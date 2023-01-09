@@ -1,4 +1,6 @@
 <?php
+require_once "/usr/lib64/php/modules/mapscript.php";
+
 require_once "../../../../config/settings.inc.php";
 require_once "../../../../include/iemmap.php";
 require_once "../../../../include/database.inc.php";
@@ -26,28 +28,28 @@ $map->setsize($width,$height);
 $map->setextent(175000, 4440000, 775000, 4890000);
 
 $counties = $map->getlayerbyname("counties");
-$counties->set("status", MS_ON);
+$counties->__set("status", MS_ON);
 
 $snet = $map->getlayerbyname("station_plot");
-$snet->set("status", MS_ON);
+$snet->__set("status", MS_ON);
 
 $iards = $map->getlayerbyname("iards");
-$iards->set("status", 1);
+$iards->__set("status", 1);
 
 $bar640t = $map->getlayerbyname("bar640t");
-$bar640t->set("status", MS_ON);
+$bar640t->__set("status", MS_ON);
 
 $states = $map->getlayerbyname("states");
-$states->set("status", MS_ON);
+$states->__set("status", MS_ON);
 
 $ponly = $map->getlayerbyname("pointonly");
-$ponly->set("status", MS_ON);
+$ponly->__set("status", MS_ON);
 
 $img = $map->prepareImage();
-$counties->draw($img);
-$states->draw($img);
-$iards->draw($img);
-$bar640t->draw($img);
+$counties->draw($map, $img);
+$states->draw($map, $img);
+$iards->draw($map, $img);
+$bar640t->draw($map, $img);
 
 $c = iemdb("isuag");
 // Figure out when we should start counting
@@ -108,7 +110,7 @@ for ($i=0; $row = pg_fetch_array($rs); $i++) {
   // Red Dot... 
   $pt = new pointObj();
   $pt->setXY($ISUAGcities[$key]['lon'], $ISUAGcities[$key]['lat'], 0);
-  $pt->draw($map, $ponly, $img, 0);
+  $pt->draw($map, $ponly, $img, 0, "");
 
   // Value UL
   $pt = new pointObj();
@@ -132,8 +134,8 @@ $map->drawLabelCache($img);
 
 if (strlen($direct) > 0) { 
   header("Content-type: image/png");
-  $img->saveImage();
+  echo $img->getBytes();
 } else { 
-    $url = $img->saveWebImage();
+    $url = saveWebImage($img);
     echo sprintf("<img src=\"%s\" border=\"1\">", $url);
 }

@@ -35,7 +35,7 @@ for ($i=0;$row=pg_fetch_assoc($rs);$i++){
 }
 $nselect .= "</select>";
 
-$uri = "current.phtml?network=${network}&sortcol=";
+$uri = "current.phtml?network={$network}&sortcol=";
 
 $mydata = Array();
 
@@ -43,6 +43,12 @@ $arr = Array(
     "network" => $network,
 );
 $jobj = iemws_json("currents.json", $arr);
+
+function myround($val, $prec){
+    if (is_null($val)) return "";
+    if (is_string($val)) return $val;
+    return round($val, $prec);
+}
 
 foreach($jobj["data"] as $bogus => $ob){
     $key = $ob["station"];
@@ -70,7 +76,7 @@ foreach($jobj["data"] as $bogus => $ob){
     if ($mydata[$key]["vsby"] < 0){
         $mydata[$key]["vsby"] = "";
     }else{
-        $mydata[$key]["vsby"] = round( $mydata[$key]["vsby"], 1);
+        $mydata[$key]["vsby"] = myround( $mydata[$key]["vsby"], 1);
     }
     $mydata[$key]["peak_ts"] = 0;
     if ($mydata[$key]["max_gust"] > $mydata[$key]["max_sknt"]){
@@ -116,34 +122,31 @@ foreach($finalA as $key => $val){
     $table .= "<td><input type=\"checkbox\" name=\"st[]\"
                value=\"".$key."\"></td>";
     $table .= "<td><a href='../sites/site.php?network=". $network ."&station=". $key ."'>". $parts["name"] . "</a></td><td ";
+    $format = "h:i A";
     if ($tdiff > 11900){
         $table .= 'bgcolor="red"';
-        $format = "%b-%d-%y %I:%M %p";
+        $format = "M-d-Y h:i A";
     } else if ($tdiff > 6900){
         $table .= 'bgcolor="orange"';
-        $format = "%I:%M %p";
     } else if ($tdiff > 1800){
         $table .= 'bgcolor="green"';
-        $format = "%I:%M %p";
-    } else {
-        $format = "%I:%M %p";
     }
-    $table .= ">". strftime($format, $parts["ts"]) ."</td>
+    $table .= ">". date($format, $parts["ts"]) ."</td>
   <td align='center'>". $parts["tmpf"] ."(<font color=\"#ff0000\">".
   $parts["max_tmpf"] ."</font>/<font color=\"#0000ff\">".
   $parts["min_tmpf"] ."</font>)</td>
  <td>". $parts["dwpf"] ."</td>
- <td>". round($parts["feel"], 0) ."</td>
- <td>". round($parts["relh"], 0) ."</td>
+ <td>". myround($parts["feel"], 0) ."</td>
+ <td>". myround($parts["relh"], 0) ."</td>
  <td>". $parts["vsby"] ."</td>
- <td>". round($parts["sknt"],0) ;
-    if (strlen($parts["gust"]) > 0 && $parts["gust"] > 0){
-        $table .= "G". round($parts["gust"],0);
+ <td>". myround($parts["sknt"],0) ;
+    if (! is_null($parts["gust"]) && strlen($parts["gust"]) > 0 && $parts["gust"] > 0){
+        $table .= "G". myround($parts["gust"],0);
     }
     $table .= "</td>
             <td>". $parts["drct"] ."</td>
-        <td>". round($parts["peak"],0) ."@ ". strftime("%I:%M %p", $parts["peak_ts"] ) ."</td>
-            <td>". round($parts["pday"],2) ."</td>
+        <td>". myround($parts["peak"],0) ."@ ". date("h:i A", $parts["peak_ts"] ) ."</td>
+            <td>". myround($parts["pday"],2) ."</td>
         </tr>\n";
 }
 
@@ -153,8 +156,8 @@ foreach($skippedStations as $key => $parts){
                value=\"".$key."\"></td>";
     $table .= "<td>". $parts["name"] . "</td><td ";
     $table .= 'bgcolor="red"';
-    $format = "%b-%d-%Y";
-    $table .= ">". strftime($format, $parts["ts"]) ."</td><th align='center' colspan='9'>Site Offline</th></tr>\n";
+    $format = "M-d-Y";
+    $table .= ">". date($format, $parts["ts"]) ."</td><th align='center' colspan='9'>Site Offline</th></tr>\n";
 }
 
 $content = <<<EOF

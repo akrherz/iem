@@ -3,7 +3,7 @@ MAP
 # Start of map file
 #
 NAME base2163
-STATUS ON
+STATUS OFF
 SIZE 640 480
 FONTSET "./fonts.list"
 EXTENT -2110437 -2251067 2548326 1239063
@@ -12,8 +12,6 @@ SHAPEPATH "/mesonet/data/gis/static/"
 SYMBOLSET "./stations.sym"
 IMAGECOLOR 0 0 250
 IMAGETYPE PNG
-TRANSPARENT OFF
-INTERLACE off
 
 #
 PROJECTION
@@ -23,8 +21,6 @@ END
 #
 WEB
   TEMPLATE radar.html
-  MINSCALE 90000
-  MAXSCALE 40000000
   IMAGEPATH "/var/webtmp/"
   IMAGEURL "/tmp/"
 END
@@ -64,7 +60,7 @@ SCALEBAR
   STATUS TRUE
 END
 
-INCLUDE "inc_iem.map"
+INCLUDE "iem.mapinc"
 
 LAYER
   NAME "places2010"
@@ -150,32 +146,13 @@ LAYER
   CLASSITEM "FIPS_CNTRY"
   CLASS
     EXPRESSION /US/
-    COLOR  105 105 105
+    STYLE
+      COLOR  105 105 105
+    END
   END
   CLASS
-    COLOR 191 191 191
-  END
-END
-
-LAYER
-  NAME cwas
-  STATUS OFF
-  TYPE POLYGON
-  DATA /mesonet/data/gis/static/shape/4326/nws/cwas.shp
-  PROJECTION
-   "init=epsg:4326"
-  END
-  LABELITEM "WFO"
-  CLASS
-    OUTLINECOLOR 255 165 0
-    LABEL
-      MINFEATURESIZE 50
-      OUTLINECOLOR 0 0 0
-      COLOR 255 255 255
-      TYPE BITMAP
-      SIZE MEDIUM
-      POSITION CC
-      PARTIALS FALSE
+    STYLE
+      COLOR 191 191 191
     END
   END
 END
@@ -189,7 +166,9 @@ LAYER
    "init=epsg:2163"
   END
   CLASS
-    COLOR 0 0 250
+    STYLE
+      COLOR 0 0 250
+    END
   END
 END
 
@@ -218,9 +197,7 @@ END
 
 LAYER
   NAME "east_vis_1km"
-  STATUS ON
-  MINSCALE 0
-  MAXSCALE 465000000
+  STATUS OFF
   DATA "/mesonet/ldmdata/gis/images/awips211/GOES13_EAST_VIS.png"
   TYPE RASTER
   PROJECTION
@@ -249,11 +226,11 @@ LAYER
   PROJECTION
    "init=epsg:2163"
   END
-  MAXSCALE 10000000
   CLASS
-    OUTLINECOLOR 54 54 54
+    STYLE
+      OUTLINECOLOR 54 54 54
+    END
   END
-#  TRANSPARENCY 80
 END
 
 LAYER
@@ -276,7 +253,7 @@ LAYER
   END
 END
 
-INCLUDE 'inc_roads.map'
+INCLUDE 'roads.mapinc'
 
 LAYER
   NAME states
@@ -292,43 +269,6 @@ LAYER
       WIDTH 1.0
     END
   END
-#  TRANSPARENCY 80
-END
-
-LAYER
-  CONNECTIONTYPE postgis
-  NAME warnings0_c
-  CONNECTION "user=nobody dbname=postgis host=iemdb-postgis.local"
-  DATA "geom from (select phenomena, u.geom, random() as oid from warnings w JOIN ugcs u on (u.gid = w.gid) WHERE significance = 'W' and expire > CURRENT_TIMESTAMP ORDER by expire, type ASC) as foo using unique oid using srid=4326"
-  STATUS OFF
-  TYPE POLYGON
-  MAXSCALE 100000
-  TEMPLATE q_template.html
-  PROJECTION
-   "init=epsg:4326"
-  END
-  CLASSITEM "phenomena"
-  CLASS
-    EXPRESSION 'TO'
-    COLOR -1 -1 -1
-    OUTLINECOLOR 255 0 0
-    SIZE 2
-    SYMBOL 'circle'
-  END
-  CLASS
-    EXPRESSION 'SV'
-    COLOR -1 -1 -1
-    OUTLINECOLOR 255 255 0
-    SIZE 2
-    SYMBOL 'circle'
-  END
-  CLASS
-    EXPRESSION 'FF'
-    COLOR -1 -1 -1
-    OUTLINECOLOR 0 255 0
-    SIZE 2
-    SYMBOL 'circle'
-  END
 END
 
 LAYER
@@ -336,7 +276,6 @@ LAYER
   NAME warnings0_p
   CONNECTION "user=nobody dbname=postgis host=iemdb-postgis.local"
   #DATA "geom from warnings"
-  MAXSCALE 100000
  DATA "geom from (select phenomena, geom, random() as oid from sbw WHERE status = 'NEW' and significance = 'W' and expire > CURRENT_TIMESTAMP  ORDER by expire, type ASC) as foo using unique oid using srid=4326"
   STATUS OFF
   TYPE POLYGON
@@ -351,10 +290,12 @@ LAYER
   CLASSITEM 'phenomena'
   CLASS
         EXPRESSION /TO|SV/
-    COLOR -1 -1 -1
-    OUTLINECOLOR 255 255 255
-    SYMBOL 'circle'
-    SIZE 1
+    STYLE
+      COLOR -1 -1 -1
+      OUTLINECOLOR 255 255 255
+      SYMBOL 'circle'
+      SIZE 1
+    END
   END
 END
 
@@ -471,7 +412,7 @@ LAYER
   END
 END
 
-INCLUDE "inc_lsrs.map"
+INCLUDE "lsrs.mapinc"
 
 # watches
 LAYER
@@ -537,67 +478,6 @@ LAYER
       PARTIALS TRUE
       BUFFER 2
     END
-  END
-END
-
-LAYER
-  NAME "n0r-ramp"
-  TYPE POINT
-  STATUS default
-  TRANSFORM FALSE
-  TRANSPARENCY 10
-  CLASS
-    LABEL
-    END
-    SYMBOL 'n0r-ramp'
-    #SIZE 40
-        COLOR 0 0 0
-  END
-END
-
-LAYER
-  NAME "n0q-ramp"
-  TYPE POINT
-  STATUS default
-  TRANSFORM FALSE
-  TRANSPARENCY 10
-  CLASS
-    LABEL
-    END
-    SYMBOL 'n0q-ramp'
-    #SIZE 40
-        COLOR 0 0 0
-  END
-END
-
-LAYER
-  NAME logo
-  TYPE POINT
-  STATUS default
-  TRANSFORM FALSE
-  TRANSPARENCY 10
-  CLASS
-    SYMBOL 'iem_logo'
-    LABEL
-    END
-    #SIZE 40
-        COLOR 0 0 0
-  END
-END
-
-# Bar Header Bar!
-LAYER
-  NAME bar640t
-  TYPE POLYGON
-  TRANSFORM FALSE
-  STATUS OFF
-  FEATURE
-    POINTS 0 0 0 36 640 36 640 0 0 0 END
-  END
-#  TRANSPARENCY 70
-  LABELCACHE FALSE
-  CLASS
-    COLOR 0 0 0
   END
 END
 

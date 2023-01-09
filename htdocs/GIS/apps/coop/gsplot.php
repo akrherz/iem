@@ -2,15 +2,13 @@
 /* Generate a plot based on a request from gsplot.phtml, no more tmp 
  * files please
  */
+require_once "/usr/lib64/php/modules/mapscript.php";
+
 require_once "../../../../config/settings.inc.php";
 require_once "../../../../include/database.inc.php";
 $coopdb = iemdb("coop");
 require_once "../../../../include/forms.php";
 require_once "../../../../include/network.php";
-/** Need to use external date lib 
- * http://php.weblogs.com/adodb_date_time_library
- */
-require_once "../../../../include/adodb-time.inc.php";
 
 $var = isset($_GET["var"]) ? xssafe($_GET["var"]) : "gdd50";
 $year = get_int404("year", date("Y"));
@@ -24,12 +22,8 @@ $nt = new NetworkTable($network);
 $cities = $nt->table;
 
 
-$sts = adodb_mktime(0, 0, 0, $smonth, $sday, $year);
-$ets = adodb_mktime(0, 0, 0, $emonth, $eday, $year);
-
-if ($sts > $ets) {
-    $sts = $ets - 86400;
-}
+$sts = new DateTime("{$year}-{$smonth}-{$sday}");
+$ets = new DateTime("{$year}-{$emonth}-{$eday}");
 
 
 function mktitlelocal($map, $imgObj, $titlet)
@@ -106,7 +100,7 @@ $state = substr($network, 0, 2);
 $dbconn = iemdb("postgis");
 $rs = pg_query($dbconn, "SELECT ST_xmin(g), ST_xmax(g), ST_ymin(g), ST_ymax(g) from (
         select ST_Extent(ST_Transform(the_geom,26915)) as g from states 
-        where state_abbr = '${state}'
+        where state_abbr = '{$state}'
         ) as foo");
 $row = pg_fetch_array($rs, 0);
 $buf = 35000; // 35km
@@ -125,28 +119,28 @@ $map->setextent(
 );
 
 $counties = $map->getlayerbyname("counties");
-$counties->set("status", MS_ON);
+$counties->__set("status", MS_ON);
 
 $states = $map->getlayerbyname("states");
-$states->set("status", MS_ON);
+$states->__set("status", MS_ON);
 
 $bar640t = $map->getlayerbyname("bar640t");
-$bar640t->set("status", MS_ON);
+$bar640t->__set("status", MS_ON);
 
 $snet = $map->getlayerbyname("snet");
-$snet->set("status", MS_ON);
+$snet->__set("status", MS_ON);
 
 $iards = $map->getlayerbyname("iards");
-$iards->set("status", 1);
+$iards->__set("status", 1);
 
 $ponly = $map->getlayerbyname("pointonly");
-$ponly->set("status", MS_ON);
+$ponly->__set("status", MS_ON);
 
 $img = $map->prepareImage();
-$counties->draw($img);
-$states->draw($img);
-$iards->draw($img);
-$bar640t->draw($img);
+$counties->draw($map, $img);
+$states->draw($map, $img);
+$iards->draw($map, $img);
+$bar640t->draw($map, $img);
 
 $rs = pg_prepare($coopdb, "SELECT", "SELECT station, 
     sum(precip) as s_prec,
@@ -166,8 +160,8 @@ $rs = pg_prepare($coopdb, "SELECT", "SELECT station,
   GROUP by station 
     ORDER by station ASC");
 $rs = pg_execute($coopdb, "SELECT", array(
-    adodb_date("Y-m-d", $sts),
-    adodb_date("Y-m-d", $ets)
+    $sts->format("Y-m-d"),
+    $ets->format("Y-m-d")
 ));
 
 for ($i = 0; $row = pg_fetch_array($rs); $i++) {
@@ -177,7 +171,7 @@ for ($i = 0; $row = pg_fetch_array($rs); $i++) {
     // Red Dot...  
     $pt = new PointObj();
     $pt->setXY($cities[$ukey]['lon'], $cities[$ukey]['lat'], 0);
-    $pt->draw($map, $ponly, $img, 0);
+    $pt->draw($map, $ponly, $img, 0, "");
 
     // City Name
     $pt = new PointObj();
@@ -186,7 +180,7 @@ for ($i = 0; $row = pg_fetch_array($rs); $i++) {
 
     // Value UL
     $pt = new PointObj();
-    $pt->setXY($cities[$ukey]['lon'], $cities[$ukey]['lat'], 0);
+    $pt->setXY($cities[$ukey]['lon'], $cities[$ukey]['lat'], 0, "");
     $pt->draw(
         $map,
         $snet,
@@ -201,12 +195,12 @@ if ($i == 0)
 $title = sprintf(
     "%s (%s through %s)",
     $varDef[$var],
-    adodb_date("Y-m-d", $sts),
-    adodb_date("Y-m-d", $ets)
+    $sts->format("Y-m-d"),
+    $ets->format("Y-m-d")
 );
 
 mktitlelocal($map, $img, $title);
 $map->drawLabelCache($img);
 
 header("Content-type: image/png");
-$img->saveImage('');
+echo $img->getBytes();

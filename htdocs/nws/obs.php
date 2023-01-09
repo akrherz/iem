@@ -56,12 +56,12 @@ foreach ($jobj["data"] as $bogus => $iemob) {
 
     if ($mydata[$key]["max_gust"] > $mydata[$key]["max_sknt"]) {
         $mydata[$key]["peak"] = $mydata[$key]["max_gust"];
-        $mydata[$key]["peak_ts"] = strtotime($mydata[$key]["local_max_gust_ts"]);
+        $mydata[$key]["peak_ts"] = new DateTime($mydata[$key]["local_max_gust_ts"]);
     } else {
         $mydata[$key]["peak"] = $mydata[$key]["max_sknt"];
         $mydata[$key]["peak_ts"] = 0;
         if ($mydata[$key]["local_max_sknt_ts"]) {
-            $mydata[$key]["peak_ts"] = strtotime($mydata[$key]["local_max_sknt_ts"]);
+            $mydata[$key]["peak_ts"] = new DateTime($mydata[$key]["local_max_sknt_ts"]);
         }
     }
 }
@@ -81,19 +81,19 @@ foreach ($finalA as $key => $parts) {
     $table .= "<td>" . $parts["name"] . " (<a href=\"$moreinfo\">" . $key . "</a>," . $parts["network"] . ")</td>";
     $table .= "<td ";
     if ($tdiff > 10000) {
-        $fmt = "%d %b %I:%M %p";
+        $fmt = "d b h:i A";
         $table .= 'bgcolor="red"';
     } else if ($tdiff > 7200) {
-        $fmt = "%I:%M %p";
+        $fmt = "h:i A";
         $table .= 'bgcolor="orange"';
     } else if ($tdiff > 3600) {
-        $fmt = "%I:%M %p";
+        $fmt = "h:i A";
         $table .= 'bgcolor="green"';
     } else {
-        $fmt = "%I:%M %p";
+        $fmt = "h:i A";
     }
-
-    $table .= ">" . strftime($fmt, strtotime($parts["local_valid"])) . "</td>
+    $ts = new DateTime($parts["local_valid"]);
+    $table .= ">" . $ts->format($fmt) . "</td>
      <td align='center'>" . round($parts["tmpf"], 0) . "(<font color=\"#ff0000\">" . round($parts["max_tmpf"], 0) . "</font>/<font color=\"#0000ff\">" . round($parts["min_tmpf"], 0) . "</font>)</td>
      <td>" . round($parts["dwpf"], 0) . "</td>
      <td>" . round($parts["feel"], 0) . "</td>
@@ -106,7 +106,7 @@ foreach ($finalA as $key => $parts) {
     }
     $table .= "</td>";
     $table .= "<td>" . $parts["drct"] . "</td>
-        <td>" . round($parts["peak"], 0) . " @ " . strftime("%I:%M %p", $parts["peak_ts"]) . "</td>
+        <td>" . round($parts["peak"], 0) . " @ " . $parts["peak_ts"]->format("h:i A") . "</td>
             <td>" . $parts["phour"] . "</td>
             <td>" . $parts["pday"] . "</td>
         </tr>\n";

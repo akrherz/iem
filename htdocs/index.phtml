@@ -45,9 +45,8 @@ $rancam = "";
 $loop = 0;
 while ($rancam == "" && $loop < 20)
 {
-    srand ((float) microtime() * 10000000);
     $cam = array_rand($cameras);
-    $camfn = "/mesonet/ldmdata/camera/stills/${cam}.jpg";
+    $camfn = "/mesonet/ldmdata/camera/stills/{$cam}.jpg";
     if (is_file($camfn) && filemtime($camfn) > (time() - 1200))
     {
         $rancam = $cam;

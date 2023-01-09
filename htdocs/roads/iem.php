@@ -1,4 +1,6 @@
 <?php
+require_once "/usr/lib64/php/modules/mapscript.php";
+
 require_once "../../config/settings.inc.php";
 require_once "../../include/database.inc.php";
 $con = iemdb("postgis");
@@ -17,7 +19,6 @@ if (!isset($_GET["valid"])) {
     $ts = strtotime($_GET["valid"]);
 }
 
-
 $map = new MapObj("roads.map");
 if ($eightbit) {
     $map->selectOutputFormat("png");
@@ -25,8 +26,8 @@ if ($eightbit) {
     $map->selectOutputFormat("png24");
 }
 $map->imagecolor->setRGB(140, 144, 90);
-$map->outputformat->set('imagemode', MS_IMAGEMODE_RGB);
-$map->outputformat->set('transparent', MS_OFF);
+$map->outputformat->__set('imagemode', MS_IMAGEMODE_RGB);
+$map->outputformat->__set('transparent', MS_OFF);
 
 $map->setextent(200000, 4440000, 710000, 4940000);
 if ($metroview) {
@@ -38,37 +39,35 @@ if ($thumbnail) {
     $height = 240;
     $width = 320;
 }
-$map->set("width", $width);
-$map->set("height", $height);
-
+$map->__set("width", $width);
+$map->__set("height", $height);
 
 $img = $map->prepareImage();
-
 
 if (isset($_GET["nexrad"])) {
     $radarfn = gmstrftime("/mesonet/ARCHIVE/data/%Y/%m/%d/GIS/uscomp/n0q_%Y%m%d%H%M.png", $ts);
     $radar = $map->getlayerbyname("nexrad_n0q");
-    $radar->set("status", MS_ON);
-    $radar->set("data", $radarfn);
-    $radar->draw($img);
+    $radar->__set("status", MS_ON);
+    $radar->__set("data", $radarfn);
+    $radar->draw($map, $img);
 }
 
 $counties = $map->getlayerbyname("counties");
 if ($metroview) {
-    $counties->set("status", MS_ON);
-    $counties->draw($img);
+    $counties->__set("status", MS_ON);
+    $counties->draw($map, $img);
 }
 
 $states = $map->getlayerbyname("states");
-$states->set("status", MS_ON);
-$states->draw($img);
+$states->__set("status", MS_ON);
+$states->draw($map, $img);
 
 $visibility = $map->getlayerbyname("visibility");
-$visibility->set("status", MS_ON);
-$visibility->draw($img);
+$visibility->__set("status", MS_ON);
+$visibility->draw($map, $img);
 
 $roads = $map->getlayerbyname("roads");
-$roads->set("status", MS_ON);
+$roads->__set("status", MS_ON);
 $dbvalid = date('Y-m-d H:i', $ts);
 # yuck
 $dbvalid2 = date('Y-m-d H:i', $ts - 90 * 86400);
@@ -88,88 +87,83 @@ if (isset($_GET['valid'])) {
         WHERE b.type > 1)
     as foo using UNIQUE boid using SRID=26915
 EOM;
-    $roads->set("data", $sql);
+    $roads->__set("data", $sql);
 }
-$roads->draw($img);
+$roads->draw($map, $img);
 
 $roads_int = $map->getlayerbyname("roads-inter");
-$roads_int->set("status", MS_ON);
+$roads_int->__set("status", MS_ON);
 if (isset($_GET['valid'])) {
-    $roads_int->set("data", str_replace("b.type > 1", "b.type = 1", $sql));
+    $roads_int->__set("data", str_replace("b.type > 1", "b.type = 1", $sql));
 }
-$roads_int->draw($img);
+$roads_int->draw($map, $img);
 
 if (isset($_GET["trucks"])) {
     // 10 minute window for trucks
     $w1 = date('Y-m-d H:i', $ts - 300);
     $w2 = date('Y-m-d H:i', $ts + 300);
     $trucks = $map->getlayerbyname("trucks");
-    $trucks->set("status", MS_ON);
-    $trucks->set("data", "geom from (select geom, random() as boid from " .
+    $trucks->__set("status", MS_ON);
+    $trucks->__set("data", "geom from (select geom, random() as boid from " .
         "idot_snowplow_archive WHERE valid > '{$w1}' and valid < '{$w2}') as foo " .
         "using UNIQUE boid using SRID=4326");
-    $trucks->draw($img);
+    $trucks->draw($map, $img);
 }
 
 //$roads_lbl = $map->getlayerbyname("roads_label");
-//$roads_lbl->draw($img);
-//$roads_lbl->set("connection", $_DATABASE);
+//$roads_lbl->draw($map, $img);
+//$roads_lbl->__set("connection", $_DATABASE);
 
 if ($thumbnail) {
     $logokey2 = $map->getlayerbyname("colorkey-small");
 } else {
     $logokey2 = $map->getlayerbyname("colorkey");
 }
-$logokey2->set("status", MS_ON);
+$logokey2->__set("status", MS_ON);
 $c1 = $logokey2->getClass(0);
 $s1 = $c1->getStyle(0);
 if ($thumbnail) {
-    $s1->set("size", 30);
+    $s1->__set("size", 30);
 } else if ($eightbit) {
-    $s1->set("symbolname", "logokey-8bit");
-    $s1->set("size", 60);
+    $s1->__set("symbolname", "logokey-8bit");
+    $s1->__set("size", 60);
 } else {
-    $s1->set("size", 50);
+    $s1->__set("size", 50);
 }
 
-$logokey = ms_newLayerObj($map);
-$logokey->set("type", MS_SHP_POINT);
-$logokey->set("transform", MS_FALSE);
-$logokey->set("status", MS_ON);
-$logokey->set("labelcache", MS_ON);
-$logokey->set("status", MS_ON);
+$logokey = new layerObj($map);
+$logokey->__set("type", MS_SHP_POINT);
+$logokey->__set("transform", MS_FALSE);
+$logokey->__set("status", MS_ON);
+$logokey->__set("labelcache", MS_ON);
+$logokey->__set("status", MS_ON);
 
-$logokey_c3 = ms_newClassObj($logokey);
-$logokey_c3s0 = ms_newStyleObj($logokey_c3);
+$logokey_c3 = new classObj($logokey);
+$logokey_c3s0 = new styleObj($logokey_c3);
 $l = $logokey_c3->addLabel(new labelObj());
-$logokey_c3->getLabel(0)->set("buffer", 10);
-$logokey_c3->getLabel(0)->set("size", MS_MEDIUM);
+$logokey_c3->getLabel(0)->__set("buffer", 10);
+$logokey_c3->getLabel(0)->__set("size", MS_MEDIUM);
 $logokey_c3->getLabel(0)->color->setRGB(0, 0, 0);
-$bpt = ms_newpointobj();
+$bpt = new pointObj();
 $bpt->setXY(300, 300);
 $bpt->draw($map, $logokey, $img, 0, "      ");
 
 $map->drawLabelCache($img);
 
-$logokey2->draw($img);
+$logokey2->draw($map, $img);
 
 $layer = $map->getLayerByName("credits");
 $c = $layer->getClass(0);
-$point = ms_newpointobj();
+$point = new pointObj();
 if ($thumbnail) {
     $point->setXY(85, 230);
-    $c->label->set("size", MS_LARGE);
+    $c->label->__set("size", MS_LARGE);
 } else {
     $point->setXY(300, 10);
 }
 $point->draw($map, $layer, $img, 0, date('Y-m-d h:i A', $ts));
 
-
-//$point = ms_newpointobj();
-//$point->setXY(500, 22);
-//$point->draw($map, $layer, $img, 1, "Limited Visibility");
-
 $map->drawLabelCache($img);
 
 header("Content-type: image/png");
-$img->saveImage('');
+echo $img->getBytes();

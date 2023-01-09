@@ -1,4 +1,6 @@
 <?php
+require_once "/usr/lib64/php/modules/mapscript.php";
+
 require_once "../../../../config/settings.inc.php";
 define("IEM_APPID", 52);
 require_once "../../../../include/myview.php";
@@ -24,7 +26,7 @@ $day = isset($_GET["day"]) ? intval($_GET["day"]): date("d");
 $height = 350;
 $width = 350;
 
-$map = ms_newMapObj("../../../../data/gis/base4326.map");
+$map = new mapObj("../../../../data/gis/base4326.map");
 $map->setProjection("init=epsg:26915");
 
 $lx =  200000;
@@ -45,45 +47,46 @@ $ex = Array(
 $map->setextent($ex[$area][0], $ex[$area][1], $ex[$area][2], $ex[$area][3]);
 
 $namer = $map->getlayerbyname("namerica");
-$namer->set("status", MS_ON);
+$namer->__set("status", MS_ON);
 
 $counties = $map->getlayerbyname("uscounties");
-$counties->set("status", MS_ON);
+$counties->__set("status", MS_ON);
 
 $stlayer = $map->getlayerbyname("states");
-$stlayer->set("status", 1);
+$stlayer->__set("status", 1);
 
 $dot = $map->getlayerbyname("pointonly");
-$dot->set("status", MS_ON);
+$dot->__set("status", MS_ON);
 
-$datal = ms_newLayerObj($map);
-$datal->set("name", "q");
-$datal->set("status", MS_ON);
-$datal->set("type", MS_LAYER_POINT);
+$datal = new layerObj($map);
+$datal->__set("name", "q");
+$datal->__set("status", MS_ON);
+$datal->__set("type", MS_LAYER_POINT);
 $datal->setProjection("init=epsg:4326");
 
-$datalc0 = ms_newClassObj($datal);
+$datalc0 = new classObj($datal);
 $datalc0->addLabel(new labelObj());
 $datalc0->getLabel(0)->color->setrgb(255,255,0);
-$datalc0->getLabel(0)->set("font", "liberation");
-$datalc0->getLabel(0)->set("size", 12);
-$datalc0->getLabel(0)->set("force", MS_TRUE);
-$datalc0->getLabel(0)->set("partials", MS_TRUE);
-//$datalc0->getLabel(0)->set("antialias", MS_TRUE);
-$datalc0->getLabel(0)->set("position", MS_UR);
-$datalc0->getLabel(0)->set("angle", 0);
-$datalc0->getLabel(0)->set("wrap", 0x57);
+$datalc0->getLabel(0)->__set("font", "liberation");
+$datalc0->getLabel(0)->__set("size", 12);
+$datalc0->getLabel(0)->__set("force", MS_TRUE);
+$datalc0->getLabel(0)->__set("partials", MS_TRUE);
+//$datalc0->getLabel(0)->__set("antialias", MS_TRUE);
+$datalc0->getLabel(0)->__set("position", MS_UR);
+$datalc0->getLabel(0)->__set("angle", 0);
+$datalc0->getLabel(0)->__set("wrap", 0x57);
 
-$datalc0s0 = ms_newStyleObj($datalc0);
+$datalc0s0 = new styleObj($datalc0);
 $datalc0s0->color->setrgb(0,0,0);
-$datalc0s0->set("symbolname", "circle");
-$datalc0s0->set("size", 3);
+$datalc0s0->__set("symbolname", "circle");
+$datalc0s0->__set("size", 3);
 
-
-$datalc1 = ms_newClassObj($datal, $datalc0);
+$datalc1 = new classObj($datal, $datalc0);
 $datalc1->setExpression("([yrs] < 80)");
-$datalc1s0 = $datalc1->getStyle(0);
+$datalc1s0 = new styleObj($datalc1);
 $datalc1s0->color->setrgb(255,0,0);
+$datalc1s0->__set("symbolname", "circle");
+$datalc1s0->__set("size", 3);
 
 $img = $map->prepareImage();
 
@@ -138,21 +141,20 @@ $rs = pg_query($coopdb, $sql);
 for($i=0;$row=pg_fetch_array($rs);$i++){
   	$station = $row["station"];
 	if (! array_key_exists($station, $cities)) continue;
-  	$pt = ms_newPointObj();
+  	$pt = new pointObj();
   	$pt->setXY($cities[$station]['lon'], $cities[$station]['lat'], 0);
   	$pt->draw($map, $datal, $img, 0, $row["d"] );
 }
 
-$namer->draw($img);
-$counties->draw($img);
-$stlayer->draw( $img);
-//$ttt->draw($img);
-$datal->draw($img);
+$namer->draw($map, $img);
+$counties->draw($map, $img);
+$stlayer->draw($map, $img);
+$datal->draw($map, $img);
 iemmap_title($map, $img, $plotDate ." ". $var[$plot]);
 
 $map->drawLabelCache($img);
 
-$url = $img->saveWebImage();
+$url = saveWebImage($img);
 
 $ar = Array("all" => "Iowa",
     "ne" => "NE Iowa",

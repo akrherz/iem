@@ -3,7 +3,7 @@ MAP
 # Start of map file
 #
 NAME "nexrad_base_reflect"
-STATUS ON
+STATUS OFF
 SIZE 800 600
 #SYMBOLSET symbols/symbol.sym
 EXTENT -126 24 -66 50
@@ -27,8 +27,6 @@ WEB
 #  HEADER ia_header.html
   TEMPLATE ia.html
 #  FOOTER ia_footer.html
-  MINSCALE 90000
-  MAXSCALE 4650000
   IMAGEPATH "/var/webtmp/"
   IMAGEURL "/tmp/"
   #LOG "/tmp/w0.log"
@@ -49,7 +47,7 @@ END
 
 #  Tile Index
 LAYER
-  STATUS ON
+  STATUS OFF
   NAME "time_idx"
   #TYPE TILEINDEX  #No worky
   TYPE POLYGON
@@ -72,7 +70,7 @@ END
 LAYER
   NAME "nexrad-n0r-wmst"
   TYPE RASTER
-  STATUS ON
+  STATUS OFF
   DEBUG ON
   PROJECTION
     "init=epsg:4326"

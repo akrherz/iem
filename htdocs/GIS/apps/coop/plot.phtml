@@ -1,13 +1,11 @@
 <?php
+require_once "/usr/lib64/php/modules/mapscript.php";
+
 require_once "../../../../config/settings.inc.php";
 define("IEM_APPID", 49);
 require_once "../../../../include/myview.php";
 require_once "../../../../include/database.inc.php";
 require_once "../../../../include/iemmap.php";
-/** Need to use external date lib *
- * http://php.weblogs.com/adodb_date_time_library
- */
-require_once "../../../../include/adodb-time.inc.php";
 require_once "../../../../include/forms.php";
 require_once "../../../../include/network.php";
 
@@ -22,8 +20,8 @@ $tokens = explode("x", $size);
 $width = $tokens[0];
 $height = $tokens[1];
 
-$ts = adodb_mktime(0, 0, 0, $month, $day, $year);
-$ndate = adodb_date("Y-m-d", $ts);
+$ts = new DateTime("{$year}-{$month}-{$day}");
+$ndate = $ts->format("Y-m-d");
 
 $t = new MyView();
 $t->title = "NWS COOP Daily Plotter";
@@ -46,7 +44,7 @@ function plotNoData($map, $img)
 {
     $layer = $map->getLayerByName("credits");
 
-    $point = ms_newpointobj();
+    $point = new pointObj();
     $point->setXY(100, 200);
     $point->draw(
         $map,
@@ -79,7 +77,7 @@ $rnd = array(
 
 $myStations = $cities;
 
-$map = ms_newMapObj("../../../../data/gis/base26915.map");
+$map = new mapObj("../../../../data/gis/base26915.map");
 $map->selectOutputFormat("PNG24");
 $map->setSize($width, $height);
 $map->setProjection("init=epsg:26915");
@@ -87,23 +85,23 @@ $map->setProjection("init=epsg:26915");
 $map->setextent(250000, 4450000, 690000, 4880000);
 
 $states = $map->getlayerbyname("states");
-$states->set("status", MS_ON);
+$states->__set("status", MS_ON);
 
 $counties = $map->getlayerbyname("iacounties");
-$counties->set("status", MS_ON);
+$counties->__set("status", MS_ON);
 
 $snet = $map->getlayerbyname("datapoint");
-$snet->set("status", MS_ON);
+$snet->__set("status", MS_ON);
 
 $ponly = $map->getlayerbyname("pointonly");
-$ponly->set("status", MS_ON);
+$ponly->__set("status", MS_ON);
 
 $cityname = $map->getlayerbyname("cityname");
-$cityname->set("status", MS_ON);
+$cityname->__set("status", MS_ON);
 
 $img = $map->prepareImage();
-$counties->draw($img);
-$states->draw($img);
+$counties->draw($map, $img);
+$states->draw($map, $img);
 
 $dbvar = ($var == "ratio") ? "snow" : $var;
 if ($source == "qc") {
@@ -113,7 +111,7 @@ if ($source == "qc") {
             . " WHERE day = '%s' and %s is not null"
             . " and substr(station, 3, 1) != 'C' and station != 'IA0000'"
             . " ORDER by $dbvar DESC",
-        adodb_date("Y-m-d", $ts),
+        $ts->format("Y-m-d"),
         $dbvar
     );
     $cutstring1 = 2;
@@ -128,8 +126,8 @@ if ($source == "qc") {
             "from summary_%s s " .
             "JOIN stations t on (t.iemid = s.iemid) WHERE day = '%s' and " .
             "network = 'IA_COOP' ORDER by $dbvar DESC",
-        adodb_date("Y", $ts),
-        adodb_date("Y-m-d", $ts)
+        $ts->format("Y"),
+        $ts->format("Y-m-d")
     );
 }
 
@@ -153,7 +151,7 @@ for ($i = 0; $row = pg_fetch_array($rs); $i++) {
 
 $tr = "# " . $ndate . " " . $vardef[$var] . "
 # Download From: https://mesonet.agron.iastate.edu/GIS/apps/coop/plot.phtml
-# Download Date: " . strftime("%d %b %Y") . "
+# Download Date: " . date("d M Y") . "
 # Data Contact: Daryl Herzmann akrherz@iastate.edu 515.294.5978
 #-----------------------snip------------------\n";
 $tr .= sprintf(
@@ -184,17 +182,17 @@ foreach ($vals as $key => $value) {
     if ($ukey == "IA0807") $cities["IA0807"]["lon"] -= 0.1;
 
     if ($showlabels) {
-        $pt = ms_newPointObj();
+        $pt = new pointObj();
         $pt->setXY($cities[$ukey]['lon'], $cities[$ukey]['lat'], 0);
-        $pt->draw($map, $ponly, $img, 0);
+        $pt->draw($map, $ponly, $img, 0, "");
 
-        $pt = ms_newPointObj();
+        $pt = new pointObj();
         $pt->setXY($cities[$ukey]['lon'], $cities[$ukey]['lat'], 0);
         $pt->draw($map, $cityname, $img, 0, substr($key, $cutstring1, $cutstring2));
     }
 
     // Value UL
-    $pt = ms_newPointObj();
+    $pt = new pointObj();
     $pt->setXY($cities[$ukey]['lon'], $cities[$ukey]['lat'], 0);
     if ($value == 0.0001) $value = "T";
     $pt->draw($map, $snet, $img, 2, $value);
@@ -206,7 +204,7 @@ if ($i == 0)
 iemmap_title($map, $img, $ndate . " " . $vardef[$var]);
 $map->drawLabelCache($img);
 
-$url = $img->saveWebImage();
+$url = saveWebImage($img);
 
 $ar = array(
     "qc" => "QC'd (1893-)",
@@ -229,25 +227,28 @@ $sizeselect = make_select("size", $size, $ar);
 
 $showlabelson = ($showlabels) ? " CHECKED=\"CHECKED\" " : "";
 
+$ts->sub(new DateInterval("P1D"));
 $minusone = sprintf(
     "plot.phtml?source=%s&amp;var=%s&amp;year=%s&amp;" .
         "month=%s&amp;day=%s&amp;size=%s&amp;labels=%s",
     $source,
     $var,
-    date("Y", $ts - 86400),
-    date("m", $ts - 86400),
-    date("d", $ts - 86400),
+    $ts->format("Y"),
+    $ts->format("m"),
+    $ts->format("d"),
     $size,
     $showlabels ? "on" : "off"
 );
+// SAD
+$ts->add(new DateInterval("P2D"));
 $plusone = sprintf(
     "plot.phtml?source=%s&amp;var=%s&amp;year=%s&amp;" .
         "month=%s&amp;day=%s&amp;size=%s&amp;labels=%s",
     $source,
     $var,
-    date("Y", $ts + 86400),
-    date("m", $ts + 96400),
-    date("d", $ts + 96400),
+    $ts->format("Y"),
+    $ts->format("m"),
+    $ts->format("d"),
     $size,
     $showlabels ? "on" : "off"
 );

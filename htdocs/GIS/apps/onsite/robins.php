@@ -1,20 +1,22 @@
 <?php
+require_once "/usr/lib64/php/modules/mapscript.php";
+
 require_once "../../../../config/settings.inc.php";
 
-$map = ms_newMapObj("robins.map");
+$map = new mapObj("robins.map");
 
 $counties = $map->getlayerbyname("counties");
-$counties->set("status", MS_ON);
+$counties->__set("status", MS_ON);
 
 $robins = $map->getlayerbyname("robins");
-$robins->set("status", MS_ON);
+$robins->__set("status", MS_ON);
 
 $img = $map->prepareImage();
 
-$counties->draw($img);
-$robins->draw($img);
+$counties->draw($map, $img);
+$robins->draw($map, $img);
 
 $map->drawLabelCache($img);
 
 header("Content-type: image/png");
-$img->saveImage('');
+echo $img->getBytes();

@@ -3,7 +3,7 @@ MAP
 # Start of map file
 #
 NAME "radar"
-STATUS ON
+STATUS OFF
 SIZE 450 350
 #SYMBOLSET symbols/symbol.sym
 EXTENT 200000 4400000 710000 4900000
@@ -25,11 +25,8 @@ WEB
 #  HEADER ia_header.html
   TEMPLATE ia.html
 #  FOOTER ia_footer.html
-  MINSCALE 90000
-  MAXSCALE 4650000
   IMAGEPATH "/home/httpd/html/tmp/"
   IMAGEURL "https://mesonet.agron.iastate.edu/tmp/"
-  LOG "/home/httpd/html/tmp/w0.log"
   METADATA
    "wms_title" "IEM WMS Service"
    "wms_onlineresource" "https://mesonet.agron.iastate.edu/cgi-bin/mapserv/mapserv?map=/opt/iem/htdocs/GIS/maps/kcciradar.map&amp;"
@@ -47,7 +44,7 @@ END
 #
 LAYER
   NAME kcci
-  STATUS ON
+  STATUS OFF
   DATA "/mesonet/data/gis/images/26915/KCCI_N0R.tif"
   TYPE RASTER
   PROJECTION

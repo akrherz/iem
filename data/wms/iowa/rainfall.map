@@ -3,7 +3,7 @@ MAP
 # Start of map file
 #
 NAME "iemtest"
-STATUS ON
+STATUS OFF
 SIZE 450 350
 #SYMBOLSET symbols/symbol.sym
 #FONTSET "/mesonet/data/gis/fonts/fonts.list"
@@ -31,8 +31,6 @@ WEB
 #  HEADER ia_header.html
   TEMPLATE ia.html
 #  FOOTER ia_footer.html
-  MINSCALE 0
-  MAXSCALE 465000000
   IMAGEPATH "/var/webtmp/"
   IMAGEURL "/tmp/"
   #LOG "/var/webtmp/w0.log"
@@ -52,10 +50,10 @@ END
 LAYER
   CONNECTIONTYPE postgis
   NAME sevendays_rainfall_data
-	GROUP sevendays_rainfall
+    GROUP sevendays_rainfall
   CONNECTION "user=nobody dbname=wepp host=iemdb-wepp.local"
   DATA  "the_geom from (select random() as oid, d.rainfall / 25.4 as da, h.the_geom as the_geom from (select sum(rainfall) as rainfall, hrap_i from daily_rainfall WHERE valid  IN ('YESTERDAY'::date, ('now'::date - '2 days'::interval)::date,('now'::date - '3 days'::interval)::date, ('now'::date - '4 days'::interval)::date, ('now'::date - '5 days'::interval)::date, ('now'::date - '6 days'::interval)::date, ('now'::date - '7 days'::interval)::date ) GROUP by hrap_i) as d left join hrap_polygons h using (hrap_i)) as foo using unique oid using srid=26915"
-  STATUS ON
+  STATUS OFF
   TYPE POLYGON
   METADATA
     "wms_group_title" "RAIN7"
@@ -64,107 +62,133 @@ LAYER
   PROJECTION
     "init=epsg:26915"
   END
-  MINSCALE 0
-  MAXSCALE 465000000
   CLASSITEM "da"
-	CLASS
-		NAME "12.00 +"
-		EXPRESSION ([da] > 12)
-		COLOR 217 31 38
-	END
-	CLASS
-		NAME "8.00 - 12.0"
-		EXPRESSION ([da] > 8)
-		COLOR 241 88 34
-	END
-	CLASS
-		NAME "6.00 - 8.00"
-		EXPRESSION ([da] > 6)
-		COLOR 249 166 128
-	END
-	CLASS
-		NAME "5.00 - 6.00"
-		EXPRESSION ([da] > 5)
-		COLOR 255 212 128
-	END
-	CLASS
-		NAME "4.00 - 5.00"
-		EXPRESSION ([da] > 4)
-		COLOR 246 235 20
-	END
-	CLASS
-		NAME "3.50 - 4.00"
-		EXPRESSION ([da] > 3.5)
-		COLOR 176 210 54
-	END
-	CLASS
-		NAME "3.00 - 3.50"
-		EXPRESSION ([da] > 3)
-		COLOR 81 184 72
-	END
-	CLASS
-		NAME "2.50 - 3.00"
-		EXPRESSION ([da] > 2.5)
-		COLOR 91 193 157
-	END
-	CLASS
-		NAME "2.00 - 2.50"
-		EXPRESSION ([da] > 2)
-		COLOR 111 204 221
-	END
-	CLASS
-		NAME "1.50 - 2.00"
-		EXPRESSION ([da] > 1.5)
-		COLOR 81 122 189
-	END
-	CLASS
-		NAME "1.00 - 1.50"
-		EXPRESSION ([da] > 1)
-		COLOR 57 83 164
-	END
-	CLASS
-		NAME "0.60 - 1.00"
-		EXPRESSION ([da] > 0.60)
-		COLOR 121 81 161
-	END
-	CLASS
-		NAME "0.30 - 0.60"
-		EXPRESSION ([da] > 0.30)
-		COLOR 186 82 159
-	END
-	CLASS
-		NAME "0.05 - 0.30"
-		EXPRESSION ([da] > 0.05)
-		COLOR 218 157 198
-	END
-	CLASS
-		NAME "0.01 - 0.05"
-		EXPRESSION ([da] > 0)
-		COLOR 248 207 226
-	END
+    CLASS
+        NAME "12.00 +"
+        EXPRESSION ([da] > 12)
+        STYLE
+          COLOR 217 31 38
+        END
+    END
+    CLASS
+        NAME "8.00 - 12.0"
+        EXPRESSION ([da] > 8)
+        STYLE
+          COLOR 241 88 34
+        END
+    END
+    CLASS
+        NAME "6.00 - 8.00"
+        EXPRESSION ([da] > 6)
+        STYLE
+          COLOR 249 166 128
+        END
+    END
+    CLASS
+        NAME "5.00 - 6.00"
+        EXPRESSION ([da] > 5)
+        STYLE
+          COLOR 255 212 128
+        END
+    END
+    CLASS
+        NAME "4.00 - 5.00"
+        EXPRESSION ([da] > 4)
+        STYLE
+          COLOR 246 235 20
+        END
+    END
+    CLASS
+        NAME "3.50 - 4.00"
+        EXPRESSION ([da] > 3.5)
+        STYLE
+          COLOR 176 210 54
+        END
+    END
+    CLASS
+        NAME "3.00 - 3.50"
+        EXPRESSION ([da] > 3)
+        STYLE
+          COLOR 81 184 72
+        END
+    END
+    CLASS
+        NAME "2.50 - 3.00"
+        EXPRESSION ([da] > 2.5)
+        STYLE
+          COLOR 91 193 157
+        END
+    END
+    CLASS
+        NAME "2.00 - 2.50"
+        EXPRESSION ([da] > 2)
+        STYLE
+          COLOR 111 204 221
+        END
+    END
+    CLASS
+        NAME "1.50 - 2.00"
+        EXPRESSION ([da] > 1.5)
+        STYLE
+          COLOR 81 122 189
+        END
+    END
+    CLASS
+        NAME "1.00 - 1.50"
+        EXPRESSION ([da] > 1)
+        STYLE
+          COLOR 57 83 164
+        END
+    END
+    CLASS
+        NAME "0.60 - 1.00"
+        EXPRESSION ([da] > 0.60)
+        STYLE
+          COLOR 121 81 161
+        END
+    END
+    CLASS
+        NAME "0.30 - 0.60"
+        EXPRESSION ([da] > 0.30)
+        STYLE
+          COLOR 186 82 159
+        END
+    END
+    CLASS
+        NAME "0.05 - 0.30"
+        EXPRESSION ([da] > 0.05)
+        STYLE
+          COLOR 218 157 198
+        END
+    END
+    CLASS
+        NAME "0.01 - 0.05"
+        EXPRESSION ([da] > 0)
+        STYLE
+          COLOR 248 207 226
+        END
+    END
 END
 
 LAYER
-	NAME sevendays_rainfall_legend
-	GROUP sevendays_rainfall
-	TYPE POINT
-   MINSCALE 0
-  MAXSCALE 465000000
+    NAME sevendays_rainfall_legend
+    GROUP sevendays_rainfall
+    TYPE POINT
     METADATA
       "wms_group_title" "RAIN7"
     "wms_title" "rain7 legend"
     END
-	FEATURE
-	POINTS 240 20 END
-	END
-	TRANSFORM FALSE
-	CLASS
-		NAME "TEST4"
-		STYLE
-  		  SYMBOL '../../gis/symbols/bars/rainbow2.png'
-		  COLOR 0 0 0
-		END
-	END
+    FEATURE
+    POINTS 240 20 END
+    END
+    TRANSFORM FALSE
+    CLASS
+        NAME "TEST4"
+        STYLE
+            SYMBOL '../../gis/symbols/bars/rainbow2.png'
+          COLOR 0 0 0
+        END
+    END
 END
 
 
@@ -172,120 +196,146 @@ END
 LAYER
   CONNECTIONTYPE postgis
   NAME yesterday_rainfall_data
-	GROUP yesterday_rainfall
+    GROUP yesterday_rainfall
   CONNECTION "user=nobody dbname=wepp host=iemdb-wepp.local"
   DATA  "the_geom from (select random() as oid, d.rainfall / 25.4 as da, h.the_geom from daily_rainfall d left join hrap_polygons h using (hrap_i) WHERE d.valid = 'YESTERDAY'::date) as foo using unique oid using srid=26915"
-  STATUS ON
+  STATUS OFF
   TYPE POLYGON
   METADATA
     "wms_group_title" "YESTRAIN"
     "wms_title" "Yesterday"
    "wms_srs" "EPSG:26915 EPSG:4326"
   END
-  MINSCALE 0
-  MAXSCALE 465000000
   PROJECTION
     "init=epsg:26915"
   END
   CLASSITEM "da"
-	CLASS
-		NAME "12.0 +"
-		EXPRESSION ([da] > 12)
-		COLOR 217 31 38
-	END
-	CLASS
-		NAME "8.00 - 12.0"
-		EXPRESSION ([da] > 8)
-		COLOR 241 88 34
-	END
-	CLASS
-		NAME "6.00 - 8.00"
-		EXPRESSION ([da] > 6)
-		COLOR 249 166 128
-	END
-	CLASS
-		NAME "5.00 - 6.00"
-		EXPRESSION ([da] > 5)
-		COLOR 255 212 128
-	END
-	CLASS
-		NAME "4.00 - 5.00"
-		EXPRESSION ([da] > 4)
-		COLOR 246 235 20
-	END
-	CLASS
-		NAME "3.50 - 4.00"
-		EXPRESSION ([da] > 3.5)
-		COLOR 176 210 54
-	END
-	CLASS
-		NAME "3.00 - 3.50"
-		EXPRESSION ([da] > 3)
-		COLOR 81 184 72
-	END
-	CLASS
-		NAME "2.50 - 3.00"
-		EXPRESSION ([da] > 2.5)
-		COLOR 91 193 157
-	END
-	CLASS
-		NAME "2.00 - 2.50"
-		EXPRESSION ([da] > 2)
-		COLOR 111 204 221
-	END
-	CLASS
-		NAME "1.50 - 2.00"
-		EXPRESSION ([da] > 1.5)
-		COLOR 81 122 189
-	END
-	CLASS
-		NAME "1.00 - 1.50"
-		EXPRESSION ([da] > 1)
-		COLOR 57 83 164
-	END
-	CLASS
-		NAME "0.60 - 1.00"
-		EXPRESSION ([da] > 0.60)
-		COLOR 121 81 161
-	END
-	CLASS
-		NAME "0.30 - 0.60"
-		EXPRESSION ([da] > 0.30)
-		COLOR 186 82 159
-	END
-	CLASS
-		NAME "0.05 - 0.30"
-		EXPRESSION ([da] > 0.05)
-		COLOR 218 157 198
-	END
-	CLASS
-		NAME "0.01 - 0.05"
-		EXPRESSION ([da] > 0)
-		COLOR 248 207 226
-	END
+    CLASS
+        NAME "12.0 +"
+        EXPRESSION ([da] > 12)
+        STYLE
+          COLOR 217 31 38
+        END
+    END
+    CLASS
+        NAME "8.00 - 12.0"
+        EXPRESSION ([da] > 8)
+        STYLE
+          COLOR 241 88 34
+        END
+    END
+    CLASS
+        NAME "6.00 - 8.00"
+        EXPRESSION ([da] > 6)
+        STYLE
+          COLOR 249 166 128
+        END
+    END
+    CLASS
+        NAME "5.00 - 6.00"
+        EXPRESSION ([da] > 5)
+        STYLE
+          COLOR 255 212 128
+        END
+    END
+    CLASS
+        NAME "4.00 - 5.00"
+        EXPRESSION ([da] > 4)
+        STYLE
+          COLOR 246 235 20
+        END
+    END
+    CLASS
+        NAME "3.50 - 4.00"
+        EXPRESSION ([da] > 3.5)
+        STYLE
+          COLOR 176 210 54
+        END
+    END
+    CLASS
+        NAME "3.00 - 3.50"
+        EXPRESSION ([da] > 3)
+        STYLE
+          COLOR 81 184 72
+        END
+    END
+    CLASS
+        NAME "2.50 - 3.00"
+        EXPRESSION ([da] > 2.5)
+        STYLE
+            COLOR 91 193 157
+        END
+    END
+    CLASS
+        NAME "2.00 - 2.50"
+        EXPRESSION ([da] > 2)
+        STYLE
+            COLOR 111 204 221
+        END
+    END
+    CLASS
+        NAME "1.50 - 2.00"
+        EXPRESSION ([da] > 1.5)
+        STYLE
+            COLOR 81 122 189
+        END
+    END
+    CLASS
+        NAME "1.00 - 1.50"
+        EXPRESSION ([da] > 1)
+        STYLE
+            COLOR 57 83 164
+        END
+    END
+    CLASS
+        NAME "0.60 - 1.00"
+        EXPRESSION ([da] > 0.60)
+        STYLE
+            COLOR 121 81 161
+        END
+    END
+    CLASS
+        NAME "0.30 - 0.60"
+        EXPRESSION ([da] > 0.30)
+        STYLE
+            COLOR 186 82 159
+        END
+    END
+    CLASS
+        NAME "0.05 - 0.30"
+        EXPRESSION ([da] > 0.05)
+        STYLE
+            COLOR 218 157 198
+        END
+    END
+    CLASS
+        NAME "0.01 - 0.05"
+        EXPRESSION ([da] > 0)
+        STYLE
+            COLOR 248 207 226
+        END
+    END
 END
 
 LAYER
-	NAME yesterday_rainfall_legend
-	GROUP yesterday_rainfall
-	TYPE POINT
-  MINSCALE 0
- MAXSCALE 465000000
-	FEATURE
-		POINTS 240 20 END
+    NAME yesterday_rainfall_legend
+    GROUP yesterday_rainfall
+    TYPE POINT
+    FEATURE
+        POINTS 240 20 END
 END
-	TRANSFORM FALSE
+    TRANSFORM FALSE
   METADATA
     "wms_group_title" "YESTRAIN"
     "wms_title" "yestrain legend"
   END
-	CLASS
-		NAME "TEST4"
-		STYLE
-  		  SYMBOL '../../gis/symbols/bars/rainbow2.png'
-		  COLOR 0 0 0
-		END
-	END
+    CLASS
+        NAME "TEST4"
+        STYLE
+            SYMBOL '../../gis/symbols/bars/rainbow2.png'
+            COLOR 0 0 0
+        END
+    END
 END
 
 
@@ -295,10 +345,8 @@ LAYER
   NAME month_rainfall_data
   CONNECTION "user=nobody dbname=wepp host=iemdb-wepp.local"
   DATA  "the_geom from (select random() as oid, d.rainfall / 25.4 as da, h.the_geom from monthly_rainfall d left join hrap_polygons h using (hrap_i) WHERE d.valid = to_char(CURRENT_TIMESTAMP, 'YYYY-MM-01')::date ) as foo using unique oid using srid=26915"
-  STATUS ON
+  STATUS OFF
   TYPE POLYGON
-  MINSCALE 0
-  MAXSCALE 465000000
   METADATA
     "wms_group_title" "MONTHRAIN"
     "wms_title" "This month"
@@ -307,104 +355,132 @@ LAYER
     "init=epsg:26915"
   END
   CLASSITEM "da"
-	CLASS
-		NAME "12.0 +"
-		EXPRESSION ([da] > 12)
-		COLOR 217 31 38
-	END
-	CLASS
-		NAME "8.0 - 12.0"
-		EXPRESSION ([da] > 8)
-		COLOR 241 88 34
-	END
-	CLASS
-		NAME "6.00 - 8.00"
-		EXPRESSION ([da] > 6)
-		COLOR 249 166 128
-	END
-	CLASS
-		NAME "5.00 - 6.00"
-		EXPRESSION ([da] > 5)
-		COLOR 255 212 128
-	END
-	CLASS
-		NAME "4.00 - 5.00"
-		EXPRESSION ([da] > 4)
-		COLOR 246 235 20
-	END
-	CLASS
-		NAME "3.50 - 4.00"
-		EXPRESSION ([da] > 3.5)
-		COLOR 176 210 54
-	END
-	CLASS
-		NAME "3.00 - 3.50"
-		EXPRESSION ([da] > 3)
-		COLOR 81 184 72
-	END
-	CLASS
-		NAME "2.50 - 3.00"
-		EXPRESSION ([da] > 2.5)
-		COLOR 91 193 157
-	END
-	CLASS
-		NAME "2.00 - 2.50"
-		EXPRESSION ([da] > 2)
-		COLOR 111 204 221
-	END
-	CLASS
-		NAME "1.50 - 2.00"
-		EXPRESSION ([da] > 1.5)
-		COLOR 81 122 189
-	END
-	CLASS
-		NAME "1.00 - 1.50"
-		EXPRESSION ([da] > 1)
-		COLOR 57 83 164
-	END
-	CLASS
-		NAME "0.60 - 1.00"
-		EXPRESSION ([da] > 0.60)
-		COLOR 121 81 161
-	END
-	CLASS
-	    NAME "0.30 - 0.60"
-		EXPRESSION ([da] > 0.30)
-		COLOR 186 82 159
-	END
-	CLASS
-	    NAME "0.05 - 0.30"
-		EXPRESSION ([da] > 0.05)
-		COLOR 218 157 198
-	END
-	CLASS
-	    NAME "0.01 - 0.05"
-		EXPRESSION ([da] > 0)
-		COLOR 248 207 226
-	END
+    CLASS
+        NAME "12.0 +"
+        EXPRESSION ([da] > 12)
+        STYLE
+            COLOR 217 31 38
+        END
+    END
+    CLASS
+        NAME "8.0 - 12.0"
+        EXPRESSION ([da] > 8)
+        STYLE
+            COLOR 241 88 34
+        END
+    END
+    CLASS
+        NAME "6.00 - 8.00"
+        EXPRESSION ([da] > 6)
+        STYLE
+            COLOR 249 166 128
+        END
+    END
+    CLASS
+        NAME "5.00 - 6.00"
+        EXPRESSION ([da] > 5)
+        STYLE
+            COLOR 255 212 128
+        END
+    END
+    CLASS
+        NAME "4.00 - 5.00"
+        EXPRESSION ([da] > 4)
+        STYLE
+            COLOR 246 235 20
+        END
+    END
+    CLASS
+        NAME "3.50 - 4.00"
+        EXPRESSION ([da] > 3.5)
+        STYLE
+            COLOR 176 210 54
+        END
+    END
+    CLASS
+        NAME "3.00 - 3.50"
+        EXPRESSION ([da] > 3)
+        STYLE
+            COLOR 81 184 72
+        END
+    END
+    CLASS
+        NAME "2.50 - 3.00"
+        EXPRESSION ([da] > 2.5)
+        STYLE
+            COLOR 91 193 157
+        END
+    END
+    CLASS
+        NAME "2.00 - 2.50"
+        EXPRESSION ([da] > 2)
+        STYLE
+            COLOR 111 204 221
+        END
+    END
+    CLASS
+        NAME "1.50 - 2.00"
+        EXPRESSION ([da] > 1.5)
+        STYLE
+            COLOR 81 122 189
+        END
+    END
+    CLASS
+        NAME "1.00 - 1.50"
+        EXPRESSION ([da] > 1)
+        STYLE
+            COLOR 57 83 164
+        END
+    END
+    CLASS
+        NAME "0.60 - 1.00"
+        EXPRESSION ([da] > 0.60)
+        STYLE
+            COLOR 121 81 161
+        END
+    END
+    CLASS
+        NAME "0.30 - 0.60"
+        EXPRESSION ([da] > 0.30)
+        STYLE
+            COLOR 186 82 159
+        END
+    END
+    CLASS
+        NAME "0.05 - 0.30"
+        EXPRESSION ([da] > 0.05)
+        STYLE
+            COLOR 218 157 198
+        END
+    END
+    CLASS
+        NAME "0.01 - 0.05"
+        EXPRESSION ([da] > 0)
+        STYLE
+            COLOR 248 207 226
+        END
+    END
 END
 
 LAYER
-	NAME month_rainfall_legend
-	GROUP month_rainfall
-	TYPE POINT
-	FEATURE
-		POINTS 240 20 END
-	END
-  MINSCALE 0
-  MAXSCALE 465000000
-	TRANSFORM FALSE
+    NAME month_rainfall_legend
+    GROUP month_rainfall
+    TYPE POINT
+    FEATURE
+        POINTS 240 20 END
+    END
+    TRANSFORM FALSE
   METADATA
     "wms_group_title" "MONTHRAIN"
     "wms_title" "monthrain legend"
   END
-	CLASS
-		NAME "TEST4"
-		STYLE
-  		  SYMBOL '../../gis/symbols/bars/rainbow2.png'
-		  COLOR 0 0 0
-		END
-	END
+    CLASS
+        NAME "TEST4"
+        STYLE
+            SYMBOL '../../gis/symbols/bars/rainbow2.png'
+          COLOR 0 0 0
+        END
+    END
 END
 
 END

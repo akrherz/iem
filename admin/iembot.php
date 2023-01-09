@@ -30,7 +30,7 @@ $name = isset($_REQUEST["name"]) ? $_REQUEST["name"]: "";
 $alertMsg = "";
 
 function reloadbot(){
-	return file_get_contents("http://iembot:9003/reload");
+    return file_get_contents("http://iembot:9003/reload");
 }
 
 
@@ -49,14 +49,14 @@ if ($action == "add" && $room != ""){
 }
 
 if ($action == "addchannel" && $channel != ""){
-	pg_execute($dbconn, "ADDCHANNEL", Array($channel, $name));
-	$alertMsg = "Channel ID: $channel added";
+    pg_execute($dbconn, "ADDCHANNEL", Array($channel, $name));
+    $alertMsg = "Channel ID: $channel added";
 }
 
 
 /* BEGIN WEB OUTPUT PLEASE */
 $t->headextra = '<link rel="stylesheet" type="text/css" 
-	href="/vendor/ext/3.4.1/resources/css/ext-all.css"/>
+    href="/vendor/ext/3.4.1/resources/css/ext-all.css"/>
 <script type="text/javascript" src="/vendor/ext/3.4.1/adapter/ext/ext-base.js"></script>
 <script type="text/javascript" src="/vendor/ext/3.4.1/ext-all.js"></script>
 <script type="text/javascript">
@@ -88,16 +88,16 @@ App.roomname = "'. $room .'";
 
 $c = "";
 if ($room != "" && $action != "delete"){
-	$c .= "<div style=\"border: 3px solid #000; background: #eee; padding:20px;\">";
+    $c .= "<div style=\"border: 3px solid #000; background: #eee; padding:20px;\">";
 
-	$c .= "<p><strong>Please click the 'Update Room Settings' once done</strong><br />
+    $c .= "<p><strong>Please click the 'Update Room Settings' once done</strong><br />
     <table width=\"800\"><tr><td width=\"400\">
     <div class=\"x-box-tl\"><div class=\"x-box-tr\"><div class=\"x-box-tc\"></div></div></div>
     <div class=\"x-box-ml\"><div class=\"x-box-mr\"><div class=\"x-box-mc\">
         <div style=\"padding-top:4px;\">
             <h3>Current Channel Subscriptions:</h3>
         </div>
-	    <div style=\"padding-top:4px;\">
+        <div style=\"padding-top:4px;\">
             Click in list to remove.
         </div>
 
@@ -106,8 +106,8 @@ if ($room != "" && $action != "delete"){
         <div style=\"padding-top:4px;\">
             Enter some text to search for channels.
         </div>
-		<input type=\"text\" size=\"20\" name=\"channelsearch\"
-		id=\"channelsearch\" />
+        <input type=\"text\" size=\"20\" name=\"channelsearch\"
+        id=\"channelsearch\" />
 
     </div></div></div>
     <div class=\"x-box-bl\"><div class=\"x-box-br\"><div class=\"x-box-bc\"></div></div></div>
@@ -120,27 +120,26 @@ if ($room != "" && $action != "delete"){
         </script>";
 
 
+    $c .= "<h4><img src=\"../images/configure.png\"/> Edit room settings for: {$room}</h4>";
 
-	$c .= "<h4><img src=\"../images/configure.png\"/> Edit room settings for: ${room}</h4>";
+    $c .= sprintf("<a href=\"iembot.php?action=delete&room=%s\">Click to remove iembot from %s room</a>", $room, $room);
 
-	$c .= sprintf("<a href=\"iembot.php?action=delete&room=%s\">Click to remove iembot from %s room</a>", $room, $room);
+    $c .= "<form name=\"modify\" method=\"POST\">";
+    $c .= "<input type=\"hidden\" name=\"action\" value=\"modify\">";
+    $c .= "<input type=\"hidden\" name=\"room\" value=\"{$room}\">";
 
-	$c .= "<form name=\"modify\" method=\"POST\">";
-	$c .= "<input type=\"hidden\" name=\"action\" value=\"modify\">";
-	$c .= "<input type=\"hidden\" name=\"room\" value=\"${room}\">";
-
-	$c .= "<p><input type=\"submit\" value=\"Update Room Settings\">";
-	$c .= "</form>";
-	$c .= "</div>";
-	$alertMsg = reloadbot();
+    $c .= "<p><input type=\"submit\" value=\"Update Room Settings\">";
+    $c .= "</form>";
+    $c .= "</div>";
+    $alertMsg = reloadbot();
 }
 
 $table = "";
 $rs = pg_execute($dbconn, "SELECTROOMS", Array());
 for ($i=0;$row=pg_fetch_array($rs);$i++){
-	if ($i % 8 == 0) $table .= "</tr><tr>";
-	$table .= sprintf("<td><a href=\"iembot.php?action=edit&room=%s\">%s</a></td>",
-			$row["roomname"], $row["roomname"] );
+    if ($i % 8 == 0) $table .= "</tr><tr>";
+    $table .= sprintf("<td><a href=\"iembot.php?action=edit&room=%s\">%s</a></td>",
+            $row["roomname"], $row["roomname"] );
 }
 
 
@@ -182,4 +181,3 @@ $t->content = <<<EOF
 
 EOF;
 $t->render('single.phtml');
-?>

@@ -19,9 +19,13 @@ $conn = iemdb("mesosite");
 $rs = pg_query($conn, "SELECT id, name, date(sts) as s from webcams WHERE network = 'IDOT'
         ORDER by name ASC");
 $sform = "<select name='cid'>";
-for ($i=0;$row=pg_fetch_assoc($rs);$i++){
-    $sform .= sprintf("<option value='%s'>%s -- (%s)</option>\n", $row["id"], $row["name"],
-            $row["s"]);
+for ($i = 0; $row = pg_fetch_assoc($rs); $i++) {
+    $sform .= sprintf(
+        "<option value='%s'>%s -- (%s)</option>\n",
+        $row["id"],
+        $row["name"],
+        $row["s"]
+    );
 }
 $sform .= "</select>";
 

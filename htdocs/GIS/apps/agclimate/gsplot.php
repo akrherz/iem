@@ -1,4 +1,6 @@
 <?php
+require_once "/usr/lib64/php/modules/mapscript.php";
+
 require_once "../../../../config/settings.inc.php";
 require_once "../../../../include/iemmap.php";
 require_once "../../../../include/forms.php";
@@ -61,35 +63,35 @@ $width = $width;
 
 $proj = "init=epsg:26915";
 
-$map = ms_newMapObj("../../../../data/gis/base26915.map");
+$map = new mapObj("../../../../data/gis/base26915.map");
 $map->setsize($width,$height);
 $map->setProjection($proj);
 
 $map->setextent(175000, 4440000, 775000, 4890000);
 
 $counties = $map->getlayerbyname("counties");
-$counties->set("status", MS_ON);
+$counties->__set("status", MS_ON);
 
 $snet = $map->getlayerbyname("station_plot");
-$snet->set("status", MS_ON);
+$snet->__set("status", MS_ON);
 
 $iards = $map->getlayerbyname("iards");
-$iards->set("status", MS_ON);
+$iards->__set("status", MS_ON);
 
 $bar640t = $map->getlayerbyname("bar640t");
-$bar640t->set("status", MS_ON);
+$bar640t->__set("status", MS_ON);
 
 $ponly = $map->getlayerbyname("pointonly");
-$ponly->set("status", MS_ON);
+$ponly->__set("status", MS_ON);
 
 $states = $map->getlayerbyname("states");
-$states->set("status", MS_ON);
+$states->__set("status", MS_ON);
 
 $img = $map->prepareImage();
-$counties->draw($img);
-$states->draw($img);
-$iards->draw($img);
-$bar640t->draw($img);
+$counties->draw($map, $img);
+$states->draw($map, $img);
+$iards->draw($map, $img);
+$bar640t->draw($map, $img);
 
 $sdate = new DateTime("${year}-${smonth}-${sday}");
 $edate = new DateTime("${year}-${emonth}-${eday}");
@@ -133,34 +135,34 @@ foreach($jobj["features"] as $bogus => $value) {
     }
 
     // Red Dot... 
-    $pt = ms_newPointObj();
+    $pt = new pointObj();
     $pt->setXY($lon, $lat, 0);
     $pt->draw($map, $ponly, $img, 0);
 
     // Value UL
-    $pt = ms_newPointObj();
+    $pt = new pointObj();
     $pt->setXY($lon, $lat, 0);
     $pt->draw($map, $snet, $img, 1, round($value, $rnd[$datavar]) );
 
     // Climate
     if (substr($var, 0, 3) == "gdd" || $var == "precip")
     {
-        $pt = ms_newPointObj();
+        $pt = new pointObj();
         $pt->setXY($lon, $lat, 0);
         $pt->draw($map, $snet, $img, 2, "(". round($value - $props["climo_". $datavar], $rnd[$datavar]) .")");
 
     }
 
     // City Name
-    $pt = ms_newPointObj();
+    $pt = new pointObj();
     $pt->setXY($lon, $lat, 0);
     $ar = explode("-", $props['name']);
     $pt->draw($map, $snet, $img, 0, $ar[0] );
 }
 
 iemmap_title($map, $img, $year." ". $varDef[$var] , 
-	"(". $sstr_txt ." - ". $estr_txt .") [some stations moved for legibility]");
+    "(". $sstr_txt ." - ". $estr_txt .") [some stations moved for legibility]");
 $map->drawLabelCache($img);
 
 header("Content-type: image/png");
-$img->saveImage('');
+echo $img->getBytes();

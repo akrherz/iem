@@ -3,7 +3,7 @@ MAP
 # Start of map file
 #
 NAME "goes_west_wv"
-STATUS ON
+STATUS OFF
 SIZE 450 350
 EXTENT -126 24 -66 50
 UNITS DD
@@ -18,8 +18,6 @@ END
 #
 WEB
   TEMPLATE ia.html
-  MINSCALE 0
-  MAXSCALE 465000000
   IMAGEPATH "/var/webtmp/"
   IMAGEURL "/tmp/"
   #LOG "/tmp/w0.log"
@@ -40,12 +38,10 @@ END
 #
 LAYER
   NAME "west_wv_4km"
-  STATUS ON
-  DATA "/mesonet/ldmdata/gis/images/GOES/conus/channel09/GOES-17_C09.png"
+  STATUS OFF
+  DATA "/mesonet/ldmdata/gis/images/GOES/conus/channel09/GOES-18_C09.png"
   TYPE RASTER
-  MINSCALE 0
-  MAXSCALE 465000000
-  INCLUDE "/mesonet/ldmdata/gis/images/GOES/conus/channel09/GOES-17_C09.msinc"
+  INCLUDE "/mesonet/ldmdata/gis/images/GOES/conus/channel09/GOES-18_C09.msinc"
   PROCESSING "CLOSE_CONNECTION=NORMAL"
 END
 

@@ -3,14 +3,13 @@ MAP
 # Start of map file
 #
 NAME "radar"
-STATUS ON
+STATUS OFF
 SIZE 450 350
-#SYMBOLSET symbols/symbol.sym
-FONTSET "/mesonet/data/gis/static/fonts/fonts.list"
+FONTSET "/opt/iem/data/gis/fonts.list"
 EXTENT -126 26 -76 50
 UNITS DD
 SHAPEPATH "/mesonet/data/gis/"
-SYMBOLSET "/mesonet/data/gis/static/symbols/stations.sym"
+SYMBOLSET "/opt/iem/data/gis/symbols/stations.sym"
 IMAGECOLOR -1 -1 -1
 IMAGETYPE png
 
@@ -21,8 +20,6 @@ OUTPUTFORMAT
   IMAGEMODE PC256
   TRANSPARENT ON
 END
-
-
 
 #
 # Projection definition, consult the PROJ.4 documentation for parameter discussion
@@ -38,11 +35,8 @@ WEB
 #  HEADER ia_header.html
   TEMPLATE ia.html
 #  FOOTER ia_footer.html
-  MINSCALE 90000
-  MAXSCALE 4650000
   IMAGEPATH "/var/webtmp/"
   IMAGEURL "https://mesonet.agron.iastate.edu/tmp/"
-  LOG "/var/webtmp/w0.log"
   METADATA
    "wms_title" "IEM WMS Service"
    "wms_onlineresource" "https://mesonet.agron.iastate.edu/cgi-bin/mapserv/mapserv?map=/opt/iem/htdocs/GIS/maps/usradar.map&amp;"
@@ -60,7 +54,7 @@ END
 #
 LAYER
   NAME usradar
-  STATUS ON
+  STATUS OFF
   DATA "/mesonet/ldmdata/gis/images/4326/USCOMP/n0r_0.tif"
   TYPE RASTER
   PROJECTION

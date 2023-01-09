@@ -8,29 +8,29 @@ require_once "../include/myview.php";
 require_once "../include/forms.php";
 require_once "../include/Facebook/autoload.php";
 
-$msgs = Array();
+$msgs = array();
 
 define("TOKEN_NAME", "iem_facebook_access_token");
 $mesosite = iemdb("mesosite", TRUE, TRUE);
-pg_prepare($mesosite, "DELETOR", "DELETE from feature WHERE ".
+pg_prepare($mesosite, "DELETOR", "DELETE from feature WHERE " .
     "date(valid) = $1");
-pg_prepare($mesosite, "INJECTOR", "INSERT into feature ".
-    "(valid, title, story, caption, voting, tags, fbid, appurl, ".
-    "javascripturl, mediasuffix, media_height, media_width) VALUES ".
+pg_prepare($mesosite, "INJECTOR", "INSERT into feature " .
+    "(valid, title, story, caption, voting, tags, fbid, appurl, " .
+    "javascripturl, mediasuffix, media_height, media_width) VALUES " .
     "($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12)");
-pg_prepare($mesosite, "UPDATOR", "UPDATE feature SET fbid = $1 WHERE ".
+pg_prepare($mesosite, "UPDATOR", "UPDATE feature SET fbid = $1 WHERE " .
     "date(valid) = $2");
-pg_prepare($mesosite, "GET_AT", "SELECT propvalue from properties WHERE ".
+pg_prepare($mesosite, "GET_AT", "SELECT propvalue from properties WHERE " .
     "propname = $1");
-pg_prepare($mesosite, "INSERT_AT", "INSERT into properties(propname, ".
+pg_prepare($mesosite, "INSERT_AT", "INSERT into properties(propname, " .
     "propvalue) VALUES ($1, $2)");
-pg_prepare($mesosite, "DELETE_AT", "DELETE from properties WHERE ".
+pg_prepare($mesosite, "DELETE_AT", "DELETE from properties WHERE " .
     "propname = $1");
 
 $fb = new \Facebook\Facebook([
-  'app_id' => '148705700931',
-  'app_secret' => $fb_feature_secret,
-  'default_graph_version' => 'v5.0'
+    'app_id' => '148705700931',
+    'app_secret' => $fb_feature_secret,
+    'default_graph_version' => 'v5.0'
 ]);
 $helper = $fb->getRedirectLoginHelper();
 // https://developers.facebook.com/docs/permissions/reference/pages_manage_posts
@@ -39,35 +39,35 @@ $callback = 'https://mesonet.agron.iastate.edu/admin/feature.php';
 $loginUrl = $helper->getLoginUrl($callback, $permissions);
 
 // Do we have a token in the database?
-$rs = pg_execute($mesosite, "GET_AT", Array(TOKEN_NAME));
+$rs = pg_execute($mesosite, "GET_AT", array(TOKEN_NAME));
 if (pg_num_rows($rs) == 0) {
-  $accessToken = null;
+    $accessToken = null;
 } else {
-  $accessToken = pg_fetch_result($rs, 0, 0);
-  $msgs[] = "Found access_token within the database.";
+    $accessToken = pg_fetch_result($rs, 0, 0);
+    $msgs[] = "Found access_token within the database.";
 }
 
 // If we have a token, try to use it
 if ($accessToken) {
-  try {
-    $fb->setDefaultAccessToken($accessToken);
-    $msgs[] = "Set access_token for facebook client.";
-} catch (Exception $e) {
-      $msgs[] = "Error: " . $e->getMessage();
-  }
+    try {
+        $fb->setDefaultAccessToken($accessToken);
+        $msgs[] = "Set access_token for facebook client.";
+    } catch (Exception $e) {
+        $msgs[] = "Error: " . $e->getMessage();
+    }
 }
 
 // If we got a response with a token to save, save it
 try {
-	$res = $helper->getAccessToken();
-	if ($res){
+    $res = $helper->getAccessToken();
+    if ($res) {
         $accessToken = $res;
         $msgs[] = "Saving acccess_token to database.";
-        pg_execute($mesosite, "INSERT_AT", Array(TOKEN_NAME, $accessToken));
+        pg_execute($mesosite, "INSERT_AT", array(TOKEN_NAME, $accessToken));
         $fb->setDefaultAccessToken($accessToken);
     }
-} catch(Facebook\Exceptions\FacebookSDKException $e) {
-	// There was an error communicating with Graph
+} catch (Facebook\Exceptions\FacebookSDKException $e) {
+    // There was an error communicating with Graph
     $msgs[] = "Error: " . $e->getMessage();
 }
 
@@ -78,7 +78,7 @@ $title = isset($_REQUEST["title"]) ? $_REQUEST["title"] : null;
 $caption = isset($_REQUEST["caption"]) ? $_REQUEST["caption"] : null;
 $tags = isset($_REQUEST["tags"]) ? $_REQUEST["tags"] : null;
 $voting = (isset($_REQUEST["voting"]) && $_REQUEST["voting"] == "yes") ? 't' : 'f';
-$mediasuffix = isset($_REQUEST["mediasuffix"]) ? $_REQUEST["mediasuffix"]: "png";
+$mediasuffix = isset($_REQUEST["mediasuffix"]) ? $_REQUEST["mediasuffix"] : "png";
 $media_height = get_int404("media_height", null);
 $media_width = get_int404("media_width", null);
 
@@ -87,20 +87,20 @@ if (empty($appurl)) $appurl = null;
 
 $app = "";
 
-if ($accessToken){
-	try {
+if ($accessToken) {
+    try {
         $response = $fb->get('/me');
         $userNode = $response->getGraphUser();
-        $app .= "Hello, ". $userNode->getName();
-	} catch(Facebook\Exceptions\FacebookSDKException $e) {
+        $app .= "Hello, " . $userNode->getName();
+    } catch (Facebook\Exceptions\FacebookSDKException $e) {
         $msgs[] = "Error: " . $e->getMessage();
     }
 } else {
-	$app .= "<a href=\"$loginUrl\">Login</a>";
+    $app .= "<a href=\"$loginUrl\">Login</a>";
 }
 
-if (! is_null($story) && ! is_null($title)){
-    $at_str = isset($_REQUEST["at_on"])? $_REQUEST["at"]: ""; 
+if (!is_null($story) && !is_null($title)) {
+    $at_str = isset($_REQUEST["at_on"]) ? $_REQUEST["at"] : "";
     $publish_at = new DateTime($at_str, new DateTimeZone("America/Chicago"));
 
     $permalink = sprintf(
@@ -114,45 +114,48 @@ if (! is_null($story) && ! is_null($title)){
     );
     // Here's the rub, Facebook wants to visit the permalink above to scrape content
     // So we need to get this info into the database before we tell facebook about it
-    pg_execute($mesosite, "DELETOR", Array($publish_at->format('Y-m-d')));
+    pg_execute($mesosite, "DELETOR", array($publish_at->format('Y-m-d')));
     pg_execute(
         $mesosite,
         "INJECTOR",
-        Array($publish_at->format("Y-m-d H:i:s"), $title, $story, $caption,
-			$voting, $tags, null, $appurl, $javascripturl,
-			$mediasuffix, $media_height, $media_width),
+        array(
+            $publish_at->format("Y-m-d H:i:s"), $title, $story, $caption,
+            $voting, $tags, null, $appurl, $javascripturl,
+            $mediasuffix, $media_height, $media_width
+        ),
     );
 
-    if ( isset($_REQUEST["facebook"]) && $_REQUEST["facebook"] == "yes"){
+    if (isset($_REQUEST["facebook"]) && $_REQUEST["facebook"] == "yes") {
 
         // https://developers.facebook.com/docs/graph-api/reference/v2.12/page/feed#custom-image
         $data = [
             'link' => $permalink,
             'message' => $story,
         ];
-        if ($at_str != ""){
+        if ($at_str != "") {
             $data["scheduled_publish_time"] = $publish_at->getTimestamp();
             $data["published"] = false;
         }
-        try{
+        try {
             // Get a page access token to use
             $response = $fb->get('/157789644737?fields=access_token');
             $fbid = $response->getGraphNode();
             $response = $fb->post('/157789644737/feed', $data, $fbid["access_token"]);
             $fbid = $response->getGraphNode();
-        } catch(Facebook\Exceptions\FacebookSDKException $e) {
+        } catch (Facebook\Exceptions\FacebookSDKException $e) {
             // There was an error communicating with Graph
             $msgs[] = "Error: " . $e->getMessage();
         }
         $story_fbid = explode("_", $fbid['id']);
         $story_fbid = $story_fbid[1];
-        $msgs[] = sprintf("Facebook <a href=\"https://www.facebook.com/". 
-            "permalink.php?story_fbid=%s&id=157789644737\">post created</a>.",
-            $story_fbid);
+        $msgs[] = sprintf(
+            "Facebook <a href=\"https://www.facebook.com/" .
+                "permalink.php?story_fbid=%s&id=157789644737\">post created</a>.",
+            $story_fbid
+        );
 
-        pg_execute($mesosite, "UPDATOR", Array($story_fbid, $publish_at->format('Y-m-d')));
+        pg_execute($mesosite, "UPDATOR", array($story_fbid, $publish_at->format('Y-m-d')));
     }
-
 }
 
 $t = new MyView();
@@ -164,7 +167,7 @@ $dt->modify('+1 day');
 $at = $dt->format('Y-m-d\\TH:i:s');
 
 $logmsgs = "<ul>";
-foreach($msgs as $msg){
+foreach ($msgs as $msg) {
     $logmsgs .= sprintf("<li>%s</li>", $msg);
 }
 

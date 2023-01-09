@@ -1,0 +1,29 @@
+name: Test Mapserver Files
+on: [push, pull_request]
+jobs:
+  build-linux:
+    name: Test Mapserver Files
+    runs-on: ubuntu-latest
+    steps:
+    - uses: actions/checkout@v2
+
+    - name: Add /etc/hosts entries
+      run: |
+        cat .github/workflows/etchosts.txt | sudo tee -a /etc/hosts
+
+    - name: Setup CI from ci-tooling
+      run: |
+        git clone --depth 1 https://github.com/akrherz/iem-database.git database
+        git clone --depth 1 https://github.com/akrherz/ci_tooling.git .ci_tooling
+        . .ci_tooling/iemwebfarm.sh
+        . .ci_tooling/postgres.sh
+        sudo ln -s `pwd` /opt/iem
+        sudo ln -s $HOME/miniconda /opt/miniconda3
+        sudo apt-get install mapserver-bin
+        sudo mkdir -p /mesonet/ldmdata/
+        wget -q http://mesonet.agron.iastate.edu/pickup/ci_msinc.tgz
+        sudo tar -C / -xzf ci_msinc.tgz
+
+    - name: Run map2img
+      run: |
+        bash test/run_mapserver.sh

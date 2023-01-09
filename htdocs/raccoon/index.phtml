@@ -23,31 +23,31 @@ $wtype = isset($_GET["wtype"]) ? $_GET["wtype"] : Array('TO', 'SV');
 
 
 if (isset($_REQUEST["wfo"])){
-	/* Check to make sure we have warnings first! */
-	$postgis = iemdb("postgis");
-	$rs = pg_prepare($postgis, "SELECT", "SELECT issue from sbw_${year} ".
-	"WHERE wfo = $1 and phenomena in ('SV','TO','FF', 'MA', 'SQ', 'DS') ".
+    /* Check to make sure we have warnings first! */
+    $postgis = iemdb("postgis");
+    $rs = pg_prepare($postgis, "SELECT", "SELECT issue from sbw_{$year} ".
+    "WHERE wfo = $1 and phenomena in ('SV','TO','FF', 'MA', 'SQ', 'DS') ".
     "and significance = 'W' and issue BETWEEN $2 and $3");
-	$rs = pg_execute($postgis, "SELECT", Array($wfo, 
-		gmdate("Y-m-d H:i", $sts) ."+00", gmdate("Y-m-d H:i", $ets) ."+00"));
-	pg_close($postgis);
-	if (pg_num_rows($rs) < 1){
-		$err = "Sorry, did not find any warnings for your selected WFO and
-		time period, please try again!";
-	} else {
-		$mesosite = iemdb("mesosite", TRUE, TRUE);
-		pg_prepare($mesosite, "INSERT", "INSERT into racoon_jobs(wfo, sts, ets,
-				radar, nexrad_product, wtype) values ($1,$2,$3,$4,$5,$6) 
-				returning jobid");
-		$rs = pg_execute($mesosite, "INSERT", array($wfo, 
-			date("Y-m-d H:i", $sts), date("Y-m-d H:i", $ets), $radar,
-				$radar_product, implode(",", $wtype)));
-		$row = pg_fetch_assoc($rs,0);
-		pg_close($mesosite);
-		$jobid = $row["jobid"];
-		Header("Location: wait.phtml?jobid=$jobid");
-		die();
-	}
+    $rs = pg_execute($postgis, "SELECT", Array($wfo, 
+        gmdate("Y-m-d H:i", $sts) ."+00", gmdate("Y-m-d H:i", $ets) ."+00"));
+    pg_close($postgis);
+    if (pg_num_rows($rs) < 1){
+        $err = "Sorry, did not find any warnings for your selected WFO and
+        time period, please try again!";
+    } else {
+        $mesosite = iemdb("mesosite", TRUE, TRUE);
+        pg_prepare($mesosite, "INSERT", "INSERT into racoon_jobs(wfo, sts, ets,
+                radar, nexrad_product, wtype) values ($1,$2,$3,$4,$5,$6) 
+                returning jobid");
+        $rs = pg_execute($mesosite, "INSERT", array($wfo, 
+            date("Y-m-d H:i", $sts), date("Y-m-d H:i", $ets), $radar,
+                $radar_product, implode(",", $wtype)));
+        $row = pg_fetch_assoc($rs,0);
+        pg_close($mesosite);
+        $jobid = $row["jobid"];
+        Header("Location: wait.phtml?jobid=$jobid");
+        die();
+    }
 }
 
 $t->title = "Raccoon - Warnings overview in PowerPoint";
@@ -55,7 +55,7 @@ $t->headextra = "<meta name='robots' content='index, nofollow'/>";
 
 $e = "";
 if (isset($err)){
-	$e = sprintf("<div class=\"alert alert-warning\">%s</div>", $err);
+    $e = sprintf("<div class=\"alert alert-warning\">%s</div>", $err);
 }
 
 $ar = Array("FF" => "Flash Flood",
@@ -66,9 +66,9 @@ $ar = Array("FF" => "Flash Flood",
 "TO" => "Tornado");
 $wtselect = "";
 foreach($ar as $p => $n){
-	$wtselect .= sprintf("<input name=\"wtype[]\" type=\"checkbox\" 
-			value=\"%s\"%s>%s (%s.W)</input><br />", $p, 
-			in_array($p, $wtype) ? " CHECKED": "", $n, $p);
+    $wtselect .= sprintf("<input name=\"wtype[]\" type=\"checkbox\" 
+            value=\"%s\"%s>%s (%s.W)</input><br />", $p, 
+            in_array($p, $wtype) ? " CHECKED": "", $n, $p);
 }
 
 
@@ -115,22 +115,22 @@ probably back fill imagery for the event.
 <form method="GET" name="raccoon">
 <table>
 <tr><th>Select Weather Office</th>
-	<td colspan="4">{$wselect}</td></tr>
+    <td colspan="4">{$wselect}</td></tr>
 <tr><th>Select RADAR source</th>
-	<td colspan="4">{$nselect}</td></tr>
+    <td colspan="4">{$nselect}</td></tr>
 <tr><th>Select Level 3 Product:</th>
-	<td colspan="4">
-	<select name="product">
-		<option value="N0Q">Base Reflectivity</option>
-		<option value="N0U">Base Velocity</option>
-	</select>
-	</td></tr>
+    <td colspan="4">
+    <select name="product">
+        <option value="N0Q">Base Reflectivity</option>
+        <option value="N0U">Base Velocity</option>
+    </select>
+    </td></tr>
 <tr><th>View Warning Types:</th>
-	<td colspan="4">
+    <td colspan="4">
 {$wtselect}
-	</td></tr>
-	
-	<tr>
+    </td></tr>
+    
+    <tr>
     <td></td>
     <th>Year</th><th>Month</th><th>Day</th>
     <th>Hour</th>

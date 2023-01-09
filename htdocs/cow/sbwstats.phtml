@@ -54,7 +54,7 @@ while ($row=pg_fetch_array($rs))
         $data[$wfo] = Array();
         foreach($phenoms as $k => $p){
             foreach($suffixes as $k => $s){
-                $data[$wfo]["${p}_$s"] = 0;
+                $data[$wfo]["{$p}_$s"] = 0;
             }
         }
     }
@@ -113,9 +113,9 @@ foreach($sorted as $v => $wfo)
 {
     foreach($phenoms as $idx => $phenom)
     {
-        $totals["${phenom}_cnt"] += $data[$wfo]["${phenom}_cnt"];
-        $totals["${phenom}_perim"] += $data[$wfo]["${phenom}_sum_perimsize"];
-        $totals["${phenom}_area"] += $data[$wfo]["${phenom}_sum_polysize"];
+        $totals["{$phenom}_cnt"] += $data[$wfo]["{$phenom}_cnt"];
+        $totals["{$phenom}_perim"] += $data[$wfo]["{$phenom}_sum_perimsize"];
+        $totals["{$phenom}_area"] += $data[$wfo]["{$phenom}_sum_polysize"];
     }
     
   $cnt = $data[$wfo]["TO_cnt"] + 

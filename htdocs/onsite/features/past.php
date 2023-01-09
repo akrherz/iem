@@ -33,7 +33,7 @@ $sql = <<<EOF
 EOF;
 $rs = pg_exec($c, $sql);
 
-$num = pg_numrows($rs);
+$num = pg_num_rows($rs);
 
 $linkbar = <<<EOF
 <div class="row well">

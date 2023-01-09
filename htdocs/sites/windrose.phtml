@@ -15,7 +15,7 @@ if (strpos($network, "COOP") > 0) {
             str_replace("_COOP", "_DCP", $network),
         )
     );
-    if (pg_numrows($rs) == 1){
+    if (pg_num_rows($rs) == 1){
         $res = pg_fetch_row($rs);
         $network = $res[0];
         header("Location: /sites/windrose.phtml?station=${station}&network=${network}");

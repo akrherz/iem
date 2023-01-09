@@ -3,19 +3,17 @@ MAP
 # Start of map file
 #
 NAME mosaic
-STATUS ON
+STATUS OFF
 SIZE 900 600
-FONTSET "/mesonet/data/gis/fonts/fonts.list"
+FONTSET "/opt/iem/data/gis/fonts.list"
 # 3 x 2  1200 x 800 km
 EXTENT -200000 4300000 1000000 5100000
 #EXTENT -104 37 -87 49
 UNITS METERS
 SHAPEPATH "/mesonet/data/gis/"
-SYMBOLSET "/mesonet/data/gis/symbols/stations.sym"
+SYMBOLSET "/opt/iem/data/gis/symbols/stations.sym"
 IMAGECOLOR 0 0 0
 IMAGETYPE PNG
-TRANSPARENT OFF
-INTERLACE off
 
 #
 PROJECTION
@@ -27,8 +25,6 @@ END
 WEB
   HEADER q_header.html
   FOOTER q_footer.html
-  MINSCALE 90000
-  MAXSCALE 40000000
   IMAGEPATH "/var/webtmp/"
   IMAGEURL "/tmp/"
   METADATA
@@ -64,7 +60,7 @@ END
 LAYER
   TYPE POLYGON
   NAME rect
-  STATUS ON
+  STATUS OFF
   METADATA
     "wms_title"  "Rect Layer"
      "wms_srs"   "EPSG:26915"
@@ -73,7 +69,9 @@ LAYER
     "init=epsg:4326"
   END
   CLASS
-    OUTLINECOLOR 250 250 250
+    STYLE
+      OUTLINECOLOR 250 250 250
+    END
   END
 END
 
@@ -81,18 +79,18 @@ LAYER
  NAME KCCI
  DATA /mesonet/data/gis/images/26915/KCCI/KCCI_N0R_0.tif
  TYPE RASTER
- STATUS ON
+ STATUS OFF
  PROJECTION
    "init=epsg:26915"
  END
- OFFSITE 0
+ OFFSITE 0 0 0
 END
 
 LAYER
   NAME radar
   DATA /mesonet/data/gis/images/unproj/USCOMP/n0r_0.tif
   TYPE RASTER
-  STATUS ON
+  STATUS OFF
   METADATA
     "wms_title" "Composite NEXRAD"
      "wms_srs" "EPSG:4269"  # Specify as Latlong?
@@ -100,15 +98,14 @@ LAYER
   PROJECTION
     "init=epsg:4326"
   END
-  OFFSITE 1
-  TRANSPARENCY 70
+  OFFSITE 0 0 0
 END
 
 LAYER
   NAME DMX
   DATA /mesonet/data/gis/images/unproj/DMX/n0r_0.tif
   TYPE RASTER
-  STATUS ON
+  STATUS OFF
   METADATA
     "wms_title" "DMX NEXRAD"
      "wms_srs" "EPSG:4269"  # Specify as Latlong?
@@ -116,7 +113,7 @@ LAYER
   PROJECTION
     "init=epsg:4326"
   END
-  OFFSITE 0
+  OFFSITE 0 0 0
 END
 
 
@@ -125,7 +122,7 @@ LAYER
   NAME radar2
   DATA /mesonet/data/gis/images/unproj/USCOMP/n0r_0.tif
   TYPE RASTER
-  STATUS ON
+  STATUS OFF
   METADATA
     "wms_title" "Composite NEXRAD"
      "wms_srs" "EPSG:4269"  # Specify as Latlong?
@@ -133,12 +130,8 @@ LAYER
   PROJECTION
     "init=epsg:4326"
   END
-  OFFSITE 1
-  TRANSPARENCY 70
+  OFFSITE 0 0 0
 END
-
-
-
 
 LAYER
   NAME credits
@@ -149,11 +142,6 @@ LAYER
     NAME 'credits'
     LABEL
       COLOR 0 0 0
-      BACKGROUNDCOLOR 250 250 250
-#      SHADOWSIZE 1 1
-#      SHADOWCOLOR 0 0 0
-#      BACKGROUNDSHADOWCOLOR 0 0 0
-#      BACKGROUNDSHADOWSIZE 1 1
       TYPE TRUETYPE
       SIZE 16
       FONT 'kcci'
@@ -168,20 +156,22 @@ END
 
 LAYER
   NAME inex
-  STATUS ON
+  STATUS OFF
   TYPE POLYGON
   DATA /mesonet/data/gis/static/shape/4326/iem/nex_rings.shp
   PROJECTION
    "init=epsg:4326"
   END
   CLASS
-    OUTLINECOLOR 255 0 0
+    STYLE
+      OUTLINECOLOR 255 0 0
+    END
   END
 END
 
 LAYER
   NAME icwa
-  STATUS ON
+  STATUS OFF
   TYPE POLYGON
   DATA /mesonet/data/gis/static/shape/4326/iem/cwas.shp
   PROJECTION
@@ -189,11 +179,13 @@ LAYER
   END
   LABELITEM "CWA"
   CLASS
-    OUTLINECOLOR 0 0 255
+    STYLE
+      OUTLINECOLOR 0 0 255
+    END
     LABEL
         TYPE BITMAP
         SIZE MEDIUM
-    FORCE TRUE
+      FORCE TRUE
         COLOR 0 0 0
     END
   END
@@ -201,7 +193,7 @@ END
 
 LAYER
   NAME states
-  STATUS DEFAULT
+  STATUS OFF
   TYPE LINE
   DATA /mesonet/data/gis/static/shape/4326/us/states.shp
   METADATA
@@ -212,46 +204,52 @@ LAYER
     "init=epsg:4326"
   END
   CLASS
-    SYMBOL "circle"
-    COLOR 105 105 105
-    SIZE 2
+    STYLE
+      SYMBOL "circle"
+      COLOR 105 105 105
+      SIZE 2
+    END
   END
 END
 
 LAYER
   NAME counties
-  STATUS ON
+  STATUS OFF
   TYPE LINE
   DATA /mesonet/data/gis/static/shape/26915/us/counties.shp
   PROJECTION
    "init=epsg:26915"
   END
   CLASS
-    SYMBOL "circle"
-    COLOR 105 105 105
-    SIZE 1
+    STYLE
+      SYMBOL "circle"
+      COLOR 105 105 105
+      SIZE 1
+    END
   END
 END
 
 LAYER
   NAME counties_unproj
-  STATUS ON
+  STATUS OFF
   TYPE LINE
   DATA /mesonet/data/gis/static/shape/4326/us/uscounties.shp
   PROJECTION
    "init=epsg:4326"
   END
   CLASS
-    SYMBOL "circle"
-    COLOR 105 105 105
-    SIZE 1
+    STYLE
+      SYMBOL "circle"
+      COLOR 105 105 105
+      SIZE 1
+    END
   END
 END
 
 
 LAYER
   NAME uscounties
-  STATUS ON
+  STATUS OFF
   TYPE LINE
   DATA /mesonet/data/gis/static/shape/4326/us/uscounties.shp
 
@@ -259,9 +257,11 @@ LAYER
    "init=epsg:4326"
   END
   CLASS
-    SYMBOL "circle"
-    COLOR 105 105 105
-    SIZE 2
+    STYLE
+      SYMBOL "circle"
+      COLOR 105 105 105
+      SIZE 2
+    END
   END
 END
 
@@ -278,17 +278,21 @@ LAYER
  CLASSITEM 'type'
   CLASS
     EXPRESSION /SVR/
-    COLOR -1 -1 -1
-    OUTLINECOLOR 255 255 0
-    SIZE 2
-    SYMBOL 1
+    STYLE
+      COLOR -1 -1 -1
+      OUTLINECOLOR 255 255 0
+      SIZE 2
+      SYMBOL 1
+    END
   END
   CLASS
     EXPRESSION /TOR/
-    COLOR -1 -1 -1
-    OUTLINECOLOR 255 0 0
-    SIZE 2
-    SYMBOL 1
+    STYLE
+      COLOR -1 -1 -1
+      OUTLINECOLOR 255 0 0
+      SIZE 2
+      SYMBOL 1
+    END
   END
 END
 
@@ -298,7 +302,7 @@ LAYER
   NAME warnings0_c
   CONNECTION "user=nobody dbname=postgis host=iemdb-postgis.local"
   DATA "geom from warnings_2004"
-  STATUS ON
+  STATUS OFF
   TYPE POLYGON
   METADATA
     "wms_title" "Current County Warnings"
@@ -312,17 +316,21 @@ LAYER
   CLASSITEM 'type'
   CLASS
     EXPRESSION /SVR/
-    COLOR -1 -1 -1
-    OUTLINECOLOR 255 255 0
-    SIZE 2
-    SYMBOL 1
+    STYLE
+      COLOR -1 -1 -1
+      OUTLINECOLOR 255 255 0
+      SIZE 2
+      SYMBOL 1
+    END
   END
   CLASS
     EXPRESSION /TOR/
-    COLOR -1 -1 -1
-    OUTLINECOLOR 255 0 0
-    SIZE 2
-    SYMBOL 1
+    STYLE
+      COLOR -1 -1 -1
+      OUTLINECOLOR 255 0 0
+      SIZE 2
+      SYMBOL 1
+    END
   END
 END
 
@@ -330,9 +338,9 @@ END
 LAYER
   CONNECTIONTYPE postgis
   NAME warnings1d_c
-  CONNECTION "user=nobody dbname=postgis host=mesonet.agron.iastate.edu"
+  CONNECTION "user=nobody dbname=postgis host=iemdb-postgis.local"
   DATA "geom from warnings_2004"
-  STATUS ON
+  STATUS OFF
   TYPE POLYGON
   METADATA
     "wms_title" "Todays County Warnings"
@@ -344,20 +352,19 @@ LAYER
    "init=epsg:4326"
   END
   CLASS
-    COLOR 255 0 0
-    BACKGROUNDCOLOR 255 0 0
-    OUTLINECOLOR 255 0 0
-#    SYMBOL 1
-#    SIZE 10
+    STYLE
+      COLOR 255 0 0
+      OUTLINECOLOR 255 0 0
+    END
   END
 END
 
 LAYER
   CONNECTIONTYPE postgis
   NAME warnings0_p
-  CONNECTION "user=nobody dbname=postgis host=mesonet.agron.iastate.edu"
+  CONNECTION "user=nobody dbname=postgis host=iemdb-postgis.local"
   DATA "geom from sbw"
-  STATUS ON
+  STATUS OFF
   TYPE POLYGON
   METADATA
     "wms_title" "Current Polygon Warnings"
@@ -369,10 +376,10 @@ LAYER
    "init=epsg:4326"
   END
   CLASS
-    COLOR -1 -1 -1
-    OUTLINECOLOR 255 255 255
-#    SYMBOL 1
-#    SIZE 10
+    STYLE
+      COLOR -1 -1 -1
+      OUTLINECOLOR 255 255 255
+    END
   END
 END
 
@@ -380,9 +387,9 @@ END
 LAYER
   CONNECTIONTYPE postgis
   NAME warnings1d_p
-  CONNECTION "user=nobody dbname=postgis host=mesonet.agron.iastate.edu"
+  CONNECTION "user=nobody dbname=postgis host=iemdb-postgis.local"
   DATA "geom from sbw"
-  STATUS ON
+  STATUS OFF
   TYPE POLYGON
   METADATA
     "wms_title" "Todays Polygon Warnings"
@@ -394,11 +401,10 @@ LAYER
    "init=epsg:4326"
   END
   CLASS
-    COLOR -1 -1 -1
-    BACKGROUNDCOLOR -1 -1 -1
-    OUTLINECOLOR 0 0 0
-#    SYMBOL 1
-#    SIZE 10
+    STYLE
+      COLOR -1 -1 -1
+      OUTLINECOLOR 0 0 0
+    END
   END
 END
 
@@ -407,16 +413,17 @@ LAYER
   TYPE POINT
   STATUS default
   TRANSFORM FALSE
-  TRANSPARENCY 10
   CLASS
-    SYMBOL 'iem_logo'
-    SIZE 40
+    STYLE
+      SYMBOL 'iem_logo'
+      SIZE 40
+    END
   END
 END
 
 LAYER
   NAME iowa_counties
-  STATUS ON
+  STATUS OFF
   TYPE POLYGON
   DATA /mesonet/data/gis/static/shape/4326/iem/cwa_counties.shp
   PROJECTION
@@ -425,36 +432,37 @@ LAYER
   CLASSITEM 'FIPS'
   CLASS
     EXPRESSION /19043/
-    OUTLINECOLOR 0 0 0
-    COLOR 0 0 0
-    BACKGROUNDCOLOR 0 0 0
-    SYMBOL 1
-    SIZE 3
+    STYLE
+      OUTLINECOLOR 0 0 0
+      COLOR 0 0 0
+      SYMBOL 1
+      SIZE 3
+    END
   END
   CLASS
-    OUTLINECOLOR 255 0 0
-    COLOR -1 -1 -1
+    STYLE
+      OUTLINECOLOR 255 0 0
+      COLOR -1 -1 -1
+    END
   END
 END
 
 LAYER
   NAME cwas
-  STATUS ON
+  STATUS OFF
   TYPE POLYGON
   DATA /mesonet/data/gis/static/shape/4326/iem/cwas.shp
   PROJECTION
    "init=epsg:4326"
   END
   LABELITEM "WFO"
-#  CLASSITEM "WFO"
   CLASS
-#    EXPRESSION /DMX|ABR/
-    OUTLINECOLOR 250 250 250
-#    COLOR 200 200 200
+    STYLE
+      OUTLINECOLOR 250 250 250
+    END
     LABEL
       MINFEATURESIZE 100
       COLOR 250 250 250
-      BACKGROUNDCOLOR -1 -1 -1
       OUTLINECOLOR -1 -1 -1
       TYPE TRUETYPE
       SIZE 12
@@ -464,7 +472,5 @@ LAYER
     END
   END
 END
-
-
 
 END

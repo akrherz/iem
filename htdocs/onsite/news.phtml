@@ -44,7 +44,7 @@ if ($id > 0) {
     $id = intval($row["id"]);
 }
 
-if (pg_numrows($result) == 1 && $id > 0) {
+if (pg_num_rows($result) == 1 && $id > 0) {
     $prev = $id - 1;
     $next = $id + 1;
     $content .= "<a rel=\"nofollow\" href=\"news.phtml?id=$prev\">&lt;&lt; Previous</a> &nbsp; &nbsp; &nbsp;";
@@ -81,7 +81,7 @@ for ($i = 0; $i < pg_num_rows($result) && $row = pg_fetch_assoc($result, $i); $i
     $content .= "</div>";
 } // End of for
 
-if (pg_numrows($result) == 1) {
+if (pg_num_rows($result) == 1) {
     $t->jsextra = <<<EOF
         <div id="fb-root"></div>
 <script type="text/javascript">
@@ -113,7 +113,7 @@ EOF;
 } else {
     $t->title = "News and Notes";
 }
-if (pg_numrows($result) == 0) {
+if (pg_num_rows($result) == 0) {
     $content .= "<div class='alert alert-danger'>No news items were found based on your search parameters!
             <a href='news.phtml' class='link link-danger'>Here</a> is the last news item posted.</div>";
 }

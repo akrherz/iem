@@ -1,14 +1,12 @@
 MAP
 NAME squaw
-STATUS ON
+STATUS OFF
 EXTENT 410000 4635000 470000 4690000
 SIZE 200 200
 UNITS METERS
 #SHAPEPATH "/mesonet/www/apps/squaw/data/gis"
 IMAGECOLOR 255 255 255
 IMAGETYPE PNG
-TRANSPARENT off
-INTERLACE off
 
 SYMBOL
    NAME 'circle'
@@ -23,8 +21,6 @@ END
 
 WEB
   TEMPLATE bogus.html
-  MINSCALE 90000
-  MAXSCALE 40000000
   IMAGEPATH "/var/webtmp/"
   IMAGEURL "/tmp/"
 END
@@ -36,7 +32,7 @@ LAYER
   PROJECTION
    "init=epsg:26915"
   END
-  STATUS ON
+  STATUS OFF
   CLASS
     STYLE
       COLOR 0 0 0
@@ -57,7 +53,7 @@ LAYER
     PROJECTION
         "init=epsg:26915"
     END
-    STATUS ON
+    STATUS OFF
     LABELCACHE ON
   CLASS
     LABEL
@@ -78,12 +74,14 @@ LAYER
   PROJECTION
     "init=epsg:26915"
   END
-  STATUS ON
+  STATUS OFF
   LABELCACHE OFF
   CLASS
-    COLOR 190 190 190
-    SYMBOL 'circle'
-    SIZE 1
+    STYLE
+      COLOR 190 190 190
+      SYMBOL 'circle'
+      SIZE 1
+    END
   END
 END
 
@@ -94,7 +92,7 @@ LAYER
   PROJECTION
     "init=epsg:26915"
   END
-  STATUS ON
+  STATUS OFF
 END
 
 END

@@ -1,7 +1,7 @@
 # Start of Mapfile (radmapserver.map)
 MAP
 NAME radmapserver
-STATUS ON
+STATUS OFF
 SIZE 450 350
 EXTENT -104 37 -87 49
 UNITS DD
@@ -15,7 +15,6 @@ END
 
 # Map interface definition
 WEB
-  LOG "/tmp/radmapserver.log"
   TEMPLATE radmapserver.html
   IMAGEPATH "/var/webtmp/"
   IMAGEURL "/tmp/"
@@ -24,7 +23,7 @@ END
 # Our Geo-referenced RADAR layer
 LAYER
   TYPE RASTER
-  STATUS ON
+  STATUS OFF
   NAME radar
   DATA "/opt/iem/htdocs/radmapserver/gisdata/radar.tif"
   PROJECTION
@@ -36,14 +35,16 @@ END
 # Our states shapefile, just to get some political boundaries
 LAYER
   TYPE POLYGON
-  STATUS ON
+  STATUS OFF
   NAME states
   DATA "/opt/iem/htdocs/radmapserver/gisdata/states.shp"
   PROJECTION
     "init=epsg:4326"
   END
   CLASS
-    OUTLINECOLOR 255 0 0
+    STYLE
+      COLOR 255 0 0
+    END
   END
 END
 

@@ -3,7 +3,7 @@ MAP
 # Start of map file
 #
 NAME "q2"
-STATUS ON
+STATUS OFF
 SIZE 450 350
 EXTENT -126 24 -66 50
 UNITS DD
@@ -18,8 +18,6 @@ END
 #
 WEB
   TEMPLATE ia.html
-  MINSCALE 0
-  MAXSCALE 465000000
   IMAGEPATH "/var/webtmp/"
   IMAGEURL "/tmp/"
   METADATA
@@ -38,11 +36,9 @@ END
 #
 LAYER
   NAME "q2_hsr"
-  STATUS ON
+  STATUS OFF
   DATA "/mesonet/ldmdata/gis/images/4326/mrms/lcref.png"
   TYPE RASTER
-  MINSCALE 0
-  MAXSCALE 465000000
   PROJECTION
     "init=epsg:4326"
   END
@@ -60,11 +56,9 @@ END
 #
 LAYER
   NAME "q2_n1p"
-  STATUS ON
+  STATUS OFF
   DATA "/mesonet/ldmdata/gis/images/4326/mrms/p1h.png"
   TYPE RASTER
-  MINSCALE 0
-  MAXSCALE 465000000
   PROJECTION
     "init=epsg:4326"
   END
@@ -79,11 +73,9 @@ END
 
 LAYER
   NAME "q2_p24h"
-  STATUS ON
+  STATUS OFF
   DATA "/mesonet/ldmdata/gis/images/4326/mrms/p24h.png"
   TYPE RASTER
-  MINSCALE 0
-  MAXSCALE 465000000
   PROJECTION
     "init=epsg:4326"
   END
@@ -103,11 +95,9 @@ END
 
 LAYER
   NAME "q2_p48h"
-  STATUS ON
+  STATUS OFF
   DATA "/mesonet/ldmdata/gis/images/4326/mrms/p48h.png"
   TYPE RASTER
-  MINSCALE 0
-  MAXSCALE 465000000
   PROJECTION
     "init=epsg:4326"
   END
@@ -127,11 +117,9 @@ END
 
 LAYER
   NAME "q2_p72h"
-  STATUS ON
+  STATUS OFF
   DATA "/mesonet/ldmdata/gis/images/4326/mrms/p72h.png"
   TYPE RASTER
-  MINSCALE 0
-  MAXSCALE 465000000
   PROJECTION
     "init=epsg:4326"
   END

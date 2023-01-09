@@ -3,7 +3,7 @@ MAP
 
 NAME "mrms"
 SIZE 450 350
-STATUS ON
+STATUS OFF
 EXTENT -126 24 -66 50
 UNITS DD
 IMAGECOLOR -1 -1 -1
@@ -31,11 +31,9 @@ END
 #
 LAYER
   NAME "mrms_p72h"
-  STATUS ON
+  STATUS OFF
   DATA "/mesonet/ldmdata/gis/images/4326/mrms/p72h.png"
   TYPE RASTER
-  MINSCALE 0
-  MAXSCALE 465000000
   PROJECTION
     "init=epsg:4326"
   END
@@ -57,11 +55,9 @@ END
 #
 LAYER
   NAME "mrms_p48h"
-  STATUS ON
+  STATUS OFF
   DATA "/mesonet/ldmdata/gis/images/4326/mrms/p48h.png"
   TYPE RASTER
-  MINSCALE 0
-  MAXSCALE 465000000
   PROJECTION
     "init=epsg:4326"
   END
@@ -83,11 +79,9 @@ END
 #
 LAYER
   NAME "mrms_p24h"
-  STATUS ON
+  STATUS OFF
   DATA "/mesonet/ldmdata/gis/images/4326/mrms/p24h.png"
   TYPE RASTER
-  MINSCALE 0
-  MAXSCALE 465000000
   PROJECTION
     "init=epsg:4326"
   END
@@ -109,11 +103,9 @@ END
 #
 LAYER
   NAME "mrms_p1h"
-  STATUS ON
+  STATUS OFF
   DATA "/mesonet/ldmdata/gis/images/4326/mrms/p1h.png"
   TYPE RASTER
-  MINSCALE 0
-  MAXSCALE 465000000
   PROJECTION
     "init=epsg:4326"
   END
@@ -135,11 +127,9 @@ END
 #
 LAYER
   NAME "mrms_a2m"
-  STATUS ON
+  STATUS OFF
   DATA "/mesonet/ldmdata/gis/images/4326/mrms/a2m.png"
   TYPE RASTER
-  MINSCALE 0
-  MAXSCALE 465000000
   PROJECTION
     "init=epsg:4326"
   END
@@ -161,7 +151,7 @@ END
 #
 LAYER
   NAME "mrms-archive"
-  STATUS ON
+  STATUS OFF
   DATA "/mesonet/ARCHIVE/data/%year%/%month%/%day%/GIS/mrms/%prod%_%year%%month%%day%%time%.png"
   TYPE RASTER
   VALIDATION
@@ -171,8 +161,6 @@ LAYER
     day                 "^[0-9]{2}$"
     time                 "^[0-9]{4}$"
   END
-  MINSCALE 0
-  MAXSCALE 465000000
   PROJECTION
     "init=epsg:4326"
   END

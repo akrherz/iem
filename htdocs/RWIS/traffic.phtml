@@ -25,25 +25,25 @@ $rs = pg_execute($dbconn, "SELECT", Array() );
  $t->refresh = 600;
 
  function fancytime($strtime){
- 	$now = time();
- 	$ts = strtotime($strtime);
- 	if (($now - $ts) < 600){ return date("h:i A", $ts); }
- 	else { return date("M d h:i A", $ts); }
+     $now = time();
+     $ts = strtotime($strtime);
+     if (($now - $ts) < 600){ return date("h:i A", $ts); }
+     else { return date("M d h:i A", $ts); }
  }
  $vals = Array(
- 		"name" => "Station Name",
- 		"valid" => "Observation Time",
- 		"avg_speed" => "Average Speed [mph]",
- 		"normal_vol" => "2 Axel Volume",
- 		"long_vol" => "3+ Axel Volume",
- 		"occupancy" => "Occupancy",
+         "name" => "Station Name",
+         "valid" => "Observation Time",
+         "avg_speed" => "Average Speed [mph]",
+         "normal_vol" => "2 Axel Volume",
+         "long_vol" => "3+ Axel Volume",
+         "occupancy" => "Occupancy",
  );
 
  $table = "";
  for($i=0;$row=pg_fetch_array($rs);$i++){
- 	$table .= sprintf("<tr><th>%s</th><th>%s</th><td>%s</td><td>%.1f</td><td>%s</td><td>%s</td><td>%s</td></tr>\n",
- 			$row["station_name"], $row["name"], fancytime($row["valid"]), $row["avg_speed"],
- 			$row["normal_vol"], $row["long_vol"], $row["occupancy"]);
+     $table .= sprintf("<tr><th>%s</th><th>%s</th><td>%s</td><td>%.1f</td><td>%s</td><td>%s</td><td>%s</td></tr>\n",
+             $row["station_name"], $row["name"], fancytime($row["valid"]), $row["avg_speed"],
+             $row["normal_vol"], $row["long_vol"], $row["occupancy"]);
  }
  
  

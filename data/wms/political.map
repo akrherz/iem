@@ -3,8 +3,10 @@ MAP
 # Start of map file
 #
 NAME "political"
-STATUS ON
+STATUS OFF
 SIZE 450 350
+EXTENT -179 1 -40 89
+UNITS DD
 SHAPEPATH "/mesonet/data/gis/static/shape/3857/"
 IMAGECOLOR -1 -1 -1
 
@@ -16,11 +18,8 @@ END
 #
 WEB
   TEMPLATE ia.html
-  MINSCALE 0
-  MAXSCALE 465000000
   IMAGEPATH "/var/webtmp/"
   IMAGEURL "/tmp/"
-  #LOG "/tmp/political.log"
   METADATA
    "wms_title" "IEM Political Boundaries Service"
    "wms_onlineresource" "https://mesonet.agron.iastate.edu/cgi-bin/mapserv/mapserv?map=/opt/iem/data/wms/political.map&SERVICE=WMS&"
@@ -30,7 +29,7 @@ WEB
    "wms_accessconstraints" "None"
    "wms_contactperson" "Daryl Herzmann"
    "wms_contactorganization" "Iowa State University"
-      "wms_enable_request" "*"
+    "wms_enable_request" "*"
   END
 END
 
@@ -38,11 +37,9 @@ END
 #
 LAYER
   NAME "fz"
-  STATUS ON
+  STATUS OFF
   DATA "nws/fire_zones.shp"
   TYPE LINE
-  MINSCALE 0
-  MAXSCALE 465000000
   PROJECTION
     "init=epsg:3857"
   END
@@ -63,11 +60,9 @@ END
 #
 LAYER
   NAME "uscounties"
-  STATUS ON
+  STATUS OFF
   DATA "us/counties.shp"
   TYPE LINE
-  MINSCALE 0
-  MAXSCALE 465000000
   PROJECTION
     "init=epsg:3857"
   END
@@ -89,11 +84,9 @@ END
 #
 LAYER
   NAME "iacounties"
-  STATUS ON
+  STATUS OFF
   DATA "us/counties.shp"
   TYPE LINE
-  MINSCALE 0
-  MAXSCALE 465000000
   PROJECTION
     "init=epsg:3857"
   END
@@ -117,11 +110,9 @@ END
 #
 LAYER
   NAME "usstates"
-  STATUS ON
+  STATUS OFF
   DATA "us/states.shp"
   TYPE LINE
-  MINSCALE 0
-  MAXSCALE 465000000
   PROJECTION
     "init=epsg:3857"
   END
@@ -131,9 +122,11 @@ LAYER
     "wms_extent" "-126 24 -66 50"
   END
   CLASS
-    SYMBOL 0
-    COLOR 0 0 0
-    SIZE 3
+    STYLE
+      SYMBOL 0
+      COLOR 0 0 0
+      SIZE 3
+    END
   END
 END
 
@@ -141,11 +134,9 @@ END
 #
 LAYER
   NAME "wfo"
-  STATUS ON
+  STATUS OFF
   DATA "nws/cwas.shp"
   TYPE LINE
-  MINSCALE 0
-  MAXSCALE 465000000
   PROJECTION
     "init=epsg:3857"
   END
@@ -155,9 +146,11 @@ LAYER
     "wms_extent" "-180 10 -66 89"
   END
   CLASS
-    SYMBOL 0
-    COLOR 0 0 0
-    SIZE 3
+    STYLE
+      SYMBOL 0
+      COLOR 0 0 0
+      SIZE 3
+    END
   END
 END
 
@@ -165,11 +158,9 @@ END
 #
 LAYER
   NAME "rfc"
-  STATUS ON
+  STATUS OFF
   DATA "nws/rfc.shp"
   TYPE LINE
-  MINSCALE 0
-  MAXSCALE 465000000
   PROJECTION
     "init=epsg:3857"
   END
@@ -179,9 +170,11 @@ LAYER
     "wms_extent" "-180 10 -66 89"
   END
   CLASS
-    SYMBOL 0
-    COLOR 0 0 0
-    SIZE 3
+    STYLE
+      SYMBOL 0
+      COLOR 0 0 0
+      SIZE 3
+    END
   END
 END
 
@@ -189,11 +182,9 @@ END
 #
 LAYER
   NAME "cwsu"
-  STATUS ON
+  STATUS OFF
   DATA "nws/cwsu.shp"
   TYPE LINE
-  MINSCALE 0
-  MAXSCALE 465000000
   PROJECTION
     "init=epsg:3857"
   END
@@ -203,9 +194,11 @@ LAYER
     "wms_extent" "-180 10 -66 89"
   END
   CLASS
-    SYMBOL 0
-    COLOR 0 0 0
-    SIZE 3
+    STYLE
+      SYMBOL 0
+      COLOR 0 0 0
+      SIZE 3
+    END
   END
 END
 
@@ -213,11 +206,9 @@ END
 #
 LAYER
   NAME "tribal"
-  STATUS ON
+  STATUS OFF
   DATA "us/tribal.shp"
   TYPE LINE
-  MINSCALE 0
-  MAXSCALE 465000000
   PROJECTION
     "init=epsg:3857"
   END
@@ -227,9 +218,11 @@ LAYER
     "wms_extent" "-180 10 -66 89"
   END
   CLASS
-    SYMBOL 0
-    COLOR 0 0 0
-    SIZE 3
+    STYLE
+      SYMBOL 0
+      COLOR 0 0 0
+      SIZE 3
+    END
   END
 END
 
@@ -238,7 +231,7 @@ END
 LAYER
   NAME "iarivers"
   GROUP "iahydrology"
-  STATUS ON
+  STATUS OFF
   DATA "iowa/IA_NHDplus_General.shp"
   TYPE LINE
   PROJECTION
@@ -263,7 +256,7 @@ END
 LAYER
   NAME "iawaterbody"
   GROUP "iahydrology"
-  STATUS ON
+  STATUS OFF
   DATA "iowa/IA_NHD_waterbody_general.shp"
   TYPE POLYGON
   PROJECTION
@@ -275,7 +268,9 @@ LAYER
     "wms_extent" "-110 30 -86 45"
   END
   CLASS
-    COLOR 0 0 255
+    STYLE
+      COLOR 0 0 255
+    END
   END
 END
 
@@ -283,7 +278,7 @@ END
 #
 LAYER
   NAME "iahshd"
-  STATUS ON
+  STATUS OFF
   DATA "/mesonet/data/gis/static/images/3857/iowa/hshd100m1.tif"
   TYPE RASTER
   PROJECTION
@@ -301,7 +296,7 @@ END
 #
 LAYER
   NAME "iaglu"
-  STATUS ON
+  STATUS OFF
   DATA "/mesonet/data/gis/static/images/3857/iowa/glu0813.tif"
   TYPE RASTER
   PROJECTION

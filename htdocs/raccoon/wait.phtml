@@ -9,22 +9,22 @@ require_once "../../include/database.inc.php";
 $jobid = xssafe($_REQUEST["jobid"]);
 $status = "PROCESSING";
 if (isset($_REQUEST["jobid"])){
-	$mesosite = iemdb("mesosite");
-	pg_prepare($mesosite, "SELECT", "SELECT * from racoon_jobs where jobid = $1");
-	$rs = pg_execute($mesosite, "SELECT", Array($jobid));
-	if (pg_num_rows($rs) < 1) die();
-	$row = pg_fetch_assoc($rs,0);
-	$sts = strtotime($row["sts"]);
-	$ets = strtotime($row["ets"]);
-	$basefn = sprintf("%s-%s-%s-%s-%s.ppt",  $row["wfo"], 
-			str_replace(",", "_", $row["wtype"]),
-			$row["radar"], gmdate("YmdH", $sts), gmdate("YmdH", $ets));
-	$fn = sprintf("/mesonet/share/pickup/raccoon/%s",  $basefn);
-	if (is_file($fn)){
-		$status = "DONE!";
-	}
-	
-	pg_close($mesosite);
+    $mesosite = iemdb("mesosite");
+    pg_prepare($mesosite, "SELECT", "SELECT * from racoon_jobs where jobid = $1");
+    $rs = pg_execute($mesosite, "SELECT", Array($jobid));
+    if (pg_num_rows($rs) < 1) die();
+    $row = pg_fetch_assoc($rs,0);
+    $sts = strtotime($row["sts"]);
+    $ets = strtotime($row["ets"]);
+    $basefn = sprintf("%s-%s-%s-%s-%s.ppt",  $row["wfo"], 
+            str_replace(",", "_", $row["wtype"]),
+            $row["radar"], gmdate("YmdH", $sts), gmdate("YmdH", $ets));
+    $fn = sprintf("/mesonet/share/pickup/raccoon/%s",  $basefn);
+    if (is_file($fn)){
+        $status = "DONE!";
+    }
+    
+    pg_close($mesosite);
 }
 
 $t->title = "Raccoon - Warnings overview in PowerPoint";
@@ -34,9 +34,9 @@ if ($status != "DONE!"){
 
 $c = "";
 if ($status == "DONE!"){
-	$c = sprintf(
+    $c = sprintf(
         '<p>Download your powerpoint <a href="/pickup/raccoon/%s">here</a>',
-		$basefn);
+        $basefn);
 }
 $t->content = <<<EOF
 <h3>IEM Raccoon</h3>

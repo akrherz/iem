@@ -1,4 +1,3 @@
-
 LAYER
   CONNECTIONTYPE postgis
   NAME "roads"
@@ -54,7 +53,6 @@ LAYER
       SYMBOL 'circle'
     END
     STYLE
-      #COLOR  152 152 152
       COLOR  240 240 0
       WIDTH 3
       ANTIALIAS TRUE
@@ -206,7 +204,6 @@ LAYER
     "wms_title" "Iowa Interstates Conditions"
     "wms_srs"   "EPSG:4326 EPSG:26915 EPSG:3857"
   END
-  #TRANSPARENCY ALPHA
   #FILTER "expire > CURRENT_TIMESTAMP and gtype = 'C'"
   PROJECTION
    "init=epsg:26915"
@@ -377,13 +374,5 @@ LAYER
   END
 
 
-#  CLASS
-#    NAME 'others'
-#    STYLE
-#      COLOR 220 220 220
-#      WIDTH 5
-#      ANTIALIAS TRUE
-#    END
-#  END
   TOLERANCE 50
 END

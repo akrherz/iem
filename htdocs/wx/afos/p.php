@@ -45,7 +45,7 @@ function locate_product($conn, $e, $pil, $dir)
         $pil,
         date("Y-m-d H:i", $ts)
     ));
-    if (pg_numrows($rs) == 0) {
+    if (pg_num_rows($rs) == 0) {
         // widen the net
         $rs = pg_prepare($conn, "_LSELECT2", "SELECT " .
             "entered at time zone 'UTC' as mytime from products " .
@@ -56,7 +56,7 @@ function locate_product($conn, $e, $pil, $dir)
             date("Y-m-d H:i", $ts)
         ));
     }
-    if (pg_numrows($rs) == 0) return $rs;
+    if (pg_num_rows($rs) == 0) return $rs;
 
     $row = pg_fetch_assoc($rs, 0);
     $uri = sprintf(
@@ -75,7 +75,7 @@ function last_product($conn, $pil)
         . " WHERE pil = $1 and entered > (now() - '31 days'::interval)"
         . " ORDER by entered DESC LIMIT 1");
     $rs = pg_execute($conn, "_LSELECT3", array($pil));
-    if (pg_numrows($rs) == 1) {
+    if (pg_num_rows($rs) == 1) {
         $row = pg_fetch_assoc($rs, 0);
         $uri = sprintf(
             "p.php?pil=%s&e=%s",
@@ -128,10 +128,10 @@ if (is_null($e)) {
 
 $content = "<h3>National Weather Service Raw Text Product</h3>";
 
-if (is_null($rs) || pg_numrows($rs) < 1) {
+if (is_null($rs) || pg_num_rows($rs) < 1) {
     $content .= "<div class=\"alert alert-warning\">Sorry, could not find product.</div>";
 }
-if (pg_numrows($rs) > 1) {
+if (pg_num_rows($rs) > 1) {
     $content .= '<div class="alert alert-warning"><i class="fa fa-file"></i> ' .
         'Found multiple products. Scroll down to see them all.</div>';
 }

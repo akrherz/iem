@@ -3,7 +3,7 @@ MAP
 # Start of map file
 #
 NAME "nexrad_base_reflect"
-STATUS ON
+STATUS OFF
 SIZE 450 350
 #SYMBOLSET symbols/symbol.sym
 EXTENT -126 24 -66 50
@@ -27,8 +27,6 @@ WEB
 #  HEADER ia_header.html
   TEMPLATE ia.html
 #  FOOTER ia_footer.html
-  MINSCALE 0
-  MAXSCALE 465000000
   IMAGEPATH "/var/webtmp/"
   IMAGEURL "/tmp/"
   #LOG "/tmp/n0r-w0.log"
@@ -50,11 +48,9 @@ END
 #
 LAYER
   NAME "nexrad-n0r"
-  STATUS ON
+  STATUS OFF
   DATA "/mesonet/ldmdata/gis/images/4326/USCOMP/n0r_0.tif"
   TYPE RASTER
-  MINSCALE 0
-  MAXSCALE 465000000
   PROJECTION
    "init=epsg:4326"
   END
@@ -69,11 +65,9 @@ END
 
 LAYER
   NAME "nexrad-n0r-900913"
-  STATUS ON
+  STATUS OFF
   DATA "/mesonet/ldmdata/gis/images/900913/USCOMP/n0r_0.tif"
   TYPE RASTER
-  MINSCALE 0
-  MAXSCALE 4650000000000000
   PROJECTION
     "init=epsg:3857"
   END
@@ -89,11 +83,9 @@ END
 
 LAYER
   NAME "nexrad-n0r-900913-m05m"
-  STATUS ON
+  STATUS OFF
   DATA "/mesonet/ldmdata/gis/images/900913/USCOMP/n0r_1.tif"
   TYPE RASTER
-  MINSCALE 0
-  MAXSCALE 4650000000000000
   PROJECTION
     "init=epsg:3857"
   END
@@ -109,11 +101,9 @@ END
 
 LAYER
   NAME "nexrad-n0r-900913-m10m"
-  STATUS ON
+  STATUS OFF
   DATA "/mesonet/ldmdata/gis/images/900913/USCOMP/n0r_2.tif"
   TYPE RASTER
-  MINSCALE 0
-  MAXSCALE 4650000000000000
   PROJECTION
     "init=epsg:3857"
   END
@@ -128,11 +118,9 @@ END
 
 LAYER
   NAME "nexrad-n0r-900913-m15m"
-  STATUS ON
+  STATUS OFF
   DATA "/mesonet/ldmdata/gis/images/900913/USCOMP/n0r_3.tif"
   TYPE RASTER
-  MINSCALE 0
-  MAXSCALE 4650000000000000
   PROJECTION
     "init=epsg:3857"
   END
@@ -147,11 +135,9 @@ END
 
 LAYER
   NAME "nexrad-n0r-900913-m20m"
-  STATUS ON
+  STATUS OFF
   DATA "/mesonet/ldmdata/gis/images/900913/USCOMP/n0r_4.tif"
   TYPE RASTER
-  MINSCALE 0
-  MAXSCALE 4650000000000000
   PROJECTION
     "init=epsg:3857"
   END
@@ -166,11 +152,9 @@ END
 
 LAYER
   NAME "nexrad-n0r-900913-m25m"
-  STATUS ON
+  STATUS OFF
   DATA "/mesonet/ldmdata/gis/images/900913/USCOMP/n0r_5.tif"
   TYPE RASTER
-  MINSCALE 0
-  MAXSCALE 4650000000000000
   PROJECTION
     "init=epsg:3857"
   END
@@ -186,11 +170,9 @@ END
 
 LAYER
   NAME "nexrad-n0r-900913-m30m"
-  STATUS ON
+  STATUS OFF
   DATA "/mesonet/ldmdata/gis/images/900913/USCOMP/n0r_6.tif"
   TYPE RASTER
-  MINSCALE 0
-  MAXSCALE 4650000000000000
   PROJECTION
     "init=epsg:3857"
   END
@@ -205,11 +187,9 @@ END
 
 LAYER
   NAME "nexrad-n0r-900913-m35m"
-  STATUS ON
+  STATUS OFF
   DATA "/mesonet/ldmdata/gis/images/900913/USCOMP/n0r_7.tif"
   TYPE RASTER
-  MINSCALE 0
-  MAXSCALE 4650000000000000
   PROJECTION
     "init=epsg:3857"
   END
@@ -224,11 +204,9 @@ END
 
 LAYER
   NAME "nexrad-n0r-900913-m40m"
-  STATUS ON
+  STATUS OFF
   DATA "/mesonet/ldmdata/gis/images/900913/USCOMP/n0r_8.tif"
   TYPE RASTER
-  MINSCALE 0
-  MAXSCALE 4650000000000000
   PROJECTION
     "init=epsg:3857"
   END
@@ -243,11 +221,9 @@ END
 
 LAYER
   NAME "nexrad-n0r-900913-m45m"
-  STATUS ON
+  STATUS OFF
   DATA "/mesonet/ldmdata/gis/images/900913/USCOMP/n0r_9.tif"
   TYPE RASTER
-  MINSCALE 0
-  MAXSCALE 4650000000000000
   PROJECTION
     "init=epsg:3857"
   END
@@ -262,11 +238,9 @@ END
 
 LAYER
   NAME "nexrad-n0r-900913-m50m"
-  STATUS ON
+  STATUS OFF
   DATA "/mesonet/ldmdata/gis/images/900913/USCOMP/n0r_10.tif"
   TYPE RASTER
-  MINSCALE 0
-  MAXSCALE 4650000000000000
   PROJECTION
     "init=epsg:3857"
   END
@@ -282,11 +256,9 @@ END
 
 LAYER
   NAME "nexrad-n0r-m05m"
-  STATUS ON
+  STATUS OFF
   DATA "/mesonet/ldmdata/gis/images/4326/USCOMP/n0r_1.tif"
   TYPE RASTER
-  MINSCALE 0
-  MAXSCALE 465000000
   PROJECTION
    "init=epsg:4326"
   END
@@ -301,11 +273,9 @@ END
 
 LAYER
   NAME "nexrad-n0r-m10m"
-  STATUS ON
+  STATUS OFF
   DATA "/mesonet/ldmdata/gis/images/4326/USCOMP/n0r_2.tif"
   TYPE RASTER
-  MINSCALE 0
-  MAXSCALE 465000000
   PROJECTION
     "init=epsg:4326"
   END
@@ -320,11 +290,9 @@ END
 
 LAYER
   NAME "nexrad-n0r-m15m"
-  STATUS ON
+  STATUS OFF
   DATA "/mesonet/ldmdata/gis/images/4326/USCOMP/n0r_3.tif"
   TYPE RASTER
-  MINSCALE 0
-  MAXSCALE 465000000
   PROJECTION
     "init=epsg:4326"
   END
@@ -339,11 +307,9 @@ END
 
 LAYER
   NAME "nexrad-n0r-m20m"
-  STATUS ON
+  STATUS OFF
   DATA "/mesonet/ldmdata/gis/images/4326/USCOMP/n0r_4.tif"
   TYPE RASTER
-  MINSCALE 0
-  MAXSCALE 465000000
   PROJECTION
     "init=epsg:4326"
   END
@@ -358,11 +324,9 @@ END
 
 LAYER
   NAME "nexrad-n0r-m25m"
-  STATUS ON
+  STATUS OFF
   DATA "/mesonet/ldmdata/gis/images/4326/USCOMP/n0r_5.tif"
   TYPE RASTER
-  MINSCALE 0
-  MAXSCALE 465000000
   PROJECTION
     "init=epsg:4326"
   END
@@ -377,11 +341,9 @@ END
 
 LAYER
   NAME "nexrad-n0r-m30m"
-  STATUS ON
+  STATUS OFF
   DATA "/mesonet/ldmdata/gis/images/4326/USCOMP/n0r_6.tif"
   TYPE RASTER
-  MINSCALE 0
-  MAXSCALE 465000000
   PROJECTION
     "init=epsg:4326"
   END
@@ -396,11 +358,9 @@ END
 
 LAYER
   NAME "nexrad-n0r-m35m"
-  STATUS ON
+  STATUS OFF
   DATA "/mesonet/ldmdata/gis/images/4326/USCOMP/n0r_7.tif"
   TYPE RASTER
-  MINSCALE 0
-  MAXSCALE 465000000
   PROJECTION
     "init=epsg:4326"
   END
@@ -415,11 +375,9 @@ END
 
 LAYER
   NAME "nexrad-n0r-m40m"
-  STATUS ON
+  STATUS OFF
   DATA "/mesonet/ldmdata/gis/images/4326/USCOMP/n0r_8.tif"
   TYPE RASTER
-  MINSCALE 0
-  MAXSCALE 465000000
   PROJECTION
     "init=epsg:4326"
   END
@@ -434,11 +392,9 @@ END
 
 LAYER
   NAME "nexrad-n0r-m45m"
-  STATUS ON
+  STATUS OFF
   DATA "/mesonet/ldmdata/gis/images/4326/USCOMP/n0r_9.tif"
   TYPE RASTER
-  MINSCALE 0
-  MAXSCALE 465000000
   PROJECTION
     "init=epsg:4326"
   END
@@ -453,11 +409,9 @@ END
 
 LAYER
   NAME "nexrad-n0r-m50m"
-  STATUS ON
+  STATUS OFF
   DATA "/mesonet/ldmdata/gis/images/4326/USCOMP/n0r_10.tif"
   TYPE RASTER
-  MINSCALE 0
-  MAXSCALE 465000000
   PROJECTION
     "init=epsg:4326"
   END

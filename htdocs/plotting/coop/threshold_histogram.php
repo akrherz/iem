@@ -25,9 +25,9 @@ pg_prepare($conn, "_SELECT0", "SELECT y1, count(*) from
 for ($thres = -40; $thres < 11; $thres++) {
     $rs = pg_execute($conn, "_SELECT0", array($thres));
     $xdata[] = $thres;
-    $ydata[] = pg_numrows($rs);
+    $ydata[] = pg_num_rows($rs);
 }
-$yrs = pg_numrows($rs);
+$yrs = pg_num_rows($rs);
 $pct = array();
 foreach ($ydata as $k => $v) {
     $pct[] = $v / $yrs * 100.0;
@@ -45,9 +45,9 @@ if ($station2 != "") {
          WHERE low < $1 GROUP by y1");
     for ($thres = -40; $thres < 11; $thres++) {
         $rs = pg_execute($conn, "_SECTOR1", array($thres));
-        $ydata[] = pg_numrows($rs);
+        $ydata[] = pg_num_rows($rs);
     }
-    $yrs2 = pg_numrows($rs);
+    $yrs2 = pg_num_rows($rs);
     $pct2 = array();
     foreach ($ydata as $k => $v) {
         $pct2[] = $v / $yrs2 * 100.0;

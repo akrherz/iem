@@ -1,12 +1,9 @@
 MAP
-#
-# Start of map file
-#
+
 NAME "weatherwarn"
-STATUS ON
+STATUS OFF
 SIZE 450 350
-#SYMBOLSET symbols/symbol.sym
-FONTSET "/mesonet/data/gis/static/fonts/fonts.list"
+FONTSET "/opt/iem/data/gis/fonts.list"
 EXTENT -155.0 15.0 -30.0 70.0
 UNITS DD
 SHAPEPATH "/mesonet/data/gis/static/"
@@ -28,8 +25,6 @@ WEB
 #  HEADER ia_header.html
   TEMPLATE img.html
 #  FOOTER ia_footer.html
-  MINSCALE 90000
-  MAXSCALE 4650000
   IMAGEPATH "/var/webtmp/"
   IMAGEURL "/tmp/"
   #LOG "/tmp/w0.log"
@@ -62,7 +57,7 @@ END
 
 LAYER
   NAME counties
-  STATUS DEFAULT
+  STATUS OFF
   TYPE POLYGON
   DATA shape/4326/iowa/iacounties.shp
   METADATA 
@@ -73,8 +68,10 @@ LAYER
     "init=epsg:4326"
   END
   CLASS
-    COLOR -1 -1 -1
-    OUTLINECOLOR 0 0 0 
+    STYLE
+      COLOR -1 -1 -1
+      OUTLINECOLOR 0 0 0
+    END
   END
 END
 
@@ -84,7 +81,7 @@ LAYER
   NAME archwarn_county
   CONNECTION "user=nobody dbname=postgis host=iemdb-postgis.local"
   DATA "geom from (select u.geom, phenomena, issue, expire, w.wfo,  significance, eventid, random() as boid from warnings_%YEAR% w JOIN ugcs u on (u.gid = w.gid) WHERE expire < '%ENDTS%' and issue > '%STARTTS%' and issue < '%ENDTS%' ORDER by expire, phenomena ASC) as foo USING unique boid USING SRID=4326"
-  STATUS ON
+  STATUS OFF
   TYPE POLYGON
   PROJECTION
    "init=epsg:4326"
@@ -98,24 +95,30 @@ LAYER
   CLASSITEM "phenomena"
   CLASS
     EXPRESSION 'TO'
-    COLOR -1 -1 -1
-    OUTLINECOLOR 255 0 0
-    SIZE 2
-    SYMBOL 1
+    STYLE
+      COLOR -1 -1 -1
+      OUTLINECOLOR 255 0 0
+      SIZE 2
+      SYMBOL 1
+    END
   END
   CLASS
     EXPRESSION 'SV'
-    COLOR -1 -1 -1
-    OUTLINECOLOR 255 255 0
-    SIZE 2
-    SYMBOL 1
+    STYLE
+      COLOR -1 -1 -1
+      OUTLINECOLOR 255 255 0
+      SIZE 2
+      SYMBOL 1
+    END
   END
   CLASS
     EXPRESSION 'FF'
-    COLOR -1 -1 -1
-    OUTLINECOLOR 0 255 0
-    SIZE 2
-    SYMBOL 1
+    STYLE
+      COLOR -1 -1 -1
+      OUTLINECOLOR 0 255 0
+      SIZE 2
+      SYMBOL 1
+    END
   END
 END
 
@@ -125,7 +128,7 @@ LAYER
   NAME archwarn_polygon
   CONNECTION "user=nobody dbname=postgis host=iemdb-postgis.local"
   DATA "geom from (select u.geom, phenomena, issue, expire, w.wfo,  significance, eventid, random() as oid from sbw_%YEAR% w JOIN ugcs u on (u.gid = w.gid) WHERE status = 'NEW' and expire < '%ENDTS%' and issue > '%STARTTS%' and issue < '%ENDTS%' ORDER by expire, phenomena ASC) as foo USING unique oid USING SRID=4326"
-  STATUS ON
+  STATUS OFF
   TYPE POLYGON
   PROJECTION
    "init=epsg:4326"
@@ -139,10 +142,12 @@ LAYER
   CLASSITEM 'phenomena'
   CLASS
         EXPRESSION /TO|SV/
-    COLOR -1 -1 -1
-    OUTLINECOLOR 255 255 255
-    SYMBOL 1
-    SIZE 1
+    STYLE
+      COLOR -1 -1 -1
+      OUTLINECOLOR 255 255 255
+      SYMBOL 1
+      SIZE 1
+    END
   END
 END
 
@@ -152,7 +157,7 @@ LAYER
   NAME warn_polygon
   CONNECTION "user=nobody dbname=postgis host=iemdb-postgis.local"
   DATA "geom from (select w.geom, phenomena, issue, expire, w.wfo,  significance, eventid, random() as oid from sbw w  WHERE status = 'NEW' and expire > CURRENT_TIMESTAMP ORDER by expire, phenomena ASC) as foo USING unique oid USING SRID=4326"
-  STATUS ON
+  STATUS OFF
   TYPE POLYGON
   PROJECTION
    "init=epsg:4326"
@@ -166,10 +171,12 @@ LAYER
   CLASSITEM 'phenomena'
   CLASS
         EXPRESSION /TO|SV/
-    COLOR -1 -1 -1
-    OUTLINECOLOR 255 255 255
-    SYMBOL 1
-    SIZE 1
+    STYLE
+      COLOR -1 -1 -1
+      OUTLINECOLOR 255 255 255
+      SYMBOL 1
+      SIZE 1
+    END
   END
 END
 
@@ -178,7 +185,7 @@ LAYER
   NAME warn_county
   CONNECTION "user=nobody dbname=postgis host=iemdb-postgis.local"
   DATA "geom from (select u.geom, phenomena, issue, expire, w.wfo, significance, eventid,  significance, eventid, random() as oid from warnings w JOIN ugcs u on (u.gid = w.gid) WHERE  expire > CURRENT_TIMESTAMP ORDER by expire, phenomena ASC) as foo USING unique oid USING SRID=4326"
-  STATUS ON
+  STATUS OFF
   TYPE POLYGON
   PROJECTION
    "init=epsg:4326"
@@ -192,24 +199,30 @@ LAYER
   CLASSITEM "phenomena"
   CLASS
     EXPRESSION 'TO'
-    COLOR -1 -1 -1
-    OUTLINECOLOR 255 0 0
-    SIZE 2
-    SYMBOL 1
+    STYLE
+      COLOR -1 -1 -1
+      OUTLINECOLOR 255 0 0
+      SIZE 2
+      SYMBOL 1
+    END
   END
   CLASS
     EXPRESSION 'SV'
-    COLOR -1 -1 -1
-    OUTLINECOLOR 255 255 0
-    SIZE 2
-    SYMBOL 1
+    STYLE
+      COLOR -1 -1 -1
+      OUTLINECOLOR 255 255 0
+      SIZE 2
+      SYMBOL 1
+    END
   END
   CLASS
     EXPRESSION 'FF'
-    COLOR -1 -1 -1
-    OUTLINECOLOR 0 255 0
-    SIZE 2
-    SYMBOL 1
+    STYLE
+      COLOR -1 -1 -1
+      OUTLINECOLOR 0 255 0
+      SIZE 2
+      SYMBOL 1
+    END
   END
 END
 

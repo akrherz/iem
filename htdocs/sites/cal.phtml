@@ -29,7 +29,7 @@ if ($portfolio != null)
     );
     $rs = pg_execute($conn, "SELECT", array($portfolio, $station));
 
-    if (pg_numrows($rs) == 0){
+    if (pg_num_rows($rs) == 0){
         $table .= "<tr><th colspan=6>No events found in database.</th></tr>";
     }
 

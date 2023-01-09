@@ -3,7 +3,7 @@ MAP
 # Start of map file
 #
 NAME "iemtest"
-STATUS ON
+STATUS OFF
 SIZE 450 350
 #SYMBOLSET symbols/symbol.sym
 #FONTSET "/mesonet/data/gis/fonts/fonts.list"
@@ -26,8 +26,6 @@ WEB
 #  HEADER ia_header.html
   TEMPLATE ia.html
 #  FOOTER ia_footer.html
-  MINSCALE 0
-  MAXSCALE 465000000
   IMAGEPATH "/var/webtmp/"
   IMAGEURL "/tmp/"
   #LOG "/var/webtmp/w0.log"
@@ -47,7 +45,7 @@ END
 LAYER
   NAME kccidoppler
   DATA  "/mesonet/ldmdata/gis/images/26915/KCCI/KCCI_N0R_0.png"
-  STATUS ON
+  STATUS OFF
   TYPE RASTER
   METADATA
     "wms_title" "KCCI Super DopplerHD"
@@ -56,8 +54,6 @@ LAYER
   PROJECTION
     "init=epsg:26915"
   END
-  MINSCALE 0
-  MAXSCALE 465000000
   OFFSITE 0 0 0
 END
 

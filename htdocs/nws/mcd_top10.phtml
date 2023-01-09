@@ -23,7 +23,7 @@ function dowork($baseurl, $sort)
     $s = <<<EOM
 
     <p>JSON Webservice for the data below:<br />
-    <code>${public}</code></p>
+    <code>{$public}</code></p>
     <table class="table table-condensed table-striped">
     <tr><th>Year</th><th>Number</th><th>Issuance UTC</th><th>Size (sq km)</th></tr>
 
@@ -50,29 +50,29 @@ $stable = dowork($baseurl, "ASC");
 $t->content = <<<EOF
 <ol class="breadcrumb">
  <li><a href="/current/severe.phtml">Severe Weather Mainpage</a></li>
- <li class="active">Top ${count} SPC Mesoscale Convective Discussions by size</li>
+ <li class="active">Top {$count} SPC Mesoscale Convective Discussions by size</li>
 </ol>
 
-<h3>Top ${count} SPC Mesoscale Convective Discussions by Size</h3>
+<h3>Top {$count} SPC Mesoscale Convective Discussions by Size</h3>
 
 <p>The IEM maintains a database of <a href="https://www.spc.noaa.gov">NWS Storm Prediction Center</a>
  Mesoscale Convective Discussions (MCD)s.  These products contain a polygon for the
  alerted region for the product. This page provides an unofficial listing
- of the top ${count} largest and smallest polygons associated with the MCDs.</p>
+ of the top {$count} largest and smallest polygons associated with the MCDs.</p>
 
  <p><strong>Pro Tip:</strong> If you want to use this data, try copying the table
  contents and pasting into a spreadsheet program like Excel.</p>
 
  <p><form method="GET" name="u">
  Number of Events to Show:
- <input size="10" type="text" name="count" value="${count}">
+ <input size="10" type="text" name="count" value="{$count}">
  <input type="submit" value="Update Table">
  </form></p>
 
-<h3>Top ${count} Largest:</h3>
+<h3>Top {$count} Largest:</h3>
 $ltable
 
-<h3>Top ${count} Smallest:</h3>
+<h3>Top {$count} Smallest:</h3>
 $stable
 
 EOF;

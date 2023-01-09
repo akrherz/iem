@@ -18,11 +18,11 @@ $year = get_int404("year", date("Y", time() - 86400));
 $month = get_int404("month", date("m", time() - 86400));
 $day = get_int404("day", date("d", time() - 86400));
 
-  $myTime = strtotime($year."-".$month."-".$day);
+$myTime = new DateTime("{$year}-{$month}-{$day}");
 
-$titleDate = strftime("%b %d, %Y", $myTime);
-$sqlDate1 = strftime("%Y-%m-%d 00:00", $myTime);
-$sqlDate2 = strftime("%Y-%m-%d 23:59", $myTime);
+$titleDate = $myTime->format("M d, Y");
+$sqlDate1 = $myTime->format("Y-m-d 00:00");
+$sqlDate2 = $myTime->format("Y-m-d 23:59");
 
 $connection = iemdb("asos1min");
 $rs = pg_prepare($connection, "SELECT", "SELECT " .
