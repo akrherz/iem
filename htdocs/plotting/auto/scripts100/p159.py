@@ -10,6 +10,7 @@ from sqlalchemy import text
 
 MDICT = {
     "all": "No Month/Time Limit",
+    "custom": "Custom/Pick Start + End Date",
     "ytd": f"Jan 1 through {datetime.date.today():%b %-d}",
     "jul1": "Jul 1 - Jun 30",
     "spring": "Spring (MAM)",
@@ -59,7 +60,10 @@ def get_description():
     by METAR stations, this application presents the frequency of number
     of hours for a given month or season at a given threshold.
 
-    <br /><br /><strong>Updated 18 Sep 2018:</strong>Plotting tool was updated
+    <p>If you pick a custom day of the year period that crosses 1 January,
+    the year of the start date is used within the plot.</p>
+
+    <p><strong>Updated 18 Sep 2018:</strong>Plotting tool was updated
     to consider dates prior to 1973 and to shade years that have more than
     20% missing data.  The hourly averages are based on years with sufficient
     data coverage.
@@ -100,6 +104,18 @@ def get_description():
             options=MDICT,
         ),
         dict(
+            type="sday",
+            name="sdate",
+            default="0101",
+            label="Inclusive Start Day of Year (when Date Limiter is custom):",
+        ),
+        dict(
+            type="sday",
+            name="edate",
+            default=f"{datetime.date.today():%m%d}",
+            label="Inclusive End Day of Year (when Date Limiter is custom):",
+        ),
+        dict(
             type="year",
             min=1973,
             default=datetime.date.today().year,
@@ -120,12 +136,32 @@ def plotter(fdict):
     mydir = ctx["dir"]
     threshold = ctx["thres"]
     year = ctx["year"]
+    sdate = ctx["sdate"]
+    edate = ctx["edate"]
 
     offset = "ts"
+    mlabel = MDICT[month] if month != "jul1" else "Jul-Jun [year of Jul shown]"
+    totaldays = 0
+    months = range(1, 13)
+    doylimit = ""
     if month in ["all", "jul1", "ytd"]:
         if month == "jul1":
             offset = "ts - '6 months'::interval"
-        months = range(1, 13)
+    elif month == "custom":
+        doylimit = (
+            " and to_char(ts, 'mmdd') >= :sdate and "
+            "to_char(ts, 'mmdd') <= :edate "
+        )
+        totaldays = (edate - sdate).days + 1
+        mlabel = f" {sdate:%b %-d} thru {edate:%b %-d}"
+        if sdate > edate:
+            totaldays = (edate.replace(year=2001) - sdate).days + 1
+            days = (edate - datetime.date(2000, 1, 1)).days + 1
+            offset = f"ts - '{days} days'::interval"
+            doylimit = (
+                " and (to_char(ts, 'mmdd') >= :sdate or "
+                "to_char(ts, 'mmdd') <= :edate) "
+            )
     elif month == "fall":
         months = [9, 10, 11]
     elif month == "winter":
@@ -143,7 +179,6 @@ def plotter(fdict):
     opp = ">=" if mydir == "aoa" else "<"
 
     dbvarname = "(sknt * 1.15)" if varname == "sped" else varname
-    doylimit = ""
     if month == "ytd":
         doylimit = " and to_char(ts, 'mmdd') <= :sday "
     with get_sqlalchemy_conn("asos") as conn:
@@ -169,6 +204,8 @@ def plotter(fdict):
                 "station": station,
                 "months": tuple(months),
                 "sday": datetime.date.today().strftime("%m%d"),
+                "sdate": sdate.strftime("%m%d"),
+                "edate": edate.strftime("%m%d"),
             },
             index_col=None,
         )
@@ -176,7 +213,6 @@ def plotter(fdict):
         raise NoDataFound("Error, no results returned!")
 
     ydf = df.groupby("year").sum()
-    mlabel = MDICT[month] if month != "jul1" else "Jul-Jun [year of Jul shown]"
     title = (
         f"({mlabel}) {METRICS[varname]} Hours {DIRS[mydir]} "
         f"{threshold}{UNITS[varname]}\n"
@@ -192,6 +228,8 @@ def plotter(fdict):
     obscount = len(months) * 30 * 24 * 0.8
     if month == "ytd":
         obscount = int(f"{datetime.date.today():%j}") * 24 * 0.8
+    elif month == "custom":
+        obscount = totaldays * 24 * 0.8
     for _year in range(ydf.index.values[0], ydf.index.values[-1] + 1):
         if _year not in ydf.index or ydf.at[_year, "obs"] < obscount:
             ax[0].axvspan(_year - 0.5, _year + 0.5, color="#cfebfd", zorder=-3)
