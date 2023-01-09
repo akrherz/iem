@@ -51,7 +51,7 @@ LAYER
   NAME "time_idx"
   #TYPE TILEINDEX  #No worky
   TYPE POLYGON
-  DATA "the_geom from nexrad_n0r_tindex"
+  DATA "the_geom from nexrad_n0r_tindex using unique filepath"
 #  FILTER "datetime = '2006-06-23 03:10+00'"
   METADATA
     "wms_title" "NEXRAD BASE REFLECT"

@@ -41,6 +41,7 @@ WEB
    "wms_enable_request" "*"
    "wms_timeformat" "YYYY-MM-DDTHH:MM:SSZ,YYYY-MM-DDTHH:MM"
     "ows_http_max_age" "300"
+    "wms_allow_getmap_without_styles" "true"
   END
 END
 
@@ -49,7 +50,7 @@ LAYER
   STATUS OFF
   NAME "time_idx"
   TYPE POLYGON
-  DATA "the_geom from nexrad_n0q_tindex"
+  DATA "the_geom from nexrad_n0q_tindex using unique filepath"
 #  FILTER "datetime = '2006-06-23 03:10+00'"
   METADATA
     "wms_title" "NEXRAD BASE REFLECT"
