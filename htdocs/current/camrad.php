@@ -18,7 +18,7 @@ if ($network == "KCRG") {
 }
 
 if (isset($_GET["ts"]) && $_GET["ts"] != "0") {
-    $ts = DateTime::createFromFormat('%Y%m%d%H%M', $_GET["ts"]);
+    $ts = DateTime::createFromFormat('YmdHi', $_GET["ts"]);
 }
 
 if (! is_null($ts)) {
@@ -31,7 +31,9 @@ if (! is_null($ts)) {
     $rs = pg_exec($conn, $sql);
     if (pg_num_rows($rs) == 0) {
         $mins = intval($ts->format("i")) % 5;
-        $ts = $ts->sub(new DateInterval("{$mins}i"));
+        if ($mins > 0){
+            $ts = $ts->sub(new DateInterval("PT{$mins}i"));
+        }
         $sql = sprintf(
             "SELECT * from camera_log WHERE valid = '%s'",
             $ts->format("Y-m-d H:i")

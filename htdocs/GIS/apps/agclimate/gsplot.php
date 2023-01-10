@@ -93,8 +93,8 @@ $states->draw($map, $img);
 $iards->draw($map, $img);
 $bar640t->draw($map, $img);
 
-$sdate = new DateTime("${year}-${smonth}-${sday}");
-$edate = new DateTime("${year}-${emonth}-${eday}");
+$sdate = new DateTime("{$year}-{$smonth}-{$sday}");
+$edate = new DateTime("{$year}-{$emonth}-{$eday}");
 $sstr_txt = $sdate->format("M j");
 $estr_txt = $edate->format("M j");
 
@@ -137,7 +137,7 @@ foreach($jobj["features"] as $bogus => $value) {
     // Red Dot... 
     $pt = new pointObj();
     $pt->setXY($lon, $lat, 0);
-    $pt->draw($map, $ponly, $img, 0);
+    $pt->draw($map, $ponly, $img, 0, "");
 
     // Value UL
     $pt = new pointObj();

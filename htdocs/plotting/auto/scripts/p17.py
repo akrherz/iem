@@ -71,12 +71,17 @@ def common(ctx):
         if now.weekday() in [5, 6]:
             weekends.append(now.day)
         now += datetime.timedelta(days=1)
-    req = requests.get(
-        f"http://iem.local/api/1/daily.json?station={station}&"
-        f"network={ctx['network']}&year={year}&month={month}",
-        timeout=15,
-    )
-    if req.status_code != 200:
+    req = None
+    try:
+        req = requests.get(
+            f"http://iem.local/api/1/daily.json?"
+            f"station={station}&"
+            f"network={ctx['network']}&year={year}&month={month}",
+            timeout=15,
+        )
+    except Exception:
+        pass
+    if req is None or req.status_code != 200:
         raise ValueError("Unable to fetch data from API service.")
     jsn = req.json()
     df = pd.DataFrame(jsn["data"])

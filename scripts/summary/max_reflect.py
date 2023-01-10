@@ -126,8 +126,9 @@ def run(prod, sts):
     os.remove(f"/tmp/{sts:%Y%m%d%H}.png")
     os.remove(wldfn)
 
-    LOG.info("sleeping 60 to allow LDM to propogate")
-    time.sleep(60)
+    # 60s was too tight it appears
+    LOG.info("sleeping 180s to allow LDM to propogate")
+    time.sleep(180)
 
     # Iowa
     layer = "nexrad_tc" if prod == "n0r" else "n0q_tc"

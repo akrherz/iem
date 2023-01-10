@@ -183,7 +183,7 @@ EOF;
         $wfo, $phenomena, $eventid,
         $significance
     ));
-    if (pg_num_rows($rs) != 1) exit("ERROR: Unable to find warning!");
+    if ($rs === FALSE || pg_num_rows($rs) != 1) exit("ERROR: Unable to find warning!");
     $row = pg_fetch_assoc($rs, 0);
     $lpad = 0.5;
     $y1 = $row["y1"] + $lpad;
