@@ -41,6 +41,7 @@ WEB
    "wms_contactorganization" "Iowa State University"
    "wms_enable_request" "*"
     "ows_http_max_age" "300"
+    "wms_allow_getmap_without_styles" "true"
   END
 END
 

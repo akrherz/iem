@@ -52,6 +52,7 @@ WEB
    "ows_role" "Owner"
    "ows_postcode" "50014"
    "ows_enable_request" "*"
+   "wms_allow_getmap_without_styles" "true"
   END
 END
 

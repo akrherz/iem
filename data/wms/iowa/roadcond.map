@@ -28,6 +28,7 @@ WEB
     "wms_encoding" "ISO-8859-1"
     "ows_schemas_location" "http://ogc.dmsolutions.ca"
     "wms_enable_request" "*"
+    "wms_allow_getmap_without_styles" "true"
   END
 END
  
