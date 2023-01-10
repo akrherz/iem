@@ -48,6 +48,9 @@ def get_description():
 
     <p>Running a plot for multiple years of data will be somewhat slow
     (30+ seconds), so please be patient with it!</p>
+
+    <p><a href="?q=235">Autoplot 235</a> presents a monthly/yearly chart of
+    issuance counts for a single Weather Forecast Offices.</p>
     """
     now = utc() + datetime.timedelta(days=1)
     desc["arguments"] = [

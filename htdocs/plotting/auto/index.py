@@ -133,7 +133,8 @@ CMAPS = {
 
 def networkselect_handler(value, arg, res):
     """Select a station from a given network."""
-    res["pltvars"].append(f"network:{arg['network']}")
+    if not isinstance(arg["network"], list):
+        res["pltvars"].append(f"network:{arg['network']}")
     return station_select(
         arg["network"],
         value,
@@ -522,7 +523,7 @@ def generate_form(apid, fdict, headers, cookies):
                 value,
                 arg["options"],
                 multiple=arg.get("multiple", False),
-                showvalue=False,
+                showvalue=arg.get("showvalue", False),
             )
         elif arg["type"] == "datetime":
             form = datetime_handler(value, arg, res)
