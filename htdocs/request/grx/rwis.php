@@ -100,7 +100,7 @@ foreach ($jobj["data"] as $bogus => $iemob) {
   Threshold: 999 
   Icon: 0,0,000,3," . pcolor($mydata["pave_avg"]) . "
   Icon: 0,0," . $mydata["drct"] . "," . s2icon(floatval($mydata["sknt"])) . "
-  Icon: 0,0,000,2,13,\"" . $mydata["name"] . " @ " . date("d M h:i A", strtotime($mydata['local_valid'])) . "\\nTemp: " . $mydata["tmpf"] . "F (Dew: " . $mydata["dwpf"] . "F)\\nWind: " . drct2txt($mydata["drct"]) . " @ " . intval($mydata["sknt"]) . "kt\\n${condTxt}\" 
+  Icon: 0,0,000,2,13,\"" . $mydata["name"] . " @ " . date("d M h:i A", strtotime($mydata['local_valid'])) . "\\nTemp: " . $mydata["tmpf"] . "F (Dew: " . $mydata["dwpf"] . "F)\\nWind: " . drct2txt($mydata["drct"]) . " @ " . intval($mydata["sknt"]) . "kt\\n{$condTxt}\" 
   Threshold: 150
   Text:  -17, 13, 1, \" " . round($mydata["tmpf"], 0) . " \" 
   Text:  -17, -13, 1, \" " . round($mydata["dwpf"], 0) . " \" 

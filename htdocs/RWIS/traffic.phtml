@@ -25,6 +25,7 @@ $rs = pg_execute($dbconn, "SELECT", Array() );
  $t->refresh = 600;
 
  function fancytime($strtime){
+    if (is_null($strtime)) return "";
      $now = time();
      $ts = strtotime($strtime);
      if (($now - $ts) < 600){ return date("h:i A", $ts); }

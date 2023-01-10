@@ -64,10 +64,6 @@ foreach($jobj["data"] as $bogus => $iemob){
 
 }
 
-function myround($val, $prec){
-    return is_null($val) ? "": round($val, $prec);
-}
-
 $finalA = aSortBySecondIndex($mydata, $sortcol);
 $i = 0;
 $now = time();
@@ -107,7 +103,7 @@ foreach($finalA as $key => $parts){
  <td>". myround($parts["feel"], 1) ."</td>
  <td>". $parts["relh"] ."</td>
  <td>". myround($parts["sknt"],0) ;
-    if (strlen($parts["gust"]) > 0 && $parts["gust"] > 0){
+    if (! is_null($parts["gust"]) && $parts["gust"] > 0){
         $table .= "G". myround($parts["gust"],1);
     }
     $table .= "</td>

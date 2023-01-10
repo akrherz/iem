@@ -223,12 +223,6 @@ $old = "";
 $domain = array_keys($nt->table);
 $online = array();
 
-function myround($val, $prec)
-{
-    if (is_null($val)) return "";
-    return round($val, $prec);
-}
-
 foreach ($finalA as $key => $parts) {
     // Keep track of online stations
     $online[] = $key;

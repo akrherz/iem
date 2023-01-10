@@ -1,4 +1,11 @@
 <?php
+// Workaround round() quirks
+function myround($val, $prec){
+    if (is_null($val)) return "";
+    if (is_string($val)) return $val;
+    return round($val, $prec);
+}
+
 // Helper to make an IEM webservice call, returns FALSE if fails
 function iemws_json($endpoint, $args)
 {

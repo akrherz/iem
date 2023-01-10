@@ -40,12 +40,6 @@ $aselect = make_select("sorder", $sorder, $ar);
 
 $uri = "all.phtml?state=$state&metar=$metar&sorder=$sorder&sortcol=";
 
-function myround($val, $prec){
-    if (is_null($val)) return "";
-    if (is_string($val)) return $val;
-    return round($val, $prec);
-}
-
 $mydata = array();
 foreach ($jobj["data"] as $bogus => $iemob) {
     $key = $iemob["station"];

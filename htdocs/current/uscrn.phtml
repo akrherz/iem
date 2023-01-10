@@ -114,16 +114,16 @@ foreach ($finalA as $key => $val) {
     }
 
     $table .= ">" . date($fmt, strtotime($parts["local_valid"])) . "</td>
-     <td align='center'>" . round($parts["tmpf"], 0) . "(<font color=\"#ff0000\">" . round($parts["max_tmpf"], 0) . "</font>/<font color=\"#0000ff\">" . round($parts["min_tmpf"], 0) . "</font>)</td>
-     <td>" . round($parts["dwpf"], 0) . "</td>
-     <td>" . round($parts["feel"], 0) . "</td>
+     <td align='center'>" . myround($parts["tmpf"], 0) . "(<font color=\"#ff0000\">" . myround($parts["max_tmpf"], 0) . "</font>/<font color=\"#0000ff\">" . myround($parts["min_tmpf"], 0) . "</font>)</td>
+     <td>" . myround($parts["dwpf"], 0) . "</td>
+     <td>" . myround($parts["feel"], 0) . "</td>
         <td>" . $parts["srad"] . "</td>
-             <td>" . round($parts["sknt"], 0);
+             <td>" . myround($parts["sknt"], 0);
     if (strlen($parts["gust"] != 0)) {
-        $table .= "G" . round($parts["gust"], 0);
+        $table .= "G" . myround($parts["gust"], 0);
     }
     $table .= "</td>";
-    $table .= "<td>" . round($parts["peak"], 0) . " @ " . date("h:i A", $parts["peak_ts"]) . "</td>
+    $table .= "<td>" . myround($parts["peak"], 0) . " @ " . date("h:i A", $parts["peak_ts"]) . "</td>
         </tr>\n";
 }
 $t->content = <<<EOF

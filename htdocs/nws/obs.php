@@ -59,7 +59,7 @@ foreach ($jobj["data"] as $bogus => $iemob) {
         $mydata[$key]["peak_ts"] = new DateTime($mydata[$key]["local_max_gust_ts"]);
     } else {
         $mydata[$key]["peak"] = $mydata[$key]["max_sknt"];
-        $mydata[$key]["peak_ts"] = 0;
+        $mydata[$key]["peak_ts"] = null;
         if ($mydata[$key]["local_max_sknt_ts"]) {
             $mydata[$key]["peak_ts"] = new DateTime($mydata[$key]["local_max_sknt_ts"]);
         }
@@ -81,7 +81,7 @@ foreach ($finalA as $key => $parts) {
     $table .= "<td>" . $parts["name"] . " (<a href=\"$moreinfo\">" . $key . "</a>," . $parts["network"] . ")</td>";
     $table .= "<td ";
     if ($tdiff > 10000) {
-        $fmt = "d b h:i A";
+        $fmt = "d M h:i A";
         $table .= 'bgcolor="red"';
     } else if ($tdiff > 7200) {
         $fmt = "h:i A";
@@ -94,19 +94,20 @@ foreach ($finalA as $key => $parts) {
     }
     $ts = new DateTime($parts["local_valid"]);
     $table .= ">" . $ts->format($fmt) . "</td>
-     <td align='center'>" . round($parts["tmpf"], 0) . "(<font color=\"#ff0000\">" . round($parts["max_tmpf"], 0) . "</font>/<font color=\"#0000ff\">" . round($parts["min_tmpf"], 0) . "</font>)</td>
-     <td>" . round($parts["dwpf"], 0) . "</td>
-     <td>" . round($parts["feel"], 0) . "</td>
+     <td align='center'>" . myround($parts["tmpf"], 0) . "(<font color=\"#ff0000\">" . myround($parts["max_tmpf"], 0) . "</font>/<font color=\"#0000ff\">" . myround($parts["min_tmpf"], 0) . "</font>)</td>
+     <td>" . myround($parts["dwpf"], 0) . "</td>
+     <td>" . myround($parts["feel"], 0) . "</td>
         <td>" . $parts["relh"] . "</td>
         <td>" . $parts["alti"] . "</td>
         <td>" . $parts["vsby"] . "</td>
-             <td>" . round($parts["sknt"], 0);
+             <td>" . myround($parts["sknt"], 0);
     if (strlen($parts["gust"] != 0)) {
-        $table .= "G" . round($parts["gust"], 0);
+        $table .= "G" . myround($parts["gust"], 0);
     }
     $table .= "</td>";
+    $aa = is_null($parts["peak_ts"]) ? "": $parts["peak_ts"]->format("h:i A");
     $table .= "<td>" . $parts["drct"] . "</td>
-        <td>" . round($parts["peak"], 0) . " @ " . $parts["peak_ts"]->format("h:i A") . "</td>
+        <td>" . myround($parts["peak"], 0) . " @ {$aa}</td>
             <td>" . $parts["phour"] . "</td>
             <td>" . $parts["pday"] . "</td>
         </tr>\n";
