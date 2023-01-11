@@ -74,7 +74,7 @@ def common(ctx):
     req = None
     try:
         req = requests.get(
-            f"http://iem.local/api/1/daily.json?"
+            f"http://mesonet.agron.iastate.edu/api/1/daily.json?"
             f"station={station}&"
             f"network={ctx['network']}&year={year}&month={month}",
             timeout=15,

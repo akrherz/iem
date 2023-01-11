@@ -1,10 +1,11 @@
 <?php
 require_once "../../../config/settings.inc.php";
 require_once "../../../include/database.inc.php";
+require_once "../../../include/network.php";
+require_once "../../../include/forms.php";
 // worker.php
 header("Content-type: text/plain");
 
-require_once "../../../include/network.php";
 $nt = new NetworkTable("ISUAG");
 $ISUAGcities = $nt->table;
 
@@ -34,13 +35,13 @@ $vardict = array(
 
 $st   = $_GET['sts'];
 $vars = $_GET['vars'];
-$s_yr = $_GET['startYear'];
-$e_yr = $_GET['endYear'];
-$s_mo = $_GET['startMonth'];
-$s_dy = $_GET['startDay'];
-$e_mo = $_GET['endMonth'];
-$e_dy = $_GET['endDay'];
-$delim = $_GET['delim'];
+$s_yr = get_int404('startYear');
+$e_yr = get_int404('endYear');
+$s_mo = get_int404('startMonth');
+$s_dy = get_int404('startDay');
+$e_mo = get_int404('endMonth');
+$e_dy = get_int404('endDay');
+$delim = xssafe($_GET['delim']);
 $cr = isset($_GET['lf']) ? "\r\n" : "\n";
 
 // Error Catching

@@ -84,7 +84,8 @@ foreach ($jobj["data"] as $bogus => $iemob) {
 
     /* Condition Text */
     $condTxt = sprintf(
-        "Sensor 1: [%.1f F] %s\\nSensor 2: [%.1f F] %s\\nSensor 3: [%.1f F] %s\\nSensor 4: [%.1f F] %s\\nAvg: [%s F]",
+        "Sensor 1: [%.1f F] %s\\nSensor 2: [%.1f F] %s\\n".
+        "Sensor 3: [%.1f F] %s\\nSensor 4: [%.1f F] %s\\nAvg: [%s F]",
         $mydata["tsf0"],
         $mydata["scond0"],
         $mydata["tsf1"],
@@ -102,8 +103,8 @@ foreach ($jobj["data"] as $bogus => $iemob) {
   Icon: 0,0," . $mydata["drct"] . "," . s2icon(floatval($mydata["sknt"])) . "
   Icon: 0,0,000,2,13,\"" . $mydata["name"] . " @ " . date("d M h:i A", strtotime($mydata['local_valid'])) . "\\nTemp: " . $mydata["tmpf"] . "F (Dew: " . $mydata["dwpf"] . "F)\\nWind: " . drct2txt($mydata["drct"]) . " @ " . intval($mydata["sknt"]) . "kt\\n{$condTxt}\" 
   Threshold: 150
-  Text:  -17, 13, 1, \" " . round($mydata["tmpf"], 0) . " \" 
-  Text:  -17, -13, 1, \" " . round($mydata["dwpf"], 0) . " \" 
+  Text:  -17, 13, 1, \" " . myround($mydata["tmpf"], 0) . " \"
+  Text:  -17, -13, 1, \" " . myround($mydata["dwpf"], 0) . " \"
  End: 
 
 ";

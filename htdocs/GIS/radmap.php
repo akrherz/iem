@@ -158,17 +158,22 @@ if (isset($_GET["vtec"])) {
     }
     $eventid = intval($eventid);
     $year = intval($year);
+    if ($year < 1980 || $year > 2030){
+        xssafe("<script>");
+    }
     $wfo = substr($wfo, 1, 3);
     // Try to find this warning as a polygon first, then look at warnings table
     $sql = <<<EOF
       with one as (
-          SELECT max(issue) as v, max(expire) as e, ST_extent(geom),
+          SELECT max(issue at time zone 'UTC') as v,
+          max(expire at time zone 'UTC') as e, ST_extent(geom),
           max('P')::text as gtype
           from sbw_{$year}
           WHERE wfo = $1 and phenomena = $2 and eventid = $3 and
           significance = $4 and status = 'NEW'),
       two as (
-          SELECT max(issue) as v, max(expire) as e, ST_extent(u.geom),
+          SELECT max(issue at time zone 'UTC') as v,
+          max(expire at time zone 'UTC') as e, ST_extent(u.geom),
           'C'::text as gtype from warnings_{$year} w JOIN ugcs u on (w.gid = u.gid)
           WHERE w.wfo = $1 and phenomena = $2 and eventid = $3 and
           significance = $4),
@@ -176,7 +181,7 @@ if (isset($_GET["vtec"])) {
 
       SELECT v, e, ST_xmax(st_extent) as x1, st_xmin(st_extent) as x0,
       ST_ymax(st_extent) as y1, st_ymin(st_extent) as y0, gtype from agg
-      WHERE gtype is not null LIMIT 1
+      WHERE gtype is not null and v is not null LIMIT 1
 EOF;
     $rs = pg_prepare($postgis, "OOR", $sql);
     $rs = pg_execute($postgis, "OOR", array(
@@ -198,11 +203,11 @@ EOF;
 
     // Now the concern here is what to do with the valid time of this plot
     // If now() is less than event end, set the plot time to now
-    $dts = new DateTime($row["v"]);
-    $dts2 = new DateTime($row["e"]);
-    $aa = new DateTime();
+    $dts = new DateTime($row["v"], new DateTimeZone("UTC"));
+    $dts2 = new DateTime($row["e"], new DateTimeZone("UTC"));
+    $aa = new DateTime('now', new DateTimeZone('UTC'));
     if ($dts2 > $aa) {
-        $dts = new DateTime();
+        $dts = new DateTime('now', new DateTimeZone('UTC'));
     }
 
     $vtec_limiter = sprintf(

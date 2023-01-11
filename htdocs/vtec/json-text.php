@@ -33,7 +33,7 @@ for ($i = 0; $row  = pg_fetch_array($result); $i++) {
     $z["id"] = $i + 1;
     $z["report"] = preg_replace("/\r\r\n/", "\n", $row["report"]);
     $z["svs"] = array();
-    $tokens = @explode('__', $row["svs"]);
+    $tokens = is_null($row["svs"]) ? Array(): explode('__', $row["svs"]);
     $lsvs = "";
     foreach ($tokens as $key => $val) {
         if ($val == "") continue;

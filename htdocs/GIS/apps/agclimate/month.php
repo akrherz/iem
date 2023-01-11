@@ -85,7 +85,7 @@ for ($i=0; $row = pg_fetch_assoc($rs); $i++) {
   // Red Dot... 
   $pt = new pointObj();
   $pt->setXY($ISUAGcities[$key]['lon'], $ISUAGcities[$key]['lat'], 0);
-  $pt->draw($map, $ponly, $img, 0);
+  $pt->draw($map, $ponly, $img, 0, "");
 
   // Value UL
   $pt = new pointObj();

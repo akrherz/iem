@@ -6,6 +6,7 @@ require_once "../../../config/settings.inc.php";
 require_once "../../../include/throttle.php";
 require_once "../../../include/database.inc.php";
 require_once "../../../include/network.php";
+require_once "../../../include/forms.php";
 
 $nt = new NetworkTable("IA_ASOS");
 
@@ -29,7 +30,8 @@ $delim = isset($_GET["delim"]) ? $_GET["delim"] : ",";
 $sample = isset($_GET["sample"]) ? $_GET["sample"] : "1min";
 $what = isset($_GET["what"]) ? $_GET["what"] : 'dl';
 
-$day1 = isset($_GET["day1"]) ? $_GET["day1"] : die("No day1 specified");
+$day1 = get_int404("day1");
+if (is_null($day1)) die("No day1 specified");
 $day2 = isset($_GET["day2"]) ? $_GET["day2"] : die("No day2 specified");
 $month1 = isset($_GET["month1"]) ? $_GET["month1"] : die("No month specified");
 $month2 = isset($_GET["month2"]) ? $_GET["month2"] : die("No month specified");
@@ -41,13 +43,16 @@ $minute1 = isset($_GET["minute1"]) ? $_GET["minute1"] : die("No minute1 specifie
 $minute2 = isset($_GET["minute2"]) ? $_GET["minute2"] : die("No minute2 specified");
 $vars = isset($_GET["vars"]) ? $_GET["vars"] : die("No vars specified");
 $tz = isset($_REQUEST['tz']) ? $_REQUEST['tz'] : 'UTC';
-$station = $_GET["station"];
+
 $stations = $_GET["station"];
 $stationString = "(";
 foreach ($stations as $key => $value) {
     $sid = trim(substr($value, 0, 4));
-    $stationString .= " '" . $sid . "',";
+    $stationString .= " '{$sid}',";
     $nt->load_station($sid);
+}
+if ($stationString == "("){
+    die("no station set.");
 }
 $cities = $nt->table;
 $stationString = substr($stationString, 0, -1);

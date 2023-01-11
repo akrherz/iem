@@ -32,7 +32,7 @@ if (! is_null($ts)) {
     if (pg_num_rows($rs) == 0) {
         $mins = intval($ts->format("i")) % 5;
         if ($mins > 0){
-            $ts = $ts->sub(new DateInterval("PT{$mins}i"));
+            $ts = $ts->sub(new DateInterval("PT{$mins}M"));
         }
         $sql = sprintf(
             "SELECT * from camera_log WHERE valid = '%s'",

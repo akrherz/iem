@@ -9,7 +9,7 @@ require_once "../../include/network.php";
 require_once "../../include/imagemaps.php";
 
 $nt = new NetworkTable("WFO");
-$nt->table["ALL"] = array("name" => " --- All ---- ");
+$nt->table["ALL"] = array("name" => " --- All ---- ", "id" => "ALL", "archive_begin" => null);
 require_once "../../include/vtec.php";
 $postgis = iemdb('postgis');
 
@@ -50,7 +50,7 @@ significance = 'W' and issue > '$tstring'  ORDER by area DESC LIMIT 10");
 
 $t->title = "NWS SVR/TOR Storm Based Warnings by Size";
 
-$extra = array("ALL" => array("name" => "--- ALL Forecast Offices ---"));
+$extra = array("ALL" => array("name" => "--- ALL Forecast Offices ---", "id" => "ALL", "archive_begin" => null));
 $sselect = networkSelect("WFO", $wfo, $extra, "wfo");
 
 $ar = array(
