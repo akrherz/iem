@@ -27,7 +27,7 @@ def database_save(date, shpfn):
     with fiona.open(shpfn) as shps:
         for shp in shps:
             geo = shape(shp["geometry"])
-            if geo.type == "Polygon":
+            if geo.geom_type == "Polygon":
                 geo = MultiPolygon([geo])
             cursor.execute(
                 "INSERT into usdm(valid, dm, geom) VALUES "
@@ -42,7 +42,7 @@ def workflow(date, routes):
     """Do work for this date"""
     # print("process_usdm workflow for %s" % (date, ))
     # 1. get file from USDM website
-    url = "%sUSDM_%s_M.zip" % (BASEURL, date.strftime("%Y%m%d"))
+    url = f"{BASEURL}USDM_{date:%Y%m%d}_M.zip"
     LOG.info("Fetching %s", url)
     req = exponential_backoff(requests.get, url, timeout=30)
     if req is None:
@@ -58,25 +58,19 @@ def workflow(date, routes):
     shpfn = None
     for name in zipfp.namelist():
         # print("    extracting: %s" % (name, ))
-        with open("/tmp/%s" % (name,), "wb") as fp:
+        with open(f"/tmp/{name}", "wb") as fp:
             fp.write(zipfp.read(name))
         if name[-3:] == "shp":
             shpfn = "/tmp/" + name
     # 2. Save it to the database
     database_save(date, shpfn)
     # 3. Send it to LDM for current and archive writing
-    for fn in glob.glob("/tmp/USDM_%s*" % (date.strftime("%Y%m%d"),)):
+    for fn in glob.glob(f"/tmp/USDM_{date:%Y%m%d}*"):
         suffix = fn.split("/")[-1].split(".", 1)[1]
         cmd = (
-            "%s -i -p 'data %s %s0000 gis/shape/4326/us/dm_current.%s "
-            "GIS/usdm/%s bogus' %s"
-        ) % (
-            PQINSERT,
-            routes,
-            date.strftime("%Y%m%d"),
-            suffix,
-            fn.split("/")[-1],
-            fn,
+            f"{PQINSERT} -i -p 'data {routes} {date:%Y%m%d}0000 "
+            f"gis/shape/4326/us/dm_current.{suffix} "
+            f"GIS/usdm/{fn.split('/')[-1]} bogus' {fn}"
         )
         LOG.info(cmd)
         subprocess.call(cmd, shell=True)

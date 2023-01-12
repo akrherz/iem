@@ -3,7 +3,10 @@ require_once "../../config/settings.inc.php";
 define("IEM_APPID", 99);
 require_once "../../include/myview.php";
 require_once "../../include/database.inc.php";
+require_once "../../include/iemprop.php";
 
+$prop = get_iemprop("nwsli.syncdate");
+$nwsli_sync_date = is_null($prop) ? "N/A": $prop;
 $pgconn = iemdb('hads');
 $rs = pg_query($pgconn, "SELECT nwsli, max(product) from unknown"
     . " WHERE length(nwsli) = 5 and "
@@ -52,10 +55,13 @@ data feed are supposed to adhere the <a href="https://www.weather.gov/media/mdl/
 specification for site identifiers.  The most common set of identifiers are
 found within the <a href="http://www.nws.noaa.gov/directives/sym/pd03012004curr.pdf">National Weather Service Location Identifier (NWSLI)</a> database.
 Unfortunately, not all site ids used by issuance centers are contained within
-NWSLI.  This page lists out unknown NWSLI'ish identifiers.  The IEM attempts
-to rectify this list quarterly, so there may be some false positive listed. The
-IEM maintains a week of raw SHEF data, so links to indicated products
-older than a week old will not work.</p>
+NWSLI.  This page lists out unknown NWSLI'ish identifiers.</p>
+
+<p>The IEM gets about a quarterly dump of the NWSLI database, which was most
+recently received on <strong>{$nwsli_sync_date}</strong>.  So newly added sites
+to NWSLI and listed here, would be false positives.  The IEM maintains only
+a seven day archive of raw SHEF products, so thus why only some links are
+active within the table.</p>
 
 <p>This page is similiar to
 <a href="https://www.nohrsc.noaa.gov/shef_archive/tomb.html">NOHRSC's Unknown Stations</a>

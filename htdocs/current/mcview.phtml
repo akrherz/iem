@@ -28,7 +28,7 @@ $autopilot = isset($_GET["autopilot"]) ? xssafe($_GET["autopilot"]) : "no";
 $year = get_int404("year", date("Y"));
 $month = get_int404("month", date("m"));
 $day = get_int404("day", date("d"));
-$hour = get_int404("hour", date("h"));
+$hour = get_int404("hour", date("H"));
 $minute = get_int404("minute", date("i"));
 
 // Used for the info presented below the plot on getting the raw data
@@ -232,7 +232,7 @@ for ($i = 0; $i < 24; $i++) {
     $ts = new DateTime("2000-01-01 $i:00");
     $timeselect .= "<option value='{$i}' ";
     if ($i == intval($hour)) $timeselect .= "SELECTED";
-    $timeselect .= ">" . $ts->format("I A") . "\n";
+    $timeselect .= ">" . $ts->format("h A") . "\n";
 }
 $timeselect .= "</select>\n";
 
