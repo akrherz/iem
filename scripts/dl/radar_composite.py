@@ -24,9 +24,7 @@ def save(sectorName, file_name, dir_name, ts, routes, bbox=None):
         "layers[]=uscounties"
     )
     if sectorName == "conus":
-        layers = (
-            f"layers[]={nexrad}&layers[]=watch_by_county&layers[]=uscounties"
-        )
+        layers = f"layers[]={nexrad}&layers[]=watch_by_county"
     uri = (
         f"http://iem.local/GIS/radmap.php?sector={sectorName}&"
         f"ts={tstamp}&{layers}"
