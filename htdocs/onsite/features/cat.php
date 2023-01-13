@@ -9,10 +9,15 @@ require_once "../../../include/forms.php";
 
 $t = new MyView();
 
-$day = isset($_GET["day"]) ? substr(xssafe($_GET["day"]), 0, 10) : null;
+try {
+    $day = isset($_GET["day"]) ? new DateTime(xssafe($_GET["day"])) : null;
+} catch (Exception $exp){
+    xssafe("<script>");
+    die();
+}
 $offset = isset($_GET["offset"]) ? intval($_GET["offset"]) : 0;
 if (is_null($day)) {
-    $day = Date("Y-m-d");
+    $day = new DateTime("now");
     $offset = -1;
 }
 
@@ -37,7 +42,7 @@ if ($offset == "-1") {
 } else if ($offset == "+1") {
     $q = "tomorrow";
 }
-$result = pg_execute($dbconn, $q, array($day));
+$result = pg_execute($dbconn, $q, array($day->format("Y-m-d")));
 
 if (pg_num_rows($result) == 0) {
     die("Feature Not Found");

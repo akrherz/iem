@@ -47,7 +47,7 @@ function get_goes_fn_and_time($ts, $sector, $product)
         foreach (array(1, -1) as $mul) {
             $lts = clone $ts;
             $mins = $i * $mul;
-            $lts->add(new DateInterval("PT{$mins}"));
+            if ($mins > 0) $lts->add(new DateInterval("PT{$mins}M"));
             $testfn = $base . $lts->format("Y/m/d") . "/GIS/sat/awips211/GOES_{$sector}_{$product}_" .
                 $lts->format("YmdHi") . ".png";
             if (is_file($testfn)) {
@@ -495,7 +495,7 @@ if (in_array("bufferedlsr", $layers)) {
         . "ST_Transform(ST_Buffer(ST_Transform(geom,2163),{$lsrbuffer}000),4326) as geo, "
         . "type as ltype, city || magnitude || ST_x(geom) || ST_y(geom) as k "
         . "from lsrs WHERE "
-        . "ST_Overlaps((select geom from sbw_" . date("Y", $ts) . " WHERE "
+        . "ST_Overlaps((select geom from sbw_" . $ts->format("Y") . " WHERE "
         . "wfo = '$wfo' and phenomena = '$phenomena' and "
         . "significance = '$significance' and eventid = $eventid "
         . "and status = 'NEW' LIMIT 1), "
