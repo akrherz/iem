@@ -405,7 +405,7 @@ foreach ($prefixes as $p1 => $p2) {
                 "/mesonet/ARCHIVE/data/%s/GIS/%scomp/n0q_%s.png",
                 $radts->format("Y/m/d"),
                 $p2,
-                $radts->format("YmdHi"),
+                $radts->format("Ymd"),
             );
         }
         if (in_array("{$p1}n0q_tc", $layers)) {
@@ -413,7 +413,7 @@ foreach ($prefixes as $p1 => $p2) {
                 "/mesonet/ARCHIVE/data/%s/GIS/%scomp/max_n0q_0z0z_%s.png",
                 $ts->format("Y/m/d"),
                 $p2,
-                $ts->format("YmdHi"),
+                $ts->format("Ymd"),
             );
         }
         if (in_array("{$p1}n0q_tc6", $layers)) {
