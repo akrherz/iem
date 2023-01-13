@@ -93,6 +93,9 @@ RewriteRule ^/search /search.py [QSA]
     ErrorDocument 404 /images/missing-320x240.jpg
   </LocationMatch>
 
+  # BUFKIT Warehouse
+  # Include /opt/bufkit_warehouse/config/apache_config.inc
+
   Alias /usage "/mesonet/share/usage/mesonet.agron.iastate.edu/"
   <Directory "/mesonet/share/usage/mesonet.agron.iastate.edu/">
     Options Indexes MultiViews
