@@ -150,22 +150,22 @@ def run(prod, sts):
     subprocess.call(cmd, shell=True)
 
     # US
-    png = requests.get(
-        f"{URLBASE}sector=conus&layers[]=uscounties&layers[]={layer}"
-        f"&ts={sts:%Y%m%d%H%M}",
-        timeout=120,
-    )
-    with open(f"/tmp/{sts:%Y%m%d%H}.png", "wb") as fh:
-        fh.write(png.content)
-    cmd = (
-        f"pqinsert -p 'plot {routes} {sts:%Y%m%d%H}00 "
-        f"summary/max_{prod}_{label}_usrad.png "
-        f"usrad/max_{prod}_{label}_{sts:%Y%m%d}.png png' "
-        f"/tmp/{sts:%Y%m%d%H}.png"
-    )
-    LOG.info(cmd)
-    subprocess.call(cmd, shell=True)
-    os.remove(f"/tmp/{sts:%Y%m%d%H}.png")
+    url = f"{URLBASE}sector=conus&layers[]={layer}&ts={sts:%Y%m%d%H%M}"
+    png = requests.get(url, timeout=120)
+    if png.status_code != 200:
+        LOG.warning("Got status_code %s for %s", png.status_code, url)
+    else:
+        with open(f"/tmp/{sts:%Y%m%d%H}.png", "wb") as fh:
+            fh.write(png.content)
+        cmd = (
+            f"pqinsert -p 'plot {routes} {sts:%Y%m%d%H}00 "
+            f"summary/max_{prod}_{label}_usrad.png "
+            f"usrad/max_{prod}_{label}_{sts:%Y%m%d}.png png' "
+            f"/tmp/{sts:%Y%m%d%H}.png"
+        )
+        LOG.info(cmd)
+        subprocess.call(cmd, shell=True)
+        os.remove(f"/tmp/{sts:%Y%m%d%H}.png")
 
 
 def main(argv):

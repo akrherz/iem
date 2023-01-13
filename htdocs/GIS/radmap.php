@@ -420,6 +420,7 @@ foreach ($prefixes as $p1 => $p2) {
             $radarfp = sprintf(
                 "/mesonet/ARCHIVE/data/%s/GIS/%scomp/max_n0q_6z6z_%s.png",
                 $ts->format("Y/m/d"),
+                $p2,
                 $ts->format("YmdHi"),
             );
         }
