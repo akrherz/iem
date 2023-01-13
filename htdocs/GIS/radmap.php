@@ -517,7 +517,6 @@ if (in_array("bufferedlsr", $layers)) {
     $blc0s0 = new StyleObj($blc0);
     $blc0s0->symbolname = 'circle';
     $blc0s0->color->setRGB(0, 0, 0);
-    $blc0s0->backgroundcolor->setRGB(0, 180, 120);
     $blc0s0->outlinecolor->setRGB(50, 50, 50);
     $blsr->draw($map, $img);
 }
@@ -690,7 +689,7 @@ if (in_array("ci", $layers)) {
     $ci->setConnectionType(MS_POSTGIS, "");
     $ci->connection = get_dbconn_str("postgis");
     $ci->status = in_array("ci", $layers);
-    $tblyr = date("Y", $ts);
+    $tblyr = $ts->format("Y");
     $sql = <<<EOF
 geo from (
     WITH stormbased as (SELECT geom from sbw_$tblyr where wfo = '$wfo' 
