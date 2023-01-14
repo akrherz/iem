@@ -16,6 +16,8 @@ $day = isset($_GET["day"]) ? intval($_GET["day"]) : date("d");
 $source = isset($_GET["source"]) ? xssafe($_GET["source"]) : "prelim";
 $size = isset($_GET["size"]) ? xssafe($_GET["size"]) : "640x480";
 $showlabels = (isset($_GET["labels"]) && $_GET["labels"] == "on");
+$timing = isset($_GET["timing"]) ? xssafe($_GET["timing"]) : "1";
+$state = isset($_GET["state"]) ? xssafe(substr($_GET["state"], 0, 2)) : "IA";
 $tokens = explode("x", $size);
 $width = $tokens[0];
 $height = $tokens[1];
@@ -29,15 +31,20 @@ $t->headextra = <<<EOF
 <script language="JavaScript" type="text/javascript">
 <!--//BEGIN Script
 function new_window(url) {
-        link = 
-        window.open(url,"_new","toolbar=0,location=0,directories=0,status=0,menubar=no,scrollbars=yes,resizable=yes,width=450,height=400");
+    link = window.open(url,"_new","toolbar=0,location=0,directories=0,status=0,menubar=no,scrollbars=yes,resizable=yes,width=450,height=400");
 } 
 //END Script-->
 </script>
 EOF;
 
-if ($source == "qc") $nt = new NetworkTable("IACLIMATE");
-else $nt = new NetworkTable("IA_COOP");
+$ar = array(
+    "0" => "All Available",
+    "1" => "Morning Obs (5-11 AM)",
+);
+$timingsel = make_select("timing", $timing, $ar);
+
+if ($source == "qc") $nt = new NetworkTable("{$state}CLIMATE");
+else $nt = new NetworkTable("{$state}_COOP");
 $cities = $nt->table;
 
 function plotNoData($map, $img)
@@ -67,6 +74,8 @@ $vardef = array(
 if (!array_key_exists($var, $vardef)) {
     $var = "precip";
 }
+$pcols = Array("precip", "snow", "snowd", "ratio");
+$timecol = in_array($var, $pcols) ? "precip_hour" : "temp_hour";
 
 $rnd = array(
     "et" => 2,
@@ -77,18 +86,36 @@ $rnd = array(
 
 $myStations = $cities;
 
-$map = new mapObj("../../../../data/gis/base26915.map");
+$map = new mapObj("../../../../data/gis/base4326.map");
+$map->imagecolor->setRGB(220, 220, 220);
 $map->selectOutputFormat("PNG24");
 $map->setSize($width, $height);
-$map->setProjection("init=epsg:26915");
-
-$map->setextent(250000, 4450000, 690000, 4880000);
+$dbconn = iemdb("postgis");
+$rs = pg_query(
+    $dbconn,
+    "SELECT ST_xmin(the_geom), ST_xmax(the_geom), ST_ymin(the_geom), ST_ymax(the_geom) ".
+    "from states where state_abbr = '{$state}'");
+$row = pg_fetch_array($rs, 0);
+$buf = 0.5;
+$map->setextent(
+    $row[0] - $buf,
+    $row[2] - $buf,
+    $row[1] + $buf,
+    $row[3] + $buf
+);
 
 $states = $map->getlayerbyname("states");
 $states->__set("status", MS_ON);
+$states_c0 = $states->getClass(0);
+$states_c0_s0 = $states_c0->getStyle(0);
+$states_c0_s0->width = 1.5;
+$states_c0_s0->color->setRGB(210, 170, 130);
 
-$counties = $map->getlayerbyname("iacounties");
+$counties = $map->getlayerbyname("uscounties");
 $counties->__set("status", MS_ON);
+$counties_c0 = $counties->getClass(0);
+$counties_c0_s0 = $counties_c0->getStyle(0);
+$counties_c0_s0->color->setRGB(180, 180, 180);
 
 $snet = $map->getlayerbyname("datapoint");
 $snet->__set("status", MS_ON);
@@ -104,13 +131,18 @@ $counties->draw($map, $img);
 $states->draw($map, $img);
 
 $dbvar = ($var == "ratio") ? "snow" : $var;
+$timingsql = "";
 if ($source == "qc") {
     $c = iemdb("coop");
+    if ($timing == "1") {
+        $timingsql = " and temp_hour between 4 and 12 ";
+    }
     $sql = sprintf(
-        "SELECT * from alldata_ia "
-            . " WHERE day = '%s' and %s is not null"
-            . " and substr(station, 3, 1) != 'C' and station != 'IA0000'"
-            . " ORDER by $dbvar DESC",
+        "SELECT *, $timecol as hour from alldata_{$state} ".
+        "WHERE day = '%s' and %s is not null" .
+            " and substr(station, 3, 1) not in ('C', 'T') " .
+            " and substr(station, 3, 4) != '0000'" .
+            " $timingsql ORDER by $dbvar DESC",
         $ts->format("Y-m-d"),
         $dbvar
     );
@@ -120,12 +152,15 @@ if ($source == "qc") {
     $c = iemdb("iem");
     $cutstring1 = 0;
     $cutstring2 = 5;
+    if ($timing == "1") {
+        $timingsql = " and extract(hour from coop_valid) between 4 and 12 ";
+    }
     $sql = sprintf(
-        "SELECT id as station, day, snowd, max_tmpf as high, " .
+        "SELECT id as station, day, snowd, max_tmpf as high, extract(hour from coop_valid) as hour, " .
             "min_tmpf as low, pday as precip, snow, snowd, coop_tmpf as tob " .
             "from summary_%s s " .
             "JOIN stations t on (t.iemid = s.iemid) WHERE day = '%s' and " .
-            "network = 'IA_COOP' ORDER by $dbvar DESC",
+            "network = '{$state}_COOP' $timingsql ORDER by $dbvar DESC",
         $ts->format("Y"),
         $ts->format("Y-m-d")
     );
@@ -137,13 +172,19 @@ for ($i = 0; $row = pg_fetch_array($rs); $i++) {
     $stid = $row['station'];
     if ($var == "ratio") {
         if ($row["snow"] > 0 && $row["precip"] > 0) {
-            $vals[$stid] = round($row["snow"] / $row["precip"], 1);
+            $vals[$stid] = Array(
+                "val" => round($row["snow"] / $row["precip"], 1),
+                "hour" => $row["hour"],
+            );
         } else {
-            $vals[$stid] = 0;
+            $vals[$stid] = Array("val" => 0, "hour" => $row["hour"]);
         }
     } else {
         if (is_null($row[$var])) continue;
-        $vals[$stid] = (float)$row[$var];
+        $vals[$stid] = Array(
+            "val" => (float)$row[$var],
+            "hour" => $row["hour"],
+        );
     }
 }
 /* ------------------------------------------------------- */
@@ -155,13 +196,14 @@ $tr = "# " . $ndate . " " . $vardef[$var] . "
 # Data Contact: Daryl Herzmann akrherz@iastate.edu 515.294.5978
 #-----------------------snip------------------\n";
 $tr .= sprintf(
-    "%-6s, %-20s, %-20s, %-10s, %10s, %10s, %10s\n",
+    "%-6s, %-20s, %-20s, %-10s, %10s, %10s, %4s, %10s\n",
     'ID',
     'StationName',
     'County',
     'Date',
     'Latitude',
     'Longitude',
+    'Hour',
     $var
 );
 foreach ($vals as $key => $value) {
@@ -169,17 +211,16 @@ foreach ($vals as $key => $value) {
     if (!isset($cities[$ukey])) continue;
 
     $tr .= sprintf(
-        "%-6s, %-20s, %-20s, %10s, %10.4f, %10.4f, %10s\n",
+        "%-6s, %-20s, %-20s, %10s, %10.4f, %10.4f, %4s, %10s\n",
         $key,
         $cities[$ukey]['name'],
         $cities[$ukey]['county'],
         $ndate,
         $cities[$ukey]['lat'],
         $cities[$ukey]['lon'],
-        $value
+        $value["hour"],
+        $value["val"],
     );
-
-    if ($ukey == "IA0807") $cities["IA0807"]["lon"] -= 0.1;
 
     if ($showlabels) {
         $pt = new pointObj();
@@ -195,7 +236,7 @@ foreach ($vals as $key => $value) {
     $pt = new pointObj();
     $pt->setXY($cities[$ukey]['lon'], $cities[$ukey]['lat'], 0);
     if ($value == 0.0001) $value = "T";
-    $pt->draw($map, $snet, $img, 2, $value);
+    $pt->draw($map, $snet, $img, 0, $value["val"]);
 }
 
 if ($i == 0)
@@ -227,30 +268,36 @@ $sizeselect = make_select("size", $size, $ar);
 
 $showlabelson = ($showlabels) ? " CHECKED=\"CHECKED\" " : "";
 
-$ts->sub(new DateInterval("P1D"));
+$sselect = stateSelect($state);
+$yest = clone $ts;
+$yest->sub(new DateInterval("P1D"));
 $minusone = sprintf(
     "plot.phtml?source=%s&amp;var=%s&amp;year=%s&amp;" .
-        "month=%s&amp;day=%s&amp;size=%s&amp;labels=%s",
+        "month=%s&amp;day=%s&amp;size=%s&amp;labels=%s&amp;timing=%s&amp;state=%s",
     $source,
     $var,
-    $ts->format("Y"),
-    $ts->format("m"),
-    $ts->format("d"),
+    $yest->format("Y"),
+    $yest->format("m"),
+    $yest->format("d"),
     $size,
-    $showlabels ? "on" : "off"
+    $showlabels ? "on" : "off",
+    $timing,
+    $state,
 );
-// SAD
-$ts->add(new DateInterval("P2D"));
+$tomorrow = clone $ts;
+$tomorrow->add(new DateInterval("P1D"));
 $plusone = sprintf(
     "plot.phtml?source=%s&amp;var=%s&amp;year=%s&amp;" .
-        "month=%s&amp;day=%s&amp;size=%s&amp;labels=%s",
+        "month=%s&amp;day=%s&amp;size=%s&amp;labels=%s&amp;timing=%s&amp;state=%s",
     $source,
     $var,
-    $ts->format("Y"),
-    $ts->format("m"),
-    $ts->format("d"),
+    $tomorrow->format("Y"),
+    $tomorrow->format("m"),
+    $tomorrow->format("d"),
     $size,
-    $showlabels ? "on" : "off"
+    $showlabels ? "on" : "off",
+    $timing,
+    $state,
 );
 
 $t->content = <<<EOF
@@ -260,8 +307,10 @@ choice.
 <form method="GET" name="myform">
 <table class="table table-bordered">
  <tr>
+    <th>Select State:</th>
    <th>Select Datasource:</th>
    <th>Select Parameter:</th>
+   <th>Timing</th>
    <th>Year</th>
    <th>Month</th>
    <th>Day</th>
@@ -269,11 +318,13 @@ choice.
    <td></td>
   </tr>
  <tr>
+  <td>{$sselect}</td>
   <td>{$sourceselect}</td>
   <td>{$varselect}
   <br /><i>Note:</i> Temperature at Observation is only available for the
   "Preliminary" data source.
   </td>
+  <td>{$timingsel}</td>
   <td>{$yselect}</td>
   <td>{$mselect}</td>
   <td>{$dselect}</td>
@@ -285,7 +336,7 @@ choice.
   </tr>
 </table>
 
-<br />  <img src="{$url}" border=1>
+<br /><img src="{$url}" border=1>
 
 <p>Open this plot in a <a href="javascript:new_window('{$url}');">new window</a> for comparison with other plots. Once the
 image is loaded up in another window, you can modify this plots 
@@ -301,7 +352,6 @@ parameters.
 necessarily for the local date.  The reports are around 7 AM, so the high
 temperature (for example) was most likely for the previous date.</li>
 </ul>
-
 
 <p>
 <img src="/images/gisready.png"><h3> Data Listing</h3>

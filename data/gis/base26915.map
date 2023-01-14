@@ -625,19 +625,9 @@ LAYER
   PROJECTION
     "init=epsg:26915"
   END
-  LABELCACHE ON
-  LABELITEM 'CO_NAME'
   CLASS
     STYLE
       OUTLINECOLOR 210 210 210
-    END
-    LABEL 
-      SIZE TINY
-      TYPE BITMAP
-      POSITION LC
-      COLOR 0 0 0
-      PARTIALS FALSE
-      FORCE FALSE
     END
   END
 END
@@ -744,42 +734,6 @@ LAYER
   LABELCACHE ON
   PROJECTION
    "init=epsg:4326"
-  END
-  CLASS
-    STYLE
-      COLOR -1 -1 -1
-    END
-    LABEL
-      COLOR  255 255 0
-      OUTLINECOLOR  0 0 0
-      SIZE 14
-      MINSIZE 4
-      MAXSIZE 18
-      TYPE TRUETYPE
-      FONT 'liberation'
-      ANTIALIAS TRUE
-      BUFFER 2
-      FORCE TRUE
-      POSITION UC
-      OFFSET 0 3
-    END
-  END
-  CLASS
-    STYLE
-      COLOR -1 -1 -1
-    END
-    LABEL
-      COLOR 0 0 0
-      SIZE 7
-      MINSIZE 4
-      MAXSIZE 18
-      TYPE TRUETYPE
-      FONT 'liberation'
-      ANTIALIAS true
-      BUFFER 0
-      FORCE FALSE
-      POSITION AUTO
-    END
   END
   CLASS
     STYLE

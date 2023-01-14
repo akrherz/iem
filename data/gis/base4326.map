@@ -359,6 +359,28 @@ LAYER
   END
 END
 
+LAYER
+  NAME cityname
+  STATUS OFF
+  TYPE POINT
+  LABELCACHE ON
+  PROJECTION
+    "init=epsg:4326"
+  END
+  CLASS
+    STYLE
+      COLOR -1 -1 -1
+    END
+    LABEL
+      COLOR 0 0 0
+      SIZE MEDIUM
+      TYPE BITMAP
+      POSITION LC
+      FORCE TRUE
+    END
+  END
+END
+
 # Counites
 LAYER
   NAME uscounties_and_name
@@ -385,7 +407,32 @@ LAYER
   END
 END
 
-
+LAYER
+  NAME datapoint
+  STATUS OFF
+  TYPE POINT
+  LABELCACHE ON
+  PROJECTION
+   "init=epsg:4326"
+  END
+  CLASS
+    STYLE
+      COLOR -1 -1 -1
+    END
+    LABEL
+      COLOR  0 0 0
+      SIZE 14
+      MINSIZE 4
+      MAXSIZE 18
+      TYPE TRUETYPE
+      FONT 'liberation'
+      ANTIALIAS TRUE
+      BUFFER 2
+      FORCE TRUE
+      POSITION UC
+    END
+  END
+END
 
 # Counites
 LAYER
