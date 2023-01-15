@@ -235,7 +235,7 @@ foreach ($vals as $key => $value) {
     // Value UL
     $pt = new pointObj();
     $pt->setXY($cities[$ukey]['lon'], $cities[$ukey]['lat'], 0);
-    if ($value == 0.0001) $value = "T";
+    if ($value["val"] == 0.0001) $value = "T";
     $pt->draw($map, $snet, $img, 0, $value["val"]);
 }
 
