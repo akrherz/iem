@@ -9,6 +9,27 @@ from pyiem.reference import state_names
 from pyiem.util import get_autoplot_context, get_sqlalchemy_conn, get_dbconn
 from pyiem.exceptions import NoDataFound
 
+MDICT = {
+    "all": "Entire Year",
+    "spring": "Spring (MAM)",
+    "fall": "Fall (SON)",
+    "winter": "Winter (DJF)",
+    "summer": "Summer (JJA)",
+    "octmar": "October thru March",
+    "jan": "January",
+    "feb": "February",
+    "mar": "March",
+    "apr": "April",
+    "may": "May",
+    "jun": "June",
+    "jul": "July",
+    "aug": "August",
+    "sep": "September",
+    "oct": "October",
+    "nov": "November",
+    "dec": "December",
+}
+
 PDICT = {
     "C": "Convective",
     "E": "Excessive Rainfall",
@@ -96,6 +117,13 @@ def get_description():
             label="Select UGC Zone/County (when appropriate):",
         ),
         dict(
+            type="select",
+            name="month",
+            default="all",
+            label="Month(s) Limiter",
+            options=MDICT,
+        ),
+        dict(
             type="date",
             name="date",
             label="Set retroactive date (exclude events on or after date):",
@@ -122,6 +150,31 @@ def plotter(fdict):
     if ctx.get("date") is not None:
         date_limiter = " and outlook_date < :date "
         params["date"] = ctx["date"]
+    month = ctx["month"]
+    if month == "all":
+        months = range(1, 13)
+    elif month == "fall":
+        months = [9, 10, 11]
+    elif month == "winter":
+        months = [12, 1, 2]
+    elif month == "spring":
+        months = [3, 4, 5]
+    elif month == "summer":
+        months = [6, 7, 8]
+    elif month == "octmar":
+        months = [10, 11, 12, 1, 2, 3]
+    else:
+        ts = datetime.datetime.strptime(f"2000-{month}-01", "%Y-%b-%d")
+        # make sure it is length two for the trick below in SQL
+        months = [
+            ts.month,
+        ]
+    if month != "all":
+        date_limiter = (
+            f" and extract(month from issue) in :months {date_limiter}"
+        )
+    params["months"] = tuple(months)
+    title3 = "" if month == "all" else f" [{MDICT[month]}]"
 
     sqllimiter = ""
     category = "CATEGORICAL"
@@ -209,7 +262,7 @@ def plotter(fdict):
         _ll = f"Prior to {ctx['date']:%-d %b %Y}, "
     title = (
         f"{_ll}Most Recent {'WPC' if outlook_type == 'E' else 'SPC'} Day "
-        f"{day} {PDICT[outlook_type]} Outlook for {title2}"
+        f"{day} {PDICT[outlook_type]} Outlook{title3} for {title2}"
     )
     fig = figure(
         apctx=ctx,
@@ -251,7 +304,7 @@ def plotter(fdict):
         fig.text(
             0.3,
             ypos + 0.05,
-            f"{df.at[thres, 'days']:,} Days",
+            f"{max(0, df.at[thres, 'days']):,} Days",
             fontsize="larger",
             va="center",
         )
