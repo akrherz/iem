@@ -14,7 +14,7 @@ $year = isset($_GET["year"]) ? intval($_GET["year"]) : date("Y");
 $month = isset($_GET["month"]) ? intval($_GET["month"]) : date("m");
 $day = isset($_GET["day"]) ? intval($_GET["day"]) : date("d");
 $source = isset($_GET["source"]) ? xssafe($_GET["source"]) : "prelim";
-$size = isset($_GET["size"]) ? xssafe($_GET["size"]) : "640x480";
+$size = isset($_GET["size"]) ? xssafe($_GET["size"]) : "1024x768";
 $showlabels = (isset($_GET["labels"]) && $_GET["labels"] == "on");
 $timing = isset($_GET["timing"]) ? xssafe($_GET["timing"]) : "1";
 $state = isset($_GET["state"]) ? xssafe(substr($_GET["state"], 0, 2)) : "IA";
@@ -87,7 +87,7 @@ $rnd = array(
 $myStations = $cities;
 
 $map = new mapObj("../../../../data/gis/base4326.map");
-$map->imagecolor->setRGB(220, 220, 220);
+$map->imagecolor->setRGB(255, 255, 255);
 $map->selectOutputFormat("PNG24");
 $map->setSize($width, $height);
 $dbconn = iemdb("postgis");
@@ -336,7 +336,7 @@ choice.
   </tr>
 </table>
 
-<br /><img src="{$url}" border=1>
+<br /><img src="{$url}">
 
 <p>Open this plot in a <a href="javascript:new_window('{$url}');">new window</a> for comparison with other plots. Once the
 image is loaded up in another window, you can modify this plots 
