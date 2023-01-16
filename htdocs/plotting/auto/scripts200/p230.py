@@ -31,7 +31,10 @@ MDICT = {
 }
 
 PDICT = {
-    "C": "Convective",
+    "C": "Convective Categorical",
+    "H": "Convective Hail Prob",
+    "T": "Convective Tornado Prob",
+    "W": "Convective Wind Prob",
     "E": "Excessive Rainfall",
     "F": "Fire Weather",
 }
@@ -74,6 +77,9 @@ def get_description():
         "description"
     ] = """This application presents an infographic showing the most recent
     date of a given SPC outlook threshold as per IEM unofficial archives.
+
+    <p>Note that the probability data can get a little wonky with the changing
+    usage of levels with time.
     """
     desc["arguments"] = [
         dict(
@@ -144,7 +150,7 @@ def plotter(fdict):
 
     params = {
         "day": day,
-        "outlook_type": outlook_type,
+        "outlook_type": outlook_type if outlook_type in ["F", "E"] else "C",
     }
     date_limiter = ""
     if ctx.get("date") is not None:
@@ -184,18 +190,29 @@ def plotter(fdict):
         category = "CRITICAL FIRE WEATHER AREA"
     elif outlook_type == "F":
         category = "FIRE WEATHER CATEGORICAL"
+    elif outlook_type == "H":
+        category = "HAIL"
+    elif outlook_type == "T":
+        category = "TORNADO"
+    elif outlook_type == "W":
+        category = "WIND"
     params["category"] = category
     if ctx["w"] == "all":
         with get_sqlalchemy_conn("postgis") as conn:
             df = pd.read_sql(
                 text(
                     f"""
+                with data as (
                 select max(expire at time zone 'UTC') as max_expire,
                 threshold from spc_outlooks
                 WHERE category = :category and day = :day and
                 outlook_type = :outlook_type and
                 threshold not in ('IDRT', 'SDRT') {date_limiter}
                 GROUP by threshold
+                )
+                select d.* from data d JOIN spc_outlook_thresholds t
+                on (d.threshold = t.threshold) ORDER by t.priority desc
+
             """
                 ),
                 conn,
@@ -240,6 +257,7 @@ def plotter(fdict):
             df = pd.read_sql(
                 text(
                     f"""
+                    WITH data as (
                 select max(expire at time zone 'UTC') as max_expire,
                 threshold from
                 spc_outlooks o, {table} t
@@ -247,6 +265,9 @@ def plotter(fdict):
                 and ST_Intersects(st_buffer(o.geom, 0), t.{geomcol})
                 and o.day = :day and o.outlook_type = :outlook_type
                 {sqllimiter} {date_limiter} GROUP by threshold
+                )
+                select d.* from data d JOIN spc_outlook_thresholds t
+                on (d.threshold = t.threshold) ORDER by t.priority desc
             """
                 ),
                 conn,
@@ -272,39 +293,49 @@ def plotter(fdict):
     ax = fig.add_axes([0.0, 0.0, 1, 1], frame_on=False)
 
     ypos = 0.78
-    dmax = None
-    for thres, row in df.sort_values("days", ascending=False).iterrows():
-        if thres not in COLORS:
-            continue
-        if dmax is None:
-            dmax = row["days"]
+    boxheight = 0.12
+    rowcount = len(df.index)
+    if rowcount > 6:
+        boxheight = 0.08
+    dmax = df["days"].max()
+    for thres, row in df.iterrows():
+        if outlook_type in ["C", "F", "E"]:
+            if thres not in COLORS:
+                continue
+            color = COLORS[thres]
+        else:
+            color = "tan"
         # Outline
-        rect = Rectangle((0.02, ypos), 0.94, 0.1, ec="k", fc="white")
+        rect = Rectangle(
+            (0.02, ypos), 0.94, boxheight - 0.02, ec="k", fc="white"
+        )
         ax.add_patch(rect)
         # Box for Label
-        rect = Rectangle((0.03, ypos + 0.01), 0.2, 0.08, color=COLORS[thres])
+        rect = Rectangle(
+            (0.03, ypos + 0.01), 0.2, boxheight - 0.04, color=color
+        )
         ax.add_patch(rect)
         # Overlay label
         fig.text(
             0.1,
-            ypos + 0.05,
+            ypos + (boxheight / 2) - 0.01,
             thres,
             fontsize="larger",
             va="center",
             bbox=dict(color="white"),
         )
         # Crude semi-transparent bar underneath
-        width = 0.54 * df.at[thres, "days"] / dmax
+        width = 0.54 * row["days"] / dmax
         rect = Rectangle(
-            (0.4, ypos), width, 0.1, color=COLORS[thres], alpha=0.3
+            (0.4, ypos), width, boxheight - 0.02, color=color, alpha=0.3
         )
         ax.add_patch(rect)
 
         # Days
         fig.text(
             0.3,
-            ypos + 0.05,
-            f"{max(0, df.at[thres, 'days']):,} Days",
+            ypos + (boxheight / 2) - 0.01,
+            f"{max(0, row['days']):,} Days",
             fontsize="larger",
             va="center",
         )
@@ -312,12 +343,12 @@ def plotter(fdict):
         # Date
         fig.text(
             0.43,
-            ypos + 0.05,
-            df.at[thres, "date"].strftime("%B %-d, %Y"),
+            ypos + (boxheight / 2) - 0.01,
+            row["date"].strftime("%B %-d, %Y"),
             fontsize="larger",
             va="center",
         )
-        ypos -= 0.12
+        ypos -= boxheight
 
     return fig, df.drop(columns=["max_expire"])
 
