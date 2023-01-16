@@ -49,45 +49,45 @@ def main():
             if utc.minute > 30:
                 print("madis2csv %s does not exist" % (fn,))
             sys.exit()
-    nc = ncopen(fn, "r", timeout=300)
-    if nc is None:
-        print(
-            ("madis2csv Numerous attempts to open MADIS netcdf %s failed!")
-            % (fn,)
+    with ncopen(fn, "r", timeout=300) as nc:
+        stations = chartostring(nc.variables["stationId"][:])
+        stationname = chartostring(nc.variables["stationName"][:])
+        tmpf = convert_value(nc.variables["temperature"][:], "degK", "degF")
+        dwpf = convert_value(nc.variables["dewpoint"][:], "degK", "degF")
+        drct = nc.variables["windDir"][:]
+        smps = nc.variables["windSpeed"][:] * 1.94384449
+        alti = nc.variables["altimeter"][:] * 29.9196 / 1013.2  # in hPa
+        vsby = nc.variables["visibility"][:] * 0.000621371192  # in hPa
+        providers = chartostring(nc.variables["dataProvider"][:])
+        lat = nc.variables["latitude"][:]
+        lon = nc.variables["longitude"][:]
+        # ele = nc.variables["elevation"][:]
+        p01m = nc.variables["precipAccum"][:] * 25.4
+        ptmp1 = convert_value(
+            nc.variables["roadTemperature1"][:], "degK", "degF"
         )
-        sys.exit(0)
-
-    stations = chartostring(nc.variables["stationId"][:])
-    stationname = chartostring(nc.variables["stationName"][:])
-    tmpf = convert_value(nc.variables["temperature"][:], "degK", "degF")
-    dwpf = convert_value(nc.variables["dewpoint"][:], "degK", "degF")
-    drct = nc.variables["windDir"][:]
-    smps = nc.variables["windSpeed"][:] * 1.94384449
-    alti = nc.variables["altimeter"][:] * 29.9196 / 1013.2  # in hPa
-    vsby = nc.variables["visibility"][:] * 0.000621371192  # in hPa
-    providers = chartostring(nc.variables["dataProvider"][:])
-    lat = nc.variables["latitude"][:]
-    lon = nc.variables["longitude"][:]
-    # ele = nc.variables["elevation"][:]
-    p01m = nc.variables["precipAccum"][:] * 25.4
-    ptmp1 = convert_value(nc.variables["roadTemperature1"][:], "degK", "degF")
-    ptmp2 = convert_value(nc.variables["roadTemperature2"][:], "degK", "degF")
-    ptmp3 = convert_value(nc.variables["roadTemperature3"][:], "degK", "degF")
-    ptmp4 = convert_value(nc.variables["roadTemperature4"][:], "degK", "degF")
-    subs1 = convert_value(
-        nc.variables["roadSubsurfaceTemp1"][:], "degK", "degF"
-    )
-    subs2 = convert_value(
-        nc.variables["roadSubsurfaceTemp2"][:], "degK", "degF"
-    )
-    subs3 = convert_value(
-        nc.variables["roadSubsurfaceTemp3"][:], "degK", "degF"
-    )
-    subs4 = convert_value(
-        nc.variables["roadSubsurfaceTemp4"][:], "degK", "degF"
-    )
-    times = nc.variables["observationTime"][:]
-    nc.close()
+        ptmp2 = convert_value(
+            nc.variables["roadTemperature2"][:], "degK", "degF"
+        )
+        ptmp3 = convert_value(
+            nc.variables["roadTemperature3"][:], "degK", "degF"
+        )
+        ptmp4 = convert_value(
+            nc.variables["roadTemperature4"][:], "degK", "degF"
+        )
+        subs1 = convert_value(
+            nc.variables["roadSubsurfaceTemp1"][:], "degK", "degF"
+        )
+        subs2 = convert_value(
+            nc.variables["roadSubsurfaceTemp2"][:], "degK", "degF"
+        )
+        subs3 = convert_value(
+            nc.variables["roadSubsurfaceTemp3"][:], "degK", "degF"
+        )
+        subs4 = convert_value(
+            nc.variables["roadSubsurfaceTemp4"][:], "degK", "degF"
+        )
+        times = nc.variables["observationTime"][:]
 
     db = {}
 

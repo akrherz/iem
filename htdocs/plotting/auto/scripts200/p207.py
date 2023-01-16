@@ -447,6 +447,8 @@ def plotter(fdict):
             mp.draw_cwas(linewidth=2)
     if sector not in ["conus", "midwest"]:
         mp.drawcounties()
+    if ctx["ct"] == "yes":
+        mp.drawcities(isolated=True, textoutlinewidth=0)
     if not df.empty and ctx["p"] in ["both", "plot"]:
         df2 = df[df["plotme"]]
         mp.plot_values(
@@ -467,8 +469,6 @@ def plotter(fdict):
                 color="#FF0000",
                 labelbuffer=0,
             )
-    if ctx["ct"] == "yes":
-        mp.drawcities()
     return mp.fig, df.drop(["geo", "plotme"], axis=1)
 
 
