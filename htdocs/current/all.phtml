@@ -50,39 +50,41 @@ foreach ($jobj["data"] as $bogus => $iemob) {
         $mydata[$key]["relh"] = "M";
         $mydata[$key]["dewpf"] = "M";
         if ($sortcol == "feel" || $sortcol == "dwpf" || $sortcol == "relh") {
-            $mydata[$key] = 0;
+            $mydata[$key]["feel"] = null;
             continue;
         }
     }
     if ($mydata[$key]["tmpf"] < -60) {
         $mydata[$key]["tmpf"] = "M";
         if ($sortcol == "tmpf" || $sortcol == "feel" || $sortcol == "dwpf" || $sortcol == "relh") {
-            $mydata[$key] = 0;
+            $mydata[$key]["feel"] = null;
             continue;
         }
     }
     if ($mydata[$key]["alti"] < -60) {
         $mydata[$key]["alti"] = "M";
         if ($sortcol == "alti") {
-            $mydata[$key] = 0;
+            $mydata[$key]["alti"] = null;
             continue;
         }
     }
     if ($mydata[$key]["vsby"] < 0) {
         $mydata[$key]["vsby"] = "M";
         if ($sortcol == "vsby") {
-            $mydata[$key] = 0;
+            $mydata[$key]["vsby"] = null;
             continue;
         }
     }
 
     if ($mydata[$key]["max_gust"] > $mydata[$key]["max_sknt"]) {
         $mydata[$key]["peak"] = $mydata[$key]["max_gust"];
-        $mydata[$key]["peak_ts"] = strtotime($mydata[$key]["local_max_gust_ts"]);
+        if (! is_null($mydata[$key]["local_max_gust_ts"])) {
+            $mydata[$key]["peak_ts"] = strtotime($mydata[$key]["local_max_gust_ts"]);
+        }
     } else {
         $mydata[$key]["peak"] = $mydata[$key]["max_sknt"];
         $mydata[$key]["peak_ts"] = 0;
-        if ($mydata[$key]["local_max_sknt_ts"]) {
+        if (! is_null($mydata[$key]["local_max_sknt_ts"])) {
             $mydata[$key]["peak_ts"] = strtotime($mydata[$key]["local_max_sknt_ts"]);
         }
     }

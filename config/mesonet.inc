@@ -111,7 +111,7 @@ RewriteRule ^/search /search.py [QSA]
   </Directory>
 
   <Directory "/opt/iem/htdocs/river">
-	 RewriteRule wfo.phtml index.php
+     RewriteRule wfo.phtml index.php
   </Directory>
 
   Alias /data "/mesonet/ldmdata"
@@ -119,8 +119,8 @@ RewriteRule ^/search /search.py [QSA]
     Options Indexes MultiViews FollowSymLinks
     AllowOverride None
     Require all granted
-	Redirect permanent /data/gis/images/unproj /data/gis/images/4326
-  	Redirect permanent /data/gis/shape/unproj /data/gis/shape/4326
+    Redirect permanent /data/gis/images/unproj /data/gis/images/4326
+      Redirect permanent /data/gis/shape/unproj /data/gis/shape/4326
   </Directory>
     
   Alias "/onsite/lapses" "/mesonet/share/lapses"
@@ -248,10 +248,10 @@ RewriteRule ^/search /search.py [QSA]
   </Directory>
 
   <Directory "/opt/iem/htdocs/geojson">
-	## QSA causes the query string to be appended
-	RewriteRule network/(.*).geojson network.py?network=$1 [QSA]
-	# 7 Dec 2016: Rewrote service as Python
-	RewriteRule network.php(.*) network.py$1 [QSA]
+    ## QSA causes the query string to be appended
+    RewriteRule network/(.*).geojson network.py?network=$1 [QSA]
+    # 7 Dec 2016: Rewrote service as Python
+    RewriteRule network.php(.*) network.py$1 [QSA]
     RewriteRule sbw.geojson(.*) sbw.py$1 [QSA]
     RewriteRule sps.geojson(.*) sps.py$1 [QSA]
     RewriteRule winter_roads.geojson(.*) winter_roads.py$1 [QSA]
@@ -277,7 +277,7 @@ RewriteRule ^/search /search.py [QSA]
     RewriteRule stage4/([0-9\.\-]+)/([0-9\.\-]+)/([0-9\.\-]+)$ stage4.py?lon=$1&lat=$2&valid=$3 [QSA]
     RewriteRule network/([0-9\.\-A-Z]+).geojson network.py?network=$1 [QSA]
     # 15 Feb 2020 migration from PHP to python
-	RewriteRule vtec_events_byugc.php(.*) vtec_events_byugc.py$1 [QSA]
+    RewriteRule vtec_events_byugc.php(.*) vtec_events_byugc.py$1 [QSA]
   </Directory>
 
   <Directory "/opt/iem/htdocs/kml">
@@ -379,4 +379,6 @@ RewriteRule ^/search /search.py [QSA]
     RewriteRule map_power_([0-9]*).png$ map_power.py?ts=$1
     RewriteRule turbine_ts_([0-9]*)_(.*).png$ turbine_ts.py?date=$1&turbinename=$2
   </Directory>
-  
+
+  # 16 Jan 2023: puzzling number of hosts have this to valid URIs
+  Redirect permanent /gis/ /GIS/

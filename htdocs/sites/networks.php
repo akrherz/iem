@@ -166,10 +166,10 @@ EOM;
         if (!$nohtml) $table .= "<pre>\n";
         foreach ($cities as $sid => $row) {
             $table .= str_pad($row["id"], 9)
-                .  str_pad($row["synop"], 7)
+                .  str_pad(is_null($row["synop"]) ? "": $row["synop"], 7)
                 .  str_pad($row["name"], 33)
-                .  str_pad($row["state"], 3)
-                .  str_pad($row["country"], 2)
+                .  str_pad(is_null($row["state"]) ? "": $row["state"], 3)
+                .  str_pad(is_null($row["country"]) ? "": $row["country"], 2)
                 .  sprintf("%6.0f", $row["lat"] * 100)
                 .  sprintf("%7.0f", $row["lon"] * 100)
                 .  sprintf("%6.0f", $row["elevation"])

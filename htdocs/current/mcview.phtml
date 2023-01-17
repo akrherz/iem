@@ -85,7 +85,7 @@ for ($i = 0; $row = pg_fetch_array($rs); $i++) {
     $issued = strtotime($row["issued"]);
     $watches .= sprintf(
         "<a href=\"mcview.phtml?prod=%srad&java=none&mode=%s&frames=1&interval=5&year=%s&month=%s&day=%s&hour=%s&minute=%s\">%s (%s %s)</a> &nbsp; ",
-        trim(strtolower($row["sel"])),
+        trim(strtolower(is_null($row["sel"]) ? "": $row["sel"])),
         $mode,
         $year,
         $month,

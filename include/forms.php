@@ -7,7 +7,7 @@
 //https://www.owasp.org/index.php/PHP_Security_Cheat_Sheet#XSS_Cheat_Sheet
 function xssafe($data, $encoding = 'UTF-8')
 {
-    if (is_array($data)) {
+    if (is_array($data) || is_null($data)) {
         return $data;
     }
     $res = htmlspecialchars($data, ENT_QUOTES | ENT_HTML401, $encoding);

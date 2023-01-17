@@ -50,7 +50,7 @@ EOF;
 for ($i = 0; $i < $num; $i++) {
     $row = pg_fetch_assoc($rs);
     $valid = strtotime(substr($row["valid"], 0, 16));
-    $p = printTags(explode(",", $row["tags"]));
+    $p = printTags(explode(",", is_null($row["tags"]) ? "": $row["tags"]));
     $d = date("Y-m-d", $valid);
     $linktext = "";
     if ($row["appurl"] != "") {
@@ -60,7 +60,7 @@ for ($i = 0; $i < $num; $i++) {
     if ($row["mediasuffix"] == 'mp4') {
         $media = <<<EOM
         <video class="img img-responsive" controls>
-          <source src="${big}" type="video/mp4">
+          <source src="{$big}" type="video/mp4">
           Your browser does not support the video tag.
       </video>
 EOM;

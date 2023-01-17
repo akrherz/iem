@@ -1,6 +1,5 @@
 <?php
 header("Content-type: text/plain");
-// Generate placefiles, whatever
 // Inspiration: http://grlevel3.tornadocentral.com/metars.php?state=IA
 
 echo 'Title: Iowa ASOS Only
@@ -58,8 +57,8 @@ foreach ($jobj["data"] as $bogus => $iemob) {
   Icon: 0,0," . $mydata["drct"] . "," . s2icon(floatval($mydata["sknt"])) . "
   Icon: 0,0,000,2,5,\"" . $mydata["name"] . " @ " . date("d M h:i A", strtotime($mydata['local_valid'])) . "\\nTemp: " . $mydata["tmpf"] . "F (Dew: " . $mydata["dwpf"] . "F)\\nWind: " . drct2txt($mydata["drct"]) . " @ " . intval($mydata["sknt"]) . "kt\\n\" 
   Threshold: 150
-  Text:  -17, 13, 1, \" " . round($mydata["tmpf"], 0) . " \" 
-  Text:  -17, -13, 1, \" " . round($mydata["dwpf"], 0) . " \" 
+  Text:  -17, 13, 1, \" " . myround($mydata["tmpf"], 0) . " \" 
+  Text:  -17, -13, 1, \" " . myround($mydata["dwpf"], 0) . " \" 
  End: 
 
 ";

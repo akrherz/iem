@@ -30,7 +30,9 @@ function get_data()
     global $wfoLimiter;
     $dbconn = iemdb("postgis");
 
-    $rs = pg_query("
+    $rs = pg_query(
+        $dbconn,
+        "
             SELECT yr, phenomena, significance, count(*) from
             (SELECT distinct extract(year from issue) as yr, wfo,
             phenomena, significance, eventid from warnings WHERE
@@ -58,7 +60,9 @@ function get_data2()
     global $phenomena, $significance;
     $dbconn = iemdb("postgis");
 
-    $rs = pg_query("
+    $rs = pg_query(
+        $dbconn,
+        "
         WITH data as (
             SELECT distinct wfo, eventid, extract(year from issue) as yr
             from warnings where phenomena = '$phenomena' and
