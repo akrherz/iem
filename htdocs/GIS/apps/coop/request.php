@@ -12,48 +12,13 @@ ignore_user_abort(true);
 
 require_once "../../../../include/database.inc.php";
 require_once "../../../../include/network.php";
-$month = isset($_GET["month"]) ? $_GET["month"] : die();
-$day = isset($_GET["day"]) ? $_GET["day"] : die();
+require_once "../../../../include/forms.php";
+$month = get_int404("month", 1);
+$day = get_int404("day", 1);
 
-function addPoint($row, $lon, $lat, $name)
-{
-    global $shpFile, $dbfFile;
-
-    // Create the shape
-    $shp = new shapeObj(MS_SHAPE_POINT);
-    $pt = new pointobj();
-    $pt->setXY($lon, $lat, 0);
-    $line = new lineObj();
-    $line->add($pt);
-    $shp->add($line);
-    $shpFile->addShape($shp);
-
-    dbase_add_record($dbfFile, array(
-        $row["station"],
-        $name,
-        $row["years"],
-        $row["cvalid"],
-        $row["high"],
-        $row["low"],
-        $row["precip"],
-        $row["max_precip"],
-        $row["max_high"],
-        $row["max_low"],
-        $row["min_high"],
-        $row["min_low"]
-    ));
-} // End addPoint 
-
-if (strlen($month) == 0) {
-    $month = date('m');
-}
-if (strlen($day) == 0) {
-    $day = date('d');
-}
-$ts = mktime(0, 0, 0, $month, $day, 2000);
-$sqlDate = date('Y-m-d', $ts);
-$filePre = date('md', $ts) . "_coop";
-
+$ts = new DateTime("2000-{$month}-{$day}");
+$sqlDate = $ts->format('Y-m-d');
+$filePre = $ts->format('md') . "_coop";
 
 $pgcon = iemdb("coop");
 $rs = pg_exec($pgcon, "select c.*, ST_X(s.geom) as lon, ST_Y(s.geom) as lat,
@@ -86,14 +51,27 @@ $dbfFile = dbase_create($shpFname . ".dbf", array(
 
 
 for ($i = 0; $row = pg_fetch_array($rs); $i++) {
-    addPoint(
-        $row,
-        $row["lon"],
-        $row["lat"],
-        $row["name"]
-    );
-} // End of for
+    // Create the shape
+    $pt = new pointObj();
+    $pt->setXY($row["lon"], $row["lat"], 0);
+    $shpFile->addPoint($pt);
 
+    dbase_add_record($dbfFile, array(
+        $row["station"],
+        $name,
+        $row["years"],
+        $row["cvalid"],
+        $row["high"],
+        $row["low"],
+        $row["precip"],
+        $row["max_precip"],
+        $row["max_high"],
+        $row["max_low"],
+        $row["min_high"],
+        $row["min_low"]
+    ));
+} // End of for
+unset($shpFile);
 dbase_close($dbfFile);
 
 // Generate zip file

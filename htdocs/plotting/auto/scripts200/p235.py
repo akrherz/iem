@@ -64,6 +64,7 @@ def plotter(fdict):
         ctx["_sname"] = "All Offices"
 
     with get_sqlalchemy_conn("afos") as conn:
+        ss = "pil = :pil" if len(pil) > 3 else "substr(pil, 1, 3) = :pil"
         df = pd.read_sql(
             text(
                 f"""
@@ -73,7 +74,7 @@ def plotter(fdict):
                 min(entered at time zone 'UTC') as min_entered,
                 max(entered at time zone 'UTC') as max_entered,
                 count(*)
-                from products WHERE substr(pil, 1, 3) = :pil {wfo_limiter}
+                from products WHERE {ss} {wfo_limiter}
                 GROUP by yr, mo ORDER by yr, mo ASC
         """
             ),
