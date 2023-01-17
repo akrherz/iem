@@ -37,7 +37,7 @@ def get_description():
     desc[
         "description"
     ] = """This chart totals the number of distinct calendar
-    days per month that a given present weather condition is reported within
+    days or hours per month that a given present weather condition is reported within
     the METAR data feed.  The calendar day is computed for the local time zone
     of the reporting station.
 
@@ -167,7 +167,7 @@ def plotter(fdict):
     ax.set_xlim(0.5, 12.5)
     ax.set_xticks(range(1, 13))
     ax.set_xticklabels(calendar.month_abbr[1:])
-    t1 = "Days" if ctx["w"] == "days" else "Hours"
+    t1 = "Days" if ctx["w"] == "day" else "Hours"
     ax.set_ylabel(f"{t1} Per Month")
     ax.set_ylim(top=(ax.get_ylim()[1] + 2))
     ax.legend(loc="best")

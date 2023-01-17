@@ -58,7 +58,8 @@ the baseline weather observation network. The
 reports for 24 hour periods, not always for the calendar day.
 <ul>
  <li><a href="/data/coopHighLow.gif">COOP High + Low Temperature</a></li>
- <li><a href="/data/summary/asos_hilo.png">ASOS High/Low Temperature</a></li>
+ <li><a href="/timemachine/#63">ASOS 12 UTC Low Temperature</a></li>
+ <li><a href="/timemachine/#116">ASOS High Temperature</a></li>
  <li><a href="/data/awos_rtp.shef">12Z AWOS RTP First Guess</a> Formatted
 product generated for the National Weather Service for comparison.</li>
 <li><a href="/data/climate/iowa_today_avg_hilo_pt.png">Average Hi/Low Temp</a></li>
