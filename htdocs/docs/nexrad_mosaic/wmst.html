@@ -85,7 +85,7 @@
 
         function animate() {
             increment_time();
-            timeout_state = setTimeout("animate()", 3000);
+            timeout_state = setTimeout(animate, 3000);
         }
 
         function buttonCheck() {

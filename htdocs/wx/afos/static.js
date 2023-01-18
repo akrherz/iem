@@ -5,17 +5,22 @@
 var tabs;
 var NO_DATE_SET = 'No Limit';
 
+function text(str){
+    // XSS shim
+    return $("<p>").text(str).text();
+}
+
 function readAnchorTags() {
     var tokens = window.location.href.split("#");
     if (tokens.length != 2) {
         return;
     }
-    $(tokens[1].split(",")).each(function (idx, pil_limit) {
+    $(text(tokens[1]).split(",")).each(function (idx, pil_limit) {
         var tokens = pil_limit.split("-");
         if (tokens.length == 1) {
             tokens.push(1);
         }
-        addTab(tokens[0], "", "", tokens[1], NO_DATE_SET, NO_DATE_SET, false);
+        addTab(text(tokens[0]), "", "", text(tokens[1]), NO_DATE_SET, NO_DATE_SET, false);
     });
 }
 function readCookies() {
@@ -92,11 +97,11 @@ function addTab(pil, center, ttaaii, limit, sdate, edate, doCookieSave) {
         return;
     }
     var pos = $(".nav-tabs").children().length;
-    $("#thetabs .nav-tabs").append('<li data-center="' + center + '" ' +
-        'data-sdate="' + sdate + '" data-edate="' + edate + '" ' +
-        'data-ttaaii="' + ttaaii + '" ' +
-        'data-limit="' + limit + '" data-pil="' + pil + '">' +
-        '<a href="#tab' + pos + '" data-toggle="tab">' + pil + '</a></li>');
+    $("#thetabs .nav-tabs").append('<li data-center="' + text(center) + '" ' +
+        'data-sdate="' + text(sdate) + '" data-edate="' + text(edate) + '" ' +
+        'data-ttaaii="' + text(ttaaii) + '" ' +
+        'data-limit="' + text(limit) + '" data-pil="' + text(pil) + '">' +
+        '<a href="#tab' + pos + '" data-toggle="tab">' + text(pil) + '</a></li>');
     $('.tab-content').append('<div class="tab-pane" id="tab' + pos + '"></div>');
     var newdiv = $("#tab" + pos);
     $('.nav-tabs li:nth-child(' + (pos + 1) + ') a').click();
