@@ -75,26 +75,20 @@ def plotter(fdict):
         ), c81 as (
         SELECT to_char(valid, 'mmdd') as sday, high, low, (high+low)/2. as avgt
         from ncdc_climate81 where station = %s
-        ), c71 as (
-        SELECT to_char(valid, 'mmdd') as sday, high, low, (high+low)/2. as avgt
-        from ncdc_climate71 where station = %s
         )
 
         SELECT o.sday, o.min_year, o.max_year,
         o.avgh as iem_avgh,
         c91.high as ncei91_avgh,
         c81.high as ncei81_avgh,
-        c71.high as ncei71_avgh,
         o.avgl as iem_avgl,
         c91.low as ncei91_avgl,
         c81.low as ncei81_avgl,
-        c71.low as ncei71_avgl,
         o.avgt as iem_avgt,
         c91.avgt as ncei91_avgt,
-        c81.avgt as ncei81_avgt,
-        c71.avgt as ncei71_avgt
-        from obs o, c91, c81, c71 where o.sday = c81.sday
-        and o.sday = c71.sday and o.sday = c91.sday ORDER by o.sday ASC
+        c81.avgt as ncei81_avgt
+        from obs o, c91, c81 where o.sday = c81.sday
+        and o.sday = c91.sday ORDER by o.sday ASC
         """,
             conn,
             params=(
@@ -104,7 +98,6 @@ def plotter(fdict):
                 ctx["eyear"],
                 ctx["_nt"].sts[station]["ncei91"],
                 ctx["_nt"].sts[station]["ncdc81"],
-                station,
             ),
             index_col="sday",
         )
@@ -151,20 +144,8 @@ def plotter(fdict):
             color="g",
             label="NCEI 1981-2010",
         )
-        ax[i].plot(
-            x,
-            df[f"ncei71_{c}"],
-            lw=2,
-            zorder=2,
-            color="r",
-            label="NCEI 1971-2000",
-        )
         ax[i].grid(True)
-        ymin = (
-            df[[f"iem_{c}", f"ncei91_{c}", f"ncei81_{c}", f"ncei71_{c}"]]
-            .min()
-            .min()
-        )
+        ymin = df[[f"iem_{c}", f"ncei91_{c}", f"ncei81_{c}"]].min().min()
         ax[i].set_ylim(bottom=ymin - 2)
 
     ax[0].set_ylabel(r"High Temp $^\circ$F")
