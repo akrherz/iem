@@ -19,20 +19,20 @@ $t->title = "NWS COOP Observations by Date by Site";
 $content = <<<EOF
  <ol class="breadcrumb">
   <li><a href="/COOP/">NWS Cooperative Observers</a></li>
-  <li class="active">View Reports by Date or Site</li>		
+  <li class="active">View Reports by Date or Site</li>
  </ol>
 <p>This page presents the raw observations of daily high and low temperature 
  along with precipitation and snow when available.  The dates shown are the 
  date when the observation was reported.  For observations made at 7 AM, this 
  would be a for a 24 hour period up until that time and not for that local date.
  The timestamps shown are valid for the local timezone of that reporting station.
-         
+
  <p><div class="alert alert-info"><strong>Hint:</strong> You should be able to 
      highlight the values in the table and then copy + paste these values into a 
      spreadsheet program like Excel. A 
      <a class="alert-link" href="/request/daily.phtml?network={$network}">download interface</a> does exist for these
     observations.</div>
-         
+
 <form name="switchnwsli" action="cat.phtml" method="GET">
 EOF;
 

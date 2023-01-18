@@ -4,13 +4,9 @@ import sys
 
 import pytz
 import requests
-import urllib3
 from pyiem.observation import Observation
 from pyiem.network import Table as NetworkTable
 from pyiem.util import get_dbconn, c2f, utc, logger
-
-# Stop the SSL cert warning :/
-urllib3.disable_warnings(urllib3.exceptions.InsecureRequestWarning)
 
 LOG = logger()
 
@@ -135,8 +131,8 @@ def savedata(icursor, scursor, reprocessing, data, maxts):
     if iem.data.get("dwpc") is not None:
         iem.data["dwpf"] = c2f(float(iem.data.get("dwpc")))
     for i in range(1, 6):
-        if iem.data.get("c%stmpf" % (i,)) is not None:
-            iem.data["c%stmpf" % (i,)] = c2f(float(iem.data.get(f"c{i}tmpc")))
+        if iem.data.get(f"c{i}tmpf") is not None:
+            iem.data[f"c{i}tmpf"] = c2f(float(iem.data.get(f"c{i}tmpc")))
         if iem.data.get(f"c{i}smv") is not None:
             iem.data[f"c{i}smv"] = float(iem.data.get(f"c{i}smv"))
     if iem.data.get("phour") is not None:
@@ -205,7 +201,7 @@ def main(argv):
         # iem uses S<id> and scan site uses just <id>
         postvars["sitenum"] = sid[1:]
         try:
-            req = requests.get(URI, params=postvars, timeout=10, verify=False)
+            req = requests.get(URI, params=postvars, timeout=10)
             response = req.content.decode("utf-8", "ignore")
         except Exception as exp:
             LOG.info("Failed to download: %s %s", sid, exp)

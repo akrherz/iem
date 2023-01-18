@@ -52,7 +52,7 @@ $(document).ready(function(){
         }));
     });
     $("#disclaimer_btn").click(function(){
-        $('#disclaimer').dialog({width: '50%', height: 400});	
+        $('#disclaimer').dialog({width: '50%', height: 400});
     });
 });
 </script>
@@ -72,7 +72,7 @@ $t->content = <<<EOF
     top:0.5em; 
     left:60px; 
     z-index:10000; 
-    background-color:#FFFFFF;	
+    background-color:#FFFFFF;
 }
         a {
         color: #00f !important;

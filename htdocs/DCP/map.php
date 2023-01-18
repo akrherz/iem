@@ -126,7 +126,7 @@ be wonderful.</p>
 <option value="FK">[FK] Fish - coho</option>
 <option value="FL">[FL] Fish - ladder (1=left, 2=right, 3=total)</option>
 <option value="FP">[FP] Fish - pink</option>
-<option value="FS">[FS] Fish – steelhead</option>
+<option value="FS">[FS] Fish - steelhead</option>
 <option value="FT">[FT] Fish type - type (1=adult, 2=jacks, 3=fingerlings)</option>
 <option value="FZ">[FZ] Fish - count of all types combined</option>
 <option value="GC">[GC] Condition, road surface (coded, see Table 1)</option>
@@ -318,14 +318,14 @@ be wonderful.</p>
 <option value="YW">[YW] GENOR raingage status level 2 - NERON observing sites (YWIRG)</option>
 <option value="YY">[YY] GENOR raingage status level 3 - NERON observing sites (YYIRG)</option>
 <option value="YZ">[YZ] Time of Observation - Minutes of the calendar day, minutes 0 - NERON observing sites (YZIRG)</option>
-</select>	
+</select>
 
 &nbsp; &nbsp; <strong>Duration:</strong>
 <select onChange="javascript: updateMap();" id="duration">
     <option value="D">D Day (24 Hour)</option>
     <option value="I">I Instantaneous</option>
     <option value="Q">Q 6 Hour</option>
-</select>	
+</select>
 
 &nbsp; <strong>Within # of Days:</strong> <input id="days" onChange="javascript: updateMap();" type="text" size="5" name="days" value="2">
 

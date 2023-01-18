@@ -10,35 +10,45 @@ require_once "../../../../include/myview.php";
 
 $t = new MyView();
 
-$var = isset($_GET["var"]) ? xssafe($_GET["var"]): "gdd50";
-$year = isset($_GET["year"]) ? intval($_GET["year"]): date("Y", time() - 86400);
-$smonth = isset($_GET["smonth"]) ? intval($_GET["smonth"]): 5;
-$sday = isset($_GET["sday"]) ? intval($_GET["sday"]): 1;
-$emonth = isset($_GET["emonth"]) ? intval($_GET["emonth"]): date("m", time() - 86400);
-$eday = isset($_GET["eday"]) ? intval($_GET["eday"]): date("d", time() - 86400);
-$network = isset($_REQUEST["network"]) ? xssafe($_REQUEST["network"]): "IACLIMATE";
+$var = isset($_GET["var"]) ? xssafe($_GET["var"]) : "gdd50";
+$year = isset($_GET["year"]) ? intval($_GET["year"]) : date("Y", time() - 86400);
+$smonth = isset($_GET["smonth"]) ? intval($_GET["smonth"]) : 5;
+$sday = isset($_GET["sday"]) ? intval($_GET["sday"]) : 1;
+$emonth = isset($_GET["emonth"]) ? intval($_GET["emonth"]) : date("m", time() - 86400);
+$eday = isset($_GET["eday"]) ? intval($_GET["eday"]) : date("d", time() - 86400);
+$network = isset($_REQUEST["network"]) ? xssafe($_REQUEST["network"]) : "IACLIMATE";
 
 $nt = new NetworkTable($network);
 $cities = $nt->table;
 
 $sts = new DateTime("{$year}-{$smonth}-{$sday}");
 $ets = new DateTime("{$year}-{$emonth}-{$eday}");
-                        
-$imgurl = sprintf("gsplot.php?network=%s&smonth=%s&sday=%s&var=%s&emonth=%s&eday=%s&year=%s",
-  $network, $smonth, $sday, $var, $emonth, $eday, $year);
+
+$imgurl = sprintf(
+    "gsplot.php?network=%s&smonth=%s&sday=%s&var=%s&emonth=%s&eday=%s&year=%s",
+    $network,
+    $smonth,
+    $sday,
+    $var,
+    $emonth,
+    $eday,
+    $year
+);
 
 $t->title = "NWS COOP Growing Season Data";
 
-$tr = sprintf("# IEM Estimated COOP Accumulations (start: %s to inclusive date: %s)\n", 
-        $sts->format("Y-m-d"),
-        $ets->format("Y-m-d") );
+$tr = sprintf(
+    "# IEM Estimated COOP Accumulations (start: %s to inclusive date: %s)\n",
+    $sts->format("Y-m-d"),
+    $ets->format("Y-m-d")
+);
 $tr .= "# Download From: https://mesonet.agron.iastate.edu/GIS/apps/coop/gsplot.phtml
-# Download Date: ". date("d M Y") ."
+# Download Date: " . date("d M Y") . "
 # CLIM_ values are based on climatology 1951-today
 # Data Contact: Daryl Herzmann akrherz@iastate.edu 515.294.5978
 #-----------------------snip------------------\n";
 
-$state = substr($network,0,2);
+$state = substr($network, 0, 2);
 
 /* Query the obs */
 $rs = pg_prepare($coopdb, "SELECT", "WITH data as (
@@ -78,56 +88,91 @@ c_gdd51, c_gdd52, c_sdd86, c_mintemp, c_maxtemp, c_cdd65, c_hdd65
 from data d JOIN climo c on (d.station = c.station) WHERE d.year = $3
 ");
 
-$rs = pg_execute($coopdb, "SELECT", Array($sts->format("md"),
-        $ets->format("md"), $year));
+$rs = pg_execute($coopdb, "SELECT", array(
+    $sts->format("md"),
+    $ets->format("md"), $year
+));
 
 
-    $tr .= sprintf("%6s,%21s,%10s,%10s,%10s,%10s,%10s,%10s,".
-                   "%10s,%10s,%10s,%10s,%10s,%10s,%10s,%10s,%10s\n", 'ID',
- 'StationName', 'Latitude', 'Longitude', 'GDD50', 'GDD48', 'SDD86', 'PRECIP',
- 'CLIM_GDD50', 'CLIM_GDD48', 'CLIM_PRECIP', 'MAX_TEMP', 'MIN_TEMP',
- 'CDD65', 'HDD65', 'CLIM_CDD65', 'CLIM_HDD65');
-for($i=0;$row=pg_fetch_array($rs);$i++){
+$tr .= sprintf(
+    "%6s,%21s,%10s,%10s,%10s,%10s,%10s,%10s," .
+        "%10s,%10s,%10s,%10s,%10s,%10s,%10s,%10s,%10s\n",
+    'ID',
+    'StationName',
+    'Latitude',
+    'Longitude',
+    'GDD50',
+    'GDD48',
+    'SDD86',
+    'PRECIP',
+    'CLIM_GDD50',
+    'CLIM_GDD48',
+    'CLIM_PRECIP',
+    'MAX_TEMP',
+    'MIN_TEMP',
+    'CDD65',
+    'HDD65',
+    'CLIM_CDD65',
+    'CLIM_HDD65'
+);
+for ($i = 0; $row = pg_fetch_array($rs); $i++) {
 
-$ukey = $row["station"];
-    if (! isset($cities[$ukey]) ) continue;
-  $tr .= sprintf("%6s,%-21s,%10.4f,%10.4f,%10.0f,%10.0f,%10.0f,".
-                 "%10.2f,%10.0f,%10.0f,%10.2f,%10.0f,%10.0f,%10.2f,%10.2f".
-                 ",%10.2f,%10.2f\n", $ukey,
-  $cities[$ukey]['name'],
-  $cities[$ukey]['lat'], $cities[$ukey]['lon'],
-          $row["s_gdd50"], $row["s_gdd48"], $row["s_sdd86"], $row["s_rainfall"],
-  $row["c_gdd50"], $row["c_gdd48"], $row["c_rainfall"], $row["s_maxtemp"],
-  $row["s_mintemp"], $row["s_cdd65"], $row["s_hdd65"], $row["c_cdd65"],
-  $row["s_hdd65"]);
+    $ukey = $row["station"];
+    if (!isset($cities[$ukey])) continue;
+    $tr .= sprintf(
+        "%6s,%-21s,%10.4f,%10.4f,%10.0f,%10.0f,%10.0f," .
+            "%10.2f,%10.0f,%10.0f,%10.2f,%10.0f,%10.0f,%10.2f,%10.2f" .
+            ",%10.2f,%10.2f\n",
+        $ukey,
+        $cities[$ukey]['name'],
+        $cities[$ukey]['lat'],
+        $cities[$ukey]['lon'],
+        $row["s_gdd50"],
+        $row["s_gdd48"],
+        $row["s_sdd86"],
+        $row["s_rainfall"],
+        $row["c_gdd50"],
+        $row["c_gdd48"],
+        $row["c_rainfall"],
+        $row["s_maxtemp"],
+        $row["s_mintemp"],
+        $row["s_cdd65"],
+        $row["s_hdd65"],
+        $row["c_cdd65"],
+        $row["s_hdd65"]
+    );
 }
 
 $netselect = "<select name=\"network\">";
 $mesosite = iemdb("mesosite");
 $rs = pg_query($mesosite, "SELECT id, name from networks where id ~* 'CLIMATE'
     and id not in ('MSCLIMATE') ORDER by name ASC");
-for ($i=0;$row=pg_fetch_assoc($rs);$i++){
-    $netselect .= sprintf("<option value='%s' %s>%s</option>\n", $row["id"],
-            ($row["id"] == $network)? "selected='selected'": "", $row["name"]);
+for ($i = 0; $row = pg_fetch_assoc($rs); $i++) {
+    $netselect .= sprintf(
+        "<option value='%s' %s>%s</option>\n",
+        $row["id"],
+        ($row["id"] == $network) ? "selected='selected'" : "",
+        $row["name"]
+    );
 }
 $netselect .= "</select>";
 
-$ar = Array(
-  "gdd32" => "Growing Degree Days (base=32)",
-  "gdd41" => "Growing Degree Days (base=41)",
-  "gdd46" => "Growing Degree Days (base=46)",
-  "gdd48" => "Growing Degree Days (base=48)",
-  "gdd50" => "Growing Degree Days (base=50)",
-  "gdd51" => "Growing Degree Days (base=51)",
-  "gdd52" => "Growing Degree Days (base=52)",
-  "cdd65" => "Cooling Degree Days (base=65)",
-  "hdd65" => "Heating Degree Days (base=65)",
+$ar = array(
+    "gdd32" => "Growing Degree Days (base=32)",
+    "gdd41" => "Growing Degree Days (base=41)",
+    "gdd46" => "Growing Degree Days (base=46)",
+    "gdd48" => "Growing Degree Days (base=48)",
+    "gdd50" => "Growing Degree Days (base=50)",
+    "gdd51" => "Growing Degree Days (base=51)",
+    "gdd52" => "Growing Degree Days (base=52)",
+    "cdd65" => "Cooling Degree Days (base=65)",
+    "hdd65" => "Heating Degree Days (base=65)",
     "prec" => "Precipitation",
-    "sdd86" => 	"Stress Degree Days (base=86)",
+    "sdd86" => "Stress Degree Days (base=86)",
     "mintemp" => "Minimum Temperature",
     "maxtemp" => "Maximum Temperature",
 );
-$vselect = make_select("var", $var, $ar );
+$vselect = make_select("var", $var, $ar);
 $yselect = yearselect(1893, $year);
 $m1select = monthSelect2($smonth, 'smonth');
 $d1select = daySelect2($sday, 'sday');

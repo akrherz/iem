@@ -1,5 +1,6 @@
 <html xmlns="http://www.w3.org/1999/xhtml">
-  <head>
+
+<head>
     <style type="text/css">
         #map {
             width: 512px;
@@ -9,81 +10,104 @@
     </style>
     <script src="/vendor/openlayers/2.13.1/OpenLayers.js"></script>
     <script type="text/javascript">
-        <!--
-var map,ia_wms;
-var image= new Image();
-var image2= new Image();
-var timeout_state=null;
-        function init(){
+        var map, ia_wms;
+        var image = new Image();
+        var image2 = new Image();
+        var timeout_state = null;
+
+        function init() {
             map = new OpenLayers.Map('map');
 
-            var ol_wms = new OpenLayers.Layer.WMS( "OpenLayers WMS",
-                "http://vmap0.tiles.osgeo.org/wms/vmap0?", {layers: 'basic'} );
+            var ol_wms = new OpenLayers.Layer.WMS("OpenLayers WMS",
+                "http://vmap0.tiles.osgeo.org/wms/vmap0?", {
+                    layers: 'basic'
+                });
 
-            var jpl_wms = new OpenLayers.Layer.WMS( "NASA Global Mosaic",
-                "http://t1.hypercube.telascience.org/cgi-bin/landsat7", 
-                {layers: "landsat7"});
+            var jpl_wms = new OpenLayers.Layer.WMS("NASA Global Mosaic",
+                "http://t1.hypercube.telascience.org/cgi-bin/landsat7", {
+                    layers: "landsat7"
+                });
 
-            ia_wms = new OpenLayers.Layer.WMS("Nexrad","https://mesonet.agron.iastate.edu/cgi-bin/wms/nexrad/n0r-t.cgi?",{layers:"nexrad-n0r-wmst",transparent:true,format:'image/png',time:"2005-08-29T13:00:00Z"});
+            ia_wms = new OpenLayers.Layer.WMS("Nexrad", "https://mesonet.agron.iastate.edu/cgi-bin/wms/nexrad/n0r-t.cgi?", {
+                layers: "nexrad-n0r-wmst",
+                transparent: true,
+                format: 'image/png',
+                time: "2005-08-29T13:00:00Z"
+            });
 
             jpl_wms.setVisibility(false);
 
             map.addLayers([ol_wms, jpl_wms, ia_wms]);
             map.addControl(new OpenLayers.Control.LayerSwitcher());
-            map.zoomToExtent(new OpenLayers.Bounds(-100.898437,22.148438,-78.398437,39.726563));
+            map.zoomToExtent(new OpenLayers.Bounds(-100.898437, 22.148438, -78.398437, 39.726563));
         }
-	function pad(i){
-		if (i<10) i='0'+i;
-		return i;
-	}
-	function change_time(t,i){
-		var s=t.split('T');
-		var d=s[0].split('-');
-		var t=s[1].split(':');
-		var date=Date.UTC(d[0],parseInt(d[1]-1),parseInt(d[2]),parseInt(t[0]),parseInt(t[1]));
-		var nd=new Date(date + i * 60 * 1000);
-		
-		var nm=pad(nd.getUTCMonth()+1);
-		var ns=nd.getUTCFullYear()+'-'+nm+'-'+pad(nd.getUTCDate())+'T'+pad(nd.getUTCHours())+':'+pad(nd.getUTCMinutes());
-		return ns;
-	}
-	function increment_time(){
-		var ns=change_time(document.getElementById('time').value,document.getElementById('increment').value);
-		image.src=ia_wms.getFullRequestString({"TIME":ns})
 
-			document.getElementById('time').value=ns;
-			ia_wms.mergeNewParams({"time":ns});
-	
-	}
-	function decrement_time(){
-		var ns=change_time(document.getElementById('time').value,0-document.getElementById('increment').value);
-		image.src=ia_wms.getFullRequestString({"TIME":ns})
-		document.getElementById('time').value=ns;
-		ia_wms.mergeNewParams({"time":ns});
-	}
-	function animate ( ) {
-		increment_time();
-      		timeout_state = setTimeout ( "animate()", 3000 ) ;
-      	}
-	function buttonCheck(){
-  		if (document.getElementById('startstop').value=="Start"){
-    			document.getElementById('startstop').value="Stop";
-    			animate();
-    		} else {
-    			document.getElementById('startstop').value="Start";
-    			clearTimeout ( timeout_state ) ;
-    			timeout_state = null ;
-    		}
-  	}
-        // -->
+        function pad(i) {
+            if (i < 10) i = '0' + i;
+            return i;
+        }
+
+        function change_time(t, i) {
+            var s = t.split('T');
+            var d = s[0].split('-');
+            var t = s[1].split(':');
+            var date = Date.UTC(d[0], parseInt(d[1] - 1), parseInt(d[2]), parseInt(t[0]), parseInt(t[1]));
+            var nd = new Date(date + i * 60 * 1000);
+
+            var nm = pad(nd.getUTCMonth() + 1);
+            var ns = nd.getUTCFullYear() + '-' + nm + '-' + pad(nd.getUTCDate()) + 'T' + pad(nd.getUTCHours()) + ':' + pad(nd.getUTCMinutes());
+            return ns;
+        }
+
+        function increment_time() {
+            var ns = change_time(document.getElementById('time').value, document.getElementById('increment').value);
+            image.src = ia_wms.getFullRequestString({
+                "TIME": ns
+            })
+
+            document.getElementById('time').value = ns;
+            ia_wms.mergeNewParams({
+                "time": ns
+            });
+
+        }
+
+        function decrement_time() {
+            var ns = change_time(document.getElementById('time').value, 0 - document.getElementById('increment').value);
+            image.src = ia_wms.getFullRequestString({
+                "TIME": ns
+            })
+            document.getElementById('time').value = ns;
+            ia_wms.mergeNewParams({
+                "time": ns
+            });
+        }
+
+        function animate() {
+            increment_time();
+            timeout_state = setTimeout("animate()", 3000);
+        }
+
+        function buttonCheck() {
+            if (document.getElementById('startstop').value == "Start") {
+                document.getElementById('startstop').value = "Stop";
+                animate();
+            } else {
+                document.getElementById('startstop').value = "Start";
+                clearTimeout(timeout_state);
+                timeout_state = null;
+            }
+        }
     </script>
-  </head>
-  <body onload="init()">
+</head>
+
+<body onload="init()">
     <input type="button" value="-" onClick='decrement_time();'>
-    <input type='text' id='time'  value="2005-08-29T13:00" onChange='ia_wms.mergeNewParams({"time":this.value});' >
-    <input type='text' id='increment'  value="15" size="4" >
+    <input type='text' id='time' value="2005-08-29T13:00" onChange='ia_wms.mergeNewParams({"time":this.value});'>
+    <input type='text' id='increment' value="15" size="4">
     <input type="button" value="+" onClick='increment_time();'>
     <input type="button" id="startstop" value="Start" onClick='buttonCheck();'>
     <div id="map"></div>
-  </body>
+</body>
+
 </html>

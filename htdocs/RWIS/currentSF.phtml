@@ -99,10 +99,6 @@ $now = time();
 foreach ($finalA as $key => $parts) {
     $i++;
     $tdiff = $now - $parts["ts"];
-    /*    if ($tdiff > 86400*5){
-	 continue;
-	}
-	*/
     $table .= "<tr";
     if ($i % 2 == 0)  $table .= " bgcolor='#eeeeee'";
 

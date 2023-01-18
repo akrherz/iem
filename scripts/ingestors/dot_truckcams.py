@@ -3,6 +3,7 @@
 
   /YYYY/mm/dd/camera/idot_trucks/keyhash/keyhash_timestamp.jpg
 """
+# pylint: disable=unsubscriptable-object
 import datetime
 import subprocess
 import tempfile
@@ -35,16 +36,12 @@ URI = (
 
 def get_current_fn(label):
     """Return how this is stored for current data"""
-    return "camera/idot_trucks/%s.jpg" % (label,)
+    return f"camera/idot_trucks/{label}.jpg"
 
 
 def get_archive_fn(label, utc):
     """Return how this is stored for current data"""
-    return "camera/idot_trucks/%s/%s_%s.jpg" % (
-        label,
-        label,
-        utc.strftime("%Y%m%d%H%M"),
-    )
+    return f"camera/idot_trucks/{label}/{label}_{utc:%Y%m%d%H%M}.jpg"
 
 
 def fetch_features(offset):
@@ -118,23 +115,21 @@ def process_features(features):
         tmp = tempfile.NamedTemporaryFile(delete=False)
         tmp.write(req.content)
         tmp.close()
-        cmd = "pqinsert -p 'plot ac %s %s %s jpg' %s" % (
-            valid.strftime("%Y%m%d%H%M"),
-            get_current_fn(label),
-            get_archive_fn(label, valid),
-            tmp.name,
+        cmd = (
+            f"pqinsert -p 'plot ac {valid:%Y%m%d%H%M} "
+            f"{get_current_fn(label)} {get_archive_fn(label, valid)} "
+            f"jpg' {tmp.name}"
         )
-        proc = subprocess.Popen(cmd, shell=True, stderr=subprocess.PIPE)
-        proc.stderr.read()
+        with subprocess.Popen(cmd, shell=True, stderr=subprocess.PIPE) as proc:
+            proc.stderr.read()
         os.unlink(tmp.name)
 
         pt = P3857(feat["geometry"]["x"], feat["geometry"]["y"], inverse=True)
-        geom = "SRID=4326;POINT(%s %s)" % (pt[0], pt[1])
         # This table has an insert trigger that logs the entry as well
         cursor.execute(
             "INSERT into idot_dashcam_current(label, valid, idnum, "
-            "geom) VALUES (%s, %s, %s, %s)",
-            (label, valid, idnum, geom),
+            "geom) VALUES (%s, %s, %s, ST_Point(%s, %s, 4326))",
+            (label, valid, idnum, pt[0], pt[1]),
         )
 
     cursor.close()

@@ -156,7 +156,7 @@ $t->jsextra = <<<EOF
 $(document).ready(function(){
     sdate = $("#sdate").datepicker({altFormat:"yymmdd"});
     sdate.datepicker('setDate', "$sdatestr");
-    edate = $("#edate").datepicker({altFormat:"yymmdd"});	
+    edate = $("#edate").datepicker({altFormat:"yymmdd"});
     edate.datepicker('setDate', "$edatestr");
 
     //Make into more PHP friendly
