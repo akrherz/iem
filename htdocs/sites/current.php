@@ -32,7 +32,7 @@ function make_shef_table($data, $iscurrent){
     $table = <<<EOM
     <p><strong>{$msg} SHEF encoded data</strong></p>
     <table class="table table-striped">
-    <thead>
+    <thead class="sticky">
         <tr><th>Physical Code</th><th>Duration</th><th>Type</th>
         <th>Source</th><th>Extrenum</th><th>Valid</th><th>Value</th>
         <th>Product</th></tr>

@@ -210,7 +210,7 @@ for that date.</p>
 <br />
 
 <table class="table table-bordered table-condensed table-striped">
-<thead style="position: sticky;top: 0;background:#FFF;">
+<thead class="sticky">
   <tr>
    <th rowspan='2' class='subtitle' valign='top'>
 {$h4}

@@ -27,7 +27,7 @@ questions!</p>
 
 
 <table class="table table-striped table-bordered">
-<thead style="position: sticky;top: 0;background:#FFF;">
+<thead class="sticky">
 <tr>
  <th rowspan="2">Variable</th>
  <th colspan="6">Timescale / Reporting Interval</th>

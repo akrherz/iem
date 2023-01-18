@@ -44,3 +44,9 @@ a.nws {
 img.olTileImage {
     max-width: none;
 }
+
+thead.sticky {
+    position: sticky;
+    top: 0;
+    background:#FFF;
+}

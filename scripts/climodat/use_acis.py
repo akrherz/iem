@@ -29,6 +29,7 @@ def safe(val):
         return float(val)
     except ValueError:
         LOG.info("failed to convert %s to float, using None", repr(val))
+    return None
 
 
 def compare(row, colname):
@@ -113,18 +114,19 @@ def do(meta, station, acis_station, interactive):
     with get_sqlalchemy_conn("coop") as conn:
         obs = pd.read_sql(
             """
-            SELECT day, high, low, precip, snow, snowd, temp_hour,
-            precip_hour, 1 as dbhas
+            SELECT day, high, low, precip, snow, snowd, temp_hour, precip_hour
             from alldata WHERE station = %s ORDER by day ASC
             """,
             conn,
             params=(station,),
             index_col="day",
         )
+        obs["dbhas"] = True
     LOG.info("Loaded %s rows from IEM", len(obs.index))
     cursor = pgconn.cursor()
     # join the tables
     df = acis.join(obs, how="left")
+    df["dbhas"] = df["dbhas"].fillna(False)
     inserts = 0
     updates = {}
     minday = None
@@ -135,7 +137,6 @@ def do(meta, station, acis_station, interactive):
     for day, row in df.iterrows():
         work = []
         args = []
-        dbhas = row["dbhas"] == 1
         for col in cols:
             newval = compare(row, col)
             if newval is None:
@@ -146,14 +147,14 @@ def do(meta, station, acis_station, interactive):
                 work.append(
                     f"{'temp' if col == 'high' else 'precip'}_estimated = 'f'"
                 )
-            if dbhas:
+            if row["dbhas"]:
                 updates[col] += 1
         if not work:
             continue
         if minday is None:
             minday = day
         maxday = day
-        if not dbhas:
+        if not row["dbhas"]:
             inserts += 1
             cursor.execute(
                 f"INSERT into {table} (station, day, sday, year, month) "

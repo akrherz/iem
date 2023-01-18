@@ -69,7 +69,7 @@ function f2($data, $key, $fmt){
 function make_table($data, $key, $minyear, $maxyear, $fmt, $climo)
 {
     $table = '<table class="table table-ruled table-condensed table-bordered">' .
-        '<thead style="position: sticky;top: 0;background:#FFF;">'.
+        '<thead class="sticky">'.
         '<tr><th>Year</th><th>Jan</th><th>Feb</th><th>Mar</th>' .
         '<th>Apr</th><th>May</th><th>Jun</th><th>Jul</th><th>Aug</th>' .
         '<th>Sep</th><th>Oct</th><th>Nov</th><th>Dec</th></tr></thead>' .
@@ -81,18 +81,18 @@ function make_table($data, $key, $minyear, $maxyear, $fmt, $climo)
                 "<td>%s</td><td>%s</td><td>%s</td><td>%s</td>" .
                 "<td>%s</td><td>%s</td></tr>",
             $year,
-            f($data, "${year}_1", $key, $fmt),
-            f($data, "${year}_2", $key, $fmt),
-            f($data, "${year}_3", $key, $fmt),
-            f($data, "${year}_4", $key, $fmt),
-            f($data, "${year}_5", $key, $fmt),
-            f($data, "${year}_6", $key, $fmt),
-            f($data, "${year}_7", $key, $fmt),
-            f($data, "${year}_8", $key, $fmt),
-            f($data, "${year}_9", $key, $fmt),
-            f($data, "${year}_10", $key, $fmt),
-            f($data, "${year}_11", $key, $fmt),
-            f($data, "${year}_12", $key, $fmt)
+            f($data, "{$year}_1", $key, $fmt),
+            f($data, "{$year}_2", $key, $fmt),
+            f($data, "{$year}_3", $key, $fmt),
+            f($data, "{$year}_4", $key, $fmt),
+            f($data, "{$year}_5", $key, $fmt),
+            f($data, "{$year}_6", $key, $fmt),
+            f($data, "{$year}_7", $key, $fmt),
+            f($data, "{$year}_8", $key, $fmt),
+            f($data, "{$year}_9", $key, $fmt),
+            f($data, "{$year}_10", $key, $fmt),
+            f($data, "{$year}_11", $key, $fmt),
+            f($data, "{$year}_12", $key, $fmt)
         );
     }
     if (sizeof($climo) > 0) {
@@ -221,7 +221,7 @@ $(document).ready(function(){
       $("#gogogo").click(function(){
             go();
       });
-      ${jsextracaller}
+      {$jsextracaller}
 });
 </script>
 EOM;
@@ -230,7 +230,7 @@ $t->content = <<<EOF
 <p><button id="gogogo" role="button" class="btn btn-primary"><i class="fa fa-arrow-down"></i> View Monthly Charts</button></p>
 
 <p>The following tables present IEM computed monthly data summaries based on
-daily data provided by or computed for the IEM. A <a href="/request/daily.phtml?network=${network}">download interface</a>
+daily data provided by or computed for the IEM. A <a href="/request/daily.phtml?network={$network}">download interface</a>
 exists for the daily summary information.  The climatology is provided by the
 nearest NCEI climate station (<a href="/sites/site.php?station={$metadata["ncei91"]}&amp;network=NCEI91">{$metadata["ncei91"]}</a>) within the current 1991-2020 
 dataset.</p>

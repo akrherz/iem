@@ -17,10 +17,9 @@ END
 WEB
   IMAGEPATH "/var/webtmp/"
   IMAGEURL "/tmp/"
-  #LOG "/var/webtmp/w0.log"
   METADATA
    "wms_title" "IEM WMS GOES Service"
-   "wms_onlineresource" "https://mesonet.agron.iastate.edu/cgi-bin/wms/goes/goes.cgi?"
+   "wms_onlineresource" "https://mesonet.agron.iastate.edu/cgi-bin/wms/goes_east.cgi?"
    "wms_srs" "EPSG:4326 EPSG:3857"
    "wms_abstract" "IEM generated GOES imagery."
    "wms_keywords" "GOES"
