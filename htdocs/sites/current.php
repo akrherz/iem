@@ -26,49 +26,23 @@ function fmt($val, $varname)
     }
     return $val;
 }
-
-if (strpos($network, "_DCP") || strpos($network, "_COOP")) {
-    $table = '<p>This station reports observations in SHEF format.  The following
-             is a table of the most recent reports from this site identifier for
-             each reported SHEF variable';
-    $mesosite = iemdb('mesosite');
-    $shefcodes = array();
-    $rs = pg_query($mesosite, "SELECT * from shef_physical_codes");
-    for ($i = 0; $row = pg_fetch_assoc($rs); $i++) {
-        $shefcodes[$row['code']] = $row['name'];
-    }
-    $durationcodes = array();
-    $rs = pg_query($mesosite, "SELECT * from shef_duration_codes");
-    for ($i = 0; $row = pg_fetch_assoc($rs); $i++) {
-        $durationcodes[$row['code']] = $row['name'];
-    }
-    $extremumcodes = array();
-    $rs = pg_query($mesosite, "SELECT * from shef_extremum_codes");
-    for ($i = 0; $row = pg_fetch_assoc($rs); $i++) {
-        $extremumcodes[$row['code']] = $row['name'];
-    }
-    $arr = array(
-        "station" => $station,
-    );
-    $jobj = iemws_json("last_shef.json", $arr);
-    $exturi = sprintf(
-        "https://mesonet.agron.iastate.edu/api/1/last_shef.json?" .
-            "station=%s",
-        $station,
-    );
-    $table .= <<<EOM
-<table class="table table-striped">
-<thead>
-    <tr><th>Physical Code</th><th>Duration</th><th>Type</th>
-    <th>Source</th><th>Extrenum</th><th>Valid</th><th>Value</th>
-    <th>Product</th></tr>
-</thead>
-EOM;
+function make_shef_table($data, $iscurrent){
+    global $shefcodes, $durationcodes, $extremumcodes, $metadata;
+    $msg = $iscurrent ? "Recent": "Five days and older";
+    $table = <<<EOM
+    <p><strong>{$msg} SHEF encoded data</strong></p>
+    <table class="table table-striped">
+    <thead>
+        <tr><th>Physical Code</th><th>Duration</th><th>Type</th>
+        <th>Source</th><th>Extrenum</th><th>Valid</th><th>Value</th>
+        <th>Product</th></tr>
+    </thead>
+    EOM;
     $localtz = new DateTimeZone($metadata["tzname"]);
     $utctz = new DateTimeZone("UTC");
     $baseprodvalid = new DateTime("now", $utctz);
     $baseprodvalid->modify("-5 days");
-    foreach ($jobj["data"] as $bogus => $row) {
+    foreach ($data as $bogus => $row) {
         $depth = "";
         if ($row["depth"] > 0) {
             $depth = sprintf("%d inch", $row["depth"]);
@@ -76,6 +50,12 @@ EOM;
         $valid = new DateTime($row["utc_valid"], $utctz);
         $valid->setTimeZone($localtz);
         $plink = "N/A";
+        if ($iscurrent && $valid < $baseprodvalid){
+            continue;
+        }
+        if (! $iscurrent && $valid >= $baseprodvalid){
+            continue;
+        }
         if ($valid > $baseprodvalid) {
             if (!is_null($row["product_id"])) {
                 $plink = sprintf(
@@ -102,6 +82,44 @@ EOM;
         );
     }
     $table .= "</table>";
+    return $table;
+}
+
+if (strpos($network, "_DCP") || strpos($network, "_COOP")) {
+    $table = <<<EOM
+<p>This station reports observations in SHEF format. The following two tables
+break these SHEF reports into recently made reports and those older than five
+days ago.  The IEM's archive of raw SHEF text products is only five days, so
+thus why the Product links are only for the first table.
+EOM;
+    $mesosite = iemdb('mesosite');
+    $shefcodes = array();
+    $rs = pg_query($mesosite, "SELECT * from shef_physical_codes");
+    for ($i = 0; $row = pg_fetch_assoc($rs); $i++) {
+        $shefcodes[$row['code']] = $row['name'];
+    }
+    $durationcodes = array();
+    $rs = pg_query($mesosite, "SELECT * from shef_duration_codes");
+    for ($i = 0; $row = pg_fetch_assoc($rs); $i++) {
+        $durationcodes[$row['code']] = $row['name'];
+    }
+    $extremumcodes = array();
+    $rs = pg_query($mesosite, "SELECT * from shef_extremum_codes");
+    for ($i = 0; $row = pg_fetch_assoc($rs); $i++) {
+        $extremumcodes[$row['code']] = $row['name'];
+    }
+    $arr = array(
+        "station" => $station,
+    );
+    $jobj = iemws_json("last_shef.json", $arr);
+    $exturi = sprintf(
+        "https://mesonet.agron.iastate.edu/api/1/last_shef.json?" .
+            "station=%s",
+        $station,
+    );
+    $table .= make_shef_table($jobj["data"], TRUE);
+    $table .= make_shef_table($jobj["data"], FALSE);
+
 } else {
     $wsuri = sprintf(
         "http://iem.local/json/current.py?network=%s&station=%s",
