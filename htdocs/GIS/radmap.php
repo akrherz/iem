@@ -68,8 +68,8 @@ function get_ridge_fn_and_time($ts, $radar, $product)
     for ($i = 0; $i < 10; $i++) {
         foreach (array(1, -1) as $mul) {
             $lts = clone $ts;
-            if ($i < 0) $lts->sub(new DateInterval("PT{$mul}M"));
-            else $lts->add(new DateInterval("PT{$mul}M"));
+            if ($i < 0) $lts->sub(new DateInterval("PT{$i}M"));
+            else $lts->add(new DateInterval("PT{$i}M"));
             $testfn = $base . $lts->format("Y/m/d") . "/GIS/ridge/$radar/$product/{$radar}_{$product}_" .
                 $lts->format("YmdHi") . ".png";
             if (is_file($testfn)) {

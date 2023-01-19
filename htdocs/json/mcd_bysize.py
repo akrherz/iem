@@ -45,11 +45,14 @@ def dowork(count, sort):
 
 def application(environ, start_response):
     """Answer request."""
+    headers = [("Content-type", "application/json")]
+    start_response("200 OK", headers)
+
     fields = parse_formvars(environ)
     count = int(fields.get("count", 10))
     sort = fields.get("sort", "DESC").upper()
     if sort not in ["ASC", "DESC"]:
-        return
+        return [b"provided `sort` not in {ASC,DESC}"]
 
     cb = fields.get("callback")
 
@@ -59,6 +62,4 @@ def application(environ, start_response):
     else:
         data = f"{html_escape(cb)}({res})"
 
-    headers = [("Content-type", "application/json")]
-    start_response("200 OK", headers)
     return [data.encode("ascii")]

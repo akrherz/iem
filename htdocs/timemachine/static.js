@@ -7,6 +7,11 @@
 var dt = moment(); // Current application time
 var irealtime = true; // Is our application in realtime mode or not
 
+function text(str) {
+    // XSS
+    return $("<p>").text(str).html();
+}
+
 function readHashLink() {
     var tokens = window.location.href.split("#");
     if (tokens.length != 2) {
@@ -126,7 +131,7 @@ function update() {
     } else {
         $('#hour_slider').css('display', 'block');
     }
-    var tpl = opt.attr('data-template');
+    var tpl = text(opt.attr('data-template'));
     // We support %Y %m %d %H %i %y
     var url = tpl.replace(/%Y/g, dt.utc().format('YYYY'))
         .replace(/%y/g, dt.utc().format('YY'))
@@ -136,7 +141,7 @@ function update() {
         .replace(/%i/g, dt.utc().format('mm'));
 
     $('#imagedisplay').attr('src', url);
-    window.location.href = '#' + opt.val() + '.' + dt.utc().format('YYYYMMDDHHmm');
+    window.location.href = `#${text(opt.val())}.${dt.utc().format('YYYYMMDDHHmm')}`;
     updateUITimestamp();
 }
 function updateUITimestamp() {

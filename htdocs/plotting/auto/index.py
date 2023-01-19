@@ -792,6 +792,8 @@ def generate_overview(apid):
     if apid > 0:
         return ""
     fn = "/mesonet/share/pickup/autoplot/overview.html"
+    with open(fn, encoding="utf8") as fh:
+        content = fh.read()
     return f"""
 <h1>Visual Overview of All Autoplots</h1>
 
@@ -800,7 +802,7 @@ available.  Click on the image or title to navigate to that autoplot. These are
 grouped into sections as they also appear grouped in the dropdown selection
 box above.</p>
 
-    {open(fn, encoding="utf8").read()}
+    {content}
     """
 
 
