@@ -4,9 +4,9 @@
  *  Basically, a browser of archived products that have RESTish URIs
  *  
  */
+var moment = window.moment || {}; // skipcq: JS-0239
 var dt = moment(); // Current application time
 var irealtime = true; // Is our application in realtime mode or not
-var moment = window.moment || {}; // skipcq: JS-0239
 
 function text(str) {
     // XSS
@@ -108,9 +108,9 @@ function update() {
     // adjust the sliders
     var sts = moment(opt.attr('data-sts'));
     var now = moment();
-    var tpl = text(opt.attr('data-template'));
+    const tpl = text(opt.attr('data-template'));
     // We support %Y %m %d %H %i %y
-    var url = tpl.replace(/%Y/g, dt.utc().format('YYYY'))
+    const url = tpl.replace(/%Y/g, dt.utc().format('YYYY'))
         .replace(/%y/g, dt.utc().format('YY'))
         .replace(/%m/g, dt.utc().format('MM'))
         .replace(/%d/g, dt.utc().format('DD'))
