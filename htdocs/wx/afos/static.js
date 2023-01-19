@@ -97,11 +97,7 @@ function addTab(pil, center, ttaaii, limit, sdate, edate, doCookieSave) {
         return;
     }
     var pos = $(".nav-tabs").children().length;
-    $("#thetabs .nav-tabs").append('<li data-center="' + text(center) + '" ' +
-        'data-sdate="' + text(sdate) + '" data-edate="' + text(edate) + '" ' +
-        'data-ttaaii="' + text(ttaaii) + '" ' +
-        'data-limit="' + text(limit) + '" data-pil="' + text(pil) + '">' +
-        '<a href="#tab' + pos + '" data-toggle="tab">' + text(pil) + '</a></li>');
+    $("#thetabs .nav-tabs").append(`<li data-center="${text(center)}" data-sdate="${text(sdate)}" data-edate="${text(edate)}" data-ttaaii="${text(ttaaii)}" data-limit="${text(limit)}" data-pil="${text(pil)}"><a href="#tab${pos}" data-toggle="tab">${text(pil)}</a></li>`);
     $('.tab-content').append('<div class="tab-pane" id="tab' + pos + '"></div>');
     var newdiv = $("#tab" + pos);
     $('.nav-tabs li:nth-child(' + (pos + 1) + ') a').click();

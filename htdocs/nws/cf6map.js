@@ -6,7 +6,7 @@ var fontSize = 14;
 
 function text(str){
     // XSS shim
-    return $("<p>").text(str).text();
+    return $("<p>").text(str).html();
 }
 
 function updateURL() {
