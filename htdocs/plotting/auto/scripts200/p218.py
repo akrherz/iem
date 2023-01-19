@@ -9,7 +9,7 @@ import pandas as pd
 from pyiem.reference import TRACE_VALUE
 from pyiem.network import Table as NetworkTable
 from pyiem.plot import figure, get_cmap
-from pyiem.util import get_autoplot_context, get_sqlalchemy_conn
+from pyiem.util import get_autoplot_context, get_sqlalchemy_conn, LOG
 from pyiem.exceptions import NoDataFound
 
 TFORMAT = "%b %-d %Y %-I:%M %p %Z"
@@ -63,6 +63,7 @@ def gauge(ax, row, col):
     az = np.arange(0, pi + 0.025, 0.025)
     rad, az = np.meshgrid(rad, az)
     z = az / pi
+    ax.grid(False)
     ax.pcolormesh(
         az,
         rad,
@@ -230,8 +231,8 @@ def plotter(fdict):
         )
         try:
             gauge(ax, row, "high")
-        except Exception:
-            pass
+        except Exception as exp:
+            LOG.exception(exp)
 
     # Low Temp
     fig.text(0.05, 0.42, "Low Temperature", fontsize=24)
@@ -243,21 +244,21 @@ def plotter(fdict):
         )
         try:
             gauge(ax, row, "low")
-        except Exception:
-            pass
+        except Exception as exp:
+            LOG.exception(exp)
 
     fig.text(0.5, 0.85, "Precipitation", fontsize=24)
     try:
         precip(fig, row, "precip")
-    except Exception:
-        pass
+    except Exception as exp:
+        LOG.exception(exp)
 
     if row["snow"] is not None or row["snow_month"] is not None:
         fig.text(0.5, 0.42, "Snowfall", fontsize=24)
         try:
             precip(fig, row, "snow")
-        except Exception:
-            pass
+        except Exception as exp:
+            LOG.exception(exp)
 
     fig.text(0.3, 0.01, f"Based on text: {row['product']}")
     return fig, df

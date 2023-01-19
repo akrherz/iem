@@ -110,7 +110,7 @@ var sbwLookup = {
     "SV": 'yellow',
     "SQ": "#C71585",
     "DS": "#FFE4C4"
-}
+};
 
 // Lookup 'table' for styling
 var lsrLookup = {
@@ -203,7 +203,7 @@ var lsrTextBackgroundColor = {
     'S': 'purple',
     'R': 'blue',
     '5': 'pink'
-}
+};
 
 // create vector layer
 lsrLayer = new ol.layer.Vector({
@@ -336,7 +336,7 @@ function lsrHTML(feature) {
     var lines = [];
     var dt = moment.utc(feature.get("valid"));
     var ldt = dt.local().format("M/D LT");
-    var z = dt.utc().format("kk:mm")
+    var z = dt.utc().format("kk:mm");
     lines.push("<strong>Valid:</strong> " + ldt + " (" + z + "Z)");
     var v = feature.get("source");
     if (v !== null) {
@@ -591,7 +591,7 @@ function initUI() {
         if (feature.get('magnitude') === undefined) return;
         // evt.originalEvent.x
         var divid = revisedRandId();
-        var div = document.createElement("div")
+        var div = document.createElement("div");
         div.innerHTML = '<div class="panel panel-primary panel-popup" id="' + divid + '">' +
             '<div class="panel-heading">' + feature.get("city") + ", " +
             feature.get("st") +
@@ -814,7 +814,7 @@ function loadData() {
         sts: sts,
         ets: ets,
         wfos: (wfos === null) ? "" : wfos.join(",")
-    }
+    };
     lsrLayer.getSource().clear(true);
     sbwLayer.getSource().clear(true);
 

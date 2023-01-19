@@ -196,7 +196,7 @@ def plotter(fdict):
         else:
             df["delta"] = df["tmpf"] - df[deltacol]
         events = df.sort_values("delta", ascending=False).head(100).copy()
-    elif ctx["how"] == "over":
+    else:  # "over"
         # Create aggregate
         gdf = df.rolling(f"{hours}h", closed="both").agg(["max", "min"])
         gdf.columns = ["_".join(col) for col in gdf.columns.values]

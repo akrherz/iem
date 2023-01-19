@@ -47,7 +47,7 @@ def get_date(raw):
     # Option 1, provided just YYYY-MM-DD
     if len(raw) <= 10:
         dt = datetime.strptime(raw, "%Y-%m-%d")
-    elif raw.find("T") > -1:
+    else:
         try:
             dt = datetime.strptime(raw[:16], "%Y-%m-%dT%H:%M")
         except ValueError:
