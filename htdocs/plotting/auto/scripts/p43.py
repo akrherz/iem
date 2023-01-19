@@ -155,10 +155,11 @@ def plotter(fdict):
     def ceilingfunc(row):
         """Our logic to compute a ceiling"""
         c = [row["skyc1"], row["skyc2"], row["skyc3"], row["skyc4"]]
-        if "OVC" in c:
-            pos = c.index("OVC")
-            larr = [row["skyl1"], row["skyl2"], row["skyl3"], row["skyl4"]]
-            return larr[pos] / 1000.0
+        if "OVC" not in c:
+            return None
+        pos = c.index("OVC")
+        larr = [row["skyl1"], row["skyl2"], row["skyl3"], row["skyl4"]]
+        return larr[pos] / 1000.0
 
     df["ceiling"] = df.apply(ceilingfunc, axis=1)
 

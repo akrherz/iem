@@ -4,8 +4,14 @@
  *  Basically, a browser of archived products that have RESTish URIs
  *  
  */
+var moment = window.moment || {}; // skipcq: JS-0239
 var dt = moment(); // Current application time
 var irealtime = true; // Is our application in realtime mode or not
+
+function text(str) {
+    // XSS
+    return $("<p>").text(str).html();
+}
 
 function readHashLink() {
     var tokens = window.location.href.split("#");
@@ -49,7 +55,8 @@ function addproducts(data) {
     });
     // now turn it into a select2 widget
     p.select2();
-    p.on('change', function (e) {
+    p.on('change', () => {
+        rectifyTime();
         update();
     });
     // read the anchor URI
@@ -98,10 +105,17 @@ function update() {
     // called after a slider event, button clicked, realtime refresh
     // or new product selected
     var opt = getSelectedOption();
-    rectifyTime();
     // adjust the sliders
     var sts = moment(opt.attr('data-sts'));
     var now = moment();
+    const tpl = text(opt.attr('data-template'));
+    // We support %Y %m %d %H %i %y
+    const url = tpl.replace(/%Y/g, dt.utc().format('YYYY'))
+        .replace(/%y/g, dt.utc().format('YY'))
+        .replace(/%m/g, dt.utc().format('MM'))
+        .replace(/%d/g, dt.utc().format('DD'))
+        .replace(/%H/g, dt.utc().format('HH'))
+        .replace(/%i/g, dt.utc().format('mm'));
     $('#year_slider').slider({
         min: sts.year(),
         max: now.year(),
@@ -126,17 +140,9 @@ function update() {
     } else {
         $('#hour_slider').css('display', 'block');
     }
-    var tpl = opt.attr('data-template');
-    // We support %Y %m %d %H %i %y
-    var url = tpl.replace(/%Y/g, dt.utc().format('YYYY'))
-        .replace(/%y/g, dt.utc().format('YY'))
-        .replace(/%m/g, dt.utc().format('MM'))
-        .replace(/%d/g, dt.utc().format('DD'))
-        .replace(/%H/g, dt.utc().format('HH'))
-        .replace(/%i/g, dt.utc().format('mm'));
 
     $('#imagedisplay').attr('src', url);
-    window.location.href = '#' + opt.val() + '.' + dt.utc().format('YYYYMMDDHHmm');
+    window.location.href = `#${text(opt.val())}.${dt.utc().format('YYYYMMDDHHmm')}`;
     updateUITimestamp();
 }
 function updateUITimestamp() {
@@ -155,8 +161,9 @@ function getSelectedOption() {
 function buildUI() {
     //year
     $("#year_slider").slider({
-        slide: function (event, ui) {
+        slide(_event, ui) {
             dt.year(ui.value);
+            rectifyTime();
             update();
             irealtime = false;
         }
@@ -165,8 +172,9 @@ function buildUI() {
     $("#hour_slider").slider({
         min: 0,
         max: 23,
-        slide: function (event, ui) {
+        slide(_event, ui) {
             dt.hour(ui.value);
+            rectifyTime();
             update();
             irealtime = false;
         }
@@ -175,8 +183,9 @@ function buildUI() {
     $("#minute_slider").slider({
         min: 0,
         max: 59,
-        slide: function (event, ui) {
+        slide(_event, ui) {
             dt.minute(ui.value);
+            rectifyTime();
             update();
             irealtime = false;
         }
@@ -185,8 +194,9 @@ function buildUI() {
     $("#day_slider").slider({
         min: 1,
         max: 367,
-        slide: function (event, ui) {
+        slide(_event, ui) {
             dt.dayOfYear(ui.value);
+            rectifyTime();
             update();
             irealtime = false;
         }
@@ -217,6 +227,7 @@ function buildUI() {
         } else {
             dt.add(parseInt($(this).attr('data-offset')), $(this).attr('data-unit'));
         }
+        rectifyTime();
         update();
         irealtime = false;
         return false;

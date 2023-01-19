@@ -8,7 +8,7 @@ import tempfile
 import numpy as np
 import pytz
 import pygrib
-import pyiem.mrms as mrms
+from pyiem import mrms
 from pyiem.plot import MapPlot, nwsprecip
 from pyiem.util import utc, logger, mm2inch
 
@@ -41,9 +41,8 @@ def doit(ts, hours):
             continue
         fp = gzip.GzipFile(gribfn, "rb")
         (tmpfp, tmpfn) = tempfile.mkstemp()
-        tmpfp = open(tmpfn, "wb")
-        tmpfp.write(fp.read())
-        tmpfp.close()
+        with open(tmpfn, "wb") as tmpfp:
+            tmpfp.write(fp.read())
         grbs = pygrib.open(tmpfn)
         grb = grbs[1]
         os.unlink(tmpfn)

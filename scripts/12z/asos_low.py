@@ -4,8 +4,9 @@ run from RUN_SUMMARY.sh
 """
 
 from pyiem.plot import MapPlot
-from pyiem.util import get_dbconnstr, utc, logger
-from pandas import read_sql
+from pyiem.util import get_sqlalchemy_conn, utc, logger
+import pandas as pd
+from sqlalchemy import text
 
 LOG = logger()
 
@@ -14,27 +15,30 @@ def main():
     """Go Main Go"""
     now = utc().replace(hour=0, minute=0, second=0, microsecond=0)
 
-    df = read_sql(
-        """
-    WITH lows as (
-     SELECT c.iemid,
-     min(tmpf) as calc_low,
-     min(min_tmpf_6hr) as reported_low
-     from current_log c JOIN stations s
-     ON (s.iemid = c.iemid)
-     WHERE valid > %s and valid < %s
-     and s.network ~* 'ASOS'
-     and s.country = 'US' and s.state not in ('HI', 'AK') GROUP by c.iemid
-    )
+    with get_sqlalchemy_conn("iem") as conn:
+        df = pd.read_sql(
+            text(
+                """
+        WITH lows as (
+        SELECT c.iemid,
+        min(tmpf) as calc_low,
+        min(min_tmpf_6hr) as reported_low
+        from current_log c JOIN stations s
+        ON (s.iemid = c.iemid)
+        WHERE valid > :sts and valid < :ets
+        and s.network ~* 'ASOS'
+        and s.country = 'US' and s.state not in ('HI', 'AK') GROUP by c.iemid
+        )
 
-    select t.id, t.state, ST_x(t.geom) as lon, ST_y(t.geom) as lat,
-    least(l.calc_low, l.reported_low) as low from
-    lows l JOIN stations t on (t.iemid = l.iemid)
-    """,
-        get_dbconnstr("iem"),
-        params=(now, now.replace(hour=12)),
-        index_col="id",
-    )
+        select t.id, t.state, ST_x(t.geom) as lon, ST_y(t.geom) as lat,
+        least(l.calc_low, l.reported_low) as low from
+        lows l JOIN stations t on (t.iemid = l.iemid)
+        """
+            ),
+            conn,
+            params={"sts": now, "ets": now.replace(hour=12)},
+            index_col="id",
+        )
     df = df[df["low"].notnull()]
     LOG.info("found %s observations for %s", len(df.index), now)
 
