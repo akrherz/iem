@@ -4,8 +4,8 @@
  *  Basically, a browser of archived products that have RESTish URIs
  *  
  */
-let dt = moment(); // Current application time
-let irealtime = true; // Is our application in realtime mode or not
+var dt = moment(); // Current application time
+var irealtime = true; // Is our application in realtime mode or not
 
 function text(str) {
     // XSS
@@ -13,16 +13,16 @@ function text(str) {
 }
 
 function readHashLink() {
-    let tokens = window.location.href.split("#");
+    var tokens = window.location.href.split("#");
     if (tokens.length != 2) {
         return;
     }
-    let tokens2 = tokens[1].split(".");
+    var tokens2 = tokens[1].split(".");
     if (tokens2.length != 2) {
         return;
     }
-    let pid = tokens2[0];
-    let stamp = tokens2[1];
+    var pid = tokens2[0];
+    var stamp = tokens2[1];
     // parse the timestamp
     if (stamp != "0") {
         dt = moment.utc(stamp, 'YYYYMMDDHHmm');
@@ -32,9 +32,9 @@ function readHashLink() {
 }
 function addproducts(data) {
     // Add entries into the products dropdown
-    let p = $('select[name=products]');
-    let groupname = '';
-    let optgroup;
+    var p = $('select[name=products]');
+    var groupname = '';
+    var optgroup;
     $.each(data.products, function (i, item) {
         if (groupname != item.groupname) {
             optgroup = $('<optgroup>');
@@ -54,7 +54,7 @@ function addproducts(data) {
     });
     // now turn it into a select2 widget
     p.select2();
-    p.on('change', function (e) {
+    p.on('change', () => {
         rectifyTime();
         update();
     });
@@ -64,16 +64,16 @@ function addproducts(data) {
 function rectifyTime() {
     // Make sure that our current dt matches what can be provided by the
     // currently selected option.
-    let opt = getSelectedOption();
-    let ets = moment();
-    let sts = moment(opt.attr('data-sts'));
-    let interval = parseInt(opt.attr('data-interval'));
-    let avail_lag = parseInt(opt.attr('data-avail_lag'));
+    var opt = getSelectedOption();
+    var ets = moment();
+    var sts = moment(opt.attr('data-sts'));
+    var interval = parseInt(opt.attr('data-interval'));
+    var avail_lag = parseInt(opt.attr('data-avail_lag'));
     if (avail_lag > 0) {
         // Adjust the ets such to account for this lag
         ets.add(0 - avail_lag, 'minutes');
     }
-    let time_offset = parseInt(opt.attr('data-time_offset'));
+    var time_offset = parseInt(opt.attr('data-time_offset'));
     ets.subtract(time_offset, 'minutes');
     // Check 1: Bounds check
     if (dt < sts) {
@@ -103,13 +103,13 @@ function rectifyTime() {
 function update() {
     // called after a slider event, button clicked, realtime refresh
     // or new product selected
-    let opt = getSelectedOption();
+    var opt = getSelectedOption();
     // adjust the sliders
-    let sts = moment(opt.attr('data-sts'));
-    let now = moment();
-    let tpl = text(opt.attr('data-template'));
+    var sts = moment(opt.attr('data-sts'));
+    var now = moment();
+    var tpl = text(opt.attr('data-template'));
     // We support %Y %m %d %H %i %y
-    let url = tpl.replace(/%Y/g, dt.utc().format('YYYY'))
+    var url = tpl.replace(/%Y/g, dt.utc().format('YYYY'))
         .replace(/%y/g, dt.utc().format('YY'))
         .replace(/%m/g, dt.utc().format('MM'))
         .replace(/%d/g, dt.utc().format('DD'))
@@ -145,7 +145,7 @@ function update() {
     updateUITimestamp();
 }
 function updateUITimestamp() {
-    let opt = getSelectedOption();
+    var opt = getSelectedOption();
     if (opt.attr('data-interval') >= 1440) {
         $('#utctime').html(dt.utc().format('MMM Do YYYY'));
         $('#localtime').html(dt.utc().format('MMM Do YYYY'));
@@ -160,7 +160,7 @@ function getSelectedOption() {
 function buildUI() {
     //year
     $("#year_slider").slider({
-        slide: function (event, ui) {
+        slide(_event, ui) {
             dt.year(ui.value);
             rectifyTime();
             update();
@@ -171,7 +171,7 @@ function buildUI() {
     $("#hour_slider").slider({
         min: 0,
         max: 23,
-        slide: function (event, ui) {
+        slide(_event, ui) {
             dt.hour(ui.value);
             rectifyTime();
             update();
@@ -182,7 +182,7 @@ function buildUI() {
     $("#minute_slider").slider({
         min: 0,
         max: 59,
-        slide: function (event, ui) {
+        slide(_event, ui) {
             dt.minute(ui.value);
             rectifyTime();
             update();
@@ -193,7 +193,7 @@ function buildUI() {
     $("#day_slider").slider({
         min: 1,
         max: 367,
-        slide: function (event, ui) {
+        slide(_event, ui) {
             dt.dayOfYear(ui.value);
             rectifyTime();
             update();
@@ -215,10 +215,10 @@ function buildUI() {
     // Listen for click
     $('.btn').on('click', function () {
         if (this.id == 'next') {
-            let opt = getSelectedOption();
+            var opt = getSelectedOption();
             dt.add(parseInt(opt.attr('data-interval')), 'minutes');
         } else if (this.id == 'prev') {
-            let opt = getSelectedOption();
+            var opt = getSelectedOption();
             dt.add(0 - parseInt(opt.attr('data-interval')), 'minutes');
         } else if (this.id == 'realtime') {
             irealtime = true;
