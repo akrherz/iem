@@ -18,53 +18,56 @@ $height = $ar[1];
 
 $gddbase = 50;
 $datavar = $var;
-if (substr($var, 0, 3) == "gdd"){
+if (substr($var, 0, 3) == "gdd") {
     $gddbase = intval(str_replace("gdd", "", $var));
     $datavar = "gdd";
 }
-if (substr($var, 0, 4) == "sgdd"){
+if (substr($var, 0, 4) == "sgdd") {
     $gddbase = intval(str_replace("sgdd", "", $var));
     $datavar = "sgdd";
 }
 
 $wsuri = sprintf(
-    "/api/1/isusm/daily.geojson?sdate=%s-%s-%s&edate=%s-%s-%s&".
-    "gddbase=%s&gddceil=%s",
-    $year, $smonth, $sday, $year, $emonth, $eday, $gddbase, 86
+    "/api/1/isusm/daily.geojson?sdate=%s-%s-%s&edate=%s-%s-%s&" .
+        "gddbase=%s&gddceil=%s",
+    $year,
+    $smonth,
+    $sday,
+    $year,
+    $emonth,
+    $eday,
+    $gddbase,
+    86
 );
 
-$varDef = Array(
-  "gdd32" => "Growing Degree Days (base=32)",
-  "gdd41" => "Growing Degree Days (base=41)",
-  "gdd46" => "Growing Degree Days (base=46)",
-  "gdd48" => "Growing Degree Days (base=48)",
-  "gdd50" => "Growing Degree Days (base=50)",
-  "gdd51" => "Growing Degree Days (base=51)",
-  "gdd52" => "Growing Degree Days (base=52)",
-  "et" => "Potential Evapotranspiration (inch)",
-  "precip" => "Precipitation (inch)",
-  "srad" => "Solar Radiation (langleys)",
-  "sgdd50" => "Soil Growing Degree Days (base=50)",
-  "sgdd52" => "Soil Growing Degree Days (base=52)",
-  "sdd86" => "Stress Degree Days (base=86)"
+$varDef = array(
+    "gdd32" => "Growing Degree Days (base=32)",
+    "gdd41" => "Growing Degree Days (base=41)",
+    "gdd46" => "Growing Degree Days (base=46)",
+    "gdd48" => "Growing Degree Days (base=48)",
+    "gdd50" => "Growing Degree Days (base=50)",
+    "gdd51" => "Growing Degree Days (base=51)",
+    "gdd52" => "Growing Degree Days (base=52)",
+    "et" => "Potential Evapotranspiration (inch)",
+    "precip" => "Precipitation (inch)",
+    "srad" => "Solar Radiation (langleys)",
+    "sgdd50" => "Soil Growing Degree Days (base=50)",
+    "sgdd52" => "Soil Growing Degree Days (base=52)",
+    "sdd86" => "Stress Degree Days (base=86)"
 );
 
-
-$rnd = Array(
-  "gdd" => 0,
-  "et" => 2, "c11" => 2,
-  "precip" => 2,
-  "srad" => 0,
-  "sgdd" => 0);
-
-
-$height = $height;
-$width = $width;
+$rnd = array(
+    "gdd" => 0,
+    "et" => 2, "c11" => 2,
+    "precip" => 2,
+    "srad" => 0,
+    "sgdd" => 0
+);
 
 $proj = "init=epsg:26915";
 
 $map = new mapObj("../../../../data/gis/base26915.map");
-$map->setsize($width,$height);
+$map->setsize($width, $height);
 $map->setProjection($proj);
 
 $map->setextent(175000, 4440000, 775000, 4890000);
@@ -98,39 +101,34 @@ $edate = new DateTime("{$year}-{$emonth}-{$eday}");
 $sstr_txt = $sdate->format("M j");
 $estr_txt = $edate->format("M j");
 
-$jdata = file_get_contents("http://iem.local". $wsuri);
-$jobj = json_decode($jdata, $assoc=TRUE);
+$jdata = file_get_contents("http://iem.local" . $wsuri);
+$jobj = json_decode($jdata, $assoc = TRUE);
 
-foreach($jobj["features"] as $bogus => $value) {
+foreach ($jobj["features"] as $bogus => $value) {
     $props = $value["properties"];
     $value = $props[$datavar];
-    if (is_null($value)){
+    if (is_null($value)) {
         continue;
     }
     $sid = $props["station"];
     $lon = $props["lon"];
     $lat = $props["lat"];
-    if ($datavar == "et" && $sid == "GVNI4"){
+    if ($datavar == "et" && $sid == "GVNI4") {
         continue;
     }
-    if ($sid == "DONI4"){
+    if ($sid == "DONI4") {
         $lat -= 0.2;
-    }
-    elseif ($sid == "AHTI4"){
+    } elseif ($sid == "AHTI4") {
         $lat += 0.2;
         $lon -= 0.2;
-    }
-    elseif ($sid == "AKCI4"){
+    } elseif ($sid == "AKCI4") {
         $lat -= 0.2;
         $lon += 0.2;
-    }
-    elseif ($sid == "AMFI4"){
+    } elseif ($sid == "AMFI4") {
         continue;
-    }
-    elseif ($sid == "BOOI4"){
+    } elseif ($sid == "BOOI4") {
         $lon -= 0.2;
-    }
-    elseif ($sid == "FRUI4"){
+    } elseif ($sid == "FRUI4") {
         $lat -= 0.05;
     }
 
@@ -142,26 +140,28 @@ foreach($jobj["features"] as $bogus => $value) {
     // Value UL
     $pt = new pointObj();
     $pt->setXY($lon, $lat, 0);
-    $pt->draw($map, $snet, $img, 1, round($value, $rnd[$datavar]) );
+    $pt->draw($map, $snet, $img, 1, round($value, $rnd[$datavar]));
 
     // Climate
-    if (substr($var, 0, 3) == "gdd" || $var == "precip")
-    {
+    if (substr($var, 0, 3) == "gdd" || $var == "precip") {
         $pt = new pointObj();
         $pt->setXY($lon, $lat, 0);
-        $pt->draw($map, $snet, $img, 2, "(". round($value - $props["climo_". $datavar], $rnd[$datavar]) .")");
-
+        $pt->draw($map, $snet, $img, 2, "(" . round($value - $props["climo_" . $datavar], $rnd[$datavar]) . ")");
     }
 
     // City Name
     $pt = new pointObj();
     $pt->setXY($lon, $lat, 0);
     $ar = explode("-", $props['name']);
-    $pt->draw($map, $snet, $img, 0, $ar[0] );
+    $pt->draw($map, $snet, $img, 0, $ar[0]);
 }
 
-iemmap_title($map, $img, $year." ". $varDef[$var] , 
-    "(". $sstr_txt ." - ". $estr_txt .") [some stations moved for legibility]");
+iemmap_title(
+    $map,
+    $img,
+    $year . " " . $varDef[$var],
+    "(" . $sstr_txt . " - " . $estr_txt . ") [some stations moved for legibility]"
+);
 $map->drawLabelCache($img);
 
 header("Content-type: image/png");

@@ -43,11 +43,9 @@ def get_last_obs(icursor):
 
 def process(today, icursor, nwsli, lastts):
     """Process this NWSLI please"""
-    myuri = "%s&sdate=%s&edate=%s&mac=%s" % (
-        URI,
-        today.strftime("%Y-%m-%d"),
-        today.strftime("%Y-%m-%d"),
-        ASSOC[nwsli],
+    myuri = (
+        f"{URI}&sdate={today:%Y-%m-%d}&edate={today:%Y-%m-%d}"
+        f"&mac={ASSOC[nwsli]}"
     )
     # print nwsli, myuri
     try:
@@ -59,9 +57,7 @@ def process(today, icursor, nwsli, lastts):
         sio.seek(0)
         df = pd.read_csv(sio)
     except Exception as exp:
-        print(
-            ("ingest_rw.py pandas fail for sid: %s\nreason: %s") % (nwsli, exp)
-        )
+        print(f"ingest_rw.py pandas fail for sid: {nwsli}\nreason: {exp}")
         return
     # Index([u'utc', u'mac', u'serial', u'tia', u'til', u'tih', u'tdl',
     # u'tdh', u'ria', u'ril', u'rih', u'rdl', u'rdh', u'bia', u'bil',
@@ -112,8 +108,8 @@ def process(today, icursor, nwsli, lastts):
             continue
         # print nwsli, utc
         iem = Observation(nwsli, "IA_RWIS", utc)
-        for iemvar in conv:
-            iem.data[iemvar] = row[conv[iemvar]]
+        for iemvar, entry in conv.items():
+            iem.data[iemvar] = row[entry]
 
         iem.save(icursor)
 
@@ -126,7 +122,7 @@ def main():
     icursor = pgconn.cursor()
     data = get_last_obs(icursor)
     for nwsli in ASSOC:
-        process(today, icursor, nwsli, data.get(nwsli, None))
+        process(today, icursor, nwsli, data.get(nwsli))
     icursor.close()
     pgconn.commit()
     pgconn.close()

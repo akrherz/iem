@@ -178,16 +178,16 @@ function parseHash() {
         var vtectokens = subtokens[0].split("-");
         if (vtectokens.length == 7) {
             CONFIG.year = parseInt(vtectokens[0]);
-            CONFIG.wfo = vtectokens[3];
-            CONFIG.phenomena = vtectokens[4];
-            CONFIG.significance = vtectokens[5];
+            CONFIG.wfo = text(vtectokens[3]);
+            CONFIG.phenomena = text(vtectokens[4]);
+            CONFIG.significance = text(vtectokens[5]);
             CONFIG.etn = parseInt(vtectokens[6]);
         }
         if (subtokens.length > 1) {
             var radartokens = subtokens[1].split("-");
             if (radartokens.length == 3) {
-                CONFIG.radar = radartokens[0];
-                CONFIG.radarProduct = radartokens[1];
+                CONFIG.radar = text(radartokens[0]);
+                CONFIG.radarProduct = text(radartokens[1]);
                 CONFIG.radarProductTime = moment.utc(radartokens[2],
                     'YYYYMMDDHHmm');
             }
