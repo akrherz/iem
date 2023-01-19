@@ -12,8 +12,8 @@ var ugcTable;
 var lsrTable;
 var sbwLsrTable;
 var element;
-// var CONFIG is set in the base HTML page
-var CONFIG = window.CONFIG || {};
+// CONFIG is set in the base HTML page
+var CONFIG = window.CONFIG || {};  // skipcq: JS-0239
 
 Number.prototype.padLeft = function (n, str) {
     return Array(n - String(this).length + 1).join(str || '0') + this;
@@ -337,8 +337,8 @@ function buildMap() {
     // TODO support mobile
     olmap.on('click', function (evt) {
         var feature = olmap.forEachFeatureAtPixel(evt.pixel,
-            function (feature) {
-                return feature;
+            function (feature2) {
+                return feature2;
             });
         if (feature) {
             if (feature.get('magnitude') === undefined) return;
