@@ -1,4 +1,5 @@
 // var CONFIG is set in the base HTML page
+window.CONFIG = window.CONFIG || {};
 // previous hashlinking looks like 2017-O-NEW-KALY-WI-Y-0015
 
 var olmap;
