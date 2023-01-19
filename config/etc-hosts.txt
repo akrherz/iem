@@ -126,5 +126,5 @@
 10.90.12.30 iembot
 # iem11, still needed to shield bandwidth
 192.168.0.235    iem-ldm.local
-# metvm3
-10.24.19.236  iem-archive.local
+# iemvm4 <-> metvm3
+10.24.19.118  iem-archive.local
