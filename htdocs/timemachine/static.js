@@ -6,6 +6,7 @@
  */
 var dt = moment(); // Current application time
 var irealtime = true; // Is our application in realtime mode or not
+var moment = window.moment || {}; // skipcq: JS-0239
 
 function text(str) {
     // XSS
