@@ -397,7 +397,7 @@ $().ready(function () {
 
     map.on('click', function (evt) {
         var feature = map.forEachFeatureAtPixel(evt.pixel,
-            function (feature2, layer) {
+            function (feature2, _layer) {
                 return feature2;
             }
         );

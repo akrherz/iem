@@ -1,5 +1,3 @@
-// var CONFIG is set in the base HTML page
-window.CONFIG = window.CONFIG || {};
 // previous hashlinking looks like 2017-O-NEW-KALY-WI-Y-0015
 
 var olmap;
@@ -14,6 +12,8 @@ var ugcTable;
 var lsrTable;
 var sbwLsrTable;
 var element;
+// var CONFIG is set in the base HTML page
+var CONFIG = window.CONFIG || {};
 
 Number.prototype.padLeft = function (n, str) {
     return Array(n - String(this).length + 1).join(str || '0') + this;
