@@ -7,7 +7,7 @@ var NO_DATE_SET = 'No Limit';
 
 function text(str){
     // XSS shim
-    return $("<p>").text(str).text();
+    return $("<p>").text(str).html();
 }
 
 function readAnchorTags() {
