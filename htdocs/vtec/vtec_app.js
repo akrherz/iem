@@ -612,10 +612,12 @@ function loadTabs() {
         "vtec=" + vstring + "\" class=\"img img-responsive\">");
     $("#sbwhistory").html(`<img src="/GIS/sbw-history.php?vtec=${vstring2}" class="img img-responsive">`);
 
-    $("#vtec_label").html(CONFIG.year + " " + text($("#wfo option:selected").text())
-        + " " + text($("#phenomena option:selected").text())
-        + " " + text($("#significance option:selected").text())
-        + " Number " + text($("#etn").val()));
+    $("#vtec_label").html(
+        `${CONFIG.year} ${text($("#wfo option:selected").text())} `
+            `${text($("#phenomena option:selected").text())} `
+            `${text($("#significance option:selected").text())} `
+            `Number ${text($("#etn").val())}`
+    );
     $.ajax({
         data: {
             wfo: CONFIG.wfo,
@@ -821,7 +823,7 @@ function buildUI() {
             var label = radartimes[ui.value].local().format("D MMM YYYY h:mm A");
             $("#radartime").html(label);
         },
-        slide: function(event, ui) {
+        slide: function (event, ui) {
             var label = radartimes[ui.value].local().format("D MMM YYYY h:mm A");
             $("#radartime").html(label);
         }

@@ -82,7 +82,7 @@ def fetch(valid, hr):
         tmpfd = tempfile.NamedTemporaryFile(delete=False)
         tmpfd.write(req.content)
         tmpfd.close()
-        subprocess.call(f"pqinsert -p '{pqstr}' {tmpfd.name}", shell=True)
+        subprocess.call(["pqinsert", "-p", pqstr, tmpfd.name])
         os.unlink(tmpfd.name)
 
 

@@ -8,6 +8,7 @@ name = "shell"
 
 [[analyzers]]
 name = "javascript"
+environment = ["jquery", ]
 
 [[analyzers]]
 name = "python"
