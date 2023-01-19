@@ -23,8 +23,8 @@ $nts = mktime($hour, $minute, 0, $month, $day, $year);
 $width = 320; $height = 240;
 $szSwitch = mktime(14,0,0,5,12,2011);
 if ($nts > $szSwitch){
-	$width = 640;
-	$height = 480;
+    $width = 640;
+    $height = 480;
 }
 
 $now = time();
@@ -58,11 +58,11 @@ for ($i=0; $i < (intval($frames));$i++){
 
 $cselect = "<select name=\"cid\">";
 foreach($cameras as $k => $v){
-	if ($v["network"] == "IDOT"){ continue; }
-	$lbl = sprintf("%s (%s)", $v["name"], date("d M Y", $v["sts"]) );
-	$cselect .= "<option value=\"$k\"";
-	if ($cid == $k) $cselect .= "selected=\"selected\"";
-	$cselect .= ">". $lbl ."\n";
+    if ($v["network"] == "IDOT"){ continue; }
+    $lbl = sprintf("%s (%s)", $v["name"], date("d M Y", $v["sts"]) );
+    $cselect .= "<option value=\"$k\"";
+    if ($cid == $k) $cselect .= "selected=\"selected\"";
+    $cselect .= ">". $lbl ."\n";
 }
 $cselect .= "</select>";
 $ys = yearSelect(2003, $year, "year");
@@ -72,31 +72,31 @@ $hs = hourSelect($hour, "hour");
 $mi = minuteSelect($minute, "minute",5);
 
 $ar = Array(
-		"script" => "Java Script",
-		"none" => "List Images",
+        "script" => "Java Script",
+        "none" => "List Images",
 );
 $loopselect = make_select("java", $java, $ar);
 
 $ar = Array(
-		"60" => "1 minute",
-		"300" => "5 minutes",
-		"900" => "15 minutes",
-		"3600" => "1 hour",
-		"86400" => "1 day",
-		"604800" => "1 week",
+        "60" => "1 minute",
+        "300" => "5 minutes",
+        "900" => "15 minutes",
+        "3600" => "1 hour",
+        "86400" => "1 day",
+        "604800" => "1 week",
 );
 $intselect = make_select("interval", $interval, $ar);
 
 $jsextra = "";
 $headextra = "";
 if ($java == "script") {
-	$sz = sizeof($images); 
-	$mis = Array();
-	foreach($images as $key => $val){
-		$mis[] = sprintf("'%s'", $val);
-	}
-	$jsurls = implode(",", $mis);
-	$control = <<<EOF
+    $sz = sizeof($images); 
+    $mis = Array();
+    foreach($images as $key => $val){
+        $mis[] = sprintf("'%s'", $val);
+    }
+    $jsurls = implode(",", $mis);
+    $control = <<<EOF
 <div id="myanimation"></div>
 EOF;
     $headextra .= <<<EOM
@@ -111,8 +111,8 @@ EOM;
  $(document).ready(function () {
     var myanimation = $("#myanimation").jsani({
         imageSrcs: [$jsurls],
-        aniWidth: ${width},
-        aniHeight: ${height},
+        aniWidth: {$width},
+        aniHeight: {$height},
         initdwell: 200,
         controls: ['stopplay', 'firstframe', 'previous', 'next', 'lastframe', 'looprock', 'slow', 'fast', 'zoom'],
         last_frame_pause: 8,
@@ -123,16 +123,16 @@ EOM;
 </script>
 EOM;
 } else {
-	$control = "";
-	foreach($images as $key => $val){
-		$control .= sprintf("<img src=\"%s\" style=\"margin: 2px;\">", $val);
-	}
+    $control = "";
+    foreach($images as $key => $val){
+        $control .= sprintf("<img src=\"%s\" style=\"margin: 2px;\">", $val);
+    }
 }
 
 $imglinks = "";
 reset($images);
 foreach($images as $key => $value){
-	$imglinks .= "<li><a href=\"". $images[$key] ."\">". $labels[$key] ."</a></li>";
+    $imglinks .= "<li><a href=\"". $images[$key] ."\">". $labels[$key] ."</a></li>";
 }
 
 $t->jsextra = $jsextra;
@@ -182,4 +182,3 @@ This page gives you a tool to build animations from this archive of images.</p>
 
 EOF;
 $t->render('single.phtml');
-?>

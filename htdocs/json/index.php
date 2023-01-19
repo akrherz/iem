@@ -102,9 +102,9 @@ $services[] = array(
         "&amp;eventid={eventid}&amp;phenomena={phenomena}" .
         "&amp;significance={significance}",
     "desc" => "Produces the storm reports that spatially and temporally
-  		coincide with a given Storm Based Warning. This only works for
-  		warnings that had polygons associated with them and not other VTEC
-  		products.",
+          coincide with a given Storm Based Warning. This only works for
+          warnings that had polygons associated with them and not other VTEC
+          products.",
     "vars" => array(
         "wfo" => "3 character NWS Office",
         "year" => "Year of VTEC Issuance",
@@ -126,7 +126,7 @@ $services[] = array(
     "url" => "/geojson/lsr.php?sts={sts}&amp;ets={ets}" .
         "&amp;wfos={wfos}",
     "desc" => "Produces the storm reports for a given office or offices
-  		valid for a specified period (inclusive).",
+          valid for a specified period (inclusive).",
     "vars" => array(
         "wfo" => "3 character NWS Office " .
             "(comma seperated for multiple, leave blank for all)",
@@ -191,7 +191,7 @@ $services[] = array(
     "title" => "Iowa Winter Road Conditions",
     "url" => "/geojson/winter_roads.geojson",
     "desc" => "This service provides the most recent Iowa Winter Road
-  		Conditions.",
+          Conditions.",
     "vars" => array(),
     "example" => array()
 );
@@ -200,7 +200,7 @@ $services[] = array(
     "title" => "NWS COOP Station Climatology",
     "url" => "/json/climodat_stclimo.py?station={station}&amp;syear={syear}&amp;eyear={eyear}",
     "desc" => "Produces a listing of daily climatology for an IEM tracked
-  		long term climodat site in the midwestern US.",
+          long term climodat site in the midwestern US.",
     "vars" => array(
         "station" => "6 character station identifier",
         "syear" => "Inclusive start year of the period of interest",
@@ -217,7 +217,7 @@ $services[] = array(
     "title" => "NWS COOP Network Climatology for one day",
     "url" => "/geojson/climodat_dayclimo.py?network={network}&amp;day={day}&amp;month={month}&amp;syear={syear}&amp;eyear={eyear}",
     "desc" => "Produces a listing of climatology for a single state
-  		for a single day.",
+          for a single day.",
     "vars" => array(
         "network" => "state network identifier",
         "month" => "Numeric month of interest (1-12)",
@@ -319,7 +319,7 @@ $services[] = array(
     "title" => "NWS VTEC Event Listing by State by Year",
     "url" => "/json/vtec_events_bystate.py?state={state}&year={year}",
     "desc" => "Produces a listing of VTEC Events (watch, warning,
-	advisories) by year by state.",
+    advisories) by year by state.",
     "vars" => array(
         "state" => "2 character State identifier",
         "year" => "YYYY year"
@@ -334,7 +334,7 @@ $services[] = array(
     "title" => "NWS VTEC Event Listing by WFO valid during Given Period",
     "url" => "/json/vtec_events_bywfo.py?wfo={wfo}&start={start}&end={end}",
     "desc" => "Produces a listing of VTEC Events (watch, warning,
-	advisories) by wfo with UGC information enumerated.",
+    advisories) by wfo with UGC information enumerated.",
     "vars" => array(
         "wfo" => "3 character WFO identifier",
         "start" => "ISO Start Datetime UTC (YYYY-MM-DDTHH:MM)",
@@ -351,10 +351,10 @@ $services[] = array(
     "title" => "NWS Text Products by AWIPS ID and Time Period",
     "url" => "/json/nwstext_search.py?sts={sts}&ets={ets}&awipsid={awipsid}",
     "desc" => "Search of NWS Issued Text Products by a time period (in 
-  		UTC) and an AWIPS ID (sometime called AFOS PIL).  If you specify
-  		the AWIPS ID to be only three characters, the interruptation is to
-  		search of that base product identifier from any issuance center. For
-  		example, setting LSR would return all LSRXXX products.",
+          UTC) and an AWIPS ID (sometime called AFOS PIL).  If you specify
+          the AWIPS ID to be only three characters, the interruptation is to
+          search of that base product identifier from any issuance center. For
+          example, setting LSR would return all LSRXXX products.",
     "vars" => array(
         "sts" => "YYYY-mm-ddTHH:MMZ Inclusive start period (UTC)",
         "ets" => "YYYY-mm-ddTHH:MMZ end time period (UTC)",
@@ -371,9 +371,9 @@ $services[] = array(
     "title" => "Daily NWS Climate (CLI Product) Summaries",
     "url" => "/geojson/cli.py?dt={dt}&fmt={fmt}",
     "desc" => "Provides a GeoJSON response summarizing all of the atomic
-  		processed data from the NWS issued CLI reports.  These reports contain
-  		daily temperature, precipitation, and snow data from the primary 
-  		climate sites.",
+          processed data from the NWS issued CLI reports.  These reports contain
+          daily temperature, precipitation, and snow data from the primary 
+          climate sites.",
     "vars" => array(
         "dt" => "YYYY-mm-dd Date you want data for (optional)",
         "fmt" => "Return format (optional) geojson (default) or csv",
@@ -388,9 +388,9 @@ $services[] = array(
     "title" => "Yearly NWS Climate (CLI Product) Summaries for One Station",
     "url" => "/json/cli.py?station={station}&year={year}&fmt={fmt}",
     "desc" => "Provides a JSON response summarizing all of the atomic
-	processed data from the NWS issued CLI reports for a single station and
-	given year.  You can optionally set <code>fmt=csv</code> to get a CSV
-	response.",
+    processed data from the NWS issued CLI reports for a single station and
+    given year.  You can optionally set <code>fmt=csv</code> to get a CSV
+    response.",
     "vars" => array(
         "year" => "YYYY desired",
         "station" => "ICAO 4-character station identifier",
@@ -407,8 +407,8 @@ $services[] = array(
     "title" => "IEM Tile Map Service Metadata",
     "url" => "/json/tms.json",
     "desc" => "Provides metadata about the currently available Tile Map
-  		Services provided by the IEM.  This is useful to determine how to 
-  		call back to the Tile Map Services.",
+          Services provided by the IEM.  This is useful to determine how to 
+          call back to the Tile Map Services.",
     "vars" => array(),
     "example" => array()
 );
@@ -417,10 +417,10 @@ $services[] = array(
     "title" => "Current Storm Based Warnings",
     "url" => "/geojson/sbw.geojson?ts={ts}",
     "desc" => "Provides a geojson format of current National Weather Service
-  		storm based warnings.  There is a 15 second caching done by the server
-  		to ease load.  The generation_time attribute is set on the output 
-  		to diagnose when the file is valid.  You can provide a timestamp
-  		to provide archived warnings back to 2002 or so.",
+          storm based warnings.  There is a 15 second caching done by the server
+          to ease load.  The generation_time attribute is set on the output 
+          to diagnose when the file is valid.  You can provide a timestamp
+          to provide archived warnings back to 2002 or so.",
     "vars" => array(
         "ts" => "ISO-8601 Timestamp YYYY-mm-ddTHH:MI:SSZ (optional)"
     ),
@@ -433,7 +433,7 @@ $services[] = array(
     "title" => "Search for Storm Based Warnings by Lat/Lon Point",
     "url" => "/json/sbw_by_point.py?lon={longitude}&lat={latitude}",
     "desc" => "Provides a listing of storm based (polygon) warnings 
-  		based on the provided latitude and longitude pair for warnings 
+          based on the provided latitude and longitude pair for warnings 
         dating back to 1 Jan 2005.",
     "vars" => array(
         "lat" => "Latitude in degrees",
@@ -469,7 +469,7 @@ $services[] = array(
     "title" => "Search for VTEC Events by Lat/Lon Point",
     "url" => "/json/vtec_events_bypoint.py?lon={longitude}&lat={latitude}&sdate={sdate}&edate={edate}",
     "desc" => "Provides a listing of VTEC events that were valid for
-  		a given latitude and longitude point.",
+          a given latitude and longitude point.",
     "vars" => array(
         "lat" => "Latitude in degrees",
         "lon" => "Longitude in (degrees east)",
@@ -546,7 +546,7 @@ $services[] = array(
     "title" => "Current Polygons from Special Weather Statements (SPS)",
     "url" => "/geojson/sps.geojson",
     "desc" => "Provides a geojson format of current National Weather Service
-  		polygons that are included with some Special Weather Statements (SPS).",
+          polygons that are included with some Special Weather Statements (SPS).",
     "vars" => array(),
     "example" => array()
 );
@@ -555,8 +555,8 @@ $services[] = array(
     "title" => "Search for Warnings by UGC Code and Date Interval",
     "url" => "/json/vtec_events_byugc.py?ugc={ugc}&edate={edate}&sdate={sdate}",
     "desc" => "Provides a json response of archived warnings valid for the
-  		given UGC code and date interval (UTC time, end date exclusive). The date
-  		of product issuance is used for the date filtering.",
+          given UGC code and date interval (UTC time, end date exclusive). The date
+          of product issuance is used for the date filtering.",
     "vars" => array(
         "ugc" => "Five character UGC identifier used by the NWS",
         "sdate" => "YYYY/mm/dd Start Date (UTC)",
@@ -573,7 +573,7 @@ $services[] = array(
     "title" => "Storm Prediction Center Watches by Time",
     "url" => "/json/spcwatch.py?ts={timestamp}",
     "desc" => "Provides a geojson format of SPC watches valid at given time
-		or current time if no time specified.",
+        or current time if no time specified.",
     "vars" => array(
         "timestamp" => "YYYYMMDDHHMI UTC Timestamp (optional)"
     ),
@@ -600,10 +600,10 @@ $services[] = array(
     "title" => "RAOB Soundings",
     "url" => "/json/raob.py?ts={timestamp}&station={station}",
     "desc" => "When provided a station and timestamp, returns a single
-		  RAOB profile.  When provided no station and a timestamp, returns
-		  all profiles in the database for that timestamp.  When provided a
-		  pressure [mb], returns just that pressure level's data.  Realtime data
-		from this service is typically available within 2 hours of observation
+          RAOB profile.  When provided no station and a timestamp, returns
+          all profiles in the database for that timestamp.  When provided a
+          pressure [mb], returns just that pressure level's data.  Realtime data
+        from this service is typically available within 2 hours of observation
         time.  For some RAOB sites, the IEM has a special identifier that merges
         period of record data for a general location.  For example, _OAX merges
         the long term data for KOMA, KOAX, and KOVN.",
@@ -658,8 +658,8 @@ $services[] = array(
     "title" => "GOES East/West Available Scans",
     "url" => "/json/goes.py?operation=list&amp;start={start}&amp;end={end}&amp;bird={bird}&amp;product={product}",
     "desc" => "This service returns a listing of available GOES scan
-  		times for a period of time. This service will default to the past 
-  		four hours worth of data when start and end times are not specified.",
+          times for a period of time. This service will default to the past 
+          four hours worth of data when start and end times are not specified.",
     "vars" => array(
         "operation" => "Currently always 'list'",
         "start" => "ISO-8601 UTC Timestamp (optional)",
@@ -697,7 +697,7 @@ $services[] = array(
     "title" => "RIDGE Current Metadata by Product",
     "url" => "/json/ridge_current.py?product={product}",
     "desc" => "This service returns a listing of the most recent image for
-  		a given product from all collected RADAR sites.",
+          a given product from all collected RADAR sites.",
     "vars" => array(
         "product" => "Level III Product {N0B, N0S, N0U, N0Z, NET}"
     ),

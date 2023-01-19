@@ -1,32 +1,32 @@
 <?php
 $OL = "6.2.1";
- require_once "../../../config/settings.inc.php";
- require_once "../../../include/myview.php";
- $t = new MyView();
- require_once "../../../include/database.inc.php";
- require_once "../../../include/forms.php";
- require_once "../../../include/imagemaps.php";
+require_once "../../../config/settings.inc.php";
+require_once "../../../include/myview.php";
+$t = new MyView();
+require_once "../../../include/database.inc.php";
+require_once "../../../include/forms.php";
+require_once "../../../include/imagemaps.php";
 
 $network = 'IA_RWIS';
 $ostation = isset($_GET["ostation"]) ? xssafe($_GET["ostation"]) : "";
-$station = isset($_GET['station']) ? xssafe($_GET["station"]): "";
-$mode = isset($_GET["mode"]) ? xssafe($_GET["mode"]): "rt";
-$syear = isset($_GET["syear"]) ? xssafe($_GET["syear"]): date("Y");
-$smonth = isset($_GET["smonth"]) ? xssafe($_GET["smonth"]): date("m");
-$sday = isset($_GET["sday"]) ? xssafe($_GET["sday"]): date("d");
-$days = isset($_GET["days"]) ? intval($_GET["days"]): 2;
+$station = isset($_GET['station']) ? xssafe($_GET["station"]) : "";
+$mode = isset($_GET["mode"]) ? xssafe($_GET["mode"]) : "rt";
+$syear = isset($_GET["syear"]) ? xssafe($_GET["syear"]) : date("Y");
+$smonth = isset($_GET["smonth"]) ? xssafe($_GET["smonth"]) : date("m");
+$sday = isset($_GET["sday"]) ? xssafe($_GET["sday"]) : date("d");
+$days = isset($_GET["days"]) ? intval($_GET["days"]) : 2;
 
-$subc = isset($_GET["subc"]) ? xssafe($_GET["subc"]): false;
-$dwpf = isset($_GET["dwpf"]) ? xssafe($_GET["dwpf"]): false;
-$tmpf = isset($_GET["tmpf"]) ? xssafe($_GET["tmpf"]): false;
-$pcpn = isset($_GET["pcpn"]) ? xssafe($_GET["pcpn"]): false;
-$s0 = isset($_GET["s0"]) ? xssafe($_GET["s0"]): false;
-$s1 = isset($_GET["s1"]) ? xssafe($_GET["s1"]): false;
-$s2 = isset($_GET["s2"]) ? xssafe($_GET["s2"]): false;
-$s3 = isset($_GET["s3"]) ? xssafe($_GET["s3"]): false;
+$subc = isset($_GET["subc"]) ? xssafe($_GET["subc"]) : false;
+$dwpf = isset($_GET["dwpf"]) ? xssafe($_GET["dwpf"]) : false;
+$tmpf = isset($_GET["tmpf"]) ? xssafe($_GET["tmpf"]) : false;
+$pcpn = isset($_GET["pcpn"]) ? xssafe($_GET["pcpn"]) : false;
+$s0 = isset($_GET["s0"]) ? xssafe($_GET["s0"]) : false;
+$s1 = isset($_GET["s1"]) ? xssafe($_GET["s1"]) : false;
+$s2 = isset($_GET["s2"]) ? xssafe($_GET["s2"]) : false;
+$s3 = isset($_GET["s3"]) ? xssafe($_GET["s3"]) : false;
 
-if (! $subc && ! $dwpf && ! $tmpf && ! $s0 && ! $s1 && ! $s2 && ! $s3 ){
-  $_GET["tmpf"] = "on";
+if (!$subc && !$dwpf && !$tmpf && !$s0 && !$s1 && !$s2 && !$s3) {
+    $_GET["tmpf"] = "on";
 }
 
 
@@ -38,11 +38,11 @@ EOF;
 $t->jsextra = <<<EOF
 <script src="/vendor/openlayers/{$OL}/ol.js" type="text/javascript"></script>
 <script src='/vendor/openlayers/{$OL}/ol-layerswitcher.js'></script>
-<script src="/js/olselect.php?network=${network}"></script>
+<script src="/js/olselect.php?network={$network}"></script>
 <script src="/vendor/select2/4.0.3/select2.min.js"></script>
 <script type="text/javascript">
 $(document).ready(function(){
-	$(".iemselect2").select2();	
+    $(".iemselect2").select2();	
 });
 </script>
 EOF;
@@ -57,8 +57,8 @@ $content = <<<EOF
         }
 </style>
 <ol class="breadcrumb">
-	<li><a href="/RWIS/">RWIS Homepage</a></li>
-	<li class="current">RWIS Temperature Time Series Plots</li>
+    <li><a href="/RWIS/">RWIS Homepage</a></li>
+    <li class="current">RWIS Temperature Time Series Plots</li>
 </ol>
 
 <p>This application plots a timeseries of data from an Iowa RWIS site 
@@ -67,98 +67,98 @@ for which time period in the archive.</p>
 
 <form method="GET" action="sf_fe.php" name="olselect">
 EOF;
-if (strlen($station) > 0 ) {  
-	$ys = yearSelect2(1995, $syear, "syear");
-	$ms =  monthSelect2($smonth, "smonth");
-	$ds = daySelect2($sday, "sday");
-	$ds2 = daySelect2($days, "days");
-	$nselect = networkSelect("IA_RWIS",$station);
-	
-	$c0 = iemdb('rwis');
-	$q0 = "SELECT * from sensors WHERE station = '". $station ."' ";
-	$r0 = pg_exec($c0, $q0);
-	
-	$row = pg_fetch_array($r0);
-	$ns0 = $row['sensor0'];
-	$ns1 = $row['sensor1'];
-	$ns2 = $row['sensor2'];
-	$ns3 = $row['sensor3'];
-	
-	pg_close($c0);
-	$cgiStr = "&mode=$mode&sday=$sday&smonth=$smonth&syear=$syear&days=$days&";
+if (strlen($station) > 0) {
+    $ys = yearSelect2(1995, $syear, "syear");
+    $ms =  monthSelect2($smonth, "smonth");
+    $ds = daySelect2($sday, "sday");
+    $ds2 = daySelect2($days, "days");
+    $nselect = networkSelect("IA_RWIS", $station);
 
-	$table = "<table class=\"table table-bordered\">
+    $c0 = iemdb('rwis');
+    $q0 = "SELECT * from sensors WHERE station = '" . $station . "' ";
+    $r0 = pg_exec($c0, $q0);
+
+    $row = pg_fetch_array($r0);
+    $ns0 = $row['sensor0'];
+    $ns1 = $row['sensor1'];
+    $ns2 = $row['sensor2'];
+    $ns3 = $row['sensor3'];
+
+    pg_close($c0);
+    $cgiStr = "&mode=$mode&sday=$sday&smonth=$smonth&syear=$syear&days=$days&";
+
+    $table = "<table class=\"table table-bordered\">
       <tr><th colspan=\"3\">Plot Options</th></tr>
       <tr><td><b>Restrict Plot:</b>
       <br><input type=\"checkbox\" name=\"limit\" value=\"yes\" ";
-	if (isset($_GET["limit"])) $table .= "CHECKED";
-	$table .= ">Temps between 25-35
+    if (isset($_GET["limit"])) $table .= "CHECKED";
+    $table .= ">Temps between 25-35
     </td><td><b>Pavement Sensors:</b><br>\n";
-	if (strlen($ns0) > 0) {
-		$table .= "<input type=\"checkbox\" name=\"s0\" ";
-		if (isset($_GET["s0"])) {
-			$table .= "CHECKED";
-			$cgiStr .= "&s0=yes";
-		}
-		$table .= ">". $ns0 ."\n";
-	}
-	if (strlen($ns1) > 0) {
-		$table .= "<br><input type=\"checkbox\" name=\"s1\" ";
-		if (isset($_GET["s1"])) {
-			$table .= "CHECKED";
-			$cgiStr .= "&s1=yes";
-		}
-		$table .= ">". $ns1 ."\n";
-	}
-	if (strlen($ns2) > 0) {
-		$table .= "<br><input type=\"checkbox\" name=\"s2\" ";
-		if (isset($_GET["s2"])) {
-			$table .= "CHECKED";
-			$cgiStr .= "&s2=yes";
-		}
-		$table .= ">". $ns2 ."\n";
-	}
-	if (strlen($ns3) > 0) {
-		$table .= "<br><input type=\"checkbox\" name=\"s3\" ";
-		if (isset($_GET["s3"])) {
-			$table .= "CHECKED";
-			$cgiStr .= "&s3=yes";
-		}
-		$table .= ">". $ns3 ."\n";
-	}
-	$table .= "</td><td><b>Other Sensors:</b><br>\n";
-	$table .= "<input type=\"checkbox\" name=\"tmpf\" ";
-	if (isset($_GET["tmpf"])) {
-		$table .= "CHECKED";
-		$cgiStr .= "&tmpf=yes";
-	}
-	$table .= ">Air Temperature\n";
-	$table .= "<br><input type=\"checkbox\" name=\"dwpf\" ";
-	if (isset($_GET["dwpf"])) {
-		$table .= "CHECKED";
-		$cgiStr .= "&dwpf=yes";
-	}
-	$table .= ">Dew Point\n";
-	$table .= "<br><input type=\"checkbox\" name=\"subc\" ";
-	if (isset($_GET["subc"])) {
-		$table .= "CHECKED";
-		$cgiStr .= "&subc=yes";
-	}
-	$table .= ">Sub Surface\n";
-	
-	$table .= "<br><input type=\"checkbox\" name=\"pcpn\" ";
-	if (isset($_GET["pcpn"])) {
-		$table .= "CHECKED";
-		$cgiStr .= "&pcpn=yes";
-	}
-	$table .= ">Precipitation\n";
-	$table .= "</td></tr></table>";
-	
-	if (isset($_GET["limit"]))  $cgiStr .= "&limit=yes";
-	
-	$rtcheck = ($mode == "rt") ? " CHECKED": "";
-	$hcheck = ($mode == "hist") ? " CHECKED": ""; 
-$content .= <<<EOF
+    if (strlen($ns0) > 0) {
+        $table .= "<input type=\"checkbox\" name=\"s0\" ";
+        if (isset($_GET["s0"])) {
+            $table .= "CHECKED";
+            $cgiStr .= "&s0=yes";
+        }
+        $table .= ">" . $ns0 . "\n";
+    }
+    if (strlen($ns1) > 0) {
+        $table .= "<br><input type=\"checkbox\" name=\"s1\" ";
+        if (isset($_GET["s1"])) {
+            $table .= "CHECKED";
+            $cgiStr .= "&s1=yes";
+        }
+        $table .= ">" . $ns1 . "\n";
+    }
+    if (strlen($ns2) > 0) {
+        $table .= "<br><input type=\"checkbox\" name=\"s2\" ";
+        if (isset($_GET["s2"])) {
+            $table .= "CHECKED";
+            $cgiStr .= "&s2=yes";
+        }
+        $table .= ">" . $ns2 . "\n";
+    }
+    if (strlen($ns3) > 0) {
+        $table .= "<br><input type=\"checkbox\" name=\"s3\" ";
+        if (isset($_GET["s3"])) {
+            $table .= "CHECKED";
+            $cgiStr .= "&s3=yes";
+        }
+        $table .= ">" . $ns3 . "\n";
+    }
+    $table .= "</td><td><b>Other Sensors:</b><br>\n";
+    $table .= "<input type=\"checkbox\" name=\"tmpf\" ";
+    if (isset($_GET["tmpf"])) {
+        $table .= "CHECKED";
+        $cgiStr .= "&tmpf=yes";
+    }
+    $table .= ">Air Temperature\n";
+    $table .= "<br><input type=\"checkbox\" name=\"dwpf\" ";
+    if (isset($_GET["dwpf"])) {
+        $table .= "CHECKED";
+        $cgiStr .= "&dwpf=yes";
+    }
+    $table .= ">Dew Point\n";
+    $table .= "<br><input type=\"checkbox\" name=\"subc\" ";
+    if (isset($_GET["subc"])) {
+        $table .= "CHECKED";
+        $cgiStr .= "&subc=yes";
+    }
+    $table .= ">Sub Surface\n";
+
+    $table .= "<br><input type=\"checkbox\" name=\"pcpn\" ";
+    if (isset($_GET["pcpn"])) {
+        $table .= "CHECKED";
+        $cgiStr .= "&pcpn=yes";
+    }
+    $table .= ">Precipitation\n";
+    $table .= "</td></tr></table>";
+
+    if (isset($_GET["limit"]))  $cgiStr .= "&limit=yes";
+
+    $rtcheck = ($mode == "rt") ? " CHECKED" : "";
+    $hcheck = ($mode == "hist") ? " CHECKED" : "";
+    $content .= <<<EOF
 <table class="table table-bordered">
 <thead>
 <tr><th>Select Station</th><th colspan="5">Timespan</th></tr>
@@ -192,9 +192,9 @@ $content .= <<<EOF
 <br><img src="plot_traffic.php?station={$station}{$cgiStr}" alt="Time Series" class="img img-responsive"/>
 <br><img src="plot_soil.php?station={$station}{$cgiStr}" alt="Time Series" class="img img-responsive"/>
 EOF;
-  } else { 
-  $nselect = networkSelect("IA_RWIS", "");
-$content .= <<<EOF
+} else {
+    $nselect = networkSelect("IA_RWIS", "");
+    $content .= <<<EOF
 <input type="hidden" name="s0" value="yes" />
 <input type="hidden" name="s1" value="yes" />
 <input type="hidden" name="s2" value="yes" />
@@ -211,6 +211,6 @@ $content .= <<<EOF
   </form>
 
 EOF;
-  }
+}
 $t->content = $content;
 $t->render('single.phtml');

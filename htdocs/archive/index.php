@@ -38,7 +38,7 @@ with pointers to content that has been placed on the CyBox storage.
   there is no mechanism attempted to repair any holes (quasi rare) from the
   LDM feed.</li>
 
-  <li><a href="https://mtarchive.geol.iastate.edu/${d}/mrms/ncep/">Mtarchive Daily Selected Files</a>
+  <li><a href="https://mtarchive.geol.iastate.edu/{$d}/mrms/ncep/">Mtarchive Daily Selected Files</a>
   <br />contains
   selected grib2 files of interest and has a more aggressive process that attempts to fill
   in holes based on NCEP LDM or HTTP outages.  This archive goes back to the beginning
@@ -105,7 +105,7 @@ on this archive and how it is made available.</p>
 </ul>
 
 </div><div class="col-md-6 col-sm-6">
-		
+
 <h3>Raw Data</h3>
 <ul>
  <li>BUFKIT archives
@@ -125,12 +125,11 @@ on this archive and how it is made available.</p>
 
  <li><a href="http://home.chpc.utah.edu/~u0553130/Brian_Blaylock/hrrr_FAQ.html">HRRR Model Archive</a>
  <br />Archive maintained by University of Utah of the HRRR model.</li>
-   
+
  <li><a href="/archive/raw/">IEM Network Data</a>
   <br />IEM data in its original unprocessed form.  ASOS/AWOS METAR observation,
    RWIS comma-deliminated data, schoolnet csv data, SCAN site format and COOP
    observations</li>
-
 
  <li><a href="http://lead.unidata.ucar.edu:8080/thredds/catalog.html">Unidata IDD 6 month archive</a>
   <br />Archive of raw data provided by Unidata for the past 6 months!</li>

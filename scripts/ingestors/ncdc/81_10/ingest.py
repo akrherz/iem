@@ -21,15 +21,17 @@ def compute_stations():
     station metadata about them!"""
     stations = []
     pass1 = []
-    for line in open("temp-inventory.txt"):
-        pass1.append(line[:11])
+    with open("temp-inventory.txt", encoding="ascii") as fh:
+        for line in fh:
+            pass1.append(line[:11])
 
     # Now we iterate over the precip inventory
-    for line in open("prcp-inventory.txt"):
-        if line[:11] not in pass1:
-            continue
-        # We have a station we care about!
-        stations.append(line[:11])
+    with open("prcp-inventory.txt", encoding="ascii") as fh:
+        for line in fh:
+            if line[:11] not in pass1:
+                continue
+            # We have a station we care about!
+            stations.append(line[:11])
     return stations
 
 
@@ -39,71 +41,75 @@ def ingest(stations, pgconn):
     data = {}
 
     print("Process PRCP")
-    for line in open("ytd-prcp-normal.txt"):
-        if line[:11] not in stations:
-            continue
-        tokens = line.split()
-        dbid = tokens[0]
-        if dbid not in data:
-            data[dbid] = {}
-
-        month = tokens[1]
-        for t in range(2, len(tokens)):
-            token = tokens[t]
-            val = int(token[:-1]) / 100.0
-            if val == "-8888":
+    with open("ytd-prcp-normal.txt", encoding="ascii") as fh:
+        for line in fh:
+            if line[:11] not in stations:
                 continue
-            d = "2000-%s-%02i" % (month, t - 1)
-            data[dbid][d] = {}
-            data[dbid][d]["precip"] = val
+            tokens = line.split()
+            dbid = tokens[0]
+            if dbid not in data:
+                data[dbid] = {}
+
+            month = tokens[1]
+            for t in range(2, len(tokens)):
+                token = tokens[t]
+                val = int(token[:-1]) / 100.0
+                if val == "-8888":
+                    continue
+                d = f"2000-{month}-{(t-1):02.0f}"
+                data[dbid][d] = {}
+                data[dbid][d]["precip"] = val
 
     print("Process SNOW")
-    for line in open("ytd-snow-normal.txt"):
-        if line[:11] not in stations:
-            continue
-        tokens = line.split()
-        dbid = tokens[0]
-
-        month = tokens[1]
-        for t in range(2, len(tokens)):
-            token = tokens[t]
-            val = int(token[:-1]) / 10.0
-            if val == "-8888":
+    with open("ytd-snow-normal.txt", encoding="ascii") as fh:
+        for line in fh:
+            if line[:11] not in stations:
                 continue
-            d = "2000-%s-%02i" % (month, t - 1)
-            data[dbid][d]["snow"] = val
+            tokens = line.split()
+            dbid = tokens[0]
+
+            month = tokens[1]
+            for t in range(2, len(tokens)):
+                token = tokens[t]
+                val = int(token[:-1]) / 10.0
+                if val == "-8888":
+                    continue
+                d = f"2000-{month}-{(t-1):02.0f}"
+                data[dbid][d]["snow"] = val
 
     print("Process TMIN")
-    for line in open("dly-tmin-normal.txt"):
-        if line[:11] not in stations:
-            continue
-        tokens = line.split()
-        dbid = tokens[0]
-
-        month = tokens[1]
-        for t in range(2, len(tokens)):
-            token = tokens[t]
-            val = int(token[:-1]) / 10.0
-            if val == "-8888":
+    with open("dly-tmin-normal.txt", encoding="ascii") as fh:
+        for line in fh:
+            if line[:11] not in stations:
                 continue
-            d = "2000-%s-%02i" % (month, t - 1)
-            data[dbid][d]["tmin"] = val
+            tokens = line.split()
+            dbid = tokens[0]
+
+            month = tokens[1]
+            for t in range(2, len(tokens)):
+                token = tokens[t]
+                val = int(token[:-1]) / 10.0
+                if val == "-8888":
+                    continue
+                d = f"2000-{month}-{(t-1):02.0f}"
+                data[dbid][d]["tmin"] = val
 
     print("Process TMAX")
-    for line in open("dly-tmax-normal.txt"):
-        if line[:11] not in stations:
-            continue
-        tokens = line.split()
-        dbid = tokens[0]
-
-        month = tokens[1]
-        for t in range(2, len(tokens)):
-            token = tokens[t]
-            val = int(token[:-1]) / 10.0
-            if val == "-8888":
+    with open("dly-tmax-normal.txt", encoding="ascii") as fh:
+        for line in fh:
+            if line[:11] not in stations:
                 continue
-            d = "2000-%s-%02i" % (month, t - 1)
-            data[dbid][d]["tmax"] = val
+            tokens = line.split()
+            dbid = tokens[0]
+
+            month = tokens[1]
+            for t in range(2, len(tokens)):
+                token = tokens[t]
+                val = int(token[:-1]) / 10.0
+                if val == "-8888":
+                    continue
+                d = f"2000-{month}-{(t-1):02.0f}"
+                data[dbid][d]["tmax"] = val
 
     progress = tqdm(data.keys())
     for dbid in progress:

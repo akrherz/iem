@@ -7,7 +7,7 @@ function reverseLayer(lyr) {
   if ( document.getElementById ) {
     var w = document.getElementById(lyr);
     if (w.style.display == "none") { 
-       w.style.display = "block"; 
+       w.style.display = "block";
       var w2 = document.getElementById("datawindow");
       w2.style.top = "120px";
       w2.style.left = "5px";
@@ -18,7 +18,6 @@ function reverseLayer(lyr) {
       w2.style.top = "5px";
       w2.style.left = "5px";
     }
-
 
   }
 }
@@ -44,7 +43,7 @@ function showControl(layerName){
   setLayerDisplay("time-control", 'none');
   setLayerDisplay("options-control", 'none');
   if (oldval == 'none'){
-	  setLayerDisplay(layerName, 'block');	  
+      setLayerDisplay(layerName, 'block');	  
   }
 }
 function setLayerDisplay( layerName, d ) {

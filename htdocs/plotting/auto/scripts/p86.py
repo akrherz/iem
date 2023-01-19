@@ -20,7 +20,6 @@ PDICT = {
     "low_tmpk_12z": "Minimum Temperature at 12 UTC",
     "high_tmpk": "Maximum Temperature",
     "high_tmpk_12z": "Maximum Temperature at 12 UTC",
-    "p01d": "Calendar Day Precipitation",
     "power_swdn": "NASA POWER :: Incident Shortwave Down",
     "rsds": "Solar Radiation",
     "avg_dwpk": "Average Dew Point",

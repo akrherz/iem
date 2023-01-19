@@ -51,9 +51,9 @@ $t->title = "IEM NEXRAD by Year";
 $er = implode(",", $extents);
 
 $ar = Array("0.5" => "100 km",
-	"2.5" => "500 km",
-	"5" => "1000 km",
-	"20" => "4000 km");
+    "2.5" => "500 km",
+    "5" => "1000 km",
+    "20" => "4000 km");
 $szselect = make_select("sz", $sz, $ar);
 
 $monselect = monthSelect($month, "month");
@@ -95,4 +95,3 @@ You can click on the map to move the desired location.</p>
 <img src='$image_url' class='img-responsive'>
 EOF;
 $t->render('single.phtml');
-?>

@@ -14,7 +14,7 @@ import requests
 import pandas as pd
 from paste.request import get_cookie_dict, parse_formvars
 from pyiem.htmlgen import make_select, station_select
-from pyiem.util import get_dbconn, utc, html_escape, get_sqlalchemy_conn
+from pyiem.util import get_dbconn, utc, html_escape, get_sqlalchemy_conn, LOG
 from pyiem.templates.iem import TEMPLATE
 from pyiem.reference import state_names, SECTORS_NAME
 from pyiem.nws.vtec import VTEC_PHENOMENA, VTEC_SIGNIFICANCE
@@ -252,8 +252,8 @@ def datetypes_handler(arg, value):
     """Handle simple forms."""
     try:
         value = int(value)
-    except ValueError:
-        pass
+    except ValueError as exp:
+        LOG.info(exp)
     if arg["type"] == "month":
         items = zip(range(1, 13), calendar.month_name[1:])
     elif arg["type"] in ["zhour", "hour"]:

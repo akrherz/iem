@@ -46,7 +46,7 @@ $t->content = <<<EOF
     <select onChange="javascript: updateMap();" id="renderattr">
         <option value='pday'>Precipitation</option>
         <option value='snow'>Snowfall</option>
-        <option value='snowd'>Snow Depth [inch]</option>	
+        <option value='snowd'>Snow Depth [inch]</option>
         <option value='high'>24 Hour High Temperature</option>
         <option value='low'>24 Hour Low Temperature</option>
         <option value='coop_tmpf'>Temperature at Observation Time</option>
@@ -68,7 +68,6 @@ $t->content = <<<EOF
   <!-- Hidden div with the popover content -->
   <p>This is the popover content</p>
 </div>
-        
 
 EOF;
 $t->render("full.phtml");

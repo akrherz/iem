@@ -8,57 +8,63 @@ require_once "../../include/forms.php";
 
 $t = new MyView();
 $t->current_network = 'RWIS';
-$sortcol = isset($_GET["sortcol"]) ? xssafe($_GET["sortcol"]): "ts";
-$network = isset($_GET['network']) ? xssafe($_GET['network']): 'IA_RWIS';
+$sortcol = isset($_GET["sortcol"]) ? xssafe($_GET["sortcol"]) : "ts";
+$network = isset($_GET['network']) ? xssafe($_GET['network']) : 'IA_RWIS';
 $t->title = "RWIS Sortable Currents";
 $t->refresh = 600;
 $mesosite = iemdb('mesosite');
 
-$vals = Array("tmpf" => "Air Temperature [F]", "dwpf" => "Dew Point Temp [F]",
-  "sknt" => "Wind Speed [knots]", "drct" => "Wind Direction [deg]",
-  "pday" => "Precip Accum [inches]", "max_sknt" => "Wind Gust [knots]",
-  "ts" => "Observation Time [local]", "feel" => "Feels Like", "peak" =>"Wind Gust",
-  "min_tmpf" => "Today's Low Temperature", "peak_ts" => "Time of Wind Gust",
-  "max_tmpf" => "Today's High Temperature", "name" => "Station Name",
-  "sid" => "Station ID", "relh" => "Relative Humidity", "vsby" => "Visibility");
+$vals = array(
+    "tmpf" => "Air Temperature [F]", "dwpf" => "Dew Point Temp [F]",
+    "sknt" => "Wind Speed [knots]", "drct" => "Wind Direction [deg]",
+    "pday" => "Precip Accum [inches]", "max_sknt" => "Wind Gust [knots]",
+    "ts" => "Observation Time [local]", "feel" => "Feels Like", "peak" => "Wind Gust",
+    "min_tmpf" => "Today's Low Temperature", "peak_ts" => "Time of Wind Gust",
+    "max_tmpf" => "Today's High Temperature", "name" => "Station Name",
+    "sid" => "Station ID", "relh" => "Relative Humidity", "vsby" => "Visibility"
+);
 
 $nselect = "<select name=\"network\">";
 $rs = pg_query($mesosite, "SELECT id, name from networks where id ~* 'RWIS' ORDER by name ASC");
-for ($i=0;$row=pg_fetch_assoc($rs);$i++){
+for ($i = 0; $row = pg_fetch_assoc($rs); $i++) {
     $sel = '';
-    if ($network == $row["id"]){
+    if ($network == $row["id"]) {
         $sel = " selected='SELECTED'";
     }
-    $nselect .= sprintf("<option value='%s'%s>%s</option>\n",
-      $row["id"], $sel, $row["name"]);
+    $nselect .= sprintf(
+        "<option value='%s'%s>%s</option>\n",
+        $row["id"],
+        $sel,
+        $row["name"]
+    );
 }
 $nselect .= "</select>";
 
 $uri = "current.phtml?network={$network}&sortcol=";
 
-$mydata = Array();
+$mydata = array();
 
-$arr = Array(
+$arr = array(
     "network" => $network,
 );
 $jobj = iemws_json("currents.json", $arr);
 
-foreach($jobj["data"] as $bogus => $ob){
+foreach ($jobj["data"] as $bogus => $ob) {
     $key = $ob["station"];
     $mydata[$key] = $ob;
     $mydata[$key]["ts"] = strtotime($ob["local_valid"]);
     $mydata[$key]["relh"] = $ob["relh"];
     $mydata[$key]["feel"] = $ob["feel"];
-    if ($mydata[$key]["dwpf"] > $mydata[$key]["tmpf"]){
+    if ($mydata[$key]["dwpf"] > $mydata[$key]["tmpf"]) {
         $mydata[$key]["feel"] = "";
         $mydata[$key]["dwpf"] = "";
     }
-    if ($mydata[$key]["relh"] > 100 || $mydata[$key]["relh"] < 0 ){
+    if ($mydata[$key]["relh"] > 100 || $mydata[$key]["relh"] < 0) {
         $mydata[$key]["feel"] = "";
         $mydata[$key]["dwpf"] = "";
         $mydata[$key]["relh"] = "";
     }
-    if ($mydata[$key]["tmpf"] > 120 || $mydata[$key]["tmpf"] < -40){
+    if ($mydata[$key]["tmpf"] > 120 || $mydata[$key]["tmpf"] < -40) {
         $mydata[$key]["feel"] = "";
         $mydata[$key]["dwpf"] = "";
         $mydata[$key]["relh"] = "";
@@ -66,13 +72,13 @@ foreach($jobj["data"] as $bogus => $ob){
         $mydata[$key]["min_tmpf"] = "";
         $mydata[$key]["max_tmpf"] = "";
     }
-    if ($mydata[$key]["vsby"] < 0){
+    if ($mydata[$key]["vsby"] < 0) {
         $mydata[$key]["vsby"] = "";
-    }else{
-        $mydata[$key]["vsby"] = myround( $mydata[$key]["vsby"], 1);
+    } else {
+        $mydata[$key]["vsby"] = myround($mydata[$key]["vsby"], 1);
     }
     $mydata[$key]["peak_ts"] = 0;
-    if ($mydata[$key]["max_gust"] > $mydata[$key]["max_sknt"]){
+    if ($mydata[$key]["max_gust"] > $mydata[$key]["max_sknt"]) {
         $mydata[$key]["peak"] = $mydata[$key]["max_gust"];
         $mydata[$key]["peak_ts"] = strtotime($mydata[$key]["local_max_gust_ts"]);
     } else {
@@ -82,29 +88,28 @@ foreach($jobj["data"] as $bogus => $ob){
         }
     }
 
-    if ($mydata[$key]["sknt"] < 0){
+    if ($mydata[$key]["sknt"] < 0) {
         $mydata[$key]["sknt"] = "";
         $mydata[$key]["drct"] = "";
     }
-
 }
 
-$finalA = Array();
+$finalA = array();
 $finalA = aSortBySecondIndex($mydata, $sortcol, "desc");
 $i = 0;
 $now = time();
-$skippedStations = Array();
+$skippedStations = array();
 $table = "";
 // Loop though all data
-foreach($finalA as $key => $val){
+foreach ($finalA as $key => $val) {
     $parts = $finalA[$key];
     $tdiff = $now - $parts["ts"];
 
     // Dont show IAC
-    if ($key == "RIOW"){
+    if ($key == "RIOW") {
         continue;
     }
-    if ($tdiff > 6900){
+    if ($tdiff > 6900) {
         $skippedStations[$key] = $parts;
         continue;
     }
@@ -113,44 +118,44 @@ foreach($finalA as $key => $val){
 
     $table .= "<tr>";
     $table .= "<td><input type=\"checkbox\" name=\"st[]\"
-               value=\"".$key."\"></td>";
-    $table .= "<td><a href='../sites/site.php?network=". $network ."&station=". $key ."'>". $parts["name"] . "</a></td><td ";
+               value=\"" . $key . "\"></td>";
+    $table .= "<td><a href='../sites/site.php?network=" . $network . "&station=" . $key . "'>" . $parts["name"] . "</a></td><td ";
     $format = "h:i A";
-    if ($tdiff > 11900){
+    if ($tdiff > 11900) {
         $table .= 'bgcolor="red"';
         $format = "M-d-Y h:i A";
-    } else if ($tdiff > 6900){
+    } else if ($tdiff > 6900) {
         $table .= 'bgcolor="orange"';
-    } else if ($tdiff > 1800){
+    } else if ($tdiff > 1800) {
         $table .= 'bgcolor="green"';
     }
-    $table .= ">". date($format, $parts["ts"]) ."</td>
-  <td align='center'>". $parts["tmpf"] ."(<font color=\"#ff0000\">".
-  $parts["max_tmpf"] ."</font>/<font color=\"#0000ff\">".
-  $parts["min_tmpf"] ."</font>)</td>
- <td>". $parts["dwpf"] ."</td>
- <td>". myround($parts["feel"], 0) ."</td>
- <td>". myround($parts["relh"], 0) ."</td>
- <td>". $parts["vsby"] ."</td>
- <td>". myround($parts["sknt"],0) ;
-    if (! is_null($parts["gust"]) && strlen($parts["gust"]) > 0 && $parts["gust"] > 0){
-        $table .= "G". myround($parts["gust"],0);
+    $table .= ">" . date($format, $parts["ts"]) . "</td>
+  <td align='center'>" . $parts["tmpf"] . "(<font color=\"#ff0000\">" .
+        $parts["max_tmpf"] . "</font>/<font color=\"#0000ff\">" .
+        $parts["min_tmpf"] . "</font>)</td>
+ <td>" . $parts["dwpf"] . "</td>
+ <td>" . myround($parts["feel"], 0) . "</td>
+ <td>" . myround($parts["relh"], 0) . "</td>
+ <td>" . $parts["vsby"] . "</td>
+ <td>" . myround($parts["sknt"], 0);
+    if (!is_null($parts["gust"]) && strlen($parts["gust"]) > 0 && $parts["gust"] > 0) {
+        $table .= "G" . myround($parts["gust"], 0);
     }
     $table .= "</td>
-            <td>". $parts["drct"] ."</td>
-        <td>". myround($parts["peak"],0) ."@ ". date("h:i A", $parts["peak_ts"] ) ."</td>
-            <td>". myround($parts["pday"],2) ."</td>
+            <td>" . $parts["drct"] . "</td>
+        <td>" . myround($parts["peak"], 0) . "@ " . date("h:i A", $parts["peak_ts"]) . "</td>
+            <td>" . myround($parts["pday"], 2) . "</td>
         </tr>\n";
 }
 
-foreach($skippedStations as $key => $parts){
+foreach ($skippedStations as $key => $parts) {
     $table .= "<tr>";
     $table .= "<td><input type=\"checkbox\" name=\"st[]\"
-               value=\"".$key."\"></td>";
-    $table .= "<td>". $parts["name"] . "</td><td ";
+               value=\"" . $key . "\"></td>";
+    $table .= "<td>" . $parts["name"] . "</td><td ";
     $table .= 'bgcolor="red"';
     $format = "M-d-Y";
-    $table .= ">". date($format, $parts["ts"]) ."</td><th align='center' colspan='9'>Site Offline</th></tr>\n";
+    $table .= ">" . date($format, $parts["ts"]) . "</td><th align='center' colspan='9'>Site Offline</th></tr>\n";
 }
 
 $content = <<<EOF

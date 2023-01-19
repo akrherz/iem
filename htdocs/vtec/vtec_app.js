@@ -114,6 +114,11 @@ var textStyle = new ol.style.Style({
     })
 });
 
+function text(str) {
+    // XSS
+    return $("<p>").text(str).html();
+}
+
 function urlencode() {
     // Make our CONFIG object a URI
     var uri = "?";
@@ -173,16 +178,16 @@ function parseHash() {
         var vtectokens = subtokens[0].split("-");
         if (vtectokens.length == 7) {
             CONFIG.year = parseInt(vtectokens[0]);
-            CONFIG.wfo = vtectokens[3];
-            CONFIG.phenomena = vtectokens[4];
-            CONFIG.significance = vtectokens[5];
+            CONFIG.wfo = text(vtectokens[3]);
+            CONFIG.phenomena = text(vtectokens[4]);
+            CONFIG.significance = text(vtectokens[5]);
             CONFIG.etn = parseInt(vtectokens[6]);
         }
         if (subtokens.length > 1) {
             var radartokens = subtokens[1].split("-");
             if (radartokens.length == 3) {
-                CONFIG.radar = radartokens[0];
-                CONFIG.radarProduct = radartokens[1];
+                CONFIG.radar = text(radartokens[0]);
+                CONFIG.radarProduct = text(radartokens[1]);
                 CONFIG.radarProductTime = moment.utc(radartokens[2],
                     'YYYYMMDDHHmm');
             }
@@ -193,9 +198,9 @@ function parseHash() {
 function readHTMLForm() {
     // See what the user has set
     CONFIG.year = parseInt($("#year").val());
-    CONFIG.wfo = $("#wfo").val();
-    CONFIG.phenomena = $("#phenomena").val();
-    CONFIG.significance = $("#significance").val();
+    CONFIG.wfo = text($("#wfo").val());
+    CONFIG.phenomena = text($("#phenomena").val());
+    CONFIG.significance = text($("#significance").val());
     CONFIG.etn = parseInt($("#etn").val());
 
 }
@@ -219,8 +224,8 @@ function getRADARSource() {
         });
     }
     radarTMSLayer.set('title', '@ ' + dt.format());
-    var src = $("#radarsource").val();
-    var prod = $("#radarproduct").val();
+    var src = text($("#radarsource").val());
+    var prod = text($("#radarproduct").val());
     var url = '/cache/tile.py/1.0.0/ridge::' + src + '-' + prod + '-' + dt.utc().format('YMMDDHHmm') + '/{z}/{x}/{y}.png';
     return new ol.source.XYZ({
         url: url
@@ -420,7 +425,7 @@ function updateRADARProducts() {
             if (CONFIG.radarProduct) {
                 $("#radarproduct").val(CONFIG.radarProduct);
             } else {
-                CONFIG.radarProduct = $("#radarproduct").val();
+                CONFIG.radarProduct = text($("#radarproduct").val());
             }
             // step3
             updateRADARTimeSlider();
@@ -451,7 +456,7 @@ function updateRADARSources() {
             if (CONFIG.radar) {
                 $("#radarsource").val(CONFIG.radar);
             } else {
-                CONFIG.radar = $("#radarsource").val();
+                CONFIG.radar = text($("#radarsource").val());
             }
             // step2
             updateRADARProducts();
@@ -605,8 +610,7 @@ function loadTabs() {
     $("#radarmap").html("<img src=\"/GIS/radmap.php?layers[]=nexrad&" +
         "layers[]=sbw&layers[]=sbwh&layers[]=uscounties&" +
         "vtec=" + vstring + "\" class=\"img img-responsive\">");
-    $("#sbwhistory").html("<img src=\"/GIS/sbw-history.php?vtec=" + vstring2 +
-        "\" class=\"img img-responsive\">");
+    $("#sbwhistory").html(`<img src="/GIS/sbw-history.php?vtec=${vstring2}" class="img img-responsive">`);
 
     $("#vtec_label").html(CONFIG.year + " " + $("#wfo option:selected").text()
         + " " + $("#phenomena option:selected").text()
