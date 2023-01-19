@@ -2,6 +2,7 @@
 import datetime
 import os
 import subprocess
+import tempfile
 
 import pytz
 from pyiem.tracker import loadqc
@@ -75,7 +76,7 @@ def main():
     ids = list(nt.sts.keys())
     ids.sort()
 
-    with open("/tmp/awos_rtp.shef", "w", encoding="utf-8") as fh:
+    with tempfile.NamedTemporaryFile("w", delete=False) as fh:
         fh.write(
             f"""
 
@@ -99,12 +100,14 @@ def main():
 
         fh.write(".END\n")
 
-    cmd = (
-        f"pqinsert -p 'plot ac {ets:%Y%m%d}0000 awos_rtp_00z.shef "
-        "awos_rtp_00z.shef shef' /tmp/awos_rtp.shef"
-    )
-    subprocess.call(cmd, shell=True)
-    os.unlink("/tmp/awos_rtp.shef")
+    cmd = [
+        "pqinsert",
+        "-p",
+        f"plot ac {ets:%Y%m%d}0000 awos_rtp_00z.shef awos_rtp_00z.shef shef",
+        fh.name,
+    ]
+    subprocess.call(cmd)
+    os.unlink(fh.name)
 
 
 if __name__ == "__main__":

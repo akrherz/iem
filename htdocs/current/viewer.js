@@ -141,7 +141,6 @@ function updateCamera() {
         }
     }
     var cid = currentCameraFeature.get("cid");
-    console.log("Proceeding with updateCamera(), cid=", cid);
     if (cid.startsWith("IDOT-")){
         doRWISView();
         updateHashLink();
@@ -190,7 +189,7 @@ function getRADARSource() {
     var prod = dt.year() < 2011 ? 'N0R' : 'N0Q';
     $("#radar_title").html('US Base Reflectivity @ ' + dt.format("h:mm A"));
     return new ol.source.XYZ({
-        url: 'https://mesonet.agron.iastate.edu/cache/tile.py/1.0.0/ridge::USCOMP-' + prod + '-' + dt.utc().format('YMMDDHHmm') + '/{z}/{x}/{y}.png'
+        url: `https://mesonet.agron.iastate.edu/cache/tile.py/1.0.0/ridge::USCOMP-${prod}-${dt.utc().format('YMMDDHHmm')}/{z}/{x}/{y}.png`
     });
 }
 
@@ -398,8 +397,8 @@ $().ready(function () {
 
     map.on('click', function (evt) {
         var feature = map.forEachFeatureAtPixel(evt.pixel,
-            function (feature, layer) {
-                return feature;
+            function (feature2, _layer) {
+                return feature2;
             }
         );
         if (!feature) {

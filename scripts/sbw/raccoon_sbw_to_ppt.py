@@ -17,7 +17,7 @@ from odf.style import Style, MasterPage, PageLayout, PageLayoutProperties
 from odf.style import TextProperties, GraphicProperties, ParagraphProperties
 from odf.text import P
 from odf.draw import Page, Frame, TextBox, Image
-from pyiem.util import get_dbconn, logger
+from pyiem.util import get_dbconn, logger, utc
 
 os.putenv("DISPLAY", "localhost:1")
 
@@ -30,8 +30,7 @@ N0B_SWITCH = datetime.datetime(2022, 5, 16)
 
 def test_job():
     """For command line testing, lets provide a dummy job"""
-    jobs = []
-    jobs.append(
+    return [
         {
             "wfo": "FSD",
             "radar": "FSD",
@@ -41,8 +40,7 @@ def test_job():
             "jobid": random.randint(1, 1000000),
             "nexrad_product": "N0U",
         }
-    )
-    return jobs
+    ]
 
 
 def add_job(row):
@@ -87,19 +85,21 @@ def get_warnings(sts, ets, wfo, wtypes):
     phenomenas = str(tuple(tokens))
     pgconn = get_dbconn("postgis")
     pcursor = pgconn.cursor(cursor_factory=psycopg2.extras.DictCursor)
-    sql = """
+    sql = f"""
     WITH stormbased as (
         SELECT phenomena, eventid, issue, expire,
         ST_Area(ST_Transform(geom,2163))/1000000.0 as polyarea
-        from sbw_%s WHERE issue BETWEEN '%s+00' and '%s+00' and
-        wfo = '%s' and phenomena in %s and significance = 'W'
+        from sbw_{sts:%Y} WHERE issue BETWEEN
+        '{sts:%Y-%m-%d %H:%M}+00' and '{ets:%Y-%m-%d %H:%M}+00' and
+        wfo = '{wfo}' and phenomena in {phenomenas} and significance = 'W'
         and status = 'NEW'
     ), countybased as (
         SELECT phenomena, eventid,
         sum(ST_Area(ST_Transform(u.geom,2163))/1000000.0) as countyarea
-        from warnings_%s w JOIN ugcs u on (u.gid = w.gid) WHERE
-        issue BETWEEN '%s+00' and '%s+00' and
-        w.wfo = '%s' and phenomena in %s and significance = 'W'
+        from warnings_{sts:%Y} w JOIN ugcs u on (u.gid = w.gid) WHERE
+        issue BETWEEN '{sts:%Y-%m-%d %H:%M}+00' and
+        '{ets:%Y-%m-%d %H:%M}+00' and
+        w.wfo = '{wfo}' and phenomena in {phenomenas} and significance = 'W'
         GROUP by phenomena, eventid
     )
 
@@ -108,18 +108,7 @@ def get_warnings(sts, ets, wfo, wtypes):
     s.expire at time zone 'UTC' as expire, s.polyarea,
     c.countyarea from stormbased s JOIN countybased c
     on (c.eventid = s.eventid and c.phenomena = s.phenomena)
-    """ % (
-        sts.year,
-        sts.strftime("%Y-%m-%d %H:%M"),
-        ets.strftime("%Y-%m-%d %H:%M"),
-        wfo,
-        phenomenas,
-        sts.year,
-        sts.strftime("%Y-%m-%d %H:%M"),
-        ets.strftime("%Y-%m-%d %H:%M"),
-        wfo,
-        phenomenas,
-    )
+    """
     pcursor.execute(sql)
     res = []
     for row in pcursor:
@@ -132,19 +121,16 @@ def do_job(job):
     """Do something"""
     warnings = get_warnings(job["sts"], job["ets"], job["wfo"], job["wtype"])
 
-    mydir = "%s/%s" % (TMPDIR, job["jobid"])
+    mydir = os.path.join(TMPDIR, job["jobid"])
     if not os.path.isdir(mydir):
         os.makedirs(mydir)
     os.chdir(mydir)
 
-    basefn = "%s-%s-%s-%s-%s" % (
-        job["wfo"],
-        job["wtype"].replace(",", "_"),
-        job["radar"],
-        job["sts"].strftime("%Y%m%d%H"),
-        job["ets"].strftime("%Y%m%d%H"),
+    basefn = (
+        f"{job['wfo']}-{job['wtype'].replace(',', '_')}-{job['radar']}-"
+        f"{job['sts']:%Y%m%d%H}-{job['ets']:%Y%m%d%H}"
     )
-    outputfile = "%s.odp" % (basefn,)
+    outputfile = f"{basefn}.odp"
 
     doc = OpenDocumentPresentation()
 
@@ -212,28 +198,16 @@ def do_job(job):
     page.addElement(frame)
     textbox = TextBox()
     frame.addElement(textbox)
-    textbox.addElement(P(text="WFO: %s" % (job["wfo"],)))
+    textbox.addElement(P(text=f"WFO: {job['wfo']}"))
     textbox.addElement(
-        P(
-            text=("Radar: %s Product: %s" "")
-            % (job["radar"], job["nexrad_product"])
-        )
+        P(text=f"Radar: {job['radar']} Product: {job['nexrad_product']}")
     )
-    textbox.addElement(P(text="Phenomenas: %s" % (job["wtype"],)))
-    textbox.addElement(
-        P(text="Start Time: %s UTC" % (job["sts"].strftime("%d %b %Y %H"),))
-    )
-    textbox.addElement(
-        P(text="End Time: %s UTC" % (job["ets"].strftime("%d %b %Y %H"),))
-    )
+    textbox.addElement(P(text=f"Phenomenas: {job['wtype']}"))
+    textbox.addElement(P(text=f"Start Time: {job['sts']:%d %b %Y %H} UTC"))
+    textbox.addElement(P(text=f"End Time: {job['ets']:%d %b %Y %H} UTC"))
     textbox.addElement(P(text=""))
-    textbox.addElement(P(text="Raccoon Version: %s" % (__REV__,)))
-    textbox.addElement(
-        P(
-            text="Generated on: %s"
-            % (datetime.datetime.utcnow().strftime("%d %b %Y %H:%M %Z"))
-        )
-    )
+    textbox.addElement(P(text=f"Raccoon Version: {__REV__}"))
+    textbox.addElement(P(text=f"Generated on: {utc():%d %b %Y %H:%M %Z}"))
     textbox.addElement(P(text=""))
     textbox.addElement(
         P(text="Bugs/Comments/Yelling?: daryl herzmann akrherz@iastate.edu")
@@ -256,41 +230,35 @@ def do_job(job):
         titleframe.addElement(textbox)
         textbox.addElement(
             P(
-                text="%s.O.NEW.K%s.%s.W.%04i"
-                % (
-                    job["sts"].year,
-                    job["wfo"],
-                    warning["phenomena"],
-                    warning["eventid"],
+                text=(
+                    f"{job['sts']:%Y}.O.NEW.K{job['wfo']}."
+                    f"{warning['phenomena']}.W.{warning['eventid']:04.0f}"
                 )
             )
         )
         textbox.addElement(
-            P(
-                text="Issue: %s UTC"
-                % (warning["issue"].strftime("%d %b %Y %H:%M"),)
-            )
+            P(text=f"Issue: {warning['issue']:%d %b %Y %H:%M} UTC")
         )
         textbox.addElement(
-            P(
-                text="Expire: %s UTC"
-                % (warning["expire"].strftime("%d %b %Y %H:%M"),)
-            )
+            P(text=f"Expire: {warning['expire']:%d %b %Y %H:%M} UTC")
         )
+        zz = warning["polyarea"] / warning["countyarea"] * 100.0
         textbox.addElement(
             P(
-                text="Poly Area: %.1f sq km (%.1f sq mi) [%.1f%% vs County]"
-                % (
-                    warning["polyarea"],
-                    warning["polyarea"] * 0.386102,
-                    warning["polyarea"] / warning["countyarea"] * 100.0,
+                text=(
+                    f"Poly Area: {warning['polyarea']:.1f} sq km "
+                    f"({(warning['polyarea'] * 0.386102):.1f} sq mi) "
+                    f"[{zz:.1f}% vs County]"
                 )
             )
         )
+        zz = warning["countyarea"] * 0.386102
         textbox.addElement(
             P(
-                text="County Area: %.1f square km (%.1f square miles)"
-                % (warning["countyarea"], warning["countyarea"] * 0.386102)
+                text=(
+                    f"County Area: {warning['countyarea']:.1f} "
+                    f"square km ({zz:.1f} square miles)"
+                )
             )
         )
 
@@ -298,16 +266,11 @@ def do_job(job):
             "http://iem.local/GIS/radmap.php?"
             "layers[]=places&layers[]=legend&layers[]=ci&layers[]=cbw"
             "&layers[]=sbw&layers[]=uscounties&layers[]=bufferedlsr"
-            "&lsrbuffer=15"
-        )
-        url += "&vtec=%s.O.NEW.K%s.%s.W.%04i" % (
-            job["sts"].year,
-            job["wfo"],
-            warning["phenomena"],
-            warning["eventid"],
+            f"&lsrbuffer=15&vtec={job['sts']:%Y}.O.NEW.K{job['wfo']}."
+            f"{warning['phenomena']}.W.{warning['eventid']:04.0f}"
         )
 
-        cmd = "wget -q -O %i.png '%s'" % (i, url)
+        cmd = f"wget -q -O {i}.png '{url}'"
         os.system(cmd)
         photoframe = Frame(
             stylename=photostyle,
@@ -317,7 +280,7 @@ def do_job(job):
             y="200pt",
         )
         page.addElement(photoframe)
-        href = doc.addPicture("%i.png" % (i,))
+        href = doc.addPicture(f"{i}.png")
         photoframe.addElement(Image(href=href))
         i += 1
 
@@ -343,11 +306,9 @@ def do_job(job):
             titleframe.addElement(textbox)
             textbox.addElement(
                 P(
-                    text="%s.W.%04i Time: %s UTC"
-                    % (
-                        warning["phenomena"],
-                        warning["eventid"],
-                        now.strftime("%d %b %Y %H%M"),
+                    text=(
+                        f"{warning['phenomena']}.W.{warning['eventid']:04.0f} "
+                        f"Time: {now:%d %b %Y %H%M} UTC"
                     )
                 )
             )
@@ -366,25 +327,17 @@ def do_job(job):
                     n0qn0r = "N0Q"
                 else:
                     n0qn0r = "N0B"
-
-            url = "http://iem.local/GIS/radmap.php?"
-            url += "layers[]=ridge&ridge_product=%s&ridge_radar=%s&" % (
-                n0qn0r,
-                job["radar"],
-            )
-            url += "layers[]=sbw&layers[]=sbwh&layers[]=uscounties&"
-            url += "layers[]=lsrs&ts2=%s&" % (
-                (now + datetime.timedelta(minutes=15)).strftime("%Y%m%d%H%M"),
-            )
-            url += "vtec=%s.O.NEW.K%s.%s.W.%04i&ts=%s" % (
-                job["sts"].year,
-                job["wfo"],
-                warning["phenomena"],
-                warning["eventid"],
-                now.strftime("%Y%m%d%H%M"),
+            zz = now + datetime.timedelta(minutes=15)
+            url = (
+                "http://iem.local/GIS/radmap.php?layers[]=ridge&"
+                f"ridge_product={n0qn0r}&ridge_radar={job['radar']}&"
+                "layers[]=sbw&layers[]=sbwh&layers[]=uscounties&"
+                f"layers[]=lsrs&ts2={zz:%Y%m%d%H%M}&vtec="
+                f"{job['sts']:%Y}.O.NEW.K{job['wfo']}.{warning['phenomena']}."
+                f"W.{warning['eventid']:04.0f}&ts={now:%Y%m%d%H%M}"
             )
 
-            cmd = "wget -q -O %i.png '%s'" % (i, url)
+            cmd = f"wget -q -O {i}.png '{url}'"
             os.system(cmd)
             photoframe = Frame(
                 stylename=photostyle,
@@ -394,22 +347,22 @@ def do_job(job):
                 y="70pt",
             )
             page.addElement(photoframe)
-            href = doc.addPicture("%i.png" % (i,))
+            href = doc.addPicture(f"{i}.png")
             photoframe.addElement(Image(href=href))
             i += 1
 
     doc.save(outputfile)
     del doc
-    cmd = "unoconv -f ppt %s" % (outputfile,)
+    cmd = f"unoconv -f ppt {outputfile}"
     subprocess.call(cmd, shell=True)
-    pptfn = "%s.ppt" % (basefn,)
+    pptfn = f"{basefn}.ppt"
     LOG.warning("Generated %s with %s slides", pptfn, i)
     if os.path.isfile(pptfn):
         LOG.warning("...copied to webfolder")
-        shutil.copyfile(pptfn, "/mesonet/share/pickup/raccoon/%s" % (pptfn,))
+        shutil.copyfile(pptfn, f"/mesonet/share/pickup/raccoon/{pptfn}")
         # Cleanup
         os.chdir(TMPDIR)
-        subprocess.call("rm -rf %s" % (job["jobid"],), shell=True)
+        subprocess.call(f"rm -rf {job['jobid']}", shell=True)
     else:
         LOG.warning("Uh oh, no output file, lets kill soffice.bin")
         subprocess.call("pkill --signal 9 soffice.bin", shell=True)

@@ -1,4 +1,3 @@
-// var CONFIG is set in the base HTML page
 // previous hashlinking looks like 2017-O-NEW-KALY-WI-Y-0015
 
 var olmap;
@@ -13,6 +12,8 @@ var ugcTable;
 var lsrTable;
 var sbwLsrTable;
 var element;
+// CONFIG is set in the base HTML page
+var CONFIG = window.CONFIG || {};  // skipcq: JS-0239
 
 Number.prototype.padLeft = function (n, str) {
     return Array(n - String(this).length + 1).join(str || '0') + this;
@@ -336,8 +337,8 @@ function buildMap() {
     // TODO support mobile
     olmap.on('click', function (evt) {
         var feature = olmap.forEachFeatureAtPixel(evt.pixel,
-            function (feature) {
-                return feature;
+            function (feature2) {
+                return feature2;
             });
         if (feature) {
             if (feature.get('magnitude') === undefined) return;
@@ -612,10 +613,12 @@ function loadTabs() {
         "vtec=" + vstring + "\" class=\"img img-responsive\">");
     $("#sbwhistory").html(`<img src="/GIS/sbw-history.php?vtec=${vstring2}" class="img img-responsive">`);
 
-    $("#vtec_label").html(CONFIG.year + " " + $("#wfo option:selected").text()
-        + " " + $("#phenomena option:selected").text()
-        + " " + $("#significance option:selected").text()
-        + " Number " + $("#etn").val());
+    $("#vtec_label").html(
+        `${CONFIG.year} ${text($("#wfo option:selected").text())}
+            ${text($("#phenomena option:selected").text())}
+            ${text($("#significance option:selected").text())}
+            Number ${text($("#etn").val())}`
+    );
     $.ajax({
         data: {
             wfo: CONFIG.wfo,
@@ -821,20 +824,20 @@ function buildUI() {
             var label = radartimes[ui.value].local().format("D MMM YYYY h:mm A");
             $("#radartime").html(label);
         },
-        slide: function(event, ui) {
+        slide: function (event, ui) {
             var label = radartimes[ui.value].local().format("D MMM YYYY h:mm A");
             $("#radartime").html(label);
         }
     });
     $("#radarsource").change(function () {
-        CONFIG.radar = $("#radarsource").val();
+        CONFIG.radar = text($("#radarsource").val());
         updateRADARProducts();
         updateHash();
     });
     $("#radarproduct").change(function () {
         // we can safely(??) assume that radartimes does not update when we
         // switch products
-        CONFIG.radarProduct = $("#radarproduct").val();
+        CONFIG.radarProduct = text($("#radarproduct").val());
         radarTMSLayer.setSource(getRADARSource());
         updateHash();
     });

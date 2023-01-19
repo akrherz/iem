@@ -2,6 +2,9 @@
 require_once "../../config/settings.inc.php";
 require_once "../../include/database.inc.php";
 require_once "../../include/forms.php";
+require_once "../../include/station.php";
+require_once "../../include/myview.php";
+
 /* bypoint.phtml  Query IEM rainfall by a point */
 $wepp = iemdb("wepp");
 $iem = iemdb("iem");
@@ -49,7 +52,6 @@ if ($method == "geocode") {
         die("Geocoder failed for: $s, $c");
     }
 } else if ($method == "id") {
-    require_once "../../include/station.php";
     $id = strtoupper(xssafe($_GET["nwsli"]));
     $st = new StationData($id);
     $cities = $st->table;
@@ -82,9 +84,16 @@ if ($method == "geocode") {
 if ($longitude > 0) {
     $longitude = 0 - $longitude;
 }
+// Ensure values are ~ Iowa
+if ($longitude < -102 || $longitude > -88){
+    die("Longitude outside of Iowa");
+}
+if ($latitude < 38 || $latitude > 44){
+    die("Longitude outside of Iowa");
+}
 
 $sql = "select hrap_i, ST_distance( the_geom, 
-    ST_transform(ST_geometryfromtext('POINT($longitude $latitude)',4326), 26915) ) 
+    ST_transform(ST_Point($longitude, $latitude, 4326), 26915) ) 
     from hrap_utm ORDER by st_distance ASC LIMIT 1";
 $rs = pg_exec($wepp, $sql);
 $row = pg_fetch_array($rs);
@@ -149,7 +158,6 @@ if ($view == "download") {
     die();
 }
 
-require_once "../../include/myview.php";
 $t = new MyView();
 $t->title = "Rainfall by Point";
 $t->content = "<pre>\n{$data}\n</pre>";

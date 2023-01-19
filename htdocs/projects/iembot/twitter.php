@@ -88,7 +88,7 @@ if (isset($_REQUEST['del']) && $channel != '' && $screen_name != '') {
         $_SESSION["screen_name"]
     );
 }
-if (isset($_REQUEST['cb'])) {
+if (isset($_REQUEST['cb']) && isset($_SESSION['token']) && isset($_SESSION['token_secret'])) {
     $connection = new TwitterOAuth(
         TWITTER_KEY,
         TWITTER_SECRET,
