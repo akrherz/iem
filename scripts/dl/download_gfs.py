@@ -98,8 +98,7 @@ def main(argv):
     # script is called every hour, just short circuit the un-needed hours
     if ts.hour % 6 != 0:
         return
-    times = [ts]
-    times.append(ts - datetime.timedelta(hours=6))
+    times = [ts, ts - datetime.timedelta(hours=6)]
     for ts in times:
         for hr in range(0, 385, 6):
             if need_to_run(ts, hr):

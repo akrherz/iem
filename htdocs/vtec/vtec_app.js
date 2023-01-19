@@ -612,10 +612,10 @@ function loadTabs() {
         "vtec=" + vstring + "\" class=\"img img-responsive\">");
     $("#sbwhistory").html(`<img src="/GIS/sbw-history.php?vtec=${vstring2}" class="img img-responsive">`);
 
-    $("#vtec_label").html(CONFIG.year + " " + $("#wfo option:selected").text()
-        + " " + $("#phenomena option:selected").text()
-        + " " + $("#significance option:selected").text()
-        + " Number " + $("#etn").val());
+    $("#vtec_label").html(CONFIG.year + " " + text($("#wfo option:selected").text())
+        + " " + text($("#phenomena option:selected").text())
+        + " " + text($("#significance option:selected").text())
+        + " Number " + text($("#etn").val()));
     $.ajax({
         data: {
             wfo: CONFIG.wfo,
@@ -827,14 +827,14 @@ function buildUI() {
         }
     });
     $("#radarsource").change(function () {
-        CONFIG.radar = $("#radarsource").val();
+        CONFIG.radar = text($("#radarsource").val());
         updateRADARProducts();
         updateHash();
     });
     $("#radarproduct").change(function () {
         // we can safely(??) assume that radartimes does not update when we
         // switch products
-        CONFIG.radarProduct = $("#radarproduct").val();
+        CONFIG.radarProduct = text($("#radarproduct").val());
         radarTMSLayer.setSource(getRADARSource());
         updateHash();
     });

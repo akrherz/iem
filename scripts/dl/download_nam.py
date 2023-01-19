@@ -72,7 +72,7 @@ def fetch(valid, hr):
     if len(offsets) != 8:
         LOG.info("warning, found %s gribs for %s[%s]", len(offsets), valid, hr)
     for pr in offsets:
-        headers = {"Range": "bytes=%s-%s" % (pr[0], pr[1])}
+        headers = {"Range": f"bytes={pr[0]}-{pr[1]}"}
         req = exponential_backoff(
             requests.get, uri[:-4], headers=headers, timeout=30
         )
@@ -82,9 +82,7 @@ def fetch(valid, hr):
         tmpfd = tempfile.NamedTemporaryFile(delete=False)
         tmpfd.write(req.content)
         tmpfd.close()
-        subprocess.call(
-            "pqinsert -p '%s' %s" % (pqstr, tmpfd.name), shell=True
-        )
+        subprocess.call(f"pqinsert -p '{pqstr}' {tmpfd.name}", shell=True)
         os.unlink(tmpfd.name)
 
 
@@ -96,9 +94,11 @@ def main():
     # script is called every hour, just short circuit the un-needed hours
     if ts.hour % 6 != 0:
         return
-    times = [ts]
-    times.append(ts - datetime.timedelta(hours=6))
-    times.append(ts - datetime.timedelta(hours=24))
+    times = [
+        ts,
+        ts - datetime.timedelta(hours=6),
+        ts - datetime.timedelta(hours=24),
+    ]
     for ts in times:
         for hr in range(6):
             if not need_to_run(ts, hr):
