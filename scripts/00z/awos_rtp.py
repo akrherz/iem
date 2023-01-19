@@ -99,11 +99,13 @@ def main():
 
         fh.write(".END\n")
 
-    cmd = (
-        f"pqinsert -p 'plot ac {ets:%Y%m%d}0000 awos_rtp_00z.shef "
-        "awos_rtp_00z.shef shef' /tmp/awos_rtp.shef"
-    )
-    subprocess.call(cmd, shell=True)
+    cmd = [
+        "pqinsert",
+        "-p",
+        f"plot ac {ets:%Y%m%d}0000 awos_rtp_00z.shef awos_rtp_00z.shef shef",
+        "/tmp/awos_rtp.shef",
+    ]
+    subprocess.call(cmd)
     os.unlink("/tmp/awos_rtp.shef")
 
 

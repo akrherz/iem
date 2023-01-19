@@ -8,7 +8,9 @@ name = "shell"
 
 [[analyzers]]
 name = "javascript"
-environment = ["jquery", ]
+
+  [analyzers.meta]
+  environment = ["jquery", ]
 
 [[analyzers]]
 name = "python"

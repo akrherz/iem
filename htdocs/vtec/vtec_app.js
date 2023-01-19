@@ -613,10 +613,10 @@ function loadTabs() {
     $("#sbwhistory").html(`<img src="/GIS/sbw-history.php?vtec=${vstring2}" class="img img-responsive">`);
 
     $("#vtec_label").html(
-        `${CONFIG.year} ${text($("#wfo option:selected").text())} `
-            `${text($("#phenomena option:selected").text())} `
-            `${text($("#significance option:selected").text())} `
-            `Number ${text($("#etn").val())}`
+        `${CONFIG.year} ${text($("#wfo option:selected").text())}
+            ${text($("#phenomena option:selected").text())}
+            ${text($("#significance option:selected").text())}
+            Number ${text($("#etn").val())}`
     );
     $.ajax({
         data: {
