@@ -53,7 +53,7 @@ def do(url, fn):
     with tempfile.NamedTemporaryFile(delete=False) as tmpfd:
         tmpfd.write(res.content)
     pqstr = f"plot c {utc():%Y%m%d%H%M} {fn} bogus{utc().second} png"
-    subprocess.call(f"pqinsert -i -p '{pqstr}' {tmpfd.name}", shell=True)
+    subprocess.call(["pqinsert", "-i", "-p", pqstr, tmpfd.name])
     os.unlink(tmpfd.name)
 
 
