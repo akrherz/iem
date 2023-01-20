@@ -1,5 +1,5 @@
-let map;
-let marker;
+var map;
+var marker;
 var CONFIG = window.CONFIG || {};  // skipcq: JS-0239
 var google = window.google || {};  // skipcq: JS-0239
 

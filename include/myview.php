@@ -10,10 +10,22 @@
  */
 class MyView {
     protected $vars = array();
+    public string $bodyextra;
+    public string $breadcrumbs;
+    public string $content;
+    public string $current_network;
+    public string $headextra = "";
+    public bool $iemss;
+    public string $jsextra = "";
+    public int $refresh;
+    public string $sites_current;
+    public string $template_dir = "";
+    public string $title;
+    public string $twitter_card;
+    public string $twitter_image;
+
     public function __construct($template_dir = null) {
             $this->template_dir =  dirname(__FILE__).'/templates/';
-            $this->headextra = '';
-            $this->jsextra = '';
     }
     public function render($template_file) {
         if (file_exists($this->template_dir.$template_file)) {
