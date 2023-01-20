@@ -34,9 +34,6 @@ cd ../dbutil
 python rwis2archive.py $(date -u --date '1 days ago' +'%Y %m %d')
 
 cd ../dl
-# at 0z, -6 days is available, hopefully!
-#python download_narr.py $(date -u --date '6 days ago' +'%Y %m %d')
-#python download_narr.py $(date -u --date '30 days ago' +'%Y %m %d')
 python download_nldas.py &
 
 cd ../qc
