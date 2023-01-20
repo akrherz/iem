@@ -34,7 +34,8 @@ def run(wfo, year, phenomena, significance, combo):
     plimit = " and ".join(limits)
     if combo == 1:
         plimit = (
-            "phenomena in ('SV', 'TO', 'FF') and significance in ('W', 'A')"
+            "phenomena in ('SV', 'TO', 'FF', 'MA') and "
+            "significance in ('W', 'A')"
         )
         orderby = "u.utc_issue ASC"
     cursor.execute(
@@ -133,7 +134,7 @@ def application(environ, start_response):
     mc.close()
 
     if cb is not None:
-        res = "%s(%s)" % (html_escape(cb), res)
+        res = f"{html_escape(cb)}({res})"
 
     headers = [("Content-type", "application/json")]
     start_response("200 OK", headers)

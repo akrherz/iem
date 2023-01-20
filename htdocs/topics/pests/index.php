@@ -17,7 +17,7 @@ $day = date("Y-m-d", time() - 86400);
 // Get things set via CGI
 $network = isset($_GET["network"]) ? xssafe($_GET["network"]) : "IACLIMATE";
 $station = isset($_GET["station"]) ? xssafe($_GET["station"]) : "IATAME";
-$pest = isset($_GET["pest"]) ? xssafe($_GET["pest"]) : null;
+$pest = isset($_GET["pest"]) ? xssafe($_GET["pest"]) : "seedcorn_maggot";
 $sdate = isset($_GET["sdate"]) ? xssafe($_GET["sdate"]) : "$year-01-01";
 $edate = isset($_GET["edate"]) ? xssafe($_GET["edate"]) : $day;
 $edatechecked = isset($_GET["edate"]) ? "" : "checked";
@@ -79,7 +79,7 @@ the backend that generates the maps/data here.</p>
 <div class="row">
 <div class="col-md-6">
 <label>Select Pest</label>
-<br />${pselect}
+<br />{$pselect}
 </div>
 <div class="col-md-3">
 <label for="sdate">Start Date</label>
@@ -179,7 +179,7 @@ forecast based on the <a href="https://digital.weather.gov/">NWS NDFD</a>
 and <a href="https://mag.ncep.noaa.gov/">NWS GFS Model</a>.</p>
 
 <label>Select Station</label>
-<br />${nselect}
+<br />{$nselect}
 
 <table class="table table-striped">
 <tbody>
