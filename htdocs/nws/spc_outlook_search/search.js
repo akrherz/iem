@@ -1,45 +1,12 @@
 
 var marker;
 var map;
+var google = window.google || {}; // skipcq: JS-0239
 
-String.prototype.format = function() {
-      let str = this;
-      for (let i = 0; i < arguments.length; i++) {       
-        const reg = new RegExp("\\{" + i + "\\}", "gm");             
-        str = str.replace(reg, arguments[i]);
-      }
-      return str;
-    }
 
 function text(str) {
     // XSS
     return $("<p>").text(str).html();
-}
-
-// https://stackoverflow.com/questions/2044616
-function selectElementContents(elid) {
-    const el = document.getElementById(elid);
-    const body = document.body;
-    let range;
-    let sel;
-    if (document.createRange && window.getSelection) {
-        range = document.createRange();
-        sel = window.getSelection();
-        sel.removeAllRanges();
-        try {
-            range.selectNodeContents(el);
-            sel.addRange(range);
-        } catch (e) {
-            range.selectNode(el);
-            sel.addRange(range);
-        }
-        document.execCommand("copy");
-    } else if (body.createTextRange) {
-        range = body.createTextRange();
-        range.moveToElementText(el);
-        range.select();
-        range.execCommand("Copy");
-    }
 }
 
 function workflow(){
@@ -80,10 +47,10 @@ function buildUI(){
 }
 
 function updateTableTitle(lon, lat){
-    const text = `Lon: ${lon} Lat: ${lat}`;
-    $('#watches').find("caption").text(`Convective Watches for ${text}`);
-    $('#outlooks').find("caption").text(`Convective Outlooks for ${text}`);
-    $('#mcds').find("caption").text(`Mesoscale Convective Discussions for ${text}`);
+    const txt = `Lon: ${lon} Lat: ${lat}`;
+    $('#watches').find("caption").text(`Convective Watches for ${txt}`);
+    $('#outlooks').find("caption").text(`Convective Outlooks for ${txt}`);
+    $('#mcds').find("caption").text(`Mesoscale Convective Discussions for ${txt}`);
 }
 
 function updateMarkerPosition(latLng) {
@@ -124,7 +91,7 @@ function doMCD(lon, lat){
     $.ajax({
         dataType: "json",
         url: jsonurl,
-        success: function(data){
+        success(data){
             $("#mcd_spinner").hide();
             $.each(data.mcds, function(index, mcd){
                 tbody.append(`<tr><td><a href="${mcd.spcurl}" target="_blank">${mcd.year} ${mcd.product_num}</a></td><td>${mcd.utc_issue}</td><td>${mcd.utc_expire}</td></tr>`)
@@ -144,7 +111,7 @@ function doWatch(lon, lat){
     $.ajax({
         dataType: "json",
         url: jsonurl,
-        success: function(data){
+        success(data){
             $("#watch_spinner").hide();
             $.each(data.features, function(index, feature){
                 var watch = feature.properties;
@@ -156,7 +123,7 @@ function doWatch(lon, lat){
             }
     });
 }
-function initialize() {
+function initialize() { // skipcq: JS-0128
     buildUI();
     var latLng = new google.maps.LatLng(41.53, -93.653);
     map = new google.maps.Map(document.getElementById('map'), {
@@ -167,7 +134,7 @@ function initialize() {
     marker = new google.maps.Marker({
         position: latLng,
         title: 'Point A',
-        map: map,
+        map,
         draggable: true
     });
 

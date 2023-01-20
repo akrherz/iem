@@ -1,6 +1,8 @@
 let map;
 let marker;
 var CONFIG = window.CONFIG || {};  // skipcq: JS-0239
+var google = window.google || {};  // skipcq: JS-0239
+
 
 //callback on when the marker is done moving    		
 function displayCoordinates(pnt) {
@@ -10,7 +12,7 @@ function displayCoordinates(pnt) {
     $("#newlon").val(lng);
 }
 
-function load() {
+function load() { // skipcq: JS-0128
     const mapOptions = {
         zoom: 15,
         center: new google.maps.LatLng(CONFIG.lat, CONFIG.lon),
@@ -20,10 +22,10 @@ function load() {
         mapOptions);
     marker = new google.maps.Marker({
         position: mapOptions.center,
-        map: map,
+        map,
         draggable: true
     });
     google.maps.event.addListener(marker, 'dragend', () => {
-            displayCoordinates(marker.getPosition());
-        });
+        displayCoordinates(marker.getPosition());
+    });
 }
