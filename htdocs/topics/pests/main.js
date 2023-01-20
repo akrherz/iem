@@ -29,8 +29,7 @@ function updateStationForecast() {
     const opts = pestData[pest];
     const sdate = text($("#sdate").val());
     const edate = text($("#edate").val());
-    var url = "/json/climodat_dd.py?station=" + station + "&gddbase=" + opts.gddbase +
-        "&gddceil=" + opts.gddceil + "&sdate=" + sdate + "&edate=" + edate;
+    const url = `/json/climodat_dd.py?station=${station}&gddbase=${opts.gddbase}&gddceil=${opts.gddceil}&sdate=${sdate}&edate=${edate}`;
     $.get(url, function (data) {
         $("#station_date").html(data.sdate + " to " + data.edate);
         $("#station_accum").html(data.accum.toFixed(1));
@@ -61,9 +60,7 @@ function updateImage() {
     const edate = text($("#edate").val());
     let state = text($("select[name='network']").val());
     state = (state !== undefined) ? state.substring(0, 2) : "IA";
-    const imgurl = "/plotting/auto/plot/97/d:sector::sector:" + state + "::var:gdd_sum::" +
-        "gddbase:" + opts.gddbase + "::gddceil:" + opts.gddceil + "::date1:" + sdate + "::usdm:no::" +
-        "date2:" + edate + "::p:contour::cmap:RdYlBu_r::c:yes::_r:43.png";
+    const imgurl = `/plotting/auto/plot/97/d:sector::sector:${state}::var:gdd_sum::gddbase:${opts.gddbase}::gddceil:${opts.gddceil}::date1:${sdate}::usdm:no::date2:${edate}::p:contour::cmap:RdYlBu_r::c:yes::_r:43.png`;
     $("#theimage").attr("src", imgurl);
 
     // Update the web browser URL
@@ -80,38 +77,28 @@ function updateImage() {
 function showProgressBar() {
     $('#willload').css('display', 'block');
     let timing = 0;
-    var progressBar = setInterval(() => {
-        {
-            if (timing >= 10 ||
-                $('#willload').css('display') == 'none') {
-                {
-                    clearInterval(progressBar);
-                }
-            }
-            var width = (timing / 10) * 100.;
-            $("#timingbar").css('width', width + '%').attr('aria-valuenow', width);
-            timing = timing + 0.2;
+    const progressBar = setInterval(() => {
+        if (timing >= 10 ||
+            $('#willload').css('display') === 'none') {
+            clearInterval(progressBar);
         }
+        const width = (timing / 10) * 100.0;
+        $("#timingbar").css('width', `${width}%`).attr('aria-valuenow', width);
+        timing = timing + 0.2;
     }, 200);
 }
 
 function setupUI() {
     $('#theimage').on('load', () => {
-            {
-                hideImageLoad();
-            }
-        });
+        hideImageLoad();
+    });
     $('#theimage').on('error', () => {
-            {
-                hideImageLoad();
-            }
-        });
+        hideImageLoad();
+    });
     // The image may be cached and return to the user before this javascript
     // is hit, so we do a check to see if it is indeed loaded now
     if ($("#theimage").get(0) && $("#theimage").get(0).complete) {
-        {
-            hideImageLoad();
-        }
+        hideImageLoad();
     }
 
     $("#sdate").datepicker({
