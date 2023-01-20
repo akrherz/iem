@@ -176,6 +176,7 @@ EOM;
     $table = "<table class=\"table table-striped\">";
     foreach ($vardict as $key => $label) {
         if (
+            is_null($json) ||
             !array_key_exists("last_ob", $json) ||
             !array_key_exists($key, $json["last_ob"])
         ) {

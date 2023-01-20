@@ -1,4 +1,4 @@
-<?php 
+<?php
 require_once "../../../config/settings.inc.php";
 define("IEM_APPID", 157);
 require_once "../../../include/mlib.php";
@@ -10,16 +10,16 @@ $t = new MyView();
 
 $t->jsextra = <<<EOF
 <script type="text/javascript" src="search.js?v=6"></script>
+<script src="https://maps.googleapis.com/maps/api/js?key={$gmapskey}&amp;callback=initialize" type="text/javascript"></script>
 EOF;
 $t->headextra = <<<EOF
-<script src="https://maps.googleapis.com/maps/api/js?key={$gmapskey}" type="text/javascript"></script>
-		  <style>
+<style>
   .map {
     width: 100%;
     height: 400px;
     float: left;
   }
-		</style>
+</style>
 EOF;
 $t->title = "SPC Convective Outlook + Discussion + Watch Search by Point";
 
@@ -37,41 +37,41 @@ your system clipboard and then within your Spreadsheet application, paste the ta
 <div class="clearfix"></div>
 
 <div class="row">
-	<div class="col-md-4 well">
+    <div class="col-md-4 well">
     <h3>Search by Point</h3>
-		<p><strong>Either enter coordinates manually:</strong><br />
-		<i>Latitude (deg N):</i> <input size="8" id="lat"><br />
-		<i>Longitude (deg E):</i> <input size="8" id="lon">
-		<br /><strong>Outlook Search Options:</strong>
+        <p><strong>Either enter coordinates manually:</strong><br />
+        <i>Latitude (deg N):</i> <input size="8" id="lat"><br />
+        <i>Longitude (deg E):</i> <input size="8" id="lon">
+        <br /><strong>Outlook Search Options:</strong>
         <br />
         <input type="checkbox" id="last" name="last" value="1">
-	List Most Recent <input id="events" type="text" name="events" size="3" value="1"> Event(s)	
-		<br />Select Outlook: <input type="radio" name="day" value="1" checked>Day 1 &nbsp;
-		<input type="radio" name="day" value="2">Day 2 &nbsp;
-		<input type="radio" name="day" value="3">Day 3
+    List Most Recent <input id="events" type="text" name="events" size="3" value="1"> Event(s)	
+        <br />Select Outlook: <input type="radio" name="day" value="1" checked>Day 1 &nbsp;
+        <input type="radio" name="day" value="2">Day 2 &nbsp;
+        <input type="radio" name="day" value="3">Day 3
 
-		<br />Select Category:
-		<input type="radio" name="cat" value="categorical" checked>Categorical &nbsp;
-		<input type="radio" name="cat" value="hail">Hail &nbsp;
-		<input type="radio" name="cat" value="tornado">Tornado &nbsp;
-		<input type="radio" name="cat" value="wind">Wind
+        <br />Select Category:
+        <input type="radio" name="cat" value="categorical" checked>Categorical &nbsp;
+        <input type="radio" name="cat" value="hail">Hail &nbsp;
+        <input type="radio" name="cat" value="tornado">Tornado &nbsp;
+        <input type="radio" name="cat" value="wind">Wind
 
-		<br /><button class="btn btn-default" id="manualpt">Update</button>
-		</p>
-		<p><strong>Or drag marker to select coordinate:</strong><br />
-		<div id="map" class="map"></div>
-	</div>
-	<div class="col-md-8">
+        <br /><button class="btn btn-default" id="manualpt">Update</button>
+        </p>
+        <p><strong>Or drag marker to select coordinate:</strong><br />
+        <div id="map" class="map"></div>
+    </div>
+    <div class="col-md-8">
     <h3>Results of Point Search</h3>
 <div id="thetabs">	
     <ul class="nav nav-pills">
-		<li class="active"><a href="#1a" data-toggle="tab">Convective Outlooks</a></li>
-		<li><a href="#2a" data-toggle="tab">Mesoscale Convective Discussions</a></li>
-		<li><a href="#3a" data-toggle="tab">Watch Polygons</a></li>
-	</ul>
+        <li class="active"><a href="#1a" data-toggle="tab">Convective Outlooks</a></li>
+        <li><a href="#2a" data-toggle="tab">Mesoscale Convective Discussions</a></li>
+        <li><a href="#3a" data-toggle="tab">Watch Polygons</a></li>
+    </ul>
 
-	<div class="tab-content clearfix">
-		<div class="tab-pane active" id="1a">
+    <div class="tab-content clearfix">
+        <div class="tab-pane active" id="1a">
 
 <p>This archive dates back until <strong>1987</strong>.</p>
 
@@ -97,7 +97,7 @@ your system clipboard and then within your Spreadsheet application, paste the ta
         <div id="outlook_spinner" style="display: none;"><img src="/images/wait24trans.gif"> Loading</div>
 
         </div>
-		<div class="tab-pane" id="2a">
+        <div class="tab-pane" id="2a">
 
 <p>This archive dates back until <strong>20 October 2008</strong> and is based
 on the MCD polygon included within the text.</p>
@@ -122,7 +122,7 @@ on the MCD polygon included within the text.</p>
 </tbody>
 </table>
         <div id="mcd_spinner" style="display: none;"><img src="/images/wait24trans.gif"> Loading</div>
-		</div><!-- ./2a -->
+        </div><!-- ./2a -->
         <div class="tab-pane" id="3a">
 
 <p>This archive dates back until <strong>1997</strong> and uses the initial watch
@@ -149,13 +149,13 @@ tool to get more accurate results for the watch-by-county era.</p>
 </tbody>
 </table>
         <div id="watch_spinner" style="display: none;"><img src="/images/wait24trans.gif"> Loading</div>
-		</div>   
-	</div>
+        </div>   
+    </div>
 </div><!-- ./thetabs -->
 
     </div><!-- ./col-md-8 -->
 </div><!-- ./row -->
 
-		
+        
 EOF;
 $t->render('full.phtml');

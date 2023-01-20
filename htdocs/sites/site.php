@@ -69,15 +69,23 @@ evaluation.</div>
 EOM;
 }
 
+$lat = sprintf("%.5f", $cities[$station]["lat"]);
+$lon = sprintf("%.5f", $cities[$station]["lon"]);
+
 $t = new MyView();
 $t->title = sprintf("Site Info: %s %s", $station, $cities[$station]["name"]);
-$t->headextra = <<<EOF
-<script src="https://maps.googleapis.com/maps/api/js?key={$gmapskey}" type="text/javascript"></script>
+$t->jsextra = <<<EOF
+<script>
+var CONFIG = {
+    lat: {$lat},
+    lon: {$lon}
+};
+</script>
+<script src="site.js" type="text/javascript"></script>
+<script src="https://maps.googleapis.com/maps/api/js?key={$gmapskey}&amp;callback=load" type="text/javascript"></script>
 EOF;
 $t->sites_current = "base";
 
-$lat = sprintf("%.5f", $cities[$station]["lat"]);
-$lon = sprintf("%.5f", $cities[$station]["lon"]);
 
 function pretty_key($key)
 {
@@ -209,37 +217,5 @@ $t->content = <<<EOF
 </div>
 </div>
 
-<script type="text/javascript">
-var map, marker;
-function load(){
-    var mapOptions = {
-            zoom: 15,
-            center: new google.maps.LatLng({$lat}, {$lon}),
-            mapTypeId: google.maps.MapTypeId.ROADMAP
-          };
-    map = new google.maps.Map(document.getElementById('mymap'),
-              mapOptions);
-    marker = new google.maps.Marker({
-                    position: mapOptions.center,
-                      map: map,
-                    draggable: true
-                });
-    google.maps.event.addListener(marker, 'dragend', function() {
-          displayCoordinates(marker.getPosition());
-    });
-                    
-    //callback on when the marker is done moving    		
-    function displayCoordinates(pnt) {
-        var lat = pnt.lat();
-        lat = lat.toFixed(8);
-        var lng = pnt.lng();
-        lng = lng.toFixed(8);
-        $("#newlat").val(lat);
-        $("#newlon").val(lng);
-    }
-}
-google.maps.event.addDomListener(window, 'load', load);
-
-</script>
 EOF;
 $t->render('sites.phtml');
