@@ -1,9 +1,14 @@
 <?php
 require_once "../../config/settings.inc.php";
 require_once "../../include/database.inc.php";
-require_once "setup.php";
+require_once "../../include/sites.php";
 require_once "../../include/myview.php";
 require_once "../../include/mlib.php";
+
+$ctx = get_sites_context();
+$station = $ctx->station;
+$network = $ctx->network;
+$metadata = $ctx->metadata;
 
 $t = new MyView();
 $t->refresh = 60;

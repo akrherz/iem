@@ -33,7 +33,7 @@ EOF;
 $t->jsextra = <<<EOF
 <script src="/vendor/openlayers/{$OL}/ol.js" type="text/javascript"></script>
 <script src='/vendor/openlayers/{$OL}/ol-layerswitcher.js'></script>
-<script src="/js/olselect.php?network=${network}"></script>
+<script src="/js/olselect.php?network={$network}"></script>
 <script src="/vendor/select2/4.0.3/select2.min.js"></script>
 <script type="text/javascript">
 $(document).ready(function(){

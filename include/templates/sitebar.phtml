@@ -8,22 +8,22 @@ require_once dirname(__FILE__)."/../imagemaps.php";
 <form method="GET" name="automatic">
 <?php 
 if (isset($savevars)){
-	foreach($savevars as $k => $v){
-		echo sprintf("<input type=\"hidden\" value=\"%s\" name=\"%s\" />",
-		$v, $k);
-	}
+    foreach($savevars as $k => $v){
+        echo sprintf("<input type=\"hidden\" value=\"%s\" name=\"%s\" />",
+        $v, $k);
+    }
 }
 if (isset($_REQUEST["prod"])){
-	echo "<input type='hidden' name='prod' value='". xssafe($_REQUEST["prod"]) ."'>\n";
+    echo "<input type='hidden' name='prod' value='". xssafe($_REQUEST["prod"]) ."'>\n";
 }
 if (isset($_REQUEST["month"])){
-	echo "<input type='hidden' name='month' value='". xssafe($_REQUEST["month"]) ."'>\n";
+    echo "<input type='hidden' name='month' value='". xssafe($_REQUEST["month"]) ."'>\n";
 }
 if (isset($_REQUEST["year"])){
-	echo "<input type='hidden' name='year' value='". xssafe($_REQUEST["year"]) ."'>\n";
+    echo "<input type='hidden' name='year' value='". xssafe($_REQUEST["year"]) ."'>\n";
 }
 if (isset($_REQUEST["day"])){
-	echo "<input type='hidden' name='day' value='". xssafe($_REQUEST["day"]) ."'>\n";
+    echo "<input type='hidden' name='day' value='". xssafe($_REQUEST["day"]) ."'>\n";
 }
 ?>
 <input type="hidden" name="network" value="<?php echo $network; ?>">
@@ -38,30 +38,30 @@ if (isset($_REQUEST["day"])){
 <?php
 $o = Array(
   "base" => Array("name" => "Information", "uri" => "site.php?",
-  		"metaok" => TRUE, "icon" => "info-circle"),
+          "metaok" => TRUE, "icon" => "info-circle"),
   "current" => Array("name" => "Last Ob", "uri" => "current.php?",
-  		"icon" => "clock"),
+          "icon" => "clock"),
   "pics" => Array("name" => "Photographs", "uri" => "pics.php?",
-  		"icon" => "camera"),
+          "icon" => "camera"),
   "cal" => Array("name" => "Calibration", "uri" => "cal.phtml?",
-		"icon" => "wrench",
-		"networks" => Array("IA_ASOS", "IA_RWIS", "ISUAG", "ISUSM")),
+        "icon" => "wrench",
+        "networks" => Array("IA_ASOS", "IA_RWIS", "ISUAG", "ISUSM")),
   "meteo" => Array("name" => "Meteogram", "uri" => "meteo.php?",
-  		"icon" => "chart-area"),
+          "icon" => "chart-area"),
   "tables" => Array("name" => "Network Table", "uri" => "networks.php?",
-  		"metaok" => TRUE, "icon" => "table"),
+          "metaok" => TRUE, "icon" => "table"),
   "neighbors" => Array("name" => "Neighbors", "uri" => "neighbors.php?",
-  		"metaok" => TRUE, "icon" => "users"),
+          "metaok" => TRUE, "icon" => "users"),
   "monthsum" => Array("name" => "Monthly Summaries",
-  		"uri" => "monthlysum.php?", "icon" => "table"),
+          "uri" => "monthlysum.php?", "icon" => "table"),
   "obhistory" => Array("name" => "Observation History",
-  		"uri" => "obhistory.php?", "icon" => "time"),
+          "uri" => "obhistory.php?", "icon" => "time"),
   "windrose" => Array("name" => "Wind Roses",
-  		"uri" => "windrose.phtml?", "icon" => "asterisk"),
+          "uri" => "windrose.phtml?", "icon" => "asterisk"),
   "custom_windrose" => Array("name" => "Custom Wind Roses",
-  		"uri" => "dyn_windrose.phtml?", "icon" => "asterisk"),
+          "uri" => "dyn_windrose.phtml?", "icon" => "asterisk"),
   "calendar" => Array("name" => "Data Calendar", "uri" => "hist.phtml?",
-  		"icon" => "calendar", "metaok" => TRUE),
+          "icon" => "calendar", "metaok" => TRUE),
 );
 
 foreach($o as $key => $val)
@@ -69,30 +69,30 @@ foreach($o as $key => $val)
     if (($key == "obhistory") && preg_match('/COCORAHS/', $network) > 0){
         continue;
     }
- 	if ((array_key_exists("azos", $val) &&  preg_match('/ASOS|ISUSM/', $network) <= 0) &&
-		(array_key_exists("rwis", $val) &&  preg_match('/RWIS/', $network) <= 0)){
-		continue;
-	}
-	if (array_key_exists("networks", $val) && !in_array($network, $val["networks"])){
-		continue;
+     if ((array_key_exists("azos", $val) &&  preg_match('/ASOS|ISUSM/', $network) <= 0) &&
+        (array_key_exists("rwis", $val) &&  preg_match('/RWIS/', $network) <= 0)){
+        continue;
+    }
+    if (array_key_exists("networks", $val) && !in_array($network, $val["networks"])){
+        continue;
     }
     // network has no wind direction
     if ($network == "USCRN" and ($key == 'custom_windrose' || $key == 'windrose')){
         continue;
     }
-	// Do not display links to pages that only work for sites that produce
-	// data that we consume!
-	if ($network == 'RAOB' && $key == 'custom_windrose'){
-		
-	}
-	else if ($metadata["metasite"] == 't' && ! array_key_exists("metaok", $val)){
-		continue;
-	}
-  	$uri = sprintf("%sstation=%s&amp;network=%s", $val["uri"], $station, $network);
-  	$active = ($this->sites_current == $key) ? " active": "";
-  	echo sprintf("<a href=\"%s\" class=\"btn btn-default%s\">".
-  			"<span class=\"fa fa-%s\"></span> %s</a>",
-  			$uri, $active, $val["icon"], $val["name"]);
+    // Do not display links to pages that only work for sites that produce
+    // data that we consume!
+    if ($network == 'RAOB' && $key == 'custom_windrose'){
+        
+    }
+    else if ($metadata["metasite"] == 't' && ! array_key_exists("metaok", $val)){
+        continue;
+    }
+      $uri = sprintf("%sstation=%s&amp;network=%s", $val["uri"], $station, $network);
+      $active = ($this->sites_current == $key) ? " active": "";
+      echo sprintf("<a href=\"%s\" class=\"btn btn-default%s\">".
+              "<span class=\"fa fa-%s\"></span> %s</a>",
+              $uri, $active, $val["icon"], $val["name"]);
 }
 
 if (preg_match('/ASOS/', $network) > 0){
@@ -102,8 +102,8 @@ if (preg_match('/ASOS/', $network) > 0){
                 $uri);
     }
     $uri = sprintf("/request/download.phtml?network=%s", $network);
-	echo sprintf("<a href=\"%s\" class=\"btn btn-default\"><span class=\"fa fa-download\"></span> Download</a>", 
-			$uri);
+    echo sprintf("<a href=\"%s\" class=\"btn btn-default\"><span class=\"fa fa-download\"></span> Download</a>", 
+            $uri);
     // TAF
     if (array_key_exists("HASTAF", $metadata["attributes"])){
         echo sprintf(
@@ -112,10 +112,10 @@ if (preg_match('/ASOS/', $network) > 0){
             $station, $network);            
     }
 }elseif (preg_match('/DCP/', $network) > 0){
-	$uri = sprintf("/request/dcp/fe.phtml?network=%s", $network);
-	echo sprintf("<a href=\"%s\" class=\"btn btn-default\"><span class=\"fa fa-download\"></span> Download</a>", 
-			$uri);
-	
+    $uri = sprintf("/request/dcp/fe.phtml?network=%s", $network);
+    echo sprintf("<a href=\"%s\" class=\"btn btn-default\"><span class=\"fa fa-download\"></span> Download</a>", 
+            $uri);
+    
 }
 ?>
 </p>

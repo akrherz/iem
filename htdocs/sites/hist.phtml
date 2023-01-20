@@ -1,12 +1,17 @@
 <?php
 /* hist.phtml */
 require_once "../../config/settings.inc.php";
-require_once "setup.php";
+require_once "../../include/sites.php";
 require_once "../../include/imagemaps.php";
 require_once "../../include/forms.php";
 require_once "../../include/mlib.php";
 require_once "../../include/myview.php";
 $DT = "1.10.24";
+
+$ctx = get_sites_context();
+$station = $ctx->station;
+$network = $ctx->network;
+$metadata = $ctx->metadata;
 
 $t = new MyView();
 
@@ -326,7 +331,7 @@ $ms = monthSelect($month, "month");
 $ds = daySelect($day);
 if ($mode == "monthly") {
     $content .= <<<EOF
-<h2>Data Calendar for {$st->table[$station]["name"]}</h2>
+<h2>Data Calendar for {$metadata["name"]}</h2>
 <p>The calendar chart below shows the daily reported climate variables.  
 You can click on a date to display the values for all sites for that day. 
 Time stamps are displayed in the <strong>{$metadata["tzname"]}</strong> 

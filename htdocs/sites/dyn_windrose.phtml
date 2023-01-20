@@ -8,7 +8,12 @@ require_once "../../include/forms.php";
 require_once "../../include/myview.php";
 
 // Makes sure this page has proper context
-require_once "setup.php";
+require_once "../../include/sites.php";
+$ctx = get_sites_context();
+$station = $ctx->station;
+$network = $ctx->network;
+$metadata = $ctx->metadata;
+
 
 // Switch this page to DCP, if necessary
 if (strpos($network, "COOP") > 0) {
@@ -25,7 +30,7 @@ if (strpos($network, "COOP") > 0) {
     if (pg_num_rows($rs) == 1){
         $res = pg_fetch_row($rs);
         $network = $res[0];
-        header("Location: /sites/dyn_windrose.phtml?station=${station}&network=${network}");
+        header("Location: /sites/dyn_windrose.phtml?station={$station}&network={$network}");
         die();
     }
 
