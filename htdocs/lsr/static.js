@@ -14,17 +14,20 @@ var dateFormat1 = "YYYYMMDDHHmm";
 var nexradBaseTime = moment().utc().subtract(moment().minutes() % 5, "minutes");
 var realtime = false;
 var TABLE_FILTERED_EVENT = "tfe";
+var moment = window.moment || {}; // skipcq: JS-0239
+var ol = window.ol || {}; // skipcq: JS-0239
+var iemdata = window.iemdata || {}; // skipcq: JS-0239
 
 // Use momentjs for formatting
 $.datetimepicker.setDateFormatter('moment');
 
 // https://datatables.net/plug-ins/api/row().show()
-$.fn.dataTable.Api.register('row().show()', function () {
-    var page_info = this.table().page.info();
+$.fn.dataTable.Api.register('row().show()', function() { // need this to work
+    const page_info = this.table().page.info();
     // Get row index
-    var new_row_index = this.index();
+    const new_row_index = this.index();
     // Row position
-    var row_position = this.table()
+    const row_position = this.table()
         .rows({ search: 'applied' })[0]
         .indexOf(new_row_index);
     // Already on right page ?
@@ -33,35 +36,41 @@ $.fn.dataTable.Api.register('row().show()', function () {
         return this;
     }
     // Find page number
-    var page_to_display = Math.floor(row_position / this.table().page.len());
+    const page_to_display = Math.floor(row_position / this.table().page.len());
     // Go to that page
     this.table().page(page_to_display);
     // Return row object
     return this;
 });
 
+function text(str) {
+    // XSS
+    return $("<p>").text(str).html();
+}
+
 function parse_href() {
     // Figure out how we were called
-    var tokens = window.location.href.split('#');
-    if (tokens.length != 2) {
+    let sts, ets;
+    const tokens = window.location.href.split('#');
+    if (tokens.length !== 2) {
         return;
     }
-    var tokens2 = tokens[1].split("/");
+    const tokens2 = tokens[1].split("/");
     if (tokens2.length < 2) {
         return;
     }
-    var wfos = tokens2[0].split(",");
+    const wfos = text(tokens2[0]).split(",");
     wfoSelect.val(wfos).trigger("change");
     if (tokens2.length > 2) {
-        var sts = moment.utc(tokens2[1], dateFormat1);
-        var ets = moment.utc(tokens2[2], dateFormat1);
+        sts = moment.utc(text(tokens2[1]), dateFormat1);
+        ets = moment.utc(text(tokens2[2]), dateFormat1);
     }
     else {
         realtime = true;
         $("#realtime").prop('checked', true);
         // Offset timing
-        var ets = moment.utc();
-        var sts = moment.utc(ets).add(parseInt(tokens2[1]), 'seconds');
+        ets = moment.utc();
+        sts = moment.utc(ets).add(parseInt(tokens2[1]), 'seconds');
     }
     $("#sts").val(sts.local().format("L LT"));
     $("#ets").val(ets.local().format("L LT"));
@@ -75,25 +84,25 @@ function parse_href() {
 function cronMinute() {
     if (!realtime) return;
     // Compute the delta
-    var sts = moment($("#sts").val(), 'L LT').utc();
-    var ets = moment($("#ets").val(), 'L LT').utc();
+    const sts = moment($("#sts").val(), 'L LT').utc();
+    const ets = moment($("#ets").val(), 'L LT').utc();
     $("#ets").val(moment().format('L LT'));
-    var seconds = ets.diff(sts) / 1000;  // seconds
+    const seconds = ets.diff(sts) / 1000;  // seconds
     $("#sts").val(moment().subtract(seconds, 'seconds').format('L LT'));
     loadData();
 }
 function getRADARSource(dt) {
-    var prod = dt.year() < 2011 ? 'N0R' : 'N0Q';
+    const prod = dt.year() < 2011 ? 'N0R' : 'N0Q';
     return new ol.source.XYZ({
-        url: '/cache/tile.py/1.0.0/ridge::USCOMP-' + prod + '-' + dt.utc().format('YMMDDHHmm') + '/{z}/{x}/{y}.png'
+        url: `/cache/tile.py/1.0.0/ridge::USCOMP-${prod}-${dt.utc().format('YMMDDHHmm')}/{z}/{x}/{y}.png`
     });
 }
 
 function make_iem_tms(title, layername, visible, type) {
     return new ol.layer.Tile({
-        title: title,
-        visible: visible,
-        type: type,
+        title,
+        visible,
+        type,
         source: new ol.source.XYZ({
             url: '/c/tile.py/1.0.0/' + layername + '/{z}/{x}/{y}.png'
         })
@@ -153,23 +162,6 @@ var lsrLookup = {
     "Z": "icons/blizzard.png"
 };
 
-var lsr_context = {
-    getText: function (feature) {
-        if (feature.attributes['type'] == 'S') {
-            return feature.attributes["magnitude"];
-        } else if (feature.attributes['type'] == 'R') {
-            return feature.attributes["magnitude"];
-        }
-        return "";
-    },
-    getExternalGraphic: function (feature) {
-        if (feature.attributes['type'] == 'S' ||
-            feature.attributes['type'] == 'R') {
-            return "";
-        }
-        return lsrLookup[feature.attributes['type']];
-    }
-};
 var sbwStyle = [new ol.style.Style({
     stroke: new ol.style.Stroke({
         color: '#000',
@@ -211,12 +203,12 @@ lsrLayer = new ol.layer.Vector({
     source: new ol.source.Vector({
         format: new ol.format.GeoJSON()
     }),
-    style: function (feature, resolution) {
+    style: (feature, _resolution) => {
         if (feature.hidden === true) {
             return new ol.style.Style();
         }
-        var mag = feature.get('magnitude').toString();
-        var typ = feature.get('type');
+        const mag = feature.get('magnitude').toString();
+        const typ = feature.get('type');
         if (mag != "") {
             if (typ == 'S' || typ == 'R' || typ == '5') {
                 textStyle.getText().setText(mag);
@@ -226,9 +218,9 @@ lsrLayer = new ol.layer.Vector({
                 return textStyle;
             }
         }
-        var url = lsrLookup[typ];
+        const url = lsrLookup[typ];
         if (url) {
-            var icon = new ol.style.Icon({
+            const icon = new ol.style.Icon({
                 src: url
             });
             lsrStyle.setImage(icon);
@@ -236,23 +228,22 @@ lsrLayer = new ol.layer.Vector({
         return lsrStyle;
     }
 });
-lsrLayer.addEventListener(TABLE_FILTERED_EVENT, function () {
+lsrLayer.addEventListener(TABLE_FILTERED_EVENT, () => {
     // Turn all features back on
     lsrLayer.getSource().getFeatures().forEach((feat) => {
         feat.hidden = false;
     });
     // Filter out the map too
-    lsrtable.rows({ "search": "removed" }).every(function (idx) {
-        var feat = lsrLayer.getSource().getFeatureById(this.data().id);
-        feat.hidden = true;
+    lsrtable.rows({ "search": "removed" }).every(function (_idx) { // this
+        lsrLayer.getSource().getFeatureById(this.data().id).hidden = true;
     });
     lsrLayer.changed();
 });
-lsrLayer.getSource().on('change', function (e) {
+lsrLayer.getSource().on('change', (_e) => {
     if (lsrLayer.getSource().isEmpty()) {
         return;
     }
-    if (lsrLayer.getSource().getState() == 'ready') {
+    if (lsrLayer.getSource().getState() === 'ready') {
         olmap.getView().fit(
             lsrLayer.getSource().getExtent(),
             {
@@ -262,17 +253,17 @@ lsrLayer.getSource().on('change', function (e) {
         );
     }
     lsrtable.rows().remove();
-    var data = [];
-    lsrLayer.getSource().getFeatures().forEach(function (feat) {
-        var props = feat.getProperties();
+    const data = [];
+    lsrLayer.getSource().getFeatures().forEach((feat) => {
+        const props = feat.getProperties();
         props.id = feat.getId();
         data.push(props);
     });
     lsrtable.rows.add(data).draw();
 
     // Build type filter
-    lsrtable.column(7).data().unique().sort().each(function (d, j) {
-        lsrtypefilter.append('<option value="' + d + '">' + d + '</option');
+    lsrtable.column(7).data().unique().sort().each((d, _j) => {
+        lsrtypefilter.append(`<option value="${d}">${d}</option`);
     });
 });
 
@@ -282,119 +273,107 @@ sbwLayer = new ol.layer.Vector({
         format: new ol.format.GeoJSON()
     }),
     visible: true,
-    style: function (feature, resolution) {
+    style: (feature, _resolution) => {
         if (feature.hidden === true) {
             return new ol.style.Style();
         }
-        var color = sbwLookup[feature.get('phenomena')];
+        const color = sbwLookup[feature.get('phenomena')];
         if (color === undefined) return;
         sbwStyle[1].getStroke().setColor(color);
         return sbwStyle;
     }
 });
-sbwLayer.addEventListener(TABLE_FILTERED_EVENT, function () {
+sbwLayer.addEventListener(TABLE_FILTERED_EVENT, () => {
     // Turn all features back on
     sbwLayer.getSource().getFeatures().forEach((feat) => {
         feat.hidden = false;
     });
     // Filter out the map too
-    sbwtable.rows({ "search": "removed" }).every(function (idx) {
-        var feat = sbwLayer.getSource().getFeatureById(this.data().id);
-        feat.hidden = true;
+    sbwtable.rows({ "search": "removed" }).every(function(_idx) {  // this
+        sbwLayer.getSource().getFeatureById(this.data().id).hidden = true;
     });
     sbwLayer.changed();
 });
-sbwLayer.getSource().on('change', function (e) {
+sbwLayer.getSource().on('change', (_e) => {
     sbwtable.rows().remove();
-    var data = [];
+    const data = [];
     sbwLayer.getSource().getFeatures().forEach(function (feat) {
-        var props = feat.getProperties();
+        const props = feat.getProperties();
         props.id = feat.getId();
         data.push(props);
     });
     sbwtable.rows.add(data).draw();
 
     // Build type filter
-    sbwtable.column(3).data().unique().sort().each(function (d, j) {
-        sbwtypefilter.append('<option value="' + iemdata.vtec_phenomena[d] + '">' + iemdata.vtec_phenomena[d] + '</option');
+    sbwtable.column(3).data().unique().sort().each((d, _j) => {
+        sbwtypefilter.append(`<option value="${iemdata.vtec_phenomena[d]}">${iemdata.vtec_phenomena[d]}</option`);
     });
 
 });
 
 function formatLSR(data) {
     // Format what is presented
-    return '<div><strong>Source:</strong> ' + data.source +
-        ' &nbsp; <strong>UTC Valid:</strong> ' + data.valid +
-        '<br /><strong>Remark:</strong> ' + data.remark +
-        '</div>';
+    return `<div><strong>Source:</strong> ${data.source} &nbsp; <strong>UTC Valid:</strong> ${data.valid}<br /><strong>Remark:</strong> ${data.remark}</div>`;
 }
 
 function revisedRandId() {
     return Math.random().toString(36).replace(/[^a-z]+/g, '').substr(2, 10);
 }
 function lsrHTML(feature) {
-    var lines = [];
-    var dt = moment.utc(feature.get("valid"));
-    var ldt = dt.local().format("M/D LT");
-    var z = dt.utc().format("kk:mm");
-    lines.push("<strong>Valid:</strong> " + ldt + " (" + z + "Z)");
-    var v = feature.get("source");
-    if (v !== null) {
-        lines.push("<strong>Source:</strong> " + v);
+    const lines = [];
+    const dt = moment.utc(feature.get("valid"));
+    const ldt = dt.local().format("M/D LT");
+    const zz = dt.utc().format("kk:mm");
+    lines.push(`<strong>Valid:</strong> ${ldt} (${zz}Z)`);
+    let vv = feature.get("source");
+    if (vv !== null) {
+        lines.push(`<strong>Source:</strong> ${vv}`);
     }
-    v = feature.get("typetext");
-    if (v !== null) {
-        lines.push("<strong>Type:</strong> " + v);
+    vv = feature.get("typetext");
+    if (vv !== null) {
+        lines.push(`<strong>Type:</strong> ${vv}`);
     }
-    v = feature.get("magnitude");
-    if (v !== null && v != "") {
-        var unit = feature.get("unit");
+    vv = feature.get("magnitude");
+    if (vv !== null && vv != "") {
+        let unit = feature.get("unit");
         if (unit === null) {
             unit = "";
         }
-        lines.push("<strong>Magnitude:</strong> " + v + " " + unit);
+        lines.push(`<strong>Magnitude:</strong> ${vv} ${unit}`);
     }
-    v = feature.get("remark");
-    if (v !== null) {
-        lines.push("<strong>Remark:</strong> " + v);
+    vv = feature.get("remark");
+    if (vv !== null) {
+        lines.push(`<strong>Remark:</strong> ${vv}`);
     }
     return lines.join("<br />");
 }
 
 function formatSBW(feature) {
-    var lines = [];
-    var ph = feature.get("phenomena");
-    var pph = ph in iemdata.vtec_phenomena ? iemdata.vtec_phenomena[ph] : ph;
-    var s = feature.get("significance");
-    var ss = s in iemdata.vtec_significance ? iemdata.vtec_significance[s] : s;
-    lines.push("<strong>" + pph + " " + ss + "</strong>");
-    var issue = moment.utc(feature.get("issue"));
-    var expire = moment.utc(feature.get("expire"));
-    var ldt = issue.local().format("M/D LT");
-    var z = issue.utc().format("kk:mm")
-    lines.push("<strong>Issued:</strong> " + ldt + " (" + z + "Z)");
+    const lines = [];
+    const ph = feature.get("phenomena");
+    const pph = ph in iemdata.vtec_phenomena ? iemdata.vtec_phenomena[ph] : ph;
+    const sig = feature.get("significance");
+    const ss = sig in iemdata.vtec_significance ? iemdata.vtec_significance[sig] : sig;
+    lines.push(`<strong>${pph} ${ss}</strong>`);
+    const issue = moment.utc(feature.get("issue"));
+    const expire = moment.utc(feature.get("expire"));
+    let ldt = issue.local().format("M/D LT");
+    let zz = issue.utc().format("kk:mm")
+    lines.push(`<strong>Issued:</strong> ${ldt} (${zz}Z)`);
     ldt = expire.local().format("M/D LT");
-    z = expire.utc().format("kk:mm")
-    lines.push("<strong>Expired:</strong> " + ldt + " (" + z + "Z)");
-    lines.push("<strong>More Details:</strong> <a href='" + feature.get("href") + "' target='_blank'>VTEC Browser</a>");
+    zz = expire.utc().format("kk:mm")
+    lines.push(`<strong>Expired:</strong> ${ldt} (${zz}Z)`);
+    lines.push(`<strong>More Details:</strong> <a href='${feature.get("href")}' target='_blank'>VTEC Browser</a>`);
     return lines.join("<br />");
 }
 
 function handleSBWClick(feature) {
-    var divid = revisedRandId();
-    var div = document.createElement("div");
-    var title = feature.get("wfo") + " " + feature.get("phenomena") +
-        "." + feature.get("significance") + " #" + feature.get("eventid");
-    div.innerHTML = '<div class="panel panel-primary panel-popup" id="' + divid + '">' +
-        '<div class="panel-heading">' + title +
-        ' &nbsp; <button type="button" class="close" ' +
-        'data-target="#' + divid + '" data-dismiss="alert"> ' +
-        '<span aria-hidden="true">&times;</span>' +
-        '<span class="sr-only">Close</span></button></div>' +
-        '<div class="panel-body">' + formatSBW(feature) + '</div>' +
-        '</div>';
-    var coordinates = feature.getGeometry().getFirstCoordinate();
-    var marker = new ol.Overlay({
+    const divid = revisedRandId();
+    const div = document.createElement("div");
+    const title = `${feature.get("wfo")} ${feature.get("phenomena")}.${feature.get("significance")} #${feature.get("eventid")}`;
+    div.innerHTML = `<div class="panel panel-primary panel-popup" id="${divid}"><div class="panel-heading">${title} &nbsp; <button type="button" class="close" data-target="#${divid}" data-dismiss="alert"> <span aria-hidden="true">&times;</span><span class="sr-only">Close</span></button></div><div class="panel-body">${formatSBW(feature)}</div></div>`;
+    const coordinates = feature.getGeometry().getFirstCoordinate();
+    const marker = new ol.Overlay({
         position: coordinates,
         positioning: 'center-center',
         element: div,
@@ -402,25 +381,25 @@ function handleSBWClick(feature) {
         dragging: false
     });
     olmap.addOverlay(marker);
-    div.addEventListener('mousedown', function (evt) {
+    div.addEventListener('mousedown', (_evt) => {
         dragPan.setActive(false);
         marker.set('dragging', true);
     });
-    olmap.on('pointermove', function (evt) {
+    olmap.on('pointermove', (evt) => {
         if (marker.get('dragging') === true) {
             marker.setPosition(evt.coordinate);
         }
     });
-    olmap.on('pointerup', function (evt) {
+    olmap.on('pointerup', (_evt) => {
         if (marker.get('dragging') === true) {
             dragPan.setActive(true);
             marker.set('dragging', false);
         }
     });
-    var id = feature.getId();
+    const id = feature.getId();
     sbwtable.rows().deselect();
     sbwtable.row(
-        sbwtable.rows(function (idx, data, node) {
+        sbwtable.rows((idx, data, _node) => {
             if (data["id"] === id) {
                 sbwtable.row(idx).select();
                 return true;
@@ -432,7 +411,7 @@ function handleSBWClick(feature) {
 }
 function initUI() {
     // Generate UI components of the page
-    var handle = $("#radartime");
+    const handle = $("#radartime");
     $("#timeslider").slider({
         min: 0,
         max: 100,
@@ -440,12 +419,12 @@ function initUI() {
             handle.text(nexradBaseTime.local().format("L LT"));
         },
         slide: function (event, ui) {
-            var dt = moment(nexradBaseTime);
+            const dt = moment(nexradBaseTime);
             dt.add(ui.value * 5, 'minutes');
             handle.text(dt.local().format("L LT"));
         },
         change: function (event, ui) {
-            var dt = moment(nexradBaseTime);
+            const dt = moment(nexradBaseTime);
             dt.add(ui.value * 5, 'minutes');
             n0q.setSource(getRADARSource(dt));
             handle.text(dt.local().format("L LT"));
@@ -461,9 +440,9 @@ function initUI() {
         width: 300,
         multiple: true
     });
-    lsrtypefilter.on("change", function () {
-        var vals = $(this).val();
-        var val = vals ? vals.join("|") : null;
+    lsrtypefilter.on("change", function() { // this
+        const vals = $(this).val();
+        const val = vals ? vals.join("|") : null;
         lsrtable.column(7).search(val ? '^' + val + '$' : '', true, false).draw();
     });
     sbwtypefilter = $("#sbwtypefilter").select2({
@@ -471,18 +450,18 @@ function initUI() {
         width: 300,
         multiple: true
     });
-    sbwtypefilter.on("change", function () {
-        var vals = $(this).val();
-        var val = vals ? vals.join("|") : null;
+    sbwtypefilter.on("change", function() { // this
+        const vals = $(this).val();
+        const val = vals ? vals.join("|") : null;
         sbwtable.column(3).search(val ? '^' + val + '$' : '', true, false).draw();
     });
     wfoSelect = $("#wfo").select2({
-        templateSelection: function (state) {
+        templateSelection: (state) => {
             return state.id;
         }
     });
     $.each(iemdata.wfos, function (idx, entry) {
-        var opt = new Option("[" + entry[0] + "] " + entry[1], entry[0], false, false);
+        const opt = new Option(`[${entry[0]}] ${entry[1]}`, entry[0], false, false);
         wfoSelect.append(opt);
     });
 
@@ -491,35 +470,35 @@ function initUI() {
         step: 1,
         maxDate: '+1970/01/03',
         minDate: '2003/01/01',
-        onClose: function (dp, $input) {
+        onClose: (_dp, _input) => {
             loadData();
         }
     });
-    var sts = moment().subtract(1, 'day');
-    var ets = moment();
+    const sts = moment().subtract(1, 'day');
+    const ets = moment();
     $("#sts").val(sts.format('L LT'));
     $("#ets").val(ets.format('L LT'));
     updateRADARTimes();
 
-    $("#load").click(function () {
+    $("#load").click(() => {
         loadData();
     });
-    $("#lsrshapefile").click(function () {
+    $("#lsrshapefile").click(() => {
         window.location.href = getShapefileLink("lsr");
     });
-    $("#lsrexcel").click(function () {
-        window.location.href = getShapefileLink("lsr") + "&fmt=excel";
+    $("#lsrexcel").click(() => {
+        window.location.href = `${getShapefileLink("lsr")}&fmt=excel`;
     });
-    $("#warnshapefile").click(function () {
+    $("#warnshapefile").click(() => {
         window.location.href = getShapefileLink("watchwarn");
     });
-    $("#warnexcel").click(function () {
-        window.location.href = getShapefileLink("watchwarn") + "&accept=excel";
+    $("#warnexcel").click(() => {
+        window.location.href = `${getShapefileLink("watchwarn")}&accept=excel`;
     });
-    $("#sbwshapefile").click(function () {
-        window.location.href = getShapefileLink("watchwarn") + "&limit1=yes";
+    $("#sbwshapefile").click(() => {
+        window.location.href = `${getShapefileLink("watchwarn")}&limit1=yes`;
     });
-    $("#realtime").click(function () {
+    $("#realtime").click(function() {
         realtime = this.checked;
         if (realtime) {
             loadData();
@@ -568,18 +547,18 @@ function initUI() {
             lsrLayer
         ]
     });
-    var ls = new ol.control.LayerSwitcher();
+    const ls = new ol.control.LayerSwitcher();
     olmap.addControl(ls);
-    olmap.getInteractions().forEach(function (interaction) {
+    olmap.getInteractions().forEach((interaction) => {
         if (interaction instanceof ol.interaction.DragPan) {
             dragPan = interaction;
         }
     });
 
-    olmap.on('click', function (evt) {
-        var feature = olmap.forEachFeatureAtPixel(evt.pixel,
-            function (feature) {
-                return feature;
+    olmap.on('click', (evt) => {
+        const feature = olmap.forEachFeatureAtPixel(evt.pixel,
+            (feature2) => {
+                return feature2;
             });
         if (feature === undefined) {
             return;
@@ -590,20 +569,11 @@ function initUI() {
         }
         if (feature.get('magnitude') === undefined) return;
         // evt.originalEvent.x
-        var divid = revisedRandId();
-        var div = document.createElement("div");
-        div.innerHTML = '<div class="panel panel-primary panel-popup" id="' + divid + '">' +
-            '<div class="panel-heading">' + feature.get("city") + ", " +
-            feature.get("st") +
-            ' &nbsp; <button type="button" class="close" ' +
-            'data-target="#' + divid + '" data-dismiss="alert"> ' +
-            '<span aria-hidden="true">&times;</span>' +
-            '<span class="sr-only">Close</span></button></div>' +
-            '<div class="panel-body">' + lsrHTML(feature) +
-            '</div>' +
-            '</div>';
-        var coordinates = feature.getGeometry().getCoordinates();
-        var marker = new ol.Overlay({
+        const divid = revisedRandId();
+        const div = document.createElement("div");
+        div.innerHTML = `<div class="panel panel-primary panel-popup" id="${divid}"><div class="panel-heading">${feature.get("city")}, ${feature.get("st")} &nbsp; <button type="button" class="close" data-target="#${divid}" data-dismiss="alert"> <span aria-hidden="true">&times;</span><span class="sr-only">Close</span></button></div><div class="panel-body">${lsrHTML(feature)}</div></div>`;
+        const coordinates = feature.getGeometry().getCoordinates();
+        const marker = new ol.Overlay({
             position: coordinates,
             positioning: 'center-center',
             element: div,
@@ -611,25 +581,25 @@ function initUI() {
             dragging: false
         });
         olmap.addOverlay(marker);
-        div.addEventListener('mousedown', function (evt) {
+        div.addEventListener('mousedown', (_evt) => {
             dragPan.setActive(false);
             marker.set('dragging', true);
         });
-        olmap.on('pointermove', function (evt) {
+        olmap.on('pointermove', (evt) => {
             if (marker.get('dragging') === true) {
                 marker.setPosition(evt.coordinate);
             }
         });
-        olmap.on('pointerup', function (evt) {
+        olmap.on('pointerup', (_evt) => {
             if (marker.get('dragging') === true) {
                 dragPan.setActive(true);
                 marker.set('dragging', false);
             }
         });
-        var id = feature.getId();
+        const id = feature.getId();
         lsrtable.rows().deselect();
         lsrtable.row(
-            lsrtable.rows(function (idx, data, node) {
+            lsrtable.rows((idx, data, _node) => {
                 if (data["id"] === id) {
                     lsrtable.row(idx).select();
                     return true;
@@ -674,19 +644,19 @@ function initUI() {
         columnDefs: [
             {
                 targets: 3,
-                render: function (data) {
+                render: (data) => {
                     return moment.utc(data).local().format('M/D LT');
                 }
             }
         ]
     });
-    lsrtable.on("search.dt", function () {
+    lsrtable.on("search.dt", () => {
         lsrLayer.dispatchEvent(TABLE_FILTERED_EVENT);
     });
     // Add event listener for opening and closing details
-    $('#lsrtable tbody').on('click', 'td.details-control', function () {
-        var tr = $(this).closest('tr');
-        var row = lsrtable.row(tr);
+    $('#lsrtable tbody').on('click', 'td.details-control', function() { // this
+        const tr = $(this).closest('tr');
+        const row = lsrtable.row(tr);
 
         if (row.child.isShown()) {
             // This row is already open - close it
@@ -726,38 +696,38 @@ function initUI() {
         columnDefs: [
             {
                 targets: 3,
-                render: function (data) {
+                render: (data) => {
                     return data in iemdata.vtec_phenomena ? iemdata.vtec_phenomena[data] : data;
                 }
             }, {
                 targets: 4,
-                render: function (data) {
+                render: (data) => {
                     return data in iemdata.vtec_significance ? iemdata.vtec_significance[data] : data;
                 }
             }, {
                 targets: 5,
-                render: function (data, type, row, meta) {
+                render: (_data, type, row, _meta) => {
                     if (type == 'display') {
-                        return '<a href="' + row.href + '">' + row.eventid + '</a>';
+                        return `<a href="${row.href}">${row.eventid}</a>`;
                     }
                     return row.eventid;
                 }
             }, {
                 targets: [6, 7],
-                render: function (data) {
+                render: (data) => {
                     return moment.utc(data).local().format('M/D LT');
                 }
             }
         ]
     });
-    sbwtable.on("search.dt", function () {
+    sbwtable.on("search.dt", () => {
         sbwLayer.dispatchEvent(TABLE_FILTERED_EVENT);
     });
 }
 
 function genSettings() {
     /* Generate URL options set on this page */
-    var s = "";
+    let s = "";
     s += (n0q.visibility ? "1" : "0");
     s += (lsrLayer.visibility ? "1" : "0");
     s += (sbwLayer.visibility ? "1" : "0");
@@ -766,35 +736,35 @@ function genSettings() {
 }
 
 function updateURL() {
-    var wfos = $("#wfo").val();  // null for all or array
-    var sts = moment($("#sts").val(), 'L LT').utc().format(dateFormat1);
-    var ets = moment($("#ets").val(), 'L LT').utc().format(dateFormat1);
-    var wstr = (wfos === null) ? "" : wfos.join(",");
-    window.location.href = "#" + wstr + "/" + sts + "/" + ets + "/" + genSettings();
+    const wfos = $("#wfo").val();  // null for all or array
+    const sts = moment($("#sts").val(), 'L LT').utc().format(dateFormat1);
+    const ets = moment($("#ets").val(), 'L LT').utc().format(dateFormat1);
+    const wstr = (wfos === null) ? "" : wfos.join(",");
+    window.location.href = `#${text(wstr)}/${sts}/${ets}/${genSettings()}`;
 
 }
 function applySettings(opts) {
-    if (opts[0] == "1") { // Show RADAR
+    if (opts[0] === "1") { // Show RADAR
         n0q.setVisibility(true);
     }
-    if (opts[1] == "1") { // Show LSRs
+    if (opts[1] === "1") { // Show LSRs
         lsrLayer.setVisibility(true);
     }
-    if (opts[2] == "1") { // Show SBWs
+    if (opts[2] === "1") { // Show SBWs
         sbwLayer.setVisibility(true);
     }
-    if (opts[3] == "1") { // Realtime
+    if (opts[3] === "1") { // Realtime
         realtime = true;
         $("#realtime").prop('checked', true);
     }
 }
 function updateRADARTimes() {
     // Figure out what our time slider should look like
-    var sts = moment($("#sts").val(), 'L LT').utc();
-    var ets = moment($("#ets").val(), 'L LT').utc();
+    const sts = moment($("#sts").val(), 'L LT').utc();
+    const ets = moment($("#ets").val(), 'L LT').utc();
     sts.subtract(sts.minute() % 5, 'minutes');
     ets.add(5 - ets.minute() % 5, 'minutes');
-    var times = ets.diff(sts) / 300000;  // 5 minute bins
+    const times = ets.diff(sts) / 300000;  // 5 minute bins
     nexradBaseTime = sts;
     $("#timeslider")
         .slider("option", "max", times - 1)
@@ -805,15 +775,15 @@ function loadData() {
     if ($(".tab .active > a").attr("href") != "#2a") {
         $("#lsrtab").click();
     }
-    var wfos = $("#wfo").val();  // null for all or array
-    var sts = moment($("#sts").val(), 'L LT').utc().format(dateFormat1);
-    var ets = moment($("#ets").val(), 'L LT').utc().format(dateFormat1);
+    const wfos = $("#wfo").val();  // null for all or array
+    const sts = moment($("#sts").val(), 'L LT').utc().format(dateFormat1);
+    const ets = moment($("#ets").val(), 'L LT').utc().format(dateFormat1);
     updateRADARTimes();
 
-    var opts = {
-        sts: sts,
-        ets: ets,
-        wfos: (wfos === null) ? "" : wfos.join(",")
+    const opts = {
+        sts,
+        ets,
+        wfos: (wfos === null) ? "" : text(wfos.join(","))
     };
     lsrLayer.getSource().clear(true);
     sbwLayer.getSource().clear(true);
@@ -823,7 +793,7 @@ function loadData() {
         method: "GET",
         url: "/geojson/lsr.php",
         dataType: 'json',
-        success: function (data) {
+        success: (data) => {
             if (data.features.length == 10000) {
                 alert("App limit of 10,000 LSRs reached.");
             }
@@ -838,7 +808,7 @@ function loadData() {
         method: "GET",
         url: "/geojson/sbw.php",
         dataType: 'json',
-        success: function (data) {
+        success: (data) => {
             sbwLayer.getSource().addFeatures(
                 (new ol.format.GeoJSON({ featureProjection: 'EPSG:3857' })
                 ).readFeatures(data)
@@ -849,15 +819,15 @@ function loadData() {
 }
 
 function getShapefileLink(base) {
-    var uri = "/cgi-bin/request/gis/" + base + ".py?";
-    var wfos = $("#wfo").val();
+    let uri = `/cgi-bin/request/gis/${base}.py?`;
+    const wfos = $("#wfo").val();
     if (wfos) {
-        for (var i = 0; i < wfos.length; i++) {
-            uri += "&wfo[]=" + wfos[i];
+        for (let i = 0; i < wfos.length; i++) {
+            uri += "&wfo[]=" + text(wfos[i]);
         }
     }
-    var sts = moment($("#sts").val(), 'L LT');
-    var ets = moment($("#ets").val(), 'L LT');
+    const sts = moment($("#sts").val(), 'L LT');
+    const ets = moment($("#ets").val(), 'L LT');
     uri += "&year1=" + sts.utc().format('Y');
     uri += "&month1=" + sts.utc().format('M');
     uri += "&day1=" + sts.utc().format('D');
