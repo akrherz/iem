@@ -16,7 +16,7 @@ var TABLE_FILTERED_EVENT = "tfe";
 var moment = window.moment || {}; // skipcq: JS-0239
 var ol = window.ol || {}; // skipcq: JS-0239
 var iemdata = window.iemdata || {}; // skipcq: JS-0239
-var nexradBaseTime = moment().utc().subtract(moment().minutes() % 5, "minutes");
+let nexradBaseTime = moment().utc().subtract(moment().minutes() % 5, "minutes");
 
 // Use momentjs for formatting
 $.datetimepicker.setDateFormatter('moment');

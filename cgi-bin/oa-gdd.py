@@ -41,31 +41,30 @@ def application(environ, start_response):
         maxV = int(form["max"])
 
     # Make sure we aren't in the future
-    now = datetime.datetime.today()
-    if ets > now:
-        ets = now
+    ets = min(datetime.datetime.today(), ets)
 
     st = NetworkTable("IACLIMATE")
-    # Compute normal from the climate database
-    sql = """
-        SELECT station,
-        sum(gddXX(%s, %s, high, low)) as gdd, count(*)
-        from alldata_ia WHERE year = %s and day >= '%s' and day < '%s'
-        and substr(station, 2, 1) != 'C' and station != 'IA0000'
-        GROUP by station
-    """ % (
-        baseV,
-        maxV,
-        sts.year,
-        sts.strftime("%Y-%m-%d"),
-        ets.strftime("%Y-%m-%d"),
-    )
 
     lats = []
     lons = []
     gdd50 = []
     valmask = []
-    ccursor.execute(sql)
+    ccursor.execute(
+        """
+        SELECT station,
+        sum(gddXX(%s, %s, high, low)) as gdd, count(*)
+        from alldata_ia WHERE year = %s and day >= %s and day < %s
+        and substr(station, 2, 1) != 'C' and station != 'IA0000'
+        GROUP by station
+    """,
+        (
+            baseV,
+            maxV,
+            sts.year,
+            sts.strftime("%Y-%m-%d"),
+            ets.strftime("%Y-%m-%d"),
+        ),
+    )
     total_days = (ets - sts).days
     for row in ccursor:
         sid = row[0]
@@ -78,21 +77,19 @@ def application(environ, start_response):
         gdd50.append(float(row[1]))
         valmask.append(True)
 
-    m = MapPlot(
-        title=("Iowa %s thru %s GDD(base=%s,max=%s) Accumulation" "")
-        % (
-            sts.strftime("%Y: %d %b"),
-            (ets - datetime.timedelta(days=1)).strftime("%d %b"),
-            baseV,
-            maxV,
+    tt = (ets - datetime.timedelta(days=1)).strftime("%d %b")
+    mp = MapPlot(
+        title=(
+            f"Iowa {sts:%Y: %d %b} thru {tt} GDD(base={baseV},max={maxV}) "
+            "Accumulation"
         ),
         axisbg="white",
     )
-    m.contourf(lons, lats, gdd50, range(int(min(gdd50)), int(max(gdd50)), 25))
-    m.plot_values(lons, lats, gdd50, fmt="%.0f")
-    m.drawcounties()
+    mp.contourf(lons, lats, gdd50, range(int(min(gdd50)), int(max(gdd50)), 25))
+    mp.plot_values(lons, lats, gdd50, fmt="%.0f")
+    mp.drawcounties()
     bio = BytesIO()
-    m.fig.savefig(bio)
-    m.close()
+    mp.fig.savefig(bio)
+    mp.close()
     start_response("200 OK", [("Content-type", "image/png")])
     return [bio.getvalue()]

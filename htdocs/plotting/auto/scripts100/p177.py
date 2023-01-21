@@ -317,9 +317,7 @@ def make_daily_rad_plot(ctx):
     for row in icursor:
         dates.append(row[0])
         vals.append(row[1])
-        jday = int(row[0].strftime("%j"))
-        if jday > 364:
-            jday = 364
+        jday = min(int(row[0].strftime("%j")), 364)
         tmax.append(theory[jday])
 
     df = pd.DataFrame(dict(dates=dates, vals=vals, jday=jday, tmax=tmax))

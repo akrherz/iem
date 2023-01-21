@@ -146,11 +146,6 @@ def plotter(fdict):
         df["utc_valid"] - df.shift(1)["utc_valid"]
     ).dt.total_seconds()
     df = df.set_index("utc_valid")
-    # if d1 is not None and d1 >= 0 and d1 <= 360:
-    # if s is not None and s >= 0 and s < 200:
-    # if t is not None and t >= -90 and t < 190:
-    # if d is not None and d >= -90 and d < 190:
-    # if v1 is not None and v1 >= 0 and v1 < 30:
 
     def ceilingfunc(row):
         """Our logic to compute a ceiling"""
