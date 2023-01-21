@@ -3,8 +3,8 @@
 <main role="main" id="main-content">
 <div class="container">
 <?php
-if (array_key_exists('content', $this->vars)){
-  echo $this->vars['content'];
+if (! is_null($this->content)){
+  echo $this->content;
 }
 ?>
 </div><!--/.container-->

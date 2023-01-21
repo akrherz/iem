@@ -1,0 +1,19 @@
+{
+  "name": "iem",
+  "version": "1.0.0",
+  "description": "If using this code causes your server to have kittens, it is your own fault.",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "lint": "eslint --ext .js --ignore-path .gitignore ."
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/akrherz/iem.git"
+  },
+  "author": "",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/akrherz/iem/issues"
+  },
+  "homepage": "https://github.com/akrherz/iem#readme"
+}

@@ -1,7 +1,12 @@
 <?php
 require_once "../../config/settings.inc.php";
 require_once "../../include/database.inc.php";
-require_once "setup.php";
+require_once "../../include/sites.php";
+require_once "../../include/myview.php";
+$ctx = get_sites_context();
+$station = $ctx->station;
+$network = $ctx->network;
+$metadata = $ctx->metadata;
 
 // Switch this page to DCP, if necessary
 if (strpos($network, "COOP") > 0) {
@@ -18,12 +23,11 @@ if (strpos($network, "COOP") > 0) {
     if (pg_num_rows($rs) == 1){
         $res = pg_fetch_row($rs);
         $network = $res[0];
-        header("Location: /sites/windrose.phtml?station=${station}&network=${network}");
+        header("Location: /sites/windrose.phtml?station={$station}&network={$network}");
         die();
     }
 }
 
-require_once "../../include/myview.php";
 $t = new MyView();
 $t->title = "Site Wind Roses";
 $t->sites_current = "windrose";
@@ -48,10 +52,10 @@ $rosedata_uri = "/cgi-bin/mywindrose.py?nsector=36&station=$station&network=$net
     . "justdata=true&hour1=0&hour2=0&year2=" . (intval(date("Y")) + 1);
 
 
-if (file_exists("/mesonet/share/windrose/${network}/${station}/${station}_yearly.png")) {
+if (file_exists("/mesonet/share/windrose/{$network}/{$station}/{$station}_yearly.png")) {
     $content .= "<p><h4>Yearly Climatology:</h4>
   <div class='row'><div class='col-md-12'><a href='{$rosedata_uri}&month1=1' class='btn btn-primary' role='button' rel='nofollow'><i class='fa fa-list'></i> View raw data</a>
-  <br /><br /><img src=\"/onsite/windrose/${network}/${station}/${station}_yearly.png\" class='img-responsive'>
+  <br /><br /><img src=\"/onsite/windrose/{$network}/{$station}/{$station}_yearly.png\" class='img-responsive'>
   </div></div>";
 
     $content .= "<p><h4>Monthly Climatology:  (click thumbnail)</h4>

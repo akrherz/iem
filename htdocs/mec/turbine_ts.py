@@ -3,7 +3,7 @@ from io import BytesIO
 import datetime
 
 import pytz
-from pandas.io.sql import read_sql
+import pandas as pd
 import matplotlib.dates as mdates
 from paste.request import parse_formvars
 from pyiem.plot.use_agg import plt
@@ -12,29 +12,24 @@ from pyiem.util import get_dbconn
 
 def workflow(turbinename, ts):
     """Go main()"""
-    pgconn = get_dbconn("mec", user="mesonet")
+    pgconn = get_dbconn("mec")
     cursor = pgconn.cursor()
     cursor.execute(
-        """SELECT unitnumber from turbines
-    where turbinename = %s""",
+        "SELECT unitnumber from turbines where turbinename = %s",
         (turbinename,),
     )
     unitnumber = cursor.fetchone()[0]
     ts1 = ts.strftime("%Y-%m-%d")
     ts2 = (ts + datetime.timedelta(hours=73)).strftime("%Y-%m-%d")
-    df = read_sql(
-        """
+    df = pd.read_sql(
+        f"""
     select coalesce(s.valid, d.valid) as stamp,
     s.power as s_power, s.pitch as s_pitch,
     s.yaw as s_yaw, s.windspeed as s_windspeed,
     d.power as d_power, d.pitch as d_pitch,
     d.yaw as d_yaw, d.windspeed as d_windspeed
-    from sampled_data_"""
-        + unitnumber
-        + """ s FULL OUTER JOIN
-    turbine_data_"""
-        + unitnumber
-        + """ d
+    from sampled_data_{unitnumber} s FULL OUTER JOIN
+    turbine_data_{unitnumber} d
     on (d.valid = s.valid)
     WHERE s.valid BETWEEN %s and %s
     ORDER by stamp ASC
@@ -45,7 +40,7 @@ def workflow(turbinename, ts):
 
     (_, ax) = plt.subplots(4, 1, sharex=True, figsize=(8, 11))
 
-    ax[0].set_title("%s - %s Plot for Turbine: %s" % (ts1, ts2, turbinename))
+    ax[0].set_title(f"{ts1} - {ts2} Plot for Turbine: {turbinename}")
 
     ax[0].bar(
         df["stamp"],
@@ -87,7 +82,7 @@ def workflow(turbinename, ts):
         s=40,
     )
     ax[1].set_ylim(bottom=-5)
-    ax[1].set_ylabel("Pitch $^\circ$")
+    ax[1].set_ylabel(r"Pitch $^\circ$")
     ax[1].grid(True)
     # --------------------------------------------------------
     ax[2].bar(

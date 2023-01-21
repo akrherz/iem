@@ -22,12 +22,12 @@ function locate_product($conn, $e, $pil, $dir)
 {
     // Attempt to locate this product and redirect to stable URI if so
     $ts = gmmktime(
-        substr($e, 8, 2),
-        substr($e, 10, 2),
+        intval(substr($e, 8, 2)),
+        intval(substr($e, 10, 2)),
         0,
-        substr($e, 4, 2),
-        substr($e, 6, 2),
-        substr($e, 0, 4)
+        intval(substr($e, 4, 2)),
+        intval(substr($e, 6, 2)),
+        intval(substr($e, 0, 4))
     );
     $sortdir = ($dir == 'next') ? "ASC" : "DESC";
     $sign = ($dir == 'next') ? ">" : "<";
@@ -67,6 +67,7 @@ function locate_product($conn, $e, $pil, $dir)
     header("Location: $uri");
     die();
 }
+
 function last_product($conn, $pil)
 {
     // Get the latest
@@ -94,18 +95,18 @@ if (is_null($e)) {
     $rs = last_product($conn, $pil);
 } elseif (!is_null($e) && !is_null($dir)) {
     // Option 2: We have a time set and some directionality set
-    $rs    = locate_product($conn, $e, $pil, $dir);
+    $rs = locate_product($conn, $e, $pil, $dir);
     // if the above fails, just go to last product
     $rs = last_product($conn, $pil);
 } else {
     // Option 3: Explicit request
     $ts = gmmktime(
-        substr($e, 8, 2),
-        substr($e, 10, 2),
+        intval(substr($e, 8, 2)),
+        intval(substr($e, 10, 2)),
         0,
-        substr($e, 4, 2),
-        substr($e, 6, 2),
-        substr($e, 0, 4)
+        intval(substr($e, 4, 2)),
+        intval(substr($e, 6, 2)),
+        intval(substr($e, 0, 4))
     );
     if (is_null($bbb)) {
         $rs = pg_prepare($conn, "_LSELECT", "SELECT data, bbb,
@@ -176,7 +177,7 @@ for ($i = 0; $row = pg_fetch_assoc($rs); $i++) {
             // Account for multi-segment SPS by counting $$ occurrences
             $segments = substr_count($row["data"], "$$");
             // Can only do one, so this is the best we can do
-            $t->twitter_image = "/plotting/auto/plot/217/pid:${product_id}.png";
+            $t->twitter_image = "/plotting/auto/plot/217/pid:{$product_id}.png";
             $img = sprintf(
                 '<p><img src="/plotting/auto/plot/217/pid:%s::segnum:0.png" ' .
                     'class="img img-responsive"></p>',
@@ -191,7 +192,7 @@ for ($i = 0; $row = pg_fetch_assoc($rs); $i++) {
                 );
             }
         } else {
-            $t->twitter_image = "/wx/afos/${newe}_${pil}.png";
+            $t->twitter_image = "/wx/afos/{$newe}_{$pil}.png";
         }
         $t->twitter_card = "summary_large_image";
         $dstamp = date("Y-m-d H:i", $basets);
@@ -241,15 +242,15 @@ Received: <strong>{$dstamp} UTC</strong>
 <input type="hidden" name="dl" value="1">
 <input type="hidden" name="limit" value="9999">
 <p><i class="fa fa-download"></i> <strong>Bulk Download</strong></p>
-<strong>PIL:</strong> <input type="text" size="6" name="pil" value="${pil}">
+<strong>PIL:</strong> <input type="text" size="6" name="pil" value="{$pil}">
 <select name="fmt">
  <option value="text">Single Text File (\\003 Delimited)</option>
  <option value="zip">Zip File of One Product per File</option>
 </select>
 <br /><strong>Start UTC Date @0z:</strong> <input type="date" min="1980-01-01"
- value="${year}-01-01" name="sdate">
+ value="{$year}-01-01" name="sdate">
  <br /><strong>End UTC Date @0z:</strong> <input type="date" min="1980-01-01"
- value="${year2}-01-01" name="edate">
+ value="{$year2}-01-01" name="edate">
 <br /><input type="submit" value="Download Please">
 </form>
 

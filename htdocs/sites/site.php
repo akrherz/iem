@@ -5,9 +5,14 @@ force_https();
 require_once "../../include/database.inc.php";
 require_once "../../include/myview.php";
 require_once "../../include/forms.php";
-require_once "setup.php";
+require_once "../../include/sites.php";
 require_once "../../include/iemprop.php";
 $gmapskey = get_iemprop("google.maps.key");
+
+$ctx = get_sites_context();
+$station = $ctx->station;
+$network = $ctx->network;
+$metadata = $ctx->metadata;
 
 $alertmsg = "";
 if (
@@ -45,17 +50,17 @@ if (
     $email = isset($_GET["email"]) ? xssafe($_GET["email"]) : 'n/a';
     $name = isset($_GET["name"]) ? xssafe($_GET["name"]) : "n/a";
     $delta = (
-        ($newlat - $cities[$station]["lat"]) ** 2 +
-        ($newlon - $cities[$station]["lon"]) ** 2) ** 0.5;
+        ($newlat - $metadata["lat"]) ** 2 +
+        ($newlon - $metadata["lon"]) ** 2) ** 0.5;
     $msg = <<<EOF
 IEM Sites Move Request
 ======================
 > REMOTE_ADDR: {$_SERVER["REMOTE_ADDR"]}
 > ID:          {$station}
-> NAME:        {$name} OLD: {$cities[$station]["name"]}
+> NAME:        {$name} OLD: {$metadata["name"]}
 > NETWORK:     {$network}
-> LON:         {$newlon} OLD: {$cities[$station]["lon"]}
-> LAT:         {$newlat} OLD: {$cities[$station]["lat"]}
+> LON:         {$newlon} OLD: {$metadata["lon"]}
+> LAT:         {$newlat} OLD: {$metadata["lat"]}
 > EMAIL:       {$email}
 
 https://mesonet.agron.iastate.edu/sites/site.php?network={$network}&station={$station}
@@ -69,15 +74,23 @@ evaluation.</div>
 EOM;
 }
 
+$lat = sprintf("%.5f", $metadata["lat"]);
+$lon = sprintf("%.5f", $metadata["lon"]);
+
 $t = new MyView();
-$t->title = sprintf("Site Info: %s %s", $station, $cities[$station]["name"]);
-$t->headextra = <<<EOF
-<script src="https://maps.googleapis.com/maps/api/js?key={$gmapskey}" type="text/javascript"></script>
+$t->title = sprintf("Site Info: %s %s", $station, $metadata["name"]);
+$t->jsextra = <<<EOF
+<script>
+var CONFIG = {
+    lat: {$lat},
+    lon: {$lon}
+};
+</script>
+<script src="site.js" type="text/javascript"></script>
+<script src="https://maps.googleapis.com/maps/api/js?key={$gmapskey}&amp;callback=load" type="text/javascript"></script>
 EOF;
 $t->sites_current = "base";
 
-$lat = sprintf("%.5f", $cities[$station]["lat"]);
-$lon = sprintf("%.5f", $cities[$station]["lon"]);
 
 function pretty_key($key)
 {
@@ -102,7 +115,7 @@ function pretty_value($key, $value)
 }
 
 $attrtable = "";
-if (sizeof($cities[$station]["attributes"]) > 0) {
+if (sizeof($metadata["attributes"]) > 0) {
     $attrtable .= <<<EOM
     <h3>Station Attributes:</h3>
     <p><i>These are key value pairs used by the IEM to do data management.</i></p>
@@ -110,7 +123,7 @@ if (sizeof($cities[$station]["attributes"]) > 0) {
     <thead><tr><th>Key / Description</th><th>Value</th></tr></thead>
     <tbody>
 EOM;
-    foreach ($cities[$station]["attributes"] as $key => $value) {
+    foreach ($metadata["attributes"] as $key => $value) {
         $attrtable .= sprintf(
             "<tr><td>%s</td><td>%s</td></tr>",
             pretty_key($key),
@@ -167,14 +180,14 @@ $t->content = <<<EOF
 
 <table class="table table-condensed table-striped">
 <tr><th>Station Identifier:</th><td>{$station}</td></tr>
-<tr><th>Station Name:</th><td>{$cities[$station]["name"]}</td></tr>
+<tr><th>Station Name:</th><td>{$metadata["name"]}</td></tr>
 <tr><th>Network:</th><td>{$network}</td></tr>
-<tr><th>County:</th><td>{$cities[$station]["county"]}</td></tr>
-<tr><th>State:</th><td>{$cities[$station]["state"]}</td></tr>
+<tr><th>County:</th><td>{$metadata["county"]}</td></tr>
+<tr><th>State:</th><td>{$metadata["state"]}</td></tr>
 <tr><th>Latitude:</th><td>{$lat}</td></tr>
 <tr><th>Longitude:</th><td>{$lon}</td></tr>
-<tr><th>Elevation [m]:</th><td>{$cities[$station]["elevation"]}</td></tr>
-<tr><th>Time Zone:</th><td>{$cities[$station]["tzname"]}</td></tr>
+<tr><th>Elevation [m]:</th><td>{$metadata["elevation"]}</td></tr>
+<tr><th>Time Zone:</th><td>{$metadata["tzname"]}</td></tr>
 </table>
 
 {$attrtable}
@@ -197,7 +210,7 @@ $t->content = <<<EOF
     New Latitude: <input id="newlat" type="text" size="10" name="lat" placeholder="move marker">
     New Longitude: <input id="newlon" type="text" size="10" name="lon" placeholder="move marker">
     <br />Enter Your Email Address [1]: <input type="text" size="40" name="email" placeholder="optional">
-    <br />Better Location Name?: <input type="text" name="name" value="{$cities[$station]["name"]}" />
+    <br />Better Location Name?: <input type="text" name="name" value="{$metadata["name"]}" />
     <br />[1] Your email address will not be shared nor will you be added to any
     lists. The IEM developer will simply email you back after consideration of
     this request.
@@ -209,37 +222,5 @@ $t->content = <<<EOF
 </div>
 </div>
 
-<script type="text/javascript">
-var map, marker;
-function load(){
-    var mapOptions = {
-            zoom: 15,
-            center: new google.maps.LatLng({$lat}, {$lon}),
-            mapTypeId: google.maps.MapTypeId.ROADMAP
-          };
-    map = new google.maps.Map(document.getElementById('mymap'),
-              mapOptions);
-    marker = new google.maps.Marker({
-                    position: mapOptions.center,
-                      map: map,
-                    draggable: true
-                });
-    google.maps.event.addListener(marker, 'dragend', function() {
-          displayCoordinates(marker.getPosition());
-    });
-                    
-    //callback on when the marker is done moving    		
-    function displayCoordinates(pnt) {
-        var lat = pnt.lat();
-        lat = lat.toFixed(8);
-        var lng = pnt.lng();
-        lng = lng.toFixed(8);
-        $("#newlat").val(lat);
-        $("#newlon").val(lng);
-    }
-}
-google.maps.event.addDomListener(window, 'load', load);
-
-</script>
 EOF;
 $t->render('sites.phtml');

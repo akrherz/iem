@@ -37,12 +37,11 @@ def process(tarfn):
                 fn = f"{pname}_{ts:%Y%m%d%H%M}.grib"
                 with open(fn, "wb") as fh:
                     fh.write(grb.tostring())
-
-                cmd = (
-                    f"pqinsert -p 'data a {ts:%Y%m%d%H%M} bogus "
-                    f"model/NARR/{pname}_{ts:%Y%m%d%H%M}.grib grib' {fn}"
+                pqstr = (
+                    f"data a {ts:%Y%m%d%H%M} bogus "
+                    f"model/NARR/{pname}_{ts:%Y%m%d%H%M}.grib grib"
                 )
-                subprocess.call(cmd, shell=True)
+                subprocess.call(["pqinsert", "-p", pqstr, fn])
                 LOG.info("grbfn: %s fn: %s", grbfn, fn)
                 os.remove(fn)
         os.remove(grbfn)
@@ -88,8 +87,20 @@ def fetch_rda(year, month):
 
     # Now call coop script
     subprocess.call(
-        f"python /opt/iem/scripts/climodat/narr_solarrad.py {year} {month}",
-        shell=True,
+        [
+            "python",
+            "/opt/iem/scripts/climodat/narr_solarrad.py",
+            f"{year}",
+            f"{month}",
+        ]
+    )
+    subprocess.call(
+        [
+            "python",
+            "/opt/iem/scripts/iemre/merge_narr.py",
+            f"{year}",
+            f"{month}",
+        ]
     )
 
 

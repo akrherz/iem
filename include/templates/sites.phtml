@@ -6,7 +6,7 @@ $this->jsextra .= <<<EOF
 <script src="/vendor/select2/4.0.3/select2.min.js"></script>
 <script type="text/javascript">
 $(document).ready(function(){
-	$(".iemselect2").select2();	
+    $(".iemselect2").select2();	
 });
 </script>
 EOF;
@@ -18,29 +18,28 @@ echo "<div class=\"container-fluid\">";
 include 'sitebar.phtml';
 
 if (array_key_exists('north', $this->vars)){
-	echo "<div class=\"row\"><div class=\"col-md-12\">\n";
-	echo $this->vars['north'];
-	echo "</div></div>\n";
+    echo "<div class=\"row\"><div class=\"col-md-12\">\n";
+    echo $this->vars['north'];
+    echo "</div></div>\n";
 }
 if (array_key_exists('east', $this->vars) && 
     array_key_exists('west', $this->vars)){
-	echo "<div class=\"row\"><div class=\"col-md-6\">\n";
-	echo $this->vars['west'];
-	echo "</div><div class=\"col-md-6\">\n";
-	echo $this->vars['east'];
-	echo "</div></div>\n";
+    echo "<div class=\"row\"><div class=\"col-md-6\">\n";
+    echo $this->vars['west'];
+    echo "</div><div class=\"col-md-6\">\n";
+    echo $this->vars['east'];
+    echo "</div></div>\n";
 }
-if (array_key_exists('content', $this->vars)){
+if (!is_null($this->content)){
   echo "<div class=\"row\"><div class=\"col-md-12\">\n";
-  echo $this->vars['content'];
+  echo $this->content;
   echo "</div></div>\n";
 }
 if (array_key_exists('south', $this->vars)){
-	echo "<div class=\"row\"><div class=\"col-md-12\">\n";
-	echo $this->vars['south'];
-	echo "</div></div>\n";
+    echo "<div class=\"row\"><div class=\"col-md-12\">\n";
+    echo $this->vars['south'];
+    echo "</div></div>\n";
 }
 echo "</div><!--/.container-->";
 echo "</main>";
 include 'footer.phtml';
-?>

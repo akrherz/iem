@@ -19,21 +19,21 @@ LOG = logger()
 
 def workflow(valid):
     """Our workflow"""
+    LOG.info("Processing %s", valid)
     if valid.month == 1 and valid.day == 1:
         LOG.warning("sorry Jan 1 processing is a TODO!")
         return
     # read prism
     tidx = daily_offset(valid)
-    nc = ncopen(f"/mesonet/data/prism/{valid.year}_daily.nc", "r")
-    ppt = nc.variables["ppt"][tidx, :, :]
-    # missing as zero
+    with ncopen(f"/mesonet/data/prism/{valid.year}_daily.nc", "r") as nc:
+        ppt = nc.variables["ppt"][tidx, :, :]
+        # missing as zero
+        lons = nc.variables["lon"][:]
+        lats = nc.variables["lat"][:]
     ppt = np.where(ppt.mask, 0, ppt)
-    lons = nc.variables["lon"][:]
-    lats = nc.variables["lat"][:]
-    nc.close()
     (lons, lats) = np.meshgrid(lons, lats)
     (i, j) = prismutil.find_ij(DEBUGLON, DEBUGLAT)
-    LOG.debug("prism debug point ppt: %.3f", ppt[j, i])
+    LOG.info("prism debug point ppt: %.3f", ppt[j, i])
 
     # Interpolate this onto the stage4 grid
     nc = ncopen(
@@ -50,7 +50,7 @@ def workflow(valid):
     sts_tidx = hourly_offset(valid - datetime.timedelta(hours=23))
     ets_tidx = hourly_offset(valid + datetime.timedelta(hours=1))
     s4total = np.sum(p01m[sts_tidx:ets_tidx, :, :], axis=0)
-    LOG.debug(
+    LOG.info(
         "stage4 s4total: %.3f lon: %.2f (%.2f) lat: %.2f (%.2f)",
         s4total[i, j],
         s4lons[i, j],
@@ -63,7 +63,7 @@ def workflow(valid):
 
     nn = NearestNDInterpolator((lons.flatten(), lats.flatten()), ppt.flat)
     prism_on_s4grid = nn(s4lons, s4lats)
-    LOG.debug(
+    LOG.info(
         "shape of prism_on_s4grid: %s s4lons: %s ll: %.2f s4lats: %s ll: %.2f",
         np.shape(prism_on_s4grid),
         np.shape(s4lons),
@@ -72,14 +72,14 @@ def workflow(valid):
         s4lats[0, 0],
     )
     multiplier = prism_on_s4grid / s4total
-    LOG.debug(
+    LOG.info(
         "prism avg: %.3f stageIV avg: %.3f prismons4grid avg: %.3f mul: %.3f",
         np.mean(ppt),
         np.mean(s4total),
         np.mean(prism_on_s4grid),
         np.mean(multiplier),
     )
-    LOG.debug(
+    LOG.info(
         "Boone IA0807 prism: %.3f stageIV: %.4f prismons4grid: %.3f mul: %.3f",
         ppt[431, 746],
         s4total[i, j],
@@ -94,7 +94,7 @@ def workflow(valid):
         # and denote that if the multiplier is zero, then we net zero
         newval = np.where(oldval < 0.001, 0.00004, oldval) * multiplier
         nc.variables["p01m"][tidx, :, :] = newval
-        LOG.debug(
+        LOG.info(
             "adjust tidx: %s oldval: %.3f newval: %.3f",
             tidx,
             oldval[i, j],

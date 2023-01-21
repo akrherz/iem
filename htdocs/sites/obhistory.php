@@ -1,8 +1,14 @@
 <?php
-require_once "setup.php";
+require_once "../../include/sites.php";
 require_once "../../include/mlib.php";
 require_once "../../include/forms.php";
 require_once "../../include/myview.php";
+
+$ctx = get_sites_context();
+$station = $ctx->station;
+$network = $ctx->network;
+$metadata = $ctx->metadata;
+
 /*
  * Rip off weather bureau website, but do it better
  */

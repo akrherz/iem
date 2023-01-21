@@ -1,203 +1,158 @@
 
 var marker;
 var map;
+var google = window.google || {}; // skipcq: JS-0239
 
-String.prototype.format = function() {
-	  var str = this;
-	  for (var i = 0; i < arguments.length; i++) {       
-	    var reg = new RegExp("\\{" + i + "\\}", "gm");             
-	    str = str.replace(reg, arguments[i]);
-	  }
-	  return str;
-	}
 
-// https://stackoverflow.com/questions/2044616
-function selectElementContents(elid) {
-	var el = document.getElementById(elid);
-	var body = document.body, range, sel;
-    if (document.createRange && window.getSelection) {
-        range = document.createRange();
-        sel = window.getSelection();
-        sel.removeAllRanges();
-        try {
-            range.selectNodeContents(el);
-            sel.addRange(range);
-        } catch (e) {
-            range.selectNode(el);
-            sel.addRange(range);
-        }
-        document.execCommand("copy");
-    } else if (body.createTextRange) {
-        range = body.createTextRange();
-        range.moveToElementText(el);
-        range.select();
-        range.execCommand("Copy");
-    }
+function text(str) {
+    // XSS
+    return $("<p>").text(str).html();
 }
 
-function workflow(){
-	var lon = parseFloat($("#lon").val());
-	var lat = parseFloat($("#lat").val());
-    if (isNaN(lon) || isNaN(lat)){
+function workflow() {
+    const lon = parseFloat($("#lon").val());
+    const lat = parseFloat($("#lat").val());
+    if (isNaN(lon) || isNaN(lat)) {
         return;
     }
-	doOutlook(lon, lat);
-	doMCD(lon, lat);
-	doWatch(lon, lat);
-	updateTableTitle(lon, lat);
+    doOutlook(lon, lat);
+    doMCD(lon, lat);
+    doWatch(lon, lat);
+    updateTableTitle(lon, lat);
 }
 
-function buildUI(){
-	$("#manualpt").click(function(){
-		var la = $("#lat").val();
-		var lo = $("#lon").val();
-		var latlng = new google.maps.LatLng(parseFloat(la), parseFloat(lo))
-		marker.setPosition(latlng);
-		updateMarkerPosition(latlng);
-	});
-	$('#last').change(function() {
-		workflow();
+function buildUI() {
+    $("#manualpt").click(() => {
+        const la = $("#lat").val();
+        const lo = $("#lon").val();
+        const latlng = new google.maps.LatLng(parseFloat(la), parseFloat(lo));
+        marker.setPosition(latlng);
+        updateMarkerPosition(latlng);
     });
-	$('#events').change(function() {
-		workflow();
+    $('#last').change(() => {
+        workflow();
+    });
+    $('#events').change(() => {
+        workflow();
 
     });
-	$('input[type=radio][name=day]').change(function() {
-		workflow();
+    $('input[type=radio][name=day]').change(() => {
+        workflow();
 
-	});
-	$('input[type=radio][name=cat]').change(function() {
-		workflow();
+    });
+    $('input[type=radio][name=cat]').change(() => {
+        workflow();
 
-	});
+    });
 }
 
-function updateTableTitle(lon, lat){
-	var text = "Lon: "+ lon +" Lat: "+ lat;
-	$('#watches').find("caption").text("Convective Watches for "+ text);
-	$('#outlooks').find("caption").text("Convective Outlooks for "+ text);
-	$('#mcds').find("caption").text("Mesoscale Convective Discussions for "+ text);
+function updateTableTitle(lon, lat) {
+    const txt = `Lon: ${lon} Lat: ${lat}`;
+    $('#watches').find("caption").text(`Convective Watches for ${txt}`);
+    $('#outlooks').find("caption").text(`Convective Outlooks for ${txt}`);
+    $('#mcds').find("caption").text(`Mesoscale Convective Discussions for ${txt}`);
 }
 
 function updateMarkerPosition(latLng) {
-	$("#lat").val(latLng.lat().toFixed(4));
-	$("#lon").val(latLng.lng().toFixed(4));
-	window.location.href = "#bypoint/{0}/{1}".format( 
-			latLng.lng().toFixed(4), latLng.lat().toFixed(4));
-	map.setCenter(latLng);
-	workflow();
+    $("#lat").val(latLng.lat().toFixed(4));
+    $("#lon").val(latLng.lng().toFixed(4));
+    window.location.href = `#bypoint/${latLng.lng().toFixed(4)}/${latLng.lat().toFixed(4)}`;
+    map.setCenter(latLng);
+    workflow();
 }
 
-function doOutlook(lon, lat){
-	var last = $('#last').is(":checked") ? $("#events").val(): '0';
-	var day = $("input[name='day']:checked").val();
-	var cat = $("input[name='cat']:checked").val();
-	var tbody = $("#outlooks tbody").empty();
-	$("#outlook_spinner").show();
-	var jsonurl = "/json/spcoutlook.py?lon="+lon+"&lat="+lat+"&last="+last+
-	"&day="+day+"&cat="+cat;
-	$("#outlooks_link").attr('href', jsonurl);
-	$.ajax({
-		dataType: "json",
-		url: jsonurl,
-		success: function(data){
-			$("#outlook_spinner").hide();
-			$.each(data.outlooks, function(index, ol){
-				tbody.append("<tr><td>" + ol.day + "</td>"+
-						"<td>" + ol.threshold + "</td>" +
-						"<td>" + ol.utc_product_issue + "</td>" +
-						"<td>" + ol.utc_issue + "</td>" +
-						"<td>" + ol.utc_expire + "</td>" +
-						"</tr>")
-			});
-			if (data.outlooks.length == 0){
-				tbody.append("<tr><td colspan=\"5\">No Results Found!</td></tr>");
-			}
-			}
-	});
+function doOutlook(lon, lat) {
+    const last = $('#last').is(":checked") ? text($("#events").val()) : '0';
+    const day = text($("input[name='day']:checked").val());
+    const cat = text($("input[name='cat']:checked").val());
+    const tbody = $("#outlooks tbody").empty();
+    $("#outlook_spinner").show();
+    const jsonurl = `/json/spcoutlook.py?lon=${lon}&lat=${lat}&last=${last}&day=${day}&cat=${cat}`;
+    $("#outlooks_link").attr('href', jsonurl);
+    $.ajax({
+        dataType: "json",
+        url: jsonurl,
+        success(data) {
+            $("#outlook_spinner").hide();
+            $.each(data.outlooks, (_index, ol) => {
+                tbody.append(`<tr><td>${ol.day}</td><td>${ol.threshold}</td><td>${ol.utc_product_issue}</td><td>${ol.utc_issue}</td><td>${ol.utc_expire}</td></tr>`)
+            });
+            if (data.outlooks.length === 0) {
+                tbody.append(`<tr><td colspan="5">No Results Found!</td></tr>`);
+            }
+        }
+    });
 }
-function doMCD(lon, lat){
-	var tbody = $("#mcds tbody").empty();
-	$("#mcd_spinner").show();
-	var jsonurl = "/json/spcmcd.py?lon="+lon+"&lat="+lat;
-	$("#mcds_link").attr('href', jsonurl);
-	$.ajax({
-		dataType: "json",
-		url: jsonurl,
-		success: function(data){
-			$("#mcd_spinner").hide();
-			$.each(data.mcds, function(index, mcd){
-				tbody.append("<tr><td><a href=\""+ mcd.spcurl + "\" target=\"_blank\">" + mcd.year + " " +
-						mcd.product_num +"</a></td>"+
-						"<td>" + mcd.utc_issue + "</td>" +
-						"<td>" + mcd.utc_expire + "</td>" +
-						"</tr>")
-			});
-			if (data.mcds.length == 0){
-				tbody.append("<tr><td colspan=\"3\">No Results Found!</td></tr>");
-			}
-			}
-	});
+function doMCD(lon, lat) {
+    const tbody = $("#mcds tbody").empty();
+    $("#mcd_spinner").show();
+    const jsonurl = `/json/spcmcd.py?lon=${lon}&lat=${lat}`;
+    $("#mcds_link").attr('href', jsonurl);
+    $.ajax({
+        dataType: "json",
+        url: jsonurl,
+        success(data) {
+            $("#mcd_spinner").hide();
+            $.each(data.mcds, (_index, mcd) => {
+                tbody.append(`<tr><td><a href="${mcd.spcurl}" target="_blank">${mcd.year} ${mcd.product_num}</a></td><td>${mcd.utc_issue}</td><td>${mcd.utc_expire}</td></tr>`)
+            });
+            if (data.mcds.length === 0) {
+                tbody.append(`<tr><td colspan="3">No Results Found!</td></tr>`);
+            }
+        }
+    });
 }
 
-function doWatch(lon, lat){
-	var tbody = $("#watches tbody").empty();
-	$("#watch_spinner").show();
-	var jsonurl = "/json/spcwatch.py?lon="+lon+"&lat="+lat;
-	$("#watches_link").attr('href', jsonurl);
-	$.ajax({
-		dataType: "json",
-		url: jsonurl,
-		success: function(data){
-			$("#watch_spinner").hide();
-			$.each(data.features, function(index, feature){
-				var watch = feature.properties;
-				tbody.append("<tr><td><a href=\""+ watch.spcurl + "\" target=\"_blank\">" + watch.year + " " +
-						watch.number +"</a></td>"+
-						"<td>" + watch.type + "</td>" +
-						"<td>" + watch.issue + "</td>" +
-						"<td>" + watch.expire + "</td>" +
-						"</tr>")
-			});
-			if (data.features.length == 0){
-				tbody.append("<tr><td colspan=\"4\">No Results Found!</td></tr>");
-			}
-			}
-	});
+function doWatch(lon, lat) {
+    const tbody = $("#watches tbody").empty();
+    $("#watch_spinner").show();
+    const jsonurl = `/json/spcwatch.py?lon=${lon}&lat=${lat}`;
+    $("#watches_link").attr('href', jsonurl);
+    $.ajax({
+        dataType: "json",
+        url: jsonurl,
+        success(data) {
+            $("#watch_spinner").hide();
+            $.each(data.features, (_index, feature) => {
+                const watch = feature.properties;
+                tbody.append(`<tr><td><a href="${watch.spcurl}" target="_blank">${watch.year} ${watch.number}</a></td><td>${watch.type}</td><td>${watch.issue}</td><td>${watch.expire}</td></tr>`)
+            });
+            if (data.features.length === 0) {
+                tbody.append(`<tr><td colspan="4">No Results Found!</td></tr>`);
+            }
+        }
+    });
 }
-function initialize() {
-	buildUI();
-	var latLng = new google.maps.LatLng(41.53, -93.653);
-	map = new google.maps.Map(document.getElementById('map'), {
-		zoom: 5,
-		center: latLng,
-		mapTypeId: google.maps.MapTypeId.ROADMAP
-	});
-	marker = new google.maps.Marker({
-		position: latLng,
-		title: 'Point A',
-		map: map,
-		draggable: true
-	});
+function initialize() { // skipcq: JS-0128
+    buildUI();
+    const latLng = new google.maps.LatLng(41.53, -93.653);
+    map = new google.maps.Map(document.getElementById('map'), {
+        zoom: 5,
+        center: latLng,
+        mapTypeId: google.maps.MapTypeId.ROADMAP
+    });
+    marker = new google.maps.Marker({
+        position: latLng,
+        title: 'Point A',
+        map,
+        draggable: true
+    });
 
-	google.maps.event.addListener(marker, 'dragend', function() {
-		updateMarkerPosition(marker.getPosition());
-	});
+    google.maps.event.addListener(marker, 'dragend', () => {
+        updateMarkerPosition(marker.getPosition());
+    });
 
-	// Do the anchor tag linking, please
-	var tokens = window.location.href.split("#");
-	if (tokens.length == 2){
-		var tokens2 = tokens[1].split("/");
-		if (tokens2.length == 3){
-			if (tokens2[0] == 'bypoint'){
-				var latlng = new google.maps.LatLng(tokens2[2], tokens2[1]);
-				marker.setPosition(latlng);
-				updateMarkerPosition(latlng);
-			}
-		}
-	}
+    // Do the anchor tag linking, please
+    const tokens = window.location.href.split("#");
+    if (tokens.length === 2) {
+        const tokens2 = tokens[1].split("/");
+        if (tokens2.length === 3) {
+            if (tokens2[0] === 'bypoint') {
+                const latlng = new google.maps.LatLng(text(tokens2[2]), text(tokens2[1]));
+                marker.setPosition(latlng);
+                updateMarkerPosition(latlng);
+            }
+        }
+    }
 
 }
-
-// Onload handler to fire off the app.
-google.maps.event.addDomListener(window, 'load', initialize);

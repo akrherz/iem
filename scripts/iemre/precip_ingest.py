@@ -18,17 +18,16 @@ LOG = logger()
 
 def get_p01m_status(valid):
     """Figure out what our current status is of this hour."""
-    nc = ncopen(
-        ("/mesonet/data/stage4/%s_stage4_hourly.nc") % (valid.year,),
-        timeout=300,
-    )
     tidx = iemre.hourly_offset(valid)
-    # 2 prism_adjust_stage4 ran
-    # 1 copied hourly data in
-    # 0 nothing happened
-    p01m_status = nc.variables["p01m_status"][tidx]
-    nc.close()
-    LOG.debug("p01m_status is %s for valid %s", p01m_status, valid)
+    with ncopen(
+        f"/mesonet/data/stage4/{valid.year}_stage4_hourly.nc",
+        timeout=300,
+    ) as nc:
+        # 2 prism_adjust_stage4 ran
+        # 1 copied hourly data in
+        # 0 nothing happened
+        p01m_status = nc.variables["p01m_status"][tidx]
+    LOG.info("p01m_status is %s for valid %s", p01m_status, valid)
     return p01m_status
 
 
@@ -92,15 +91,14 @@ def copy_to_iemre(valid):
     res = np.where(np.logical_or(res < 0, res > 250), 0.0, res)
 
     # Open up our RE file
-    nc = ncopen(iemre.get_hourly_ncname(valid.year), "a", timeout=300)
-    nc.variables["p01m"][tidx, :, :] = res
-    LOG.debug(
+    with ncopen(iemre.get_hourly_ncname(valid.year), "a", timeout=300) as nc:
+        nc.variables["p01m"][tidx, :, :] = res
+    LOG.info(
         "wrote data to hourly IEMRE min: %.2f avg: %.2f max: %.2f",
         np.min(res),
         np.mean(res),
         np.max(res),
     )
-    nc.close()
 
 
 def workflow(valid):

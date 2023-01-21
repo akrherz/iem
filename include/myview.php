@@ -10,10 +10,26 @@
  */
 class MyView {
     protected $vars = array();
+    public ?string $bodyextra = null;
+    public ?string $breadcrumbs = null;
+    public ?string $content = null;
+    public ?string $current_network = null;
+    public ?string $headextra = null;
+    public bool $iemss = FALSE;
+    public ?string $jsextra = null;
+    public int $refresh = -1;
+    public ?string $sites_current = null;
+    public ?string $template_dir = null;
+    public ?string $title = null;
+    public string $twitter_card = "summary";
+    public string $twitter_description = "Iowa Environmental Mesonet of Iowa State University";
+    public string $twitter_image = "/images/logo_large.png";
+    public ?string $twitter_video = null;
+    public int $twitter_video_width = 0;
+    public int $twitter_video_height = 0;
+
     public function __construct($template_dir = null) {
             $this->template_dir =  dirname(__FILE__).'/templates/';
-            $this->headextra = '';
-            $this->jsextra = '';
     }
     public function render($template_file) {
         if (file_exists($this->template_dir.$template_file)) {

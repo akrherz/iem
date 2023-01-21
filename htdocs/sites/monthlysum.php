@@ -2,12 +2,17 @@
 // Summary of monthly data from IEMAccess
 require_once "../../config/settings.inc.php";
 require_once "../../include/database.inc.php";
-require_once "setup.php";
+require_once "../../include/sites.php";
 require_once "../../include/myview.php";
 require_once "../../include/forms.php";
 
 $month = get_int404("month", date("m"));
 $year = get_int404("year", date("Y"));
+
+$ctx = get_sites_context();
+$station = $ctx->station;
+$network = $ctx->network;
+$metadata = $ctx->metadata;
 
 $t = new MyView();
 $t->title = "Monthly Summaries";
