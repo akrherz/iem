@@ -9,13 +9,10 @@ require_once dirname(__FILE__) . "/myview.php";
 
 class SitesContext
 {
-    public string $station;
-    public string $network;
-    public array $metadata;
+    public ?string $station = null;
+    public ?string $network = null;
+    public ?array $metadata = null;
 
-    function __construct()
-    {
-    }
     public function neighbors()
     {
         $con = iemdb("mesosite");
