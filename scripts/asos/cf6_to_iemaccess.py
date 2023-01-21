@@ -1,6 +1,6 @@
 """Merge the CF6 Processed Data.
 
-Run from RUN_12Z.sh for yesterday and a few other previous dates.
+Run from RUN_12Z.sh, RUN_0Z.sh for past 48 hours of data
 """
 # pylint: disable=no-member
 # stdlib
@@ -11,6 +11,7 @@ from datetime import date
 from pyiem.util import get_sqlalchemy_conn, get_dbconn, logger
 from metpy.units import units
 import pandas as pd
+from sqlalchemy import text
 
 LOG = logger()
 
@@ -28,23 +29,78 @@ def comp(old, new):
     return True
 
 
-def main(argv):
-    """Go Main Go."""
-    dbconn = get_dbconn("iem")
-    valid = date(int(argv[1]), int(argv[2]), int(argv[3]))
+def get_data(argv):
+    """Figure out what data we want."""
+    params = {}
+    lmt = "updated > (now() - '48 hours'::interval)"
+    if len(argv) == 4:
+        lmt = "valid = :valid"
+        params["valid"] = date(int(argv[1]), int(argv[2]), int(argv[3]))
+
     with get_sqlalchemy_conn("iem") as conn:
         cf6 = pd.read_sql(
-            "SELECT * from cf6_data where valid = %s ORDER by station ASC",
+            text(f"SELECT * from cf6_data where {lmt} ORDER by station ASC"),
             conn,
-            params=(valid,),
-            index_col="station",
+            params=params,
         )
     for col in ["avg_smph", "max_smph", "gust_smph"]:
         cf6[col.replace("smph", "sknt")] = (
             (units("miles/hour") * cf6[col].values).to(units("knots")).m
         )
-    LOG.info("Loaded %s CF6 entries for %s date", len(cf6.index), valid)
+    LOG.info("Found %s CF6 entries for syncing", len(cf6.index))
+    return cf6
 
+
+def update_climodat(cf6df, xref, valid):
+    """Update iemaccess."""
+    with get_sqlalchemy_conn("coop") as conn:
+        obs = pd.read_sql(
+            "select station, high, low, precip from alldata WHERE day = %s",
+            conn,
+            params=(valid,),
+            index_col="station",
+        )
+    df = cf6df.join(xref, how="inner")
+    if df.empty:
+        return
+    dbconn = get_dbconn("coop")
+    cursor = dbconn.cursor()
+    uvals = 0
+    urows = 0
+    for _station, row in df.iterrows():
+        for clsid in [row["climodat_src"], row["climodat_dest"]]:
+            if clsid not in obs.index:
+                LOG.warning("No climodat data for %s[%s]?", clsid, valid)
+                continue
+            current = obs.loc[clsid]
+            work = []
+            params = []
+            for col in ["high", "low", "precip"]:
+                if not comp(current[col], row[col]):
+                    continue
+                uvals += 1
+                work.append(f"{col} = %s")
+                params.append(row[col])
+                LOG.debug("%s %s %s->%s", clsid, col, current[col], row[col])
+            if not work:
+                continue
+            params.append(clsid)
+            params.append(valid)
+            urows += 1
+            cursor.execute(
+                f"UPDATE alldata SET {','.join(work)} WHERE station = %s and "
+                "day = %s",
+                params,
+            )
+
+    cursor.close()
+    dbconn.commit()
+    LOG.info("%s updated %s values over %s rows", valid, uvals, urows)
+
+
+def update_iemaccess(cf6df, valid):
+    """Update iemaccess."""
+    dbconn = get_dbconn("iem")
     table = f"summary_{valid.year}"
     with get_sqlalchemy_conn("iem") as conn:
         obs = pd.read_sql(
@@ -58,7 +114,7 @@ def main(argv):
             index_col="station",
         )
 
-    df = cf6.join(obs, lsuffix="_cf6")
+    df = cf6df.join(obs, lsuffix="_cf6")
     obscols = (
         "max_tmpf min_tmpf pday snow snowd avg_sknt max_sknt "
         "avg_drct max_gust max_drct"
@@ -68,8 +124,8 @@ def main(argv):
         "avg_drct gust_sknt gust_drct"
     ).split()
     cursor = dbconn.cursor()
-    updated_vals = 0
-    updated_rows = 0
+    uvals = 0
+    urows = 0
     for station, row in df.iterrows():
         if pd.isnull(row["iemid"]):
             # Lots of false positives here, like WFOs
@@ -80,14 +136,14 @@ def main(argv):
         for ocol, ccol in zip(obscols, cf6cols):
             if not comp(row[ocol], row[ccol]):
                 continue
-            updated_vals += 1
+            uvals += 1
             work.append(f"{ocol} = %s")
             params.append(row[ccol])
         if not work:
             continue
         params.append(int(row["iemid"]))
         params.append(valid)
-        updated_rows += 1
+        urows += 1
         cursor.execute(
             f"UPDATE {table} SET {','.join(work)} WHERE iemid = %s and "
             "day = %s",
@@ -96,7 +152,45 @@ def main(argv):
 
     cursor.close()
     dbconn.commit()
-    LOG.info("Updated %s values over %s rows", updated_vals, updated_rows)
+    LOG.info("%s updated %s values over %s rows", valid, uvals, urows)
+
+
+def build_xref():
+    """Build a cross reference"""
+    with get_sqlalchemy_conn("mesosite") as conn:
+        df = pd.read_sql(
+            """
+            with data as (
+                select r.iemid, t.id as climodat_src,
+                t.iemid as climodat_src_iemid from station_threading r JOIN
+                stations t on (r.source_iemid = t.iemid)
+                WHERE end_date is null),
+            agg as (
+                select t.id as climodat_dest, climodat_src, climodat_src_iemid
+                from data d JOIN stations t on (d.iemid = t.iemid)),
+            agg2 as (
+                select climodat_src, climodat_dest,
+                split_part(value, '|', 1) as icao from
+                agg a JOIN station_attributes s on
+                (a.climodat_src_iemid = s.iemid) WHERE value ~* 'ASOS')
+            select climodat_src, climodat_dest,
+            case when length(icao) = 3 then 'K'||icao else icao end as station
+            from agg2
+            """,
+            conn,
+            index_col="station",
+        )
+    return df
+
+
+def main(argv):
+    """Go Main Go."""
+    cf6 = get_data(argv)
+    xref = build_xref()
+
+    for valid, gdf in cf6.groupby("valid"):
+        update_climodat(gdf.copy().set_index("station"), xref, valid)
+        update_iemaccess(gdf.copy().set_index("station"), valid)
 
 
 if __name__ == "__main__":
