@@ -30,9 +30,9 @@ if (array_key_exists('east', $this->vars) &&
     echo $this->vars['east'];
     echo "</div></div>\n";
 }
-if (array_key_exists('content', $this->vars)){
+if (!is_null($this->content)){
   echo "<div class=\"row\"><div class=\"col-md-12\">\n";
-  echo $this->vars['content'];
+  echo $this->content;
   echo "</div></div>\n";
 }
 if (array_key_exists('south', $this->vars)){
@@ -43,4 +43,3 @@ if (array_key_exists('south', $this->vars)){
 echo "</div><!--/.container-->";
 echo "</main>";
 include 'footer.phtml';
-?>

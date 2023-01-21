@@ -2,11 +2,7 @@
 <?php include 'navbar.phtml'; ?>
 <main role="main" id="main-content">
 <div class="container-fluid">
-<?php 
-if (array_key_exists('breadcrumbs', $this->vars)){
-  echo $this->vars['breadcrumbs'];
-}
-?>
+<?php echo $this->breadcrumbs; ?>
 <table class="table table-striped table-condensed">
 <thead>
 <tr>
@@ -15,42 +11,42 @@ if (array_key_exists('breadcrumbs', $this->vars)){
 <tbody><tr>
 <?php
 $d = Array(
-		"ASOS" => Array("url" => "/ASOS/current.phtml"),
-		"CoCoRaHS" => Array("url" => "/cocorahs/current.phtml"),
-		"COOP" => Array("url" => "/COOP/current.phtml"),
-		"DCP" => Array("url" => "/DCP/current.phtml"),
-		"DCP" => Array("url" => "/DCP/current.phtml"),
-		"ISU Soil Moisture" => Array("url" => "/agclimate/current.phtml"),
-		"Other" => Array("url" => "/other/current.phtml"),
-		"SCAN" => Array("url" => "/scan/current.phtml"),
-		"My Favorites" => Array("url" => "/my/current.phtml"),
-		"By State" => Array("url" => "/current/all.phtml"),
-		"RWIS" => Array("url" => "/RWIS/current.phtml"),
-		"RWIS Surface" => Array("url" => "/RWIS/currentSF.phtml"),
-		"RWIS Traffic" => Array("url" => "/RWIS/traffic.phtml"),
-		"RWIS Soil" => Array("url" => "/RWIS/soil.phtml"),
-		"By NWS WFO" => Array("url" => "/nws/obs.php"),
-		"USCRN" => Array("url" => "/current/uscrn.phtml"),
+        "ASOS" => Array("url" => "/ASOS/current.phtml"),
+        "CoCoRaHS" => Array("url" => "/cocorahs/current.phtml"),
+        "COOP" => Array("url" => "/COOP/current.phtml"),
+        "DCP" => Array("url" => "/DCP/current.phtml"),
+        "DCP" => Array("url" => "/DCP/current.phtml"),
+        "ISU Soil Moisture" => Array("url" => "/agclimate/current.phtml"),
+        "Other" => Array("url" => "/other/current.phtml"),
+        "SCAN" => Array("url" => "/scan/current.phtml"),
+        "My Favorites" => Array("url" => "/my/current.phtml"),
+        "By State" => Array("url" => "/current/all.phtml"),
+        "RWIS" => Array("url" => "/RWIS/current.phtml"),
+        "RWIS Surface" => Array("url" => "/RWIS/currentSF.phtml"),
+        "RWIS Traffic" => Array("url" => "/RWIS/traffic.phtml"),
+        "RWIS Soil" => Array("url" => "/RWIS/soil.phtml"),
+        "By NWS WFO" => Array("url" => "/nws/obs.php"),
+        "USCRN" => Array("url" => "/current/uscrn.phtml"),
 );
 $i = 1;
 foreach($d as $key => $value){
-	echo "<th";
-	if ($this->current_network == $key){
-		echo " class=\"info\">$key</th>";
-	}else{
-		echo "><a href=\"". $value["url"] ."\">$key</a></th>";
-	}
-	if ($i % 6 == 0){
-		echo "</tr><tr>";
-	}
-	$i++;
+    echo "<th";
+    if ($this->current_network == $key){
+        echo " class=\"info\">$key</th>";
+    }else{
+        echo "><a href=\"". $value["url"] ."\">$key</a></th>";
+    }
+    if ($i % 6 == 0){
+        echo "</tr><tr>";
+    }
+    $i++;
   }
 ?>
 </tr></tbody></table>
 <?php 
-if (array_key_exists('content', $this->vars)){
+if (!is_null($this->content)){
   echo "<div class=\"row\"><div class=\"col-md-12\">\n";
-  echo $this->vars['content'];
+  echo $this->content;
   echo "</div></div>\n";
 }
 ?>

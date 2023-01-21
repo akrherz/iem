@@ -1,30 +1,18 @@
 <?php 
-$title = array_key_exists('title', $this->vars)? 'IEM :: '. $this->title : 'Iowa Environmental Mesonet';
+$title = is_null($this->title)? 'Iowa Environmental Mesonet': "IEM :: {$this->title}";
 // Page should refresh
 $refresh = "";
-if (array_key_exists('refresh', $this->vars)){
+if ($this->refresh > 0){
   $refresh = sprintf("<meta http-equiv=\"refresh\" content=\"%s;\">",
     $this->refresh);
 }
-$headextra = array_key_exists('headextra', $this->vars)? $this->headextra : '';
-if (array_key_exists('iemss', $this->vars)){
+$headextra = is_null($this->headextra) ? '': $this->headextra;
+if ($this->iemss){
   $headextra .= <<<EOF
 <link rel="stylesheet" href="/vendor/openlayers/3.9.0/ol.css" type="text/css">
 EOF;
 }
-$bodyextra = array_key_exists('bodyextra', $this->vars)? ' '. $this->bodyextra : '';
-$twimage = array_key_exists('twitter_image', $this->vars) ? 
-				$this->twitter_image : '/images/logo_large.png';
-$twvideo = array_key_exists('twitter_video', $this->vars) ? 
-				$this->twitter_video : null;
-$twvideo_height = array_key_exists('twitter_video_height', $this->vars) ? 
-				$this->twitter_video_height : null;
-$twvideo_width = array_key_exists('twitter_video_width', $this->vars) ? 
-				$this->twitter_video_width : null;
-$twcard = array_key_exists('twitter_card', $this->vars) ? 
-				$this->twitter_card : 'summary';
-$twdescription = array_key_exists('twitter_description', $this->vars) ? 
-				$this->twitter_description : 'Iowa Environmental Mesonet of Iowa State University';
+$bodyextra = is_null($this->bodyextra) ? '': " {$this->bodyextra}";
 ?>
 <!DOCTYPE html>
 <html lang="en">
@@ -47,28 +35,28 @@ $twdescription = array_key_exists('twitter_description', $this->vars) ?
       <script src="/vendor/html5shiv/3.7.3/html5shiv.min.js"></script>
       <script src="/vendor/respond/1.4.2/respond.min.js"></script>
     <![endif]-->
-	<!-- Any page specific headextra content here -->
-	<?php echo $headextra; ?>
+    <!-- Any page specific headextra content here -->
+    <?php echo $headextra; ?>
 
-	<!-- Essential Social Tags -->
-	<meta property="og:title" content="<?php echo $title; ?>">
-	<meta property="og:description" content="<?php echo $twdescription; ?>">
-	<meta property="og:image" content="https://mesonet.agron.iastate.edu<?php echo $twimage; ?>">
-	<meta property="og:url" content="https://mesonet.agron.iastate.edu<?php echo htmlentities($_SERVER["REQUEST_URI"]); ?>">
-	<?php if (!empty($twvideo)){ 
+    <!-- Essential Social Tags -->
+    <meta property="og:title" content="<?php echo $title; ?>">
+    <meta property="og:description" content="<?php echo $this->twitter_description; ?>">
+    <meta property="og:image" content="https://mesonet.agron.iastate.edu<?php echo $this->twitter_image; ?>">
+    <meta property="og:url" content="https://mesonet.agron.iastate.edu<?php echo htmlentities($_SERVER["REQUEST_URI"]); ?>">
+    <?php if (!is_null($this->twitter_video)){ 
         echo <<<EOM
     <meta property="og:type" content="video">
-    <meta property="og:video" content="https://mesonet.agron.iastate.edu{$twvideo}">
+    <meta property="og:video" content="https://mesonet.agron.iastate.edu{$this->twitter_video}">
     <meta property="og:video:type" content="video/mp4">
-    <meta property="og:video:width" content="{$twvideo_width}">
-    <meta property="og:video:height" content="{$twvideo_height}">
+    <meta property="og:video:width" content="{$this->twitter_video_width}">
+    <meta property="og:video:height" content="{$this->twitter_video_height}">
 
 EOM;
     } ?>
-    <meta name="twitter:card" content="<?php echo $twcard; ?>">
+    <meta name="twitter:card" content="<?php echo $this->twitter_card; ?>">
 
-	<!-- Non-essential -->
-	<meta name="twitter:creator" content="@akrherz">
+    <!-- Non-essential -->
+    <meta name="twitter:creator" content="@akrherz">
     <!-- Le fav and touch icons -->
     <link rel="shortcut icon" href="/favicon.ico">
     <link rel="apple-touch-icon-precomposed" sizes="144x144" href="/apple-touch-icon-precomposed.png">

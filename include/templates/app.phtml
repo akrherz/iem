@@ -1,6 +1,6 @@
 <?php 
-$title = array_key_exists('title', $this->vars)? 'IEM :: '. $this->title : 'Iowa Environmental Mesonet';
-$headextra = array_key_exists('headextra', $this->vars)? $this->headextra : '';
+$title = is_null($this->title)? 'Iowa Environmental Mesonet': "IEM :: {$this->title}";
+$headextra = is_null($this->headextra) ? '': $this->headextra;
 ?>
 <!DOCTYPE html>
 <html lang="en">
@@ -11,7 +11,7 @@ $headextra = array_key_exists('headextra', $this->vars)? $this->headextra : '';
     <title><?php echo $title; ?></title>
     <meta name="description" content="Iowa State University, Iowa Environmental Mesonet">
     <meta name="author" content="daryl herzmann akrherz@iastate.edu">
-	<?php echo $headextra; ?>
+    <?php echo $headextra; ?>
 <style>
 html,body{
 height:100%;
@@ -19,45 +19,35 @@ height:100%;
 </style>
     </head>
 <?php 
-$jsextra = array_key_exists('jsextra', $this->vars)? $this->jsextra : '';
-if (array_key_exists('iemss', $this->vars)){
-	$jsextra .= <<<EOF
+$jsextra = is_null($this->jsextra) ? '' : $this->jsextra;
+if ($this->iemss){
+    $jsextra .= <<<EOF
 <script src="/vendor/openlayers/3.9.0/ol.js"></script>
 <script src="/js/iemss.js"></script>
 EOF;
 }
  
 if (array_key_exists('north', $this->vars)){
-	echo "<div class=\"row\"><div class=\"col-xs-12\">\n";
-	echo $this->vars['north'];
-	echo "</div></div>\n";
+    echo "<div class=\"row\"><div class=\"col-xs-12\">\n";
+    echo $this->vars['north'];
+    echo "</div></div>\n";
 }
 if (array_key_exists('east', $this->vars) && 
     array_key_exists('west', $this->vars)){
-	echo "<div class=\"row\"><div class=\"col-xs-6\">\n";
-	echo $this->vars['west'];
-	echo "</div><div class=\"col-xs-6\">\n";
-	echo $this->vars['east'];
-	echo "</div></div>\n";
+    echo "<div class=\"row\"><div class=\"col-xs-6\">\n";
+    echo $this->vars['west'];
+    echo "</div><div class=\"col-xs-6\">\n";
+    echo $this->vars['east'];
+    echo "</div></div>\n";
 }
-if (array_key_exists('content', $this->vars)){
-  echo $this->vars['content'];
+if (!is_null($this->content)){
+  echo $this->content;
 }
 if (array_key_exists('south', $this->vars)){
-	echo "<div class=\"row\"><div class=\"col-xs-12\">\n";
-	echo $this->vars['south'];
-	echo "</div></div>\n";
+    echo "<div class=\"row\"><div class=\"col-xs-12\">\n";
+    echo $this->vars['south'];
+    echo "</div></div>\n";
 }
-?>
-<?php 
-$jsextra = array_key_exists('jsextra', $this->vars)? $this->jsextra : '';
-if (array_key_exists('iemss', $this->vars)){
-	$jsextra .= <<<EOF
-<script src="/vendor/openlayers/3.9.0/ol.js"></script>
-<script src="/js/iemss.js"></script>
-EOF;
-}
-
 ?>
  <!-- Placed at the end of the document so the pages load faster -->
     <script src="/vendor/jquery/1.11.3/jquery-1.11.3.min.js"></script>

@@ -2,11 +2,7 @@
 <?php include 'navbar.phtml'; ?>
 <main role="main" id="main-content">
 <div class="container-fluid">
-<?php
-if (array_key_exists('content', $this->vars)){
-  echo $this->vars['content'];
-}
-?>
+<?php echo $this->content; ?>
 </div><!--/.container-->
 </main>
 <?php include 'footer.phtml'; ?>

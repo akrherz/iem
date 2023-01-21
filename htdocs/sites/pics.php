@@ -30,20 +30,17 @@ $t->title = "Site Photos";
 
 $t->sites_current = "pics";
 
-
-
-
 $table = sprintf(
     "<tr>%s%s%s</tr><tr>%s%s%s</tr><tr>%s%s%s</tr>",
-    $ctx->printtd($network, "NW", $dir, $station),
-    $ctx->printtd($network, "N", $dir, $station),
-    $ctx->printtd($network, "NE", $dir, $station),
-    $ctx->printtd($network, "W", $dir, $station),
+    $ctx->printtd("NW", $dir),
+    $ctx->printtd("N", $dir),
+    $ctx->printtd("NE", $dir),
+    $ctx->printtd("W", $dir),
     "<td><img src=\"{$puri}\" alt=\"{$station} {$dir}\" class=\"img img-responsive\" /></td>",
-    $ctx->printtd($network, "E", $dir, $station),
-    $ctx->printtd($network, "SW", $dir, $station),
-    $ctx->printtd($network, "S", $dir, $station),
-    $ctx->printtd($network, "SE", $dir, $station)
+    $ctx->printtd("E", $dir),
+    $ctx->printtd("SW", $dir),
+    $ctx->printtd("S", $dir),
+    $ctx->printtd("SE", $dir)
 );
 
 $more = "";
@@ -57,7 +54,6 @@ if (file_exists($filename)) {
 if (file_exists("/mesonet/share/pics/$station/HEADER.html")) {
     $more .= "<p><strong>" . file_get_contents("/mesonet/share/pics/$station/HEADER.html") . "</strong>";
 }
-
 
 $t->content = <<<EOF
 <h3>Directional Photos</h3>
