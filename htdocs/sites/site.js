@@ -1,5 +1,3 @@
-var map;
-var marker;
 var CONFIG = window.CONFIG || {};  // skipcq: JS-0239
 var google = window.google || {};  // skipcq: JS-0239
 
@@ -18,9 +16,9 @@ function load() { // skipcq: JS-0128
         center: new google.maps.LatLng(CONFIG.lat, CONFIG.lon),
         mapTypeId: google.maps.MapTypeId.ROADMAP
     };
-    map = new google.maps.Map(document.getElementById('mymap'),
+    const map = new google.maps.Map(document.getElementById('mymap'),
         mapOptions);
-    marker = new google.maps.Marker({
+    const marker = new google.maps.Marker({
         position: mapOptions.center,
         map,
         draggable: true
