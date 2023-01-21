@@ -11,12 +11,12 @@ var wfoSelect;
 var lsrtypefilter;
 var sbwtypefilter;
 var dateFormat1 = "YYYYMMDDHHmm";
-var nexradBaseTime = moment().utc().subtract(moment().minutes() % 5, "minutes");
 var realtime = false;
 var TABLE_FILTERED_EVENT = "tfe";
 var moment = window.moment || {}; // skipcq: JS-0239
 var ol = window.ol || {}; // skipcq: JS-0239
 var iemdata = window.iemdata || {}; // skipcq: JS-0239
+var nexradBaseTime = moment().utc().subtract(moment().minutes() % 5, "minutes");
 
 // Use momentjs for formatting
 $.datetimepicker.setDateFormatter('moment');
@@ -50,7 +50,8 @@ function text(str) {
 
 function parse_href() {
     // Figure out how we were called
-    let sts, ets;
+    let sts = null;
+    let ets = null;
     const tokens = window.location.href.split('#');
     if (tokens.length !== 2) {
         return;
@@ -70,7 +71,7 @@ function parse_href() {
         $("#realtime").prop('checked', true);
         // Offset timing
         ets = moment.utc();
-        sts = moment.utc(ets).add(parseInt(tokens2[1]), 'seconds');
+        sts = moment.utc(ets).add(parseInt(tokens2[1], 10), 'seconds');
     }
     $("#sts").val(sts.local().format("L LT"));
     $("#ets").val(ets.local().format("L LT"));
@@ -334,7 +335,7 @@ function lsrHTML(feature) {
         lines.push(`<strong>Type:</strong> ${vv}`);
     }
     vv = feature.get("magnitude");
-    if (vv !== null && vv != "") {
+    if (vv !== null && vv !== "") {
         let unit = feature.get("unit");
         if (unit === null) {
             unit = "";
@@ -585,9 +586,9 @@ function initUI() {
             dragPan.setActive(false);
             marker.set('dragging', true);
         });
-        olmap.on('pointermove', (evt) => {
+        olmap.on('pointermove', (evt2) => {
             if (marker.get('dragging') === true) {
-                marker.setPosition(evt.coordinate);
+                marker.setPosition(evt2.coordinate);
             }
         });
         olmap.on('pointerup', (_evt) => {
@@ -823,7 +824,7 @@ function getShapefileLink(base) {
     const wfos = $("#wfo").val();
     if (wfos) {
         for (let i = 0; i < wfos.length; i++) {
-            uri += "&wfo[]=" + text(wfos[i]);
+            uri += `&wfo[]=${text(wfos[i])}`;
         }
     }
     const sts = moment($("#sts").val(), 'L LT');
