@@ -322,15 +322,15 @@ if (in_array("n0q", $layers) || in_array("ridge", $layers) || in_array("prn0q", 
 
 $img = $map->prepareImage();
 
-$namerica = $map->getlayerbyname("namerica");
+$namerica = $map->getLayerByName("namerica");
 $namerica->status = MS_ON;
 $namerica->draw($map, $img);
 
-$lakes = $map->getlayerbyname("lakes");
+$lakes = $map->getLayerByName("lakes");
 $lakes->status = MS_ON;
 $lakes->draw($map, $img);
 
-$places = $map->getlayerbyname("places2010");
+$places = $map->getLayerByName("places2010");
 $places->status = in_array("places", $layers);
 $places->draw($map, $img);
 
@@ -344,7 +344,7 @@ if (
         strtoupper($_REQUEST["goes_product"])
     );
     if ($res[0] != NULL) {
-        $radar = $map->getlayerbyname("east_vis_1km");
+        $radar = $map->getLayerByName("east_vis_1km");
         $radar->status = MS_ON;
         $radar->data = $res[0];
         $radar->draw($map, $img);
@@ -386,7 +386,7 @@ if (in_array("nexrad", $layers) || in_array("nexrad_tc", $layers)  || in_array("
         );
     }
     if (is_file($radarfp)) {
-        $radar = $map->getlayerbyname("nexrad_n0r");
+        $radar = $map->getLayerByName("nexrad_n0r");
         $radar->status = MS_ON;
         $radar->data = $radarfp;
         $radar->draw($map, $img);
@@ -425,7 +425,7 @@ foreach ($prefixes as $p1 => $p2) {
             );
         }
         if (is_file($radarfp)) {
-            $radar = $map->getlayerbyname("nexrad_n0q");
+            $radar = $map->getLayerByName("nexrad_n0q");
             $radar->status = MS_ON;
             $radar->data = $radarfp;
             $radar->draw($map, $img);
@@ -445,7 +445,7 @@ if (
         strtoupper($_REQUEST["ridge_product"])
     );
     if ($res[0] != NULL) {
-        $radar = $map->getlayerbyname("nexrad_n0q");
+        $radar = $map->getLayerByName("nexrad_n0q");
         $radar->status = MS_ON;
         $radar->data = $res[0];
         $radar->draw($map, $img);
@@ -458,13 +458,13 @@ if (
     }
 }
 
-$states = $map->getlayerbyname("states");
+$states = $map->getLayerByName("states");
 $states->status = MS_ON;
 $states->draw($map, $img);
 
 /* All SBWs for a WFO */
 if (in_array("allsbw", $layers) && isset($_REQUEST["sector_wfo"])) {
-    $sbwh = $map->getlayerbyname("allsbw");
+    $sbwh = $map->getLayerByName("allsbw");
     $sbwh->status =  MS_ON;
     $sbwh->connection = get_dbconn_str("postgis");
     $sql = sprintf(
@@ -478,11 +478,11 @@ if (in_array("allsbw", $layers) && isset($_REQUEST["sector_wfo"])) {
     $sbwh->data = $sql;
     $sbwh->draw($map, $img);
 }
-$counties = $map->getlayerbyname("uscounties");
+$counties = $map->getLayerByName("uscounties");
 $counties->status = in_array("uscounties", $layers);
 $counties->draw($map, $img);
 
-$cwas = $map->getlayerbyname("cwas");
+$cwas = $map->getLayerByName("cwas");
 $cwas->status = in_array("cwas", $layers);
 $cwas->draw($map, $img);
 
@@ -522,7 +522,7 @@ if (in_array("bufferedlsr", $layers)) {
 }
 
 /* Watch by County */
-$wbc = $map->getlayerbyname("watch_by_county");
+$wbc = $map->getLayerByName("watch_by_county");
 $wbc->status = in_array("watch_by_county", $layers);
 $wbc->connection = get_dbconn_str("postgis");
 $sql = sprintf(
@@ -540,7 +540,7 @@ $sql = sprintf(
 $wbc->data = $sql;
 $wbc->draw($map, $img);
 
-$watches = $map->getlayerbyname("watches");
+$watches = $map->getLayerByName("watches");
 $watches->status = in_array("watches", $layers);
 $watches->connection = get_dbconn_str("postgis");
 $sql = sprintf(
@@ -603,7 +603,7 @@ if (isset($_REQUEST["vtec"]) && in_array("cbw", $layers)) {
 /* Storm based warning history, plotted as a white outline, I think */
 if (in_array("sbwh", $layers) && intval($ts->format("Y")) > 2001) {
     $ptext = "'ZZ' as phenomena";
-    $sbwh = $map->getlayerbyname("sbw");
+    $sbwh = $map->getLayerByName("sbw");
     $sbwh->status = MS_ON;
     $sbwh->connection = get_dbconn_str("postgis");
     $sql = sprintf(
@@ -627,7 +627,7 @@ if (in_array("sbw", $layers)  && intval($ts->format("Y")) > 2001) {
     if (in_array("sbw", $layers) && in_array("cbw", $layers)) {
         $ptext = "'ZZ' as phenomena";
     }
-    $sbw = $map->getlayerbyname("sbw");
+    $sbw = $map->getLayerByName("sbw");
     $sbw->status = MS_ON;
     $sbw->connection = get_dbconn_str("postgis");
     $sql = sprintf(
@@ -646,7 +646,7 @@ if (in_array("sbw", $layers)  && intval($ts->format("Y")) > 2001) {
 }
 
 /* warnings by county */
-$w0c = $map->getlayerbyname("warnings0_c");
+$w0c = $map->getLayerByName("warnings0_c");
 $w0c->connection = get_dbconn_str("postgis");
 $w0c->status = in_array("county_warnings", $layers);
 $sql = sprintf(
@@ -663,7 +663,7 @@ $w0c->data = $sql;
 $w0c->draw($map, $img);
 
 /* Local Storm Reports */
-$lsrs = $map->getlayerbyname("lsrs");
+$lsrs = $map->getLayerByName("lsrs");
 $lsrs->connection = get_dbconn_str("postgis");
 $lsrs->status = in_array("lsrs", $layers);
 if ($ts2 > $ts1) {
@@ -721,41 +721,41 @@ EOF;
 }
 
 /* Interstates */
-$interstates = $map->getlayerbyname("interstates");
+$interstates = $map->getLayerByName("interstates");
 $interstates->status = in_array("interstates", $layers);
 $interstates->draw($map, $img);
 
 /* roads */
-$roads = $map->getlayerbyname("roads");
+$roads = $map->getLayerByName("roads");
 $roads->connection = get_dbconn_str("postgis");
 $roads->status = in_array("roads", $layers);
 $roads->draw($map, $img);
 
 /* roads */
-$roadsint = $map->getlayerbyname("roads-inter");
+$roadsint = $map->getLayerByName("roads-inter");
 $roadsint->connection = get_dbconn_str("postgis");
 $roadsint->status = in_array("roads-inter", $layers);
 $roadsint->draw($map, $img);
 
 if (in_array("usdm", $layers)) {
-    $usdm = $map->getlayerbyname("usdm");
+    $usdm = $map->getLayerByName("usdm");
     $usdm->status = MS_ON;
     $usdm->draw($map, $img);
 }
 
 if (in_array("cities", $layers)) {
-    $l = $map->getlayerbyname("cities");
+    $l = $map->getLayerByName("cities");
     $l->status = MS_ON;
     $l->draw($map, $img);
 }
 
 if (in_array("surface", $layers)) {
-    $surface = $map->getlayerbyname("surface");
+    $surface = $map->getLayerByName("surface");
     $surface->status = MS_ON;
     $surface->draw($map, $img);
 }
 if (in_array("airtemps", $layers)) {
-    $airtemps = $map->getlayerbyname("airtemps");
+    $airtemps = $map->getLayerByName("airtemps");
     $airtemps->status = MS_ON;
     if ($width > 800) {
         for ($i = 0; $i < $airtemps->numclasses; $i++) {

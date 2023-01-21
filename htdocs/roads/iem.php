@@ -48,27 +48,27 @@ if (isset($_GET["nexrad"])) {
     $gmtts = clone $ts;
     $gmtts->setTimezone(new DateTimeZone("UTC"));
     $radarfn = sprintf("/mesonet/ARCHIVE/data/%s/GIS/uscomp/n0q_%s.png", $gmtts->format("Y/m/d"), $gmtts->format("YmdHi"));
-    $radar = $map->getlayerbyname("nexrad_n0q");
+    $radar = $map->getLayerByName("nexrad_n0q");
     $radar->__set("status", MS_ON);
     $radar->__set("data", $radarfn);
     $radar->draw($map, $img);
 }
 
-$counties = $map->getlayerbyname("counties");
+$counties = $map->getLayerByName("counties");
 if ($metroview) {
     $counties->__set("status", MS_ON);
     $counties->draw($map, $img);
 }
 
-$states = $map->getlayerbyname("states");
+$states = $map->getLayerByName("states");
 $states->__set("status", MS_ON);
 $states->draw($map, $img);
 
-$visibility = $map->getlayerbyname("visibility");
+$visibility = $map->getLayerByName("visibility");
 $visibility->__set("status", MS_ON);
 $visibility->draw($map, $img);
 
-$roads = $map->getlayerbyname("roads");
+$roads = $map->getLayerByName("roads");
 $roads->__set("status", MS_ON);
 $dbvalid = $ts->format('Y-m-d H:i');
 # yuck
@@ -95,7 +95,7 @@ EOM;
 }
 $roads->draw($map, $img);
 
-$roads_int = $map->getlayerbyname("roads-inter");
+$roads_int = $map->getLayerByName("roads-inter");
 $roads_int->__set("status", MS_ON);
 if (isset($_GET['valid'])) {
     $roads_int->__set("data", str_replace("b.type > 1", "b.type = 1", $sql));
@@ -110,7 +110,7 @@ if (isset($_GET["trucks"])) {
     $w2 = clone $ts;
     $w2->add(new DateInterval("PT5M"));
     $w2 = $w2->format('Y-m-d H:i');
-    $trucks = $map->getlayerbyname("trucks");
+    $trucks = $map->getLayerByName("trucks");
     $trucks->__set("status", MS_ON);
     $trucks->__set("data", "geom from (select geom, random() as boid from " .
         "idot_snowplow_archive WHERE valid > '{$w1}' and valid < '{$w2}') as foo " .
@@ -119,9 +119,9 @@ if (isset($_GET["trucks"])) {
 }
 
 if ($thumbnail) {
-    $logokey2 = $map->getlayerbyname("colorkey-small");
+    $logokey2 = $map->getLayerByName("colorkey-small");
 } else {
-    $logokey2 = $map->getlayerbyname("colorkey");
+    $logokey2 = $map->getLayerByName("colorkey");
 }
 $logokey2->__set("status", MS_ON);
 $c1 = $logokey2->getClass(0);

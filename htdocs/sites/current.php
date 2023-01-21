@@ -53,7 +53,7 @@ function make_shef_table($data, $iscurrent){
             $depth = sprintf("%d inch", $row["depth"]);
         }
         $valid = new DateTime($row["utc_valid"], $utctz);
-        $valid->setTimeZone($localtz);
+        $valid->setTimezone($localtz);
         $plink = "N/A";
         if ($iscurrent && $valid < $baseprodvalid){
             continue;

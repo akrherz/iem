@@ -31,11 +31,11 @@ $map->setsize(720, 496);
 
 $img = $map->prepareImage();
 
-$states = $map->getlayerbyname("states");
+$states = $map->getLayerByName("states");
 $states->__set("status", MS_ON);
 $states->draw($map, $img);
 
-$roads = $map->getlayerbyname("roads");
+$roads = $map->getLayerByName("roads");
 $roads->__set("status", MS_ON);
 
 for ($k = 0; $k < 17; $k++) {
@@ -47,7 +47,7 @@ for ($k = 0; $k < 17; $k++) {
 }
 $roads->draw($map, $img);
 
-$roads_int = $map->getlayerbyname("roads-inter");
+$roads_int = $map->getLayerByName("roads-inter");
 $roads_int->__set("status", MS_ON);
 for ($k = 0; $k < 17; $k++) {
     $r_c1 = $roads_int->getClass($k);

@@ -72,22 +72,22 @@ $map->setProjection($proj);
 
 $map->setextent(175000, 4440000, 775000, 4890000);
 
-$counties = $map->getlayerbyname("counties");
+$counties = $map->getLayerByName("counties");
 $counties->__set("status", MS_ON);
 
-$snet = $map->getlayerbyname("station_plot");
+$snet = $map->getLayerByName("station_plot");
 $snet->__set("status", MS_ON);
 
-$iards = $map->getlayerbyname("iards");
+$iards = $map->getLayerByName("iards");
 $iards->__set("status", MS_ON);
 
-$bar640t = $map->getlayerbyname("bar640t");
+$bar640t = $map->getLayerByName("bar640t");
 $bar640t->__set("status", MS_ON);
 
-$ponly = $map->getlayerbyname("pointonly");
+$ponly = $map->getLayerByName("pointonly");
 $ponly->__set("status", MS_ON);
 
-$states = $map->getlayerbyname("states");
+$states = $map->getLayerByName("states");
 $states->__set("status", MS_ON);
 
 $img = $map->prepareImage();

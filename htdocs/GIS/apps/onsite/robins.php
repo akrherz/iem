@@ -5,10 +5,10 @@ require_once "../../../../config/settings.inc.php";
 
 $map = new mapObj("robins.map");
 
-$counties = $map->getlayerbyname("counties");
+$counties = $map->getLayerByName("counties");
 $counties->__set("status", MS_ON);
 
-$robins = $map->getlayerbyname("robins");
+$robins = $map->getLayerByName("robins");
 $robins->__set("status", MS_ON);
 
 $img = $map->prepareImage();

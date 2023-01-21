@@ -134,11 +134,11 @@ for ($i = 0; $row = pg_fetch_array($rs); $i++) {
 
     $img = $map->prepareImage();
 
-    $namerica = $map->getlayerbyname("namerica");
+    $namerica = $map->getLayerByName("namerica");
     $namerica->__set("status", MS_ON);
     $namerica->draw($map, $img);
 
-    $lakes = $map->getlayerbyname("lakes");
+    $lakes = $map->getLayerByName("lakes");
     $lakes->__set("status", MS_ON);
     $lakes->draw($map, $img);
 
@@ -153,17 +153,17 @@ for ($i = 0; $row = pg_fetch_array($rs); $i++) {
         );
     }
     if (is_file($radarfp)) {
-        $radar = $map->getlayerbyname("nexrad_n0r");
+        $radar = $map->getLayerByName("nexrad_n0r");
         $radar->__set("status", MS_ON);
         $radar->__set("data", $radarfp);
         $radar->draw($map, $img);
     }
 
-    $counties = $map->getlayerbyname("uscounties");
+    $counties = $map->getLayerByName("uscounties");
     $counties->__set("status", MS_ON);
     $counties->draw($map, $img);
 
-    $states = $map->getlayerbyname("states");
+    $states = $map->getLayerByName("states");
     $states->__set("status", MS_ON);
     $states->draw($map, $img);
 
