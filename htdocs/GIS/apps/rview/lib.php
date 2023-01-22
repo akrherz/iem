@@ -82,13 +82,13 @@ function drawStateNEXRAD($hlext) {
  $map->setextent(-96.639706, 40.375437,-90.140061, 43.501196);
  $map->setProjection("init=epsg:4326");
 
- $namerica = $map->getlayerbyname("namerica");
+ $namerica = $map->getLayerByName("namerica");
  $namerica->__set("status", MS_ON);
 
- $counties = $map->getlayerbyname("counties_unproj");
+ $counties = $map->getLayerByName("counties_unproj");
  $counties->__set("status", MS_ON);
 
- $radarL = $map->getlayerbyname("radar");
+ $radarL = $map->getLayerByName("radar");
  $radarL->__set("status", MS_ON);
 
  $img = $map->prepareImage();
@@ -96,7 +96,7 @@ function drawStateNEXRAD($hlext) {
  $radarL->draw($map, $img);
  $counties->draw($map, $img);
 
- $rect = $map->getlayerbyname("rect");
+ $rect = $map->getLayerByName("rect");
  $rect->__set("status", MS_ON);
 
  /** Draw a box for what we are zoomed in on */
@@ -132,12 +132,12 @@ function drawCountyNEXRAD($site, $extents) {
   $map->setextent($extents[0],$extents[1], $extents[2],$extents[3] );
   $map->setProjection("init=epsg:4326");
 
- $namerica = $map->getlayerbyname("namerica");
+ $namerica = $map->getLayerByName("namerica");
  $namerica->__set("status", MS_ON);
-  $counties = $map->getlayerbyname("counties_unproj");
+  $counties = $map->getLayerByName("counties_unproj");
   $counties->__set("status", MS_ON);
 
-  $radarL = $map->getlayerbyname("DMX");
+  $radarL = $map->getLayerByName("DMX");
   $radarL->__set("status", MS_ON);
   $radarL->__set("data", "/mesonet/ldmdata/gis/images/4326/ridge/{$site}/N0B_0.png");
 
@@ -162,12 +162,12 @@ function drawKCCI($extents) {
   $map->setextent($extents[0],$extents[1], $extents[2],$extents[3] );
   $map->setProjection("init=epsg:4326");
 
- $namerica = $map->getlayerbyname("namerica");
+ $namerica = $map->getLayerByName("namerica");
  $namerica->__set("status", MS_ON);
-  $counties = $map->getlayerbyname("counties_unproj");
+  $counties = $map->getLayerByName("counties_unproj");
   $counties->__set("status", MS_ON);
 
-  $radarL = $map->getlayerbyname("KCCI");
+  $radarL = $map->getLayerByName("KCCI");
   $radarL->__set("status", MS_ON);
 
   $img = $map->prepareImage();

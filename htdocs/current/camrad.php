@@ -73,16 +73,16 @@ elseif ($network == "KCRG")
     $map->setExtent(-93.0, 40.9, -90.1, 43.7);
 $map->setSize(320, 240);
 
-$namer = $map->getlayerbyname("namerica");
+$namer = $map->getLayerByName("namerica");
 $namer->__set("status", 1);
 
-$stlayer = $map->getlayerbyname("states");
+$stlayer = $map->getLayerByName("states");
 $stlayer->__set("status", 1);
 
-$counties = $map->getlayerbyname("uscounties");
+$counties = $map->getLayerByName("uscounties");
 $counties->__set("status", 1);
 
-$c0 = $map->getlayerbyname("sbw");
+$c0 = $map->getLayerByName("sbw");
 $c0->__set("status", MS_ON);
 $db_ts = $ts->format("Y-m-d H:i");
 $year = $ts->format("Y");
@@ -93,7 +93,7 @@ $c0->__set("data", "geom from "
     . " and significance = 'W' ORDER by phenomena ASC) as foo "
     . " using unique oid using SRID=4326");
 
-$radar = $map->getlayerbyname("nexrad_n0q");
+$radar = $map->getLayerByName("nexrad_n0q");
 $radar->__set("status", MS_ON);
 $radts->setTimezone(new DateTimeZone("UTC"));
 $fp = "/mesonet/ARCHIVE/data/" . $radts->format('Y/m/d/') . "GIS/uscomp/n0r_" . $radts->format('YmdHi') . ".png";

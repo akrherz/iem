@@ -84,11 +84,11 @@ for ($year = $beginYear; $year <= $endYear; $year++) {
 
     $img = $map->prepareImage();
 
-    $namerica = $map->getlayerbyname("namerica");
+    $namerica = $map->getLayerByName("namerica");
     $namerica->__set("status", MS_ON);
     $namerica->draw($map, $img);
 
-    $lakes = $map->getlayerbyname("lakes");
+    $lakes = $map->getLayerByName("lakes");
     $lakes->__set("status", MS_ON);
     $lakes->draw($map, $img);
 
@@ -99,13 +99,13 @@ for ($year = $beginYear; $year <= $endYear; $year++) {
         $radts->format("YmdHi"),
     );
     if (is_file($radarfp)) {
-        $radar = $map->getlayerbyname("nexrad_n0r");
+        $radar = $map->getLayerByName("nexrad_n0r");
         $radar->__set("status", MS_ON);
         $radar->__set("data", $radarfp);
         $radar->draw($map, $img);
     }
 
-    $counties = $map->getlayerbyname("uscounties");
+    $counties = $map->getLayerByName("uscounties");
     if (($extents[2] - $extents[0]) > 5) {
         $counties->__set("status", MS_OFF);
     } else {
@@ -113,7 +113,7 @@ for ($year = $beginYear; $year <= $endYear; $year++) {
     }
     $counties->draw($map, $img);
 
-    $states = $map->getlayerbyname("states");
+    $states = $map->getLayerByName("states");
     $states->__set("status", MS_ON);
     $states->draw($map, $img);
 

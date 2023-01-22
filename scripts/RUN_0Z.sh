@@ -22,6 +22,9 @@ sleep 300
 cd ../00z
 python awos_rtp.py
 
+cd ../asos
+python cf6_to_iemaccess.py
+
 cd ../ingestors
 python elnino.py
 

@@ -47,16 +47,16 @@ $ex = array(
 
 $map->setextent($ex[$area][0], $ex[$area][1], $ex[$area][2], $ex[$area][3]);
 
-$namer = $map->getlayerbyname("namerica");
+$namer = $map->getLayerByName("namerica");
 $namer->__set("status", MS_ON);
 
-$counties = $map->getlayerbyname("uscounties");
+$counties = $map->getLayerByName("uscounties");
 $counties->__set("status", MS_ON);
 
-$stlayer = $map->getlayerbyname("states");
+$stlayer = $map->getLayerByName("states");
 $stlayer->__set("status", 1);
 
-$dot = $map->getlayerbyname("pointonly");
+$dot = $map->getLayerByName("pointonly");
 $dot->__set("status", MS_ON);
 
 $datal = new layerObj($map);

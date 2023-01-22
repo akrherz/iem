@@ -104,26 +104,26 @@ $map->setextent(
     $row[3] + $buf
 );
 
-$states = $map->getlayerbyname("states");
+$states = $map->getLayerByName("states");
 $states->__set("status", MS_ON);
 $states_c0 = $states->getClass(0);
 $states_c0_s0 = $states_c0->getStyle(0);
 $states_c0_s0->width = 1.5;
 $states_c0_s0->color->setRGB(210, 170, 130);
 
-$counties = $map->getlayerbyname("uscounties");
+$counties = $map->getLayerByName("uscounties");
 $counties->__set("status", MS_ON);
 $counties_c0 = $counties->getClass(0);
 $counties_c0_s0 = $counties_c0->getStyle(0);
 $counties_c0_s0->color->setRGB(180, 180, 180);
 
-$snet = $map->getlayerbyname("datapoint");
+$snet = $map->getLayerByName("datapoint");
 $snet->__set("status", MS_ON);
 
-$ponly = $map->getlayerbyname("pointonly");
+$ponly = $map->getLayerByName("pointonly");
 $ponly->__set("status", MS_ON);
 
-$cityname = $map->getlayerbyname("cityname");
+$cityname = $map->getLayerByName("cityname");
 $cityname->__set("status", MS_ON);
 
 $img = $map->prepareImage();
