@@ -8,9 +8,6 @@ $t->title = 'Winter Road Conditions';
 $t->refresh = 600;
 $tm = time();
   $t->content = <<<EOF
-<!--
-<div style="color: #f00;">Road Conditions are not reported till after 15 November...</div>
--->
 
 <div class="row">
           <div class="col-md-4">
@@ -33,23 +30,9 @@ $tm = time();
  <li><a href="http://www.dps.state.ia.us/ISP/">Iowa State Patrol</a></li>
 </ul>
 
-<div class="panel panel-default">
-          <div class="panel-heading">Surrounding States:</div>
-          <div class="panel-body">
-<pre>
-Iowa :          800-288-1047
-Illinois :      800-452-4368
-Kansas :        800-585-7623
-Minnesota :     800-542-0220
-Missouri :      888-275-6636
-Nebraska :      800-906-9069
-South Dakota :  866-697-3511
-</pre>
-          </div></div>
-
 </div><div class="col-md-8">
 
-<img class="img-responsive" src="https://mesonet.agron.iastate.edu/data/iaroads.png?{$tm}">
+<img class="img-responsive" src="/data/iaroads.png?{$tm}">
 
 <p>An archive of this image is in the:
 <a href="/timemachine/#118.0" class="btn btn-success"><i class="fa fa-clock-o"></i> IEM Time Machine</a>.</p>

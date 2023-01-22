@@ -49,7 +49,7 @@ $stationString = "(";
 foreach ($stations as $key => $value) {
     $sid = trim(substr($value, 0, 4));
     $stationString .= " '{$sid}',";
-    $nt->load_station($sid);
+    $nt->loadStation($sid);
 }
 if ($stationString == "("){
     die("no station set.");

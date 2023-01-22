@@ -20,7 +20,7 @@ $nt = new NetworkTable("IA_ASOS");
 function networkOffline($network)
 {
     global $pgconn, $nt;
-    $nt->load_network($network);
+    $nt->loadNetwork($network);
     $cities = $nt->table;
     $s = "";
     $rs = pg_execute($pgconn, "SELECT", Array($network) );

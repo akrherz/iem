@@ -37,15 +37,15 @@ EOM;
         );
 
         if (is_string($a)) {
-            $this->load_station($a, $n);
+            $this->loadStation($a, $n);
         } else if (is_array($a)) {
             foreach ($a as $id) {
-                $this->load_station($id, $n);
+                $this->loadStation($id, $n);
             }
         }
     }
 
-    function load_station($id, $n = "")
+    function loadStation($id, $n = "")
     {
         if ($n != "") {
             $rs = pg_execute($this->dbconn, "SELECT  ST1", array($id, $n));

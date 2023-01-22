@@ -1,7 +1,10 @@
-var map, selectedFeature, selectControl;
+var map;
+var selectedFeature;
+var selectControl;
 var roadlayer;
+var ol = window.ol || {}; // skipcq: JS-0239
 
-var style = new ol.style.Style({
+const style = new ol.style.Style({
     fill: new ol.style.Fill({
         color: 'rgba(255, 255, 255, 0)'
     }),
@@ -12,7 +15,7 @@ var style = new ol.style.Style({
 });
 
 // Lookup 'table' for styling of road conditions based on cond_code
-var rcLookup = {
+const rcLookup = {
     0: '#000000',
     1: '#00CC00',
     3: '#F0F000',
@@ -36,13 +39,13 @@ var rcLookup = {
 
 $(document).ready(function(){
 
-    var roadLayer = new ol.layer.Vector({
+    const roadLayer = new ol.layer.Vector({
         title: 'Winter Road Conditions',
         source: new ol.source.Vector({
             url: '/geojson/winter_roads.geojson',
             format: new ol.format.GeoJSON()
         }),
-        style: function(feature, resolution){
+        style: (feature, _resolution) => {
             try{
                 style.getStroke().setColor(rcLookup[feature.get('code')]);
             } catch(e) {
@@ -66,7 +69,7 @@ $(document).ready(function(){
     });
 
     // Create a LayerSwitcher instance and add it to the map
-    var layerSwitcher = new ol.control.LayerSwitcher();
+    const layerSwitcher = new ol.control.LayerSwitcher();
     map.addControl(layerSwitcher);
 
     //TODO add hover support

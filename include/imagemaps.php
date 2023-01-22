@@ -154,7 +154,7 @@ function networkSelect(
             $tbl = $sid;
             $sid = $idx;
         } else {
-            $nt->load_station($sid);
+            $nt->loadStation($sid);
             $tbl = $nt->table[$sid];
         }
         $sname = make_sname($tbl);
@@ -187,7 +187,7 @@ function networkSelectAuto($network, $selected, $extra = array())
         $s .= ">{$sname}</option>\n";
     }
     foreach ($extra as $idx => $sid) {
-        $nt->load_station($sid);
+        $nt->loadStation($sid);
         $tbl = $nt->table[$sid];
         $sname = make_sname($tbl);
         $s .= "<option value=\"$sid\" ";
