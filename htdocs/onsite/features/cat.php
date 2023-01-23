@@ -4,8 +4,8 @@ define("IEM_APPID", 55);
 define("FBEXTRA", True);
 require_once "../../../include/myview.php";
 require_once "../../../include/database.inc.php";
-require_once "../../../include/feature.php";
 require_once "../../../include/forms.php";
+require_once "../../../include/mlib.php";
 
 $t = new MyView();
 

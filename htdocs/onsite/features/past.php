@@ -3,7 +3,7 @@ require_once "../../../config/settings.inc.php";
 define("IEM_APPID", 23);
 require_once "../../../include/myview.php";
 require_once "../../../include/database.inc.php";
-require_once "../../../include/feature.php";
+require_once "../../../include/mlib.php";
 require_once "../../../include/forms.php";
 
 $year = get_int404("year", date("Y"));
