@@ -17,7 +17,7 @@ def main(argv):
         f"python hrrr_ref2raster.py {tstring} {argv[5]}",
     ]
     for cmd in cmds:
-        subprocess.call(cmd, shell=True)
+        subprocess.call(cmd.split())
         # allow for some time for LDM to move data
         time.sleep(120)
 

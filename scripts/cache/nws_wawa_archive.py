@@ -34,7 +34,7 @@ def main():
     dstamp = utcnow.strftime("%Y%m%d%H%M")
     pqstr = f"plot a {dstamp} bogus wwa/wwa_{dstamp}.png png"
     LOG.info(pqstr)
-    subprocess.call(f"pqinsert -i -p '{pqstr}' {tmpfd.name}", shell=True)
+    subprocess.call(["pqinsert", "-i", "-p", pqstr, tmpfd.name])
     os.unlink(tmpfd.name)
 
 

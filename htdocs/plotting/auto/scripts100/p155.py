@@ -7,28 +7,26 @@ from pyiem.util import get_autoplot_context, get_sqlalchemy_conn
 from pyiem.exceptions import NoDataFound
 from sqlalchemy import text
 
-MDICT = dict(
-    [
-        ("all", "No Month/Time Limit"),
-        ("spring", "Spring (MAM)"),
-        ("fall", "Fall (SON)"),
-        ("winter", "Winter (DJF)"),
-        ("summer", "Summer (JJA)"),
-        ("octmar", "October thru March"),
-        ("jan", "January"),
-        ("feb", "February"),
-        ("mar", "March"),
-        ("apr", "April"),
-        ("may", "May"),
-        ("jun", "June"),
-        ("jul", "July"),
-        ("aug", "August"),
-        ("sep", "September"),
-        ("oct", "October"),
-        ("nov", "November"),
-        ("dec", "December"),
-    ]
-)
+MDICT = {
+    "all": "Entire Year",
+    "spring": "Spring (MAM)",
+    "fall": "Fall (SON)",
+    "winter": "Winter (DJF)",
+    "summer": "Summer (JJA)",
+    "octmar": "October thru March",
+    "jan": "January",
+    "feb": "February",
+    "mar": "March",
+    "apr": "April",
+    "may": "May",
+    "jun": "June",
+    "jul": "July",
+    "aug": "August",
+    "sep": "September",
+    "oct": "October",
+    "nov": "November",
+    "dec": "December",
+}
 
 METRICS = dict(
     [
@@ -206,7 +204,6 @@ def plotter(fdict):
         title2 += f" @{dt:%-I %p}"
     (agg, dbvar) = varname.split("_")
     # Special accounting for the peak_wind_gust column
-    tzname = ctx["_nt"].sts[station]["tzname"]
     if dbvar == "gust":
         titlelabel = "Top"
         with get_sqlalchemy_conn("asos") as conn:
@@ -327,7 +324,7 @@ def plotter(fdict):
     fig.text(
         0.98,
         0.03,
-        f"Timezone: {ctx['_nt'].sts[station]['tzname']}",
+        f"Timezone: {tzname}",
         ha="right",
         fontsize=14,
     )

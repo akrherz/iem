@@ -121,7 +121,7 @@ def do_job(job):
     """Do something"""
     warnings = get_warnings(job["sts"], job["ets"], job["wfo"], job["wtype"])
 
-    mydir = os.path.join(TMPDIR, job["jobid"])
+    mydir = os.path.join(TMPDIR, f"{job['jobid']}")
     if not os.path.isdir(mydir):
         os.makedirs(mydir)
     os.chdir(mydir)
@@ -353,8 +353,7 @@ def do_job(job):
 
     doc.save(outputfile)
     del doc
-    cmd = f"unoconv -f ppt {outputfile}"
-    subprocess.call(cmd, shell=True)
+    subprocess.call(["unoconv", "-f", "ppt", outputfile])
     pptfn = f"{basefn}.ppt"
     LOG.warning("Generated %s with %s slides", pptfn, i)
     if os.path.isfile(pptfn):
@@ -362,10 +361,10 @@ def do_job(job):
         shutil.copyfile(pptfn, f"/mesonet/share/pickup/raccoon/{pptfn}")
         # Cleanup
         os.chdir(TMPDIR)
-        subprocess.call(f"rm -rf {job['jobid']}", shell=True)
+        subprocess.call(["rm", "-rf", f"{job['jobid']}"])
     else:
         LOG.warning("Uh oh, no output file, lets kill soffice.bin")
-        subprocess.call("pkill --signal 9 soffice.bin", shell=True)
+        subprocess.call(["pkill", "--signal", "9", "soffice.bin"])
         add_job(job)
 
 

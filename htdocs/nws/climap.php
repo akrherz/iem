@@ -9,7 +9,7 @@ require_once "../../include/mlib.php";
 force_https();
 $t = new MyView();
 $t->title = "Map of Daily NWS CLImage reports";
-$OL = '6.6.0';
+$OL = '7.1.0';
 $t->headextra = <<<EOF
 <link rel="stylesheet" href="/vendor/openlayers/{$OL}/ol.css" type="text/css">
 <link rel="stylesheet" href="/vendor/jquery-ui/1.12.1/jquery-ui.min.css" />

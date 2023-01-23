@@ -1,7 +1,3 @@
-var map;
-var selectedFeature;
-var selectControl;
-var roadlayer;
 var ol = window.ol || {}; // skipcq: JS-0239
 
 const style = new ol.style.Style({
@@ -37,7 +33,7 @@ const rcLookup = {
     86: '#FF0000'
 };
 
-$(document).ready(function(){
+$(document).ready(() => {
 
     const roadLayer = new ol.layer.Vector({
         title: 'Winter Road Conditions',
@@ -49,12 +45,13 @@ $(document).ready(function(){
             try{
                 style.getStroke().setColor(rcLookup[feature.get('code')]);
             } catch(e) {
+                // empty
             }
             return [style];
         }
     });
     
-    map = new ol.Map({
+    const map = new ol.Map({
         target: 'map',
         layers: [new ol.layer.Tile({
             title: 'OpenStreetMap',

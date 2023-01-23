@@ -44,7 +44,7 @@ EOM;
         }
     }
 
-    function loadNetwork($network, $force3char = FALSE)
+    public function loadNetwork($network, $force3char = FALSE)
     {
         $rs = pg_execute($this->dbconn, "SELECT", array($network));
         for ($i = 0; $row = pg_fetch_array($rs); $i++) {
@@ -57,7 +57,7 @@ EOM;
         }
     }
 
-    function loadStation($id)
+    public function loadStation($id)
     {
         $rs = pg_execute($this->dbconn, "SELECTST", array($id));
         for ($i = 0; $row = pg_fetch_array($rs); $i++) {

@@ -10,12 +10,12 @@ Example:
 
 */
 // https://datatables.net/plug-ins/api/row().show()
-$.fn.dataTable.Api.register('row().show()', function () {
-    var page_info = this.table().page.info();
+$.fn.dataTable.Api.register('row().show()', function () { // needs this
+    const page_info = this.table().page.info();
     // Get row index
-    var new_row_index = this.index();
+    const new_row_index = this.index();
     // Row position
-    var row_position = this.table()
+    const row_position = this.table()
         .rows({ search: 'applied' })[0]
         .indexOf(new_row_index);
     // Already on right page ?
@@ -24,7 +24,7 @@ $.fn.dataTable.Api.register('row().show()', function () {
         return this;
     }
     // Find page number
-    var page_to_display = Math.floor(row_position / this.table().page.len());
+    const page_to_display = Math.floor(row_position / this.table().page.len());
     // Go to that page
     this.table().page(page_to_display);
     // Return row object
@@ -38,7 +38,7 @@ function get_style(color, text) {
         }),
         text: new ol.style.Text({
             font: '14px Calibri,sans-serif',
-            text: text,
+            text,
             fill: new ol.style.Fill({
                 color: color,
                 width: 1
@@ -52,7 +52,7 @@ function get_style(color, text) {
 }
 
 function getLabelForFeature(inst, feat) {
-    var label = "TBD";
+    let label = "TBD";
     if (inst.label_field == "id") {
         label = feat.getId();
     } else if (inst.label_field) {
@@ -76,8 +76,7 @@ function init_map(idx, inst) {
         source: new ol.source.Vector({
             format: new ol.format.GeoJSON()
         }),
-        style: function (feature) {
-            var label = "TBD";
+        style: (feature) => {
             return [get_style("#000", getLabelForFeature(inst, feature))];
         }
     });
@@ -85,7 +84,7 @@ function init_map(idx, inst) {
         method: "GET",
         url: inst.geojson_src,
         dataType: "json",
-        success: function (data) {
+        success: (data) => {
             if (data.meta) {
                 inst.label_field = data.meta.propdefault;
                 inst.proporder = data.meta.proporder;
@@ -111,19 +110,19 @@ function init_map(idx, inst) {
             zoom: 3
         })
     });
-    inst.map.on('click', function (evt) {
-        var feature = inst.map.forEachFeatureAtPixel(evt.pixel,
-            function (feature, layer) {
-                return feature;
+    inst.map.on('click', (evt) => {
+        const feature = inst.map.forEachFeatureAtPixel(evt.pixel,
+            (feature2, _layer) => {
+                return feature2;
             });
         if (!feature) {
             return;
         }
         highlightFeature(inst, feature);
-        var id = feature.getId();
+        const id = feature.getId();
         inst.table.rows().deselect();
         inst.table.row(
-            inst.table.rows(function (idx, data, node) {
+            inst.table.rows((idx, data, _node) => {
                 if (data["id"] === id) {
                     inst.table.row(idx).select();
                     return true;
@@ -134,7 +133,7 @@ function init_map(idx, inst) {
 
     });
 
-    inst.vectorLayer.getSource().on('change', function (e) {
+    inst.vectorLayer.getSource().on('change', (e) => {
         if (inst.vectorLayer.getSource().getState() == 'ready' && inst.zoomReset === false) {
             inst.map.getView().fit(
                 inst.vectorLayer.getSource().getExtent(),
@@ -148,28 +147,28 @@ function init_map(idx, inst) {
         if (inst.table) {
             return;
         }
-        var columns = [{ title: 'ID', data: 'id' }];
+        const columns = [{ title: 'ID', data: 'id' }];
         $(inst.select).append(
-            "<option value=\"id\">ID</option>"
+            '<option value="id">ID</option>'
         );
-        var data = [];
+        const data = [];
         // If we have a column order, use it!
         if (inst.proporder) {
-            inst.proporder.forEach(function (val) {
+            inst.proporder.forEach((val) => {
                 columns.push({ title: val, data: val })
                 $(inst.select).append(
-                    "<option value=\"" + val + "\">" + val + "</option>"
+                    `<option value="${val}">${val}</option>`
                 );
             });
         }
-        inst.vectorLayer.getSource().getFeatures().forEach(function (feat) {
+        inst.vectorLayer.getSource().getFeatures().forEach((feat) => {
             if (columns.length == 1) {
                 feat.getKeys().forEach(function (key) {
                     if (key == "geometry") {
                         return;
                     }
                     $(inst.select).append(
-                        "<option value=\"" + key + "\">" + key + "</option>"
+                        `<option value="${key}">${key}</option>`
                     );
                     columns.push({ title: key, data: key });
                 });
@@ -178,49 +177,46 @@ function init_map(idx, inst) {
                 inst.label_field = "id";
             }
             $(inst.select).val(inst.label_field);
-            var props = feat.getProperties();
+            const props = feat.getProperties();
             props.id = feat.getId();
             data.push(props);
         });
-        inst.table = $("#maptable-table" + idx).DataTable({
-            columns: columns,
-            data: data,
+        inst.table = $(`#maptable-table${idx}`).DataTable({
+            columns,
+            data,
             select: true
         });
-        inst.table.on('select', function (e, dt, type, indexes) {
+        inst.table.on('select', (_e, dt, type, indexes) => {
             if (type !== 'row') {
                 return;
             }
-            var featid = dt.row(indexes).data()["id"];
-            var feat = inst.vectorLayer.getSource().getFeatureById(featid);
+            const featid = dt.row(indexes).data()["id"];
+            const feat = inst.vectorLayer.getSource().getFeatureById(featid);
             highlightFeature(inst, feat);
         });
     });
 
-    // var layerSwitcher = new ol.control.LayerSwitcher();
-    // inst.map.addControl(layerSwitcher);
 }
-
 
 function init(idx, div) {
     // Setup the given div for usage
     // Add left and right hand side divs
-    var inst = {};
-    inst.proporder;
+    const inst = {};
+    inst.proporder = null;
     inst.zoomReset = false;
     inst.geojson_src = $(div).data('geojson-src');
     inst.label_field = $(div).data('label-field');
-    var leftcol = document.createElement('div');
+    const leftcol = document.createElement('div');
     leftcol.className = 'col-md-6';
     inst.mapdiv = document.createElement('div');
     inst.mapdiv.style = "height: 400px";
     leftcol.append(inst.mapdiv);
-    var p = document.createElement('p');
-    var t = document.createTextNode("Select variable for labels:");
+    const p = document.createElement('p');
+    const t = document.createTextNode("Select variable for labels:");
     p.appendChild(t);
     inst.select = document.createElement('select');
     p.appendChild(inst.select);
-    $(inst.select).on("change", function () {
+    $(inst.select).on("change", function () { // this
         inst.label_field = this.value;
         inst.vectorLayer.setStyle(inst.vectorLayer.getStyle());
         if (inst.selectedFeature) {
@@ -229,10 +225,9 @@ function init(idx, div) {
     });
     leftcol.appendChild(p);
     div.append(leftcol);
-    var tablediv = document.createElement('div');
+    const tablediv = document.createElement('div');
     tablediv.className = 'col-md-6';
-    inst.table;
-    var tableElement = document.createElement('table');
+    const tableElement = document.createElement('table');
     tableElement.id = "maptable-table" + idx;
     tablediv.appendChild(tableElement);
     div.append(tablediv);
@@ -244,8 +239,8 @@ function init(idx, div) {
 // https://learn.jquery.com/plugins/basic-plugin-creation/
 (function ($) {
 
-    $.fn.MapTable = function (options) {
-        var res = [];
+    $.fn.MapTable = function (_options) { // this
+        const res = [];
         this.each(function (idx, item) {
             res.push(init(idx, item));
         });

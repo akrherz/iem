@@ -45,7 +45,7 @@ EOM;
         }
     }
 
-    function loadStation($id, $n = "")
+    public function loadStation($id, $n = "")
     {
         if ($n != "") {
             $rs = pg_execute($this->dbconn, "SELECT  ST1", array($id, $n));

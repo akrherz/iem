@@ -1,23 +1,21 @@
 """
  Dump a CSV file of the MADIS data, kind of sad that I do this, but alas
 """
-import os
-import sys
-import time
-import subprocess
-import warnings
 import datetime
+import os
+import subprocess
+from tempfile import NamedTemporaryFile
+import time
+import warnings
 
 from netCDF4 import chartostring  # @UnresolvedImport
 import numpy.ma
 import pytz
-from pyiem.util import ncopen, convert_value
+from pyiem.util import ncopen, convert_value, logger
 
-warnings.filterwarnings("ignore", category=DeprecationWarning)
-# prevent core.py:931: RuntimeWarning: overflow encountered in multiply
+LOG = logger()
+# GIGO
 warnings.simplefilter("ignore", RuntimeWarning)
-# prevent core.py:3785: UserWarning: Warning: converting a masked element
-warnings.simplefilter("ignore", UserWarning)
 
 
 def sanity_check(val, lower, upper, goodfmt, default):
@@ -39,17 +37,18 @@ def main():
     format_tokens = fmt.split(",")
 
     utc = datetime.datetime.utcnow()
-    fn = "/mesonet/data/madis/mesonet1/%s.nc" % (utc.strftime("%Y%m%d_%H00"),)
+    fn = f"/mesonet/data/madis/mesonet1/{utc:%Y%m%d_%H}00.nc"
     if not os.path.isfile(fn):
         time.sleep(60)
-        fn = "/mesonet/data/madis/mesonet1/%s.nc" % (
-            utc.strftime("%Y%m%d_%H00"),
-        )
         if not os.path.isfile(fn):
             if utc.minute > 30:
-                print("madis2csv %s does not exist" % (fn,))
-            sys.exit()
-    with ncopen(fn, "r", timeout=300) as nc:
+                LOG.warning("%s does not exist", fn)
+            return
+    # This processing is slow and LDM could be over-writing us, so we shall
+    # make a copy of this file :/
+    tmpfn = f"/tmp/{os.path.basename(fn)}"
+    subprocess.call(["cp", fn, tmpfn])
+    with ncopen(tmpfn, "r", timeout=300) as nc:
         stations = chartostring(nc.variables["stationId"][:])
         stationname = chartostring(nc.variables["stationName"][:])
         tmpf = convert_value(nc.variables["temperature"][:], "degK", "degF")
@@ -88,7 +87,7 @@ def main():
             nc.variables["roadSubsurfaceTemp4"][:], "degK", "degF"
         )
         times = nc.variables["observationTime"][:]
-
+    os.unlink(tmpfn)
     db = {}
 
     for recnum in range(len(stations) - 1, -1, -1):
@@ -125,36 +124,33 @@ def main():
             "PTMP4": sanity_check(ptmp4[recnum], -100, 150, "%.0f", ""),
         }
 
-    with open("/tmp/madis.csv", "w", encoding="utf-8") as fh:
-        fh.write("%s\n" % (fmt,))
-        for stid in db:
+    with NamedTemporaryFile("w", encoding="utf-8", delete=False) as fh:
+        fh.write(f"{fmt}\n")
+        for _stid, entry in db.items():
             for key in format_tokens:
-                if key in db[stid]:
-                    fh.write("%s" % (db[stid][key],))
+                if key in entry:
+                    fh.write(f"{entry[key]}")
                 fh.write(",")
             fh.write("\n")
 
-    pqstr = "data c %s fn/madis.csv bogus csv" % (utc.strftime("%Y%m%d%H%M"),)
-    cmd = "pqinsert -i -p '%s' /tmp/madis.csv" % (pqstr,)
-    subprocess.call(cmd, shell=True)
-    os.remove("/tmp/madis.csv")
+    pqstr = f"data c {utc:%Y%m%d%H%M} fn/madis.csv bogus csv"
+    subprocess.call(["pqinsert", "-i", "-p", pqstr, fh.name])
+    os.remove(fh.name)
 
-    with open("/tmp/madis.csv", "w", encoding="utf-8") as fh:
-        fh.write("%s\n" % (fmt,))
-        for stid in db:
-            if db[stid]["PROVIDER"] in ["IADOT", "NEDOR"]:
-                for key in format_tokens:
-                    if key in db[stid]:
-                        fh.write("%s" % (db[stid][key],))
-                    fh.write(",")
-                fh.write("\n")
+    with NamedTemporaryFile("w", encoding="utf-8", delete=False) as fh:
+        fh.write(f"{fmt}\n")
+        for _stid, entry in db.items():
+            if entry["PROVIDER"] not in ["IADOT", "NEDOR"]:
+                continue
+            for key in format_tokens:
+                if key in entry:
+                    fh.write(f"{entry[key]}")
+                fh.write(",")
+            fh.write("\n")
 
-    pqstr = "data c %s fn/madis_iamn.csv bogus csv" % (
-        utc.strftime("%Y%m%d%H%M"),
-    )
-    cmd = f"pqinsert -i -p '{pqstr}' /tmp/madis.csv"
-    subprocess.call(cmd, shell=True)
-    os.remove("/tmp/madis.csv")
+    pqstr = f"data c {utc:%Y%m%d%H%M} fn/madis_iamn.csv bogus csv"
+    subprocess.call(["pqinsert", "-i", "-p", pqstr, fh.name])
+    os.remove(fh.name)
 
 
 if __name__ == "__main__":

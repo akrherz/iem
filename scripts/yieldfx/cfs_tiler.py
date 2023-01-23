@@ -8,8 +8,10 @@ import sys
 import numpy as np
 from metpy.units import units
 from pyiem import iemre
-from pyiem.util import utc, ncopen, convert_value
+from pyiem.util import utc, ncopen, convert_value, logger
 from pyiem.meteorology import gdd
+
+LOG = logger()
 
 
 def make_netcdf(fullpath, valid, west, south):
@@ -109,7 +111,7 @@ def copy_iemre(nc, fromyear, ncdate0, ncdate1, islice, jslice):
     """Copy IEMRE data from a given year to **inclusive** dates."""
     rencfn = iemre.get_daily_ncname(fromyear)
     if not os.path.isfile(rencfn):
-        print("reanalysis fn %s missing" % (rencfn,))
+        LOG.warning("reanalysis fn %s missing", rencfn)
         return
     renc = ncopen(rencfn)
     tidx0 = (ncdate0 - datetime.date(1980, 1, 1)).days
@@ -122,9 +124,6 @@ def copy_iemre(nc, fromyear, ncdate0, ncdate1, islice, jslice):
         retslice = slice(0, tsteps)
     else:
         retslice = slice(0 - tsteps, None)
-    # print("copy_iemre from %s filling %s steps nc: %s iemre: %s" % (
-    #    fromyear, tsteps, tslice, retslice
-    # ))
     highc = convert_value(
         renc.variables["high_tmpk"][retslice, jslice, islice], "degK", "degC"
     )
@@ -164,7 +163,7 @@ def copy_iemre(nc, fromyear, ncdate0, ncdate1, islice, jslice):
 def tile_extraction(nc, valid, west, south):
     """Do our tile extraction"""
     # update model metadata
-    nc.valid = "CFS model: %s" % (valid.strftime("%Y-%m-%dT%H:%M:%SZ"),)
+    nc.valid = f"CFS model: {valid:%Y-%m-%dT%H:%M:%S}Z"
     i, j = iemre.find_ij(west, south)
     islice = slice(i, i + 16)
     jslice = slice(j, j + 16)
@@ -197,18 +196,17 @@ def qc(nc):
         avgv = np.mean(nc.variables["srad"][i, :, :])
         if avgv > 0:
             continue
-        print("ts: %s avgv: %s" % (ts, avgv))
-    print("done...")
+        LOG.info("ts: %s avgv: %s", ts, avgv)
+    LOG.warning("done...")
 
 
 def workflow(valid, ncfn, west, south):
     """Make the magic happen"""
-    basedir = "/mesonet/share/pickup/yieldfx/cfs%02i" % (valid.hour,)
+    basedir = "/mesonet/share/pickup/yieldfx/cfs{valid.hour:02.0f}"
     if not os.path.isdir(basedir):
         os.makedirs(basedir)
-    nc = make_netcdf("%s/%s" % (basedir, ncfn), valid, west, south)
+    nc = make_netcdf(f"{basedir}/{ncfn}", valid, west, south)
     tile_extraction(nc, valid, west, south)
-    # qc(nc)
     nc.close()
 
 
@@ -230,10 +228,9 @@ def main(argv):
                 # with the first number in the file name being number
                 # of tiles since 90 degrees north, and the second number
                 # being number of tiles since -180 degrees eas
-                ncfn = "clim_%04i_%04i.tile.nc4" % (
-                    (90 - south) / 2,
-                    (180 - (0 - west)) / 2 + 1,
-                )
+                y = (90 - south) / 2
+                x = (180 - (0 - west)) / 2 + 1
+                ncfn = f"clim_{y:04.0f}_{x:04.0f}.tile.nc4"
                 workflow(valid, ncfn, west, south)
 
 

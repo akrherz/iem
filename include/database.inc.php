@@ -3,7 +3,6 @@
  * Database connection function that most every script uses :)
  */
 
-
 function database_failure($DBKEY)
 {
     echo sprintf("<div class='warning'>Unable to contact database: %s</div>", $DBKEY);
