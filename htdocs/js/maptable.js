@@ -122,9 +122,9 @@ function init_map(idx, inst) {
         const id = feature.getId();
         inst.table.rows().deselect();
         inst.table.row(
-            inst.table.rows((idx, data, _node) => {
+            inst.table.rows((idx2, data, _node) => {
                 if (data["id"] === id) {
-                    inst.table.row(idx).select();
+                    inst.table.row(idx2).select();
                     return true;
                 }
                 return false;
@@ -133,7 +133,7 @@ function init_map(idx, inst) {
 
     });
 
-    inst.vectorLayer.getSource().on('change', (e) => {
+    inst.vectorLayer.getSource().on('change', (_e2) => {
         if (inst.vectorLayer.getSource().getState() == 'ready' && inst.zoomReset === false) {
             inst.map.getView().fit(
                 inst.vectorLayer.getSource().getExtent(),
@@ -190,7 +190,7 @@ function init_map(idx, inst) {
             if (type !== 'row') {
                 return;
             }
-            const featid = dt.row(indexes).data()["id"];
+            const featid = dt.row(indexes).data().id;
             const feat = inst.vectorLayer.getSource().getFeatureById(featid);
             highlightFeature(inst, feat);
         });
@@ -211,11 +211,11 @@ function init(idx, div) {
     inst.mapdiv = document.createElement('div');
     inst.mapdiv.style = "height: 400px";
     leftcol.append(inst.mapdiv);
-    const p = document.createElement('p');
-    const t = document.createTextNode("Select variable for labels:");
-    p.appendChild(t);
+    const pp = document.createElement('p');
+    const tt = document.createTextNode("Select variable for labels:");
+    pp.appendChild(tt);
     inst.select = document.createElement('select');
-    p.appendChild(inst.select);
+    pp.appendChild(inst.select);
     $(inst.select).on("change", function () { // this
         inst.label_field = this.value;
         inst.vectorLayer.setStyle(inst.vectorLayer.getStyle());
@@ -223,12 +223,12 @@ function init(idx, div) {
             highlightFeature(inst, inst.selectedFeature);
         }
     });
-    leftcol.appendChild(p);
+    leftcol.appendChild(pp);
     div.append(leftcol);
     const tablediv = document.createElement('div');
     tablediv.className = 'col-md-6';
     const tableElement = document.createElement('table');
-    tableElement.id = "maptable-table" + idx;
+    tableElement.id = `maptable-table${idx}`;
     tablediv.appendChild(tableElement);
     div.append(tablediv);
 

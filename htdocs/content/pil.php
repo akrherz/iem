@@ -16,11 +16,11 @@ if ($val) {
 // Need to buffer the output so that we can save it to memcached later
 ob_start();
 
-$img = ImageCreate(80, 80);
-$white = ImageColorAllocate($img, 255, 255, 255);
-$black = ImageColorAllocate($img, 0, 0, 0);
-$ee = ImageColorAllocate($img, 150, 150, 150);
-ImageFilledRectangle($img, 0, 0, 85, 85, $white);
+$img = imagecreate(80, 80);
+$white = imagecolorallocate($img, 255, 255, 255);
+$black = imagecolorallocate($img, 0, 0, 0);
+$ee = imagecolorallocate($img, 150, 150, 150);
+imagefilledrectangle($img, 0, 0, 85, 85, $white);
 //$logo = imagecreatefrompng("../images/logo_small.png");
 //imagecopy($img, $logo, 0, 0, 0, 0, 85, 65);
 imagettftext(
@@ -55,8 +55,8 @@ imagettftext(
 );
 
 header("content-type: image/png");
-ImagePng($img);
-ImageDestroy($img);
+imagepng($img);
+imagedestroy($img);
 
 $memcache->set("pil_{$pil}.png", ob_get_contents(), 0);
 ob_end_flush();

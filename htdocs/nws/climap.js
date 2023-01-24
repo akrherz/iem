@@ -3,6 +3,7 @@ var vectorLayer;
 var map;
 var element;
 var fontSize = 14;
+var ol = window.ol || {};  // skipcq: JS-0239
 
 function text(str) {
     // XSS
@@ -10,9 +11,9 @@ function text(str) {
 }
 
 function updateURL() {
-    const t = $.datepicker.formatDate("yymmdd",
+    const tt = $.datepicker.formatDate("yymmdd",
         $("#datepicker").datepicker('getDate'));
-    window.location.href = `#${t}/${renderattr}`;
+    window.location.href = `#${tt}/${renderattr}`;
 }
 
 function updateMap() {
@@ -34,7 +35,7 @@ const vectorStyleFunction = (feature, _resolution) => {
     let style = null;
     const value = feature.get(renderattr);
     let color = "#FFFFFF";
-    let outlinecolor = "#000000";
+    const outlinecolor = "#000000";
     if (value !== "M") {
         if (renderattr.indexOf("depart") > -1) {
             if (renderattr.indexOf("high") > -1 || renderattr.indexOf("low") > -1) {
@@ -56,10 +57,10 @@ const vectorStyleFunction = (feature, _resolution) => {
                 color: 'rgba(255, 255, 255, 0.6)'
             }),
             text: new ol.style.Text({
-                font: fontSize + 'px Calibri,sans-serif',
+                font: `${fontSize}px Calibri,sans-serif`,
                 text: value.toString(),
                 fill: new ol.style.Fill({
-                    color: color,
+                    color,
                     width: 1
                 }),
                 stroke: new ol.style.Stroke({
@@ -99,7 +100,7 @@ function makeVectorLayer(dt) {
         source: new ol.source.Vector({
             format: new ol.format.GeoJSON(),
             projection: ol.proj.get('EPSG:3857'),
-            url: '/geojson/cli.py?dt=' + dt
+            url: `/geojson/cli.py?dt=${dt}`
         }),
         style: vectorStyleFunction
     });
@@ -124,7 +125,7 @@ $(document).ready(() => {
         target: 'map',
         layers: [new ol.layer.Tile({
             title: 'Global Imagery',
-            source: new ol.source.BingMaps({ key: key, imagerySet: 'Aerial' })
+            source: new ol.source.BingMaps({ key, imagerySet: 'Aerial' })
         }),
         new ol.layer.Tile({
             title: 'State Boundaries',
@@ -156,11 +157,11 @@ $(document).ready(() => {
     $(element).popover({
         'placement': 'top',
         'html': true,
-        content: function () { return $('#popover-content').html(); }
+        content() { return $('#popover-content').html(); }
     });
 
     // display popup on click
-    map.on('click', function (evt) {
+    map.on('click', (evt) => {
         const feature = map.forEachFeatureAtPixel(evt.pixel,
             (feature2, _layer) => {
                 return feature2;
@@ -187,14 +188,14 @@ $(document).ready(() => {
     });
 
     // Figure out if we have anything specified from the window.location
-    const tokens = window.location.href.split("#");
+    let tokens = window.location.href.split("#");
     if (tokens.length == 2) {
         // #YYYYmmdd/variable
         tokens = tokens[1].split("/");
         if (tokens.length == 2) {
             const tpart = text(tokens[0]);
             renderattr = text(tokens[1]);
-            $('select[id=renderattr] option[value=' + renderattr + ']').attr("selected", "selected");
+            $(`select[id=renderattr] option[value=${renderattr}]`).attr("selected", "selected");
             const dstr = `${tpart.substr(4, 2)}/${tpart.substr(6, 2)}/${tpart.substr(0, 4)}`;
             $("#datepicker").datepicker("setDate", new Date(dstr));
             updateDate();
@@ -202,16 +203,19 @@ $(document).ready(() => {
     }
 
     // Font size buttons
-    $('#fplus').click(function () {
+    $('#fplus').click(() => {
         fontSize += 2;
         vectorLayer.setStyle(vectorStyleFunction);
     });
-    $('#fminus').click(function () {
+    $('#fminus').click(() => {
         fontSize -= 2;
         vectorLayer.setStyle(vectorStyleFunction);
     });
 
-    $("#dlcsv").click(function () {
+    $("#dlcsv").click(() => {
         window.location.href = `/geojson/cli.py?dl=1&fmt=csv&dt=${$.datepicker.formatDate("yy-mm-dd", $("#datepicker").datepicker('getDate'))}`;
+    });
+    $("#renderattr").change(() => {
+        updateMap();
     });
 });

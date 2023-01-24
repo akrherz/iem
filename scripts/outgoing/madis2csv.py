@@ -39,6 +39,7 @@ def main():
     utc = datetime.datetime.utcnow()
     fn = f"/mesonet/data/madis/mesonet1/{utc:%Y%m%d_%H}00.nc"
     if not os.path.isfile(fn):
+        LOG.info("%s does not exist", fn)
         time.sleep(60)
         if not os.path.isfile(fn):
             if utc.minute > 30:
@@ -46,7 +47,9 @@ def main():
             return
     # This processing is slow and LDM could be over-writing us, so we shall
     # make a copy of this file :/
-    tmpfn = f"/tmp/{os.path.basename(fn)}"
+    with NamedTemporaryFile("wb", delete=False) as tmpfp:
+        pass
+    tmpfn = f"{tmpfp}.nc"
     subprocess.call(["cp", fn, tmpfn])
     with ncopen(tmpfn, "r", timeout=300) as nc:
         stations = chartostring(nc.variables["stationId"][:])
