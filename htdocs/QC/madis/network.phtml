@@ -1,91 +1,94 @@
 <?php
- require_once "../../../config/settings.inc.php";
- define("IEM_APPID", 97);
- require_once "../../../include/myview.php";
- require_once "../../../include/database.inc.php";
- require_once "../../../include/forms.php";
- require_once "../../../include/mlib.php";
+require_once "../../../config/settings.inc.php";
+define("IEM_APPID", 97);
+require_once "../../../include/myview.php";
+require_once "../../../include/database.inc.php";
+require_once "../../../include/forms.php";
+require_once "../../../include/mlib.php";
 
- $t = new MyView();
- $t->title = "Quality Control, MADIS Raw QC";
- $dbconn = iemdb("iem");
- $rs = pg_prepare(
+$t = new MyView();
+$t->title = "Quality Control, MADIS Raw QC";
+$dbconn = iemdb("iem");
+$rs = pg_prepare(
     $dbconn,
     "SELECT",
-    "SELECT c.*, t.id as station, t.name, ".
-    "c.valid at time zone 'UTC' as uv from current_qc c JOIN stations t on ".
-    "(c.iemid = t.iemid) WHERE t.network = $1");
- $sortcol = isset($_GET["sortcol"]) ? xssafe($_GET["sortcol"]): "station";
- $network = isset($_GET["network"])? substr($_GET["network"],0,10): "IA_ASOS";
- if ($network == "AWOS") {
+    "SELECT c.*, t.id as station, t.name, " .
+        "c.valid at time zone 'UTC' as uv from current_qc c JOIN stations t on " .
+        "(c.iemid = t.iemid) WHERE t.network = $1"
+);
+$sortcol = isset($_GET["sortcol"]) ? xssafe($_GET["sortcol"]) : "station";
+$network = isset($_GET["network"]) ? substr($_GET["network"], 0, 10) : "IA_ASOS";
+if ($network == "AWOS") {
     $network = "IA_ASOS";
- }
- $baa = 'network.phtml?network='. $network;
+}
+$baa = 'network.phtml?network=' . $network;
 
- 
- $rs = pg_execute($dbconn, "SELECT", Array($network));
- 
- $data = Array();
- for($i=0; $row = pg_fetch_array($rs); $i++)
- {
-     $data[ $row["station"] ] = $row;
- }
-  
- $finalA = Array();
- $finalA = aSortBySecondIndex($data, $sortcol);
+
+$rs = pg_execute($dbconn, "SELECT", array($network));
+
+$data = array();
+for ($i = 0; $row = pg_fetch_array($rs); $i++) {
+    $data[$row["station"]] = $row;
+}
+
+$finalA = array();
+$finalA = aSortBySecondIndex($data, $sortcol);
 
 $rs = pg_exec(
     iemdb("mesosite"),
     "SELECT id, name from networks"
 );
-$networks = Array();
-while($row=pg_fetch_assoc($rs)){
+$networks = array();
+while ($row = pg_fetch_assoc($rs)) {
     $networks[$row["id"]] = $row["name"];
 }
 
 $rs = pg_exec(
     $dbconn,
-    "select distinct network from current_qc q JOIN stations t ".
-    "ON (q.iemid = t.iemid) ORDER by network ASC");
-$ar = Array();
-while($row=pg_fetch_assoc($rs)){
+    "select distinct network from current_qc q JOIN stations t " .
+        "ON (q.iemid = t.iemid) ORDER by network ASC"
+);
+$ar = array();
+while ($row = pg_fetch_assoc($rs)) {
     $ar[$row["network"]] = $networks[$row["network"]];
 }
 $sselect = make_select("network", $network, $ar);
 
- $i = false;
- 
- function vp($v, $r){
-     if ($v > 0) return '<td><font id="c">'. round($v,$r) .'</font></td>';
-     else if ($v < 0) return '<td><font id="w">'. round($v,$r) .'</font></td>';
-     return '<td>'. round($v,$r) .'</td>';
- }
- function pp($v, $r){
-     if (intval($v) == -17966) return 'M';
-     return round($v,$r);
- }
- $table = "";
- foreach($finalA as $key => $val){
-     $ts = new DateTime($val["uv"]);
-     $table .= '<tr ';
-     if ($i) $table .= 'class="even"';
-     $table .= '><td>'. $val["station"] .'</td><td>'. $val["name"] .'</td>
-  <td>'. $ts->format("d M G:i") .'Z</td>
-  <td id="divider">'. pp($val["tmpf"],0) .'</td>'.
-   vp($val["tmpf_qc_av"], 1) .
-   vp($val["tmpf_qc_sc"], 1) .
-   '<td id="divider">'. pp($val["dwpf"],0) .'</td>'.
-   vp($val["dwpf_qc_av"], 1) .
-   vp($val["dwpf_qc_sc"], 1) .
-   '<td id="divider">'. pp($val["alti"],2) .'</td>'.
-   vp($val["alti_qc_av"], 2) .
-   vp($val["alti_qc_sc"], 2) .
-   '</tr>';
- 
-     $i = ! $i;
- }
- 
- $t->content = <<<EOF
+$i = false;
+
+function vp($v, $r)
+{
+    if ($v > 0) return '<td><font id="c">' . round($v, $r) . '</font></td>';
+    else if ($v < 0) return '<td><font id="w">' . round($v, $r) . '</font></td>';
+    return '<td>' . round($v, $r) . '</td>';
+}
+function pp($v, $r)
+{
+    if (intval($v) == -17966) return 'M';
+    return round($v, $r);
+}
+$table = "";
+foreach ($finalA as $key => $val) {
+    $ts = new DateTime($val["uv"]);
+    $table .= '<tr ';
+    if ($i) $table .= 'class="even"';
+    $table .= '><td>' . $val["station"] . '</td><td>' . $val["name"] . '</td>
+  <td>' . $ts->format("d M G:i") . 'Z</td>
+  <td id="divider">' . pp($val["tmpf"], 0) . '</td>' .
+        vp($val["tmpf_qc_av"], 1) .
+        vp($val["tmpf_qc_sc"], 1) .
+        '<td id="divider">' . pp($val["dwpf"], 0) . '</td>' .
+        vp($val["dwpf_qc_av"], 1) .
+        vp($val["dwpf_qc_sc"], 1) .
+        '<td id="divider">' . pp($val["alti"], 2) . '</td>' .
+        vp($val["alti_qc_av"], 2) .
+        vp($val["alti_qc_sc"], 2) .
+        '</tr>';
+
+    $i = !$i;
+}
+
+$t->content = <<<EOF
 <h3>MADIS QC Values</h3>
 <p>Here are the MADIS QC values for some of the networks
 in the IEM.  <font color="#ff0000">Red numbers</font> indicate that the 

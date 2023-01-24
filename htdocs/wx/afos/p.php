@@ -155,7 +155,7 @@ for ($i = 0; $row = pg_fetch_assoc($rs); $i++) {
         $t->title = sprintf(
             "%s from NWS %s",
             substr($pil, 0, 3),
-            substr($row["source"], 1, 3)
+            substr(is_null($row["source"]) ? "": $row["source"], 1, 3)
         );
         $product_id = sprintf(
             "%s-%s-%s-%s",

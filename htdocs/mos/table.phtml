@@ -31,7 +31,7 @@ if (!array_key_exists($model, $models)) {
     $model = "NBE";
 }
 
-$now = strtotime("${year}-${month}-${day} ${hour}:00");
+$now = strtotime("{$year}-{$month}-{$day} {$hour}:00");
 if ($model == "NAM" && $now < mktime(12, 0, 0, 12, 9, 2008)) {
     $model = "ETA";
 }

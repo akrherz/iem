@@ -8,7 +8,7 @@ $pil = isset($_REQUEST["pil"]) ? substr(xssafe($_REQUEST["pil"]), 0, 6) : 'AFDDM
 // Try to get it from memcached
 $memcache = new Memcached();
 $memcache->addServer('iem-memcached', 11211);
-$val = $memcache->get("pil_${pil}.png");
+$val = $memcache->get("pil_{$pil}.png");
 if ($val) {
     header("Content-type: image/png");
     die($val);
@@ -58,5 +58,5 @@ header("content-type: image/png");
 ImagePng($img);
 ImageDestroy($img);
 
-$memcache->set("pil_${pil}.png", ob_get_contents(), 0);
+$memcache->set("pil_{$pil}.png", ob_get_contents(), 0);
 ob_end_flush();

@@ -19,9 +19,9 @@ def plot_poly(fig, poly, fields):
     """Add to axes."""
     ax = fig.add_axes([0.15, 0.15, 0.7, 0.7])
     title = fields.get("title", "")[:120]
-    title += "\npolygon.is_valid: %s linearring.is_valid: %s" % (
-        poly.is_valid,
-        poly.exterior.is_valid,
+    title += (
+        f"\npolygon.is_valid: {poly.is_valid} "
+        f"linearring.is_valid: {poly.exterior.is_valid}"
     )
     fitbox(fig, title, 0.15, 0.9, 0.9, 0.95)
 

@@ -71,14 +71,14 @@ data from this network, see <a href="dailyRequest.php">this page</a>.
         <TABLE>
                 <TR><TH></TH><TH>Year:</TH><TH>Month:</TH><TH>Day:</TH></TR>
                 <TR><TH>Starting On:</TH>
-                <td>${ys}</td>
-                <td>${ms}</td>
-                <td>${ds}</td>
-                </TR>
-                <TR><TH>Ending On:</TH>
-                <td>${ys2}</td>
-                <td>${ms2}</td>
-                <td>${ds2}</td>
+                <td>{$ys}</td>
+                <td>{$ms}</td>
+                <td>{$ds}</td>
+                </tr>
+                <tr><TH>Ending On:</TH>
+                <td>{$ys2}</td>
+                <td>{$ms2}</td>
+                <td>{$ds2}</td>
                 </TR>
             </TABLE>
 

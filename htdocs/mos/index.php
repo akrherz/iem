@@ -1,4 +1,4 @@
-<?php 
+<?php
 define("IEM_APPID", 74);
 require_once "../../config/settings.inc.php";
 require_once "../../include/myview.php";

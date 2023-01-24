@@ -14,7 +14,6 @@ $rs = pg_exec(
 );
 pg_close($conn);
 
-
 header("Content-type: text/xml");
 echo "<?xml version=\"1.0\" encoding=\"utf-8\"?>\n";
 echo "<feed xmlns=\"http://www.w3.org/2005/Atom\" xmlns:georss=\"http://www.georss.org/georss\">\n";
@@ -41,7 +40,7 @@ for ($i = 0; $row = pg_fetch_array($rs); $i++) {
     echo "<title>" . $row["name"] . " [" . $row["id"] . "]</title>\n";
     echo "<author><name>Daryl Herzmann</name><email>akrherz@iastate.edu</email></author>\n";
     echo "<link href=\"https://mesonet.agron.iastate.edu/sites/site.php?station=" . $row["id"] . "&amp;network=" . $row["network"] . "\" />\n";
-    echo "<content type=\"html\">${cbody}</content>\n";
+    echo "<content type=\"html\">{$cbody}</content>\n";
     echo "<id>https://mesonet.agron.iastate.edu/sites/site.php?station=" . $row["id"] . "&amp;network=" . $row["network"] . "</id>\n";
     echo "<updated>" . gmdate('Y-m-d\\TH:i:s\\Z', strtotime($row["modified"])) . "</updated>\n";
     echo "<georss:point>" . $row["lat"] . " " . $row["lon"] . "</georss:point>\n";

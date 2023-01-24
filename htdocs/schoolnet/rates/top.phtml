@@ -1,32 +1,34 @@
-<?php 
+<?php
 require_once "../../../config/settings.inc.php";
 require_once "../../../include/forms.php";
 require_once "../../../include/imagemaps.php";
- ?>
+?>
+
 <body bgcolor="#FFC0CB">
 
-<form method="GET" action="/cgi-bin/precip/snetRates.py" target="display">
-<table>
-<tr>
-  <td colspan=5>Make selections and data will appear below:</td>
-  <td rowspan=3><a href="/" target="_top">Iowa Mesonet Homepage</a><br><a href="/schoolnet/" target="_top">SchoolNet Mainpage</a><br><a href="bottom.phtml" target="display">Reset App</a></td></tr>
-<tr>
-  <th>Select Station:</th>
-  <th>Year:</th>
-  <th>Month:</th>
-  <th>Day:</th>
-</tr>
-<tr>
-  <td><?php echo networkSelect("KCCI", ""); ?></td>
-  <td><?php echo yearSelect(2002, date("Y")); ?></td>
-  <td><?php echo monthSelect( date("m") ); ?></td>
-  <td><?php echo daySelect( date("d") ); ?></td>
-  <td><input type="submit" value="View"></td>
-</tr>
+    <form method="GET" action="/cgi-bin/precip/snetRates.py" target="display">
+        <table>
+            <tr>
+                <td colspan=5>Make selections and data will appear below:</td>
+                <td rowspan=3><a href="/" target="_top">Iowa Mesonet Homepage</a><br><a href="/schoolnet/" target="_top">SchoolNet Mainpage</a><br><a href="bottom.phtml" target="display">Reset App</a></td>
+            </tr>
+            <tr>
+                <th>Select Station:</th>
+                <th>Year:</th>
+                <th>Month:</th>
+                <th>Day:</th>
+            </tr>
+            <tr>
+                <td><?php echo networkSelect("KCCI", ""); ?></td>
+                <td><?php echo yearSelect(2002, date("Y")); ?></td>
+                <td><?php echo monthSelect(date("m")); ?></td>
+                <td><?php echo daySelect(date("d")); ?></td>
+                <td><input type="submit" value="View"></td>
+            </tr>
 
-</table>
+        </table>
 
-<pre>
+        <pre>
                                          Rainfall Rates (inches/hour) 
 SID  ,   DATE    ,TIME ,PCOUNT,P01MIN,60min ,30min ,20min ,15min ,10min , 5min , 1min ,
 </pre>

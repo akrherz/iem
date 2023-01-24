@@ -8,12 +8,12 @@ $fts = isset($_GET["fts"]) ? intval($_GET["fts"]) : exit();
 
 $memcache = new Memcached();
 $memcache->addServer('iem-memcached', 11211);
-$urls = $memcache->get("/GIS/apps/rview/warnings.phtml?fts=${fts}");
+$urls = $memcache->get("/GIS/apps/rview/warnings.phtml?fts={$fts}");
 if (!$urls) {
     die("fts not found, ERROR");
 }
 chdir("/var/webtmp");
-$cmdstr = "gifsicle --colors 256 --loopcount=0 --delay=100 -o ${fts}_anim.gif ";
+$cmdstr = "gifsicle --colors 256 --loopcount=0 --delay=100 -o {$fts}_anim.gif ";
 foreach ($urls as $k => $v) {
     // value is now single quoted, so remove those
     $res = file_get_contents(sprintf(
@@ -34,4 +34,4 @@ foreach ($urls as $k => $v) {
 header("Content-type: application/octet-stream");
 header("Content-Disposition: attachment; filename=myanimation.gif");
 
-readfile("${fts}_anim.gif");
+readfile("{$fts}_anim.gif");

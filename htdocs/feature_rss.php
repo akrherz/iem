@@ -34,7 +34,7 @@ pg_close($conn);
 for ($i = 0; $row = pg_fetch_assoc($rs); $i++) {
     $appurl = "";
     if ($row["appurl"] != "") {
-        $appurl = "<p><a href=\"https://mesonet.agron.iastate.edu" . $row["appurl"] . "\">Generate This Chart on IEM Website</a></p>";
+        $appurl = "<p><a href=\"https://mesonet.agron.iastate.edu{$row['appurl']}\">Generate This Chart on IEM Website</a></p>";
     }
     $mediaurl = sprintf(
         "https://mesonet.agron.iastate.edu/onsite/features/%s.%s",
@@ -44,13 +44,13 @@ for ($i = 0; $row = pg_fetch_assoc($rs); $i++) {
     if ($row["mediasuffix"] == 'mp4') {
         $cbody = <<<EOM
 <video controls>
-		<source src="${mediaurl}" type="video/mp4">
-		Your browser does not support the video tag.
+        <source src="{$mediaurl}" type="video/mp4">
+        Your browser does not support the video tag.
 </video>
 EOM;
     } else {
         $cbody = <<<EOM
-<img src="${mediaurl}" 
+<img src="{$mediaurl}" 
  alt="Feature" style="float: left; padding: 5px;" />
 EOM;
     }

@@ -1,10 +1,10 @@
 $("#thebutton").click(function(){
-    var text = $("#thetext").val();
-    var title = $("#thetitle").val();
+    const text = $("#thetext").val();
+    const title = $("#thetitle").val();
     $.post(
         "generate_plot.py",
         {text: text, title: title},
-        function(data){
+        (data) => {
             $("#theimage").attr("src", data.imgurl);
             $("#thegeojson").html(JSON.stringify(data.geojson));
         }

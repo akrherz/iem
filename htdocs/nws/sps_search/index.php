@@ -1,4 +1,4 @@
-<?php 
+<?php
 require_once "../../../config/settings.inc.php";
 define("IEM_APPID", 140);
 require_once "../../../include/mlib.php";
@@ -22,11 +22,11 @@ $t->headextra = <<<EOF
 <link rel="stylesheet" href="/vendor/jquery-ui/1.11.4/jquery-ui.min.css" />
 <link rel="stylesheet" type="text/css" href="/vendor/select2/4.1.0rc0/select2.min.css"/ >
 <style>
-  .map {
+.map {
     width: 100%;
     height: 400px;
     float: left;
-  }
+}
 </style>
 EOF;
 $t->title = "Special Weather Statement (SPS) Search by Point";

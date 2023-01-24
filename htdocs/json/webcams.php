@@ -52,13 +52,13 @@ $result = pg_execute($connect, "CAMSEL", $ar);
 
 $ar = array("images" => array());
 if ($ts > 0) {
-    $url = "https://mesonet.agron.iastate.edu/current/camrad.php?network=${network}&ts=" . $_REQUEST["ts"];
+    $url = "https://mesonet.agron.iastate.edu/current/camrad.php?network={$network}&ts=" . $_REQUEST["ts"];
 } else {
-    $url = "https://mesonet.agron.iastate.edu/current/camrad.php?network=${network}&" . time();
+    $url = "https://mesonet.agron.iastate.edu/current/camrad.php?network={$network}&" . time();
 }
 if (pg_num_rows($result) > 0) {
     $ar["images"][] = array(
-        "cid" => "${network}-000",
+        "cid" => "{$network}-000",
         "name" => " NEXRAD Overview",
         "county" => "",
         "network" => "",
