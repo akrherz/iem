@@ -51,11 +51,7 @@ def plotter(fdict):
     sector = ctx["sector"]
     threshold = ctx["threshold"]
     threshold_mm = util.convert_value(threshold, "inch", "millimeter")
-    window_sts = date - datetime.timedelta(days=90)
-    if window_sts.year != date.year:
-        raise NoDataFound("Sorry, do not support multi-year plots yet!")
 
-    # idx0 = iemre.daily_offset(window_sts)
     idx1 = iemre.daily_offset(date)
     ncfn = iemre.get_daily_mrms_ncname(date.year)
     if not os.path.isfile(ncfn):
@@ -72,6 +68,7 @@ def plotter(fdict):
             geom_col="the_geom",
         )
     czs = CachingZonalStats(iemre.MRMS_AFFINE)
+    steps = 0
     with util.ncopen(ncfn) as nc:
         czs.gen_stats(
             np.zeros((nc.variables["lat"].size, nc.variables["lon"].size)),
@@ -93,13 +90,31 @@ def plotter(fdict):
         total = np.zeros(
             (jslice.stop - jslice.start, islice.stop - islice.start)
         )
-        for i, idx in enumerate(range(idx1, idx1 - 90, -1)):
-            total += nc.variables[ncvar][idx, jslice, islice]
-            grid = np.where(
-                np.logical_and(grid == 0, total > threshold_mm), i, grid
-            )
         lon = nc.variables["lon"][islice]
         lat = nc.variables["lat"][jslice]
+
+        for idx in range(idx1, max(-1, idx1 - 91), -1):
+            total += nc.variables[ncvar][idx, jslice, islice]
+            grid = np.where(
+                np.logical_and(grid == 0, total > threshold_mm), steps, grid
+            )
+            steps += 1
+    # Do we need to do a previous year?
+    if steps < 90:
+        ncfn = iemre.get_daily_mrms_ncname(date.year - 1)
+        if not os.path.isfile(ncfn):
+            raise NoDataFound("No data found.")
+        with util.ncopen(ncfn) as nc:
+            idx1 = iemre.daily_offset(datetime.date(date.year - 1, 12, 31))
+            while steps < 91:
+                total += nc.variables[ncvar][idx, jslice, islice]
+                grid = np.where(
+                    np.logical_and(grid == 0, total > threshold_mm),
+                    steps,
+                    grid,
+                )
+                idx1 -= 1
+                steps += 1
 
     mp = MapPlot(
         apctx=ctx,
@@ -122,7 +137,9 @@ def plotter(fdict):
     cmap = get_cmap(ctx["cmap"])
     cmap.set_over("k")
     cmap.set_under("white")
-    mp.pcolormesh(x, y, grid, np.arange(0, 81, 10), cmap=cmap, units="days")
+    mp.pcolormesh(
+        x, y, grid, np.arange(0, 91, 15), cmap=cmap, units="days", extend="max"
+    )
     mp.drawcounties()
     mp.drawcities()
 
