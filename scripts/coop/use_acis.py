@@ -111,7 +111,7 @@ def main(argv):
                 data[col] = val
                 if hour is None:
                     hour = row[i + 1][1]
-            if not data:
+            if not data or hour < 0:
                 continue
             valid = datetime.datetime(
                 date.year,
