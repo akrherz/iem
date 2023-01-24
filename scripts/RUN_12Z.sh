@@ -1,12 +1,15 @@
 # Ensure this is actually being run at 12z, since crontab is in CST/CDT
 HH=$(date -u +%H)
 if [ "$HH" -ne "12" ]
-	then
-		exit
+    then
+        exit
 fi
 
 cd asos
 python cf6_to_iemaccess.py
+
+cd ../era5
+python fetch_era5.py $(date -u --date '5 days ago' +'%Y %m %d')
 
 # DVN wants this to run at 12:10 UTC, so we start the cron script a bit late
 cd ../12z
