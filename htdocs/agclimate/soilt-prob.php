@@ -24,6 +24,9 @@ $tblrows = array();
 
 $row1 = "<tr><th>Date:</th>";
 foreach ($thresholds as $k => $thres) {
+    if (!is_numeric($thres)){
+        xssafe("<script>");
+    }
     $row1 .= "<th>$thres</th>";
     $rs = pg_execute($conn, "spring", array($station, $thres));
     $cnts = array();

@@ -6,6 +6,28 @@ require_once "../../include/database.inc.php";
 require_once "../../include/forms.php";
 $dbconn = iemdb("iem");
 $sortcol = isset($_GET['sortcol']) ? xssafe($_GET['sortcol']) : 'valid';
+$vals = array(
+    "sname" => "Station Name",
+    "valid" => "Observation Time",
+    "tmpf_1in" => "1 inch Depth Temperature",
+    "tmpf_3in" => "3 inch Depth Temperature",
+    "tmpf_6in" => "6 inch Depth Temperature",
+    "tmpf_9in" => "9 inch Depth Temperature",
+    "tmpf_12in" => "12 inch Depth Temperature",
+    "tmpf_18in" => "18 inch Depth Temperature",
+    "tmpf_24in" => "24 inch Depth Temperature",
+    "tmpf_30in" => "30 inch Depth Temperature",
+    "tmpf_36in" => "36 inch Depth Temperature",
+    "tmpf_42in" => "42 inch Depth Temperature",
+    "tmpf_48in" => "48 inch Depth Temperature",
+    "tmpf_54in" => "54 inch Depth Temperature",
+    "tmpf_60in" => "60 inch Depth Temperature",
+    "tmpf_66in" => "66 inch Depth Temperature",
+    "tmpf_72in" => "72 inch Depth Temperature",
+);
+if (!array_key_exists($sortcol, $vals)){
+    die("Invalid sortcol provided");
+}
 
 /* Query out the data */
 $rs = pg_prepare($dbconn, "SELECT", "select t.valid, s.name as sname,
@@ -48,25 +70,7 @@ function f($val)
 {
     return $val;
 }
-$vals = array(
-    "sname" => "Station Name",
-    "valid" => "Observation Time",
-    "tmpf_1in" => "1 inch Depth Temperature",
-    "tmpf_3in" => "3 inch Depth Temperature",
-    "tmpf_6in" => "6 inch Depth Temperature",
-    "tmpf_9in" => "9 inch Depth Temperature",
-    "tmpf_12in" => "12 inch Depth Temperature",
-    "tmpf_18in" => "18 inch Depth Temperature",
-    "tmpf_24in" => "24 inch Depth Temperature",
-    "tmpf_30in" => "30 inch Depth Temperature",
-    "tmpf_36in" => "36 inch Depth Temperature",
-    "tmpf_42in" => "42 inch Depth Temperature",
-    "tmpf_48in" => "48 inch Depth Temperature",
-    "tmpf_54in" => "54 inch Depth Temperature",
-    "tmpf_60in" => "60 inch Depth Temperature",
-    "tmpf_66in" => "66 inch Depth Temperature",
-    "tmpf_72in" => "72 inch Depth Temperature",
-);
+
 
 $data = array();
 $table  = "";

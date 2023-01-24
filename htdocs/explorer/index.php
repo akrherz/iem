@@ -62,7 +62,7 @@ $t->content = <<<EOM
             data-target="https://mesonet.agron.iastate.edu">
 
             <br /><strong>Precipitation Departure</strong>
-            <img src="/plotting/auto/plot/84/sector:IA::src:mrms::opt:dep::usdm:yes::ptype:g::sdate:2022-08-01::cmap:BrBG::_r:43.png"
+            <img src="/plotting/auto/plot/84/sector:IA::src:mrms::opt:dep::usdm:yes::ptype:g::sdate:2022-08-01::edate:2022-10-10::cmap:BrBG::_r:43.png"
             role="button" title="Precip Departure Aug 1"
             data-target="https://mesonet.agron.iastate.edu">
 

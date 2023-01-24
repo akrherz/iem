@@ -129,6 +129,10 @@ if (gettype($layers) == "string") {
 
 /* Straight CGI Butter */
 $sector = isset($_GET["sector"]) ? $_GET["sector"] : "iem";
+if (!array_key_exists($sector, $sectors)){
+    $opts = implode(", ", array_keys($sectors));
+    die("Invalid sector provided, available: {$opts}");
+}
 $width = get_int404("width", 640);
 $height = get_int404("height", 480);
 $lsrbuffer = get_int404("lsrbuffer", 15);

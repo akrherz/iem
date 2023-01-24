@@ -73,7 +73,7 @@ function make_shef_table($data, $iscurrent){
             "<tr><td>[%s] %s %s</td><td>[%s] %s</td><td>%s</td>" .
                 "<td>%s</td><td>[%s] %s</td><td>%s</td><td>%s</td><td>%s</td></tr>",
             $row["physical_code"],
-            $shefcodes[$row["physical_code"]],
+            array_key_exists($row["physical_code"], $shefcodes) ? $shefcodes[$row["physical_code"]] : "((unknown code))",
             $depth,
             $row["duration"],
             $durationcodes[$row["duration"]],
