@@ -36,7 +36,7 @@ $layers = isset($_GET["layers"]) ? $_GET["layers"] : array(
 $cu = isset($_GET["cu"]) ? intval($_GET["cu"]) : 0;
 $loop = isset($_GET["loop"]) ? intval($_GET["loop"]) : 0;
 if ($loop == 2) $loop = 1;
-$tz = isset($_GET["tz"]) ? xssafe($_GET["tz"]) : "CDT";
+$tz = isset($_GET["tz"]) ? strtoupper(xssafe($_GET["tz"])) : "CDT";
 $tzdict = array(
     "UTC" => 0, "EDT" => 14400, "EST" => 18000, "CDT" => 18000,
     "CST" => 21600, "MDT" => 21600, "MST" => 25200, "PDT" => 25200,
@@ -49,7 +49,7 @@ $filter = isset($_GET["filter"]) ? intval($_GET["filter"]) : 0;
 $lsrwindow = isset($_GET["lsrwindow"]) ? intval($_GET["lsrwindow"]) : "0";
 $lsrlook = isset($_GET["lsrlook"]) ? xssafe($_GET["lsrlook"]) : "+";
 // careful here as we can have PXXX sites
-$site = isset($_GET["site"]) ? substr($_GET["site"], 0, 4) : "DMX";
+$site = isset($_GET["site"]) ? strtoupper(substr($_GET["site"], 0, 4)) : "DMX";
 $osite = isset($_GET["osite"]) ? substr($_GET["osite"], 0, 4) : "DMX";
 $sortcol = isset($_GET["sortcol"]) ? substr(xssafe($_GET["sortcol"]), 0, 20) : "issued";
 $sortdir = isset($_GET["sortdir"]) ? intval($_GET["sortdir"]) : 0;

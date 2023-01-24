@@ -1,7 +1,7 @@
 <?php
 // Throttle the script kiddies.
 
-$key = "throttle_" . $_SERVER['REMOTE_ADDR'];
+$key = "throttle_{$_SERVER['REMOTE_ADDR']}";
 
 $memcache = new Memcached();
 $memcache->setOption(Memcached::OPT_BINARY_PROTOCOL, true);

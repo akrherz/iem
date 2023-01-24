@@ -71,7 +71,7 @@ for ($i = 0; $row = pg_fetch_array($rs); $i++) {
     if (array_key_exists($row["cond_code"], $colors)) {
         $color = $colors[$row["cond_code"]];
     }
-    echo "Color: ${color}\n";
+    echo "Color: {$color}\n";
     foreach ($segments as $q => $seg) {
         echo "Line: 4, 0, " . $row["major"] . " :: " . $row["minor"]  . "\\nReport: " . $row["raw"] . "\\nTime: " . date('j M Y g:i A', $valid) . "\n";
         $tokens = explode(",", $seg);

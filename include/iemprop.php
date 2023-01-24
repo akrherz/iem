@@ -1,6 +1,6 @@
 <?php
 /* Need something to fetch IEM Properties */
-include_once dirname(__FILE__) . "/database.inc.php";
+require_once dirname(__FILE__) . "/database.inc.php";
 
 function get_iemprop($propname)
 {

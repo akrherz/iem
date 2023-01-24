@@ -27,7 +27,7 @@ $zipFile = sprintf("n0q_%s.zip", date("YmdHi", $ts));
 
 if (is_file($zipFile)) {
     header("Content-type: application/octet-stream");
-    header("Content-Disposition: attachment; filename=${zipFile}");
+    header("Content-Disposition: attachment; filename={$zipFile}");
     readfile($zipFile);
     die();
 }
@@ -44,12 +44,12 @@ if (!is_file($inFile)) die("No GIS composite found for this time!");
 $cmd = sprintf("/opt/miniconda3/envs/prod/bin/gdalwarp -t_srs \"EPSG:4326\" -s_srs \"EPSG:4326\" -of GTIFF %s %s.tif", $inFile, $outFile);
 `$cmd`;
 
-$cmd = "zip $zipFile ${outFile}.tif";
+$cmd = "zip $zipFile {$outFile}.tif";
 `$cmd`;
 
 header("Content-type: application/octet-stream");
-header("Content-Disposition: attachment; filename=${zipFile}");
+header("Content-Disposition: attachment; filename={$zipFile}");
 readfile($zipFile);
 
 unlink($zipFile);
-unlink("${outFile}.tif");
+unlink("{$outFile}.tif");

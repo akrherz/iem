@@ -6,9 +6,9 @@ require_once "../../include/vtec.php";
 require_once "../../include/forms.php";
 require_once "../../include/imagemaps.php";
 
-$wfo = isset($_GET["wfo"]) ? substr($_GET["wfo"], 0, 4) : 'DMX';
+$wfo = isset($_GET["wfo"]) ? substr(xssafe($_GET["wfo"]), 0, 4) : 'DMX';
 $year = get_int404("year", intval(date("Y")));
-$state = isset($_GET['state']) ? substr($_GET["state"], 0, 2) : 'IA';
+$state = isset($_GET['state']) ? substr(xssafe($_GET["state"]), 0, 2) : 'IA';
 $which = isset($_GET["which"]) ? $_GET["which"] : 'wfo';
 $significance = isset($_GET["s"]) ? xssafe($_GET["s"]) : "";
 $phenomena = isset($_GET["p"]) ? xssafe($_GET["p"]) : "";

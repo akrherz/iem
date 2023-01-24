@@ -4,7 +4,7 @@ require_once "../../include/mlib.php";
 require_once "../../include/forms.php";
 force_https();
 require_once "../../include/myview.php";
-$OL = "7.1.0";
+$OL = "7.2.2";
 $JQUERYUI = "1.13.2";
 $t = new MyView();
 $t->title = "Valid Time Event Code (VTEC) App";

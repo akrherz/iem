@@ -7,7 +7,7 @@ if ($cameras) {
     return;
 }
 
-include_once(dirname(__FILE__) . "/database.inc.php");
+require_once dirname(__FILE__) . "/database.inc.php";
 
 $mesosite = iemdb("mesosite");
 $rs = pg_query($mesosite, "SELECT *, ST_x(geom) as lon,

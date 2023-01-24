@@ -105,7 +105,7 @@ foreach ($finalA as $key => $parts) {
         $table .= "G" . myround($parts["gust"], 0);
     }
     $table .= "</td>";
-    $aa = is_null($parts["peak_ts"]) ? "": $parts["peak_ts"]->format("h:i A");
+    $aa = is_null($parts["peak_ts"]) ? "" : $parts["peak_ts"]->format("h:i A");
     $table .= "<td>" . $parts["drct"] . "</td>
         <td>" . myround($parts["peak"], 0) . " @ {$aa}</td>
             <td>" . $parts["phour"] . "</td>

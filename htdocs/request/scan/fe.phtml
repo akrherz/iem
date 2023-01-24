@@ -13,7 +13,6 @@ $ms2 = monthSelect("", "month2");
 $ds2 = daySelect2("", "day2");
 $hs2 = gmtHourSelect("", "hour2");
 
-
 $t->content = <<<EOF
 <ol class="breadcrumb">
     <li><a href="/scan/">SCAN</a></li>
@@ -51,7 +50,7 @@ IEM has from the SCAN network.  The archive has some holes in it....
     <td rowspan="2">{$ys}</td>
     <td>{$ms}</td>
     <td>{$ds}</td>
-    <td>${hs}
+    <td>{$hs}
     <input type="hidden" name="minute1" value="0">
     </td>
   </tr>

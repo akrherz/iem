@@ -1,5 +1,6 @@
 {
     "require": {
-        "abraham/twitteroauth": "^3.3"
+        "abraham/twitteroauth": "^3.3",
+        "erusev/parsedown": "^1.7"
     }
 }

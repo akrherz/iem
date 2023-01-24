@@ -29,7 +29,7 @@ $e2date = date("2000-m-d", $ets);
 $today = time();
 
 $st = new StationData($station, $network);
-$st->load_station($st->table[$station]['climate_site']);
+$st->loadStation($st->table[$station]['climate_site']);
 $cities = $st->table;
 $coopdb = iemdb("coop");
 $iem = iemdb("iem");

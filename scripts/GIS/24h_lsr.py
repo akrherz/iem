@@ -1,34 +1,30 @@
 """Dump 24 hour LSRs to a file"""
-import zipfile
-import os
-import shutil
-import subprocess
 import datetime
+import os
+import subprocess
+import zipfile
 
 from geopandas import read_postgis
-from pyiem.util import get_sqlalchemy_conn
+from pyiem.util import get_sqlalchemy_conn, logger
 
-SCHEMA = {
-    "geometry": "Point",
-    "properties": dict(
-        [
-            ("VALID", "str:12"),
-            ("MAG", "float"),
-            ("WFO", "str:3"),
-            ("TYPECODE", "str:1"),
-            ("TYPETEXT", "str:40"),
-            ("CITY", "str:40"),
-            ("COUNTY", "str:40"),
-            ("STATE", "str:2"),
-            ("SOURCE", "str:40"),
-            ("REMARK", "str:200"),
-            ("LON", "float"),
-            ("LAT", "float"),
-            ("UGC", "str:6"),
-            ("UGCNAME", "str:128"),
-        ]
-    ),
+LOG = logger()
+FIELDS = {
+    "VALID": "str:12",
+    "MAG": "float",
+    "WFO": "str:3",
+    "TYPECODE": "str:1",
+    "TYPETEXT": "str:40",
+    "CITY": "str:40",
+    "COUNTY": "str:40",
+    "STATE": "str:2",
+    "SOURCE": "str:40",
+    "REMARK": "str:200",
+    "LON": "float",
+    "LAT": "float",
+    "UGC": "str:6",
+    "UGCNAME": "str:128",
 }
+SCHEMA = {"geometry": "Point", "properties": FIELDS}
 
 
 def main():
@@ -63,6 +59,7 @@ def main():
             index_col=None,
             geom_col="geom",
         )
+        LOG.info("Got %s rows", len(df.index))
     if df.empty:
         return
     df.columns = [s.upper() if s != "geom" else "geom" for s in df.columns]
@@ -74,25 +71,24 @@ def main():
         zfh.write("lsr_24hour.shp")
         zfh.write("lsr_24hour.shx")
         zfh.write("lsr_24hour.dbf")
-        shutil.copy("/opt/iem/data/gis/meta/4326.prj", "lsr_24hour.prj")
-        zfh.write("lsr_24hour.prj")
+        with open("/opt/iem/data/gis/meta/4326.prj", encoding="ascii") as fh:
+            zfh.writestr("lsr_24hour.prj", fh.read())
+        zfh.getinfo("lsr_24hour.prj").external_attr = 0o664
 
-    cmd = (
-        "pqinsert -i "
-        f'-p "zip c {ets:%Y%m%d%H%M} gis/shape/4326/us/lsr_24hour.zip '
-        'bogus zip" lsr_24hour.zip'
+    pstr = (
+        f"zip c {ets:%Y%m%d%H%M} gis/shape/4326/us/lsr_24hour.zip " "bogus zip"
     )
-    subprocess.call(cmd, shell=True)
+    LOG.info(pstr)
+    subprocess.call(["pqinsert", "-i", "-p", pstr, "lsr_24hour.zip"])
     for suffix in ["geojson", "csv"]:
-        cmd = (
-            "pqinsert -i "
-            f'-p "data c {ets:%Y%m%d%H%M} '
-            f"gis/shape/4326/us/lsr_24hour.{suffix} "
-            f'bogus {suffix}" lsr_24hour.{suffix}'
+        pstr = (
+            f"data c {ets:%Y%m%d%H%M} "
+            f"gis/shape/4326/us/lsr_24hour.{suffix} bogus {suffix}"
         )
-        subprocess.call(cmd, shell=True)
+        LOG.info(pstr)
+        subprocess.call(["pqinsert", "-i", "-p", pstr, f"lsr_24hour.{suffix}"])
 
-    for suffix in ["shp", "shx", "dbf", "prj", "zip", "geojson", "csv"]:
+    for suffix in ["shp", "shx", "dbf", "zip", "geojson", "csv"]:
         os.remove(f"lsr_24hour.{suffix}")
 
 

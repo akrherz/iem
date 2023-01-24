@@ -4,11 +4,12 @@
  */
 require_once "../../config/settings.inc.php";
 define("IEM_APPID", 84);
+require_once "../../include/vendor/erusev/parsedown/Parsedown.php";
+
 require_once "../../include/database.inc.php";
-$mesosite = iemdb("mesosite");
 require_once "../../include/myview.php";
-require_once "../../include/Parsedown.php";
 require_once "../../include/forms.php";
+$mesosite = iemdb("mesosite");
 $t = new MyView();
 
 $myid = isset($_GET["id"]) ? xssafe($_GET["id"]) : null;
@@ -22,16 +23,16 @@ $t->title = "Datasets :: {$myid}";
 
 function get_text($pageid)
 {
-    $fn = "../../docs/datasets/${pageid}.md";
+    $fn = "../../docs/datasets/{$pageid}.md";
     $Parsedown = new Parsedown();
     $c = $Parsedown->text(file_get_contents($fn));
     $ts = date("F d, Y", filemtime($fn));
     $s = <<<EOF
 <div class="panel panel-info">
 <div class="panel-body">
-${c}
+{$c}
 </div>
-<div class="panel-footer">Updated: ${ts} <a href="/info/datasets/${pageid}.html">Permalink</a></div>
+<div class="panel-footer">Updated: {$ts} <a href="/info/datasets/{$pageid}.html">Permalink</a></div>
 </div>
 EOF;
     return $s;

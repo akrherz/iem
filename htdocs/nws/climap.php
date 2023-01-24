@@ -9,7 +9,7 @@ require_once "../../include/mlib.php";
 force_https();
 $t = new MyView();
 $t->title = "Map of Daily NWS CLImage reports";
-$OL = '6.6.0';
+$OL = '7.2.2';
 $t->headextra = <<<EOF
 <link rel="stylesheet" href="/vendor/openlayers/{$OL}/ol.css" type="text/css">
 <link rel="stylesheet" href="/vendor/jquery-ui/1.12.1/jquery-ui.min.css" />
@@ -53,8 +53,8 @@ $t->content = <<<EOF
 <button id="fplus" class="btn btn-default"><i class="fa fa-plus"></i></button>
 </div>
 
-        <form name='bah'><p><strong>Select Variable to Plot:</strong> 
-<select onChange="javascript: updateMap();" id="renderattr">
+<form name='bah'><p><strong>Select Variable to Plot:</strong> 
+<select id="renderattr">
     <option value="high">High Temperature</option>
     <option value="high_depart">High Temperature Departure</option>
     <option value="high_record">Record High Temperature</option>

@@ -29,7 +29,7 @@ $today = time();
 
 $st = new StationData($station, $network);
 $climate_site = $st->table[$station]['climate_site'];
-$st->load_station($climate_site);
+$st->loadStation($climate_site);
 $cities = $st->table;
 $coopdb = iemdb("coop");
 $iem = iemdb("iem");
@@ -103,8 +103,6 @@ $graph->img->SetMargin(45, 10, 80, 60);
 $graph->xaxis->SetFont(FF_FONT1, FS_BOLD);
 $graph->yaxis->SetTitleMargin(30);
 $graph->xaxis->SetPos("min");
-//$graph->xaxis->SetTitle("Day of Month");
-//$graph->xscale->ticks->SupressTickMarks();
 $graph->xaxis->SetLabelFormatString("M d", true);
 $graph->xaxis->SetLabelAngle(90);
 
@@ -121,7 +119,6 @@ foreach ($times as $k => $v) {
 
 // Create the linear plot
 $b1plot = new BarPlot($cdiff, $times);
-//$b1plot->SetFillColor("red");
 $b1plot->SetLegend("Accum Difference");
 
 // Create the linear plot

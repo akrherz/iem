@@ -11,6 +11,7 @@ Run from RUN_2AM.sh
 """
 # stdlib
 from datetime import date, timedelta
+import glob
 import os
 import subprocess
 import sys
@@ -150,8 +151,9 @@ def main():
     os.chdir(WORKDIR)
     yesterday = date.today() - timedelta(days=1)
     zipfn = f"umrb_realtime_{yesterday:%Y%m%d}.zip"
-    # unsure why the wildcard doesn't work here for non-shell
-    subprocess.call(f"zip -q {zipfn} tmp?.tmp pcp?.pcp", shell=True)
+    tfiles = glob.glob("tmp?.tmp")
+    pfiles = glob.glob("pcp?.pcp")
+    subprocess.call(["zip", "-q", zipfn, *tfiles, *pfiles])
     # 5. Copy the zip file to the resulting folder
     subprocess.call(["mv", zipfn, DATADIR])
 

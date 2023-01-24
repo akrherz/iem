@@ -17,10 +17,7 @@ from paste.request import parse_formvars
 def workflow(valid, period, start_response):
     """Actually do the work!"""
     fn = valid.strftime(
-        (
-            "/mesonet/ARCHIVE/data/%Y/%m/%d/"
-            f"GIS/mrms/p{period}h_%Y%m%d%H%M.png"
-        )
+        "/mesonet/ARCHIVE/data/%Y/%m/%d/" f"GIS/mrms/p{period}h_%Y%m%d%H%M.png"
     )
     if not os.path.isfile(fn):
         raise FileNotFoundError(fn)

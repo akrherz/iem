@@ -4,7 +4,6 @@ Run every minute from RUN_1MIN.sh
 """
 import zipfile
 import os
-import shutil
 import subprocess
 import datetime
 
@@ -120,6 +119,7 @@ def main():
     """,
         (ets,),
     )
+    LOG.info("Found %s rows", pcursor.rowcount)
 
     for row in pcursor:
         shp.point(row["lon"], row["lat"])
@@ -170,26 +170,25 @@ def main():
         )
 
     shp.close()
-    shutil.copy("/opt/iem/data/gis/meta/4326.prj", "current_nexattr.prj")
     with zipfile.ZipFile(
         "current_nexattr.zip", "w", zipfile.ZIP_DEFLATED
     ) as zfp:
         zfp.write("current_nexattr.shp")
         zfp.write("current_nexattr.shx")
         zfp.write("current_nexattr.dbf")
-        zfp.write("current_nexattr.prj")
-
+        with open("/opt/iem/data/gis/meta/4326.prj", encoding="ascii") as fh:
+            zfp.writestr("current_nexattr.prj", fh.read())
         zfp.writestr("current_nexattr.txt", INFORMATION)
-        zinfo = zfp.getinfo("current_nexattr.txt")
-        zinfo.external_attr = 0o664
+        zfp.getinfo("current_nexattr.txt").external_attr = 0o664
+        zfp.getinfo("current_nexattr.prj").external_attr = 0o664
 
-    cmd = (
-        f'pqinsert -i -p "zip c {now:%Y%m%d%H%M} '
-        'gis/shape/4326/us/current_nexattr.zip bogus zip" current_nexattr.zip'
+    pstr = (
+        f"zip c {now:%Y%m%d%H%M} "
+        "gis/shape/4326/us/current_nexattr.zip bogus zip"
     )
-    subprocess.call(cmd, shell=True)
+    subprocess.call(["pqinsert", "-i", "-p", pstr, "current_nexattr.zip"])
 
-    for suffix in ["zip", "shp", "dbf", "shx", "prj"]:
+    for suffix in ["zip", "shp", "dbf", "shx"]:
         os.unlink(f"current_nexattr.{suffix}")
 
 

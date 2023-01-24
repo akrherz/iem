@@ -80,6 +80,6 @@ for ($j=0;$j<$num_vars;$j++){
 
 // Display the graph
 $fp = "jpgraph_". $station ."_". time() .".png";
-$graph->Stroke("/var/webtmp/". $fp);
+$graph->Stroke("/var/webtmp/{$fp}");
 
-echo "<p><img src=\"/tmp/". $fp ."\">\n";
+echo "<p><img src=\"/tmp/{$fp}\">\n";

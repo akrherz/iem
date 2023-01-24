@@ -22,9 +22,9 @@ def main():
         "from raw_inbound WHERE updated < %s",
         (ceiling,),
     )
-    LOG.debug("inserted %s rows into tmp", cursor.rowcount)
+    LOG.info("inserted %s rows into tmp", cursor.rowcount)
     cursor.execute("delete from raw_inbound where updated < %s", (ceiling,))
-    LOG.debug("removed %s rows from inbound", cursor.rowcount)
+    LOG.info("removed %s rows from inbound", cursor.rowcount)
     cursor.close()
     pgconn.commit()
     cursor = pgconn.cursor()
@@ -44,9 +44,9 @@ def main():
             (row[0], ts, *row[2:]),
         )
     if cursor.rowcount == 0:
-        LOG.info("found no data to insert...")
+        LOG.warning("found no data to insert...")
     cursor.execute("delete from raw_inbound_tmp")
-    LOG.debug("removed %s rows from tmp", cursor.rowcount)
+    LOG.info("removed %s rows from tmp", cursor.rowcount)
     cursor2.close()
     pgconn.commit()
     pgconn.close()

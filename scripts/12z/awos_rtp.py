@@ -5,6 +5,7 @@
 import os
 import subprocess
 import datetime
+import tempfile
 
 from pyiem.tracker import loadqc
 from pyiem import network
@@ -26,23 +27,6 @@ def main():
     yesterday12z = now12z - datetime.timedelta(days=1)
 
     fmt = "%-6s:%-19s: %3s / %3s / %5s / %4s / %2s\n"
-
-    shef_fn = "/tmp/awos_rtp.shef"
-    out = open(shef_fn, "w", encoding="utf8")
-    out.write(
-        (
-            "\n"
-            "\n"
-            "\n"
-            ".BR DMX %s Z DH06/TAIRVX/DH12/TAIRVP/PPDRVZ/SFDRVZ/SDIRVZ\n"
-            ": IOWA AWOS RTP FIRST GUESS PROCESSED BY THE IEM\n"
-            ":   06Z to 06Z HIGH TEMPERATURE FOR %s\n"
-            ":   00Z TO 12Z TODAY LOW TEMPERATURE\n"
-            ":   12Z YESTERDAY TO 12Z TODAY RAINFALL\n"
-            ":   ...BASED ON REPORTED OBS...\n"
-        )
-        % (now12z.strftime("%m%d"), yesterday6z.strftime("%d %b %Y").upper())
-    )
 
     # 6z to 6z high temperature
     highs = {}
@@ -75,7 +59,7 @@ def main():
     for row in icursor:
         if qdict.get(row[0], {}).get("precip") or row[1] is None:
             continue
-        pcpn[row[0]] = "%5.2f" % (row[1],)
+        pcpn[row[0]] = f"{row[1]:5.2f}"
 
     # 0z to 12z low temperature
     lows = {}
@@ -93,32 +77,47 @@ def main():
             continue
         lows[row[0]] = row[1]
 
-    ids = list(nt.sts.keys())
-    ids.sort()
-    for myid in ids:
-        if nt.sts[myid]["attributes"].get("IS_AWOS") != "1":
-            continue
-        out.write(
-            fmt
-            % (
-                myid,
-                nt.sts[myid]["name"],
-                highs.get(myid, "M"),
-                lows.get(myid, "M"),
-                pcpn.get(myid, "M"),
-                "M",
-                "M",
+    with tempfile.NamedTemporaryFile(
+        "w", encoding="utf-8", delete=False
+    ) as fh:
+        tt = yesterday6z.strftime("%d %b %Y").upper()
+        fh.write(
+            (
+                "\n"
+                "\n"
+                "\n"
+                f".BR DMX {now12z:%m%d} Z "
+                "DH06/TAIRVX/DH12/TAIRVP/PPDRVZ/SFDRVZ/SDIRVZ\n"
+                ": IOWA AWOS RTP FIRST GUESS PROCESSED BY THE IEM\n"
+                f":   06Z to 06Z HIGH TEMPERATURE FOR {tt}\n"
+                ":   00Z TO 12Z TODAY LOW TEMPERATURE\n"
+                ":   12Z YESTERDAY TO 12Z TODAY RAINFALL\n"
+                ":   ...BASED ON REPORTED OBS...\n"
             )
         )
+        ids = list(nt.sts.keys())
+        ids.sort()
+        for myid in ids:
+            if nt.sts[myid]["attributes"].get("IS_AWOS") != "1":
+                continue
+            fh.write(
+                fmt
+                % (
+                    myid,
+                    nt.sts[myid]["name"],
+                    highs.get(myid, "M"),
+                    lows.get(myid, "M"),
+                    pcpn.get(myid, "M"),
+                    "M",
+                    "M",
+                )
+            )
 
-    out.write(".END\n")
-    out.close()
+        fh.write(".END\n")
 
-    cmd = (
-        "pqinsert -p 'plot ac %s0000 awos_rtp.shef awos_rtp.shef shef' %s"
-    ) % (now12z.strftime("%Y%m%d"), shef_fn)
-    subprocess.call(cmd, shell=True)
-    os.unlink(shef_fn)
+    pqstr = f"plot ac {now12z:%Y%m%d}0000 awos_rtp.shef awos_rtp.shef shef"
+    subprocess.call(["pqinsert", "-p", pqstr, fh.name])
+    os.unlink(fh.name)
 
 
 if __name__ == "__main__":

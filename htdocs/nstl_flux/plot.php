@@ -95,7 +95,7 @@ $graph->tabtitle->Set($vars[$pvar]["details"]);
 $graph->tabtitle->SetFont(FF_GEORGIA, FS_BOLD, 14);
 
 $graph->yaxis->title->SetFont(FF_GEORGIA, FS_BOLD, 10);
-$graph->xaxis->SetTitle("Timeseries for ${ts_lbl}");
+$graph->xaxis->SetTitle("Timeseries for {$ts_lbl}");
 $graph->yaxis->SetTitle($vars[$pvar]["details"] . " [" . $vars[$pvar]["units"] . "]");
 $graph->yaxis->SetTitleMargin(45);
 

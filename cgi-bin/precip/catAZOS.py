@@ -65,7 +65,7 @@ Hourly Precipitation [IA_ASOS]
 
     sio.write(
         """
-<td>Pick: (yyyy-mm-dd)  
+<td>Pick: (yyyy-mm-dd)
 <form method="GET" action="catAZOS.py">
 <input type="text" size="8" name="date">
 <input type="submit" value="Submit Date">
@@ -111,15 +111,15 @@ table.main{
    <th rowspan="2">Station</th>
 </tr>
 <tr>
-  <td class="style1">Mid</td> <td class="style2">1</td> <td class="style0">2</td> 
-  <td class="style1">3</td> <td class="style2">4</td> <td class="style0">5</td> 
-  <td class="style1">6</td> <td class="style2">7</td> <td class="style0">8</td> 
-  <td class="style1">9</td> <td class="style2">10</td> <td class="style0">11</td> 
-  <td class="style1">Noon</td> <td class="style2">1</td> <td class="style0">2</td> 
-  <td class="style1">3</td> <td class="style2">4</td> <td class="style0">5</td> 
-  <td class="style1">6</td> <td class="style2">7</td> <td class="style0">8</td> 
-  <td class="style1">9</td> <td class="style2">10</td> <td class="style0">11</td> 
-  <th>Tot:</th>
+<td class="style1">Mid</td> <td class="style2">1</td><td class="style0">2</td>
+<td class="style1">3</td> <td class="style2">4</td><td class="style0">5</td>
+<td class="style1">6</td> <td class="style2">7</td><td class="style0">8</td>
+<td class="style1">9</td> <td class="style2">10</td><td class="style0">11</td>
+<td class="style1">Noon</td><td class="style2">1</td><td class="style0">2</td>
+<td class="style1">3</td> <td class="style2">4</td> <td class="style0">5</td>
+<td class="style1">6</td> <td class="style2">7</td> <td class="style0">8</td>
+<td class="style1">9</td> <td class="style2">10</td> <td class="style0">11</td>
+<th>Tot:</th>
 </tr>
 """
     )
@@ -177,23 +177,23 @@ def application(environ, start_response):
     for station in ids:
         j += 1
         sio.write('<tr class="row' + str(j % 5) + '">')
-        sio.write("%s%s%s" % ("<td>", station, "</td>"))
+        sio.write(f"<td>{station}</td>")
         for i in range(24):
             sio.write('<td class="style' + str((i + 1) % 3) + '">')
-            sio.write("%s%s " % (stData[station][i], "</td>"))
+            sio.write(f"{stData[station][i]}</td>")
             try:
                 totp[station] = totp[station] + stData[station][i]
             except Exception:
                 continue
-        sio.write("%s%s%s" % ("<td>", totp[station], "</td>"))
-        sio.write("%s%s%s" % ("<td>", station, "</td>"))
+        sio.write(f"<td>{totp[station]}</td>")
+        sio.write(f"<td>{station}</td>")
         sio.write("</tr>")
 
     sio.write(
         """
 </table>
 
-<p>Precipitation values are shown for the hour in which they are valid.  For
+<p>Precipitation values are shown for the hour in which they are valid. For
 example, the value in the 1AM column is precipitation accumulation from 1 AM
 till 2 AM.
 """

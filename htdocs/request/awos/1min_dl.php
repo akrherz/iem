@@ -55,6 +55,9 @@ if ($selectAll) {
         $stationString .= " '" . $key . "',";
     }
 }
+if ($stationString == "("){
+    die("No station provided.");
+}
 
 $stationString = substr($stationString, 0, -1);
 $stationString .= ")";

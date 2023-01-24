@@ -36,15 +36,15 @@ EOM;
             sprintf($sql_template, "id = $1")
         );
         if (is_string($a)) {
-            $this->load_network($a, $force3char);
+            $this->loadNetwork($a, $force3char);
         } else if (is_array($a)) {
             foreach ($a as $network) {
-                $this->load_network($network, $force3char);
+                $this->loadNetwork($network, $force3char);
             }
         }
     }
 
-    function load_network($network, $force3char = FALSE)
+    public function loadNetwork($network, $force3char = FALSE)
     {
         $rs = pg_execute($this->dbconn, "SELECT", array($network));
         for ($i = 0; $row = pg_fetch_array($rs); $i++) {
@@ -57,7 +57,7 @@ EOM;
         }
     }
 
-    function load_station($id)
+    public function loadStation($id)
     {
         $rs = pg_execute($this->dbconn, "SELECTST", array($id));
         for ($i = 0; $row = pg_fetch_array($rs); $i++) {
