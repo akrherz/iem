@@ -1,18 +1,19 @@
 
 // A Map Widget with a dragable marker that has callbacks
+var google = window.google || {}; // skipcq: JS-0239
+
 class MapMarkerWidget {
 
     constructor(mapdiv, lon, lat){
         this.mapdiv = mapdiv;
-        this.map;
-        this.marker;
+        this.map = null;
+        this.marker = null;
         this.callbacks = [];
-        var my = this; // closure for below
         this.initialize(lon, lat);
     }
 
     initialize(lon, lat){
-        var latLng = new google.maps.LatLng(lat, lon);
+        const latLng = new google.maps.LatLng(lat, lon);
         this.map = new google.maps.Map(document.getElementById(this.mapdiv), {
             zoom: 3,
             center: latLng,
@@ -24,8 +25,8 @@ class MapMarkerWidget {
             map: this.map,
             draggable: true
         });
-        var my = this;  // closure again
-        google.maps.event.addListener(this.marker, 'dragend', function() {
+        const my = this;  // closure again
+        google.maps.event.addListener(this.marker, 'dragend', () => {
             my.markerCB();
         });
     }
@@ -34,7 +35,7 @@ class MapMarkerWidget {
         this.callbacks.push(cb);
     }
     markerCB(){
-        var pos = this.marker.getPosition();
+        const pos = this.marker.getPosition();
         this.callbacks.forEach(cb => cb(pos.lng(), pos.lat()));
     }
 }

@@ -63,9 +63,10 @@ def ingest(grbfn, valid):
                     )
                     tp01m = np.sum(nc2.variables["p01m"][(tidx0 + 1) :], 0)
                     tevap = np.sum(nc2.variables["evap"][(tidx0 + 1) :], 0)
-            tsolar = np.sum(rsds[(tidx0 + 1) : tidx], 0) * 3600.0
-            tp01m = np.sum(p01m[(tidx0 + 1) : tidx], 0)
-            tevap = np.sum(evap[(tidx0 + 1) : tidx], 0)
+            else:
+                tsolar = np.sum(rsds[(tidx0 + 1) : tidx], 0) * 3600.0
+                tp01m = np.sum(p01m[(tidx0 + 1) : tidx], 0)
+                tevap = np.sum(evap[(tidx0 + 1) : tidx], 0)
         elif valid.hour > 1:
             tidx0 = iemre.hourly_offset(valid.replace(hour=1))
             tsolar = np.sum(rsds[tidx0:tidx], 0) * 3600.0
