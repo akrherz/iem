@@ -32,26 +32,37 @@ def ingest(grbfn, valid):
     # Eh
     tidx = iemre.hourly_offset(valid)
     with ncopen(ncfn, "a") as nc:
-        nc.variables["uwnd"][tidx, :, :] = grbs[1].values
+        nc.variables["uwnd"][tidx, :, :] = np.flipud(grbs[1].values)
         LOG.info("uwnd %s", nc.variables["uwnd"][tidx, ames_j, ames_i])
-        nc.variables["vwnd"][tidx, :, :] = grbs[2].values
+        nc.variables["vwnd"][tidx, :, :] = np.flipud(grbs[2].values)
         LOG.info("vwnd %s", nc.variables["vwnd"][tidx, ames_j, ames_i])
-        nc.variables["dwpk"][tidx, :, :] = grbs[3].values
+        nc.variables["dwpk"][tidx, :, :] = np.flipud(grbs[3].values)
         LOG.info("dwpf %s", nc.variables["dwpk"][tidx, ames_j, ames_i])
-        nc.variables["tmpk"][tidx, :, :] = grbs[4].values
+        nc.variables["tmpk"][tidx, :, :] = np.flipud(grbs[4].values)
         LOG.info("tmpk %s", nc.variables["tmpk"][tidx, ames_j, ames_i])
-        nc.variables["soilt"][tidx, 0, :, :] = grbs[5].values
-        nc.variables["soilt"][tidx, 1, :, :] = grbs[6].values
-        nc.variables["soilt"][tidx, 2, :, :] = grbs[7].values
-        nc.variables["soilt"][tidx, 3, :, :] = grbs[8].values
+        nc.variables["soilt"][tidx, 0, :, :] = np.flipud(grbs[5].values)
+        nc.variables["soilt"][tidx, 1, :, :] = np.flipud(grbs[6].values)
+        nc.variables["soilt"][tidx, 2, :, :] = np.flipud(grbs[7].values)
+        nc.variables["soilt"][tidx, 3, :, :] = np.flipud(grbs[8].values)
         LOG.info("soilt %s", nc.variables["soilt"][tidx, :, ames_j, ames_i])
         # -- Solar Radiation is accumulated since 0z
         rsds = nc.variables["rsds"]
         p01m = nc.variables["p01m"]
         evap = nc.variables["evap"]
-        val = grbs[9].values
+        val = np.flipud(grbs[9].values)
         if valid.hour == 0:
             tidx0 = iemre.hourly_offset((valid - timedelta(hours=24)))
+            # Special 1 Jan consideration
+            if valid.month == 1 and valid.day == 1 and valid.year > 1950:
+                with ncopen(
+                    (f"/mesonet/data/era5/{valid.year - 1}_era5land_hourly.nc")
+                ) as nc2:
+                    tsolar = (
+                        np.sum(nc2.variables["rsds"][(tidx0 + 1) :], 0)
+                        * 3600.0
+                    )
+                    tp01m = np.sum(nc2.variables["p01m"][(tidx0 + 1) :], 0)
+                    tevap = np.sum(nc2.variables["evap"][(tidx0 + 1) :], 0)
             tsolar = np.sum(rsds[(tidx0 + 1) : tidx], 0) * 3600.0
             tp01m = np.sum(p01m[(tidx0 + 1) : tidx], 0)
             tevap = np.sum(evap[(tidx0 + 1) : tidx], 0)
@@ -74,7 +85,7 @@ def ingest(grbfn, valid):
             val[ames_j, ames_i],
         )
         # m to mm
-        val = grbs[10].values
+        val = np.flipud(grbs[10].values)
         nc.variables["evap"][tidx, :, :] = (val * 1000.0) - tevap
         LOG.info(
             "evap %s grib:%s",
@@ -82,7 +93,7 @@ def ingest(grbfn, valid):
             val[ames_j, ames_i],
         )
         # m to mm
-        val = grbs[11].values
+        val = np.flipud(grbs[11].values)
         accum = (val * 1000.0) - tp01m
         nc.variables["p01m"][tidx, :, :] = np.where(accum < 0, 0, accum)
         LOG.info(
@@ -90,7 +101,7 @@ def ingest(grbfn, valid):
             nc.variables["p01m"][tidx, ames_j, ames_i],
             val[ames_j, ames_i],
         )
-        val = grbs[12].values
+        val = np.flipud(grbs[12].values)
         nc.variables["soilm"][tidx, 0, :, :] = val
         nc.variables["soilm"][tidx, 1, :, :] = grbs[13].values
         nc.variables["soilm"][tidx, 2, :, :] = grbs[14].values
