@@ -559,9 +559,10 @@ foreach ($wA as $key => $val) {
     $updated = strtotime($uA[$key]) - $tzoff;
     $resetApp = "$uri_nowfo&tz=$tz&cu=$cu&year=$year&month=$month&day=$day&hour=$hour&minute=$m&archive=$archive&tzoff=$tzoff&site=$wfo";
 
+    $pp = (array_key_exists($phenomena, $vtec_phenomena)) ? $vtec_phenomena[$phenomena]: "(($phenomena))";
     $content .= "<div class=\"wwa-state\">$sname</div>" .
         "<div class=\"wwa$significance\"><span style=\"font-size: 14pt;\">" .
-        $vtec_phenomena[$phenomena] . " " . $vtec_significance[$significance] .
+        $pp . " " . $vtec_significance[$significance] .
         "</span> (<a href=\"$warningscat\">View Text</a>) expires " .
         date($dformat, $expire) . " by <a href=\"$resetApp\">$wfo</a> (" .
         $fA[$key] . ")<br />" . $wA[$key] .

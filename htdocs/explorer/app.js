@@ -3,8 +3,9 @@ var olMap;
 var overviewMap;
 var popup;
 var stationLayer;
+var ol = window.ol || {}; // skipcq: JS-0239
 
-var airportStyle = new ol.style.Style({
+const airportStyle = new ol.style.Style({
     zIndex: 99,
     image: new ol.style.Icon({
         src: "img/airport.svg",
@@ -12,7 +13,7 @@ var airportStyle = new ol.style.Style({
     })
 });
 airportStyle.enabled = true;
-var isusmStyle = new ol.style.Style({
+const isusmStyle = new ol.style.Style({
     zIndex: 99,
     image: new ol.style.Icon({
         src: "img/isu.svg",
@@ -20,7 +21,7 @@ var isusmStyle = new ol.style.Style({
     })
 });
 isusmStyle.enabled = true;
-var climateStyle = new ol.style.Style({
+const climateStyle = new ol.style.Style({
     zIndex: 100,
     image: new ol.style.Circle({
         fill: new ol.style.Fill({color: '#00ff00'}),
@@ -32,7 +33,7 @@ var climateStyle = new ol.style.Style({
     })
 });
 climateStyle.enabled = true;
-var climodistrictStyle = new ol.style.Style({
+const climodistrictStyle = new ol.style.Style({
     zIndex: 101,
     text: new ol.style.Text({
         text: '',
@@ -47,7 +48,7 @@ var climodistrictStyle = new ol.style.Style({
     })
 });
 climodistrictStyle.enabled = true;
-var stateStyle = new ol.style.Style({
+const stateStyle = new ol.style.Style({
     zIndex: 102,
     text: new ol.style.Text({
         text: '',
@@ -63,60 +64,65 @@ var stateStyle = new ol.style.Style({
 });
 stateStyle.enabled = true;
 
+function text(str){
+    // XSS
+    return $("<p>").text(str).html();
+}
+
 function make_iem_tms(title, layername, visible, type) {
     return new ol.layer.Tile({
-        title: title,
-        visible: visible,
-        type: type,
+        title,
+        visible,
+        type,
         source: new ol.source.XYZ({
-            url: '/c/tile.py/1.0.0/' + layername + '/{z}/{x}/{y}.png'
+            url: `/c/tile.py/1.0.0/${layername}/{z}/{x}/{y}.png`
         })
     })
 }
 
 function mapClickHandler(event){
     var feature = olMap.forEachFeatureAtPixel(event.pixel,
-        function (feature) {
-            return feature;
+        (feature2) => {
+            return feature2;
         });
     if (feature === undefined) {
         return;
     }
     // TODO prevent two windows opening for same station?
     // Create new div to hold window content
-    var div = document.createElement("div");
+    const div = document.createElement("div");
     div.classList.add("datadiv");
-    var station = feature.get("sid");
+    const station = feature.get("sid");
     div.setAttribute("data-station", station);
-    var network = feature.get("network");
+    const network = feature.get("network");
     div.setAttribute("data-network", network);
     div.setAttribute("title", station + " " + feature.get("sname"));
-    var prefix = (network.endsWith("ASOS") ? "asos": "coop");
+    let prefix = (network.endsWith("ASOS") ? "asos": "coop");
     prefix = (network == "ISUSM") ? "isusm": prefix;
-    var $newdiv = $(`.${prefix}-data-template`).clone().css("display", "block").appendTo($(div));
+    const $newdiv = $(`.${prefix}-data-template`).clone().css("display", "block").appendTo($(div));
     $newdiv.find("a").each(function(i, a){
         a.href = a.href.replaceAll("{station}", station).replaceAll("{network}", network);
     });
     $newdiv.removeClass(`${prefix}-data-template`);
-    var classID = station + "_" + epoch;
+    const classID = `${station}_${epoch}`;
     epoch += 1;
     windowFactory(div, classID);
 }
 
-function stationLayerStyleFunc(feature, resolution){
-    var network = feature.get("network");
+function stationLayerStyleFunc(feature, _resolution){
+    const network = feature.get("network");
     if (network.search("ASOS") > 0){
         return airportStyle.enabled ? airportStyle: null;
     }
-    if (network == "ISUSM"){
+    if (network === "ISUSM"){
         return isusmStyle.enabled ? isusmStyle: null;
     }
-    var sid = feature.get("sid");
+    const sid = feature.get("sid");
     if (sid.substr(2, 1) == "C"){
         climodistrictStyle.getText().setText(sid.substr(0, 2) + parseInt(sid.substr(3, 3)));
         return climodistrictStyle.enabled ? climodistrictStyle: null;
     }
-    if (sid.substr(2, 4) == "0000"){
+    if (sid.substr(2, 4) === "0000"){
         stateStyle.getText().setText(sid.substr(0, 2));
         return stateStyle.enabled ? stateStyle: null;
     }
@@ -125,10 +131,10 @@ function stationLayerStyleFunc(feature, resolution){
 function displayFeature(evt){
     var features = olMap.getFeaturesAtPixel(olMap.getEventPixel(evt.originalEvent));
     if (features.length > 0){
-        var feature = features[0];
+        const feature = features[0];
         popup.element.hidden = false;
         popup.setPosition(evt.coordinate);
-        $('#info-name').html("[" + feature.get("sid") + "] " + feature.get('sname'));
+        $('#info-name').html(`[${feature.get("sid")}] ${feature.get('sname')}`);
     } else {
         popup.element.hidden = true;
     }
@@ -182,10 +188,10 @@ function initMap(){
         ]
     });
 
-    var ls = new ol.control.LayerSwitcher();
+    const ls = new ol.control.LayerSwitcher();
     olMap.addControl(ls);
     olMap.on("click", mapClickHandler);
-    olMap.on("pointermove", function(evt){
+    olMap.on("pointermove", (evt) => {
         if (evt.dragging){
             return;
         }
@@ -199,24 +205,24 @@ function initMap(){
     olMap.addOverlay(popup);
 }
 function loadImage(elem){
-    var div = document.createElement("div");
+    const div = document.createElement("div");
     div.title = elem.title;
-    var tgt = $(elem).data("target");
-    var p = document.createElement("p");
-    var ahref = document.createElement("a");
+    const tgt = $(elem).data("target");
+    const pp = document.createElement("p");
+    const ahref = document.createElement("a");
     ahref.href = tgt;
     ahref.target = "_blank";
     ahref.text = "IEM Website Link";
     ahref.classList.add("btn");
     ahref.classList.add("btn-default");
-    p.appendChild(ahref);
-    div.appendChild(p);
-    var img = document.createElement("img");
+    pp.appendChild(ahref);
+    div.appendChild(pp);
+    const img = document.createElement("img");
     img.classList.add("img");
     img.classList.add("img-responsive");
     img.src = elem.src;
     div.appendChild(img);
-    var dlg = $(div).dialog({
+    const dlg = $(div).dialog({
         draggable: true,
         autoOpen: true,
         classes: {
@@ -227,7 +233,7 @@ function loadImage(elem){
         responsive: true,
         width: 800,
         height: 600,
-        close: function() {
+        close() {
             $(this).dialog('destroy').remove();
         }
     });
@@ -237,44 +243,44 @@ function loadImage(elem){
 
 function compute_href(uri){
     // Some magic here :/
-    var tokens = uri.split("/");
-    var res = "";
+    const tokens = uri.split("/");
+    let res = "";
     if (tokens[1] == "plotting"){
-        res = "/plotting/auto/?q=" + tokens[4] + "&";
-        var tokens2 = tokens[5].split("::");
+        res = `/plotting/auto/?q=${text(tokens[4])}&`;
+        const tokens2 = text(tokens[5]).split("::");
         tokens2.forEach(function (a){
             if (a.startsWith("_")){
                 return;
             }
-            var tokens3 = a.split(":");
+            const tokens3 = a.split(":");
             res += tokens3[0] + "=" + tokens3[1] + "&";
         });
     }
     return res;
 }
 function loadAutoplot(container, uri, divid){
-    var $target = $(container).find(".data-display");
+    const $target = $(container).find(".data-display");
     // Remove any previous content
     $target.empty();
-    var iemhref = compute_href(uri);
-    var p = document.createElement("p");
-    var ahref = document.createElement("a");
+    const iemhref = compute_href(uri);
+    const pp = document.createElement("p");
+    const ahref = document.createElement("a");
     ahref.href = iemhref;
     ahref.target = "_blank";
     ahref.text = "IEM Website Link";
     ahref.classList.add("btn");
     ahref.classList.add("btn-default");
-    p.appendChild(ahref);
-    $(p).appendTo($target);
+    pp.appendChild(ahref);
+    $(pp).appendTo($target);
     if (uri.endsWith("js")){
         // Create a div to append into that target
-        var datadiv = document.createElement("div");
+        const datadiv = document.createElement("div");
         datadiv.id = divid;
         datadiv.classList.add("viz");
         $(datadiv).appendTo($target);
         $.getScript(uri);
     } else {
-        var img = document.createElement("img");
+        const img = document.createElement("img");
         img.classList.add("img");
         img.classList.add("img-responsive");
         img.src = uri;
@@ -283,34 +289,34 @@ function loadAutoplot(container, uri, divid){
 
 }
 function changeStations(elem){
-    var netclass = $(elem).attr("id");
-    if (netclass == "asos"){
+    const netclass = $(elem).attr("id");
+    if (netclass === "asos"){
         airportStyle.enabled = elem.checked;
     }
-    if (netclass == "isusm"){
+    if (netclass === "isusm"){
         isusmStyle.enabled = elem.checked;
     }
-    if (netclass == "coop"){
+    if (netclass === "coop"){
         climateStyle.enabled = elem.checked;
     }
-    if (netclass == "cd"){
+    if (netclass === "cd"){
         climodistrictStyle.enabled = elem.checked;
     }
-    if (netclass == "state"){
+    if (netclass === "state"){
         stateStyle.enabled = elem.checked;
     }
     stationLayer.changed();
 }
 function loaderClicked(elem){
-    var $elem = $(elem);
-    var container = $elem.closest(".datadiv");
-    var station = $(container).data("station");
-    var network = $(container).data("network");
-    var tpl = $elem.data("url-template");
-    var divid = "d" + station + network;
-    var month = container.find("select[name=month]").val();
-    var type = container.find("select[name=type]").val();
-    var uri = tpl
+    const $elem = $(elem);
+    const container = $elem.closest(".datadiv");
+    const station = $(container).data("station");
+    const network = $(container).data("network");
+    const tpl = $elem.data("url-template");
+    const divid = `d${station}${network}`;
+    const month = text(container.find("select[name=month]").val());
+    const type = text(container.find("select[name=type]").val());
+    const uri = tpl
         .replaceAll("{station}", station)
         .replaceAll("{network}", network)
         .replaceAll("{elem}", divid)
