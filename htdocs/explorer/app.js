@@ -97,7 +97,7 @@ function mapClickHandler(event){
     const network = feature.get("network");
     div.setAttribute("data-network", network);
     div.setAttribute("title", station + " " + feature.get("sname"));
-    const prefix = (network.endsWith("ASOS") ? "asos": "coop");
+    let prefix = (network.endsWith("ASOS") ? "asos": "coop");
     prefix = (network == "ISUSM") ? "isusm": prefix;
     const $newdiv = $(`.${prefix}-data-template`).clone().css("display", "block").appendTo($(div));
     $newdiv.find("a").each(function(i, a){
