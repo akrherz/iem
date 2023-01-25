@@ -145,13 +145,14 @@ def run(valid):
 
 def main(argv):
     """Go!"""
+    valid = utc(*[int(a) for a in argv[1:]])
     if len(argv) == 5:
-        valid = utc(*[int(a) for a in argv[1:]])
-        run(valid)
+        offsets = [0]
     elif len(argv) == 4:
-        valid = utc(*[int(a) for a in argv[1:]])
-        for hr in range(24):
-            run(valid.replace(hour=hr))
+        # Best to run for 1z through 0z as 0z has the 24hr sum to consider
+        offsets = range(1, 25)
+    for offset in offsets:
+        run(valid + timedelta(hours=offset))
 
 
 if __name__ == "__main__":
