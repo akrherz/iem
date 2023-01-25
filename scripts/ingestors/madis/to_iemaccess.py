@@ -13,6 +13,7 @@ from pyiem.observation import Observation
 from pyiem.util import get_dbconn, ncopen, logger, convert_value, mm2inch
 
 LOG = logger()
+MYDIR = "/mesonet/data/madis/mesonet1"
 MY_PROVIDERS = ["KYTC-RWIS", "KYMN", "NEDOR", "MesoWest"]
 warnings.filterwarnings("ignore", category=DeprecationWarning)
 
@@ -22,10 +23,13 @@ def find_file():
     fn = None
     for i in range(0, 4):
         ts = datetime.datetime.utcnow() - datetime.timedelta(hours=i)
-        testfn = ts.strftime("/mesonet/data/madis/mesonet1/%Y%m%d_%H00.nc")
-        if os.path.isfile(testfn):
-            LOG.info("processing %s", testfn)
-            fn = testfn
+        for j in range(300, -1, -1):
+            testfn = ts.strftime(f"{MYDIR}/%Y%m%d_%H00_{j}.nc")
+            if os.path.isfile(testfn):
+                LOG.info("processing %s", testfn)
+                fn = testfn
+                break
+        if fn is not None:
             break
 
     if fn is None:

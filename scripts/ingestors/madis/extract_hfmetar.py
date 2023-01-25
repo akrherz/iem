@@ -260,16 +260,16 @@ def find_fn(argv):
             int(argv[1]), int(argv[2]), int(argv[3]), int(argv[4])
         )
         return utcnow.strftime("/mesonet/data/madis/hfmetar/%Y%m%d_%H00.nc")
-    else:
-        utcnow = datetime.datetime.utcnow()
-        start = 0 if len(argv) == 1 else int(argv[1])
-        for i in range(start, 5):
-            ts = utcnow - datetime.timedelta(hours=i)
-            fn = ts.strftime("/mesonet/data/madis/hfmetar/%Y%m%d_%H00.nc")
+    utcnow = datetime.datetime.utcnow()
+    start = 0 if len(argv) == 1 else int(argv[1])
+    for i in range(start, 5):
+        ts = utcnow - datetime.timedelta(hours=i)
+        for j in range(300, -1, -1):
+            fn = ts.strftime(f"/mesonet/data/madis/hfmetar/%Y%m%d_%H00{j}.nc")
             if os.path.isfile(fn):
                 return fn
-        LOG.warning("no MADIS HFMETAR file found!")
-        sys.exit()
+    LOG.warning("no MADIS HFMETAR file found!")
+    sys.exit()
 
 
 def main(argv):

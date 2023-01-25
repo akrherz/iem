@@ -41,10 +41,15 @@ def main():
     icursor = pgconn.cursor()
 
     utcnow = datetime.datetime.utcnow()
+    fn = None
     for i in range(10):
         now = utcnow - datetime.timedelta(hours=i)
-        fn = f"/mesonet/data/madis/mesonet1/{now:%Y%m%d_%H}00.nc"
-        if os.path.isfile(fn):
+        for j in range(300, -1, -1):
+            testfn = f"/mesonet/data/madis/mesonet1/{now:%Y%m%d_%H}00_{j}.nc"
+            if os.path.isfile(testfn):
+                fn = testfn
+                break
+        if fn is not None:
             break
 
     if not os.path.isfile(fn):
