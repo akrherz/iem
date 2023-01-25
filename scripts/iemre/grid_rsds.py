@@ -57,7 +57,7 @@ def do_coop(ts):
     ds["rsds"].values = nn(xi, yi) * 1000000.0 / 86400.0
     iemre.set_grids(ts.date(), ds)
     subprocess.call(
-        ["python", "db_to_netcdf.py", f"{ts:Y}", f"{ts:%m}", f"{ts:%d}"]
+        ["python", "db_to_netcdf.py", f"{ts:%Y}", f"{ts:%m}", f"{ts:%d}"]
     )
 
 
@@ -92,7 +92,7 @@ def try_merra(ts):
     ds["rsds"].values = nn(xi, yi)
     iemre.set_grids(ts.date(), ds)
     subprocess.call(
-        ["python", "db_to_netcdf.py", f"{ts:Y}", f"{ts:%m}", f"{ts:%d}"]
+        ["python", "db_to_netcdf.py", f"{ts:%Y}", f"{ts:%m}", f"{ts:%d}"]
     )
 
     return True
@@ -168,7 +168,7 @@ def do_hrrr(ts):
 
     iemre.set_grids(ts.date(), ds)
     subprocess.call(
-        ["python", "db_to_netcdf.py", f"{ts:Y}", f"{ts:%m}", f"{ts:%d}"]
+        ["python", "db_to_netcdf.py", f"{ts:%Y}", f"{ts:%m}", f"{ts:%d}"]
     )
 
 

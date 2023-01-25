@@ -302,7 +302,7 @@ function hourSelect($selected, $name, $jsextra = '')
         $ts = new DateTime("2000-01-01 $i:00");
         $s .= "<option value='" . $i . "' ";
         if ($i == intval($selected)) $s .= "SELECTED";
-        $s .= ">" . $ts->format("I A") . "</option>";
+        $s .= ">" . $ts->format("h A") . "</option>";
     }
     return $s . "</select>\n";
 }
