@@ -70,7 +70,7 @@ function highlightFeature(inst, feat) {
 }
 
 function init_map(idx, inst) {
-    inst.selectedFeature;
+    inst.selectedFeature = null;
     inst.vectorLayer = new ol.layer.Vector({
         title: 'Data',
         source: new ol.source.Vector({
