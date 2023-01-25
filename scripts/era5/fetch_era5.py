@@ -146,6 +146,7 @@ def run(valid):
 def main(argv):
     """Go!"""
     valid = utc(*[int(a) for a in argv[1:]])
+    offsets = []
     if len(argv) == 5:
         offsets = [0]
     elif len(argv) == 4:
