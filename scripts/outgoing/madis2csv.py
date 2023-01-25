@@ -39,9 +39,10 @@ def main():
     utc = datetime.datetime.utcnow()
     fn = None
     for i in range(300, -1, -1):
-        fn = f"/mesonet/data/madis/mesonet1/{utc:%Y%m%d_%H}00_{i}.nc"
-        if not os.path.isfile(fn):
+        testfn = f"/mesonet/data/madis/mesonet1/{utc:%Y%m%d_%H}00_{i}.nc"
+        if not os.path.isfile(testfn):
             continue
+        fn = testfn
         LOG.info("Found %s", fn)
         break
     if fn is None:

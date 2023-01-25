@@ -265,7 +265,7 @@ def find_fn(argv):
     for i in range(start, 5):
         ts = utcnow - datetime.timedelta(hours=i)
         for j in range(300, -1, -1):
-            fn = ts.strftime(f"/mesonet/data/madis/hfmetar/%Y%m%d_%H00{j}.nc")
+            fn = ts.strftime(f"/mesonet/data/madis/hfmetar/%Y%m%d_%H00_{j}.nc")
             if os.path.isfile(fn):
                 return fn
     LOG.warning("no MADIS HFMETAR file found!")
