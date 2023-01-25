@@ -50,8 +50,13 @@ def process_metars(metars):
     collective += "\r\r\n".join(metars)
     collective += "\r\r\n\003"
     # Send this to metar_parser.py
-    cmd = "python /home/meteor_ldm/pyWWA/parsers/metar_parser.py -x -l"
-    with Popen(cmd, shell=True, stdout=PIPE, stdin=PIPE, stderr=PIPE) as proc:
+    cmd = [
+        "python",
+        "/home/meteor_ldm/pyWWA/parsers/metar_parser.py",
+        "-x",
+        "-l",
+    ]
+    with Popen(cmd, stdout=PIPE, stdin=PIPE, stderr=PIPE) as proc:
         _stdout, _stderr = proc.communicate(collective.encode("utf-8"))
 
 
@@ -61,9 +66,11 @@ def main():
     fns = []
     for offset in range(5):
         now = utc() - datetime.timedelta(hours=offset)
-        fn = f"/mesonet/data/madis/metar/{now:%Y%m%d_%H}00.nc"
-        if os.path.isfile(fn):
-            fns.append(fn)
+        for j in range(300, -1, -1):
+            fn = f"/mesonet/data/madis/metar/{now:%Y%m%d_%H}00_{j}.nc"
+            if os.path.isfile(fn):
+                fns.append(fn)
+                break
         if len(fns) == 2:
             break
     if not fns:

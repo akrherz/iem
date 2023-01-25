@@ -37,21 +37,20 @@ def main():
     format_tokens = fmt.split(",")
 
     utc = datetime.datetime.utcnow()
-    fn = f"/mesonet/data/madis/mesonet1/{utc:%Y%m%d_%H}00.nc"
-    if not os.path.isfile(fn):
-        LOG.info("%s does not exist", fn)
-        time.sleep(60)
+    fn = None
+    for i in range(300, -1, -1):
+        fn = f"/mesonet/data/madis/mesonet1/{utc:%Y%m%d_%H}00_{i}.nc"
         if not os.path.isfile(fn):
-            if utc.minute > 30:
-                LOG.warning("%s does not exist", fn)
-            return
-    # This processing is slow and LDM could be over-writing us, so we shall
-    # make a copy of this file :/
-    with NamedTemporaryFile("wb", delete=False) as tmpfp:
-        pass
-    tmpfn = f"{tmpfp}.nc"
-    subprocess.call(["cp", fn, tmpfn])
-    with ncopen(tmpfn, "r", timeout=300) as nc:
+            continue
+        LOG.info("Found %s", fn)
+        break
+    if fn is None:
+        if utc.minute > 30:
+            LOG.warning("No netcdf files found...")
+        return
+    # Let file settle
+    time.sleep(6)
+    with ncopen(fn, "r", timeout=300) as nc:
         stations = chartostring(nc.variables["stationId"][:])
         stationname = chartostring(nc.variables["stationName"][:])
         tmpf = convert_value(nc.variables["temperature"][:], "degK", "degF")
@@ -90,7 +89,6 @@ def main():
             nc.variables["roadSubsurfaceTemp4"][:], "degK", "degF"
         )
         times = nc.variables["observationTime"][:]
-    os.unlink(tmpfn)
     db = {}
 
     for recnum in range(len(stations) - 1, -1, -1):
