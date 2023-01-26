@@ -4,16 +4,9 @@
     //ISO-8601 Date Matching
     const reIsoDate = /^(\d{4})-(\d{2})-(\d{2})((T)(\d{2}):(\d{2})(:(\d{2})(\.\d*)?)?)?(Z)?$/;
     Date.parseISO = (val) => {
-        const m = typeof val === 'string' && val.match(reIsoDate);
-        if (m) return new Date(Date.UTC(+m[1], +m[2] - 1, +m[3], +m[6] || 0, +m[7] || 0, +m[9] || 0, parseInt((+m[10]) * 1000) || 0));
-        return null;
-    }
-
-    //MS-Ajax Date Matching
-    const reMsAjaxDate = /^\\?\/Date\((\-?\d+)\)\\?\/$/;
-    Date.parseAjax = (val) => {
-        const m = typeof val === 'string' && val.match(reMsAjaxDate);
-        if (m) return new Date(+m[1]);
+        if (typeof val !== 'string') return null;
+        const mm = val.match(reIsoDate);
+        if (mm) return new Date(Date.UTC(+mm[1], +mm[2] - 1, +mm[3], +mm[6] || 0, +mm[7] || 0, +mm[9] || 0, parseInt((+mm[10]) * 1000) || 0));
         return null;
     }
 })();
@@ -27,13 +20,13 @@ function fetchtimes(findtime) {
     const cid = $('select[name=cid]').val();
     const mydate = $('#realdate').val();
     $('select[name=times]').html("<option value='-1'>Loading...</option>");
-    $.getJSON(`/json/webcam.py?cid=${cid}&date=${mydate}`, function (data) {
+    $.getJSON(`/json/webcam.py?cid=${cid}&date=${mydate}`, (data) => {
         let html = '';
         const len = data.images.length;
-        for (var i = 0; i < len; i++) {
+        for (let i = 0; i < len; i++) {
             let ts = Date.parseISO(data.images[i].valid);
 
-            let result = new Array();
+            const result = new Array();
             result[0] = $.datepicker.formatDate('M dd ', ts);
             if (ts.getHours() > 12) {
                 result[2] = ts.getHours() - 12;
@@ -74,7 +67,7 @@ function getimage() {
     }
 }
 
-$(document).ready(function () {
+$(document).ready(() => {
     $("#datepicker").datepicker({
         dateFormat: "DD, d MM, yy",
         altFormat: "yymmdd", altField: "#realdate",
@@ -96,9 +89,9 @@ $(document).ready(function () {
             const tpart = tokens[1];
             /* Set camera ID */
             $(`select[name=cid] option[value=${cid}]`).attr("selected", "selected");
-            var dstr = `${tpart.substr(4, 2)}/${tpart.substr(6, 2)}/${tpart.substr(0, 4)}`;
+            const dstr = `${tpart.substr(4, 2)}/${tpart.substr(6, 2)}/${tpart.substr(0, 4)}`;
             $("#datepicker").datepicker("setDate", new Date(dstr)); // mm/dd/yyyy
-            var isotime = `${tpart.substr(0, 4)}-${tpart.substr(4, 2)}-${tpart.substr(6, 2)}T${tpart.substr(8, 2)}:${tpart.substr(10, 2)}:00Z`;
+            const isotime = `${tpart.substr(0, 4)}-${tpart.substr(4, 2)}-${tpart.substr(6, 2)}T${tpart.substr(8, 2)}:${tpart.substr(10, 2)}:00Z`;
             fetchtimes(isotime);
         } else {
             fetchtimes(false);
