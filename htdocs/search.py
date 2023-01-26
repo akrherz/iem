@@ -10,7 +10,7 @@ from pyiem.util import get_sqlalchemy_conn, get_properties
 from paste.request import parse_formvars
 import requests
 
-AFOS_RE = re.compile(r"^[A-Z]{5}[A-Z0-9]$", re.I)
+AFOS_RE = re.compile(r"^[A-Z0-9]{6}$", re.I)
 STATION_RE = re.compile(r"^[A-Z0-9]{3,10}$", re.I)
 AUTOPLOT_RE = re.compile(r"^(autoplot|ap)?\s?(?P<n>\d{1,3})$", re.I)
 
