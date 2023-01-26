@@ -143,7 +143,6 @@ def get_description():
     away as sometimes it will take 3-5 minutes to generate a map :("""
     today = datetime.date.today()
     tom = today + datetime.timedelta(days=3)
-    jan1 = today.replace(day=1, month=1)
     desc["arguments"] = [
         dict(
             type="select",
@@ -197,7 +196,7 @@ def get_description():
         dict(
             type="datetime",
             name="sdate",
-            default=jan1.strftime("%Y/%m/%d 0000"),
+            default="2006/01/01 0000",
             label="Start DateTime UTC:",
             min="1986/01/01 0000",
         ),
@@ -420,12 +419,9 @@ def do_polygon(ctx):
         counts = counts / years
         ctx["units"] = "count per year"
     elif varname == "periodavg":
-        ctx["title"] = ("Yearly %s between %s and %s [%s-%s]") % (
-            varname.replace("period", ""),
-            sdate.strftime("%d %b"),
-            edate.strftime("%d %b"),
-            year,
-            year2,
+        ctx["title"] = (
+            f"Yearly {varname.replace('period', '')} between {edate:%d %b} "
+            f"and {edate:%d %b} [{year}-{year2}]"
         )
         years = (maxv.year - minv.year) + 1
         counts = counts / years
@@ -514,11 +510,8 @@ def do_ugc(ctx):
             )
             data[row[0]] = row[1].year if varname == "lastyear" else days
         ctx["lblformat"] = "%.0f"
-        ctx["title"] = "%s-%s %s" % (
-            sdate.strftime("%-d %b %Y"),
-            edate.strftime("%-d %b %Y"),
-            "Year of Last" if varname == "lastyear" else PDICT2[varname],
-        )
+        tt = "Year of Last" if varname == "lastyear" else PDICT2[varname]
+        ctx["title"] = f"{sdate:%-d %b %Y}-{edate:%-d %b %Y} {tt}"
         datavar = "year" if varname == "lastyear" else "days"
     elif varname == "yearcount":
         table = f"warnings_{year}"
@@ -631,10 +624,9 @@ def do_ugc(ctx):
             ctx["labels"][row[0]] = (
                 midnight + datetime.timedelta(hours=row[1])
             ).strftime("%-I %p")
-        ctx["title"] = ("Most Freq. Issue Hour: %s and %s") % (
-            sdate.strftime("%d %b %Y"),
-            edate.strftime("%d %b %Y"),
-        )
+        ctx[
+            "title"
+        ] = f"Most Freq. Issue Hour: {sdate:%d %b %Y} and {edate:%d %b %Y}"
         datavar = "hour"
     elif varname == "yearavg":
         if t == "cwa":
@@ -693,7 +685,7 @@ def do_ugc(ctx):
         ctx["title"] = f"Yearly Avg: {minv:%d %b %Y} and {maxv:%d %b %Y}"
         ctx["lblformat"] = "%.2f"
         datavar = "count"
-    elif varname.startswith("period"):
+    else:  # period
         if sdate.strftime("%m%d") > edate.strftime("%m%d"):
             daylimiter = (
                 f"and (to_char(issue, 'mmdd') >= '{sdate:%m%d}' "
