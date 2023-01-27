@@ -53,11 +53,11 @@ $table = <<<EOF
     border: 0px !important;
     padding: 2px !important;
     background: tan !important;
-}	
+}
 </style>
 <h3>{$title}</h3>
 <table id="thetable" class="table table-condensed table-striped table-bordered table-hover">
-<thead>
+<thead class="sticky">
 <tr class="small">
     <th rowspan="2">{$col1label}</th>
     <th colspan="6">Maximum Temperature &deg;F</th>
@@ -81,6 +81,7 @@ $table = <<<EOF
     <th>Ob</th><th>Rec</th><th>Years</th><th>Mon to Date</th><th>Depth</th>
 </tr>
 </thead>
+<tbody>
 EOF;
 function departure($actual, $normal)
 {
@@ -100,21 +101,22 @@ function departcolor($actual, $normal)
     if ($diff <= -10) return "#00BFFF";
     return "#fff";
 }
-function trace($val)
-{
-    if ($val == 0.0001) return 'T';
-    return $val;
-}
 function new_record($actual, $record)
 {
     if ($actual == "M" || $record == "M") return "";
-    if ($actual == $record) return "<i class=\"fa fa-star-empty\"></i>";
+    if ($actual === $record) return '<i class="fa fa-star-o"></i>';
+    // Careful of Trace
+    if ($actual === "T"){
+        if ($record > 0.001) return "";
+        return '<i class="fa fa-star"></i>';
+    }
     if ($actual > $record) return "<i class=\"fa fa-star\"></i>";
+    return "";
 }
 function new_record2($actual, $record)
 {
     if ($actual == "M" || $record == "M") return "";
-    if ($actual == $record) return "<i class=\"fa fa-star-empty\"></i>";
+    if ($actual == $record) return '<i class="fa fa-star-o"></i>';
     if ($actual < $record) return "<i class=\"fa fa-star\"></i>";
 }
 foreach ($arr as $entry) {
@@ -177,24 +179,24 @@ foreach ($arr as $entry) {
         departcolor($row["low"], $row["low_normal"]),
         departure($row["low"], $row["low_normal"]),
 
-        trace($row["precip"]),
+        $row["precip"],
         new_record($row["precip"], $row["precip_record"]),
-        trace($row["precip_record"]),
+        $row["precip_record"],
         implode(" ", $row["precip_record_years"]),
-        trace($row["precip_normal"]),
-        trace($row["precip_month"]),
-        trace($row["precip_month_normal"]),
+        $row["precip_normal"],
+        $row["precip_month"],
+        $row["precip_month_normal"],
 
-        trace($row["snow"]),
+        $row["snow"],
         new_record($row["snow"], $row["snow_record"]),
-        trace($row["snow_record"]),
+        $row["snow_record"],
         implode(' ', $row["snow_record_years"]),
-        trace($row["snow_month"]),
-        trace($row["snowdepth"]),
+        $row["snow_month"],
+        $row["snowdepth"],
 
     );
 }
-$table .= "</table>";
+$table .= "</tbody></table>";
 
 $sselect = networkSelect("NWSCLI", $station);
 
@@ -245,12 +247,10 @@ directly access it here:
 
 <p><button id="makefancy">Make Table Interactive</button></p>
 
-<div class="table-responsive">
-    {$table}
-</div>
+{$table}
 
 <p><strong>Key:</strong> &nbsp; &nbsp;
-            <i class="fa fa-star-empty"></i> Record Tied,
+            <i class="fa fa-star-o"></i> Record Tied,
             <i class="fa fa-star"></i> Record Set.</p>
 
 EOF;
