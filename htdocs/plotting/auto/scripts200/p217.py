@@ -123,6 +123,7 @@ def plotter(fdict):
         bounds = row["geom"].bounds
         population = row["pop"]
     stextra = " for Polygon" if not row["geom"].is_empty else ""
+    # NOTE Can't do background=ne2 yet until we deal with pixelation issue
     mp = MapPlot(
         apctx=ctx,
         title=(
