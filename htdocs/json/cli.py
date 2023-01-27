@@ -190,6 +190,7 @@ def application(environ, start_response):
     else:
         data = get_data(station, year, fmt)
         mc.set(mckey, data, 300)
+    mc.close()
     if cb is not None:
         data = f"{html_escape(cb)}({data})"
 

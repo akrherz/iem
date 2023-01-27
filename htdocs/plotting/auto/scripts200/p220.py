@@ -300,6 +300,7 @@ def plotter(fdict):
         state=csector,
         cwa=(ctx["wfo"] if len(ctx["wfo"]) == 3 else ctx["wfo"][1:]),
         nocaption=True,
+        background="ne2",
     )
     rects = []
     rectlabels = []
@@ -369,6 +370,7 @@ def plotter(fdict):
 
     if sector == "cwa":
         mp.draw_cwas(color="k", linewidth=2.5)
+    if sector in ["cwa", "state"]:
         mp.drawcounties()
         mp.drawcities()
 

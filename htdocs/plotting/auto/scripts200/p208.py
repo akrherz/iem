@@ -297,6 +297,7 @@ def plotter(fdict):
         )
         if ctx["opt"] == "etn":
             title += f" #{etn}"
+    # NOTE Can't do background=ne2 yet as we are pixelated
     mp = MapPlot(
         apctx=ctx,
         subtitle=(
