@@ -188,7 +188,7 @@ def munge_df(ctx, df):
         return df[df["sday"] <= today_sday]
 
     if today_sday >= "0701":
-        return df[("0701" <= df["sday"]) & (df["sday"] <= today_sday)]
+        return df[(df["sday"] >= "0701") & (df["sday"] <= today_sday)]
 
     return df[(df["sday"] <= today_sday) | (df["sday"] >= "0701")]
 

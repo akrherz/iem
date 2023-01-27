@@ -6,7 +6,7 @@
     Date.parseISO = (val) => {
         if (typeof val !== 'string') return null;
         const mm = val.match(reIsoDate);
-        if (mm) return new Date(Date.UTC(+mm[1], +mm[2] - 1, +mm[3], +mm[6] || 0, +mm[7] || 0, +mm[9] || 0, parseInt((+mm[10]) * 1000) || 0));
+        if (mm) return new Date(Date.UTC(Number(mm[1]), Number(mm[2]) - 1, Number(mm[3]), Number(mm[6]) || 0, Number(mm[7]) || 0, Number(mm[9]) || 0, parseInt((Number(mm[10])) * 1000, 10) || 0));
         return null;
     }
 })();
