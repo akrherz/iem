@@ -41,7 +41,7 @@ function addproducts(data) {
         if (groupname != item.groupname) {
             optgroup = $('<optgroup>');
             optgroup.attr('label', item.groupname);
-            p.append(optgroup);
+            pp.append(optgroup);
             groupname = item.groupname;
         }
         optgroup.append($('<option>', {
