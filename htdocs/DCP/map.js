@@ -68,8 +68,7 @@ const vectorStyleFunction = (feature, _resolution) => {
         ];
     }
     return style;
-}
-
+};
 
 function makeVectorLayer() {
     const vs = new ol.source.Vector({
