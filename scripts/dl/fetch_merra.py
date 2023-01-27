@@ -62,12 +62,21 @@ def do_month(sts):
         if not os.path.isdir(dirname):
             os.makedirs(dirname)
         localfn = now.strftime("/mesonet/data/merra2/%Y/%Y%m%d.nc")
-        cmd = (
-            "curl -n -c ~/.urscookies -b ~/.urscookies -L "
-            f"--url '{uri}' -o {localfn}"
-        )
+        cmd = [
+            "curl",
+            "-n",
+            "-c",
+            "~/.urscookies",
+            "-b",
+            "~/.urscookies",
+            "-L",
+            "--url",
+            uri,
+            "-o",
+            localfn,
+        ]
         with subprocess.Popen(
-            cmd, stdout=subprocess.PIPE, shell=True, stderr=subprocess.PIPE
+            cmd, stdout=subprocess.PIPE, stderr=subprocess.PIPE
         ) as proc:
             proc.stderr.read()
         # Check that the netcdf file is valid

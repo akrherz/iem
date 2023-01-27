@@ -1,6 +1,6 @@
 """Download an hour worth of ERA5.
 
-Run from RUN_12Z.sh for 5 days ago.
+Run from RUN_0Z.sh for 5 days ago.
 """
 from datetime import timedelta
 import os

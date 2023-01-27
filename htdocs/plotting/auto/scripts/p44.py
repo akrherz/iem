@@ -44,7 +44,11 @@ def get_description():
 
     <p>If you want to use the "cold season" as the basis of a year, pick the
     "July 1" option below. The "year" label is then associated with the fall
-    portion of the cold season (1 Jul 2021 - 30 Jun 2022 is 2021).
+    portion of the cold season (1 Jul 2021 - 30 Jun 2022 is 2021).</p>
+
+    <p><strong>Updated 26 Jan 2023</strong> When selecting to limit to a year
+    to date period, a more exact algorithm is now used to accumulate warnings
+    through the end of the current date in central timezone.</p>
     """
     desc["arguments"] = [
         dict(
@@ -160,28 +164,33 @@ def make_barplot(ctx, df):
 
 def munge_df(ctx, df):
     """Rectify an x-axis."""
-    # create a simple doy example
-    df["doy"] = pd.to_numeric(df.index.strftime("%j"))
+    # Create sday
+    df["sday"] = df.index.strftime("%m%d")
     df["year"] = df.index.year
     df["month"] = df.index.month
 
-    month = 1
-    xlimit = 367
-    today = datetime.date.today()
-    if ctx["limit"] == "yes":
-        xlimit = int(today.strftime("%j"))
+    # Rectify the year, if we are starting on jul1
     if ctx["s"] == "jul1":
         df.loc[df["month"] < 7, "year"] = df["year"] - 1
-        month = 7
-        if ctx["limit"] == "yes":
-            base = datetime.date(today.year, 7, 1)
-            if today.month < 7:
-                base = datetime.date(today.year - 1, 7, 1)
-            xlimit = (today - base).days
+
+    # Create a baseline for a common xaxis
+    month = 7 if ctx["s"] == "jul1" else 1
     baseline = pd.to_datetime({"year": df["year"], "month": month, "day": 1})
     df["xaxis"] = (df.index - baseline).astype(int) // 86400 // 1e9
 
-    return df[df["xaxis"] < xlimit]
+    # If not limiting, we are done
+    if ctx["limit"] == "no":
+        return df
+
+    today_sday = datetime.date.today().strftime("%m%d")
+    # If year starts on jan1, easy
+    if ctx["s"] == "jan1":
+        return df[df["sday"] <= today_sday]
+
+    if today_sday >= "0701":
+        return df[(df["sday"] >= "0701") & (df["sday"] <= today_sday)]
+
+    return df[(df["sday"] <= today_sday) | (df["sday"] >= "0701")]
 
 
 def plotter(fdict):
@@ -266,13 +275,19 @@ def plotter(fdict):
     elif combo == "all":
         title = "All VTEC Events"
     ptitle = f"NWS WFO: {ctx['_nt'].sts[station]['name']} ({station})"
+    if station == "_ALL":
+        ptitle = "All NWS Offices"
     if opt == "state":
         _p = "Parishes" if state == "LA" else "Counties"
         ptitle = f"NWS Issued for {_p} in {reference.state_names[state]}"
-    ctx["title"] = f"{ptitle}\n{title} Count"
     ctx["xlabel"] = "all days plotted"
     if ctx["limit"] == "yes":
-        ctx["xlabel"] = f"Up until {datetime.date.today():%B %d}"
+        mm = "January 1" if ctx["s"] == "jan1" else "July 1"
+        ctx["xlabel"] = f"{mm} through {datetime.date.today():%B %-d}"
+        ptitle = f"{ptitle} [{ctx['xlabel']}]"
+        if ctx["s"] == "jul1":
+            ctx["xlabel"] += " (Year for July 1 shown)"
+    ctx["title"] = f"{ptitle}\n{title} Count"
 
     if ctx["plot"] == "bar":
         return make_barplot(ctx, df)
@@ -338,8 +353,7 @@ def plotter(fdict):
     if ctx["s"] == "jan1":
         ax.set_xticklabels(calendar.month_abbr[1:])
     else:
-        labels = calendar.month_abbr[7:]
-        labels.extend(calendar.month_abbr[1:7])
+        labels = calendar.month_abbr[7:] + calendar.month_abbr[1:7]
         ax.set_xticklabels(labels)
     plot_common(ctx, ax)
     ax.set_ylim(bottom=0)

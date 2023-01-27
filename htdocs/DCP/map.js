@@ -5,24 +5,29 @@ var vectorLayer;
 var map;
 var element;
 var fontSize = 14;
+var ol = window.ol || {}; // skipcq: JS-0239
 
 function updateURL() {
-    window.location.href = "#" + physical_code + "." + duration + "." + days;
+    window.location.href = `#${physical_code}.${duration}.${days}`;
+}
+function text(str) {
+    // XSS
+    return $("<p>").text(str).html();
 }
 
 function updateMap() {
-    physical_code = $('#pe').val();
-    duration = $('#duration').val();
-    days = $('#days').val();
+    physical_code = text($('#pe').val());
+    duration = text($('#duration').val());
+    days = text($('#days').val());
     map.removeLayer(vectorLayer);
     vectorLayer = makeVectorLayer();
     map.addLayer(vectorLayer);
     updateURL();
 }
 
-var vectorStyleFunction = function (feature, resolution) {
-    var style;
-    if (feature.get("value") != "M") {
+const vectorStyleFunction = (feature, _resolution) => {
+    let style = null;
+    if (feature.get("value") !== "M") {
         style = [new ol.style.Style({
             fill: new ol.style.Fill({
                 color: 'rgba(255, 255, 255, 0.6)'
@@ -67,7 +72,7 @@ var vectorStyleFunction = function (feature, resolution) {
 
 
 function makeVectorLayer() {
-    var vs = new ol.source.Vector({
+    const vs = new ol.source.Vector({
         format: new ol.format.GeoJSON(),
         projection: ol.proj.get('EPSG:3857'),
         url: '/api/1/shef_currents.geojson?duration=' + duration + '&pe=' + physical_code + "&days=" + days
@@ -83,10 +88,10 @@ function makeVectorLayer() {
     });
 }
 
-$(document).ready(function () {
+$(document).ready(() => {
 
     vectorLayer = makeVectorLayer();
-    var key = 'AsgbmE8m-iBbkypiCOE23M0qElHUfEQtaTvPdDPdM0p7s0N7pJcgrjo70FXjX6bY';
+    const key = 'AsgbmE8m-iBbkypiCOE23M0qElHUfEQtaTvPdDPdM0p7s0N7pJcgrjo70FXjX6bY';
     map = new ol.Map({
         target: 'map',
         layers: [new ol.layer.Tile({
@@ -108,12 +113,12 @@ $(document).ready(function () {
         })
     });
 
-    var layerSwitcher = new ol.control.LayerSwitcher();
+    const layerSwitcher = new ol.control.LayerSwitcher();
     map.addControl(layerSwitcher);
 
     element = document.getElementById('popup');
 
-    var popup = new ol.Overlay({
+    const popup = new ol.Overlay({
         element: element,
         positioning: 'bottom-center',
         stopEvent: false
@@ -123,23 +128,20 @@ $(document).ready(function () {
     $(element).popover({
         'placement': 'top',
         'html': true,
-        content: function () { return $('#popover-content').html(); }
+        content() { return $('#popover-content').html(); }
     });
 
     // display popup on click
-    map.on('click', function (evt) {
-        var feature = map.forEachFeatureAtPixel(evt.pixel,
-            function (feature, layer) {
-                return feature;
+    map.on('click', (evt) => {
+        const feature = map.forEachFeatureAtPixel(evt.pixel,
+            (feature2, _layer) => {
+                return feature2;
             });
         if (feature) {
-            var geometry = feature.getGeometry();
-            var coord = geometry.getCoordinates();
+            const geometry = feature.getGeometry();
+            const coord = geometry.getCoordinates();
             popup.setPosition(coord);
-            var content = "<p><strong>ID:</strong> " + feature.get('station')
-                + "<br /><strong>Value:</strong> " + feature.get('value')
-                + "<br /><strong>UTC Valid:</strong> " + feature.get('utc_valid')
-                + "</p>";
+            const content = `<p><strong>ID:</strong> ${feature.get('station')}<br /><strong>Value:</strong> ${feature.get('value')}<br /><strong>UTC Valid:</strong> ${feature.get('utc_valid')}</p>`;
             $('#popover-content').html(content);
             $(element).popover('show');
 
@@ -150,27 +152,27 @@ $(document).ready(function () {
     });
 
     // Figure out if we have anything specified from the window.location
-    var tokens = window.location.href.split("#");
+    let tokens = window.location.href.split("#");
     if (tokens.length == 2) {
         // #YYYYmmdd/variable
         tokens = tokens[1].split(".");
         if (tokens.length == 3) {
-            physical_code = tokens[0];
-            duration = tokens[1];
-            days = tokens[2];
+            physical_code = text(tokens[0]);
+            duration = text(tokens[1]);
+            days = text(tokens[2]);
         }
     }
-    $('select[id=pe] option[value=' + physical_code + ']').attr("selected", "selected");
-    $('select[id=duration] option[value=' + duration + ']').attr("selected", "selected");
+    $(`select[id=pe] option[value=${physical_code}]`).attr("selected", "selected");
+    $(`select[id=duration] option[value=${duration}]`).attr("selected", "selected");
     $("#days").val(days);
     updateMap();
 
     // Font size buttons
-    $('#fplus').click(function () {
+    $('#fplus').click(() => {
         fontSize += 2;
         vectorLayer.setStyle(vectorStyleFunction);
     });
-    $('#fminus').click(function () {
+    $('#fminus').click(() => {
         fontSize -= 2;
         vectorLayer.setStyle(vectorStyleFunction);
     });
