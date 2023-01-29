@@ -104,19 +104,25 @@ def update_iemaccess(cf6df, valid):
     table = f"summary_{valid.year}"
     with get_sqlalchemy_conn("iem") as conn:
         obs = pd.read_sql(
-            "SELECT s.*, t.network, "
-            "case when length(t.id) = 3 then 'K'||t.id else t.id end "
-            f"as station from {table} s JOIN "
-            "stations t on (s.iemid = t.iemid) WHERE s.day = %s and "
-            "t.network ~* 'ASOS' ORDER by station ASC",
+            f"""
+            SELECT s.*, t.network,
+            case when length(t.id) = 3 then 'K'||t.id else t.id end
+            as station from {table} s JOIN
+            stations t on (s.iemid = t.iemid) WHERE s.day = %s and
+            (t.network ~* 'ASOS' or
+                (t.network ~* 'COOP' and length(id) < 5)
+            ) ORDER by station ASC
+            """,
             conn,
             params=(valid,),
-            index_col="station",
+            index_col=None,
         )
 
-    df = cf6df.join(obs, lsuffix="_cf6")
+    df = cf6df.merge(
+        obs, left_index=True, right_on="station", suffixes=("_cf6", "_ob")
+    )
     obscols = (
-        "max_tmpf min_tmpf pday snow snowd avg_sknt max_sknt "
+        "max_tmpf min_tmpf pday snow_ob snowd avg_sknt_ob max_sknt_ob "
         "avg_drct max_gust max_drct"
     ).split()
     cf6cols = (
@@ -126,10 +132,10 @@ def update_iemaccess(cf6df, valid):
     cursor = dbconn.cursor()
     uvals = 0
     urows = 0
-    for station, row in df.iterrows():
+    for _id, row in df.iterrows():
         if pd.isnull(row["iemid"]):
             # Lots of false positives here, like WFOs
-            LOG.info("Yikes, station %s is unknown?", station)
+            LOG.info("Yikes, station %s has no iemid?", row["station"])
             continue
         work = []
         params = []
@@ -137,7 +143,7 @@ def update_iemaccess(cf6df, valid):
             if not comp(row[ocol], row[ccol]):
                 continue
             uvals += 1
-            work.append(f"{ocol} = %s")
+            work.append(f"{ocol.replace('_ob', '')} = %s")
             params.append(row[ccol])
         if not work:
             continue
