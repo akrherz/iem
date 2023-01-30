@@ -125,10 +125,11 @@ Field 0: Type=C/String, Title='VALID', Timestamp in UTC
 Field 1: Type=C/String, Title='URGENT', Was this an urgent PIREP
 Field 2: Type=C/String, Title='AIRCRAFT', Reported Aircraft type
 Field 3: Type=C/String, Title='REPORT', The PIREP Report
-Field 4: Type=N/Double, Title='LAT', Latitude
-Field 5: Type=N/Double, Title='LON', Longitude 
-Field 6: Type=C/String, Title='ICING', The icing /IC portion of the PIREP
-Field 7: Type=C/String, Title='TURB', The turbulence /TB portion of the PIREP
+Field 4: Type=C/String, Title='ICING', The icing /IC portion of the PIREP
+Field 5: Type=C/String, Title='TURB', The turbulence /TB portion of the PIREP
+Field 6: Type=C/String, Title='ARTCC', The ARTCC identifier, when applicable.
+Field 7: Type=N/Double, Title='LAT', Latitude
+Field 8: Type=N/Double, Title='LON', Longitude 
 </pre>
 
 <h4>Archive notes:</h4>
@@ -148,7 +149,8 @@ Field 7: Type=C/String, Title='TURB', The turbulence /TB portion of the PIREP
  above and the poor format of this data, this archive is not the greatest, but
  is certainly unique!</li>
  <li><strong>30 January 2023:</strong> Added extraction of icing and turbulence
- portions of the PIREP.</li>
+ portions of the PIREP. Added the associated, when applicable, ARTCC
+ identifier for the location of the PIREP.</li>
  </ul>
 EOF;
 $t->content = $content;
