@@ -108,6 +108,7 @@ def plotter(fdict):
     ts = utc(ts.year, ts.month, ts.day, hour)
     which = ctx["which"]
     stations = [station]
+    name = ctx["_nt"].sts[station]["name"]
     if station.startswith("_"):
         name = ctx["_nt"].sts[station]["name"].split("--")[0]
         stations = (
@@ -121,7 +122,6 @@ def plotter(fdict):
     if which == "month":
         vlimit = " and extract(month from f.valid) = :month "
         params["month"] = ts.month
-    name = ctx["_nt"].sts[station]["name"]
 
     hrlimit = "and extract(hour from f.valid at time zone 'UTC') = :hour "
     params["hour"] = hour
@@ -179,12 +179,12 @@ def plotter(fdict):
         df.loc[df[key] == df[f"{key}_min"], f"{key}_percentile"] = 0.0
 
     title = f"{station} {name} {ts:%Y/%m/%d %H} UTC Sounding"
-    subtitle = "(%s-%s) Percentile Ranks (%s) for %s at %s" % (
-        pd.Timestamp(df.iloc[0]["min_valid"]).year,
-        pd.Timestamp(df.iloc[0]["max_valid"]).year,
-        ("All Year" if which == "none" else calendar.month_name[ts.month]),
-        PDICT3[varname],
-        "Any Hour" if ctx["h"] == "all" else f"{hour} UTC",
+    tt = "All Year" if which == "none" else calendar.month_name[ts.month]
+    uu = "Any Hour" if ctx["h"] == "all" else f"{hour} UTC"
+    subtitle = (
+        f"({pd.Timestamp(df.iloc[0]['min_valid']).year}-"
+        f"{pd.Timestamp(df.iloc[0]['max_valid']).year}) Percentile Ranks "
+        f"({tt}) for {PDICT3[varname]} at {uu}"
     )
     fig = figure(title=title, subtitle=subtitle, apctx=ctx)
     ax = fig.add_axes([0.1, 0.1, 0.75, 0.78])

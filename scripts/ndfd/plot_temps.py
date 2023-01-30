@@ -28,13 +28,13 @@ def plot_gdd(ts):
 
     subtitle = (
         "Based on National Digital Forecast Database (NDFD) "
-        "00 UTC Forecast made %s"
-    ) % (ts.strftime("%-d %b %Y"),)
+        f"00 UTC Forecast made {ts:%-d %b %Y}"
+    )
+    t2 = ts + datetime.timedelta(days=6)
     mp = MapPlot(
-        title="NWS NDFD 7 Day (%s through %s) GDD50 Departure from Avg"
-        % (
-            ts.strftime("%-d %b"),
-            (ts + datetime.timedelta(days=6)).strftime("%-d %b"),
+        title=(
+            f"NWS NDFD 7 Day ({ts:%-d %b} through {t2:%-d %b}) "
+            "GDD50 Departure from Avg"
         ),
         subtitle=subtitle,
         sector="midwest",
@@ -50,9 +50,9 @@ def plot_gdd(ts):
     )
     mp.drawcounties()
     pqstr = (
-        "data c %s summary/cb_ndfd_7day_gdd.png summary/cb_ndfd_7day_gdd.png "
-        "png"
-    ) % (ts.strftime("%Y%m%d%H%M"),)
+        f"data c {ts:%Y%m%d%H%M} summary/cb_ndfd_7day_gdd.png "
+        "summary/cb_ndfd_7day_gdd.png png"
+    )
     mp.postprocess(pqstr=pqstr)
     mp.close()
     nc.close()
@@ -61,22 +61,20 @@ def plot_gdd(ts):
 def plot_maxmin(ts, field):
     """Generate our plot."""
     nc = ncopen(ts.strftime("/mesonet/data/ndfd/%Y%m%d%H_ndfd.nc"))
-    if field == "high_tmpk":
-        data = np.max(nc.variables[field][:], 0)
-    elif field == "low_tmpk":
-        data = np.min(nc.variables[field][:], 0)
+    func = np.max if field == "high_tmpk" else np.min
+    data = func(nc.variables[field][:], 0)
     data = masked_array(data, units.degK).to(units.degF).m
 
     subtitle = (
         "Based on National Digital Forecast Database (NDFD) "
-        "00 UTC Forecast made %s"
-    ) % (ts.strftime("%-d %b %Y"),)
+        f"00 UTC Forecast made {ts:%-d %b %Y}"
+    )
+    t2 = ts + datetime.timedelta(days=6)
+    tt = "Maximum" if field == "high_tmpk" else "Minimum"
     mp = MapPlot(
-        title="NWS NDFD 7 Day (%s through %s) %s Temperature"
-        % (
-            ts.strftime("%-d %b"),
-            (ts + datetime.timedelta(days=6)).strftime("%-d %b"),
-            "Maximum" if field == "high_tmpk" else "Minimum",
+        title=(
+            f"NWS NDFD 7 Day ({ts:%-d %b} through {t2:%-d %b}) "
+            f"{tt} Temperature"
         ),
         subtitle=subtitle,
         sector="midwest",
@@ -90,13 +88,10 @@ def plot_maxmin(ts, field):
         units="Degrees F",
     )
     mp.drawcounties()
+    tt = "max" if field == "high_tmpk" else "min"
     pqstr = (
-        "data c %s summary/cb_ndfd_7day_%s.png summary/cb_ndfd_7day_%s.png "
-        "png"
-    ) % (
-        ts.strftime("%Y%m%d%H%M"),
-        "max" if field == "high_tmpk" else "min",
-        "max" if field == "high_tmpk" else "min",
+        f"data c {ts:%Y%m%d%H%M} summary/cb_ndfd_7day_{tt}.png "
+        f"summary/cb_ndfd_7day_{tt}.png png"
     )
     mp.postprocess(pqstr=pqstr)
     mp.close()

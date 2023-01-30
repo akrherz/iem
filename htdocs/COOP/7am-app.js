@@ -1,14 +1,23 @@
 var renderattr = "pday";
-var map, coopLayer, azosLayer, mrmsLayer;
+let map = null;
+let coopLayer = null;
+let azosLayer = null;
+let mrmsLayer = null;
+var ol = window.ol || {}; // skipcq: JS-0239
+
+function text(str){
+    // XSS
+    return $("<p>").text(str).html();
+}
 
 function updateURL() {
-    var t = $.datepicker.formatDate("yymmdd",
+    const tt = $.datepicker.formatDate("yymmdd",
         $("#datepicker").datepicker('getDate'));
-    window.location.href = "#" + t + "/" + renderattr;
+    window.location.href = `#${tt}/${renderattr}`;
 }
 
 function updateMap() {
-    renderattr = $('#renderattr').val();
+    renderattr = text($('#renderattr').val());
     coopLayer.setStyle(coopLayer.getStyle());
     azosLayer.setStyle(azosLayer.getStyle());
     updateURL();
@@ -16,7 +25,7 @@ function updateMap() {
 
 function updateDate() {
     // We have a changed date, hello!
-    var fullDate = $.datepicker.formatDate("yy-mm-dd",
+    const fullDate = $.datepicker.formatDate("yy-mm-dd",
         $("#datepicker").datepicker('getDate'));
     map.removeLayer(coopLayer);
     coopLayer = makeVectorLayer(fullDate, 'NWS COOP Reports', 'coop');
@@ -32,14 +41,14 @@ function updateDate() {
 
 function makeVectorLayer(dt, title, group) {
     return new ol.layer.Vector({
-        title: title,
+        title,
         source: new ol.source.Vector({
             format: new ol.format.GeoJSON(),
             projection: ol.proj.get('EPSG:3857'),
             url: '/geojson/7am.py?group=' + group + '&dt=' + dt
         }),
         style: function (feature, resolution) {
-            var txt = (feature.get(renderattr) == 0.0001) ? "T" : feature.get(renderattr);
+            let txt = (feature.get(renderattr) == 0.0001) ? "T" : feature.get(renderattr);
             txt = (txt == null) ? '.' : txt;
             return [new ol.style.Style({
                 text: new ol.style.Text({
@@ -59,7 +68,7 @@ function makeVectorLayer(dt, title, group) {
 }
 function get_tms_url() {
     // Generate the TMS URL given the current settings
-    return '/cache/tile.py/1.0.0/idep0::mrms-12z24h::' + $.datepicker.formatDate("yy-mm-dd", $("#datepicker").datepicker('getDate')) + '/{z}/{x}/{y}.png';
+    return `/cache/tile.py/1.0.0/idep0::mrms-12z24h::${$.datepicker.formatDate("yy-mm-dd", $("#datepicker").datepicker('getDate'))}/{z}/{x}/{y}.png`;
 }
 
 function buildUI() {
@@ -70,23 +79,23 @@ function buildUI() {
         maxDate: new Date()
     });
     $("#datepicker").datepicker('setDate', new Date());
-    $("#datepicker").change(function () {
+    $("#datepicker").change(() => {
         updateDate();
     });
-    $("#minusday").click(function () {
-        var date2 = $('#datepicker').datepicker('getDate');
+    $("#minusday").click(() => {
+        const date2 = $('#datepicker').datepicker('getDate');
         date2.setDate(date2.getDate() - 1);
         $('#datepicker').datepicker('setDate', date2);
         updateDate();
     });
-    $("#plusday").click(function () {
-        var date2 = $('#datepicker').datepicker('getDate');
+    $("#plusday").click(() => {
+        const date2 = $('#datepicker').datepicker('getDate');
         date2.setDate(date2.getDate() + 1);
         $('#datepicker').datepicker('setDate', date2);
         updateDate();
     });
 }
-$(document).ready(function () {
+$(document).ready(() => {
     buildUI();
 
     coopLayer = makeVectorLayer($.datepicker.formatDate("yy-mm-dd", new Date()),
@@ -122,13 +131,13 @@ $(document).ready(function () {
         })
     });
 
-    var layerSwitcher = new ol.control.LayerSwitcher();
+    const layerSwitcher = new ol.control.LayerSwitcher();
     map.addControl(layerSwitcher);
 
-    var element = document.getElementById('popup');
+    const element = document.getElementById('popup');
 
-    var popup = new ol.Overlay({
-        element: element,
+    const popup = new ol.Overlay({
+        element,
         positioning: 'bottom-center',
         stopEvent: false
     });
@@ -137,39 +146,27 @@ $(document).ready(function () {
     $(element).popover({
         'placement': 'top',
         'html': true,
-        content: function () {
+        content: () => {
             return $('#popover-content').html();
         }
     });
 
 
     // display popup on click
-    map.on('click', function (evt) {
-        var feature = map.forEachFeatureAtPixel(evt.pixel,
-            function (feature, layer) {
-                return feature;
+    map.on('click', (evt) => {
+        const feature = map.forEachFeatureAtPixel(evt.pixel,
+            (feature2, _layer) => {
+                return feature2;
             });
         if (feature) {
-            var geometry = feature.getGeometry();
-            var coord = geometry.getCoordinates();
+            const geometry = feature.getGeometry();
+            const coord = geometry.getCoordinates();
             popup.setPosition(coord);
-            var content = "<p><strong>"
-                + feature.getId() + " " + feature.get('name') + "</strong>"
-                + "<br />Hour of Ob: " + feature.get('hour')
-                + "<br />High: " + feature.get('high')
-                + "<br />Low: " + feature.get('low')
-                + "<br />Temp at Ob: " + feature.get('coop_tmpf')
-                + "<br />Precip: " + feature.get('pday')
-                + "<br />Snow: " + feature.get('snow')
-                + "<br />Snow Depth: " + feature.get('snowd')
-                + "</p>";
+            const content = `<p><strong>${feature.getId()} ${feature.get('name')}</strong><br />Hour of Ob: ${feature.get('hour')}<br />High: ${feature.get('high')}<br />Low: ${feature.get('low')}<br />Temp at Ob: ${feature.get('coop_tmpf')}<br />Precip: ${feature.get('pday')}<br />Snow: ${feature.get('snow')}<br />Snow Depth: ${feature.get('snowd')}</p>`;
             $('#popover-content').html(content);
             $(element).popover('show');
         } else {
             $(element).popover('hide');
         }
     });
-
-
-
 });
