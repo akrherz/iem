@@ -60,6 +60,10 @@ def run(ctx, start_response):
         case when is_urgent then 'T' else 'F' end,
         substr(replace(aircraft_type, ',', ' '), 0, 40),
         substr(replace(report, ',', ' '), 0, 255),
+        substr(trim(substring(replace(report, ',', ' '),
+            '/IC([^/]*)/')), 0, 255) as icing,
+        substr(trim(substring(replace(report, ',', ' '),
+            '/TB([^/]*)/')), 0, 255) as turb,
         ST_y(geom::geometry) as lat, ST_x(geom::geometry) as lon
         from pireps WHERE {spatialsql}
         valid >= %s and valid < %s ORDER by valid ASC
@@ -84,7 +88,7 @@ def run(ctx, start_response):
             ("Content-Disposition", f"attachment; filename={fn}.csv"),
         ]
         start_response("200 OK", headers)
-        sio.write("VALID,URGENT,AIRCRAFT,REPORT,LAT,LON\n")
+        sio.write("VALID,URGENT,AIRCRAFT,REPORT,ICING,TURBULENCE,LAT,LON\n")
         for row in cursor:
             sio.write(",".join([str(s) for s in row]) + "\n")
         return sio.getvalue().encode("ascii", "ignore")
@@ -98,6 +102,8 @@ def run(ctx, start_response):
         shp.field("URGENT", "C", 1)
         shp.field("AIRCRAFT", "C", 40)
         shp.field("REPORT", "C", 255)  # Max field size is 255
+        shp.field("ICING", "C", 255)  # Max field size is 255
+        shp.field("TURB", "C", 255)  # Max field size is 255
         shp.field("LAT", "F", 7, 4)
         shp.field("LON", "F", 9, 4)
         for row in cursor:
