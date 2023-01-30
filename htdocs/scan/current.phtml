@@ -51,78 +51,47 @@ $t1 = "";
 foreach($finalA as $key => $val){
     $parts = $finalA[$key];
     $i++;
-    $tdiff = $now->diff($parts["ts"]);
-    // Don't show stations over 5 days old
-    if ($tdiff > 86400*5){
-        continue;
-    }
     $t1 .= "<tr";
     if ($i % 2 == 0)  $t1 .= " bgcolor='#eeeeee'";
 
     $t1 .= ">";
     $t1 .= "<td><input type=\"checkbox\" name=\"st[]\"
                value=\"".$key."\"></td>";
-    $t1 .= "<td><a href=\"". make_link($key) ."\">". $cities[$key]["name"] . "</a></td><td ";
-    if ($tdiff > 11900){
-        $t1 .= 'bgcolor="red"';
-        $format = "B-d-Y h:i A";
-    } else if ($tdiff > 9600){
-        $t1 .= 'bgcolor="orange"';
-        $format = "h:i A";
-    } else if ($tdiff > 7200){
-        $t1 .= 'bgcolor="green"';
-        $format = "h:i A";
-    } else {
-        $format = "h:i A";
-    }
-    $t1 .= ">". $parts["ts"]->format($format) ."</td>
-  <td align='center'>". round($parts["tmpf"],0) ."(<font color=\"#ff0000\">".
-  round($parts["max_tmpf"],0) ."</font>/<font color=\"#0000ff\">".
-  round($parts["min_tmpf"],0) ."</font>)</td>
- <td>". round($parts["dwpf"],0) ."</td>
- <td>". round($parts["feel"], 0) ."</td>
+    $t1 .= "<td><a href=\"". make_link($key) ."\">". $cities[$key]["name"] . "</a></td><td>";
+    $t1 .= $parts["ts"]->format("M-d-Y h:i A") ."</td>
+  <td align='center'>". myround($parts["tmpf"],0) ."(<font color=\"#ff0000\">".
+  myround($parts["max_tmpf"],0) ."</font>/<font color=\"#0000ff\">".
+  myround($parts["min_tmpf"],0) ."</font>)</td>
+ <td>". myround($parts["dwpf"],0) ."</td>
+ <td>". myround($parts["feel"], 0) ."</td>
  <td>". $parts["relh"] ."</td>
- <td>". round($parts["sknt"],0) ;
-    if (strlen($parts["gust"]) > 0 && $parts["gust"] > 0){
+ <td>". myround($parts["sknt"],0) ;
+    if (!is_null($parts["gust"]) && $parts["gust"] > 0){
         $t1 .= "G". $parts["gust"];
     }
-    $t1 .= "</td><td>". round($parts["drct"],0) ."</td>";
+    $t1 .= "</td><td>". myround($parts["drct"],0) ."</td>";
     $t1 .= "<td>";
     if (array_key_exists("peak_ts", $parts)){
-        $t1 .= round($parts["peak"],0) ."@ ". $parts["peak_ts"]->format("h:i P") ;
+        $t1 .= myround($parts["peak"],0) ."@ ". $parts["peak_ts"]->format("h:i P") ;
     }	
-    $t1 .= "</td><td>". round($parts["srad"],0) ."</td></tr>";
+    $t1 .= "</td><td>". myround($parts["srad"],0) ."</td></tr>";
 }
 
 $t2 = "";
 $n = $finalA;
 foreach($n as $key => $parts){
-    $tdiff = $now->diff($parts["ts"]);
-    // Don't show stations over 5 days old
-    if ($tdiff > 86400*5){
-        continue;
-    }
     $i++;
     $t2 .= "<tr";
     if ($i % 2 == 0)  $t2 .= " bgcolor='#eeeeee'";
 
     $t2 .= ">";
-    $t2 .= "<td><a href=\"". make_link($key) ."\">". $cities[$key]["name"] . "</a></td></td><td ";
-    $format = "h:i P";
-    if ($tdiff > 11900){
-        $t2 .= 'bgcolor="red"';
-        $format = "M-d-Y h:i P";
-    } else if ($tdiff > 9600){
-        $t2 .= 'bgcolor="orange"';
-    } else if ($tdiff > 7200){
-        $t2 .= 'bgcolor="green"';
-    }
-    $t2 .= ">". $parts["ts"]->format($format) ."</td>
-    <td>". round($parts["c1smv"],0) ."</td><td>". round($parts["c1tmpf"],0) ."</td>
-    <td>". round($parts["c2smv"],0) ."</td><td>". round($parts["c2tmpf"],0) ."</td>
-    <td>". round($parts["c3smv"],0) ."</td><td>". round($parts["c3tmpf"],0) ."</td>
-    <td>". round($parts["c4smv"],0) ."</td><td>". round($parts["c4tmpf"],0) ."</td>
-    <td>". round($parts["c5smv"],0) ."</td><td>". round($parts["c5tmpf"],0) ."</td>";
+    $t2 .= "<td><a href=\"". make_link($key) ."\">". $cities[$key]["name"] . "</a></td></td><td>";
+    $t2 .= $parts["ts"]->format("M-d-Y h:i P") ."</td>
+    <td>". myround($parts["c1smv"],0) ."</td><td>". myround($parts["c1tmpf"],0) ."</td>
+    <td>". myround($parts["c2smv"],0) ."</td><td>". myround($parts["c2tmpf"],0) ."</td>
+    <td>". myround($parts["c3smv"],0) ."</td><td>". myround($parts["c3tmpf"],0) ."</td>
+    <td>". myround($parts["c4smv"],0) ."</td><td>". myround($parts["c4tmpf"],0) ."</td>
+    <td>". myround($parts["c5smv"],0) ."</td><td>". myround($parts["c5tmpf"],0) ."</td>";
 
     $t2 .= "</tr>";
 }
@@ -211,4 +180,3 @@ a column to sort it.<br>
 </table>
 EOF;
 $t->render("sortables.phtml");
-?>
