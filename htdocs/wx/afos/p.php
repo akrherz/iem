@@ -73,7 +73,7 @@ function last_product($conn, $pil)
     // Get the latest
     $rs = pg_prepare($conn, "_LSELECT3", "SELECT data, bbb, "
         . " entered at time zone 'UTC' as mytime, source from products"
-        . " WHERE pil = $1 and entered > (now() - '31 days'::interval)"
+        . " WHERE pil = $1"
         . " ORDER by entered DESC LIMIT 1");
     $rs = pg_execute($conn, "_LSELECT3", array($pil));
     if (pg_num_rows($rs) == 1) {
