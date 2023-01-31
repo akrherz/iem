@@ -156,7 +156,7 @@ def plotter(fdict):
             plot_units = "F"
             clevs = np.arange(-30, 120, 5)
             clevstride = 2
-        elif varname in ["range_tmpk", "range_tmpk_12z"]:
+        else:  # range_tmpk range_tmpk_12z
             vname2 = f"low_tmpk{'_12z' if varname == 'range_tmpk_12z' else ''}"
             vname1 = vname2.replace("low", "high")
             d1 = nc.variables[vname1][idx0, jslice, islice]
