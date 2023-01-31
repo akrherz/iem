@@ -48,6 +48,9 @@ EOF;
 // A dance here to get a 4-char and 3-char identifier
 $source = isset($_REQUEST["source"]) ? substr(xssafe($_GET["source"]), 0, 4) : 'DMX';
 $pil = isset($_REQUEST["pil"]) ? xssafe($_REQUEST["pil"]) : "AFD";
+if (strlen($pil) > 6){
+    xssafe("</script>");
+}
 $by = isset($_REQUEST["by"]) ? xssafe($_REQUEST["by"]) : "cccc";
 $view = isset($_GET["view"]) ? xssafe($_GET["view"]) : 'grid';
 $order = isset($_GET["order"]) ? xssafe($_GET["order"]) : "asc";
@@ -130,7 +133,7 @@ foreach ($datequeue as $dt) {
     if ($order == "desc") {
         $rows = array_reverse($rows);
     }
-    if (sizeof($rows) == 0) {
+    if (is_null($rows) || sizeof($rows) == 0) {
         $table .= "<h3>No products found for $dt</h3>\n";
         continue;
     }

@@ -1,4 +1,11 @@
-"""Time Series of PIREPs by ARTCC/AKZone"""
+"""
+This autoplot presents a time series of UTC daily PIREP totals by ARTCC
+or Alaska Zone.  The chart presents daily totals for PIREPs that contain
+icing (/IC), turbulence (/TB), icing or turbulence and all reports.</p>
+
+<p>Each chart presents a simple average over the plot and a trailing
+30 day average.
+"""
 from datetime import date, timedelta
 
 import pandas as pd
@@ -63,18 +70,7 @@ PDICT = {
 
 def get_description():
     """Return a dict describing how to call this plotter"""
-    desc = {}
-    desc["cache"] = 86400
-    desc[
-        "description"
-    ] = """
-    This autoplot presents a time series of UTC daily PIREP totals by ARTCC
-    or Alaska Zone.  The chart presents daily totals for PIREPs that contain
-    icing (/IC), turbulence (/TB), icing or turbulence and all reports.</p>
-
-    <p>Each chart presents a simple average over the plot and a trailing
-    30 day average.
-    """
+    desc = {"cache": 86400, "description": __doc__}
     today = date.today() + timedelta(days=1)
     t365 = today - timedelta(days=365)
 
@@ -185,7 +181,7 @@ def plotter(fdict):
         axes[i].plot(
             df.index.values,
             df[col].rolling(30).mean(),
-            color="tan",
+            color="brown",
             lw=2,
             label="30 Day Trail Ave" if i == 3 else "",
         )
