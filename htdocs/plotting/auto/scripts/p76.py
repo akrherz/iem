@@ -251,7 +251,7 @@ def make_plot(df, ctx):
     """Do the plotting"""
 
     # Special case of computing means of non-linear dew point
-    means = df.groupby("year").mean()
+    means = df.groupby("year").mean(numeric_only=True)
     means["dwpf"] = (
         mcalc.dewpoint(means["vapor_pressure"].values * units("kPa"))
         .to(units("degF"))
@@ -264,21 +264,13 @@ def make_plot(df, ctx):
         means.index.values, means[varname].values
     )
     avgv = means[varname].mean()
+    tt = "Distribution" if ctx["w"] == "violin" else "Averages"
     title = (
-        "%s (%.0f-%.0f)\n"
-        "%s %s [%s] %s Avg: %.1f, slope: %.2f %s/century, R$^2$=%.2f"
-    ) % (
-        ctx["_sname"],
-        means.index.min(),
-        means.index.max(),
-        PDICT[varname],
-        "Distribution" if ctx["w"] == "violin" else "Averages",
-        MDICT[season],
-        ctx.get("hour_limiter", ""),
-        avgv,
-        h_slope * 100.0,
-        UNITS[varname],
-        r_value**2,
+        f"{ctx['_sname']} ({means.index.min():.0f}-{means.index.max():.0f})\n"
+        f"{PDICT[varname]} {tt} [{MDICT[season]}] "
+        f"{ctx.get('hour_limiter', '')} Avg: {avgv:.1f}, "
+        f"slope: {(h_slope * 100.):.2f} {UNITS[varname]}/century, "
+        f"R$^2$={(r_value**2):.2f}"
     )
 
     (fig, ax) = figure_axes(title=title, apctx=ctx)

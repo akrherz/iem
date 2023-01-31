@@ -7,7 +7,7 @@ require_once "../../include/database.inc.php";
 
     $connection = iemdb("postgis");
     $q = "SELECT * from robins ORDER by id";
-    $rs = pg_exec($q);
+    $rs = pg_exec($connection, $q);
     
     $table = "";
     for( $i=0; $row = pg_fetch_array($rs); $i++) {

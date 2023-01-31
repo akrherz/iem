@@ -49,7 +49,8 @@ def run(ctx, start_response):
         lon = float(ctx.get("lon", -91.99))
         lat = float(ctx.get("lat", 41.99))
         spatialsql = (
-            f"ST_Distance(geom::geometry, ST_SetSRID(ST_Point({lon}, {lat}), "
+            "ST_Distance(p.geom::geometry, "
+            f"ST_SetSRID(ST_Point({lon}, {lat}), "
             f"4326)) <= {distance} and "
         )
     else:
@@ -60,8 +61,15 @@ def run(ctx, start_response):
         case when is_urgent then 'T' else 'F' end,
         substr(replace(aircraft_type, ',', ' '), 0, 40),
         substr(replace(report, ',', ' '), 0, 255),
-        ST_y(geom::geometry) as lat, ST_x(geom::geometry) as lon
-        from pireps WHERE {spatialsql}
+        substr(trim(substring(replace(report, ',', ' '),
+            '/IC([^/]*)/')), 0, 255) as icing,
+        substr(trim(substring(replace(report, ',', ' '),
+            '/TB([^/]*)/')), 0, 255) as turb,
+        a.ident as atrcc,
+        ST_y(p.geom::geometry) as lat, ST_x(p.geom::geometry) as lon
+        from pireps p LEFT JOIN airspaces a on (
+            st_intersects(p.geom, a.geom) and a.type_code = 'ARTCC'
+        ) WHERE {spatialsql}
         valid >= %s and valid < %s ORDER by valid ASC
         """
     args = (
@@ -84,7 +92,9 @@ def run(ctx, start_response):
             ("Content-Disposition", f"attachment; filename={fn}.csv"),
         ]
         start_response("200 OK", headers)
-        sio.write("VALID,URGENT,AIRCRAFT,REPORT,LAT,LON\n")
+        sio.write(
+            "VALID,URGENT,AIRCRAFT,REPORT,ICING,TURBULENCE,ATRCC,LAT,LON\n"
+        )
         for row in cursor:
             sio.write(",".join([str(s) for s in row]) + "\n")
         return sio.getvalue().encode("ascii", "ignore")
@@ -98,6 +108,9 @@ def run(ctx, start_response):
         shp.field("URGENT", "C", 1)
         shp.field("AIRCRAFT", "C", 40)
         shp.field("REPORT", "C", 255)  # Max field size is 255
+        shp.field("ICING", "C", 255)  # Max field size is 255
+        shp.field("TURB", "C", 255)  # Max field size is 255
+        shp.field("ARTCC", "C", 3)
         shp.field("LAT", "F", 7, 4)
         shp.field("LON", "F", 9, 4)
         for row in cursor:

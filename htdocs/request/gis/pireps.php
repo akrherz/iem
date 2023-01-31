@@ -82,10 +82,10 @@ $content .= "
      ". yearSelect2(2003, date("Y"), "year1") ."
     </td>
     <td>
-     ". monthSelect2(0,"month1") ."
+     ". monthSelect2(1, "month1") ."
     </td>
     <td>
-     ". daySelect2(0, "day1") ."
+     ". daySelect2(1, "day1") ."
     </td>
     <td>
      ". gmtHourSelect(0, "hour1") ."
@@ -101,16 +101,16 @@ $content .= "
      ". yearSelect2(2003, date("Y"), "year2") ."
     </td>
     <td>
-     ". monthSelect2(0,"month2") ."
+     ". monthSelect2(date("m"), "month2") ."
     </td>
     <td>
-     ". daySelect2(0, "day2") ."
+     ". daySelect2(date("d"), "day2") ."
     </td>
     <td>
-     ". gmtHourSelect(0, "hour2") ."
+     ". gmtHourSelect(23, "hour2") ."
     </td>
     <td>
-     ". minuteSelect(0, "minute2") ."
+     ". minuteSelect(59, "minute2") ."
     </td>
   </tr>
 </table>";
@@ -125,8 +125,11 @@ Field 0: Type=C/String, Title='VALID', Timestamp in UTC
 Field 1: Type=C/String, Title='URGENT', Was this an urgent PIREP
 Field 2: Type=C/String, Title='AIRCRAFT', Reported Aircraft type
 Field 3: Type=C/String, Title='REPORT', The PIREP Report
-Field 4: Type=N/Double, Title='LAT', Latitude
-Field 5: Type=N/Double, Title='LON', Longitude 
+Field 4: Type=C/String, Title='ICING', The icing /IC portion of the PIREP
+Field 5: Type=C/String, Title='TURB', The turbulence /TB portion of the PIREP
+Field 6: Type=C/String, Title='ARTCC', The ARTCC identifier, when applicable.
+Field 7: Type=N/Double, Title='LAT', Latitude
+Field 8: Type=N/Double, Title='LON', Longitude 
 </pre>
 
 <h4>Archive notes:</h4>
@@ -145,6 +148,9 @@ Field 5: Type=N/Double, Title='LON', Longitude
  is complete and PIREPs from Canada are mostly missing.  Again, due to reasons
  above and the poor format of this data, this archive is not the greatest, but
  is certainly unique!</li>
+ <li><strong>30 January 2023:</strong> Added extraction of icing and turbulence
+ portions of the PIREP. Added the associated, when applicable, ARTCC
+ identifier for the location of the PIREP.</li>
  </ul>
 EOF;
 $t->content = $content;
