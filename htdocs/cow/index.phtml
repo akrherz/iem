@@ -14,9 +14,12 @@ $sday = get_int404("sday", 1);
 $shour = get_int404("shour", 12);
 $sts = new DateTime("{$syear}-{$smonth}-{$sday} {$shour}:00");
 
-$eyear = get_int404("eyear", date("Y"));
-$emonth = get_int404("emonth", date("m"));
-$eday = get_int404("eday", date("d"));
+$tomorrow = new DateTime('now', new DateTimeZone("UTC"));
+$tomorrow->add(new DateInterval("PT24H"));
+
+$eyear = get_int404("eyear", $tomorrow->format("Y"));
+$emonth = get_int404("emonth", $tomorrow->format("m"));
+$eday = get_int404("eday", $tomorrow->format("d"));
 $ehour = get_int404("ehour", 12);
 $ets = new DateTime("{$eyear}-{$emonth}-{$eday} {$ehour}:00");
 

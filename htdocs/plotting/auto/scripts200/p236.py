@@ -70,7 +70,7 @@ PDICT = {
 
 def get_description():
     """Return a dict describing how to call this plotter"""
-    desc = {"cache": 86400, "description": __doc__}
+    desc = {"cache": 86400, "description": __doc__, "data": True}
     today = date.today() + timedelta(days=1)
     t365 = today - timedelta(days=365)
 
