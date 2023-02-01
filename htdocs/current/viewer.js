@@ -125,7 +125,7 @@ function doRWISView(){
     let hit = false;
     while (i < 10){
         const url = currentCameraFeature.get(`imgurl${i}`);
-        if (url !== null){
+        if (url !== null && url !== undefined){
             if (!hit){
                 $("#rwismain").attr('src', url);
                 hit = true;
