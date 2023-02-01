@@ -58,7 +58,7 @@ function makeVectorLayer(dt, title, group) {
         source: new ol.source.Vector({
             format: new ol.format.GeoJSON(),
             projection: ol.proj.get('EPSG:3857'),
-            url: '/geojson/7am.py?group=' + group + '&dt=' + dt
+            url: `/geojson/7am.py?group=${group}&dt=${dt}`
         }),
         style: function (feature, resolution) {
             let txt = (feature.get(renderattr) == 0.0001) ? "T" : feature.get(renderattr);

@@ -12,27 +12,25 @@ PDICT = {
     "wcht": "Minimum Wind Chill",
     "heat": "Maximum Heat Index",
 }
-MDICT = dict(
-    [
-        ("all", "No Month/Time Limit"),
-        ("spring", "Spring (MAM)"),
-        ("fall", "Fall (SON)"),
-        ("winter", "Winter (DJF)"),
-        ("summer", "Summer (JJA)"),
-        ("jan", "January"),
-        ("feb", "February"),
-        ("mar", "March"),
-        ("apr", "April"),
-        ("may", "May"),
-        ("jun", "June"),
-        ("jul", "July"),
-        ("aug", "August"),
-        ("sep", "September"),
-        ("oct", "October"),
-        ("nov", "November"),
-        ("dec", "December"),
-    ]
-)
+MDICT = {
+    "all": "No Month/Time Limit",
+    "spring": "Spring (MAM)",
+    "fall": "Fall (SON)",
+    "winter": "Winter (DJF)",
+    "summer": "Summer (JJA)",
+    "jan": "January",
+    "feb": "February",
+    "mar": "March",
+    "apr": "April",
+    "may": "May",
+    "jun": "June",
+    "jul": "July",
+    "aug": "August",
+    "sep": "September",
+    "oct": "October",
+    "nov": "November",
+    "dec": "December",
+}
 
 
 def get_description():
@@ -136,7 +134,7 @@ def plotter(fdict):
     ys = np.array(ys)
 
     title = (
-        f"{ctx['_sname']} ({df.index[0]:.0f}-{df.index[-1]:.0f}\n"
+        f"{ctx['_sname']} ({df.index[0]:.0f}-{df.index[-1]:.0f})\n"
         f"Frequency of Observed {PDICT[ctx['var']]} over {MDICT[ctx['month']]}"
     )
     fig = figure(apctx=ctx, title=title)

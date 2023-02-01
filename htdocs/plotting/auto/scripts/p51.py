@@ -228,7 +228,7 @@ def plotter(fdict):
         ax3 = fig.add_axes([0.1, 0.11, 0.8, 0.75])
         ax1 = ax3
         title = "Precipitation"
-    elif whichplots == "sdd":
+    else:  # sdd
         ax4 = fig.add_axes([0.1, 0.1, 0.8, 0.8])
         ax1 = ax4
         title = "Stress Degree Days (base=86)"
@@ -266,7 +266,7 @@ def plotter(fdict):
                 color=color,
                 lw=2,
                 zorder=6,
-                label="%s" % (yearlabel,),
+                label=f"{yearlabel}",
             )
         p = x["osdd86"].cumsum()
         if whichplots in ["all", "sdd"]:
@@ -276,7 +276,7 @@ def plotter(fdict):
                 color=color,
                 lw=2,
                 zorder=6,
-                label="%s" % (yearlabel,),
+                label=f"{yearlabel}",
             )
 
         # Plot Climatology
@@ -350,15 +350,10 @@ def plotter(fdict):
         ax1.text(
             0.5,
             0.9,
-            "%s/%s - %s/%s\nClimatology %s %.0f-%.0f"
-            % (
-                sdate.month,
-                sdate.day,
-                edate.month,
-                edate.day,
-                climosite,
-                baseyear,
-                datetime.date.today().year,
+            (
+                f"{sdate.month}/{sdate.day} - {edate.month}/{edate.day}\n"
+                f"Climatology {climosite} {baseyear:.0f}-"
+                f"{datetime.date.today().year:.0f}"
             ),
             transform=ax1.transAxes,
             ha="center",
