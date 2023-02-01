@@ -55,7 +55,7 @@ def plotter(fdict):
     varname = ctx["var"]
     with get_sqlalchemy_conn("coop") as conn:
         df = pd.read_sql(
-            f"""
+            """
             SELECT year, month, sum(precip) as sum_precip,
             avg(high) as avg_high,
             avg(low) as avg_low,
@@ -65,7 +65,7 @@ def plotter(fdict):
             sum(hdd(high,low,65)) as hdd65,
             sum(case when precip > 0.009 then 1 else 0 end) as rain_days,
             sum(case when snow >= 0.1 then 1 else 0 end) as snow_days
-            from alldata_{station[:2]} WHERE station = %s GROUP by year, month
+            from alldata WHERE station = %s GROUP by year, month
         """,
             conn,
             params=(station,),
@@ -138,7 +138,7 @@ def plotter(fdict):
     ax.set_title(f"{PDICT[varname]} base=60" r"$^\circ$F")
     filtered = df[(df["year"] >= y1) & (df["year"] <= (y1 + 20))]
     df2 = filtered[["month", "year", varname + "60"]].pivot(
-        "year", "month", varname + "60"
+        index="year", columns="month", values=f"{varname}60"
     )
     sns.heatmap(df2, annot=True, fmt=".0f", linewidths=0.5, ax=ax)
 

@@ -4,7 +4,6 @@ let webcamGeoJsonLayer = null;
 let idotdashcamGeoJsonLayer = null;
 let idotRWISLayer = null;
 let sbwlayer = null;
-let selectControl = null;
 let ts = null;
 let aqlive = 0;
 let realtimeMode = true;
@@ -12,6 +11,7 @@ let currentCameraFeature = null;
 let cameraID = "ISUC-003";
 const ISOFMT = "Y-MM-DD[T]HH:mm:ss[Z]";
 var ol = window.ol || {};  // skipcq: JS-0239
+var moment = window.moment || {};  // skipcq: JS-0239
 
 const sbwLookup = {
     "TO": 'red',

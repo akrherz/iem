@@ -15,6 +15,7 @@ from pyiem.util import (
     get_dbconn,
     get_sqlalchemy_conn,
     utc,
+    LOG,
 )
 from pyiem.exceptions import NoDataFound
 
@@ -70,8 +71,8 @@ def get_text(product_id):
         if req.status_code == 200:
             text = req.content.decode("ascii", "ignore").replace("\001", "")
             text = "\n".join(text.replace("\r", "").split("\n")[5:])
-    except Exception:
-        pass
+    except Exception as exp:
+        LOG.debug(exp)
 
     return text
 
@@ -204,11 +205,11 @@ def plotter(fdict):
             **TEXTARGS,
         ).set_path_effects(PE)
         # Plot wind as text string
-        if not pd.isna(row["ws_sknt"]):
+        if pd.notna(row["ws_sknt"]):
             ax.text(
                 valid,
                 3.8 + (0.5 if row["v"] > 0 else 0.5),
-                "WS%g" % (row["ws_sknt"],),
+                f"WS{row['ws_sknt']:.0f}",
                 ha="center",
                 fontsize=TEXTARGS["fontsize"],
                 va="top" if row["v"] < 0 else "bottom",
@@ -320,7 +321,7 @@ def plotter(fdict):
     df = df.reset_index()
     for col in ["valid", "end_valid"]:
         # some rows could be NaN
-        df[col] = df[~pd.isna(df[col])][col].apply(
+        df[col] = df[pd.notna(df[col])][col].apply(
             lambda x: x.strftime("%Y-%m-%d %H:%M")
         )
     return fig, df.drop("next_valid", axis=1)
