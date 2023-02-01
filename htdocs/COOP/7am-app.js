@@ -10,6 +10,19 @@ function text(str){
     return $("<p>").text(str).html();
 }
 
+function parseHashlink(){
+    // Figure out what was set from the hash links
+    const tokens = window.location.href.split('#');
+    if (tokens.length < 2) return;
+    const subtokens = tokens[1].split("/");
+    if (subtokens.length > 1) {
+        renderattr = text(subtokens[1]);
+        $("#renderattr").val(renderattr);
+    }
+    const dt = $.datepicker.parseDate("yymmdd", text(subtokens[0]));
+    $("#datepicker").datepicker("setDate", dt);
+}
+
 function updateURL() {
     const tt = $.datepicker.formatDate("yymmdd",
         $("#datepicker").datepicker('getDate'));
@@ -97,6 +110,7 @@ function buildUI() {
 }
 $(document).ready(() => {
     buildUI();
+    parseHashlink();
 
     coopLayer = makeVectorLayer($.datepicker.formatDate("yy-mm-dd", new Date()),
         'NWS COOP Reports', 'coop');
