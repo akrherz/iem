@@ -57,7 +57,7 @@ def process_metars(metars):
         "-l",
     ]
     with Popen(cmd, stdout=PIPE, stdin=PIPE, stderr=PIPE) as proc:
-        _stdout, _stderr = proc.communicate(collective.encode("utf-8"))
+        proc.communicate(collective.encode("utf-8"))
 
 
 def main():

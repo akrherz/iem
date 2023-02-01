@@ -56,7 +56,7 @@ EOF;
 $t->jsextra = <<<EOM
 <script src='/vendor/jquery-datatables/1.10.20/datatables.min.js'></script>
 <script>
-$(document).ready(function(){
+$(document).ready(() => {
     $("#thetable table").DataTable();
 });
 </script>

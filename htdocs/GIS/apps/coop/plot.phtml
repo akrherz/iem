@@ -10,9 +10,9 @@ require_once "../../../../include/forms.php";
 require_once "../../../../include/network.php";
 
 $var = isset($_GET["var"]) ? xssafe($_GET["var"]) : "high";
-$year = isset($_GET["year"]) ? intval($_GET["year"]) : date("Y");
-$month = isset($_GET["month"]) ? intval($_GET["month"]) : date("m");
-$day = isset($_GET["day"]) ? intval($_GET["day"]) : date("d");
+$year = get_int404("year", date("Y"));
+$month = get_int404("month", date("m"));
+$day = get_int404("day", date("d"));
 $source = isset($_GET["source"]) ? xssafe($_GET["source"]) : "prelim";
 $size = isset($_GET["size"]) ? xssafe($_GET["size"]) : "1024x768";
 $showlabels = (isset($_GET["labels"]) && $_GET["labels"] == "on");
@@ -105,11 +105,17 @@ $map->setextent(
 );
 
 $states = $map->getLayerByName("states");
-$states->__set("status", MS_ON);
+$states->status = MS_ON;
 $states_c0 = $states->getClass(0);
 $states_c0_s0 = $states_c0->getStyle(0);
 $states_c0_s0->width = 1.5;
 $states_c0_s0->color->setRGB(210, 170, 130);
+
+$cwas = $map->getLayerByName("cwas");
+$cwas->status = MS_ON;
+$cwas_c0 = $cwas->getClass(0);
+$cwas_c0_s0 = $cwas_c0->getStyle(0);
+$cwas_c0_s0->outlinecolor->setRGB(255, 0, 0);
 
 $counties = $map->getLayerByName("uscounties");
 $counties->__set("status", MS_ON);
@@ -129,6 +135,7 @@ $cityname->__set("status", MS_ON);
 $img = $map->prepareImage();
 $counties->draw($map, $img);
 $states->draw($map, $img);
+$cwas->draw($map, $img);
 
 $dbvar = ($var == "ratio") ? "snow" : $var;
 $timingsql = "";

@@ -60,15 +60,15 @@ def run(year, fmt):
             index="wfo",
             columns=["phenomena", "significance"],
             values="url",
-            aggfunc=lambda x: " ".join(x),
+            aggfunc=" ".join,
         )
         .fillna("")
     )
 
-    cls = ' class="table-bordered table-condensed table-striped"'
-    html = ("<p><strong>Table generated at: %s</strong></p>\n%s") % (
-        res["generated_at"],
-        df.style.set_table_attributes(cls).render(),
+    cls = ["table-bordered", "table-condensed", "table-striped"]
+    html = (
+        f"<p><strong>Table generated at: {res['generated_at']}</strong></p>\n"
+        f"{df.to_html(classes=cls, escape=False)}"
     )
     return html
 
@@ -102,7 +102,7 @@ def application(environ, start_response):
     mc.close()
 
     if cb is not None:
-        res = "%s(%s)" % (html_escape(cb), res)
+        res = f"{html_escape(cb)}({res})"
 
     start_response("200 OK", headers)
     return [res.encode("ascii")]

@@ -7,7 +7,7 @@ from zoneinfo import ZoneInfo
 import pandas as pd
 from paste.request import parse_formvars
 from sqlalchemy import text
-from pyiem.util import get_sqlalchemy_conn
+from pyiem.util import get_sqlalchemy_conn, LOG
 
 EXL = "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"
 
@@ -41,8 +41,8 @@ def run(start_response, ctx):
             df[col] = (
                 df[col].dt.tz_localize(ctx["tz"]).dt.strftime("%Y-%m-%d %H:%M")
             )
-        except Exception:
-            pass
+        except Exception as exp:
+            LOG.debug(exp)
 
     bio = BytesIO()
     if ctx["fmt"] == "excel":

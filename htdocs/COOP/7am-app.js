@@ -122,6 +122,11 @@ $(document).ready(() => {
             source: new ol.source.XYZ({
                 url: '/c/tile.py/1.0.0/usstates/{z}/{x}/{y}.png'
             })
+        }), new ol.layer.Tile({
+            title: 'NWS CWA Boundaries',
+            source: new ol.source.XYZ({
+                url: '/c/tile.py/1.0.0/wfo-900913/{z}/{x}/{y}.png'
+            })
         }), coopLayer, azosLayer
         ],
         view: new ol.View({

@@ -1,18 +1,19 @@
-var map;
-var n0q;
-var webcamGeoJsonLayer;
-var idotdashcamGeoJsonLayer;
-var idotRWISLayer;
-var sbwlayer;
-var selectControl;
-var ts = null;
-var aqlive = 0;
-var realtimeMode = true;
-var currentCameraFeature;
-var cameraID = "ISUC-003";
-var ISOFMT = "Y-MM-DD[T]HH:mm:ss[Z]";
+let map = null;
+let n0q = null;
+let webcamGeoJsonLayer = null;
+let idotdashcamGeoJsonLayer = null;
+let idotRWISLayer = null;
+let sbwlayer = null;
+let ts = null;
+let aqlive = 0;
+let realtimeMode = true;
+let currentCameraFeature = null;
+let cameraID = "ISUC-003";
+const ISOFMT = "Y-MM-DD[T]HH:mm:ss[Z]";
+var ol = window.ol || {};  // skipcq: JS-0239
+var moment = window.moment || {};  // skipcq: JS-0239
 
-var sbwLookup = {
+const sbwLookup = {
     "TO": 'red',
     "MA": 'purple',
     "EW": 'green',
@@ -21,7 +22,7 @@ var sbwLookup = {
     "DS": "#FFE4C4"
 };
 
-var sbwStyle = [new ol.style.Style({
+const sbwStyle = [new ol.style.Style({
     stroke: new ol.style.Stroke({
         color: '#FFF',
         width: 4.5
@@ -34,41 +35,45 @@ var sbwStyle = [new ol.style.Style({
 })
 ];
 
-var cameraStyle = new ol.style.Style({
+const cameraStyle = new ol.style.Style({
     image: new ol.style.Icon({
         src: '/images/yellow_arrow.png'
     })
 });
-var trackaplowStyle = new ol.style.Style({
+const trackaplowStyle = new ol.style.Style({
     image: new ol.style.Icon({
         src: '/images/trackaplow.png',
         scale: 0.4
     })
 });
-var trackaplowStyle2 = new ol.style.Style({
+const trackaplowStyle2 = new ol.style.Style({
     image: new ol.style.Icon({
         src: '/images/trackaplow_red.png',
         scale: 0.6
     })
 });
-var rwisStyle = new ol.style.Style({
+const rwisStyle = new ol.style.Style({
     image: new ol.style.Icon({
         src: '/images/rwiscam.svg',
         scale: 0.6
     })
 });
-var cameraStyle2 = new ol.style.Style({
+const cameraStyle2 = new ol.style.Style({
     image: new ol.style.Icon({
         src: '/images/red_arrow.png',
         scale: 1.2
     })
 });
 
+function text(str) {
+    return $("<p>").text(str).html();
+}
+
 function liveShot() {
     if (aqlive) return;
     aqlive = true;
     ts = new Date();
-    $("#webcam_image").attr('src', "/current/live/" + currentCameraFeature.get("cid") + ".jpg?ts=" + ts.getTime());
+    $("#webcam_image").attr('src', `/current/live/${currentCameraFeature.get("cid")}.jpg?ts=${ts.getTime()}`);
     aqlive = false;
 }
 
@@ -77,14 +82,14 @@ function updateHashLink() {
     if (!currentCameraFeature){
         return;
     }
-    var extra = realtimeMode ? "" : "/" + $('#dtpicker').data('DateTimePicker').date().utc().format(ISOFMT);
-    window.location.href = '#' + currentCameraFeature.get("cid") + extra;
+    const extra = realtimeMode ? "" : `/${$('#dtpicker').data('DateTimePicker').date().utc().format(ISOFMT)}`;
+    window.location.href = `#${currentCameraFeature.get("cid")}${extra}`;
 }
 
 function findFeatureByCid(cid) {
     // Find the feature for the given camera id
-    var feature;
-    webcamGeoJsonLayer.getSource().forEachFeature(function (feat) {
+    let feature = null;
+    webcamGeoJsonLayer.getSource().forEachFeature((feat) => {
         if (feat.get('cid') == cid) {
             feature = feat;
         }
@@ -92,7 +97,7 @@ function findFeatureByCid(cid) {
     if (feature) {
         return feature;
     }
-    idotdashcamGeoJsonLayer.getSource().forEachFeature(function (feat) {
+    idotdashcamGeoJsonLayer.getSource().forEachFeature((feat) => {
         if (feat.get('cid') == cid) {
             feature = feat;
         }
@@ -100,7 +105,7 @@ function findFeatureByCid(cid) {
     if (feature) {
         return feature;
     }
-    idotRWISLayer.getSource().forEachFeature(function (feat) {
+    idotRWISLayer.getSource().forEachFeature((feat) => {
         if (feat.get('cid') == cid) {
             feature = feat;
         }
@@ -116,17 +121,17 @@ function doRWISView(){
     $("#singleimageview").css("display", "none");
     $("#rwisview").css("display", "block");
     $("#rwislist").empty();
-    var i = 0;
-    var hit = false;
+    let i = 0;
+    let hit = false;
     while (i < 10){
-        var url = currentCameraFeature.get('imgurl' + i);
-        if (url !== null){
+        const url = currentCameraFeature.get(`imgurl${i}`);
+        if (url !== null && url !== undefined){
             if (!hit){
                 $("#rwismain").attr('src', url);
                 hit = true;
                 continue;
             }
-            $("#rwislist").append('<div class="col-md-2"><img onclick="handleRWISClick(this);" src="' + url +'" class="img img-responsive"></div>');
+            $("#rwislist").append(`<div class="col-md-2"><img onclick="handleRWISClick(this);" src="${url}" class="img img-responsive"></div>`);
         }
         i += 1;
     }
@@ -140,7 +145,7 @@ function updateCamera() {
             return;
         }
     }
-    var cid = currentCameraFeature.get("cid");
+    const cid = currentCameraFeature.get("cid");
     if (cid.startsWith("IDOT-")){
         doRWISView();
         updateHashLink();
@@ -149,7 +154,7 @@ function updateCamera() {
         $("#singleimageview").css("display", "block");
         $("#rwisview").css("display", "none");
         $("#liveshot").css("display", "block");
-        var url = currentCameraFeature.get("url");
+        let url = currentCameraFeature.get("url");
         if (url === undefined) {
             $("#liveshot").css("display", "none");
             url = currentCameraFeature.get("imgurl");
@@ -157,19 +162,18 @@ function updateCamera() {
         if (url === undefined) {
             url = currentCameraFeature.get("imgurl0");
         }
-        var valid = currentCameraFeature.get("valid");
+        let valid = currentCameraFeature.get("valid");
         if (valid === undefined) {
             valid = currentCameraFeature.get("utc_valid");
         }
-        var name = currentCameraFeature.get("name");
+        let name = currentCameraFeature.get("name");
         if (name === undefined) {
             name = "Iowa DOT Dash Cam";
         }
         if (url !== undefined) {
             $("#webcam_image").attr('src', url);
             $("#webcam_title").html(
-                "[" + currentCameraFeature.get("cid") + "] " + name +
-                ' @ ' + moment(valid).format("D MMM YYYY h:mm A"));
+                `[${currentCameraFeature.get("cid")}] ${name} @ ${moment(valid).format("D MMM YYYY h:mm A")}`);
             updateHashLink();
             }
     }
@@ -183,11 +187,11 @@ function cronMinute() {
 }
 
 function getRADARSource() {
-    var dt = moment();
+    let dt = moment();
     if (!realtimeMode) dt = $('#dtpicker').data('DateTimePicker').date();
     dt.subtract(dt.minutes() % 5, 'minutes');
-    var prod = dt.year() < 2011 ? 'N0R' : 'N0Q';
-    $("#radar_title").html('US Base Reflectivity @ ' + dt.format("h:mm A"));
+    const prod = dt.year() < 2011 ? 'N0R' : 'N0Q';
+    $("#radar_title").html(`US Base Reflectivity @ ${dt.format("h:mm A")}`);
     return new ol.source.XYZ({
         url: `https://mesonet.agron.iastate.edu/cache/tile.py/1.0.0/ridge::USCOMP-${prod}-${dt.utc().format('YMMDDHHmm')}/{z}/{x}/{y}.png`
     });
@@ -199,13 +203,13 @@ function refreshRADAR() {
     }
 }
 function refreshJSON() {
-    var url = "/geojson/webcam.php?network=TV";
+    let url = "/geojson/webcam.php?network=TV";
     if (!realtimeMode) {
         // Append the current timestamp to the URI
         url += "&ts=" + $('#dtpicker').data('DateTimePicker').date().utc().format(ISOFMT);
     }
-    var newsource = new ol.source.Vector({
-        url: url,
+    let newsource = new ol.source.Vector({
+        url,
         format: new ol.format.GeoJSON()
     });
     newsource.on('change', function () {
@@ -220,7 +224,7 @@ function refreshJSON() {
         url += "?valid=" + $('#dtpicker').data('DateTimePicker').date().utc().format(ISOFMT);
     }
     newsource = new ol.source.Vector({
-        url: url,
+        url,
         format: new ol.format.GeoJSON()
     });
     newsource.on('change', function () {
@@ -235,47 +239,46 @@ function refreshJSON() {
         url += "?valid=" + $('#dtpicker').data('DateTimePicker').date().utc().format(ISOFMT);
     }
     newsource = new ol.source.Vector({
-        url: url,
+        url,
         format: new ol.format.GeoJSON()
     });
     newsource.on('change', function () {
         updateCamera();
     });
     idotRWISLayer.setSource(newsource);
-    
 
-    var url = "/geojson/sbw.geojson";
+    url = "/geojson/sbw.geojson";
     if (!realtimeMode) {
         // Append the current timestamp to the URI
         url += "?ts=" + $('#dtpicker').data('DateTimePicker').date().utc().format(ISOFMT);
     }
     sbwlayer.setSource(new ol.source.Vector({
-        url: url,
+        url,
         format: new ol.format.GeoJSON()
     }));
 }
 
 // Set the current camera by cid
 function setCamera(cid) {
-    var feature = findFeatureByCid(cid);
+    const feature = findFeatureByCid(cid);
     if (feature) {
         currentCameraFeature = feature;
     }
-    $("#c" + cid).prop('checked', true);
+    $(`#c${cid}`).prop('checked', true);
     updateHashLink();
     updateCamera();
 }
 
 function parseURI() {
-    var tokens = window.location.href.split('#');
+    const tokens = window.location.href.split('#');
     if (tokens.length == 2) {
-        var tokens2 = tokens[1].split("/");
+        const tokens2 = tokens[1].split("/");
         if (tokens2.length == 1) {
-            cameraID = tokens[1];
+            cameraID = text(tokens[1]);
         } else {
-            cameraID = tokens2[0];
+            cameraID = text(tokens2[0]);
             $('#toggle_event_mode button').eq(1).click();
-            $('#dtpicker').data('DateTimePicker').date(moment(tokens2[1]));
+            $('#dtpicker').data('DateTimePicker').date(moment(text(tokens2[1])));
         }
     }
 }
@@ -283,7 +286,7 @@ function parseURI() {
 function buildUI() {
 
     // Thanks to http://jsfiddle.net/hmgyu371/
-    $('#toggle_event_mode button').click(function () {
+    $('#toggle_event_mode button').click(function () { // this
         if ($(this).hasClass('locked_active') || $(this).hasClass('unlocked_inactive')) {
             // Enable Archive
             realtimeMode = false;
@@ -307,7 +310,7 @@ function buildUI() {
             date: "fa fa-calendar"
         }
     });
-    $('#dtpicker').on('dp.change', function () {
+    $('#dtpicker').on('dp.change', () => {
         if (!realtimeMode) {
             refreshJSON();
             refreshRADAR();
@@ -315,7 +318,7 @@ function buildUI() {
     });
 }
 
-$().ready(function () {
+$().ready(() => {
     buildUI();
 
     sbwlayer = new ol.layer.Vector({
@@ -324,8 +327,8 @@ $().ready(function () {
             url: "/geojson/sbw.geojson",
             format: new ol.format.GeoJSON()
         }),
-        style: function (feature, resolution) {
-            var color = sbwLookup[feature.get('phenomena')];
+        style: (feature, _resolution) => {
+            const color = sbwLookup[feature.get('phenomena')];
             if (color === undefined) return;
             sbwStyle[1].getStroke().setColor(color);
             return sbwStyle;
@@ -333,7 +336,7 @@ $().ready(function () {
     });
     idotdashcamGeoJsonLayer = new ol.layer.Vector({
         title: 'Iowa DOT Truck Dashcams (2014-)',
-        style: function (feature, resolution) {
+        style: (feature, _resolution) => {
             if (currentCameraFeature &&
                 currentCameraFeature.get("cid") == feature.get("cid")) {
                 currentCameraFeature = feature;
@@ -355,17 +358,17 @@ $().ready(function () {
     });
     webcamGeoJsonLayer = new ol.layer.Vector({
         title: 'Webcams (2003-)',
-        style: function (feature, resolution) {
+        style: (feature, _resolution) => {
             if (currentCameraFeature &&
                 currentCameraFeature.get("cid") == feature.get("cid")) {
                 currentCameraFeature = feature;
                 // OL rotation is in radians!
                 cameraStyle2.getImage().setRotation(
-                    parseInt(feature.get('angle')) / 180. * 3.14);
+                    parseInt(feature.get('angle')) / 180. * 3.14, 10);
                 return [cameraStyle2];
             }
             cameraStyle.getImage().setRotation(
-                parseInt(feature.get('angle')) / 180. * 3.14);
+                parseInt(feature.get('angle')) / 180. * 3.14, 10);
             return [cameraStyle];
         }
     });
@@ -392,11 +395,11 @@ $().ready(function () {
             zoom: 6
         })
     });
-    var layerSwitcher = new ol.control.LayerSwitcher();
+    const layerSwitcher = new ol.control.LayerSwitcher();
     map.addControl(layerSwitcher);
 
-    map.on('click', function (evt) {
-        var feature = map.forEachFeatureAtPixel(evt.pixel,
+    map.on('click', (evt) => {
+        const feature = map.forEachFeatureAtPixel(evt.pixel,
             function (feature2, _layer) {
                 return feature2;
             }
@@ -413,7 +416,7 @@ $().ready(function () {
         // Set new styling
         if (feature.get("angle") !== undefined) {
             cameraStyle2.getImage().setRotation(
-                parseInt(feature.get('angle')) / 180. * 3.14);
+                parseInt(feature.get('angle')) / 180. * 3.14, 10);
             feature.setStyle(cameraStyle2);
         }
         updateCamera();
