@@ -319,6 +319,7 @@ some convective outlook or the number of outlooks for a given point.</li>
 <ul>
 <li><a href="/request/gis/wpc_mpd.phtml">
 <i class="fa fa-download"></i> WPC Precipitation Discussion Shapefile Download</a></li>
+<li><a href="/nws/wpc_national_hilo/">WPC National High Low Listing</a></li>
 <li><a href="/request/gis/spc_outlooks.phtml">
  <i class="fa fa-download"></i> WPC Outlook Shapefile Download</a></li>
  </div>
