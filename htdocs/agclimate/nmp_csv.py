@@ -93,7 +93,7 @@ def do_soil_moisture(row):
         if pd.isna([t, sv_t, vwc, sv_vwc]).all():
             continue
         depth_mm = convert_value(depth, "inch", "meter")
-        for (_t, _v) in [[t, vwc], [sv_t, sv_vwc]]:
+        for _t, _v in [[t, vwc], [sv_t, sv_vwc]]:
             if pd.isna([_t, _v]).all():
                 continue
             depths.append(f"{depth_mm:.3f}")

@@ -1,4 +1,8 @@
-"""Streaks from CLI sites"""
+"""This plot presents the current streak of days with
+    a high or low temperature above or at-below the daily average temperature.
+    You can also plot the number of days since last measurable precipitation
+    event (trace events are counted as dry).
+    This plot is based off of NWS CLI sites."""
 import datetime
 
 import pandas as pd
@@ -23,16 +27,9 @@ SECTORS.update(SECTORS_NAME)
 
 def get_description():
     """Return a dict describing how to call this plotter"""
-    desc = {}
+    desc = {"description": __doc__}
     desc["data"] = True
     desc["cache"] = 3600
-    desc[
-        "description"
-    ] = """This plot presents the current streak of days with
-    a high or low temperature above or at/below the daily average temperature.
-    You can also plot the number of days since last measurable precipitation
-    event (trace events are counted as dry).
-    This plot is based off of NWS CLI sites."""
     desc["arguments"] = [
         dict(
             type="select",

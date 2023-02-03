@@ -1,4 +1,8 @@
-"""Percentile Rank for station's data."""
+"""This chart presents the rank a station's yearly
+    summary value has against an unweighted population of available
+    observations in the state.  The green line is a simple average of the
+    plot.
+"""
 
 import pandas as pd
 from pyiem.util import get_autoplot_context, get_sqlalchemy_conn
@@ -15,14 +19,7 @@ PDICT = {
 
 def get_description():
     """Return a dict describing how to call this plotter"""
-    desc = {}
-    desc["data"] = True
-    desc[
-        "description"
-    ] = """This chart presents the rank a station's yearly
-    summary value has against an unweighted population of available
-    observations in the state.  The green line is a simple average of the
-    plot."""
+    desc = {"data": True, "description": __doc__}
     desc["arguments"] = [
         dict(
             type="station",
@@ -55,8 +52,7 @@ def plotter(fdict):
             select station, year, sum(precip) as precip,
             avg(high) as high, avg(low) as low,
             avg((high+low)/2.) as temp, count(*) from alldata_{station[:2]}
-            WHERE year >= 1893 and substr(station, 3, 1) != 'C' and
-            substr(station, 3, 4) != '0000' GROUP by station, year
+            WHERE year >= 1893 GROUP by station, year
         ), counts as (
             select year, max(count) as maxcnt from data GROUP by year
         ), quorum as (

@@ -160,7 +160,7 @@ def plotter(fdict):
     x = []
     x2 = []
     labels = []
-    for (minv, maxv) in ranges:
+    for minv, maxv in ranges:
         labels.append(f"{minv:.0f} to {maxv:.0f}")
         # How many departure cells in this range
         hits = np.logical_and(departure < maxv, departure > minv)

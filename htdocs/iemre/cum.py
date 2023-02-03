@@ -32,7 +32,6 @@ def application(environ, start_response):
     offset1 = iemre.daily_offset(ts1)
 
     with ncopen(iemre.get_daily_ncname(ts0.year)) as nc:
-
         # 2-D precipitation, inches
         precip = np.sum(
             nc.variables["p01d"][offset0:offset1, :, :] / 25.4, axis=0

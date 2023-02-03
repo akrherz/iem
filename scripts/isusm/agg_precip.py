@@ -26,7 +26,7 @@ def main():
     LOG.info("Found %s rows needing aggregation", cursor.rowcount)
     if cursor.rowcount == 0:
         return
-    for (station, iemid, date) in cursor:
+    for station, iemid, date in cursor:
         LOG.info("Processing %s %s", station, date)
         # NB so careful here, we have to total over a CST date :(
         sts = datetime(date.year, date.month, date.day, 1, tzinfo=CST)

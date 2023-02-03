@@ -1,4 +1,20 @@
-"""Top 10"""
+"""Based on available hourly observation reports
+    by METAR stations, this application presents the top 10 events for a
+    given metric of your choice.  Please note that this application often
+    reveals bad data stored within the database.  Please do contact us when
+    you see suspicious reports and we'll clean up the database.</p>
+
+    <p>You can optionally generate this plot for an explicit period of days,
+    the year is ignored with only the month and day portion used.  If you set
+    the start date to a date later than the end date, then the effect is to
+    consider the date period crossing 1 January.</p>
+
+    <p>If you pick the same start and end date, you effectively get the
+    extremes for that date.</p>
+
+    <p>The CSV/Excel download option for this autoplot will return 100
+    unfiltered events for further usage as you see fit.</p>
+"""
 import datetime
 
 import pandas as pd
@@ -70,28 +86,9 @@ UNITS = {
 
 def get_description():
     """Return a dict describing how to call this plotter"""
-    desc = {}
+    desc = {"description": __doc__}
     desc["data"] = True
     desc["cache"] = 86400
-    desc[
-        "description"
-    ] = """Based on available hourly observation reports
-    by METAR stations, this application presents the top 10 events for a
-    given metric of your choice.  Please note that this application often
-    reveals bad data stored within the database.  Please do contact us when
-    you see suspicious reports and we'll clean up the database.</p>
-
-    <p>You can optionally generate this plot for an explicit period of days,
-    the year is ignored with only the month and day portion used.  If you set
-    the start date to a date later than the end date, then the effect is to
-    consider the date period crossing 1 January.</p>
-
-    <p>If you pick the same start and end date, you effectively get the
-    extremes for that date.</p>
-
-    <p>The CSV/Excel download option for this autoplot will return 100
-    unfiltered events for further usage as you see fit.</p>
-    """
     desc["arguments"] = [
         dict(
             type="zstation",
@@ -303,7 +300,7 @@ def plotter(fdict):
         f"({ab.year}-{datetime.datetime.now().year})"
     )
     fig = figure(title=title, subtitle=subtitle, apctx=ctx)
-    ax = fig.add_axes([0.15, 0.1, 0.65, 0.8])
+    ax = fig.add_axes([0.1, 0.1, 0.65, 0.8])
     ax.barh(
         range(len(y), 0, -1),
         y,

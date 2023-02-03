@@ -74,7 +74,6 @@ def application(environ, start_response):
 
     with ncopen(fn) as nc:
         with ncopen(iemre.get_dailyc_ncname()) as cnc:
-
             res["data"].append(
                 {
                     "prism_precip_in": myrounder(prism_precip, 2),

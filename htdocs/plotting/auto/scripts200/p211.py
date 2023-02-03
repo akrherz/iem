@@ -1,4 +1,9 @@
-"""Plot 1 minute ASOS data."""
+"""This application generates charts of 1 minute interval ASOS data,
+    where available.  It presently lists all ASOS sites without limiting them
+    to which the IEM has data for, sorry.  You can only select up to 5 days
+    worth of data at this time.  Any reported 1 minute precipitation value
+    over 0.50 inches is omitted as bad data.
+"""
 from datetime import timezone, timedelta
 
 import pytz
@@ -21,16 +26,8 @@ PDICT = {
 
 def get_description():
     """Return a dict describing how to call this plotter"""
-    desc = {}
-    desc["data"] = True
-    desc[
-        "description"
-    ] = """This application generates charts of 1 minute interval ASOS data,
-    where available.  It presently lists all ASOS sites without limiting them
-    to which the IEM has data for, sorry.  You can only select up to 5 days
-    worth of data at this time.  Any reported 1 minute precipitation value
-    over 0.50 inches is omitted as bad data."""
-    sts = utc() - timedelta(days=2)
+    desc = {"data": True, "description": __doc__}
+    sts = utc() - timedelta(days=5)
     desc["arguments"] = [
         dict(
             type="select",

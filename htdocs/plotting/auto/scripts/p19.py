@@ -173,7 +173,7 @@ def plotter(fdict):
     fig.text(xpos - 0.01, ypos - 0.01, "Percentile   Value")
     ypos -= 0.01
     monofont = FontProperties(family="monospace")
-    for (q, val) in ranks.items():
+    for q, val in ranks.items():
         if 0.02 < q < 0.98 and (q * 100.0 % 10) != 0:
             continue
         if q > 0.1 and int(q * 100) in [20, 90]:

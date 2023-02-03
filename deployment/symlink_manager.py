@@ -87,7 +87,7 @@ def main():
         target = f"/mnt/mtarchive4/ARCHIVE/data/{year}"
         workflow(link, target)
 
-    for (link, target) in PAIRS:
+    for link, target in PAIRS:
         workflow(link, target)
 
 

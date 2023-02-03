@@ -57,16 +57,19 @@ delay to the availability of this data from
 runs on the 15th each month and downloads data for the previous 3rd, 6th, and 12th month
 to the current date.</p>
 
-<form method="GET" name="st">
-        <table class="table table-bordered">
-        <tr><th>Select Station:</th><th>Select Date</th></tr>
-        <tr><td>{$sselect}</td><td>{$yselect} {$mselect} {$dselect}</td></tr>
-        <tr><td colspan="2"><input type="submit"></td></tr>
-        </table>
-        </form>
+<p><strong>Updated 3 Feb 2023:</strong> As it stands currently, I can not find
+this datasource available from NCEI.  So there's no data in this archive since
+~Feb 2021.</p>
 
-        
-        {$table}
-        
+<form method="GET" name="st">
+<table class="table table-bordered">
+<tr><th>Select Station:</th><th>Select Date</th></tr>
+<tr><td>{$sselect}</td><td>{$yselect} {$mselect} {$dselect}</td></tr>
+<tr><td colspan="2"><input type="submit"></td></tr>
+</table>
+</form>
+
+{$table}
+
 EOF;
 $t->render('single.phtml');
