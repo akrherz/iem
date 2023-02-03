@@ -1,4 +1,5 @@
-"""SPS Event Plotting Engine, not used from UI."""
+"""This plot is not meant for interactive use, but a backend for
+    SPS plots."""
 
 # third party
 import pytz
@@ -21,15 +22,8 @@ WFOCONV = {"JSJ": "SJU"}
 
 def get_description():
     """Return a dict describing how to call this plotter"""
-    desc = {}
+    desc = {"description": __doc__, "data": True, "cache": 3600}
     desc["defaults"] = {"_r": "t"}
-    desc["cache"] = 3600
-    desc["data"] = True
-    desc[
-        "description"
-    ] = """This plot is not meant for interactive use, but a backend for
-    SPS plots.
-    """
     desc["arguments"] = [
         dict(
             type="text",
@@ -131,7 +125,7 @@ def plotter(fdict):
             f"till {expire.strftime(TFORMAT)}"
         ),
         subtitle=(f"Estimated {popyear} Population{stextra}: {population:,}"),
-        sector="custom",
+        sector="spherical_mercator",
         west=bounds[0] - 0.02,
         south=bounds[1] - 0.3,
         east=bounds[2] + (bounds[2] - bounds[0]) + 0.02,

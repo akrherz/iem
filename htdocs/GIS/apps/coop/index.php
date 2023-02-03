@@ -20,8 +20,8 @@ $cities = $nt->table;
 
 $plot = isset($_GET["plot"]) ? xssafe($_GET["plot"]) : "high";
 $area = isset($_GET["area"]) ? xssafe($_GET["area"]) : "all";
-$month = isset($_GET["month"]) ? intval($_GET["month"]) : date("m");
-$day = isset($_GET["day"]) ? intval($_GET["day"]) : date("d");
+$month = get_int404("month", date("m"));
+$day = get_int404("day", date("d"));
 
 $height = 350;
 $width = 350;
@@ -43,7 +43,9 @@ $ex = array(
     "sw" => array($lx,           $ly,           $ux - ($dx / 2), $uy - ($dy / 2)),
     "nw" => array($lx,           $ly + ($dy / 2), $ux - ($dx / 2), $uy)
 );
-
+if (!array_key_exists($area, $ex)){
+    xssafe("<script>");
+}
 
 $map->setextent($ex[$area][0], $ex[$area][1], $ex[$area][2], $ex[$area][3]);
 
@@ -71,23 +73,9 @@ $datalc0->getLabel(0)->color->setrgb(255, 255, 0);
 $datalc0->getLabel(0)->__set("font", "liberation");
 $datalc0->getLabel(0)->__set("size", 12);
 $datalc0->getLabel(0)->__set("force", MS_TRUE);
-$datalc0->getLabel(0)->__set("partials", MS_TRUE);
-//$datalc0->getLabel(0)->__set("antialias", MS_TRUE);
+$datalc0->getLabel(0)->__set("partials", MS_FALSE);
 $datalc0->getLabel(0)->__set("position", MS_UR);
 $datalc0->getLabel(0)->__set("angle", 0);
-$datalc0->getLabel(0)->__set("wrap", 0x57);
-
-$datalc0s0 = new styleObj($datalc0);
-$datalc0s0->color->setrgb(0, 0, 0);
-$datalc0s0->__set("symbolname", "circle");
-$datalc0s0->__set("size", 3);
-
-$datalc1 = new classObj($datal, $datalc0);
-$datalc1->setExpression("([yrs] < 80)");
-$datalc1s0 = new styleObj($datalc1);
-$datalc1s0->color->setrgb(255, 0, 0);
-$datalc1s0->__set("symbolname", "circle");
-$datalc1s0->__set("size", 3);
 
 $img = $map->prepareImage();
 
@@ -112,8 +100,11 @@ $var = array(
     "min_high" => "Record Min High Temp [F]",
     "high" => "Average High Temp [F]"
 );
+if (!array_key_exists($plot, $var)){
+    xssafe("<script>");
+}
 
-$dbdate = "2000-" . $month . "-" . $day;
+$dbdate = new DateTime("2000-{$month}-{$day}");
 
 if (strcmp($area, 'all') != 0) {
 
@@ -140,17 +131,20 @@ if (strcmp($area, 'all') != 0) {
     );
 }
 
-$sql = "SELECT station, years as yrs, " . $dbarray[$plot] . " as d 
-    from climate WHERE valid = '" . $dbdate . "'
-    and substr(station,1,2) = 'IA'";
+$sql = "SELECT station, " . $dbarray[$plot] . " as d
+    from climate WHERE valid = '{$dbdate->format('Y-m-d')}'
+    and substr(station,1,2) = 'IA' and substr(station, 3, 1) not in ('T', 'C')
+    and substr(station, 3, 4) != '0000' ";
 
 $rs = pg_query($coopdb, $sql);
-for ($i = 0; $row = pg_fetch_array($rs); $i++) {
-    $station = $row["station"];
-    if (!array_key_exists($station, $cities)) continue;
-    $pt = new pointObj();
-    $pt->setXY($cities[$station]['lon'], $cities[$station]['lat'], 0);
-    $pt->draw($map, $datal, $img, 0, $row["d"]);
+if ($rs !== FALSE) {
+    for ($i = 0; $row = pg_fetch_array($rs); $i++) {
+        $station = $row["station"];
+        if (!array_key_exists($station, $cities)) continue;
+        $pt = new pointObj();
+        $pt->setXY($cities[$station]['lon'], $cities[$station]['lat'], 0);
+        $pt->draw($map, $datal, $img, 0, $row["d"]);
+    }
 }
 
 $namer->draw($map, $img);

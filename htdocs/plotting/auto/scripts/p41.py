@@ -1,50 +1,4 @@
-"""Q/Q Plot"""
-
-import numpy as np
-import pandas as pd
-from scipy import stats
-from matplotlib.font_manager import FontProperties
-from pyiem.plot import figure
-from pyiem.plot.use_agg import plt
-from pyiem.util import get_autoplot_context, get_sqlalchemy_conn
-from pyiem.exceptions import NoDataFound
-
-ODICT = {"max": "Maximum", "min": "Minimum", "avg": "Average"}
-PDICT = {
-    "high": "Daily High Temperature",
-    "low": "Daily Low Temperature",
-    "avg": "Daily Average Temperature",
-}
-MDICT = dict(
-    [
-        ("all", "All Year"),
-        ("spring", "Spring (MAM)"),
-        ("fall", "Fall (SON)"),
-        ("winter", "Winter (DJF)"),
-        ("summer", "Summer (JJA)"),
-        ("1", "January"),
-        ("2", "February"),
-        ("3", "March"),
-        ("4", "April"),
-        ("5", "May"),
-        ("6", "June"),
-        ("7", "July"),
-        ("8", "August"),
-        ("9", "September"),
-        ("10", "October"),
-        ("11", "November"),
-        ("12", "December"),
-    ]
-)
-
-
-def get_description():
-    """Return a dict describing how to call this plotter"""
-    desc = {}
-    desc["data"] = True
-    desc[
-        "description"
-    ] = """This plot compares the distribution of daily
+"""This plot compares the distribution of daily
     temperatures for two months or periods for a single station of your choice.
     The left hand plot depicts a quantile - quantile plot, which simply plots
     the montly percentile values against each other.  You could think of this
@@ -65,7 +19,47 @@ def get_description():
     </ul>
     <br />Clever combinations of the above allow for assessment of strength
     and duration of stretches of hot or cold weather.
-    """
+"""
+
+import numpy as np
+import pandas as pd
+from scipy import stats
+from matplotlib.font_manager import FontProperties
+from pyiem.plot import figure
+from pyiem.plot.use_agg import plt
+from pyiem.util import get_autoplot_context, get_sqlalchemy_conn
+from pyiem.exceptions import NoDataFound
+
+ODICT = {"max": "Maximum", "min": "Minimum", "avg": "Average"}
+PDICT = {
+    "high": "Daily High Temperature",
+    "low": "Daily Low Temperature",
+    "avg": "Daily Average Temperature",
+}
+MDICT = {
+    "year": "Calendar Year",
+    "spring": "Spring (MAM)",
+    "fall": "Fall (SON)",
+    "winter": "Winter (DJF)",
+    "summer": "Summer (JJA)",
+    "1": "January",
+    "2": "February",
+    "3": "March",
+    "4": "April",
+    "5": "May",
+    "6": "June",
+    "7": "July",
+    "8": "August",
+    "9": "September",
+    "10": "October",
+    "11": "November",
+    "12": "December",
+}
+
+
+def get_description():
+    """Return a dict describing how to call this plotter"""
+    desc = {"data": True, "description": __doc__}
     desc["arguments"] = [
         dict(
             type="station",
@@ -146,7 +140,7 @@ def get_data(station, month, period, varname, days, opt):
         doffset = "31 days"
     elif month == "spring":
         mlimiter = " and month in (3, 4, 5) "
-    elif month == "summer":
+    else:  # summer
         mlimiter = " and month in (6, 7, 8) "
 
     ylimiter = ""
@@ -222,8 +216,8 @@ def plotter(fdict):
     pc2 = np.percentile(m2data, range(0, 101, 1))
     df = pd.DataFrame(
         {
-            "%s_%s_%s_%s" % (MDICT[month1], varname, y1, y2): pd.Series(pc1),
-            "%s_%s_%s_%s" % (MDICT[month2], varname, y3, y4): pd.Series(pc2),
+            f"{MDICT[month1]}_{varname}_{y1}_{y2}": pd.Series(pc1),
+            f"{MDICT[month2]}_{varname}_{y3}_{y4}": pd.Series(pc2),
             "quantile": pd.Series(range(0, 101, 5)),
         }
     )
@@ -238,7 +232,7 @@ def plotter(fdict):
         lw=3,
         color="r",
         zorder=2,
-        label=r"Fit R$^2$=%.2f" % (s_r**2,),
+        label=r"Fit R$^2$=" f"{s_r**2:.2f}",
     )
     ax.axvline(highlight, zorder=1, color="k")
     y = highlight * s_slp + s_int
@@ -246,30 +240,30 @@ def plotter(fdict):
     ax.text(
         pc1[0],
         y,
-        r"%.0f $^\circ$F" % (y,),
+        f"{y:.0f}" r" $^\circ$F",
         va="center",
         bbox=dict(color="white"),
     )
     ax.text(
         highlight,
         pc2[0],
-        r"%.0f $^\circ$F" % (highlight,),
+        f"{highlight:.0f}" r" $^\circ$F",
         ha="center",
         rotation=90,
         bbox=dict(color="white"),
     )
     t2 = PDICT[varname]
     if days > 1:
-        t2 = "%s %s over %s days" % (ODICT[opt], PDICT[varname], days)
+        t2 = f"{ODICT[opt]} {PDICT[varname]} over {days} days"
     fig.suptitle(
         f"{ctx['_sname']}\n"
         f"{MDICT[month2]} ({y1}-{y2}) vs {MDICT[month1]} ({y3}-{y4})\n{t2}"
     )
     ax.set_xlabel(
-        r"%s (%s-%s) %s $^\circ$F" % (MDICT[month1], y1, y2, PDICT[varname])
+        f"{MDICT[month1]} ({y1}-{y2}) {PDICT[varname]}" r" $^\circ$F"
     )
     ax.set_ylabel(
-        r"%s (%s-%s) %s $^\circ$F" % (MDICT[month2], y3, y4, PDICT[varname])
+        f"{MDICT[month2]} ({y3}-{y4}) {PDICT[varname]}" r" $^\circ$F"
     )
     ax.text(
         0.5,
@@ -309,23 +303,25 @@ def plotter(fdict):
     ax.legend(
         (pr0, pr1),
         (
-            r"%s (%s-%s), $\mu$=%.1f"
-            % (MDICT[month1], y1, y2, np.mean(m1data)),
-            r"%s (%s-%s), $\mu$=%.1f"
-            % (MDICT[month2], y3, y4, np.mean(m2data)),
+            f"{MDICT[month1]} ({y1}-{y2}),"
+            r" $\mu$"
+            f"={np.mean(m1data):.1f}",
+            f"{MDICT[month2]} ({y3}-{y4}),"
+            r" $\mu$"
+            f"={np.mean(m2data):.1f}",
         ),
         ncol=1,
         loc=(0.1, -0.2),
     )
-    ax.set_ylabel(r"%s $^\circ$F" % (PDICT[varname],))
+    ax.set_ylabel(f"{PDICT[varname]}" r" $^\circ$F")
     ax.grid()
 
     # Third
     monofont = FontProperties(family="monospace")
     y = 0.86
     x = 0.83
-    col1 = "%s_%s_%s_%s" % (MDICT[month1], varname, y1, y2)
-    col2 = "%s_%s_%s_%s" % (MDICT[month2], varname, y3, y4)
+    col1 = f"{MDICT[month1]}_{varname}_{y1}_{y2}"
+    col2 = f"{MDICT[month2]}_{varname}_{y3}_{y4}"
     fig.text(x, y + 0.04, "Percentile Data    Diff")
     for percentile in [
         100,
@@ -348,25 +344,25 @@ def plotter(fdict):
         1,
     ]:
         row = df.loc[percentile]
-        fig.text(x, y, "%3i" % (percentile,), fontproperties=monofont)
+        fig.text(x, y, f"{percentile:3.0f}", fontproperties=monofont)
         fig.text(
             x + 0.025,
             y,
-            "%5.1f" % (row[col1],),
+            f"{row[col1]:5.1f}",
             fontproperties=monofont,
             color="r",
         )
         fig.text(
             x + 0.07,
             y,
-            "%5.1f" % (row[col2],),
+            f"{row[col2]:5.1f}",
             fontproperties=monofont,
             color="b",
         )
         fig.text(
             x + 0.11,
             y,
-            "%5.1f" % (row[col2] - row[col1],),
+            f"{(row[col2] - row[col1]):5.1f}",
             fontproperties=monofont,
         )
         y -= 0.04
@@ -375,7 +371,7 @@ def plotter(fdict):
 
 
 if __name__ == "__main__":
-    _fig, _df = plotter(
+    plotter(
         dict(
             station="IA7708",
             network="IACLIMATE",
@@ -387,4 +383,3 @@ if __name__ == "__main__":
             opt="max",
         )
     )
-    _fig.savefig("/tmp/bah.png")
