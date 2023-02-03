@@ -1,4 +1,8 @@
-"""Combined frequencies."""
+"""The IEM computes daily summaries of ASOS station
+    data based on available station summaries and computed summaries based
+    on available hourly data.  This chart presents the frequency combination
+    of one or more variables.  Please let us know if you want additional
+    fields added to this tool."""
 import calendar
 import itertools
 
@@ -10,15 +14,8 @@ from pyiem.exceptions import NoDataFound
 
 def get_description():
     """Return a dict describing how to call this plotter"""
-    desc = {}
+    desc = {"description": __doc__}
     desc["data"] = True
-    desc[
-        "description"
-    ] = """The IEM computes daily summaries of ASOS station
-    data based on available station summaries and computed summaries based
-    on available hourly data.  This chart presents the frequency combination
-    of one or more variables.  Please let us know if you want additional
-    fields added to this tool."""
     desc["arguments"] = [
         dict(
             type="zstation",

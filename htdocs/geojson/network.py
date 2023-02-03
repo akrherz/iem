@@ -15,7 +15,6 @@ def run(network, only_online):
 
     # One off special
     if network in ["ASOS1MIN", "TAF"]:
-
         cursor.execute(
             "SELECT ST_asGeoJson(geom, 4) as geojson, t.* "
             "from stations t JOIN station_attributes a "

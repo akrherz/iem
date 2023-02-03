@@ -253,7 +253,9 @@ def common_df_logic(filename, maxts, nwsli, tablename):
         errors="ignore",
     )
     if "ws_mps_s_wvt" in df.columns:
-        df = df.assign(ws_mph=lambda df_: df_["ws_mps_s_wvt"] * 2.23694,).drop(
+        df = df.assign(
+            ws_mph=lambda df_: df_["ws_mps_s_wvt"] * 2.23694,
+        ).drop(
             columns=["ws_mps_s_wvt"],
         )
 

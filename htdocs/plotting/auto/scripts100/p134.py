@@ -1,4 +1,15 @@
-"""Extreme period each year"""
+"""This plot displays the period of consecutive days
+    each year with the extreme criterion meet. In the case of a tie, the
+    first period of the season is used for the analysis.  For a season to
+    count within the analysis, it must have had at least 200 days with data.
+
+    <p>The dew point option only works for ASOS networks and does a simple
+    arthimetic mean of dew point temperatures.
+
+<p>Note that the coldest and warmest feels like temperature values are
+averages of the daily minimum or maximum values, not an average of an
+average feels like temperature.  This is why we can't have nice things.</p>
+"""
 import datetime
 
 import numpy as np
@@ -6,6 +17,7 @@ import pandas as pd
 import matplotlib.colors as mpcolors
 from matplotlib.colorbar import ColorbarBase
 from matplotlib.ticker import MaxNLocator
+from sqlalchemy import text
 from pyiem.plot import get_cmap, figure
 from pyiem.util import get_autoplot_context, get_sqlalchemy_conn
 from pyiem.exceptions import NoDataFound
@@ -14,10 +26,12 @@ PDICT = {
     "coldest_temp": "Coldest Average Temperature",
     "coldest_hitemp": "Coldest Average High Temperature",
     "coldest_lotemp": "Coldest Average Low Temperature",
-    "coldest_lodwpf": "Coldest Average Low Dew Point Temperature",
+    "coldest_lofeel": "Coldest Average Feels Like Temperature",
+    "coldest_lodwpf": "Coldest Average Daily Low Dew Point Temperature",
     "warmest_temp": "Warmest Average Temperature",
     "warmest_hitemp": "Warmest Average High Temperature",
     "warmest_lotemp": "Warmest Average Low Temperature",
+    "warmest_hifeel": "Warmest Average Daily High Feels Like Temperature",
     "warmest_hidwpf": "Warmest Average High Dew Point Temperature",
     "wettest": "Highest Precipitation",
 }
@@ -26,10 +40,12 @@ XREF = {
     "coldest_temp": "avg_temp",
     "coldest_hitemp": "avg_hitemp",
     "coldest_lotemp": "avg_lotemp",
+    "coldest_lofeel": "avg_lofeel",
     "coldest_lodwpf": "avg_lodwpf",
     "warmest_temp": "avg_temp",
     "warmest_hitemp": "avg_hitemp",
     "warmest_lotemp": "avg_lotemp",
+    "warmest_hifeel": "avg_hifeel",
     "warmest_hidwpf": "avg_hidwpf",
     "wettest": "sum_precip",
 }
@@ -37,19 +53,7 @@ XREF = {
 
 def get_description():
     """Return a dict describing how to call this plotter"""
-    desc = {}
-    desc["data"] = True
-    desc["cache"] = 86400
-    desc[
-        "description"
-    ] = """This plot displays the period of consecutive days
-    each year with the extreme criterion meet. In the case of a tie, the
-    first period of the season is used for the analysis.  For a season to
-    count within the analysis, it must have had at least 200 days with data.
-
-    <p>The dew point option only works for ASOS networks and does a simple
-    arthimetic mean of dew point temperatures.
-    """
+    desc = {"data": True, "cache": 86400, "description": __doc__}
     desc["arguments"] = [
         dict(
             type="sid",
@@ -84,6 +88,8 @@ def get_data(ctx):
         lowcol = "low"
         highdwpf = "null"
         lowdwpf = "null"
+        highfeel = "null"
+        lowfeel = "null"
         precipcol = "precip"
         stationcol = "station"
     else:
@@ -93,30 +99,38 @@ def get_data(ctx):
         lowcol = "min_tmpf"
         highdwpf = "max_dwpf"
         lowdwpf = "min_dwpf"
+        highfeel = "max_feel"
+        lowfeel = "min_feel"
         precipcol = "pday"
         table = "summary"
         stationcol = "iemid"
     with get_sqlalchemy_conn(dbname) as conn:
         df = pd.read_sql(
-            f"""
+            text(
+                f"""
         WITH data as (
-        SELECT day, extract(year from day + '%s months'::interval) as season,
+        SELECT day,
+        extract(year from day + ':offset months'::interval) as season,
         avg(({highcol} + {lowcol})/2.)
-            OVER (ORDER by day ASC ROWS %s preceding) as avg_temp,
+            OVER (ORDER by day ASC ROWS :days preceding) as avg_temp,
         avg({highcol})
-            OVER (ORDER by day ASC ROWS %s preceding) as avg_hitemp,
+            OVER (ORDER by day ASC ROWS :days preceding) as avg_hitemp,
         avg({lowcol})
-            OVER (ORDER by day ASC ROWS %s preceding) as avg_lotemp,
+            OVER (ORDER by day ASC ROWS :days preceding) as avg_lotemp,
+        avg({highfeel})
+            OVER (ORDER by day ASC ROWS :days preceding) as avg_hifeel,
+        avg({lowfeel})
+            OVER (ORDER by day ASC ROWS :days preceding) as avg_lofeel,
         avg({highdwpf})
-            OVER (ORDER by day ASC ROWS %s preceding) as avg_hidwpf,
+            OVER (ORDER by day ASC ROWS :days preceding) as avg_hidwpf,
         avg({lowdwpf})
-            OVER (ORDER by day ASC ROWS %s preceding) as avg_lodwpf,
+            OVER (ORDER by day ASC ROWS :days preceding) as avg_lodwpf,
         sum({precipcol})
-            OVER (ORDER by day ASC ROWS %s preceding) as sum_precip
-        from {table} WHERE {stationcol} = %s and {highcol} is not null),
+            OVER (ORDER by day ASC ROWS :days preceding) as sum_precip
+        from {table} WHERE {stationcol} = :station and {highcol} is not null),
         agg1 as (
             SELECT season, day, avg_temp, avg_hitemp, avg_lotemp,
-            sum_precip, avg_hidwpf, avg_lodwpf,
+            sum_precip, avg_hidwpf, avg_lodwpf, avg_lofeel, avg_hifeel,
             row_number()
                 OVER (PARTITION by season ORDER by avg_temp ASC nulls last,
                 day ASC) as coldest_temp_rank,
@@ -127,6 +141,9 @@ def get_data(ctx):
                 OVER (PARTITION by season ORDER by avg_lotemp ASC nulls last,
                 day ASC) as coldest_lotemp_rank,
             row_number()
+                OVER (PARTITION by season ORDER by avg_lofeel ASC nulls last,
+                day ASC) as coldest_lofeel_rank,
+            row_number()
                 OVER (PARTITION by season ORDER by avg_hidwpf DESC nulls last,
                 day ASC) as warmest_hidwpf_rank,
             row_number()
@@ -135,6 +152,9 @@ def get_data(ctx):
             row_number()
                 OVER (PARTITION by season ORDER by avg_hitemp DESC nulls last,
                 day ASC) as warmest_hitemp_rank,
+            row_number()
+                OVER (PARTITION by season ORDER by avg_hifeel DESC nulls last,
+                day ASC) as warmest_hifeel_rank,
             row_number()
                 OVER (PARTITION by season ORDER by avg_lotemp DESC nulls last,
                 day ASC) as warmest_lotemp_rank,
@@ -147,22 +167,14 @@ def get_data(ctx):
             count(*) OVER (PARTITION by season)
             from data)
         SELECT season, day,
-        extract(doy from day - '%s days'::interval)::int as doy,
+        extract(doy from day - ':days days'::interval)::int as doy,
         avg_temp, avg_hitemp, avg_lotemp, avg_hidwpf, avg_lodwpf,
+        avg_lofeel, avg_hifeel,
         sum_precip from agg1 where {varname}_rank = 1 and count > 200
-        """,
-            conn,
-            params=(
-                offset,
-                days - 1,
-                days - 1,
-                days - 1,
-                days - 1,
-                days - 1,
-                days - 1,
-                station,
-                days - 1,
+        """
             ),
+            conn,
+            params={"days": days - 1, "offset": offset, "station": station},
             index_col="season",
         )
     if varname.startswith("coldest"):

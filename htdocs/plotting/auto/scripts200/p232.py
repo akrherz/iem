@@ -1,4 +1,7 @@
-"""ASOS Time series during NWS WWA"""
+"""This app plots ASOS/METAR data during a period of your choice and overlays
+    NWS Watch, Warning, and Advisory data.  The choice of NWS Headline type
+    will limit which potential headlines events are overlaid on the chart.
+"""
 import datetime
 
 # third party
@@ -32,17 +35,8 @@ DOMAIN = {
 
 def get_description():
     """Return a dict describing how to call this plotter"""
-    desc = {}
+    desc = {"description": __doc__, "cache": 600, "data": True}
     desc["defaults"] = {"_r": "t"}
-    desc["data"] = True
-    desc["cache"] = 600
-    desc[
-        "description"
-    ] = """
-    This app plots ASOS/METAR data during a period of your choice and overlays
-    NWS Watch, Warning, and Advisory data.  The choice of NWS Headline type
-    will limit which potential headlines events are overlaid on the chart.
-    """
     desc["arguments"] = [
         dict(
             type="select",
@@ -54,6 +48,7 @@ def get_description():
         dict(
             type="zstation",
             default="MCW",
+            network="IA_ASOS",
             name="station",
             label="Select station to plot:",
         ),

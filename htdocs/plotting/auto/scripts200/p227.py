@@ -1,4 +1,5 @@
-"""NWEM plotting..."""
+"""This plot is not meant for interactive use, but a backend for
+    NWEM plots."""
 
 # third party
 import pytz
@@ -18,20 +19,15 @@ WFOCONV = {"JSJ": "SJU"}
 
 def get_description():
     """Return a dict describing how to call this plotter"""
-    desc = {}
+    desc = {"description": __doc__}
     desc["defaults"] = {"_r": "t"}
     desc["cache"] = 3600
     desc["data"] = True
-    desc[
-        "description"
-    ] = """This plot is not meant for interactive use, but a backend for
-    NWEM plots.
-    """
     desc["arguments"] = [
         dict(
             type="text",
             name="pid",
-            default="202203300110-KOUN-WOUS44-FRWOUN",
+            default="202302031255-KLWX-FZUS71-MWSLWX-RRA",
             label="IEM generated up to 35 char product identifier:",
         ),
         dict(
@@ -108,16 +104,13 @@ def plotter(fdict):
         apctx=ctx,
         title=(f"{wfo} {label} ({pil}) " f"till {expire.strftime(TFORMAT)}"),
         subtitle=(f"Estimated {popyear} Population{stextra}: {population:,}"),
-        sector="custom",
+        sector="spherical_mercator",
         west=bounds[0] - 0.02,
         south=bounds[1] - 0.3,
         east=bounds[2] + (bounds[2] - bounds[0]) + 0.02,
         north=bounds[3] + 0.3,
         nocaption=True,
     )
-    # Hackish
-    mp.sector = "cwa"
-    mp.cwa = wfo
 
     # Plot text on the page, hehe
     report = (
@@ -150,7 +143,6 @@ def plotter(fdict):
             zorder=Z_OVERLAY2,
         )
 
-    mp.drawcities()
     mp.drawcounties()
     return mp.fig, df.drop("geom", axis=1)
 

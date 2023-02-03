@@ -1,10 +1,19 @@
-"""NLDN Flash Density Maps."""
+"""This data is courtesy of <a href="{LL}">Vaisala NLDN</a>.  The IEM
+    processes a data stream by NLDN to construct this heatmap. The flash
+    density is computed over a two by two kilometer grid constructed using
+    a US National Atlas Albers (EPSG:2163) projection.  You are limited to plot
+    less than 32 days worth of data at a time.</p>
+
+    <p><strong>Note:</strong> Due to some lame reasons, it is difficult to
+    document what data gaps exist within this dataset.  In general, the
+    coverage should be good outside of the major gap on 10 August 2020 due
+    to the derecho power outage.</p>
+"""
 import datetime
 
 import geopandas as gpd
 import matplotlib.colors as mpcolors
 import numpy as np
-from pyiem.exceptions import NoDataFound
 from pyiem.plot import MapPlot, get_cmap, pretty_bins
 from pyiem.reference import EPSG, state_bounds, Z_CLIP2
 from pyiem.util import get_autoplot_context, get_sqlalchemy_conn, utc
@@ -17,22 +26,7 @@ LL = (
 
 def get_description():
     """Return a dict describing how to call this plotter"""
-    desc = {}
-    desc["data"] = False
-    desc[
-        "description"
-    ] = f"""
-    This data is courtesy of <a href="{LL}">Vaisala NLDN</a>.  The IEM
-    processes a data stream by NLDN to construct this heatmap. The flash
-    density is computed over a two by two kilometer grid constructed using
-    a US National Atlas Albers (EPSG:2163) projection.  You are limited to plot
-    less than 32 days worth of data at a time.</p>
-
-    <p><strong>Note:</strong> Due to some lame reasons, it is difficult to
-    document what data gaps exist within this dataset.  In general, the
-    coverage should be good outside of the major gap on 10 August 2020 due
-    to the derecho power outage.</p>
-    """
+    desc = {"data": False, "description": __doc__}
     desc["arguments"] = [
         dict(
             type="state",
@@ -82,8 +76,6 @@ def plotter(fdict):
             params=(sts, ets, *bnds),
             geom_col="geo",
         )
-    if df.empty:
-        raise NoDataFound("No Lightning Data Found.")
     with get_sqlalchemy_conn("postgis") as conn:
         statedf = gpd.read_postgis(
             "SELECT st_transform(the_geom, 2163) as geo from states "
@@ -93,8 +85,6 @@ def plotter(fdict):
             geom_col="geo",
         )
     df = gpd.sjoin(df, statedf, predicate="within")
-    if df.empty:
-        raise NoDataFound("No Lightning Data Found.")
     [xmin, ymin, xmax, ymax] = statedf.total_bounds
     buffer = 30_000
     title = (
@@ -115,34 +105,34 @@ def plotter(fdict):
         projection=EPSG[2163],
         continentalcolor="white",
     )
-
-    H, xedges, yedges = np.histogram2d(
-        df["geo"].x,
-        df["geo"].y,
-        bins=(
-            np.arange(xmin, xmax, 2000.0),
-            np.arange(ymin, ymax, 2000.0),
-        ),
-    )
-    H = H.transpose()
-    bins = pretty_bins(0, np.max(H))
-    if bins[1] > 1:
-        bins[0] = 1
-    cmap = get_cmap(ctx["cmap"])
-    cmap.set_under("white")
-    norm = mpcolors.BoundaryNorm(bins, cmap.N)
-    xx, yy = np.meshgrid(xedges, yedges)
-    mp.panels[0].pcolormesh(
-        xx,
-        yy,
-        np.where(H > 0, H, np.nan),
-        norm=norm,
-        cmap=cmap,
-        zorder=Z_CLIP2,
-        crs=EPSG[2163],
-    )
+    if not df.empty:
+        xaxis = np.arange(xmin, xmax, 2000.0)
+        yaxis = np.arange(ymin, ymax, 2000.0)
+        H, xedges, yedges = np.histogram2d(
+            df["geo"].x,
+            df["geo"].y,
+            bins=(xaxis, yaxis),
+        )
+        H = H.transpose()
+        bins = pretty_bins(0, np.max(H))
+        if bins[1] > 1:
+            bins[0] = 1
+        cmap = get_cmap(ctx["cmap"])
+        cmap.set_under("white")
+        norm = mpcolors.BoundaryNorm(bins, cmap.N)
+        xx, yy = np.meshgrid(xedges, yedges)
+        mp.panels[0].pcolormesh(
+            xx,
+            yy,
+            np.where(H > 0, H, np.nan),
+            norm=norm,
+            cmap=cmap,
+            zorder=Z_CLIP2,
+            crs=EPSG[2163],
+        )
+        mp.draw_colorbar(bins, cmap, norm, title="flashes per 2x2 km cell")
+    mp.fig.text(0.5, 0.5, "No Flashes Found in Domain.", ha="center")
     mp.draw_mask("state")
-    mp.draw_colorbar(bins, cmap, norm, title="flashes per 2x2 km cell")
     mp.drawcounties()
 
     return mp.fig, None

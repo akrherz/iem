@@ -1,4 +1,10 @@
-"""Map of NASS Progress Data"""
+"""This generates a map showing USDA NASS weekly
+    statistics.  The date you select is rectified back to the latest available
+    date.  Historical data is linearly interpolated so that departures can be
+    computed. A complication is that NASS data does not exist before the
+    season has started or ended. In this situation, hopefully the Right-Thing
+    is done!
+"""
 import datetime
 
 import pandas as pd
@@ -56,19 +62,11 @@ PDICT2 = {
 
 def get_description():
     """Return a dict describing how to call this plotter"""
-    desc = {}
-    desc["data"] = True
-    desc["cache"] = 3600
-    desc["nass"] = True
-    desc[
-        "description"
-    ] = """This generates a map showing USDA NASS weekly
-    statistics.  The date you select is rectified back to the latest available
-    date.  Historical data is linearly interpolated so that departures can be
-    computed. A complication is that NASS data does not exist before the
-    season has started or ended. In this situation, hopefully the Right-Thing
-    is done!"""
+    desc = {"data": True, "cache": 3600, "description": __doc__}
+    # Compute a better default for corn planting.
     today = datetime.date.today()
+    if today.month < 5 or today.month > 6:
+        today = datetime.date(today.year - 1, 5, 15)
     desc["arguments"] = [
         dict(
             type="csector",
@@ -179,22 +177,16 @@ def get_df(ctx):
     ctx["df"].index.name = "state"
     col = "avg" if ctx["w"] == "avg" else f'week{ctx["weeks"]}ago'
     ctx["df"]["departure"] = ctx["df"]["thisval"] - ctx["df"][col]
-    ctx["title"] = "%s USDA NASS %s" % (
-        date.strftime("%-d %b %Y"),
-        NASS_CROP_PROGRESS[varname],
-    )
+    ctx["title"] = f"{date:%-d %b %Y} USDA NASS {NASS_CROP_PROGRESS[varname]}"
     if ctx["w"] == "avg":
         ctx["subtitle"] = (
-            "Top value is %i percentage, bottom value is "
-            "departure from %i-%i avg" % (date.year, syear, eyear - 1)
+            f"Top value is {date.year} percentage, bottom value is "
+            f"departure from {syear}-{eyear - 1} avg"
         )
     else:
         ctx["subtitle"] = (
-            "Top value is %i percentage, bottom value is "
-            "precentage points change since %s"
-        ) % (
-            date.year,
-            week_ending_start.strftime("%-d %b %Y"),
+            f"Top value is {date.year} percentage, bottom value is "
+            f"precentage points change since {week_ending_start:%-d %b %Y}"
         )
 
 
@@ -212,15 +204,13 @@ def plotter(fdict):
             if pd.isna(row["avg"]):
                 subscript = "M"
             else:
-                subscript = "[-%.0f]" % (row["avg"],)
+                subscript = f"[-{row['avg']:.0f}]"
                 data[state] = 0 - row["avg"]
         else:
-            subscript = "[%s%.0f]" % ("+" if val > 0 else "", val)
+            subscript = f"[{'+' if val > 0 else ''}{val:.0f}]"
             subscript = "[0]" if subscript in ["[-0]", "[+0]"] else subscript
-        labels[state] = "%s\n%s" % (
-            "M" if pd.isna(row["thisval"]) else int(row["thisval"]),
-            subscript,
-        )
+        tt = "M" if pd.isna(row["thisval"]) else int(row["thisval"])
+        labels[state] = f"{tt}\n{subscript}"
 
     mp = MapPlot(
         apctx=ctx,

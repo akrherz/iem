@@ -1,42 +1,38 @@
-"""Center Weather Advisory (CWA) Infographic."""
+"""This plot is not meant for interactive use, but a backend for
+    CWA plots."""
 from datetime import timezone, timedelta
 
 # third party
 from geopandas import read_postgis
 from pyiem.plot.geoplot import MapPlot
-from pyiem.util import get_autoplot_context, get_sqlalchemy_conn, utc
+from pyiem.util import get_autoplot_context, get_sqlalchemy_conn
 from pyiem.exceptions import NoDataFound
 from pyiem.reference import Z_OVERLAY2
 
 
 def get_description():
     """Return a dict describing how to call this plotter"""
-    desc = {}
+    desc = {"description": __doc__}
     desc["defaults"] = {"_r": "t"}
     desc["cache"] = 3600
     desc["data"] = True
-    desc[
-        "description"
-    ] = """This plot is not meant for interactive use, but a backend for
-    CWA plots.
-    """
     desc["arguments"] = [
         dict(
             type="networkselect",
             network="CWSU",
-            default="ZME",
+            default="ZMA",
             name="cwsu",
             label="Select CWSU:",
         ),
         dict(
             type="int",
-            default=101,
+            default=207,
             name="num",
             label="CWA Number:",
         ),
         dict(
             type="datetime",
-            default=f"{utc():%Y/%m/%d %H%M}",
+            default="2023/02/03 1653",
             name="issue",
             label=(
                 "UTC Timestamp of the CWA Issuance "
@@ -83,7 +79,7 @@ def plotter(fdict):
             f"till {row['expire']:%Y-%m-%d %H:%M} UTC"
         ),
         subtitle=row["narrative"],
-        sector="custom",
+        sector="spherical_mercator",
         west=bounds[0] - 1.2,
         south=bounds[1] - 1.2,
         east=bounds[2] + 1.2,
@@ -98,7 +94,6 @@ def plotter(fdict):
         linewidth=4,
         zorder=Z_OVERLAY2,
     )
-    mp.drawcities()
     mp.drawcounties()
     radtime = mp.overlay_nexrad(
         df["issue"][0].to_pydatetime(),
