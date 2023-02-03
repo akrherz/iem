@@ -17,17 +17,17 @@ $rs = pg_prepare(
         "(c.iemid = t.iemid) WHERE t.network = $1"
 );
 $sortcol = isset($_GET["sortcol"]) ? xssafe($_GET["sortcol"]) : "station";
-$network = isset($_GET["network"]) ? substr($_GET["network"], 0, 10) : "IA_ASOS";
+$network = isset($_GET["network"]) ? substr(xssafe($_GET["network"]), 0, 10) : "IA_ASOS";
 if ($network == "AWOS") {
     $network = "IA_ASOS";
 }
-$baa = 'network.phtml?network=' . $network;
+$baa = "network.phtml?network={$network}";
 
 
 $rs = pg_execute($dbconn, "SELECT", array($network));
 
 $data = array();
-for ($i = 0; $row = pg_fetch_array($rs); $i++) {
+for ($i = 0; $row = pg_fetch_assoc($rs); $i++) {
     $data[$row["station"]] = $row;
 }
 
@@ -58,22 +58,29 @@ $i = false;
 
 function vp($v, $r)
 {
-    if ($v > 0) return '<td><font id="c">' . round($v, $r) . '</font></td>';
-    else if ($v < 0) return '<td><font id="w">' . round($v, $r) . '</font></td>';
-    return '<td>' . round($v, $r) . '</td>';
+    if (is_null($v)) return "<td>M</td>";
+    $v = floatval($v);
+    if ($v > 0) return '<td><font id="c">' . myround($v, $r) . '</font></td>';
+    else if ($v < 0) return '<td><font id="w">' . myround($v, $r) . '</font></td>';
+    return '<td>' . myround($v, $r) . '</td>';
 }
 function pp($v, $r)
 {
+    if (is_null($v)) return "M";
+    $v = floatval($v);
     if (intval($v) == -17966) return 'M';
-    return round($v, $r);
+    return myround($v, $r);
 }
 $table = "";
+$now = new DateTime("now");
+$thisyear = $now->format("Y");
 foreach ($finalA as $key => $val) {
     $ts = new DateTime($val["uv"]);
+    $fmt = ($ts->format("Y") == $thisyear) ? "d G:i" : "Y M d G:i";
     $table .= '<tr ';
     if ($i) $table .= 'class="even"';
     $table .= '><td>' . $val["station"] . '</td><td>' . $val["name"] . '</td>
-  <td>' . $ts->format("d M G:i") . 'Z</td>
+  <td>' . $ts->format($fmt) . 'Z</td>
   <td id="divider">' . pp($val["tmpf"], 0) . '</td>' .
         vp($val["tmpf_qc_av"], 1) .
         vp($val["tmpf_qc_sc"], 1) .

@@ -1,40 +1,4 @@
-"""A fancy pants plot of a given VTEC headline."""
-# local
-from datetime import timezone
-
-# third party
-import pandas as pd
-import geopandas as gpd
-from sqlalchemy import text
-from pyiem.nws import vtec
-from pyiem.plot.geoplot import MapPlot
-from pyiem.util import get_autoplot_context, get_sqlalchemy_conn, utc
-from pyiem.exceptions import NoDataFound
-from pyiem.reference import Z_OVERLAY2, Z_OVERLAY2_LABEL, LATLON
-import pytz
-
-TFORMAT = "%b %-d %Y %-I:%M %p %Z"
-PDICT = {
-    "single": "Plot just this single VTEC Event",
-    "expand": "Plot same VTEC Phenom/Sig from any WFO coincident with event",
-    "etn": "Plot same VTEC Phenom/Sig + Event ID from any WFO",
-}
-PDICT3 = {
-    "on": "Overlay NEXRAD Mosaic",
-    "auto": "Let autoplot decide when to include NEXRAD overlay",
-    "off": "No NEXRAD Mosaic Please",
-}
-
-
-def get_description():
-    """Return a dict describing how to call this plotter"""
-    desc = {}
-    desc["defaults"] = {"_r": "t"}
-    desc["cache"] = 300
-    desc["data"] = True
-    desc[
-        "description"
-    ] = """This application generates a map showing the coverage of a given
+"""This application generates a map showing the coverage of a given
     VTEC alert.  The tricky part here is how time is handled
     for events whereby zones/counties can be added / removed from the alert.
     If you specific an exact time, you should get the proper extent of the
@@ -54,7 +18,38 @@ def get_description():
       multiple WFOs.</li>
     </ul>
     </p>
-    """
+"""
+# local
+from datetime import timezone
+
+# third party
+import pandas as pd
+import geopandas as gpd
+from sqlalchemy import text
+from pyiem.nws import vtec
+from pyiem.plot.geoplot import MapPlot
+from pyiem.util import get_autoplot_context, get_sqlalchemy_conn, utc
+from pyiem.exceptions import NoDataFound
+from pyiem.reference import Z_OVERLAY2, Z_OVERLAY2_LABEL, LATLON, Z_FILL
+import pytz
+
+TFORMAT = "%b %-d %Y %-I:%M %p %Z"
+PDICT = {
+    "single": "Plot just this single VTEC Event",
+    "expand": "Plot same VTEC Phenom/Sig from any WFO coincident with event",
+    "etn": "Plot same VTEC Phenom/Sig + Event ID from any WFO",
+}
+PDICT3 = {
+    "on": "Overlay NEXRAD Mosaic",
+    "auto": "Let autoplot decide when to include NEXRAD overlay",
+    "off": "No NEXRAD Mosaic Please",
+}
+
+
+def get_description():
+    """Return a dict describing how to call this plotter"""
+    desc = {"description": __doc__, "cache": 300, "data": True}
+    desc["defaults"] = {"_r": "t"}
     now = utc()
     desc["arguments"] = [
         dict(
@@ -143,28 +138,7 @@ def plotter(fdict):
             geom_col="simple_geom",
         )
     if df.empty:
-        if year == 2022:
-            year = 2021
-            with get_sqlalchemy_conn("postgis") as conn:
-                df = gpd.read_postgis(
-                    f"""
-                    SELECT w.ugc, simple_geom, u.name,
-                    issue at time zone 'UTC' as issue,
-                    expire at time zone 'UTC' as expire,
-                    init_expire at time zone 'UTC' as init_expire,
-                    1 as val,
-                    status, is_emergency, is_pds, w.wfo
-                    from warnings_{year} w JOIN ugcs u on (w.gid = u.gid)
-                    WHERE w.wfo = %s and eventid = %s and significance = %s and
-                    phenomena = %s ORDER by issue ASC
-                """,
-                    conn,
-                    params=(wfo[-3:], etn, s1, p1),
-                    index_col="ugc",
-                    geom_col="simple_geom",
-                )
-        if df.empty:
-            raise NoDataFound("VTEC Event was not found, sorry.")
+        raise NoDataFound("VTEC Event was not found, sorry.")
     if ctx["opt"] == "expand":
         # Get all phenomena coincident with the above alert
         with get_sqlalchemy_conn("postgis") as conn:
@@ -174,7 +148,6 @@ def plotter(fdict):
                 issue at time zone 'UTC' as issue,
                 expire at time zone 'UTC' as expire,
                 init_expire at time zone 'UTC' as init_expire,
-                1 as val,
                 status, is_emergency, is_pds, w.wfo
                 from warnings_{year} w JOIN ugcs u on (w.gid = u.gid)
                 WHERE significance = %s and
@@ -195,7 +168,6 @@ def plotter(fdict):
                 issue at time zone 'UTC' as issue,
                 expire at time zone 'UTC' as expire,
                 init_expire at time zone 'UTC' as init_expire,
-                1 as val,
                 status, is_emergency, is_pds, w.wfo
                 from warnings_{year} w JOIN ugcs u on (w.gid = u.gid)
                 WHERE significance = %s and
@@ -269,9 +241,9 @@ def plotter(fdict):
             .strftime(TFORMAT)
         )
 
-    df["color"] = vtec.NWS_COLORS.get(f"{p1}.{s1}", "#FF0000")
+    df["color"] = vtec.NWS_COLORS.get(f"{p1}.{s1}", "#FF0000") + "D0"
     if not sbwdf.empty:
-        df["color"] = "tan"
+        df["color"] = "#D2B48CD0"
     if len(df["wfo"].unique()) == 1:
         bounds = df["simple_geom"].total_bounds
         if not sbwdf.empty:
@@ -297,7 +269,6 @@ def plotter(fdict):
         )
         if ctx["opt"] == "etn":
             title += f" #{etn}"
-    # NOTE Can't do background=ne2 yet as we are pixelated
     mp = MapPlot(
         apctx=ctx,
         subtitle=(
@@ -305,7 +276,7 @@ def plotter(fdict):
             f"to {m(df['expire'].max())}"
         ),
         title=title,
-        sector="custom",
+        sector="spherical_mercator",
         west=bounds[0] - buffer,
         south=bounds[1] - buffer,
         east=bounds[2] + buffer,
@@ -332,33 +303,17 @@ def plotter(fdict):
             ha="center",
         )
     else:
-        # Do we have a fixed zone/county product?
-        if len(df2.index.str.slice(2, 3).unique().values) == 1:
-            # Let pyIEM handle it verbatim
-            mp.fill_ugcs(
-                df2["val"].to_dict(),
-                color=df2["color"].to_dict(),
-                draw_colorbar=False,
-                labels=df2["name"].to_dict(),
-                missingval="",
-                ilabel=(len(df2.index) <= 10),
-                labelbuffer=5,
-                is_firewx=(p1 == "FW"),
+        # We have the geometries already, so can't we just use them?
+        # The issue is that pyiem doesn't really support zones changes
+        (
+            df2.to_crs(mp.panels[0].crs).plot(
+                ax=mp.panels[0].ax,
+                aspect=None,
+                ec="white",
+                fc=df2["color"].values,
+                zorder=Z_FILL,
             )
-        else:
-            # Need to chunk it.
-            for geotype in ["Z", "C"]:
-                df3 = df2[df2.index.str.slice(2, 3) == geotype]
-                mp.fill_ugcs(
-                    df3["val"].to_dict(),
-                    color=df3["color"].to_dict(),
-                    draw_colorbar=False,
-                    labels=df3["name"].to_dict(),
-                    missingval="",
-                    ilabel=(len(df2.index) <= 10),
-                    labelbuffer=5,
-                    is_firewx=(p1 == "FW"),
-                )
+        )
 
     if not sbwdf.empty:
         color = vtec.NWS_COLORS.get(f"{p1}.{s1}", "#FF0000")
@@ -385,8 +340,6 @@ def plotter(fdict):
                 edgecolor="k",
                 zorder=Z_OVERLAY2,
             )
-    mp.drawcities(textsize=12, color="#fff", outlinecolor="#000")
-    mp.drawcounties()
     if ctx["n"] != "off":
         if (p1 in ["SV", "TO", "FF", "MA"] and s1 == "W") or ctx["n"] == "on":
             radval = mp.overlay_nexrad(
@@ -406,6 +359,14 @@ def plotter(fdict):
                     va="top",
                     zorder=Z_OVERLAY2_LABEL + 100,
                 )
+    mp.fill_cwas(
+        {"HFO": 0},
+        ec="green",
+        fc="None",
+        plotmissing=True,
+        draw_colorbar=False,
+        lw=2,
+    )
     return mp.fig, df.drop("simple_geom", axis=1)
 
 
