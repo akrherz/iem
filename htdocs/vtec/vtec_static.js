@@ -22,6 +22,7 @@ iemdata.vtec_phenomena_dict = [
 ['FL','Flood'],
 ['FR','Frost'],
 ['FZ','Freeze'],
+['UP','Freezing Spray'],
 ['FG','Dense Fog'],
 ['FW','Red Flag'],
 ['GL','Gale'],
@@ -41,8 +42,8 @@ iemdata.vtec_phenomena_dict = [
 ['LO','Low Water'],
 ['LS','Lakeshore Flood'],
 ['LW','Lake Wind'],
-['MF', 'Marine Dense Fog'],
-['MS', 'Marine Dense Smoke'],
+['MF','Marine Dense Fog'],
+['MS','Marine Dense Smoke'],
 ['RB','Small Craft for Rough Bar'],
 ['RH','Radiological Hazard'],
 ['RP','Rip Current'],
@@ -59,15 +60,13 @@ iemdata.vtec_phenomena_dict = [
 ['TR','Tropical Storm'],
 ['TS','Tsunami'],
 ['TY','Typhoon'],
-['UP','Ice Accretion'],
 ['VO','Volcano'],
 ['WC','Wind Chill'],
 ['WI','Wind'],
 ['WS','Winter Storm'],
 ['WW','Winter Weather'],
 ['ZF','Freezing Fog'],
-['ZR','Freezing Rain'],
-['ZY','Freezing Spray']
+['ZR','Freezing Rain']
 ];
 
 

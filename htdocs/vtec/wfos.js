@@ -28,6 +28,7 @@ iemdata.vtec_phenomena_dict = [
 ['FL','Flood'],
 ['FR','Frost'],
 ['FZ','Freeze'],
+['UP','Freezing Spray'],
 ['FG','Dense Fog'],
 ['FW','Red Flag'],
 ['GL','Gale'],
@@ -61,15 +62,13 @@ iemdata.vtec_phenomena_dict = [
 ['TR','Tropical Storm'],
 ['TS','Tsunami'],
 ['TY','Typhoon'],
-['UP','Ice Accretion'],
 ['VO','Volcano'],
 ['WC','Wind Chill'],
 ['WI','Wind'],
 ['WS','Winter Storm'],
 ['WW','Winter Weather'],
 ['ZF','Freezing Fog'],
-['ZR','Freezing Rain'],
-['ZY', 'Freezing Spray']
+['ZR','Freezing Rain']
 ];
 
 iemdata.vtecPhenomenaStore = new Ext.data.SimpleStore({
