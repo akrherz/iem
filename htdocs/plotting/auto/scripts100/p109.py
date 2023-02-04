@@ -1,42 +1,4 @@
-"""WFO VTEC counts on a map."""
-import datetime
-
-import pandas as pd
-import numpy as np
-import pytz
-from pyiem.nws import vtec
-from pyiem.plot import MapPlot, get_cmap
-from pyiem.util import get_autoplot_context, get_sqlalchemy_conn
-
-PDICT = {
-    "count": "Event Count",
-    "days": "Days with 1+ Events",
-    "tpercent": "Percent of Time",
-    "count_rank": "Rank of Event Count (1=lowest)",
-    "count_departure": "Departure from Average of Event Count",
-    "count_standard": "Standardized Departure from Average of Event Count",
-}
-PDICT2 = {
-    "all": "Use All VTEC Events",
-    "set": "Use Requested VTEC Events From Form",
-}
-PDICT3 = {
-    "yes": "Only Emergencies",
-    "all": "All Events",
-}
-PDICT4 = {
-    "wfo": "by WFO",
-    "state": "by State",
-}
-
-
-def get_description():
-    """Return a dict describing how to call this plotter"""
-    desc = {}
-    desc["data"] = True
-    desc[
-        "description"
-    ] = """This application generates per WFO or state maps of VTEC
+"""This application generates per WFO or state maps of VTEC
     event counts.  The current three available metrics are:<br />
     <ul>
         <li><strong>Event Count</strong>: The number of distinct VTEC events.
@@ -72,9 +34,45 @@ def get_description():
 
     <p>Note that various VTEC events have differenting start periods of record.
     Most products go back to October 2005.</p>
-    """
+"""
+import datetime
+
+import pandas as pd
+import numpy as np
+import pytz
+from pyiem.nws import vtec
+from pyiem.plot import MapPlot, get_cmap
+from pyiem.util import get_autoplot_context, get_sqlalchemy_conn
+
+PDICT = {
+    "count": "Event Count",
+    "days": "Days with 1+ Events",
+    "tpercent": "Percent of Time",
+    "count_rank": "Rank of Event Count (1=lowest)",
+    "count_departure": "Departure from Average of Event Count",
+    "count_standard": "Standardized Departure from Average of Event Count",
+}
+PDICT2 = {
+    "all": "Use All VTEC Events",
+    "set": "Use Requested VTEC Events From Form",
+}
+PDICT3 = {
+    "yes": "Only Emergencies",
+    "all": "All Events",
+}
+PDICT4 = {
+    "wfo": "by WFO",
+    "state": "by State",
+}
+
+
+def get_description():
+    """Return a dict describing how to call this plotter"""
+    desc = {"description": __doc__}
+    desc["data"] = True
     today = datetime.date.today()
     jan1 = today.replace(month=1, day=1)
+    tomorrow = today + datetime.timedelta(days=1)
     desc["arguments"] = [
         dict(
             type="select",
@@ -93,9 +91,10 @@ def get_description():
         dict(
             type="datetime",
             name="edate",
-            default=today.strftime("%Y/%m/%d 0000"),
+            default=today.strftime("%Y/%m/%d 2359"),
             label="End Date / Time (UTC):",
             min="2005/01/01 0000",
+            max=f"{tomorrow:%Y/%m/%d} 2359",
         ),
         dict(
             type="select",

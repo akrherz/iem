@@ -1,4 +1,5 @@
-"""Consec days"""
+"""This plot displays the maximum number of consec
+    days above or below some threshold for high or low temperature."""
 import datetime
 import calendar
 
@@ -32,12 +33,7 @@ ADICT = {
 
 def get_description():
     """Return a dict describing how to call this plotter"""
-    desc = {}
-    desc["data"] = True
-    desc[
-        "description"
-    ] = """This plot displays the maximum number of consec
-    days above or below some threshold for high or low temperature."""
+    desc = {"description": __doc__, "data": True}
     desc["arguments"] = [
         dict(
             type="station",
@@ -104,7 +100,7 @@ def plotter(fdict):
     elif ctx["climo"] == "ncei81":
         cltable = "ncdc_climate81"
         clstation = ctx["_nt"].sts[station]["ncdc81"]
-    elif ctx["climo"] == "ncei91":
+    else:  # ncei91
         cltable = "ncei_climate91"
         clstation = ctx["_nt"].sts[station]["ncei91"]
     with get_sqlalchemy_conn("coop") as conn:
