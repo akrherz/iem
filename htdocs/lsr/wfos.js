@@ -28,6 +28,7 @@ iemdata.vtec_phenomena = {
     'FL': 'Flood',
     'FR': 'Frost',
     'FZ': 'Freeze',
+    'UP': 'Freezing Spray',
     'FG': 'Dense Fog',
     'FW': 'Red Flag',
     'GL': 'Gale',
@@ -62,15 +63,13 @@ iemdata.vtec_phenomena = {
     'TR': 'Tropical Storm',
     'TS': 'Tsunami',
     'TY': 'Typhoon',
-    'UP': 'Ice Accretion',
     'VO': 'Volcano',
     'WC': 'Wind Chill',
     'WI': 'Wind',
     'WS': 'Winter Storm',
     'WW': 'Winter Weather',
     'ZF': 'Freezing Fog',
-    'ZR': 'Freezing Rain',
-    'ZY': 'Freezing Spray'
+    'ZR': 'Freezing Rain'
 };
 
 iemdata.vtec_significance = {

@@ -12,6 +12,18 @@ LOGRE = re.compile(r"Autoplot\[\s*(\d+)\] Timing:\s*(\d+\.\d+)s Key: ([^\s]*)")
 LOGFN = "/var/log/app/autoplot_log"
 
 
+def archive(cursor):
+    """Move data out of the way."""
+    cursor.execute(
+        "insert into autoplot_timing_archive select * from autoplot_timing "
+        "WHERE valid < now() - '10 days'::interval"
+    )
+    cursor.execute(
+        "DELETE from autoplot_timing where valid < now() - '10 days'::interval"
+    )
+    LOG.info("Archived %s rows", cursor.rowcount)
+
+
 def get_dbendts(cursor):
     """Figure out when we have data until"""
     cursor.execute("SELECT max(valid) from autoplot_timing")
@@ -68,6 +80,7 @@ def main():
     cursor = mesosite.cursor()
     dbendts = get_dbendts(cursor)
     find_and_save(cursor, dbendts)
+    archive(cursor)
     cursor.close()
     mesosite.commit()
 

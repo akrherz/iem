@@ -21,6 +21,7 @@ $vtec_phenomena = Array(
   'FL' => 'Flood',
   'FR' => 'Frost',
   'FZ' => 'Freeze',
+  'UP' => 'Freezing Spray',
   'FG' => 'Dense Fog',
   'FW' => 'Red Flag',
   'GL' => 'Gale',
@@ -61,7 +62,6 @@ $vtec_phenomena = Array(
   'TR' => 'Tropical Storm',
   'TS' => 'Tsunami',
   'TY' => 'Typhoon',
-  'UP' => 'Ice Accretion',
   'VO' => 'Volcano',
   'WC' => 'Wind Chill',
   'WI' => 'Wind',
@@ -69,7 +69,6 @@ $vtec_phenomena = Array(
   'WW' => 'Winter Weather',
   'ZF' => 'Freezing Fog',
   'ZR' => 'Freezing Rain',
-  'ZY' => "Freezing Spray",
 );
 
 $vtec_significance = Array(
