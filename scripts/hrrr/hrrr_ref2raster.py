@@ -12,9 +12,8 @@ import pygrib
 from pyiem.util import utc, logger
 
 LOG = logger()
-PALETTE = Image.open(
-    open("/mesonet/ldmdata/gis/images/4326/USCOMP/n0q_0.png", "rb")
-).getpalette()
+with open("/mesonet/ldmdata/gis/images/4326/USCOMP/n0q_0.png", "rb") as fh:
+    PALETTE = Image.open(fh).getpalette()
 
 
 def do_grb(grib, valid, routes):
@@ -26,17 +25,27 @@ def do_grb(grib, valid, routes):
     else:
         fxvalid = valid + datetime.timedelta(hours=fxdelta)
         fxminutes = int(fxdelta * 60.0)
-    gribtemp = tempfile.NamedTemporaryFile(suffix=".grib2", delete=False)
     newgribtemp = tempfile.NamedTemporaryFile(suffix=".grib2")
     pngtemp = tempfile.NamedTemporaryFile(suffix=".png")
-    gribtemp.write(grib.tostring())
-    gribtemp.close()
+    with tempfile.NamedTemporaryFile(
+        suffix=".grib2", delete=False
+    ) as gribtemp:
+        gribtemp.write(grib.tostring())
     # Regrid this to match N0Q
-    cmd = (
-        "wgrib2 %s -set_grib_type same -new_grid_winds earth "
-        "-new_grid latlon -126:3050:0.02 23.01:1340:0.02 %s"
-    ) % (gribtemp.name, newgribtemp.name)
-    subprocess.call(cmd, shell=True, stdout=subprocess.PIPE)
+    cmd = [
+        "wgrib2",
+        gribtemp.name,
+        "-set_grib_type",
+        "same",
+        "-new_grid_winds",
+        "earth",
+        "-new_grid",
+        "latlon",
+        "-126:3050:0.02",
+        "23.01:1340:0.02",
+        newgribtemp.name,
+    ]
+    subprocess.call(cmd, stdout=subprocess.PIPE)
     # Rasterize
     grbs = pygrib.open(newgribtemp.name)
     g1 = grbs[1]
@@ -51,57 +60,56 @@ def do_grb(grib, valid, routes):
     png = Image.fromarray(raster)
     png.putpalette(PALETTE)
     png.save(pngtemp)
-    cmd = (
-        "pqinsert -i -p 'plot %s %s gis/images/4326/hrrr/"
-        "refd_%04i.png GIS/hrrr/%02i/refd_%04i.png png' %s"
-    ) % (
-        routes,
-        valid.strftime("%Y%m%d%H%M"),
-        fxminutes,
-        valid.hour,
-        fxminutes,
+    cmd = [
+        "pqinsert",
+        "-i",
+        "-p",
+        (
+            f"plot {routes} {valid:%Y%m%d%H%M} gis/images/4326/hrrr/"
+            f"refd_{fxminutes:04.0f}.png GIS/hrrr/{valid:%H}/"
+            f"refd_{fxminutes:04.0f}.png png"
+        ),
         pngtemp.name,
-    )
-    subprocess.call(cmd, shell=True)
+    ]
+    subprocess.call(cmd)
     # Do world file variant
-    wldtmp = tempfile.NamedTemporaryFile(delete=False, mode="w")
-    wldtmp.write(
-        """0.02
-0.0
-0.0
--0.02
--126.0
-50.0"""
-    )
-    wldtmp.close()
-    cmd = (
-        "pqinsert -i -p 'plot %s %s gis/images/4326/hrrr/"
-        "refd_%04i.wld GIS/hrrr/%02i/refd_%04i.wld wld' %s"
-    ) % (
-        routes,
-        valid.strftime("%Y%m%d%H%M"),
-        fxminutes,
-        valid.hour,
-        fxminutes,
+    with tempfile.NamedTemporaryFile(delete=False, mode="w") as wldtmp:
+        wldtmp.write(
+            "\n".join(["0.02", "0.0", "0.0", "-0.02", "-126.0", "50.0"])
+        )
+    cmd = [
+        "pqinsert",
+        "-i",
+        "-p",
+        (
+            f"plot {routes} {valid:%Y%m%d%H%M} gis/images/4326/hrrr/"
+            f"refd_{fxminutes:04.0f}.wld GIS/hrrr/{valid:%H}/"
+            f"refd_{fxminutes:04.0f}.wld wld"
+        ),
         wldtmp.name,
-    )
-    subprocess.call(cmd, shell=True)
+    ]
+    subprocess.call(cmd)
     # Do json metadata
-    jsontmp = tempfile.NamedTemporaryFile(delete=False, mode="w")
     jdict = {
         "model_init_utc": valid.strftime("%Y-%m-%dT%H:%M:%SZ"),
         "forecast_minute": fxminutes,
         "model_forecast_utc": fxvalid.strftime("%Y-%m-%dT%H:%M:%SZ"),
     }
-    json.dump(jdict, jsontmp)
-    jsontmp.close()
+    with tempfile.NamedTemporaryFile(delete=False, mode="w") as jsontmp:
+        json.dump(jdict, jsontmp)
     # No need to archive this JSON file, it provides nothing new
-    cmd = (
-        "pqinsert -i -p 'plot c %s gis/images/4326/hrrr/"
-        "refd_%04i.json bogus json' %s"
-    ) % (valid.strftime("%Y%m%d%H%M"), fxminutes, jsontmp.name)
+    cmd = [
+        "pqinsert",
+        "-i",
+        "-p",
+        (
+            f"plot c {valid:%Y%m%d%H%M} gis/images/4326/hrrr/"
+            f"refd_{fxminutes:04.0f}.json bogus json"
+        ),
+        jsontmp.name,
+    ]
     if routes == "ac":
-        subprocess.call(cmd, shell=True)
+        subprocess.call(cmd)
     os.unlink(gribtemp.name)
     os.unlink(wldtmp.name)
     os.unlink(jsontmp.name)
@@ -110,10 +118,7 @@ def do_grb(grib, valid, routes):
 def workflow(valid, routes):
     """Process this time's data"""
     gribfn = valid.strftime(
-        (
-            "/mesonet/ARCHIVE/data/%Y/%m/%d/model/hrrr/%H/"
-            "hrrr.t%Hz.refd.grib2"
-        )
+        "/mesonet/ARCHIVE/data/%Y/%m/%d/model/hrrr/%H/hrrr.t%Hz.refd.grib2"
     )
     if not os.path.isfile(gribfn):
         LOG.warning("missing %s", gribfn)

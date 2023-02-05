@@ -109,7 +109,7 @@ def plotter(fdict):
         gdf = df.groupby("source").sum(numeric_only=True)
     elif ctx["var"] == "last":
         gdf = df.groupby("source").max(numeric_only=True)
-    elif ctx["var"] == "first":
+    else:  # first
         gdf = df.groupby("source").min(numeric_only=True)
     minval = 1
     maxval = gdf["count"].max()

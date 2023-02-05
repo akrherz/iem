@@ -348,7 +348,7 @@ def plotter(fdict):
         fig = make_precip_plot(ctx)
     elif ctx["ptype"] == "meteo":
         fig = make_meteo_plot(ctx)
-    elif ctx["ptype"] in ["wind", "windkt"]:
+    else:  # wind windkt
         fig = make_wind_plot(ctx, ctx["ptype"])
     # Need to drop timezone for excel output
     for col in ["utc_valid", "local_valid"]:

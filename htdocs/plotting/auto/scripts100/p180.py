@@ -1,4 +1,7 @@
-"""Daily Climatology"""
+"""This application plots daily climatology for
+    a location or two of your choice.  You can pick which climatology to use
+    and effectively build a difference plot when picking the same station,
+    but using a different climatology."""
 # stdlib
 import calendar
 
@@ -36,15 +39,8 @@ LABELS = {
 
 def get_description():
     """Return a dict describing how to call this plotter"""
-    desc = {}
+    desc = {"description": __doc__}
     desc["data"] = True
-    desc[
-        "description"
-    ] = """This application plots daily climatology for
-    a location or two of your choice.  You can pick which climatology to use
-    and effectively build a difference plot when picking the same station,
-    but using a different climatology.
-    """
     desc["arguments"] = [
         dict(
             type="select",
@@ -229,10 +225,10 @@ def plotter(fdict):
 
     c1label = c1
     if c1 == "custom":
-        c1label = "[%s-%s]" % (ctx["sy1"], ctx["ey1"])
+        c1label = f"[{ctx['sy1']}-{ctx['ey1']}]"
     c2label = c2
     if c2 == "custom":
-        c2label = "[%s-%s]" % (ctx["sy2"], ctx["ey2"])
+        c2label = f"[{ctx['sy2']}-{ctx['ey2']}]"
     var1 = "high" if varname == "temps" else varname
     var2 = "low" if varname == "temps" else None
     ax0.plot(
@@ -240,20 +236,20 @@ def plotter(fdict):
         df[var1],
         color="r",
         linestyle="-",
-        label="%s %s (%s)" % (var1.capitalize(), station1, c1label),
+        label=f"{var1.capitalize()} {station1} ({c1label})",
     )
     if var2 is not None:
         ax0.plot(
             df.index.values,
             df[var2],
             color="b",
-            label="Low %s (%s)" % (station1, c1label),
+            label=f"Low {station1} ({c1label})",
         )
     ax0.set_ylabel(LABELS[varname])
-    title = "[%s] %s %s Daily Averages" % (
-        station1,
-        ctx["_nt1"].sts[station1]["name"],
-        PDICT[c1] if c1 != "custom" else c1label,
+    tt = PDICT[c1] if c1 != "custom" else c1label
+    title = (
+        f"[{station1}] {ctx['_nt1'].sts[station1]['name']}:: "
+        f"{tt} Daily Averages"
     )
     subtitle = None
     if station2 is not None:
@@ -266,13 +262,10 @@ def plotter(fdict):
             label = f"{c1label} - {c2label}"
         else:
             title = "Daily Climatology Comparison"
-            subtitle = "[%s] %s %s vs [%s] %s %s" % (
-                station1,
-                ctx["_nt1"].sts[station1]["name"],
-                PDICT[ctx["c1"]],
-                station2,
-                ctx["_nt2"].sts[station2]["name"],
-                PDICT[ctx["c2"]],
+            subtitle = (
+                f"[{station1}] {ctx['_nt1'].sts[station1]['name']} "
+                f"{PDICT[ctx['c1']]} vs [{station2}] "
+                f"{ctx['_nt2'].sts[station2]['name']} {PDICT[ctx['c2']]}"
             )
             label = f"{station1} ({c1}) - {station2} ({c2})"
         ax0.plot(
@@ -286,7 +279,7 @@ def plotter(fdict):
                 df.index.values,
                 df[f"{var2}2"],
                 color="green",
-                label="Low %s (%s)" % (station2, c2label),
+                label=f"Low {station2} ({c2label})",
             )
         delta = df[f"{var1}diff"]
         if ctx["s"] != "0":
@@ -318,7 +311,7 @@ def plotter(fdict):
         ax1.xaxis.set_major_formatter(mdates.DateFormatter("%b"))
 
         # Compute monthly
-        gdf = df.groupby(df.index.month).mean()
+        gdf = df.groupby(df.index.month).mean(numeric_only=True)
         ax2.text(
             0.01,
             1.0,

@@ -237,12 +237,10 @@ def get_site(year, month, iemre, nwsli):
         )
         now += datetime.timedelta(days=1)
 
-    table = "raw%s" % (year,)
+    table = f"raw{year}"
     hcursor.execute(
-        """
-    SELECT valid, key, value from """
-        + table
-        + """ WHERE station = %s
+        f"""
+    SELECT valid, key, value from {table} WHERE station = %s
     and valid > %s and valid <= %s
     and value != -9999 and substr(key,3,1) not in ('H','Q') ORDER by valid ASC
     """,
@@ -262,7 +260,7 @@ def get_site(year, month, iemre, nwsli):
         if key in ["TAIRGZ"]:
             # This is automated station
             continue
-        elif key in ["TAIRZXZ", "TAIRZX"]:
+        if key in ["TAIRZXZ", "TAIRZX"]:
             data[idx]["coop"]["high"] = row[2]
         elif key in ["TAIRZNZ", "TAIRZN"]:
             data[idx]["coop"]["low"] = row[2]
@@ -275,7 +273,7 @@ def get_site(year, month, iemre, nwsli):
         elif key in ["PPDRZZ"]:
             data[idx]["coop"]["prec"] = row[2]
         elif key[:2] in ["PP", "SF"] and key[2] == "V":
-            data[idx]["coop"]["v"] += "%s/%s " % (key, row[2])
+            data[idx]["coop"]["v"] += f"{key}/{row[2]} "
         elif key[:2] in ["PP", "SD", "SF", "TA"]:
             if key not in UNCONV_VARS:
                 LOG.warning("Unaccounted for %s %s %s", nwsli, valid, key)
@@ -320,7 +318,7 @@ def print_data(year, month, iemre, nwsli, sheet, data):
     row = sheet.row(0)
     row.write(8, "?")
     row.write(10, "?")
-    row.write(12, "%s %s NWSLI: %s" % (get_sitename(iemre), iemre, nwsli))
+    row.write(12, f"{get_sitename(iemre)} {iemre} NWSLI: {nwsli}")
     row = sheet.row(1)
     row.write(2, "YR")
     row.write(3, "MO")
@@ -344,7 +342,7 @@ def print_data(year, month, iemre, nwsli, sheet, data):
     while sts < ets:
         idx = int(sts.day)
         row = sheet.row(idx + 1)
-        row.write(0, "%s" % (int(iemre[2:]),))
+        row.write(0, f"{int(iemre[2:])}")
         row.write(2, year)
         row.write(3, month)
         row.write(4, sts.day)
@@ -389,7 +387,7 @@ def runner(year, month):
             sheet,
             data,
         )
-    fn = "/tmp/IEM%s%02i.xls" % (year, month)
+    fn = f"/tmp/IEM{year}{month:02.0f}.xls"
     book.save(fn)
     return fn
 
@@ -401,22 +399,17 @@ def main():
         fn = runner(lastmonth.year, lastmonth.month)
         # Email this out!
         msg = MIMEMultipart()
-        msg["Subject"] = ("IEM COOP Report for %s") % (
-            lastmonth.strftime("%b %Y"),
-        )
+        msg["Subject"] = f"IEM COOP Report for {lastmonth:%b %Y}"
         msg["From"] = "akrherz@iastate.edu"
         # msg['To'] = 'akrherz@localhost'
         msg["To"] = "justin.glisan@iowaagriculture.gov"
         msg.preamble = "COOP Report"
 
-        fp = open(fn, "rb")
         b = MIMEBase("Application", "VND.MS-EXCEL")
-        b.set_payload(fp.read())
+        with open(fn, "rb") as fp:
+            b.set_payload(fp.read())
         encoders.encode_base64(b)
-        fp.close()
-        b.add_header(
-            "Content-Disposition", 'attachment; filename="%s"' % (fn,)
-        )
+        b.add_header("Content-Disposition", f'attachment; filename="{fn}"')
         msg.attach(b)
 
         # Send the email via our own SMTP server.

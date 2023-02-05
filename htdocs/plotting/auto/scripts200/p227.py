@@ -7,7 +7,7 @@ import requests
 from geopandas import read_postgis
 from pyiem.network import Table as NetworkTable
 from pyiem.plot.geoplot import MapPlot
-from pyiem.util import get_autoplot_context, get_sqlalchemy_conn
+from pyiem.util import get_autoplot_context, get_sqlalchemy_conn, LOG
 from pyiem.exceptions import NoDataFound
 from pyiem.reference import Z_OVERLAY2, LATLON, prodDefinitions
 from sqlalchemy import text
@@ -49,8 +49,8 @@ def get_text(product_id):
         if req.status_code == 200:
             res = req.content.decode("ascii", "ignore").replace("\001", "")
             res = "\n".join(text.replace("\r", "").split("\n")[5:])
-    except Exception:
-        pass
+    except Exception as exp:
+        LOG.info(exp)
 
     return res
 
