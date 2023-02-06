@@ -157,8 +157,8 @@ function selectElementContents(elid) {
 function updateHash() {
     // Set the hashlink as per our current CONFIG
     let href = `#${CONFIG.year}-O-NEW-${CONFIG.wfo}-${CONFIG.phenomena}-${CONFIG.significance}-${CONFIG.etn.padLeft(4)}`;
-    if (CONFIG.radarProductTime != null && CONFIG.radarProduct != null &&
-        CONFIG.radar != null) {
+    if (CONFIG.radarProductTime !== null && CONFIG.radarProduct !== null &&
+        CONFIG.radar !== null) {
         href += "/" + CONFIG.radar + "-" + CONFIG.radarProduct +
             "-" + CONFIG.radarProductTime.utc().format('YMMDDHHmm');
     }
@@ -385,7 +385,7 @@ function updateRADARTimeSlider() {
             $.each(data.scans, (_idx, scan) => {
                 radartimes.push(moment.utc(scan.ts));
             });
-            if (CONFIG.radarProductTime == null && radartimes.length > 0) {
+            if (CONFIG.radarProductTime === null && radartimes.length > 0) {
                 CONFIG.radarProducTime = radartimes[0];
             }
             let idx = 0;
@@ -405,7 +405,7 @@ function updateRADARProducts() {
     $.ajax({
         data: {
             radar: $("#radarsource").val(),
-            start: (CONFIG.issue != null) ? CONFIG.issue.utc().format() : '',
+            start: (CONFIG.issue !== null) ? CONFIG.issue.utc().format() : '',
             operation: 'products'
         },
         url: '/json/radar',
@@ -436,7 +436,7 @@ function updateRADARSources() {
         data: {
             lat: center[1],
             lon: center[0],
-            start: (CONFIG.issue != null) ? CONFIG.issue.utc().format() : '',
+            start: (CONFIG.issue !== null) ? CONFIG.issue.utc().format() : '',
             operation: 'available'
         },
         url: '/json/radar',

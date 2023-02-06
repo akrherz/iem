@@ -1,4 +1,7 @@
-"""Generate monthly high/low climo plot"""
+"""Daily plot of observed high and low temperatures or precipitation
+    along with the daily climatology for the nearest (sometimes same) location.
+    The vertical highlighted stripes on the plot are just the weekend dates.
+"""
 import datetime
 import warnings
 
@@ -8,7 +11,7 @@ import requests
 import matplotlib.patheffects as PathEffects
 from matplotlib.patches import Rectangle
 from pyiem.plot import figure_axes
-from pyiem.util import get_autoplot_context, get_sqlalchemy_conn
+from pyiem.util import get_autoplot_context, get_sqlalchemy_conn, LOG
 
 warnings.simplefilter("ignore", UserWarning)
 PDICT = {"temps": "Plot High/Low Temperatures", "precip": "Plot Precipitation"}
@@ -16,18 +19,10 @@ PDICT = {"temps": "Plot High/Low Temperatures", "precip": "Plot Precipitation"}
 
 def get_description():
     """Return a dict describing how to call this plotter"""
-    desc = {}
-    desc["cache"] = 300
+    desc = {"description": __doc__, "data": True, "cache": 300}
     today = datetime.date.today()
     mo = today.month
     yr = today.year
-    desc["data"] = True
-    desc[
-        "description"
-    ] = """Daily plot of observed high and low temperatures or precipitation
-    along with the daily climatology for the nearest (sometimes same) location.
-    The vertical highlighted stripes on the plot are just the weekend dates.
-    """
     desc["arguments"] = [
         dict(
             type="zstation",
@@ -79,8 +74,8 @@ def common(ctx):
             f"network={ctx['network']}&year={year}&month={month}",
             timeout=15,
         )
-    except Exception:
-        pass
+    except Exception as exp:
+        LOG.info(exp)
     if req is None or req.status_code != 200:
         raise ValueError("Unable to fetch data from API service.")
     jsn = req.json()

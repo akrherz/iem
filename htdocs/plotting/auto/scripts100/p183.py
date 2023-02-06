@@ -62,7 +62,7 @@ def plotter(fdict):
     ctx = util.get_autoplot_context(fdict, get_description())
     sdate = ctx["sdate"]
     edate = ctx["edate"]
-    state = ctx["state"]
+    state = ctx["state"].upper()
 
     fips = ""
     for key, entry in state_fips.items():
@@ -77,7 +77,7 @@ def plotter(fdict):
     headers = {}
     headers["Accept"] = "application/json, text/javascript, */*; q=0.01"
     headers["Content-Type"] = "application/json; charset=UTF-8"
-    req = requests.get(SERVICE + suffix, payload, headers=headers)
+    req = requests.get(SERVICE + suffix, payload, headers=headers, timeout=30)
     if req.status_code != 200:
         raise NoDataFound("API request to droughtmonitor website failed...")
     jdata = req.json()

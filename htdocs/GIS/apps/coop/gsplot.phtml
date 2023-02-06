@@ -17,6 +17,9 @@ $sday = isset($_GET["sday"]) ? intval($_GET["sday"]) : 1;
 $emonth = isset($_GET["emonth"]) ? intval($_GET["emonth"]) : date("m", time() - 86400);
 $eday = isset($_GET["eday"]) ? intval($_GET["eday"]) : date("d", time() - 86400);
 $network = isset($_REQUEST["network"]) ? xssafe($_REQUEST["network"]) : "IACLIMATE";
+if (strlen($network) > 9){
+    xssafe("<script>");
+}
 
 $nt = new NetworkTable($network);
 $cities = $nt->table;

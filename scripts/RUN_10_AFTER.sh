@@ -9,21 +9,27 @@ LHH=$(date +'%H')
 YEST=$(date --date '1 day ago' +'%Y %m %d')
 TODAY=$(date +'%Y %m %d')
 
-cd iemre
+cd dl
+if [ $LHH -eq "23" ]
+then
+    python download_cfs.py &
+fi
+
+cd ../iemre
 # MRMS hourly totals arrive shortly after the top of the hour
 if [ $LHH -eq "00" ]
 then
-	python merge_mrms_q3.py	$YEST
+    python merge_mrms_q3.py	$YEST
 else
-	python merge_mrms_q3.py	
+    python merge_mrms_q3.py	
 fi
 python merge_ifc.py
 
 if [ $HH -eq "12" ]
 then
-	python merge_mrms_q3.py	$YEST
-	cd ../current
-	python q3_today_total.py $YEST
+    python merge_mrms_q3.py	$YEST
+    cd ../current
+    python q3_today_total.py $YEST
 fi
 
 # We have troubles with IEMRE daily_analysis running timely at midnight, so
@@ -31,13 +37,13 @@ fi
 if [ $LHH -eq "23" ]
 then
     python daily_analysis.py $TODAY
-	python grid_rsds.py	$TODAY
+    python grid_rsds.py	$TODAY
 fi
 
 if [ $LHH -eq "05" ]
 then
-	cd ../coop
-	python cfs_extract.py &
+    cd ../coop
+    python cfs_extract.py &
 fi
 
 cd ../hads
@@ -101,12 +107,12 @@ python q3_today_total.py
 cd ../ua
 if [ $HH -eq "04" ]
 then
-	python ingest_from_rucsoundings.py $YYYY $MM $DD 00
+    python ingest_from_rucsoundings.py $YYYY $MM $DD 00
     python compute_params.py $YYYY
 fi
 if [ $HH -eq "16" ]
 then
-	python ingest_from_rucsoundings.py $YYYY $MM $DD 12
+    python ingest_from_rucsoundings.py $YYYY $MM $DD 12
     python compute_params.py $YYYY
 fi
 
@@ -116,10 +122,10 @@ python current_bias.py GFS
 
 if [ $HH -eq "01" ]
 then
-	cd ../coop
-	python ndfd_extract.py &
+    cd ../coop
+    python ndfd_extract.py &
 
-	cd ../ndfd
-	python ndfd2netcdf.py $(date -u +'%Y %m %d')
-	python plot_temps.py $(date -u +'%Y %m %d')
+    cd ../ndfd
+    python ndfd2netcdf.py $(date -u +'%Y %m %d')
+    python plot_temps.py $(date -u +'%Y %m %d')
 fi
