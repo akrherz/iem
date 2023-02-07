@@ -1,4 +1,7 @@
-"""Heatmap of daily data."""
+"""This app generates a heatmap-like presentation of daily climate data
+    of your choice.  In the case of 'Trailing XX Days', you will want to set
+    a trailing number of days to evaluate the metric for.
+"""
 import calendar
 import datetime
 
@@ -18,16 +21,7 @@ PDICT = {
 
 def get_description():
     """Return a dict describing how to call this plotter"""
-    desc = {}
-    desc["data"] = True
-    desc["cache"] = 86400
-    desc[
-        "description"
-    ] = """
-    This app generates a heatmap-like presentation of daily climate data
-    of your choice.  In the case of 'Trailing XX Days', you will want to set
-    a trailing number of days to evaluate the metric for.
-    """
+    desc = {"description": __doc__, "data": True, "cache": 86400}
     today = datetime.date.today()
     desc["arguments"] = [
         dict(
@@ -94,7 +88,7 @@ def plotter(fdict):
         )
         levels = [0, 25, 50, 75, 100, 150, 200, 250, 300]
         label = "Percent"
-    elif ctx["var"] == "daily_high_depart":
+    else:  # daily_high_depart
         climo = df[["high", "sday"]].groupby("sday").mean()
         df["high_avg"] = df.merge(
             climo, left_on="sday", right_index=True, suffixes=("", "_avg")

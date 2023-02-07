@@ -10,7 +10,7 @@ YEST=$(date --date '1 day ago' +'%Y %m %d')
 TODAY=$(date +'%Y %m %d')
 
 cd dl
-if [ $LHH -eq "23" ]
+if [ $HH -eq "23" ]
 then
     python download_cfs.py &
 fi

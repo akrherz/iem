@@ -1,4 +1,4 @@
-$("#thebutton").click(function(){
+$("#thebutton").click(() => {
     const text = $("#thetext").val();
     const title = $("#thetitle").val();
     $.post(
