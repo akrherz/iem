@@ -9,7 +9,7 @@ class StationData
     public $table;
     public $dbconn;
 
-    function __construct($a, $n = "")
+    public function __construct($a, $n = "")
     {
         $this->table = array();
         $this->dbconn = iemdb("mesosite");
@@ -62,7 +62,7 @@ EOM;
         return true;
     }
 
-    function do_conversions($id)
+    public function do_conversions($id)
     {
         if (!is_null($this->table[$id]["archive_begin"])) {
             $this->table[$id]["archive_begin"] = new DateTime($this->table[$id]["archive_begin"]);
@@ -76,7 +76,7 @@ EOM;
         }
     }
 
-    function get($id)
+    public function get($id)
     {
         return $this->table[$id];
     }

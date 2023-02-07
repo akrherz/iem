@@ -3,6 +3,7 @@ require_once "../../config/settings.inc.php";
 require_once "../../include/forms.php";
 require_once "../../include/database.inc.php";
 require_once "../../include/imagemaps.php";
+require_once "../../include/myview.php";
 
 function download_data($sts, $ets)
 {
@@ -24,24 +25,24 @@ function download_data($sts, $ets)
         for ($j = 1; $j < 13; $j++) {
             echo sprintf(
                 "%s,%s,%s,%s,",
-                $row["ch${j}avg"],
-                $row["ch${j}sd"],
-                $row["ch${j}max"],
-                $row["ch${j}min"]
+                $row["ch{$j}avg"],
+                $row["ch{$j}sd"],
+                $row["ch{$j}max"],
+                $row["ch{$j}min"]
             );
         }
         echo "\n";
     }
 } // End of download_data
 
-$syear = isset($_GET["syear"]) ? intval($_GET["syear"]) : date("Y", time() - 86400);
-$eyear = isset($_GET["eyear"]) ? intval($_GET["eyear"]) : date("Y", time() - 86400);
-$emonth = isset($_GET["emonth"]) ? intval($_GET["emonth"]) : date("m", time());
-$eday = isset($_GET["eday"]) ? intval($_GET["eday"]) : date("d", time());
-$smonth = isset($_GET["smonth"]) ? intval($_GET["smonth"]) : date("m", time() - 86400);
-$sday = isset($_GET["sday"]) ? intval($_GET["sday"]) : date("d", time() - 86400);
-$ehour = isset($_GET["ehour"]) ? intval($_GET["ehour"]) : 0;
-$shour = isset($_GET["shour"]) ? intval($_GET["shour"]) : 0;
+$syear = get_int404("syear", date("Y", time() - 86400));
+$eyear = get_int404("eyear", date("Y", time() - 86400));
+$emonth = get_int404("emonth", date("m", time()));
+$eday = get_int404("eday", date("d", time()));
+$smonth = get_int404("smonth", date("m", time() - 86400));
+$sday = get_int404("sday", date("d", time() - 86400));
+$ehour = get_int404("ehour", 0);
+$shour = get_int404("shour", 0);
 $station = isset($_REQUEST['station']) ? xssafe($_REQUEST['station']) : 'ISU4003';
 
 $imguri = sprintf(
@@ -68,7 +69,6 @@ if (isset($_REQUEST["action"])) {
         die();
     }
 }
-include("../../include/myview.php");
 $t = new MyView();
 
 $t->title = "Atmospheric Structure Instrumentation";

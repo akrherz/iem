@@ -1,4 +1,5 @@
-"""ISU Soil Moisture Network Daily Plots."""
+"""This application generates maps of daily ISU
+    Soil Moisture Network Data."""
 import datetime
 
 import pandas as pd
@@ -25,12 +26,7 @@ PLOTTYPES = {
 
 def get_description():
     """Return a dict describing how to call this plotter"""
-    desc = {}
-    desc["data"] = True
-    desc[
-        "description"
-    ] = """This application generates maps of daily ISU
-    Soil Moisture Network Data."""
+    desc = {"description": __doc__, "data": True}
     ets = datetime.datetime.now().replace(minute=0)
     sts = ets - datetime.timedelta(days=1)
     desc["arguments"] = [
@@ -394,7 +390,7 @@ def plotter(fdict):
         title = "ISU Soil Moisture Average Wind Speed [MPH]"
         subtitle = "based on available daily summary data"
         data, df = plot8(ctx)
-    elif ctx["opt"] == "9":
+    else:  # 9
         title = (
             "ISU Soil Moisture Plant Available Soil Water (6-30 inch) [inch]"
         )

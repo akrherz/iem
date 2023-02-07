@@ -8,7 +8,7 @@ class NetworkTable
     public array $table;
     public $dbconn;
 
-    function __construct($a, $force3char = FALSE, $only_online = FALSE)
+    public function __construct($a, $force3char = FALSE, $only_online = FALSE)
     {
         $this->table = array();
         $ol = ($only_online) ? " and online = 't' " : "";
@@ -70,7 +70,7 @@ EOM;
         return true;
     }
 
-    function do_conversions($id)
+    public function do_conversions($id)
     {
         if (!is_null($this->table[$id]["archive_begin"])) {
             // can't deal with ancient dates
@@ -90,7 +90,7 @@ EOM;
         }
     }
 
-    function get($id)
+    public function get($id)
     {
         return $this->table[$id];
     }
