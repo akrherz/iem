@@ -1,7 +1,7 @@
 <?php
 require_once "../../config/settings.inc.php";
 require_once "../../include/myview.php";
-$OL = "7.1.0";
+$OL = "7.2.2";
 $DT = "1.11.1";
 $S2 = "4.1.0rc0";
 
@@ -33,7 +33,7 @@ $t->headextra = <<<EOM
 <link rel="stylesheet" href="/vendor/jquery-ui/1.11.4/jquery-ui.min.css" />
 <link rel="stylesheet" type="text/css"
 href="/vendor/datetimepicker/2.5.20/jquery.datetimepicker.min.css" />
-<link rel="stylesheet" type="text/css" href="/vendor/select2/${S2}/select2.min.css"/ >
+<link rel="stylesheet" type="text/css" href="/vendor/select2/{$S2}/select2.min.css"/ >
 <link rel='stylesheet' href="/vendor/openlayers/{$OL}/ol.css" type='text/css'>
 <link type="text/css" href="/vendor/openlayers/{$OL}/ol-layerswitcher.css" rel="stylesheet" />
 <link type="text/css" href="static.css" rel="stylesheet" />
@@ -176,7 +176,7 @@ $t->content = <<<EOM
 
 <div class="row">
   <div class="col-md-5" id="leftside">
-    ${theform}
+    {$theform}
     <div id="map"></div>
   </div><!-- ./col-md-5 -->
   <div class="col-md-7" id="rightside">
@@ -190,13 +190,13 @@ $t->content = <<<EOM
 
     <div class="tab-content tabs clearfix">
         <div role="tabpanel" class="tab-pane active" id="1a">
-            ${tab1a}
+            {$tab1a}
         </div>
         <div role="tabpanel" class="tab-pane" id="2a">
-            ${tab2a}
+            {$tab2a}
         </div>
         <div role="tabpanel" class="tab-pane" id="3a">
-            ${tab3a}
+            {$tab3a}
         </div>
 
     </div>

@@ -46,8 +46,7 @@ $rs = pg_execute($dbconn, "SELECT", Array() );
              $row["station_name"], $row["name"], fancytime($row["valid"]), $row["avg_speed"],
              $row["normal_vol"], $row["long_vol"], $row["occupancy"]);
  }
- 
- 
+
 $t->content = <<<EOF
 <h3 class="subtitle">Iowa RWIS Traffic Data</h3>
 

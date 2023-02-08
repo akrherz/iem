@@ -13,12 +13,9 @@ EXL = "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"
 
 def make_url(row):
     """Build URL."""
-    return "/vtec/#%s-O-NEW-K%s-%s-%s-%04i" % (
-        row["iso_issued"][:4],
-        row["wfo"],
-        row["phenomena"],
-        row["significance"],
-        row["eventid"],
+    return (
+        f"/vtec/#{row['iso_issued'][:4]}-O-NEW-K{row['wfo']}-"
+        f"{row['phenomena']}-{row['significance']}-{row['eventid']:04.0f}"
     )
 
 
@@ -94,28 +91,20 @@ def application(environ, start_response):
 
     df = get_df(ugc, sdate, edate)
     if fmt == "xlsx":
-        fn = "vtec_%s_%s_%s.xlsx" % (
-            ugc,
-            sdate.strftime("%Y%m%d"),
-            edate.strftime("%Y%m%d"),
-        )
+        fn = f"vtec_{ugc}_{sdate:%Y%m%d}_{edate:%Y%m%d}.xlsx"
         headers = [
             ("Content-type", EXL),
-            ("Content-disposition", "attachment; Filename=" + fn),
+            ("Content-disposition", f"attachment; Filename={fn}"),
         ]
         start_response("200 OK", headers)
         bio = BytesIO()
         df.to_excel(bio, index=False)
         return [bio.getvalue()]
     if fmt == "csv":
-        fn = "vtec_%s_%s_%s.csv" % (
-            ugc,
-            sdate.strftime("%Y%m%d"),
-            edate.strftime("%Y%m%d"),
-        )
+        fn = f"vtec_{ugc}_{sdate:%Y%m%d}_{edate:%Y%m%d}.csv"
         headers = [
             ("Content-type", "application/octet-stream"),
-            ("Content-disposition", "attachment; Filename=" + fn),
+            ("Content-disposition", f"attachment; Filename={fn}"),
         ]
         start_response("200 OK", headers)
         bio = StringIO()
@@ -123,11 +112,9 @@ def application(environ, start_response):
         return [bio.getvalue().encode("utf-8")]
 
     res = as_json(df)
-    if cb is None:
-        data = res
-    else:
-        data = "%s(%s)" % (html_escape(cb), res)
+    if cb is not None:
+        res = f"{html_escape(cb)}({res})"
 
     headers = [("Content-type", "application/json")]
     start_response("200 OK", headers)
-    return [data.encode("ascii")]
+    return [res.encode("ascii")]

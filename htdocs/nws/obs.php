@@ -56,11 +56,13 @@ foreach ($jobj["data"] as $bogus => $iemob) {
 
     if ($mydata[$key]["max_gust"] > $mydata[$key]["max_sknt"]) {
         $mydata[$key]["peak"] = $mydata[$key]["max_gust"];
-        $mydata[$key]["peak_ts"] = new DateTime($mydata[$key]["local_max_gust_ts"]);
+        if (! is_null($mydata[$key]["local_max_gust_ts"])) {
+            $mydata[$key]["peak_ts"] = new DateTime($mydata[$key]["local_max_gust_ts"]);
+        }
     } else {
         $mydata[$key]["peak"] = $mydata[$key]["max_sknt"];
         $mydata[$key]["peak_ts"] = null;
-        if ($mydata[$key]["local_max_sknt_ts"]) {
+        if (! is_null($mydata[$key]["local_max_sknt_ts"])) {
             $mydata[$key]["peak_ts"] = new DateTime($mydata[$key]["local_max_sknt_ts"]);
         }
     }

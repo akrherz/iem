@@ -7,7 +7,7 @@ $mos = iemdb("mos");
 pg_exec($mos, "SET TIME ZONE 'UTC'");
 
 $station = isset($_GET["station"]) ? xssafe($_GET["station"]) : "KAMW";
-$ts = isset($_GET["valid"]) ? strtotime($_GET["valid"]) : time();
+$ts = isset($_GET["valid"]) ? strtotime(xssafe($_GET["valid"])) : time();
 $year = intval(date("Y", $ts));
 if ($year < 2007) {
     exit();

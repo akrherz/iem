@@ -1,6 +1,6 @@
 <?php 
-include("../../../config/settings.inc.php");
-include("../../../include/myview.php");
+require_once "../../../config/settings.inc.php";
+require_once "../../../include/myview.php";
 $t = new MyView();
 $t->title = "Iowa Caucus Weather";
 
@@ -20,7 +20,7 @@ educational use only.</p>
 
 <div style="text-align: center; font-size: large; font-color: #0000f0;">Forecast Discussion</div>
 
-		{$fx}
+{$fx}
 
 <div style="text-align: center; font-size: large; font-color: #0000f0;">Average Temperatures for 19 Jan</div>
 
@@ -39,4 +39,3 @@ educational use only.</p>
 
 EOF;
 $t->render('single.phtml');
-?>
