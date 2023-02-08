@@ -3,7 +3,6 @@ import os
 import zipfile
 import datetime
 import json
-import shutil
 
 import numpy as np
 import shapefile
@@ -69,10 +68,10 @@ def application(environ, start_response):
         res = {"data": []}
         res["data"].append(
             {
-                "gdd": "%.0f" % (myGDD,),
-                "precip": "%.1f" % (myPrecip,),
-                "latitude": "%.4f" % (lat,),
-                "longitude": "%.4f" % (lon,),
+                "gdd": f"{myGDD:.0f}",
+                "precip": f"{myPrecip:.1f}",
+                "latitude": f"{lat:.4f}",
+                "longitude": f"{lon:.4f}",
             }
         )
         headers = [("Content-type", "application/json")]
@@ -80,7 +79,7 @@ def application(environ, start_response):
         return [json.dumps(res).encode("ascii")]
 
     # Time to create the shapefiles
-    basefn = "iemre_%s_%s" % (ts0.strftime("%Y%m%d"), ts1.strftime("%Y%m"))
+    basefn = f"iemre_{ts0:%Y%m%d}_{ts1:%Y%m%d}"
     w = shapefile.Writer(basefn)
     w.field("GDD", "F", 10, 2)
     w.field("PREC_IN", "F", 10, 2)
@@ -104,11 +103,11 @@ def application(environ, start_response):
             w.record(gdd[j, i], precip[j, i])
     w.close()
     # Create zip file, send it back to the clients
-    shutil.copyfile("/opt/iem/data/gis/meta/4326.prj", "%s.prj" % (basefn,))
-    z = zipfile.ZipFile("%s.zip" % (basefn,), "w", zipfile.ZIP_DEFLATED)
-    for suffix in ["shp", "shx", "dbf", "prj"]:
-        z.write("%s.%s" % (basefn, suffix))
-    z.close()
+    with zipfile.ZipFile(f"{basefn}.zip", "w", zipfile.ZIP_DEFLATED) as zfp:
+        for suffix in ["shp", "shx", "dbf", "prj"]:
+            zfp.write(f"{basefn}.{suffix}")
+        with open("/opt/iem/data/gis/meta/4326.prj", encoding="ascii") as fh:
+            zfp.writestr(f"{basefn}.prj", fh.read())
 
     headers = [
         ("Content-type", "application/octet-stream"),

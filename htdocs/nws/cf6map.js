@@ -1,8 +1,9 @@
-var renderattr = "high";
-var vectorLayer;
-var map;
-var element;
-var fontSize = 14;
+let renderattr = "high";
+let vectorLayer = null;
+let map = null;
+let element = null;
+let fontSize = 14;
+var ol = window.ol || {};  // skipcq: JS-0239
 
 function text(str){
     // XSS shim
@@ -10,9 +11,9 @@ function text(str){
 }
 
 function updateURL() {
-    var t = $.datepicker.formatDate("yymmdd",
+    const tt = $.datepicker.formatDate("yymmdd",
         $("#datepicker").datepicker('getDate'));
-    window.location.href = "#" + t + "/" + renderattr;
+    window.location.href = `#${tt}/${renderattr}`;
 }
 
 function updateMap() {
@@ -22,7 +23,7 @@ function updateMap() {
 }
 
 function updateDate() {
-    var fullDate = $.datepicker.formatDate("yy-mm-dd",
+    const fullDate = $.datepicker.formatDate("yy-mm-dd",
         $("#datepicker").datepicker('getDate'));
     map.removeLayer(vectorLayer);
     vectorLayer = makeVectorLayer(fullDate);
@@ -31,10 +32,10 @@ function updateDate() {
 }
 
 var vectorStyleFunction = function (feature, resolution) {
-    var style;
-    var value = feature.get(renderattr);
-    var color = "#FFFFFF";
-    var outlinecolor = "#000000";
+    let style = null;
+    const value = feature.get(renderattr);
+    let color = "#FFFFFF";
+    const outlinecolor = "#000000";
     if (value != "M") {
         if (renderattr.indexOf("depart") > -1) {
             if (renderattr.indexOf("high") > -1 || renderattr.indexOf("low") > -1) {
@@ -59,7 +60,7 @@ var vectorStyleFunction = function (feature, resolution) {
                 font: fontSize + 'px Calibri,sans-serif',
                 text: value.toString(),
                 fill: new ol.style.Fill({
-                    color: color,
+                    color,
                     width: 1
                 }),
                 stroke: new ol.style.Stroke({
@@ -99,13 +100,13 @@ function makeVectorLayer(dt) {
         source: new ol.source.Vector({
             format: new ol.format.GeoJSON(),
             projection: ol.proj.get('EPSG:3857'),
-            url: '/geojson/cf6.py?dt=' + dt
+            url: `/geojson/cf6.py?dt=${dt}`
         }),
         style: vectorStyleFunction
     });
 }
 
-$(document).ready(function () {
+$(document).ready(() => {
 
 
     $("#datepicker").datepicker({
@@ -119,7 +120,7 @@ $(document).ready(function () {
     });
 
     vectorLayer = makeVectorLayer($.datepicker.formatDate("yy-mm-dd", new Date()));
-    var key = 'AsgbmE8m-iBbkypiCOE23M0qElHUfEQtaTvPdDPdM0p7s0N7pJcgrjo70FXjX6bY';
+    const key = 'AsgbmE8m-iBbkypiCOE23M0qElHUfEQtaTvPdDPdM0p7s0N7pJcgrjo70FXjX6bY';
     map = new ol.Map({
         target: 'map',
         layers: [new ol.layer.Tile({
@@ -141,12 +142,12 @@ $(document).ready(function () {
         })
     });
 
-    var layerSwitcher = new ol.control.LayerSwitcher();
+    const layerSwitcher = new ol.control.LayerSwitcher();
     map.addControl(layerSwitcher);
 
     element = document.getElementById('popup');
 
-    var popup = new ol.Overlay({
+    const popup = new ol.Overlay({
         element: element,
         positioning: 'bottom-center',
         stopEvent: false
@@ -160,27 +161,22 @@ $(document).ready(function () {
     });
 
     // display popup on click
-    map.on('click', function (evt) {
-        var feature = map.forEachFeatureAtPixel(evt.pixel,
-            function (feature, layer) {
-                return feature;
+    map.on('click', (evt) => {
+        const feature = map.forEachFeatureAtPixel(evt.pixel,
+            (feature2, _layer) => {
+                return feature2;
             });
         if (feature) {
-            var geometry = feature.getGeometry();
-            var coord = geometry.getCoordinates();
+            const geometry = feature.getGeometry();
+            const coord = geometry.getCoordinates();
             popup.setPosition(coord);
-            var content = "<p><strong>" + feature.get('name') + "</strong>"
-                + "<br />High: " + feature.get('high')
-                + "<br />Low: " + feature.get('low')
-                + "<br />Precip: " + feature.get('precip')
-                + "<br />Snow: " + feature.get('snow')
-                + "</p>";
+            const content = `<p><strong>${feature.get('name')}</strong><br />High: ${feature.get('high')}<br />Low: ${feature.get('low')}<br />Precip: ${feature.get('precip')}<br />Snow: ${feature.get('snow')}</p>`;
             $('#popover-content').html(content);
             $(element).popover('show');
 
             $('#cf6report').html("<h3>Loading text, one moment please...</h3>");
-            $.get(feature.get('link'), function (data) {
-                $('#cf6report').html("<pre>" + data + "</pre>");
+            $.get(feature.get('link'), (data) => {
+                $('#cf6report').html(`<pre>${data}</pre>`);
             });
 
         } else {
@@ -195,21 +191,21 @@ $(document).ready(function () {
         // #YYYYmmdd/variable
         tokens = tokens[1].split("/");
         if (tokens.length == 2) {
-            var tpart = tokens[0];
+            const tpart = tokens[0];
             renderattr = tokens[1];
             $('select[id=renderattr] option[value=' + renderattr + ']').attr("selected", "selected");
-            var dstr = tpart.substr(4, 2) + "/" + tpart.substr(6, 2) + "/" + tpart.substr(0, 4);
+            const dstr = `${tpart.substr(4, 2)}/${tpart.substr(6, 2)}/${tpart.substr(0, 4)}`;
             $("#datepicker").datepicker("setDate", new Date(dstr));
             updateDate();
         }
     }
 
     // Font size buttons
-    $('#fplus').click(function () {
+    $('#fplus').click(() => {
         fontSize += 2;
         vectorLayer.setStyle(vectorStyleFunction);
     });
-    $('#fminus').click(function () {
+    $('#fminus').click(() => {
         fontSize -= 2;
         vectorLayer.setStyle(vectorStyleFunction);
     });

@@ -7,31 +7,33 @@ require_once "../../include/forms.php";
 require_once "../../include/imagemaps.php";
 require_once "../../include/database.inc.php";
 
-$wfo = isset($_REQUEST["wfo"]) ? xssafe($_REQUEST["wfo"]): 'OAX';
-$radar = isset($_REQUEST["radar"]) ? xssafe($_REQUEST["radar"]): 'OAX';
-$radar_product = isset($_REQUEST["product"]) ? xssafe($_REQUEST["product"]): 'N0Q';
+$wfo = isset($_REQUEST["wfo"]) ? xssafe($_REQUEST["wfo"]) : 'OAX';
+$radar = isset($_REQUEST["radar"]) ? xssafe($_REQUEST["radar"]) : 'OAX';
+$radar_product = isset($_REQUEST["product"]) ? xssafe($_REQUEST["product"]) : 'N0Q';
 $year = get_int404("year", date("Y"));
 $month1 = get_int404("month1", date("m"));
-$day1= get_int404("day1", date("d"));
+$day1 = get_int404("day1", date("d"));
 $hour1 = get_int404("hour1", 0);
 $month2 = get_int404("month2", date("m"));
 $day2 = get_int404("day2", date("d"));
 $hour2 = get_int404("hour2", 23);
 $sts = gmmktime($hour1, 0, 0, $month1, $day1, $year);
 $ets = gmmktime($hour2, 0, 0, $month2, $day2, $year);
-$wtype = isset($_GET["wtype"]) ? $_GET["wtype"] : Array('TO', 'SV');
+$wtype = isset($_GET["wtype"]) ? $_GET["wtype"] : array('TO', 'SV');
 
 
-if (isset($_REQUEST["wfo"])){
+if (isset($_REQUEST["wfo"])) {
     /* Check to make sure we have warnings first! */
     $postgis = iemdb("postgis");
-    $rs = pg_prepare($postgis, "SELECT", "SELECT issue from sbw_{$year} ".
-    "WHERE wfo = $1 and phenomena in ('SV','TO','FF', 'MA', 'SQ', 'DS') ".
-    "and significance = 'W' and issue BETWEEN $2 and $3");
-    $rs = pg_execute($postgis, "SELECT", Array($wfo, 
-        gmdate("Y-m-d H:i", $sts) ."+00", gmdate("Y-m-d H:i", $ets) ."+00"));
+    $rs = pg_prepare($postgis, "SELECT", "SELECT issue from sbw_{$year} " .
+        "WHERE wfo = $1 and phenomena in ('SV','TO','FF', 'MA', 'SQ', 'DS') " .
+        "and significance = 'W' and issue BETWEEN $2 and $3");
+    $rs = pg_execute($postgis, "SELECT", array(
+        $wfo,
+        gmdate("Y-m-d H:i", $sts) . "+00", gmdate("Y-m-d H:i", $ets) . "+00"
+    ));
     pg_close($postgis);
-    if (pg_num_rows($rs) < 1){
+    if (pg_num_rows($rs) < 1) {
         $err = "Sorry, did not find any warnings for your selected WFO and
         time period, please try again!";
     } else {
@@ -39,10 +41,12 @@ if (isset($_REQUEST["wfo"])){
         pg_prepare($mesosite, "INSERT", "INSERT into racoon_jobs(wfo, sts, ets,
                 radar, nexrad_product, wtype) values ($1,$2,$3,$4,$5,$6) 
                 returning jobid");
-        $rs = pg_execute($mesosite, "INSERT", array($wfo, 
+        $rs = pg_execute($mesosite, "INSERT", array(
+            $wfo,
             date("Y-m-d H:i", $sts), date("Y-m-d H:i", $ets), $radar,
-                $radar_product, implode(",", $wtype)));
-        $row = pg_fetch_assoc($rs,0);
+            $radar_product, implode(",", $wtype)
+        ));
+        $row = pg_fetch_assoc($rs, 0);
         pg_close($mesosite);
         $jobid = $row["jobid"];
         Header("Location: wait.phtml?jobid=$jobid");
@@ -54,31 +58,38 @@ $t->title = "Raccoon - Warnings overview in PowerPoint";
 $t->headextra = "<meta name='robots' content='index, nofollow'/>";
 
 $e = "";
-if (isset($err)){
+if (isset($err)) {
     $e = sprintf("<div class=\"alert alert-warning\">%s</div>", $err);
 }
 
-$ar = Array("FF" => "Flash Flood",
-"MA" => "Marine",
+$ar = array(
+    "FF" => "Flash Flood",
+    "MA" => "Marine",
     "SQ" => "Snow Squall",
     "DS" => "Dust Storm",
-"SV" => "Severe Thunderstorm",
-"TO" => "Tornado");
+    "SV" => "Severe Thunderstorm",
+    "TO" => "Tornado"
+);
 $wtselect = "";
-foreach($ar as $p => $n){
-    $wtselect .= sprintf("<input name=\"wtype[]\" type=\"checkbox\" 
-            value=\"%s\"%s>%s (%s.W)</input><br />", $p, 
-            in_array($p, $wtype) ? " CHECKED": "", $n, $p);
+foreach ($ar as $p => $n) {
+    $wtselect .= sprintf(
+        "<input name=\"wtype[]\" type=\"checkbox\" 
+            value=\"%s\"%s>%s (%s.W)</input><br />",
+        $p,
+        in_array($p, $wtype) ? " CHECKED" : "",
+        $n,
+        $p
+    );
 }
 
 
-$wselect = networkSelect("WFO", $wfo, Array(), "wfo");
-$nselect = networkSelect("NEXRAD", $radar, Array(), "radar");
+$wselect = networkSelect("WFO", $wfo, array(), "wfo");
+$nselect = networkSelect("NEXRAD", $radar, array(), "radar");
 $yselect = yearSelect2(2002, $year, "year");
-$m1select = monthSelect2($month1,"month1");
+$m1select = monthSelect2($month1, "month1");
 $d1select = daySelect2($day1, "day1");
 $h1select = gmtHourSelect($hour1, "hour1");
-$m2select = monthSelect2($month2,"month2");
+$m2select = monthSelect2($month2, "month2");
 $d2select = daySelect2($day2, "day2");
 $h2select = gmtHourSelect($hour2, "hour2");
 $t->content = <<<EOF

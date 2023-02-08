@@ -106,11 +106,10 @@ def plotter(fdict):
     df["doy"] = pd.to_numeric(df["valid"].dt.strftime("%j"))
     df["year"] = df["valid"].dt.year
 
-    title = ("ISU AgClimate [%s] %s [%s-]\n" "Site %s Yearly Timeseries") % (
-        station,
-        nt.sts[station]["name"],
-        df["valid"].min().year,
-        VARS[varname],
+    title = (
+        f"ISU AgClimate [{station}] {nt.sts[station]['name']} "
+        f"[{df['valid'].min().year}-]\n"
+        f"Site {VARS[varname]} Yearly Timeseries"
     )
     (fig, ax) = figure_axes(title=title, apctx=ctx)
     for dtype in ["L", "C"]:
@@ -133,14 +132,14 @@ def plotter(fdict):
                     lw=2.0,
                 )
 
-    gdf = df.groupby("doy").mean()
+    gdf = df.groupby("doy").mean(numeric_only=True)
     ax.plot(gdf.index.values, gdf[varname].values, color="k", label="Average")
     ax.grid(True)
     if varname == "tsoil":
         ax.set_ylabel(r"Daily Avg Temp $^{\circ}\mathrm{F}$")
         ax.set_xlabel(
-            ("* pre-2014 data provided by [%s] %s")
-            % (oldstation, oldnt.sts[oldstation]["name"])
+            "* pre-2014 data provided by "
+            f"[{oldstation}] {oldnt.sts[oldstation]['name']}"
         )
     else:
         ax.set_ylabel("Daily Avg Volumetric Water Content [kg/kg]")

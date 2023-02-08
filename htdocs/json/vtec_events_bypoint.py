@@ -13,12 +13,9 @@ EXL = "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"
 
 def make_url(row):
     """Build URL."""
-    return "/vtec/#%s-O-NEW-K%s-%s-%s-%04i" % (
-        row["iso_issued"][:4],
-        row["wfo"],
-        row["phenomena"],
-        row["significance"],
-        row["eventid"],
+    return (
+        f"/vtec/#{row['iso_issued'][:4]}-O-NEW-K{row['wfo']}-"
+        f"{row['phenomena']}-{row['significance']}-{row['eventid']:04.0f}"
     )
 
 
@@ -102,30 +99,26 @@ def application(environ, start_response):
 
     df = get_df(lon, lat, sdate, edate)
     if fmt == "xlsx":
-        fn = "vtec_%.4fW_%.4fN_%s_%s.xlsx" % (
-            0 - lon,
-            lat,
-            sdate.strftime("%Y%m%d"),
-            edate.strftime("%Y%m%d"),
+        fn = (
+            f"vtec_{(0 - lon):.4f}W_{lat:.4f}N_{sdate:%Y%m%d}_"
+            f"{edate:%Y%m%d}.xlsx"
         )
         headers = [
             ("Content-type", EXL),
-            ("Content-disposition", "attachment; Filename=" + fn),
+            ("Content-disposition", f"attachment; Filename={fn}"),
         ]
         start_response("200 OK", headers)
         bio = BytesIO()
         df.to_excel(bio, index=False)
         return [bio.getvalue()]
     if fmt == "csv":
-        fn = "vtec_%.4fW_%.4fN_%s_%s.csv" % (
-            0 - lon,
-            lat,
-            sdate.strftime("%Y%m%d"),
-            edate.strftime("%Y%m%d"),
+        fn = (
+            f"vtec_{(0 - lon):.4f}W_{lat:.4f}N_{sdate:%Y%m%d}_"
+            f"{edate:%Y%m%d}.csv"
         )
         headers = [
             ("Content-type", "application/octet-stream"),
-            ("Content-disposition", "attachment; Filename=" + fn),
+            ("Content-disposition", f"attachment; Filename={fn}"),
         ]
         start_response("200 OK", headers)
         bio = StringIO()
@@ -133,11 +126,9 @@ def application(environ, start_response):
         return [bio.getvalue().encode("utf-8")]
 
     res = to_json(df)
-    if cb is None:
-        data = res
-    else:
-        data = "%s(%s)" % (html_escape(cb), res)
+    if cb is not None:
+        res = f"{html_escape(cb)}({res})"
 
     headers = [("Content-type", "application/json")]
     start_response("200 OK", headers)
-    return [data.encode("ascii")]
+    return [res.encode("ascii")]

@@ -2,13 +2,14 @@
 /* Generate JSON of l3 nexrad attributes! */
 require_once "../../config/settings.inc.php";
 require_once "../../include/database.inc.php";
+require_once "../../include/forms.php";
 $postgis = iemdb("radar");
 
 
 /* Figure out what was requested */
-$center_lat = isset($_GET["lat"]) ? floatval($_GET["lat"]): 58.1;
-$center_lng = isset($_GET["lon"]) ? floatval($_GET["lon"]): -97.0;
-$radius = isset($_GET["radius"]) ? floatval($_GET["radius"]): 2000.0; # in meters
+$center_lat = isset($_GET["lat"]) ? floatval(xssafe($_GET["lat"])): 58.1;
+$center_lng = isset($_GET["lon"]) ? floatval(xssafe($_GET["lon"])): -97.0;
+$radius = isset($_GET["radius"]) ? floatval(xssafe($_GET["radius"])): 2000.0; # in meters
 
 $rs = pg_prepare($postgis, "SELECT", "SELECT ST_x(geom) as lon, ST_y(geom) as lat,
      ST_distance(ST_transform(geom,2163), 
@@ -22,8 +23,8 @@ $rs = pg_prepare($postgis, "SELECT", "SELECT ST_x(geom) as lon, ST_y(geom) as la
 $rs = pg_execute($postgis, "SELECT", Array());
 if (pg_num_rows($rs) == 0){
   $json = array("hotspots"=> Array(), "layer"=>"nexradl3attr", "errorString"=>"Sorry, no attributes close to you right now!", "morePages"=>false, "errorCode"=>21, "nextPageKey"=>null);
-  echo  json_encode($json);
-  exit; // 
+  echo json_encode($json);
+  die();
 
 }
 /*
@@ -68,5 +69,4 @@ for($i=0;$row=pg_fetch_assoc($rs);$i++)
     "type" => 0);
 }
 
-
-echo  json_encode($json);
+echo json_encode($json);

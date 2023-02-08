@@ -111,12 +111,13 @@ EOM;
 
         /* Create SHP,DBF bases */
         $filePre = "{$network}_locs";
+        $sufixes = Array("shp", "shx", "dbf", "zip");
         if (!is_file("/var/webtmp/{$filePre}.zip")) {
             $shpFname = "/var/webtmp/$filePre";
-            @unlink($shpFname . ".shp");
-            @unlink($shpFname . ".shx");
-            @unlink($shpFname . ".dbf");
-            @unlink($shpFname . ".zip");
+            foreach($sufixes as $key => $suff){
+                $fn = "{$shpFname}.{$suff}";
+                if (is_file($fn)) unlink($fn);
+            }
             $shpFile = new shapeFileObj($shpFname, MS_SHAPEFILE_POINT);
             $dbfFile = dbase_create($shpFname . ".dbf", array(
                 array("ID", "C", 6),
@@ -134,7 +135,7 @@ EOM;
                     $row["id"],
                     $row["name"],
                     $row["network"],
-                    $row["archive_begin"]->format("Y-m-d"),
+                    is_null($row["archive_begin"]) ? "": $row["archive_begin"]->format("Y-m-d"),
                 ));
             }
             unset($shpFile);
@@ -143,8 +144,12 @@ EOM;
             copy("/opt/iem/data/gis/meta/4326.prj", $filePre . ".prj");
             popen("zip {$filePre}.zip {$filePre}.shp {$filePre}.shx {$filePre}.dbf {$filePre}.prj", 'r');
         }
-        $table .= "Shapefile Generation Complete.<br>";
-        $table .= "Please download this <a href=\"/tmp/" . $filePre . ".zip\">zipfile</a>.";
+        $table .= <<<EOM
+<div class="alert alert-info">
+Shapefile Generation Complete.<br>
+Please download this <a href="/tmp/{$filePre}.zip">zipfile</a>.
+</div>
+EOM;
         chdir("/opt/iem/htdocs/sites/");
     } else if ($format == "awips") {
         if (!$nohtml) $table .= "<pre>\n";

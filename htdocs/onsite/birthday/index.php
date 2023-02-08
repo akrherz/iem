@@ -1,11 +1,10 @@
 <?php  
-include("../../../config/settings.inc.php");
-include("../../../include/myview.php");
+require_once "../../../config/settings.inc.php";
+require_once "../../../include/myview.php";
 $t = new MyView();
   $t->title = "Birthday Weather";
-include("../../../include/forms.php");
-include("../../../include/imagemaps.php");
-
+require_once "../../../include/forms.php";
+require_once "../../../include/imagemaps.php";
 
 $startYear = isset($_GET['startYear']) ? intval($_GET['startYear']): 1951;
 
@@ -32,7 +31,7 @@ conditions at a location near to you.  Just follow the instructions below.
 
 <table><TR><TH>Year:</TH><TH>Month:</TH><TH>Day:</TH></TR>
 <TR>
-	<TD><INPUT type="TEXT" name="year" size="5" MAXLENGTH="4" value="1951"></TD>
+<TD><INPUT type="TEXT" name="year" size="5" MAXLENGTH="4" value="1951"></TD>
 
 <TD>{$mselect}</TD>
 
@@ -49,4 +48,3 @@ conditions at a location near to you.  Just follow the instructions below.
 purposes only.
 EOF;
 $t->render('single.phtml');
-?>

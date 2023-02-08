@@ -1,20 +1,20 @@
-var stateSelect;
-var ugcSelect;
-var mapwidget1;
-var mapwidget2;
-var table1;
-var table2;
-var table2IsByPoint = true;
-var hashlinkUGC;
-var edate;
-var sdate;
-var edate1;
-var sdate1;
-var BACKEND_EVENTS_BYPOINT = '/json/vtec_events_bypoint.py';
-var BACKEND_EVENTS_BYUGC = '/json/vtec_events_byugc.py';
-var BACKEND_SBW_BYPOINT = '/json/sbw_by_point.py';
+let stateSelect = null;
+let ugcSelect = null;
+let mapwidget1 = null;
+let mapwidget2 = null;
+let table1 = null;
+let table2 = null;
+let table2IsByPoint = true;
+let hashlinkUGC = null;
+let edate = null;
+let sdate = null;
+let edate1 = null;
+let sdate1 = null;
+const BACKEND_EVENTS_BYPOINT = '/json/vtec_events_bypoint.py';
+const BACKEND_EVENTS_BYUGC = '/json/vtec_events_byugc.py';
+const BACKEND_SBW_BYPOINT = '/json/sbw_by_point.py';
 
-var states = [["AL", "Alabama"], ["AK", "Alaska"], ["AZ", "Arizona"],
+const states = [["AL", "Alabama"], ["AK", "Alaska"], ["AZ", "Arizona"],
         ["AR", "Arkansas"], ["CA", "California"], ["CO", "Colorado"],
         ["CT", "Connecticut"], ["DE", "Delaware"], ["FL", "Florida"],
         ["GA", "Georgia"], ["HI", "Hawaii"], ["ID", "Idaho"],
@@ -51,24 +51,28 @@ var states = [["AL", "Alabama"], ["AK", "Alaska"], ["AZ", "Arizona"],
         ["PZ", "Pacific Ocean PZ"],
         ["SL", "St. Lawrence River"]
 ];
+var google = window.google || {};  // skipcq: JS-0239
+
+function text(str) {
+    // XSS
+    return $("<p>").text(str).html();
+}
 
 function updateMarkerPosition(lon, lat) {
-    var latLng = new google.maps.LatLng(parseFloat(lat), parseFloat(lon))
+    const latLng = new google.maps.LatLng(parseFloat(lat), parseFloat(lon))
     $("#lat").val(latLng.lat().toFixed(4));
     $("#lon").val(latLng.lng().toFixed(4));
-    window.location.href = "#bypoint/" +
-        latLng.lng().toFixed(4) + "/" + latLng.lat().toFixed(4);
+    window.location.href = `#bypoint/${latLng.lng().toFixed(4)}/${latLng.lat().toFixed(4)}`;
     if (mapwidget1){
         mapwidget1.map.setCenter(latLng);
     }
     updateTable();
 }
 function updateMarkerPosition2(lon, lat) {
-    var latLng = new google.maps.LatLng(parseFloat(lat), parseFloat(lon))
+    const latLng = new google.maps.LatLng(parseFloat(lat), parseFloat(lon))
     $("#lat2").val(latLng.lat().toFixed(4));
     $("#lon2").val(latLng.lng().toFixed(4));
-    window.location.href = "#eventsbypoint/" +
-        latLng.lng().toFixed(4) + "/" + latLng.lat().toFixed(4);
+    window.location.href = `#eventsbypoint/${latLng.lng().toFixed(4)}/${latLng.lat().toFixed(4)}`;
     if (mapwidget2){
         mapwidget2.map.setCenter(latLng);
     }
@@ -87,10 +91,10 @@ function updateTable(){
         url: BACKEND_SBW_BYPOINT,
         dataType: "json",
         method: "GET",
-        success: function(data){
+        success: (data) => {
             table1.clear();
-            $.map(data.sbws, function(row){
-                var uri = '<a href="'+ row.url + '" target="_blank">' + row.eventid + '</a>';
+            $.map(data.sbws, (row) => {
+                const uri = `<a href="${row.url}" target="_blank">${row.eventid}</a>`;
                 table1.row.add(
                     [uri, row.ph_name, row.sig_name, row.issue,
                     row.expire, row.issue_hailtag, row.issue_windtag,
@@ -114,10 +118,10 @@ function updateTable2ByUGC(){
         url: BACKEND_EVENTS_BYUGC,
         dataType: "json",
         method: "GET",
-        success: function(data){
+        success: (data) => {
             table2.clear();
-            $.map(data.events, function(row){
-                var uri = '<a href="'+ row.url + '" target="_blank">' + row.eventid + '</a>';
+            $.map(data.events, (row) => {
+                const uri = `<a href="${row.url}" target="_blank">${row.eventid}</a>`;
                 table2.row.add(
                     [uri, row.ph_name, row.sig_name, row.issue, row.expire]);
             });
@@ -140,10 +144,10 @@ function updateTable2ByPoint(){
         url: BACKEND_EVENTS_BYPOINT,
         dataType: "json",
         method: "GET",
-        success: function(data){
+        success: (data) => {
             table2.clear();
-            $.map(data.events, function(row){
-                var uri = '<a href="'+ row.url + '" target="_blank">' + row.eventid + '</a>';
+            $.map(data.events, (row) => {
+                const uri = `<a href="${row.url}" target="_blank">${row.eventid}</a>`;
                 table2.row.add(
                     [uri, row.ph_name, row.sig_name, row.issue, row.expire]);
             });
@@ -154,10 +158,10 @@ function updateTable2ByPoint(){
 
 function buildUI(){
     // Export Buttons
-    $(".iemtool").click(function(){
-        var btn = $(this);
-        var url = BACKEND_SBW_BYPOINT;
-        var params = {
+    $(".iemtool").click(function(){ // this
+        const btn = $(this);
+        let url = BACKEND_SBW_BYPOINT;
+        const params = {
             fmt: (btn.data("opt") == "csv") ? "csv" : "xlsx",
             lat: $("#lat").val(),
             lon: $("#lon").val(),
@@ -175,7 +179,7 @@ function buildUI(){
                 params.lat = $("#lat2").val();
             }
         }
-        window.location = url + "?" + $.param(params);
+        window.location = `${url}?${$.param(params)}`;
     });
     // Tables
     table1 = $("#table1").DataTable({
@@ -194,7 +198,7 @@ function buildUI(){
         altFormat:"yy/mm/dd",
         minDate: new Date(1986, 0, 1),
         maxDate: new Date(),
-        onClose: function(){
+        onClose: () => {
             updateTable2ByUGC();
         }
     });
@@ -204,7 +208,7 @@ function buildUI(){
         altFormat:"yy/mm/dd",
         minDate: new Date(1986, 0, 1),
         defaultDate: +1,
-        onClose: function(){
+        onClose: () => {
             updateTable2ByUGC();
         }
     });
@@ -214,7 +218,7 @@ function buildUI(){
         altFormat:"yy/mm/dd",
         minDate: new Date(2002, 0, 1),
         maxDate: new Date(),
-        onClose: function(){
+        onClose: () => {
             updateTable();
         }
     });
@@ -224,38 +228,38 @@ function buildUI(){
         altFormat:"yy/mm/dd",
         minDate: new Date(2002, 0, 1),
         defaultDate: +1,
-        onClose: function(){
+        onClose: () => {
             updateTable();
         }
     });
     edate1.datepicker("setDate", +1);
 
     // select boxes
-    var data = $.map(states, function(obj){
-        var e = {};
-        e.id = obj[0];
-        e.text = obj[1];
-        return e;
+    const data = $.map(states, (obj) => {
+        const ee = {};
+        ee.id = obj[0];
+        ee.text = obj[1];
+        return ee;
     });
     stateSelect = $("select[name='state']").select2({
         placeholder: "Select a geography/state",
         data: data
     });
     stateSelect.val('').trigger("change");
-    stateSelect.on("select2:select", function(e){
-        var state = e.params.data.id;
+    stateSelect.on("select2:select", (e) => {
+        const state = e.params.data.id;
         // Load the ugcSelect box
         $.ajax({
             data: {
-                state: state
+                state
             },
             url: "/json/state_ugc.php",
             method: "GET",
             dataType: "json",
-            success: function(data){
+            success: (data2) => {
                 ugcSelect.empty();
-                $.map(data.ugcs, function(obj){
-                    var extra = (obj.ugc.substr(2, 1) == "Z") ? " (Zone)": "";
+                $.map(data2.ugcs, (obj) => {
+                    const extra = (obj.ugc.substr(2, 1) === "Z") ? " (Zone)": "";
                     ugcSelect.append(new Option("[" + obj.ugc + "] "+ obj.name + extra, obj.ugc, false, false));
                 });
                 ugcSelect.val('').trigger("change");
@@ -270,47 +274,47 @@ function buildUI(){
     ugcSelect = $("select[name='ugc']").select2({
         placeholder: "Select County/Zone after Selecting Geography"
     });
-    ugcSelect.on("select2:select", function(e){
-        var ugc = e.params.data.id;
-        window.location.href = "#byugc/" + ugc;
+    ugcSelect.on("select2:select", (e) => {
+        const ugc = e.params.data.id;
+        window.location.href = `#byugc/${ugc}`;
         updateTable2ByUGC();
     });
     // Manual Point Entry
-    $("#manualpt").click(function(){
-        var la = $("#lat").val();
-        var lo = $("#lon").val();
+    $("#manualpt").click(() => {
+        const la = $("#lat").val();
+        const lo = $("#lon").val();
         if (la == "" || lo == ""){
             return;
         }
-        var latlng = new google.maps.LatLng(parseFloat(la), parseFloat(lo))
+        const latlng = new google.maps.LatLng(parseFloat(la), parseFloat(lo))
         mapwidget1.marker.setPosition(latlng);
         updateMarkerPosition(lo, la);
     });
-    $("#manualpt2").click(function(){
-        var la = $("#lat2").val();
-        var lo = $("#lon2").val();
+    $("#manualpt2").click(() => {
+        const la = $("#lat2").val();
+        const lo = $("#lon2").val();
         if (la == "" || lo == ""){
             return;
         }
-        var latlng = new google.maps.LatLng(parseFloat(la), parseFloat(lo))
+        const latlng = new google.maps.LatLng(parseFloat(la), parseFloat(lo))
         mapwidget2.marker.setPosition(latlng);
         updateMarkerPosition2(lo, la);
     });
 
 };
 
-function initialize() {
+function _load() {
     buildUI();
-    var default_lon = -93.653;
-    var default_lat = 41.53;
+    let default_lon = -93.653;
+    let default_lat = 41.53;
 
     // Do the anchor tag linking, please
-    var tokens = window.location.href.split("#");
+    const tokens = window.location.href.split("#");
     if (tokens.length == 2){
-        var tokens2 = tokens[1].split("/");
+        const tokens2 = tokens[1].split("/");
         if (tokens2.length == 2){
             if (tokens2[0] == 'byugc'){
-                var aTag = $("a[name='byugc']");
+                const aTag = $("a[name='byugc']");
                 $('html,body').animate({scrollTop: aTag.offset().top},'slow');
                 hashlinkUGC = tokens2[1];
                 stateSelect.val(tokens2[1].substr(0, 2)).trigger("change");
@@ -326,13 +330,13 @@ function initialize() {
         }
         if (tokens2.length == 3){
             if (tokens2[0] == 'bypoint'){
-                default_lat = tokens2[2];
-                default_lon = tokens2[1];
+                default_lat = text(tokens2[2]);
+                default_lon = text(tokens2[1]);
                 updateMarkerPosition(default_lon, default_lat);
             }
             if (tokens2[0] == 'eventsbypoint'){
-                default_lat = tokens2[2];
-                default_lon = tokens2[1];
+                default_lat = text(tokens2[2]);
+                default_lon = text(tokens2[1]);
                 updateMarkerPosition2(default_lon, default_lat);
             }
         }
@@ -345,6 +349,3 @@ function initialize() {
     mapwidget2.register(updateMarkerPosition2);
 
 }
-
-// Onload handler to fire off the app.
-google.maps.event.addDomListener(window, 'load', initialize);

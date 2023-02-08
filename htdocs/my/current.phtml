@@ -308,14 +308,14 @@ if ($doSF) {
         if ($parts["pave_avg"] < -90) $pave_avg = "M";
         else $pave_avg = myround($parts["pave_avg"], 1);
 
-        $table .= "<td align='center'>" . $parts["tmpf"] . "</td>
-            <td align='center'>" . $parts["dwpf"] . "</td>
-            <td align='center'>" . $tmpf0 . "</td>
-            <td align='center'>" . $tmpf1 . "</td>
-            <td align='center'>" . $tmpf2 . "</td>
-            <td align='center'>" . $tmpf3 . "</td>
-            <td align='center'>" . $subt . "</td>
-            <td align='center'>" . $pave_avg . "</td>
+        $table .= "<td align='center'>{$parts['tmpf']}</td>
+            <td align='center'>{$parts['dwpf']}</td>
+            <td align='center'>{$tmpf0}</td>
+            <td align='center'>{$tmpf1}</td>
+            <td align='center'>{$tmpf2}</td>
+            <td align='center'>{$tmpf3}</td>
+            <td align='center'>{$subt}</td>
+            <td align='center'>{$pave_avg}</td>
             </tr>\n";
     }
 
