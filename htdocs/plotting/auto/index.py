@@ -416,6 +416,7 @@ def get_cookie_value(arg, cookies):
         return cookies.get(arg["name"])
     if arg["type"] == "networkselect":
         return cookies.get(f"{arg['name']}_{arg['network']}")
+    return None
 
 
 def get_timing(apid):
@@ -486,7 +487,9 @@ def generate_form(apid, fdict, headers, cookies):
     formhtml = ""
     for arg in meta["arguments"]:
         value = fdict.get(arg["name"], get_cookie_value(arg, cookies))
-        if value is not None:
+        if arg.get("multiple", False):
+            value = fdict.getall(arg["name"])
+        if isinstance(value, str):
             value = html_escape(value)
         if value is None:
             value = str(arg["default"])
