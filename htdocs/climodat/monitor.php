@@ -91,7 +91,7 @@ foreach ($stationgrps as $state => $stations) {
        sum({$gddstr}) as ogdd50,
        sum(o.precip) as oprecip,
        sum(c.avg_gdd) as cgdd50, sum(c.avg_precip) as cprecip,
-       sum(c.avg_srad) as csrad,
+       coalesce(sum(c.avg_srad), 1) as csrad,
        max(o.high) as maxtmpf, min(o.low) as mintmpf,
        avg( (o.high + o.low) / 2.0 ) as avgtmpf,
        sum(c.avg_sdd) as csdd86, sum(sdd86(o.high, o.low)) as osdd86,

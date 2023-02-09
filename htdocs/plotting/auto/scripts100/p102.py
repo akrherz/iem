@@ -1,8 +1,15 @@
-"""LSR ranks"""
+"""The National Weather Service issues Local Storm
+    Reports (LSRs) with a label associated with each report indicating the
+    source of the report.  This plot summarizes the number of reports
+    received each year by each source type.  The values are the ranks for
+    that year with 1 indicating the largest.  The values following the LSR
+    event type in parenthesis are the raw LSR counts for that year. You need
+    to graph at least two years worth of data to make this plot type work."""
 import datetime
 
 import numpy as np
 import pandas as pd
+from sqlalchemy import text
 from pyiem.plot import figure_axes
 from pyiem import util
 from pyiem.reference import lsr_events
@@ -13,18 +20,7 @@ MARKERS = ["8", ">", "<", "v", "o", "h", "*"]
 
 def get_description():
     """Return a dict describing how to call this plotter"""
-    desc = {}
-    desc["data"] = True
-    desc["cache"] = 3600
-    desc[
-        "description"
-    ] = """The National Weather Service issues Local Storm
-    Reports (LSRs) with a label associated with each report indicating the
-    source of the report.  This plot summarizes the number of reports
-    received each year by each source type.  The values are the ranks for
-    that year with 1 indicating the largest.  The values following the LSR
-    event type in parenthesis are the raw LSR counts for that year. You need
-    to graph at least two years worth of data to make this plot type work."""
+    desc = {"desciption": __doc__, "data": True, "cache": 3600}
     today = datetime.date.today()
     ltypes = list(lsr_events.keys())
     ltypes.sort()
@@ -76,27 +72,31 @@ def plotter(fdict):
         syear = eyear - 1
     # optional parameter, this could return null
     ltype = ctx.get("ltype")
-    wfo_limiter = " and wfo = '%s' " % (
-        station if len(station) == 3 else station[1:],
-    )
+    params = {"wfo": station if len(station) == 3 else station[1:]}
+    wfo_limiter = " and wfo = :wfo "
     if station == "_ALL":
         wfo_limiter = ""
     typetext_limiter = ""
     if ltype:
         if len(ltype) == 1:
-            typetext_limiter = " and typetext = '%s'" % (ltype[0],)
+            typetext_limiter = " and typetext = :tt "
+            params["tt"] = ltype[0]
         else:
-            typetext_limiter = " and typetext in %s" % (tuple(ltype),)
+            typetext_limiter = " and typetext in :tt"
+            params["tt"] = tuple(ltype)
     with util.get_sqlalchemy_conn("postgis") as conn:
         df = pd.read_sql(
-            f"""
+            text(
+                f"""
             select extract(year from valid)::int as yr, upper(source) as src,
             count(*) from lsrs
             where valid > '{syear}-01-01' and
             valid < '{eyear + 1}-01-01' {wfo_limiter} {typetext_limiter}
             GROUP by yr, src
-        """,
+        """
+            ),
             conn,
+            params=params,
         )
     if df.empty:
         raise NoDataFound("No data found")
@@ -107,13 +107,14 @@ def plotter(fdict):
     df["rank"] = df.groupby(["yr"])["count"].rank(
         ascending=False, method="first"
     )
-    title = "NWS %s Local Storm Report Sources Ranks" % (
-        ctx["_nt"].sts[station]["name"],
+    title = (
+        f"NWS {ctx['_nt'].sts[station]['name']} "
+        "Local Storm Report Sources Ranks"
     )
     if ltype:
-        label = "For LSR Types: %s" % (repr(ltype),)
+        label = f"For LSR Types: {repr(ltype)}"
         if len(label) > 90:
-            label = "%s..." % (label[:90],)
+            label = f"{label[:90]}..."
         title += f"\n{label}"
     (fig, ax) = figure_axes(title=title, apctx=ctx)
     # Do syear as left side
@@ -129,7 +130,7 @@ def plotter(fdict):
     for _, row in dyear.iterrows():
         src = row["src"]
         leftsrcs.append(src)
-        ylabels.append("%s (%.0f)" % (src, row["count"]))
+        ylabels.append(f"{src} ({row['count']:.0f})")
         d = df[df["src"] == src].sort_values(by=["yr"])
         ax.plot(
             np.array(d["yr"]),
@@ -143,7 +144,7 @@ def plotter(fdict):
         if i > 20:
             break
     ax.set_yticks(range(1, len(ylabels) + 1))
-    ax.set_yticklabels(["%s %s" % (s, i + 1) for i, s in enumerate(ylabels)])
+    ax.set_yticklabels([f"{s} {i + 1}" for i, s in enumerate(ylabels)])
     ax.set_ylim(0.5, 20.5)
 
     ax2 = ax.twinx()
@@ -156,7 +157,7 @@ def plotter(fdict):
         if i > 20:
             break
         src = row["src"]
-        y2labels.append("%s (%.0f)" % (src, row["count"]))
+        y2labels.append(f"{src} ({row['count']:.0f})")
         if src not in leftsrcs:
             d = df[df["src"] == src].sort_values(by=["yr"])
             ax.plot(
@@ -169,7 +170,7 @@ def plotter(fdict):
             usedline += 1
 
     ax2.set_yticks(range(1, len(y2labels) + 1))
-    ax2.set_yticklabels(["%s %s" % (i + 1, s) for i, s in enumerate(y2labels)])
+    ax2.set_yticklabels([f"{i + 1} {s}" for i, s in enumerate(y2labels)])
     ax2.set_ylim(0.5, 20.5)
 
     pos = [0.2, 0.13, 0.6, 0.75]

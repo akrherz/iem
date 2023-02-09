@@ -1,4 +1,14 @@
-"""Min temp after, max temp after, count of days"""
+"""Create plots of yearly totals and optionally fit
+    a linear trendline.  Here is a brief description of some of the
+    available metrics.
+    <ul>
+     <li><strong>Frost Free Days</strong>: Number of days each year between
+     the last spring sub 32F temperature and first fall sub 32F temperature.
+     </li>
+    </ul>
+
+    <p>If you plot the DJF period, the year shown is the year of the
+    December within the three year period."""
 import datetime
 
 from scipy.stats import linregress
@@ -220,22 +230,7 @@ def yearly_plot(ctx):
 
 def get_description():
     """Return a dict describing how to call this plotter"""
-    desc = {}
-    desc["data"] = True
-    desc[
-        "description"
-    ] = """Create plots of yearly totals and optionally fit
-    a linear trendline.  Here is a brief description of some of the
-    available metrics.
-    <ul>
-     <li><strong>Frost Free Days</strong>: Number of days each year between
-     the last spring sub 32F temperature and first fall sub 32F temperature.
-     </li>
-    </ul>
-
-    <p>If you plot the DJF period, the year shown is the year of the
-    December within the three year period.
-    """
+    desc = {"description": __doc__, "data": True}
     pdict = {}
     for varname, item in META.items():
         pdict[varname] = item["title"]
