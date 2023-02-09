@@ -1,4 +1,14 @@
-"""VTEC Products issued by date"""
+"""This application presents a calendar of daily
+    counts of the number of watch, warning, advisories issued by day.  This
+    accounting is based on the initial issuance date of a given VTEC phenomena
+    and significance by event identifier.  So a single Winter Storm Watch
+    for 40 zones, would only count as 1 event for this chart.  Dates are
+    computed in the local time zone of the issuance forecast office in the
+    case of a single office and in Central Time for the case of all offices of
+    plotting a given state.
+
+    <p>You can also generate this plot considering "ALL" NWS Offices, when
+    doing so the time zone used to compute the calendar dates is US Central."""
 import datetime
 
 import pandas as pd
@@ -19,22 +29,7 @@ PDICT2 = {
 
 def get_description():
     """Return a dict describing how to call this plotter"""
-    desc = {}
-    desc["data"] = True
-    desc[
-        "description"
-    ] = """This application presents a calendar of daily
-    counts of the number of watch, warning, advisories issued by day.  This
-    accounting is based on the initial issuance date of a given VTEC phenomena
-    and significance by event identifier.  So a single Winter Storm Watch
-    for 40 zones, would only count as 1 event for this chart.  Dates are
-    computed in the local time zone of the issuance forecast office in the
-    case of a single office and in Central Time for the case of all offices of
-    plotting a given state.
-
-    <p>You can also generate this plot considering "ALL" NWS Offices, when
-    doing so the time zone used to compute the calendar dates is US Central.
-    """
+    desc = {"description": __doc__, "data": True}
     today = datetime.date.today()
     jan1 = today.replace(month=1, day=1)
     desc["arguments"] = [

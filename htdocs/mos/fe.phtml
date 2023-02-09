@@ -28,23 +28,14 @@ $table = "";
 foreach($mosvars as $k => $v){
     $table .= sprintf("<tr><th>%s</th><td>%s</td></tr>\n", $k, $v);
 }
-
-$modselect = "<select name=\"model\">";
-$modselect .= "<option value=\"GFS\" ";
-if ($model == "GFS") $modselect .= " SELECTED";
-$modselect .= ">AVN/GFS</option>\n";
-
-$modselect .= "<option value=\"MEX\" ";
-if ($model == "MEX") $modselect .= " SELECTED";
-$modselect .= ">GFS-X (MEX)</option>\n";
-
-$modselect .= "<option value=\"NAM\" ";
-if ($model == "NAM" || $model == "ETA") $modselect .= " SELECTED";
-$modselect .= ">Eta/NAM</option>\n";
-$modselect .= "<option value=\"NBS\" ";
-if ($model == "NBS") $modselect .= " SELECTED";
-$modselect .= ">NBS</option>\n";
-$modselect .= "</select>";
+$ar = Array(
+    "GFS" => "AVN/GFS",
+    "MEX" => "GFS-X (MEX)",
+    "NAM" => "Eta/NAM",
+    "NBE" => "NBE",
+    "NBS" => "NBS",
+);
+$modselect = make_select("model", $model, $ar);
 
 $t->content = <<<EOF
 <h3>NWS MOS Download Interface</h3>

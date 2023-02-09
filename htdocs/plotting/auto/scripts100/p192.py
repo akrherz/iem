@@ -1,4 +1,4 @@
-"""Generalized mapper of AZOS data"""
+"""Generates analysis maps of ASOS station data."""
 import datetime
 
 import pytz
@@ -8,7 +8,7 @@ from metpy.calc import apparent_temperature
 from metpy.units import units
 from pyiem import reference
 from pyiem.plot import MapPlot, get_cmap
-from pyiem.util import get_autoplot_context, get_sqlalchemy_conn
+from pyiem.util import get_autoplot_context, get_sqlalchemy_conn, utc
 from pyiem.exceptions import NoDataFound
 
 PDICT = {"cwa": "Plot by NWS Forecast Office", "state": "Plot by State"}
@@ -17,14 +17,8 @@ PDICT2 = {"vsby": "Visibility", "feel": "Feels Like Temperature"}
 
 def get_description():
     """Return a dict describing how to call this plotter"""
-    desc = {}
-    desc["data"] = True
-    desc["cache"] = 600
-    desc[
-        "description"
-    ] = """Generates analysis maps of ASOS
-    station data."""
-    utcnow = datetime.datetime.utcnow()
+    desc = {"description": __doc__, "cache": 600, "data": True}
+    utcnow = utc()
     desc["arguments"] = [
         dict(
             type="select",
@@ -190,7 +184,7 @@ def plotter(fdict):
             .to(units("degF"))
             .m
         )
-        df = df[~pd.isna(df["feel"])]
+        df = df[pd.notna(df["feel"])]
     if df.empty:
         raise ValueError("No Data Found")
     # Data QC, cough

@@ -3,10 +3,10 @@ from io import BytesIO
 import zipfile
 import os
 import datetime
+import tempfile
 
 from psycopg2.extras import DictCursor
 import fiona
-from fiona.crs import from_epsg
 from shapely.geometry import mapping
 from shapely.wkb import loads
 import pandas as pd
@@ -62,13 +62,13 @@ def parse_wfo_location_group(form):
         wfos = form.getall("wfo[]")
         wfos.append("XXX")  # Hack to make next section work
         if "ALL" not in wfos:
-            limiter = " and w.wfo in %s " % (str(tuple(char3(wfos))),)
+            limiter = f" and w.wfo in {tuple(char3(wfos))} "
 
     if "wfos[]" in form:
         wfos = form.getall("wfos[]")
         wfos.append("XXX")  # Hack to make next section work
         if "ALL" not in wfos:
-            limiter = " and w.wfo in %s " % (str(tuple(char3(wfos))),)
+            limiter = f" and w.wfo in {tuple(char3(wfos))} "
     return limiter
 
 
@@ -76,11 +76,11 @@ def build_sql(form):
     """Build the SQL statement."""
     try:
         sts, ets = get_time_extent(form)
-    except ValueError:
+    except Exception as exp:
         raise ValueError(
             "An invalid date was specified, please check that the day of the "
             "month exists for your selection (ie June 31st vs June 30th)."
-        )
+        ) from exp
 
     table_extra = ""
     location_group = form.get("location_group", "wfo")
@@ -90,11 +90,9 @@ def build_sql(form):
             states.append("XX")  # Hack for 1 length
             wfo_limiter = (
                 " and ST_Intersects(s.the_geom, w.geom) "
-                "and s.state_abbr in %s "
-            ) % (tuple(states),)
-            wfo_limiter2 = (" and substr(w.ugc, 1, 2) in %s ") % (
-                str(tuple(states)),
+                f"and s.state_abbr in {tuple(states)} "
             )
+            wfo_limiter2 = f" and substr(w.ugc, 1, 2) in {tuple(states)} "
             table_extra = " , states s "
         else:
             raise ValueError("No state specified")
@@ -110,7 +108,7 @@ def build_sql(form):
         raise ValueError("Please shorten request to less than 5 years.")
 
     # Change to postgis db once we have the wfo list
-    fn = "wwa_%s_%s" % (sts.strftime("%Y%m%d%H%M"), ets.strftime("%Y%m%d%H%M"))
+    fn = f"wwa_{sts:%Y%m%d%H%M}_{ets:%Y%m%d%H%M}"
     timeopt = int(form.get("timeopt", [1])[0])
     if timeopt == 2:
         year3 = int(form.get("year3"))
@@ -119,12 +117,7 @@ def build_sql(form):
         hour3 = int(form.get("hour3"))
         minute3 = int(form.get("minute3"))
         sts = utc(year3, month3, day3, hour3, minute3)
-        fn = "wwa_%s" % (sts.strftime("%Y%m%d%H%M"),)
-
-    os.chdir("/tmp/")
-    for suffix in ["shp", "shx", "dbf", "txt", "zip"]:
-        if os.path.isfile("%s.%s" % (fn, suffix)):
-            os.remove("%s.%s" % (fn, suffix))
+        fn = f"wwa_{sts:%Y%m%d%H%M}"
 
     limiter = ""
     if "limit0" in form:
@@ -143,8 +136,8 @@ def build_sql(form):
     warnings_table = "warnings"
     sbw_table = "sbw"
     if sts.year == ets.year:
-        warnings_table = "warnings_%s" % (sts.year,)
-        sbw_table = "sbw_%s" % (sts.year,)
+        warnings_table = f"warnings_{sts.year}"
+        sbw_table = f"sbw_{sts.year}"
 
     geomcol = "geom"
     if form.get("simple", "no") == "yes":
@@ -156,12 +149,12 @@ def build_sql(form):
         is_emergency, utc_polygon_begin, utc_polygon_end, windtag, hailtag,
         tornadotag, damagetag """
 
-    timelimit = "issue >= '%s' and issue < '%s'" % (sts, ets)
+    timelimit = f"issue >= '{sts}' and issue < '{ets}'"
     if timeopt == 2:
-        timelimit = "issue <= '%s' and issue > '%s' and expire > '%s'" % (
-            sts,
-            sts + datetime.timedelta(days=-30),
-            sts,
+        timelimit = (
+            f"issue <= '{sts}' and "
+            f"issue > '{sts + datetime.timedelta(days=-30)}' and "
+            f"expire > '{sts}'"
         )
     sbwtimelimit = timelimit
     statuslimit = " status = 'NEW' "
@@ -278,114 +271,116 @@ def application(environ, start_response):
         start_response("200 OK", [("Content-type", "text/plain")])
         return [b"ERROR: No results found for query, please try again"]
 
-    csv = open(f"{fn}.csv", "w")
-    csv.write(
-        (
-            "WFO,ISSUED,EXPIRED,INIT_ISS,INIT_EXP,PHENOM,GTYPE,SIG,ETN,"
-            "STATUS,NWS_UGC,AREA_KM2,UPDATED,HVTEC_NWSLI,HVTEC_SEVERITY,"
-            "HVTEC_CAUSE,HVTEC_RECORD,IS_EMERGENCY,POLYBEGIN,POLYEND,WINDTAG,"
-            "HAILTAG,TORNADOTAG,DAMAGETAG\n"
-        )
-    )
-    with fiona.open(
-        f"{fn}.shp",
-        "w",
-        crs=from_epsg(4326),
-        driver="ESRI Shapefile",
-        schema={
-            "geometry": "MultiPolygon",
-            "properties": {
-                "WFO": "str:3",
-                "ISSUED": "str:12",
-                "EXPIRED": "str:12",
-                "INIT_ISS": "str:12",
-                "INIT_EXP": "str:12",
-                "PHENOM": "str:2",
-                "GTYPE": "str:1",
-                "SIG": "str:1",
-                "ETN": "str:4",
-                "STATUS": "str:3",
-                "NWS_UGC": "str:6",
-                "AREA_KM2": "float",
-                "UPDATED": "str:12",
-                "HV_NWSLI": "str:5",
-                "HV_SEV": "str:1",
-                "HV_CAUSE": "str:2",
-                "HV_REC": "str:2",
-                "EMERGENC": "bool",
-                "POLY_BEG": "str:12",
-                "POLY_END": "str:12",
-                "WINDTAG": "float",
-                "HAILTAG": "float",
-                "TORNTAG": "str:16",
-                "DAMAGTAG": "str:16",
-            },
-        },
-    ) as output:
-        for row in cursor:
-            if row["geo"] is None:
-                continue
-            mp = loads(row["geo"], hex=True)
-            csv.write(
-                f"{row['wfo']},{dfmt(row['utc_issue'])},"
-                f"{dfmt(row['utc_expire'])},"
-                f"{dfmt(row['utc_prodissue'])},{dfmt(row['utc_init_expire'])},"
-                f"{row['phenomena']},{row['gtype']},"
-                f"{row['significance']},{row['eventid']},{row['status']},"
-                f"{row['ugc']},{row['area2d']:.2f},{dfmt(row['utc_updated'])},"
-                f"{row['hvtec_nwsli']},{row['hvtec_severity']},"
-                f"{row['hvtec_cause']},{row['hvtec_record']},"
-                f"{row['is_emergency']},{dfmt(row['utc_polygon_begin'])},"
-                f"{dfmt(row['utc_polygon_end'])},{row['windtag']},"
-                f"{row['hailtag']},{row['tornadotag']},{row['damagetag']}\n"
-            )
-            output.write(
-                {
-                    "properties": {
-                        "WFO": row["wfo"],
-                        "ISSUED": row["utc_issue"],
-                        "EXPIRED": row["utc_expire"],
-                        "INIT_ISS": row["utc_prodissue"],
-                        "INIT_EXP": row["utc_init_expire"],
-                        "PHENOM": row["phenomena"],
-                        "GTYPE": row["gtype"],
-                        "SIG": row["significance"],
-                        "ETN": row["eventid"],
-                        "STATUS": row["status"],
-                        "NWS_UGC": row["ugc"],
-                        "AREA_KM2": row["area2d"],
-                        "UPDATED": row["utc_updated"],
-                        "HV_NWSLI": row["hvtec_nwsli"],
-                        "HV_SEV": row["hvtec_severity"],
-                        "HV_CAUSE": row["hvtec_cause"],
-                        "HV_REC": row["hvtec_record"],
-                        "EMERGENC": row["is_emergency"],
-                        "POLY_BEG": row["utc_polygon_begin"],
-                        "POLY_END": row["utc_polygon_end"],
-                        "WINDTAG": row["windtag"],
-                        "HAILTAG": row["hailtag"],
-                        "TORNTAG": row["tornadotag"],
-                        "DAMAGTAG": row["damagetag"],
-                    },
-                    "geometry": mapping(mp),
-                }
-            )
-    csv.close()
+    # Filenames are racy, so we need to have a temp folder
+    with tempfile.TemporaryDirectory() as tmpdirname:
+        os.chdir(tmpdirname)
 
-    with zipfile.ZipFile(fn + ".zip", "w", zipfile.ZIP_DEFLATED) as zf:
-        for suffix in ["shp", "shx", "dbf", "cpg", "prj", "csv"]:
-            zf.write(f"{fn}.{suffix}")
+        with open(f"{fn}.csv", "w", encoding="ascii") as csv:
+            csv.write(
+                "WFO,ISSUED,EXPIRED,INIT_ISS,INIT_EXP,PHENOM,GTYPE,SIG,ETN,"
+                "STATUS,NWS_UGC,AREA_KM2,UPDATED,HVTEC_NWSLI,HVTEC_SEVERITY,"
+                "HVTEC_CAUSE,HVTEC_RECORD,IS_EMERGENCY,POLYBEGIN,POLYEND,"
+                "WINDTAG,HAILTAG,TORNADOTAG,DAMAGETAG\n"
+            )
+            with fiona.open(
+                f"{fn}.shp",
+                "w",
+                crs="EPSG:4326",
+                driver="ESRI Shapefile",
+                schema={
+                    "geometry": "MultiPolygon",
+                    "properties": {
+                        "WFO": "str:3",
+                        "ISSUED": "str:12",
+                        "EXPIRED": "str:12",
+                        "INIT_ISS": "str:12",
+                        "INIT_EXP": "str:12",
+                        "PHENOM": "str:2",
+                        "GTYPE": "str:1",
+                        "SIG": "str:1",
+                        "ETN": "str:4",
+                        "STATUS": "str:3",
+                        "NWS_UGC": "str:6",
+                        "AREA_KM2": "float",
+                        "UPDATED": "str:12",
+                        "HV_NWSLI": "str:5",
+                        "HV_SEV": "str:1",
+                        "HV_CAUSE": "str:2",
+                        "HV_REC": "str:2",
+                        "EMERGENC": "bool",
+                        "POLY_BEG": "str:12",
+                        "POLY_END": "str:12",
+                        "WINDTAG": "float",
+                        "HAILTAG": "float",
+                        "TORNTAG": "str:16",
+                        "DAMAGTAG": "str:16",
+                    },
+                },
+            ) as output:
+                for row in cursor:
+                    if row["geo"] is None:
+                        continue
+                    mp = loads(row["geo"], hex=True)
+                    csv.write(
+                        f"{row['wfo']},{dfmt(row['utc_issue'])},"
+                        f"{dfmt(row['utc_expire'])},"
+                        f"{dfmt(row['utc_prodissue'])},"
+                        f"{dfmt(row['utc_init_expire'])},"
+                        f"{row['phenomena']},{row['gtype']},"
+                        f"{row['significance']},{row['eventid']},"
+                        f"{row['status']},"
+                        f"{row['ugc']},{row['area2d']:.2f},"
+                        f"{dfmt(row['utc_updated'])},"
+                        f"{row['hvtec_nwsli']},{row['hvtec_severity']},"
+                        f"{row['hvtec_cause']},{row['hvtec_record']},"
+                        f"{row['is_emergency']},"
+                        f"{dfmt(row['utc_polygon_begin'])},"
+                        f"{dfmt(row['utc_polygon_end'])},{row['windtag']},"
+                        f"{row['hailtag']},{row['tornadotag']},"
+                        f"{row['damagetag']}\n"
+                    )
+                    output.write(
+                        {
+                            "properties": {
+                                "WFO": row["wfo"],
+                                "ISSUED": row["utc_issue"],
+                                "EXPIRED": row["utc_expire"],
+                                "INIT_ISS": row["utc_prodissue"],
+                                "INIT_EXP": row["utc_init_expire"],
+                                "PHENOM": row["phenomena"],
+                                "GTYPE": row["gtype"],
+                                "SIG": row["significance"],
+                                "ETN": row["eventid"],
+                                "STATUS": row["status"],
+                                "NWS_UGC": row["ugc"],
+                                "AREA_KM2": row["area2d"],
+                                "UPDATED": row["utc_updated"],
+                                "HV_NWSLI": row["hvtec_nwsli"],
+                                "HV_SEV": row["hvtec_severity"],
+                                "HV_CAUSE": row["hvtec_cause"],
+                                "HV_REC": row["hvtec_record"],
+                                "EMERGENC": row["is_emergency"],
+                                "POLY_BEG": row["utc_polygon_begin"],
+                                "POLY_END": row["utc_polygon_end"],
+                                "WINDTAG": row["windtag"],
+                                "HAILTAG": row["hailtag"],
+                                "TORNTAG": row["tornadotag"],
+                                "DAMAGTAG": row["damagetag"],
+                            },
+                            "geometry": mapping(mp),
+                        }
+                    )
+
+        with zipfile.ZipFile(fn + ".zip", "w", zipfile.ZIP_DEFLATED) as zf:
+            for suffix in ["shp", "shx", "dbf", "cpg", "prj", "csv"]:
+                zf.write(f"{fn}.{suffix}")
+        with open(f"{fn}.zip", "rb") as fh:
+            payload = fh.read()
 
     headers = [
         ("Content-type", "application/octet-stream"),
-        ("Content-Disposition", "attachment; filename=%s.zip" % (fn,)),
+        ("Content-Disposition", f"attachment; filename={fn}.zip"),
     ]
     start_response("200 OK", headers)
-    payload = open(f"{fn}.zip", "rb").read()
-
-    for suffix in ["zip", "shp", "shx", "dbf", "prj", "csv", "cpg"]:
-        fullfn = f"{fn}.{suffix}"
-        if os.path.isfile(fullfn):
-            os.remove(fullfn)
 
     return [payload]

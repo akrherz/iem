@@ -1,4 +1,5 @@
-"""when are the daily records"""
+"""This chart presents the year that the present
+    day climatology record resides."""
 import calendar
 
 import numpy as np
@@ -12,12 +13,7 @@ from pyiem.exceptions import NoDataFound
 
 def get_description():
     """Return a dict describing how to call this plotter"""
-    desc = {}
-    desc["data"] = True
-    desc[
-        "description"
-    ] = """This chart presents the year that the present
-    day climatology record resides."""
+    desc = {"description": __doc__, "data": True}
     desc["arguments"] = [
         dict(
             type="station",

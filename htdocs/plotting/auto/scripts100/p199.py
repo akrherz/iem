@@ -353,8 +353,6 @@ def plotter(fdict):
     ctx["nt"].sts["DONI4"]["lon"] += 0.05
     ctx["nt"].sts["DONI4"]["lat"] -= 0.2
 
-    title = "TBD"
-    subtitle = "TBD"
     if ctx["opt"] == "1":
         title = "ISU Soil Moisture Max/Min 4 Inch Soil Temperature"
         subtitle = "based on available hourly observations"
