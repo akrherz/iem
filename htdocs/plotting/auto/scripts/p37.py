@@ -1,4 +1,12 @@
-"""MOS plot"""
+"""This chart displays the combination of
+    Model Output Statistics (MOS) forecasts and actual observations
+    by the automated station the MOS forecast is for.  MOS is forecasting
+    high and low temperatures over 12 hours periods, so these values are not
+    actual calendar day high and low temperatures.
+
+<p>The bars represent the ensemble of previously made forecasts valid for the
+given time.
+"""
 import datetime
 
 import numpy as np
@@ -12,6 +20,7 @@ PDICT = {
     "GFS": "GFS (16 Dec 2003 - current)",
     "MEX": "GFS Extended (12 Jul 2020 - current)",
     "NBE": "NBE (23 Jul 2020 - current)",
+    "NBS": "NBS (23 Jul 2020 - current)",
     "ETA": "ETA (24 Feb 2002 - 9 Dec 2008)",
     "AVN": "AVN (1 Jun 2000 - 16 Dec 2003)",
 }
@@ -67,16 +76,7 @@ SQL_OB = """
 
 def get_description():
     """Return a dict describing how to call this plotter"""
-    desc = {}
-    desc["data"] = True
-    desc["cache"] = 86400
-    desc[
-        "description"
-    ] = """This chart displays the combination of
-    Model Output Statistics (MOS) forecasts and actual observations
-    by the automated station the MOS forecast is for.  MOS is forecasting
-    high and low temperatures over 12 hours periods, so these values are not
-    actual calendar day high and low temperatures."""
+    desc = {"description": __doc__, "data": True, "cache": 86400}
     today = datetime.date.today()
     desc["arguments"] = [
         dict(
@@ -131,25 +131,26 @@ def plot_others(varname, ax, mosdata, month1, month, obs):
         top.append(mosdata.get(now, [np.nan, np.nan])[1])
         _obs.append(obs.get(now, np.nan))
         rows.append(
-            dict(
-                valid=now,
-                min=bottom[-1],
-                max=top[-1],
-                dpt=_obs[-1],
-            )
+            {
+                "valid": now,
+                "min": bottom[-1],
+                "max": top[-1],
+                "dpt": _obs[-1],
+            }
         )
         now += datetime.timedelta(hours=6)
     df = pd.DataFrame(rows)
-    if df[~pd.isna(df["min"])].empty:
+    if df[pd.notna(df["min"])].empty:
         raise ValueError("No MOS data found for query.")
 
-    bottom = np.ma.fix_invalid(bottom)
     top = np.ma.fix_invalid(top)
+    bottom = np.ma.fix_invalid(bottom)
+    delta = np.ma.fix_invalid(top - bottom).filled(np.nan)
     _obs = np.ma.fix_invalid(_obs)
 
     ax.bar(
         x,
-        top - bottom,
+        delta,
         facecolor="pink",
         width=0.25,
         bottom=bottom,

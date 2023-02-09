@@ -1,4 +1,9 @@
-"""departures"""
+"""This plot presents accumulated totals and departures
+    of growing degree days (GDD), precipitation and stress degree days (SDD).
+    Leap days
+    are not considered for this plot. The light blue area represents the
+    range of accumulated values based on the observation history at the
+    site."""
 import datetime
 
 import pandas as pd
@@ -17,17 +22,7 @@ PDICT = {
 
 def get_description():
     """Return a dict describing how to call this plotter"""
-    desc = {}
-    desc["data"] = True
-    desc[
-        "description"
-    ] = """
-    This plot presents accumulated totals and departures
-    of growing degree days (GDD), precipitation and stress degree days (SDD).
-    Leap days
-    are not considered for this plot. The light blue area represents the
-    range of accumulated values based on the observation history at the
-    site."""
+    desc = {"description": __doc__, "data": True}
     today = datetime.date.today()
     if today.month < 5:
         today = today.replace(year=today.year - 1, month=10, day=1)
@@ -174,7 +169,7 @@ def plotter(fdict):
         ax3 = fig.add_axes([0.1, 0.11, 0.8, 0.75])
         ax1 = ax3
         title = "Precipitation"
-    elif whichplots == "sdd":
+    else:  # sdd
         fig = figure(apctx=ctx)
         ax4 = fig.add_axes([0.1, 0.1, 0.8, 0.8])
         ax1 = ax4
@@ -193,8 +188,8 @@ def plotter(fdict):
         raise NoDataFound("Unknown station metadata.")
     for year in range(ab.year, datetime.datetime.now().year + 1):
         sts = sdate.replace(year=year)
-        ets = sts + datetime.timedelta(days=(xlen - 1))
-        x = df.loc[sts:ets, "o" + glabel].cumsum()
+        ets = sts + datetime.timedelta(days=xlen - 1)
+        x = df.loc[sts:ets, f"o{glabel}"].cumsum()
         if x.empty:
             continue
         acc[(year - sdate.year), : len(x.index)] = x.values

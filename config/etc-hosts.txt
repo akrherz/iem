@@ -87,7 +87,6 @@
 10.90.12.21 iemdb-portfolio.local
 10.90.12.21 iemdb-rtstats.local
 10.90.12.21 iemdb-rwis.local
-10.90.12.21 iemdb-scada.local
 10.90.12.21 iemdb-scan.local
 10.90.12.21 iemdb-squaw.local
 10.90.12.21 iemdb-sustainablecorn.local
@@ -114,7 +113,6 @@
 10.90.12.23 iemdb-awos.local
 10.90.12.23 iemdb-hml.local
 10.90.12.23 iemdb-iem.local
-10.90.12.23 iemdb-mec.local
 10.90.12.23 iemdb-openfire.local
 10.90.12.23 iemdb-snet.local
 
