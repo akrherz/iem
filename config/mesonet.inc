@@ -291,19 +291,6 @@ RewriteRule ^/search /search.py [QSA]
     RewriteRule #(.*)$ /lsr/#$1 [R=301,NE]
   </Directory>
 
-  <Directory "/opt/iem/htdocs/mec">
-    AuthUserFile /opt/iem/config/admin.users
-    AuthGroupFile /dev/null
-    AuthName Administrative
-    AuthType Basic
-
-    require user mec
-
-    RewriteRule i/([A-Za-z\-_0-9]*).png$ image.php?i=$1
-    RewriteRule map_power_([0-9]*)_(yaw2?).png$ map_power.py?ts=$1&yawsource=$2
-    RewriteRule turbine_ts_([0-9]*)_(.*).png$ turbine_ts.py?date=$1&turbinename=$2
-  </Directory>
-
   <Directory "/opt/iem/htdocs/nws">
     RewriteRule days_since_([A-Z][A-Z])_([A-Z]).png /plotting/auto/plot/92/phenomena:$1::significance:$2::dpi:100.png
   </Directory>
@@ -365,19 +352,6 @@ RewriteRule ^/search /search.py [QSA]
   <Directory "/opt/iem/htdocs/metadata/xml">
     RewriteRule pl_(.*)_(.*).xml pl.py?network=$1&station=$2 [QSA]
     RewriteRule sd_(.*)_(.*).xml sd.py?network=$1&station=$2 [QSA]
-  </Directory>
-
-  <Directory "/opt/iem/htdocs/scada">
-    AuthUserFile /opt/iem/config/admin.users
-    AuthGroupFile /dev/null
-    AuthName Administrative
-    AuthType Basic
-
-    require user mec
-
-    RewriteRule i/([A-Za-z\-_0-9]*).png$ image.php?i=$1
-    RewriteRule map_power_([0-9]*).png$ map_power.py?ts=$1
-    RewriteRule turbine_ts_([0-9]*)_(.*).png$ turbine_ts.py?date=$1&turbinename=$2
   </Directory>
 
   # 16 Jan 2023: puzzling number of hosts have this to valid URIs
