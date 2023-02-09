@@ -169,10 +169,11 @@ def plotter(fdict):
         nocaption=True,
         titlefontsize=16,
     )
+    ramp = None
     if varname == "vsby":
         ramp = np.array([0.01, 0.1, 0.25, 0.5, 1, 2, 3, 5, 8, 9.9])
         valunit = "miles"
-    elif varname == "feel":
+    else:  # feel
         valunit = "F"
         df["feel"] = (
             apparent_temperature(
@@ -225,4 +226,4 @@ def plotter(fdict):
 
 
 if __name__ == "__main__":
-    plotter(dict(v="feel", valid="2021-09-08 1500"))
+    plotter({"v": "feel", "valid": "2021-09-08 1500"})

@@ -40,11 +40,13 @@ $rs = pg_prepare($conn, "SELECT", "SELECT replace(report,'\001','') as report,
 $rs = pg_execute($conn, "SELECT", array($wfo, $phenomena, $eventid, $significance));
 $txtdata = "";
 for ($i = 0; $row  = pg_fetch_array($rs); $i++) {
-    $tokens = @explode('__', $row["svs"]);
-    $tokens = array_reverse($tokens);
-    foreach ($tokens as $key => $val) {
-        if ($val == "") continue;
-        $txtdata .= sprintf("<pre>%s</pre><br />", $val);
+    if (!is_null($row["svs"])){
+        $tokens = explode('__', $row["svs"]);
+        $tokens = array_reverse($tokens);
+        foreach ($tokens as $key => $val) {
+            if ($val == "") continue;
+            $txtdata .= sprintf("<pre>%s</pre><br />", $val);
+        }
     }
     $txtdata .= sprintf(
         "<h4>Issuance Report:</h4><pre>%s</pre><br />",

@@ -1,4 +1,5 @@
-"""ISU Soil Moisture Network Time Series"""
+"""This application generates time series charts using data from the
+    ISU Soil Moisture Network."""
 # pylint: disable=no-member,too-many-lines
 import datetime
 
@@ -41,14 +42,8 @@ PLOTTYPES = {
 
 def get_description():
     """Return a dict describing how to call this plotter"""
-    desc = {}
+    desc = {"description": __doc__, "data": True}
     desc["frontend"] = "/agclimate/smts.php"
-    desc["data"] = True
-    desc[
-        "description"
-    ] = """This application generates time series charts using data from the
-    ISU Soil Moisture Network.
-    """
     ets = datetime.datetime.now().replace(minute=0)
     sts = ets - datetime.timedelta(days=7)
     desc["arguments"] = [
@@ -1025,7 +1020,7 @@ def plotter(fdict):
         fig, df = make_daily_rainfall_soil_rh(ctx)
     elif ctx["opt"] == "10":
         fig, df = make_inversion_plot(ctx)
-    elif ctx["opt"] == "11":
+    else:  # 11
         fig, df = make_inversion_timing(ctx)
 
     # removal of timestamps, sigh

@@ -33,6 +33,11 @@ PDICT = {
     "last": "Year of Last Issuance",
     "first": "Year of First Issuance",
 }
+PDICT2 = {
+    "cwsu": "Center Weather Service Unit (CWSU)",
+    "rfc": "River Forecast Center (RFC)",
+    "cwa": "Weather Forecast Office (WFO) / CWA",
+}
 
 
 def fix():
@@ -63,6 +68,13 @@ def get_description():
             label="Statistic to Plot",
             default="count",
         ),
+        {
+            "type": "select",
+            "name": "w",
+            "options": PDICT2,
+            "label": "Summarize by:",
+            "default": "cwa",
+        },
         dict(
             type="datetime",
             name="sts",
@@ -139,10 +151,15 @@ def plotter(fdict):
             f"and {ctx['ets']:%d %b %Y %H:%M} UTC, "
             "based on unofficial IEM Archives"
         ),
-        sector="nws",
+        sector="nws" if ctx["w"] == "cwa" else "conus",
         nocaption=True,
     )
-    mp.fill_cwas(
+    func = {
+        "cwa": mp.fill_cwas,
+        "cwsu": mp.fill_cwsu,
+        "rfc": mp.fill_rfc,
+    }
+    func[ctx["w"]](
         data,
         ilabel=True,
         lblformat="%.0f",
