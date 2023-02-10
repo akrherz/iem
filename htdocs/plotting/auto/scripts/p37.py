@@ -15,12 +15,14 @@ import datetime
 import numpy as np
 import pandas as pd
 import matplotlib.dates as mdates
+from matplotlib.ticker import AutoMinorLocator, MaxNLocator
 from pyiem.plot import figure_axes
 from pyiem.util import get_autoplot_context, get_dbconn
 
 PDICT = {
     "NAM": "NAM (9 Dec 2008 - current)",
     "GFS": "GFS (16 Dec 2003 - current)",
+    "LAV": "GFS LAMP (23 Jul 2020 - current)",
     "MEX": "GFS Extended (12 Jul 2020 - current)",
     "NBE": "NBE (23 Jul 2020 - current)",
     "NBS": "NBS (23 Jul 2020 - current)",
@@ -42,18 +44,18 @@ T_SQL = """
     SELECT date(ftime),
     min(case when
         extract(hour from ftime at time zone 'UTC') = 12
-        then coalesce(n_x, tmp) else null end) as min_morning,
+        then coalesce(n_x, txn) else null end) as min_morning,
     max(case when
         extract(hour from ftime at time zone 'UTC') = 12
-        then coalesce(n_x, tmp) else null end) as max_morning,
+        then coalesce(n_x, txn) else null end) as max_morning,
     min(case when
         extract(hour from ftime at time zone 'UTC') = 0
-        then coalesce(n_x, tmp) else null end) as min_afternoon,
+        then coalesce(n_x, txn) else null end) as min_afternoon,
     max(case when
         extract(hour from ftime at time zone 'UTC') = 0
-        then coalesce(n_x, tmp) else null end) as max_afternoon
+        then coalesce(n_x, txn) else null end) as max_afternoon
     from alldata WHERE station = %s and runtime BETWEEN %s and %s
-    and model = %s GROUP by date
+    and model = %s and (txn is null or txn > -98) GROUP by date
     """
 SQL = """
     SELECT ftime at time zone 'UTC', min(RPL), max(RPL)
@@ -276,7 +278,7 @@ def plotter(fdict):
     # Extract the range of forecasts for each day for approximately
     # the given month
     month1 = datetime.datetime(year, month, 1)
-    sts = month1 - datetime.timedelta(days=7)
+    sts = month1 - datetime.timedelta(days=10)
     ets = month1 + datetime.timedelta(days=32)
     station4 = f"K{station}" if len(station) == 3 else station
     is_temp = ctx["var"] == "t"
@@ -347,6 +349,10 @@ def plotter(fdict):
         fontsize=12,
     )
     ax.grid()
+    ax.yaxis.set_minor_locator(AutoMinorLocator())
+    ax.yaxis.set_major_locator(MaxNLocator(integer=True))
+    ax.tick_params(which="minor", color="tan")
+    ax.grid(which="minor", axis="y", color="tan", linestyle="-.")
 
     return fig, df
 
