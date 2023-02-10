@@ -30,28 +30,19 @@ def save_content(station, content):
             continue
         suffix = epoch[ftype] if epoch[ftype] > 0 else ""
         epoch[ftype] += 1
-        filename = "%s%s_%s_%s.dat" % (
-            station,
-            suffix,
-            ftype,
-            NOW.strftime("%Y%m%d"),
-        )
+        filename = f"{station}{suffix}_{ftype}_{NOW:%Y%m%d}.dat"
         # send to LDM for archival
-        pqstr = "data a %s bogus raw/isusm/%s dat" % (
-            NOW.strftime("%Y%m%d%H%M"),
-            filename,
-        )
+        pqstr = f"data a {NOW:%Y%m%d%H%M} bogus raw/isusm/{filename} dat"
         LOG.debug(pqstr)
         with tempfile.NamedTemporaryFile(delete=False) as tmpfd:
             tmpfd.write(content[key].getvalue())
-        proc = subprocess.Popen(
-            "pqinsert -i -p '%s' %s" % (pqstr, tmpfd.name),
-            shell=True,
+        with subprocess.Popen(
+            ["pqinsert", "-i", "-p", pqstr, tmpfd.name],
             stdout=subprocess.PIPE,
             stderr=subprocess.PIPE,
             stdin=subprocess.PIPE,
-        )
-        (stdout, stderr) = proc.communicate()
+        ) as proc:
+            (stdout, stderr) = proc.communicate()
         if stdout != b"" or stderr != b"":
             LOG.info("%s stdout: %s stderr: %s", pqstr, stdout, stderr)
         os.unlink(tmpfd.name)
@@ -68,7 +59,7 @@ def process(files):
             continue
         ftype = fn.rsplit("_", 5)[1]
         # build key based on the header
-        key = "%s||%s" % (ftype, lines[1])
+        key = f"{ftype}||{lines[1]}"
         if key not in content:
             content[key] = BytesIO()
             content[key].write(b"".join(lines[:4]))
@@ -81,10 +72,10 @@ def process(files):
 
 def zip_and_delete(station, files):
     """zip em off to storage and delete them, gasp."""
-    archivedir = "%s/archived/%s/%02i" % (PATH, NOW.year, NOW.month)
+    archivedir = f"{PATH}/archived/{NOW.year}/{NOW:%m}"
     if not os.path.isdir(archivedir):
         os.makedirs(archivedir)
-    savefn = "%s/%s_%s.zip" % (archivedir, station, NOW.strftime("%Y%m%d"))
+    savefn = f"{archivedir}/{station}_{NOW:%Y%m%d}.zip"
     if os.path.isfile(savefn):
         LOG.info("Refusing to overwrite %s", savefn)
         return

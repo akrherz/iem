@@ -5,16 +5,17 @@
 require_once "../../../config/settings.inc.php";
 require_once "../../../include/database.inc.php";
 require_once "../../../include/vtec.php";
+require_once "../../../include/forms.php";
 $connect = iemdb("postgis");
 pg_query($connect, "SET TIME ZONE 'UTC'");
 
-$year = isset($_GET["year"]) ? intval($_GET["year"]) : 2008;
-$month = isset($_GET["month"]) ? intval($_GET["month"]) : 1;
-$day = isset($_GET["day"]) ? intval($_GET["day"]) : 8;
-$hour = isset($_GET["hour"]) ? intval($_GET["hour"]) : 10;
-$minute = isset($_GET["minute"]) ? intval($_GET["minute"]) : 0;
+$year = get_int404("year", 2008);
+$month = get_int404("month", 1);
+$day = get_int404("day", 8);
+$hour = get_int404("hour", 10);
+$minute = get_int404("minute", 0);
 $ts = gmmktime($hour, $minute, 0, $month, $day, $year);
-$wfo = isset($_GET["wfo"]) ? substr($_GET["wfo"], 0, 3) : "MPX";
+$wfo = isset($_GET["wfo"]) ? substr(xssafe($_GET["wfo"]), 0, 3) : "MPX";
 
 $rs = pg_prepare($connect, "SELECT", "SELECT *, ST_AsText(geom) as g, 
            round(ST_area(ST_transform(geom,2163)) / 1000000.0) as psize

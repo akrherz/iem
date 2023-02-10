@@ -60,7 +60,7 @@ def main(argv):
             values=sumvar,
         )
         .rename(
-            columns=dict((i + 1, v) for i, v in enumerate(month_abbr[1:])),
+            columns=dict(enumerate(month_abbr[1:], start=1)),
         )
     )
     print(f"Observation Count For {station}")

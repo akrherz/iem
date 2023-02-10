@@ -51,7 +51,7 @@ def generic_gridder(df, idx):
     df2 = df[df[idx].notnull()]
     if len(df2.index) < 4:
         LOG.warning("Not enough data %s", idx)
-        return
+        return None
     xi, yi = np.meshgrid(iemre.XAXIS, iemre.YAXIS)
     res = np.ones(xi.shape) * np.nan
     # do our gridding
@@ -135,7 +135,7 @@ def copy_iemre(ts, ds):
                 vwnd = hnc.variables["vwnd"][offset, :, :]
                 if uwnd.mask.all():
                     # Quell logging when we are close to current clock time.
-                    now = sts + datetime.timedelta(hours=(offset - offset1))
+                    now = sts + datetime.timedelta(hours=offset - offset1)
                     if now < (utc() - datetime.timedelta(hours=3)):
                         LOG.warning(
                             "No wind for offset: %s[%s-%s] %s",

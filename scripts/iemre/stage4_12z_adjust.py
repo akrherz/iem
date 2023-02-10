@@ -16,7 +16,7 @@ def save12z(ts, val):
     """Save the data to our daily 12z file."""
     ncfn = f"/mesonet/data/stage4/{ts.year}_stage4_daily.nc"
     if not os.path.isfile(ncfn):
-        LOG.warn("File not found! %s", ncfn)
+        LOG.warning("File not found! %s", ncfn)
         return
     idx = iemre.daily_offset(ts)
     LOG.debug("Writing 12z grid to %s at idx: %s", ncfn, idx)
@@ -34,9 +34,9 @@ def merge(ts):
     """
 
     # Load up the 12z 24h total, this is what we base our deltas on
-    fn = ("/mesonet/ARCHIVE/data/%s/stage4/ST4.%s.24h.grib") % (
-        ts.strftime("%Y/%m/%d"),
-        ts.strftime("%Y%m%d%H"),
+    fn = (
+        "/mesonet/ARCHIVE/data/"
+        f"{ts:%Y/%m/%d}/stage4/ST4.{ts:%Y%m%d%H}.24h.grib"
     )
     if not os.path.isfile(fn):
         LOG.info("stage4_12z_adjust %s is missing", fn)

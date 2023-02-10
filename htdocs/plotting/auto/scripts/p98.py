@@ -1,4 +1,6 @@
-"""Day of month frequency."""
+"""This plot produces the daily frequency of
+    a given criterion being meet for a station and month of your choice. The
+    number labeled above each bar is the actual number of years."""
 import calendar
 
 import numpy as np
@@ -20,14 +22,7 @@ PDICT2 = {"above": "At or Above Threshold", "below": "Below Threshold"}
 
 def get_description():
     """Return a dict describing how to call this plotter"""
-    desc = {}
-    desc["data"] = True
-    desc[
-        "description"
-    ] = """This plot produces the daily frequency of
-    a given criterion being meet for a station and month of your choice. The
-    number labeled above each bar is the actual number of years.
-    """
+    desc = {"description": __doc__, "data": True}
     desc["arguments"] = [
         dict(
             type="station",
@@ -69,10 +64,10 @@ def plotter(fdict):
     month = ctx["month"]
     threshold = float(ctx["thres"])
     if PDICT.get(varname) is None:
-        return
+        raise NoDataFound("No Data Found.")
     drct = ctx["dir"]
     if PDICT2.get(drct) is None:
-        return
+        raise NoDataFound("No Data Found.")
     operator = ">=" if drct == "above" else "<"
     with get_sqlalchemy_conn("coop") as conn:
         df = pd.read_sql(
