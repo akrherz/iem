@@ -215,13 +215,14 @@ def plotter(fdict):
 
     fig = figure(apctx=ctx)
 
+    ax1 = None
+    ax2 = None
     if station2 is not None:
         ax0 = fig.add_axes([0.05, 0.15, 0.43, 0.75])
         ax1 = fig.add_axes([0.55, 0.55, 0.43, 0.35])
         ax2 = fig.add_axes([0.55, 0.07, 0.43, 0.35])
     else:
         ax0 = fig.add_axes([0.12, 0.15, 0.8, 0.75])
-        ax1 = None
 
     c1label = c1
     if c1 == "custom":
@@ -286,7 +287,7 @@ def plotter(fdict):
             ax1.text(
                 0.01,
                 0.99,
-                "** %s Day Smoother Applied" % (int(ctx["s"]),),
+                f"** {int(ctx['s'])} Day Smoother Applied",
                 transform=ax1.transAxes,
                 va="top",
             )

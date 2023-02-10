@@ -151,7 +151,7 @@ def plotter(fdict):
             f"and {ctx['ets']:%d %b %Y %H:%M} UTC, "
             "based on unofficial IEM Archives"
         ),
-        sector="nws" if ctx["w"] == "cwa" else "conus",
+        sector="nws",
         nocaption=True,
     )
     func = {
