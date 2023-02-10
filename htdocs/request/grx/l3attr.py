@@ -11,6 +11,7 @@ TODO suggestions:
 TODO:
 Add storm tracks.
 """
+# pylint: disable=unpacking-non-sequence
 import math
 
 from pymemcache.client import Client
@@ -238,14 +239,13 @@ def rotate(x, y, rad):
 
 def dir2ccwrot(mydir):
     """Convert to CCW"""
-    if mydir >= 270 and mydir <= 360:
+    if 270 <= mydir <= 360:
         return 0 - (mydir - 270)
-    if mydir >= 180 and mydir < 270:
+    if 180 <= mydir < 270:
         return 270 - mydir
-    if mydir >= 90 and mydir < 180:
+    if 90 <= mydir < 180:
         return 180 - (mydir - 90)
-    if mydir >= 0 and mydir < 90:
-        return 180 + (90 - mydir)
+    return 180 + (90 - mydir)
 
 
 def rabbit_tracks(row):
@@ -268,14 +268,15 @@ def rabbit_tracks(row):
     # Draw white line out 30 minutes
     lons, lats = P3857(x, y, inverse=True)
     res += (
-        'Line: 1, 0, "Cell [%s]"\n' "%.4f, %.4f\n" "%.4f, %.4f\n" "END:\n"
-    ) % (row["storm_id"], lat0, lon0, lats[-1], lons[-1])
+        f"Line: 1, 0, \"Cell [{row['storm_id']}]\"\n"
+        f"{lat0:.4f}, {lon0:.4f}\n"
+        f"{lats[-1]:.4f}, {lons[-1]:.4f}\n"
+        "END:\n"
+    )
     for i in range(3):
-        res += ('Icon: %.4f,%.4f,%.0f,1,10,"+%.0f min"\n') % (
-            lats[i],
-            lons[i],
-            rotation,
-            (i + 1) * 15,
+        res += (
+            f"Icon: {lats[i]:.4f},{lons[i]:.4f},{rotation:.0f},"
+            f'1,10,"+{((i + 1) * 15):.0f} min"\n'
         )
     return res
 
@@ -288,8 +289,8 @@ def produce_content(nexrad, poh, meso, tvs, max_size):
     threshold = 999
     title = "IEM NEXRAD L3 Attributes"
     if nexrad != "":
-        limiter = " and nexrad = '%s' " % (nexrad,)
-        title = "IEM %s NEXRAD L3 Attributes" % (nexrad,)
+        limiter = f" and nexrad = '{nexrad}' "
+        title = f"IEM {nexrad} NEXRAD L3 Attributes"
         threshold = 45
     meso_limiter = ""
     titleadd = ""
@@ -317,27 +318,23 @@ def produce_content(nexrad, poh, meso, tvs, max_size):
     )
     res = (
         "Refresh: 3\n"
-        "Threshold: %s\n"
-        "Title: %s%s\n"
-        'IconFile: 1, 32, 32, 16, 16, "%s"\n'
+        f"Threshold: {threshold}\n"
+        f"Title: {title}{titleadd}\n"
+        f'IconFile: 1, 32, 32, 16, 16, "{ICONFILE}"\n'
         'Font: 1, 11, 1, "Courier New"\n'
-    ) % (threshold, title, titleadd, ICONFILE)
+    )
     for row in cursor:
-        text = ("K%s [%s] %s Z\\n" "Drct: %s Speed: %s kts\\n") % (
-            row["nexrad"],
-            row["storm_id"],
-            row["utc_valid"].strftime("%H:%M"),
-            row["drct"],
-            row["sknt"],
+        text = (
+            f"K{row['nexrad']} [{row['storm_id']}] {row['utc_valid']:%H:%M} "
+            f"Z\\n\" \"Drct: {row['drct']} Speed: {row['sknt']} kts\\n"
         )
         icon = 9
         if row["tvs"] != "NONE" or row["meso"] != "NONE":
-            text += "TVS: %s MESO: %s\\n" % (row["tvs"], row["meso"])
+            text += f"TVS: {row['tvs']} MESO: {row['meso']}\\n"
         if row["poh"] > 0 or row["posh"] > 0:
-            text += "POH: %s POSH: %s MaxSize: %s\\n" % (
-                row["poh"],
-                row["posh"],
-                row["max_size"],
+            text += (
+                f"POH: {row['poh']} POSH: {row['posh']} "
+                f"MaxSize: {row['max_size']}\\n"
             )
             icon = 2
         if row["meso"] != "NONE":
@@ -351,11 +348,11 @@ def produce_content(nexrad, poh, meso, tvs, max_size):
         if row["tvs"] != "NONE":
             icon = 5
         res += (
-            "Object: %.4f,%.4f\n"
+            f"Object: {row['lat']:.4f},{row['lon']:.4f}\n"
             "Threshold: 999\n"
-            'Icon: 0,0,0,1,%s,"%s"\n'
+            f'Icon: 0,0,0,1,{icon},"{text}"\n'
             "END:\n"
-        ) % (row["lat"], row["lon"], icon, text)
+        )
         res += rabbit_tracks(row)
     return res
 
@@ -375,13 +372,7 @@ def application(environ, start_response):
     meso = float(form.get("meso", -1))
     tvs = "tvs" in form
     max_size = float(form.get("max_size", 0))
-    mckey = "/request/grx/i3attr|%s|%s|%s|%s|%s" % (
-        nexrad,
-        poh,
-        meso,
-        tvs,
-        max_size,
-    )
+    mckey = f"/request/grx/i3attr|{nexrad}|{poh}|{meso}|{tvs}|{max_size}"
     mc = Client("iem-memcached:11211")
     res = mc.get(mckey)
     if not res:

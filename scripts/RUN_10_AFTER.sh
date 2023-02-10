@@ -119,6 +119,7 @@ fi
 cd ../mos
 python current_bias.py NAM
 python current_bias.py GFS
+python current_bias.py NBS
 
 if [ $HH -eq "01" ]
 then

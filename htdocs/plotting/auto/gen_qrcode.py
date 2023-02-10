@@ -35,7 +35,7 @@ def application(environ, start_response):
     if fields.get("q", "").find("network:WFO::wfo:PAAQ") > -1:
         fields["q"] = fields["q"].replace("network:WFO", "network:NWS")
     uri = q2uri(fields.get("q"), fields.get("p"))
-    mckey = hashlib.md5(uri.encode("utf-8")).hexdigest()
+    mckey = hashlib.sha256(uri.encode("utf-8")).hexdigest()
     # Figure out what our response headers should be
     response_headers = [("Content-type", "image/png")]
     mc = Client("iem-memcached:11211")
