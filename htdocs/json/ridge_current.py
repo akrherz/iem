@@ -7,7 +7,7 @@ import glob
 
 from pymemcache.client import Client
 from paste.request import parse_formvars
-from pyiem.util import html_escape
+from pyiem.util import html_escape, LOG
 
 ISO = "%Y-%m-%dT%H:%M:%SZ"
 
@@ -28,8 +28,8 @@ def run(product):
             with open(fn, encoding="utf-8") as fh:
                 j = json.load(fh)
             res["meta"].append(j["meta"])
-        except Exception:
-            pass
+        except Exception as exp:
+            LOG.info(exp)
 
     return json.dumps(res)
 

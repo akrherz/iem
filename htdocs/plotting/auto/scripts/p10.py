@@ -1,4 +1,7 @@
-"""First and Last Date"""
+"""This plot presents the period between the first
+    or last date for spring and fall season that the temperature was above or
+    below some threshold.  The year is split into two seasons on 1 July. A
+    simple linear trend line is placed on both dates."""
 import calendar
 import datetime
 
@@ -25,16 +28,7 @@ PDICT2 = {
 
 def get_description():
     """Return a dict describing how to call this plotter"""
-    desc = {}
-    desc["data"] = True
-    desc["report"] = True
-    desc[
-        "description"
-    ] = """This plot presents the period between the first
-    or last date for spring and fall season that the temperature was above or
-    below some threshold.  The year is split into two seasons on 1 July. A
-    simple linear trend line is placed on both dates.
-    """
+    desc = {"description": __doc__, "data": True, "report": True}
     desc["arguments"] = [
         dict(
             type="station",
@@ -107,7 +101,7 @@ def plotter(fdict):
                  then day else null end) as fall_date
             from {table} where station = %s
             GROUP by year ORDER by year ASC"""
-    elif direction == "above2":
+    else:  # above2
         sql = f"""select year,
              max(case when {varname} >= %s and month < 7
                  then extract(doy from day) else 0 end) as spring,
@@ -145,36 +139,28 @@ def plotter(fdict):
     if df.empty:
         raise NoDataFound("No data found for query.")
     df["season"] = df["fall"] - df["spring"]
-    res = """\
-# IEM Climodat https://mesonet.agron.iastate.edu/climodat/
-# Report Generated: %s
-# Climate Record: %s -> %s
-# Site Information: [%s] %s
-# Contact Information: Daryl Herzmann akrherz@iastate.edu 515.294.5978
-# LENGTH OF SEASON FOR STATION NUMBER  %s   BASE TEMP=%s
-# LAST SPRING OCCURENCE FIRST FALL OCCURENCE
-   YEAR MONTH DAY DOY         MONTH DAY DOY   LENGTH OF SEASON
-""" % (
-        datetime.date.today().strftime("%d %b %Y"),
-        ctx["_nt"].sts[station]["archive_begin"],
-        datetime.date.today(),
-        station,
-        ctx["_nt"].sts[station]["name"],
-        station,
-        threshold,
+    today = datetime.date.today()
+    res = (
+        "# IEM Climodat https://mesonet.agron.iastate.edu/climodat/\n"
+        f"# Report Generated: {today:%d %b %Y}\n"
+        f"# Climate Record: {ctx['_nt'].sts[station]['archive_begin']} "
+        f"-> {today}\n"
+        f"# Site Information: {ctx['_sname']}\n"
+        "# Contact Information: Daryl Herzmann "
+        "akrherz@iastate.edu 515.294.5978\n"
+        f"# LENGTH OF SEASON FOR STATION NUMBER  {station}   "
+        f"BASE TEMP={threshold}\n"
+        "# LAST SPRING OCCURENCE FIRST FALL OCCURENCE\n"
+        "   YEAR MONTH DAY DOY         MONTH DAY DOY   LENGTH OF SEASON\n"
     )
     for _, row in df.iterrows():
         if row["spring_date"] is None or row["fall_date"] is None:
             continue
-        res += ("%7i%4i%6i%4i        %4i%6i%4i          %.0f\n") % (
-            row["year"],
-            row["spring_date"].month,
-            row["spring_date"].day,
-            row["spring"],
-            row["fall_date"].month,
-            row["fall_date"].day,
-            row["fall"],
-            row["season"],
+        res += (
+            f"{row['year']:7.0f}{row['spring_date'].month:4.0f}"
+            f"{row['spring_date'].day:6.0f}{row['spring']:4.0f}        "
+            f"{row['fall_date'].month:4.0f}{row['fall_date'].day:6.0f}"
+            f"{row['fall']:4.0f}          {row['season']:.0f}\n"
         )
     sts = datetime.date(2000, 1, 1) + datetime.timedelta(
         days=df["spring"].mean()
@@ -182,15 +168,10 @@ def plotter(fdict):
     ets = datetime.date(2000, 1, 1) + datetime.timedelta(
         days=df["fall"].mean()
     )
-    res += ("%7s%4i%6i%4i        %4i%6i%4i          %.0f\n") % (
-        "MEAN",
-        sts.month,
-        sts.day,
-        df["spring"].mean(),
-        ets.month,
-        ets.day,
-        df["spring"].mean(),
-        df["season"].mean(),
+    res += (
+        f"{'MEAN':7s}{sts.month:4.0f}{sts.day:6.0f}{df['spring'].mean():4.0f}"
+        f"        {ets.month:4.0f}{ets.day:6.0f}{df['fall'].mean():4.0f}"
+        f"          {df['season'].mean():.0f}\n"
     )
     years = np.array(df["year"], dtype=int)
     spring = np.array(df["spring"], dtype=int)
@@ -203,7 +184,7 @@ def plotter(fdict):
     ax.bar(years, fall - spring, bottom=spring, ec="tan", fc="tan", zorder=1)
     for _v in [fall, spring]:
         avgv = int(np.average(_v))
-        ts = datetime.date(2000, 1, 1) + datetime.timedelta(days=(avgv - 1))
+        ts = datetime.date(2000, 1, 1) + datetime.timedelta(days=avgv - 1)
         ax.text(
             years[-1] + 3,
             avgv,
@@ -216,7 +197,7 @@ def plotter(fdict):
     ax.text(
         1.02,
         0.5,
-        "<- %.1f days ->" % (days,),
+        f"<- {days:.1f} days ->",
         transform=ax.transAxes,
         rotation=-90,
     )
@@ -225,26 +206,29 @@ def plotter(fdict):
         years * s_slp + s_int,
         lw=3,
         zorder=2,
-        label=r"%.2f $\frac{days}{100y}$ R$^2$=%.2f"
-        % (s_slp * 100.0, s_r**2),
+        label=(
+            f"{(s_slp * 100.0):.2f} "
+            r"$\frac{days}{100y}$ R$^2$="
+            f"{(s_r**2):.2f}"
+        ),
     )
     ax.plot(
         years,
         years * f_slp + f_int,
         lw=3,
         zorder=2,
-        label=r"%.2f $\frac{days}{100y}$ R$^2$=%.2f"
-        % (f_slp * 100.0, f_r**2),
+        label=(
+            f"{(f_slp * 100.0):.2f} "
+            r"$\frac{days}{100y}$ R$^2$="
+            f"{(f_r**2):.2f}"
+        ),
     )
     ax.grid(True)
     title = PDICT.get(direction, "").replace(
         "Temperature", PDICT2.get(varname)
     )
     units = r"$^\circ$F" if not varname.startswith("snow") else "inch"
-    ax.set_title(
-        ("[%s] %s\n" r"%s %s%s")
-        % (station, ctx["_nt"].sts[station]["name"], title, threshold, units)
-    )
+    ax.set_title(f"{ctx['_sname']}\n{title} {threshold}{units}")
     ax.legend(ncol=2, fontsize=14, labelspacing=2)
     ax.set_yticks((1, 32, 60, 91, 121, 152, 182, 213, 244, 274, 305, 335))
     ax.set_yticklabels(calendar.month_abbr[1:])

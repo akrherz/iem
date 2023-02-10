@@ -1,4 +1,22 @@
-"""Office accumulated warnings"""
+"""This plot displays an accumulated total of
+    office issued watch, warning, advisories.  These totals are not official
+    and based on IEM processing of NWS text warning data.  The totals are for
+    individual warnings and not some combination of counties + warnings. The
+    archive begin date varies depending on which phenomena you are interested
+    in.
+
+    <p>Generally, the archive starts in Fall 2005 for most types.  Event
+    counts do exist for Severe Thunderstorm, Tornado and Flash Flood warnings
+    for dates back to 1986.  Data quality prior to 2001 is not the greatest
+    though.</p>
+
+    <p>If you want to use the "cold season" as the basis of a year, pick the
+    "July 1" option below. The "year" label is then associated with the fall
+    portion of the cold season (1 Jul 2021 - 30 Jun 2022 is 2021).</p>
+
+    <p><strong>Updated 26 Jan 2023</strong> When selecting to limit to a year
+    to date period, a more exact algorithm is now used to accumulate warnings
+    through the end of the current date in central timezone.</p>"""
 import datetime
 import math
 import calendar
@@ -25,31 +43,7 @@ PDICT5 = {"jan1": "January 1", "jul1": "July 1"}
 
 def get_description():
     """Return a dict describing how to call this plotter"""
-    desc = {}
-    desc["cache"] = 86400
-    desc["data"] = True
-    desc[
-        "description"
-    ] = """This plot displays an accumulated total of
-    office issued watch, warning, advisories.  These totals are not official
-    and based on IEM processing of NWS text warning data.  The totals are for
-    individual warnings and not some combination of counties + warnings. The
-    archive begin date varies depending on which phenomena you are interested
-    in.
-
-    <p>Generally, the archive starts in Fall 2005 for most types.  Event
-    counts do exist for Severe Thunderstorm, Tornado and Flash Flood warnings
-    for dates back to 1986.  Data quality prior to 2001 is not the greatest
-    though.</p>
-
-    <p>If you want to use the "cold season" as the basis of a year, pick the
-    "July 1" option below. The "year" label is then associated with the fall
-    portion of the cold season (1 Jul 2021 - 30 Jun 2022 is 2021).</p>
-
-    <p><strong>Updated 26 Jan 2023</strong> When selecting to limit to a year
-    to date period, a more exact algorithm is now used to accumulate warnings
-    through the end of the current date in central timezone.</p>
-    """
+    desc = {"description": __doc__, "cache": 86400, "data": True}
     desc["arguments"] = [
         dict(
             type="select",
@@ -142,7 +136,9 @@ def make_barplot(ctx, df):
     fig = figure(title=ctx["title"], apctx=ctx)
     ax = fig.add_axes([0.1, 0.1, 0.8, 0.8])
     df2 = (
-        df.groupby("year").sum().reindex(range(ctx["syear"], ctx["eyear"] + 1))
+        df.groupby("year")
+        .sum(numeric_only=True)
+        .reindex(range(ctx["syear"], ctx["eyear"] + 1))
     )
     df2 = df2.fillna(0)
     ax.bar(df2.index.values, df2["count"])
@@ -153,7 +149,7 @@ def make_barplot(ctx, df):
             float(row["count"]) + (top * 0.025),
             f"{row['count']:.0f}",
             rotation=90 if len(df2.index) > 17 else 0,
-            bbox=dict(color="white", boxstyle="square,pad=0"),
+            bbox={"color": "white", "boxstyle": "square,pad=0"},
             ha="center",
         )
     ax.set_xlim(ctx["syear"] - 0.5, ctx["eyear"] + 0.5)

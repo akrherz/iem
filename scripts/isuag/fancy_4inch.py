@@ -1,4 +1,5 @@
 """Pretty Four Inch Depth Iowa Plots"""
+# pylint: disable=unbalanced-tuple-unpacking
 # stdlib
 import datetime
 import sys
@@ -26,10 +27,8 @@ def get_idx(lons, lats, lon, lat):
 def get_grib(now, fhour):
     """Find the desired grib within the grib messages"""
     gribfn = now.strftime(
-        (
-            "/mesonet/ARCHIVE/data/%Y/%m/%d/model/nam/"
-            "%H/nam.t%Hz.conusnest.hiresf0" + str(fhour) + ".tm00.grib2"
-        )
+        "/mesonet/ARCHIVE/data/%Y/%m/%d/model/nam/"
+        f"%H/nam.t%Hz.conusnest.hiresf0{fhour}.tm00.grib2"
     )
     if not os.path.isfile(gribfn):
         LOG.info("NAM missing: %s", gribfn)
@@ -43,6 +42,7 @@ def get_grib(now, fhour):
     for g in gs:
         if str(g).find("levels 0.0-0.1 m") > 0:
             return g
+    return None
 
 
 def do_nam(valid):
@@ -91,12 +91,6 @@ def main(argv):
     nam = convert_value(hvals, "degK", "degF")
     window = np.ones((3, 3))
     nam = convolve2d(nam, window / window.sum(), mode="same", boundary="symm")
-
-    # mp = MapPlot(sector='midwest')
-    # mp.pcolormesh(hlons, hlats, nam,
-    #              range(20, 90, 5))
-    # mp.postprocess(filename='test.png')
-    # sys.exit()
 
     # Query out the data
     df = read_sql(
@@ -166,8 +160,7 @@ def main(argv):
 
     mp = MapPlot(
         sector="iowa",
-        title=("Average 4 inch Depth Soil Temperatures for %s")
-        % (ts.strftime("%b %d, %Y"),),
+        title=f"Average 4 inch Depth Soil Temperatures for {ts:%b %d, %Y}",
         subtitle=(
             "County est. based on bias adj. "
             "NWS NAM Model (black numbers), "
@@ -201,8 +194,9 @@ def main(argv):
     mp.drawcounties()
     routes = "a" if day_ago >= 4 else "ac"
     pqstr = (
-        "plot %s %s0000 soilt_day%s.png isuag_county_4inch_soil.png png"
-    ) % (routes, ts.strftime("%Y%m%d"), day_ago)
+        f"plot {routes} {ts:%Y%m%d}0000 soilt_day{day_ago}.png "
+        "isuag_county_4inch_soil.png png"
+    )
     mp.postprocess(pqstr=pqstr)
     mp.close()
 
