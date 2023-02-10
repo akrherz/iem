@@ -362,6 +362,8 @@ $( "#{dpname}" ).flatpickr({{
 
 def add_to_plotvars(value, fdict, arg, res):
     """Add to our plotvars."""
+    if value == "":
+        return
     if arg["type"] == "vtec_ps":
         suffix = arg["name"]
         value = html_escape(fdict.get(f"phenomena{suffix}", "SV"))
