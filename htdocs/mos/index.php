@@ -78,15 +78,22 @@ multiplied by 10 for its true value.
 
 <h3>Current Plots</h3>
 <div class="row">
-    <div class="col-md-6">
-<a href="/timemachine/#52.0"><img src="/data/conus_nam_mos_T_bias.png" 
- class="img img-responsive" border="1"/></a>
- </div>
-    <div class="col-md-6">
 
+<div class="col-md-4">
 <a href="/timemachine/#51.0"><img src="/data/conus_gfs_mos_T_bias.png" 
  class="img img-responsive" border="1"/></a>
- </div>
+</div>
+
+<div class="col-md-4">
+<a href="/timemachine/#52.0"><img src="/data/conus_nam_mos_T_bias.png" 
+ class="img img-responsive" border="1"/></a>
+</div>
+
+<div class="col-md-4">
+<a href="/timemachine/#50.0"><img src="/data/conus_nbs_mos_T_bias.png" 
+ class="img img-responsive" border="1"/></a>
+</div>
+
 </div>
 EOF;
 $t->render('single.phtml');

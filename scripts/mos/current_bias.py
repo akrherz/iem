@@ -3,7 +3,9 @@ import sys
 
 import pytz
 from pyiem.plot import MapPlot, get_cmap
-from pyiem.util import get_dbconn, utc
+from pyiem.util import get_dbconn, utc, logger
+
+LOG = logger()
 
 
 def doit(now, model):
@@ -20,7 +22,8 @@ def doit(now, model):
     row = mcursor.fetchone()
     runtime = row[0]
     if runtime is None:
-        sys.exit()
+        LOG.info("Model %s runtime %s not found, abort", model, now)
+        return
     runtime = runtime.replace(tzinfo=pytz.utc)
 
     # Load up the mos forecast for our given
@@ -68,47 +71,23 @@ def doit(now, model):
     cmap.set_over("black")
 
     localnow = now.astimezone(pytz.timezone("America/Chicago"))
-    mp = MapPlot(
-        sector="midwest",
-        title="%s MOS Temperature Bias " % (model,),
-        subtitle=("Model Run: %s Forecast Time: %s")
-        % (
-            runtime.strftime("%d %b %Y %H %Z"),
-            localnow.strftime("%d %b %Y %-I %p %Z"),
-        ),
+    subtitle = (
+        f"Model Run: {runtime:%d %b %Y %H %Z} "
+        f"Forecast Time: {localnow:%d %b %Y %-I %p %Z}"
     )
-    mp.contourf(lons, lats, vals, range(-10, 11, 2), units="F", cmap=cmap)
-
-    pqstr = "plot ac %s00 %s_mos_T_bias.png %s_mos_T_bias_%s.png png" % (
-        now.strftime("%Y%m%d%H"),
-        model.lower(),
-        model.lower(),
-        now.strftime("%H"),
-    )
-    mp.postprocess(pqstr=pqstr, view=False)
-    mp.close()
-
     mp = MapPlot(
         sector="conus",
-        title="%s MOS Temperature Bias " % (model,),
-        subtitle=("Model Run: %s Forecast Time: %s")
-        % (
-            runtime.strftime("%d %b %Y %H %Z"),
-            localnow.strftime("%d %b %Y %-I %p %Z"),
-        ),
+        title=f"{model} MOS Temperature Bias",
+        subtitle=subtitle,
     )
     mp.contourf(lons, lats, vals, range(-10, 11, 2), units="F", cmap=cmap)
 
     pqstr = (
-        "plot ac %s00 conus_%s_mos_T_bias.png "
-        "conus_%s_mos_T_bias_%s.png png"
-    ) % (
-        now.strftime("%Y%m%d%H"),
-        model.lower(),
-        model.lower(),
-        now.strftime("%H"),
+        f"plot ac {now:%Y%m%d%H}00 conus_{model.lower()}_mos_T_bias.png "
+        f"conus_{model.lower()}_mos_T_bias_{now:%H}.png png"
     )
-    mp.postprocess(pqstr=pqstr, view=False)
+    mp.postprocess(pqstr=pqstr)
+    mp.close()
 
 
 def main(argv):
