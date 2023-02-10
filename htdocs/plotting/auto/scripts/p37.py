@@ -6,6 +6,9 @@
 
 <p>The bars represent the ensemble of previously made forecasts valid for the
 given time.
+
+<p><strong>Updated 9 Feb 2023</strong> The data download columns names were
+changed to be more explicit about what is being presented.
 """
 import datetime
 
@@ -69,8 +72,10 @@ T_SQL_OB = """
 SQL_OB = """
     select date_trunc('hour',
     valid at time zone 'UTC' + '10 minutes'::interval) as datum,
-    avg(RPL) from alldata where station = %s and valid between %s and %s
-    and extract(minute from valid) >= 50 and RPL is not null GROUP by datum
+    RPL from alldata where station = %s and valid between %s and %s
+    and (extract(minute from valid) >= 50 or
+         extract(minute from valid) < 10) and RPL is not null
+    and report_type in (3, 4)
     """
 
 
@@ -122,44 +127,45 @@ def plot_others(varname, ax, mosdata, month1, month, obs):
     top = []
     bottom = []
     _obs = []
-    now = datetime.datetime(month1.year, month1.month, month1.day)
     x = []
-    rows = []
+    now = datetime.datetime(month1.year, month1.month, month1.day)
     while now.month == month:
         x.append(now)
         bottom.append(mosdata.get(now, [np.nan, np.nan])[0])
         top.append(mosdata.get(now, [np.nan, np.nan])[1])
         _obs.append(obs.get(now, np.nan))
-        rows.append(
-            {
-                "valid": now,
-                "min": bottom[-1],
-                "max": top[-1],
-                "dpt": _obs[-1],
-            }
-        )
         now += datetime.timedelta(hours=6)
-    df = pd.DataFrame(rows)
-    if df[pd.notna(df["min"])].empty:
+    df = pd.DataFrame(
+        {
+            "valid": pd.to_datetime(x),
+            f"mos_min_{varname}": bottom,
+            f"mos_max_{varname}": top,
+            f"ob_{varname}": _obs,
+        }
+    )
+    df["mos_delta"] = df[f"mos_max_{varname}"] - df[f"mos_min_{varname}"]
+    if df[f"mos_min_{varname}"].isna().sum() == len(df.index):
         raise ValueError("No MOS data found for query.")
 
-    top = np.ma.fix_invalid(top)
-    bottom = np.ma.fix_invalid(bottom)
-    delta = np.ma.fix_invalid(top - bottom).filled(np.nan)
-    _obs = np.ma.fix_invalid(_obs)
-
     ax.bar(
-        x,
-        delta,
+        df["valid"].values,
+        df["mos_delta"].values,
         facecolor="pink",
         width=0.25,
-        bottom=bottom,
+        bottom=df[f"mos_min_{varname}"].values,
         label="Range",
         zorder=1,
         alpha=0.5,
         align="center",
     )
-    ax.scatter(x, _obs, zorder=2, s=40, c="red", label="Actual")
+    ax.scatter(
+        df["valid"],
+        df[f"ob_{varname}"],
+        zorder=2,
+        s=40,
+        c="red",
+        label="Actual",
+    )
     ax.xaxis.set_major_formatter(mdates.DateFormatter("%-d"))
     ax.set_ylabel(PDICT2[varname])
 
@@ -175,10 +181,9 @@ def plot_temps(ax, mosdata, month1, month, obs):
     hobs = []
     lobs = []
     now = month1.date()
-    days = []
-    rows = []
+    valid = []
     while now.month == month:
-        days.append(now.day)
+        valid.append(now)
         lbottom.append(
             mosdata.get(now, {}).get("morning", [np.nan, np.nan])[0]
         )
@@ -191,53 +196,59 @@ def plot_temps(ax, mosdata, month1, month, obs):
 
         hobs.append(obs.get(now, {}).get("max", np.nan))
         lobs.append(obs.get(now, {}).get("min", np.nan))
-        rows.append(
-            dict(
-                day=now,
-                low_min=lbottom[-1],
-                low_max=ltop[-1],
-                high_min=hbottom[-1],
-                high_max=htop[-1],
-                high=hobs[-1],
-                low=lobs[-1],
-            )
-        )
         now += datetime.timedelta(days=1)
-    df = pd.DataFrame(rows)
-    days = np.array(days)
-
-    hbottom = np.ma.fix_invalid(hbottom)
-
-    hobs = np.ma.fix_invalid(hobs)
-    lobs = np.ma.fix_invalid(lobs)
-
-    arr = (df["high_max"] - df["high_min"]).values
+    df = pd.DataFrame(
+        {
+            "valid": pd.to_datetime(valid),
+            "low_min": lbottom,
+            "low_max": ltop,
+            "high_min": hbottom,
+            "high_max": htop,
+            "high": hobs,
+            "low": lobs,
+        }
+    )
+    df["high_delta"] = df["high_max"] - df["high_min"]
+    df["low_delta"] = df["low_max"] - df["low_min"]
     ax.bar(
-        days + 0.1,
-        arr,
+        df["valid"].dt.day + 0.1,
+        df["high_delta"],
         facecolor="pink",
         width=0.7,
-        bottom=hbottom,
+        bottom=df["high_min"],
         zorder=1,
         alpha=0.5,
         label="Daytime High",
         align="center",
     )
-    arr = (df["low_max"] - df["low_min"]).values
     ax.bar(
-        days - 0.1,
-        arr,
+        df["valid"].dt.day - 0.1,
+        df["low_delta"],
         facecolor="blue",
         width=0.7,
-        bottom=df["low_min"].values,
+        bottom=df["low_min"],
         zorder=1,
         alpha=0.3,
         label="Morning Low",
         align="center",
     )
 
-    ax.scatter(days + 0.1, hobs, zorder=2, s=40, c="red", label="Actual High")
-    ax.scatter(days - 0.1, lobs, zorder=2, s=40, c="blue", label="Actual Low")
+    ax.scatter(
+        df["valid"].dt.day + 0.1,
+        df["high"],
+        zorder=2,
+        s=40,
+        c="red",
+        label="Actual High",
+    )
+    ax.scatter(
+        df["valid"].dt.day - 0.1,
+        df["low"],
+        zorder=2,
+        s=40,
+        c="blue",
+        label="Actual Low",
+    )
 
     next1 = now.replace(day=1)
     days = (next1 - month1.date()).days
