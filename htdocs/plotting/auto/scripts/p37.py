@@ -81,7 +81,7 @@ SQL_OB = """
 
 def get_description():
     """Return a dict describing how to call this plotter"""
-    desc = {"description": __doc__, "data": True, "cache": 86400}
+    desc = {"description": __doc__, "data": True, "cache": 3600}
     today = datetime.date.today()
     desc["arguments"] = [
         dict(

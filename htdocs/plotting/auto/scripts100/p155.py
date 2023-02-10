@@ -86,9 +86,7 @@ UNITS = {
 
 def get_description():
     """Return a dict describing how to call this plotter"""
-    desc = {"description": __doc__}
-    desc["data"] = True
-    desc["cache"] = 86400
+    desc = {"description": __doc__, "data": True, "cache": 86400}
     desc["arguments"] = [
         dict(
             type="zstation",

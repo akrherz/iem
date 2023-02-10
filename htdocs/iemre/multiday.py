@@ -34,7 +34,7 @@ def application(environ, start_response):
     ts1 = datetime.datetime.strptime(form.get("date1"), "%Y-%m-%d")
     ts2 = datetime.datetime.strptime(form.get("date2"), "%Y-%m-%d")
     if ts1 > ts2:
-        return [send_error(start_response, "date1 larger than date2")]
+        (ts1, ts2) = (ts2, ts1)
     if ts1.year != ts2.year:
         return [
             send_error(start_response, "multi-year query not supported yet...")
@@ -60,7 +60,6 @@ def application(environ, start_response):
                 f"lat value outside of bounds: {iemre.SOUTH} to {iemre.NORTH}",
             )
         ]
-    # fmt = form["format"][0]
 
     i, j = iemre.find_ij(lon, lat)
     offset1 = iemre.daily_offset(ts1)

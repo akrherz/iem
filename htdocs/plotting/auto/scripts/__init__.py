@@ -684,6 +684,10 @@ nopts = [
     {"id": 234, "label": "Local Storm Reports Calendar Counts"},
     {"id": 102, "label": "Local Storm Report Source Type Ranks by Year"},
     {
+        "id": 237,
+        "label": "Map of WFO/CWSU Miscellaneous Event Counts (SPS/CWA)",
+    },
+    {
         "id": 44,
         "label": "NWS Office Accumulated Watch/Warning/Advisories by Year",
     },

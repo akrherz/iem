@@ -1,4 +1,14 @@
-"""Comparison of hourly values for one station."""
+"""This application presents daily comparisons of an
+    automation station's hourly data.  You pick two hours of your choice and
+    the application will compute the difference between the two.  The hours
+    selected are for the local time zone of the station.  The comparison is
+    made between the first hour and the subsequent second hour.  If the first
+    hour is less than the second, the comparison is made on the same calendar
+    day.  If the second hour is less than the first, then the second hour is
+    taken from the next day.
+
+    <p>The chart displays a two dimensional histogram / heatmap underneath
+    the plotted lines covering the period of record data."""
 import datetime
 import calendar
 
@@ -26,21 +36,7 @@ PDICT2 = {
 
 def get_description():
     """Return a dict describing how to call this plotter"""
-    desc = {}
-    desc["data"] = True
-    desc[
-        "description"
-    ] = """This application presents daily comparisons of an
-    automation station's hourly data.  You pick two hours of your choice and
-    the application will compute the difference between the two.  The hours
-    selected are for the local time zone of the station.  The comparison is
-    made between the first hour and the subsequent second hour.  If the first
-    hour is less than the second, the comparison is made on the same calendar
-    day.  If the second hour is less than the first, then the second hour is
-    taken from the next day.
-
-    <p>The chart displays a two dimensional histogram / heatmap underneath
-    the plotted lines covering the period of record data."""
+    desc = {"description": __doc__, "data": True}
     desc["arguments"] = [
         dict(
             type="zstation",
@@ -234,7 +230,7 @@ def plotter(fdict):
     # Plot an average line
     gdf = (
         df.groupby("doy")
-        .mean()
+        .mean(numeric_only=True)
         .rolling(ctx["smooth"], min_periods=1, center=True)
         .mean()
     )
@@ -258,7 +254,7 @@ def plotter(fdict):
         if not df2.empty:
             gdf = (
                 df2.groupby("doy")
-                .mean()
+                .mean(numeric_only=True)
                 .rolling(ctx["smooth"], min_periods=1, center=True)
                 .mean()
             )
