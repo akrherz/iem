@@ -24,25 +24,7 @@ $t->headextra = <<<EOF
 EOF;
 $t->jsextra = <<<EOF
 <script src="/vendor/select2/4.0.3/select2.min.js"></script>
-<script>
-$(document).ready(function(){
-    $(".iemselect2").select2();
-});
-
-function showHide(v){
-    var d2 = document.getElementById("d2");
-    if (document.getElementById("drange").checked){
-        d2.style.display = "block";
-    } else{
-        d2.style.display = "none";
-    }
-}
-function j(name){
-    $('html,body').animate({
-        scrollTop: $("#sect"+name).offset().top
-     });
-}
-</script>
+<script src="list.js"></script>
 EOF;
 
 // A dance here to get a 4-char and 3-char identifier
@@ -146,10 +128,11 @@ foreach ($datequeue as $dt) {
                 $prods[$row[$antiby]] = "";
             }
             $prods[$row[$antiby]] .= sprintf(
-                "<tr><td>%s</td><td><a href=\"%s\">%s</a></td><td>%s</td><td>%s</td></tr>",
+                "<tr><td>%s</td><td><a href=\"%s\">%s</a>%s</td><td>%s</td><td>%s</td></tr>",
                 $row["cccc"],
                 $url,
                 $row["pil"],
+                ($row["count"] > 1) ? " {$row['count']}x": "",
                 gmdate("Y-m-d", $ts),
                 gmdate("H:i", $ts)
             );
@@ -162,9 +145,10 @@ foreach ($datequeue as $dt) {
                 $columns[$row[$antiby]] = "";
             }
             $columns[$row[$antiby]] .= sprintf(
-                "<a href=\"%s\">%s</a> (%s)<br />",
+                "<a href=\"%s\">%s</a> %s@%s<br />",
                 $url,
                 $row["pil"],
+                ($row["count"] > 1) ? "{$row['count']}x": "",
                 gmdate($timeformat, $ts)
             );
         }
@@ -198,9 +182,10 @@ foreach ($datequeue as $dt) {
                 $colnum += 1;
             }
             $table .= sprintf(
-                "<a href=\"%s\">%s</a> (%s)<br />",
+                "<a href=\"%s\">%s</a> %s@%s<br />",
                 $url,
                 $row["pil"],
+                ($row["count"] > 1) ? "{$row['count']}x": "",
                 gmdate("H:i", $ts)
             );
         }
