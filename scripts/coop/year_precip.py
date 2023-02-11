@@ -78,7 +78,6 @@ def main():
             )
 
         fp.write(".END\n")
-    fp.close()
 
     subprocess.call(
         [

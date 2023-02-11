@@ -2,7 +2,6 @@
 
 import zipfile
 import os
-import shutil
 import datetime
 
 from osgeo import ogr
@@ -20,36 +19,30 @@ def application(environ, start_response):
         hour = int(form.get("hour"))
         minute = int(form.get("minute"))
         ts = datetime.datetime(year, month, day, hour, minute)
-        fp = "watch_by_county_%s" % (ts.strftime("%Y%m%d%H%M"),)
+        fp = f"watch_by_county_{ts:%Y%m%d%H%M}"
     else:
         ts = datetime.datetime.utcnow()
         fp = "watch_by_county"
 
     if "etn" in form:
-        etnLimiter = "and eventid = %s" % (int(form.get("etn")),)
-        fp = "watch_by_county_%s_%s" % (
-            ts.strftime("%Y%m%d%H%M"),
-            int(form.get("etn")),
-        )
+        etnLimiter = f"and eventid = {int(form.get('etn'))}"
+        fp = f"watch_by_county_{ts:Y%m%d%H%M}_{int(form.get('etn'))}"
     else:
         etnLimiter = ""
 
     os.chdir("/tmp/")
     for suffix in ["shp", "shx", "dbf"]:
-        if os.path.isfile("%s.%s" % (fp, suffix)):
-            os.remove("%s.%s" % (fp, suffix))
+        if os.path.isfile(f"{fp}.{suffix}"):
+            os.remove(f"{fp}.{suffix}")
 
-    table = "warnings_%s" % (ts.year,)
+    table = f"warnings_{ts.year}"
     source = ogr.Open(
-        (
-            "PG:host=iemdb-postgis.local dbname=postgis "
-            "user=nobody tables=%s(tgeom)"
-        )
-        % (table,)
+        "PG:host=iemdb-postgis.local dbname=postgis "
+        f"user=nobody tables={table}(tgeom)"
     )
 
     out_driver = ogr.GetDriverByName("ESRI Shapefile")
-    out_ds = out_driver.CreateDataSource("%s.shp" % (fp,))
+    out_ds = out_driver.CreateDataSource(f"{fp}.shp")
     out_layer = out_ds.CreateLayer("polygon", None, ogr.wkbPolygon)
 
     fd = ogr.FieldDefn("ISSUED", ogr.OFTString)
@@ -71,22 +64,18 @@ def application(environ, start_response):
     fd = ogr.FieldDefn("ETN", ogr.OFTInteger)
     out_layer.CreateField(fd)
 
-    sql = """
+    tt = ts.strftime("%Y-%m-%d %H:%M+00")
+    sql = f"""
         select phenomena, eventid, ST_multi(ST_union(u.geom)) as tgeom,
         max(to_char(expire at time zone 'UTC', 'YYYYMMDDHH24MI')) as utcexpire,
         min(to_char(issue at time zone 'UTC', 'YYYYMMDDHH24MI')) as utcissue
-        from warnings_%s w JOIN ugcs u on (u.gid = w.gid)
+        from warnings_{ts.year} w JOIN ugcs u on (u.gid = w.gid)
         WHERE significance = 'A' and phenomena IN ('TO','SV')
-        and issue > '%s'::timestamp -'3 days':: interval
-        and issue <= '%s' and
-        expire > '%s' %s GROUP by phenomena, eventid ORDER by phenomena ASC
-    """ % (
-        ts.year,
-        ts.strftime("%Y-%m-%d %H:%M+00"),
-        ts.strftime("%Y-%m-%d %H:%M+00"),
-        ts.strftime("%Y-%m-%d %H:%M+00"),
-        etnLimiter,
-    )
+        and issue > '{tt}'::timestamp -'3 days':: interval
+        and issue <= '{tt}' and
+        expire > '{tt}' {etnLimiter}
+        GROUP by phenomena, eventid ORDER by phenomena ASC
+    """
 
     data = source.ExecuteSQL(sql)
 
@@ -111,20 +100,22 @@ def application(environ, start_response):
     out_ds.Destroy()
 
     # Create zip file, send it back to the clients
-    shutil.copyfile("/opt/iem/data/gis/meta/4326.prj", fp + ".prj")
     with zipfile.ZipFile(fp + ".zip", "w", zipfile.ZIP_DEFLATED) as zf:
         zf.write(fp + ".shp")
         zf.write(fp + ".shx")
         zf.write(fp + ".dbf")
         zf.write(fp + ".prj")
+        with open("/opt/iem/data/gis/meta/4326.prj", encoding="ascii") as fh:
+            zf.writestr(f"{fp}.prj", fh.read())
 
     headers = [
         ("Content-type", "application/octet-stream"),
-        ("Content-Disposition", "attachment; filename=%s.zip" % (fp,)),
+        ("Content-Disposition", f"attachment; filename={fp}.zip"),
     ]
     start_response("200 OK", headers)
-    payload = open(fp + ".zip", "rb").read()
+    with open(f"{fp}.zip", "rb") as fh:
+        payload = fh.read()
 
     for suffix in ["zip", "shp", "shx", "dbf", "prj"]:
-        os.remove("%s.%s" % (fp, suffix))
+        os.remove(f"{fp}.{suffix}")
     return [payload]

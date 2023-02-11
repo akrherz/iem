@@ -20,6 +20,7 @@ def findfile(ts):
         )
         if os.path.isfile(fn):
             return fn
+    return None
 
 
 def run(ts):
