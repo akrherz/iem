@@ -29,12 +29,12 @@ def check_date(date):
             continue
         ob = row[1]
         # Go fetch me the IEMRE value!
-        uri = ("http://iem.local/iemre/daily/%s/%.2f/%.2f/json") % (
-            date.strftime("%Y-%m-%d"),
-            nt.sts[station]["lat"],
-            nt.sts[station]["lon"],
+        uri = (
+            f"http://iem.local/iemre/daily/{date:%Y-%m-%d}/"
+            f"{nt.sts[station]['lat']:.2f}/"
+            f"{nt.sts[station]['lon']:.2f}/json"
         )
-        res = requests.get(uri)
+        res = requests.get(uri, timeout=60)
         j = json.loads(res.content)
         if j["data"][0]["srad_mj"] is None:
             LOG.info("fix_solar %s %s estimate is missing", station, date)
@@ -93,12 +93,12 @@ def fix_nulls():
                 LOG.info("unknown station %s metadata, skipping", station)
                 continue
             # Go fetch me the IEMRE value!
-            uri = ("http://iem.local/iemre/daily/%s/%.2f/%.2f/json") % (
-                v1.strftime("%Y-%m-%d"),
-                nt.sts[station]["lat"],
-                nt.sts[station]["lon"],
+            uri = (
+                f"http://iem.local/iemre/daily/{v1:%Y-%m-%d}/"
+                f"{nt.sts[station]['lat']:.2f}/"
+                f"{nt.sts[station]['lon']:.2f}/json"
             )
-            res = requests.get(uri)
+            res = requests.get(uri, timeout=60)
             if res.status_code != 200:
                 LOG.info("Fix solar got %s from %s", res.status_code, uri)
                 continue
@@ -122,10 +122,8 @@ def fix_nulls():
             row2[1],
         )
         cursor2.execute(
-            """
-            UPDATE sm_daily SET slrkj_tot_qc = %s
-            WHERE station = %s and valid = %s
-        """,
+            "UPDATE sm_daily SET slrkj_tot_qc = %s "
+            "WHERE station = %s and valid = %s",
             (row2[0], station, row[1]),
         )
 

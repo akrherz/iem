@@ -62,21 +62,22 @@ def load(dirname, location, sdate):
     data = []
     idx = []
     mindoy = int(sdate.strftime("%j"))
-    fn = "%s/%s.met" % (dirname, location)
+    fn = f"{dirname}/{location}.met"
     if not os.path.isfile(fn):
         raise NoDataFound("Data file was not found.")
-    for line in open(fn, encoding="utf8"):
-        line = line.strip()
-        if not line.startswith("19") and not line.startswith("20"):
-            continue
-        tokens = line.split()
-        if int(tokens[1]) < mindoy:
-            continue
-        data.append(tokens)
-        ts = datetime.date(int(tokens[0]), 1, 1) + datetime.timedelta(
-            days=int(tokens[1]) - 1
-        )
-        idx.append(ts)
+    with open(fn, encoding="utf8") as fh:
+        for line in fh:
+            line = line.strip()
+            if not line.startswith("19") and not line.startswith("20"):
+                continue
+            tokens = line.split()
+            if int(tokens[1]) < mindoy:
+                continue
+            data.append(tokens)
+            ts = datetime.date(int(tokens[0]), 1, 1) + datetime.timedelta(
+                days=int(tokens[1]) - 1
+            )
+            idx.append(ts)
     if len(data[0]) < 10:
         cols = ["year", "doy", "radn", "maxt", "mint", "rain"]
     else:
@@ -139,9 +140,9 @@ def plotter(fdict):
 
     # write current year data back to resdf
     for _v, _u in zip(["gddcum", "raincum"], ["F", "in"]):
-        resdf["%s[%s]" % (_v, _u)] = thisyear[_v]
+        resdf[f"{_v}[{_u}]"] = thisyear[_v]
     for _v in ["mint", "maxt"]:
-        resdf["%s[F]" % (_v)] = c2f(thisyear[_v].values)
+        resdf[f"{_v}[F]"] = c2f(thisyear[_v].values)
     resdf["rain[in]"] = mm2inch(thisyear["rain"])
     for _ptype, unit in zip(["gdd", "rain"], ["F", "in"]):
         resdf[f"{_ptype}cum_climo[{unit}]"] = cdf.groupby("doy")[
@@ -168,7 +169,7 @@ def plotter(fdict):
             zorder=4,
             color="b",
             lw=2,
-            label="%s Obs + CFS Forecast" % (today.year,),
+            label=f"{today.year} Obs + CFS Forecast",
         )
         climo = cdf.groupby("doy")[ptype + "cum"].mean()
         ax.plot(
@@ -218,7 +219,7 @@ def plotter(fdict):
             zorder=2,
         )
 
-    ax.set_title("%s %s" % (STATIONS[location], PLOTS[ptype]))
+    ax.set_title(f"{STATIONS[location]} {PLOTS[ptype]}")
     ax.set_ylabel(PLOTS[ptype])
     ax.legend(loc=(0.03, -0.16), ncol=3, fontsize=12)
     ax.set_xticks((1, 32, 60, 91, 121, 152, 182, 213, 244, 274, 305, 335))

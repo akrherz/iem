@@ -64,7 +64,7 @@ def do_nam(valid):
                 data = np.zeros(np.shape(lats))
     if grib is None or lats is None:
         LOG.info("Failed to find NAM data for %s", valid)
-        return
+        return None
     data += grib.values
     count += 1
     return lons, lats, data / float(count)

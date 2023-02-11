@@ -133,8 +133,9 @@ if (is_null($rs) || pg_num_rows($rs) < 1) {
     $content .= "<div class=\"alert alert-warning\">Sorry, could not find product.</div>";
 }
 if (pg_num_rows($rs) > 1) {
-    $content .= '<div class="alert alert-warning"><i class="fa fa-file"></i> ' .
-        'Found multiple products. Scroll down to see them all.</div>';
+    $rows = pg_num_rows($rs);
+    $content .= '<div class="alert alert-danger"><i class="fa fa-file"></i> ' .
+        "Found {$rows} products at the given pil and timestamp. Scroll down to see them all.</div>";
 }
 $img = "";
 for ($i = 0; $row = pg_fetch_assoc($rs); $i++) {

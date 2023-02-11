@@ -349,10 +349,14 @@ def plotter(fdict):
         fontsize=12,
     )
     ax.grid()
-    ax.yaxis.set_minor_locator(AutoMinorLocator())
     ax.yaxis.set_major_locator(MaxNLocator(integer=True))
-    ax.tick_params(which="minor", color="tan")
-    ax.grid(which="minor", axis="y", color="tan", linestyle="-.")
+    ticks = ax.yaxis.get_majorticklocs()
+    if len(ticks) > 2:
+        delta = ticks[1] - ticks[0]
+        interval = delta if delta < 6 else int(delta / 2)
+        ax.yaxis.set_minor_locator(AutoMinorLocator(interval))
+        ax.tick_params(which="minor", color="tan")
+        ax.grid(which="minor", axis="y", color="tan", linestyle=":")
 
     return fig, df
 

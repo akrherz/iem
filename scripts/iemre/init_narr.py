@@ -25,12 +25,12 @@ def init_year(ts):
     # grid shape is y, x
     lats, lons = grb.latlons()
 
-    fp = "%s/%s_narr.nc" % (BASEDIR, ts.year)
+    fp = f"{BASEDIR}/{ts.year}_narr.nc"
     if os.path.isfile(fp):
         LOG.info("Cowardly refusing to overwrite file %s.", fp)
         sys.exit()
     nc = ncopen(fp, "w")
-    nc.title = "IEM Packaged NARR for %s" % (ts.year,)
+    nc.title = f"IEM Packaged NARR for {ts.year}"
     nc.platform = "Grided Reanalysis"
     nc.description = "NARR Data"
     nc.institution = "Iowa State University, Ames, IA, USA"
@@ -39,9 +39,7 @@ def init_year(ts):
     nc.realization = 1
     nc.Conventions = "CF-1.0"
     nc.contact = "Daryl Herzmann, akrherz@iastate.edu, 515-294-5978"
-    nc.history = ("%s Generated") % (
-        datetime.datetime.now().strftime("%d %B %Y"),
-    )
+    nc.history = f"{datetime.datetime.now():%d %B %Y} Generated"
     nc.comment = "No Comment at this time"
 
     # Setup Dimensions
@@ -50,7 +48,7 @@ def init_year(ts):
     nc.createDimension("bnds", 2)
     ts2 = datetime.datetime(ts.year + 1, 1, 1)
     days = (ts2 - ts).days
-    print("Year %s has %s days" % (ts.year, days))
+    print(f"Year {ts.year} has {days} days")
     nc.createDimension("time", int(days) * 8)
 
     # Setup Coordinate Variables
@@ -69,7 +67,7 @@ def init_year(ts):
     lon[:] = lons
 
     tm = nc.createVariable("time", float, ("time",))
-    tm.units = "Hours since %s-01-01 00:00:0.0" % (ts.year,)
+    tm.units = f"Hours since {ts.year}-01-01 00:00:0.0"
     tm.long_name = "Time"
     tm.standard_name = "time"
     tm.axis = "T"

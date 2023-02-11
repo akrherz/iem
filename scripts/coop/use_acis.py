@@ -36,6 +36,7 @@ def safe(val):
         LOG.warning(
             "%s failed to convert %s to float, using None", exp, repr(val)
         )
+    return None
 
 
 def is_new(newval, oldval):

@@ -1,16 +1,15 @@
 """
-Example script that scrapes data from the IEM ASOS download service
-"""
-from __future__ import print_function
-import json
-import time
-import datetime
+Example script that scrapes data from the IEM ASOS download service.
 
-# Python 2 and 3: alternative 4
-try:
-    from urllib.request import urlopen
-except ImportError:
-    from urllib2 import urlopen
+Requires: Python 3
+"""
+import datetime
+import json
+import os
+import sys
+import time
+
+from urllib.request import urlopen
 
 # Number of attempts to download data
 MAX_ATTEMPTS = 6
@@ -38,7 +37,7 @@ def download_data(uri):
             if data is not None and not data.startswith("ERROR"):
                 return data
         except Exception as exp:
-            print("download_data(%s) failed with %s" % (uri, exp))
+            print(f"download_data({uri}) failed with {exp}")
             time.sleep(5)
         attempt += 1
 
@@ -52,8 +51,12 @@ def get_stations_from_filelist(filename):
     The file should simply have one station per line.
     """
     stations = []
-    for line in open(filename):
-        stations.append(line.strip())
+    if not os.path.isfile(filename):
+        print(f"Filename {filename} does not exist, aborting!")
+        sys.exit()
+    with open(filename, encoding="ascii") as fh:
+        for line in fh:
+            stations.append(line.strip())
     return stations
 
 
@@ -65,13 +68,14 @@ def get_stations_from_networks():
      WA WI WV WY"""
     networks = []
     for state in states.split():
-        networks.append("%s_ASOS" % (state,))
+        networks.append(f"{state}_ASOS")
 
     for network in networks:
         # Get metadata
         uri = (
-            "https://mesonet.agron.iastate.edu/geojson/network/%s.geojson"
-        ) % (network,)
+            "https://mesonet.agron.iastate.edu/"
+            f"geojson/network/{network}.geojson"
+        )
         data = urlopen(uri)
         jdict = json.load(data)
         for site in jdict["features"]:
@@ -95,10 +99,10 @@ def download_alldata():
         thisurl = service
         thisurl += now.strftime("year1=%Y&month1=%m&day1=%d&")
         thisurl += (now + interval).strftime("year2=%Y&month2=%m&day2=%d&")
-        print("Downloading: %s" % (now,))
+        print(f"Downloading: {now}")
         data = download_data(thisurl)
-        outfn = "%s.txt" % (now.strftime("%Y%m%d"),)
-        with open(outfn, "w") as fh:
+        outfn = f"{now:%Y%m%d}.txt"
+        with open(outfn, "w", encoding="ascii") as fh:
             fh.write(data)
         now += interval
 
@@ -118,17 +122,12 @@ def main():
     stations = get_stations_from_networks()
     # stations = get_stations_from_filelist("mystations.txt")
     for station in stations:
-        uri = "%s&station=%s" % (service, station)
-        print("Downloading: %s" % (station,))
+        uri = f"{service}&station={station}"
+        print(f"Downloading: {station}")
         data = download_data(uri)
-        outfn = "%s_%s_%s.txt" % (
-            station,
-            startts.strftime("%Y%m%d%H%M"),
-            endts.strftime("%Y%m%d%H%M"),
-        )
-        out = open(outfn, "w")
-        out.write(data)
-        out.close()
+        outfn = f"{station}_{startts:%Y%m%d%H%M}_{endts:%Y%m%d%H%M}.txt"
+        with open(outfn, "w", encoding="ascii") as fh:
+            fh.write(data)
 
 
 if __name__ == "__main__":

@@ -54,7 +54,6 @@ cd ../plots
 
 cd ../ingestors
 python flux_ingest.py
-python stuart_smith.py &
 
 if [ $LHH -eq "15" ]
 then

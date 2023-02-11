@@ -21,6 +21,7 @@ def get_minvalid(sid):
         minv = cursor.fetchone()[0]
         if minv is not None:
             return minv
+    return None
 
 
 def do_network(network):
