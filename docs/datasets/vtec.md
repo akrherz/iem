@@ -46,8 +46,8 @@ The pyIEM parsers send emails to the IEM developer when issues are found.  The p
 | WFO | 3 Char | This is the three character NWS Office/Center identifier.  For CONUS locations, this is the 4 character ID dropping the first `K`.  For non-CONUS sites, this is the identifier dropping the `P`. |
 | ISSUED  | 12 Char | This timestamp represents the start time of the event.  When an event's lifecycle begins, this issued value can be updated as the NWS issues updates.  The value presented represents the last known state of the event start time.|
 | EXPIRED  | 12 Char  | Similiar to the ISSUED column above, this represents the products event end time.  Again, this value is updated as the event lifecycle happens with updates made by the NWS. |
-| INIT_ISS | 12 Char | This is timestamp of the NWS Text Product that started the event.  This timestamp is important for products like Winter Storm Watch, which have a begin time a number of days/hours into the future, but are typically considered to be in effect at the time of the text product issuace.  Yeah, this is where the headaches start.  This timestamp can also be used to form a canonical URL back to the IEM to fetch the raw NWS Text for this event. It is **not** updated during the event's lifecycle. |
-| INIT_EXP | 12 Char | Similiar to `INIT_ISS` above, this is the expiration of the event denoted with the first issuance of the event.  It is **not** updated during the event's lifecycle. |
+| INIT_ISS | 12 Char | This is timestamp of the NWS Text Product that started the event.  This timestamp is important for products like Winter Storm Watch, which have a begin time a number of days/hours into the future, but are typically considered to be in effect at the time of the text product issuace.  Yeah, this is where the headaches start.  This timestamp can also be used to form a canonical URL back to the IEM to fetch the raw NWS Text for this event. It is __not__ updated during the event's lifecycle. |
+| INIT_EXP | 12 Char | Similiar to `INIT_ISS` above, this is the expiration of the event denoted with the first issuance of the event.  It is __not__ updated during the event's lifecycle. |
 | PHENOM or TYPE | 2 Char | This is the two character NWS identifier used to denote the VTEC event type.  For example, `TO` for Tornado and `SV` for Severe Thunderstorm.  A lookup table of these codes exists [here](https://github.com/akrherz/pyIEM/blob/main/src/pyiem/nws/vtec.py). |
 | SIG | 1 Char | This is the one character NWS identifier used to denote the VTEC significance.  The same link above for `PHENOM` has a lookup table for these. |
 | GTYPE | 1 Char | Either `P` for polygon or `C` for county/zone/parish.  The shapefiles you download could contain both so-called storm-based (polygon) events and traditional county/zone based events. |
@@ -57,9 +57,9 @@ The pyIEM parsers send emails to the IEM developer when issues are found.  The p
 | AREA_KM2 | Number | The IEM computed area of this event, this area computation is done in Albers (EPSG:2163). |
 | UPDATED | 12 Char | The timestamp when this event's lifecycle was last updated by the NWS. |
 | HV_NWSLI | 5 Char | For events that have H-VTEC (Hydro VTEC), this is the five character NWS Location Identifier. |
-| HV_SEV | 1 Char | For events that have H-VTEC (Hydro VTEC), this is the one character flood severity **at issuance**. |
+| HV_SEV | 1 Char | For events that have H-VTEC (Hydro VTEC), this is the one character flood severity __at issuance__. |
 | HV_CAUSE | 2 Char | For events that have H-VTEC (Hydro VTEC), this is the two character cause of the flood. |
-| HV_REC | 2 Char | For events that have H-VTEC (Hydro VTEC), this is the code denoting if a record crest is expected **at issuance.** |
+| HV_REC | 2 Char | For events that have H-VTEC (Hydro VTEC), this is the code denoting if a record crest is expected __at issuance__. |
 | EMERGENC | Boolean | Based on unofficial IEM logic, is this event an "Emergency" at any point during its life cycle. |
 | POLY_BEG | 12 Char | In the case of polygons (GTYPE=P) the UTC timestamp that the polygon is initially valid for. |
 | POLY_END | 12 Char | In the case of polygons (GTYPE=P) the UTC timestamp that the polygon expires at. |
@@ -68,7 +68,35 @@ The pyIEM parsers send emails to the IEM developer when issues are found.  The p
 | TORNTAG | 16 Char | The IBW tornado tag.  See HAILTAG. |
 | DAMAGTAG | 16 Char | The IBW damage tag. See HAILTAG. |
 
-    Whew, so let us do a practical example to try to illustrate what the above schema is attempting to capture.  The NWS in Des Moines `wfo=DMX` issues a Winter Storm Watch `phenom=WS` `sig=A` for Story County (`nws_ugc=IAZ048`).  This product was issued at noon on 19 March 2019 `INIT_ISS=201903191700` and goes into effect at 6 PM on 20 March `ISSUE=201903202300` `INIT_ISS=201903202300` until 6 AM 21 March `EXPIRE=201903211100` `INIT_EXP=201903211100`.  At 7 PM on 19 March, DMX decides to upgrade the event to a Winter Storm Warning.  The Winter Storm Watch then gets updated with `EXPIRE=201903200000` `UPDATED=201903200000` `STATUS=UPG`.  So the confusing aspect here becomes that the database representation has an `EXPIRE` that is before the `ISSUE` column.  This is just tricky to resolve, so good luck.  It is a long standing annoyance of how NWS handles VTEC events like this with `ISSUE` times well into the future.  For all practical purposes, once a winter storm watch is issued, it is valid **now**, but the encoding does not follow this.
+1. I notice entires with an `expire` timestamp before the `issue` timestamp. How can this be?
+
+    Oh my, buckle up for some confusion.  The first point in this space is that our database
+    represents the most recent snapshot of the given VTEC event during its life cycle.  The
+    life cycle includes the issuance to its death via a cancels, expiration, or
+    upgrade to a different VTEC event.
+
+    To illustrate the evolution of the database fields with a VTEC event lifecycle,
+    please consider this example.  At noon on 19 March 2019, NWS Des Moines `wfo=DMX` issues a Winter Storm Watch `phenom=WS` `sig=A` for Story County (`nws_ugc=IAZ048`). This watch goes into effect at 6 PM (tomorrow, 20 March) until 6 AM 21 March.  The storm is a day away yet... The database entry looks like so:
+
+    | STATUS | ISSUE | INIT_ISS | EXPIRE | INIT_EXP |
+| --- | --- | --- | --- | --- |
+| NEW | 201903202300 | 201903171700 | 201903211100 | 201903211100 |
+
+    Now tomorrow comes and the NWS needs to decide what to do with the watch prior to 6 PM, since these type of
+    watches can not reach their issuance time without either being cancelled or upgraded.  So at 5 PM, the NWS
+    decides to issue a Winter Storm Warning.  Now the database entry for the __watch__ looks like so:
+
+    | STATUS | ISSUE | INIT_ISS | EXPIRE | INIT_EXP |
+| --- | --- | --- | --- | --- |
+| UPG | 201903202300 | 201903171700 | __201903202200__ | 201903211100 |
+
+    See how the `EXPIRE` column is now less than the `ISSUE` column, but the `INIT_ISS` and `INIT_EXP` columns
+    are unchanged to hopefully help the end user deal with this situation.  You have life choices to make on
+    how to deal with this situation.
+
+    In general, the watch _practically_ is in effect once the NWS issued it, regardless of when the actual bad
+    weather is going to start.  So the recommendation is to use the `INIT_ISS` column as the watch start time
+    and the `EXPIRE` as the watch end time, but this logic is totally at your discretion.
 
 1. How do Severe Thunderstorm, Flash Flood, or Tornado warnings have VTEC codes for dates prior to implementation?
 
