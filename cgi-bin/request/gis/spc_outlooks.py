@@ -2,14 +2,14 @@
 # Local
 from io import BytesIO
 import os
+import tempfile
 import zipfile
 
 # Third Party
-from geopandas import read_postgis
+import geopandas as gpd
 from paste.request import parse_formvars
-from pyiem.util import get_dbconn, utc
+from pyiem.util import get_sqlalchemy_conn, utc
 
-# cgitb.enable()
 PRJFILE = "/opt/iem/data/gis/meta/4326.prj"
 
 
@@ -47,7 +47,6 @@ def get_context(environ):
 
 def run(ctx, start_response):
     """Do something!"""
-    pgconn = get_dbconn("postgis")
     common = "at time zone 'UTC', 'YYYYMMDDHH24MI'"
     schema = {
         "geometry": "MultiPolygon",
@@ -64,43 +63,43 @@ def run(ctx, start_response):
             ]
         ),
     }
-    df = read_postgis(
-        "select "
-        f"to_char(issue {common}) as issue, "
-        f"to_char(expire {common}) as expire, "
-        f"to_char(product_issue {common}) as prodiss, "
-        "outlook_type as type, day, threshold, category, cycle, geom "
-        "from spc_outlooks WHERE product_issue >= %s and "
-        "product_issue < %s and outlook_type in %s and day in %s "
-        "ORDER by product_issue ASC",
-        pgconn,
-        params=(
-            ctx["sts"],
-            ctx["ets"],
-            tuple(ctx["types"]),
-            tuple(ctx["days"]),
-        ),
-        geom_col="geom",
-    )
+    with get_sqlalchemy_conn("postgis") as conn:
+        df = gpd.read_postgis(
+            "select "
+            f"to_char(issue {common}) as issue, "
+            f"to_char(expire {common}) as expire, "
+            f"to_char(product_issue {common}) as prodiss, "
+            "outlook_type as type, day, threshold, category, cycle, geom "
+            "from spc_outlooks WHERE product_issue >= %s and "
+            "product_issue < %s and outlook_type in %s and day in %s "
+            "ORDER by product_issue ASC",
+            conn,
+            params=(
+                ctx["sts"],
+                ctx["ets"],
+                tuple(ctx["types"]),
+                tuple(ctx["days"]),
+            ),
+            geom_col="geom",
+        )
     if df.empty:
         start_response("200 OK", [("Content-type", "text/plain")])
         return b"ERROR: no results found for your query"
     df.columns = [s.upper() if s != "geom" else "geom" for s in df.columns]
     fn = f"outlooks_{ctx['sts']:%Y%m%d%H%M}_{ctx['ets']:%Y%m%d%H%M}"
 
-    os.chdir("/tmp")
-    df.to_file(f"{fn}.shp", schema=schema)
+    with tempfile.TemporaryDirectory() as tmpdir:
+        os.chdir(tmpdir)
+        df.to_file(f"{fn}.shp", schema=schema)
 
-    zio = BytesIO()
-    with zipfile.ZipFile(
-        zio, mode="w", compression=zipfile.ZIP_DEFLATED
-    ) as zf:
-        with open(PRJFILE, encoding="utf-8") as fh:
-            zf.writestr(f"{fn}.prj", fh.read())
-        for suffix in ["shp", "shx", "dbf"]:
-            zf.write(f"{fn}.{suffix}")
-    for suffix in ["shp", "shx", "dbf"]:
-        os.unlink(f"{fn}.{suffix}")
+        zio = BytesIO()
+        with zipfile.ZipFile(
+            zio, mode="w", compression=zipfile.ZIP_DEFLATED
+        ) as zf:
+            with open(PRJFILE, encoding="utf-8") as fh:
+                zf.writestr(f"{fn}.prj", fh.read())
+            for suffix in ["shp", "shx", "dbf"]:
+                zf.write(f"{fn}.{suffix}")
     headers = [
         ("Content-type", "application/octet-stream"),
         ("Content-Disposition", f"attachment; filename={fn}.zip"),

@@ -2,12 +2,15 @@
 # Local
 from io import BytesIO
 import os
+import tempfile
 import zipfile
 
 # Third Party
-from geopandas import read_postgis
+import geopandas as gpd
 from paste.request import parse_formvars
 from pyiem.util import get_sqlalchemy_conn, utc
+
+PRJFILE = "/opt/iem/data/gis/meta/4326.prj"
 
 
 def get_context(environ):
@@ -58,7 +61,7 @@ def run(ctx, start_response):
         ),
     }
     with get_sqlalchemy_conn("postgis") as pgconn:
-        df = read_postgis(
+        df = gpd.read_postgis(
             "select "
             f"to_char(issue {common}) as issue, "
             f"to_char(expire {common}) as expire, "
@@ -77,26 +80,21 @@ def run(ctx, start_response):
         start_response("200 OK", [("Content-type", "text/plain")])
         return b"ERROR: no results found for your query"
     df.columns = [s.upper() if s != "geom" else "geom" for s in df.columns]
-    fn = "sps_%s_%s" % (
-        ctx["sts"].strftime("%Y%m%d%H%M"),
-        ctx["ets"].strftime("%Y%m%d%H%M"),
-    )
+    fn = f"sps_{ctx['sts']:%Y%m%d%H%M}_{ctx['ets']:%Y%m%d%H%M}"
 
-    os.chdir("/tmp")
-    df.to_file(f"{fn}.shp", schema=schema)
+    with tempfile.TemporaryDirectory() as tempdir:
+        os.chdir(tempdir)
+        df.to_file(f"{fn}.shp", schema=schema)
 
-    zio = BytesIO()
-    with zipfile.ZipFile(
-        zio, mode="w", compression=zipfile.ZIP_DEFLATED
-    ) as zf:
-        zf.writestr(
-            fn + ".prj", open("/opt/iem/data/gis/meta/4326.prj").read()
-        )
-        zf.write(f"{fn}.shp")
-        zf.write(f"{fn}.shx")
-        zf.write(f"{fn}.dbf")
-    for suffix in ["shp", "shx", "dbf"]:
-        os.unlink(f"{fn}.{suffix}")
+        zio = BytesIO()
+        with zipfile.ZipFile(
+            zio, mode="w", compression=zipfile.ZIP_DEFLATED
+        ) as zf:
+            with open(PRJFILE, encoding="ascii") as fp:
+                zf.writestr(f"{fn}.prj", fp.read())
+            zf.write(f"{fn}.shp")
+            zf.write(f"{fn}.shx")
+            zf.write(f"{fn}.dbf")
     headers = [
         ("Content-type", "application/octet-stream"),
         ("Content-Disposition", f"attachment; filename={fn}.zip"),

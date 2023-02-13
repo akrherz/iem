@@ -40,30 +40,31 @@ def find_and_save(cursor, dbendts):
     now = datetime.datetime.now()
     thisyear = now.year
     inserts = 0
-    for line in open(LOGFN, "rb"):
-        line = line.decode("utf-8", "ignore")
-        tokens = LOGRE.findall(line)
-        if len(tokens) != 1:
-            continue
-        (appid, timing, uri) = tokens[0]
-        try:
-            valid = datetime.datetime.strptime(
-                f"{thisyear} {line[:15]}", "%Y %b %d %H:%M:%S"
+    with open(LOGFN, "rb") as fh:
+        for line in fh:
+            line = line.decode("utf-8", "ignore")
+            tokens = LOGRE.findall(line)
+            if len(tokens) != 1:
+                continue
+            (appid, timing, uri) = tokens[0]
+            try:
+                valid = datetime.datetime.strptime(
+                    f"{thisyear} {line[:15]}", "%Y %b %d %H:%M:%S"
+                )
+            except ValueError as exp:
+                LOG.info(line)
+                LOG.error(exp)
+                continue
+            if valid > now or valid <= dbendts:
+                continue
+            hostname = line.split()[3]
+            cursor.execute(
+                "INSERT into autoplot_timing "
+                "(appid, valid, timing, uri, hostname) "
+                "VALUES (%s, %s, %s, %s, %s)",
+                (appid, valid, timing, uri, hostname),
             )
-        except ValueError as exp:
-            LOG.info(line)
-            LOG.error(exp)
-            continue
-        if valid > now or valid <= dbendts:
-            continue
-        hostname = line.split()[3]
-        cursor.execute(
-            "INSERT into autoplot_timing "
-            "(appid, valid, timing, uri, hostname) "
-            "VALUES (%s, %s, %s, %s, %s)",
-            (appid, valid, timing, uri, hostname),
-        )
-        inserts += 1
+            inserts += 1
     # Don't complain during the early morning hours
     if inserts == 0 and now.hour > 5:
         LOG.warning(

@@ -2,15 +2,13 @@
     Dump storm attributes from the database to a shapefile for the users
 """
 import datetime
-import zipfile
 from io import BytesIO, StringIO
+import zipfile
 
 # import cgitb
 import shapefile
 from paste.request import parse_formvars
 from pyiem.util import get_dbconn, utc
-
-# cgitb.enable()
 
 
 def get_context(environ):
@@ -55,38 +53,32 @@ def run(ctx, start_response):
         ctx["radar"].append("XXX")
     radarlimit = ""
     if "ALL" not in ctx["radar"]:
-        radarlimit = " and nexrad in %s " % (str(tuple(ctx["radar"])),)
+        radarlimit = f" and nexrad in {tuple(ctx['radar'])} "
     if len(ctx["radar"]) > 2 and (ctx["ets"] - ctx["sts"]).days > 6:
         ctx["ets"] = ctx["sts"] + datetime.timedelta(days=7)
 
-    sql = """
+    cursor.execute(
+        f"""
         SELECT to_char(valid at time zone 'UTC', 'YYYYMMDDHH24MI') as utctime,
         storm_id, nexrad, azimuth, range, tvs, meso, posh, poh, max_size,
         vil, max_dbz, max_dbz_height, top, drct, sknt,
         ST_y(geom) as lat, ST_x(geom) as lon
         from nexrad_attributes_log WHERE
-        valid >= '%s' and valid < '%s' %s  ORDER by valid ASC
-        """ % (
-        ctx["sts"].strftime("%Y-%m-%d %H:%M+00"),
-        ctx["ets"].strftime("%Y-%m-%d %H:%M+00"),
-        radarlimit,
+        valid >= %s and valid < %s {radarlimit} ORDER by valid ASC
+        """,
+        (ctx["sts"], ctx["ets"]),
     )
-
-    cursor.execute(sql)
     if cursor.rowcount == 0:
         start_response("200 OK", [("Content-type", "text/plain")])
         return b"ERROR: no results found for your query"
 
-    fn = "stormattr_%s_%s" % (
-        ctx["sts"].strftime("%Y%m%d%H%M"),
-        ctx["ets"].strftime("%Y%m%d%H%M"),
-    )
+    fn = f"stormattr_{ctx['sts']:%Y%m%d%H%M}_{ctx['ets']:%Y%m%d%H%M}"
 
     # sys.stderr.write("End SQL with rowcount %s" % (cursor.rowcount, ))
     if ctx["fmt"] == "csv":
         headers = [
             ("Content-type", "application/octet-stream"),
-            ("Content-Disposition", "attachment; filename=%s.csv" % (fn,)),
+            ("Content-Disposition", f"attachment; filename={fn}.csv"),
         ]
         start_response("200 OK", headers)
         sio.write(
@@ -147,7 +139,7 @@ def run(ctx, start_response):
         zf.writestr(fn + ".dbf", dbfio.getvalue())
     headers = [
         ("Content-type", "application/octet-stream"),
-        ("Content-Disposition", "attachment; filename=%s.zip" % (fn,)),
+        ("Content-Disposition", f"attachment; filename={fn}.zip"),
     ]
     start_response("200 OK", headers)
 
