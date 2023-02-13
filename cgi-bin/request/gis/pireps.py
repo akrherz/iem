@@ -65,11 +65,9 @@ def run(ctx, start_response):
             '/IC([^/]*)/')), 0, 255) as icing,
         substr(trim(substring(replace(report, ',', ' '),
             '/TB([^/]*)/')), 0, 255) as turb,
-        a.ident as atrcc,
-        ST_y(p.geom::geometry) as lat, ST_x(p.geom::geometry) as lon
-        from pireps p LEFT JOIN airspaces a on (
-            st_intersects(p.geom, a.geom) and a.type_code = 'ARTCC'
-        ) WHERE {spatialsql}
+        '' as atrcc,
+        ST_y(geom::geometry) as lat, ST_x(geom::geometry) as lon
+        from pireps WHERE {spatialsql}
         valid >= %s and valid < %s ORDER by valid ASC
         """
     args = (

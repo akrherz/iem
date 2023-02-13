@@ -616,7 +616,8 @@ def dump_raw_to_ldm(nwsli, dyprocessed, hrprocessed):
     filename = f"{BASE}/{STATIONS[nwsli]}_DailySI.dat"
     if not os.path.isfile(filename):
         return
-    fdata = open(filename, "rb").read().decode("ascii", "ignore")
+    with open(filename, "rb") as fh:
+        fdata = fh.read().decode("ascii", "ignore")
     lines = fdata.split("\n")
     if len(lines) < 5:
         return
@@ -629,15 +630,16 @@ def dump_raw_to_ldm(nwsli, dyprocessed, hrprocessed):
     for linenum in range(0 - dyprocessed, 0):
         os.write(tmpfd, lines[linenum].encode("ascii", "ignore"))
     os.close(tmpfd)
-    cmd = (
-        "pqinsert -p "
-        f"'data c {utc():%Y%m%d%H%M} csv/isusm/{nwsli}_daily.txt bogus txt' "
-        f"{tmpfn}"
-    )
-    proc = subprocess.Popen(
-        cmd, shell=True, stderr=subprocess.PIPE, stdout=subprocess.PIPE
-    )
-    proc.stdout.read()
+    cmd = [
+        "pqinsert",
+        "-p",
+        f"data c {utc():%Y%m%d%H%M} csv/isusm/{nwsli}_daily.txt bogus txt",
+        tmpfn,
+    ]
+    with subprocess.Popen(
+        cmd, stderr=subprocess.PIPE, stdout=subprocess.PIPE
+    ) as proc:
+        proc.stdout.read()
     os.remove(tmpfn)
 
     # Send the raw datafile to LDM
@@ -658,15 +660,16 @@ def dump_raw_to_ldm(nwsli, dyprocessed, hrprocessed):
     for linenum in range(0 - hrprocessed, 0):
         os.write(tmpfd, lines[linenum].encode("ascii", "ignore"))
     os.close(tmpfd)
-    cmd = (
-        "pqinsert -p "
-        f"'data c {utc():%Y%m%d%H%M} csv/isusm/{nwsli}_hourly.txt bogus txt' "
-        f"{tmpfn}"
-    )
-    proc = subprocess.Popen(
-        cmd, shell=True, stderr=subprocess.PIPE, stdout=subprocess.PIPE
-    )
-    proc.stdout.read()
+    cmd = [
+        "pqinsert",
+        "-p",
+        f"data c {utc():%Y%m%d%H%M} csv/isusm/{nwsli}_hourly.txt bogus txt",
+        tmpfn,
+    ]
+    with subprocess.Popen(
+        cmd, stderr=subprocess.PIPE, stdout=subprocess.PIPE
+    ) as proc:
+        proc.stdout.read()
     os.remove(tmpfn)
 
 
@@ -693,19 +696,29 @@ def main(argv):
 
     if EVENTS["reprocess_solar"]:
         LOG.info("Calling fix_solar.py with no args")
-        subprocess.call("python ../isuag/fix_solar.py", shell=True)
+        subprocess.call(["python", "../isuag/fix_solar.py"])
     if EVENTS["reprocess_temps"]:
         LOG.info("Calling fix_temps.py with no args")
-        subprocess.call("python ../isuag/fix_temps.py", shell=True)
+        subprocess.call(["python", "../isuag/fix_temps.py"])
     for day in EVENTS["days"]:
         LOG.info("Calling fix_{solar,precip}.py for %s", day)
         subprocess.call(
-            f"python ../isusm/fix_precip.py {day:%Y %m %d}",
-            shell=True,
+            [
+                "python",
+                "../isusm/fix_precip.py",
+                f"{day:%Y}",
+                f"{day:%m}",
+                f"{day:%d}",
+            ]
         )
         subprocess.call(
-            f"python ../isuag/fix_solar.py {day:%Y %m %d}",
-            shell=True,
+            [
+                "python",
+                "../isuag/fix_solar.py",
+                f"{day:%Y}",
+                f"{day:%m}",
+                f"{day:%d}",
+            ]
         )
 
 
