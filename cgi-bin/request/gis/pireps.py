@@ -65,7 +65,7 @@ def run(ctx, start_response):
             '/IC([^/]*)/')), 0, 255) as icing,
         substr(trim(substring(replace(report, ',', ' '),
             '/TB([^/]*)/')), 0, 255) as turb,
-        atrcc, ST_y(geom::geometry) as lat, ST_x(geom::geometry) as lon
+        artcc, ST_y(geom::geometry) as lat, ST_x(geom::geometry) as lon
         from pireps WHERE {spatialsql}
         valid >= %s and valid < %s ORDER by valid ASC
         """
