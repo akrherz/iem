@@ -30,12 +30,16 @@ def main():
         return
 
     remotepath = valid.strftime("/stage/iemwebcams/auto/%Y/%m/%d")
-    cmd = (
-        f'rsync -a --rsync-path "mkdir -p {remotepath} && rsync" '
-        f"{' '.join(localfns)} mesonet@metl60.agron.iastate.edu:{remotepath}"
-    )
-    LOG.info(cmd)
-    subprocess.call(cmd, shell=True)
+    cmd = [
+        "rsync",
+        "-a",
+        "--rsync-path",
+        f"mkdir -p {remotepath} && rsync",
+        *localfns,
+        f"mesonet@metl60.agron.iastate.edu:{remotepath}",
+    ]
+    LOG.info(" ".join(cmd))
+    subprocess.call(cmd)
 
 
 if __name__ == "__main__":

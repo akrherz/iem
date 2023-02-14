@@ -446,15 +446,16 @@ def process(order):
     )
     base = ts - datetime.timedelta(days=2)
     ceiling = ts + datetime.timedelta(days=2)
-    subprocess.call("tar -xzf %s" % (order,), shell=True)
+    subprocess.call(["tar", "-xzf", order])
     inserts = 0
     deletes = 0
     filesparsed = 0
     bad = 0
-    for fn in glob.glob("%s[0-2][0-9].*" % (order[:6],)):
-        content = re.sub(
-            BAD_CHARS, "", open(fn, "rb").read().decode("ascii", "ignore")
-        )
+    for fn in glob.glob(f"{order[:6]}[0-2][0-9].*"):
+        with open(fn, "rb") as fh:
+            content = re.sub(
+                BAD_CHARS, "", fh.read().decode("ascii", "ignore")
+            )
         # Now we are getting closer, lets split by the delimter as we
         # may have multiple products in one file!
         for bulletin in content.split("\001"):
@@ -473,25 +474,19 @@ def process(order):
                 bad += 1
                 continue
 
-            table = "products_%s_%s" % (
-                prod.valid.year,
-                ("0712" if prod.valid.month > 6 else "0106"),
-            )
+            tt = "0712" if prod.valid.month > 6 else "0106"
+            table = f"products_{prod.valid.year}_{tt}"
             cursor.execute(
-                """
-                DELETE from """
-                + table
-                + """ WHERE pil = %s and
+                f"""
+                DELETE from {table} WHERE pil = %s and
                 entered = %s and source = %s and data = %s
             """,
                 (prod.afos, prod.valid, prod.source, bulletin),
             )
             deletes += cursor.rowcount
             cursor.execute(
-                """
-                INSERT into """
-                + table
-                + """
+                f"""
+                INSERT into {table}
                 (data, pil, entered, source, wmo) values (%s,%s,%s,%s,%s)
             """,
                 (bulletin, prod.afos, prod.valid, prod.source, prod.wmo),
@@ -501,8 +496,8 @@ def process(order):
         os.unlink(fn)
         filesparsed += 1
     print(
-        ("%s Files Parsed: %s Inserts: %s Deletes: %s Bad: %s")
-        % (order, filesparsed, inserts, deletes, bad)
+        f"{order} Files Parsed: {filesparsed} Inserts: {inserts} "
+        f"Deletes: {deletes} Bad: {bad}"
     )
     cursor.close()
     PGCONN.commit()
