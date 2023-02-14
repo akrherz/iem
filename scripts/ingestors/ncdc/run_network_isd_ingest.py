@@ -16,20 +16,21 @@ LOG = logger()
 def build_xref():
     """Figure out how to reference stations"""
     xref = {}
-    for linenum, line in enumerate(open("isd-history.txt")):
-        if linenum < 24:
-            continue
-        airforce = line[:6]
-        wban = int(line[7:12])
-        faa = line[51:55]
-        if faa.strip() == "":
-            continue
-        if faa[0] == "K":
-            faa = faa[1:]
-        sts = datetime.datetime.strptime(line[82:90], "%Y%m%d")
-        ets = datetime.datetime.strptime(line[91:99], "%Y%m%d")
-        ar = xref.setdefault(faa, [])
-        ar.append([airforce, wban, sts, ets])
+    with open("isd-history.txt", encoding="ascii") as fh:
+        for linenum, line in enumerate(fh):
+            if linenum < 24:
+                continue
+            airforce = line[:6]
+            wban = int(line[7:12])
+            faa = line[51:55]
+            if faa.strip() == "":
+                continue
+            if faa[0] == "K":
+                faa = faa[1:]
+            sts = datetime.datetime.strptime(line[82:90], "%Y%m%d")
+            ets = datetime.datetime.strptime(line[91:99], "%Y%m%d")
+            ar = xref.setdefault(faa, [])
+            ar.append([airforce, wban, sts, ets])
     return xref
 
 
@@ -55,15 +56,17 @@ def main(argv):
                 continue
             stid = station if len(station) == 4 else "K" + station
             eyear = min([till_year, option[3].year])
-            cmd = "python ingest_isd.py %s %s %s %s %s" % (
+            cmd = [
+                "python",
+                "ingest_isd.py",
                 option[0],
                 option[1],
                 stid,
-                option[2].year,
-                eyear,
-            )
-            LOG.info(cmd)
-            subprocess.call(cmd, shell=True)
+                str(option[2].year),
+                str(eyear),
+            ]
+            LOG.info(" ".join(cmd))
+            subprocess.call(cmd)
 
 
 if __name__ == "__main__":

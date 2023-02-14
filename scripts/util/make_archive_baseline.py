@@ -64,7 +64,7 @@ def main(argv):
     for pil in PILS:
         fn = f"{pil}_{ts:%Y%m%d}.txt"
         if not os.path.isfile(fn):
-            subprocess.call(f"touch {fn}", shell=True)
+            subprocess.call(["touch", fn])
             os.chmod(fn, 0o664)
             chgrp(fn, grp.getgrnam("iem-friends")[2])
 
