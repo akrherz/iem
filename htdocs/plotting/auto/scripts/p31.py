@@ -1,4 +1,20 @@
-"""jumps in temperature"""
+"""This chart attempts to assess by now much the high temperature
+    can change between two or three periods of time.
+    These periods are defined by
+    the consecutive number of days you choose.  The tricky part is to
+    explain what exactly these periods are!  The middle period of days
+    includes 'today', which is where this metric is evaluated.  So a middle
+    period of <code>1</code> days only includes 'today' and not 'tomorrow'.
+    If you summarize this plot by year, a simple linear trendline is
+    presented as well.
+
+    <p>A practical example here may be warranted.  Consider a period of
+    four days whereby the warmest high temperature was only 40 degrees F. Then
+    on the next day, the high temperature soars to 60 degrees.  For the plot
+    settings of <code>4</code> trailing days (Maxiumum)
+    and <code>1</code> forward days (Whatever, does not matter for 1 day
+    aggregate),
+    this example evaluates to a jump of 20 degrees."""
 import datetime
 import calendar
 
@@ -46,28 +62,7 @@ MDICT = dict(
 
 def get_description():
     """Return a dict describing how to call this plotter"""
-    desc = {}
-    desc["data"] = True
-    desc[
-        "description"
-    ] = """This chart attempts to assess by now much the high temperature
-    can change between two or three periods of time.
-    These periods are defined by
-    the consecutive number of days you choose.  The tricky part is to
-    explain what exactly these periods are!  The middle period of days
-    includes 'today', which is where this metric is evaluated.  So a middle
-    period of <code>1</code> days only includes 'today' and not 'tomorrow'.
-    If you summarize this plot by year, a simple linear trendline is
-    presented as well.
-
-    <p>A practical example here may be warranted.  Consider a period of
-    four days whereby the warmest high temperature was only 40 degrees F. Then
-    on the next day, the high temperature soars to 60 degrees.  For the plot
-    settings of <code>4</code> trailing days (Maxiumum)
-    and <code>1</code> forward days (Whatever, does not matter for 1 day
-    aggregate),
-    this example evaluates to a jump of 20 degrees.
-    """
+    desc = {"description": __doc__, "data": True}
     desc["arguments"] = [
         dict(
             type="station",
@@ -244,42 +239,34 @@ def plotter(fdict):
         up = obs[(obs["two"] >= 0) & (obs["three"] >= 0)]
         obs["change"] = up[["two", "three"]].min(axis=1)
         down = obs[(obs["two"] < 0) & (obs["three"] < 0)]
-        obs.at[down.index, "change"] = down[["two", "three"]].max(axis=1)
+        obs.loc[down.index, "change"] = down[["two", "three"]].max(axis=1)
     else:
         obs["change"] = obs["two"]
     weekly = obs[[agg, "change"]].groupby(agg).describe()
     df = weekly["change"]
 
     extreme = max([df["max"].max(), 0 - df["min"].min()]) + 10
-    title = "Backward (%s) %.0f Days and Forward (%s) %.0f Inclusive Days" % (
-        PDICT2[ctx["stat"]],
-        days,
-        PDICT2[ctx["mstat"]],
-        mdays,
+    title = (
+        f"Backward ({PDICT2[ctx['stat']]}) {days:.0f} Days and Forward "
+        f"({PDICT2[ctx['mstat']]}) {mdays:.0f} Inclusive Days"
     )
     if ctx["how"] == "three":
-        title = ("Back (%s) %.0fd, Middle (%s) %.0fd, Forward (%s) %.0fd") % (
-            PDICT2[ctx["stat"]],
-            days,
-            PDICT2[ctx["mstat"]],
-            mdays,
-            PDICT2[ctx["fstat"]],
-            fdays,
+        title = (
+            f"Back ({PDICT2[ctx['stat']]}) {days:.0f}d, Middle "
+            f"({PDICT2[ctx['mstat']]}) {mdays:.0f}d, Forward "
+            f"({PDICT2[ctx['fstat']]}) {fdays:.0f}d"
         )
     subtitle = (
         ""
         if ctx["thres"] is None
         else rf"\nBack Threshold of at least {ctx['thres']:.0f} $^\circ$F"
     )
-    title = ("%s (%.0f-%.0f) Max Change in %s %s (%s)\n%s%s") % (
-        ctx["_sname"],
-        max([ctx["_nt"].sts[station]["archive_begin"].year, syear]),
-        eyear,
-        PDICT3[ctx["var"]].replace("Temperature", "Temp"),
-        PDICT[agg].replace("Aggregate", "Agg"),
-        MDICT[month],
-        title,
-        subtitle,
+    tt = max([ctx["_nt"].sts[station]["archive_begin"].year, syear])
+    title = (
+        f"{ctx['_sname']} ({tt:.0f}-{eyear:.0f}) Max Change in "
+        f"{PDICT3[ctx['var']].replace('Temperature', 'Temp')} "
+        f"{PDICT[agg].replace('Aggregate', 'Agg')} ({MDICT[month]})\n"
+        f"{title}{subtitle}"
     )
     fig, ax = figure_axes(title=title, apctx=ctx)
     multiplier = 1
@@ -310,7 +297,7 @@ def plotter(fdict):
             ax.text(
                 0.9,
                 yloc,
-                r"R^2=%.02f" % (r_value**2,),
+                r"R^2=" f"{(r_value**2):.02f}",
                 color=color,
                 transform=ax.transAxes,
                 va="center",
@@ -342,8 +329,7 @@ def plotter(fdict):
     ax.text(
         xloc,
         extreme - 5,
-        "Maximum Jump in %s (avg: %.1f)"
-        % (PDICT3[ctx["var"]], df["max"].mean()),
+        f"Maximum Jump in {PDICT3[ctx['var']]} (avg: {df['max'].mean():.1f})",
         color="red",
         va="center",
         ha="center",
@@ -352,8 +338,8 @@ def plotter(fdict):
     ax.text(
         xloc,
         0 - extreme + 5,
-        "Maximum (Negative) Dip in %s (avg: %.1f)"
-        % (PDICT3[ctx["var"]], df["min"].mean()),
+        f"Maximum (Negative) Dip in {PDICT3[ctx['var']]} "
+        f"(avg: {df['min'].mean():.1f})",
         color="blue",
         va="center",
         ha="center",

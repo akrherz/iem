@@ -17,13 +17,12 @@ def main():
         tzinfo=pytz.timezone("America/Chicago")
     )
 
-    fn = ("/mesonet/ARCHIVE/data/%s/text/ot/ot0006.dat" "") % (
-        now.strftime("%Y/%m/%d"),
-    )
+    fn = f"/mesonet/ARCHIVE/data/{now:%Y/%m/%d}/text/ot/ot0006.dat"
 
     if not os.path.isfile(fn):
         return
-    lines = open(fn, "r").readlines()
+    with open(fn, "r", encoding="ascii") as fh:
+        lines = fh.readlines()
     line = lines[-1]
 
     # January 17, 2017 02:57 PM

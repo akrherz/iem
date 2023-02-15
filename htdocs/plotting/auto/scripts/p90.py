@@ -1,65 +1,4 @@
-"""UGC/Polygon WWA stats onimbus"""
-import datetime
-
-import psycopg2.extras
-import numpy as np
-import pytz
-from rasterstats import zonal_stats
-import pandas as pd
-from geopandas import read_postgis
-from affine import Affine
-from pyiem.nws import vtec
-from pyiem.reference import state_names, state_bounds, wfo_bounds
-from pyiem.plot import get_cmap
-from pyiem.plot.geoplot import MapPlot
-from pyiem.util import (
-    get_autoplot_context,
-    get_dbconn,
-    get_sqlalchemy_conn,
-    utc,
-)
-from pyiem.exceptions import NoDataFound
-
-PDICT = {"cwa": "Plot by NWS Forecast Office", "state": "Plot by State"}
-PDICT2 = {
-    "yearcount": "Count of Events for Given Year",
-    "days": "Days Since Last Issuance",
-    "hour": "Most Frequent Issuance Hour of Day",
-    "total": "Total Count between Start and End Date",
-    "lastyear": "Year of Last Issuance",
-    "yearavg": "Yearly Average Count between Start and End Year",
-    "periodavg": (
-        "Yearly Average Count between Start and End DateTime Bounded by Years"
-    ),
-    "periodmin": (
-        "Yearly Minimum Count between Start and End DateTime Bounded by Years"
-    ),
-    "periodmax": (
-        "Yearly Maximum Count between Start and End DateTime Bounded by Years"
-    ),
-}
-PDICT3 = {
-    "yes": "YES: Label Counties/Zones",
-    "no": "NO: Do not Label Counties/Zones",
-}
-PDICT4 = {
-    "ugc": "Summarize/Plot by UGC (Counties/Parishes/Zones)",
-    "polygon": "Summarize/Plot by Polygon (Storm Based Warnings)",
-}
-PDICT5 = {
-    "yes": "YES: Draw Counties/Parishes",
-    "no": "NO: Do Not Draw Counties/Parishes",
-}
-
-
-def get_description():
-    """Return a dict describing how to call this plotter"""
-    desc = {}
-    desc["data"] = True
-    desc["cache"] = 86400
-    desc[
-        "description"
-    ] = """This application has a considerable and likely
+"""This application has a considerable and likely
     confusing amount of configuration options.  The biggest source of the
     confusion is the interplay between the statistic chosen and the dates/times
     provided.  This table summarizes that interplay.<br />
@@ -141,6 +80,62 @@ def get_description():
 
     <p><strong>This app can be very slow</strong>, so please let it grind
     away as sometimes it will take 3-5 minutes to generate a map :("""
+import datetime
+
+import psycopg2.extras
+import numpy as np
+import pytz
+from rasterstats import zonal_stats
+import pandas as pd
+from geopandas import read_postgis
+from affine import Affine
+from pyiem.nws import vtec
+from pyiem.reference import state_names, state_bounds, wfo_bounds
+from pyiem.plot import get_cmap
+from pyiem.plot.geoplot import MapPlot
+from pyiem.util import (
+    get_autoplot_context,
+    get_dbconn,
+    get_sqlalchemy_conn,
+    utc,
+)
+from pyiem.exceptions import NoDataFound
+
+PDICT = {"cwa": "Plot by NWS Forecast Office", "state": "Plot by State"}
+PDICT2 = {
+    "yearcount": "Count of Events for Given Year",
+    "days": "Days Since Last Issuance",
+    "hour": "Most Frequent Issuance Hour of Day",
+    "total": "Total Count between Start and End Date",
+    "lastyear": "Year of Last Issuance",
+    "yearavg": "Yearly Average Count between Start and End Year",
+    "periodavg": (
+        "Yearly Average Count between Start and End DateTime Bounded by Years"
+    ),
+    "periodmin": (
+        "Yearly Minimum Count between Start and End DateTime Bounded by Years"
+    ),
+    "periodmax": (
+        "Yearly Maximum Count between Start and End DateTime Bounded by Years"
+    ),
+}
+PDICT3 = {
+    "yes": "YES: Label Counties/Zones",
+    "no": "NO: Do not Label Counties/Zones",
+}
+PDICT4 = {
+    "ugc": "Summarize/Plot by UGC (Counties/Parishes/Zones)",
+    "polygon": "Summarize/Plot by Polygon (Storm Based Warnings)",
+}
+PDICT5 = {
+    "yes": "YES: Draw Counties/Parishes",
+    "no": "NO: Do Not Draw Counties/Parishes",
+}
+
+
+def get_description():
+    """Return a dict describing how to call this plotter"""
+    desc = {"description": __doc__, "data": True, "cache": 86400}
     today = datetime.date.today()
     tom = today + datetime.timedelta(days=3)
     desc["arguments"] = [
@@ -622,7 +617,7 @@ def do_ugc(ctx):
             rows.append(dict(hour=int(row[1]), ugc=row[0]))
             data[row[0]] = row[1]
             ctx["labels"][row[0]] = (
-                midnight + datetime.timedelta(hours=row[1])
+                midnight + datetime.timedelta(hours=int(row[1]))
             ).strftime("%-I %p")
         ctx[
             "title"

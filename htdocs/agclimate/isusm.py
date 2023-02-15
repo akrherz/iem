@@ -75,8 +75,7 @@ def plot(data, v):
             figsize=(8.0, 6.4),
         )
         mp.plot_values([-95], [41.99], ["No Data Found"], "%s", textsize=30)
-        mp.postprocess(web=True)
-        return
+        return mp
 
     mp = MapPlot(
         sector="iowa",

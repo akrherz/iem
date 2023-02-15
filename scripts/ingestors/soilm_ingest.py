@@ -216,7 +216,7 @@ def do_inversion(filename, nwsli):
 def common_df_logic(filename, maxts, nwsli, tablename):
     """Our commonality to reading"""
     if not os.path.isfile(filename):
-        return
+        return None
 
     df = pd.read_csv(filename, skiprows=[0, 2, 3], na_values=["NAN"])
     # convert all columns to lowercase
@@ -378,7 +378,7 @@ def common_df_logic(filename, maxts, nwsli, tablename):
         )
     df = df[df["valid"] > maxts].copy()
     if df.empty:
-        return
+        return None
 
     df = df.drop("record", axis=1)
     # Create _qc and _f columns
@@ -405,7 +405,7 @@ def common_df_logic(filename, maxts, nwsli, tablename):
     except psycopg2.errors.UniqueViolation as exp:  # pylint: disable=no-member
         LOG.exception(exp)
         icursor.close()
-        return
+        return None
     icursor.close()
     ISUAG.commit()
     return df

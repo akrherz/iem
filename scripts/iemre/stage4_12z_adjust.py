@@ -40,7 +40,7 @@ def merge(ts):
     )
     if not os.path.isfile(fn):
         LOG.info("stage4_12z_adjust %s is missing", fn)
-        return False
+        return
 
     grbs = pygrib.open(fn)
     grb = grbs[1]

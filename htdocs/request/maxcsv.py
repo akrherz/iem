@@ -17,9 +17,9 @@ import requests
 import ephem
 import pytz
 import pandas as pd
-from pandas.io.sql import read_sql
 from paste.request import parse_formvars
-from pyiem.util import get_dbconn, utc
+from pyiem.util import get_dbconn, get_sqlalchemy_conn, utc
+from sqlalchemy import text
 
 # DOT plows
 # RWIS sensor data
@@ -166,100 +166,112 @@ def do_moon(lon, lat):
 
 def do_iaroadcond():
     """Iowa DOT Road Conditions as dots"""
-    pgconn = get_dbconn("postgis")
-    df = read_sql(
-        """
-    select b.idot_id as locationid,
-    replace(b.longname, ',', ' ') as locationname,
-    ST_y(ST_transform(ST_centroid(b.geom),4326)) as latitude,
-    ST_x(ST_transform(ST_centroid(b.geom),4326)) as longitude, cond_code
-    from roads_base b JOIN roads_current c on (c.segid = b.segid)
-    """,
-        pgconn,
-    )
+    with get_sqlalchemy_conn("postgis") as conn:
+        df = pd.read_sql(
+            """
+        select b.idot_id as locationid,
+        replace(b.longname, ',', ' ') as locationname,
+        ST_y(ST_transform(ST_centroid(b.geom),4326)) as latitude,
+        ST_x(ST_transform(ST_centroid(b.geom),4326)) as longitude, cond_code
+        from roads_base b JOIN roads_current c on (c.segid = b.segid)
+        """,
+            conn,
+        )
     return df
 
 
 def do_webcams(network):
     """direction arrows"""
-    pgconn = get_dbconn("mesosite")
-    df = read_sql(
+    with get_sqlalchemy_conn("mesosite") as conn:
+        df = pd.read_sql(
+            text(
+                """
+        select cam as locationid, w.name as locationname,
+        st_y(geom) as latitude,
+        st_x(geom) as longitude, drct
+        from camera_current c JOIN webcams w on (c.cam = w.id)
+        WHERE c.valid > (now() - '30 minutes'::interval) and w.network = :net
         """
-    select cam as locationid, w.name as locationname, st_y(geom) as latitude,
-    st_x(geom) as longitude, drct
-    from camera_current c JOIN webcams w on (c.cam = w.id)
-    WHERE c.valid > (now() - '30 minutes'::interval) and w.network = %s
-    """,
-        pgconn,
-        params=(network,),
-    )
+            ),
+            conn,
+            params={"network": network},
+        )
     return df
 
 
 def do_iowa_azos(date, itoday=False):
     """Dump high and lows for Iowa ASOS"""
-    pgconn = get_dbconn("iem")
-    df = read_sql(
-        f"""
-    select id as locationid, n.name as locationname, st_y(geom) as latitude,
-    st_x(geom) as longitude, s.day, s.max_tmpf::int as high,
-    s.min_tmpf::int as low, coalesce(pday, 0) as precip
-    from stations n JOIN summary_{date.year} s on (n.iemid = s.iemid)
-    WHERE n.network = 'IA_ASOS' and s.day = %s
-    """,
-        pgconn,
-        params=(date,),
-        index_col="locationid",
-    )
-    if itoday:
-        # Additionally, piggy back rainfall totals
-        df2 = read_sql(
-            """
-        SELECT id as station,
-        sum(phour) as precip720,
-        sum(case when valid >= (now() - '168 hours'::interval)
-            then phour else 0 end) as precip168,
-        sum(case when valid >= (now() - '72 hours'::interval)
-            then phour else 0 end) as precip72,
-        sum(case when valid >= (now() - '48 hours'::interval)
-            then phour else 0 end) as precip48,
-        sum(case when valid >= (now() - '24 hours'::interval)
-            then phour else 0 end) as precip24
-        from hourly h JOIN stations t on (h.iemid = t.iemid)
-        where t.network = 'IA_ASOS' and valid >= now() - '720 hours'::interval
-        and phour > 0.005 GROUP by id
-        """,
-            pgconn,
-            index_col="station",
+    with get_sqlalchemy_conn("iem") as conn:
+        df = pd.read_sql(
+            text(
+                f"""
+        select id as locationid, n.name as locationname,
+        st_y(geom) as latitude,
+        st_x(geom) as longitude, s.day, s.max_tmpf::int as high,
+        s.min_tmpf::int as low, coalesce(pday, 0) as precip
+        from stations n JOIN summary_{date.year} s on (n.iemid = s.iemid)
+        WHERE n.network = 'IA_ASOS' and s.day = :dt
+        """
+            ),
+            conn,
+            params={"dt": date},
+            index_col="locationid",
         )
-        for col in [
-            "precip24",
-            "precip48",
-            "precip72",
-            "precip168",
-            "precip720",
-        ]:
-            df[col] = df2[col]
-            # make sure the new column is >= precip
-            df.loc[df[col] < df["precip"], col] = df["precip"]
+        if itoday:
+            # Additionally, piggy back rainfall totals
+            df2 = pd.read_sql(
+                text(
+                    """
+            SELECT id as station,
+            sum(phour) as precip720,
+            sum(case when valid >= (now() - '168 hours'::interval)
+                then phour else 0 end) as precip168,
+            sum(case when valid >= (now() - '72 hours'::interval)
+                then phour else 0 end) as precip72,
+            sum(case when valid >= (now() - '48 hours'::interval)
+                then phour else 0 end) as precip48,
+            sum(case when valid >= (now() - '24 hours'::interval)
+                then phour else 0 end) as precip24
+            from hourly h JOIN stations t on (h.iemid = t.iemid)
+            where t.network = 'IA_ASOS' and
+            valid >= now() - '720 hours'::interval
+            and phour > 0.005 GROUP by id
+            """
+                ),
+                conn,
+                index_col="station",
+            )
+            for col in [
+                "precip24",
+                "precip48",
+                "precip72",
+                "precip168",
+                "precip720",
+            ]:
+                df[col] = df2[col]
+                # make sure the new column is >= precip
+                df.loc[df[col] < df["precip"], col] = df["precip"]
     df = df.reset_index()
     return df
 
 
 def do_iarwis():
     """Dump RWIS data"""
-    pgconn = get_dbconn("iem")
-    df = read_sql(
+    with get_sqlalchemy_conn("iem") as conn:
+        df = pd.read_sql(
+            text(
+                """
+        select id as locationid, n.name as locationname,
+        st_y(geom) as latitude,
+        st_x(geom) as longitude, tsf0 as pavetmp1, tsf1 as pavetmp2,
+        tsf2 as pavetmp3, tsf3 as pavetmp4
+        from stations n JOIN current s on (n.iemid = s.iemid)
+        WHERE n.network in ('IA_RWIS', 'WI_RWIS', 'IL_RWIS') and
+        s.valid > (now() - '2 hours'::interval)
         """
-    select id as locationid, n.name as locationname, st_y(geom) as latitude,
-    st_x(geom) as longitude, tsf0 as pavetmp1, tsf1 as pavetmp2,
-    tsf2 as pavetmp3, tsf3 as pavetmp4
-    from stations n JOIN current s on (n.iemid = s.iemid)
-    WHERE n.network in ('IA_RWIS', 'WI_RWIS', 'IL_RWIS') and
-    s.valid > (now() - '2 hours'::interval)
-    """,
-        pgconn,
-    )
+            ),
+            conn,
+        )
     # Compute simple average in whole degree F
     df["paveavg"] = (
         df[["pavetmp1", "pavetmp2", "pavetmp3", "pavetmp4"]]
@@ -306,26 +318,31 @@ def do_ahps_obs(nwsli):
         return "NO DATA"
     plabel = cursor.fetchone()[1]
     slabel = cursor.fetchone()[1]
-    df = read_sql(
+    with get_sqlalchemy_conn("hml") as conn:
+        df = pd.read_sql(
+            text(
+                """
+        WITH primaryv as (
+        SELECT valid, value from hml_observed_data WHERE station = :nwsli
+        and key = get_hml_observed_key(:plabel) and
+        valid > now() - '1 day'::interval
+        ), secondaryv as (
+        SELECT valid, value from hml_observed_data WHERE station = :nwsli
+        and key = get_hml_observed_key(:slabel) and
+        valid > now() - '1 day'::interval
+        )
+        SELECT p.valid at time zone 'UTC' as valid,
+        p.value as primary_value, s.value as secondary_value,
+        'O' as type
+        from primaryv p LEFT JOIN secondaryv s ON (p.valid = s.valid)
+        WHERE p.valid > (now() - '72 hours'::interval)
+        ORDER by p.valid DESC
         """
-    WITH primaryv as (
-      SELECT valid, value from hml_observed_data WHERE station = %s
-      and key = get_hml_observed_key(%s) and valid > now() - '1 day'::interval
-    ), secondaryv as (
-      SELECT valid, value from hml_observed_data WHERE station = %s
-      and key = get_hml_observed_key(%s) and valid > now() - '1 day'::interval
-    )
-    SELECT p.valid at time zone 'UTC' as valid,
-    p.value as primary_value, s.value as secondary_value,
-    'O' as type
-    from primaryv p LEFT JOIN secondaryv s ON (p.valid = s.valid)
-    WHERE p.valid > (now() - '72 hours'::interval)
-    ORDER by p.valid DESC
-    """,
-        pgconn,
-        params=(nwsli, plabel, nwsli, slabel),
-        index_col=None,
-    )
+            ),
+            conn,
+            params={"nwsli": nwsli, "plabel": plabel, "slabel": slabel},
+            index_col=None,
+        )
     sys.stderr.write(str(plabel))
     sys.stderr.write(str(slabel))
     df["locationid"] = nwsli
@@ -386,17 +403,20 @@ def do_ahps_fx(nwsli):
     secondaryname = row[5]
     secondaryunits = row[6]
     # Get the latest forecast
-    df = read_sql(
-        f"""
-    SELECT valid at time zone 'UTC' as valid,
-    primary_value, secondary_value, 'F' as type from
-    hml_forecast_data_{generationtime.year} WHERE hml_forecast_id = %s
-    ORDER by valid ASC
-    """,
-        pgconn,
-        params=(row[0],),
-        index_col=None,
-    )
+    with get_sqlalchemy_conn("hml") as conn:
+        df = pd.read_sql(
+            text(
+                f"""
+        SELECT valid at time zone 'UTC' as valid,
+        primary_value, secondary_value, 'F' as type from
+        hml_forecast_data_{generationtime.year} WHERE hml_forecast_id = :sid
+        ORDER by valid ASC
+        """
+            ),
+            conn,
+            params={"sid": row[0]},
+            index_col=None,
+        )
     # Get the obs
     plabel = f"{primaryname}[{primaryunits}]"
     slabel = f"{secondaryname}[{secondaryunits}]"
@@ -483,18 +503,21 @@ def do_ahps(nwsli):
             break
 
     # get observations
-    odf = read_sql(
+    with get_sqlalchemy_conn("hml") as conn:
+        odf = pd.read_sql(
+            text(
+                """
+        SELECT valid at time zone 'UTC' as valid,
+        value from hml_observed_data WHERE station = :nwsli
+        and key = :lookupkey and valid > now() - '3 day'::interval
+        and extract(minute from valid) = 0
+        ORDER by valid DESC
         """
-    SELECT valid at time zone 'UTC' as valid,
-    value from hml_observed_data WHERE station = %s
-    and key = %s and valid > now() - '3 day'::interval
-    and extract(minute from valid) = 0
-    ORDER by valid DESC
-    """,
-        pgconn,
-        params=(nwsli, lookupkey),
-        index_col=None,
-    )
+            ),
+            conn,
+            params={"nwsli": nwsli, "lookupkey": lookupkey},
+            index_col=None,
+        )
     # hoop jumping to get a timestamp in the local time of this sensor
     # see akrherz/iem#187
     odf["obtime"] = (
@@ -504,17 +527,20 @@ def do_ahps(nwsli):
         .dt.strftime("%a. %-I %p")
     )
     # Get the latest forecast
-    df = read_sql(
-        f"""
-        SELECT valid at time zone 'UTC' as valid,
-        primary_value, secondary_value, 'F' as type from
-        hml_forecast_data_{y} WHERE hml_forecast_id = %s
-        ORDER by valid ASC
-    """,
-        pgconn,
-        params=(row[0],),
-        index_col=None,
-    )
+    with get_sqlalchemy_conn("hml") as conn:
+        df = pd.read_sql(
+            text(
+                f"""
+            SELECT valid at time zone 'UTC' as valid,
+            primary_value, secondary_value, 'F' as type from
+            hml_forecast_data_{y} WHERE hml_forecast_id = :fid
+            ORDER by valid ASC
+        """
+            ),
+            conn,
+            params={"fid": row[0]},
+            index_col=None,
+        )
     # Get the obs
     # plabel = "{}[{}]".format(primaryname, primaryunits)
     # slabel = "{}[{}]".format(secondaryname, secondaryunits)
@@ -544,7 +570,7 @@ def do_ahps(nwsli):
         fs = (
             row["forecaststage"] if not pd.isnull(row["forecaststage"]) else ""
         )
-        res += ("%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s\n") % (
+        vals = [
             nwsli if idx == 0 else "",
             stationname if idx == 0 else "",
             latitude if idx == 0 else "",
@@ -561,7 +587,8 @@ def do_ahps(nwsli):
             "" if idx > 0 else maxrow["forecaststage"],
             "" if idx > 0 else feet(maxrow["forecaststage"]),
             "" if idx > 0 else maxrow["forecasttime"],
-        )
+        ]
+        res += ",".join(str(x) for x in vals) + "\n"
 
     return res
 
@@ -629,6 +656,9 @@ def application(environ, start_response):
     """Do Something"""
     form = parse_formvars(environ)
     appname = form.get("q")
+    if appname is None:
+        start_response("404 File Not Found", [("Content-type", "text/plain")])
+        return [b"No such service."]
     res = router(appname)
     start_response("200 OK", [("Content-type", "text/plain")])
     if isinstance(res, pd.DataFrame):
