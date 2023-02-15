@@ -151,13 +151,19 @@ def get_df(ctx):
             continue
         thisval = sdf.loc[date.strftime("%Y-%m-%d")]["value"]
         # linear interpolate data to get comparables
-        newdf = sdf.resample("D").interpolate(method="linear")
+        newdf = (
+            sdf[~sdf.index.duplicated(keep="first")]
+            .resample("D")
+            .interpolate(method="linear")
+        )
         # get doy averages
         y10 = newdf[(newdf["year"] >= syear) & (newdf["year"] < eyear)]
         if y10.empty:
             avgval = None
         else:
-            doyavgs = y10.groupby(y10.index.strftime("%m%d")).mean()
+            doyavgs = y10.groupby(y10.index.strftime("%m%d")).mean(
+                numeric_only=True
+            )
             if date.strftime("%m%d") in doyavgs.index:
                 avgval = doyavgs.at[date.strftime("%m%d"), "value"]
             else:
@@ -236,4 +242,6 @@ def plotter(fdict):
 
 
 if __name__ == "__main__":
-    plotter({"var": "soybeans_poor_verypoor"})
+    plotter(
+        {"var": "corn_harvest", "w": "avg", "weeks": "1", "date": "2019-11-19"}
+    )

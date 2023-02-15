@@ -1,4 +1,12 @@
-"""COOP period stats"""
+"""This plot presents aggregate statistics by year for a date period
+    of your choice.  You can either set an explicit date period or make
+    the end date based on the first date below a given low temperature
+    threshold. If your period crosses a year bounds,
+    the plotted year represents the year of the start date of the period.
+
+    <br /><br />This autoplot is specific to data from COOP stations, a
+    similiar autoplot <a href="/plotting/auto/?q=140">#140</a> exists for
+    automated stations."""
 import datetime
 
 import numpy as np
@@ -40,20 +48,7 @@ PDICT = {
 
 def get_description():
     """Return a dict describing how to call this plotter"""
-    desc = {}
-    desc["data"] = True
-    desc[
-        "description"
-    ] = """This plot presents aggregate statistics by year for a date period
-    of your choice.  You can either set an explicit date period or make
-    the end date based on the first date below a given low temperature
-    threshold. If your period crosses a year bounds,
-    the plotted year represents the year of the start date of the period.
-
-    <br /><br />This autoplot is specific to data from COOP stations, a
-    similiar autoplot <a href="/plotting/auto/?q=140">#140</a> exists for
-    automated stations.
-    """
+    desc = {"description": __doc__, "data": True}
     today = datetime.datetime.today() - datetime.timedelta(days=1)
     desc["arguments"] = [
         dict(
@@ -225,6 +220,7 @@ def plotter(fdict):
             avg_high_temp=("high", "mean"),
             avg_low_temp=("low", "mean"),
             precip=("precip", "sum"),
+            snow=("snow", "sum"),
             gdd=("gdd", "sum"),
             min_low=("low", "min"),
             max_low=("low", "max"),
@@ -372,4 +368,4 @@ def plotter(fdict):
 
 
 if __name__ == "__main__":
-    plotter({"varname": "gdd", "thres": 0.01, "stop": 32})
+    plotter({"varname": "snow", "thres": 0.01, "stop": 32})

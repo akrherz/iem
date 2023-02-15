@@ -1,4 +1,27 @@
-"""hourly histogram."""
+"""Caution: This plot takes a bit of time to
+    generate. This plot displays a histogram of hourly observations.
+    <strong>Only the routine hourly observations are considered</strong>,
+    so specials or multiple observations per hour are not considered.
+    The connecting lines between the dots are to help readability. In the
+    case of wind chill, the year shown is for the winter season actual year
+    with December contained within.
+
+    <p>This form provides an option for the case of wind chill and heat index
+    to only include cases that are additive.  What this means is to only
+    include observations where the wind chill temperature is colder than the
+    air temperature or when the heat index temperature is warmer than the
+    air temperature.</p>
+
+    <p>This application only considers one observation per hour.  In the case
+    of multiple observations within an hour, a simple average of the found
+    values is used.  In the future, the hope is to limit the considered data
+    to the "synoptic" observation at the top of the hour, but we are not there
+    yet.</p>
+
+    <p><strong>Change made 29 Aug 2018</strong>: The algorithm used here was
+    updated to use greater than or equal to the given threshold.  In the case
+    of wind chill, it is less than or equal to.</p>
+"""
 import datetime
 
 import numpy as np
@@ -36,34 +59,7 @@ OPTDICT = {
 
 def get_description():
     """Return a dict describing how to call this plotter"""
-    desc = {}
-    desc["data"] = True
-    desc[
-        "description"
-    ] = """Caution: This plot takes a bit of time to
-    generate. This plot displays a histogram of hourly observations.
-    <strong>Only the routine hourly observations are considered</strong>,
-    so specials or multiple observations per hour are not considered.
-    The connecting lines between the dots are to help readability. In the
-    case of wind chill, the year shown is for the winter season actual year
-    with December contained within.
-
-    <p>This form provides an option for the case of wind chill and heat index
-    to only include cases that are additive.  What this means is to only
-    include observations where the wind chill temperature is colder than the
-    air temperature or when the heat index temperature is warmer than the
-    air temperature.</p>
-
-    <p>This application only considers one observation per hour.  In the case
-    of multiple observations within an hour, a simple average of the found
-    values is used.  In the future, the hope is to limit the considered data
-    to the "synoptic" observation at the top of the hour, but we are not there
-    yet.</p>
-
-    <p><strong>Change made 29 Aug 2018</strong>: The algorithm used here was
-    updated to use greater than or equal to the given threshold.  In the case
-    of wind chill, it is less than or equal to.</p>
-    """
+    desc = {"description": __doc__, "data": True}
     desc["arguments"] = [
         dict(
             type="zstation",
@@ -183,7 +179,7 @@ def plotter(fdict):
         else:
             df2 = df
         maxval = int(df2["feel"].max() + 1)
-        LEVELS[varname] = np.arange(80, maxval)
+        LEVELS[varname] = np.arange(maxval - 31, maxval)
     elif varname in ["windchill", "tmpf_cold", "dwpf_cold"]:
         legloc = 2
         if varname == "windchill":
@@ -288,7 +284,12 @@ def plotter(fdict):
 
 if __name__ == "__main__":
     plotter(
-        dict(
-            ytd="yes", network="UT_ASOS", zstation="SGU", var="dwpf", inc="yes"
-        )
+        {
+            "ytd": "yes",
+            "network": "IA_ASOS",
+            "zstation": "DSM",
+            "var": "heatindex",
+            "inc": "yes",
+            "year": 2016,
+        }
     )

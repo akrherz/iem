@@ -326,7 +326,7 @@ def add_zeros(df, ctx):
                 )
     if newrows:
         df = pd.concat(
-            [df, GeoDataFrame(newrows, geometry="geo")],
+            [df, GeoDataFrame(newrows, geometry="geo", crs=EPSG[2163])],
             ignore_index=True,
             sort=False,
         )

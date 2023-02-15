@@ -44,7 +44,7 @@ def get_df(year, sts, topic):
             LOG.debug("Got status_code=400 (no data) %s", req.url)
         else:
             LOG.warning("Got status_code %s %s", req.status_code, req.url)
-        return
+        return None
     data = req.json()
     return pd.DataFrame(data["data"])
 

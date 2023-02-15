@@ -50,18 +50,16 @@ def run(ctx, start_response):
     common = "at time zone 'UTC', 'YYYYMMDDHH24MI'"
     schema = {
         "geometry": "MultiPolygon",
-        "properties": dict(
-            [
-                ("ISSUE", "str:12"),
-                ("EXPIRE", "str:12"),
-                ("PRODISS", "str:12"),
-                ("TYPE", "str:1"),
-                ("DAY", "int"),
-                ("THRESHOLD", "str:4"),
-                ("CATEGORY", "str:64"),
-                ("CYCLE", "int"),
-            ]
-        ),
+        "properties": {
+            "ISSUE": "str:12",
+            "EXPIRE": "str:12",
+            "PRODISS": "str:12",
+            "TYPE": "str:1",
+            "DAY": "int",
+            "THRESHOLD": "str:4",
+            "CATEGORY": "str:48",  # 43 as checked max, to save space
+            "CYCLE": "int",
+        },
     }
     with get_sqlalchemy_conn("postgis") as conn:
         df = gpd.read_postgis(

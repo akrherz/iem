@@ -28,7 +28,7 @@ for ($i = 0; $row = pg_fetch_assoc($rs); $i++) {
         $urltemplate = str_replace(
             "/mesonet/ARCHIVE",
             "https://mesonet.agron.iastate.edu/archive",
-            $row["filename_template"]
+            is_null($row["filename_template"]) ? "": $row["filename_template"]
         );
         $t->title = sprintf("RASTER info for %s", $rname);
     }

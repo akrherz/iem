@@ -18,7 +18,8 @@ def main():
     if not os.path.isfile(fn):
         sys.exit()
 
-    lines = open(fn, "r").readlines()
+    with open(fn, "r", encoding="ascii") as fh:
+        lines = fh.readlines()
     lastline = lines[-1]
     tokens = re.split(r"[\s+]+", lastline)
 

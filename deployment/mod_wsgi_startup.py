@@ -8,7 +8,10 @@ import warnings
 
 # These need set before importing matplotlib
 envpath = "/opt/miniconda3/envs/prod"
+# Since we are not sourcing the conda env, we need to set some things
 os.environ["PROJ_LIB"] = f"{envpath}/share/proj"
+# Don't want proj going out to download stuff
+os.environ["PROJ_NETWORK"] = "off"
 os.environ["MPLCONFIGDIR"] = "/var/cache/matplotlib"
 os.environ["CARTOPY_OFFLINE_SHARED"] = f"{envpath}/share/cartopy"
 
