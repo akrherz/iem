@@ -92,7 +92,7 @@ def run(mcursor, model, station, lon, lat, ts):
             station,
             model,
         )
-        return
+        return None
 
     table = f"model_gridpoint_{ts.year}"
     sql = (

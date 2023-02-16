@@ -49,8 +49,7 @@ def run(ctx, start_response):
         lon = float(ctx.get("lon", -91.99))
         lat = float(ctx.get("lat", 41.99))
         spatialsql = (
-            "ST_Distance(p.geom::geometry, "
-            f"ST_SetSRID(ST_Point({lon}, {lat}), "
+            f"ST_Distance(geom::geometry, ST_SetSRID(ST_Point({lon}, {lat}), "
             f"4326)) <= {distance} and "
         )
     else:
