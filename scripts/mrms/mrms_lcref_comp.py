@@ -29,9 +29,10 @@ def make_colorramp():
     # Black to remove, eventually
     c[0, :] = [0, 0, 0]
     i = 2
-    for line in open("gr2ae.txt").readlines():
-        c[i, :] = list(map(int, line.split()[-3:]))
-        i += 1
+    with open("gr2ae.txt", encoding="ascii") as fh:
+        for line in fh:
+            c[i, :] = list(map(int, line.split()[-3:]))
+            i += 1
     return tuple(c.ravel())
 
 
@@ -80,77 +81,83 @@ def do(now, realtime=False):
     # Create Image
     png = Image.fromarray(np.flipud(imgdata))
     png.putpalette(make_colorramp())
-    png.save("%s.png" % (tmpfn,))
+    png.save(f"{tmpfn}.png")
 
-    mrms.write_worldfile("%s.wld" % (tmpfn,))
+    mrms.write_worldfile(f"{tmpfn}.wld")
     # Inject WLD file
     prefix = "lcref"
     routes = "ac" if realtime else "a"
-    pqstr = (
-        "pqinsert -i -p 'plot %s %s "
-        "gis/images/4326/mrms/%s.wld GIS/mrms/%s_%s.wld wld' %s.wld"
-    ) % (
-        routes,
-        now.strftime("%Y%m%d%H%M"),
-        prefix,
-        prefix,
-        now.strftime("%Y%m%d%H%M"),
-        tmpfn,
-    )
-    LOG.debug(pqstr)
-    subprocess.call(pqstr, shell=True)
+    pqstr = [
+        "pqinsert",
+        "-i",
+        "-p",
+        (
+            f"plot {routes} {now:%Y%m%d%H%M} gis/images/4326/mrms/{prefix}.wld"
+            f" GIS/mrms/{prefix}_{now:%Y%m%d%H%M}.wld wld"
+        ),
+        f"{tmpfn}.wld",
+    ]
+    LOG.info(" ".join(pqstr))
+    subprocess.call(pqstr)
     # Now we inject into LDM
-    pqstr = (
-        "pqinsert -i -p 'plot %s %s "
-        "gis/images/4326/mrms/%s.png GIS/mrms/%s_%s.png png' %s.png"
-    ) % (
-        routes,
-        now.strftime("%Y%m%d%H%M"),
-        prefix,
-        prefix,
-        now.strftime("%Y%m%d%H%M"),
-        tmpfn,
-    )
-    LOG.debug(pqstr)
-    subprocess.call(pqstr, shell=True)
+    pqstr = [
+        "pqinsert",
+        "-i",
+        "-p",
+        (
+            f"plot {routes} {now:%Y%m%d%H%M} gis/images/4326/mrms/{prefix}.png"
+            f" GIS/mrms/{prefix}_{now::%Y%m%d%H%M}.png png"
+        ),
+        f"{tmpfn}.png",
+    ]
+    LOG.info(" ".join(pqstr))
+    subprocess.call(pqstr)
     # Create 3857 image
-    cmd = (
-        "gdalwarp -s_srs EPSG:4326 -t_srs EPSG:3857 -q -of GTiff "
-        "-tr 1000.0 1000.0 %s.png %s.tif"
-    ) % (tmpfn, tmpfn)
-    subprocess.call(cmd, shell=True)
+    cmd = [
+        "gdalwarp",
+        "-s_srs",
+        "EPSG:4326",
+        "-t_srs",
+        "EPSG:3857",
+        "-q",
+        "-of",
+        "GTiff",
+        "-tr",
+        "1000.0",
+        "1000.0",
+        f"{tmpfn}.png",
+        f"{tmpfn}.tif",
+    ]
+    subprocess.call(cmd)
     # Insert into LDM
-    pqstr = (
-        "pqinsert -i -p 'plot c %s "
-        "gis/images/3857/mrms/%s.tif GIS/mrms/%s_%s.tif tif' %s.tif"
-    ) % (
-        now.strftime("%Y%m%d%H%M"),
-        prefix,
-        prefix,
-        now.strftime("%Y%m%d%H%M"),
-        tmpfn,
-    )
+    pqstr = [
+        "pqinsert",
+        "-i",
+        "-p",
+        (
+            f"plot c {now:%Y%m%d%H%M} gis/images/3857/mrms/{prefix}.tif "
+            f"GIS/mrms/{prefix}_{now:%Y%m%d%H%M}.tif tif"
+        ),
+        f"{tmpfn}.tif",
+    ]
     if realtime:
-        LOG.debug(pqstr)
-        subprocess.call(pqstr, shell=True)
+        subprocess.call(pqstr)
 
-    with open("%s.json" % (tmpfn,), "w") as fh:
-        fh.write(json.dumps(dict(meta=metadata)))
+    with open(f"{tmpfn}.json", "w", encoding="ascii") as fh:
+        json.dump({"meta": metadata}, fh)
 
     # Insert into LDM
-    pqstr = (
-        "pqinsert -p 'plot c %s "
-        "gis/images/4326/mrms/%s.json GIS/mrms/%s_%s.json json' %s.json"
-    ) % (
-        now.strftime("%Y%m%d%H%M"),
-        prefix,
-        prefix,
-        now.strftime("%Y%m%d%H%M"),
-        tmpfn,
-    )
+    pqstr = [
+        "pqinsert",
+        "-p",
+        (
+            f"plot c {now:%Y%m%d%H%M} gis/images/4326/mrms/{prefix}.json "
+            f"GIS/mrms/{prefix}_{now:%Y%m%d%H%M}.json json"
+        ),
+        f"{tmpfn}.json",
+    ]
     if realtime:
-        LOG.debug(pqstr)
-        subprocess.call(pqstr, shell=True)
+        subprocess.call(pqstr)
 
     for suffix in ["tif", "json", "png", "wld"]:
         os.unlink(f"{tmpfn}.{suffix}")
