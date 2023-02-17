@@ -37,7 +37,66 @@ $y2 = yearSelect2(1928, date("Y"), "year2");
 $m2 = monthSelect(date("m"), "month2");
 $d2 = daySelect2(date("d"), "day2");
 
+$ar = Array(
+    "None" => "Text string 'None'",
+    "M" => "M",
+    "blank" => "Empty string (blank)",
+);
+$naselect = make_select("na", "blank", $ar);
+
+$ar = Array(
+    "csv" => "Comma Seperated (csv)",
+    "excel" => "Excel (xlsx)",
+    "json" => "JSON",
+);
+$fmtselect = make_select("format", "csv", $ar);
+
+
+$vars = array(
+    "max_temp_f" => "Maximum Air Temperature [F].",
+    "min_temp_f" => "Minimum Air Temperature [F].",
+    "max_dewpoint_f" => "Maximum Dew Point [F].",
+    "min_dewpoint_f" => "Minimum Dew Point [F].",
+    "precip_in" => "Daily Precipitation [inch].",
+    "avg_wind_speed_kts" => "Average Wind Speed [knots]",
+    "avg_wind_drct" => "Average Wind Direction [deg]",
+    "min_rh" => "Minimum Relative Humidity [%]",
+    "avg_rh" => "Average Relative Humidity [%]: computed by time averaging the available reports, it is not average of the daily max/min.",
+    "max_rh" => "Maximum Relative Humidity [%]",
+    "climo_high_f" => "NCEI 1991-2020 Daily High Temperature Climatology [F]",
+    "climo_low_f" => "NCEI 1991-2020 Daily Low Temperature Climatology [F]",
+    "climo_precip_in" => "NCEI 1991-2020 Daily Precipitation Climatology [inch]",
+    "snow_in" => "Reported Snowfall [inch]",
+    "snowd_in" => "Reported Snow Depth [inch]",
+    "min_feel" => "Minimum 'Feels Like' (either wind chill or heat index) temperature.  The value is always at least the air temperature.",
+    "avg_feel" => "Average 'Feels Like' (either wind chill or heat index) temperature.  The value is always at least the air temperature. Value is a time weighted average.",
+    "max_feel" => "Maximum 'Feels Like' (either wind chill or heat index) temperature.  The value is always at least the air temperature.",
+    "max_wind_speed_kts" => "Maximum sustained wind speed in knots.",
+    "max_wind_gust_kts" => "Maximum wind gust in knots.",
+    "srad_mj" => "Daily Solar Radiation MJ/m2 (when available).",
+);
+$varform = "";
+foreach($vars as $key => $val){
+    $varform .= sprintf(
+        '<br /><label for="%s" class="checkbox-inline"><input type="checkbox" name="var" value="%s" id="%s" class="sq-form-field" > '.
+        '[%s] %s</label>'. "\n",
+        $key, $key, $key, $key, $val,
+    );
+}
+
+
 $t->content = <<<EOF
+<style>
+label {
+    font-weight: normal !important;
+    margin-bottom: 5px;
+    display:inline-block;
+}
+input {
+    display:inline-block;
+}
+</style>
+
 <h3>IEM Computed Daily Summary of Observations</h3>
         
 <p>This page allows you to download the IEM computed daily summary of whatever
@@ -61,6 +120,8 @@ $t->content = <<<EOF
 
 <div id="iemss" data-network="{$network}"></div>
 
+</div><div class="col-md-6 col-sm-6">
+
 <h4>Select inclusive date period:</h4>
 <table class="table table-striped">
   <tr>
@@ -71,7 +132,7 @@ $t->content = <<<EOF
   <tr>
     <th>Start:</th>
     <td>{$y1}</td><td>{$m1}</td><td>{$d1}</td>
-        </tr>
+  </tr>
 
   <tr>
     <th>End:</th>
@@ -79,44 +140,23 @@ $t->content = <<<EOF
   </tr>
 </table>
 
-            </div>
-            <div class="col-md-6 col-sm-6">
+<h4>Select from available daily variables</h4>
 
-    <p><strong>Note</strong>: Values of 0.0001 inches are Trace Reports</p>
+<p><strong>Note</strong>: Values of 0.0001 inches are Trace Reports</p>
 
-<dl class="dl-horizontal">
- <dt>station</dt><dd>Common identifier for the station.</dd>
- <dt>day</dt><dd>Calendar date of the summary.</dd>
- <dt>max_temp_f</dt><dd>Maximum Air Temperature [F].</dd>
- <dt>min_temp_f</dt><dd>Minimum Air Temperature [F].</dd>
- <dt>max_dewpoint_f</dt><dd>Maximum Dew Point [F].</dd>
- <dt>min_dewpoint_f</dt><dd>Minimum Dew Point [F].</dd>
- <dt>precip_in</dt><dd>Daily Precipitation [inch].</dd>
- <dt>avg_wind_speed_kts</dt><dd>Average Wind Speed [knots]</dd>
- <dt>avg_wind_drct</dt><dd>Average Wind Direction [deg]</dd>
- <dt>min_rh</dt><dd>Minimum Relative Humidity [%]</dd>
- <dt>avg_rh</dt><dd>Average Relative Humidity [%]: computed by time averaging
-  the available reports, it is not average of the daily max/min.</dd>
- <dt>max_rh</dt><dd>Maximum Relative Humidity [%]</dd>
- <dt>climo_high_f</dt><dd>NCEI 1991-2020 Daily High Temperature Climatology [F]</dd>
- <dt>climo_low_f</dt><dd>NCEI 1991-2020 Daily Low Temperature Climatology [F]</dd>
- <dt>climo_precip_in</dt><dd>NCEI 1991-2020 Daily Precipitation Climatology [inch]</dd>
- <dt>snow_in</dt><dd>Reported Snowfall [inch]</dd>
- <dt>snowd_in</dt><dd>Reported Snow Depth [inch]</dd>
- <dt>min_feel</dt><dd>Minimum "Feels Like" (either wind chill or heat index)
- temperature.  The value is always at least the air temperature.</dd>
- <dt>avg_feel</dt><dd>Average "Feels Like" (either wind chill or heat index)
- temperature.  The value is always at least the air temperature. Value is
- a time weighted average.</dd>
- <dt>max_feel</dt><dd>Maximum "Feels Like" (either wind chill or heat index)
- temperature.  The value is always at least the air temperature.</dd>
- <dt>max_wind_speed_kts</dt><dd>Maximum sustained wind speed in knots.</dd>
- <dt>max_wind_gust_kts</dt><dd>Maximum wind gust in knots.</dd>
- <dt>srad_mj</dt><dd>Daily Solar Radiation MJ/m2 (when available).</dd> 
-</dl>
+{$varform}
+
+<h4>How to represent missing values:</h4>
+
+{$naselect}
+
+<h4>Download Data Format:</h4>
+
+{$fmtselect}
+
+<p><input type="submit" value="Request Data"></p>
 
 </div></div>
-            <input type="submit" value="Request Data">
 </form>
 
 EOF;
