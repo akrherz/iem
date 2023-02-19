@@ -4,14 +4,14 @@ from io import StringIO, BytesIO
 import pandas as pd
 from paste.request import parse_formvars
 from sqlalchemy import text
-from pyiem.util import get_sqlalchemy_conn, utc
+from pyiem.util import get_sqlalchemy_conn, utc, LOG
 
 EXL = "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"
 
 
 def get_data(sts, ets, station, model, fmt):
     """Go fetch data please"""
-    model1 = model
+    model2 = model
     if model == "NAM":
         model2 = "ETA"
     if model == "GFS":
@@ -33,7 +33,7 @@ def get_data(sts, ets, station, model, fmt):
             params={
                 "sts": sts,
                 "ets": ets,
-                "model1": model1,
+                "model1": model,
                 "model2": model2,
                 "station": station,
             },
@@ -71,7 +71,8 @@ def application(environ, start_response):
     form = parse_formvars(environ)
     try:
         sts, ets = parse_dates(form)
-    except Exception:
+    except (ValueError, KeyError) as exp:
+        LOG.info(exp)
         start_response(
             "500 Internal Server Error", [("Content-type", "text/plain")]
         )
