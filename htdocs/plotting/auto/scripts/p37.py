@@ -146,6 +146,7 @@ def plot_others(varname, ax, mosdata, month1, month, obs):
         }
     )
     df["mos_delta"] = df[f"mos_max_{varname}"] - df[f"mos_min_{varname}"]
+    # TODO do mos_delta=0 get visibly plotted?
     if df[f"mos_min_{varname}"].isna().sum() == len(df.index):
         raise ValueError("No MOS data found for query.")
 
