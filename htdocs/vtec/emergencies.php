@@ -1,47 +1,29 @@
 <?php
 require_once "../../config/settings.inc.php";
 define("IEM_APPID", 120);
+$OL = "7.2.2";
+$JQUERYUI = "1.13.2";
 
 require_once "../../include/myview.php";
 require_once "../../include/vtec.php";
 require_once "../../include/forms.php";
 require_once "../../include/imagemaps.php";
 
-$uri = "http://iem.local/json/vtec_emergencies.py";
-$data = file_get_contents($uri);
-$json = json_decode($data, $assoc = TRUE);
-$table = "";
-foreach ($json['events'] as $key => $val) {
-    $table .= sprintf(
-        "<tr><td>%s</td><td>%s</td><td>%s</td>" .
-            "<td><a href=\"%s\">%s</a></td>" .
-            "<td>%s</td><td>%s</td><td>%s %s</td><td>%s</td><td>%s</td></tr>",
-        $val["year"],
-        $val["wfo"],
-        $val["states"],
-        $val["uri"],
-        $val["eventid"],
-        $val["phenomena"],
-        $val["significance"],
-        $vtec_phenomena[$val["phenomena"]],
-        $vtec_significance[$val["significance"]],
-        $val["issue"],
-        $val["expire"]
-    );
-}
-
 $t = new MyView();
 $t->title = "Tornado + Flash Flood Emergencies Listing";
 $t->headextra = <<<EOM
 <link type="text/css" href="/vendor/jquery-datatables/1.10.20/datatables.min.css" rel="stylesheet" />
+<link rel="stylesheet" href="/vendor/jquery-ui/{$JQUERYUI}/jquery-ui.min.css" />
+<link rel='stylesheet' href="/vendor/openlayers/{$OL}/ol.css" type='text/css'>
+<link type="text/css" href="/vendor/openlayers/{$OL}/ol-layerswitcher.css" rel="stylesheet" />
 EOM;
 $t->jsextra = <<<EOM
 <script src='/vendor/jquery-datatables/1.10.20/datatables.min.js'></script>
-<script>
-$('#makefancy').click(function(){
-    $("#thetable table").DataTable();
-});
-</script>
+<script src="/vendor/jquery-ui/{$JQUERYUI}/jquery-ui.js"></script>
+<script src="/vendor/moment/2.13.0/moment.min.js"></script>
+<script src='/vendor/openlayers/{$OL}/ol.js'></script>
+<script src='/vendor/openlayers/{$OL}/ol-layerswitcher.js'></script>
+<script src="emergencies.js"></script>
 EOM;
 
 
@@ -55,18 +37,16 @@ $t->content = <<<EOF
 <div class="alert alert-info">This page presents the current
 <strong>unofficial</strong> IEM
 accounting of Tornado and Flash Flood Emergencies issued by the NWS.  If you find
-any discrepancies, please <a href="/info/contacts.php">let us know</a>!  There is
-an hour of caching involved with this listing, so anything within the past hour
-may not immediately appear here.  You may wonder how events prior to the implementation
+any discrepancies, please <a href="/info/contacts.php">let us know</a>!
+ You may wonder how events prior to the implementation
 of VTEC have eventids.  These were retroactively generated and assigned by the IEM.
 </div>
 
 <p>Link to <a href="https://en.wikipedia.org/wiki/List_of_United_States_tornado_emergencies">Wikipedia List of United States tornado emergencies</a>.</p>
 
-<p>There is a <a href="/json/">JSON(P) webservice</a> that backends this table presentation, you can
+<p>There is a <a href="/api/1/docs#/vtec/service_nws_emergencies__fmt__get">IEM webservice</a> that backends this table presentation, you can
 directly access it here:
-<br /><code>https://mesonet.agron.iastate.edu/json/vtec_emergencies.py
-</code></p>
+<br /><code>https://mesonet.agron.iastate.edu/api/1/nws/emergencies.geojson</code></p>
 
 <p><strong>Related:</strong>
 <a class="btn btn-primary" href="/vtec/pds.php">PDS Warnings</a>
@@ -75,14 +55,26 @@ directly access it here:
 &nbsp;
 </p>
 
+<style>
+#map {
+    width: 100%;
+    height: 400px;
+}
+.popover {
+    min-width: 400px;
+}
+</style>
+<div id="map"></div>
+<div id="popup" class="ol-popup"></div>
+
 <p><button id="makefancy">Make Table Interactive</button></p>
 
 <div id="thetable">
 <table class="table table-striped table-condensed">
 <thead><tr><th>Year</th><th>WFO</th><th>State(s)</th><th>Event ID</th>
-<th>PH</th><th>SIG</th><th>Event</th><th>Issue</th><th>Expire</th></tr>
-</thead>		
-{$table}
+<th>Event</th><th>Issue</th><th>Expire</th></tr>
+</thead>
+<tbody></tbody>
 </table>
 </div>
 
