@@ -1,8 +1,11 @@
 """This chart displays the combination of
     Model Output Statistics (MOS) forecasts and actual observations
-    by the automated station the MOS forecast is for.  MOS is forecasting
-    high and low temperatures over 12 hours periods, so these values are not
-    actual calendar day high and low temperatures.
+    by the automated station the MOS forecast is for.
+
+<p>The case of ~Daily Max/Min Air Temperature is difficult to explain.  The
+NBS/NBE values are slightly different periods than the GFS/NAM values.  Some
+care is taken to attempt to properly align the MOS values to the observations
+and consider METAR 6-hour max/min temperatures when appropriate.</p>
 
 <p>The bars represent the ensemble of previously made forecasts valid for the
 given time.
@@ -30,7 +33,7 @@ PDICT = {
     "AVN": "AVN (1 Jun 2000 - 16 Dec 2003)",
 }
 PDICT2 = {
-    "t": "12 Hour Max/Min Air Temperature [F]",
+    "t": "~Daily Max/Min Air Temperature [F]",
     "tmp": "Air Temperature [F]",
     "dpt": "Dew Point Temperature [F]",
     "wsp": "10 meter Wind Speed [kts]",
@@ -40,6 +43,7 @@ LOOKUP = {
     "tmp": "tmpf",
     "wsp": "sknt",
 }
+# TODO this is hackishly letting my CDT/CST database get the dates right
 T_SQL = """
     SELECT date(ftime),
     min(case when
@@ -71,6 +75,36 @@ T_SQL_OB = """
     from alldata WHERE station = %s and valid between %s and %s
     GROUP by date
     """
+# Tricky business here
+# TODO Guam
+# Min is 0-18z reported at 12z
+# Max is 12-6z next day reported at 0z
+NBM_TXN_OB_SQL = """
+    WITH obs as (
+        SELECT
+        date_trunc('hour',
+            (valid + '10 minutes'::interval) at time zone 'UTC') as utc_valid,
+        tmpf, max_tmpf_6hr, min_tmpf_6hr from alldata WHERE station = %s
+        and valid between %s and %s and (extract(minute from valid) >= 50 or
+         extract(minute from valid) < 10) and report_type in (3, 4)
+    ), highs as (
+        select date(utc_valid - '6 hours'::interval),
+        max(greatest(tmpf,
+            case when extract(hour from utc_valid) in (18, 0, 6)
+            then max_tmpf_6hr else null end)) as high_0z
+        from obs WHERE extract(hour from utc_valid) > 12 or
+        extract(hour from utc_valid) <= 6 GROUP by date
+    ), lows as (
+        select date(utc_valid),
+        min(least(tmpf,
+            case when extract(hour from utc_valid) in (6, 12, 18)
+            then min_tmpf_6hr else null end)) as low_12z
+        from obs WHERE extract(hour from utc_valid) <= 18 GROUP by date
+    )
+    select h.date, l.low_12z, h.high_0z from highs h JOIN lows l on
+    (h.date = l.date) ORDER by date asc
+
+"""
 SQL_OB = """
     select date_trunc('hour',
     valid at time zone 'UTC' + '10 minutes'::interval) as datum,
@@ -175,7 +209,7 @@ def plot_others(varname, ax, mosdata, month1, month, obs):
     return df
 
 
-def plot_temps(ax, mosdata, month1, month, obs):
+def plot_temps(ax, mosdata, month1, month, obs, model):
     """Temp logic"""
     htop = []
     hbottom = []
@@ -213,6 +247,9 @@ def plot_temps(ax, mosdata, month1, month, obs):
     )
     df["high_delta"] = df["high_max"] - df["high_min"]
     df["low_delta"] = df["low_max"] - df["low_min"]
+    label = "Daytime High"
+    if model in ["NBE", "NBS"]:
+        label = "12z-6z High"
     ax.bar(
         df["valid"].dt.day + 0.1,
         df["high_delta"],
@@ -221,9 +258,12 @@ def plot_temps(ax, mosdata, month1, month, obs):
         bottom=df["high_min"],
         zorder=1,
         alpha=0.5,
-        label="Daytime High",
+        label=label,
         align="center",
     )
+    label = "Morning Low"
+    if model in ["NBE", "NBS"]:
+        label = "0z-18z Low"
     ax.bar(
         df["valid"].dt.day - 0.1,
         df["low_delta"],
@@ -232,7 +272,7 @@ def plot_temps(ax, mosdata, month1, month, obs):
         bottom=df["low_min"],
         zorder=1,
         alpha=0.3,
-        label="Morning Low",
+        label=label,
         align="center",
     )
 
@@ -305,10 +345,13 @@ def plotter(fdict):
             mosdata[row[0]] = [row[1], row[2]]
 
     # Go and figure out what the observations where for this month, tricky!
-    acursor.execute(
-        T_SQL_OB if is_temp else SQL_OB.replace("RPL", LOOKUP[ctx["var"]]),
-        (station, sts, ets),
-    )
+    if model in ["NBE", "NBS"] and is_temp:
+        acursor.execute(NBM_TXN_OB_SQL, (station, sts, ets))
+    else:
+        acursor.execute(
+            T_SQL_OB if is_temp else SQL_OB.replace("RPL", LOOKUP[ctx["var"]]),
+            (station, sts, ets),
+        )
 
     obs = {}
     for row in acursor:
@@ -328,7 +371,7 @@ def plotter(fdict):
     (fig, ax) = figure_axes(title=title, apctx=ctx)
 
     if is_temp:
-        df = plot_temps(ax, mosdata, month1, month, obs)
+        df = plot_temps(ax, mosdata, month1, month, obs, model)
     else:
         df = plot_others(ctx["var"], ax, mosdata, month1, month, obs)
     ax.set_xlabel(f"Day of {month1:%B %Y}")
