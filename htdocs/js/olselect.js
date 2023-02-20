@@ -5,14 +5,9 @@ let popup = null;
 let network = null;
 var ol = window.ol || {}; // skipcq: JS-0239
 
-function selectAllStations() {
-    $("#olstation").find('option').attr('selected', 'selected');
-}
-
 $(document).ready(() => {
     network = $("#map").data("network");
     if (network === null){
-        alert("network should not be null in this context!");
         return;
     }
 
@@ -29,7 +24,7 @@ $(document).ready(() => {
                     zIndex: zindex,
                     image: new ol.style.Circle({
                         fill: new ol.style.Fill({
-                            color: color
+                            color
                         }),
                         stroke: new ol.style.Stroke({
                             color: '#000000',
@@ -41,8 +36,8 @@ $(document).ready(() => {
             ];
         }
     });
-    vectorLayer.getSource().on('change', (e) => {
-        if (vectorLayer.getSource().getState() == 'ready') {
+    vectorLayer.getSource().on('change', (_e) => {
+        if (vectorLayer.getSource().getState() === 'ready') {
             map.getView().fit(
                 vectorLayer.getSource().getExtent(),
                 {
@@ -86,7 +81,7 @@ $(document).ready(() => {
     }).appendTo('#map');
     element = document.getElementById('mappopup');
     popup = new ol.Overlay({
-        element: element,
+        element,
         positioning: 'bottom-center',
         stopEvent: false
     });

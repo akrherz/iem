@@ -40,16 +40,9 @@ function load_data() {
             elayer.setSource(vectorSource);
             $.each(geodata.features, (_idx, feat) => {
                 const prop = feat.properties;
-                const lbl = (prop.phenomena == "TO") ? "Tornado" : "Flash Flood";
+                const lbl = (prop.phenomena === "TO") ? "Tornado" : "Flash Flood";
                 $('#thetable tbody').append(
-                    '<tr><td>' + prop.year + '</td>' +
-                    '<td>' + prop.wfo + '</td>' +
-                    '<td>' + prop.states + '</td>' +
-                    '<td><a href="' + prop.uri + '">' + prop.eventid + '</a></td>' +
-                    '<td>' + lbl + ' Warning</td>' +
-                    '<td>' + prop.utc_issue + '</td>' +
-                    '<td>' + prop.utc_expire + '</td>' +
-                    '</tr>');
+                    `<tr><td>${prop.year}</td><td>${prop.wfo}</td><td>${prop.states}</td><td><a href="${prop.uri}">${prop.eventid}</a></td><td>${lbl} Warning</td><td>${prop.utc_issue}</td><td>${prop.utc_expire}</td></tr>`);
             });
 
         }
@@ -63,7 +56,7 @@ function featureHTML(features, lalo) {
         '<div class="panel-body">'];
     $.each(features, (_i, feature) => {
         const dt = moment.utc(feature.get('utc_issue')).format('MMM Do, YYYY');
-        const lbl = (feature.get("phenomena") == "TO") ? "Tornado" : "Flash Flood";
+        const lbl = (feature.get("phenomena") === "TO") ? "Tornado" : "Flash Flood";
         html.push(
             `<strong>${dt}<strong> <a href="${feature.get('uri')}">${lbl} #${feature.get('eventid')}</a><br />`
         );
@@ -77,7 +70,7 @@ function init_map() {
         title: 'Emergencies',
         style: (feature, _resolution) => {
             sbwStyle[1].getStroke().setColor(sbwLookup[feature.get('phenomena')]);
-            sbwStyle[1].getFill().setColor(sbwLookup[feature.get('phenomena')] + "30");
+            sbwStyle[1].getFill().setColor(`${sbwLookup[feature.get('phenomena')]}30`);
             return sbwStyle;
         },
         source: new ol.source.Vector({
@@ -110,7 +103,7 @@ function init_map() {
 
     olmap.on('click', (evt) => {
         const features = [];
-        olmap.forEachFeatureAtPixel(evt.pixel, function (feature2) {
+        olmap.forEachFeatureAtPixel(evt.pixel, (feature2) => {
             features.push(feature2);
         });
         if (features.length > 0) {
@@ -131,7 +124,7 @@ function init_map() {
 
 }
 function init_ui() {
-    $('#makefancy').click(function () {
+    $('#makefancy').click(() => {
         $("#thetable table").DataTable();
     });
 }
