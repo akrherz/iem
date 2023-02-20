@@ -101,7 +101,7 @@ EOF;
     $t->jsextra = <<<EOF
 <script src="/vendor/openlayers/{$OL}/ol.js" type="text/javascript"></script>
 <script src='/vendor/openlayers/{$OL}/ol-layerswitcher.js'></script>
-<script src="/js/olselect.php?network={$network}"></script>
+<script src="/js/olselect.js"></script>
 <script src="/vendor/select2/4.0.3/select2.min.js"></script>
 <script type="text/javascript">
 $(document).ready(function(){
@@ -260,8 +260,7 @@ that have data up until today.  Yellow dots have data, but not for a period
 ending today.  Clicking on one of the dots will change the station select
 form above.</p>
 
-<div id="map"></div>
-
+<div id="map" data-network="{$network}"></div>
 
 <a name="ks"><h3 class="subtitle">"Kitchen Sink" Datafiles</h3></a>
 <div id="iem-form2">
