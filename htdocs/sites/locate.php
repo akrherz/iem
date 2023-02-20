@@ -1,5 +1,5 @@
 <?php
-$OL = "6.6.0";
+$OL = "7.2.2";
 /*
  * Main landing page for the IEM Sites stuff
  */
@@ -33,7 +33,7 @@ EOF;
 $t->jsextra = <<<EOF
 <script src="/vendor/openlayers/{$OL}/ol.js" type="text/javascript"></script>
 <script src='/vendor/openlayers/{$OL}/ol-layerswitcher.js'></script>
-<script src="/js/olselect.php?network={$network}"></script>
+<script src="/js/olselect.js"></script>
 <script src="/vendor/select2/4.0.3/select2.min.js"></script>
 <script type="text/javascript">
 $(document).ready(function(){
@@ -75,7 +75,7 @@ you may find useful.</p>
 stations that are no longer active.  Click on a dot to select a station, then click
 the 'Select Station' button above.</p>
 
-<div id="map" style="width:100%; height: 400px;"></div>
+<div id="map" style="width:100%; height: 400px;" data-network="{$network}"></div>
 
 </form>
 

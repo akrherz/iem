@@ -63,12 +63,12 @@ EOF;
   $t->jsextra = <<<EOF
 <script src="/vendor/openlayers/{$OL}/ol.js" type="text/javascript"></script>
 <script src='/vendor/openlayers/{$OL}/ol-layerswitcher.js'></script>
-<script src="/js/olselect.php?network={$network}"></script>
+<script src="/js/olselect.js"></script>
 <script src="/vendor/select2/4.0.3/select2.min.js"></script>
 <script type="text/javascript">
-$(document).ready(function(){
-    $(".iemselect2").select2();
-});
+  $(document).ready(function(){
+      $(".iemselect2").select2();
+  });
 </script>
 EOF;
 
@@ -103,7 +103,7 @@ if (is_null($station)){
         }
 </style>
 <i>Click on the dot to select your site:</i><br />
-<div id="map"></div>
+<div id="map" data-network="{$network}"></div>
 EOF;
 } else { 
     if (! $alone){
