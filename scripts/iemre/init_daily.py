@@ -7,7 +7,7 @@ import geopandas as gpd
 import numpy as np
 from pyiem import iemre
 from pyiem.grid.zs import CachingZonalStats
-from pyiem.util import get_dbconn, ncopen, logger
+from pyiem.util import get_sqlalchemy_conn, ncopen, logger
 
 LOG = logger()
 
@@ -22,7 +22,7 @@ def init_year(ts):
         LOG.info("cowardly refusing to overwrite: %s", fn)
         sys.exit()
     nc = ncopen(fn, "w")
-    nc.title = "IEM Daily Reanalysis %s" % (ts.year,)
+    nc.title = f"IEM Daily Reanalysis {ts.year}"
     nc.platform = "Grided Observations"
     nc.description = "IEM daily analysis on a 0.125 degree grid"
     nc.institution = "Iowa State University, Ames, IA, USA"
@@ -31,9 +31,7 @@ def init_year(ts):
     nc.realization = 1
     nc.Conventions = "CF-1.0"
     nc.contact = "Daryl Herzmann, akrherz@iastate.edu, 515-294-5978"
-    nc.history = ("%s Generated") % (
-        datetime.datetime.now().strftime("%d %B %Y"),
-    )
+    nc.history = f"{datetime.datetime.now():%d %B %Y} Generated"
     nc.comment = "No Comment at this time"
 
     # Setup Dimensions
@@ -58,7 +56,7 @@ def init_year(ts):
     lon[:] = iemre.XAXIS
 
     tm = nc.createVariable("time", float, ("time",))
-    tm.units = "Days since %s-01-01 00:00:0.0" % (ts.year,)
+    tm.units = f"Days since {ts.year}-01-01 00:00:0.0"
     tm.long_name = "Time"
     tm.standard_name = "time"
     tm.axis = "T"
@@ -196,13 +194,13 @@ def compute_hasdata(year):
     """Compute the has_data grid"""
     nc = ncopen(iemre.get_daily_ncname(year), "a", timeout=300)
     czs = CachingZonalStats(iemre.AFFINE)
-    pgconn = get_dbconn("postgis")
-    states = gpd.GeoDataFrame.from_postgis(
-        "SELECT the_geom, state_abbr from states",
-        pgconn,
-        index_col="state_abbr",
-        geom_col="the_geom",
-    )
+    with get_sqlalchemy_conn("postgis") as conn:
+        states = gpd.read_postgis(
+            "SELECT the_geom, state_abbr from states",
+            conn,
+            index_col="state_abbr",
+            geom_col="the_geom",
+        )
     data = np.flipud(nc.variables["hasdata"][:, :])
     czs.gen_stats(data, states["the_geom"])
     for nav in czs.gridnav:

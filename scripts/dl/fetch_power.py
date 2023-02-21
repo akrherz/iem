@@ -108,8 +108,13 @@ def main(argv):
         LOG.info("saving %s", date)
         iemre.set_grids(date, item["data"])
         subprocess.call(
-            f"python ../iemre/db_to_netcdf.py {date:%Y %m %d}",
-            shell=True,
+            [
+                "python",
+                "../iemre/db_to_netcdf.py",
+                f"{date:%Y}",
+                f"{date:%m}",
+                f"{date:%d}",
+            ]
         )
 
 

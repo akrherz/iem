@@ -4,12 +4,14 @@ require_once "../../../../config/settings.inc.php";
 require_once "../../../../include/iemmap.php";
 require_once "../../../../include/database.inc.php";
 require_once "../../../../include/network.php";
+require_once "../../../../include/forms.php";
 $dbconn = iemdb("isuag");
-$dvar = isset($_GET["dvar"]) ? $_GET["dvar"] : "rain_in_tot";
+$dvar = isset($_GET["dvar"]) ? xssafe($_GET["dvar"]) : "rain_in_tot";
 
-$title = Array(
-    "rain_in_tot" => "Rainfall (inches)", 
-    "dailyet" => "Potential Evapotrans. (in)");
+$title = array(
+    "rain_in_tot" => "Rainfall (inches)",
+    "dailyet" => "Potential Evapotrans. (in)"
+);
 if (!array_key_exists($dvar, $title)) die();
 
 $rs = pg_prepare($dbconn, "SELECT", "select station, sum({$dvar}_qc) as s,
@@ -21,12 +23,12 @@ $rs = pg_prepare($dbconn, "SELECT", "select station, sum({$dvar}_qc) as s,
 $nt = new NetworkTable("ISUSM");
 $ISUAGcities = $nt->table;
 
-$year = isset($_GET["year"]) ? $_GET["year"]: date("Y", time() - 86400 - (7 * 3600) );
-$month = isset($_GET["month"]) ? $_GET["month"]: date("m", time() - 86400 - (7 * 3600) );
-$day = isset($_GET["day"]) ? $_GET["day"]: date("d", time() - 86400 - (7 * 3600) );
-$date = isset($_GET["date"]) ? $_GET["date"]: $year ."-". $month ."-". $day;
+$year = get_int404("year", date("Y", time() - 86400 - (7 * 3600)));
+$month = get_int404("month", date("m", time() - 86400 - (7 * 3600)));
+$day = get_int404("day", date("d", time() - 86400 - (7 * 3600)));
+$date = isset($_GET["date"]) ? xssafe($_GET["date"]) : $year . "-" . $month . "-" . $day;
 
-$sts = mktime(0,0,0,$month,1,$year);
+$sts = mktime(0, 0, 0, $month, 1, $year);
 
 $myStations = $ISUAGcities;
 $height = 768;
@@ -34,7 +36,7 @@ $width = 1024;
 
 $map = new mapObj("../../../../data/gis/base26915.map");
 $map->setProjection("init=epsg:26915");
-$map->setsize($width,$height);
+$map->setsize($width, $height);
 $map->setextent(175000, 4440000, 775000, 4890000);
 
 $counties = $map->getLayerByName("counties");
@@ -61,50 +63,48 @@ $states->draw($map, $img);
 $iards->draw($map, $img);
 $bar640t->draw($map, $img);
 
-$rs = pg_execute($dbconn, "SELECT", Array($month, $year));
+$rs = pg_execute($dbconn, "SELECT", array($month, $year));
 $minvalid = null;
 $maxvalid = null;
-for ($i=0; $row = pg_fetch_assoc($rs); $i++) {
-  $key = $row["station"];
-  if ($key == "AMFI4" or $key == "AHTI4") continue;
+for ($i = 0; $row = pg_fetch_assoc($rs); $i++) {
+    $key = $row["station"];
+    if ($key == "AMFI4" or $key == "AHTI4") continue;
 
-  if (is_null($minvalid) || $row["min_valid"] < $minvalid){
-      $minvalid = $row["min_valid"];
-  }
-  if (is_null($maxvalid) || $row["max_valid"] > $maxvalid){
-    $maxvalid = $row["max_valid"];
-}
-    if ($dvar == "rain_in_tot"){
-        $val = round($row["s"],2);
-    } else {
-        $val = round($row["s"] / 25.4,2);
+    if (is_null($minvalid) || $row["min_valid"] < $minvalid) {
+        $minvalid = $row["min_valid"];
     }
-  $sdate = strtotime( $row["min"] );
-  $edate = strtotime( $row["max"] );
-  
-  // Red Dot... 
-  $pt = new pointObj();
-  $pt->setXY($ISUAGcities[$key]['lon'], $ISUAGcities[$key]['lat'], 0);
-  $pt->draw($map, $ponly, $img, 0, "");
+    if (is_null($maxvalid) || $row["max_valid"] > $maxvalid) {
+        $maxvalid = $row["max_valid"];
+    }
+    if ($dvar == "rain_in_tot") {
+        $val = round($row["s"], 2);
+    } else {
+        $val = round($row["s"] / 25.4, 2);
+    }
 
-  // Value UL
-  $pt = new pointObj();
-  $pt->setXY($ISUAGcities[$key]['lon'], $ISUAGcities[$key]['lat'], 0);
-  $pt->draw($map, $snet, $img, 0, $val);
+    // Red Dot... 
+    $pt = new pointObj();
+    $pt->setXY($ISUAGcities[$key]['lon'], $ISUAGcities[$key]['lat'], 0);
+    $pt->draw($map, $ponly, $img, 0, "");
 
-  // City Name
-  $pt = new pointObj();
-  $pt->setXY($ISUAGcities[$key]['lon'], $ISUAGcities[$key]['lat'], 0);
-  if ($key == "A131909" || $key == "A130209"){
-    $pt->draw($map, $snet, $img, 1, $ISUAGcities[$key]['plot_name'] );
-  } else {
-    $pt->draw($map, $snet, $img, 1, $ISUAGcities[$key]['plot_name'] );
-  }
+    // Value UL
+    $pt = new pointObj();
+    $pt->setXY($ISUAGcities[$key]['lon'], $ISUAGcities[$key]['lat'], 0);
+    $pt->draw($map, $snet, $img, 0, $val);
+
+    // City Name
+    $pt = new pointObj();
+    $pt->setXY($ISUAGcities[$key]['lon'], $ISUAGcities[$key]['lat'], 0);
+    if ($key == "A131909" || $key == "A130209") {
+        $pt->draw($map, $snet, $img, 1, $ISUAGcities[$key]['plot_name']);
+    } else {
+        $pt->draw($map, $snet, $img, 1, $ISUAGcities[$key]['plot_name']);
+    }
 }
 $minvalid = strtotime($minvalid);
 $maxvalid = strtotime($maxvalid);
-iemmap_title($map, $img, $title[$dvar] ." [ ".
-    date("d M", $minvalid) ." thru ". date("d M Y", $maxvalid) ." ]");
+iemmap_title($map, $img, $title[$dvar] . " [ " .
+    date("d M", $minvalid) . " thru " . date("d M Y", $maxvalid) . " ]");
 $map->drawLabelCache($img);
 
 header("Content-type: image/png");

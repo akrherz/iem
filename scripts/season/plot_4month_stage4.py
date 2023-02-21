@@ -9,7 +9,7 @@
 import datetime
 
 import numpy as np
-from pyiem.plot import MapPlot
+from pyiem.plot import MapPlot, get_cmap
 from pyiem import iemre
 from pyiem.util import ncopen
 
@@ -21,44 +21,47 @@ def main():
     sts = ets - datetime.timedelta(days=121)
 
     # Get the normal accumm
-    cnc = ncopen(iemre.get_dailyc_ncname(), "r")
-    lons = cnc.variables["lon"][:]
-    lats = cnc.variables["lat"][:]
-    index0 = iemre.daily_offset(sts)
-    index1 = iemre.daily_offset(ets)
-    if index1 < index0:  # Uh oh, we are spanning a year
-        clprecip = np.sum(cnc.variables["p01d"][:index1, :, :], 0)
-        clprecip = clprecip + np.sum(cnc.variables["p01d"][index0:, :, :], 0)
-    else:
-        clprecip = np.sum(cnc.variables["p01d"][index0:index1, :, :], 0)
-    cnc.close()
+    with ncopen(iemre.get_dailyc_ncname(), "r") as cnc:
+        lons = cnc.variables["lon"][:]
+        lats = cnc.variables["lat"][:]
+        index0 = iemre.daily_offset(sts)
+        index1 = iemre.daily_offset(ets)
+        if index1 < index0:  # Uh oh, we are spanning a year
+            clprecip = np.sum(cnc.variables["p01d"][:index1, :, :], 0)
+            clprecip = clprecip + np.sum(
+                cnc.variables["p01d"][index0:, :, :], 0
+            )
+        else:
+            clprecip = np.sum(cnc.variables["p01d"][index0:index1, :, :], 0)
 
     # Get the observed precip
     if sts.year != ets.year:  # spanner, darn
-        onc = ncopen(iemre.get_daily_ncname(sts.year))
-        obprecip = np.sum(onc.variables["p01d"][index0:, :, :], 0)
-        onc.close()
-        onc = ncopen(iemre.get_daily_ncname(ets.year))
-        obprecip = obprecip + np.sum(onc.variables["p01d"][:index1, :, :], 0)
-        onc.close()
+        with ncopen(iemre.get_daily_ncname(sts.year)) as onc:
+            obprecip = np.sum(onc.variables["p01d"][index0:, :, :], 0)
+        with ncopen(iemre.get_daily_ncname(ets.year)) as onc:
+            obprecip = obprecip + np.sum(
+                onc.variables["p01d"][:index1, :, :], 0
+            )
     else:
         ncfn = iemre.get_daily_ncname(sts.year)
-        onc = ncopen(ncfn, "r")
-        obprecip = np.sum(onc.variables["p01d"][index0:index1, :, :], 0)
-        onc.close()
+        with ncopen(ncfn, "r") as onc:
+            obprecip = np.sum(onc.variables["p01d"][index0:index1, :, :], 0)
 
     lons, lats = np.meshgrid(lons, lats)
 
     # Plot departure from normal
     mp = MapPlot(
         sector="midwest",
-        title=("Precipitation Departure %s - %s")
-        % (sts.strftime("%b %d %Y"), ets.strftime("%b %d %Y")),
+        title=f"Precipitation Departure {sts:%b %d %Y} - {ets:%b %d %Y}",
         subtitle="based on IEM Estimates",
     )
 
     mp.pcolormesh(
-        lons, lats, (obprecip - clprecip) / 25.4, np.arange(-10, 10, 1)
+        lons,
+        lats,
+        (obprecip - clprecip) / 25.4,
+        np.arange(-10, 10, 1),
+        cmap=get_cmap("RdBu"),
     )
     mp.postprocess(pqstr="plot c 000000000000 summary/4mon_diff.png bogus png")
     mp.close()
@@ -66,8 +69,7 @@ def main():
     # Plot normals
     mp = MapPlot(
         sector="midwest",
-        title=("Normal Precipitation:: %s - %s")
-        % (sts.strftime("%b %d %Y"), ets.strftime("%b %d %Y")),
+        title=f"Normal Precipitation:: {sts:%b %d %Y} - {ets:%b %d %Y}",
         subtitle="based on IEM Estimates",
     )
 
@@ -80,8 +82,7 @@ def main():
     # Plot Obs
     mp = MapPlot(
         sector="midwest",
-        title=("Estimated Precipitation:: %s - %s")
-        % (sts.strftime("%b %d %Y"), ets.strftime("%b %d %Y")),
+        title=f"Estimated Precipitation:: {sts:%b %d %Y} - {ets:%b %d %Y}",
         subtitle="based on IEM Estimates",
     )
 

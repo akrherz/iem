@@ -87,7 +87,7 @@ def fetch(valid):
     if len(offsets) != 13:
         LOG.info("warning, found %s gribs for %s", len(offsets), valid)
     for pr in offsets:
-        headers = {"Range": "bytes=%s-%s" % (pr[0], pr[1])}
+        headers = {"Range": f"bytes={pr[0]}-{pr[1]}"}
         req = exponential_backoff(
             requests.get, uri[:-4], headers=headers, timeout=30
         )
@@ -97,9 +97,7 @@ def fetch(valid):
         tmpfd = tempfile.NamedTemporaryFile(delete=False)
         tmpfd.write(req.content)
         tmpfd.close()
-        subprocess.call(
-            "pqinsert -p '%s' %s" % (pqstr, tmpfd.name), shell=True
-        )
+        subprocess.call(["pqinsert", "-p", pqstr, tmpfd.name])
         os.unlink(tmpfd.name)
 
 

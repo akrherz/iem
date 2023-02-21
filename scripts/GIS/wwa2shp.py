@@ -1,29 +1,26 @@
 """Something to dump current warnings to a shapefile."""
 import zipfile
 import os
-import shutil
 import subprocess
+import tempfile
 
 from osgeo import ogr
 from pyiem.util import utc
 
+PRJFILE = "/opt/iem/data/gis/meta/4326.prj"
+XMLFILE = "/opt/iem/scripts/GIS/current_ww.shp.xml"
 
-def main():
-    """Go Main Go"""
+
+def workflow():
+    """Do work."""
     utcnow = utc()
-
-    os.chdir("/tmp")
     fp = "current_ww"
-    for suffix in ["shp", "shx", "dbf"]:
-        if os.path.isfile("%s.%s" % (fp, suffix)):
-            os.remove("%s.%s" % (fp, suffix))
-
     source = ogr.Open(
         "PG:host=iemdb-postgis.local dbname=postgis gssencmode=disable"
     )
 
     out_driver = ogr.GetDriverByName("ESRI Shapefile")
-    out_ds = out_driver.CreateDataSource("%s.shp" % (fp,))
+    out_ds = out_driver.CreateDataSource(f"{fp}.shp")
     out_layer = out_ds.CreateLayer("polygon", None, ogr.wkbPolygon)
 
     fd = ogr.FieldDefn("ISSUED", ogr.OFTString)
@@ -81,7 +78,7 @@ def main():
     fd.SetWidth(5)
     out_layer.CreateField(fd)
 
-    sql = """
+    sql = f"""
      SELECT geom, 'P' as gtype, significance, wfo, status, eventid,
      null as ugc, phenomena,
      to_char(expire at time zone 'UTC', 'YYYYMMDDHH24MI') as utcexpire,
@@ -91,7 +88,8 @@ def main():
      to_char(init_expire at time zone 'UTC', 'YYYYMMDDHH24MI')
          as utc_init_expire,
      hvtec_nwsli
-     from sbw_%s WHERE polygon_begin <= '%s' and polygon_end > '%s'
+     from sbw_{utcnow.year} WHERE
+     polygon_begin <= '{utcnow}' and polygon_end > '{utcnow}'
 
     UNION
 
@@ -105,16 +103,9 @@ def main():
      to_char(init_expire at time zone 'UTC', 'YYYYMMDDHH24MI')
          as utc_init_expire,
      hvtec_nwsli
-     from warnings_%s w JOIN ugcs u on (u.gid = w.gid) WHERE
-     expire > '%s' and w.gid is not null
-
-    """ % (
-        utcnow.year,
-        utcnow,
-        utcnow,
-        utcnow.year,
-        utcnow,
-    )
+     from warnings_{utcnow.year} w JOIN ugcs u on (u.gid = w.gid) WHERE
+     expire > '{utcnow}' and w.gid is not null
+    """
 
     data = source.ExecuteSQL(sql)
 
@@ -151,24 +142,32 @@ def main():
     source.Destroy()
     out_ds.Destroy()
 
-    shutil.copy(
-        "/opt/iem/scripts/GIS/current_ww.shp.xml", "current_ww.shp.xml"
-    )
-    shutil.copy("/opt/iem/data/gis/meta/4326.prj", "current_ww.prj")
     with zipfile.ZipFile("current_ww.zip", "w", zipfile.ZIP_DEFLATED) as z:
         z.write("current_ww.shp")
-        z.write("current_ww.shp.xml")
+        with open(XMLFILE, encoding="ascii") as fh:
+            z.writestr("current_ww.shp.xml", fh.read())
         z.write("current_ww.shx")
         z.write("current_ww.dbf")
-        z.write("current_ww.prj")
+        with open(PRJFILE, encoding="ascii") as fh:
+            z.writestr("current_ww.prj", fh.read())
 
-    cmd = (
-        'pqinsert -p "zip c %s '
-        'gis/shape/4326/us/current_ww.zip bogus zip" current_ww.zip'
-    ) % (utcnow.strftime("%Y%m%d%H%M"),)
-    subprocess.call(cmd, shell=True)
-    for suffix in ["shp", "shp.xml", "shx", "dbf", "prj", "zip"]:
-        os.remove(f"current_ww.{suffix}")
+    cmd = [
+        "pqinsert",
+        "-p",
+        (
+            f"zip c {utcnow:%Y%m%d%H%M} gis/shape/4326/us/current_ww.zip "
+            "bogus zip"
+        ),
+        "current_ww.zip",
+    ]
+    subprocess.call(cmd)
+
+
+def main():
+    """Go Main Go"""
+    with tempfile.TemporaryDirectory() as tempdir:
+        os.chdir(tempdir)
+        workflow()
 
 
 if __name__ == "__main__":
