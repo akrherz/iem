@@ -38,47 +38,7 @@ $t->content = <<<EOF
 
 EOF;
 $t->jsextra = <<<EOF
-<script>
-var report = 'snowdepth';
-
-function fetch(){
-    $('#datatable tbody').empty();
-    $('#datatable tbody').append('<tr><th colspan="5">Querying server, one moment</th></tr>');
-    $.get('/geojson/recent_metar.py?q='+report).done(function(j){
-        $('#datatable tbody').empty();
-        for (var i=0; i < j.features.length; i++){
-            var feat = j.features[i];
-            var row = ['<tr>',
-                '<td>'+ feat.properties.station +'</td>',
-                '<td>'+ feat.properties.network +'</td>',
-                '<td>'+ feat.properties.valid +'</td>',
-                '<td>'+ feat.properties.value +'</td>',
-                '<td>'+ feat.properties.metar +'</td>',
-                '</tr>'];
-            $('#datatable tbody').append(row.join(''));
-        }
-        if (j.features.length == 0){
-            $('#datatable tbody').append('<tr><th colspan="5">No results were found, sorry!</th></tr>');
-        }
-    });
-}
-
-$( document ).ready(function() {
-    $("#report").change(function(){
-        //console.log("change() called...");
-        report = this.value;
-        window.location.href = '#'+report;
-        fetch();
-    });
-    
-    var tokens = window.location.href.split("#");
-    if (tokens.length == 2){
-        report = tokens[1];
-        $('#report').val(report);
-    }
-    fetch();
-});
-</script>
+<script src="recent.js"></script>
 EOF;
 
 $t->render('single.phtml');

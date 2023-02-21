@@ -8,8 +8,7 @@ import tempfile
 import pytz
 import numpy as np
 import pygrib
-import pyiem.mrms as mrms
-from pyiem import iemre
+from pyiem import iemre, mrms
 from pyiem.util import ncopen, utc, logger
 
 LOG = logger()
@@ -40,11 +39,9 @@ def run(ts):
             fn = mrms.fetch(prefix, gmtts)
             if fn is None:
                 continue
-            fp = gzip.GzipFile(fn, "rb")
             (_, gribfn) = tempfile.mkstemp()
-            tmpfp = open(gribfn, "wb")
-            tmpfp.write(fp.read())
-            tmpfp.close()
+            with gzip.GzipFile(fn, "rb") as zfn, open(gribfn, "wb") as tmpfp:
+                tmpfp.write(zfn.read())
             os.unlink(fn)
             break
         if gribfn is None:

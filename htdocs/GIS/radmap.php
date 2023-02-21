@@ -292,6 +292,7 @@ if ($sector == "wfo") {
 
 $utcnow = new DateTime('now', new DateTimeZone("UTC"));
 $ts = isset($_GET["ts"]) ? DateTime::createFromFormat("YmdHi", $_GET["ts"], new DateTimeZone("UTC")) : $utcnow;
+if (is_bool($ts)) xssafe("<script>");
 $ts1 = isset($_GET["ts1"]) ? DateTime::createFromFormat("YmdHi", $_GET["ts1"], new DateTimeZone("UTC")) : null;
 $ts2 = isset($_GET["ts2"]) ? DateTime::createFromFormat("YmdHi", $_GET["ts2"], new DateTimeZone("UTC")) : null;
 if (isset($dts) && !isset($_GET["ts"])) {

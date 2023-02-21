@@ -75,9 +75,9 @@ def process(ts):
             continue
         ftime = ts + datetime.timedelta(hours=fhour)
         fn = (
-            "/mesonet/ARCHIVE/data/%s/%02i/%02i/model/ndfd/%02i/"
-            "ndfd.t%02iz.awp2p5f%03i.grib2"
-        ) % (ts.year, ts.month, ts.day, ts.hour, ts.hour, fhour)
+            f"/mesonet/ARCHIVE/data/{ts:%Y/%m/%d}/model/ndfd/{ts:%H}/"
+            f"ndfd.t{ts:%H}z.awp2p5f{fhour:03.0f}.grib2"
+        )
         if not os.path.isfile(fn):
             LOG.warning("missing: %s", fn)
             continue

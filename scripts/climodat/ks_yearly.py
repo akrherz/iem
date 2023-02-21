@@ -11,37 +11,23 @@ cursor = pgconn.cursor(cursor_factory=psycopg2.extras.DictCursor)
 ENDYEAR = datetime.date.today().year
 
 
-def setupcsv():
-    """setup output file"""
-    out = open("/mesonet/share/climodat/ks/yearly.csv", "w")
-    out.write("stationID,stationName,Latitude,Longitude,")
-    for i in range(1893, ENDYEAR):
-        for v in ["MINT", "MAXT", "PREC", "GDD50", "SDD86"]:
-            out.write("%02i_%s," % (i, v))
-    out.write("CYR_MINT,CYR_MAXT,CYR_PREC,CYR_GDD50,CYR_SDD86,\n")
-    return out
-
-
 def metadata(nt, sid, csv):
     """write metadata"""
-    csv.write(
-        "%s,%s,%s,%s,"
-        % (sid, nt.sts[sid]["name"], nt.sts[sid]["lat"], nt.sts[sid]["lon"])
-    )
+    entry = nt.sts[sid]
+    csv.write(f"{sid},{entry['name']},{entry['lat']},{entry['lon']},")
 
 
 def process(sid, csv):
     """Process"""
-    table = "alldata_%s" % (sid[:2],)
     # Fetch Yearly Totals
     cursor.execute(
-        f"""
+        """
         SELECT year, round(avg(high)::numeric,1) as avg_high,
         round(avg(low)::numeric,1) as avg_low,
         round(sum(precip)::numeric,2) as rain,
         round(sum(gdd50(high, low))::numeric, 0) as gdd50,
         round(sum(sdd86(high, low))::numeric, 0) as sdd86
-        from {table}
+        from alldata
         WHERE station = %s GROUP by year ORDER by year ASC
     """,
         (sid,),
@@ -68,27 +54,22 @@ def process(sid, csv):
                 "oSDD": "M",
             }
         years += 1
+        entry = data[i]
         csv.write(
-            "%s,%s,%s,%s,%s,"
-            % (
-                data[i]["oLow"],
-                data[i]["oHigh"],
-                data[i]["oRain"],
-                data[i]["oGDD"],
-                data[i]["oSDD"],
-            )
+            f"{entry['oLow']},{entry['oHigh']},{entry['oRain']},"
+            f"{entry['oGDD']},{entry['oSDD']},"
         )
 
     # Need to do climate stuff
     # Then climate
     cursor.execute(
-        f"""
+        """
         SELECT round(avg(high)::numeric,1) as avg_high,
         round(avg(low)::numeric,1) as avg_low,
         sum(precip) as rain,
         sum(gdd50(high, low)) as gdd50,
         sum(sdd86(high, low)) as sdd86
-        from {table} WHERE station = %s
+        from alldata WHERE station = %s
     """,
         (sid,),
     )
@@ -96,16 +77,10 @@ def process(sid, csv):
     aHigh = row["avg_high"]
     aLow = row["avg_low"]
     aRain = row["rain"]
-    csv.write(
-        "%s,%s,%.2f,%.2f,%.2f,"
-        % (
-            aLow,
-            aHigh,
-            float(aRain) / float(years),
-            float(row["gdd50"]) / float(years),
-            float(row["sdd86"]) / float(years),
-        )
-    )
+    rr = float(aRain) / float(years)
+    gr = float(row["gdd50"]) / float(years)
+    sr = float(row["sdd86"]) / float(years)
+    csv.write(f"{aLow},{aHigh},{rr:.2f},{gr:.2f},{sr:.2f},")
 
     csv.write("\n")
     csv.flush()
@@ -114,12 +89,18 @@ def process(sid, csv):
 def main():
     """Go Main Go"""
     nt = NetworkTable("IACLIMATE")
-    csv = setupcsv()
     keys = list(nt.sts.keys())
     keys.sort()
-    for sid in keys:
-        metadata(nt, sid, csv)
-        process(sid, csv)
+    fn = "/mesonet/share/climodat/ks/yearly.csv"
+    with open(fn, "w", encoding="ascii") as fp:
+        fp.write("stationID,stationName,Latitude,Longitude,")
+        for i in range(1893, ENDYEAR):
+            for v in ["MINT", "MAXT", "PREC", "GDD50", "SDD86"]:
+                fp.write(f"{i:02.0f}_{v},")
+        fp.write("CYR_MINT,CYR_MAXT,CYR_PREC,CYR_GDD50,CYR_SDD86,\n")
+        for sid in keys:
+            metadata(nt, sid, fp)
+            process(sid, fp)
 
 
 if __name__ == "__main__":

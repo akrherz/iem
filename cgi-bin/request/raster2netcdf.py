@@ -10,9 +10,10 @@ import tempfile
 
 import numpy as np
 import pytz
+import netCDF4
 from PIL import Image
 from paste.request import parse_formvars
-from pyiem.util import get_dbconn, ncopen
+from pyiem.util import get_dbconn
 
 
 def get_gridinfo(filename, xpoints, ypoints):
@@ -56,7 +57,7 @@ def get_table(prod):
 def make_netcdf(xpoints, ypoints, lons, lats):
     """generate the netcdf file"""
     tmpobj = tempfile.NamedTemporaryFile(suffix=".nc", delete=False)
-    with ncopen(tmpobj.name, "w") as nc:
+    with netCDF4.Dataset(tmpobj.name, "w") as nc:
         nc.Conventions = "CF-1.6"
         nc.createDimension("lat", ypoints)
         nc.createDimension("lon", xpoints)
@@ -86,7 +87,7 @@ def do_work(valid, prod, start_response):
     lons, lats = get_gridinfo(fn, xpoints, ypoints)
     # create netcdf file
     tmpname = make_netcdf(xpoints, ypoints, lons, lats)
-    with ncopen(tmpname, "a") as nc:
+    with netCDF4.Dataset(tmpname, "a") as nc:
         # write data
         ncvar = nc.createVariable(
             prod, float, ("lat", "lon"), zlib=True, fill_value=1.0e20

@@ -64,8 +64,7 @@ def main(argv):
             with open(f"{TMPDIR}/{lfn}.gz", "wb") as fh:
                 fh.write(req.content)
             subprocess.call(
-                f"gunzip {TMPDIR}/{lfn}.gz",
-                shell=True,
+                ["gunzip", f"{TMPDIR}/{lfn}.gz"],
                 stderr=subprocess.PIPE,
             )
         added = 0
@@ -83,32 +82,33 @@ def main(argv):
             current.append(row[0].strftime("%Y%m%d%H%M"))
         acursor.close()
         # ignore any bad bytes, sigh
-        for line in open(f"{TMPDIR}/{lfn}", errors="ignore", encoding="utf-8"):
-            try:
-                data = ds3505.parser(line.strip(), faa, add_metar=True)
-            except Exception as exp:
-                print(f"failed to parse line: '{line.strip()}'")
-                print(exp)
-                data = None
-            if data is None:
-                bad += 1
-                continue
-            if data["valid"].strftime("%Y%m%d%H%M") in current:
-                skipped += 1
-                continue
-            textprod = mock.Mock()
-            textprod.valid = data["valid"]
-            textprod.utcnow = data["valid"]
-            mtr = to_metar(textprod, data["metar"])
-            to_iemaccess(
-                icursor,
-                mtr,
-                iemid,
-                tzname,
-                force_current_log=True,
-                skip_current=True,
-            )
-            added += 1
+        with open(f"{TMPDIR}/{lfn}", errors="ignore", encoding="utf-8") as fh:
+            for line in fh:
+                try:
+                    data = ds3505.parser(line.strip(), faa, add_metar=True)
+                except ValueError as exp:
+                    print(f"failed to parse line: '{line.strip()}'")
+                    print(exp)
+                    data = None
+                if data is None:
+                    bad += 1
+                    continue
+                if data["valid"].strftime("%Y%m%d%H%M") in current:
+                    skipped += 1
+                    continue
+                textprod = mock.Mock()
+                textprod.valid = data["valid"]
+                textprod.utcnow = data["valid"]
+                mtr = to_metar(textprod, data["metar"])
+                to_iemaccess(
+                    icursor,
+                    mtr,
+                    iemid,
+                    tzname,
+                    force_current_log=True,
+                    skip_current=True,
+                )
+                added += 1
         msgs.append(
             f"  {year}: {faa} added: {added} bad: {bad} skipped: {skipped}"
         )

@@ -1,4 +1,9 @@
-"""IEMRE trailing"""
+"""Using the gridded IEM ReAnalysis of daily
+    precipitation.  This chart presents the areal coverage of some trailing
+    number of days precipitation for a state of your choice.  This application
+    does not properly account for the trailing period of precipitation during
+    the first few days of January.  This application only works for CONUS
+    states eventhough it presents non-CONUS states as an option, sorry."""
 import datetime
 import os
 
@@ -15,16 +20,7 @@ from pyiem.exceptions import NoDataFound
 
 def get_description():
     """Return a dict describing how to call this plotter"""
-    desc = {}
-    desc["data"] = True
-    desc[
-        "description"
-    ] = """Using the gridded IEM ReAnalysis of daily
-    precipitation.  This chart presents the areal coverage of some trailing
-    number of days precipitation for a state of your choice.  This application
-    does not properly account for the trailing period of precipitation during
-    the first few days of January.  This application only works for CONUS
-    states eventhough it presents non-CONUS states as an option, sorry."""
+    desc = {"description": __doc__, "data": True}
     today = datetime.date.today()
     desc["arguments"] = [
         dict(
@@ -91,11 +87,8 @@ def plotter(fdict):
             raise ValueError("Application does not work for non-CONUS.")
 
         now = datetime.date(year, 1, 1)
-        now += datetime.timedelta(days=(period - 1))
-        ets = datetime.date(year, 12, 31)
-        today = datetime.date.today()
-        if ets > today:
-            ets = today
+        now += datetime.timedelta(days=period - 1)
+        ets = min(datetime.date.today(), datetime.date(year, 12, 31))
         days = []
         coverage = []
         while now <= ets:
@@ -107,7 +100,9 @@ def plotter(fdict):
             coverage.append(tots / float(datapts) * 100.0)
 
             now += datetime.timedelta(days=1)
-    df = pd.DataFrame(dict(day=pd.Series(days), coverage=pd.Series(coverage)))
+    df = pd.DataFrame(
+        {"day": pd.Series(days), "coverage": pd.Series(coverage)}
+    )
 
     title = (
         f"{year} IEM Estimated Areal "
