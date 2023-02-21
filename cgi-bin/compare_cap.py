@@ -1,14 +1,13 @@
 #!/usr/bin/env python
 """Do a comparison with what's on api.weather.gov/cap"""
 from io import StringIO
-import datetime
 
 import simplejson
 import requests
 import pandas as pd
 from pandas.io.sql import read_sql
 from pyiem.nws.vtec import parse as vtec_parse
-from pyiem.util import get_dbconn
+from pyiem.util import get_dbconn, utc
 
 CAP = "https://api.weather.gov/alerts/active"
 
@@ -17,28 +16,21 @@ def application(_environ, start_response):
     """Go Main Go"""
     sio = StringIO()
     start_response("200 OK", [("Content-type", "text/plain")])
-    sio.write(
-        "Report run at %s\n"
-        % (datetime.datetime.utcnow().strftime("%Y-%m-%dT%H:%M:%SZ"))
-    )
-    sio.write("Comparison against %s\n" % (CAP,))
+    sio.write(f"Report run at {utc():%Y-%m-%dT%H:%M:%SZ}\n")
+    sio.write(f"Comparison against {CAP}\n")
     try:
-        req = requests.get(CAP, headers={"Accept": "application/geo+json"})
+        req = requests.get(
+            CAP, headers={"Accept": "application/geo+json"}, timeout=30
+        )
         if req.status_code != 200:
-            sio.write(
-                "Download failed with status_code %s" % (req.status_code,)
-            )
+            sio.write(f"Download failed with status_code {req.status_code}")
         jdata = req.json()
     except requests.exceptions.BaseHTTPError as exp:
-        sio.write(
-            ("Failure to download %s, comparison failed" "%s\n") % (CAP, exp)
-        )
-        return
+        sio.write(f"Failure to download {CAP}, comparison failed {exp}\n")
+        return None
     except simplejson.errors.JSONDecodeError as exp:
-        sio.write(
-            ("Download %s had bad JSON %s" "%s\n") % (CAP, req.content, exp)
-        )
-        return
+        sio.write(f"Download {CAP} had bad JSON {req.content} {exp}\n")
+        return None
     rows = []
     for feature in jdata["features"]:
         props = feature["properties"]
@@ -78,14 +70,8 @@ def application(_environ, start_response):
         ]
         if df2.empty:
             sio.write(
-                ("IEM MISSING (%s %s %s %s %s)\n")
-                % (
-                    row["wfo"],
-                    row["phenomena"],
-                    row["significance"],
-                    row["eventid"],
-                    row["ugc"],
-                )
+                f"IEM MISSING ({row['wfo']} {row['phenomena']} "
+                f"{row['significance']} {row['eventid']} {row['ugc']})\n"
             )
 
     for _idx, row in iemdf.iterrows():
@@ -100,14 +86,8 @@ def application(_environ, start_response):
         ]
         if df2.empty:
             sio.write(
-                ("NWS MISSING (%s %s %s %s %s)\n")
-                % (
-                    row["wfo"],
-                    row["phenomena"],
-                    row["significance"],
-                    row["eventid"],
-                    row["ugc"],
-                )
+                f"NWS MISSING ({row['wfo']} {row['phenomena']} "
+                f"{row['significance']} {row['eventid']} {row['ugc']})\n"
             )
 
     sio.write("DONE...\n")

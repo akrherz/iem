@@ -15,27 +15,20 @@ def do_month(year, month, routes):
     ets = sts + datetime.timedelta(days=35)
     ets = ets.replace(day=1)
 
-    today = datetime.datetime.now()
-    if ets > today:
-        ets = today
+    ets = min(datetime.datetime.now(), ets)
 
     idx0 = iemre.daily_offset(sts)
     idx1 = iemre.daily_offset(ets)
 
-    nc = ncopen(iemre.get_daily_mrms_ncname(year), "r")
+    with ncopen(iemre.get_daily_mrms_ncname(year), "r") as nc:
+        lats = nc.variables["lat"][:]
+        lons = nc.variables["lon"][:]
+        p01d = mm2inch(np.sum(nc.variables["p01d"][idx0:idx1, :, :], 0))
 
-    lats = nc.variables["lat"][:]
-    lons = nc.variables["lon"][:]
-    p01d = mm2inch(np.sum(nc.variables["p01d"][idx0:idx1, :, :], 0))
-    nc.close()
-
+    dd = (ets - datetime.timedelta(days=1)).strftime("%-d %b %Y")
     mp = MapPlot(
         sector="iowa",
-        title="MRMS %s - %s Total Precipitation"
-        % (
-            sts.strftime("%-d %b"),
-            (ets - datetime.timedelta(days=1)).strftime("%-d %b %Y"),
-        ),
+        title=f"MRMS {sts:%-d %b} - {dd} Total Precipitation",
         subtitle="Data from NOAA MRMS Project",
     )
     x, y = np.meshgrid(lons, lats)
@@ -44,12 +37,7 @@ def do_month(year, month, routes):
     mp.drawcounties()
     currentfn = "summary/iowa_mrms_q3_month.png"
     archivefn = sts.strftime("%Y/%m/summary/iowa_mrms_q3_month.png")
-    pqstr = "plot %s %s00 %s %s png" % (
-        routes,
-        sts.strftime("%Y%m%d%H"),
-        currentfn,
-        archivefn,
-    )
+    pqstr = f"plot {routes} {sts:%Y%m%d%H}00 {currentfn} {archivefn} png"
     mp.postprocess(pqstr=pqstr)
 
 

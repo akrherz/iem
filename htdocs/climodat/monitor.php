@@ -40,7 +40,7 @@ if (isset($_GET['r'])) {
 // Prevent stations from appearing twice in the display
 $tmpst = array();
 foreach ($s as $k => $v) {
-    if (in_array($v, $tmpst)) {
+    if (in_array($v, $tmpst) || strlen($v) != 6) {
         unset($s[$k]);
     } else {
         $tmpst[] = $v;

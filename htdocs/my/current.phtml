@@ -110,7 +110,9 @@ foreach ($jobj["data"] as $bogus => $iemob) {
     $mydata[$value]["peak"] = 0;
     if ($mydata[$value]["max_gust"] > $mydata[$value]["max_sknt"]) {
         $mydata[$value]["peak"] = $mydata[$value]["max_gust"];
-        $mydata[$value]["peak_ts"] = strtotime($mydata[$value]["local_max_gust_ts"]);
+        if ($mydata[$value]["local_max_gust_ts"] > 0){
+            $mydata[$value]["peak_ts"] = strtotime($mydata[$value]["local_max_gust_ts"]);
+        }
     } else {
         $mydata[$value]["peak"] = $mydata[$value]["max_sknt"];
         if ($mydata[$value]["local_max_sknt_ts"] > 0) {

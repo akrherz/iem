@@ -36,22 +36,18 @@ def main():
     for row in ccursor:
         mrain[row[0]] = row[1]
 
+    dt = now.strftime("%d %b %Y").upper()
+    tmpfd.write(f"   VALID AT 7AM ON: {dt}\n\n")
     tmpfd.write(
-        "   VALID AT 7AM ON: %s\n\n" % (now.strftime("%d %b %Y").upper(),)
-    )
-    tmpfd.write(
-        "%-6s%-24s%10s%11s%10s\n"
-        % ("ID", "STATION", "PREC (IN)", "CLIMO4DATE", "DIFF")
+        f"{'ID':6s}{'STATION':24s}{'PREC (IN)':10s}"
+        f"{'CLIMO4DATE':11s}{'DIFF':10s}\n"
     )
 
-    queryStr = """
-        SELECT id,  pday  as prectot from summary_%s s
+    queryStr = f"""
+        SELECT id,  pday  as prectot from summary_{now.year} s
         JOIN stations t ON (t.iemid = s.iemid)
-        WHERE day = '%s' and t.network = 'IA_COOP' and pday >= 0
-    """ % (
-        now.year,
-        now.strftime("%Y-%m-%d"),
-    )
+        WHERE day = '{now:%Y-%m-%d}' and t.network = 'IA_COOP' and pday >= 0
+    """
 
     icursor.execute(queryStr)
 
@@ -70,23 +66,22 @@ def main():
     keys.sort()
 
     for k in keys:
+        item = d[k]
+        diff = item["prectot"] - item["crain"]
         tmpfd.write(
-            "%-6s%-24.24s%10.2f%11.2f%10.2f\n"
-            % (
-                k,
-                d[k]["name"],
-                d[k]["prectot"],
-                d[k]["crain"],
-                d[k]["prectot"] - d[k]["crain"],
-            )
+            f"{k:6s}{item['name']:24.24s}{item['prectot']:10.2f}"
+            f"{item['crain']:11.2f}{diff:10.2f}\n"
         )
 
     tmpfd.write(".END\n")
     tmpfd.close()
     subprocess.call(
-        ("pqinsert -p 'data c 000000000000 text/IEMNWSDPR.txt bogus txt' %s")
-        % (tmpfd.name,),
-        shell=True,
+        [
+            "pqinsert",
+            "-p",
+            "data c 000000000000 text/IEMNWSDPR.txt bogus txt",
+            tmpfd.name,
+        ]
     )
     os.unlink(tmpfd.name)
 

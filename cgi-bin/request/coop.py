@@ -60,10 +60,10 @@ def get_cgi_dates(form):
     m2 = int(form.get("month2", today.month))
     d2 = int(form.get("day2", today.day))
 
-    ets = sane_date(y2, m2, d2)
-    archive_end = datetime.date.today() - datetime.timedelta(days=1)
-    if ets > archive_end:
-        ets = archive_end
+    ets = min(
+        sane_date(y2, m2, d2),
+        datetime.date.today() - datetime.timedelta(days=1),
+    )
 
     return [sane_date(y1, m1, d1), ets]
 
@@ -136,12 +136,12 @@ def do_apsim(ctx):
     sio.write("! Iowa Environmental Mesonet -- NWS Cooperative Data\n")
     sio.write(f"! Created: {utc():%d %b %Y %H:%M:%S} UTC\n")
     sio.write("! Contact: daryl herzmann akrherz@iastate.edu 515-294-5978\n")
-    sio.write("! Station: %s %s\n" % (station, nt.sts[station]["name"]))
-    sio.write("! Data Period: %s - %s\n" % (ctx["sts"], ctx["ets"]))
+    sio.write(f"! Station: {station} {nt.sts[station]['name']}\n")
+    sio.write(f"! Data Period: {ctx['sts']} - {ctx['ets']}\n")
     if ctx["scenario"] == "yes":
         sio.write(
-            "! !SCENARIO DATA! inserted after: %s replicating year: %s\n"
-            % (ctx["ets"], ctx["scenario_year"])
+            f"! !SCENARIO DATA! inserted after: {ctx['ets']} "
+            f"replicating year: {ctx['scenario_year']}\n"
         )
 
     sio.write("[weather.met.weather]\n")
@@ -814,9 +814,9 @@ def application(environ, start_response):
             headers.append(("Content-type", "application/octet-stream"))
             dlfn = "changeme.txt"
             if len(ctx["stations"]) < 10:
-                dlfn = "%s.txt" % ("_".join(ctx["stations"]),)
+                dlfn = f"{'_'.join(ctx['stations'])}.txt"
             headers.append(
-                ("Content-Disposition", "attachment; filename=%s" % (dlfn,))
+                ("Content-Disposition", f"attachment; filename={dlfn}")
             )
         else:
             headers.append(("Content-type", "text/plain"))

@@ -29,7 +29,7 @@ def download(now, offset):
     for hr in hours:
         url = (
             "https://nomads.ncep.noaa.gov/pub/data/nccf/com/pcpanl/"
-            f"prod/pcpanl.{now:%Y%m%d}/st4_conus.{now:%Y%m%d%H}"
+            f"prod/pcpanl.{now:%Y%m%d}/st4_conus.{now:%Y%m%d%H}."
             f"{hr:02.0f}h.grb2"
         )
         LOG.info("fetching %s", url)
@@ -46,11 +46,12 @@ def download(now, offset):
             "pqinsert",
             "-p",
             (
-                f"data a {now:%Y%m%d%H%M} blah stage4/ST4.{now:%Y%m%d%H%M}."
+                f"data a {now:%Y%m%d%H%M} blah stage4/ST4.{now:%Y%m%d%H}."
                 f"{hr:02.0f}h.grib grib"
             ),
             "tmp.grib",
         ]
+        LOG.info(" ".join(cmd))
         subprocess.call(cmd)
 
 
