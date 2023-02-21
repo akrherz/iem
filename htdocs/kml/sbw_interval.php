@@ -3,8 +3,13 @@
 require_once "../../config/settings.inc.php";
 require_once "../../include/database.inc.php";
 require_once "../../include/vtec.php";
-$connect = iemdb("postgis");
 
+function nice_date($val){
+    if (is_null($val)) return "not available";
+    return gmdate('d M Y H:i', strtotime($val)) ." UTC";
+}
+
+$connect = iemdb("postgis");
 $has_error = false;
 $error_message = 'Unknown error occurred';
 $mywfos = array();
@@ -101,10 +106,10 @@ for ($i=0;$row=pg_fetch_array($result);$i++){
         <![CDATA[
   <p><font color=\"red\"><i>Polygon Size:</i></font> ". $row["psize"] ." sq km
   <br /><font color=\"red\"><i>Event ID:</i></font> $uri
-  <br /><font color=\"red\"><i>Issued:</i></font> ". gmdate('d M Y H:i', strtotime($row["issue"])) ." GMT
-  <br /><font color=\"red\"><i>Expires:</i></font> ". gmdate('d M Y H:i', strtotime($row["expire"])) ." GMT
-  <br /><font color=\"red\"><i>Polygon Begin:</i></font> ". gmdate('d M Y H:i', strtotime($row["polygon_begin"])) ." GMT
-  <br /><font color=\"red\"><i>Polygon End:</i></font> ". gmdate('d M Y H:i', strtotime($row["polygon_end"])) ." GMT
+  <br /><font color=\"red\"><i>Issued:</i></font> ". nice_date($row["issue"]) ."
+  <br /><font color=\"red\"><i>Expires:</i></font> ". nice_date($row["expire"]) ."
+  <br /><font color=\"red\"><i>Polygon Begin:</i></font> ". nice_date($row["polygon_begin"]) ."
+  <br /><font color=\"red\"><i>Polygon End:</i></font> ". nice_date($row["polygon_end"]) ."
   <br /><font color=\"red\"><i>Status:</i></font> ". $vtec_status[$row["status"]] ."
   <br /><font color=\"red\"><i>Hail Tag:</i></font> {$row["hailtag"]} IN
   <br /><font color=\"red\"><i>Wind Tag:</i></font> {$row["windtag"]} MPH

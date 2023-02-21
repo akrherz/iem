@@ -7,6 +7,7 @@ run from RUN_STAGE4.sh
 import datetime
 import os
 import subprocess
+import tempfile
 
 import requests
 from pyiem.util import exponential_backoff, logger, utc
@@ -26,14 +27,12 @@ def download(now, offset):
     if now.hour == 12:
         hours.append(24)
     for hr in hours:
-        url = "%s.%02ih.grb2" % (
-            now.strftime(
-                "https://nomads.ncep.noaa.gov/pub/data/nccf/com/pcpanl/"
-                "prod/pcpanl.%Y%m%d/st4_conus.%Y%m%d%H"
-            ),
-            hr,
+        url = (
+            "https://nomads.ncep.noaa.gov/pub/data/nccf/com/pcpanl/"
+            f"prod/pcpanl.{now:%Y%m%d}/st4_conus.{now:%Y%m%d%H}"
+            f"{hr:02.0f}h.grb2"
         )
-        LOG.debug("fetching %s", url)
+        LOG.info("fetching %s", url)
         response = exponential_backoff(requests.get, url, timeout=60)
         if response is None or response.status_code != 200:
             if offset > 23:
@@ -43,12 +42,16 @@ def download(now, offset):
         with open("tmp.grib", "wb") as fh:
             fh.write(response.content)
         # Inject into LDM
-        cmd = (
-            "pqinsert -p 'data a %s blah "
-            "stage4/ST4.%s.%02ih.grib grib' tmp.grib"
-        ) % (now.strftime("%Y%m%d%H%M"), now.strftime("%Y%m%d%H"), hr)
-        subprocess.call(cmd, shell=True)
-        os.remove("tmp.grib")
+        cmd = [
+            "pqinsert",
+            "-p",
+            (
+                f"data a {now:%Y%m%d%H%M} blah stage4/ST4.{now:%Y%m%d%H%M}."
+                f"{hr:02.0f}h.grib grib"
+            ),
+            "tmp.grib",
+        ]
+        subprocess.call(cmd)
 
 
 def main():
@@ -57,7 +60,9 @@ def main():
     utcnow = utc()
     utcnow = utcnow.replace(minute=0, second=0, microsecond=0)
     for offset in [33, 9, 3, 0]:
-        download(utcnow - datetime.timedelta(hours=offset), offset)
+        with tempfile.TemporaryDirectory() as tempdir:
+            os.chdir(tempdir)
+            download(utcnow - datetime.timedelta(hours=offset), offset)
 
 
 if __name__ == "__main__":

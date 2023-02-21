@@ -17,31 +17,34 @@ def do(ts):
     for hr in range(24):
         now = ts.replace(hour=hr, minute=0, second=0)
 
-        uri = now.strftime(
+        uri = (
             "https://nomads.ncep.noaa.gov/pub/data/nccf/com/nldas/"
-            "prod/nldas.%Y%m%d/nldas.t12z.force-a.grb2f"
-        ) + "%02i" % (hr,)
-
+            f"prod/nldas.{now:%Y%m%d}/nldas.t12z.force-a.grb2f{hr:02.0f}"
+        )
         try:
             req = exponential_backoff(requests.get, uri, timeout=60)
             if req is None or req.status_code != 200:
-                raise Exception(
-                    "status code is %s"
-                    % (0 if req is None else req.status_code,)
+                raise RuntimeError(
+                    f"status code is {0 if req is None else req.status_code}"
                 )
-        except Exception:
-            LOG.info("download failed for: %s", uri)
+        except Exception as exp:
+            LOG.warning("download failed for: %s, %s", uri, exp)
             continue
         tmpfd = tempfile.NamedTemporaryFile(delete=False)
         tmpfd.write(req.content)
         tmpfd.close()
 
-        cmd = (
-            "pqinsert -p 'data a %s bogus "
-            "model/nldas/nldas.t12z.force-a.grb2f%02i grib2' %s"
-        ) % (now.strftime("%Y%m%d%H%M"), hr, tmpfd.name)
-        LOG.debug(cmd)
-        subprocess.call(cmd, shell=True)
+        cmd = [
+            "pqinsert",
+            "-p",
+            (
+                f"data a {now:%Y%m%d%H%M} bogus "
+                f"model/nldas/nldas.t12z.force-a.grb2f{hr:02.0f} grib2"
+            ),
+            tmpfd.name,
+        ]
+        LOG.info(" ".join(cmd))
+        subprocess.call(cmd)
 
         os.remove(tmpfd.name)
 

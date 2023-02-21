@@ -7,7 +7,7 @@ require_once "../../include/forms.php";
 $network = isset($_GET["network"]) ? xssafe($_GET["network"]) : "KCCI"; 
 
 header("Content-Type: application/vnd.google-earth.kml+xml");
-echo <<<EOF
+echo <<<EOM
 <?xml version="1.0" encoding="UTF-8"?>
 <kml xmlns="http://www.opengis.net/kml/2.2">
  <Document>
@@ -22,7 +22,7 @@ echo <<<EOF
       <bgColor>ffffffff</bgColor>
     </BalloonStyle>
   </Style>
-EOF;
+EOM;
 
 $nt = new NetworkTable($network);
 

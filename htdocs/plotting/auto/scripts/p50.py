@@ -1,4 +1,9 @@
-"""IBW Tag Freq."""
+"""This app produces a table of frequencies of
+    wind and hail tags used in NWS Severe Thunderstorm Warnings. You have the
+    choice to only plot the issuance or use a computed max value over the
+    warning's lifecycle (including SVSs).  The maximum wind and hail tags
+    are computed independently over the lifecycle of the Severe Thunderstorm
+    Warning."""
 import datetime
 
 import pandas as pd
@@ -19,17 +24,7 @@ FONTSIZE = 12
 
 def get_description():
     """Return a dict describing how to call this plotter"""
-    desc = {}
-    desc["data"] = True
-    desc["cache"] = 300
-    desc[
-        "description"
-    ] = """This app produces a table of frequencies of
-    wind and hail tags used in NWS Severe Thunderstorm Warnings. You have the
-    choice to only plot the issuance or use a computed max value over the
-    warning's lifecycle (including SVSs).  The maximum wind and hail tags
-    are computed independently over the lifecycle of the Severe Thunderstorm
-    Warning."""
+    desc = {"description": __doc__, "data": True, "cache": 300}
     today = datetime.datetime.today() + datetime.timedelta(days=1)
 
     desc["arguments"] = [
@@ -95,8 +90,8 @@ def plotter(fdict):
     date2 = ctx.get(
         "date2", datetime.date.today() + datetime.timedelta(days=1)
     )
-    wfo_limiter = ("and wfo = '%s' ") % (
-        station if len(station) == 3 else station[1:],
+    wfo_limiter = (
+        f"and wfo = '{station if len(station) == 3 else station[1:]}' "
     )
     if station == "_ALL":
         wfo_limiter = ""
@@ -121,13 +116,14 @@ def plotter(fdict):
     args = (date1, date2)
     supextra = ""
     if opt == "wfo" and station != "_ALL":
-        supextra = "For warnings issued by %s %s.\n" % (
-            station,
-            ctx["_nt"].sts[station]["name"],
+        supextra = (
+            f"For warnings issued by {station} "
+            f"{ctx['_nt'].sts[station]['name']}.\n"
         )
     if opt == "state":
-        supextra = ("For warnings that covered some portion of %s.\n") % (
-            state_names[state],
+        supextra = (
+            "For warnings that covered some portion of "
+            f"{state_names[state]}.\n"
         )
 
         sql = f"""
@@ -171,7 +167,7 @@ def plotter(fdict):
         ax.text(
             x,
             y,
-            "%.2f" % (val,) if ctx["p"] == "percent" else row["count"],
+            f"{val:.2f}" if ctx["p"] == "percent" else row["count"],
             ha="center",
             fontsize=FONTSIZE,
             color="r" if val >= 10 else "k",
@@ -179,14 +175,14 @@ def plotter(fdict):
             bbox=dict(color="white", boxstyle="square,pad=0"),
         )
 
-    for hailtag, row in df.groupby("hailtag").sum().iterrows():
-        y = uniquehail.index(hailtag)
+    for htag, row in df.groupby("hailtag").sum(numeric_only=True).iterrows():
+        y = uniquehail.index(htag)
         x = len(uniquewind)
         val = row["count"] / total * 100.0
         ax.text(
             x,
             y,
-            "%.2f" % (val,) if ctx["p"] == "percent" else int(row["count"]),
+            f"{val:.2f}" if ctx["p"] == "percent" else int(row["count"]),
             ha="center",
             fontsize=FONTSIZE,
             color="r" if val >= 10 else "k",
@@ -194,14 +190,14 @@ def plotter(fdict):
             bbox=dict(color="white", boxstyle="square,pad=0"),
         )
 
-    for windtag, row in df.groupby("windtag").sum().iterrows():
+    for wtag, row in df.groupby("windtag").sum(numeric_only=True).iterrows():
         y = -1
-        x = uniquewind.index(windtag)
+        x = uniquewind.index(wtag)
         val = row["count"] / total * 100.0
         ax.text(
             x,
             y,
-            "%.2f" % (val,) if ctx["p"] == "percent" else int(row["count"]),
+            f"{val:.2f}" if ctx["p"] == "percent" else int(row["count"]),
             ha="center",
             fontsize=FONTSIZE,
             color="r" if val >= 10 else "k",
@@ -221,20 +217,11 @@ def plotter(fdict):
     ax.xaxis.set_label_position("top")
     plt.tick_params(top=False, bottom=False, left=False, right=False)
     fig.suptitle(
-        (
-            "%s of NWS Wind/Hail Tags for "
-            "Svr Tstorm Warn %s\n"
-            "%s through %s, %.0f warnings\n%s"
-            "Values larger than 10%% in red"
-        )
-        % (
-            PDICT2[ctx["p"]],
-            PDICT3[ctx["agg"]],
-            minvalid.strftime("%-d %b %Y"),
-            maxvalid.strftime("%-d %b %Y"),
-            df["count"].sum(),
-            supextra,
-        )
+        f"{PDICT2[ctx['p']]} of NWS Wind/Hail Tags for Svr Tstorm Warn "
+        f"{PDICT3[ctx['agg']]}\n"
+        f"{minvalid:%-d %b %Y} through {maxvalid:%-d %b %Y}, "
+        f"{df['count'].sum():.0f} warnings\n{supextra}"
+        "Values larger than 10% in red"
     )
     ax.set_position([0.12, 0.05, 0.86, 0.72])
 
