@@ -490,6 +490,9 @@ function initUI() {
     $("#lsrexcel").click(() => {
         window.location.href = `${getShapefileLink("lsr")}&fmt=excel`;
     });
+    $("#lsrkml").click(() => {
+        window.location.href = `${getShapefileLink("lsr")}&fmt=kml`;
+    });
     $("#warnshapefile").click(() => {
         window.location.href = getShapefileLink("watchwarn");
     });
