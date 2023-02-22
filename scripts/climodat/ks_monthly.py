@@ -15,39 +15,17 @@ pgconn = get_dbconn("coop")
 cursor = pgconn.cursor()
 
 
-def setup_csv(yr):
-    """Setup the output file"""
-    mydir = "/mesonet/share/climodat/ks"
-    if not os.path.isdir(mydir):
-        os.makedirs(mydir)
-    out = open(f"{mydir}/{yr}_monthly.csv", "w", encoding="utf-8")
-    out.write("stationID,stationName,Latitude,Longitude,")
-    for i in range(1, 13):
-        for v in ["MINT", "MAXT", "PREC", "GDD50", "SDD86"]:
-            out.write("%02i_%s,C%02i_%s," % (i, v, i, v))
-    out.write(
-        (
-            "%i_MINT,CYR_MINT,%i_MAXT,CYR_MAXT,%i_PREC,CYR_PREC,"
-            "%i_GDD50,CYR_GDD50,%i_SDD86,CYR_SDD86\n"
-        )
-        % (yr, yr, yr, yr, yr)
-    )
-    return out
-
-
 def metadata(sid, csv):
     """write metadata to csv file"""
-    csv.write(
-        "%s,%s,%s,%s,"
-        % (sid, nt.sts[sid]["name"], nt.sts[sid]["lat"], nt.sts[sid]["lon"])
-    )
+    entry = nt.sts[sid]
+    csv.write(f"{sid},{entry['name']},{entry['lat']},{entry['lon']},")
 
 
 def fmt(val):
     """Prettier."""
     if val is None or val == "M":
         return "M"
-    return "%.2f" % (val,)
+    return f"{val:.2f}"
 
 
 def process(sid, csv, yr):
@@ -113,19 +91,9 @@ def process(sid, csv, yr):
             osdd.append(float(obSDD))
 
         csv.write(
-            "%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,"
-            % (
-                fmt(obLow),
-                fmt(avgLow),
-                fmt(obHigh),
-                fmt(avgHigh),
-                fmt(obRain),
-                fmt(avgRain),
-                fmt(obGDD),
-                fmt(avgGDD),
-                fmt(obSDD),
-                fmt(avgSDD),
-            )
+            f"{fmt(obLow)},{fmt(avgLow)},{fmt(obHigh)},{fmt(avgHigh)},"
+            f"{fmt(obRain)},{fmt(avgRain)},{fmt(obGDD)},{fmt(avgGDD)},"
+            f"{fmt(obSDD)},{fmt(avgSDD)},"
         )
 
     low = np.average(ol)
@@ -139,19 +107,8 @@ def process(sid, csv, yr):
     avg_gdd = np.sum(agdd)
     avg_sdd = np.sum(asdd)
     csv.write(
-        "%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,"
-        % (
-            fmt(low),
-            fmt(avg_low),
-            fmt(high),
-            fmt(avg_high),
-            fmt(rain),
-            fmt(avg_rain),
-            fmt(gdd),
-            fmt(avg_gdd),
-            fmt(sdd),
-            fmt(avg_sdd),
-        )
+        f"{fmt(low)},{fmt(avg_low)},{fmt(high)},{fmt(avg_high)},{fmt(rain)},"
+        f"{fmt(avg_rain)},{fmt(gdd)},{fmt(avg_gdd)},{fmt(sdd)},{fmt(avg_sdd)},"
     )
 
     csv.write("\n")
@@ -160,10 +117,21 @@ def process(sid, csv, yr):
 
 def main(yr):
     """main !"""
-    csv = setup_csv(yr)
-    for sid in tqdm(nt.sts, disable=not sys.stdout.isatty()):
-        metadata(sid, csv)
-        process(sid, csv, yr)
+    mydir = "/mesonet/share/climodat/ks"
+    if not os.path.isdir(mydir):
+        os.makedirs(mydir)
+    with open(f"{mydir}/{yr}_monthly.csv", "w", encoding="utf-8") as fh:
+        fh.write("stationID,stationName,Latitude,Longitude,")
+        for i in range(1, 13):
+            for v in ["MINT", "MAXT", "PREC", "GDD50", "SDD86"]:
+                fh.write(f"{i:02.0f}_{v},C{i:02.0f}_{v},")
+        fh.write(
+            f"{yr}_MINT,CYR_MINT,{yr}_MAXT,CYR_MAXT,{yr}_PREC,CYR_PREC,"
+            f"{yr}_GDD50,CYR_GDD50,{yr}_SDD86,CYR_SDD86\n"
+        )
+        for sid in tqdm(nt.sts, disable=not sys.stdout.isatty()):
+            metadata(sid, fh)
+            process(sid, fh, yr)
 
 
 def frontend(argv):

@@ -19,7 +19,7 @@ $t->jsextra = <<<EOF
 <script src='/vendor/openlayers/{$OL}/ol-layerswitcher.js'></script>
 
 <script type="text/javascript" src="wfos.js"></script>
-<script type="text/javascript" src="static.js?v=4"></script>
+<script type="text/javascript" src="static.js?v=5"></script>
 <script>
 $(document).ready(function(){
     initUI(); // static.js
@@ -81,8 +81,9 @@ $tab2a = <<<EOM
 <br />
 <p>
 <strong>Tools:</strong> &nbsp;
-<button id="lsrshapefile" class="btn btn-primary" role="button">Download Shapefile</button>
-<button id="lsrexcel" class="btn btn-primary" role="button">Download Excel</button>
+<button id="lsrexcel" class="btn btn-primary" role="button"><i class="fa fa-download"></i> Excel</button>
+<button id="lsrkml" class="btn btn-primary" role="button"><i class="fa fa-download"></i> KML</button>
+<button id="lsrshapefile" class="btn btn-primary" role="button"><i class="fa fa-download"></i> Shapefile</button>
 <select name="lt" id="lsrtypefilter" class="form-control"></select>
 </p>
 

@@ -130,13 +130,13 @@ def do_day(valid):
     stsnowd = czs.gen_stats(np.flipud(snowd), climdiv["geom"])
 
     for i, iemid in enumerate(climdiv.index.values):
-        row = dict(
-            high=sthigh[i],
-            low=stlow[i],
-            precip=stprecip[i],
-            snow=stsnow[i],
-            snowd=stsnowd[i],
-        )
+        row = {
+            "high": sthigh[i],
+            "low": stlow[i],
+            "precip": stprecip[i],
+            "snow": stsnow[i],
+            "snowd": stsnowd[i],
+        }
         # we must have temperature data
         if row["high"] is np.ma.masked or row["low"] is np.ma.masked:
             LOG.warning("%s has missing temperature data, using state", iemid)

@@ -1,4 +1,17 @@
-"""Map of dates"""
+"""This app generates a map showing either an explicit year's first or last
+    date or the given percentile (observed
+    frequency) date over all available years of a given temperature threshold.
+    Sadly, this app can only plot one state's worth of data at a time.  If a
+    given year failed to meet the given threshold, it is not included on the
+    plot nor with the computed percentiles.
+
+    <br /><br />
+    <strong>Description of Observed Frequency:</strong> If requested, this
+    app will generate a plot showing the date of a given percentile for the
+    first/last temperature exceedance.  As a practical example of the 50th
+    percentile, the date plotted means that 50% of the previous years on
+    record experienced that temperature threshold by the given date.
+"""
 import datetime
 
 import numpy as np
@@ -36,25 +49,7 @@ ORDER = {"spring_below": "max", "fall_below": "min", "high_above": "min"}
 
 def get_description():
     """Return a dict describing how to call this plotter"""
-    desc = {}
-    desc["data"] = True
-    desc[
-        "description"
-    ] = """
-    This app generates a map showing either an explicit year's first or last
-    date or the given percentile (observed
-    frequency) date over all available years of a given temperature threshold.
-    Sadly, this app can only plot one state's worth of data at a time.  If a
-    given year failed to meet the given threshold, it is not included on the
-    plot nor with the computed percentiles.
-
-    <br /><br />
-    <strong>Description of Observed Frequency:</strong> If requested, this
-    app will generate a plot showing the date of a given percentile for the
-    first/last temperature exceedance.  As a practical example of the 50th
-    percentile, the date plotted means that 50% of the previous years on
-    record experienced that temperature threshold by the given date.
-    """
+    desc = {"description": __doc__, "data": True}
     today = datetime.datetime.today() - datetime.timedelta(days=1)
     desc["arguments"] = [
         dict(type="state", name="sector", default="IA", label="Select State:"),
@@ -188,7 +183,7 @@ def plotter(fdict):
         )
     if df.empty:
         raise NoDataFound("No data found")
-    df = df[~pd.isnull(df["event"])]
+    df = df[df["event"].notna()]
     df["doy"] = (df["event"] - df["min_day"]).dt.days
 
     basedate = datetime.date(2000, 7 if varname == "fall_below" else 1, 1)
@@ -202,11 +197,10 @@ def plotter(fdict):
                 "%-m/%-d"
             )
         )
-        title = r"%.0f%s Percentile Date of %s %s$^\circ$F" % (
-            ctx["p"],
-            th(str(ctx["p"])),
-            PDICT2[varname],
-            threshold,
+        title = (
+            f"{ctx['p']:.0f}{th(str(ctx['p']))} Percentile Date of "
+            f"{PDICT2[varname]} {threshold}"
+            r"$^\circ$F"
         )
         extra = (
             ", period of record: "
@@ -245,7 +239,7 @@ def plotter(fdict):
         df2.at[station, "lat"] = nt.sts[station]["lat"]
         df2.at[station, "lon"] = nt.sts[station]["lon"]
 
-    df2 = df2[~pd.isnull(df2["lat"])]
+    df2 = df2[df2["lat"].notna()]
     mp = MapPlot(
         apctx=ctx,
         sector="state",
@@ -255,7 +249,7 @@ def plotter(fdict):
         subtitle=f"based on NWS COOP and IEM Daily Estimates{extra}",
         nocaption=True,
     )
-    if ctx.get("sday") is not None:
+    if ctx.get("p") is None and ctx.get("sday") is not None:
         mp.contourf(
             df2["lon"],
             df2["lat"],
@@ -308,12 +302,15 @@ def plotter(fdict):
 
 if __name__ == "__main__":
     plotter(
-        dict(
-            sday="0928",
-            sector="IA",
-            threshold=32,
-            var="fall_below",
-            popt="contour",
-            year="2022",
-        )
+        {
+            "sector": "DC",
+            "var": "high_above",
+            "popt": "contour",
+            "year": 2022,
+            "threshold": 80,
+            "p": 70,
+            "sday": "0223",
+            "syear": 1893,
+            "eyear": 2022,
+        }
     )
