@@ -18,9 +18,8 @@ def main():
     ipgconn = get_dbconn("iem")
     icursor = ipgconn.cursor()
     icursor.execute(
-        """
-        select day, avg_sknt, avg_rh from summary where iemid = 37004
-        and day >= '1980-01-01' ORDER by day ASC"""
+        "select day, avg_sknt, avg_rh from summary where iemid = 37004 "
+        "and day >= '1980-01-01' ORDER by day ASC"
     )
     for row in icursor:
         if row[1] is None or row[2] is None:
@@ -38,31 +37,32 @@ def main():
             "DELETE from yieldfx_baseline where station = %s", (location,)
         )
         LOG.info("Removed %s rows for station: %s", cursor.rowcount, location)
-        for line in open(fn):
-            line = line.strip()
-            if not line.startswith("19") and not line.startswith("20"):
-                continue
-            tokens = line.split()
-            valid = datetime.date(int(tokens[0]), 1, 1) + datetime.timedelta(
-                days=int(tokens[1]) - 1
-            )
-            cursor.execute(
-                """
-            INSERT into yieldfx_baseline (station, valid,
-            radn, maxt, mint, rain, windspeed, rh)
-            VALUES (%s, %s, %s, %s, %s, %s, %s, %s)
-            """,
-                (
-                    location,
-                    valid,
-                    float(tokens[2]),
-                    float(tokens[3]),
-                    float(tokens[4]),
-                    float(tokens[5]),
-                    dsm[valid]["wind_speed"],
-                    dsm[valid]["avg_rh"],
-                ),
-            )
+        with open(fn, encoding="ascii") as fh:
+            for line in fh:
+                line = line.strip()
+                if not line.startswith("19") and not line.startswith("20"):
+                    continue
+                tokens = line.split()
+                valid = datetime.date(
+                    int(tokens[0]), 1, 1
+                ) + datetime.timedelta(days=int(tokens[1]) - 1)
+                cursor.execute(
+                    """
+                INSERT into yieldfx_baseline (station, valid,
+                radn, maxt, mint, rain, windspeed, rh)
+                VALUES (%s, %s, %s, %s, %s, %s, %s, %s)
+                """,
+                    (
+                        location,
+                        valid,
+                        float(tokens[2]),
+                        float(tokens[3]),
+                        float(tokens[4]),
+                        float(tokens[5]),
+                        dsm[valid]["wind_speed"],
+                        dsm[valid]["avg_rh"],
+                    ),
+                )
 
     cursor.close()
     pgconn.commit()

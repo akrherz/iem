@@ -606,7 +606,10 @@ mopts = [
         "id": 202,
         "label": "Hourly variable comparison between two hours on one day",
     },
-    {"id": 169, "label": "Largest Rise/Drop in Temperature over X Hours"},
+    {
+        "id": 169,
+        "label": "Largest Rise/Drop in Temperature / Dew Point over X Hours",
+    },
     {"id": 18, "label": "Long term observation time series"},
     {"id": 45, "label": "Monthly Frequency of Overcast Conditions"},
     {

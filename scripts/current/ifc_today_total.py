@@ -25,7 +25,7 @@ def doday(ts, realtime):
     if realtime:
         now = datetime.datetime.now() - datetime.timedelta(minutes=60)
         lastts = now.replace(minute=59)
-    subtitle = "Total between 12:00 AM and %s" % (lastts.strftime("%I:%M %p"),)
+    subtitle = f"Total between 12:00 AM and {lastts:%I:%M %p}"
     routes = "ac"
     if not realtime:
         routes = "a"
@@ -49,13 +49,11 @@ def doday(ts, realtime):
         10,
     ]
 
-    pqstr = ("plot %s %s00 iowa_ifc_1d.png iowa_ifc_1d.png png") % (
-        routes,
-        ts.strftime("%Y%m%d%H"),
+    pqstr = (
+        f"plot {routes} {ts:%Y%m%d%H}00 iowa_ifc_1d.png iowa_ifc_1d.png png"
     )
     mp = MapPlot(
-        title=("%s Iowa Flood Center Today's Precipitation")
-        % (ts.strftime("%-d %b %Y"),),
+        title=f"{ts:%-d %b %Y} Iowa Flood Center Today's Precipitation",
         subtitle=subtitle,
         sector="custom",
         west=xaxis[0],

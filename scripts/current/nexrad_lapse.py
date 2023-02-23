@@ -84,10 +84,17 @@ def run(sts, ets):
     )
 
     subprocess.call(
-        f"pqinsert -i -p 'data c {ets.strftime('%Y%m%d%H%M')} "
-        "lapse/iowa_nexrad.png lapse/iowa_nexrad.png "
-        f"{tmpname}' {tmpname}.png",
-        shell=True,
+        [
+            "pqinsert",
+            "-i",
+            "-p",
+            (
+                f"data c {ets.strftime('%Y%m%d%H%M')} lapse/iowa_nexrad.png "
+                "lapse/iowa_nexrad.png"
+            ),
+            tmpname,
+            f"{tmpname}.png",
+        ]
     )
     os.unlink(f"{tmpname}.png")
 

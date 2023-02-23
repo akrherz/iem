@@ -1,4 +1,28 @@
-"""x-hour temp change"""
+"""This chart presents the largest changes in
+    temperature over a given number of hours.  This is based on available
+    temperature reports.  There are two options for how to compute the
+    temperature change over a given window.</p>
+
+    <p><table class="table table-striped">
+    <thead><tr><th>Label</th><th>Description</th></tr></thead>
+    <tbody>
+    <tr><td>Compute at ends of time window</td><td>This requires an exact
+    match between the starting timestamp and ending timestamp of the given
+    window of time.  For example, computing a 12 hour change between exactly
+    6:53 AM and 6:53 PM.</td></tr>
+    <tr><td>Compute over time window</td><td>This is more forgiving and
+    considers the observation at the start of the window and then any
+    subsequent observation over the window of time.  The end of the
+    window is inclusive as well.</td></tr>
+    </tbody>
+    </table></p>
+
+    <p><strong>Note:</strong>  This app is very effective at finding bad data
+    points as the spark-line plot of the data for the given period will look
+    flakey.</p>
+
+    <p><a href="/plotting/auto/?q=139">Autoplot 139</a> is similar to this
+    plot, but only considers a calendar day.</p>"""
 from datetime import datetime, timedelta, date
 
 import pytz
@@ -32,41 +56,15 @@ PDICT = {
     "exact": "Compute at ends of time window",
     "over": "Compute over time window",
 }
+PDICT2 = {
+    "tmpf": "Air Temperature",
+    "dwpf": "Dew Point Temperature",
+}
 
 
 def get_description():
     """Return a dict describing how to call this plotter"""
-    desc = {}
-    desc["data"] = True
-    desc["cache"] = 86400
-    desc[
-        "description"
-    ] = """This chart presents the largest changes in
-    temperature over a given number of hours.  This is based on available
-    temperature reports.  There are two options for how to compute the
-    temperature change over a given window.</p>
-
-    <p><table class="table table-striped">
-    <thead><tr><th>Label</th><th>Description</th></tr></thead>
-    <tbody>
-    <tr><td>Compute at ends of time window</td><td>This requires an exact
-    match between the starting timestamp and ending timestamp of the given
-    window of time.  For example, computing a 12 hour change between exactly
-    6:53 AM and 6:53 PM.</td></tr>
-    <tr><td>Compute over time window</td><td>This is more forgiving and
-    considers the observation at the start of the window and then any
-    subsequent observation over the window of time.  The end of the
-    window is inclusive as well.</td></tr>
-    </tbody>
-    </table></p>
-
-    <p><strong>Note:</strong>  This app is very effective at finding bad data
-    points as the spark-line plot of the data for the given period will look
-    flakey.</p>
-
-    <p><a href="/plotting/auto/?q=139">Autoplot 139</a> is similar to this
-    plot, but only considers a calendar day.</p>
-    """
+    desc = {"description": __doc__, "data": True, "cache": 86400}
     desc["arguments"] = [
         dict(
             type="zstation",
@@ -75,6 +73,13 @@ def get_description():
             label="Select Station:",
             network="IA_ASOS",
         ),
+        {
+            "type": "select",
+            "options": PDICT2,
+            "default": "tmpf",
+            "label": "Select Variable",
+            "name": "v",
+        },
         dict(type="int", name="hours", label="Number of Hours:", default=24),
         dict(
             type="select",
@@ -101,10 +106,10 @@ def get_description():
     return desc
 
 
-def plot_event(ax, i, df):
+def plot_event(ax, i, df, varname):
     """plot date."""
-    df["norm"] = (df["tmpf"] - df["tmpf"].min()) / (
-        df["tmpf"].max() - df["tmpf"].min()
+    df["norm"] = (df[varname] - df[varname].min()) / (
+        df[varname].max() - df[varname].min()
     )
     sts = df.index[0].to_pydatetime()
     df["xnorm"] = [x.total_seconds() for x in (df.index.to_pydatetime() - sts)]
@@ -126,6 +131,9 @@ def plotter(fdict):
     hours = ctx["hours"]
     mydir = ctx["dir"]
     month = ctx["month"]
+    varname = ctx["v"]
+    if varname not in PDICT2:
+        raise NoDataFound("Invalid varname")
 
     if month == "all":
         months = range(1, 13)
@@ -152,9 +160,10 @@ def plotter(fdict):
     with get_sqlalchemy_conn("asos") as conn:
         df = pd.read_sql(
             text(
-                """
-            SELECT valid at time zone 'UTC' as utc_valid, tmpf from alldata
-            where station = :station and tmpf between -100 and 150
+                f"""
+            SELECT valid at time zone 'UTC' as utc_valid, {varname}
+            from alldata
+            where station = :station and {varname} between -100 and 150
             ORDER by valid desc
         """
             ),
@@ -172,8 +181,8 @@ def plotter(fdict):
         df = df[df["month"].isin(months)]
 
     # Create offset for exact aggregate
-    deltacol = "tmpf_max" if ctx["dir"] == "warm" else "tmpf_min"
-    compcol = "tmpf_min" if ctx["dir"] == "warm" else "tmpf_max"
+    deltacol = f"{varname}_max" if ctx["dir"] == "warm" else f"{varname}_min"
+    compcol = f"{varname}_min" if ctx["dir"] == "warm" else f"{varname}_max"
     if ctx["how"] == "exact":
         df = df.reset_index()
         # Create timestamp to look for second tmpf value
@@ -187,14 +196,14 @@ def plotter(fdict):
                 suffixes=("", "2"),
             )
             .drop(columns=["utc_valid2", "end_valid2"])
-            .rename(columns={"tmpf2": deltacol})
+            .rename(columns={f"{varname}2": deltacol})
             .set_index("utc_valid")
         )
         # Careful here that our delta is the right sign
         if ctx["dir"] == "warm":
-            df["delta"] = df[deltacol] - df["tmpf"]
+            df["delta"] = df[deltacol] - df[varname]
         else:
-            df["delta"] = df["tmpf"] - df[deltacol]
+            df["delta"] = df[varname] - df[deltacol]
         events = df.sort_values("delta", ascending=False).head(100).copy()
     else:  # "over"
         # Create aggregate
@@ -203,18 +212,19 @@ def plotter(fdict):
         df = df.join(gdf)
         if df.index[0] < df.index[-1]:
             df = df.iloc[::-1]
-        df["delta"] = (df["tmpf"] - df[deltacol]).abs()
+        df["delta"] = (df[varname] - df[deltacol]).abs()
         # Only consider cases when current val equals extremum
         events = (
-            df[df["tmpf"] == df[compcol]]
+            df[df[varname] == df[compcol]]
             .sort_values("delta", ascending=False)
             .head(100)
             .copy()
         )
 
     hlabel = "Over Exactly" if ctx["how"] == "exact" else "Within"
+    tt = PDICT2[varname].rsplit(" ", maxsplit=1)[0]
     title = (
-        f"{ctx['_sname']}:: Top 10 {MDICT[mydir]}\n"
+        f"{ctx['_sname']}:: Top 10 {tt} {MDICT[mydir]}\n"
         f"{hlabel} {hours} Hour Period ({ab.year}-{date.today().year}) "
         f"[{MDICT2[month]}]"
     )
@@ -243,7 +253,7 @@ def plotter(fdict):
         event = df.loc[ets:sts].iloc[::-1]
         if ctx["how"] == "over":
             # Need to figure out first row with the ob we want
-            entry = event[event["tmpf"] == row[deltacol]]
+            entry = event[event[varname] == row[deltacol]]
             ets = entry.index[0].to_pydatetime()
         else:
             ets -= timedelta(minutes=1)
@@ -256,12 +266,13 @@ def plotter(fdict):
         sts = sts.replace(tzinfo=pytz.UTC).astimezone(pytz.timezone(tzname))
         ets = ets.replace(tzinfo=pytz.UTC).astimezone(pytz.timezone(tzname))
         lbl = (
-            f"{row['tmpf']:.0f} to {row[deltacol]:.0f} -> {row['delta']:.0f}\n"
+            f"{row[varname]:.0f} to {row[deltacol]:.0f} -> "
+            f"{row['delta']:.0f}\n"
             f"{sts:%-d %b %Y %-I:%M %p} - {ets:%-d %b %Y %-I:%M %p}"
         )
         labels.append(lbl)
         ax.barh(len(labels), row["delta"], color="b", align="center")
-        plot_event(sparkax, 11 - len(labels), event.copy())
+        plot_event(sparkax, 11 - len(labels), event.copy(), varname)
 
     sparkax.set_ylim(1, 11)
     sparkax.axis("off")

@@ -30,38 +30,29 @@ def main():
         (sts,),
     )
 
-    files = {}
-    for wfo in WFOS:
-        files[wfo] = open("/tmp/%sRR3.txt" % (wfo,), "w")
-
     for row in acursor:
-        files[row[1]].write(row[0].replace("\001", ""))
-        files[row[1]].write("\n")
-
-    for wfo in WFOS:
-        files[wfo].close()
+        with open(f"/tmp/{row[1]}RR3.txt", "a", encoding="ascii") as fh:
+            fh.write(row[0].replace("\001", ""))
+            fh.write("\n")
 
     msg = MIMEMultipart()
-    msg["Subject"] = "NWS RR3 Data for %s - %s" % (
-        sts.strftime("%d %b %Y"),
-        now.strftime("%d %b %Y"),
-    )
+    msg["Subject"] = f"NWS RR3 Data for {sts:%d %b %Y} - {now:%d %b %Y}"
     msg["From"] = "akrherz@iastate.edu"
     msg["To"] = "justin.glisan@iowaagriculture.gov"
     msg.preamble = "RR3 Report"
 
-    fn = "RR3-%s-%s.txt" % (sts.strftime("%Y%m%d"), now.strftime("%Y%m%d"))
+    fn = f"RR3-{sts:%Y%m%d}-{now:%Y%m%d}.txt"
 
     for wfo in WFOS:
         b = MIMEBase("Text", "Plain")
-        with open("/tmp/%sRR3.txt" % (wfo,), "rb") as fp:
+        with open(f"/tmp/{wfo}RR3.txt", "rb") as fp:
             b.set_payload(fp.read())
         encoders.encode_base64(b)
         b.add_header(
-            "Content-Disposition", 'attachment; filename="%s-%s"' % (wfo, fn)
+            "Content-Disposition", f'attachment; filename="{wfo}-{fn}"'
         )
         msg.attach(b)
-        os.unlink("/tmp/%sRR3.txt" % (wfo,))
+        os.unlink(f"/tmp/{wfo}RR3.txt")
 
     # Send the email via our own SMTP server.
     s = smtplib.SMTP("mailhub.iastate.edu")
