@@ -53,7 +53,8 @@ def process(files):
     files.sort()
     content = {}
     for fn in files:
-        lines = open(fn, "rb").readlines()
+        with open(fn, "rb") as fh:
+            lines = fh.readlines()
         if len(lines) < 4:
             LOG.debug("fn: %s has %s lines, skipping", fn, len(lines))
             continue

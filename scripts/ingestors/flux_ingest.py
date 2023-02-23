@@ -173,12 +173,13 @@ def main():
             if not os.path.isfile(myfn):
                 LOG.info("missing file: %s", myfn)
                 continue
-            df = pd.read_csv(
-                open(myfn, encoding="ISO-8859-1"),
-                skiprows=[0, 2, 3],
-                index_col=0,
-                na_values=["NAN"],
-            )
+            with open(myfn, encoding="ISO-8859-1") as fh:
+                df = pd.read_csv(
+                    fh,
+                    skiprows=[0, 2, 3],
+                    index_col=0,
+                    na_values=["NAN"],
+                )
             df = df.drop(columns="RECORD")
             if df.empty:
                 LOG.info("file: %s has no data", fn)
