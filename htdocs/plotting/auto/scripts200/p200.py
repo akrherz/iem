@@ -1,4 +1,21 @@
-"""SPC Convective Outlook Heatmaps."""
+"""This application generates heatmaps of Storm Prediction Center
+convective outlooks.
+
+<p><strong>Major Caveat</strong>: Due to how the IEM stores the outlook
+geometries, the values presented here are for an outlook level and levels
+higher.  For example, if a location was in a moderate risk and you asked
+this app to total slight risks, the moderate risk would count toward the
+slight risk total.</p>
+
+<p><i class="fa fa-info"></i> This autoplot currently only considers
+outlooks since 2002.  This app is also horribly slow for reasons I have
+yet to fully debug :(</p>
+
+<p><strong>Updated 28 Apr 2022</strong>: A generalized outlook category
+was added to lump all of the issuance times together.  So you can do
+generic requests now like for any Day 1 Outlook, instead of limiting to
+just the 13z issuance, for example.</p>
+"""
 import datetime
 
 import numpy as np
@@ -148,30 +165,7 @@ GRIDSOUTH = 19.47
 
 def get_description():
     """Return a dict describing how to call this plotter"""
-    desc = {}
-    desc["data"] = True
-    desc["cache"] = 86400
-    desc[
-        "description"
-    ] = """
-    This application generates heatmaps of Storm Prediction Center
-    convective outlooks.
-
-    <p><strong>Major Caveat</strong>: Due to how the IEM stores the outlook
-    geometries, the values presented here are for an outlook level and levels
-    higher.  For example, if a location was in a moderate risk and you asked
-    this app to total slight risks, the moderate risk would count toward the
-    slight risk total.</p>
-
-    <p><i class="fa fa-info"></i> This autoplot currently only considers
-    outlooks since 2002.  This app is also horribly slow for reasons I have
-    yet to fully debug :(</p>
-
-    <p><strong>Updated 28 Apr 2022</strong>: A generalized outlook category
-    was added to lump all of the issuance times together.  So you can do
-    generic requests now like for any Day 1 Outlook, instead of limiting to
-    just the 13z issuance, for example.</p>
-    """
+    desc = {"description": __doc__, "data": True, "cache": 86400}
     desc["arguments"] = [
         dict(
             type="select",
@@ -391,8 +385,12 @@ def plotter(fdict):
             {"lat": lats.ravel(), "lon": lons.ravel(), "freq": domain.ravel()}
         )
     if ctx["w"] == "lastyear":
-        domain = np.where(domain < 1, np.nan, domain)
-        rng = range(int(np.nanmin(domain)), int(np.nanmax(domain)) + 2)
+        if np.ma.max(domain) < 1:
+            domain = np.where(domain < 1, np.nan, domain)
+            rng = range(2022, 2024)
+        else:
+            domain = np.where(domain < 1, np.nan, domain)
+            rng = range(int(np.nanmin(domain)), int(np.nanmax(domain)) + 2)
     elif ctx["w"] == "count":
         domain = np.where(domain < 1, np.nan, domain)
         rng = np.unique(np.linspace(1, np.nanmax(domain) + 1, 10, dtype=int))
@@ -427,4 +425,16 @@ def plotter(fdict):
 
 
 if __name__ == "__main__":
-    plotter(dict(level="CATEGORICAL.SLGT", p="1.C.A", csector="conus"))
+    plotter(
+        {
+            "month": "all",
+            "p": "6.C.10",
+            "level": "ANY SEVERE.0.30",
+            "t": "cwa",
+            "network": "WFO",
+            "station": "EWX",
+            "csector": "southernplains",
+            "drawc": "no",
+            "w": "lastyear",
+        }
+    )

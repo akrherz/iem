@@ -54,52 +54,51 @@ def main():
             )
             thisyear[row[0].strftime("%m%d")]["rh"] = row[2]
 
-        fn = "%s_HM_%s.wth" % (site, today.strftime("%Y%m%d"))
-        fh = open(fn, "w")
-        fh.write(
-            """\
-  %s        IA   Lat.(deg)= %.2f  Long.(deg)=%.2f  Elev.(m)=%.0f.\r
+        fn = f"{site}_HM_{today:%Y%m%d}.wth"
+        with open(fn, "w", encoding="ascii") as fh:
+            fh.write(
+                """\
+%s        IA   Lat.(deg)= %.2f  Long.(deg)=%.2f  Elev.(m)=%.0f.\r
 %.2f (Lat.)\r
 year    day     Solar   T-High  T-Low   RelHum  Precip  WndSpd\r
                 MJ/m2   oC      oC      %%       mm      km/hr\r
 """
-            % (
-                site.upper(),
-                nt.sts[XREF[i]]["lat"],
-                nt.sts[XREF[i]]["lon"],
-                nt.sts[XREF[i]]["lat"],
-                nt.sts[XREF[i]]["elevation"],
-            )
-        )
-
-        # Get the baseline obs
-        sts = datetime.date(2021, 9, 1)
-        ets = today
-        now = sts
-        while now < ets:
-            idx = now.strftime("%m%d")
-            row = [now, None, None, None, None, None, None]
-            for j, key in enumerate(
-                ["radn", "maxt", "mint", "rh", "rain", "windspeed"]
-            ):
-                row[j + 1] = thisyear[idx][key]
-            fh.write(
-                ("%s\t%4s\t%.3f\t%.1f\t%.1f\t%.0f\t%.1f\t%.1f\r\n")
                 % (
-                    row[0].year,
-                    int(row[0].strftime("%j")),
-                    row[1],
-                    row[2],
-                    row[3],
-                    row[4],
-                    row[5],
-                    convert_value(
-                        row[6], "meter / second", "kilometer / hour"
-                    ),
+                    site.upper(),
+                    nt.sts[XREF[i]]["lat"],
+                    nt.sts[XREF[i]]["lon"],
+                    nt.sts[XREF[i]]["lat"],
+                    nt.sts[XREF[i]]["elevation"],
                 )
             )
-            now += datetime.timedelta(days=1)
-        fh.close()
+
+            # Get the baseline obs
+            sts = datetime.date(2021, 9, 1)
+            ets = today
+            now = sts
+            while now < ets:
+                idx = now.strftime("%m%d")
+                row = [now, None, None, None, None, None, None]
+                for j, key in enumerate(
+                    ["radn", "maxt", "mint", "rh", "rain", "windspeed"]
+                ):
+                    row[j + 1] = thisyear[idx][key]
+                fh.write(
+                    ("%s\t%4s\t%.3f\t%.1f\t%.1f\t%.0f\t%.1f\t%.1f\r\n")
+                    % (
+                        row[0].year,
+                        int(row[0].strftime("%j")),
+                        row[1],
+                        row[2],
+                        row[3],
+                        row[4],
+                        row[5],
+                        convert_value(
+                            row[6], "meter / second", "kilometer / hour"
+                        ),
+                    )
+                )
+                now += datetime.timedelta(days=1)
         try:
             subprocess.call(
                 ["mv", fn, f"/mesonet/share/pickup/yieldfx/{site}.wth"],
