@@ -3,6 +3,7 @@ require_once "../../config/settings.inc.php";
 require_once "../../include/database.inc.php";
 require_once "../../include/vtec.php";
 require_once "../../include/myview.php";
+require_once "../../include/forms.php";
 $conn = iemdb("postgis");
 
 $ref = isset($_SERVER["HTTP_REFERER"]) ? $_SERVER["HTTP_REFERER"] : 'none';
@@ -12,7 +13,7 @@ syslog(LOG_WARNING, "Deprecated " . $_SERVER["REQUEST_URI"] .
     ' referer: ' . $ref);
 closelog();
 
-$v = isset($_GET["vtec"]) ? substr($_GET["vtec"], 0, 25) : "2008-O-NEW-KJAX-TO-W-0048";
+$v = isset($_GET["vtec"]) ? substr(xssafe($_GET["vtec"]), 0, 25) : "2008-O-NEW-KJAX-TO-W-0048";
 $tokens = preg_split("/-/", $v);
 $year = intval($tokens[0]);
 $operation = $tokens[1];
