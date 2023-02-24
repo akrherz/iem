@@ -79,6 +79,7 @@ T_SQL_OB = """
 # TODO Guam
 # Min is 0-18z reported at 12z
 # Max is 12-6z next day reported at 0z
+# NOTE: 7 hour to pull date back
 NBM_TXN_OB_SQL = """
     WITH obs as (
         SELECT
@@ -88,7 +89,7 @@ NBM_TXN_OB_SQL = """
         and valid between %s and %s and (extract(minute from valid) >= 50 or
          extract(minute from valid) < 10) and report_type in (3, 4)
     ), highs as (
-        select date(utc_valid - '6 hours'::interval),
+        select date(utc_valid - '7 hours'::interval),
         max(greatest(tmpf,
             case when extract(hour from utc_valid) in (18, 0, 6)
             then max_tmpf_6hr else null end)) as high_0z
