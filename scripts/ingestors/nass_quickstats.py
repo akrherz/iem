@@ -67,17 +67,25 @@ def process(df):
         # Ignore duplicated data like CONDITION, 5 YEAR AVG
         if row["statisticcat_desc"].find("YEAR") > 0:
             continue
+        # fix SQL comparator
+        cc = "is" if row["week_ending"] is None else "="
+        cf = ""
+        xtra = []
+        if row["county_ansi"] is not None:
+            cf = "and county_ansi = %s"
+            xtra.append(row["county_ansi"])
         # Uniqueness by short_desc, year, state_alpha, week_ending
         cursor.execute(
             "SELECT load_time from nass_quickstats where year = %s "
-            "and short_desc = %s and state_alpha = %s and week_ending = %s "
-            "and freq_desc = %s",
+            "and short_desc = %s and state_alpha = %s "
+            f"and week_ending {cc} %s and freq_desc = %s {cf}",
             (
                 row["year"],
                 row["short_desc"],
                 row["state_alpha"],
                 row["week_ending"],
                 row["freq_desc"],
+                *xtra,
             ),
         )
         if cursor.rowcount > 0:
@@ -88,13 +96,15 @@ def process(df):
             cursor.execute(
                 "DELETE from nass_quickstats where year = %s "
                 "and short_desc = %s and "
-                "state_alpha = %s and week_ending = %s and freq_desc = %s",
+                f"state_alpha = %s and week_ending {cc} %s and freq_desc = %s "
+                f"{cf}",
                 (
                     row["year"],
                     row["short_desc"],
                     row["state_alpha"],
                     row["week_ending"],
                     row["freq_desc"],
+                    *xtra,
                 ),
             )
             deleted += cursor.rowcount

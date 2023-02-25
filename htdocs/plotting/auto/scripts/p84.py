@@ -1,4 +1,25 @@
-"""Precip estimates"""
+"""This application generates maps of precipitation
+    daily or multi-day totals.  There are currently three backend data sources
+    made available to this plotting application:
+    <ul>
+      <li><a href="/iemre/">IEM Reanalysis</a>
+      <br />A crude gridding of available COOP data and long term climate data
+      processed by the IEM. The plotted totals represent periods typical to
+      COOP data reporting, which is roughly 12 UTC (7 AM local) each day.</li>
+      <li><a href="https://www.nssl.noaa.gov/projects/mrms/">NOAA MRMS</a>
+      <br />A state of the art gridded analysis of RADAR data using
+      observations and model data to help in the processing.</li>
+      <li><a href="http://prism.oregonstate.edu">Oregon State PRISM</a>
+      <br />The PRISM data is credit Oregon State University,
+      created 4 Feb 2004.  This information arrives with a few day lag. The
+      plotted totals represent periods typical to COOP data reporting, so
+      12 UTC (7 AM local) each day.</li>
+      <li>Stage IV is a legacy NOAA precipitation product that gets quality
+      controlled by the River Forecast Centers. This page presents
+      24 hours totals at 12 UTC each day.</li>
+      <li>Iowa Flood Center is an analysis produced by the U of Iowa IIHR.</li>
+    </ul>
+"""
 from datetime import datetime, timedelta
 import os
 
@@ -32,33 +53,8 @@ PDICT4 = {
 
 def get_description():
     """Return a dict describing how to call this plotter"""
-    desc = {}
+    desc = {"description": __doc__, "data": False}
     desc["cache"] = 3600  # Things like MRMS update hourly
-    desc["data"] = False
-    desc[
-        "description"
-    ] = """This application generates maps of precipitation
-    daily or multi-day totals.  There are currently three backend data sources
-    made available to this plotting application:
-    <ul>
-      <li><a href="/iemre/">IEM Reanalysis</a>
-      <br />A crude gridding of available COOP data and long term climate data
-      processed by the IEM. The plotted totals represent periods typical to
-      COOP data reporting, which is roughly 12 UTC (7 AM local) each day.</li>
-      <li><a href="https://www.nssl.noaa.gov/projects/mrms/">NOAA MRMS</a>
-      <br />A state of the art gridded analysis of RADAR data using
-      observations and model data to help in the processing.</li>
-      <li><a href="http://prism.oregonstate.edu">Oregon State PRISM</a>
-      <br />The PRISM data is credit Oregon State University,
-      created 4 Feb 2004.  This information arrives with a few day lag. The
-      plotted totals represent periods typical to COOP data reporting, so
-      12 UTC (7 AM local) each day.</li>
-      <li>Stage IV is a legacy NOAA precipitation product that gets quality
-      controlled by the River Forecast Centers. This page presents
-      24 hours totals at 12 UTC each day.</li>
-      <li>Iowa Flood Center is an analysis produced by the U of Iowa IIHR.</li>
-    </ul>
-    """
     today = datetime.today() - timedelta(days=1)
     desc["arguments"] = [
         dict(
@@ -276,6 +272,8 @@ def plotter(fdict):
             nc.variables["lat"][:],
             [west, south, east, north],
         )
+        if sector == "conus":
+            x0, y0, x1, y1 = 0, 0, -1, -1
         if src == "stage4":
             lats = nc.variables["lat"][y0:y1, x0:x1]
             lons = nc.variables["lon"][y0:y1, x0:x1]
