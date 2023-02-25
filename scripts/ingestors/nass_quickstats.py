@@ -70,8 +70,10 @@ def process(df):
         # fix SQL comparator
         cc = "is" if row["week_ending"] is None else "="
         cf = ""
+        xtra = []
         if row["county_ansi"] is not None:
-            cf = f"and county_ansi = '{row['county_ansi']}'"
+            cf = "and county_ansi = %s"
+            xtra.append(row["county_ansi"])
         # Uniqueness by short_desc, year, state_alpha, week_ending
         cursor.execute(
             "SELECT load_time from nass_quickstats where year = %s "
@@ -83,6 +85,7 @@ def process(df):
                 row["state_alpha"],
                 row["week_ending"],
                 row["freq_desc"],
+                *xtra,
             ),
         )
         if cursor.rowcount > 0:
@@ -101,6 +104,7 @@ def process(df):
                     row["state_alpha"],
                     row["week_ending"],
                     row["freq_desc"],
+                    *xtra,
                 ),
             )
             deleted += cursor.rowcount
@@ -169,7 +173,7 @@ def main(argv):
         years = range(1980, datetime.now().year + 1)
     else:
         years = [None]
-        sts = (datetime.now() - timedelta(days=2)).replace(
+        sts = (datetime.now() - timedelta(days=1)).replace(
             hour=0, minute=0, second=0
         )
 
