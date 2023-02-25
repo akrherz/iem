@@ -69,23 +69,20 @@ def process(df):
             continue
         # fix SQL comparator
         cc = "is" if row["week_ending"] is None else "="
-        cf = ""
-        xtra = []
-        if row["county_ansi"] is not None:
-            cf = "and county_ansi = %s"
-            xtra.append(row["county_ansi"])
+        cf = "is" if row["county_ansi"] is None else "="
         # Uniqueness by short_desc, year, state_alpha, week_ending
         cursor.execute(
             "SELECT load_time from nass_quickstats where year = %s "
             "and short_desc = %s and state_alpha = %s "
-            f"and week_ending {cc} %s and freq_desc = %s {cf}",
+            f"and week_ending {cc} %s and freq_desc = %s and "
+            f"county_ansi {cf} %s",
             (
                 row["year"],
                 row["short_desc"],
                 row["state_alpha"],
                 row["week_ending"],
                 row["freq_desc"],
-                *xtra,
+                row["county_ansi"],
             ),
         )
         if cursor.rowcount > 0:
@@ -97,14 +94,14 @@ def process(df):
                 "DELETE from nass_quickstats where year = %s "
                 "and short_desc = %s and "
                 f"state_alpha = %s and week_ending {cc} %s and freq_desc = %s "
-                f"{cf}",
+                f"and county_ansi {cf} %s",
                 (
                     row["year"],
                     row["short_desc"],
                     row["state_alpha"],
                     row["week_ending"],
                     row["freq_desc"],
-                    *xtra,
+                    row["county_ansi"],
                 ),
             )
             deleted += cursor.rowcount
