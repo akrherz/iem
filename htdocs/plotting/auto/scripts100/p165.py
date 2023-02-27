@@ -159,7 +159,7 @@ def plotter(fdict):
                 extract(doy from day) as doy
                 from alldata_{sector} WHERE month in :months and
                 substr(station, 3, 4) != '0000'
-                and substr(station, 3, 1) not in ('C', 'T')
+                and substr(station, 3, 1) not in ('C', 'D', 'T')
             )
             SELECT station, {YRGP[varname]},
             {ORDER[varname]}(

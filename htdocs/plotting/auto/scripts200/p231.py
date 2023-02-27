@@ -1,4 +1,10 @@
-"""Change in SPI."""
+"""This autoplot produces an infographic for a given state with some
+    diagnostics on the weekly change in Standardized Precipitation Index (SPI)
+    over a given day interval.  The purpose is to show how a state's SPI values
+    have changed over a seven day period.  Changes in SPI drought classfication
+    are colorized as green for improvements and red for degradations.
+
+    <p>Caution, this chart does take a number of seconds to generate."""
 import datetime
 
 import pandas as pd
@@ -10,18 +16,7 @@ from pyiem.util import get_autoplot_context, get_sqlalchemy_conn
 
 def get_description():
     """Return a dict describing how to call this plotter"""
-    desc = {}
-    desc["data"] = True
-    desc[
-        "description"
-    ] = """This autoplot produces an infographic for a given state with some
-    diagnostics on the weekly change in Standardized Precipitation Index (SPI)
-    over a given day interval.  The purpose is to show how a state's SPI values
-    have changed over a seven day period.  Changes in SPI drought classfication
-    are colorized as green for improvements and red for degradations.
-
-    <p>Caution, this chart does take a number of seconds to generate.
-    """
+    desc = {"description": __doc__, "data": True}
     today = datetime.date.today() - datetime.timedelta(days=1)
     lastweek = today - datetime.timedelta(days=7)
     desc["arguments"] = [
@@ -63,7 +58,8 @@ def compute(state, sdate, edate, days):
                 SELECT station, day, sday,
                 sum(precip) OVER (PARTITION by station ORDER by day ASC
                 ROWS between %s PRECEDING AND CURRENT ROW) from
-                alldata_{state} WHERE substr(station, 3, 1) not in ('C', 'T')
+                alldata_{state} WHERE
+                substr(station, 3, 1) not in ('C', 'D', 'T')
                 and station != '{state}0000'
             ), datum as (
                 SELECT * from obs where sday in %s
