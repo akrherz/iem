@@ -37,8 +37,8 @@ def load_table(state, date):
     )
     threaded = {}
     for sid in nt.sts:
-        # handled by compute_0000
-        if sid[2:] == "0000" or sid[2] == "C":
+        # handled by compute4regions
+        if sid[2:] == "0000" or sid[2] in ["C", "D"]:
             continue
         entry = nt.sts[sid]
         if skip_calday_sites and not entry["temp24_hour"] in range(3, 12):

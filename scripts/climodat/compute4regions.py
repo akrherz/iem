@@ -1,4 +1,7 @@
-"""Compute the Statewide and Climate District Averages!"""
+"""Compute the regional values.
+
+Run from RUN_NOON.sh
+"""
 import sys
 import datetime
 import warnings
@@ -10,21 +13,18 @@ from pyiem import iemre
 from pyiem.grid.zs import CachingZonalStats
 from pyiem.util import (
     get_dbconn,
-    get_dbconnstr,
+    get_sqlalchemy_conn,
     ncopen,
     logger,
     mm2inch,
     convert_value,
 )
-from sqlalchemy import text
 
 LOG = logger()
 LOG.setLevel(logging.INFO)
 warnings.filterwarnings("ignore", category=FutureWarning)
 COOP = get_dbconn("coop")
 ccursor = COOP.cursor()
-
-SKIPSTATES = "AK HI DC AS PR VI GU MP".split()
 
 
 def zero(val):
@@ -83,65 +83,33 @@ def do_day(valid):
         snow = mm2inch(nc.variables["snow_12z"][idx, :, :])
         snowd = mm2inch(nc.variables["snowd_12z"][idx, :, :])
 
-    # build out the state mappers
-    states = gpd.read_postgis(
-        text(
-            "SELECT the_geom, state_abbr from states "
-            "where state_abbr not in :states"
-        ),
-        get_dbconnstr("postgis"),
-        params={
-            "states": tuple(SKIPSTATES),
-        },
-        index_col="state_abbr",
-        geom_col="the_geom",
-    )
-    czs = CachingZonalStats(iemre.AFFINE)
-    sthigh = czs.gen_stats(np.flipud(high), states["the_geom"])
-    stlow = czs.gen_stats(np.flipud(low), states["the_geom"])
-    stprecip = czs.gen_stats(np.flipud(precip), states["the_geom"])
-    stsnow = czs.gen_stats(np.flipud(snow), states["the_geom"])
-    stsnowd = czs.gen_stats(np.flipud(snowd), states["the_geom"])
-
-    statedata = {}
-    for i, state in enumerate(states.index.values):
-        statedata[state] = dict(
-            high=sthigh[i],
-            low=stlow[i],
-            precip=stprecip[i],
-            snow=stsnow[i],
-            snowd=stsnowd[i],
+    # get the geometries and stations to update
+    with get_sqlalchemy_conn("coop") as conn:
+        gdf = gpd.read_postgis(
+            """
+            SELECT t.id, c.geom from stations t JOIN climodat_regions c on
+            (t.iemid = c.iemid) ORDER by t.id ASC
+            """,
+            conn,
+            index_col="id",
+            geom_col="geom",
         )
-        update_database(state + "0000", valid, statedata[state])
-
-    # build out climate division mappers
-    climdiv = gpd.read_postgis(
-        text("SELECT geom, iemid from climdiv where st_abbrv not in :states"),
-        get_dbconnstr("postgis"),
-        params={"states": tuple(SKIPSTATES)},
-        index_col="iemid",
-        geom_col="geom",
-    )
     czs = CachingZonalStats(iemre.AFFINE)
-    sthigh = czs.gen_stats(np.flipud(high), climdiv["geom"])
-    stlow = czs.gen_stats(np.flipud(low), climdiv["geom"])
-    stprecip = czs.gen_stats(np.flipud(precip), climdiv["geom"])
-    stsnow = czs.gen_stats(np.flipud(snow), climdiv["geom"])
-    stsnowd = czs.gen_stats(np.flipud(snowd), climdiv["geom"])
+    sthigh = czs.gen_stats(np.flipud(high), gdf["geom"])
+    stlow = czs.gen_stats(np.flipud(low), gdf["geom"])
+    stprecip = czs.gen_stats(np.flipud(precip), gdf["geom"])
+    stsnow = czs.gen_stats(np.flipud(snow), gdf["geom"])
+    stsnowd = czs.gen_stats(np.flipud(snowd), gdf["geom"])
 
-    for i, iemid in enumerate(climdiv.index.values):
-        row = {
+    for i, sid in enumerate(gdf.index.values):
+        data = {
             "high": sthigh[i],
             "low": stlow[i],
             "precip": stprecip[i],
             "snow": stsnow[i],
             "snowd": stsnowd[i],
         }
-        # we must have temperature data
-        if row["high"] is np.ma.masked or row["low"] is np.ma.masked:
-            LOG.warning("%s has missing temperature data, using state", iemid)
-            row = statedata[iemid[:2]]
-        update_database(iemid, valid, row)
+        update_database(sid, valid, data)
 
 
 def main(argv):
