@@ -62,7 +62,7 @@ function makeVectorLayer(dt, title, group) {
         }),
         style: function (feature, resolution) {
             let txt = (feature.get(renderattr) == 0.0001) ? "T" : feature.get(renderattr);
-            txt = (txt == null) ? '.' : txt;
+            txt = (txt === null) ? '.' : txt;
             return [new ol.style.Style({
                 text: new ol.style.Text({
                     font: '14px Calibri,sans-serif',

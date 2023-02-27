@@ -74,7 +74,7 @@ def plotter(fdict):
             index_col="ugc",
         )
     if df.empty:
-        return NoDataFound("Could not find any data, sorry.")
+        raise NoDataFound("Could not find any data, sorry.")
     mp = MapPlot(
         apctx=ctx,
         title=(

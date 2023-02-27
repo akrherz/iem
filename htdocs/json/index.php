@@ -204,7 +204,7 @@ $services[] = array(
     "vars" => array(
         "station" => "6 character station identifier",
         "syear" => "Inclusive start year of the period of interest",
-        "syear" => "Exclusive end year of the period of interest"
+        "eyear" => "Exclusive end year of the period of interest"
     ),
     "example" => array(
         "{station}" => "IA0200",
@@ -223,7 +223,7 @@ $services[] = array(
         "month" => "Numeric month of interest (1-12)",
         "day" => "Numeric day of interest (1-31)",
         "syear" => "Inclusive start year of the period of interest",
-        "syear" => "Exclusive end year of the period of interest"
+        "eyear" => "Exclusive end year of the period of interest"
     ),
     "example" => array(
         "{network}" => "IACLIMATE",
