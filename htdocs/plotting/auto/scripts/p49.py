@@ -1,4 +1,13 @@
-"""Daily Frequency of Some Threshold."""
+"""
+This plot presents the observed frequency of
+some daily event happening.  Leap day (Feb 29th) is excluded from the
+analysis. If you download the data from this application, a placeholder
+date during the year 2001 is used.</p>
+
+<p>You can specify a given number of forward days to look for the given
+threshold to happen.  Please be sure to review the aggregate function that
+you want used over this period of days.
+"""
 import datetime
 
 import matplotlib.dates as mdates
@@ -26,19 +35,7 @@ PDICT3 = {
 
 def get_description():
     """Return a dict describing how to call this plotter"""
-    desc = {}
-    desc["cache"] = 86400
-    desc["data"] = True
-    desc[
-        "description"
-    ] = """This plot presents the observed frequency of
-    some daily event happening.  Leap day (Feb 29th) is excluded from the
-    analysis. If you download the data from this application, a placeholder
-    date during the year 2001 is used.</p>
-
-    <p>You can specify a given number of forward days to look for the given
-    threshold to happen.  Please be sure to review the aggregate function that
-    you want used over this period of days."""
+    desc = {"description": __doc__, "cache": 86400, "data": True}
     desc["arguments"] = [
         dict(
             type="station",
@@ -104,7 +101,6 @@ def plotter(fdict):
     varname = ctx["var"]
     opt = XREF[ctx["opt"]]
     days = int(ctx["days"])
-    table = f"alldata_{station[:2]}"
     func = "avg" if days == 1 else ctx["f"]
     with get_sqlalchemy_conn("coop") as conn:
         df = pd.read_sql(
@@ -113,7 +109,7 @@ def plotter(fdict):
                 WITH data as (
                 SELECT sday, {func}({varname})
                 OVER (ORDER by day ASC ROWS between
-                CURRENT ROW and {days - 1} FOLLOWING) as val, day from {table}
+                CURRENT ROW and {days - 1} FOLLOWING) as val, day from alldata
                 WHERE station = %s and {varname} is not null and year >= %s
                 and year <= %s)
                 SELECT sday, sum(case when val {opt} {threshold} then 1 else 0
@@ -135,7 +131,7 @@ def plotter(fdict):
     df["freq"] = df["hits"] / df["total"] * 100.0
 
     title = (
-        f"{station} {ctx['_nt'].sts[station]['name']} "
+        f"{ctx['_sname']} "
         f"({df['min_date'].min().year}-{df['max_date'].max().year})"
     )
     subtitle = (

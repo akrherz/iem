@@ -19,7 +19,7 @@ def setupdir():
         os.makedirs(TMPDIR)
     # Cleanup
     os.chdir(TMPDIR)
-    subprocess.call("tmpwatch 24 .", shell=True)
+    subprocess.call(["tmpwatch", "24", "."])
 
 
 def run(sts, ets):

@@ -1,6 +1,18 @@
-"""VTEC combos"""
+"""
+This chart shows the number of VTEC phenomena and
+significance combinations issued by a NWS Forecast Office for a given year.
+Please note that not all current-day VTEC products were started in 2005,
+some came a few years later.  So numbers in 2005 are not directly
+comparable to 2015.  Here is a
+<a href="http://www.nws.noaa.gov/os/vtec/pdfs/VTEC_explanation6.pdf">handy
+chart</a> with more details on VTEC and codes used in this graphic.
+
+<p>Due to the chart's oblong nature, there is no way to control the
+image size at this time.
+"""
 
 import pandas as pd
+from matplotlib.ticker import MaxNLocator
 from pyiem.plot import figure
 from pyiem.util import get_autoplot_context, get_sqlalchemy_conn
 from pyiem.exceptions import NoDataFound
@@ -8,23 +20,8 @@ from pyiem.exceptions import NoDataFound
 
 def get_description():
     """Return a dict describing how to call this plotter"""
-    desc = {}
+    desc = {"description": __doc__, "data": True, "cache": 86400}
     desc["defaults"] = {"_r": None}  # disables
-    desc["data"] = True
-    desc["cache"] = 86400
-    desc[
-        "description"
-    ] = """This chart shows the number of VTEC phenomena and
-    significance combinations issued by a NWS Forecast Office for a given year.
-    Please note that not all current-day VTEC products were started in 2005,
-    some came a few years later.  So numbers in 2005 are not directly
-    comparable to 2015.  Here is a
-<a href="http://www.nws.noaa.gov/os/vtec/pdfs/VTEC_explanation6.pdf">handy
- chart</a> with more details on VTEC and codes used in this graphic.
-
-    <p>Due to the chart's oblong nature, there is no way to control the
-    image size at this time.
-    """
     desc["arguments"] = [
         dict(
             type="networkselect",
@@ -83,28 +80,22 @@ def plotter(fdict):
         gdf.index.values, gdf["wfo"], width=0.8, fc="b", ec="b", align="center"
     )
     for yr, row in gdf.iterrows():
-        ax[0].text(yr, row["wfo"] + 1, "%s" % (row["wfo"],), ha="center")
+        ax[0].text(yr, row["wfo"] + 1, row["wfo"], ha="center")
     ax[0].set_title(
-        (
-            "[%s] NWS %s\nCount of Distinct VTEC Phenomena/"
-            "Significance - %i to %i"
-        )
-        % (
-            station,
-            ctx["_nt"].sts[station]["name"],
-            df["year"].min(),
-            df["year"].max(),
-        )
+        f"[{station}] NWS {ctx['_nt'].sts[station]['name']}\n"
+        "Count of Distinct VTEC Phenomena/Significance - "
+        f"{df['year'].min():.0f} to {df['year'].max():.0f}"
     )
     ax[0].grid()
     ax[0].set_ylabel("Count")
     ax[0].set_xlim(gdf.index.values.min() - 0.5, gdf.index.values.max() + 0.5)
+    ax[0].xaxis.set_major_locator(MaxNLocator(integer=True))
 
     pos = {}
     i = 1
     df = df.sort_values(["phenomena", "significance"])
     for _, row in df.iterrows():
-        key = "%s.%s" % (row["phenomena"], row["significance"])
+        key = f"{row['phenomena']}.{row['significance']}"
         if key not in pos:
             pos[key] = i
             i += 1
@@ -115,7 +106,7 @@ def plotter(fdict):
             ha="center",
             va="center",
             fontsize=10,
-            bbox=dict(color="white"),
+            bbox={"color": "white"},
         )
 
     ax[1].set_title("VTEC <Phenomena.Significance> Issued by Year")
@@ -123,6 +114,7 @@ def plotter(fdict):
     ax[1].set_yticks([])
     ax[1].grid(True)
     ax[1].set_xlim(gdf.index.values.min() - 0.5, gdf.index.values.max() + 0.5)
+    ax[1].xaxis.set_major_locator(MaxNLocator(integer=True))
     return fig, df
 
 
