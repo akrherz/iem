@@ -28,7 +28,7 @@ $t = new MyView();
 $t->title = "Pest Forecasting Maps";
 $t->jsextra = <<<EOM
 <script src="/vendor/jquery-ui/1.11.4/jquery-ui.js"></script>
-<script type="text/javascript" src="main.js?v=2"></script>
+<script type="text/javascript" src="main.js?v=3"></script>
 EOM;
 $t->headextra = <<<EOM
 <link rel="stylesheet" href="/vendor/jquery-ui/1.11.4/jquery-ui.min.css" />
@@ -54,6 +54,7 @@ $ar = array(
     "soybean_aphid" => "Soybean Aphid (Aphis glycines)",
     "common_stalk_borer" => "Common Stalk Borer (Papaipema nebris)",
     "japanese_beetle" => "Japanese Beetle (Popillia japonica)",
+    "western_bean_cutworm" => "Western Bean Cutworm (Striacosta albicosta)",
 );
 $pselect = make_select("pest", $pest, $ar, "updateImage", "form-control");
 $nselect = networkSelect($network, $station, array(), "station", TRUE);
@@ -150,6 +151,17 @@ the backend that generates the maps/data here.</p>
 </ul>
 
 <p><a href="https://crops.extension.iastate.edu/encyclopedia/japanese-beetle-corn-and-soybean">Learn more here!</a></p>
+</div>
+
+<div id="western_bean_cutworm" class="pinfo" style="display: none;">
+<h3>Western Bean Cutworm (Striacosta albicosta)</h3>
+<p>Key Degree Day Levels:</p>
+<ul>
+ <li><strong>March 1:</strong> Start Date</li>
+ <li><strong>2,577</strong>: 25% month flight</li>
+</ul>
+
+<p><a href="https://cropwatch.unl.edu/2021/degree-days-prediction-western-bean-cutworm-flight">Learn more here!</a></p>
 </div>
 
 

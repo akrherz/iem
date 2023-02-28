@@ -88,6 +88,8 @@ def application(environ, start_response):
     edate = datetime.datetime.strptime(
         fields.get("edate", f"{today:%Y-%m-%d}"), "%Y-%m-%d"
     ).date()
+    if edate < sdate:
+        sdate, edate = edate, sdate
     gddbase = int(fields.get("gddbase", 50))
     gddceil = int(fields.get("gddceil", 86))
 
