@@ -147,7 +147,7 @@ if ($source == "qc") {
     $sql = sprintf(
         "SELECT *, $timecol as hour from alldata_{$state} ".
         "WHERE day = '%s' and %s is not null" .
-            " and substr(station, 3, 1) not in ('C', 'T') " .
+            " and substr(station, 3, 1) not in ('C', 'D', 'T') " .
             " and substr(station, 3, 4) != '0000'" .
             " $timingsql ORDER by $dbvar DESC",
         $ts->format("Y-m-d"),

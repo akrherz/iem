@@ -1,4 +1,16 @@
-"""3 Dot Scatter plot.."""
+"""
+This visualization mashes up the US Drought Monitor and three trailing
+day standardized precipitation index of your choice within a map
+presentation for a single state.  SPI is computed by the simple formula
+of <code>(accum - climatology) / standard deviation</code>.</p>
+
+<p>This autoplot is extremely slow to generate due to the on-the-fly
+calculation of standard deviation. As such, an optimization is done to
+sub-sample from available stations since the resulting map can only display
+a certain number of data points legibly. This means that the dataset you
+download from this page does not contain all available stations for a given
+state :/
+"""
 import datetime
 import sys
 
@@ -14,28 +26,24 @@ from pyiem.util import get_autoplot_context, get_sqlalchemy_conn
 from sqlalchemy import text
 from tqdm import tqdm
 
+PDICT = {
+    "normal": "Normal Mode / Plot by State",
+    "iadrought": "Special Iowa Drought Monitoring",
+}
+
 
 def get_description():
     """Return a dict describing how to call this plotter"""
-    desc = {}
-    desc["data"] = True
-    desc[
-        "description"
-    ] = """
-    This visualization mashes up the US Drought Monitor and three trailing
-    day standardized precipitation index of your choice within a map
-    presentation for a single state.  SPI is computed by the simple formula
-    of <code>(accum - climatology) / standard deviation</code>.</p>
-
-    <p>This autoplot is extremely slow to generate due to the on-the-fly
-    calculation of standard deviation. As such, an optimization is done to
-    sub-sample from available stations since the resulting map can only display
-    a certain number of data points legibly. This means that the dataset you
-    download from this page does not contain all available stations for a given
-    state :/
-    """
+    desc = {"description": __doc__, "data": True}
     dt = datetime.date.today() - datetime.timedelta(days=1)
     desc["arguments"] = [
+        {
+            "type": "select",
+            "name": "mode",
+            "default": "normal",
+            "label": "Application Mode:",
+            "options": PDICT,
+        },
         dict(
             type="state",
             name="state",
@@ -70,6 +78,31 @@ def get_description():
     return desc
 
 
+def overlay_drought_regions(mp):
+    """Add an overlay."""
+    with get_sqlalchemy_conn("coop") as conn:
+        gdf = gpd.read_postgis(
+            """
+            SELECT id, c.geom from climodat_regions c JOIN stations t on
+            (c.iemid = t.iemid) WHERE t.network = 'IACLIMATE' and
+            substr(id, 3, 1) = 'D'
+            """,
+            conn,
+            index_col="id",
+            geom_col="geom",
+        )
+    if gdf.empty:
+        return
+    gdf.to_crs(mp.panels[0].crs).plot(
+        ax=mp.panels[0].ax,
+        aspect=None,
+        lw=3,
+        ec="k",
+        fc="None",
+        zorder=Z_OVERLAY2,
+    )
+
+
 def plotter(fdict):
     """Go"""
     ctx = get_autoplot_context(fdict, get_description())
@@ -99,6 +132,12 @@ def plotter(fdict):
         for station, meta in progress:
             if not meta["online"]:
                 continue
+            if ctx["mode"] == "iadrought":
+                if station[2] != "D":
+                    continue
+            else:
+                if station[2] in ["C", "D"] or station[2:] == "0000":
+                    continue
             yidx = int((meta["lat"] - ymin) / GZ)
             xidx = int((meta["lon"] - xmin) / GZ)
             hits[yidx, xidx] += 1
@@ -151,12 +190,12 @@ def plotter(fdict):
     df = gpd.GeoDataFrame(
         df, geometry=gpd.points_from_xy(df["lon"], df["lat"], crs="EPSG:4326")
     )
+    st = "stations w/ 30+ years of data"
+    if ctx["mode"] == "iadrought":
+        st = "Iowa Drought Monitoring Regions"
     mp = MapPlot(
         title="Trailing Day Standardized Precipitation Index",
-        subtitle=(
-            f"Ending {date:%B %-d %Y} computed for stations w/ 30+ years "
-            "of data"
-        ),
+        subtitle=f"Ending {date:%B %-d %Y} computed for {st}",
         sector="state",
         state=state,
         stateborderwidth=2,
@@ -170,23 +209,27 @@ def plotter(fdict):
     )
     norm = mpcolors.BoundaryNorm(levels, cmap.N)
     df = df.assign(
-        color1=lambda x: [a for a in cmap(norm(x.z1))],
-        color2=lambda x: [a for a in cmap(norm(x.z2))],
-        color3=lambda x: [a for a in cmap(norm(x.z3))],
+        color1=list(cmap(norm(df.z1))),
+        color2=list(cmap(norm(df.z2))),
+        color3=list(cmap(norm(df.z3))),
     )
     # Get the extent of the map
     (x0, x1, y0, y1) = mp.panels[0].get_extent()
     # Compute an offset
     xoff = (x1 - x0) * 0.0075
     yoff = (y1 - y0) * 0.0125
-
+    markersize = 60
+    if ctx["mode"] == "iadrought":
+        markersize = 180
+        xoff *= 2
+        yoff *= 2
     df.to_crs(mp.panels[0].crs).plot(
         facecolor=df["color1"],
         edgecolor="#ffffff",
         aspect=None,
         ax=mp.panels[0].ax,
         zorder=Z_OVERLAY2 + 3,
-        markersize=60,
+        markersize=markersize,
     )
     df.to_crs(mp.panels[0].crs).assign(
         geometry=lambda x: x.geometry.translate(xoff, -yoff)
@@ -196,7 +239,7 @@ def plotter(fdict):
         aspect=None,
         ax=mp.panels[0].ax,
         zorder=Z_OVERLAY2 + 3,
-        markersize=60,
+        markersize=markersize,
     )
     df.to_crs(mp.panels[0].crs).assign(
         geometry=lambda x: x.geometry.translate(-xoff, -yoff)
@@ -206,8 +249,10 @@ def plotter(fdict):
         aspect=None,
         ax=mp.panels[0].ax,
         zorder=Z_OVERLAY2 + 3,
-        markersize=60,
+        markersize=markersize,
     )
+    if ctx["mode"] == "iadrought":
+        overlay_drought_regions(mp)
 
     # Add the legend
     mp.fig.text(0.85, 0.95, "Trailing Days\nDot Legend", ha="right")
@@ -230,4 +275,4 @@ def plotter(fdict):
 
 
 if __name__ == "__main__":
-    plotter({"d3": "365", "state": "NE"})[0].savefig("/tmp/bah.png")
+    plotter({"d3": "365", "state": "IA", "mode": "iadrought"})

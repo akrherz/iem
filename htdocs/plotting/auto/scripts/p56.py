@@ -1,4 +1,18 @@
-"""WWA Frequency"""
+"""
+This chart shows the time partitioned frequency of having
+at least one watch/warning/advisory (WWA) issued by the Weather Forecast
+Office (top plot) and the overall number of WWA issued events
+(bottom plot). This plot hopefully
+answers the question of which day/week/month of the year is most common
+to get a certain WWA type and which week has seen the most WWAs issued.
+The plot
+only considers issuance date. When plotting for a state, an event is
+defined on a per forecast office basis.
+
+<p><strong>Updated 4 Jan 2022:</strong> The week aggregation was
+previously done by iso-week, which is sub-optimal.  The new aggregation
+for week is by day of the year divided by 7.
+"""
 import calendar
 import datetime
 
@@ -23,25 +37,7 @@ PDICT = {
 
 def get_description():
     """Return a dict describing how to call this plotter"""
-    desc = {}
-    desc["data"] = True
-    desc["cache"] = 86400
-    desc[
-        "description"
-    ] = """This chart shows the time partitioned frequency of having
-    at least one watch/warning/advisory (WWA) issued by the Weather Forecast
-    Office (top plot) and the overall number of WWA issued events
-    (bottom plot). This plot hopefully
-    answers the question of which day/week/month of the year is most common
-    to get a certain WWA type and which week has seen the most WWAs issued.
-    The plot
-    only considers issuance date. When plotting for a state, an event is
-    defined on a per forecast office basis.
-
-    <p><strong>Updated 4 Jan 2022:</strong> The week aggregation was
-    previously done by iso-week, which is sub-optimal.  The new aggregation
-    for week is by day of the year divided by 7.
-    """
+    desc = {"description": __doc__, "data": True, "cache": 86400}
     desc["arguments"] = [
         dict(
             type="select",
@@ -174,4 +170,4 @@ def plotter(fdict):
 
 
 if __name__ == "__main__":
-    plotter({"how": "doy"})
+    plotter({})

@@ -1,4 +1,11 @@
-"""Plot or Harvest Progress"""
+"""
+This chart presents the crop progress by year.
+The most recent value for the current year is denoted on each of the
+previous years on record.
+
+<p><strong>Updated 15 June 2021</strong>: The options for this autoplot
+were changed and not backwards compatable with previous URIs, sorry.</p>
+"""
 import calendar
 
 import numpy as np
@@ -36,18 +43,7 @@ PDICT = {
 
 def get_description():
     """Return a dict describing how to call this plotter"""
-    desc = {}
-    desc["data"] = True
-    desc["nass"] = True
-    desc[
-        "description"
-    ] = """This chart presents the crop progress by year.
-    The most recent value for the current year is denoted on each of the
-    previous years on record.
-
-    <p><strong>Updated 15 June 2021</strong>: The options for this autoplot
-    were changed and not backwards compatable with previous URIs, sorry.</p>
-    """
+    desc = {"description": __doc__, "data": True, "nass": True}
     desc["arguments"] = [
         dict(type="state", name="state", default="IA", label="Select State:"),
         dict(

@@ -70,7 +70,7 @@ def main(argv):
         from alldata a JOIN stations t ON (a.station = t.id)
         WHERE a.day = %s and t.network ~* 'CLIMATE' and
         substr(a.station,3,4) != '0000' and
-        substr(station,3,1) not in ('C', 'T')
+        substr(station,3,1) not in ('C', 'D', 'T')
         and precip >= 0 and precip < 50
         and not precip_estimated
     """,

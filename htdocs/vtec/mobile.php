@@ -15,6 +15,9 @@ closelog();
 
 $v = isset($_GET["vtec"]) ? substr(xssafe($_GET["vtec"]), 0, 25) : "2008-O-NEW-KJAX-TO-W-0048";
 $tokens = preg_split("/-/", $v);
+if (sizeof($tokens) < 7){
+    xssafe("</scripts>");
+}
 $year = intval($tokens[0]);
 $operation = $tokens[1];
 $vstatus = $tokens[2];
@@ -39,6 +42,9 @@ $rs = pg_prepare($conn, "SELECT", "SELECT replace(report,'\001','') as report,
         w.significance = $4 ORDER by length(svs) DESC LIMIT 1");
 
 $rs = pg_execute($conn, "SELECT", array($wfo, $phenomena, $eventid, $significance));
+if ($rs === FALSE){
+    xssafe("<script>");
+}
 $txtdata = "";
 for ($i = 0; $row  = pg_fetch_array($rs); $i++) {
     if (!is_null($row["svs"])){

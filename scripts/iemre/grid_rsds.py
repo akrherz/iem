@@ -32,7 +32,7 @@ def do_coop(ts):
         coalesce(narr_srad, merra_srad) from alldata a JOIN stations t
         ON (a.station = t.id) WHERE
         day = %s and t.network ~* 'CLIMATE' and
-        substr(id, 3, 1) not in ('C', 'T')
+        substr(id, 3, 1) not in ('C', 'D', 'T')
         and substr(id, 3, 4) != '0000'
     """,
         (ts.strftime("%Y-%m-%d"),),
