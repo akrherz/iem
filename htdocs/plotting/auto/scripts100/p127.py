@@ -66,7 +66,7 @@ def plotter(fdict):
     with get_sqlalchemy_conn("coop") as conn:
         df = pd.read_sql(
             """
-            select year, week_ending, num_value,
+            select distinct year, week_ending, num_value,
             extract(doy from week_ending)::int as day_of_year
             from nass_quickstats
             where short_desc = %s and state_alpha = %s and

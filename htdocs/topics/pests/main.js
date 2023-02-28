@@ -5,6 +5,7 @@ pestData.alfalfa_weevil = { 'gddbase': 48, 'gddceil': 90 };
 pestData.soybean_aphid = { 'gddbase': 50, 'gddceil': 90 };
 pestData.common_stalk_borer = { 'gddbase': 41, 'gddceil': 90 };
 pestData.japanese_beetle = { 'gddbase': 50, 'gddceil': 90 };
+pestData.western_bean_cutworm = { 'gddbase': 38, 'gddceil': 75 };
 
 function text(str) {
     // XSS
@@ -22,6 +23,10 @@ function hideImageLoad() {
             '<i class="fa fa-table"></i> As Excel</a></p>');
     }
 }
+function rectify_start_date(pest) {
+    const month = (pest === "western_bean_cutworm") ? 2: 0; // le sigh
+    $("#sdate").datepicker("setDate", new Date((new Date()).getFullYear(), month, 1));
+}
 
 function updateStationForecast() {
     const station = text($("select[name='station']").val());
@@ -38,7 +43,7 @@ function updateStationForecast() {
         $("#station_gfs_accum").html("+" + data.gfs_accum.toFixed(1));
         $("#station_gfs_total").html((data.accum + data.gfs_accum).toFixed(1));
 
-        $("#station_ndfd_date").html(data.ndfd_sdate + " to " + data.ndfd_edate);
+        $("#station_ndfd_date").html(`${data.ndfd_sdate} to ${data.ndfd_edate}`);
         $("#station_ndfd_accum").html("+" + data.ndfd_accum.toFixed(1));
         $("#station_ndfd_total").html((data.accum + data.ndfd_accum).toFixed(1));
     });
@@ -56,6 +61,7 @@ function updateImage() {
     // Show this pest's pinfo container
     $('#' + pest).css('display', 'block');
     const opts = pestData[pest];
+    rectify_start_date(pest);
     const sdate = text($("#sdate").val());
     const edate = text($("#edate").val());
     let state = text($("select[name='network']").val());
@@ -64,14 +70,13 @@ function updateImage() {
     $("#theimage").attr("src", imgurl);
 
     // Update the web browser URL
-    let url = "/topics/pests/?state=" + state + "&pest=" + pest + "&sdate="
-        + sdate + "&station=" + station;
+    let url = `/topics/pests/?state=${state}&pest=${pest}&sdate=${sdate}&station=${station}`;
     // is edate_off checked?
     if (!$("#edate_off").is(':checked')) {
         url += "&edate=" + edate;
     }
     window.history.pushState({}, "", url);
-
+    updateStationForecast();
 }
 
 function showProgressBar() {
