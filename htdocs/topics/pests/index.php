@@ -158,7 +158,7 @@ the backend that generates the maps/data here.</p>
 <p>Key Degree Day Levels:</p>
 <ul>
  <li><strong>March 1:</strong> Start Date</li>
- <li><strong>2,577</strong>: 25% month flight</li>
+ <li><strong>2,577</strong>: 25% moth flight</li>
 </ul>
 
 <p><a href="https://cropwatch.unl.edu/2021/degree-days-prediction-western-bean-cutworm-flight">Learn more here!</a></p>
