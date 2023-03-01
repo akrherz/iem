@@ -1,4 +1,8 @@
-"""Simple stats by year"""
+"""
+This plot displays a metric for each year.
+In most cases, you can access the raw data for these plots
+<a href="/climodat/" class="alert-link">here.</a>
+"""
 import datetime
 
 import numpy as np
@@ -33,13 +37,7 @@ PDICT = {
 
 def get_description():
     """Return a dict describing how to call this plotter"""
-    desc = {}
-    desc[
-        "description"
-    ] = """This plot displays a metric for each year.
-    In most cases, you can access the raw data for these plots
-    <a href="/climodat/" class="alert-link">here.</a>"""
-    desc["data"] = True
+    desc = {"description": __doc__, "data": True}
     eyear = datetime.date.today().year
     desc["arguments"] = [
         dict(
@@ -170,8 +168,11 @@ def plotter(fdict):
     ax.axhline(avgv, lw=2, color="k", zorder=2, label=lbl)
     lbl = "1981-2010: " + precision % (a1981_2010,)
     ax.axhline(a1981_2010, lw=2, color="brown", zorder=2, label=lbl)
-    ax.plot(years, tavg, lw=1.5, color="g", zorder=4, label="Trailing 30yr")
-    ax.plot(years, tavg, lw=3, color="yellow", zorder=3)
+    if len(years) == len(tavg):
+        ax.plot(
+            years, tavg, lw=1.5, color="g", zorder=4, label="Trailing 30yr"
+        )
+        ax.plot(years, tavg, lw=3, color="yellow", zorder=3)
     ax.set_xlim(years[0] - 1, years[-1] + 1)
     if ptype.find("precip") == -1 and ptype.find("days") == -1:
         ax.set_ylim(min(data) - 5, max(data) + 5)
@@ -190,4 +191,4 @@ def plotter(fdict):
 
 
 if __name__ == "__main__":
-    plotter({})
+    plotter({"syear": 2000})
