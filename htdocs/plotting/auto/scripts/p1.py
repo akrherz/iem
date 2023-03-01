@@ -1,4 +1,15 @@
-"""monthly comparisons"""
+"""
+This app allows the arbitrary comparison of months
+against other months.  When the period of months wraps around a new
+year, the app attempts to keep this situation straight with Dec and Jan
+following each other.  The periods are combined together based on the
+year of the beginning month of each period. If there is a metric you
+wished to see added to this analysis, please
+<a href="/info/contacts.php">let us know</a>!
+
+<p>The five years with the most extreme values are labelled on the chart.
+"""
+# pylint: disable=unsubscriptable-object,unsupported-assignment-operation
 import datetime
 import calendar
 
@@ -56,19 +67,9 @@ UNITS = {
 
 def get_description():
     """Return a dict describing how to call this plotter"""
-    desc = {}
-    desc["data"] = True
+    desc = {"description": __doc__, "data": True}
     today = datetime.date.today()
     yesterday = today - datetime.timedelta(days=60)
-    desc[
-        "description"
-    ] = """This app allows the arbitrary comparison of months
-    against other months.  When the period of months wraps around a new
-    year, the app attempts to keep this situation straight with Dec and Jan
-    following each other.  The periods are combined together based on the
-    year of the beginning month of each period. If there is a metric you
-    wished to see added to this analysis, please
-    <a href="/info/contacts.php">let us know</a>!"""
     desc["arguments"] = [
         dict(
             type="station",
@@ -141,7 +142,7 @@ def compute_months_and_offsets(start, count):
     return months, offsets
 
 
-def combine(df, months, offsets):
+def combine(df, months, offsets) -> pd.DataFrame:
     """combine"""
     # To allow for periods that cross years! We create a second dataframe with
     # the year shifted back one!
@@ -171,7 +172,7 @@ def combine(df, months, offsets):
 
 def plotter(fdict):
     """Go"""
-    today = datetime.date.today()
+    today = datetime.date.today() + datetime.timedelta(days=1)
     ctx = util.get_autoplot_context(fdict, get_description())
     station = ctx["station"]
     threshold = ctx["threshold"]
@@ -215,21 +216,23 @@ def plotter(fdict):
     if xdf.empty or ydf.empty:
         raise NoDataFound("Sorry, could not find data.")
 
-    resdf = pd.DataFrame(
+    df = pd.DataFrame(
         {
             f"{varname1}_1": xdf[varname1],
             f"{varname2}_2": ydf[varname2],
         }
     )
-    resdf = resdf.dropna()
+    xdata = df[f"{varname1}_1"]
+    ydata = df[f"{varname2}_2"]
+    df = df.dropna()
     title = (
-        f"{resdf.index.min()}-{resdf.index.max()} {ctx['_sname']}\n"
+        f"{df.index.min()}-{df.index.max()} {ctx['_sname']}\n"
         "Comparison of Monthly Periods, Quadrant Frequency Labelled"
     )
     (fig, ax) = figure_axes(title=title, apctx=ctx)
     ax.scatter(
-        resdf[f"{varname1}_1"],
-        resdf[f"{varname2}_2"],
+        xdata,
+        ydata,
         marker="s",
         facecolor="b",
         edgecolor="b",
@@ -238,36 +241,29 @@ def plotter(fdict):
     )
     ax.grid(True)
 
-    h_slope, intercept, r_value, _, _ = stats.linregress(
-        resdf[varname1 + "_1"], resdf[varname2 + "_2"]
-    )
-    y = (
-        h_slope
-        * np.arange(resdf[f"{varname1}_1"].min(), resdf[f"{varname1}_1"].max())
-        + intercept
-    )
+    h_slope, intercept, r_value, _, _ = stats.linregress(xdata, ydata)
+    y = h_slope * np.arange(xdata.min(), xdata.max()) + intercept
     ax.plot(
-        np.arange(resdf[f"{varname1}_1"].min(), resdf[f"{varname1}_1"].max()),
+        np.arange(xdata.min(), xdata.max()),
         y,
         lw=2,
         color="r",
-        label="Slope=%.2f R$^2$=%.2f" % (h_slope, r_value**2),
+        label=f"Slope={h_slope:.2f} R$^2$={r_value**2:.2f}",
     )
     ax.legend(fontsize=10)
     xmonths = ", ".join([calendar.month_abbr[x] for x in months1])
     ymonths = ", ".join([calendar.month_abbr[x] for x in months2])
-    t1 = "" if varname1 not in ["days_high_aoa"] else " %.0f" % (threshold,)
-    t2 = "" if varname2 not in ["days_high_aoa"] else " %.0f" % (threshold,)
-    x = resdf[f"{varname1}_1"].mean()
-    y = resdf[f"{varname2}_2"].mean()
+    t1 = "" if varname1 not in ["days_high_aoa"] else f" {threshold:.0f}"
+    t2 = "" if varname2 not in ["days_high_aoa"] else f" {threshold:.0f}"
+    x = xdata.mean()
+    y = ydata.mean()
+    df["zscore"] = ((xdata - x) ** 2 + (ydata - y) ** 2) ** 0.5
     ax.set_xlabel(
-        "%s\n%s%s [%s], Avg: %.1f"
-        % (xmonths, PDICT[varname1], t1, UNITS[varname1], x),
+        f"{xmonths}\n{PDICT[varname1]}{t1} [{UNITS[varname1]}], Avg: {x:.1f}",
         fontsize=12,
     )
     ax.set_ylabel(
-        "%s\n%s%s [%s], Avg: %.1f"
-        % (ymonths, PDICT[varname2], t2, UNITS[varname2], y),
+        f"{ymonths}\n{PDICT[varname2]}{t2} [{UNITS[varname2]}], Avg: {y:.1f}",
         fontsize=12,
     )
 
@@ -277,68 +273,57 @@ def plotter(fdict):
     )
     ax.axhline(y, linestyle="--", color="g")
     ax.axvline(x, linestyle="--", color="g")
-    ur = len(
-        resdf[
-            (resdf["%s_1" % (varname1,)] >= x)
-            & (resdf["%s_2" % (varname2,)] >= y)
-        ].index
-    )
+    ur = len(df[(xdata >= x) & (ydata >= y)].index)
+    val = ur / float(len(df.index)) * 100.0
     ax.text(
         0.95,
         0.75,
-        "%s (%.1f%%)" % (ur, ur / float(len(resdf.index)) * 100.0),
+        f"{ur} ({val:.1f}%)",
         color="tan",
         fontsize=24,
         transform=ax.transAxes,
         ha="right",
         zorder=2,
     )
-    lr = len(
-        resdf[
-            (resdf[f"{varname1}_1"] >= x) & (resdf[f"{varname2}_2"] < y)
-        ].index
-    )
+    lr = len(df[(xdata >= x) & (ydata < y)].index)
+    val = lr / float(len(df.index)) * 100.0
     ax.text(
         0.95,
         0.25,
-        "%s (%.1f%%)" % (lr, lr / float(len(resdf.index)) * 100.0),
+        f"{lr} ({val:.1f}%)",
         color="tan",
         fontsize=24,
         transform=ax.transAxes,
         ha="right",
         zorder=2,
     )
-    ll = len(
-        resdf[
-            (resdf[f"{varname1}_1"] < x) & (resdf[f"{varname2}_2"] < y)
-        ].index
-    )
+    ll = len(df[(xdata < x) & (ydata < y)].index)
+    val = ll / float(len(df.index)) * 100.0
     ax.text(
         0.05,
         0.25,
-        "%s (%.1f%%)" % (ll, ll / float(len(resdf.index)) * 100.0),
+        f"{ll} ({val:.1f}%)",
         color="tan",
         fontsize=24,
         transform=ax.transAxes,
         ha="left",
         zorder=2,
     )
-    ul = len(
-        resdf[
-            (resdf[f"{varname1}_1"] < x) & (resdf[f"{varname2}_2"] >= y)
-        ].index
-    )
+    ul = len(df[(xdata < x) & (ydata >= y)].index)
+    val = ul / float(len(df.index)) * 100.0
     ax.text(
         0.05,
         0.75,
-        "%s (%.1f%%)" % (ul, ul / float(len(resdf.index)) * 100.0),
+        f"{ul} ({val:.1f}%)",
         color="tan",
         fontsize=24,
         transform=ax.transAxes,
         ha="left",
         zorder=2,
     )
-    return fig, resdf
+    for yr in df.sort_values("zscore", ascending=False).head(5).index:
+        ax.text(xdata[yr], ydata[yr], f" {yr}")
+    return fig, df
 
 
 if __name__ == "__main__":
