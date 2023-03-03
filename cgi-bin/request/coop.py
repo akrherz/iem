@@ -466,7 +466,7 @@ def do_simple(ctx):
     WITH scenario as (
         SELECT station, high, low, precip, snow, snowd, narr_srad,
         temp_estimated, precip_estimated,
-        merra_srad, merra_srad_cs, hrrr_srad,
+        merra_srad, hrrr_srad,
         to_char(('{thisyear}-'||month||'-'||extract(day from day))::date,
         'YYYY/mm/dd') as day,
         extract(doy from day) as doy,
@@ -481,7 +481,7 @@ def do_simple(ctx):
     ), obs as (
         SELECT station, high, low, precip, snow, snowd, narr_srad,
         temp_estimated, precip_estimated,
-        merra_srad, merra_srad_cs, hrrr_srad,
+        merra_srad, hrrr_srad,
         to_char(day, 'YYYY/mm/dd') as day,
         extract(doy from day) as doy,
         gddxx(50, 86, high, low) as gdd_50_86,
