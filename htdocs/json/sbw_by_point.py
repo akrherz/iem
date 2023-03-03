@@ -19,12 +19,9 @@ EXL = "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"
 
 def make_url(row):
     """Build URL."""
-    return "/vtec/#%s-O-NEW-K%s-%s-%s-%04i" % (
-        row["iso_issued"][:4],
-        row["wfo"],
-        row["phenomena"],
-        row["significance"],
-        row["eventid"],
+    return (
+        f"/vtec/#{row['iso_issued'][:4]}-O-NEW-K{row['wfo']}-"
+        f"{row['phenomena']}-{row['significance']}-{row['eventid']:04.0f}"
     )
 
 
@@ -127,14 +124,19 @@ def application(environ, start_response):
     """Answer request."""
     fields = parse_formvars(environ)
     ctx = {}
-    ctx["lat"] = float(fields.get("lat", 41.99))
-    ctx["lon"] = float(fields.get("lon", -92.0))
-    ctx["sdate"] = datetime.datetime.strptime(
-        fields.get("sdate", "2002/1/1"), "%Y/%m/%d"
-    )
-    ctx["edate"] = datetime.datetime.strptime(
-        fields.get("edate", "2099/1/1"), "%Y/%m/%d"
-    )
+    try:
+        ctx["lat"] = float(fields.get("lat", 41.99))
+        ctx["lon"] = float(fields.get("lon", -92.0))
+        ctx["sdate"] = datetime.datetime.strptime(
+            fields.get("sdate", "2002/1/1"), "%Y/%m/%d"
+        )
+        ctx["edate"] = datetime.datetime.strptime(
+            fields.get("edate", "2099/1/1"), "%Y/%m/%d"
+        )
+    except ValueError:
+        headers = [("Content-type", "text/plain")]
+        start_response("404 File Not Found", headers)
+        return [b"Failed to parse inputs."]
 
     fmt = fields.get("fmt", "json")
     try:
@@ -147,7 +149,7 @@ def application(environ, start_response):
 
     data, df = get_events(ctx)
     if fmt == "xlsx":
-        fn = "sbw_%.4fN_%.4fW.xlsx" % (ctx["lat"], 0 - ctx["lon"])
+        fn = f"sbw_{ctx['lat']:.4f}N_{0 - ctx['lon']:.4f}W.xlsx"
         headers = [
             ("Content-type", EXL),
             ("Content-disposition", f"attachment; Filename={fn}"),
@@ -157,7 +159,7 @@ def application(environ, start_response):
         df.to_excel(bio, index=False)
         return [bio.getvalue()]
     if fmt == "csv":
-        fn = "sbw_%.4fN_%.4fW.csv" % (ctx["lat"], 0 - ctx["lon"])
+        fn = f"sbw_{ctx['lat']:.4f}N_{0 - ctx['lon']:.4f}W.csv"
         headers = [
             ("Content-type", "application/octet-stream"),
             ("Content-disposition", "attachment; Filename=" + fn),

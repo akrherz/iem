@@ -108,10 +108,15 @@ def run(wfo, damagetag, year):
 def application(environ, start_response):
     """Answer request."""
     fields = parse_formvars(environ)
-    wfo = fields.get("wfo", "DMX")[:4]
-    year = int(fields.get("year", 2015))
-    damagetag = fields.get("damagetag")
-    cb = fields.get("callback")
+    try:
+        wfo = fields.get("wfo", "DMX")[:4]
+        year = int(fields.get("year", 2015))
+        damagetag = fields.get("damagetag")
+        cb = fields.get("callback")
+    except ValueError:
+        headers = [("Content-type", "text/plain")]
+        start_response("404 File Not Found", headers)
+        return [b"Invalid parameters provided."]
 
     mckey = (
         f"/json/ibw_tags/{damagetag if damagetag is not None else wfo}/{year}"

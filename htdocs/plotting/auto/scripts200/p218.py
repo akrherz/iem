@@ -1,6 +1,12 @@
 """
 This produces an infographic with some of the information found
 presented in NWS CLI reports.
+
+<p>The high and low temperature gauges contain some extra statistical
+information based on the period of record observations for the site. Sometimes
+this period of record information comes from a nearby weather station. This
+informatiom also provides the coldest high temperature and warmest low
+temperature, both of which are not found within the raw CLI text product.
 """
 # Local
 from dataclasses import dataclass

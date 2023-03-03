@@ -1,4 +1,9 @@
-"""hourly precipitation reports"""
+"""
+This chart displays the number of hourly
+observations each month that reported measurable precipitation.  Sites
+are able to report trace amounts, but those reports are not considered
+in hopes of making the long term climatology comparable.
+"""
 import datetime
 import calendar
 
@@ -11,16 +16,8 @@ from pyiem.exceptions import NoDataFound
 
 def get_description():
     """Return a dict describing how to call this plotter"""
-    desc = {}
+    desc = {"description": __doc__, "data": True}
     ts = datetime.date.today()
-    desc["data"] = True
-    desc[
-        "description"
-    ] = """This chart displays the number of hourly
-    observations each month that reported measurable precipitation.  Sites
-    are able to report trace amounts, but those reports are not considered
-    in hopes of making the long term climatology comparable.
-    """
     desc["arguments"] = [
         dict(
             type="zstation",
@@ -92,9 +89,7 @@ def plotter(fdict):
         align="center",
     )
     for i, _ in enumerate(bars):
-        ax.text(
-            i + 1 - 0.25, monthly[i] + 1, "%.0f" % (monthly[i],), ha="center"
-        )
+        ax.text(i + 1 - 0.25, monthly[i] + 1, f"{monthly[i]:.0f}", ha="center")
     thisyear = df["count"].values.tolist()
     if not all([a is None for a in thisyear]):
         bars = ax.bar(
@@ -111,7 +106,7 @@ def plotter(fdict):
                 ax.text(
                     i + 1 + 0.25,
                     thisyear[i] + 1,
-                    "%.0f" % (thisyear[i],),
+                    f"{thisyear[i]:.0f}",
                     ha="center",
                 )
 
@@ -128,7 +123,7 @@ def plotter(fdict):
         ax.text(
             row["month"],
             row["max"],
-            "%i\n%i." % (row["max_year"], row["max"]),
+            f"{row['max_year']:.0f}\n{row['max']:.0f} ",
             ha="right",
         )
     ax.set_xticks(range(0, 13))
@@ -143,9 +138,7 @@ def plotter(fdict):
     ax.set_ylabel("Hours with 0.01+ inch precip")
     today = datetime.date.today()
     if today.year == year:
-        ax.set_xlabel(
-            "For %s, valid till %s." % (year, today.strftime("%-d %B"))
-        )
+        ax.set_xlabel(f"For {year}, valid till {today:%-d %B}.")
     ax.grid(True)
     ax.legend(ncol=3)
 
