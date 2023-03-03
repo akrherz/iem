@@ -1,4 +1,10 @@
-"""Precip bins"""
+"""
+Using long term data, five precipitation bins are
+constructed such that each bin contributes 20% to the annual precipitation
+total.  Using these 5 bins, an individual year's worth of data is
+compared.  With this comparison, you can say that one's years worth of
+departures can be explained by these differences in precipitation bins.
+"""
 import datetime
 
 import psycopg2.extras
@@ -11,15 +17,7 @@ from pyiem.exceptions import NoDataFound
 
 def get_description():
     """Return a dict describing how to call this plotter"""
-    desc = {}
-    desc["data"] = True
-    desc[
-        "description"
-    ] = """Using long term data, five precipitation bins are
-    constructed such that each bin contributes 20% to the annual precipitation
-    total.  Using these 5 bins, an individual year's worth of data is
-    compared.  With this comparison, you can say that one's years worth of
-    departures can be explained by these differences in precipitation bins."""
+    desc = {"description": __doc__, "data": True}
     desc["arguments"] = [
         dict(
             type="station",
@@ -50,14 +48,13 @@ def plotter(fdict):
     if year == today.year:
         jdaylimit = int(today.strftime("%j"))
 
-    table = "alldata_%s" % (station[:2],)
     endyear = int(datetime.datetime.now().year) + 1
 
     cursor.execute(
-        f"""
+        """
         select precip, sum(precip) OVER (ORDER by precip ASC) as rsum,
         sum(precip) OVER () as tsum,
-        min(year) OVER () as minyear from {table} where
+        min(year) OVER () as minyear from alldata where
         station = %s and precip > 0.009 and extract(doy from day) < %s and
         year < extract(year from now()) ORDER by precip ASC
     """,
@@ -94,7 +91,7 @@ def plotter(fdict):
     yearlytotals = np.zeros((endyear - minyear, 5), "f")
 
     cursor.execute(
-        f"""
+        """
     SELECT year,
     sum(case when precip >= %s and precip < %s then 1 else 0 end) as bin0,
     sum(case when precip >= %s and precip < %s then 1 else 0 end) as bin1,
@@ -106,7 +103,7 @@ def plotter(fdict):
     sum(case when precip >= %s and precip < %s then precip else 0 end) as tot2,
     sum(case when precip >= %s and precip < %s then precip else 0 end) as tot3,
     sum(case when precip >= %s and precip < %s then precip else 0 end) as tot4
-    from {table} where extract(doy from day) < %s and
+    from alldata where extract(doy from day) < %s and
     station = %s and precip > 0 and year > 1879 GROUP by year
     """,
         (
@@ -136,8 +133,8 @@ def plotter(fdict):
     )
     for row in cursor:
         for i in range(5):
-            yearlybins[int(row[0]) - minyear, i] = row["bin%s" % (i,)]
-            yearlytotals[int(row[0]) - minyear, i] = row["tot%s" % (i,)]
+            yearlybins[int(row[0]) - minyear, i] = row[f"bin{i}"]
+            yearlytotals[int(row[0]) - minyear, i] = row[f"tot{i}"]
 
     avgs = np.average(yearlybins, 0)
     df["avg_days"] = avgs
@@ -151,7 +148,7 @@ def plotter(fdict):
     if jdaylimit < 367:
         addl = f" thru {today:%-d %b}"
     title = (
-        f"{ctx['_sname']} [{minyear}-{endyear - 2}]\n"
+        f"{ctx['_sname']} [{minyear}-{endyear - 1}]\n"
         f"Daily Precipitation Contributions{addl}"
     )
     (fig, ax) = figure_axes(title=title, apctx=ctx)
@@ -168,7 +165,7 @@ def plotter(fdict):
         ax.text(
             _bar.get_x() + 0.2,
             avgs[i] + ybuffer,
-            "%.1f" % (avgs[i],),
+            f"{avgs[i]:.1f}",
             ha="center",
             zorder=2,
         )
@@ -176,7 +173,7 @@ def plotter(fdict):
         ax.text(
             i,
             max(avgs[i], dlast[i]) + 2 * ybuffer,
-            "%s%.1f%%" % ("+" if delta > 0 else "", delta),
+            f"{'+' if delta > 0 else ''}{delta:.1f}%",
             ha="center",
             color="r",
             bbox=dict(pad=0, facecolor="white", edgecolor="white"),
@@ -189,13 +186,13 @@ def plotter(fdict):
         width=0.4,
         fc="r",
         align="center",
-        label='%s = %.2f"' % (year, np.sum(yearlytotals[year - minyear, :])),
+        label=f'{year} = {np.sum(yearlytotals[year - minyear, :]):.2f}"',
     )
     for i, _bar in enumerate(bars):
         ax.text(
             _bar.get_x() + 0.2,
             dlast[i] + ybuffer,
-            "%.0f" % (dlast[i],),
+            f"{dlast[i]:.0f}",
             ha="center",
             fontsize="larger",
         )
@@ -208,7 +205,7 @@ def plotter(fdict):
         color="r",
         ha="center",
         va="top",
-        bbox=dict(facecolor="white", edgecolor="white"),
+        bbox={"facecolor": "white", "edgecolor": "white"},
     )
     ax.legend()
     ax.grid(True)
@@ -217,7 +214,7 @@ def plotter(fdict):
         0.5,
         -0.05,
         "Precipitation Bins [inch], split into equal 20%"
-        f" by rain volume ({(normal / 5.):.2f}in)",
+        f" by rain volume ({(normal / 5.):.2f}in) over period of record",
         transform=ax.transAxes,
         va="top",
         ha="center",
@@ -225,7 +222,7 @@ def plotter(fdict):
     ax.set_xticks(np.arange(0, 5))
     xlabels = []
     for i in range(5):
-        xlabels.append("%.2f-%.2f" % (bins[i], bins[i + 1]))
+        xlabels.append(f"{bins[i]:.2f}-{bins[i + 1]:.2f}")
     ax.set_xticklabels(xlabels)
     ax.set_ylim(top=ax.get_ylim()[1] * 1.1)
 

@@ -1,32 +1,46 @@
-"""Fancy pants visualization of CLI data."""
+"""
+This produces an infographic with some of the information found
+presented in NWS CLI reports.
+
+<p>The high and low temperature gauges contain some extra statistical
+information based on the period of record observations for the site. Sometimes
+this period of record information comes from a nearby weather station. This
+informatiom also provides the coldest high temperature and warmest low
+temperature, both of which are not found within the raw CLI text product.
+"""
 # Local
+from dataclasses import dataclass
 from datetime import date, timedelta
 from math import pi
 
 # third party
 import numpy as np
 import pandas as pd
+from matplotlib.patches import Rectangle
 from pyiem.reference import TRACE_VALUE
-from pyiem.network import Table as NetworkTable
-from pyiem.plot import figure, get_cmap
-from pyiem.util import get_autoplot_context, get_sqlalchemy_conn, LOG
+from pyiem.plot import figure
+from pyiem.util import get_autoplot_context, get_sqlalchemy_conn, logger
 from pyiem.exceptions import NoDataFound
 
+LOG = logger()
 TFORMAT = "%b %-d %Y %-I:%M %p %Z"
+
+
+@dataclass
+class GaugeParams:
+    """Simple."""
+
+    minval: float = None
+    maxval: float = None
+    avgval: float = None
+    stddev: float = None
+    ptiles: list = None
 
 
 def get_description():
     """Return a dict describing how to call this plotter"""
-    desc = {}
+    desc = {"description": __doc__, "data": True, "cache": 300}
     desc["defaults"] = {"_r": "t"}
-    # Shorten the cache as CLIs sometimes get updated frequently.
-    desc["cache"] = 300
-    desc["data"] = True
-    desc[
-        "description"
-    ] = """This produces an infographic with some of the information found
-    presented in NWS CLI reports.
-    """
     yest = date.today() - timedelta(days=1)
     desc["arguments"] = [
         dict(
@@ -56,51 +70,109 @@ def miss(val):
     return val
 
 
-def gauge(ax, row, col):
+def gauge(ax, row, col, params):
     """Make the gauge plot."""
-    cmap = get_cmap("RdBu")
-    rad = np.arange(0, 3)
-    az = np.arange(0, pi + 0.025, 0.025)
-    rad, az = np.meshgrid(rad, az)
-    z = az / pi
-    ax.grid(False)
-    ax.pcolormesh(
-        az,
-        rad,
-        z,
-        cmap=cmap,
-        shading="auto",
+    if col == "high":
+        if pd.notna(row["high_record"]):
+            params.maxval = row["high_record"]
+        if pd.notna(row["high_normal"]):
+            params.avgval = row["high_normal"]
+    else:
+        if pd.notna(row["low_record"]):
+            params.minval = float(row["low_record"])
+        if pd.notna(row["low_normal"]):
+            params.avgval = row["low_normal"]
+
+    # Polar coordinates, so 0 is maxval and pi is minval
+    colors = ["#BE0000", "#E48900", "#B6EB7A", "#0F4CBB", "#1B262C"]
+    # Okay, the chart will go from maxval (rad=pi) to maxval (rad=0)
+    bar_ends = [
+        float(params.avgval + 2 * params.stddev),
+        float(params.avgval + params.stddev),
+        float(params.avgval - params.stddev),
+        float(params.avgval - 2 * params.stddev),
+        params.minval,
+    ]
+    labels = [r"2$\sigma$", r"$\sigma$", r"-$\sigma$", r"-2$\sigma$", ""]
+    pos = 0
+    positive_delta = float(params.maxval - params.avgval)
+    negative_delta = float(params.avgval - params.minval)
+    for val, color, label in zip(bar_ends, colors, labels):
+        if val > params.avgval:
+            ha = "left"
+            if val > params.maxval:
+                continue
+            pos2 = (params.maxval - val) / positive_delta * pi / 2.0
+        else:
+            ha = "right"
+            if val < params.minval:
+                continue
+            pos2 = pi / 2.0 + (
+                (params.avgval - val) / negative_delta * pi / 2.0
+            )
+        ax.add_patch(Rectangle((pos, 1), pos2 - pos, 2, color=color))
+        if abs(val - params.minval) > 1 and abs(val - params.maxval) > 1:
+            ax.text(pos2, 3.1, f"{val:.0f}", ha=ha)
+        ax.text(
+            pos2,
+            0.8,
+            label,
+            va="center",
+            ha="left" if ha == "right" else "right",
+        )
+        pos = pos2
+    # manual placement of max/min
+    ax.text(
+        0 if col == "low" else pi,
+        3.1,
+        f"{params.maxval:.0f}" if col == "low" else f"{params.minval:.0f}",
+        ha="left" if col == "low" else "right",
     )
+
+    # Add ticks for percentiles 10 through 90
+    for val in params.ptiles:
+        if val > params.avgval:
+            pos = (params.maxval - val) / positive_delta * pi / 2.0
+        else:
+            pos = pi / 2.0 + (
+                (params.avgval - val) / negative_delta * pi / 2.0
+            )
+        ax.add_patch(Rectangle((pos, 1), 0.001, 2, color="white"))
+
+    # Tick for params.avgval
+    ax.add_patch(Rectangle((pi / 2.0, 1), 0.001, 2, color="k"))
+    # Median
+    val = params.ptiles[4]
+    if val > params.avgval:
+        pos = (params.maxval - val) / positive_delta * pi / 2.0
+    else:
+        pos = pi / 2.0 + ((params.avgval - val) / negative_delta * pi / 2.0)
+    ax.add_patch(Rectangle((pos, 1), 0.001, 2, color="r"))
+
+    ax.grid(False)
     ax.set_xlim(0, pi)
     ax.set_xticks([])
-    maxval = row[f"{col}_record"]
-    normal = row[f"{col}_normal"]
-    if pd.isna(normal):
-        normal = row[col]
-    if pd.isna(maxval):
-        maxval = normal + (20 if col == "high" else -20)
-    minval = normal - (maxval - normal)
-    ratio = (row[col] - minval) / (maxval - minval)
-    if col == "high":
-        ratio = 1 - ratio
-    if ratio < 0:
-        ratio = 0
-    elif ratio > 1:
-        ratio = 1
-    theta = ratio * pi
+    if row[col] >= params.avgval:
+        theta = (params.maxval - row[col]) / positive_delta * (pi / 2.0)
+        theta = max([0, theta])
+    else:
+        theta = (pi / 2.0) + (params.avgval - row[col]) / negative_delta * (
+            pi / 2.0
+        )
+        theta = min([pi, theta])
     ax.text(
-        0 if col == "high" else pi,
-        3.25,
-        f"Record:\n"
+        -0.05 if col == "high" else pi + 0.05,
+        2,
+        f"Record: "
         rf"{miss(row[col + '_record'])}$^\circ$F"
         f"\n{', '.join([str(s) for s in row[col + '_record_years']])}",
-        va="center",
+        va="top",
         ha="left" if col == "high" else "right",
     )
     ax.text(
         pi / 2,
         3.25,
-        rf"Avg: {miss(row[f'{col}_normal'])}$^\circ$F",
+        "Avg:\n" + f"{miss(row[f'{col}_normal'])}" + r"$^\circ$F",
         ha="center",
     )
     ax.set_rorigin(-4.5)
@@ -115,6 +187,7 @@ def gauge(ax, row, col):
         head_length=1,
         fc="yellow",
         ec="k",
+        clip_on=False,
     )
     ax.text(
         theta,
@@ -185,9 +258,6 @@ def precip(fig, row, col):
             ha="left",
             bbox=dict(color="white"),
         )
-    # ax.text(0, vals[0] + 0.04, str(row[col]), ha="center")
-    # ax.text(1, vals[1] + 0.04, str(row[col + "_month"]), ha="center")
-    # ax.text(2, vals[2] + 0.04, str(row[col + "_" + jan1]), ha="center")
     ax.set_xticks(range(3))
     ax.set_xticklabels(
         [
@@ -201,10 +271,36 @@ def precip(fig, row, col):
     ax.set_yticks([])
 
 
+def build_params(clsite, dt):
+    """Figure out some metrics"""
+    hp = GaugeParams()
+    lp = GaugeParams()
+    if clsite is not None:
+        with get_sqlalchemy_conn("coop") as conn:
+            df = pd.read_sql(
+                "SELECT year, high, low from alldata WHERE "
+                "station = %s and sday = %s",
+                conn,
+                params=(clsite, f"{dt:%m%d}"),
+                index_col="year",
+            )
+        hp.minval = df["high"].min()
+        hp.maxval = df["high"].max()
+        hp.avgval = df["high"].mean()
+        hp.stddev = df["high"].std()
+        hp.ptiles = df["high"].quantile(np.arange(0.1, 0.91, 0.1)).to_list()
+        lp.maxval = df["low"].max()
+        lp.minval = df["low"].min()
+        lp.avgval = df["low"].mean()
+        lp.stddev = df["low"].std()
+        lp.ptiles = df["low"].quantile(np.arange(0.1, 0.91, 0.1)).to_list()
+
+    return hp, lp
+
+
 def plotter(fdict):
     """Go"""
     ctx = get_autoplot_context(fdict, get_description())
-    nt = NetworkTable("NWSCLI")
     with get_sqlalchemy_conn("iem") as conn:
         df = pd.read_sql(
             "SELECT * from cli_data where station = %s and valid = %s",
@@ -214,10 +310,15 @@ def plotter(fdict):
         )
     if df.empty:
         raise NoDataFound("No CLI data found for date/station.")
+    # Build temperature gauge params
+    highparams, lowparams = build_params(
+        ctx["_nt"].sts[ctx["station"]]["climate_site"],
+        ctx["date"],
+    )
     row = df.iloc[0]
     title = (
         f"{ctx['date'].strftime('%-d %b %Y')} CLImate Report for "
-        f"{ctx['station']} {nt.sts[ctx['station']]['name']}"
+        f"{ctx['_sname']}"
     )
     fig = figure(title=title, apctx=ctx)
 
@@ -228,11 +329,9 @@ def plotter(fdict):
             [0.05, 0.48, 0.3, 0.4],
             projection="polar",
             anchor="SW",
+            frame_on=False,
         )
-        try:
-            gauge(ax, row, "high")
-        except Exception as exp:
-            LOG.exception(exp)
+        gauge(ax, row, "high", highparams)
 
     # Low Temp
     fig.text(0.05, 0.42, "Low Temperature", fontsize=24)
@@ -241,28 +340,22 @@ def plotter(fdict):
             [0.05, 0.05, 0.3, 0.4],
             projection="polar",
             anchor="SW",
+            frame_on=False,
         )
-        try:
-            gauge(ax, row, "low")
-        except Exception as exp:
-            LOG.exception(exp)
+        gauge(ax, row, "low", lowparams)
+
+    fig.text(0.05, 0.05, "Lines: Black=Avg, Red=Median, White=10th-90th Ptile")
 
     fig.text(0.5, 0.85, "Precipitation", fontsize=24)
-    try:
-        precip(fig, row, "precip")
-    except Exception as exp:
-        LOG.exception(exp)
+    precip(fig, row, "precip")
 
     if row["snow"] is not None or row["snow_month"] is not None:
         fig.text(0.5, 0.42, "Snowfall", fontsize=24)
-        try:
-            precip(fig, row, "snow")
-        except Exception as exp:
-            LOG.exception(exp)
+        precip(fig, row, "snow")
 
     fig.text(0.3, 0.01, f"Based on text: {row['product']}")
     return fig, df
 
 
 if __name__ == "__main__":
-    plotter({"station": "KUKI", "date": "2021-03-28"})
+    plotter({"station": "PBRW", "date": "2023-03-01"})

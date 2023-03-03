@@ -47,6 +47,8 @@ RewriteRule ^/search /search.py [QSA]
 
     # Default handler for python scripts
     WSGIProcessGroup iemwsgi_ap
+    # Allow wsgi scripts to emit 404s that can come back to the handler.
+    WSGIErrorOverride On
     AddHandler wsgi-script .py
     Options +ExecCGI
 

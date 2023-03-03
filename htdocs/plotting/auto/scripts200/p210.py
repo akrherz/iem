@@ -1,22 +1,23 @@
-"""This application generates a map of the per WFO office usage of a
-    given text product identifier based on unofficial IEM archives of NWS
-    Text Product data.  The three character IDs presented here are sometimes
-    called the AWIPS ID or AFOS ID.</p>
+"""
+This application generates a map of the per WFO office usage of a
+given text product identifier based on unofficial IEM archives of NWS
+Text Product data.  The three character IDs presented here are sometimes
+called the AWIPS ID or AFOS ID.</p>
 
-    <p>If you pick the "Year of First/Last Issuance",
-    please be careful with the
-    start datetime setting as it will floor the time period that products
-    are searched for.</p>
+<p>If you pick the "Year of First/Last Issuance",
+please be careful with the
+start datetime setting as it will floor the time period that products
+are searched for.</p>
 
-    <p>The IEM Archives are generally reliable back to 2001, so please note
-    that any 2001 values plotted on the map as the first year would be a false
-    positive.</p>
+<p>The IEM Archives are generally reliable back to 2001, so please note
+that any 2001 values plotted on the map as the first year would be a false
+positive.</p>
 
-    <p>Running a plot for multiple years of data will be somewhat slow
-    (30+ seconds), so please be patient with it!</p>
+<p>Running a plot for multiple years of data will be somewhat slow
+(30+ seconds), so please be patient with it!</p>
 
-    <p><a href="?q=235">Autoplot 235</a> presents a monthly/yearly chart of
-    issuance counts for a single Weather Forecast Offices.</p>
+<p><a href="?q=235">Autoplot 235</a> presents a monthly/yearly chart of
+issuance counts for a single Weather Forecast Offices.</p>
 """
 import datetime
 
@@ -118,11 +119,11 @@ def plotter(fdict):
 
     data = {}
     if ctx["var"] == "count":
-        gdf = df.groupby("source").sum(numeric_only=True)
+        gdf = df.groupby("source").sum()
     elif ctx["var"] == "last":
-        gdf = df.groupby("source").max(numeric_only=True)
+        gdf = df.groupby("source").max()
     else:  # first
-        gdf = df.groupby("source").min(numeric_only=True)
+        gdf = df.groupby("source").min()
     minval = 1
     maxval = gdf["count"].max()
     if ctx["var"] in ["last", "first"]:
@@ -173,4 +174,4 @@ def plotter(fdict):
 
 
 if __name__ == "__main__":
-    plotter(dict(pil="AWW", var="first"))
+    plotter({"pil": "AWW", "var": "last"})
