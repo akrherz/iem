@@ -259,7 +259,10 @@ if (isset($_REQUEST['pid'])) {
 /* Could define a custom box */
 if (isset($_GET["bbox"])) {
     $sector = "custom";
-    $bbox = isset($_GET["bbox"]) ? explode(",", $_GET["bbox"]) : die("No BBOX");
+    $bbox = explode(",", $_GET["bbox"]);
+    if (sizeof($bbox) != 4){
+        xssafe("</script>");
+    }
     $sectors["custom"] = array("epsg" => 4326, "ext" => $bbox);
 }
 /* Fetch bounds based on wfo as being set by bounds */
