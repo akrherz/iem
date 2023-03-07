@@ -45,6 +45,9 @@ python check_n0q.py
 cd ../era5
 python fetch_era5.py $(date -u --date '6 days ago' +'%Y %m %d')
 
+cd ../climodat
+python era5land_solarrad.py $(date -u --date '7 days ago' +'%Y %m %d')
+
 cd ../iemre
 # wait some more so to not collide with other IEMRE processes
 sleep 600

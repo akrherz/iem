@@ -57,22 +57,18 @@ def do(date):
         return
     with ncopen(fn, timeout=300) as nc:
         rad = nc.variables["SWGDN"][7:, :, :]
-        cs_rad = nc.variables["SWGDNCLR"][7:, :, :]
         xc = nc.variables["lon"][:]
         yc = nc.variables["lat"][:]
 
     if not os.path.isfile(fn2):
         LOG.warning("%s miss[%s] -> zeros", sts.strftime("%Y%m%d"), fn2)
         rad2 = 0
-        cs_rad2 = 0
     else:
         with ncopen(fn2, timeout=300) as nc:
             rad2 = nc.variables["SWGDN"][:7, :, :]
-            cs_rad2 = nc.variables["SWGDNCLR"][:7, :, :]
 
     # W m-2 -> J m-2 s-1 -> J m-2 dy-1
     total = (np.sum(rad, 0) + np.sum(rad2, 0)) * 3600.0
-    cs_total = (np.sum(cs_rad, 0) + np.sum(cs_rad2, 0)) * 3600.0
 
     ccursor.execute(
         "SELECT station, ST_x(geom), ST_y(geom), temp24_hour "
@@ -106,25 +102,6 @@ def do(date):
         # MJ m-2 dy-1
         rad_mj = float(val) / 1000000.0
 
-        z0 = cs_total[gridys[0], gridxs[0]]
-        z1 = cs_total[gridys[1], gridxs[1]]
-        z2 = cs_total[gridys[2], gridxs[2]]
-        z3 = cs_total[gridys[3], gridxs[3]]
-
-        cs_val = (
-            z0 / distances[0]
-            + z1 / distances[1]
-            + z2 / distances[2]
-            + z3 / distances[3]
-        ) / (
-            1.0 / distances[0]
-            + 1.0 / distances[1]
-            + 1.0 / distances[2]
-            + 1.0 / distances[3]
-        )
-        # MJ m-2 dy-1
-        cs_rad_mj = float(cs_val) / 1000000.0
-
         if rad_mj < 0:
             LOG.info("WHOA! Negative RAD: %.2f, station: %s", rad_mj, row[0])
             continue
@@ -135,8 +112,8 @@ def do(date):
             date2 = (date + datetime.timedelta(days=1)).strftime("%Y-%m-%d")
         ccursor2.execute(
             "UPDATE alldata SET merra_srad = %s, "
-            "merra_srad_cs = %s WHERE day = %s and station = %s",
-            (rad_mj, cs_rad_mj, date2, row[0]),
+            "WHERE day = %s and station = %s",
+            (rad_mj, date2, row[0]),
         )
     ccursor2.close()
     pgconn.commit()
