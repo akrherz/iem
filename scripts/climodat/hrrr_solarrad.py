@@ -8,132 +8,155 @@ import datetime
 import os
 import sys
 
-import pytz
+from affine import Affine
 import pyproj
 import numpy as np
+import pandas as pd
+import geopandas as gpd
 import pygrib
-from pyiem.util import get_dbconn, utc, logger
+from pyiem.grid.zs import CachingZonalStats
+from pyiem.util import get_dbconn, utc, logger, get_sqlalchemy_conn
 
 LOG = logger()
-P4326 = pyproj.Proj("epsg:4326")
-LCC = pyproj.Proj(
-    "+lon_0=-97.5 +y_0=0.0 +R=6367470. +proj=lcc +x_0=0.0"
+LCC = (
+    "+proj=lcc +lon_0=-97.5 +y_0=0.0 +R=6367470. +x_0=0.0"
     " +units=m +lat_2=38.5 +lat_1=38.5 +lat_0=38.5"
 )
 
 SWITCH_DATE = utc(2014, 10, 10, 20)
 
 
-def run(ts):
+def compute_regions(affine, rsds, df):
+    """Do the spatial averaging work."""
+    with get_sqlalchemy_conn("coop") as conn:
+        gdf = gpd.read_postgis(
+            """
+            SELECT t.id, ST_Transform(c.geom, %s) as geo
+            from stations t JOIN climodat_regions c on
+            (t.iemid = c.iemid) ORDER by t.id ASC
+            """,
+            conn,
+            index_col="id",
+            params=(LCC,),
+            geom_col="geo",
+        )
+    czs = CachingZonalStats(affine)
+    data = czs.gen_stats(np.flipud(rsds), gdf["geo"])
+    for i, sid in enumerate(gdf.index.values):
+        df.at[sid, "hrrr_srad"] = data[i]
+
+
+def build_stations(dt) -> pd.DataFrame:
+    """Figure out what we need data for."""
+    with get_sqlalchemy_conn("coop") as conn:
+        df = pd.read_sql(
+            """
+            SELECT station, st_x(ST_Transform(geom, %s)) as projx,
+            st_y(st_transform(geom, %s)) as projy, temp_hour
+            from alldata a JOIN stations t on (a.station = t.id) WHERE
+            t.network ~* 'CLIMATE' and a.day = %s and
+            st_x(geom) between -127 and -65
+            ORDER by station ASC
+            """,
+            conn,
+            params=(LCC, LCC, dt),
+            index_col="station",
+        )
+    df["hrrr_srad"] = np.nan
+    df["i"] = np.nan
+    df["j"] = np.nan
+    LOG.info("Found %s database entries", len(df.index))
+    return df
+
+
+def get_grid(grb):
+    """Figure out the x-y coordinates."""
+    pj = pyproj.Proj(grb.projparams)
+    # ll
+    lat1 = grb["latitudeOfFirstGridPointInDegrees"]
+    lon1 = grb["longitudeOfFirstGridPointInDegrees"]
+    llx, lly = pj(lon1, lat1)
+    xaxis = llx + grb["DxInMetres"] * np.arange(grb["Nx"])
+    yaxis = lly + grb["DyInMetres"] * np.arange(grb["Ny"])
+    return xaxis, yaxis
+
+
+def compute(df, sids, dt, do_regions=False):
     """Process data for this timestamp"""
-    pgconn = get_dbconn("coop")
-    cursor = pgconn.cursor()
-    cursor2 = pgconn.cursor()
+    # Life choice is to run 6z to 6z
+    sts = utc(dt.year, dt.month, dt.day, 6)
+    ets = sts + datetime.timedelta(hours=24)
+
     total = None
     xaxis = None
     yaxis = None
-    for hr in range(5, 23):  # Only need 5 AM to 10 PM for solar
-        utcts = ts.replace(hour=hr).astimezone(pytz.UTC)
-        fn = utcts.strftime(
+    for now in pd.date_range(sts, ets, freq="1H"):
+        fn = now.strftime(
             "/mesonet/ARCHIVE/data/%Y/%m/%d/model/hrrr/%H/"
             "hrrr.t%Hz.3kmf00.grib2"
         )
         if not os.path.isfile(fn):
+            LOG.info("Missing %s", fn)
             continue
         grbs = pygrib.open(fn)
         try:
-            if utcts >= SWITCH_DATE:
+            if now >= SWITCH_DATE:
                 grb = grbs.select(name="Downward short-wave radiation flux")
             else:
                 grb = grbs.select(parameterNumber=192)
         except ValueError:
-            # Don't complain about 10 PM file, which may not be complete yet
-            if utcts.hour not in [3, 4]:
-                LOG.info("%s had no solar rad", fn)
-            continue
-        if not grb:
-            LOG.info("Could not find SWDOWN in HRR %s", fn)
             continue
         g = grb[0]
         if total is None:
+            xaxis, yaxis = get_grid(g)
+            affine = Affine(
+                g["DxInMetres"], 0, xaxis[0], 0, 0 - g["DyInMetres"], yaxis[-1]
+            )
             total = g.values
-            lat1 = g["latitudeOfFirstGridPointInDegrees"]
-            lon1 = g["longitudeOfFirstGridPointInDegrees"]
-            llcrnrx, llcrnry = LCC(lon1, lat1)
-            nx = g["Nx"]
-            ny = g["Ny"]
-            dx = g["DxInMetres"]
-            dy = g["DyInMetres"]
-            xaxis = llcrnrx + dx * np.arange(nx)
-            yaxis = llcrnry + dy * np.arange(ny)
         else:
             total += g.values
 
     if total is None:
-        LOG.info("No HRRR data for %s", ts.strftime("%d %b %Y"))
+        LOG.warning("No HRRR data for %s", dt)
         return
 
     # Total is the sum of the hourly values
     # We want MJ day-1 m-2
-    total = (total * 3600.0) / 1000000.0
+    total = (total * 3600.0) / 1_000_000.0
 
-    cursor.execute(
-        "SELECT station, ST_x(geom), ST_y(geom), temp24_hour from "
-        "alldata a JOIN stations t on (a.station = t.id) where day = %s "
-        "and network ~* 'CLIMATE' ",
-        (ts.strftime("%Y-%m-%d"),),
-    )
-    for row in cursor:
-        (x, y) = LCC(row[1], row[2])
-        i = np.digitize([x], xaxis)[0]
-        j = np.digitize([y], yaxis)[0]
+    df["i"] = np.digitize(df["projx"].values, xaxis)
+    df["j"] = np.digitize(df["projy"].values, yaxis)
+    for sid, row in df.loc[sids].iterrows():
+        df.at[sid, "hrrr_srad"] = total[int(row["j"]), int(row["i"])]
 
-        try:
-            rad_mj = float(total[j, i])
-        except IndexError:
-            LOG.info("station %s outside of bounds j:%s i:%s", row[0], j, i)
-            continue
+    if do_regions:
+        compute_regions(affine, total, df)
 
-        if rad_mj < 0:
-            LOG.info("WHOA! Negative RAD: %.2f, station: %s", rad_mj, row[0])
-            continue
-        # if our station is 12z, then this day's data goes into 'tomorrow'
-        # if our station is not, then this day is today
-        date2 = ts.strftime("%Y-%m-%d")
-        if row[3] in range(4, 13):
-            date2 = (ts + datetime.timedelta(days=1)).strftime("%Y-%m-%d")
-        cursor2.execute(
-            f"UPDATE alldata_{row[0][:2]} SET hrrr_srad = %s WHERE "
-            "day = %s and station = %s",
-            (rad_mj, date2, row[0]),
-        )
-    cursor.close()
-    cursor2.close()
-    pgconn.commit()
-    pgconn.close()
+    LOG.info("IA0200 %s", df.at["IA0200", "hrrr_srad"])
 
 
 def main(argv):
     """Do Something"""
-    if len(argv) == 4:
-        sts = utc(int(argv[1]), int(argv[2]), int(argv[3]), 12, 0)
-        sts = sts.astimezone(pytz.timezone("America/Chicago"))
-        run(sts)
+    dt = datetime.date(int(argv[1]), int(argv[2]), int(argv[3]))
+    df = build_stations(dt)
+    # We currently do two options
+    # 1. For morning sites 1-11 AM, they get yesterday's radiation
+    sids = df[(df["temp_hour"] > 0) & (df["temp_hour"]) < 12].index.values
+    compute(df, sids, dt - datetime.timedelta(days=1), True)
+    # 2. All other sites get today
+    sids = df[df["hrrr_srad"].isna()].index.values
+    compute(df, sids, dt)
 
-    elif len(argv) == 3:
-        # Run for a given month!
-        sts = utc(int(argv[1]), int(argv[2]), 1, 12, 0)
-        # run for last date of previous month as well
-        sts = sts.astimezone(pytz.timezone("America/Chicago"))
-        sts = sts - datetime.timedelta(days=1)
-        ets = sts + datetime.timedelta(days=45)
-        ets = ets.replace(day=1)
-        now = sts
-        while now < ets:
-            run(now)
-            now += datetime.timedelta(days=1)
-    else:
-        LOG.info("ERROR: call with hrrr_solarrad.py <YYYY> <mm> <dd>")
+    pgconn = get_dbconn("coop")
+    cursor = pgconn.cursor()
+    for sid, row in df[df["hrrr_srad"].notna()].iterrows():
+        cursor.execute(
+            "UPDATE alldata set hrrr_srad = %s where station = %s and "
+            "day = %s",
+            (row["hrrr_srad"], sid, dt),
+        )
+    cursor.close()
+    pgconn.commit()
 
 
 if __name__ == "__main__":
