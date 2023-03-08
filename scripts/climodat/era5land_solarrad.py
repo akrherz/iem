@@ -9,10 +9,32 @@ import sys
 
 import numpy as np
 import pandas as pd
-from pyiem.iemre import hourly_offset
+import geopandas as gpd
+from affine import Affine
+from pyiem.grid.zs import CachingZonalStats
+from pyiem.iemre import hourly_offset, WEST, NORTH
 from pyiem.util import get_dbconn, ncopen, logger, get_sqlalchemy_conn, utc
 
 LOG = logger()
+
+
+def compute_regions(rsds, df):
+    """Do the spatial averaging work."""
+    with get_sqlalchemy_conn("coop") as conn:
+        gdf = gpd.read_postgis(
+            """
+            SELECT t.id, c.geom from stations t JOIN climodat_regions c on
+            (t.iemid = c.iemid) ORDER by t.id ASC
+            """,
+            conn,
+            index_col="id",
+            geom_col="geom",
+        )
+    affine = Affine(0.1, 0, WEST, 0, -0.1, NORTH)
+    czs = CachingZonalStats(affine)
+    data = czs.gen_stats(np.flipud(rsds), gdf["geom"])
+    for i, sid in enumerate(gdf.index.values):
+        df.at[sid, "era5land_srad"] = data[i]
 
 
 def build_stations(dt) -> pd.DataFrame:
@@ -23,8 +45,7 @@ def build_stations(dt) -> pd.DataFrame:
             SELECT station, st_x(geom) as lon, st_y(geom) as lat, temp_hour
             from alldata a JOIN stations t on (a.station = t.id) WHERE
             t.network ~* 'CLIMATE' and a.day = %s and
-            substr(station, 3, 1) not in ('C', 'D') and
-            substr(station, 3, 4) != '0000' and st_x(geom) between -127 and -65
+            st_x(geom) between -127 and -65
             ORDER by station ASC
             """,
             conn,
@@ -38,7 +59,7 @@ def build_stations(dt) -> pd.DataFrame:
     return df
 
 
-def compute(df, sids, dt):
+def compute(df, sids, dt, do_regions=False):
     """Do the magic."""
     # Life choice is to run 6z to 6z
     sts = utc(dt.year, dt.month, dt.day, 6)
@@ -66,6 +87,9 @@ def compute(df, sids, dt):
     for sid, row in df.loc[sids].iterrows():
         df.at[sid, "era5land_srad"] = rsds[int(row["j"]), int(row["i"])]
 
+    if do_regions:
+        compute_regions(rsds, df)
+
     LOG.info("IA0200 %s", df.at["IA0200", "era5land_srad"])
 
 
@@ -76,7 +100,7 @@ def do(dt):
     # We currently do two options
     # 1. For morning sites 1-11 AM, they get yesterday's radiation
     sids = df[(df["temp_hour"] > 0) & (df["temp_hour"]) < 12].index.values
-    compute(df, sids, dt - datetime.timedelta(days=1))
+    compute(df, sids, dt - datetime.timedelta(days=1), True)
     # 2. All other sites get today
     sids = df[df["era5land_srad"].isna()].index.values
     compute(df, sids, dt)
