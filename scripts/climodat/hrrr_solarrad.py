@@ -55,7 +55,7 @@ def build_stations(dt) -> pd.DataFrame:
             st_y(st_transform(geom, %s)) as projy, temp_hour
             from alldata a JOIN stations t on (a.station = t.id) WHERE
             t.network ~* 'CLIMATE' and a.day = %s and
-            st_x(geom) between -127 and -65
+            st_x(geom) between -127 and -65 and state != 'PR'
             ORDER by station ASC
             """,
             conn,
