@@ -24,7 +24,7 @@ $year = isset($_GET["year"]) ? intval($_GET["year"]) : date("Y", $ts);
 $hour = isset($_GET["hour"]) ? intval($_GET["hour"]) : date("H", $ts);
 $minute = isset($_GET["minute"]) ? intval($_GET["minute"]) : date("i", $ts);
 $extents = isset($_GET["BBOX"]) ? explode(",", $_GET["BBOX"]) : array(-105, 40, -97, 47);
-$ts = mktime($hour, $minute, 0, $month, $day, $year);
+$dt = new DateTime("{$year}-{$month}-{$day} {$hour}:{$minute}");
 
 /* This is our final image!  */
 $map2 = new mapObj($mapFile);
@@ -41,7 +41,7 @@ $bar640t->draw($map2, $img2);
 $tlayer = $map2->getLayerByName("bar640t-title");
 $point = new pointObj();
 $point->setXY(80, 10);
-$d = date("d M h:i A", $ts);
+$d = $dt->format("d M h:i A");
 $point->draw($map2, $tlayer, $img2, 0, "NEXRAD by Year for Time: $d");
 
 /* Draw the subtitle */
@@ -71,7 +71,8 @@ $gdimg_dest = imagecreatefromstring($img2->getBytes());
 $i = 0;
 $utcnow = new DateTime('now', new DateTimeZone("UTC"));
 for ($year = $beginYear; $year <= $endYear; $year++) {
-    $radts = new DateTime("{$year}-{$month}-{$day} {$hour}:{$minute}", new DateTimeZone("UTC"));
+    $radts = new DateTime("{$year}-{$month}-{$day} {$hour}:{$minute}");
+    $radts->setTimezone(new DateTimeZone("UTC"));
     if ($radts > $utcnow) {
         continue;
     }
