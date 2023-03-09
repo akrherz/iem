@@ -23,6 +23,8 @@ LCC = (
     " +units=m +lat_2=38.5 +lat_1=38.5 +lat_0=38.5"
 )
 
+# NOTE: for unsure reasons, the old HRRR data prior to this timestamp gets
+# invalidly decoded by present day pygrib, so we just abort for now.
 SWITCH_DATE = utc(2014, 10, 10, 20)
 
 
@@ -85,6 +87,9 @@ def compute(df, sids, dt, do_regions=False):
     """Process data for this timestamp"""
     # Life choice is to run 6z to 6z
     sts = utc(dt.year, dt.month, dt.day, 6)
+    if sts < SWITCH_DATE:
+        LOG.warning("Aborting due to inability to process archive.")
+        return
     ets = sts + datetime.timedelta(hours=24)
 
     total = None
