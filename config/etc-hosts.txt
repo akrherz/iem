@@ -68,10 +68,11 @@
 # Database stuff
 
 ### iemdb PostgreSQL
-# iemdb1 metvm4-dc
+# iemdb1 metvm33-dc
 10.90.12.21 iemdb1.local
 10.90.12.21 iemdb-afos.local
 10.90.12.21 iemdb-asos1min.local
+10.90.12.21 iemdb-coop.local
 10.90.12.21 iemdb-frost.local
 10.90.12.21 iemdb-id3b.local
 10.90.12.21 iemdb-idep.local
@@ -96,7 +97,6 @@
 ### iemdb2 PostgreSQL
 # iemdb2 metvm2-dc
 10.90.12.22 iemdb2.local
-10.90.12.22 iemdb-coop.local
 10.90.12.22 iemdb-hads iemdb-hads.local
 10.90.12.22 iemdb-talltowers.local
 10.90.12.22 iemdb-iemre.local
