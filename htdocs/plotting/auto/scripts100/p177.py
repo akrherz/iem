@@ -471,32 +471,22 @@ def make_daily_plot(ctx):
 
 def make_battery_plot(ctx):
     """Generate a plot of battery"""
-    icursor = ctx["pgconn"].cursor(cursor_factory=psycopg2.extras.DictCursor)
-    icursor.execute(
-        """SELECT valid, battv_min_qc from sm_hourly
+    with get_sqlalchemy_conn("isuag") as conn:
+        df = pd.read_sql(
+            """SELECT valid, battv_min_qc from sm_hourly
     where station = %s and valid >= %s and valid < %s
     and battv_min_qc is not null ORDER by valid ASC
-    """,
-        (
-            ctx["station"],
-            ctx["sts"].strftime("%Y-%m-%d 00:00"),
-            ctx["ets"].strftime("%Y-%m-%d 23:59"),
-        ),
-    )
-    dates = []
-    battv = []
-    for row in icursor:
-        dates.append(row[0])
-        battv.append(row[1])
+            """,
+            conn,
+            params=(ctx["station"], ctx["sts"], ctx["ets"]),
+        )
 
-    df = pd.DataFrame(dict(dates=dates, battv=battv))
     title = f"ISUSM Station: {ctx['_sname']} Timeseries\n" "Battery Voltage"
     (fig, ax) = figure_axes(apctx=ctx, title=title)
-    ax.plot(dates, battv)
+    ax.plot(df["valid"], df["battv_min_qc"])
     ax.grid(True)
     ax.set_ylabel("Battery Voltage [V]")
-    ax.xaxis.set_major_formatter(mdates.DateFormatter("%-d %b\n%Y"))
-    ax.legend(loc="best", ncol=2, fontsize=10)
+    xaxis_magic(ctx, ax)
     return fig, df
 
 

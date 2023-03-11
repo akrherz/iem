@@ -1,4 +1,8 @@
-"""comparison"""
+"""
+This application generates a comparison of daily
+high and low temperatures between two automated ASOS sites of your
+choosing.
+"""
 import datetime
 
 import pandas as pd
@@ -15,14 +19,7 @@ PDICT = {
 
 def get_description():
     """Return a dict describing how to call this plotter"""
-    desc = {}
-    desc["data"] = True
-    desc["cache"] = 86400
-    desc[
-        "description"
-    ] = """This application generates a comparison of daily
-    high and low temperatures between two automated ASOS sites of your
-    choosing."""
+    desc = {"description": __doc__, "data": True, "cache": 86400}
     edate = datetime.date.today()
     sdate = edate - datetime.timedelta(days=90)
     desc["arguments"] = [
@@ -113,16 +110,9 @@ def plotter(fdict):
     ax = fig.subplots(2, 1, sharex=True)
 
     ax[0].set_title(
-        ("[%s] %s minus [%s] %s\n%s Difference: %s - %s")
-        % (
-            station1,
-            ctx["_nt1"].sts[station1]["name"],
-            station2,
-            ctx["_nt2"].sts[station2]["name"],
-            PDICT[varname],
-            sdate.strftime("%-d %b %Y"),
-            edate.strftime("%-d %b %Y"),
-        )
+        f"[{station1}] {ctx['_nt1'].sts[station1]['name']} minus "
+        f"[{station2}] {ctx['_nt2'].sts[station2]['name']}\n"
+        f"{PDICT[varname]} Difference: {sdate:%-d %b %Y} - {edate:%-d %b %Y}"
     )
 
     for i, vname in enumerate(["high", "low"]):
@@ -138,7 +128,7 @@ def plotter(fdict):
         ax[i].text(
             0.5,
             0.95,
-            "%s Higher (%.1f%%)" % (station1, freq1),
+            f"{station1} Higher ({freq1:.1f}%)",
             transform=ax[i].transAxes,
             va="top",
             ha="center",
@@ -148,7 +138,7 @@ def plotter(fdict):
         ax[i].text(
             0.5,
             0.01,
-            "%s Higher (%.1f%%)" % (station2, freq2),
+            f"{station2} Higher ({freq2:.1f}%)",
             transform=ax[i].transAxes,
             va="bottom",
             ha="center",
@@ -158,7 +148,7 @@ def plotter(fdict):
         ax[i].text(
             0.95,
             0.99,
-            "Bias: %.2f" % (df[col].mean(),),
+            f"Bias: {df[col].mean():.2f}",
             transform=ax[i].transAxes,
             va="top",
             ha="right",
@@ -166,8 +156,8 @@ def plotter(fdict):
             fontsize=8,
         )
         ax[i].set_ylabel(
-            (r"%s %s Difference $^\circ$F")
-            % (vname.capitalize(), varname.capitalize())
+            f"{vname.capitalize()} {varname.capitalize()} Difference "
+            r"$^\circ$F"
         )
         y0 = min([df[col].min(), -1])
         y1 = max([df[col].max(), 1])

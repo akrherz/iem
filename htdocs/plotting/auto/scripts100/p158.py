@@ -1,4 +1,10 @@
-"""talltowers plot"""
+"""
+This plot presents one second data from the
+Iowa Atmospheric Observatory Tall-Towers sites overseen by Dr Gene Takle.
+The plot limits the number of times plotted to approximately 1,000 so to
+prevent web browser crashes.  If you select a time period greater than
+20 minutes, you will get strided results.
+"""
 import datetime
 
 import pytz
@@ -11,15 +17,7 @@ from pyiem.util import get_autoplot_context, get_sqlalchemy_conn
 
 def get_description():
     """Return a dict describing how to call this plotter"""
-    desc = {}
-    desc["data"] = True
-    desc[
-        "description"
-    ] = """This plot presents one second data from the
-    Iowa Atmospheric Observatory Tall-Towers sites overseen by Dr Gene Takle.
-    The plot limits the number of times plotted to approximately 1,000 so to
-    prevent web browser crashes.  If you select a time period greater than
-    20 minutes, you will get strided results."""
+    desc = {"description": __doc__, "data": True}
     desc["arguments"] = [
         dict(
             type="networkselect",
@@ -58,7 +56,7 @@ def get_context(fdict):
     stride = 1 if size < 1000 else int(((size / 1000) + 1))
 
     towerid = ctx["_nt"].sts[station]["remote_id"]
-    ctx["title"] = "Tall Tower %s" % (ctx["_nt"].sts[station]["name"],)
+    ctx["title"] = f"Tall Tower {ctx['_nt'].sts[station]['name']}"
     with get_sqlalchemy_conn("talltowers") as conn:
         ctx["df"] = pd.read_sql(
             """
@@ -433,27 +431,27 @@ def plotter(fdict):
         x = "_1" if height == 120 else ""
         ax1.plot(
             ctx["df"].index.values,
-            ctx["df"]["airtc_%sm%s" % (height, x)].values,
+            ctx["df"][f"airtc_{height}m{x}"].values,
             lw=2,
-            label="%sm" % (height,),
+            label=f"{height}m",
         )
         ax2.plot(
             ctx["df"].index.values,
-            ctx["df"]["rh_%sm%s" % (height, x)].values,
+            ctx["df"][f"rh_{height}m{x}"].values,
             lw=2,
-            label="%sm" % (height,),
+            label=f"{height}m",
         )
         ax3.plot(
             ctx["df"].index.values,
-            ctx["df"]["ws_%sm_s" % (height,)].values,
+            ctx["df"][f"ws_{height}m_s"].values,
             lw=2,
-            label="%sm" % (height,),
+            label=f"{height}m",
         )
         ax4.plot(
             ctx["df"].index.values,
-            ctx["df"]["winddir_%sm_s" % (height,)].values,
+            ctx["df"][f"winddir_{height}m_s"].values,
             lw=2,
-            label="%sm" % (height,),
+            label=f"{height}m",
         )
     ax1.legend(loc=(0.0, -0.15), ncol=6)
     ax1.grid(True)

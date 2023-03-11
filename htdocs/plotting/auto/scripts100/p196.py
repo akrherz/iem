@@ -1,5 +1,18 @@
 """
-Heat Advisory and Wind Chill alerts by temperature.
+This plot presents a frequency of having either a heat index
+or wind chill advisory/warning active for a given computed feels like
+temperature.  The major caveat with this plot is that it does not address
+the duration requirement that these alerts carry with them.  For example,
+instantaneously dipping to a wind chill of -20 does not necessarily
+necessitate a wind chill advisory be issued.  Another tunable knob to
+this application is to only consider 'additive' cases.  That being when
+the wind chill is colder than the air temperature and when the heat index
+is higher than the air temperature.  In the case of wind chill, a calm
+wind can lead to a nebulous wind chill.  Similiarly, a low humidity to
+what the computed heat index is.</p>
+
+<p>The plot shows the NWS headline frequency for the forecast zone that
+the automated weather station resides in.
 """
 
 import pandas as pd
@@ -17,25 +30,7 @@ PDICT2 = {"heat": "Heat Index", "chill": "Wind Chill"}
 
 def get_description():
     """Return a dict describing how to call this plotter"""
-    desc = {}
-    desc["data"] = True
-    desc["cache"] = 3600
-    desc[
-        "description"
-    ] = """This plot presents a frequency of having either a heat index
-    or wind chill advisory/warning active for a given computed feels like
-    temperature.  The major caveat with this plot is that it does not address
-    the duration requirement that these alerts carry with them.  For example,
-    instantaneously dipping to a wind chill of -20 does not necessarily
-    necessitate a wind chill advisory be issued.  Another tunable knob to
-    this application is to only consider 'additive' cases.  That being when
-    the wind chill is colder than the air temperature and when the heat index
-    is higher than the air temperature.  In the case of wind chill, a calm
-    wind can lead to a nebulous wind chill.  Similiarly, a low humidity to
-    what the computed heat index is.</p>
-
-    <p>The plot shows the NWS headline frequency for the forecast zone that
-    the automated weather station resides in."""
+    desc = {"description": __doc__, "data": True, "cache": 3600}
     desc["arguments"] = [
         dict(
             type="zstation",

@@ -89,7 +89,8 @@ def error_image(message, fmt):
     """Create an error image"""
     plt.close()
     _, ax = plt.subplots(1, 1)
-    msg = f"IEM Autoplot generation resulted in an error\n{message}"
+    cleantext = str(message).replace("\t", "")
+    msg = f"IEM Autoplot generation resulted in an error\n{cleantext}"
     ax.text(0.5, 0.5, msg, transform=ax.transAxes, ha="center", va="center")
     ram = BytesIO()
     plt.axis("off")
