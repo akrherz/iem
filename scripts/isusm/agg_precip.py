@@ -34,9 +34,12 @@ def main():
 
         with get_sqlalchemy_conn("iem") as conn:
             df = pd.read_sql(
-                "SELECT valid, phour, pcounter from current_log "
-                "WHERE iemid = %s and valid > %s and valid < %s "
-                "ORDER by valid ASC",
+                """
+                SELECT valid at time zone 'UTC+6' as valid, phour, pcounter
+                from current_log
+                WHERE iemid = %s and valid > %s and valid < %s
+                ORDER by valid ASC
+                """,
                 conn,
                 params=(iemid, sts, ets),
                 index_col="valid",

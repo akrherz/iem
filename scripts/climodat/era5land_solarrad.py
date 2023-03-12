@@ -40,12 +40,13 @@ def compute_regions(rsds, df):
 def build_stations(dt) -> pd.DataFrame:
     """Figure out what we need data for."""
     with get_sqlalchemy_conn("coop") as conn:
+        # There's a lone VICLIMATE site at -65 :/
         df = pd.read_sql(
             """
             SELECT station, st_x(geom) as lon, st_y(geom) as lat, temp_hour
             from alldata a JOIN stations t on (a.station = t.id) WHERE
             t.network ~* 'CLIMATE' and a.day = %s and
-            st_x(geom) between -127 and -65
+            st_x(geom) between -127 and -65.1
             ORDER by station ASC
             """,
             conn,
