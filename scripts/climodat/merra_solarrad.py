@@ -140,7 +140,7 @@ def do(dt):
     df = build_stations(dt)
     # We currently do two options
     # 1. For morning sites 1-11 AM, they get yesterday's radiation
-    sids = df[(df["temp_hour"] > 0) & (df["temp_hour"]) < 12].index.values
+    sids = df[(df["temp_hour"] > 0) & (df["temp_hour"] < 12)].index.values
     compute(df, sids, dt - datetime.timedelta(days=1), True)
     # 2. All other sites get today
     sids = df[df["merra_srad"].isna()].index.values

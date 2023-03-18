@@ -1,6 +1,16 @@
-"""Radiation Plot"""
+"""
+This plot presents daily estimates of solar radiation for a given year
+for the 'climodat' stations tracked by the IEM.  These
+stations only report temperature, precipitation, and snowfall, but many
+users are interested in solar radiation data as well.  So estimates
+are pulled from various reanalysis and forecast model analyses to generate
+the numbers presented.  There are four sources of solar radiation made
+available for this plot.  The HRRR data is the only one in 'real-time',
+the MERRAv2/NARR lag by about a month, and the ERA5 Land lags by 8-9 days.
+"""
 import calendar
 import datetime
+import itertools
 
 import numpy as np
 import pandas as pd
@@ -9,27 +19,17 @@ from pyiem.util import get_autoplot_context, get_sqlalchemy_conn
 from pyiem.exceptions import NoDataFound
 
 PDICT = {
-    "best": "Use NARR, then MERRA, then HRRR",
-    "narr_srad": "Use NARR (1979-2015)",
-    "merra_srad": "Use MERRA v2",
-    "hrrr_srad": "Use HRRR (2013+)",
+    "best": "Use ERA5 Land, then HRRR",
+    "era5land_srad": "Use ERA5 Land (1951-)",
+    "hrrr_srad": "Use HRRR (2013-)",
+    "merra_srad": "Use MERRA v2 (1980-)",
+    "narr_srad": "Use NARR (1979-)",
 }
 
 
 def get_description():
     """Return a dict describing how to call this plotter"""
-    desc = {}
-    desc["data"] = True
-    desc[
-        "description"
-    ] = """This plot presents yearly estimates of daily
-    solar radiation for the 'climodat' stations tracked by the IEM.  These
-    stations only report temperature, precipitation, and snowfall, but many
-    users are interested in solar radiation data as well.  So estimates
-    are pulled from various reanalysis and forecast model analyses to generate
-    the numbers presented.  There are three sources of solar radiation made
-    available for this plot.  The HRRR data is the only one in 'real-time',
-    the MERRAv2 lags by about a month, and the NARR is no longer produced."""
+    desc = {"description": __doc__, "data": True}
     desc["arguments"] = [
         dict(
             type="station",
@@ -67,14 +67,21 @@ def plotter(fdict):
         df = pd.read_sql(
             """
             WITH agg as (
-                SELECT sday, max(coalesce(narr_srad, 0))
+                SELECT sday,
+                max(narr_srad),
+                min(narr_srad),
+                avg(narr_srad)
                 from alldata where
-                station = %s  and year > 1978 GROUP by sday),
+                station = %s and year > 1978 and narr_srad is not null
+                GROUP by sday),
             obs as (
-                SELECT sday, day, narr_srad, merra_srad, hrrr_srad
+                SELECT sday, day, era5land_srad, narr_srad, merra_srad,
+                hrrr_srad
                 from alldata WHERE station = %s and year = %s)
-            SELECT a.sday, a.max as max_narr, o.day, o.narr_srad, o.merra_srad,
-            o.hrrr_srad from agg a LEFT JOIN obs o on (a.sday = o.sday)
+            SELECT a.sday, a.max as max_narr, a.min as min_narr,
+            a.avg as avg_narr, o.day, o.narr_srad, o.merra_srad,
+            o.hrrr_srad, o.era5land_srad
+            from agg a LEFT JOIN obs o on (a.sday = o.sday)
             ORDER by a.sday ASC
         """,
             conn,
@@ -83,12 +90,13 @@ def plotter(fdict):
         )
     if df.empty:
         raise NoDataFound("No Data Found.")
-    df["max_narr_smooth"] = (
-        df["max_narr"].rolling(window=7, min_periods=1, center=True).mean()
-    )
-    df["best"] = (
-        df["narr_srad"].fillna(df["merra_srad"]).fillna(df["hrrr_srad"])
-    )
+    for col in ["max", "min", "avg"]:
+        df[f"{col}_narr_smooth"] = (
+            df[f"{col}_narr"]
+            .rolling(window=7, min_periods=1, center=True)
+            .mean()
+        )
+    df["best"] = df["era5land_srad"].fillna(df["hrrr_srad"])
     # hack for leap day here
     if df["best"].loc["0229"] is None:
         df = df.drop("0229")
@@ -99,22 +107,28 @@ def plotter(fdict):
         f"1979-{lyear} NARR Climatology w/ {year} "
     )
     fig = figure(apctx=ctx, title=title)
-    ax = fig.add_axes([0.1, 0.1, 0.6, 0.8])
+    ax = fig.add_axes([0.07, 0.1, 0.45, 0.8])
 
+    xaxis = np.arange(1, len(df.index) + 1)
     ax.fill_between(
-        range(len(df.index)),
-        0,
-        df["max_narr_smooth"],
+        xaxis,
+        df["min_narr"],
+        df["max_narr"],
         color="tan",
-        label="Max",
+        label="Range",
+    )
+    ax.plot(
+        xaxis,
+        df["avg_narr_smooth"],
+        color="k",
+        label="Average",
     )
     if not np.isnan(df[varname].max()):
-        ax.bar(
-            range(len(df.index)),
+        ax.scatter(
+            xaxis,
             df[varname],
-            fc="g",
-            ec="g",
-            label=f"{year}",
+            color="g",
+            label=f"{year} {varname.split('_')[0]}",
         )
     ax.set_xticks((1, 32, 60, 91, 121, 152, 182, 213, 244, 274, 305, 335))
     ax.set_xticklabels(calendar.month_abbr[1:])
@@ -122,16 +136,14 @@ def plotter(fdict):
     ax.legend()
     ax.grid(True)
     ax.set_ylabel("Shortwave Solar Radiation $MJ$ $d^{-1}$")
+    ax.set_xlabel("* Climatology has 7 day smooth applied")
 
     # Do the x,y scatter plots
-    for i, combo in enumerate(
-        [
-            ("narr_srad", "merra_srad"),
-            ("narr_srad", "hrrr_srad"),
-            ("hrrr_srad", "merra_srad"),
-        ]
-    ):
-        ax3 = fig.add_axes([0.78, 0.1 + (0.3 * i), 0.2, 0.2])
+    opts = ["narr_srad", "merra_srad", "era5land_srad", "hrrr_srad"]
+    for i, combo in enumerate(itertools.combinations(opts, 2)):
+        row = i % 3
+        col = i // 3
+        ax3 = fig.add_axes([0.6 + (0.22 * col), 0.1 + (0.3 * row), 0.15, 0.19])
 
         xmax = df[combo[0]].max()
         xlabel = combo[0].replace("_srad", "").upper()
@@ -165,16 +177,17 @@ def plotter(fdict):
         ax3.set_xlim(0, maxv)
         ax3.plot([0, maxv], [0, maxv], color="k")
         ax3.set_xlabel(
-            r"%s $\mu$=%.1f" % (xlabel, df[combo[0]].mean()),
+            f"{xlabel} " r"$\mu$=" f"{df[combo[0]].mean():.1f}",
             labelpad=0,
             fontsize=12,
         )
         ax3.set_ylabel(
-            r"%s $\mu$=%.1f" % (ylabel, df[combo[1]].mean()), fontsize=12
+            f"{ylabel} " r"$\mu$=" f"{df[combo[1]].mean():.1f}",
+            fontsize=12,
         )
 
     return fig, df
 
 
 if __name__ == "__main__":
-    plotter(dict(year=2010, network="TNCLIMATE", station="TN6402"))
+    plotter({"year": 2010, "network": "TNCLIMATE", "station": "TN6402"})

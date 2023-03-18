@@ -24,26 +24,25 @@ def process(tarfn):
     subprocess.call(f"tar -xf {tarfn}", shell=True)
     for grbfn in glob.glob("merged_AWIP32*sfc"):
         grbs = pygrib.open(grbfn)
-        for pnum, pname in zip(["204", "61"], ["rad", "apcp"]):
-            try:
-                argrbs = grbs.select(parameterName=pnum)
-            except ValueError:
-                LOG.info("failed to find %s in %s", pname, grbfn)
-                continue
-            for grb in argrbs:
-                dt = grb["dataDate"]
-                hr = int(grb["dataTime"]) / 100.0
-                ts = datetime.datetime.strptime(f"{dt} {hr:.0f}", "%Y%m%d %H")
-                fn = f"{pname}_{ts:%Y%m%d%H%M}.grib"
-                with open(fn, "wb") as fh:
-                    fh.write(grb.tostring())
-                pqstr = (
-                    f"data a {ts:%Y%m%d%H%M} bogus "
-                    f"model/NARR/{pname}_{ts:%Y%m%d%H%M}.grib grib"
-                )
-                subprocess.call(["pqinsert", "-p", pqstr, fn])
-                LOG.info("grbfn: %s fn: %s", grbfn, fn)
-                os.remove(fn)
+        # NB: this sfc file has two DSWRF fields, one is a 3 hour average and
+        # the other is a instantaneous forecast, we want the average!
+        radgrb = grbs.select(parameterName="204", stepType="avg")[0]
+        pcpgrb = grbs.select(parameterName="61")[0]
+
+        dt = radgrb["dataDate"]
+        hr = int(radgrb["dataTime"]) / 100.0
+        ts = datetime.datetime.strptime(f"{dt} {hr:.0f}", "%Y%m%d %H")
+        for prefix, grb in zip(["rad", "apcp"], [radgrb, pcpgrb]):
+            fn = f"{prefix}_{ts:%Y%m%d%H%M}.grib"
+            with open(fn, "wb") as fh:
+                fh.write(grb.tostring())
+            pqstr = (
+                f"data a {ts:%Y%m%d%H%M} bogus "
+                f"model/NARR/{prefix}_{ts:%Y%m%d%H%M}.grib grib"
+            )
+            subprocess.call(["pqinsert", "-p", pqstr, fn])
+            LOG.info("grbfn: %s fn: %s", grbfn, fn)
+            os.remove(fn)
         os.remove(grbfn)
 
 
