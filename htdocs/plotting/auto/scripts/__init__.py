@@ -233,7 +233,10 @@ daily_opts = [
     {"id": 157, "label": "Relative Humidity Max/Min/Avg by Day of Year"},
     {"id": 62, "label": "Snow Depth"},
     {"id": 199, "label": "ISU Soil Moisture Network Daily Plots"},
-    {"id": 38, "label": "Solar Radiation Estimates from NARR"},
+    {
+        "id": 38,
+        "label": "Solar Radiation Estimates ERA5Land, HRRR, MERRAv2, NARR/",
+    },
     {"id": 25, "label": "Spread of Daily High and Low Temperatures"},
     {"id": 137, "label": "Start Date of Spring/Fall with Statistics"},
     {
