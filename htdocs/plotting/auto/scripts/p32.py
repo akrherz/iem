@@ -1,4 +1,9 @@
-"""Daily departures"""
+"""
+This plot presents the daily high, low, or
+average temperature departure.  The average temperature is simply the
+average of the daily high and low.  The daily climatology is simply based
+on the period of record observations for the site.
+"""
 import datetime
 
 import pandas as pd
@@ -23,14 +28,7 @@ OPTDICT = {
 
 def get_description():
     """Return a dict describing how to call this plotter"""
-    desc = {}
-    desc["data"] = True
-    desc[
-        "description"
-    ] = """This plot presents the daily high, low, or
-    average temperature departure.  The average temperature is simply the
-    average of the daily high and low.  The daily climatology is simply based
-    on the period of record observations for the site."""
+    desc = {"description": __doc__, "data": True}
     desc["arguments"] = [
         dict(
             type="station",
@@ -116,8 +114,9 @@ def plotter(fdict):
             stddev(low) as stddev_low, stddev((high+low)/2.) as stddev_temp,
             avg(gddxx(%s, %s, high, low)) as avg_gdd,
             stddev(gddxx(%s, %s, high, low)) as stddev_gdd,
-            avg(coalesce(merra_srad, hrrr_srad)) as avg_srad,
-            stddev(coalesce(merra_srad, hrrr_srad)) as stddev_srad,
+            avg(coalesce(era5land_srad, merra_srad, hrrr_srad)) as avg_srad,
+            stddev(coalesce(era5land_srad, merra_srad, hrrr_srad))
+                as stddev_srad,
             count(*)::float as years
             from alldata WHERE station = %s GROUP by sday
         )

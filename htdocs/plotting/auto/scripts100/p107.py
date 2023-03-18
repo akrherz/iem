@@ -1,12 +1,17 @@
-"""This plot presents aggregate statistics by year for a date period
-    of your choice.  You can either set an explicit date period or make
-    the end date based on the first date below a given low temperature
-    threshold. If your period crosses a year bounds,
-    the plotted year represents the year of the start date of the period.
+"""
+This plot presents aggregate statistics by year for a date period
+of your choice.  You can either set an explicit date period or make
+the end date based on the first date below a given low temperature
+threshold. If your period crosses a year bounds,
+the plotted year represents the year of the start date of the period.
 
-    <br /><br />This autoplot is specific to data from COOP stations, a
-    similiar autoplot <a href="/plotting/auto/?q=140">#140</a> exists for
-    automated stations."""
+<br /><br />This autoplot is specific to data from COOP stations, a
+similiar autoplot <a href="/plotting/auto/?q=140">#140</a> exists for
+automated stations.
+
+<p>A quorum of at least 90% of the days within the choosen period must have
+data in order to be included within the plot.
+"""
 import datetime
 
 import numpy as np
@@ -35,6 +40,9 @@ PDICT = {
     "min_low": "Minimum Low Temperature",
     "max_low": "Maximum Low Temperature",
     "range_low": "Range of Low Temperature",
+    "avg_era5land_srad": "Average Daily Solar Radiation (ERA5 Land)",
+    "max_era5land_srad": "Max Daily Solar Radiation (ERA5 Land)",
+    "min_era5land_srad": "Min Daily Solar Radiation (ERA5 Land)",
     "precip": "Total Precipitation",
     "snow": "Total Snowfall",
     "days-precip-above": (
@@ -145,7 +153,7 @@ def plotter(fdict):
     gddbase = ctx["base"]
     gddceil = ctx["ceil"]
     sts = datetime.date(2012, ctx["month"], ctx["day"])
-    ets = sts + datetime.timedelta(days=(days - 1))
+    ets = sts + datetime.timedelta(days=days - 1)
     varname = ctx["varname"]
     year = ctx["year"]
     threshold = ctx["thres"]
@@ -168,7 +176,11 @@ def plotter(fdict):
         daylimit = "sday >= :sday"
         params["sday"] = sts.strftime("%m%d")
         doff = 0
-    culler = " and snow is not null" if varname.find("snow") > -1 else ""
+    culler = ""
+    if varname.find("snow") > -1:
+        culler = " and snow is not null"
+    elif varname.find("era5") > -1:
+        culler = " and era5land_srad is not null"
 
     with get_sqlalchemy_conn("coop") as conn:
         df = pd.read_sql(
@@ -176,8 +188,8 @@ def plotter(fdict):
                 f"""
         SELECT extract(year from day - '{doff} days'::interval)::int as yr,
         day, high, low, precip, snow, (high + low) / 2. as avg_temp,
-        gddxx(:gddbase, :gddceil, high, low) as gdd
-        from alldata_{station[:2]} WHERE station = :station and {daylimit}
+        gddxx(:gddbase, :gddceil, high, low) as gdd, era5land_srad
+        from alldata WHERE station = :station and {daylimit}
         {culler} ORDER by day ASC
         """
             ),
@@ -234,6 +246,9 @@ def plotter(fdict):
             days_precip_above=("precip", lambda x: (x >= threshold).sum()),
             count=("high", "count"),
             min_day=("day", "min"),
+            avg_era5land_srad=("era5land_srad", "mean"),
+            min_era5land_srad=("era5land_srad", "min"),
+            max_era5land_srad=("era5land_srad", "max"),
         )
         .reset_index()
         .rename(
@@ -316,6 +331,9 @@ def plotter(fdict):
         ylabel = "Precipitation [inch]"
     elif varname in ["snow"]:
         ylabel = "Snowfall [inch]"
+    elif varname.find("srad") > -1:
+        vv = PDICT[varname].replace("Daily", "Daily\n")
+        ylabel = f"{vv} [MJ/d]"
     elif varname.find("days") > -1:
         ylabel = "Days"
     elif varname == "gdd":
