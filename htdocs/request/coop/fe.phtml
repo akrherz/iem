@@ -7,7 +7,7 @@ require_once "../../../include/network.php";
 require_once "../../../include/forms.php";
 require_once "../../../include/imagemaps.php";
 
-$network = isset($_REQUEST["network"]) ? substr($_REQUEST["network"], 0, 10) : "IACLIMATE";
+$network = isset($_REQUEST["network"]) ? substr(xssafe($_REQUEST["network"]), 0, 10) : "IACLIMATE";
 
 $t = new MyView();
 $t->iemss = True;
@@ -104,9 +104,10 @@ for one day, set the start and end times to the same value.</i>
   <option value="precip_estimated">Precipitation Estimated Flag</option>
   <option value="snow">Variable: Snowfall [inch]</option>
   <option value="snowd">Variable: Snow Depth (since 1991) [inch]</option>
-  <option value="narr_srad">Estimate: NARR Sampled Solar Radiation [MJ/day] (1979-)</option>
-  <option value="merra_srad">Estimate: MERRA-2 Sampled Solar Radiation [MJ/day] (1979-)</option>
+  <option value="era5land_srad">Estimate: ERA5 Land Sampled Solar Radiation [MJ/day] (1951-)</option>
   <option value="hrrr_srad">Estimate: HRRR Sampled Solar Radiation [MJ/day] (2013-)</option>
+  <option value="merra_srad">Estimate: MERRA-2 Sampled Solar Radiation [MJ/day] (1979-)</option>
+  <option value="narr_srad">Estimate: NARR Sampled Solar Radiation [MJ/day] (1979-)</option>
 </select>
 
 <p><h4>4. Specialized Data/Model Formats</h4>

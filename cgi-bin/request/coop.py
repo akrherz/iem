@@ -119,7 +119,7 @@ def do_apsim(ctx):
         cursor.execute(
             f"""
             SELECT day, high, low, precip, 1 as doy,
-            coalesce(narr_srad, merra_srad, hrrr_srad) as srad
+            coalesce(era5land_srad, narr_srad, merra_srad, hrrr_srad) as srad
             from {table} WHERE station = %s
             and day >= %s and day <= %s {sdaylimit}""",
             (ctx["stations"][0], sts, ets),
@@ -145,9 +145,7 @@ def do_apsim(ctx):
         )
 
     sio.write("[weather.met.weather]\n")
-    sio.write(
-        "latitude = %.1f (DECIMAL DEGREES)\n" % (nt.sts[station]["lat"],)
-    )
+    sio.write(f"latitude = {nt.sts[station]['lat']:.1f} (DECIMAL DEGREES)\n")
 
     # Compute average temperature!
     cursor.execute(
@@ -157,8 +155,8 @@ def do_apsim(ctx):
     )
     row = cursor.fetchone()
     sio.write(
-        "tav = %.3f (oC) ! annual average ambient temperature\n"
-        % (f2c(row["avgt"]),)
+        f"tav = {f2c(row['avgt']):.3f} (oC) "
+        "! annual average ambient temperature\n"
     )
 
     # Compute the annual amplitude in temperature
@@ -183,12 +181,11 @@ def do_apsim(ctx):
     )
 
     cursor.execute(
-        f"""
+        """
         SELECT day, high, low, precip,
         extract(doy from day) as doy,
-        coalesce(narr_srad, merra_srad, hrrr_srad) as srad
-        from {table}
-        WHERE station = %s and
+        coalesce(era5land_srad, narr_srad, merra_srad, hrrr_srad) as srad
+        from alldata WHERE station = %s and
         day >= %s and day <= %s and high is not null and
         low is not null and precip is not null ORDER by day ASC
         """,
@@ -465,7 +462,7 @@ def do_simple(ctx):
     sql = f"""
     WITH scenario as (
         SELECT station, high, low, precip, snow, snowd, narr_srad,
-        temp_estimated, precip_estimated,
+        era5land_srad, temp_estimated, precip_estimated,
         merra_srad, hrrr_srad,
         to_char(('{thisyear}-'||month||'-'||extract(day from day))::date,
         'YYYY/mm/dd') as day,
@@ -480,7 +477,7 @@ def do_simple(ctx):
         day >= %s and day <= %s
     ), obs as (
         SELECT station, high, low, precip, snow, snowd, narr_srad,
-        temp_estimated, precip_estimated,
+        era5land_srad, temp_estimated, precip_estimated,
         merra_srad, hrrr_srad,
         to_char(day, 'YYYY/mm/dd') as day,
         extract(doy from day) as doy,
@@ -530,7 +527,7 @@ def do_simple(ctx):
         sio.write(
             "# Contact: daryl herzmann akrherz@iastate.edu 515-294-5978\n"
         )
-        sio.write("# Data Period: %s - %s\n" % (ctx["sts"], ctx["ets"]))
+        sio.write(f"# Data Period: {ctx['sts']} - {ctx['ets']}\n")
         if ctx["scenario"] == "yes":
             sio.write(
                 "# !SCENARIO DATA! inserted after: %s replicating year: %s\n"
@@ -588,13 +585,13 @@ def do_salus(ctx):
  ('{thisyear}-'||month||'-'||extract(day from day))::date
     as day,
         high, low, precip, station,
-        coalesce(narr_srad, merra_srad, hrrr_srad) as srad
+        coalesce(era5land_srad, narr_srad, merra_srad, hrrr_srad) as srad
         from {table} WHERE station = %s and
         day >= %s and year = %s
     ), obs as (
         SELECT day,
         high, low, precip,  station,
-        coalesce(narr_srad, merra_srad, hrrr_srad) as srad
+        coalesce(era5land_srad, narr_srad, merra_srad, hrrr_srad) as srad
         from {table} WHERE station = %s and
         day >= %s and day <= %s ORDER by day ASC
     ), total as (
