@@ -12,10 +12,33 @@ import datetime
 import sys
 import os
 
+from affine import Affine
 import numpy as np
-from pyiem.util import get_dbconn, ncopen, logger
+import pandas as pd
+import geopandas as gpd
+from pyiem.grid.zs import CachingZonalStats
+from pyiem.util import get_dbconn, ncopen, logger, get_sqlalchemy_conn
 
 LOG = logger()
+
+
+def compute_regions(rsds, df):
+    """Do the spatial averaging work."""
+    with get_sqlalchemy_conn("coop") as conn:
+        gdf = gpd.read_postgis(
+            """
+            SELECT t.id, c.geom from stations t JOIN climodat_regions c on
+            (t.iemid = c.iemid) ORDER by t.id ASC
+            """,
+            conn,
+            index_col="id",
+            geom_col="geom",
+        )
+    affine = Affine(0.625, 0, -180.0, 0, -0.5, 90)
+    czs = CachingZonalStats(affine)
+    data = czs.gen_stats(np.flipud(rsds), gdf["geom"])
+    for i, sid in enumerate(gdf.index.values):
+        df.at[sid, "merra_srad"] = data[i]
 
 
 def get_gp(xc, yc, x, y):
@@ -41,22 +64,38 @@ def get_gp(xc, yc, x, y):
     return gridx, gridy, distance
 
 
-def do(date):
-    """Process for a given date."""
-    LOG.info("do(%s)", date)
-    pgconn = get_dbconn("coop")
-    ccursor = pgconn.cursor()
-    ccursor2 = pgconn.cursor()
-    sts = date.replace(hour=6)  # 6z
-    ets = sts + datetime.timedelta(days=1)
+def build_stations(dt) -> pd.DataFrame:
+    """Figure out what we need data for."""
+    with get_sqlalchemy_conn("coop") as conn:
+        # There's a lone VICLIMATE site at -65 :/
+        df = pd.read_sql(
+            """
+            SELECT station, st_x(geom) as lon, st_y(geom) as lat, temp_hour
+            from alldata a JOIN stations t on (a.station = t.id) WHERE
+            t.network ~* 'CLIMATE' and a.day = %s and
+            st_y(geom) > 0
+            ORDER by station ASC
+            """,
+            conn,
+            params=(dt,),
+            index_col="station",
+        )
+    df["merra_srad"] = np.nan
+    LOG.info("Found %s database entries", len(df.index))
+    return df
 
+
+def compute(df, sids, dt, do_regions=False):
+    """Compute things."""
+    sts = dt.replace(hour=6)  # 6z
+    ets = sts + datetime.timedelta(days=1)
     fn = sts.strftime("/mesonet/data/merra2/%Y/%Y%m%d.nc")
     fn2 = ets.strftime("/mesonet/data/merra2/%Y/%Y%m%d.nc")
     if not os.path.isfile(fn):
         LOG.warning("%s miss[%s] -> fail", sts.strftime("%Y%m%d"), fn)
         return
     with ncopen(fn, timeout=300) as nc:
-        rad = nc.variables["SWGDN"][7:, :, :]
+        rad = np.sum(nc.variables["SWGDN"][7:, :, :], 0)
         xc = nc.variables["lon"][:]
         yc = nc.variables["lat"][:]
 
@@ -65,23 +104,13 @@ def do(date):
         rad2 = 0
     else:
         with ncopen(fn2, timeout=300) as nc:
-            rad2 = nc.variables["SWGDN"][:7, :, :]
+            rad2 = np.sum(nc.variables["SWGDN"][:7, :, :], 0)
 
-    # W m-2 -> J m-2 s-1 -> J m-2 dy-1
-    total = (np.sum(rad, 0) + np.sum(rad2, 0)) * 3600.0
+    # W m-2 -> J m-2 s-1 -> J m-2 dy-1 -> MJ m-2 dy-1
+    total = (rad + rad2) * 3600.0 / 1_000_000.0
 
-    ccursor.execute(
-        "SELECT station, ST_x(geom), ST_y(geom), temp24_hour "
-        "from alldata a JOIN stations t on "
-        "(a.station = t.id) where day = %s and network ~* 'CLIMATE'",
-        (date.strftime("%Y-%m-%d"),),
-    )
-    for row in ccursor:
-        (x, y) = (row[1], row[2])
-        (gridxs, gridys, distances) = get_gp(xc, yc, x, y)
-        if gridxs is None:
-            LOG.info("station %s outside of bounds?", row[0])
-            continue
+    for sid, row in df.loc[sids].iterrows():
+        (gridxs, gridys, distances) = get_gp(xc, yc, row["lon"], row["lat"])
 
         z0 = total[gridys[0], gridxs[0]]
         z1 = total[gridys[1], gridxs[1]]
@@ -100,22 +129,33 @@ def do(date):
             + 1.0 / distances[3]
         )
         # MJ m-2 dy-1
-        rad_mj = float(val) / 1000000.0
+        df.at[sid, "merra_srad"] = float(val)
+    if do_regions:
+        compute_regions(total, df)
 
-        if rad_mj < 0:
-            LOG.info("WHOA! Negative RAD: %.2f, station: %s", rad_mj, row[0])
-            continue
-        # if our station is 12z, then this day's data goes into 'tomorrow'
-        # if our station is not, then this day is today
-        date2 = date.strftime("%Y-%m-%d")
-        if row[3] in range(4, 13):
-            date2 = (date + datetime.timedelta(days=1)).strftime("%Y-%m-%d")
-        ccursor2.execute(
-            "UPDATE alldata SET merra_srad = %s, "
-            "WHERE day = %s and station = %s",
-            (rad_mj, date2, row[0]),
+
+def do(dt):
+    """Process for a given date."""
+    LOG.info("do(%s)", dt)
+    df = build_stations(dt)
+    # We currently do two options
+    # 1. For morning sites 1-11 AM, they get yesterday's radiation
+    sids = df[(df["temp_hour"] > 0) & (df["temp_hour"]) < 12].index.values
+    compute(df, sids, dt - datetime.timedelta(days=1), True)
+    # 2. All other sites get today
+    sids = df[df["merra_srad"].isna()].index.values
+    compute(df, sids, dt)
+
+    pgconn = get_dbconn("coop")
+    cursor = pgconn.cursor()
+    for sid, row in df[df["merra_srad"].notna()].iterrows():
+        cursor.execute(
+            "UPDATE alldata set merra_srad = %s where station = %s and "
+            "day = %s",
+            (row["merra_srad"], sid, dt),
         )
-    ccursor2.close()
+
+    cursor.close()
     pgconn.commit()
     pgconn.close()
 
