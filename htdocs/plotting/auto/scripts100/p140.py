@@ -1,4 +1,14 @@
-"""Period stats"""
+"""
+This plot presents statistics for a period of
+days each year provided your start date and number of days after that
+date. If your period crosses a year bounds, the plotted year represents
+the year of the start date of the period. <strong>Average Dew Point Temp
+</strong> is computed by averaging the daily max and min dew point values.
+
+<br /><br />This autoplot is specific to data from automated stations, a
+similiar autoplot <a href="/plotting/auto/?q=107">#107</a> exists for
+long term COOP data.
+"""
 import datetime
 
 import numpy as np
@@ -20,26 +30,15 @@ PDICT = {
     "min_high": "Minimum High Temperature",
     "max_low": "Maximum Low Temperature",
     "min_low": "Minimum Low Temperature",
+    "max_feel": "Maximum Feels Like Temperature",
+    "min_feel": "Minimum Feels Like Temperature",
     "precip": "Total Precipitation",
 }
 
 
 def get_description():
     """Return a dict describing how to call this plotter"""
-    desc = {}
-    desc["data"] = True
-    desc[
-        "description"
-    ] = """This plot presents statistics for a period of
-    days each year provided your start date and number of days after that
-    date. If your period crosses a year bounds, the plotted year represents
-    the year of the start date of the period. <strong>Average Dew Point Temp
-    </strong> is computed by averaging the daily max and min dew point values.
-
-    <br /><br />This autoplot is specific to data from automated stations, a
-    similiar autoplot <a href="/plotting/auto/?q=107">#107</a> exists for
-    long term COOP data.
-    """
+    desc = {"description": __doc__, "data": True}
     today = datetime.datetime.today() - datetime.timedelta(days=1)
     sts = today - datetime.timedelta(days=14)
     desc["arguments"] = [
@@ -114,7 +113,7 @@ def plotter(fdict):
     station = ctx["station"]
     days = ctx["days"]
     sts = datetime.date(2012, ctx["month"], ctx["day"])
-    ets = sts + datetime.timedelta(days=(days - 1))
+    ets = sts + datetime.timedelta(days=days - 1)
     varname = ctx["varname"]
     year = ctx["year"]
     sdays = []
@@ -136,7 +135,8 @@ def plotter(fdict):
         max(min_tmpf) as max_low,
         max(max_tmpf) as max_high,
         min(max_tmpf) as min_high,
-        avg((max_dwpf + min_dwpf)/2.) as avg_dewp
+        avg((max_dwpf + min_dwpf)/2.) as avg_dewp,
+        max(max_feel) as max_feel, min(min_feel) as min_feel
         from summary s JOIN stations t on (s.iemid = t.iemid)
         WHERE t.network = :network and t.id = :station
         and to_char(day, 'mmdd') in :sdays and day >= :sdate
