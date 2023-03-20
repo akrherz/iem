@@ -1,4 +1,7 @@
-"""Days below threshold"""
+"""
+The number of days for a given season that are
+either above or below some temperature threshold.
+"""
 
 from scipy import stats
 import pandas as pd
@@ -23,12 +26,7 @@ PDICT3 = {
 
 def get_description():
     """Return a dict describing how to call this plotter"""
-    desc = {}
-    desc["data"] = True
-    desc[
-        "description"
-    ] = """The number of days for a given season that are
-    either above or below some temperature threshold."""
+    desc = {"description": __doc__, "data": True}
     desc["arguments"] = [
         dict(
             type="station",
@@ -81,11 +79,7 @@ def plotter(fdict):
     threshold = ctx["threshold"]
     startyear = ctx["year"]
 
-    b = "%s %s %s" % (
-        varname,
-        ">=" if direction == "above" else "<",
-        threshold,
-    )
+    b = f"{varname} {'>=' if direction == 'above' else '<'} {threshold}"
 
     with get_sqlalchemy_conn("coop") as conn:
         df = pd.read_sql(
@@ -151,8 +145,8 @@ def plotter(fdict):
     ax.text(
         0.01,
         0.99,
-        "Avg: %.1f, slope: %.2f days/century, R$^2$=%.2f"
-        % (avgv, h_slope * 100.0, r_value**2),
+        f"Avg: {avgv:.1f}, slope: {h_slope * 100.:.2f} days/century, "
+        f"R$^2$={r_value**2:.2f}",
         transform=ax.transAxes,
         va="top",
         bbox=dict(color="white"),

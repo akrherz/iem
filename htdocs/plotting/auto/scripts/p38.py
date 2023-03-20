@@ -20,10 +20,16 @@ from pyiem.exceptions import NoDataFound
 
 PDICT = {
     "best": "Use ERA5 Land, then HRRR",
-    "era5land_srad": "Use ERA5 Land (1951-)",
-    "hrrr_srad": "Use HRRR (2013-)",
-    "merra_srad": "Use MERRA v2 (1980-)",
-    "narr_srad": "Use NARR (1979-)",
+    "era5land_srad": "ERA5 Land (1951-)",
+    "hrrr_srad": "HRRR (2013-)",
+    "merra_srad": "MERRA v2 (1980-)",
+    "narr_srad": "NARR (1979-)",
+}
+PDICT2 = {
+    "era5land_srad": "ERA5 Land (1951-)",
+    "hrrr_srad": "HRRR (2013-)",
+    "merra_srad": "MERRA v2 (1980-)",
+    "narr_srad": "NARR (1979-)",
 }
 
 
@@ -43,15 +49,22 @@ def get_description():
             options=PDICT,
             default="best",
             name="var",
-            label="Select Radiation Source",
+            label="Select Radiation Source for Timeseries",
         ),
-        dict(
-            type="year",
-            name="year",
-            default=datetime.date.today().year,
-            min=1979,
-            label="Select Year to Plot:",
-        ),
+        {
+            "type": "select",
+            "options": PDICT2,
+            "default": "era5land_srad",
+            "name": "climo",
+            "label": "Select Radiation Source for Climatology",
+        },
+        {
+            "type": "year",
+            "name": "year",
+            "default": datetime.date.today().year,
+            "min": 1951,
+            "label": "Select Year to Plot:",
+        },
     ]
     return desc
 
@@ -62,24 +75,25 @@ def plotter(fdict):
     station = ctx["station"]
     year = ctx["year"]
     varname = ctx["var"]
+    climo = ctx["climo"]
 
     with get_sqlalchemy_conn("coop") as conn:
         df = pd.read_sql(
-            """
+            f"""
             WITH agg as (
                 SELECT sday,
-                max(narr_srad),
-                min(narr_srad),
-                avg(narr_srad)
+                max({climo}),
+                min({climo}),
+                avg({climo})
                 from alldata where
-                station = %s and year > 1978 and narr_srad is not null
+                station = %s and {climo} is not null
                 GROUP by sday),
             obs as (
                 SELECT sday, day, era5land_srad, narr_srad, merra_srad,
                 hrrr_srad
                 from alldata WHERE station = %s and year = %s)
-            SELECT a.sday, a.max as max_narr, a.min as min_narr,
-            a.avg as avg_narr, o.day, o.narr_srad, o.merra_srad,
+            SELECT a.sday, a.max as max_{climo}, a.min as min_{climo},
+            a.avg as avg_{climo}, o.day, o.narr_srad, o.merra_srad,
             o.hrrr_srad, o.era5land_srad
             from agg a LEFT JOIN obs o on (a.sday = o.sday)
             ORDER by a.sday ASC
@@ -91,8 +105,8 @@ def plotter(fdict):
     if df.empty:
         raise NoDataFound("No Data Found.")
     for col in ["max", "min", "avg"]:
-        df[f"{col}_narr_smooth"] = (
-            df[f"{col}_narr"]
+        df[f"{col}_{climo}_smooth"] = (
+            df[f"{col}_{climo}"]
             .rolling(window=7, min_periods=1, center=True)
             .mean()
         )
@@ -101,10 +115,9 @@ def plotter(fdict):
     if df["best"].loc["0229"] is None:
         df = df.drop("0229")
 
-    lyear = datetime.date.today().year - 1
     title = (
-        f"{ctx['_sname']} Daily Solar Radiation\n"
-        f"1979-{lyear} NARR Climatology w/ {year} "
+        f"{ctx['_sname']}:: {year} Daily Solar Radiation\n"
+        f"{PDICT2[climo]} Climatology"
     )
     fig = figure(apctx=ctx, title=title)
     ax = fig.add_axes([0.07, 0.1, 0.45, 0.8])
@@ -112,16 +125,16 @@ def plotter(fdict):
     xaxis = np.arange(1, len(df.index) + 1)
     ax.fill_between(
         xaxis,
-        df["min_narr"],
-        df["max_narr"],
+        df[f"min_{climo}"],
+        df[f"max_{climo}"],
         color="tan",
-        label="Range",
+        label=f"{climo.split('_')[0]} Range",
     )
     ax.plot(
         xaxis,
-        df["avg_narr_smooth"],
+        df[f"avg_{climo}_smooth"],
         color="k",
-        label="Average",
+        label=f"{climo.split('_')[0]} Average",
     )
     if not np.isnan(df[varname].max()):
         ax.scatter(
