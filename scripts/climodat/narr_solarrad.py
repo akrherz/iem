@@ -24,6 +24,7 @@ Review the following pdf file for details.
     http://rda.ucar.edu/datasets/ds608.0/docs/rr4.pdf
 
 """
+# pylint: disable=unpacking-non-sequence
 import datetime
 import os
 import sys
@@ -42,6 +43,7 @@ LCC = (
     "+proj=lcc +lon_0=-107.0 +y_0=0.0 +R=6367470.21484 "
     "+x_0=0.0 +units=m +lat_2=50.0 +lat_1=50.0 +lat_0=50.0"
 )
+COL = "narr_srad"
 
 
 def get_grid(grb):
@@ -73,7 +75,7 @@ def compute_regions(affine, rsds, df):
     czs = CachingZonalStats(affine)
     data = czs.gen_stats(np.flipud(rsds), gdf["geo"])
     for i, sid in enumerate(gdf.index.values):
-        df.at[sid, "narr_srad"] = data[i]
+        df.at[sid, COL] = data[i]
 
 
 def compute(df, sids, dt, do_regions=False):
@@ -114,12 +116,12 @@ def compute(df, sids, dt, do_regions=False):
     df["i"] = np.digitize(df["projx"].values, xaxis)
     df["j"] = np.digitize(df["projy"].values, yaxis)
     for sid, row in df.loc[sids].iterrows():
-        df.at[sid, "narr_srad"] = total[int(row["j"]), int(row["i"])]
+        df.at[sid, COL] = total[int(row["j"]), int(row["i"])]
 
     if do_regions:
         compute_regions(affine, total, df)
 
-    LOG.info("IA0200 %s", df.at["IA0200", "narr_srad"])
+    LOG.info("IA0200 %s", df.at["IA0200", COL])
 
 
 def build_stations(dt) -> pd.DataFrame:
@@ -138,7 +140,7 @@ def build_stations(dt) -> pd.DataFrame:
             params=(LCC, LCC, dt),
             index_col="station",
         )
-    df["narr_srad"] = np.nan
+    df[COL] = np.nan
     df["i"] = np.nan
     df["j"] = np.nan
     LOG.info("Found %s database entries", len(df.index))
@@ -155,16 +157,15 @@ def do(dt):
     sids = df[(df["temp_hour"] > 0) & (df["temp_hour"] < 12)].index.values
     compute(df, sids, dt - datetime.timedelta(days=1), True)
     # 2. All other sites get today
-    sids = df[df["narr_srad"].isna()].index.values
+    sids = df[df[COL].isna()].index.values
     compute(df, sids, dt)
 
     pgconn = get_dbconn("coop")
     cursor = pgconn.cursor()
 
-    for sid, row in df[df["narr_srad"].notna()].iterrows():
+    for sid, row in df[df[COL].notna()].iterrows():
         cursor.execute(
-            "UPDATE alldata set narr_srad = %s where station = %s and "
-            "day = %s",
+            f"UPDATE alldata set {COL} = %s where station = %s and day = %s",
             (row["narr_srad"], sid, dt),
         )
 
@@ -178,11 +179,8 @@ def main(argv):
     if len(argv) == 4:
         do(datetime.datetime(int(argv[1]), int(argv[2]), int(argv[3])))
     if len(argv) == 3:
-        # Run for a given month, but include the last day of the previous month
-        sts = datetime.datetime(
-            int(argv[1]), int(argv[2]), 1
-        ) - datetime.timedelta(days=1)
-        ets = sts + datetime.timedelta(days=45)
+        sts = datetime.datetime(int(argv[1]), int(argv[2]), 1)
+        ets = sts + datetime.timedelta(days=35)
         ets = ets.replace(day=1)
         now = sts
         while now < ets:

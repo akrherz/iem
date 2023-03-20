@@ -1,4 +1,12 @@
-"""ASOS comparisons"""
+"""
+This application plots the difference in morning
+low or afternoon high temperature between two sites of your choice.
+The morning is
+defined as the period between midnight and 8 AM local time.  The afternoon
+high is defined as the period between noon and 8 PM.  If any difference
+is greater than 25 degrees, it is omitted from this analysis.  This app
+may take a while to generate a plot, so please be patient!
+"""
 import datetime
 import calendar
 
@@ -16,18 +24,7 @@ PDICT = {
 
 def get_description():
     """Return a dict describing how to call this plotter"""
-    desc = {}
-    desc["data"] = True
-    desc["cache"] = 86400
-    desc[
-        "description"
-    ] = """This application plots the difference in morning
-    low or afternoon high temperature between two sites of your choice.
-    The morning is
-    defined as the period between midnight and 8 AM local time.  The afternoon
-    high is defined as the period between noon and 8 PM.  If any difference
-    is greater than 25 degrees, it is omitted from this analysis.  This app
-    may take a while to generate a plot, so please be patient!"""
+    desc = {"description": __doc__, "data": True, "cache": 86400}
     desc["arguments"] = [
         dict(
             type="zstation",
