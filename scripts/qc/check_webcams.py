@@ -45,7 +45,7 @@ def workflow(netname, pname):
             seconds=ticks
         )
         valid = valid.replace(tzinfo=pytz.UTC)
-        obs[row[0]] = dict(valid=valid)
+        obs[row[0]] = {"valid": valid}
     # Abort out if no obs are found
     if not obs:
         return

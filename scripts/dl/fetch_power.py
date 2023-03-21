@@ -86,7 +86,6 @@ def main(argv):
                 shp = np.shape(data)
                 jslice = slice(j, min([j + shp[0], iemre.NY]))
                 islice = slice(i, min([i + shp[1], iemre.NX]))
-                # LOG.debug("islice %s jslice: %s", islice, jslice)
                 # align grids
                 data = data[
                     slice(0, jslice.stop - jslice.start),

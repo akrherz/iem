@@ -22,6 +22,7 @@ LCC = (
     "+proj=lcc +lon_0=-97.5 +y_0=0.0 +R=6367470. +x_0=0.0"
     " +units=m +lat_2=38.5 +lat_1=38.5 +lat_0=38.5"
 )
+COL = "hrrr_srad"
 
 # NOTE: for unsure reasons, the old HRRR data prior to this timestamp gets
 # invalidly decoded by present day pygrib, so we just abort for now.
@@ -45,7 +46,7 @@ def compute_regions(affine, rsds, df):
     czs = CachingZonalStats(affine)
     data = czs.gen_stats(np.flipud(rsds), gdf["geo"])
     for i, sid in enumerate(gdf.index.values):
-        df.at[sid, "hrrr_srad"] = data[i]
+        df.at[sid, COL] = data[i]
 
 
 def build_stations(dt) -> pd.DataFrame:
@@ -64,7 +65,7 @@ def build_stations(dt) -> pd.DataFrame:
             params=(LCC, LCC, dt),
             index_col="station",
         )
-    df["hrrr_srad"] = np.nan
+    df[COL] = np.nan
     df["i"] = np.nan
     df["j"] = np.nan
     LOG.info("Found %s database entries", len(df.index))
@@ -132,12 +133,12 @@ def compute(df, sids, dt, do_regions=False):
     df["i"] = np.digitize(df["projx"].values, xaxis)
     df["j"] = np.digitize(df["projy"].values, yaxis)
     for sid, row in df.loc[sids].iterrows():
-        df.at[sid, "hrrr_srad"] = total[int(row["j"]), int(row["i"])]
+        df.at[sid, COL] = total[int(row["j"]), int(row["i"])]
 
     if do_regions:
         compute_regions(affine, total, df)
 
-    LOG.info("IA0200 %s", df.at["IA0200", "hrrr_srad"])
+    LOG.info("IA0200 %s", df.at["IA0200", COL])
 
 
 def main(argv):
@@ -149,16 +150,16 @@ def main(argv):
     sids = df[(df["temp_hour"] > 0) & (df["temp_hour"] < 12)].index.values
     compute(df, sids, dt - datetime.timedelta(days=1), True)
     # 2. All other sites get today
-    sids = df[df["hrrr_srad"].isna()].index.values
+    sids = df[df[COL].isna()].index.values
     compute(df, sids, dt)
 
     pgconn = get_dbconn("coop")
     cursor = pgconn.cursor()
-    for sid, row in df[df["hrrr_srad"].notna()].iterrows():
+    for sid, row in df[df[COL].notna()].iterrows():
         cursor.execute(
-            "UPDATE alldata set hrrr_srad = %s where station = %s and "
+            f"UPDATE alldata set {COL} = %s where station = %s and "
             "day = %s",
-            (row["hrrr_srad"], sid, dt),
+            (row[COL], sid, dt),
         )
     cursor.close()
     pgconn.commit()

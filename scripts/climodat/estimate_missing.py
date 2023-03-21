@@ -32,14 +32,14 @@ def process(cursor, station, df, meta):
         "lon": meta["lon"],
         "lat": meta["lat"],
     }
-    req = requests.get(wsuri)
+    req = requests.get(wsuri, timeout=60)
     if req.status_code != 200:
-        LOG.info("%s got status %s", wsuri, req.status_code)
+        LOG.warning("%s got status %s", wsuri, req.status_code)
         return
     try:
         estimated = pd.DataFrame(req.json()["data"])
     except Exception as exp:
-        LOG.info(
+        LOG.warning(
             "\n%s Failure:%s\n%s\nExp: %s", station, req.content, wsuri, exp
         )
         return
@@ -72,7 +72,7 @@ def process(cursor, station, df, meta):
                     f"{prefix}_{col}_{units}"
                 ]
         if None in newvals.values():
-            LOG.info(
+            LOG.warning(
                 "Skipping %s as there are missing values still", row["day"]
             )
             continue
@@ -88,24 +88,15 @@ def process(cursor, station, df, meta):
             newvals["precip"],
             precip_estimated,
         )
-        sql = """
-            UPDATE alldata_%s SET temp_estimated = %s,
-            precip_estimated = %s, high = %.0f, low = %.0f, precip = %.2f,
-            temp_hour = coalesce(temp_hour, %s),
-            precip_hour = coalesce(precip_hour, %s)
-            WHERE station = '%s' and day = '%s'
-            """ % (
-            station[:2],
-            temp_estimated,
-            precip_estimated,
-            newvals["high"],
-            newvals["low"],
-            newvals["precip"],
-            hour,
-            hour,
-            station,
-            row["day"],
-        )
+        sql = f"""
+            UPDATE alldata SET temp_estimated = {temp_estimated},
+            precip_estimated = {precip_estimated},
+            high = {newvals['high']:.0f}, low = {newvals['low']:.0f},
+            precip = {newvals['precip']:.2f},
+            temp_hour = coalesce(temp_hour, {hour}),
+            precip_hour = coalesce(precip_hour, {hour})
+            WHERE station = '{station}' and day = '{row['day']}'
+            """
         cursor.execute(sql.replace("nan", "null"))
 
 
@@ -124,10 +115,10 @@ def main(argv):
         get_dbconnstr("coop"),
         index_col=None,
     )
-    LOG.info("Processing %s rows for %s", len(df.index), state)
+    LOG.warning("Processing %s rows for %s", len(df.index), state)
     for (_year, station), gdf in df.groupby(["year", "station"]):
         if station not in nt.sts:
-            LOG.info("station %s is unknown, skipping...", station)
+            LOG.warning("station %s is unknown, skipping...", station)
             continue
         cursor = pgconn.cursor()
         process(cursor, station, gdf, nt.sts[station])

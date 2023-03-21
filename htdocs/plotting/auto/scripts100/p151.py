@@ -1,4 +1,10 @@
-"""Period deltas"""
+"""
+This map produces an analysis yearly averages. You
+can either plot the difference between two period of years or simply the
+years between the first period.  This app is meant to address the question
+about changes in climate or just to produce a simple plot of yearly
+averages over some period of years.
+"""
 import datetime
 
 from geopandas import read_postgis
@@ -19,20 +25,18 @@ PDICT2 = {
     "values": "Show just the values",
     "contour": "Show just the contour",
 }
-PDICT3 = dict(
-    [
-        ("total_precip", "Total Precipitation"),
-        ("gdd", "Growing Degree Days (base=50/86)"),
-        ("sdd", "Stress Degree Days (High > 86)"),
-        ("avg_temp", "Average Temperature"),
-        ("avg_high", "Average High Temperature"),
-        ("avg_low", "Average Low Temperature"),
-        ("days_high_above", "Days with High Temp At or Above [Threshold]"),
-        ("days_high_below", "Days with High Temp Below [Threshold]"),
-        ("days_low_above", "Days with Low Temp At or Above [Threshold]"),
-        ("days_low_below", "Days with Low Temp Below [Threshold]"),
-    ]
-)
+PDICT3 = {
+    "total_precip": "Total Precipitation",
+    "gdd": "Growing Degree Days (base=50/86)",
+    "sdd": "Stress Degree Days (High > 86)",
+    "avg_temp": "Average Temperature",
+    "avg_high": "Average High Temperature",
+    "avg_low": "Average Low Temperature",
+    "days_high_above": "Days with High Temp At or Above [Threshold]",
+    "days_high_below": "Days with High Temp Below [Threshold]",
+    "days_low_above": "Days with Low Temp At or Above [Threshold]",
+    "days_low_below": "Days with Low Temp Below [Threshold]",
+}
 PDICT4 = {
     "english": "English",
     "metric": "Metric",
@@ -89,15 +93,7 @@ OPT1 = {"diff": "Plot Difference", "p1": "Just Plot Period One Values"}
 
 def get_description():
     """Return a dict describing how to call this plotter"""
-    desc = {}
-    desc["data"] = True
-    desc[
-        "description"
-    ] = """This map produces an analysis yearly averages. You
-    can either plot the difference between two period of years or simply the
-    years between the first period.  This app is meant to address the question
-    about changes in climate or just to produce a simple plot of yearly
-    averages over some period of years."""
+    desc = {"description": __doc__, "data": True}
     desc["arguments"] = [
         dict(
             type="select",
@@ -354,19 +350,16 @@ def plotter(fdict):
     opt1 = ctx["opt1"]
 
     column = varname
-    title = "%s %s" % (MDICT[month], PDICT3[varname])
-    title = title.replace("[Threshold]", "%.1f" % (threshold,))
+    title = f"{MDICT[month]} {PDICT3[varname]}"
+    title = title.replace("[Threshold]", f"{threshold:.1f}")
     if opt1 == "p1":
-        column = "p1_%s" % (varname,)
-        title = "%.0f-%.0f %s" % (p1syear, p1eyear, title)
+        column = f"p1_{varname}"
+        title = f"{p1syear:.0f}-{p1eyear:.0f} {title}"
     else:
-        title = ("%.0f-%.0f minus %.0f-%.0f %s Difference (%s)") % (
-            p2syear,
-            p2eyear,
-            p1syear,
-            p1eyear,
-            title,
-            UNITS[varname] if ctx["r"] == "english" else MUNITS[varname],
+        tt = UNITS[varname] if ctx["r"] == "english" else MUNITS[varname]
+        title = (
+            f"{p2syear:.0f}-{p2eyear:.0f} minus {p1syear:.0f}-{p1eyear:.0f} "
+            f"{title} Difference ({tt})"
         )
 
     # Reindex so that most extreme values are first
@@ -409,7 +402,7 @@ def plotter(fdict):
             df2["lon"].values,
             df2["lat"].values,
             df2[column].values,
-            fmt="%%.%if" % (PRECISION.get(varname, 1),),
+            fmt=f"%.{PRECISION.get(varname, 1):.0f}f",
             labelbuffer=5,
         )
 
@@ -417,4 +410,4 @@ def plotter(fdict):
 
 
 if __name__ == "__main__":
-    plotter(dict(over="annual"))
+    plotter({"over": "annual"})

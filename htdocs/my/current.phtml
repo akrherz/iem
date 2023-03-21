@@ -276,7 +276,7 @@ if ($doSF) {
         if (!in_array($key, $sfstations)) continue;
         $parts = $finalA[$key];
         $i++;
-        $tdiff = $now - strtotime($parts["local_valid"]);
+        $tdiff = $now - $parts["ts"];
         if ($tdiff > 86400 * 5) {
             continue;
         }
@@ -289,13 +289,13 @@ if ($doSF) {
         $table .= "<th>" . $parts["name"] . "</th>";
         $table .= "<td";
         if ($tdiff > 11900) {
-            $table .= ' bgcolor="red">' . date("M-d-Y h:i A", strtotime($parts["local_valid"])) . '</td>';
+            $table .= ' bgcolor="red">' . date("M-d-Y h:i A", $parts["ts"]) . '</td>';
         } else if ($tdiff > 7200) {
-            $table .= ' bgcolor="orange">' . date("M-d-Y h:i A", strtotime($parts["local_valid"])) . '</td>';
+            $table .= ' bgcolor="orange">' . date("M-d-Y h:i A", $parts["ts"]) . '</td>';
         } else if ($tdiff > 3600) {
-            $table .= ' bgcolor="green">' . date("h:i A", strtotime($parts["local_valid"])) . '</td>';
+            $table .= ' bgcolor="green">' . date("h:i A", $parts["ts"]) . '</td>';
         } else {
-            $table .= '>' . date("h:i A", strtotime($parts["local_valid"])) . '</td>';
+            $table .= '>' . date("h:i A", $parts["ts"]) . '</td>';
         }
         if ($parts["tsf0"] < -90) $tmpf0 = "M";
         else $tmpf0 = myround($parts["tsf0"], 1);

@@ -38,16 +38,17 @@ def look4(ts):
     """Let us investigate"""
     cursor.execute(
         "SELECT source, count(*) from products WHERE entered >= %s "
-        "and entered < %s and source is not null "
+        "and entered < %s and substr(source, 1, 1) in ('K', 'P') "
         "GROUP by source ORDER by count DESC",
         (ts, ts + datetime.timedelta(hours=24)),
     )
     for row in cursor:
         source = row[0]
         lookup = source[1:] if source[0] == "K" else source
-        if lookup not in nt.sts and source[0] in ["K", "P"]:
-            print(f"{row[0]} {row[1]}")
-            sample(source, ts)
+        if lookup in nt.sts:
+            continue
+        print(f"{row[0]} {row[1]}")
+        sample(source, ts)
 
 
 def main(argv):

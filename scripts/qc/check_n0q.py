@@ -14,8 +14,9 @@ def run(sts, ets):
     now = sts
     interval = datetime.timedelta(minutes=5)
     while now < ets:
-        fn = now.strftime(
-            "/mesonet/ARCHIVE/data/%Y/%m/%d/GIS/uscomp/n0q_%Y%m%d%H%M.png"
+        fn = (
+            f"/mesonet/ARCHIVE/data/{now:%Y/%m/%d}/GIS/uscomp/"
+            f"n0q_{now:%Y%m%d%H%M}.png"
         )
         if not os.path.isfile(fn):
             LOG.warning("%s is missing", os.path.basename(fn))

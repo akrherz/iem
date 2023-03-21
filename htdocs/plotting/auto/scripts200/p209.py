@@ -1,4 +1,9 @@
-"""NASS yearly bar plot."""
+"""
+This plot presents the weekly change in a given USDA NASS Crop
+Progress report variable.  The units of the change are expressed as percentage
+points and not a true percentage.  For example, if the first value was 30% and
+the next value was 50%, the change in percentage points is 20.
+"""
 import datetime
 
 import pandas as pd
@@ -26,15 +31,7 @@ PDICT2 = {"CORN": "Corn", "SOYBEANS": "Soybean"}
 
 def get_description():
     """Return a dict describing how to call this plotter"""
-    desc = {}
-    desc["cache"] = 3600
-    desc["data"] = True
-    desc["nass"] = True
-    desc[
-        "description"
-    ] = """This plot presents the weekly change in a given USDA NASS Crop
-    Progress report variable.
-    """
+    desc = {"description": __doc__, "cache": 3600, "nass": True, "data": True}
     today = datetime.datetime.today()
     desc["arguments"] = [
         dict(type="state", name="state", default="IA", label="Select State:"),
@@ -198,4 +195,4 @@ def plotter(fdict):
 
 
 if __name__ == "__main__":
-    plotter(dict(commodity_desc="CORN", unit_desc="PCT HARVESTED"))
+    plotter({"commodity_desc": "CORN", "unit_desc": "PCT HARVESTED"})

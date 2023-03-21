@@ -13,7 +13,7 @@ LOG = logger()
 
 def main():
     """Go Main Go"""
-    NT = NetworkTable("IA_ASOS")
+    nt = NetworkTable("IA_ASOS")
     IEM = get_dbconn("iem")
     PORTFOLIO = get_dbconn("portfolio")
 
@@ -26,11 +26,11 @@ def main():
     )
     obs = {}
     for row in icursor:
-        if NT.sts[row[0]]["attributes"].get("IS_AWOS") == "1":
-            obs[row[0]] = dict(id=row[0], valid=row[1])
+        if nt.sts[row[0]]["attributes"].get("IS_AWOS") == "1":
+            obs[row[0]] = {"id": row[0], "valid": row[1]}
 
     tracker = TrackerEngine(IEM.cursor(), PORTFOLIO.cursor(), 10)
-    tracker.process_network(obs, "iaawos", NT, threshold)
+    tracker.process_network(obs, "iaawos", nt, threshold)
     tracker.send_emails()
     tac = tracker.action_count
     if tac > 6:

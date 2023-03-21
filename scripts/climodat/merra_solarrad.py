@@ -20,6 +20,7 @@ from pyiem.grid.zs import CachingZonalStats
 from pyiem.util import get_dbconn, ncopen, logger, get_sqlalchemy_conn
 
 LOG = logger()
+COL = "merra_srad"
 
 
 def compute_regions(rsds, df):
@@ -38,7 +39,7 @@ def compute_regions(rsds, df):
     czs = CachingZonalStats(affine)
     data = czs.gen_stats(np.flipud(rsds), gdf["geom"])
     for i, sid in enumerate(gdf.index.values):
-        df.at[sid, "merra_srad"] = data[i]
+        df.at[sid, COL] = data[i]
 
 
 def get_gp(xc, yc, x, y):
@@ -80,7 +81,7 @@ def build_stations(dt) -> pd.DataFrame:
             params=(dt,),
             index_col="station",
         )
-    df["merra_srad"] = np.nan
+    df[COL] = np.nan
     LOG.info("Found %s database entries", len(df.index))
     return df
 
@@ -129,7 +130,7 @@ def compute(df, sids, dt, do_regions=False):
             + 1.0 / distances[3]
         )
         # MJ m-2 dy-1
-        df.at[sid, "merra_srad"] = float(val)
+        df.at[sid, COL] = float(val)
     if do_regions:
         compute_regions(total, df)
 
@@ -143,16 +144,16 @@ def do(dt):
     sids = df[(df["temp_hour"] > 0) & (df["temp_hour"] < 12)].index.values
     compute(df, sids, dt - datetime.timedelta(days=1), True)
     # 2. All other sites get today
-    sids = df[df["merra_srad"].isna()].index.values
+    sids = df[df[COL].isna()].index.values
     compute(df, sids, dt)
 
     pgconn = get_dbconn("coop")
     cursor = pgconn.cursor()
-    for sid, row in df[df["merra_srad"].notna()].iterrows():
+    for sid, row in df[df[COL].notna()].iterrows():
         cursor.execute(
-            "UPDATE alldata set merra_srad = %s where station = %s and "
+            f"UPDATE alldata set {COL} = %s where station = %s and "
             "day = %s",
-            (row["merra_srad"], sid, dt),
+            (row[COL], sid, dt),
         )
 
     cursor.close()
