@@ -4,6 +4,7 @@ Run from RUN_50_AFTER.sh
 """
 from datetime import timedelta, date
 import shutil
+import subprocess
 import sys
 
 import pygrib
@@ -77,6 +78,15 @@ def create(ts):
         low.coordinates = "lon lat"
 
         ncvar = nc.createVariable(
+            "tsoil", np.uint16, ("time", "lat", "lon"), fill_value=65535
+        )
+        ncvar.units = "K"
+        ncvar.scale_factor = 0.01
+        ncvar.long_name = "0-10 cm Average Soil Temperature"
+        ncvar.standard_name = "0-10 cm Average Soil Temperature"
+        ncvar.coordinates = "lon lat"
+
+        ncvar = nc.createVariable(
             "p01d", np.uint16, ("time", "lat", "lon"), fill_value=65535
         )
         ncvar.units = "mm"
@@ -94,6 +104,7 @@ def merge_grib(nc, now):
     lats = None
     tmaxgrid = None
     tmingrid = None
+    tsoilgrid = None
     pgrid = None
     hits = 0
     for fhour in range(6, 385, 6):
@@ -128,6 +139,13 @@ def merge_grib(nc, now):
                     pgrid = grb.values * 6.0 * 3600
                 else:
                     pgrid += grb.values * 6.0 * 3600
+            # Hacky
+            elif name == "st" and str(grb).find("0.0-0.1 m") > -1:
+                if tsoilgrid is None:
+                    tsoilgrid = grb.values
+                else:
+                    tsoilgrid += grb.values
+
         grbs.close()
 
         # Write tmax, tmin out at 6z
@@ -142,8 +160,13 @@ def merge_grib(nc, now):
                 nc.variables["low_tmpk"][days, :, :] = nn(xi, yi)
                 nn = NearestNDInterpolator((lons, lats), np.ravel(pgrid))
                 nc.variables["p01d"][days, :, :] = nn(xi, yi)
+                nn = NearestNDInterpolator(
+                    (lons, lats), np.ravel(tsoilgrid / 4.0)
+                )
+                nc.variables["tsoil"][days, :, :] = nn(xi, yi)
             tmingrid = None
             tmaxgrid = None
+            tsoilgrid = None
             hits = 0
 
 
@@ -160,6 +183,9 @@ def main(argv):
         "/mesonet/data/iemre/gfs_current_new.nc",
         "/mesonet/data/iemre/gfs_current.nc",
     )
+    # Generate 4inch plots based on 6z GFS
+    if now.hour == 6:
+        subprocess.call(["python", "gfs_4inch.py"])
 
 
 if __name__ == "__main__":
