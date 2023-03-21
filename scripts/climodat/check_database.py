@@ -23,7 +23,7 @@ def main(argv):
 
     for station, gdf in df.groupby("station"):
         if station not in nt.sts:
-            LOG.info(
+            LOG.warning(
                 "station: %s is unknown to %sCLIMATE, skip", station, state
             )
             continue

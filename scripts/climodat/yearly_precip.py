@@ -1,5 +1,4 @@
-"""Generate a map of Yearly Precipitation
-"""
+"""Generate a map of Yearly Precipitation."""
 import sys
 
 from pyiem.util import web2ldm, logger
@@ -20,7 +19,7 @@ def runYear(year):
     LOG.info(pqstr)
     res = web2ldm(url, pqstr)
     if not res:
-        LOG.info("failed for year: %s", year)
+        LOG.warning("failed for year: %s", year)
 
 
 if __name__ == "__main__":

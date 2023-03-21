@@ -1,4 +1,8 @@
-"""Plot IEMRE"""
+"""
+This map presents a daily <a href="/iemre/">IEM ReAnalysis</a> variable
+of your choice.  The concept of a day within this dataset is a period
+between 6 UTC to 6 UTC, which is Central Standard Time all year round.
+"""
 import datetime
 import os
 
@@ -32,13 +36,7 @@ PDICT2 = {"c": "Contour Plot", "g": "Grid Cell Mesh"}
 
 def get_description():
     """Return a dict describing how to call this plotter"""
-    desc = {}
-    desc[
-        "description"
-    ] = """This map presents a daily IEM ReAnalysis variable
-    of your choice.  The concept of a day within this dataset is a period
-    between 6 UTC to 6 UTC, which is Central Standard Time all year round.
-    """
+    desc = {"description": __doc__}
     today = datetime.datetime.today() - datetime.timedelta(days=1)
     desc["arguments"] = [
         dict(

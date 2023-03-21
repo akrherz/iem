@@ -44,6 +44,9 @@ def text_image(content):
     max_width = pt2px(font.getsize(max_width_line)[0])
     height = max_height * len(lines)  # perfect or a little oversized
     width = int(round(max_width + 40))  # a little oversized
+    # A limit of PIL
+    if (height * width) > 90_000_000:
+        width, height = 1200, 1000
     image = PIL.Image.new(grayscale, (width, height), color=255)
     draw = PIL.ImageDraw.Draw(image)
 

@@ -25,22 +25,25 @@ $skycover = array(
     255 => "MISSING"
 );
 
-$gis = isset($_GET["gis"]) ? $_GET["gis"] : 'no';
-$delim = isset($_GET["delim"]) ? $_GET["delim"] : ",";
-$sample = isset($_GET["sample"]) ? $_GET["sample"] : "1min";
-$what = isset($_GET["what"]) ? $_GET["what"] : 'dl';
+if (! isset($_GET["station"])) {
+    xssafe("</script>");
+}
+$gis = isset($_GET["gis"]) ? xssafe($_GET["gis"]) : 'no';
+$delim = isset($_GET["delim"]) ? xssafe($_GET["delim"]) : ",";
+$sample = isset($_GET["sample"]) ? xssafe($_GET["sample"]) : "1min";
+$what = isset($_GET["what"]) ? xssafe($_GET["what"]) : 'dl';
 
 $day1 = get_int404("day1");
 if (is_null($day1)) die("No day1 specified");
-$day2 = isset($_GET["day2"]) ? $_GET["day2"] : die("No day2 specified");
-$month1 = isset($_GET["month1"]) ? $_GET["month1"] : die("No month specified");
-$month2 = isset($_GET["month2"]) ? $_GET["month2"] : die("No month specified");
-$year1 = isset($_GET["year1"]) ? $_GET["year1"] : die("No year1 specified");
-$year2 = isset($_GET["year2"]) ? $_GET["year2"] : die("No year2 specified");
-$hour1 = isset($_GET["hour1"]) ? $_GET["hour1"] : die("No hour1 specified");
-$hour2 = isset($_GET["hour2"]) ? $_GET["hour2"] : die("No hour2 specified");
-$minute1 = isset($_GET["minute1"]) ? $_GET["minute1"] : die("No minute1 specified");
-$minute2 = isset($_GET["minute2"]) ? $_GET["minute2"] : die("No minute2 specified");
+$day2 = isset($_GET["day2"]) ? xssafe($_GET["day2"]) : die("No day2 specified");
+$month1 = isset($_GET["month1"]) ? xssafe($_GET["month1"]) : die("No month specified");
+$month2 = isset($_GET["month2"]) ? xssafe($_GET["month2"]) : die("No month specified");
+$year1 = isset($_GET["year1"]) ? xssafe($_GET["year1"]) : die("No year1 specified");
+$year2 = isset($_GET["year2"]) ? xssafe($_GET["year2"]) : die("No year2 specified");
+$hour1 = isset($_GET["hour1"]) ? xssafe($_GET["hour1"]) : die("No hour1 specified");
+$hour2 = isset($_GET["hour2"]) ? xssafe($_GET["hour2"]) : die("No hour2 specified");
+$minute1 = isset($_GET["minute1"]) ? xssafe($_GET["minute1"]) : die("No minute1 specified");
+$minute2 = isset($_GET["minute2"]) ? xssafe($_GET["minute2"]) : die("No minute2 specified");
 $vars = isset($_GET["vars"]) ? $_GET["vars"] : die("No vars specified");
 $tz = isset($_REQUEST['tz']) ? $_REQUEST['tz'] : 'UTC';
 

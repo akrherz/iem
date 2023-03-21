@@ -1,28 +1,30 @@
-"""This chart presents the largest changes in
-    temperature over a given number of hours.  This is based on available
-    temperature reports.  There are two options for how to compute the
-    temperature change over a given window.</p>
+"""
+This chart presents the largest changes in
+temperature over a given number of hours.  This is based on available
+temperature reports.  There are two options for how to compute the
+temperature change over a given window.</p>
 
-    <p><table class="table table-striped">
-    <thead><tr><th>Label</th><th>Description</th></tr></thead>
-    <tbody>
-    <tr><td>Compute at ends of time window</td><td>This requires an exact
-    match between the starting timestamp and ending timestamp of the given
-    window of time.  For example, computing a 12 hour change between exactly
-    6:53 AM and 6:53 PM.</td></tr>
-    <tr><td>Compute over time window</td><td>This is more forgiving and
-    considers the observation at the start of the window and then any
-    subsequent observation over the window of time.  The end of the
-    window is inclusive as well.</td></tr>
-    </tbody>
-    </table></p>
+<p><table class="table table-striped">
+<thead><tr><th>Label</th><th>Description</th></tr></thead>
+<tbody>
+<tr><td>Compute at ends of time window</td><td>This requires an exact
+match between the starting timestamp and ending timestamp of the given
+window of time.  For example, computing a 12 hour change between exactly
+6:53 AM and 6:53 PM.</td></tr>
+<tr><td>Compute over time window</td><td>This is more forgiving and
+considers the observation at the start of the window and then any
+subsequent observation over the window of time.  The end of the
+window is inclusive as well.</td></tr>
+</tbody>
+</table></p>
 
-    <p><strong>Note:</strong>  This app is very effective at finding bad data
-    points as the spark-line plot of the data for the given period will look
-    flakey.</p>
+<p><strong>Note:</strong>  This app is very effective at finding bad data
+points as the spark-line plot of the data for the given period will look
+flakey.</p>
 
-    <p><a href="/plotting/auto/?q=139">Autoplot 139</a> is similar to this
-    plot, but only considers a calendar day.</p>"""
+<p><a href="/plotting/auto/?q=139">Autoplot 139</a> is similar to this
+plot, but only considers a calendar day.</p>
+"""
 from datetime import datetime, timedelta, date
 
 import pytz

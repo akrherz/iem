@@ -1,26 +1,7 @@
-"""Flight category by hour"""
-import datetime
-
-import numpy as np
-import pytz
-import pandas as pd
-import matplotlib.colors as mpcolors
-from matplotlib.patches import Rectangle
-from pyiem.plot import figure_axes
-from pyiem.util import get_autoplot_context, get_sqlalchemy_conn, utc
-from pyiem.exceptions import NoDataFound
-
-
-def get_description():
-    """Return a dict describing how to call this plotter"""
-    desc = {}
-    desc["data"] = True
-    desc["cache"] = 86400
-    desc[
-        "description"
-    ] = """This chart summarizes Flight Category by hour
-    and day of a given month.  In the case of multiple observations for a
-    given hour, the worst category is plotted.
+"""
+This chart summarizes Flight Category by hour
+and day of a given month.  In the case of multiple observations for a
+given hour, the worst category is plotted.
 
 <table class="table table-condensed table-bordered">
 <thead><tr><th>code</th><th>Label</th><th>Description</th></tr></thead>
@@ -39,7 +20,26 @@ Ceiling &gt; 3000' AGL and visibility &gt; 5 statutes miles (green)</td></tr>
 </table>
 </tbody>
 </table>
-    """
+"""
+import datetime
+
+try:
+    from zoneinfo import ZoneInfo
+except ImportError:
+    from backports.zoneinfo import ZoneInfo  # type:ignore
+
+import numpy as np
+import pandas as pd
+import matplotlib.colors as mpcolors
+from matplotlib.patches import Rectangle
+from pyiem.plot import figure_axes
+from pyiem.util import get_autoplot_context, get_sqlalchemy_conn, utc
+from pyiem.exceptions import NoDataFound
+
+
+def get_description():
+    """Return a dict describing how to call this plotter"""
+    desc = {"description": __doc__, "data": True, "cache": 86400}
     today = datetime.date.today()
     desc["arguments"] = [
         dict(
@@ -74,7 +74,7 @@ def plotter(fdict):
     month = ctx["month"]
 
     tzname = ctx["_nt"].sts[station]["tzname"]
-    tzinfo = pytz.timezone(tzname)
+    tzinfo = ZoneInfo(tzname)
 
     # Figure out the 1rst and last of this month in the local time zone
     sts = utc(year, month, 3)
@@ -87,7 +87,7 @@ def plotter(fdict):
             """
         SELECT valid at time zone %s as ts,
         skyc1, skyc2, skyc3, skyc4, skyl1, skyl2, skyl3, skyl4, vsby
-        from alldata where station = %s and valid BETWEEN %s and %s
+        from alldata where station = %s and valid >= %s and valid < %s
         and vsby is not null and report_type = 3 ORDER by valid ASC
         """,
             conn,
@@ -132,7 +132,6 @@ def plotter(fdict):
             val = 0
         data[y, x] = max(data[y, x], val)
         conds.append(lookup[val])
-        # print row['ts'], y, x, val, data[y, x], level, row['vsby']
 
     df["flstatus"] = conds
     title = (
@@ -188,4 +187,6 @@ def plotter(fdict):
 
 
 if __name__ == "__main__":
-    plotter(dict(station="DSM", year=2009, month=1, network="IA_ASOS"))
+    plotter(
+        {"zstation": "NFFN", "year": 2015, "month": 11, "network": "FJ__ASOS"}
+    )

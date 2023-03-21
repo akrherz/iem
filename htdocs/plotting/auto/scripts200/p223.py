@@ -1,4 +1,9 @@
-"""Divide up the observations into partitions."""
+"""
+This chart presents the monthly/seasonal partition of how a daily
+observed climate variable is observed.  Rewording, what percentage of
+a given year's daily reports at the given threshold range occur within
+the given month and season.
+"""
 import calendar
 import datetime
 
@@ -24,14 +29,7 @@ PDICT3 = {
 
 def get_description():
     """Return a dict describing how to call this plotter"""
-    desc = {}
-    desc["data"] = True
-    desc[
-        "description"
-    ] = """This chart presents the monthly/seasonal partition of how a daily
-    observed climate variable is observed.  Rewording, what percentage of
-    a given year's daily reports at the given threshold range occur within
-    the given month and season."""
+    desc = {"description": __doc__, "data": True}
     desc["arguments"] = [
         dict(
             type="station",
