@@ -11,11 +11,11 @@ require_once "../../../../include/myview.php";
 $t = new MyView();
 
 $var = isset($_GET["var"]) ? xssafe($_GET["var"]) : "gdd50";
-$year = isset($_GET["year"]) ? intval($_GET["year"]) : date("Y", time() - 86400);
-$smonth = isset($_GET["smonth"]) ? intval($_GET["smonth"]) : 5;
-$sday = isset($_GET["sday"]) ? intval($_GET["sday"]) : 1;
-$emonth = isset($_GET["emonth"]) ? intval($_GET["emonth"]) : date("m", time() - 86400);
-$eday = isset($_GET["eday"]) ? intval($_GET["eday"]) : date("d", time() - 86400);
+$year = get_int404("year", date("Y", time() - 86400));
+$smonth = get_int404("smonth", 5);
+$sday = get_int404("sday", 1);
+$emonth = get_int404("emonth", date("m", time() - 86400));
+$eday = get_int404("eday", date("d", time() - 86400));
 $network = isset($_REQUEST["network"]) ? xssafe($_REQUEST["network"]) : "IACLIMATE";
 if (strlen($network) > 9){
     xssafe("<script>");
@@ -54,14 +54,15 @@ $tr .= "# Download From: https://mesonet.agron.iastate.edu/GIS/apps/coop/gsplot.
 $state = substr($network, 0, 2);
 
 /* Query the obs */
-$rs = pg_prepare($coopdb, "SELECT", "WITH data as (
-  SELECT station, year,
+$rs = pg_prepare($coopdb, "SELECT", <<<EOM
+WITH data as (
+  SELECT station,
   sum(precip) as s_rainfall,
   sum(gddxx(32, 86, high, low)) as s_gdd32,
-    sum(gddxx(41, 86, high, low)) as s_gdd41,
-    sum(gddxx(46, 86, high, low)) as s_gdd46,
-    sum(gddxx(48, 86, high, low)) as s_gdd48,
-    sum(gddxx(50, 86, high, low)) as s_gdd50,
+  sum(gddxx(41, 86, high, low)) as s_gdd41,
+  sum(gddxx(46, 86, high, low)) as s_gdd46,
+  sum(gddxx(48, 86, high, low)) as s_gdd48,
+  sum(gddxx(50, 86, high, low)) as s_gdd50,
   sum(gddxx(51, 86, high, low)) as s_gdd51,
   sum(gddxx(52, 86, high, low)) as s_gdd52,
   sum(cdd(high, low, 65)) as s_cdd65,
@@ -69,31 +70,36 @@ $rs = pg_prepare($coopdb, "SELECT", "WITH data as (
   sum(sdd86(high,low)) as s_sdd86,
   min(low) as s_mintemp,
   max(high) as s_maxtemp from alldata_{$state}
-  WHERE sday >= $1 and sday <= $2 GROUP by station, year
+  WHERE year = $3 and sday >= $1 and sday <= $2 GROUP by station, year
 ), climo as (
   SELECT station,
-  avg(s_rainfall) as c_rainfall,
-  avg(s_gdd32) as c_gdd32,
-  avg(s_gdd41) as c_gdd41,
-  avg(s_gdd46) as c_gdd46,
-  avg(s_gdd48) as c_gdd48,
-  avg(s_gdd50) as c_gdd50,
-  avg(s_gdd51) as c_gdd51,
-  avg(s_gdd52) as c_gdd52,
-  avg(s_sdd86) as c_sdd86,
-  avg(s_cdd65) as c_cdd65,
-  avg(s_hdd65) as c_hdd65,
-  avg(s_mintemp) as c_mintemp,
-  avg(s_maxtemp) as c_maxtemp from data GROUP by station
+  sum(precip) as c_rainfall,
+  sum(gdd32) as c_gdd32,
+  sum(gdd41) as c_gdd41,
+  sum(gdd46) as c_gdd46,
+  sum(gdd48) as c_gdd48,
+  sum(gdd50) as c_gdd50,
+  sum(gdd51) as c_gdd51,
+  sum(gdd52) as c_gdd52,
+  sum(sdd86) as c_sdd86,
+  sum(cdd65) as c_cdd65,
+  sum(hdd65) as c_hdd65
+  from climate WHERE
+  station in (select station from data) and
+  valid >= $4 and valid <= $5 GROUP by station
 )
 SELECT d.*, c_rainfall, c_gdd32, c_gdd41, c_gdd46, c_gdd48, c_gdd50,
-c_gdd51, c_gdd52, c_sdd86, c_mintemp, c_maxtemp, c_cdd65, c_hdd65
-from data d JOIN climo c on (d.station = c.station) WHERE d.year = $3
-");
+c_gdd51, c_gdd52, c_sdd86, c_cdd65, c_hdd65
+from data d JOIN climo c on (d.station = c.station)
+EOM
+);
 
 $rs = pg_execute($coopdb, "SELECT", array(
     $sts->format("md"),
-    $ets->format("md"), $year
+    $ets->format("md"),
+    $year,
+    sprintf("2000-%s", $sts->format("m-d")),
+    sprintf("2000-%s", $ets->format("m-d")),
 ));
 
 
@@ -148,8 +154,10 @@ for ($i = 0; $row = pg_fetch_array($rs); $i++) {
 
 $netselect = "<select name=\"network\">";
 $mesosite = iemdb("mesosite");
-$rs = pg_query($mesosite, "SELECT id, name from networks where id ~* 'CLIMATE'
-    and id not in ('MSCLIMATE') ORDER by name ASC");
+$rs = pg_query(
+    $mesosite,
+    "SELECT id, name from networks where id ~* 'CLIMATE' ".
+    "ORDER by name ASC");
 for ($i = 0; $row = pg_fetch_assoc($rs); $i++) {
     $netselect .= sprintf(
         "<option value='%s' %s>%s</option>\n",

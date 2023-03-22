@@ -43,6 +43,12 @@ PDICT = {
     "avg_era5land_srad": "Average Daily Solar Radiation (ERA5 Land)",
     "max_era5land_srad": "Max Daily Solar Radiation (ERA5 Land)",
     "min_era5land_srad": "Min Daily Solar Radiation (ERA5 Land)",
+    "avg_merra_srad": "Average Daily Solar Radiation (MERRAv2)",
+    "max_merra_srad": "Max Daily Solar Radiation (MERRAv2)",
+    "min_merra_srad": "Min Daily Solar Radiation (MERRAv2)",
+    "avg_narr_srad": "Average Daily Solar Radiation (NARR)",
+    "max_narr_srad": "Max Daily Solar Radiation (NARR)",
+    "min_narr_srad": "Min Daily Solar Radiation (NARR)",
     "precip": "Total Precipitation",
     "snow": "Total Snowfall",
     "days-precip-above": (
@@ -181,6 +187,10 @@ def plotter(fdict):
         culler = " and snow is not null"
     elif varname.find("era5") > -1:
         culler = " and era5land_srad is not null"
+    elif varname.find("merra") > -1:
+        culler = " and merra_srad is not null"
+    elif varname.find("narr") > -1:
+        culler = " and narr_srad is not null"
 
     with get_sqlalchemy_conn("coop") as conn:
         df = pd.read_sql(
@@ -188,7 +198,8 @@ def plotter(fdict):
                 f"""
         SELECT extract(year from day - '{doff} days'::interval)::int as yr,
         day, high, low, precip, snow, (high + low) / 2. as avg_temp,
-        gddxx(:gddbase, :gddceil, high, low) as gdd, era5land_srad
+        gddxx(:gddbase, :gddceil, high, low) as gdd, era5land_srad,
+        merra_srad, narr_srad
         from alldata WHERE station = :station and {daylimit}
         {culler} ORDER by day ASC
         """
@@ -249,6 +260,12 @@ def plotter(fdict):
             avg_era5land_srad=("era5land_srad", "mean"),
             min_era5land_srad=("era5land_srad", "min"),
             max_era5land_srad=("era5land_srad", "max"),
+            avg_merra_srad=("merra_srad", "mean"),
+            min_merra_srad=("merra_srad", "min"),
+            max_merra_srad=("merra_srad", "max"),
+            avg_narr_srad=("narr_srad", "mean"),
+            min_narr_srad=("narr_srad", "min"),
+            max_narr_srad=("narr_srad", "max"),
         )
         .reset_index()
         .rename(

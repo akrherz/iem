@@ -381,7 +381,32 @@ LAYER
   END
 END
 
-# Counites
+LAYER
+  NAME counties
+  STATUS OFF
+  TYPE POLYGON
+  DATA "/mesonet/data/gis/static/shape/4326/us/uscounties.shp"
+  LABELCACHE ON
+  LABELITEM 'NAME'
+  CLASS
+    STYLE
+      OUTLINECOLOR 210 210 210
+      WIDTH 1.0
+    END
+    LABEL
+      SIZE TINY
+      TYPE BITMAP
+      POSITION LC
+#      COLOR 90 90 90
+      COLOR 0 0 0
+      PARTIALS FALSE
+      FORCE FALSE
+    END
+  END
+END
+
+
+# Counties
 LAYER
   NAME uscounties_and_name
   STATUS OFF
@@ -434,7 +459,7 @@ LAYER
   END
 END
 
-# Counites
+# Counties
 LAYER
   NAME iacounties
   STATUS OFF
@@ -869,7 +894,35 @@ LAYER
   END
 END
 
-
+LAYER
+  NAME credits26915
+  TYPE POINT
+  STATUS default
+  TRANSFORM FALSE
+  LABELCACHE ON
+  CLASS
+    LABEL
+      COLOR 255 255 255
+      TYPE TRUETYPE
+      SIZE 14
+      FONT 'liberation'
+      POSITION CR
+      FORCE TRUE
+      PARTIALS TRUE
+    END
+  END
+  CLASS
+    LABEL
+      COLOR 0 0 200
+      TYPE BITMAP
+      SIZE MEDIUM
+      POSITION CR
+      FORCE TRUE
+      PARTIALS TRUE
+      WRAP '|'
+    END
+  END
+END
 
 
 
@@ -979,7 +1032,97 @@ LAYER
           FORCE TRUE
       END
   END
+  CLASS
+    STYLE
+      SYMBOL 1
+      COLOR 255 0 0
+      SIZE 5
+    END
+  END
 END
+
+LAYER
+  NAME snet
+  STATUS OFF
+  TYPE POINT
+  LABELCACHE ON
+  PROJECTION
+   "init=epsg:4326"
+  END
+  CLASS
+    STYLE
+      COLOR  255 255 0
+    END
+    LABEL
+      COLOR  255 255 0
+      OUTLINECOLOR  0 0 0
+      SIZE 14
+      TYPE TRUETYPE
+      FONT 'liberation-bold'
+      ANTIALIAS TRUE
+      BUFFER 2
+      FORCE FALSE
+      POSITION UC
+      OFFSET 0 5
+    END
+  END
+  CLASS
+    STYLE
+      COLOR  255 255 0
+    END
+    LABEL
+      COLOR 0 0 0
+      SIZE 12
+      MINSIZE 4
+      MAXSIZE 18
+      TYPE TRUETYPE
+      FONT 'liberation-bold'
+      ANTIALIAS true
+      BUFFER 0
+      FORCE TRUE
+      POSITION CR
+      OFFSET 2 0
+    END
+  END
+  CLASS
+    STYLE
+      COLOR  255 255 0
+    END
+    LABEL
+      COLOR  255 255 0
+      OUTLINECOLOR  0 0 0
+      SIZE 8
+      TYPE TRUETYPE
+      FONT 'liberation-bold'
+      ANTIALIAS TRUE
+      BUFFER 2
+      FORCE TRUE
+      POSITION LC
+      OFFSET 0 5
+    END
+  END
+  CLASS
+    STYLE
+      COLOR 255 255 0
+    END
+    LABEL
+      STYLE
+      COLOR 0 0 0
+      SIZE 8
+      END
+      MINSIZE 4
+      MAXSIZE 18
+      TYPE TRUETYPE
+      FONT 'liberation'
+      ANTIALIAS true
+      BUFFER 0
+      FORCE TRUE
+      POSITION CL
+      OFFSET 2 0
+    END
+  END
+END
+
 
 LAYER
   NAME barbs

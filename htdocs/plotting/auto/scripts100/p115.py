@@ -1,4 +1,10 @@
-"""Monthly precip in text format"""
+"""
+This reports presents simple monthy and yearly
+summary statistics.  The <i>WYEAR</i> column denotes the 'Water Year'
+total, which is defined for the period between 1 Oct and 30 Sep. For
+example, the 2009 <i>WYEAR</i> value represents the period between
+1 Oct 2008 and 30 Sep 2009, the 2009 water year.
+"""
 import datetime
 import calendar
 
@@ -25,16 +31,7 @@ LABELS = {
 
 def get_description():
     """Return a dict describing how to call this plotter"""
-    desc = {}
-    desc["data"] = True
-    desc["report"] = True
-    desc[
-        "description"
-    ] = """This reports presents simple monthy and yearly
-    summary statistics.  The <i>WYEAR</i> column denotes the 'Water Year'
-    total, which is defined for the period between 1 Oct and 30 Sep. For
-    example, the 2009 <i>WYEAR</i> value represents the period between
-    1 Oct 2008 and 30 Sep 2009, the 2009 water year."""
+    desc = {"description": __doc__, "data": True, "report": True}
     desc["arguments"] = [
         dict(
             type="station",
@@ -58,7 +55,7 @@ def myformat(val, precision):
     """Nice"""
     if val is None:
         return " ****"
-    fmt = "%%5.%sf" % (precision,)
+    fmt = f"%5.{precision}f"
     return fmt % val
 
 
@@ -70,7 +67,7 @@ def p(df, year, month, varname, precision):
         return " ****"
     if pd.isna(val):
         return " ****"
-    fmt = "%%5.%sf" % (precision,)
+    fmt = f"%5.{precision}f"
     return fmt % val
 
 
@@ -82,16 +79,17 @@ def plotter(fdict):
     varname = ctx["var"]
 
     with get_sqlalchemy_conn("coop") as conn:
+        # Prevent trace values from accumulating
         df = pd.read_sql(
-            f"""
+            """
             SELECT year, month,
             case when month in (10, 11, 12) then year + 1 else year end
             as water_year,
-            sum(precip) as precip,
-            sum(snow) as snow,
+            round(sum(precip)::numeric, 2) as precip,
+            round(sum(snow)::numeric, 2) as snow,
             avg(high) as avg_high, avg(low) as avg_low,
             avg((high+low)/2.) as avg_temp, max(day) as max_day from
-            alldata_{station[:2]} WHERE station = %s
+            alldata WHERE station = %s
             GROUP by year, water_year, month ORDER by year ASC, month ASC
         """,
             conn,
@@ -103,24 +101,17 @@ def plotter(fdict):
 
     res = (
         "# IEM Climodat https://mesonet.agron.iastate.edu/climodat/\n"
-        "# Report Generated: %s\n"
-        "# Climate Record: %s -> %s, "
+        f"# Report Generated: {datetime.date.today():%d %b %Y}\n"
+        f"# Climate Record: {ctx['_nt'].sts[station]['archive_begin']} "
+        f"-> {df['max_day'].max()}, "
         "WYEAR column is Water Year Oct 1 - Sep 30\n"
-        "# Site Information: [%s] %s\n"
+        f"# Site Information: {ctx['_sname']}\n"
         "# Contact Information: "
         "Daryl Herzmann akrherz@iastate.edu 515.294.5978\n"
-    ) % (
-        datetime.date.today().strftime("%d %b %Y"),
-        ctx["_nt"].sts[station]["archive_begin"],
-        df["max_day"].max(),
-        station,
-        ctx["_nt"].sts[station]["name"],
-    )
-    res += (
-        "# %s\n"
+        f"# {LABELS[varname]}\n"
         "YEAR   JAN   FEB   MAR   APR   MAY   JUN   JUL   AUG   SEP   "
         "OCT   NOV   DEC   ANN WYEAR\n"
-    ) % (LABELS[varname],)
+    )
 
     years = df["year"].unique()
     years.sort()
@@ -185,16 +176,16 @@ def plotter(fdict):
     # create a better resulting dataframe
     resdf = pd.DataFrame(index=years)
     resdf.index.name = "YEAR"
-    for i, month_abbr in enumerate(calendar.month_abbr):
-        if i == 0:
-            continue
-        resdf[month_abbr.upper()] = df[df["month"] == i].set_index("year")[
-            varname
-        ]
+    for i, month_abbr in enumerate(calendar.month_abbr[1:], start=1):
+        col = month_abbr.upper()
+        resdf[col] = df[df["month"] == i].set_index("year")[varname]
+        resdf.at["MEAN", col] = df[df["month"] == i][varname].mean()
     resdf["ANN"] = yrmean if varname not in ["precip", "snow"] else yrsum
+    resdf.at["MEAN", "ANN"] = resdf["ANN"].mean()
     resdf["WATER YEAR"] = (
         wyrmean if varname not in ["precip", "snow"] else wyrsum
     )
+    resdf.at["MEAN", "WATER YEAR"] = resdf["WATER YEAR"].mean()
 
     return None, resdf, res
 
