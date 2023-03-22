@@ -32,7 +32,7 @@ $ets = new DateTime("{$year}-{$emonth}-{$eday}");
 function mktitlelocal($map, $imgObj, $titlet)
 {
 
-    $layer = $map->getLayerByName("credits");
+    $layer = $map->getLayerByName("credits26915");
 
     // point feature with text for location
     $point = new pointobj();
@@ -94,32 +94,25 @@ $myStations = $cities;
 $height = 480;
 $width = 640;
 
-$proj = "init=epsg:26915";
-
-$map = new MapObj("../../../../data/gis/base26915.map");
-$map->setProjection($proj);
+$map = new MapObj("../../../../data/gis/base4326.map");
+$map->imagecolor->setRGB(255, 255, 255);
+$map->setSize(1024, 768);
 
 $state = substr($network, 0, 2);
 $dbconn = iemdb("postgis");
 $rs = pg_query($dbconn, "SELECT ST_xmin(g), ST_xmax(g), ST_ymin(g), ST_ymax(g) from (
-        select ST_Extent(ST_Transform(the_geom,26915)) as g from states 
+        select ST_Extent(the_geom) as g from states 
         where state_abbr = '{$state}'
         ) as foo");
 $row = pg_fetch_array($rs, 0);
-$buf = 35000; // 35km
+$buf = 0.2; // 35km
 $xsz = $row[1] - $row[0];
 $ysz = $row[3] - $row[2];
-if (($ysz + 100000) > $xsz) {
-    $map->setsize(768, 1024);
-} else {
-    $map->setsize(1024, 768);
-}
-$map->setextent(
-    $row[0] - $buf,
-    $row[2] - $buf,
-    $row[1] + $buf,
-    $row[3] + $buf
-);
+$minx = $row[0] - $buf;
+$maxx = $row[1] + $buf;
+$miny = $row[2] - $buf;
+$maxy = $row[3] + $buf;
+$map->setextent($minx, $miny, $maxx, $maxy);
 
 $counties = $map->getLayerByName("counties");
 $counties->__set("status", MS_ON);
@@ -133,48 +126,60 @@ $bar640t->__set("status", MS_ON);
 $snet = $map->getLayerByName("snet");
 $snet->__set("status", MS_ON);
 
-$iards = $map->getLayerByName("iards");
-$iards->__set("status", 1);
-
 $ponly = $map->getLayerByName("pointonly");
 $ponly->__set("status", MS_ON);
 
 $img = $map->prepareImage();
 $counties->draw($map, $img);
 $states->draw($map, $img);
-$iards->draw($map, $img);
 $bar640t->draw($map, $img);
 
-$rs = pg_prepare($coopdb, "SELECT", "SELECT station, 
+// Allow 15 labels in each direction?
+$dy = ($map->extent->maxy - $map->extent->miny) / 15;
+$dx = ($map->extent->maxx - $map->extent->minx) / 15;
+
+$rs = pg_prepare($coopdb, "SELECT", <<<EOM
+    SELECT station, 
     sum(precip) as s_prec,
-  sum(gddxx(32, 86, high, low)) as s_gdd32,
+    sum(gddxx(32, 86, high, low)) as s_gdd32,
     sum(gddxx(41, 86, high, low)) as s_gdd41,
     sum(gddxx(46, 86, high, low)) as s_gdd46,
     sum(gddxx(48, 86, high, low)) as s_gdd48,
     sum(gddxx(50, 86, high, low)) as s_gdd50,
-  sum(gddxx(51, 86, high, low)) as s_gdd51,
+    sum(gddxx(51, 86, high, low)) as s_gdd51,
     sum(gddxx(52, 86, high, low)) as s_gdd52,
-  sum(cdd(high, low, 65)) as s_cdd65,
-  sum(hdd(high, low, 65)) as s_hdd65,
+    sum(cdd(high, low, 65)) as s_cdd65,
+    sum(hdd(high, low, 65)) as s_hdd65,
     sum(sdd86(high,low)) as s_sdd86, min(low) as s_mintemp,
-    max(high) as s_maxtemp from alldata 
+    max(high) as s_maxtemp from alldata_{$state}
     WHERE day >= $1 and day <= $2
-  and substr(station, 3, 4) != '0000' and substr(station, 3, 1) != 'C'
-  GROUP by station 
-    ORDER by station ASC");
+    and substr(station, 3, 4) != '0000' and substr(station, 3, 1) != 'C'
+    GROUP by station 
+    ORDER by station ASC
+EOM
+);
 $rs = pg_execute($coopdb, "SELECT", array(
     $sts->format("Y-m-d"),
     $ets->format("Y-m-d")
 ));
 
+$used = Array();
+
 for ($i = 0; $row = pg_fetch_array($rs); $i++) {
 
     $ukey = $row["station"];
     if (!isset($cities[$ukey])) continue;
-    // Red Dot...  
+    $key = sprintf(
+        "%.0f_%.0f",
+        ($cities[$ukey]["lon"] - $map->extent->minx) / $dx,
+        ($cities[$ukey]["lat"] - $map->extent->miny) / $dy,
+    );
+    if (in_array($key, $used)) continue;
+    $used[] = $key;
+    // Red Dot...
     $pt = new PointObj();
     $pt->setXY($cities[$ukey]['lon'], $cities[$ukey]['lat'], 0);
-    $pt->draw($map, $ponly, $img, 0, "");
+    $pt->draw($map, $ponly, $img, 2, "");
 
     // City Name
     $pt = new PointObj();

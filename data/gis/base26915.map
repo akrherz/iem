@@ -155,12 +155,9 @@ LAYER
       COLOR  255 255 0
     END
     LABEL
-            COLOR  255 255 0
+      COLOR  255 255 0
       OUTLINECOLOR  0 0 0
-      
       SIZE 14
-      #MINSIZE 4
-      #MAXSIZE 18
       TYPE TRUETYPE
       FONT 'liberation-bold'
       ANTIALIAS TRUE
@@ -168,7 +165,6 @@ LAYER
       FORCE FALSE
       POSITION UC
       OFFSET 0 5
-     
     END
   END
   CLASS
@@ -176,10 +172,8 @@ LAYER
       COLOR  255 255 0
     END
     LABEL
-
       COLOR 0 0 0
       SIZE 12
-   
       MINSIZE 4
       MAXSIZE 18
       TYPE TRUETYPE
@@ -189,7 +183,6 @@ LAYER
       FORCE TRUE
       POSITION CR
       OFFSET 2 0
-     
     END
   END
   CLASS
@@ -197,13 +190,9 @@ LAYER
       COLOR  255 255 0
     END
     LABEL
-
       COLOR  255 255 0
       OUTLINECOLOR  0 0 0
-   
       SIZE 8
-      #MINSIZE 4
-      #MAXSIZE 18
       TYPE TRUETYPE
       FONT 'liberation-bold'
       ANTIALIAS TRUE
@@ -211,12 +200,11 @@ LAYER
       FORCE TRUE
       POSITION LC
       OFFSET 0 5
-      
     END
   END
   CLASS
     STYLE
-      COLOR  255 255 0
+      COLOR 255 255 0
     END
     LABEL
       STYLE
@@ -232,7 +220,6 @@ LAYER
       FORCE TRUE
       POSITION CL
       OFFSET 2 0
-      
     END
   END
 END
