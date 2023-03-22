@@ -648,6 +648,7 @@ mopts = [
 ]
 nsopts = [
     {"id": 238, "label": "NASS County Yield Maps"},
+    {"id": 239, "label": "NASS County Yields + Weather Station Summaries"},
     {"id": 156, "label": "NASS Crop Condition by Year for Six States"},
     {"id": 127, "label": "NASS Crop Progress by Year"},
     {"id": 197, "label": "NASS Crop Progress State Average Map"},
