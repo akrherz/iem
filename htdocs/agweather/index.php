@@ -156,20 +156,24 @@ for various pests of interest.</p>
 
 
 <tr><td>Solar Radiation</td>
-<td>Most of the <a href="/schoolnet/">SchoolNet</a> sites report radiation
-data at minute intervals, but the data is not of great quality.</td>
-<td>The <a href="/agclimate/">ISU Soil Moisture</a> network collects solar 
-radiation data hourly.</td>
+<td colspan="2">The <a href="/agclimate/">ISU Soil Moisture</a> network collects solar 
+radiation at minute and hourly intervals.</td>
 <td>The <a href="/agclimate/">ISU Soil Moisture</a> network makes daily 
 summaries available. The IEM also provides estimated radiation data for download
 for <a href="/request/coop/fe.phtml">NWS COOP</a> sites based on model analyses.</td>
-<td colspan="3">Summarized data for this timescale does not exist on the IEM 
-at this time.</td>
+<td colspan="3">
+The model analyses (MERRAv2, HRRR, NARR, and ERA5Land) used to provide solar radiation
+data for the <a href="/request/coop/fe.phtml">NWS COOP</a> sites and be summarized
+over time here:
+<ul>
+  <li><a href="/plotting/auto/?q=107">Autoplot 107</a> has daily averages over a period
+  of your choice.</li>
+</ul>
+</td>
 </tr>
 
 <tr><td>Soil Moisture</td>
-<td>Does not exist.</td>
-<td>The <a href="/agclimate/">ISU Soil Moisture</a> network collects hourly
+<td colspan="2">The <a href="/agclimate/">ISU Soil Moisture</a> network collects five minute and hourly
 soil moisture data.</td>
 <td>The <a href="http://wepp.mesonet.agron.iastate.edu/GIS/sm.phtml?pvar=vsm">Iowa Daily Erosion Project</a>
 produces soil moisture analyses based on a model called WEPP.</td>
@@ -178,8 +182,7 @@ at this time.</td>
 </tr>
 
 <tr><td>Soil Temperature</td>
-<td>Does not exist.</td>
-<td>The <a href="/agclimate/">ISU Soil Moisture</a> network collects hourly
+<td colspan="2">The <a href="/agclimate/">ISU Soil Moisture</a> network collects five minute and hourly
 soil temperature data.</td>
 <td>The <a href="/agclimate/">ISU Soil Moisture</a> network produces daily
 summaries of high and low temperature.
@@ -220,7 +223,7 @@ summarized SDD data.
       <li><a href="/GIS/apps/coop/gsplot.phtml?var=sdd86&year={$y}">Map of Totals</a></li>
       <li><a href="/plotting/auto/?q=108">Single Site Graphs</a></li>
 </ul>
-          </td>
+</td>
 </tr>
 
 <tr><td>Wind</td>
@@ -270,7 +273,7 @@ from Spring thresholds (mainly because of plant size/height).</blockquote>
 
 <h4>External Links</h4>
 <ul>
- <li><a href="http://www.iowaagriculture.gov/climatology.asp">State of Iowa Climatologist</a></li>
+ <li><a href="https://iowaagriculture.gov/climatology-bureau">State of Iowa Climatologist</a></li>
  <li><a href="http://www.nass.usda.gov/Charts_and_Maps/Crop_Progress_&_Condition/index.asp">USDA Charts &amp; Maps of Crop Progress</a></li>
  <li><a href="http://www.nass.usda.gov/Publications/State_Crop_Progress_and_Condition/index.asp">USDA State Crop Progress &amp; Condition</a></li>
  <li><a href="http://planthardiness.ars.usda.gov/PHZMWeb/">USDA Plant Hardiness Map</a> (enter

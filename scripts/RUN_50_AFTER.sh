@@ -2,7 +2,10 @@
 
 python cache/cache_autoplots.py &
 
-python gfs/gfs2iemre.py $(date -u --date '6 hours ago' +'%Y %m %d %H') &
+cd gfs
+# Le Sigh on paths
+python gfs2iemre.py $(date -u --date '6 hours ago' +'%Y %m %d %H') &
+cd ..
 
 cd ingestors/madis
 python extract_hfmetar.py 2 &
@@ -11,9 +14,9 @@ python extract_hfmetar.py 2 &
 # for ISUSM et al
 HH=$(date +%H)
 if [ "$HH" -eq "22" ]
-	then
-		cd ../../climodat
-		python hrrr_solarrad.py $(date +'%Y %m %d')	
+    then
+        cd ../../climodat
+        python hrrr_solarrad.py $(date +'%Y %m %d')	
 fi
 
-#END
+# END
