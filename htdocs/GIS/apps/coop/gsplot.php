@@ -135,8 +135,8 @@ $states->draw($map, $img);
 $bar640t->draw($map, $img);
 
 // Allow 15 labels in each direction?
-$dy = ($map->extent->maxy - $map->extent->miny) / 15;
-$dx = ($map->extent->maxx - $map->extent->minx) / 15;
+$dy = ($map->extent->maxy - $map->extent->miny) / 25;
+$dx = ($map->extent->maxx - $map->extent->minx) / 25;
 
 $rs = pg_prepare($coopdb, "SELECT", <<<EOM
     SELECT station, 

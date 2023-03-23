@@ -324,7 +324,7 @@ def plotter(fdict):
 
     # High Temp
     fig.text(0.05, 0.85, "High Temperature", fontsize=24)
-    if not pd.isna(row["high"]):
+    if not pd.isna(row["high"]) and highparams.stddev is not None:
         ax = fig.add_axes(
             [0.05, 0.48, 0.3, 0.4],
             projection="polar",
@@ -335,7 +335,7 @@ def plotter(fdict):
 
     # Low Temp
     fig.text(0.05, 0.42, "Low Temperature", fontsize=24)
-    if not pd.isna(row["low"]):
+    if not pd.isna(row["low"]) and lowparams.stddev is not None:
         ax = fig.add_axes(
             [0.05, 0.05, 0.3, 0.4],
             projection="polar",
@@ -358,4 +358,4 @@ def plotter(fdict):
 
 
 if __name__ == "__main__":
-    plotter({"station": "PBRW", "date": "2023-03-01"})
+    plotter({"station": "NPPG", "date": "2023-03-22"})
