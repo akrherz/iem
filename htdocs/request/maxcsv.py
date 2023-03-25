@@ -194,7 +194,7 @@ def do_webcams(network):
         """
             ),
             conn,
-            params={"network": network},
+            params={"net": network},
         )
     return df
 
