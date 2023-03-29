@@ -106,7 +106,7 @@ def do(now, realtime=False):
         "-p",
         (
             f"plot {routes} {now:%Y%m%d%H%M} gis/images/4326/mrms/{prefix}.png"
-            f" GIS/mrms/{prefix}_{now::%Y%m%d%H%M}.png png"
+            f" GIS/mrms/{prefix}_{now:%Y%m%d%H%M}.png png"
         ),
         f"{tmpfn}.png",
     ]
