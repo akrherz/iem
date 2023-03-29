@@ -1,4 +1,16 @@
-"""Calendar of SPC Outlooks by WFO/state."""
+"""
+This application presents a calendar of Storm Prediction Center or Weather
+Prediction Center outlooks by state, WFO, or county. The GIS spatial operation
+done is a simple touches.  So an individual outlook that just barely
+scrapes the selected area would count for this presentation.  Suggestions
+would be welcome as to how this could be improved.
+
+<p>This app attempts to not double-count outlook days.  A SPC/WPC Outlook
+technically crosses two calendar days ending at 12 UTC (~7 AM). This
+application considers the midnight to ~7 AM period to be for the
+previous day, which is technically not accurate but the logic that most
+people expect to see.</p>
+"""
 import calendar
 import datetime
 
@@ -53,24 +65,7 @@ MDICT = {
 
 def get_description():
     """Return a dict describing how to call this plotter"""
-    desc = {}
-    desc["data"] = True
-    desc[
-        "description"
-    ] = """This application presents a calendar of Storm
-    Prediction Center or Weather Prediction Center
-    outlooks by state, WFO, or county.
-    The GIS spatial operation
-    done is a simple touches.  So an individual outlook that just barely
-    scrapes the selected area would count for this presentation.  Suggestions
-    would be welcome as to how this could be improved.
-
-    <p>This app attempts to not double-count outlook days.  A SPC/WPC Outlook
-    technically crosses two calendar days ending at 12 UTC (~7 AM). This
-    application considers the midnight to ~7 AM period to be for the
-    previous day, which is technically not accurate but the logic that most
-    people expect to see.</p>
-    """
+    desc = {"description": __doc__, "data": True}
     today = datetime.date.today()
     jan1 = today.replace(month=1, day=1)
     desc["arguments"] = [
@@ -262,18 +257,19 @@ def plotter(fdict):
     while now <= ets:
         data[now] = {"val": " "}
         now += datetime.timedelta(days=1)
-    df2 = (
-        df.reset_index()
-        .groupby("threshold")
-        .last()
-        .assign(
-            days=lambda df_: (ets - df_["date"]).dt.days,
-        )
-    )
     aggtxt = []
-    for thres, row in df2.iterrows():
-        if thres in COLORS:
-            aggtxt.append(f"{thres} {row['days']} Days")
+    if not df.empty:
+        df2 = (
+            df.reset_index()
+            .groupby("threshold")
+            .last()
+            .assign(
+                days=lambda df_: (ets - df_["date"]).dt.days,
+            )
+        )
+        for thres, row in df2.iterrows():
+            if thres in COLORS:
+                aggtxt.append(f"{thres} {row['days']} Days")
     for date, row in df.iterrows():
         if row["threshold"] == "TSTM" and ctx.get("g", "yes") == "no":
             continue

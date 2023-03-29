@@ -1,4 +1,7 @@
-"""warmest 91 days"""
+"""
+This chart presents the start or end date of the
+warmest 91 day period each year.
+"""
 import datetime
 
 import psycopg2.extras
@@ -15,13 +18,7 @@ PDICT = {"end_summer": "End of Summer", "start_summer": "Start of Summer"}
 
 def get_description():
     """Return a dict describing how to call this plotter"""
-    desc = {}
-    desc["data"] = True
-    desc[
-        "description"
-    ] = """This chart presents the start or end date of the
-    warmest 91 day period each year.
-    """
+    desc = {"description": __doc__, "data": True}
     desc["arguments"] = [
         dict(
             type="station",
@@ -50,12 +47,12 @@ def plotter(fdict):
     station = ctx["station"]
 
     cursor.execute(
-        f"""
+        """
     select year, extract(doy from day) as d from
         (select day, year, rank() OVER (PARTITION by year ORDER by avg DESC)
         from
             (select day, year, avg((high+low)/2.) OVER
-            (ORDER by day ASC rows 91 preceding) from alldata_{station[:2]}
+            (ORDER by day ASC rows 91 preceding) from alldata
             where station = %s and day > '1893-01-01') as foo)
             as foo2 where rank = 1
             ORDER by year ASC
@@ -105,8 +102,11 @@ def plotter(fdict):
     ax.text(
         0.1,
         0.03,
-        "Avg Date: %s, slope: %.2f days/century, R$^2$=%.2f"
-        % (avgd.strftime("%-d %b"), h_slope * 100.0, r_value**2),
+        (
+            f"Avg Date: {avgd:%-d %b}, "
+            f"slope: {h_slope * 100.:.2f} days/century, "
+            f"R$^2$={r_value**2:.2f}"
+        ),
         transform=ax.transAxes,
         va="bottom",
     )

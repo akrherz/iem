@@ -1,4 +1,9 @@
-"""Daily high/low against climo"""
+"""
+This plot produces a time series difference
+between daily high and low temperatures against climatology. For this
+context, the climatology is the simple daily average based on period of
+record data.
+"""
 import datetime
 
 import pandas as pd
@@ -12,15 +17,7 @@ PDICT = {"abs": "Departure in degrees", "sigma": "Depature in sigma"}
 
 def get_description():
     """Return a dict describing how to call this plotter"""
-    desc = {}
-    desc[
-        "description"
-    ] = """This plot produces a time series difference
-    between daily high and low temperatures against climatology. For this
-    context, the climatology is the simple daily average based on period of
-    record data.
-    """
-    desc["data"] = True
+    desc = {"description": __doc__, "data": True}
     desc["arguments"] = [
         dict(
             type="station",
@@ -53,10 +50,9 @@ def plotter(fdict):
     delta = ctx["delta"]
     year = ctx["year"]
 
-    table = f"alldata_{station[:2]}"
     with get_sqlalchemy_conn("coop") as conn:
         df = pd.read_sql(
-            f"""
+            """
             WITH days as (
                 select generate_series('%s-01-01'::date, '%s-12-31'::date,
                     '1 day'::interval)::date as day,
@@ -66,11 +62,11 @@ def plotter(fdict):
             climo as (
                 SELECT sday, avg(high) as avg_high, stddev(high)
                 as stddev_high,
-                avg(low) as avg_low, stddev(low) as stddev_low from {table}
+                avg(low) as avg_low, stddev(low) as stddev_low from alldata
                 WHERE station = %s GROUP by sday
             ),
             thisyear as (
-                SELECT day, sday, high, low from {table}
+                SELECT day, sday, high, low from alldata
                 WHERE station = %s and year = %s
             ),
             thisyear2 as (
@@ -111,7 +107,7 @@ def plotter(fdict):
         df.index.values,
         df["high"].values,
         color="brown",
-        label="%s High" % (year,),
+        label=f"{year} High",
     )
     ax[0].plot(
         df.index.values,
@@ -125,7 +121,7 @@ def plotter(fdict):
             df.index.values,
             (df.high - df.avg_high).values,
             color="r",
-            label="High Diff %s - Climate" % (year),
+            label=f"High Diff {year} - Climate",
         )
         ax[1].plot(
             df.index.values,
@@ -139,7 +135,7 @@ def plotter(fdict):
             df.index.values,
             df.high_sigma.values,
             color="r",
-            label="High Diff %s - Climate" % (year),
+            label=f"High Diff {year} - Climate",
         )
         ax[1].plot(
             df.index.values, df.low_sigma.values, color="b", label="Low Diff"
