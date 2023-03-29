@@ -20,6 +20,11 @@ from pyiem.util import (
 LOG = logger()
 
 
+def zerocheck(val):
+    """Prevent database overflows."""
+    return 0 if np.isclose(val, 0) else val
+
+
 def figure(val, qcval):
     """Go."""
     if qcval > 1000:
@@ -161,14 +166,14 @@ def workflow(fn):
             """,
             (
                 tmpf,
-                tmpf_qc_av,
-                tmpf_qc_sc,
+                zerocheck(tmpf_qc_av),
+                zerocheck(tmpf_qc_sc),
                 dwpf,
-                dwpf_qc_av,
-                dwpf_qc_sc,
+                zerocheck(dwpf_qc_av),
+                zerocheck(dwpf_qc_sc),
                 alti,
-                alti_qc_av,
-                alti_qc_sc,
+                zerocheck(alti_qc_av),
+                zerocheck(alti_qc_sc),
                 ts,
                 currentdf.at[sid, "iemid"],
             ),
