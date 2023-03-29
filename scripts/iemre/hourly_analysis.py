@@ -9,14 +9,55 @@ import pandas as pd
 from metpy.units import masked_array, units
 from metpy.calc import wind_components
 from metpy.interpolate import inverse_distance_to_grid
-from scipy.interpolate import NearestNDInterpolator
+from scipy.interpolate import NearestNDInterpolator, RegularGridInterpolator
 from pyiem import iemre
+from pyiem.iemre import hourly_offset
 from pyiem.util import get_sqlalchemy_conn, ncopen, utc, logger
 
 # stop RuntimeWarning: invalid value encountered in greater
 np.warnings.filterwarnings("ignore")
 LOG = logger()
 MEMORY = {"ts": datetime.datetime.now()}
+
+
+def use_era5land(ts, kind):
+    """Use the ERA5Land dataset."""
+    tasks = {
+        "wind": ["uwnd", "vwnd"],
+    }
+    ncfn = f"/mesonet/data/era5/{ts:%Y}_era5land_hourly.nc"
+    if not os.path.isfile(ncfn):
+        LOG.warning("Failed to find %s", ncfn)
+        return None
+    try:
+        tidx = hourly_offset(ts)
+        with ncopen(ncfn) as nc:
+            lats = nc.variables["lat"][:]
+            lons = nc.variables["lon"][:]
+            res = []
+            xi, yi = np.meshgrid(iemre.XAXIS, iemre.YAXIS)
+            for task in tasks[kind]:
+                vals = nc.variables[task][tidx, :, :]
+                if vals.mask.all():
+                    continue
+                # OK, ERA5Land is tight to land and when we interpolate
+                # we end up with slivers of no data.  So we goose things
+                # to smear data to the borders.
+                for shift in (-4, 4):
+                    for axis in (0, 1):
+                        vals_shifted = np.roll(vals, shift=shift, axis=axis)
+                        idx = ~vals_shifted.mask * vals.mask
+                        vals[idx] = vals_shifted[idx]
+                nn = RegularGridInterpolator((lats, lons), vals.filled(np.nan))
+                data = np.ma.array(nn((yi, xi)))
+                data.mask = np.isnan(data)
+                res.append(data)
+        if res:
+            return res
+
+    except Exception as exp:
+        LOG.warning("%s exp:%s", ncfn, exp)
+    return None
 
 
 def use_rtma(ts, kind):
@@ -167,6 +208,9 @@ def grid_hour(ts):
 
     # try first to use RTMA
     res = use_rtma(ts, "wind")
+    if res is None:
+        # try ERA5Land
+        res = use_era5land(ts, "wind")
     if res is not None:
         ures, vres = res
     else:
