@@ -235,7 +235,7 @@ daily_opts = [
     {"id": 199, "label": "ISU Soil Moisture Network Daily Plots"},
     {
         "id": 38,
-        "label": "Solar Radiation Estimates ERA5Land, HRRR, MERRAv2, NARR/",
+        "label": "Solar Radiation Estimates ERA5Land, HRRR, MERRAv2, NARR",
     },
     {"id": 25, "label": "Spread of Daily High and Low Temperatures"},
     {"id": 137, "label": "Start Date of Spring/Fall with Statistics"},

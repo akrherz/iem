@@ -11,14 +11,14 @@ require_once "../../include/forms.php";
 function ss($v)
 {
     if ($v == '') return '';
-    return intval($v);
+    return intval(xssafe($v));
 }
 
 $year = date("Y");
 $sdate = isset($_GET["sdate"]) ? xssafe($_GET["sdate"]) : "05/01/{$year}";
 $network = isset($_GET["network"]) ? xssafe($_GET["network"]) : "IACLIMATE";
 $edate = isset($_GET["edate"]) ? xssafe($_GET["edate"]) : "12/31/{$year}";
-$gddbase = isset($_GET["gddbase"]) ? intval($_GET["gddbase"]) : 50;
+$gddbase = get_int404("gddbase", 50);
 $gddfloor = isset($_GET["gddfloor"]) ? ss($_GET["gddfloor"]) : 50;
 $gddceil = isset($_GET["gddceil"]) ? ss($_GET["gddceil"]) : 86;
 
@@ -270,7 +270,7 @@ for a bias assessment of these values.</p>
 <h4>The following table is valid for a period from {$snice} to {$enice} (inclusive).</h4>
 
 <p><i>"Climo"</i> is the climatology value, which is computed over the period of
-1951-2015.</p>
+record since 1951.</p>
 
 <form name="remove">
 <input type="hidden" name="network" value="{$network}">

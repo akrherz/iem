@@ -9,9 +9,10 @@ require_once "../../include/network.php";
 $nt = new NetworkTable("WFO");
 $t = new MyView();
 $wfo = isset($_REQUEST["wfo"]) ? xssafe($_REQUEST["wfo"]) : 'DMX';
-$year = isset($_REQUEST["year"]) ? intval($_REQUEST["year"]) : 2012;
-$sid = isset($_REQUEST["sid"]) ? intval($_REQUEST["sid"]) : 1;
-$eid = isset($_REQUEST["eid"]) ? intval($_REQUEST["eid"]) : 999;
+$year = get_int404("year", 2012);
+if ($year < 1986) xssafe("<script>");
+$sid = get_int404("sid", 1);
+$eid = get_int404("eid", 999);
 $rhthres = isset($_REQUEST["relh"]) ? floatval($_REQUEST["relh"]) : 25;
 $skntthres = isset($_REQUEST["sknt"]) ? floatval($_REQUEST["sknt"]) : 25;
 $gustthres = isset($_REQUEST["gust"]) ? floatval($_REQUEST["gust"]) : 25;
@@ -19,7 +20,7 @@ $vsbythres = isset($_REQUEST["vsby"]) ? floatval($_REQUEST["vsby"]) : 0.25;
 $ltmpfthres = isset($_REQUEST["ltmpf"]) ? floatval($_REQUEST["ltmpf"]) : 32;
 $wchtthres = isset($_REQUEST["wcht"]) ? floatval($_REQUEST["wcht"]) : -20;
 $htmpfthres = isset($_REQUEST["htmpf"]) ? floatval($_REQUEST["htmpf"]) : 100;
-$mode = isset($_REQUEST["mode"]) ? substr($_REQUEST["mode"], 0, 4) : 'FW.W';
+$mode = isset($_REQUEST["mode"]) ? substr(xssafe($_REQUEST["mode"]), 0, 4) : 'FW.W';
 $ar = explode(".", $mode);
 $phenomena = $ar[0];
 $significance = $ar[1];
@@ -152,6 +153,7 @@ $rs = pg_execute($postgis, "FIND", array(
     $wfo, $sid, $eid, $phenomena,
     $significance
 ));
+if ($rs === FALSE) xssafe("</script>");
 for ($i = 0; $row = pg_fetch_assoc($rs); $i++) {
     $ar = explode(",", $row["a"]);
     $issue = $row["issue"];
@@ -215,9 +217,6 @@ for ($i = 0; $row = pg_fetch_assoc($rs); $i++) {
     }
     $table .= "</td></tr></table>";
 }
-
-
-
 
 $t->content = <<<EOF
 <ol class="breadcrumb">

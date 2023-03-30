@@ -12,9 +12,8 @@ def run(station, syear, eyear):
     pgconn = get_dbconn("coop")
     cursor = pgconn.cursor()
 
-    table = f"alldata_{station[:2]}"
     cursor.execute(
-        f"""
+        """
     WITH data as (
       SELECT sday, year, precip,
       avg(precip) OVER (PARTITION by sday) as avg_precip,
@@ -27,7 +26,7 @@ def run(station, syear, eyear):
       rank() OVER (PARTITION by sday ORDER by precip DESC) as max_precip,
       max(high - low) OVER (PARTITION by sday) as max_range,
       min(high - low) OVER (PARTITION by sday) as min_range
-      from {table} WHERE station = %s and year >= %s and year < %s),
+      from alldata WHERE station = %s and year >= %s and year < %s),
 
     max_highs as (
       SELECT sday, high, array_agg(year) as years from data
@@ -98,7 +97,7 @@ def run(station, syear, eyear):
 def application(environ, start_response):
     """Answer request."""
     fields = parse_formvars(environ)
-    station = fields.get("station", "IA0200").upper()
+    station = fields.get("station", "IA0200").upper()[:6]
     syear = int(fields.get("syear", 1800))
     eyear = int(fields.get("eyear", datetime.datetime.now().year + 1))
     cb = fields.get("callback", None)

@@ -1,4 +1,12 @@
-"""First or Last Date with temp"""
+"""
+This plot presents the yearly first or last date
+of a given high or low temperature along with the number of days that
+year above/below the threshold along with the cumulative distribution
+function for the first date!  When you select a low temperature option,
+the season displayed in the chart and available download spreadsheet
+represents the start year of the winter season.  Rewording, the year 2016
+would represent the period of 1 July 2016 to 30 Jun 2017.
+"""
 import datetime
 
 import pandas as pd
@@ -25,18 +33,7 @@ PDICT2 = {
 
 def get_description():
     """Return a dict describing how to call this plotter"""
-    desc = {}
-    desc["data"] = True
-    desc[
-        "description"
-    ] = """This plot presents the yearly first or last date
-    of a given high or low temperature along with the number of days that
-    year above/below the threshold along with the cumulative distribution
-    function for the first date!  When you select a low temperature option,
-    the season displayed in the chart and available download spreadsheet
-    represents the start year of the winter season.  Rewording, the year 2016
-    would represent the period of 1 July 2016 to 30 Jun 2017.
-    """
+    desc = {"description": __doc__, "data": True}
     thisyear = datetime.date.today().year
     desc["arguments"] = [
         dict(
@@ -117,7 +114,7 @@ def plotter(fdict):
             with data as (
                 SELECT extract(year from day + '%s months'::interval)
                     as season,
-                high, low, day from alldata_{station[:2]} WHERE station = %s
+                high, low, day from alldata WHERE station = %s
                 and day >= '1893-01-01'),
             agg1 as (
                 SELECT season - %s as season,

@@ -1,7 +1,9 @@
-"""This plot presents the period between the first
-    or last date for spring and fall season that the temperature was above or
-    below some threshold.  The year is split into two seasons on 1 July. A
-    simple linear trend line is placed on both dates."""
+"""
+This plot presents the period between the first
+or last date for spring and fall season that the temperature was above or
+below some threshold.  The year is split into two seasons on 1 July. A
+simple linear trend line is placed on both dates.
+"""
 import calendar
 import datetime
 
@@ -75,8 +77,6 @@ def plotter(fdict):
     varname = ctx["varname"]
     startyear = ctx["year"]
 
-    table = f"alldata_{station[:2]}"
-
     if direction == "below":
         sql = f"""select year,
         max(case when {varname} < %s and month < 7
@@ -87,7 +87,7 @@ def plotter(fdict):
             then extract(doy from day) else 388 end) as fall,
         min(case when {varname} < %s and month > 6
             then day else null end) as fall_date
-        from {table} where station = %s
+        from alldata where station = %s
         GROUP by year ORDER by year ASC"""
     elif direction == "above":
         sql = f"""select year,
@@ -99,7 +99,7 @@ def plotter(fdict):
                  then extract(doy from day) else 183 end) as fall,
              max(case when {varname} >= %s and month > 6
                  then day else null end) as fall_date
-            from {table} where station = %s
+            from alldata where station = %s
             GROUP by year ORDER by year ASC"""
     else:  # above2
         sql = f"""select year,
@@ -111,7 +111,7 @@ def plotter(fdict):
                  then extract(doy from day) else 388 end) as fall,
              min(case when {varname} >= %s and month > 6
                  then day else null end) as fall_date
-            from {table} where station = %s
+            from alldata where station = %s
             GROUP by year ORDER by year ASC"""
 
     ccursor.execute(sql, (threshold, threshold, threshold, threshold, station))
