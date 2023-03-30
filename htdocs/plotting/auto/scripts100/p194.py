@@ -1,4 +1,16 @@
-"""USDM Heatmaps and friends"""
+"""
+This application generates a heatmap of the
+frequency of a given drought classification.  The classification is the
+minimal threshold, so if a location is in D3 classification drought, it
+would count as D0, D1, D2, and D3 for this analysis.  The dates you
+specify are rectified to the previous Tuesday on which the USDM analysis
+is valid for.
+
+<p><strong>Caution:</strong>  This is an unofficial depiction of time
+duration of Drought Monitor classfication and due to complexities with
+how the grid analysis is done, the exact pixel location is nebulous.
+Having said that, it should be close!
+"""
 import datetime
 
 import numpy as np
@@ -24,23 +36,7 @@ PDICT2 = {"weeks": "Number of Weeks", "percent": "Percentage of Weeks"}
 
 def get_description():
     """Return a dict describing how to call this plotter"""
-    desc = {}
-    desc["data"] = True
-    desc["cache"] = 600
-    desc[
-        "description"
-    ] = """This application generates a heatmap of the
-    frequency of a given drought classification.  The classification is the
-    minimal threshold, so if a location is in D3 classification drought, it
-    would count as D0, D1, D2, and D3 for this analysis.  The dates you
-    specify are rectified to the previous Tuesday on which the USDM analysis
-    is valid for.
-
-    <p><strong>Caution:</strong>  This is an unofficial depiction of time
-    duration of Drought Monitor classfication and due to complexities with
-    how the grid analysis is done, the exact pixel location is nebulous.
-    Having said that, it should be close!
-    """
+    desc = {"description": __doc__, "data": True, "cache": 600}
     today = datetime.date.today()
     desc["arguments"] = [
         dict(
@@ -192,10 +188,11 @@ def plotter(fdict):
     cmap.set_under("white")
     cmap.set_bad("white")
     xx, yy = np.meshgrid(lons, lats)
+    raster2 = np.flipud(raster)
     mp.pcolormesh(
         xx,
         yy,
-        np.flipud(raster),
+        raster2,
         ramp,
         cmap=cmap,
         units="count" if ctx["w"] == "weeks" else "Percent",
@@ -206,9 +203,11 @@ def plotter(fdict):
         mp.drawcities()
 
     rows = []
-    for j in range(raster.shape[0]):
-        for i in range(raster.shape[1]):
-            rows.append(dict(lon=lons[i], lat=lats[j], value=raster[j, i]))
+    for j in range(raster2.shape[0]):
+        for i in range(raster2.shape[1]):
+            rows.append(
+                {"lon": lons[i], "lat": lats[j], "value": raster2[j, i]}
+            )
 
     return mp.fig, pd.DataFrame(rows)
 
