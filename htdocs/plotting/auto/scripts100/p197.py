@@ -1,9 +1,10 @@
-"""This generates a map showing USDA NASS weekly
-    statistics.  The date you select is rectified back to the latest available
-    date.  Historical data is linearly interpolated so that departures can be
-    computed. A complication is that NASS data does not exist before the
-    season has started or ended. In this situation, hopefully the Right-Thing
-    is done!
+"""
+This generates a map showing USDA NASS weekly
+statistics.  The date you select is rectified back to the latest available
+date.  Historical data is linearly interpolated so that departures can be
+computed. A complication is that NASS data does not exist before the
+season has started or ended. In this situation, hopefully the Right-Thing
+is done!
 """
 import datetime
 

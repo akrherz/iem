@@ -1,6 +1,7 @@
-"""Daily plot of observed high and low temperatures or precipitation
-    along with the daily climatology for the nearest (sometimes same) location.
-    The vertical highlighted stripes on the plot are just the weekend dates.
+"""
+Daily plot of observed high and low temperatures or precipitation
+along with the daily climatology for the nearest (sometimes same) location.
+The vertical highlighted stripes on the plot are just the weekend dates.
 """
 import datetime
 import warnings
@@ -112,7 +113,7 @@ def common(ctx):
             params=(ctx["_nt"].sts[station][clcol], month),
             index_col="day_of_month",
         )
-    df = cdf.join(df)
+    df = cdf.join(df, how="outer")
     df["accum_climo_precip"] = df["climo_precip"].cumsum()
     if "accum_pday" not in df.columns:
         df["accum_pday"] = 0
@@ -300,5 +301,5 @@ def plotter(fdict):
 
 if __name__ == "__main__":
     plotter(
-        {"month": 5, "year": 2012, "station": "MIRT2", "network": "TX_DCP"}
+        {"month": 3, "year": 2023, "station": "NSTU", "network": "AS_ASOS"}
     )

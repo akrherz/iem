@@ -11,6 +11,7 @@ $vtec_phenomena = Array(
   'BW' => 'Brisk Wind',
   'BZ' => 'Blizzard',
   'CF' => 'Coastal Flood',
+  'CW' => 'Cold Weather',
   'DU' => 'Blowing Dust',
   'DS' => 'Dust Storm',
   'EC' => 'Extreme Cold',

@@ -22,7 +22,7 @@ from pyiem.util import get_dbconn, get_dbconnstr, logger
 from sqlalchemy import text
 
 LOG = logger()
-NON_CONUS = ["AK", "HI", "PR", "VI", "GU"]
+NON_CONUS = ["AK", "HI", "PR", "VI", "GU", "AS"]
 
 
 def load_table(state, date):
@@ -231,13 +231,15 @@ def commit(cursor, table, df, ts):
 def merge_obs(df, state, ts):
     """Merge data from observations."""
     obs = pd.read_sql(
-        "SELECT t.id || '|' || t.network as tracks, "
-        "max_tmpf as high, min_tmpf as low, "
-        "pday as precip, snow, snowd, "
-        "coalesce(extract(hour from (coop_valid + '1 minute'::interval) "
-        "  at time zone tzname), 24) as temp_hour "
-        "from summary s JOIN stations t "
-        "on (t.iemid = s.iemid) WHERE t.network in (%s, %s) and s.day = %s",
+        """
+        SELECT t.id || '|' || t.network as tracks,
+        max_tmpf as high, min_tmpf as low,
+        pday as precip, snow, snowd,
+        coalesce(extract(hour from (coop_valid + '1 minute'::interval)
+          at time zone tzname), 24) as temp_hour
+        from summary s JOIN stations t
+        on (t.iemid = s.iemid) WHERE t.network in (%s, %s) and s.day = %s
+        """,
         get_dbconnstr("iem"),
         params=(f"{state}_COOP", f"{state}_ASOS", ts),
         index_col="tracks",

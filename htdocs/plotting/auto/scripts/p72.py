@@ -1,4 +1,18 @@
-"""histogram of issuance time."""
+"""
+This chart presents a histogram of the Watch,
+Warning, Advisory valid time.  This is the time period between the
+issuance and final expiration time of a given event.  An individual event
+is one Valid Time Event Code (VTEC) event identifier.  For example, a
+Winter Storm Watch for 30 counties would only count as one event in this
+analysis.
+
+<p>If an individual event goes for more than 24 hours, the event is
+capped at a 24 hour duration for the purposes of this analysis.  Events
+like Flood Warnings are prime examples of this.
+
+<p><a href="/plotting/auto/?q=48">Autoplot 48</a> is similar to this, but
+plots for a single county/zone/parish at a time.
+"""
 import datetime
 
 import pandas as pd
@@ -33,25 +47,7 @@ MDICT = {
 
 def get_description():
     """Return a dict describing how to call this plotter"""
-    desc = {}
-    desc["cache"] = 86400
-    desc["data"] = True
-    desc[
-        "description"
-    ] = """This chart presents a histogram of the Watch,
-    Warning, Advisory valid time.  This is the time period between the
-    issuance and final expiration time of a given event.  An individual event
-    is one Valid Time Event Code (VTEC) event identifier.  For example, a
-    Winter Storm Watch for 30 counties would only count as one event in this
-    analysis.
-
-    <p>If an individual event goes for more than 24 hours, the event is
-    capped at a 24 hour duration for the purposes of this analysis.  Events
-    like Flood Warnings are prime examples of this.
-
-    <p><a href="/plotting/auto/?q=48">Autoplot 48</a> is similar to this, but
-    plots for a single county/zone/parish at a time.
-    """
+    desc = {"description": __doc__, "data": True, "cache": 86400}
     desc["arguments"] = [
         dict(
             type="networkselect",

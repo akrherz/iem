@@ -72,10 +72,10 @@ def application(environ, start_response):
         distanceInMiles = float(form.get(f"m{i}", 100))
         if distanceInMiles <= 0.00001:
             continue
-        r = int(form.get(f"r{i}", 255))
-        g = int(form.get(f"g{i}", 255))
-        b = int(form.get(f"b{i}", 0))
-        a = int(form.get(f"a{i}", 255))
+        r = int(float(form.get(f"r{i}", 255)))
+        g = int(float(form.get(f"g{i}", 255)))
+        b = int(float(form.get(f"b{i}", 0)))
+        a = int(float(form.get(f"a{i}", 255)))
         t = form.get(f"t{i}", "").replace("\n", "\\n")
 
         # Create the lon/lat pairs

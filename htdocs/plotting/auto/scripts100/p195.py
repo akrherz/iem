@@ -1,4 +1,10 @@
-"""Storm Motion 2D Histogram."""
+"""
+Some of the warnings that the National Weather
+Service issues includes a storm motion vector.  This application
+plots the speed vs direction of the vector and includes a kernel density
+estimate (KDE) overlay.  You can optionally pick a date to highlight on the
+chart.  This date is a central time zone date.
+"""
 # pylint: disable=consider-using-f-string
 import datetime
 import json
@@ -29,17 +35,7 @@ PDICT2 = {
 
 def get_description():
     """Return a dict describing how to call this plotter"""
-    desc = {}
-    desc["data"] = True
-    desc["cache"] = 600
-    desc[
-        "description"
-    ] = """Some of the warnings that the National Weather
-    Service issues includes a storm motion vector.  This application
-    plots the speed vs direction of the vector and includes a kernel density
-    estimate (KDE) overlay.  You can optionally pick a date to highlight on the
-    chart.  This date is a central time zone date.
-    """
+    desc = {"description": __doc__, "data": True, "cache": 600}
     today = datetime.date.today()
     desc["arguments"] = [
         dict(
