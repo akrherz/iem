@@ -4,7 +4,7 @@ import datetime
 
 from pymemcache.client import Client
 from paste.request import parse_formvars
-from pyiem.util import get_dbconn, html_escape
+from pyiem.util import get_dbconn, html_escape, utc
 
 DAMAGE_TAGS = "CONSIDERABLE DESTRUCTIVE CATASTROPHIC".split()
 
@@ -111,6 +111,8 @@ def application(environ, start_response):
     try:
         wfo = fields.get("wfo", "DMX")[:4]
         year = int(fields.get("year", 2015))
+        if year < 2000 or year > utc().year:
+            raise ValueError("Invalid year")
         damagetag = fields.get("damagetag")
         cb = fields.get("callback")
     except ValueError:

@@ -17,7 +17,7 @@ URI = (
     "http://mesonet.agron.iastate.edu/iemre/multiday/"
     "%(sdate)s/%(edate)s/%(lat)s/%(lon)s/json"
 )
-NON_CONUS = ["AK", "HI", "PR", "VI", "GU"]
+NON_CONUS = ["AK", "HI", "PR", "VI", "GU", "AS"]
 
 
 def process(cursor, station, df, meta):
