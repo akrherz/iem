@@ -71,7 +71,7 @@ if (isset($_REQUEST["phenomena"])){
       issue < $2 and
       expire > $1 and expire < $3 $str_wfo_list
       and status = 'NEW' and significance is not null
-      LIMIT 500");
+      LIMIT 5000");
   $rs = pg_execute($postgis, "SELECT", Array(date("Y-m-d H:i", $sts), 
                                            date("Y-m-d H:i", $ets),
                                            date("Y-m-d H:i", $ets + 86400*10)));
@@ -112,4 +112,3 @@ for ($i=0;$row=pg_fetch_assoc($rs);$i++)
   $ar["features"][] = $z;
 }
 echo str_replace($reps, $subs, json_encode($ar));
-
