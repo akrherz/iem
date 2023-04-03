@@ -416,11 +416,17 @@ $services[] = array(
 $services[] = array(
     "title" => "Current Storm Based Warnings",
     "url" => "/geojson/sbw.geojson?ts={ts}",
-    "desc" => "Provides a geojson format of current National Weather Service
-          storm based warnings.  There is a 15 second caching done by the server
-          to ease load.  The generation_time attribute is set on the output 
-          to diagnose when the file is valid.  You can provide a timestamp
-          to provide archived warnings back to 2002 or so.",
+    "desc" => <<<EOM
+Provides a geojson format of current National Weather Service
+storm based warnings.  There is a 15 second caching done by the server
+to ease load.  The generation_time attribute is set on the output 
+to diagnose when the file is valid.  You can provide a timestamp
+to provide archived warnings back to 2002 or so.  The polygons returned are the
+actualy ones valid at the given timestamp or realtime, so any polygon updates
+done with warning event are included here.  There should only be one polygon
+per warning event.
+EOM
+    ,
     "vars" => array(
         "ts" => "ISO-8601 Timestamp YYYY-mm-ddTHH:MI:SSZ (optional)"
     ),
@@ -428,6 +434,28 @@ $services[] = array(
         "{ts}" => "2011-04-27T22:00:00Z"
     )
 );
+
+$services[] = array(
+    "title" => "Storm Based Warnings Issued Between Interval",
+    "url" => "/geojson/sbw.php?sts={sts}&ets={ets}",
+    "desc" => <<<EOM
+This service returns a GeoJSON of storm based warnings over a UTC time period
+of your coice.  The start time is inclusive and the end time exclusive.  The
+time domain denotes the issuance time of the storm based warning, so actual
+events returned could span over the end timestamp.  The polygons returned are
+just the issuance and not any polygons with subsequent product updates.
+EOM
+    ,
+    "vars" => array(
+        "sts" => "UTC Start Time YYYYmmddHMI",
+        "ets" => "UTC End Time YYYYmmddHMI",
+    ),
+    "example" => array(
+        "{sts}" => "201104272200",
+        "{ets}" => "201104280200",
+    )
+);
+
 
 $services[] = array(
     "title" => "Search for Storm Based Warnings by Lat/Lon Point",

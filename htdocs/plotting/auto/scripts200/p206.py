@@ -1,4 +1,4 @@
-"""Map of Daily Summaries."""
+"""Generates analysis maps of ASOS station data for a given date."""
 import datetime
 
 import numpy as np
@@ -22,7 +22,7 @@ PDICT2 = {
     "max_rh": "Max Relative Humidity [%]",
     "min_rh": "Min Relative Humidity [%]",
     "max_gust": "Peak Wind Gust [MPH]",
-    "max_sknt": "Peak Wind Gust [MPH]",
+    "max_sknt": "Peak Sustained Wind [MPH]",
 }
 VARUNITS = {
     "max_tmpf": "F",
@@ -39,13 +39,7 @@ PDICT3 = {"both": "Plot and Contour Values", "plot": "Only Plot Values"}
 
 def get_description():
     """Return a dict describing how to call this plotter"""
-    desc = {}
-    desc["data"] = True
-    desc["cache"] = 600
-    desc[
-        "description"
-    ] = """Generates analysis maps of ASOS
-    station data for a given date."""
+    desc = {"description": __doc__, "data": True, "cache": 600}
     now = datetime.datetime.now()
     desc["arguments"] = [
         dict(
