@@ -77,7 +77,7 @@ def plotter(fdict):
         level, 'spring' as typ from highs WHERE rank = 1)
         """,
             conn,
-            params=[station],
+            params=(station,),
         )
     if df.empty:
         raise NoDataFound("No Data Found.")

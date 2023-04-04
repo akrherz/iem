@@ -133,7 +133,7 @@ def plotter(fdict):
         and substr(station, 3, 1) != 'C' and substr(station, 3, 4) != '0000'
         """,
             conn,
-            params=[p1syear, p1eyear, p2syear, p2eyear],
+            params=(p1syear, p1eyear, p2syear, p2eyear),
             index_col="station",
         )
     if df.empty:
