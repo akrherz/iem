@@ -21,6 +21,7 @@ sleep 300
 
 cd ../00z
 python awos_rtp.py
+python asos_high.py
 
 cd ../asos
 python cf6_to_iemaccess.py

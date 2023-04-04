@@ -25,6 +25,16 @@ $cfg["air_temperature"] = array(
                 "minimums, when available, the plot shows low temperatures at " .
                 "12 UTC."
         ),
+        "0z_high" => array(
+            "label" => "00 UTC High Temperature",
+            "timemachine" => null,
+            "img" => "/data/summary/iowa_asos_0z_high.png",
+            "desc" => <<<EOM
+This plot presents a computed high temperature between the 12z and 0z time
+period for the date.  Available 6-hour max values at 18 and 00 UTC are
+included within the calculation.
+EOM
+        ),
         "today_high" => array(
             "label" => "Today's High Temperature",
             "timemachine" => "#116.0",
