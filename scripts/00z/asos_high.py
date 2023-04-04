@@ -43,7 +43,7 @@ def main():
     df = df[df["high"].notnull()]
     LOG.info("found %s observations for %s", len(df.index), now)
 
-    for sector in ["iowa", "midwest"]:
+    for sector in ["iowa", "midwest", "conus"]:
         mp = MapPlot(
             sector=sector if len(sector) > 2 else "state",
             state=sector if len(sector) == 2 else "IA",
