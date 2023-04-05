@@ -183,7 +183,7 @@ surface plots and other plots.</li>
 <li><a href="http://climate.engin.umich.edu/tornadopaths/">Historical Tornado Tracks</a></li>
 
 <li><a href="http://ida.water.usgs.gov/ida/">USGS Instantaneous Data Archive</a>
-<br />Goldmine of historical USGS river gage data.</li>
+<br />Goldmine of historical USGS river gauge data.</li>
 </ul>
 
 <h3>US Daily Weather Maps</h3>
