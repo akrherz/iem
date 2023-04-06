@@ -62,7 +62,7 @@ if ($tags == '') {
     $tags = "<strong>Documented Datasets:</strong> :" . $tags;
 }
 
-$t->content = <<<EOF
+$t->content = <<<EOM
 <ul class="breadcrumb">
 <li><a href="/info/">IEM Information</a></li>
 <li><a href="/info/datasets/">IEM Dataset Documentation</a></li>
@@ -73,6 +73,6 @@ $t->content = <<<EOF
 
 {$content}
         
-EOF;
+EOM;
 
 $t->render('single.phtml');

@@ -2,13 +2,13 @@
 // Cool.....
 
 require_once "../../../config/settings.inc.php";
-include("../../../include/database.inc.php");
-include("../../../include/network.php");
+require_once "../../../include/database.inc.php";
+require_once "../../../include/network.php";
 require_once "../../../include/forms.php";
-$nt = new NetworkTable("AWOS");
-include ("../../../include/jpgraph/jpgraph.php");
-include ("../../../include/jpgraph/jpgraph_line.php");
-include ("../../../include/jpgraph/jpgraph_led.php");
+$nt = new NetworkTable("IA_ASOS");
+require_once "../../../include/jpgraph/jpgraph.php";
+require_once "../../../include/jpgraph/jpgraph_line.php";
+require_once "../../../include/jpgraph/jpgraph_led.php";
 
 $station = isset($_GET["station"]) ? xssafe($_GET["station"]): "";
 $year = get_int404("year", date("Y", time() - 86400));
@@ -20,8 +20,6 @@ $myTime = strtotime($year."-".$month."-".$day);
 $titleDate = date("M d, Y", $myTime);
 $tableName = sprintf("t%s", date("Y_m", $myTime));
 $sqlDate = date("Y-m-d", $myTime);
-
-
 
 $connection = iemdb("awos");
 $rs = pg_prepare($connection, "SELECT", "SELECT " .

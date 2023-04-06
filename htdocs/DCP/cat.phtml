@@ -99,7 +99,7 @@ foreach ($stations as $k => $v) {
 }
 $table .= "</table>";
 
-$t->content = <<<EOF
+$t->content = <<<EOM
 <div class="breadcrumb">
         <li><a href="/DCP/">DCP/HADS Mainpage</a></li>
         <li class="active">View All Reports at One Time</li>
@@ -142,8 +142,9 @@ choice.
 {$table}
 </form>
 
-<b>Legend:</b>  TAI = Air Temp (F), PCI = Rainfall Counter, PPH = Hourly Precip, UDI = Wind Direction, USI = Wind Speed
+<strong>Legend:</strong>  TAI = Air Temp (F), PCI = Rainfall Counter, PPH = Hourly Precip,
+UDI = Wind Direction, USI = Wind Speed
 
 </table>
-EOF;
+EOM;
 $t->render('full.phtml');

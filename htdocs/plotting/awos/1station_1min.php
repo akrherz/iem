@@ -12,7 +12,7 @@ $day = get_int404("day", 1);
 
 $t->title = "AWOS 1 Minute Time Series";
 
-$nselect = networkSelect("AWOS", $station);
+$nselect = networkSelect("IA_ASOS", $station);
 $yselect = yearSelect(1995, 2011, $year);
 $mselect = monthSelect($month);
 $dselect = daySelect($day);

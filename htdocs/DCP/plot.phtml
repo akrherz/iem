@@ -3,16 +3,16 @@ require_once "../../config/settings.inc.php";
 require_once "../../include/myview.php";
 $t = new MyView();
 
-$t->headextra = <<<EOF
+$t->headextra = <<<EOM
 <link rel="stylesheet" type="text/css" href="/vendor/ext/3.4.1/resources/css/ext-all.css"/>
-EOF;
-$t->jsextra = <<<EOF
+EOM;
+$t->jsextra = <<<EOM
 <script type="text/javascript" src="/vendor/ext/3.4.1/adapter/ext/ext-base.js"></script>
 <script type="text/javascript" src="/vendor/ext/3.4.1/ext-all.js"></script>
 <script type="text/javascript" src="plot.js?v=3"></script>
-EOF;
+EOM;
 
-$t->content = <<<EOF
+$t->content = <<<EOM
 <ul class="breadcrumb">
  <li><a href="/DCP/">DCP/HADS Mainpage</a></li>
  <li class="active">Historical DCP Plotting</li>
@@ -35,6 +35,5 @@ to reveal available variables for that station.  You may also wish to
 </div>
 </div>
 
-
-EOF;
+EOM;
 $t->render('single.phtml');

@@ -1,4 +1,15 @@
-"""Monthly Sounding Averages"""
+"""
+This plot presents a simple average of a given
+sounding variable of your choice.  If the selected month period crosses
+a calendar year, the year shown is for the January included in the period.
+
+<br /><br />The 'Select Station' option provides some 'virtual' stations
+that are spliced together archives of close by stations.  For some
+locations, the place that the sounding is made has moved over the years..
+
+<br /><br />
+<strong>Some derived parameters are a work-in-progress.</strong>
+"""
 import datetime
 
 import pandas as pd
@@ -86,22 +97,7 @@ PDICT5 = {
 
 def get_description():
     """Return a dict describing how to call this plotter"""
-    desc = {}
-    desc["data"] = True
-    desc["cache"] = 86400
-    desc[
-        "description"
-    ] = """This plot presents a simple average of a given
-    sounding variable of your choice.  If the selected month period crosses
-    a calendar year, the year shown is for the January included in the period.
-
-    <br /><br />The 'Select Station' option provides some 'virtual' stations
-    that are spliced together archives of close by stations.  For some
-    locations, the place that the sounding is made has moved over the years..
-
-    <br /><br />
-    <strong>Some derived parameters are a work-in-progress.</strong>
-    """
+    desc = {"description": __doc__, "data": True, "cache": 86400}
     desc["arguments"] = [
         dict(
             type="networkselect",
@@ -170,7 +166,7 @@ def compute(dfin, varname):
             vals = []
             for _i, row in rows.iterrows():
                 vals.append(row["utc_valid"].strftime("%Y-%m-%d %H:%M"))
-            extra = "" if len(vals) < 5 else ";+ %s more" % (len(vals) - 4,)
+            extra = "" if len(vals) < 5 else f";+ {len(vals) - 4} more"
             df.at[year, f"{varname}_{agg}_valid"] = "; ".join(vals[:4]) + extra
     return df
 
@@ -289,7 +285,7 @@ def plotter(fdict):
     rng = df[colname].max() - df[colname].min()
     ax.set_ylim(df[colname].min() - rng * 0.1, df[colname].max() + rng * 0.1)
     ax.axhline(avgv, color="k")
-    ax.text(df.index.values[-1] + 2, avgv, "Avg:\n%.1f" % (avgv,))
+    ax.text(df.index.values[-1] + 2, avgv, f"Avg:\n{avgv:.1f}")
     ax.set_xlabel("Year")
     ax.set_ylabel("%s %s%s" % (PDICT4[agg], PDICT3[varname], leveltitle))
     ax.grid(True)

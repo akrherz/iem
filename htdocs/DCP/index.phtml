@@ -4,21 +4,20 @@ require_once "../../include/myview.php";
 $t = new MyView();
 $t->title = "GOES/HADS/DCP";
 
-$t->content = <<<EOF
+$t->content = <<<EOM
 <h3>GOES DCP</h3>
 
 <p>The Geostationary Operational Environmental Satellites 
 (GOES) Data Collection Platforms (DCPs) are a set of hydrologic and meteorologic
 data collection points.  The DCPs are a collection of networks owned and operated 
 by a host of entities. [<b>1</b>]  The IEM receives this dataset from our 
-<a href="http://www.unidata.ucar.edu">Unidata</a> 
+<a href="https://www.unidata.ucar.edu">Unidata</a> 
 feed, which contains the products produced by the Office of Dissemination
 of the National Weather Service.<p>
 
 <p>The NWS has a fantastic 
 <a href="https://hads.ncep.noaa.gov">website</a> if you are curious 
 about this dataset.</p>
-
 
 <p>The IEM attempts to process all available data in this feed.  The applications
  below are divided up by states, so switch the state shown to find data outside of 
@@ -53,5 +52,5 @@ href="https://hads.ncep.noaa.gov/dcp_operators.shtml">https://hads.ncep.noaa.gov
 <br><a href="http://water.usgs.gov/pubs/circ/circ1123/">http://water.usgs.gov/pubs/circ/circ1123/</a>
  , viewed: 21 Jun 2003
 
-EOF;
+EOM;
 $t->render('single.phtml');

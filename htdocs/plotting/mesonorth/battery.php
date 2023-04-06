@@ -1,5 +1,8 @@
 <?php
 require_once "../../../config/settings.inc.php";
+require_once "../../../include/jpgraph/jpgraph.php";
+require_once "../../../include/jpgraph/jpgraph_line.php";
+require_once "../../../include/jpgraph/jpgraph_date.php";
 
 $year = isset($_GET["year"]) ? $_GET["year"] : date("Y");
 $month = isset($_GET["month"]) ? $_GET["month"]: date("m");
@@ -11,7 +14,6 @@ $titleDate = date("M d, Y", $myTime);
 $dirRef = date("Y/m/d", $myTime);
 
 $fcontents = file("/mesonet/ARCHIVE/data/$dirRef/text/ot/ot0003.dat");
-
 
 $oldformat = 1;
 if ($myTime >= mktime(0,0,0,8,12,2005))
@@ -52,9 +54,6 @@ foreach($new_contents as $line_num => $line){
 } // End of while
 
 
-require_once "../../../include/jpgraph/jpgraph.php";
-require_once "../../../include/jpgraph/jpgraph_line.php";
-require_once "../../../include/jpgraph/jpgraph_date.php";
 
 // Create the graph. These two calls are always required
 $graph = new Graph(600,300);
@@ -76,9 +75,6 @@ $graph->subtitle->Set($titleDate );
 $graph->legend->SetLayout(LEGEND_HOR);
 $graph->legend->Pos(0.01,0.075);
 
-//[DMF]$graph->y2axis->scale->ticks->Set(100,25);
-//[DMF]$graph->y2axis->scale->ticks->SetPrecision(0);
-
 $graph->title->SetFont(FF_FONT1,FS_BOLD,14);
 $graph->yaxis->SetTitle("Voltage [Volts]");
 
@@ -95,10 +91,6 @@ $lineplot=new LinePlot($v1, $times);
 $lineplot->SetLegend("Voltage");
 $lineplot->SetColor("blue");
 
-//[DMF]$graph->Add($lineplot2);
 $graph->Add($lineplot);
-//[DMF]$graph->AddY2($lineplot3);
 
 $graph->Stroke();
-
-?>

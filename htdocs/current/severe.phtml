@@ -3,7 +3,7 @@ require_once "../../config/settings.inc.php";
 require_once "../../include/myview.php";
 $t = new MyView();
 $t->title = "Severe Weather Products";
-$t->content = <<<EOF
+$t->content = <<<EOM
 <div class="row">
 <div class="col-md-3"> 
  <h3>Current Severe Weather</h3>
@@ -231,5 +231,5 @@ is a simple visual diagnostic between the two.</p>
 
         </div>
 </div><!-- ./row -->
-EOF;
+EOM;
 $t->render('full.phtml');

@@ -9,7 +9,7 @@ $t->title = "Iowa State Webcams";
 
 $cb = rand(0, 100000);
 
-$t->content = <<<EOF
+$t->content = <<<EOM
 <style>
 .nopadding {
    padding: 0 !important;
@@ -27,27 +27,27 @@ $t->content = <<<EOF
 <div class="row">
   <div class="col-md-6">
 <h4>AEA Farm</h4>
-<img src="/data/camera/stills/KCCI-027.jpg?${cb}" class="img img-responsive"></div>
+<img src="/data/camera/stills/KCCI-027.jpg?{$cb}" class="img img-responsive"></div>
   <div class="col-md-6">
 <h4>Memorial Union</h4>
-<img src="/data/camera/stills/ISUC-003.jpg?${cb}" class="img img-responsive"></div>
+<img src="/data/camera/stills/ISUC-003.jpg?{$cb}" class="img img-responsive"></div>
 </div>
 
 <h4>Curtis Hall</h4>
 
 <div class="row">
-  <div class="col-md-4 nopadding"><img src="/data/camera/stills/ISUC-004.jpg?${cb}" class="img img-responsive"></div>
-  <div class="col-md-4 nopadding"><img src="/data/camera/stills/ISUC-005.jpg?${cb}" class="img img-responsive"></div>
-  <div class="col-md-4 nopadding"><img src="/data/camera/stills/ISUC-006.jpg?${cb}" class="img img-responsive"></div>
+  <div class="col-md-4 nopadding"><img src="/data/camera/stills/ISUC-004.jpg?{$cb}" class="img img-responsive"></div>
+  <div class="col-md-4 nopadding"><img src="/data/camera/stills/ISUC-005.jpg?{$cb}" class="img img-responsive"></div>
+  <div class="col-md-4 nopadding"><img src="/data/camera/stills/ISUC-006.jpg?{$cb}" class="img img-responsive"></div>
 </div>
 
 <h4>Design Building</h4>
 
 <div class="row">
-  <div class="col-md-4 nopadding"><img src="/data/camera/stills/ISUC-007.jpg?${cb}" class="img img-responsive"></div>
-  <div class="col-md-4 nopadding"><img src="/data/camera/stills/ISUC-008.jpg?${cb}" class="img img-responsive"></div>
-  <div class="col-md-4 nopadding"><img src="/data/camera/stills/ISUC-009.jpg?${cb}" class="img img-responsive"></div>
+  <div class="col-md-4 nopadding"><img src="/data/camera/stills/ISUC-007.jpg?{$cb}" class="img img-responsive"></div>
+  <div class="col-md-4 nopadding"><img src="/data/camera/stills/ISUC-008.jpg?{$cb}" class="img img-responsive"></div>
+  <div class="col-md-4 nopadding"><img src="/data/camera/stills/ISUC-009.jpg?{$cb}" class="img img-responsive"></div>
 </div>
 
-EOF;
+EOM;
 $t->render('full.phtml');
