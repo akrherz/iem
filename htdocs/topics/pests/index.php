@@ -22,6 +22,12 @@ $sdate = isset($_GET["sdate"]) ? xssafe($_GET["sdate"]) : "$year-01-01";
 $edate = isset($_GET["edate"]) ? xssafe($_GET["edate"]) : $day;
 $edatechecked = isset($_GET["edate"]) ? "" : "checked";
 
+// Folks may have this page bookmarked and thus get a wonky combination of
+// start date and end date, rectify this
+if ((! isset($_GET["edate"])) && isset($_GET["sdate"])) {
+    $sdate = sprintf("%s-%s", $year, substr($sdate, 5, 5));
+}
+
 $sselect = selectClimodatNetwork($network, "network");
 
 $t = new MyView();
