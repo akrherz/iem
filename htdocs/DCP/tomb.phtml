@@ -12,11 +12,11 @@ $rs = pg_query($pgconn, "SELECT nwsli, max(product) from unknown"
     . " WHERE length(nwsli) = 5 and "
     . "nwsli ~* '[A-Z][A-Z][A-Z][A-Z][0-9]' "
     . "GROUP by nwsli ORDER by nwsli ASC");
-$table = <<<EOF
+$table = <<<EOM
 <table id="table1" class="table table-striped table-bordered">
 <thead><tr><th>NWSLI</th><th>WMO Source</th><th>Recent Product</th></tr></thead>
 <tbody>
-EOF;
+EOM;
 $floor = date("YmdHi", time() - 8 * 86400);
 for ($i = 0; $row = pg_fetch_array($rs); $i++) {
     $link = sprintf("<a href=\"/p.php?pid=%s\">%s</a>", $row[1], $row[1]);
@@ -41,10 +41,10 @@ $t->jsextra = <<<EOF
 </script>
 EOF;
 
-$t->content = <<<EOF
+$t->content = <<<EOM
 <ol class="breadcrumb">
-        <li><a href="/DCP/">HADS/DCP Mainpage</a></li>
-        <li class="active">Unknown NWSLIs</li>
+    <li><a href="/DCP/">HADS/DCP Mainpage</a></li>
+    <li class="active">Unknown NWSLIs</li>
 </ol>
 
 <h3>Unknown NWSLIs used in SHEF Products</h3>
@@ -53,7 +53,7 @@ $t->content = <<<EOF
 NOAAPort data stream.  The identifiers used by the stations reported in this
 data feed are supposed to adhere the <a href="https://www.weather.gov/media/mdl/SHEF_CodeManual_5July2012.pdf">SHEF Manual</a>
 specification for site identifiers.  The most common set of identifiers are
-found within the <a href="http://www.nws.noaa.gov/directives/sym/pd03012004curr.pdf">National Weather Service Location Identifier (NWSLI)</a> database.
+found within the <a href="https://www.nws.noaa.gov/directives/sym/pd03012004curr.pdf">National Weather Service Location Identifier (NWSLI)</a> database.
 Unfortunately, not all site ids used by issuance centers are contained within
 NWSLI.  This page lists out unknown NWSLI'ish identifiers.</p>
 
@@ -69,5 +69,5 @@ page, but this page only contains <strong>NWSLI-like identifiers</strong>.</p>
 
 {$table}
 
-EOF;
+EOM;
 $t->render('single.phtml');

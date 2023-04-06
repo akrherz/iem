@@ -12,9 +12,9 @@ $t->title = "CoCoRaHS Observations";
 
 $station = isset($_GET["station"]) ? xssafe($_GET["station"]) : "";
 $network = isset($_GET["network"]) ? xssafe($_GET["network"]) : "IACOCORAHS";
-$date = isset($_GET["date"]) ? substr($_GET["date"], 0, 10) : date("Y-m-d");
-$sortvar = isset($_GET["sortvar"]) ? substr($_GET["sortvar"], 0, 10) : "pday";
-$year = isset($_GET["year"]) ? substr($_GET["year"], 0, 4) : date("Y");
+$date = isset($_GET["date"]) ? substr(xssafe($_GET["date"]), 0, 10) : date("Y-m-d");
+$sortvar = isset($_GET["sortvar"]) ? substr(xssafe($_GET["sortvar"]), 0, 10) : "pday";
+$year = isset($_GET["year"]) ? substr(xssafe($_GET["year"]), 0, 4) : date("Y");
 $sortdir = "ASC";
 if (
     $sortvar == "pday" || $sortvar == "snow" ||

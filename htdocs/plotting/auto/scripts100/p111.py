@@ -1,4 +1,4 @@
-"""Climodat"""
+"""Top 30 24-Hour Precipitation Events."""
 import datetime
 
 import pandas as pd
@@ -8,10 +8,7 @@ from pyiem.exceptions import NoDataFound
 
 def get_description():
     """Return a dict describing how to call this plotter"""
-    desc = {}
-    desc["data"] = True
-    desc["report"] = True
-    desc["description"] = """ """
+    desc = {"description": __doc__, "data": True, "report": True}
     desc["arguments"] = [
         dict(
             type="station",

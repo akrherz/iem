@@ -89,7 +89,7 @@ the backend that generates the maps/data here.</p>
 <div class="col-md-3">
 <input type="checkbox" name="edate_off" id="edate_off" value="1" $edatechecked>
 <label for="edate_off">Default to Latest End Date</label>
-<input type="text" name="edate" id="edate" value="$edate" class="form-control" placeholder="Start Date">
+<input type="text" name="edate" id="edate" value="$edate" class="form-control" placeholder="End Date">
 </div>
 
 </div><!-- end row -->

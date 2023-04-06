@@ -1,6 +1,13 @@
 <?php
 require_once "../../../config/settings.inc.php";
 require_once "../../../include/database.inc.php";
+require_once "../../../include/jpgraph/jpgraph.php";
+require_once "../../../include/jpgraph/jpgraph_line.php";
+require_once "../../../include/jpgraph/jpgraph_bar.php";
+require_once "../../../include/jpgraph/jpgraph_date.php";
+require_once "../../../include/jpgraph/jpgraph_led.php";
+require_once "../../../include/network.php";
+$nt = new NetworkTable("IA_RWIS");
 
 /** We need these vars to make this work */
 $syear = isset($_GET["syear"]) ? $_GET["syear"] : date("Y");
@@ -18,8 +25,6 @@ if ($mode != 'rt') {
     $sts = mktime(0, 0, 0, $smonth, $sday, $syear);
     $ets = $sts + ($days * 86400.0);
 }
-
-
 
 $iemdb = iemdb('iem');
 $rs = pg_prepare($iemdb, "SELECTMETA", "SELECT * from 
@@ -59,11 +64,6 @@ for ($i = 0; $row = pg_fetch_array($rs); $i++) {
 pg_close($dbconn);
 pg_close($iemdb);
 
-include("../../../include/jpgraph/jpgraph.php");
-include("../../../include/jpgraph/jpgraph_line.php");
-include("../../../include/jpgraph/jpgraph_bar.php");
-include("../../../include/jpgraph/jpgraph_date.php");
-include("../../../include/jpgraph/jpgraph_led.php");
 
 if (pg_num_rows($rs) == 0) {
 
@@ -72,8 +72,6 @@ if (pg_num_rows($rs) == 0) {
     die();
 }
 
-include("../../../include/network.php");
-$nt = new NetworkTable("IA_RWIS");
 $cities = $nt->table;
 
 // Create the graph. These two calls are always required
@@ -82,8 +80,6 @@ $graph->SetScale("datlin");
 $graph->SetMarginColor("white");
 $graph->SetColor("lightyellow");
 $graph->img->SetMargin(40, 55, 105, 105);
-//$graph->xaxis->SetFont(FS_FONT1,FS_BOLD);
-
 
 $graph->yaxis->SetTitle("Average Speed [mph]");
 $graph->yaxis->title->SetFont(FF_FONT1, FS_BOLD, 12);

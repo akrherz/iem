@@ -16,12 +16,12 @@ $shef = isset($_REQUEST['shef']) && $_REQUEST['shef'] == 'yes';
 $t->title = "DCP/GOES Current Conditions";
 $t->refresh = 600;
 
-$t->breadcrumbs = <<<EOF
+$t->breadcrumbs = <<<EOM
 <ol class="breadcrumb">
-        <li><a href="/DCP/">DCP Network</a></li>
-        <li class="active">Sortable Currents</li>
-        </ol>
-EOF;
+<li><a href="/DCP/">DCP Network</a></li>
+<li class="active">Sortable Currents</li>
+</ol>
+EOM;
 $cols = array(
     "valid" => "Timestamp",
     'station' => "Station ID",
@@ -84,7 +84,6 @@ $content = <<<EOF
 <form method="GET" action="current.phtml" name="myselector">
 <input type="hidden" name="sortcol" value="{$sortcol}">
 <strong>Select Network:</strong> {$nselect}
-
 
 <strong>Show SHEF Codes:</strong> {$sselect}
 

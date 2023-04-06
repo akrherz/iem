@@ -122,7 +122,7 @@ foreach ($finalA as $key => $val) {
     $table .= "<td>" . myround($parts["peak"], 0) . " @ " . date("h:i A", $parts["peak_ts"]) . "</td>
         </tr>\n";
 }
-$t->content = <<<EOF
+$t->content = <<<EOM
 
 <form method="GET" action="uscrn.phtml" name="work">
 <input type="hidden" value="{$sortcol}" name="sortcol">
@@ -168,5 +168,5 @@ station.</p>
 <input type="reset" value="Reset">
 
 </form></div>
-EOF;
+EOM;
 $t->render('sortables.phtml');

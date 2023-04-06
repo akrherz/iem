@@ -3,7 +3,7 @@ require_once "../../config/settings.inc.php";
 require_once "../../include/myview.php";
 $t = new MyView();
 $t->title = "Links";
-$t->content = <<<EOF
+$t->content = <<<EOM
 
 <h3>Links</h3><p>
 
@@ -18,7 +18,7 @@ $t->content = <<<EOF
  <li><a href="http://mesowest.utah.edu/">Meso West</a></li>
  <li><a href="http://agebb.missouri.edu/weather/">Missouri</a></li>
  <li><a href="http://nysmesonet.org/">New York Mesonet</a></li>
- <li><a href="http://www.mesonet.ou.edu">Oklahoma Mesonet</a></li>
+ <li><a href="https://mesonet.org">Oklahoma Mesonet</a></li>
  <li><a href="http://chiliweb.southalabama.edu/">South Alabama Mesonet</a></li>
  <li><a href="http://www.mesonet.ttu.edu/">West Texas Mesonet</a></li>
  <li><a href="http://agwx.soils.wisc.edu/uwex_agwx/awon">Wisconsin Extension AgWeather</a></li>
@@ -80,5 +80,5 @@ access this data in the following locations:</p>
 
 </div></div>
 
-EOF;
+EOM;
 $t->render('single.phtml');

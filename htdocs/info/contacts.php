@@ -26,13 +26,5 @@ and can provide you web links to the resources you are looking for!
 <br><i>Phone:</i> 515.451.9249 (Please email before calling, please!)
 <br /><i>Twitter</i> <a href="https://twitter.com/akrherz">@akrherz</a> 
 
-<hr>
-
-<p><a href="http://www.nsf.gov"><img src="/images/nsf.gif" border="0"></a>
-<br clear="all" />This website is based upon work supported by grants from the National Science
-Foundation. Opinions, findings, and conclusions or recommendations
-expressed in this material are those of the author(s) and do not necessarily
-reflect the views of the National Science Foundation.</p>
-
 EOM;
 $t->render('single.phtml');

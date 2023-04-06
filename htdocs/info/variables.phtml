@@ -4,7 +4,7 @@ require_once "../../include/myview.php";
 $t = new MyView();
 $t->title = "Data Variables";
 
-$t->content = <<<EOF
+$t->content = <<<EOM
 
 <p>This table shows the variables reported from the various IEM networks.  As
 you can see, no network reports everything, but the combination of all
@@ -77,5 +77,5 @@ IEM.
   <br />Few == Very few stations report this variable
    <br>Some == Some sites report this variable, not all
    <br>(blank) == No sites report this variable</dd></div>
-EOF;
+EOM;
 $t->render('single.phtml');

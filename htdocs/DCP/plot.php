@@ -17,8 +17,8 @@ $varname = isset($_REQUEST['var']) ? xssafe($_REQUEST['var']): die("No var");
 if (strlen($varname) == 7){
     $varname = substr($varname, 0, 6);
 }
-$sday = isset($_REQUEST['sday']) ? strtotime($_REQUEST['sday']) : die("No sday");
-$eday = isset($_REQUEST['eday']) ? strtotime($_REQUEST['eday']) : die("No eday");
+$sday = isset($_REQUEST['sday']) ? strtotime(xssafe($_REQUEST['sday'])) : die("No sday");
+$eday = isset($_REQUEST['eday']) ? strtotime(xssafe($_REQUEST['eday'])) : die("No eday");
 
 $rs = pg_prepare(
     $pgconn,

@@ -5,7 +5,7 @@ $t = new MyView();
 
 $t->title = "CoCoRaHS";
 
-$t->content = <<<EOF
+$t->content = <<<EOM
 
 <h3>Community Collaborative Rain, Hail, and Snow Network</h3>
 
@@ -19,5 +19,5 @@ $t->content = <<<EOF
     <li><a href="current.phtml">Sortable Currents</a></li>
     <li><a href="obs.phtml">View Observations by date or site</a></li>
 </ul>
-EOF;
+EOM;
 $t->render('single.phtml');
