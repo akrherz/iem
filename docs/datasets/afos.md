@@ -33,3 +33,9 @@ This database culls some of the more frequently issued text products.  The reaso
 1. How can I bulk download the data?
 
 Sadly, this is not well done at the moment.  The [WX AFOS](https://mesonet.agron.iastate.edu/wx/afos/) is about the best option as it has a "Download Text" button.
+
+2. Please describe any one-offs within the archive?
+
+The `RRM` product is generally SHEF and thus was culled from the database to conserve space.
+An IEM user requested that this product be retained, so the culling of it stopped on 31
+March 2023.  So this product's archive only dates back till then.
