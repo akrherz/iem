@@ -157,13 +157,13 @@ for ($i = 0; $row = pg_fetch_array($rs); $i++) {
 
 $msghtml = "";
 foreach ($msg as $key => $val) {
-    $msghtml .= "<div class='alert alert-info'>" . $val . "</div>";
+    $msghtml .= "<div class='alert alert-info'>{$val}</div>";
 }
 
 $t = new MyView();
 $t->title = "IEMBot Twitter Configuration Page";
 
-$t->content = <<<EOL
+$t->content = <<<EOM
 
 <ol class="breadcrumb">
  <li><a href="/projects/iembot/">IEMBot Homepage</a></li>
@@ -171,6 +171,10 @@ $t->content = <<<EOL
 </ol>
 
 {$msghtml}
+
+<div class="alert alert-info">Policy and API changes at Twitter likely mean that
+this integration will stop working very soon.  The exact date is unknown as Twitter
+does not tell developers of changes.  What a time to be alive.</div>
 
 <h3>IEMBOT + Twitter Integration</h3>
         
@@ -217,7 +221,6 @@ any future posts to your page on IEMbot's behalf.</p>
     window.location.href='/projects/iembot/twitter.php?removeme=1';}">Delete IEMBot</button></p>
 </div>
 
-
-EOL;
+EOM;
 
 $t->render('single.phtml');
