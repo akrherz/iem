@@ -201,7 +201,10 @@ def main(argv):
         # We want to QC the case of having too low of precip.
         # How low is too low?
         # if stageIV > 0.1 and obs < 0.05
-        if row["stage4"] > 0.1 and row["obs"] < 0.05:
+        # Or if obs is 1 inch over stage4
+        if (row["stage4"] > 0.1 and row["obs"] < 0.05) or (
+            (row["obs"] - row["stage4"]) > 1
+        ):
             # print to keep email log more pretty
             print(
                 f"ISUSM fix_precip {date} {station} "
