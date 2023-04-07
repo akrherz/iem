@@ -114,10 +114,9 @@ class RAOB:
 
     def __str__(self):
         """override str()"""
-        return "RAOB from %s valid %s with %s levels" % (
-            self.station,
-            self.valid,
-            len(self.profile),
+        return (
+            f"RAOB from {self.station} valid {self.valid} "
+            f"with {len(self.profile)} levels"
         )
 
     def database_save(self, txn):
@@ -246,6 +245,7 @@ def parse(raw, sid):
 
 def main(valid):
     """Run for the given valid time!"""
+    LOG.info("running for %s", valid)
     nt = NetworkTable("RAOB")
     dbconn = get_dbconn("raob")
     # check what we have
@@ -270,20 +270,14 @@ def main(valid):
             continue
         progress.set_description(sid)
         uri = (
-            "https://rucsoundings.noaa.gov/get_raobs.cgi?data_source=RAOB;"
-            "start_year=%s;start_month_name=%s;"
-        ) % (valid.year, valid.strftime("%b"))
-        uri += ("start_mday=%s;start_hour=%s;start_min=0;n_hrs=12.0;") % (
-            valid.day,
-            valid.hour,
+            "https://rucsoundings.noaa.gov/get_raobs.cgi?data_source=RAOB&"
+            f"start_year={valid:%Y}&start_month_name={valid:%b}&"
+            f"start_mday={valid.day}&start_hour={valid.hour}&"
+            "start_min=0&n_hrs=12.0&"
+            f"fcst_len=shortest&airport={sid}&"
+            "text=Ascii%20text%20%28GSD%20format%29&"
+            f"hydrometeors=false&startSecs={v12:%s}&endSecs={valid:%s}"
         )
-        uri += "fcst_len=shortest;airport=%s;" % (sid,)
-        uri += "text=Ascii%20text%20%28GSD%20format%29;"
-        uri += ("hydrometeors=false&startSecs=%s&endSecs=%s") % (
-            v12.strftime("%s"),
-            valid.strftime("%s"),
-        )
-
         req = exponential_backoff(requests.get, uri, timeout=30)
         if req is None or req.status_code != 200:
             LOG.info("dl failed %s for %s", sid, valid)
@@ -295,7 +289,7 @@ def main(valid):
                     obs.at[sid, "added"] = len(rob.profile)
                 rob.database_save(cursor)
         except Exception as exp:
-            fn = "/tmp/%s_%s_fail" % (sid, valid.strftime("%Y%m%d%H%M"))
+            fn = f"/tmp/{sid}_{valid:%Y%m%d%H%M}_fail"
             LOG.info("FAIL %s %s %s, check %s for data", sid, valid, exp, fn)
             with open(fn, "w", encoding="utf-8") as fh:
                 fh.write(req.content)
