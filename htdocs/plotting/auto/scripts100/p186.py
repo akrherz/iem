@@ -1,4 +1,16 @@
-"""USDM Filled Time Series"""
+"""
+This plot shows the weekly change in drought
+monitor intensity expressed in terms of category change over the area
+of the selected state.  For example, an arrow of length one pointing
+up would indicate a one category improvement in drought over the area
+of the state. This
+plot uses a JSON data service provided by the
+<a href="https://droughtmonitor.unl.edu">Drought Monitor</a> website.
+
+<p>In the case of plotting contiguous US values, the magnitude of the change
+values is multiplied by five as drought changes at that scale are slower than
+at the state scale when normalized by area.
+"""
 import datetime
 import calendar
 
@@ -6,7 +18,7 @@ import numpy as np
 import requests
 import pandas as pd
 from scipy.interpolate import interp1d
-from pyiem import util
+from pyiem.util import get_autoplot_context
 from pyiem.plot import figure
 from pyiem.reference import state_names, state_fips
 from pyiem.exceptions import NoDataFound
@@ -16,24 +28,24 @@ SERVICE = (
     "/DmData/DataTables.aspx/ReturnTabularDMAreaPercent_state"
 )
 COLORS = ["#ffff00", "#fcd37f", "#ffaa00", "#e60000", "#730000"]
+PDICT = {
+    "state": "Summarize by State",
+    "conus": "Summarize for Contiguous US",
+}
 
 
 def get_description():
     """Return a dict describing how to call this plotter"""
-    desc = {}
-    desc["data"] = True
-    desc[
-        "description"
-    ] = """This plot shows the weekly change in drought
-    monitor intensity expressed in terms of category change over the area
-    of the selected state.  For example, an arrow of length one pointing
-    up would indicate a one category improvement in drought over the area
-    of the state. This
-    plot uses a JSON data service provided by the
-    <a href="https://droughtmonitor.unl.edu">Drought Monitor</a> website.
-    """
+    desc = {"description": __doc__, "data": True}
     thisyear = datetime.date.today().year
     desc["arguments"] = [
+        {
+            "type": "select",
+            "options": PDICT,
+            "default": "state",
+            "label": "How to Summarize",
+            "name": "w",
+        },
         dict(type="state", name="state", default="IA", label="Select State:"),
         dict(
             type="year",
@@ -55,36 +67,44 @@ def get_description():
 
 def plotter(fdict):
     """Go"""
-    ctx = util.get_autoplot_context(fdict, get_description())
+    ctx = get_autoplot_context(fdict, get_description())
     state = ctx["state"]
     syear = ctx["syear"]
     eyear = ctx["eyear"]
 
-    fips = ""
-    for key, _state in state_fips.items():
-        if _state == state:
-            fips = key
-    payload = {"area": fips, "statstype": "2"}
+    url = SERVICE
+    if ctx["w"] == "state":
+        fips = ""
+        for key, _state in state_fips.items():
+            if _state == state:
+                fips = key
+        payload = {"area": fips, "statstype": "2"}
+    else:
+        url = url.replace("_state", "_national")
+        payload = {"area": "'conus'", "statstype": "2"}
     headers = {}
     headers["Accept"] = "application/json, text/javascript, */*; q=0.01"
     headers["Content-Type"] = "application/json; charset=UTF-8"
-    req = util.exponential_backoff(
-        requests.get, SERVICE, payload, headers=headers
-    )
+    headers["user-agent"] = "requests"
+    req = requests.get(url, payload, headers=headers, timeout=30)
     if req is None or req.status_code != 200:
         raise NoDataFound("Drought Web Service failed to deliver data.")
     jdata = req.json()
     if "d" not in jdata:
         raise NoDataFound("Data Not Found.")
     df = pd.DataFrame(jdata["d"])
-    df["Date"] = pd.to_datetime(df["mapDate"], format="%m/%d/%Y")
+    df["Date"] = pd.to_datetime(
+        df["mapDate"], format="%m/%d/%Y" if ctx["w"] == "state" else "%m-%d-%Y"
+    )
     df = df.sort_values("Date", ascending=True)
-    df["x"] = df["Date"] + datetime.timedelta(hours=(3.5 * 24))
+    df["x"] = df["Date"] + datetime.timedelta(hours=3.5 * 24)
     # accounting
     df["score"] = (
         df["D4"] * 5 + df["D3"] * 4 + df["D2"] * 3 + df["D1"] * 2 + df["D0"]
     )
     df["delta"] = df["score"].diff()
+    if ctx["w"] == "conus":
+        df["delta"] = df["delta"] * 5
     df.iat[0, df.columns.get_loc("delta")] = 0
 
     fig = figure(apctx=ctx)
@@ -124,12 +144,13 @@ def plotter(fdict):
     ax.set_xlim(0, 366)
     ax.set_xlabel(
         "curve height of 1 year is 1 effective drought category "
-        f"change over area of {state_names[state]}"
+        "change over area of "
+        f"{state_names[state] if ctx['w'] == 'state' else '1/5 Contiguous US'}"
     )
     ax.set_ylabel(f"Year, thru {df.Date.max():%d %b %Y}")
     ax.set_title(
-        f"{syear:.0f}-{eyear:.0f} US Drought Monitor Weekly "
-        f"Change for {state_names[state]}\n"
+        f"{syear:.0f}-{eyear:.0f} US Drought Monitor Weekly Change for "
+        f"{state_names[state] if ctx['w'] == 'state' else 'Contiguous US'}\n"
         "curve height represents change in intensity + coverage"
     )
 
@@ -140,11 +161,19 @@ def plotter(fdict):
     ax.set_yticks(
         np.arange(ax.get_ylim()[0] - 1, ax.get_ylim()[1], -1, dtype="i")
     )
-    fig.text(0.02, 0.03, "Blue areas are improving conditions", color="b")
-    fig.text(0.4, 0.03, "Red areas are degrading conditions", color="r")
+    fig.text(
+        0.4,
+        0.01,
+        "Blue areas are improving conditions",
+        color="b",
+        ha="center",
+    )
+    fig.text(
+        0.7, 0.01, "Red areas are degrading conditions", color="r", ha="center"
+    )
 
     return fig, df
 
 
 if __name__ == "__main__":
-    plotter({})
+    plotter({"w": "conus"})
