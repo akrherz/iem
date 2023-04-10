@@ -14,9 +14,10 @@ LOG = logger()
 def review_iemaccess():
     """Go find stations that have summary entries, but marked offline."""
     df = read_sql(
-        "select s.iemid, t.id, t.network from "
-        "summary s JOIN stations t on (s.iemid = t.iemid) "
-        "where day = 'YESTERDAY' and not online",
+        """
+        select s.iemid, t.id, t.network from summary s JOIN stations t on
+        (s.iemid = t.iemid) where day = 'YESTERDAY' and not online
+        """,
         get_dbconnstr("iem"),
     )
     if df.empty:
@@ -54,8 +55,8 @@ def main():
             continue
         if not row2[0]:
             print(
-                ("Site %s [%s] %s was unknown, but is in mesosite")
-                % (nwsli, network, row[2])
+                f"Site {nwsli} [{network}] {row[2]} was unknown, "
+                "but is in mesosite"
             )
             mcursor.execute(
                 "update stations SET online = 't' where id = %s "
@@ -64,8 +65,8 @@ def main():
             )
         else:
             print(
-                ("Site %s [%s] %s was unknown, but online in DB?")
-                % (nwsli, network, row[2])
+                f"Site {nwsli} [{network}] {row[2]} was unknown, "
+                "but online in DB?"
             )
         hcursor2.execute("DELETE from unknown where nwsli = %s", (nwsli,))
 

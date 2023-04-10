@@ -32,7 +32,7 @@ def main():
                     + ".png"
                 )
             )
-            requests.get(uri)
+            requests.get(uri, timeout=5)
             cnt += 1
             if cnt % 100 == 0:
                 delta = datetime.datetime.now() - start

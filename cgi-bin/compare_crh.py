@@ -19,7 +19,7 @@ def application(_environ, start_response):
     sio.write("Report run at %s\n" % (datetime.datetime.utcnow(),))
     sio.write("Comparing %s\n" % (URI,))
     try:
-        req = requests.get(URI + NOUNCE)
+        req = requests.get(URI + NOUNCE, timeout=30)
         jdata = req.json()
     except Exception as exp:
         sio.write(

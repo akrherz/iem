@@ -1,29 +1,6 @@
 """Need to set station metadata for county name for a given site."""
-import sys
 
 from pyiem.util import get_dbconn
-
-
-class bcolors:
-    """Hack"""
-
-    HEADER = "\033[95m"
-    OKBLUE = "\033[94m"
-    OKGREEN = "\033[92m"
-    WARNING = "\033[93m"
-    FAIL = "\033[91m"
-    ENDC = "\033[0m"
-
-
-def msg(text):
-    """format a message"""
-    if not sys.stdout.isatty():
-        return text
-    if text == "OK":
-        return "%s[ OK ]%s" % (bcolors.OKGREEN, bcolors.ENDC)
-    if text == "FAIL":
-        return "%s[FAIL]%s" % (bcolors.FAIL, bcolors.ENDC)
-    return text
 
 
 def set_county(mcursor2, iemid, ugc, ugcname):
@@ -49,9 +26,9 @@ def logic(
         """
         SELECT ugc, name from ugcs WHERE
         ST_Contains(geom, ST_GeomFromText('Point(%s %s)',4326))
-        and substr(ugc,1,3) = '%s' and end_ts is null
-    """
-        % (lon, lat, state + ugccode)
+        and substr(ugc,1,3) = %s and end_ts is null
+    """,
+        (lon, lat, state + ugccode),
     )
 
     result = False
@@ -62,20 +39,20 @@ def logic(
             """
             SELECT ugc, name,
             ST_Distance(geom, ST_GeomFromText('Point(%s %s)',4326)) as d
-            from ugcs WHERE substr(ugc,1,3) = '%s' and end_ts is null and
+            from ugcs WHERE substr(ugc,1,3) = %s and end_ts is null and
             ST_Distance(geom, ST_GeomFromText('Point(%s %s)',4326)) < 2
             ORDER by d ASC LIMIT 1
-        """
-            % (lon, lat, state + ugccode, lon, lat)
+        """,
+            (lon, lat, state + ugccode, lon, lat),
         )
         if pcursor.rowcount == 1:
             (ugc, ugcname, dist) = pcursor.fetchone()
             print(
                 (
-                    "%s set_county[%s] ID: %s Net: %s: St: %s "
+                    "OK set_county[%s] ID: %s Net: %s: St: %s "
                     "UGC: %s Dist: %.2f"
                 )
-                % (msg("OK"), ugccode, station, network, state, ugc, dist)
+                % (ugccode, station, network, state, ugc, dist)
             )
             if ugccode == "C":
                 set_county(mcursor2, iemid, ugc, ugcname)
@@ -85,14 +62,13 @@ def logic(
         else:
             print(
                 (
-                    "%s set_county[%s] ID:%s Net:%s St:%s "
+                    "FAIL set_county[%s] ID:%s Net:%s St:%s "
                     "Lon:%.4f Lat:%.4f\n"
                     "https://mesonet.agron.iastate.edu/sites/"
                     "site.php?station=%s&network=%s"
                     ""
                 )
                 % (
-                    msg("FAIL"),
                     ugccode,
                     station,
                     network,
@@ -108,8 +84,8 @@ def logic(
     else:
         (ugc, ugcname) = pcursor.fetchone()
         print(
-            ("%s %s IEMID: %s SID: %s Network: %s to: %s [%s]")
-            % (msg("OK"), ugccode, iemid, station, network, ugcname, ugc)
+            ("OK %s IEMID: %s SID: %s Network: %s to: %s [%s]")
+            % (ugccode, iemid, station, network, ugcname, ugc)
         )
         if ugccode == "C":
             set_county(mcursor2, iemid, ugc, ugcname)

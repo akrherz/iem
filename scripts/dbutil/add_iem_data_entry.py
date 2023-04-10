@@ -50,7 +50,7 @@ def main():
         for valid in [now, now - datetime.timedelta(days=1)]:
             add_summary(icursor2, valid.date(), row["iemid"])
         icursor2.execute(
-            "INSERT into current ( valid, iemid) VALUES ('1980-01-01', %s)",
+            "INSERT into current (valid, iemid) VALUES ('1980-01-01', %s)",
             (row["iemid"],),
         )
 

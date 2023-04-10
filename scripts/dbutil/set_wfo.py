@@ -15,9 +15,11 @@ def main():
 
     # Find sites we need to check on
     mcursor.execute(
-        "select s.id, s.iemid, s.network, st_x(geom) as lon, "
-        "st_y(geom) as lat from stations s WHERE "
-        "(s.wfo IS NULL or s.wfo = '') and s.country = 'US'"
+        """
+        select s.id, s.iemid, s.network, st_x(geom) as lon,
+        st_y(geom) as lat from stations s WHERE
+        (s.wfo IS NULL or s.wfo = '') and s.country = 'US'
+        """
     )
 
     for row in mcursor:
