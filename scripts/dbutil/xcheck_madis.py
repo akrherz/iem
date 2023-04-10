@@ -21,13 +21,13 @@ def main():
         pgconn,
         index_col="nwsli",
     )
-    print("Found %s unknown entries" % (len(udf.index),))
+    print(f"Found {len(udf.index)} unknown entries")
     # Find latest MADIS netcdf
     now = utc()
     i = 0
     while i < 10:
         now -= datetime.timedelta(hours=1)
-        testfn = now.strftime("/mesonet/data/madis/mesonet1/%Y%m%d_%H00.nc")
+        testfn = now.strftime("/mesonet/data/madis/mesonet1/%Y%m%d_%H00_10.nc")
         if os.path.isfile(testfn):
             break
         i += 1
@@ -35,22 +35,13 @@ def main():
         stations = chartostring(nc.variables["stationId"][:]).tolist()
         names = chartostring(nc.variables["stationName"][:])
         providers = chartostring(nc.variables["dataProvider"][:])
-        latitudes = nc.variables["latitude"][:]
-        longitudes = nc.variables["longitude"][:]
+        lats = nc.variables["latitude"][:]
+        lons = nc.variables["longitude"][:]
     for sid in udf.index.values:
         if sid not in stations:
             continue
         idx = stations.index(sid)
-        print(
-            "%s %s %s %s %s"
-            % (
-                sid,
-                names[idx],
-                providers[idx],
-                latitudes[idx],
-                longitudes[idx],
-            )
-        )
+        print(f"{sid} {names[idx]} {providers[idx]} {lats[idx]} {lons[idx]}")
 
 
 if __name__ == "__main__":

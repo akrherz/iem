@@ -37,7 +37,7 @@ def main():
             "https://hads.ncep.noaa.gov/"
             "compressed_defs/%s_dcps_compressed.txt"
         ) % (hadscode,)
-        req = requests.get(uri)
+        req = requests.get(uri, timeout=60)
         if req.status_code != 200:
             print("uri: %s failed" % (uri,))
             continue

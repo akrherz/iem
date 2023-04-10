@@ -9,7 +9,7 @@ from pyiem.util import get_dbconn
 
 def main():
     """Go"""
-    pgconn = get_dbconn("mesosite", user="mesonet")
+    pgconn = get_dbconn("mesosite")
     cursor = pgconn.cursor()
     df = pd.read_csv("stations.tsv", sep=r"\t", engine="python")
     df["stname"] = df["LOCATION"] + " " + df["VECTOR"]

@@ -48,7 +48,7 @@ def get_hdf(nt, date):
                 f"{nt.sts[station]['lat']:.2f}/{ldate:%Y-%m-%d}"
             )
             try:
-                j = requests.get(uri).json()
+                j = requests.get(uri, timeout=30).json()
             except Exception as exp:
                 LOG.warning("JSON stage4 service failed\n%s\n%s", uri, exp)
                 continue

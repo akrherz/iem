@@ -30,7 +30,7 @@ def main():
             f"{date:%Y-%m-%d}/{nt.sts[station]['lat']:.2f}/"
             f"{nt.sts[station]['lon']:.2f}/json"
         )
-        res = requests.get(uri)
+        res = requests.get(uri, timeout=60)
         j = json.loads(res.content)
         if not j["data"]:
             LOG.info(" %s %s IEMRE Failure", station, date)

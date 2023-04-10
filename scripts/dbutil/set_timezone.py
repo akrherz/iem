@@ -29,8 +29,8 @@ def main():
             """
         select tzid from tz_world where ST_Intersects(geom,
         ST_GeomFromText('SRID=4326;POINT(%s %s)'));
-          """
-            % (lon, lat)
+          """,
+            (lon, lat),
         )
         row2 = mcursor2.fetchone()
         if row2 is None or row2[0] == "uninhabited":
