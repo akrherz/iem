@@ -1,8 +1,9 @@
-"""This application generates charts of 1 minute interval ASOS data,
-    where available.  It presently lists all ASOS sites without limiting them
-    to which the IEM has data for, sorry.  You can only select up to 5 days
-    worth of data at this time.  Any reported 1 minute precipitation value
-    over 0.50 inches is omitted as bad data.
+"""
+This application generates charts of 1 minute interval ASOS data,
+where available.  It presently lists all ASOS sites without limiting them
+to which the IEM has data for, sorry.  You can only select up to 5 days
+worth of data at this time.  Any reported 1 minute precipitation value
+over 0.50 inches is omitted as bad data.
 """
 from datetime import timezone, timedelta
 
@@ -270,28 +271,30 @@ def make_meteo_plot(ctx):
     do_xaxis(ctx, ax, False)
 
     # -----------------------------
-    gust = (
+    df["gust"] = (
         masked_array(df["gust_sknt"].values, units("knots"))
         .to(units("miles per hour"))
         .m
     )
-    sknt = (
+    df["sknt"] = (
         masked_array(df["sknt"].values, units("knots"))
         .to(units("miles per hour"))
         .m
     )
 
     ax = fig.add_axes([0.1, 0.36, 0.85, 0.25])
+    df2 = df[df["gust"].notna()]
     ax.bar(
-        df["local_valid"].values,
-        gust,
+        df2["local_valid"].values,
+        df2["gust"].values,
         zorder=1,
         width=1.0 / 1440.0,
         label="Wind Gust",
     )
+    df2 = df[df["sknt"].notna()]
     ax.bar(
-        df["local_valid"].values,
-        sknt,
+        df2["local_valid"].values,
+        df2["sknt"].values,
         zorder=2,
         width=1.0 / 1440.0,
         label="Wind Speed",
@@ -302,14 +305,14 @@ def make_meteo_plot(ctx):
         df["local_valid"].values,
         df["drct"].values,
         zorder=1,
-        color="green",
-        label="Wind Direction",
+        edgecolor="k",
+        facecolor="white",
     )
     ax2.set_ylim(0, 360)
     ax2.set_yticks(range(0, 361, 45))
     ax2.set_yticklabels(["N", "NE", "E", "SE", "S", "SW", "W", "NW", "N"])
     ax.grid(True)
-    ymax = max([7, gust.max(), sknt.max()])
+    ymax = max([7, df["gust"].max(), df["sknt"].max()])
     for i in range(10):
         if i * 8 > ymax:
             ax.set_ylim(0, i * 8)
