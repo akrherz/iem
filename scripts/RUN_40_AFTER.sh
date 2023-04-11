@@ -6,7 +6,7 @@ HH6=$(date -u --date '6 hours ago' +'%H')
 
 cd dl
 python download_ffg.py &
-python download_hrrr.py &
+(python download_hrrr_rad.py ; python download_hrrr_tsoil.py) &
 python download_nam.py $(date -u --date '3 hours ago' +'%Y %m %d %H') &
 
 cd ../rtma

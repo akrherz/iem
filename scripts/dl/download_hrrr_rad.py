@@ -12,7 +12,6 @@ import tempfile
 import os
 
 import requests
-import pygrib
 from pyiem.util import exponential_backoff, logger, utc
 
 LOG = logger()
@@ -22,38 +21,26 @@ def need_to_run(valid):
     """Check to see if we already have the radiation data we need"""
     gribfn = valid.strftime(
         "/mesonet/ARCHIVE/data/%Y/%m/%d/model/hrrr/"
-        "%H/hrrr.t%Hz.3kmf00.grib2"
+        "%H/hrrr.t%Hz.3kmf01.grib2"
     )
     if not os.path.isfile(gribfn):
-        return True
-    try:
-        grbs = pygrib.open(gribfn)
-        for name in [
-            "Downward short-wave radiation flux",
-            "Upward long-wave radiation flux",
-        ]:
-            grbs.select(name=name)
-        # print("%s had everything we desired!" % (gribfn, ))
-        return False
-    except Exception:
         return True
 
 
 def fetch(valid):
     """Fetch the radiation data for this timestamp
-    80:54371554:d=2014101002:ULWRF:top of atmosphere:anl:
-    81:56146124:d=2014101002:DSWRF:surface:anl:
+    22:23684154:d=2023041000:DSWRF:surface:0-15 min ave fcst:
     """
     uri = valid.strftime(
         (
             "https://nomads.ncep.noaa.gov/pub/data/nccf/"
             "com/hrrr/prod/hrrr.%Y%m%d/conus/hrrr.t%Hz."
-            "wrfprsf00.grib2.idx"
+            "wrfsubhf01.grib2.idx"
         )
     )
     req = exponential_backoff(requests.get, uri, timeout=30)
     if req is None or req.status_code != 200:
-        LOG.info("failed to get idx %s", uri)
+        LOG.warning("failed to get idx %s", uri)
         return
 
     offsets = []
@@ -65,27 +52,21 @@ def fetch(valid):
         if neednext:
             offsets[-1].append(int(tokens[1]))
             neednext = False
-        if tokens[3] in ["ULWRF", "DSWRF"]:
+        if (
+            tokens[3]
+            in [
+                "DSWRF",
+            ]
+            and tokens[5].find("ave fcst") > -1
+        ):
             offsets.append([int(tokens[1])])
             neednext = True
-        # Save soil temp and water at surface, 10cm and 40cm
-        if tokens[3] in ["TSOIL", "SOILW"]:
-            if tokens[4] in [
-                "0-0 m below ground",
-                "0.1-0.1 m below ground",
-                "0.3-0.3 m below ground",
-                "0.6-0.6 m below ground",
-                "1-1 m below ground",
-            ]:
-                offsets.append([int(tokens[1])])
-                neednext = True
-
     pqstr = valid.strftime(
-        "data u %Y%m%d%H00 bogus model/hrrr/%H/hrrr.t%Hz.3kmf00.grib2 grib2"
+        "data u %Y%m%d%H00 bogus model/hrrr/%H/hrrr.t%Hz.3kmf01.grib2 grib2"
     )
 
-    if len(offsets) != 13:
-        LOG.info("warning, found %s gribs for %s", len(offsets), valid)
+    if len(offsets) != 4:
+        LOG.warning("warning, found %s gribs for %s", len(offsets), valid)
     for pr in offsets:
         headers = {"Range": f"bytes={pr[0]}-{pr[1]}"}
         req = exponential_backoff(
@@ -94,9 +75,8 @@ def fetch(valid):
         if req is None:
             LOG.info("failure for uri: %s", uri)
             continue
-        tmpfd = tempfile.NamedTemporaryFile(delete=False)
-        tmpfd.write(req.content)
-        tmpfd.close()
+        with tempfile.NamedTemporaryFile(delete=False) as tmpfd:
+            tmpfd.write(req.content)
         subprocess.call(["pqinsert", "-p", pqstr, tmpfd.name])
         os.unlink(tmpfd.name)
 
@@ -105,9 +85,7 @@ def main(argv):
     """Go Main Go"""
     times = []
     if len(argv) == 5:
-        times.append(
-            utc(int(argv[1]), int(argv[2]), int(argv[3]), int(argv[4]))
-        )
+        times.append(utc(*[int(i) for i in argv[1:]]))
     else:
         times.append(utc() - datetime.timedelta(hours=1))
         times.append(utc() - datetime.timedelta(hours=6))

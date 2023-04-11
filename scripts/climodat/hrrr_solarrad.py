@@ -97,6 +97,31 @@ def compute(df, sids, dt, do_regions=False):
     xaxis = None
     yaxis = None
     for now in pd.date_range(sts, ets, freq="1H"):
+        # Try the newer f01 files, which have better data!
+        fn = now.strftime(
+            "/mesonet/ARCHIVE/data/%Y/%m/%d/model/hrrr/%H/"
+            "hrrr.t%Hz.3kmf01.grib2"
+        )
+        if os.path.isfile(fn):
+            grbs = pygrib.open(fn)
+            selgrbs = grbs.select(name="Downward short-wave radiation flux")
+            if len(selgrbs) == 4:
+                # Goodie
+                for g in selgrbs:
+                    if total is None:
+                        xaxis, yaxis = get_grid(g)
+                        affine = Affine(
+                            g["DxInMetres"],
+                            0,
+                            xaxis[0],
+                            0,
+                            0 - g["DyInMetres"],
+                            yaxis[-1],
+                        )
+                        total = g.values * 900.0  # 15 min data
+                    else:
+                        total += g.values * 900.0
+                continue
         fn = now.strftime(
             "/mesonet/ARCHIVE/data/%Y/%m/%d/model/hrrr/%H/"
             "hrrr.t%Hz.3kmf00.grib2"
@@ -118,9 +143,9 @@ def compute(df, sids, dt, do_regions=False):
             affine = Affine(
                 g["DxInMetres"], 0, xaxis[0], 0, 0 - g["DyInMetres"], yaxis[-1]
             )
-            total = g.values
+            total = g.values * 3600.0
         else:
-            total += g.values
+            total += g.values * 3600.0
 
     if total is None:
         LOG.warning("No HRRR data for %s", dt)
@@ -128,7 +153,7 @@ def compute(df, sids, dt, do_regions=False):
 
     # Total is the sum of the hourly values
     # We want MJ day-1 m-2
-    total = (total * 3600.0) / 1_000_000.0
+    total = total / 1_000_000.0
 
     df["i"] = np.digitize(df["projx"].values, xaxis)
     df["j"] = np.digitize(df["projy"].values, yaxis)
