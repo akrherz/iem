@@ -157,11 +157,12 @@ def plotter(fdict):
         row = i % 3
         col = i // 3
         ax3 = fig.add_axes([0.6 + (0.22 * col), 0.1 + (0.3 * row), 0.15, 0.19])
+        df2 = df[df[combo[0]].notna() & df[combo[1]].notna()]
 
-        xmax = df[combo[0]].max()
+        xmax = df2[combo[0]].max()
         xlabel = combo[0].replace("_srad", "").upper()
         ylabel = combo[1].replace("_srad", "").upper()
-        ymax = df[combo[1]].max()
+        ymax = df2[combo[1]].max()
         if np.isnan(xmax) or np.isnan(ymax):
             ax3.text(
                 0.5,
@@ -173,7 +174,7 @@ def plotter(fdict):
             ax3.get_xaxis().set_visible(False)
             ax3.get_yaxis().set_visible(False)
             continue
-        c = df[[combo[0], combo[1]]].corr()
+        c = df2[[combo[0], combo[1]]].corr()
         ax3.text(
             0.5,
             1.01,
@@ -183,19 +184,19 @@ def plotter(fdict):
             transform=ax3.transAxes,
         )
         ax3.scatter(
-            df[combo[0]], df[combo[1]], edgecolor="None", facecolor="green"
+            df2[combo[0]], df2[combo[1]], edgecolor="None", facecolor="green"
         )
         maxv = max([ax3.get_ylim()[1], ax3.get_xlim()[1]])
         ax3.set_ylim(0, maxv)
         ax3.set_xlim(0, maxv)
         ax3.plot([0, maxv], [0, maxv], color="k")
         ax3.set_xlabel(
-            f"{xlabel} " r"$\mu$=" f"{df[combo[0]].mean():.1f}",
+            f"{xlabel} " r"$\mu$=" f"{df2[combo[0]].mean():.1f}",
             labelpad=0,
             fontsize=12,
         )
         ax3.set_ylabel(
-            f"{ylabel} " r"$\mu$=" f"{df[combo[1]].mean():.1f}",
+            f"{ylabel} " r"$\mu$=" f"{df2[combo[1]].mean():.1f}",
             fontsize=12,
         )
 
