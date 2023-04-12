@@ -1,4 +1,4 @@
-<?php 
+<?php
 require_once "../../config/settings.inc.php";
 require_once "../../include/myview.php";
 require_once "../../include/mlib.php";
@@ -7,39 +7,41 @@ require_once "../../include/forms.php";
 $nt = new NetworkTable("SCAN");
 $cities = $nt->table;
 
-$sortcol = isset($_GET["sortcol"]) ? xssafe($_GET["sortcol"]): 'station';
+$sortcol = isset($_GET["sortcol"]) ? xssafe($_GET["sortcol"]) : 'station';
 $t = new MyView();
 $t->title = "SCAN Sortable Currents";
 $t->refresh = 3600;
 
-function make_link($sid){
+function make_link($sid)
+{
     return sprintf("/sites/site.php?network=SCAN&station=%s", $sid);
 }
 
 
-$mydata = Array();
-$arr = Array(
+$mydata = array();
+$arr = array(
     "network" => "SCAN",
 );
 $jobj = iemws_json("currents.json", $arr);
 
-foreach($jobj["data"] as $bogus => $iemob){
+foreach ($jobj["data"] as $bogus => $iemob) {
     $key = $iemob["station"];
     $mydata[$key] = $iemob;
     $mydata[$key]["ts"] = new DateTime($iemob["local_valid"]);
     $mydata[$key]["sped"] = $mydata[$key]["sknt"] * 1.15078;
-    $mydata[$key]["relh"] = relh(f2c($mydata[$key]["tmpf"]),
-            f2c($mydata[$key]["dwpf"]) );
-    if ($mydata[$key]["max_gust"] > $mydata[$key]["max_sknt"]){
+    $mydata[$key]["relh"] = relh(
+        f2c($mydata[$key]["tmpf"]),
+        f2c($mydata[$key]["dwpf"])
+    );
+    if ($mydata[$key]["max_gust"] > $mydata[$key]["max_sknt"]) {
         $mydata[$key]["peak"] = $mydata[$key]["max_gust"];
         $mydata[$key]["peak_ts"] = new DateTime($mydata[$key]["local_max_gust_ts"]);
     } else {
         $mydata[$key]["peak"] = $mydata[$key]["max_sknt"];
-        if ($mydata[$key]["local_max_sknt_ts"]){
+        if ($mydata[$key]["local_max_sknt_ts"]) {
             $mydata[$key]["peak_ts"] = new DateTime($mydata[$key]["local_max_sknt_ts"]);
         }
     }
-
 }
 
 $finalA = aSortBySecondIndex($mydata, $sortcol);
@@ -48,7 +50,7 @@ $now = new DateTime();
 
 $t1 = "";
 // Loop though all data
-foreach($finalA as $key => $val){
+foreach ($finalA as $key => $val) {
     $parts = $finalA[$key];
     $i++;
     $t1 .= "<tr";
@@ -56,54 +58,56 @@ foreach($finalA as $key => $val){
 
     $t1 .= ">";
     $t1 .= "<td><input type=\"checkbox\" name=\"st[]\"
-               value=\"".$key."\"></td>";
-    $t1 .= "<td><a href=\"". make_link($key) ."\">". $cities[$key]["name"] . "</a></td><td>";
-    $t1 .= $parts["ts"]->format("M-d-Y h:i A") ."</td>
-  <td align='center'>". myround($parts["tmpf"],0) ."(<font color=\"#ff0000\">".
-  myround($parts["max_tmpf"],0) ."</font>/<font color=\"#0000ff\">".
-  myround($parts["min_tmpf"],0) ."</font>)</td>
- <td>". myround($parts["dwpf"],0) ."</td>
- <td>". myround($parts["feel"], 0) ."</td>
- <td>". $parts["relh"] ."</td>
- <td>". myround($parts["sknt"],0) ;
-    if (!is_null($parts["gust"]) && $parts["gust"] > 0){
-        $t1 .= "G". $parts["gust"];
+               value=\"" . $key . "\"></td>";
+    $t1 .= "<td><a href=\"" . make_link($key) . "\">" . $cities[$key]["name"] . "</a></td><td>";
+    $t1 .= $parts["ts"]->format("M-d-Y h:i A") . "</td>
+  <td align='center'>" . myround($parts["tmpf"], 0) . "(<font color=\"#ff0000\">" .
+        myround($parts["max_tmpf"], 0) . "</font>/<font color=\"#0000ff\">" .
+        myround($parts["min_tmpf"], 0) . "</font>)</td>
+ <td>" . myround($parts["dwpf"], 0) . "</td>
+ <td>" . myround($parts["feel"], 0) . "</td>
+ <td>" . $parts["relh"] . "</td>
+ <td>" . myround($parts["sknt"], 0);
+    if (!is_null($parts["gust"]) && $parts["gust"] > 0) {
+        $t1 .= "G" . $parts["gust"];
     }
-    $t1 .= "</td><td>". myround($parts["drct"],0) ."</td>";
+    $t1 .= "</td><td>" . myround($parts["drct"], 0) . "</td>";
     $t1 .= "<td>";
-    if (array_key_exists("peak_ts", $parts)){
-        $t1 .= myround($parts["peak"],0) ."@ ". $parts["peak_ts"]->format("h:i P") ;
-    }	
-    $t1 .= "</td><td>". myround($parts["srad"],0) ."</td></tr>";
+    if (array_key_exists("peak_ts", $parts)) {
+        $t1 .= myround($parts["peak"], 0) . "@ " . $parts["peak_ts"]->format("h:i P");
+    }
+    $t1 .= "</td><td>" . myround($parts["srad"], 0) . "</td></tr>";
 }
 
 $t2 = "";
 $n = $finalA;
-foreach($n as $key => $parts){
+foreach ($n as $key => $parts) {
     $i++;
     $t2 .= "<tr";
     if ($i % 2 == 0)  $t2 .= " bgcolor='#eeeeee'";
 
     $t2 .= ">";
-    $t2 .= "<td><a href=\"". make_link($key) ."\">". $cities[$key]["name"] . "</a></td></td><td>";
-    $t2 .= $parts["ts"]->format("M-d-Y h:i P") ."</td>
-    <td>". myround($parts["c1smv"],0) ."</td><td>". myround($parts["c1tmpf"],0) ."</td>
-    <td>". myround($parts["c2smv"],0) ."</td><td>". myround($parts["c2tmpf"],0) ."</td>
-    <td>". myround($parts["c3smv"],0) ."</td><td>". myround($parts["c3tmpf"],0) ."</td>
-    <td>". myround($parts["c4smv"],0) ."</td><td>". myround($parts["c4tmpf"],0) ."</td>
-    <td>". myround($parts["c5smv"],0) ."</td><td>". myround($parts["c5tmpf"],0) ."</td>";
+    $t2 .= "<td><a href=\"" . make_link($key) . "\">" . $cities[$key]["name"] . "</a></td></td><td>";
+    $t2 .= $parts["ts"]->format("M-d-Y h:i P") . "</td>
+    <td>" . myround($parts["c1smv"], 0) . "</td><td>" . myround($parts["c1tmpf"], 0) . "</td>
+    <td>" . myround($parts["c2smv"], 0) . "</td><td>" . myround($parts["c2tmpf"], 0) . "</td>
+    <td>" . myround($parts["c3smv"], 0) . "</td><td>" . myround($parts["c3tmpf"], 0) . "</td>
+    <td>" . myround($parts["c4smv"], 0) . "</td><td>" . myround($parts["c4tmpf"], 0) . "</td>
+    <td>" . myround($parts["c5smv"], 0) . "</td><td>" . myround($parts["c5tmpf"], 0) . "</td>";
 
     $t2 .= "</tr>";
 }
 
-$vals = Array("tmpf" => "Air Temperature [F]", "dwpf" => "Dew Point Temp [F]",
-  "sknt" => "Wind Speed [knots]", "wdir" => "Wind Direction [deg]",
-  "pday" => "Precip Accum [inches]", "max_sknt" => "Wind Gust [knots]",
-  "ts" => "Observation Time [local]", "feel" => "Feels Like",
-  "min_tmpf" => "Today's Low Temperature", "srad" => "Solar Radiation",
-  "max_tmpf" => "Today's High Temperature",
-  "station" => "Station ID", "relh" => "Relative Humidity");
-
+$vals = array(
+    "tmpf" => "Air Temperature [F]", "dwpf" => "Dew Point Temp [F]",
+    "sknt" => "Wind Speed [knots]", "wdir" => "Wind Direction [deg]",
+    "pday" => "Precip Accum [inches]", "max_sknt" => "Wind Gust [knots]",
+    "ts" => "Observation Time [local]", "feel" => "Feels Like",
+    "min_tmpf" => "Today's Low Temperature", "srad" => "Solar Radiation",
+    "max_tmpf" => "Today's High Temperature", "gtim" => "Time of Gust",
+    "drct" => "Wind Direction",
+    "station" => "Station ID", "relh" => "Relative Humidity"
+);
 
 $t->current_network = 'SCAN';
 $t->content = <<<EOF

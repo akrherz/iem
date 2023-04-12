@@ -2,14 +2,14 @@
 /* Generate a 1 minute plot of precip and pressure */
 require_once "../../../config/settings.inc.php";
 require_once "../../../include/forms.php";
-include_once("../../../include/network.php");
-include_once("../../../include/mlib.php");
-include_once("../../../include/database.inc.php");
-include("../../../include/jpgraph/jpgraph.php");
-include("../../../include/jpgraph/jpgraph_line.php");
-include("../../../include/jpgraph/jpgraph_scatter.php");
-include("../../../include/jpgraph/jpgraph_date.php");
-include("../../../include/jpgraph/jpgraph_led.php");
+require_once "../../../include/network.php";
+require_once "../../../include/mlib.php";
+require_once "../../../include/database.inc.php";
+require_once "../../../include/jpgraph/jpgraph.php";
+require_once "../../../include/jpgraph/jpgraph_line.php";
+require_once "../../../include/jpgraph/jpgraph_scatter.php";
+require_once "../../../include/jpgraph/jpgraph_date.php";
+require_once "../../../include/jpgraph/jpgraph_led.php";
 
 $nt = new NetworkTable(array("KCCI", "KIMT", "KELO"));
 $cities = $nt->table;
@@ -86,15 +86,11 @@ $graph->xaxis->SetTitleMargin(50);
 
 $graph->yaxis->title->SetFont(FF_FONT1, FS_BOLD, 14);
 $graph->yaxis->SetFont(FF_FONT1, FS_BOLD, 12);
-//$graph->yaxis->title->SetBox( array(150,150,150), $tcolor, true);
-//$graph->yaxis->title->SetColor( $tcolor );
 $graph->yaxis->SetTitleMargin(50);
 $graph->yscale->SetGrace(10);
 
 $graph->y2axis->title->SetFont(FF_FONT1, FS_BOLD, 14);
 $graph->y2axis->SetFont(FF_FONT1, FS_BOLD, 12);
-//$graph->y2axis->title->SetBox( array(150,150,150), $tcolor, true);
-//$graph->y2axis->title->SetColor( $tcolor );
 $graph->y2axis->SetTitleMargin(40);
 
 $graph->tabtitle->SetFont(FF_FONT1, FS_BOLD, 16);
@@ -134,17 +130,6 @@ $lineplot2->SetLegend("Precipitation");
 $lineplot2->SetFillColor("blue@0.1");
 $lineplot2->SetColor("blue");
 $lineplot2->SetWeight(2);
-//$lineplot2->SetFilled();
-//$lineplot2->SetFillColor("blue");
-
-// Box for error notations
-//$t1 = new Text("Dups: ".$dups ." Missing: ".$missing );
-//$t1->SetPos(0.4,0.95);
-//$t1->SetOrientation("h");
-//$t1->SetFont(FF_FONT1,FS_BOLD);
-//$t1->SetBox("white","black",true);
-//$t1->SetColor("black");
-//$graph->AddText($t1);
 
 $graph->AddY2($lineplot2);
 $graph->Add($lineplot);

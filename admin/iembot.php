@@ -1,7 +1,7 @@
 <?php
 require_once "../config/settings.inc.php";
 require_once "../include/database.inc.php";
-include_once "../include/myview.php";
+require_once "../include/myview.php";
 $t = new MyView();
 
 $dbconn = iemdb("mesosite");

@@ -1,4 +1,7 @@
-"""Ingest NCEI's ISH data into the IEM archives."""
+"""Ingest NCEI's ISH data into the IEM archives.
+
+https://www.ncei.noaa.gov/pub/data/noaa/isd-history.txt
+"""
 import sys
 import subprocess
 import os

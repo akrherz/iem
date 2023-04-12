@@ -115,13 +115,13 @@ if ($what == "download") {
     if ($selectAll) {
         foreach ($nt->table as $key => $value) {
             $station = $key;
-            include("plot_1min.php");
+            include "plot_1min.php";
         }
     } else {
         foreach ($stations as $key => $value) {
             $station = $value;
 
-            include("plot_1min.php");
+            include "plot_1min.php";
         }
     }
 } else {

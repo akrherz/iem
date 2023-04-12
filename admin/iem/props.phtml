@@ -1,6 +1,8 @@
 <?php
-include("../../config/settings.inc.php");
-include("../../include/database.inc.php");
+require_once "../../config/settings.inc.php";
+require_once "../../include/database.inc.php";
+require_once "../../include/myview.php";
+
 $dbconn = iemdb("mesosite", TRUE, TRUE);
  /* Edit IEM Properties */
 $rs = pg_prepare($dbconn, "DELETE", "DELETE from properties WHERE
@@ -22,7 +24,6 @@ if ( isset($_GET["propname"]) && isset($_GET["propvalue"])){
 
 $rs = pg_query($dbconn, "SELECT * from properties ORDER by propname ASC");
 
-include("../../include/myview.php");
 $t = new MyView();
 $t->title = "Properties Editor";
 
