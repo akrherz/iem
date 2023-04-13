@@ -123,9 +123,6 @@ for ($i = 0; $row = pg_fetch_array($rs); $i++) {
     echo $d[$delim] . $row["dvalid"] . $d[$delim];
     for ($j = 0; $j < $num_vars; $j++) {
         echo $row["var" . $j] . $d[$delim];
-        if ($vars[$j] == "ca1") echo $skycover[$row["var" . $j]] . $d[$delim];
-        if ($vars[$j] == "ca2") echo $skycover[$row["var" . $j]] . $d[$delim];
-        if ($vars[$j] == "ca3") echo $skycover[$row["var" . $j]] . $d[$delim];
     }
     echo "\n";
 }
