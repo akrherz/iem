@@ -46,9 +46,6 @@ $graph->xaxis->SetFont(FF_FONT1,FS_BOLD);
 //$graph->xaxis->SetTickLabels($xlabel);
 $graph->xaxis->SetLabelAngle(90);
 
-//$graph->yaxis->scale->ticks->Set(5,1);
-//$graph->yaxis->scale->ticks->SetPrecision(0);
-
 $graph->title->Set("Dynamic AWOS Plot for ". $Wcities[$station]["city"]);
 $graph->subtitle->Set("Plot valid between: ".$sqlTS1 ." & ". $sqlTS2 );
 $graph->title->SetFont(FF_FONT1,FS_BOLD,16);
@@ -58,9 +55,6 @@ $graph->xaxis->SetTitle("Valid GMT");
 $graph->xaxis->SetTitleMargin(70);
 $graph->xaxis->title->SetFont(FF_FONT1,FS_BOLD,12);
 
-//$ints = $i % 60 ;
-//if ($ints > 1)
-//$graph->xaxis->SetTextLabelInterval($ints);
 $graph->legend->Pos(0.01, 0.01, "right", "top");
 $graph->yscale->SetGrace(10);
 

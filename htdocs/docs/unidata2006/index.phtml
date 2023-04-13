@@ -1,10 +1,9 @@
 <?php
-include("../../../config/settings.inc.php");
-include_once "../../../include/myview.php";
+require_once "../../../config/settings.inc.php";
+require_once "../../../include/myview.php";
 $t = new MyView();
 $t->title = "Unidata Equipment Grant Report";
 $t->content = <<<EOF
-
 
 <div style="text-align: center; width: 800px;">
 <h3>Increasing GIS Web Services Capacity to Serve The Unidata Community.</h3>
@@ -117,4 +116,3 @@ any questions or suggestions.
 
 EOF;
 $t->render('single.phtml');
-?>

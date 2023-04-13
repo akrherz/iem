@@ -16,7 +16,7 @@ LOG = logger()
 def build_xref():
     """Figure out how to reference stations"""
     xref = {}
-    with open("isd-history.txt", encoding="ascii") as fh:
+    with open("isd-history.txt", encoding="utf-8") as fh:
         for linenum, line in enumerate(fh):
             if linenum < 24:
                 continue

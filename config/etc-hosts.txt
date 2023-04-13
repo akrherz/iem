@@ -95,7 +95,7 @@
 10.90.12.21 iemdb-wepp.local
 
 ### iemdb2 PostgreSQL
-# iemdb2 metvm2-dc
+# iemdb2 metvm4-dc
 10.90.12.22 iemdb2.local
 10.90.12.22 iemdb-hads iemdb-hads.local
 10.90.12.22 iemdb-talltowers.local
@@ -107,7 +107,7 @@
 10.90.12.22 iemdb-postgis.local
 
 ### iemdb3 PostgreSQL
-# iemdb3 metvm6-dc
+# iemdb3 metvm2-dc
 10.90.12.23 iemdb3.local
 10.90.12.23 iemdb-asos.local
 10.90.12.23 iemdb-awos.local

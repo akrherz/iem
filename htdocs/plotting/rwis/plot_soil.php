@@ -2,6 +2,7 @@
 require_once "../../../config/settings.inc.php";
 require_once "../../../include/database.inc.php";
 require_once "../../../include/forms.php";
+require_once "../../../include/network.php";
 
 /** We need these vars to make this work */
 $syear = get_int404("syear", date("Y"));
@@ -71,7 +72,6 @@ if (pg_num_rows($rs) == 0) {
     die();
 }
 
-include("../../../include/network.php");
 $nt = new NetworkTable("IA_RWIS");
 $cities = $nt->table;
 

@@ -3,6 +3,7 @@
 require_once "../../../config/settings.inc.php";
 require_once "../../../include/database.inc.php";
 require_once "../../../include/network.php";
+require_once "../../../include/forms.php";
 $nt = new NetworkTable("IA_RWIS");
 $cities = $nt->table;
 
@@ -88,60 +89,40 @@ $sqlStr .= " and station IN " . $stationString . " ORDER by valid ASC";
 if ($what == "download") {
     header("Content-type: application/octet-stream");
     header("Content-Disposition: attachment; filename=changeme.txt");
-} else if ($what == "plot") {
-    include("../../plotting/jpgraph/jpgraph.php");
-    include("../../plotting/jpgraph/jpgraph_line.php");
-    if ($selectAll) {
-        foreach ($Rcities as $key => $value) {
-            $station = $key;
-            include("plot_1min.php");
-        }
-    } else {
-        foreach ($stations as $key => $value) {
-            $station = $value;
-
-            include("plot_1min.php");
-        }
-    }
 } else {
     header("Content-type: text/plain");
 }
 
-if ($what != "plot") {
-    $connection = iemdb("rwis");
+$connection = iemdb("rwis");
 
-    $query1 = "SET TIME ZONE 'GMT'";
+$query1 = "SET TIME ZONE 'GMT'";
 
-    $result = pg_exec($connection, $query1);
-    $rs =  pg_exec($connection, $sqlStr);
+$result = pg_exec($connection, $query1);
+$rs =  pg_exec($connection, $sqlStr);
 
-    pg_close($connection);
+pg_close($connection);
+if ($gis == "yes") {
+    echo "station,station_name,lat,lon,valid(GMT),";
+} else {
+    echo "station,station_name,valid(GMT),";
+}
+for ($j = 0; $j < $num_vars; $j++) {
+    echo $vars[$j] . $d[$delim];
+    if ($vars[$j] == "ca1") echo "ca1code" . $d[$delim];
+    if ($vars[$j] == "ca2") echo "ca2code" . $d[$delim];
+    if ($vars[$j] == "ca3") echo "ca3code" . $d[$delim];
+}
+echo "\n";
+
+for ($i = 0; $row = pg_fetch_array($rs); $i++) {
+    $sid = $row["station"];
+    echo $sid . $d[$delim] . $cities[$sid]["name"];
     if ($gis == "yes") {
-        echo "station,station_name,lat,lon,valid(GMT),";
-    } else {
-        echo "station,station_name,valid(GMT),";
+        echo  $d[$delim] . $cities[$sid]["lat"] . $d[$delim] .  $cities[$sid]["lon"];
     }
+    echo $d[$delim] . $row["dvalid"] . $d[$delim];
     for ($j = 0; $j < $num_vars; $j++) {
-        echo $vars[$j] . $d[$delim];
-        if ($vars[$j] == "ca1") echo "ca1code" . $d[$delim];
-        if ($vars[$j] == "ca2") echo "ca2code" . $d[$delim];
-        if ($vars[$j] == "ca3") echo "ca3code" . $d[$delim];
+        echo $row["var" . $j] . $d[$delim];
     }
     echo "\n";
-
-    for ($i = 0; $row = pg_fetch_array($rs); $i++) {
-        $sid = $row["station"];
-        echo $sid . $d[$delim] . $cities[$sid]["name"];
-        if ($gis == "yes") {
-            echo  $d[$delim] . $cities[$sid]["lat"] . $d[$delim] .  $cities[$sid]["lon"];
-        }
-        echo $d[$delim] . $row["dvalid"] . $d[$delim];
-        for ($j = 0; $j < $num_vars; $j++) {
-            echo $row["var" . $j] . $d[$delim];
-            if ($vars[$j] == "ca1") echo $skycover[$row["var" . $j]] . $d[$delim];
-            if ($vars[$j] == "ca2") echo $skycover[$row["var" . $j]] . $d[$delim];
-            if ($vars[$j] == "ca3") echo $skycover[$row["var" . $j]] . $d[$delim];
-        }
-        echo "\n";
-    }
 }

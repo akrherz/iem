@@ -33,7 +33,11 @@ $data = array();
 for ($i = 0; $row = pg_fetch_array($rs); $i++) {
     $st = $row["station"];
     if (!isset($data[$st])) {
-        $data[$st] = array("min_low" => 100, "station" => $st);
+        $data[$st] = array(
+            "min_low" => 100,
+            "avglow32day" => null,
+            "avglow28day" => null,
+            "station" => $st);
         $data[$st]["low"] = $row["min_low"];
         $data[$st]["lowyr"] = $row["min_low_yr"] . "-" . substr($row["valid"], 5, 6);
     }

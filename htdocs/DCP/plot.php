@@ -37,7 +37,6 @@ for ($i=0;$row=pg_fetch_assoc($rs);$i++){
     $data[] = $row["value"];
 }
 
-
 $graph = new Graph(640,480);
 $graph->SetScale("datelin");
 
@@ -48,10 +47,6 @@ $graph->img->SetMargin(40,40,45,120);
 $title = sprintf("%s [%s] \nPlot of SHEF Variable [%s]", $nt->table[$station]['name'],
     $station, $varname);
 $graph->title->Set($title);
-
-//$graph->title->SetFont(FF_VERDANA,FS_BOLD,11);
-//$graph->subtitle->SetFont(FF_VERDANA,FS_BOLD,20);
-//$graph->xaxis->title->SetFont(FF_VERDANA,FS_BOLD,11);
 
 $graph->xaxis->scale->SetDateFormat("M d h A");
 

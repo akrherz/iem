@@ -24,8 +24,8 @@ if (isset($_GET["img_x"]) && isset($_GET["img_y"])) {
     $dy = ($ur_y - $ll_y) / floatval(480);
     $dx = ($ur_x - $ll_x) / floatval(640);
 
-    $_GET["lon0"] = (intval($_GET["img_x"]) * $dx) + $ll_x;
-    $_GET["lat0"] = $ur_y - (intval($_GET["img_y"]) * $dy);
+    $_GET["lon0"] = (get_int404("img_x", 0) * $dx) + $ll_x;
+    $_GET["lat0"] = $ur_y - (get_int404("img_y", 0) * $dy);
     /* $_GET["site"] = "user"; */
 }
 
@@ -33,8 +33,8 @@ $layers = isset($_GET["layers"]) ? $_GET["layers"] : array(
     "cwas", "warnings",
     "uscounties", "nexrad", "watches"
 );
-$cu = isset($_GET["cu"]) ? intval($_GET["cu"]) : 0;
-$loop = isset($_GET["loop"]) ? intval($_GET["loop"]) : 0;
+$cu = get_int404("cu", 0);
+$loop = get_int404("loop", 0);
 if ($loop == 2) $loop = 1;
 $tz = isset($_GET["tz"]) ? strtoupper(xssafe($_GET["tz"])) : "CDT";
 $tzdict = array(
@@ -45,20 +45,20 @@ $tzdict = array(
 
 $tzoff = $tzdict[$tz];
 $autopilot = isset($_GET["autopilot"]) ? xssafe($_GET["autopilot"]) : 0;
-$filter = isset($_GET["filter"]) ? intval($_GET["filter"]) : 0;
-$lsrwindow = isset($_GET["lsrwindow"]) ? intval($_GET["lsrwindow"]) : "0";
+$filter = get_int404("filter", 0);
+$lsrwindow = get_int404("lsrwindow", "0");
 $lsrlook = isset($_GET["lsrlook"]) ? xssafe($_GET["lsrlook"]) : "+";
 // careful here as we can have PXXX sites
 $site = isset($_GET["site"]) ? strtoupper(substr($_GET["site"], 0, 4)) : "DMX";
 $osite = isset($_GET["osite"]) ? substr($_GET["osite"], 0, 4) : "DMX";
 $sortcol = isset($_GET["sortcol"]) ? substr(xssafe($_GET["sortcol"]), 0, 20) : "issued";
-$sortdir = isset($_GET["sortdir"]) ? intval($_GET["sortdir"]) : 0;
+$sortdir = get_int404("sortdir", 0);
 $lon0 = isset($_GET["lon0"]) ? floatval($_GET["lon0"]) : 0;
 $lat0 = isset($_GET["lat0"]) ? floatval($_GET["lat0"]) : 0;
-$zoom = isset($_GET["zoom"]) ? intval($_GET["zoom"]) : 250;
+$zoom = get_int404("zoom", 250);
 $imgsize = isset($_GET["imgsize"]) ? xssafe($_GET["imgsize"]) : "640x480";
-$interval = isset($_GET["interval"]) ? intval($_GET["interval"]) : 5;
-$frames = isset($_GET["frames"]) ? intval($_GET["frames"]) : 10;
+$interval = get_int404("interval", 5);
+$frames = get_int404("frames", 10);
 $warngeo = isset($_GET["warngeo"]) ? xssafe($_GET["warngeo"]) : "both";
 $ar = explode("x", $imgsize);
 $width = $ar[0];
@@ -69,11 +69,11 @@ $archive = isset($_GET["archive"]) ? xssafe($_GET["archive"]) : "";
 //if ($isarchive) { $loop = 0; }
 $a = time();
 if ($isarchive) {
-    $year = isset($_GET["year"]) ? intval($_GET["year"]) : date("Y", $a - $tzoff);
-    $month = isset($_GET["month"]) ? intval($_GET["month"]) : date("m", $a - $tzoff);
-    $day = isset($_GET["day"]) ? intval($_GET["day"]) : date("d", $a - $tzoff);
-    $hour = isset($_GET["hour"]) ? intval($_GET["hour"]) : date("H", $a - $tzoff);
-    $m = isset($_GET["minute"]) ? intval($_GET["minute"]) : date("i", $a - $tzoff);
+    $year = get_int404("year", date("Y", $a - $tzoff));
+    $month = get_int404("month", date("m", $a - $tzoff));
+    $day = get_int404("day", date("d", $a - $tzoff));
+    $hour = get_int404("hour", date("H", $a - $tzoff));
+    $m = get_int404("minute", date("i", $a - $tzoff));
 } else {
     $year = date("Y", $a - $tzoff);
     $month = date("m", $a - $tzoff);
@@ -400,7 +400,7 @@ EOF;
 
 $heightadd = 0;
 $maptitle = "IEM NEXRAD Mosaic Base Reflectivity";
-if (intval($loop) == 1 || intval($loop) == 2) {
+if ($loop === 1 || $loop === 2) {
     // Alternative 1, we want javascript looper!
     $urls = array();
     for ($i = 0; $i < $frames; $i++) {
@@ -436,7 +436,7 @@ if (intval($loop) == 1 || intval($loop) == 2) {
 EOM;
 } else {
     $imgi = 0;
-    include("warnings_plot.php");
+    require "warnings_plot.php";
     $content .= "<input type=\"hidden\" name=\"extents\" value=\"{$x0},{$y0},{$x1},{$y1}\">\n";
     $content .= "<input type=\"image\" name=\"img\" src=\"" . $url . "\" border=\"1\">\n";
     $content .= "</form>";

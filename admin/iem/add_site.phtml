@@ -1,10 +1,7 @@
 <?php
-/* 
-  * Add/Edit a site to the IEM Database 
-  * $Id: $:
-  */
-include("../../config/settings.inc.php");
-include("../../include/database.inc.php");
+//Add/Edit a site to the IEM Database 
+require_once "../../config/settings.inc.php";
+require_once "../../include/database.inc.php";
 
 $station = isset($_REQUEST["station"]) ? substr($_REQUEST["station"], 0, 10) : "";
 $sname = isset($_REQUEST["sname"]) ? $_REQUEST["sname"] : "";
