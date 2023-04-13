@@ -537,7 +537,7 @@ for ($i = 0; $row = pg_fetch_array($result); $i++) {
     if (!array_key_exists($key, $wA)) {
         $wA[$key] = "";
     }
-    $wA[$key] .= "<a href=\"warnings.phtml?archive=$archive&$baseuri?tz=$tz&cu=$cu&year=$year&month=$month&day=$day&hour=$hour&minute=$m&tzoff=$tzoff&sortdir=$sortdir&loop=$loop&sortcol=$sortcol&c=yes&lon0=" . $row["lon0"] . "&lat0=" . $row["lat0"] . "&warngeo=$warngeo\">" . $row["cname"] . "</a>, ";
+    $wA[$key] .= "<a href=\"warnings.phtml?archive=$archive&tz=$tz&cu=$cu&year=$year&month=$month&day=$day&hour=$hour&minute=$m&tzoff=$tzoff&sortdir=$sortdir&loop=$loop&sortcol=$sortcol&c=yes&lon0=" . $row["lon0"] . "&lat0=" . $row["lat0"] . "&warngeo=$warngeo\">" . $row["cname"] . "</a>, ";
 }
 
 /* Now we loop thru aggregated warnings */
