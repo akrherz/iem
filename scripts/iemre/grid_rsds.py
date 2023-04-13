@@ -110,9 +110,38 @@ def do_hrrr(ts):
     # So IEMRE is storing data from coast to coast, so we should be
     # aggressive about running for an entire calendar date
     now = ts.replace(hour=1)
+    gridlen = 0.0
     for _ in range(24):
         now += datetime.timedelta(hours=1)
         utcnow = now.astimezone(pytz.UTC)
+        # Try the newer f01 files, which have better data!
+        fn = utcnow.strftime(
+            "/mesonet/ARCHIVE/data/%Y/%m/%d/model/hrrr/%H/"
+            "hrrr.t%Hz.3kmf01.grib2"
+        )
+        if os.path.isfile(fn):
+            grbs = pygrib.open(fn)
+            selgrbs = grbs.select(name="Downward short-wave radiation flux")
+            if len(selgrbs) == 4:
+                # Goodie
+                for g in selgrbs:
+                    if total is None:
+                        total = g.values
+                        lat1 = g["latitudeOfFirstGridPointInDegrees"]
+                        lon1 = g["longitudeOfFirstGridPointInDegrees"]
+                        llcrnrx, llcrnry = LCC(lon1, lat1)
+                        nx = g["Nx"]
+                        ny = g["Ny"]
+                        dx = g["DxInMetres"]
+                        dy = g["DyInMetres"]
+                        xaxis = llcrnrx + dx * np.arange(nx)
+                        yaxis = llcrnry + dy * np.arange(ny)
+                        total = g.values
+                    else:
+                        total += g.values
+                gridlen += 4.0
+                continue
+
         fn = utcnow.strftime(
             "/mesonet/ARCHIVE/data/%Y/%m/%d/model/hrrr/%H/"
             "hrrr.t%Hz.3kmf00.grib2"
@@ -134,6 +163,7 @@ def do_hrrr(ts):
             LOG.info("Could not find SWDOWN in HRR %s", fn)
             continue
         g = grb[0]
+        gridlen += 1.0
         if total is None:
             total = g.values
             lat1 = g["latitudeOfFirstGridPointInDegrees"]
@@ -153,7 +183,7 @@ def do_hrrr(ts):
         return
 
     # We wanna store as W m-2, so we just average out the data by hour
-    total = total / 24.0
+    total = total / gridlen
 
     ds = iemre.get_grids(ts.date(), varnames="rsds")
     for i, lon in enumerate(iemre.XAXIS):
