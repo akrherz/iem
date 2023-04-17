@@ -494,6 +494,10 @@ $cwas = $map->getLayerByName("cwas");
 $cwas->status = in_array("cwas", $layers);
 $cwas->draw($map, $img);
 
+$cwsu = $map->getLayerByName("cwsu");
+$cwsu->status = in_array("cwsu", $layers);
+$cwsu->draw($map, $img);
+
 /* Buffered LSRs */
 if (in_array("bufferedlsr", $layers)) {
     $blsr = new LayerObj($map);

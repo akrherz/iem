@@ -44,7 +44,6 @@ $tzdict = array(
 );
 
 $tzoff = $tzdict[$tz];
-$autopilot = isset($_GET["autopilot"]) ? xssafe($_GET["autopilot"]) : 0;
 $filter = get_int404("filter", 0);
 $lsrwindow = get_int404("lsrwindow", "0");
 $lsrlook = isset($_GET["lsrlook"]) ? xssafe($_GET["lsrlook"]) : "+";
@@ -102,7 +101,7 @@ if ($isarchive && $basets < $wfo_filter_ts) {
     $filter = 0;
 }
 
-$nt = new NetworkTable("WFO", TRUE);
+$nt = new NetworkTable(Array("WFO", "RFC", "CWSU"), TRUE);
 $nt->table["NHC"] = array(
     "lat" => 25.75, "lon" => -80.38,
     "name" => "National Hurricane Center"
@@ -140,12 +139,14 @@ $jsextra = <<<EOM
 <script type="text/javascript" src="warnings.js?v=2"></script>
 <script src="/vendor/jquery-ui/{$JQUERYUI}/jquery-ui.min.js"></script>
 <script language="javascript" type="text/javascript" src="/vendor/jsani/2.84/jquery.jsani.min.js"></script>
+<script src="/vendor/select2/4.0.3/select2.min.js"></script>
 <script language="JavaScript1.2" type="text/javascript">
 EOM;
 $headextra = <<<EOF
 <link rel="stylesheet" href="/vendor/jquery-ui/{$JQUERYUI}/jquery-ui.min.css">
 <link rel="stylesheet" href="/vendor/jquery-ui/{$JQUERYUI}/jquery-ui.theme.min.css">
 <link rel="stylesheet" href="/vendor/jsani/2.84/jquery.jsani.min.css">
+<link rel="stylesheet" type="text/css" href="/vendor/select2/4.0.3/select2.min.css"/ >
 <link rel="stylesheet" type="text/css" href="warnings.css" />
 EOF;
 if (!$isarchive)
@@ -154,11 +155,8 @@ if (!$isarchive)
 $jsextra .= "</script>";
 $t->headextra = $headextra;
 
-if ($autopilot) $t->bodyextra = "onLoad=\"handsOff2();\"";
-
 $content = <<<EOF
 <form style="display: inline;" method="GET" name="myform" action="{$baseuri}">
-<input type="hidden" value="{$autopilot}" name="autopilot">
 <input type="hidden" value="{$site}" name="osite">
 <input type="hidden" name="tzoff" value="0">
 EOF;
@@ -180,10 +178,12 @@ $rtl = array(
 $rtlselect = "";
 foreach ($rtl as $key => $val) {
     $rtlselect .= sprintf(
-        "<br /><input name=\"layers[]\" type=\"checkbox\" "
-            . " value=\"%s\"%s>%s\n",
+        '<br /><input id="layer%s" name="layers[]" type="checkbox" '
+            .' value="%s"%s> <label for="layer%s">%s</label>',
+        $key,
         $key,
         (in_array($key, $layers)) ? ' checked="checked"' : '',
+        $key,
         $val
     );
 }
@@ -194,6 +194,7 @@ $ll = array(
     "hin0q" => "Hawaii NEXRAD (2010+)",
     "prn0q" => "Puerto Rico NEXRAD (2010+)",
     "warnings" => "Warnings",
+    "cwsu" => "CWSU Boundaries",
     "cwas" => "WFO Boundaries",
     "uscounties" => "US Counties",
     "interstates" => "US Interstates",
@@ -202,15 +203,17 @@ $ll = array(
 $lselect = "";
 foreach ($ll as $key => $val) {
     $lselect .= sprintf(
-        "<br /><input name=\"layers[]\" type=\"checkbox\" "
-            . " value=\"%s\"%s>%s\n",
+        '<br /><input id="layer%s" name="layers[]" type="checkbox" '
+            .' value="%s"%s> <label for="layer%s">%s</label>',
+        $key,
         $key,
         (in_array($key, $layers)) ? ' checked="checked"' : '',
+        $key,
         $val
     );
 }
 
-$wselect = "<select name=\"site\" style=\"width: 195px;\">";
+$wselect = '<select name="site" class="iemselect2" style="width: 100%">';
 foreach ($nt->table as $key => $value) {
     $wselect .= "<option value=\"$key\" ";
     if ($site == $key) $wselect .= "SELECTED";
@@ -321,7 +324,6 @@ $content .= <<<EOF
 <input type="submit" value="Time" style="background: #FF5EC4;" onClick="javascript: showControl('time-control'); return false;">
 <input type="submit" value="Options" style="background: #2EA7F2;" onClick="javascript: showControl('options-control'); return false;">
 <input type="submit" value="Update Map">
-<input type="submit" onClick="javascript: handsOff(); return false;" value="Auto Pilot">
 <br />
 <div id="layers-control" style="width: 450px; background: #73FA4D; display: none; z-index: 3; position: absolute; padding: 5px; margin: 2px; border: 2px solid #000;">
 
@@ -334,7 +336,7 @@ $content .= <<<EOF
 <div style="float: right;"><input type="submit" onClick="javascript: setLayerDisplay('layers-control', 'none'); return false;" value="Save Settings"><input type="submit" value="Save + Update Map"> </div>
 </div>
 <div id="locations-control" style="width: 450px; background: #F2FE5A; display: none; z-index: 3; position: absolute;  padding: 5px; margin: 2px; border: 2px solid #000;">
-<strong>NWS Office:</strong><br />
+<strong>NWS CWSU/WFO/RFC Office:</strong><br />
 {$wselect}
 
 <br />Selecting a different office will move the display to that office.
@@ -584,20 +586,17 @@ if (!$isarchive) {
     $content .= "<img src=\"/images/gisready.png\">Download <a href=\"/data/gis/shape/unproj/us/current_ww.zip\">GIS shapefile of current warnings</a> and/or <a href=\"/data/gis/images/4326/USCOMP/n0r_0.gtif.Z\">GeoTiff of NEXRAD base reflectivity</a>.";
 }
 $content .= <<<EOF
-<font size="-1">
 <p><b>Notes:</b>
 <ul>
  <li>This application is educational grade and should not be used operationally.</li>
- <li>Flash Flood Warnings (FFW) do not have VTEC IDs, so those columns are blank for FFWs.</li>
- <li>The status column is simply the status of the warning.  The warning is in 'NEW' state until a SVS is issued, then it goes to 'CON' for continued.</li>
- <li>Warnings identified by WFO are available after 29 Aug 2004.</li>
- <li>NEXRAD composite is available since 1 Aug 2003.</li>
+ <li>The status column is simply the status of the warning.
+ The warning is in 'NEW' state until a SVS is issued, then it goes to 'CON' for continued.</li>
+ <li>NEXRAD composite is available since 1 Jan 1997.</li>
  <li>Prior to the NWS adoption of VTEC, warnings were not expired nor canceled.</li>
  <li>SVS updates were added in 2005.</li>
  <li>LSR archive begins 1 Jan 2004.</li>
  <li>Archive of watches begins 1 Jan 1997.</li>
 </ul>
-</font>
 </div>
 EOF;
 $t->jsextra = $jsextra;

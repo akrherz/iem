@@ -257,6 +257,32 @@ LAYER
 END
 
 LAYER
+  NAME cwsu
+  STATUS OFF
+  TYPE POLYGON
+  DATA /mesonet/data/gis/static/shape/4326/nws/cwsu.shp
+  PROJECTION
+   "init=epsg:4326"
+  END
+  LABELITEM "ID"
+  CLASS
+    STYLE
+      OUTLINECOLOR 255 165 0
+    END
+    LABEL
+      MINFEATURESIZE 50
+      OUTLINECOLOR 0 0 0
+      COLOR 255 255 255
+      TYPE BITMAP
+      SIZE MEDIUM
+      POSITION CC
+      PARTIALS FALSE
+    END
+  END
+END
+
+
+LAYER
   CONNECTIONTYPE postgis
   NAME warnings0_c
   CONNECTION "user=nobody dbname=postgis host=iemdb-postgis.local"
