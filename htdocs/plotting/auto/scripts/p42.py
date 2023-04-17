@@ -1,30 +1,15 @@
 """
-This has a bug though as it would not catch end period streaks :/
+Based on hourly or better METAR reports, this
+plot displays the longest periods above or below a given temperature
+threshold.  There are plenty of caveats to this plot, including missing
+data periods and data during the 1960s that only has
+reports every three hours.  This plot also limits the number of lines
+drawn to 10, so if you hit the limit, please change the thresholds.  This
+plot also stops any computed streak when it encounters a data gap greater
+than three hours.
 
-with data as (
-  select valid, tmpf as val,
-  lag(tmpf) OVER (ORDER by valid ASC) as lag_val
-  from t2001 where station = 'DSM' and tmpf is not null
-  ORDER by valid ASC),
-agg as (
-  SELECT valid,
-  case
-    when lag_val >= 70 and val < 70
-    then 'down'
-    when lag_val < 70 and val >= 70
-    then 'up'
-    else null end as mydir from data),
-agg2 as (
-  SELECT valid, lag(valid) OVER (ORDER by valid ASC) as lag_valid, mydir
-  from agg WHERE mydir is not null),
-agg3 as (
-  SELECT rank() OVER (ORDER by valid ASC), * from agg2
-  where (valid - lag_valid) > '48 hours'::interval
-  and mydir = 'down' and
-  extract(year from valid) = extract(year from lag_valid))
-
-SELECT a.rank, d.valid, d.val from agg3 a, data d WHERE
-  d.valid <= a.valid and d.valid >= a.lag_valid ORDER by d.valid;
+<p>You can additionally set a secondary threshold which then makes this
+autoplot compute streaks within a range of values.</p>
 """
 import datetime
 
@@ -65,24 +50,7 @@ MDICT = {
 
 def get_description():
     """Return a dict describing how to call this plotter"""
-    desc = {}
-    desc["cache"] = 86400
-    desc["data"] = True
-    desc[
-        "description"
-    ] = """
-    Based on hourly or better METAR reports, this
-    plot displays the longest periods above or below a given temperature
-    threshold.  There are plenty of caveats to this plot, including missing
-    data periods and data during the 1960s that only has
-    reports every three hours.  This plot also limits the number of lines
-    drawn to 10, so if you hit the limit, please change the thresholds.  This
-    plot also stops any computed streak when it encounters a data gap greater
-    than three hours.
-
-    <p>You can additionally set a secondary threshold which then makes this
-    autoplot compute streaks within a range of values.</p>
-    """
+    desc = {"description": __doc__, "cache": 86400, "data": True}
     year_range = f"1928-{datetime.date.today().year}"
     desc["arguments"] = [
         dict(
@@ -233,7 +201,8 @@ def plotter(fdict):
     if "yrange" in ctx:
         y1, y2 = ctx["yrange"].split("-")
         year_limiter = (
-            f" and valid >= '{int(y1)}-01-01' and valid < '{int(y2)}-01-01' "
+            f" and valid >= '{int(y1)}-01-01' and "
+            f"valid < '{int(y2) + 1}-01-01' "
         )
     if month == "all":
         months = range(1, 13)
