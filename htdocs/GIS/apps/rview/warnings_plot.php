@@ -48,6 +48,9 @@ if ( in_array("uscounties", $layers) ){
 if ( in_array("cwas", $layers) ){
     $url .= "layers[]=cwas&";
 }
+if ( in_array("cwsu", $layers) ){
+    $url .= "layers[]=cwsu&";
+}
 if ( in_array("watches", $layers) ){
     $url .= "layers[]=watches&";
 }
