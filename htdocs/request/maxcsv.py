@@ -248,7 +248,7 @@ def do_iowa_azos(date, itoday=False):
                 "precip168",
                 "precip720",
             ]:
-                df[col] = df2[col]
+                df[col] = df2[col].round(2)
                 # make sure the new column is >= precip
                 df.loc[df[col] < df["precip"], col] = df["precip"]
     df = df.reset_index()
