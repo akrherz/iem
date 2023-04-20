@@ -20,7 +20,7 @@ def hourly_process(cursor, station, hour, mdf, hdf):
     row = pd.Series(
         {"station": station, "valid": hour + datetime.timedelta(hours=1)}
     )
-    if row["valid"] not in hdf.index:
+    if row["valid"] not in hdf.index or mdf.empty:
         return
     lastob = mdf.iloc[-1]
     svobs = mdf[~pd.isna(mdf["sv_t16_qc"])]
