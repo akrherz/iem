@@ -154,6 +154,11 @@ Highcharts.chart('"""
             type: 'scatter',
             zoomType: 'xy'
         },
+        plotOptions: {
+            scatter: {
+                turboThreshold: 0
+            }
+        },
         title: {
             text: '%s'
         },
