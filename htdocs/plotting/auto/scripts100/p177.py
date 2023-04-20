@@ -292,48 +292,57 @@ def make_daily_rad_plot(ctx):
         ctx["_nt"].sts[ctx["station"]]["lat"],
         ctx["_nt"].sts[ctx["station"]]["elevation"],
     )
+    maxes = pd.DataFrame({"tmax": theory, "jday": range(1, 366)})
 
-    icursor = ctx["pgconn"].cursor(cursor_factory=psycopg2.extras.DictCursor)
-    icursor.execute(
-        "SELECT valid, slrkj_tot_qc / 1000. from sm_daily where station = %s "
-        "and valid >= %s and valid <= %s and slrkj_tot_qc > 0 and "
-        "slrkj_tot_qc < 40000 ORDER by valid ASC",
-        (
-            ctx["station"],
-            ctx["sts"].strftime("%Y-%m-%d"),
-            ctx["ets"].strftime("%Y-%m-%d"),
-        ),
-    )
-    dates = []
-    vals = []
-    tmax = []
-    if icursor.rowcount == 0:
+    with get_sqlalchemy_conn("isuag") as conn:
+        df = pd.read_sql(
+            """
+            SELECT valid, slrkj_tot_qc / 1000. as rad from sm_daily
+            where station = %s and valid >= %s and valid <= %s
+            ORDER by valid ASC
+            """,
+            conn,
+            params=(
+                ctx["station"],
+                ctx["sts"].strftime("%Y-%m-%d"),
+                ctx["ets"].strftime("%Y-%m-%d"),
+            ),
+            parse_dates="valid",
+            index_col="valid",
+        )
+    if df.empty:
         raise NoDataFound("No Data Found, sorry")
-    for row in icursor:
-        dates.append(row[0])
-        vals.append(row[1])
-        jday = min(int(row[0].strftime("%j")), 364)
-        tmax.append(theory[jday])
-
-    df = pd.DataFrame(dict(dates=dates, vals=vals, jday=jday, tmax=tmax))
+    df = (
+        df.reindex(pd.date_range(df.index[0], df.index[-1], freq="1D"))
+        .reset_index()
+        .rename(columns={"index": "valid"})
+    )
+    df["jday"] = df["valid"].dt.strftime("%j").astype(int)
+    df = df.join(maxes, on="jday", lsuffix="_")
 
     title = (
-        f"ISUSM Station: {ctx['_sname']} Timeseries\n" "Daily Solar Radiation"
+        f"ISUSM Station: {ctx['_sname']} Timeseries\n Daily Solar Radiation"
     )
     (fig, ax) = figure_axes(apctx=ctx, title=title)
     ax.bar(
-        dates,
-        vals,
+        df["valid"].values,
+        df["rad"].values,
         fc="tan",
         ec="brown",
         zorder=2,
         align="center",
         label="Observed",
     )
-    ax.plot(dates, tmax, label=r"Modelled Max $\tau$ =0.75", color="k", lw=1.5)
+    ax.plot(
+        df["valid"].values,
+        df["tmax"].values,
+        label=r"Modelled Max $\tau$ =0.75",
+        color="k",
+        lw=1.5,
+    )
     ax.grid(True)
     ax.xaxis.set_major_formatter(mdates.DateFormatter("%-d %b\n%Y"))
-    interval = int(len(dates) / 7.0 + 1)
+    interval = int(len(df.index) / 7.0 + 1)
     ax.xaxis.set_major_locator(mdates.DayLocator(interval=interval))
     ax.set_ylabel("Solar Radiation $MJ m^{-2}$")
     ax.set_ylim(0, 38)
@@ -1040,6 +1049,7 @@ if __name__ == "__main__":
     plotter(
         {
             "station": "BOOI4",
-            "opt": "9",
+            "opt": "4",
+            "sts": "2012-01-01 0000",
         }
     )

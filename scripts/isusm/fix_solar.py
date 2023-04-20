@@ -67,7 +67,8 @@ def fix_nulls():
     cursor.execute(
         """
         SELECT station, valid from sm_daily where (slrkj_tot_qc is null or
-        slrkj_tot_qc = 0) and valid > '2019-04-14' ORDER by valid ASC
+        slrkj_tot_qc < 0.1 or slrkj_tot_qc > 35000)
+        and valid > '2019-04-14' ORDER by valid ASC
     """
     )
     for row in cursor:
@@ -83,14 +84,14 @@ def fix_nulls():
         )
         row2 = cursor2.fetchone()
         if row2[0] is None or row2[0] < 0.01:
-            LOG.info(
+            LOG.warning(
                 "%s %s summed %s hourly for solar, using IEMRE",
                 station,
                 v1.strftime("%d %b %Y"),
                 row2[0],
             )
             if station not in nt.sts:
-                LOG.info("unknown station %s metadata, skipping", station)
+                LOG.warning("unknown station %s metadata, skipping", station)
                 continue
             # Go fetch me the IEMRE value!
             uri = (
@@ -100,11 +101,11 @@ def fix_nulls():
             )
             res = requests.get(uri, timeout=60)
             if res.status_code != 200:
-                LOG.info("Fix solar got %s from %s", res.status_code, uri)
+                LOG.warning("Fix solar got %s from %s", res.status_code, uri)
                 continue
             j = json.loads(res.content)
             if not j["data"]:
-                LOG.info(
+                LOG.warning(
                     "fix solar: No data for %s %s",
                     station,
                     v1.strftime("%d %b %Y"),
@@ -114,13 +115,16 @@ def fix_nulls():
         if row2[0] is None or row2[0] < 0.01:
             LOG.info("Triple! Failure %s %s", station, v1.strftime("%d %b %Y"))
             continue
-        LOG.info(
+        LOG.warning(
             "%s %s -> %.2f (%s obs)",
             station,
             v1.strftime("%d %b %Y"),
             row2[0],
             row2[1],
         )
+        if row2[0] > 35000:
+            LOG.warning("New value %s too large, skipping", row2[0])
+            continue
         cursor2.execute(
             "UPDATE sm_daily SET slrkj_tot_qc = %s "
             "WHERE station = %s and valid = %s",
