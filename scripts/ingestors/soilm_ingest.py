@@ -696,7 +696,7 @@ def main(argv):
 
     if EVENTS["reprocess_solar"]:
         LOG.info("Calling fix_solar.py with no args")
-        subprocess.call(["python", "../isusum/fix_solar.py"])
+        subprocess.call(["python", "../isusm/fix_solar.py"])
     if EVENTS["reprocess_temps"]:
         LOG.info("Calling fix_temps.py with no args")
         subprocess.call(["python", "../isuag/fix_temps.py"])
