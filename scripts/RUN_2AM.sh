@@ -2,10 +2,8 @@
 DD=$(date +%d)
 DOW=$(date +%u)
 
-cd isuag
+cd isusm
 bash run_plots.sh
-
-cd ../isusm
 python backfill_summary.py &
 if [ $DD -eq "07" ]
     then

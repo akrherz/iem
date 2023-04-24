@@ -160,7 +160,7 @@ def main(argv):
 
     mp = MapPlot(
         sector="iowa",
-        title=f"Average 4 inch Depth Soil Temperatures for {ts:%b %d, %Y}",
+        title=f"{ts:%b %d, %Y} Avg [(Hi+Lo)/2] Daily 4 inch Depth Soil Temp",
         subtitle=(
             "County est. based on bias adj. "
             "NWS NAM Model (black numbers), "

@@ -18,7 +18,10 @@ $t->content = <<<EOF
 
 <p>This page presents daily soil temperature analysis maps.  The left hand
 column plots combine ISU Soil Moisture Network observations and bias corrected
-NWS NAM forecast model analyses to produce a higher resolution plot.  The right
+NWS NAM forecast model analyses to produce a higher resolution plot. The values
+plotted represent a daily average with the ISUSM stations being averaged between the
+daily high and low value and the NAM Model representing an average of six hour
+interval data. The right
 hand plots are simple GFS forecast model outputs without any bias correction.</p>
 
 <p><strong>Links:</strong> <a class="btn btn-default" href="/timemachine/#57.0">Archive of This Map</a>
