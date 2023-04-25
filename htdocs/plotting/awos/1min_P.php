@@ -121,9 +121,7 @@ $graph = new Graph(600,300,"example1");
 $graph->SetScale("textlin");
 $graph->SetY2Scale("lin", 0, $accumP + 1.00);
 $graph->img->SetMargin(55,40,55,60);
-//$graph->xaxis->SetFont(FONT1,FS_BOLD);
 $graph->xaxis->SetTickLabels($xlabel);
-//$graph->xaxis->SetTextLabelInterval(60);
 $graph->xaxis->SetTextTickInterval(60);
 $graph->xaxis->SetLabelAngle(90);
 $graph->title->Set($nt->table[$station]['name'] ." Time Series");
@@ -139,17 +137,13 @@ $graph->yaxis->SetColor("black");
 $graph->yscale->SetGrace(10);
 $graph->y2axis->SetColor("blue");
 
-$graph->title->SetFont(FF_FONT1,FS_BOLD,16);
-
 $graph->yaxis->SetTitle("Altimeter [mb]");
 $graph->y2axis->SetTitle("Accumulated Precipitation [inches]");
 
-$graph->yaxis->title->SetFont(FF_FONT1,FS_BOLD,12);
 $graph->xaxis->SetTitle("Valid Local Time");
 $graph->xaxis->SetTitleMargin(30);
 $graph->yaxis->SetTitleMargin(43);
 //$graph->y2axis->SetTitleMargin(28);
-$graph->xaxis->title->SetFont(FF_FONT1,FS_BOLD,12);
 $graph->xaxis->SetPos("min");
 
 // Create the linear plot
@@ -170,7 +164,6 @@ $lineplot2->SetColor("blue");
 $t1 = new Text("Dups: ".$dups ." Missing: ".$missing );
 $t1->SetPos(0.4,0.95);
 $t1->SetOrientation("h");
-$t1->SetFont(FF_FONT1,FS_BOLD);
 //$t1->SetBox("white","black",true);
 $t1->SetColor("black");
 $graph->AddText($t1);

@@ -85,16 +85,13 @@ $graph->xgrid->SetLineStyle('dashed');
 $graph->xgrid->SetColor('gray');
 
 $graph->xaxis->SetFont(FF_FONT1, FS_NORMAL);
-$graph->xaxis->title->SetFont(FF_GEORGIA, FS_BOLD, 12);
 $graph->xaxis->SetLabelAngle(90);
 $graph->xaxis->SetPos("min");
 $graph->xaxis->SetLabelFormatString("h A", true);
 $graph->xaxis->SetTitleMargin(35);
 
 $graph->tabtitle->Set($vars[$pvar]["details"]);
-$graph->tabtitle->SetFont(FF_GEORGIA, FS_BOLD, 14);
 
-$graph->yaxis->title->SetFont(FF_GEORGIA, FS_BOLD, 10);
 $graph->xaxis->SetTitle("Timeseries for {$ts_lbl}");
 $graph->yaxis->SetTitle($vars[$pvar]["details"] . " [" . $vars[$pvar]["units"] . "]");
 $graph->yaxis->SetTitleMargin(45);

@@ -43,12 +43,9 @@ $graph->SetScale("datelin");
 $graph->SetY2Scale("lin", 0, 1000);
 
 $graph->img->SetMargin(65, 55, 45, 60);
-//$graph->xaxis->SetFont(FONT1,FS_BOLD);
-//$graph->xaxis->SetTextLabelInterval(60);
 
 $graph->xaxis->SetLabelAngle(90);
 $graph->yaxis->scale->ticks->Set(2, 1);
-//$graph->yscale->SetGrace(10);
 $graph->title->Set("Temperatures & Solar Radiation for " . $cities[$station]['name']);
 $graph->subtitle->Set($titleDate);
 
@@ -57,17 +54,14 @@ $graph->legend->Pos(0.15, 0.11);
 
 //[DMF]$graph->y2axis->scale->ticks->Set(100,25);
 
-$graph->title->SetFont(FF_FONT1, FS_BOLD, 14);
 $graph->yaxis->SetTitle("Temperature [F]");
 
 $graph->y2axis->SetTitle("Solar Radiation [W m**-2]");
 
-$graph->yaxis->title->SetFont(FF_FONT1, FS_BOLD, 12);
 $graph->xaxis->SetTitle("Valid Local Time");
 $graph->xaxis->SetTitleMargin(30);
 $graph->y2axis->SetTitleMargin(40);
 $graph->yaxis->SetTitleMargin(40);
-$graph->xaxis->title->SetFont(FF_FONT1, FS_BOLD, 12);
 $graph->xaxis->SetPos("min");
 
 // Create the linear plot
