@@ -299,8 +299,8 @@ $( '#{dpname}' ).datepicker({{
     dateFormat: "mm/dd",
     altFormat: "mmdd",
     altField: "#alt_{dpname}",
-    maxDate: new Date('{_todate(vmax)}'),
-    minDate: new Date('{_todate(vmin)}')
+    endDate: new Date('{_todate(vmax)}'),
+    startDate: new Date('{_todate(vmin)}')
 }});
 $("#{dpname}").datepicker(
     'setDate', new Date('{_todate(value)}')
@@ -325,8 +325,8 @@ $( '#{dpname}' ).datepicker({{
     changeMonth: true,
     changeYear: true,
     dateFormat: "yy/mm/dd",
-    maxDate: new Date('{vmax}'),
-    minDate: new Date('{vmin}')
+    endDate: new Date('{vmax}'),
+    startDate: new Date('{vmin}')
 }});
 $("#{dpname}").datepicker(
     'setDate', new Date('{value}')
@@ -351,8 +351,8 @@ $( "#{dpname}" ).flatpickr({{
     time_24hr: true,
     allowInput: true,
     defaultDate: moment('{value}', 'YYYY/MM/DD HHmm').toDate(),
-    maxDate: moment('{vmax}', 'YYYY/MM/DD HHmm').toDate(),
-    minDate: moment('{arg['min']}', 'YYYY/MM/DD HHmm').toDate()}});
+    endDate: moment('{vmax}', 'YYYY/MM/DD HHmm').toDate(),
+    startDate: moment('{arg['min']}', 'YYYY/MM/DD HHmm').toDate()}});
     """
     return (
         f"<input type=\"text\" name=\"{arg['name']}\" id=\"{dpname}\" "

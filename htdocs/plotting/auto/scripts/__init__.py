@@ -125,6 +125,10 @@ daily_opts = [
         "label": "Growing Degree Day Periods for One Year by Planting Date",
     },
     {
+        "id": 240,
+        "label": "Growing Degree Day Obs + Near Term Forecast",
+    },
+    {
         "id": 204,
         "label": "Heatmap of Daily / Trailing Daily Temperature / Precip",
     },
