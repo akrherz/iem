@@ -15,7 +15,6 @@ $year = get_int404("year", date("Y", time() - 86400));
 $month = get_int404("month", date("m", time() - 86400));
 $day = get_int404("day", date("d", time() - 86400));
 
-
   $myTime = strtotime($year."-".$month."-".$day);
 
 
@@ -118,17 +117,12 @@ for ($j=0; $j<24; $j++){
   $xlabel[$j*60] = $xpre[$j];
 }
 
-
-
-
 // Create the graph. These two calls are always required
 $graph = new Graph(600,300,"example1");
 $graph->SetScale("textlin",0, 360);
 $graph->SetY2Scale("lin");
 $graph->img->SetMargin(55,40,55,60);
-//$graph->xaxis->SetFont(FONT1,FS_BOLD);
 $graph->xaxis->SetTickLabels($xlabel);
-//$graph->xaxis->SetTextLabelInterval(60);
 $graph->xaxis->SetTextTickInterval(60);
 $graph->xaxis->SetLabelAngle(90);
 $graph->title->Set($nt->table[$station]['name'] ." Time Series");
@@ -142,17 +136,14 @@ $graph->yaxis->scale->ticks->Set(90,15);
 $graph->yaxis->SetColor("blue");
 $graph->y2axis->SetColor("red");
 
-$graph->title->SetFont(FF_FONT1,FS_BOLD,16);
 
 $graph->yaxis->SetTitle("Wind Direction");
 $graph->y2axis->SetTitle("Wind Speed [MPH]");
 
-$graph->yaxis->title->SetFont(FF_FONT1,FS_BOLD,12);
 $graph->xaxis->SetTitle("Valid Local Time");
 $graph->xaxis->SetTitleMargin(30);
 $graph->yaxis->SetTitleMargin(30);
 //$graph->y2axis->SetTitleMargin(28);
-$graph->xaxis->title->SetFont(FF_FONT1,FS_BOLD,12);
 $graph->xaxis->SetPos("min");
 
 // Create the linear plot
@@ -172,7 +163,6 @@ $sp1->mark->SetWidth(3);
 $t1 = new Text("Dups: ".$dups ." Missing: ".$missing );
 $t1->SetPos(0.4,0.95);
 $t1->SetOrientation("h");
-$t1->SetFont(FF_FONT1,FS_BOLD);
 //$t1->SetBox("white","black",true);
 $t1->SetColor("black");
 $graph->AddText($t1);

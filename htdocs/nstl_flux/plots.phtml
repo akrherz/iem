@@ -6,9 +6,9 @@ $t = new MyView();
 require_once "../../include/forms.php";
 require_once "../../include/database.inc.php";
 
-$year = isset($_GET["year"]) ? intval($_GET["year"]) : date("Y", time() - 86400);
-$month = isset($_GET["month"]) ? intval($_GET["month"]) : date("m", time() - 86400);
-$day = isset($_GET["day"]) ? intval($_GET["day"]) : date("d", time() - 86400);
+$year = get_int404("year", date("Y", time() - 86400));
+$month = get_int404("month", date("m", time() - 86400));
+$day = get_int404("day", date("d", time() - 86400));
 $pvar1 = isset($_GET["pvar1"]) ? xssafe($_GET["pvar1"]) : "fc_wpl";
 $pvar2 = isset($_GET["pvar2"]) ? xssafe($_GET["pvar2"]) : "le_wpl";
 $pvar3 = isset($_GET["pvar3"]) ? xssafe($_GET["pvar3"]) : "hs";

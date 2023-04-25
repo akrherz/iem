@@ -131,17 +131,11 @@ if ($dwpf[0] == "") {
     $dwpf[0] = 0;
 }
 
-
-
-
-
 // Create the graph. These two calls are always required
 $graph = new Graph(600, 300, "example1");
 $graph->SetScale("textlin", $min_yaxis - 4, $max_yaxis + 4);
 $graph->img->SetMargin(55, 40, 55, 60);
-//$graph->xaxis->SetFont(FONT1,FS_BOLD);
 $graph->xaxis->SetTickLabels($xlabel);
-//$graph->xaxis->SetTextLabelInterval(60);
 $graph->xaxis->SetTextTickInterval(60);
 
 $graph->xaxis->SetLabelAngle(90);
@@ -152,17 +146,11 @@ $graph->subtitle->Set($titleDate);
 $graph->legend->SetLayout(LEGEND_HOR);
 $graph->legend->Pos(0.01, 0.07);
 
-
-
-$graph->title->SetFont(FF_FONT1, FS_BOLD, 16);
-
 $graph->yaxis->SetTitle("Temperature [F]");
 
-$graph->yaxis->title->SetFont(FF_FONT1, FS_BOLD, 12);
 $graph->xaxis->SetTitle("Valid Local Time");
 $graph->xaxis->SetTitleMargin(30);
 //$graph->yaxis->SetTitleMargin(48);
-$graph->xaxis->title->SetFont(FF_FONT1, FS_BOLD, 12);
 $graph->xaxis->SetPos("min");
 
 // Create the linear plot
@@ -181,8 +169,6 @@ $lineplot2->SetColor("blue");
 $t1 = new Text("Dups: " . $dups . " Missing: " . $missing);
 $t1->SetPos(0.4, 0.95);
 $t1->SetOrientation("h");
-$t1->SetFont(FF_FONT1, FS_BOLD);
-//$t1->SetBox("white","black",true);
 $t1->SetColor("black");
 $graph->AddText($t1);
 
