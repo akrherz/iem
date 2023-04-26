@@ -2,6 +2,8 @@
 
 python cache/cache_autoplots.py &
 
+python dl/download_rtma_ru.py &
+
 cd gfs
 # Le Sigh on paths
 python gfs2iemre.py $(date -u --date '6 hours ago' +'%Y %m %d %H') &

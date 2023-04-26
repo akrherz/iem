@@ -107,6 +107,10 @@ on this archive and how it is made available.</p>
 </div><div class="col-md-6 col-sm-6">
 
 <h3>Raw Data</h3>
+
+<p><a href="schema.php">Directory schema</a> details for the per-UTC date
+<a href="/archive/data/">IEM Archive</a> and <a href="https://mtarchive.geol.iastate.edu">MTArchive</a>.</p>
+
 <ul>
  <li>BUFKIT archives
   <br /><a href="/archive/data/">Iowa Only</a> The general IEM data archive

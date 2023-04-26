@@ -49,6 +49,8 @@ ROOT={$u}
    |- Pre-generated NEXRAD imagery w/ warnings and watches Kansas
 |- lotrad
    |- Pre-generated NEXRAD imagery w/ warnings and watches Illinois
+| - model
+   |- rtma selected gribs from the RTMA and RTMA-RU (Rapid Update)
 |- raw
    |- Raw datafiles for the AWOS and RWIS network
 |- srad
