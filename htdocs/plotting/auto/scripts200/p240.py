@@ -2,6 +2,15 @@
 This autoplot combines growing degree day observations along with a near
 term forecast from the deterministic GFS and NWS NDFD models.
 
+<p>The primary source of observations for this plot is from the NWS COOP
+network, but most of those observations are approximately 7 AM to 7 AM totals
+whereas the forecast data is approximately a calendar date.  For sites that
+report morning data, the observations are backed up one day to better align
+with the forecast.  This then creates a problem when running the app in the
+late afternoon/evening when the first forecast day is tomorrow and there
+is no observation for today yet. This is generally a thorny issue and
+why we can't have nice things.
+
 <p>This app uses <a href="/plotting/auto/?q=9">Autoplot #9</a> to generate the
 GDD Climatology.
 """
@@ -43,7 +52,7 @@ def get_obsdf(ctx):
         df = pd.read_sql(
             text(
                 """
-                SELECT day, gddxx(50, 86, high, low) as gdd
+                SELECT day, gddxx(50, 86, high, low) as gdd, temp_hour
                 from alldata
                 WHERE station = :station and day >= :sts
                 ORDER by day ASC
@@ -65,6 +74,12 @@ def plotter(fdict):
     ctx = get_autoplot_context(fdict, get_description())
 
     df = get_obsdf(ctx)
+    # Account for morning obs
+    is_morning = False
+    if not df.empty:
+        cnt = len(df[(df["temp_hour"] > 1) & (df["temp_hour"] < 12)].index)
+        if cnt / len(df.index) > 0.5:
+            is_morning = True
     req = requests.get(
         "http://mesonet.agron.iastate.edu/json/climodat_dd.py?"
         f"station={ctx['station']}&gddbase=50&gddceil=86&",
@@ -73,6 +88,11 @@ def plotter(fdict):
     data = req.json()
     gfsdf = pd.DataFrame(data["gfs"])
     gfsdf["date"] = pd.to_datetime(gfsdf["date"])
+    if is_morning:
+        if not df.empty and df.index.values[-1] == gfsdf["date"].values[0]:
+            df["gdd"] = df["gdd"].shift(-1)
+        else:
+            is_morning = False
     gfsdf = gfsdf.set_index("date")
     nwsdf = pd.DataFrame(data["ndfd"])
     nwsdf["date"] = pd.to_datetime(nwsdf["date"])
@@ -94,8 +114,8 @@ def plotter(fdict):
     )
     try:
         climodf = pd.read_csv(url, dtype={"sday": str}).set_index("sday")
-    except Exception:
-        raise NoDataFound("Failed to load climatology, aborting, sorry.")
+    except Exception as exp:
+        raise NoDataFound("Failed to load climatology, aborting.") from exp
     df = df.merge(climodf, left_on="sday", right_index=True)
 
     xaxis = df.index.values
@@ -153,8 +173,10 @@ def plotter(fdict):
     ax2.plot(xaxis, df["gdd"].cumsum(), label="Obs", color="g", zorder=5)
     ax2.plot(xaxis, df["mean"].values, color="k")
     ax2.set_ylabel("Accumulated GDDs (lines)")
+    if is_morning:
+        ax.set_xlabel("* Observations shifted one day due to morning reports")
     return fig, df
 
 
 if __name__ == "__main__":
-    plotter({})
+    plotter({"station": "IA0203"})
