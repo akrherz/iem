@@ -51,7 +51,7 @@ $lsrlook = isset($_GET["lsrlook"]) ? xssafe($_GET["lsrlook"]) : "+";
 $site = isset($_GET["site"]) ? strtoupper(substr($_GET["site"], 0, 4)) : "DMX";
 $osite = isset($_GET["osite"]) ? substr($_GET["osite"], 0, 4) : "DMX";
 $sortcol = isset($_GET["sortcol"]) ? substr(xssafe($_GET["sortcol"]), 0, 20) : "issued";
-$sortdir = get_int404("sortdir", 0);
+$sortdir = isset($_GET["sortdir"]) ? xssafe($_GET["sortdir"]) : "DESC";
 $lon0 = isset($_GET["lon0"]) ? floatval($_GET["lon0"]) : 0;
 $lat0 = isset($_GET["lat0"]) ? floatval($_GET["lat0"]) : 0;
 $zoom = get_int404("zoom", 250);
@@ -306,7 +306,8 @@ if ($cu == 1) {
 }
 $pradio .= ">Convective Only";
 
-$ar = array(0 => "DESC", 1 => "ASC");
+$ar = array("DESC" => "DESC", "ASC" => "ASC");
+if (!array_key_exists($sortdir, $ar)){ $sortdir = "DESC"; }
 $sdselect = make_select("sortdir", $sortdir, $ar);
 
 $yselect = yearSelect(2003, $year, "year");
@@ -458,8 +459,6 @@ $scols = array("wfo", "phenomena", "cname", "expire", "sname", "issue", "updated
 if (!in_array($sortcol, $scols)) {
     $sortcol = "issue";
 }
-if ($sortdir == 1) $sortdir = "ASC";
-else $sortdir = "DESC";
 
 $wtable = "warnings_$year";
 $tsextra = "CURRENT_TIMESTAMP and issue < CURRENT_TIMESTAMP ";
