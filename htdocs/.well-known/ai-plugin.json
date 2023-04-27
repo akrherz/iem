@@ -1,0 +1,18 @@
+{
+    "schema_version": "v1",
+    "name_for_human": "IEM Plugin",
+    "name_for_model": "iem",
+    "description_for_human": "Plugin for working with IEM data.",
+    "description_for_model": "Plugin for working with IEM data.",
+    "auth": {
+        "type": "none"
+    },
+    "api": {
+        "type": "openapi",
+        "url": "https://mesonet.agron.iastate.edu/api/1/openapi.json",
+        "is_user_authenticated": false
+    },
+    "logo_url": "https://mesonet.agron.iastate.edu/images/logo_small.png",
+    "contact_email": "akrherz@iastate.edu",
+    "legal_info_url": "https://mesonet.agron.iastate.edu/disclaimer.php"
+}
