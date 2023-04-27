@@ -183,6 +183,19 @@ def main(argv):
         "/mesonet/data/iemre/gfs_current_new.nc",
         "/mesonet/data/iemre/gfs_current.nc",
     )
+    # Archive this as we need it for various projects
+    cmd = [
+        "pqinsert",
+        "-i",
+        "-p",
+        (
+            f"data a {now:%Y%m%d%H%M} bogus "
+            f"model/gfs/gfs_{now:%Y%m%d%H}_iemre.nc nc"
+        ),
+        "/mesonet/data/iemre/gfs_current.nc",
+    ]
+    subprocess.call(cmd)
+
     # Generate 4inch plots based on 6z GFS
     if now.hour == 6:
         subprocess.call(["python", "gfs_4inch.py"])
