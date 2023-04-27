@@ -10,9 +10,57 @@ import subprocess
 import tempfile
 
 import requests
+import pygrib
 from pyiem.util import exponential_backoff, logger, utc
 
 LOG = logger()
+ARCHIVE_THRES = utc() - datetime.timedelta(days=3)
+
+
+def fetch_aws(dt):
+    """Get the data via AWS PDS."""
+    localfn = (
+        f"/mesonet/ARCHIVE/data/{dt:%Y/%m/%d}/model/rtma/{dt:%H}/"
+        f"rtma2p5_ru.t{dt:%H%M}z.2dvaranl_ndfd.grb2"
+    )
+    if os.path.isfile(localfn):
+        LOG.info("Skipping as we have data %s", localfn)
+        return
+
+    b = "_" if dt > utc(2021, 9, 10) else "-"
+    url = (
+        f"https://s3.amazonaws.com/noaa-rtma-pds/rtma2p5{b}ru.{dt:%Y%m%d}/"
+        f"rtma2p5_ru.t{dt:%H%M}z.2dvarges_ndfd.grb2"
+    )
+    req = exponential_backoff(requests.get, url, timeout=30)
+    if req is None or req.status_code != 200:
+        LOG.info("failed to get idx: %s", url)
+        return
+    with tempfile.NamedTemporaryFile("wb", delete=False) as tmpfp:
+        tmpfp.write(req.content)
+        del req
+    grbs = pygrib.open(tmpfp.name)
+    with tempfile.NamedTemporaryFile("wb", delete=False) as tmpfp2:
+        tmpfp2.write(grbs.select(name="2 metre temperature")[0].tostring())
+        grbs.seek(0)
+        tmpfp2.write(
+            grbs.select(name="2 metre dewpoint temperature")[0].tostring()
+        )
+    cmd = [
+        "pqinsert",
+        "-i",
+        "-p",
+        (
+            f"data a {dt:%Y%m%d%H%M} bogus model/rtma/"
+            f"{dt:%H}/{localfn.split('/')[-1]} grib2"
+        ),
+        tmpfp2.name,
+    ]
+    LOG.info(" ".join(cmd))
+    subprocess.call(cmd)
+
+    os.unlink(tmpfp.name)
+    os.unlink(tmpfp2.name)
 
 
 def fetch(dt):
@@ -89,7 +137,7 @@ def main(argv):
             valid = (ts - datetime.timedelta(hours=hroffset)).replace(
                 minute=minute
             )
-            fetch(valid)
+            (fetch if valid > ARCHIVE_THRES else fetch_aws)(valid)
 
 
 if __name__ == "__main__":

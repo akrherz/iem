@@ -233,6 +233,10 @@ daily_opts = [
         "id": 110,
         "label": "Precipitation Frequency Bins by Climate Week (climodat)",
     },
+    {
+        "id": 241,
+        "label": "Real-Time Mesoscale Analysis (RTMA) Max/Min Air Temperature",
+    },
     {"id": 43, "label": "Recent (Past 2-3 Days) Timeseries (Meteogram)"},
     {"id": 157, "label": "Relative Humidity Max/Min/Avg by Day of Year"},
     {"id": 62, "label": "Snow Depth"},
