@@ -54,8 +54,7 @@ def get_obsdf(ctx):
                 """
                 SELECT day, gddxx(50, 86, high, low) as gdd, temp_hour
                 from alldata
-                WHERE station = :station and day >= :sts
-                ORDER by day ASC
+                WHERE station = :station and day >= :sts ORDER by day ASC
             """
             ),
             conn,
@@ -159,16 +158,31 @@ def plotter(fdict):
     ax2.plot(
         xaxis,
         df["gddgfs"].combine_first(df["gdd"]).cumsum(),
+        color="white",
+        zorder=4,
+        lw=4,
+    )
+    ax2.plot(
+        xaxis,
+        df["gddgfs"].combine_first(df["gdd"]).cumsum(),
         color="b",
-        label="GFS",
-        zorder=3,
+        zorder=5,
+        lw=2,
+    )
+
+    ax2.plot(
+        xaxis,
+        df["gddndfd"].combine_first(df["gdd"]).cumsum(),
+        color="white",
+        zorder=4,
+        lw=4,
     )
     ax2.plot(
         xaxis,
         df["gddndfd"].combine_first(df["gdd"]).cumsum(),
         color="r",
-        label="NWS NDFD",
-        zorder=4,
+        zorder=5,
+        lw=2,
     )
     ax2.plot(xaxis, df["gdd"].cumsum(), label="Obs", color="g", zorder=5)
     ax2.plot(xaxis, df["mean"].values, color="k")
