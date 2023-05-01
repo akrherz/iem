@@ -1,4 +1,13 @@
-"""Daily avg wind speeds"""
+"""
+This plot displays daily average wind speeds for
+a given year and month of your choice.  These values are computed by the
+IEM using available observations.  Some observation sites explicitly
+produce an average wind speed, but that is not considered for this plot.
+You can download daily summary data
+<a href="/request/daily.phtml" class="alert-link">here</a>.
+The average wind direction
+is computed by vector averaging of the wind speed and direction reports.
+"""
 import datetime
 
 import numpy as np
@@ -24,20 +33,7 @@ XREF_UNITS = {
 
 def get_description():
     """Return a dict describing how to call this plotter"""
-    desc = {}
-    desc["data"] = True
-    desc["cache"] = 86400
-    desc[
-        "description"
-    ] = """This plot displays daily average wind speeds for
-    a given year and month of your choice.  These values are computed by the
-    IEM using available observations.  Some observation sites explicitly
-    produce an average wind speed, but that is not considered for this plot.
-    You can download daily summary data
-    <a href="/request/daily.phtml" class="alert-link">here</a>.
-    The average wind direction
-    is computed by vector averaging of the wind speed and direction reports.
-    """
+    desc = {"description": __doc__, "data": True, "cache": 86400}
     desc["arguments"] = [
         dict(
             type="sid",
@@ -174,7 +170,7 @@ def plotter(fdict):
             "No Wind Speed Information For Site For Period.",
             transform=ax.transAxes,
             ha="center",
-            bbox=dict(color="white"),
+            bbox={"color": "white"},
         )
     ax.set_xlim(0.5, 31.5)
     ax.set_xticks(range(1, 31, 5))
