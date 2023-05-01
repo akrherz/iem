@@ -23,8 +23,7 @@ def need_to_run(valid):
         "/mesonet/ARCHIVE/data/%Y/%m/%d/model/hrrr/"
         "%H/hrrr.t%Hz.3kmf01.grib2"
     )
-    if not os.path.isfile(gribfn):
-        return True
+    return not os.path.isfile(gribfn)
 
 
 def fetch(valid):
