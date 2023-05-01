@@ -266,7 +266,7 @@ def merge_obs(df, state, ts):
         )
         # Use obs if the current entry is null or is estimated and new
         # col is not null
-        useidx = pd.isna(df[col]) | (~pd.isna(df[f"{col}b"]) & df[estcol])
+        useidx = pd.isna(df[col]) | (pd.notna(df[f"{col}b"]) & df[estcol])
         hits = useidx.sum()
         if hits == 0:
             continue

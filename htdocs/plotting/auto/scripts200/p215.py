@@ -1,4 +1,8 @@
-"""KDE of Temps."""
+"""
+This autoplot generates some metrics on the distribution of temps
+over a given period of years.  The plotted distribution in the upper panel
+is using a guassian kernel density estimate.
+"""
 import calendar
 from datetime import date, datetime
 
@@ -17,40 +21,30 @@ PDICT = {
     "low": "Low Temperature [F]",
     "avgt": "Average Temperature [F]",
 }
-MDICT = dict(
-    [
-        ("all", "No Month/Time Limit"),
-        ("spring", "Spring (MAM)"),
-        ("fall", "Fall (SON)"),
-        ("winter", "Winter (DJF)"),
-        ("summer", "Summer (JJA)"),
-        ("jan", "January"),
-        ("feb", "February"),
-        ("mar", "March"),
-        ("apr", "April"),
-        ("may", "May"),
-        ("jun", "June"),
-        ("jul", "July"),
-        ("aug", "August"),
-        ("sep", "September"),
-        ("oct", "October"),
-        ("nov", "November"),
-        ("dec", "December"),
-    ]
-)
+MDICT = {
+    "all": "No Month/Time Limit",
+    "spring": "Spring (MAM)",
+    "fall": "Fall (SON)",
+    "winter": "Winter (DJF)",
+    "summer": "Summer (JJA)",
+    "jan": "January",
+    "feb": "February",
+    "mar": "March",
+    "apr": "April",
+    "may": "May",
+    "jun": "June",
+    "jul": "July",
+    "aug": "August",
+    "sep": "September",
+    "oct": "October",
+    "nov": "November",
+    "dec": "December",
+}
 
 
 def get_description():
     """Return a dict describing how to call this plotter"""
-    desc = {}
-    desc["cache"] = 3600
-    desc["data"] = True
-    desc[
-        "description"
-    ] = """This autoplot generates some metrics on the distribution of temps
-    over a given period of years.  The plotted distribution in the upper panel
-    is using a guassian kernel density estimate.
-    """
+    desc = {"description": __doc__, "cache": 3600, "data": True}
     desc["arguments"] = [
         dict(
             type="station",
@@ -145,7 +139,7 @@ def get_df(ctx, period):
 
 def f2s(value):
     """HAAAAAAAAAAAAACK."""
-    return ("%.5f" % value).rstrip("0").rstrip(".")
+    return (f"{value:.5f}").rstrip("0").rstrip(".")
 
 
 def plotter(fdict):
@@ -163,10 +157,10 @@ def plotter(fdict):
         max([df1[ctx["v"]].max(), df2[ctx["v"]].max()]) + 1,
         dtype="i",
     )
-    period1 = "%s-%s" % (ctx["sy1"], ctx["ey1"])
-    period2 = "%s-%s" % (ctx["sy2"], ctx["ey2"])
-    label1 = "%s-%s %s" % (ctx["sy1"], ctx["ey1"], ctx["v"])
-    label2 = "%s-%s %s" % (ctx["sy2"], ctx["ey2"], ctx["v"])
+    period1 = f"{ctx['sy1']}-{ctx['ey1']}"
+    period2 = f"{ctx['sy2']}-{ctx['ey2']}"
+    label1 = f"{period1} {ctx['v']}"
+    label2 = f"{period2} {ctx['v']}"
 
     df = pd.DataFrame({label1: kern1(xpos), label2: kern2(xpos)}, index=xpos)
 
@@ -187,7 +181,7 @@ def plotter(fdict):
         df[label1],
         lw=2,
         c=C1,
-        label=rf"{label1} - $\mu$={df1[ctx['v']].mean():.2f}",
+        label=rf"{label1}: $\mu$={df1[ctx['v']].mean():.2f}",
         zorder=4,
     )
     ax.fill_between(xpos, 0, df[label1], color=C1, alpha=alpha, zorder=3)
@@ -197,7 +191,7 @@ def plotter(fdict):
         df[label2],
         lw=2,
         c=C2,
-        label=rf"{label2} - $\mu$={df2[ctx['v']].mean():.2f}",
+        label=rf"{label2}: $\mu$={df2[ctx['v']].mean():.2f}",
         zorder=4,
     )
     ax.fill_between(xpos, 0, df[label2], color=C2, alpha=alpha, zorder=3)
@@ -214,7 +208,7 @@ def plotter(fdict):
     dam = delta.abs().max() * 1.1
     ax2.set_ylim(0 - dam, dam)
     ax2.set_xlabel(PDICT[ctx["v"]])
-    ax2.set_ylabel("%s minus\n%s" % (period2, period1))
+    ax2.set_ylabel(f"{period2} minus\n{period1}")
     ax2.grid(True)
     ax2.fill_between(xpos, 0, delta, where=delta > 0, color=C2, alpha=alpha)
     ax2.fill_between(xpos, 0, delta, where=delta < 0, color=C1, alpha=alpha)
@@ -234,8 +228,10 @@ def plotter(fdict):
         y -= 0.03
         val = f2s(ptile * 100.0)
         fig.text(0.88, y, val)
-        fig.text(0.91, y, "%.1f" % (p1[f"{val}%"],))
-        fig.text(0.95, y, "%.1f" % (p2[f"{val}%"],))
+        v1 = p1[f"{val}%"]
+        v2 = p2[f"{val}%"]
+        fig.text(0.91, y, f"{v1:.1f}")
+        fig.text(0.95, y, f"{v2:.1f}")
 
     return fig, df
 

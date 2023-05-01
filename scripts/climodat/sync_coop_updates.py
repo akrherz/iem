@@ -18,10 +18,12 @@ def load_changes():
     """Find what has changed."""
     with get_sqlalchemy_conn("iem") as conn:
         df = pd.read_sql(
-            "SELECT distinct id, c.iemid, network, tzname, "
-            "date(valid at time zone t.tzname) from current_log c JOIN "
-            "stations t on (c.iemid = t.iemid) WHERE t.network ~* 'COOP' and "
-            "updated > now() - '25 hours'::interval",
+            """
+            SELECT distinct id, c.iemid, network, tzname,
+            date(valid at time zone t.tzname) from current_log c JOIN
+            stations t on (c.iemid = t.iemid) WHERE t.network ~* 'COOP' and
+            updated > now() - '25 hours'::interval
+            """,
             conn,
             index_col=None,
         )

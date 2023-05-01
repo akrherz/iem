@@ -7,7 +7,7 @@ import geopandas as gpd
 import numpy as np
 from pyiem import iemre
 from pyiem.grid.zs import CachingZonalStats
-from pyiem.util import get_dbconn, ncopen, logger
+from pyiem.util import get_dbconn, ncopen, logger, utc
 
 LOG = logger()
 
@@ -21,7 +21,7 @@ def init_year(ts):
         LOG.info("Cowardly refusing to overwrite: %s", fn)
         return
     nc = ncopen(fn, "w")
-    nc.title = "IEM Hourly Reanalysis %s" % (ts.year,)
+    nc.title = f"IEM Hourly Reanalysis {ts.year}"
     nc.platform = "Grided Observations"
     nc.description = "IEM hourly analysis on a 0.125 degree grid"
     nc.institution = "Iowa State University, Ames, IA, USA"
@@ -30,9 +30,7 @@ def init_year(ts):
     nc.realization = 1
     nc.Conventions = "CF-1.0"
     nc.contact = "Daryl Herzmann, akrherz@iastate.edu, 515-294-5978"
-    nc.history = ("%s Generated") % (
-        datetime.datetime.now().strftime("%d %B %Y"),
-    )
+    nc.history = f"{utc():%d %B %Y} Generated"
     nc.comment = "No Comment at this time"
 
     # Setup Dimensions
@@ -59,7 +57,7 @@ def init_year(ts):
     lon[:] = iemre.XAXIS
 
     tm = nc.createVariable("time", float, ("time",))
-    tm.units = "Hours since %s-01-01 00:00:0.0" % (ts.year,)
+    tm.units = f"Hours since {ts.year}-01-01 00:00:0.0"
     tm.long_name = "Time"
     tm.standard_name = "time"
     tm.axis = "T"

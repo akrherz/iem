@@ -350,7 +350,7 @@ def email_report(report, subject):
     report.seek(0)
     b.set_payload(report.read())
     encoders.encode_base64(b)
-    b.add_header("Content-Disposition", 'attachment; filename="%s"' % (fn))
+    b.add_header("Content-Disposition", f'attachment; filename="{fn}"')
     msg.attach(b)
 
     # Send the email via our own SMTP server.

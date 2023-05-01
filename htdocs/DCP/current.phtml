@@ -10,7 +10,7 @@ $pgconn = iemdb('iem');
 $mesosite = iemdb('mesosite');
 
 $sortcol = isset($_GET['sortcol']) ? xssafe($_GET['sortcol']) : "valid";
-$network = isset($_GET['network']) ? xssafe($_GET["network"]) : 'IA_DCP';
+$network = get_str404("network", 'IA_DCP', 9);
 $shef = isset($_REQUEST['shef']) && $_REQUEST['shef'] == 'yes';
 
 $t->title = "DCP/GOES Current Conditions";

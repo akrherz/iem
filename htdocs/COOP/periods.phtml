@@ -13,8 +13,8 @@ $emonth = get_int404("emonth", 0);
 $sday = get_int404("sday", 0);
 $eday = get_int404("eday", 0);
 $sortcol = isset($_GET["sortcol"]) ? xssafe($_GET["sortcol"]) : "avg_high";
-$station = isset($_GET["station"]) ? xssafe($_GET['station']) : 'IA0000';
-$network = isset($_GET["network"]) ? xssafe($_GET["network"]) : "IACLIMATE";
+$station = get_str404('station', 'IA0000', 6);
+$network = get_str404("network", "IACLIMATE", 9);
 
 $nt = new NetworkTable($network);
 

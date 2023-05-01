@@ -3,10 +3,10 @@ require_once "../../config/settings.inc.php";
 define("IEM_APPID", 4);
 require_once "../../include/forms.php";
 
-$station = isset($_GET["station"]) ? substr(xssafe($_GET["station"]), 0, 5) : "";
-$network = isset($_GET["network"]) ? substr(xssafe($_GET["network"]), 0, 7) : "IA_COOP";
-$date = isset($_GET["date"]) ? substr(xssafe($_GET["date"]), 0, 10) : "";
-$sortvar = isset($_GET["sortvar"]) ? substr(xssafe($_GET["sortvar"]), 0, 10) : "";
+$station = get_str404("station", "", 5);
+$network = get_str404("network", "IA_COOP", 7);
+$date = get_str404("date", "", 10);
+$sortvar = get_str404("sortvar", "", 10);
 $year = get_int404("year", date("Y"));
 
 if ($date == "" && $station == "") $station = "AMSI4";

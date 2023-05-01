@@ -21,10 +21,9 @@ def main():
     if content.find(b".EOO") < 0:
         LOG.info("%s failed to produce valid CSV", uri)
         return
-    tmpfd = tempfile.NamedTemporaryFile(delete=False)
-    tmpfd.write(req.content)
-    tmpfd.close()
-    subprocess.call("pqinsert -p 'isusm.csv' %s" % (tmpfd.name,), shell=True)
+    with tempfile.NamedTemporaryFile(delete=False) as tmpfd:
+        tmpfd.write(req.content)
+    subprocess.call(["pqinsert", "-p", "isusm.csv", tmpfd.name])
     os.unlink(tmpfd.name)
 
 

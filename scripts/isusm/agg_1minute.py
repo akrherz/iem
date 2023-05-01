@@ -23,7 +23,7 @@ def hourly_process(cursor, station, hour, mdf, hdf):
     if row["valid"] not in hdf.index or mdf.empty:
         return
     lastob = mdf.iloc[-1]
-    svobs = mdf[~pd.isna(mdf["sv_t16_qc"])]
+    svobs = mdf[pd.notna(mdf["sv_t16_qc"])]
     sumdf = mdf.sum(numeric_only=True)
     row["obs_count"] = len(mdf.index)
     current = hdf.loc[row["valid"]]

@@ -13,7 +13,7 @@ $nt->table["ALL"] = array("name" => " --- All ---- ", "id" => "ALL", "archive_be
 require_once "../../include/vtec.php";
 $postgis = iemdb('postgis');
 
-$wfo = isset($_GET["wfo"]) ? xssafe($_GET["wfo"]) : 'ALL';
+$wfo = get_str404("wfo", 'ALL', 4);
 $limit = isset($_GET["limit"]) ? xssafe($_GET["limit"]) : 'TOSV';
 $tlimit = isset($_GET["tlimit"]) ? xssafe($_GET["tlimit"]) : '2007';
 $lstring = "'SV','TO'";

@@ -104,8 +104,8 @@ function station_helper($station)
 function get_sites_context()
 {
     // Return a SitesContext
-    $station = isset($_GET["station"]) ? substr(xssafe($_GET["station"]), 0, 20) : "";
-    $network = isset($_GET["network"]) ? xssafe($_GET["network"]) : "";
+    $station = get_str404("station", "", 20);
+    $network = get_str404("network", "", 14);  // could be 10?
 
     if ($station == "") {
         header("Location: /sites/locate.php");
