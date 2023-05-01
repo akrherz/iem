@@ -24,6 +24,20 @@ function xecho($data)
     echo xssafe($data);
 }
 
+// Ensure we get a sane string
+function get_str404($name, $default = null, $maxlength = null)
+{
+    if (!array_key_exists($name, $_REQUEST)) {
+        return $default;
+    }
+    $val = xssafe($_REQUEST[$name]);
+    if ($maxlength !== null && strlen($val) > $maxlength){
+        http_response_code(404);
+        die();
+    }
+    return $val;
+}
+
 // Ensure we are getting int values from request or we 404
 function get_int404($name, $default = null)
 {
