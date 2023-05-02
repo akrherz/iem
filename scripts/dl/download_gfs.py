@@ -37,9 +37,11 @@ def need_to_run(valid, hr):
 
 def fetch(valid, hr):
     """Fetch the data for this timestamp"""
+    baseurl = "https://ftpprd.ncep.noaa.gov/data/nccf/com/gfs/prod/"
+    if (utc() - valid) > datetime.timedelta(days=2):
+        baseurl = "https://s3.amazonaws.com/noaa-gfs-bdp-pds/"
     uri = valid.strftime(
-        "https://ftpprd.ncep.noaa.gov/data/nccf/com/gfs/prod/"
-        f"gfs.%Y%m%d/%H/atmos/gfs.t%Hz.sfluxgrbf{hr:03.0f}.grib2.idx"
+        f"{baseurl}gfs.%Y%m%d/%H/atmos/gfs.t%Hz.sfluxgrbf{hr:03.0f}.grib2.idx"
     )
     req = exponential_backoff(requests.get, uri, timeout=30)
     if req is None or req.status_code != 200:
