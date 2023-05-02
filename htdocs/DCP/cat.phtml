@@ -9,7 +9,7 @@ $pgconn = iemdb("hads");
 $mesosite = iemdb("mesosite");
 $t = new MyView();
 
-$network = isset($_GET['network']) ? xssafe($_GET["network"]) : 'IA_DCP';
+$network = get_str404("network", 'IA_DCP', 9);
 $minute = get_int404("minute", 0);
 $hour = get_int404("hour", date("H"));
 $day = get_int404("day", date("d"));

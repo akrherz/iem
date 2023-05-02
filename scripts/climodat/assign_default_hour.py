@@ -20,12 +20,13 @@ def main():
     for sid, row in df.iterrows():
         for col in ["temp24_hour", "precip24_hour"]:
             df2 = pd.read_sql(
-                f"SELECT {col.replace('24', '')} as datum, count(*), "
-                f"min(day), max(day) from alldata_{sid[:2]} WHERE "
-                "station = %s and day > now() - '3 years'::interval and "
-                f"{col.replace('24', '')} is not null and "
-                f"{col.replace('24_hour', '')}_estimated = 'f' GROUP by datum "
-                "ORDER by count DESC",
+                f"""SELECT {col.replace('24', '')} as datum, count(*),
+                min(day), max(day) from alldata_{sid[:2]} WHERE
+                station = %s and day > now() - '3 years'::interval and
+                {col.replace('24', '')} is not null and
+                {col.replace('24_hour', '')}_estimated = 'f' GROUP by datum
+                ORDER by count DESC
+                """,
                 get_dbconnstr("coop"),
                 params=(sid,),
                 index_col=None,

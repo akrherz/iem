@@ -126,7 +126,6 @@ def do_hrrr(ts):
                 # Goodie
                 for g in selgrbs:
                     if total is None:
-                        total = g.values
                         lat1 = g["latitudeOfFirstGridPointInDegrees"]
                         lon1 = g["longitudeOfFirstGridPointInDegrees"]
                         llcrnrx, llcrnry = LCC(lon1, lat1)

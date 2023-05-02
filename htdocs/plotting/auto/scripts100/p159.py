@@ -1,4 +1,16 @@
-"""Frequencies"""
+"""
+Based on available hourly observation reports
+by METAR stations, this application presents the frequency of number
+of hours for a given month or season at a given threshold.
+
+<p>If you pick a custom day of the year period that crosses 1 January,
+the year of the start date is used within the plot.</p>
+
+<p><strong>Updated 18 Sep 2018:</strong>Plotting tool was updated
+to consider dates prior to 1973 and to shade years that have more than
+20% missing data.  The hourly averages are based on years with sufficient
+data coverage.
+"""
 import datetime
 
 from matplotlib.ticker import MaxNLocator
@@ -51,23 +63,7 @@ DIRS = {"aoa": "At or Above", "below": "Below"}
 
 def get_description():
     """Return a dict describing how to call this plotter"""
-    desc = {}
-    desc["data"] = True
-    desc["cache"] = 86400
-    desc[
-        "description"
-    ] = """Based on available hourly observation reports
-    by METAR stations, this application presents the frequency of number
-    of hours for a given month or season at a given threshold.
-
-    <p>If you pick a custom day of the year period that crosses 1 January,
-    the year of the start date is used within the plot.</p>
-
-    <p><strong>Updated 18 Sep 2018:</strong>Plotting tool was updated
-    to consider dates prior to 1973 and to shade years that have more than
-    20% missing data.  The hourly averages are based on years with sufficient
-    data coverage.
-    """
+    desc = {"description": __doc__, "data": True, "cache": 86400}
     desc["arguments"] = [
         dict(
             type="zstation",

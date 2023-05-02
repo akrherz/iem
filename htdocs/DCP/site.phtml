@@ -14,7 +14,7 @@ $day = get_int404("day", date("d"));
 $month = get_int404("month", date("m"));
 $year = get_int404("year", date("Y"));
 $station = isset($_GET['station']) ? xssafe($_GET['station']) : null;
-$network = isset($_GET['network']) ? xssafe($_GET["network"]) : 'IA_DCP';
+$network = get_str404("network", 'IA_DCP', 9);
 
 $ts = mktime(1, 0, 0, $month, $day, $year);
 

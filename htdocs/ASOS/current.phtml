@@ -8,7 +8,7 @@ require_once "../../include/forms.php";
 require_once "../../include/network.php";
 require_once "../../include/database.inc.php";
 
-$network = isset($_GET['network']) ? substr(xssafe($_GET["network"]), 0, 10) : 'IA_ASOS';
+$network = get_str404("network", 'IA_ASOS', 10);
 $metar = isset($_GET['metar']) ? xssafe($_GET["metar"]) : "no";
 $sortcol = isset($_GET['sortcol'])  ? xssafe($_GET['sortcol']) : "ts";
 $sorder = isset($_GET['sorder']) ? xssafe($_GET['sorder']) : "desc";
@@ -25,7 +25,6 @@ $t->headextra = <<<EOF
 EOF;
 $t->jsextra = <<<EOF
 <script src="/vendor/select2/4.0.3/select2.min.js"></script>
-          
 <script language="JavaScript" type="text/javascript">
 $(document).ready(function(){
     $(".iemselect2").select2();

@@ -3,8 +3,8 @@
 import datetime
 
 # Third Party
-from pandas import read_sql
-from pyiem.util import get_dbconn, get_dbconnstr, logger
+import pandas as pd
+from pyiem.util import get_dbconn, get_sqlalchemy_conn, logger
 
 LOG = logger()
 FLOOR = datetime.date.today() - datetime.timedelta(days=365)
@@ -26,15 +26,16 @@ def remove_track(iemid):
 def check_last(station, row):
     """Do the work."""
     trackstation, tracknetwork = row["tracks"].split("|")
-    df = read_sql(
-        "SELECT max(day) from summary s JOIN stations t on "
-        "(s.iemid = t.iemid) WHERE t.id = %s and t.network = %s and "
-        "s.day > %s and (s.max_tmpf is not null or "
-        "s.pday is not null)",
-        get_dbconnstr("iem"),
-        index_col=None,
-        params=(trackstation, tracknetwork, FLOOR),
-    )
+    with get_sqlalchemy_conn("iem") as conn:
+        df = pd.read_sql(
+            "SELECT max(day) from summary s JOIN stations t on "
+            "(s.iemid = t.iemid) WHERE t.id = %s and t.network = %s and "
+            "s.day > %s and (s.max_tmpf is not null or "
+            "s.pday is not null)",
+            conn,
+            index_col=None,
+            params=(trackstation, tracknetwork, FLOOR),
+        )
     lastdate = df.iloc[0]["max"]
     if lastdate is not None:
         return
@@ -65,21 +66,23 @@ def set_offline(iemid):
 
 def main():
     """Go Main Go."""
-    sdf = read_sql(
-        """
-        with locs as (
-            select s.iemid, id, network, value from stations s LEFT
-            JOIN station_attributes a on (s.iemid = a.iemid and
-            a.attr = 'TRACKS_STATION'))
-        select s.id, s.iemid, s.network, st_x(geom) as lon, st_y(geom) as lat,
-        s.name, l.value as tracks from stations S LEFT JOIN locs l on
-        (s.iemid = l.iemid) WHERE s.network ~* 'CLIMATE' and
-        substr(s.id, 3, 4) != '0000' and
-        substr(s.id, 3, 1) != 'C' ORDER by s.id ASC
-        """,
-        get_dbconnstr("mesosite"),
-        index_col="id",
-    )
+    with get_sqlalchemy_conn("mesosite") as conn:
+        sdf = pd.read_sql(
+            """
+            with locs as (
+                select s.iemid, id, network, value from stations s LEFT
+                JOIN station_attributes a on (s.iemid = a.iemid and
+                a.attr = 'TRACKS_STATION'))
+            select s.id, s.iemid, s.network,
+            st_x(geom) as lon, st_y(geom) as lat,
+            s.name, l.value as tracks from stations S LEFT JOIN locs l on
+            (s.iemid = l.iemid) WHERE s.network ~* 'CLIMATE' and
+            substr(s.id, 3, 4) != '0000' and
+            substr(s.id, 3, 1) != 'C' ORDER by s.id ASC
+            """,
+            conn,
+            index_col="id",
+        )
     for station, row in sdf.iterrows():
         if row["tracks"] is None:
             LOG.info("%s tracks no station, setting offline.", station)

@@ -1,4 +1,14 @@
-"""Maps of averages"""
+"""
+This application produces map analysis of
+climatological averages.  The IEM maintains a number of different
+climatologies based on period of record and source.  If you pick the NCEI
+Climatology, only basic temperature and precipitation variables are
+available at this time.
+
+<p>If you select a period of dates with the end date prior to the start
+date, the logic then has the period cross the 1 January boundary.  For
+example, a period between Dec 15 and Jan 15 will be computed.</p>
+"""
 import calendar
 import datetime
 
@@ -83,20 +93,7 @@ MDICT = dict(
 
 def get_description():
     """Return a dict describing how to call this plotter"""
-    desc = {}
-    desc["data"] = True
-    desc[
-        "description"
-    ] = """This application produces map analysis of
-    climatological averages.  The IEM maintains a number of different
-    climatologies based on period of record and source.  If you pick the NCEI
-    Climatology, only basic temperature and precipitation variables are
-    available at this time.
-
-    <p>If you select a period of dates with the end date prior to the start
-    date, the logic then has the period cross the 1 January boundary.  For
-    example, a period between Dec 15 and Jan 15 will be computed.</p>
-    """
+    desc = {"description": __doc__, "data": True}
     desc["arguments"] = [
         dict(
             type="select",
@@ -184,7 +181,7 @@ def plotter(fdict):
     elif month == "summer":
         months = [6, 7, 8]
     else:
-        ts = datetime.datetime.strptime("2000-" + month + "-01", "%Y-%b-%d")
+        ts = datetime.datetime.strptime(f"2000-{month}-01", "%Y-%b-%d")
         # make sure it is length two for the trick below in SQL
         months = [ts.month]
 
@@ -264,7 +261,7 @@ def plotter(fdict):
         )
     if df.empty:
         raise NoDataFound("No data was found for query, sorry.")
-    df = df[~pd.isna(df[varname])]
+    df = df[pd.notna(df[varname])]
     if df.empty:
         raise NoDataFound("No data was found for query, sorry.")
     levels = pretty_bins(df[varname].min(), df[varname].max(), 10)
