@@ -1,8 +1,8 @@
 """
-This chart presents the largest changes in
-temperature over a given number of hours.  This is based on available
-temperature reports.  There are two options for how to compute the
-temperature change over a given window.</p>
+This chart presents the largest change in some observed variable
+over a given number of hours.  This is based on available
+reports.  There are two options for how to compute the
+change over a given window.</p>
 
 <p><table class="table table-striped">
 <thead><tr><th>Label</th><th>Description</th></tr></thead>
@@ -34,7 +34,7 @@ from pyiem.util import get_autoplot_context, get_sqlalchemy_conn
 from pyiem.exceptions import NoDataFound
 from sqlalchemy import text
 
-MDICT = {"warm": "Temperature Rise", "cool": "Temperature Drop"}
+MDICT = {"warm": "Rise", "cool": "Drop"}
 MDICT2 = {
     "all": "No Month/Time Limit",
     "spring": "Spring (MAM)",
@@ -61,6 +61,8 @@ PDICT = {
 PDICT2 = {
     "tmpf": "Air Temperature",
     "dwpf": "Dew Point Temperature",
+    "alti": "Pressure Altimeter",
+    "mslp": "Sea Level Pressure",
 }
 
 
@@ -164,8 +166,8 @@ def plotter(fdict):
             text(
                 f"""
             SELECT valid at time zone 'UTC' as utc_valid, {varname}
-            from alldata
-            where station = :station and {varname} between -100 and 150
+            from alldata where station = :station
+            and {varname} is not null
             ORDER by valid desc
         """
             ),
@@ -267,11 +269,18 @@ def plotter(fdict):
             continue
         sts = sts.replace(tzinfo=pytz.UTC).astimezone(pytz.timezone(tzname))
         ets = ets.replace(tzinfo=pytz.UTC).astimezone(pytz.timezone(tzname))
-        lbl = (
-            f"{row[varname]:.0f} to {row[deltacol]:.0f} -> "
-            f"{row['delta']:.0f}\n"
-            f"{sts:%-d %b %Y %-I:%M %p} - {ets:%-d %b %Y %-I:%M %p}"
-        )
+        if varname in ["alti", "mslp"]:
+            lbl = (
+                f"{row[varname]:.2f} to {row[deltacol]:.2f} -> "
+                f"{row['delta']:.2f}\n"
+                f"{sts:%-d %b %Y %-I:%M %p} - {ets:%-d %b %Y %-I:%M %p}"
+            )
+        else:
+            lbl = (
+                f"{row[varname]:.0f} to {row[deltacol]:.0f} -> "
+                f"{row['delta']:.0f}\n"
+                f"{sts:%-d %b %Y %-I:%M %p} - {ets:%-d %b %Y %-I:%M %p}"
+            )
         labels.append(lbl)
         ax.barh(len(labels), row["delta"], color="b", align="center")
         plot_event(sparkax, 11 - len(labels), event.copy(), varname)
@@ -283,7 +292,13 @@ def plotter(fdict):
     ax.set_yticklabels(labels)
     ax.set_ylim(10.5, 0.5)
     ax.grid(True)
-    ax.set_xlabel("Delta Degrees Fahrenheit")
+    units = {
+        "tmpf": "Delta Degrees Fahrenheit",
+        "dwpf": "Delta Degrees Fahrenheit",
+        "alti": "Altimeter Change [inch]",
+        "mslp": "Sea Level Pressure Change [mb]",
+    }
+    ax.set_xlabel(units.get(varname))
     return fig, (
         events[events["use"] == 1]
         .reset_index()
