@@ -21,6 +21,7 @@ TOPICS = [
     {"commodity_desc": "CORN", "statisticcat_desc": "CONDITION"},
     {"commodity_desc": "SOYBEANS", "statisticcat_desc": "CONDITION"},
     {"commodity_desc": "SOIL", "statisticcat_desc": "MOISTURE"},
+    {"commodity_desc": "FIELDWORK", "statisticcat_desc": "DAYS SUITABLE"},
 ]
 SERVICE = "https://quickstats.nass.usda.gov/api/api_GET/"
 
@@ -55,7 +56,7 @@ def process(df):
     df["num_value"] = pd.to_numeric(df["Value"], errors="coerce")
     # Get load_time in proper order
     df["load_time"] = pd.to_datetime(
-        df["load_time"], format="%Y-%m-%d %H:%M:%S"
+        df["load_time"].str.slice(0, 19), format="%Y-%m-%d %H:%M:%S"
     ).dt.tz_localize(pytz.timezone("America/New_York"))
     df = df.replace({np.nan: None, "": None})
     pgconn = get_dbconn("coop")

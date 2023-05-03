@@ -38,6 +38,7 @@ PDICT = {
     "SS": "SOYBEANS - PROGRESS, MEASURED IN PCT SETTING PODS",
     "SC": "SOYBEANS - PROGRESS, MEASURED IN PCT COLORING",
     "SH": "SOYBEANS - PROGRESS, MEASURED IN PCT HARVESTED",
+    "FD": "FIELDWORK - DAYS SUITABLE, MEASURED IN DAYS / WEEK",
 }
 
 
@@ -80,11 +81,18 @@ def plotter(fdict):
     if df.empty:
         raise NoDataFound("ERROR: No data found!")
     df["yeari"] = df["year"] - df["year"].min()
+    if ctx["short_desc"] == "FD":
+        df["num_value"] = df[["num_value", "year"]].groupby("year").cumsum()
 
     year0 = int(df["year"].min())
     lastyear = int(df["year"].max())
+    tt = (
+        f"{short_desc} Progress"
+        if ctx["short_desc"] != "FD"
+        else "Accumulated Days Suitable for Field Work"
+    )
     title = (
-        f"{state_names[state]} {short_desc} Progress\n"
+        f"{state_names[state]} {tt}\n"
         f"USDA NASS {year0:.0f}-{lastyear:.0f} -- "
         "Daily Linear Interpolated Values Between Weekly Reports"
     )
@@ -110,7 +118,7 @@ def plotter(fdict):
             for i, jday in enumerate(range(d0, d1 + 1)):
                 data[date.year - year0, jday] = lval + i * delta
         else:
-            data[ldate.year - year0, d0:] = 100
+            data[ldate.year - year0, d0:] = np.max(data[ldate.year - year0, :])
 
         lastrow = row
 
@@ -133,15 +141,19 @@ def plotter(fdict):
     # We need to compute the domain of this plot
     maxv = np.max(data, 0)
     minv = np.min(data, 0)
-    ax.set_xlim(np.argmax(maxv > 0) - 7, np.argmax(minv > 99) + 7)
+    if ctx["short_desc"] == "FD":
+        ax.set_xlim(np.argmax(maxv > 0) - 7)
+    else:
+        ax.set_xlim(np.argmax(maxv > 0) - 7, np.argmax(minv > 99) + 7)
     ax.set_ylim(lastyear + 0.5, year0 - 0.5)
     ax.yaxis.set_major_locator(ticker.MaxNLocator(integer=True))
     ax.grid(True)
     lastweek = df["week_ending"].max()
-    ax.set_xlabel(f"X denotes {lastweek:%d %b %Y} value of {dlast:.0f}%")
+    unit = "%" if ctx["short_desc"] != "FD" else " days"
+    ax.set_xlabel(f"X denotes {lastweek:%d %b %Y} value of {dlast:.1f}{unit}")
 
     return fig, df
 
 
 if __name__ == "__main__":
-    plotter({})
+    plotter({"short_desc": "FD"})
