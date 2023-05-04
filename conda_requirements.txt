@@ -78,8 +78,7 @@ setuptools-markdown
 shapely
 # various dumpers
 simplejson
-# pandas-dev/pandas/pull/48576
-sqlalchemy<2
+sqlalchemy
 # scripts
 tqdm
 # AHPS scripts

@@ -5,7 +5,7 @@ NCEI provides monthly tar files for nearly up to the current day here:
 
 https://www1.ncdc.noaa.gov/pub/download/hidden/onemin/
 
-NCEI generates these at about 1530z, so we run a bit after that via crontab
+NCEI generates these at about 1530EDT, so we run a bit after that via crontab
 """
 # stdlib
 import re

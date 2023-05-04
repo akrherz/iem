@@ -1,5 +1,6 @@
-"""This plot is not meant for interactive use, but a backend for
-    SPS plots."""
+"""
+This plot is not meant for interactive use, but a backend for SPS plots.
+"""
 
 # third party
 import pytz
@@ -116,6 +117,7 @@ def plotter(fdict):
     else:
         bounds = row["geom"].bounds
         population = row["pop"]
+    pp = "Missing" if population <= 0 else f"{population:,}"
     stextra = " for Polygon" if not row["geom"].is_empty else ""
     # NOTE Can't do background=ne2 yet until we deal with pixelation issue
     mp = MapPlot(
@@ -124,7 +126,7 @@ def plotter(fdict):
             f"{wfo} Special Weather Statement (SPS) "
             f"till {expire.strftime(TFORMAT)}"
         ),
-        subtitle=(f"Estimated {popyear} Population{stextra}: {population:,}"),
+        subtitle=(f"Estimated {popyear} Population{stextra}: {pp}"),
         sector="spherical_mercator",
         west=bounds[0] - 0.02,
         south=bounds[1] - 0.3,
@@ -211,4 +213,4 @@ def plotter(fdict):
 
 
 if __name__ == "__main__":
-    plotter({"pid": "202001111306-TJSJ-WWCA82-SPSSJU", "segnum": 0})
+    plotter({"pid": "202305040706-PGUM-WWPQ82-SPSPQ2", "segnum": 0})
