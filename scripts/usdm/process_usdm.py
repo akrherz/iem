@@ -1,16 +1,16 @@
 """IEM Processing of the USDM Shapefiles"""
-import sys
 import datetime
-import tempfile
-import zipfile
+import glob
 import os
 import subprocess
-import glob
+import sys
+import tempfile
+import zipfile
 
-import requests
 import fiona
-from shapely.geometry import shape, MultiPolygon
-from pyiem.util import get_dbconn, exponential_backoff, logger
+import requests
+from pyiem.util import exponential_backoff, get_dbconn, logger
+from shapely.geometry import MultiPolygon, shape
 
 LOG = logger()
 BASEURL = "https://droughtmonitor.unl.edu/data/shapefiles_m/"

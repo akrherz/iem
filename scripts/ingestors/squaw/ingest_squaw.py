@@ -2,7 +2,7 @@
 import re
 
 import requests
-from pyiem.util import get_dbconn, exponential_backoff, logger
+from pyiem.util import exponential_backoff, get_dbconn, logger
 
 LOG = logger()
 

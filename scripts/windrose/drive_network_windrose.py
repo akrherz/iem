@@ -1,6 +1,6 @@
 """Generate a windrose for each site in the specified network..."""
-import sys
 import subprocess
+import sys
 
 from pyiem.network import Table as NetworkTable
 from pyiem.util import logger

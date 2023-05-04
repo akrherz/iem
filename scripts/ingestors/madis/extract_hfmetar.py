@@ -3,20 +3,20 @@
 Run from RUN_10MIN.sh
 Run from RUN_40_AFTER.sh for two hours ago
 """
+import datetime
 import os
 import sys
-import datetime
 import warnings
 
-import pytz
 import numpy as np
-from tqdm import tqdm
+import pytz
 from metar import Metar
+from metpy.units import masked_array, units
 from netCDF4 import chartostring
-from metpy.units import units, masked_array
 from pyiem.observation import Observation
-from pyiem.util import get_dbconn, ncopen, logger, convert_value, mm2inch
 from pyiem.reference import TRACE_VALUE
+from pyiem.util import convert_value, get_dbconn, logger, mm2inch, ncopen
+from tqdm import tqdm
 
 warnings.filterwarnings("ignore", category=DeprecationWarning)
 warnings.simplefilter("ignore", RuntimeWarning)

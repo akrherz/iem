@@ -3,10 +3,10 @@
 """
 from io import BytesIO
 
+from paste.request import parse_formvars
 from pyiem.network import Table as NetworkTable
 from pyiem.plot import MapPlot
-from pyiem.util import get_dbconn, c2f
-from paste.request import parse_formvars
+from pyiem.util import c2f, get_dbconn
 
 CTX = {
     "tmpf": {"title": "2m Air Temperature [F]"},

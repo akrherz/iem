@@ -8,7 +8,6 @@ import json
 import os
 import sys
 import time
-
 from urllib.request import urlopen
 
 # Number of attempts to download data

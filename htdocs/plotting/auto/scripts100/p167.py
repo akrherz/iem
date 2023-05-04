@@ -28,13 +28,13 @@ try:
 except ImportError:
     from backports.zoneinfo import ZoneInfo  # type:ignore
 
+import matplotlib.colors as mpcolors
 import numpy as np
 import pandas as pd
-import matplotlib.colors as mpcolors
 from matplotlib.patches import Rectangle
+from pyiem.exceptions import NoDataFound
 from pyiem.plot import figure_axes
 from pyiem.util import get_autoplot_context, get_sqlalchemy_conn, utc
-from pyiem.exceptions import NoDataFound
 
 
 def get_description():

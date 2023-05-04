@@ -4,18 +4,18 @@ Called from `RUN_20_AFTER.sh` for current date.
 Called from `RUN_12Z.sh` for yesterday and a week ago.
 """
 # pylint: disable=cell-var-from-loop
-import sys
 import datetime
+import sys
 
 try:
     from zoneinfo import ZoneInfo
 except ImportError:
     from backports.zoneinfo import ZoneInfo  # type: ignore
 
-from pyiem.util import logger, get_dbconn, get_dbconnstr
-from pyiem.network import Table as NetworkTable
 from metpy.units import units
 from pandas import read_sql
+from pyiem.network import Table as NetworkTable
+from pyiem.util import get_dbconn, get_dbconnstr, logger
 
 LOG = logger()
 MM = units("mm")

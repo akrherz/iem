@@ -2,8 +2,8 @@
 
 Looks at the asos database and finds the first observation from a site.
 """
-import sys
 import datetime
+import sys
 
 from pyiem.network import Table as NetworkTable
 from pyiem.util import get_dbconn, logger

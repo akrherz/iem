@@ -12,15 +12,15 @@ average feels like temperature.  This is why we can't have nice things.</p>
 """
 import datetime
 
+import matplotlib.colors as mpcolors
 import numpy as np
 import pandas as pd
-import matplotlib.colors as mpcolors
 from matplotlib.colorbar import ColorbarBase
 from matplotlib.ticker import MaxNLocator
-from sqlalchemy import text
-from pyiem.plot import get_cmap, figure
-from pyiem.util import get_autoplot_context, get_sqlalchemy_conn
 from pyiem.exceptions import NoDataFound
+from pyiem.plot import figure, get_cmap
+from pyiem.util import get_autoplot_context, get_sqlalchemy_conn
+from sqlalchemy import text
 
 PDICT = {
     "coldest_temp": "Coldest Average Temperature",

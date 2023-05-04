@@ -14,7 +14,7 @@ import os
 import numpy as np
 import pygrib
 from pyiem.network import Table as NetworkTable
-from pyiem.util import get_dbconn, logger, utc, convert_value
+from pyiem.util import convert_value, get_dbconn, logger, utc
 
 LOG = logger()
 nt = NetworkTable("IACLIMATE")

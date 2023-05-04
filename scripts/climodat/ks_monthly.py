@@ -1,14 +1,14 @@
 """
  Need something to generate a kitchen sink report of Climate Data
 """
-import sys
-import os
 import datetime
+import os
+import sys
 
 import numpy as np
-from tqdm import tqdm
 from pyiem.network import Table as NetworkTable
 from pyiem.util import get_dbconn
+from tqdm import tqdm
 
 nt = NetworkTable("IACLIMATE")
 pgconn = get_dbconn("coop")

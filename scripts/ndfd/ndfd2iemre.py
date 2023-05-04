@@ -3,14 +3,14 @@
 Run from RUN_20_AFTER.sh
 """
 import os
-from datetime import timedelta, date
 import shutil
+from datetime import date, timedelta
 
-import pygrib
 import numpy as np
-from scipy.interpolate import NearestNDInterpolator
+import pygrib
 from pyiem import iemre
-from pyiem.util import utc, ncopen, logger
+from pyiem.util import logger, ncopen, utc
+from scipy.interpolate import NearestNDInterpolator
 
 LOG = logger()
 

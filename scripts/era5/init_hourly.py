@@ -1,11 +1,11 @@
 """Generate the ERA5 hourly analysis file for a year"""
 import datetime
-import sys
 import os
+import sys
 
 import numpy as np
 from pyiem import iemre
-from pyiem.util import ncopen, logger
+from pyiem.util import logger, ncopen
 
 LOG = logger()
 

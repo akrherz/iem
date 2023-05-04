@@ -2,13 +2,13 @@
 import datetime
 import os
 
-import numpy as np
 import geopandas as gpd
+import numpy as np
 from pyiem import iemre, util
+from pyiem.exceptions import NoDataFound
+from pyiem.grid.zs import CachingZonalStats
 from pyiem.plot import get_cmap
 from pyiem.plot.geoplot import MapPlot
-from pyiem.grid.zs import CachingZonalStats
-from pyiem.exceptions import NoDataFound
 
 
 def get_description():

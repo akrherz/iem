@@ -4,12 +4,12 @@ import datetime
 import json
 import sys
 
+import pandas as pd
+
 # third party
 import pytz
-import pandas as pd
 import requests
-from pyiem.util import get_dbconn, get_dbconnstr, logger, exponential_backoff
-
+from pyiem.util import exponential_backoff, get_dbconn, get_dbconnstr, logger
 
 LOG = logger()
 URI = (

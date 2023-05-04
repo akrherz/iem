@@ -1,11 +1,11 @@
 """Pidgin-holed service for some WFO data... """
+import datetime
 import json
 from io import BytesIO, StringIO
-import datetime
 
+import pandas as pd
 from paste.request import parse_formvars
 from pyiem.util import get_sqlalchemy_conn, html_escape
-import pandas as pd
 from sqlalchemy import text
 
 EXL = "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"

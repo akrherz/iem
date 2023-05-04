@@ -1,14 +1,14 @@
 """ISU Agronomy Hall Vantage Pro 2 OT0010"""
 import datetime
-import re
 import os
+import re
 import sys
 
 import pytz
-from metpy.units import units
 from metpy.calc import dewpoint_from_relative_humidity
+from metpy.units import units
 from pyiem.observation import Observation
-from pyiem.util import get_dbconn, convert_value, logger
+from pyiem.util import convert_value, get_dbconn, logger
 
 LOG = logger()
 

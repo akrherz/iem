@@ -1,10 +1,10 @@
 """Download Interface for RWIS data"""
 # pylint: disable=abstract-class-instantiated
 import datetime
-from io import StringIO, BytesIO
+from io import BytesIO, StringIO
 
-import pytz
 import pandas as pd
+import pytz
 from paste.request import parse_formvars
 from pyiem.network import Table as NetworkTable
 from pyiem.util import get_sqlalchemy_conn

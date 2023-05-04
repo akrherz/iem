@@ -16,10 +16,10 @@ import datetime
 
 import numpy as np
 import pandas as pd
-from pyiem.plot.geoplot import MapPlot
-from pyiem.network import Table as NetworkTable
-from pyiem.util import get_autoplot_context, get_sqlalchemy_conn
 from pyiem.exceptions import NoDataFound
+from pyiem.network import Table as NetworkTable
+from pyiem.plot.geoplot import MapPlot
+from pyiem.util import get_autoplot_context, get_sqlalchemy_conn
 from sqlalchemy import text
 
 PDICT3 = {"contour": "Contour + Plot Values", "values": "Plot Values Only"}

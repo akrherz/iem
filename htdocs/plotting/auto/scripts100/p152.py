@@ -1,10 +1,10 @@
 """Period differences"""
 
 import pandas as pd
-from pyiem.plot import MapPlot, centered_bins, get_cmap
-from pyiem.util import get_autoplot_context, get_sqlalchemy_conn
 from pyiem.exceptions import NoDataFound
+from pyiem.plot import MapPlot, centered_bins, get_cmap
 from pyiem.reference import SECTORS_NAME
+from pyiem.util import get_autoplot_context, get_sqlalchemy_conn
 
 PDICT = {"state": "State Level Maps (select state)"}
 PDICT.update(SECTORS_NAME)

@@ -1,15 +1,14 @@
 """This plot displays the maximum number of consec
     days above or below some threshold for high or low temperature."""
-import datetime
 import calendar
+import datetime
 
 import numpy as np
 import pandas as pd
-from pyiem.exceptions import NoDataFound
-from pyiem.plot import fitbox, figure
-from pyiem.util import get_autoplot_context, get_sqlalchemy_conn
 from matplotlib.font_manager import FontProperties
-
+from pyiem.exceptions import NoDataFound
+from pyiem.plot import figure, fitbox
+from pyiem.util import get_autoplot_context, get_sqlalchemy_conn
 
 PDICT = {
     "high_over": "High Temperature At or Above",

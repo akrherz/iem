@@ -1,18 +1,18 @@
 """Use data provided by ACIS to replace climodat data."""
-import sys
 import datetime
+import sys
 import time
 
-import requests
 import pandas as pd
+import requests
 from pyiem.network import Table as NetworkTable
-from pyiem.util import (
-    get_dbconn,
-    logger,
-    exponential_backoff,
-    get_sqlalchemy_conn,
-)
 from pyiem.reference import TRACE_VALUE, ncei_state_codes
+from pyiem.util import (
+    exponential_backoff,
+    get_dbconn,
+    get_sqlalchemy_conn,
+    logger,
+)
 
 LOG = logger()
 SERVICE = "http://data.rcc-acis.org/StnData"

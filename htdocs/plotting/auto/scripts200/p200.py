@@ -18,18 +18,17 @@ just the 13z issuance, for example.</p>
 """
 import datetime
 
-import numpy as np
 import geopandas as gpd
-from affine import Affine
+import numpy as np
 import pandas as pd
-from pyiem.grid.zs import CachingZonalStats
-from pyiem.plot.geoplot import MapPlot
-from pyiem.plot import get_cmap
-from pyiem.util import get_autoplot_context, get_sqlalchemy_conn, utc
+from affine import Affine
 from pyiem.exceptions import NoDataFound
+from pyiem.grid.zs import CachingZonalStats
+from pyiem.plot import get_cmap
+from pyiem.plot.geoplot import MapPlot
 from pyiem.reference import LATLON
+from pyiem.util import get_autoplot_context, get_sqlalchemy_conn, utc
 from sqlalchemy import text
-
 
 PDICT5 = {
     "yes": "YES: Draw Counties/Parishes",

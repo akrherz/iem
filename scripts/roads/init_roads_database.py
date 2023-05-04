@@ -3,10 +3,10 @@
  * JSON data is in Google 3857
 """
 
-from shapely.geometry import LineString, MultiLineString
 import requests
+from ingest_roads_rest import LOG, URI
 from pyiem.util import get_dbconn
-from ingest_roads_rest import URI, LOG
+from shapely.geometry import LineString, MultiLineString
 
 
 def main():

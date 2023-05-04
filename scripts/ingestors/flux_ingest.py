@@ -1,14 +1,14 @@
 """
 Ingest files provided by NLAE containing flux information
 """
+import datetime
 import os
 from io import StringIO
-import datetime
 
-import pytz
 import pandas as pd
+import pytz
 from pyiem.observation import Observation
-from pyiem.util import get_dbconn, logger, utc, convert_value, c2f
+from pyiem.util import c2f, convert_value, get_dbconn, logger, utc
 
 LOG = logger()
 BASEDIR = "/mesonet/home/mesonet/ot/ot0005/incoming/Fluxdata"

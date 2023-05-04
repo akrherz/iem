@@ -1,11 +1,11 @@
 """Legacy."""
-from io import StringIO
 import datetime
+from io import StringIO
 
 from paste.request import parse_formvars
 from pyiem.network import Table as NetworkTable
-from pyiem.util import get_dbconn
 from pyiem.templates.iem import TEMPLATE
+from pyiem.util import get_dbconn
 
 nt = NetworkTable("IACLIMATE")
 

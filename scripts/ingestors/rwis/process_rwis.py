@@ -3,17 +3,18 @@
 import datetime
 import json
 import os
-import sys
 import subprocess
+import sys
+
+import numpy as np
+import pandas as pd
 
 # third party
 import requests
-import pandas as pd
-import numpy as np
-from pyiem.tracker import TrackerEngine
+from pyiem import util
 from pyiem.network import Table as NetworkTable
 from pyiem.observation import Observation
-from pyiem import util
+from pyiem.tracker import TrackerEngine
 
 LOG = util.logger()
 NT = NetworkTable("IA_RWIS")

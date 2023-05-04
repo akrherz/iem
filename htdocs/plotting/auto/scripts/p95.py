@@ -1,15 +1,15 @@
 """Average T and precip"""
 import datetime
 
-import psycopg2.extras
+import matplotlib.colors as mpcolors
 import numpy as np
 import pandas as pd
-from scipy import stats
-import matplotlib.colors as mpcolors
-from pyiem.plot import get_cmap, figure
+import psycopg2.extras
+from pyiem.exceptions import NoDataFound
+from pyiem.plot import figure, get_cmap
 from pyiem.plot.use_agg import plt
 from pyiem.util import get_autoplot_context, get_dbconn
-from pyiem.exceptions import NoDataFound
+from scipy import stats
 
 PDICT = {"none": "Show all values", "hide": 'Show "strong" events'}
 

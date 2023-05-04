@@ -1,10 +1,10 @@
 """ Generate a GeoJSON of current storm based warnings """
-import json
 import datetime
+import json
 
-from pymemcache.client import Client
 from paste.request import parse_formvars
 from pyiem.util import get_dbconn, html_escape
+from pymemcache.client import Client
 
 
 def run():

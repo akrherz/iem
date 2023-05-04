@@ -8,12 +8,12 @@ icing (/IC), turbulence (/TB), icing or turbulence and all reports.</p>
 """
 from datetime import date, timedelta
 
-import pandas as pd
 import matplotlib.dates as mdates
-from sqlalchemy import text
+import pandas as pd
 from pyiem.exceptions import NoDataFound
 from pyiem.plot import figure
 from pyiem.util import get_autoplot_context, get_sqlalchemy_conn, utc
+from sqlalchemy import text
 
 # select distinct '"'||ident||'": "['||ident||'] '||name||'",' from airspaces
 # where type_code in ('AKZONE', 'ARTCC');

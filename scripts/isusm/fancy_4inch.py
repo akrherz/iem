@@ -2,18 +2,19 @@
 # pylint: disable=unbalanced-tuple-unpacking
 # stdlib
 import datetime
-import sys
 import os
+import sys
+
+import numpy as np
+import pygrib
 
 # thirdparty
 from pandas import read_sql
-import numpy as np
-from scipy.signal import convolve2d
-import pygrib
+from pyiem.network import Table
 from pyiem.plot import MapPlot, get_cmap
 from pyiem.tracker import loadqc
-from pyiem.network import Table
-from pyiem.util import get_dbconnstr, logger, c2f, convert_value
+from pyiem.util import c2f, convert_value, get_dbconnstr, logger
+from scipy.signal import convolve2d
 
 LOG = logger()
 

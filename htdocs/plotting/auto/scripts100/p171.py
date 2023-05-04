@@ -3,12 +3,12 @@ import calendar
 
 import numpy as np
 import pandas as pd
-import seaborn as sns
 import pyiem.nws.vtec as vtec
+import seaborn as sns
 from pyiem import reference
-from pyiem.plot import figure_axes
-from pyiem.util import get_autoplot_context, get_sqlalchemy_conn, get_dbconn
 from pyiem.exceptions import NoDataFound
+from pyiem.plot import figure_axes
+from pyiem.util import get_autoplot_context, get_dbconn, get_sqlalchemy_conn
 from sqlalchemy import text
 
 PDICT = {

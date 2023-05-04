@@ -1,13 +1,13 @@
 """Merge the PNG IFC files into the daily netcdf file"""
 import datetime
-import sys
 import os
+import sys
 
+import numpy as np
 import pytz
 from osgeo import gdal
-import numpy as np
 from pyiem import iemre
-from pyiem.util import ncopen, logger, utc
+from pyiem.util import logger, ncopen, utc
 
 LOG = logger()
 

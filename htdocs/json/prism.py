@@ -1,13 +1,13 @@
 """ JSON service providing PRISM data for a given point """
-import os
 import datetime
 import json
+import os
 
 import numpy as np
-from pymemcache.client import Client
 from paste.request import parse_formvars
 from pyiem import prism
-from pyiem.util import ncopen, html_escape, c2f, mm2inch
+from pyiem.util import c2f, html_escape, mm2inch, ncopen
+from pymemcache.client import Client
 
 
 def myrounder(val, precision):

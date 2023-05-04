@@ -10,15 +10,15 @@ wished to see added to this analysis, please
 <p>The five years with the most extreme values are labelled on the chart.
 """
 # pylint: disable=unsubscriptable-object,unsupported-assignment-operation
-import datetime
 import calendar
+import datetime
 
 import numpy as np
-from scipy import stats
 import pandas as pd
-from pyiem.plot import figure_axes
 from pyiem import util
 from pyiem.exceptions import NoDataFound
+from pyiem.plot import figure_axes
+from scipy import stats
 
 PDICT = {
     "total_precip": "Total Precipitation",

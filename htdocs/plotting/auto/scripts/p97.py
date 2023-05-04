@@ -2,18 +2,18 @@
 # pylint: disable=invalid-unary-operand-type
 import datetime
 
+import geopandas as gpd
 import numpy as np
 import pandas as pd
-import geopandas as gpd
-from pyiem.plot import MapPlot, get_cmap, centered_bins, pretty_bins
+from pyiem.exceptions import NoDataFound
+from pyiem.plot import MapPlot, centered_bins, get_cmap, pretty_bins
+from pyiem.reference import wfo_bounds
 from pyiem.util import (
     get_autoplot_context,
     get_dbconn,
     get_sqlalchemy_conn,
     logger,
 )
-from pyiem.exceptions import NoDataFound
-from pyiem.reference import wfo_bounds
 from sqlalchemy import text
 
 LOG = logger()

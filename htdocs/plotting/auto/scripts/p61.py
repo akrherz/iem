@@ -5,13 +5,13 @@
     This plot is based off of NWS CLI sites."""
 import datetime
 
-import pandas as pd
 import geopandas as gpd
+import pandas as pd
+from pyiem.exceptions import NoDataFound
 from pyiem.network import Table as NetworkTable
 from pyiem.plot.geoplot import MapPlot
-from pyiem.util import get_autoplot_context, get_sqlalchemy_conn
-from pyiem.exceptions import NoDataFound
 from pyiem.reference import SECTORS_NAME
+from pyiem.util import get_autoplot_context, get_sqlalchemy_conn
 
 PDICT = {
     "precip": "Last Measurable Precipitation",

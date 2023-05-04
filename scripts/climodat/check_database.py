@@ -1,6 +1,6 @@
 """Rectify climodat database entries."""
-from io import StringIO
 import sys
+from io import StringIO
 
 import pandas as pd
 from pyiem.network import Table as NetworkTable

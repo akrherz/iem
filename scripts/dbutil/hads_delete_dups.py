@@ -6,7 +6,7 @@
 import datetime
 import sys
 
-from pyiem.util import get_dbconn, utc, logger
+from pyiem.util import get_dbconn, logger, utc
 
 LOG = logger()
 

@@ -1,14 +1,14 @@
 """Grid climate for netcdf usage"""
-import sys
 import datetime
+import sys
 
 import numpy as np
 import psycopg2.extras
-from scipy.interpolate import NearestNDInterpolator
 from pyiem import iemre
 from pyiem.network import Table as NetworkTable
 from pyiem.reference import state_names
-from pyiem.util import get_dbconn, ncopen, convert_value, logger
+from pyiem.util import convert_value, get_dbconn, logger, ncopen
+from scipy.interpolate import NearestNDInterpolator
 
 LOG = logger()
 NT = NetworkTable(["%sCLIMATE" % (abbr,) for abbr in state_names])

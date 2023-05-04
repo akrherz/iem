@@ -1,13 +1,13 @@
 """Time series plot."""
 import datetime
 
-import pytz
-import psycopg2.extras
 import numpy as np
 import pandas as pd
-from pyiem.plot import figure_axes
-from pyiem.util import get_autoplot_context, get_sqlalchemy_conn, get_dbconn
+import psycopg2.extras
+import pytz
 from pyiem.exceptions import NoDataFound
+from pyiem.plot import figure_axes
+from pyiem.util import get_autoplot_context, get_dbconn, get_sqlalchemy_conn
 
 MDICT = {
     "tmpf": "Air Temperature",

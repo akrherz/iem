@@ -3,16 +3,16 @@ import argparse
 import datetime
 import json
 import os
+import pathlib
 import subprocess
 import sys
-import pathlib
 import tempfile
 
-import pygrib
 import numpy as np
-from pyiem.util import logger
-from pyiem.mrms import NORTH, WEST
+import pygrib
 import rasterio
+from pyiem.mrms import NORTH, WEST
+from pyiem.util import logger
 from rasterio.transform import from_origin
 
 LOG = logger()

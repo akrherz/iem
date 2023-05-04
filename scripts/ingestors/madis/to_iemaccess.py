@@ -1,16 +1,16 @@
 """Suck in MADIS data into the iemdb"""
 import datetime
 import os
+import subprocess
 import sys
 import warnings
-import subprocess
 
 import numpy as np
-import pytz
 import psycopg2.extras
+import pytz
 from netCDF4 import chartostring
 from pyiem.observation import Observation
-from pyiem.util import get_dbconn, ncopen, logger, convert_value, mm2inch
+from pyiem.util import convert_value, get_dbconn, logger, mm2inch, ncopen
 
 LOG = logger()
 MYDIR = "/mesonet/data/madis/mesonet1"

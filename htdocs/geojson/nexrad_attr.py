@@ -1,12 +1,12 @@
 """ Generate a GeoJSON of nexrad attributes"""
-import json
 import datetime
+import json
 
-from pymemcache.client import Client
 import psycopg2.extras
 import pytz
 from paste.request import parse_formvars
 from pyiem.util import get_dbconn, html_escape
+from pymemcache.client import Client
 
 
 def run(ts, fmt):

@@ -1,6 +1,6 @@
 """Compute the archive start time of a HADS/DCP/COOP network"""
-import sys
 import datetime
+import sys
 
 from pyiem.network import Table as NetworkTable
 from pyiem.util import get_dbconn, logger

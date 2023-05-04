@@ -9,15 +9,15 @@ So 1000 W m-2 x 3600 is 3,600,000 W s m-2 is 86 langleys
 RUN_MIDNIGHT.sh every 28th of the month.
 """
 import datetime
-import sys
 import os
+import sys
 
-from affine import Affine
+import geopandas as gpd
 import numpy as np
 import pandas as pd
-import geopandas as gpd
+from affine import Affine
 from pyiem.grid.zs import CachingZonalStats
-from pyiem.util import get_dbconn, ncopen, logger, get_sqlalchemy_conn
+from pyiem.util import get_dbconn, get_sqlalchemy_conn, logger, ncopen
 
 LOG = logger()
 COL = "merra_srad"

@@ -13,16 +13,16 @@ for line in open('/tmp/SCIA1107.txt'):
 
 sys.exit()
 """
-import sys
+import datetime
 import os
 import smtplib
+import sys
 from email import encoders
 from email.mime.base import MIMEBase
 from email.mime.multipart import MIMEMultipart
-import datetime
 
-from xlwt import Workbook
 from pyiem.util import get_dbconn, logger
+from xlwt import Workbook
 
 LOG = logger()
 MESOSITE = get_dbconn("mesosite")

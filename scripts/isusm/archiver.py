@@ -5,12 +5,12 @@ together and then 1) dumps to LDM and 2) archives off to storage.
 run on iem15's crontab
 """
 import datetime
-import os
 import glob
+import os
 import subprocess
-from io import BytesIO
 import tempfile
 import zipfile
+from io import BytesIO
 
 from pyiem.util import logger, utc
 

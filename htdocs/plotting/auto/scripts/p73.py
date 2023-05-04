@@ -3,11 +3,11 @@ import datetime
 
 import pandas as pd
 from matplotlib.ticker import MaxNLocator
+from pyiem.exceptions import NoDataFound
 from pyiem.nws import vtec
 from pyiem.plot import figure_axes
-from pyiem.util import get_autoplot_context, get_sqlalchemy_conn, get_dbconn
-from pyiem.exceptions import NoDataFound
 from pyiem.reference import state_names
+from pyiem.util import get_autoplot_context, get_dbconn, get_sqlalchemy_conn
 from sqlalchemy import text
 
 PDICT = {"yes": "Limit Plot to Year-to-Date", "no": "Plot Entire Year"}

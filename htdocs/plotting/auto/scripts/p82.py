@@ -2,19 +2,18 @@
 import datetime
 
 import numpy as np
-import psycopg2.extras
 import pandas as pd
+import psycopg2.extras
 from matplotlib.patches import Rectangle
-from pyiem.util import (
-    get_autoplot_context,
-    get_sqlalchemy_conn,
-    convert_value,
-    get_dbconn,
-)
-from pyiem.reference import TRACE_VALUE
-from pyiem.plot import calendar_plot
 from pyiem.exceptions import NoDataFound
-
+from pyiem.plot import calendar_plot
+from pyiem.reference import TRACE_VALUE
+from pyiem.util import (
+    convert_value,
+    get_autoplot_context,
+    get_dbconn,
+    get_sqlalchemy_conn,
+)
 
 PDICT = {
     "max_tmpf": "High Temperature",

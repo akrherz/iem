@@ -2,10 +2,10 @@
 import datetime
 import json
 
-from pymemcache.client import Client
 import pandas as pd
 from paste.request import parse_formvars
 from pyiem.util import get_dbconn, html_escape
+from pymemcache.client import Client
 
 
 def run(year, fmt):

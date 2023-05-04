@@ -1,10 +1,10 @@
 """SPC MCD service."""
-import os
 import json
+import os
 
-from pymemcache.client import Client
 from paste.request import parse_formvars
 from pyiem.util import get_dbconn, html_escape
+from pymemcache.client import Client
 
 ISO9660 = "%Y-%m-%dT%H:%MZ"
 

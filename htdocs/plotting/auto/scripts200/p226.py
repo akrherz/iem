@@ -1,13 +1,13 @@
 """This plot is not meant for interactive use, but a backend for
     CWA plots."""
-from datetime import timezone, timedelta
+from datetime import timedelta, timezone
 
 # third party
 from geopandas import read_postgis
-from pyiem.plot.geoplot import MapPlot
-from pyiem.util import get_autoplot_context, get_sqlalchemy_conn
 from pyiem.exceptions import NoDataFound
+from pyiem.plot.geoplot import MapPlot
 from pyiem.reference import Z_OVERLAY2
+from pyiem.util import get_autoplot_context, get_sqlalchemy_conn
 
 
 def get_description():

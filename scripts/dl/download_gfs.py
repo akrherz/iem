@@ -5,9 +5,9 @@ days worth of data into /mesonet/tmp/gfs/
 
 RUN from RUN_20_AFTER.sh
 """
-import sys
 import datetime
 import os
+import sys
 
 import requests
 from pyiem.util import exponential_backoff, logger, utc

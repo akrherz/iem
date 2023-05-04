@@ -1,15 +1,15 @@
 """Seasonal averages of Humudity."""
 import datetime
 
-import numpy as np
-from scipy import stats
-import pandas as pd
 import metpy.calc as mcalc
-from metpy.units import units
+import numpy as np
+import pandas as pd
 from matplotlib.ticker import MaxNLocator
+from metpy.units import units
+from pyiem.exceptions import NoDataFound
 from pyiem.plot import figure_axes
 from pyiem.util import get_autoplot_context, get_sqlalchemy_conn, utc
-from pyiem.exceptions import NoDataFound
+from scipy import stats
 from sqlalchemy import text
 
 MDICT = {

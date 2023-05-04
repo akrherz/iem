@@ -7,13 +7,13 @@ import datetime
 import os
 
 import numpy as np
+from metpy.units import masked_array, units
 from pyiem import iemre
+from pyiem.exceptions import NoDataFound
 from pyiem.plot import MapPlot
 from pyiem.plot.colormaps import stretch_cmap
-from pyiem.util import get_autoplot_context, ncopen
-from pyiem.exceptions import NoDataFound
 from pyiem.reference import LATLON
-from metpy.units import units, masked_array
+from pyiem.util import get_autoplot_context, ncopen
 
 PDICT = {
     "p01d_12z": "24 Hour Precipitation at 12 UTC",

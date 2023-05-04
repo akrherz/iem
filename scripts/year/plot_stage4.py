@@ -5,8 +5,8 @@ Run from RUN_SUMMARY.sh
 import datetime
 
 import numpy as np
-from pyiem.plot import MapPlot
 from pyiem import iemre
+from pyiem.plot import MapPlot
 from pyiem.util import ncopen
 
 

@@ -3,9 +3,9 @@ import calendar
 import datetime
 
 import pandas as pd
-from pyiem.util import get_autoplot_context, get_sqlalchemy_conn
-from pyiem.plot import figure_axes
 from pyiem.exceptions import NoDataFound
+from pyiem.plot import figure_axes
+from pyiem.util import get_autoplot_context, get_sqlalchemy_conn
 
 PDICT = {"above": "Above Threshold", "below": "Below Threshold"}
 PDICT2 = {"max_rh": "Daily Max RH", "min_rh": "Daily Min RH"}

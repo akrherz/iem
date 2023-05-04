@@ -1,26 +1,26 @@
 """Our mod_wsgi frontend to autoplot generation"""
 # pylint: disable=abstract-class-instantiated
-import sys
-import os
-import tempfile
 import importlib.machinery
 import importlib.util
 import json
+import os
+import sys
 import syslog
+import tempfile
 import traceback
 from io import BytesIO
 
 import numpy as np
-from pymemcache.client import Client
+import pandas as pd
 import pytz
 from pandas.api.types import is_datetime64_any_dtype as isdt
-import pandas as pd
-from PIL import Image
 from paste.request import parse_formvars
-from six import string_types
-from pyiem.util import utc
-from pyiem.plot.use_agg import plt
+from PIL import Image
 from pyiem.exceptions import NoDataFound
+from pyiem.plot.use_agg import plt
+from pyiem.util import utc
+from pymemcache.client import Client
+from six import string_types
 
 # Attempt to stop hangs within mod_wsgi and numpy
 np.seterr(all="ignore")

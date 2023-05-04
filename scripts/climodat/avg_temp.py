@@ -1,8 +1,8 @@
 """
  Generate maps of Average Temperatures
 """
-import sys
 import datetime
+import sys
 
 import pandas as pd
 from pyiem.network import Table as NetworkTable

@@ -1,7 +1,7 @@
 """Generate a map of Yearly Precipitation."""
 import sys
 
-from pyiem.util import web2ldm, logger
+from pyiem.util import logger, web2ldm
 
 LOG = logger()
 

@@ -2,9 +2,9 @@
 import sys
 
 import requests
-from twisted.words.xish import xpath, domish
 from pyiem.network import Table as NetworkTable
 from pyiem.util import get_dbconn, logger
+from twisted.words.xish import domish, xpath
 
 LOG = logger()
 

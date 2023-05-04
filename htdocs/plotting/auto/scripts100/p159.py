@@ -13,11 +13,11 @@ data coverage.
 """
 import datetime
 
-from matplotlib.ticker import MaxNLocator
 import pandas as pd
-from pyiem.util import get_autoplot_context, get_sqlalchemy_conn
-from pyiem.plot import figure
+from matplotlib.ticker import MaxNLocator
 from pyiem.exceptions import NoDataFound
+from pyiem.plot import figure
+from pyiem.util import get_autoplot_context, get_sqlalchemy_conn
 from sqlalchemy import text
 
 MDICT = {

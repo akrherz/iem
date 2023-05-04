@@ -2,15 +2,15 @@
 
 Run from RUN_0Z.sh for 5 days ago.
 """
-from datetime import timedelta
 import os
 import sys
+from datetime import timedelta
 
-import numpy as np
-from pyiem import iemre
-from pyiem.util import utc, ncopen, logger
 import cdsapi
+import numpy as np
 import pygrib
+from pyiem import iemre
+from pyiem.util import logger, ncopen, utc
 
 LOG = logger()
 CDSVARS = (

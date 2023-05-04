@@ -1,8 +1,8 @@
 """Plot of Precip reports"""
 import datetime
 
-from pyiem.reference import TRACE_VALUE
 from pyiem.plot import MapPlot
+from pyiem.reference import TRACE_VALUE
 from pyiem.util import get_dbconn
 
 

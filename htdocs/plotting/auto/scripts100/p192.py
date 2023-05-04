@@ -1,15 +1,15 @@
 """Generates analysis maps of ASOS station data."""
 import datetime
 
-import pytz
 import numpy as np
 import pandas as pd
+import pytz
 from metpy.calc import apparent_temperature
 from metpy.units import units
 from pyiem import reference
+from pyiem.exceptions import NoDataFound
 from pyiem.plot import MapPlot, get_cmap
 from pyiem.util import get_autoplot_context, get_sqlalchemy_conn, utc
-from pyiem.exceptions import NoDataFound
 
 PDICT = {"cwa": "Plot by NWS Forecast Office", "state": "Plot by State"}
 PDICT2 = {"vsby": "Visibility", "feel": "Feels Like Temperature"}

@@ -2,13 +2,13 @@
 import datetime
 import json
 
-from metpy.units import units
 import numpy as np
-from pymemcache.client import Client
+from metpy.units import units
 from paste.request import parse_formvars
 from pyiem.iemre import find_ij
 from pyiem.meteorology import gdd as calc_gdd
-from pyiem.util import get_dbconn, ncopen, c2f
+from pyiem.util import c2f, get_dbconn, ncopen
+from pymemcache.client import Client
 
 
 def compute_taxis(ncvar):

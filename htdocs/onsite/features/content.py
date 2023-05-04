@@ -1,8 +1,8 @@
 """Frontend for Feature Content, such that we can make some magic happen"""
-import sys
+import datetime
 import os
 import re
-import datetime
+import sys
 from io import BytesIO
 
 from pyiem.util import get_dbconn

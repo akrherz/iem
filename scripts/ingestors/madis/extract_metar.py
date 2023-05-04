@@ -4,17 +4,17 @@ called from RUN_20MIN.sh
 """
 import datetime
 import os
-from subprocess import Popen, PIPE
+from subprocess import PIPE, Popen
 
 import numpy as np
-import xarray as xr
 import pandas as pd
+import xarray as xr
 from pyiem.util import (
-    get_dbconn,
     convert_value,
+    get_dbconn,
+    get_sqlalchemy_conn,
     logger,
     utc,
-    get_sqlalchemy_conn,
 )
 
 LOG = logger()

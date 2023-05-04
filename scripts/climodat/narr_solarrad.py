@@ -29,14 +29,14 @@ import datetime
 import os
 import sys
 
-from affine import Affine
+import geopandas as gpd
 import numpy as np
 import pandas as pd
 import pygrib
 import pyproj
-import geopandas as gpd
+from affine import Affine
 from pyiem.grid.zs import CachingZonalStats
-from pyiem.util import get_dbconn, logger, get_sqlalchemy_conn, utc
+from pyiem.util import get_dbconn, get_sqlalchemy_conn, logger, utc
 
 LOG = logger()
 LCC = (

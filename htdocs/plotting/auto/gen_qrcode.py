@@ -3,10 +3,11 @@
 import hashlib
 from io import BytesIO
 
+import qrcode
+
 # third party
 from paste.request import parse_formvars
 from pymemcache.client import Client
-import qrcode
 
 HTTP200 = "200 OK"
 

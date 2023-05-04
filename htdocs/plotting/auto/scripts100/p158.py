@@ -7,10 +7,10 @@ prevent web browser crashes.  If you select a time period greater than
 """
 import datetime
 
-import pytz
+import matplotlib.dates as mdates
 import numpy as np
 import pandas as pd
-import matplotlib.dates as mdates
+import pytz
 from pyiem.plot import figure
 from pyiem.util import get_autoplot_context, get_sqlalchemy_conn
 

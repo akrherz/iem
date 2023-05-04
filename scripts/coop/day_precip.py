@@ -1,8 +1,8 @@
 """
 Daily precip something
 """
-import os
 import datetime
+import os
 import subprocess
 import tempfile
 

@@ -21,13 +21,13 @@ issuance counts for a single Weather Forecast Offices.</p>
 """
 import datetime
 
-import pytz
 import numpy as np
 import pandas as pd
-from pyiem.plot.geoplot import MapPlot
-from pyiem.util import get_autoplot_context, get_sqlalchemy_conn, utc
+import pytz
 from pyiem.exceptions import NoDataFound
+from pyiem.plot.geoplot import MapPlot
 from pyiem.reference import prodDefinitions
+from pyiem.util import get_autoplot_context, get_sqlalchemy_conn, utc
 
 PDICT = {
     "count": "Issuance Count",

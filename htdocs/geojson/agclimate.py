@@ -6,7 +6,7 @@ import psycopg2.extras
 from paste.request import parse_formvars
 from pyiem.network import Table as NetworkTable
 from pyiem.tracker import loadqc
-from pyiem.util import drct2text, get_dbconn, utc, convert_value
+from pyiem.util import convert_value, drct2text, get_dbconn, utc
 
 
 def safe_t(val, units="degC"):

@@ -4,14 +4,14 @@ observations each month that reported measurable precipitation.  Sites
 are able to report trace amounts, but those reports are not considered
 in hopes of making the long term climatology comparable.
 """
-import datetime
 import calendar
+import datetime
 
 import numpy as np
 import pandas as pd
+from pyiem.exceptions import NoDataFound
 from pyiem.plot import figure_axes
 from pyiem.util import get_autoplot_context, get_sqlalchemy_conn
-from pyiem.exceptions import NoDataFound
 
 
 def get_description():

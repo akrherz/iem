@@ -15,7 +15,7 @@ import geopandas as gpd
 import matplotlib.colors as mpcolors
 import numpy as np
 from pyiem.plot import MapPlot, get_cmap, pretty_bins
-from pyiem.reference import EPSG, state_bounds, Z_CLIP2
+from pyiem.reference import EPSG, Z_CLIP2, state_bounds
 from pyiem.util import get_autoplot_context, get_sqlalchemy_conn, utc
 
 LL = (

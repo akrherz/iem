@@ -1,7 +1,7 @@
 """Properly zap a period of data from the database"""
-import sys
-import subprocess
 import datetime
+import subprocess
+import sys
 
 from pyiem.util import get_dbconn, logger
 

@@ -7,7 +7,7 @@ import sys
 import numpy as np
 from pyiem.iemre import daily_offset
 from pyiem.plot import MapPlot, nwsprecip
-from pyiem.util import ncopen, mm2inch
+from pyiem.util import mm2inch, ncopen
 
 
 def doday(ts, realtime):

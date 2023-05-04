@@ -1,15 +1,15 @@
 """Ob timeseries"""
 import datetime
 
-import pytz
 import matplotlib.dates as mdates
-from matplotlib import ticker
 import pandas as pd
+import pytz
+from matplotlib import ticker
+from metpy.units import units
+from pyiem.exceptions import NoDataFound
 from pyiem.plot import figure
 from pyiem.plot.use_agg import plt
 from pyiem.util import get_autoplot_context, get_sqlalchemy_conn, utc
-from pyiem.exceptions import NoDataFound
-from metpy.units import units
 
 PDICT = {
     "default": "Temperatures | Winds | Clouds + Vis",

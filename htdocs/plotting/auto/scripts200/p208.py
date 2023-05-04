@@ -22,16 +22,17 @@
 # local
 from datetime import timezone
 
+import geopandas as gpd
+
 # third party
 import pandas as pd
-import geopandas as gpd
-from sqlalchemy import text
+import pytz
+from pyiem.exceptions import NoDataFound
 from pyiem.nws import vtec
 from pyiem.plot.geoplot import MapPlot
+from pyiem.reference import LATLON, Z_FILL, Z_OVERLAY2, Z_OVERLAY2_LABEL
 from pyiem.util import get_autoplot_context, get_sqlalchemy_conn, utc
-from pyiem.exceptions import NoDataFound
-from pyiem.reference import Z_OVERLAY2, Z_OVERLAY2_LABEL, LATLON, Z_FILL
-import pytz
+from sqlalchemy import text
 
 TFORMAT = "%b %-d %Y %-I:%M %p %Z"
 PDICT = {

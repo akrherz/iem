@@ -7,10 +7,10 @@
 import datetime
 import sys
 
-import pytz
 import numpy as np
+import pytz
 from pandas import read_sql
-from pyiem.util import get_dbconn, get_dbconnstr, utc, logger
+from pyiem.util import get_dbconn, get_dbconnstr, logger, utc
 
 LOG = logger()
 

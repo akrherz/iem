@@ -2,9 +2,9 @@
 
  Called from nowhere known at the moment
 """
-from io import StringIO
-import sys
 import datetime
+import sys
+from io import StringIO
 
 import pytz
 from paste.request import parse_formvars

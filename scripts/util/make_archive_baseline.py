@@ -6,10 +6,10 @@
 Since we have web scrapers, we need to have empty folders to keep the Server
 from having lots of 404s
 """
-import os
-import sys
 import grp
+import os
 import subprocess
+import sys
 
 from pyiem.network import Table as NetworkTable
 from pyiem.util import utc

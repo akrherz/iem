@@ -1,12 +1,12 @@
 """
  Generate simple plots of 12z COOP preciptiation
 """
-import sys
 import datetime
+import sys
 import warnings
 
-from pyiem.plot import MapPlot
 from pyiem.network import Table as NetworkTable
+from pyiem.plot import MapPlot
 from pyiem.util import get_dbconn
 
 warnings.simplefilter("ignore", UserWarning)

@@ -1,12 +1,12 @@
 """ Find VTEC events by a given UGC code. """
+import datetime
 import json
 from io import BytesIO, StringIO
-import datetime
 
-from paste.request import parse_formvars
-from pyiem.util import get_sqlalchemy_conn, html_escape
-from pyiem.nws.vtec import VTEC_PHENOMENA, VTEC_SIGNIFICANCE, get_ps_string
 from pandas.io.sql import read_sql
+from paste.request import parse_formvars
+from pyiem.nws.vtec import VTEC_PHENOMENA, VTEC_SIGNIFICANCE, get_ps_string
+from pyiem.util import get_sqlalchemy_conn, html_escape
 
 EXL = "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"
 

@@ -1,11 +1,11 @@
 """Generate the storage of NARR 3 hourly products"""
 import datetime
-import sys
 import os
+import sys
 
 import numpy as np
 import pygrib
-from pyiem.util import ncopen, logger
+from pyiem.util import logger, ncopen
 
 # This exists on dev laptop :/
 TEMPLATE_FN = (

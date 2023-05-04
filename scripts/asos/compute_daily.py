@@ -2,14 +2,14 @@
 
 Called from RUN_12Z.sh for the previous date
 """
+import datetime
 import sys
 import time
-import datetime
 import warnings
 
+import metpy.calc as mcalc
 import numpy as np
 import pandas as pd
-import metpy.calc as mcalc
 from metpy.units import units as munits
 from pyiem.util import get_dbconn, get_dbconnstr, logger
 

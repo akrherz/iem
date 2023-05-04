@@ -2,22 +2,22 @@
 
 Run from RUN_NOON.sh
 """
-import sys
 import datetime
-import warnings
 import logging
+import sys
+import warnings
 
-import numpy as np
 import geopandas as gpd
+import numpy as np
 from pyiem import iemre
 from pyiem.grid.zs import CachingZonalStats
 from pyiem.util import (
+    convert_value,
     get_dbconn,
     get_sqlalchemy_conn,
-    ncopen,
     logger,
     mm2inch,
-    convert_value,
+    ncopen,
 )
 
 LOG = logger()

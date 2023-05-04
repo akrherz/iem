@@ -4,16 +4,16 @@ Generate a PNG windrose based on the CGI parameters, called from
     htdocs/sites/dyn_windrose.phtml
     htdocs/sites/windrose.phtml
 """
-from io import BytesIO
 import datetime
+from io import BytesIO
 
 import numpy
 import pytz
 from paste.request import parse_formvars
-from pyiem.plot.use_agg import plt
-from pyiem.windrose_utils import windrose
 from pyiem.network import Table as NetworkTable
+from pyiem.plot.use_agg import plt
 from pyiem.util import get_dbconn
+from pyiem.windrose_utils import windrose
 
 
 def send_error(form, msg, start_response):

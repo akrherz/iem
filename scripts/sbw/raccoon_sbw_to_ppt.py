@@ -4,19 +4,26 @@
 This script looks for queued jobs within the database and runs them
 sequentially each minute"""
 
-import sys
-import shutil
 import datetime
-import subprocess
-import random
 import os
+import random
+import shutil
+import subprocess
+import sys
 
 import psycopg2.extras
+from odf.draw import Frame, Image, Page, TextBox
 from odf.opendocument import OpenDocumentPresentation
-from odf.style import Style, MasterPage, PageLayout, PageLayoutProperties
-from odf.style import TextProperties, GraphicProperties, ParagraphProperties
+from odf.style import (
+    GraphicProperties,
+    MasterPage,
+    PageLayout,
+    PageLayoutProperties,
+    ParagraphProperties,
+    Style,
+    TextProperties,
+)
 from odf.text import P
-from odf.draw import Page, Frame, TextBox, Image
 from pyiem.util import get_dbconn, logger, utc
 
 os.putenv("DISPLAY", "localhost:1")

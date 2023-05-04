@@ -1,13 +1,13 @@
 """ Crop condition reports"""
-import datetime
 import calendar
+import datetime
 
-from matplotlib.font_manager import FontProperties
 import pandas as pd
-from pyiem.util import get_autoplot_context, get_sqlalchemy_conn
+from matplotlib.font_manager import FontProperties
+from pyiem.exceptions import NoDataFound
 from pyiem.plot import figure
 from pyiem.reference import state_names
-from pyiem.exceptions import NoDataFound
+from pyiem.util import get_autoplot_context, get_sqlalchemy_conn
 from sqlalchemy import text
 
 NASS_CROP_PROGRESS = {

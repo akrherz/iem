@@ -1,8 +1,8 @@
 """
 JSON webservice providing timestamps of available webcam images
 """
-import json
 import datetime
+import json
 
 import pytz
 from paste.request import parse_formvars

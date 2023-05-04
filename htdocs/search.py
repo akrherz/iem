@@ -2,13 +2,14 @@
 # Local
 import re
 
+import pandas as pd
+import requests
+
 # Third Party
 from commonregex import CommonRegex
-import pandas as pd
-from pyiem.templates.iem import TEMPLATE
-from pyiem.util import get_sqlalchemy_conn, get_properties
 from paste.request import parse_formvars
-import requests
+from pyiem.templates.iem import TEMPLATE
+from pyiem.util import get_properties, get_sqlalchemy_conn
 
 AFOS_RE = re.compile(r"^[A-Z0-9]{6}$", re.I)
 STATION_RE = re.compile(r"^[A-Z0-9]{3,10}$", re.I)

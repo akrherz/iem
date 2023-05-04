@@ -1,13 +1,13 @@
 """Average dew point by wind direction."""
 import datetime
 
+import matplotlib.ticker as mticker
+import metpy.calc as mcalc
 import pandas as pd
 from metpy.units import units
-import metpy.calc as mcalc
-import matplotlib.ticker as mticker
+from pyiem.exceptions import NoDataFound
 from pyiem.plot import figure_axes
 from pyiem.util import get_autoplot_context, get_sqlalchemy_conn
-from pyiem.exceptions import NoDataFound
 from sqlalchemy import text
 
 MDICT = {

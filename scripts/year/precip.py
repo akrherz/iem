@@ -6,8 +6,8 @@ import tempfile
 
 import numpy as np
 import requests
-from pyiem.plot import MapPlot
 from pyiem.network import Table as NetworkTable
+from pyiem.plot import MapPlot
 from pyiem.util import get_dbconn
 
 

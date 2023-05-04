@@ -4,20 +4,21 @@ IEM_APPID 92
 """
 # pylint: disable=wrong-import-position
 # stdlib
-from datetime import datetime, date
 import calendar
 import os
 import sys
+from datetime import date, datetime
+
+import pandas as pd
 
 # Third Party
 import requests
-import pandas as pd
 from paste.request import get_cookie_dict, parse_formvars
 from pyiem.htmlgen import make_select, station_select
-from pyiem.util import get_dbconn, utc, html_escape, get_sqlalchemy_conn, LOG
-from pyiem.templates.iem import TEMPLATE
-from pyiem.reference import state_names, SECTORS_NAME
 from pyiem.nws.vtec import VTEC_PHENOMENA, VTEC_SIGNIFICANCE
+from pyiem.reference import SECTORS_NAME, state_names
+from pyiem.templates.iem import TEMPLATE
+from pyiem.util import LOG, get_dbconn, get_sqlalchemy_conn, html_escape, utc
 from sqlalchemy import text
 
 BASEDIR, WSGI_FILENAME = os.path.split(__file__)

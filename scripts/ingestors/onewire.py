@@ -1,7 +1,7 @@
 """Onewire ingest."""
-import time
-import os
 import datetime
+import os
+import time
 
 os.environ["TZ"] = "CST6CDT"
 

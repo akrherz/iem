@@ -2,12 +2,11 @@
 import datetime
 from io import StringIO
 
-import requests
 import pandas as pd
 import pytz
-from pyiem.util import get_dbconn
+import requests
 from pyiem.observation import Observation
-
+from pyiem.util import get_dbconn
 
 URI = (
     "http://www.rainwise.net/inview/api/stationdata-iowa.php?"

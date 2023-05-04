@@ -7,15 +7,15 @@
 import datetime
 import os
 
-import numpy as np
 import geopandas as gpd
-import pandas as pd
 import matplotlib.dates as mdates
+import numpy as np
+import pandas as pd
 from pyiem import iemre, reference
-from pyiem.plot import figure_axes
-from pyiem.grid.zs import CachingZonalStats
-from pyiem.util import get_autoplot_context, get_sqlalchemy_conn, ncopen
 from pyiem.exceptions import NoDataFound
+from pyiem.grid.zs import CachingZonalStats
+from pyiem.plot import figure_axes
+from pyiem.util import get_autoplot_context, get_sqlalchemy_conn, ncopen
 
 
 def get_description():

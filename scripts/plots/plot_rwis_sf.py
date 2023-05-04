@@ -1,5 +1,6 @@
 """Plot of current RWIS surface temperatures"""
 import datetime
+
 import numpy as np
 from pyiem.plot import MapPlot
 from pyiem.util import get_dbconn

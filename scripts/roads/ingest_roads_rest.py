@@ -29,25 +29,25 @@ Run every five minutes from RUN_5MIN.sh
       },
 
 """
-import json
 import datetime
+import json
+import os
+import subprocess
 import sys
 import zipfile
-import subprocess
-import os
 
 import pandas as pd
 import psycopg2.extras
-from shapely.wkb import loads
-import shapefile
 import requests
+import shapefile
 from pyiem.util import (
     exponential_backoff,
     get_dbconn,
-    logger,
     get_sqlalchemy_conn,
+    logger,
     utc,
 )
+from shapely.wkb import loads
 
 LOG = logger()
 URI = (

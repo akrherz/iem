@@ -2,8 +2,8 @@
 Provide nws text for one center for one date, or not.
 """
 # stdlib
-from datetime import timezone, datetime, timedelta
 import json
+from datetime import datetime, timedelta, timezone
 
 # extras
 from paste.request import parse_formvars

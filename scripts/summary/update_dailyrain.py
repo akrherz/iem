@@ -6,8 +6,8 @@ messages come and overwrite the trouble. Run from RUN_10MIN.sh
 """
 import datetime
 
-from pyiem.util import get_dbconn
 from pyiem.reference import TRACE_VALUE
+from pyiem.util import get_dbconn
 
 
 def main():

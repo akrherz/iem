@@ -5,18 +5,18 @@
 
 """
 import datetime
+import gzip
+import json
 import os
+import subprocess
 import sys
 import tempfile
-import subprocess
-import json
-import gzip
 
 import numpy as np
+import pygrib
 from PIL import Image
 from pyiem import mrms
 from pyiem.util import logger
-import pygrib
 
 LOG = logger()
 TMP = "/mesonet/tmp"

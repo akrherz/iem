@@ -17,8 +17,8 @@ SWGDNCLR    surface incoming shortwave flux assuming clear sky
 """
 import datetime
 import os
-import sys
 import subprocess
+import sys
 
 from pyiem.util import get_properties, logger, ncopen
 

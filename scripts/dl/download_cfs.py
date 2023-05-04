@@ -12,8 +12,8 @@ import os
 import subprocess
 import tempfile
 
-import requests
 import pygrib
+import requests
 from pyiem.util import exponential_backoff, logger, utc
 
 LOG = logger()

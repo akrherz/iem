@@ -2,13 +2,13 @@
  Generate a RTP product for the weather bureau as my database as more AWOS
  obs than what they get
 """
+import datetime
 import os
 import subprocess
-import datetime
 import tempfile
 
-from pyiem.tracker import loadqc
 from pyiem import network
+from pyiem.tracker import loadqc
 from pyiem.util import get_dbconn, utc
 
 

@@ -1,9 +1,9 @@
 """Copy the provided baseline data to the database"""
+import datetime
 import glob
 import os
-import datetime
 
-from pyiem.util import get_dbconn, logger, convert_value
+from pyiem.util import convert_value, get_dbconn, logger
 
 LOG = logger()
 

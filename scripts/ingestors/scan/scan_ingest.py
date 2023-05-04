@@ -4,9 +4,9 @@ import sys
 
 import pytz
 import requests
-from pyiem.observation import Observation
 from pyiem.network import Table as NetworkTable
-from pyiem.util import get_dbconn, c2f, utc, logger
+from pyiem.observation import Observation
+from pyiem.util import c2f, get_dbconn, logger, utc
 
 LOG = logger()
 

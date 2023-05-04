@@ -1,6 +1,6 @@
 """Legacy stuff."""
-from io import StringIO
 import datetime
+from io import StringIO
 
 import psycopg2.extras
 import pytz

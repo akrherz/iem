@@ -6,18 +6,18 @@ of 0.02 mm per index.
 
 """
 import datetime
-import os
-import tempfile
-import subprocess
-import json
-import sys
 import gzip
+import json
+import os
+import subprocess
+import sys
+import tempfile
 
 import numpy as np
+import pygrib
 from PIL import Image
 from pyiem import mrms
 from pyiem.util import logger, utc
-import pygrib
 
 LOG = logger()
 

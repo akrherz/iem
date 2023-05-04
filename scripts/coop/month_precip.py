@@ -2,8 +2,8 @@
 Monthly precip something
 """
 import datetime
-import subprocess
 import os
+import subprocess
 
 from pyiem.network import Table as NetworkTable
 from pyiem.util import get_dbconn, logger

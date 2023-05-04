@@ -1,8 +1,8 @@
 """
 Generate web output for precip data
 """
-from io import StringIO
 import datetime
+from io import StringIO
 
 import psycopg2.extras
 from paste.request import parse_formvars

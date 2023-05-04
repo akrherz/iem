@@ -1,12 +1,12 @@
 """
 Drive a windrose for a given network and site
 """
-from calendar import month_abbr
-import sys
 import os
+import sys
+from calendar import month_abbr
 
-from pyiem.plot.use_agg import plt
 from pyiem.network import Table as NetworkTable
+from pyiem.plot.use_agg import plt
 from pyiem.windrose_utils import windrose
 
 CACHE_DIR = "/mesonet/share/windrose"

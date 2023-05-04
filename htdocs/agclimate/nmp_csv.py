@@ -9,7 +9,7 @@ import numpy as np
 import pandas as pd
 from metpy.units import units
 from pyiem.network import Table as NetworkTable
-from pyiem.util import get_sqlalchemy_conn, convert_value
+from pyiem.util import convert_value, get_sqlalchemy_conn
 
 INVERSION = [
     "BOOI4",

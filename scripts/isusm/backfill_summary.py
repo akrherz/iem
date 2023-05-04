@@ -4,11 +4,11 @@ Some of the variables don't get properly updated in the summary table.
 
 cronjob from RUN_2AM.sh
 """
-from datetime import timedelta
 import sys
+from datetime import timedelta
 
 import pandas as pd
-from pyiem.util import get_dbconn, logger, utc, get_sqlalchemy_conn
+from pyiem.util import get_dbconn, get_sqlalchemy_conn, logger, utc
 
 LOG = logger()
 

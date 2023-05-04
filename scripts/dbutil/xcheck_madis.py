@@ -1,10 +1,10 @@
 """See if MADIS knows any station metadata."""
-import os
 import datetime
+import os
 import warnings
 
-from pandas import read_sql
 from netCDF4 import chartostring
+from pandas import read_sql
 from pyiem.util import get_dbconnstr, ncopen, utc
 
 warnings.filterwarnings("ignore", category=DeprecationWarning)

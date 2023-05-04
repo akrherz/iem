@@ -1,11 +1,11 @@
 """Compare the REST service with our current database."""
 import datetime
 
-from shapely.geometry import LineString, MultiLineString
 import requests
+from ingest_roads_rest import URI
 from pandas import read_sql
 from pyiem.util import get_dbconn, get_dbconnstr, logger, utc
-from ingest_roads_rest import URI
+from shapely.geometry import LineString, MultiLineString
 
 LOG = logger()
 

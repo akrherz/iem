@@ -3,15 +3,14 @@ import datetime
 import os
 from io import StringIO
 
+import matplotlib.image as mpimage
 import pandas as pd
 from geopandas import read_postgis
-import matplotlib.image as mpimage
-from pyiem.util import get_autoplot_context, get_sqlalchemy_conn, utc
+from pyiem.nws.vtec import VTEC_PHENOMENA
 from pyiem.plot import figure
 from pyiem.plot.util import fitbox
-from pyiem.nws.vtec import VTEC_PHENOMENA
+from pyiem.util import get_autoplot_context, get_sqlalchemy_conn, utc
 from sqlalchemy import text
-
 
 PDICT = {
     "W": "By Issuance Center",

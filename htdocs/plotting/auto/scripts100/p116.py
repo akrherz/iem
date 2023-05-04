@@ -1,11 +1,11 @@
 """Monthly HDD/CDD Totals."""
 import datetime
 
-import seaborn as sns
 import pandas as pd
-from pyiem.plot import figure_axes
-from pyiem.util import get_sqlalchemy_conn, get_autoplot_context
+import seaborn as sns
 from pyiem.exceptions import NoDataFound
+from pyiem.plot import figure_axes
+from pyiem.util import get_autoplot_context, get_sqlalchemy_conn
 
 PDICT = {"cdd": "Cooling Degree Days", "hdd": "Heating Degree Days"}
 

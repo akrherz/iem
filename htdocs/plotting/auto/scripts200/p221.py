@@ -9,10 +9,10 @@ import datetime
 import os
 from io import BytesIO
 
+import matplotlib.colors as mpcolors
+import numpy as np
 import pygrib
 from PIL import Image
-import numpy as np
-import matplotlib.colors as mpcolors
 from pyiem.plot import MapPlot, ramp2df
 from pyiem.util import get_autoplot_context, utc
 

@@ -6,11 +6,12 @@ Called from gfs2iemre.py for just the 6z run.
 # stdlib
 import datetime
 
+import numpy as np
+
 # thirdparty
 import pandas as pd
-import numpy as np
 from pyiem.plot import MapPlot, get_cmap
-from pyiem.util import get_sqlalchemy_conn, logger, convert_value, ncopen
+from pyiem.util import convert_value, get_sqlalchemy_conn, logger, ncopen
 
 LOG = logger()
 

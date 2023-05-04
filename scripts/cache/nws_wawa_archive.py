@@ -2,12 +2,12 @@
 
 https://mesonet.agron.iastate.edu/timemachine/#59.0
 """
+import os
 import subprocess
 import tempfile
-import os
 
-from pyiem.util import exponential_backoff, logger, utc
 import requests
+from pyiem.util import exponential_backoff, logger, utc
 
 LOG = logger()
 SRC = "https://forecast.weather.gov/wwamap/png/US.png"

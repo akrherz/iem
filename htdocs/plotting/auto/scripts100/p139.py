@@ -8,9 +8,9 @@ except ImportError:
 
 import pandas as pd
 from matplotlib.font_manager import FontProperties
-from pyiem.util import get_autoplot_context, get_sqlalchemy_conn
-from pyiem.plot import figure
 from pyiem.exceptions import NoDataFound
+from pyiem.plot import figure
+from pyiem.util import get_autoplot_context, get_sqlalchemy_conn
 from sqlalchemy import text
 
 MDICT = {

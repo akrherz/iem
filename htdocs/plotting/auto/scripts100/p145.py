@@ -1,11 +1,11 @@
 """4 inch soil temps or moisture"""
-import datetime
 import calendar
+import datetime
 
 import pandas as pd
 from pyiem import util
-from pyiem.plot import figure_axes
 from pyiem.network import Table as NetworkTable  # This is needed.
+from pyiem.plot import figure_axes
 
 VARS = {
     "tsoil": "4 inch Soil Temperature",

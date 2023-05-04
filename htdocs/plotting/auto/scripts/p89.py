@@ -2,16 +2,16 @@
 import datetime
 import os
 
-import numpy as np
-import matplotlib.dates as mdates
-import pandas as pd
 import geopandas as gpd
+import matplotlib.dates as mdates
+import numpy as np
+import pandas as pd
 from metpy.units import units
 from pyiem import iemre, reference
-from pyiem.grid.zs import CachingZonalStats
-from pyiem.util import get_autoplot_context, get_sqlalchemy_conn, ncopen
-from pyiem.plot import figure
 from pyiem.exceptions import NoDataFound
+from pyiem.grid.zs import CachingZonalStats
+from pyiem.plot import figure
+from pyiem.util import get_autoplot_context, get_sqlalchemy_conn, ncopen
 
 
 def get_description():

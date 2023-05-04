@@ -1,8 +1,8 @@
 """Generate a WXC formatted file of DOT Snowplow positions"""
 import datetime
-from pymemcache.client import Client
 
 from pyiem.util import get_dbconn
+from pymemcache.client import Client
 
 
 def get_data():

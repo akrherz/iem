@@ -1,16 +1,35 @@
-"""Flash Flood Guidance Plots"""
+"""
+This application plots Flash Flood Guidance for
+a time of your choice.  The time is used to query a 24 hour trailing window
+to find the most recent FFG issuance.
+
+<p>For dates after 1 Jan 2019, a gridded 5km analysis product is used as
+the county guidance was discontinued. The raw data download option does
+not work for that data either.  You can find the raw Grib files on the
+IEM Archives, for example
+<a href="https://mesonet.agron.iastate.edu/archive/data/2019/04/25/model/ffg/">
+here</a>.
+</p>
+
+<p>Additionally, there is a <a
+href="/api/1/docs#/default/ffg_bypoint_service_ffg_bypoint_json_get">
+FFG by Point</a>
+web service that provides the raw values.</p>
+
+<p>For dates before 1 Jan 2019, this dataset is based on IEM processing
+of county/zone based FFG guidance found in the FFG text products.
+"""
 import datetime
 import os
 
-import pytz
-import pygrib
-from metpy.units import units, masked_array
 import pandas as pd
-from pyiem.util import get_autoplot_context, get_sqlalchemy_conn
+import pygrib
+import pytz
+from metpy.units import masked_array, units
+from pyiem.exceptions import NoDataFound
 from pyiem.plot import MapPlot, get_cmap
 from pyiem.reference import SECTORS_NAME
-from pyiem.exceptions import NoDataFound
-
+from pyiem.util import get_autoplot_context, get_sqlalchemy_conn
 
 HOURS = {
     "1": "One Hour",
@@ -32,28 +51,7 @@ PDICT3 = {
 
 def get_description():
     """Return a dict describing how to call this plotter"""
-    desc = {}
-    desc["data"] = True
-    desc[
-        "description"
-    ] = """This application plots Flash Flood Guidance for
-    a time of your choice.  The time is used to query a 24 hour trailing window
-    to find the most recent FFG issuance.
-
-    <p>For dates after 1 Jan 2019, a gridded 5km analysis product is used as
-    the county guidance was discontinued. The raw data download option does
-    not work for that data either.  You can find the raw Grib files on the
-    IEM Archives, for example
-<a href="https://mesonet.agron.iastate.edu/archive/data/2019/04/25/model/ffg/">
-here</a>.
-    </p>
-
-    <p>Additionally, there is a <a href="https://mesonet.agron.iastate.edu/api/1/docs#/default/ffg_bypoint_service_ffg_bypoint_json_get">FFG by Point</a>
-    web service that provides the raw values.</p>
-
-    <p>For dates before 1 Jan 2019, this dataset is based on IEM processing
-    of county/zone based FFG guidance found in the FFG text products.
-    """
+    desc = {"description": __doc__, "data": True}
     now = datetime.datetime.utcnow()
     desc["arguments"] = [
         dict(
@@ -119,8 +117,10 @@ def plotter(fdict):
         continentalcolor="white",
         state=ctx["state"],
         cwa=ctx["wfo"],
-        title=("NWS RFC %s Hour Flash Flood Guidance on %s UTC")
-        % (hour, ts.strftime("%-d %b %Y %H")),
+        title=(
+            f"NWS RFC {hour} Hour Flash Flood Guidance "
+            f"on {ts:%-d %b %Y %H} UTC"
+        ),
         subtitle=(
             "Estimated amount of %s Rainfall "
             "needed for non-urban Flash Flooding to commence"

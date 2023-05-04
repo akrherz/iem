@@ -6,10 +6,10 @@ import os
 import sys
 
 import pygrib
-from metpy.units import units, masked_array
+import pytz
+from metpy.units import masked_array, units
 from pyiem.plot import MapPlot, nwsprecip
 from pyiem.util import logger
-import pytz
 
 LOG = logger()
 

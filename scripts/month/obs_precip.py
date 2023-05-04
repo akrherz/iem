@@ -2,8 +2,8 @@
 
 import datetime
 
-from pyiem.plot import MapPlot
 import pyiem.tracker
+from pyiem.plot import MapPlot
 from pyiem.util import get_dbconn
 
 

@@ -3,8 +3,8 @@
 Lets run at 12z for the previous date
 """
 import datetime
-import subprocess
 import os
+import subprocess
 import sys
 
 from pyiem.util import logger

@@ -3,9 +3,9 @@ import datetime
 import sys
 from multiprocessing import Pool
 
-from bs4 import BeautifulSoup
-import requests
 import pandas as pd
+import requests
+from bs4 import BeautifulSoup
 from pyiem.util import get_dbconn, logger
 
 LOG = logger()

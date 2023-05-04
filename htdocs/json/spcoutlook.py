@@ -2,13 +2,13 @@
 import datetime
 import json
 
-from pymemcache.client import Client
-import pytz
 import pandas as pd
+import pytz
 from pandas.io.sql import read_sql
 from paste.request import parse_formvars
 from pyiem.nws.products.spcpts import THRESHOLD_ORDER
 from pyiem.util import get_dbconn, get_sqlalchemy_conn, html_escape
+from pymemcache.client import Client
 
 ISO9660 = "%Y-%m-%dT%H:%MZ"
 

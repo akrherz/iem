@@ -5,17 +5,17 @@ to which the IEM has data for, sorry.  You can only select up to 5 days
 worth of data at this time.  Any reported 1 minute precipitation value
 over 0.50 inches is omitted as bad data.
 """
-from datetime import timezone, timedelta
+from datetime import timedelta, timezone
 
-import pytz
-import pandas as pd
 import numpy as np
+import pandas as pd
+import pytz
 from matplotlib.dates import DateFormatter
-from metpy.units import units, masked_array
-from pyiem.util import get_autoplot_context, get_sqlalchemy_conn, utc
-from pyiem.plot.use_agg import plt
-from pyiem.plot import figure_axes, figure
+from metpy.units import masked_array, units
 from pyiem.exceptions import NoDataFound
+from pyiem.plot import figure, figure_axes
+from pyiem.plot.use_agg import plt
+from pyiem.util import get_autoplot_context, get_sqlalchemy_conn, utc
 
 PDICT = {
     "meteo": "Meteogram Style (Temp/Wind/Pressure)",

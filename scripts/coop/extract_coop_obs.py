@@ -1,11 +1,11 @@
 """ Dump out obs from the database for use by other apps """
-import subprocess
-import os
 import datetime
+import os
+import subprocess
 import zipfile
 
-import shapefile
 import psycopg2.extras
+import shapefile
 from pyiem.util import get_dbconn
 
 

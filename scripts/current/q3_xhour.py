@@ -1,16 +1,16 @@
 """Create a plot of the X Hour interval precipitation"""
-import os
-import sys
 import datetime
 import gzip
+import os
+import sys
 import tempfile
 
 import numpy as np
-import pytz
 import pygrib
+import pytz
 from pyiem import mrms
 from pyiem.plot import MapPlot, nwsprecip
-from pyiem.util import utc, logger, mm2inch
+from pyiem.util import logger, mm2inch, utc
 
 LOG = logger()
 TMP = "/mesonet/tmp"

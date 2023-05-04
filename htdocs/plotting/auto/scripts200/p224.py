@@ -2,12 +2,12 @@
 from datetime import timezone
 from zoneinfo import ZoneInfo
 
-from matplotlib.patches import Rectangle
 import pandas as pd
-from pyiem.util import get_autoplot_context, get_sqlalchemy_conn, utc
+from matplotlib.patches import Rectangle
+from pyiem.exceptions import NoDataFound
 from pyiem.nws.vtec import NWS_COLORS, get_ps_string
 from pyiem.plot import figure
-from pyiem.exceptions import NoDataFound
+from pyiem.util import get_autoplot_context, get_sqlalchemy_conn, utc
 from sqlalchemy import text
 
 PDICT = {

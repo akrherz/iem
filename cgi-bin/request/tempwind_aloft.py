@@ -1,12 +1,12 @@
 """Download tempwinds_aloft dataset"""
-from io import StringIO, BytesIO
 import datetime
+from io import BytesIO, StringIO
 
-import pytz
 import pandas as pd
+import pytz
 from paste.request import parse_formvars
-from sqlalchemy import text
 from pyiem.util import get_sqlalchemy_conn
+from sqlalchemy import text
 
 EXL = "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"
 

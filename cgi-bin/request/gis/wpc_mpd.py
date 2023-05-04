@@ -1,9 +1,9 @@
 """Dump WPC MPDs."""
 # Local
-from io import BytesIO
 import os
 import tempfile
 import zipfile
+from io import BytesIO
 
 # Third Party
 import geopandas as gpd

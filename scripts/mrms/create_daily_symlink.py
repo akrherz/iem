@@ -6,9 +6,9 @@ like IDEP, we'd like predictable calendar day rasters
 Run from RUN_MIDNIGHT.sh
 
 """
-import sys
-import os
 import datetime
+import os
+import sys
 
 try:
     from zoneinfo import ZoneInfo  # type: ignore

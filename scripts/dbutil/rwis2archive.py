@@ -9,7 +9,7 @@ import datetime
 import sys
 
 import psycopg2.extras
-from pyiem.util import get_dbconn, utc, logger
+from pyiem.util import get_dbconn, logger, utc
 
 LOG = logger()
 

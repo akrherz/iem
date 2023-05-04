@@ -14,15 +14,15 @@ Having said that, it should be close!
 import datetime
 
 import numpy as np
-from affine import Affine
 import pandas as pd
+from affine import Affine
 from geopandas import read_postgis
+from pyiem.exceptions import NoDataFound
+from pyiem.grid.zs import CachingZonalStats
 from pyiem.plot import MapPlot
 from pyiem.plot.colormaps import stretch_cmap
-from pyiem.grid.zs import CachingZonalStats
-from pyiem.util import get_autoplot_context, get_sqlalchemy_conn, get_dbconn
-from pyiem.exceptions import NoDataFound
 from pyiem.reference import LATLON
+from pyiem.util import get_autoplot_context, get_dbconn, get_sqlalchemy_conn
 
 PDICT = {
     "0": "D0: Abnormally Dry",

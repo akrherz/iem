@@ -8,13 +8,13 @@ import os
 import subprocess
 import sys
 
+import numpy as np
+import pygrib
 import pyproj
 import pytz
-import numpy as np
-from scipy.interpolate import NearestNDInterpolator
-import pygrib
 from pyiem import iemre
-from pyiem.util import get_dbconn, utc, ncopen, logger
+from pyiem.util import get_dbconn, logger, ncopen, utc
+from scipy.interpolate import NearestNDInterpolator
 
 LOG = logger()
 P4326 = pyproj.Proj(init="epsg:4326")

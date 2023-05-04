@@ -1,14 +1,14 @@
 """
     Plot the hourly stage IV precip data
 """
-import sys
-import os
 import datetime
+import os
+import sys
 
 import pygrib
 import pytz
-from pyiem.util import utc, logger
 from pyiem.plot import MapPlot, get_cmap
+from pyiem.util import logger, utc
 
 LOG = logger()
 

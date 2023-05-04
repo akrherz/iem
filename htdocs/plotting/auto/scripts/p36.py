@@ -1,14 +1,14 @@
 """One month being warmer than the other"""
-import datetime
 import calendar
+import datetime
 
-import psycopg2.extras
+import matplotlib.patheffects as PathEffects
 import numpy as np
 import pandas as pd
-import matplotlib.patheffects as PathEffects
-from pyiem.util import get_autoplot_context, get_dbconn
-from pyiem.plot import figure_axes
+import psycopg2.extras
 from pyiem.exceptions import NoDataFound
+from pyiem.plot import figure_axes
+from pyiem.util import get_autoplot_context, get_dbconn
 
 
 def get_description():

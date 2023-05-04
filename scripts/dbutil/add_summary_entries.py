@@ -1,6 +1,6 @@
 """Initialize entries in the IEM summary table"""
-import sys
 import datetime
+import sys
 
 from pyiem.util import get_dbconn, logger
 

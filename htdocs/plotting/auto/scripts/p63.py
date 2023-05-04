@@ -1,11 +1,11 @@
 """records by year"""
 import datetime
 
-import psycopg2.extras
 import pandas as pd
+import psycopg2.extras
+from pyiem.exceptions import NoDataFound
 from pyiem.plot import figure
 from pyiem.util import get_autoplot_context, get_dbconn
-from pyiem.exceptions import NoDataFound
 
 
 def get_description():

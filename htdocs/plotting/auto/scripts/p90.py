@@ -82,24 +82,24 @@
     away as sometimes it will take 3-5 minutes to generate a map :("""
 import datetime
 
-import psycopg2.extras
 import numpy as np
-import pytz
-from rasterstats import zonal_stats
 import pandas as pd
-from geopandas import read_postgis
+import psycopg2.extras
+import pytz
 from affine import Affine
+from geopandas import read_postgis
+from pyiem.exceptions import NoDataFound
 from pyiem.nws import vtec
-from pyiem.reference import state_names, state_bounds, wfo_bounds
 from pyiem.plot import get_cmap
 from pyiem.plot.geoplot import MapPlot
+from pyiem.reference import state_bounds, state_names, wfo_bounds
 from pyiem.util import (
     get_autoplot_context,
     get_dbconn,
     get_sqlalchemy_conn,
     utc,
 )
-from pyiem.exceptions import NoDataFound
+from rasterstats import zonal_stats
 
 PDICT = {"cwa": "Plot by NWS Forecast Office", "state": "Plot by State"}
 PDICT2 = {

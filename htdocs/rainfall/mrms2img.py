@@ -1,16 +1,15 @@
 """
 Create ERDAS Imagine file from a MRMS Raster
 """
-import sys
-from io import BytesIO
-import os
 import datetime
+import os
+import sys
 import zipfile
+from io import BytesIO
 
-from osgeo import gdal
-from osgeo import osr
-from imageio import imread
 import numpy as np
+from imageio import imread
+from osgeo import gdal, osr
 from paste.request import parse_formvars
 
 

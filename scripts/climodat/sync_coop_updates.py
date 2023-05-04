@@ -7,9 +7,9 @@ run from RUN_NOON.sh and RUN_0Z.sh
 """
 # pylint: disable=cell-var-from-loop
 
-from pyiem.util import get_dbconn, get_sqlalchemy_conn, logger
 import pandas as pd
 from psycopg2.extras import DictCursor
+from pyiem.util import get_dbconn, get_sqlalchemy_conn, logger
 
 LOG = logger()
 

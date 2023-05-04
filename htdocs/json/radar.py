@@ -1,10 +1,10 @@
 """
 Return JSON metadata for nexrad information
 """
-import json
 import datetime
-import os.path
 import glob
+import json
+import os.path
 
 from paste.request import parse_formvars
 from pyiem.util import get_dbconn, html_escape

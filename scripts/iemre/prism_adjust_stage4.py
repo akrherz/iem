@@ -3,14 +3,14 @@
 Take the PRISM data, valid at 12z and bias correct the hourly stage IV data
 
 """
-import sys
 import datetime
+import sys
 
 import numpy as np
-from scipy.interpolate import NearestNDInterpolator
-from pyiem.iemre import daily_offset, hourly_offset
 from pyiem import prism as prismutil
-from pyiem.util import utc, ncopen, find_ij, logger
+from pyiem.iemre import daily_offset, hourly_offset
+from pyiem.util import find_ij, logger, ncopen, utc
+from scipy.interpolate import NearestNDInterpolator
 
 DEBUGLON = -93.89
 DEBUGLAT = 42.04

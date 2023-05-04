@@ -10,12 +10,16 @@ is computed by vector averaging of the wind speed and direction reports.
 """
 import datetime
 
+import matplotlib.patheffects as PathEffects
 import numpy as np
 import pandas as pd
-import matplotlib.patheffects as PathEffects
-from pyiem.util import drct2text
-from pyiem.util import get_autoplot_context, get_sqlalchemy_conn, convert_value
 from pyiem.plot import figure_axes
+from pyiem.util import (
+    convert_value,
+    drct2text,
+    get_autoplot_context,
+    get_sqlalchemy_conn,
+)
 
 PDICT = {
     "KT": "knots",

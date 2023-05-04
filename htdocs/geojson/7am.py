@@ -2,12 +2,12 @@
 import datetime
 import json
 
-from pymemcache.client import Client
 import psycopg2.extras
 import pytz
 from paste.request import parse_formvars
 from pyiem.reference import TRACE_VALUE
 from pyiem.util import get_dbconn, html_escape
+from pymemcache.client import Client
 
 
 def p(val, precision=2):

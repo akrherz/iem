@@ -1,19 +1,19 @@
 """
  Generate the dailyb spam, run from RUN_12Z.sh
 """
-import subprocess
-import smtplib
+import datetime
 import os
 import re
-import datetime
-from email.mime.text import MIMEText
+import smtplib
+import subprocess
 from email.mime.multipart import MIMEMultipart
+from email.mime.text import MIMEText
 
 import psycopg2.extras
-import requests
 import pytz
-from pyiem.util import exponential_backoff, get_dbconn, logger, utc
+import requests
 import wwa  # @UnresolvedImport
+from pyiem.util import exponential_backoff, get_dbconn, logger, utc
 
 LOG = logger()
 IEM_BRANCHES = "https://api.github.com/repos/akrherz/iem/branches"

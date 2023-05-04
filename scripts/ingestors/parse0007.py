@@ -4,8 +4,8 @@ import os
 import sys
 
 import pytz
-from metpy.units import units
 from metpy.calc import dewpoint_from_relative_humidity
+from metpy.units import units
 from pyiem.observation import Observation
 from pyiem.util import get_dbconn, logger
 

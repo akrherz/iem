@@ -4,9 +4,9 @@ import os
 
 import numpy as np
 import pygrib
-from pyiem.plot import MapPlot, get_cmap, pretty_bins
-from pyiem.util import get_autoplot_context, utc, mm2inch
 from pyiem.exceptions import NoDataFound
+from pyiem.plot import MapPlot, get_cmap, pretty_bins
+from pyiem.util import get_autoplot_context, mm2inch, utc
 
 PDICT = {"120": "Five Day", "168": "Seven Day"}
 PDICT2 = {"0": "0z (7 PM CDT)", "12": "12z (7 AM CDT)"}

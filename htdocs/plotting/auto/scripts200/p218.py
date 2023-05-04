@@ -17,10 +17,10 @@ from math import pi
 import numpy as np
 import pandas as pd
 from matplotlib.patches import Rectangle
-from pyiem.reference import TRACE_VALUE
-from pyiem.plot import figure
-from pyiem.util import get_autoplot_context, get_sqlalchemy_conn, logger
 from pyiem.exceptions import NoDataFound
+from pyiem.plot import figure
+from pyiem.reference import TRACE_VALUE
+from pyiem.util import get_autoplot_context, get_sqlalchemy_conn, logger
 
 LOG = logger()
 TFORMAT = "%b %-d %Y %-I:%M %p %Z"

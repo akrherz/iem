@@ -1,13 +1,13 @@
 """Download IEM summary data!"""
-from io import StringIO, BytesIO
 import datetime
 import sys
+from io import BytesIO, StringIO
 
 import pandas as pd
 from paste.request import parse_formvars
-from sqlalchemy import text
-from pyiem.util import get_sqlalchemy_conn, get_dbconn
 from pyiem.network import Table as NetworkTable
+from pyiem.util import get_dbconn, get_sqlalchemy_conn
+from sqlalchemy import text
 
 EXL = "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"
 

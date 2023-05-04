@@ -1,23 +1,24 @@
 """Visualization of TAFs"""
 import datetime
 
+import matplotlib.patheffects as PathEffects
+import numpy as np
+import pandas as pd
+
 # third party
 import requests
-import pandas as pd
-import numpy as np
-import matplotlib.patheffects as PathEffects
 from matplotlib.patches import Rectangle
-from metpy.units import units
 from metpy.calc import wind_components
+from metpy.units import units
+from pyiem.exceptions import NoDataFound
 from pyiem.plot import figure
 from pyiem.util import (
+    LOG,
     get_autoplot_context,
     get_dbconn,
     get_sqlalchemy_conn,
     utc,
-    LOG,
 )
-from pyiem.exceptions import NoDataFound
 
 VIS = "visibility"
 TEXTARGS = {

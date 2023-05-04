@@ -1,7 +1,7 @@
 """A util script used on daryl's laptop to switch 'iemdb' /etc/hosts entry."""
+import os
 import sys
 import tempfile
-import os
 
 DB1, DB2, DB3 = range(3)
 IPS = "172.16.170.1 172.16.172.1 172.16.174.1".split()

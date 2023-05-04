@@ -3,9 +3,9 @@
  * JSON data is in 3857
 """
 
-from shapely.geometry import LineString, MultiLineString
 import requests
 from pyiem.util import get_dbconn
+from shapely.geometry import LineString, MultiLineString
 
 URI = (
     "https://services.arcgis.com/8lRhdTsQyJpO52F1/ArcGIS/rest/services/"

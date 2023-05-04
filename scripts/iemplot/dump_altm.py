@@ -1,9 +1,9 @@
 """Dumping altimeter data so that GEMPAK can analyze it."""
 import datetime
 
-from pyiem.util import get_dbconnstr
-from pandas import read_sql
 from metpy.units import units
+from pandas import read_sql
+from pyiem.util import get_dbconnstr
 
 
 def main():

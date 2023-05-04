@@ -1,8 +1,8 @@
 """Dump CWAs."""
 # Local
-from io import BytesIO
 import os
 import zipfile
+from io import BytesIO
 
 # Third Party
 import fiona

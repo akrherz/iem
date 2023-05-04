@@ -11,17 +11,17 @@ plot uses a JSON data service provided by the
 values is multiplied by five as drought changes at that scale are slower than
 at the state scale when normalized by area.
 """
-import datetime
 import calendar
+import datetime
 
 import numpy as np
-import requests
 import pandas as pd
-from scipy.interpolate import interp1d
-from pyiem.util import get_autoplot_context
-from pyiem.plot import figure
-from pyiem.reference import state_names, state_fips
+import requests
 from pyiem.exceptions import NoDataFound
+from pyiem.plot import figure
+from pyiem.reference import state_fips, state_names
+from pyiem.util import get_autoplot_context
+from scipy.interpolate import interp1d
 
 SERVICE = (
     "https://droughtmonitor.unl.edu"

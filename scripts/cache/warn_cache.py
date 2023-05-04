@@ -8,8 +8,8 @@ pre-generate them and allow folks to download.
 import datetime
 import sys
 
-from pyiem.util import logger
 import requests
+from pyiem.util import logger
 
 LOG = logger()
 FINAL = "/mesonet/share/pickup/wwa/"

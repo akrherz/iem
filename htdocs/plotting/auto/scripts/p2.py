@@ -1,14 +1,14 @@
 """GDD vs precip departures"""
 # pylint: disable=no-member
-import datetime
 import calendar
+import datetime
 
-from scipy import stats
 import pandas as pd
 from matplotlib.patches import Circle
+from pyiem.exceptions import NoDataFound
 from pyiem.plot import figure_axes
 from pyiem.util import get_autoplot_context, get_sqlalchemy_conn
-from pyiem.exceptions import NoDataFound
+from scipy import stats
 
 
 def get_description():

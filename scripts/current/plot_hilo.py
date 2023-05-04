@@ -1,7 +1,8 @@
 """ Plot the High + Low Temperatures"""
 
-import sys
 import datetime
+import sys
+
 from pyiem.plot import MapPlot
 from pyiem.util import get_dbconn
 

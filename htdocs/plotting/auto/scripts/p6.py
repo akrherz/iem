@@ -3,13 +3,13 @@
 import calendar
 import datetime
 
-import pandas as pd
-from scipy.stats import norm
 import numpy as np
-from pyiem.util import get_autoplot_context, get_sqlalchemy_conn
-from pyiem.plot import figure_axes
+import pandas as pd
 from pyiem import reference
 from pyiem.exceptions import NoDataFound
+from pyiem.plot import figure_axes
+from pyiem.util import get_autoplot_context, get_sqlalchemy_conn
+from scipy.stats import norm
 
 PDICT = {
     "sum-precip": "Total Precipitation [inch]",

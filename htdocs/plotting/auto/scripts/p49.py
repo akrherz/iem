@@ -12,9 +12,9 @@ import datetime
 
 import matplotlib.dates as mdates
 import pandas as pd
+from pyiem.exceptions import NoDataFound
 from pyiem.plot import figure_axes
 from pyiem.util import get_autoplot_context, get_sqlalchemy_conn
-from pyiem.exceptions import NoDataFound
 
 PDICT = {
     "high": "High Temp (F)",

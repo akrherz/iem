@@ -3,11 +3,11 @@ import datetime
 
 import pandas as pd
 from matplotlib.patches import Rectangle
-from sqlalchemy import text
+from pyiem.exceptions import NoDataFound
 from pyiem.plot import figure
 from pyiem.reference import state_names
-from pyiem.util import get_autoplot_context, get_sqlalchemy_conn, get_dbconn
-from pyiem.exceptions import NoDataFound
+from pyiem.util import get_autoplot_context, get_dbconn, get_sqlalchemy_conn
+from sqlalchemy import text
 
 MDICT = {
     "all": "Entire Year",

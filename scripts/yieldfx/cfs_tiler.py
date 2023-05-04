@@ -8,8 +8,8 @@ import sys
 import numpy as np
 from metpy.units import units
 from pyiem import iemre
-from pyiem.util import utc, ncopen, convert_value, logger
 from pyiem.meteorology import gdd
+from pyiem.util import convert_value, logger, ncopen, utc
 
 LOG = logger()
 

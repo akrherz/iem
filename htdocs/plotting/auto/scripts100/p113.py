@@ -1,12 +1,12 @@
 """daily records"""
-from calendar import month_abbr
 import datetime
+from calendar import month_abbr
 
-from pyiem.util import get_autoplot_context
-from pyiem.plot import figure_axes
-from pyiem.exceptions import NoDataFound
 import pandas as pd
 import requests
+from pyiem.exceptions import NoDataFound
+from pyiem.plot import figure_axes
+from pyiem.util import get_autoplot_context
 
 PDICT = {
     "maxmin": "Daily Maximum / Minimums",

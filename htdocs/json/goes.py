@@ -1,10 +1,10 @@
 """
 Return JSON metadata for GOES Imagery
 """
+import datetime
+import glob
 import json
 import os
-import glob
-import datetime
 
 from paste.request import parse_formvars
 from pyiem.util import html_escape

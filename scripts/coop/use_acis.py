@@ -1,19 +1,19 @@
 """Use data provided by ACIS to replace IEM COOP data."""
-import sys
 import datetime
+import sys
 
 try:
     from zoneinfo import ZoneInfo
 except ImportError:
     from backports.zoneinfo import ZoneInfo  # type: ignore
 
-import requests
-from tqdm import tqdm
 import pandas as pd
+import requests
 from pyiem.network import Table as NetworkTable
 from pyiem.observation import Observation
-from pyiem.util import get_dbconn, get_sqlalchemy_conn, logger
 from pyiem.reference import TRACE_VALUE
+from pyiem.util import get_dbconn, get_sqlalchemy_conn, logger
+from tqdm import tqdm
 
 LOG = logger()
 SERVICE = "http://data.rcc-acis.org/StnData"

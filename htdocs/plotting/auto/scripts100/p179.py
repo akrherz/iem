@@ -1,13 +1,12 @@
 """GDD Accumulation"""
 import datetime
 
+import matplotlib.colors as mpcolors
 import numpy as np
 import pandas as pd
-import matplotlib.colors as mpcolors
-from pyiem.util import get_autoplot_context, get_dbconn
-from pyiem.plot import figure
-from pyiem.plot import get_cmap
 from pyiem.exceptions import NoDataFound
+from pyiem.plot import figure, get_cmap
+from pyiem.util import get_autoplot_context, get_dbconn
 
 
 def get_description():

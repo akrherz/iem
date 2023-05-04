@@ -20,17 +20,17 @@
       <li>Iowa Flood Center is an analysis produced by the U of Iowa IIHR.</li>
     </ul>
 """
-from datetime import datetime, timedelta
 import os
+from datetime import datetime, timedelta
 
 import numpy as np
+from metpy.units import masked_array, units
 from pyiem import iemre, util
+from pyiem.exceptions import NoDataFound
 from pyiem.plot import get_cmap, pretty_bins
 from pyiem.plot.geoplot import MapPlot
 from pyiem.reference import LATLON
-from pyiem.exceptions import NoDataFound
 from pyiem.util import get_dbconn, get_properties
-from metpy.units import units, masked_array
 
 PDICT2 = {"c": "Contour Plot", "g": "Grid Cell Mesh"}
 SRCDICT = {

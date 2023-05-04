@@ -1,12 +1,12 @@
 """days since VTEC product"""
 import datetime
 
-import psycopg2.extras
 import pandas as pd
+import psycopg2.extras
+from pyiem.exceptions import NoDataFound
 from pyiem.nws import vtec
 from pyiem.plot.geoplot import MapPlot
 from pyiem.util import get_autoplot_context, get_dbconn, utc
-from pyiem.exceptions import NoDataFound
 
 PDICT = {
     "yes": "Only Emergencies",

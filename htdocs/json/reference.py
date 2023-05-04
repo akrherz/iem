@@ -1,10 +1,10 @@
 """pyIEM reference tables."""
 import json
 
-from pymemcache.client import Client
 from paste.request import parse_formvars
 from pyiem import reference
 from pyiem.util import html_escape
+from pymemcache.client import Client
 
 ISO9660 = "%Y-%m-%dT%H:%M:%SZ"
 

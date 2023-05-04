@@ -6,13 +6,13 @@ try:
 except ImportError:
     from zoneinfo import ZoneInfo  # type: ignore
 
-import pandas as pd
 import matplotlib.dates as mdates
+import pandas as pd
 from matplotlib import ticker
+from pyiem.exceptions import NoDataFound
 from pyiem.nws import vtec
 from pyiem.plot import figure
 from pyiem.util import get_autoplot_context, get_sqlalchemy_conn
-from pyiem.exceptions import NoDataFound
 
 
 def get_description():

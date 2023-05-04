@@ -1,14 +1,14 @@
 """GDD Fun"""
 import datetime
 
-import psycopg2.extras
+import matplotlib.colors as mpcolors
+import matplotlib.dates as mdates
 import numpy as np
 import pandas as pd
-import matplotlib.dates as mdates
-import matplotlib.colors as mpcolors
-from pyiem.plot import get_cmap, figure
-from pyiem.util import get_autoplot_context, get_dbconn
+import psycopg2.extras
 from pyiem.exceptions import NoDataFound
+from pyiem.plot import figure, get_cmap
+from pyiem.util import get_autoplot_context, get_dbconn
 
 
 def get_description():

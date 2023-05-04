@@ -4,14 +4,14 @@
 import datetime
 import os
 import subprocess
-from tempfile import NamedTemporaryFile
 import time
 import warnings
+from tempfile import NamedTemporaryFile
 
-from netCDF4 import chartostring  # @UnresolvedImport
 import numpy.ma
 import pytz
-from pyiem.util import ncopen, convert_value, logger
+from netCDF4 import chartostring  # @UnresolvedImport
+from pyiem.util import convert_value, logger, ncopen
 
 LOG = logger()
 # GIGO

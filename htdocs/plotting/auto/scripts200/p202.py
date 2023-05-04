@@ -9,18 +9,18 @@
 
     <p>The chart displays a two dimensional histogram / heatmap underneath
     the plotted lines covering the period of record data."""
-import datetime
 import calendar
+import datetime
 
+import matplotlib.colors as mpcolors
+import metpy.calc as mcalc
 import numpy as np
 import pandas as pd
-import matplotlib.colors as mpcolors
 from matplotlib.colorbar import ColorbarBase
 from metpy.units import units
-import metpy.calc as mcalc
-from pyiem.util import get_autoplot_context, get_sqlalchemy_conn
-from pyiem.plot import get_cmap, figure_axes, pretty_bins
 from pyiem.exceptions import NoDataFound
+from pyiem.plot import figure_axes, get_cmap, pretty_bins
+from pyiem.util import get_autoplot_context, get_sqlalchemy_conn
 
 PDICT = {
     "tmpf": "Air Temperature [F]",

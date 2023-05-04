@@ -2,12 +2,12 @@
  Look at the sources saved to the AFOS database and then whine about
  sources we do not understand!
 """
-import sys
 import datetime
+import sys
 
 import pytz
 from pyiem.network import Table as NetworkTable
-from pyiem.util import get_dbconn, utc, logger
+from pyiem.util import get_dbconn, logger, utc
 
 LOG = logger()
 pgconn = get_dbconn("afos")

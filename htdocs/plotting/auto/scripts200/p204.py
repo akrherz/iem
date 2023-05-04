@@ -7,11 +7,11 @@ import datetime
 
 import matplotlib.colors as mpcolors
 import numpy as np
-from seaborn import heatmap
 import pandas as pd
-from pyiem.plot import get_cmap, figure_axes
-from pyiem.util import get_autoplot_context, get_sqlalchemy_conn
 from pyiem.exceptions import NoDataFound
+from pyiem.plot import figure_axes, get_cmap
+from pyiem.util import get_autoplot_context, get_sqlalchemy_conn
+from seaborn import heatmap
 
 PDICT = {
     "trail_precip_percent": "Trailing XX Days Precip Percent of Average",

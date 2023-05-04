@@ -1,7 +1,7 @@
 """Regenerate composites to fulfill various reasons."""
 import datetime
-import sys
 import subprocess
+import sys
 
 from pyiem.util import logger, utc
 
