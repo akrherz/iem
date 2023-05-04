@@ -13,11 +13,12 @@ do a better job than the hourly.
 from datetime import timedelta
 import os
 
+import matplotlib.colors as mpcolors
 import numpy as np
 import pandas as pd
 import pygrib
 from pyiem.exceptions import NoDataFound
-from pyiem.plot import MapPlot, get_cmap, pretty_bins
+from pyiem.plot import MapPlot, pretty_bins
 from pyiem.reference import LATLON
 from pyiem.util import get_autoplot_context, convert_value, utc
 
@@ -159,8 +160,15 @@ def plotter(fdict):
         stateborderwidth=3,
     )
     if ctx["mode"] == "fz":
+        # https://colorbrewer2.org/#type=diverging&scheme=RdYlBu&n=8
+        # <26, 26-28, 28-30, 30-32, 32-34, 34-36, >36
+        colors = (
+            "#f46d43 #fdae61 #fee090 #e0f3f8 #abd9e9 #74add1 #4575b4"
+        ).split()[::-1]
+        cmap = mpcolors.ListedColormap(colors[1:-1])
+        cmap.set_under(colors[0])
+        cmap.set_over(colors[-1])
         bins = np.arange(26, 37, 2)
-        cmap = get_cmap("turbo")
     else:
         # xmin, xmax, ymin, ymax
         bnds = mp.panels[0].get_extent(crs=LATLON)
