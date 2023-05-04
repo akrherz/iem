@@ -1,9 +1,11 @@
 """
- Attempt to process the 1 minute archives available from NCDC
+Attempt to process the 1 minute archives available from NCEI
 
- NCDC provides monthly tar files for nearly up to the current day here:
+NCEI provides monthly tar files for nearly up to the current day here:
 
- https://www1.ncdc.noaa.gov/pub/download/hidden/onemin/
+https://www1.ncdc.noaa.gov/pub/download/hidden/onemin/
+
+NCEI generates these at about 1530z, so we run a bit after that via crontab
 """
 # stdlib
 import re
@@ -324,7 +326,7 @@ def init_dataframe(argv):
     df["archive_end"] = utc(1980, 1, 1)
     df["fn5"] = ""
     df["fn6"] = ""
-    dt = utc() - datetime.timedelta(days=2)
+    dt = utc()
     if len(argv) == 2:  # Hard coded hidden filename
         dl_realtime(df, dt, filebase=argv[1])
     elif len(argv) >= 3:

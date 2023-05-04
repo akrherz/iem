@@ -252,8 +252,9 @@ def make_meteo_plot(ctx):
     title = f"{get_ttitle(df)} {ctx['_sname']} :: One Minute Meteogram"
     fig = figure(apctx=ctx, title=title)
 
+    axheight = 0.22
     # -----------------------------
-    ax = fig.add_axes([0.1, 0.65, 0.85, 0.25])
+    ax = fig.add_axes([0.1, 0.69, 0.85, axheight])
     ax.plot(
         df["local_valid"].values,
         df["tmpf"].values,
@@ -282,7 +283,7 @@ def make_meteo_plot(ctx):
         .m
     )
 
-    ax = fig.add_axes([0.1, 0.36, 0.85, 0.25])
+    ax = fig.add_axes([0.1, 0.37, 0.85, axheight])
     df2 = df[df["gust"].notna()]
     ax.bar(
         df2["local_valid"].values,
@@ -299,7 +300,7 @@ def make_meteo_plot(ctx):
         width=1.0 / 1440.0,
         label="Wind Speed",
     )
-    ax.legend(loc="best", ncol=3)
+    ax.legend(loc=(0, 1), ncol=3)
     ax2 = ax.twinx()
     ax2.scatter(
         df["local_valid"].values,
@@ -322,7 +323,7 @@ def make_meteo_plot(ctx):
     do_xaxis(ctx, ax, False)
 
     # -----------------------------
-    ax = fig.add_axes([0.1, 0.07, 0.85, 0.25])
+    ax = fig.add_axes([0.1, 0.09, 0.85, axheight])
     ax.plot(
         df["local_valid"].values,
         df["pres1"].values,

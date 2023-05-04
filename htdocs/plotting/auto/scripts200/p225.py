@@ -1,4 +1,17 @@
-"""Heatmap of SPI/Departure values."""
+"""
+Departure from climatology metrics have an annual signal that
+is a function of the climatology.  This plot shows the distribution of
+departure values.</p>
+
+<p><strong>SPI</strong> is the standardized precipitation index. This is
+computed by using the NCEI 1991-2020 climatology to provide the average
+accumulation and the observed data to provide the standard deviation.</p>
+
+<p>The <strong>Minimum Possible</strong> value presented is a function
+of the statistical metric being computed.  For example, if the climatology
+accumation is 2 inches, the max negative departure can only be two
+inches.</p>
+"""
 import calendar
 
 import pandas as pd
@@ -21,23 +34,7 @@ XTICKS = [1, 32, 60, 91, 121, 152, 182, 213, 244, 274, 305, 335]
 
 def get_description():
     """Return a dict describing how to call this plotter"""
-    desc = {}
-    desc["data"] = True
-    desc[
-        "description"
-    ] = """Departure from climatology metrics have an annual signal that
-    is a function of the climatology.  This plot shows the distribution of
-    departure values.</p>
-
-    <p><strong>SPI</strong> is the standardized precipitation index. This is
-    computed by using the NCEI 1991-2020 climatology to provide the average
-    accumulation and the observed data to provide the standard deviation.</p>
-
-    <p>The <strong>Minimum Possible</strong> value presented is a function
-    of the statistical metric being computed.  For example, if the climatology
-    accumation is 2 inches, the max negative departure can only be two
-    inches.</p>
-    """
+    desc = {"description": __doc__, "data": True}
     desc["arguments"] = [
         dict(
             type="station",
