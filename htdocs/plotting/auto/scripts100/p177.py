@@ -1,5 +1,7 @@
-"""This application generates time series charts using data from the
-    ISU Soil Moisture Network."""
+"""
+This application generates time series charts using data from the
+ISU Soil Moisture Network.
+"""
 # pylint: disable=no-member,too-many-lines
 import datetime
 
@@ -1049,7 +1051,7 @@ if __name__ == "__main__":
     plotter(
         {
             "station": "BOOI4",
-            "opt": "4",
+            "opt": "11",
             "sts": "2012-01-01 0000",
         }
     )

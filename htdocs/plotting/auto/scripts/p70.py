@@ -1,4 +1,22 @@
-"""period between first and last watch"""
+"""
+This chart attempts to display the period between the first and last VTEC
+enabled watch, warning or advisory <strong>issuance</strong> by year.  For
+some long term products, like Flood Warnings, this plot does not attempt
+to show the time domain that those products were valid, only the issuance.
+The right two plots display the total number of events and the total
+number of dates with at least one event.</p>
+
+<p>The left plot can be colorized by either coloring the event counts per
+day or the accumulated "year/season to date" total.</p>
+
+<p>For the purposes of this plot, an event is defined by a single VTEC
+event identifier usage.  For example, a single Tornado Watch covering
+10 counties only counts as one event. The simple average is computed
+over the years excluding the first and last year.</p>
+
+<p>When you split this plot by 1 July, the year shown is for the year of
+the second half of this period, ie 2020 is 1 Jul 2019 - 30 Jun 2020.</p>
+"""
 import datetime
 
 import matplotlib.colors as mpcolors
@@ -27,30 +45,7 @@ PDICT3 = {
 
 def get_description():
     """Return a dict describing how to call this plotter"""
-    desc = {}
-    desc["data"] = True
-    desc["cache"] = 86400
-    desc[
-        "description"
-    ] = """
-    This chart attempts to display the period between the first and last VTEC
-    enabled watch, warning or advisory <strong>issuance</strong> by year.  For
-    some long term products, like Flood Warnings, this plot does not attempt
-    to show the time domain that those products were valid, only the issuance.
-    The right two plots display the total number of events and the total
-    number of dates with at least one event.</p>
-
-    <p>The left plot can be colorized by either coloring the event counts per
-    day or the accumulated "year/season to date" total.</p>
-
-    <p>For the purposes of this plot, an event is defined by a single VTEC
-    event identifier usage.  For example, a single Tornado Watch covering
-    10 counties only counts as one event. The simple average is computed
-    over the years excluding the first and last year.</p>
-
-    <p>When you split this plot by 1 July, the year shown is for the year of
-    the second half of this period, ie 2020 is 1 Jul 2019 - 30 Jun 2020.</p>
-    """
+    desc = {"description": __doc__, "data": True, "cache": 86400}
     desc["arguments"] = [
         dict(
             type="select",
@@ -124,6 +119,9 @@ def plotter(fdict):
             conn,
             params=(phenomena, significance),
             index_col=None,
+            parse_dates=[
+                "date",
+            ],
         )
     if df.empty:
         raise NoDataFound("No data found for query")
@@ -139,11 +137,11 @@ def plotter(fdict):
             axis=1,
         )
         df["doy"] = df.apply(
-            lambda x: x["date"] - datetime.date(x["year"] - 1, 7, 1), axis=1
+            lambda x: x["date"] - pd.Timestamp(x["year"] - 1, 7, 1), axis=1
         )
     else:
         df["doy"] = df.apply(
-            lambda x: x["date"] - datetime.date(x["year"], 1, 1), axis=1
+            lambda x: x["date"] - pd.Timestamp(x["year"], 1, 1), axis=1
         )
     df["doy"] = df["doy"].dt.days
 
@@ -168,7 +166,9 @@ def plotter(fdict):
     cmap.set_over("black")
     bins = [1, 2, 3, 4, 5, 7, 10, 15, 20, 25, 50]
     if ctx["f"] == "accum":
-        maxval = int(df[["year", "count"]].groupby("year").sum().max()) + 1
+        maxval = (
+            int(df[["year", "count"]].groupby("year").sum().max().iloc[0]) + 1
+        )
         if maxval < 11:
             bins = np.arange(1, 11)
         elif maxval < 21:

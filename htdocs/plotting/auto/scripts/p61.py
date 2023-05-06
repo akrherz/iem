@@ -1,8 +1,10 @@
-"""This plot presents the current streak of days with
-    a high or low temperature above or at-below the daily average temperature.
-    You can also plot the number of days since last measurable precipitation
-    event (trace events are counted as dry).
-    This plot is based off of NWS CLI sites."""
+"""
+This plot presents the current streak of days with
+a high or low temperature above or at-below the daily average temperature.
+You can also plot the number of days since last measurable precipitation
+event (trace events are counted as dry).
+This plot is based off of NWS CLI sites.
+"""
 import datetime
 
 import geopandas as gpd
@@ -108,6 +110,14 @@ def get_data(ctx):
             conn,
             params=(d180, today, d180, d180, d180, d180, d180, d180),
             index_col="station",
+            parse_dates=[
+                "last_dry",
+                "last_wet",
+                "last_low_below",
+                "last_low_above",
+                "last_high_below",
+                "last_high_above",
+            ],
         )
     if df.empty:
         raise NoDataFound("No Data Found.")
@@ -117,6 +127,7 @@ def get_data(ctx):
     df["val"] = None
     df["color"] = ""
     df["label"] = ""
+
     df["precip_days"] = (df["last_dry"] - df["last_wet"]).dt.days
     df["low_days"] = (df["last_low_above"] - df["last_low_below"]).dt.days
     df["high_days"] = (df["last_high_above"] - df["last_high_below"]).dt.days
