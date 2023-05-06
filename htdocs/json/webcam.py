@@ -40,7 +40,7 @@ def dance(cid, start_ts, end_ts):
 def application(environ, start_response):
     """Answer request."""
     fields = parse_formvars(environ)
-    cid = fields.get("cid", "KCCI-016")
+    cid = fields.get("cid", "ISUC-003")
     start_ts = fields.get("start_ts")
     end_ts = fields.get("end_ts")
     date = fields.get("date")
