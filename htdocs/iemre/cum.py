@@ -1,14 +1,14 @@
 """Fun."""
-import os
-import zipfile
 import datetime
 import json
+import os
+import zipfile
 
 import numpy as np
 import shapefile
 from paste.request import parse_formvars
 from pyiem import iemre
-from pyiem.util import get_dbconn, ncopen, convert_value
+from pyiem.util import convert_value, get_dbconn, ncopen
 
 
 def application(environ, start_response):

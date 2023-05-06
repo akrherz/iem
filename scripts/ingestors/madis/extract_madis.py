@@ -2,10 +2,10 @@
 import datetime
 import os
 
-import pytz
 import numpy as np
+import pytz
 from netCDF4 import chartostring
-from pyiem.util import get_dbconn, ncopen, convert_value, logger
+from pyiem.util import convert_value, get_dbconn, logger, ncopen
 
 LOG = logger()
 

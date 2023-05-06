@@ -2,11 +2,11 @@
 import calendar
 import datetime
 
-import pandas as pd
 import numpy as np
+import pandas as pd
 from pyiem import util
-from pyiem.plot import figure_axes
 from pyiem.exceptions import NoDataFound
+from pyiem.plot import figure_axes
 
 
 def get_description():

@@ -1,10 +1,10 @@
 """Climodat consec days"""
 import datetime
 
-import pandas as pd
 import numpy as np
-from pyiem.util import get_autoplot_context, get_dbconn
+import pandas as pd
 from pyiem.exceptions import NoDataFound
+from pyiem.util import get_autoplot_context, get_dbconn
 
 
 def get_description():

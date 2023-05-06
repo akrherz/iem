@@ -4,10 +4,10 @@ import json
 import warnings
 
 import numpy as np
+import pyiem.prism as prismutil
 from paste.request import parse_formvars
 from pyiem import iemre
-from pyiem.util import ncopen, convert_value
-import pyiem.prism as prismutil
+from pyiem.util import convert_value, ncopen
 
 warnings.simplefilter("ignore", UserWarning)
 json.encoder.FLOAT_REPR = lambda o: format(o, ".2f")

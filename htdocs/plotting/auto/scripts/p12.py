@@ -9,11 +9,11 @@ would represent the period of 1 July 2016 to 30 Jun 2017.
 """
 import datetime
 
-import pandas as pd
 import numpy as np
+import pandas as pd
+from pyiem.exceptions import NoDataFound
 from pyiem.plot import figure_axes
 from pyiem.util import get_autoplot_context, get_sqlalchemy_conn
-from pyiem.exceptions import NoDataFound
 
 PDICT = {
     "last_high_above": "Last Date At or Above (High Temperature)",

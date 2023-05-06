@@ -1,10 +1,10 @@
 """ Service to dump out IBW tags for a WFO / Year"""
-import json
 import datetime
+import json
 
-from pymemcache.client import Client
 from paste.request import parse_formvars
 from pyiem.util import get_dbconn, html_escape, utc
+from pymemcache.client import Client
 
 DAMAGE_TAGS = "CONSIDERABLE DESTRUCTIVE CATASTROPHIC".split()
 

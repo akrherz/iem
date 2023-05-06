@@ -1,12 +1,12 @@
 """First Fall Threshold Dates."""
 import datetime
 
-import pandas as pd
 import numpy as np
-from scipy.stats import linregress
+import pandas as pd
+from pyiem.exceptions import NoDataFound
 from pyiem.plot import figure_axes
 from pyiem.util import get_autoplot_context, get_sqlalchemy_conn
-from pyiem.exceptions import NoDataFound
+from scipy.stats import linregress
 
 
 def get_description():

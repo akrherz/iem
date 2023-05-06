@@ -3,13 +3,13 @@
  Use Unidata's motherlode server :)
 
 """
+import datetime
 import sys
 from io import StringIO
-import datetime
 
-import requests
-import pytz
 import pandas as pd
+import pytz
+import requests
 from pyiem.network import Table as NetworkTable
 from pyiem.util import get_dbconn, logger
 

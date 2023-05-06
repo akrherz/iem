@@ -7,7 +7,7 @@ import sys
 
 # third party
 import psycopg2.extras
-from pyiem.util import get_dbconn, utc, logger
+from pyiem.util import get_dbconn, logger, utc
 
 LOG = logger()
 OTHER = get_dbconn("other")

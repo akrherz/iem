@@ -6,13 +6,13 @@
 import datetime
 from io import BytesIO
 
-from pymemcache.client import Client
-import pytz
-import PIL.ImageFont
 import PIL.ImageDraw
+import PIL.ImageFont
 import PIL.ImageOps
+import pytz
 from paste.request import parse_formvars
 from pyiem.util import get_dbconn
+from pymemcache.client import Client
 
 
 def pt2px(pt):

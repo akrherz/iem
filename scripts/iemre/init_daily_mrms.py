@@ -1,11 +1,11 @@
 """Generate the storage netcdf file for 0.01deg MRMS data over the Midwest"""
 import datetime
-import sys
 import os
+import sys
 
 import numpy as np
 from pyiem import iemre
-from pyiem.util import ncopen, logger
+from pyiem.util import logger, ncopen
 
 LOG = logger()
 

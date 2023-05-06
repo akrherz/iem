@@ -14,10 +14,10 @@ state :/
 import datetime
 import sys
 
-import numpy as np
-import pandas as pd
 import geopandas as gpd
 import matplotlib.colors as mpcolors
+import numpy as np
+import pandas as pd
 from pyiem.exceptions import NoDataFound
 from pyiem.network import Table as NetworkTable
 from pyiem.plot import MapPlot

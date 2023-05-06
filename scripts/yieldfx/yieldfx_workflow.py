@@ -7,22 +7,22 @@
  - For this year, replace day + 4 to Dec 31 with CFS :)
  - Upload the resulting file <site>_YYYYmmdd.met
 """
-import sys
 import datetime
-import tempfile
-from io import StringIO
 import os
 import subprocess
+import sys
+import tempfile
+from io import StringIO
 
 import numpy as np
 import pandas as pd
 from metpy.units import units
 from pyiem.meteorology import gdd
 from pyiem.util import (
+    convert_value,
     get_dbconn,
     get_sqlalchemy_conn,
     logger,
-    convert_value,
 )
 
 LOG = logger()

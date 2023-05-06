@@ -1,8 +1,8 @@
 """Ingest the El Nino"""
 import datetime
 
-import requests
 import pandas as pd
+import requests
 from pyiem.util import get_dbconn, get_sqlalchemy_conn
 
 

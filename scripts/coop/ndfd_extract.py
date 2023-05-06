@@ -8,15 +8,15 @@ Attempt to derive climodat data from the NDFD database, we will use the 00 UTC
 files.
 
 """
-import sys
 import datetime
 import os
+import sys
 
-import pyproj
 import numpy as np
 import pygrib
+import pyproj
 from pyiem.network import Table as NetworkTable
-from pyiem.util import get_dbconn, logger, utc, convert_value
+from pyiem.util import convert_value, get_dbconn, logger, utc
 
 LOG = logger()
 nt = NetworkTable("IACLIMATE")

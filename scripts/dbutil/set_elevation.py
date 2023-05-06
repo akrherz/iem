@@ -1,6 +1,6 @@
 """Hit up ESRIs elevation REST service to compute a station elevation."""
-import time
 import sys
+import time
 
 import requests
 from pyiem.util import get_dbconn, logger

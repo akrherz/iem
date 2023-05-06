@@ -2,8 +2,8 @@
 import datetime
 
 import psycopg2.extras
-from pyiem.plot import MapPlot
 from pyiem.network import Table as NetworkTable
+from pyiem.plot import MapPlot
 from pyiem.util import get_dbconn
 
 

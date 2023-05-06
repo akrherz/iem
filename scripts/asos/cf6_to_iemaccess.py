@@ -7,10 +7,11 @@ Run from RUN_12Z.sh, RUN_0Z.sh for past 48 hours of data
 import sys
 from datetime import date
 
-# third party
-from pyiem.util import get_sqlalchemy_conn, get_dbconn, logger
-from metpy.units import units
 import pandas as pd
+from metpy.units import units
+
+# third party
+from pyiem.util import get_dbconn, get_sqlalchemy_conn, logger
 from sqlalchemy import text
 
 LOG = logger()

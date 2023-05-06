@@ -4,11 +4,11 @@ import calendar
 import numpy as np
 import pandas as pd
 import seaborn as sns
-from sqlalchemy import text
-from pyiem.plot import figure_axes
-from pyiem.util import get_autoplot_context, get_sqlalchemy_conn
 from pyiem.exceptions import NoDataFound
+from pyiem.plot import figure_axes
 from pyiem.reference import prodDefinitions
+from pyiem.util import get_autoplot_context, get_sqlalchemy_conn
+from sqlalchemy import text
 
 
 def get_description():

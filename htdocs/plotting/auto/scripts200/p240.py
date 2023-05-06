@@ -16,9 +16,9 @@ GDD Climatology.
 """
 from datetime import date, timedelta
 
-import requests
-import pandas as pd
 import matplotlib.dates as mdates
+import pandas as pd
+import requests
 from pyiem.exceptions import NoDataFound
 from pyiem.plot import figure
 from pyiem.util import get_autoplot_context, get_sqlalchemy_conn

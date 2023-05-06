@@ -5,13 +5,12 @@
 import pytz
 import requests
 from geopandas import read_postgis
+from pyiem.exceptions import NoDataFound
 from pyiem.network import Table as NetworkTable
 from pyiem.plot.geoplot import MapPlot
-from pyiem.util import get_autoplot_context, get_sqlalchemy_conn, LOG
-from pyiem.exceptions import NoDataFound
-from pyiem.reference import Z_OVERLAY2, LATLON, prodDefinitions
+from pyiem.reference import LATLON, Z_OVERLAY2, prodDefinitions
+from pyiem.util import LOG, get_autoplot_context, get_sqlalchemy_conn
 from sqlalchemy import text
-
 
 TFORMAT = "%b %-d %Y %-I:%M %p %Z"
 WFOCONV = {"JSJ": "SJU"}

@@ -4,11 +4,11 @@
 import datetime
 from io import StringIO
 
-import requests
 import pandas as pd
-from tqdm import tqdm
+import requests
 from pyiem.network import Table as NetworkTable
 from pyiem.util import get_dbconn, logger
+from tqdm import tqdm
 
 LOG = logger()
 BASEURL = "https://www.ncei.noaa.gov/data/normals-daily/1991-2020/access"

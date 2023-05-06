@@ -6,13 +6,13 @@ The vertical highlighted stripes on the plot are just the weekend dates.
 import datetime
 import warnings
 
+import matplotlib.patheffects as PathEffects
 import numpy as np
 import pandas as pd
 import requests
-import matplotlib.patheffects as PathEffects
 from matplotlib.patches import Rectangle
 from pyiem.plot import figure_axes
-from pyiem.util import get_autoplot_context, get_sqlalchemy_conn, LOG
+from pyiem.util import LOG, get_autoplot_context, get_sqlalchemy_conn
 
 warnings.simplefilter("ignore", UserWarning)
 PDICT = {"temps": "Plot High/Low Temperatures", "precip": "Plot Precipitation"}

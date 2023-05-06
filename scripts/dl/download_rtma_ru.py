@@ -3,14 +3,14 @@ Download RTMA Rapid Updates grids
 
 Run from RUN_50_AFTER.sh for previous hour
 """
-import sys
 import datetime
 import os
 import subprocess
+import sys
 import tempfile
 
-import requests
 import pygrib
+import requests
 from pyiem.util import exponential_backoff, logger, utc
 
 LOG = logger()

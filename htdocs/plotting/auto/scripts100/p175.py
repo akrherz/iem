@@ -1,22 +1,21 @@
 """snow cover coverage."""
-import os
 import datetime
+import os
 
-import numpy as np
-import pandas as pd
 import geopandas as gpd
 import matplotlib.dates as mdates
-from pyiem import iemre
-from pyiem.plot import figure_axes
+import numpy as np
+import pandas as pd
+from pyiem import iemre, reference
+from pyiem.exceptions import NoDataFound
 from pyiem.grid.zs import CachingZonalStats
+from pyiem.plot import figure_axes
 from pyiem.util import (
+    convert_value,
     get_autoplot_context,
     get_sqlalchemy_conn,
     ncopen,
-    convert_value,
 )
-from pyiem import reference
-from pyiem.exceptions import NoDataFound
 
 
 def get_description():

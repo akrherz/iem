@@ -7,13 +7,13 @@ Run from RUN_0Z.sh for seven UTC days ago.
 import datetime
 import sys
 
+import geopandas as gpd
 import numpy as np
 import pandas as pd
-import geopandas as gpd
 from affine import Affine
 from pyiem.grid.zs import CachingZonalStats
-from pyiem.iemre import hourly_offset, WEST, NORTH
-from pyiem.util import get_dbconn, ncopen, logger, get_sqlalchemy_conn, utc
+from pyiem.iemre import NORTH, WEST, hourly_offset
+from pyiem.util import get_dbconn, get_sqlalchemy_conn, logger, ncopen, utc
 
 LOG = logger()
 

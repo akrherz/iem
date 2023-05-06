@@ -2,8 +2,8 @@
 Send Harry Hillaker a weekly email summarizing the past seven days worth of
 RR3 products.
 """
-import os
 import datetime
+import os
 import smtplib
 from email import encoders
 from email.mime.base import MIMEBase

@@ -10,8 +10,8 @@ minute interval samples, so these will not fully capture the actual high nor
 low temperature.  When the 15 minute data is available, it should certainly
 do a better job than the hourly.
 """
-from datetime import timedelta
 import os
+from datetime import timedelta
 
 import matplotlib.colors as mpcolors
 import numpy as np
@@ -20,7 +20,7 @@ import pygrib
 from pyiem.exceptions import NoDataFound
 from pyiem.plot import MapPlot, pretty_bins
 from pyiem.reference import LATLON
-from pyiem.util import get_autoplot_context, convert_value, utc
+from pyiem.util import convert_value, get_autoplot_context, utc
 
 PDICT = {
     "max": "Maximum",

@@ -4,9 +4,9 @@ run from RUN_0Z.sh
 """
 import datetime
 
-from pyiem.plot import MapPlot
-from pyiem.util import get_sqlalchemy_conn, utc, logger
 import pandas as pd
+from pyiem.plot import MapPlot
+from pyiem.util import get_sqlalchemy_conn, logger, utc
 from sqlalchemy import text
 
 LOG = logger()

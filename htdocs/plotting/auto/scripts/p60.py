@@ -1,14 +1,13 @@
 """Hourly frequencies."""
-import datetime
 import calendar
+import datetime
 
+import matplotlib.colors as mpcolors
 import numpy as np
 import pandas as pd
-import matplotlib.colors as mpcolors
-from pyiem.plot import get_cmap
-from pyiem.plot import figure_axes, pretty_bins
-from pyiem.util import get_autoplot_context, get_sqlalchemy_conn
 from pyiem.exceptions import NoDataFound
+from pyiem.plot import figure_axes, get_cmap, pretty_bins
+from pyiem.util import get_autoplot_context, get_sqlalchemy_conn
 from sqlalchemy import text
 
 PDICT = {"above": "At or Above Threshold", "below": "Below Threshold"}

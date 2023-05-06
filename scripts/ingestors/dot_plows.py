@@ -1,9 +1,9 @@
 """Consume a REST service of DOT Snowplow locations and data."""
-import json
 import datetime
+import json
 
 import requests
-from pyiem.util import get_dbconn, utc, exponential_backoff, logger
+from pyiem.util import exponential_backoff, get_dbconn, logger, utc
 
 LOG = logger()
 

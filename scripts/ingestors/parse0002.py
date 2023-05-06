@@ -1,11 +1,11 @@
 """Quick and Dirty to get the ISUMET station data into the DB"""
-import re
 import os
+import re
 import sys
 
 import pytz
 from pyiem.observation import Observation
-from pyiem.util import get_dbconn, utc, convert_value
+from pyiem.util import convert_value, get_dbconn, utc
 
 
 def main():

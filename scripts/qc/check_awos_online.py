@@ -4,9 +4,9 @@ run from RUN_10_AFTER.sh
 """
 import datetime
 
-from pyiem.tracker import TrackerEngine
 from pyiem.network import Table as NetworkTable
-from pyiem.util import get_dbconn, utc, logger
+from pyiem.tracker import TrackerEngine
+from pyiem.util import get_dbconn, logger, utc
 
 LOG = logger()
 

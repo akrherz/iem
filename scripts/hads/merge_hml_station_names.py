@@ -9,7 +9,7 @@ from pyiem.reference import nwsli2state
 from pyiem.util import get_dbconn
 
 sys.path.insert(0, "../dbutil")
-from delete_station import delete_logic  # @UnresolvedImport
+from delete_station import delete_logic  # noqa
 
 
 def build_stations():

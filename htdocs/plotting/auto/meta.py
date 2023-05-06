@@ -1,8 +1,8 @@
 """mod_wsgi handler for autoplot cache needs"""
-import sys
 import importlib
-import os
 import json
+import os
+import sys
 
 from paste.request import parse_formvars
 from pyiem.reference import FIGSIZES_NAMES

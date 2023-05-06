@@ -1,6 +1,6 @@
 """ Generate a plot of GDD for the ASOS network"""
-import sys
 import datetime
+import sys
 
 from pyiem.util import logger, web2ldm
 

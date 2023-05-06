@@ -4,10 +4,10 @@ called from RUN_10_AFTER.sh
 """
 import datetime
 
-from pyiem.network import Table as NetworkTable
-from pyiem.util import get_properties, get_dbconn, utc, logger
 import pandas as pd
 import requests
+from pyiem.network import Table as NetworkTable
+from pyiem.util import get_dbconn, get_properties, logger, utc
 
 LOG = logger()
 DBCONN = get_dbconn("iem")

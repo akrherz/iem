@@ -1,13 +1,13 @@
 """
  Generate a map of Number of days with precip
 """
-import sys
 import datetime
+import sys
 
-from pyiem.plot import MapPlot
-from pyiem.network import Table as NetworkTable
-from pyiem.util import get_dbconn
 import psycopg2.extras
+from pyiem.network import Table as NetworkTable
+from pyiem.plot import MapPlot
+from pyiem.util import get_dbconn
 
 
 def runYear(year):

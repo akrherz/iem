@@ -1,10 +1,10 @@
 """Dump baseline file as CSV, with GDD computed"""
+import datetime
 import glob
 import os
-import datetime
 
-from metpy.units import units
 import pyiem.meteorology as met
+from metpy.units import units
 
 
 def main():

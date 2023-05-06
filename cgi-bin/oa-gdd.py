@@ -1,12 +1,12 @@
 """
  Produce a OA GDD Plot, dynamically!
 """
-from io import BytesIO
 import datetime
+from io import BytesIO
 
 from paste.request import parse_formvars
-from pyiem.plot import MapPlot
 from pyiem.network import Table as NetworkTable
+from pyiem.plot import MapPlot
 from pyiem.util import get_dbconn
 
 

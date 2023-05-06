@@ -5,8 +5,8 @@ import sys
 import numpy as np
 import pandas as pd
 from pyiem.network import Table as NetworkTable
-from pyiem.plot.use_agg import plt
 from pyiem.plot import get_cmap
+from pyiem.plot.use_agg import plt
 from pyiem.util import get_sqlalchemy_conn, utc
 from tqdm import tqdm
 

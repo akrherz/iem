@@ -5,14 +5,14 @@
 """
 # pylint: disable=unsubscriptable-object
 import datetime
+import json
+import os
 import subprocess
 import tempfile
-import os
-import json
 
+import pyproj
 import pytz
 import requests
-import pyproj
 from pyiem.util import exponential_backoff, get_dbconn, logger
 
 LOG = logger()

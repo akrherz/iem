@@ -1,14 +1,14 @@
 """JSON service emitting observation history for a given date"""
+import datetime
 import json
 import os
-import datetime
 
-from pandas.io.sql import read_sql
 from dateutil.parser import parse
-from pymemcache.client import Client
+from pandas.io.sql import read_sql
 from paste.request import parse_formvars
 from pyiem.reference import IEMVARS
 from pyiem.util import get_sqlalchemy_conn, html_escape
+from pymemcache.client import Client
 
 
 def do_today(table, station, network, date):

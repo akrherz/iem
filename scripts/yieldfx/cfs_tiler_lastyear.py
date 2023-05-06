@@ -7,8 +7,8 @@ import os
 import numpy as np
 from metpy.units import units
 from pyiem import iemre
-from pyiem.util import ncopen, convert_value
 from pyiem.meteorology import gdd
+from pyiem.util import convert_value, ncopen
 
 
 def make_netcdf(fullpath, valid, west, south):

@@ -1,12 +1,12 @@
 """Grid climate for netcdf usage"""
-import sys
 import datetime
+import sys
 
 import numpy as np
 import pandas as pd
-from scipy.interpolate import NearestNDInterpolator
 from pyiem import iemre
-from pyiem.util import get_sqlalchemy_conn, ncopen, convert_value, logger
+from pyiem.util import convert_value, get_sqlalchemy_conn, logger, ncopen
+from scipy.interpolate import NearestNDInterpolator
 from sqlalchemy import text
 
 LOG = logger()

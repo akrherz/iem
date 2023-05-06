@@ -3,7 +3,7 @@ Download Interface for HADS data
 """
 # pylint: disable=abstract-class-instantiated
 from datetime import timedelta
-from io import StringIO, BytesIO
+from io import BytesIO, StringIO
 
 import pandas as pd
 from pandas.io.sql import read_sql

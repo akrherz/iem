@@ -2,16 +2,16 @@
 import calendar
 
 import pandas as pd
-from metpy.units import units as munits
 from metpy.calc import wind_components, wind_direction
+from metpy.units import units as munits
+from pyiem.exceptions import NoDataFound
 from pyiem.plot import figure_axes
 from pyiem.util import (
+    convert_value,
     drct2text,
     get_autoplot_context,
     get_sqlalchemy_conn,
-    convert_value,
 )
-from pyiem.exceptions import NoDataFound
 
 UNITS = {"mph": "miles per hour", "kt": "knots", "mps": "meters per second"}
 UNITCONV = {"mph": "miles / hour", "kt": "knot", "mps": "meter / second"}

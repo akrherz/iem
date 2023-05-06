@@ -3,24 +3,24 @@
 # pylint: disable=no-member,too-many-lines
 import datetime
 
+import matplotlib.colors as mpcolors
+import matplotlib.dates as mdates
 import numpy as np
+import pandas as pd
 import psycopg2
 import pytz
-import pandas as pd
-import matplotlib.dates as mdates
-import matplotlib.colors as mpcolors
-from matplotlib.patches import Patch
 from matplotlib.lines import Line2D
+from matplotlib.patches import Patch
 from pyiem import meteorology
+from pyiem.exceptions import NoDataFound
 from pyiem.plot import figure, figure_axes, get_cmap
 from pyiem.util import (
+    c2f,
     convert_value,
     get_autoplot_context,
     get_dbconn,
-    c2f,
     get_sqlalchemy_conn,
 )
-from pyiem.exceptions import NoDataFound
 
 CENTRAL = pytz.timezone("America/Chicago")
 PLOTTYPES = {

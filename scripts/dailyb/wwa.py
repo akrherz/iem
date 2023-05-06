@@ -1,22 +1,26 @@
 """Some simple summary stats for the IEM Daily Bulletin..."""
 import datetime
+
 import pytz
 from pyiem.util import get_dbconn, utc
 
 POSTGIS = get_dbconn("postgis")
 cursor = POSTGIS.cursor()
 
-textfmt = """
-             Summary +_________ By WFO ____________+  Watches
-Type         US   IA | ARX   DVN   DMX   OAX   FSD |  US
-Tornado     %(TOu)3s  %(TOi)3s | %(TOARX)3s   %(TODVN)3s   %(TODMX)3s   %(TOOAX)3s   %(TOFSD)3s | %(TORw)3s
-Svr Tstorm  %(SVu)3s  %(SVi)3s | %(SVARX)3s   %(SVDVN)3s   %(SVDMX)3s   %(SVOAX)3s   %(SVFSD)3s | %(SVRw)3s
-Flash Flood %(FFu)3s  %(FFi)3s | %(FFARX)3s   %(FFDVN)3s   %(FFDMX)3s   %(FFOAX)3s   %(FFFSD)3s | N/A
-
-ARX = LaCrosse, WI  DVN = Davenport, IA    DMX = Des Moines, IA
-OAX = Omaha, NE     FSD = Sioux Falls, SD
-
-"""
+textfmt = (
+    "             Summary +_________ By WFO ____________+  Watches\n"
+    "Type         US   IA | ARX   DVN   DMX   OAX   FSD |  US\n"
+    "Tornado     %(TOu)3s  %(TOi)3s | %(TOARX)3s   %(TODVN)3s   "
+    "%(TODMX)3s   %(TOOAX)3s   %(TOFSD)3s | %(TORw)3s\n"
+    "Svr Tstorm  %(SVu)3s  %(SVi)3s | %(SVARX)3s   %(SVDVN)3s   "
+    "%(SVDMX)3s   %(SVOAX)3s   %(SVFSD)3s | %(SVRw)3s\n"
+    "Flash Flood %(FFu)3s  %(FFi)3s | %(FFARX)3s   %(FFDVN)3s   "
+    "%(FFDMX)3s   %(FFOAX)3s   %(FFFSD)3s | N/A\n"
+    "\n"
+    "ARX = LaCrosse, WI  DVN = Davenport, IA    DMX = Des Moines, IA\n"
+    "OAX = Omaha, NE     FSD = Sioux Falls, SD\n"
+    "\n"
+)
 
 htmlfmt = """
 <table cellpadding="3" cellspacing="0" border="1">

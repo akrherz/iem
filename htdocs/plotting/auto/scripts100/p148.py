@@ -1,12 +1,12 @@
 """Special Days each year"""
-import datetime
 import calendar
+import datetime
 
-from dateutil.easter import easter as get_easter
 import pandas as pd
-from pyiem.util import get_autoplot_context, get_sqlalchemy_conn
-from pyiem.plot import figure_axes
+from dateutil.easter import easter as get_easter
 from pyiem.exceptions import NoDataFound
+from pyiem.plot import figure_axes
+from pyiem.util import get_autoplot_context, get_sqlalchemy_conn
 from sqlalchemy import text
 
 PDICT = {

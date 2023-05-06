@@ -1,12 +1,12 @@
 """Avg dew point at temperature."""
 import datetime
 
+import metpy.calc as mcalc
 import pandas as pd
 from metpy.units import units
-import metpy.calc as mcalc
-from pyiem.util import get_autoplot_context, get_sqlalchemy_conn
-from pyiem.plot import figure_axes
 from pyiem.exceptions import NoDataFound
+from pyiem.plot import figure_axes
+from pyiem.util import get_autoplot_context, get_sqlalchemy_conn
 from sqlalchemy import text
 
 MDICT = {

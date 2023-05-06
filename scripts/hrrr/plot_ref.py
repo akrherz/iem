@@ -4,17 +4,17 @@ Generate an animated GIF of HRRR forecasted 1km reflectivity
 Run from RUN_40AFTER.sh and for the previous hour's HRRR run
 """
 import datetime
+import os
 import subprocess
 import sys
-import os
 
-import numpy as np
-import pytz
-import pygrib
 import matplotlib.colors as mpcolors
-from pyiem.plot import MapPlot, ramp2df
+import numpy as np
+import pygrib
 import pyiem.reference as ref
-from pyiem.util import utc, logger
+import pytz
+from pyiem.plot import MapPlot, ramp2df
+from pyiem.util import logger, utc
 
 LOG = logger()
 HOURS = [18] * 24

@@ -3,10 +3,10 @@ import sys
 import warnings
 
 from netCDF4 import chartostring
-from pyiem.util import get_dbconn, ncopen, logger
+from pyiem.util import get_dbconn, logger, ncopen
 
 sys.path.insert(0, ".")
-from to_iemaccess import provider2network
+from to_iemaccess import provider2network  # noqa
 
 warnings.filterwarnings("ignore", category=DeprecationWarning)
 LOG = logger()

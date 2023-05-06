@@ -1,6 +1,6 @@
 """Create a plot of SMOS data for either 0 or 12z"""
-import sys
 import datetime
+import sys
 
 import numpy as np
 from pandas import read_sql

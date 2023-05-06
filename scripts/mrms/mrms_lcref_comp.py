@@ -2,18 +2,18 @@
  Generate a composite of the MRMS Lowest Composite Reflectvity
 """
 import datetime
-import os
-import tempfile
-import json
-import sys
 import gzip
+import json
+import os
 import subprocess
+import sys
+import tempfile
 
 import numpy as np
-from PIL import Image
 import pygrib
 import pyiem.mrms as mrms
-from pyiem.util import utc, logger
+from PIL import Image
+from pyiem.util import logger, utc
 
 LOG = logger()
 

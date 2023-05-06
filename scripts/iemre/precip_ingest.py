@@ -3,15 +3,15 @@
     1. Copies to hourly stage IV netCDF files
     2. Copies hourly stage IV netCDF to hourly IEMRE
 """
-import os
 import datetime
+import os
 import sys
 
 import numpy as np
-from scipy.interpolate import NearestNDInterpolator
 import pygrib
 from pyiem import iemre
-from pyiem.util import utc, ncopen, logger
+from pyiem.util import logger, ncopen, utc
+from scipy.interpolate import NearestNDInterpolator
 
 LOG = logger()
 

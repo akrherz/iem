@@ -17,11 +17,11 @@ import datetime
 import json
 
 import pytz
-from pymemcache.client import Client
 from pandas.io.sql import read_sql
 from paste.request import parse_formvars
 from pyiem.network import Table as NetworkTable
 from pyiem.util import get_sqlalchemy_conn, html_escape
+from pymemcache.client import Client
 from sqlalchemy import text
 
 json.encoder.FLOAT_REPR = lambda o: format(o, ".2f")

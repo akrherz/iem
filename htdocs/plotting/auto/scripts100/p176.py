@@ -2,9 +2,9 @@
 # pylint: disable=no-member
 
 import pandas as pd
-from pyiem.util import get_autoplot_context, get_dbconn
-from pyiem.plot import figure_axes
 from pyiem.exceptions import NoDataFound
+from pyiem.plot import figure_axes
+from pyiem.util import get_autoplot_context, get_dbconn
 
 PDICT = {"0": "Max Highs / Min Lows", "1": "Min Highs / Max Lows"}
 PDICT2 = {

@@ -1,12 +1,12 @@
 """Merge the 1km Q2 24 hour precip data estimates"""
 import datetime
-import sys
 import os
+import sys
 
-import pytz
 import numpy as np
-from PIL import Image
 import pyiem.mrms as mrms
+import pytz
+from PIL import Image
 from pyiem import iemre
 from pyiem.util import ncopen
 

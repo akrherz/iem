@@ -2,10 +2,10 @@
 
 Run from RUN_MIDNIGHT.sh for the previous date"""
 import datetime
-import subprocess
+import glob
 import os
 import stat
-import glob
+import subprocess
 
 from pyiem.util import logger
 

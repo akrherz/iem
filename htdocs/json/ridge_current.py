@@ -1,13 +1,13 @@
 """
  Aggregate the RIDGE current files
 """
-import json
 import datetime
 import glob
+import json
 
-from pymemcache.client import Client
 from paste.request import parse_formvars
-from pyiem.util import html_escape, LOG
+from pyiem.util import LOG, html_escape
+from pymemcache.client import Client
 
 ISO = "%Y-%m-%dT%H:%M:%SZ"
 

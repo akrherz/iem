@@ -1,14 +1,14 @@
 """max temp before jul 1 or min after"""
-import datetime
 import calendar
+import datetime
 
-import psycopg2.extras
 import numpy as np
 import pandas as pd
+import psycopg2.extras
 from matplotlib.patches import Rectangle
+from pyiem.exceptions import NoDataFound
 from pyiem.plot import figure_axes
 from pyiem.util import get_autoplot_context, get_dbconn
-from pyiem.exceptions import NoDataFound
 
 PDICT = {
     "fall": "Minimum Temperature after 1 July",

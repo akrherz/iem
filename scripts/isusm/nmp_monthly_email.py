@@ -12,7 +12,7 @@ import smtplib
 from email.mime.text import MIMEText
 
 from pandas import read_sql
-from pyiem.util import get_properties, get_dbconnstr
+from pyiem.util import get_dbconnstr, get_properties
 
 
 def generate_report(start_date, end_date):

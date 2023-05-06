@@ -1,11 +1,11 @@
 """Ingest the NWS provided netcdf file of COOP data"""
-import sys
 import datetime
+import sys
 
 import numpy as np
 from pandas import read_sql
-from pyiem.util import get_dbconn, get_dbconnstr, ncopen, logger
 from pyiem.reference import TRACE_VALUE
+from pyiem.util import get_dbconn, get_dbconnstr, logger, ncopen
 
 LOG = logger()
 

@@ -3,9 +3,9 @@ import datetime
 
 import numpy as np
 import pandas as pd
+from pyiem.exceptions import NoDataFound
 from pyiem.plot import figure
 from pyiem.util import get_autoplot_context, get_sqlalchemy_conn
-from pyiem.exceptions import NoDataFound
 from sqlalchemy import text
 
 PDICT = {

@@ -10,15 +10,15 @@ except ImportError:
 import pandas as pd
 from geopandas import read_postgis
 from matplotlib.patches import Rectangle
+from pyiem.exceptions import NoDataFound
 from pyiem.plot import MapPlot
+from pyiem.reference import LATLON, Z_OVERLAY2_LABEL, Z_POLITICAL
 from pyiem.util import (
     get_autoplot_context,
+    get_dbconn,
     get_sqlalchemy_conn,
     utc,
-    get_dbconn,
 )
-from pyiem.exceptions import NoDataFound
-from pyiem.reference import Z_OVERLAY2_LABEL, Z_POLITICAL, LATLON
 from sqlalchemy import text
 
 CENTRALTZ = ZoneInfo("America/Chicago")

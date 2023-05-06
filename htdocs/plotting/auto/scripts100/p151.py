@@ -7,12 +7,12 @@ averages over some period of years.
 """
 import datetime
 
-from geopandas import read_postgis
 import numpy as np
-from pyiem.plot import MapPlot, centered_bins, get_cmap
-from pyiem.util import get_autoplot_context, get_sqlalchemy_conn
+from geopandas import read_postgis
 from pyiem.exceptions import NoDataFound
+from pyiem.plot import MapPlot, centered_bins, get_cmap
 from pyiem.reference import SECTORS_NAME
+from pyiem.util import get_autoplot_context, get_sqlalchemy_conn
 from sqlalchemy import text
 
 PDICT = {

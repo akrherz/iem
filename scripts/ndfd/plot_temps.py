@@ -1,14 +1,14 @@
 """Generate some plots."""
-import sys
 import datetime
+import sys
 
 import numpy as np
 from metpy.units import masked_array, units
-from pyiem.util import utc, ncopen
 from pyiem.iemre import daily_offset
 from pyiem.meteorology import gdd
 from pyiem.plot import get_cmap
 from pyiem.plot.geoplot import MapPlot
+from pyiem.util import ncopen, utc
 
 
 def plot_gdd(ts):

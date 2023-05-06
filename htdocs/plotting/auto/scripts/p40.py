@@ -4,9 +4,9 @@ import datetime
 import numpy as np
 import pandas as pd
 from matplotlib.patches import Rectangle
-from pyiem.plot import get_cmap, figure
-from pyiem.util import get_autoplot_context, get_sqlalchemy_conn, utc
 from pyiem.exceptions import NoDataFound
+from pyiem.plot import figure, get_cmap
+from pyiem.util import get_autoplot_context, get_sqlalchemy_conn, utc
 
 PDICT = {"sky": "Sky Coverage + Visibility", "vsby": "Just Visibility"}
 

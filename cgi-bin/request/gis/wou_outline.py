@@ -1,10 +1,10 @@
 """Generate a Watch Outline for a given SPC convective watch """
-import zipfile
 import os
+import zipfile
 from io import BytesIO
 
-import shapefile
 import psycopg2.extras
+import shapefile
 from paste.request import parse_formvars
 from pyiem import wellknowntext
 from pyiem.util import get_dbconn

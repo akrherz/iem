@@ -1,5 +1,5 @@
 """Process talltowers data request."""
-from io import StringIO, BytesIO
+from io import BytesIO, StringIO
 
 try:
     from zoneinfo import ZoneInfo  # type: ignore
@@ -7,8 +7,8 @@ except ImportError:
     from backports.zoneinfo import ZoneInfo  # type: ignore
 import datetime
 
-from paste.request import parse_formvars
 import pandas as pd
+from paste.request import parse_formvars
 from pyiem.util import get_dbconn, get_sqlalchemy_conn
 
 EXL = "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"

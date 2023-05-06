@@ -2,9 +2,9 @@
 import calendar
 
 import pandas as pd
+from pyiem.exceptions import NoDataFound
 from pyiem.plot import figure
 from pyiem.util import get_autoplot_context, get_sqlalchemy_conn, utc
-from pyiem.exceptions import NoDataFound
 from sqlalchemy import text
 
 PDICT = {"00": "00 UTC", "12": "12 UTC"}

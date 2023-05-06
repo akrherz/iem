@@ -5,10 +5,10 @@ import json
 import os
 
 import numpy as np
-from pymemcache.client import Client
 from paste.request import parse_formvars
 from pyiem import iemre
-from pyiem.util import utc, ncopen, html_escape, mm2inch
+from pyiem.util import html_escape, mm2inch, ncopen, utc
+from pymemcache.client import Client
 
 
 def myrounder(val, precision):

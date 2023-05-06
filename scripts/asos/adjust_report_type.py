@@ -11,7 +11,7 @@ import datetime
 import sys
 
 import pandas as pd
-from pyiem.util import utc, logger, get_sqlalchemy_conn, get_dbconn
+from pyiem.util import get_dbconn, get_sqlalchemy_conn, logger, utc
 
 LOG = logger()
 

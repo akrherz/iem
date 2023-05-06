@@ -3,11 +3,11 @@ The number of days for a given season that are
 either above or below some temperature threshold.
 """
 
-from scipy import stats
 import pandas as pd
+from pyiem.exceptions import NoDataFound
 from pyiem.plot import figure_axes
 from pyiem.util import get_autoplot_context, get_sqlalchemy_conn
-from pyiem.exceptions import NoDataFound
+from scipy import stats
 
 PDICT = {"above": "At or Above Threshold", "below": "Below Threshold"}
 PDICT2 = {

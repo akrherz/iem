@@ -1,11 +1,11 @@
 """Generate the storage of stage IV hourly products"""
 import datetime
-import sys
 import os
+import sys
 
 import numpy as np
 import pygrib
-from pyiem.util import ncopen, logger
+from pyiem.util import logger, ncopen
 
 # This exists on dev laptop :/
 TEMPLATE_FN = "/mesonet/ARCHIVE/data/2014/09/09/stage4/ST4.2014090900.01h.grib"

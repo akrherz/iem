@@ -10,12 +10,11 @@ import datetime
 import json
 
 import pandas as pd
-from pyiem.plot import figure
-from pyiem.util import get_autoplot_context, get_sqlalchemy_conn, convert_value
-from pyiem.exceptions import NoDataFound
 import seaborn as sns
+from pyiem.exceptions import NoDataFound
+from pyiem.plot import figure
+from pyiem.util import convert_value, get_autoplot_context, get_sqlalchemy_conn
 from sqlalchemy import text
-
 
 PDICT = {
     "TO": "Tornado Warning",

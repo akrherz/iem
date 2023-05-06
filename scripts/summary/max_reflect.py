@@ -4,13 +4,13 @@ Run from RUN_0Z.sh, RUN_10_AFTER.sh (6z)
 """
 import datetime
 import os
-import time
-import sys
 import subprocess
+import sys
+import time
 
+import numpy as np
 import requests
 from osgeo import gdal, gdalconst
-import numpy as np
 from pyiem.util import get_dbconn, logger, utc
 
 LOG = logger()

@@ -2,13 +2,13 @@
 import datetime
 from io import BytesIO
 
+import matplotlib.dates as mdates
+import numpy as np
 import psycopg2.extras
 import pytz
-import numpy as np
-import matplotlib.dates as mdates
 from paste.request import parse_formvars
-from pyiem.plot.use_agg import plt
 from pyiem.network import Table as NetworkTable
+from pyiem.plot.use_agg import plt
 from pyiem.util import get_dbconn
 
 

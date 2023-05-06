@@ -6,16 +6,16 @@
 4. Copy data into netcdf file
 5. Cleanup
 """
-import glob
-import sys
 import datetime
+import glob
 import os
 import subprocess
+import sys
 
-import rasterio
 import numpy as np
+import rasterio
 from pyiem.iemre import daily_offset
-from pyiem.util import ncopen, logger, get_properties, get_dbconn
+from pyiem.util import get_dbconn, get_properties, logger, ncopen
 
 LOG = logger()
 PROPNAME = "prism.archive_end"

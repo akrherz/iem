@@ -1,13 +1,13 @@
 """Ingest SMOS data, please!"""
+import datetime
 import glob
 import os
 import re
-import datetime
-from io import StringIO
 import warnings
+from io import StringIO
 
 import pytz
-from pyiem.util import get_dbconn, ncopen, logger
+from pyiem.util import get_dbconn, logger, ncopen
 
 LOG = logger()
 TSTAMP = re.compile("([0-9]{8}T[0-9]{6})")

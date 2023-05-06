@@ -8,25 +8,25 @@ https://www1.ncdc.noaa.gov/pub/download/hidden/onemin/
 NCEI generates these at about 1530EDT, so we run a bit after that via crontab
 """
 # stdlib
-import re
 import codecs
+import datetime
 import os
-from io import StringIO
+import re
 import subprocess
 import sys
 import tarfile
-import datetime
+from io import StringIO
 
 # third party
 import pandas as pd
+import requests
 from pyiem.util import (
+    exponential_backoff,
     get_dbconn,
     get_dbconnstr,
     logger,
     utc,
-    exponential_backoff,
 )
-import requests
 from tqdm import tqdm
 
 LOG = logger()

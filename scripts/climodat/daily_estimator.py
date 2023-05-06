@@ -8,8 +8,6 @@ RUN_0Z.sh - processes the current date and gets the prelim calday sites data.
 RUN_2AM.sh - processes yesterday, which should run all sites
 """
 import datetime
-
-# pylint: disable=invalid-unary-operand-type
 import sys
 
 import numpy as np
@@ -41,7 +39,7 @@ def load_table(state, date):
         if sid[2:] == "0000" or sid[2] in ["C", "D"]:
             continue
         entry = nt.sts[sid]
-        if skip_calday_sites and not entry["temp24_hour"] in range(3, 12):
+        if skip_calday_sites and entry["temp24_hour"] not in range(3, 12):
             continue
         if entry["threading"]:
             threaded[sid] = nt.get_threading_id(sid, date)

@@ -3,8 +3,8 @@
     Run from RUN_2AM.sh for 3, 6, and 12 months in the past
     on the 15th each month
 """
-import sys
 import datetime
+import sys
 
 import pandas as pd
 from pyiem.network import Table as NetworkTable

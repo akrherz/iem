@@ -1,16 +1,16 @@
 """Process the US Climate Reference Network"""
 import datetime
-import os
-import sys
 import glob
+import os
 import subprocess
+import sys
 
-import pytz
 import pandas as pd
+import pytz
 import requests
 from metpy.units import units
 from pyiem.observation import Observation
-from pyiem.util import get_dbconn, exponential_backoff, logger
+from pyiem.util import exponential_backoff, get_dbconn, logger
 
 LOG = logger()
 BASE = "/mesonet/tmp/uscrn"

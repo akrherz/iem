@@ -11,11 +11,10 @@ import calendar
 import numpy as np
 import pandas as pd
 from matplotlib import ticker
-from pyiem.plot import figure_axes
-from pyiem.plot import get_cmap
-from pyiem.util import get_autoplot_context, get_sqlalchemy_conn
-from pyiem.reference import state_names
 from pyiem.exceptions import NoDataFound
+from pyiem.plot import figure_axes, get_cmap
+from pyiem.reference import state_names
+from pyiem.util import get_autoplot_context, get_sqlalchemy_conn
 
 PDICT = {
     "CPR": "CORN - PROGRESS, MEASURED IN PCT SEEDBED PREPARED",

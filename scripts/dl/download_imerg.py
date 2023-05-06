@@ -15,18 +15,18 @@ Drop L in the above.
 
 RUN from RUN_20AFTER.sh for 5 hours ago.
 """
-import subprocess
-import json
 import datetime
+import json
 import os
+import subprocess
 import sys
 import tempfile
 
-from PIL import Image
 import numpy as np
 import requests
+from PIL import Image
 from pyiem import mrms
-from pyiem.util import utc, ncopen, logger, exponential_backoff
+from pyiem.util import exponential_backoff, logger, ncopen, utc
 
 LOG = logger()
 

@@ -3,12 +3,12 @@
 Run from RUN_40_AFTER.sh
 """
 import datetime
+import os
 import subprocess
 import tempfile
-import os
 
-from pyiem.util import logger, utc, exponential_backoff
 import requests
+from pyiem.util import exponential_backoff, logger, utc
 
 LOG = logger()
 

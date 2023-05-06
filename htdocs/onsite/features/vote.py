@@ -1,7 +1,7 @@
 """ Feature Voting"""
-from http.cookies import SimpleCookie
-import json
 import datetime
+import json
+from http.cookies import SimpleCookie
 
 from paste.request import parse_formvars
 from pyiem.util import get_dbconn

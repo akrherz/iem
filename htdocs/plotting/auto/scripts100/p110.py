@@ -2,11 +2,11 @@
 import datetime
 from calendar import month_abbr
 
-import pandas as pd
 import numpy as np
-from pyiem.plot import figure
-from pyiem.util import get_sqlalchemy_conn, get_autoplot_context
+import pandas as pd
 from pyiem.exceptions import NoDataFound
+from pyiem.plot import figure
+from pyiem.util import get_autoplot_context, get_sqlalchemy_conn
 
 CWEEK = {
     1: "3/1-->3/7   ",

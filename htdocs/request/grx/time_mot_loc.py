@@ -1,13 +1,13 @@
 """Serve Time Motion Location Vectors."""
-import re
-import math
 import datetime
+import math
+import re
 from io import StringIO
 
 import pytz
+from paste.request import parse_formvars
 from psycopg2.extras import RealDictCursor
 from pyiem.util import get_dbconn, utc
-from paste.request import parse_formvars
 
 LOLA = re.compile(r"(?P<lon>[0-9\.\-]+) (?P<lat>[0-9\.\-]+)")
 SQLISO = "YYYY-MM-DDThh24:MI:SSZ"

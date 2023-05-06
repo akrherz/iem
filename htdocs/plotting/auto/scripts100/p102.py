@@ -9,11 +9,11 @@ import datetime
 
 import numpy as np
 import pandas as pd
-from sqlalchemy import text
-from pyiem.plot import figure_axes
 from pyiem import util
-from pyiem.reference import lsr_events
 from pyiem.exceptions import NoDataFound
+from pyiem.plot import figure_axes
+from pyiem.reference import lsr_events
+from sqlalchemy import text
 
 MARKERS = ["8", ">", "<", "v", "o", "h", "*"]
 

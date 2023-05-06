@@ -3,14 +3,14 @@ import datetime
 
 import numpy as np
 import pandas as pd
-from windrose.windrose import histogram
-from windrose import WindroseAxes
 from matplotlib.patches import Rectangle
-from sqlalchemy import text
-from pyiem.util import get_autoplot_context, get_sqlalchemy_conn, drct2text
+from pyiem.exceptions import NoDataFound
 from pyiem.plot import figure
 from pyiem.plot.use_agg import plt
-from pyiem.exceptions import NoDataFound
+from pyiem.util import drct2text, get_autoplot_context, get_sqlalchemy_conn
+from sqlalchemy import text
+from windrose import WindroseAxes
+from windrose.windrose import histogram
 
 PDICT = {
     "ts": "Thunderstorm (TS) Reported",

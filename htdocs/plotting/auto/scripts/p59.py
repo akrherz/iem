@@ -1,14 +1,14 @@
 """u and v wind climatology"""
-import datetime
 import calendar
+import datetime
 
 import numpy as np
 import pandas as pd
+from metpy.calc import wind_components
+from metpy.units import units
+from pyiem.exceptions import NoDataFound
 from pyiem.plot import figure
 from pyiem.util import get_autoplot_context, get_sqlalchemy_conn
-from pyiem.exceptions import NoDataFound
-from metpy.units import units
-from metpy.calc import wind_components
 
 PDICT = {
     "mps": "Meters per Second",

@@ -2,16 +2,16 @@
 
 For now, we just run each Monday for the current year RUN_2AM.sh
 """
-import sys
-import time
 import datetime
 import subprocess
+import sys
+import time
 
-from tqdm import tqdm
-import requests
 import numpy as np
+import requests
 from pyiem import iemre
-from pyiem.util import ncopen, logger, exponential_backoff
+from pyiem.util import exponential_backoff, logger, ncopen
+from tqdm import tqdm
 
 LOG = logger()
 

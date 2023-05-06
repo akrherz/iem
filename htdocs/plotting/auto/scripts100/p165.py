@@ -1,25 +1,26 @@
-"""This app generates a map showing either an explicit year's first or last
-    date or the given percentile (observed
-    frequency) date over all available years of a given temperature threshold.
-    Sadly, this app can only plot one state's worth of data at a time.  If a
-    given year failed to meet the given threshold, it is not included on the
-    plot nor with the computed percentiles.
+"""
+This app generates a map showing either an explicit year's first or last
+date or the given percentile (observed
+frequency) date over all available years of a given temperature threshold.
+Sadly, this app can only plot one state's worth of data at a time.  If a
+given year failed to meet the given threshold, it is not included on the
+plot nor with the computed percentiles.
 
-    <br /><br />
-    <strong>Description of Observed Frequency:</strong> If requested, this
-    app will generate a plot showing the date of a given percentile for the
-    first/last temperature exceedance.  As a practical example of the 50th
-    percentile, the date plotted means that 50% of the previous years on
-    record experienced that temperature threshold by the given date.
+<br /><br />
+<strong>Description of Observed Frequency:</strong> If requested, this
+app will generate a plot showing the date of a given percentile for the
+first/last temperature exceedance.  As a practical example of the 50th
+percentile, the date plotted means that 50% of the previous years on
+record experienced that temperature threshold by the given date.
 """
 import datetime
 
 import numpy as np
 import pandas as pd
-from pyiem.plot.geoplot import MapPlot
-from pyiem.network import Table as NetworkTable
-from pyiem.util import get_autoplot_context, get_sqlalchemy_conn
 from pyiem.exceptions import NoDataFound
+from pyiem.network import Table as NetworkTable
+from pyiem.plot.geoplot import MapPlot
+from pyiem.util import get_autoplot_context, get_sqlalchemy_conn
 from sqlalchemy import text
 
 PDICT3 = {"contour": "Contour + Plot Values", "values": "Plot Values Only"}
@@ -184,7 +185,7 @@ def plotter(fdict):
     if df.empty:
         raise NoDataFound("No data found")
     df = df[df["event"].notna()]
-    df["doy"] = (df["event"] - df["min_day"]).dt.days
+    df["doy"] = (df["event"] - df["min_day"]).apply(lambda x: x.days)
 
     basedate = datetime.date(2000, 7 if varname == "fall_below" else 1, 1)
     if ctx.get("p") is not None:
@@ -303,7 +304,7 @@ def plotter(fdict):
 if __name__ == "__main__":
     plotter(
         {
-            "sector": "DC",
+            "sector": "ia",
             "var": "high_above",
             "popt": "contour",
             "year": 2022,

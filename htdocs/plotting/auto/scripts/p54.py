@@ -7,14 +7,14 @@ high is defined as the period between noon and 8 PM.  If any difference
 is greater than 25 degrees, it is omitted from this analysis.  This app
 may take a while to generate a plot, so please be patient!
 """
-import datetime
 import calendar
+import datetime
 
 import numpy as np
 import pandas as pd
-from pyiem.plot import get_cmap, figure
-from pyiem.util import get_autoplot_context, get_sqlalchemy_conn
 from pyiem.exceptions import NoDataFound
+from pyiem.plot import figure, get_cmap
+from pyiem.util import get_autoplot_context, get_sqlalchemy_conn
 
 PDICT = {
     "low": "Morning Low (midnight to 8 AM)",

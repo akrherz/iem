@@ -5,12 +5,12 @@ total, which is defined for the period between 1 Oct and 30 Sep. For
 example, the 2009 <i>WYEAR</i> value represents the period between
 1 Oct 2008 and 30 Sep 2009, the 2009 water year.
 """
-import datetime
 import calendar
+import datetime
 
 import pandas as pd
-from pyiem.util import get_sqlalchemy_conn, get_autoplot_context
 from pyiem.exceptions import NoDataFound
+from pyiem.util import get_autoplot_context, get_sqlalchemy_conn
 
 PDICT = {
     "precip": "Total Precipitation",

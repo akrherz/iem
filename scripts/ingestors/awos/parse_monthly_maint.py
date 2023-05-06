@@ -4,9 +4,9 @@
 entire sensors replaced when outside of bounds.
 2. There is no flag that denotes if a calibration even happened :/
 """
-import sys
-import re
 import datetime
+import re
+import sys
 
 import pandas as pd
 from pyiem.util import get_dbconn

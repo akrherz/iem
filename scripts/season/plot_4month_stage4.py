@@ -9,8 +9,8 @@
 import datetime
 
 import numpy as np
-from pyiem.plot import MapPlot, get_cmap
 from pyiem import iemre
+from pyiem.plot import MapPlot, get_cmap
 from pyiem.util import ncopen
 
 

@@ -1,11 +1,11 @@
 """see what station info can be gleaned from HADS website"""
 from io import StringIO
 
-import requests
 import pandas as pd
+import requests
 from pandas import read_sql
+from pyiem.reference import nwsli2country, nwsli2state
 from pyiem.util import get_dbconn, get_dbconnstr
-from pyiem.reference import nwsli2state, nwsli2country
 
 
 def main():

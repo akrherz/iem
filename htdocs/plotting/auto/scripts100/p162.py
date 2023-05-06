@@ -1,14 +1,13 @@
 """Overcast 2-D Histogram"""
 import datetime
 
+import matplotlib.colors as mpcolors
 import numpy as np
 import numpy.ma as ma
 import pandas as pd
-import matplotlib.colors as mpcolors
-from pyiem.plot import figure_axes
-from pyiem.plot import get_cmap
-from pyiem.util import get_autoplot_context, get_sqlalchemy_conn
 from pyiem.exceptions import NoDataFound
+from pyiem.plot import figure_axes, get_cmap
+from pyiem.util import get_autoplot_context, get_sqlalchemy_conn
 
 
 def get_description():

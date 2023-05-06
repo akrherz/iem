@@ -6,12 +6,12 @@ If hour and minute are omitted, this is a daily copy, otherwise hourly.
 
 see: akrherz/iem#199
 """
-import sys
 import datetime
+import sys
 
 import numpy as np
-from pyiem.util import utc, ncopen, logger
 from pyiem import iemre
+from pyiem.util import logger, ncopen, utc
 
 LOG = logger()
 

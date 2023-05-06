@@ -1,10 +1,11 @@
 """ Create a simple prinout of observation quanity in the database """
-from calendar import month_abbr
 import sys
+from calendar import month_abbr
+
+import pandas as pd
 
 # Third Party
 from colorama import Fore, Style
-import pandas as pd
 from pyiem.util import get_sqlalchemy_conn
 
 

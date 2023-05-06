@@ -12,11 +12,11 @@
 import datetime
 
 import pandas as pd
+from pyiem.exceptions import NoDataFound
 from pyiem.nws import vtec
 from pyiem.plot import calendar_plot
 from pyiem.reference import state_names
-from pyiem.util import get_autoplot_context, get_sqlalchemy_conn, get_dbconn
-from pyiem.exceptions import NoDataFound
+from pyiem.util import get_autoplot_context, get_dbconn, get_sqlalchemy_conn
 from sqlalchemy import text
 
 PDICT = {"yes": "Colorize Cells in Chart", "no": "Just plot values please"}

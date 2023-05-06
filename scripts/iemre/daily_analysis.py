@@ -6,17 +6,17 @@ this script twice per day:
     RUN_MIDNIGHT.sh for just the 'calendar day' variables yesterday
     RUN_NOON.sh for the 12z today vals and calendar day yesterday
 """
-import os
-import sys
-import subprocess
 import datetime
+import os
+import subprocess
+import sys
 
 import numpy as np
-from pandas.io.sql import read_sql
-from scipy.stats import zscore
 from metpy.interpolate import inverse_distance_to_grid
+from pandas.io.sql import read_sql
 from pyiem import iemre
-from pyiem.util import get_dbconnstr, utc, ncopen, logger, convert_value
+from pyiem.util import convert_value, get_dbconnstr, logger, ncopen, utc
+from scipy.stats import zscore
 
 PGCONN = get_dbconnstr("iem")
 COOP_PGCONN = get_dbconnstr("coop")

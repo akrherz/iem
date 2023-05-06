@@ -1,14 +1,14 @@
 """Snow depth."""
-import datetime
 import copy
+import datetime
 
+import matplotlib.colors as mpcolors
 import numpy as np
 import pandas as pd
-import matplotlib.colors as mpcolors
+from pyiem.exceptions import NoDataFound
 from pyiem.plot import figure
 from pyiem.plot.colormaps import nwssnow
 from pyiem.util import get_autoplot_context, get_sqlalchemy_conn
-from pyiem.exceptions import NoDataFound
 
 LEVELS = [0.1, 1, 2, 3, 4, 6, 8, 12, 18, 24, 30, 36]
 

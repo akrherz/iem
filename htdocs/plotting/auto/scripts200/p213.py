@@ -1,17 +1,16 @@
 """Plot up some percentiles please."""
 import datetime
 
-import pytz
+import matplotlib.dates as mdates
 import numpy as np
 import pandas as pd
-import matplotlib.dates as mdates
-from matplotlib.font_manager import FontProperties
+import pytz
 from matplotlib.colorbar import ColorbarBase
-from pyiem.util import get_autoplot_context, get_sqlalchemy_conn
-from pyiem.plot import get_cmap
-from pyiem.plot import figure
-from pyiem.plot.util import fitbox
+from matplotlib.font_manager import FontProperties
 from pyiem.exceptions import NoDataFound
+from pyiem.plot import figure, get_cmap
+from pyiem.plot.util import fitbox
+from pyiem.util import get_autoplot_context, get_sqlalchemy_conn
 
 PDICT = {
     "tmpf": "Air Temperature [F]",

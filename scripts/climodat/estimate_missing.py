@@ -7,8 +7,8 @@ This script utilizes the IEMRE web service to provide data.
 """
 import sys
 
-import requests
 import pandas as pd
+import requests
 from pyiem.network import Table as NetworkTable
 from pyiem.util import get_dbconn, get_dbconnstr, logger
 

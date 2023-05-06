@@ -1,6 +1,6 @@
 """ Process CoCoRaHS Stations!"""
-import sys
 import datetime
+import sys
 
 import pytz
 import requests

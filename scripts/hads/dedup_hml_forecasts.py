@@ -3,8 +3,8 @@
 Suspicion is that do to retrans, etc, there are lots of dups in the HML
 database.  So this attempts to de-dup them.
 """
-import sys
 import datetime
+import sys
 
 from pyiem.util import get_dbconn, logger, utc
 

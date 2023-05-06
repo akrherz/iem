@@ -2,8 +2,8 @@
 
 But be careful about not overwritting 'better' data gleaned from CLI/DSM
 """
-import sys
 import datetime
+import sys
 import warnings
 
 import numpy as np

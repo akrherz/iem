@@ -1,6 +1,6 @@
 """A specialized report"""
-from io import StringIO
 import datetime
+from io import StringIO
 
 from pyiem.util import get_dbconn
 

@@ -14,15 +14,15 @@ people expect to see.</p>
 import calendar
 import datetime
 
-import pandas as pd
-import numpy as np
 import matplotlib.colors as mpcolors
+import numpy as np
+import pandas as pd
 from matplotlib.patches import Rectangle
 from matplotlib.ticker import MaxNLocator
+from pyiem.exceptions import NoDataFound
 from pyiem.plot import calendar_plot, figure
 from pyiem.reference import state_names
-from pyiem.util import get_autoplot_context, get_sqlalchemy_conn, get_dbconn
-from pyiem.exceptions import NoDataFound
+from pyiem.util import get_autoplot_context, get_dbconn, get_sqlalchemy_conn
 
 PDICT = {
     "C": "Convective",

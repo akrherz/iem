@@ -4,14 +4,13 @@ warmest 91 day period each year.
 """
 import datetime
 
-import psycopg2.extras
 import numpy as np
 import pandas as pd
-from scipy import stats
+import psycopg2.extras
+from pyiem.exceptions import NoDataFound
 from pyiem.plot import figure_axes
 from pyiem.util import get_autoplot_context, get_dbconn
-from pyiem.exceptions import NoDataFound
-
+from scipy import stats
 
 PDICT = {"end_summer": "End of Summer", "start_summer": "Start of Summer"}
 

@@ -1,21 +1,22 @@
 """Using the gridded IEM ReAnalysis of daily
-    precipitation.  This chart presents the areal coverage of some trailing
-    number of days precipitation for a state of your choice.  This application
-    does not properly account for the trailing period of precipitation during
-    the first few days of January.  This application only works for CONUS
-    states eventhough it presents non-CONUS states as an option, sorry."""
+precipitation.  This chart presents the areal coverage of some trailing
+number of days precipitation for a state of your choice.  This application
+does not properly account for the trailing period of precipitation during
+the first few days of January.  This application only works for CONUS
+states eventhough it presents non-CONUS states as an option, sorry.
+"""
 import datetime
 import os
 
-import numpy as np
 import geopandas as gpd
-import pandas as pd
 import matplotlib.dates as mdates
+import numpy as np
+import pandas as pd
 from pyiem import iemre, reference
-from pyiem.plot import figure_axes
-from pyiem.grid.zs import CachingZonalStats
-from pyiem.util import get_autoplot_context, get_sqlalchemy_conn, ncopen
 from pyiem.exceptions import NoDataFound
+from pyiem.grid.zs import CachingZonalStats
+from pyiem.plot import figure_axes
+from pyiem.util import get_autoplot_context, get_sqlalchemy_conn, ncopen
 
 
 def get_description():

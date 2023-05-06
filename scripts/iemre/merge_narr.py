@@ -11,7 +11,7 @@ import sys
 import numpy as np
 import pygrib
 from pyiem import iemre
-from pyiem.util import ncopen, logger
+from pyiem.util import logger, ncopen
 
 LOG = logger()
 

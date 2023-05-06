@@ -2,12 +2,12 @@
 Run at 00 UTC and get the files from 4 days ago!
 """
 import datetime
+import os
 import subprocess
 import tempfile
-import os
 
 import requests
-from pyiem.util import logger, utc, exponential_backoff
+from pyiem.util import exponential_backoff, logger, utc
 
 LOG = logger()
 

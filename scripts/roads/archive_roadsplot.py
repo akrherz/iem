@@ -4,13 +4,13 @@ Called from RUN_5MIN.sh
 """
 import datetime
 import os
-import sys
 import subprocess
+import sys
 import tempfile
 
-from pyiem.util import utc, logger
 import pytz
 import requests
+from pyiem.util import logger, utc
 
 LOG = logger()
 

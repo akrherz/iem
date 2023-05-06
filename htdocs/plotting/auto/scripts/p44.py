@@ -17,17 +17,17 @@
     <p><strong>Updated 26 Jan 2023</strong> When selecting to limit to a year
     to date period, a more exact algorithm is now used to accumulate warnings
     through the end of the current date in central timezone.</p>"""
+import calendar
 import datetime
 import math
-import calendar
 
 import numpy as np
 import pandas as pd
+from pyiem import reference
+from pyiem.exceptions import NoDataFound
 from pyiem.nws import vtec
 from pyiem.plot import figure
 from pyiem.util import get_autoplot_context, get_sqlalchemy_conn
-from pyiem import reference
-from pyiem.exceptions import NoDataFound
 from sqlalchemy import text
 
 PDICT = {"yes": "Limit Plot to Year-to-Date", "no": "Plot Entire Year"}

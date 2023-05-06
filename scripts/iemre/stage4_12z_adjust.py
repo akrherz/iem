@@ -1,13 +1,13 @@
 """Use the QC'd 12z 24 Hour files to adjust hourly data."""
-import sys
-import os
 import datetime
+import os
+import sys
 
 import numpy as np
-from scipy.interpolate import NearestNDInterpolator
 import pygrib
 from pyiem import iemre
-from pyiem.util import ncopen, logger, utc
+from pyiem.util import logger, ncopen, utc
+from scipy.interpolate import NearestNDInterpolator
 
 LOG = logger()
 

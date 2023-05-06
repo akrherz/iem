@@ -3,10 +3,10 @@ import datetime
 
 import numpy as np
 import pandas as pd
-from scipy import stats
+from pyiem.exceptions import NoDataFound
 from pyiem.plot import figure_axes
 from pyiem.util import get_autoplot_context, get_sqlalchemy_conn
-from pyiem.exceptions import NoDataFound
+from scipy import stats
 
 PDICT = {
     "high": "Average High Temperature",

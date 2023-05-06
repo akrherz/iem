@@ -5,9 +5,9 @@ import datetime
 import sys
 
 from pandas import read_sql
+from pyiem.network import Table as NetworkTable
 from pyiem.plot import MapPlot
 from pyiem.util import get_dbconnstr
-from pyiem.network import Table as NetworkTable
 
 
 def doday(ts, realtime):

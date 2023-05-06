@@ -5,13 +5,12 @@ This plot is not meant for interactive use, but a backend for SPS plots.
 # third party
 import pytz
 from geopandas import read_postgis
+from pyiem.exceptions import NoDataFound
 from pyiem.network import Table as NetworkTable
 from pyiem.plot.geoplot import MapPlot
+from pyiem.reference import LATLON, Z_OVERLAY2
 from pyiem.util import get_autoplot_context, get_sqlalchemy_conn
-from pyiem.exceptions import NoDataFound
-from pyiem.reference import Z_OVERLAY2, LATLON
 from sqlalchemy import text
-
 
 TFORMAT = "%b %-d %Y %-I:%M %p %Z"
 UNITS = {

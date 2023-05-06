@@ -3,7 +3,7 @@ import datetime
 import os
 
 import numpy as np
-from pyiem.util import ncopen, logger
+from pyiem.util import logger, ncopen
 
 LOG = logger()
 BASEDIR = "/mesonet/data/iemre"

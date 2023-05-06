@@ -3,13 +3,13 @@
 run from RUN_5MIN.sh
 """
 import datetime
-import tempfile
 import os
 import subprocess
 import sys
+import tempfile
 
 import requests
-from pyiem.util import get_dbconn, exponential_backoff, utc, logger
+from pyiem.util import exponential_backoff, get_dbconn, logger, utc
 
 LOG = logger()
 N0QBASE = utc(2010, 11, 14)

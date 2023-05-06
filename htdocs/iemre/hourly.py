@@ -1,14 +1,14 @@
 """ JSON service providing IEMRE data for a given point """
-import os
 import datetime
 import json
+import os
 
 import numpy as np
-from pymemcache.client import Client
-from paste.request import parse_formvars
 import pytz
+from paste.request import parse_formvars
 from pyiem import iemre
-from pyiem.util import ncopen, utc, convert_value
+from pyiem.util import convert_value, ncopen, utc
+from pymemcache.client import Client
 
 ISO = "%Y-%m-%dT%H:%MZ"
 

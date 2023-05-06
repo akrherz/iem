@@ -1,18 +1,18 @@
 """Generate a shapefile of warnings based on the CGI request"""
-from io import BytesIO
-import zipfile
-import os
 import datetime
+import os
 import tempfile
+import zipfile
+from io import BytesIO
 
-from psycopg2.extras import DictCursor
 import fiona
-from shapely.geometry import mapping
-from shapely.wkb import loads
 import pandas as pd
 from pandas.io.sql import read_sql
 from paste.request import parse_formvars
+from psycopg2.extras import DictCursor
 from pyiem.util import get_dbconn, utc
+from shapely.geometry import mapping
+from shapely.wkb import loads
 
 EXL = "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"
 

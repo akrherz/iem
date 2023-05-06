@@ -10,20 +10,21 @@ We are generating the format directly used by the distrubuted SWAT. Notes:
 Run from RUN_2AM.sh
 """
 # stdlib
-from datetime import date, timedelta
 import glob
 import os
 import subprocess
 import sys
+from datetime import date, timedelta
+
+import numpy as np
+import pandas as pd
 
 # third party
 from affine import Affine
-import numpy as np
-import pandas as pd
 from geopandas import read_postgis
+from pyiem import iemre, mrms
 from pyiem.grid.zs import CachingZonalStats
-from pyiem import mrms, iemre
-from pyiem.util import get_dbconnstr, logger, ncopen, convert_value
+from pyiem.util import convert_value, get_dbconnstr, logger, ncopen
 from tqdm import tqdm
 
 LOG = logger()
@@ -117,9 +118,9 @@ def workflow(page, huc12s):
             # write the year, date
             tfh.write(f"{now.year:>4}{int(now.strftime('%j')):>3}")
             pfh.write(f"{now.year:>4}{int(now.strftime('%j')):>3}")
-            for p, h, l in zip(pdata, hdata, ldata):
+            for p, h, ll in zip(pdata, hdata, ldata):
                 pfh.write(f"{p:5.1f}")
-                tfh.write(f"{h:5.1f}{l:5.1f}")
+                tfh.write(f"{h:5.1f}{ll:5.1f}")
             tfh.write("\n")
             pfh.write("\n")
 

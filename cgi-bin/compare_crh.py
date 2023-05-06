@@ -2,8 +2,8 @@
 import datetime
 from io import StringIO
 
-import requests
 import pandas as pd
+import requests
 from pandas.io.sql import read_sql
 from pyiem.util import get_dbconn
 

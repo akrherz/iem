@@ -4,11 +4,11 @@ import zipfile
 from io import BytesIO, StringIO
 
 import fiona
-import shapefile
-import pandas as pd
 import geopandas as gpd
+import pandas as pd
+import shapefile
 from paste.request import parse_formvars
-from pyiem.util import get_dbconn, utc, get_sqlalchemy_conn
+from pyiem.util import get_dbconn, get_sqlalchemy_conn, utc
 
 fiona.supported_drivers["KML"] = "rw"
 EXL = "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"

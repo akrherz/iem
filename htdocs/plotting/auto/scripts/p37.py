@@ -15,9 +15,9 @@ changed to be more explicit about what is being presented.
 """
 import datetime
 
+import matplotlib.dates as mdates
 import numpy as np
 import pandas as pd
-import matplotlib.dates as mdates
 from matplotlib.ticker import AutoMinorLocator, MaxNLocator
 from pyiem.plot import figure_axes
 from pyiem.util import get_autoplot_context, get_dbconn

@@ -2,12 +2,12 @@
 import calendar
 import datetime
 
+import matplotlib.patheffects as PathEffects
 import numpy as np
 import pandas as pd
-import matplotlib.patheffects as PathEffects
+from pyiem.exceptions import NoDataFound
 from pyiem.plot import figure_axes
 from pyiem.util import get_autoplot_context, get_sqlalchemy_conn
-from pyiem.exceptions import NoDataFound
 
 PDICT = {"high": "High Temperature", "low": "Low Temperature"}
 

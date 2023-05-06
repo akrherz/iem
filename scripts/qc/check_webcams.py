@@ -1,9 +1,9 @@
 """
 Check to see if there are webcams offline, generate emails and such
 """
+import datetime
 import os
 import stat
-import datetime
 
 import pytz
 from pyiem.network import Table as NetworkTable

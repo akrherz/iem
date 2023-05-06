@@ -14,12 +14,12 @@ Add storm tracks.
 # pylint: disable=unpacking-non-sequence
 import math
 
-from pymemcache.client import Client
-import pyproj
 import numpy as np
 import psycopg2.extras
+import pyproj
 from paste.request import parse_formvars
-from pyiem.util import get_dbconn, convert_value
+from pyiem.util import convert_value, get_dbconn
+from pymemcache.client import Client
 
 # Do geo math in US National Atlas Equal Area
 P3857 = pyproj.Proj(init="epsg:3857")

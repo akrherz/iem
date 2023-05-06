@@ -67,7 +67,8 @@ import sys
 
 import pytz
 import requests
-from tqdm import tqdm
+from pandas import read_sql
+from pyiem.network import Table as NetworkTable
 from pyiem.util import (
     exponential_backoff,
     get_dbconn,
@@ -75,8 +76,7 @@ from pyiem.util import (
     logger,
     utc,
 )
-from pyiem.network import Table as NetworkTable
-from pandas import read_sql
+from tqdm import tqdm
 
 LOG = logger()
 

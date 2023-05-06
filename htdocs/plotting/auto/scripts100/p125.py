@@ -13,10 +13,10 @@ import calendar
 import datetime
 
 import pandas as pd
-from pyiem.plot import MapPlot, get_cmap, pretty_bins
-from pyiem.util import get_autoplot_context, get_sqlalchemy_conn
 from pyiem.exceptions import NoDataFound
-from pyiem.reference import SECTORS_NAME, LATLON
+from pyiem.plot import MapPlot, get_cmap, pretty_bins
+from pyiem.reference import LATLON, SECTORS_NAME
+from pyiem.util import get_autoplot_context, get_sqlalchemy_conn
 from sqlalchemy import text
 
 PDICT = {

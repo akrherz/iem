@@ -4,20 +4,21 @@
 """
 import datetime
 
+import matplotlib.dates as mdates
+import numpy as np
+
 # third party
 import pandas as pd
-import numpy as np
-import matplotlib.dates as mdates
-from matplotlib.patches import Rectangle
-from sqlalchemy import text
 import pytz
-from pyiem.plot import figure
+from matplotlib.patches import Rectangle
+from pyiem.exceptions import NoDataFound
 from pyiem.nws.vtec import NWS_COLORS, get_ps_string
+from pyiem.plot import figure
 from pyiem.util import (
     get_autoplot_context,
     get_sqlalchemy_conn,
 )
-from pyiem.exceptions import NoDataFound
+from sqlalchemy import text
 
 PDICT = {
     "BZ": "Blizzard Warning",

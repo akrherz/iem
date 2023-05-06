@@ -1,12 +1,12 @@
 """Watches"""
 import datetime
 
-import pandas as pd
 import matplotlib.ticker as ticker
+import pandas as pd
 from pyiem import util
+from pyiem.exceptions import NoDataFound
 from pyiem.plot import figure
 from pyiem.reference import state_names
-from pyiem.exceptions import NoDataFound
 
 MDICT = {
     "ytd": "Limit Plot to Year to Date",

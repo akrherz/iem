@@ -5,11 +5,11 @@
 Run at 40 AFTER for the previous hour
 
 """
+import datetime
+import os
 import subprocess
 import sys
-import datetime
 import tempfile
-import os
 
 import requests
 from pyiem.util import exponential_backoff, logger, utc

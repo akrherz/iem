@@ -1,15 +1,15 @@
 """Make a gridded analysis of p01d_12z based on obs."""
-import sys
-import subprocess
 import datetime
+import subprocess
+import sys
 
 import numpy as np
-import verde as vd
 import pyproj
-from metpy.units import units as mpunits
+import verde as vd
 from metpy.units import masked_array
+from metpy.units import units as mpunits
 from pandas import read_sql
-from pyiem.iemre import get_grids, XAXIS, YAXIS, set_grids
+from pyiem.iemre import XAXIS, YAXIS, get_grids, set_grids
 from pyiem.util import get_dbconnstr, logger
 
 LOG = logger()

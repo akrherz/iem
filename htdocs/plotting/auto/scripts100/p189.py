@@ -11,11 +11,11 @@
     December within the three year period."""
 import datetime
 
-from scipy.stats import linregress
 import pandas as pd
-from pyiem.util import get_autoplot_context, get_sqlalchemy_conn
-from pyiem.plot import figure_axes
 from pyiem.exceptions import NoDataFound
+from pyiem.plot import figure_axes
+from pyiem.util import get_autoplot_context, get_sqlalchemy_conn
+from scipy.stats import linregress
 
 BOOLS = {
     "yes": "Yes, fit linear regression",

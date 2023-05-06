@@ -9,15 +9,15 @@ is nothing analogous for the climate/crop district weather values as those
 values are mostly missing within USDA NASS.
 """
 
-import pandas as pd
 import matplotlib.colors as mpcolors
+import pandas as pd
 from matplotlib.colorbar import ColorbarBase
 from matplotlib.ticker import MaxNLocator
-from sklearn.linear_model import LinearRegression
 from pyiem.exceptions import NoDataFound
-from pyiem.plot import figure, pretty_bins, get_cmap
+from pyiem.plot import figure, get_cmap, pretty_bins
 from pyiem.reference import state_names
-from pyiem.util import get_autoplot_context, get_sqlalchemy_conn, get_dbconn
+from pyiem.util import get_autoplot_context, get_dbconn, get_sqlalchemy_conn
+from sklearn.linear_model import LinearRegression
 from sqlalchemy import text
 
 PDICT = {

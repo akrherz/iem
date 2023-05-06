@@ -5,8 +5,8 @@ import subprocess
 import tempfile
 
 import pytz
-from pyiem.tracker import loadqc
 from pyiem import network
+from pyiem.tracker import loadqc
 from pyiem.util import get_dbconn, utc
 
 

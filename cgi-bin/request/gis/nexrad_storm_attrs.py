@@ -2,8 +2,8 @@
     Dump storm attributes from the database to a shapefile for the users
 """
 import datetime
-from io import BytesIO, StringIO
 import zipfile
+from io import BytesIO, StringIO
 
 # import cgitb
 import shapefile

@@ -1,13 +1,13 @@
 """Generate the IEMRE daily analysis file for a year"""
 import datetime
-import sys
 import os
+import sys
 
 import geopandas as gpd
 import numpy as np
 from pyiem import iemre
 from pyiem.grid.zs import CachingZonalStats
-from pyiem.util import get_sqlalchemy_conn, ncopen, logger
+from pyiem.util import get_sqlalchemy_conn, logger, ncopen
 
 LOG = logger()
 

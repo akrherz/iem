@@ -5,7 +5,7 @@ import sys
 
 import pytz
 from pyiem.observation import Observation
-from pyiem.util import get_dbconn, convert_value
+from pyiem.util import convert_value, get_dbconn
 
 
 def main():

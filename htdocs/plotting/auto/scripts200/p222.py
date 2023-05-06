@@ -2,10 +2,10 @@
 from datetime import timedelta
 
 import pandas as pd
-from sqlalchemy import text
-from pyiem.util import get_autoplot_context, get_sqlalchemy_conn, utc
-from pyiem.plot import figure_axes
 from pyiem.exceptions import NoDataFound
+from pyiem.plot import figure_axes
+from pyiem.util import get_autoplot_context, get_sqlalchemy_conn, utc
+from sqlalchemy import text
 
 PDICT = {
     "svrtor": "Severe Thunderstorm + Tornado Warnings",

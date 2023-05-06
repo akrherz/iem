@@ -3,8 +3,8 @@
 """
 import datetime
 
-from pymemcache.client import Client
 from pyiem.util import get_dbconn
+from pymemcache.client import Client
 
 URLBASE = "https://mesonet.agron.iastate.edu/data/camera/idot_trucks"
 ARROWS = "https://mesonet.agron.iastate.edu/request/grx/arrows.png"

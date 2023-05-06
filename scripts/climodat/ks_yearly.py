@@ -2,8 +2,8 @@
 import datetime
 
 import psycopg2.extras
-from pyiem.util import get_dbconn
 from pyiem.network import Table as NetworkTable
+from pyiem.util import get_dbconn
 
 pgconn = get_dbconn("coop")
 cursor = pgconn.cursor(cursor_factory=psycopg2.extras.DictCursor)

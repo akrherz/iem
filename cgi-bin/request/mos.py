@@ -1,10 +1,10 @@
 """Download MOS data."""
-from io import StringIO, BytesIO
+from io import BytesIO, StringIO
 
 import pandas as pd
 from paste.request import parse_formvars
+from pyiem.util import LOG, get_sqlalchemy_conn, utc
 from sqlalchemy import text
-from pyiem.util import get_sqlalchemy_conn, utc, LOG
 
 EXL = "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"
 

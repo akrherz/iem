@@ -3,9 +3,9 @@ import datetime
 import sys
 from io import StringIO
 
-import pytz
 import pandas as pd
-from pyiem.util import get_dbconn, get_dbconnstr, convert_value, logger
+import pytz
+from pyiem.util import convert_value, get_dbconn, get_dbconnstr, logger
 
 LOG = logger()
 

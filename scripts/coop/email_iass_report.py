@@ -2,13 +2,13 @@
  Generate and email a report to the IASS folks with summarized IEM estimated
  COOP data included...
 """
-import sys
-from io import StringIO
 import datetime
 import smtplib
+import sys
 from email import encoders
 from email.mime.base import MIMEBase
 from email.mime.multipart import MIMEMultipart
+from io import StringIO
 
 import psycopg2.extras
 from pyiem.util import get_dbconn

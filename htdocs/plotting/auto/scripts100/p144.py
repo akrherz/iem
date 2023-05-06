@@ -1,16 +1,16 @@
 """ISUAG"""
 
 import pandas as pd
+from pyiem.exceptions import NoDataFound
 from pyiem.network import Table as NetworkTable  # This is needed.
 from pyiem.plot import figure_axes
 from pyiem.plot.use_agg import plt
 from pyiem.util import (
+    convert_value,
     get_autoplot_context,
     get_sqlalchemy_conn,
     utc,
-    convert_value,
 )
-from pyiem.exceptions import NoDataFound
 
 XREF = {
     "AEEI4": "A130209",

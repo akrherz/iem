@@ -2,10 +2,10 @@
 import datetime
 
 import pandas as pd
-from pyiem.plot import get_cmap, centered_bins
+from pyiem.exceptions import NoDataFound
+from pyiem.plot import centered_bins, get_cmap
 from pyiem.plot.geoplot import MapPlot
 from pyiem.util import get_autoplot_context, get_sqlalchemy_conn
-from pyiem.exceptions import NoDataFound
 
 PDICT = {"high": "High temperature", "low": "Low Temperature"}
 

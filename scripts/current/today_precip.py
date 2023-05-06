@@ -2,9 +2,10 @@
  Generate analysis of precipitation
 """
 import datetime
+
 from pyiem.plot import MapPlot
-from pyiem.util import get_dbconn
 from pyiem.reference import TRACE_VALUE
+from pyiem.util import get_dbconn
 
 
 def t(value):

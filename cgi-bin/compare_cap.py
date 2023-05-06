@@ -2,9 +2,9 @@
 """Do a comparison with what's on api.weather.gov/cap"""
 from io import StringIO
 
-import simplejson
-import requests
 import pandas as pd
+import requests
+import simplejson
 from pandas.io.sql import read_sql
 from pyiem.nws.vtec import parse as vtec_parse
 from pyiem.util import get_dbconn, utc

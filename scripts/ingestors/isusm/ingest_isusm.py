@@ -5,13 +5,13 @@ import subprocess
 import traceback
 
 import inotify.adapters
-import pytz
-from metpy.units import units
-from metpy.calc import dewpoint_from_relative_humidity
-from pyiem.observation import Observation
-from pyiem.util import get_dbconn, logger, convert_value, c2f, mm2inch
 import numpy as np
 import pandas as pd
+import pytz
+from metpy.calc import dewpoint_from_relative_humidity
+from metpy.units import units
+from pyiem.observation import Observation
+from pyiem.util import c2f, convert_value, get_dbconn, logger, mm2inch
 
 LOG = logger()
 DIRPATH = "/var/opt/CampbellSci/LoggerNet"

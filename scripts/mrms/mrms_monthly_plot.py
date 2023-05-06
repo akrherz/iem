@@ -3,9 +3,9 @@ import datetime
 import sys
 
 import numpy as np
-from pyiem.plot import MapPlot
-from pyiem.util import ncopen, mm2inch
 from pyiem import iemre
+from pyiem.plot import MapPlot
+from pyiem.util import mm2inch, ncopen
 
 
 def do_month(year, month, routes):

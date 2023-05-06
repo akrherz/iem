@@ -2,16 +2,16 @@
 
 https://www.ncei.noaa.gov/pub/data/noaa/isd-history.txt
 """
-import sys
-import subprocess
 import os
+import subprocess
+import sys
 from unittest import mock
 
-import tqdm
 import requests
-from pyiem.nws.products.metarcollect import to_metar, to_iemaccess, normid
+import tqdm
 from pyiem.ncei import ds3505
-from pyiem.util import get_dbconn, utc, exponential_backoff, logger
+from pyiem.nws.products.metarcollect import normid, to_iemaccess, to_metar
+from pyiem.util import exponential_backoff, get_dbconn, logger, utc
 
 LOG = logger()
 TMPDIR = "/mesonet/tmp"

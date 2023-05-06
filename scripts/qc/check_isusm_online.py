@@ -4,8 +4,8 @@ run from RUN_40_AFTER.sh
 """
 import datetime
 
-from pyiem.tracker import TrackerEngine
 from pyiem.network import Table as NetworkTable
+from pyiem.tracker import TrackerEngine
 from pyiem.util import get_dbconn, utc
 
 

@@ -2,8 +2,8 @@
 import datetime
 
 import pandas as pd
-from pyiem.util import get_autoplot_context, get_sqlalchemy_conn
 from pyiem.exceptions import NoDataFound
+from pyiem.util import get_autoplot_context, get_sqlalchemy_conn
 
 PDICT = {"precip_days": "Precipitation Days", "snow_days": "Snowfall Days"}
 

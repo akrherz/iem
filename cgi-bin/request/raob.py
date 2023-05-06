@@ -1,13 +1,13 @@
 """
 Download interface for data from RAOB network
 """
-from io import StringIO
 import datetime
+from io import StringIO
 
 import pytz
 from paste.request import parse_formvars
-from pyiem.util import get_dbconn
 from pyiem.network import Table as NetworkTable
+from pyiem.util import get_dbconn
 
 
 def m(val):

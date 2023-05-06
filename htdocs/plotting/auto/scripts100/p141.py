@@ -1,14 +1,14 @@
 """yieldfx plot"""
 import calendar
-import os
 import datetime
+import os
 
 import pandas as pd
 from metpy.units import units
+from pyiem.exceptions import NoDataFound
 from pyiem.meteorology import gdd
 from pyiem.plot import figure_axes
-from pyiem.util import get_autoplot_context, mm2inch, c2f
-from pyiem.exceptions import NoDataFound
+from pyiem.util import c2f, get_autoplot_context, mm2inch
 
 STATIONS = dict(
     [

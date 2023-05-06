@@ -1,10 +1,10 @@
 """climodat"""
 import datetime
 
-import pandas as pd
 import numpy as np
-from pyiem.util import get_autoplot_context, get_sqlalchemy_conn
+import pandas as pd
 from pyiem.exceptions import NoDataFound
+from pyiem.util import get_autoplot_context, get_sqlalchemy_conn
 
 
 def get_description():

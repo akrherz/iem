@@ -1,10 +1,10 @@
 """Generate a plot of SDD"""
-import sys
 import datetime
+import sys
 
-from pyiem.util import get_dbconn, logger
-from pyiem.plot import MapPlot
 from pyiem.network import Table as NetworkTable
+from pyiem.plot import MapPlot
+from pyiem.util import get_dbconn, logger
 
 LOG = logger()
 

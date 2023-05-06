@@ -5,13 +5,13 @@
 # stdlib
 import calendar
 
+import matplotlib.dates as mdates
+
 # third party
 import pandas as pd
-import matplotlib.dates as mdates
 from pyiem.exceptions import NoDataFound
+from pyiem.plot import figure, fitbox
 from pyiem.util import get_autoplot_context, get_sqlalchemy_conn
-from pyiem.plot import figure
-from pyiem.plot import fitbox
 
 PDICT = {
     "por": "Period of Record (por) Climatology",

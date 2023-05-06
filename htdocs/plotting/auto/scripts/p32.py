@@ -6,11 +6,10 @@ on the period of record observations for the site.
 """
 import datetime
 
-import pandas as pd
-import matplotlib.dates as mdates
 import matplotlib.colors as mpcolors
-from pyiem.plot import get_cmap
-from pyiem.plot import figure_axes
+import matplotlib.dates as mdates
+import pandas as pd
+from pyiem.plot import figure_axes, get_cmap
 from pyiem.util import get_autoplot_context, get_sqlalchemy_conn
 
 PDICT = {

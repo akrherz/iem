@@ -1,13 +1,13 @@
 """Wind Speed by Temperature"""
-import datetime
 import calendar
+import datetime
 
 import matplotlib.patheffects as PathEffects
-import psycopg2.extras
 import pandas as pd
-from pyiem.util import get_autoplot_context, get_dbconn
-from pyiem.plot import figure_axes
+import psycopg2.extras
 from pyiem.exceptions import NoDataFound
+from pyiem.plot import figure_axes
+from pyiem.util import get_autoplot_context, get_dbconn
 
 
 def get_description():

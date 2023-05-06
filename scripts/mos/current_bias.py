@@ -3,7 +3,7 @@ import sys
 
 import pytz
 from pyiem.plot import MapPlot, get_cmap
-from pyiem.util import get_dbconn, utc, logger
+from pyiem.util import get_dbconn, logger, utc
 
 LOG = logger()
 

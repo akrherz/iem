@@ -6,8 +6,8 @@ import datetime
 import sys
 
 import psycopg2.extras
-from pyiem.reference import state_names
 from pyiem.network import Table as NetworkTable
+from pyiem.reference import state_names
 from pyiem.util import get_dbconn, logger
 
 LOG = logger()

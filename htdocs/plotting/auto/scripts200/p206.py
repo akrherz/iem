@@ -1,13 +1,13 @@
 """Generates analysis maps of ASOS station data for a given date."""
 import datetime
 
+import geopandas as gpd
 import numpy as np
 import pandas as pd
-import geopandas as gpd
 from pyiem import reference
+from pyiem.exceptions import NoDataFound
 from pyiem.plot import MapPlot, get_cmap
 from pyiem.util import get_autoplot_context, get_sqlalchemy_conn
-from pyiem.exceptions import NoDataFound
 
 PDICT = {
     "cwa": "Plot by NWS Forecast Office",

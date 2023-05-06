@@ -1,13 +1,13 @@
 """USDM Filled Time Series"""
 import datetime
 
-import requests
-import pandas as pd
 import matplotlib.dates as mdates
+import pandas as pd
+import requests
 from pyiem import util
-from pyiem.plot import figure_axes
-from pyiem.reference import state_names, state_fips
 from pyiem.exceptions import NoDataFound
+from pyiem.plot import figure_axes
+from pyiem.reference import state_fips, state_names
 
 SERVICE = (
     "https://droughtmonitor.unl.edu"

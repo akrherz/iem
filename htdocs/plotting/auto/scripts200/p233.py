@@ -2,9 +2,9 @@
 import datetime
 
 import pandas as pd
+from pyiem.exceptions import NoDataFound
 from pyiem.plot import calendar_plot
 from pyiem.util import get_autoplot_context, get_sqlalchemy_conn
-from pyiem.exceptions import NoDataFound
 from sqlalchemy import text
 
 PDICT = {"yes": "Colorize Cells in Chart", "no": "Just plot values please"}

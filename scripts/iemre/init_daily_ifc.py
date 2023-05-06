@@ -1,10 +1,10 @@
 """Generate the storage netcdf file for Iowa Flood Center Precip"""
 import datetime
-import sys
 import os
+import sys
 
 import numpy as np
-from pyiem.util import ncopen, logger
+from pyiem.util import logger, ncopen
 
 LOG = logger()
 

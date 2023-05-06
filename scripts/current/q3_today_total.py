@@ -2,14 +2,14 @@
  Create a plot of today's estimated precipitation based on the Q3 data
 """
 import datetime
-import sys
 import os
+import sys
 
 import numpy as np
+import pyiem.iemre as iemre
 import pytz
 from pyiem.plot import MapPlot, nwsprecip
-from pyiem.util import utc, ncopen, logger, mm2inch
-import pyiem.iemre as iemre
+from pyiem.util import logger, mm2inch, ncopen, utc
 
 LOG = logger()
 

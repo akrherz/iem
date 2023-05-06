@@ -3,16 +3,16 @@
     https://mesonet.agron.iastate.edu/cgi-bin/request/raster2netcdf.py?
     dstr=201710251200&prod=composite_n0r
 """
-from io import BytesIO
-import os
 import datetime
+import os
 import tempfile
+from io import BytesIO
 
+import netCDF4
 import numpy as np
 import pytz
-import netCDF4
-from PIL import Image
 from paste.request import parse_formvars
+from PIL import Image
 from pyiem.util import get_dbconn
 
 

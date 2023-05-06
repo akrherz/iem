@@ -1,18 +1,19 @@
 """Generate a pretty plot, please."""
 # stdlib
-import os
 import json
+import os
 import tempfile
 
-# third party
-from pyiem.plot.use_agg import plt
-from pyiem.plot import fitbox
-from pyiem.reference import TWITTER_RESOLUTION_INCH
-from pyiem.nws.product import str2polygon
-from pyiem.util import utc
 import geopandas as gpd
 import matplotlib.patheffects as PathEffects
 from paste.request import parse_formvars
+from pyiem.nws.product import str2polygon
+from pyiem.plot import fitbox
+
+# third party
+from pyiem.plot.use_agg import plt
+from pyiem.reference import TWITTER_RESOLUTION_INCH
+from pyiem.util import utc
 
 
 def plot_poly(fig, poly, fields):

@@ -9,10 +9,10 @@ from io import BytesIO, StringIO
 
 import pandas as pd
 import psycopg2.extras
+from metpy.units import units
 from paste.request import parse_formvars
 from pyiem.network import Table as NetworkTable
-from pyiem.util import get_dbconn, utc, get_dbconnstr
-from metpy.units import units
+from pyiem.util import get_dbconn, get_dbconnstr, utc
 from sqlalchemy import text
 
 DEGC = units.degC

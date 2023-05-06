@@ -1,8 +1,8 @@
 """Generate a web crawler friendly page."""
 import re
 
-from pyiem.util import get_dbconn, html_escape, utc
 from pyiem.nws import vtec
+from pyiem.util import get_dbconn, html_escape, utc
 
 # sadly, I have a lot of links in the wild without a status?
 VTEC_RE = re.compile(

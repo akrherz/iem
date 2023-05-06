@@ -1,8 +1,8 @@
 """Something to dump current warnings to a shapefile."""
-import zipfile
 import os
 import subprocess
 import tempfile
+import zipfile
 
 from osgeo import ogr
 from pyiem.util import utc

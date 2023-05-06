@@ -1,13 +1,13 @@
 """Ingest Iowa DOT RWIS data provided by DTN."""
 
 # third party
-from pyiem.observation import Observation
-from pyiem.network import Table as NetworkTable
-from pyiem.util import get_properties, get_dbconn, utc, logger
-from metpy.units import masked_array, units
-import pandas as pd
 import numpy as np
+import pandas as pd
 import requests
+from metpy.units import masked_array, units
+from pyiem.network import Table as NetworkTable
+from pyiem.observation import Observation
+from pyiem.util import get_dbconn, get_properties, logger, utc
 
 LOG = logger()
 DBCONN = get_dbconn("iem")

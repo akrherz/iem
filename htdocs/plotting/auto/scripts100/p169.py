@@ -25,13 +25,13 @@ flakey.</p>
 <p><a href="/plotting/auto/?q=139">Autoplot 139</a> is similar to this
 plot, but only considers a calendar day.</p>
 """
-from datetime import datetime, timedelta, date
+from datetime import date, datetime, timedelta
 
-import pytz
 import pandas as pd
+import pytz
+from pyiem.exceptions import NoDataFound
 from pyiem.plot import figure
 from pyiem.util import get_autoplot_context, get_sqlalchemy_conn
-from pyiem.exceptions import NoDataFound
 from sqlalchemy import text
 
 MDICT = {"warm": "Rise", "cool": "Drop"}

@@ -2,8 +2,8 @@
 
 Likely due to water being dumped into the tipping bucket to clean it :/
 """
-import sys
 import datetime
+import sys
 
 import pytz
 from pyiem.util import get_dbconn

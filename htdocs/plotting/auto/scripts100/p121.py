@@ -2,8 +2,8 @@
 import datetime
 
 import pandas as pd
-from pyiem.util import get_autoplot_context, get_dbconn
 from pyiem.exceptions import NoDataFound
+from pyiem.util import get_autoplot_context, get_dbconn
 
 
 def get_description():

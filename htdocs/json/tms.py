@@ -1,13 +1,13 @@
 """
  Tile Map service metadata
 """
+import datetime
 import json
 import os
-import datetime
 
-from pymemcache.client import Client
 from paste.request import parse_formvars
 from pyiem.util import html_escape
+from pymemcache.client import Client
 
 
 def run():

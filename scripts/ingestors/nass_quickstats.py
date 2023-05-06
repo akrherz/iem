@@ -4,12 +4,11 @@ Run from RUN_10_AFTER.sh at 3 PM each day."""
 import sys
 from datetime import datetime, timedelta
 
-import requests
-import pytz
 import numpy as np
 import pandas as pd
-from pyiem.util import get_dbconn, logger, get_properties
-
+import pytz
+import requests
+from pyiem.util import get_dbconn, get_properties, logger
 
 LOG = logger()
 PROPS = get_properties()

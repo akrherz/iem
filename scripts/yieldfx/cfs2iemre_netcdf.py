@@ -2,16 +2,16 @@
 
 This will allow for downstream usage by PSIMS/Drydown. Run from RUN_NOON.sh
 """
+import datetime
 import os
 import sys
-import datetime
 
 import numpy as np
+import pygrib
+from pyiem import iemre
+from pyiem.util import logger, ncopen, utc
 from scipy.interpolate import NearestNDInterpolator
 from tqdm import tqdm
-import pygrib
-from pyiem.util import utc, ncopen, logger
-from pyiem import iemre
 
 LOG = logger()
 DEFAULTS = {"srad": 0.0, "high_tmpk": 100.0, "low_tmpk": 400.0, "p01d": 0.0}

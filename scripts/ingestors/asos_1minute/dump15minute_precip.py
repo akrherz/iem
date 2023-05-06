@@ -1,6 +1,6 @@
 """util dumper"""
-import sys
 import datetime
+import sys
 
 from pandas import read_sql
 from pyiem.util import get_dbconnstr

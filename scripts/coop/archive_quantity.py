@@ -1,6 +1,6 @@
 """ Create a simple prinout of observation quanity in the database """
-import sys
 import datetime
+import sys
 
 import numpy as np
 from pyiem.util import get_dbconn

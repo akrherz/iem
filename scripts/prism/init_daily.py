@@ -1,11 +1,11 @@
 """Generate the yearly PRISM file to hold our data """
 import datetime
-import sys
 import os
+import sys
 
 import numpy as np
 from pyiem import prism
-from pyiem.util import ncopen, logger
+from pyiem.util import logger, ncopen
 
 LOG = logger()
 

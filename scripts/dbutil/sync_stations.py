@@ -5,8 +5,8 @@ databases.  This will hopefully remove some hackery
 import sys
 
 import numpy as np
-from pyiem.util import get_dbconn, get_dbconnstr, logger, utc
 from pandas import read_sql
+from pyiem.util import get_dbconn, get_dbconnstr, logger, utc
 
 LOG = logger()
 

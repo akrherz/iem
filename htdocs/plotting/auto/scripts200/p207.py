@@ -4,13 +4,13 @@ import datetime
 
 import numpy as np
 import pandas as pd
-from pyproj import Transformer
-from geopandas import read_postgis, GeoDataFrame
-from shapely.geometry import Polygon, Point
-from scipy.interpolate import Rbf
+from geopandas import GeoDataFrame, read_postgis
 from pyiem.plot import MapPlot, nwssnow
 from pyiem.reference import EPSG
 from pyiem.util import get_autoplot_context, get_sqlalchemy_conn, logger
+from pyproj import Transformer
+from scipy.interpolate import Rbf
+from shapely.geometry import Point, Polygon
 from sqlalchemy import text
 
 LOG = logger()

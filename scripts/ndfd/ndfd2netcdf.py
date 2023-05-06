@@ -1,11 +1,11 @@
 """Copy NDFD grib data to netcdf."""
-import sys
-import os
 import datetime
+import os
+import sys
 
-import pygrib
 import numpy as np
-from pyiem.util import utc, ncopen
+import pygrib
+from pyiem.util import ncopen, utc
 
 
 def create_netcdf(ts):

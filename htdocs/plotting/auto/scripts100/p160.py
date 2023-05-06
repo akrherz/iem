@@ -3,13 +3,13 @@ TODO: add table listing each forecast's peak and peak time...
 """
 import datetime
 
-import pytz
+import matplotlib.dates as mdates
 import numpy as np
 import pandas as pd
-import matplotlib.dates as mdates
+import pytz
+from pyiem.exceptions import NoDataFound
 from pyiem.plot import figure_axes
 from pyiem.util import get_autoplot_context, get_sqlalchemy_conn
-from pyiem.exceptions import NoDataFound
 
 STAGES = "low action bankfull flood moderate major record".split()
 COLORS = {

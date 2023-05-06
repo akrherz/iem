@@ -1,13 +1,13 @@
 """Create an analysis of LSR snowfall reports"""
-import tempfile
 import os
 import subprocess
+import tempfile
 
 import requests
 from pyiem.util import (
     exponential_backoff,
-    get_properties,
     get_dbconn,
+    get_properties,
     logger,
     utc,
 )

@@ -3,16 +3,16 @@
 RUN from RUN_10MIN.sh
 """
 # stdlib
-from datetime import datetime, timedelta, timezone
-import os
 import json
-import tempfile
-import subprocess
-import urllib3
+import os
 import ssl
+import subprocess
+import tempfile
+from datetime import datetime, timedelta, timezone
 
 # third party
 import requests
+import urllib3
 from pyiem import util
 
 LOG = util.logger()

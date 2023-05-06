@@ -2,9 +2,9 @@
 
 Run from RUN_5MIN.sh
 """
-import tempfile
 import os
 import subprocess
+import tempfile
 
 import requests
 from pyiem.util import logger

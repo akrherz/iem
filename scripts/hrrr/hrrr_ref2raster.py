@@ -1,15 +1,15 @@
 """Convert HRRR Grib Reflectivity to RASTERS matching ramp used with N0Q"""
-import sys
-import os
 import datetime
-import tempfile
-import subprocess
 import json
+import os
+import subprocess
+import sys
+import tempfile
 
 import numpy as np
-from PIL import Image
 import pygrib
-from pyiem.util import utc, logger
+from PIL import Image
+from pyiem.util import logger, utc
 
 LOG = logger()
 with open("/mesonet/ldmdata/gis/images/4326/USCOMP/n0q_0.png", "rb") as fh:

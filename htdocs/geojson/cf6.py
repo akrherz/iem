@@ -1,13 +1,13 @@
 """ Produce geojson of CF6 data """
 import datetime
 
-import simplejson as json
-from simplejson import encoder
-from pymemcache.client import Client
 import psycopg2.extras
+import simplejson as json
 from paste.request import parse_formvars
-from pyiem.util import get_dbconn, html_escape
 from pyiem.reference import TRACE_VALUE
+from pyiem.util import get_dbconn, html_escape
+from pymemcache.client import Client
+from simplejson import encoder
 
 encoder.FLOAT_REPR = lambda o: format(o, ".2f")
 

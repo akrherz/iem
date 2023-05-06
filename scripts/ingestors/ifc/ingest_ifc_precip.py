@@ -14,16 +14,15 @@
 http://s-iihr57.iihr.uiowa.edu/feeds/IFC7ADV/latest.dat
 http://s-iihr57.iihr.uiowa.edu/feeds/IFC7ADV/H99999999_I0007_G_15MAR2013_154500.out
 """
-import tempfile
-import os
 import datetime
+import os
 import subprocess
+import tempfile
 
-import requests
 import numpy as np
-from PIL import Image
-from PIL import PngImagePlugin
 import pyiem.mrms as mrms
+import requests
+from PIL import Image, PngImagePlugin
 from pyiem.util import exponential_backoff, logger
 
 LOG = logger()

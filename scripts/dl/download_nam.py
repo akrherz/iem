@@ -1,12 +1,12 @@
 """Get some soil grids from the NAM"""
-import subprocess
-import sys
 import datetime
 import os
+import subprocess
+import sys
 import tempfile
 
-import requests
 import pygrib
+import requests
 from pyiem.util import exponential_backoff, logger
 
 LOG = logger()

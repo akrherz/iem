@@ -4,15 +4,15 @@ Appears that data for the previous month is available by the 9th of current mon
 
     called from RUN_2AM.sh
 """
-import sys
-import os
-import glob
 import datetime
+import glob
+import os
 import subprocess
+import sys
 
-import requests
 import pygrib
-from pyiem.util import get_properties, logger, exponential_backoff
+import requests
+from pyiem.util import exponential_backoff, get_properties, logger
 
 LOG = logger()
 TMP = "/mesonet/tmp"

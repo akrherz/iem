@@ -6,15 +6,14 @@ the next value was 50%, the change in percentage points is 20.
 """
 import datetime
 
-import pandas as pd
-from pyiem.plot import get_cmap
-from pyiem.plot import figure_axes
-from pyiem.reference import state_names
-from pyiem.util import get_autoplot_context, get_sqlalchemy_conn
-from pyiem.exceptions import NoDataFound
-from matplotlib.colorbar import ColorbarBase
 import matplotlib.colors as mpcolors
 import numpy as np
+import pandas as pd
+from matplotlib.colorbar import ColorbarBase
+from pyiem.exceptions import NoDataFound
+from pyiem.plot import figure_axes, get_cmap
+from pyiem.reference import state_names
+from pyiem.util import get_autoplot_context, get_sqlalchemy_conn
 
 PDICT = {
     "PCT PLANTED": "Planting",

@@ -3,12 +3,12 @@
     python run_network_isd_ingest.py <network> <lastyr_exclusive>
     ftp://ftp.ncdc.noaa.gov/pub/data/noaa
 """
-import sys
 import datetime
 import subprocess
+import sys
 
-from pyiem.util import logger
 from pyiem.network import Table as NetworkTable
+from pyiem.util import logger
 
 LOG = logger()
 

@@ -3,14 +3,14 @@
 Run from RUN_20_AFTER.sh
 
 """
-import subprocess
 import datetime
 import os
+import subprocess
 import tempfile
 
 import numpy as np
-from pyiem.util import get_dbconn
 from pyiem.tracker import loadqc
+from pyiem.util import get_dbconn
 
 
 def mt(prefix, tmpf, depth, q):
