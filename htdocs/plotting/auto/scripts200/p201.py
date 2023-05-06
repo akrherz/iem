@@ -187,6 +187,9 @@ def plotter(fdict):
                     ets + datetime.timedelta(days=2),
                 ),
                 index_col="date",
+                parse_dates=[
+                    "date",
+                ],
             )
         title2 = "Contiguous US"
     else:
@@ -250,6 +253,9 @@ def plotter(fdict):
                     ets + datetime.timedelta(days=2),
                 ),
                 index_col="date",
+                parse_dates=[
+                    "date",
+                ],
             )
 
     data = {}
@@ -264,7 +270,7 @@ def plotter(fdict):
             .groupby("threshold")
             .last()
             .assign(
-                days=lambda df_: (ets - df_["date"]).dt.days,
+                days=lambda df_: (pd.Timestamp(ets) - df_["date"]).dt.days,
             )
         )
         for thres, row in df2.iterrows():
@@ -273,7 +279,7 @@ def plotter(fdict):
     for date, row in df.iterrows():
         if row["threshold"] == "TSTM" and ctx.get("g", "yes") == "no":
             continue
-        data[date] = {
+        data[date.to_pydatetime().date()] = {
             "val": row["threshold"],
             "cellcolor": COLORS.get(row["threshold"], "#EEEEEE"),
         }

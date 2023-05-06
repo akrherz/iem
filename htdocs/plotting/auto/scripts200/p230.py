@@ -1,4 +1,10 @@
-"""Infographic for last SPC/WPC Outlook of given threshold."""
+"""
+This application presents an infographic showing the most recent
+date of a given SPC outlook threshold as per IEM unofficial archives.
+
+<p>Note that the probability data can get a little wonky with the changing
+usage of levels with time.
+"""
 import datetime
 
 import pandas as pd
@@ -71,16 +77,7 @@ DAYS = {
 
 def get_description():
     """Return a dict describing how to call this plotter"""
-    desc = {}
-    desc["data"] = True
-    desc[
-        "description"
-    ] = """This application presents an infographic showing the most recent
-    date of a given SPC outlook threshold as per IEM unofficial archives.
-
-    <p>Note that the probability data can get a little wonky with the changing
-    usage of levels with time.
-    """
+    desc = {"description": __doc__, "data": True}
     desc["arguments"] = [
         dict(
             type="select",
@@ -276,8 +273,11 @@ def plotter(fdict):
             )
     if df.empty:
         raise NoDataFound("No Results For Query.")
-    df["date"] = df["max_expire"].dt.date - datetime.timedelta(days=1)
-    df["days"] = (datetime.date.today() - df["date"]).dt.days
+    df["date"] = pd.to_datetime(
+        df["max_expire"].dt.date - pd.Timedelta(days=1)
+    )
+
+    df["days"] = (pd.Timestamp(datetime.date.today()) - df["date"]).dt.days
     _ll = ""
     if ctx.get("date") is not None:
         _ll = f"Prior to {ctx['date']:%-d %b %Y}, "

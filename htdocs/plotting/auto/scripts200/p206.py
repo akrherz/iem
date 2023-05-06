@@ -17,6 +17,8 @@ PDICT = {
 PDICT2 = {
     "max_tmpf": "Max Air Temperature [F]",
     "min_tmpf": "Min Air Temperature [F]",
+    "max_dwpf": "Max Dew Point Temperature [F]",
+    "min_dwpf": "Min Dew Point Temperature [F]",
     "max_feel": "Max Feels Like Temperature [F]",
     "min_feel": "Min Feels Like Temperature [F]",
     "max_rh": "Max Relative Humidity [%]",
@@ -27,6 +29,8 @@ PDICT2 = {
 VARUNITS = {
     "max_tmpf": "F",
     "min_tmpf": "F",
+    "max_dwpf": "F",
+    "min_dwpf": "F",
     "max_feel": "F",
     "min_feel": "F",
     "max_relh": "percent",
@@ -129,7 +133,7 @@ def get_df(ctx, buf=2.25):
                     'SRID=4326;POLYGON((%s %s, %s %s, %s %s, %s %s, %s %s))'),
                     geom)
             )
-            SELECT s.day, s.max_tmpf, s.min_tmpf,
+            SELECT s.day, s.max_tmpf, s.min_tmpf, s.max_dwpf, s.min_dwpf,
             s.min_rh, s.max_rh, s.min_feel, s.max_feel,
             max_sknt * 1.15 as max_sknt,
             max_gust * 1.15 as max_gust, t.id as station, t.lat, t.lon,
@@ -243,4 +247,4 @@ def plotter(fdict):
 
 
 if __name__ == "__main__":
-    plotter(dict(v="feel"))
+    plotter({"v": "feel"})
