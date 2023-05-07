@@ -1,4 +1,9 @@
-"""Days at or above temperature level"""
+"""
+This plot shows the number of days with a high
+temperature at or above a given threshold.  You can optionally generate
+this plot for the year to date period.  The present year is not used for
+the computation of the average nor minimum value.
+"""
 import datetime
 
 import pandas as pd
@@ -15,15 +20,7 @@ PDICT = {
 
 def get_description():
     """Return a dict describing how to call this plotter"""
-    desc = {}
-    desc["data"] = True
-    desc[
-        "description"
-    ] = """This plot shows the number of days with a high
-    temperature at or above a given threshold.  You can optionally generate
-    this plot for the year to date period.  The present year is not used for
-    the computation of the average nor minimum value.
-    """
+    desc = {"description": __doc__, "data": True}
     today = datetime.date.today()
     desc["arguments"] = [
         dict(
