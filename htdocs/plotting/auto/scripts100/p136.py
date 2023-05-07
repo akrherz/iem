@@ -1,4 +1,11 @@
-"""Wind Chill Hours"""
+"""
+This plot displays the number of accumulated
+hours below a given wind chill temperature threshold by season. The
+labeled season shown is for the year of January. So the season of 2016
+would be from July 2015 to June 2016.  Hours with no wind are included
+in this analysis with the wind chill temperature being the air temperature
+in those instances.
+"""
 import datetime
 
 import pandas as pd
@@ -15,18 +22,7 @@ PDICT = {
 
 def get_description():
     """Return a dict describing how to call this plotter"""
-    desc = {}
-    desc["data"] = True
-    desc["cache"] = 86400
-    desc[
-        "description"
-    ] = """This plot displays the number of accumulated
-    hours below a given wind chill temperature threshold by season. The
-    labeled season shown is for the year of January. So the season of 2016
-    would be from July 2015 to June 2016.  Hours with no wind are included
-    in this analysis with the wind chill temperature being the air temperature
-    in those instances.
-    """
+    desc = {"description": __doc__, "data": True, "cache": 86400}
     desc["arguments"] = [
         dict(
             type="zstation",
@@ -245,10 +241,10 @@ def get_context(fdict):
 
     if ctx["season"] in ctx["df"].index.values:
         s = ctx["df"].loc[[ctx["season"]]].transpose()
-        s = s.dropna().astype("timedelta64[h]")
+        s = s.dropna().astype("timedelta64[s]")
         ctx["lines"]["season"] = {
             "x": s.index.values[::-1],
-            "y": s[ctx["season"]].values[::-1] / 24.0,
+            "y": s[ctx["season"]].values[::-1] / 24.0 / 3600.0,
             "c": "blue",
             "label": f"{ctx['season']}",
         }
@@ -258,10 +254,10 @@ def get_context(fdict):
         s = ctx["dfdescribe"].loc[[lbl]].transpose()
         if s[lbl].isnull().all():
             continue
-        s = s.dropna().astype("timedelta64[h]")
+        s = s.dropna().astype("timedelta64[s]")
         ctx["lines"][lbl] = {
             "x": s.index.values[::-1],
-            "y": s[lbl].values[::-1] / 24.0,
+            "y": s[lbl].values[::-1] / 24.0 / 3600.0,
             "label": lbl,
             "c": color,
         }
@@ -279,8 +275,8 @@ def plotter(fdict):
     )
     for year in ctx["df"].index.values:
         s = ctx["df"].loc[[year]].transpose()
-        s = s.dropna().astype("timedelta64[h]")
-        ax.plot(s.index.values, s[year].values / 24.0, c="tan")
+        s = s.dropna().astype("timedelta64[s]")
+        ax.plot(s.index.values, s[year].values / 24.0 / 3600.0, c="tan")
     if "season" in ctx["lines"]:
         ax.plot(
             ctx["lines"]["season"]["x"],

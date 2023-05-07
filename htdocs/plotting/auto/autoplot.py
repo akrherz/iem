@@ -8,7 +8,13 @@ import sys
 import syslog
 import tempfile
 import traceback
+from datetime import timezone
 from io import BytesIO
+
+try:
+    from zoneinfo import ZoneInfo
+except ImportError:
+    from backports.zoneinfo import ZoneInfo  # noqa
 
 import numpy as np
 import pandas as pd
@@ -250,7 +256,12 @@ def workflow(mc, environ, form, fmt):
             if isdt(df[column]):
                 # Careful, only use ISO format when the timezone is UTC
                 dtz = df[column].dt.tz
-                if dtz is not None and dtz.zone == "UTC":
+                # We could have timezone or zoneinfo or pytz :/
+                if dtz is not None and dtz in [
+                    pytz.timezone("UTC"),
+                    ZoneInfo("UTC"),
+                    timezone.utc,
+                ]:
                     df[column] = df[column].dt.strftime("%Y-%m-%dT%H:%M:%SZ")
                 else:
                     df[column] = df[column].dt.strftime("%Y-%m-%dT%H:%M:%S")

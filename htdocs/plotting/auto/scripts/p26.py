@@ -1,4 +1,10 @@
-"""max temp before jul 1 or min after"""
+"""
+This plot presents the climatology and actual
+year's progression of warmest to date or coldest to date temperature.
+The simple average is presented along with the percentile intervals. When
+plotting the after 1 July period, the calendar year of the fall season
+is shown.  For example, 1 Jul 2019 to 30 Jun 2020 is 2019 for this plot.
+"""
 import calendar
 import datetime
 
@@ -19,15 +25,7 @@ PDICT2 = {"high": "High Temperature", "low": "Low Temperature"}
 
 def get_description():
     """Return a dict describing how to call this plotter"""
-    desc = {}
-    desc["data"] = True
-    desc[
-        "description"
-    ] = """This plot presents the climatology and actual
-    year's progression of warmest to date or coldest to date temperature.
-    The simple average is presented along with the percentile intervals. When
-    plotting the after 1 July period, the calendar year of the fall season
-    is shown.  For example, 1 Jul 2019 to 30 Jun 2020 is 2019 for this plot."""
+    desc = {"description": __doc__, "data": True}
     desc["arguments"] = [
         dict(
             type="station",
@@ -306,4 +304,4 @@ def plotter(fdict):
 
 
 if __name__ == "__main__":
-    plotter(dict(network="IACLIMATE", station="IATDSM", half="fall"))
+    plotter({})
