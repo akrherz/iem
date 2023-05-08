@@ -812,6 +812,7 @@ uopts = [
 misc = [
     {"id": 226, "label": "Center Weather Advisory (CWA) Map"},
     {"id": 221, "label": "HRRR Time-Lagged Ensemble Reflectivity Plot"},
+    {"id": 242, "label": "Local Storm Report (LSR) Simple Map"},
     {"id": 227, "label": "NWEM / NWS Non-VTEC Products containing a polygon"},
     {"id": 236, "label": "PIREP Daily Counts by ARTCC / Alaska Zone"},
     {"id": 220, "label": "SPC Convective / Fire Weather Outlook Graphics"},
