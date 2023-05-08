@@ -330,6 +330,8 @@ def add_zeros(df, ctx):
             ignore_index=True,
             sort=False,
         )
+        # Ensure we end up with val being float
+        df["val"] = pd.to_numeric(df["val"])
     # compute a cell index for each row
     df["xcell"] = ((df["geo"].x - ctx["bnds2163"][0]) / cellsize).astype(int)
     df["ycell"] = ((df["geo"].y - ctx["bnds2163"][1]) / cellsize).astype(int)
@@ -359,6 +361,7 @@ def do_analysis(df, ctx):
     yi = np.arange(ctx["bnds2163"][1], ctx["bnds2163"][3] + sz, sz / 1.9)
     xi, yi = np.meshgrid(xi, yi)
     lons, lats = T2163_4326.transform(xi, yi)
+
     gridder = Rbf(
         df2["level_0"].values,
         df2["level_1"].values,

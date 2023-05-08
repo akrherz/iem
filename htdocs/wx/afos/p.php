@@ -192,6 +192,14 @@ for ($i = 0; $row = pg_fetch_assoc($rs); $i++) {
                     $segnum,
                 );
             }
+        } else if (substr($pil, 0, 3) == "LSR") {
+            // Can only do one, so this is the best we can do
+            $t->twitter_image = "/plotting/auto/plot/242/pid:{$product_id}.png";
+            $img = sprintf(
+                '<p><img src="/plotting/auto/plot/242/pid:%s.png" ' .
+                    'class="img img-responsive"></p>',
+                $product_id,
+            );
         } else {
             $t->twitter_image = "/wx/afos/{$newe}_{$pil}.png";
         }
@@ -263,7 +271,9 @@ EOF;
     if (strtotime($row["mytime"]) != $basets) {
         continue;
     }
-    $d = preg_replace("/\r\r\n/", "\n", $row["data"]);
+    $d = preg_replace(
+        "/\1/", "", preg_replace("/\r\r\n/", "\n", $row["data"])
+    );
     $content .= "<pre>" . htmlentities($d) . "</pre>\n";
 }
 
