@@ -1,14 +1,16 @@
-"""This application presents a calendar of daily
-    counts of the number of watch, warning, advisories issued by day.  This
-    accounting is based on the initial issuance date of a given VTEC phenomena
-    and significance by event identifier.  So a single Winter Storm Watch
-    for 40 zones, would only count as 1 event for this chart.  Dates are
-    computed in the local time zone of the issuance forecast office in the
-    case of a single office and in Central Time for the case of all offices of
-    plotting a given state.
+"""
+This application presents a calendar of daily
+counts of the number of watch, warning, advisories issued by day.  This
+accounting is based on the initial issuance date of a given VTEC phenomena
+and significance by event identifier.  So a single Winter Storm Watch
+for 40 zones, would only count as 1 event for this chart.  Dates are
+computed in the local time zone of the issuance forecast office in the
+case of a single office and in Central Time for the case of all offices of
+plotting a given state.
 
-    <p>You can also generate this plot considering "ALL" NWS Offices, when
-    doing so the time zone used to compute the calendar dates is US Central."""
+<p>You can also generate this plot considering "ALL" NWS Offices, when
+doing so the time zone used to compute the calendar dates is US Central.
+"""
 import datetime
 
 import pandas as pd
@@ -151,7 +153,7 @@ def plotter(fdict):
             significance.append(s[0])
 
     pstr = []
-    title = ""
+    title = []
     params = {}
     params["tzname"] = ctx["_nt"].sts[wfo]["tzname"]
     params["sts"] = sts - datetime.timedelta(days=2)
@@ -161,8 +163,9 @@ def plotter(fdict):
         params[f"ph{i}"] = p
         params[f"sig{i}"] = s
         if i == 2:
-            title += "\n"
-        title += f"{vtec.get_ps_string(p, s)} {p}.{s}, "
+            title[-1] += "\n"
+        title.append(f"{vtec.get_ps_string(p, s)} {p}.{s}")
+    title = ", ".join(title)
     pstr = " or ".join(pstr)
     pstr = f"({pstr})"
 
@@ -217,13 +220,16 @@ def plotter(fdict):
         now += datetime.timedelta(days=1)
     for date, row in df.iterrows():
         data[date] = {"val": row["count"]}
+    aa = "VTEC Events"
+    if len(significance) == 1:
+        aa = f"{vtec.get_ps_string(phenomena[0], significance[0])} Count"
     fig = calendar_plot(
         sts,
         ets,
         data,
         apctx=ctx,
         heatmap=(ctx["heatmap"] == "yes"),
-        title=f"Number of VTEC Events for {title2} by Local Calendar Date",
+        title=f"{aa} for {title2} by Local Calendar Date",
         subtitle=f"Valid {sts:%d %b %Y} - {ets:%d %b %Y} for {title}",
     )
     return fig, df
