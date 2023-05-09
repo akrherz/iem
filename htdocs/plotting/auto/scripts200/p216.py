@@ -1,4 +1,7 @@
-"""Consec days"""
+"""
+This chart presents the longest daily streaks of having some
+temperature threshold meet.
+"""
 import datetime
 
 import numpy as np
@@ -17,12 +20,7 @@ PDICT2 = {"high": "High Temperature", "low": "Low Temperature"}
 
 def get_description():
     """Return a dict describing how to call this plotter"""
-    desc = {}
-    desc["data"] = True
-    desc[
-        "description"
-    ] = """This chart presents the longest daily streaks of having some
-    temperature threshold meet."""
+    desc = {"description": __doc__, "data": True}
     desc["arguments"] = [
         dict(
             type="station",
