@@ -16,6 +16,7 @@ python download_imerg.py $(date -u --date '6 months ago' +'%Y %m %d %H 30')
 
 cd ../ingestors/madis
 python extract_hfmetar.py 0 &
+python to_iemaccess.py 1 &
 
 cd ../../plots
 ./RUN_PLOTS

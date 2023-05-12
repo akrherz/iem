@@ -1,4 +1,9 @@
-"""Suck in MADIS data into the iemdb"""
+"""Suck in MADIS data into the iemdb.
+
+Run from RUN_20MIN.sh
+RUN_20_AFTER for previous hour
+RUN_40_AFTER for 2 hours ago.
+"""
 import datetime
 import os
 import subprocess
@@ -18,10 +23,10 @@ MY_PROVIDERS = ["KYTC-RWIS", "KYMN", "NEDOR", "MesoWest"]
 warnings.filterwarnings("ignore", category=DeprecationWarning)
 
 
-def find_file():
+def find_file(offset0):
     """Find the most recent file"""
     fn = None
-    for i in range(0, 4):
+    for i in range(offset0, 4):
         ts = datetime.datetime.utcnow() - datetime.timedelta(hours=i)
         for j in range(300, -1, -1):
             testfn = ts.strftime(f"{MYDIR}/%Y%m%d_%H00_{j}.nc")
@@ -79,11 +84,11 @@ def build_roadstate_xref(ncvar):
     return xref
 
 
-def main():
+def main(argv):
     """Do Something"""
     pgconn = get_dbconn("iem")
     icursor = pgconn.cursor(cursor_factory=psycopg2.extras.DictCursor)
-    fn = find_file()
+    fn = find_file(0 if len(argv) == 1 else int(argv[1]))
     nc = ncopen(fn, timeout=300)
 
     stations = chartostring(nc.variables["stationId"][:])
@@ -224,4 +229,4 @@ def main():
 
 
 if __name__ == "__main__":
-    main()
+    main(sys.argv)
