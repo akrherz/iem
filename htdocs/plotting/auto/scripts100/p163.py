@@ -271,7 +271,7 @@ def plotter(fdict):
                 )
             else:
                 df = pd.read_sql(
-                    """
+                    f"""
                 WITH data as (
                     SELECT distinct ugc, date(valid)
                     from lsrs l JOIN ugcs u on (l.gid = u.gid)
