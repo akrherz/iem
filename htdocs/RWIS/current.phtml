@@ -52,7 +52,7 @@ $jobj = iemws_json("currents.json", $arr);
 foreach ($jobj["data"] as $bogus => $ob) {
     $key = $ob["station"];
     $mydata[$key] = $ob;
-    $mydata[$key]["ts"] = strtotime($ob["local_valid"]);
+    $mydata[$key]["ts"] = new DateTime($ob["local_valid"]);
     $mydata[$key]["relh"] = $ob["relh"];
     $mydata[$key]["feel"] = $ob["feel"];
     if ($mydata[$key]["dwpf"] > $mydata[$key]["tmpf"]) {
@@ -77,14 +77,14 @@ foreach ($jobj["data"] as $bogus => $ob) {
     } else {
         $mydata[$key]["vsby"] = myround($mydata[$key]["vsby"], 1);
     }
-    $mydata[$key]["peak_ts"] = 0;
+    $mydata[$key]["peak_ts"] = null;
     if ($mydata[$key]["max_gust"] > $mydata[$key]["max_sknt"]) {
         $mydata[$key]["peak"] = $mydata[$key]["max_gust"];
-        $mydata[$key]["peak_ts"] = strtotime($mydata[$key]["local_max_gust_ts"]);
+        $mydata[$key]["peak_ts"] = new DateTime($mydata[$key]["local_max_gust_ts"]);
     } else {
         $mydata[$key]["peak"] = $mydata[$key]["max_sknt"];
         if ($mydata[$key]["local_max_sknt_ts"]) {
-            $mydata[$key]["peak_ts"] = strtotime($mydata[$key]["local_max_sknt_ts"]);
+            $mydata[$key]["peak_ts"] = new DateTime($mydata[$key]["local_max_sknt_ts"]);
         }
     }
 
@@ -103,12 +103,8 @@ $table = "";
 // Loop though all data
 foreach ($finalA as $key => $val) {
     $parts = $finalA[$key];
-    $tdiff = $now - $parts["ts"];
+    $tdiff = $now - strtotime($parts["utc_valid"]);
 
-    // Dont show IAC
-    if ($key == "RIOW") {
-        continue;
-    }
     if ($tdiff > 6900) {
         $skippedStations[$key] = $parts;
         continue;
@@ -129,11 +125,11 @@ foreach ($finalA as $key => $val) {
     } else if ($tdiff > 1800) {
         $table .= 'bgcolor="green"';
     }
-    $table .= ">" . date($format, $parts["ts"]) . "</td>
-  <td align='center'>" . $parts["tmpf"] . "(<font color=\"#ff0000\">" .
-        $parts["max_tmpf"] . "</font>/<font color=\"#0000ff\">" .
-        $parts["min_tmpf"] . "</font>)</td>
- <td>" . $parts["dwpf"] . "</td>
+    $table .= ">" . $parts["ts"]->format($format) . "</td>
+  <td align='center'>" . myround($parts["tmpf"], 1) . "(<font color=\"#ff0000\">" .
+        myround($parts["max_tmpf"], 1) . "</font>/<font color=\"#0000ff\">" .
+        myround($parts["min_tmpf"], 1) . "</font>)</td>
+ <td>" . myround($parts["dwpf"], 1) . "</td>
  <td>" . myround($parts["feel"], 0) . "</td>
  <td>" . myround($parts["relh"], 0) . "</td>
  <td>" . $parts["vsby"] . "</td>
@@ -141,11 +137,14 @@ foreach ($finalA as $key => $val) {
     if (!is_null($parts["gust"]) && strlen($parts["gust"]) > 0 && $parts["gust"] > 0) {
         $table .= "G" . myround($parts["gust"], 0);
     }
-    $table .= "</td>
-            <td>" . $parts["drct"] . "</td>
-        <td>" . myround($parts["peak"], 0) . "@ " . date("h:i A", $parts["peak_ts"]) . "</td>
-            <td>" . myround($parts["pday"], 2) . "</td>
-        </tr>\n";
+    $table .= "</td>";
+    if (! is_null($parts["peak_ts"])){
+        $table .= "<td>" . $parts["drct"] . "</td>
+        <td>" . myround($parts["peak"], 0) . "@ " . $parts["peak_ts"]->format("h:i A") . "</td>
+            <td>" . myround($parts["pday"], 2) . "</td>";
+    }
+            
+    $table .= "</tr>\n";
 }
 
 foreach ($skippedStations as $key => $parts) {
@@ -155,7 +154,7 @@ foreach ($skippedStations as $key => $parts) {
     $table .= "<td>" . $parts["name"] . "</td><td ";
     $table .= 'bgcolor="red"';
     $format = "M-d-Y";
-    $table .= ">" . date($format, $parts["ts"]) . "</td><th align='center' colspan='9'>Site Offline</th></tr>\n";
+    $table .= ">" . $parts["ts"]->format($format) . "</td><th align='center' colspan='9'>Site Offline</th></tr>\n";
 }
 
 $content = <<<EOF
