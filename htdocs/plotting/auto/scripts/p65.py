@@ -1,4 +1,8 @@
-"""Day freq of month"""
+"""
+This plot displays the frequency of a given day
+in the month having the coldest high or low temperature of that month for
+a year.
+"""
 import calendar
 import datetime
 
@@ -11,13 +15,7 @@ PDICT = {"cold": "Coldest Temperature", "hot": "Hottest Temperature"}
 
 def get_description():
     """Return a dict describing how to call this plotter"""
-    desc = {}
-    desc["data"] = True
-    desc[
-        "description"
-    ] = """This plot displays the frequency of a given day
-    in the month having the coldest high or low temperature of that month for
-    a year."""
+    desc = {"description": __doc__, "data": True}
     today = datetime.date.today()
     desc["arguments"] = [
         dict(

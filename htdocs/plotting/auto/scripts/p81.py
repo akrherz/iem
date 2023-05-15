@@ -1,7 +1,9 @@
-"""This chart presents two measures of temperature
-    variability.  The first is the standard deviation of the period of
-    record for a given day of the year.  The second is the standard deviation
-    of the day to day changes in temperature."""
+"""
+This chart presents two measures of temperature
+variability.  The first is the standard deviation of the period of
+record for a given day of the year.  The second is the standard deviation
+of the day to day changes in temperature.
+"""
 import calendar
 
 import pandas as pd

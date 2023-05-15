@@ -8,6 +8,7 @@ QRE = re.compile("q=([0-9]+)")
 NO_FEATURES = [
     17,  # is referenced by canonical page
     68,  # nws unique VTEC types per year
+    81,  # stddev daily temps, too boring
     91,  # hated by myself and the general public
     96,  # one-off showing precip biases
     94,  # one-off showing temp biases

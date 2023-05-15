@@ -1,4 +1,9 @@
-"""first and last snowfalls"""
+"""
+This chart displays either the first or last date
+of the winter season with a snowfall of a given intensity.  The snowfall
+and snow depth data is not of great quality, so please be careful with
+this plot.
+"""
 import calendar
 import datetime
 
@@ -19,14 +24,7 @@ PDICT = {
 
 def get_description():
     """Return a dict describing how to call this plotter"""
-    desc = {}
-    desc["data"] = True
-    desc[
-        "description"
-    ] = """This chart displays either the first or last date
-    of the winter season with a snowfall of a given intensity.  The snowfall
-    and snow depth data is not of great quality, so please be careful with
-    this plot."""
+    desc = {"description": __doc__, "data": True}
     desc["arguments"] = [
         dict(
             type="station",
@@ -238,5 +236,10 @@ def plotter(fdict):
 
 if __name__ == "__main__":
     plotter(
-        dict(threshold="T", dir="first", station="IATDSM", network="IACLIMATE")
+        {
+            "threshold": "T",
+            "dir": "first",
+            "station": "IATDSM",
+            "network": "IACLIMATE",
+        }
     )
