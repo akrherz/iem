@@ -1,4 +1,9 @@
-"""Consec days"""
+"""
+This chart presents the daily frequency of the
+given date having the prescribed number of previous days above or below
+some provided treshold. <a href="/plotting/auto/?q=216">Autoplot 216</a>
+provides actual streaks and yearly maximum values.
+"""
 import calendar
 
 import pandas as pd
@@ -15,14 +20,7 @@ PDICT2 = {"high": "High Temperature", "low": "Low Temperature"}
 
 def get_description():
     """Return a dict describing how to call this plotter"""
-    desc = {}
-    desc["data"] = True
-    desc[
-        "description"
-    ] = """This chart presents the daily frequency of the
-    given date having the prescribed number of previous days above or below
-    some provided treshold. <a href="/plotting/auto/?q=216">Autoplot 216</a>
-    provides actual streaks and yearly maximum values."""
+    desc = {"description": __doc__, "data": True}
     desc["arguments"] = [
         dict(
             type="station",
