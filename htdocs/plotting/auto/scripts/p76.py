@@ -1,4 +1,19 @@
-"""Seasonal averages of Humudity."""
+"""
+Simple plot of yearly average dew points by year,
+season, or month.
+This calculation was done by computing the mixing ratio, then averaging
+the mixing ratios by year, and then converting that average to a dew point.
+This was done due to the non-linear nature of dew point when expressed in
+units of temperature.  If you plot the 'winter' season, the year shown is
+of the Jan/Feb portion of the season. If you plot the 'Water Year', the
+year shown is the September 30th of the period.
+
+<p>You can optionally restrict the local hours of the day to consider for
+the plot.  These hours are expressed as a range of hours using a 24 hour
+clock.  For example, '8-16' would indicate a period between 8 AM and 4 PM
+inclusive.  If you want to plot one hour, just set the start and end hour
+to the same value.</p>
+"""
 import datetime
 
 import metpy.calc as mcalc
@@ -45,35 +60,22 @@ UNITS = {
     "dwpf": "F",
     "feel": "F",
     "relh": "%",
-    "vpd": "kPa",
+    "vpd": "hPa",
 }
 PDICT2 = {
     "bar": "Bar Plot",
     "violin": "Violin Plot",
 }
+PDICT3 = {
+    "min": "Minimum",
+    "mean": "Mean",
+    "max": "Maximum",
+}
 
 
 def get_description():
     """Return a dict describing how to call this plotter"""
-    desc = {}
-    desc["data"] = True
-    desc[
-        "description"
-    ] = """Simple plot of yearly average dew points by year,
-    season, or month.
-    This calculation was done by computing the mixing ratio, then averaging
-    the mixing ratios by year, and then converting that average to a dew point.
-    This was done due to the non-linear nature of dew point when expressed in
-    units of temperature.  If you plot the 'winter' season, the year shown is
-    of the Jan/Feb portion of the season. If you plot the 'Water Year', the
-    year shown is the September 30th of the period.
-
-    <p>You can optionally restrict the local hours of the day to consider for
-    the plot.  These hours are expressed as a range of hours using a 24 hour
-    clock.  For example, '8-16' would indicate a period between 8 AM and 4 PM
-    inclusive.  If you want to plot one hour, just set the start and end hour
-    to the same value.</p>
-    """
+    desc = {"description": __doc__, "data": True}
     desc["arguments"] = [
         dict(
             type="zstation",
@@ -96,6 +98,13 @@ def get_description():
             label="Metric to Plot:",
             options=PDICT,
         ),
+        {
+            "type": "select",
+            "options": PDICT3,
+            "default": "mean",
+            "label": "Daily aggregate to use in yearly statistics",
+            "name": "agg",
+        },
         dict(
             type="year", name="year", default=1893, label="Start Year of Plot"
         ),
@@ -147,7 +156,7 @@ def run_calcs(df, ctx):
             df["pressure"].values * units("millibars"),
             df["mixingratio"].values * units("kg/kg"),
         )
-        .to(units("kPa"))
+        .to(units("hPa"))
         .m
     )
     df["saturation_vapor_pressure"] = (
@@ -155,7 +164,7 @@ def run_calcs(df, ctx):
             df["pressure"].values * units("millibars"),
             df["saturation_mixingratio"].values * units("kg/kg"),
         )
-        .to(units("kPa"))
+        .to(units("hPa"))
         .m
     )
     df["vpd"] = df["saturation_vapor_pressure"] - df["vapor_pressure"]
@@ -227,6 +236,7 @@ def get_data(ctx, startyear):
                 and report_type = 3
             )
         SELECT valid,
+        date(valid at time zone :tzname),
         extract(year from valid + ':days days'::interval)::int as year,
         tmpf, dwpf, slp, relh, feel from obs
         """
@@ -250,10 +260,16 @@ def get_data(ctx, startyear):
 def make_plot(df, ctx):
     """Do the plotting"""
 
+    means = (
+        df.groupby("date")
+        .agg(ctx["agg"], numeric_only=True)
+        .reset_index()
+        .groupby("year")
+        .mean(numeric_only=True)
+    )
     # Special case of computing means of non-linear dew point
-    means = df.groupby("year").mean(numeric_only=True)
     means["dwpf"] = (
-        mcalc.dewpoint(means["vapor_pressure"].values * units("kPa"))
+        mcalc.dewpoint(means["vapor_pressure"].values * units("hPa"))
         .to(units("degF"))
         .m
     )
@@ -267,7 +283,7 @@ def make_plot(df, ctx):
     tt = "Distribution" if ctx["w"] == "violin" else "Averages"
     title = (
         f"{ctx['_sname']} ({means.index.min():.0f}-{means.index.max():.0f})\n"
-        f"{PDICT[varname]} {tt} [{MDICT[season]}] "
+        f"{PDICT3[ctx['agg']]} Daily {PDICT[varname]} {tt} [{MDICT[season]}] "
         f"{ctx.get('hour_limiter', '')} Avg: {avgv:.1f}, "
         f"slope: {(h_slope * 100.):.2f} {UNITS[varname]}/century, "
         f"R$^2$={(r_value**2):.2f}"
@@ -295,7 +311,13 @@ def make_plot(df, ctx):
             means[varname].max() + means[varname].max() / 10.0,
         )
     else:
-        data = df[["year", varname]].groupby("year")[varname].apply(list)
+        data = (
+            df.groupby("date")
+            .agg(ctx["agg"], numeric_only=True)
+            .reset_index()
+            .groupby("year")[varname]
+            .apply(list)
+        )
         v1 = ax.violinplot(
             data.values,
             positions=list(data.index),
@@ -344,4 +366,12 @@ def plotter(fdict):
 
 
 if __name__ == "__main__":
-    plotter({"station": "DSM", "network": "IA_ASOS"})
+    plotter(
+        {
+            "station": "DSM",
+            "network": "IA_ASOS",
+            "year": 1990,
+            "season": "summer",
+            "agg": "max",
+        }
+    )

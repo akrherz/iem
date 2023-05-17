@@ -1,4 +1,4 @@
-<?php 
+<?php
 require_once "../../../config/settings.inc.php";
 require_once "../../../include/myview.php";
 require_once "../../../include/cameras.inc.php";
@@ -10,10 +10,11 @@ $t->headextra = <<<EOF
 EOF;
 
 $camselect = "<select id=\"mycam\" name=\"mycam\" onchange=\"myloader();\">";
-foreach($cameras as $key => $dict)
-{
-	if ($dict["removed"] || $dict["network"] == "IDOT"){ continue; }
-	$camselect .= "<option value=\"". $dict["moviebase"] ."\">". $dict["name"] ." \n";
+foreach ($cameras as $key => $dict) {
+    if ($dict["removed"] || $dict["network"] == "IDOT") {
+        continue;
+    }
+    $camselect .= "<option value=\"" . $dict["moviebase"] . "\">" . $dict["name"] . " \n";
 }
 $camselect .= "</select>";
 
@@ -28,8 +29,8 @@ note the timestamp on the lapses, some of them may be old.</p>
 <div style="background: #eee; border: 1px solid #000; margin: 5px; padding: 5px; width: 650px;">
 <div class="flowplayer">
 <video>
-<source type="video/mp4" src="/onsite/lapses/auto/ames_sunrise.mp4">
-<source type="video/flv" src="/onsite/lapses/auto/ames_sunrise.flv">
+<source type="video/mp4" src="/onsite/lapses/auto/isu_curtis_center_sunrise.mp4">
+<source type="video/flv" src="/onsite/lapses/auto/isu_curtis_center_sunrise.flv">
 </video>
 </div>
 <form name="theform">

@@ -1,4 +1,9 @@
-"""4 inch soil temps or moisture"""
+"""
+This chart presents daily timeseries of
+soil temperature or moisture.  The dataset contains merged information
+from the legacy Iowa State Ag Climate Network and present-day Iowa State
+Soil Moisture Network.
+"""
 import calendar
 import datetime
 
@@ -36,16 +41,7 @@ XREF = {
 
 def get_description():
     """Return a dict describing how to call this plotter"""
-    desc = {}
-    desc["data"] = True
-    desc[
-        "description"
-    ] = """This chart presents daily timeseries of
-    soil temperature or moisture.  The dataset contains merged information
-    from the legacy Iowa State Ag Climate Network and present-day Iowa State
-    Soil Moisture Network.  Each year's data is represented by individual blue
-    lines, with the year to highlight in red and the overall average in
-    black."""
+    desc = {"description": __doc__, "data": True}
     today = datetime.date.today()
     desc["arguments"] = [
         dict(
@@ -88,12 +84,13 @@ def plotter(fdict):
         WITH legacy as (
             SELECT valid, c30 as tsoil, 'L' as dtype
             from daily where station = %s
-            and c30 > 0 ORDER by valid ASC
+            and c30 > -20 and c30 < 40 ORDER by valid ASC
         ), present as (
             SELECT valid, t4_c_avg_qc * 9./5. + 32. as tsoil,
             'C' as dtype, vwc12, vwc24, vwc50
             from sm_daily
-            where station = %s and t4_c_avg_qc is not null ORDER by valid ASC
+            where station = %s and t4_c_avg_qc > -20 and t4_c_avg_qc < 40
+            ORDER by valid ASC
         )
         SELECT valid, tsoil, dtype, null as vwc12, null as vwc24, null as vwc50
         from legacy UNION ALL select * from present
@@ -112,28 +109,45 @@ def plotter(fdict):
         f"Site {VARS[varname]} Yearly Timeseries"
     )
     (fig, ax) = figure_axes(title=title, apctx=ctx)
-    for dtype in ["L", "C"]:
-        for year, df2 in df[df["dtype"] == dtype].groupby("year"):
-            if year in [1997, 1988]:
-                continue
-            ax.plot(
-                df2["doy"].values,
-                df2[varname].values,
-                color="skyblue",
-                zorder=2,
-            )
-            if year == highlightyear:
-                ax.plot(
-                    df2["doy"].values,
-                    df2[varname].values,
-                    color="red",
-                    zorder=5,
-                    label=str(year),
-                    lw=2.0,
-                )
 
-    gdf = df.groupby("doy").mean(numeric_only=True)
-    ax.plot(gdf.index.values, gdf[varname].values, color="k", label="Average")
+    gdf = df[["doy", varname]].groupby("doy").describe().reset_index()
+    # vertical bars for range
+    ax.bar(
+        gdf["doy"].values,
+        gdf[(varname, "max")] - gdf[(varname, "min")],
+        bottom=gdf[(varname, "min")],
+        color="tan",
+        label="Range",
+        width=1.05,
+    )
+    # bands for 25-75% ptile
+    ax.bar(
+        gdf["doy"].values,
+        gdf[(varname, "75%")] - gdf[(varname, "25%")],
+        bottom=gdf[(varname, "25%")],
+        color="lightgreen",
+        label="25-75 Percentile",
+        width=1.05,
+    )
+    # Mean
+    ax.plot(
+        gdf["doy"].values,
+        gdf[(varname, "mean")].values,
+        color="k",
+        label="Average",
+    )
+
+    df2 = df[df["year"] == highlightyear]
+    if not df2.empty:
+        ax.plot(
+            df2["doy"].values,
+            df2[varname].values,
+            color="red",
+            zorder=5,
+            label=f"{highlightyear}",
+            lw=2.0,
+        )
+
     ax.grid(True)
     if varname == "tsoil":
         ax.set_ylabel(r"Daily Avg Temp $^{\circ}\mathrm{F}$")
@@ -146,9 +160,7 @@ def plotter(fdict):
     ax.set_xticks((1, 32, 60, 91, 121, 152, 182, 213, 244, 274, 305, 335))
     ax.set_xticklabels(calendar.month_abbr[1:])
     ax.set_xlim(0, 367)
-    if varname == "tsoil":
-        ax.set_ylim(gdf["tsoil"].min() - 15, gdf["tsoil"].max() + 15)
-    else:
+    if varname != "tsoil":
         ax.set_ylim(0, 1)
     ax.axhline(32, lw=2, color="purple", zorder=4)
     # ax.set_yticks(range(-10, 90, 20))

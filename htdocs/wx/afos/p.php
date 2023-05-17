@@ -192,7 +192,7 @@ for ($i = 0; $row = pg_fetch_assoc($rs); $i++) {
                     $segnum,
                 );
             }
-        } else if (substr($pil, 0, 3) == "LSR") {
+        } else if ((substr($pil, 0, 3) == "LSR") && (intval(substr($product_id, 0, 4)) > 1985)) {
             // Can only do one, so this is the best we can do
             $t->twitter_image = "/plotting/auto/plot/242/pid:{$product_id}.png";
             $img = sprintf(

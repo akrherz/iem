@@ -81,7 +81,7 @@ def get_description():
 def get_image(filename):
     """Get an image"""
     fn = f"/opt/iem/htdocs/lsr/icons/{filename}"
-    return OffsetImage(plt.imread(fn, format="png"), zoom=0.7)
+    return OffsetImage(plt.imread(fn, format=filename[-3:]), zoom=0.7)
 
 
 def overlay_info(fig, df):
@@ -160,9 +160,13 @@ def get_df(table, product_id):
         df["utc_valid"] = df["utc_valid"].dt.tz_localize(ZoneInfo("UTC"))
         nt = NetworkTable("WFO")
         wfo = product_id[14:17]
+        if wfo not in nt.sts:
+            wfo = f"P{wfo}"
         if wfo in nt.sts:
             tzinfo = ZoneInfo(nt.sts[wfo]["tzname"])
-            df["local_valid"] = df["utc_valid"].dt.tz_convert(tzinfo)
+        else:
+            tzinfo = ZoneInfo("America/Chicago")
+        df["local_valid"] = df["utc_valid"].dt.tz_convert(tzinfo)
     return df
 
 

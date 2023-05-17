@@ -1,4 +1,13 @@
-"""Daily humidity plot"""
+"""
+This plot presents one of two metrics indicating
+daily humidity levels as reported by a surface weather station. The
+first being mixing ratio, which is a measure of the amount of water
+vapor in the air.  The second being vapor pressure deficit, which reports
+the difference between vapor pressure and saturated vapor pressure.
+The vapor pressure calculation shown here makes no accounting for
+leaf tempeature. The saturation vapor pressure is computed by the
+Tetens formula (Buck, 1981).
+"""
 import calendar
 import datetime
 
@@ -13,27 +22,17 @@ PDICT = {
     "mixing_ratio": "Mixing Ratio [g/kg]",
     "vpd": "Vapor Pressure Deficit [hPa]",
 }
+PDICT2 = {
+    "min": "Minimum",
+    "mean": "Mean",
+    "max": "Maximum",
+}
 
 
 def get_description():
     """Return a dict describing how to call this plotter"""
-    desc = {}
+    desc = {"description": __doc__, "data": True}
     today = datetime.date.today()
-    desc["data"] = True
-    desc[
-        "description"
-    ] = """This plot presents one of two metrics indicating
-    daily humidity levels as reported by a surface weather station. The
-    first being mixing ratio, which is a measure of the amount of water
-    vapor in the air.  The second being vapor pressure deficit, which reports
-    the difference between vapor pressure and saturated vapor pressure.
-    The vapor pressure calculation shown here makes no accounting for
-    leaf tempeature. The saturation vapor pressure is computed by the
-    Tetens formula (Buck, 1981).
-
-    <br />On 22 June 2016, this plot was modified to display the range of
-    daily averages and not the range of instantaneous observations.
-    """
     desc["arguments"] = [
         dict(
             type="zstation",
@@ -55,6 +54,13 @@ def get_description():
             label="Which Humidity Variable to Compute?",
             options=PDICT,
         ),
+        {
+            "type": "select",
+            "options": PDICT2,
+            "default": "mean",
+            "label": "Which daily statistic to compute?",
+            "name": "agg",
+        },
     ]
     return desc
 
@@ -108,17 +114,27 @@ def plotter(fdict):
     ).to(units("kPa"))
     df["vpd"] = df["saturation_vapor_pressure"] - df["vapor_pressure"]
 
-    dailymeans = df[["year", "doy", varname]].groupby(["year", "doy"]).mean()
-    dailymeans = dailymeans.reset_index()
-    if varname not in dailymeans.columns:
+    daily = (
+        df[["year", "doy", varname]]
+        .groupby(["year", "doy"])
+        .agg(ctx["agg"])
+        .reset_index()
+    )
+    if varname not in daily.columns:
         raise NoDataFound("All data is missing.")
-    df2 = dailymeans[["doy", varname]].groupby("doy").describe()
+    df2 = daily[["doy", varname]].groupby("doy").describe()
 
     dyear = df[df["year"] == year]
     df3 = dyear[["doy", varname]].groupby("doy").describe()
-    df3[(varname, "diff")] = df3[(varname, "mean")] - df2[(varname, "mean")]
+    # tricky
+    df3[(varname, "diff")] = (
+        df3[(varname, ctx["agg"])] - df2[(varname, "mean")]
+    )
 
-    title = f"{ctx['_sname']}]:: Daily Mean Surface {PDICT[varname]}"
+    title = (
+        f"{ctx['_sname']}]:: Daily {PDICT2[ctx['agg']]} "
+        f"Surface {PDICT[varname]}"
+    )
     fig = figure(apctx=ctx, title=title)
     ax = fig.subplots(2, 1)
     multiplier = 1000.0 if varname == "mixing_ratio" else 10.0
@@ -136,10 +152,10 @@ def plotter(fdict):
         label="Climatology",
     )
     ax[0].plot(
-        df3[(varname, "mean")].index.values,
-        df3[(varname, "mean")].values * multiplier,
+        df3[(varname, ctx["agg"])].index.values,
+        df3[(varname, ctx["agg"])].values * multiplier,
         color="r",
-        label="%s" % (year,),
+        label=f"{year}",
     )
 
     lbl = (
