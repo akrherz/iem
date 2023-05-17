@@ -1,8 +1,10 @@
-"""The IEM computes daily summaries of ASOS station
-    data based on available station summaries and computed summaries based
-    on available hourly data.  This chart presents the frequency combination
-    of one or more variables.  Please let us know if you want additional
-    fields added to this tool."""
+"""
+The IEM computes daily summaries of ASOS station
+data based on available station summaries and computed summaries based
+on available hourly data.  This chart presents the frequency combination
+of one or more variables.  Please let us know if you want additional
+fields added to this tool.
+"""
 import calendar
 import itertools
 
@@ -14,8 +16,7 @@ from pyiem.util import get_autoplot_context, get_sqlalchemy_conn
 
 def get_description():
     """Return a dict describing how to call this plotter"""
-    desc = {"description": __doc__}
-    desc["data"] = True
+    desc = {"description": __doc__, "data": True}
     desc["arguments"] = [
         dict(
             type="zstation",
@@ -161,7 +162,7 @@ def plotter(fdict):
             color=color,
         )
 
-    ax.legend(ncol=4, loc=(-0.05, -0.21), fontsize=14)
+    ax.legend(ncol=3, loc=(-0.05, -0.21), fontsize=14)
     ax.set_xticks((1, 32, 60, 91, 121, 152, 182, 213, 244, 274, 305, 335))
     ax.set_xticklabels(calendar.month_abbr[1:])
     ax.set_position([0.1, 0.2, 0.75, 0.7])

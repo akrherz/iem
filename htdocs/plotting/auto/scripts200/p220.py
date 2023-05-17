@@ -1,4 +1,17 @@
-"""Plot SPC Outlook Infographics."""
+"""
+This app generates infographics for the Storm Prediction Center
+or Weather Prediction Center outlooks.
+The trick here is how the valid time works.  The app will first
+attempt to match an issuance to that timestamp, if it fails, it then
+looks backwards in time for the most recent issuance to that timestamp.
+
+<p>Another bit of ambiguity is which outlook you get between about
+midnight and the 13z issuance of the Day 1 Outlook.  In this case and
+as the code stands now, you get the next day's outlook.
+
+<p>A <a href="/request/gis/spc_outlooks.phtml">GIS Shapefile</a> download
+option exists for downloading these outlooks in-bulk.</p>
+"""
 import datetime
 
 try:
@@ -42,6 +55,8 @@ PDICT2 = {
     "1E": "Day 1 Excessive Rainfall Outlook",
     "2E": "Day 2 Excessive Rainfall Outlook",
     "3E": "Day 3 Excessive Rainfall Outlook",
+    "4E": "Day 4 Excessive Rainfall Outlook",
+    "5E": "Day 5 Excessive Rainfall Outlook",
 }
 PDICT3 = {
     "categorical": "Categorical (D1-3), Any Severe (D4-8)",
@@ -117,26 +132,9 @@ ORDER by day ASC, priority ASC
 
 def get_description():
     """Return a dict describing how to call this plotter"""
-    desc = {}
+    desc = {"description": __doc__, "data": True}
     desc["defaults"] = {"_r": "t"}
-    desc["data"] = True
     desc["cache"] = 600
-    desc[
-        "description"
-    ] = """
-    This app generates infographics for the Storm Prediction Center
-    or Weather Prediction Center outlooks.
-    The trick here is how the valid time works.  The app will first
-    attempt to match an issuance to that timestamp, if it fails, it then
-    looks backwards in time for the most recent issuance to that timestamp.
-
-    <p>Another bit of ambiguity is which outlook you get between about
-    midnight and the 13z issuance of the Day 1 Outlook.  In this case and
-    as the code stands now, you get the next day's outlook.
-
-    <p>A <a href="/request/gis/spc_outlooks.phtml">GIS Shapefile</a> download
-    option exists for downloading these outlooks in-bulk.</p>
-    """
     desc["arguments"] = [
         dict(
             type="select",
@@ -385,4 +383,4 @@ if __name__ == "__main__":
     # plotter(dict(cat="categorical", which="0C", valid="2019-05-14 2022"))
     # has three days of F
     # plotter(dict(cat="categorical", which="0F", valid="2018-05-07 2322"))
-    plotter(dict(cat="categorical", which="1C", valid="2000-03-08 1919"))
+    plotter({"cat": "categorical", "which": "1C", "valid": "2000-03-08 1919"})
