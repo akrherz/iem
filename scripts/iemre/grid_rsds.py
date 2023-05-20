@@ -7,11 +7,11 @@ import datetime
 import os
 import subprocess
 import sys
+from zoneinfo import ZoneInfo
 
 import numpy as np
 import pygrib
 import pyproj
-import pytz
 from pyiem import iemre
 from pyiem.util import get_dbconn, logger, ncopen, utc
 from scipy.interpolate import NearestNDInterpolator
@@ -109,21 +109,22 @@ def do_hrrr(ts):
     yaxis = None
     # So IEMRE is storing data from coast to coast, so we should be
     # aggressive about running for an entire calendar date
-    now = ts.replace(hour=1)
-    gridlen = 0.0
-    for _ in range(24):
-        now += datetime.timedelta(hours=1)
-        utcnow = now.astimezone(pytz.UTC)
+    for hr in range(24):
+        utcnow = ts.replace(hour=hr).astimezone(ZoneInfo("UTC"))
+        LOG.info("Considering timestamp %s", utcnow)
         # Try the newer f01 files, which have better data!
-        fn = utcnow.strftime(
+        fn = (utcnow - datetime.timedelta(hours=1)).strftime(
             "/mesonet/ARCHIVE/data/%Y/%m/%d/model/hrrr/%H/"
             "hrrr.t%Hz.3kmf01.grib2"
         )
         if os.path.isfile(fn):
             grbs = pygrib.open(fn)
             selgrbs = grbs.select(name="Downward short-wave radiation flux")
-            if len(selgrbs) == 4:
+            # sometimes we have multiple grids :/
+            if len(selgrbs) >= 4:
+                LOG.info("Using %s", fn)
                 # Goodie
+                subtotal = None
                 for g in selgrbs:
                     if total is None:
                         lat1 = g["latitudeOfFirstGridPointInDegrees"]
@@ -135,10 +136,14 @@ def do_hrrr(ts):
                         dy = g["DyInMetres"]
                         xaxis = llcrnrx + dx * np.arange(nx)
                         yaxis = llcrnry + dy * np.arange(ny)
-                        total = g.values
+                    if subtotal is None:
+                        subtotal = g.values
                     else:
-                        total += g.values
-                gridlen += 4.0
+                        subtotal += g.values
+                if total is None:
+                    total = subtotal / float(len(selgrbs))
+                else:
+                    total += subtotal / float(len(selgrbs))
                 continue
 
         fn = utcnow.strftime(
@@ -161,8 +166,8 @@ def do_hrrr(ts):
         if not grb:
             LOG.info("Could not find SWDOWN in HRR %s", fn)
             continue
+        LOG.info("Using %s", fn)
         g = grb[0]
-        gridlen += 1.0
         if total is None:
             total = g.values
             lat1 = g["latitudeOfFirstGridPointInDegrees"]
@@ -182,7 +187,7 @@ def do_hrrr(ts):
         return
 
     # We wanna store as W m-2, so we just average out the data by hour
-    total = total / gridlen
+    total = total / 24.0
 
     ds = iemre.get_grids(ts.date(), varnames="rsds")
     for i, lon in enumerate(iemre.XAXIS):
@@ -217,7 +222,7 @@ def main(argv):
         sts = sts.replace(hour=12)
         queue.append(sts)
     for sts in queue:
-        sts = sts.replace(tzinfo=pytz.timezone("America/Chicago"))
+        sts = sts.replace(tzinfo=ZoneInfo("America/Chicago"))
         if not try_merra(sts):
             if sts.year >= 2014:
                 do_hrrr(sts)
