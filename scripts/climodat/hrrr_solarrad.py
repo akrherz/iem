@@ -91,12 +91,13 @@ def compute(df, sids, dt, do_regions=False):
     if sts < SWITCH_DATE:
         LOG.warning("Aborting due to inability to process archive.")
         return
-    ets = sts + datetime.timedelta(hours=24)
-
     total = None
     xaxis = None
     yaxis = None
-    for now in pd.date_range(sts, ets, freq="1H"):
+    # date_range is inclusive
+    for now in pd.date_range(
+        sts, sts + datetime.timedelta(hours=23), freq="1H"
+    ):
         # Try the newer f01 files, which have better data!
         fn = now.strftime(
             "/mesonet/ARCHIVE/data/%Y/%m/%d/model/hrrr/%H/"
