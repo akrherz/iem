@@ -1,4 +1,7 @@
-"""Accumuldated days"""
+"""
+This plot displays the accumulated number of days
+that the high or low temperature was above or below some threshold.
+"""
 import datetime
 
 import pandas as pd
@@ -17,14 +20,7 @@ PDICT2 = {"jan1": "January 1", "jul1": "July 1"}
 
 def get_description():
     """Return a dict describing how to call this plotter"""
-    desc = {}
-    desc["data"] = True
-    desc["cache"] = 86400
-    desc[
-        "description"
-    ] = """This plot displays the accumulated number of days
-    that the high or low temperature was above or below some threshold.
-    """
+    desc = {"description": __doc__, "data": True, "cache": 86400}
     desc["arguments"] = [
         dict(
             type="station",
@@ -99,7 +95,7 @@ def highcharts(fdict):
         ticks = (ts - datetime.date(1970, 1, 1)).total_seconds() * 1000.0
         avgs.append([ticks, row["avg"]])
         ranges.append([ticks, row["min"], row["max"]])
-        if row["thisyear"] >= 0:
+        if row["thisyear"] is not None:
             thisyear.append([ticks, row["thisyear"]])
     lbl = (
         "%s" % (fdict.get("year", 2015),)

@@ -1,4 +1,13 @@
-"""Temperature/Precip/Snow Ranges"""
+"""
+This application plots frequencies of a variable
+of your choice for five bins of your choice.  These five bins represent
+inclusive ranges and may overlap, if so desired.  The range entries below
+are in units of inches or Fahrenheit where appropriate.  The date selection
+sets the year-to-date period used for each year.
+
+<p><strong>Updated 17 March 2021</strong>: The range parameters were
+updated to be space delimited so to allow negative numbers to be used.
+"""
 import datetime
 
 import numpy as np
@@ -23,19 +32,7 @@ def parse_range(rng):
 
 def get_description():
     """Return a dict describing how to call this plotter"""
-    desc = {}
-    desc["data"] = True
-    desc[
-        "description"
-    ] = """This application plots frequencies of a variable
-    of your choice for five bins of your choice.  These five bins represent
-    inclusive ranges and may overlap, if so desired.  The range entries below
-    are in units of inches or Fahrenheit where appropriate.  The date selection
-    sets the year-to-date period used for each year.
-
-    <p><strong>Updated 17 March 2021</strong>: The range parameters were
-    updated to be space delimited so to allow negative numbers to be used.
-    """
+    desc = {"description": __doc__, "data": True}
     today = datetime.date.today()
     desc["arguments"] = [
         dict(
@@ -163,20 +160,21 @@ def plotter(fdict):
             ha="center",
         )
 
-    bars = ax.bar(
-        np.arange(1, 6) + 0.25,
-        gdf.loc[date.year].values,
-        width=0.25,
-        label=str(date.year),
-    )
-    for i, mybar in enumerate(bars):
-        ax.text(
-            mybar.get_x() + 0.125,
-            mybar.get_height() + 0.5,
-            f"{mybar.get_height():.0f}",
-            fontsize=14,
-            ha="center",
+    if date.year in gdf.index:
+        bars = ax.bar(
+            np.arange(1, 6) + 0.25,
+            gdf.loc[date.year].values,
+            width=0.25,
+            label=str(date.year),
         )
+        for i, mybar in enumerate(bars):
+            ax.text(
+                mybar.get_x() + 0.125,
+                mybar.get_height() + 0.5,
+                f"{mybar.get_height():.0f}",
+                fontsize=14,
+                ha="center",
+            )
     ax.grid(True)
     ax.set_xticks(range(1, 6))
     ax.set_xticklabels(

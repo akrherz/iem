@@ -1,4 +1,15 @@
-"""GDD Accumulation"""
+"""
+This application creates two 2-D histograms of
+GDD accumulation frequencies. These frequencies are based on historical
+data for the specificed site and base the end of each year's growing
+season on the first sub freezing temperature of the fall.  The left hand
+plot shows the overall frequency based on each year's data.  The right
+hand plot does a scenario using the combination of year to date data for
+this year and then each previous year afterwards is appended to this
+year's data to provide frequencies.  The right hand plot is meant to
+provide current frequencies / probabilities of what could potentially
+happen this year.
+"""
 import datetime
 
 import matplotlib.colors as mpcolors
@@ -11,21 +22,7 @@ from pyiem.util import get_autoplot_context, get_dbconn
 
 def get_description():
     """Return a dict describing how to call this plotter"""
-    desc = {}
-    desc["data"] = True
-    desc[
-        "description"
-    ] = """this application creates two 2-D histograms of
-    GDD accumulation frequencies. These frequencies are based on historical
-    data for the specificed site and base the end of each year's growing
-    season on the first sub freezing temperature of the fall.  The left hand
-    plot shows the overall frequency based on each year's data.  The right
-    hand plot does a scenario using the combination of year to date data for
-    this year and then each previous year afterwards is appended to this
-    year's data to provide frequencies.  The right hand plot is meant to
-    provide current frequencies / probabilities of what could potentially
-    happen this year.
-    """
+    desc = {"description": __doc__, "data": True}
     today = datetime.date.today()
     desc["arguments"] = [
         dict(
@@ -81,9 +78,11 @@ def plotter(fdict):
     pgconn = get_dbconn("coop")
     cursor = pgconn.cursor()
     cursor.execute(
-        "SELECT year, extract(doy from day), gddxx(%s, %s, high,low), low "
-        "from alldata where station = %s and "
-        "year > %s and day < %s",
+        """
+        SELECT year, extract(doy from day), gddxx(%s, %s, high,low), low
+        from alldata where station = %s and year > %s and day < %s and
+        high is not null and low is not null
+        """,
         (base, ceil, station, byear, today),
     )
 

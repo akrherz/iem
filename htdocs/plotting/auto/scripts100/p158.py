@@ -11,6 +11,7 @@ import matplotlib.dates as mdates
 import numpy as np
 import pandas as pd
 import pytz
+from pyiem.exceptions import NoDataFound
 from pyiem.plot import figure
 from pyiem.util import get_autoplot_context, get_sqlalchemy_conn
 
@@ -75,6 +76,8 @@ def get_context(fdict):
             ),
             index_col="valid",
         )
+    if ctx["df"].empty:
+        raise NoDataFound("Failed to find any data.")
     return ctx
 
 

@@ -1,4 +1,9 @@
-"""temperature above average frequency by year"""
+"""
+The frequency of days per year that the temperature
+was above/below average.  Data is shown for the current year as well, so
+you should consider the representativity of that value when compared with
+other years with a full year's worth of data.
+"""
 import datetime
 
 import matplotlib.patheffects as PathEffects
@@ -44,14 +49,7 @@ MDICT = dict(
 
 def get_description():
     """Return a dict describing how to call this plotter"""
-    desc = {}
-    desc["data"] = True
-    desc[
-        "description"
-    ] = """The frequency of days per year that the temperature
-    was above/below average.  Data is shown for the current year as well, so
-    you should consider the representativity of that value when compared with
-    other years with a full year's worth of data."""
+    desc = {"description": __doc__, "data": True}
     desc["arguments"] = [
         dict(
             type="station",
@@ -215,7 +213,7 @@ def plotter(fdict):
             mybar.set_edgecolor(colorbelow)
     ax.axhline(avgv, lw=2, color="k", zorder=2)
     txt = ax.text(
-        bars[10].get_x(),
+        bars[-1].get_x(),
         avgv,
         f"Avg: {avgv:.1f}{'' if ctx['opt'] == 'number' else '%'}",
         color="yellow",

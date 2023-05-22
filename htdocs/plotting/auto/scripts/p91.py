@@ -1,4 +1,13 @@
-"""Windows"""
+"""
+This plot produces statistics on min, max, and
+average values of a variable over a window of days.  The labels get
+a bit confusing, but we are looking for previous periods of time with
+temperature
+above or below a given threshold.  For precipitation, it is only a period
+with each day above a given threshold and the average over that period.
+<a href="/plotting/auto/?q=216">Autoplot 216</a>
+provides actual streaks and yearly maximum values.
+"""
 
 import numpy as np
 import pandas as pd
@@ -25,19 +34,7 @@ UNITS = {
 
 def get_description():
     """Return a dict describing how to call this plotter"""
-    desc = {}
-    desc["data"] = True
-    desc[
-        "description"
-    ] = """This plot produces statistics on min, max, and
-    average values of a variable over a window of days.  The labels get
-    a bit confusing, but we are looking for previous periods of time with
-    temperature
-    above or below a given threshold.  For precipitation, it is only a period
-    with each day above a given threshold and the average over that period.
-    <a href="/plotting/auto/?q=216">Autoplot 216</a>
-    provides actual streaks and yearly maximum values
-    """
+    desc = {"description": __doc__, "data": True}
     desc["arguments"] = [
         dict(
             type="station",
