@@ -4,13 +4,14 @@ warmest 91 day period each year.
 """
 import datetime
 
+import matplotlib.colors as mpcolors
 import numpy as np
 import pandas as pd
-import psycopg2.extras
 from pyiem.exceptions import NoDataFound
-from pyiem.plot import figure_axes
-from pyiem.util import get_autoplot_context, get_dbconn
+from pyiem.plot import centered_bins, figure_axes, get_cmap, plt
+from pyiem.util import get_autoplot_context, get_sqlalchemy_conn
 from scipy import stats
+from sqlalchemy import text
 
 PDICT = {"end_summer": "End of Summer", "start_summer": "Start of Summer"}
 
@@ -33,58 +34,73 @@ def get_description():
             label="Which value to plot:",
             options=PDICT,
         ),
+        {
+            "type": "cmap",
+            "name": "cmap",
+            "default": "RdYlGn",
+            "label": "Color Ramp:",
+        },
     ]
     return desc
 
 
 def plotter(fdict):
     """Go"""
-    pgconn = get_dbconn("coop")
-    cursor = pgconn.cursor(cursor_factory=psycopg2.extras.DictCursor)
     ctx = get_autoplot_context(fdict, get_description())
     which = ctx["which"]
     station = ctx["station"]
 
-    cursor.execute(
+    with get_sqlalchemy_conn("coop") as conn:
+        df = pd.read_sql(
+            text(
+                """
+            with obs as (
+                select day, year, avg((high+low)/2.) OVER
+                (ORDER by day ASC rows 91 preceding) from alldata
+                where station = :sid and day > '1893-01-01'
+            ), agg as (
+                select day, year, avg,
+                rank() OVER (PARTITION by year ORDER by avg DESC)
+                from obs
+            )
+            select year, extract(doy from day)::int as doy, avg from agg
+            where rank = 1 ORDER by year ASC
         """
-    select year, extract(doy from day) as d from
-        (select day, year, rank() OVER (PARTITION by year ORDER by avg DESC)
-        from
-            (select day, year, avg((high+low)/2.) OVER
-            (ORDER by day ASC rows 91 preceding) from alldata
-            where station = %s and day > '1893-01-01') as foo)
-            as foo2 where rank = 1
-            ORDER by year ASC
-    """,
-        (station,),
-    )
-    if cursor.rowcount == 0:
+            ),
+            conn,
+            params={"sid": station},
+            index_col="year",
+        )
+    if df.empty:
         raise NoDataFound("No Data Found.")
-    years = []
-    maxsday = []
     today = datetime.date.today()
-    delta = 0 if which == "end_summer" else 91
-    for row in cursor:
-        if row["year"] == today.year and row["d"] < 270:
-            continue
-        maxsday.append(int(row["d"]) - delta)
-        years.append(row["year"])
+    df["departure"] = df["avg"] - df["avg"].mean()
+    df["plot_doy"] = df["doy"] - (0 if which == "end_summer" else 91)
+    if today.year in df.index and df.at[today.year, "doy"] < 270:
+        df = df.drop(today.year)
 
-    df = pd.DataFrame(dict(year=pd.Series(years), doy=pd.Series(maxsday)))
-    maxsday = np.array(maxsday)
-    t1 = "End" if delta == 0 else "Start"
+    t1 = "End" if which == "end_summer" else "Start"
     title = (
         f"{ctx['_sname']} :: {PDICT.get(which)}\n"
         f"{t1} Date of Warmest (Avg Temp) 91 Day Period"
     )
     (fig, ax) = figure_axes(title=title, apctx=ctx)
-    ax.scatter(years, maxsday)
+
+    cmap = get_cmap(ctx["cmap"])
+    bins = centered_bins(df["departure"].abs().max())
+    norm = mpcolors.BoundaryNorm(bins, cmap.N)
+    ax.scatter(df.index, df["plot_doy"], c=cmap(norm(df["departure"].values)))
     ax.grid(True)
     ax.set_ylabel(f"{t1} Date")
 
+    sm = plt.cm.ScalarMappable(norm, cmap)
+    sm.set_array(bins)
+    cb = fig.colorbar(sm, extend="neither", ax=ax)
+    cb.set_label("Summer Avg Temperature Departure")
+
     yticks = []
     yticklabels = []
-    for i in np.arange(min(maxsday) - 5, max(maxsday) + 5, 1):
+    for i in np.arange(df["plot_doy"].min() - 5, df["plot_doy"].max() + 5, 1):
         ts = datetime.datetime(2000, 1, 1) + datetime.timedelta(days=int(i))
         if ts.day in [1, 8, 15, 22, 29]:
             yticks.append(i)
@@ -92,11 +108,15 @@ def plotter(fdict):
     ax.set_yticks(yticks)
     ax.set_yticklabels(yticklabels)
 
-    h_slope, intercept, r_value, _, _ = stats.linregress(years, maxsday)
-    ax.plot(years, h_slope * np.array(years) + intercept, lw=2, color="r")
+    h_slope, intercept, r_value, _, _ = stats.linregress(
+        df.index.values, df["plot_doy"].values
+    )
+    ax.plot(
+        df.index.values, h_slope * df.index.values + intercept, lw=2, color="r"
+    )
 
     avgd = datetime.datetime(2000, 1, 1) + datetime.timedelta(
-        days=int(np.average(maxsday))
+        days=int(df["plot_doy"].mean())
     )
     ax.text(
         0.1,
@@ -109,8 +129,8 @@ def plotter(fdict):
         transform=ax.transAxes,
         va="bottom",
     )
-    ax.set_xlim(min(years) - 1, max(years) + 1)
-    ax.set_ylim(min(maxsday) - 5, max(maxsday) + 5)
+    ax.set_xlim(df.index.values[0] - 1, df.index.values[-1] + 1)
+    ax.set_ylim(df["plot_doy"].min() - 5, df["plot_doy"].max() + 5)
 
     return fig, df
 

@@ -1,4 +1,12 @@
-"""Average T and precip"""
+"""
+This chart displays the combination of average
+temperature and total precipitation for one or more months of your choice.
+The dots are colorized based on the Southern Oscillation Index (SOI) value
+for a month of your choice.  Many times, users want to compare the SOI
+value with monthly totals for a period a few months after the validity of
+the SOI value.  The thought is that there is some lag time for the impacts
+of a given SOI to be felt in the midwestern US.
+"""
 import datetime
 
 import matplotlib.colors as mpcolors
@@ -16,18 +24,7 @@ PDICT = {"none": "Show all values", "hide": 'Show "strong" events'}
 
 def get_description():
     """Return a dict describing how to call this plotter"""
-    desc = {}
-    desc["data"] = True
-    desc[
-        "description"
-    ] = """This chart displays the combination of average
-    temperature and total precipitation for one or more months of your choice.
-    The dots are colorized based on the Southern Oscillation Index (SOI) value
-    for a month of your choice.  Many times, users want to compare the SOI
-    value with monthly totals for a period a few months after the validity of
-    the SOI value.  The thought is that there is some lag time for the impacts
-    of a given SOI to be felt in the midwestern US.
-    """
+    desc = {"description": __doc__, "data": True}
     desc["arguments"] = [
         dict(
             type="station",
@@ -172,6 +169,9 @@ def plotter(fdict):
             ax.text(x, y + 0.2, f"{year}", ha="center", va="bottom", zorder=5)
         rows.append(dict(year=year, precip=x, tmpf=y, soi3m=val))
 
+    if not rows:
+        raise NoDataFound("Failed to find any data.")
+    df = pd.DataFrame(rows)
     ax.axhline(np.average(ys), lw=2, color="k", linestyle="-.", zorder=2)
     ax.axvline(np.average(xs), lw=2, color="k", linestyle="-.", zorder=2)
 
@@ -186,7 +186,6 @@ def plotter(fdict):
     ax.set_ylabel(
         (r"Average Temperature $^\circ$F, " "Avg: %.1f") % (np.average(ys),)
     )
-    df = pd.DataFrame(rows)
     ax2 = fig.add_axes([0.67, 0.55, 0.28, 0.35])
     ax2.scatter(df["soi3m"].values, df["tmpf"].values)
     ax2.set_xlabel("<-- El Nino :: SOI :: La Nina -->")
