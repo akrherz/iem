@@ -1,4 +1,10 @@
-"""u and v wind climatology"""
+"""
+This plot presents a climatology of wind
+observations.  The top panel presents the u (east/west) and v (north/south)
+components.  The bottom panel is the simple average of the wind speed
+magnitude.  The plotted information contains a seven day smoother.  If you
+download the raw data, it will not contain this smoothing.
+"""
 import calendar
 import datetime
 
@@ -31,16 +37,7 @@ def smooth(x):
 
 def get_description():
     """Return a dict describing how to call this plotter"""
-    desc = {}
-    desc["data"] = True
-    desc["cache"] = 86400
-    desc[
-        "description"
-    ] = """This plot presents a climatology of wind
-    observations.  The top panel presents the u (east/west) and v (north/south)
-    components.  The bottom panel is the simple average of the wind speed
-    magnitude.  The plotted information contains a seven day smoother.  If you
-    download the raw data, it will not contain this smoothing."""
+    desc = {"description": __doc__, "data": True, "cache": 86400}
     desc["arguments"] = [
         dict(
             type="zstation",
@@ -117,14 +114,14 @@ def plotter(fdict):
     axes = fig.subplots(2, 1)
     ax = axes[0]
     ax.plot(
-        np.arange(1, 366),
+        np.arange(1, len(u)),
         smooth(u[:-1]),
         color="r",
         label="u, West(+) : East(-) component",
         lw=2,
     )
     ax.plot(
-        np.arange(1, 366),
+        np.arange(1, len(v)),
         smooth(v[:-1]),
         color="b",
         label="v, South(+) : North(-) component",
@@ -144,7 +141,7 @@ def plotter(fdict):
 
     ax = axes[1]
     ax.plot(
-        np.arange(1, 366),
+        np.arange(1, len(mag)),
         smooth(mag[:-1]),
         color="g",
         lw=2,

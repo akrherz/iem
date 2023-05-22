@@ -2,13 +2,15 @@ name: Install and Test
 on: [push]
 jobs:
   build-linux:
-    name: Python (${{ matrix.PYTHON_VERSION }})
+    name: Python (${{ matrix.PYTHON_VERSION }}) with IEM Data (${{ matrix.WITH_IEM_DATA }})
     runs-on: ubuntu-latest
     strategy:
       matrix:
         PYTHON_VERSION: ["3.11"]
+        WITH_IEM_DATA: ["YES", "NO"]
     env:
       PYTHON_VERSION: ${{ matrix.PYTHON_VERSION }}
+      WITH_IEM_DATA: ${{ matrix.WITH_IEM_DATA }}
     steps:
     - uses: actions/checkout@v3
 
@@ -61,12 +63,11 @@ jobs:
         which python
         python /opt/iem/deployment/mod_wsgi_startup.py
         sudo systemctl status apache2.service -l
-        # Run autoplot tests with basically no data in database
-        SERVICE=http://iem.local pytest -n 4 .ipc/tests/test_autoplot.py
-        # Add some test data to the database
-        python database/store_test_data.py
-        python scripts/dbutil/sync_stations.py
-        # Run autoplot testing a second time
+        if [[ ${{ matrix.WITH_IEM_DATA }} == "YES" ]]; then
+          # Add some test data to the database
+          python database/store_test_data.py
+          python scripts/dbutil/sync_stations.py
+        fi
         SERVICE=http://iem.local pytest -n 4 .ipc/tests/test_autoplot.py
 
     - name: View Apache Logs

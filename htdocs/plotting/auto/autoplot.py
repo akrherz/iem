@@ -67,7 +67,7 @@ def parser(cgistr):
     return data
 
 
-def get_response_headers(fmt):
+def get_response_headers(status, fmt):
     """Figure out some headers"""
     extra = None
     if fmt == "png":
@@ -83,8 +83,11 @@ def get_response_headers(fmt):
     elif fmt in ["csv", "txt"]:
         ctype = "text/plain"
     else:
-        ctype = "application/vnd.ms-excel"
-        extra = [("Content-Disposition", "attachment;Filename=iem.xlsx")]
+        if status != HTTP200:
+            ctype = "text/plain"
+        else:
+            ctype = "application/vnd.ms-excel"
+            extra = [("Content-Disposition", "attachment;Filename=iem.xlsx")]
     res = [("Content-type", ctype)]
     if extra:
         res.extend(extra)
@@ -331,8 +334,6 @@ def application(environ, start_response):
         fields["q"] = fields["q"].replace("network:WFO", "network:NWS")
     # Figure out the format that was requested from us, default to png
     fmt = fields.get("fmt", "png")[:7]
-    # Figure out what our response headers should be
-    response_headers = get_response_headers(fmt)
     mc = Client("iem-memcached:11211")
     try:
         # do the work!
@@ -342,7 +343,8 @@ def application(environ, start_response):
         output = handle_error(exp, fmt, environ.get("REQUEST_URI"))
     finally:
         mc.close()
-    start_response(status, response_headers)
+    # Figure out what our response headers should be
+    start_response(status, get_response_headers(status, fmt))
     # python3 mod-wsgi requires returning bytes, so we encode strings
     if sys.version_info[0] > 2 and isinstance(output, str):
         output = output.encode("UTF-8")

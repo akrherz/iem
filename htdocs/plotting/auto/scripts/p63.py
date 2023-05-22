@@ -1,4 +1,12 @@
-"""records by year"""
+"""
+This chart plots the number of daily maximum
+high temperatures, minimum low temperatures and precipitation records
+set by year.  Ties are not included.  The algorithm sets the records based
+on the first year of data and then iterates over each sequential year
+and sets the new daily records.  A general model of the number of new
+records to be set each year would be 365 / (number of years).  So you would
+expect to set 365 records the first year, 183 the second, and so on...
+"""
 import datetime
 
 import pandas as pd
@@ -10,18 +18,7 @@ from pyiem.util import get_autoplot_context, get_dbconn
 
 def get_description():
     """Return a dict describing how to call this plotter"""
-    desc = {}
-    desc["data"] = True
-    desc[
-        "description"
-    ] = """This chart plots the number of daily maximum
-    high temperatures, minimum low temperatures and precipitation records
-    set by year.  Ties are not included.  The algorithm sets the records based
-    on the first year of data and then iterates over each sequential year
-    and sets the new daily records.  A general model of the number of new
-    records to be set each year would be 365 / (number of years).  So you would
-    expect to set 365 records the first year, 183 the second, and so on...
-    """
+    desc = {"description": __doc__, "data": True}
     desc["arguments"] = [
         dict(
             type="station",
@@ -52,7 +49,8 @@ def plotter(fdict):
         """
         SELECT sday, year, high, low, precip, day from alldata
         where station = %s and sday != '0229'
-        and year >= %s ORDER by day ASC
+        and year >= %s and high is not null and low is not null
+        and precip is not null ORDER by day ASC
     """,
         (station, syear),
     )

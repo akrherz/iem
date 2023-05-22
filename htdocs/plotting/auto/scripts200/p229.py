@@ -1,13 +1,14 @@
-"""This data is courtesy of <a href="{LL}">Vaisala NLDN</a>.  The IEM
-    processes a data stream by NLDN to construct this heatmap. The flash
-    density is computed over a two by two kilometer grid constructed using
-    a US National Atlas Albers (EPSG:2163) projection.  You are limited to plot
-    less than 32 days worth of data at a time.</p>
+"""
+This data is courtesy of <a href="{LL}">Vaisala NLDN</a>.  The IEM
+processes a data stream by NLDN to construct this heatmap. The flash
+density is computed over a two by two kilometer grid constructed using
+a US National Atlas Albers (EPSG:2163) projection.  You are limited to plot
+less than 32 days worth of data at a time.</p>
 
-    <p><strong>Note:</strong> Due to some lame reasons, it is difficult to
-    document what data gaps exist within this dataset.  In general, the
-    coverage should be good outside of the major gap on 10 August 2020 due
-    to the derecho power outage.</p>
+<p><strong>Note:</strong> Due to some lame reasons, it is difficult to
+document what data gaps exist within this dataset.  In general, the
+coverage should be good outside of the major gap on 10 August 2020 due
+to the derecho power outage.</p>
 """
 import datetime
 
@@ -84,7 +85,8 @@ def plotter(fdict):
             params=(state,),
             geom_col="geo",
         )
-    df = gpd.sjoin(df, statedf, predicate="within")
+    if not df.empty:
+        df = gpd.sjoin(df, statedf, predicate="within")
     [xmin, ymin, xmax, ymax] = statedf.total_bounds
     buffer = 30_000
     title = (
