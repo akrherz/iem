@@ -118,8 +118,8 @@
 
 ##############################################################################
 
-# iem12
-10.24.19.176 pyvbcam.local
+# mesonet-pyvbcam (iem12)
+10.24.19.228 pyvbcam.local
 # iem8-dc
 10.90.12.30 iembot
 # iem11, still needed to shield bandwidth
