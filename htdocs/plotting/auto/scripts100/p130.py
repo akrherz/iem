@@ -1,4 +1,11 @@
-"""temps vs high and low"""
+"""
+This chart presents violin plots of the distribution of daily
+high and low temperatures on dates with and without snow cover by month.
+A given month is plotted when at least 1% of the days on record for the
+month had snowcover.  There
+are a number of caveats due to the timing of the daily temperature and
+snow cover report.  Also with the quality of the snow cover data.
+"""
 import calendar
 
 import numpy as np
@@ -11,16 +18,7 @@ from pyiem.util import get_autoplot_context, get_sqlalchemy_conn
 
 def get_description():
     """Return a dict describing how to call this plotter"""
-    desc = {}
-    desc["data"] = True
-    desc[
-        "description"
-    ] = """This chart presents violin plots of the distribution of daily
-    high and low temperatures on dates with and without snow cover by month.
-    A given month is plotted when at least 1% of the days on record for the
-    month had snowcover.  There
-    are a number of caveats due to the timing of the daily temperature and
-    snow cover report.  Also with the quality of the snow cover data."""
+    desc = {"description": __doc__, "data": True}
     desc["arguments"] = [
         dict(
             type="station",
@@ -108,11 +106,13 @@ def plotter(fdict):
                     ha="right",
                 )
                 b = v["bodies"][0]
-                m = np.mean(b.get_paths()[0].vertices[:, 0])
-                b.get_paths()[0].vertices[:, 0] = np.clip(
-                    b.get_paths()[0].vertices[:, 0], -np.inf, m
-                )
-                b.set_color(colors[0])
+                paths = b.get_paths()
+                if paths:
+                    m = np.mean(paths[0].vertices[:, 0])
+                    paths[0].vertices[:, 0] = np.clip(
+                        paths[0].vertices[:, 0], -np.inf, m
+                    )
+                    b.set_color(colors[0])
 
             res.append(
                 {
@@ -143,4 +143,4 @@ def plotter(fdict):
 
 
 if __name__ == "__main__":
-    plotter(dict(station="MNTINL", network="MNCLIMATE"))
+    plotter({})
