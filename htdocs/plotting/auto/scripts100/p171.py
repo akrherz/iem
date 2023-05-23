@@ -200,11 +200,13 @@ def plotter(fdict):
     (fig, ax) = figure_axes(title=title, subtitle=subtitle, apctx=ctx)
     # Print the top 10 days
     ypos = 0.9
-    fig.text(0.84, ypos, "Top 10 Dates")
+    fig.text(0.82, ypos, "Top 10 Dates")
+    ypos -= 0.04
+    fig.text(0.82, ypos, params["tzname"])
     gdf = daily.groupby("min_date").count().sort_values("yr", ascending=False)
     for dt, row in gdf.head(10).iterrows():
         ypos -= 0.04
-        fig.text(0.84, ypos, f"{dt} {row['yr']:3.0f}")
+        fig.text(0.82, ypos, f"{dt} {row['yr']:3.0f}")
     ax.set_position([0.1, 0.1, 0.75, 0.8])
     sns.heatmap(
         df2,

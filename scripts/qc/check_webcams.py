@@ -4,8 +4,8 @@ Check to see if there are webcams offline, generate emails and such
 import datetime
 import os
 import stat
+from zoneinfo import ZoneInfo
 
-import pytz
 from pyiem.network import Table as NetworkTable
 from pyiem.tracker import TrackerEngine
 from pyiem.util import get_dbconn, utc
@@ -44,7 +44,7 @@ def workflow(netname, pname):
         valid = datetime.datetime(1970, 1, 1) + datetime.timedelta(
             seconds=ticks
         )
-        valid = valid.replace(tzinfo=pytz.UTC)
+        valid = valid.replace(tzinfo=ZoneInfo("UTC"))
         obs[row[0]] = {"valid": valid}
     # Abort out if no obs are found
     if not obs:

@@ -64,8 +64,8 @@ RANGE:   Range (nautical miles) from the ground point for this level.
 """
 import datetime
 import sys
+from zoneinfo import ZoneInfo
 
-import pytz
 import requests
 from pandas import read_sql
 from pyiem.network import Table as NetworkTable
@@ -209,7 +209,7 @@ def parse(raw, sid):
             s = " ".join(tokens[1:])
             ts = datetime.datetime.strptime(s, "%H %d %b %Y")
             rob = RAOB()
-            rob.valid = ts.replace(tzinfo=pytz.UTC)
+            rob.valid = ts.replace(tzinfo=ZoneInfo("UTC"))
             continue
         if tokens[0] == "1":
             fl_hhmm = line[44:].strip()

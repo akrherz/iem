@@ -7,8 +7,8 @@ import os
 import subprocess
 import sys
 import tempfile
+from zoneinfo import ZoneInfo
 
-import pytz
 import requests
 from pyiem.util import logger, utc
 
@@ -26,7 +26,7 @@ def do(now):
     LOG.debug("running for %s", now)
 
     # CAREFUL, web takes valid in CST/CDT
-    service = now.astimezone(pytz.timezone("America/Chicago")).strftime(
+    service = now.astimezone(ZoneInfo("America/Chicago")).strftime(
         "http://iem.local/roads/iem.php?valid=%Y-%m-%d%%20%H:%M"
     )
     routes = "ac" if (utc() - now) < datetime.timedelta(minutes=10) else "a"

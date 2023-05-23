@@ -4,8 +4,8 @@ import glob
 import os
 import re
 import subprocess
+from zoneinfo import ZoneInfo
 
-import pytz
 from pyiem.nws.product import TextProduct
 from pyiem.util import get_dbconn, noaaport_text
 
@@ -442,7 +442,7 @@ def process(order):
     """Process this timestamp"""
     cursor = PGCONN.cursor()
     ts = datetime.datetime.strptime(order[:6], "%y%m%d").replace(
-        tzinfo=pytz.utc
+        tzinfo=ZoneInfo("UTC")
     )
     base = ts - datetime.timedelta(days=2)
     ceiling = ts + datetime.timedelta(days=2)
