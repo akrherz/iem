@@ -718,7 +718,8 @@ nopts = [
     {
         "id": 171,
         "label": (
-            "Number of Watch/Warning/Advisories Issued per Year per Month"
+            "Number of Watch/Warning/Advisories Issued per Year per Month + "
+            "Top 10 Daily"
         ),
     },
     {

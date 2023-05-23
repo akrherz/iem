@@ -14,10 +14,10 @@ import datetime
 import os
 import sys
 import time
+from zoneinfo import ZoneInfo
 
 import numpy as np
 import pygrib
-import pytz
 from pyiem.plot import MapPlot
 from pyiem.util import logger, utc
 
@@ -71,7 +71,7 @@ def run(ts, routes):
     # 0.002641
 
     lats, lons = u.latlons()
-    lts = ts.astimezone(pytz.timezone("America/Chicago"))
+    lts = ts.astimezone(ZoneInfo("America/Chicago"))
     pqstr = (
         f"plot {routes} {ts:%Y%m%d%H}00 midwest/rtma_wind_power.png "
         f"midwest/rtma_wind_power_{ts:%H}00.png png"

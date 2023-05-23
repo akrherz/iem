@@ -2,9 +2,9 @@
 import datetime
 import os
 import sys
+from zoneinfo import ZoneInfo
 
 import numpy as np
-import pytz
 from osgeo import gdal
 from pyiem import iemre
 from pyiem.util import logger, ncopen, utc
@@ -21,7 +21,7 @@ def run(ts):
 
     total = None
     while now <= ets:
-        gmt = now.astimezone(pytz.utc)
+        gmt = now.astimezone(ZoneInfo("UTC"))
         if gmt > currenttime:
             break
         fn = gmt.strftime(
@@ -60,8 +60,8 @@ def main(argv):
         date = date - datetime.timedelta(minutes=60)
         date = date.replace(hour=12, minute=0, second=0, microsecond=0)
     # Stupid pytz timezone dance
-    date = date.replace(tzinfo=pytz.utc)
-    date = date.astimezone(pytz.timezone("America/Chicago"))
+    date = date.replace(tzinfo=ZoneInfo("UTC"))
+    date = date.astimezone(ZoneInfo("America/Chicago"))
     run(date)
 
 

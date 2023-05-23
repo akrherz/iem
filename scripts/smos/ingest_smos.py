@@ -5,8 +5,8 @@ import os
 import re
 import warnings
 from io import StringIO
+from zoneinfo import ZoneInfo
 
-import pytz
 from pyiem.util import get_dbconn, logger, ncopen
 
 LOG = logger()
@@ -67,7 +67,7 @@ def fn2datetime(fn):
     if not tokens:
         return None
     ts = datetime.datetime.strptime(tokens[0], "%Y%m%dT%H%M%S")
-    return ts.replace(tzinfo=pytz.UTC)
+    return ts.replace(tzinfo=ZoneInfo("UTC"))
 
 
 def load_grid_ids(scursor, grid_ids):

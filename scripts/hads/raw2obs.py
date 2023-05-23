@@ -2,10 +2,10 @@
 import datetime
 import sys
 from io import StringIO
+from zoneinfo import ZoneInfo
 
 import pandas as pd
-import pytz
-from pyiem.util import convert_value, get_dbconn, get_dbconnstr, logger
+from pyiem.util import convert_value, get_dbconn, get_sqlalchemy_conn, logger
 
 LOG = logger()
 
@@ -21,19 +21,22 @@ def do(ts):
     """Do a UTC date's worth of data"""
     pgconn = get_dbconn("hads")
     table = ts.strftime("raw%Y_%m")
-    sts = datetime.datetime(ts.year, ts.month, ts.day).replace(tzinfo=pytz.utc)
-    ets = sts + datetime.timedelta(hours=24)
-    df = pd.read_sql(
-        f"""
-        SELECT station, valid, substr(key, 1, 3) as vname, value
-        from {table} WHERE valid >= %s and valid < %s and
-        substr(key, 1, 3) in ('USI', 'UDI', 'TAI', 'TDI')
-        and value > -999
-    """,
-        get_dbconnstr("hads"),
-        params=(sts, ets),
-        index_col=None,
+    sts = datetime.datetime(ts.year, ts.month, ts.day).replace(
+        tzinfo=ZoneInfo("UTC")
     )
+    ets = sts + datetime.timedelta(hours=24)
+    with get_sqlalchemy_conn("hads") as conn:
+        df = pd.read_sql(
+            f"""
+            SELECT station, valid, substr(key, 1, 3) as vname, value
+            from {table} WHERE valid >= %s and valid < %s and
+            substr(key, 1, 3) in ('USI', 'UDI', 'TAI', 'TDI')
+            and value > -999
+        """,
+            conn,
+            params=(sts, ets),
+            index_col=None,
+        )
     if df.empty:
         LOG.info("No data found for date: %s", ts)
         return

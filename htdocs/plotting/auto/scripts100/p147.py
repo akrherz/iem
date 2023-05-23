@@ -1,4 +1,7 @@
-"""Two station temperature frequency"""
+"""
+This plot presents the daily frequency of the
+first station having a higher value than the second station.
+"""
 import calendar
 
 import pandas as pd
@@ -15,14 +18,7 @@ PDICT = {
 
 def get_description():
     """Return a dict describing how to call this plotter"""
-    desc = {}
-    desc["data"] = True
-    desc["cache"] = 86400
-    desc[
-        "description"
-    ] = """This plot presents the daily frequency of the
-    first station having a higher value than the second station.
-    """
+    desc = {"description": __doc__, "data": True, "cache": 86400}
     desc["arguments"] = [
         dict(
             type="station",

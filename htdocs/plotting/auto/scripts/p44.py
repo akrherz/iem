@@ -1,22 +1,23 @@
-"""This plot displays an accumulated total of
-    office issued watch, warning, advisories.  These totals are not official
-    and based on IEM processing of NWS text warning data.  The totals are for
-    individual warnings and not some combination of counties + warnings. The
-    archive begin date varies depending on which phenomena you are interested
-    in.
+"""
+This plot displays an accumulated total of
+office issued watch, warning, advisories.  These totals are not official
+and based on IEM processing of NWS text warning data.  The totals are for
+individual warnings and not some combination of counties + warnings. The
+archive begin date varies depending on which phenomena you are interested
+in.
 
-    <p>Generally, the archive starts in Fall 2005 for most types.  Event
-    counts do exist for Severe Thunderstorm, Tornado and Flash Flood warnings
-    for dates back to 1986.  Data quality prior to 2001 is not the greatest
-    though.</p>
+<p>Generally, the archive starts in Fall 2005 for most types.  Event
+counts do exist for Severe Thunderstorm, Tornado and Flash Flood warnings
+for dates back to 1986.  Data quality prior to 2001 is not the greatest
+though.</p>
 
-    <p>If you want to use the "cold season" as the basis of a year, pick the
-    "July 1" option below. The "year" label is then associated with the fall
-    portion of the cold season (1 Jul 2021 - 30 Jun 2022 is 2021).</p>
+<p>If you want to use the "cold season" as the basis of a year, pick the
+"July 1" option below. The "year" label is then associated with the fall
+portion of the cold season (1 Jul 2021 - 30 Jun 2022 is 2021).</p>
 
-    <p><strong>Updated 26 Jan 2023</strong> When selecting to limit to a year
-    to date period, a more exact algorithm is now used to accumulate warnings
-    through the end of the current date in central timezone.</p>"""
+<p><strong>Updated 26 Jan 2023</strong> When selecting to limit to a year
+to date period, a more exact algorithm is now used to accumulate warnings
+through the end of the current date in central timezone.</p>"""
 import calendar
 import datetime
 import math
