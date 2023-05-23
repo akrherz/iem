@@ -5,7 +5,7 @@ MAP
 NAME "nexrad_eet"
 STATUS OFF
 SIZE 450 350
-EXTENT -126 24 -66 50
+EXTENT -171 5 170 70
 UNITS DD
 SHAPEPATH "/mesonet/data/gis/"
 IMAGECOLOR -1 -1 -1
@@ -101,6 +101,7 @@ LAYER
   OFFSITE 0 0 0
   PROCESSING "CLOSE_CONNECTION=NORMAL"
 END
+
 LAYER
   NAME "nexrad-eet-900913-pr"
   GROUP "nexrad-eet-900913"
@@ -114,6 +115,24 @@ LAYER
     "wms_title" "NEXRAD BASE REFLECT (GOOGLE)"
     "wms_srs"   "EPSG:900913 EPSG:4326 EPSG:102100 EPSG:3857"
     "wms_extent" "-126 24 -66 50"
+  END
+  OFFSITE 0 0 0
+  PROCESSING "CLOSE_CONNECTION=NORMAL"
+END
+
+LAYER
+  NAME "nexrad-eet-900913-gu"
+  GROUP "nexrad-eet-900913"
+  STATUS OFF
+  DATA "/mesonet/ldmdata/gis/images/900913/GUCOMP/eet_0.tif"
+  TYPE RASTER
+  PROJECTION
+    "init=epsg:3857"
+  END
+  METADATA
+    "wms_title" "NEXRAD BASE REFLECT (GOOGLE)"
+    "wms_srs"   "EPSG:900913 EPSG:4326 EPSG:102100 EPSG:3857"
+    "wms_extent" "140.5 9.2 149.0 17.7"
   END
   OFFSITE 0 0 0
   PROCESSING "CLOSE_CONNECTION=NORMAL"
@@ -188,6 +207,24 @@ LAYER
   OFFSITE 0 0 0
   PROCESSING "CLOSE_CONNECTION=NORMAL"
 END
+
+LAYER
+  NAME "nexrad-eet-900913-m05m-gu"
+  GROUP "nexrad-eet-900913-m05m"
+  STATUS OFF
+  DATA "/mesonet/ldmdata/gis/images/900913/GUCOMP/eet_1.tif"
+  TYPE RASTER
+  PROJECTION
+    "init=epsg:3857"
+  END
+  METADATA
+    "wms_title" "NEXRAD BASE REFLECT (GOOGLE) M5 MINS"
+    "wms_srs"   "EPSG:900913 EPSG:4326 EPSG:102100 EPSG:3857"
+    "wms_extent" "140.5 9.2 149.0 17.7"
+  END
+  OFFSITE 0 0 0
+  PROCESSING "CLOSE_CONNECTION=NORMAL"
+END
 #-----------------------------------------
 LAYER
   NAME "nexrad-eet-900913-m10m-conus"
@@ -253,6 +290,23 @@ LAYER
     "wms_title" "NEXRAD BASE REFLECT (GOOGLE) M10 MINS"
     "wms_srs"   "EPSG:900913 EPSG:4326 EPSG:102100 EPSG:3857"
     "wms_extent" "-126 24 -66 50"
+  END
+  OFFSITE 0 0 0
+  PROCESSING "CLOSE_CONNECTION=NORMAL"
+END
+LAYER
+  NAME "nexrad-eet-900913-m10m-gu"
+  GROUP "nexrad-eet-900913-m10m"
+  STATUS OFF
+  DATA "/mesonet/ldmdata/gis/images/900913/GUCOMP/eet_2.tif"
+  TYPE RASTER
+  PROJECTION
+    "init=epsg:3857"
+  END
+  METADATA
+    "wms_title" "NEXRAD BASE REFLECT (GOOGLE) M10 MINS"
+    "wms_srs"   "EPSG:900913 EPSG:4326 EPSG:102100 EPSG:3857"
+    "wms_extent" "140.5 9.2 149.0 17.7"
   END
   OFFSITE 0 0 0
   PROCESSING "CLOSE_CONNECTION=NORMAL"
@@ -326,6 +380,23 @@ LAYER
   OFFSITE 0 0 0
   PROCESSING "CLOSE_CONNECTION=NORMAL"
 END
+LAYER
+  NAME "nexrad-eet-900913-m15m-gu"
+  GROUP "nexrad-eet-900913-m15m"
+  STATUS OFF
+  DATA "/mesonet/ldmdata/gis/images/900913/GUCOMP/eet_3.tif"
+  TYPE RASTER
+  PROJECTION
+    "init=epsg:3857"
+  END
+  METADATA
+    "wms_title" "NEXRAD BASE REFLECT (GOOGLE) M15 MINS"
+    "wms_srs"   "EPSG:900913 EPSG:4326 EPSG:102100 EPSG:3857"
+    "wms_extent" "140.5 9.2 149.0 17.7"
+  END
+  OFFSITE 0 0 0
+  PROCESSING "CLOSE_CONNECTION=NORMAL"
+END
 #--------------------------------------------
 LAYER
   GROUP "nexrad-eet-900913-m20m"
@@ -391,6 +462,23 @@ LAYER
     "wms_title" "NEXRAD BASE REFLECT (GOOGLE) M20 MINS"
     "wms_srs"   "EPSG:900913 EPSG:4326 EPSG:102100 EPSG:3857"
     "wms_extent" "-126 24 -66 50"
+  END
+  OFFSITE 0 0 0
+  PROCESSING "CLOSE_CONNECTION=NORMAL"
+END
+LAYER
+  NAME "nexrad-eet-900913-m20m-gu"
+  GROUP "nexrad-eet-900913-m20m"
+  STATUS OFF
+  DATA "/mesonet/ldmdata/gis/images/900913/GUCOMP/eet_4.tif"
+  TYPE RASTER
+  PROJECTION
+    "init=epsg:3857"
+  END
+  METADATA
+    "wms_title" "NEXRAD BASE REFLECT (GOOGLE) M20 MINS"
+    "wms_srs"   "EPSG:900913 EPSG:4326 EPSG:102100 EPSG:3857"
+    "wms_extent" "140.5 9.2 149.0 17.7"
   END
   OFFSITE 0 0 0
   PROCESSING "CLOSE_CONNECTION=NORMAL"
@@ -464,6 +552,23 @@ LAYER
   OFFSITE 0 0 0
   PROCESSING "CLOSE_CONNECTION=NORMAL"
 END
+LAYER
+  NAME "nexrad-eet-900913-m25m-gu"
+  GROUP "nexrad-eet-900913-m25m"
+  STATUS OFF
+  DATA "/mesonet/ldmdata/gis/images/900913/GUCOMP/eet_5.tif"
+  TYPE RASTER
+  PROJECTION
+    "init=epsg:3857"
+  END
+  METADATA
+    "wms_title" "NEXRAD BASE REFLECT (GOOGLE) M25 MINS"
+    "wms_srs"   "EPSG:900913 EPSG:4326 EPSG:102100 EPSG:3857"
+    "wms_extent" "140.5 9.2 149.0 17.7"
+  END
+  OFFSITE 0 0 0
+  PROCESSING "CLOSE_CONNECTION=NORMAL"
+END
 #----------------------------------------------
 LAYER
   NAME "nexrad-eet-900913-m30m-conus"
@@ -529,6 +634,23 @@ LAYER
     "wms_title" "NEXRAD BASE REFLECT (GOOGLE) M30 MINS"
     "wms_srs"   "EPSG:900913 EPSG:4326 EPSG:102100 EPSG:3857"
     "wms_extent" "-126 24 -66 50"
+  END
+  OFFSITE 0 0 0
+  PROCESSING "CLOSE_CONNECTION=NORMAL"
+END
+LAYER
+  NAME "nexrad-eet-900913-m30m-gu"
+  GROUP "nexrad-eet-900913-m30m"
+  STATUS OFF
+  DATA "/mesonet/ldmdata/gis/images/900913/GUCOMP/eet_6.tif"
+  TYPE RASTER
+  PROJECTION
+    "init=epsg:3857"
+  END
+  METADATA
+    "wms_title" "NEXRAD BASE REFLECT (GOOGLE) M30 MINS"
+    "wms_srs"   "EPSG:900913 EPSG:4326 EPSG:102100 EPSG:3857"
+    "wms_extent" "140.5 9.2 149.0 17.7"
   END
   OFFSITE 0 0 0
   PROCESSING "CLOSE_CONNECTION=NORMAL"
@@ -602,6 +724,23 @@ LAYER
   OFFSITE 0 0 0
   PROCESSING "CLOSE_CONNECTION=NORMAL"
 END
+LAYER
+  NAME "nexrad-eet-900913-m35m-gu"
+  GROUP "nexrad-eet-900913-m35m"
+  STATUS OFF
+  DATA "/mesonet/ldmdata/gis/images/900913/GUCOMP/eet_7.tif"
+  TYPE RASTER
+  PROJECTION
+    "init=epsg:3857"
+  END
+  METADATA
+    "wms_title" "NEXRAD BASE REFLECT (GOOGLE) M35 MINS"
+    "wms_srs"   "EPSG:900913 EPSG:4326 EPSG:102100 EPSG:3857"
+    "wms_extent" "140.5 9.2 149.0 17.7"
+  END
+  OFFSITE 0 0 0
+  PROCESSING "CLOSE_CONNECTION=NORMAL"
+END
 #---------------------------------------
 LAYER
   GROUP "nexrad-eet-900913-m40m"
@@ -667,6 +806,23 @@ LAYER
     "wms_title" "NEXRAD BASE REFLECT (GOOGLE) M40 MINS"
     "wms_srs"   "EPSG:900913 EPSG:4326 EPSG:102100 EPSG:3857"
     "wms_extent" "-126 24 -66 50"
+  END
+  OFFSITE 0 0 0
+  PROCESSING "CLOSE_CONNECTION=NORMAL"
+END
+LAYER
+  NAME "nexrad-eet-900913-m40m-gu"
+  GROUP "nexrad-eet-900913-m40m"
+  STATUS OFF
+  DATA "/mesonet/ldmdata/gis/images/900913/GUCOMP/eet_8.tif"
+  TYPE RASTER
+  PROJECTION
+    "init=epsg:3857"
+  END
+  METADATA
+    "wms_title" "NEXRAD BASE REFLECT (GOOGLE) M40 MINS"
+    "wms_srs"   "EPSG:900913 EPSG:4326 EPSG:102100 EPSG:3857"
+    "wms_extent" "140.5 9.2 149.0 17.7"
   END
   OFFSITE 0 0 0
   PROCESSING "CLOSE_CONNECTION=NORMAL"
@@ -740,6 +896,23 @@ LAYER
   OFFSITE 0 0 0
   PROCESSING "CLOSE_CONNECTION=NORMAL"
 END
+LAYER
+  NAME "nexrad-eet-900913-m45m-gu"
+  GROUP "nexrad-eet-900913-m45m"
+  STATUS OFF
+  DATA "/mesonet/ldmdata/gis/images/900913/GUCOMP/eet_9.tif"
+  TYPE RASTER
+  PROJECTION
+    "init=epsg:3857"
+  END
+  METADATA
+    "wms_title" "NEXRAD BASE REFLECT (GOOGLE) M45 MINS"
+    "wms_srs"   "EPSG:900913 EPSG:4326 EPSG:102100 EPSG:3857"
+    "wms_extent" "140.5 9.2 149.0 17.7"
+  END
+  OFFSITE 0 0 0
+  PROCESSING "CLOSE_CONNECTION=NORMAL"
+END
 #----------------------------------------------------
 LAYER
   NAME "nexrad-eet-900913-m50m-conus"
@@ -809,6 +982,23 @@ LAYER
   OFFSITE 0 0 0
   PROCESSING "CLOSE_CONNECTION=NORMAL"
 END
+LAYER
+  NAME "nexrad-eet-900913-m50m-gu"
+  GROUP "nexrad-eet-900913-m50m"
+  STATUS OFF
+  DATA "/mesonet/ldmdata/gis/images/900913/GUCOMP/eet_10.tif"
+  TYPE RASTER
+  PROJECTION
+    "init=epsg:3857"
+  END
+  METADATA
+    "wms_title" "NEXRAD BASE REFLECT (GOOGLE) M50 MINS"
+    "wms_srs"   "EPSG:900913 EPSG:4326 EPSG:102100 EPSG:3857"
+    "wms_extent" "140.5 9.2 149.0 17.7"
+  END
+  OFFSITE 0 0 0
+  PROCESSING "CLOSE_CONNECTION=NORMAL"
+END
 #----------------------------------------------------
 LAYER
   NAME "nexrad-eet-900913-m55m-conus"
@@ -874,6 +1064,23 @@ LAYER
     "wms_title" "NEXRAD BASE REFLECT (GOOGLE) M55 MINS"
     "wms_srs"   "EPSG:900913 EPSG:4326 EPSG:102100 EPSG:3857"
     "wms_extent" "-126 24 -66 50"
+  END
+  OFFSITE 0 0 0
+  PROCESSING "CLOSE_CONNECTION=NORMAL"
+END
+LAYER
+  NAME "nexrad-eet-900913-m55m-gu"
+  GROUP "nexrad-eet-900913-m55m"
+  STATUS OFF
+  DATA "/mesonet/ldmdata/gis/images/900913/GUCOMP/eet_11.tif"
+  TYPE RASTER
+  PROJECTION
+    "init=epsg:3857"
+  END
+  METADATA
+    "wms_title" "NEXRAD BASE REFLECT (GOOGLE) M55 MINS"
+    "wms_srs"   "EPSG:900913 EPSG:4326 EPSG:102100 EPSG:3857"
+    "wms_extent" "140.5 9.2 149.0 17.7"
   END
   OFFSITE 0 0 0
   PROCESSING "CLOSE_CONNECTION=NORMAL"
@@ -949,6 +1156,23 @@ LAYER
   OFFSITE 0 0 0
   PROCESSING "CLOSE_CONNECTION=NORMAL"
 END
+LAYER
+  NAME "nexrad-eet-gu"
+  GROUP "nexrad-eet"
+  STATUS OFF
+  DATA "/mesonet/ldmdata/gis/images/4326/GUCOMP/eet_0.tif"
+  TYPE RASTER
+  PROJECTION
+   "init=epsg:4326"
+  END
+  METADATA
+    "wms_title" "NEXRAD BASE REFLECT CURRENT"
+    "wms_srs"   "EPSG:4326 EPSG:26915"
+    "wms_extent" "140.5 9.2 149 17.7"
+  END
+  OFFSITE 0 0 0
+  PROCESSING "CLOSE_CONNECTION=NORMAL"
+END
 #----------------------------------------
 LAYER
   NAME "nexrad-eet-m05m-conus"
@@ -1014,6 +1238,23 @@ LAYER
     "wms_title" "NEXRAD BASE REFLECT M5 MINS"
     "wms_srs"   "EPSG:4326 EPSG:26915"
     "wms_extent" "-126 24 -66 50"
+  END
+  OFFSITE 0 0 0
+  PROCESSING "CLOSE_CONNECTION=NORMAL"
+END
+LAYER
+  NAME "nexrad-eet-m05m-gu"
+  GROUP "nexrad-eet-m05m"
+  STATUS OFF
+  DATA "/mesonet/ldmdata/gis/images/4326/GUCOMP/eet_1.tif"
+  TYPE RASTER
+  PROJECTION
+   "init=epsg:4326"
+  END
+  METADATA
+    "wms_title" "NEXRAD BASE REFLECT M5 MINS"
+    "wms_srs"   "EPSG:4326 EPSG:26915"
+    "wms_extent" "140.5 9.2 149 17.7"
   END
   OFFSITE 0 0 0
   PROCESSING "CLOSE_CONNECTION=NORMAL"
@@ -1087,6 +1328,23 @@ LAYER
   OFFSITE 0 0 0
   PROCESSING "CLOSE_CONNECTION=NORMAL"
 END
+LAYER
+  NAME "nexrad-eet-m10m-gu"
+  GROUP "nexrad-eet-m10m"
+  STATUS OFF
+  DATA "/mesonet/ldmdata/gis/images/4326/GUCOMP/eet_2.tif"
+  TYPE RASTER
+  PROJECTION
+   "init=epsg:4326"
+  END
+  METADATA
+    "wms_title" "NEXRAD BASE REFLECT M10 MINS"
+    "wms_srs"   "EPSG:4326 EPSG:26915"
+    "wms_extent" "140.5 9.2 149 17.7"
+  END
+  OFFSITE 0 0 0
+  PROCESSING "CLOSE_CONNECTION=NORMAL"
+END
 #----------------------
 LAYER
   NAME "nexrad-eet-m15m-conus"
@@ -1152,6 +1410,23 @@ LAYER
     "wms_title" "NEXRAD BASE REFLECT M15 MINS"
     "wms_srs"   "EPSG:4326 EPSG:26915"
     "wms_extent" "-126 24 -66 50"
+  END
+  OFFSITE 0 0 0
+  PROCESSING "CLOSE_CONNECTION=NORMAL"
+END
+LAYER
+  NAME "nexrad-eet-m15m-gu"
+  GROUP "nexrad-eet-m15m"
+  STATUS OFF
+  DATA "/mesonet/ldmdata/gis/images/4326/GUCOMP/eet_3.tif"
+  TYPE RASTER
+  PROJECTION
+   "init=epsg:4326"
+  END
+  METADATA
+    "wms_title" "NEXRAD BASE REFLECT M15 MINS"
+    "wms_srs"   "EPSG:4326 EPSG:26915"
+    "wms_extent" "140.5 9.2 149 17.7"
   END
   OFFSITE 0 0 0
   PROCESSING "CLOSE_CONNECTION=NORMAL"
@@ -1225,6 +1500,23 @@ LAYER
   OFFSITE 0 0 0
   PROCESSING "CLOSE_CONNECTION=NORMAL"
 END
+LAYER
+  NAME "nexrad-eet-m20m-gu"
+  GROUP "nexrad-eet-m20m"
+  STATUS OFF
+  DATA "/mesonet/ldmdata/gis/images/4326/GUCOMP/eet_4.tif"
+  TYPE RASTER
+  PROJECTION
+   "init=epsg:4326"
+  END
+  METADATA
+    "wms_title" "NEXRAD BASE REFLECT M20 MINS"
+    "wms_srs"   "EPSG:4326 EPSG:26915"
+    "wms_extent" "140.5 9.2 149 17.7"
+  END
+  OFFSITE 0 0 0
+  PROCESSING "CLOSE_CONNECTION=NORMAL"
+END
 #-------------------------------
 LAYER
   NAME "nexrad-eet-m25m-conus"
@@ -1290,6 +1582,23 @@ LAYER
     "wms_title" "NEXRAD BASE REFLECT M25 MINS"
     "wms_srs"   "EPSG:4326 EPSG:26915"
     "wms_extent" "-126 24 -66 50"
+  END
+  OFFSITE 0 0 0
+  PROCESSING "CLOSE_CONNECTION=NORMAL"
+END
+LAYER
+  NAME "nexrad-eet-m25m-gu"
+  GROUP "nexrad-eet-m25m"
+  STATUS OFF
+  DATA "/mesonet/ldmdata/gis/images/4326/GUCOMP/eet_5.tif"
+  TYPE RASTER
+  PROJECTION
+   "init=epsg:4326"
+  END
+  METADATA
+    "wms_title" "NEXRAD BASE REFLECT M25 MINS"
+    "wms_srs"   "EPSG:4326 EPSG:26915"
+    "wms_extent" "140.5 9.2 149 17.7"
   END
   OFFSITE 0 0 0
   PROCESSING "CLOSE_CONNECTION=NORMAL"
@@ -1363,6 +1672,23 @@ LAYER
   OFFSITE 0 0 0
   PROCESSING "CLOSE_CONNECTION=NORMAL"
 END
+LAYER
+  NAME "nexrad-eet-m30m-gu"
+  GROUP "nexrad-eet-m30m"
+  STATUS OFF
+  DATA "/mesonet/ldmdata/gis/images/4326/GUCOMP/eet_6.tif"
+  TYPE RASTER
+  PROJECTION
+   "init=epsg:4326"
+  END
+  METADATA
+    "wms_title" "NEXRAD BASE REFLECT M30 MINS"
+    "wms_srs"   "EPSG:4326 EPSG:26915"
+    "wms_extent" "140.5 9.2 149 17.7"
+  END
+  OFFSITE 0 0 0
+  PROCESSING "CLOSE_CONNECTION=NORMAL"
+END
 #------------------------------
 LAYER
   NAME "nexrad-eet-m35m-conus"
@@ -1428,6 +1754,23 @@ LAYER
     "wms_title" "NEXRAD BASE REFLECT M35 MINS"
     "wms_srs"   "EPSG:4326 EPSG:26915"
     "wms_extent" "-126 24 -66 50"
+  END
+  OFFSITE 0 0 0
+  PROCESSING "CLOSE_CONNECTION=NORMAL"
+END
+LAYER
+  NAME "nexrad-eet-m35m-gu"
+  GROUP "nexrad-eet-m35m"
+  STATUS OFF
+  DATA "/mesonet/ldmdata/gis/images/4326/GUCOMP/eet_7.tif"
+  TYPE RASTER
+  PROJECTION
+   "init=epsg:4326"
+  END
+  METADATA
+    "wms_title" "NEXRAD BASE REFLECT M35 MINS"
+    "wms_srs"   "EPSG:4326 EPSG:26915"
+    "wms_extent" "140.5 9.2 149 17.7"
   END
   OFFSITE 0 0 0
   PROCESSING "CLOSE_CONNECTION=NORMAL"
@@ -1501,6 +1844,23 @@ LAYER
   OFFSITE 0 0 0
   PROCESSING "CLOSE_CONNECTION=NORMAL"
 END
+LAYER
+  NAME "nexrad-eet-m40m-gu"
+  GROUP "nexrad-eet-m40m"
+  STATUS OFF
+  DATA "/mesonet/ldmdata/gis/images/4326/GUCOMP/eet_8.tif"
+  TYPE RASTER
+  PROJECTION
+   "init=epsg:4326"
+  END
+  METADATA
+    "wms_title" "NEXRAD BASE REFLECT M40 MINS"
+    "wms_srs"   "EPSG:4326 EPSG:26915"
+    "wms_extent" "140.5 9.2 149 17.7"
+  END
+  OFFSITE 0 0 0
+  PROCESSING "CLOSE_CONNECTION=NORMAL"
+END
 #-------------------------------------------
 LAYER
   NAME "nexrad-eet-m45m-conus"
@@ -1570,6 +1930,23 @@ LAYER
   OFFSITE 0 0 0
   PROCESSING "CLOSE_CONNECTION=NORMAL"
 END
+LAYER
+  NAME "nexrad-eet-m45m-gu"
+  GROUP "nexrad-eet-m45m"
+  STATUS OFF
+  DATA "/mesonet/ldmdata/gis/images/4326/GUCOMP/eet_9.tif"
+  TYPE RASTER
+  PROJECTION
+   "init=epsg:4326"
+  END
+  METADATA
+    "wms_title" "NEXRAD BASE REFLECT M45 MINS"
+    "wms_srs"   "EPSG:4326 EPSG:26915"
+    "wms_extent" "140.5 9.2 149 17.7"
+  END
+  OFFSITE 0 0 0
+  PROCESSING "CLOSE_CONNECTION=NORMAL"
+END
 #-----------------------------
 LAYER
   GROUP "nexrad-eet-m50m"
@@ -1618,6 +1995,23 @@ LAYER
     "wms_title" "NEXRAD BASE REFLECT M50 MINS"
     "wms_srs"   "EPSG:4326 EPSG:26915"
     "wms_extent" "-126 24 -66 50"
+  END
+  OFFSITE 0 0 0
+  PROCESSING "CLOSE_CONNECTION=NORMAL"
+END
+LAYER
+  NAME "nexrad-eet-m50m-gu"
+  GROUP "nexrad-eet-m50m"
+  STATUS OFF
+  DATA "/mesonet/ldmdata/gis/images/4326/GUCOMP/eet_10.tif"
+  TYPE RASTER
+  PROJECTION
+   "init=epsg:4326"
+  END
+  METADATA
+    "wms_title" "NEXRAD BASE REFLECT M50 MINS"
+    "wms_srs"   "EPSG:4326 EPSG:26915"
+    "wms_extent" "140.5 9.2 149 17.7"
   END
   OFFSITE 0 0 0
   PROCESSING "CLOSE_CONNECTION=NORMAL"
@@ -1687,6 +2081,23 @@ LAYER
     "wms_title" "NEXRAD BASE REFLECT M50 MINS"
     "wms_srs"   "EPSG:4326 EPSG:26915"
     "wms_extent" "-126 24 -66 50"
+  END
+  OFFSITE 0 0 0
+  PROCESSING "CLOSE_CONNECTION=NORMAL"
+END
+LAYER
+  NAME "nexrad-eet-m55m-gu"
+  GROUP "nexrad-eet-m55m"
+  STATUS OFF
+  DATA "/mesonet/ldmdata/gis/images/4326/GUCOMP/eet_11.tif"
+  TYPE RASTER
+  PROJECTION
+   "init=epsg:4326"
+  END
+  METADATA
+    "wms_title" "NEXRAD BASE REFLECT M55 MINS"
+    "wms_srs"   "EPSG:4326 EPSG:26915"
+    "wms_extent" "140.5 9.2 149 17.7"
   END
   OFFSITE 0 0 0
   PROCESSING "CLOSE_CONNECTION=NORMAL"

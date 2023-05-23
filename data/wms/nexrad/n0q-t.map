@@ -5,7 +5,7 @@ MAP
 NAME "nexrad_base_reflect"
 STATUS OFF
 SIZE 800 600
-EXTENT -171 15 -66 70
+EXTENT -171 5 170 70
 UNITS DD
 SHAPEPATH "/mesonet/data/gis/"
 IMAGECOLOR -1 -1 -1
