@@ -90,7 +90,7 @@ back to 1951.</li>
   <br />Current and archived Iowa road conditions.</li>
  <li><a href="/cow/">IEM Cow</a>
   <br />Unofficial NWS polygon warning verification.</li>
- <li><a href="/docs/nexrad_mosiac/">NEXRAD Mosiac on the IEM</a>
+ <li><a href="/docs/nexrad_mosaic/">NEXRAD Mosaic on the IEM</a>
   <br />Information about the NEXRAD Mosiac that the IEM generates.</li>
 </ul>
 
