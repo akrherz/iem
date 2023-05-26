@@ -36,6 +36,6 @@ openfire | iem11-dc | None | None
 rabbitmq | iem9-dc | iem8-dc | nagios check
 samba | iem16 | None | cron scripts check data availability
 RIDGE | iem9-dc | None    | inbound file queue, check latency 7 radars
-webalizer | iem19 | None | None
+webalizer | iem8-dc | None | None
 Webcam Current | iem19 | None | cron script monitors for offline webcams
 Webcam Lapses | iem19 | None | None
