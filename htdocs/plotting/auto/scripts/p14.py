@@ -230,4 +230,4 @@ def plotter(fdict):
 
 
 if __name__ == "__main__":
-    plotter(dict(station="IA7708", year=2017, network="IACLIMATE"))
+    plotter({"station": "IA7708", "year": 2017, "network": "IACLIMATE"})

@@ -6,11 +6,7 @@ ID,Station,Latitude,Longitude
 import datetime
 import re
 import sys
-
-try:
-    from zoneinfo import ZoneInfo  # type: ignore
-except ImportError:
-    from backports.zoneinfo import ZoneInfo  # type: ignore
+from zoneinfo import ZoneInfo
 
 # third party
 import ephem

@@ -6,14 +6,10 @@ Called from `RUN_12Z.sh` for yesterday and a week ago.
 # pylint: disable=cell-var-from-loop
 import datetime
 import sys
+from zoneinfo import ZoneInfo
 
-try:
-    from zoneinfo import ZoneInfo
-except ImportError:
-    from backports.zoneinfo import ZoneInfo  # type: ignore
-
+import pandas as pd
 from metpy.units import units
-from pandas import read_sql
 from pyiem.network import Table as NetworkTable
 from pyiem.util import get_dbconn, get_dbconnstr, logger
 
@@ -28,7 +24,7 @@ def run(valid):
     iem_pgconn = get_dbconn("iem")
     LOG.info("Processing %s", valid.date())
     # Fetch enough data to cross all the dates
-    df = read_sql(
+    df = pd.read_sql(
         "SELECT station, valid at time zone 'UTC' as utc_valid, precip_mm "
         "from uscrn_alldata where valid > %s and valid < %s",
         get_dbconnstr("other"),

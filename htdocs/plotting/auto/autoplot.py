@@ -10,11 +10,7 @@ import tempfile
 import traceback
 from datetime import timezone
 from io import BytesIO
-
-try:
-    from zoneinfo import ZoneInfo
-except ImportError:
-    from backports.zoneinfo import ZoneInfo  # noqa
+from zoneinfo import ZoneInfo
 
 import numpy as np
 import pandas as pd

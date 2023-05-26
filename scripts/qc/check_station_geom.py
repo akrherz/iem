@@ -9,8 +9,7 @@ LOG = logger()
 
 def main():
     """Go Main"""
-    pgconn = get_dbconn("mesosite")
-    mcursor = pgconn.cursor()
+    mcursor = get_dbconn("mesosite").cursor()
 
     mcursor.execute(
         "SELECT id, network, ST_x(geom), ST_y(geom), modified from stations "

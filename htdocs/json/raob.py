@@ -15,9 +15,9 @@
 """
 import datetime
 import json
+from zoneinfo import ZoneInfo
 
-import pytz
-from pandas.io.sql import read_sql
+import pandas as pd
 from paste.request import parse_formvars
 from pyiem.network import Table as NetworkTable
 from pyiem.util import get_sqlalchemy_conn, html_escape
@@ -63,7 +63,7 @@ def run(ts, sid, pressure):
         pressurelimiter = " and p.pressure = :pid "
         params["pid"] = pressure
     with get_sqlalchemy_conn("raob") as conn:
-        df = read_sql(
+        df = pd.read_sql(
             text(
                 f"""
             SELECT f.station, p.pressure, p.height,
@@ -113,7 +113,7 @@ def parse_time(tstring):
     else:
         dt = datetime.datetime.strptime(tstring[:12], "%Y%m%d%H%M")
 
-    return dt.replace(tzinfo=pytz.utc)
+    return dt.replace(tzinfo=ZoneInfo("UTC"))
 
 
 def application(environ, start_response):

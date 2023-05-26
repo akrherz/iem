@@ -1,11 +1,13 @@
 """
- Look at the sources saved to the AFOS database and then whine about
- sources we do not understand!
+Look at the sources saved to the AFOS database and then whine about
+sources we do not understand!
+
+called from RUN_MIDNIGHT.sh
 """
 import datetime
 import sys
+from zoneinfo import ZoneInfo
 
-import pytz
 from pyiem.network import Table as NetworkTable
 from pyiem.util import get_dbconn, logger, utc
 
@@ -30,7 +32,7 @@ def sample(source, ts):
         if row[0] in pils:
             continue
         pils.append(row[0])
-        valid = row[1].astimezone(pytz.UTC)
+        valid = row[1].astimezone(ZoneInfo("UTC"))
         print(f" {BASE}={valid:%Y%m%d%H%M}-{source}-{row[2]}-{row[0]}")
 
 

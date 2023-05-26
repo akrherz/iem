@@ -9,11 +9,7 @@ Run from RUN_MIDNIGHT.sh
 import datetime
 import os
 import sys
-
-try:
-    from zoneinfo import ZoneInfo  # type: ignore
-except ImportError:
-    from backports.zoneinfo import ZoneInfo
+from zoneinfo import ZoneInfo
 
 from pyiem.util import logger
 

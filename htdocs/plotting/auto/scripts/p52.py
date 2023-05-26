@@ -1,10 +1,11 @@
-"""Wfo Gantt chart"""
+"""
+Gantt chart of watch, warning, and advisories issued
+by an NWS Forecast Office for a start date and number of days of your
+choice. The duration of the individual alert is the maximum found between
+the earliest issuance and latest expiration.
+"""
 import datetime
-
-try:
-    from backports.zoneinfo import ZoneInfo  # type: ignore
-except ImportError:
-    from zoneinfo import ZoneInfo  # type: ignore
+from zoneinfo import ZoneInfo
 
 import matplotlib.dates as mdates
 import pandas as pd
@@ -17,16 +18,7 @@ from pyiem.util import get_autoplot_context, get_sqlalchemy_conn
 
 def get_description():
     """Return a dict describing how to call this plotter"""
-    desc = {}
-    desc["cache"] = 600
-    desc["data"] = True
-    desc[
-        "description"
-    ] = """
-    Gantt chart of watch, warning, and advisories issued
-    by an NWS Forecast Office for a start date and number of days of your
-    choice. The duration of the individual alert is the maximum found between
-    the earliest issuance and latest expiration."""
+    desc = {"description": __doc__, "cache": 600, "data": True}
     desc["arguments"] = [
         dict(
             type="networkselect",

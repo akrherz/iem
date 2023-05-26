@@ -5,11 +5,7 @@ id for it to be of any usage. Perhaps this autoplot will become more useful
 in the future for interactive use!
 """
 from textwrap import wrap
-
-try:
-    from zoneinfo import ZoneInfo
-except ImportError:
-    from backports.zoneinfo import ZoneInfo  # noqa
+from zoneinfo import ZoneInfo
 
 import geopandas as gpd
 import matplotlib.patheffects as PathEffects

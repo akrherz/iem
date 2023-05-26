@@ -1,4 +1,7 @@
-"""Merge the PNG IFC files into the daily netcdf file"""
+"""Merge the PNG IFC files into the daily netcdf file.
+
+called from RUN_10_AFTER.sh
+"""
 import datetime
 import os
 import sys
@@ -14,6 +17,7 @@ LOG = logger()
 
 def run(ts):
     """Process this date's worth of data"""
+    LOG.info("Running for %s", ts)
     now = ts.replace(hour=0, minute=0)
     ets = now + datetime.timedelta(hours=24)
     interval = datetime.timedelta(minutes=5)
@@ -52,14 +56,10 @@ def run(ts):
 def main(argv):
     """Go Main Go"""
     if len(argv) == 4:
-        date = datetime.datetime(
-            int(argv[1]), int(argv[2]), int(argv[3]), 12, 0
-        )
+        date = utc(int(argv[1]), int(argv[2]), int(argv[3]), 12)
     else:
-        date = datetime.datetime.now()
-        date = date - datetime.timedelta(minutes=60)
+        date = utc() - datetime.timedelta(minutes=60)
         date = date.replace(hour=12, minute=0, second=0, microsecond=0)
-    # Stupid pytz timezone dance
     date = date.replace(tzinfo=ZoneInfo("UTC"))
     date = date.astimezone(ZoneInfo("America/Chicago"))
     run(date)

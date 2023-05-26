@@ -1,13 +1,17 @@
-"""Generate a First Guess RTP that the bureau can use for their product."""
+"""Generate a First Guess RTP that the bureau can use for their product.
+
+called from RUN_0Z.sh
+"""
 import datetime
 import os
 import subprocess
 import tempfile
 
-import pytz
 from pyiem import network
 from pyiem.tracker import loadqc
-from pyiem.util import get_dbconn, utc
+from pyiem.util import get_dbconn, logger, utc
+
+LOG = logger()
 
 
 def main():
@@ -17,9 +21,7 @@ def main():
     pgconn = get_dbconn("iem")
     icursor = pgconn.cursor()
 
-    ets = utc().replace(
-        tzinfo=pytz.utc, hour=0, minute=0, second=0, microsecond=0
-    )
+    ets = utc().replace(hour=0, minute=0, second=0, microsecond=0)
     sts12z = ets + datetime.timedelta(hours=-12)
     sts6z = ets + datetime.timedelta(hours=-18)
     sts24h = ets + datetime.timedelta(days=-1)
@@ -106,6 +108,7 @@ def main():
         f"plot ac {ets:%Y%m%d}0000 awos_rtp_00z.shef awos_rtp_00z.shef shef",
         fh.name,
     ]
+    LOG.info(" ".join(cmd))
     subprocess.call(cmd)
     os.unlink(fh.name)
 

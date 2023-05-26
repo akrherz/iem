@@ -1,15 +1,14 @@
 """Attempt at totalling up DCP data
 
-    Run from `RUN_12Z.sh` for previous day
-    Run from `RUN_20_AFTER.sh` for current day
-
+Run from `RUN_12Z.sh` for previous day
+Run from `RUN_20_AFTER.sh` for current day
 """
 import datetime
 import sys
+from zoneinfo import ZoneInfo
 
 import numpy as np
-import pytz
-from pandas import read_sql
+import pandas as pd
 from pyiem.util import get_dbconn, get_dbconnstr, logger, utc
 
 LOG = logger()
@@ -20,7 +19,7 @@ def workflow(date):
     iem_pgconn = get_dbconn("iem")
     icursor = iem_pgconn.cursor()
     # load up the current obs
-    df = read_sql(
+    df = pd.read_sql(
         f"""
     WITH dcp as (
         SELECT id, iemid, tzname from stations where network ~* 'DCP'
@@ -38,14 +37,14 @@ def workflow(date):
     bases = {}
     ts = utc(date.year, date.month, date.day, 12)
     for tzname in df["tzname"].unique():
-        base = ts.astimezone(pytz.timezone(tzname))
+        base = ts.astimezone(ZoneInfo(tzname))
         bases[tzname] = base.replace(hour=0)
     # retrieve data that is within 12 hours of our bounds
     sts = datetime.datetime(
         date.year, date.month, date.day
     ) - datetime.timedelta(hours=12)
     ets = sts + datetime.timedelta(hours=48)
-    obsdf = read_sql(
+    obsdf = pd.read_sql(
         f"""
     SELECT distinct station, valid at time zone 'UTC' as utc_valid, value
     from raw{date.year} WHERE valid between %s and %s and
@@ -58,7 +57,7 @@ def workflow(date):
     if obsdf.empty:
         LOG.info("%s found no data", date)
         return
-    obsdf["utc_valid"] = obsdf["utc_valid"].dt.tz_localize(pytz.UTC)
+    obsdf["utc_valid"] = obsdf["utc_valid"].dt.tz_localize(ZoneInfo("UTC"))
     precip = np.zeros((24 * 60))
     grouped = obsdf.groupby("station")
     for station in obsdf["station"].unique():

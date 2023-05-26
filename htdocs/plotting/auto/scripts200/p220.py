@@ -13,11 +13,7 @@ as the code stands now, you get the next day's outlook.
 option exists for downloading these outlooks in-bulk.</p>
 """
 import datetime
-
-try:
-    from zoneinfo import ZoneInfo  # type: ignore
-except ImportError:
-    from backports.zoneinfo import ZoneInfo  # type: ignore
+from zoneinfo import ZoneInfo
 
 # third party
 import pandas as pd

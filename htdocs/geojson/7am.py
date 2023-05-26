@@ -1,9 +1,9 @@
 """ Generate a GeoJSON of 7 AM precip data """
 import datetime
 import json
+from zoneinfo import ZoneInfo
 
 import psycopg2.extras
-import pytz
 from paste.request import parse_formvars
 from pyiem.reference import TRACE_VALUE
 from pyiem.util import get_dbconn, html_escape
@@ -40,7 +40,7 @@ def run_azos(ts):
 
     utcnow = datetime.datetime.utcnow()
     # Now we have the tricky work of finding what 7 AM is
-    ts = ts.astimezone(pytz.timezone("America/Chicago"))
+    ts = ts.astimezone(ZoneInfo("America/Chicago"))
     ts1 = ts.replace(hour=7)
     ts0 = ts1 - datetime.timedelta(hours=24)
     cursor.execute(
@@ -134,7 +134,7 @@ def application(environ, start_response):
     cb = form.get("callback", None)
     dt = form.get("dt", datetime.date.today().strftime("%Y-%m-%d"))
     ts = datetime.datetime.strptime(dt, "%Y-%m-%d")
-    ts = ts.replace(hour=12, tzinfo=pytz.utc)
+    ts = ts.replace(hour=12, tzinfo=ZoneInfo("UTC"))
 
     mckey = f"/geojson/7am/{dt}/{group}"
     mc = Client("iem-memcached:11211")
