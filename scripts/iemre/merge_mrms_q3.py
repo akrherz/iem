@@ -1,13 +1,16 @@
-"""Merge the 0.01x0.01 Q3 24 hour precip data estimates"""
+"""Merge the 0.01x0.01 Q3 24 hour precip data estimates.
+
+called from RUN_10_AFTER.sh
+"""
 import datetime
 import gzip
 import os
 import sys
 import tempfile
+from zoneinfo import ZoneInfo
 
 import numpy as np
 import pygrib
-import pytz
 from pyiem import iemre, mrms
 from pyiem.util import logger, ncopen, utc
 
@@ -26,7 +29,7 @@ def run(ts):
     offset = iemre.daily_offset(ts)
     ncprecip = nc.variables["p01d"]
 
-    gmtts = ts.astimezone(pytz.UTC)
+    gmtts = ts.astimezone(ZoneInfo("UTC"))
     utcnow = utc()
     total = None
     lats = None
@@ -89,8 +92,8 @@ def main(argv):
         ts = datetime.datetime.now()
         ts = ts.replace(hour=12)
 
-    ts = ts.replace(tzinfo=pytz.UTC)
-    ts = ts.astimezone(pytz.timezone("America/Chicago"))
+    ts = ts.replace(tzinfo=ZoneInfo("UTC"))
+    ts = ts.astimezone(ZoneInfo("America/Chicago"))
     ts = ts.replace(hour=0, minute=0, second=0, microsecond=0)
     run(ts)
 

@@ -1,11 +1,7 @@
 """Process talltowers data request."""
-from io import BytesIO, StringIO
-
-try:
-    from zoneinfo import ZoneInfo  # type: ignore
-except ImportError:
-    from backports.zoneinfo import ZoneInfo  # type: ignore
 import datetime
+from io import BytesIO, StringIO
+from zoneinfo import ZoneInfo
 
 import pandas as pd
 from paste.request import parse_formvars

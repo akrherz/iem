@@ -1,15 +1,17 @@
 """
- Sum up the hourly precipitation from NCEP stage IV and produce maps
+Sum up the hourly precipitation from NCEP stage IV and produce maps
+
+called from RUN_STAGE4.sh
 """
 import datetime
 import os
 import sys
+from zoneinfo import ZoneInfo
 
 import pygrib
-import pytz
 from metpy.units import masked_array, units
 from pyiem.plot import MapPlot, nwsprecip
-from pyiem.util import logger
+from pyiem.util import logger, utc
 
 LOG = logger()
 
@@ -20,6 +22,7 @@ def doday(ts, realtime):
 
     We should total files from 1 AM to midnight local time
     """
+    LOG.info("Running for %s realtime: %s", ts, realtime)
     sts = ts.replace(hour=1)
     ets = sts + datetime.timedelta(hours=24)
     interval = datetime.timedelta(hours=1)
@@ -27,9 +30,9 @@ def doday(ts, realtime):
     total = None
     lts = None
     while now < ets:
-        gmt = now.astimezone(pytz.utc)
+        gmt = now.astimezone(ZoneInfo("UTC"))
         fn = gmt.strftime(
-            ("/mesonet/ARCHIVE/data/%Y/%m/%d/" "stage4/ST4.%Y%m%d%H.01h.grib")
+            "/mesonet/ARCHIVE/data/%Y/%m/%d/stage4/ST4.%Y%m%d%H.01h.grib"
         )
         if os.path.isfile(fn):
             lts = now
@@ -86,18 +89,14 @@ def main(argv):
 
     """
     if len(argv) == 4:
-        date = datetime.datetime(
-            int(argv[1]), int(argv[2]), int(argv[3]), 12, 0
-        )
+        date = utc(int(argv[1]), int(argv[2]), int(argv[3]), 12)
         realtime = False
     else:
-        date = datetime.datetime.now()
+        date = utc()
         date = date - datetime.timedelta(minutes=90)
         date = date.replace(hour=12, minute=0, second=0, microsecond=0)
         realtime = True
-    # Stupid pytz timezone dance
-    date = date.replace(tzinfo=pytz.utc)
-    date = date.astimezone(pytz.timezone("America/Chicago"))
+    date = date.astimezone(ZoneInfo("America/Chicago"))
     doday(date, realtime)
 
 

@@ -22,11 +22,7 @@ Ceiling &gt; 3000' AGL and visibility &gt; 5 statutes miles (green)</td></tr>
 </table>
 """
 import datetime
-
-try:
-    from zoneinfo import ZoneInfo
-except ImportError:
-    from backports.zoneinfo import ZoneInfo  # type:ignore
+from zoneinfo import ZoneInfo
 
 import matplotlib.colors as mpcolors
 import numpy as np

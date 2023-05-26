@@ -1,11 +1,7 @@
 """Use data provided by ACIS to replace IEM COOP data."""
 import datetime
 import sys
-
-try:
-    from zoneinfo import ZoneInfo
-except ImportError:
-    from backports.zoneinfo import ZoneInfo  # type: ignore
+from zoneinfo import ZoneInfo
 
 import pandas as pd
 import requests

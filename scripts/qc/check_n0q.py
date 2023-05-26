@@ -1,4 +1,7 @@
-"""Check the availability of NEXRAD Mosiacs."""
+"""Check the availability of NEXRAD Mosiacs.
+
+called from RUN_0Z.sh
+"""
 import datetime
 import os
 import sys
@@ -14,17 +17,17 @@ def run(sts, ets):
     now = sts
     interval = datetime.timedelta(minutes=5)
     while now < ets:
-        fn = (
-            f"/mesonet/ARCHIVE/data/{now:%Y/%m/%d}/GIS/uscomp/"
-            f"n0q_{now:%Y%m%d%H%M}.png"
-        )
-        if not os.path.isfile(fn):
-            LOG.warning("%s is missing", os.path.basename(fn))
-        else:
-            if os.stat(fn)[6] < 200000:
+        for comp in ["us", "ak", "hi", "pr", "gu"]:
+            fn = (
+                f"/mesonet/ARCHIVE/data/{now:%Y/%m/%d}/GIS/{comp}comp/"
+                f"n0q_{now:%Y%m%d%H%M}.png"
+            )
+            if not os.path.isfile(fn):
+                LOG.warning("[%s]%s is missing", comp, os.path.basename(fn))
+            elif comp == "us" and os.stat(fn)[6] < 200000:
                 LOG.warning(
                     "check_n0q.py %s too small, size: %s",
-                    fn.split("/")[-1],
+                    os.path.basename(fn),
                     os.stat(fn)[6],
                 )
         now += interval

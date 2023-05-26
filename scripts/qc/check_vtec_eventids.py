@@ -2,6 +2,8 @@
 My purpose in life is to daily check the VTEC database and see if there are
 any IDs that are missing.  daryl then follows up with the weather bureau
 reporting anything he finds after an investigation.
+
+called from RUN_MIDNIGHT.sh
 """
 import datetime
 

@@ -1,10 +1,18 @@
-"""Top 10 largest, smallest"""
-import datetime
+"""
+This table presents the 10 largest or smallest differences
+between the lowest and highest air temperature for a local calendar
+day.  Some stations have auxillary products that provide 'daily' values
+over a date defined always in standard time.  This plot also presents
+sprites of the temperature time series starting at 12 hours before the
+denoted date and ending at 12 hours after the date.  The sprite often
+quickly points out bad data points, sigh, but also easily shows if the
+temperature change was an increase during the day or decrease.
 
-try:
-    from zoneinfo import ZoneInfo
-except ImportError:
-    from backports.zoneinfo import ZoneInfo  # type: ignore
+<p><a href="/plotting/auto/?q=169">Autoplot 169</a> is similar to this
+plot, but computes the change over arbitrary time windows.</p>
+"""
+import datetime
+from zoneinfo import ZoneInfo
 
 import pandas as pd
 from matplotlib.font_manager import FontProperties
@@ -38,23 +46,7 @@ PDICT = {"largest": "Largest", "smallest": "Smallest"}
 
 def get_description():
     """Return a dict describing how to call this plotter"""
-    desc = {}
-    desc["data"] = True
-    desc["cache"] = 86400
-    desc[
-        "description"
-    ] = """This table presents the 10 largest or smallest differences
-    between the lowest and highest air temperature for a local calendar
-    day.  Some stations have auxillary products that provide 'daily' values
-    over a date defined always in standard time.  This plot also presents
-    sprites of the temperature time series starting at 12 hours before the
-    denoted date and ending at 12 hours after the date.  The sprite often
-    quickly points out bad data points, sigh, but also easily shows if the
-    temperature change was an increase during the day or decrease.
-
-    <p><a href="/plotting/auto/?q=169">Autoplot 169</a> is similar to this
-    plot, but computes the change over arbitrary time windows.</p>
-    """
+    desc = {"description": __doc__, "data": True, "cache": 86400}
     desc["arguments"] = [
         dict(
             type="zstation",

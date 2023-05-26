@@ -2,9 +2,11 @@
 
 Note, we do not want to do TRUNCATE here to do ugly locking that happens and
 which can jam things up badly when we are doing upgrades, etc.
-"""
 
-import pytz
+called from RUN_10_AFTER.sh
+"""
+from zoneinfo import ZoneInfo
+
 from pyiem.util import get_dbconn, logger, utc
 
 LOG = logger()
@@ -36,7 +38,7 @@ def main():
     )
     for row in cursor:
         table = f"raw{row[1]:%Y_%m}"
-        ts = row[1].replace(tzinfo=pytz.utc)
+        ts = row[1].replace(tzinfo=ZoneInfo("UTC"))
         cursor2.execute(
             f"INSERT into {table} "
             "(station, valid, key, value, depth, unit_convention, "

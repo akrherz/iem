@@ -1,9 +1,12 @@
 """Generate the IEMRE climatology file, hmmm"""
 import datetime
+import os
 
 import numpy as np
 from pyiem import iemre
-from pyiem.util import ncopen
+from pyiem.util import logger, ncopen
+
+LOG = logger()
 
 
 def init_year(ts):
@@ -11,6 +14,9 @@ def init_year(ts):
     Create a new NetCDF file for a year of our specification!
     """
     fn = iemre.get_dailyc_mrms_ncname()
+    if os.path.isfile(fn):
+        LOG.warning("Cowardly refusing to create fn: %s", fn)
+        return
     nc = ncopen(fn, "w")
     nc.title = "IEM Daily Reanalysis Climatology %s" % (ts.year,)
     nc.platform = "Grided Climatology"

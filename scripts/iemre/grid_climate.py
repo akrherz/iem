@@ -117,7 +117,7 @@ def main(argv):
         workflow(ts)
     else:
         for ts in pd.date_range("2000/1/1", "2000/12/31"):
-            print(ts)
+            LOG.info(ts)
             workflow(ts)
 
 

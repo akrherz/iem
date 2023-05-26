@@ -1,19 +1,25 @@
 """Generate the IEMRE climatology file, hmmm"""
 import datetime
+import os
 
 import geopandas as gpd
 import numpy as np
 from pyiem import iemre
 from pyiem.grid.zs import CachingZonalStats
-from pyiem.util import get_dbconn, ncopen
+from pyiem.util import get_dbconn, logger, ncopen
+
+LOG = logger()
 
 
 def init_year(ts):
     """
     Create a new NetCDF file for a year of our specification!
     """
-    fp = iemre.get_dailyc_ncname()
-    nc = ncopen(fp, "w")
+    fn = iemre.get_dailyc_ncname()
+    if os.path.isfile(fn):
+        LOG.warning("Cowardly refusing to create file: %s", fn)
+        return
+    nc = ncopen(fn, "w")
     nc.title = "IEM Daily Reanalysis Climatology %s" % (ts.year,)
     nc.platform = "Grided Climatology"
     nc.description = "IEM daily analysis on a 0.125 degree grid"
@@ -93,9 +99,8 @@ def init_year(ts):
     nc.close()
 
 
-def compute_hasdata():
+def compute_hasdata(nc):
     """Compute the has_data grid"""
-    nc = ncopen(iemre.get_dailyc_ncname(), "a", timeout=300)
     czs = CachingZonalStats(iemre.AFFINE)
     pgconn = get_dbconn("postgis")
     states = gpd.GeoDataFrame.from_postgis(
@@ -115,13 +120,13 @@ def compute_hasdata():
         xslice = slice(nav.x0, nav.x0 + nav.xsz)
         data[yslice, xslice] = np.where(grid > 0, 1, data[yslice, xslice])
     nc.variables["hasdata"][:, :] = np.flipud(data)
-    nc.close()
 
 
 def main():
     """Go Main"""
     init_year(datetime.datetime(2000, 1, 1))
-    compute_hasdata()
+    with ncopen(iemre.get_dailyc_ncname(), "a", timeout=300) as nc:
+        compute_hasdata(nc)
 
 
 if __name__ == "__main__":
