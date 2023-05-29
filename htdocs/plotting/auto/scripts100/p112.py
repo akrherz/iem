@@ -1,4 +1,7 @@
-"""GDD by month and year"""
+"""
+This application totals growing degree days by
+month and year.
+"""
 import datetime
 
 import numpy as np
@@ -9,13 +12,7 @@ from pyiem.util import get_autoplot_context, get_sqlalchemy_conn
 
 def get_description():
     """Return a dict describing how to call this plotter"""
-    desc = {}
-    desc["data"] = True
-    desc["report"] = True
-    desc[
-        "description"
-    ] = """This application totals growing degree days by
-    month and year."""
+    desc = {"description": __doc__, "data": True, "report": True}
     desc["arguments"] = [
         dict(
             type="station",
@@ -126,7 +123,7 @@ def plotter(fdict):
         sum(gddxx(48,86,high,low)) as gdd48,
         sum(gddxx(50,86,high,low)) as gdd50,
         sum(gddxx(%s, %s, high, low)) as {varname}
-        from alldata_{station[:2]} WHERE station = %s GROUP by year, month
+        from alldata WHERE station = %s GROUP by year, month
         """,
             conn,
             params=(gddbase, gddceil, station),

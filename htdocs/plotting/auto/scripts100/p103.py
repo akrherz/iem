@@ -1,4 +1,9 @@
-"""Steps up and down"""
+"""
+This plot analyzes the number of steps down in
+low temperature during the fall season and the number of steps up in
+high temperature during the spring season.  These steps are simply having
+a newer colder low or warmer high for the season to date period.
+"""
 import calendar
 
 import numpy as np
@@ -12,15 +17,7 @@ PDICT = {"spring": "1 January - 31 December", "fall": "1 July - 30 June"}
 
 def get_description():
     """Return a dict describing how to call this plotter"""
-    desc = {}
-    desc["data"] = True
-    desc[
-        "description"
-    ] = """This plot analyzes the number of steps down in
-    low temperature during the fall season and the number of steps up in
-    high temperature during the spring season.  These steps are simply having
-    a newer colder low or warmer high for the season to date period.
-    """
+    desc = {"description": __doc__, "data": True}
     desc["arguments"] = [
         dict(
             type="station",

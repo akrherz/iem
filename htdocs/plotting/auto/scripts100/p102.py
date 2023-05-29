@@ -1,10 +1,12 @@
-"""The National Weather Service issues Local Storm
-    Reports (LSRs) with a label associated with each report indicating the
-    source of the report.  This plot summarizes the number of reports
-    received each year by each source type.  The values are the ranks for
-    that year with 1 indicating the largest.  The values following the LSR
-    event type in parenthesis are the raw LSR counts for that year. You need
-    to graph at least two years worth of data to make this plot type work."""
+"""
+The National Weather Service issues Local Storm
+Reports (LSRs) with a label associated with each report indicating the
+source of the report.  This plot summarizes the number of reports
+received each year by each source type.  The values are the ranks for
+that year with 1 indicating the largest.  The values following the LSR
+event type in parenthesis are the raw LSR counts for that year. You need
+to graph at least two years worth of data to make this plot type work.
+"""
 import datetime
 
 import numpy as np

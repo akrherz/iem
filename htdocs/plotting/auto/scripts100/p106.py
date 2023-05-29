@@ -1,4 +1,10 @@
-"""hourly histogram on days"""
+"""
+This plot displays hourly temperature distributions on dates having at
+least one hourly observation meeting the given requirement.  The
+distributions are presented as "violins" with the width of the violin
+providing some insight into the population density at the given
+temperature.
+"""
 import datetime
 
 import psycopg2.extras
@@ -34,16 +40,7 @@ MDICT = {
 
 def get_description():
     """Return a dict describing how to call this plotter"""
-    desc = {}
-    desc[
-        "description"
-    ] = """
-    This plot displays hourly temperature distributions on dates having at
-    least one hourly observation meeting the given requirement.  The
-    distributions are presented as "violins" with the width of the violin
-    providing some insight into the population density at the given
-    temperature.
-    """
+    desc = {"description": __doc__}
     desc["arguments"] = [
         dict(
             type="zstation",

@@ -1,4 +1,11 @@
-"""VTEC frequency"""
+"""
+This chart displays the relative frequency of
+VTEC products.  This is computed by taking the unique combination of
+events and UGC county/zones.  Restating and for example, a single
+Severe Thunderstorm Warning covering portions of two counties would
+count as two events in this summary. The values plotted are relative to the
+most frequent product.
+"""
 import datetime
 
 import numpy as np
@@ -11,17 +18,7 @@ from pyiem.util import get_autoplot_context, get_dbconn
 
 def get_description():
     """Return a dict describing how to call this plotter"""
-    desc = {}
-    desc["data"] = True
-    desc["cache"] = 3600
-    desc[
-        "description"
-    ] = """This chart displays the relative frequency of
-    VTEC products.  This is computed by taking the unique combination of
-    events and UGC county/zones.  Restating and for example, a single
-    Severe Thunderstorm Warning covering portions of two counties would
-    count as two events in this summary. The values plotted are relative to the
-    most frequent product."""
+    desc = {"description": __doc__, "data": True, "cache": 86400}
     desc["arguments"] = [
         dict(
             type="networkselect",

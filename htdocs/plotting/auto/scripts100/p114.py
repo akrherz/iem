@@ -8,10 +8,7 @@ from pyiem.util import get_autoplot_context, get_sqlalchemy_conn
 
 def get_description():
     """Return a dict describing how to call this plotter"""
-    desc = {}
-    desc["data"] = True
-    desc["report"] = True
-    desc["description"] = """ """
+    desc = {"description": __doc__, "data": True, "report": True}
     desc["arguments"] = [
         dict(
             type="station",
@@ -31,7 +28,7 @@ def plotter(fdict):
 
     with get_sqlalchemy_conn("coop") as conn:
         df = pd.read_sql(
-            f"SELECT year, count(low) from alldata_{station[:2]} "
+            "SELECT year, count(low) from alldata "
             "WHERE station = %s and low >= 32 and year < %s "
             "GROUP by year ORDER by year ASC",
             conn,

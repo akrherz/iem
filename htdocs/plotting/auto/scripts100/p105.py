@@ -1,4 +1,10 @@
-"""Precip metrics"""
+"""
+This plot presents three precipitation metrics for
+a site of your choice.  The upper plot displays the maximum period of days
+in between precip events of either greater than 0.01" (labelled no rain)
+and then of a threshold of your choice.  The bottom plot provides the
+maximum 24 hour period precip as reported by the once daily observatons
+"""
 import calendar
 
 import numpy as np
@@ -12,16 +18,7 @@ PDICT = {"yes": "Yes, consider trace reports", "no": "No, omit trace reports"}
 
 def get_description():
     """Return a dict describing how to call this plotter"""
-    desc = {}
-    desc["data"] = True
-    desc[
-        "description"
-    ] = """This plot presents three precipitation metrics for
-    a site of your choice.  The upper plot displays the maximum period of days
-    in between precip events of either greater than 0.01" (labelled no rain)
-    and then of a threshold of your choice.  The bottom plot provides the
-    maximum 24 hour period precip as reported by the once daily observatons.
-    """
+    desc = {"description": __doc__, "data": True}
     desc["arguments"] = [
         dict(
             type="station",
@@ -64,19 +61,18 @@ def plotter(fdict):
     station = ctx["station"]
     threshold = ctx["thres"]
     use_trace = ctx["trace"] == "yes"
-    table = f"alldata_{station[:2]}"
     with get_sqlalchemy_conn("coop") as conn:
         df = pd.read_sql(
-            f"""
+            """
         with data as (
-        select sday, day, precip from {table}
+        select sday, day, precip from alldata
         where station = %s),
 
         rains as (
-        SELECT day from {table} WHERE station = %s and precip >= %s),
+        SELECT day from alldata WHERE station = %s and precip >= %s),
 
         rains2 as (
-        SELECT day from {table} WHERE station = %s and precip >= %s),
+        SELECT day from alldata WHERE station = %s and precip >= %s),
 
         agg as (
         SELECT d.sday, d.day, d.precip, r.day as rday
