@@ -117,7 +117,6 @@ def main():
     for row in mcursor:
         iemid = row[0]
         station = row[1]
-        # name = row[2]
         network = row[3]
         lon = row[4]
         lat = row[5]

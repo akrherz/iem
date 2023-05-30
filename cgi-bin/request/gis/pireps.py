@@ -80,7 +80,6 @@ def run(ctx, start_response):
 
     fn = f"pireps_{ctx['sts']:%Y%m%d%H%M}_{ctx['ets']:%Y%m%d%H%M}"
 
-    # sys.stderr.write("End SQL with rowcount %s" % (cursor.rowcount, ))
     if ctx["fmt"] == "csv":
         sio = StringIO()
         headers = [

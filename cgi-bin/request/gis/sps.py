@@ -44,21 +44,19 @@ def run(ctx, start_response):
     common = "at time zone 'UTC', 'YYYYMMDDHH24MI'"
     schema = {
         "geometry": "Polygon",
-        "properties": dict(
-            [
-                ("ISSUE", "str:12"),
-                ("EXPIRE", "str:12"),
-                ("PROD_ID", "str:32"),
-                ("WFO", "str:3"),
-                ("LNDSPOUT", "str:64"),
-                ("WTRSPOUT", "str:64"),
-                ("MAX_HAIL", "str:16"),
-                ("MAX_WIND", "str:16"),
-                ("TML_VALD", "str:12"),
-                ("TML_DRCT", "int"),
-                ("TML_SKNT", "int"),
-            ]
-        ),
+        "properties": {
+            "ISSUE": "str:12",
+            "EXPIRE": "str:12",
+            "PROD_ID": "str:32",
+            "WFO": "str:3",
+            "LNDSPOUT": "str:64",
+            "WTRSPOUT": "str:64",
+            "MAX_HAIL": "str:16",
+            "MAX_WIND": "str:16",
+            "TML_VALD": "str:12",
+            "TML_DRCT": "int",
+            "TML_SKNT": "int",
+        },
     }
     with get_sqlalchemy_conn("postgis") as pgconn:
         df = gpd.read_postgis(

@@ -109,7 +109,7 @@ def workflow(now, realtime):
         subprocess.call(pqstr, shell=True)
 
         with open(f"{tmpfn}.json", "w", encoding="utf8") as fh:
-            fh.write(json.dumps(dict(meta=metadata)))
+            json.dump({"meta": metadata}, fh)
         # Insert into LDM
         pqstr = (
             f"pqinsert -i -p 'plot c {now:%Y%m%d%H%M} "

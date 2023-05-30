@@ -103,7 +103,7 @@ def main(argv):
         "generation_time": utc().strftime(ISO),
     }
     with open(f"{tmp.name}.json", "w", encoding="utf8") as fp:
-        fp.write(json.dumps(metadata))
+        json.dump(metadata, fp)
     pqstr = (
         f"pqinsert -i -p 'plot {routes} {valid:%Y%m%d%H%M} "
         "gis/images/4326/imerg/p30m.json "
