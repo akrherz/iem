@@ -157,5 +157,7 @@ function mapFactory(network, formname) {
         const station = feature.get("sid");
         $(`select[name="${formname}"]`).select2().val(station).trigger("change");
     });
+    // Fix responsive issues
+    olMap.updateSize();
 
 };

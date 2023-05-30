@@ -563,7 +563,11 @@ def generate_form(apid, fdict, headers, cookies):
                 add_to_plotvars(value, fdict, arg, res)
         else:
             add_to_plotvars(value, fdict, arg, res)
-        formhtml += f"<tr><td>{arg['label']}</td><td>{form}</td></tr>\n"
+        formhtml += (
+            f'<div class="row apdiv"><div class="col-md-3">{arg["label"]}'
+            f'</div><div class="col-md-9">{form}</div></div>'
+            "\n"
+        )
     if fdict.get("_cb") == "1":
         res["pltvars"].append("_cb:1")
     res["imguri"] += "::".join(res["pltvars"]).replace("/", "-")
@@ -672,12 +676,25 @@ var progressBar = setInterval(function (){{
     if meta.get("maptable"):
         opts["maptable"] = "Interactive Map + Table"
     sel = make_select("_fmt", fmt, opts, showvalue=False)
-    formhtml += f"<tr><td>Select Output Format:</td><td>{sel}</td></tr>"
+    formhtml += (
+        '<div class="row apdiv"><div class="col-md-3">Select Output Format:'
+        f'</div><div class="col-md-9">{sel}</div></div>'
+    )
 
     res[
         "formhtml"
     ] = f"""
 <style>
+.apopts .row:nth-of-type(odd) {{
+  background-color: #EEEEEE;
+}}
+.apopts .row:nth-of-type(even) {{
+  background-color: #FFFFFF;
+}}
+.apdiv {{
+    margin-top: 3px;
+    margin-bottom: 3px;
+}}
 .optcontrol {{
   float: left;
   margin-right: 10px !important;
@@ -712,10 +729,9 @@ function onNetworkChange(newnetwork){{
         <form method="GET" name="s" id="myForm">
         <input type="hidden" name="_wait" value="no" id="_wait">
         <input type="hidden" name="q" value="{apid}">
-        <table class="table table-striped">
-                <thead><tr><th>Description</th><th>Value</th></tr></thead>
+        <div class="container-fluid apopts">
         {formhtml}
-        </table>
+        </div>
         <button type="submit">Make Plot with Options</button>
         <button type="submit" name="_cb" value="1">
         Force Updated Plot (no caching)</button>
@@ -790,7 +806,7 @@ plot type.</p>
 
 def generate_autoplot_list(apid):
     """The select list of available autoplots."""
-    s = '<select name="q" class="iemselect2">\n'
+    s = '<select name="q" class="iemselect2" data-width="100%">\n'
     for entry in scripts.data["plots"]:
         s += f"<optgroup label=\"{entry['label']}\">\n"
         for opt in entry["options"]:
