@@ -49,11 +49,11 @@ function stationLayerStyleFunc(feature, _resolution) {
         const sid = feature.get("sid");
         if (sid.substr(2, 1) == "C") {
             climodistrictStyle.getText().setText(sid.substr(0, 2) + parseInt(sid.substr(3, 3)));
-            return climodistrictStyle.enabled ? climodistrictStyle : null;
+            return climodistrictStyle;
         }
         if (sid.substr(2, 4) === "0000") {
             stateStyle.getText().setText(sid.substr(0, 2));
-            return stateStyle.enabled ? stateStyle : null;
+            return stateStyle;
         }
     }
     return climateStyle;
@@ -81,6 +81,25 @@ function mapFactory(network, formname) {
     }
 
     $(`#map_${network}_${formname}`).css("display", "block");
+
+    var olMap = new ol.Map({
+        target: `map_${network}_${formname}`,
+        view: new ol.View({
+            enableRotation: false,
+            center: ol.proj.transform([-94.5, 42.1], 'EPSG:4326', 'EPSG:3857'),
+            zoom: 7,
+            maxZoom: 16,
+            minZoom: 1
+        }),
+        layers: [
+            new ol.layer.Tile({
+                title: 'OpenStreetMap',
+                visible: true,
+                type: 'base',
+                source: new ol.source.OSM()
+            })
+        ]
+    });
     const stationLayer = new ol.layer.Vector({
         title: "Stations",
         source: new ol.source.Vector({
@@ -100,25 +119,32 @@ function mapFactory(network, formname) {
             );
         }
     });
+    olMap.addLayer(stationLayer);
+    //  showing the position the user clicked
+    var popup = new ol.Overlay({
+        element: document.getElementById(`popup_${network}_${formname}`),
+        offset: [7, 7]
+    });
+    olMap.addOverlay(popup);
 
-    var olMap = new ol.Map({
-        target: `map_${network}_${formname}`,
-        view: new ol.View({
-            enableRotation: false,
-            center: ol.proj.transform([-94.5, 42.1], 'EPSG:4326', 'EPSG:3857'),
-            zoom: 7,
-            maxZoom: 16,
-            minZoom: 6
-        }),
-        layers: [
-            new ol.layer.Tile({
-                title: 'OpenStreetMap',
-                visible: true,
-                type: 'base',
-                source: new ol.source.OSM()
-            }),
-            stationLayer
+    olMap.on('pointermove', (event) => {
+        if (event.dragging) { return; }
+        var feature = olMap.forEachFeatureAtPixel(event.pixel,
+            (feature2) => {
+                return feature2;
+            });
+        if (feature === undefined) {
+            popup.element.hidden = true;
+            return;
+        }
+        popup.element.hidden = false;
+        popup.setPosition(event.coordinate);
+        const html = [
+            `<strong>ID:</strong> ${feature.get("sid")}`,
+            `<br /><strong>Name:</strong> ${feature.get("sname")}`,
+            `<br /><strong>POR:</strong> ${feature.get("time_domain")}`,
         ]
+        $(`#popup_${network}_${formname}`).html(html.join(""));
     });
     olMap.on("click", (event) => {
         var feature = olMap.forEachFeatureAtPixel(event.pixel,
@@ -129,7 +155,7 @@ function mapFactory(network, formname) {
             return;
         }
         const station = feature.get("sid");
-        $(`select[name="${formname}"]`).select2().val(station);
+        $(`select[name="${formname}"]`).select2().val(station).trigger("change");
     });
 
 };

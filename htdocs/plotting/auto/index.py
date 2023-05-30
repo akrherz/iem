@@ -139,6 +139,7 @@ def map_select_widget(network, name):
 onClick="mapFactory('{network}', '{name}');">Show Map</button>
 <div style="display: none; width: 100%; height: 600px;"
  id="map_{network}_{name}"></div>
+<div class="popup" id="popup_{network}_{name}"></div>
 """
 
 
@@ -690,6 +691,15 @@ var progressBar = setInterval(function (){{
 .ui-datepicker-month {{
   color: #000;
 }}
+.popup {{
+    background-color: rgba(0, 0, 0, 0.75);
+    color: #FFF;
+    font-weight: bold;
+    font-size: 1.2em;
+    padding-left: 20px;
+    padding-right: 20px;
+    z-index: 10002;
+}}
 </style>
 <script>
 function onNetworkChange(newnetwork){{
@@ -865,7 +875,7 @@ to some of these autoplots.</p>
 <script src="/vendor/jquery-ui/1.11.4/jquery-ui.js"></script>
 <script src="/vendor/moment/2.13.0/moment.min.js"></script>
 <script src="/vendor/flatpickr/4.6.9/flatpickr.min.js"></script>
-<script src="/vendor/select2/4.0.3/select2.min.js"></script>
+<script src="/vendor/select2/4.1.0rc0/select2.min.js"></script>
 <script src="/vendor/openlayers/{OPENLAYERS}/ol.js" type="text/javascript">
 </script>
 <script src='/vendor/openlayers/{OPENLAYERS}/ol-layerswitcher.js'></script>
@@ -905,7 +915,7 @@ $(document).ready(function(){{
  <link rel="stylesheet" type="text/css"
  href="/vendor/flatpickr/4.6.9/flatpickr.min.css"/>
  <link rel="stylesheet" type="text/css"
- href="/vendor/select2/4.0.3/select2.min.css"/ >
+ href="/vendor/select2/4.1.0rc0/select2.min.css"/ >
 <link rel="stylesheet"
  href="/vendor/openlayers/{OPENLAYERS}/ol.css" type="text/css">
 <link type="text/css"
