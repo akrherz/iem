@@ -28,7 +28,7 @@ if BASEDIR not in sys.path:
 import scripts  # noqa
 
 HIGHCHARTS = "10.1.0"
-OPENLAYERS = "6.4.3"
+OPENLAYERS = "7.2.2"
 CSECTORS = state_names.copy()
 CSECTORS.update(SECTORS_NAME)
 CMAPS = {
@@ -132,6 +132,16 @@ CMAPS = {
 }
 
 
+def map_select_widget(network, name):
+    """Generate the HTML for a wiz bang popup."""
+    return f"""
+&nbsp; <button type="button" id="button_{network}_{name}" data-state="0"
+onClick="mapFactory('{network}', '{name}');">Show Map</button>
+<div style="display: none; width: 100%; height: 600px;"
+ id="map_{network}_{name}"></div>
+"""
+
+
 def networkselect_handler(value, arg, res):
     """Select a station from a given network."""
     if not isinstance(arg["network"], list):
@@ -141,7 +151,7 @@ def networkselect_handler(value, arg, res):
         value,
         arg["name"],
         select_all=arg.get("all", False),
-    )
+    ) + map_select_widget(arg["network"], arg["name"])
 
 
 def station_handler(value, arg, fdict, res, typ):
@@ -169,7 +179,7 @@ def station_handler(value, arg, fdict, res, typ):
     )
     select = station_select(network, value, arg["name"])
     res["pltvars"].append(f"{networkcgi}:{network}")
-    return netselect + " " + select
+    return netselect + " " + select + map_select_widget(network, arg["name"])
 
 
 def ugc_select(state, ugc):
@@ -586,22 +596,14 @@ def generate_form(apid, fdict, headers, cookies):
             )
             res[
                 "headextra"
-            ] += f"""
-<link rel="stylesheet"
- href="/vendor/openlayers/{OPENLAYERS}/ol.css" type="text/css">
-<link type="text/css"
- href="/vendor/openlayers/{OPENLAYERS}/ol-layerswitcher.css"
- rel="stylesheet" />
+            ] += """
 <link type="text/css"
  href="/vendor/jquery-datatables/1.10.24/datatables.min.css"
  rel="stylesheet" />
             """
             res[
                 "extrascripts"
-            ] += f"""
-<script src="/vendor/openlayers/{OPENLAYERS}/ol.js" type="text/javascript">
-</script>
-<script src='/vendor/openlayers/{OPENLAYERS}/ol-layerswitcher.js'></script>
+            ] += """
 <script src='/vendor/jquery-datatables/1.10.24/datatables.min.js'></script>
 <script src="/js/maptable.js"></script>
 <script>
@@ -864,7 +866,11 @@ to some of these autoplots.</p>
 <script src="/vendor/moment/2.13.0/moment.min.js"></script>
 <script src="/vendor/flatpickr/4.6.9/flatpickr.min.js"></script>
 <script src="/vendor/select2/4.0.3/select2.min.js"></script>
+<script src="/vendor/openlayers/{OPENLAYERS}/ol.js" type="text/javascript">
+</script>
+<script src='/vendor/openlayers/{OPENLAYERS}/ol-layerswitcher.js'></script>
 {res['extrascripts']}
+<script src="js/mapselect.js"></script>
 <script>
 function hideImageLoad(){{
         // console.log("load() fired...");
@@ -900,6 +906,11 @@ $(document).ready(function(){{
  href="/vendor/flatpickr/4.6.9/flatpickr.min.css"/>
  <link rel="stylesheet" type="text/css"
  href="/vendor/select2/4.0.3/select2.min.css"/ >
+<link rel="stylesheet"
+ href="/vendor/openlayers/{OPENLAYERS}/ol.css" type="text/css">
+<link type="text/css"
+ href="/vendor/openlayers/{OPENLAYERS}/ol-layerswitcher.css"
+ rel="stylesheet" />
 <style>
     .select2-results .select2-disabled,
     .select2-results__option[aria-disabled=true] {{
