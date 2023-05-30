@@ -1,4 +1,7 @@
-"""Climodat"""
+"""
+This plot presents the weekly percentage of
+precipitation events within a given rainfall bin.
+"""
 import datetime
 from calendar import month_abbr
 
@@ -67,13 +70,7 @@ CWEEK = {
 
 def get_description():
     """Return a dict describing how to call this plotter"""
-    desc = {}
-    desc["data"] = True
-    desc["report"] = True
-    desc[
-        "description"
-    ] = """This plot presents the weekly percentage of
-    precipitation events within a given rainfall bin."""
+    desc = {"description": __doc__, "data": True, "report": True}
     desc["arguments"] = [
         dict(
             type="station",

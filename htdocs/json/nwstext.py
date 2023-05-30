@@ -4,9 +4,9 @@ Provide nws text in JSON format
 # stdlib
 import datetime
 import json
+from zoneinfo import ZoneInfo
 
 # extras
-import pytz
 from paste.request import parse_formvars
 from pyiem.util import get_dbconn, html_escape
 
@@ -25,7 +25,7 @@ def application(environ, start_response):
     cb = fields.get("callback")
     tokens = pid.split("-")
     utc = datetime.datetime.strptime(tokens[0], "%Y%m%d%H%M")
-    utc = utc.replace(tzinfo=pytz.UTC)
+    utc = utc.replace(tzinfo=ZoneInfo("UTC"))
     root = {"products": []}
 
     acursor.execute(

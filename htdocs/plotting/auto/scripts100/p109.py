@@ -1,39 +1,40 @@
-"""This application generates per WFO or state maps of VTEC
-    event counts.  The current three available metrics are:<br />
-    <ul>
-        <li><strong>Event Count</strong>: The number of distinct VTEC events.
-        A distinct event is simply the usage of one VTEC event identifier.</li>
-        <li><strong>Days with 1+ Events</strong>: This is the number of days
-        within the period of interest that had at least one VTEC event. A day
-        is defined within the US Central Time Zone.  If one event crosses
-        midnight, this would count as two days.</li>
-        <li><strong>Percent of Time</strong>: This is the temporal coverage
-        percentage within the period of interest.  Rewording, what percentage
-        of the time was at least one event active.</li>
-        <li><strong>Rank of Event Count</strong>: The ranking from least to
-        greatest of the given period's event count vs period of record
-        climatology.</li>
-        <li><strong>Departure from Average of Event Count</strong>: The number
-        of events that the given period differs from the period of record
-        climatology.</li>
-        <li>
-        <strong>Standardized Departure from Average of Event Count</strong>:
-        The departure expressed in sigma units of this periods event total
-        vs the period of record climatology.</li>
-    </ul></p>
+"""
+This application generates per WFO or state maps of VTEC
+event counts.  The current three available metrics are:<br />
+<ul>
+    <li><strong>Event Count</strong>: The number of distinct VTEC events.
+    A distinct event is simply the usage of one VTEC event identifier.</li>
+    <li><strong>Days with 1+ Events</strong>: This is the number of days
+    within the period of interest that had at least one VTEC event. A day
+    is defined within the US Central Time Zone.  If one event crosses
+    midnight, this would count as two days.</li>
+    <li><strong>Percent of Time</strong>: This is the temporal coverage
+    percentage within the period of interest.  Rewording, what percentage
+    of the time was at least one event active.</li>
+    <li><strong>Rank of Event Count</strong>: The ranking from least to
+    greatest of the given period's event count vs period of record
+    climatology.</li>
+    <li><strong>Departure from Average of Event Count</strong>: The number
+    of events that the given period differs from the period of record
+    climatology.</li>
+    <li>
+    <strong>Standardized Departure from Average of Event Count</strong>:
+    The departure expressed in sigma units of this periods event total
+    vs the period of record climatology.</li>
+</ul></p>
 
-    <p><strong>PLEASE USE CAUTION</strong> with the departure from average
-    plots as they are not exactly straight forward to compute.  If you are
-    plotting small periods of time, individual events will heavily skew the
-    averages.  The exact start date of each event type is not an exact
-    science due to the implementation of some products and other complexities.
-    For Severe Thunderstorm, Tornado, Flash Flood, and Marine Warnings, the
-    IEM has a special accounting of these back to 2002.  For other event
-    types, the archive starts with the VTEC implementation, which varies by
-    product.</p>
+<p><strong>PLEASE USE CAUTION</strong> with the departure from average
+plots as they are not exactly straight forward to compute.  If you are
+plotting small periods of time, individual events will heavily skew the
+averages.  The exact start date of each event type is not an exact
+science due to the implementation of some products and other complexities.
+For Severe Thunderstorm, Tornado, Flash Flood, and Marine Warnings, the
+IEM has a special accounting of these back to 2002.  For other event
+types, the archive starts with the VTEC implementation, which varies by
+product.</p>
 
-    <p>Note that various VTEC events have differenting start periods of record.
-    Most products go back to October 2005.</p>
+<p>Note that various VTEC events have differenting start periods of record.
+Most products go back to October 2005.</p>
 """
 import datetime
 

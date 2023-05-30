@@ -1,4 +1,7 @@
-"""daily records"""
+"""
+Presents the simple daily climatology as
+computed by period of record data.
+"""
 import datetime
 from calendar import month_abbr
 
@@ -18,13 +21,7 @@ PDICT = {
 
 def get_description():
     """Return a dict describing how to call this plotter"""
-    desc = {}
-    desc["data"] = True
-    desc["report"] = True
-    desc[
-        "description"
-    ] = """Presents the simple daily climatology as
-    computed by period of record data."""
+    desc = {"description": __doc__, "data": True, "report": True}
     desc["arguments"] = [
         dict(
             type="station",

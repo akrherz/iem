@@ -1,9 +1,11 @@
-"""This plot presents accumulated totals and departures
-    of growing degree days (GDD), precipitation and stress degree days (SDD).
-    Leap days
-    are not considered for this plot. The light blue area represents the
-    range of accumulated values based on the observation history at the
-    site."""
+"""
+This plot presents accumulated totals and departures
+of growing degree days (GDD), precipitation and stress degree days (SDD).
+Leap days
+are not considered for this plot. The light blue area represents the
+range of accumulated values based on the observation history at the
+site.
+"""
 import datetime
 
 import numpy as np

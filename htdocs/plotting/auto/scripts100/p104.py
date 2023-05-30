@@ -1,4 +1,13 @@
-"""Weather cycling"""
+"""
+This plot presents the time series of trailing X
+number of day departures evaluated every Y days forward in time.  The
+departures are expressed in terms of standard deviation (sigma) by
+comparing the current period against the same period of dates back through
+the period of record.  The evaluation points are connected by arrows to
+express the evolution of the departures.  Since the plot is bounded by
+physical processes, the plot tends to cycle.  In economics, a classic
+comparable plot to this one is of suply vs demand.
+"""
 import datetime
 
 import numpy as np
@@ -10,19 +19,7 @@ from pyiem.util import get_autoplot_context, get_dbconn
 
 def get_description():
     """Return a dict describing how to call this plotter"""
-    desc = {}
-    desc["data"] = True
-    desc[
-        "description"
-    ] = """This plot presents the time series of trailing X
-    number of day departures evaluated every Y days forward in time.  The
-    departures are expressed in terms of standard deviation (sigma) by
-    comparing the current period against the same period of dates back through
-    the period of record.  The evaluation points are connected by arrows to
-    express the evolution of the departures.  Since the plot is bounded by
-    physical processes, the plot tends to cycle.  In economics, a classic
-    comparable plot to this one is of suply vs demand.
-    """
+    desc = {"description": __doc__, "data": True}
     today = datetime.datetime.today() - datetime.timedelta(days=1)
     desc["arguments"] = [
         dict(
@@ -86,8 +83,7 @@ def plotter(fdict):
     date2 = ctx["date2"]
 
     title = (
-        f"{date1:%d %b %Y} - {date2:%d %b %Y} "
-        f"[{station}] {ctx['_nt'].sts[station]['name']}\n"
+        f"{ctx['_sname']} ({date1:%d %b %Y} - {date2:%d %b %Y})\n"
         f"{days} Day Trailing Departures plotted every {days2} days"
     )
 

@@ -3,8 +3,8 @@ JSON webservice providing timestamps of available webcam images
 """
 import datetime
 import json
+from zoneinfo import ZoneInfo
 
-import pytz
 from paste.request import parse_formvars
 from pyiem.util import get_dbconn
 
@@ -27,11 +27,11 @@ def dance(cid, start_ts, end_ts):
             f"data/%Y/%m/%d/camera/{cid}/{cid}_%Y%m%d%H%M.jpg"
         )
         data["images"].append(
-            dict(
-                valid=row[0].strftime("%Y-%m-%dT%H:%M:00Z"),
-                drct=row[1],
-                href=uri,
-            )
+            {
+                "valid": row[0].strftime("%Y-%m-%dT%H:%M:00Z"),
+                "drct": row[1],
+                "href": uri,
+            }
         )
 
     return data
@@ -46,13 +46,13 @@ def application(environ, start_response):
     date = fields.get("date")
     if date is not None:
         start_ts = datetime.datetime.strptime(date, "%Y%m%d")
-        start_ts = start_ts.replace(tzinfo=pytz.timezone("America/Chicago"))
+        start_ts = start_ts.replace(tzinfo=ZoneInfo("America/Chicago"))
         end_ts = start_ts + datetime.timedelta(days=1)
     else:
         start_ts = datetime.datetime.strptime(start_ts, "%Y%m%d%H%M")
-        start_ts = start_ts.replace(tzinfo=pytz.UTC)
+        start_ts = start_ts.replace(tzinfo=ZoneInfo("UTC"))
         end_ts = datetime.datetime.strptime(end_ts, "%Y%m%d%H%M")
-        end_ts = end_ts.replace(tzinfo=pytz.UTC)
+        end_ts = end_ts.replace(tzinfo=ZoneInfo("UTC"))
 
     headers = [("Content-type", "application/json")]
     start_response("200 OK", headers)
