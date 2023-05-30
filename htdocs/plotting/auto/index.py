@@ -139,6 +139,7 @@ def map_select_widget(network, name):
 onClick="mapFactory('{network}', '{name}');">Show Map</button>
 <div style="display: none; width: 100%; height: 600px;"
  id="map_{network}_{name}"></div>
+<div class="popup" id="popup_{network}_{name}"></div>
 """
 
 
@@ -562,7 +563,11 @@ def generate_form(apid, fdict, headers, cookies):
                 add_to_plotvars(value, fdict, arg, res)
         else:
             add_to_plotvars(value, fdict, arg, res)
-        formhtml += f"<tr><td>{arg['label']}</td><td>{form}</td></tr>\n"
+        formhtml += (
+            f'<div class="row apdiv"><div class="col-md-3">{arg["label"]}'
+            f'</div><div class="col-md-9">{form}</div></div>'
+            "\n"
+        )
     if fdict.get("_cb") == "1":
         res["pltvars"].append("_cb:1")
     res["imguri"] += "::".join(res["pltvars"]).replace("/", "-")
@@ -671,12 +676,25 @@ var progressBar = setInterval(function (){{
     if meta.get("maptable"):
         opts["maptable"] = "Interactive Map + Table"
     sel = make_select("_fmt", fmt, opts, showvalue=False)
-    formhtml += f"<tr><td>Select Output Format:</td><td>{sel}</td></tr>"
+    formhtml += (
+        '<div class="row apdiv"><div class="col-md-3">Select Output Format:'
+        f'</div><div class="col-md-9">{sel}</div></div>'
+    )
 
     res[
         "formhtml"
     ] = f"""
 <style>
+.apopts .row:nth-of-type(odd) {{
+  background-color: #EEEEEE;
+}}
+.apopts .row:nth-of-type(even) {{
+  background-color: #FFFFFF;
+}}
+.apdiv {{
+    margin-top: 3px;
+    margin-bottom: 3px;
+}}
 .optcontrol {{
   float: left;
   margin-right: 10px !important;
@@ -690,6 +708,15 @@ var progressBar = setInterval(function (){{
 .ui-datepicker-month {{
   color: #000;
 }}
+.popup {{
+    background-color: rgba(0, 0, 0, 0.75);
+    color: #FFF;
+    font-weight: bold;
+    font-size: 1.2em;
+    padding-left: 20px;
+    padding-right: 20px;
+    z-index: 10002;
+}}
 </style>
 <script>
 function onNetworkChange(newnetwork){{
@@ -702,10 +729,9 @@ function onNetworkChange(newnetwork){{
         <form method="GET" name="s" id="myForm">
         <input type="hidden" name="_wait" value="no" id="_wait">
         <input type="hidden" name="q" value="{apid}">
-        <table class="table table-striped">
-                <thead><tr><th>Description</th><th>Value</th></tr></thead>
+        <div class="container-fluid apopts">
         {formhtml}
-        </table>
+        </div>
         <button type="submit">Make Plot with Options</button>
         <button type="submit" name="_cb" value="1">
         Force Updated Plot (no caching)</button>
@@ -780,7 +806,7 @@ plot type.</p>
 
 def generate_autoplot_list(apid):
     """The select list of available autoplots."""
-    s = '<select name="q" class="iemselect2">\n'
+    s = '<select name="q" class="iemselect2" data-width="100%">\n'
     for entry in scripts.data["plots"]:
         s += f"<optgroup label=\"{entry['label']}\">\n"
         for opt in entry["options"]:
@@ -865,7 +891,7 @@ to some of these autoplots.</p>
 <script src="/vendor/jquery-ui/1.11.4/jquery-ui.js"></script>
 <script src="/vendor/moment/2.13.0/moment.min.js"></script>
 <script src="/vendor/flatpickr/4.6.9/flatpickr.min.js"></script>
-<script src="/vendor/select2/4.0.3/select2.min.js"></script>
+<script src="/vendor/select2/4.1.0rc0/select2.min.js"></script>
 <script src="/vendor/openlayers/{OPENLAYERS}/ol.js" type="text/javascript">
 </script>
 <script src='/vendor/openlayers/{OPENLAYERS}/ol-layerswitcher.js'></script>
@@ -905,7 +931,7 @@ $(document).ready(function(){{
  <link rel="stylesheet" type="text/css"
  href="/vendor/flatpickr/4.6.9/flatpickr.min.css"/>
  <link rel="stylesheet" type="text/css"
- href="/vendor/select2/4.0.3/select2.min.css"/ >
+ href="/vendor/select2/4.1.0rc0/select2.min.css"/ >
 <link rel="stylesheet"
  href="/vendor/openlayers/{OPENLAYERS}/ol.css" type="text/css">
 <link type="text/css"

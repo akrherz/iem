@@ -27,18 +27,19 @@ from pyiem.util import (
 CENTRAL = pytz.timezone("America/Chicago")
 PLOTTYPES = {
     "1": "3 Panel Plot",
-    "at": "One Minute Timeseries",
-    "2": "Just Soil Temps",
-    "sm": "Just Soil Moisture",
+    "8": "Battery Voltage",
     "3": "Daily Max/Min 4 Inch Soil Temps",
+    "9": "Daily Rainfall, 4 inch Soil Temp, and RH",
+    "7": "Daily Soil Water + Change",
     "4": "Daily Solar Radiation",
     "5": "Daily Potential Evapotranspiration",
+    "encrh": "Enclosure Relative Humidity",
     "6": "Histogram of Volumetric Soil Moisture",
-    "7": "Daily Soil Water + Change",
-    "8": "Battery Voltage",
-    "9": "Daily Rainfall, 4 inch Soil Temp, and RH",
     "10": "Inversion Diagnostic Plot (BOOI4, CAMI4, CRFI4)",
     "11": "Inversion Daily Timing (BOOI4, CAMI4, CRFI4)",
+    "2": "Just Soil Temps",
+    "sm": "Just Soil Moisture",
+    "at": "One Minute Timeseries",
 }
 
 
@@ -480,23 +481,27 @@ def make_daily_plot(ctx):
     return fig, df
 
 
-def make_battery_plot(ctx):
+def make_hourly_plot(ctx, vname):
     """Generate a plot of battery"""
     with get_sqlalchemy_conn("isuag") as conn:
         df = pd.read_sql(
-            """SELECT valid, battv_min_qc from sm_hourly
+            f"""SELECT valid, {vname} from sm_hourly
     where station = %s and valid >= %s and valid < %s
-    and battv_min_qc is not null ORDER by valid ASC
+    and {vname} is not null ORDER by valid ASC
             """,
             conn,
             params=(ctx["station"], ctx["sts"], ctx["ets"]),
         )
-
-    title = f"ISUSM Station: {ctx['_sname']} Timeseries\n" "Battery Voltage"
+    title = "Battery Voltage"
+    label = "Battery Voltage [V]"
+    if vname == "encrh_avg":
+        title = "Enclosure Relative Humidity"
+        label = "Relative Humidity [%]"
+    title = f"ISUSM Station: {ctx['_sname']} Timeseries\n{title}"
     (fig, ax) = figure_axes(apctx=ctx, title=title)
-    ax.plot(df["valid"], df["battv_min_qc"])
+    ax.plot(df["valid"], df[vname])
     ax.grid(True)
-    ax.set_ylabel("Battery Voltage [V]")
+    ax.set_ylabel(label)
     xaxis_magic(ctx, ax)
     return fig, df
 
@@ -1016,7 +1021,9 @@ def plotter(fdict):
     elif ctx["opt"] == "7":
         fig, df = make_daily_water_change_plot(ctx)
     elif ctx["opt"] == "8":
-        fig, df = make_battery_plot(ctx)
+        fig, df = make_hourly_plot(ctx, "battv_min_qc")
+    elif ctx["opt"] == "encrh":
+        fig, df = make_hourly_plot(ctx, "encrh_avg")
     elif ctx["opt"] == "9":
         fig, df = make_daily_rainfall_soil_rh(ctx)
     elif ctx["opt"] == "10":

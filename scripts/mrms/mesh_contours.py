@@ -44,7 +44,7 @@ def pqinsert(tmpfn, ets, interval):
 def make_metadata(tmpfn, mydict):
     """Make metadata."""
     with open(f"{tmpfn}_meta.json", "w") as fp:
-        fp.write(json.dumps(mydict))
+        json.dump(mydict, fp)
 
 
 def make_contours(tmpfn):

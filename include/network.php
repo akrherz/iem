@@ -53,7 +53,7 @@ EOM;
                 $keyid = substr($keyid, 1, 3);
             }
             $this->table[$keyid] = $row;
-            $this->do_conversions($keyid);
+            $this->doConversions($keyid);
         }
     }
 
@@ -62,7 +62,7 @@ EOM;
         $rs = pg_execute($this->dbconn, "SELECTST", array($id));
         for ($i = 0; $row = pg_fetch_array($rs); $i++) {
             $this->table[$row["id"]] = $row;
-            $this->do_conversions($row["id"]);
+            $this->doConversions($row["id"]);
         }
         if (pg_num_rows($rs) < 1) {
             return false;
@@ -70,7 +70,7 @@ EOM;
         return true;
     }
 
-    public function do_conversions($id)
+    public function doConversions($id)
     {
         if (!is_null($this->table[$id]["archive_begin"])) {
             // can't deal with ancient dates

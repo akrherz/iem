@@ -54,7 +54,7 @@ EOM;
         }
         for ($i = 0; $row = pg_fetch_array($rs); $i++) {
             $this->table[$row["id"]] = $row;
-            $this->do_conversions($row["id"]);
+            $this->doConversions($row["id"]);
         }
         if (pg_num_rows($rs) < 1) {
             return false;
@@ -62,7 +62,7 @@ EOM;
         return true;
     }
 
-    public function do_conversions($id)
+    public function doConversions($id)
     {
         if (!is_null($this->table[$id]["archive_begin"])) {
             $this->table[$id]["archive_begin"] = new DateTime($this->table[$id]["archive_begin"]);

@@ -31,7 +31,6 @@ def main():
     now = datetime.datetime.now()
 
     df = get_df()
-    # df = pd.read_csv('example.csv')
     rng = range(-30, 120, 2)
 
     for sector in ["iowa", "midwest", "conus"]:
