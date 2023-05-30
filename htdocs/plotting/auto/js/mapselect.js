@@ -1,4 +1,5 @@
 // Map select widget that can appear
+var ol = window.ol || {}; // skipcq: JS-0239
 
 const climateStyle = new ol.style.Style({
     zIndex: 100,
@@ -82,7 +83,7 @@ function mapFactory(network, formname) {
 
     $(`#map_${network}_${formname}`).css("display", "block");
 
-    var olMap = new ol.Map({
+    const olMap = new ol.Map({
         target: `map_${network}_${formname}`,
         view: new ol.View({
             enableRotation: false,
@@ -121,7 +122,7 @@ function mapFactory(network, formname) {
     });
     olMap.addLayer(stationLayer);
     //  showing the position the user clicked
-    var popup = new ol.Overlay({
+    const popup = new ol.Overlay({
         element: document.getElementById(`popup_${network}_${formname}`),
         offset: [7, 7]
     });
@@ -129,7 +130,7 @@ function mapFactory(network, formname) {
 
     olMap.on('pointermove', (event) => {
         if (event.dragging) { return; }
-        var feature = olMap.forEachFeatureAtPixel(event.pixel,
+        const feature = olMap.forEachFeatureAtPixel(event.pixel,
             (feature2) => {
                 return feature2;
             });
@@ -147,7 +148,7 @@ function mapFactory(network, formname) {
         $(`#popup_${network}_${formname}`).html(html.join(""));
     });
     olMap.on("click", (event) => {
-        var feature = olMap.forEachFeatureAtPixel(event.pixel,
+        const feature = olMap.forEachFeatureAtPixel(event.pixel,
             (feature2) => {
                 return feature2;
             });

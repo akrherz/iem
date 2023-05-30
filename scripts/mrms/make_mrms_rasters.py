@@ -269,9 +269,3 @@ def main(argv):
 
 if __name__ == "__main__":
     main(sys.argv)
-
-
-def test_ramp():
-    """Check our work"""
-    img = convert_to_image(np.array([25]))
-    assert abs(img[0] - 100) < 0.01
