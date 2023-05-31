@@ -2,6 +2,7 @@
 import datetime
 import os
 import sys
+import warnings
 
 import numpy as np
 import pandas as pd
@@ -14,8 +15,8 @@ from pyiem.iemre import hourly_offset
 from pyiem.util import get_sqlalchemy_conn, logger, ncopen, utc
 from scipy.interpolate import NearestNDInterpolator, RegularGridInterpolator
 
-# stop RuntimeWarning: invalid value encountered in greater
-np.warnings.filterwarnings("ignore")
+# Prevent invalid value encountered in cast
+warnings.simplefilter("ignore", RuntimeWarning)
 LOG = logger()
 MEMORY = {"ts": datetime.datetime.now()}
 
