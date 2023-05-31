@@ -4,16 +4,20 @@
 import datetime
 import os
 import re
-import smtplib
 import subprocess
-from email.mime.multipart import MIMEMultipart
-from email.mime.text import MIMEText
 
 import psycopg2.extras
 import pytz
 import requests
 import wwa  # @UnresolvedImport
-from pyiem.util import exponential_backoff, get_dbconn, logger, utc
+from mailchimp3 import MailChimp
+from pyiem.util import (
+    exponential_backoff,
+    get_dbconn,
+    get_properties,
+    logger,
+    utc,
+)
 
 LOG = logger()
 IEM_BRANCHES = "https://api.github.com/repos/akrherz/iem/branches"
@@ -274,14 +278,20 @@ def news():
 
 def main():
     """Go Main!"""
-    msg = MIMEMultipart("alternative")
+    mc = MailChimp(mc_api=get_properties()["mailchimp.apikey"])
     now = datetime.datetime.now()
-    msg["Subject"] = f"IEM Daily Bulletin for {now:%b %-d %Y}"
-    msg["From"] = "daryl herzmann <akrherz@iastate.edu>"
-    if os.environ["USER"] == "akrherz":
-        msg["To"] = "akrherz@iastate.edu"
-    else:
-        msg["To"] = "iem-dailyb@iastate.edu"
+    response = mc.campaigns.create(
+        data={
+            "type": "regular",
+            "recipients": {"list_id": "69e0e4ae67"},
+            "settings": {
+                "subject_line": f"IEM Daily Bulletin for {now:%b %-d %Y}",
+                "from_name": "IEM Daily Bulletin",
+                "reply_to": "akrherz@iastate.edu",
+            },
+        }
+    )
+    campaign_id = response["id"]
 
     text = f"Iowa Environmental Mesonet Daily Bulletin for {now:%d %B %Y}\n\n"
     html = (
@@ -313,47 +323,39 @@ def main():
     except Exception as exp:
         LOG.exception(exp)
 
-    part1 = MIMEText(text, "plain")
-    part2 = MIMEText(html, "html")
-    msg.attach(part1)
-    msg.attach(part2)
-
-    exponential_backoff(send_email, msg)
+    mc.campaigns.content.update(
+        campaign_id=campaign_id,
+        data={
+            "plain_text": text,
+            "html": html,
+        },
+    )
+    mc.campaigns.actions.send(campaign_id=campaign_id)
+    LOG.info("campaign_id %s was sent", campaign_id)
 
     # Send forth LDM
     with open("tmp.txt", "w", encoding="utf-8") as fh:
         fh.write(text)
     subprocess.call(
-        'pqinsert -p "plot c 000000000000 iemdb.txt bogus txt" tmp.txt',
-        shell=True,
+        [
+            "pqinsert",
+            "-p",
+            "plot c 000000000000 iemdb.txt bogus txt",
+            "tmp.txt",
+        ]
     )
     with open("tmp.txt", "w", encoding="utf-8") as fh:
         fh.write(html)
     subprocess.call(
-        'pqinsert -p "plot c 000000000000 iemdb.html bogus txt" tmp.txt',
-        shell=True,
+        [
+            "pqinsert",
+            "-p",
+            "plot c 000000000000 iemdb.html bogus txt",
+            "tmp.txt",
+        ]
     )
     os.unlink("tmp.txt")
 
 
-def send_email(msg):
-    """Send emails"""
-    smtp = smtplib.SMTP("mailhub.iastate.edu")
-    smtp.sendmail(msg["From"], [msg["To"]], msg.as_string())
-    smtp.quit()
-
-
-def tests():
-    """Hacky means to test things"""
-    text, html = get_github_commits()
-    LOG.info("Text Variant")
-    LOG.info(text)
-    with open("/tmp/gh.html", "w", encoding="utf-8") as fh:
-        fh.write(html)
-    subprocess.call("xdg-open /tmp/gh.html >& /dev/null", shell=True)
-
-
 if __name__ == "__main__":
-    # cowreport()
     main()
-    # tests()
