@@ -4,6 +4,7 @@ called from RUN_20MIN.sh
 """
 import datetime
 import os
+import warnings
 from subprocess import PIPE, Popen
 
 import numpy as np
@@ -16,6 +17,10 @@ from pyiem.util import (
     logger,
     utc,
 )
+from xarray.coding.variables import SerializationWarning
+
+# File has missing_value and fillValue set :/
+warnings.simplefilter("ignore", SerializationWarning)
 
 LOG = logger()
 
