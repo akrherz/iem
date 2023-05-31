@@ -33,8 +33,7 @@ form is: <code>datatype routes timestamp archive_path current_path suffix</code>
 <p><b>STEP 3: Sign up for IEM bulletin (optional)</b>
 <br>You don't have to complete this step, but you can keep up-to-date with
 IEM news and events with the IEM Daily Bulletin.  You can sign up for it
-<a 
-href="mailto:iem-dailyb-join@iastate.edu">here</a>.
+<a href="https://mailchi.mp/25e185228da8/iem-daily-bulletin">here</a>.
  If this service generates enough interest, I will set up a dedicated 
 email
 list for it.
