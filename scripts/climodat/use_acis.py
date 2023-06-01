@@ -36,6 +36,10 @@ def compare(row, colname):
     """Do we need to update this column?"""
     oldval = safe(row[colname])
     newval = safe(row[f"a{colname}"])
+    if newval is not None and colname in ["high", "low", "precip"]:
+        # If we have an estimated flag and ACIS is not None, do things.
+        if row[f"{'precip' if colname == 'precip' else 'temp'}_estimated"]:
+            return newval
     if oldval is None and newval is not None:
         return newval
     if newval is not None and oldval != newval:
@@ -114,7 +118,8 @@ def do(meta, station, acis_station, interactive):
     with get_sqlalchemy_conn("coop") as conn:
         obs = pd.read_sql(
             """
-            SELECT day, high, low, precip, snow, snowd, temp_hour, precip_hour
+            SELECT day, high, low, precip, snow, snowd, temp_hour, precip_hour,
+            temp_estimated, precip_estimated
             from alldata WHERE station = %s ORDER by day ASC
             """,
             conn,
@@ -143,9 +148,10 @@ def do(meta, station, acis_station, interactive):
                 continue
             work.append(f"{col} = %s")
             args.append(newval)
-            if col in ["high", "precip"]:
+            if col in ["high", "precip"]:  # suboptimal to exclude low
                 work.append(
-                    f"{'temp' if col == 'high' else 'precip'}_estimated = 'f'"
+                    f"{'precip' if col == 'precip' else 'temp'}_"
+                    "estimated = 'f'"
                 )
             if row["dbhas"]:
                 updates[col] += 1

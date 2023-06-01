@@ -1,16 +1,17 @@
-"""wind rose"""
+"""
+This application generates a wind rose for a given
+criterion being meet. A wind rose plot is a convenient way of summarizing
+wind speed and direction.
+"""
 import datetime
 
 import numpy as np
 import pandas as pd
-from matplotlib.patches import Rectangle
+from metpy.units import units
 from pyiem.exceptions import NoDataFound
-from pyiem.plot import figure
-from pyiem.plot.use_agg import plt
+from pyiem.plot.windrose import WindrosePlot, histogram
 from pyiem.util import drct2text, get_autoplot_context, get_sqlalchemy_conn
 from sqlalchemy import text
-from windrose import WindroseAxes
-from windrose.windrose import histogram
 
 PDICT = {
     "ts": "Thunderstorm (TS) Reported",
@@ -51,14 +52,7 @@ RAMPS = {
 
 def get_description():
     """Return a dict describing how to call this plotter"""
-    desc = {}
-    desc["data"] = True
-    desc["defaults"] = {"_r": "88"}
-    desc[
-        "description"
-    ] = """This application generates a wind rose for a given
-    criterion being meet. A wind rose plot is a convenient way of summarizing
-    wind speed and direction."""
+    desc = {"description": __doc__, "data": True, "defaults": {"_r": "88"}}
     desc["arguments"] = [
         dict(
             type="zstation",
@@ -303,60 +297,29 @@ def plotter(fdict):
     """Go"""
     ctx = get_context(fdict)
 
-    fig = figure(
-        title=ctx["plottitle"],
-        subtitle=ctx["subtitle"],
-        facecolor="w",
-        edgecolor="w",
-        apctx=ctx,
-    )
-    ax = WindroseAxes(fig, [0.08, 0.15, 0.86, 0.7], facecolor="w")
-    fig.add_axes(ax)
-    bins = get_ramp(ctx)
-    ax.bar(
-        ctx["df"]["drct"].values,
-        ctx["df"]["smph"].values,
+    wr = WindrosePlot(rect=[0.08, 0.15, 0.86, 0.7])
+    wr.fig.text(0.15, 0.95, ctx["plottitle"])
+    wr.fig.text(0.15, 0.9, ctx["subtitle"])
+    bins = units("mile / hour") * get_ramp(ctx)[1:]
+    wr.barplot(
+        units("degree") * ctx["df"]["drct"].values,
+        units("mile / hour") * ctx["df"]["smph"].values,
         normed=True,
         bins=bins,
         opening=0.8,
         edgecolor="white",
         nsector=18,
     )
-    handles = []
-    for p in ax.patches_list:
-        color = p.get_facecolor()
-        handles.append(
-            Rectangle((0, 0), 0.1, 0.3, facecolor=color, edgecolor="black")
-        )
-    legend = fig.legend(
-        handles,
-        (
-            f"{bins[1]}-{bins[2]}",
-            f"{bins[2]}-{bins[3]}",
-            f"{bins[3]}-{bins[4]}",
-            f"{bins[4]}-{bins[5]}",
-            f"{bins[5]}-{bins[6]}",
-            f"{bins[6]}+",
-        ),
-        loc=(0.01, 0.03),
-        ncol=6,
-        title="Wind Speed [mph]",
-        mode=None,
-        columnspacing=0.9,
-        handletextpad=0.45,
-    )
-    plt.setp(legend.get_texts(), fontsize=10)
 
-    fig.text(
-        0.95,
-        0.12,
-        f"n={len(ctx['df'].index)}",
-        verticalalignment="bottom",
-        ha="right",
-    )
-
-    return fig, ctx["df"]
+    return wr.fig, ctx["df"]
 
 
 if __name__ == "__main__":
-    plotter(dict(station="AMW", month="jan", opt="tmpf_above", threshold=32))
+    plotter(
+        {
+            "station": "AMW",
+            "month": "jan",
+            "opt": "tmpf_above",
+            "threshold": 32,
+        }
+    )
