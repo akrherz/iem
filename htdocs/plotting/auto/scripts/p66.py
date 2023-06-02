@@ -12,10 +12,14 @@ from pyiem.plot import figure_axes
 from pyiem.util import get_autoplot_context, get_sqlalchemy_conn
 
 PDICT = {
-    "above": "Temperature At or Above (AOA) Threshold",
-    "below": "Temperature Below Threshold",
+    "above": "At or Above (AOA) Threshold",
+    "below": "Below Threshold",
 }
-PDICT2 = {"high": "High Temperature", "low": "Low Temperature"}
+PDICT2 = {
+    "precip": "Accumulated Precipitation",
+    "low": "Low Temperature",
+    "high": "High Temperature",
+}
 
 
 def get_description():
@@ -41,13 +45,13 @@ def get_description():
             name="dir",
             default="above",
             options=PDICT,
-            label="Select temperature direction",
+            label="Select direction",
         ),
         dict(
-            type="int",
+            type="float",
             name="threshold",
             default="60",
-            label="Temperature Threshold (F):",
+            label="Threshold (F or inch):",
         ),
         dict(type="int", name="days", default="7", label="Number of Days:"),
     ]
@@ -77,11 +81,14 @@ def plotter(fdict):
     syear = df.index[0].year
     eyear = df.index[-1].year
     years = eyear - syear + 1
-    df["trail"] = (
-        df[varname]
-        .rolling(window=f"{days}D")
-        .agg("min" if mydir == "above" else "max")
-    )
+    if varname == "precip":
+        df["trail"] = df[varname].rolling(window=f"{days}D").agg("sum")
+    else:
+        df["trail"] = (
+            df[varname]
+            .rolling(window=f"{days}D")
+            .agg("min" if mydir == "above" else "max")
+        )
     if mydir == "above":
         df = df.loc[df["trail"] >= threshold]
     else:
@@ -95,11 +102,11 @@ def plotter(fdict):
     ).fillna(0)
 
     label = "AOA" if mydir == "above" else "below"
+    units = "inch" if varname == "precip" else r"$^\circ$F"
     title = (
         f"{ctx['_sname']} [{syear}-{eyear}] ::"
         f"Frequency of {days} Consec Days "
-        f"with {varname.capitalize()} {label} {threshold}"
-        r"$^\circ$F "
+        f"with {varname.capitalize()} {label} {threshold} {units}"
     )
     fig, ax = figure_axes(apctx=ctx, title=title)
     ax.set_position([0.1, 0.1, 0.75, 0.8])
@@ -116,24 +123,23 @@ def plotter(fdict):
     df = df.sort_values("sday")
     ypos = 0.85
     xpos = 0.87
+    fmt = "%.0f" if varname != "precip" else "%.2f"
     fig.text(xpos, ypos + 0.03, "End Date of Streak")
     fig.text(xpos - 0.015, ypos, "Earliest Dates   ", rotation=90, va="top")
     for day, row in df.head(10).iterrows():
         ypos -= 0.03
-        fig.text(
-            xpos, ypos, f"{day.strftime('%-2d %b %Y')} {row['trail']:.0f}"
-        )
+        txt = fmt % row["trail"]
+        fig.text(xpos, ypos, f"{day.strftime('%-2d %b %Y')} {txt}")
 
     ypos -= 0.1
     fig.text(xpos - 0.015, ypos, "Latest Dates   ", rotation=90, va="top")
     for day, row in df.tail(10).iloc[::-1].iterrows():
         ypos -= 0.03
-        fig.text(
-            xpos, ypos, f"{day.strftime('%-2d %b %Y')} {row['trail']:.0f}"
-        )
+        txt = fmt % row["trail"]
+        fig.text(xpos, ypos, f"{day.strftime('%-2d %b %Y')} {txt}")
 
     return fig, freq
 
 
 if __name__ == "__main__":
-    plotter({})
+    plotter({"var": "precip", "threshold": 0.25})
