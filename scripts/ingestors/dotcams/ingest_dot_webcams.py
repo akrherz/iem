@@ -106,7 +106,7 @@ def process_feature(cursor, domain, feat):
             req = get_legacy_session().get(url, timeout=30)
         except requests.exceptions.Timeout:
             # Try again
-            req = requests.get(url, timeout=60)
+            req = get_legacy_session().get(url, timeout=60)
         if req.status_code == 404:
             LOG.debug("cloud 404 %s", url)
             with open(CLOUD404, "a", encoding="utf8") as fh:

@@ -78,7 +78,7 @@ daily_opts = [
     {
         "id": 66,
         "label": (
-            "Consecutive Days Frequency by DOY for High/Low Temp "
+            "Consecutive Days Frequency by DOY for High/Low/Precip "
             "Above/Below Threshold"
         ),
     },
