@@ -22,7 +22,7 @@ python hrrr_solarrad.py $(date --date '1 days ago'  +'%Y %m %d')
 python sync_coop_updates.py
 
 cd ../prism
-python ingest_prism.py $(date --date '3 days ago' +'%Y %m %d')
+python ingest_prism.py $(date --date '1 days ago' +'%Y %m %d')
 
 cd ../iemre
 # adjusts stage IV hourly file to PRISM reality

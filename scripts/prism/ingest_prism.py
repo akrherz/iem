@@ -1,10 +1,6 @@
 """Ingest the PRISM data into a local yearly netCDF file
 
-1. Download from their FTP site
-2. Unzip into /mesonet/tmp
-3. Open the actual BIL file with rasterio
-4. Copy data into netcdf file
-5. Cleanup
+Called from RUN_NOON.sh and RUN_2AM.sh
 """
 import datetime
 import glob
@@ -47,17 +43,25 @@ def do_download(valid):
             uri = valid.strftime(
                 f"ftp://prism.nacse.org/daily/{varname}/%Y/{localfn}.zip"
             )
-            # prevent zero byte files
             subprocess.call(
-                ("wget -q --timeout=120 -O %s.zip %s || " " rm -f %s.zip")
-                % (localfn, uri, localfn),
-                shell=True,
+                [
+                    "wget",
+                    "-q",
+                    "--timeout=120",
+                    "-O",
+                    f"{localfn}.zip",
+                    uri,
+                ],
             )
-            if os.path.isfile(localfn + ".zip"):
-                break
+            # a failed download is a 0-byte file :/
+            if os.stat(f"{localfn}.zip").st_size == 0:
+                os.unlink(f"{localfn}.zip")
+                continue
+            LOG.info("Worked %s", localfn)
+            break
 
-        subprocess.call("unzip -q %s.zip" % (localfn,), shell=True)
-        files.append(localfn + ".bil")
+        subprocess.call(["unzip", "-q", f"{localfn}.zip"])
+        files.append(f"{localfn}.bil")
 
     return files
 

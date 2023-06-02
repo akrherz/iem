@@ -25,6 +25,7 @@ PDICT = {
     "avg_high_temp": "Average High Temperature",
     "avg_low_temp": "Average Low Temperature",
     "avg_temp": "Average Temperature",
+    "avg_range": "Average Daily Temperature Range",
     "gdd": "Growing Degree Days",
     "days-high-above": (
         "Days with High Temp Greater Than or Equal To (threshold)"
@@ -198,6 +199,7 @@ def plotter(fdict):
                 f"""
         SELECT extract(year from day - '{doff} days'::interval)::int as yr,
         day, high, low, precip, snow, (high + low) / 2. as avg_temp,
+        high - low as range,
         gddxx(:gddbase, :gddceil, high, low) as gdd, era5land_srad,
         merra_srad, narr_srad
         from alldata WHERE station = :station and {daylimit}
@@ -242,6 +244,7 @@ def plotter(fdict):
             avg_temp=("avg_temp", "mean"),
             avg_high_temp=("high", "mean"),
             avg_low_temp=("low", "mean"),
+            avg_range=("range", "mean"),
             precip=("precip", "sum"),
             snow=("snow", "sum"),
             gdd=("gdd", "sum"),

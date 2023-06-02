@@ -104,12 +104,11 @@ def highcharts(fdict):
     """Generate the highcharts variant"""
     ctx = get_context(fdict)
     bins = get_ramp(ctx)
-    dir_edges, _, table = histogram(
-        ctx["df"]["drct"].values,
-        ctx["df"]["smph"].values,
-        bins,
+    _, dir_edges, table = histogram(
+        units("mile / hour") * ctx["df"]["smph"].values,
+        units("degree") * ctx["df"]["drct"].values,
+        units("mile / hour") * bins[1:],
         18,
-        True,
     )
     arr = [drct2text(mydir) for mydir in dir_edges]
     containername = fdict.get("_e", "ap_container")
