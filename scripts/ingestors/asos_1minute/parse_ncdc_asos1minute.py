@@ -3,7 +3,7 @@ Attempt to process the 1 minute archives available from NCEI
 
 NCEI provides monthly tar files for nearly up to the current day here:
 
-https://www1.ncdc.noaa.gov/pub/download/hidden/onemin/
+https://www.ncei.noaa.gov/pub/download/hidden/onemin/
 
 NCEI generates these at about 1530EDT, so we run a bit after that via crontab
 """
@@ -30,7 +30,7 @@ from pyiem.util import (
 from tqdm import tqdm
 
 LOG = logger()
-HIDDENURL = "https://www1.ncdc.noaa.gov/pub/download/hidden/onemin"
+HIDDENURL = "https://www.ncei.noaa.gov/pub/download/hidden/onemin"
 BASEDIR = "/mesonet/ARCHIVE/raw/asos/data"
 TMPDIR = "/mesonet/tmp/asos1min"
 if not os.path.isdir(TMPDIR):

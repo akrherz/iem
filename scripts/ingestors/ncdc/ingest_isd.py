@@ -58,7 +58,7 @@ def main(argv):
         icursor = iemdb.cursor()
         lfn = f"{airforce:06.0f}-{wban:05.0f}-{year}"
         if not os.path.isfile(f"{TMPDIR}/{lfn}"):
-            uri = f"https://www1.ncdc.noaa.gov/pub/data/noaa/{year}/{lfn}.gz"
+            uri = f"https://www.ncei.noaa.gov/pub/data/noaa/{year}/{lfn}.gz"
             req = exponential_backoff(requests.get, uri, timeout=30)
             if req is None or req.status_code != 200:
                 LOG.info("Failed to fetch %s", uri)

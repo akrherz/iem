@@ -53,7 +53,7 @@ $t->content = <<<EOF
 <p>The IEM maintains an archive of processed rain gauge data from the "Fisher Porter"
 equipment that is run at some NWS COOP locations in Iowa.  There is considerable
 delay to the availability of this data from
-<a href="https://www1.ncdc.noaa.gov/pub/data/hpd/data/">NCEI</a>.  Currently, a process
+<a href="https://www.ncei.noaa.gov/pub/data/hpd/data/">NCEI</a>.  Currently, a process
 runs on the 15th each month and downloads data for the previous 3rd, 6th, and 12th month
 to the current date.</p>
 
