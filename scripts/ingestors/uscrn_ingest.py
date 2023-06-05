@@ -14,7 +14,7 @@ from pyiem.util import exponential_backoff, get_dbconn, logger
 
 LOG = logger()
 BASE = "/mesonet/tmp/uscrn"
-URI = "https://www1.ncdc.noaa.gov/pub/data/uscrn/products/subhourly01"
+URI = "https://www.ncei.noaa.gov/pub/data/uscrn/products/subhourly01"
 FTP = "ftp://ftp.ncdc.noaa.gov/pub/data/uscrn/products/subhourly01"
 
 

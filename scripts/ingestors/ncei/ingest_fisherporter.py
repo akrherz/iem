@@ -67,7 +67,7 @@ def main(_argv):
     pgconn = get_dbconn("other")
     for sid in nt.sts:
         url = (
-            "https://www1.ncdc.noaa.gov/pub/data/hpd/auto/v2/beta/15min/"
+            "https://www.ncei.noaa.gov/pub/data/hpd/auto/v2/beta/15min/"
             f"all_csv/USC00{sid}.15m.csv"
         )
         try:
