@@ -27,7 +27,7 @@ LL = (
 
 def get_description():
     """Return a dict describing how to call this plotter"""
-    desc = {"data": False, "description": __doc__}
+    desc = {"data": False, "description": __doc__.replace("{LL}", LL)}
     desc["arguments"] = [
         dict(
             type="state",
@@ -133,7 +133,8 @@ def plotter(fdict):
             crs=EPSG[2163],
         )
         mp.draw_colorbar(bins, cmap, norm, title="flashes per 2x2 km cell")
-    mp.fig.text(0.5, 0.5, "No Flashes Found in Domain.", ha="center")
+    else:
+        mp.fig.text(0.5, 0.5, "No Flashes Found in Domain.", ha="center")
     mp.draw_mask("state")
     mp.drawcounties()
 
