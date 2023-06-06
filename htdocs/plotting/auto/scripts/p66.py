@@ -3,6 +3,13 @@ This chart presents the daily frequency of the
 given date having the prescribed number of previous days above or below
 some provided treshold. <a href="/plotting/auto/?q=216">Autoplot 216</a>
 provides actual streaks and yearly maximum values.
+
+<p>The accumulated precipitation metric is for an inclusive number of trailing
+days evaluated at that given day, so there is not double accounting for days
+that participate in a trailing day period that ended in the future.  Rewording,
+an example frequency of 25% of May 1 would indicate that on that date, it had
+an inclusive trailing number of days accumulation above or below the choosen
+threshold.
 """
 import calendar
 

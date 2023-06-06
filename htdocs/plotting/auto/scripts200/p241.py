@@ -158,6 +158,7 @@ def plotter(fdict):
             f"{res['maxdt']:%Y-%m-%dT%H:%MZ}"
         ),
         stateborderwidth=3,
+        nocaption=True,
     )
     if ctx["mode"] == "fz":
         # https://colorbrewer2.org/#type=diverging&scheme=RdYlBu&n=8
