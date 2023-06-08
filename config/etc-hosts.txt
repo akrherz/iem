@@ -14,7 +14,7 @@
 192.168.0.1      iem-director0.local
 192.168.0.2      iem-director1.local
 192.168.0.4      thumper-ah.local
-192.168.0.12     iem12.local lesync.local
+192.168.0.12     iem12.local
 192.168.0.18     iem18.local
 
 # VM servers for webfarm nodes
@@ -122,7 +122,5 @@
 10.24.19.228 pyvbcam.local
 # iem8-dc
 10.90.12.30 iembot
-# iem11, still needed to shield bandwidth
-192.168.0.235    iem-ldm.local
 # iemvm4 <-> metvm3
 10.24.19.118  iem-archive.local
