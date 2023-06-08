@@ -17,7 +17,9 @@ function attrs2str($arr)
     $s = "";
     if (is_array($arr)) {
         foreach ($arr as $key => $value) {
-            $s .= sprintf("%s=%s<br />", $key, $value);
+            if ($key != ""){  // Good grief PHP
+                $s .= sprintf("%s=%s<br />", $key, $value);
+            }
         }
     }
     return $s;
@@ -225,6 +227,7 @@ added stations.
 <br /><strong>Special Table Requests</strong>
 <ul>
  <li><a href="networks.php?special=allasos&format=gempak&nohtml">Global METAR in GEMPAK Format</a></li>
+ <li><a href="networks.php?special=allasos&format=csv&nohtml">Global METAR in CSV Format</a></li>
 <li><a href="/geojson/network/AZOS.geojson">Global METAR/ASOS in GeoJSON</a></li>
  </ul>
 </div>
@@ -247,7 +250,8 @@ table that you need, please <a href="/info/contacts.php">let us know</a>.</p>
 </td></tr>
 
 <tr>
- <td colspan="2"><input type="checkbox" name="nohtml">Just Table, no HTML</td></tr>
+ <td colspan="2"><input type="checkbox" name="nohtml" id="nohtml">
+ <label for="nohtml">Just Table, no HTML</label></td></tr>
 
 <tr><td colspan="2">
 <input type="submit" value="Create Table">
