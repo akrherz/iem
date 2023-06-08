@@ -306,10 +306,6 @@ RewriteRule ^/search /search.py [QSA]
     RewriteRule ^[0-9]{4}/[0-9]{2}/.*$ content.py [PT]
   </Directory>
 
-  <Directory "/opt/iem/htdocs/current">
-    RewriteRule live/(.*).jpg http://pyvbcam.local/live.py?id=$1 [P]
-  </Directory>
-
   <Directory "/opt/iem/htdocs/other">
     RewriteRule kymn.phtml current.phtml?network=KYMN
   </Directory>
