@@ -93,15 +93,6 @@ if (pg_num_rows($result) == 1) {
   fjs.parentNode.insertBefore(js, fjs);
 }(document, 'script', 'facebook-jssdk'));
 
-window.fbAsyncInit = function() {
-    FB.Event.subscribe('comment.create', function(response){
-        $.post('/fbcomments.php', {
-          "action": "comment created",
-          "url_of_page_comment_leaved_on": response.href,
-          "id_of_comment_object": response.commentID
-        });
-      });
-}
 </script>
 EOF;
     $huri = "https://mesonet.agron.iastate.edu/onsite/news.phtml?id=" . $id;
