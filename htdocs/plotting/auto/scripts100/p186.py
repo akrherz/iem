@@ -78,10 +78,10 @@ def plotter(fdict):
         for key, _state in state_fips.items():
             if _state == state:
                 fips = key
-        payload = {"area": fips, "statstype": "2"}
+        payload = {"area": fips, "statstype": "'2'", "diff": "'0'"}
     else:
         url = url.replace("_state", "_national")
-        payload = {"area": "'conus'", "statstype": "2"}
+        payload = {"area": "'conus'", "statstype": "'2'", "diff": "'0'"}
     headers = {}
     headers["Accept"] = "application/json, text/javascript, */*; q=0.01"
     headers["Content-Type"] = "application/json; charset=UTF-8"
@@ -93,9 +93,9 @@ def plotter(fdict):
     if "d" not in jdata:
         raise NoDataFound("Data Not Found.")
     df = pd.DataFrame(jdata["d"])
-    df["Date"] = pd.to_datetime(
-        df["mapDate"], format="%m/%d/%Y" if ctx["w"] == "state" else "%m-%d-%Y"
-    )
+    for c in ["0", "1", "2", "3", "4"]:
+        df[f"D{c}"] = pd.to_numeric(df[f"D{c}"])
+    df["Date"] = pd.to_datetime(df["Date"], format="%Y-%m-%d")
     df = df.sort_values("Date", ascending=True)
     df["x"] = df["Date"] + datetime.timedelta(hours=3.5 * 24)
     # accounting

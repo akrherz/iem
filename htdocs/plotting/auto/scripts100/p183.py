@@ -1,4 +1,9 @@
-"""USDM Filled Time Series"""
+"""
+This plot presents a time series of areal coverage
+of United States Drought Monitor for a given state of your choice. This
+plot uses a JSON data service provided by the
+<a href="https://droughtmonitor.unl.edu">Drought Monitor</a> website.
+"""
 import datetime
 
 import matplotlib.dates as mdates
@@ -19,15 +24,7 @@ PDICT = {"state": "Plot Individual State", "national": "Plot CONUS"}
 
 def get_description():
     """Return a dict describing how to call this plotter"""
-    desc = {}
-    desc["data"] = True
-    desc[
-        "description"
-    ] = """This plot presents a time series of areal coverage
-    of United States Drought Monitor for a given state of your choice. This
-    plot uses a JSON data service provided by the
-    <a href="https://droughtmonitor.unl.edu">Drought Monitor</a> website.
-    """
+    desc = {"description": __doc__, "data": True}
     today = datetime.datetime.today()
     sts = today - datetime.timedelta(days=720)
     desc["arguments"] = [
@@ -69,10 +66,10 @@ def plotter(fdict):
         if entry == state:
             fips = f"{key:02.0f}"
     if ctx["s"] == "state":
-        payload = {"area": f"'{fips}'", "statstype": "2"}  # Le Sigh
+        payload = {"area": f"'{fips}'", "statstype": "'2'", "diff": "'0'"}
         suffix = "state"
     else:
-        payload = {"area": "conus", "statstype": "2"}
+        payload = {"area": "'conus'", "statstype": "'2'", "diff": "'0'"}
         suffix = "national"
     headers = {}
     headers["Accept"] = "application/json, text/javascript, */*; q=0.01"
@@ -84,7 +81,9 @@ def plotter(fdict):
     if "d" not in jdata:
         raise NoDataFound("No data Found.")
     df = pd.DataFrame(jdata["d"])
-    df["Date"] = pd.to_datetime(df["mapDate"], format="%m/%d/%Y")
+    for c in ["0", "1", "2", "3", "4"]:
+        df[f"D{c}"] = pd.to_numeric(df[f"D{c}"])
+    df["Date"] = pd.to_datetime(df["Date"], format="%Y-%m-%d")
     df = df[
         (df["Date"] >= pd.Timestamp(sdate))
         & (df["Date"] <= pd.Timestamp(edate))
@@ -165,7 +164,7 @@ def plotter(fdict):
     ax.set_position([0.1, 0.15, 0.8, 0.75])
     ax.xaxis.set_major_formatter(mdates.DateFormatter("%b\n%Y"))
 
-    return fig, df[["Date", "NONE", "D0", "D1", "D2", "D3", "D4"]]
+    return fig, df[["Date", "None", "D0", "D1", "D2", "D3", "D4"]]
 
 
 if __name__ == "__main__":

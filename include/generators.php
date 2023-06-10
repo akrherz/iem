@@ -1,49 +1,66 @@
-<?php 
+<?php
 /*
  * functions that generate stuff
  */
-require_once dirname(__FILE__) ."/database.inc.php";
+require_once dirname(__FILE__) . "/database.inc.php";
 
-function get_news_by_tag($tag){
+function get_news_by_tag($tag)
+{
     // Generate a listing of recent news items by a certain tag
     $pgconn = iemdb("mesosite", TRUE, TRUE);
-    $rs = pg_prepare($pgconn, "NEWSTAGSELECT",
-            "SELECT id, entered, title from news WHERE "
-            ."tags @> ARRAY[$1]::varchar[] ORDER by entered DESC LIMIT 5");
-    $rs = pg_execute($pgconn, "NEWSTAGSELECT", Array($tag));
+    $rs = pg_prepare(
+        $pgconn,
+        "NEWSTAGSELECT",
+        "SELECT id, entered, title from news WHERE "
+            . "tags @> ARRAY[$1]::varchar[] ORDER by entered DESC LIMIT 5"
+    );
+    $rs = pg_execute($pgconn, "NEWSTAGSELECT", array($tag));
     $s = "<h3>Recent News Items</h3><p>Most recent news items tagged: "
-        ."{$tag}</p><ul>";
-    for($i=0;$row=pg_fetch_assoc($rs);$i++){
-        $s .= sprintf("<li><a href=\"/onsite/news.phtml?id=%s\">%s</a>"
-                ."<br />Posted: %s</li>\n", $row["id"],
-                $row["title"], date("d M Y", strtotime($row["entered"])));
+        . "{$tag}</p><ul>";
+    for ($i = 0; $row = pg_fetch_assoc($rs); $i++) {
+        $s .= sprintf(
+            "<li><a href=\"/onsite/news.phtml?id=%s\">%s</a>"
+                . "<br />Posted: %s</li>\n",
+            $row["id"],
+            $row["title"],
+            date("d M Y", strtotime($row["entered"]))
+        );
     }
     $s .= "</ul>";
     return $s;
 }
 
-function get_iemapps_tags($tagname){
+function get_iemapps_tags($tagname)
+{
     // Get a html list for this tagname
     $pgconn = iemdb("mesosite", TRUE, TRUE);
-    $rs = pg_prepare($pgconn, "TAGSELECT", 
-            "SELECT name, description, url from iemapps WHERE "
-            ."appid in (SELECT appid from iemapps_tags WHERE tag = $1) "
-            ."ORDER by name ASC");
-    $rs = pg_execute($pgconn, "TAGSELECT", Array($tagname));
+    $rs = pg_prepare(
+        $pgconn,
+        "TAGSELECT",
+        "SELECT name, description, url from iemapps WHERE "
+            . "appid in (SELECT appid from iemapps_tags WHERE tag = $1) "
+            . "ORDER by name ASC"
+    );
+    $rs = pg_execute($pgconn, "TAGSELECT", array($tagname));
     $s = "<ul>";
-    for($i=0;$row=pg_fetch_assoc($rs);$i++){
-        $s .= sprintf("<li><a href=\"%s\">%s</a><br />%s</li>\n", $row["url"],
-                $row["name"], $row["description"]);	
+    for ($i = 0; $row = pg_fetch_assoc($rs); $i++) {
+        $s .= sprintf(
+            "<li><a href=\"%s\">%s</a><br />%s</li>\n",
+            $row["url"],
+            $row["name"],
+            $row["description"]
+        );
     }
     $s .= "</ul>";
     return $s;
 }
 
-function get_website_stats(){
+function get_website_stats()
+{
     $memcache = new Memcached();
     $memcache->addServer('iem-memcached', 11211);
     $val = $memcache->get("iemperf.json");
-    if (! $val){
+    if (!$val) {
         // Fetch from nagios
         $val = @file_get_contents("https://nagios.agron.iastate.edu/cgi-bin/get_iemstats.py");
         if ($val) $memcache->set("iemperf.json", $val, 90);
@@ -52,23 +69,22 @@ function get_website_stats(){
     $rcolor = "success";
     $bandwidth = 0;
     $req = 0;
-    if ($val){
+    if ($val) {
         $jobj = json_decode($val);
-    
+
         $bandwidth = $jobj->stats->bandwidth / 1000000.0;
         // grading of the bandwidth (MB/s)
         if ($bandwidth > 35) $bcolor = "warning";
         if ($bandwidth > 70) $bcolor = "danger";
-    
+
         $req = $jobj->stats->apache_req_per_sec;
         if ($req > 5000) $rcolor = "warning";
         if ($req > 7500) $rcolor = "danger";
-        
     }
     $label = sprintf("%.1f MB/s", $bandwidth);
-    $bpercent = intval( $bandwidth / 124.0  * 100.0 );
+    $bpercent = intval($bandwidth / 124.0  * 100.0);
     $rlabel = number_format($req);
-    $rpercent = intval( $req / 15000.0 * 100.0);    
+    $rpercent = intval($req / 15000.0 * 100.0);
 
     $s = <<<EOF
 <div class="panel panel-default">
@@ -93,43 +109,46 @@ EOF;
     return $s;
 }
 
-function gen_feature($t){
+function gen_feature($t)
+{
     $s = '';
-    
+
     $connection = iemdb("mesosite", TRUE, TRUE);
     $query1 = "SELECT *, to_char(valid, 'YYYY/MM/YYMMDD') as imageref,
                 to_char(valid, 'DD Mon YYYY HH:MI AM') as webdate,
                 to_char(valid, 'YYYY-MM-DD') as permalink from feature
                 WHERE valid < now() ORDER by valid DESC LIMIT 1";
     $result = pg_exec($connection, $query1);
-    $row = pg_fetch_assoc($result,0);
+    $row = pg_fetch_assoc($result, 0);
     $good = intval($row["good"]);
     $bad = intval($row["bad"]);
     $abstain = intval($row["abstain"]);
-    $tags = ($row["tags"] != null) ? explode(",", $row["tags"]): Array();
+    $tags = ($row["tags"] != null) ? explode(",", $row["tags"]) : array();
     $fbid = $row["fbid"];
-    $fburl = sprintf("https://www.facebook.com/permalink.php?".
-            "story_fbid=%s&id=157789644737", $fbid);
-    
-    $imghref = sprintf("/onsite/features/%s.%s", $row["imageref"],
-        $row["mediasuffix"]);
-    
+    $fburl = sprintf("https://www.facebook.com/permalink.php?" .
+        "story_fbid=%s&id=157789644737", $fbid);
+
+    $imghref = sprintf(
+        "/onsite/features/%s.%s",
+        $row["imageref"],
+        $row["mediasuffix"]
+    );
+
     $linktext = "";
-    if ($row["appurl"] != ""){
-        $linktext = "<br /><a class=\"btn btn-sm btn-primary\" href=\"".$row["appurl"]."\"><i class=\"fa fa-signal\"></i> Generate This Chart on Website</a>";
+    if ($row["appurl"] != "") {
+        $linktext = "<br /><a class=\"btn btn-sm btn-primary\" href=\"" . $row["appurl"] . "\"><i class=\"fa fa-signal\"></i> Generate This Chart on Website</a>";
     }
-    
+
     $tagtext = "";
-    if (sizeof($tags) > 0){
+    if (sizeof($tags) > 0) {
         $tagtext .= "<br /><small>Tags: &nbsp; ";
-        foreach($tags as $k => $v)
-        {
+        foreach ($tags as $k => $v) {
             $tagtext .= sprintf("<a href=\"/onsite/features/tags/%s.html\">%s</a> &nbsp; ", $v, $v);
         }
         $tagtext .= "</small>";
     }
     $jsextra = "";
-    if ($row["mediasuffix"] == 'mp4'){
+    if ($row["mediasuffix"] == 'mp4') {
         $imgiface = <<<EOM
 <video class="img img-responsive" controls>
     <source src="{$imghref}" type="video/mp4">
@@ -139,7 +158,7 @@ EOM;
     } else {
         $imgiface = "<a href=\"$imghref\"><img src=\"$imghref\" alt=\"Feature\" class=\"img img-responsive\" /></a>";
     }
-    if ($row["javascripturl"]){
+    if ($row["javascripturl"]) {
         $imgiface = <<<EOF
 <div class="hidden-sm hidden-xs">
 <div id="ap_container" style="width:100%s;height:400px;"></div>
@@ -156,7 +175,7 @@ EOF;
 <script src="{$row["javascripturl"]}"></script>
 EOF;
     }
-    
+
     $s .= <<<EOF
 <div class="panel panel-default top-buffer">
     <div class="panel-heading">
@@ -183,23 +202,19 @@ EOF;
             {$imgiface}
             <div class="caption"><span>{$row["caption"]}</span>{$linktext}</div>
         </div>
-        
+
         <h4 style="display: inline;">{$row["title"]}</h4>
         
             <br /><small>Posted: {$row["webdate"]}, Views: {$row["views"]}</small>
             {$tagtext}
             <br />{$row["story"]}
-    
-            
-
 
         <div class="clearfix"></div>
-            
 
 EOF;
-    
+
     /* Rate Feature and Past ones too! */
-    if ($row["voting"] == "f"){
+    if ($row["voting"] == "f") {
         $fbtext = "";
         $vtext = "";
     } else {
@@ -219,7 +234,7 @@ EOF;
         </div>
     </div>
 EOF;
-        
+
         $t->jsextra = <<<EOF
         <div id="fb-root"></div>
 <script type="text/javascript">
@@ -231,15 +246,6 @@ EOF;
   fjs.parentNode.insertBefore(js, fjs);
 }(document, 'script', 'facebook-jssdk'));
 
-window.fbAsyncInit = function() {
-    FB.Event.subscribe('comment.create', function(response){
-        $.post('/fbcomments.php', {
-          "action": "comment created",
-          "url_of_page_comment_leaved_on": response.href,
-          "id_of_comment_object": response.commentID
-        });
-      });
-}
 function onFeatureData(data){
       $("#feature_good_votes").html(data.good);
       $("#feature_bad_votes").html(data.bad);
@@ -259,7 +265,7 @@ $(document).ready(function(){
 </script>
 {$jsextra}
 EOF;
-        $huri = "https://mesonet.agron.iastate.edu/onsite/features/cat.php?day=". $row["permalink"] ;
+        $huri = "https://mesonet.agron.iastate.edu/onsite/features/cat.php?day=" . $row["permalink"];
         $fbtext = <<<EOF
 <div class="fb-comments" data-href="{$huri}" data-numposts="5" data-colorscheme="light"></div>
 EOF;
@@ -277,27 +283,33 @@ EOF;
             and extract(day from valid) = extract(day from now()) and 
             extract(year from valid) != extract(year from now()) ORDER by yr DESC";
     $result = pg_exec($connection, $sql);
-    
-    for($i=0;$row=pg_fetch_assoc($result);$i++)
-    {
+
+    for ($i = 0; $row = pg_fetch_assoc($result); $i++) {
         // Start a new row
-        if ($i % 2 == 0){ $s .= "\n<div class=\"row\">"; }
-        $s .= sprintf("\n<div class=\"col-xs-6\">%s: %s".
-                "<a href=\"onsite/features/cat.php?day=%s\">".
+        if ($i % 2 == 0) {
+            $s .= "\n<div class=\"row\">";
+        }
+        $s .= sprintf(
+            "\n<div class=\"col-xs-6\">%s: %s" .
+                "<a href=\"onsite/features/cat.php?day=%s\">" .
                 "%s</a></div>",
-                $row["yr"],
-                $row["appurl"] ? "<i class=\"fa fa-signal\"></i> ": "",
-                substr($row["valid"], 0, 10), $row["title"]);
+            $row["yr"],
+            $row["appurl"] ? "<i class=\"fa fa-signal\"></i> " : "",
+            substr($row["valid"], 0, 10),
+            $row["title"]
+        );
         // End the row
-        if ($i % 2 != 0){ $s .= "\n</div>\n"; }
+        if ($i % 2 != 0) {
+            $s .= "\n</div>\n";
+        }
     }
-    
-    if ($i > 0 && $i % 2 != 0){ 
-        $s .= "\n<div class=\"col-xs-6\">&nbsp;</div>\n</div>"; 
+
+    if ($i > 0 && $i % 2 != 0) {
+        $s .= "\n<div class=\"col-xs-6\">&nbsp;</div>\n</div>";
     }
-        
+
     $s .= "</div><!--  end of panel body -->";
     $s .= "</div><!-- end of panel -->";
-    
+
     return $s;
 }

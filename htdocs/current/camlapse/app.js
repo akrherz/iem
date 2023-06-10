@@ -47,9 +47,9 @@ $(() => {
             document.getElementById('mylapse').value = mylapse;
             window.setTimeout(myloader, 1000);
         } else {
-            document.getElementById('mycam').value = 'ames';
+            document.getElementById('mycam').value = 'isu_curtis_center';
         }
     } else {
-        document.getElementById('mycam').value = 'ames';
+        document.getElementById('mycam').value = 'isu_curtis_center';
     }
 });
