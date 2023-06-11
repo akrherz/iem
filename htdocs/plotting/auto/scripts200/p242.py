@@ -38,6 +38,7 @@ ICONS = {
     "F": "flood.png",
     "v": "flood.png",
     "G": "wind.png",
+    "h": "hail.png",
     "H": "hail.png",
     "I": "hot.png",
     "J": "fog.png",
