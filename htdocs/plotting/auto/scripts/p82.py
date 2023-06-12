@@ -1,4 +1,11 @@
-"""Calendar Plot of Automated Station Summaries"""
+"""
+This chart presents a series of daily summary data
+as a calendar.  The daily totals should be valid for the local day of the
+weather station.  The climatology is based on the nearest NCEI 1981-2010
+climate station, which in most cases is the same station.  Climatology
+values are rounded to the nearest whole degree Fahrenheit and then compared
+against the observed value to compute a departure.
+"""
 import datetime
 
 import numpy as np
@@ -24,6 +31,8 @@ PDICT = {
     "avg_departure": "Average Temperature Departure",
     "max_dwpf": "Highest Dew Point Temperature",
     "min_dwpf": "Lowest Dew Point Temperature",
+    "max_feel": "Maximum Feels Like Temperature",
+    "min_feel": "Minimum Feels Like Temperature",
     "avg_smph": "Average Wind Speed [mph]",
     "max_smph": "Maximum Wind Speed/Gust [mph]",
     "pday": "Precipitation",
@@ -35,17 +44,7 @@ COLORS = "white #ffff72 #ffc672 #ff7272 #e28eff".split()
 
 def get_description():
     """Return a dict describing how to call this plotter"""
-    desc = {}
-    desc["data"] = True
-    desc[
-        "description"
-    ] = """This chart presents a series of daily summary data
-    as a calendar.  The daily totals should be valid for the local day of the
-    weather station.  The climatology is based on the nearest NCEI 1981-2010
-    climate station, which in most cases is the same station.  Climatology
-    values are rounded to the nearest whole degree Fahrenheit and then compared
-    against the observed value to compute a departure.
-    """
+    desc = {"description": __doc__, "data": True}
     today = datetime.date.today()
     m90 = today - datetime.timedelta(days=90)
     desc["arguments"] = [
@@ -154,6 +153,8 @@ def plotter(fdict):
             low as min_tmpf,
             null as max_dwpf,
             null as min_dwpf,
+            null as max_feel,
+            null as min_feel,
             (high + low) / 2. as avg_tmpf,
             precip as pday,
             null as avg_sknt, null as peak_wind,
@@ -172,7 +173,7 @@ def plotter(fdict):
             SELECT day, max_tmpf, min_tmpf, max_dwpf, min_dwpf,
             (max_tmpf + min_tmpf) / 2. as avg_tmpf,
             pday, avg_sknt, coalesce(max_gust, max_sknt) as peak_wind,
-            max_rstage
+            max_rstage, max_feel, min_feel
             from summary s JOIN stations t
             on (t.iemid = s.iemid) WHERE s.day >= %s and s.day <= %s and
             t.id = %s and t.network = %s ORDER by day ASC
@@ -209,6 +210,8 @@ def plotter(fdict):
                 avg_departure=ad,
                 min_tmpf=row["min_tmpf"],
                 avg_tmpf=row["avg_tmpf"],
+                min_feel=row["min_feel"],
+                max_feel=row["max_feel"],
                 pday=row["pday"],
                 max_rstage=row["max_rstage"],
             )

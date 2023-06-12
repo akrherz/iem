@@ -27,7 +27,7 @@ if BASEDIR not in sys.path:
 # Local
 import scripts  # noqa
 
-HIGHCHARTS = "10.1.0"
+HIGHCHARTS = "11.1.0"
 OPENLAYERS = "7.2.2"
 CSECTORS = state_names.copy()
 CSECTORS.update(SECTORS_NAME)
