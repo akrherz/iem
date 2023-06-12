@@ -53,6 +53,7 @@ const lsrLookup = {
     "F": "/lsr/icons/flood.png",
     "v": "/lsr/icons/flood.png",
     "G": "/lsr/icons/wind.png",
+    "h": "/lsr/icons/hail.png",
     "H": "/lsr/icons/hail.png",
     "I": "/lsr/icons/hot.png",
     "J": "/lsr/icons/fog.png",

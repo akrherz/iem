@@ -1,4 +1,9 @@
-"""Time series plot."""
+"""
+This chart displays a simple time series of
+an observed variable for a location of your choice.  For sites in the
+US, the daily high and low temperature climatology is presented as a
+filled bar for each day plotted when Air Temperature is selected.
+"""
 import datetime
 
 import numpy as np
@@ -29,15 +34,8 @@ UNITS = {
 
 def get_description():
     """Return a dict describing how to call this plotter"""
-    desc = {}
+    desc = {"description": __doc__, "data": True}
     ts = datetime.date.today() - datetime.timedelta(days=365)
-    desc["data"] = True
-    desc[
-        "description"
-    ] = """This chart displays a simple time series of
-    an observed variable for a location of your choice.  For sites in the
-    US, the daily high and low temperature climatology is presented as a
-    filled bar for each day plotted when Air Temperature is selected."""
     desc["arguments"] = [
         dict(
             type="zstation",
@@ -71,7 +69,7 @@ def highcharts(fdict):
     ranges = []
     now = ctx["sdate"]
     oneday = datetime.timedelta(days=1)
-    while ctx["climo"] is not None and (now - oneday) <= ctx["edate"]:
+    while ctx["climo"] and (now - oneday) <= ctx["edate"]:
         ranges.append(
             [
                 int(now.strftime("%s")) * 1000.0,
@@ -258,4 +256,11 @@ def plotter(fdict):
 
 
 if __name__ == "__main__":
-    plotter({})
+    highcharts(
+        {
+            "network": "IS__ASOS",
+            "zstation": "BIHN",
+            "sdate": "2022-06-12",
+            "days": 365,
+        }
+    )

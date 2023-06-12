@@ -143,6 +143,7 @@ var lsrLookup = {
     "F": "icons/flood.png",
     "v": "icons/flood.png",
     "G": "icons/wind.png",
+    "h": "icons/hail.png",
     "H": "icons/hail.png",
     "I": "icons/hot.png",
     "J": "icons/fog.png",
