@@ -108,31 +108,41 @@ def highcharts(fdict):
         units("mile / hour") * ctx["df"]["smph"].values,
         units("degree") * ctx["df"]["drct"].values,
         units("mile / hour") * bins[1:],
-        18,
+        16,
     )
+    table = table.m
+    dir_edges = dir_edges.m
     arr = [drct2text(mydir) for mydir in dir_edges]
     containername = fdict.get("_e", "ap_container")
     return f"""
     var arr = {arr};
     Highcharts.chart("{containername}", {{
         series: [
-        {{name: '{bins[1]} - {bins[2]}',
-          data: {str(list(zip(arr, table[1])))},
-          _colorIndex: 0}},
+        {{
+            name: '{bins[1]} - {bins[2]}',
+            data: {str(list(table[:, 0]))},
+            pointInterval: 22.5,
+            _colorIndex: 0
+        }},
         {{name: '{bins[2]} - {bins[3]}',
-        data: {str(list(zip(arr, table[2])))},
+        data: {str(list(table[:, 1]))},
+            pointInterval: 22.5,
         _colorIndex: 1}},
         {{name: '{bins[3]} - {bins[4]}',
-        data: {str(list(zip(arr, table[3])))},
+        data: {str(list(table[:, 2]))},
+            pointInterval: 22.5,
         _colorIndex: 2}},
         {{name: '{bins[4]} - {bins[5]}',
-        data: {str(list(zip(arr, table[4])))},
+        data: {str(list(table[:, 3]))},
+            pointInterval: 22.5,
         _colorIndex: 3}},
         {{name: '{bins[5]} - {bins[6]}',
-        data: {str(list(zip(arr, table[5])))},
+        data: {str(list(table[:, 4]))},
+            pointInterval: 22.5,
         _colorIndex: 4}},
         {{name: '{bins[6]} +',
-        data: {str(list(zip(arr, table[6])))},
+        data: {str(list(table[:, 5]))},
+            pointInterval: 22.5,
         _colorIndex: 5}}
         ],
     chart: {{
@@ -143,10 +153,12 @@ def highcharts(fdict):
             'text': '{ctx["title"]}'
     }},
     subtitle: {{
-            'text': '{ctx["subtitle"]}'
+        'text': '{ctx["subtitle"]}'
     }},
     pane: {{
-            'size': '85%'
+        startAngle: 0,
+        endAngle: 360,
+        'size': '85%'
     }},
     legend: {{
         title: {{text: 'Wind Speed [MPH]'}},
@@ -154,21 +166,9 @@ def highcharts(fdict):
             layout: 'horizontal'
     }},
     xAxis: {{
-        'tickInterval': 18./8.,
-        'labels': {{
-                   formatter: function(){{
-                       var v = this.value.toFixed(1);
-                       if (v == '0.0') {{return 'N';}}
-                       if (v == '2.3') {{return 'NE';}}
-                       if (v == '4.5') {{return 'E';}}
-                       if (v == '6.8') {{return 'SE';}}
-                       if (v == '9.0') {{return 'S';}}
-                       if (v == '11.3') {{return 'SW';}}
-                       if (v == '13.5') {{return 'W';}}
-                       if (v == '15.8') {{return 'NW';}}
-                       return v;
-                   }}
-        }}
+        tickInterval: 22.5,
+        min: 0,
+        max: 360
     }},
     yAxis: {{
             'min': 0,
@@ -296,9 +296,11 @@ def plotter(fdict):
     """Go"""
     ctx = get_context(fdict)
 
-    wr = WindrosePlot(rect=[0.08, 0.15, 0.86, 0.7])
-    wr.fig.text(0.15, 0.95, ctx["plottitle"])
-    wr.fig.text(0.15, 0.9, ctx["subtitle"])
+    wr = WindrosePlot(
+        title=ctx["plottitle"],
+        subtitle=ctx["subtitle"],
+        rect=[0.08, 0.15, 0.86, 0.7],
+    )
     bins = units("mile / hour") * get_ramp(ctx)[1:]
     wr.barplot(
         units("degree") * ctx["df"]["drct"].values,
@@ -307,18 +309,18 @@ def plotter(fdict):
         bins=bins,
         opening=0.8,
         edgecolor="white",
-        nsector=18,
+        nsector=16,
     )
 
     return wr.fig, ctx["df"]
 
 
 if __name__ == "__main__":
-    plotter(
+    highcharts(
         {
             "station": "AMW",
-            "month": "jan",
-            "opt": "tmpf_above",
+            "month": "all",
+            "opt": "ts",
             "threshold": 32,
         }
     )
