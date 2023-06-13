@@ -24,6 +24,8 @@ PDICT = {
     "low_tmpk_12z": "Minimum Temperature at 12 UTC",
     "high_tmpk": "Maximum Temperature",
     "high_tmpk_12z": "Maximum Temperature at 12 UTC",
+    "high_soil4t": "Maximum 4 Inch Soil Temperature",
+    "low_soil4t": "Minimum 4 Inch Soil Temperature",
     "power_swdn": "NASA POWER :: Incident Shortwave Down",
     "rsds": "Solar Radiation",
     "avg_dwpk": "Average Dew Point",
@@ -142,6 +144,8 @@ def plotter(fdict):
             "high_tmpk_12z",
             "low_tmpk_12z",
             "avg_dwpk",
+            "high_soil4t",
+            "low_soil4t",
         ]:
             # Value is in W m**-2, we want MJ
             data = (
@@ -199,4 +203,4 @@ def plotter(fdict):
 
 
 if __name__ == "__main__":
-    plotter(dict(ptype="g", date="2016-01-03", var="high_tmpk_12z"))
+    plotter({"ptype": "g", "date": "2016-01-03", "var": "high_tmpk_12z"})

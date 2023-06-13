@@ -187,6 +187,24 @@ def init_year(ts):
     v1.coordinates = "lon lat"
     v1.description = "from NASA POWER"
 
+    v1 = nc.createVariable(
+        "high_soil4t", np.uint16, ("time", "lat", "lon"), fill_value=65535
+    )
+    v1.units = "K"
+    v1.scale_factor = 0.01
+    v1.long_name = "4inch Soil Temperature Daily High"
+    v1.standard_name = "4inch Soil Temperature"
+    v1.coordinates = "lon lat"
+
+    v1 = nc.createVariable(
+        "low_soil4t", np.uint16, ("time", "lat", "lon"), fill_value=65535
+    )
+    v1.units = "K"
+    v1.scale_factor = 0.01
+    v1.long_name = "4inch Soil Temperature Daily Low"
+    v1.standard_name = "4inch Soil Temperature"
+    v1.coordinates = "lon lat"
+
     nc.close()
 
 
