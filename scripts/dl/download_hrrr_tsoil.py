@@ -1,9 +1,8 @@
 """
- Since the NOAAPort feed of HRRR data does not have radiation, we should
- download this manually from NCEP
+Since the NOAAPort feed of HRRR data does not have radiation, we should
+download this manually from NCEP
 
-Run at 40 AFTER for the previous hour
-
+Run at 40 AFTER for the previous hour.
 """
 import datetime
 import os
@@ -11,6 +10,7 @@ import subprocess
 import sys
 import tempfile
 
+import pygrib
 import requests
 from pyiem.util import exponential_backoff, logger, utc
 
@@ -23,7 +23,17 @@ def need_to_run(valid):
         "/mesonet/ARCHIVE/data/%Y/%m/%d/model/hrrr/"
         "%H/hrrr.t%Hz.3kmf00.grib2"
     )
-    return not os.path.isfile(gribfn)
+    # If the file does not exist, we have no choice
+    if not os.path.isfile(gribfn):
+        return True
+    # Look for our grids please.
+    grbs = pygrib.open(gribfn)
+    hits = 0
+    for grb in grbs:
+        if grb.shortName in ["soilw", "st"]:
+            hits += 1
+    LOG.info("Found %s soil fields in %s", hits, gribfn)
+    return hits != 10
 
 
 def fetch(valid):
@@ -68,8 +78,8 @@ def fetch(valid):
         "data u %Y%m%d%H00 bogus model/hrrr/%H/hrrr.t%Hz.3kmf00.grib2 grib2"
     )
 
-    if len(offsets) != 13:
-        LOG.info("warning, found %s gribs for %s", len(offsets), valid)
+    if len(offsets) != 10:
+        LOG.warning("warning, found %s gribs for %s", len(offsets), valid)
     for pr in offsets:
         headers = {"Range": f"bytes={pr[0]}-{pr[1]}"}
         req = exponential_backoff(
