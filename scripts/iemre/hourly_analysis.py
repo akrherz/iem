@@ -25,6 +25,7 @@ def use_era5land(ts, kind):
     """Use the ERA5Land dataset."""
     tasks = {
         "wind": ["uwnd", "vwnd"],
+        "soilt": ["soilt"],
     }
     ncfn = f"/mesonet/data/era5/{ts:%Y}_era5land_hourly.nc"
     if not os.path.isfile(ncfn):
@@ -38,7 +39,10 @@ def use_era5land(ts, kind):
             res = []
             xi, yi = np.meshgrid(iemre.XAXIS, iemre.YAXIS)
             for task in tasks[kind]:
-                vals = nc.variables[task][tidx, :, :]
+                if task == "soilt":
+                    vals = nc.variables[task][tidx, 0, :, :]
+                else:
+                    vals = nc.variables[task][tidx, :, :]
                 if vals.mask.all():
                     continue
                 # OK, ERA5Land is tight to land and when we interpolate
@@ -54,10 +58,42 @@ def use_era5land(ts, kind):
                 data.mask = np.isnan(data)
                 res.append(data)
         if res:
-            return res
+            return res[0] if len(res) == 1 else res
 
     except Exception as exp:
         LOG.warning("%s exp:%s", ncfn, exp)
+    return None
+
+
+def use_hrrr_soilt(ts):
+    """Verbatim copy HRRR, if it exists."""
+    # We may be running close to real-time, so it makes some sense to take
+    # files from the recent past.
+    grbfn = None
+    for offset in range(5):
+        fn = (ts - datetime.timedelta(hours=offset)).strftime(
+            "/mesonet/ARCHIVE/data/%Y/%m/%d/model/hrrr/%H/"
+            "hrrr.t%Hz.3kmf00.grib2"
+        )
+        if os.path.isfile(fn):
+            grbfn = fn
+            break
+    if grbfn is None:
+        LOG.info("Failed to find any HRRR grib files")
+        return None
+    try:
+        grbs = pygrib.open(fn)
+        lats = None
+        for grb in grbs:
+            if grb.shortName != "st" or str(grb).find("level 0.1 m") == -1:
+                continue
+            lats, lons = [np.ravel(x) for x in grb.latlons()]
+            xi, yi = np.meshgrid(iemre.XAXIS, iemre.YAXIS)
+            nn = NearestNDInterpolator((lons, lats), np.ravel(grb.values))
+            return nn(xi, yi)
+        grbs.close()
+    except Exception as exp:
+        LOG.debug("%s exp:%s", fn, exp)
     return None
 
 
@@ -206,6 +242,14 @@ def grid_hour(ts):
             params=params,
             index_col="station",
         )
+
+    # Soil Temperature, try ERA5Land
+    res = use_era5land(ts, "soilt")
+    if res is None:
+        # Use HRRR
+        res = use_hrrr_soilt(ts)
+    if res is not None:
+        write_grid(ts, "soil4t", res)
 
     # try first to use RTMA
     res = use_rtma(ts, "wind")

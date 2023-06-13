@@ -81,6 +81,8 @@ def copy_iemre(ts, ds):
     offset1 = iemre.hourly_offset(sts)
     offset2 = iemre.hourly_offset(ets)
     windhours = 0
+    hi_soil4t = None
+    lo_soil4t = None
     if ts.month == 12 and ts.day == 31:
         LOG.warning(
             "p01d      for %s [idx:%s] %s(%s)->%s(%s) SPECIAL",
@@ -103,13 +105,21 @@ def copy_iemre(ts, ds):
                 vwnd = hnc.variables["vwnd"][offset, :, :]
                 if uwnd.mask.all():
                     LOG.warning("No wind for offset: %s", offset)
-                    continue
-                mag = (uwnd**2 + vwnd**2) ** 0.5
-                windhours += 1
-                if sped is None:
-                    sped = mag
                 else:
-                    sped += mag
+                    mag = (uwnd**2 + vwnd**2) ** 0.5
+                    windhours += 1
+                    if sped is None:
+                        sped = mag
+                    else:
+                        sped += mag
+                soil4t = hnc.variables["soil4t"][offset, :, :]
+                if soil4t.mask.all():
+                    continue
+                if hi_soil4t is None:
+                    hi_soil4t = soil4t
+                    lo_soil4t = soil4t
+                hi_soil4t = np.where(soil4t > hi_soil4t, soil4t, hi_soil4t)
+                lo_soil4t = np.where(soil4t < lo_soil4t, soil4t, lo_soil4t)
         ncfn = iemre.get_hourly_ncname(sts.year)
         if os.path.isfile(ncfn):
             with ncopen(ncfn, timeout=600) as hnc:
@@ -119,9 +129,17 @@ def copy_iemre(ts, ds):
                     vwnd = hnc.variables["vwnd"][offset, :, :]
                     if uwnd.mask.all():
                         LOG.warning("No wind for offset: %s", offset)
+                    else:
+                        windhours += 1
+                        sped += (uwnd**2 + vwnd**2) ** 0.5
+                    soil4t = hnc.variables["soil4t"][offset, :, :]
+                    if soil4t.mask.all():
                         continue
-                    windhours += 1
-                    sped += (uwnd**2 + vwnd**2) ** 0.5
+                    if hi_soil4t is None:
+                        hi_soil4t = soil4t
+                        lo_soil4t = soil4t
+                    hi_soil4t = np.where(soil4t > hi_soil4t, soil4t, hi_soil4t)
+                    lo_soil4t = np.where(soil4t < lo_soil4t, soil4t, lo_soil4t)
     else:
         ncfn = iemre.get_hourly_ncname(sts.year)
         if not os.path.isfile(ncfn):
@@ -144,13 +162,23 @@ def copy_iemre(ts, ds):
                             offset2,
                             now,
                         )
-                    continue
-                windhours += 1
-                mag = (uwnd**2 + vwnd**2) ** 0.5
-                if sped is None:
-                    sped = mag
                 else:
-                    sped += mag
+                    windhours += 1
+                    mag = (uwnd**2 + vwnd**2) ** 0.5
+                    if sped is None:
+                        sped = mag
+                    else:
+                        sped += mag
+                soil4t = hnc.variables["soil4t"][offset, :, :]
+                if soil4t.mask.all():
+                    continue
+                if hi_soil4t is None:
+                    hi_soil4t = soil4t
+                    lo_soil4t = soil4t
+                hi_soil4t = np.where(soil4t > hi_soil4t, soil4t, hi_soil4t)
+                lo_soil4t = np.where(soil4t < lo_soil4t, soil4t, lo_soil4t)
+    ds["high_soil4t"].values = hi_soil4t
+    ds["low_soil4t"].values = lo_soil4t
     ds["p01d"].values = np.where(phour < 0, 0, phour)
     if windhours > 0:
         ds["wind_speed"].values = sped / windhours

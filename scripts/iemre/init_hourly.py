@@ -7,7 +7,7 @@ import geopandas as gpd
 import numpy as np
 from pyiem import iemre
 from pyiem.grid.zs import CachingZonalStats
-from pyiem.util import get_dbconn, logger, ncopen, utc
+from pyiem.util import get_sqlalchemy_conn, logger, ncopen, utc
 
 LOG = logger()
 
@@ -134,6 +134,15 @@ def init_year(ts):
     p01m.coordinates = "lon lat"
     p01m.description = "Precipitation accumulation for the hour valid time"
 
+    v1 = nc.createVariable(
+        "soil4t", np.uint16, ("time", "lat", "lon"), fill_value=65535
+    )
+    v1.units = "K"
+    v1.scale_factor = 0.01
+    v1.long_name = "4inch Soil Temperature"
+    v1.standard_name = "4inch Soil Temperature"
+    v1.coordinates = "lon lat"
+
     nc.close()
 
 
@@ -141,13 +150,13 @@ def compute_hasdata(year):
     """Compute the has_data grid"""
     nc = ncopen(iemre.get_hourly_ncname(year), "a", timeout=300)
     czs = CachingZonalStats(iemre.AFFINE)
-    pgconn = get_dbconn("postgis")
-    states = gpd.GeoDataFrame.from_postgis(
-        "SELECT the_geom, state_abbr from states",
-        pgconn,
-        index_col="state_abbr",
-        geom_col="the_geom",
-    )
+    with get_sqlalchemy_conn("postgis") as conn:
+        states = gpd.GeoDataFrame.from_postgis(
+            "SELECT the_geom, state_abbr from states",
+            conn,
+            index_col="state_abbr",
+            geom_col="the_geom",
+        )
     data = np.flipud(nc.variables["hasdata"][:, :])
     czs.gen_stats(data, states["the_geom"])
     for nav in czs.gridnav:

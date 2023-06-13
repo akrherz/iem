@@ -11,6 +11,7 @@ import subprocess
 import sys
 import tempfile
 
+import pygrib
 import requests
 from pyiem.util import exponential_backoff, logger, utc
 
@@ -23,19 +24,28 @@ def need_to_run(valid):
         "/mesonet/ARCHIVE/data/%Y/%m/%d/model/hrrr/"
         "%H/hrrr.t%Hz.3kmf01.grib2"
     )
-    return not os.path.isfile(gribfn)
+    # If the file does not exist, we have no choice
+    if not os.path.isfile(gribfn):
+        return True
+    # Look for our grids please.
+    grbs = pygrib.open(gribfn)
+    hits = 0
+    for grb in grbs:
+        if grb.shortName == "dswrf":
+            hits += 1
+    LOG.info("Found %s dswrf fields in %s", hits, gribfn)
+    return hits != 4
 
 
 def fetch(valid):
     """Fetch the radiation data for this timestamp
     22:23684154:d=2023041000:DSWRF:surface:0-15 min ave fcst:
     """
+    baseuri = "https://nomads.ncep.noaa.gov/pub/data/nccf/com/hrrr/prod"
+    if valid < utc() - datetime.timedelta(days=1):
+        baseuri = "https://noaa-hrrr-bdp-pds.s3.amazonaws.com"
     uri = valid.strftime(
-        (
-            "https://nomads.ncep.noaa.gov/pub/data/nccf/"
-            "com/hrrr/prod/hrrr.%Y%m%d/conus/hrrr.t%Hz."
-            "wrfsubhf01.grib2.idx"
-        )
+        f"{baseuri}/hrrr.%Y%m%d/conus/hrrr.t%Hz.wrfsubhf01.grib2.idx"
     )
     req = exponential_backoff(requests.get, uri, timeout=30)
     if req is None or req.status_code != 200:
