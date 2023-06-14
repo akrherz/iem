@@ -72,86 +72,99 @@ def application(environ, start_response):
     c2000 = ts.replace(year=2000)
     coffset = iemre.daily_offset(c2000)
 
-    with ncopen(fn) as nc:
-        with ncopen(iemre.get_dailyc_ncname()) as cnc:
-            res["data"].append(
-                {
-                    "prism_precip_in": myrounder(prism_precip, 2),
-                    "mrms_precip_in": myrounder(mrms_precip, 2),
-                    "daily_high_f": myrounder(
-                        convert_value(
-                            nc.variables["high_tmpk"][offset, j, i],
-                            "degK",
-                            "degF",
-                        ),
-                        1,
+    with ncopen(fn) as nc, ncopen(iemre.get_dailyc_ncname()) as cnc:
+        res["data"].append(
+            {
+                "prism_precip_in": myrounder(prism_precip, 2),
+                "mrms_precip_in": myrounder(mrms_precip, 2),
+                "daily_high_f": myrounder(
+                    convert_value(
+                        nc.variables["high_tmpk"][offset, j, i],
+                        "degK",
+                        "degF",
                     ),
-                    "12z_high_f": myrounder(
-                        convert_value(
-                            nc.variables["high_tmpk_12z"][offset, j, i],
-                            "degK",
-                            "degF",
-                        ),
-                        1,
+                    1,
+                ),
+                "12z_high_f": myrounder(
+                    convert_value(
+                        nc.variables["high_tmpk_12z"][offset, j, i],
+                        "degK",
+                        "degF",
                     ),
-                    "climate_daily_high_f": myrounder(
-                        convert_value(
-                            cnc.variables["high_tmpk"][coffset, j, i],
-                            "degK",
-                            "degF",
-                        ),
-                        1,
+                    1,
+                ),
+                "climate_daily_high_f": myrounder(
+                    convert_value(
+                        cnc.variables["high_tmpk"][coffset, j, i],
+                        "degK",
+                        "degF",
                     ),
-                    "daily_low_f": myrounder(
-                        convert_value(
-                            nc.variables["low_tmpk"][offset, j, i],
-                            "degK",
-                            "degF",
-                        ),
-                        1,
+                    1,
+                ),
+                "daily_low_f": myrounder(
+                    convert_value(
+                        nc.variables["low_tmpk"][offset, j, i],
+                        "degK",
+                        "degF",
                     ),
-                    "12z_low_f": myrounder(
-                        convert_value(
-                            nc.variables["low_tmpk_12z"][offset, j, i],
-                            "degK",
-                            "degF",
-                        ),
-                        1,
+                    1,
+                ),
+                "12z_low_f": myrounder(
+                    convert_value(
+                        nc.variables["low_tmpk_12z"][offset, j, i],
+                        "degK",
+                        "degF",
                     ),
-                    "avg_dewpoint_f": myrounder(
-                        convert_value(
-                            nc.variables["avg_dwpk"][offset, j, i],
-                            "degK",
-                            "degF",
-                        ),
-                        1,
+                    1,
+                ),
+                "soil4t_high_f": myrounder(
+                    convert_value(
+                        nc.variables["high_soil4t"][offset, j, i],
+                        "degK",
+                        "degF",
                     ),
-                    "climate_daily_low_f": myrounder(
-                        convert_value(
-                            cnc.variables["low_tmpk"][coffset, j, i],
-                            "degK",
-                            "degF",
-                        ),
-                        1,
+                    1,
+                ),
+                "soil4t_low_f": myrounder(
+                    convert_value(
+                        nc.variables["low_soil4t"][offset, j, i],
+                        "degK",
+                        "degF",
                     ),
-                    "daily_precip_in": myrounder(
-                        nc.variables["p01d"][offset, j, i] / 25.4, 2
+                    1,
+                ),
+                "avg_dewpoint_f": myrounder(
+                    convert_value(
+                        nc.variables["avg_dwpk"][offset, j, i],
+                        "degK",
+                        "degF",
                     ),
-                    "12z_precip_in": myrounder(
-                        nc.variables["p01d_12z"][offset, j, i] / 25.4, 2
+                    1,
+                ),
+                "climate_daily_low_f": myrounder(
+                    convert_value(
+                        cnc.variables["low_tmpk"][coffset, j, i],
+                        "degK",
+                        "degF",
                     ),
-                    "climate_daily_precip_in": myrounder(
-                        cnc.variables["p01d"][coffset, j, i] / 25.4, 2
-                    ),
-                    "srad_mj": myrounder(
-                        nc.variables["rsds"][offset, j, i]
-                        * 86400.0
-                        / 1000000.0,
-                        2,
-                    ),
-                    "avg_windspeed_mps": myrounder(
-                        nc.variables["wind_speed"][offset, j, i], 2
-                    ),
-                }
-            )
+                    1,
+                ),
+                "daily_precip_in": myrounder(
+                    nc.variables["p01d"][offset, j, i] / 25.4, 2
+                ),
+                "12z_precip_in": myrounder(
+                    nc.variables["p01d_12z"][offset, j, i] / 25.4, 2
+                ),
+                "climate_daily_precip_in": myrounder(
+                    cnc.variables["p01d"][coffset, j, i] / 25.4, 2
+                ),
+                "srad_mj": myrounder(
+                    nc.variables["rsds"][offset, j, i] * 86400.0 / 1000000.0,
+                    2,
+                ),
+                "avg_windspeed_mps": myrounder(
+                    nc.variables["wind_speed"][offset, j, i], 2
+                ),
+            }
+        )
     return [json.dumps(res).encode("ascii")]

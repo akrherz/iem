@@ -81,6 +81,12 @@ def application(environ, start_response):
         low12temp = convert_value(
             nc.variables["low_tmpk_12z"][offset1:offset2, j, i], "degK", "degF"
         )
+        high_soil4t = convert_value(
+            nc.variables["high_soil4t"][offset1:offset2, j, i], "degK", "degF"
+        )
+        low_soil4t = convert_value(
+            nc.variables["low_soil4t"][offset1:offset2, j, i], "degK", "degF"
+        )
         precip = nc.variables["p01d"][offset1:offset2, j, i] / 25.4
         precip12 = nc.variables["p01d_12z"][offset1:offset2, j, i] / 25.4
 
@@ -127,6 +133,8 @@ def application(environ, start_response):
                 "climate_daily_high_f": clean(chigh[i]),
                 "daily_low_f": clean(lowtemp[i]),
                 "12z_low_f": clean(low12temp[i]),
+                "soil4t_high_f": clean(high_soil4t[i]),
+                "soil4t_low_f": clean(low_soil4t[i]),
                 "climate_daily_low_f": clean(clow[i]),
                 "daily_precip_in": clean(precip[i]),
                 "12z_precip_in": clean(precip12[i]),

@@ -68,6 +68,14 @@ def workflow(sts, ets, i, j):
                         ),
                         1,
                     ),
+                    "soil4t_f": myrounder(
+                        convert_value(
+                            nc.variables["soil4t"][offset, j, i],
+                            "degK",
+                            "degF",
+                        ),
+                        1,
+                    ),
                     "uwnd_mps": myrounder(
                         nc.variables["uwnd"][offset, j, i], 2
                     ),

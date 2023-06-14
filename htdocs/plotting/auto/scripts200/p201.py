@@ -306,6 +306,8 @@ def plotter(fdict):
         data = np.ones((ets.year - sts.year + 1, 366)) * -1
         thresholds = list(COLORS.keys())
         for date, row in df.iterrows():
+            if date > pd.Timestamp(ets):
+                continue
             if row["threshold"] == "TSTM" and ctx.get("g", "yes") == "no":
                 continue
             if row["threshold"] in thresholds:
