@@ -129,3 +129,8 @@ then
     python ndfd2netcdf.py $(date -u +'%Y %m %d')
     python plot_temps.py $(date -u +'%Y %m %d')
 fi
+
+# Additional hourly_analysis for a number of days ago, to pick up new data
+cd ../iemre
+python hourly_analysis.py `date -u --date '1 days ago' +'%Y %m %d %H'`
+python hourly_analysis.py `date -u --date '9 days ago' +'%Y %m %d %H'`
