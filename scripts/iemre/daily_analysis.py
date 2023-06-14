@@ -177,8 +177,9 @@ def copy_iemre(ts, ds):
                     lo_soil4t = soil4t
                 hi_soil4t = np.where(soil4t > hi_soil4t, soil4t, hi_soil4t)
                 lo_soil4t = np.where(soil4t < lo_soil4t, soil4t, lo_soil4t)
-    ds["high_soil4t"].values = hi_soil4t
-    ds["low_soil4t"].values = lo_soil4t
+    if hi_soil4t is not None:
+        ds["high_soil4t"].values = hi_soil4t
+        ds["low_soil4t"].values = lo_soil4t
     ds["p01d"].values = np.where(phour < 0, 0, phour)
     if windhours > 0:
         ds["wind_speed"].values = sped / windhours
