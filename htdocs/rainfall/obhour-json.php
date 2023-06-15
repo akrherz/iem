@@ -40,6 +40,7 @@ foreach ($intervals as $key => $interval) {
         $ts0 = clone $ts;
         $ts0->setTimezone(new DateTimeZone("America/Chicago"));
         $ts0->setTime(0, 0, 0);
+        $ts0->setTimezone(new DateTimeZone("UTC"));
     } else {
         $ts0 = clone $ts;
         $ts0->sub(new DateInterval("PT{$interval}H"));

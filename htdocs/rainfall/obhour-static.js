@@ -223,7 +223,7 @@ var gpanel =  new Ext.grid.GridPanel({
         cm: new Ext.grid.ColumnModel([
             {header: "ID",  width: 40, sortable: true, dataIndex: 'id'},
             {header: "Name", id: "sitename", width: 150, sortable: true, dataIndex: 'name'},
-            {header: "Midnight", toffset: 0, width: 80, sortable: true, dataIndex: 'pmidnight'},
+            {header: "Midnight Central", toffset: 0, width: 80, sortable: true, dataIndex: 'pmidnight'},
             {header: "1 Hour", toffset: 1, width: 80, sortable: true, dataIndex: 'p1'},
             {header: "3 Hour", toffset: 3, width: 80, sortable: true, dataIndex: 'p3'},
             {header: "6 Hour", toffset: 6, width: 80, sortable: true, dataIndex: 'p6'},
