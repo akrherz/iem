@@ -70,6 +70,8 @@ def daily_process(cursor, station, date, df, ddf):
     row["obs_count"] = df["tair_c_avg_qc"].size
     row["tair_c_max"] = maxdf["tair_c_avg_qc"]
     row["tair_c_min"] = mindf["tair_c_avg_qc"]
+    row["t4_c_max"] = maxdf["t4_c_avg_qc"]
+    row["t4_c_min"] = mindf["t4_c_avg_qc"]
     # For daily, we want the average for some of these columns
     for colname in (
         "t4_c_avg t12_c_avg t24_c_avg t50_c_avg vwc12 vwc24 vwc50 rh_avg "
