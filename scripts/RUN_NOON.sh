@@ -34,6 +34,8 @@ python precip_ingest.py $(date --date '3 days ago' +'%Y %m %d')
 # Since we have now adjusted the 12z precip 3 days ago, we should rerun
 # iemre for four days ago
 python daily_analysis.py $(date --date '4 days ago' +'%Y %m %d')
+# Updated soil temperature data from ERA5
+python daily_analysis.py $(date --date '10 days ago' +'%Y %m %d')
 
 # and now recompute climodat statewide/climate from four days ago
 cd ../climodat

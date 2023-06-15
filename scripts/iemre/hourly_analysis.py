@@ -1,4 +1,7 @@
-"""I produce the hourly analysis used by IEMRE."""
+"""I produce the hourly analysis used by IEMRE.
+
+Run from RUN_10_AFTER.sh
+"""
 import datetime
 import os
 import sys
