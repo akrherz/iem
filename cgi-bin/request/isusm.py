@@ -115,7 +115,7 @@ def fetch_daily(form, cols):
         c2f( tair_c_min_qc ))::numeric,1) as gdd50 from sm_daily WHERE
       valid >= :sts and valid < :ets and station in :stations
     )
-    SELECT d.*, s.rh_min, s.rh, s.rh_max, s.soil04tn, s.soil04tx,
+    SELECT d.*, s.rh_min, s.rh, s.rh_max,
     s.soil12tn, s.soil12tx, s.soil24tn, s.soil24tx, s.soil50tn, s.soil50tx
     FROM soils s JOIN daily d on (d.station = s.station and s.date = d.valid)
     ORDER by d.valid ASC

@@ -11,7 +11,7 @@ $ts = DateTime::createFromFormat("YmdHi", $tstr, new DateTimeZone(("UTC")));
 
 $networks = "'$network'";
 if ($network == "IOWA") {
-    $networks = "'KCCI','IA_ASOS','KIMT'";
+    $networks = "'IA_ASOS'";
 }
 
 $intervals = array(1, 3, 6, 12, 24, 48, 72, 168, 720, "midnight");

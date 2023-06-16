@@ -10,7 +10,6 @@ Ext.onReady(function(){
 Ext.namespace('iemdata');
 
 iemdata.networks = [
- ['IOWA','Iowa Networks'],
  ['IA_ASOS','Iowa ASOS/AWOS'],
  ['AL_ASOS','Alabama ASOS/AWOS'],
  ['AK_ASOS','Alaska ASOS/AWOS'],

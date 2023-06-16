@@ -46,6 +46,7 @@ DDICT = {
 PDICT = {
     "wfo": "Select by NWS Forecast Office",
     "state": "Select by State",
+    "all": "No State/WFO Limit (all)",
 }
 PDICT2 = {
     "single": "Total for Single Selected Phenomena / Significance",
@@ -118,6 +119,9 @@ def plotter(fdict):
     phenomena = ctx["phenomena"]
     significance = ctx["significance"]
     opt = ctx["opt"]
+    if opt == "all":
+        opt = "wfo"
+        station = "_ALL"
     state = ctx["state"]
     ctx["_nt"].sts["_ALL"] = {
         "name": "All Offices",
