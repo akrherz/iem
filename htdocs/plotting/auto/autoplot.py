@@ -322,12 +322,15 @@ def application(environ, start_response):
     # Parse the request that was sent our way
     fields = parse_formvars(environ)
     # HACK
-    if fields.get("q", "").find("network:WFO::wfo:PHEB") > -1:
-        fields["q"] = fields["q"].replace("network:WFO", "network:NWS")
-    if fields.get("q", "").find("network:WFO::wfo:NHC") > -1:
-        fields["q"] = fields["q"].replace("network:WFO", "network:NCEP")
-    if fields.get("q", "").find("network:WFO::wfo:PAAQ") > -1:
-        fields["q"] = fields["q"].replace("network:WFO", "network:NWS")
+    qstr = fields.get("q", "")
+    if qstr.find("network:WFO::wfo:PHEB") > -1:
+        fields["q"] = qstr.replace("network:WFO", "network:NWS")
+    if qstr.find("network:WFO::wfo:NHC") > -1:
+        fields["q"] = qstr.replace("network:WFO", "network:NCEP")
+    if qstr.find("network:WFO::wfo:PAAQ") > -1:
+        fields["q"] = qstr.replace("network:WFO", "network:NWS")
+    if qstr.find("network:AWOS") > -1:
+        fields["q"] = qstr.replace("network:AWOS", "network:IA_ASOS")
     # Figure out the format that was requested from us, default to png
     fmt = fields.get("fmt", "png")[:7]
     mc = Client("iem-memcached:11211")
