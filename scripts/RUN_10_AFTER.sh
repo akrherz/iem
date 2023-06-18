@@ -23,7 +23,12 @@ then
 else
     python merge_mrms_q3.py	
 fi
-python merge_ifc.py
+
+python merge_ifc.py $TODAY
+if [ $LHH -eq "01" ]
+then
+    python merge_ifc.py $YEST
+fi
 
 if [ $HH -eq "12" ]
 then
@@ -66,6 +71,10 @@ python process_traffic.py &
 cd ../../current
 python plot_hilo.py
 python ifc_today_total.py
+if [ $LHH -eq "01" ]
+then
+    python ifc_today_total.py $YEST
+fi
 python today_min_windchill.py
 
 cd ../summary
