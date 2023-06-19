@@ -87,14 +87,14 @@ def get_description():
             name="sdate",
             default=jan1.strftime("%Y/%m/%d 0000"),
             label="Start Date / Time (UTC, inclusive):",
-            min="2005/01/01 0000",
+            min="2002/01/01 0000",
         ),
         dict(
             type="datetime",
             name="edate",
             default=today.strftime("%Y/%m/%d 2359"),
             label="End Date / Time (UTC):",
-            min="2005/01/01 0000",
+            min="2002/01/01 0000",
             max=f"{tomorrow:%Y/%m/%d} 2359",
         ),
         dict(

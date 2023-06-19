@@ -363,8 +363,8 @@ $( "#{dpname}" ).flatpickr({{
     time_24hr: true,
     allowInput: true,
     defaultDate: moment('{value}', 'YYYY/MM/DD HHmm').toDate(),
-    endDate: moment('{vmax}', 'YYYY/MM/DD HHmm').toDate(),
-    startDate: moment('{arg['min']}', 'YYYY/MM/DD HHmm').toDate()}});
+    maxDate: moment('{vmax}', 'YYYY/MM/DD HHmm').toDate(),
+    minDate: moment('{arg['min']}', 'YYYY/MM/DD HHmm').toDate()}});
     """
     return (
         f"<input type=\"text\" name=\"{arg['name']}\" id=\"{dpname}\" "

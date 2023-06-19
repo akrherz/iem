@@ -55,14 +55,14 @@ def run(ts):
 
 def main(argv):
     """Go Main Go"""
-    if len(argv) == 4:
-        date = utc(int(argv[1]), int(argv[2]), int(argv[3]), 12)
-    else:
-        date = utc() - datetime.timedelta(minutes=60)
-        date = date.replace(hour=12, minute=0, second=0, microsecond=0)
-    date = date.replace(tzinfo=ZoneInfo("UTC"))
-    date = date.astimezone(ZoneInfo("America/Chicago"))
-    run(date)
+    # We are always running for a Central Timezone Date
+    valid = datetime.datetime(
+        int(argv[1]),
+        int(argv[2]),
+        int(argv[3]),
+        tzinfo=ZoneInfo("America/Chicago"),
+    )
+    run(valid)
 
 
 if __name__ == "__main__":
