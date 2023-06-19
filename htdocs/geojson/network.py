@@ -66,6 +66,8 @@ def run(network, only_online):
                     elevation=row["elevation"],
                     sname=row["name"],
                     time_domain=time_domain,
+                    archive_begin=None if ab is None else f"{ab:%Y-%m-%d}",
+                    archive_end=None if ae is None else f"{ae:%Y-%m-%d}",
                     state=row["state"],
                     country=row["country"],
                     climate_site=row["climate_site"],
