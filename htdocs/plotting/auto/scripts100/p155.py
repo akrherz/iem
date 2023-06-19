@@ -1,19 +1,20 @@
-"""Based on available hourly observation reports
-    by METAR stations, this application presents the top 10 events for a
-    given metric of your choice.  Please note that this application often
-    reveals bad data stored within the database.  Please do contact us when
-    you see suspicious reports and we'll clean up the database.</p>
+"""
+Based on available hourly observation reports
+by METAR stations, this application presents the top 10 events for a
+given metric of your choice.  Please note that this application often
+reveals bad data stored within the database.  Please do contact us when
+you see suspicious reports and we'll clean up the database.</p>
 
-    <p>You can optionally generate this plot for an explicit period of days,
-    the year is ignored with only the month and day portion used.  If you set
-    the start date to a date later than the end date, then the effect is to
-    consider the date period crossing 1 January.</p>
+<p>You can optionally generate this plot for an explicit period of days,
+the year is ignored with only the month and day portion used.  If you set
+the start date to a date later than the end date, then the effect is to
+consider the date period crossing 1 January.</p>
 
-    <p>If you pick the same start and end date, you effectively get the
-    extremes for that date.</p>
+<p>If you pick the same start and end date, you effectively get the
+extremes for that date.</p>
 
-    <p>The CSV/Excel download option for this autoplot will return 100
-    unfiltered events for further usage as you see fit.</p>
+<p>The CSV/Excel download option for this autoplot will return 100
+unfiltered events for further usage as you see fit.</p>
 """
 import datetime
 
@@ -43,35 +44,32 @@ MDICT = {
     "nov": "November",
     "dec": "December",
 }
-
-METRICS = dict(
-    [
-        ("max_tmpf", "Max Air Temperature"),
-        ("min_tmpf", "Min Air Temperature"),
-        ("below_tmpf", "Air Temperature Below Threshold"),
-        ("above_tmpf", "Air Temperature At or Above Threshold"),
-        ("min_alti", "Min Pressure Altimeter"),
-        ("max_alti", "Max Pressure Altimeter"),
-        ("below_alti", "Altimeter Below Threshold"),
-        ("above_alti", "Altimeter At or Above Threshold"),
-        ("max_dwpf", "Max Dewpoint Temperature"),
-        ("min_dwpf", "Min Dewpoint Temperature"),
-        ("below_dwpf", "Dewpoint Temperature Below Threshold"),
-        ("above_dwpf", "Dewpoint Temperature At or Above Threshold"),
-        ("max_feel", "Max Feels Like Temperature"),
-        ("min_feel", "Min Feels Like Temperature"),
-        ("below_feel", "Feels Like Temperature Below Threshold"),
-        ("above_feel", "Feels Like Temperature At or Above Threshold"),
-        ("max_p01i", "Max Hourly Precipitation"),
-        ("above_p01i", "Precipitation At or Above Threshold"),
-        ("min_mslp", "Min Sea Level Pressure"),
-        ("max_mslp", "Max Sea Level Pressure"),
-        ("below_mslp", "Sea Level Pressure Below Threshold"),
-        ("above_mslp", "Sea Level Pressure At or Above Threshold"),
-        ("max_sknt", "Max Wind Speed Sustained"),
-        ("max_gust", "Max Wind Speed Gust"),
-    ]
-)
+METRICS = {
+    "max_tmpf": "Max Air Temperature",
+    "min_tmpf": "Min Air Temperature",
+    "below_tmpf": "Air Temperature Below Threshold",
+    "above_tmpf": "Air Temperature At or Above Threshold",
+    "min_alti": "Min Pressure Altimeter",
+    "max_alti": "Max Pressure Altimeter",
+    "below_alti": "Altimeter Below Threshold",
+    "above_alti": "Altimeter At or Above Threshold",
+    "max_dwpf": "Max Dewpoint Temperature",
+    "min_dwpf": "Min Dewpoint Temperature",
+    "below_dwpf": "Dewpoint Temperature Below Threshold",
+    "above_dwpf": "Dewpoint Temperature At or Above Threshold",
+    "max_feel": "Max Feels Like Temperature",
+    "min_feel": "Min Feels Like Temperature",
+    "below_feel": "Feels Like Temperature Below Threshold",
+    "above_feel": "Feels Like Temperature At or Above Threshold",
+    "max_p01i": "Max Hourly Precipitation",
+    "above_p01i": "Precipitation At or Above Threshold",
+    "min_mslp": "Min Sea Level Pressure",
+    "max_mslp": "Max Sea Level Pressure",
+    "below_mslp": "Sea Level Pressure Below Threshold",
+    "above_mslp": "Sea Level Pressure At or Above Threshold",
+    "max_sknt": "Max Wind Speed Sustained",
+    "max_gust": "Max Wind Speed Gust",
+}
 UNITS = {
     "tmpf": "F",
     "dwpf": "F",
@@ -81,6 +79,10 @@ UNITS = {
     "alti": "inch",
     "sknt": "knots",
     "gust": "knots",
+}
+PDICT = {
+    "all": "List all Reports",
+    "one": "List only 1 per Day",
 }
 
 
@@ -102,6 +104,13 @@ def get_description():
             label="Which Metric to Summarize",
             options=METRICS,
         ),
+        {
+            "type": "select",
+            "options": PDICT,
+            "name": "w",
+            "default": "all",
+            "label": "List All or Filter 1/Day",
+        },
         dict(
             type="float",
             name="threshold",
@@ -269,21 +278,20 @@ def plotter(fdict):
     lastval = -99
     ranks = []
     currentrank = 0
-    rows2keep = []
-    for idx, row in df.iterrows():
-        key = row["valid"].strftime("%Y%m%d%H")
+    dtfmt = "%Y%m%d" if ctx["w"] == "one" else "%Y%m%d%H"
+    for _, row in df.iterrows():
+        key = row["valid"].strftime(dtfmt)
         if key in hours or pd.isnull(row[dbvar]):
             continue
-        rows2keep.append(idx)
         hours.append(key)
         y.append(row[dbvar])
-        lbl = fmt % (row[dbvar],)
-        lbl += f" -- {row['valid']:%b %d, %Y %-I:%M %p}"
+        lbl1 = fmt % (row[dbvar],)
+        lbl = f"{lbl1} -- {row['valid']:%b %d, %Y %-I:%M %p}"
         ylabels.append(lbl)
-        if row[dbvar] != lastval or agg in ["above", "below"]:
+        if lbl1 != lastval or agg in ["above", "below"]:
             currentrank += 1
         ranks.append(currentrank)
-        lastval = row[dbvar]
+        lastval = lbl1
         if len(ylabels) == 10:
             break
     if not y:
@@ -293,6 +301,8 @@ def plotter(fdict):
     if ab is None:
         raise NoDataFound("Unknown station metadata.")
     title = f"{ctx['_sname']} {titlelabel} 10 Events"
+    if ctx["w"] == "one":
+        title += " (Only 1 Ob per Day Shown)"
     st = ctx.get("threshold") if agg in ["above", "below"] else ""
     subtitle = (
         f"{METRICS[varname]} {st} ({title2}) "
