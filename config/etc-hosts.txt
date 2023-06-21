@@ -57,12 +57,12 @@
 10.90.12.31 nagios
 # runs with special 10 MB size and 8 GB memory size
 10.90.12.14    iem-memcached
-# memcache1(248) iemvm2 <-> metvm8
-10.24.19.117    iem-memcached1
-# memcache2(247) metvm8 <-> iemvm2
-10.24.19.116    iem-memcached2
-# VI12(62) iemvm1 <-> metvm7
-10.24.19.115    iem-memcached3
+# arritt <-> metvm4-dc
+10.90.12.45    iem-memcached1
+# metvm4-dc <-> metvm33-dc
+10.90.12.46    iem-memcached2
+# metvm33-dc <-> arritt
+10.90.12.47    iem-memcached3
 
 ##############################################################################
 # Database stuff
