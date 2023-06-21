@@ -26,7 +26,7 @@ def fetch(cid):
         (cid,),
     )
     if cursor.rowcount != 1:
-        return
+        return None
     (
         ip,
         fqdn,
@@ -39,7 +39,7 @@ def fetch(cid):
     ) = cursor.fetchone()
     pgconn.close()
     if scrape_url is not None or not online:
-        return
+        return None
     # Get IEM properties
     iemprops = get_properties()
     user = iemprops.get(f"webcam.{network.lower()}.user")
@@ -51,7 +51,7 @@ def fetch(cid):
     uri = uribase % (ip if ip is not None else fqdn, port)
     req = requests.get(uri, auth=HTTPDigestAuth(user, passwd), timeout=15)
     if req.status_code != 200:
-        return
+        return None
     image = Image.open(BytesIO(req.content))
     (width, height) = image.size
     # Draw black box

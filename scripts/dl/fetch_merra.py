@@ -1,7 +1,7 @@
 """
- Monthly download of the MERRA data, website suggests that the previous
- month is available around the 2-3 week of the next month, so this is run
- from RUN_MIDNIGHT.sh, but only on the 28th of each month
+Monthly download of the MERRA data, website suggests that the previous
+month is available around the 2-3 week of the next month, so this is run
+from RUN_MIDNIGHT.sh, but only on the 28th of each month
 
 MERRA2 Variables we want to process
 -----------------------------------
@@ -20,14 +20,15 @@ import os
 import subprocess
 import sys
 
-from pyiem.util import get_properties, logger, ncopen
+import netCDF4
+from pyiem.util import get_properties, logger
 
 LOG = logger()
 PROPS = get_properties()
 
 
 def trans(now):
-    """Hacky hack hack"""
+    """Get the reprocessing level.  Check MERRA docs for changelog."""
     if now.year < 1992:
         return "100"
     if now.year < 2001:
@@ -75,13 +76,14 @@ def do_month(sts):
             "-o",
             localfn,
         ]
+        LOG.info(" ".join(cmd))
         with subprocess.Popen(
             cmd, stdout=subprocess.PIPE, stderr=subprocess.PIPE
         ) as proc:
             proc.stderr.read()
         # Check that the netcdf file is valid
         try:
-            nc = ncopen(localfn)
+            nc = netCDF4.Dataset(localfn)
             nc.close()
         except Exception:
             LOG.warning("ncopen %s failed, deleting.", localfn)
