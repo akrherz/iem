@@ -104,7 +104,7 @@ def plotter(fdict):
             thisyear = gdf.at[year, "high"]
         res.append(
             dict(
-                avgval=gdf.iloc[:-1].mean(),
+                avgval=gdf.iloc[:-1].mean()[0],
                 minval=gdf.iloc[:-1].min()[0],
                 level=level,
                 label=label,
