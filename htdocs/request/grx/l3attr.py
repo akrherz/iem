@@ -22,7 +22,7 @@ from pyiem.util import convert_value, get_dbconn
 from pymemcache.client import Client
 
 # Do geo math in US National Atlas Equal Area
-P3857 = pyproj.Proj(init="epsg:3857")
+P3857 = pyproj.Proj("EPSG:3857")
 
 ICONFILE = "https://mesonet.agron.iastate.edu/request/grx/storm_attribute.png"
 SECONDS = np.array([15 * 60, 30 * 60, 45 * 60, 60 * 60])
