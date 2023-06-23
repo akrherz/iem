@@ -4,17 +4,18 @@
 import datetime
 import os
 import re
+import smtplib
 import subprocess
+from email.mime.multipart import MIMEMultipart
+from email.mime.text import MIMEText
 
 import psycopg2.extras
 import pytz
 import requests
 import wwa  # @UnresolvedImport
-from mailchimp3 import MailChimp
 from pyiem.util import (
     exponential_backoff,
     get_dbconn,
-    get_properties,
     logger,
     utc,
 )
@@ -276,22 +277,23 @@ def news():
     return txt, html
 
 
+def send_email(msg):
+    """Send emails"""
+    smtp = smtplib.SMTP("mailhub.iastate.edu")
+    smtp.sendmail(msg["From"], [msg["To"]], msg.as_string())
+    smtp.quit()
+
+
 def main():
     """Go Main!"""
-    mc = MailChimp(mc_api=get_properties()["mailchimp.apikey"])
+    msg = MIMEMultipart("alternative")
     now = datetime.datetime.now()
-    response = mc.campaigns.create(
-        data={
-            "type": "regular",
-            "recipients": {"list_id": "69e0e4ae67"},
-            "settings": {
-                "subject_line": f"IEM Daily Bulletin for {now:%b %-d %Y}",
-                "from_name": "IEM Daily Bulletin",
-                "reply_to": "akrherz@iastate.edu",
-            },
-        }
-    )
-    campaign_id = response["id"]
+    msg["Subject"] = f"IEM Daily Bulletin for {now:%b %-d %Y}"
+    msg["From"] = "daryl herzmann <akrherz@iastate.edu>"
+    if os.environ["USER"] == "akrherz2":
+        msg["To"] = "akrherz@iastate.edu"
+    else:
+        msg["To"] = "iem-dailyb@googlegroups.com"
 
     text = f"Iowa Environmental Mesonet Daily Bulletin for {now:%d %B %Y}\n\n"
     html = (
@@ -322,16 +324,12 @@ def main():
         html += h
     except Exception as exp:
         LOG.exception(exp)
+    part1 = MIMEText(text, "plain")
+    part2 = MIMEText(html, "html")
+    msg.attach(part1)
+    msg.attach(part2)
 
-    mc.campaigns.content.update(
-        campaign_id=campaign_id,
-        data={
-            "plain_text": text,
-            "html": html,
-        },
-    )
-    mc.campaigns.actions.send(campaign_id=campaign_id)
-    LOG.info("campaign_id %s was sent", campaign_id)
+    exponential_backoff(send_email, msg)
 
     # Send forth LDM
     with open("tmp.txt", "w", encoding="utf-8") as fh:
