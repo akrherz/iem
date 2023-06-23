@@ -15,8 +15,7 @@ export dd="`date --date '1 day ago' +'%d'`"
 export yyyymm="`date --date '1 day ago' +'%Y%m'`"
 
 PREFIXES="iem iemssl datateam sustainablecorn weatherim depbackend"
-MACHINES="iemvs100 iemvs101 iemvs102 iemvs103 iemvs104 iemvs105 iemvs106 \
-iemvs107 iemvs108 iemvs109 iemvs35-dc iemvs36-dc iemvs37-dc iemvs38-dc \
+MACHINES="iemvs35-dc iemvs36-dc iemvs37-dc iemvs38-dc \
 iemvs39-dc iemvs40-dc iemvs41-dc iemvs42-dc iemvs43-dc iemvs44-dc"
 CONFBASE="/opt/iem/scripts/webalizer"
 

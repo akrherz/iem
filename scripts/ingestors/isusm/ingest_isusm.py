@@ -134,6 +134,7 @@ STATIONS = {
     "TasselRidge": "OSTI4",
     "Bankston": "BNKI4",
     "Inwood": "CSII4",
+    "Jefferson": "DOCI4",
     "Glenwood": "GVNI4",
     "Masonville": "TPOI4",
 }
