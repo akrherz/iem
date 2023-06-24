@@ -1,7 +1,8 @@
 """
-This autoplot prints out the top 10 dates for number of VTEC events issued
-by NWS Office or State.  Note that a warning covering multiple counties would
-only count as 1 in this summary.
+This autoplot prints out the top 10 dates for number of VTEC events issued.
+Note that a warning covering multiple counties would only count as 1 in this
+summary.  You can either produce top 10 totals for a given wfo/state or get the
+top 10 totals per wfo/state over all wfos/states.
 
 <p>If you summarize by a 12z to 12z period, the date of the start of the period
 is shown.</p>
@@ -46,7 +47,9 @@ DDICT = {
 PDICT = {
     "wfo": "Select by NWS Forecast Office",
     "state": "Select by State",
-    "all": "No State/WFO Limit (all)",
+    "all": "Show NWS Totals (all)",
+    "bywfo": "Show per NWS Office Totals",
+    "bystate": "Show per State Totals",
 }
 PDICT2 = {
     "single": "Total for Single Selected Phenomena / Significance",
@@ -163,6 +166,8 @@ def plotter(fdict):
     if opt == "state":
         wfo_limiter = " and substr(ugc, 1, 2) = :state "
         params["state"] = state
+    if opt in ["bystate", "bywfo"]:
+        wfo_limiter = ""
 
     subtitle = (
         f"{vtec.get_ps_string(phenomena, significance)} "
@@ -177,23 +182,35 @@ def plotter(fdict):
         params["sig"] = "W"
         subtitle = "Svr T'Storm + Tornado + Flash Flood Warnings"
 
+    sql = f"""
+        SELECT
+        extract(year from issue)::int as yr,
+        extract(month from issue)::int as mo,
+        min(date(issue at time zone :tzname {offset})) as min_date,
+        wfo, phenomena, significance, eventid
+        from warnings where phenomena in :ph and significance = :sig
+        {wfo_limiter}
+        GROUP by yr, mo, wfo, phenomena, significance, eventid
+        ORDER by yr asc, mo asc
+    """
+    if opt == "bystate":
+        # Yes, double counting
+        sql = f"""
+            SELECT
+            extract(year from issue)::int as yr,
+            extract(month from issue)::int as mo,
+            min(date(issue at time zone :tzname {offset})) as min_date,
+            substr(ugc, 1, 2) as state,
+            wfo, phenomena, significance, eventid
+            from warnings where phenomena in :ph and significance = :sig
+            GROUP by yr, mo, state, wfo, phenomena, significance, eventid
+            ORDER by yr asc, mo asc
+        """
     with get_sqlalchemy_conn("postgis") as conn:
         # NB quasi hack here as we have some redundant ETNs for a given year
         # so the groupby helps some.
         daily = pd.read_sql(
-            text(
-                f"""
-                SELECT
-                extract(year from issue)::int as yr,
-                extract(month from issue)::int as mo,
-                min(date(issue at time zone :tzname {offset})) as min_date,
-                wfo, phenomena, significance, eventid
-                from warnings where phenomena in :ph and significance = :sig
-                {wfo_limiter}
-                GROUP by yr, mo, wfo, phenomena, significance, eventid
-                ORDER by yr asc, mo asc
-        """
-            ),
+            text(sql),
             conn,
             params=params,
             index_col=None,
@@ -205,14 +222,25 @@ def plotter(fdict):
     daily = daily[daily["mo"].isin(months)].sort_values(
         "min_date", ascending=True
     )
-    df = (
-        daily[["min_date", "eventid"]]
-        .groupby("min_date")
-        .count()
-        .reset_index()
-        .rename(columns={"eventid": "count"})
-        .sort_values(["count", "min_date"], ascending=False)
-    )
+    if opt in ["bystate", "bywfo"]:
+        col = opt.replace("by", "")
+        df = (
+            daily[["min_date", "eventid", col]]
+            .groupby([col, "min_date"])
+            .count()
+            .reset_index()
+            .rename(columns={"eventid": "count"})
+            .sort_values(["count", "min_date"], ascending=False)
+        )
+    else:
+        df = (
+            daily[["min_date", "eventid"]]
+            .groupby("min_date")
+            .count()
+            .reset_index()
+            .rename(columns={"eventid": "count"})
+            .sort_values(["count", "min_date"], ascending=False)
+        )
 
     title = f"NWS {ctx['_sname']}"
     if opt == "state":
@@ -220,6 +248,10 @@ def plotter(fdict):
             "NWS Issued for Counties/Zones for State of "
             f"{reference.state_names[state]}"
         )
+    elif opt == "bystate":
+        title = "NWS Issued by State"
+    elif opt == "bywfo":
+        title = "NWS Issued by WFO"
     if month != "all":
         title += f" [{MDICT[month]}]"
     fig = figure(
@@ -241,11 +273,15 @@ def plotter(fdict):
     labels = []
     rank = 0
     lastval = -1
+    extra = ""
     for _, row in df.head(10).iterrows():
         if row["count"] != lastval:
             rank += 1
         lastval = row["count"]
-        labels.append(f"#{rank} {row['min_date']:%d %b %Y} :: {row['count']}")
+        md = f"{row['min_date']:%d %b %Y}"
+        if opt in ["bystate", "bywfo"]:
+            extra = row[opt.replace("by", "")]
+        labels.append(f"#{rank} {extra} {md} :: {row['count']}")
     ax.set_yticks(range(1, 11))
     ax.set_yticklabels(labels)
     ax.set_ylim(11, 0)

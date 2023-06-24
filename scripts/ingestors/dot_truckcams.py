@@ -16,7 +16,7 @@ import requests
 from pyiem.util import exponential_backoff, get_dbconn, logger
 
 LOG = logger()
-P3857 = pyproj.Proj(init="EPSG:3857")
+P3857 = pyproj.Proj("EPSG:3857")
 URI = (
     "https://services.arcgis.com/8lRhdTsQyJpO52F1/ArcGIS/rest/services/"
     "AVL_Images_Past_1HR_View/FeatureServer/0/query?"

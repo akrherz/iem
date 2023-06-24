@@ -17,7 +17,7 @@ from pyiem.util import get_dbconn, logger, ncopen, utc
 from scipy.interpolate import NearestNDInterpolator
 
 LOG = logger()
-P4326 = pyproj.Proj(init="epsg:4326")
+P4326 = pyproj.Proj("EPSG:4326")
 SWITCH_DATE = utc(2014, 10, 10, 20)
 
 
