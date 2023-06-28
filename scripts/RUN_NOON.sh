@@ -6,7 +6,7 @@ python plot.py 0
 
 cd ../iemre
 python stage4_12z_adjust.py $(date +'%Y %m %d')
-python daily_analysis.py
+python daily_analysis.py $(date +'%Y %m %d')
 python stage4_12z_adjust.py $(date --date '1 days ago' +'%Y %m %d')
 python daily_analysis.py $(date --date '1 days ago' +'%Y %m %d')
 

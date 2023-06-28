@@ -21,7 +21,7 @@ This is done by `daily_analysis.py`. If the year is 2009+, we look to see what C
 
 ### p01d_12z
 
-`daily_analysis.py` sums up the hourly iemre precipitation data. For pre-1997 dates, we are gridding out whatever climodat station observations we have for the date see `grid_p01d_12z_pre1997.py`.
+`daily_analysis.py` sums up the hourly iemre precipitation data. For pre-1997 dates, we are gridding out whatever climodat station observations we have for the date.
 
 ### high_tmpk low_tmpk avg_dwpk wind_speed
 
