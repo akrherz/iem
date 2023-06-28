@@ -8,6 +8,9 @@ fi
 cd util
 python make_archive_baseline.py
 
+cd ../ncei
+python ingest_climdiv.py &
+
 cd ../iemre
 # need to run daily analysis for climodat estimator to then work
 python daily_analysis.py $(date +'%Y %m %d')

@@ -455,14 +455,14 @@ def use_climodat_daily(ts, ds):
         return
     suffix = "_all" if ts.year < 1951 else ""
     res = generic_gridder(df, f"highdata{suffix}")
-    ds["high_tmpk"].values = convert_value(res, "degF", "degK")
+    if res is not None:
+        ds["high_tmpk"].values = convert_value(res, "degF", "degK")
     res = generic_gridder(df, f"lowdata{suffix}")
-    ds["low_tmpk"].values = convert_value(res, "degF", "degK")
-    ds["p01d"].values = convert_value(
-        generic_gridder(df, f"precipdata{suffix}"),
-        "inch",
-        "mm",
-    )
+    if res is not None:
+        ds["low_tmpk"].values = convert_value(res, "degF", "degK")
+    res = generic_gridder(df, f"precipdata{suffix}")
+    if res is not None:
+        ds["p01d"].values = convert_value(res, "inch", "mm")
 
 
 def workflow(ts):
