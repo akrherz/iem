@@ -12,6 +12,9 @@ from imageio import imread
 from osgeo import gdal, osr
 from paste.request import parse_formvars
 
+# Workaround future
+gdal.UseExceptions()
+
 
 def workflow(valid, period, start_response):
     """Actually do the work!"""
