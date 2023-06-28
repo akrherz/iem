@@ -391,6 +391,10 @@ yearly_opts = [
         "label": "Compare one station yearly summary vs entire state",
     },
     {
+        "id": 244,
+        "label": "Compare NCEI Climdiv to IEM Climodat Statewide Values",
+    },
+    {
         "id": 128,
         "label": "Comparison of Yearly Summaries between two stations",
     },
