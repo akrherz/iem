@@ -22,6 +22,25 @@ PDICT = {
     "avg_high": "Average High Temperature",
     "avg_low": "Average Low Temperature",
 }
+MDICT = {
+    "all": "Entire Year",
+    "spring": "Spring (MAM)",
+    "summer": "Summer (JJA)",
+    "fall": "Fall (SON)",
+    "winter": "Winter (DJF)",
+    "jan": "January",
+    "feb": "February",
+    "mar": "March",
+    "apr": "April",
+    "may": "May",
+    "jun": "June",
+    "jul": "July",
+    "aug": "August",
+    "sep": "September",
+    "oct": "October",
+    "nov": "November",
+    "dec": "December",
+}
 
 
 def get_description():
@@ -33,6 +52,13 @@ def get_description():
             name="state",
             default="IA",
             label="Select state to compare",
+        ),
+        dict(
+            type="select",
+            name="m",
+            default="all",
+            label="Month Limiter",
+            options=MDICT,
         ),
         {
             "type": "select",
@@ -49,41 +75,79 @@ def plotter(fdict):
     """Go"""
     ctx = get_autoplot_context(fdict, get_description())
     procdate = get_properties().get("ncei.climdiv.procdate", "20230101")
-    threshold = datetime.datetime.strptime(procdate, "%Y%m%d").replace(day=1)
 
     state = ctx["state"]
     varname = ctx["varname"]
     sql = """
         with iem as (
             SELECT
-            year,
+            year, month,
             sum(precip) as iem_sum_precip, avg(high) as iem_avg_high,
             avg(low) as iem_avg_low
-            from alldata WHERE station = :station and day < :threshold
-            GROUP by year
+            from alldata WHERE station = :station
+            GROUP by year, month
         ), ncei as (
             SELECT
             extract(year from day)::int as ncei_year,
-            sum(precip) as ncei_sum_precip, avg(high) as ncei_avg_high,
-            avg(low) as ncei_avg_low
-            from ncei_climdiv WHERE station = :station GROUP by ncei_year
+            extract(month from day)::int as ncei_month,
+            precip as ncei_sum_precip, high as ncei_avg_high,
+            low as ncei_avg_low
+            from ncei_climdiv WHERE station = :station
         )
-        select n.*, i.* from ncei n JOIN iem i on (n.ncei_year = i.year)
-        ORDER by i.year ASC
+        select n.*, i.* from ncei n JOIN iem i on
+        (n.ncei_year = i.year and n.ncei_month = i.month)
+        ORDER by i.year ASC, i.month ASC
     """
     with get_sqlalchemy_conn("coop") as conn:
         df = pd.read_sql(
             text(sql),
             conn,
-            params={"station": f"{state}0000", "threshold": threshold},
+            params={"station": f"{state}0000"},
             index_col="year",
         )
 
     if df.empty:
         raise NoDataFound("Sorry, no data found!")
 
+    month = ctx["m"]
+    if month == "all":
+        months = range(1, 13)
+    elif month == "fall":
+        months = [9, 10, 11]
+    elif month == "spring":
+        months = [3, 4, 5]
+    elif month == "summer":
+        months = [6, 7, 8]
+    elif month == "winter":
+        months = [12, 1, 2]
+        df = df.reset_index()
+        df["year"] = df.loc[df["month"].isin([1, 2]), "year"] - 1
+        df = df.set_index("year")
+    else:
+        ts = datetime.datetime.strptime(f"2000-{month}-01", "%Y-%b-%d")
+        # make sure it is length two for the trick below in SQL
+        months = [ts.month, 999]
+
+    df = (
+        df.loc[df["month"].isin(months)]
+        .groupby("year")
+        .agg(
+            {
+                "ncei_sum_precip": "sum",
+                "ncei_avg_high": "mean",
+                "ncei_avg_low": "mean",
+                "iem_sum_precip": "sum",
+                "iem_avg_high": "mean",
+                "iem_avg_low": "mean",
+            }
+        )
+    )
+
     fig = figure(
-        title=f"{reference.state_names[state]} Yearly Bias (IEM minus NCEI)",
+        title=(
+            f"{reference.state_names[state]} [{MDICT[month]}] Bias "
+            "(IEM minus NCEI)"
+        ),
         subtitle=f"{PDICT[varname]}, NCEI processdate: {procdate}",
         apctx=ctx,
     )
