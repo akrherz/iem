@@ -32,30 +32,34 @@ def generic_gridder(df, idx):
     """
     Generic gridding algorithm for easy variables
     """
-    if df[idx].max() == 0 and df[idx].max() == 0:
-        return np.zeros((iemre.NY, iemre.NX))
-    window = 2.0
-    f1 = df[df[idx].notnull()]
-    for lat in np.arange(iemre.SOUTH, iemre.NORTH, window):
-        for lon in np.arange(iemre.WEST, iemre.EAST, window):
-            (west, east, south, north) = (lon, lon + window, lat, lat + window)
-            box = f1[
-                (f1["lat"] >= south)
-                & (f1["lat"] < north)
-                & (f1["lon"] >= west)
-                & (f1["lon"] < east)
-            ]
-            # can't QC data that is all equal
-            if len(box.index) < 4 or box[idx].min() == box[idx].max():
-                continue
-            z = np.abs(zscore(box[idx]))
-            # Compute where the standard dev is +/- 2std
-            bad = box[z > 1.5]
-            df.loc[bad.index, idx] = np.nan
+    if not idx.startswith("precip"):
+        window = 2.0
+        f1 = df[df[idx].notnull()]
+        for lat in np.arange(iemre.SOUTH, iemre.NORTH, window):
+            for lon in np.arange(iemre.WEST, iemre.EAST, window):
+                (west, east, south, north) = (
+                    lon,
+                    lon + window,
+                    lat,
+                    lat + window,
+                )
+                box = f1[
+                    (f1["lat"] >= south)
+                    & (f1["lat"] < north)
+                    & (f1["lon"] >= west)
+                    & (f1["lon"] < east)
+                ]
+                # can't QC data that is all equal
+                if len(box.index) < 4 or box[idx].min() == box[idx].max():
+                    continue
+                z = np.abs(zscore(box[idx]))
+                # Compute where the standard dev is +/- 2std
+                bad = box[z > 1.5]
+                df.loc[bad.index, idx] = np.nan
 
     df2 = df[df[idx].notnull()]
     if len(df2.index) < 4:
-        LOG.warning("Not enough data %s", idx)
+        LOG.info("Not enough data %s", idx)
         return None
     xi, yi = np.meshgrid(iemre.XAXIS, iemre.YAXIS)
     res = np.ones(xi.shape) * np.nan

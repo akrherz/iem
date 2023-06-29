@@ -16,6 +16,7 @@ from pyiem.util import (
 
 LOG = logger()
 SERVICE = "http://data.rcc-acis.org/StnData"
+METASERVICE = "http://data.rcc-acis.org/StnMeta"
 
 
 def safe(val):
@@ -36,15 +37,43 @@ def compare(row, colname):
     """Do we need to update this column?"""
     oldval = safe(row[colname])
     newval = safe(row[f"a{colname}"])
+    # If both values are missing, we are good.
+    if newval is None and oldval is None:
+        return False
     if newval is not None and colname in ["high", "low", "precip"]:
+        est = row[f"{'precip' if colname == 'precip' else 'temp'}_estimated"]
+        # if ACIS is missing and we are not estimated, bad!
+        if not est and newval is None:
+            return newval
         # If we have an estimated flag and ACIS is not None, do things.
-        if row[f"{'precip' if colname == 'precip' else 'temp'}_estimated"]:
+        if est:
             return newval
     if oldval is None and newval is not None:
         return newval
     if newval is not None and oldval != newval:
         return newval
-    return None
+    return False
+
+
+def compute_sdate(acis_station):
+    """Figure out when we should have some data."""
+    payload = {
+        "sids": acis_station,
+        "meta": "sid_dates",
+    }
+    req = exponential_backoff(
+        requests.post, METASERVICE, json=payload, timeout=30
+    )
+    if req is None or req.status_code != 200:
+        LOG.warning("Meta download failure for %s", acis_station)
+        return "2023-01-01"
+    j = req.json()
+    minval = "2023-01-01"
+    if j["meta"]:
+        for sid_date in j["meta"][0]["sid_dates"]:
+            if sid_date[0] == f"{acis_station} 2":
+                minval = min([sid_date[1], minval])
+    return minval
 
 
 def do(meta, station, acis_station, interactive):
@@ -59,7 +88,7 @@ def do(meta, station, acis_station, interactive):
     fmt = "%Y-%m-%d"
     payload = {
         "sid": acis_station,
-        "sdate": meta["attributes"].get("FLOOR", "1850-01-01"),
+        "sdate": meta["attributes"].get("FLOOR", compute_sdate(acis_station)),
         "edate": meta["attributes"].get("CEILING", today.strftime(fmt)),
         "elems": [
             {"name": "maxt", "add": "t"},
@@ -144,7 +173,7 @@ def do(meta, station, acis_station, interactive):
         args = []
         for col in cols:
             newval = compare(row, col)
-            if newval is None:
+            if newval is False:
                 continue
             work.append(f"{col} = %s")
             args.append(newval)
