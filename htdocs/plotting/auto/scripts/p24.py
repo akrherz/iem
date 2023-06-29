@@ -1,4 +1,18 @@
-"""Climate District ranks"""
+"""
+The map presents IEM computed climate district or statewide
+ranks for a metric of your choice.  This map can be generated for a given
+month and year or period of dates.  If the period of days includes leap
+day, this day is included and unweighted against years without it.  If the
+period spans two years, the presented year on the map represents the
+second year in the selection.  For plotting period Option 2, the time
+period is limited to 1 year or less.
+
+<p>The data uses the current NWS COOP nomenclature of
+reporting each day at approximately 7 AM.  So for example, a plot of June
+precipitation would stricly include the period of 7 AM 31 May
+to 7 AM 30 June. Data for the current date is available at approximately
+noon each day.
+"""
 import datetime
 
 import numpy as np
@@ -46,25 +60,7 @@ MDICT = {
 
 def get_description():
     """Return a dict describing how to call this plotter"""
-    desc = {}
-    desc["data"] = True
-    desc["cache"] = 86400
-    desc[
-        "description"
-    ] = """The map presents IEM computed climate district or statewide
-    ranks for a metric of your choice.  This map can be generated for a given
-    month and year or period of dates.  If the period of days includes leap
-    day, this day is included and unweighted against years without it.  If the
-    period spans two years, the presented year on the map represents the
-    second year in the selection.  For plotting period Option 2, the time
-    period is limited to 1 year or less.
-
-    <p>The data uses the current NWS COOP nomenclature of
-    reporting each day at approximately 7 AM.  So for example, a plot of June
-    precipitation would stricly include the period of 7 AM 31 May
-    to 7 AM 30 June. Data for the current date is available at approximately
-    noon each day.
-    """
+    desc = {"description": __doc__, "data": True, "cache": 86400}
     today = datetime.date.today()
     lmonth = today - datetime.timedelta(days=28)
     desc["arguments"] = [

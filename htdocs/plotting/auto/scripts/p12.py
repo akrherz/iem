@@ -260,10 +260,4 @@ def plotter(fdict):
 
 
 if __name__ == "__main__":
-    plotter(
-        dict(
-            which="first_high_above",
-            threshold=70,
-            year=2021,
-        )
-    )
+    plotter({})

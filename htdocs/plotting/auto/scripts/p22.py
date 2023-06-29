@@ -1,4 +1,8 @@
-"""Close to average!"""
+"""
+This plot displays the frequency of a daily high
+or low temperature being within a certain bounds of the long term NCEI
+climatology for the location.
+"""
 import calendar
 
 import pandas as pd
@@ -11,13 +15,7 @@ PDICT = {"high": "High temperature", "low": "Low Temperature"}
 
 def get_description():
     """Return a dict describing how to call this plotter"""
-    desc = {}
-    desc["data"] = True
-    desc[
-        "description"
-    ] = """This plot displays the frequency of a daily high
-    or low temperature being within a certain bounds of the long term NCEI
-    climatology for the location."""
+    desc = {"description": __doc__, "data": True}
     desc["arguments"] = [
         dict(
             type="station",

@@ -10,8 +10,7 @@ import numpy as np
 from metpy.units import masked_array, units
 from pyiem import iemre
 from pyiem.exceptions import NoDataFound
-from pyiem.plot import MapPlot
-from pyiem.plot.colormaps import stretch_cmap
+from pyiem.plot import MapPlot, get_cmap, pretty_bins
 from pyiem.reference import LATLON
 from pyiem.util import get_autoplot_context, ncopen
 
@@ -73,6 +72,50 @@ def get_description():
     return desc
 
 
+def unit_convert(nc, varname, idx0, jslice, islice):
+    """Convert units."""
+    data = None
+    if not varname.startswith("range"):
+        data = nc.variables[varname][idx0, jslice, islice]
+    if varname in ["rsds", "power_swdn"]:
+        # Value is in W m**-2, we want MJ
+        multi = (86400.0 / 1000000.0) if varname == "rsds" else 1
+        data = data * multi
+    elif varname in ["wind_speed"]:
+        data = (
+            masked_array(
+                data,
+                units("meter / second"),
+            )
+            .to(units("mile / hour"))
+            .m
+        )
+    elif varname in ["p01d", "p01d_12z", "snow_12z", "snowd_12z"]:
+        # Value is in W m**-2, we want MJ
+        data = masked_array(data, units("mm")).to(units("inch")).m
+    elif varname in [
+        "high_tmpk",
+        "low_tmpk",
+        "high_tmpk_12z",
+        "low_tmpk_12z",
+        "avg_dwpk",
+        "high_soil4t",
+        "low_soil4t",
+    ]:
+        # Value is in W m**-2, we want MJ
+        data = masked_array(data, units("degK")).to(units("degF")).m
+    else:  # range_tmpk range_tmpk_12z
+        vname2 = f"low_tmpk{'_12z' if varname == 'range_tmpk_12z' else ''}"
+        vname1 = vname2.replace("low", "high")
+        d1 = nc.variables[vname1][idx0, jslice, islice]
+        d2 = nc.variables[vname2][idx0, jslice, islice]
+        data = (
+            masked_array(d1, units("degK")).to(units("degF")).m
+            - masked_array(d2, units("degK")).to(units("degF")).m
+        )
+    return data
+
+
 def plotter(fdict):
     """Go"""
     ctx = get_autoplot_context(fdict, get_description())
@@ -100,44 +143,26 @@ def plotter(fdict):
     with ncopen(ncfn) as nc:
         lats = nc.variables["lat"][jslice]
         lons = nc.variables["lon"][islice]
-        cmap = ctx["cmap"]
+        cmap = get_cmap(ctx["cmap"])
+        data = unit_convert(nc, varname, idx0, jslice, islice)
+        if np.ma.is_masked(np.max(data)):
+            raise NoDataFound("Data Unavailable")
+        ptiles = np.nanpercentile(data.filled(np.nan), [5, 95, 99.9])
         if varname in ["rsds", "power_swdn"]:
-            # Value is in W m**-2, we want MJ
-            multi = (86400.0 / 1000000.0) if varname == "rsds" else 1
-            data = nc.variables[varname][idx0, jslice, islice] * multi
             plot_units = "MJ d-1"
-            clevs = np.arange(0, 37, 3.0)
+            clevs = pretty_bins(0, ptiles[1])
             clevs[0] = 0.01
-            clevstride = 1
+            cmap.set_under("white")
         elif varname in ["wind_speed"]:
-            data = (
-                masked_array(
-                    nc.variables[varname][idx0, jslice, islice],
-                    units("meter / second"),
-                )
-                .to(units("mile / hour"))
-                .m
-            )
             plot_units = "mph"
-            clevs = np.arange(0, 41, 2)
+            clevs = pretty_bins(0, ptiles[1])
             clevs[0] = 0.01
-            clevstride = 2
         elif varname in ["p01d", "p01d_12z", "snow_12z", "snowd_12z"]:
             # Value is in W m**-2, we want MJ
-            data = (
-                masked_array(
-                    nc.variables[varname][idx0, jslice, islice], units("mm")
-                )
-                .to(units("inch"))
-                .m
-            )
             plot_units = "inch"
-            clevs = np.arange(0, 0.25, 0.05)
-            clevs = np.append(clevs, np.arange(0.25, 3.0, 0.25))
-            clevs = np.append(clevs, np.arange(3.0, 10.0, 1))
+            clevs = pretty_bins(0, ptiles[2])
             clevs[0] = 0.01
-            clevstride = 1
-            cmap = stretch_cmap(ctx["cmap"], clevs)
+            cmap.set_under("white")
         elif varname in [
             "high_tmpk",
             "low_tmpk",
@@ -146,33 +171,12 @@ def plotter(fdict):
             "avg_dwpk",
             "high_soil4t",
             "low_soil4t",
+            "range_tmpk",
+            "range_tmpk_12z",
         ]:
-            # Value is in W m**-2, we want MJ
-            data = (
-                masked_array(
-                    nc.variables[varname][idx0, jslice, islice], units("degK")
-                )
-                .to(units("degF"))
-                .m
-            )
             plot_units = "F"
-            clevs = np.arange(-30, 120, 5)
-            clevstride = 2
-        else:  # range_tmpk range_tmpk_12z
-            vname2 = f"low_tmpk{'_12z' if varname == 'range_tmpk_12z' else ''}"
-            vname1 = vname2.replace("low", "high")
-            d1 = nc.variables[vname1][idx0, jslice, islice]
-            d2 = nc.variables[vname2][idx0, jslice, islice]
-            data = (
-                masked_array(d1, units("degK")).to(units("degF")).m
-                - masked_array(d2, units("degK")).to(units("degF")).m
-            )
-            plot_units = "F"
-            clevs = np.arange(0, 61, 5)
-            clevstride = 2
+            clevs = pretty_bins(ptiles[0], ptiles[1])
 
-    if np.ma.is_masked(np.max(data)):
-        raise NoDataFound("Data Unavailable")
     x, y = np.meshgrid(lons, lats)
     if ptype == "c":
         # in the case of contour, use the centroids on the grids
@@ -181,7 +185,6 @@ def plotter(fdict):
             y + 0.125,
             data,
             clevs,
-            clevstride=clevstride,
             units=plot_units,
             ilabel=True,
             labelfmt="%.0f",
@@ -194,7 +197,6 @@ def plotter(fdict):
             y,
             data,
             clevs,
-            clevstride=clevstride,
             cmap=cmap,
             units=plot_units,
         )
@@ -203,4 +205,4 @@ def plotter(fdict):
 
 
 if __name__ == "__main__":
-    plotter({"ptype": "g", "date": "2016-01-03", "var": "high_tmpk_12z"})
+    plotter({"ptype": "g", "date": "2023-06-01", "var": "power_swdn"})

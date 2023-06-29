@@ -1,5 +1,14 @@
-"""GDD vs precip departures"""
-# pylint: disable=no-member
+"""
+This plot compares the growing degree day vs
+precipitation
+departure for a given month and station.  The departure is expressed in
+units of standard deviation.  So a value of one would represent an one
+standard deviation departure from long term mean.  The mean and standard
+deviation is computed against the current / period of record climatology.
+The circle represents a line of equal extremity as compared with the year
+of your choosing.  The dots greater than 2.5 sigma from center are
+labelled with the year they represent.
+"""
 import calendar
 import datetime
 
@@ -13,9 +22,8 @@ from scipy import stats
 
 def get_description():
     """Return a dict describing how to call this plotter"""
-    desc = {}
+    desc = {"description": __doc__, "data": True}
     today = datetime.datetime.now()
-    desc["data"] = True
     desc["arguments"] = [
         dict(
             type="station",
@@ -44,18 +52,6 @@ def get_description():
             label="Growing Degree Day ceiling (F)",
         ),
     ]
-    desc[
-        "description"
-    ] = """This plot compares the growing degree day vs
-    precipitation
-    departure for a given month and station.  The departure is expressed in
-    units of standard deviation.  So a value of one would represent an one
-    standard deviation departure from long term mean.  The mean and standard
-    deviation is computed against the current / period of record climatology.
-    The circle represents a line of equal extremity as compared with the year
-    of your choosing.  The dots greater than 2.5 sigma from center are
-    labelled with the year they represent.
-    """
     return desc
 
 
@@ -70,8 +66,7 @@ def plotter(fdict):
         df = pd.read_sql(
             "SELECT year, sum(precip) as total_precip, "
             "sum(gddxx(%s, %s, high::numeric,low::numeric)) as gdd "
-            f"from alldata_{station[:2]} "
-            "WHERE station = %s and month = %s GROUP by year",
+            "from alldata WHERE station = %s and month = %s GROUP by year",
             conn,
             params=(ctx["gddbase"], ctx["gddceil"], station, month),
             index_col="year",
