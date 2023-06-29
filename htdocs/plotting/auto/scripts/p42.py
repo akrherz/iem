@@ -25,6 +25,7 @@ PDICT2 = {
     "feel": "Feels Like Temperature",
     "dwpf": "Dew Point Temperature",
     "mslp": "Sea Level Pressure",
+    "vsby": "Visibility",
 }
 MDICT = {
     "all": "Entire Year",
@@ -92,7 +93,7 @@ def get_description():
             type="float",
             name="threshold",
             default=50,
-            label="Temperature (F) / Pressure (mb) Threshold:",
+            label="Temperature (F) / Pressure (mb) / Vis (mi) Threshold:",
         ),
         dict(
             optional=True,
@@ -100,8 +101,8 @@ def get_description():
             name="t2",
             default=60,
             label=(
-                "Secondary Temperature (F) / Pressure (mb) Threshold (for "
-                "range queries)"
+                "Secondary Temperature (F) / Pressure (mb) / Vis (mi) "
+                "Threshold (for range queries)"
             ),
         ),
         dict(
@@ -217,9 +218,10 @@ def plotter(fdict):
         # make sure it is length two for the trick below in SQL
         months = [ts.month, 999]
 
+    rnd = 0 if varname not in ["mslp", "vsby"] else 2
     cursor.execute(
         f"""
-        SELECT valid, round({varname}::numeric,{0 if varname != 'mslp' else 2})
+        SELECT valid, round({varname}::numeric,{rnd})
         from alldata where station = %s {year_limiter}
         and {varname} is not null and extract(month from valid) in %s
         ORDER by valid ASC
@@ -232,6 +234,8 @@ def plotter(fdict):
     units = r"$^\circ$F"
     if varname == "mslp":
         units = "mb"
+    elif varname == "vsby":
+        units = "mile"
     title = (
         f"{y1 if y1 is not None else ab.year}-"
         f"{y2 if y2 is not None else datetime.datetime.now().year} "
