@@ -1,4 +1,10 @@
-"""IEMAccess daily summary ranges"""
+"""
+This plot presents the range between the min
+and maximum observation of your choice for a given station and a given
+year.  Some of these values are only computed based on hourly reports,
+so they would be represent a true min and max of a continuously observed
+variable.
+"""
 import datetime
 
 import matplotlib.dates as mdates
@@ -23,16 +29,8 @@ PDICT2 = {
 
 def get_description():
     """Return a dict describing how to call this plotter"""
-    desc = {}
+    desc = {"description": __doc__, "data": True}
     today = datetime.datetime.now()
-    desc["data"] = True
-    desc[
-        "description"
-    ] = """This plot presents the range between the min
-    and maximum observation of your choice for a given station and a given
-    year.  Some of these values are only computed based on hourly reports,
-    so they would be represent a true min and max of a continuously observed
-    variable."""
     desc["arguments"] = [
         dict(
             type="zstation",

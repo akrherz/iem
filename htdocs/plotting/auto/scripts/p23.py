@@ -1,4 +1,7 @@
-"""Monthly departures and elnino"""
+"""
+This plot presents the combination of monthly
+temperature or precipitation departures and El Nino index values.
+"""
 import datetime
 
 import pandas as pd
@@ -16,13 +19,8 @@ PDICT = {
 
 def get_description():
     """Return a dict describing how to call this plotter"""
-    desc = {}
+    desc = {"description": __doc__, "data": True}
     year = datetime.date.today().year - 7
-    desc["data"] = True
-    desc[
-        "description"
-    ] = """This plot presents the combination of monthly
-    temperature or precipitation departures and El Nino index values."""
     desc["arguments"] = [
         dict(
             type="station",

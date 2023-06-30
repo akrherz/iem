@@ -238,12 +238,4 @@ def plotter(fdict):
 
 
 if __name__ == "__main__":
-    plotter(
-        dict(
-            station="IATAME",
-            network="IACLIMATE",
-            direction="above2",
-            varname="snow",
-            threshold=1,
-        )
-    )
+    plotter({})

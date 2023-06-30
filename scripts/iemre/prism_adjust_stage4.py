@@ -4,9 +4,11 @@ Take the PRISM data, valid at 12z and bias correct the hourly stage IV data
 
 """
 import datetime
+import os
 import sys
 
 import numpy as np
+import pandas as pd
 from pyiem import prism as prismutil
 from pyiem.iemre import daily_offset, hourly_offset
 from pyiem.util import find_ij, logger, ncopen, utc
@@ -17,12 +19,40 @@ DEBUGLAT = 42.04
 LOG = logger()
 
 
+def compute_s4total(valid):
+    """Figure out the 24 hour total for this timestamp."""
+    # Split into two, so to support 1 January without yucky code
+    # 13z yesterday, arrears
+    sts = valid - datetime.timedelta(hours=23)
+    tidx0 = hourly_offset(sts)
+    # 23z yesterday
+    tidx1 = hourly_offset(sts + datetime.timedelta(hours=10))
+    ncfn = f"/mesonet/data/stage4/{sts.year}_stage4_hourly.nc"
+    stage4total = None
+    if os.path.isfile(ncfn):
+        with ncopen(ncfn) as nc:
+            p01m = nc.variables["p01m"]
+            LOG.info("%s [%s thru %s]", ncfn, tidx0, tidx1)
+            stage4total = np.sum(p01m[tidx0 : (tidx1 + 1), :, :], axis=0)
+
+    # 0z today
+    sts = valid - datetime.timedelta(hours=12)
+    tidx0 = hourly_offset(sts)
+    # 11z today
+    tidx1 = hourly_offset(valid)
+    ncfn = f"/mesonet/data/stage4/{sts.year}_stage4_hourly.nc"
+    with ncopen(ncfn) as nc:
+        p01m = nc.variables["p01m"]
+        LOG.info("%s [%s thru %s]", ncfn, tidx0, tidx1)
+        tt = np.sum(p01m[tidx0 : (tidx1 + 1), :, :], axis=0)
+        stage4total = tt if stage4total is None else (stage4total + tt)
+
+    return stage4total
+
+
 def workflow(valid):
     """Our workflow"""
     LOG.info("Processing %s", valid)
-    if valid.month == 1 and valid.day == 1:
-        LOG.warning("sorry Jan 1 processing is a TODO!")
-        return
     # read prism
     tidx = daily_offset(valid)
     with ncopen(f"/mesonet/data/prism/{valid.year}_daily.nc", "r") as nc:
@@ -32,30 +62,20 @@ def workflow(valid):
         lats = nc.variables["lat"][:]
     ppt = np.where(ppt.mask, 0, ppt)
     (lons, lats) = np.meshgrid(lons, lats)
-    (i, j) = prismutil.find_ij(DEBUGLON, DEBUGLAT)
-    LOG.info("prism debug point ppt: %.3f", ppt[j, i])
+    (pi, pj) = prismutil.find_ij(DEBUGLON, DEBUGLAT)
+    LOG.info("prism debug point ppt: %.3f", ppt[pj, pi])
 
-    # Interpolate this onto the stage4 grid
-    nc = ncopen(
-        f"/mesonet/data/stage4/{valid.year}_stage4_hourly.nc",
-        "a",
-        timeout=300,
-    )
-    p01m = nc.variables["p01m"]
-    p01m_status = nc.variables["p01m_status"]
-    s4lons = nc.variables["lon"][:]
-    s4lats = nc.variables["lat"][:]
-    i, j = find_ij(s4lons, s4lats, DEBUGLON, DEBUGLAT)
-    # Values are in the hourly arrears, so start at -23 and thru current hour
-    sts_tidx = hourly_offset(valid - datetime.timedelta(hours=23))
-    ets_tidx = hourly_offset(valid + datetime.timedelta(hours=1))
-    s4total = np.sum(p01m[sts_tidx:ets_tidx, :, :], axis=0)
+    s4total = compute_s4total(valid)
+    with ncopen(f"/mesonet/data/stage4/{valid.year}_stage4_hourly.nc") as nc:
+        s4lons = nc.variables["lon"][:]
+        s4lats = nc.variables["lat"][:]
+    sj, si = find_ij(s4lons, s4lats, DEBUGLON, DEBUGLAT)
     LOG.info(
         "stage4 s4total: %.3f lon: %.2f (%.2f) lat: %.2f (%.2f)",
-        s4total[i, j],
-        s4lons[i, j],
+        s4total[sj, si],
+        s4lons[sj, si],
         DEBUGLON,
-        s4lats[i, j],
+        s4lats[sj, si],
         DEBUGLAT,
     )
     # make sure the s4total does not have zeros
@@ -63,56 +83,58 @@ def workflow(valid):
 
     nn = NearestNDInterpolator((lons.flatten(), lats.flatten()), ppt.flat)
     prism_on_s4grid = nn(s4lons, s4lats)
-    LOG.info(
-        "shape of prism_on_s4grid: %s s4lons: %s ll: %.2f s4lats: %s ll: %.2f",
-        np.shape(prism_on_s4grid),
-        np.shape(s4lons),
-        s4lons[0, 0],
-        np.shape(s4lats),
-        s4lats[0, 0],
-    )
     multiplier = prism_on_s4grid / s4total
     LOG.info(
-        "prism avg: %.3f stageIV avg: %.3f prismons4grid avg: %.3f mul: %.3f",
+        "gridavgs: prism: %.3f stageIV: %.3f prismons4grid: %.3f mul: %.3f",
         np.mean(ppt),
         np.mean(s4total),
         np.mean(prism_on_s4grid),
         np.mean(multiplier),
     )
     LOG.info(
-        "Boone IA0807 prism: %.3f stageIV: %.4f prismons4grid: %.3f mul: %.3f",
-        ppt[431, 746],
-        s4total[i, j],
-        prism_on_s4grid[i, j],
-        multiplier[i, j],
+        "prism: %.3f stageIV: %.4f prismons4grid: %.3f mul: %.3f",
+        ppt[pj, pi],
+        s4total[sj, si],
+        prism_on_s4grid[sj, si],
+        multiplier[sj, si],
     )
-
-    # Do the work now, we should not have to worry about the scale factor
-    for tidx in range(sts_tidx, ets_tidx):
-        oldval = p01m[tidx, :, :]
-        # we threshold the s4total to at least 0.001, so we divide by 24 here
-        # and denote that if the multiplier is zero, then we net zero
-        newval = np.where(oldval < 0.001, 0.00004, oldval) * multiplier
-        nc.variables["p01m"][tidx, :, :] = newval
-        LOG.info(
-            "adjust tidx: %s oldval: %.3f newval: %.3f",
-            tidx,
-            oldval[i, j],
-            newval[i, j],
-        )
-        # make sure have data
-        if np.ma.max(newval) > 0:
-            p01m_status[tidx] = 2
-        else:
-            LOG.warning(
-                "NOOP for time %s[idx:%s]",
-                (
-                    datetime.datetime(valid.year, 1, 1, 0)
-                    + datetime.timedelta(hours=tidx)
-                ).strftime("%Y-%m-%dT%H"),
-                tidx,
+    # 13 z yesterday
+    sts = valid - datetime.timedelta(hours=23)
+    # Through 12z file
+    ets = valid
+    for now in pd.date_range(sts, ets, freq="1H"):
+        idx = hourly_offset(now)
+        ncfn = f"/mesonet/data/stage4/{now.year}_stage4_hourly.nc"
+        if not os.path.isfile(ncfn):
+            continue
+        with ncopen(ncfn, "a") as nc:
+            oldval = nc.variables["p01m"][idx]
+            # we threshold the s4total to at least 0.001,
+            # so we divide by 24 here
+            # and denote that if the multiplier is zero, then we net zero
+            newval = np.where(oldval < 0.001, 0.00004, oldval) * multiplier
+            # Unsure
+            newval = np.where(newval < 0.01, 0, newval)
+            nc.variables["p01m"][idx, :, :] = newval
+            LOG.info(
+                "adjust %s[%s] oldval: %.3f newval: %.3f",
+                now.strftime("%Y%m%d%H"),
+                idx,
+                oldval[sj, si],
+                newval[sj, si],
             )
-    nc.close()
+            # make sure have data
+            if np.ma.max(newval) > 0:
+                nc.variables["p01m_status"][idx] = 2
+            else:
+                LOG.warning(
+                    "NOOP for time %s[idx:%s]",
+                    (
+                        datetime.datetime(valid.year, 1, 1, 0)
+                        + datetime.timedelta(hours=idx)
+                    ).strftime("%Y-%m-%dT%H"),
+                    idx,
+                )
 
 
 def main(argv):

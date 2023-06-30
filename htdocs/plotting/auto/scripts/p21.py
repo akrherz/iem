@@ -1,4 +1,7 @@
-"""Change in NCEI climatology over some period."""
+"""
+This map displays an analysis of the change in
+average high or low temperature over a time period of your choice.
+"""
 import datetime
 
 import pandas as pd
@@ -12,12 +15,7 @@ PDICT = {"high": "High temperature", "low": "Low Temperature"}
 
 def get_description():
     """Return a dict describing how to call this plotter"""
-    desc = {}
-    desc["data"] = True
-    desc[
-        "description"
-    ] = """This map displays an analysis of the change in
-    average high or low temperature over a time period of your choice."""
+    desc = {"description": __doc__, "data": True}
     today = datetime.date.today()
     threeweeks = today - datetime.timedelta(days=21)
     desc["arguments"] = [
