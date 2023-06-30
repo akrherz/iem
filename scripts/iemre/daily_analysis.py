@@ -85,33 +85,54 @@ def generic_gridder(df, idx):
 def copy_iemre_hourly(ts, ds):
     """Compute the 6 UTC to 6 UTC totals via IEMRE hourly values."""
     sts = utc(ts.year, ts.month, ts.day, 6)
-    ets = sts + datetime.timedelta(hours=24)
-    offset = iemre.daily_offset(ts)
-    offset1 = iemre.hourly_offset(sts)
-    offset2 = iemre.hourly_offset(ets)
+    ets = sts + datetime.timedelta(hours=23)
+    pairs = [(sts, ets)]
+    if sts.year != ets.year:
+        # 6z to 23z (inclusve)
+        # 0z to 5z (inclusive)
+        pairs = [
+            (sts, sts + datetime.timedelta(hours=17)),
+            (sts + datetime.timedelta(hours=18), ets),
+        ]
     windhours = 0
     hi_soil4t = None
     lo_soil4t = None
-    if ts.month == 12 and ts.day == 31:
-        LOG.warning(
-            "p01d      for %s [idx:%s] %s(%s)->%s(%s) SPECIAL",
-            ts,
-            offset,
-            sts.strftime("%Y%m%d%H"),
-            offset1,
-            ets.strftime("%Y%m%d%H"),
-            offset2,
-        )
-        ncfn = iemre.get_hourly_ncname(ets.year)
+    sped = None
+    totalprecip = None
+    for pair in pairs:
+        ncfn = iemre.get_hourly_ncname(pair[0].year)
         if not os.path.isfile(ncfn):
             LOG.warning("Missing %s", ncfn)
-            return
-        with ncopen(ncfn, timeout=600) as hnc:
-            phour = np.sum(hnc.variables["p01m"][:offset2, :, :], 0)
-            sped = None
-            for offset in range(offset2):
-                uwnd = hnc.variables["uwnd"][offset, :, :]
-                vwnd = hnc.variables["vwnd"][offset, :, :]
+            continue
+        tidx1 = iemre.hourly_offset(pair[0])
+        tidx2 = iemre.hourly_offset(pair[1])
+        LOG.info("Using %s for [%s thru %s]", ncfn, tidx1, tidx2)
+        with ncopen(ncfn, timeout=600) as nc:
+            nc_p01m = nc.variables["p01m"]
+            nc_uwnd = nc.variables["uwnd"]
+            nc_vwnd = nc.variables["vwnd"]
+            nc_t4 = nc.variables["soil4t"]
+            # Caution: precip is stored arrears, so we have ugliness
+            _idx1 = 0 if tidx1 == 0 else tidx1 + 1
+            LOG.info("precip read [%s<%s]", _idx1, tidx2 + 2)
+            precip = np.nansum(nc_p01m[_idx1 : (tidx2 + 2), :, :], axis=0)
+            if totalprecip is None:
+                totalprecip = precip
+            else:
+                totalprecip = np.nansum([precip, totalprecip], axis=0)
+            maxt4 = np.ma.max(nc_t4[tidx1 : (tidx2 + 1), :, :], axis=0)
+            if hi_soil4t is None:
+                hi_soil4t = maxt4
+            else:
+                hi_soil4t = np.ma.maximum(hi_soil4t, maxt4)
+            mint4 = np.ma.min(nc_t4[tidx1 : (tidx2 + 1), :, :], axis=0)
+            if lo_soil4t is None:
+                lo_soil4t = mint4
+            else:
+                lo_soil4t = np.ma.maximum(lo_soil4t, mint4)
+            for offset in range(tidx1, tidx2 + 1):
+                uwnd = nc_uwnd[offset, :, :]
+                vwnd = nc_vwnd[offset, :, :]
                 if uwnd.mask.all():
                     LOG.warning("No wind for offset: %s", offset)
                 else:
@@ -121,113 +142,46 @@ def copy_iemre_hourly(ts, ds):
                         sped = mag
                     else:
                         sped += mag
-                soil4t = hnc.variables["soil4t"][offset, :, :]
-                if soil4t.mask.all():
-                    continue
-                if hi_soil4t is None:
-                    hi_soil4t = soil4t
-                    lo_soil4t = soil4t
-                hi_soil4t = np.where(soil4t > hi_soil4t, soil4t, hi_soil4t)
-                lo_soil4t = np.where(soil4t < lo_soil4t, soil4t, lo_soil4t)
-        ncfn = iemre.get_hourly_ncname(sts.year)
-        if os.path.isfile(ncfn):
-            with ncopen(ncfn, timeout=600) as hnc:
-                phour += np.sum(hnc.variables["p01m"][offset1:, :, :], 0)
-                for offset in range(offset1, hnc.dimensions["time"].size):
-                    uwnd = hnc.variables["uwnd"][offset, :, :]
-                    vwnd = hnc.variables["vwnd"][offset, :, :]
-                    if uwnd.mask.all():
-                        LOG.warning("No wind for offset: %s", offset)
-                    else:
-                        windhours += 1
-                        sped += (uwnd**2 + vwnd**2) ** 0.5
-                    soil4t = hnc.variables["soil4t"][offset, :, :]
-                    if soil4t.mask.all():
-                        continue
-                    if hi_soil4t is None:
-                        hi_soil4t = soil4t
-                        lo_soil4t = soil4t
-                    hi_soil4t = np.where(soil4t > hi_soil4t, soil4t, hi_soil4t)
-                    lo_soil4t = np.where(soil4t < lo_soil4t, soil4t, lo_soil4t)
-    else:
-        ncfn = iemre.get_hourly_ncname(sts.year)
-        if not os.path.isfile(ncfn):
-            LOG.warning("Missing %s", ncfn)
-            return
-        with ncopen(ncfn, timeout=600) as hnc:
-            phour = np.sum(hnc.variables["p01m"][offset1:offset2, :, :], 0)
-            sped = None
-            for offset in range(offset1, offset2):
-                uwnd = hnc.variables["uwnd"][offset, :, :]
-                vwnd = hnc.variables["vwnd"][offset, :, :]
-                if uwnd.mask.all():
-                    # Quell logging when we are close to current clock time.
-                    now = sts + datetime.timedelta(hours=offset - offset1)
-                    if now < (utc() - datetime.timedelta(hours=3)):
-                        LOG.warning(
-                            "No wind for offset: %s[%s-%s] %s",
-                            offset,
-                            offset1,
-                            offset2,
-                            now,
-                        )
-                else:
-                    windhours += 1
-                    mag = (uwnd**2 + vwnd**2) ** 0.5
-                    if sped is None:
-                        sped = mag
-                    else:
-                        sped += mag
-                soil4t = hnc.variables["soil4t"][offset, :, :]
-                if soil4t.mask.all():
-                    continue
-                if hi_soil4t is None:
-                    hi_soil4t = soil4t
-                    lo_soil4t = soil4t
-                hi_soil4t = np.where(soil4t > hi_soil4t, soil4t, hi_soil4t)
-                lo_soil4t = np.where(soil4t < lo_soil4t, soil4t, lo_soil4t)
     if hi_soil4t is not None:
         ds["high_soil4t"].values = hi_soil4t
         ds["low_soil4t"].values = lo_soil4t
-    ds["p01d"].values = np.where(phour < 0, 0, phour)
+    ds["p01d"].values = totalprecip
     if windhours > 0:
         ds["wind_speed"].values = sped / windhours
 
 
 def copy_iemre_12z(ts, ds):
-    """Compute the 24 Hour precip at 12 UTC, we do some more tricks though"""
-    offset = iemre.daily_offset(ts)
+    """Compute the 24 Hour precip at 12 UTC."""
+    # arrears, so inclusive end
     ets = utc(ts.year, ts.month, ts.day, 12)
-    sts = ets - datetime.timedelta(hours=24)
-    offset1 = iemre.hourly_offset(sts)
-    offset2 = iemre.hourly_offset(ets)
-    if ts.month == 1 and ts.day == 1:
-        if sts.year >= 1900:
-            LOG.warning(
-                "p01d_12z  for %s [idx:%s] %s(%s)->%s(%s) SPECIAL",
-                ts,
-                offset,
-                sts.strftime("%Y%m%d%H"),
-                offset1,
-                ets.strftime("%Y%m%d%H"),
-                offset2,
-            )
-        ncfn = iemre.get_hourly_ncname(ets.year)
+    # 13z yesterday
+    sts = ets - datetime.timedelta(hours=23)
+    pairs = [(sts, ets)]
+    if sts.year != ets.year:
+        # 13z to 23z (inclusve)
+        # 0z to 12z (inclusive)
+        pairs = [
+            (sts, sts + datetime.timedelta(hours=10)),
+            (sts + datetime.timedelta(hours=11), ets),
+        ]
+    totalprecip = None
+    for pair in pairs:
+        ncfn = iemre.get_hourly_ncname(pair[0].year)
         if not os.path.isfile(ncfn):
             LOG.warning("Missing %s", ncfn)
-            return
-        with ncopen(ncfn, timeout=600) as hnc:
-            phour = np.sum(hnc.variables["p01m"][:offset2, :, :], 0)
-        with ncopen(iemre.get_hourly_ncname(sts.year), timeout=600) as hnc:
-            phour += np.sum(hnc.variables["p01m"][offset1:, :, :], 0)
-    else:
-        ncfn = iemre.get_hourly_ncname(ts.year)
-        if not os.path.isfile(ncfn):
-            LOG.warning("Missing %s", ncfn)
-            return
-        with ncopen(ncfn, timeout=600) as hnc:
-            phour = np.sum(hnc.variables["p01m"][offset1:offset2, :, :], 0)
-    ds["p01d_12z"].values = np.where(phour < 0, 0, phour)
+            continue
+        tidx1 = iemre.hourly_offset(pair[0])
+        tidx2 = iemre.hourly_offset(pair[1])
+        LOG.info("Using %s for [%s thru %s]", ncfn, tidx1, tidx2)
+        with ncopen(ncfn, timeout=600) as nc:
+            nc_p01m = nc.variables["p01m"]
+            # Caution: precip is stored arrears, so we have ugliness
+            precip = np.nansum(nc_p01m[tidx1 : (tidx2 + 1), :, :], axis=0)
+            if totalprecip is None:
+                totalprecip = precip
+            else:
+                totalprecip = np.nansum([precip, totalprecip], axis=0)
+    ds["p01d_12z"].values = totalprecip
 
 
 def use_climodat_12z(ts, ds):
@@ -333,16 +287,20 @@ def use_coop_12z(ts, ds):
     if len(df.index) < 4:
         LOG.warning("Failed quorum")
     res = generic_gridder(df, "highdata")
-    ds["high_tmpk_12z"].values = convert_value(res, "degF", "degK")
+    if res is not None:
+        ds["high_tmpk_12z"].values = convert_value(res, "degF", "degK")
 
     res = generic_gridder(df, "lowdata")
-    ds["low_tmpk_12z"].values = convert_value(res, "degF", "degK")
+    if res is not None:
+        ds["low_tmpk_12z"].values = convert_value(res, "degF", "degK")
 
     res = generic_gridder(df, "snowdata")
-    ds["snow_12z"].values = convert_value(res, "inch", "millimeter")
+    if res is not None:
+        ds["snow_12z"].values = convert_value(res, "inch", "millimeter")
 
     res = generic_gridder(df, "snowddata")
-    ds["snowd_12z"].values = convert_value(res, "inch", "millimeter")
+    if res is not None:
+        ds["snowd_12z"].values = convert_value(res, "inch", "millimeter")
 
 
 def use_asos_daily(ts, ds):
@@ -434,7 +392,7 @@ def use_climodat_daily(ts, ds):
         case when temp_estimated or temp_hour is null or
         (temp_hour > 4 and temp_hour < 13) then null else low end as lowdata,
         case when precip_estimated or precip_hour is null or
-        precip_hour > 4 or precip_hour < 13 then null else precip end
+        (precip_hour > 4 and precip_hour < 13) then null else precip end
             as precipdata
         from alldata a JOIN mystations m
         ON (a.station = m.id) WHERE a.day = %s
