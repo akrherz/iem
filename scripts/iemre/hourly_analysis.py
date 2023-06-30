@@ -266,11 +266,6 @@ def grid_hour(ts):
             LOG.warning("%s has no entries, FAIL", ts)
             return
         ures, vres = grid_wind(df, domain)
-    LOG.info(
-        "wind is done. max(ures): %s max(vres): %s",
-        np.max(ures),
-        np.max(vres),
-    )
     if ures is None:
         LOG.warning("Failure for uwnd at %s", ts)
     else:
@@ -308,7 +303,6 @@ def grid_hour(ts):
     write_grid(ts, "dwpk", masked_array(dwpf, data_units="degF").to("degK"))
 
     res = grid_skyc(df, domain)
-    LOG.info("grid skyc is done")
     if res is None:
         LOG.warning("Failure for skyc at %s", ts)
     else:
@@ -327,8 +321,8 @@ def write_grid(valid, vname, grid):
             "offset: %s writing %s with min: %s max: %s Ames: %s",
             offset,
             vname,
-            np.ma.min(grid),
-            np.ma.max(grid),
+            np.nanmin(grid),
+            np.nanmax(grid),
             grid[151, 259],
         )
         nc.variables[vname][offset] = grid
