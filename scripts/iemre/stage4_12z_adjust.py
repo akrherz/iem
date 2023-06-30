@@ -19,7 +19,7 @@ def save12z(ts, val):
         LOG.warning("File not found! %s", ncfn)
         return
     idx = iemre.daily_offset(ts)
-    LOG.debug("Writing 12z grid to %s at idx: %s", ncfn, idx)
+    LOG.info("Writing 12z grid to %s at idx: %s", ncfn, idx)
     with ncopen(ncfn, "a") as nc:
         # Account for pre-2002 shape difference
         if val.shape == (880, 1160):
@@ -39,7 +39,7 @@ def merge(ts):
         f"{ts:%Y/%m/%d}/stage4/ST4.{ts:%Y%m%d%H}.24h.grib"
     )
     if not os.path.isfile(fn):
-        LOG.info("stage4_12z_adjust %s is missing", fn)
+        LOG.warning("stage4_12z_adjust %s is missing", fn)
         return
 
     grbs = pygrib.open(fn)

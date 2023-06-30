@@ -430,9 +430,9 @@ def use_climodat_daily(ts, ds):
         case when not precip_estimated then precip else null end as
             precipdata_all,
         case when temp_estimated or temp_hour is null or
-        temp_hour > 4 or temp_hour < 13 then null else high end as highdata,
+        (temp_hour > 4 and temp_hour < 13) then null else high end as highdata,
         case when temp_estimated or temp_hour is null or
-        temp_hour > 4 or temp_hour < 13 then null else low end as lowdata,
+        (temp_hour > 4 and temp_hour < 13) then null else low end as lowdata,
         case when precip_estimated or precip_hour is null or
         precip_hour > 4 or precip_hour < 13 then null else precip end
             as precipdata
@@ -504,6 +504,15 @@ def workflow(ts):
             ds[f"{col}_12z"].values = ds[col]
 
     for vname in list(ds.keys()):
+        # Some grids are too tight to the CONUS boundary, so we smear things
+        # out some.
+        vals = ds[vname].to_masked_array()
+        for shift in (-4, 4):
+            for axis in (0, 1):
+                vals_shifted = np.roll(vals, shift=shift, axis=axis)
+                idx = ~vals_shifted.mask * vals.mask
+                vals[idx] = vals_shifted[idx]
+        ds[vname].values = vals
         msg = f"{vname:14s} {ds[vname].min():6.2f} {ds[vname].max():6.2f}"
         LOG.info(msg)
     iemre.set_grids(ts, ds)
