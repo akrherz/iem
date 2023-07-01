@@ -1,4 +1,9 @@
-"""monthly or yearly temperature range"""
+"""
+This chart presents the range between the warmest
+high temperature and the coldest low temperature for a given month for
+each year.  The bottom panel displays the range between those two values.
+The black lines represent the simple averages of the data.
+"""
 import calendar
 import datetime
 
@@ -13,16 +18,8 @@ PDICT = {"monthly": "Plot Single Month", "yearly": "Plot Entire Year"}
 
 def get_description():
     """Return a dict describing how to call this plotter"""
-    desc = {}
-    desc["data"] = True
+    desc = {"description": __doc__, "data": True}
     desc["defaults"] = {"_r": "96"}
-    desc[
-        "description"
-    ] = """This chart presents the range between the warmest
-    high temperature and the coldest low temperature for a given month for
-    each year.  The bottom panel displays the range between those two values.
-    The black lines represent the simple averages of the data.
-    """
     today = datetime.date.today()
     desc["arguments"] = [
         dict(

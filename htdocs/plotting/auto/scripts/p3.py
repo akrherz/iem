@@ -36,42 +36,37 @@ from pyiem.plot import figure_axes
 from pyiem.util import get_autoplot_context, get_sqlalchemy_conn
 from sqlalchemy import text
 
-PDICT = dict(
-    [
-        ("max-high", "Maximum High"),
-        ("avg-high", "Average High"),
-        ("std-high", "Standard Deviation High"),
-        ("delta-high", "Average Day to Day High Change"),
-        ("min-high", "Minimum High"),
-        ("max-low", "Maximum Low"),
-        ("avg-low", "Average Low"),
-        ("std-low", "Standard Deviation Low"),
-        ("delta-low", "Average Day to Day Low Change"),
-        ("min-low", "Minimum Low"),
-        ("avg-temp", "Average Temp"),
-        ("std-temp", "Standard Deviation of Average Temp"),
-        ("delta-temp", "Average Day to Day Avg Temp Change"),
-        ("range-avghi-avglo", "Range between Average High + Average Low"),
-        ("max-precip", "Maximum Daily Precip"),
-        ("sum-precip", "Total Precipitation"),
-        (
-            "days-high-above",
-            "Days with High Temp Greater Than or Equal To (threshold)",
-        ),
-        ("days-high-below", "Days with High Temp Below (threshold)"),
-        (
-            "days-high-above-avg",
-            "Days with High Temp Greater Than or Equal To Average",
-        ),
-        (
-            "days-lows-above",
-            "Days with Low Temp Greater Than or Equal To (threshold)",
-        ),
-        ("days-lows-below", "Days with Low Temp Below (threshold)"),
-        ("days-lows-below-avg", "Days with Low Temp Below Average"),
-        ("days-precip-above", "Days with Precipitation Above (threshold)"),
-    ]
-)
+PDICT = {
+    "max-high": "Maximum High",
+    "avg-high": "Average High",
+    "std-high": "Standard Deviation High",
+    "delta-high": "Average Day to Day High Change",
+    "min-high": "Minimum High",
+    "max-low": "Maximum Low",
+    "avg-low": "Average Low",
+    "std-low": "Standard Deviation Low",
+    "delta-low": "Average Day to Day Low Change",
+    "min-low": "Minimum Low",
+    "avg-temp": "Average Temp",
+    "std-temp": "Standard Deviation of Average Temp",
+    "delta-temp": "Average Day to Day Avg Temp Change",
+    "range-avghi-avglo": "Range between Average High + Average Low",
+    "max-precip": "Maximum Daily Precip",
+    "sum-precip": "Total Precipitation",
+    "days-high-above": (
+        "Days with High Temp Greater Than or Equal To (threshold)"
+    ),
+    "days-high-below": "Days with High Temp Below (threshold)",
+    "days-high-above-avg": (
+        "Days with High Temp Greater Than or Equal To Average"
+    ),
+    "days-lows-above": (
+        "Days with Low Temp Greater Than or Equal To (threshold)"
+    ),
+    "days-lows-below": "Days with Low Temp Below (threshold)",
+    "days-lows-below-avg": "Days with Low Temp Below Average",
+    "days-precip-above": "Days with Precipitation Above (threshold)",
+}
 PDICT2 = {"no": "Plot Yearly Values", "yes": "Plot Decadal Values"}
 MDICT = {
     "year": "Calendar Year",
