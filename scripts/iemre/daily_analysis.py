@@ -134,14 +134,14 @@ def copy_iemre_hourly(ts, ds):
                 uwnd = nc_uwnd[offset, :, :]
                 vwnd = nc_vwnd[offset, :, :]
                 if uwnd.mask.all():
-                    LOG.warning("No wind for offset: %s", offset)
+                    LOG.info("No wind for offset: %s", offset)
+                    continue
+                mag = (uwnd**2 + vwnd**2) ** 0.5
+                windhours += 1
+                if sped is None:
+                    sped = mag
                 else:
-                    mag = (uwnd**2 + vwnd**2) ** 0.5
-                    windhours += 1
-                    if sped is None:
-                        sped = mag
-                    else:
-                        sped += mag
+                    sped += mag
     if hi_soil4t is not None:
         ds["high_soil4t"].values = hi_soil4t
         ds["low_soil4t"].values = lo_soil4t
