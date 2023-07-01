@@ -23,8 +23,6 @@ from pyiem.util import (
 LOG = logger()
 LOG.setLevel(logging.INFO)
 warnings.filterwarnings("ignore", category=FutureWarning)
-COOP = get_dbconn("coop")
-ccursor = COOP.cursor()
 
 
 def zero(val):
@@ -34,7 +32,7 @@ def zero(val):
     return val
 
 
-def update_database(stid, valid, row):
+def update_database(cursor, stid, valid, row):
     """Update the database with these newly computed values!"""
     if row["precip"] is None:
         LOG.info("Skipping %s as has missing data %s", stid, row)
@@ -43,7 +41,7 @@ def update_database(stid, valid, row):
 
     def do_update(_row):
         """Do the database work, please."""
-        ccursor.execute(
+        cursor.execute(
             f"UPDATE {table} SET high = %s, low = %s, precip = %s, snow = %s, "
             "snowd = %s, temp_hour = 7, precip_hour = 7 "
             "WHERE station = %s and day = %s",
@@ -57,10 +55,10 @@ def update_database(stid, valid, row):
                 valid,
             ),
         )
-        return ccursor.rowcount == 1
+        return cursor.rowcount == 1
 
     if not do_update(row):
-        ccursor.execute(
+        cursor.execute(
             f"INSERT into {table} (station, day, temp_estimated, "
             "precip_estimated, year, month, sday) VALUES "
             "(%s, %s, 't', 't', %s, %s, %s)",
@@ -69,7 +67,7 @@ def update_database(stid, valid, row):
         do_update(row)
 
 
-def do_day(valid):
+def do_day(cursor, valid):
     """Process a day please"""
     idx = iemre.daily_offset(valid)
     with ncopen(iemre.get_daily_ncname(valid.year), "r", timeout=300) as nc:
@@ -109,26 +107,17 @@ def do_day(valid):
             "snow": stsnow[i],
             "snowd": stsnowd[i],
         }
-        update_database(sid, valid, data)
+        update_database(cursor, sid, valid, data)
 
 
 def main(argv):
     """Go Main Go"""
-    if len(argv) == 4:
-        do_day(datetime.date(int(argv[1]), int(argv[2]), int(argv[3])))
-    elif len(argv) == 3:
-        sts = datetime.date(int(argv[1]), int(argv[2]), 1)
-        ets = sts + datetime.timedelta(days=35)
-        ets = ets.replace(day=1)
-        now = sts
-        while now < ets:
-            do_day(now)
-            now += datetime.timedelta(days=1)
-    else:
-        do_day(datetime.date.today())
+    conn = get_dbconn("coop")
+    cursor = conn.cursor()
+    do_day(cursor, datetime.date(int(argv[1]), int(argv[2]), int(argv[3])))
+    cursor.close()
+    conn.commit()
 
 
 if __name__ == "__main__":
     main(sys.argv)
-    ccursor.close()
-    COOP.commit()

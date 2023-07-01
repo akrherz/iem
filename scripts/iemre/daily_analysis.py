@@ -134,14 +134,14 @@ def copy_iemre_hourly(ts, ds):
                 uwnd = nc_uwnd[offset, :, :]
                 vwnd = nc_vwnd[offset, :, :]
                 if uwnd.mask.all():
-                    LOG.warning("No wind for offset: %s", offset)
+                    LOG.info("No wind for offset: %s", offset)
+                    continue
+                mag = (uwnd**2 + vwnd**2) ** 0.5
+                windhours += 1
+                if sped is None:
+                    sped = mag
                 else:
-                    mag = (uwnd**2 + vwnd**2) ** 0.5
-                    windhours += 1
-                    if sped is None:
-                        sped = mag
-                    else:
-                        sped += mag
+                    sped += mag
     if hi_soil4t is not None:
         ds["high_soil4t"].values = hi_soil4t
         ds["low_soil4t"].values = lo_soil4t
@@ -387,10 +387,12 @@ def use_climodat_daily(ts, ds):
         case when not temp_estimated then low else null end as lowdata_all,
         case when not precip_estimated then precip else null end as
             precipdata_all,
-        case when temp_estimated or temp_hour is null or
-        (temp_hour > 4 and temp_hour < 13) then null else high end as highdata,
-        case when temp_estimated or temp_hour is null or
-        (temp_hour > 4 and temp_hour < 13) then null else low end as lowdata,
+        case when temp_estimated or temp_hour is null or high < -50 or
+            high > 130 or (temp_hour > 4 and temp_hour < 13) then null
+            else high end as highdata,
+        case when temp_estimated or temp_hour is null or low < -90 or low > 90
+            or (temp_hour > 4 and temp_hour < 13) then null else low end
+            as lowdata,
         case when precip_estimated or precip_hour is null or
         (precip_hour > 4 and precip_hour < 13) then null else precip end
             as precipdata

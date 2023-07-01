@@ -8,6 +8,7 @@ import datetime
 import os
 import subprocess
 import tempfile
+import time
 
 import requests
 from pyiem.util import exponential_backoff, logger, utc
@@ -33,10 +34,20 @@ def download(now, offset):
             f"{hr:02.0f}h.grb2"
         )
         LOG.info("fetching %s", url)
-        response = exponential_backoff(requests.get, url, timeout=60)
-        if response is None or response.status_code != 200:
+        response = None
+        for attempt in range(2):
+            response = exponential_backoff(requests.get, url, timeout=60)
+            if response is not None and response.status_code == 200:
+                break
             if offset > 23:
-                LOG.info("dl %s failed", url)
+                LOG.warning("dl %s failed", url)
+            if offset > 0:
+                break
+            if attempt == 0:
+                LOG.info("Sleeping 600 after dl fail %s", url)
+                time.sleep(600)
+        if response is None:
+            LOG.info("Full fail for %s", url)
             continue
         # Same temp file
         with open("tmp.grib", "wb") as fh:
@@ -60,7 +71,8 @@ def main():
     # We want this hour UTC
     utcnow = utc()
     utcnow = utcnow.replace(minute=0, second=0, microsecond=0)
-    for offset in [33, 9, 3, 0]:
+    # Website review seems to show updates ~8 days later :/
+    for offset in [0, 240, 8 * 24, 9, 3]:
         with tempfile.TemporaryDirectory() as tempdir:
             os.chdir(tempdir)
             download(utcnow - datetime.timedelta(hours=offset), offset)

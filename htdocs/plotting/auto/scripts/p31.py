@@ -1,20 +1,22 @@
-"""This chart attempts to assess by now much the high temperature
-    can change between two or three periods of time.
-    These periods are defined by
-    the consecutive number of days you choose.  The tricky part is to
-    explain what exactly these periods are!  The middle period of days
-    includes 'today', which is where this metric is evaluated.  So a middle
-    period of <code>1</code> days only includes 'today' and not 'tomorrow'.
-    If you summarize this plot by year, a simple linear trendline is
-    presented as well.
+"""
+This chart attempts to assess by now much the high temperature
+can change between two or three periods of time.
+These periods are defined by
+the consecutive number of days you choose.  The tricky part is to
+explain what exactly these periods are!  The middle period of days
+includes 'today', which is where this metric is evaluated.  So a middle
+period of <code>1</code> days only includes 'today' and not 'tomorrow'.
+If you summarize this plot by year, a simple linear trendline is
+presented as well.
 
-    <p>A practical example here may be warranted.  Consider a period of
-    four days whereby the warmest high temperature was only 40 degrees F. Then
-    on the next day, the high temperature soars to 60 degrees.  For the plot
-    settings of <code>4</code> trailing days (Maxiumum)
-    and <code>1</code> forward days (Whatever, does not matter for 1 day
-    aggregate),
-    this example evaluates to a jump of 20 degrees."""
+<p>A practical example here may be warranted.  Consider a period of
+four days whereby the warmest high temperature was only 40 degrees F. Then
+on the next day, the high temperature soars to 60 degrees.  For the plot
+settings of <code>4</code> trailing days (Maxiumum)
+and <code>1</code> forward days (Whatever, does not matter for 1 day
+aggregate),
+this example evaluates to a jump of 20 degrees.
+"""
 import calendar
 import datetime
 
@@ -36,28 +38,26 @@ PDICT4 = {
     "two": "Just consider trailing and middle period",
     "three": "Consider full cycle between trailing, middle, and forward",
 }
-MDICT = dict(
-    [
-        ("year", "All Year"),
-        ("spring", "Spring (MAM)"),
-        ("fall", "Fall (SON)"),
-        ("winter", "Winter (DJF)"),
-        ("summer", "Summer (JJA)"),
-        ("gs", "Growing Season (May-Sep)"),
-        ("1", "January"),
-        ("2", "February"),
-        ("3", "March"),
-        ("4", "April"),
-        ("5", "May"),
-        ("6", "June"),
-        ("7", "July"),
-        ("8", "August"),
-        ("9", "September"),
-        ("10", "October"),
-        ("11", "November"),
-        ("12", "December"),
-    ]
-)
+MDICT = {
+    "year": "All Year",
+    "spring": "Spring (MAM)",
+    "fall": "Fall (SON)",
+    "winter": "Winter (DJF)",
+    "summer": "Summer (JJA)",
+    "gs": "Growing Season (May-Sep)",
+    "1": "January",
+    "2": "February",
+    "3": "March",
+    "4": "April",
+    "5": "May",
+    "6": "June",
+    "7": "July",
+    "8": "August",
+    "9": "September",
+    "10": "October",
+    "11": "November",
+    "12": "December",
+}
 
 
 def get_description():
@@ -350,4 +350,4 @@ def plotter(fdict):
 
 
 if __name__ == "__main__":
-    plotter(dict(how="three"))
+    plotter({})

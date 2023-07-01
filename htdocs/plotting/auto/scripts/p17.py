@@ -300,6 +300,4 @@ def plotter(fdict):
 
 
 if __name__ == "__main__":
-    plotter(
-        {"month": 3, "year": 2023, "station": "NSTU", "network": "AS_ASOS"}
-    )
+    plotter({})

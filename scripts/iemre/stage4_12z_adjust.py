@@ -1,4 +1,10 @@
-"""Use the QC'd 12z 24 Hour files to adjust hourly data."""
+"""Use the QC'd 12z 24 Hour files to adjust hourly data.
+
+No need to run for previous days as PRISM is available.
+
+Called from:
+  RUN_NOON.sh and RUN_0Z.sh for today.
+"""
 import datetime
 import os
 import sys
@@ -7,7 +13,6 @@ import numpy as np
 import pygrib
 from pyiem import iemre
 from pyiem.util import logger, ncopen, utc
-from scipy.interpolate import NearestNDInterpolator
 
 LOG = logger()
 
@@ -46,56 +51,62 @@ def merge(ts):
     grb = grbs[1]
     val = grb.values
     save12z(ts, val)
-    lats, lons = grb.latlons()
-    # can save a bit of memory as we don't need all data
-    stride = slice(None, None, 3)
-    lats = np.ravel(lats[stride, stride])
-    lons = np.ravel(lons[stride, stride])
-    vals = np.ravel(val[stride, stride])
-    # Clip large values
-    vals = np.where(vals > 250.0, 0, vals)
-    nn = NearestNDInterpolator((lons, lats), vals)
-    xi, yi = np.meshgrid(iemre.XAXIS, iemre.YAXIS)
-    stage4 = nn(xi, yi)
-    # Prevent Large numbers, negative numbers
-    stage4 = np.where(stage4 < 10000.0, stage4, 0.0)
-    stage4 = np.where(stage4 < 0.0, 0.0, stage4)
 
-    ts0 = ts - datetime.timedelta(days=1)
-    offset0 = iemre.hourly_offset(ts0)
-    offset1 = iemre.hourly_offset(ts)
-    # Running at 12 UTC 1 Jan
-    if offset0 > offset1:
-        offset0 = 0
-    # Open up our RE file
-    with ncopen(iemre.get_hourly_ncname(ts.year), "a", timeout=300) as nc:
-        iemre_total = np.sum(
-            nc.variables["p01m"][offset0:offset1, :, :], axis=0
-        )
-        iemre_total = np.where(iemre_total > 0.0, iemre_total, 0.00024)
-        iemre_total = np.where(iemre_total < 10000.0, iemre_total, 0.00024)
-        multiplier = stage4 / iemre_total
-        for offset in range(offset0, offset1):
-            # Get the unmasked dadta
-            data = nc.variables["p01m"][offset, :, :]
-
-            # Keep data within reason
-            data = np.where(data > 10000.0, 0.0, data)
-            # 0.00024 / 24
-            adjust = np.where(data > 0, data, 0.00001) * multiplier
-            adjust = np.where(adjust > 250.0, 0, adjust)
-            nc.variables["p01m"][offset, :, :] = np.where(
-                adjust < 0.01, 0, adjust
+    # storage is in the arrears
+    sts = ts - datetime.timedelta(hours=23)
+    pairs = [(sts, ts)]
+    if ts.month == 1 and ts.day == 1:
+        pairs = [
+            (sts, sts + datetime.timedelta(hours=10)),  # 13z thr 23z
+            (ts.replace(hour=0), ts),
+        ]
+    hourly_total = None
+    for pair in pairs:
+        ncfn = f"/mesonet/data/stage4/{pair[0].year}_stage4_hourly.nc"
+        idx0 = iemre.hourly_offset(pair[0])
+        idx1 = iemre.hourly_offset(pair[1])
+        LOG.info("%s [%s thru %s]", ncfn, idx0, idx1)
+        with ncopen(ncfn, timeout=60) as nc:
+            # Check that the status value is (1,2), otherwise prism ran
+            sentinel = np.nanmax(
+                nc.variables["p01m_status"][idx0 : (idx1 + 1)]
             )
+            if sentinel == 3:
+                LOG.warning("Aborting as p01m_status[%s] == 3", sentinel)
+                return
+            p01m = nc.variables["p01m"]
+            total = np.nansum(p01m[idx0 : (idx1 + 1)], axis=0)
+            if hourly_total is None:
+                hourly_total = total
+            else:
+                hourly_total = np.nansum([total, hourly_total], axis=0)
+    # Set a min value to prevent div by zero
+    hourly_total = np.where(hourly_total > 0.0, hourly_total, 0.00024)
+    multiplier = val / hourly_total
+    for pair in pairs:
+        ncfn = f"/mesonet/data/stage4/{pair[0].year}_stage4_hourly.nc"
+        idx0 = iemre.hourly_offset(pair[0])
+        idx1 = iemre.hourly_offset(pair[1])
+        with ncopen(ncfn, mode="a", timeout=60) as nc:
+            nc.variables["p01m_status"][idx0 : (idx1 + 1)] = 2
+            for idx in range(idx0, idx1 + 1):
+                data = nc.variables["p01m"][idx, :, :]
+                adjust = np.where(data > 0, data, 0.00001) * multiplier
+                adjust = np.where(adjust > 250.0, 0, adjust)
+                LOG.info(
+                    "idx: %s orig:%.2f new:%.2f",
+                    idx,
+                    np.nanmean(data),
+                    np.nanmean(adjust),
+                )
+                nc.variables["p01m"][idx, :, :] = np.where(
+                    adjust < 0.01, 0, adjust
+                )
 
 
 def main(argv):
     """Go Main Go"""
-    if len(argv) == 4:
-        ts = utc(int(argv[1]), int(argv[2]), int(argv[3]), 12)
-    else:
-        ts = utc() - datetime.timedelta(days=1)
-        ts = ts.replace(hour=12, minute=0, second=0, microsecond=0)
+    ts = utc(int(argv[1]), int(argv[2]), int(argv[3]), 12)
     merge(ts)
 
 

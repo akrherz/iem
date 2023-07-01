@@ -125,7 +125,7 @@ def workflow(valid):
             )
             # make sure have data
             if np.ma.max(newval) > 0:
-                nc.variables["p01m_status"][idx] = 2
+                nc.variables["p01m_status"][idx] = 3
             else:
                 LOG.warning(
                     "NOOP for time %s[idx:%s]",

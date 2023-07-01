@@ -53,6 +53,7 @@ cd ../climodat
 python era5land_solarrad.py $(date -u --date '7 days ago' +'%Y %m %d')
 
 cd ../iemre
-# wait some more so to not collide with other IEMRE processes
-sleep 600
-python stage4_12z_adjust.py
+# We have hopefully gotten a refreshed 12z stage4 file, so we chunk it again
+python stage4_12z_adjust.py $(date +'%Y %m %d')
+# Run precip ingest to copy this to IEMRE
+python precip_ingest.py $(date +'%Y %m %d')

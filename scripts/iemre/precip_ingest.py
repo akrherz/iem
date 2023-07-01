@@ -43,7 +43,7 @@ def ingest_hourly_grib(valid):
     )
     if not os.path.isfile(fn):
         LOG.info("stage4_ingest: missing file %s", fn)
-        return 0
+        return
     gribs = pygrib.open(fn)
     grb = gribs[1]
     val = grb.values
@@ -65,7 +65,7 @@ def ingest_hourly_grib(valid):
         np.mean(val),
         np.max(val),
     )
-    return 1
+    return
 
 
 def copy_to_iemre(valid):
@@ -101,11 +101,11 @@ def copy_to_iemre(valid):
     )
 
 
-def workflow(valid):
+def workflow(valid, force_copy):
     """Our stage IV workflow."""
     # Figure out what the current status is
     p01m_status = get_p01m_status(valid)
-    if np.ma.is_masked(p01m_status) or p01m_status < 2:
+    if np.ma.is_masked(p01m_status) or p01m_status < 2 or force_copy:
         # merge in the raw hourly data
         ingest_hourly_grib(valid)
 
@@ -116,13 +116,13 @@ def main(argv):
     """Go Main"""
     if len(argv) == 5:
         ts = utc(int(argv[1]), int(argv[2]), int(argv[3]), int(argv[4]))
-        workflow(ts)
+        workflow(ts, True)
         return
     # Otherwise we are running for an explicit 12z to 12z period, copy only
     ets = utc(int(argv[1]), int(argv[2]), int(argv[3]), 12)
     now = ets - datetime.timedelta(hours=23)
     while now <= ets:
-        copy_to_iemre(now)
+        workflow(now, False)
         now += datetime.timedelta(hours=1)
 
 

@@ -159,9 +159,11 @@ def estimate_hilo(df, ds):
             df.at[sid, "dirty"] = True
 
 
-def nonan(val, precision=0):
+def nonan(val, minval, maxval, precision=0):
     """Can't have NaN."""
     if pd.isna(val):
+        return None
+    if val < minval or val > maxval:
         return None
     if precision == 0:
         return int(np.round(val, 0))
@@ -201,15 +203,15 @@ def commit(cursor, table, df, ts):
                 "WHERE day = %s and station = %s"
             )
             args = (
-                nonan(_row["high"]),
-                nonan(_row["low"]),
-                nonan(_row["precip"], 2),
-                nonan(_row["snow"], 1),
-                nonan(_row["snowd"], 1),
+                nonan(_row["high"], -60, 140),
+                nonan(_row["low"], -80, 100),
+                nonan(_row["precip"], 0, 30, 2),
+                nonan(_row["snow"], 0, 100, 1),
+                nonan(_row["snowd"], 0, 900, 1),
                 _row["temp_estimated"],
                 _row["precip_estimated"],
-                nonan(_row["temp_hour"]),
-                nonan(_row["precip_hour"]),
+                nonan(_row["temp_hour"], 0, 25),
+                nonan(_row["precip_hour"], 0, 25),
                 ts,
                 _sid,
             )

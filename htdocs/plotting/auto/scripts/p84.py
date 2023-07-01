@@ -1,24 +1,25 @@
-"""This application generates maps of precipitation
-    daily or multi-day totals.  There are currently three backend data sources
-    made available to this plotting application:
-    <ul>
-      <li><a href="/iemre/">IEM Reanalysis</a>
-      <br />A crude gridding of available COOP data and long term climate data
-      processed by the IEM. The plotted totals represent periods typical to
-      COOP data reporting, which is roughly 12 UTC (7 AM local) each day.</li>
-      <li><a href="https://www.nssl.noaa.gov/projects/mrms/">NOAA MRMS</a>
-      <br />A state of the art gridded analysis of RADAR data using
-      observations and model data to help in the processing.</li>
-      <li><a href="http://prism.oregonstate.edu">Oregon State PRISM</a>
-      <br />The PRISM data is credit Oregon State University,
-      created 4 Feb 2004.  This information arrives with a few day lag. The
-      plotted totals represent periods typical to COOP data reporting, so
-      12 UTC (7 AM local) each day.</li>
-      <li>Stage IV is a legacy NOAA precipitation product that gets quality
-      controlled by the River Forecast Centers. This page presents
-      24 hours totals at 12 UTC each day.</li>
-      <li>Iowa Flood Center is an analysis produced by the U of Iowa IIHR.</li>
-    </ul>
+"""
+This application generates maps of precipitation
+daily or multi-day totals.  There are currently three backend data sources
+made available to this plotting application:
+<ul>
+    <li><a href="/iemre/">IEM Reanalysis</a>
+    <br />A crude gridding of available COOP data and long term climate data
+    processed by the IEM. The plotted totals represent periods typical to
+    COOP data reporting, which is roughly 12 UTC (7 AM local) each day.</li>
+    <li><a href="https://www.nssl.noaa.gov/projects/mrms/">NOAA MRMS</a>
+    <br />A state of the art gridded analysis of RADAR data using
+    observations and model data to help in the processing.</li>
+    <li><a href="http://prism.oregonstate.edu">Oregon State PRISM</a>
+    <br />The PRISM data is credit Oregon State University,
+    created 4 Feb 2004.  This information arrives with a few day lag. The
+    plotted totals represent periods typical to COOP data reporting, so
+    12 UTC (7 AM local) each day.</li>
+    <li>Stage IV is a legacy NOAA precipitation product that gets quality
+    controlled by the River Forecast Centers. This page presents
+    24 hours totals at 12 UTC each day.</li>
+    <li>Iowa Flood Center is an analysis produced by the U of Iowa IIHR.</li>
+</ul>
 """
 import os
 from datetime import datetime, timedelta
@@ -284,7 +285,7 @@ def plotter(fdict):
             p01d = mm2inch(nc.variables[ncvar][idx0, y0:y1, x0:x1])
         elif (idx1 - idx0) < 32:
             p01d = mm2inch(
-                np.sum(nc.variables[ncvar][idx0:idx1, y0:y1, x0:x1], 0)
+                np.nansum(nc.variables[ncvar][idx0:idx1, y0:y1, x0:x1], 0)
             )
         else:
             # Too much data can overwhelm this app, need to chunk it
@@ -292,14 +293,15 @@ def plotter(fdict):
                 i2 = min([i + 10, idx1])
                 if idx0 == i:
                     p01d = mm2inch(
-                        np.sum(nc.variables[ncvar][i:i2, y0:y1, x0:x1], 0)
+                        np.nansum(nc.variables[ncvar][i:i2, y0:y1, x0:x1], 0)
                     )
                 else:
                     p01d += mm2inch(
-                        np.sum(nc.variables[ncvar][i:i2, y0:y1, x0:x1], 0)
+                        np.nansum(nc.variables[ncvar][i:i2, y0:y1, x0:x1], 0)
                     )
     if np.ma.is_masked(np.max(p01d)):
         raise NoDataFound("Data Unavailable")
+    p01d = p01d.filled(np.nan)
     plot_units = "inches"
     cmap = get_cmap(ctx["cmap"])
     cmap.set_bad("white")
@@ -370,4 +372,11 @@ def plotter(fdict):
 
 
 if __name__ == "__main__":
-    plotter(dict(sdate="2019-01-01", edate="2019-02-01", src="stage4"))
+    plotter(
+        {
+            "sector": "conus",
+            "sdate": "2007-01-01",
+            "edate": "2007-01-01",
+            "src": "stage4",
+        }
+    )
