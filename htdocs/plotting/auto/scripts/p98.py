@@ -1,6 +1,8 @@
-"""This plot produces the daily frequency of
-    a given criterion being meet for a station and month of your choice. The
-    number labeled above each bar is the actual number of years."""
+"""
+This plot produces the daily frequency of
+a given criterion being meet for a station and month of your choice. The
+number labeled above each bar is the actual number of years.
+"""
 import calendar
 
 import numpy as np
@@ -76,7 +78,7 @@ def plotter(fdict):
             sum(case when {varname} {operator} %s then 1 else 0 end)
             as hit,
             count(*) as total
-            from alldata_{station[:2]} WHERE station = %s and month = %s
+            from alldata WHERE station = %s and month = %s
             GROUP by sday ORDER by sday ASC
             """,
             conn,

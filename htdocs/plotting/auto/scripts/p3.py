@@ -1,4 +1,31 @@
-"""Plot monthly data over all years"""
+"""
+This plot displays a single month's worth of data
+over all of the years in the period of record.  In most cases, you can
+access the raw data for these plots
+<a href="/climodat/" class="link link-info">here.</a>  For the variables
+comparing the daily temperatures against average, the average is taken
+from the NCEI current 1981-2010 climatology.
+
+<p>This page presents a number of statistical measures.  In general, these
+can be summarized as:
+<ul>
+    <li><strong>Average:</strong> simple arithmetic mean</li>
+    <li><strong>Maximum:</strong> the largest single day value</li>
+    <li><strong>Standard Deviation:</strong> measure indicating the spread
+    within the population of daily values for each grouped period.  Lower
+    values indicate less variability within the month or period.</li>
+    <li><strong>Average Day to Day:</strong> this is computed by sequentially
+    ordering the daily observations with time, computing the absolute value
+    between the current day and previous day and then averaging those values.
+    This is another measure of variability during the month.</li>
+    </ul></p>
+
+<p>You can optionally summarize by decades.  For this plot and for example,
+the decade of the 90s represents the inclusive years 1990 thru 1999.
+Please use care to specify start and end years that make sense for this
+presentation.  For example, if the year is only 2020, the 2020 decade
+values would only have one year included!</p>
+"""
 import calendar
 import datetime
 
@@ -69,37 +96,7 @@ MDICT = {
 
 def get_description():
     """Return a dict describing how to call this plotter"""
-    desc = {}
-    desc["data"] = True
-    desc[
-        "description"
-    ] = """This plot displays a single month's worth of data
-    over all of the years in the period of record.  In most cases, you can
-    access the raw data for these plots
-    <a href="/climodat/" class="link link-info">here.</a>  For the variables
-    comparing the daily temperatures against average, the average is taken
-    from the NCEI current 1981-2010 climatology.
-
-    <p>This page presents a number of statistical measures.  In general, these
-    can be summarized as:
-    <ul>
-     <li><strong>Average:</strong> simple arithmetic mean</li>
-     <li><strong>Maximum:</strong> the largest single day value</li>
-     <li><strong>Standard Deviation:</strong> measure indicating the spread
-     within the population of daily values for each grouped period.  Lower
-     values indicate less variability within the month or period.</li>
-     <li><strong>Average Day to Day:</strong> this is computed by sequentially
-     ordering the daily observations with time, computing the absolute value
-     between the current day and previous day and then averaging those values.
-     This is another measure of variability during the month.</li>
-     </ul></p>
-
-    <p>You can optionally summarize by decades.  For this plot and for example,
-    the decade of the 90s represents the inclusive years 1990 thru 1999.
-    Please use care to specify start and end years that make sense for this
-    presentation.  For example, if the year is only 2020, the 2020 decade
-    values would only have one year included!</p>
-    """
+    desc = {"description": __doc__, "data": True}
     today = datetime.date.today()
     desc["arguments"] = [
         dict(
@@ -213,8 +210,6 @@ def get_context(fdict):
     ptype = ctx["type"]
     threshold = ctx["threshold"]
 
-    table = f"alldata_{station[:2]}"
-
     lag = "0 days"
     if month == "fall":
         months = [9, 10, 11]
@@ -253,7 +248,7 @@ def get_context(fdict):
             abs(low - lag(low) OVER (ORDER by day ASC)) as dlow,
             abs((high+low)/2. - lag((high+low)/2.)
                 OVER (ORDER by day ASC)) as dtemp
-            from {table} WHERE station = :station),
+            from alldata WHERE station = :station),
         agg as (
             SELECT myyear, avg(dhigh) as dhigh, avg(dlow) as dlow,
             avg(dtemp) as dtemp from day2day
@@ -286,7 +281,7 @@ def get_context(fdict):
             sum(case when o.low < :t then 1 else 0 end) as "days-lows-below",
             sum(case when o.precip >= :t then 1 else 0 end)
                 as "days-precip-above"
-            from {table} o JOIN climo c on (o.sday = c.sday)
+            from alldata o JOIN climo c on (o.sday = c.sday)
         where station = :station and month in :months GROUP by myyear)
 
         SELECT b.*, a.dhigh as "delta-high", a.dlow as "delta-low",

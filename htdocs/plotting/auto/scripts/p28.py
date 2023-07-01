@@ -1,4 +1,26 @@
-"""trailing day precip."""
+"""
+This plot presents trailing day precipitation
+metrics.  Each point on the x-axis represents a period from that date to
+the right-most date on the plot.  There are five options for units to
+display the chart in, more specifically, the right hand axis on the
+interactive chart version.
+<br />
+<ul>
+    <li><strong>Departure [inch]</strong>: the absolute amount of precip
+    above or below long term average.</li>
+    <li><strong>Percent of Average [%]</strong>: the departure from average
+    expressed in percent of average.</li>
+    <li><strong>Percentile (1=wettest)</strong>: The percentile rank for
+    this period's total versus all totals from the same period of days
+    over the period of record for the station.</li>
+    <li><strong>Rank (1=wettest)</strong>: The overall rank over the other
+    years for the period of record for the location.</li>
+    <li><strong>Standardized Precip Index [sigma]</strong>: This expresses
+    the precipitation departure in terms of standard deviations from
+    average.  The standard deviations and averages are based on period of
+    record data.</li>
+</ul>
+"""
 import datetime
 
 import numpy as np
@@ -20,33 +42,8 @@ PDICT = {
 
 def get_description():
     """Return a dict describing how to call this plotter"""
-    desc = {}
+    desc = {"description": __doc__, "data": True}
     today = datetime.date.today()
-    desc["data"] = True
-    desc[
-        "description"
-    ] = """This plot presents trailing day precipitation
-    metrics.  Each point on the x-axis represents a period from that date to
-    the right-most date on the plot.  There are five options for units to
-    display the chart in, more specifically, the right hand axis on the
-    interactive chart version.
-    <br />
-    <ul>
-      <li><strong>Departure [inch]</strong>: the absolute amount of precip
-      above or below long term average.</li>
-      <li><strong>Percent of Average [%]</strong>: the departure from average
-      expressed in percent of average.</li>
-      <li><strong>Percentile (1=wettest)</strong>: The percentile rank for
-      this period's total versus all totals from the same period of days
-      over the period of record for the station.</li>
-      <li><strong>Rank (1=wettest)</strong>: The overall rank over the other
-      years for the period of record for the location.</li>
-      <li><strong>Standardized Precip Index [sigma]</strong>: This expresses
-      the precipitation departure in terms of standard deviations from
-      average.  The standard deviations and averages are based on period of
-      record data.</li>
-    </ul>
-    """
     desc["arguments"] = [
         dict(
             type="station",
@@ -84,7 +81,7 @@ def get_ctx(fdict):
 
     cursor.execute(
         "SELECT year,  extract(doy from day) as doy, precip from "
-        f"alldata_{station[:2]} where station = %s and precip is not null",
+        "alldata where station = %s and precip is not null",
         (station,),
     )
     if cursor.rowcount == 0:
@@ -414,15 +411,15 @@ def plotter(fdict):
     ax.plot(xaxis, ctx["departures"][::-1], zorder=6)
 
     df = pd.DataFrame(
-        dict(
-            day=np.arange(-365, 0),
-            maxaccum=ctx["maxes"][::-1],
-            accum=ctx["totals"][::-1],
-            rank=ctx["ranks"][::-1],
-            spi=ctx["spi"][::-1],
-            percentages=ctx["percentages"][::-1],
-            departures=ctx["departures"][::-1],
-        )
+        {
+            "day": np.arange(-365, 0),
+            "maxaccum": ctx["maxes"][::-1],
+            "accum": ctx["totals"][::-1],
+            "rank": ctx["ranks"][::-1],
+            "spi": ctx["spi"][::-1],
+            "percentages": ctx["percentages"][::-1],
+            "departures": ctx["departures"][::-1],
+        }
     )
 
     return fig, df

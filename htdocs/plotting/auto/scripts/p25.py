@@ -1,4 +1,9 @@
-"""Distrubution of daily high and low temperatures"""
+"""
+This plot displays the distribution of observed
+daily high and low temperatures for a given day and given state.  The
+dataset is fit with a simple normal distribution based on the simple
+population statistics.
+"""
 import datetime
 
 import numpy as np
@@ -12,15 +17,7 @@ from scipy.stats import norm
 
 def get_description():
     """Return a dict describing how to call this plotter"""
-    desc = {}
-    desc["data"] = True
-    desc[
-        "description"
-    ] = """This plot displays the distribution of observed
-    daily high and low temperatures for a given day and given state.  The
-    dataset is fit with a simple normal distribution based on the simple
-    population statistics.
-    """
+    desc = {"description": __doc__, "data": True}
     desc["arguments"] = [
         dict(type="state", name="state", default="IA", label="Which state?"),
         dict(type="month", name="month", default="10", label="Select Month:"),
