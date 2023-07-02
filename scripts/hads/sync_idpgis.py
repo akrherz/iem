@@ -9,7 +9,7 @@ from pyiem.util import get_dbconn, logger
 
 LOG = logger()
 SERVICE = (
-    "https://idpgis.ncep.noaa.gov/arcgis/rest/services/NWS_Observations/"
+    "https://mapservices.weather.noaa.gov/eventdriven/rest/services/water/"
     "ahps_riv_gauges/MapServer/0/query?where=1%3D1&"
     "geometryType=esriGeometryPoint&"
     "outFields=PEDTS%2CGaugeLID%2CLocation%2CState&returnGeometry=true&f=json"
@@ -34,7 +34,7 @@ def get_current(dbconn):
 
 def get_idp():
     """See what AHPS has."""
-    LOG.debug("Fetching %s", SERVICE)
+    LOG.info("Fetching %s", SERVICE)
     req = requests.get(SERVICE, timeout=60)
     jobj = req.json()
     idp = {}
