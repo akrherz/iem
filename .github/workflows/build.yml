@@ -20,6 +20,12 @@ jobs:
 
     - name: Setup CI from ci-tooling
       run: |
+        rm -rf database
+        rm -rf .ci_tooling
+        rm -rf .ipc
+        rm -rf /opt/iem
+        rm -rf /opt/miniconda3
+        rm -rf /mesonet/www/logs
         git clone --depth 1 https://github.com/akrherz/iem-database.git database
         git clone --depth 1 https://github.com/akrherz/ci_tooling.git .ci_tooling
         git clone --depth 1 https://github.com/akrherz/iem-production-checks.git .ipc
