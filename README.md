@@ -16,7 +16,7 @@ The processing load for the IEM is spread over a number of virtual machines.
 This is an attempt to document what is running where.  The backup shown may not
 be automated, but another system that could be up and running the service in
 limited time.
-
+ 
 Process | Primary | Backup | Monitor
 ------- | ------- | ------ | -------
 GOES R/S | iem8-dc | iem19 | None
