@@ -13,6 +13,11 @@ jobs:
 
     - name: Setup CI from ci-tooling
       run: |
+        rm -rf /opt/iemwebfarm
+        rm -rf /opt/iem
+        rm -rf /opt/miniconda3
+        rm -rf /mesonet/ldmdata/
+        rm -rf ci_msinc.tgz
         git clone --depth 1 https://github.com/akrherz/iem-database.git database
         git clone --depth 1 https://github.com/akrherz/ci_tooling.git .ci_tooling
         . .ci_tooling/iemwebfarm.sh
