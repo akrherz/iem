@@ -173,8 +173,8 @@ def main(argv):
     if len(argv) == 4:
         today = datetime.date(int(argv[1]), int(argv[2]), int(argv[3]))
     else:
-        # Run for 12z yesterday
-        today = datetime.date.today() - datetime.timedelta(days=1)
+        # Run for 12z two days ago
+        today = datetime.date.today() - datetime.timedelta(days=2)
     LOG.info("running for today=%s", today)
     for hour in [0, 6, 12, 18]:
         valid = utc(today.year, today.month, today.day, hour)

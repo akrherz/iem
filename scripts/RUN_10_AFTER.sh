@@ -9,13 +9,7 @@ LHH=$(date +'%H')
 YEST=$(date --date '1 day ago' +'%Y %m %d')
 TODAY=$(date +'%Y %m %d')
 
-cd dl
-if [ $HH -eq "23" ]
-then
-    python download_cfs.py &
-fi
-
-cd ../iemre
+cd iemre
 # MRMS hourly totals arrive shortly after the top of the hour
 if [ $LHH -eq "00" ]
 then

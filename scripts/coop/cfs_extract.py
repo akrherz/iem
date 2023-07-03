@@ -4,9 +4,7 @@ Total precipitation
 Maximum temperature
 Minimum temperature
 
-Attempt to derive climodat data from the CFS, we will use the 12 UTC
-files.
-
+Run at 5 AM local from RUN_10_AFTER.sh
 """
 import datetime
 import os
@@ -17,7 +15,6 @@ from pyiem.network import Table as NetworkTable
 from pyiem.util import convert_value, get_dbconn, logger, utc
 
 LOG = logger()
-nt = NetworkTable("IACLIMATE")
 
 
 def do_agg(dkey, fname, ts, data):
@@ -135,9 +132,10 @@ def dbsave(ts, data):
             LOG.warning("Missing data for date: %s", date)
             del data["fx"][date]
 
+    nt = NetworkTable("IACLIMATE")
     for sid, entry in nt.sts.items():
         # Skip virtual stations
-        if sid[2:] == "0000" or sid[2] == "C":
+        if sid[2:] == "0000" or sid[2] in ["C", "D"]:
             continue
         # Careful here, lon is 0-360 for this file
         i = np.digitize([entry["lon"] + 360], data["x"])[0]

@@ -1,6 +1,6 @@
 """Download and archive the CFS data
 
-Run from RUN_NOON.sh and 23z and we process the previous UTC day's data.
+Run from RUN_NOON.sh
 
 tmax
 tmin
@@ -77,8 +77,8 @@ def dl(now, varname, scenario):
 
 def main():
     """Do main"""
-    # Run for yesterday and three days ago
-    for offset in [1, 3]:
+    # Run for two and three days ago
+    for offset in [2, 3]:
         now = utc() - datetime.timedelta(days=offset)
         for hour in [0, 6, 12, 18]:
             now = now.replace(hour=hour, minute=0, second=0, microsecond=0)
