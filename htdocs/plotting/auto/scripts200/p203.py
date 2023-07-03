@@ -264,8 +264,6 @@ def plotter(fdict):
             row["eventid"],
             issue.strftime("%H%M"),
         )
-        # (w, h) = font10.getsize(s)
-        # print s, h
         ax.text(
             0,
             0,
