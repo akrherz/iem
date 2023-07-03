@@ -26,6 +26,7 @@ jobs:
         rm -rf /opt/iem
         rm -rf /opt/miniconda3
         rm -rf /mesonet/www/logs
+        rm -rf /opt/iemwebfarm
         git clone --depth 1 https://github.com/akrherz/iem-database.git database
         git clone --depth 1 https://github.com/akrherz/ci_tooling.git .ci_tooling
         git clone --depth 1 https://github.com/akrherz/iem-production-checks.git .ipc
