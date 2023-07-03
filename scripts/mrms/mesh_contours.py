@@ -30,7 +30,7 @@ def pqinsert(tmpfn, ets, interval):
         f"GIS/mrms/mesh_{interval}min_{ets.strftime('%Y%m%d%H%M')}.geojson "
         "bogus"
     )
-    LOG.debug(name)
+    LOG.info(name)
     cmd = f"pqinsert -i -p '{name}' {tmpfn}.geojson"
     if pathlib.Path(f"{tmpfn}.geojson").stat().st_size > 0:
         subprocess.call(cmd, shell=True)
@@ -121,7 +121,7 @@ def main(argv):
     with tempfile.NamedTemporaryFile() as tmp:
         maxval, hits, misses = agg(sts, ets)
         if maxval is None:
-            LOG.debug("Aborting, no data! %s", ctx)
+            LOG.info("Aborting, no data! %s", ctx)
             return
         make_raster(maxval, tmp.name)
         make_contours(tmp.name)

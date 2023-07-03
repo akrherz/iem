@@ -23,7 +23,7 @@ def need_to_run(valid, hr):
     try:
         grbs = pygrib.open(gribfn)
         if grbs.messages < 5:
-            LOG.debug("gribfn %s only has %s messages", gribfn, grbs.messages)
+            LOG.info("gribfn %s only has %s messages", gribfn, grbs.messages)
             return True
     except Exception:
         return True
@@ -103,7 +103,7 @@ def main():
         for hr in range(6):
             if not need_to_run(ts, hr):
                 continue
-            LOG.debug("Running for ts: %s hr: %s", ts, hr)
+            LOG.info("Running for ts: %s hr: %s", ts, hr)
             fetch(ts, hr)
 
 

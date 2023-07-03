@@ -21,9 +21,9 @@ def do(now):
         "/mesonet/ARCHIVE/data/%Y/%m/%d/iaroads/iaroads_%H%M.png"
     )
     if os.path.isfile(fn):
-        LOG.debug("skipping as file %s exists", fn)
+        LOG.info("skipping as file %s exists", fn)
         return
-    LOG.debug("running for %s", now)
+    LOG.info("running for %s", now)
 
     # CAREFUL, web takes valid in CST/CDT
     service = now.astimezone(ZoneInfo("America/Chicago")).strftime(
@@ -41,8 +41,8 @@ def do(now):
         f"plot {routes} {now:%Y%m%d%H%M} iaroads.png "
         f"iaroads/iaroads_{now:%H%M}.png png"
     )
-    LOG.debug(pqstr)
-    subprocess.call(f"pqinsert -i -p '{pqstr}' {tmpfd.name}", shell=True)
+    LOG.info(pqstr)
+    subprocess.call(["pqinsert", "-i", "-p", pqstr, tmpfd.name])
     os.unlink(tmpfd.name)
 
 

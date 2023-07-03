@@ -47,7 +47,6 @@ def do_month(sts):
     interval = datetime.timedelta(days=1)
     now = sts
     while now < ets:
-        LOG.debug(now)
         # We only fetch the northern hemisphere, for better or worse
         uri = now.strftime(
             "http://goldsmr4.gesdisc.eosdis.nasa.gov/daac-bin/OTF/"

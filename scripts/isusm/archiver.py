@@ -26,14 +26,14 @@ def save_content(station, content):
     for key in content:
         ftype = key.split("||")[0]
         if ftype not in epoch:
-            LOG.debug("Hmmmm, unknown ftype: %s", ftype)
+            LOG.info("Hmmmm, unknown ftype: %s", ftype)
             continue
         suffix = epoch[ftype] if epoch[ftype] > 0 else ""
         epoch[ftype] += 1
         filename = f"{station}{suffix}_{ftype}_{NOW:%Y%m%d}.dat"
         # send to LDM for archival
         pqstr = f"data a {NOW:%Y%m%d%H%M} bogus raw/isusm/{filename} dat"
-        LOG.debug(pqstr)
+        LOG.info(pqstr)
         with tempfile.NamedTemporaryFile(delete=False) as tmpfd:
             tmpfd.write(content[key].getvalue())
         with subprocess.Popen(
@@ -56,7 +56,7 @@ def process(files):
         with open(fn, "rb") as fh:
             lines = fh.readlines()
         if len(lines) < 4:
-            LOG.debug("fn: %s has %s lines, skipping", fn, len(lines))
+            LOG.info("fn: %s has %s lines, skipping", fn, len(lines))
             continue
         ftype = fn.rsplit("_", 5)[1]
         # build key based on the header
@@ -80,7 +80,7 @@ def zip_and_delete(station, files):
     if os.path.isfile(savefn):
         LOG.info("Refusing to overwrite %s", savefn)
         return
-    LOG.debug("creating %s", savefn)
+    LOG.info("creating %s", savefn)
     with zipfile.ZipFile(savefn, "w", zipfile.ZIP_DEFLATED) as zfh:
         for fn in files:
             zfh.write(fn)

@@ -70,7 +70,7 @@ def run(prod, sts):
             continue
         n0r = gdal.Open(fn, 0)
         n0rd = n0r.ReadAsArray()
-        LOG.debug(
+        LOG.info(
             "%s %s %s %s", now, n0rd.dtype, np.shape(n0rd), n0r.RasterCount
         )
         if maxn0r is None:
@@ -97,13 +97,15 @@ def run(prod, sts):
         shell=True,
     )
     # Insert into LDM
-    cmd = (
-        f"pqinsert -p 'plot a {sts:%Y%m%d%H}00 bogus "
-        f"GIS/uscomp/max_{prod}_{label}_{sts:%Y%m%d}.png png' "
-        f"/tmp/{sts:%Y%m%d%H}.png"
-    )
-    LOG.info(cmd)
-    subprocess.call(cmd, shell=True)
+    cmd = [
+        "pqinsert",
+        "-p",
+        f"plot a {sts:%Y%m%d%H}00 bogus "
+        f"GIS/uscomp/max_{prod}_{label}_{sts:%Y%m%d}.png png",
+        f"/tmp/{sts:%Y%m%d%H}.png",
+    ]
+    LOG.info(" ".join(cmd))
+    subprocess.call(cmd)
 
     # Create tmp world file
     wldfn = f"/tmp/tmpwld{sts:%Y%m%d%H}.wld"

@@ -18,8 +18,8 @@ def main():
         ".png"
     )
     pqstr = "plot c 000000000000 summary/gdd_mon.png bogus png"
-    LOG.debug(url)
-    LOG.debug(pqstr)
+    LOG.info(url)
+    LOG.info(pqstr)
     res = web2ldm(url, pqstr)
     if not res:
         LOG.info("failed to work!")
