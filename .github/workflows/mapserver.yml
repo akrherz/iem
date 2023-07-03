@@ -13,11 +13,11 @@ jobs:
 
     - name: Initialize
       run: |
-        rm -rf /opt/iemwebfarm
-        rm -rf /opt/iem
-        rm -rf /opt/miniconda3
-        rm -rf /mesonet/ldmdata/
-        rm -rf ci_msinc.tgz
+        sudo rm -rf /opt/iemwebfarm
+        sudo rm -rf /opt/iem
+        sudo rm -rf /opt/miniconda3
+        sudo rm -rf /mesonet/ldmdata/
+        sudo rm -rf ci_msinc.tgz
 
     - name: Setup CI from ci-tooling
       run: |
@@ -39,8 +39,8 @@ jobs:
     - name: Clean Up
       if: failure()
       run: |
-        rm -rf /opt/iemwebfarm
-        rm -rf /opt/iem
-        rm -rf /opt/miniconda3
-        rm -rf /mesonet/ldmdata/
-        rm -rf ci_msinc.tgz
+        sudo rm -rf /opt/iemwebfarm
+        sudo rm -rf /opt/iem
+        sudo rm -rf /opt/miniconda3
+        sudo rm -rf /mesonet/ldmdata/
+        sudo rm -rf ci_msinc.tgz
