@@ -20,14 +20,14 @@ jobs:
 
     - name: Initialize
       run: |
-        rm -rf database
-        rm -rf .ci_tooling
-        rm -rf .ipc
-        rm -rf /opt/iem
-        rm -rf /opt/miniconda3
-        rm -rf /mesonet/www/logs
-        rm -rf /opt/iemwebfarm
-        rm -rf /var/cache/matplotlib
+        sudo rm -rf database
+        sudo rm -rf .ci_tooling
+        sudo rm -rf .ipc
+        sudo rm -rf /opt/iem
+        sudo rm -rf /opt/miniconda3
+        sudo rm -rf /mesonet/www/logs
+        sudo rm -rf /opt/iemwebfarm
+        sudo rm -rf /var/cache/matplotlib
 
     - name: Setup CI from ci-tooling
       run: |
@@ -86,11 +86,11 @@ jobs:
       run: |
         sudo systemctl status apache2 -l
         sudo cat /var/log/apache2/error.log
-        rm -rf database
-        rm -rf .ci_tooling
-        rm -rf .ipc
-        rm -rf /opt/iem
-        rm -rf /opt/miniconda3
-        rm -rf /mesonet/www/logs
-        rm -rf /opt/iemwebfarm
-        rm -rf /var/cache/matplotlib
+        sudo rm -rf database
+        sudo rm -rf .ci_tooling
+        sudo rm -rf .ipc
+        sudo rm -rf /opt/iem
+        sudo rm -rf /opt/miniconda3
+        sudo rm -rf /mesonet/www/logs
+        sudo rm -rf /opt/iemwebfarm
+        sudo rm -rf /var/cache/matplotlib
