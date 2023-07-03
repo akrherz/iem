@@ -51,7 +51,7 @@ def do(now, realtime=False):
 
     gribfn = mrms.fetch("SeamlessHSR", now)
     if gribfn is None:
-        lf = LOG.info if realtime else LOG.debug
+        lf = LOG.warning if realtime else LOG.info
         lf("Missing SeamlessHSR: %s", now.strftime("%Y-%m-%dT%H:%MZ"))
         return
 

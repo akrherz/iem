@@ -82,7 +82,7 @@ def update_climodat(cf6df, xref, valid):
                 uvals += 1
                 work.append(f"{col} = %s")
                 params.append(row[col])
-                LOG.debug("%s %s %s->%s", clsid, col, current[col], row[col])
+                LOG.info("%s %s %s->%s", clsid, col, current[col], row[col])
             if not work:
                 continue
             params.append(clsid)

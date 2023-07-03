@@ -34,7 +34,6 @@ def save(sectorName, file_name, dir_name, ts, routes, bbox=None):
             f"http://iem.local/GIS/radmap.php?bbox={bbox}&ts={tstamp}&{layers}"
         )
     req = exponential_backoff(requests.get, uri, timeout=60)
-    LOG.debug(uri)
     if req is None or req.status_code != 200:
         LOG.warning("%s failure", uri)
         return
@@ -89,7 +88,7 @@ def runtime(ts, routes):
 def main(argv):
     """Go Main Go"""
     ts = utc(*[int(x) for x in argv[1:6]])
-    LOG.debug("Running for %s", ts)
+    LOG.info("Running for %s", ts)
     # If we are near real-time, also check various archive points
     if (utc() - ts).total_seconds() > 1000:
         runtime(ts, "a")

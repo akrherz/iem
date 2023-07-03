@@ -37,11 +37,12 @@ def text_image(content):
     font = PIL.ImageFont.truetype(font_path, size=large_font)
 
     # make the background image based on the combination of font and lines
-    max_width_line = max(lines, key=lambda s: font.getsize(s)[0])
+    max_width_line = max(lines, key=lambda s: font.getlength(s))
     # max height is adjusted down because it's too large visually for spacing
     test_string = "ABCDEFGHIJKLMNOPQRSTUVWXYZ"
-    max_height = pt2px(font.getsize(test_string)[1])
-    max_width = pt2px(font.getsize(max_width_line)[0])
+    bbox = font.getbbox(test_string)
+    max_height = bbox[3] - bbox[1]
+    max_width = font.getlength(max_width_line)
     height = max_height * len(lines)  # perfect or a little oversized
     width = int(round(max_width + 40))  # a little oversized
     # A limit of PIL

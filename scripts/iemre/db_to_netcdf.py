@@ -31,7 +31,6 @@ def main(argv):
         for vname in ds:
             if vname not in nc.variables:
                 continue
-            LOG.debug("copying database var %s to netcdf", vname)
             # Careful here, ds could contain NaN values
             nc.variables[vname][idx, :, :] = np.ma.array(
                 ds[vname].values, mask=np.isnan(ds[vname].values)

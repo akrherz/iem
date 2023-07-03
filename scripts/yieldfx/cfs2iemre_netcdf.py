@@ -164,7 +164,7 @@ def finalize(nc):
     nc.close()
     # Rename it
     newfilename = filename.replace("temp_", "")
-    LOG.debug("Renaming %s to %s", filename, newfilename)
+    LOG.info("Renaming %s to %s", filename, newfilename)
     os.rename(filename, newfilename)
 
 
@@ -175,7 +175,7 @@ def main(argv):
     else:
         # Run for 12z yesterday
         today = datetime.date.today() - datetime.timedelta(days=1)
-    LOG.debug("running for today=%s", today)
+    LOG.info("running for today=%s", today)
     for hour in [0, 6, 12, 18]:
         valid = utc(today.year, today.month, today.day, hour)
         # Create netcdf file

@@ -86,7 +86,6 @@ def copy_iemre(nc, ncdate0, ncdate1, islice, jslice):
         tidx1 = (ncdate1 - datetime.date(ncdate0.year, 1, 1)).days
         re_slice = slice(tidx0, tidx1 + 1)
 
-        # LOG.debug("filling nc: %s iemre: %s", yfx_slice, re_slice)
         highc = convert_value(
             renc.variables["high_tmpk"][re_slice, jslice, islice],
             "degK",
