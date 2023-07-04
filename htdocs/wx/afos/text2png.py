@@ -54,7 +54,7 @@ def text_image(content):
     # draw each line of text
     vertical_position = 5
     horizontal_position = 5
-    line_spacing = int(round(max_height * 0.8))  # reduced spacing seems better
+    line_spacing = max_height + 2
     for line in lines:
         draw.text(
             (horizontal_position, vertical_position), line, fill=0, font=font
