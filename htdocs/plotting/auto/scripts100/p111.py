@@ -28,7 +28,7 @@ def plotter(fdict):
 
     with get_sqlalchemy_conn("coop") as conn:
         df = pd.read_sql(
-            f"SELECT day, precip from alldata_{station[:2]} WHERE "
+            "SELECT day, precip from alldata WHERE "
             "station = %s and precip is not null "
             "ORDER by precip DESC LIMIT 30",
             conn,

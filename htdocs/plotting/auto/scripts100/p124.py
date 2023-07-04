@@ -11,10 +11,7 @@ CATS = np.array([0.01, 0.5, 1.0, 2.0, 3.0, 4.0])
 
 def get_description():
     """Return a dict describing how to call this plotter"""
-    desc = {}
-    desc["data"] = True
-    desc["report"] = True
-    desc["description"] = """ """
+    desc = {"description": __doc__, "data": True, "report": True}
     desc["arguments"] = [
         dict(
             type="station",
@@ -33,8 +30,6 @@ def plotter(fdict):
 
     station = ctx["station"]
 
-    table = f"alldata_{station[:2]}"
-
     bs = ctx["_nt"].sts[station]["archive_begin"]
     if bs is None:
         raise NoDataFound("No metadata found.")
@@ -42,7 +37,7 @@ def plotter(fdict):
     # 0.01, 0.5, 1, 2, 3, 4
     with get_sqlalchemy_conn("coop") as conn:
         df = pd.read_sql(
-            f"""
+            """
             SELECT year, month,
             sum(case when precip >= %s then 1 else 0 end) as cat1,
             sum(case when precip >= %s then 1 else 0 end) as cat2,
@@ -50,7 +45,7 @@ def plotter(fdict):
             sum(case when precip >= %s then 1 else 0 end) as cat4,
             sum(case when precip >= %s then 1 else 0 end) as cat5,
             sum(case when precip >= %s then 1 else 0 end) as cat6
-            from {table} WHERE station = %s GROUP by year, month
+            from alldata WHERE station = %s GROUP by year, month
             ORDER by year, month
         """,
             conn,
@@ -70,7 +65,7 @@ def plotter(fdict):
         "# IEM Climodat https://mesonet.agron.iastate.edu/climodat/\n"
         f"# Report Generated: {datetime.date.today():%d %b %Y}\n"
         f"# Climate Record: {bs} -> {datetime.date.today()}\n"
-        f"# Site Information: [{station}] {ctx['_nt'].sts[station]['name']}\n"
+        f"# Site Information: {ctx['_sname']}\n"
         "# Contact Information: Daryl Herzmann akrherz@iastate.edu "
         "515.294.5978\n"
         "# Number of days per year with precipitation at or "

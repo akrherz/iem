@@ -9,10 +9,7 @@ from pyiem.util import get_autoplot_context, get_dbconn
 
 def get_description():
     """Return a dict describing how to call this plotter"""
-    desc = {}
-    desc["data"] = True
-    desc["report"] = True
-    desc["description"] = """ """
+    desc = {"description": __doc__, "data": True, "report": True}
     desc["arguments"] = [
         dict(
             type="station",
@@ -67,7 +64,6 @@ def plotter(fdict):
     ctx = get_autoplot_context(fdict, get_description())
     station = ctx["station"]
 
-    table = f"alldata_{station[:2]}"
     bs = ctx["_nt"].sts[station]["archive_begin"]
     if bs is None:
         raise NoDataFound("No Data Found.")
@@ -110,7 +106,7 @@ def plotter(fdict):
     )
 
     cursor.execute(
-        f"SELECT high, low from {table} WHERE station = %s and "
+        "SELECT high, low from alldata WHERE station = %s and "
         "day >= '1900-01-01' ORDER by day ASC",
         (station,),
     )

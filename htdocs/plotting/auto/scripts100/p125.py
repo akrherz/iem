@@ -66,29 +66,27 @@ PRECISION = {
     "total_cdd65": 0,
     "total_hdd65": 0,
 }
-MDICT = dict(
-    [
-        ("all", "No Month/Time Limit"),
-        ("spring", "Spring (MAM)"),
-        ("mjj", "May/June/July"),
-        ("gs", "May thru Sep"),
-        ("fall", "Fall (SON)"),
-        ("winter", "Winter (DJF)"),
-        ("summer", "Summer (JJA)"),
-        ("jan", "January"),
-        ("feb", "February"),
-        ("mar", "March"),
-        ("apr", "April"),
-        ("may", "May"),
-        ("jun", "June"),
-        ("jul", "July"),
-        ("aug", "August"),
-        ("sep", "September"),
-        ("oct", "October"),
-        ("nov", "November"),
-        ("dec", "December"),
-    ]
-)
+MDICT = {
+    "all": "No Month/Time Limit",
+    "spring": "Spring (MAM)",
+    "mjj": "May/June/July",
+    "gs": "May thru Sep",
+    "fall": "Fall (SON)",
+    "winter": "Winter (DJF)",
+    "summer": "Summer (JJA)",
+    "jan": "January",
+    "feb": "February",
+    "mar": "March",
+    "apr": "April",
+    "may": "May",
+    "jun": "June",
+    "jul": "July",
+    "aug": "August",
+    "sep": "September",
+    "oct": "October",
+    "nov": "November",
+    "dec": "December",
+}
 
 
 def get_description():
@@ -293,4 +291,4 @@ def plotter(fdict):
 
 
 if __name__ == "__main__":
-    plotter(dict(month="gs", var="total_gdd50", src="climate51"))
+    plotter({})
