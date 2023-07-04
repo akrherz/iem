@@ -2,9 +2,6 @@
 This chart presents the crop progress by year.
 The most recent value for the current year is denoted on each of the
 previous years on record.
-
-<p><strong>Updated 15 June 2021</strong>: The options for this autoplot
-were changed and not backwards compatable with previous URIs, sorry.</p>
 """
 import calendar
 
@@ -143,7 +140,10 @@ def plotter(fdict):
     if ctx["short_desc"] == "FD":
         ax.set_xlim(np.argmax(maxv > 0) - 7)
     else:
-        ax.set_xlim(np.argmax(maxv > 0) - 7, np.argmax(minv > 99) + 7)
+        ax.set_xlim(
+            np.nanargmax(maxv > 0) - 7,
+            np.nanargmax(minv >= np.nanmax(minv)) + 7,
+        )
     ax.set_ylim(lastyear + 0.5, year0 - 0.5)
     ax.yaxis.set_major_locator(ticker.MaxNLocator(integer=True))
     ax.grid(True)
@@ -155,4 +155,4 @@ def plotter(fdict):
 
 
 if __name__ == "__main__":
-    plotter({"short_desc": "FD"})
+    plotter({})

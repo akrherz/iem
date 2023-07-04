@@ -1,10 +1,11 @@
-"""This plot displays the period of consecutive days
-    each year with the extreme criterion meet. In the case of a tie, the
-    first period of the season is used for the analysis.  For a season to
-    count within the analysis, it must have had at least 200 days with data.
+"""
+This plot displays the period of consecutive days
+each year with the extreme criterion meet. In the case of a tie, the
+first period of the season is used for the analysis.  For a season to
+count within the analysis, it must have had at least 200 days with data.
 
-    <p>The dew point option only works for ASOS networks and does a simple
-    arthimetic mean of dew point temperatures.
+<p>The dew point option only works for ASOS networks and does a simple
+arthimetic mean of dew point temperatures.
 
 <p>Note that the coldest and warmest feels like temperature values are
 averages of the daily minimum or maximum values, not an average of an
@@ -303,4 +304,4 @@ def plotter(fdict):
 
 
 if __name__ == "__main__":
-    plotter(dict(station="IA0112", var="wettest", network="IACLIMATE", days=3))
+    plotter({})
