@@ -92,6 +92,7 @@ def get_data(pgconn, ts):
     midnight = ts.replace(hour=0, minute=0)
     tophour = ts.replace(minute=0)
     h24 = ts - datetime.timedelta(hours=24)
+    mon_ts0 = min([h24, ts.replace(day=1, hour=1)])
     cursor.execute(
         """
         with calendar_day as (
@@ -107,7 +108,9 @@ def get_data(pgconn, ts):
         twentyfour_hour as (
             select
             station,
-            sum(rain_in_tot) as p24m from
+            sum(case when valid > %s then rain_in_tot else 0 end) as p24m,
+            sum(rain_in_tot) as pmonth
+            from
             sm_hourly WHERE valid > %s and valid <= %s
             GROUP by station
         ),
@@ -139,11 +142,11 @@ def get_data(pgconn, ts):
                 h.valid = date_trunc('hour', m.valid))
             where h.valid = %s and m.valid = %s
         )
-        SELECT a.*, c.max_tmpc, c.min_tmpc, c.pday, h.p24m from
+        SELECT a.*, c.max_tmpc, c.min_tmpc, c.pday, h.p24m, h.pmonth from
         agg a LEFT JOIN calendar_day c on (a.station = c.station)
         LEFT JOIN twentyfour_hour h on (a.station = h.station)
     """,
-        (midnight, ts, h24, ts, tophour, ts),
+        (midnight, ts, h24, mon_ts0, ts, tophour, ts),
     )
     for row in cursor:
         sid = row["station"]
@@ -184,6 +187,7 @@ def get_data(pgconn, ts):
                     "low": safe_t(row["min_tmpc"], "degC"),
                     "pday": safe(row["pday"], 2),
                     "p24i": safe(row["p24m"], 2),
+                    "pmonth": safe(row["pmonth"], 2),
                     "soil04t": (
                         safe_t(row["t4_c_avg_qc"])
                         if not q.get("soil4", False)
