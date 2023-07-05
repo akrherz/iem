@@ -1,10 +1,12 @@
-"""This autoplot produces an infographic for a given state with some
-    diagnostics on the weekly change in Standardized Precipitation Index (SPI)
-    over a given day interval.  The purpose is to show how a state's SPI values
-    have changed over a seven day period.  Changes in SPI drought classfication
-    are colorized as green for improvements and red for degradations.
+"""
+This autoplot produces an infographic for a given state with some
+diagnostics on the weekly change in Standardized Precipitation Index (SPI)
+over a given day interval.  The purpose is to show how a state's SPI values
+have changed over a seven day period.  Changes in SPI drought classfication
+are colorized as green for improvements and red for degradations.
 
-    <p>Caution, this chart does take a number of seconds to generate."""
+<p>Caution, this chart does take a number of seconds to generate.
+"""
 import datetime
 
 import pandas as pd

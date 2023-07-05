@@ -194,4 +194,4 @@ def plotter(fdict):
 
 
 if __name__ == "__main__":
-    plotter({"commodity_desc": "CORN", "unit_desc": "PCT HARVESTED"})
+    plotter({})

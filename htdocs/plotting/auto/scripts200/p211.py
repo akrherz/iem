@@ -361,11 +361,4 @@ def plotter(fdict):
 
 
 if __name__ == "__main__":
-    plotter(
-        {
-            "network": "PA_ASOS",
-            "zstation": "RDG",
-            "sts": "2020-08-02 0900",
-            "ets": "2020-08-02 1245",
-        }
-    )
+    plotter({})

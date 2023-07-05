@@ -82,6 +82,7 @@ def plotter(fdict):
             f"{year1}-{ctx['year'] - 1} Average"
         ),
         stateborderwidth=3,
+        nocaption=True,
     )
     mp.fill_ugcs(
         df["delta"].to_dict(),

@@ -57,8 +57,11 @@ def application(environ, start_response):
 
     # Things for the user to theoretically input:
     loc = html_escape(form.get("loc", "Jack Trice Stadium"))
-    pointLat = float(form.get("lat", 42.014004))
-    pointLon = float(form.get("lon", -93.635773))
+    try:
+        pointLat = float(form.get("lat", 42.014004))
+        pointLon = float(form.get("lon", -93.635773))
+    except ValueError:
+        return [b"ERROR: Invalid lat or lon valid provided."]
     sio = StringIO()
     sio.write(
         f"; This is a placefile to draw a range ring x miles from: {loc}\n"

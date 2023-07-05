@@ -4,9 +4,8 @@
 import datetime
 import json
 
-import pytz
 from paste.request import parse_formvars
-from pyiem.util import get_dbconn, html_escape
+from pyiem.util import get_dbconn, html_escape, utc
 from pymemcache.client import Client
 
 
@@ -45,19 +44,19 @@ def application(environ, start_response):
     fields = parse_formvars(environ)
     awipsid = fields.get("awipsid", "AFDDMX")[:6]
     sts = fields.get("sts", "2019-10-03T00:00Z")
-    ets = fields.get("ets", "2019-10-04T00:00Z")
+    ets = fields.get("ets", f"{utc():%Y-%m-%dT%H:%M}")
     cb = fields.get("callback", None)
 
     mckey = f"/json/nwstext_search/{sts}/{ets}/{awipsid}?callback={cb}"
     mc = Client("iem-memcached:11211")
     res = mc.get(mckey)
     if not res:
-        sts = datetime.datetime.strptime(sts, "%Y-%m-%dT%H:%MZ")
-        sts = sts.replace(tzinfo=pytz.UTC)
-        ets = datetime.datetime.strptime(ets, "%Y-%m-%dT%H:%MZ")
-        ets = ets.replace(tzinfo=pytz.UTC)
+        sts = datetime.datetime.strptime(sts[:16], "%Y-%m-%dT%H:%M")
+        sts = sts.replace(tzinfo=datetime.timezone.utc)
+        ets = datetime.datetime.strptime(ets[:16], "%Y-%m-%dT%H:%M")
+        ets = ets.replace(tzinfo=datetime.timezone.utc)
         now = datetime.datetime.utcnow()
-        now = now.replace(tzinfo=pytz.utc)
+        now = now.replace(tzinfo=datetime.timezone.utc)
         cacheexpire = 0 if ets < now else 120
 
         res = run(sts, ets, awipsid)
