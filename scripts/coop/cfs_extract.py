@@ -49,11 +49,8 @@ def do_agg(dkey, fname, ts, data):
 def do_temp(dkey, fname, func, ts, data):
     """Do Temperatures"""
     fn = ts.strftime(
-        (
-            "/mesonet/ARCHIVE/data/%Y/%m/%d/model/cfs/%H/"
-            + fname
-            + ".01.%Y%m%d%H.daily.grib2"
-        )
+        f"/mesonet/ARCHIVE/data/%Y/%m/%d/model/cfs/%H/{fname}"
+        ".01.%Y%m%d%H.daily.grib2"
     )
     if not os.path.isfile(fn):
         return
@@ -165,7 +162,7 @@ def dbsave(ts, data):
 def main():
     """Go!"""
     # Extract 12 UTC Data
-    ts = utc() - datetime.timedelta(days=2)
+    ts = utc() - datetime.timedelta(days=3)
     ts = ts.replace(hour=12, minute=0, second=0, microsecond=0)
     data = process(ts)
     dbsave(ts, data)

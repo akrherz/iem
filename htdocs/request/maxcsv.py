@@ -310,7 +310,7 @@ def do_ahps_obs(nwsli):
     """,
         (nwsli,),
     )
-    if cursor.rowcount == 0:
+    if cursor.rowcount != 2:
         return "NO DATA"
     plabel = cursor.fetchone()[1]
     slabel = cursor.fetchone()[1]

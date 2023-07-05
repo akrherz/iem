@@ -1,14 +1,16 @@
-"""This application presents daily comparisons of an
-    automation station's hourly data.  You pick two hours of your choice and
-    the application will compute the difference between the two.  The hours
-    selected are for the local time zone of the station.  The comparison is
-    made between the first hour and the subsequent second hour.  If the first
-    hour is less than the second, the comparison is made on the same calendar
-    day.  If the second hour is less than the first, then the second hour is
-    taken from the next day.
+"""
+This application presents daily comparisons of an
+automation station's hourly data.  You pick two hours of your choice and
+the application will compute the difference between the two.  The hours
+selected are for the local time zone of the station.  The comparison is
+made between the first hour and the subsequent second hour.  If the first
+hour is less than the second, the comparison is made on the same calendar
+day.  If the second hour is less than the first, then the second hour is
+taken from the next day.
 
-    <p>The chart displays a two dimensional histogram / heatmap underneath
-    the plotted lines covering the period of record data."""
+<p>The chart displays a two dimensional histogram / heatmap underneath
+the plotted lines covering the period of record data.
+"""
 import calendar
 import datetime
 

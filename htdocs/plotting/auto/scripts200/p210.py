@@ -174,4 +174,4 @@ def plotter(fdict):
 
 
 if __name__ == "__main__":
-    plotter({"pil": "AWW", "var": "last"})
+    plotter({})

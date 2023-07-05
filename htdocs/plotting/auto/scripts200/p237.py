@@ -99,10 +99,4 @@ def plotter(fdict):
 
 
 if __name__ == "__main__":
-    plotter(
-        dict(
-            sdate="2017-01-01",
-            edate="2017-12-31",
-            wfo="OUN",
-        )
-    )
+    plotter({})
