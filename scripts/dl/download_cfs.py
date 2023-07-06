@@ -1,15 +1,15 @@
 """Download and archive the CFS data
 
-Run from RUN_NOON.sh
+Run from RUN_NOON.sh for 3 and 4 days ago
 
 tmax
 tmin
 prate
 dswsfc
 """
-import datetime
 import os
 import subprocess
+import sys
 import tempfile
 
 import pygrib
@@ -75,18 +75,16 @@ def dl(now, varname, scenario):
     os.remove(tmpfd.name)
 
 
-def main():
+def main(argv):
     """Do main"""
-    # Run for two and three days ago
-    for offset in [2, 3]:
-        now = utc() - datetime.timedelta(days=offset)
-        for hour in [0, 6, 12, 18]:
-            now = now.replace(hour=hour, minute=0, second=0, microsecond=0)
-            for varname in ["tmax", "tmin", "prate", "dswsfc"]:
-                # Control member 1 is the only one out 9 months
-                if not check(now, varname, 1):
-                    dl(now, varname, 1)
+    now = utc(*[int(x) for x in argv[1:4]])
+    for hour in [0, 6, 12, 18]:
+        now = now.replace(hour=hour)
+        for varname in ["tmax", "tmin", "prate", "dswsfc"]:
+            # Control member 1 is the only one out 9 months
+            if not check(now, varname, 1):
+                dl(now, varname, 1)
 
 
 if __name__ == "__main__":
-    main()
+    main(sys.argv)

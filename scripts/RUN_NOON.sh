@@ -49,6 +49,7 @@ bash download_cpc.sh
 
 cd ../dl
 # NB used for drydown
-python download_cfs.py
+python download_cfs.py $(date --date '3 days ago' +'%Y %m %d')
+python download_cfs.py $(date --date '4 days ago' +'%Y %m %d')
 cd ../yieldfx
 python cfs2iemre_netcdf.py
