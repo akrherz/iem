@@ -312,7 +312,7 @@ def plotter(fdict):
                 np.sum(nc.variables[clncvar][idx0:idx1, y0:y1, x0:x1], 0)
             )
         p01d = p01d - climo
-        [maxv] = np.percentile(np.abs(p01d), [99])
+        [maxv] = np.nanpercentile(np.abs(p01d), [99])
         clevs = np.around(np.linspace(0 - maxv, maxv, 11), decimals=2)
     elif opt == "per":
         with util.ncopen(clncfn) as nc:

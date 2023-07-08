@@ -136,6 +136,7 @@ def plotter(fdict):
     jslice = slice(j0, j1)
     islice = slice(i0, i1)
 
+    plot_units = ""
     idx0 = iemre.daily_offset(date)
     ncfn = iemre.get_daily_ncname(date.year)
     if not os.path.isfile(ncfn):
