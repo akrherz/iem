@@ -1,6 +1,6 @@
 """
 The map presents IEM computed climate district or statewide
-ranks for a metric of your choice.  This map can be generated for a given
+values for a metric of your choice.  This map can be generated for a given
 month and year or period of dates.  If the period of days includes leap
 day, this day is included and unweighted against years without it.  If the
 period spans two years, the presented year on the map represents the
@@ -11,14 +11,14 @@ period is limited to 1 year or less.
 reporting each day at approximately 7 AM.  So for example, a plot of June
 precipitation would stricly include the period of 7 AM 31 May
 to 7 AM 30 June. Data for the current date is available at approximately
-noon each day.
+noon central time each day.
 """
 import datetime
 
 import numpy as np
 import pandas as pd
 from pyiem.exceptions import NoDataFound
-from pyiem.plot import MapPlot, get_cmap
+from pyiem.plot import MapPlot, centered_bins, get_cmap, pretty_bins
 from pyiem.util import get_autoplot_context, get_sqlalchemy_conn
 
 PDICT = {
@@ -36,6 +36,11 @@ PDICT2 = {
 PDICT3 = {
     "cd": "Climate District",
     "st": "State",
+}
+PDICT4 = {
+    "rank": "Ranks",
+    "val": "Values",
+    "dep": "Departures",
 }
 
 MDICT = {
@@ -84,6 +89,13 @@ def get_description():
             label="Select Variable",
             options=PDICT,
         ),
+        {
+            "type": "select",
+            "options": PDICT4,
+            "default": "rank",
+            "name": "w",
+            "label": "Select aggregate to plot",
+        },
         dict(
             type="select",
             name="p",
@@ -173,6 +185,8 @@ def get_daily_data(ctx, sdate, edate):
             avg(avghi) OVER (PARTITION by station) as avg_high,
             stddev(avghi) OVER (PARTITION by station) as std_high,
             avghi as high,
+            avg(avgt) OVER (PARTITION by station) as avg_avgt,
+            avgt,
             avg(avglo) OVER (PARTITION by station) as avg_low,
             stddev(avglo) OVER (PARTITION by station) as std_low,
             avglo as low,
@@ -183,7 +197,12 @@ def get_daily_data(ctx, sdate, edate):
             rank() OVER (PARTITION by station ORDER by avgt DESC) as avgt_rank
             from monthly)
 
-        SELECT station, precip_rank, avgt_rank, high_rank, low_rank,
+        SELECT station,
+        high as high_val, low as low_val, precip as precip_val,
+        avgt as avgt_val,
+        high - avg_high as high_dep, low - avg_low as low_dep,
+        precip - avg_precip as precip_dep, avgt - avg_avgt as avgt_dep,
+        precip_rank, avgt_rank, high_rank, low_rank,
         ((high - avg_high) / std_high) - ((precip - avg_precip) / std_precip)
         as aridity, max_date from ranks where year = %s
         """,
@@ -227,19 +246,37 @@ def plotter(fdict):
     ctx["lastyear"] = datetime.date.today().year
     ctx["years"] = ctx["lastyear"] - 1893 + 1
 
-    subtitle = (
-        "Based on IEM Estimates, 1 is "
-        f"{'wettest' if ctx['var'] == 'precip' else 'hottest'} out of "
-        f"{ctx['years']} total years (1893-{ctx['lastyear']})"
-    )
+    subtitle = "Based on IEM Estimates"
+    title = "Ranks "
+    units = ""
     if ctx["var"] == "aridity":
         subtitle = "Std Average High Temp Departure minus Std Precip Departure"
+        title = ""
+    elif ctx["w"] == "dep":
+        title = "Departure "
+        if ctx["var"] in ["high", "low", "avgt"]:
+            units = "degrees F"
+        elif ctx["var"] == "precip":
+            units = "inch"
+    elif ctx["w"] == "val":
+        title = ""
+        if ctx["var"] in ["high", "low", "avgt"]:
+            units = "degrees F"
+        elif ctx["var"] == "precip":
+            units = "inch"
+    elif ctx["w"] == "rank":
+        subtitle += (
+            ", 1 is "
+            f"{'wettest' if ctx['var'] == 'precip' else 'hottest'} out of "
+            f"{ctx['years']} total years (1893-{ctx['lastyear']})"
+        )
+    if ctx["w"] == "rank":
+        units = ""
     mp = MapPlot(
         apctx=ctx,
         continentalcolor="white",
         title=(
-            f"{ctx['label']} {PDICT[ctx['var']]} "
-            f"{'Ranks ' if ctx['var'] != 'aridity' else ''}"
+            f"{ctx['label']} {PDICT[ctx['var']]} {title}"
             f"by {PDICT3[ctx['which']]}"
         ),
         subtitle=subtitle,
@@ -247,20 +284,27 @@ def plotter(fdict):
         nocaption=True,
     )
     cmap = get_cmap(ctx["cmap"])
-    bins = [
-        1,
-        5,
-        10,
-        25,
-        50,
-        75,
-        100,
-        ctx["years"] - 10,
-        ctx["years"] - 5,
-        ctx["years"],
-    ]
-    pvar = ctx["var"] + "_rank"
+    pvar = f"{ctx['var']}_{ctx['w']}"
     fmt = "%.0f"
+    if ctx["w"] == "rank":
+        bins = [
+            1,
+            5,
+            10,
+            25,
+            50,
+            75,
+            100,
+            ctx["years"] - 10,
+            ctx["years"] - 5,
+            ctx["years"],
+        ]
+    elif ctx["w"] == "val":
+        bins = pretty_bins(ctx["df"][pvar].min(), ctx["df"][pvar].max())
+        fmt = "%.2f"
+    elif ctx["w"] == "dep":
+        bins = centered_bins(ctx["df"][pvar].abs().max())
+        fmt = "%.2f"
     if ctx["var"] == "aridity":
         bins = np.arange(-4, 4.1, 1)
         pvar = ctx["var"]
@@ -274,6 +318,7 @@ def plotter(fdict):
             lblformat=fmt,
             bins=bins,
             cmap=cmap,
+            units=units,
         )
     else:
         mp.fill_climdiv(
@@ -283,6 +328,7 @@ def plotter(fdict):
             lblformat=fmt,
             bins=bins,
             cmap=cmap,
+            units=units,
         )
 
     return mp.fig, ctx["df"]
