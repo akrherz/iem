@@ -13,8 +13,6 @@ ephem
 fiona
 # various places
 gdal
-# used
-geojson
 # important
 geopandas
 # mrms script
