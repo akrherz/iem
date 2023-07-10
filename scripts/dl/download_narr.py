@@ -70,7 +70,7 @@ def fetch_rda(year, month):
     days.append(f"20{lastday.day}")
     for day in days:
         uri = (
-            "https://rda.ucar.edu/data/ds608.0/3HRLY/"
+            "https://data.rda.ucar.edu/ds608.0/3HRLY/"
             f"{year}/NARRsfc_{year}{month:02.0f}_{day}.tar"
         )
         req = exponential_backoff(

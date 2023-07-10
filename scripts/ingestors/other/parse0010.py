@@ -24,14 +24,14 @@ def main():
     fn = valid.strftime("/mesonet/ARCHIVE/data/%Y/%m/%d/text/ot/ot0010.dat")
 
     if not os.path.isfile(fn):
-        LOG.debug("missing %s", fn)
+        LOG.info("missing %s", fn)
         sys.exit(0)
 
     with open(fn, encoding="ascii") as fh:
         lines = fh.readlines()
     lastline = lines[-1].strip()
     tokens = re.split(r"[\s+]+", lastline)
-    if len(tokens) != 20:
+    if len(tokens) != 18:
         return
 
     tparts = re.split(":", tokens[3])
@@ -63,8 +63,7 @@ def main():
         float(tokens[10]), "mile / hour", "knot"
     )
     iem.data["alti"] = float(tokens[12])
-    iem.data["pday"] = float(tokens[13])
-    iem.data["srad"] = None if tokens[18] == "n/a" else float(tokens[18])
+    iem.data["pday"] = float(tokens[13]) / 100.0
 
     iem.save(cursor)
 
