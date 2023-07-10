@@ -162,7 +162,7 @@ def dbsave(ts, data):
 def main():
     """Go!"""
     # Extract 12 UTC Data
-    ts = utc() - datetime.timedelta(days=3)
+    ts = utc() - datetime.timedelta(days=4)
     ts = ts.replace(hour=12, minute=0, second=0, microsecond=0)
     data = process(ts)
     dbsave(ts, data)

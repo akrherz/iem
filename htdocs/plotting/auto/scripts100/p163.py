@@ -1,4 +1,19 @@
-"""LSR map by WFO"""
+"""
+This application generates a map displaying the
+number of LSRs issued between a period of your choice. These
+are the preliminary reports and not official totals of events.</p>
+
+<p>For plots that compare against an "average" value, the period of record
+is used (since 2002).</p>
+
+<p><strong>NOTE:</strong> If you choose a period longer than one year,
+only the "count" metric is available.  Sorry.</p>
+
+<p><strong>Caution while plotting by county:</strong> The raw NWS LSR
+product text only contains a free-text name and state.  The IEM attempts
+to use some heuristics to associate those with an actual political
+boundary.  This fails about one percent of the time.
+"""
 import datetime
 
 import numpy as np
@@ -12,6 +27,9 @@ MDICT = {
     "NONE": "All LSR Types",
     "NRS": "All LSR Types except HEAVY RAIN + SNOW",
     "H1": "One Inch and Larger Hail ",
+    "H2": "Two Inch and Larger Hail ",
+    "G58": "Thunderstorm Wind Gust >= 58 MPH ",
+    "G75": "Thunderstorm Wind Gust >= 75 MPH ",
     "CON": "Convective LSRs (Tornado, TStorm Gst/Dmg, Hail)",
     "AVALANCHE": "AVALANCHE",
     "BLIZZARD": "BLIZZARD",
@@ -78,25 +96,7 @@ PDICT3 = {
 
 def get_description():
     """Return a dict describing how to call this plotter"""
-    desc = {}
-    desc["data"] = True
-    desc[
-        "description"
-    ] = """This application generates a map displaying the
-    number of LSRs issued between a period of your choice. These
-    are the preliminary reports and not official totals of events.</p>
-
-    <p>For plots that compare against an "average" value, the period of record
-    is used (since 2002).</p>
-
-    <p><strong>NOTE:</strong> If you choose a period longer than one year,
-    only the "count" metric is available.  Sorry.</p>
-
-    <p><strong>Caution while plotting by county:</strong> The raw NWS LSR
-    product text only contains a free-text name and state.  The IEM attempts
-    to use some heuristics to associate those with an actual political
-    boundary.  This fails about one percent of the time.
-    """
+    desc = {"description": __doc__, "data": True}
     today = utc() + datetime.timedelta(days=1)
     jan1 = today.replace(month=1, day=1)
     desc["arguments"] = [
@@ -240,6 +240,12 @@ def plotter(fdict):
         tlimiter = " and typetext not in ('HEAVY RAIN', 'SNOW', 'HEAVY SNOW') "
     elif myfilter == "H1":
         tlimiter = " and typetext = 'HAIL' and magnitude >= 1 "
+    elif myfilter == "H2":
+        tlimiter = " and typetext = 'HAIL' and magnitude >= 2 "
+    elif myfilter == "G58":
+        tlimiter = " and type = 'G' and magnitude >= 58 "
+    elif myfilter == "G75":
+        tlimiter = " and type = 'G' and magnitude >= 75 "
     elif myfilter == "CON":
         tlimiter = (
             " and typetext in ('TORNADO', 'HAIL', 'TSTM WND GST', "

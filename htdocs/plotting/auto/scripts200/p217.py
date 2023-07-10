@@ -45,6 +45,8 @@ def plotter(fdict):
     """Go"""
     ctx = get_autoplot_context(fdict, get_description())
     pid = ctx["pid"][:35]
+    if len(pid) < 30 or not pid[0].isdigit():
+        raise NoDataFound("Invalid pid provided.")
     segnum = ctx["segnum"]
     nt = NetworkTable("WFO")
 
