@@ -9,7 +9,7 @@ looks backwards in time for the most recent issuance to that timestamp.
 midnight and the 13z issuance of the Day 1 Outlook.  In this case and
 as the code stands now, you get the next day's outlook.
 
-<p>A <a href="/request/gis/spc_outlooks.phtml">GIS Shapefile</a> download
+<p>A <a href="/request/gis/outlooks.phtml">GIS Shapefile</a> download
 option exists for downloading these outlooks in-bulk.</p>
 """
 import datetime
