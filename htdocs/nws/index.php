@@ -292,8 +292,8 @@ first guess at fields the NWS needs for their RTP product.</p>
 <ul>
 <li><a href="/request/gis/spc_mcd.phtml">
 <i class="fa fa-download"></i> SPC Mesoscale Discussion Shapefile Download</a></li>
-<li><a href="/request/gis/spc_outlooks.phtml">
- <i class="fa fa-download"></i> SPC Outlook Shapefile Download</a></li>
+<li><a href="/request/gis/outlooks.phtml">
+ <i class="fa fa-download"></i> SPC/WPC Outlook Shapefile Download</a></li>
 
  <li><a href="/request/gis/spc_watch.phtml">
  <i class="fa fa-download"></i> SPC Watch Polygon Shapefile Download</a></li>
@@ -321,8 +321,8 @@ some convective outlook or the number of outlooks for a given point.</li>
 <li><a href="/request/gis/wpc_mpd.phtml">
 <i class="fa fa-download"></i> WPC Precipitation Discussion Shapefile Download</a></li>
 <li><a href="/nws/wpc_national_hilo/">WPC National High Low Listing</a></li>
-<li><a href="/request/gis/spc_outlooks.phtml">
- <i class="fa fa-download"></i> WPC Outlook Shapefile Download</a></li>
+<li><a href="/request/gis/outlooks.phtml">
+ <i class="fa fa-download"></i> SPC/WPC Outlook Shapefile Download</a></li>
  </div>
 </div>
 

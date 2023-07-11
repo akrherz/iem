@@ -42,7 +42,13 @@ def get_context(environ):
     days = [int(x) for x in form.getall("d")]
     if not days:
         days = list(range(1, 9))
-    return dict(sts=sts, ets=ets, types=types, days=days)
+    return {
+        "sts": sts,
+        "ets": ets,
+        "types": types,
+        "days": days,
+        "geom_col": "geom" if form.get("geom") == "geom" else "geom_layers",
+    }
 
 
 def run(ctx, start_response):
@@ -63,14 +69,16 @@ def run(ctx, start_response):
     }
     with get_sqlalchemy_conn("postgis") as conn:
         df = gpd.read_postgis(
-            "select "
-            f"to_char(issue {common}) as issue, "
-            f"to_char(expire {common}) as expire, "
-            f"to_char(product_issue {common}) as prodiss, "
-            "outlook_type as type, day, threshold, category, cycle, geom "
-            "from spc_outlooks WHERE product_issue >= %s and "
-            "product_issue < %s and outlook_type in %s and day in %s "
-            "ORDER by product_issue ASC",
+            f"""select
+            to_char(issue {common}) as issue,
+            to_char(expire {common}) as expire,
+            to_char(product_issue {common}) as prodiss,
+            outlook_type as type, day, threshold, category, cycle,
+            {ctx["geom_col"]}
+            from spc_outlooks WHERE product_issue >= %s and
+            product_issue < %s and outlook_type in %s and day in %s
+            ORDER by product_issue ASC
+            """,
             conn,
             params=(
                 ctx["sts"],
@@ -78,7 +86,7 @@ def run(ctx, start_response):
                 tuple(ctx["types"]),
                 tuple(ctx["days"]),
             ),
-            geom_col="geom",
+            geom_col=ctx["geom_col"],
         )
     if df.empty:
         start_response("200 OK", [("Content-type", "text/plain")])
