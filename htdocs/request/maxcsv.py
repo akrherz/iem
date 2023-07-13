@@ -5,7 +5,6 @@ ID,Station,Latitude,Longitude
 """
 import datetime
 import re
-import sys
 from zoneinfo import ZoneInfo
 
 # third party
@@ -339,8 +338,6 @@ def do_ahps_obs(nwsli):
             params={"nwsli": nwsli, "plabel": plabel, "slabel": slabel},
             index_col=None,
         )
-    sys.stderr.write(str(plabel))
-    sys.stderr.write(str(slabel))
     df["locationid"] = nwsli
     df["locationname"] = stationname
     df["latitude"] = latitude

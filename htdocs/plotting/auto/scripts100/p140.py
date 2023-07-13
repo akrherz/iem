@@ -34,6 +34,11 @@ PDICT = {
     "min_feel": "Minimum Feels Like Temperature",
     "precip": "Total Precipitation",
 }
+PDICT2 = {
+    "none": "Plot metric, not count of days",
+    "aoa": "Days At or Above Threshold",
+    "below": "Days Below Threshold",
+}
 
 
 def get_description():
@@ -76,6 +81,19 @@ def get_description():
             label="Variable to Compute:",
             options=PDICT,
         ),
+        {
+            "type": "select",
+            "options": PDICT2,
+            "name": "w",
+            "default": "none",
+            "label": "Use Threshold to Count Number of Days",
+        },
+        {
+            "type": "float",
+            "name": "thres",
+            "label": "Threshold (inch, F, MPH)",
+            "default": "1",
+        },
         dict(
             type="year",
             name="year",
@@ -122,6 +140,10 @@ def plotter(fdict):
         sdays.append(ts.strftime("%m%d"))
 
     doff = (days + 1) if ets.year != sts.year else 0
+    threshold = ctx["thres"]
+    mydir = ">=" if ctx["w"] == "aoa" else "<"
+    aggcol = "max_tmpf" if ctx["w"] == "none" else ctx["varname"]
+    dfcol = ctx["varname"] if ctx["w"] == "none" else "count_days"
     with get_sqlalchemy_conn("iem") as conn:
         df = pd.read_sql(
             text(
@@ -136,7 +158,9 @@ def plotter(fdict):
         max(max_tmpf) as max_high,
         min(max_tmpf) as min_high,
         avg((max_dwpf + min_dwpf)/2.) as avg_dewp,
-        max(max_feel) as max_feel, min(min_feel) as min_feel
+        max(max_feel) as max_feel, min(min_feel) as min_feel,
+        sum(case when {aggcol} {mydir} {threshold} then 1 else 0 end) as
+            count_days
         from summary s JOIN stations t on (s.iemid = t.iemid)
         WHERE t.network = :network and t.id = :station
         and to_char(day, 'mmdd') in :sdays and day >= :sdate
@@ -157,18 +181,35 @@ def plotter(fdict):
     df["range_high_temp"] = df["max_high"] - df["min_high"]
     df["range_low_temp"] = df["max_low"] - df["min_low"]
     # require values , not nan
-    df2 = df[df[varname].notnull()].sort_values(varname, ascending=False)
+    df2 = df[df[dfcol].notnull()].sort_values(dfcol, ascending=False)
 
+    ylabel = r"Temperature $^\circ$F"
+    units = r"$^\circ$F"
+    if varname in ["precip"]:
+        ylabel = "Precipitation [inch]"
+        units = "[inch]"
+    elif varname in ["avg_wind_speed"]:
+        ylabel = "Wind Speed [MPH]"
+        units = "[MPH]"
+    if ctx["w"] != "none":
+        ylabel = "Days"
     title = (
         f"{ctx['_sname']}\n"
         f"{PDICT.get(varname)} from {sts:%d %b} through {ets:%d %b}"
     )
+    if ctx["w"] != "none":
+        tt = PDICT2[ctx["w"]].replace("Threshold", f"{ctx['thres']}")
+        title = (
+            f"{ctx['_sname']}\n"
+            f"{tt} {units} for {PDICT.get(varname)} "
+            f"from {sts:%d %b} through {ets:%d %b}"
+        )
     fig = figure(apctx=ctx, title=title)
     ax = fig.subplots(2, 1)
     ax[0].set_position([0.07, 0.53, 0.78, 0.36])
     ax[1].set_position([0.07, 0.1, 0.78, 0.36])
 
-    fmter = intfmt if varname.find("days") > -1 else nice
+    fmter = intfmt if ctx["w"] != "none" else nice
     yrfmter = intfmt if sts.year == ets.year else crossesjan1
 
     # Print top 10
@@ -179,7 +220,7 @@ def plotter(fdict):
         ypos -= dy
         _fp = {"weight": "bold"} if yr == year else {}
         fig.text(0.86, ypos, yrfmter(yr), font_properties=_fp)
-        fig.text(0.95, ypos, fmter(row[varname]), font_properties=_fp)
+        fig.text(0.95, ypos, fmter(row[dfcol]), font_properties=_fp)
 
     ypos -= 2 * dy
     fig.text(0.86, ypos, "Bottom 10")
@@ -187,43 +228,38 @@ def plotter(fdict):
     for yr, row in df2.tail(10).iterrows():
         _fp = {"weight": "bold"} if yr == year else {}
         fig.text(0.86, ypos, yrfmter(yr), font_properties=_fp)
-        fig.text(0.95, ypos, fmter(row[varname]), font_properties=_fp)
+        fig.text(0.95, ypos, fmter(row[dfcol]), font_properties=_fp)
         ypos += dy
 
     bars = ax[0].bar(
-        df.index, df[varname], facecolor="r", edgecolor="r", align="center"
+        df.index, df[dfcol], facecolor="r", edgecolor="r", align="center"
     )
     thisvalue = "M"
-    for mybar, x, y in zip(bars, df.index.values, df[varname]):
+    for mybar, x, y in zip(bars, df.index.values, df[dfcol]):
         if x == year:
             mybar.set_facecolor("g")
             mybar.set_edgecolor("g")
             thisvalue = y
     ax[0].set_xlabel(f"Year, {year} = {nice(thisvalue)}")
     ax[0].axhline(
-        df[varname].mean(),
+        df[dfcol].mean(),
         lw=2,
-        label=f"Avg: {df[varname].mean():.2f}",
+        label=f"Avg: {df[dfcol].mean():.2f}",
         color="b",
     )
-    trail = df[varname].rolling(30, min_periods=30, center=False).mean()
+    trail = df[dfcol].rolling(30, min_periods=30, center=False).mean()
     ax[0].plot(trail.index, trail.values, color="k", label="30yr Avg", lw=2)
-    ylabel = r"Temperature $^\circ$F"
-    if varname in ["precip"]:
-        ylabel = "Precipitation [inch]"
-    elif varname in ["avg_wind_speed"]:
-        ylabel = "Wind Speed [MPH]"
     ax[0].set_ylabel(ylabel)
     ax[0].grid(True)
     ax[0].legend(ncol=2, fontsize=10)
     ax[0].set_xlim(df.index.values[0] - 1, df.index.values[-1] + 1)
-    dy = df[varname].max() - df[varname].min()
-    ax[0].set_ylim(df[varname].min() - dy * 0.2, df[varname].max() + dy * 0.25)
+    dy = df[dfcol].max() - df[dfcol].min()
+    ax[0].set_ylim(df[dfcol].min() - dy * 0.2, df[dfcol].max() + dy * 0.25)
     box = ax[0].get_position()
     ax[0].set_position([box.x0, box.y0 + 0.02, box.width, box.height * 0.98])
 
     # Plot 2: CDF
-    vals = df[pd.notnull(df[varname])][varname]
+    vals = df[pd.notnull(df[dfcol])][dfcol]
     X2 = np.sort(vals)
     ptile = np.percentile(vals, [0, 5, 50, 95, 100])
     N = len(vals)
@@ -233,14 +269,14 @@ def plotter(fdict):
     ax[1].set_ylabel("Observed Frequency [%]")
     ax[1].grid(True)
     ax[1].set_yticks([0, 5, 10, 25, 50, 75, 90, 95, 100])
-    mysort = df.sort_values(by=varname, ascending=True)
+    mysort = df.sort_values(by=dfcol, ascending=True)
     info = (
-        f"Min: {df[varname].min():.2f} {yrfmter(mysort.index[0])}\n"
+        f"Min: {df[dfcol].min():.2f} {yrfmter(mysort.index[0])}\n"
         f"95th: {ptile[1]:.2f}\n"
-        f"Mean: {df[varname].mean():.2f}\n"
-        f"STD: {df[varname].std():.2f}\n"
+        f"Mean: {df[dfcol].mean():.2f}\n"
+        f"STD: {df[dfcol].std():.2f}\n"
         f"5th: {ptile[3]:.2f}\n"
-        f"Max: {df[varname].max():.2f} {yrfmter(mysort.index[-1])}"
+        f"Max: {df[dfcol].max():.2f} {yrfmter(mysort.index[-1])}"
     )
     ax[1].axvline(thisvalue, lw=2, color="g")
     ax[1].text(
