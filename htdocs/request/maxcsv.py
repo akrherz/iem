@@ -338,6 +338,8 @@ def do_ahps_obs(nwsli):
             params={"nwsli": nwsli, "plabel": plabel, "slabel": slabel},
             index_col=None,
         )
+    if df.empty:
+        return "NO DATA"
     df["locationid"] = nwsli
     df["locationname"] = stationname
     df["latitude"] = latitude
@@ -662,3 +664,4 @@ def application(environ, start_response):
 def test_hml():
     """Can we do it?"""
     do_ahps("DBQI4")
+    do_ahps_obs("ESSV1")
