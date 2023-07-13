@@ -91,7 +91,10 @@ def run(ctx, start_response):
     if df.empty:
         start_response("200 OK", [("Content-type", "text/plain")])
         return b"ERROR: no results found for your query"
-    df.columns = [s.upper() if s != "geom" else "geom" for s in df.columns]
+    df.columns = [
+        s.upper() if not s.startswith("geom") else ctx["geom_col"]
+        for s in df.columns
+    ]
     fn = f"outlooks_{ctx['sts']:%Y%m%d%H%M}_{ctx['ets']:%Y%m%d%H%M}"
 
     with tempfile.TemporaryDirectory() as tmpdir:
