@@ -1,4 +1,14 @@
-"""Temp drops in the fall"""
+"""
+This plot presents the largest drop in low
+temperature during a period between 1 July and 30 June of the next year,
+but not including the July data of that year. The drop compares the lowest
+low previous to the date with the low for that date.  For example,
+if your coldest low to date was 40, you would not expect to see a
+low temperature of 20 the next night without first setting colder
+daily low temperatures. See also
+<a class="alert-link" href="/plotting/auto/?q=103">autoplot 103</a>
+for more details.
+"""
 from calendar import month_abbr
 from datetime import date
 
@@ -10,19 +20,7 @@ from pyiem.util import get_autoplot_context, get_sqlalchemy_conn
 
 def get_description():
     """Return a dict describing how to call this plotter"""
-    desc = {}
-    desc["data"] = True
-    desc[
-        "description"
-    ] = """This plot presents the largest drop in low
-    temperature during a period between 1 July and 30 June of the next year,
-    but not including the July data of that year. The drop compares the lowest
-    low previous to the date with the low for that date.  For example,
-    if your coldest low to date was 40, you would not expect to see a
-    low temperature of 20 the next night without first setting colder
-    daily low temperatures. See also
-    <a class="alert-link" href="/plotting/auto/?q=103">this autoplot</a>
-    for more details."""
+    desc = {"description": __doc__, "data": True}
     desc["arguments"] = [
         dict(
             type="station",

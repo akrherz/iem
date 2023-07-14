@@ -1,4 +1,7 @@
-"""day to day temp changes"""
+"""
+This plot displays the directional frequency of
+day to day changes in high or low temperature summarized by month.
+"""
 import calendar
 import datetime
 
@@ -14,12 +17,7 @@ PDICT = {"high": "High Temperature", "low": "Low Temperature"}
 
 def get_description():
     """Return a dict describing how to call this plotter"""
-    desc = {}
-    desc["data"] = True
-    desc[
-        "description"
-    ] = """This plot displays the directional frequency of
-    day to day changes in high or low temperature summarized by month."""
+    desc = {"description": __doc__, "data": True}
     desc["arguments"] = [
         dict(
             type="station",
@@ -85,9 +83,7 @@ def plotter(fdict):
     nochange2 = gyear[varname + "_unch"]
     decrease2 = gyear[varname + "_lower"]
 
-    title = (
-        f"{ctx['_sname']}\n" f"Day to Day {varname.title()} Temperature Change"
-    )
+    title = f"{ctx['_sname']}\nDay to Day {varname.title()} Temperature Change"
     (fig, ax) = figure_axes(title=title, apctx=ctx)
 
     total = decrease + nochange + increase
