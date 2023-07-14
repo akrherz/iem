@@ -210,6 +210,8 @@ def get_data(ctx, startyear):
         # make sure it is length two for the trick below in SQL
         months = [ts.month, 999]
         lastyear += 1
+    if startyear >= lastyear:
+        raise NoDataFound("Start year should be less than end year.")
     hours = range(24)
     if ctx.get("hours"):
         try:
@@ -273,6 +275,8 @@ def make_plot(df, ctx):
         .to(units("degF"))
         .m
     )
+    if means.empty:
+        raise NoDataFound("No data found.")
 
     season = ctx["season"]
     varname = ctx["varname"]
@@ -368,9 +372,9 @@ def plotter(fdict):
 if __name__ == "__main__":
     plotter(
         {
-            "station": "DSM",
-            "network": "IA_ASOS",
-            "year": 1990,
+            "station": "BGR",
+            "network": "ME_ASOS",
+            "year": 2023,
             "season": "summer",
             "agg": "max",
         }

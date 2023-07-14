@@ -74,7 +74,7 @@ def run(ctx, start_response):
             to_char(expire {common}) as expire,
             to_char(product_issue {common}) as prodiss,
             outlook_type as type, day, threshold, category, cycle,
-            {ctx["geom_col"]}
+            {ctx["geom_col"]} as geom
             from spc_outlooks WHERE product_issue >= %s and
             product_issue < %s and outlook_type in %s and day in %s
             ORDER by product_issue ASC
@@ -86,15 +86,12 @@ def run(ctx, start_response):
                 tuple(ctx["types"]),
                 tuple(ctx["days"]),
             ),
-            geom_col=ctx["geom_col"],
+            geom_col="geom",
         )
     if df.empty:
         start_response("200 OK", [("Content-type", "text/plain")])
         return b"ERROR: no results found for your query"
-    df.columns = [
-        s.upper() if not s.startswith("geom") else ctx["geom_col"]
-        for s in df.columns
-    ]
+    df.columns = [s.upper() if s != "geom" else "geom" for s in df.columns]
     fn = f"outlooks_{ctx['sts']:%Y%m%d%H%M}_{ctx['ets']:%Y%m%d%H%M}"
 
     with tempfile.TemporaryDirectory() as tmpdir:

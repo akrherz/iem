@@ -1,4 +1,10 @@
-"""Hourly temp ranges"""
+"""
+This plot presents the frequency of a given hourly
+temperature being within the bounds of two temperature thresholds. The
+hour is specified in UTC (Coordinated Universal Time) and observations
+are rounded forward in time such that an observation at :54 after the
+hour is moved to the top of the hour.
+"""
 import calendar
 
 import numpy as np
@@ -11,16 +17,7 @@ from pyiem.util import get_autoplot_context, get_sqlalchemy_conn, utc
 
 def get_description():
     """Return a dict describing how to call this plotter"""
-    desc = {}
-    desc[
-        "description"
-    ] = """This plot presents the frequency of a given hourly
-    temperature being within the bounds of two temperature thresholds. The
-    hour is specified in UTC (Coordinated Universal Time) and observations
-    are rounded forward in time such that an observation at :54 after the
-    hour is moved to the top of the hour.
-    """
-    desc["data"] = True
+    desc = {"description": __doc__, "data": True}
     desc["arguments"] = [
         dict(
             type="zstation",
