@@ -31,7 +31,7 @@ def main():
         lines = fh.readlines()
     lastline = lines[-1].strip()
     tokens = re.split(r"[\s+]+", lastline)
-    if len(tokens) != 20:
+    if len(tokens) != 19:
         return
 
     tparts = re.split(":", tokens[3])
@@ -57,12 +57,12 @@ def main():
         )
     else:
         LOG.debug("relative humidity out of bounds: %s", relh)
-    iem.data["sknt"] = convert_value(float(tokens[8]), "mile / hour", "knot")
-    iem.data["drct"] = int(tokens[9])
+    iem.data["sknt"] = convert_value(float(tokens[7]), "mile / hour", "knot")
+    iem.data["drct"] = int(tokens[8])
     iem.data["max_sknt"] = convert_value(
-        float(tokens[10]), "mile / hour", "knot"
+        float(tokens[9]), "mile / hour", "knot"
     )
-    iem.data["alti"] = float(tokens[12])
+    iem.data["alti"] = float(tokens[11])
     iem.data["pday"] = float(tokens[13]) / 100.0
     iem.data["srad"] = float(tokens[18])
 
