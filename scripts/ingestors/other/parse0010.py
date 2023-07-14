@@ -31,7 +31,7 @@ def main():
         lines = fh.readlines()
     lastline = lines[-1].strip()
     tokens = re.split(r"[\s+]+", lastline)
-    if len(tokens) != 18:
+    if len(tokens) != 20:
         return
 
     tparts = re.split(":", tokens[3])
@@ -64,6 +64,7 @@ def main():
     )
     iem.data["alti"] = float(tokens[12])
     iem.data["pday"] = float(tokens[13]) / 100.0
+    iem.data["srad"] = float(tokens[18])
 
     iem.save(cursor)
 
