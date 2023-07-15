@@ -97,6 +97,10 @@ def gauge(ax, row, col, params):
     pos = 0
     positive_delta = float(params.maxval - params.avgval)
     negative_delta = float(params.avgval - params.minval)
+    if positive_delta == 0:
+        positive_delta = 0.01
+    if negative_delta == 0:
+        negative_delta = 0.01
     for val, color, label in zip(bar_ends, colors, labels):
         if val > params.avgval:
             ha = "left"
@@ -358,4 +362,4 @@ def plotter(fdict):
 
 
 if __name__ == "__main__":
-    plotter({"station": "NPPG", "date": "2023-03-22"})
+    plotter({"station": "KCRQ", "date": "2023-07-14"})

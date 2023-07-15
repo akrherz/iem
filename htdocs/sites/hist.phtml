@@ -127,7 +127,7 @@ if ($mode == "monthly") {
 } else {
     $arr = array(
         "network" => $network,
-        "date" => sprintf("%s-%s-%s", $year, $month, $day),
+        "date" => sprintf("%s-%02.0f-%02.0f", $year, $month, $day),
     );
 }
 $wsuri = sprintf("/api/1/daily.json?%s", http_build_query($arr));
