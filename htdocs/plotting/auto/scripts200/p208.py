@@ -1,30 +1,28 @@
-"""This application generates a map showing the coverage of a given
-    VTEC alert.  The tricky part here is how time is handled
-    for events whereby zones/counties can be added / removed from the alert.
-    If you specific an exact time, you should get the proper extent of the
-    alert at that time.  If you do not specify the time, you should get the
-    total inclusion of any zones/counties that were added to the alert.
-
-    <p>This plot can be run in three special modes, those are:
-    <ul>
-      <li><strong>Single Event</strong>: Plots for a given WFO and event id.
-      </li>
-      <li><strong>Same Phen/Sig over multiple WFOs</strong>: The given single
-      event is expanded in space to cover any coincident events for the given
-      single event.</li>
-      <li><strong>Same Phen/Sig over multiple WFOs</strong>: In this case, the
-      event id is used to expand the plot.  This makes most sense for SVR + TOR
-      watches along with Tropical Alerts as the same event id is used over
-      multiple WFOs.</li>
-    </ul>
-    </p>
 """
-# local
+This application generates a map showing the coverage of a given
+VTEC alert.  The tricky part here is how time is handled
+for events whereby zones/counties can be added / removed from the alert.
+If you specific an exact time, you should get the proper extent of the
+alert at that time.  If you do not specify the time, you should get the
+total inclusion of any zones/counties that were added to the alert.
+
+<p>This plot can be run in three special modes, those are:
+<ul>
+    <li><strong>Single Event</strong>: Plots for a given WFO and event id.
+    </li>
+    <li><strong>Same Phen/Sig over multiple WFOs</strong>: The given single
+    event is expanded in space to cover any coincident events for the given
+    single event.</li>
+    <li><strong>Same Phen/Sig over multiple WFOs</strong>: In this case, the
+    event id is used to expand the plot.  This makes most sense for SVR + TOR
+    watches along with Tropical Alerts as the same event id is used over
+    multiple WFOs.</li>
+</ul>
+</p>
+"""
 from datetime import timezone
 
 import geopandas as gpd
-
-# third party
 import pandas as pd
 import pytz
 from pyiem.exceptions import NoDataFound
