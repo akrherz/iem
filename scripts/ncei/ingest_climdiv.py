@@ -16,32 +16,40 @@ ELEMENT2IEM = {
 }
 
 
-def process(procdate):
+def process(procdate, region):
     """Process the climdiv data."""
     ncei2state = {}
     for key, val in ncei_state_codes.items():
-        ncei2state[f"{int(val):03.0f}"] = key
+        if region == "st":
+            ncei2state[f"{int(val):03.0f}"] = key
+        else:
+            ncei2state[f"{int(val):02.0f}"] = key
     alldf = None
+    pos = 3 if region == "st" else 2
     for element, iemvar in ELEMENT2IEM.items():
-        LOG.info("Fetching %s", element)
+        LOG.info("Fetching %s[%s]", element, region)
         df = (
             pd.read_csv(
                 "https://www.ncei.noaa.gov/pub/data/cirs/climdiv/"
-                f"climdiv-{element}st-v1.0.0-{procdate}",
+                f"climdiv-{element}{region}-v1.0.0-{procdate}",
                 names="stcode 1 2 3 4 5 6 7 8 9 10 11 12".split(),
                 dtype={"stcode": str},
                 sep="\s+",
                 na_values=["-9.99", "-99.90"],
             )
             .assign(
-                state=lambda df_: df_["stcode"].str.slice(0, 3),
-                divnum=lambda df_: df_["stcode"].str.slice(3, 4),
+                state=lambda df_: df_["stcode"].str.slice(0, pos),
+                divnum=lambda df_: df_["stcode"].str.slice(pos, 4),
                 year=lambda df_: pd.to_numeric(df_["stcode"].str.slice(6, 10)),
             )
             .assign(
                 state=lambda df_: df_["state"].map(ncei2state),
                 station=lambda df_: (
-                    df_["state"] + df_["divnum"].str.pad(4, fillchar="0")
+                    df_["state"]
+                    + ("" if region == "st" else "C")
+                    + df_["divnum"].str.pad(
+                        4 if region == "st" else 3, fillchar="0"
+                    )
                 ),
             )
             .dropna(subset=["state"])
@@ -123,8 +131,9 @@ def main():
         LOG.info("Nothing to do, procdate %s", procdate)
         return
     LOG.warning("Found new %s to process", procdate)
-    df = process(procdate)
-    dbsave(df)
+    for region in ["dv", "st"]:
+        df = process(procdate, region)
+        dbsave(df)
     set_procdate(procdate)
 
 
