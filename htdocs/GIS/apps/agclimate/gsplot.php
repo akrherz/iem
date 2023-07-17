@@ -28,7 +28,7 @@ if (substr($var, 0, 4) == "sgdd") {
 }
 
 $wsuri = sprintf(
-    "/api/1/isusm/daily.geojson?sdate=%s-%s-%s&edate=%s-%s-%s&" .
+    "/api/1/isusm/daily.geojson?sdate=%s-%02.0f-%02.0f&edate=%s-%02.0f-%02.0f&" .
         "gddbase=%s&gddceil=%s",
     $year,
     $smonth,
