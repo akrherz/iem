@@ -7,11 +7,11 @@ with its "Climdiv" dataset.  This autoplot creates comparisons between the two.
 import datetime
 
 import pandas as pd
-from pyiem import reference
 from pyiem.exceptions import NoDataFound
 from pyiem.plot import figure
 from pyiem.util import (
     get_autoplot_context,
+    get_dbconn,
     get_properties,
     get_sqlalchemy_conn,
 )
@@ -41,18 +41,35 @@ MDICT = {
     "nov": "November",
     "dec": "December",
 }
+SDICT = {}  # to be filled
+
+
+def fill_sdict():
+    """Ensure we have stations to select from!"""
+    conn = get_dbconn("mesosite")
+    cursor = conn.cursor()
+    cursor.execute(
+        """
+        SELECT id, name from stations where network ~* 'CLIMATE' and
+        (substr(id, 3, 4) = '0000' or substr(id, 3, 1) = 'C') ORDER by id ASC
+        """
+    )
+    for row in cursor:
+        SDICT[row[0]] = row[1]
 
 
 def get_description():
     """Return a dict describing how to call this plotter"""
+    fill_sdict()
     desc = {"description": __doc__, "data": True, "cache": 86400}
     desc["arguments"] = [
-        dict(
-            type="state",
-            name="state",
-            default="IA",
-            label="Select state to compare",
-        ),
+        {
+            "type": "select",
+            "options": SDICT,
+            "name": "station",
+            "default": "IA0000",
+            "label": "Select statewide/climate district to compare:",
+        },
         dict(
             type="select",
             name="m",
@@ -73,10 +90,11 @@ def get_description():
 
 def plotter(fdict):
     """Go"""
+    fill_sdict()
     ctx = get_autoplot_context(fdict, get_description())
     procdate = get_properties().get("ncei.climdiv.procdate", "20230101")
 
-    state = ctx["state"]
+    station = ctx["station"]
     varname = ctx["varname"]
     sql = """
         with iem as (
@@ -102,7 +120,7 @@ def plotter(fdict):
         df = pd.read_sql(
             text(sql),
             conn,
-            params={"station": f"{state}0000"},
+            params={"station": station},
             index_col="year",
         )
 
@@ -145,7 +163,7 @@ def plotter(fdict):
 
     fig = figure(
         title=(
-            f"{reference.state_names[state]} [{MDICT[month]}] Bias "
+            f"[{station}] {SDICT[station]}:: [{MDICT[month]}] Bias "
             "(IEM minus NCEI)"
         ),
         subtitle=f"{PDICT[varname]}, NCEI processdate: {procdate}",

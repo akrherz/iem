@@ -1,6 +1,7 @@
-"""This app generates a heatmap-like presentation of daily climate data
-    of your choice.  In the case of 'Trailing XX Days', you will want to set
-    a trailing number of days to evaluate the metric for.
+"""
+This app generates a heatmap-like presentation of daily climate data
+of your choice.  In the case of 'Trailing XX Days', you will want to set
+a trailing number of days to evaluate the metric for.
 """
 import calendar
 import datetime
