@@ -1,4 +1,15 @@
-"""Departures over trailing days"""
+"""
+This plot presents the trailing X number of days
+temperature or precipitation departure from long term average. You can
+express this departure either in Absolute Departure or as a Standard
+Deviation.  The Standard Deviation option along with precipitation is
+typically called the "Standardized Precipitation Index".
+
+<p>The plot also contains an underlay with the weekly US Drought Monitor
+that is valid for the station location.  If you plot a climate district
+station, you get the US Drought Monitor valid for the district centroid.
+If you plot a statewide average, you get no USDM included.
+"""
 import datetime
 import sys
 
@@ -24,22 +35,7 @@ COLORS = ["#ffff00", "#fcd37f", "#ffaa00", "#e60000", "#730000"]
 
 def get_description():
     """Return a dict describing how to call this plotter"""
-    desc = {}
-    desc["data"] = True
-    desc["cache"] = 86400
-    desc[
-        "description"
-    ] = """This plot presents the trailing X number of days
-    temperature or precipitation departure from long term average. You can
-    express this departure either in Absolute Departure or as a Standard
-    Deviation.  The Standard Deviation option along with precipitation is
-    typically called the "Standardized Precipitation Index".
-
-    <p>The plot also contains an underlay with the weekly US Drought Monitor
-    that is valid for the station location.  If you plot a climate district
-    station, you get the US Drought Monitor valid for the district centroid.
-    If you plot a statewide average, you get no USDM included.
-    """
+    desc = {"description": __doc__, "data": True, "cache": 86400}
     today = datetime.date.today()
     sts = today - datetime.timedelta(days=720)
     desc["arguments"] = [

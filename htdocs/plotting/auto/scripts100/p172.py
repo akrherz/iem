@@ -1,4 +1,20 @@
-"""accumulated precip."""
+"""
+This chart presents year to date accumulated
+precipitation for a station of your choice.  The year with the highest and
+lowest accumulation is shown along with the envelop of observations and
+long term average.  You can optionally plot up to three additional years
+of your choice.</p>
+
+<p>You can specify the start date (ignore the year) for when to start
+the 365 day accumulation of precipitation.  The year shown is the year
+for the start of the accumulation period.  For example, if you accumulate
+after 1 October, the year 2020 would represent the period from 1 Oct 2020
+to 30 Sep 2021.</p>
+
+<p>Accumulating snowfall data is frought with peril, but this app will let
+you do it!  The app has a tight requirement of no less than 3 days of
+missing data for the year to be considered in the plot.</p>
+"""
 import datetime
 
 import pandas as pd
@@ -14,26 +30,7 @@ PDICT = {
 
 def get_description():
     """Return a dict describing how to call this plotter"""
-    desc = {}
-    desc["data"] = True
-    desc[
-        "description"
-    ] = """This chart presents year to date accumulated
-    precipitation for a station of your choice.  The year with the highest and
-    lowest accumulation is shown along with the envelop of observations and
-    long term average.  You can optionally plot up to three additional years
-    of your choice.</p>
-
-    <p>You can specify the start date (ignore the year) for when to start
-    the 365 day accumulation of precipitation.  The year shown is the year
-    for the start of the accumulation period.  For example, if you accumulate
-    after 1 October, the year 2020 would represent the period from 1 Oct 2020
-    to 30 Sep 2021.</p>
-
-    <p>Accumulating snowfall data is frought with peril, but this app will let
-    you do it!  The app has a tight requirement of no less than 3 days of
-    missing data for the year to be considered in the plot.</p>
-    """
+    desc = {"description": __doc__, "data": True}
     today = datetime.date.today()
     thisyear = today.year
     desc["arguments"] = [
@@ -163,6 +160,8 @@ def plotter(fdict):
         df = df[df["row"] <= doy_trunc]
 
     df, cullyears = cull_missing(df, ctx["var"], ctx["m"])
+    if df.empty:
+        raise NoDataFound("No data found for variable.")
     if not climo.empty:
         df = df.join(climo, how="left", on="sday")
 
@@ -270,4 +269,11 @@ def plotter(fdict):
 
 
 if __name__ == "__main__":
-    plotter(dict(sdate="2000-07-01", station="IA8706", var="snow"))
+    plotter(
+        {
+            "sdate": "0101",
+            "station": "OK6382",
+            "var": "snow",
+            "network": "OKCLIMATE",
+        }
+    )

@@ -55,7 +55,7 @@ def fill_sdict():
         """
     )
     for row in cursor:
-        SDICT[row[0]] = row[1]
+        SDICT[row[0]] = f"[{row[0]}] {row[1]}"
 
 
 def get_description():
