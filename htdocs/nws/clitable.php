@@ -105,11 +105,6 @@ function new_record($actual, $record)
 {
     if ($actual == "M" || $record == "M") return "";
     if ($actual === $record) return '<i class="fa fa-star-o"></i>';
-    // Careful of Trace
-    if ($actual === "T"){
-        if ($record > 0.001) return "";
-        return '<i class="fa fa-star"></i>';
-    }
     if ($actual > $record) return "<i class=\"fa fa-star\"></i>";
     return "";
 }
@@ -118,6 +113,19 @@ function new_record2($actual, $record)
     if ($actual == "M" || $record == "M") return "";
     if ($actual == $record) return '<i class="fa fa-star-o"></i>';
     if ($actual < $record) return "<i class=\"fa fa-star\"></i>";
+}
+function new_record3($actual, $record)
+{
+    if ($actual == "M" || $record == "M") return "";
+    if ($actual == 0) return "";
+    if ($actual === $record) return '<i class="fa fa-star-o"></i>';
+    // Careful of Trace
+    if ($actual === "T"){
+        if ($record > 0.001) return "";
+        return '<i class="fa fa-star"></i>';
+    }
+    if ($actual > $record) return "<i class=\"fa fa-star\"></i>";
+    return "";
 }
 foreach ($arr as $entry) {
     $row = ($opt === "bystation") ? $entry : $entry["properties"];
@@ -143,8 +151,16 @@ foreach ($arr as $entry) {
         );
         $col1 = sprintf("<a href=\"%s\">%s</a>", $link, date("Md,y", $ts));
     }
+    $hrecord = new_record($row["high"], $row["high_record"]);
+    $lrecord = new_record2($row["low"], $row["low_record"]);
+    $precord = new_record3($row["precip"], $row["precip_record"]);
+    $srecord = new_record3($row["snow"], $row["snow_record"]);
+    $rowlabel = "0";
+    if ($hrecord != "" || $lrecord != "" || $precord != "" || $srecord != ""){
+        $rowlabel = "1";
+    }
     $table .= sprintf(
-        "<tr>
+        "<tr data-record='%s'>
         <td nowrap><a href=\"/p.php?pid=%s\" target=\"_blank\"><i class=\"fa fa-list-alt\" alt=\"View Text\"></i></a>
             %s</td>
             <td>%s%s</td><td nowrap>%s</td><td>%s</td>
@@ -159,10 +175,11 @@ foreach ($arr as $entry) {
             <td>%s%s</td><td>%s</td><td>%s</td>
             <td>%s</td><td>%s</td>
             </tr>",
+        $rowlabel,
         $row["product"],
         $col1,
         $row["high"],
-        new_record($row["high"], $row["high_record"]),
+        $hrecord,
         $row["high_time"],
         $row["high_record"],
         implode(" ", $row["high_record_years"]),
@@ -171,7 +188,7 @@ foreach ($arr as $entry) {
         departure($row["high"], $row["high_normal"]),
 
         $row["low"],
-        new_record2($row["low"], $row["low_record"]),
+        $lrecord,
         $row["low_time"],
         $row["low_record"],
         implode(" ", $row["low_record_years"]),
@@ -180,7 +197,7 @@ foreach ($arr as $entry) {
         departure($row["low"], $row["low_normal"]),
 
         $row["precip"],
-        new_record($row["precip"], $row["precip_record"]),
+        $precord,
         $row["precip_record"],
         implode(" ", $row["precip_record_years"]),
         $row["precip_normal"],
@@ -188,7 +205,7 @@ foreach ($arr as $entry) {
         $row["precip_month_normal"],
 
         $row["snow"],
-        new_record($row["snow"], $row["snow_record"]),
+        $srecord,
         $row["snow_record"],
         implode(' ', $row["snow_record_years"]),
         $row["snow_month"],
@@ -236,8 +253,7 @@ $t->content = <<<EOF
     {$ys} {$ms} {$ds}
     <br /><input type="submit" value="Generate Table" />
 </form>
-    
-    
+
     </div>
 </div>
 
@@ -245,13 +261,16 @@ $t->content = <<<EOF
 directly access it here:
 <br /><code>{$prettyurl}</code></p>
 
-<p><button id="makefancy">Make Table Interactive</button></p>
+<p>
+<button id="makefancy">Make Table Interactive</button> &nbsp;
+<button id="makerecords" data-toggle="0"><span id="makerecordslabel">Show Rows with Records</span></button>
+</p>
 
 {$table}
 
 <p><strong>Key:</strong> &nbsp; &nbsp;
-            <i class="fa fa-star-o"></i> Record Tied,
-            <i class="fa fa-star"></i> Record Set.</p>
+    <i class="fa fa-star-o"></i> Record Tied,
+    <i class="fa fa-star"></i> Record Set.</p>
 
 EOF;
 $t->headextra = <<<EOF
@@ -261,13 +280,6 @@ EOF;
 $t->jsextra = <<<EOF
 <script src="/vendor/select2/4.0.3/select2.min.js"></script>
 <script src='/vendor/jquery-datatables/1.10.20/datatables.min.js'></script>
-<script>
-$(document).ready(function(){
-    $(".iemselect2").select2();
-});
-$('#makefancy').click(function(){
-    $("#thetable").DataTable();
-});
-</script>
+<script src="clitable.js"></script>
 EOF;
 $t->render('full.phtml');
