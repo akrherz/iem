@@ -1,4 +1,7 @@
-"""climodat days over threshold"""
+"""
+A simple accounting of the number of days with a low temperature below the
+given threshold or above the given threshold by year.
+"""
 import datetime
 
 import pandas as pd
@@ -8,10 +11,7 @@ from pyiem.util import get_autoplot_context, get_sqlalchemy_conn
 
 def get_description():
     """Return a dict describing how to call this plotter"""
-    desc = {}
-    desc["data"] = True
-    desc["report"] = True
-    desc["description"] = """ """
+    desc = {"description": __doc__, "data": True, "report": True}
     desc["arguments"] = [
         dict(
             type="station",
@@ -64,7 +64,7 @@ def plotter(fdict):
     )
     with get_sqlalchemy_conn("coop") as conn:
         df = pd.read_sql(
-            f"""SELECT year,
+            """SELECT year,
         sum(case when low <= -20 THEN 1 ELSE 0 END) as m20,
         sum(case when low <= -10 THEN 1 ELSE 0 END) as m10,
         sum(case when low <=  0 THEN 1 ELSE 0 END) as m0,
@@ -74,7 +74,7 @@ def plotter(fdict):
         sum(case when high >= 80 THEN 1 ELSE 0 END) as e80,
         sum(case when high >= 93 THEN 1 ELSE 0 END) as e93,
         sum(case when high >= 100 THEN 1 ELSE 0 END) as e100
-        from alldata_{station[:2]}
+        from alldata
         WHERE station = %s GROUP by year ORDER by year ASC
         """,
             conn,
