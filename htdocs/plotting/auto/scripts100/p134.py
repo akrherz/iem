@@ -58,6 +58,7 @@ def get_description():
     desc["arguments"] = [
         dict(
             type="sid",
+            include_climodat=True,
             name="station",
             default="DSM",
             network="IA_ASOS",
