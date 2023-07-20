@@ -1,4 +1,8 @@
+<h3>Application Disabled</h3>
+
+See <a href="https://twitter.com/akrherz/status/1681634270715203585">@akrherz twitter status</a>
 <?php
+die();
 session_start();
 require_once "../../../config/settings.inc.php";
 define("IEM_APPID", 102);
