@@ -110,7 +110,7 @@ def overloaded():
         cursor = pgconn.cursor()
         cursor.execute("select one::float from system_loadavg")
         val = cursor.fetchone()[0]
-    if val > 25:  # Cut back on logging
+    if val > 30:  # Cut back on logging
         sys.stderr.write(f"/cgi-bin/request/asos.py over cpu thres: {val}\n")
     return val > 20
 
@@ -187,8 +187,8 @@ def toobusy(pgconn, name):
         "SELECT pid from pg_stat_activity where query ~* %s",
         (name,),
     )
-    over = cursor.rowcount > 5
-    if over:
+    over = cursor.rowcount > 6
+    if over and cursor.rowcount > 9:  # cut back on logging
         sys.stderr.write(f"asos.py cursors {cursor.rowcount}: {name}\n")
     cursor.close()
     return over
