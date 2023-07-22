@@ -120,7 +120,7 @@
 
 # mesonet-pyvbcam (iem12)
 10.24.19.228 pyvbcam.local
-# iem8-dc
+# iem11-dc
 10.90.12.30 iembot
-# iemvm4 <-> metvm3
-10.24.19.118  iem-archive.local
+# metvm6-dc
+10.90.12.26  iem-archive.local
