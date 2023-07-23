@@ -13,9 +13,9 @@ def main():
 
     service = (
         "http://iem.local/plotting/auto/plot/206/t:state::network:WFO"
-        "::wfo:DMX::state:IA::v:max_gust::p:both::day:%s::"
-        "cmap:gist_stern_r::dpi:100::_cb:1.png"
-    ) % (now.strftime("%Y-%m-%d"),)
+        f"::wfo:DMX::state:IA::v:max_gust::p:both::day:{now:%Y-%m-%d}::"
+        "cmap:gist_stern_r::_cb:1.png"
+    )
 
     req = requests.get(service, timeout=60)
     tmpfd = tempfile.NamedTemporaryFile(delete=False)
@@ -25,7 +25,7 @@ def main():
     pqstr = "plot ac %s summary/today_gust.png iowa_wind_gust.png png" % (
         now.strftime("%Y%m%d%H%M"),
     )
-    subprocess.call("pqinsert -i -p '%s' %s" % (pqstr, tmpfd.name), shell=True)
+    subprocess.call(["pqinsert", "-i", "-p", pqstr, tmpfd.name])
     os.unlink(tmpfd.name)
 
 

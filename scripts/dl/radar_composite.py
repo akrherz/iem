@@ -41,11 +41,14 @@ def save(sectorName, file_name, dir_name, ts, routes, bbox=None):
     with tempfile.NamedTemporaryFile(delete=False) as tmpfd:
         tmpfd.write(req.content)
 
-    cmd = (
-        f"pqinsert -p 'plot {routes} {tstamp} {file_name} {dir_name}/"
-        f"n0r_{tstamp[:8]}_{tstamp[8:]}.png png' {tmpfd.name}"
-    )
-    subprocess.call(cmd, shell=True)
+    cmd = [
+        "pqinsert",
+        "-p",
+        f"plot {routes} {tstamp} {file_name} "
+        f"{dir_name}/n0r_{tstamp[:8]}_{tstamp[8:]}.png png",
+        tmpfd.name,
+    ]
+    subprocess.call(cmd)
     os.unlink(tmpfd.name)
 
 

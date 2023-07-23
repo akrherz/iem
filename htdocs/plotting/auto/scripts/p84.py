@@ -372,11 +372,4 @@ def plotter(fdict):
 
 
 if __name__ == "__main__":
-    plotter(
-        {
-            "sector": "conus",
-            "sdate": "2007-01-01",
-            "edate": "2007-01-01",
-            "src": "stage4",
-        }
-    )
+    plotter({})

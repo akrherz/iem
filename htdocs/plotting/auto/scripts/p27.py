@@ -1,4 +1,10 @@
-"""First Fall Threshold Dates."""
+"""
+This chart presents the date of the first fall
+(date after 1 July) temperature below threshold 1 and then the number of
+days after that date until threshold 2 was reached. The slanted dashed
+lines are used to translate the dots to the date of occurrence for the
+second threshold.
+"""
 import datetime
 
 import numpy as np
@@ -11,15 +17,7 @@ from scipy.stats import linregress
 
 def get_description():
     """Return a dict describing how to call this plotter"""
-    desc = {}
-    desc["data"] = True
-    desc[
-        "description"
-    ] = """This chart presents the date of the first fall
-    (date after 1 July) temperature below threshold 1 and then the number of
-    days after that date until threshold 2 was reached. The slanted dashed
-    lines are used to translate the dots to the date of occurrence for the
-    second threshold."""
+    desc = {"description": __doc__, "data": True}
     desc["arguments"] = [
         dict(
             type="station",
