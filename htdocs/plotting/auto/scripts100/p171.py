@@ -12,6 +12,9 @@ the month of issuance.</p>
 single watch issued by multiple WFOs would potentially count as more than
 one event in this listing.  Sorry, tough issue to get around.  In the case
 of warnings and advisories, the totals should be good.</p>
+
+<p><a href="/plotting/auto/?q=245">Autoplot 245</a> produces a similar plot to
+this one, but with Local Storm Report (LSR) totals.</p>
 """
 import calendar
 
