@@ -226,4 +226,4 @@ def plotter(fdict):
 
 
 if __name__ == "__main__":
-    plotter({"v": "feel", "valid": "2021-09-08 1500"})
+    plotter({})

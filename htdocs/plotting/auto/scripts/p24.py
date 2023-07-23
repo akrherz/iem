@@ -285,7 +285,7 @@ def plotter(fdict):
     )
     cmap = get_cmap(ctx["cmap"])
     pvar = f"{ctx['var']}_{ctx['w']}"
-    fmt = "%.0f"
+    fmt = "%.2f"
     if ctx["w"] == "rank":
         bins = [
             1,
@@ -299,12 +299,11 @@ def plotter(fdict):
             ctx["years"] - 5,
             ctx["years"],
         ]
+        fmt = "%.0f"
     elif ctx["w"] == "val":
         bins = pretty_bins(ctx["df"][pvar].min(), ctx["df"][pvar].max())
-        fmt = "%.2f"
-    elif ctx["w"] == "dep":
+    else:  # dep
         bins = centered_bins(ctx["df"][pvar].abs().max())
-        fmt = "%.2f"
     if ctx["var"] == "aridity":
         bins = np.arange(-4, 4.1, 1)
         pvar = ctx["var"]

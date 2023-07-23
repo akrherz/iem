@@ -700,8 +700,9 @@ nopts = [
         "id": 52,
         "label": "Gantt Chart of WFO Issued Watch/Warning/Advisories",
     },
-    {"id": 163, "label": "Local Storm Reports Issued by WFO/State [map]"},
+    {"id": 245, "label": "Local Storm Reports by Month/Year + Top 10 Daily"},
     {"id": 234, "label": "Local Storm Reports Calendar Counts"},
+    {"id": 163, "label": "Local Storm Reports Issued by WFO/State [map]"},
     {"id": 102, "label": "Local Storm Report Source Type Ranks by Year"},
     {
         "id": 237,
