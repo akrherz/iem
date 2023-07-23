@@ -1,4 +1,12 @@
-"""Metric Something by Something."""
+"""
+This plot generates a comparison between two hourly ASOS
+observation values. The interactive chart version and raw data download
+also presents the most recent UTC timestamp for that given combination.
+Apps like these are very good at quickly seeing bad-data outliers :(
+Please review any results you find here to see if the values match
+what the reality may have been.  Additionally, for the case of mean
+values, the presented timestamp is not of much use.
+"""
 import datetime
 
 import pandas as pd
@@ -20,44 +28,31 @@ VDICT = {
     "sknt": "Wind Speed [kts]",
 }
 ADICT = {"min": "Minimum", "avg": "Average", "max": "Maximum"}
-MDICT = dict(
-    [
-        ("all", "No Month/Time Limit"),
-        ("spring", "Spring (MAM)"),
-        ("fall", "Fall (SON)"),
-        ("winter", "Winter (DJF)"),
-        ("summer", "Summer (JJA)"),
-        ("jan", "January"),
-        ("feb", "February"),
-        ("mar", "March"),
-        ("apr", "April"),
-        ("may", "May"),
-        ("jun", "June"),
-        ("jul", "July"),
-        ("aug", "August"),
-        ("sep", "September"),
-        ("oct", "October"),
-        ("nov", "November"),
-        ("dec", "December"),
-    ]
-)
+MDICT = {
+    "all": "Entire Year",
+    "spring": "Spring (MAM)",
+    "summer": "Summer (JJA)",
+    "fall": "Fall (SON)",
+    "winter": "Winter (DJF)",
+    "jan": "January",
+    "feb": "February",
+    "mar": "March",
+    "apr": "April",
+    "may": "May",
+    "jun": "June",
+    "jul": "July",
+    "aug": "August",
+    "sep": "September",
+    "oct": "October",
+    "nov": "November",
+    "dec": "December",
+}
 
 
 def get_description():
     """Return a dict describing how to call this plotter"""
-    desc = {}
-    desc["data"] = True
-    desc["cache"] = 86400
+    desc = {"description": __doc__, "data": True, "cache": 86400}
     desc["highcharts"] = True
-    desc[
-        "description"
-    ] = """This plot generates a comparison between two hourly ASOS
-    observation values. The interactive chart version and raw data download
-    also presents the most recent UTC timestamp for that given combination.
-    Apps like these are very good at quickly seeing bad-data outliers :(
-    Please review any results you find here to see if the values match
-    what the reality may have been.  Additionally, for the case of mean
-    values, the presented timestamp is not of much use."""
     desc["arguments"] = [
         dict(
             type="zstation",

@@ -42,9 +42,6 @@ def compare(row, colname):
         return False
     if newval is not None and colname in ["high", "low", "precip"]:
         est = row[f"{'precip' if colname == 'precip' else 'temp'}_estimated"]
-        # if ACIS is missing and we are not estimated, bad!
-        if not est and newval is None:
-            return newval
         # If we have an estimated flag and ACIS is not None, do things.
         if est:
             return newval

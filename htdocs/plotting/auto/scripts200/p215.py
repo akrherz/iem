@@ -115,16 +115,18 @@ def get_df(ctx, period):
     elif month == "summer":
         months = [6, 7, 8]
     else:
-        ts = datetime.strptime("2000-" + month + "-01", "%Y-%b-%d")
+        ts = datetime.strptime(f"2000-{month}-01", "%Y-%b-%d")
         months = [ts.month]
         ctx["mlabel"] = calendar.month_name[ts.month]
     with get_sqlalchemy_conn("coop") as conn:
         df = pd.read_sql(
             text(
-                "SELECT high, low, (high+low)/2. as avgt from alldata WHERE "
-                "day >= :d1 and day <= :d2 and station = :station "
-                "and high is not null "
-                "and low is not null and month in :months"
+                """
+                SELECT high, low, (high+low)/2. as avgt from alldata WHERE
+                day >= :d1 and day <= :d2 and station = :station
+                and high is not null
+                and low is not null and month in :months
+                """
             ),
             conn,
             params={

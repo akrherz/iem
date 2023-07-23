@@ -219,4 +219,4 @@ def plotter(fdict):
 
 
 if __name__ == "__main__":
-    plotter(dict(network="IA_ASOS", station="AMW"))
+    plotter({})

@@ -1,4 +1,9 @@
-"""Visualization of TAFs"""
+"""
+This app generates infographics for Terminal Aerodome Forecasts (TAF).
+You need not provide an exact valid timestamp for the TAF issuance, the
+app will search backwards in time up to 24 hours to find the nearest
+issuance stored in the database.
+"""
 import datetime
 
 import matplotlib.patheffects as PathEffects
@@ -33,18 +38,8 @@ PE = [PathEffects.withStroke(linewidth=5, foreground="white")]
 
 def get_description():
     """Return a dict describing how to call this plotter"""
-    desc = {}
+    desc = {"description": __doc__, "data": True, "cache": 86400}
     desc["defaults"] = {"_r": "t"}
-    desc["data"] = True
-    desc["cache"] = 600
-    desc[
-        "description"
-    ] = """
-    This app generates infographics for Terminal Aerodome Forecasts (TAF).
-    You need not provide an exact valid timestamp for the TAF issuance, the
-    app will search backwards in time up to 24 hours to find the nearest
-    issuance stored in the database.
-    """
     desc["arguments"] = [
         dict(
             type="text",
@@ -329,4 +324,4 @@ def plotter(fdict):
 
 
 if __name__ == "__main__":
-    plotter(dict(station="KMCK", valid="2021-07-06 1606"))
+    plotter({})

@@ -1,4 +1,7 @@
-"""monthly wind speeds"""
+"""
+This graph presents monthly average wind speed
+values along with vector-averaged average wind direction.
+"""
 import calendar
 
 import pandas as pd
@@ -19,13 +22,7 @@ UNITCONV = {"mph": "miles / hour", "kt": "knot", "mps": "meter / second"}
 
 def get_description():
     """Return a dict describing how to call this plotter"""
-    desc = {}
-    desc["data"] = True
-    desc["cache"] = 86400
-    desc[
-        "description"
-    ] = """This graph presents monthly average wind speed
-    values along with vector-averaged average wind direction."""
+    desc = {"description": __doc__, "data": True, "cache": 86400}
     desc["arguments"] = [
         dict(
             type="zstation",
