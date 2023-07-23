@@ -1,4 +1,5 @@
-"""Using the gridded IEM ReAnalysis of daily
+"""
+Using the gridded IEM ReAnalysis of daily
 precipitation.  This chart presents the areal coverage of some trailing
 number of days precipitation for a state of your choice.  This application
 does not properly account for the trailing period of precipitation during
@@ -121,4 +122,4 @@ def plotter(fdict):
 
 
 if __name__ == "__main__":
-    plotter({"state": "HI"})
+    plotter({})

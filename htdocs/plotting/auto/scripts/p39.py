@@ -1,4 +1,11 @@
-"""scenarios"""
+"""
+This plot compares the month to date average
+temperature of this month against any previous month of your choice.
+The plot then contains this month's to date average temperature along
+with the scenarios of the remaining days for this month from each of
+the past years.  These scenarios provide a good approximation of what is
+possible for the remainder of the month.
+"""
 import calendar
 import datetime
 
@@ -11,15 +18,7 @@ from pyiem.util import get_autoplot_context, get_dbconn
 
 def get_description():
     """Return a dict describing how to call this plotter"""
-    desc = {}
-    desc[
-        "description"
-    ] = """This plot compares the month to date average
-    temperature of this month against any previous month of your choice.
-    The plot then contains this month's to date average temperature along
-    with the scenarios of the remaining days for this month from each of
-    the past years.  These scenarios provide a good approximation of what is
-    possible for the remainder of the month."""
+    desc = {"description": __doc__}
     today = datetime.date.today()
     lastmonth = (today.replace(day=1)) - datetime.timedelta(days=25)
     desc["arguments"] = [
@@ -191,4 +190,4 @@ def plotter(fdict):
 
 
 if __name__ == "__main__":
-    plotter(dict(station="IATAME", network="IACLIMATE"))
+    plotter({})

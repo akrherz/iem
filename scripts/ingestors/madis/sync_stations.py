@@ -40,7 +40,7 @@ def main(argv):
         lon = float(longitudes[recnum])
         lat = float(latitudes[recnum])
         if mcursor.rowcount == 0:
-            LOG.info("Add network: %s station: %s %s", network, stid, name)
+            LOG.warning("Add network: %s station: %s %s", network, stid, name)
             mcursor.execute(
                 "INSERT into stations(id, network, synop, country, plot_name, "
                 "name, state, online, geom, metasite) "
@@ -54,7 +54,7 @@ def main(argv):
         distance = ((olon - lon) ** 2 + (olat - lat) ** 2) ** 0.5
         if distance < 0.001:
             continue
-        LOG.info(
+        LOG.warning(
             "move %s %s dist: %s lon: %s -> %s lat: %s -> %s",
             stid,
             network,

@@ -217,9 +217,9 @@ def main(argv):
                 sid,
                 val["network"],
             )
-            subprocess.call(f"python sync_stations.py {fn}", shell=True)
+            subprocess.call(["python", "sync_stations.py", fn])
             os.chdir("../../dbutil")
-            subprocess.call("sh SYNC_STATIONS.sh", shell=True)
+            subprocess.call(["sh", "SYNC_STATIONS.sh"])
             os.chdir("../ingestors/madis")
             LOG.info("...done with sync.")
         del iem

@@ -162,10 +162,7 @@ def plotter(fdict):
     )
 
     fig = figure(
-        title=(
-            f"[{station}] {SDICT[station]}:: [{MDICT[month]}] Bias "
-            "(IEM minus NCEI)"
-        ),
+        title=f"{SDICT[station]}:: [{MDICT[month]}] Bias (IEM minus NCEI)",
         subtitle=f"{PDICT[varname]}, NCEI processdate: {procdate}",
         apctx=ctx,
     )

@@ -161,7 +161,10 @@ def plotter(fdict):
         elif varname in ["p01d", "p01d_12z", "snow_12z", "snowd_12z"]:
             # Value is in W m**-2, we want MJ
             plot_units = "inch"
-            clevs = pretty_bins(0, ptiles[2])
+            if ptiles[2] < 1:
+                clevs = np.arange(0, 1.01, 0.1)
+            else:
+                clevs = pretty_bins(0, ptiles[2])
             clevs[0] = 0.01
             cmap.set_under("white")
         elif varname in [
@@ -206,4 +209,4 @@ def plotter(fdict):
 
 
 if __name__ == "__main__":
-    plotter({"ptype": "g", "date": "2023-06-01", "var": "power_swdn"})
+    plotter({})

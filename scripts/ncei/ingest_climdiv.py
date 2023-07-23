@@ -66,6 +66,7 @@ def process(procdate, region):
             )
             .drop(columns=["year", "month", "day"])
             .set_index(["station", "date"])
+            .dropna()
         )
         if alldf is None:
             alldf = df

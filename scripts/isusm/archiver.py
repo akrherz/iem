@@ -1,8 +1,6 @@
 """
 LoggerNet delivers now single files per poll.  This script pieces them back
 together and then 1) dumps to LDM and 2) archives off to storage.
-
-run on iem15's crontab
 """
 import datetime
 import glob
