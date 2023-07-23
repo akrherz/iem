@@ -22,7 +22,7 @@ MARKERS = ["8", ">", "<", "v", "o", "h", "*"]
 
 def get_description():
     """Return a dict describing how to call this plotter"""
-    desc = {"desciption": __doc__, "data": True, "cache": 3600}
+    desc = {"description": __doc__, "data": True, "cache": 3600}
     today = datetime.date.today()
     ltypes = list(lsr_events.keys())
     ltypes.sort()
