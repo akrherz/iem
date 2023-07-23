@@ -325,7 +325,7 @@ function lsrHTML(feature) {
     const lines = [];
     const dt = moment.utc(feature.get("valid"));
     const ldt = dt.local().format("M/D LT");
-    const zz = dt.utc().format("kk:mm");
+    const zz = dt.utc().format("HH:mm");
     lines.push(`<strong>Valid:</strong> ${ldt} (${zz}Z)`);
     let vv = feature.get("source");
     if (vv !== null) {
@@ -360,10 +360,10 @@ function formatSBW(feature) {
     const issue = moment.utc(feature.get("issue"));
     const expire = moment.utc(feature.get("expire"));
     let ldt = issue.local().format("M/D LT");
-    let zz = issue.utc().format("kk:mm")
+    let zz = issue.utc().format("HH:mm")
     lines.push(`<strong>Issued:</strong> ${ldt} (${zz}Z)`);
     ldt = expire.local().format("M/D LT");
-    zz = expire.utc().format("kk:mm")
+    zz = expire.utc().format("HH:mm")
     lines.push(`<strong>Expired:</strong> ${ldt} (${zz}Z)`);
     lines.push(`<strong>More Details:</strong> <a href='${feature.get("href")}' target='_blank'>VTEC Browser</a>`);
     return lines.join("<br />");
