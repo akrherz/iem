@@ -68,7 +68,8 @@ function iemws_json($endpoint, $args)
 function force_https()
 {
     if (empty($_SERVER["HTTPS"]) || $_SERVER["HTTPS"] !== "on") {
-        header("Location: https://" . $_SERVER["HTTP_HOST"] . $_SERVER["REQUEST_URI"]);
+        // Ensure we collapse folks that have bookmarks to aliases
+        header("Location: https://mesonet.agron.iastate.edu" . $_SERVER["REQUEST_URI"]);
         exit();
     }
 }
