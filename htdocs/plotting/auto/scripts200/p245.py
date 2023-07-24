@@ -177,7 +177,7 @@ def plotter(fdict):
                 text(
                     f"""
                      with data as (
-                SELECT distinct valid, city, typetext, remark
+                SELECT distinct valid, geom, typetext, magnitude
                 from lsrs l where 1 = 1 {tlimiter} {wfo_limiter}
                 ) select date(valid at time zone :tzname),
                 count(*) from data GROUP by date ORDER by date
@@ -193,7 +193,7 @@ def plotter(fdict):
                 text(
                     f"""
                 with data as (
-                SELECT distinct valid, city, typetext, remark
+                SELECT distinct valid, geom, typetext, magnitude
                 from lsrs l JOIN ugcs u on (l.gid = u.gid)
                 where 1 = 1 {tlimiter} {wfo_limiter}
                 )
@@ -220,13 +220,13 @@ def plotter(fdict):
     title = f"NWS {ctx['_sname']}"
     if opt == "state":
         title = (
-            "NWS Issued for Counties/Zones for State of "
+            "NWS Local Storm Reports for State of "
             f"{reference.state_names[state]}"
         )
     elif opt == "ugc":
         name, wfo = get_ugc_name(ctx["ugc"])
         title = (
-            f"NWS [{wfo}] {ctx['_nt'].sts[wfo]['name']} Issued for "
+            f"NWS [{wfo}] {ctx['_nt'].sts[wfo]['name']} Reports for "
             f"[{ctx['ugc']}] {name}"
         )
     (fig, ax) = figure_axes(
