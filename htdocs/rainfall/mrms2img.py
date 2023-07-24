@@ -4,8 +4,8 @@ Create ERDAS Imagine file from a MRMS Raster
 import datetime
 import os
 import sys
+import tempfile
 import zipfile
-from io import BytesIO
 
 import numpy as np
 from imageio import imread
@@ -16,10 +16,10 @@ from paste.request import parse_formvars
 gdal.UseExceptions()
 
 
-def workflow(valid, period, start_response):
+def workflow(tmpdir, valid, period, start_response):
     """Actually do the work!"""
     fn = valid.strftime(
-        "/mesonet/ARCHIVE/data/%Y/%m/%d/" f"GIS/mrms/p{period}h_%Y%m%d%H%M.png"
+        f"/mesonet/ARCHIVE/data/%Y/%m/%d/GIS/mrms/p{period}h_%Y%m%d%H%M.png"
     )
     if not os.path.isfile(fn):
         raise FileNotFoundError(fn)
@@ -53,7 +53,8 @@ def workflow(valid, period, start_response):
     # print '5', np.max(data), np.min(data), data[0,0]
 
     drv = gdal.GetDriverByName("HFA")
-    outfn = f"mrms_{period}h_{valid:%Y%m%d%H%M}.img"
+    basefn = f"mrms_{period}h_{valid:%Y%m%d%H%M}"
+    outfn = f"{tmpdir}/{basefn}.img"
     ds = drv.Create(
         outfn, size[1], size[0], 1, gdal.GDT_UInt16, options=["COMPRESS=YES"]
     )
@@ -76,30 +77,24 @@ def workflow(valid, period, start_response):
     # close file
     del ds
 
-    zipfn = f"mrms_{period}h_{valid:%Y%m%d%H%M}.zip"
+    zipfn = f"{tmpdir}/{basefn}.zip"
     with zipfile.ZipFile(zipfn, "w", zipfile.ZIP_DEFLATED) as zfp:
-        zfp.write(outfn)
-        zfp.write(outfn + ".aux.xml")
+        zfp.write(outfn, f"{basefn}.img")
+        zfp.write(f"{outfn}.aux.xml", f"{basefn}.img.aux.xml")
 
     # Send file back to client
     headers = [
         ("Content-type", "application/octet-stream"),
-        ("Content-Disposition", f"attachment; filename={zipfn}"),
+        ("Content-Disposition", f"attachment; filename={basefn}.zip"),
     ]
     start_response("200 OK", headers)
-    bio = BytesIO()
     with open(zipfn, "rb") as fh:
-        bio.write(fh.read())
-    os.unlink(outfn)
-    os.unlink(zipfn)
-    os.unlink(outfn + ".aux.xml")
-    return bio.getvalue()
+        payload = fh.read()
+    return payload
 
 
 def application(environ, start_response):
     """Do Something"""
-    os.chdir("/tmp")
-
     form = parse_formvars(environ)
     year = int(form.get("year", 2016))
     month = int(form.get("month", 4))
@@ -112,7 +107,8 @@ def application(environ, start_response):
     valid = datetime.datetime(year, month, day, hour, minute)
 
     try:
-        return [workflow(valid, period, start_response)]
+        with tempfile.TemporaryDirectory() as tmpdir:
+            return [workflow(tmpdir, valid, period, start_response)]
     except Exception as exp:
         sys.stderr.write(str(exp) + "\n")
         headers = [("Content-type", "text/plain")]

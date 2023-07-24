@@ -1,6 +1,5 @@
 """Dump SPC Watches."""
 # Local
-import os
 import tempfile
 import zipfile
 from io import BytesIO
@@ -128,19 +127,17 @@ def run(ctx, start_response):
             df.to_file(fp, driver="KML", NameField="NAME")
         return fp.getvalue()
 
-    os.chdir("/tmp")
-    df.to_file(f"{fn}.shp", schema=schema)
+    with tempfile.TemporaryDirectory() as tmpdir:
+        df.to_file(f"{tmpdir}/{fn}.shp", schema=schema)
 
-    zio = BytesIO()
-    with zipfile.ZipFile(
-        zio, mode="w", compression=zipfile.ZIP_DEFLATED
-    ) as zf:
-        with open(PRJFILE, encoding="utf-8") as fh:
-            zf.writestr(f"{fn}.prj", fh.read())
-        for suffix in ["shp", "shx", "dbf"]:
-            zf.write(f"{fn}.{suffix}")
-    for suffix in ["shp", "shx", "dbf"]:
-        os.unlink(f"{fn}.{suffix}")
+        zio = BytesIO()
+        with zipfile.ZipFile(
+            zio, mode="w", compression=zipfile.ZIP_DEFLATED
+        ) as zf:
+            with open(PRJFILE, encoding="utf-8") as fh:
+                zf.writestr(f"{fn}.prj", fh.read())
+            for suffix in ["shp", "shx", "dbf"]:
+                zf.write(f"{tmpdir}/{fn}.{suffix}", f"{fn}.{suffix}")
 
     return zio.getvalue()
 

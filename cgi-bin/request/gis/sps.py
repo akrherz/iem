@@ -1,6 +1,5 @@
 """Dump SPS."""
 # Local
-import os
 import tempfile
 import zipfile
 from io import BytesIO
@@ -80,9 +79,8 @@ def run(ctx, start_response):
     df.columns = [s.upper() if s != "geom" else "geom" for s in df.columns]
     fn = f"sps_{ctx['sts']:%Y%m%d%H%M}_{ctx['ets']:%Y%m%d%H%M}"
 
-    with tempfile.TemporaryDirectory() as tempdir:
-        os.chdir(tempdir)
-        df.to_file(f"{fn}.shp", schema=schema)
+    with tempfile.TemporaryDirectory() as tmpdir:
+        df.to_file(f"{tmpdir}/{fn}.shp", schema=schema)
 
         zio = BytesIO()
         with zipfile.ZipFile(
@@ -90,9 +88,8 @@ def run(ctx, start_response):
         ) as zf:
             with open(PRJFILE, encoding="ascii") as fp:
                 zf.writestr(f"{fn}.prj", fp.read())
-            zf.write(f"{fn}.shp")
-            zf.write(f"{fn}.shx")
-            zf.write(f"{fn}.dbf")
+            for suffix in ("shp", "shx", "dbf"):
+                zf.write(f"{tmpdir}/{fn}.{suffix}", f"{fn}.{suffix}")
     headers = [
         ("Content-type", "application/octet-stream"),
         ("Content-Disposition", f"attachment; filename={fn}.zip"),

@@ -1,7 +1,7 @@
 """Fun."""
 import datetime
 import json
-import os
+import tempfile
 import zipfile
 
 import numpy as np
@@ -13,8 +13,6 @@ from pyiem.util import convert_value, get_dbconn, ncopen
 
 def application(environ, start_response):
     """Go main go"""
-    os.chdir("/tmp")
-
     form = parse_formvars(environ)
     ts0 = datetime.datetime.strptime(form.get("date0"), "%Y-%m-%d")
     ts1 = datetime.datetime.strptime(form.get("date1"), "%Y-%m-%d")
@@ -78,45 +76,48 @@ def application(environ, start_response):
         start_response("200 OK", headers)
         return [json.dumps(res).encode("ascii")]
 
-    # Time to create the shapefiles
-    basefn = f"iemre_{ts0:%Y%m%d}_{ts1:%Y%m%d}"
-    w = shapefile.Writer(basefn)
-    w.field("GDD", "F", 10, 2)
-    w.field("PREC_IN", "F", 10, 2)
+    with tempfile.TemporaryDirectory() as tmpdir:
+        # Time to create the shapefiles
+        basefn = f"iemre_{ts0:%Y%m%d}_{ts1:%Y%m%d}"
+        w = shapefile.Writer(f"{tmpdir}/{basefn}")
+        w.field("GDD", "F", 10, 2)
+        w.field("PREC_IN", "F", 10, 2)
 
-    for x in iemre.XAXIS:
-        for y in iemre.YAXIS:
-            w.poly(
-                [
+        for x in iemre.XAXIS:
+            for y in iemre.YAXIS:
+                w.poly(
                     [
-                        (x, y),
-                        (x, y + iemre.DY),
-                        (x + iemre.DX, y + iemre.DY),
-                        (x + iemre.DX, y),
-                        (x, y),
+                        [
+                            (x, y),
+                            (x, y + iemre.DY),
+                            (x + iemre.DX, y + iemre.DY),
+                            (x + iemre.DX, y),
+                            (x, y),
+                        ]
                     ]
-                ]
-            )
+                )
 
-    for i in range(len(iemre.XAXIS)):
-        for j in range(len(iemre.YAXIS)):
-            w.record(gdd[j, i], precip[j, i])
-    w.close()
-    # Create zip file, send it back to the clients
-    with zipfile.ZipFile(f"{basefn}.zip", "w", zipfile.ZIP_DEFLATED) as zfp:
-        for suffix in ["shp", "shx", "dbf", "prj"]:
-            zfp.write(f"{basefn}.{suffix}")
-        with open("/opt/iem/data/gis/meta/4326.prj", encoding="ascii") as fh:
-            zfp.writestr(f"{basefn}.prj", fh.read())
+        for i in range(len(iemre.XAXIS)):
+            for j in range(len(iemre.YAXIS)):
+                w.record(gdd[j, i], precip[j, i])
+        w.close()
+        # Create zip file, send it back to the clients
+        with zipfile.ZipFile(
+            f"{tmpdir}/{basefn}.zip", "w", zipfile.ZIP_DEFLATED
+        ) as zfp:
+            for suffix in ["shp", "shx", "dbf"]:
+                zfp.write(f"{tmpdir}/{basefn}.{suffix}", f"{basefn}.{suffix}")
+            with open(
+                "/opt/iem/data/gis/meta/4326.prj", encoding="ascii"
+            ) as fh:
+                zfp.writestr(f"{basefn}.prj", fh.read())
+        with open(f"{tmpdir}/{basefn}.zip", "rb") as fh:
+            content = fh.read()
 
     headers = [
         ("Content-type", "application/octet-stream"),
         ("Content-Disposition", f"attachment; filename={basefn}.zip"),
     ]
     start_response("200 OK", headers)
-    with open(f"{basefn}.zip", "rb") as fh:
-        content = fh.read()
-    for suffix in ["zip", "shp", "shx", "dbf", "prj"]:
-        os.unlink(f"{basefn}.{suffix}")
 
     return [content]
