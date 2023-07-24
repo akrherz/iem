@@ -1,8 +1,8 @@
 """Watch by county, a one-off"""
 import datetime
-import os
 import tempfile
 import zipfile
+from io import BytesIO
 
 from osgeo import ogr
 from paste.request import parse_formvars
@@ -21,20 +21,18 @@ def application(environ, start_response):
         hour = int(form.get("hour"))
         minute = int(form.get("minute"))
         ts = datetime.datetime(year, month, day, hour, minute)
-        fp = f"watch_by_county_{ts:%Y%m%d%H%M}"
+        fn = f"watch_by_county_{ts:%Y%m%d%H%M}"
     else:
         ts = datetime.datetime.utcnow()
-        fp = "watch_by_county"
+        fn = "watch_by_county"
 
     if "etn" in form:
         etnLimiter = f"and eventid = {int(form.get('etn'))}"
-        fp = f"watch_by_county_{ts:Y%m%d%H%M}_{int(form.get('etn'))}"
+        fn = f"watch_by_county_{ts:Y%m%d%H%M}_{int(form.get('etn'))}"
     else:
         etnLimiter = ""
 
-    with tempfile.TemporaryDirectory() as tempdir:
-        os.chdir(tempdir)
-
+    with tempfile.TemporaryDirectory() as tmpdir:
         table = f"warnings_{ts.year}"
         source = ogr.Open(
             "PG:host=iemdb-postgis.local dbname=postgis "
@@ -42,7 +40,7 @@ def application(environ, start_response):
         )
 
         out_driver = ogr.GetDriverByName("ESRI Shapefile")
-        out_ds = out_driver.CreateDataSource(f"{fp}.shp")
+        out_ds = out_driver.CreateDataSource(f"{tmpdir}/{fn}.shp")
         out_layer = out_ds.CreateLayer("polygon", None, ogr.wkbPolygon)
 
         fd = ogr.FieldDefn("ISSUED", ogr.OFTString)
@@ -101,19 +99,18 @@ def application(environ, start_response):
         source.Destroy()
         out_ds.Destroy()
 
-        # Create zip file, send it back to the clients
-        with zipfile.ZipFile(fp + ".zip", "w", zipfile.ZIP_DEFLATED) as zf:
-            zf.write(fp + ".shp")
-            zf.write(fp + ".shx")
-            zf.write(fp + ".dbf")
-            with open(PROJFILE, encoding="ascii") as fh:
-                zf.writestr(f"{fp}.prj", fh.read())
-        with open(f"{fp}.zip", "rb") as fh:
-            payload = fh.read()
+        zio = BytesIO()
+        with zipfile.ZipFile(
+            zio, mode="w", compression=zipfile.ZIP_DEFLATED
+        ) as zf:
+            with open(PROJFILE, encoding="ascii") as fp:
+                zf.writestr(f"{fn}.prj", fp.read())
+            for suffix in ("shp", "shx", "dbf"):
+                zf.write(f"{tmpdir}/{fn}.{suffix}", f"{fn}.{suffix}")
 
     headers = [
         ("Content-type", "application/octet-stream"),
-        ("Content-Disposition", f"attachment; filename={fp}.zip"),
+        ("Content-Disposition", f"attachment; filename={fn}.zip"),
     ]
     start_response("200 OK", headers)
-    return [payload]
+    return [zio.getvalue()]

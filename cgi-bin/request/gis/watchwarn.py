@@ -1,6 +1,5 @@
 """Generate a shapefile of warnings based on the CGI request"""
 import datetime
-import os
 import tempfile
 import zipfile
 from io import BytesIO
@@ -272,10 +271,8 @@ def application(environ, start_response):
         return [b"ERROR: No results found for query, please try again"]
 
     # Filenames are racy, so we need to have a temp folder
-    with tempfile.TemporaryDirectory() as tmpdirname:
-        os.chdir(tmpdirname)
-
-        with open(f"{fn}.csv", "w", encoding="ascii") as csv:
+    with tempfile.TemporaryDirectory() as tmpdir:
+        with open(f"{tmpdir}/{fn}.csv", "w", encoding="ascii") as csv:
             csv.write(
                 "WFO,ISSUED,EXPIRED,INIT_ISS,INIT_EXP,PHENOM,GTYPE,SIG,ETN,"
                 "STATUS,NWS_UGC,AREA_KM2,UPDATED,HVTEC_NWSLI,HVTEC_SEVERITY,"
@@ -283,7 +280,7 @@ def application(environ, start_response):
                 "WINDTAG,HAILTAG,TORNADOTAG,DAMAGETAG\n"
             )
             with fiona.open(
-                f"{fn}.shp",
+                f"{tmpdir}/{fn}.shp",
                 "w",
                 crs="EPSG:4326",
                 driver="ESRI Shapefile",
@@ -371,10 +368,12 @@ def application(environ, start_response):
                         }
                     )
 
-        with zipfile.ZipFile(fn + ".zip", "w", zipfile.ZIP_DEFLATED) as zf:
+        with zipfile.ZipFile(
+            f"{tmpdir}/{fn}.zip", "w", zipfile.ZIP_DEFLATED
+        ) as zf:
             for suffix in ["shp", "shx", "dbf", "cpg", "prj", "csv"]:
-                zf.write(f"{fn}.{suffix}")
-        with open(f"{fn}.zip", "rb") as fh:
+                zf.write(f"{tmpdir}/{fn}.{suffix}", f"{fn}.{suffix}")
+        with open(f"{tmpdir}/{fn}.zip", "rb") as fh:
             payload = fh.read()
 
     headers = [

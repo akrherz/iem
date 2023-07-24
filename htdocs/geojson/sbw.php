@@ -18,10 +18,6 @@ function toTime($s){
                intval(substr($s,0,4)) );
 }
 
-/* Look for calling values */
-
-
-
 $rs = pg_query($postgis, "SET TIME ZONE 'UTC'");
 
 if (isset($_REQUEST["phenomena"])){
@@ -54,8 +50,31 @@ if (isset($_REQUEST["phenomena"])){
           $eventid, $phenomena));
   }
   
+} else if (isset($_GET["states"]) && $_GET["states"] != "") {
+    $states = explode(",", xssafe($_GET["states"]));
+    $sts = isset($_REQUEST["sts"]) ? toTime($_REQUEST["sts"]) : die("sts not defined");
+    $ets = isset($_REQUEST["ets"]) ? toTime($_REQUEST["ets"]) : die("ets not defined");
+    $stateList = implode("','", $states);
+    $str_state_list = "and s.state_abbr in ('$stateList')";
+    $rs = pg_prepare(
+        $postgis,
+        "SELECT",
+        "SELECT distinct
+        issue, expire, phenomena, status, w.wfo, eventid, significance,
+        to_char(issue, 'YYYY-MM-DDThh24:MI:SSZ') as iso_issue,
+        to_char(expire, 'YYYY-MM-DDThh24:MI:SSZ') as iso_expire,
+        ST_asGeoJson(geom) as geojson, hvtec_nwsli
+        FROM sbw w, states s WHERE
+        issue < $2 and
+        expire > $1 and expire < $3 $str_state_list
+        and status = 'NEW' and significance is not null
+        and ST_Intersects(w.geom, s.the_geom)
+        LIMIT 5000");
+  $rs = pg_execute($postgis, "SELECT", Array(date("Y-m-d H:i", $sts), 
+                                           date("Y-m-d H:i", $ets),
+                                           date("Y-m-d H:i", $ets + 86400*10)));
 } else {
-    $wfos = isset($_REQUEST["wfos"]) ? explode(",", $_REQUEST["wfos"]) : Array();
+    $wfos = isset($_REQUEST["wfos"]) ? explode(",", xssafe($_REQUEST["wfos"])) : Array();
     $sts = isset($_REQUEST["sts"]) ? toTime($_REQUEST["sts"]) : die("sts not defined");
     $ets = isset($_REQUEST["ets"]) ? toTime($_REQUEST["ets"]) : die("ets not defined");
     $wfoList = implode("','", $wfos);

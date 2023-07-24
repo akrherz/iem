@@ -8,6 +8,7 @@ var lsrLayer;
 var sbwLayer;
 var counties;
 var wfoSelect;
+var stateSelect;
 var lsrtypefilter;
 var sbwtypefilter;
 var dateFormat1 = "YYYYMMDDHHmm";
@@ -60,8 +61,15 @@ function parse_href() {
     if (tokens2.length < 2) {
         return;
     }
-    const wfos = text(tokens2[0]).split(",");
-    wfoSelect.val(wfos).trigger("change");
+    const ids = text(tokens2[0]).split(",");
+    if (ids.length > 0){
+        if (ids[0].length === 3){
+            wfoSelect.val(ids).trigger("change");
+        } else {
+            stateSelect.val(ids).trigger("change");
+            $("#by_state").click();
+        }
+    }
     if (tokens2.length > 2) {
         sts = moment.utc(text(tokens2[1]), dateFormat1);
         ets = moment.utc(text(tokens2[2]), dateFormat1);
@@ -95,7 +103,7 @@ function cronMinute() {
 function getRADARSource(dt) {
     const prod = dt.year() < 2011 ? 'N0R' : 'N0Q';
     return new ol.source.XYZ({
-        url: `/cache/tile.py/1.0.0/ridge::USCOMP-${prod}-${dt.utc().format('YMMDDHHmm')}/{z}/{x}/{y}.png`
+        url: `https://mesonet.agron.iastate.edu/cache/tile.py/1.0.0/ridge::USCOMP-${prod}-${dt.utc().format('YMMDDHHmm')}/{z}/{x}/{y}.png`
     });
 }
 
@@ -105,7 +113,7 @@ function make_iem_tms(title, layername, visible, type) {
         visible,
         type,
         source: new ol.source.XYZ({
-            url: '/c/tile.py/1.0.0/' + layername + '/{z}/{x}/{y}.png'
+            url: `/c/tile.py/1.0.0/${layername}/{z}/{x}/{y}.png`
         })
     })
 }
@@ -462,9 +470,18 @@ function initUI() {
             return state.id;
         }
     });
+    stateSelect = $("#state").select2({
+        templateSelection: (state) => {
+            return state.id;
+        }
+    });
     $.each(iemdata.wfos, function (idx, entry) {
         const opt = new Option(`[${entry[0]}] ${entry[1]}`, entry[0], false, false);
         wfoSelect.append(opt);
+    });
+    $.each(iemdata.states, function (idx, entry) {
+        const opt = new Option(`[${entry[0]}] ${entry[1]}`, entry[0], false, false);
+        stateSelect.append(opt);
     });
 
     $(".iemdtp").datetimepicker({
@@ -741,10 +758,14 @@ function genSettings() {
 }
 
 function updateURL() {
-    const wfos = $("#wfo").val();  // null for all or array
     const sts = moment($("#sts").val(), 'L LT').utc().format(dateFormat1);
     const ets = moment($("#ets").val(), 'L LT').utc().format(dateFormat1);
-    const wstr = (wfos === null) ? "" : wfos.join(",");
+    const by = $("input[type=radio][name=by]:checked").val();
+    const wfos = $("#wfo").val();  // null for all or array
+    const states = $("#state").val();  // null for all or array
+    var wstr = "";
+    if (wfos !== null && by === "wfo") wstr = wfos.join(",");
+    else wstr = states.join(",");
     window.location.href = `#${text(wstr)}/${sts}/${ets}/${genSettings()}`;
 
 }
@@ -781,15 +802,21 @@ function loadData() {
         $("#lsrtab").click();
     }
     const wfos = $("#wfo").val();  // null for all or array
+    const states = $("#state").val();  // null for all or array
+    const by = $("input[type=radio][name=by]:checked").val();
     const sts = moment($("#sts").val(), 'L LT').utc().format(dateFormat1);
     const ets = moment($("#ets").val(), 'L LT').utc().format(dateFormat1);
     updateRADARTimes();
 
     const opts = {
         sts,
-        ets,
-        wfos: (wfos === null) ? "" : text(wfos.join(","))
+        ets
     };
+    if (by === "state"){
+        opts.states = (states === null) ? "" : text(states.join(","));
+    } else {
+        opts.wfos = (wfos === null) ? "" : text(wfos.join(","));
+    }
     lsrLayer.getSource().clear(true);
     sbwLayer.getSource().clear(true);
 
@@ -825,10 +852,17 @@ function loadData() {
 
 function getShapefileLink(base) {
     let uri = `/cgi-bin/request/gis/${base}.py?`;
+    const by = $("input[type=radio][name=by]:checked").val();
     const wfos = $("#wfo").val();
-    if (wfos) {
+    if (wfos && by === "wfo") {
         for (let i = 0; i < wfos.length; i++) {
             uri += `&wfo[]=${text(wfos[i])}`;
+        }
+    }
+    const states = $("#state").val();
+    if (states && by == "state") {
+        for (let i = 0; i < states.length; i++) {
+            uri += `&states[]=${text(states[i])}`;
         }
     }
     const sts = moment($("#sts").val(), 'L LT');

@@ -44,6 +44,25 @@ if (isset($_REQUEST["phenomena"])) {
         $wfo, $phenomena,
         $eventid, $significance
     ));
+} else if (isset($_GET["states"]) && $_GET["states"] != "") {
+    $states = explode(",", xssafe($_GET["states"]));
+    $sts = isset($_REQUEST["sts"]) ? toTime($_REQUEST["sts"]) : die("sts not defined");
+    $ets = isset($_REQUEST["ets"]) ? toTime($_REQUEST["ets"]) : die("ets not defined");
+    $stateList = implode("','", $states);
+    $str_state_list = "and s.state_abbr in ('$stateList')";
+    $rs = pg_prepare($postgis, "SELECT", "SELECT distinct l.*, 
+        to_char(valid, 'YYYY-MM-DDThh24:MI:SSZ') as iso_valid,
+        ST_x(l.geom) as lon, ST_y(l.geom) as lat 
+          FROM lsrs l, states s WHERE
+          valid BETWEEN $1 and $2 $str_state_list
+          and ST_Intersects(l.geom, s.the_geom)
+          LIMIT 10000");
+
+    $rs = pg_execute($postgis, "SELECT", array(
+        date("Y-m-d H:i", $sts),
+        date("Y-m-d H:i", $ets)
+    ));
+
 } else {
     /* Look for calling values */
     $wfos = isset($_REQUEST["wfos"]) ? explode(",", $_REQUEST["wfos"]) : array();

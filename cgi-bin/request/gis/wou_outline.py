@@ -1,5 +1,4 @@
 """Generate a Watch Outline for a given SPC convective watch """
-import os
 import zipfile
 from io import BytesIO
 
@@ -17,8 +16,6 @@ def main(year, etn, start_response):
     pcursor = POSTGIS.cursor(cursor_factory=psycopg2.extras.DictCursor)
 
     basefn = f"watch_{year}_{etn}"
-
-    os.chdir("/tmp/")
 
     pcursor.execute(
         f"""select
