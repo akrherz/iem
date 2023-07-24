@@ -149,6 +149,11 @@ def application(environ, start_response):
         aStates.append("XX")
         if "_ALL" not in aStates:
             statelimiter = f" and l.state in {tuple(aStates)} "
+    if "states" in form:
+        aStates = form.getall("states")
+        aStates.append("XX")
+        if "_ALL" not in aStates:
+            statelimiter = f" and l.state in {tuple(aStates)} "
 
     wfoLimiter = ""
     if "wfo[]" in form:

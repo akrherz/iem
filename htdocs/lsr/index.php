@@ -1,5 +1,7 @@
 <?php
 require_once "../../config/settings.inc.php";
+require_once "../../include/mlib.php";
+force_https();
 require_once "../../include/myview.php";
 $OL = "7.2.2";
 $DT = "1.11.1";
@@ -19,7 +21,7 @@ $t->jsextra = <<<EOF
 <script src='/vendor/openlayers/{$OL}/ol-layerswitcher.js'></script>
 
 <script type="text/javascript" src="wfos.js"></script>
-<script type="text/javascript" src="static.js?v=6"></script>
+<script type="text/javascript" src="static.js?v=7"></script>
 <script>
 $(document).ready(function(){
     initUI(); // static.js
@@ -134,8 +136,14 @@ $theform = <<<EOM
 <div class="row">
 <div class="col-md-6">
 <div class="form-group">
-<label for="wfo">Select WFO: (default ALL)</label>
+<input type="radio" name="by" id="by_wfo" value="wfo" checked="checked">
+<label for="by_wfo">Select by WFO: (default ALL)</label>
 <select name="wfo" id="wfo" class="form-control" multiple="multiple"></select>
+
+<br /><input type="radio" name="by" id="by_state" value="state">
+<label for="by_state">Select by State: (default ALL)</label>
+<select name="state" id="state" class="form-control" multiple="multiple"></select>
+
 <br /><input type="checkbox" id="realtime" name="rt">
   <label for="realtime"> Auto Refresh/Realtime</label>
 </div>
