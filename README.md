@@ -29,7 +29,7 @@ iem-web-services | iem27-dc | iem11-dc | nagios check
 letsencrpyt | iem8-dc | None | nagios SSL check
 LDM | iem11 | None | None
 LoggerNet | iem8-dc | None | nagios check
-memcached | iem8-dc | iem11-dc | nagios check
+memcached | metvm0-dc | iem8-dc | nagios check
 NEXRAD Mosaics | iem8-dc | iem16 | nagios checks archive
 NWWS-OI Ingest | iem12 | None | None
 openfire | iem11-dc | None | None

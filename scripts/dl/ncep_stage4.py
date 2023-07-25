@@ -29,7 +29,7 @@ def download(now, offset):
         hours.append(24)
     for hr in hours:
         url = (
-            "https://nomads.ncep.noaa.gov/pub/data/nccf/com/pcpanl/"
+            "https://ftpprd.ncep.noaa.gov/data/nccf/com/pcpanl/"
             f"prod/pcpanl.{now:%Y%m%d}/st4_conus.{now:%Y%m%d%H}."
             f"{hr:02.0f}h.grb2"
         )
@@ -46,7 +46,7 @@ def download(now, offset):
             if attempt == 0:
                 LOG.info("Sleeping 600 after dl fail %s", url)
                 time.sleep(600)
-        if response is None:
+        if response is None or response.status_code != 200:
             LOG.info("Full fail for %s", url)
             continue
         # Same temp file
