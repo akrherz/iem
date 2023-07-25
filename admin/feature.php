@@ -1,17 +1,23 @@
 <?php
 // Need session to track state
+
+use Html2Text\Html2Text;
+
 session_start();
 /* Web based feature publisher */
 require_once "../config/settings.inc.php";
 require_once "../include/database.inc.php";
 require_once "../include/myview.php";
 require_once "../include/forms.php";
+require_once "../include/html2text.php";
 require_once "../include/Facebook/autoload.php";
 
 $msgs = array();
 
 define("TOKEN_NAME", "iem_facebook_access_token");
 $mesosite = iemdb("mesosite", TRUE, TRUE);
+pg_prepare($mesosite, "SELECTOR", "select valid from feature WHERE " .
+    "date(valid) = $1");
 pg_prepare($mesosite, "DELETOR", "DELETE from feature WHERE " .
     "date(valid) = $1");
 pg_prepare($mesosite, "INJECTOR", "INSERT into feature " .
@@ -103,6 +109,12 @@ if (!is_null($story) && !is_null($title)) {
     $at_str = isset($_REQUEST["at_on"]) ? $_REQUEST["at"] : "";
     $publish_at = new DateTime($at_str, new DateTimeZone("America/Chicago"));
 
+    // Abort if we already have an entry, too painful.
+    $res = pg_execute($mesosite, "SELECTOR", array($publish_at->format('Y-m-d')));
+    if (pg_num_rows($res) !== 0){
+        die("Database entry already exists!");
+    }
+
     $permalink = sprintf(
         "https://mesonet.agron.iastate.edu/onsite/features/cat.php?day=%s",
         $publish_at->format("Y-m-d")
@@ -126,15 +138,25 @@ if (!is_null($story) && !is_null($title)) {
     );
 
     if (isset($_REQUEST["facebook"]) && $_REQUEST["facebook"] == "yes") {
-
+        $html = new Html2Text($story);
         // https://developers.facebook.com/docs/graph-api/reference/v2.12/page/feed#custom-image
         $data = [
             'link' => $permalink,
-            'message' => $story,
+            'message' => $html->getText(),
         ];
         if ($at_str != "") {
             $data["scheduled_publish_time"] = $publish_at->getTimestamp();
             $data["published"] = false;
+        }
+        if (!is_null($appurl)){
+            $alink = "https://mesonet.agron.iastate.edu$appurl";
+            if (substr($appurl, 0, 1) !== "/"){
+                $alinke = $appurl;
+            }
+            $data["actions"] = json_encode(Array(
+                "link" => $alink,
+                "name" => "IEM Generator App",
+            ));
         }
         try {
             // Get a page access token to use
@@ -190,7 +212,7 @@ $t->content = <<<EOF
 <br /><input type="text" name="title" size="80" /></p>
 
 <p>Enter Story:
-<br /><textarea NAME='story' wrap="hard" ROWS="20" COLS="70"></textarea></p>
+<br /><textarea name='story' rows="20" cols="70"></textarea></p>
 
 <p>Caption:
 <br /><input type="text" name="caption" size="80" /></p>
@@ -219,7 +241,7 @@ $t->content = <<<EOF
 <br /><input type="checkbox" name="voting" value="yes" checked="checked" id="voting" />
 <label for="voting">Yes</label></p>
 
-<p><input type="checkbox" id="at_on" name="at_on">
+<p><input type="checkbox" id="at_on" name="at_on" checked="checked">
 <label for="at_on">Publish at Iowa Timestamp</label>:
 <br /><input type="text" name="at" value="{$at}" /></p>
 
