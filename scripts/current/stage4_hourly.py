@@ -8,7 +8,7 @@ import sys
 import pygrib
 import pytz
 from pyiem.plot import MapPlot, get_cmap
-from pyiem.util import logger, utc
+from pyiem.util import logger, mm2inch, utc
 
 LOG = logger()
 
@@ -31,10 +31,14 @@ def doit(ts):
         LOG.info("Missing stage4 %s", fn)
         return
 
-    grbs = pygrib.open(fn)
-    grib = grbs[1]
+    try:
+        grbs = pygrib.open(fn)
+        grib = grbs[1]
+    except Exception:
+        LOG.warning("Read %s failure", fn)
+        return
     lats, lons = grib.latlons()
-    vals = grib.values / 25.4
+    vals = mm2inch(grib.values)
 
     cmap = get_cmap("jet")
     cmap.set_under("white")
