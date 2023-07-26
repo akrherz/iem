@@ -66,8 +66,7 @@ def doday(ts, realtime):
 
         mp = MapPlot(
             sector=sector,
-            title=("%s NCEP Stage IV Today's Precipitation")
-            % (ts.strftime("%-d %b %Y"),),
+            title=f"{ts:%-d %b %Y} NCEP Stage IV Today's Precipitation",
             subtitle=subtitle,
         )
 

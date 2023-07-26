@@ -118,8 +118,14 @@ def do_hrrr(ts):
             "hrrr.t%Hz.3kmf01.grib2"
         )
         if os.path.isfile(fn):
-            grbs = pygrib.open(fn)
-            selgrbs = grbs.select(name="Downward short-wave radiation flux")
+            try:
+                grbs = pygrib.open(fn)
+                selgrbs = grbs.select(
+                    name="Downward short-wave radiation flux"
+                )
+            except Exception:
+                LOG.warning("Read of %s failed", fn)
+                continue
             # sometimes we have multiple grids :/
             if len(selgrbs) >= 4:
                 LOG.info("Using %s", fn)
