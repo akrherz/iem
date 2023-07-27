@@ -10,7 +10,6 @@ import calendar
 import datetime
 
 import numpy as np
-import psycopg2.extras
 from pyiem.exceptions import NoDataFound
 from pyiem.plot import figure_axes
 from pyiem.util import get_autoplot_context, get_dbconn
@@ -56,7 +55,7 @@ def get_description():
 def plotter(fdict):
     """Go"""
     pgconn = get_dbconn("coop")
-    cursor = pgconn.cursor(cursor_factory=psycopg2.extras.DictCursor)
+    cursor = pgconn.cursor()
 
     ctx = get_autoplot_context(fdict, get_description())
     station = ctx["station"]
@@ -97,10 +96,17 @@ def plotter(fdict):
             data = np.ma.ones((effective_date.year - row[0] + 1, days)) * -99
         data[row[0] - baseyear, row[1].day - 1] = row[2]
 
+    # Do we have data for the effective_date ?
+    pos = (
+        effective_date.day
+        if data[-1, effective_date.day - 1] > -99
+        else (effective_date.day - 1)
+    )
+
     # overwrite our current month's data
-    currentdata = data[-1, : effective_date.day - 1]
+    currentdata = data[-1, :pos]
     for i in range(np.shape(data)[0] - 1):
-        data[i, : effective_date.day - 1] = currentdata
+        data[i, :pos] = currentdata
     data.mask = data < -98
     avgs = np.ma.zeros(np.shape(data))
     days = np.shape(data)[1]
@@ -114,11 +120,7 @@ def plotter(fdict):
     for yr in range(np.shape(data)[0] - 1):
         if avgs[yr, -1] > prevavg[-1]:
             beats += 1
-    title = "[%s] %s scenarios for %s" % (
-        station,
-        ctx["_nt"].sts[station]["name"],
-        effective_date.strftime("%b %Y"),
-    )
+    title = f"{ctx['_sname']} scenarios for {effective_date:%b %Y}"
     subtitle = "1-%s [%s] + %s-%s [%s-%s] beats %s %s %s/%s (%.1f%%)" % (
         effective_date.day,
         effective_date.year,
@@ -138,12 +140,12 @@ def plotter(fdict):
     for yr in range(np.shape(data)[0] - 1):
         ax.plot(np.arange(1, days + 1), avgs[yr, :], zorder=1, color="tan")
 
-    lv = avgs[-1, effective_date.day - 1]
+    lv = avgs[-1, pos]
     if np.ma.is_masked(lv):
-        lv = avgs[-1, effective_date.day - 2]
+        lv = avgs[-1, pos - 1]
     ax.plot(
-        np.arange(1, effective_date.day),
-        avgs[-1, : effective_date.day - 1],
+        np.arange(1, pos + 1),
+        avgs[-1, :pos],
         zorder=3,
         lw=2,
         color="brown",
