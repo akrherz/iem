@@ -167,7 +167,8 @@ def main(argv):
     if len(argv) == 2:
         LOG.info("Re-running all!")
         sts = None
-        years = range(1980, datetime.now().year + 1)
+        # Oh my cats
+        years = range(1866, datetime.now().year + 1)
     else:
         years = [None]
         sts = (datetime.now() - timedelta(days=1)).replace(
