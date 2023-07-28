@@ -310,10 +310,6 @@ RewriteRule ^/search /search.py [QSA]
     RewriteRule live/(.*).jpg live.py?id=$1 [L]
   </Directory>
 
-  <Directory "/opt/iem/htdocs/other">
-    RewriteRule kymn.phtml current.phtml?network=KYMN
-  </Directory>
-
   <Directory "/opt/iem/htdocs/plotting/auto">
     RewriteRule qrcode/([0-9]{1,12})/(.*).png$ gen_qrcode.py?p=$1&q=$2&fmt=png [B]
     RewriteRule plot/([0-9]{1,12})/(.*).png$ autoplot.py?p=$1&q=$2&fmt=png [B]

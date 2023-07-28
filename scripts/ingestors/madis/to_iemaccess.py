@@ -19,7 +19,7 @@ from pyiem.util import convert_value, get_dbconn, logger, mm2inch, ncopen
 
 LOG = logger()
 MYDIR = "/mesonet/data/madis/mesonet1"
-MY_PROVIDERS = ["KYTC-RWIS", "KYMN", "NEDOR", "MesoWest"]
+MY_PROVIDERS = ["KYTC-RWIS", "NEDOR", "MesoWest"]
 warnings.filterwarnings("ignore", category=DeprecationWarning)
 
 
@@ -54,8 +54,6 @@ def provider2network(provider, name):
     """Convert a MADIS network ID to one that I use, here in IEM land"""
     if not provider.endswith("DOT") and provider not in MY_PROVIDERS:
         return None
-    if provider == "KYMN":
-        return provider
     if provider == "MesoWest":
         # get the network from the last portion of the name
         tokens = name.split()
