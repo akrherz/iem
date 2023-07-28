@@ -88,7 +88,7 @@ function parse_href() {
         // We have settings
         applySettings(tokens2[3]);
     }
-    loadData();
+    setTimeout(loadData, 0);
 }
 function cronMinute() {
     if (!realtime) return;
@@ -98,7 +98,7 @@ function cronMinute() {
     $("#ets").val(moment().format('L LT'));
     const seconds = ets.diff(sts) / 1000;  // seconds
     $("#sts").val(moment().subtract(seconds, 'seconds').format('L LT'));
-    loadData();
+    setTimeout(loadData, 0);
 }
 function getRADARSource(dt) {
     const prod = dt.year() < 2011 ? 'N0R' : 'N0Q';
@@ -490,7 +490,7 @@ function initUI() {
         maxDate: '+1970/01/03',
         minDate: '2003/01/01',
         onClose: (_dp, _input) => {
-            loadData();
+            setTimeout(loadData, 0);
         }
     });
     const sts = moment().subtract(1, 'day');
@@ -500,7 +500,7 @@ function initUI() {
     updateRADARTimes();
 
     $("#load").click(() => {
-        loadData();
+        setTimeout(loadData, 0);
     });
     $("#lsrshapefile").click(() => {
         window.location.href = getShapefileLink("lsr");
@@ -523,7 +523,7 @@ function initUI() {
     $("#realtime").click(function() {
         realtime = this.checked;
         if (realtime) {
-            loadData();
+            setTimeout(loadData, 0);
         }
     });
     olmap = new ol.Map({
@@ -765,7 +765,7 @@ function updateURL() {
     const states = $("#state").val();  // null for all or array
     var wstr = "";
     if (wfos !== null && by === "wfo") wstr = wfos.join(",");
-    else wstr = states.join(",");
+    else if (states !== null && by === "state") wstr = states.join(",");
     window.location.href = `#${text(wstr)}/${sts}/${ets}/${genSettings()}`;
 
 }
