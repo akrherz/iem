@@ -216,16 +216,18 @@ def plotter(fdict):
                     f"""
                 WITH data as (
                     SELECT
-                    case when peak_wind_gust > gust then
+                    case when
+                    coalesce(peak_wind_gust, 0) > coalesce(gust, 0) then
                     coalesce(peak_wind_time, valid)
                     else valid end as v,
-                    case when peak_wind_gust > gust then peak_wind_gust
-                    else gust end as speed from alldata
+                    case when
+                    coalesce(peak_wind_gust, 0) > coalesce(gust, 0)
+                    then peak_wind_gust else gust end as speed from alldata
                     WHERE station = :station {date_limiter})
 
                 SELECT v at time zone :tzname as valid, speed as gust from data
                 WHERE speed is not null
-                ORDER by gust DESC LIMIT 100
+                ORDER by gust DESC, v DESC LIMIT 100
             """
                 ),
                 conn,
