@@ -225,9 +225,9 @@ def plotter(fdict):
                     then peak_wind_gust else gust end as speed from alldata
                     WHERE station = :station {date_limiter})
 
-                SELECT v at time zone :tzname as valid, speed as gust from data
-                WHERE speed is not null
-                ORDER by gust DESC, v DESC LIMIT 100
+                SELECT distinct v at time zone :tzname as valid, speed as gust
+                from data WHERE speed is not null
+                ORDER by gust DESC, valid DESC LIMIT 100
             """
                 ),
                 conn,
