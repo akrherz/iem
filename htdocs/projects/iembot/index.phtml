@@ -7,7 +7,7 @@ require_once "../../../include/database.inc.php";
 
 $btable = <<<EOM
 <table class="table table-striped table-bordered table-condensed">
-<thead><tr><th>Twitter User</th><th>Channels</th></tr></thead>
+<thead><tr><th>Twitter User</th><th>Mastodon User</th><th>Channels</th></tr></thead>
 <tbody>
 EOM;
 $pgconn = iemdb("mesosite");
@@ -20,7 +20,10 @@ $rs = pg_exec(
 );
 while ($row = pg_fetch_assoc($rs)) {
     $btable .= sprintf(
-        "<tr><td><a href=\"https://twitter.com/%s\">@%s</a></td><td>%s</td></tr>",
+        "<tr><td><a href=\"https://twitter.com/%s\">@%s</a></td>".
+        "<td><a href=\"https://masto.globaleas.org/@%s\">@%s@masto.globaleas.org</a></td><td>%s</td></tr>",
+        $row["screen_name"],
+        $row["screen_name"],
         $row["screen_name"],
         $row["screen_name"],
         $row["channels"]
@@ -67,7 +70,7 @@ warnings by their chat partners.</p>
 
 <ul>
   <li><a href="#channels"><i class="fa fa-list"></i> IEMBot Channels</a></li>
-  <li><a href="#bots"><i class="fa fa-list"></i> List of IEMBots on Twitter + Channel Subscriptions</a></li>
+  <li><a href="#bots"><i class="fa fa-list"></i> List of IEMBots on Twitter/Mastodon + Channel Subscriptions</a></li>
 </ul>
 
 
@@ -77,9 +80,8 @@ warnings by their chat partners.</p>
  <li><a href="public.phtml">Public Chatrooms</a> (requires XMPP client and public XMPP account)</li>
  <li><a href="https://weather.im/iembot/">HTML web interface</a>  anybody can view and monitor online!</li>
  <li><a href="https://weather.im/live/">Weather.IM Live Client</a>, interactive chat client.</li>
- <li><a href="twitter.php">Configure IEMBot</a> to post messages to your Twitter account.
- <strong>Update 7 Apr 2023</strong>: It seems very likely that API/policy changes at Twitter
- will eliminate iembot's support there.</li>
+ <li>Configure IEMBot to post messages to your Twitter account. <a href="https://twitter.com/akrherz/status/1681634270715203585">twitter support is dead</a></li>
+ <li>Configure IEMBot to post to <a href="/projects/iembot/mastodon">Mastodon</a></li>
 </ul>
 
 <script>
