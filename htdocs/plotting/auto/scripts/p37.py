@@ -1,6 +1,7 @@
-"""This chart displays the combination of
-    Model Output Statistics (MOS) forecasts and actual observations
-    by the automated station the MOS forecast is for.
+"""
+This chart displays the combination of
+Model Output Statistics (MOS) forecasts and actual observations
+by the automated station the MOS forecast is for.
 
 <p>The case of ~Daily Max/Min Air Temperature is difficult to explain.  The
 NBS/NBE values are slightly different periods than the GFS/NAM values.  Some
@@ -407,12 +408,4 @@ def plotter(fdict):
 
 
 if __name__ == "__main__":
-    plotter(
-        {
-            "var": "t",
-            "network": "IA_ASOS",
-            "zstation": "DSM",
-            "month": 10,
-            "year": 2021,
-        }
-    )
+    plotter({})

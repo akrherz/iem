@@ -1,5 +1,7 @@
-"""This plot displays the maximum number of consec
-    days above or below some threshold for high or low temperature."""
+"""
+This plot displays the maximum number of consec
+days above or below some threshold for high or low temperature.
+"""
 import calendar
 import datetime
 
@@ -209,12 +211,4 @@ def plotter(fdict):
 
 
 if __name__ == "__main__":
-    plotter(
-        dict(
-            station="MATBOS",
-            network="MACLIMATE",
-            var="high_over",
-            which="average",
-            climo="ncei81",
-        )
-    )
+    plotter({})

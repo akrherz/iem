@@ -46,6 +46,8 @@ def plotter(fdict):
     ctx = get_autoplot_context(fdict, get_description())
     station = ctx["station"]
     sts = ctx["sdate"]
+    if station not in ctx["_nt"].sts:
+        raise NoDataFound("Invalid station provided.")
     tz = ZoneInfo(ctx["_nt"].sts[station]["tzname"])
     sts = datetime.datetime(sts.year, sts.month, sts.day, tzinfo=tz)
     days = ctx["days"]

@@ -1,4 +1,7 @@
-"""x-hour changes."""
+"""
+This plot presents a histogram of the change
+in some observed variable over a given number of hours.
+"""
 import calendar
 import datetime
 
@@ -29,12 +32,7 @@ def compute_bins(interval):
 
 def get_description():
     """Return a dict describing how to call this plotter"""
-    desc = {}
-    desc["cache"] = 86400
-    desc[
-        "description"
-    ] = """This plot presents a histogram of the change
-    in some observed variable over a given number of hours."""
+    desc = {"description": __doc__, "cache": 86400}
     desc["arguments"] = [
         dict(
             type="zstation",

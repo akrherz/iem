@@ -40,7 +40,7 @@ def get_description():
         dict(
             type="station",
             name="station",
-            default="IA0200",
+            default="IATAME",
             label="Select Station:",
             network="IACLIMATE",
         ),
@@ -204,4 +204,4 @@ def plotter(fdict):
 
 
 if __name__ == "__main__":
-    plotter({"year": 2010, "network": "TNCLIMATE", "station": "TN6402"})
+    plotter({})
