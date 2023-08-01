@@ -108,7 +108,7 @@ def get_data(network, sts, ets, stations, cols, na, fmt):
         right_on=["station", "sday"],
         suffixes=("", "_r"),
     )
-    df = df[cols]
+    df = df[df.columns.intersection(cols)]
     if na != "blank":
         df = df.fillna(na)
     if fmt == "json":

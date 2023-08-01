@@ -1,4 +1,13 @@
-"""time of day frequency of WWA"""
+"""
+For a given watch/warning/advisory type and forecast
+zone, what is the frequency by time of day that the product was valid.  The
+total number of events for the county/zone is used for the frequency. Due
+to how the NWS issues some products for counties and some products for
+zones, you may need to try twice to get the proper one selected.
+
+<p><a href="/plotting/auto/?q=72">Autoplot 72</a> is similar to this, but
+plots for a single WFO at a time.
+"""
 import numpy as np
 import pandas as pd
 import psycopg2.extras
@@ -10,21 +19,7 @@ from pyiem.util import get_autoplot_context, get_dbconn
 
 def get_description():
     """Return a dict describing how to call this plotter"""
-    desc = {}
-    desc["data"] = True
-    desc["cache"] = 86400
-    desc[
-        "description"
-    ] = """
-    For a given watch/warning/advisory type and forecast
-    zone, what is the frequency by time of day that the product was valid.  The
-    total number of events for the county/zone is used for the frequency. Due
-    to how the NWS issues some products for counties and some products for
-    zones, you may need to try twice to get the proper one selected.
-
-    <p><a href="/plotting/auto/?q=72">Autoplot 72</a> is similar to this, but
-    plots for a single WFO at a time.
-    """
+    desc = {"description": __doc__, "data": True, "cache": 86400}
     desc["arguments"] = [
         dict(
             type="ugc",

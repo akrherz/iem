@@ -67,6 +67,13 @@ def main(argv):
         INSERT into iem_calibration(station, portfolio, valid, parameter,
         adjustment, final, comments) values (%s, 'iaawos', %s, %s, %s, %s, %s)
         """
+        comment = (
+            row["Description"]
+            .replace('"', "")
+            .replace("\r", "")
+            .replace("\n", " ")
+            + comment
+        )
         tempadj = float(parts[0][1]) - float(parts[0][0])
         args = (
             faa,
@@ -74,9 +81,16 @@ def main(argv):
             "tmpf",
             tempadj,
             parts[0][2],
-            row["Description"].replace('"', "") + comment,
+            comment,
         )
         if len(sys.argv) > 1:
+            pcursor.execute(
+                """
+                delete from iem_calibration where station = %s and valid = %s
+                and parameter = %s
+                """,
+                (faa, date.strftime("%Y-%m-%d"), "tmpf"),
+            )
             pcursor.execute(sql, args)
 
         dewpadj = float(parts[0][3]) - float(parts[0][2])
@@ -84,11 +98,18 @@ def main(argv):
             faa,
             date.strftime("%Y-%m-%d"),
             "dwpf",
-            float(parts[0][3]) - float(parts[0][1]),
+            dewpadj,
             parts[0][3],
-            row["Description"].replace('"', "") + comment,
+            comment,
         )
         if len(sys.argv) > 1:
+            pcursor.execute(
+                """
+                delete from iem_calibration where station = %s and valid = %s
+                and parameter = %s
+                """,
+                (faa, date.strftime("%Y-%m-%d"), "dwpf"),
+            )
             pcursor.execute(sql, args)
 
         print(
