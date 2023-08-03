@@ -244,7 +244,7 @@ RewriteRule ^/search /search.py [QSA]
   </Directory>
 
   <Directory "/opt/iem/htdocs/wx/afos">
-    RewriteRule ([0-9]{12})_([A-Z0-9\s]+).png$ text2png.py?e=$1&pil=$2
+    RewriteRule ([0-9]{12})_([A-Z0-9\s]+).png$ text2png.py?e=$1&pil=$2 [B,L]
   </Directory>
 
   <Directory "/opt/iem/htdocs/AWOS">
