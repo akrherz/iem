@@ -30,12 +30,15 @@ def do(ts):
     tmpfd, tmpfn = tempfile.mkstemp()
     os.write(tmpfd, req.content)
     os.close(tmpfd)
-    cmd = (
-        f"pqinsert -i -p 'data a {ts:%Y%m%d%H%M} bogus "
-        f"model/ffg/{remotefn[:-5]}.grib2 grib2' {tmpfn}"
-    )
+    cmd = [
+        "pqinsert",
+        "-i",
+        "-p",
+        f"data a {ts:%Y%m%d%H%M} bogus model/ffg/{remotefn[:-5]}.grib2 grib2",
+        tmpfn,
+    ]
     LOG.info(cmd)
-    subprocess.call(cmd, shell=True)
+    subprocess.call(cmd)
 
     os.remove(tmpfn)
 

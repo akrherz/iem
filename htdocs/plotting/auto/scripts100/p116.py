@@ -1,4 +1,9 @@
-"""Monthly HDD/CDD Totals."""
+"""
+This chart presents monthly cooling degree days
+or heating degree days for a 20 year period of your choice.  The 20 year
+limit is for plot usability only, the data download has all available
+years contained.
+"""
 import datetime
 
 import pandas as pd
@@ -12,15 +17,7 @@ PDICT = {"cdd": "Cooling Degree Days", "hdd": "Heating Degree Days"}
 
 def get_description():
     """Return a dict describing how to call this plotter"""
-    desc = {}
-    desc["data"] = True
-    desc["report"] = True
-    desc[
-        "description"
-    ] = """This chart presents monthly cooling degree days
-    or heating degree days for a 20 year period of your choice.  The 20 year
-    limit is for plot usability only, the data download has all available
-    years contained."""
+    desc = {"description": __doc__, "data": True, "report": True}
     y20 = datetime.date.today().year - 19
     desc["arguments"] = [
         dict(
@@ -134,8 +131,11 @@ def plotter(fdict):
     title = (
         f"[{station}] {ctx['_nt'].sts[station]['name']} " f"({y1}-{y1 + 20})"
     )
-    fig, ax = figure_axes(title=title, apctx=ctx)
-    ax.set_title(f"{PDICT[varname]} base=60" r"$^\circ$F")
+    fig, ax = figure_axes(
+        title=title,
+        subtitle=f"{PDICT[varname]} base=60" r"$^\circ$F",
+        apctx=ctx,
+    )
     filtered = df[(df["year"] >= y1) & (df["year"] <= (y1 + 20))]
     df2 = filtered[["month", "year", varname + "60"]].pivot(
         index="year", columns="month", values=f"{varname}60"
@@ -146,4 +146,4 @@ def plotter(fdict):
 
 
 if __name__ == "__main__":
-    plotter(dict(syear=1990))
+    plotter({})
