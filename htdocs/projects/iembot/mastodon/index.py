@@ -176,7 +176,8 @@ def build_subui(mapp, fdict):
     for row in cursor:
         du = f"/projects/iembot/mastodon/?del={row[0]}"
         res += f'<p><strong>{row[0]}</strong> <a href="{du}">Delete</a></p>'
-
+    cursor.close()
+    conn.commit()
     return res
 
 
