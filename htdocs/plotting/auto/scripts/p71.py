@@ -69,8 +69,9 @@ def get_description():
     return desc
 
 
-def draw_line(ax, x, y, angle):
-    """Draw a line"""
+def arrow(ax, x, y, angle):
+    """Draw a arrow."""
+    # This is suboptimal as it is in data space and not an annotation space
     r = 0.25
     ax.arrow(
         x,
@@ -78,7 +79,7 @@ def draw_line(ax, x, y, angle):
         r * np.cos(angle),
         r * np.sin(angle),
         head_width=0.35,
-        head_length=0.5,
+        head_length=0.35,
         fc="k",
         ec="k",
     )
@@ -145,7 +146,7 @@ def plotter(fdict):
             apos = df["speed"].max() * 1.075
             for _, row in df.iterrows():
                 x = row["day"].day
-                draw_line(ax, x, apos, (270.0 - row["drct"]) / 180.0 * np.pi)
+                arrow(ax, x, apos, (270.0 - row["drct"]) / 180.0 * np.pi)
                 ax.text(
                     x,
                     pos,
@@ -165,7 +166,7 @@ def plotter(fdict):
                 lw=2,
                 label=label,
             )
-            ax.legend(loc=(0.75, 1.02))
+            ax.legend(loc=(0.5, -0.1))
         ax.grid(True, zorder=11)
     else:
         ax.text(
