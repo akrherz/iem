@@ -1,4 +1,11 @@
-"""Fall Minimum by Date"""
+"""
+This chart displays the combination of liquid
+precipitation with snowfall totals for a given month.  The liquid totals
+include the melted snow.  So this plot does <strong>not</strong> show
+the combination of non-frozen vs frozen precipitation. For a given winter
+month, not all precipitation falls as snow, so you can not assume that
+the liquid equivalent did not include some liquid rainfall.
+"""
 import calendar
 
 import pandas as pd
@@ -10,17 +17,8 @@ from pyiem.util import get_autoplot_context, get_sqlalchemy_conn
 
 def get_description():
     """Return a dict describing how to call this plotter"""
-    desc = {}
+    desc = {"description": __doc__, "data": True}
     desc["defaults"] = {"_r": "86"}
-    desc["data"] = True
-    desc[
-        "description"
-    ] = """This chart displays the combination of liquid
-    precipitation with snowfall totals for a given month.  The liquid totals
-    include the melted snow.  So this plot does <strong>not</strong> show
-    the combination of non-frozen vs frozen precipitation. For a given winter
-    month, not all precipitation falls as snow, so you can not assume that
-    the liquid equivalent did not include some liquid rainfall."""
     desc["arguments"] = [
         dict(
             type="station",

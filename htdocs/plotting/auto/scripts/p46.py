@@ -1,4 +1,10 @@
-"""Min wind chill / max heat index frequency"""
+"""
+This chart presents the frequency of observed
+minimum wind chill or maximum heat index over the period of
+record for the observation site.  Please note that this application
+requires the feels like temperature to be additive, so heat index
+greater than air temperature and wind chill less than air temperature.
+"""
 import datetime
 
 import numpy as np
@@ -35,17 +41,7 @@ MDICT = {
 
 def get_description():
     """Return a dict describing how to call this plotter"""
-    desc = {}
-    desc["data"] = True
-    desc[
-        "description"
-    ] = """This chart presents the frequency of observed
-    minimum wind chill or maximum heat index over the period of
-    record for the observation site.  Please note that this application
-    requires the feels like temperature to be additive, so heat index
-    greater than air temperature and wind chill less than air temperature.
-    """
-    desc["cache"] = 86400
+    desc = {"description": __doc__, "data": True, "cache": 86400}
     desc["arguments"] = [
         dict(
             type="zstation",
