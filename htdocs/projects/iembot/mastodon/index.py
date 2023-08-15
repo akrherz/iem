@@ -186,7 +186,7 @@ def sanitize_server(val):
         return None
     if val.startswith("https://"):
         return val[8:]
-    return val
+    return val.split("@")[-1].rstrip("/")
 
 
 def save_code(mapp, server, code, headers):
