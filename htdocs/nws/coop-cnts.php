@@ -5,12 +5,12 @@
 require_once "../../config/settings.inc.php";
 define("IEM_APPID", 113);
 require_once "../../include/myview.php";
-$t = new MyView();
-
 require_once "../../include/database.inc.php";
 require_once "../../include/network.php";
-$nt = new NetworkTable("WFO");
 require_once "../../include/forms.php";
+$t = new MyView();
+
+$nt = new NetworkTable("WFO");
 $dbconn = iemdb("iem");
 
 $wfo = isset($_REQUEST['wfo']) ? xssafe($_REQUEST['wfo']) : 'DMX';
@@ -85,9 +85,13 @@ is "missing" data from sites.  Please <a href="/info/contacts.php">let us know</
 <h3>COOP Report for wfo: {$wfo}, month: {$month}, year: {$year}</h3>
 
 <table class="table table-striped table-condensed table-bordered">
+<thead class="sticky">
 <tr><th>NWSLI</th><th>Name</th><th>Possible</th>
 <th>Precip Obs</th><th>Temperature Obs</th><th>Snowfall Obs</th><th>Snowdepth Obs</th></tr>
+</thead>
+<tbody>
 {$table}
+</tbody>
 </table>
 EOF;
 $t->render('single.phtml');

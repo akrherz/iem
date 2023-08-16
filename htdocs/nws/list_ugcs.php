@@ -5,6 +5,11 @@
 require_once "../../config/settings.inc.php";
 define("IEM_APPID", 141);
 require_once "../../include/myview.php";
+require_once "../../include/database.inc.php";
+require_once "../../include/imagemaps.php";
+require_once "../../include/mlib.php";
+require_once "../../include/forms.php";
+
 $t = new MyView();
 $t->headextra = <<<EOM
 <link type="text/css" href="/vendor/jquery-datatables/1.10.20/datatables.min.css" rel="stylesheet" />
@@ -17,11 +22,6 @@ $('#makefancy').click(function(){
 });
 </script>
 EOM;
-
-require_once "../../include/database.inc.php";
-require_once "../../include/imagemaps.php";
-require_once "../../include/mlib.php";
-require_once "../../include/forms.php";
 
 $wfo = isset($_REQUEST['wfo']) ? xssafe($_REQUEST['wfo']) : 'DMX';
 $just_firewx = isset($_REQUEST["just_firewx"]) ? intval(xssafe($_REQUEST["just_firewx"])) : 0;
@@ -101,7 +101,7 @@ you can <a href="list_ugcs.php?just_firewx=1">list all fire weather UGCs</a>.</p
 
 <div id="thetable">
 <table class="table table-striped table-condensed table-bordered">
-<thead><tr><th>UGC</th><th>Warning Search</th><th>Name</th><th>WFO</th></tr></thead>
+<thead class="sticky"><tr><th>UGC</th><th>Warning Search</th><th>Name</th><th>WFO</th></tr></thead>
 <tbody>
 {$table}
 </tbody>

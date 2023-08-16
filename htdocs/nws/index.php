@@ -251,6 +251,9 @@ first guess at fields the NWS needs for their RTP product.</p>
 <p>The IEM processes LSRs issued by the NWS in real-time. A number of
     applications on this website utilize this source of reports.</p>
 <ul>
+    <li><a href="https://groups.google.com/g/nws-damage-survey-pns">NWS Damage Survey PNS Email List</a>
+    <br />An email list that provides any NWS issued Damage Survey PNS statements.</li>
+
     <li><a href="/plotting/auto/?q=207">LSR + COOP Snowfall Analysis Autoplot #207</a>
     <br />Dynamic analysis of available LSR and COOP reports that is used to
     generate these static maps for:
