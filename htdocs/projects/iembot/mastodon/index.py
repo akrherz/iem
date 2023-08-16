@@ -19,8 +19,8 @@ HEADER = """
 
 <h3>Highly Experimental IEMBot to Mastodon Configuration:</h3>
 
-<p>There are absolutely no warranties with this service.  Use at your own
-risk and peril!</p>
+<div class="alert alert-danger">There are absolutely no warranties with this service.
+Use at your own risk and peril!</div>
 
 """
 ENTER_HOST_FORM = """
@@ -119,6 +119,12 @@ def get_app4user(cookies):
 
 def build_subui(mapp, fdict):
     """Show the subscriptions."""
+    me = mapp.me()
+    res = f"""
+    <p>Hi <a href="{me['url']}">@{me['username']}</a>
+    <img src="{me['avatar']}" style="width:20px;">!
+    This page configures your IEMBot channel subscriptions.</p>
+    """
     conn = get_dbconn("mesosite")
     cursor = conn.cursor()
     log = []
@@ -160,7 +166,7 @@ def build_subui(mapp, fdict):
         (mapp.iembot_user_id,),
     )
     logmsg = "" if not log else f"<h3>Log Messages</h3> {'<br/>'.join(log)}"
-    res = f"""
+    res += f"""
 {logmsg}
 
 <p><a href="/projects/iembot/mastodon/?testmsg"
@@ -187,7 +193,7 @@ def sanitize_server(val):
         return None
     if val.startswith("https://"):
         return val[8:]
-    return val.split("@")[-1].rstrip("/")
+    return val.split("@")[-1].rstrip("/").lower()
 
 
 def save_code(mapp, server, code, headers):
