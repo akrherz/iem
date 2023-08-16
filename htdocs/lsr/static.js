@@ -6,7 +6,8 @@ var sbwtable; // SBW DataTable
 var n0q; // RADAR Layer
 var lsrLayer;
 var sbwLayer;
-var counties;
+var countiesLayer;
+var statesLayer;
 var wfoSelect;
 var stateSelect;
 var lsrtypefilter;
@@ -526,6 +527,9 @@ function initUI() {
             setTimeout(loadData, 0);
         }
     });
+    statesLayer = make_iem_tms('US States', 'usstates', true, '');
+    countiesLayer = make_iem_tms('US Counties', 'uscounties', false, '');
+
     olmap = new ol.Map({
         target: 'map',
         controls: ol.control.defaults.defaults().extend([new ol.control.FullScreen()]),
@@ -563,8 +567,8 @@ function initUI() {
                 })
             }),
             n0q,
-            make_iem_tms('US States', 'usstates', true, ''),
-            make_iem_tms('US Counties', 'uscounties', false, ''),
+            statesLayer,
+            countiesLayer,
             sbwLayer,
             lsrLayer
         ]
@@ -754,6 +758,8 @@ function genSettings() {
     s += (lsrLayer.visibility ? "1" : "0");
     s += (sbwLayer.visibility ? "1" : "0");
     s += (realtime ? "1" : "0");
+    s += (statesLayer.visibility ? "1" : "0");
+    s += (countiesLayer.visibility ? "1" : "0");
     return s;
 }
 
@@ -770,18 +776,24 @@ function updateURL() {
 
 }
 function applySettings(opts) {
-    if (opts[0] === "1") { // Show RADAR
-        n0q.setVisibility(true);
+    if (opts[0] !== undefined) { // Show RADAR
+        n0q.setVisible(opts[0] === "1");
     }
-    if (opts[1] === "1") { // Show LSRs
-        lsrLayer.setVisibility(true);
+    if (opts[1] !== undefined) { // Show LSRs
+        lsrLayer.setVisible(opts[1] === "1");
     }
-    if (opts[2] === "1") { // Show SBWs
-        sbwLayer.setVisibility(true);
+    if (opts[2] !== undefined) { // Show SBWs
+        sbwLayer.setVisible(opts[2] === "1");
     }
     if (opts[3] === "1") { // Realtime
         realtime = true;
         $("#realtime").prop('checked', true);
+    }
+    if (opts[4] !== undefined) {
+        statesLayer.setVisible(opts[4] === "1");
+    }
+    if (opts[5] !== undefined) {
+        countiesLayer.setVisible(opts[5] === "1");
     }
 }
 function updateRADARTimes() {
