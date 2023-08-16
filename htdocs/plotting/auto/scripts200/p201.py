@@ -10,6 +10,11 @@ technically crosses two calendar days ending at 12 UTC (~7 AM). This
 application considers the midnight to ~7 AM period to be for the
 previous day, which is technically not accurate but the logic that most
 people expect to see.</p>
+
+<p>When plotting hail, tornado, or wind probabilities, a "H" will appear on
+days that had "hatched"/"SIGNificant" risk.  Note that this isn't an exact
+science as the hatched and probability risk are not checked to see if they
+spatially/temporally overlap each other.</p>
 """
 import calendar
 import datetime
@@ -25,7 +30,10 @@ from pyiem.reference import state_names
 from pyiem.util import get_autoplot_context, get_dbconn, get_sqlalchemy_conn
 
 PDICT = {
-    "C": "Convective",
+    "C": "Convective (Categorical)",
+    "H": "Convective (Hail)",
+    "T": "Convective (Tornado)",
+    "W": "Convective (Wind)",
     "E": "Excessive Rainfall",
     "F": "Fire Weather",
 }
@@ -46,6 +54,13 @@ COLORS = {
     "ELEV": "#ffbb7c",
     "CRIT": "#ff787d",
     "EXTM": "#ff78ff",
+    "0.02": "#008b00",
+    "0.05": "#8b4726",
+    "0.10": "#ffc800",
+    "0.15": "#ff0000",
+    "0.30": "#ff00ff",
+    "0.45": "#912cee",
+    "0.60": "#104e8b",
 }
 DAYS = {
     "1": "Day 1",
@@ -154,12 +169,22 @@ def plotter(fdict):
 
     sqllimiter = ""
     category = "CATEGORICAL"
+    outlook_type_code = outlook_type
     if day >= 4 and outlook_type == "C":
         category = "ANY SEVERE"
     elif day >= 3 and outlook_type == "F":
         category = "CRITICAL FIRE WEATHER AREA"
     elif outlook_type == "F":
         category = "FIRE WEATHER CATEGORICAL"
+    elif outlook_type == "H":
+        outlook_type_code = "C"
+        category = "HAIL"
+    elif outlook_type == "T":
+        outlook_type_code = "C"
+        category = "TORNADO"
+    elif outlook_type == "W":
+        outlook_type_code = "C"
+        category = "WIND"
     if ctx["w"] == "all":
         with get_sqlalchemy_conn("postgis") as conn:
             df = pd.read_sql(
@@ -169,20 +194,26 @@ def plotter(fdict):
                 WHERE category = %s and day = %s and outlook_type = %s and
                 outlook_date >= %s and outlook_date <= %s and
                 threshold not in ('IDRT', 'SDRT')),
+            hatched as (
+                select distinct outlook_date, threshold from data
+                where threshold = 'SIGN'
+            ),
             agg as (
                 select outlook_date, d.threshold, priority,
                 rank() OVER (PARTITION by outlook_date ORDER by priority DESC)
                 from data d JOIN spc_outlook_thresholds t
-                on (d.threshold = t.threshold))
+                on (d.threshold = t.threshold) WHERE d.threshold != 'SIGN')
 
-            SELECT distinct outlook_date as date, threshold from agg
-            where rank = 1 ORDER by date ASC
+            SELECT distinct a.outlook_date as date, a.threshold,
+            case when h.threshold = 'SIGN' then true else false end as sign
+            from agg a LEFT JOIN hatched h on (a.outlook_date = h.outlook_date)
+            where rank = 1 ORDER by a.outlook_date ASC
             """,
                 conn,
                 params=(
                     category,
                     day,
-                    outlook_type,
+                    outlook_type_code,
                     sts,
                     ets + datetime.timedelta(days=2),
                 ),
@@ -234,21 +265,27 @@ def plotter(fdict):
                 and ST_Intersects(st_buffer(o.geom, 0), t.{geomcol})
                 and o.day = %s and o.outlook_type = %s and outlook_date >= %s
                 and outlook_date <= %s {sqllimiter}),
+            hatched as (
+                select distinct outlook_date, threshold from data
+                where threshold = 'SIGN'
+            ),
             agg as (
                 select outlook_date, d.threshold, priority,
                 rank() OVER (PARTITION by outlook_date ORDER by priority DESC)
                 from data d JOIN spc_outlook_thresholds t
-                on (d.threshold = t.threshold))
+                on (d.threshold = t.threshold) WHERE d.threshold != 'SIGN')
 
-            SELECT distinct outlook_date as date, threshold from agg
-            where rank = 1 ORDER by date ASC
+            SELECT distinct a.outlook_date as date, a.threshold,
+            case when h.threshold = 'SIGN' then true else false end as sign
+            from agg a LEFT JOIN hatched h on (a.outlook_date = h.outlook_date)
+            where rank = 1 ORDER by a.outlook_date ASC
             """,
                 conn,
                 params=(
                     geoval,
                     category,
                     day,
-                    outlook_type,
+                    outlook_type_code,
                     sts,
                     ets + datetime.timedelta(days=2),
                 ),
@@ -280,7 +317,7 @@ def plotter(fdict):
         if row["threshold"] == "TSTM" and ctx.get("g", "yes") == "no":
             continue
         data[date.to_pydatetime().date()] = {
-            "val": row["threshold"],
+            "val": row["threshold"] + ("H" if row["sign"] else ""),
             "cellcolor": COLORS.get(row["threshold"], "#EEEEEE"),
         }
     title = (
@@ -291,6 +328,8 @@ def plotter(fdict):
         f"Valid {sts:%d %b %Y} - {ets:%d %b %Y}. "
         f"Days since by threshold: {', '.join(aggtxt)}"
     )
+    if outlook_type in ["H", "W", "T"]:
+        subtitle += ", H denotes SIGN"
     if ctx["mode"] == "cal":
         fig = calendar_plot(
             sts,
@@ -348,13 +387,4 @@ def plotter(fdict):
 
 
 if __name__ == "__main__":
-    plotter(
-        dict(
-            mode="heat",
-            state="IA",
-            w="all",
-            sdate="2021-01-01",
-            day="1",
-            edate="2021-09-21",
-        )
-    )
+    plotter({})
