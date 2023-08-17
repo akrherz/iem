@@ -3,7 +3,7 @@ require_once "../../config/settings.inc.php";
 require_once "../../include/mlib.php";
 force_https();
 require_once "../../include/myview.php";
-$OL = "7.2.2";
+$OL = "7.5.1";
 $DT = "1.11.1";
 $S2 = "4.1.0rc0";
 
@@ -77,6 +77,19 @@ generate links to it.  Currently, there are two calling modes:</p>
   WFO IDs.  You can then specify a number of seconds from now into the
   past.  For example, <i>/lsr/#LWX/-86400</i> would produce LSRs from
   LWX for the past day (86400 seconds).</p>
+
+<p>An additional URI parameter can be appended onto the end, which cryptically
+controls settings on the page.  So in the form above <code>/lsr/#WFO/YYYYMMDDHHII/YYYYMMDDHHII/??????</code>
+, where the <code>?</code> are sequential boolean flags (1=ON,0=OFF).  These values
+are as follows:
+<ul>
+<li>Show RADAR on Map</li>
+<li>Show LSRs on Map/li>
+<li>Show Warnings on Map</li>
+<li>Run in Realtime Mode</li>
+<li>Show States on Map</li>
+<li>Show Counties on Map</li>
+<ul>
 <br />
 EOM;
 $tab2a = <<<EOM

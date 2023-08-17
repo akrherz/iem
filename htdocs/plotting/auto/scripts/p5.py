@@ -1,4 +1,8 @@
-"""daily ranges"""
+"""
+This plot displays the dates with the monthly
+record of your choice displayed. In the case of ties, only the most
+recent occurence is shown.
+"""
 import calendar
 import datetime
 
@@ -22,13 +26,7 @@ PDICT = {
 
 def get_description():
     """Return a dict describing how to call this plotter"""
-    desc = {}
-    desc["data"] = True
-    desc[
-        "description"
-    ] = """This plot displays the dates with the monthly
-    record of your choice displayed. In the case of ties, only the most
-    recent occurence is shown."""
+    desc = {"data": True, "description": __doc__}
     desc["arguments"] = [
         dict(
             type="station",
@@ -129,4 +127,4 @@ def plotter(fdict):
 
 
 if __name__ == "__main__":
-    plotter({"var": "max_snow"})
+    plotter({})

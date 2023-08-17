@@ -1,4 +1,12 @@
-"""METAR cloudiness"""
+"""
+This chart is an attempted illustration of the
+amount of cloudiness that existed at a METAR site for a given month.
+The chart combines reports of cloud amount and level to provide a visual
+representation of the cloudiness.  Once the METAR site hits a cloud level
+of overcast, it can no longer sense clouds above that level.  So while the
+chart will indicate cloudiness up to the top, it may not have been like
+that in reality.
+"""
 import datetime
 
 import numpy as np
@@ -13,19 +21,7 @@ PDICT = {"sky": "Sky Coverage + Visibility", "vsby": "Just Visibility"}
 
 def get_description():
     """Return a dict describing how to call this plotter"""
-    desc = {}
-    desc["data"] = True
-    desc["cache"] = 3600
-    desc[
-        "description"
-    ] = """This chart is an attempted illustration of the
-    amount of cloudiness that existed at a METAR site for a given month.
-    The chart combines reports of cloud amount and level to provide a visual
-    representation of the cloudiness.  Once the METAR site hits a cloud level
-    of overcast, it can no longer sense clouds above that level.  So while the
-    chart will indicate cloudiness up to the top, it may not have been like
-    that in reality.
-    """
+    desc = {"description": __doc__, "data": True, "cache": 3600}
     today = datetime.date.today()
     desc["arguments"] = [
         dict(
@@ -246,8 +242,4 @@ def plotter(fdict):
 
 
 if __name__ == "__main__":
-    plotter(
-        dict(
-            zstation="RAS", year=2012, month=3, ptype="vsby", network="TX_ASOS"
-        )
-    )
+    plotter({})

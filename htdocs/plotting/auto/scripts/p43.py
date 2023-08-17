@@ -1,4 +1,8 @@
-"""Ob timeseries"""
+"""
+This plot presents a time series of
+observations.  Please note the colors and axes labels used to denote
+which variable is which in the combination plots.
+"""
 import datetime
 
 import matplotlib.dates as mdates
@@ -45,15 +49,8 @@ def date_ticker(ax, mytz):
 
 def get_description():
     """Return a dict describing how to call this plotter"""
-    desc = {}
+    desc = {"description": __doc__, "data": True, "cache": 360}
     desc["defaults"] = {"_r": "88"}
-    desc["data"] = True
-    desc["cache"] = 360
-    desc[
-        "description"
-    ] = """This plot presents a time series of
-    observations.  Please note the colors and axes labels used to denote
-    which variable is which in the combination plots."""
     d3 = datetime.date.today() - datetime.timedelta(days=2)
     desc["arguments"] = [
         dict(
@@ -290,4 +287,4 @@ def plotter(fdict):
 
 
 if __name__ == "__main__":
-    plotter(dict(station="WAYT1", network="TN_COOP"))
+    plotter({})

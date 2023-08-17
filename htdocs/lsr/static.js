@@ -3,10 +3,9 @@ var dragPan;
 var olmap; // Openlayers map
 var lsrtable; // LSR DataTable
 var sbwtable; // SBW DataTable
-var n0q; // RADAR Layer
-var lsrLayer;
-var sbwLayer;
-var counties;
+var n0q = {}; // RADAR Layer
+let countiesLayer = {};
+let statesLayer = {};
 var wfoSelect;
 var stateSelect;
 var lsrtypefilter;
@@ -201,14 +200,14 @@ var textStyle = new ol.style.Style({
         padding: [2, 2, 2, 2]
     })
 });
-var lsrTextBackgroundColor = {
+const lsrTextBackgroundColor = {
     'S': 'purple',
     'R': 'blue',
     '5': 'pink'
 };
 
 // create vector layer
-lsrLayer = new ol.layer.Vector({
+const lsrLayer = new ol.layer.Vector({
     title: "Local Storm Reports",
     source: new ol.source.Vector({
         format: new ol.format.GeoJSON()
@@ -276,8 +275,9 @@ lsrLayer.getSource().on('change', (_e) => {
         lsrtypefilter.append(`<option value="${d}">${d}</option`);
     });
 });
+lsrLayer.on('change:visible', updateURL);
 
-sbwLayer = new ol.layer.Vector({
+const sbwLayer = new ol.layer.Vector({
     title: "Storm Based Warnings",
     source: new ol.source.Vector({
         format: new ol.format.GeoJSON()
@@ -293,6 +293,7 @@ sbwLayer = new ol.layer.Vector({
         return sbwStyle;
     }
 });
+sbwLayer.on('change:visible', updateURL);
 sbwLayer.addEventListener(TABLE_FILTERED_EVENT, () => {
     // Turn all features back on
     sbwLayer.getSource().getFeatures().forEach((feat) => {
@@ -445,6 +446,7 @@ function initUI() {
         visible: true,
         source: getRADARSource(nexradBaseTime)
     });
+    n0q.on('change:visible', updateURL);
     lsrtypefilter = $("#lsrtypefilter").select2({
         placeholder: "Filter LSRs by Event Type",
         width: 300,
@@ -526,6 +528,11 @@ function initUI() {
             setTimeout(loadData, 0);
         }
     });
+    statesLayer = make_iem_tms('US States', 'usstates', true, '');
+    statesLayer.on('change:visible', updateURL);
+    countiesLayer = make_iem_tms('US Counties', 'uscounties', false, '');
+    countiesLayer.on('change:visible', updateURL);
+
     olmap = new ol.Map({
         target: 'map',
         controls: ol.control.defaults.defaults().extend([new ol.control.FullScreen()]),
@@ -563,8 +570,8 @@ function initUI() {
                 })
             }),
             n0q,
-            make_iem_tms('US States', 'usstates', true, ''),
-            make_iem_tms('US Counties', 'uscounties', false, ''),
+            statesLayer,
+            countiesLayer,
             sbwLayer,
             lsrLayer
         ]
@@ -750,10 +757,12 @@ function initUI() {
 function genSettings() {
     /* Generate URL options set on this page */
     let s = "";
-    s += (n0q.visibility ? "1" : "0");
-    s += (lsrLayer.visibility ? "1" : "0");
-    s += (sbwLayer.visibility ? "1" : "0");
+    s += (n0q.isVisible() ? "1" : "0");
+    s += (lsrLayer.isVisible() ? "1" : "0");
+    s += (sbwLayer.isVisible() ? "1" : "0");
     s += (realtime ? "1" : "0");
+    s += (statesLayer.isVisible() ? "1" : "0");
+    s += (countiesLayer.isVisible() ? "1" : "0");
     return s;
 }
 
@@ -770,18 +779,24 @@ function updateURL() {
 
 }
 function applySettings(opts) {
-    if (opts[0] === "1") { // Show RADAR
-        n0q.setVisibility(true);
+    if (opts[0] !== undefined) { // Show RADAR
+        n0q.setVisible(opts[0] === "1");
     }
-    if (opts[1] === "1") { // Show LSRs
-        lsrLayer.setVisibility(true);
+    if (opts[1] !== undefined) { // Show LSRs
+        lsrLayer.setVisible(opts[1] === "1");
     }
-    if (opts[2] === "1") { // Show SBWs
-        sbwLayer.setVisibility(true);
+    if (opts[2] !== undefined) { // Show SBWs
+        sbwLayer.setVisible(opts[2] === "1");
     }
     if (opts[3] === "1") { // Realtime
         realtime = true;
         $("#realtime").prop('checked', true);
+    }
+    if (opts[4] !== undefined) {
+        statesLayer.setVisible(opts[4] === "1");
+    }
+    if (opts[5] !== undefined) {
+        countiesLayer.setVisible(opts[5] === "1");
     }
 }
 function updateRADARTimes() {

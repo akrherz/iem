@@ -1,4 +1,8 @@
-"""monthly temp record / climatology."""
+"""
+This plot displays the monthly records or climatology for
+a station of your choice.  The current month for the current day is not
+considered for the analysis, except for total precipitation.
+"""
 import calendar
 import datetime
 
@@ -20,13 +24,7 @@ PDICT2 = {"min": "Minimum", "mean": "Climatology", "max": "Maximum"}
 
 def get_description():
     """Return a dict describing how to call this plotter"""
-    desc = {}
-    desc["data"] = True
-    desc[
-        "description"
-    ] = """This plot displays the monthly records or climatology for
-    a station of your choice.  The current month for the current day is not
-    considered for the analysis, except for total precipitation."""
+    desc = {"description": __doc__, "data": True}
     desc["arguments"] = [
         dict(
             type="station",
@@ -177,4 +175,4 @@ def plotter(fdict):
 
 
 if __name__ == "__main__":
-    plotter({"agg": "mean", "varname": "total_precip"})
+    plotter({})
