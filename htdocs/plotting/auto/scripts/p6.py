@@ -1,4 +1,9 @@
-"""Distribution of obs"""
+"""
+This application plots out the distribution of
+some monthly metric for single month for all tracked sites within one
+state.  The plot presents the distribution and normalized frequency
+for a specific year and for all years combined for the given month.
+"""
 # pylint: disable=no-member
 import calendar
 import datetime
@@ -21,15 +26,8 @@ PDICT = {
 
 def get_description():
     """Return a dict describing how to call this plotter"""
-    desc = {}
+    desc = {"description": __doc__, "data": True}
     today = datetime.date.today()
-    desc[
-        "description"
-    ] = """This application plots out the distribution of
-    some monthly metric for single month for all tracked sites within one
-    state.  The plot presents the distribution and normalized frequency
-    for a specific year and for all years combined for the given month."""
-    desc["data"] = True
     desc["arguments"] = [
         dict(type="state", name="state", default="IA", label="Select State:"),
         dict(

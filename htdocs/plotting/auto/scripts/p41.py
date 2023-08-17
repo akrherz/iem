@@ -1,24 +1,25 @@
-"""This plot compares the distribution of daily
-    temperatures for two months or periods for a single station of your choice.
-    The left hand plot depicts a quantile - quantile plot, which simply plots
-    the montly percentile values against each other.  You could think of this
-    plot as comparable frequencies.  The right hand plot depicts the
-    distribution of each month's temperatures expressed as a violin plot. These
-    type of plots are useful to see the shape of the distribution.  These plots
-    also contain the mean and extremes of the distributions.
+"""
+This plot compares the distribution of daily
+temperatures for two months or periods for a single station of your choice.
+The left hand plot depicts a quantile - quantile plot, which simply plots
+the montly percentile values against each other.  You could think of this
+plot as comparable frequencies.  The right hand plot depicts the
+distribution of each month's temperatures expressed as a violin plot. These
+type of plots are useful to see the shape of the distribution.  These plots
+also contain the mean and extremes of the distributions.
 
-    <br />There is an additional bit of functionality allowing for the
-    computation of metrics over a number of trailing days.  When this
-    trailing day window period is set to a value larger than 1 day, you will
-    want to also set the computation method over that window.  The options
-    are:
-    <ul>
-      <li>Max: Take the day with the highest value</li>
-      <li>Avg: Take the average of all days in the window</li>
-      <li>Min: Take the lowest value over the window</li>
-    </ul>
-    <br />Clever combinations of the above allow for assessment of strength
-    and duration of stretches of hot or cold weather.
+<br />There is an additional bit of functionality allowing for the
+computation of metrics over a number of trailing days.  When this
+trailing day window period is set to a value larger than 1 day, you will
+want to also set the computation method over that window.  The options
+are:
+<ul>
+    <li>Max: Take the day with the highest value</li>
+    <li>Avg: Take the average of all days in the window</li>
+    <li>Min: Take the lowest value over the window</li>
+</ul>
+<br />Clever combinations of the above allow for assessment of strength
+and duration of stretches of hot or cold weather.
 """
 
 import numpy as np
@@ -371,15 +372,4 @@ def plotter(fdict):
 
 
 if __name__ == "__main__":
-    plotter(
-        dict(
-            station="IA7708",
-            network="IACLIMATE",
-            month1="6",
-            month2="1",
-            var="low",
-            highlight=44,
-            days=1,
-            opt="max",
-        )
-    )
+    plotter({})

@@ -1,4 +1,10 @@
-"""Overcast Freq"""
+"""
+Computes the frequency of having a day within
+a month with an overcast sky reported at a given time of the day.  There
+are a number of caveats to this plot as sensors and observing techniques
+have changed over the years!  The algorithm specifically looks for the
+OVC condition to be reported in the METAR observation.
+"""
 import calendar
 import datetime
 
@@ -10,17 +16,7 @@ from pyiem.util import get_autoplot_context, get_sqlalchemy_conn
 
 def get_description():
     """Return a dict describing how to call this plotter"""
-    desc = {}
-    desc["cache"] = 86400
-    desc[
-        "description"
-    ] = """ Computes the frequency of having a day within
-    a month with an overcast sky reported at a given time of the day.  There
-    are a number of caveats to this plot as sensors and observing techniques
-    have changed over the years!  The algorithm specifically looks for the
-    OVC condition to be reported in the METAR observation.
-    """
-    desc["data"] = True
+    desc = {"description": __doc__, "cache": 86400, "data": True}
     today = datetime.date.today()
     desc["arguments"] = [
         dict(
