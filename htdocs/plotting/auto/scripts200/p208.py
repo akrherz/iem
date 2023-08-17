@@ -252,15 +252,10 @@ def plotter(fdict):
         bounds = df2["simple_geom"].total_bounds
     buffer = 0.4
     _pds = " (PDS) " if True in df["is_pds"].values else ""
-    _tt = (
-        "Emergency"
-        if True in df["is_emergency"].values
-        else vtec.VTEC_SIGNIFICANCE.get(s1, s1)
-    )
-    title = (
-        f"{year} {wfo} {vtec.VTEC_PHENOMENA.get(p1, p1)}{_pds} {_tt} "
-        f"({p1}.{s1}) #{etn}"
-    )
+    lbl = vtec.get_ps_string(p1, s1)
+    if df["is_emergency"].any():
+        lbl = f"{vtec.VTEC_PHENOMENA.get(p1, p1)} Emergency"
+    title = f"{year} {wfo} {_pds} {lbl} " f"({p1}.{s1}) #{etn}"
     if ctx["opt"] in ["expand", "etn"]:
         title = (
             f"{year} NWS {vtec.VTEC_PHENOMENA.get(p1, p1)} "
