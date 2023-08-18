@@ -11,6 +11,7 @@ coverage should be good outside of the major gap on 10 August 2020 due
 to the derecho power outage.</p>
 """
 import datetime
+from zoneinfo import ZoneInfo
 
 import geopandas as gpd
 import matplotlib.colors as mpcolors
@@ -58,8 +59,8 @@ def plotter(fdict):
     """Go"""
     ctx = get_autoplot_context(fdict, get_description())
     state = ctx["state"]
-    sts = ctx["sts"]
-    ets = ctx["ets"]
+    sts = ctx["sts"].replace(tzinfo=ZoneInfo("UTC"))
+    ets = ctx["ets"].replace(tzinfo=ZoneInfo("UTC"))
     if (ets - sts).total_seconds() >= (32 * 86400):
         raise ValueError("Must pick period less than 32 days long")
 
