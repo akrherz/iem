@@ -1,8 +1,8 @@
 """GeoJSON source for VTEC event"""
 import datetime
-import json
 
 import psycopg2.extras
+import simplejson as json
 from paste.request import parse_formvars
 from pyiem.util import get_dbconn, html_escape
 from pymemcache.client import Client
@@ -15,13 +15,11 @@ def run_lsrs(wfo, year, phenomena, significance, etn, sbw):
     pgconn = get_dbconn("postgis")
     cursor = pgconn.cursor(cursor_factory=psycopg2.extras.DictCursor)
 
-    sbwtable = f"sbw_{year}"
-    warningtable = f"warnings_{year}"
     if sbw == 1:
         sql = f"""
             SELECT distinct l.*, valid at time zone 'UTC' as utc_valid,
             ST_asGeoJson(l.geom) as geojson
-            from lsrs l, {sbwtable} w WHERE
+            from lsrs l, sbw_{year} w WHERE
             l.geom && w.geom and ST_contains(w.geom, l.geom)
             and l.wfo = %s and
             l.valid >= w.issue and l.valid <= w.expire and
@@ -34,7 +32,7 @@ def run_lsrs(wfo, year, phenomena, significance, etn, sbw):
         sql = f"""
             WITH countybased as (
                 SELECT min(issue) as issued, max(expire) as expired
-                from {warningtable} w JOIN ugcs u on (u.gid = w.gid)
+                from warnings_{year} w JOIN ugcs u on (u.gid = w.gid)
                 WHERE w.wfo = %s and w.eventid = %s and
                 w.significance = %s
                 and w.phenomena = %s)
@@ -120,7 +118,6 @@ def run(wfo, year, phenomena, significance, etn):
     pgconn = get_dbconn("postgis")
     cursor = pgconn.cursor(cursor_factory=psycopg2.extras.DictCursor)
 
-    table = f"warnings_{year}"
     cursor.execute(
         f"""
     SELECT
@@ -128,7 +125,7 @@ def run(wfo, year, phenomena, significance, etn):
     ST_asGeoJson(u.geom) as geojson,
     issue at time zone 'UTC' as utc_issue,
     init_expire at time zone 'UTC' as utc_init_expire
-    from {table} w JOIN ugcs u on (w.gid = u.gid)
+    from warnings_{year} w JOIN ugcs u on (w.gid = u.gid)
     WHERE w.wfo = %s and eventid = %s and
     phenomena = %s and significance = %s
     """,
