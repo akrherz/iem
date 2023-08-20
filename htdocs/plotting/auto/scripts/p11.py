@@ -10,7 +10,7 @@ import datetime
 import matplotlib.dates as mdates
 import pandas as pd
 from pyiem.exceptions import NoDataFound
-from pyiem.plot import figure_axes
+from pyiem.plot import figure
 from pyiem.util import get_autoplot_context, get_sqlalchemy_conn
 
 PDICT = {
@@ -104,7 +104,8 @@ def plotter(fdict):
         f"Daily Min/Max {PDICT2[varname]}\n"
         f"Period: {df.index.values[0]:%-d %b} to {df.index.values[-1]:%-d %b}"
     )
-    (fig, ax) = figure_axes(title=title, apctx=ctx)
+    fig = figure(title=title, apctx=ctx)
+    ax = fig.add_axes([0.1, 0.15, 0.8, 0.75])
     bars = ax.bar(
         df.index.values,
         df["range"].values,
