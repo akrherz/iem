@@ -2,14 +2,13 @@
 from io import StringIO
 
 import pandas as pd
-from pandas.io.sql import read_sql
 from pyiem.util import get_sqlalchemy_conn
 
 
 def application(_environ, start_response):
     """Go Main Go"""
     with get_sqlalchemy_conn("iem") as conn:
-        amsi4 = read_sql(
+        amsi4 = pd.read_sql(
             """
         SELECT to_char(day + '16 hours'::interval,
             'YYYY-MM-DD HH24:MI') as valid,
@@ -22,7 +21,7 @@ def application(_environ, start_response):
             index_col="valid",
         )
     with get_sqlalchemy_conn("isuag") as conn:
-        df = read_sql(
+        df = pd.read_sql(
             """
         SELECT to_char(valid, 'YYYY-MM-DD HH24:MI') as valid,
         case when extract(hour from valid) > 16 then

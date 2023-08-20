@@ -1,6 +1,6 @@
 """
 This data is courtesy of <a href="{LL}">Vaisala NLDN</a>.  The IEM
-processes a data stream by NLDN to construct this heatmap. The flash
+processes a data stream by NLDN to construct this heatmap. The stroke
 density is computed over a two by two kilometer grid constructed using
 a US National Atlas Albers (EPSG:2163) projection.  You are limited to plot
 less than 32 days worth of data at a time.</p>
@@ -92,7 +92,7 @@ def plotter(fdict):
     buffer = 30_000
     title = (
         f"{sts:%-d %b %Y %H%M}Z - {ets:%-d %b %Y %H%M}Z :: "
-        f"{len(df.index):,.0f} Lightning Flashes"
+        f"{len(df.index):,.0f} Lightning Strokes"
     )
     mp = MapPlot(
         state=state,
@@ -133,9 +133,9 @@ def plotter(fdict):
             zorder=Z_CLIP2,
             crs=EPSG[2163],
         )
-        mp.draw_colorbar(bins, cmap, norm, title="flashes per 2x2 km cell")
+        mp.draw_colorbar(bins, cmap, norm, title="strokes per 2x2 km cell")
     else:
-        mp.fig.text(0.5, 0.5, "No Flashes Found in Domain.", ha="center")
+        mp.fig.text(0.5, 0.5, "No Strokes Found in Domain.", ha="center")
     mp.draw_mask("state")
     mp.drawcounties()
 

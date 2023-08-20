@@ -253,13 +253,13 @@ function setupUI() {
     });
 
 
-    $('#varpicker').change(function () {
+    $('#varpicker').change(() => {
         varname = text($('#varpicker').val());
         gj.setStyle(gj.getStyle());
         updateTitle();
     });
 };
 
-$(document).ready(function () {
+$(document).ready(() => {
     setupUI();
 });

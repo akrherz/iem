@@ -118,7 +118,7 @@ if ($errmsg != "") {
     $img = $errmsg;
 }
 
-$t->content = <<<EOF
+$t->content = <<<EOM
 <ol class="breadcrumb">
  <li><a href="/agclimate/">ISU Soil Moisture Network</a></li>
  <li class="active">Soil Moisture Plots</li>
@@ -168,5 +168,5 @@ and click the 'Make Plot' button below.
 
 <p><strong>Plot Description:</strong> {$thedescription}
 </p>
-EOF;
+EOM;
 $t->render('single.phtml');

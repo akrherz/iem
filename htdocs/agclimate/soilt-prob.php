@@ -3,10 +3,10 @@
 require_once "../../config/settings.inc.php";
 define("IEM_APPID", 88);
 require_once "../../include/myview.php";
-$t = new MyView();
 require_once "../../include/database.inc.php";
 require_once "../../include/imagemaps.php";
 require_once "../../include/forms.php";
+$t = new MyView();
 
 $station = isset($_GET["station"]) ? xssafe($_GET['station']) : "A130209";
 $tstr = isset($_GET["tstr"]) ? xssafe($_GET['tstr']) : "50,45,40,35,32,28,23";

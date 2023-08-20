@@ -106,10 +106,9 @@ if ($prod == 10 || $prod == 11) {
 }
 
 $t->content = <<<EOF
-
 <table style="float: left;" width="100%">
-<TR>
-<TD valign="top">
+<tr>
+<td valign="top">
 {$extra}
 
 <img src="{$data[$prod]["mapurl"]}" ALT="ISU Ag Climate" style="border: 1px solid #000; ">
@@ -136,10 +135,8 @@ $t->content = <<<EOF
   <td>We are not confident of the estimate</td></tr>
 
 </table>
-
-
-</TD>
-<TD valign="TOP" width="250">
+</td>
+<td valign="TOP" width="250">
 
 <div id="right">
 <table width="100%" cellspacing="0" cellpadding="1">
@@ -203,7 +200,7 @@ $t->content = <<<EOF
 </table>
 </div>
 
-</TD></TR>
+</td></tr>
 </table>
 
 <br clear="all" /><p>&nbsp;</p>
