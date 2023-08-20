@@ -25,11 +25,13 @@ function pretty($val, $fmt)
 $table = <<<EOM
 <form method="GET" action="/my/current.phtml" name="my">
 <table class='table table-striped table-bordered table-condensed'>
+<thead class="sticky">
 <tr>
 <th rowspan="2">Add:</th>
 <th rowspan='2'>Location</th>
 <th rowspan='2'>Valid</th>
 <th colspan='3'>Air Temp &deg;F</th>
+<th rowspan="2">Dew Pt &deg;F</th>
 <th colspan='3'>Wind MPH</th>
 <th rowspan='2'>Today's Rain inch</th>
 <th>4 inches</th>
@@ -44,6 +46,8 @@ $table = <<<EOM
 <th>Temp &deg;F</th><th>Moist %</th>
 <th>Temp &deg;F</th><th>Moist %</th>
 </tr>
+</thead>
+<tbody>
 EOM;
 $offline = array();
 $threshold = time() - 86400;
@@ -64,7 +68,7 @@ foreach ($jobj["data"] as $bogus => $data) {
     $table .= sprintf(
         "<tr><td><input type=\"checkbox\" name=\"st[]\" value=\"%s\"></td>" .
             "<td><a href=\"%s\">%s</a></td><td>%s</td>" .
-            "<td>%s</td><td>%s</td><td>%s</td>" .
+            "<td>%s</td><td>%s</td><td>%s</td><td>%s</td>" .
             "<td>%s @ %s</td><td>%s</td><td>%s @ %s</td>" .
             "<td>%s</td><td>%s</td><td>%s</td><td>%s</td>" .
             "<td>%s</td><td>%s</td>" .
@@ -76,6 +80,7 @@ foreach ($jobj["data"] as $bogus => $data) {
         pretty($data["tmpf"], '%.1f'),
         pretty($data["max_tmpf"], '%.1f'),
         pretty($data["min_tmpf"], '%.1f'),
+        pretty($data["dwpf"], '%.1f'),
         drct2txt($data["drct"]),
         pretty($data["sknt"] * 1.15, '%.0f'),
         pretty($data['gust'] * 1.15, '%.0f'),
@@ -93,6 +98,7 @@ foreach ($jobj["data"] as $bogus => $data) {
 }
 
 $table .= <<<EOM
+</tbody>
 </table>
 <input type="submit" value="Add to Favorites">
 <input type="reset" value="Reset">
