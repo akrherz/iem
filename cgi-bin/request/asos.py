@@ -4,8 +4,9 @@ Download interface for ASOS data from the asos database
 import datetime
 import sys
 from io import StringIO
+from zoneinfo import ZoneInfo
+from zoneinfo._common import ZoneInfoNotFoundError
 
-import pytz
 from paste.request import parse_formvars
 from pyiem.network import Table as NetworkTable
 from pyiem.util import get_dbconn, utc
@@ -150,8 +151,8 @@ def get_time_bounds(form, tzinfo):
                 int(form.get(f"minute{num}", 0)),
             )
 
-        sts = tzinfo.localize(_get("1"))
-        ets = tzinfo.localize(_get("2"))
+        sts = _get("1").replace(tzinfo=tzinfo)
+        ets = _get("2").replace(tzinfo=tzinfo)
     except Exception:
         return None, None
 
@@ -208,8 +209,8 @@ def application(environ, start_response):
         yield b"ERROR: server over capacity, please try later"
         return
     try:
-        tzinfo = pytz.timezone(form.get("tz", "Etc/UTC"))
-    except pytz.exceptions.UnknownTimeZoneError as exp:
+        tzinfo = ZoneInfo(form.get("tz", "Etc/UTC"))
+    except ZoneInfoNotFoundError as exp:
         start_response(
             "500 Internal Server Error", [("Content-type", "text/plain")]
         )

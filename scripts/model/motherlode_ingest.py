@@ -6,9 +6,9 @@
 import datetime
 import sys
 from io import StringIO
+from zoneinfo import ZoneInfo
 
 import pandas as pd
-import pytz
 import requests
 from pyiem.network import Table as NetworkTable
 from pyiem.util import get_dbconn, logger
@@ -66,7 +66,7 @@ def run(mcursor, model, station, lon, lat, ts):
     host = (
         BASE_URL
         if (
-            datetime.datetime.utcnow().replace(tzinfo=pytz.UTC) - ts
+            datetime.datetime.utcnow().replace(tzinfo=ZoneInfo("UTC")) - ts
         ).total_seconds()
         < 86400
         else BASE_URL2
@@ -120,7 +120,7 @@ def run(mcursor, model, station, lon, lat, ts):
         sbcin = xref(row, "sbcin", model)
         pwater = xref(row, "pwater", model)
         fts = datetime.datetime.strptime(row["time"], "%Y-%m-%dT%H:%M:%SZ")
-        fts = fts.replace(tzinfo=pytz.utc)
+        fts = fts.replace(tzinfo=ZoneInfo("UTC"))
         sql = f"""INSERT into {table} (station, model, runtime,
               ftime, sbcape, sbcin, pwater)
               VALUES (%s, %s , %s, %s, %s, %s, %s)"""
@@ -179,7 +179,9 @@ def main(argv):
         gts = datetime.datetime(
             int(argv[1]), int(argv[2]), int(argv[3]), int(argv[4])
         )
-    gts = gts.replace(tzinfo=pytz.utc, minute=0, second=0, microsecond=0)
+    gts = gts.replace(
+        tzinfo=ZoneInfo("UTC"), minute=0, second=0, microsecond=0
+    )
 
     if gts.hour % 6 == 0:
         ts = gts - datetime.timedelta(hours=6)

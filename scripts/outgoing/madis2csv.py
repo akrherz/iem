@@ -7,9 +7,9 @@ import subprocess
 import time
 import warnings
 from tempfile import NamedTemporaryFile
+from zoneinfo import ZoneInfo
 
 import numpy.ma
-import pytz
 from netCDF4 import chartostring  # @UnresolvedImport
 from pyiem.util import convert_value, logger, ncopen
 
@@ -100,7 +100,7 @@ def main():
         if numpy.ma.is_masked(ot) or ot > 2141347600:
             continue
         ts = datetime.datetime(1970, 1, 1) + datetime.timedelta(seconds=ot)
-        ts = ts.replace(tzinfo=pytz.UTC)
+        ts = ts.replace(tzinfo=ZoneInfo("UTC"))
         db[station] = {
             "STN": station,
             "PROVIDER": providers[recnum],

@@ -1,8 +1,10 @@
-"""This plot is not meant for interactive use, but a backend for
-    NWEM plots."""
+"""
+This plot is not meant for interactive use, but a backend for
+NWEM plots.
+"""
+from zoneinfo import ZoneInfo
 
 # third party
-import pytz
 import requests
 from geopandas import read_postgis
 from pyiem.exceptions import NoDataFound
@@ -18,10 +20,8 @@ WFOCONV = {"JSJ": "SJU"}
 
 def get_description():
     """Return a dict describing how to call this plotter"""
-    desc = {"description": __doc__}
+    desc = {"description": __doc__, "cache": 3600, "data": True}
     desc["defaults"] = {"_r": "t"}
-    desc["cache"] = 3600
-    desc["data"] = True
     desc["arguments"] = [
         dict(
             type="text",
@@ -91,7 +91,7 @@ def plotter(fdict):
         tzname = nt.sts.get(f"P{wfo}", {}).get("tzname")
         if tzname is None:
             tzname = "UTC"
-    tz = pytz.timezone(tzname)
+    tz = ZoneInfo(tzname)
     expire = df["expire"].dt.tz_convert(tz)[0]
 
     bounds = row["geom"].bounds

@@ -1,9 +1,9 @@
 """Ingest the RWIS rainwise data"""
 import datetime
 from io import StringIO
+from zoneinfo import ZoneInfo
 
 import pandas as pd
-import pytz
 import requests
 from pyiem.observation import Observation
 from pyiem.util import get_dbconn
@@ -101,7 +101,7 @@ def process(today, icursor, nwsli, lastts):
         if pd.isnull(row["utc"]):
             continue
         utc = datetime.datetime.strptime(row["utc"], "%Y-%m-%d %H:%M:%S")
-        utc = utc.replace(tzinfo=pytz.timezone("UTC"))
+        utc = utc.replace(tzinfo=ZoneInfo("UTC"))
 
         if lastts is not None and utc < lastts:
             continue

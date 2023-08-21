@@ -1,9 +1,9 @@
 """
 This plot is not meant for interactive use, but a backend for SPS plots.
 """
+from zoneinfo import ZoneInfo
 
 # third party
-import pytz
 from geopandas import read_postgis
 from pyiem.exceptions import NoDataFound
 from pyiem.network import Table as NetworkTable
@@ -85,7 +85,7 @@ def plotter(fdict):
         tzname = nt.sts.get(f"P{wfo}", {}).get("tzname")
         if tzname is None:
             tzname = "UTC"
-    tz = pytz.timezone(tzname)
+    tz = ZoneInfo(tzname)
     expire = df["expire"].dt.tz_convert(tz)[0]
     is_fwx = False
     if row["geom"].is_empty:

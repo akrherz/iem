@@ -5,11 +5,11 @@
 """
 import datetime
 from io import BytesIO
+from zoneinfo import ZoneInfo
 
 import PIL.ImageDraw
 import PIL.ImageFont
 import PIL.ImageOps
-import pytz
 from paste.request import parse_formvars
 from pyiem.util import get_dbconn
 from pymemcache.client import Client
@@ -73,7 +73,7 @@ def make_image(e, pil):
     pgconn = get_dbconn("afos")
     cursor = pgconn.cursor()
     valid = datetime.datetime.strptime(e, "%Y%m%d%H%M")
-    valid = valid.replace(tzinfo=pytz.UTC)
+    valid = valid.replace(tzinfo=ZoneInfo("UTC"))
 
     cursor.execute(
         "SELECT data from products WHERE pil = %s and entered = %s",

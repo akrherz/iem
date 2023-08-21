@@ -1,9 +1,9 @@
 """Legacy stuff."""
 import datetime
 from io import StringIO
+from zoneinfo import ZoneInfo
 
 import psycopg2.extras
-import pytz
 from paste.request import parse_formvars
 from pyiem.util import get_dbconn
 
@@ -29,9 +29,9 @@ def application(environ, start_response):
     day = form.get("day", 7)
     station = form.get("station", "SAMI4")[:5]
     s = datetime.datetime(int(year), int(month), int(day))
-    s = s.replace(tzinfo=pytz.timezone("America/Chicago"))
+    s = s.replace(tzinfo=ZoneInfo("America/Chicago"))
     e = s + datetime.timedelta(days=1)
-    e = e.replace(tzinfo=pytz.timezone("America/Chicago"))
+    e = e.replace(tzinfo=ZoneInfo("America/Chicago"))
     interval = datetime.timedelta(seconds=60)
 
     sio.write(

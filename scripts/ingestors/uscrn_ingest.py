@@ -4,9 +4,9 @@ import glob
 import os
 import subprocess
 import sys
+from zoneinfo import ZoneInfo
 
 import pandas as pd
-import pytz
 import requests
 from metpy.units import units
 from pyiem.observation import Observation
@@ -125,7 +125,7 @@ def process_file(icursor, ocursor, year, filename, size, reprocess):
         valid = datetime.datetime.strptime(
             "%s %s" % (row["UTC_DATE"], row["UTC_TIME"]), "%Y%m%d %H%M"
         )
-        valid = valid.replace(tzinfo=pytz.utc)
+        valid = valid.replace(tzinfo=ZoneInfo("UTC"))
         ob = Observation(str(row["WBANNO"]), "USCRN", valid)
         ob.data["tmpf"] = is_within(
             (float(row["TMPC"]) * units.degC).to(units.degF).magnitude,

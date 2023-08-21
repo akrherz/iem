@@ -31,8 +31,6 @@ replaced with proprietary solutions.
   <h4>Historical Data</h4>
   <ul>
    <li><a href="/schoolnet/dl/">Download</a> from the archive!</a></li>
-   <li><a href="/cgi-bin/precip/catSNET.py">Hourly Rainfall</a> tables</a></li>
-   <li><a href="/schoolnet/rates/">Rainfall Rates</a></li>
   </ul>
 
   </div>

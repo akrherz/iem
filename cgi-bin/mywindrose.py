@@ -6,9 +6,9 @@ Generate a PNG windrose based on the CGI parameters, called from
 """
 import datetime
 from io import BytesIO
+from zoneinfo import ZoneInfo
 
 import numpy
-import pytz
 from paste.request import parse_formvars
 from pyiem.network import Table as NetworkTable
 from pyiem.plot.use_agg import plt
@@ -154,8 +154,8 @@ def application(environ, start_response):
     tzname = nt.sts[station]["tzname"]
     if network != "RAOB":
         # Assign the station time zone to the sts and ets
-        sts = pytz.timezone(tzname).localize(sts)
-        ets = pytz.timezone(tzname).localize(ets)
+        sts = sts.replace(tzinfo=ZoneInfo(tzname))
+        ets = ets.replace(tzinfo=ZoneInfo(tzname))
     else:
         tzname = "UTC"
     bins = []

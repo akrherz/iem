@@ -8,9 +8,9 @@ import smtplib
 import subprocess
 from email.mime.multipart import MIMEMultipart
 from email.mime.text import MIMEText
+from zoneinfo import ZoneInfo
 
 import psycopg2.extras
-import pytz
 import requests
 import wwa  # @UnresolvedImport
 from pyiem.util import (
@@ -78,8 +78,8 @@ def get_github_commits():
             utcvalid = datetime.datetime.strptime(
                 timestring, "%Y-%m-%dT%H:%M:%SZ"
             )
-            valid = utcvalid.replace(tzinfo=pytz.utc).astimezone(
-                pytz.timezone("America/Chicago")
+            valid = utcvalid.replace(tzinfo=ZoneInfo("UTC")).astimezone(
+                ZoneInfo("America/Chicago")
             )
             data = {
                 "stamp": valid.strftime("%b %-d %-2I:%M %p"),
@@ -117,10 +117,10 @@ def get_github_commits():
 
 def cowreport():
     """Generate something from the Cow, moooo!"""
-    central = pytz.timezone("America/Chicago")
+    central = ZoneInfo("America/Chicago")
     yesterday = (utc() - datetime.timedelta(days=1)).astimezone(central)
     midnight = yesterday.replace(hour=0, minute=0)
-    midutc = midnight.astimezone(pytz.UTC)
+    midutc = midnight.astimezone(ZoneInfo("UTC"))
     begints = midutc.strftime("%Y-%m-%dT%H:%M")
     endts = (midutc + datetime.timedelta(hours=24)).strftime("%Y-%m-%dT%H:%M")
     api = (
