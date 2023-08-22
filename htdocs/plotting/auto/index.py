@@ -28,7 +28,7 @@ if BASEDIR not in sys.path:
 import scripts  # noqa
 
 HIGHCHARTS = "11.1.0"
-OPENLAYERS = "7.2.2"
+OPENLAYERS = "7.5.1"
 CSECTORS = state_names.copy()
 CSECTORS.update(SECTORS_NAME)
 CMAPS = {
@@ -137,8 +137,12 @@ def map_select_widget(network, name):
     return f"""
 &nbsp; <button type="button" id="button_{network}_{name}" data-state="0"
 onClick="mapFactory('{network}', '{name}');">Show Map</button>
-<div style="display: none; width: 100%; height: 600px;"
- id="map_{network}_{name}"></div>
+<div style="display: none; width: 100%; height: 640px;" id="map_{network}_{name}_wrap">
+<br />Click dot to select in form above. <strong>Key</strong>
+<img src="/images/green_dot.svg" style="height: 15px;"> Online &nbsp;
+<img src="/images/red_dot.svg" style="height: 15px;"> Offline<br />
+<div style="width: 100%; height: 600px;" id="map_{network}_{name}"></div>
+</div>
 <div class="popup" id="popup_{network}_{name}"></div>
 """
 
@@ -896,7 +900,7 @@ to some of these autoplots.</p>
 </script>
 <script src='/vendor/openlayers/{OPENLAYERS}/ol-layerswitcher.js'></script>
 {res['extrascripts']}
-<script src="js/mapselect.js"></script>
+<script src="js/mapselect.js?v=2"></script>
 <script>
 function hideImageLoad(){{
         // console.log("load() fired...");
