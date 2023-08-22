@@ -1,91 +1,93 @@
-"""This application has a considerable and likely
-    confusing amount of configuration options.  The biggest source of the
-    confusion is the interplay between the statistic chosen and the dates/times
-    provided.  This table summarizes that interplay.<br />
+"""
+This application has a considerable and likely
+confusing amount of configuration options.  The biggest source of the
+confusion is the interplay between the statistic chosen and the dates/times
+provided.  This table summarizes that interplay.<br />
 
-    <table>
-    <thead><tr><th>Statistic</th><th>Uses</th><th>Application</th></tr></thead>
-    <tbody>
-    <tr>
-    <td>Days Since</td>
-    <td>Start/End Date Time</td>
-    <td>This plots the number of "days" since the last issuance of a given
-    headline between the start and end date times that you provide.  The
-    concept of "days" is 24 hour periods.</td>
-    </tr>
+<table>
+<thead><tr><th>Statistic</th><th>Uses</th><th>Application</th></tr></thead>
+<tbody>
+<tr>
+<td>Days Since</td>
+<td>Start/End Date Time</td>
+<td>This plots the number of "days" since the last issuance of a given
+headline between the start and end date times that you provide.  The
+concept of "days" is 24 hour periods.</td>
+</tr>
 
-    <tr>
-    <td>Last Year</td>
-    <td>Start/End Date Time</td>
-    <td>This plots the most recent year of issuance for a given warning type.
-    </td>
-    </tr>
+<tr>
+<td>Last Year</td>
+<td>Start/End Date Time</td>
+<td>This plots the most recent year of issuance for a given warning type.
+</td>
+</tr>
 
-    <tr>
-    <td>Most Frequent Hour</td>
-    <td>Start/End Date Time</td>
-    <td>This plots only works for UGC summarization. It attempts to plot the
-    hour of the day with the most frequent number of events issued. Not that
-    for long-fuse warnings, these type of plot is likely ill-defined.</td>
-    </tr>
+<tr>
+<td>Most Frequent Hour</td>
+<td>Start/End Date Time</td>
+<td>This plots only works for UGC summarization. It attempts to plot the
+hour of the day with the most frequent number of events issued. Not that
+for long-fuse warnings, these type of plot is likely ill-defined.</td>
+</tr>
 
-    <tr>
-    <td>Total Count</td>
-    <td>Start/End Date Time</td>
-    <td>This plots the total number of events between the start and end
-    date time.</td>
-    </tr>
+<tr>
+<td>Total Count</td>
+<td>Start/End Date Time</td>
+<td>This plots the total number of events between the start and end
+date time.</td>
+</tr>
 
-    <tr>
-    <td>Year Average</td>
-    <td>Start/End Year</td>
-    <td>This plots the average number of events between the inclusive start
-    and end year. The caveat is that it uses the actual found time domain
-    of warnings within those years to compute a yearly average. So if you
-    pick a year period between 2005 to 2010 and no warnings were issued in
-    2005, it would then use 2006 to 2010 to compute the yearly average.</td>
-    </tr>
+<tr>
+<td>Year Average</td>
+<td>Start/End Year</td>
+<td>This plots the average number of events between the inclusive start
+and end year. The caveat is that it uses the actual found time domain
+of warnings within those years to compute a yearly average. So if you
+pick a year period between 2005 to 2010 and no warnings were issued in
+2005, it would then use 2006 to 2010 to compute the yearly average.</td>
+</tr>
 
-    <tr>
-    <td>Year Count</td>
-    <td>Start Year</td>
-    <td>This plots the number of events for a given year.  A year is defined
-    as the calendar year in US Central Time.</td>
-    </tr>
+<tr>
+<td>Year Count</td>
+<td>Start Year</td>
+<td>This plots the number of events for a given year.  A year is defined
+as the calendar year in US Central Time.</td>
+</tr>
 
-    <tr>
-    <td>Yearly Min/Avg/Max Count bounded...</td>
-    <td>Start/End Date Time<br />Start/End Year</td>
-    <td>This plots the min/avg/max number of events per year between the
-    given dates.  For example, you could produce a plot of the average
-    number of Tornado Warnings during June.  Please note that only the
-    average plot works when summarizing by polygons.</td>
-    </tr>
+<tr>
+<td>Yearly Min/Avg/Max Count bounded...</td>
+<td>Start/End Date Time<br />Start/End Year</td>
+<td>This plots the min/avg/max number of events per year between the
+given dates.  For example, you could produce a plot of the average
+number of Tornado Warnings during June.  Please note that only the
+average plot works when summarizing by polygons.</td>
+</tr>
 
-    </table>
+</table>
 
-    <p>In general, it will produce
-    a map of either a single NWS Weather Forecast Office (WFO) or for a
-    specified state.  For warning types that are issued with polygons, you
-    can optionally plot heatmaps of these products.  Please be careful when
-    selecting start and end dates to ensure you are getting the plot you
-    want.  There are likely some combinations here that will produce a
-    broken image symbol.  If you find such a case, please email us the link
-    to this page that shows the broken image!</p>
+<p>In general, it will produce
+a map of either a single NWS Weather Forecast Office (WFO) or for a
+specified state.  For warning types that are issued with polygons, you
+can optionally plot heatmaps of these products.  Please be careful when
+selecting start and end dates to ensure you are getting the plot you
+want.  There are likely some combinations here that will produce a
+broken image symbol.  If you find such a case, please email us the link
+to this page that shows the broken image!</p>
 
-    <p>Storm Based Warning polygons were not official until 1 October 2007,
-    so if you generate plots for years prior to this date, you may notice
-    polygons well outside the County Warning Area bounds.  There was no
-    enforcement of these unofficial polygons to stay within CWA bounds.</p>
+<p>Storm Based Warning polygons were not official until 1 October 2007,
+so if you generate plots for years prior to this date, you may notice
+polygons well outside the County Warning Area bounds.  There was no
+enforcement of these unofficial polygons to stay within CWA bounds.</p>
 
-    <p><strong>This app can be very slow</strong>, so please let it grind
-    away as sometimes it will take 3-5 minutes to generate a map :("""
+<p><strong>This app can be very slow</strong>, so please let it grind
+away as sometimes it will take 3-5 minutes to generate a map :(
+"""
 import datetime
+from zoneinfo import ZoneInfo
 
 import numpy as np
 import pandas as pd
 import psycopg2.extras
-import pytz
 from affine import Affine
 from geopandas import read_postgis
 from pyiem.exceptions import NoDataFound
@@ -266,11 +268,11 @@ def do_polygon(ctx):
     elif varname == "hour":
         raise NoDataFound("Sorry, not implemented for polygon summaries.")
     elif varname == "yearcount":
-        sts = datetime.datetime(year, 1, 1).replace(tzinfo=pytz.utc)
-        ets = datetime.datetime(year, 12, 31, 23, 59).replace(tzinfo=pytz.utc)
+        sts = utc(year, 1, 1)
+        ets = utc(year, 12, 31, 23, 59)
     else:
-        sts = datetime.datetime(year, 1, 1).replace(tzinfo=pytz.utc)
-        ets = datetime.datetime(year2, 12, 31, 23, 59).replace(tzinfo=pytz.utc)
+        sts = utc(year, 1, 1)
+        ets = utc(year2, 12, 31, 23, 59)
     daylimiter = ""
     if varname.startswith("period"):
         if sdate.strftime("%m%d") > edate.strftime("%m%d"):
@@ -497,7 +499,9 @@ def do_ugc(ctx):
         data = {}
         for row in cursor:
             days = int(
-                (edate - row[1].replace(tzinfo=pytz.UTC)).total_seconds()
+                (
+                    edate - row[1].replace(tzinfo=ZoneInfo("UTC"))
+                ).total_seconds()
                 / 86400.0
             )
             rows.append(
@@ -813,8 +817,8 @@ def plotter(fdict):
     """Go"""
     ctx = get_autoplot_context(fdict, get_description())
     # Covert datetime to UTC
-    ctx["sdate"] = ctx["sdate"].replace(tzinfo=pytz.utc)
-    ctx["edate"] = ctx["edate"].replace(tzinfo=pytz.utc)
+    ctx["sdate"] = ctx["sdate"].replace(tzinfo=ZoneInfo("UTC"))
+    ctx["edate"] = ctx["edate"].replace(tzinfo=ZoneInfo("UTC"))
     state = ctx["state"]
     phenomena = ctx["phenomena"]
     significance = ctx["significance"]

@@ -2,8 +2,8 @@
 import datetime
 import os
 import sys
+from zoneinfo import ZoneInfo
 
-import pytz
 from metpy.calc import dewpoint_from_relative_humidity
 from metpy.units import units
 from pyiem.observation import Observation
@@ -39,7 +39,7 @@ def main():
         minute=int(hhmm[2:]),
         second=0,
         microsecond=0,
-        tzinfo=pytz.timezone("America/Chicago"),
+        tzinfo=ZoneInfo("America/Chicago"),
     )
 
     iemob = Observation("OT0007", "OT", ts)

@@ -1,9 +1,9 @@
 """Download tempwinds_aloft dataset"""
 import datetime
 from io import BytesIO, StringIO
+from zoneinfo import ZoneInfo
 
 import pandas as pd
-import pytz
 from paste.request import parse_formvars
 from pyiem.util import get_sqlalchemy_conn
 from sqlalchemy import text
@@ -76,7 +76,8 @@ def application(environ, start_response):
 
     fmt = form.get("format", "csv")
     tz = form.get("tz", "UTC")
-    pytz.timezone(tz)
+    # Ensure this is well formed
+    ZoneInfo(tz)
     station = form.get("station")[:4]
     na = form.get("na", "M")
     if na not in ["M", "None", "blank"]:

@@ -4,10 +4,10 @@
 import datetime
 import os
 import sys
+from zoneinfo import ZoneInfo
 
 import numpy as np
 import pyiem.iemre as iemre
-import pytz
 from pyiem.plot import MapPlot, nwsprecip
 from pyiem.util import logger, mm2inch, ncopen, utc
 
@@ -19,7 +19,7 @@ def doday(ts, realtime):
     Create a plot of precipitation stage4 estimates for some day
     """
     lts = utc(ts.year, ts.month, ts.day, 12)
-    lts = lts.astimezone(pytz.timezone("America/Chicago"))
+    lts = lts.astimezone(ZoneInfo("America/Chicago"))
     # make assumptions about the last valid MRMS data
     if realtime:
         # Up until :59 after of the last hour

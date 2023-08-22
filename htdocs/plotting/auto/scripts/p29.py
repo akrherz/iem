@@ -6,10 +6,10 @@ are rounded forward in time such that an observation at :54 after the
 hour is moved to the top of the hour.
 """
 import calendar
+from zoneinfo import ZoneInfo
 
 import numpy as np
 import pandas as pd
-import pytz
 from pyiem.exceptions import NoDataFound
 from pyiem.plot import figure_axes
 from pyiem.util import get_autoplot_context, get_sqlalchemy_conn, utc
@@ -77,7 +77,7 @@ def plotter(fdict):
     df["above_freq"] = df["above"] / df["count"] * 100.0
     df["below_freq"] = df["below"] / df["count"] * 100.0
     ut = utc(2000, 1, 1, hour, 0)
-    localt = ut.astimezone(pytz.timezone(ctx["_nt"].sts[station]["tzname"]))
+    localt = ut.astimezone(ZoneInfo(ctx["_nt"].sts[station]["tzname"]))
     title = (
         f"{ctx['_sname']}\nFrequency of {hour} UTC ({localt:%-I %p} LST) "
         rf"Temp between {t1}$^\circ$F and {t2}$^\circ$F"

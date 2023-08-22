@@ -1,10 +1,17 @@
-"""precip bias by hour"""
+"""
+This plot looks at the bias associated with computing
+24 hour precipitation totals using a given hour of the day as the
+delimiter. This plot will take a number of seconds to generate, so please
+be patient.  This chart attempts to address the question of if computing
+24 hour precip totals at midnight or 7 AM biases the totals.  Such biases
+are commmon when computing this metric for high or low temperature.
+"""
 import datetime
+from zoneinfo import ZoneInfo
 
 import numpy as np
 import pandas as pd
 import psycopg2.extras
-import pytz
 from pyiem.exceptions import NoDataFound
 from pyiem.plot import figure_axes
 from pyiem.util import get_autoplot_context, get_dbconn
@@ -12,17 +19,7 @@ from pyiem.util import get_autoplot_context, get_dbconn
 
 def get_description():
     """Return a dict describing how to call this plotter"""
-    desc = {}
-    desc["data"] = True
-    desc[
-        "description"
-    ] = """
-    This plot looks at the bias associated with computing
-    24 hour precipitation totals using a given hour of the day as the
-    delimiter. This plot will take a number of seconds to generate, so please
-    be patient.  This chart attempts to address the question of if computing
-    24 hour precip totals at midnight or 7 AM biases the totals.  Such biases
-    are commmon when computing this metric for high or low temperature."""
+    desc = {"description": __doc__, "data": True}
     desc["arguments"] = [
         dict(
             type="zstation",
@@ -49,7 +46,7 @@ def plotter(fdict):
         minute=0,
         second=0,
         microsecond=0,
-        tzinfo=pytz.utc,
+        tzinfo=ZoneInfo("UTC"),
     )
     ts1973 = datetime.datetime(1973, 1, 1)
     today = datetime.datetime.now()
@@ -70,14 +67,14 @@ def plotter(fdict):
             minvalid = row[0]
         data[(row[0] - ts1973).days * 24 + row[0].hour] = row[1]
 
-    lts = jan1.astimezone(pytz.timezone(ctx["_nt"].sts[station]["tzname"]))
+    lts = jan1.astimezone(ZoneInfo(ctx["_nt"].sts[station]["tzname"]))
     lts = lts.replace(month=7, hour=0)
     cnts = [0] * 24
     avgv = [0] * 24
     rows = []
     for hr in range(24):
         ts = lts.replace(hour=hr)
-        zhour = ts.astimezone(pytz.utc).hour
+        zhour = ts.astimezone(ZoneInfo("UTC")).hour
         arr = np.reshape(data[zhour : (0 - 24 + zhour)], (days - 1, 24))
         tots = np.sum(arr, 1)
         cnts[hr] = np.sum(np.where(tots > 0, 1, 0))

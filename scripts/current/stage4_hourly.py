@@ -4,9 +4,9 @@
 import datetime
 import os
 import sys
+from zoneinfo import ZoneInfo
 
 import pygrib
-import pytz
 from pyiem.plot import MapPlot, get_cmap
 from pyiem.util import logger, mm2inch, utc
 
@@ -17,8 +17,7 @@ def doit(ts):
     """
     Generate hourly plot of stage4 data
     """
-    gmtnow = datetime.datetime.utcnow()
-    gmtnow = gmtnow.replace(tzinfo=pytz.utc)
+    gmtnow = utc()
     routes = "a"
     if ((gmtnow - ts).days * 86400.0 + (gmtnow - ts).seconds) < 7200:
         routes = "ac"
@@ -60,7 +59,7 @@ def doit(ts):
         2,
         3,
     ]
-    localtime = ts.astimezone(pytz.timezone("America/Chicago"))
+    localtime = ts.astimezone(ZoneInfo("America/Chicago"))
 
     for sector in ["iowa", "midwest", "conus"]:
         mp = MapPlot(

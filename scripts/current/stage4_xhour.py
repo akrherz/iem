@@ -4,9 +4,9 @@ Create a variable X hour plot of stage IV estimates
 import datetime
 import os
 import sys
+from zoneinfo import ZoneInfo
 
 import pygrib
-import pytz
 from pyiem.plot import MapPlot, get_cmap
 from pyiem.util import logger, mm2inch
 
@@ -53,7 +53,7 @@ def do(ts, hours):
     cmap.set_over("black")
     clevs = [0.01, 0.1, 0.25, 0.5, 1, 2, 3, 5, 8, 9.9]
     localtime = (ts - datetime.timedelta(minutes=1)).astimezone(
-        pytz.timezone("America/Chicago")
+        ZoneInfo("America/Chicago")
     )
 
     for sector in ["iowa", "midwest", "conus"]:
@@ -89,7 +89,7 @@ def main(argv):
     else:
         ts = datetime.datetime.utcnow()
         hr = int(sys.argv[1])
-    ts = ts.replace(tzinfo=pytz.utc)
+    ts = ts.replace(tzinfo=ZoneInfo("UTC"))
     do(ts, hr)
 
 

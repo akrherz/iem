@@ -3,8 +3,8 @@ import datetime
 import os
 import subprocess
 import tempfile
+from zoneinfo import ZoneInfo
 
-import pytz
 from PIL import Image, ImageDraw, ImageFont
 from pyiem.plot import MapPlot
 from pyiem.util import logger, utc
@@ -63,7 +63,7 @@ def run(sts, ets):
             outline="#000000",
             width=3,
         )
-        text = now.astimezone(pytz.timezone("America/Chicago")).strftime(
+        text = now.astimezone(ZoneInfo("America/Chicago")).strftime(
             "%A %-2I:%M %p"
         )
         draw.text((456, 47), text, fill="#000000", font=font)
