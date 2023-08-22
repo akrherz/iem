@@ -4167,6 +4167,7 @@ class Ticks {
     public $supress_last=false,$supress_tickmarks=false,$supress_minor_tickmarks=false;
     public $maj_ticks_pos = array(), $maj_ticklabels_pos = array(),
            $ticks_pos = array(), $maj_ticks_label = array();
+    public $ticks_label = array();
     public $precision;
 
     protected $minor_abs_size=3, $major_abs_size=5;
