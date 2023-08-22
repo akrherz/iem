@@ -4,8 +4,8 @@ Likely due to water being dumped into the tipping bucket to clean it :/
 """
 import datetime
 import sys
+from zoneinfo import ZoneInfo
 
-import pytz
 from pyiem.util import get_dbconn
 
 
@@ -70,7 +70,7 @@ def main(argv):
     # Our weather stations are in CST, so the 'daily' precip is for a 6z to 6z
     # period and not calendar day, the hourly values are in the rears
     sts = datetime.datetime(date.year, date.month, date.day, 6)
-    sts = sts.replace(tzinfo=pytz.utc)
+    sts = sts.replace(tzinfo=ZoneInfo("UTC"))
     ets = sts + datetime.timedelta(hours=24)
     zero_hourly(station, sts, ets)
     zero_daily(station, date)

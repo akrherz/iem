@@ -1,7 +1,7 @@
 """Hourly precip download"""
 import datetime
+from zoneinfo import ZoneInfo
 
-import pytz
 from paste.request import parse_formvars
 from pyiem.util import get_dbconn
 
@@ -42,7 +42,7 @@ def application(environ, start_response):
     """run rabbit run"""
     start_response("200 OK", [("Content-type", "text/plain")])
     form = parse_formvars(environ)
-    tzinfo = pytz.timezone(form.get("tz", "America/Chicago"))
+    tzinfo = ZoneInfo(form.get("tz", "America/Chicago"))
     ctx = {
         "st": form.get("st") == "1",
         "lalo": form.get("lalo") == "1",

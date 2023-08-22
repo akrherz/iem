@@ -5,11 +5,11 @@ US, the daily high and low temperature climatology is presented as a
 filled bar for each day plotted when Air Temperature is selected.
 """
 import datetime
+from zoneinfo import ZoneInfo
 
 import numpy as np
 import pandas as pd
 import psycopg2.extras
-import pytz
 from pyiem.exceptions import NoDataFound
 from pyiem.plot import figure_axes
 from pyiem.util import get_autoplot_context, get_dbconn, get_sqlalchemy_conn
@@ -239,7 +239,7 @@ def plotter(fdict):
     # Construct a local timezone x axis
     x = (
         ctx["df"]
-        .index.tz_localize(pytz.UTC)
+        .index.tz_localize(ZoneInfo("UTC"))
         .tz_convert(ctx["_nt"].sts[ctx["station"]]["tzname"])
         .tz_localize(None)
     )
@@ -256,11 +256,4 @@ def plotter(fdict):
 
 
 if __name__ == "__main__":
-    highcharts(
-        {
-            "network": "IS__ASOS",
-            "zstation": "BIHN",
-            "sdate": "2022-06-12",
-            "days": 365,
-        }
-    )
+    highcharts({})

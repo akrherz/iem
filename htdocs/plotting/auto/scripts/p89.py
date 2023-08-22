@@ -1,4 +1,12 @@
-"""iemre stuff"""
+"""
+This is a complex plot to describe!  For each
+24 hour period (roughly ending 7 AM), the IEM computes a gridded
+precipitation estimate.  This chart displays the daily coverage of a
+specified intensity for that day.  The chart also compares this coverage
+against the portion of the state that was below a second given threshold
+over X number of days.  This provides some insight into if the
+precipitation fell over locations that needed it.
+"""
 import datetime
 import os
 
@@ -16,19 +24,8 @@ from pyiem.util import get_autoplot_context, get_sqlalchemy_conn, ncopen
 
 def get_description():
     """Return a dict describing how to call this plotter"""
-    desc = {}
+    desc = {"description": __doc__, "data": True}
     today = datetime.date.today()
-    desc[
-        "description"
-    ] = """This is a complex plot to describe!  For each
-    24 hour period (roughly ending 7 AM), the IEM computes a gridded
-    precipitation estimate.  This chart displays the daily coverage of a
-    specified intensity for that day.  The chart also compares this coverage
-    against the portion of the state that was below a second given threshold
-    over X number of days.  This provides some insight into if the
-    precipitation fell over locations that needed it.
-    """
-    desc["data"] = True
     desc["arguments"] = [
         dict(
             type="year",

@@ -3,8 +3,8 @@ Download interface for data from RAOB network
 """
 import datetime
 from io import StringIO
+from zoneinfo import ZoneInfo
 
-import pytz
 from paste.request import parse_formvars
 from pyiem.network import Table as NetworkTable
 from pyiem.util import get_dbconn
@@ -72,7 +72,7 @@ def friendly_date(form, key):
             dt = datetime.datetime.strptime(val, "%m/%d/%Y")
         else:
             dt = datetime.datetime.strptime(val, "%m/%d/%Y %H:%M")
-        dt = dt.replace(tzinfo=pytz.UTC)
+        dt = dt.replace(tzinfo=ZoneInfo("UTC"))
     except Exception:
         return (
             f"Invalid {key} date provided, should be '%m/%d/%Y %H:%M'"

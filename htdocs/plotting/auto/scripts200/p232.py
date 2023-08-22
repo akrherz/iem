@@ -1,15 +1,15 @@
-"""This app plots ASOS/METAR data during a period of your choice and overlays
-    NWS Watch, Warning, and Advisory data.  The choice of NWS Headline type
-    will limit which potential headlines events are overlaid on the chart.
+"""
+This app plots ASOS/METAR data during a period of your choice and overlays
+NWS Watch, Warning, and Advisory data.  The choice of NWS Headline type
+will limit which potential headlines events are overlaid on the chart.
 """
 import datetime
-
-import matplotlib.dates as mdates
-import numpy as np
+from zoneinfo import ZoneInfo
 
 # third party
+import matplotlib.dates as mdates
+import numpy as np
 import pandas as pd
-import pytz
 from matplotlib.patches import Rectangle
 from pyiem.exceptions import NoDataFound
 from pyiem.nws.vtec import NWS_COLORS, get_ps_string
@@ -163,8 +163,8 @@ def plotter(fdict):
             index_col=None,
         )
     if not wwa.empty:
-        wwa["utc_issue"] = wwa["utc_issue"].dt.tz_localize(pytz.UTC)
-        wwa["utc_expire"] = wwa["utc_expire"].dt.tz_localize(pytz.UTC)
+        wwa["utc_issue"] = wwa["utc_issue"].dt.tz_localize(ZoneInfo("UTC"))
+        wwa["utc_expire"] = wwa["utc_expire"].dt.tz_localize(ZoneInfo("UTC"))
         wwa = wwa[wwa["key"].isin(DOMAIN[ctx["mode"]])].reset_index()
     # Find Obs
     with get_sqlalchemy_conn("asos") as conn:
@@ -240,7 +240,7 @@ def plotter(fdict):
     top_ax.set_ylim(0, len(wwa.index) + 1)
     top_ax.set_xticks([])
     top_ax.set_yticks([])
-    tzinfo = pytz.timezone(ctx["_nt"].sts[station]["tzname"])
+    tzinfo = ZoneInfo(ctx["_nt"].sts[station]["tzname"])
     ax.xaxis.set_major_locator(mdates.DayLocator(interval=1, tz=tzinfo))
     ax.xaxis.set_major_formatter(
         mdates.DateFormatter("|\n%d %b %Y", tz=tzinfo)

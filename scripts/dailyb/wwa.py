@@ -1,7 +1,7 @@
 """Some simple summary stats for the IEM Daily Bulletin..."""
 import datetime
+from zoneinfo import ZoneInfo
 
-import pytz
 from pyiem.util import get_dbconn, utc
 
 POSTGIS = get_dbconn("postgis")
@@ -65,7 +65,7 @@ def run(sts=None, ets=None):
     if sts is None or ets is None:
         yest = utc() - datetime.timedelta(hours=24)
         yest = yest.replace(second=0, microsecond=0, minute=0)
-        ts = yest.astimezone(pytz.timezone("America/Chicago"))
+        ts = yest.astimezone(ZoneInfo("America/Chicago"))
         sts = ts.replace(hour=0)
         ets = sts + datetime.timedelta(hours=24)
 
@@ -142,7 +142,7 @@ def run(sts=None, ets=None):
 def main():
     """Lets actually do something"""
     sts = utc(2015, 5, 4, 0)
-    sts = sts.astimezone(pytz.timezone("America/Chicago"))
+    sts = sts.astimezone(ZoneInfo("America/Chicago"))
     sts = sts.replace(hour=0)
     ets = sts + datetime.timedelta(hours=24)
     txt, html = run(sts, ets)

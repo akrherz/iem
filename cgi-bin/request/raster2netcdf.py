@@ -7,10 +7,10 @@ import datetime
 import os
 import tempfile
 from io import BytesIO
+from zoneinfo import ZoneInfo
 
 import netCDF4
 import numpy as np
-import pytz
 from paste.request import parse_formvars
 from PIL import Image
 from pyiem.util import get_dbconn
@@ -117,6 +117,6 @@ def application(environ, start_response):
     dstr = form.get("dstr", "201710251200")[:12]
     prod = form.get("prod", "composite_n0r")[:100]  # arb
     valid = datetime.datetime.strptime(dstr, "%Y%m%d%H%M").replace(
-        tzinfo=pytz.UTC
+        tzinfo=ZoneInfo("UTC")
     )
     return [do_work(valid, prod, start_response)]

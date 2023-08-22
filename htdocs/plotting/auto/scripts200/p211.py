@@ -6,10 +6,10 @@ worth of data at this time.  Any reported 1 minute precipitation value
 over 0.50 inches is omitted as bad data.
 """
 from datetime import timedelta, timezone
+from zoneinfo import ZoneInfo
 
 import numpy as np
 import pandas as pd
-import pytz
 from matplotlib.dates import DateFormatter
 from metpy.units import masked_array, units
 from pyiem.exceptions import NoDataFound
@@ -86,7 +86,7 @@ def get_data(ctx):
     df.index.name = "utc_valid"
     df = df.reset_index()
     # Create a local valid time column
-    ctx["tz"] = pytz.timezone(ctx["_nt"].sts[ctx["zstation"]]["tzname"])
+    ctx["tz"] = ZoneInfo(ctx["_nt"].sts[ctx["zstation"]]["tzname"])
     df["local_valid"] = df["utc_valid"].dt.tz_convert(ctx["tz"])
     df["oprecip"] = df["precip"]
     df["precip"] = df["precip"].fillna(0)

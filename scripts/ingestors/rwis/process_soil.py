@@ -3,11 +3,10 @@
 import datetime
 import json
 import sys
-
-import pandas as pd
+from zoneinfo import ZoneInfo
 
 # third party
-import pytz
+import pandas as pd
 import requests
 from pyiem.util import exponential_backoff, get_dbconn, get_dbconnstr, logger
 
@@ -45,7 +44,7 @@ def process_features(features):
         valid = (
             datetime.datetime(1970, 1, 1)
             + datetime.timedelta(seconds=props["DATA_LAST_UPDATED"] / 1000.0)
-        ).replace(tzinfo=pytz.UTC)
+        ).replace(tzinfo=ZoneInfo("UTC"))
         rows.append(
             {
                 "nwsli": props["NWS_ID"],

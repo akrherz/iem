@@ -12,7 +12,19 @@ const climateStyle = new ol.style.Style({
         radius: 7
     })
 });
-climateStyle.enabled = true;
+
+const stationStyleOffline = new ol.style.Style({
+    zIndex: 99,
+    image: new ol.style.Circle({
+        fill: new ol.style.Fill({ color: '#ff0000' }),
+        stroke: new ol.style.Stroke({
+            color: '#880000',
+            width: 2.25
+        }),
+        radius: 7
+    })
+});
+
 const climodistrictStyle = new ol.style.Style({
     zIndex: 101,
     text: new ol.style.Text({
@@ -57,6 +69,7 @@ function stationLayerStyleFunc(feature, _resolution) {
             return stateStyle;
         }
     }
+    if (feature.get("archive_end") !== null) return stationStyleOffline; 
     return climateStyle;
 }
 
@@ -71,17 +84,17 @@ function mapFactory(network, formname) {
         // Should hide me
         $(`#button_${network}_${formname}`).data("state", 2);
         $(`#button_${network}_${formname}`).text("Show Map");
-        $(`#map_${network}_${formname}`).css("display", "none");
+        $(`#map_${network}_${formname}_wrap`).css("display", "none");
         return;
     } else {
         // Should show me
         $(`#button_${network}_${formname}`).data("state", 1);
         $(`#button_${network}_${formname}`).text("Hide Map");
-        $(`#map_${network}_${formname}`).css("display", "block");
+        $(`#map_${network}_${formname}_wrap`).css("display", "block");
         return;
     }
 
-    $(`#map_${network}_${formname}`).css("display", "block");
+    $(`#map_${network}_${formname}_wrap`).css("display", "block");
 
     const olMap = new ol.Map({
         target: `map_${network}_${formname}`,

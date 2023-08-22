@@ -7,12 +7,12 @@ import datetime
 import os
 import subprocess
 import sys
+from zoneinfo import ZoneInfo
 
 import matplotlib.colors as mpcolors
 import numpy as np
 import pygrib
 import pyiem.reference as ref
-import pytz
 from pyiem.plot import MapPlot, ramp2df
 from pyiem.util import logger, utc
 
@@ -55,7 +55,7 @@ def run(valid, routes):
         if not is_minute and minute % 60 != 0:
             continue
         now = valid + datetime.timedelta(minutes=minute)
-        now = now.astimezone(pytz.timezone("America/Chicago"))
+        now = now.astimezone(ZoneInfo("America/Chicago"))
         grbs.seek(0)
 
         try:

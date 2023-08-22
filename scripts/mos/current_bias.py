@@ -1,7 +1,7 @@
 """Analysis of current MOS temperature bias."""
 import sys
+from zoneinfo import ZoneInfo
 
-import pytz
 from pyiem.plot import MapPlot, get_cmap
 from pyiem.util import get_dbconn, logger, utc
 
@@ -24,7 +24,7 @@ def doit(now, model):
     if runtime is None:
         LOG.info("Model %s runtime %s not found, abort", model, now)
         return
-    runtime = runtime.replace(tzinfo=pytz.utc)
+    runtime = runtime.replace(tzinfo=ZoneInfo("UTC"))
 
     # Load up the mos forecast for our given
     mcursor.execute(
@@ -70,7 +70,7 @@ def doit(now, model):
     cmap.set_under("black")
     cmap.set_over("black")
 
-    localnow = now.astimezone(pytz.timezone("America/Chicago"))
+    localnow = now.astimezone(ZoneInfo("America/Chicago"))
     subtitle = (
         f"Model Run: {runtime:%d %b %Y %H %Z} "
         f"Forecast Time: {localnow:%d %b %Y %-I %p %Z}"

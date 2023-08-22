@@ -10,7 +10,6 @@ from zoneinfo import ZoneInfo
 # third party
 import ephem
 import pandas as pd
-import pytz
 import requests
 from paste.request import parse_formvars
 from pyiem.util import get_dbconn, get_sqlalchemy_conn, utc
@@ -298,7 +297,7 @@ def do_ahps_obs(nwsli):
     latitude = row[2]
     longitude = row[1]
     stationname = row[0]
-    tzinfo = pytz.timezone(row[3])
+    tzinfo = ZoneInfo(row[3])
     # Figure out which keys we have
     cursor.execute(
         """
@@ -346,7 +345,7 @@ def do_ahps_obs(nwsli):
     df["longitude"] = longitude
     df["Time"] = (
         df["valid"]
-        .dt.tz_localize(pytz.UTC)
+        .dt.tz_localize(ZoneInfo("UTC"))
         .dt.tz_convert(tzinfo)
         .dt.strftime("%m/%d/%Y %H:%M")
     )
@@ -378,7 +377,7 @@ def do_ahps_fx(nwsli):
     latitude = row[2]
     longitude = row[1]
     stationname = row[0]
-    tzinfo = pytz.timezone(row[3])
+    tzinfo = ZoneInfo(row[3])
     # Get the last forecast
     cursor.execute(
         """
@@ -422,7 +421,7 @@ def do_ahps_fx(nwsli):
     df["longitude"] = longitude
     df["Time"] = (
         df["valid"]
-        .dt.tz_localize(pytz.UTC)
+        .dt.tz_localize(ZoneInfo("UTC"))
         .dt.tz_convert(tzinfo)
         .dt.strftime("%m/%d/%Y %H:%M")
     )
@@ -461,7 +460,7 @@ def do_ahps(nwsli):
     latitude = row[2]
     longitude = row[1]
     stationname = row[0].replace(",", " ")
-    tzinfo = pytz.timezone(row[3])
+    tzinfo = ZoneInfo(row[3])
     # Get the last forecast
     cursor.execute(
         """
@@ -517,7 +516,7 @@ def do_ahps(nwsli):
     # see akrherz/iem#187
     odf["obtime"] = (
         odf["valid"]
-        .dt.tz_localize(pytz.UTC)
+        .dt.tz_localize(ZoneInfo("UTC"))
         .dt.tz_convert(tzinfo)
         .dt.strftime("%a. %-I %p")
     )
@@ -545,7 +544,7 @@ def do_ahps(nwsli):
     # see akrherz/iem#187
     df["forecasttime"] = (
         df["valid"]
-        .dt.tz_localize(pytz.UTC)
+        .dt.tz_localize(ZoneInfo("UTC"))
         .dt.tz_convert(tzinfo)
         .dt.strftime("%a. %-I %p")
     )

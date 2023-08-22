@@ -5,8 +5,8 @@
 import datetime
 import sys
 from io import StringIO
+from zoneinfo import ZoneInfo
 
-import pytz
 from paste.request import parse_formvars
 from pyiem.util import get_dbconn
 
@@ -40,7 +40,7 @@ def application(environ, start_response):
     valid = datetime.datetime.strptime(
         form.get("valid", "2016010100")[:10], "%Y%m%d%H"
     )
-    valid = valid.replace(tzinfo=pytz.UTC)
+    valid = valid.replace(tzinfo=ZoneInfo("UTC"))
     acursor.execute(
         """
         SELECT metar from alldata

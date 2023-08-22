@@ -1,10 +1,23 @@
-"""Plot up some percentiles please."""
+"""
+This application generates percentiles based on available data
+from the selected station.  These types of applications are good at
+identifying bad data :(.  The date you select is used to generate the
+bottom panel of explicit percentiles for the period of interest.  The
+week is computed for the ISO-8601 week.
+
+<p>If you generate this plot with the "year" option selected, you may
+get an unexpected result.  The percentiles are computed over the entire
+year which means that about everything during the summer is near the top
+and everything during winter is near the bottom.  More understandable
+results are found with shorter time windows of time to compute the
+percentiles.
+"""
 import datetime
+from zoneinfo import ZoneInfo
 
 import matplotlib.dates as mdates
 import numpy as np
 import pandas as pd
-import pytz
 from matplotlib.colorbar import ColorbarBase
 from matplotlib.font_manager import FontProperties
 from pyiem.exceptions import NoDataFound
@@ -28,22 +41,7 @@ PDICT2 = {
 
 def get_description():
     """Return a dict describing how to call this plotter"""
-    desc = {}
-    desc["data"] = True
-    desc[
-        "description"
-    ] = """This application generates percentiles based on available data
-    from the selected station.  These types of applications are good at
-    identifying bad data :(.  The date you select is used to generate the
-    bottom panel of explicit percentiles for the period of interest.  The
-    week is computed for the ISO-8601 week.
-
-    <p>If you generate this plot with the "year" option selected, you may
-    get an unexpected result.  The percentiles are computed over the entire
-    year which means that about everything during the summer is near the top
-    and everything during winter is near the bottom.  More understandable
-    results are found with shorter time windows of time to compute the
-    percentiles."""
+    desc = {"description": __doc__, "data": True}
     desc["arguments"] = [
         dict(
             type="zstation",
@@ -217,7 +215,7 @@ def plotter(fdict):
         bp.set_yticks([0, 10, 25, 50, 75, 90, 100])
         bp.set_ylim(-1, 101)
         bp.xaxis.set_major_formatter(
-            mdates.DateFormatter(datefmt, tz=pytz.timezone(tzname))
+            mdates.DateFormatter(datefmt, tz=ZoneInfo(tzname))
         )
         if opt == "day":
             bp.set_xlabel(f"Timezone: {tzname}")

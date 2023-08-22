@@ -2,8 +2,8 @@
 import os
 import re
 import sys
+from zoneinfo import ZoneInfo
 
-import pytz
 from pyiem.observation import Observation
 from pyiem.util import convert_value, get_dbconn, utc
 
@@ -12,7 +12,7 @@ def main():
     """Go Main Go"""
     iemaccess = get_dbconn("iem")
     cursor = iemaccess.cursor()
-    valid = utc().astimezone(pytz.timezone("America/Chicago"))
+    valid = utc().astimezone(ZoneInfo("America/Chicago"))
     fn = valid.strftime("/mesonet/ARCHIVE/data/%Y/%m/%d/text/ot/ot0002.dat")
 
     if not os.path.isfile(fn):

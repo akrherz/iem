@@ -1,13 +1,12 @@
 """Download Interface for RWIS data"""
 # pylint: disable=abstract-class-instantiated
-import datetime
 from io import BytesIO, StringIO
+from zoneinfo import ZoneInfo
 
 import pandas as pd
-import pytz
 from paste.request import parse_formvars
 from pyiem.network import Table as NetworkTable
-from pyiem.util import get_sqlalchemy_conn
+from pyiem.util import get_sqlalchemy_conn, utc
 from sqlalchemy import text
 
 DELIMITERS = {"comma": ",", "space": " ", "tab": "\t"}
@@ -16,9 +15,7 @@ EXL = "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"
 
 def get_time(form, tzname):
     """Get timestamps"""
-    ts = datetime.datetime.utcnow()
-    ts = ts.replace(tzinfo=pytz.UTC)
-    ts = ts.astimezone(pytz.timezone(tzname))
+    ts = utc().astimezone(ZoneInfo(tzname))
     y1 = int(form.get("year1"))
     y2 = int(form.get("year2"))
     m1 = int(form.get("month1"))

@@ -10,9 +10,9 @@ Implementation Thoughts:
 # pylint: disable=unsubscriptable-object
 import datetime
 import sys
+from zoneinfo import ZoneInfo
 
 import pandas as pd
-import pytz
 import requests
 from pyiem.network import Table as NetworkTable
 from pyiem.util import get_dbconn, get_dbconnstr, logger, utc
@@ -58,7 +58,7 @@ def get_hdf(nt, date):
                         station=station,
                         valid=datetime.datetime.strptime(
                             entry["end_valid"], "%Y-%m-%dT%H:%M:%SZ"
-                        ).replace(tzinfo=pytz.UTC),
+                        ).replace(tzinfo=ZoneInfo("UTC")),
                         precip_in=entry["precip_in"],
                     )
                 )

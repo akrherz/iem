@@ -4,10 +4,10 @@ observations.  Please note the colors and axes labels used to denote
 which variable is which in the combination plots.
 """
 import datetime
+from zoneinfo import ZoneInfo
 
 import matplotlib.dates as mdates
 import pandas as pd
-import pytz
 from matplotlib import ticker
 from metpy.units import units
 from pyiem.exceptions import NoDataFound
@@ -98,7 +98,7 @@ def get_data(network, station, tzname, sdate):
         return df
 
     sts = utc(2018)
-    sts = sts.astimezone(pytz.timezone(tzname))
+    sts = sts.astimezone(ZoneInfo(tzname))
     sts = sts.replace(
         year=sdate.year, month=sdate.month, day=sdate.day, hour=0, minute=0
     )
@@ -198,7 +198,7 @@ def plotter(fdict):
     if not df2.empty:
         ax.set_ylim(bottom=(df["dwpf"].min() - 3))
     plt.setp(ax.get_xticklabels(), visible=True)
-    date_ticker(ax, pytz.timezone(tzname))
+    date_ticker(ax, ZoneInfo(tzname))
     ax.set_xlim(xmin, xmax)
     ax.legend(loc="best", ncol=2)
 
@@ -230,7 +230,7 @@ def plotter(fdict):
     ax.set_ylabel("Wind Direction")
     ax2.set_ylabel("Wind Speed [mph]")
     ax.set_ylim(0, 360.1)
-    date_ticker(ax, pytz.timezone(tzname))
+    date_ticker(ax, ZoneInfo(tzname))
     ax.scatter(
         df2.index.values,
         df2["drct"],
@@ -277,7 +277,7 @@ def plotter(fdict):
         ax.set_ylabel("Pressure [mb]")
 
     ax.set_xlim(xmin, xmax)
-    date_ticker(ax, pytz.timezone(tzname))
+    date_ticker(ax, ZoneInfo(tzname))
     ax.set_xlabel(f"Plot Time Zone: {tzname}")
     ax.yaxis.set_major_locator(ticker.LinearLocator(9))
     ax2.yaxis.set_major_locator(ticker.LinearLocator(9))

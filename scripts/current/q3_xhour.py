@@ -4,10 +4,10 @@ import gzip
 import os
 import sys
 import tempfile
+from zoneinfo import ZoneInfo
 
 import numpy as np
 import pygrib
-import pytz
 from pyiem import mrms
 from pyiem.plot import MapPlot, nwsprecip
 from pyiem.util import logger, mm2inch, utc
@@ -25,10 +25,10 @@ def doit(ts, hours):
     now = ts - datetime.timedelta(hours=hours - 1)
     interval = datetime.timedelta(hours=1)
     ets = datetime.datetime.utcnow()
-    ets = ets.replace(tzinfo=pytz.utc)
+    ets = ets.replace(tzinfo=ZoneInfo("UTC"))
     total = None
     while now < ets:
-        gmt = now.astimezone(pytz.utc)
+        gmt = now.astimezone(ZoneInfo("UTC"))
         gribfn = None
         for prefix in ["MultiSensor_QPE_01H_Pass2", "RadarOnly_QPE_01H"]:
             gribfn = mrms.fetch(prefix, gmt)
@@ -72,7 +72,7 @@ def doit(ts, hours):
         f"q2/iowa_q2_{hours}h_{ts:%H}00.png png"
     )
 
-    lts = ts.astimezone(pytz.timezone("America/Chicago"))
+    lts = ts.astimezone(ZoneInfo("America/Chicago"))
     subtitle = f"Total up to {lts:%d %B %Y %I:%M %p %Z}"
     mp = MapPlot(
         title=f"NCEP MRMS Q3 (RADAR Only) {hours} Hour Precipitation [inch]",
