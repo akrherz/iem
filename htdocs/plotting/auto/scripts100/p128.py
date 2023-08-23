@@ -1,4 +1,7 @@
-"""compares yearly summaries"""
+"""
+This chart compares yearly summaries between two long term climate sites. Only
+years with similiar observation counts are used in this data presentation.
+"""
 # pylint: disable=no-member
 
 import pandas as pd
@@ -6,28 +9,21 @@ from pyiem.exceptions import NoDataFound
 from pyiem.plot import figure_axes
 from pyiem.util import get_autoplot_context, get_sqlalchemy_conn
 
-PDICT = dict(
-    [
-        ("avg_high", "Average High Temperature"),
-        ("avg_low", "Average Low Temperature"),
-        ("avg_temp", "Average Temperature"),
-        ("max_high", "Maximum Daily High"),
-        ("min_high", "Minimum Daily High"),
-        ("max_low", "Maximum Daily Low"),
-        ("min_low", "Minimum Daily Low"),
-        ("total_precip", "Total Precipitation"),
-    ]
-)
+PDICT = {
+    "avg_high": "Average High Temperature",
+    "avg_low": "Average Low Temperature",
+    "avg_temp": "Average Temperature",
+    "max_high": "Maximum Daily High",
+    "min_high": "Minimum Daily High",
+    "max_low": "Maximum Daily Low",
+    "min_low": "Minimum Daily Low",
+    "total_precip": "Total Precipitation",
+}
 
 
 def get_description():
     """Return a dict describing how to call this plotter"""
-    desc = {}
-    desc["data"] = True
-    desc[
-        "description"
-    ] = """This chart compares yearly summaries between two
-    long term climate sites."""
+    desc = {"description": __doc__, "data": True}
     desc["arguments"] = [
         dict(
             type="select",
@@ -63,14 +59,14 @@ def plotter(fdict):
 
     with get_sqlalchemy_conn("coop") as conn:
         df = pd.read_sql(
-            f"""WITH one as (
+            """WITH one as (
         SELECT year, sum(precip) as one_total_precip,
         avg(high) as one_avg_high, avg(low) as one_avg_low,
         avg((high+low)/2.) as one_avg_temp,
         max(high) as one_max_high,
         min(high) as one_min_high,
         min(low) as one_min_low,
-        max(low) as one_max_low from alldata_{station1[:2]} WHERE
+        max(low) as one_max_low, count(*) as obs from alldata WHERE
         station = %s GROUP by year),
         two as (
         SELECT year, sum(precip) as two_total_precip,
@@ -79,7 +75,7 @@ def plotter(fdict):
         max(high) as two_max_high,
         min(high) as two_min_high,
         min(low) as two_min_low,
-        max(low) as two_max_low from alldata_{station2[:2]} WHERE
+        max(low) as two_max_low, count(*) as obs from alldata WHERE
         station = %s GROUP by year
         )
 
@@ -87,8 +83,8 @@ def plotter(fdict):
         one_avg_temp, one_max_high, one_min_low, one_min_high, one_max_low,
         two_total_precip, two_avg_high,
         two_avg_low, two_avg_temp, two_max_high, two_min_low, two_min_high,
-        two_max_low from one o JOIN two t
-        on (o.year = t.year) ORDER by o.year ASC
+        two_max_low from one o, two t
+        WHERE o.year = t.year and abs(o.obs - t.obs) < 5 ORDER by o.year ASC
         """,
             conn,
             params=(station1, station2),
