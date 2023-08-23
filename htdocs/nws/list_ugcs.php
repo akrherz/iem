@@ -23,7 +23,7 @@ $('#makefancy').click(function(){
 </script>
 EOM;
 
-$wfo = isset($_REQUEST['wfo']) ? xssafe($_REQUEST['wfo']) : 'DMX';
+$wfo = isset($_REQUEST['station']) ? xssafe($_REQUEST['station']) : 'DMX';
 $just_firewx = isset($_REQUEST["just_firewx"]) ? intval(xssafe($_REQUEST["just_firewx"])) : 0;
 $w = isset($_REQUEST["w"]) ? xssafe($_REQUEST["w"]) : "wfo";
 $state = isset($_REQUEST["state"]) ? xssafe($_REQUEST["state"]) : "IA";

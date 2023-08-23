@@ -33,8 +33,8 @@ VARUNITS = {
     "min_dwpf": "F",
     "max_feel": "F",
     "min_feel": "F",
-    "max_relh": "percent",
-    "min_relh": "percent",
+    "max_rh": "percent",
+    "min_rh": "percent",
     "max_gust": "mph",
     "max_sknt": "mph",
 }
