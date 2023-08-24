@@ -1,4 +1,11 @@
-"""Climatologies comparison"""
+"""
+This plot displays a comparison of various daily
+temperature climatologies.  The National Center for Environmental
+Information (NCEI) releases a 30 year climatology every ten years.  This
+data is smoothed to remove day to day variability.  The raw daily averages
+are shown computed from the daily observation archive maintained by the
+IEM.
+"""
 import calendar
 import datetime
 
@@ -10,16 +17,7 @@ from pyiem.util import get_autoplot_context, get_sqlalchemy_conn
 
 def get_description():
     """Return a dict describing how to call this plotter"""
-    desc = {}
-    desc["data"] = True
-    desc[
-        "description"
-    ] = """This plot displays a comparison of various daily
-    temperature climatologies.  The National Center for Environmental
-    Information (NCEI) releases a 30 year climatology every ten years.  This
-    data is smoothed to remove day to day variability.  The raw daily averages
-    are shown computed from the daily observation archive maintained by the
-    IEM."""
+    desc = {"description": __doc__, "data": True}
     desc["arguments"] = [
         # IATDSM has some troubles here
         dict(
@@ -169,4 +167,4 @@ def plotter(fdict):
 
 
 if __name__ == "__main__":
-    plotter(dict(station="IATAME"))
+    plotter({})

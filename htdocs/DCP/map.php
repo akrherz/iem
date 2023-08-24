@@ -9,7 +9,7 @@ force_https();
 require_once "../../include/myview.php";
 $t = new MyView();
 $t->title = "SHEF Physical Code Map";
-$OL = '7.2.2';
+$OL = '7.5.1';
 $t->headextra = <<<EOM
 <link rel="stylesheet" href="/vendor/openlayers/{$OL}/ol.css" type="text/css">
 <link rel="stylesheet" href="/vendor/jquery-ui/1.11.4/jquery-ui.min.css" />

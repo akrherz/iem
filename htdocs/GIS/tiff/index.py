@@ -36,7 +36,7 @@ SOURCES = {
     },
     "rtma": {
         "label": "Real-Time Mesoscale Analysis (RTMA)",
-        "re": "%Y/%m/%d/model/rtma/%H/rmta.t%Hz.awp2p5f000.grib2",
+        "re": "%Y/%m/%d/model/rtma/%H/rtma.t%Hz.awp2p5f000.grib2",
         "modulo": 1,
     },
 }

@@ -1,4 +1,8 @@
-"""GDD Fun"""
+"""
+This plot presents the period over which growing
+degree days were accumulated between the two thresholds provided by
+the user.  The colors represent the number of days for the period shown.
+"""
 import datetime
 
 import matplotlib.colors as mpcolors
@@ -13,13 +17,7 @@ from pyiem.util import get_autoplot_context, get_dbconn
 
 def get_description():
     """Return a dict describing how to call this plotter"""
-    desc = {}
-    desc["data"] = True
-    desc[
-        "description"
-    ] = """This plot presents the period over which growing
-    degree days were accumulated between the two thresholds provided by
-    the user.  The colors represent the number of days for the period shown."""
+    desc = {"description": __doc__, "data": True}
     today = datetime.date.today()
     year = today.year if today.month > 5 else today.year - 1
     desc["arguments"] = [
