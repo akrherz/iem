@@ -20,6 +20,7 @@ foreach (glob(dirname(__FILE__) . '/themes/*.php') as $theme_class_script) {
 //===================================================
 abstract class Theme {
     protected $color_index;
+    public $graph;
     
     function __construct() {
         $this->color_index = 0;

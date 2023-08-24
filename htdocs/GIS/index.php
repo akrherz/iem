@@ -73,6 +73,8 @@ IEM webpages.  It signifies that the data link is ready for most GIS systems.
 
 <p><h3>IEM GIS Projects</h3>
 <ul>
+ <li><a href="/GIS/tiff/">Grib to GeoTIFF Service</a>
+ <br />Provides various archived grib files in a GeoTIFF format.</li>
  <li><a href="goes.phtml">GOES Satellite GIS Products</a>
   <br />Current and archived GIS products from NOAA's GOES satellites</li>
  <li><a href="/ogc/">Open GIS Web Services</a>

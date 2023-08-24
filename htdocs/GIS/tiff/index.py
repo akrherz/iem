@@ -5,7 +5,7 @@ import os
 import subprocess
 import tempfile
 from calendar import month_abbr
-from datetime import datetime
+from datetime import datetime, timedelta
 
 from paste.request import parse_formvars
 from pyiem.htmlgen import make_select
@@ -18,7 +18,7 @@ HEADER = """
  <li class="active">Download TIFFs</li>
 </ol>
 
-<h3>Grib to TIFF Server:</h3>
+<h3>Grib to TIFF Service:</h3>
 
 <p>The IEM archives a lot of grib imagery, this service presents it for a
 given UTC date with links to download what is available.</p>
@@ -30,38 +30,68 @@ given UTC date with links to download what is available.</p>
 """
 SOURCES = {
     "5kmffg": {
-        "re": "5kmffg_%Y%m%d%H.grib2",
+        "label": "Flash Flood Guidance @5km (FFG)",
+        "re": "%Y/%m/%d/model/ffg/5kmffg_%Y%m%d%H.grib2",
+        "modulo": 6,
+    },
+    "rtma": {
+        "label": "Real-Time Mesoscale Analysis (RTMA)",
+        "re": "%Y/%m/%d/model/rtma/%H/rmta.t%Hz.awp2p5f000.grib2",
+        "modulo": 1,
     },
 }
 
 
-def generate_ui(valid, res):
+def generate_ui(key, valid, res):
     """Make the UI for the given date."""
-    # FFG
-    for hr in range(0, 24, 6):
-        tstr = f"{valid:%Y%m%d}{hr:02.0f}"
-        testfn = (
-            f"/mesonet/ARCHIVE/data/{valid:%Y/%m/%d}/model/ffg/5kmffg_"
-            f"{tstr}.grib2"
-        )
+    meta = SOURCES[key]
+    res["content"] += (
+        f"<h3>{meta['label']}</h3>"
+        f'<p>Real-time stable link: <a href="/GIS/tiff/?service={key}">'
+        f"/GIS/tiff/?service={key}</a></p>"
+    )
+    found = False
+    for hr in range(0, 24, meta["modulo"]):
+        ts = valid.replace(hour=hr)
+        testfn = f"/mesonet/ARCHIVE/data/{ts.strftime(meta['re'])}"
         if not os.path.isfile(testfn):
             continue
-        href = f"/GIS/tiff/?service=5kmffg&amp;ts={tstr}"
+        found = True
+        href = f"/GIS/tiff/?service={key}&amp;ts={ts:%Y%m%d%H%M}"
         grbfn = testfn.rsplit("/", 1)[-1]
         href2 = testfn.replace("/mesonet/ARCHIVE/", "/archive/")
         res["content"] += (
             f'<br />{grbfn} <a href="{href}">As GeoTIFF</a>, '
             f'<a href="{href2}">As Grib</a>'
         )
+    if not found:
+        res["content"] += "<p>Failed to find any archived files.</p>"
 
 
-def workflow(tmpdir, ts):
+def workflow(key, tmpdir, ts):
     """Go ts."""
-    valid = datetime.strptime(ts, "%Y%m%d%H")
-    testfn = (
-        f"/mesonet/ARCHIVE/data/{valid:%Y/%m/%d}/model/ffg/5kmffg_"
-        f"{valid:%Y%m%d%H}.grib2"
-    )
+    meta = SOURCES[key]
+    if ts is None:
+        # Go to 0z tomorrow and work backwards
+        valid = (utc() + timedelta(days=1)).replace(hour=0, minute=0)
+        found = False
+        for offset in range(0, 25, meta["modulo"]):
+            ts = valid - timedelta(hours=offset)
+            testfn = f"/mesonet/ARCHIVE/data/{ts.strftime(meta['re'])}"
+            if os.path.isfile(testfn):
+                found = True
+                break
+        if not found:
+            raise FileNotFoundError("Failed to find recent file for service")
+
+    else:
+        valid = datetime.strptime(ts, "%Y%m%d%H%M")
+        testfn = (
+            f"/mesonet/ARCHIVE/data/{valid:%Y/%m/%d}/model/ffg/5kmffg_"
+            f"{valid:%Y%m%d%H}.grib2"
+        )
+        if not os.path.isfile(testfn):
+            raise FileNotFoundError("Failed to find file for service.")
     with subprocess.Popen(
         [
             "gdalwarp",
@@ -81,7 +111,7 @@ def application(environ, start_response):
     fdict = parse_formvars(environ)
     service = fdict.get("service")
     if service in SOURCES:
-        ts = fdict.get("ts")
+        ts = fdict.get("ts", "current")[:12]
         headers = [
             ("Content-type", "application/octet-stream"),
             (
@@ -89,9 +119,16 @@ def application(environ, start_response):
                 f"attachment; filename={service}_{ts}.tiff",
             ),
         ]
-        start_response("200 OK", headers)
         with tempfile.TemporaryDirectory() as tmpdir:
-            return [workflow(tmpdir, fdict.get("ts"))]
+            try:
+                res = workflow(service, tmpdir, fdict.get("ts"))
+                start_response("200 OK", headers)
+                return [res]
+            except FileNotFoundError:
+                start_response(
+                    "400 Bad Request", [("Content-type", "text/plain")]
+                )
+                return [b"File not found for service/ts combination."]
 
     valid = utc(
         int(fdict.get("year", utc().year)),
@@ -101,6 +138,7 @@ def application(environ, start_response):
 
     headers = [("Content-type", "text/html")]
     res = {
+        "IEM_APPID": 33,
         "content": HEADER
         % {
             "ys": make_select(
@@ -121,9 +159,10 @@ def application(environ, start_response):
                 dict(zip(range(1, 32), range(1, 32))),
                 showvalue=False,
             ),
-        }
+        },
     }
-    generate_ui(valid, res)
+    for key in SOURCES:
+        generate_ui(key, valid, res)
 
     start_response("200 OK", headers)
     return [TEMPLATE.render(res).encode("utf-8")]
