@@ -1,8 +1,8 @@
 """ Process CoCoRaHS Stations!"""
 import datetime
 import sys
+from zoneinfo import ZoneInfo
 
-import pytz
 import requests
 from pyiem.observation import Observation
 from pyiem.reference import TRACE_VALUE
@@ -28,7 +28,7 @@ def main(daysago):
 
     now = datetime.datetime.now() - datetime.timedelta(days=daysago)
 
-    lts = utc().astimezone(pytz.timezone("America/Chicago"))
+    lts = utc().astimezone(ZoneInfo("America/Chicago"))
 
     state = sys.argv[1]
 

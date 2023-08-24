@@ -1,11 +1,11 @@
 """ ASI Data Timeseries """
 import datetime
 from io import BytesIO
+from zoneinfo import ZoneInfo
 
 import matplotlib.dates as mdates
 import numpy as np
 import psycopg2.extras
-import pytz
 from paste.request import parse_formvars
 from pyiem.network import Table as NetworkTable
 from pyiem.plot.use_agg import plt
@@ -104,7 +104,7 @@ def application(environ, start_response):
     ax[0].legend(loc=(0.05, -0.15), ncol=3)
     ax[0].set_xlim(min(valid), max(valid))
     days = (max(valid) - min(valid)).days
-    central = pytz.timezone("America/Chicago")
+    central = ZoneInfo("America/Chicago")
     if days >= 3:
         interval = max(int(days / 7), 1)
         ax[0].xaxis.set_major_locator(

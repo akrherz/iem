@@ -37,10 +37,10 @@ product.</p>
 Most products go back to October 2005.</p>
 """
 import datetime
+from zoneinfo import ZoneInfo
 
 import numpy as np
 import pandas as pd
-import pytz
 from pyiem.nws import vtec
 from pyiem.plot import MapPlot, get_cmap
 from pyiem.util import get_autoplot_context, get_sqlalchemy_conn
@@ -333,10 +333,8 @@ def get_count_bins(df, varname):
 def plotter(fdict):
     """Go"""
     ctx = get_autoplot_context(fdict, get_description())
-    sts = ctx["sdate"]
-    sts = sts.replace(tzinfo=pytz.UTC)
-    ets = ctx["edate"]
-    ets = ets.replace(tzinfo=pytz.UTC)
+    sts = ctx["sdate"].replace(tzinfo=ZoneInfo("UTC"))
+    ets = ctx["edate"].replace(tzinfo=ZoneInfo("UTC"))
     p1 = ctx["phenomenav1"]
     p2 = ctx["phenomenav2"]
     p3 = ctx["phenomenav3"]

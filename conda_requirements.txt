@@ -58,8 +58,6 @@ pyshp>=2
 # for testing
 pytest
 pytest-xdist
-# important
-pytz
 # various places
 rasterio
 # various places

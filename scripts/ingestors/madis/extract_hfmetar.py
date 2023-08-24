@@ -7,9 +7,9 @@ import datetime
 import os
 import sys
 import warnings
+from zoneinfo import ZoneInfo
 
 import numpy as np
-import pytz
 from metar import Metar
 from metpy.units import masked_array, units
 from netCDF4 import chartostring
@@ -146,7 +146,7 @@ def process(ncfn):
         ts = datetime.datetime(1970, 1, 1) + datetime.timedelta(
             seconds=data["observationTime"][i]
         )
-        ts = ts.replace(tzinfo=pytz.UTC)
+        ts = ts.replace(tzinfo=ZoneInfo("UTC"))
 
         mtr = f"{sid} {ts:%d%H%M}Z AUTO "
         network = xref.get(sid3, "ASOS")

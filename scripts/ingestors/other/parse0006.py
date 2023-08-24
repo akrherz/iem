@@ -2,8 +2,8 @@
 import datetime
 import os
 import sys
+from zoneinfo import ZoneInfo
 
-import pytz
 from pyiem.observation import Observation
 from pyiem.util import convert_value, get_dbconn
 
@@ -13,9 +13,7 @@ def main():
     pgconn = get_dbconn("iem")
     icursor = pgconn.cursor()
 
-    now = datetime.datetime.now().replace(
-        tzinfo=pytz.timezone("America/Chicago")
-    )
+    now = datetime.datetime.now().replace(tzinfo=ZoneInfo("America/Chicago"))
 
     fn = f"/mesonet/ARCHIVE/data/{now:%Y/%m/%d}/text/ot/ot0006.dat"
 

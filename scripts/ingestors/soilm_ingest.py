@@ -10,13 +10,11 @@ import os
 import subprocess
 import sys
 import tempfile
+from zoneinfo import ZoneInfo
 
 import numpy as np
 import pandas as pd
-
-# Third party
 import psycopg2
-import pytz
 from metpy.calc import dewpoint_from_relative_humidity
 from metpy.units import units
 from pyiem.observation import Observation
@@ -165,7 +163,7 @@ def qcval2(df, colname, floor, ceiling):
 def make_time(string):
     """Convert a time in the file to a datetime"""
     tstamp = datetime.datetime.strptime(string, "%Y-%m-%d %H:%M:%S")
-    tstamp = tstamp.replace(tzinfo=pytz.FixedOffset(-360))
+    tstamp = tstamp.replace(tzinfo=ZoneInfo("Etc/GMT+6"))
     return tstamp
 
 
@@ -528,7 +526,7 @@ def daily_process(nwsli, maxts):
         valid = datetime.datetime(
             row["valid"].year, row["valid"].month, row["valid"].day, 12, 0
         )
-        valid = valid.replace(tzinfo=pytz.timezone("America/Chicago"))
+        valid = valid.replace(tzinfo=ZoneInfo("America/Chicago"))
         ob = Observation(nwsli, "ISUSM", valid)
         ob.data["max_tmpf"] = c2f(row["tair_c_max_qc"])
         ob.data["min_tmpf"] = c2f(row["tair_c_min_qc"])
@@ -567,8 +565,8 @@ def get_max_timestamps(nwsli):
     """Fetch out our max values"""
     icursor = ISUAG.cursor()
     data = {
-        "hourly": datetime.datetime(2012, 1, 1, tzinfo=pytz.FixedOffset(-360)),
-        "minute": datetime.datetime(2012, 1, 1, tzinfo=pytz.FixedOffset(-360)),
+        "hourly": datetime.datetime(2012, 1, 1, tzinfo=ZoneInfo("Etc/GMT+6")),
+        "minute": datetime.datetime(2012, 1, 1, tzinfo=ZoneInfo("Etc/GMT+6")),
         "daily": datetime.date(2012, 1, 1),
     }
     icursor.execute(

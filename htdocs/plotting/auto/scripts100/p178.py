@@ -21,10 +21,10 @@ of county/zone based FFG guidance found in the FFG text products.
 """
 import datetime
 import os
+from zoneinfo import ZoneInfo
 
 import pandas as pd
 import pygrib
-import pytz
 from metpy.units import masked_array, units
 from pyiem.exceptions import NoDataFound
 from pyiem.plot import MapPlot, get_cmap
@@ -108,7 +108,7 @@ def get_description():
 def plotter(fdict):
     """Go"""
     ctx = get_autoplot_context(fdict, get_description())
-    ts = ctx["ts"].replace(tzinfo=pytz.utc)
+    ts = ctx["ts"].replace(tzinfo=ZoneInfo("UTC"))
     hour = int(ctx["hour"])
     ilabel = ctx["ilabel"] == "yes"
     plot = MapPlot(

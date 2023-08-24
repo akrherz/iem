@@ -4,13 +4,13 @@ ISU Soil Moisture Network.
 """
 # pylint: disable=no-member,too-many-lines
 import datetime
+from zoneinfo import ZoneInfo
 
 import matplotlib.colors as mpcolors
 import matplotlib.dates as mdates
 import numpy as np
 import pandas as pd
 import psycopg2
-import pytz
 from matplotlib.lines import Line2D
 from matplotlib.patches import Patch
 from pyiem import meteorology
@@ -24,7 +24,7 @@ from pyiem.util import (
     get_sqlalchemy_conn,
 )
 
-CENTRAL = pytz.timezone("America/Chicago")
+CENTRAL = ZoneInfo("America/Chicago")
 PLOTTYPES = {
     "1": "3 Panel Plot",
     "8": "Battery Voltage",
@@ -99,7 +99,7 @@ def make_inversion_timing(ctx):
     if df.empty:
         raise NoDataFound("No inversion data found for station!")
     df = df.assign(
-        utc_valid=lambda df_: df_.utc_valid.dt.tz_localize(pytz.UTC),
+        utc_valid=lambda df_: df_.utc_valid.dt.tz_localize(ZoneInfo("UTC")),
         valid=lambda df_: df_.utc_valid.dt.tz_convert(CENTRAL),
         delta=lambda df_: (
             c2f(df_.tair_10_c_avg_qc) - c2f(df_.tair_15_c_avg_qc)
@@ -712,25 +712,17 @@ def plot_sm(ctx):
     if days >= 3:
         interval = max(int(days / 7), 1)
         ax.xaxis.set_major_locator(
-            mdates.DayLocator(
-                interval=interval, tz=pytz.timezone("America/Chicago")
-            )
+            mdates.DayLocator(interval=interval, tz=CENTRAL)
         )
         ax.xaxis.set_major_formatter(
-            mdates.DateFormatter(
-                "%-d %b\n%Y", tz=pytz.timezone("America/Chicago")
-            )
+            mdates.DateFormatter("%-d %b\n%Y", tz=CENTRAL)
         )
     else:
         ax.xaxis.set_major_locator(
-            mdates.AutoDateLocator(
-                maxticks=10, tz=pytz.timezone("America/Chicago")
-            )
+            mdates.AutoDateLocator(maxticks=10, tz=CENTRAL)
         )
         ax.xaxis.set_major_formatter(
-            mdates.DateFormatter(
-                "%-I %p\n%d %b", tz=pytz.timezone("America/Chicago")
-            )
+            mdates.DateFormatter("%-I %p\n%d %b", tz=CENTRAL)
         )
     ax.set_ylabel(r"Volumetric Soil Moisture $m^3/m^3$")
     return fig, df
@@ -975,25 +967,17 @@ def xaxis_magic(ctx, ax):
     if days >= 3:
         interval = max(int(days / 7), 1)
         ax.xaxis.set_major_locator(
-            mdates.DayLocator(
-                interval=interval, tz=pytz.timezone("America/Chicago")
-            )
+            mdates.DayLocator(interval=interval, tz=CENTRAL)
         )
         ax.xaxis.set_major_formatter(
-            mdates.DateFormatter(
-                "%-d %b\n%Y", tz=pytz.timezone("America/Chicago")
-            )
+            mdates.DateFormatter("%-d %b\n%Y", tz=CENTRAL)
         )
     else:
         ax.xaxis.set_major_locator(
-            mdates.AutoDateLocator(
-                maxticks=10, tz=pytz.timezone("America/Chicago")
-            )
+            mdates.AutoDateLocator(maxticks=10, tz=CENTRAL)
         )
         ax.xaxis.set_major_formatter(
-            mdates.DateFormatter(
-                "%-I %p\n%-d %b", tz=pytz.timezone("America/Chicago")
-            )
+            mdates.DateFormatter("%-I %p\n%-d %b", tz=CENTRAL)
         )
 
 

@@ -21,10 +21,10 @@ total inclusion of any zones/counties that were added to the alert.
 </p>
 """
 from datetime import timezone
+from zoneinfo import ZoneInfo
 
 import geopandas as gpd
 import pandas as pd
-import pytz
 from pyiem.exceptions import NoDataFound
 from pyiem.nws import vtec
 from pyiem.plot.geoplot import MapPlot
@@ -235,8 +235,8 @@ def plotter(fdict):
     def m(valid):
         """Convert to our local timestamp."""
         return (
-            valid.tz_localize(pytz.UTC)
-            .astimezone(pytz.timezone(tzname))
+            valid.tz_localize(ZoneInfo("UTC"))
+            .astimezone(ZoneInfo(tzname))
             .strftime(TFORMAT)
         )
 
@@ -341,7 +341,7 @@ def plotter(fdict):
                 caxpos=(0.02, 0.07, 0.3, 0.005),
             )
             if radval is not None:
-                tstamp = radval.astimezone(pytz.timezone(tzname)).strftime(
+                tstamp = radval.astimezone(ZoneInfo(tzname)).strftime(
                     "%-I:%M %p"
                 )
                 mp.ax.text(

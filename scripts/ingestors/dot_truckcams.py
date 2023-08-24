@@ -9,9 +9,9 @@ import json
 import os
 import subprocess
 import tempfile
+from zoneinfo import ZoneInfo
 
 import pyproj
-import pytz
 import requests
 from pyiem.util import exponential_backoff, get_dbconn, logger
 
@@ -89,7 +89,7 @@ def process_features(features):
         if logdt is None:
             continue
         ts = datetime.datetime.utcfromtimestamp(logdt / 1000.0)
-        valid = ts.replace(tzinfo=pytz.UTC)
+        valid = ts.replace(tzinfo=ZoneInfo("UTC"))
         label = feat["attributes"]["PHOTO_ANUMBER"]
         idnum = feat["attributes"]["PHOTO_UID"]
         LOG.debug(

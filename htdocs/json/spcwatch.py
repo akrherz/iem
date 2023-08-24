@@ -3,9 +3,9 @@
 """
 import datetime
 import json
+from zoneinfo import ZoneInfo
 
 import pandas as pd
-import pytz
 from paste.request import parse_formvars
 from pyiem.util import get_dbconn, html_escape
 from pymemcache.client import Client
@@ -114,7 +114,7 @@ def application(environ, start_response):
         ts = datetime.datetime.utcnow()
     else:
         ts = datetime.datetime.strptime(ts, "%Y%m%d%H%M")
-    ts = ts.replace(tzinfo=pytz.UTC)
+    ts = ts.replace(tzinfo=ZoneInfo("UTC"))
 
     cb = fields.get("callback")
 

@@ -5,9 +5,9 @@ No longer is relayed via NLAE.
 import datetime
 import os
 import sys
+from zoneinfo import ZoneInfo
 
 import pandas as pd
-import pytz
 from pint import UnitRegistry
 from pyiem.observation import Observation
 from pyiem.util import get_dbconn, logger
@@ -68,7 +68,7 @@ def sum_hourly(hdf, date, col):
     """Figure out the sum based on the hourly data"""
     # TODO 6z is a quasi bug here as we also total precip
     sts = datetime.datetime(date.year, date.month, date.day, 6)
-    sts = sts.replace(tzinfo=pytz.utc)
+    sts = sts.replace(tzinfo=ZoneInfo("UTC"))
     ets = sts + datetime.timedelta(hours=24)
     df2 = hdf[(hdf["valid"] > sts) & (hdf["valid"] < ets)]
     if df2.empty:
@@ -90,9 +90,7 @@ def clean(key, value):
 def database(lastob, ddf, hdf, force_currentlog):
     """Do the tricky database work"""
     # This should be okay as we are always going to CST
-    maxts = (
-        hdf["TIMESTAMP"].max().replace(tzinfo=pytz.timezone("America/Chicago"))
-    )
+    maxts = hdf["TIMESTAMP"].max().replace(tzinfo=ZoneInfo("America/Chicago"))
     if lastob is not None and maxts <= lastob:
         return
     iemdb = get_dbconn("iem")
@@ -102,7 +100,7 @@ def database(lastob, ddf, hdf, force_currentlog):
     else:
         df2 = hdf[hdf["valid"] > lastob]
     for _, row in df2.iterrows():
-        localts = row["valid"].tz_convert(pytz.timezone("America/Chicago"))
+        localts = row["valid"].tz_convert(ZoneInfo("America/Chicago"))
         # Find, if it exists, the summary table entry here
         daily = ddf[ddf["date"] == localts.date()]
         ob = Observation(SID, "OT", localts)
@@ -139,7 +137,7 @@ def get_last():
     """,
         (SID,),
     )
-    return cursor.fetchone()[0].replace(tzinfo=pytz.utc)
+    return cursor.fetchone()[0].replace(tzinfo=ZoneInfo("UTC"))
 
 
 def campbell2df(year):
@@ -181,7 +179,7 @@ def campbell2df(year):
     # Move all timestamps to UTC +6
     hdf["valid"] = (
         hdf["TIMESTAMP"] + datetime.timedelta(hours=6)
-    ).dt.tz_localize(pytz.UTC)
+    ).dt.tz_localize(ZoneInfo("UTC"))
     return ddf, hdf
 
 

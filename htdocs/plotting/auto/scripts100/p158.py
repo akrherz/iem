@@ -6,11 +6,11 @@ prevent web browser crashes.  If you select a time period greater than
 20 minutes, you will get strided results.
 """
 import datetime
+from zoneinfo import ZoneInfo
 
 import matplotlib.dates as mdates
 import numpy as np
 import pandas as pd
-import pytz
 from pyiem.exceptions import NoDataFound
 from pyiem.plot import figure
 from pyiem.util import get_autoplot_context, get_sqlalchemy_conn
@@ -47,7 +47,7 @@ def get_description():
 def get_context(fdict):
     """Get plot context"""
     ctx = get_autoplot_context(fdict, get_description())
-    ctx["dt"] = ctx["dt"].replace(tzinfo=pytz.UTC)
+    ctx["dt"] = ctx["dt"].replace(tzinfo=ZoneInfo("UTC"))
     dt = ctx["dt"]
     station = ctx["station"]
     minutes = ctx["minutes"]
@@ -460,9 +460,7 @@ def plotter(fdict):
     ax1.grid(True)
     ax1.set_ylabel("Air Temp C")
     ax1.xaxis.set_major_formatter(
-        mdates.DateFormatter(
-            "%-I %p\n%-d %b", tz=pytz.timezone("America/Chicago")
-        )
+        mdates.DateFormatter("%-I %p\n%-d %b", tz=ZoneInfo("America/Chicago"))
     )
     ax1.set_title(ctx["title"])
     ax2.grid(True)

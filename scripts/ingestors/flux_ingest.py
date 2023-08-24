@@ -4,9 +4,9 @@ Ingest files provided by NLAE containing flux information
 import datetime
 import os
 from io import StringIO
+from zoneinfo import ZoneInfo
 
 import pandas as pd
-import pytz
 from pyiem.observation import Observation
 from pyiem.util import c2f, convert_value, get_dbconn, logger, utc
 
@@ -144,7 +144,7 @@ def c(v):
 def make_time(string):
     """Convert a time in the file to a datetime"""
     tstamp = datetime.datetime.strptime(string, "%Y-%m-%d %H:%M:%S")
-    tstamp = tstamp.replace(tzinfo=pytz.FixedOffset(-360))
+    tstamp = tstamp.replace(tzinfo=ZoneInfo("Etc/GMT+6"))
     return tstamp
 
 
@@ -201,7 +201,7 @@ def main():
             continue
         df = df.rename(columns=CONVERT)
         # We need a UTC year to allow for the database insert below to work
-        df["utcyear"] = df["valid"].dt.tz_convert(pytz.utc).dt.year
+        df["utcyear"] = df["valid"].dt.tz_convert(ZoneInfo("UTC")).dt.year
         df["station"] = station
         for year, gdf in df.groupby("utcyear"):
             exclude = []

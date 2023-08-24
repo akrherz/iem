@@ -3,8 +3,8 @@ import datetime
 import math
 import re
 from io import StringIO
+from zoneinfo import ZoneInfo
 
-import pytz
 from paste.request import parse_formvars
 from psycopg2.extras import RealDictCursor
 from pyiem.util import get_dbconn, utc
@@ -27,7 +27,7 @@ def gentext(sio, row, grversion):
     """Turn the database row into placefile worthy text."""
     smps = row["tml_sknt"] * 0.5144
     drct = row["tml_direction"]
-    tml_valid = row["tml_valid"].astimezone(pytz.UTC)
+    tml_valid = row["tml_valid"].astimezone(ZoneInfo("UTC"))
     duration = (row["polygon_end"] - row["tml_valid"]).total_seconds()
     distance = smps * duration
     lats = []
@@ -92,11 +92,9 @@ def application(environ, start_response):
     refresh = 60
     if "valid" in form:
         # pylint: disable=no-value-for-parameter
-        valid = pytz.UTC.localize(
-            datetime.datetime.strptime(
-                form.get("valid")[:16], "%Y-%m-%dT%H:%M"
-            )
-        )
+        valid = datetime.datetime.strptime(
+            form.get("valid")[:16], "%Y-%m-%dT%H:%M"
+        ).replace(tzinfo=ZoneInfo("UTC"))
         refresh = 86400
     t1 = valid
     t2 = valid

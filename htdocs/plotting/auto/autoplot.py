@@ -14,7 +14,6 @@ from zoneinfo import ZoneInfo
 
 import numpy as np
 import pandas as pd
-import pytz
 from pandas.api.types import is_datetime64_any_dtype as isdt
 from paste.request import parse_formvars
 from PIL import Image
@@ -155,7 +154,7 @@ def get_res_by_fmt(p, fmt, fdict):
 
 def plot_metadata(fig, start_time, p):
     """Place timestamp on the image"""
-    now = utc().astimezone(pytz.timezone("America/Chicago"))
+    now = utc().astimezone(ZoneInfo("America/Chicago"))
     fig.text(
         0.01,
         0.005,
@@ -255,9 +254,8 @@ def workflow(mc, environ, form, fmt):
             if isdt(df[column]):
                 # Careful, only use ISO format when the timezone is UTC
                 dtz = df[column].dt.tz
-                # We could have timezone or zoneinfo or pytz :/
+                # We could have timezone or zoneinfo :/
                 if dtz is not None and dtz in [
-                    pytz.timezone("UTC"),
                     ZoneInfo("UTC"),
                     timezone.utc,
                 ]:
