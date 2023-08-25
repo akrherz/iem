@@ -1,51 +1,58 @@
-div.wwaW{
-  border-top: 1px solid #000;
-  border-left: 10px solid #f00;
-  margin-bottom: 3px;
-  float: left;
-  width: 90%;
+div.wwaW {
+    border-top: 1px solid #000;
+    border-left: 10px solid #f00;
+    margin-bottom: 3px;
+    float: left;
+    width: 90%;
 }
-div.wwaY{
-  border-top: 1px solid #000;
-  border-left: 10px solid #ff0;
-  margin-bottom: 3px;
-  float: left;
-  width: 90%;
+
+div.wwaY {
+    border-top: 1px solid #000;
+    border-left: 10px solid #ff0;
+    margin-bottom: 3px;
+    float: left;
+    width: 90%;
 }
-div.wwaS{
-  border-left: 10px solid #fff;
-  border-top: 1px solid #000;
-  margin-bottom: 3px;
-  float: left;
-  width: 90%;
+
+div.wwaS {
+    border-left: 10px solid #fff;
+    border-top: 1px solid #000;
+    margin-bottom: 3px;
+    float: left;
+    width: 90%;
 }
-div.wwaA{
-  border-top: 1px solid #000;
-  border-left: 10px solid #f0f;
-  margin-bottom: 3px;
-  float: left;
-  width: 90%;
+
+div.wwaA {
+    border-top: 1px solid #000;
+    border-left: 10px solid #f0f;
+    margin-bottom: 3px;
+    float: left;
+    width: 90%;
 }
-.issued{
- background: #eee;
- width: 33%;
- float: left;
+
+.issued {
+    background: #eee;
+    width: 33%;
+    float: left;
 }
-.updated{
- background: #eee;
- width: 33%;
- float: left;
+
+.updated {
+    background: #eee;
+    width: 33%;
+    float: left;
 }
-.vtec{
- clear: both;
- float: left;
- background: #eee;
- width: 33%;
+
+.vtec {
+    clear: both;
+    float: left;
+    background: #eee;
+    width: 33%;
 }
-.wwa-state{
- clear: both;
- border: 1px solid #000;
- float: left;
- padding: 5px;
- width: 30px;
+
+.wwa-state {
+    clear: both;
+    border: 1px solid #000;
+    float: left;
+    padding: 5px;
+    width: 30px;
 }

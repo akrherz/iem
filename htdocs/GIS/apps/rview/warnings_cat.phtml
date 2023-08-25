@@ -1,17 +1,17 @@
 <?php
+// remove me someday
 require_once "../../../../config/settings.inc.php";
+require_once "../../../../include/forms.php";
 
 /* Get some stuff from our request */
-$year = isset($_GET["year"]) ? intval($_GET["year"]) : 2008;
-$wfo = isset($_GET["wfo"]) ? substr($_GET["wfo"],0,3) : "DMX";
-$eventid = isset($_GET["eventid"]) ? intval($_GET["eventid"]) : 13;
-$phenomena = isset($_GET["phenomena"]) ? substr($_GET["phenomena"],0,2) : "TO";
-$significance = isset($_GET["significance"]) ? substr($_GET["significance"],0,1) : "W";
+$year = isset($_GET["year"]) ? intval(xssafe($_GET["year"])) : 2008;
+$wfo = isset($_GET["wfo"]) ? substr(xssafe($_GET["wfo"]),0,3) : "DMX";
+$eventid = isset($_GET["eventid"]) ? intval(xssafe($_GET["eventid"])) : 13;
+$phenomena = isset($_GET["phenomena"]) ? substr(xssafe($_GET["phenomena"]),0,2) : "TO";
+$significance = isset($_GET["significance"]) ? substr(xssafe($_GET["significance"]),0,1) : "W";
 
 /* Generate URL for forwarding */
 $uri = sprintf("/vtec/%s-O-NEW-K%s-%s-%s-%04d.html",  
   $year, $wfo, $phenomena, $significance, $eventid);
 
 header("Location: $uri");
-
-?>

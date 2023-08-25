@@ -1,19 +1,19 @@
-<?php 
+<?php
 require_once "../../../config/settings.inc.php";
 require_once "../../../include/myview.php";
-require_once "../../../include/forms.php"; 
+require_once "../../../include/forms.php";
 
 $t = new MyView();
 $t->title = "B548 Agronomy Time Series";
 
-$year = isset($_GET["year"]) ? intval($_GET["year"]): date("Y");
-$month = isset($_GET["month"]) ? intval($_GET["month"]): date("m");
-$day = isset($_GET["day"]) ? intval($_GET["day"]): date("d");
-$ts = mktime(0,0,0,$month, $day, $year);
+$year = get_int404("year", date("Y"));
+$month = get_int404("month", date("m"));
+$day = get_int404("day", date("d"));
+$ts = mktime(0, 0, 0, $month, $day, $year);
 
 $battery = "";
-if ($ts < mktime(0,0,0,7,9,2006)) { 
-  $battery = <<<EOF
+if ($ts < mktime(0, 0, 0, 7, 9, 2006)) {
+    $battery = <<<EOF
   <img src="battery.php?year={$year}&month={$month}&day={$day}" ALT="Time Series">
 EOF;
 }
@@ -22,12 +22,24 @@ $ys = yearSelect2(2003, $year, "year");
 $ms = monthSelect($month, "month");
 $ds = daySelect($day, "day");
 
-$url = sprintf("1min_ot.php?year=%s&month=%s&day=%s", date("Y", $ts),
-		date("m", $ts), date("d", $ts) );
-$n = sprintf("ot_10min.phtml?year=%s&month=%s&day=%s", date("Y", $ts +86400),
-		date("m", $ts + 86400), date("d", $ts + 86400) );
-$p = sprintf("ot_10min.phtml?year=%s&month=%s&day=%s", date("Y", $ts - 86400),
-		date("m", $ts - 86400), date("d", $ts - 86400) );
+$url = sprintf(
+    "1min_ot.php?year=%s&month=%s&day=%s",
+    date("Y", $ts),
+    date("m", $ts),
+    date("d", $ts)
+);
+$n = sprintf(
+    "ot_10min.phtml?year=%s&month=%s&day=%s",
+    date("Y", $ts + 86400),
+    date("m", $ts + 86400),
+    date("d", $ts + 86400)
+);
+$p = sprintf(
+    "ot_10min.phtml?year=%s&month=%s&day=%s",
+    date("Y", $ts - 86400),
+    date("m", $ts - 86400),
+    date("d", $ts - 86400)
+);
 
 $t->content = <<<EOF
 <ol class="breadcrumb">
@@ -55,8 +67,6 @@ cooled air departs the heat exchanger.</li>
 
   <form method="GET" action="ot_10min.phtml">
 {$ys} {$ms} {$ds}
-
-
 
   <input type="submit" value="Make Plot"></form>
 <p><a href="{$p}">View Previous Day</a> 
@@ -94,6 +104,8 @@ cooled air departs the heat exchanger.</li>
   <li><a href="ot_10min.phtml?year=2022&month=3&day=22">22 Mar 2022</a>
   <br />ISU FP&amp;M shuts down chilled water supply to do some local
   construction work.</li>
+  <li><a href="ot_10min.phtml?year=2023&month=8&day=24">24 Aug 2023</a>
+  <br />Fire at ISU FP&amp;M shuts down chilled water supply.</li>
 </ul>
 
 EOF;

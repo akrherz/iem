@@ -1,7 +1,7 @@
 <?php
 
 function printHTML($urls, $width, $height){
-	$urls = implode("::", $urls);
+    $urls = implode("::", $urls);
 return <<<EOF
 <form name="jsani" id="jsani" action="#" style="width: {$width}px; height: {$height}px;">
     <input type="hidden" name="filenames" value="{$urls}">
@@ -17,5 +17,3 @@ return <<<EOF
 </form>
 EOF;
 }
-
-?>
