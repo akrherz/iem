@@ -1,5 +1,6 @@
 <?php
 require_once "../../../../config/settings.inc.php";
+define("IEM_APPID", 72);
 putenv("TZ=UTC");
 require_once "../../../../include/myview.php";
 require_once "../../../../include/forms.php";
@@ -63,14 +64,14 @@ $d = date("d F Y H:i",  $ts);
 
 $maptitle = htmlentities("SPC Watch number $num during $year");
 $margin = 0.5;
-$url = sprintf("%s/GIS/radmap.php?title=%s&layers[]=uscounties&layers[]=nexrad&ts=%s&height=480&width=640&layers[]=watches&layers[]=watch_by_county&sector=conus&bbox=%s,%s,%s,%s", $rooturl, $maptitle, gmdate('YmdHi', $ts), $row["x0"] - $margin, $row["y0"] - $margin, $row["x1"] + $margin, $row["y1"] + $margin);
+$url = sprintf("/GIS/radmap.php?title=%s&layers[]=uscounties&layers[]=nexrad&ts=%s&height=480&width=640&layers[]=watches&layers[]=watch_by_county&sector=conus&bbox=%s,%s,%s,%s", $maptitle, gmdate('YmdHi', $ts), $row["x0"] - $margin, $row["y0"] - $margin, $row["x1"] + $margin, $row["y1"] + $margin);
 
 /*____________________________ Plot LSRs */
 if ($expires < time() && $year > 2002) {
-    $lurl = sprintf("%s/GIS/radmap.php?layers[]=lsrs&ts=%s&ts2=%s&height=480&width=640&layers[]=watches&sector=conus&bbox=%s,%s,%s,%s", $rooturl, gmdate('YmdHi', $ts), gmdate('YmdHi', $expires), $row["x0"] - $margin, $row["y0"] - $margin, $row["x1"] + $margin, $row["y1"] + $margin);
+    $lurl = sprintf("/GIS/radmap.php?layers[]=lsrs&ts=%s&ts2=%s&height=480&width=640&layers[]=watches&sector=conus&bbox=%s,%s,%s,%s", gmdate('YmdHi', $ts), gmdate('YmdHi', $expires), $row["x0"] - $margin, $row["y0"] - $margin, $row["x1"] + $margin, $row["y1"] + $margin);
 }
 
-$ourl = sprintf("%s/GIS/radmap.php?layers[]=nexrad&ts=%s&height=480&width=640&layers[]=watches&sector=conus", $rooturl, gmdate('YmdHi', $ts));
+$ourl = sprintf("/GIS/radmap.php?layers[]=nexrad&ts=%s&height=480&width=640&layers[]=watches&sector=conus", gmdate('YmdHi', $ts));
 
 $prevlink = "";
 if ($num > 1) {

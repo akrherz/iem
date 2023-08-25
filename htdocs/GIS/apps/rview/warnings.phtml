@@ -48,7 +48,7 @@ $filter = get_int404("filter", 0);
 $lsrwindow = get_int404("lsrwindow", "0");
 $lsrlook = isset($_GET["lsrlook"]) ? xssafe($_GET["lsrlook"]) : "+";
 // careful here as we can have PXXX sites
-$site = isset($_GET["site"]) ? strtoupper(substr($_GET["site"], 0, 4)) : "DMX";
+$site = isset($_GET["site"]) ? strtoupper(substr(xssafe($_GET["site"]), 0, 4)) : "DMX";
 $osite = isset($_GET["osite"]) ? substr($_GET["osite"], 0, 4) : "DMX";
 $sortcol = isset($_GET["sortcol"]) ? substr(xssafe($_GET["sortcol"]), 0, 20) : "issued";
 $sortdir = isset($_GET["sortdir"]) ? xssafe($_GET["sortdir"]) : "DESC";
@@ -106,6 +106,9 @@ $nt->table["NHC"] = array(
     "lat" => 25.75, "lon" => -80.38,
     "name" => "National Hurricane Center"
 );
+if (!array_key_exists($site, $nt->table)){
+    xssafe("<script>");
+}
 
 $uri = "$baseuri?frames=$frames&amp;interval=$interval&amp;site=$site&amp;" .
     "cu=$cu&amp;archive=$archive&amp;year=$year&amp;month=$month&amp;" .
@@ -552,7 +555,8 @@ foreach ($wA as $key => $val) {
     $expire = $tokens[5];
     $status = $tokens[6];
 
-    $warningscat = "warnings_cat.phtml?year=$year&wfo=$wfo&phenomena=$phenomena&eventid=$eventid&significance=$significance";
+    $warningscat = sprintf("/vtec/%s-O-NEW-K%s-%s-%s-%04d.html",  
+        $year, $wfo, $phenomena, $significance, $eventid);
 
     $k += 1;
     $issue = strtotime($iA[$key]) - $tzoff;

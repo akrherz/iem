@@ -1,4 +1,11 @@
-"""Binned"""
+"""
+This plot is a histogram of observed temperatures
+placed into six range bins of your choice.  The plot attempts to answer
+the question of how often is the air temperature within a certain range
+during a certain time of the year.  The data for this plot is partitioned
+by week of the year.  Each plot legend entry contains the overall
+frequency for that bin.
+"""
 import calendar
 import datetime
 
@@ -12,17 +19,7 @@ PDICT = {"tmpf": "Air Temperature", "dwpf": "Dew Point Temperature"}
 
 def get_description():
     """Return a dict describing how to call this plotter"""
-    desc = {}
-    desc["cache"] = 86400
-    desc[
-        "description"
-    ] = """This plot is a histogram of observed temperatures
-    placed into six range bins of your choice.  The plot attempts to answer
-    the question of how often is the air temperature within a certain range
-    during a certain time of the year.  The data for this plot is partitioned
-    by week of the year.  Each plot legend entry contains the overall
-    frequency for that bin."""
-    desc["data"] = True
+    desc = {"description": __doc__, "cache": 86400, "data": True}
     desc["arguments"] = [
         dict(
             type="zstation",

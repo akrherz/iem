@@ -1,9 +1,9 @@
 """SPC Outlook JSON service."""
 import datetime
 import json
+from zoneinfo import ZoneInfo
 
 import pandas as pd
-import pytz
 from pandas.io.sql import read_sql
 from paste.request import parse_formvars
 from pyiem.nws.products.spcpts import THRESHOLD_ORDER
@@ -29,13 +29,13 @@ def get_dbcursor():
 def dotime(time, lon, lat, day, cat):
     """Query for Outlook based on some timestamp"""
     if time in ["", "current", "now"]:
-        ts = datetime.datetime.utcnow().replace(tzinfo=pytz.utc)
+        ts = datetime.datetime.utcnow().replace(tzinfo=ZoneInfo("UTC"))
         if day > 1:
             ts += datetime.timedelta(days=(day - 1))
     else:
         # ISO formatting
         ts = datetime.datetime.strptime(time, "%Y-%m-%dT%H:%MZ")
-        ts = ts.replace(tzinfo=pytz.utc)
+        ts = ts.replace(tzinfo=ZoneInfo("UTC"))
     with get_sqlalchemy_conn("postgis") as conn:
         df = read_sql(
             """

@@ -26,9 +26,9 @@ flakey.</p>
 plot, but only considers a calendar day.</p>
 """
 from datetime import date, datetime, timedelta
+from zoneinfo import ZoneInfo
 
 import pandas as pd
-import pytz
 from pyiem.exceptions import NoDataFound
 from pyiem.plot import figure
 from pyiem.util import get_autoplot_context, get_sqlalchemy_conn
@@ -267,8 +267,8 @@ def plotter(fdict):
         # Allow the output to contain more data
         if len(labels) >= 10:
             continue
-        sts = sts.replace(tzinfo=pytz.UTC).astimezone(pytz.timezone(tzname))
-        ets = ets.replace(tzinfo=pytz.UTC).astimezone(pytz.timezone(tzname))
+        sts = sts.replace(tzinfo=ZoneInfo("UTC")).astimezone(ZoneInfo(tzname))
+        ets = ets.replace(tzinfo=ZoneInfo("UTC")).astimezone(ZoneInfo(tzname))
         if varname in ["alti", "mslp"]:
             lbl = (
                 f"{row[varname]:.2f} to {row[deltacol]:.2f} -> "

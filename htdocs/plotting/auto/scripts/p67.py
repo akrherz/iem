@@ -1,4 +1,8 @@
-"""Wind Speed by Temperature"""
+"""
+This plot displays the frequency of having a
+reported wind speed be above a given threshold by reported temperature
+and by month.
+"""
 import calendar
 import datetime
 
@@ -12,14 +16,7 @@ from pyiem.util import get_autoplot_context, get_dbconn
 
 def get_description():
     """Return a dict describing how to call this plotter"""
-    desc = {}
-    desc["data"] = True
-    desc["cache"] = 86400
-    desc[
-        "description"
-    ] = """This plot displays the frequency of having a
-    reported wind speed be above a given threshold by reported temperature
-    and by month."""
+    desc = {"description": __doc__, "data": True, "cache": 86400}
     desc["arguments"] = [
         dict(
             type="zstation",

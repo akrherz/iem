@@ -1,4 +1,10 @@
-"""Replicated 108 plot, but for non-climodat."""
+"""
+This plot presents accumulated totals and departures
+of growing degree days, precipitation and stress degree days. Leap days
+are not considered for this plot. The light blue area represents the
+range of accumulated values based on the climatology for the site. The
+climatology is based on the closest nearby long-term climate site.
+"""
 import datetime
 
 import numpy as np
@@ -17,17 +23,7 @@ PDICT = {
 
 def get_description():
     """Return a dict describing how to call this plotter"""
-    desc = {}
-    desc["data"] = True
-    desc[
-        "description"
-    ] = """
-    This plot presents accumulated totals and departures
-    of growing degree days, precipitation and stress degree days. Leap days
-    are not considered for this plot. The light blue area represents the
-    range of accumulated values based on the climatology for the site. The
-    climatology is based on the closest nearby long-term climate site.
-    """
+    desc = {"description": __doc__, "data": True}
     today = datetime.date.today()
     if today.month < 5:
         today = today.replace(year=today.year - 1, month=10, day=1)
@@ -127,10 +123,12 @@ def plotter(fdict):
     climosite = ctx["_nt"].sts[station]["climate_site"]
     with get_sqlalchemy_conn("coop") as conn:
         climo = pd.read_sql(
-            f"SELECT day, sday, gddxx(%s, %s, high, low) as {glabel}, "
-            "sdd86(high, low) as sdd86, precip "
-            "from alldata WHERE station = %s and "
-            "year >= 1951 ORDER by day ASC",
+            f"""
+            SELECT day, sday, gddxx(%s, %s, high, low) as {glabel},
+            sdd86(high, low) as sdd86, precip
+            from alldata WHERE station = %s and
+            year >= 1951 ORDER by day ASC
+            """,
             conn,
             params=(gddbase, gddceil, ctx["_nt"].sts[station]["climate_site"]),
             index_col="day",
@@ -409,4 +407,4 @@ def plotter(fdict):
 
 
 if __name__ == "__main__":
-    plotter(dict(station="AEEI4", network="ISUSM"))
+    plotter({})

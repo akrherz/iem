@@ -1,9 +1,9 @@
 """Generates analysis maps of ASOS station data."""
 import datetime
+from zoneinfo import ZoneInfo
 
 import numpy as np
 import pandas as pd
-import pytz
 from metpy.calc import apparent_temperature
 from metpy.units import units
 from pyiem import reference
@@ -77,7 +77,7 @@ def get_description():
 def get_df(ctx, bnds, buf=2.25):
     """Figure out what data we need to fetch here"""
     if ctx.get("valid"):
-        valid = ctx["valid"].replace(tzinfo=pytz.utc)
+        valid = ctx["valid"].replace(tzinfo=ZoneInfo("UTC"))
         with get_sqlalchemy_conn("asos") as conn:
             df = pd.read_sql(
                 """
@@ -113,7 +113,7 @@ def get_df(ctx, bnds, buf=2.25):
             )
         df = df.groupby("station").first()
     else:
-        valid = datetime.datetime.utcnow().replace(tzinfo=pytz.utc)
+        valid = datetime.datetime.utcnow().replace(tzinfo=ZoneInfo("UTC"))
         with get_sqlalchemy_conn("iem") as conn:
             df = pd.read_sql(
                 """

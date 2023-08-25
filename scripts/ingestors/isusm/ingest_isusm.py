@@ -3,11 +3,11 @@ import datetime
 import os
 import subprocess
 import traceback
+from zoneinfo import ZoneInfo
 
 import inotify.adapters
 import numpy as np
 import pandas as pd
-import pytz
 from metpy.calc import dewpoint_from_relative_humidity
 from metpy.units import units
 from pyiem.observation import Observation
@@ -149,7 +149,7 @@ INVERSION = {
 def make_time(string):
     """Convert a CST timestamp in the file to a datetime"""
     tstamp = datetime.datetime.strptime(string, "%Y-%m-%d %H:%M:%S")
-    tstamp = tstamp.replace(tzinfo=pytz.FixedOffset(-360))
+    tstamp = tstamp.replace(tzinfo=ZoneInfo("Etc/GMT+6"))
     return tstamp
 
 

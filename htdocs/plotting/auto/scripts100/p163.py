@@ -15,10 +15,10 @@ to use some heuristics to associate those with an actual political
 boundary.  This fails about one percent of the time.
 """
 import datetime
+from zoneinfo import ZoneInfo
 
 import numpy as np
 import pandas as pd
-import pytz
 from pyiem.exceptions import NoDataFound
 from pyiem.plot import MapPlot, get_cmap
 from pyiem.util import get_autoplot_context, get_sqlalchemy_conn, utc
@@ -229,8 +229,8 @@ def get_count_bins(df, varname):
 def plotter(fdict):
     """Go"""
     ctx = get_autoplot_context(fdict, get_description())
-    sts = ctx["sdate"].replace(tzinfo=pytz.utc)
-    ets = ctx["edate"].replace(tzinfo=pytz.utc)
+    sts = ctx["sdate"].replace(tzinfo=ZoneInfo("UTC"))
+    ets = ctx["edate"].replace(tzinfo=ZoneInfo("UTC"))
     varname = ctx["var"]
     by = ctx["by"]
     myfilter = ctx["filter"]

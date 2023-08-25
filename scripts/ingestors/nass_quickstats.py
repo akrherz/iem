@@ -3,10 +3,10 @@
 Run from RUN_10_AFTER.sh at 3 PM each day."""
 import sys
 from datetime import datetime, timedelta
+from zoneinfo import ZoneInfo
 
 import numpy as np
 import pandas as pd
-import pytz
 import requests
 from pyiem.util import get_dbconn, get_properties, logger
 
@@ -56,7 +56,7 @@ def process(df):
     # Get load_time in proper order
     df["load_time"] = pd.to_datetime(
         df["load_time"].str.slice(0, 19), format="%Y-%m-%d %H:%M:%S"
-    ).dt.tz_localize(pytz.timezone("America/New_York"))
+    ).dt.tz_localize(ZoneInfo("America/New_York"))
     df = df.replace({np.nan: None, "": None})
     pgconn = get_dbconn("coop")
     cursor = pgconn.cursor()

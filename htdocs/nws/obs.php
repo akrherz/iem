@@ -17,12 +17,16 @@ $wfo = isset($_REQUEST["wfo"]) ? xssafe($_REQUEST["wfo"]) : 'DMX';
 $t->refresh = 60;
 $t->title = "Obs by NWS Forecast Office";
 $nt = new NetworkTable("WFO");
+if (!key_exists($wfo, $nt->table)){
+    xssafe("<script>");
+}
+$tzname = $nt->table[$wfo]["tzname"];
+$tzinfo = new DateTimeZone($tzname);
 
 $arr = array(
     "wfo" => $wfo,
 );
 $jobj = iemws_json("currents.json", $arr);
-
 
 $vals = array(
     "tmpf" => "Air Temperature [F]", "dwpf" => "Dew Point Temp [F]",
@@ -42,7 +46,7 @@ $wselect = "<select name=\"wfo\">";
 foreach ($nt->table as $key => $value) {
     $wselect .= "<option value=\"$key\" ";
     if ($wfo == $key) $wselect .= "SELECTED";
-    $wselect .= ">[" . $key . "] " . $nt->table[$key]["name"] . "\n";
+    $wselect .= ">[" . $key . "] " . $nt->table[$key]["name"] . "</option>\n";
 }
 $wselect .= "</select>";
 
@@ -50,27 +54,34 @@ $mydata = array();
 foreach ($jobj["data"] as $bogus => $iemob) {
     $key = $iemob["station"];
     $mydata[$key] = $iemob;
-    $mydata[$key]["ts"] = $mydata[$key]["local_valid"]; // legacy
+    $valid = new DateTime($mydata[$key]["utc_valid"], new DateTimeZone("UTC"));
+    $lts = $valid->setTimezone($tzinfo);
+    $mydata[$key]["ts"] = $lts->format("YmdHi");
+    $mydata[$key]["lts"] = $lts;
     $mydata[$key]["sped"] = $mydata[$key]["sknt"] * 1.15078;
     $mydata[$key]["relh"] = relh(f2c($mydata[$key]["tmpf"]), f2c($mydata[$key]["dwpf"]));
 
     if ($mydata[$key]["max_gust"] > $mydata[$key]["max_sknt"]) {
         $mydata[$key]["peak"] = $mydata[$key]["max_gust"];
-        if (! is_null($mydata[$key]["local_max_gust_ts"])) {
-            $mydata[$key]["peak_ts"] = new DateTime($mydata[$key]["local_max_gust_ts"]);
+        $mydata[$key]["peak_ts"] = null;
+        if (! is_null($mydata[$key]["utc_max_gust_ts"])) {
+            $gts = new DateTime($mydata[$key]["utc_max_gust_ts"], new DateTimeZone("UTC"));
+            $mydata[$key]["peak_ts"] = $gts->setTimezone($tzinfo);
         }
     } else {
         $mydata[$key]["peak"] = $mydata[$key]["max_sknt"];
         $mydata[$key]["peak_ts"] = null;
         if (! is_null($mydata[$key]["local_max_sknt_ts"])) {
-            $mydata[$key]["peak_ts"] = new DateTime($mydata[$key]["local_max_sknt_ts"]);
+            $gts = new DateTime($mydata[$key]["utc_max_sknt_ts"], new DateTimeZone("UTC"));
+            $mydata[$key]["peak_ts"] = $gts->setTimezone($tzinfo);
         }
     }
 }
 
 $table = "";
 $finalA = aSortBySecondIndex($mydata, $sortcol, $sorder);
-$now = time();
+$now = new DateTime("now", new DateTimeZone("UTC"));
+$now = $now->setTimezone($tzinfo);
 $i = 0;
 foreach ($finalA as $key => $parts) {
     $i++;
@@ -78,7 +89,7 @@ foreach ($finalA as $key => $parts) {
     if ($i % 2 == 0)  $table .= " bgcolor='#eeeeee'";
     $table .= "><td><input type=\"checkbox\" name=\"st[]\" value=\"" . $key . "\"></td>";
 
-    $tdiff = $now - strtotime($parts["local_valid"]);
+    $tdiff = $now->getTimestamp() - $parts["lts"]->getTimestamp();
     $moreinfo = sprintf("/sites/site.php?station=%s&network=%s", $key, $parts["network"]);
     $table .= "<td>" . $parts["name"] . " (<a href=\"$moreinfo\">" . $key . "</a>," . $parts["network"] . ")</td>";
     $table .= "<td ";
@@ -94,8 +105,7 @@ foreach ($finalA as $key => $parts) {
     } else {
         $fmt = "h:i A";
     }
-    $ts = new DateTime($parts["local_valid"]);
-    $table .= ">" . $ts->format($fmt) . "</td>
+    $table .= ">" . $parts["lts"]->format($fmt) . "</td>
      <td align='center'>" . myround($parts["tmpf"], 0) . "(<font color=\"#ff0000\">" . myround($parts["max_tmpf"], 0) . "</font>/<font color=\"#0000ff\">" . myround($parts["min_tmpf"], 0) . "</font>)</td>
      <td>" . myround($parts["dwpf"], 0) . "</td>
      <td>" . myround($parts["feel"], 0) . "</td>
@@ -108,10 +118,12 @@ foreach ($finalA as $key => $parts) {
     }
     $table .= "</td>";
     $aa = is_null($parts["peak_ts"]) ? "" : $parts["peak_ts"]->format("h:i A");
+    $phour = ($parts["phour"] != 0.0001) ? $parts["phour"] : 'T';
+    $pday = ($parts["pday"] != 0.0001) ? $parts["pday"] : 'T';
     $table .= "<td>" . $parts["drct"] . "</td>
         <td>" . myround($parts["peak"], 0) . " @ {$aa}</td>
-            <td>" . $parts["phour"] . "</td>
-            <td>" . $parts["pday"] . "</td>
+            <td>{$phour}</td>
+            <td>{$pday}</td>
         </tr>\n";
     if ($metar == "yes") {
         $table .= "<tr";
@@ -152,7 +164,7 @@ $t->content = <<<EOF
 </form>
 
 <p>Sorted by column <b>{$vals[$sortcol]}</b>. 
-Timestamps displayed are the local time for the sensor.
+Timestamps displayed are for <strong>{$tzname}</strong> timezone.
 
 <form method="GET" action="/my/current.phtml">
 

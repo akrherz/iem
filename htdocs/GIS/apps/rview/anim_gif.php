@@ -1,5 +1,5 @@
 <?php
-/* Create animated GIF! and then send it to them... */
+// Create animated GIF! and then send it to them...
 
 // Prevent client abort from leaving temp files around
 ignore_user_abort(true);

@@ -9,10 +9,10 @@ import os
 import subprocess
 import sys
 import warnings
+from zoneinfo import ZoneInfo
 
 import numpy as np
 import psycopg2.extras
-import pytz
 from netCDF4 import chartostring
 from pyiem.observation import Observation
 from pyiem.util import convert_value, get_dbconn, logger, mm2inch, ncopen
@@ -147,7 +147,7 @@ def main(argv):
         db[this_station] = {}
         ticks = obtime[recnum]
         ts = datetime.datetime(1970, 1, 1) + datetime.timedelta(seconds=ticks)
-        db[this_station]["ts"] = ts.replace(tzinfo=pytz.utc)
+        db[this_station]["ts"] = ts.replace(tzinfo=ZoneInfo("UTC"))
         db[this_station]["network"] = network
         db[this_station]["pres"] = sanity_check(pressure[recnum], 0, 1000000)
         db[this_station]["tmpk"] = sanity_check(tmpk[recnum], 200, 330)

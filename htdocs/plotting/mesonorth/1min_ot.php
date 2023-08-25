@@ -1,19 +1,19 @@
 <?php
 require_once "../../../config/settings.inc.php";
+require_once "../../../include/forms.php";
 require_once "../../../include/jpgraph/jpgraph.php";
 require_once "../../../include/jpgraph/jpgraph_line.php";
 require_once "../../../include/jpgraph/jpgraph_date.php";
 require_once "../../../include/jpgraph/jpgraph_led.php";
 
-$year = isset($_GET["year"]) ? $_GET["year"] : date("Y");
-$month = isset($_GET["month"]) ? $_GET["month"] : date("m");
-$day = isset($_GET["day"]) ? $_GET["day"] : date("d");
+$year = get_int404("year", date("Y"));
+$month = get_int404("month", date("m"));
+$day = get_int404("day", date("d"));
 
 $myTime = mktime(0, 0, 0, $month, $day, $year);
 
 $titleDate = date("M d, Y", $myTime);
 $dirRef = date("Y/m/d", $myTime);
-
 
 $fp = "/mesonet/ARCHIVE/data/$dirRef/text/ot/ot0003.dat";
 if (!file_exists($fp)) {
@@ -65,25 +65,15 @@ $graph = new Graph(1200, 628);
 $graph->SetScale("datlin");
 
 $graph->img->SetMargin(65, 20, 45, 90);
-//$graph->xaxis->SetFont(FONT1,FS_BOLD);
-//$graph->xaxis->SetTickLabels($xlabel);
-//$graph->xaxis->SetTextLabelInterval(60);
 $graph->xaxis->SetTextTickInterval(6);
 $graph->xaxis->SetLabelAngle(90);
-//$graph->xaxis->scale->SetDateFormat("h A");
 $graph->xaxis->SetLabelFormatString("h:i A", true);
-
-//$graph->yaxis->scale->ticks->SetPrecision(1);
-//$graph->yaxis->scale->ticks->Set(1.2,0.5);
 
 $graph->yscale->SetGrace(10);
 $graph->title->Set("Cluster Room Temperature ($titleDate)");
 
 $graph->legend->SetLayout(LEGEND_HOR);
 $graph->legend->Pos(0.01, 0.05);
-
-//[DMF]$graph->y2axis->scale->ticks->Set(100,25);
-//[DMF]$graph->y2axis->scale->ticks->SetPrecision(0);
 
 $graph->title->SetFont(FF_FONT1, FS_BOLD, 14);
 $graph->yaxis->SetTitle("Temperature [F]");

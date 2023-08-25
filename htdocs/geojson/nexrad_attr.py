@@ -1,9 +1,9 @@
 """ Generate a GeoJSON of nexrad attributes"""
 import datetime
 import json
+from zoneinfo import ZoneInfo
 
 import psycopg2.extras
-import pytz
 from paste.request import parse_formvars
 from pyiem.util import get_dbconn, html_escape
 from pymemcache.client import Client
@@ -29,7 +29,7 @@ def run(ts, fmt):
             valid = datetime.datetime.strptime(ts, "%Y-%m-%dT%H:%M:%S")
         except ValueError:
             return "ERROR"
-        valid = valid.replace(tzinfo=pytz.UTC)
+        valid = valid.replace(tzinfo=ZoneInfo("UTC"))
         tbl = "nexrad_attributes_%s" % (valid.year,)
         cursor.execute(
             f"""

@@ -3,8 +3,8 @@ import datetime
 import os
 import re
 import sys
+from zoneinfo import ZoneInfo
 
-import pytz
 from metpy.calc import dewpoint_from_relative_humidity
 from metpy.units import units
 from pyiem.observation import Observation
@@ -19,8 +19,8 @@ def main():
     cursor = iemaccess.cursor()
 
     valid = datetime.datetime.utcnow()
-    valid = valid.replace(tzinfo=pytz.utc)
-    valid = valid.astimezone(pytz.timezone("America/Chicago"))
+    valid = valid.replace(tzinfo=ZoneInfo("UTC"))
+    valid = valid.astimezone(ZoneInfo("America/Chicago"))
     fn = valid.strftime("/mesonet/ARCHIVE/data/%Y/%m/%d/text/ot/ot0010.dat")
 
     if not os.path.isfile(fn):

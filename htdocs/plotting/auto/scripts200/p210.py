@@ -20,10 +20,10 @@ positive.</p>
 issuance counts for a single Weather Forecast Offices.</p>
 """
 import datetime
+from zoneinfo import ZoneInfo
 
 import numpy as np
 import pandas as pd
-import pytz
 from pyiem.exceptions import NoDataFound
 from pyiem.plot.geoplot import MapPlot
 from pyiem.reference import prodDefinitions
@@ -101,7 +101,7 @@ def plotter(fdict):
     fix()
     ctx = get_autoplot_context(fdict, get_description())
     pil = ctx["pil"][:3]
-    if ctx["ets"].astimezone(pytz.UTC) > utc():
+    if ctx["ets"].astimezone(ZoneInfo("UTC")) > utc():
         ctx["ets"] = utc()
 
     with get_sqlalchemy_conn("afos") as conn:

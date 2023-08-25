@@ -171,6 +171,15 @@ EOM;
     pg_close($pgconn);
 }
 
+function df($val){
+    if (is_null($val)){
+        return "";
+    }
+    return $val->format("Y-m-d");
+}
+$ab = df($metadata["archive_begin"]);
+$ae = df($metadata["archive_end"]);
+
 $t->content = <<<EOF
 
 {$alertmsg}
@@ -179,6 +188,7 @@ $t->content = <<<EOF
 <div class="col-md-4">
 
 <table class="table table-condensed table-striped">
+<tr><th>IEM Internal ID:</th><td>{$metadata["iemid"]}</td></tr>
 <tr><th>Station Identifier:</th><td>{$station}</td></tr>
 <tr><th>Station Name:</th><td>{$metadata["name"]}</td></tr>
 <tr><th>Network:</th><td>{$network}</td></tr>
@@ -188,6 +198,8 @@ $t->content = <<<EOF
 <tr><th>Longitude:</th><td>{$lon}</td></tr>
 <tr><th>Elevation [m]:</th><td>{$metadata["elevation"]}</td></tr>
 <tr><th>Time Zone:</th><td>{$metadata["tzname"]}</td></tr>
+<tr><th>Archive Begin:</th><td>{$ab}</td></tr>
+<tr><th>Archive End:</th><td>{$ae}</td></tr>
 </table>
 
 {$attrtable}

@@ -1,8 +1,8 @@
 """Download and process the scan dataset"""
 import datetime
 import sys
+from zoneinfo import ZoneInfo
 
-import pytz
 import requests
 from pyiem.network import Table as NetworkTable
 from pyiem.observation import Observation
@@ -98,7 +98,7 @@ def savedata(icursor, scursor, reprocessing, data, maxts):
     else:
         tstr = data["Date"] + " " + data["Time (CDT)"]
     ts = datetime.datetime.strptime(tstr, "%Y-%m-%d %H:%M")
-    localts = utc().astimezone(pytz.timezone("America/Chicago"))
+    localts = utc().astimezone(ZoneInfo("America/Chicago"))
     ts = localts.replace(
         year=ts.year,
         month=ts.month,
@@ -116,7 +116,7 @@ def savedata(icursor, scursor, reprocessing, data, maxts):
     iem = Observation(sid, "SCAN", ts)
 
     iem.data["ts"] = ts
-    iem.data["year"] = ts.astimezone(pytz.utc).year
+    iem.data["year"] = ts.astimezone(ZoneInfo("UTC")).year
     for key in data.keys():
         if (
             key in mapping

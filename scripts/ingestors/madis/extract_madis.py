@@ -1,9 +1,9 @@
 """extract_madis.py Get the latest MADIS numbers from the data file!"""
 import datetime
 import os
+from zoneinfo import ZoneInfo
 
 import numpy as np
-import pytz
 from netCDF4 import chartostring
 from pyiem.util import convert_value, get_dbconn, logger, ncopen
 
@@ -74,7 +74,7 @@ def main():
         sid = stations[p]
         ticks = int(times[p])
         ts = datetime.datetime(1970, 1, 1) + datetime.timedelta(seconds=ticks)
-        ts = ts.replace(tzinfo=pytz.UTC)
+        ts = ts.replace(tzinfo=ZoneInfo("UTC"))
 
         (tmpf, tmpf_qc_av, tmpf_qc_sc) = (None, None, None)
         (dwpf, dwpf_qc_av, dwpf_qc_sc) = (None, None, None)

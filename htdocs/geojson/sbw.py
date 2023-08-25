@@ -1,9 +1,9 @@
 """ Generate a GeoJSON of current storm based warnings """
 import datetime
 import json
+from zoneinfo import ZoneInfo
 
 import psycopg2.extras
-import pytz
 from paste.request import parse_formvars
 from pyiem.util import get_dbconn, html_escape
 from pymemcache.client import Client
@@ -15,11 +15,11 @@ def run(ts):
     cursor = pgconn.cursor(cursor_factory=psycopg2.extras.DictCursor)
 
     if ts == "":
-        utcnow = datetime.datetime.utcnow().replace(tzinfo=pytz.utc)
+        utcnow = datetime.datetime.utcnow().replace(tzinfo=ZoneInfo("UTC"))
         t0 = utcnow + datetime.timedelta(days=7)
     else:
         utcnow = datetime.datetime.strptime(ts, "%Y-%m-%dT%H:%M:%SZ").replace(
-            tzinfo=pytz.UTC
+            tzinfo=ZoneInfo("UTC")
         )
         t0 = utcnow
     sbwtable = f"sbw_{utcnow.year}"

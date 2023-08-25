@@ -1,12 +1,23 @@
 """
-TODO: add table listing each forecast's peak and peak time...
+This page presents a sphagetti plot of river stage
+and forecasts.  The plot is roughly centered on the date of your choice
+with the plot showing any forecasts made three days prior to the date
+and for one day afterwards.  Sorry that you have to know the station ID
+prior to using this page (will fix at some point).  Presented timestamps
+are hopefully all in the local timezone of the reporting station.  If
+you download the data, the timestamps are all in UTC.</p>
+
+<p>For the image format output options, you can optionally control if
+forecasts, observations, or both are plotted.  For the Interactive Chart
+version, this is controlled by clicking on the legend items which will
+hide and show the various lines.
 """
 import datetime
+from zoneinfo import ZoneInfo
 
 import matplotlib.dates as mdates
 import numpy as np
 import pandas as pd
-import pytz
 from pyiem.exceptions import NoDataFound
 from pyiem.plot import figure_axes
 from pyiem.util import get_autoplot_context, get_sqlalchemy_conn
@@ -24,28 +35,12 @@ PDICT = {
     "fx": "Just plot forecasts",
     "obs": "Just plot observations",
 }
+UTC = ZoneInfo("UTC")
 
 
 def get_description():
     """Return a dict describing how to call this plotter"""
-    desc = {}
-    desc["data"] = True
-    desc["cache"] = 3600
-    desc[
-        "description"
-    ] = """This page presents a sphagetti plot of river stage
-    and forecasts.  The plot is roughly centered on the date of your choice
-    with the plot showing any forecasts made three days prior to the date
-    and for one day afterwards.  Sorry that you have to know the station ID
-    prior to using this page (will fix at some point).  Presented timestamps
-    are hopefully all in the local timezone of the reporting station.  If
-    you download the data, the timestamps are all in UTC.</p>
-
-    <p>For the image format output options, you can optionally control if
-    forecasts, observations, or both are plotted.  For the Interactive Chart
-    version, this is controlled by clicking on the legend items which will
-    hide and show the various lines.
-    """
+    desc = {"description": __doc__, "data": True, "cache": 3600}
     utc = datetime.datetime.utcnow()
     desc["arguments"] = [
         dict(
@@ -127,8 +122,8 @@ def get_context(fdict):
             index_col=None,
         )
     if not ctx["fdf"].empty:
-        ctx["fdf"]["valid"] = ctx["fdf"]["valid"].dt.tz_localize(pytz.UTC)
-        ctx["fdf"]["issued"] = ctx["fdf"]["issued"].dt.tz_localize(pytz.UTC)
+        ctx["fdf"]["valid"] = ctx["fdf"]["valid"].dt.tz_localize(UTC)
+        ctx["fdf"]["issued"] = ctx["fdf"]["issued"].dt.tz_localize(UTC)
         for lbl in ["primary", "secondary"]:
             ctx[lbl] = (
                 f"{ctx['fdf'].iloc[0][lbl + 'name']}"
@@ -154,7 +149,7 @@ def get_context(fdict):
         )
     if df.empty:
         raise NoDataFound("No Data Found.")
-    df["valid"] = df["valid"].dt.tz_localize(pytz.UTC)
+    df["valid"] = df["valid"].dt.tz_localize(UTC)
     ctx["odf"] = df.pivot(index="valid", columns="label", values="value")
     if ctx["fdf"].empty:
         ctx["df"] = ctx["odf"].reset_index()
@@ -169,11 +164,7 @@ def get_context(fdict):
             sort=False,
         )
     ctx["title"] = f"[{ctx['station']}] {ctx['name']}"
-    ldt = (
-        ctx["dt"]
-        .replace(tzinfo=pytz.UTC)
-        .astimezone(pytz.timezone(ctx["tzname"]))
-    )
+    ldt = ctx["dt"].replace(tzinfo=UTC).astimezone(ZoneInfo(ctx["tzname"]))
     ctx["subtitle"] = f"+/- 72 hours around {ldt:%d %b %Y %-I:%M %p %Z}"
     # Attempt to find a column in ft
     for i, col in enumerate(ctx["odf"].columns):
@@ -200,7 +191,7 @@ def highcharts(fdict):
             df2 = df[df["id"] == fx]
             issued = (
                 df2.iloc[0]["issued"]
-                .tz_convert(pytz.timezone(ctx["tzname"]))
+                .tz_convert(ZoneInfo(ctx["tzname"]))
                 .strftime("%-m/%-d %-I%p %Z")
             )
             v = df2[["ticks", ctx["var"] + "_value"]].to_json(orient="values")
@@ -305,7 +296,7 @@ def plotter(fdict):
             df2 = df[df["id"] == fx]
             issued = (
                 df2.iloc[0]["issued"]
-                .tz_convert(pytz.timezone(ctx["tzname"]))
+                .tz_convert(ZoneInfo(ctx["tzname"]))
                 .strftime("%-m/%-d %-I%p %Z")
             )
             ax.plot(
@@ -341,10 +332,10 @@ def plotter(fdict):
         )
     ax.set_ylim(*ylim)
     ax.xaxis.set_major_locator(
-        mdates.AutoDateLocator(tz=pytz.timezone(ctx["tzname"]))
+        mdates.AutoDateLocator(tz=ZoneInfo(ctx["tzname"]))
     )
     ax.xaxis.set_major_formatter(
-        mdates.DateFormatter("%-d %b\n%Y", tz=pytz.timezone(ctx["tzname"]))
+        mdates.DateFormatter("%-d %b\n%Y", tz=ZoneInfo(ctx["tzname"]))
     )
     pos = ax.get_position()
     ax.grid(True)

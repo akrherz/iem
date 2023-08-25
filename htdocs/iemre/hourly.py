@@ -2,9 +2,9 @@
 import datetime
 import json
 import os
+from zoneinfo import ZoneInfo
 
 import numpy as np
-import pytz
 from paste.request import parse_formvars
 from pyiem import iemre
 from pyiem.util import convert_value, ncopen, utc
@@ -27,7 +27,7 @@ def get_timerange(form):
     # This logic does not properly handle spring/fall time changes as it always
     # returns a 24 hour period.
     ts = utc(ts.year, ts.month, ts.day, 12).astimezone(
-        pytz.timezone("America/Chicago")
+        ZoneInfo("America/Chicago")
     )
     return ts.replace(hour=0), ts.replace(hour=23)
 
@@ -53,7 +53,7 @@ def workflow(sts, ets, i, j):
             offset = iemre.hourly_offset(now)
             res["data"].append(
                 {
-                    "valid_utc": now.astimezone(pytz.UTC).strftime(ISO),
+                    "valid_utc": now.astimezone(ZoneInfo("UTC")).strftime(ISO),
                     "valid_local": now.strftime(ISO[:-1]),
                     "skyc_%": myrounder(nc.variables["skyc"][offset, j, i], 1),
                     "air_temp_f": myrounder(
