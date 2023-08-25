@@ -67,6 +67,9 @@ EOM;
         if (!is_null($this->table[$id]["archive_begin"])) {
             $this->table[$id]["archive_begin"] = new DateTime($this->table[$id]["archive_begin"]);
         }
+        if (!is_null($this->table[$id]["archive_end"])) {
+            $this->table[$id]["archive_end"] = new DateTime($this->table[$id]["archive_end"]);
+        }
         // Make attributes more accessible
         $this->table[$id]["attrs"] = json_decode($this->table[$id]["attrs"]);
         $this->table[$id]["attr_values"] = json_decode($this->table[$id]["attr_values"]);
