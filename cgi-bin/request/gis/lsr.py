@@ -144,17 +144,12 @@ def application(environ, start_response):
         ]
 
     statelimiter = ""
-    if "state" in form:
-        aStates = form.getall("state")
-        aStates.append("XX")
-        if "_ALL" not in aStates:
-            statelimiter = f" and l.state in {tuple(aStates)} "
-    if "states" in form:
-        aStates = form.getall("states")
-        aStates.append("XX")
-        if "_ALL" not in aStates:
-            statelimiter = f" and l.state in {tuple(aStates)} "
-
+    for opt in ["state", "states", "states[]"]:
+        if opt in form:
+            aStates = form.getall(opt)
+            aStates.append("XX")
+            if "_ALL" not in aStates:
+                statelimiter = f" and l.state in {tuple(aStates)} "
     wfoLimiter = ""
     if "wfo[]" in form:
         aWFO = form.getall("wfo[]")
