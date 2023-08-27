@@ -32,6 +32,9 @@ PDICT = {
     "min_low": "Minimum Low Temperature",
     "max_feel": "Maximum Feels Like Temperature",
     "min_feel": "Minimum Feels Like Temperature",
+    "max_rh": "Maximum Relative Humidity",
+    "avg_rh": "Average Relative Humidity",
+    "min_rh": "Minimum Relative Humidity",
     "precip": "Total Precipitation",
 }
 PDICT2 = {
@@ -91,7 +94,7 @@ def get_description():
         {
             "type": "float",
             "name": "thres",
-            "label": "Threshold (inch, F, MPH)",
+            "label": "Threshold (inch, F, MPH, %)",
             "default": "1",
         },
         dict(
@@ -157,6 +160,9 @@ def plotter(fdict):
         max(min_tmpf) as max_low,
         max(max_tmpf) as max_high,
         min(max_tmpf) as min_high,
+        max(max_rh) as max_rh,
+        max(avg_rh) as avg_rh,
+        min(min_rh) as min_rh,
         avg((max_dwpf + min_dwpf)/2.) as avg_dewp,
         max(max_feel) as max_feel, min(min_feel) as min_feel,
         sum(case when {aggcol} {mydir} {threshold} then 1 else 0 end) as
@@ -191,6 +197,9 @@ def plotter(fdict):
     elif varname in ["avg_wind_speed"]:
         ylabel = "Wind Speed [MPH]"
         units = "[MPH]"
+    elif varname.find("rh") > -1:
+        ylabel = "Relative Humidity [%]"
+        units = "[%]"
     if ctx["w"] != "none":
         ylabel = "Days"
     title = (
