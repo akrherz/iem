@@ -1,4 +1,17 @@
-"""Top 10"""
+"""
+This plot displays the top ten events for a given
+site and period of your choice. Here is a description of the labels
+shown in the 'Which Metric to Summarize' option:
+<ul>
+    <li><i>Total Precipitation</i>: Total precipitation over the specified
+    number of days.</li>
+    <li><i>Max Least High</i>: The highest minimum high temperature over
+    the specified duration of days.</li>
+<li><i>Min Greatest Low</i>: The coldest maximum low temperature over
+    the specified duration of days. Example series) -15 -12 -14 -16 would
+    be -12</li>
+</ul>
+"""
 import calendar
 import datetime
 
@@ -8,28 +21,26 @@ from pyiem.plot import figure
 from pyiem.util import get_autoplot_context, get_sqlalchemy_conn
 from sqlalchemy import text
 
-MDICT = dict(
-    [
-        ("all", "No Month/Time Limit"),
-        ("spring", "Spring (MAM)"),
-        ("fall", "Fall (SON)"),
-        ("winter", "Winter (DJF)"),
-        ("summer", "Summer (JJA)"),
-        ("octmar", "October thru March"),
-        ("jan", "January"),
-        ("feb", "February"),
-        ("mar", "March"),
-        ("apr", "April"),
-        ("may", "May"),
-        ("jun", "June"),
-        ("jul", "July"),
-        ("aug", "August"),
-        ("sep", "September"),
-        ("oct", "October"),
-        ("nov", "November"),
-        ("dec", "December"),
-    ]
-)
+MDICT = {
+    "all": "Entire Year",
+    "spring": "Spring (MAM)",
+    "fall": "Fall (SON)",
+    "winter": "Winter (DJF)",
+    "summer": "Summer (JJA)",
+    "octmar": "October thru March",
+    "jan": "January",
+    "feb": "February",
+    "mar": "March",
+    "apr": "April",
+    "may": "May",
+    "jun": "June",
+    "jul": "July",
+    "aug": "August",
+    "sep": "September",
+    "oct": "October",
+    "nov": "November",
+    "dec": "December",
+}
 
 METRICS = {
     "total_precip": "Total Precipitation",
@@ -40,24 +51,7 @@ METRICS = {
 
 def get_description():
     """Return a dict describing how to call this plotter"""
-    desc = {}
-    desc["data"] = True
-    desc["cache"] = 86400
-    desc[
-        "description"
-    ] = """This plot displays the top ten events for a given
-    site and period of your choice. Here is a description of the labels
-    shown in the 'Which Metric to Summarize' option:
-    <ul>
-     <li><i>Total Precipitation</i>: Total precipitation over the specified
-     number of days.</li>
-     <li><i>Max Least High</i>: The highest minimum high temperature over
-     the specified duration of days.</li>
-    <li><i>Min Greatest Low</i>: The coldest maximum low temperature over
-     the specified duration of days. Example series) -15 -12 -14 -16 would
-     be -12</li>
-    </ul>
-    """
+    desc = {"description": __doc__, "data": True, "cache": 86400}
     desc["arguments"] = [
         dict(
             type="station",
@@ -111,7 +105,7 @@ def plotter(fdict):
     elif month == "octmar":
         months = [10, 11, 12, 1, 2, 3]
     else:
-        ts = datetime.datetime.strptime("2000-" + month + "-01", "%Y-%b-%d")
+        ts = datetime.datetime.strptime(f"2000-{month}-01", "%Y-%b-%d")
         # make sure it is length two for the trick below in SQL
         months = [ts.month, 999]
 
