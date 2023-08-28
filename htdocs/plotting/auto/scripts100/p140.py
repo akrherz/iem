@@ -8,6 +8,9 @@ the year of the start date of the period. <strong>Average Dew Point Temp
 <br /><br />This autoplot is specific to data from automated stations, a
 similiar autoplot <a href="/plotting/auto/?q=107">#107</a> exists for
 long term COOP data.
+
+<p><strong>Updated 27 Aug 2023:</strong> The API for this autoplot was changed
+to use a more user friendly start and end date.
 """
 import datetime
 
@@ -64,19 +67,18 @@ def get_description():
             name="syear",
             label="Limit plot start year (if data exists) to:",
         ),
-        dict(
-            type="month",
-            name="month",
-            default=sts.month,
-            label="Start Month:",
-        ),
-        dict(
-            type="day",
-            name="day",
-            default=sts.day,
-            label="Start Day:",
-        ),
-        dict(type="int", name="days", default="14", label="Number of Days"),
+        {
+            "type": "sday",
+            "name": "sday",
+            "default": f"{sts:%m%d}",
+            "label": "Inclusive Start Date of the Year",
+        },
+        {
+            "type": "sday",
+            "name": "eday",
+            "default": f"{today:%m%d}",
+            "label": "Inclusise End Date of the Year",
+        },
         dict(
             type="select",
             name="varname",
@@ -132,17 +134,22 @@ def plotter(fdict):
     """Go"""
     ctx = get_autoplot_context(fdict, get_description())
     station = ctx["station"]
-    days = ctx["days"]
-    sts = datetime.date(2012, ctx["month"], ctx["day"])
-    ets = sts + datetime.timedelta(days=days - 1)
     varname = ctx["varname"]
     year = ctx["year"]
     sdays = []
-    for i in range(days):
-        ts = sts + datetime.timedelta(days=i)
-        sdays.append(ts.strftime("%m%d"))
-
-    doff = (days + 1) if ets.year != sts.year else 0
+    dtlimiter = (
+        "(to_char(day, 'mmdd') >= :sday and to_char(day, 'mmdd') <= :eday)"
+    )
+    doff = "extract(year from day)"
+    if ctx["eday"] < ctx["sday"]:
+        dtlimiter = (
+            "(to_char(day, 'mmdd') >= :eday or "
+            "to_char(day, 'mmdd') <= :sday)"
+        )
+        doff = (
+            "case when to_char(day, 'mmdd') < :sday then "
+            "(extract(year from day)::int - 1) else extract(year from day) end"
+        )
     threshold = ctx["thres"]
     mydir = ">=" if ctx["w"] == "aoa" else "<"
     aggcol = "max_tmpf" if ctx["w"] == "none" else ctx["varname"]
@@ -151,7 +158,7 @@ def plotter(fdict):
         df = pd.read_sql(
             text(
                 f"""
-        SELECT extract(year from day - '{doff} days'::interval) as yr,
+        SELECT {doff} as yr,
         avg((max_tmpf+min_tmpf)/2.) as avg_temp,
         avg(max_tmpf) as avg_high_temp,
         avg(min_tmpf) as avg_low_temp,
@@ -169,7 +176,7 @@ def plotter(fdict):
             count_days
         from summary s JOIN stations t on (s.iemid = t.iemid)
         WHERE t.network = :network and t.id = :station
-        and to_char(day, 'mmdd') in :sdays and day >= :sdate
+        and {dtlimiter} and day >= :start
         GROUP by yr ORDER by yr ASC
         """
             ),
@@ -178,7 +185,9 @@ def plotter(fdict):
                 "network": ctx["network"],
                 "station": station,
                 "sdays": tuple(sdays),
-                "sdate": datetime.date(ctx["syear"], 1, 1),
+                "sday": f"{ctx['sday']:%m%d}",
+                "eday": f"{ctx['eday']:%m%d}",
+                "start": datetime.date(ctx["syear"], 1, 1),
             },
             index_col="yr",
         )
@@ -204,14 +213,15 @@ def plotter(fdict):
         ylabel = "Days"
     title = (
         f"{ctx['_sname']}\n"
-        f"{PDICT.get(varname)} from {sts:%d %b} through {ets:%d %b}"
+        f"{PDICT.get(varname)} from "
+        f"{ctx['sday']:%d %b} through {ctx['eday']:%d %b}"
     )
     if ctx["w"] != "none":
         tt = PDICT2[ctx["w"]].replace("Threshold", f"{ctx['thres']}")
         title = (
             f"{ctx['_sname']}\n"
             f"{tt} {units} for {PDICT.get(varname)} "
-            f"from {sts:%d %b} through {ets:%d %b}"
+            f"from {ctx['sday']:%d %b} through {ctx['eday']:%d %b}"
         )
     fig = figure(apctx=ctx, title=title)
     ax = fig.subplots(2, 1)
@@ -219,7 +229,7 @@ def plotter(fdict):
     ax[1].set_position([0.07, 0.1, 0.78, 0.36])
 
     fmter = intfmt if ctx["w"] != "none" else nice
-    yrfmter = intfmt if sts.year == ets.year else crossesjan1
+    yrfmter = intfmt if ctx["eday"] > ctx["sday"] else crossesjan1
 
     # Print top 10
     dy = 0.03
@@ -287,7 +297,8 @@ def plotter(fdict):
         f"5th: {ptile[3]:.2f}\n"
         f"Max: {df[dfcol].max():.2f} {yrfmter(mysort.index[-1])}"
     )
-    ax[1].axvline(thisvalue, lw=2, color="g")
+    if thisvalue != "M":
+        ax[1].axvline(thisvalue, lw=2, color="g")
     ax[1].text(
         0.8,
         0.95,
