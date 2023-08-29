@@ -1,4 +1,8 @@
-"""seasonal cycles"""
+"""
+This report displays the number of cycles between
+two temperature thresholds of your choice.  A cycle representing one
+round trip from below some threshold to above the second threshold.
+"""
 import datetime
 
 import pandas as pd
@@ -8,14 +12,7 @@ from pyiem.util import get_autoplot_context, get_dbconn
 
 def get_description():
     """Return a dict describing how to call this plotter"""
-    desc = {}
-    desc["data"] = True
-    desc["report"] = True
-    desc[
-        "description"
-    ] = """This report displays the number of cycles between
-    two temperature thresholds of your choice.  A cycle representing one
-    round trip from below some threshold to above the second threshold."""
+    desc = {"description": __doc__, "data": True, "report": True}
     desc["arguments"] = [
         dict(
             type="station",

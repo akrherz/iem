@@ -1,4 +1,9 @@
-"""snowfall totals around day"""
+"""
+This plot displays the total reported snowfall for
+a period prior to a given date and then after the date for the winter
+season.  When you select a date to split the winter season, the year
+shown in the date can be ignored.
+"""
 import datetime
 
 import pandas as pd
@@ -9,16 +14,7 @@ from pyiem.util import get_autoplot_context, get_sqlalchemy_conn
 
 def get_description():
     """Return a dict describing how to call this plotter"""
-    desc = {}
-    desc["data"] = True
-    desc["cache"] = 86400
-    desc[
-        "description"
-    ] = """This plot displays the total reported snowfall for
-    a period prior to a given date and then after the date for the winter
-    season.  When you select a date to split the winter season, the year
-    shown in the date can be ignored.
-    """
+    desc = {"description": __doc__, "data": True, "cache": 86400}
     desc["arguments"] = [
         dict(
             type="station",

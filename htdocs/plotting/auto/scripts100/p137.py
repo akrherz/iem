@@ -1,4 +1,12 @@
-"""Duration of seasons"""
+"""
+This plot displays some metrics about the start
+date and duration of the spring or fall season.
+The definition of the season
+being the period between the coldest 91 day stretch and subsequent
+warmest 91 day stretch.  91 days being approximately 1/4 of the year,
+assuming the four seasons are to be equal duration.  Of course, this is
+arbitrary, but interesting to look at!
+"""
 import datetime
 
 import matplotlib.dates as mdates
@@ -13,19 +21,7 @@ PDICT = {"spring": "Spring Season", "fall": "Fall Season"}
 
 def get_description():
     """Return a dict describing how to call this plotter"""
-    desc = {}
-    desc["data"] = True
-    desc["cache"] = 86400
-    desc[
-        "description"
-    ] = """This plot displays some metrics about the start
-    date and duration of the spring or fall season.
-    The definition of the season
-    being the period between the coldest 91 day stretch and subsequent
-    warmest 91 day stretch.  91 days being approximately 1/4 of the year,
-    assuming the four seasons are to be equal duration.  Of course, this is
-    arbitrary, but interesting to look at!
-    """
+    desc = {"description": __doc__, "data": True, "cache": 86400}
     desc["arguments"] = [
         dict(
             type="station",
@@ -230,4 +226,4 @@ def plotter(fdict):
 
 
 if __name__ == "__main__":
-    plotter(dict(season="fall", station="IA0200", network="IACLIMATE"))
+    plotter({})

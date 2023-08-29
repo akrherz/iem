@@ -48,7 +48,8 @@ def workflow(col):
         if col == "climate_site":
             sql = (
                 f"select id from stations WHERE network = '{st}CLIMATE' "
-                "and substr(id,3,4) != '0000' and substr(id,3,1) != 'C' "
+                "and substr(id,3,4) != '0000' and "
+                "substr(id,3,1) not in ('C', 'D') "
                 "and online ORDER by ST_distance(geom, %s) ASC LIMIT 1"
             )
         else:

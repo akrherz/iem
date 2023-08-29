@@ -10,10 +10,7 @@ PDICT = {"precip_days": "Precipitation Days", "snow_days": "Snowfall Days"}
 
 def get_description():
     """Return a dict describing how to call this plotter"""
-    desc = {}
-    desc["data"] = True
-    desc["report"] = True
-    desc["description"] = """ """
+    desc = {"description": __doc__, "data": True, "report": True}
     desc["arguments"] = [
         dict(
             type="station",
@@ -41,11 +38,11 @@ def plotter(fdict):
 
     with get_sqlalchemy_conn("coop") as conn:
         df = pd.read_sql(
-            f"""
+            """
             SELECT year, month,
             sum(case when precip > 0.009 then 1 else 0 end) as precip_days,
             sum(case when snow > 0.009 then 1 else 0 end) as snow_days
-            from alldata_{station[:2]} WHERE station = %s
+            from alldata WHERE station = %s
             GROUP by year, month
         """,
             conn,

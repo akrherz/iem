@@ -1,4 +1,7 @@
-"""Frequency of first fall low"""
+"""
+This chart presents the accumulated frequency of
+having the first fall temperature at or below a given threshold.
+"""
 import datetime
 
 import matplotlib.dates as mdates
@@ -12,13 +15,7 @@ PDICT = {"low": "Low Temperature", "high": "High Temperature"}
 
 def get_description():
     """Return a dict describing how to call this plotter"""
-    desc = {}
-    desc["data"] = True
-    desc["report"] = True
-    desc[
-        "description"
-    ] = """This chart presents the accumulated frequency of
-    having the first fall temperature at or below a given threshold."""
+    desc = {"description": __doc__, "data": True, "report": True}
     desc["arguments"] = [
         dict(
             type="station",
@@ -48,9 +45,6 @@ def plotter(fdict):
     station = ctx["station"]
     thresholds = [ctx["t1"], ctx["t2"], ctx["t3"], ctx["t4"]]
 
-    table = f"alldata_{station[:2]}"
-    # Load up dict of dates..
-
     sz = 214 + 304
     df = pd.DataFrame(
         {
@@ -72,8 +66,8 @@ def plotter(fdict):
                 select
                 case when month > 7 then year + 1 else year end as winter,
                 min(case when {ctx["var"]} <= %s
-                then day else '2099-01-01'::date end) as mindate from {table}
-                WHERE month not in (6, 7) and station = %s and year < %s
+                then day else '2099-01-01'::date end) as mindate from alldata
+                WHERE station = %s and month not in (6, 7) and year < %s
                 GROUP by winter
             """,
                 conn,
@@ -168,4 +162,4 @@ def plotter(fdict):
 
 
 if __name__ == "__main__":
-    plotter({"var": "high", "t4": 0})
+    plotter({})

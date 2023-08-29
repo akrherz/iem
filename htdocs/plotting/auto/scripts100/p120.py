@@ -1,4 +1,7 @@
-"""last spring temp"""
+"""
+This chart presents the accumulated frequency of
+having the last spring temperature at or below a given threshold.
+"""
 import datetime
 
 import matplotlib.dates as mdates
@@ -10,13 +13,7 @@ from pyiem.util import get_autoplot_context, get_sqlalchemy_conn
 
 def get_description():
     """Return a dict describing how to call this plotter"""
-    desc = {}
-    desc["data"] = True
-    desc["report"] = True
-    desc[
-        "description"
-    ] = """This chart presents the accumulated frequency of
-    having the last spring temperature at or below a given threshold."""
+    desc = {"description": __doc__, "data": True, "report": True}
     desc["arguments"] = [
         dict(
             type="station",

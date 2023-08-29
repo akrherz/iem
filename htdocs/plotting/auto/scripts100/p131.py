@@ -1,4 +1,9 @@
-"""Plot overcast conditions by temperature"""
+"""
+This plot displays the frequency of having overcast
+conditions reported by air temperature.  More specifically, this script
+looks for the report of 'OVC' within the METAR sky conditions.  Many
+caveats apply with the reporting changes of this over the years.
+"""
 import datetime
 
 import pandas as pd
@@ -31,16 +36,7 @@ MDICT = {
 
 def get_description():
     """Return a dict describing how to call this plotter"""
-    desc = {}
-    desc["data"] = True
-    desc["cache"] = 86400
-    desc[
-        "description"
-    ] = """
-    This plot displays the frequency of having overcast
-    conditions reported by air temperature.  More specifically, this script
-    looks for the report of 'OVC' within the METAR sky conditions.  Many
-    caveats apply with the reporting changes of this over the years."""
+    desc = {"description": __doc__, "data": True, "cache": 86400}
     desc["arguments"] = [
         dict(
             type="zstation",

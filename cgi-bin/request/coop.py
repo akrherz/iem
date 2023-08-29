@@ -596,7 +596,7 @@ def do_salus(ctx):
         day >= %s and day <= %s ORDER by day ASC
     ), total as (
         SELECT *, extract(doy from day) as doy from obs
-        UNION SELECT * from scenario
+        UNION SELECT *, extract(doy from day) as doy from scenario
     )
 
     SELECT * from total ORDER by day ASC
@@ -804,6 +804,7 @@ def application(environ, start_response):
         "apsim" in ctx["myvars"]
         or "daycent" in ctx["myvars"]
         or "century" in ctx["myvars"]
+        or "salus" in ctx["myvars"]
     ):
         headers.append(("Content-type", "text/plain"))
     elif "dndc" not in ctx["myvars"] and ctx["what"] != "excel":
