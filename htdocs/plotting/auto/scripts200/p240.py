@@ -193,4 +193,4 @@ def plotter(fdict):
 
 
 if __name__ == "__main__":
-    plotter({"station": "IA0203"})
+    plotter({})
