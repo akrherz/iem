@@ -1,4 +1,10 @@
-"""Monthly counts of text products."""
+"""
+This autoplot presents the total number of text products issued by UTC
+month and year.
+
+<p><a href="?q=210">Autoplot 210</a> presents a map of issuance counts
+for all Weather Forecast Offices.</p>
+"""
 import calendar
 
 import numpy as np
@@ -13,17 +19,7 @@ from sqlalchemy import text
 
 def get_description():
     """Return a dict describing how to call this plotter"""
-    desc = {}
-    desc["cache"] = 86400
-    desc[
-        "description"
-    ] = """
-    This autoplot presents the total number of text products issued by UTC
-    month and year.
-
-    <p><a href="?q=210">Autoplot 210</a> presents a map of issuance counts
-    for all Weather Forecast Offices.</p>
-    """
+    desc = {"description": __doc__, "cache": 86400}
     desc["arguments"] = [
         dict(
             type="networkselect",

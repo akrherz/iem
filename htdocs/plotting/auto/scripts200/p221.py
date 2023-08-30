@@ -1,10 +1,12 @@
-"""The NCEP deterministic HRRR model forecast produces a post
-    processed field that is meant to resemble RADAR reflectivity.  The
-    lowest 1km HRRR product is plotted along with the IEM mosaic NWS
-    NEXRAD base reflectivity.
+"""
+The NCEP deterministic HRRR model forecast produces a post
+processed field that is meant to resemble RADAR reflectivity.  The
+lowest 1km HRRR product is plotted along with the IEM mosaic NWS
+NEXRAD base reflectivity.
 
-    <p><strong>Caution:</strong> This autoplot is very slow to generate,
-    please be patient!"""
+<p><strong>Caution:</strong> This autoplot is very slow to generate,
+please be patient!
+"""
 import datetime
 import os
 from io import BytesIO

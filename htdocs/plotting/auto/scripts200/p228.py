@@ -275,4 +275,4 @@ def plotter(fdict):
 
 
 if __name__ == "__main__":
-    plotter({"d3": "365", "state": "IA", "mode": "iadrought"})
+    plotter({})

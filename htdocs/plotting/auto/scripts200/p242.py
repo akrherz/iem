@@ -194,7 +194,8 @@ def plotter(fdict):
         pos = [0.01, 0.05, 0.5, 0.85]
 
     bounds = df["geom"].total_bounds
-    buffer = 0.2 if (bounds[3] - bounds[1]) < 0.2 else 0
+    minext = min(bounds[3] - bounds[1], bounds[2] - bounds[0])
+    buffer = 0.2 if minext < 0.2 else 0
 
     # Bias to the east, for overlay
     mp = MapPlot(
@@ -247,4 +248,4 @@ def plotter(fdict):
 
 
 if __name__ == "__main__":
-    plotter({"pid": "202305080420-KILX-NWUS53-LSRILX"})
+    plotter({})

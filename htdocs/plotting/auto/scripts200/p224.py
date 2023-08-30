@@ -1,4 +1,33 @@
-"""Population metrics at a given time."""
+"""
+<p>This autoplot attempts to estimate the number of people or area
+in the US
+under a given NWS Watch/Warning/Advisory (WaWA).  Double-accounting is
+somewhat a problem here in the case of overlapping polygons. For each
+WaWA type, if there are polygons associated with the event, the
+population of the polygon intersection with the 30 arc-second grid is
+used.</p>
+
+<p>While the graphic only displays the top 10, the data download provides
+everything available to be computed.</p>
+
+<p><strong>Footnote on "Active" WaWA</strong>: A more complex than it
+should be nuance to explain here is the concept of what is "active" at
+a given timestamp.  Let us consider a real world example.  On Monday
+afternoon, the NWS issues a Winter Storm Warning for an upcoming
+storm that goes "into effect" at noon on Tuesday.  You request this
+plot for a timestamp of 6 PM on that Monday.  Is the Winter Storm
+Warning included in this metric at that time?
+<ul>
+<li>Yes, if you select the option to include any WaWA that have been
+created, but may have an VTEC start time in the future yet.</li>
+<li>No, if you select the option to only include WaWA that have an
+issuance time before the given timestamp.</li>
+</ul>
+<br />The default setting here is the first option, to include any events
+that have been created, but not necessarily having an issuance time prior
+to the given timestamp.  This is why we can't have nice things!
+</p>
+"""
 from datetime import timezone
 from zoneinfo import ZoneInfo
 
@@ -22,41 +51,7 @@ PDICT2 = {
 
 def get_description():
     """Return a dict describing how to call this plotter"""
-    desc = {}
-    desc["data"] = True
-    desc["cache"] = 120
-    desc[
-        "description"
-    ] = """
-    <p>This autoplot attempts to estimate the number of people or area
-    in the US
-    under a given NWS Watch/Warning/Advisory (WaWA).  Double-accounting is
-    somewhat a problem here in the case of overlapping polygons. For each
-    WaWA type, if there are polygons associated with the event, the
-    population of the polygon intersection with the 30 arc-second grid is
-    used.</p>
-
-    <p>While the graphic only displays the top 10, the data download provides
-    everything available to be computed.</p>
-
-    <p><strong>Footnote on "Active" WaWA</strong>: A more complex than it
-    should be nuance to explain here is the concept of what is "active" at
-    a given timestamp.  Let us consider a real world example.  On Monday
-    afternoon, the NWS issues a Winter Storm Warning for an upcoming
-    storm that goes "into effect" at noon on Tuesday.  You request this
-    plot for a timestamp of 6 PM on that Monday.  Is the Winter Storm
-    Warning included in this metric at that time?
-    <ul>
-    <li>Yes, if you select the option to include any WaWA that have been
-    created, but may have an VTEC start time in the future yet.</li>
-    <li>No, if you select the option to only include WaWA that have an
-    issuance time before the given timestamp.</li>
-    </ul>
-    <br />The default setting here is the first option, to include any events
-    that have been created, but not necessarily having an issuance time prior
-    to the given timestamp.  This is why we can't have nice things!
-    </p>
-    """
+    desc = {"description": __doc__, "data": True, "cache": 120}
     desc["arguments"] = [
         dict(
             type="select",
@@ -219,4 +214,4 @@ def plotter(fdict):
 
 
 if __name__ == "__main__":
-    plotter({"which": "area"})
+    plotter({})

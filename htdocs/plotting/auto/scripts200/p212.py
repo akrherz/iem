@@ -1,4 +1,16 @@
-"""Plot Time Series for Sounding Parameter."""
+"""
+This plot presents the daily climatology range of a sounding
+variable along with a given year's values.
+
+<p>The Storm Prediction Center website has a
+<a href="https://www.spc.noaa.gov/exper/soundingclimo/">
+very similiar tool</a> that you may want to check out.</p>
+
+<p>The max and min monthly values are labeled within the plot.</p>
+
+<p>If you select to plot both 00 and 12 UTC, the climatology is computed
+seperately at 00 and 12 UTC.  The chart gets more noisey when doing so.</p>
+"""
 import datetime
 
 import matplotlib.dates as mdates
@@ -48,24 +60,8 @@ PDICT3 = {
 
 def get_description():
     """Return a dict describing how to call this plotter"""
-    desc = {}
-    desc["data"] = True
+    desc = {"description": __doc__, "data": True, "cache": 86400}
     desc["highcharts"] = True
-    desc["cache"] = 86400
-    desc[
-        "description"
-    ] = """This plot presents the daily climatology range of a sounding
-    variable along with a given year's values.
-
-    <p>The Storm Prediction Center website has a
-    <a href="https://www.spc.noaa.gov/exper/soundingclimo/">
-    very similiar tool</a> that you may want to check out.</p>
-
-    <p>The max and min monthly values are labeled within the plot.</p>
-
-    <p>If you select to plot both 00 and 12 UTC, the climatology is computed
-    seperately at 00 and 12 UTC.  The chart gets more noisey when doing so.</p>
-    """
     desc["arguments"] = [
         dict(
             type="networkselect",
@@ -413,8 +409,4 @@ def plotter(fdict):
 
 
 if __name__ == "__main__":
-    plotter(
-        dict(
-            station="KEPZ", var="pwater_in", level=500, hour="both", year=1996
-        )
-    )
+    plotter({})

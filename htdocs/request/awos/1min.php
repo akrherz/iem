@@ -2,13 +2,15 @@
 require_once "../../../config/settings.inc.php";
 define("IEM_APPID", 65);
 require_once "../../../include/myview.php";
+require_once "../../../include/iemprop.php";
+require_once "../../../include/imagemaps.php";
+require_once "../../../include/forms.php";
+require_once "../../../include/network.php";
+
 $t = new MyView();
 $t->title = "AWOS One Minute Data Download";
 
-require_once "../../../include/iemprop.php";
 $awos_archive_end = strtotime( get_iemprop("awos.1min.end") );
-require_once "../../../include/imagemaps.php";
-require_once "../../../include/forms.php";
 $bogus = 0;
 
 $ys1 = yearSelect2(1995, date("Y"), "year1");
@@ -25,7 +27,15 @@ $hs2 = hour24Select($bogus, "hour2");
 
 $aend = date('d M Y', $awos_archive_end);
 
-$sselect = networkMultiSelect("AWOS", '', Array(), 'station[]');
+$nt = new NetworkTable("IA_ASOS");
+$ar = Array();
+foreach ($nt->table as $sid => $meta){
+    if (array_key_exists("IS_AWOS", $meta["attributes"])){
+        $ar[$sid] = $meta["name"];
+    }
+}
+
+$sselect = make_select('station[]', "", $ar, '', '', TRUE, TRUE);
 
 $t->content = <<<EOF
 <ol class="breadcrumb">
@@ -44,8 +54,8 @@ free to email Daryl (akrherz@iastate.edu) and make your request.</p>
 
 <div class="alert alert-warning">Population of this archive was discontinued by the DOT on 1 April 2011. Data
 for dates after that date can be found 
-<a class="link link-warning" href="/request/download.phtml?network=AWOS">here</a>, but it is only
-at a 5-10 minute interval.
+<a class="link link-warning" href="/request/download.phtml?network=IA_ASOS">here</a>, but it is only
+at a 20 minute interval.
 
 <ul>
  <li><b>Archive Begins:</b> 1 Jan 1995 (for some sites, not all)</li>

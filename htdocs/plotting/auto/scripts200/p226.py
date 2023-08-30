@@ -1,5 +1,7 @@
-"""This plot is not meant for interactive use, but a backend for
-    CWA plots."""
+"""
+This plot is not meant for interactive use, but a backend for
+CWA plots.
+"""
 from datetime import timedelta, timezone
 
 # third party
@@ -12,10 +14,8 @@ from pyiem.util import get_autoplot_context, get_sqlalchemy_conn
 
 def get_description():
     """Return a dict describing how to call this plotter"""
-    desc = {"description": __doc__}
+    desc = {"description": __doc__, "cache": 3600, "data": True}
     desc["defaults"] = {"_r": "t"}
-    desc["cache"] = 3600
-    desc["data"] = True
     desc["arguments"] = [
         dict(
             type="networkselect",
@@ -112,4 +112,4 @@ def plotter(fdict):
 
 
 if __name__ == "__main__":
-    plotter({"cwsu": "ZME", "segnum": 102, "date": "2002/03/03"})
+    plotter({})

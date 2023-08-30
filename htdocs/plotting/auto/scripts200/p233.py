@@ -1,4 +1,9 @@
-"""VTEC Products issued by date"""
+"""
+This calendar presents the number of Special Weather Statements
+that contain polygons issued per day.
+<a href="/plotting/auto/?q=143">Autoplot 143</a> presents this same data,
+but as yearly and monthly totals.
+"""
 import datetime
 
 import pandas as pd
@@ -12,15 +17,7 @@ PDICT = {"yes": "Colorize Cells in Chart", "no": "Just plot values please"}
 
 def get_description():
     """Return a dict describing how to call this plotter"""
-    desc = {}
-    desc["data"] = True
-    desc[
-        "description"
-    ] = """This calendar presents the number of Special Weather Statements
-    that contain polygons issued per day.
-    <a href="/plotting/auto/?q=143">Autoplot 143</a> presents this same data,
-    but as yearly and monthly totals.
-    """
+    desc = {"description": __doc__, "data": True}
     today = datetime.date.today()
     jan1 = today.replace(month=1, day=1)
     desc["arguments"] = [
@@ -123,10 +120,4 @@ def plotter(fdict):
 
 
 if __name__ == "__main__":
-    plotter(
-        dict(
-            sdate="2017-01-01",
-            edate="2017-12-31",
-            wfo="OUN",
-        )
-    )
+    plotter({})

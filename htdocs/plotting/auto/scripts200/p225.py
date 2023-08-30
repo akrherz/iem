@@ -180,4 +180,4 @@ def plotter(fdict):
 
 
 if __name__ == "__main__":
-    plotter({"var": "spi"})
+    plotter({})

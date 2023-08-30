@@ -7,14 +7,13 @@ LOG = logger()
 
 # LINK , TARGET
 M2 = "/mnt/mesonet2"
-M7 = "/mnt/mesonet7"
 PAIRS = [
-    ["/mesonet/data/merra2", f"{M7}/data/merra2"],
+    ["/mesonet/data/merra2", f"{M2}/data/merra2"],
     ["/mesonet/nawips", f"{M2}/gempak"],
     ["/mesonet/wepp", f"{M2}/idep"],
     ["/mesonet/ARCHIVE/gempak", f"{M2}/longterm/gempak"],
     ["/mesonet/ARCHIVE/raw", f"{M2}/longterm/raw"],
-    ["/mesonet/ARCHIVE/rer", f"{M7}/ARCHIVE/rer"],
+    ["/mesonet/ARCHIVE/rer", f"{M2}/ARCHIVE/rer"],
     ["/mesonet/data/dotcams", f"{M2}/data/dotcams"],
     ["/mesonet/data/era5", f"{M2}/data/era5"],
     ["/mesonet/data/gempak", f"{M2}/data/gempak"],
@@ -29,17 +28,17 @@ PAIRS = [
     ["/mesonet/data/stage4", f"{M2}/data/stage4"],
     ["/mesonet/data/text", f"{M2}/data/text"],
     ["/mesonet/ldmdata", f"{M2}/ldmdata"],  # May fail if node writes data
-    ["/mesonet/share/cases", f"{M7}/share/cases"],
+    ["/mesonet/share/cases", f"{M2}/share/cases"],
     ["/mesonet/share/climodat", f"{M2}/share/climodat"],
-    ["/mesonet/share/features", f"{M7}/share/features"],
-    ["/mesonet/share/iemmaps", f"{M7}/share/iemmaps"],
-    ["/mesonet/share/lapses", f"{M7}/share/lapses"],
+    ["/mesonet/share/features", f"{M2}/share/features"],
+    ["/mesonet/share/iemmaps", f"{M2}/share/iemmaps"],
+    ["/mesonet/share/lapses", f"{M2}/share/lapses"],
     ["/mesonet/share/pickup", f"{M2}/share/pickup"],
-    ["/mesonet/share/pics", f"{M7}/share/pics"],
-    ["/mesonet/share/present", f"{M7}/share/present"],
-    ["/mesonet/share/usage", f"{M7}/share/usage"],
-    ["/mesonet/share/windrose", f"{M7}/share/windrose"],
-    ["/mesonet/home", f"{M7}/home"],
+    ["/mesonet/share/pics", f"{M2}/share/pics"],
+    ["/mesonet/share/present", f"{M2}/share/present"],
+    ["/mesonet/share/usage", f"{M2}/share/usage"],
+    ["/mesonet/share/windrose", f"{M2}/share/windrose"],
+    ["/mesonet/home", f"{M2}/home"],
 ]
 
 

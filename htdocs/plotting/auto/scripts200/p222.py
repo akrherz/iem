@@ -1,4 +1,11 @@
-"""1 minute precip during severe weather."""
+"""
+Using available one minute precipitation data from an ASOS, this
+data is merged with an archive of polygon based warnings.
+Precipitation totals are then computed during the warnings that spatially
+cover the observation point and within one hour of the warning.
+
+<p>This app is slow to load, please be patient!
+"""
 from datetime import timedelta
 
 import pandas as pd
@@ -15,17 +22,7 @@ PDICT = {
 
 def get_description():
     """Return a dict describing how to call this plotter"""
-    desc = {}
-    desc["data"] = True
-    desc[
-        "description"
-    ] = """Using available one minute precipitation data from an ASOS, this
-    data is merged with an archive of polygon based warnings.
-    Precipitation totals are then computed during the warnings that spatially
-    cover the observation point and within one hour of the warning.
-
-    <p>This app is slow to load, please be patient!
-    """
+    desc = {"description": __doc__, "data": True}
     desc["arguments"] = [
         dict(
             type="zstation",
@@ -208,9 +205,4 @@ def plotter(fdict):
 
 
 if __name__ == "__main__":
-    plotter(
-        {
-            "network": "PA_ASOS",
-            "zstation": "RDG",
-        }
-    )
+    plotter({})
