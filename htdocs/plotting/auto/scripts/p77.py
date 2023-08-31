@@ -1,4 +1,9 @@
-"""first and last date stuff"""
+"""
+For each year, the average first and last date of
+a given temperature is computed.  The values are then averaged and plotted
+to represent the period between these occurences and also the number of
+days represented by the period.
+"""
 import calendar
 import datetime
 
@@ -11,15 +16,7 @@ from pyiem.util import get_autoplot_context, get_sqlalchemy_conn
 
 def get_description():
     """Return a dict describing how to call this plotter"""
-    desc = {}
-    desc["data"] = True
-    desc[
-        "description"
-    ] = """For each year, the average first and last date of
-    a given temperature is computed.  The values are then averaged and plotted
-    to represent the period between these occurences and also the number of
-    days represented by the period.
-    """
+    desc = {"description": __doc__, "data": True}
     desc["arguments"] = [
         dict(
             type="station",

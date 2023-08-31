@@ -29,6 +29,7 @@ PDICT = {
     "max_low": "Maximum Low Temperature",
     "avg_low": "Average Low Temperature",
     "min_low": "Minimum Low Temperature",
+    "avg_range": "Average Daily Temperature Range",
     "days_high_aoa": "Days with High At or Above",
     "avg_rad": "Average Daily Solar Radiation",
     "cdd65": "Cooling Degree Days (base 65)",
@@ -51,6 +52,7 @@ UNITS = {
     "max_low": "F",
     "avg_low": "F",
     "min_low": "F",
+    "avg_range": "F",
     "days_high_aoa": "days",
     "avg_rad": "MJ/d",
     "cdd65": "F",
@@ -122,6 +124,12 @@ def get_description():
             name="var2",
             label="Comparison 2 Variable",
         ),
+        {
+            "type": "year",
+            "default": yesterday.year,
+            "name": "year",
+            "label": "Year to Highlight on the Chart",
+        },
     ]
     return desc
 
@@ -164,7 +172,7 @@ def combine(df, months, offsets) -> pd.DataFrame:
         tmpdf = pd.DataFrame({"a": xdf["max_high"], "b": thisdf["max_high"]})
         xdf["max_high"] = tmpdf.max(axis=1)
     if len(months) > 1:
-        for col in ["temp", "rad"]:
+        for col in ["temp", "rad", "range"]:
             xdf[f"avg_{col}"] = xdf[f"avg_{col}"] / float(len(months))
 
     return xdf
@@ -195,6 +203,7 @@ def plotter(fdict):
         min(low) as min_low,
         sum(case when high >= %s then 1 else 0 end) as days_high_aoa,
         avg(coalesce(merra_srad, hrrr_srad)) as avg_rad,
+        avg(high - low) as avg_range,
         sum(cdd(high, low, 65)) as cdd65,
         sum(hdd(high, low, 65)) as hdd65,
         sum(gddxx(32, 86, high, low)) as gdd32,
@@ -323,6 +332,17 @@ def plotter(fdict):
     )
     for yr in df.sort_values("zscore", ascending=False).head(5).index:
         ax.text(xdata[yr], ydata[yr], f" {yr}")
+    if ctx["year"] in df.index:
+        ax.text(xdata[ctx["year"]], ydata[ctx["year"]], f" {ctx['year']}")
+        ax.scatter(
+            xdata[ctx["year"]],
+            ydata[ctx["year"]],
+            marker="s",
+            facecolor="r",
+            edgecolor="r",
+            label=None,
+            zorder=4,
+        )
     return fig, df
 
 

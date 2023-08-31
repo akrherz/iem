@@ -1,4 +1,9 @@
-"""Snow depth."""
+"""
+This chart presents the daily snow depth reports
+as a image.  Each box represents an individual day's report with the
+color denoting the amount.  Values in light gray are missing in the
+database.
+"""
 import copy
 import datetime
 
@@ -15,14 +20,7 @@ LEVELS = [0.1, 1, 2, 3, 4, 6, 8, 12, 18, 24, 30, 36]
 
 def get_description():
     """Return a dict describing how to call this plotter"""
-    desc = {}
-    desc["data"] = True
-    desc[
-        "description"
-    ] = """This chart presents the daily snow depth reports
-    as a image.  Each box represents an individual day's report with the
-    color denoting the amount.  Values in light gray are missing in the
-    database."""
+    desc = {"description": __doc__, "data": True}
     today = datetime.datetime.today()
     lyear = today.year if today.month > 8 else (today.year - 1)
     desc["arguments"] = [

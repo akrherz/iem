@@ -1,4 +1,11 @@
-"""METAR Code Climo"""
+"""
+Frequency plot partitioned by hour and
+day or week of the
+year for a given METAR code to appear in the present weather. If your
+favorite METAR code is not available in the listing, please let us know!
+If multiple reports occurred within the same hour during one day/week,
+it would only count as one in this analysis.
+"""
 import calendar
 import datetime
 
@@ -24,16 +31,7 @@ PDICT2 = {"week": "group by week of year", "doy": "group by day of year"}
 
 def get_description():
     """Return a dict describing how to call this plotter"""
-    desc = {}
-    desc["data"] = True
-    desc[
-        "description"
-    ] = """Frequency plot partitioned by hour and
-    day or week of the
-    year for a given METAR code to appear in the present weather. If your
-    favorite METAR code is not available in the listing, please let us know!
-    If multiple reports occurred within the same hour during one day/week,
-    it would only count as one in this analysis."""
+    desc = {"description": __doc__, "data": True}
     desc["arguments"] = [
         dict(
             type="zstation",

@@ -1,4 +1,11 @@
-"""Hourly temp impacts from clouds"""
+"""
+This plot attempts to show the impact of cloudiness
+on temperatures.  The plot shows a simple difference between the average
+temperature during cloudy/mostly cloudy conditions and the average
+temperature by hour and by week of the year.  The input data for this
+chart is limited to post 1973 as cloud cover data since then is more
+reliable/comparable.
+"""
 import datetime
 
 import numpy as np
@@ -15,16 +22,7 @@ PDICT = {
 
 def get_description():
     """Return a dict describing how to call this plotter"""
-    desc = {}
-    desc["data"] = True
-    desc[
-        "description"
-    ] = """This plot attempts to show the impact of cloudiness
-    on temperatures.  The plot shows a simple difference between the average
-    temperature during cloudy/mostly cloudy conditions and the average
-    temperature by hour and by week of the year.  The input data for this
-    chart is limited to post 1973 as cloud cover data since then is more
-    reliable/comparable."""
+    desc = {"description": __doc__, "data": True}
     desc["arguments"] = [
         dict(
             type="zstation",
