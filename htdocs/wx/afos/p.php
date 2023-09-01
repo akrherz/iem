@@ -88,17 +88,7 @@ function last_product($conn, $pil)
     }
     return $rs;
 }
-
-// Okay, lets see if we can find the product we are looking for!
-if (is_null($e)) {
-    // Option 1: We only pil= set and no time, find the last product
-    $rs = last_product($conn, $pil);
-} elseif (!is_null($e) && !is_null($dir)) {
-    // Option 2: We have a time set and some directionality set
-    $rs = locate_product($conn, $e, $pil, $dir);
-    // if the above fails, just go to last product
-    $rs = last_product($conn, $pil);
-} else {
+function exact_product($conn, $e, $pil, $bbb){
     // Option 3: Explicit request
     $ts = gmmktime(
         intval(substr($e, 8, 2)),
@@ -125,11 +115,43 @@ if (is_null($e)) {
             gmdate("Y-m-d H:i+00", $ts), $bbb
         ));
     }
+    return $rs;
+}
+
+// Okay, lets see if we can find the product we are looking for!
+if (is_null($e)) {
+    // Option 1: We only pil= set and no time, find the last product
+    $rs = last_product($conn, $pil);
+} elseif (!is_null($e) && !is_null($dir)) {
+    // Option 2: We have a time set and some directionality set
+    $rs = locate_product($conn, $e, $pil, $dir);
+    // if the above fails, just go to last product
+    $rs = last_product($conn, $pil);
+} else {
+    $rs = exact_product($conn, $e, $pil, $bbb);
 }
 
 $content = "<h3>National Weather Service Raw Text Product</h3>";
 
 if (is_null($rs) || pg_num_rows($rs) < 1) {
+    if (!is_null($e)){
+        // Archived AFOS data suffers from some rectification problems, so we try
+        // to be helpful here and look around for nearby products.
+        $offsets = Array(-1, 1, -2, 2, -3, 3, -4, 4, -5, 5);
+        foreach($offsets as $_idx => $offset){
+            $rs = exact_product($conn, $e + $offset, $pil, $bbb);
+            if (!is_null($rs) && pg_num_rows($rs) > 0){
+                $row = pg_fetch_assoc($rs, 0);
+                $uri = sprintf(
+                    "p.php?pil=%s&e=%s",
+                    $pil,
+                    date("YmdHi", strtotime($row["mytime"]))
+                );
+                header("Location: $uri");
+                die();
+            }
+        }
+    }
     $content .= "<div class=\"alert alert-warning\">Sorry, could not find product.</div>";
 }
 if (pg_num_rows($rs) > 1) {
