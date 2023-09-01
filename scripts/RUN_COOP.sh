@@ -1,5 +1,4 @@
 # COOP related scripts that are run at :10 after between 6-10 AM
-# set -x
 
 cd coop
 bash PREC.sh

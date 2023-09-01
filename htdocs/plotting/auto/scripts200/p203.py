@@ -1,4 +1,10 @@
-"""Visual summary of polygons for a given UTC date."""
+"""
+This application generates a visual summary of polygons issued for a given
+UTC date.
+
+<p>Due to the plot's oblong nature, there is no present way to control the
+plot's resolution.
+"""
 import datetime
 import os
 from io import StringIO
@@ -27,21 +33,10 @@ COLORS = {"SV": "#ffff00", "TO": "#ff0000", "FF": "#00ff00", "MA": "#00ff00"}
 
 def get_description():
     """Return a dict describing how to call this plotter"""
-    desc = {}
+    desc = {"description": __doc__, "data": True, "text": True}
     desc["defaults"] = {"_r": None}
-    desc["data"] = True
-    desc["text"] = True
     desc["cache"] = 600
     desc["plotmetadata"] = False
-    desc[
-        "description"
-    ] = """
-    This application generates a visual summary of polygons issued for a given
-    UTC date.
-
-    <p>Due to the plot's oblong nature, there is no present way to control the
-    plot's resolution.
-    """
     today = datetime.date.today()
     desc["arguments"] = [
         dict(

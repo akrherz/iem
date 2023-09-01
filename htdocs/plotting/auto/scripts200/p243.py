@@ -291,11 +291,4 @@ def plotter(fdict):
 
 
 if __name__ == "__main__":
-    plotter(
-        {
-            "wfo": "BOX",
-            "network": "WFO",
-            "phenomena": "SV",
-            "significance": "W",
-        }
-    )
+    plotter({})

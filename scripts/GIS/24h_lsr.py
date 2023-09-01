@@ -1,11 +1,15 @@
-"""Dump 24 hour LSRs to a file"""
+"""Dump 24 hour LSRs to a file.
+
+Called from RUN_5MIN.sh
+"""
 import datetime
 import os
 import subprocess
+import tempfile
 import zipfile
 
 from geopandas import read_postgis
-from pyiem.util import get_sqlalchemy_conn, logger
+from pyiem.util import get_sqlalchemy_conn, logger, utc
 
 LOG = logger()
 FIELDS = {
@@ -29,11 +33,9 @@ SCHEMA = {"geometry": "Point", "properties": FIELDS}
 
 def main():
     """Go Main Go"""
-    os.chdir("/tmp/")
-
     # We set one minute into the future, so to get expiring warnings
     # out of the shapefile
-    ets = datetime.datetime.utcnow() + datetime.timedelta(minutes=+1)
+    ets = utc() + datetime.timedelta(minutes=+1)
     with get_sqlalchemy_conn("postgis") as conn:
         df = read_postgis(
             """
@@ -75,9 +77,7 @@ def main():
             zfh.writestr("lsr_24hour.prj", fh.read())
         zfh.getinfo("lsr_24hour.prj").external_attr = 0o664
 
-    pstr = (
-        f"zip c {ets:%Y%m%d%H%M} gis/shape/4326/us/lsr_24hour.zip " "bogus zip"
-    )
+    pstr = f"zip c {ets:%Y%m%d%H%M} gis/shape/4326/us/lsr_24hour.zip bogus zip"
     LOG.info(pstr)
     subprocess.call(["pqinsert", "-i", "-p", pstr, "lsr_24hour.zip"])
     for suffix in ["geojson", "csv"]:
@@ -88,9 +88,8 @@ def main():
         LOG.info(pstr)
         subprocess.call(["pqinsert", "-i", "-p", pstr, f"lsr_24hour.{suffix}"])
 
-    for suffix in ["shp", "shx", "dbf", "zip", "geojson", "csv"]:
-        os.remove(f"lsr_24hour.{suffix}")
-
 
 if __name__ == "__main__":
-    main()
+    with tempfile.TemporaryDirectory() as _tmpdir:
+        os.chdir(_tmpdir)
+        main()

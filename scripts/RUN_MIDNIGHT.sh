@@ -39,7 +39,7 @@ python dedup_hml_forecasts.py
 python raw2obs.py
 
 cd ../mrms
-python create_daily_symlink.py $(date --date '1 day ago' +'%Y %m %d')
+python copy_daily_24h.py $(date +'%Y %m %d')
 python mrms_monthly_plot.py
 
 # Assume we have MERRA data by the 28th each month
