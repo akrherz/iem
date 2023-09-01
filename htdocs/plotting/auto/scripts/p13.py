@@ -60,7 +60,7 @@ def plotter(fdict):
                 where station = :sid and day > '1893-01-01'
             ), agg as (
                 select day, year, avg,
-                rank() OVER (PARTITION by year ORDER by avg DESC)
+                rank() OVER (PARTITION by year ORDER by avg DESC, day DESC)
                 from obs
             )
             select year, extract(doy from day)::int as doy, avg from agg
