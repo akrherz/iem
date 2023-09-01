@@ -131,7 +131,6 @@ filters based on your interval of choice.</i>
 <select name="what">
   <option value="download">Download to Disk
   <option value="view">View on-line
-  <option value="plot">Plot in Chart
 </select>
 
 <p><h3 class="subtitle">6. Data Delimitation:</h3><br>
