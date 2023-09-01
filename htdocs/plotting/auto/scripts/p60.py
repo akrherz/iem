@@ -1,4 +1,14 @@
-"""Hourly frequencies."""
+"""
+This plot presents hourly variable metrics from automated
+stations.  Values are
+partitioned by week of the year to smooth out some of the day to day
+variation.
+
+<p><strong>Updated 28 Jun 2022</strong>: Partitioning by week is now
+done by taking the day of the year divided by 7 instead of iso-week
+calculation.  This hopefully makes the data presentation more straight
+forward.
+"""
 import calendar
 import datetime
 
@@ -36,22 +46,8 @@ PDICT3 = {
 
 def get_description():
     """Return a dict describing how to call this plotter"""
-    desc = {}
-    desc["highcharts"] = True
+    desc = {"description": __doc__, "data": True, "cache": 86400}
     desc["cache"] = 86400
-    desc[
-        "description"
-    ] = """This plot presents hourly variable metrics from automated
-    stations.  Values are
-    partitioned by week of the year to smooth out some of the day to day
-    variation.
-
-    <p><strong>Updated 28 Jun 2022</strong>: Partitioning by week is now
-    done by taking the day of the year divided by 7 instead of iso-week
-    calculation.  This hopefully makes the data presentation more straight
-    forward.
-    """
-    desc["data"] = True
     desc["arguments"] = [
         dict(
             type="zstation",

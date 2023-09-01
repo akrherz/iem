@@ -1,4 +1,6 @@
-"""Totals"""
+"""
+Simple plot of seasonal/yearly precipitation totals.
+"""
 import datetime
 
 import numpy as np
@@ -21,13 +23,7 @@ PDICT2 = {
 
 def get_description():
     """Return a dict describing how to call this plotter"""
-    desc = {}
-    desc["data"] = True
-    desc[
-        "description"
-    ] = """
-    Simple plot of seasonal/yearly precipitation totals.
-    """
+    desc = {"description": __doc__, "data": True}
     desc["arguments"] = [
         dict(
             type="station",

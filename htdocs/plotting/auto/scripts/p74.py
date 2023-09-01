@@ -94,7 +94,7 @@ def plotter(fdict):
         sum(case when month in (9, 10, 11) and {b}
         then 1 else 0 end) as fall,
         sum(case when {b} then 1 else 0 end) as all
-        from alldata_{station[:2]} WHERE station = %s and year >= %s
+        from alldata WHERE station = %s and year >= %s
         GROUP by yr ORDER by yr ASC
         """,
             conn,

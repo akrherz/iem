@@ -1,4 +1,15 @@
-"""Simple plot of number of WAWA"""
+"""
+This chart displays the number of products issued
+by a NWS Office  or state by year for a given watch, warning,
+or advisory of your choice.  These numbers are based on IEM archives and
+are not official!  The counting is summing up distinct events.  If one
+tornado watch covered 40 counties, this would only count as 1 for this
+plot.
+
+<p>Since the year 2005 and 2008 are common start years for VTEC tracking of
+various phenomena, when this app encounters those years as the starting
+point of the plot, they are droppped from the display.
+"""
 import datetime
 
 import pandas as pd
@@ -20,22 +31,7 @@ PDICT2 = {
 
 def get_description():
     """Return a dict describing how to call this plotter"""
-    desc = {}
-    desc["data"] = True
-    desc["cache"] = 86400
-    desc[
-        "description"
-    ] = """This chart displays the number of products issued
-    by a NWS Office  or state by year for a given watch, warning,
-    or advisory of your choice.  These numbers are based on IEM archives and
-    are not official!  The counting is summing up distinct events.  If one
-    tornado watch covered 40 counties, this would only count as 1 for this
-    plot.
-
-    <p>Since the year 2005 and 2008 are common start years for VTEC tracking of
-    various phenomena, when this app encounters those years as the starting
-    point of the plot, they are droppped from the display.
-    """
+    desc = {"description": __doc__, "data": True, "cache": 86400}
     desc["arguments"] = [
         dict(
             type="select",
