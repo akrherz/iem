@@ -69,63 +69,54 @@ ISSUANCE = {
     "7.C.10": "Day 7 Convective @10z",
     "8.C.10": "Day 8 Convective @10z",
 }
-OUTLOOKS = dict(
-    (
-        ("ANY SEVERE.0.02", "Any Severe 2% (Day 3+)"),
-        ("ANY SEVERE.0.05", "Any Severe 5% (Day 3+)"),
-        ("ANY SEVERE.0.15", "Any Severe 15% (Day 3+)"),
-        ("ANY SEVERE.0.25", "Any Severe 25% (Day 3+)"),
-        ("ANY SEVERE.0.30", "Any Severe 30% (Day 3+)"),
-        ("ANY SEVERE.0.35", "Any Severe 35% (Day 3+)"),
-        ("ANY SEVERE.0.45", "Any Severe 45% (Day 3+)"),
-        ("ANY SEVERE.0.60", "Any Severe 60% (Day 3+)"),
-        ("ANY SEVERE.SIGN", "Any Severe Significant (Day 3+)"),
-        ("CATEGORICAL.TSTM", "Categorical Thunderstorm Risk (Days 1-3)"),
-        ("CATEGORICAL.MRGL", "Categorical Marginal Risk (2015+) (Days 1-3)"),
-        ("CATEGORICAL.SLGT", "Categorical Slight Risk (Days 1-3)"),
-        ("CATEGORICAL.ENH", "Categorical Enhanced Risk (2015+) (Days 1-3)"),
-        ("CATEGORICAL.MDT", "Categorical Moderate Risk (Days 1-3)"),
-        ("CATEGORICAL.HIGH", "Categorical High Risk (Days 1-3)"),
-        (
-            "FIRE WEATHER CATEGORICAL.CRIT",
-            "Categorical Critical Fire Wx (Days 1-2)",
-        ),
-        (
-            "FIRE WEATHER CATEGORICAL.EXTM",
-            "Categorical Extreme Fire Wx (Days 1-2)",
-        ),
-        (
-            "CRITICAL FIRE WEATHER AREA.0.15",
-            "Critical Fire Weather Area 15% (Days3-7)",
-        ),
-        ("HAIL.0.05", "Hail 5% (Days 1+2)"),
-        ("HAIL.0.15", "Hail 15% (Days 1+2)"),
-        ("HAIL.0.25", "Hail 25% (Days 1+2)"),
-        ("HAIL.0.30", "Hail 30% (Days 1+2)"),
-        ("HAIL.0.35", "Hail 35% (Days 1+2)"),
-        ("HAIL.0.45", "Hail 45% (Days 1+2)"),
-        ("HAIL.0.60", "Hail 60% (Days 1+2)"),
-        ("HAIL.SIGN", "Hail Significant (Days 1+2)"),
-        ("TORNADO.0.02", "Tornado 2% (Days 1+2)"),
-        ("TORNADO.0.05", "Tornado 5% (Days 1+2)"),
-        ("TORNADO.0.10", "Tornado 10% (Days 1+2)"),
-        ("TORNADO.0.15", "Tornado 15% (Days 1+2)"),
-        ("TORNADO.0.25", "Tornado 25% (Days 1+2)"),
-        ("TORNADO.0.30", "Tornado 30% (Days 1+2)"),
-        ("TORNADO.0.35", "Tornado 35% (Days 1+2)"),
-        ("TORNADO.0.45", "Tornado 45% (Days 1+2)"),
-        ("TORNADO.0.60", "Tornado 60% (Days 1+2)"),
-        ("TORNADO.SIGN", "Tornado Significant (Days 1+2)"),
-        ("WIND.0.05", "Wind 5% (Days 1+2)"),
-        ("WIND.0.15", "Wind 15% (Days 1+2)"),
-        ("WIND.0.25", "Wind 25% (Days 1+2)"),
-        ("WIND.0.30", "Wind 30% (Days 1+2)"),
-        ("WIND.0.35", "Wind 35% (Days 1+2)"),
-        ("WIND.0.45", "Wind 45% (Days 1+2)"),
-        ("WIND.0.60", "Wind 60% (Days 1+2)"),
-        ("WIND.SIGN", "Wind Significant (Days 1+2)"),
-    )
-)
+OUTLOOKS = {
+    "ANY SEVERE.0.02": "Any Severe 2% (Day 3+)",
+    "ANY SEVERE.0.05": "Any Severe 5% (Day 3+)",
+    "ANY SEVERE.0.15": "Any Severe 15% (Day 3+)",
+    "ANY SEVERE.0.25": "Any Severe 25% (Day 3+)",
+    "ANY SEVERE.0.30": "Any Severe 30% (Day 3+)",
+    "ANY SEVERE.0.35": "Any Severe 35% (Day 3+)",
+    "ANY SEVERE.0.45": "Any Severe 45% (Day 3+)",
+    "ANY SEVERE.0.60": "Any Severe 60% (Day 3+)",
+    "ANY SEVERE.SIGN": "Any Severe Significant (Day 3+)",
+    "CATEGORICAL.TSTM": "Categorical Thunderstorm Risk (Days 1-3)",
+    "CATEGORICAL.MRGL": "Categorical Marginal Risk (2015+) (Days 1-3)",
+    "CATEGORICAL.SLGT": "Categorical Slight Risk (Days 1-3)",
+    "CATEGORICAL.ENH": "Categorical Enhanced Risk (2015+) (Days 1-3)",
+    "CATEGORICAL.MDT": "Categorical Moderate Risk (Days 1-3)",
+    "CATEGORICAL.HIGH": "Categorical High Risk (Days 1-3)",
+    "FIRE WEATHER CATEGORICAL.CRIT": "Categorical Critical Fire Wx (Days 1-2)",
+    "FIRE WEATHER CATEGORICAL.EXTM": "Categorical Extreme Fire Wx (Days 1-2)",
+    "CRITICAL FIRE WEATHER AREA.0.15": (
+        "Critical Fire Weather Area 15% (Days3-7)"
+    ),
+    "HAIL.0.05": "Hail 5% (Days 1+2)",
+    "HAIL.0.15": "Hail 15% (Days 1+2)",
+    "HAIL.0.25": "Hail 25% (Days 1+2)",
+    "HAIL.0.30": "Hail 30% (Days 1+2)",
+    "HAIL.0.35": "Hail 35% (Days 1+2)",
+    "HAIL.0.45": "Hail 45% (Days 1+2)",
+    "HAIL.0.60": "Hail 60% (Days 1+2)",
+    "HAIL.SIGN": "Hail Significant (Days 1+2)",
+    "TORNADO.0.02": "Tornado 2% (Days 1+2)",
+    "TORNADO.0.05": "Tornado 5% (Days 1+2)",
+    "TORNADO.0.10": "Tornado 10% (Days 1+2)",
+    "TORNADO.0.15": "Tornado 15% (Days 1+2)",
+    "TORNADO.0.25": "Tornado 25% (Days 1+2)",
+    "TORNADO.0.30": "Tornado 30% (Days 1+2)",
+    "TORNADO.0.35": "Tornado 35% (Days 1+2)",
+    "TORNADO.0.45": "Tornado 45% (Days 1+2)",
+    "TORNADO.0.60": "Tornado 60% (Days 1+2)",
+    "TORNADO.SIGN": "Tornado Significant (Days 1+2)",
+    "WIND.0.05": "Wind 5% (Days 1+2)",
+    "WIND.0.15": "Wind 15% (Days 1+2)",
+    "WIND.0.25": "Wind 25% (Days 1+2)",
+    "WIND.0.30": "Wind 30% (Days 1+2)",
+    "WIND.0.35": "Wind 35% (Days 1+2)",
+    "WIND.0.45": "Wind 45% (Days 1+2)",
+    "WIND.0.60": "Wind 60% (Days 1+2)",
+    "WIND.SIGN": "Wind Significant (Days 1+2)",
+}
 PDICT = {"cwa": "Plot by NWS Forecast Office", "state": "Plot by State/Sector"}
 PDICT2 = {
     "avg": "Average Number of Days per Year",
@@ -137,27 +128,26 @@ UNITS = {
     "count": "days",
     "lastyear": "year",
 }
-MDICT = dict(
-    [
-        ("all", "No Month/Time Limit"),
-        ("spring", "Spring (MAM)"),
-        ("fall", "Fall (SON)"),
-        ("winter", "Winter (DJF)"),
-        ("summer", "Summer (JJA)"),
-        ("jan", "January"),
-        ("feb", "February"),
-        ("mar", "March"),
-        ("apr", "April"),
-        ("may", "May"),
-        ("jun", "June"),
-        ("jul", "July"),
-        ("aug", "August"),
-        ("sep", "September"),
-        ("oct", "October"),
-        ("nov", "November"),
-        ("dec", "December"),
-    ]
-)
+MDICT = {
+    "all": "Entire Year",
+    "spring": "Spring (MAM)",
+    "fall": "Fall (SON)",
+    "winter": "Winter (DJF)",
+    "summer": "Summer (JJA)",
+    "jan": "January",
+    "feb": "February",
+    "mar": "March",
+    "apr": "April",
+    "may": "May",
+    "jun": "June",
+    "jul": "July",
+    "aug": "August",
+    "sep": "September",
+    "oct": "October",
+    "nov": "November",
+    "dec": "December",
+}
+
 GRIDWEST = -139.2
 GRIDEAST = -55.1
 GRIDNORTH = 54.51
@@ -256,7 +246,7 @@ def plotter(fdict):
     elif month == "summer":
         months = [6, 7, 8]
     else:
-        ts = datetime.datetime.strptime("2000-" + month + "-01", "%Y-%b-%d")
+        ts = datetime.datetime.strptime(f"2000-{month}-01", "%Y-%b-%d")
         # make sure it is length two for the trick below in SQL
         months = [ts.month, 999]
 
@@ -426,16 +416,4 @@ def plotter(fdict):
 
 
 if __name__ == "__main__":
-    plotter(
-        {
-            "month": "all",
-            "p": "6.C.10",
-            "level": "ANY SEVERE.0.30",
-            "t": "cwa",
-            "network": "WFO",
-            "station": "EWX",
-            "csector": "southernplains",
-            "drawc": "no",
-            "w": "lastyear",
-        }
-    )
+    plotter({})

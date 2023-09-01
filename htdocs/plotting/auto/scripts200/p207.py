@@ -1,4 +1,30 @@
-"""Snowfall analysis maps."""
+"""
+Generates an analysis map of snowfall or freezing rain data
+based on NWS Local Storm Reports and NWS COOP Data.  This autoplot
+presents a number of tunables including:
+<ul>
+    <li>The window of hours to look before the specified valid time to
+    find Local Storm Reports (LSR).</li>
+    <li>The option to attempt to inject zeros into the observations prior
+    to doing an analysis.  Since the LSRs are all non-zero values, sometimes
+    it is good to attempt to add zeros in to keep the reports from bleeding
+    into areas that did not receive snow.</li>
+    <li>You can pick which
+    <a href="{SCIPY}">SciPy.interpolate.Rbf</a>
+    function to use.  The radius in the function shown equals the grid cell
+    size used for the analysis.</li>
+    <li>You can optionally include any NWS COOP reports that were processed
+    by the IEM over the time period that you specified.</li>
+</ul>
+
+<br /><br />If you download the data for this analysis, there is a column
+called <code>{USEME}</code> which denotes if the report was used to
+create the grid analysis.  There is a primative quality control routine
+that attempts to omit too low of reports.
+
+<br /><br />Having trouble with this app?  If so, please copy/paste the URL
+showing the bad image and <a href="/info/contacts.php">email it to us</a>!
+"""
 # pylint: disable=unpacking-non-sequence
 import datetime
 
@@ -58,37 +84,7 @@ PDICT8 = {
 
 def get_description():
     """Return a dict describing how to call this plotter"""
-    desc = {}
-    desc["data"] = True
-    desc["cache"] = 60
-    desc[
-        "description"
-    ] = f"""Generates an analysis map of snowfall or freezing rain data
-    based on NWS Local Storm Reports and NWS COOP Data.  This autoplot
-    presents a number of tunables including:
-    <ul>
-       <li>The window of hours to look before the specified valid time to
-       find Local Storm Reports (LSR).</li>
-       <li>The option to attempt to inject zeros into the observations prior
-       to doing an analysis.  Since the LSRs are all non-zero values, sometimes
-       it is good to attempt to add zeros in to keep the reports from bleeding
-       into areas that did not receive snow.</li>
-       <li>You can pick which
-       <a href="{SCIPY}">SciPy.interpolate.Rbf</a>
-       function to use.  The radius in the function shown equals the grid cell
-       size used for the analysis.</li>
-       <li>You can optionally include any NWS COOP reports that were processed
-       by the IEM over the time period that you specified.</li>
-    </ul>
-
-    <br /><br />If you download the data for this analysis, there is a column
-    called <code>{USEME}</code> which denotes if the report was used to
-    create the grid analysis.  There is a primative quality control routine
-    that attempts to omit too low of reports.
-
-    <br /><br />Having trouble with this app?  If so, please copy/paste the URL
-    showing the bad image and <a href="/info/contacts.php">email it to us</a>!
-    """
+    desc = {"description": __doc__, "data": True, "cache": 60}
     now = datetime.datetime.now()
     desc["arguments"] = [
         dict(
@@ -476,20 +472,4 @@ def plotter(fdict):
 
 
 if __name__ == "__main__":
-    fig, _df = plotter(
-        dict(
-            v="snow",
-            t="cwa",
-            csector="IA",
-            wfo="LSX",
-            endts="2022-02-03 1955",
-            hours=48,
-            z="yes",
-            p="contour",
-            coop="yes",
-            sz=50,
-            f="linear",
-            c="no",
-        )
-    )
-    fig.savefig("/tmp/test.png")
+    plotter({})

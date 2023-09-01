@@ -203,4 +203,4 @@ def plotter(fdict):
 
 
 if __name__ == "__main__":
-    plotter({"sts": "2021-05-12 0500", "ets": "2021-05-12 1600"})
+    plotter({})

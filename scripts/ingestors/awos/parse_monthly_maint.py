@@ -45,7 +45,7 @@ def main(argv):
         if key in done:
             continue
         done.append(key)
-        date = datetime.datetime.strptime(row["Visit Date"], "%d-%b-%y")
+        date = datetime.datetime.strptime(row["Visit Date"], "%m-%d-%Y")
         descr = (
             row["Description"]
             .lower()

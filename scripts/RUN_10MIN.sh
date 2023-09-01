@@ -1,5 +1,4 @@
 # Run every 10 minutes please
-#set -x
 
 cd current
 python vsby.py

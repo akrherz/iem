@@ -1,4 +1,7 @@
-"""Plot 7 Day Precipitation Totals"""
+"""Plot 7,31,91 Day Precipitation Totals.
+
+Called from RUN_10_AFTER.sh
+"""
 import datetime
 import sys
 
@@ -13,7 +16,7 @@ def fmter(val):
         return 0
     if 0 < val < 0.009:
         return "T"
-    return "%.2f" % (val,)
+    return f"{val:.2f}"
 
 
 def main(days, argv):
