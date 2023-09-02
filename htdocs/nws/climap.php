@@ -1,7 +1,5 @@
 <?php 
-/**
- * Produce a map of CLI parsed data for a single day
- */
+// Produce a map of CLI parsed data for a single day
 require_once "../../config/settings.inc.php";
 define("IEM_APPID", 76);
 require_once "../../include/myview.php";
@@ -9,7 +7,7 @@ require_once "../../include/mlib.php";
 force_https();
 $t = new MyView();
 $t->title = "Map of Daily NWS CLImage reports";
-$OL = '7.2.2';
+$OL = '7.5.1';
 $t->headextra = <<<EOF
 <link rel="stylesheet" href="/vendor/openlayers/{$OL}/ol.css" type="text/css">
 <link rel="stylesheet" href="/vendor/jquery-ui/1.12.1/jquery-ui.min.css" />
@@ -29,7 +27,7 @@ $t->jsextra = <<<EOF
 <script src="/vendor/openlayers/{$OL}/ol.js" type="text/javascript"></script>
 <script src="/vendor/jquery-ui/1.12.1/jquery-ui.js"></script>
 <script src='/vendor/openlayers/{$OL}/ol-layerswitcher.js'></script>
-<script src='climap.js?v=2'></script>
+<script src='climap.js?v=3'></script>
 EOF;
 
 $t->content = <<<EOF
@@ -43,10 +41,10 @@ $t->content = <<<EOF
         <li><a href="/nws/">NWS Mainpage</a></li>
         <li class="active">Map of NWS Daily CLI Reports</li>
         </div>
-        
+
 <div class="row">
 <div class="col-md-12">
-        
+
 <div class="pull-right">
 <i class="fa fa-text-size"></i>
 <button id="fminus" class="btn btn-default"><i class="fa fa-minus"></i></button>
