@@ -111,7 +111,7 @@ $(document).ready(() => {
 
     $("#datepicker").datepicker({
         dateFormat: "DD, d MM, yy",
-        minDate: new Date(2009, 1, 1),
+        minDate: new Date(2001, 1, 1),
         maxDate: new Date()
     });
     $("#datepicker").datepicker('setDate', new Date());
