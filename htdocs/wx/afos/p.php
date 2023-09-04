@@ -17,7 +17,17 @@ if (is_null($pil) || trim($pil) == "") {
 }
 
 $conn = iemdb("afos");
-
+$rs = pg_prepare(
+    $conn,
+    "_LSELECT",
+    "SELECT data, bbb, entered at time zone 'UTC' as mytime, source, wmo ".
+    "from products WHERE pil = $1 and entered = $2");
+$rs = pg_prepare(
+    $conn,
+    "_LSELECT_BBB",
+    "SELECT data, bbb, entered at time zone 'UTC' as mytime, source, wmo ".
+    "from products WHERE pil = $1 and entered = $2 and bbb = $3");
+    
 function locate_product($conn, $e, $pil, $dir)
 {
     // Attempt to locate this product and redirect to stable URI if so
@@ -99,20 +109,15 @@ function exact_product($conn, $e, $pil, $bbb){
         intval(substr($e, 0, 4))
     );
     if (is_null($bbb)) {
-        $rs = pg_prepare($conn, "_LSELECT", "SELECT data, bbb,
-            entered at time zone 'UTC' as mytime, source, wmo from products
-            WHERE pil = $1 and entered = $2");
         $rs = pg_execute($conn, "_LSELECT", array(
             $pil,
-            gmdate("Y-m-d H:i+00", $ts)
+            gmdate("Y-m-d H:i+00", $ts),
         ));
     } else {
-        $rs = pg_prepare($conn, "_LSELECT", "SELECT data, bbb,
-            entered at time zone 'UTC' as mytime, source, wmo from products
-            WHERE pil = $1 and entered = $2 and bbb = $3");
-        $rs = pg_execute($conn, "_LSELECT", array(
+        $rs = pg_execute($conn, "_LSELECT_BBB", array(
             $pil,
-            gmdate("Y-m-d H:i+00", $ts), $bbb
+            gmdate("Y-m-d H:i+00", $ts),
+            $bbb,
         ));
     }
     return $rs;
