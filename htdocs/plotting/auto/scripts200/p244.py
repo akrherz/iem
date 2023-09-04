@@ -186,7 +186,6 @@ def plotter(fdict):
         color="r",
         ha="left",
     )
-    ax.set_ylabel("Precipitation Bias [inch]")
     ax.grid()
 
     y = 0.9

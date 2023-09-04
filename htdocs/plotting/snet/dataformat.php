@@ -96,4 +96,3 @@ the end represents the change in pressure. 'S' == Steady.  'R' == Raising.
 </table></div>
 EOF;
 $t->render('single.phtml');
-?>

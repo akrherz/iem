@@ -10,8 +10,8 @@ $day1 = get_int404("day1", date("d", time() + 86400));
 $day2 = get_int404("day2", date("d", time() + 86400));
 $hour1 = get_int404("hour1", 0);
 $hour2 = get_int404("hour2", 12);
-$model = isset($_GET["model"]) ? $_GET["model"] : "GFS";
-$station = isset($_GET["station"]) ? strtoupper($_GET["station"]) : "KAMW";
+$model = isset($_GET["model"]) ? xssafe($_GET["model"]) : "GFS";
+$station = isset($_GET["station"]) ? strtoupper(xssafe($_GET["station"])) : "KAMW";
 
 $url = sprintf(
     "/cgi-bin/request/mos.py?year1=%s&year2=%s&month1=%s&month2=%s&" .

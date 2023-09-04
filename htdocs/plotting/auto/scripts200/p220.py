@@ -375,8 +375,4 @@ def plotter(fdict):
 
 
 if __name__ == "__main__":
-    # has all 5 days with something included
-    # plotter(dict(cat="categorical", which="0C", valid="2019-05-14 2022"))
-    # has three days of F
-    # plotter(dict(cat="categorical", which="0F", valid="2018-05-07 2322"))
-    plotter({"cat": "categorical", "which": "1C", "valid": "2000-03-08 1919"})
+    plotter({})

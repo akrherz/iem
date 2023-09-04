@@ -214,4 +214,4 @@ def plotter(fdict):
 
 
 if __name__ == "__main__":
-    plotter({"pid": "202305040706-PGUM-WWPQ82-SPSPQ2", "segnum": 0})
+    plotter({})

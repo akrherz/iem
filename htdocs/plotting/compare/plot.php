@@ -2,6 +2,7 @@
 require_once "../../../config/settings.inc.php";
 require_once "../../../include/station.php";
 require_once "../../../include/database.inc.php";
+require_once "../../../include/forms.php";
 require_once "../../../include/jpgraph/jpgraph.php";
 require_once "../../../include/jpgraph/jpgraph_line.php";
 require_once "../../../include/jpgraph/jpgraph_date.php";
@@ -9,9 +10,9 @@ require_once "../../../include/jpgraph/jpgraph_date.php";
 $pgconn = iemdb("iem");
 
 /* Get vars */
-$station1 = isset($_GET['station1']) ? substr($_GET['station1'],0,10) : "AMW";
-$station2 = isset($_GET['station2']) ? substr($_GET['station2'],0,10) : "DSM";
-$var = isset($_GET['var']) ? substr($_GET['var'],0,10): 'tmpf';
+$station1 = isset($_GET['station1']) ? substr(xssafe($_GET['station1']),0,10) : "AMW";
+$station2 = isset($_GET['station2']) ? substr(xssafe($_GET['station2']),0,10) : "DSM";
+$var = isset($_GET['var']) ? substr(xssafe($_GET['var']),0,10): 'tmpf';
 
 $st = new StationData(Array($station1,$station2) );
 $cities = $st->table;
@@ -30,19 +31,14 @@ $sql = "SELECT extract(EPOCH from valid) as epoch, $var as data,
 pg_prepare($pgconn, "SELECT22", $sql);
 $rs = pg_execute($pgconn, "SELECT22", Array($station1,$station2));
 
-/* Assign into data arrays */
-//$cnt=array($station1 => 0, $station2 => 0);
-
+// Assign into data arrays
 for ($i=0;  $row=pg_fetch_array($rs); $i++)
 {
   $s = $row["station"];
   if ($var == "drct" && floatval($row["data"]) == 0) { continue; }
   $datay[$s][] = $row["data"];
   $datax[$s][] = $row["epoch"];
-  //$cnt[$s] += 1;
 }
-
-
 
 // Create the graph. These two calls are always required
 $graph = new Graph(640,400,"example1");
@@ -65,21 +61,20 @@ $titles = Array(
 $graph->yaxis->SetTitleMargin(40);
 $graph->xaxis->SetTitleMargin(70);
 
-
 $graph->xaxis->SetTitle("Valid Local Time");
 $graph->yaxis->SetTitle($titles[$var]);
 $graph->tabtitle->Set('Recent Comparison');
 
-  $graph->tabtitle->SetFont(FF_FONT1,FS_BOLD,16);
-  $graph->SetColor('wheat');
+$graph->tabtitle->SetFont(FF_FONT1,FS_BOLD,16);
+$graph->SetColor('wheat');
 
-  $graph->legend->SetLayout(LEGEND_HOR);
-  $graph->legend->SetPos(0.01,0.06, 'right', 'top');
-  $graph->legend->SetLineSpacing(3);
+$graph->legend->SetLayout(LEGEND_HOR);
+$graph->legend->SetPos(0.01,0.06, 'right', 'top');
+$graph->legend->SetLineSpacing(3);
 
-  $graph->ygrid->SetFill(true,'#EFEFEF@0.5','#BBCCEE@0.5');
-  $graph->ygrid->Show();
-  $graph->xgrid->Show();
+$graph->ygrid->SetFill(true,'#EFEFEF@0.5','#BBCCEE@0.5');
+$graph->ygrid->Show();
+$graph->xgrid->Show();
 
 // Create the linear plot
 $lineplot=new LinePlot($datay[$station1], $datax[$station1]);

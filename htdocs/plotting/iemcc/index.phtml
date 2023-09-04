@@ -3,6 +3,11 @@ require_once "../../../config/settings.inc.php";
 include_once "../../../include/myview.php";
 require_once "../../../include/mlib.php";
 require_once "../../../include/forms.php";
+require_once "../../../include/jpgraph/jpgraph.php";
+require_once "../../../include/jpgraph/jpgraph_line.php";
+require_once "../../../include/jpgraph/jpgraph_date.php";
+require_once "../../../include/jpgraph/jpgraph_scatter.php";
+
 $t = new MyView();
 $t->title = "Central Command Time Series";
 
@@ -72,10 +77,6 @@ for($i=0;$i<sizeof($drct);$i+=5)
     $drct5[] = $drct[$i];
 }
 
-require_once "../../../include/jpgraph/jpgraph.php";
-require_once "../../../include/jpgraph/jpgraph_line.php";
-require_once "../../../include/jpgraph/jpgraph_date.php";
-require_once "../../../include/jpgraph/jpgraph_scatter.php";
 
 /* ------------------------- */
 // Create the graph. These two calls are always required
@@ -126,9 +127,6 @@ $graph->SetScale("datlin",0, 360);
 $graph->SetY2Scale("lin");
 
 $graph->img->SetMargin(55,55,40,60);
-//$graph->xaxis->SetFont(FONT1,FS_BOLD);
-//$graph->xaxis->SetTickLabels($xlabel);
-//$graph->xaxis->SetTextLabelInterval(60);
 $graph->xaxis->SetTextTickInterval(60);
 $graph->xaxis->SetLabelAngle(90);
 $graph->title->Set("Wind Speed & Direction");
@@ -253,4 +251,3 @@ every minute. Note that the archive begins 17 Aug 2006.</p>
 
 EOF;
 $t->render('single.phtml');
-?>

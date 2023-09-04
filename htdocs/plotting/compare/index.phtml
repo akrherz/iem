@@ -1,41 +1,39 @@
 <?php
-$OL = "7.2.2";
- require_once "../../../config/settings.inc.php";
- require_once "../../../include/mlib.php";
- force_https();
-  require_once "../../../include/myview.php";
- require_once "../../../include/forms.php";
- require_once "../../../include/imagemaps.php";
- require_once "../../../include/station.php";
- $t = new MyView();
+$OL = "7.5.1";
+require_once "../../../config/settings.inc.php";
+require_once "../../../include/mlib.php";
+force_https();
+require_once "../../../include/myview.php";
+require_once "../../../include/forms.php";
+require_once "../../../include/imagemaps.php";
+require_once "../../../include/station.php";
+$t = new MyView();
 
- $network = isset($_REQUEST['network']) ? xssafe($_REQUEST['network']) : "IA_ASOS";
- $station1 = isset($_GET['station']) ? strtoupper(xssafe($_GET['station'])) : "";
- $station2 = isset($_GET['station1']) ? strtoupper(xssafe($_GET['station1'])) : "";
+$network = isset($_REQUEST['network']) ? xssafe($_REQUEST['network']) : "IA_ASOS";
+$station1 = isset($_GET['station']) ? strtoupper(xssafe($_GET['station'])) : "";
+$station2 = isset($_GET['station1']) ? strtoupper(xssafe($_GET['station1'])) : "";
 
- $var = isset($_GET['var']) ? xssafe($_GET['var']): "tmpf";
- $st = new StationData(Array($station1, $station2));
- $cities = $st->table;
+$var = isset($_GET['var']) ? xssafe($_GET['var']) : "tmpf";
+$st = new StationData(array($station1, $station2));
+$cities = $st->table;
 
 
- $uri = "/plotting/compare/index.phtml?";
- $ar = Array();
- if (strlen($station1) > 0)
- {
-   $ar["station1"] = $station1;
- } else {
- 	$cities[""]["name"] = "";
- 	$cities[""]["network"] = "";
- }
- 
- if (strlen($station2) > 0)
- {
-   $ar["station1"] = $station2;
-   $uri = "/plotting/compare/index.phtml?station1=$station2";
- }else{
- 	$cities[""]["name"] = "";
- 	$cities[""]["network"] = "";
- }
+$uri = "/plotting/compare/index.phtml?";
+$ar = array();
+if (strlen($station1) > 0) {
+    $ar["station1"] = $station1;
+} else {
+    $cities[""]["name"] = "";
+    $cities[""]["network"] = "";
+}
+
+if (strlen($station2) > 0) {
+    $ar["station1"] = $station2;
+    $uri = "/plotting/compare/index.phtml?station1=$station2";
+} else {
+    $cities[""]["name"] = "";
+    $cities[""]["network"] = "";
+}
 
 $t->headextra = <<<EOF
 <link rel="stylesheet" href="/vendor/openlayers/{$OL}/ol.css" type="text/css">
@@ -49,18 +47,20 @@ $t->jsextra = <<<EOF
 <script src="/vendor/select2/4.0.3/select2.min.js"></script>
 <script type="text/javascript">
 $(document).ready(function(){
-	$(".iemselect2").select2();	
+    $(".iemselect2").select2();	
 });
 </script>
 EOF;
 $t->title = "Site Comparisons";
 
-$ar = Array("tmpf" => "Temperature",
-"dwpf" => "Dew Point",
-"sknt" => "Wind Speed (knots)",
-"drct" => "Wind Direction",
-"alti" => "Pressure Altimeter",
-"phour" => "Hourly Precipitation");
+$ar = array(
+    "tmpf" => "Temperature",
+    "dwpf" => "Dew Point",
+    "sknt" => "Wind Speed (knots)",
+    "drct" => "Wind Direction",
+    "alti" => "Pressure Altimeter",
+    "phour" => "Hourly Precipitation"
+);
 $vselect = make_select("var", $var, $ar);
 
 $content = <<<EOF
@@ -115,10 +115,9 @@ choices.
 EOF;
 $nselect = selectNetwork($network);
 $sselect = networkSelect($network, $station1);
-if (strlen($station1) == 0 || strlen($station2) == 0)
-{
-$content .= <<<EOF
-	<form name="netselect">
+if (strlen($station1) == 0 || strlen($station2) == 0) {
+    $content .= <<<EOF
+    <form name="netselect">
 <input type="hidden" name="station1" value="{$station1}">
 <table><tr><th>Select Network</th>
 <td>{$nselect}</td>
@@ -138,9 +137,8 @@ $content .= <<<EOF
 </form>
 
 EOF;
-} else
-{
-$content .= <<<EOF
+} else {
+    $content .= <<<EOF
 <img src="plot.php?var={$var}&station1={$station1}&station2={$station2}" />
 <br /><b>Loading Comparison, please be patient...</b>
 EOF;
