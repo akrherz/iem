@@ -1,4 +1,12 @@
-"""RH climatology"""
+"""
+The IEM computes a daily maximum and minimum
+relative humidity value based on whatever observations were available
+for that calendar day.  This app presents these values along with
+a simple climatology computed by averaging the daily observations. You
+can also plot a frequency of the RH value being above or below
+some threshold. This frequency is grouped by week of the year to
+provide some smoothing to the metric.
+"""
 import calendar
 import datetime
 
@@ -13,17 +21,7 @@ PDICT2 = {"max_rh": "Daily Max RH", "min_rh": "Daily Min RH"}
 
 def get_description():
     """Return a dict describing how to call this plotter"""
-    desc = {}
-    desc["data"] = True
-    desc[
-        "description"
-    ] = """The IEM computes a daily maximum and minimum
-    relative humidity value based on whatever observations were available
-    for that calendar day.  This app presents these values along with
-    a simple climatology computed by averaging the daily observations. You
-    can also plot a frequency of the RH value being above or below
-    some threshold. This frequency is grouped by week of the year to
-    provide some smoothing to the metric."""
+    desc = {"description": __doc__, "data": True}
     today = datetime.datetime.today() - datetime.timedelta(days=1)
     desc["arguments"] = [
         dict(

@@ -1,4 +1,9 @@
-"""SPS Monthly Counts"""
+"""
+The NWS issues Special Weather Statements (SPS) products that often cover
+events that are just below severe limits and/or not covered by other
+headline products.  Sometimes these SPS products have polygons.  This
+app provides a monthly total of the number of such SPS products.
+"""
 import calendar
 
 import numpy as np
@@ -16,16 +21,7 @@ PDICT = {
 
 def get_description():
     """Return a dict describing how to call this plotter"""
-    desc = {}
-    desc["cache"] = 86400
-    desc[
-        "description"
-    ] = """
-    The NWS issues Special Weather Statements (SPS) products that often cover
-    events that are just below severe limits and/or not covered by other
-    headline products.  Sometimes these SPS products have polygons.  This
-    app provides a monthly total of the number of such SPS products.
-    """
+    desc = {"description": __doc__, "cache": 86400}
     desc["arguments"] = [
         dict(
             type="select",

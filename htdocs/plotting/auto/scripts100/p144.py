@@ -1,4 +1,10 @@
-"""ISUAG"""
+"""
+This plot uses hourly 4 inch depth soil
+temperature observations from the ISU Soil Moisture Network.  It first
+plots the first period each year that the soil temperature was at or
+above 50 degrees for at least X number of hours.  It then plots any
+subsequent periods below 50 degrees for that year.
+"""
 
 import pandas as pd
 from pyiem.exceptions import NoDataFound
@@ -35,14 +41,7 @@ XREF = {
 
 def get_description():
     """Return a dict describing how to call this plotter"""
-    desc = {}
-    desc[
-        "description"
-    ] = """This plot uses hourly 4 inch depth soil
-    temperature observations from the ISU Soil Moisture Network.  It first
-    plots the first period each year that the soil temperature was at or
-    above 50 degrees for at least X number of hours.  It then plots any
-    subsequent periods below 50 degrees for that year."""
+    desc = {"description": __doc__}
     desc["arguments"] = [
         dict(
             type="networkselect",

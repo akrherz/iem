@@ -1,4 +1,7 @@
-"""Period differences"""
+"""
+This map produces an analysis of change in
+the number of days for the growing season.
+"""
 
 import pandas as pd
 from pyiem.exceptions import NoDataFound
@@ -22,12 +25,7 @@ PDICT3 = {
 
 def get_description():
     """Return a dict describing how to call this plotter"""
-    desc = {}
-    desc["data"] = True
-    desc[
-        "description"
-    ] = """This map produces an analysis of change in
-    the number of days for the growing season."""
+    desc = {"description": __doc__, "data": True}
     desc["arguments"] = [
         dict(
             type="select",
@@ -189,4 +187,4 @@ def plotter(fdict):
 
 
 if __name__ == "__main__":
-    plotter(dict(over="annual"))
+    plotter({})

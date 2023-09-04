@@ -1,8 +1,5 @@
 <?php
-
-/**
- * Produce a map of CF6 parsed data for a single day
- */
+// Produce a map of CF6 parsed data for a single day
 require_once "../../config/settings.inc.php";
 define("IEM_APPID", 131);
 require_once "../../include/myview.php";
@@ -10,7 +7,7 @@ require_once "../../include/mlib.php";
 force_https();
 $t = new MyView();
 $t->title = "Map of Daily NWS CF6 reports";
-$OL = '7.2.2';
+$OL = '7.5.1';
 $t->headextra = <<<EOF
 <link rel="stylesheet" href="/vendor/openlayers/{$OL}/ol.css" type="text/css">
 <link rel="stylesheet" href="/vendor/jquery-ui/1.12.1/jquery-ui.min.css" />
@@ -74,10 +71,10 @@ $t->content = <<<EOF
     <option value="wxcodes">wxcodes</option>
     <option value="gust_smph">Wind Gust</option>
     <option value="gust_drct">Wind Gust Direction</option>
-    </select>	
-        
+    </select>
+
 <strong>For Date:</strong><input type="text" id="datepicker" size="30">
-        
+
 </form>
 </div></div><!-- ./row -->
 
@@ -89,7 +86,6 @@ $t->content = <<<EOF
 
 </div></div><!-- ./row -->
 
-        
 <div class="row">
 <div class="col-md-12">
     <h4>Click on map to show CF6 text below</h4>

@@ -1,4 +1,19 @@
-"""Aridity"""
+"""
+This plot presents a time series of Aridity Index.
+This index computes the standardized high temperature departure subtracted
+by the standardized precipitation departure.  For the purposes of this
+plot, this index is computed daily over a trailing period of days of your
+choice.  The climatology is based on the present period of record
+statistics.  You can optionally plot this index for two other period of
+days of your choice.  Entering '0' will disable additional lines appearing
+on the plot.
+
+<br />You can also optionally generate this plot for the same period of
+days over different years of your choice.  When plotted over multiple
+years, only "Number of Days #1' is considered.  An additional year is
+plotted representing the best root mean squared error fit to the selected
+year's data.
+"""
 import datetime
 
 import matplotlib.dates as mdates
@@ -11,27 +26,7 @@ from pyiem.util import get_autoplot_context, get_sqlalchemy_conn
 
 def get_description():
     """Return a dict describing how to call this plotter"""
-    desc = {}
-    desc["data"] = True
-    desc["cache"] = 86400
-    desc[
-        "description"
-    ] = """
-    This plot presents a time series of Aridity Index.
-    This index computes the standardized high temperature departure subtracted
-    by the standardized precipitation departure.  For the purposes of this
-    plot, this index is computed daily over a trailing period of days of your
-    choice.  The climatology is based on the present period of record
-    statistics.  You can optionally plot this index for two other period of
-    days of your choice.  Entering '0' will disable additional lines appearing
-    on the plot.
-
-    <br />You can also optionally generate this plot for the same period of
-    days over different years of your choice.  When plotted over multiple
-    years, only "Number of Days #1' is considered.  An additional year is
-    plotted representing the best root mean squared error fit to the selected
-    year's data.
-    """
+    desc = {"description": __doc__, "data": True, "cache": 86400}
     today = datetime.date.today()
     sts = today - datetime.timedelta(days=180)
     desc["arguments"] = [
@@ -103,7 +98,7 @@ def plotter(fdict):
     year3 = ctx.get("year3")  # could be null!
     with get_sqlalchemy_conn("coop") as conn:
         df = pd.read_sql(
-            f"""
+            """
         WITH agg as (
             SELECT o.day, o.sday,
             avg(high) OVER (ORDER by day ASC ROWS %s PRECEDING) as avgt,
@@ -115,7 +110,7 @@ def plotter(fdict):
             avg(high) OVER (ORDER by day ASC ROWS %s PRECEDING) as avgt3,
             sum(precip) OVER (ORDER by day ASC ROWS %s PRECEDING) as sump3,
             count(*) OVER (ORDER by day ASC ROWS %s PRECEDING) as cnt3
-            from alldata_{station[:2]} o WHERE station = %s),
+            from alldata o WHERE station = %s),
         agg2 as (
             SELECT sday,
             avg(avgt) as avg_avgt, stddev(avgt) as std_avgt,

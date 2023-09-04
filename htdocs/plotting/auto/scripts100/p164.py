@@ -1,4 +1,11 @@
-"""NWSLI stations over/under"""
+"""
+This chart presents a simple accounting of the
+percentage of first order NWS climate sites that are either above or
+below average or reporting precipitation / snow each day.  Note that no
+spatial weighting is done, so one should not interpret this as an areal
+coverage of some condition.  For temperature, sites with an average
+temperature for that date are omitted.
+"""
 import datetime
 
 import pandas as pd
@@ -17,18 +24,7 @@ MDICT = {
 
 def get_description():
     """Return a dict describing how to call this plotter"""
-    desc = {}
-    desc["data"] = True
-    desc["cache"] = 86400
-    desc[
-        "description"
-    ] = """This chart presents a simple accounting of the
-    percentage of first order NWS climate sites that are either above or
-    below average or reporting precipitation / snow each day.  Note that no
-    spatial weighting is done, so one should not interpret this as an areal
-    coverage of some condition.  For temperature, sites with an average
-    temperature for that date are omitted.
-    """
+    desc = {"description": __doc__, "data": True, "cache": 86400}
     sts = datetime.date.today() - datetime.timedelta(days=45)
     ets = datetime.date.today() - datetime.timedelta(days=1)
     desc["arguments"] = [
@@ -139,4 +135,4 @@ def plotter(fdict):
 
 
 if __name__ == "__main__":
-    plotter(dict(network="IA_ASOS", station="AMW"))
+    plotter({})

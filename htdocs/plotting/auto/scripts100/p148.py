@@ -1,4 +1,10 @@
-"""Special Days each year"""
+"""
+This plot presents a daily observation for a site
+and year on a given date / holiday date each year.  A large caveat to this
+chart is that much of the long term daily climate data is for a 24 hour
+period ending at around 7 AM.  This chart will also not plot for dates
+prior to the holiday's inception.
+"""
 import calendar
 import datetime
 
@@ -26,17 +32,7 @@ PDICT2 = {
 
 def get_description():
     """Return a dict describing how to call this plotter"""
-    desc = {}
-    desc["data"] = True
-    desc["cache"] = 86400
-    desc[
-        "description"
-    ] = """This plot presents a daily observation for a site
-    and year on a given date / holiday date each year.  A large caveat to this
-    chart is that much of the long term daily climate data is for a 24 hour
-    period ending at around 7 AM.  This chart will also not plot for dates
-    prior to the holiday's inception.
-    """
+    desc = {"description": __doc__, "data": True, "cache": 86400}
     desc["arguments"] = [
         dict(
             type="station",
@@ -293,4 +289,4 @@ def plotter(fdict):
 
 
 if __name__ == "__main__":
-    plotter(dict(date="easter"))
+    plotter({})

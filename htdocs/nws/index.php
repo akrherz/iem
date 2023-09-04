@@ -202,23 +202,19 @@ events.</li>
   <div class="panel-heading">ASOS/AWOS METAR</div>
   <div class="panel-body">
 <ul>
-    <li>Daily Climate Summary (AFOS: CLI Product) 
-        <a href="climap.php">Interactive Map</a> or 
-        <a href="clitable.php">Text Table</a></li>
- <li><a href="obs.php">Sortable Currents by WFO</a></li>
+  <li><a href="obs.php">Sortable Currents by WFO</a></li>
 </ul>
 
 <h4>Iowa AWOS RTP First Guess</h4>
-<p>The IEM processes an auxillary feed of Iowa AWOS data direct
-from the Iowa DOT.  This information is used to produce a more accurate
-first guess at fields the NWS needs for their RTP product.</p>
+<p>The IEM attempts to get the temperature and precipitation logic correct
+to build the required SHEF fields for the RTP product.</p>
 <ul>
  <li><a href="/data/awos_rtp_00z.shef">0Z SHEF</a></li>
  <li><a href="/data/awos_rtp.shef">12Z SHEF</a></li>
 </ul>
 
   </div>
-</div><!-- ASOS/AWOS/METAR -->
+</div>
 
 <div class="panel panel-default">
   <div class="panel-heading">Cooperative Observer Program - COOP</div>

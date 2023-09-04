@@ -1,4 +1,10 @@
-"""Temperature of rain"""
+"""
+This chart displays the frequency of having
+measurable precipitation reported by an ASOS site and the air temperature
+that was reported at the same time.  This chart makes an assumption
+about the two values being coincident, whereas in actuality they may not
+have been.
+"""
 import calendar
 import datetime
 
@@ -11,16 +17,7 @@ from pyiem.util import get_autoplot_context, get_sqlalchemy_conn
 
 def get_description():
     """Return a dict describing how to call this plotter"""
-    desc = {}
-    desc["data"] = True
-    desc[
-        "description"
-    ] = """This chart displays the frequency of having
-    measurable precipitation reported by an ASOS site and the air temperature
-    that was reported at the same time.  This chart makes an assumption
-    about the two values being coincident, whereas in actuality they may not
-    have been.
-    """
+    desc = {"description": __doc__, "data": True}
     desc["arguments"] = [
         dict(
             type="zstation",
