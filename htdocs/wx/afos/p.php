@@ -47,11 +47,11 @@ function locate_product($conn, $e, $pil, $dir)
         (intval(date("m", $ts)) > 6) ? "0712" : "0106"
     );
     // first attempt shortcut
-    $rs = pg_prepare($conn, "_LSELECT", "SELECT " .
+    $rs = pg_prepare($conn, "_LSELECT22", "SELECT " .
         "entered at time zone 'UTC' as mytime from $table " .
         "WHERE pil = $1 and entered $sign $2 " .
         "ORDER by entered $sortdir LIMIT 1");
-    $rs = pg_execute($conn, "_LSELECT", array(
+    $rs = pg_execute($conn, "_LSELECT22", array(
         $pil,
         date("Y-m-d H:i", $ts)
     ));
