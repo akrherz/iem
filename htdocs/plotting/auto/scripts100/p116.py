@@ -71,7 +71,7 @@ def plotter(fdict):
     if df.empty:
         raise NoDataFound("No Data Found.")
     df["monthdate"] = df[["year", "month"]].apply(
-        lambda x: datetime.date(x[0], x[1], 1), axis=1
+        lambda x: datetime.date(x.iloc[0], x.iloc[1], 1), axis=1
     )
     df = df.set_index("monthdate")
 
@@ -137,6 +137,8 @@ def plotter(fdict):
         apctx=ctx,
     )
     filtered = df[(df["year"] >= y1) & (df["year"] <= (y1 + 20))]
+    if filtered.empty:
+        raise NoDataFound("No data for specified period")
     df2 = filtered[["month", "year", varname + "60"]].pivot(
         index="year", columns="month", values=f"{varname}60"
     )
