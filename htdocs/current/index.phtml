@@ -161,13 +161,13 @@ $cfg["humidity"] = array(
             "label" => "Surface Moisture Divergence &amp; Winds",
             "timemachine" => "#21.0",
             "img" => "/data/surfaceMD0.gif",
-            "desc" => "Description to be written..."
+            "desc" => "Legacy plot of surface moisture divergence."
         ),
         "iowa_dw" => array(
             "label" => "Surface Dew Points &amp; Winds",
             "timemachine" => "#19.0",
             "img" => "/data/surfaceDW0.gif",
-            "desc" => "Description to be written..."
+            "desc" => "Legacy plot of surface winds and dew point."
         ),
     )
 );
@@ -176,34 +176,47 @@ $cfg["precipitation"] = array(
     "name" => "Precipitation",
     "prods" => array(
         "today_mrms_iowa" => array(
-            "label" => "MRMS Q3 Today's Precip",
+            "label" => "MRMS Today's Precip",
             "timemachine" => "#45.{$daylink}",
             "img" => "/data/iowa_q2_1d.png",
-            "desc" => "Description to be written..."
+            "desc" => <<<EOM
+Multi-RADAR Multi-Sensor (MRMS) summary of hourly precipitation estimates for
+a central time zone calendar date.
+EOM
         ),
         "hour_mrms_iowa" => array(
-            "label" => "MRMS Q3 Hourly Precip",
+            "label" => "MRMS Hourly Precip",
             "timemachine" => "#46.{$daylink}",
             "img" => "/data/iowa_q2_1h.png",
-            "desc" => "Description to be written..."
+            "desc" => <<<EOM
+Multi-RADAR Multi-Sensor (MRMS) hourly precipitation esimates.
+EOM
         ),
         "3hour_mrms_iowa" => array(
             "label" => "MRMS Q3 Three Hourly Precip",
             "timemachine" => "#47.{$daylink}",
             "img" => "/data/iowa_q2_3h.png",
-            "desc" => "Description to be written..."
+            "desc" => <<<EOM
+Multi-RADAR Multi-Sensor (MRMS) 3 hour precipitation estimates computed by
+combining hourly esimates.
+EOM
         ),
         "6hour_mrms_iowa" => array(
             "label" => "MRMS Q3 Six Hourly Precip",
             "timemachine" => "#48.{$daylink}",
             "img" => "/data/iowa_q2_6h.png",
-            "desc" => "Description to be written..."
+            "desc" => <<<EOM
+Multi-RADAR Multi-Sensor (MRMS) 6 hour precipitation estimates computed by
+combining hourly esimates.
+EOM
         ),
         "today_asos_iowa" => array(
-            "label" => "Iowa ASOS/AWOS Today's Precip",
+            "label" => "Iowa ASOS Today's Precip",
             "timemachine" => null,
             "img" => "/data/summary/today_prec.png",
-            "desc" => "Description to be written..."
+            "desc" => <<<EOM
+IEM computed calendar day precipitation total based on available hourly reports
+EOM
         ),
         "7day_asos_iowa" => array(
             "label" => "Iowa ASOS/AWOS 7 Day Precip",
@@ -230,49 +243,64 @@ $cfg["precipitation"] = array(
             "label" => "Stage IV Today's Precip",
             "timemachine" => "#43.{$daylink}",
             "img" => "/data/conus_stage4_1d.png",
-            "desc" => "Description to be written..."
+            "desc" => <<<EOM
+IEM totaling of available NCEP Stage IV hourly precipitation estimates.
+EOM
         ),
         "today_stage4_midwest" => array(
             "label" => "Stage IV Today's Precip",
             "timemachine" => "#42.{$daylink}",
             "img" => "/data/midwest_stage4_1d.png",
-            "desc" => "Description to be written..."
+            "desc" => <<<EOM
+IEM totaling of available NCEP Stage IV hourly precipitation for the central
+time zone calendar day.
+EOM
         ),
         "today_stage4_iowa" => array(
             "label" => "Stage IV Today's Precip",
             "timemachine" => "#41.{$daylink}",
             "img" => "/data/iowa_stage4_1d.png",
-            "desc" => "Description to be written..."
+            "desc" => <<<EOM
+IEM totaling of available NCEP Stage IV hourly precipitation for the central
+time zone calendar day.
+EOM
         ),
         "hour_stage4_midwest" => array(
             "label" => "Stage IV Hourly Precip",
             "timemachine" => "#40.{$mhourlink}",
             "img" => "/data/midwest_stage4_1h.png",
-            "desc" => "Description to be written..."
+            "desc" => <<<EOM
+IEM computed total of NCEP Stage IV precipitation over an hour.
+EOM
         ),
         "today_stage4_iowa" => array(
             "label" => "Stage IV Hourly Precip",
             "timemachine" => "#39.{$mhourlink}",
             "img" => "/data/iowa_stage4_1h.png",
-            "desc" => "Description to be written..."
+            "desc" => <<<EOM
+IEM totaling of available NCEP Stage IV hourly precipitation for the central
+time zone calendar day.
+EOM
         ),
         "midwest_coop_contour" => array(
             "label" => "COOP Precipitation Analysis",
             "timemachine" => "#38.0",
             "img" => "/data/midwest_coop_12z_precip.png",
-            "desc" => "Description to be written..."
+            "desc" => "Contour plot of available COOP reports."
         ),
         "iowa_coop_contour" => array(
             "label" => "COOP Precipitation Analysis",
             "timemachine" => "#37.0",
             "img" => "/data/iowa_coop_12z_precip.png",
-            "desc" => "Description to be written..."
+            "desc" => "Contour plot of available COOP reports."
         ),
         "iowa_flood_center" => array(
             "label" => "Iowa Flood Center",
             "timemachine" => "#82.0",
             "img" => "/data/iowa_ifc_1d.png",
-            "desc" => "Description to be written..."
+            "desc" => <<<EOM
+IEM computed daily total of available Iowa Flood Center precipitation estimates.
+EOM
         ),
         "year_departure" => array(
             "label" => "Departure from Average",
@@ -286,43 +314,43 @@ $cfg["precipitation"] = array(
             "label" => "Stage IV Yearly Total",
             "timemachine" => null,
             "img" => "/data/summary/year/stage4obs.png",
-            "desc" => "Description to be written..."
+            "desc" => "Yearlong total of NCEP Stage IV Precipitation."
         ),
         "year_average" => array(
             "label" => "Yearly Average Total",
             "timemachine" => null,
             "img" => "/data/summary/year/normals.png",
-            "desc" => "Description to be written..."
+            "desc" => "IEM computed precipitation average for the year."
         ),
         "4mon_accum" => array(
             "label" => "4 Month Estimated accumulation",
             "timemachine" => null,
             "img" => "/data/summary/4mon_stage4obs.png",
-            "desc" => "Description to be written..."
+            "desc" => "IEM computed 4 month precipitation from NCEP Stage IV."
         ),
         "4mon_climate" => array(
             "label" => "4 Month Climatology",
             "timemachine" => null,
             "img" => "/data/summary/4mon_normals.png",
-            "desc" => "Description to be written..."
+            "desc" => "IEM computed 4 month climatology based on long term climate sites."
         ),
         "4mon_diff" => array(
             "label" => "4 Month Departures",
             "timemachine" => null,
             "img" => "/data/summary/4mon_diff.png",
-            "desc" => "Description to be written..."
+            "desc" => "IEM computed departure from average based on long term climate sites."
         ),
         "asos_month_accum" => array(
-            "label" => "Monthly Accumulation [ASOS/AWOS]",
+            "label" => "Monthly Accumulation ASOS",
             "timemachine" => null,
             "img" => "/data/summary/month_prec.png",
-            "desc" => ""
+            "desc" => "IEM computed monthly precipitation total from ASOS."
         ),
         "coop_month_accum" => array(
             "label" => "Monthly Accumulation [COOP]",
             "timemachine" => null,
             "img" => "/data/coopMonthPlot.png",
-            "desc" => ""
+            "desc" => "IEM computed monthly precipitation total from COOP."
         ),
     )
 );
@@ -334,7 +362,7 @@ $cfg["pressure"] = array(
             "label" => "Iowa Altimeter",
             "timemachine" => null,
             "img" => "/data/mesonet_altm.gif",
-            "desc" => "Description to be written..."
+            "desc" => "Pressure altimeter analysis."
         ),
     )
 );
@@ -346,13 +374,13 @@ $cfg["snow"] = array(
             "label" => "Seasonal Snowfall",
             "timemachine" => null,
             "img" => "/data/summary/mw_season_snowfall.png",
-            "desc" => "Description to be written..."
+            "desc" => "Seasonal snowfall total based on NWS CLI Sites."
         ),
         "monthly_snowfall" => array(
             "label" => "Monthly Snowfall",
             "timemachine" => null,
             "img" => "/data/coopMonthSPlot.gif",
-            "desc" => "Description to be written..."
+            "desc" => "Monthly snowfall total from NWS COOP sites."
         ),
     )
 );
@@ -364,19 +392,19 @@ $cfg["soil_temperature"] = array(
             "label" => "Yesterday Average",
             "timemachine" => "#57.0",
             "img" => "/data/soilt_day1.png",
-            "desc" => "Description to be written..."
+            "desc" => "IEM Soil Temperature analysis maps."
         ),
         "day2" => array(
             "label" => "Day 2 Average",
             "timemachine" => "#57.0",
             "img" => "/data/soilt_day2.png",
-            "desc" => "Description to be written..."
+            "desc" => "IEM Soil Temperature analysis maps."
         ),
         "day3" => array(
             "label" => "Day 3 Average",
             "timemachine" => "#57.0",
             "img" => "/data/soilt_day3.png",
-            "desc" => "Description to be written..."
+            "desc" => "IEM Soil Temperature analysis maps."
         ),
     )
 );
@@ -388,13 +416,13 @@ $cfg["station_plot"] = array(
             "label" => "IEM Mesoplot",
             "timemachine" => "#1.0",
             "img" => "/data/mesonet.gif",
-            "desc" => "Description to be written..."
+            "desc" => "Iowa Mesonet station plot combining ASOS + RWIS."
         ),
         "mw" => array(
             "label" => "Midwest Mesoplot",
             "timemachine" => "#4.0",
             "img" => "/data/MWmesonet.gif",
-            "desc" => "Description to be written..."
+            "desc" => "Midwest station plot of airport data."
         ),
     )
 );
@@ -402,35 +430,29 @@ $cfg["station_plot"] = array(
 $cfg["sounding"] = array(
     "name" => "Sounding",
     "prods" => array(
-        "slater" => array(
-            "label" => "Slater Wind Profiler",
-            "timemachine" => null,
-            "img" => "http://www.rap.ucar.edu/weather/upper/sla_wp.gif",
-            "desc" => "Description to be written..."
-        ),
         "dvn" => array(
             "label" => "Daveport RAOB",
             "timemachine" => null,
             "img" => "http://www.rap.ucar.edu/weather/upper/dvn.gif",
-            "desc" => "Description to be written..."
+            "desc" => "Recent sounding for Davenport."
         ),
         "oax" => array(
             "label" => "Omaha RAOB",
             "timemachine" => null,
             "img" => "http://www.rap.ucar.edu/weather/upper/oax.gif",
-            "desc" => "Description to be written..."
+            "desc" => "Recent sounding for Omaha."
         ),
         "mpx" => array(
             "label" => "Minneapolis RAOB",
             "timemachine" => null,
             "img" => "http://www.rap.ucar.edu/weather/upper/mpx.gif",
-            "desc" => "Description to be written..."
+            "desc" => "Recent sounding for Minneapolis."
         ),
         "top" => array(
             "label" => "Topeka RAOB",
             "timemachine" => null,
             "img" => "http://www.rap.ucar.edu/weather/upper/top.gif",
-            "desc" => "Description to be written..."
+            "desc" => "Recent sounding for Topeka."
         ),
     )
 );
@@ -442,19 +464,19 @@ $cfg["wind_speed"] = array(
             "label" => "10m Today's Peak Wind Gust",
             "timemachine" => "#16.{$daylink}",
             "img" => "/data/summary/today_gust.png",
-            "desc" => "Description to be written..."
+            "desc" => "Computed wind gust from ASOS stations."
         ),
         "wind_power" => array(
             "label" => "Wind Power Potential",
             "timemachine" => "#60.{$mhourlink}",
             "img" => "/data/midwest/rtma_wind_power.png",
-            "desc" => "Description to be written..."
+            "desc" => "An estimate of wind power based on NCEP RTMA."
         ),
         "iowa_frontogenesis" => array(
             "label" => "Surface Frontogenesis &amp; Winds",
             "timemachine" => "#18.0",
             "img" => "/data/surfaceFRNT0.gif",
-            "desc" => "Description to be written..."
+            "desc" => "Legacy surface frontogenesis plot."
         ),
         "windroses" => array(
             "label" => "Wind Roses",
@@ -477,7 +499,7 @@ $cfg["visibility"] = array(
             "label" => "Iowa Visibility",
             "timemachine" => "#24.0",
             "img" => "/data/iowa_vsby.png",
-            "desc" => "Description to be written..."
+            "desc" => "Analysis of visibility from ASOS stations."
         ),
     )
 );
@@ -606,4 +628,4 @@ $t->content = <<<EOF
 </div><!-- ./row -->
 
 EOF;
-$t->render('single.phtml');
+$t->render('full.phtml');

@@ -1,4 +1,7 @@
-"""Generate a plot of GDD"""
+"""Generate a plot of GDD.
+
+Called from RUN_SUMMARY.sh
+"""
 import datetime
 
 from pyiem.util import logger, web2ldm

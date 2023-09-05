@@ -1,4 +1,8 @@
-"""Hourly Temp Frequencies"""
+"""
+Based on IEM archives of METAR reports, this
+application produces the hourly frequency of a temperature at or
+above or below a temperature thresold.
+"""
 import calendar
 
 import pandas as pd
@@ -14,13 +18,7 @@ PDICT = {
 
 def get_description():
     """Return a dict describing how to call this plotter"""
-    desc = {}
-    desc["data"] = True
-    desc[
-        "description"
-    ] = """Based on IEM archives of METAR reports, this
-    application produces the hourly frequency of a temperature at or
-    above or below a temperature thresold."""
+    desc = {"description": __doc__, "data": True}
     desc["arguments"] = [
         dict(
             type="zstation",

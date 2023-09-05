@@ -280,4 +280,4 @@ def plotter(fdict):
 
 
 if __name__ == "__main__":
-    plotter(dict(split="jul1", f="accum"))
+    plotter({})

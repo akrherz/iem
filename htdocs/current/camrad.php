@@ -3,7 +3,6 @@
  * Generate a RADAR image with webcams overlain for some *UTC* timestamp!
  */
 require_once "/usr/lib64/php/modules/mapscript.php";
-
 require_once "../../config/settings.inc.php";
 require_once "../../include/database.inc.php";
 require_once "../../include/cameras.inc.php";
@@ -107,7 +106,6 @@ if (file_exists($fp)) {
     $y = 20;
 }
 
-
 $cp = new layerObj($map);
 $cp->setProjection("epsg:4326");
 $cp->__set("type", MS_SHAPE_POINT);
@@ -116,7 +114,6 @@ $cp->__set("labelcache", MS_ON);
 $cl = new classObj($cp);
 $lbl = new labelObj();
 $cl->addLabel($lbl);
-//$cl->getLabel(0)->__set("type", MS_TRUETYPE);
 $cl->getLabel(0)->__set("size", 10);
 $cl->getLabel(0)->__set("position", MS_CR);
 $cl->getLabel(0)->__set("font", "liberation-bold");
@@ -129,7 +126,6 @@ $cl->getLabel(0)->color->setRGB(0, 0, 0);
 $cl2 = new classObj($cp);
 $lbl = new labelObj();
 $cl2->addLabel($lbl);
-//$cl2->getLabel(0)->__set("type", MS_TRUETYPE);
 $cl2->getLabel(0)->__set("size", "10");
 $cl2->getLabel(0)->__set("font", "esri34");
 $cl2->getLabel(0)->__set("position", MS_CC);

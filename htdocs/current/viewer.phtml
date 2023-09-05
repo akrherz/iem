@@ -1,5 +1,5 @@
 <?php
-$OL = "7.2.2";
+$OL = "7.5.1";
 require_once "../../config/settings.inc.php";
 define("IEM_APPID", 95);
 require_once "../../include/mlib.php";
@@ -30,7 +30,6 @@ $t->content = <<<EOF
    margin-top: 0px;
 }
 </style>
- 
      <div class="row">
          <div class="col-sm-4">
          <h3><i class="fa fa-camera"></i> IEM Webcam Viewer</h3>
@@ -56,7 +55,7 @@ $t->content = <<<EOF
         </div>
         </div>
      </div>
- 
+
 <div class="row">
 <div class="col-md-6">
 
@@ -110,7 +109,6 @@ can sometimes be wrong for various painful reasons.</p>
         
 <p>More information on the IEM's webcam work can be found
     <a href="/projects/webcam.php">here</a>.</p>
-
 
 EOF;
 $t->render('full.phtml');

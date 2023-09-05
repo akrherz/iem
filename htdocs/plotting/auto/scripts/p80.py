@@ -1,4 +1,18 @@
-"""VTEC product duration"""
+"""
+This plot presents the accumulated frequency of duration for a given
+NWS VTEC Watch, Warning, Advisory product.  The complication with this
+tool is that some alerts are issued for zones and others are for
+counties.  If you do not find results for one, try switching to the
+other.</p>
+
+<p>There's a second major complication and that is the case of watches
+and how VTEC handles issuance and expiration time.  Some watches are
+issued for time periods well into the future and are either cancelled
+or upgraded prior to the VTEC issuance time.  In those cases, this app
+considers the wall clock issuance time of the watch as the start time
+and the wall clock time when the watch was either cancelled or upgraded.
+In this case, both lines are presented as equal.
+"""
 import numpy as np
 import pandas as pd
 import psycopg2.extras
@@ -10,26 +24,7 @@ from pyiem.util import get_autoplot_context, get_dbconn
 
 def get_description():
     """Return a dict describing how to call this plotter"""
-    desc = {}
-    desc["data"] = True
-    desc["cache"] = 86400
-    desc[
-        "description"
-    ] = """
-    This plot presents the accumulated frequency of duration for a given
-    NWS VTEC Watch, Warning, Advisory product.  The complication with this
-    tool is that some alerts are issued for zones and others are for
-    counties.  If you do not find results for one, try switching to the
-    other.</p>
-
-    <p>There's a second major complication and that is the case of watches
-    and how VTEC handles issuance and expiration time.  Some watches are
-    issued for time periods well into the future and are either cancelled
-    or upgraded prior to the VTEC issuance time.  In those cases, this app
-    considers the wall clock issuance time of the watch as the start time
-    and the wall clock time when the watch was either cancelled or upgraded.
-    In this case, both lines are presented as equatl.
-    """
+    desc = {"description": __doc__, "data": True, "cache": 86400}
     desc["arguments"] = [
         dict(
             type="ugc",

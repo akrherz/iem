@@ -1,4 +1,14 @@
-"""map of climodat departures"""
+"""
+This application plots an analysis of station
+data for a period of your choice.  Spatially aggregated values like those
+for climate districts and statewide averages are not included.  The IEM
+computed climatologies are based on simple daily averages of observations.
+
+<p><strong>Change 1 Dec 2022:</strong> When you select a plot variable that
+does need climatology, the resulting download does not contain those
+climatology fields as they are computationally expensive to compute
+on-the-fly.  This was done as an optimization to speed up the app.
+"""
 # pylint: disable=invalid-unary-operand-type
 import datetime
 
@@ -100,20 +110,7 @@ GDD_KNOWN_BASES = [32, 41, 46, 48, 50, 51, 52]
 
 def get_description():
     """Return a dict describing how to call this plotter"""
-    desc = {}
-    desc["data"] = True
-    desc[
-        "description"
-    ] = """This application plots an analysis of station
-    data for a period of your choice.  Spatially aggregated values like those
-    for climate districts and statewide averages are not included.  The IEM
-    computed climatologies are based on simple daily averages of observations.
-
-    <p><strong>Change 1 Dec 2022:</strong> When you select a plot variable that
-    does need climatology, the resulting download does not contain those
-    climatology fields as they are computationally expensive to compute
-    on-the-fly.  This was done as an optimization to speed up the app.
-    """
+    desc = {"description": __doc__, "data": True}
     today = datetime.datetime.today() - datetime.timedelta(days=1)
     desc["arguments"] = [
         dict(
@@ -633,19 +630,4 @@ def plotter(fdict):
 
 
 if __name__ == "__main__":
-    plotter(
-        {
-            "wfo": "DMX",
-            "d": "sector",
-            "sector": "IA",
-            "var": "precip_sum",
-            "gddbase": 50,
-            "gddceil": 86,
-            "date1": "1950-01-01",
-            "date2": "1955-12-31",
-            "p": "contour",
-            "cmap": "RdYlBu",
-            "c": "yes",
-            "ct": "ncei_climate91",
-        }
-    )
+    plotter({})

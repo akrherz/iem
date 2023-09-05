@@ -10,8 +10,8 @@ if ($cameras) {
 require_once dirname(__FILE__) . "/database.inc.php";
 
 $mesosite = iemdb("mesosite");
-$rs = pg_query($mesosite, "SELECT *, ST_x(geom) as lon,
-        ST_y(geom) as lat from webcams ORDER by name ASC");
+$rs = pg_query($mesosite, "SELECT *, ST_x(geom) as lon, ".
+        "ST_y(geom) as lat from webcams ORDER by name ASC");
 $cameras = array();
 while ($row = pg_fetch_assoc($rs)) {
     $cameras[$row["id"]] = array(

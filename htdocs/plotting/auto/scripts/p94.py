@@ -1,4 +1,13 @@
-"""Bias computing hi/lo"""
+"""
+This plot looks at the effect of splitting a 24
+hour period at different hours of the day.  Using the hourly temperature
+record, we can look at the bias of computing the daily high and low
+temperature.  Confusing?  Assuming that the 'truth' is a daily high and
+low computed at midnight, we can compare this value against 24 hour periods
+computed for each hour of the day. This plot is one of the main reasons
+that comparing climate data for a station that changed hour of day
+observation over the years is problematic.
+"""
 import datetime
 
 import numpy as np
@@ -11,18 +20,7 @@ from pyiem.util import get_autoplot_context, get_dbconn
 
 def get_description():
     """Return a dict describing how to call this plotter"""
-    desc = {}
-    desc["data"] = True
-    desc[
-        "description"
-    ] = """This plot looks at the effect of splitting a 24
-    hour period at different hours of the day.  Using the hourly temperature
-    record, we can look at the bias of computing the daily high and low
-    temperature.  Confusing?  Assuming that the 'truth' is a daily high and
-    low computed at midnight, we can compare this value against 24 hour periods
-    computed for each hour of the day. This plot is one of the main reasons
-    that comparing climate data for a station that changed hour of day
-    observation over the years is problematic."""
+    desc = {"description": __doc__, "data": True}
     desc["arguments"] = [
         dict(
             type="zstation",
