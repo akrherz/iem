@@ -321,11 +321,14 @@ def add_zeros(df, ctx):
                     }
                 )
     if newrows:
-        df = pd.concat(
-            [df, GeoDataFrame(newrows, geometry="geo", crs=EPSG[2163])],
-            ignore_index=True,
-            sort=False,
-        )
+        if not df.empty:
+            df = pd.concat(
+                [df, GeoDataFrame(newrows, geometry="geo", crs=EPSG[2163])],
+                ignore_index=True,
+                sort=False,
+            )
+        else:
+            df = GeoDataFrame(newrows, geometry="geo", crs=EPSG[2163])
         # Ensure we end up with val being float
         df["val"] = pd.to_numeric(df["val"])
     # compute a cell index for each row
