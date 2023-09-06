@@ -9,7 +9,9 @@ import calendar
 import datetime
 
 import pandas as pd
+import seaborn as sns
 from pyiem.exceptions import NoDataFound
+from pyiem.plot import figure_axes
 from pyiem.util import get_autoplot_context, get_sqlalchemy_conn
 
 PDICT = {
@@ -18,6 +20,13 @@ PDICT = {
     "avg_high": "Average High Temperature",
     "avg_low": "Average Low Temperature",
     "avg_temp": "Average Monthly Temperature",
+}
+FMT = {
+    "precip": ".2f",
+    "snow": ".1f",
+    "avg_high": ".1f",
+    "avg_low": ".1f",
+    "avg_temp": ".1f",
 }
 
 LABELS = {
@@ -32,6 +41,7 @@ LABELS = {
 def get_description():
     """Return a dict describing how to call this plotter"""
     desc = {"description": __doc__, "data": True, "report": True}
+    y20 = datetime.date.today().year - 19
     desc["arguments"] = [
         dict(
             type="station",
@@ -47,6 +57,13 @@ def get_description():
             label="Select variable:",
             options=PDICT,
         ),
+        {
+            "type": "year",
+            "name": "syear",
+            "default": y20,
+            "label": "For plotting, year to start 20 years of plot",
+        },
+        dict(type="cmap", name="cmap", default="plasma", label="Color Ramp:"),
     ]
     return desc
 
@@ -186,8 +203,29 @@ def plotter(fdict):
         wyrmean if varname not in ["precip", "snow"] else wyrsum
     )
     resdf.at["MEAN", "WATER YEAR"] = resdf["WATER YEAR"].mean()
+    y1 = int(fdict.get("syear", 1990))
 
-    return None, resdf, res
+    fig, ax = figure_axes(
+        title=f"{ctx['_sname']} {LABELS[varname]}",
+        apctx=ctx,
+    )
+    filtered = df[(df["year"] >= y1) & (df["year"] <= (y1 + 20))]
+    if filtered.empty:
+        raise NoDataFound("No data for specified period")
+    df2 = filtered[["month", "year", varname]].pivot(
+        index="year", columns="month", values=varname
+    )
+    ax = sns.heatmap(
+        df2,
+        annot=True,
+        fmt=FMT[varname],
+        linewidths=0.5,
+        ax=ax,
+        cmap=ctx["cmap"],
+    )
+    ax.set_xticklabels(calendar.month_abbr[1:])
+
+    return fig, resdf, res
 
 
 if __name__ == "__main__":
