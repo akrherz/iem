@@ -362,4 +362,4 @@ def plotter(fdict):
 
 
 if __name__ == "__main__":
-    plotter({"station": "KCRQ", "date": "2023-07-14"})
+    plotter({})

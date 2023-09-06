@@ -2,6 +2,11 @@
 require_once "../../../config/settings.inc.php";
 require_once "../../../include/database.inc.php";
 require_once "../../../include/forms.php";
+require_once "../../../include/network.php";
+require_once "../../../include/jpgraph/jpgraph.php";
+require_once "../../../include/jpgraph/jpgraph_line.php";
+require_once "../../../include/jpgraph/jpgraph_bar.php";
+require_once "../../../include/jpgraph/jpgraph_date.php";
 
 /** We need these vars to make this work */
 $subc = isset($_GET["subc"]) ? $_GET["subc"] : "";
@@ -164,14 +169,7 @@ for ($i = 0; $row = pg_fetch_array($result); $i++) {
     $freezing[] = 32;
 }
 pg_close($c0);
-//pg_close($c1);
 
-require_once "../../../include/jpgraph/jpgraph.php";
-require_once "../../../include/jpgraph/jpgraph_line.php";
-require_once "../../../include/jpgraph/jpgraph_bar.php";
-require_once "../../../include/jpgraph/jpgraph_date.php";
-
-require_once "../../../include/network.php";
 $nt = new NetworkTable("IA_RWIS");
 $cities = $nt->table;
 
@@ -203,7 +201,6 @@ $graph->xaxis->SetLabelFormatString("M-j h A", true);
 
 $graph->legend->Pos(0.01, 0.01);
 $graph->legend->SetLayout(LEGEND_VERT);
-
 
 // Create the linear plot
 $lineplot = new LinePlot($tcs0, $times);
@@ -252,7 +249,6 @@ $bp1->SetLegend("Precip");
 $bp1->SetFillColor("black");
 $bp1->SetAbsWidth(1.0);
 
-
 // Create the linear plot
 $fz = new LinePlot($freezing, $times);
 $fz->SetColor("blue");
@@ -275,26 +271,9 @@ $mySOb = array();
 if ($mode == "hist") {
     $ptext = "Historical Plot for dates:\n";
     $tx3 = new Text($ptext . $plotTitle);
-} else {
-    /*
- $tx3 = new Text("Last Ob @ ". strftime("%m/%d %I:%M %p", $mySOb['ts']) ." 
-  Sensor 0: ". $mySOb['tmpf0'] ." F 
-  Sensor 1: ". $mySOb['tmpf1'] ." F 
-  Sensor 2: ". $mySOb['tmpf2'] ." F 
-  Sensor 3: ". $mySOb['tmpf3'] ." F 
- Air  Temp: ". $myOb['tmpf'] ." F
- Dew Point: ". $myOb['dwpf'] ." F
- SubS Temp: ". $mySOb['subt'] ." F
-");
-*/
 }
-//$tx3->SetPos(0.31,0.001, 'left', 'top');
-//$tx3->SetFont(FF_FONT1, FS_NORMAL, 8);
-//$tx3->SetColor("blue");
-
 $graph->AddText($tx1);
 $graph->AddText($tx2);
-//$graph->AddText($tx3);
 
 // Add the plot to the graph
 $graph->Add($fz);
@@ -315,6 +294,5 @@ if (max($Adwpf) != "" && isset($_GET["dwpf"]))
 
 if (max($pcpn) != "" && isset($_GET["pcpn"]))
     $graph->AddY2($bp1);
-
 
 $graph->Stroke();

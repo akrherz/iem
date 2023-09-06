@@ -108,7 +108,6 @@ function makeVectorLayer(dt) {
 
 $(document).ready(() => {
 
-
     $("#datepicker").datepicker({
         dateFormat: "DD, d MM, yy",
         minDate: new Date(2001, 1, 1),

@@ -6,7 +6,7 @@ $t = new MyView();
 /* Script to generate a loop of whatever */
 $prod = isset($_GET['prod']) ? xssafe($_GET['prod']) : 'mesonet';
 $java = isset($_GET['java']) ? xssafe($_GET['java']) : 'none';
-$frames = isset($_GET['frames']) ? intval($_GET['frames']) : 10;
+$frames = get_int404('frames', 10);
 
 $products = array(
     "mesonet" => array(
@@ -73,7 +73,6 @@ $t->content = <<<EOF
  <td>{$loopselect}</td>
  <td>{$prodselect}</td>
 <td><input type="text" name="frames" value="{$frames}" size="3"></tr></table>
-
 
 </form>
 

@@ -1,4 +1,19 @@
-"""sounding stuff"""
+"""
+This plot presents percentiles of observations from
+a given sounding profile against the long term record for the site. These
+percentiles are computed against all other soundings for the valid hour of
+the profile of interest.  For example, a 00 UTC sounding is only compared
+against other 00 UTC soundings for the given month or for the period of
+record.
+
+<br /><br />The 'Select Station' option provides some 'virtual' stations
+that are spliced together archives of close by stations.  For some
+locations, the place that the sounding is made has moved over the years.
+
+<br /><br />A process runs at 3:10 and 15:10z each day to ingest the
+current 0 and 12z soundings respectively.  You may not find the current
+day's sounding if running this application prior to those ingest times.
+"""
 import calendar
 
 import pandas as pd
@@ -26,27 +41,7 @@ PDICT4 = {
 
 def get_description():
     """Return a dict describing how to call this plotter"""
-    desc = {}
-    desc["data"] = True
-    desc["cache"] = 86400
-    desc[
-        "description"
-    ] = """
-    This plot presents percentiles of observations from
-    a given sounding profile against the long term record for the site. These
-    percentiles are computed against all other soundings for the valid hour of
-    the profile of interest.  For example, a 00 UTC sounding is only compared
-    against other 00 UTC soundings for the given month or for the period of
-    record.
-
-    <br /><br />The 'Select Station' option provides some 'virtual' stations
-    that are spliced together archives of close by stations.  For some
-    locations, the place that the sounding is made has moved over the years.
-
-    <br /><br />A process runs at 3:10 and 15:10z each day to ingest the
-    current 0 and 12z soundings respectively.  You may not find the current
-    day's sounding if running this application prior to those ingest times.
-    """
+    desc = {"description": __doc__, "data": True, "cache": 86400}
     today = utc()
     desc["arguments"] = [
         dict(
@@ -230,13 +225,4 @@ def plotter(fdict):
 
 
 if __name__ == "__main__":
-    plotter(
-        {
-            "station": "KGJT",
-            "hour": "12",
-            "var": "smps",
-            "date": "2021-12-27",
-            "which": "none",
-            "h": "same",
-        },
-    )
+    plotter({})

@@ -1,16 +1,16 @@
 <?php
-$OL = "7.2.2";
- require_once "../../../config/settings.inc.php";
- require_once "../../../include/myview.php";
- require_once "../../../include/database.inc.php";
- require_once "../../../include/imagemaps.php";
- require_once "../../../include/forms.php";
- $t = new MyView();
+$OL = "7.5.1";
+require_once "../../../config/settings.inc.php";
+require_once "../../../include/myview.php";
+require_once "../../../include/database.inc.php";
+require_once "../../../include/imagemaps.php";
+require_once "../../../include/forms.php";
+$t = new MyView();
 
- $station = isset($_GET['station']) ? xssafe($_GET["station"]): "";
- $network = isset($_GET["network"]) ? xssafe($_GET['network']): "IA_ASOS";
- $year = isset($_GET['year']) ? intval($_GET['year']): date("Y");
- $month = isset($_GET['month']) ? intval($_GET['month']): date("m");
+$station = isset($_GET['station']) ? xssafe($_GET["station"]) : "";
+$network = isset($_GET["network"]) ? xssafe($_GET['network']) : "IA_ASOS";
+$year = get_int404('year', date("Y"));
+$month = get_int404('month', date("m"));
 
 $t->headextra = <<<EOF
 <link rel="stylesheet" href="/vendor/openlayers/{$OL}/ol.css" type="text/css">
@@ -24,7 +24,7 @@ $t->jsextra = <<<EOF
 <script src="/vendor/select2/4.0.3/select2.min.js"></script>
 <script type="text/javascript">
 $(document).ready(function(){
-	$(".iemselect2").select2();	
+    $(".iemselect2").select2();	
 });
 </script>
 EOF;
@@ -45,11 +45,11 @@ $content = <<<EOF
 <p>This application creates a plot of observed precipitation versus 
 climatology for a site of your choice in Iowa. 
 EOF;
-if (strlen($station) > 0 ) { 
-	$nselect = networkSelect($network,$station);
-	$yselect = yearSelect(2004,$year,"year");
-	$mselect = monthSelect($month);
-	$content .= <<<EOF
+if (strlen($station) > 0) {
+    $nselect = networkSelect($network, $station);
+    $yselect = yearSelect(2004, $year, "year");
+    $mselect = monthSelect($month);
+    $content .= <<<EOF
 <form name="ds" action="rainfall.phtml" method="GET">
 <input type="hidden" value="{$network}" name="network">
 <table cellspacing=2 border=1 cellpadding=2>
@@ -64,9 +64,9 @@ if (strlen($station) > 0 ) {
 
 <p><img src="/plotting/auto/plot/17/month:{$month}::year:{$year}::station:{$station}::network:{$network}::p:precip.png" alt="Time Series" />
 EOF;
-} else { 
-	$nselect = networkSelect($network, "");
-	$content .= <<<EOF
+} else {
+    $nselect = networkSelect($network, "");
+    $content .= <<<EOF
 
 <br /><a href="rainfall.phtml?network=IA_ASOS">Iowa ASOS</a> &nbsp; 
 <a href="rainfall.phtml?network=AWOS">Iowa AWOS</a> &nbsp; 
@@ -81,7 +81,6 @@ EOF;
 <div id="map" data-network="{$network}"></div>
 </form>
 EOF;
-} 
+}
 $t->content = $content;
 $t->render('single.phtml');
-?>

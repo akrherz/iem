@@ -285,12 +285,4 @@ def plotter(fdict):
 
 
 if __name__ == "__main__":
-    plotter(
-        dict(
-            network="CT_ASOS",
-            zstation="GON",
-            var="dwpf",
-            thres=60,
-            month="sep",
-        )
-    )
+    plotter({})

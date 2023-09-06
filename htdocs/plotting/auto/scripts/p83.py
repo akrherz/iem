@@ -1,4 +1,10 @@
-"""period averages around a date"""
+"""
+This plot compares a period of days prior to
+a specified date to the same number of days after a date.  The specified
+date is not used in either statistical value.  If you select a period that
+includes leap day, there is likely some small ambiguity with the resulting
+plot labels.
+"""
 import datetime
 
 import numpy as np
@@ -18,16 +24,7 @@ UNITS = {"high": r"$^\circ$F", "low": r"$^\circ$F", "precip": "inch"}
 
 def get_description():
     """Return a dict describing how to call this plotter"""
-    desc = {}
-    desc["data"] = True
-    desc[
-        "description"
-    ] = """This plot compares a period of days prior to
-    a specified date to the same number of days after a date.  The specified
-    date is not used in either statistical value.  If you select a period that
-    includes leap day, there is likely some small ambiguity with the resulting
-    plot labels.
-    """
+    desc = {"description": __doc__, "data": True}
     desc["arguments"] = [
         dict(
             type="station",

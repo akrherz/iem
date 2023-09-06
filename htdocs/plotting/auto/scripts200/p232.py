@@ -261,4 +261,4 @@ def plotter(fdict):
 
 
 if __name__ == "__main__":
-    plotter(dict(station="MCW", network="IA_ASOS", valid="2022-12-21 1206"))
+    plotter({})

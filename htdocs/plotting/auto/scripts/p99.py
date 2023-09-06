@@ -81,7 +81,7 @@ def plotter(fdict):
             params=(year, year, year, year, station, station, year),
             index_col="day",
         )
-    if df.empty:
+    if df.empty or df["stddev_high"].min() == 0:
         raise NoDataFound("No Data Found.")
     df.index.name = "Date"
     df["high_sigma"] = (df["high"] - df["avg_high"]) / df["stddev_high"]

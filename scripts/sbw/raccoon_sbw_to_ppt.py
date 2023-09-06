@@ -2,7 +2,10 @@
 """Generate a Powerpoint file for an event.
 
 This script looks for queued jobs within the database and runs them
-sequentially each minute"""
+sequentially each minute
+
+Called from RUN_1MIN.sh
+"""
 
 import datetime
 import os

@@ -1,4 +1,4 @@
-""" Crop condition reports"""
+"""This chart presents crop condition reports from USDA/NASS."""
 import calendar
 import datetime
 
@@ -62,14 +62,7 @@ PDICT2 = {
 
 def get_description():
     """Return a dict describing how to call this plotter"""
-    desc = {}
-    desc["data"] = True
-    desc["nass"] = True
-    desc[
-        "description"
-    ] = """This chart presents crop condition reports from USDA/NASS.
-
-    """
+    desc = {"description": __doc__, "data": True, "nass": True}
     desc["arguments"] = [
         dict(
             type="select",
@@ -262,4 +255,4 @@ def plotter(fdict):
 
 
 if __name__ == "__main__":
-    plotter({"var": "soil_short_veryshort"})
+    plotter({})

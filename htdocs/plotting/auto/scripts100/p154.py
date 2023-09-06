@@ -1,4 +1,9 @@
-"""Hourly temperature averages"""
+"""
+This chart presents an average hourly value for
+a given month or season over the years covering the period of record
+for the site.  For the year to plot, at least 80% data availability needs
+to be obtained.
+"""
 import datetime
 
 import pandas as pd
@@ -11,41 +16,31 @@ from sqlalchemy import text
 
 PDICT = dict([("avg_tmpf", "Average Temperature")])
 UNITS = {"avg_tmpf": "F"}
-MDICT = dict(
-    [
-        ("all", "No Month Limit"),
-        ("spring", "Spring (MAM)"),
-        ("fall", "Fall (SON)"),
-        ("winter", "Winter (DJF)"),
-        ("summer", "Summer (JJA)"),
-        ("gs", "1 May to 30 Sep"),
-        ("jan", "January"),
-        ("feb", "February"),
-        ("mar", "March"),
-        ("apr", "April"),
-        ("may", "May"),
-        ("jun", "June"),
-        ("jul", "July"),
-        ("aug", "August"),
-        ("sep", "September"),
-        ("oct", "October"),
-        ("nov", "November"),
-        ("dec", "December"),
-    ]
-)
+MDICT = {
+    "all": "No Month Limit",
+    "spring": "Spring (MAM)",
+    "fall": "Fall (SON)",
+    "winter": "Winter (DJF)",
+    "summer": "Summer (JJA)",
+    "gs": "1 May to 30 Sep",
+    "jan": "January",
+    "feb": "February",
+    "mar": "March",
+    "apr": "April",
+    "may": "May",
+    "jun": "June",
+    "jul": "July",
+    "aug": "August",
+    "sep": "September",
+    "oct": "October",
+    "nov": "November",
+    "dec": "December",
+}
 
 
 def get_description():
     """Return a dict describing how to call this plotter"""
-    desc = {}
-    desc["data"] = True
-    desc[
-        "description"
-    ] = """This chart presents an average hourly value for
-    a given month or season over the years covering the period of record
-    for the site.  For the year to plot, at least 80% data availability needs
-    to be obtained.
-    """
+    desc = {"description": __doc__, "data": True}
     desc["arguments"] = [
         dict(
             type="zstation",
@@ -103,7 +98,7 @@ def plotter(fdict):
     elif month == "gs":
         months = [5, 6, 7, 8, 9]
     else:
-        ts = datetime.datetime.strptime("2000-" + month + "-01", "%Y-%b-%d")
+        ts = datetime.datetime.strptime(f"2000-{month}-01", "%Y-%b-%d")
         # make sure it is length two for the trick below in SQL
         months = [ts.month]
 
@@ -177,4 +172,4 @@ def plotter(fdict):
 
 
 if __name__ == "__main__":
-    plotter(dict(month="08", network="IA_ASOS"))
+    plotter({})

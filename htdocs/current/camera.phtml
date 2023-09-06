@@ -29,7 +29,7 @@ foreach ($cameras as $id => $val) {
     if ($cameras[$id]["network"] != $network) continue;
 
     $cameras[$id]["url"] = sprintf("/data/camera/stills/%s.jpg?%s", $id, time());
-    $camfn = "/mesonet/ldmdata/camera/stills/${id}.jpg";
+    $camfn = "/mesonet/ldmdata/camera/stills/{$id}.jpg";
     if (!is_file($camfn) || filemtime($camfn) < (time() - 1200)) {
         $cameras[$id]["active"] = false;
     }
@@ -39,10 +39,10 @@ foreach ($cameras as $id => $val) {
         $ts = mktime($hour, $minute, 0, $month, $day, $year);
         $ts5 = mktime($hour, $minute - ($minute % 5), 0, $month, $day, $year);
 
-        $fp = "/mesonet/ARCHIVE/data/" . gmdate("Y/m/d/", $ts) . "camera/$id/${id}_" . gmdate("YmdHi", $ts) . ".jpg";
-        $url = "/archive/data/" . gmdate("Y/m/d/", $ts) . "camera/$id/${id}_" . gmdate("YmdHi", $ts) . ".jpg";
-        $fp5 = "/mesonet/ARCHIVE/data/" . gmdate("Y/m/d/", $ts5) . "camera/$id/${id}_" . gmdate("YmdHi", $ts5) . ".jpg";
-        $url5 = "/archive/data/" . gmdate("Y/m/d/", $ts5) . "camera/$id/${id}_" . gmdate("YmdHi", $ts5) . ".jpg";
+        $fp = "/mesonet/ARCHIVE/data/" . gmdate("Y/m/d/", $ts) . "camera/$id/{$id}_" . gmdate("YmdHi", $ts) . ".jpg";
+        $url = "/archive/data/" . gmdate("Y/m/d/", $ts) . "camera/$id/{$id}_" . gmdate("YmdHi", $ts) . ".jpg";
+        $fp5 = "/mesonet/ARCHIVE/data/" . gmdate("Y/m/d/", $ts5) . "camera/$id/{$id}_" . gmdate("YmdHi", $ts5) . ".jpg";
+        $url5 = "/archive/data/" . gmdate("Y/m/d/", $ts5) . "camera/$id/{$id}_" . gmdate("YmdHi", $ts5) . ".jpg";
 
         if (is_file($fp)) $cameras[$id]["url"] = $url;
         else if (is_file($fp5)) $cameras[$id]["url"] = $url5;
@@ -86,7 +86,6 @@ $ds = daySelect2($day, "day", $jsextra);
 $hs = hourSelect($hour, "hour", $jsextra);
 $ms = minuteSelect2($minute, "minute", $jsextra);
 $dd = date("YmdHi", $radts);
-
 
 $misstxt = "Cameras Missing: ";
 $control = "";

@@ -15,7 +15,8 @@ cd ../ingestors
 python dot_truckcams.py &
 
 cd dotcams
-python ingest_dot_webcams.py &
+# Le Sigh
+OPENSSL_CONF=openssl.conf python ingest_dot_webcams.py &
 
 cd ../../summary
 python update_dailyrain.py

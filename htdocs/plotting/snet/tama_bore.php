@@ -1,7 +1,11 @@
 <?php
 // 1 minute schoolnet data plotter
 // Cool.....
-include("../../../config/settings.inc.php");
+require_once "../../../config/settings.inc.php";
+require_once "../../../include/jpgraph/jpgraph.php";
+require_once "../../../include/jpgraph/jpgraph_line.php";
+require_once "../../../include/jpgraph/jpgraph_date.php";
+require_once "../../../include/jpgraph/jpgraph_scatter.php";
 
 $fcontents = file("data/STQI4_070506.txt");
 $sts = mktime(7,45,0,5,6,2007);
@@ -68,10 +72,7 @@ foreach($fcontents as $linenum => $line)
 } // End of while
 
 
-include ("../../../include/jpgraph/jpgraph.php");
-include ("../../../include/jpgraph/jpgraph_line.php");
-include ("../../../include/jpgraph/jpgraph_date.php");
-include ("../../../include/jpgraph/jpgraph_scatter.php");
+
 
 // Create the graph. These two calls are always required
 $graph = new Graph(640,480);
@@ -101,7 +102,6 @@ $graph->yaxis->SetTitle("Wind Direction (blue dots)");
 $graph->yaxis->title->SetFont(FF_FONT1,FS_BOLD,12);
 $graph->yaxis->SetTitleMargin(40);
 
-
 $graph->ynaxis[0]->SetFont(FF_FONT1,FS_BOLD);
 $graph->ynaxis[0]->scale->ticks->Set(10,5);
 $graph->ynaxis[0]->SetTitle("Wind Speed [MPH]");
@@ -110,9 +110,6 @@ $graph->ynaxis[0]->SetTitleMargin(30);
 $graph->ynaxis[0]->SetColor("red", "red");
 $graph->ynaxis[0]->title->SetColor("red", "red");
 
-
-//$graph->ynaxis[1]->SetFont(FF_FONT1,FS_BOLD);
-//$graph->ynaxis[1]->scale->ticks->Set(0.01,0.005);
 $graph->ynaxis[1]->SetTitle("Pressure");
 $graph->ynaxis[1]->title->SetFont(FF_FONT1,FS_BOLD,12);
 $graph->ynaxis[1]->SetTitleMargin(45);
@@ -132,13 +129,6 @@ $lineplot2=new LinePlot($alti, $times);
 $lineplot2->SetLegend("Pressure");
 $lineplot2->SetColor("black");
 
-//if ($hasgust == 1){
-  // Create the linear plot
-//  $lp1=new LinePlot($gust);
-//  $lp1->SetLegend("Peak Wind Gust");
-//  $lp1->SetColor("black");
-//}
-
 // Create the linear plot
 $sp1=new ScatterPlot($drct, $times);
 $sp1->mark->SetType(MARK_FILLEDCIRCLE);
@@ -152,4 +142,3 @@ $graph->AddY(0,$lineplot);
 $graph->AddY(1,$lineplot2);
 //$graph->AddY2($lp1);
 $graph->Stroke();
-?>

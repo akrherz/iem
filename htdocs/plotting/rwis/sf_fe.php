@@ -1,5 +1,5 @@
 <?php
-$OL = "7.2.2";
+$OL = "7.5.1";
 require_once "../../../config/settings.inc.php";
 require_once "../../../include/myview.php";
 $t = new MyView();
@@ -28,7 +28,6 @@ $s3 = isset($_GET["s3"]) ? xssafe($_GET["s3"]) : false;
 if (!$subc && !$dwpf && !$tmpf && !$s0 && !$s1 && !$s2 && !$s3) {
     $_GET["tmpf"] = "on";
 }
-
 
 $t->headextra = <<<EOF
 <link rel="stylesheet" href="/vendor/openlayers/{$OL}/ol.css" type="text/css">

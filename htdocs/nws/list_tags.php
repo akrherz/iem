@@ -10,7 +10,7 @@ require_once "../../include/imagemaps.php";
 
 $t = new MyView();
 
-$year = isset($_REQUEST["year"]) ? intval($_REQUEST["year"]) : date("Y");
+$year = get_int404("year", date("Y"));
 $wfo = isset($_REQUEST["wfo"]) ? xssafe($_REQUEST["wfo"]) : "DMX";
 $opt = isset($_REQUEST["opt"]) ? xssafe($_REQUEST["opt"]) : "bywfo";
 $damagetag = isset($_REQUEST["damagetag"]) ? xssafe($_REQUEST["damagetag"]) : "considerable";
@@ -298,6 +298,5 @@ $t->content = <<<EOF
 <button id="create-grid4" class="btn btn-info" type="button">Make Table Sortable</button>
         {$smwtable}
 
- 
 EOF;
 $t->render('full.phtml');

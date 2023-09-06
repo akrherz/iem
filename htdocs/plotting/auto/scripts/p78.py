@@ -1,4 +1,11 @@
-"""Avg dew point at temperature."""
+"""
+This plot displays the average dew point at
+a given air temperature along with the envelope between the 5th and 95th
+percentile.  The average dew point is computed by taking the
+observations of mixing ratio, averaging those, and then back computing
+the dew point temperature.  With that averaged dew point temperature a
+relative humidity value is computed.
+"""
 import datetime
 
 import metpy.calc as mcalc
@@ -32,17 +39,7 @@ MDICT = {
 
 def get_description():
     """Return a dict describing how to call this plotter"""
-    desc = {}
-    desc["data"] = True
-    desc["cache"] = 86400
-    desc[
-        "description"
-    ] = """This plot displays the average dew point at
-    a given air temperature along with the envelope between the 5th and 95th
-    percentile.  The average dew point is computed by taking the
-    observations of mixing ratio, averaging those, and then back computing
-    the dew point temperature.  With that averaged dew point temperature a
-    relative humidity value is computed."""
+    desc = {"description": __doc__, "data": True, "cache": 86400}
     desc["arguments"] = [
         dict(
             type="zstation",
@@ -209,4 +206,4 @@ def plotter(fdict):
 
 
 if __name__ == "__main__":
-    plotter(dict(month="nov"))
+    plotter({})

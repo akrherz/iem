@@ -1,4 +1,9 @@
-"""days since VTEC product"""
+"""
+This map depicts the number of days since a
+Weather Forecast Office has issued a given VTEC product.  You can
+set the plot to a retroactive date, which computes the number of number
+of days prior to that date.
+"""
 import datetime
 
 import pandas as pd
@@ -16,15 +21,7 @@ PDICT = {
 
 def get_description():
     """Return a dict describing how to call this plotter"""
-    desc = {}
-    desc["data"] = True
-    desc["cache"] = 3600
-    desc[
-        "description"
-    ] = """This map depicts the number of days since a
-    Weather Forecast Office has issued a given VTEC product.  You can
-    set the plot to a retroactive date, which computes the number of number
-    of days prior to that date."""
+    desc = {"description": __doc__, "data": True, "cache": 3600}
     desc["arguments"] = [
         dict(
             type="phenomena",

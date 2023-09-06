@@ -301,6 +301,7 @@ monthly_opts = [
     {"id": 85, "label": "Hourly Temperature Frequencies by Month"},
     {"id": 20, "label": "Hours of Precipitation by Month"},
     {"id": 177, "label": "ISU Soil Moisture Network Timeseries Plots"},
+    {"id": 115, "label": "Monthly Heatmap of Summary Totals"},
     {
         "id": 2,
         "label": "Month Precipitation vs Month Growing Degree Day Departures",
