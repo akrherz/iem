@@ -87,10 +87,8 @@ def merge_grib(ts, nc):
         fts = ts + datetime.timedelta(hours=fhour)
         fhourstr = "%03i" % (fhour,)
         gribfn = ts.strftime(
-            (
-                "/mesonet/ARCHIVE/data/%Y/%m/%d/model/ndfd/"
-                "%H/ndfd.t%Hz.awp2p5f" + fhourstr + ".grib2"
-            )
+            "/mesonet/ARCHIVE/data/%Y/%m/%d/model/ndfd/"
+            f"%H/ndfd.t%Hz.awp2p5f{fhourstr}.grib2"
         )
         if not os.path.isfile(gribfn):
             print("ndfd2netcdf missing %s" % (gribfn,))

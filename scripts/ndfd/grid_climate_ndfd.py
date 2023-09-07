@@ -9,7 +9,7 @@ from pyiem.reference import state_names
 from pyiem.util import convert_value, get_dbconn, ncopen
 from scipy.interpolate import NearestNDInterpolator
 
-NT = NetworkTable(["%sCLIMATE" % (abbr,) for abbr in state_names])
+NT = NetworkTable([f"{abbr}CLIMATE" for abbr in state_names])
 COOP = get_dbconn("coop")
 
 
