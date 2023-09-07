@@ -35,7 +35,7 @@ daily_opts = [
     },
     {
         "id": 172,
-        "label": "Accumulated Year to Date / Period Precipitation / Snowfall",
+        "label": "Accumulated Year to Date / Period Precip / Snowfall",
     },
     {
         "id": 149,
@@ -48,7 +48,7 @@ daily_opts = [
         ),
     },
     {"id": 94, "label": "Bias of 24 Hour High+Low Computation by Hour"},
-    {"id": 96, "label": "Bias of 24 Hour Precipitation Computation by Hour"},
+    {"id": 96, "label": "Bias of 24 Hour Precip Computation by Hour"},
     {
         "id": 82,
         "label": "Calendar of Daily Observations from Automated Stations",
@@ -182,14 +182,12 @@ daily_opts = [
         "id": 84,
         "label": (
             "MRMS Q3 / PRISM / Stage IV / IFC / IEM Reanalysis Estimated "
-            "Precipitation (multiday summaries/departures)"
+            "Precip (multiday summaries/departures)"
         ),
     },
     {
         "id": 185,
-        "label": (
-            "Number of Days to Accumulate an Amount of Precipitation (MRMS)"
-        ),
+        "label": ("Number of Days to Accumulate an Amount of Precip (MRMS)"),
     },
     {
         "id": 164,
@@ -227,11 +225,11 @@ daily_opts = [
     },
     {
         "id": 182,
-        "label": "Precipitation (MRMS) Coverage Efficiency by State",
+        "label": "Precip (MRMS) Coverage Efficiency by State",
     },
     {
         "id": 110,
-        "label": "Precipitation Frequency Bins by Climate Week (climodat)",
+        "label": "Precip Frequency Bins by Climate Week (climodat)",
     },
     {
         "id": 241,
@@ -251,16 +249,16 @@ daily_opts = [
         "id": 4,
         "label": "State Areal Coverage of Precip Intensity over X Days",
     },
-    {"id": 89, "label": "State Areal Coverage/Efficiency of Precipitation"},
+    {"id": 89, "label": "State Areal Coverage/Efficiency of Precip"},
     {"id": 81, "label": "Standard Deviation of Daily Temperatures"},
-    {"id": 28, "label": "Trailing Number of Days Precipitation Total Rank"},
+    {"id": 28, "label": "Trailing Number of Days Precip Total Rank"},
     {
         "id": 228,
-        "label": "Trailing Standardized Precipitation (SPI) + Drought Monitor",
+        "label": "Trailing Standardized Precip (SPI) + Drought Monitor",
     },
     {
         "id": 142,
-        "label": "Trailing X Number of Days Temp/Precipitation Departures",
+        "label": "Trailing X Number of Days Temp/Precip Departures",
     },
     {"id": 132, "label": "Top 10 Precip/Temperature Values by Month/Season"},
     {"id": 190, "label": "Year of Daily High/Low Temperature Record"},
@@ -299,12 +297,12 @@ monthly_opts = [
     },
     {"id": 154, "label": "Hourly Temperature Averages by Month"},
     {"id": 85, "label": "Hourly Temperature Frequencies by Month"},
-    {"id": 20, "label": "Hours of Precipitation by Month"},
+    {"id": 20, "label": "Hours of Precip by Month"},
     {"id": 177, "label": "ISU Soil Moisture Network Timeseries Plots"},
     {"id": 115, "label": "Monthly Heatmap of Summary Totals"},
     {
         "id": 2,
-        "label": "Month Precipitation vs Month Growing Degree Day Departures",
+        "label": "Month Precip vs Month Growing Degree Day Departures",
     },
     {
         "id": 223,
@@ -312,28 +310,27 @@ monthly_opts = [
     },
     {
         "id": 57,
-        "label": "Monthly Precipitation/Temperature Records or Climatology",
+        "label": "Monthly Precip/Temperature Records or Climatology",
     },
     {
         "id": 95,
         "label": (
-            "Monthly Precipitation/Temperature with "
-            "El Nino SOI Index Relationship"
+            "Monthly Precip/Temperature with " "El Nino SOI Index Relationship"
         ),
     },
     {
         "id": 24,
         "label": (
-            "Monthly Precipitation/Temperature "
+            "Monthly Precip/Temperature "
             "Climate District / Statewide Ranks/Aridity"
         ),
     },
     {
         "id": 3,
-        "label": "Monthly Precipitation/Temperature Statistics by Year",
+        "label": "Monthly/Yearly Precip/Temperature Statistics by Year",
     },
-    {"id": 6, "label": "Monthly Precipitation/Temperature Distributions"},
-    {"id": 8, "label": "Monthly Precipitation Reliability"},
+    {"id": 6, "label": "Monthly Precip/Temperature Distributions"},
+    {"id": 8, "label": "Monthly Precip Reliability"},
     {
         "id": 23,
         "label": "Monthly Station Departures + El Nino 3.4 Index Time Series",
@@ -342,8 +339,7 @@ monthly_opts = [
     {
         "id": 58,
         "label": (
-            "One Day's Precipitation Greater than X percentage "
-            "of Monthly Total"
+            "One Day's Precip Greater than X percentage " "of Monthly Total"
         ),
     },
     {
@@ -353,7 +349,7 @@ monthly_opts = [
             "for Two Months/Periods"
         ),
     },
-    {"id": 47, "label": "Snowfall vs Precipitation Total for a Month"},
+    {"id": 47, "label": "Snowfall vs Precip Total for a Month"},
     {
         "id": 39,
         "label": "Scenarios for this month besting some previous month",
@@ -472,7 +468,7 @@ yearly_opts = [
             "Max/Min High/Low after first temperature exceedence of season"
         ),
     },
-    {"id": 105, "label": "Maximum Period between Precipitation Amounts"},
+    {"id": 105, "label": "Maximum Period between Precip Amounts"},
     {"id": 46, "label": "Minimum Wind Chill / Max Heat Index Temperature"},
     {"id": 30, "label": "Monthly Temperature Range"},
     {"id": 44, "label": "NWS Office Accumulated SVR+TOR Warnings"},
@@ -485,7 +481,7 @@ yearly_opts = [
         "id": 134,
         "label": "Period each year that was warmest/coldest/wettest",
     },
-    {"id": 75, "label": "Precipitation Totals by Season/Year"},
+    {"id": 75, "label": "Precip Totals by Season/Year"},
     {
         "id": 63,
         "label": "Records Set by Year (Max High / Min Low / Max Precip)",
@@ -510,7 +506,7 @@ yearly_opts = [
         "id": 103,
         "label": "Step Ups in High Temp / Step Downs in Low Temp by Year",
     },
-    {"id": 100, "label": "Temperature / Precipitation Statistics by Year"},
+    {"id": 100, "label": "Temperature / Precip Statistics by Year"},
     {
         "id": 136,
         "label": "Time per Winter Season below Wind Chill Threshold",
@@ -521,7 +517,7 @@ yearly_opts = [
     },
     {
         "id": 14,
-        "label": "Yearly Precipitation Contributions by Daily Totals",
+        "label": "Yearly Precip Contributions by Daily Totals",
     },
 ]
 hopts = [
@@ -638,7 +634,7 @@ mopts = [
     },
     {"id": 37, "label": "MOS Forecast Ranges + ASOS Observations"},
     {"id": 211, "label": "One Minute Interval Plots"},
-    {"id": 222, "label": "One Minute Precipitation During Severe Weather"},
+    {"id": 222, "label": "One Minute Precip During Severe Weather"},
     {
         "id": 162,
         "label": "Overcast Sky Condition 2D Histogram (Level by Week)",
@@ -651,7 +647,7 @@ mopts = [
     },
     {
         "id": 146,
-        "label": "Temperature Frequency by Week During Precipitation",
+        "label": "Temperature Frequency by Week During Precip",
     },
     {
         "id": 155,

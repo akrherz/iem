@@ -1,5 +1,6 @@
 """Generate the NDFD climatology file, hmmm"""
 import datetime
+import os
 
 import numpy as np
 import pygrib
@@ -10,7 +11,11 @@ def init_year(ts):
     """
     Create a new NetCDF file for a year of our specification!
     """
-    nc = ncopen("/mesonet/data/ndfd/ndfd_dailyc.nc", "w")
+    ncfn = "/mesonet/data/ndfd/ndfd_dailyc.nc"
+    if os.path.isfile(ncfn):
+        print(f"Cowardly refusing to overwrite {ncfn}")
+        return
+    nc = ncopen(ncfn, "w")
     nc.title = "NDFD"
     nc.contact = "Daryl Herzmann, akrherz@iastate.edu, 515-294-5978"
     nc.history = "%s Generated" % (
