@@ -118,14 +118,14 @@ def main(argv):
         df[newcol] = c2f(df[col].values)
         df = df.drop(columns=col)
 
+    df["ticket"] = False
     for stid, row in df.iterrows():
         df.at[stid, "ticket"] = qdict.get(stid, {}).get("soil4", False)
         x, y = get_idx(hlons, hlats, nt.sts[stid]["lon"], nt.sts[stid]["lat"])
         df.at[stid, "nam"] = nam[x, y]
         df.at[stid, "lat"] = nt.sts[stid]["lat"]
         df.at[stid, "lon"] = nt.sts[stid]["lon"]
-    # ticket is an object type from above
-    df = df[~df["ticket"].astype("bool")]
+    df = df[~df["ticket"]]
     df["diff"] = df["ob"] - df["nam"]
     bias = df["diff"].mean()
     nam = nam + bias
