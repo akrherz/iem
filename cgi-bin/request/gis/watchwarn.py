@@ -8,7 +8,7 @@ import fiona
 import pandas as pd
 from pandas.io.sql import read_sql
 from paste.request import parse_formvars
-from psycopg2.extras import DictCursor
+from psycopg2.extras import RealDictCursor
 from pyiem.util import get_dbconn, utc
 from shapely.geometry import mapping
 from shapely.wkb import loads
@@ -264,7 +264,7 @@ def application(environ, start_response):
         start_response("200 OK", headers)
         return [do_excel(pgconn, sql)]
 
-    cursor = pgconn.cursor(cursor_factory=DictCursor)
+    cursor = pgconn.cursor(cursor_factory=RealDictCursor)
     cursor.execute(sql)
     if cursor.rowcount == 0:
         start_response("200 OK", [("Content-type", "text/plain")])

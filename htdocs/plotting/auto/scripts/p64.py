@@ -9,7 +9,6 @@ import datetime
 
 import numpy as np
 import pandas as pd
-import psycopg2.extras
 from matplotlib.patches import Rectangle
 from pyiem.exceptions import NoDataFound
 from pyiem.plot import figure_axes
@@ -53,7 +52,7 @@ def get_description():
 def get_data(ctx):
     """Get some data please"""
     pgconn = get_dbconn("coop")
-    cursor = pgconn.cursor(cursor_factory=psycopg2.extras.DictCursor)
+    cursor = pgconn.cursor()
     station = ctx["station"]
     threshold = ctx["threshold"]
     threshold = TRACE_VALUE if threshold == "T" else float(threshold)

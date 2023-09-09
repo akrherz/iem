@@ -95,7 +95,7 @@ def shpschema():
 def main():
     """Go Main Go"""
     pgconn = get_dbconn("radar")
-    pcursor = pgconn.cursor(cursor_factory=psycopg2.extras.DictCursor)
+    pcursor = pgconn.cursor(cursor_factory=psycopg2.extras.RealDictCursor)
 
     os.chdir("/tmp")
 

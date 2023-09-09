@@ -85,7 +85,7 @@ def build_roadstate_xref(ncvar):
 def main(argv):
     """Do Something"""
     pgconn = get_dbconn("iem")
-    icursor = pgconn.cursor(cursor_factory=psycopg2.extras.DictCursor)
+    icursor = pgconn.cursor(cursor_factory=psycopg2.extras.RealDictCursor)
     fn = find_file(0 if len(argv) == 1 else int(argv[1]))
     nc = ncopen(fn, timeout=300)
 

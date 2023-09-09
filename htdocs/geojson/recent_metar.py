@@ -20,7 +20,7 @@ def trace(val):
 def get_data(q):
     """Get the data for this query"""
     pgconn = get_dbconn("iem")
-    cursor = pgconn.cursor(cursor_factory=psycopg2.extras.DictCursor)
+    cursor = pgconn.cursor(cursor_factory=psycopg2.extras.RealDictCursor)
     data = {"type": "FeatureCollection", "features": []}
 
     # Fetch the values

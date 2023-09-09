@@ -54,7 +54,7 @@ def grid_day(nc, ts):
     I proctor the gridding of data on an hourly basis
     @param ts Timestamp of the analysis, we'll consider a 20 minute window
     """
-    cursor = COOP.cursor(cursor_factory=psycopg2.extras.DictCursor)
+    cursor = COOP.cursor(cursor_factory=psycopg2.extras.RealDictCursor)
     offset = iemre.daily_offset(ts)
     if ts.day == 29 and ts.month == 2:
         ts = datetime.datetime(2000, 3, 1)

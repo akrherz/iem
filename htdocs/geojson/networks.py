@@ -11,7 +11,7 @@ from pymemcache.client import Client
 def run():
     """Actually do the hard work of getting the current SBW in geojson"""
     pgconn = get_dbconn("mesosite")
-    cursor = pgconn.cursor(cursor_factory=psycopg2.extras.DictCursor)
+    cursor = pgconn.cursor(cursor_factory=psycopg2.extras.RealDictCursor)
 
     utcnow = datetime.datetime.utcnow()
 

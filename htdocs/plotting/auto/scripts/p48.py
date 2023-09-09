@@ -10,7 +10,6 @@ plots for a single WFO at a time.
 """
 import numpy as np
 import pandas as pd
-import psycopg2.extras
 from pyiem.exceptions import NoDataFound
 from pyiem.nws import vtec
 from pyiem.plot import figure_axes
@@ -46,7 +45,7 @@ def get_description():
 def plotter(fdict):
     """Go"""
     pgconn = get_dbconn("postgis")
-    cursor = pgconn.cursor(cursor_factory=psycopg2.extras.DictCursor)
+    cursor = pgconn.cursor()
     ctx = get_autoplot_context(fdict, get_description())
 
     ugc = ctx["ugc"]

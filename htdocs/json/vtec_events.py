@@ -21,7 +21,7 @@ def run(wfo, year, phenomena, significance, combo):
       combo (int, optional): special one-offs
     """
     pgconn = get_dbconn("postgis")
-    cursor = pgconn.cursor(cursor_factory=psycopg2.extras.DictCursor)
+    cursor = pgconn.cursor(cursor_factory=psycopg2.extras.RealDictCursor)
 
     table = f"warnings_{year}"
     sbwtable = f"sbw_{year}"

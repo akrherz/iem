@@ -12,7 +12,7 @@ ISO9660 = "%Y-%m-%dT%H:%M:%SZ"
 def run(year, is_pds):
     """Generate data."""
     pgconn = get_dbconn("postgis")
-    cursor = pgconn.cursor(cursor_factory=psycopg2.extras.DictCursor)
+    cursor = pgconn.cursor(cursor_factory=psycopg2.extras.RealDictCursor)
 
     if is_pds:
         limiter = "w.is_pds"

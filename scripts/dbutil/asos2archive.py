@@ -210,7 +210,7 @@ def main():
     reset_times = build_reset_times()
     first_updated = get_first_updated()
     iempgconn = get_dbconn("iem")
-    icursor = iempgconn.cursor(cursor_factory=psycopg2.extras.DictCursor)
+    icursor = iempgconn.cursor(cursor_factory=psycopg2.extras.RealDictCursor)
 
     LOG.info(
         "Processing %s thru %s",

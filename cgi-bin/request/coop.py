@@ -100,7 +100,7 @@ def do_apsim(ctx):
         ).encode("ascii")
 
     dbconn = get_database()
-    cursor = dbconn.cursor(cursor_factory=psycopg2.extras.DictCursor)
+    cursor = dbconn.cursor(cursor_factory=psycopg2.extras.RealDictCursor)
 
     station = ctx["stations"][0]
     table = get_tablename(ctx["stations"])
@@ -246,7 +246,7 @@ def do_century(ctx):
     nt = NetworkTable(f"{station[:2]}CLIMATE", only_online=False)
 
     dbconn = get_database()
-    cursor = dbconn.cursor(cursor_factory=psycopg2.extras.DictCursor)
+    cursor = dbconn.cursor(cursor_factory=psycopg2.extras.RealDictCursor)
 
     # Automatically set dates to start and end of year to make output clean
     sts = datetime.date(ctx["sts"].year, 1, 1)
@@ -347,7 +347,7 @@ def do_daycent(ctx):
         ).encode("ascii")
 
     dbconn = get_database()
-    cursor = dbconn.cursor(cursor_factory=psycopg2.extras.DictCursor)
+    cursor = dbconn.cursor(cursor_factory=psycopg2.extras.RealDictCursor)
 
     table = get_tablename(ctx["stations"])
 
@@ -361,14 +361,10 @@ def do_daycent(ctx):
         if febtest.day == 28:
             sdaylimit = " and sday != '0229'"
         cursor.execute(
-            """
+            f"""
             SELECT day, high, low, precip
-            from """
-            + table
-            + """ WHERE station = %s
-            and day >= %s and day <= %s """
-            + sdaylimit
-            + """
+            from {table} WHERE station = %s
+            and day >= %s and day <= %s {sdaylimit}
             """,
             (ctx["stations"][0], sts, ets),
         )
@@ -449,7 +445,7 @@ def do_simple(ctx):
     """Generate Simple output"""
 
     dbconn = get_database()
-    cursor = dbconn.cursor(cursor_factory=psycopg2.extras.DictCursor)
+    cursor = dbconn.cursor(cursor_factory=psycopg2.extras.RealDictCursor)
 
     table = get_tablename(ctx["stations"])
 
@@ -565,7 +561,7 @@ def do_salus(ctx):
         ).encode("ascii")
 
     dbconn = get_database()
-    cursor = dbconn.cursor(cursor_factory=psycopg2.extras.DictCursor)
+    cursor = dbconn.cursor(cursor_factory=psycopg2.extras.RealDictCursor)
 
     scenario_year = 2030
     asts = datetime.date(2030, 1, 1)
@@ -634,7 +630,7 @@ def do_dndc(ctx):
     * julian day, tmax C , tmin C, precip cm seperated by space
     """
     dbconn = get_database()
-    cursor = dbconn.cursor(cursor_factory=psycopg2.extras.DictCursor)
+    cursor = dbconn.cursor(cursor_factory=psycopg2.extras.RealDictCursor)
 
     table = get_tablename(ctx["stations"])
 

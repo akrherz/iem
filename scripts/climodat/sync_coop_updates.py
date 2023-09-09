@@ -8,7 +8,7 @@ run from RUN_NOON.sh and RUN_0Z.sh
 # pylint: disable=cell-var-from-loop
 
 import pandas as pd
-from psycopg2.extras import DictCursor
+from psycopg2.extras import RealDictCursor
 from pyiem.util import get_dbconn, get_sqlalchemy_conn, logger
 
 LOG = logger()
@@ -86,9 +86,9 @@ def compare_and_update(ccursor, currentob, newob):
 def main():
     """Go Main Go."""
     accessdb = get_dbconn("iem")
-    acursor = accessdb.cursor(cursor_factory=DictCursor)
+    acursor = accessdb.cursor(cursor_factory=RealDictCursor)
     coopdb = get_dbconn("coop")
-    ccursor = coopdb.cursor(cursor_factory=DictCursor)
+    ccursor = coopdb.cursor(cursor_factory=RealDictCursor)
     df = load_changes()
     xref = load_xref()
     updates = 0
@@ -144,7 +144,7 @@ def main():
                 LOG.info("database commit after %s updates", updates)
                 ccursor.close()
                 coopdb.commit()
-                ccursor = coopdb.cursor(cursor_factory=DictCursor)
+                ccursor = coopdb.cursor(cursor_factory=RealDictCursor)
 
     logl = LOG.warning if updates < 500 else LOG.info
     logl("synced %s rows, %s unused, %s dups", updates, unused, dups)

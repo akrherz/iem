@@ -39,7 +39,7 @@ def get_description():
 def plotter(fdict):
     """Go"""
     pgconn = get_dbconn("coop")
-    cursor = pgconn.cursor(cursor_factory=psycopg2.extras.DictCursor)
+    cursor = pgconn.cursor(cursor_factory=psycopg2.extras.RealDictCursor)
     ctx = get_autoplot_context(fdict, get_description())
     station = ctx["station"]
     today = datetime.datetime.now()

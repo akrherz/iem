@@ -8,7 +8,6 @@ import datetime
 import matplotlib.patheffects as PathEffects
 import numpy as np
 import pandas as pd
-import psycopg2.extras
 from pyiem.exceptions import NoDataFound
 from pyiem.plot import figure_axes
 from pyiem.util import get_autoplot_context, get_dbconn
@@ -32,7 +31,7 @@ def get_description():
 def plotter(fdict):
     """Go"""
     pgconn = get_dbconn("coop")
-    cursor = pgconn.cursor(cursor_factory=psycopg2.extras.DictCursor)
+    cursor = pgconn.cursor()
     ctx = get_autoplot_context(fdict, get_description())
     station = ctx["station"]
 

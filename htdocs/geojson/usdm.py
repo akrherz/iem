@@ -17,10 +17,10 @@ def rectify_date(tstamp):
     """
     if tstamp == "":
         pgconn = get_dbconn("postgis")
-        cursor = pgconn.cursor(cursor_factory=psycopg2.extras.DictCursor)
+        cursor = pgconn.cursor(cursor_factory=psycopg2.extras.RealDictCursor)
         # Go get the latest USDM stored in the database!
         cursor.execute("SELECT max(valid) from usdm")
-        return cursor.fetchone()[0]
+        return cursor.fetchone()["max"]
 
     ts = datetime.datetime.strptime(tstamp, "%Y-%m-%d").date()
     offset = (ts.weekday() - 1) % 7
@@ -30,7 +30,7 @@ def rectify_date(tstamp):
 def run(ts):
     """Actually do the hard work of getting the USDM in geojson"""
     pgconn = get_dbconn("postgis")
-    cursor = pgconn.cursor(cursor_factory=psycopg2.extras.DictCursor)
+    cursor = pgconn.cursor(cursor_factory=psycopg2.extras.RealDictCursor)
 
     # Look for polygons into the future as well as we now have Flood products
     # with a start time in the future

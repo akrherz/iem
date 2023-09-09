@@ -11,7 +11,7 @@ def main():
     """Go Main Go"""
     now = datetime.datetime.now()
     pgconn = get_dbconn("iem")
-    icursor = pgconn.cursor(cursor_factory=psycopg2.extras.DictCursor)
+    icursor = pgconn.cursor(cursor_factory=psycopg2.extras.RealDictCursor)
 
     day1 = datetime.date.today().replace(day=1)
     day2 = (day1 + datetime.timedelta(days=35)).replace(day=1)

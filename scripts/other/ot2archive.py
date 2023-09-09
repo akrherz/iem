@@ -17,8 +17,8 @@ IEM = get_dbconn("iem")
 def dowork(ts, ts2):
     """Process between these two timestamps please"""
     # Delete any obs from yesterday
-    ocursor = OTHER.cursor(cursor_factory=psycopg2.extras.DictCursor)
-    icursor = IEM.cursor(cursor_factory=psycopg2.extras.DictCursor)
+    ocursor = OTHER.cursor(cursor_factory=psycopg2.extras.RealDictCursor)
+    icursor = IEM.cursor(cursor_factory=psycopg2.extras.RealDictCursor)
     ocursor.execute(
         "DELETE from alldata WHERE valid >= %s and valid < %s", (ts, ts2)
     )

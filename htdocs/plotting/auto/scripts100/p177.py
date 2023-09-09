@@ -10,7 +10,6 @@ import matplotlib.colors as mpcolors
 import matplotlib.dates as mdates
 import numpy as np
 import pandas as pd
-import psycopg2
 from matplotlib.lines import Line2D
 from matplotlib.patches import Patch
 from pyiem import meteorology
@@ -233,7 +232,7 @@ def make_inversion_plot(ctx):
 
 def make_daily_pet_plot(ctx):
     """Generate a daily PET plot"""
-    icursor = ctx["pgconn"].cursor(cursor_factory=psycopg2.extras.DictCursor)
+    icursor = ctx["pgconn"].cursor()
     icursor.execute(
         """WITH climo as (
         select to_char(valid, 'mmdd') as mmdd, avg(c70) as  et

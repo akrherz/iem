@@ -13,7 +13,7 @@ POSTGIS = get_dbconn("postgis")
 
 def main(year, etn, start_response):
     """Go Main Go"""
-    pcursor = POSTGIS.cursor(cursor_factory=psycopg2.extras.DictCursor)
+    pcursor = POSTGIS.cursor(cursor_factory=psycopg2.extras.RealDictCursor)
 
     basefn = f"watch_{year}_{etn}"
 

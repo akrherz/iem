@@ -87,7 +87,6 @@ from zoneinfo import ZoneInfo
 
 import numpy as np
 import pandas as pd
-import psycopg2.extras
 from affine import Affine
 from geopandas import read_postgis
 from pyiem.exceptions import NoDataFound
@@ -456,7 +455,7 @@ def do_polygon(ctx):
 def do_ugc(ctx):
     """Do UGC based logic."""
     pgconn = get_dbconn("postgis")
-    cursor = pgconn.cursor(cursor_factory=psycopg2.extras.DictCursor)
+    cursor = pgconn.cursor()
     varname = ctx["v"]
     station = ctx["station"][:4]
     state = ctx["state"]

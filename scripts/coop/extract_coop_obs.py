@@ -12,7 +12,7 @@ from pyiem.util import get_dbconn
 def main():
     """Go main!"""
     pgconn = get_dbconn("iem")
-    icursor = pgconn.cursor(cursor_factory=psycopg2.extras.DictCursor)
+    icursor = pgconn.cursor(cursor_factory=psycopg2.extras.RealDictCursor)
 
     now = datetime.datetime.now()
     ts = now.strftime("%Y%m%d")

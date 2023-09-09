@@ -31,7 +31,7 @@ def fetcher(station, sts, ets):
     ]
 
     pgconn = get_dbconn("other")
-    ocursor = pgconn.cursor(cursor_factory=psycopg2.extras.DictCursor)
+    ocursor = pgconn.cursor(cursor_factory=psycopg2.extras.RealDictCursor)
     ocursor.execute(
         """
     SELECT * from alldata where station = %s and valid between %s and %s
@@ -51,8 +51,7 @@ def fetcher(station, sts, ets):
     )
 
     for row in ocursor:
-        for col in cols:
-            sio.write("%s," % (row[col],))
+        sio.write(",".join(f"{row[col]}" for col in cols))
         sio.write("\n")
     return sio.getvalue().encode("ascii")
 

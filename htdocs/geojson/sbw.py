@@ -12,7 +12,7 @@ from pymemcache.client import Client
 def run(ts):
     """Actually do the hard work of getting the current SBW in geojson"""
     pgconn = get_dbconn("postgis")
-    cursor = pgconn.cursor(cursor_factory=psycopg2.extras.DictCursor)
+    cursor = pgconn.cursor(cursor_factory=psycopg2.extras.RealDictCursor)
 
     if ts == "":
         utcnow = datetime.datetime.utcnow().replace(tzinfo=ZoneInfo("UTC"))

@@ -51,7 +51,7 @@ def compute_plant_water(row):
 
 def get_inversion_data(pgconn, ts):
     """Retrieve inversion data."""
-    cursor = pgconn.cursor(cursor_factory=psycopg2.extras.DictCursor)
+    cursor = pgconn.cursor(cursor_factory=psycopg2.extras.RealDictCursor)
     nt = NetworkTable("ISUSM", only_online=False)
     data = {"type": "FeatureCollection", "features": []}
     cursor.execute(
@@ -85,7 +85,7 @@ def get_inversion_data(pgconn, ts):
 
 def get_data(pgconn, ts):
     """Get the data for this timestamp"""
-    cursor = pgconn.cursor(cursor_factory=psycopg2.extras.DictCursor)
+    cursor = pgconn.cursor(cursor_factory=psycopg2.extras.RealDictCursor)
     qcdict = loadqc()
     nt = NetworkTable("ISUSM", only_online=False)
     data = {"type": "FeatureCollection", "features": []}

@@ -50,7 +50,7 @@ def application(environ, start_response):
         return [b"ERROR"]
 
     pgconn = get_dbconn("other")
-    icursor = pgconn.cursor(cursor_factory=psycopg2.extras.DictCursor)
+    icursor = pgconn.cursor(cursor_factory=psycopg2.extras.RealDictCursor)
 
     icursor.execute(
         "SELECT * from asi_data WHERE station = %s and "

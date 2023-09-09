@@ -27,7 +27,7 @@ def add_summary(cursor, date, iemid):
 def main():
     """Go Main Go"""
     pgconn = get_dbconn("iem")
-    icursor = pgconn.cursor(cursor_factory=psycopg2.extras.DictCursor)
+    icursor = pgconn.cursor(cursor_factory=psycopg2.extras.RealDictCursor)
     icursor2 = pgconn.cursor()
 
     # Find sites that are online and not metasites that are not in the current

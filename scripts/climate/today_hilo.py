@@ -17,7 +17,7 @@ def main():
     coop = get_dbconn("coop")
 
     obs = []
-    cursor = coop.cursor(cursor_factory=psycopg2.extras.DictCursor)
+    cursor = coop.cursor(cursor_factory=psycopg2.extras.RealDictCursor)
     cursor.execute(
         "SELECT station, high, low from climate WHERE valid = %s "
         "and substr(station,0,3) = 'IA'",

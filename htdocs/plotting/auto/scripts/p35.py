@@ -6,7 +6,6 @@ import calendar
 import datetime
 
 import numpy as np
-import psycopg2.extras
 from pyiem.exceptions import NoDataFound
 from pyiem.plot import figure_axes
 from pyiem.util import get_autoplot_context, get_dbconn
@@ -62,7 +61,7 @@ def get_description():
 def plotter(fdict):
     """Go"""
     pgconn = get_dbconn("asos")
-    cursor = pgconn.cursor(cursor_factory=psycopg2.extras.DictCursor)
+    cursor = pgconn.cursor()
     ctx = get_autoplot_context(fdict, get_description())
     station = ctx["zstation"]
     hours = ctx["hours"]
