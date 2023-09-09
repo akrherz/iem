@@ -13,7 +13,7 @@ ISO9660 = "%Y-%m-%dT%H:%M:%SZ"
 def run(wfo, year, phenomena, significance, etn):
     """Do great things"""
     pgconn = get_dbconn("postgis")
-    cursor = pgconn.cursor(cursor_factory=psycopg2.extras.DictCursor)
+    cursor = pgconn.cursor(cursor_factory=psycopg2.extras.RealDictCursor)
 
     # This is really a BUG here and we need to rearch the database
     cursor.execute(

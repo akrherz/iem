@@ -43,7 +43,7 @@ def main(argv):
     icursor.close()
 
     # Get traffic obs from access
-    icursor = iemdb.cursor(cursor_factory=psycopg2.extras.DictCursor)
+    icursor = iemdb.cursor(cursor_factory=psycopg2.extras.RealDictCursor)
     icursor.execute(
         """SELECT l.nwsli as station, s.lane_id, d.* from
        rwis_traffic_data_log d, rwis_locations l, rwis_traffic_sensors s
@@ -70,7 +70,7 @@ def main(argv):
     rcursor.close()
 
     # Get soil obs from access
-    icursor = iemdb.cursor(cursor_factory=psycopg2.extras.DictCursor)
+    icursor = iemdb.cursor(cursor_factory=psycopg2.extras.RealDictCursor)
     sql = """SELECT l.nwsli as station, d.valid,
          max(case when sensor_id = 1 then temp else null end) as tmpf_1in,
          max(case when sensor_id = 3 then temp else null end) as tmpf_3in,
@@ -115,7 +115,7 @@ def main(argv):
     rcursor.close()
 
     # Get regular obs from Access
-    icursor = iemdb.cursor(cursor_factory=psycopg2.extras.DictCursor)
+    icursor = iemdb.cursor(cursor_factory=psycopg2.extras.RealDictCursor)
     # Since we store drct in the RWIS archive as NaN, we better make sure
     # we don't attempt to use these values as it will error out
     icursor.execute("update current_log set drct = null where drct = 'NaN'")

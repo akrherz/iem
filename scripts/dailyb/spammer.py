@@ -161,7 +161,7 @@ def cowreport():
 def feature():
     """Print the feature for yesterday"""
     mesosite = get_dbconn("mesosite")
-    mcursor = mesosite.cursor(cursor_factory=psycopg2.extras.DictCursor)
+    mcursor = mesosite.cursor(cursor_factory=psycopg2.extras.RealDictCursor)
     lastts = datetime.datetime.now() + datetime.timedelta(days=-1)
     # Query
     mcursor.execute(
@@ -234,7 +234,7 @@ Bad: %(bad)s  Abstain: %(abstain)s
 def news():
     """Print the news that is fit to print"""
     mesosite = get_dbconn("mesosite")
-    mcursor = mesosite.cursor(cursor_factory=psycopg2.extras.DictCursor)
+    mcursor = mesosite.cursor(cursor_factory=psycopg2.extras.RealDictCursor)
     # Last dailyb delivery
     lastts = datetime.datetime.now() + datetime.timedelta(days=-1)
     mcursor.execute(

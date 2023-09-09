@@ -10,7 +10,7 @@ from pymemcache.client import Client
 def run(network, station):
     """Get last ob!"""
     pgconn = get_dbconn("iem")
-    cursor = pgconn.cursor(cursor_factory=psycopg2.extras.DictCursor)
+    cursor = pgconn.cursor(cursor_factory=psycopg2.extras.RealDictCursor)
     cursor.execute(
         """
     WITH mystation as (SELECT * from stations where id = %s and network = %s),

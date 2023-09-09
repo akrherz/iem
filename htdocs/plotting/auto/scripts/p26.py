@@ -62,7 +62,7 @@ def get_description():
 def get_context(fdict):
     """Get the raw infromations we need"""
     pgconn = get_dbconn("coop")
-    cursor = pgconn.cursor(cursor_factory=psycopg2.extras.DictCursor)
+    cursor = pgconn.cursor(cursor_factory=psycopg2.extras.RealDictCursor)
 
     today = datetime.date.today()
     thisyear = today.year

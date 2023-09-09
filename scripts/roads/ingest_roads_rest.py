@@ -161,7 +161,7 @@ def export_shapefile(txn, valid):
 def main():
     """Go something greatish"""
     pgconn = get_dbconn("postgis")
-    cursor = pgconn.cursor(cursor_factory=psycopg2.extras.DictCursor)
+    cursor = pgconn.cursor(cursor_factory=psycopg2.extras.RealDictCursor)
 
     with get_sqlalchemy_conn("postgis") as conn:
         current = pd.read_sql(

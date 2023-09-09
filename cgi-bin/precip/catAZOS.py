@@ -11,7 +11,7 @@ from pyiem.util import get_dbconn
 
 nt = NetworkTable("IA_ASOS")
 IEM = get_dbconn("iem")
-icursor = IEM.cursor(cursor_factory=psycopg2.extras.DictCursor)
+icursor = IEM.cursor(cursor_factory=psycopg2.extras.RealDictCursor)
 
 requireHrs = [0] * 25
 stData = {}

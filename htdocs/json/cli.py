@@ -49,7 +49,7 @@ def f2_sanitize(val):
 def get_data(station, year, fmt):
     """Get the data for this timestamp"""
     pgconn = get_dbconn("iem")
-    cursor = pgconn.cursor(cursor_factory=psycopg2.extras.DictCursor)
+    cursor = pgconn.cursor(cursor_factory=psycopg2.extras.RealDictCursor)
     data = {"results": []}
     # Fetch the daily values
     cursor.execute(

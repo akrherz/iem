@@ -134,7 +134,7 @@ def set_daily_extremes(table, ts):
     sday_limiter = ""
     if ts is not None:
         sday_limiter = f" and valid = '2000-{ts:%m-%d}' "
-    ccursor = COOP.cursor(cursor_factory=psycopg2.extras.DictCursor)
+    ccursor = COOP.cursor(cursor_factory=psycopg2.extras.RealDictCursor)
     ccursor.execute(
         f"""
         SELECT * from {table} WHERE max_high_yr is null and

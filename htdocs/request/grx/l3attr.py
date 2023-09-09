@@ -284,7 +284,7 @@ def rabbit_tracks(row):
 def produce_content(nexrad, poh, meso, tvs, max_size):
     """Do Stuff"""
     pgconn = get_dbconn("radar")
-    cursor = pgconn.cursor(cursor_factory=psycopg2.extras.DictCursor)
+    cursor = pgconn.cursor(cursor_factory=psycopg2.extras.RealDictCursor)
     limiter = ""
     threshold = 999
     title = "IEM NEXRAD L3 Attributes"

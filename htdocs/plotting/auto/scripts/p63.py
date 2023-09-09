@@ -34,7 +34,7 @@ def get_description():
 def plotter(fdict):
     """Go"""
     pgconn = get_dbconn("coop")
-    cursor = pgconn.cursor(cursor_factory=psycopg2.extras.DictCursor)
+    cursor = pgconn.cursor(cursor_factory=psycopg2.extras.RealDictCursor)
     ctx = get_autoplot_context(fdict, get_description())
     station = ctx["station"]
 
@@ -65,11 +65,11 @@ def plotter(fdict):
 
     # hstraight = 0
     for row in cursor:
-        sday = row[0]
-        year = row[1]
-        high = row[2]
-        low = row[3]
-        precip = row[4]
+        sday = row["sday"]
+        year = row["year"]
+        high = row["high"]
+        low = row["low"]
+        precip = row["precip"]
         if year == syear:
             hrecords[sday] = high
             lrecords[sday] = low

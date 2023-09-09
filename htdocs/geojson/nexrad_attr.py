@@ -12,7 +12,7 @@ from pymemcache.client import Client
 def run(ts, fmt):
     """Actually do the hard work of getting the geojson"""
     pgconn = get_dbconn("radar")
-    cursor = pgconn.cursor(cursor_factory=psycopg2.extras.DictCursor)
+    cursor = pgconn.cursor(cursor_factory=psycopg2.extras.RealDictCursor)
 
     utcnow = datetime.datetime.utcnow()
 

@@ -141,7 +141,7 @@ def get_data(fdict):
     """Get data common to both methods"""
     ctx = get_autoplot_context(fdict, get_description())
     coop_pgconn = get_dbconn("coop")
-    ccursor = coop_pgconn.cursor(cursor_factory=psycopg2.extras.DictCursor)
+    ccursor = coop_pgconn.cursor(cursor_factory=psycopg2.extras.RealDictCursor)
     ctx["station"] = ctx["zstation"]
     sdate = ctx["sdate"]
     days = ctx["days"]

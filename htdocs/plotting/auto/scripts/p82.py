@@ -143,7 +143,7 @@ def plotter(fdict):
 
     if ctx["network"].find("CLIMATE") > -1:
         cursor = get_dbconn("coop").cursor(
-            cursor_factory=psycopg2.extras.DictCursor
+            cursor_factory=psycopg2.extras.RealDictCursor
         )
         cursor.execute(
             """
@@ -167,7 +167,7 @@ def plotter(fdict):
         )
     else:
         pgconn = get_dbconn("iem")
-        cursor = pgconn.cursor(cursor_factory=psycopg2.extras.DictCursor)
+        cursor = pgconn.cursor(cursor_factory=psycopg2.extras.RealDictCursor)
         cursor.execute(
             """
             SELECT day, max_tmpf, min_tmpf, max_dwpf, min_dwpf,
@@ -255,4 +255,4 @@ def plotter(fdict):
 
 
 if __name__ == "__main__":
-    plotter({"var": "avg_tmpf", "station": "CHS", "network": "SC_ASOS"})
+    plotter({})

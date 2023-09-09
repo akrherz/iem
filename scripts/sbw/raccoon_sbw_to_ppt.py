@@ -56,7 +56,7 @@ def test_job():
 def add_job(row):
     """Add back a job"""
     pgconn = get_dbconn("mesosite")
-    mcursor = pgconn.cursor(cursor_factory=psycopg2.extras.DictCursor)
+    mcursor = pgconn.cursor()
     LOG.warning("setting racoon jobid: %s back to unprocessed", row["jobid"])
     mcursor.execute(
         "UPDATE racoon_jobs SET processed = False WHERE jobid = %s",
@@ -69,7 +69,7 @@ def add_job(row):
 def check_for_work():
     """See if we have any requests to process!"""
     pgconn = get_dbconn("mesosite")
-    mcursor = pgconn.cursor(cursor_factory=psycopg2.extras.DictCursor)
+    mcursor = pgconn.cursor(cursor_factory=psycopg2.extras.RealDictCursor)
     mcursor2 = pgconn.cursor()
     mcursor.execute(
         "SELECT jobid, wfo, radar, sts at time zone 'UTC' as sts, "
@@ -94,7 +94,7 @@ def get_warnings(sts, ets, wfo, wtypes):
     tokens.append("ZZZ")
     phenomenas = str(tuple(tokens))
     pgconn = get_dbconn("postgis")
-    pcursor = pgconn.cursor(cursor_factory=psycopg2.extras.DictCursor)
+    pcursor = pgconn.cursor(cursor_factory=psycopg2.extras.RealDictCursor)
     sql = f"""
     WITH stormbased as (
         SELECT phenomena, eventid, issue, expire,

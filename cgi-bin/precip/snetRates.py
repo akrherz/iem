@@ -41,7 +41,7 @@ def application(environ, start_response):
 
     if s.strftime("%Y%m%d") == datetime.datetime.now().strftime("%Y%m%d"):
         IEM = get_dbconn("iem")
-        cursor = IEM.cursor(cursor_factory=psycopg2.extras.DictCursor)
+        cursor = IEM.cursor(cursor_factory=psycopg2.extras.RealDictCursor)
         cursor.execute(
             """SELECT s.id as station, valid, pday from current_log c JOIN
         stations s on (s.iemid = c.iemid) WHERE
@@ -50,7 +50,7 @@ def application(environ, start_response):
         )
     else:
         SNET = get_dbconn("snet")
-        cursor = SNET.cursor(cursor_factory=psycopg2.extras.DictCursor)
+        cursor = SNET.cursor(cursor_factory=psycopg2.extras.RealDictCursor)
 
         cursor.execute(
             """SELECT station, valid, pday from t"""

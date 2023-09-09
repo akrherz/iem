@@ -17,7 +17,7 @@ def run(state, year, phenomena, significance):
       year (int): year to run for
     """
     pgconn = get_dbconn("postgis")
-    cursor = pgconn.cursor(cursor_factory=psycopg2.extras.DictCursor)
+    cursor = pgconn.cursor(cursor_factory=psycopg2.extras.RealDictCursor)
 
     limits = ["phenomena is not null", "significance is not null"]
     if phenomena != "__":

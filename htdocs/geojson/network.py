@@ -11,7 +11,7 @@ from pymemcache.client import Client
 def run(network, only_online):
     """Generate a GeoJSON dump of the provided network"""
     pgconn = get_dbconn("mesosite")
-    cursor = pgconn.cursor(cursor_factory=psycopg2.extras.DictCursor)
+    cursor = pgconn.cursor(cursor_factory=psycopg2.extras.RealDictCursor)
 
     # One off special
     if network in ["ASOS1MIN", "TAF"]:

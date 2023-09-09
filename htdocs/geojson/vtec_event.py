@@ -13,7 +13,7 @@ ISO = "%Y-%m-%dT%H:%M:%SZ"
 def run_lsrs(wfo, year, phenomena, significance, etn, sbw):
     """Do great things"""
     pgconn = get_dbconn("postgis")
-    cursor = pgconn.cursor(cursor_factory=psycopg2.extras.DictCursor)
+    cursor = pgconn.cursor(cursor_factory=psycopg2.extras.RealDictCursor)
 
     if sbw == 1:
         sql = f"""
@@ -76,7 +76,7 @@ def run_lsrs(wfo, year, phenomena, significance, etn, sbw):
 def run_sbw(wfo, year, phenomena, significance, etn):
     """Do great things"""
     pgconn = get_dbconn("postgis")
-    cursor = pgconn.cursor(cursor_factory=psycopg2.extras.DictCursor)
+    cursor = pgconn.cursor(cursor_factory=psycopg2.extras.RealDictCursor)
 
     table = f"sbw_{year}"
     cursor.execute(
@@ -116,7 +116,7 @@ def run_sbw(wfo, year, phenomena, significance, etn):
 def run(wfo, year, phenomena, significance, etn):
     """Do great things"""
     pgconn = get_dbconn("postgis")
-    cursor = pgconn.cursor(cursor_factory=psycopg2.extras.DictCursor)
+    cursor = pgconn.cursor(cursor_factory=psycopg2.extras.RealDictCursor)
 
     cursor.execute(
         f"""

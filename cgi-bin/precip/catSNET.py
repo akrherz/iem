@@ -163,7 +163,7 @@ def application(environ, start_response):
         tm,
     )
     pgconn = get_dbconn("iem")
-    icursor = pgconn.cursor(cursor_factory=psycopg2.extras.DictCursor)
+    icursor = pgconn.cursor(cursor_factory=psycopg2.extras.RealDictCursor)
 
     icursor.execute(sqlStr)
 

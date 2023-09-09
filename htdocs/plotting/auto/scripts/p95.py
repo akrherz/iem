@@ -12,7 +12,6 @@ import datetime
 import matplotlib.colors as mpcolors
 import numpy as np
 import pandas as pd
-import psycopg2.extras
 from pyiem.exceptions import NoDataFound
 from pyiem.plot import figure, get_cmap
 from pyiem.plot.use_agg import plt
@@ -77,7 +76,7 @@ def title(wanted):
 def plotter(fdict):
     """Go"""
     pgconn = get_dbconn("coop")
-    ccursor = pgconn.cursor(cursor_factory=psycopg2.extras.DictCursor)
+    ccursor = pgconn.cursor()
     ctx = get_autoplot_context(fdict, get_description())
     station = ctx["station"]
     lagmonths = ctx["lag"]

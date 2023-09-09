@@ -36,7 +36,7 @@ def router(group, ts):
 def run_azos(ts):
     """Get the data please"""
     pgconn = get_dbconn("iem")
-    cursor = pgconn.cursor(cursor_factory=psycopg2.extras.DictCursor)
+    cursor = pgconn.cursor(cursor_factory=psycopg2.extras.RealDictCursor)
 
     utcnow = datetime.datetime.utcnow()
     # Now we have the tricky work of finding what 7 AM is
@@ -78,7 +78,7 @@ def run_azos(ts):
 def run(ts):
     """Actually do the hard work of getting the current SPS in geojson"""
     pgconn = get_dbconn("iem")
-    cursor = pgconn.cursor(cursor_factory=psycopg2.extras.DictCursor)
+    cursor = pgconn.cursor(cursor_factory=psycopg2.extras.RealDictCursor)
 
     utcnow = datetime.datetime.utcnow()
 

@@ -11,7 +11,7 @@ def main():
     """Go Main Go"""
     now = datetime.datetime.now()
     pgconn = get_dbconn("iem")
-    icursor = pgconn.cursor(cursor_factory=psycopg2.extras.DictCursor)
+    icursor = pgconn.cursor(cursor_factory=psycopg2.extras.RealDictCursor)
 
     # Compute normal from the climate database
     data = []

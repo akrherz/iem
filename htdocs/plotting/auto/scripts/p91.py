@@ -11,7 +11,6 @@ provides actual streaks and yearly maximum values.
 
 import numpy as np
 import pandas as pd
-import psycopg2.extras
 from pyiem.plot import figure_axes
 from pyiem.util import get_autoplot_context, get_dbconn
 
@@ -57,7 +56,7 @@ def get_description():
 def plotter(fdict):
     """Go"""
     pgconn = get_dbconn("coop")
-    ccursor = pgconn.cursor(cursor_factory=psycopg2.extras.DictCursor)
+    ccursor = pgconn.cursor()
     ctx = get_autoplot_context(fdict, get_description())
     station = ctx["station"]
     varname = ctx["var"]

@@ -7,7 +7,6 @@ of days prior to that date.
 import datetime
 
 import pandas as pd
-import psycopg2.extras
 from pyiem.exceptions import NoDataFound
 from pyiem.nws import vtec
 from pyiem.plot.geoplot import MapPlot
@@ -57,7 +56,7 @@ def plotter(fdict):
     """Go"""
     bins = [0, 1, 14, 31, 91, 182, 273, 365, 730, 1460, 2920, 3800]
     pgconn = get_dbconn("postgis")
-    cursor = pgconn.cursor(cursor_factory=psycopg2.extras.DictCursor)
+    cursor = pgconn.cursor()
     ctx = get_autoplot_context(fdict, get_description())
     phenomena = ctx["phenomena"]
     significance = ctx["significance"]
