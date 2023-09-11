@@ -6,7 +6,7 @@ from zoneinfo import ZoneInfo
 import requests
 from pyiem.network import Table as NetworkTable
 from pyiem.observation import Observation
-from pyiem.util import c2f, get_dbconn, logger, utc
+from pyiem.util import c2f, get_dbconnc, logger, utc
 
 LOG = logger()
 
@@ -184,10 +184,8 @@ def load_times(icursor):
 def main(argv):
     """Go Main Go"""
     nt = NetworkTable("SCAN")
-    SCAN = get_dbconn("scan")
-    scursor = SCAN.cursor()
-    ACCESS = get_dbconn("iem")
-    icursor = ACCESS.cursor()
+    SCAN, scursor = get_dbconnc("scan")
+    ACCESS, icursor = get_dbconnc("iem")
     reprocessing = False
     if len(argv) == 4:
         postvars["intervalType"] = "View Historic"

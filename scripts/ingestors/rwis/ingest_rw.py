@@ -6,7 +6,7 @@ from zoneinfo import ZoneInfo
 import pandas as pd
 import requests
 from pyiem.observation import Observation
-from pyiem.util import get_dbconn
+from pyiem.util import get_dbconnc
 
 URI = (
     "http://www.rainwise.net/inview/api/stationdata-iowa.php?"
@@ -36,7 +36,7 @@ def get_last_obs(icursor):
         + str(tuple(sids))
     )
     for row in icursor:
-        data[row[0]] = row[1]
+        data[row["id"]] = row["valid"]
     return data
 
 
@@ -117,8 +117,7 @@ def main():
     """Go Main Go"""
     today = datetime.datetime.now()
 
-    pgconn = get_dbconn("iem")
-    icursor = pgconn.cursor()
+    pgconn, icursor = get_dbconnc("iem")
     data = get_last_obs(icursor)
     for nwsli in ASSOC:
         process(today, icursor, nwsli, data.get(nwsli))

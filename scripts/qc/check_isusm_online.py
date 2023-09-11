@@ -6,14 +6,14 @@ import datetime
 
 from pyiem.network import Table as NetworkTable
 from pyiem.tracker import TrackerEngine
-from pyiem.util import get_dbconn, utc
+from pyiem.util import get_dbconnc, utc
 
 
 def main():
     """Go Main Go"""
     nt = NetworkTable("ISUSM")
-    IEM = get_dbconn("iem")
-    PORTFOLIO = get_dbconn("portfolio")
+    IEM, icursor = get_dbconnc("iem")
+    PORTFOLIO, pcursor = get_dbconnc("portfolio")
 
     threshold = utc() - datetime.timedelta(hours=12)
 
@@ -24,9 +24,9 @@ def main():
     )
     obs = {}
     for row in icursor:
-        obs[row[0]] = {"id": row[0], "valid": row[1]}
+        obs[row["id"]] = {"id": row["id"], "valid": row["valid"]}
 
-    tracker = TrackerEngine(IEM.cursor(), PORTFOLIO.cursor(), 7)
+    tracker = TrackerEngine(icursor, pcursor, 7)
     tracker.process_network(obs, "isusm", nt, threshold)
     tracker.send_emails()
     tac = tracker.action_count

@@ -6,7 +6,7 @@ from zoneinfo import ZoneInfo
 import requests
 from pyiem.observation import Observation
 from pyiem.reference import TRACE_VALUE
-from pyiem.util import get_dbconn, logger, utc
+from pyiem.util import get_dbconnc, logger, utc
 
 LOG = logger()
 
@@ -23,8 +23,7 @@ def safeP(v):
 
 def main(daysago):
     """Go Main Go"""
-    dbconn = get_dbconn("iem")
-    cursor = dbconn.cursor()
+    dbconn, cursor = get_dbconnc("iem")
 
     now = datetime.datetime.now() - datetime.timedelta(days=daysago)
 

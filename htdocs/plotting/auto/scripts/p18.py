@@ -157,8 +157,8 @@ def get_data(fdict):
             (ctx["_nt"].sts[ctx["station"]]["ncei91"],),
         )
         for row in ccursor:
-            ctx["climo"][row[0].strftime("%m%d")] = dict(
-                high=row[1], low=row[2]
+            ctx["climo"][row["valid"].strftime("%m%d")] = dict(
+                high=row["high"], low=row["low"]
             )
     col = "tmpf::int" if ctx["var"] == "tmpf" else ctx["var"]
     col = "dwpf::int" if ctx["var"] == "dwpf" else col

@@ -18,8 +18,6 @@ from pyiem.tracker import TrackerEngine
 
 LOG = util.logger()
 NT = NetworkTable("IA_RWIS")
-IEM = util.get_dbconn("iem")
-PORTFOLIO = util.get_dbconn("portfolio")
 RWIS2METAR = {
     "00": "XADA",
     "01": "XALG",
@@ -164,12 +162,13 @@ def merge(atmos, surface):
 def do_iemtracker(obs):
     """Iterate over the obs and do IEM Tracker related activities"""
     threshold = util.utc() - datetime.timedelta(hours=3)
-
-    tracker = TrackerEngine(IEM.cursor(), PORTFOLIO.cursor())
+    iem_pgconn, icursor = util.get_dbconnc("iem")
+    portfolio_pgconn, pcursor = util.get_dbconnc("portfolio")
+    tracker = TrackerEngine(icursor, pcursor)
     tracker.process_network(obs, "iarwis", NT, threshold)
     tracker.send_emails()
-    IEM.commit()
-    PORTFOLIO.commit()
+    iem_pgconn.commit()
+    portfolio_pgconn.commit()
 
 
 def METARtemp(val):
@@ -263,6 +262,8 @@ def gen_metars(obs, filename, convids=False):
 def update_iemaccess(obs):
     """Update the IEMAccess database"""
     for sid in obs:
+        # FIXME
+        pgconn, icursor = util.get_dbconnc("iem")
         ob = obs[sid]
         iemob = Observation(sid, "IA_RWIS", ob["valid"])
         for varname in ob:
@@ -277,10 +278,9 @@ def update_iemaccess(obs):
                 iemob.data[varname] = ob.get(varname)
             elif not np.isnan(thisval):
                 iemob.data[varname] = ob.get(varname)
-        icursor = IEM.cursor()
         iemob.save(icursor)
         icursor.close()
-        IEM.commit()
+        pgconn.commit()
 
 
 def process_features(features):
@@ -353,5 +353,3 @@ def main():
 
 if __name__ == "__main__":
     main()
-    IEM.commit()
-    PORTFOLIO.commit()

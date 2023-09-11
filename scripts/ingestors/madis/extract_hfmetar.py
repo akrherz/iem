@@ -15,7 +15,7 @@ from metpy.units import masked_array, units
 from netCDF4 import chartostring
 from pyiem.observation import Observation
 from pyiem.reference import TRACE_VALUE
-from pyiem.util import convert_value, get_dbconn, logger, mm2inch, ncopen
+from pyiem.util import convert_value, get_dbconnc, logger, mm2inch, ncopen
 from tqdm import tqdm
 
 warnings.filterwarnings("ignore", category=DeprecationWarning)
@@ -66,15 +66,14 @@ def process_sky(data, skycs, skyls):
 
 def process(ncfn):
     """Process this file"""
-    pgconn = get_dbconn("iem")
-    icursor = pgconn.cursor()
+    pgconn, icursor = get_dbconnc("iem")
     xref = {}
     icursor.execute(
         "SELECT id, network from stations where "
         "(network ~* 'ASOS' and country = 'US') or id in ('PGSN')"
     )
     for row in icursor:
-        xref[row[0]] = row[1]
+        xref[row["id"]] = row["network"]
     icursor.close()
     nc = ncopen(ncfn)
     data = {}
@@ -242,7 +241,8 @@ def process(ncfn):
         for key in iem.data:
             if isinstance(iem.data[key], np.float32):
                 print(f"key: {key} type: {type(iem.data[key])}")
-        icursor = pgconn.cursor()
+        # FIXME
+        pgconn, icursor = get_dbconnc("iem")
         if not iem.save(icursor, force_current_log=True, skip_current=True):
             print(
                 f"extract_hfmetar: unknown station? {sid3} {network} {ts}\n"
@@ -251,6 +251,7 @@ def process(ncfn):
 
         icursor.close()
         pgconn.commit()
+        pgconn.close()
 
 
 def find_fn(argv):

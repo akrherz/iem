@@ -8,20 +8,19 @@ from zoneinfo import ZoneInfo
 
 from pyiem.network import Table as NetworkTable
 from pyiem.tracker import TrackerEngine
-from pyiem.util import get_dbconn, utc
+from pyiem.util import get_dbconnc, utc
 
 
 def workflow(netname, pname):
     """Do something please"""
-    pgconn_iem = get_dbconn("iem")
-    pgconn_mesosite = get_dbconn("mesosite")
-    pgconn_portfolio = get_dbconn("portfolio")
+    pgconn_iem, icursor = get_dbconnc("iem")
+    pgconn_mesosite, mcursor = get_dbconnc("mesosite")
+    pgconn_portfolio, pcursor = get_dbconnc("portfolio")
 
     # Now lets check files
     mydir = "/mesonet/ldmdata/camera/stills"
 
     threshold = utc() - datetime.timedelta(hours=2)
-    mcursor = pgconn_mesosite.cursor()
     mcursor.execute(
         "SELECT id, network, name from webcams where network = %s and online "
         "ORDER by id ASC",
@@ -31,10 +30,13 @@ def workflow(netname, pname):
     obs = {}
     missing = 0
     for row in mcursor:
-        nt.sts[row[0]] = dict(
-            id=row[0], network=row[1], name=row[2], tzname="America/Chicago"
+        nt.sts[row["id"]] = dict(
+            id=row["id"],
+            network=row["network"],
+            name=row["name"],
+            tzname="America/Chicago",
         )
-        fn = f"{mydir}/{row[0]}.jpg"
+        fn = f"{mydir}/{row['id']}.jpg"
         if not os.path.isfile(fn):
             missing += 1
             if missing > 1:
@@ -45,12 +47,12 @@ def workflow(netname, pname):
             seconds=ticks
         )
         valid = valid.replace(tzinfo=ZoneInfo("UTC"))
-        obs[row[0]] = {"valid": valid}
+        obs[row["id"]] = {"valid": valid}
     # Abort out if no obs are found
     if not obs:
         return
 
-    tracker = TrackerEngine(pgconn_iem.cursor(), pgconn_portfolio.cursor(), 10)
+    tracker = TrackerEngine(icursor, pcursor, 10)
     tracker.process_network(obs, pname, nt, threshold)
     tracker.send_emails()
     pgconn_iem.commit()

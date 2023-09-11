@@ -17,12 +17,9 @@ import pandas as pd
 from metpy.calc import dewpoint_from_relative_humidity
 from metpy.units import units
 from pyiem.observation import Observation
-from pyiem.util import c2f, convert_value, get_dbconn, logger, mm2inch, utc
+from pyiem.util import c2f, convert_value, get_dbconnc, logger, mm2inch, utc
 
 LOG = logger()
-ISUAG = get_dbconn("isuag")
-
-ACCESS = get_dbconn("iem")
 
 EVENTS = {"reprocess_solar": False, "days": [], "reprocess_temps": False}
 VARCONV = {
@@ -176,12 +173,12 @@ def do_inversion(filename, nwsli):
     # convert all columns to lowercase
     df.columns = map(str.lower, df.columns)
     df["valid"] = df["timestamp"].apply(make_time)
-    cursor = ISUAG.cursor()
+    pgconn, cursor = get_dbconnc("isuag")
     cursor.execute(
         "SELECT max(valid) from sm_inversion where station = %s",
         (nwsli,),
     )
-    maxts = cursor.fetchone()[0]
+    maxts = cursor.fetchone()["max"]
     if maxts is not None:
         df = df[df["valid"] > maxts]
     for _, row in df.iterrows():
@@ -208,7 +205,7 @@ def do_inversion(filename, nwsli):
         )
     LOG.info("Inserted %s inversion rows for %s", len(df.index), nwsli)
     cursor.close()
-    ISUAG.commit()
+    pgconn.commit()
 
 
 def common_df_logic(filename, maxts, nwsli, tablename):
@@ -397,7 +394,7 @@ def common_df_logic(filename, maxts, nwsli, tablename):
     output = io.StringIO()
     df.to_csv(output, sep="\t", header=False, index=False)
     output.seek(0)
-    icursor = ISUAG.cursor()
+    pgconn, icursor = get_dbconnc("isuag")
     try:
         icursor.copy_from(output, tablename, columns=df.columns, null="")
     except Exception as exp:
@@ -405,7 +402,7 @@ def common_df_logic(filename, maxts, nwsli, tablename):
         icursor.close()
         return None
     icursor.close()
-    ISUAG.commit()
+    pgconn.commit()
     return df
 
 
@@ -419,7 +416,7 @@ def m15_process(nwsli, maxts):
     # Update IEMAccess
     processed = 0
     LOG.info("processing %s rows from %s", len(df.index), fn)
-    acursor = ACCESS.cursor()
+    pgconn, acursor = get_dbconnc("iem")
     for _i, row in df.iterrows():
         ob = Observation(nwsli, "ISUSM", row["valid"].to_pydatetime())
         tmpc = units("degC") * row["tair_c_avg_qc"]
@@ -457,7 +454,7 @@ def m15_process(nwsli, maxts):
         ob.save(acursor, force_current_log=True)
         processed += 1
     acursor.close()
-    ACCESS.commit()
+    pgconn.commit()
     return processed
 
 
@@ -469,7 +466,7 @@ def hourly_process(nwsli, maxts):
         return 0
     processed = 0
     LOG.info("processing %s rows from %s", len(df.index), fn)
-    acursor = ACCESS.cursor()
+    pgconn, acursor = get_dbconnc("iem")
     for _i, row in df.iterrows():
         # Update IEMAccess
         ob = Observation(nwsli, "ISUSM", row["valid"].to_pydatetime())
@@ -507,7 +504,7 @@ def hourly_process(nwsli, maxts):
         ob.save(acursor)
         processed += 1
     acursor.close()
-    ACCESS.commit()
+    pgconn.commit()
     return processed
 
 
@@ -519,7 +516,7 @@ def daily_process(nwsli, maxts):
         return 0
     LOG.info("processing %s rows from %s", len(df.index), fn)
     processed = 0
-    acursor = ACCESS.cursor()
+    pgconn, acursor = get_dbconnc("iem")
     for _i, row in df.iterrows():
         # Need a timezone
         valid = datetime.datetime(
@@ -556,13 +553,13 @@ def daily_process(nwsli, maxts):
 
         processed += 1
     acursor.close()
-    ACCESS.commit()
+    pgconn.commit()
     return processed
 
 
 def get_max_timestamps(nwsli):
     """Fetch out our max values"""
-    icursor = ISUAG.cursor()
+    pgconn, icursor = get_dbconnc("isuag")
     data = {
         "hourly": datetime.datetime(2012, 1, 1, tzinfo=ZoneInfo("Etc/GMT+6")),
         "minute": datetime.datetime(2012, 1, 1, tzinfo=ZoneInfo("Etc/GMT+6")),
@@ -576,8 +573,8 @@ def get_max_timestamps(nwsli):
         (nwsli,),
     )
     row = icursor.fetchone()
-    if row[0] is not None:
-        data["daily"] = row[0]
+    if row["max"] is not None:
+        data["daily"] = row["max"]
 
     icursor.execute(
         """
@@ -586,8 +583,8 @@ def get_max_timestamps(nwsli):
         (nwsli,),
     )
     row = icursor.fetchone()
-    if row[0] is not None:
-        data["hourly"] = row[0]
+    if row["max"] is not None:
+        data["hourly"] = row["max"]
 
     icursor.execute(
         """
@@ -597,8 +594,8 @@ def get_max_timestamps(nwsli):
         (nwsli,),
     )
     row = icursor.fetchone()
-    if row[0] is not None:
-        data["minute"] = row[0]
+    if row["max"] is not None:
+        data["minute"] = row["max"]
     LOG.info(
         "%s max daily: %s hourly: %s minute: %s",
         nwsli,
@@ -606,6 +603,7 @@ def get_max_timestamps(nwsli):
         data["hourly"],
         data["minute"],
     )
+    pgconn.close()
     return data
 
 
