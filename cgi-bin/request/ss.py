@@ -17,7 +17,8 @@ from io import BytesIO
 
 import pandas as pd
 from paste.request import parse_formvars
-from pyiem.util import get_dbconn
+from pyiem.util import get_dbconn, get_sqlalchemy_conn
+from sqlalchemy import text
 
 LOOKUP = {
     9100104: "SSP #6",
@@ -35,17 +36,17 @@ def gage_run(sts, ets, stations, excel, start_response):
     if len(stations) == 1:
         stations.append(0)
 
-    dbconn = get_dbconn("other")
-    sql = """select date(valid) as date, to_char(valid, 'HH24:MI:SS') as time,
+    sql = text(
+        """select date(valid) as date, to_char(valid, 'HH24:MI:SS') as time,
     site_serial, ch1_data_p, ch2_data_p,
     ch1_data_t, ch2_data_t, ch1_data_c
-    from ss_logger_data WHERE valid between '%s' and '%s' and
-    site_serial in %s ORDER by valid ASC""" % (
-        sts,
-        ets,
-        str(tuple(stations)),
+    from ss_logger_data WHERE valid between :sts and :ets and
+    site_serial = ANY(:stations) ORDER by valid ASC"""
     )
-    df = pd.read_sql(sql, dbconn)
+    with get_sqlalchemy_conn("other") as conn:
+        df = pd.read_sql(
+            sql, conn, params={"sts": sts, "ets": ets, "stations": stations}
+        )
     headers = [
         "date",
         "time",

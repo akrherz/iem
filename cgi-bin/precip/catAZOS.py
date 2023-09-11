@@ -4,14 +4,11 @@ IEM_APPID = 79
 import datetime
 from io import StringIO
 
-import psycopg2.extras
 from paste.request import parse_formvars
 from pyiem.network import Table as NetworkTable
-from pyiem.util import get_dbconn
+from pyiem.util import get_dbconnc
 
 nt = NetworkTable("IA_ASOS")
-IEM = get_dbconn("iem")
-icursor = IEM.cursor(cursor_factory=psycopg2.extras.RealDictCursor)
 
 requireHrs = [0] * 25
 stData = {}
@@ -138,7 +135,7 @@ def application(environ, start_response):
     ts = doHeader(environ, start_response, sio)
     loadstations()
     setupTable(sio)
-
+    conn, icursor = get_dbconnc("iem")
     icursor.execute(
         "SELECT extract('hour' from valid) as vhour, t.id as station, "
         f"valid, phour from hourly_{ts.year} h JOIN stations t on "
@@ -160,7 +157,7 @@ def application(environ, start_response):
                 stData[row["station"]][vhour] = "&nbsp;"
             except KeyError:
                 continue
-
+    conn.close()
     if ts < datetime.datetime(2006, 6, 1):
         stData["MXO"] = ["M"] * 24
     if ts < datetime.datetime(2007, 6, 1):
@@ -176,7 +173,7 @@ def application(environ, start_response):
     ids.sort()
     for station in ids:
         j += 1
-        sio.write('<tr class="row' + str(j % 5) + '">')
+        sio.write(f'<tr class="row{j % 5}">')
         sio.write(f"<td>{station}</td>")
         for i in range(24):
             sio.write('<td class="style' + str((i + 1) % 3) + '">')

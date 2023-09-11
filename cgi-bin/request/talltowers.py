@@ -93,14 +93,14 @@ def application(environ, start_response):
     (((date_part('minute', valid)::integer / {tw}::integer) * {tw}::integer)
      || ' minutes')::interval) at time zone %s as ts,
     {','.join(tokens)} from
-    data_analog where tower in %s and valid >= %s and valid < %s
+    data_analog where tower = ANY(%s) and valid >= %s and valid < %s
     GROUP by tower, ts ORDER by tower, ts
     """
     with get_sqlalchemy_conn("talltowers", user="tt_web") as conn:
         df = pd.read_sql(
             sql,
             conn,
-            params=(tzname, tuple(stations), sts, ets),
+            params=(tzname, stations, sts, ets),
         )
     df = df.rename(columns={"ts": "valid"})
     df["tower"] = df["tower"].replace(TOWERIDS)

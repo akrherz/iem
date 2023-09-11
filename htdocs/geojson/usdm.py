@@ -2,9 +2,8 @@
 import datetime
 import json
 
-import psycopg2.extras
 from paste.request import parse_formvars
-from pyiem.util import get_dbconn, html_escape
+from pyiem.util import get_dbconnc, html_escape
 from pymemcache.client import Client
 
 
@@ -16,11 +15,12 @@ def rectify_date(tstamp):
     back to tuesday
     """
     if tstamp == "":
-        pgconn = get_dbconn("postgis")
-        cursor = pgconn.cursor(cursor_factory=psycopg2.extras.RealDictCursor)
+        pgconn, cursor = get_dbconnc("postgis")
         # Go get the latest USDM stored in the database!
         cursor.execute("SELECT max(valid) from usdm")
-        return cursor.fetchone()["max"]
+        res = cursor.fetchone()["max"]
+        pgconn.close()
+        return res
 
     ts = datetime.datetime.strptime(tstamp, "%Y-%m-%d").date()
     offset = (ts.weekday() - 1) % 7
@@ -29,8 +29,7 @@ def rectify_date(tstamp):
 
 def run(ts):
     """Actually do the hard work of getting the USDM in geojson"""
-    pgconn = get_dbconn("postgis")
-    cursor = pgconn.cursor(cursor_factory=psycopg2.extras.RealDictCursor)
+    pgconn, cursor = get_dbconnc("postgis")
 
     # Look for polygons into the future as well as we now have Flood products
     # with a start time in the future
@@ -65,7 +64,7 @@ def run(ts):
                 geometry=json.loads(row["geojson"]),
             )
         )
-
+    pgconn.close()
     return json.dumps(res)
 
 

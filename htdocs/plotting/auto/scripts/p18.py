@@ -9,10 +9,9 @@ from zoneinfo import ZoneInfo
 
 import numpy as np
 import pandas as pd
-import psycopg2.extras
 from pyiem.exceptions import NoDataFound
 from pyiem.plot import figure_axes
-from pyiem.util import get_autoplot_context, get_dbconn, get_sqlalchemy_conn
+from pyiem.util import get_autoplot_context, get_dbconnc, get_sqlalchemy_conn
 
 MDICT = {
     "tmpf": "Air Temperature",
@@ -140,8 +139,7 @@ def highcharts(fdict):
 def get_data(fdict):
     """Get data common to both methods"""
     ctx = get_autoplot_context(fdict, get_description())
-    coop_pgconn = get_dbconn("coop")
-    ccursor = coop_pgconn.cursor(cursor_factory=psycopg2.extras.RealDictCursor)
+    coop_pgconn, ccursor = get_dbconnc("coop")
     ctx["station"] = ctx["zstation"]
     sdate = ctx["sdate"]
     days = ctx["days"]
@@ -179,6 +177,7 @@ def get_data(fdict):
             ),
             index_col="valid",
         )
+    coop_pgconn.close()
     if ctx["df"].empty:
         raise NoDataFound("No data found.")
 

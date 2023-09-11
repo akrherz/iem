@@ -10,7 +10,6 @@ import datetime
 
 import numpy as np
 import pandas as pd
-import psycopg2.extras
 from matplotlib.patches import Rectangle
 from pyiem.exceptions import NoDataFound
 from pyiem.plot import calendar_plot
@@ -18,7 +17,7 @@ from pyiem.reference import TRACE_VALUE
 from pyiem.util import (
     convert_value,
     get_autoplot_context,
-    get_dbconn,
+    get_dbconnc,
     get_sqlalchemy_conn,
 )
 
@@ -142,9 +141,7 @@ def plotter(fdict):
         raise NoDataFound("No Data Found.")
 
     if ctx["network"].find("CLIMATE") > -1:
-        cursor = get_dbconn("coop").cursor(
-            cursor_factory=psycopg2.extras.RealDictCursor
-        )
+        pgconn, cursor = get_dbconnc("coop")
         cursor.execute(
             """
             SELECT
@@ -166,8 +163,7 @@ def plotter(fdict):
             (sdate, edate, station),
         )
     else:
-        pgconn = get_dbconn("iem")
-        cursor = pgconn.cursor(cursor_factory=psycopg2.extras.RealDictCursor)
+        pgconn, cursor = get_dbconnc("iem")
         cursor.execute(
             """
             SELECT day, max_tmpf, min_tmpf, max_dwpf, min_dwpf,
@@ -184,9 +180,9 @@ def plotter(fdict):
     rows = []
     data = {}
     for row in cursor:
-        hd = diff(row["max_tmpf"], cdf.at[row[0].strftime("%m%d"), "high"])
-        ld = diff(row["min_tmpf"], cdf.at[row[0].strftime("%m%d"), "low"])
-        ad = diff(row["avg_tmpf"], cdf.at[row[0].strftime("%m%d"), "avg"])
+        hd = diff(row["max_tmpf"], cdf.at[row["day"].strftime("%m%d"), "high"])
+        ld = diff(row["min_tmpf"], cdf.at[row["day"].strftime("%m%d"), "low"])
+        ad = diff(row["avg_tmpf"], cdf.at[row["day"].strftime("%m%d"), "avg"])
         avg_sknt = row["avg_sknt"]
         if avg_sknt is None:
             if varname == "avg_smph":
@@ -216,15 +212,15 @@ def plotter(fdict):
                 max_rstage=row["max_rstage"],
             )
         )
-        data[row[0]] = {"val": safe(rows[-1], varname)}
-        if data[row[0]]["val"] == "0":
-            data[row[0]]["color"] = "k"
+        data[row["day"]] = {"val": safe(rows[-1], varname)}
+        if data[row["day"]]["val"] == "0":
+            data[row["day"]]["color"] = "k"
         elif varname == "high_departure":
-            data[row[0]]["color"] = "b" if hd < 0 else "r"
+            data[row["day"]]["color"] = "b" if hd < 0 else "r"
         elif varname == "low_departure":
-            data[row[0]]["color"] = "b" if ld < 0 else "r"
+            data[row["day"]]["color"] = "b" if ld < 0 else "r"
         elif varname == "avg_departure":
-            data[row[0]]["color"] = "b" if ad < 0 else "r"
+            data[row["day"]]["color"] = "b" if ad < 0 else "r"
         elif varname == "max_rstage":
             if not stagevals:
                 meta = ctx["_nt"].sts[station]
@@ -232,7 +228,8 @@ def plotter(fdict):
                 stagevals.append(1e9)
             if not pd.isna(row["max_rstage"]):
                 idx = np.digitize(row["max_rstage"], stagevals)
-                data[row[0]]["cellcolor"] = COLORS[idx]
+                data[row["day"]]["cellcolor"] = COLORS[idx]
+    pgconn.close()
     df = pd.DataFrame(rows)
 
     title = (

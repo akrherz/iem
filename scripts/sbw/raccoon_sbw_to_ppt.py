@@ -14,7 +14,6 @@ import shutil
 import subprocess
 import sys
 
-import psycopg2.extras
 from odf.draw import Frame, Image, Page, TextBox
 from odf.opendocument import OpenDocumentPresentation
 from odf.style import (
@@ -27,7 +26,7 @@ from odf.style import (
     TextProperties,
 )
 from odf.text import P
-from pyiem.util import get_dbconn, logger, utc
+from pyiem.util import get_dbconnc, logger, utc
 
 os.putenv("DISPLAY", "localhost:1")
 
@@ -55,8 +54,7 @@ def test_job():
 
 def add_job(row):
     """Add back a job"""
-    pgconn = get_dbconn("mesosite")
-    mcursor = pgconn.cursor()
+    pgconn, mcursor = get_dbconnc("mesosite")
     LOG.warning("setting racoon jobid: %s back to unprocessed", row["jobid"])
     mcursor.execute(
         "UPDATE racoon_jobs SET processed = False WHERE jobid = %s",
@@ -68,8 +66,7 @@ def add_job(row):
 
 def check_for_work():
     """See if we have any requests to process!"""
-    pgconn = get_dbconn("mesosite")
-    mcursor = pgconn.cursor(cursor_factory=psycopg2.extras.RealDictCursor)
+    pgconn, mcursor = get_dbconnc("mesosite")
     mcursor2 = pgconn.cursor()
     mcursor.execute(
         "SELECT jobid, wfo, radar, sts at time zone 'UTC' as sts, "
@@ -81,7 +78,7 @@ def check_for_work():
         jobs.append(row)
         mcursor2.execute(
             "UPDATE racoon_jobs SET processed = True WHERE jobid = %s",
-            (row[0],),
+            (row["jobid"],),
         )
     pgconn.commit()
     pgconn.close()
@@ -93,8 +90,7 @@ def get_warnings(sts, ets, wfo, wtypes):
     tokens = wtypes.split(",")
     tokens.append("ZZZ")
     phenomenas = str(tuple(tokens))
-    pgconn = get_dbconn("postgis")
-    pcursor = pgconn.cursor(cursor_factory=psycopg2.extras.RealDictCursor)
+    pgconn, pcursor = get_dbconnc("postgis")
     sql = f"""
     WITH stormbased as (
         SELECT phenomena, eventid, issue, expire,

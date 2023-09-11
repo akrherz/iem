@@ -12,8 +12,7 @@ Run from RUN_10MIN.sh
 import datetime
 import sys
 
-import psycopg2.extras
-from pyiem.util import get_dbconn, logger, utc
+from pyiem.util import get_dbconnc, logger, utc
 
 LOG = logger()
 PROPERTY_NAME = "asos2archive_last"
@@ -23,23 +22,21 @@ RMTHRES = utc(1996, 7, 1)
 
 def build_reset_times() -> dict:
     """Return dictionary with known reset minutes."""
-    pgconn = get_dbconn("mesosite")
-    cursor = pgconn.cursor()
+    pgconn, cursor = get_dbconnc("mesosite")
     cursor.execute(
         "SELECT id, value from stations t JOIN station_attributes a on "
         "t.iemid = a.iemid where a.attr = 'METAR_RESET_MINUTE'"
     )
     res = {}
     for row in cursor:
-        res[row[0]] = int(row[1])
+        res[row["id"]] = int(row["value"])
     pgconn.close()
     return res
 
 
 def get_first_updated():
     """Figure out which is the last updated timestamp we ran for."""
-    pgconn = get_dbconn("mesosite")
-    cursor = pgconn.cursor()
+    pgconn, cursor = get_dbconnc("mesosite")
     cursor.execute(
         "SELECT propvalue from properties where propname = %s",
         (PROPERTY_NAME,),
@@ -48,14 +45,13 @@ def get_first_updated():
         LOG.warning("iem property %s is not set, abort!", PROPERTY_NAME)
         sys.exit()
 
-    dt = datetime.datetime.strptime(cursor.fetchone()[0], ISO9660)
+    dt = datetime.datetime.strptime(cursor.fetchone()["propvalue"], ISO9660)
     return dt.replace(tzinfo=datetime.timezone.utc)
 
 
 def set_last_updated(value):
     """Update the database."""
-    pgconn = get_dbconn("mesosite")
-    cursor = pgconn.cursor()
+    pgconn, cursor = get_dbconnc("mesosite")
     cursor.execute(
         "UPDATE properties SET propvalue = %s where propname = %s",
         (value.strftime(ISO9660), PROPERTY_NAME),
@@ -89,8 +85,7 @@ def compute_time(argv):
 
 def do_insert(source_cursor, reset_times, madis):
     """Insert the rows into the archive."""
-    pgconn = get_dbconn("asos")
-    cursor = pgconn.cursor()
+    pgconn, cursor = get_dbconnc("asos")
 
     (inserts, skips, locked, deletes) = (0, 0, 0, 0)
     for row in source_cursor:
@@ -209,8 +204,7 @@ def main():
     last_updated = utc()
     reset_times = build_reset_times()
     first_updated = get_first_updated()
-    iempgconn = get_dbconn("iem")
-    icursor = iempgconn.cursor(cursor_factory=psycopg2.extras.RealDictCursor)
+    iempgconn, icursor = get_dbconnc("iem")
 
     LOG.info(
         "Processing %s thru %s",

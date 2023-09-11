@@ -7,9 +7,8 @@ import os
 import subprocess
 import zipfile
 
-import psycopg2.extras
 import shapefile
-from pyiem.util import get_dbconn, logger, utc
+from pyiem.util import get_dbconnc, logger, utc
 
 LOG = logger()
 INFORMATION = """
@@ -94,8 +93,7 @@ def shpschema():
 
 def main():
     """Go Main Go"""
-    pgconn = get_dbconn("radar")
-    pcursor = pgconn.cursor(cursor_factory=psycopg2.extras.RealDictCursor)
+    pgconn, pcursor = get_dbconnc("radar")
 
     os.chdir("/tmp")
 
@@ -168,7 +166,7 @@ def main():
             0,
             0,
         )
-
+    pgconn.close()
     shp.close()
     with zipfile.ZipFile(
         "current_nexattr.zip", "w", zipfile.ZIP_DEFLATED

@@ -231,7 +231,7 @@ def load_data(ctx, basets, endts):
             sum(snow) as val, ST_x(geom) as lon, ST_y(geom) as lat,
             ST_Transform(geom, 2163) as geo
             from summary s JOIN stations t on (s.iemid = t.iemid)
-            WHERE s.day in :days
+            WHERE s.day = ANY(:days)
             and (t.network ~* 'COOP' or t.network = 'IACOCORAHS')
             and snow >= 0 and
             coop_valid >= :basets and coop_valid <= :endts
@@ -241,7 +241,7 @@ def load_data(ctx, basets, endts):
             ),
             conn,
             params={
-                "days": tuple(days),
+                "days": days,
                 "basets": basets,
                 "endts": endts,
             },

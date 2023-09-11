@@ -118,8 +118,8 @@ def get_df(ctx):
     params2 = NASS_CROP_PROGRESS_LOOKUP[varname]
     params = {}
     if isinstance(params2, list):
-        dlimit = " short_desc in :dlimit "
-        params["dlimit"] = tuple(params2)
+        dlimit = " short_desc = ANY(:dlimit) "
+        params["dlimit"] = params2
     else:
         dlimit = " short_desc = :dlimit "
         params["dlimit"] = params2

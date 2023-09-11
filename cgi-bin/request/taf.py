@@ -24,13 +24,13 @@ def run(start_response, ctx):
             sknt, drct, gust, visibility,
             presentwx, skyc, skyl, ws_level, ws_drct, ws_sknt, product_id
             from taf t JOIN taf_forecast f on (t.id = f.taf_id)
-            WHERE t.station in :stations and f.valid >= :sts
+            WHERE t.station = ANY(:stations) and f.valid >= :sts
             and f.valid < :ets order by t.valid
             """
             ),
             dbconn,
             params={
-                "stations": tuple(ctx["stations"]),
+                "stations": ctx["stations"],
                 "sts": ctx["sts"],
                 "ets": ctx["ets"],
             },

@@ -74,7 +74,7 @@ def plotter(fdict):
     station = ctx["zstation"]
     offset = 0
     if ctx["month"] == "all":
-        months = range(1, 13)
+        months = list(range(1, 13))
         offset = 3
     elif ctx["month"] == "fall":
         months = [9, 10, 11]
@@ -99,7 +99,7 @@ def plotter(fdict):
                 as year,
             min(feel) as min_feel, max(feel) as max_feel
             from alldata WHERE station = :station and {additive}
-            and extract(month from valid) in :months
+            and extract(month from valid) = ANY(:months)
             GROUP by year ORDER by year ASC
         """
             ),
@@ -107,7 +107,7 @@ def plotter(fdict):
             params={
                 "offset": offset,
                 "station": station,
-                "months": tuple(months),
+                "months": months,
             },
             index_col="year",
         )

@@ -146,17 +146,15 @@ def plotter(fdict):
             SELECT phenomena ||'.'|| significance as key,
             issue at time zone 'UTC' as utc_issue,
             expire at time zone 'UTC' as utc_expire, eventid
-            from warnings where ugc in :ugcs and issue < :ets
+            from warnings where ugc = ANY(:ugcs) and issue < :ets
             and expire > :sts ORDER by issue ASC"""
             ),
             conn,
             params={
-                "ugcs": tuple(
-                    [
-                        ctx["_nt"].sts[station]["ugc_zone"],
-                        ctx["_nt"].sts[station]["ugc_county"],
-                    ]
-                ),
+                "ugcs": [
+                    ctx["_nt"].sts[station]["ugc_zone"],
+                    ctx["_nt"].sts[station]["ugc_county"],
+                ],
                 "sts": sts,
                 "ets": ets,
             },

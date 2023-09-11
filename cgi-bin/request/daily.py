@@ -49,11 +49,11 @@ def get_climate(network, stations):
             SELECT station, to_char(valid, 'mmdd') as sday,
             high as climo_high_f, low as climo_low_f,
             precip as climo_precip_in from ncei_climate91
-            where station in :clisites
+            where station = ANY(:clisites)
             """
             ),
             conn,
-            params={"clisites": tuple(clisites)},
+            params={"clisites": clisites},
         )
     return df
 
@@ -94,11 +94,11 @@ def get_data(network, sts, ets, stations, cols, na, fmt):
             from summary s JOIN stations t
             on (t.iemid = s.iemid) WHERE
             s.day >= :st and s.day <= :et and
-            t.network = :n and t.id in :ds
+            t.network = :n and t.id = ANY(:ds)
             ORDER by day ASC"""
             ),
             conn,
-            params={"st": sts, "et": ets, "n": network, "ds": tuple(stations)},
+            params={"st": sts, "et": ets, "n": network, "ds": stations},
         )
     # Join to climate data frame
     df = df.merge(

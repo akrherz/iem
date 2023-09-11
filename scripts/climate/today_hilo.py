@@ -1,10 +1,9 @@
 """ Generate a map of today's average high and low temperature"""
 import datetime
 
-import psycopg2.extras
 from pyiem.network import Table as NetworkTable
 from pyiem.plot import MapPlot
-from pyiem.util import get_dbconn
+from pyiem.util import get_dbconnc
 
 
 def main():
@@ -14,10 +13,9 @@ def main():
     nt = NetworkTable("IACLIMATE")
     nt.sts["IA0200"]["lon"] = -93.6
     nt.sts["IA5992"]["lat"] = 41.65
-    coop = get_dbconn("coop")
+    pgconn, cursor = get_dbconnc("coop")
 
     obs = []
-    cursor = coop.cursor(cursor_factory=psycopg2.extras.RealDictCursor)
     cursor.execute(
         "SELECT station, high, low from climate WHERE valid = %s "
         "and substr(station,0,3) = 'IA'",
@@ -36,6 +34,7 @@ def main():
                 dwpf=row["low"],
             )
         )
+    pgconn.close()
 
     mp = MapPlot(
         title=("Average High + Low Temperature [F] (1893-%s)") % (today.year,),

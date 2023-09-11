@@ -43,8 +43,6 @@ pillow
 pip
 # for psql and friends
 postgresql
-# important
-psycopg2
 # for pyiem
 pyarrow
 # lots of places

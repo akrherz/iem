@@ -31,9 +31,9 @@ PDICT2 = {
 }
 
 MONTH_DOMAIN = {
-    "spring_below": range(1, 7),
-    "fall_below": range(1, 13),
-    "high_above": range(1, 13),
+    "spring_below": list(range(1, 7)),
+    "fall_below": list(range(1, 13)),
+    "high_above": list(range(1, 13)),
 }
 SQLOPT = {
     "spring_below": " low < :t ",
@@ -158,7 +158,7 @@ def plotter(fdict):
                 SELECT station, day, year, high, low,
                 case when month < 7 then year - 1 else year end as winter_year,
                 extract(doy from day) as doy
-                from alldata_{sector} WHERE month in :months and
+                from alldata_{sector} WHERE month = ANY(:months) and
                 substr(station, 3, 4) != '0000'
                 and substr(station, 3, 1) not in ('C', 'D', 'T')
             )
@@ -175,7 +175,7 @@ def plotter(fdict):
             ),
             conn,
             params={
-                "months": tuple(MONTH_DOMAIN[varname]),
+                "months": MONTH_DOMAIN[varname],
                 "t": threshold,
                 "syear": syear,
                 "eyear": eyear,

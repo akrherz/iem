@@ -174,9 +174,9 @@ def plotter(fdict):
         ]
     if month != "all":
         date_limiter = (
-            f" and extract(month from issue) in :months {date_limiter}"
+            f" and extract(month from issue) = ANY(:months) {date_limiter}"
         )
-    params["months"] = tuple(months)
+    params["months"] = list(months)
     title3 = "" if month == "all" else f" [{MDICT[month]}]"
 
     sqllimiter = ""
@@ -271,6 +271,7 @@ def plotter(fdict):
                 params=params,
                 index_col="threshold",
             )
+    conn.close()
     if df.empty:
         raise NoDataFound("No Results For Query.")
     df["date"] = pd.to_datetime(

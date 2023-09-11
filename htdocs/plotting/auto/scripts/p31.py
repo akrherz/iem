@@ -207,7 +207,7 @@ def plotter(fdict):
             (ORDER by day ASC rows between :days PRECEDING and 1 PRECEDING)
             as trailing_stat
         from alldata where station = :station)
-        SELECT * from data WHERE month in :months and year >= :syear
+        SELECT * from data WHERE month = ANY(:months) and year >= :syear
             and year <= :eyear ORDER by day ASC
         """
             ),
@@ -218,7 +218,7 @@ def plotter(fdict):
                 "f3": fdays - 1,
                 "days": days,
                 "station": station,
-                "months": tuple(months),
+                "months": months,
                 "syear": syear,
                 "eyear": eyear,
             },

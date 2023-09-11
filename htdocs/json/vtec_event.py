@@ -2,9 +2,8 @@
 import datetime
 import json
 
-import psycopg2.extras
 from paste.request import parse_formvars
-from pyiem.util import get_dbconn, html_escape
+from pyiem.util import get_dbconnc, html_escape
 from pymemcache.client import Client
 
 ISO9660 = "%Y-%m-%dT%H:%M:%SZ"
@@ -12,8 +11,7 @@ ISO9660 = "%Y-%m-%dT%H:%M:%SZ"
 
 def run(wfo, year, phenomena, significance, etn):
     """Do great things"""
-    pgconn = get_dbconn("postgis")
-    cursor = pgconn.cursor(cursor_factory=psycopg2.extras.RealDictCursor)
+    pgconn, cursor = get_dbconnc("postgis")
 
     # This is really a BUG here and we need to rearch the database
     cursor.execute(
@@ -41,6 +39,7 @@ def run(wfo, year, phenomena, significance, etn):
         "wfo": wfo,
     }
     if cursor.rowcount == 0:
+        pgconn.close()
         return json.dumps(res)
 
     row = cursor.fetchone()
@@ -89,7 +88,7 @@ def run(wfo, year, phenomena, significance, etn):
                 "utc_updated": row["utc_updated"].strftime(ISO9660),
             }
         )
-
+    pgconn.close()
     return json.dumps(res)
 
 

@@ -3,10 +3,9 @@ import datetime
 import json
 from zoneinfo import ZoneInfo
 
-import psycopg2.extras
 from paste.request import parse_formvars
 from pyiem.reference import TRACE_VALUE
-from pyiem.util import get_dbconn, html_escape
+from pyiem.util import get_dbconnc, html_escape
 from pymemcache.client import Client
 
 
@@ -35,8 +34,7 @@ def router(group, ts):
 
 def run_azos(ts):
     """Get the data please"""
-    pgconn = get_dbconn("iem")
-    cursor = pgconn.cursor(cursor_factory=psycopg2.extras.RealDictCursor)
+    pgconn, cursor = get_dbconnc("iem")
 
     utcnow = datetime.datetime.utcnow()
     # Now we have the tricky work of finding what 7 AM is
@@ -71,14 +69,13 @@ def run_azos(ts):
                 ),
             )
         )
-
+    pgconn.close()
     return json.dumps(res)
 
 
 def run(ts):
     """Actually do the hard work of getting the current SPS in geojson"""
-    pgconn = get_dbconn("iem")
-    cursor = pgconn.cursor(cursor_factory=psycopg2.extras.RealDictCursor)
+    pgconn, cursor = get_dbconnc("iem")
 
     utcnow = datetime.datetime.utcnow()
 
@@ -121,7 +118,7 @@ def run(ts):
                 ),
             )
         )
-
+    pgconn.close()
     return json.dumps(res)
 
 

@@ -58,15 +58,17 @@ def get_data(ctx, meta):
         raise NoDataFound("Failed to find any one-minute data, sorry.")
     obsdf["inwarn"] = False
     obsdf["nearwarn"] = False
-    phenomenas = ("TO", "SV")
+    phenomenas = ["TO", "SV"]
     if ctx["w"] == "ffw":
-        phenomenas = ("FF",)
+        phenomenas = [
+            "FF",
+        ]
     with get_sqlalchemy_conn("postgis") as conn:
         warndf = pd.read_sql(
             text(
                 """
             SELECT issue, expire from sbw WHERE issue > '2002-01-01' and
-            phenomena in :ph and significance = 'W' and
+            phenomena = ANY(:ph) and significance = 'W' and
             status = 'NEW' and ST_Contains(geom,
             GeomFromEWKT('SRID=4326;POINT(:lon :lat)'))
             ORDER by issue ASC

@@ -6,8 +6,7 @@ from io import StringIO
 from zoneinfo import ZoneInfo
 
 from paste.request import parse_formvars
-from psycopg2.extras import RealDictCursor
-from pyiem.util import get_dbconn, utc
+from pyiem.util import get_dbconnc, utc
 
 LOLA = re.compile(r"(?P<lon>[0-9\.\-]+) (?P<lat>[0-9\.\-]+)")
 SQLISO = "YYYY-MM-DDThh24:MI:SSZ"
@@ -86,8 +85,7 @@ def application(environ, start_response):
     grversion = float(form.get("version", 1.0))
     is_all = "all" in form
     phenoms = ["TO", "SV"] if is_all else ["TO"]
-    pgconn = get_dbconn("postgis")
-    cursor = pgconn.cursor(cursor_factory=RealDictCursor)
+    pgconn, cursor = get_dbconnc("postgis")
     valid = utc()
     refresh = 60
     if "valid" in form:
@@ -105,17 +103,17 @@ def application(environ, start_response):
         t2 = valid + datetime.timedelta(hours=2)
         tmlabel = valid.strftime("%b %d %Y %H%Mz")
     cursor.execute(
-        "SELECT ST_x(tml_geom) as lon, ST_y(tml_geom) as lat, "
-        "ST_AsText(tml_geom_line) as line, "
-        "tml_valid, tml_direction, tml_sknt, "
-        "polygon_begin, polygon_end, eventid, wfo, phenomena, "
-        f"to_char(polygon_begin at time zone 'UTC', '{SQLISO}') as iso_begin, "
-        f"to_char(polygon_end at time zone 'UTC', '{SQLISO}') as iso_end "
-        f"from sbw_{valid.year} WHERE polygon_end > %s and "
-        "polygon_begin < %s and phenomena in %s "
-        "and tml_direction is not null and status != 'CAN' and "
-        "polygon_end > polygon_begin",
-        (t1, t2, tuple(phenoms)),
+        f"""SELECT ST_x(tml_geom) as lon, ST_y(tml_geom) as lat,
+        ST_AsText(tml_geom_line) as line,
+        tml_valid, tml_direction, tml_sknt,
+        polygon_begin, polygon_end, eventid, wfo, phenomena,
+        to_char(polygon_begin at time zone 'UTC', '{SQLISO}') as iso_begin,
+        to_char(polygon_end at time zone 'UTC', '{SQLISO}') as iso_end
+        from sbw_{valid.year} WHERE polygon_end > %s and
+        polygon_begin < %s and phenomena = ANY(%s)
+        and tml_direction is not null and status != 'CAN' and
+        polygon_end > polygon_begin""",
+        (t1, t2, phenoms),
     )
     sio = StringIO()
     label = "TOR+SVR" if is_all else "TOR"
@@ -127,6 +125,6 @@ def application(environ, start_response):
     )
     for row in cursor:
         gentext(sio, row, grversion)
-
+    pgconn.close()
     start_response("200 OK", [("Content-type", "text/plain")])
     return [sio.getvalue().encode("utf-8")]

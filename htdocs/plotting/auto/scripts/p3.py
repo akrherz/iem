@@ -220,7 +220,7 @@ def get_context(fdict):
         months = [6, 7, 8]
         label = "Summer (JJA)"
     elif month == "year":
-        months = range(1, 13)
+        months = list(range(1, 13))
         label = "Calendar Year"
     else:
         months = [int(month)]
@@ -247,7 +247,7 @@ def get_context(fdict):
         agg as (
             SELECT myyear, avg(dhigh) as dhigh, avg(dlow) as dlow,
             avg(dtemp) as dtemp from day2day
-            WHERE month in :months GROUP by myyear),
+            WHERE month = ANY(:months) GROUP by myyear),
         agg2 as (
             SELECT
             extract(year from day + '{lag}'::interval)::int / {decagg}
@@ -277,7 +277,7 @@ def get_context(fdict):
             sum(case when o.precip >= :t then 1 else 0 end)
                 as "days-precip-above"
             from alldata o JOIN climo c on (o.sday = c.sday)
-        where station = :station and month in :months GROUP by myyear)
+        where station = :station and month = ANY(:months) GROUP by myyear)
 
         SELECT b.*, a.dhigh as "delta-high", a.dlow as "delta-low",
         a.dtemp as "delta-temp" from agg a JOIN agg2 b
@@ -290,7 +290,7 @@ def get_context(fdict):
             params={
                 "ncei": ctx["_nt"].sts[station]["ncei91"],
                 "station": station,
-                "months": tuple(months),
+                "months": months,
                 "t": threshold,
                 "syear": ctx["syear"],
                 "eyear": ctx["eyear"],
@@ -417,13 +417,4 @@ def plotter(fdict):
 
 
 if __name__ == "__main__":
-    plotter(
-        dict(
-            station="IATDSM",
-            network="IACLIMATE",
-            type="max-high",
-            month="11",
-            threshold=-99,
-            decadal="yes",
-        )
-    )
+    plotter({})

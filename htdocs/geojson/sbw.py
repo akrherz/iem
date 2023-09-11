@@ -3,16 +3,14 @@ import datetime
 import json
 from zoneinfo import ZoneInfo
 
-import psycopg2.extras
 from paste.request import parse_formvars
-from pyiem.util import get_dbconn, html_escape
+from pyiem.util import get_dbconnc, html_escape
 from pymemcache.client import Client
 
 
 def run(ts):
     """Actually do the hard work of getting the current SBW in geojson"""
-    pgconn = get_dbconn("postgis")
-    cursor = pgconn.cursor(cursor_factory=psycopg2.extras.RealDictCursor)
+    pgconn, cursor = get_dbconnc("postgis")
 
     if ts == "":
         utcnow = datetime.datetime.utcnow().replace(tzinfo=ZoneInfo("UTC"))
@@ -70,7 +68,7 @@ def run(ts):
                 geometry=json.loads(row["geojson"]),
             )
         )
-
+    pgconn.close()
     return json.dumps(res)
 
 

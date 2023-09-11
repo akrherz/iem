@@ -5,11 +5,10 @@ from zoneinfo import ZoneInfo
 
 import matplotlib.dates as mdates
 import numpy as np
-import psycopg2.extras
 from paste.request import parse_formvars
 from pyiem.network import Table as NetworkTable
 from pyiem.plot.use_agg import plt
-from pyiem.util import get_dbconn
+from pyiem.util import get_dbconnc
 
 
 def application(environ, start_response):
@@ -49,8 +48,7 @@ def application(environ, start_response):
         start_response("200 OK", [("Content-type", "text/plain")])
         return [b"ERROR"]
 
-    pgconn = get_dbconn("other")
-    icursor = pgconn.cursor(cursor_factory=psycopg2.extras.RealDictCursor)
+    pgconn, icursor = get_dbconnc("other")
 
     icursor.execute(
         "SELECT * from asi_data WHERE station = %s and "
@@ -65,7 +63,7 @@ def application(environ, start_response):
         for i in range(1, 13):
             data[f"ch{i}avg"].append(row[f"ch{i}avg"])
         valid.append(row["valid"])
-
+    pgconn.close()
     for i in range(1, 13):
         data[f"ch{i}avg"] = np.array(data[f"ch{i}avg"])
 

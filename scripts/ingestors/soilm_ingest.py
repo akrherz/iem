@@ -14,7 +14,6 @@ from zoneinfo import ZoneInfo
 
 import numpy as np
 import pandas as pd
-import psycopg2
 from metpy.calc import dewpoint_from_relative_humidity
 from metpy.units import units
 from pyiem.observation import Observation
@@ -401,7 +400,7 @@ def common_df_logic(filename, maxts, nwsli, tablename):
     icursor = ISUAG.cursor()
     try:
         icursor.copy_from(output, tablename, columns=df.columns, null="")
-    except psycopg2.errors.UniqueViolation as exp:  # pylint: disable=no-member
+    except Exception as exp:
         LOG.exception(exp)
         icursor.close()
         return None

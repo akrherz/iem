@@ -86,7 +86,7 @@ def plotter(fdict):
     hour = ctx["hour"]
 
     if month == "all":
-        months = range(1, 13)
+        months = list(range(1, 13))
     elif month == "fall":
         months = [9, 10, 11]
     elif month == "winter":
@@ -111,7 +111,7 @@ def plotter(fdict):
             tmpf::int as itmpf, dwpf::int as idwpf from alldata
             where station = :station and tmpf is not null
             and dwpf is not null and
-            extract(month from valid at time zone :tzname) in :months),
+            extract(month from valid at time zone :tzname) = ANY(:months)),
         agg1 as (
             SELECT date_trunc('hour', ts) as hts, avg(itmpf) as avg_itmpf,
             avg(idwpf) as avg_idwpf from obs
@@ -126,7 +126,7 @@ def plotter(fdict):
             params={
                 "tzname": ctx["_nt"].sts[station]["tzname"],
                 "station": station,
-                "months": tuple(months),
+                "months": months,
                 "hour": hour,
             },
             index_col="year",

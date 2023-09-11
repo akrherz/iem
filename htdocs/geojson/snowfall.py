@@ -2,10 +2,9 @@
 import datetime
 import json
 
-import psycopg2.extras
 from paste.request import parse_formvars
 from pyiem.reference import TRACE_VALUE
-from pyiem.util import get_dbconn, html_escape
+from pyiem.util import get_dbconnc, html_escape
 from pymemcache.client import Client
 
 json.encoder.FLOAT_REPR = lambda o: format(o, ".2f")
@@ -22,8 +21,7 @@ def sanitize(val):
 
 def get_data(ts):
     """Get the data for this timestamp"""
-    pgconn = get_dbconn("iem")
-    cursor = pgconn.cursor(cursor_factory=psycopg2.extras.RealDictCursor)
+    pgconn, cursor = get_dbconnc("iem")
     data = {"type": "FeatureCollection", "features": []}
     # Fetch the daily values
     cursor.execute(
@@ -55,6 +53,7 @@ def get_data(ts):
                 },
             }
         )
+    pgconn.close()
     return json.dumps(data)
 
 

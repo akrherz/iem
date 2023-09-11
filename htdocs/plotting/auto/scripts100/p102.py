@@ -84,8 +84,8 @@ def plotter(fdict):
             typetext_limiter = " and typetext = :tt "
             params["tt"] = ltype[0]
         else:
-            typetext_limiter = " and typetext in :tt"
-            params["tt"] = tuple(ltype)
+            typetext_limiter = " and typetext = ANY(:tt)"
+            params["tt"] = ltype
     with util.get_sqlalchemy_conn("postgis") as conn:
         df = pd.read_sql(
             text(

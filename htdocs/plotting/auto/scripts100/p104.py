@@ -110,9 +110,9 @@ def plotter(fdict):
         max(case when year = %s then t else -999 end) from
         (SELECT year, sum(precip) as p, avg((high+low)/2.) as t
         from alldata
-        WHERE station = %s and sday in %s GROUP by year) as foo
+        WHERE station = %s and sday = ANY(%s) GROUP by year) as foo
         """,
-            (now.year, now.year, station, tuple(sdays)),
+            (now.year, now.year, station, sdays),
         )
         row = cursor.fetchone()
         if row[0] is None:
@@ -124,6 +124,7 @@ def plotter(fdict):
         aligns.append(align[now.month % 2])
 
         now += interval
+    pgconn.close()
     df = pd.DataFrame(
         dict(
             psigma=pd.Series(psigma),

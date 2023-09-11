@@ -136,7 +136,6 @@ def plotter(fdict):
     station = ctx["station"]
     varname = ctx["varname"]
     year = ctx["year"]
-    sdays = []
     dtlimiter = (
         "(to_char(day, 'mmdd') >= :sday and to_char(day, 'mmdd') <= :eday)"
     )
@@ -184,7 +183,6 @@ def plotter(fdict):
             params={
                 "network": ctx["network"],
                 "station": station,
-                "sdays": tuple(sdays),
                 "sday": f"{ctx['sday']:%m%d}",
                 "eday": f"{ctx['eday']:%m%d}",
                 "start": datetime.date(ctx["syear"], 1, 1),

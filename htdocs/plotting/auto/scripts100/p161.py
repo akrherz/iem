@@ -107,7 +107,7 @@ def get_context(fdict):
 
     offset = "day"
     if month == "all":
-        months = range(1, 13)
+        months = list(range(1, 13))
     elif month == "fall":
         months = [9, 10, 11]
     elif month == "winter":
@@ -131,7 +131,7 @@ def get_context(fdict):
             sum(case when {varname}::int {opp} :t then 1 else 0 end) as count
             from summary s JOIN stations t on (s.iemid = t.iemid)
             WHERE t.id = :station and t.network = :network
-            and extract(month from day) in :months
+            and extract(month from day) = ANY(:months)
             and {varname} is not null
             GROUP by year ORDER by year ASC
             """
@@ -141,7 +141,7 @@ def get_context(fdict):
                 "t": threshold,
                 "station": station,
                 "network": ctx["network"],
-                "months": tuple(months),
+                "months": months,
             },
             index_col="year",
         )

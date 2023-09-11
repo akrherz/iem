@@ -4,10 +4,9 @@
 import datetime
 import sys
 
-import psycopg2.extras
 from pyiem.network import Table as NetworkTable
 from pyiem.plot import MapPlot
-from pyiem.util import get_dbconn
+from pyiem.util import get_dbconnc
 
 
 def runYear(year):
@@ -17,14 +16,13 @@ def runYear(year):
     nt = NetworkTable("IACLIMATE")
     nt.sts["IA0200"]["lon"] = -93.4
     nt.sts["IA5992"]["lat"] = 41.65
-    pgconn = get_dbconn("coop")
-    ccursor = pgconn.cursor(cursor_factory=psycopg2.extras.RealDictCursor)
+    pgconn, cursor = get_dbconnc("coop")
 
     lats = []
     lons = []
     vals = []
     labels = []
-    ccursor.execute(
+    cursor.execute(
         """
         SELECT station,
         sum(case when precip > 0.009 then 1 else 0 end) as days, max(day)
@@ -33,7 +31,7 @@ def runYear(year):
     """,
         (year,),
     )
-    for row in ccursor:
+    for row in cursor:
         sid = row["station"].upper()
         if sid not in nt.sts:
             continue
@@ -42,7 +40,7 @@ def runYear(year):
         lons.append(nt.sts[sid]["lon"])
         vals.append(row["days"])
         maxday = row["max"]
-
+    pgconn.close()
     mp = MapPlot(
         title="Days with Measurable Precipitation (%s)" % (year,),
         subtitle="Map valid January 1 - %s" % (maxday.strftime("%b %d")),

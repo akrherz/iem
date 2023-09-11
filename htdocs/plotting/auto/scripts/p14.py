@@ -9,10 +9,9 @@ import datetime
 
 import numpy as np
 import pandas as pd
-import psycopg2.extras
 from pyiem.exceptions import NoDataFound
 from pyiem.plot import figure_axes
-from pyiem.util import get_autoplot_context, get_dbconn
+from pyiem.util import get_autoplot_context, get_dbconnc
 
 
 def get_description():
@@ -38,8 +37,7 @@ def get_description():
 
 def plotter(fdict):
     """Go"""
-    pgconn = get_dbconn("coop")
-    cursor = pgconn.cursor(cursor_factory=psycopg2.extras.RealDictCursor)
+    pgconn, cursor = get_dbconnc("coop")
     ctx = get_autoplot_context(fdict, get_description())
     station = ctx["station"]
     today = datetime.datetime.now()
@@ -61,6 +59,7 @@ def plotter(fdict):
         (station, jdaylimit),
     )
     if cursor.rowcount == 0:
+        pgconn.close()
         raise NoDataFound("No Data Found.")
     total = None
     base = None
@@ -135,7 +134,7 @@ def plotter(fdict):
         for i in range(5):
             yearlybins[int(row[0]) - minyear, i] = row[f"bin{i}"]
             yearlytotals[int(row[0]) - minyear, i] = row[f"tot{i}"]
-
+    pgconn.close()
     avgs = np.average(yearlybins, 0)
     df["avg_days"] = avgs
     dlast = yearlybins[year - minyear, :]
@@ -230,4 +229,4 @@ def plotter(fdict):
 
 
 if __name__ == "__main__":
-    plotter({"station": "IA7708", "year": 2017, "network": "IACLIMATE"})
+    plotter({})

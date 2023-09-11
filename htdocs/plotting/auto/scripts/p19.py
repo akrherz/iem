@@ -81,7 +81,7 @@ def plotter(fdict):
     month = ctx["month"]
     year = ctx.get("year")
     if month == "all":
-        months = range(1, 13)
+        months = list(range(1, 13))
     elif month == "fall":
         months = [9, 10, 11]
     elif month == "winter":
@@ -99,10 +99,10 @@ def plotter(fdict):
             text(
                 "SELECT high, low, year, month from alldata "
                 "WHERE station = :station "
-                "and year > 1892 and high >= low and month in :months "
+                "and year > 1892 and high >= low and month = ANY(:months) "
             ),
             conn,
-            params={"station": station, "months": tuple(months)},
+            params={"station": station, "months": months},
             index_col=None,
         )
     if ddf.empty:

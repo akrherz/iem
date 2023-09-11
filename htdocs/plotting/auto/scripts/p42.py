@@ -16,7 +16,7 @@ import datetime
 import pandas as pd
 from pyiem.exceptions import NoDataFound
 from pyiem.plot import figure_axes
-from pyiem.util import get_autoplot_context, get_dbconn
+from pyiem.util import get_autoplot_context, get_dbconnc
 
 PDICT = {"above": "At or Above Threshold...", "below": "Below Threshold..."}
 PDICT2 = {
@@ -185,8 +185,7 @@ def compute_xlabels(ax):
 
 def plotter(fdict):
     """Go"""
-    pgconn = get_dbconn("asos")
-    cursor = pgconn.cursor()
+    pgconn, cursor = get_dbconnc("asos")
 
     ctx = get_autoplot_context(fdict, get_description())
     station = ctx["zstation"]
@@ -205,7 +204,7 @@ def plotter(fdict):
             f"valid < '{int(y2) + 1}-01-01' "
         )
     if month == "all":
-        months = range(1, 13)
+        months = list(range(1, 13))
     elif month == "fall":
         months = [9, 10, 11]
     elif month == "spring":
@@ -220,12 +219,12 @@ def plotter(fdict):
     rnd = 0 if varname not in ["mslp", "vsby"] else 2
     cursor.execute(
         f"""
-        SELECT valid, round({varname}::numeric,{rnd})
+        SELECT valid, round({varname}::numeric,{rnd}) as d
         from alldata where station = %s {year_limiter}
-        and {varname} is not null and extract(month from valid) in %s
+        and {varname} is not null and extract(month from valid) = ANY(%s)
         ORDER by valid ASC
         """,
-        (station, tuple(months)),
+        (station, months),
     )
     ab = ctx["_nt"].sts[station]["archive_begin"]
     if ab is None:
@@ -266,22 +265,23 @@ def plotter(fdict):
     (fig, ax) = figure_axes(title=title, subtitle=subtitle, apctx=ctx)
 
     for row in cursor:
-        if (month != "all" and year != row[0].year) or (
-            valid and (row[0] - valid[-1]) > datetime.timedelta(hours=3)
+        if (month != "all" and year != row["valid"].year) or (
+            valid and (row["valid"] - valid[-1]) > datetime.timedelta(hours=3)
         ):
-            year = row[0].year
+            year = row["valid"].year
             lines = plot(ax, interval, valid, tmpf, lines, mydir, month)
             valid = []
             tmpf = []
-        if lower <= row[1] < upper:
-            valid.append(row[0])
-            tmpf.append(row[1])
+        if lower <= row["d"] < upper:
+            valid.append(row["valid"])
+            tmpf.append(row["d"])
         else:
-            valid.append(row[0])
-            tmpf.append(row[1])
+            valid.append(row["valid"])
+            tmpf.append(row["d"])
             lines = plot(ax, interval, valid, tmpf, lines, mydir, month)
             valid = []
             tmpf = []
+    pgconn.close()
 
     lines = plot(ax, interval, valid, tmpf, lines, mydir, month)
     compute_xlabels(ax)

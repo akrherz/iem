@@ -2,14 +2,13 @@
 import datetime
 
 from pyiem.plot import MapPlot
-from pyiem.util import get_dbconn
+from pyiem.util import get_dbconnc
 
 
 def main():
     """Go Main Go"""
     now = datetime.date.today()
-    pgconn = get_dbconn("iem")
-    icursor = pgconn.cursor()
+    pgconn, icursor = get_dbconnc("iem")
 
     day1 = now.replace(day=1)
     day2 = (now + datetime.timedelta(days=35)).replace(day=1)
@@ -35,14 +34,15 @@ def main():
     labels = []
     icursor.execute(sql)
     for row in icursor:
-        if row[2] > (now.day / 3) or row[1] is None:
+        if row["missing"] > (now.day / 3) or row[1] is None:
             continue
 
-        sid = row[0]
+        sid = row["id"]
         labels.append(sid)
-        lats.append(row[4])
-        lons.append(row[3])
-        precip.append(row[1])
+        lats.append(row["lat"])
+        lons.append(row["lon"])
+        precip.append(row["precip"])
+    pgconn.close()
 
     mp = MapPlot(
         title="This Month's Precipitation [inch] (NWS COOP Network)",

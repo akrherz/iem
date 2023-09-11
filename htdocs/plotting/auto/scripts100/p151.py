@@ -192,7 +192,7 @@ def get_data(ctx):
     p2years = p2eyear - p2syear + 1
 
     if month == "all":
-        months = range(1, 13)
+        months = list(range(1, 13))
     elif month == "fall":
         months = [9, 10, 11]
     elif month == "winter":
@@ -234,7 +234,7 @@ def get_data(ctx):
             sum(case when {lcol} >= :t then 1 else 0 end) as days_low_above,
             sum(case when {lcol} < :t then 1 else 0 end) as days_low_below
             from {table} WHERE year >= :syear1 and year <= :eyear1
-            and month in :months GROUP by station, year),
+            and month = ANY(:months) GROUP by station, year),
         period2 as (
             SELECT station, year, sum({pcol}) as total_precip,
             avg(({hcol}+{lcol}) / 2.) as avg_temp, avg({hcol}) as avg_high,
@@ -246,7 +246,7 @@ def get_data(ctx):
             sum(case when {lcol} >= :t then 1 else 0 end) as days_low_above,
             sum(case when {lcol} < :t then 1 else 0 end) as days_low_below
             from {table} WHERE year >= :syear2 and year <= :eyear2
-            and month in :months GROUP by station, year),
+            and month = ANY(:months) GROUP by station, year),
         p1agg as (
             SELECT station, avg(total_precip) as precip,
             avg(avg_temp) as avg_temp, avg(avg_high) as avg_high,
@@ -301,7 +301,7 @@ def get_data(ctx):
                 "t": threshold,
                 "syear1": p1syear,
                 "eyear1": p1eyear,
-                "months": tuple(months),
+                "months": months,
                 "syear2": p2syear,
                 "eyear2": p2eyear,
                 "p1years": p1years,

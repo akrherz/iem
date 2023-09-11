@@ -132,7 +132,7 @@ def plotter(fdict):
     }
     month = ctx["month"]
     if month == "all":
-        months = range(1, 13)
+        months = list(range(1, 13))
     elif month == "fall":
         months = [9, 10, 11]
     elif month == "winter":
@@ -148,7 +148,9 @@ def plotter(fdict):
         # make sure it is length two for the trick below in SQL
         months = [ts.month]
     params = {
-        "ph": (phenomena,),
+        "ph": [
+            phenomena,
+        ],
         "sig": significance,
         "tzname": ctx["_nt"].sts[station]["tzname"],
     }
@@ -174,11 +176,11 @@ def plotter(fdict):
         f"({phenomena}.{significance})"
     )
     if ctx["c"] == "svrtor":
-        params["ph"] = ("SV", "TO")
+        params["ph"] = ["SV", "TO"]
         params["sig"] = "W"
         subtitle = "Severe T'Storm + Tornado Warnings"
     elif ctx["c"] == "svrtorffw":
-        params["ph"] = ("SV", "TO", "FF")
+        params["ph"] = ["SV", "TO", "FF"]
         params["sig"] = "W"
         subtitle = "Svr T'Storm + Tornado + Flash Flood Warnings"
 
@@ -188,7 +190,7 @@ def plotter(fdict):
         extract(month from issue)::int as mo,
         min(date(issue at time zone :tzname {offset})) as min_date,
         wfo, phenomena, significance, eventid
-        from warnings where phenomena in :ph and significance = :sig
+        from warnings where phenomena = ANY(:ph) and significance = :sig
         {wfo_limiter}
         GROUP by yr, mo, wfo, phenomena, significance, eventid
         ORDER by yr asc, mo asc
@@ -202,7 +204,7 @@ def plotter(fdict):
             min(date(issue at time zone :tzname {offset})) as min_date,
             substr(ugc, 1, 2) as state,
             wfo, phenomena, significance, eventid
-            from warnings where phenomena in :ph and significance = :sig
+            from warnings where phenomena = ANY(:ph) and significance = :sig
             GROUP by yr, mo, state, wfo, phenomena, significance, eventid
             ORDER by yr asc, mo asc
         """

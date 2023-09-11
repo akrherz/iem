@@ -113,7 +113,9 @@ def plotter(fdict):
     }
 
     params = {
-        "ph": (phenomena,),
+        "ph": [
+            phenomena,
+        ],
         "sig": significance,
         "tzname": ctx["_nt"].sts[station]["tzname"],
     }
@@ -134,11 +136,11 @@ def plotter(fdict):
         f"({phenomena}.{significance}) Issued by Year, Month"
     )
     if ctx["c"] == "svrtor":
-        params["ph"] = ("SV", "TO")
+        params["ph"] = ["SV", "TO"]
         params["sig"] = "W"
         subtitle = "Severe T'Storm + Tornado Warnings Issued by Year, Month"
     elif ctx["c"] == "svrtorffw":
-        params["ph"] = ("SV", "TO", "FF")
+        params["ph"] = ["SV", "TO", "FF"]
         params["sig"] = "W"
         subtitle = (
             "Svr T'Storm + Tornado + Flash Flood Warnings "
@@ -157,7 +159,8 @@ def plotter(fdict):
                 min(date(issue at time zone :tzname)) as min_date,
                 wfo,
                 phenomena, significance, eventid
-                from warnings where phenomena in :ph and significance = :sig
+                from warnings where phenomena = ANY(:ph)
+                and significance = :sig
                 {wfo_limiter}
                 GROUP by yr, mo, wfo, phenomena, significance, eventid
                 ORDER by yr asc, mo asc

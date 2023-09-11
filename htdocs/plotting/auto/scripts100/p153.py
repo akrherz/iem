@@ -134,7 +134,7 @@ def plotter(fdict):
     station = ctx["zstation"]
 
     if month == "all":
-        months = range(1, 13)
+        months = list(range(1, 13))
     elif month == "fall":
         months = [9, 10, 11]
     elif month == "winter":
@@ -152,7 +152,7 @@ def plotter(fdict):
     params = {
         "tzname": ctx["_nt"].sts[station]["tzname"],
         "station": station,
-        "months": tuple(months),
+        "months": months,
     }
     doylimiter = ""
     monlimiter = ""
@@ -169,7 +169,8 @@ def plotter(fdict):
         over = MDICT[month]
         if len(months) < 12:
             monlimiter = (
-                "and extract(month from valid at time zone :tzname) in :months"
+                "and extract(month from valid at time zone :tzname) "
+                "= ANY(:months)"
             )
     delta = 10 if varname != "max_p01i" else -1
     with get_sqlalchemy_conn("asos") as conn:

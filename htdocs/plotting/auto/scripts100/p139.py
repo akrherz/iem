@@ -127,7 +127,7 @@ def plotter(fdict):
     month = ctx["month"]
 
     if month == "all":
-        months = range(1, 13)
+        months = list(range(1, 13))
     elif month == "fall":
         months = [9, 10, 11]
     elif month == "winter":
@@ -151,7 +151,7 @@ def plotter(fdict):
             max_tmpf::int - min_tmpf::int as difference
             from summary s JOIN stations t on (s.iemid = t.iemid)
             where t.id = :station and t.network = :network
-            and extract(month from day) in :months
+            and extract(month from day) = ANY(:months)
             and max_tmpf is not null and min_tmpf is not null
             ORDER by difference {order}, date DESC LIMIT 50
         """
@@ -160,7 +160,7 @@ def plotter(fdict):
             params={
                 "station": station,
                 "network": ctx["network"],
-                "months": tuple(months),
+                "months": months,
             },
             parse_dates=("date",),
             index_col=None,

@@ -2,11 +2,10 @@
 import datetime
 import json
 
-import psycopg2.extras
 from paste.request import parse_formvars
 from pyiem.network import Table as NetworkTable
 from pyiem.tracker import loadqc
-from pyiem.util import convert_value, drct2text, get_dbconn, utc
+from pyiem.util import convert_value, drct2text, get_dbconnc, utc
 
 
 def safe_t(val, units="degC"):
@@ -49,9 +48,8 @@ def compute_plant_water(row):
     return safe(val, 2)
 
 
-def get_inversion_data(pgconn, ts):
+def get_inversion_data(cursor, ts):
     """Retrieve inversion data."""
-    cursor = pgconn.cursor(cursor_factory=psycopg2.extras.RealDictCursor)
     nt = NetworkTable("ISUSM", only_online=False)
     data = {"type": "FeatureCollection", "features": []}
     cursor.execute(
@@ -83,9 +81,8 @@ def get_inversion_data(pgconn, ts):
     return json.dumps(data)
 
 
-def get_data(pgconn, ts):
+def get_data(cursor, ts):
     """Get the data for this timestamp"""
-    cursor = pgconn.cursor(cursor_factory=psycopg2.extras.RealDictCursor)
     qcdict = loadqc()
     nt = NetworkTable("ISUSM", only_online=False)
     data = {"type": "FeatureCollection", "features": []}
@@ -247,11 +244,10 @@ def application(environ, start_response):
         fmt = "%Y-%m-%dT%H:%M:%S.000Z" if len(dt) == 24 else "%Y-%m-%dT%H:%MZ"
         ts = datetime.datetime.strptime(dt, fmt)
         ts = ts.replace(tzinfo=datetime.timezone.utc)
-    with get_dbconn("isuag") as pgconn:
-        func = (
-            get_data if field.get("inversion") is None else get_inversion_data
-        )
-        data = func(pgconn, ts)
+    pgconn, cursor = get_dbconnc("isuag")
+    func = get_data if field.get("inversion") is None else get_inversion_data
+    data = func(cursor, ts)
+    pgconn.close()
 
     start_response("200 OK", headers)
     return [data.encode("ascii")]

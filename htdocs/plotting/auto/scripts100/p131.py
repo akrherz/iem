@@ -79,7 +79,7 @@ def plotter(fdict):
     hour = ctx.get("hour")
 
     if month == "all":
-        months = range(1, 13)
+        months = list(range(1, 13))
     elif month == "fall":
         months = [9, 10, 11]
     elif month == "winter":
@@ -89,7 +89,7 @@ def plotter(fdict):
     elif month == "summer":
         months = [6, 7, 8]
     else:
-        ts = datetime.datetime.strptime("2000-" + month + "-01", "%Y-%b-%d")
+        ts = datetime.datetime.strptime(f"2000-{month}-01", "%Y-%b-%d")
         # make sure it is length two for the trick below in SQL
         months = [ts.month, 999]
 
@@ -103,8 +103,8 @@ def plotter(fdict):
                     or skyc4 = :v) then 1 else 0 end) as hits,
                 count(*)
                 from alldata where station = :station
-                and tmpf is not null and extract(month from valid) in :months
-                and report_type = 3
+                and tmpf is not null and
+                extract(month from valid) = ANY(:months) and report_type = 3
                 GROUP by t ORDER by t ASC
                 """
                 ),
@@ -112,7 +112,7 @@ def plotter(fdict):
                 params={
                     "v": varname,
                     "station": station,
-                    "months": tuple(months),
+                    "months": months,
                 },
                 index_col=None,
             )
@@ -126,7 +126,8 @@ def plotter(fdict):
                     or skyc4 = :v) then 1 else 0 end) as hits,
                 count(*)
                 from alldata where station = :station
-                and tmpf is not null and extract(month from valid) in :months
+                and tmpf is not null and
+                extract(month from valid) = ANY(:months)
                 and extract(hour from ((valid +
                     '10 minutes'::interval) at time zone :tzname)) = :hour
                 and report_type = 3
@@ -137,7 +138,7 @@ def plotter(fdict):
                 params={
                     "v": varname,
                     "station": station,
-                    "months": tuple(months),
+                    "months": months,
                     "tzname": ctx["_nt"].sts[station]["tzname"],
                     "hour": hour,
                 },

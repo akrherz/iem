@@ -25,8 +25,8 @@ def main(network):
 
     acursor.execute(
         "SELECT station, min(date(valid)), max(date(valid)) from alldata "
-        "WHERE station in %s GROUP by station ORDER by min ASC",
-        (tuple(ids),),
+        "WHERE station = ANY(%s) GROUP by station ORDER by min ASC",
+        (ids,),
     )
     for row in acursor:
         station = row[0]

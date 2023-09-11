@@ -2,16 +2,14 @@
 import datetime
 import json
 
-import psycopg2.extras
 from paste.request import parse_formvars
-from pyiem.util import get_dbconn, html_escape
+from pyiem.util import get_dbconnc, html_escape
 from pymemcache.client import Client
 
 
 def run(network, only_online):
     """Generate a GeoJSON dump of the provided network"""
-    pgconn = get_dbconn("mesosite")
-    cursor = pgconn.cursor(cursor_factory=psycopg2.extras.RealDictCursor)
+    pgconn, cursor = get_dbconnc("mesosite")
 
     # One off special
     if network in ["ASOS1MIN", "TAF"]:
@@ -84,7 +82,7 @@ def run(network, only_online):
                 geometry=json.loads(row["geojson"]),
             )
         )
-
+    pgconn.close()
     return json.dumps(res)
 
 

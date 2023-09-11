@@ -4,15 +4,13 @@ import os
 import subprocess
 import zipfile
 
-import psycopg2.extras
 import shapefile
 from pyiem.util import get_dbconn
 
 
 def main():
     """Go main!"""
-    pgconn = get_dbconn("iem")
-    icursor = pgconn.cursor(cursor_factory=psycopg2.extras.RealDictCursor)
+    pgconn, icursor = get_dbconn("iem")
 
     now = datetime.datetime.now()
     ts = now.strftime("%Y%m%d")

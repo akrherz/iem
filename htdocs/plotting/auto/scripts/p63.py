@@ -10,10 +10,9 @@ expect to set 365 records the first year, 183 the second, and so on...
 import datetime
 
 import pandas as pd
-import psycopg2.extras
 from pyiem.exceptions import NoDataFound
 from pyiem.plot import figure
-from pyiem.util import get_autoplot_context, get_dbconn
+from pyiem.util import get_autoplot_context, get_dbconnc
 
 
 def get_description():
@@ -33,14 +32,13 @@ def get_description():
 
 def plotter(fdict):
     """Go"""
-    pgconn = get_dbconn("coop")
-    cursor = pgconn.cursor(cursor_factory=psycopg2.extras.RealDictCursor)
     ctx = get_autoplot_context(fdict, get_description())
     station = ctx["station"]
 
     sts = ctx["_nt"].sts[station]["archive_begin"]
     if sts is None:
         raise NoDataFound("Station metadata unknown.")
+    pgconn, cursor = get_dbconnc("coop")
     syear = sts.year if sts.month == 1 and sts.day == 1 else (sts.year + 1)
     syear = max(syear, 1893)
     eyear = datetime.datetime.now().year
@@ -84,7 +82,7 @@ def plotter(fdict):
         if low < lrecords[sday]:
             lrecords[sday] = low
             lyears[year - syear - 1] += 1
-
+    pgconn.close()
     years = range(syear + 1, eyear + 1)
     for i, year in enumerate(years):
         expect[i] = 365.0 / float(year - syear + 1)

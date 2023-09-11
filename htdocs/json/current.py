@@ -1,16 +1,14 @@
 """Current Observation for a station and network"""
 import json
 
-import psycopg2.extras
 from paste.request import parse_formvars
-from pyiem.util import get_dbconn, html_escape, utc
+from pyiem.util import get_dbconnc, html_escape, utc
 from pymemcache.client import Client
 
 
 def run(network, station):
     """Get last ob!"""
-    pgconn = get_dbconn("iem")
-    cursor = pgconn.cursor(cursor_factory=psycopg2.extras.RealDictCursor)
+    pgconn, cursor = get_dbconnc("iem")
     cursor.execute(
         """
     WITH mystation as (SELECT * from stations where id = %s and network = %s),
@@ -25,8 +23,10 @@ def run(network, station):
         (station, network),
     )
     if cursor.rowcount == 0:
+        pgconn.close()
         return "{}"
     row = cursor.fetchone()
+    pgconn.close()
     data = {}
     data["server_gentime"] = utc().strftime("%Y-%m-%dT%H:%M:%SZ")
     data["id"] = station

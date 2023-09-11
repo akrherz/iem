@@ -6,19 +6,16 @@ import datetime
 import sys
 
 # third party
-import psycopg2.extras
-from pyiem.util import get_dbconn, logger, utc
+from pyiem.util import get_dbconnc, logger, utc
 
 LOG = logger()
-OTHER = get_dbconn("other")
-IEM = get_dbconn("iem")
 
 
 def dowork(ts, ts2):
     """Process between these two timestamps please"""
     # Delete any obs from yesterday
-    ocursor = OTHER.cursor(cursor_factory=psycopg2.extras.RealDictCursor)
-    icursor = IEM.cursor(cursor_factory=psycopg2.extras.RealDictCursor)
+    OTHER, ocursor = get_dbconnc("other")
+    IEM, icursor = get_dbconnc("iem")
     ocursor.execute(
         "DELETE from alldata WHERE valid >= %s and valid < %s", (ts, ts2)
     )

@@ -165,7 +165,7 @@ def plotter(fdict):
     opt = ctx["opt"]
     month = ctx["month"]
     if month == "all":
-        months = range(1, 13)
+        months = list(range(1, 13))
     elif month == "fall":
         months = [9, 10, 11]
     elif month == "winter":
@@ -188,7 +188,7 @@ def plotter(fdict):
     else:
         title = MDICT[month]
     params = {}
-    dtlimiter = "extract(month from valid) in :months"
+    dtlimiter = "extract(month from valid) = ANY(:months)"
     if ctx.get("sdate") is not None and ctx.get("edate") is not None:
         if ctx["sdate"] > ctx["edate"]:
             dtlimiter = "(valid >= :sdate or valid <= :edate)"
@@ -213,7 +213,7 @@ def plotter(fdict):
             "b2": bnds[2],
             "b3": bnds[1],
             "b4": bnds[3],
-            "months": tuple(months),
+            "months": months,
         }
     )
 

@@ -119,7 +119,7 @@ def get_data(ctx):
         varname = "pwater_mm"
     level = ctx["level"]
     params = {
-        "stations": tuple(stations),
+        "stations": stations,
         "level": level,
     }
     hour = ctx["hour"]
@@ -136,7 +136,7 @@ def get_data(ctx):
                     "extract(year from f.valid at time zone 'UTC')::int "
                     "as year, f.valid at time zone 'UTC' as utc_valid, "
                     f"{varname} from raob_profile p JOIN raob_flights f on "
-                    "(p.fid = f.fid) WHERE f.station in :stations "
+                    "(p.fid = f.fid) WHERE f.station = ANY(:stations) "
                     f"{hrlimiter} and p.pressure = :level  "
                     f"and {varname} is not null ORDER by valid ASC"
                 ),
@@ -156,7 +156,7 @@ def get_data(ctx):
                     "extract(year from valid at time zone 'UTC')::int "
                     "as year, valid at time zone 'UTC' as utc_valid, "
                     f"{varname} from raob_flights f WHERE "
-                    "station in :stations "
+                    "station = ANY(:stations) "
                     f"{hrlimiter} and {varname} is not null ORDER by valid ASC"
                 ),
                 conn,

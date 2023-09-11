@@ -173,13 +173,13 @@ def get_context(fdict):
             ctx["df"] = pd.read_sql(
                 text(
                     f"SELECT year, high, day, low, precip from {table} "
-                    "WHERE station = :station and day in :days "
+                    "WHERE station = :station and day = ANY(:days) "
                     "ORDER by year ASC"
                 ),
                 conn,
                 params={
                     "station": station,
-                    "days": tuple(days),
+                    "days": days,
                 },
                 index_col="year",
             )

@@ -87,7 +87,7 @@ def plotter(fdict):
     phenomena = ctx["phenomena"]
     significance = ctx["significance"]
     if ctx["season"] == "all":
-        months = range(1, 13)
+        months = list(range(1, 13))
     elif ctx["season"] == "water_year":
         months = range(1, 13)
     elif ctx["season"] == "spring":
@@ -123,7 +123,7 @@ def plotter(fdict):
             max(expire at time zone :tzname) as maxexpire from warnings WHERE
             phenomena = :phenomena and significance = :significance
             and wfo = :wfo and
-            extract(month from issue) in :months GROUP by yr, eventid),
+            extract(month from issue) = ANY(:months) GROUP by yr, eventid),
         events as (
             select count(*) from data),
         timedomain as (
@@ -146,7 +146,7 @@ def plotter(fdict):
                 "phenomena": phenomena,
                 "significance": significance,
                 "wfo": wfo,
-                "months": tuple(months),
+                "months": months,
             },
             index_col="minute",
         )

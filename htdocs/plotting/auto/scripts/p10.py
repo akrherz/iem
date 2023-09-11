@@ -9,10 +9,9 @@ import datetime
 
 import numpy as np
 import pandas as pd
-import psycopg2.extras
 from pyiem.exceptions import NoDataFound
 from pyiem.plot import figure_axes
-from pyiem.util import get_autoplot_context, get_dbconn
+from pyiem.util import get_autoplot_context, get_dbconnc
 from scipy import stats
 
 PDICT = {
@@ -68,8 +67,7 @@ def get_description():
 
 def plotter(fdict):
     """Go"""
-    pgconn = get_dbconn("coop")
-    ccursor = pgconn.cursor(cursor_factory=psycopg2.extras.RealDictCursor)
+    pgconn, ccursor = get_dbconnc("coop")
     ctx = get_autoplot_context(fdict, get_description())
     station = ctx["station"]
     threshold = ctx["threshold"]
@@ -116,6 +114,7 @@ def plotter(fdict):
 
     ccursor.execute(sql, (threshold, threshold, threshold, threshold, station))
     if ccursor.rowcount == 0:
+        pgconn.close()
         raise NoDataFound("No Data Found.")
     rows = []
     for row in ccursor:
@@ -134,7 +133,7 @@ def plotter(fdict):
                 fall_date=row["fall_date"],
             )
         )
-
+    pgconn.close()
     df = pd.DataFrame(rows)
     if df.empty:
         raise NoDataFound("No data found for query.")

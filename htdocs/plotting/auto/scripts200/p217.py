@@ -95,15 +95,17 @@ def plotter(fdict):
             for source in ["z", "fz", "mz"]:
                 ugcdf = read_postgis(
                     text(
-                        f"SELECT simple_geom, ugc, gpw_population_{popyear} "
-                        "as pop from ugcs where wfo = :wfo and ugc in :ugcs "
-                        "and (end_ts is null or end_ts > :expire) and "
-                        "source = :source"
+                        f"""
+                        SELECT simple_geom, ugc, gpw_population_{popyear}
+                        as pop from ugcs where wfo = :wfo and ugc = ANY(:ugcs)
+                        and (end_ts is null or end_ts > :expire) and
+                        source = :source
+                        """
                     ),
                     conn,
                     params={
                         "wfo": WFOCONV.get(wfo, wfo),
-                        "ugcs": tuple(row["ugcs"]),
+                        "ugcs": row["ugcs"],
                         "expire": expire,
                         "source": source,
                     },

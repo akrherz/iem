@@ -114,7 +114,7 @@ SQL = """
 WITH data as (
     SELECT o.*, g.* from spc_outlook o LEFT JOIN spc_outlook_geometries g
     on (o.id = g.spc_outlook_id and g.category = :c) WHERE product_issue = :ts
-    and day in :days and outlook_type = :ot)
+    and day = ANY(:days) and outlook_type = :ot)
 
 SELECT d.product_issue at time zone 'UTC' as product_issue,
 expire at time zone 'UTC' as expire, d.geom,
@@ -182,7 +182,7 @@ def outlook_search(valid, days, outlook_type):
     cursor = get_dbconn("postgis").cursor()
     cursor.execute(
         "SELECT product_issue at time zone 'UTC' from spc_outlook "
-        "WHERE day in %s and outlook_type = %s and product_issue > %s and "
+        "WHERE day = ANY(%s) and outlook_type = %s and product_issue > %s and "
         "product_issue < %s ORDER by product_issue DESC",
         (days, outlook_type, valid - datetime.timedelta(hours=24), valid),
     )
@@ -235,11 +235,13 @@ def plotter(fdict):
         category = "CRITICAL FIRE WEATHER AREA"
     if (day == 0 or day > 3) and outlook_type == "C":
         category = "ANY SEVERE"
-    days = (day,)
+    days = [
+        day,
+    ]
     if day == 0:
-        days = tuple(range(4, 9))
+        days = list(range(4, 9))
         if outlook_type == "F":
-            days = tuple(range(3, 9))
+            days = list(range(3, 9))
 
     def fetch(ts):
         """Getme data."""
