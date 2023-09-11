@@ -176,8 +176,8 @@ def plotter(fdict):
         for i in range(days):
             ts = sts + datetime.timedelta(days=i)
             sdays.append(ts.strftime("%m%d"))
-        daylimit = "sday in :sdays"
-        params["sdays"] = tuple(sdays)
+        daylimit = "sday = ANY(:sdays)"
+        params["sdays"] = sdays
         doff = (days + 1) if ets.year != sts.year else 0
     else:
         daylimit = "sday >= :sday"

@@ -236,7 +236,7 @@ def plotter(fdict):
     month = ctx["month"]
 
     if month == "all":
-        months = range(1, 13)
+        months = list(range(1, 13))
     elif month == "fall":
         months = [9, 10, 11]
     elif month == "winter":
@@ -273,7 +273,7 @@ def plotter(fdict):
         "g8": GRIDSOUTH,
         "g9": GRIDWEST,
         "g10": GRIDSOUTH,
-        "months": tuple(months),
+        "months": months,
         "edate": ctx.get("edate", utc() + datetime.timedelta(days=2)),
     }
 
@@ -293,7 +293,7 @@ def plotter(fdict):
             ST_Intersects(geom,
             ST_GeomFromEWKT('SRID=4326;POLYGON((:g1 :g2, :g3 :g4,
             :g5 :g6, :g7 :g8, :g9 :g10))'))
-            and extract(month from issue) in :months
+            and extract(month from issue) = ANY(:months)
             and product_issue > '2002-01-01' and
             product_issue < :edate
             GROUP by expire ORDER by min_issue ASC

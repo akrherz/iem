@@ -18,7 +18,7 @@ from pyiem.htmlgen import make_select, station_select
 from pyiem.nws.vtec import VTEC_PHENOMENA, VTEC_SIGNIFICANCE
 from pyiem.reference import SECTORS_NAME, state_names
 from pyiem.templates.iem import TEMPLATE
-from pyiem.util import LOG, get_dbconn, get_sqlalchemy_conn, html_escape, utc
+from pyiem.util import LOG, get_dbconnc, get_sqlalchemy_conn, html_escape, utc
 from sqlalchemy import text
 
 BASEDIR, WSGI_FILENAME = os.path.split(__file__)
@@ -162,7 +162,7 @@ def networkselect_handler(value, arg, res):
 def station_handler(value, arg, fdict, res, typ):
     """Generate HTML."""
     networks = {}
-    cursor = get_dbconn("mesosite").cursor()
+    pgconn, cursor = get_dbconnc("mesosite")
     netlim = ""
     if typ == "zstation":
         netlim = "WHERE id ~* 'ASOS'"
@@ -172,7 +172,8 @@ def station_handler(value, arg, fdict, res, typ):
         netlim = "WHERE id !~* 'CLIMATE'"
     cursor.execute(f"SELECT id, name from networks {netlim} ORDER by name ASC")
     for row in cursor:
-        networks[row[0]] = row[1]
+        networks[row["id"]] = row["name"]
+    pgconn.close()
     # We could have two plus zstations
     networkcgi = "network"
     if arg["name"][-1].isdigit():
@@ -189,7 +190,7 @@ def station_handler(value, arg, fdict, res, typ):
 
 def ugc_select(state, ugc):
     """Generate a select for a given state."""
-    cursor = get_dbconn("postgis").cursor()
+    pgconn, cursor = get_dbconnc("postgis")
     cursor.execute(
         "SELECT ugc, name from ugcs WHERE substr(ugc, 1, 2) = %s and "
         "end_ts is null ORDER by name ASC",
@@ -197,7 +198,10 @@ def ugc_select(state, ugc):
     )
     ar = {}
     for row in cursor:
-        ar[row[0]] = f"{row[1]} {'(Zone)' if row[0][2] == 'Z' else ''}"
+        ar[
+            row["ugc"]
+        ] = f"{row['name']} {'(Zone)' if row['ugc'][2] == 'Z' else ''}"
+    pgconn.close()
     return make_select("ugc", ugc, ar, cssclass="iemselect2")
 
 
@@ -439,14 +443,14 @@ def get_cookie_value(arg, cookies):
 
 def get_timing(apid):
     """Get a timing sample."""
-    pgconn = get_dbconn("mesosite")
-    cursor = pgconn.cursor()
+    pgconn, cursor = get_dbconnc("mesosite")
     cursor.execute(
         "SELECT avg(timing)::int from autoplot_timing where appid = %s "
         "and valid > (now() - '7 days'::interval)",
         (apid,),
     )
-    timing = cursor.fetchone()[0]
+    timing = cursor.fetchone()["avg"]
+    pgconn.close()
     return timing if timing is not None else -1
 
 

@@ -56,8 +56,8 @@ def run(ts, sid, pressure):
                 .split()
             )
             if len(ids) > 1:
-                stationlimiter = " f.station in :sid and "
-                params["sid"] = tuple(ids)
+                stationlimiter = " f.station = ANY(:sid) and "
+                params["sid"] = ids
     pressurelimiter = ""
     if pressure > 0:
         pressurelimiter = " and p.pressure = :pid "

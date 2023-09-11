@@ -6,21 +6,21 @@ import sys
 
 from paste.request import parse_formvars
 from pyiem.reference import FIGSIZES_NAMES
-from pyiem.util import get_dbconn
+from pyiem.util import get_dbconnc
 
 BASEDIR, WSGI_FILENAME = os.path.split(__file__)
 
 
 def get_timing(pidx):
     """Return an average plot generation time for this app"""
-    pgconn = get_dbconn("mesosite")
-    cursor = pgconn.cursor()
+    pgconn, cursor = get_dbconnc("mesosite")
     cursor.execute(
         "SELECT avg(timing) from autoplot_timing where appid = %s "
         "and valid > (now() - '7 days'::interval)",
         (pidx,),
     )
-    timing = cursor.fetchone()[0]
+    timing = cursor.fetchone()["avg"]
+    pgconn.close()
     return timing if timing is not None else -1
 
 

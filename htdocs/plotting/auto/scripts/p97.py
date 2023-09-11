@@ -331,7 +331,7 @@ def get_data(ctx):
         "gddceil": ctx["gddceil"],
         "date1": date1,
         "date2": date2,
-        "cull": tuple(cull),
+        "cull": cull,
     }
     for table in tables:
         # Only compute expensive climatology, when necessary
@@ -348,7 +348,8 @@ def get_data(ctx):
                     from {table} WHERE
                     day >= :date1 and day <= :date2 and
                     substr(station, 3, 1) != 'C' and
-                    substr(station, 3, 4) != '0000' and station not in :cull),
+                    substr(station, 3, 4) != '0000'
+                    and not (station = ANY(:cull))),
                 climo as ({build_climate_sql(ctx, table)}),
                 combo as (
                     SELECT o.station, o.precip - c.precip as precip_diff,
@@ -450,7 +451,8 @@ def get_data(ctx):
                     from {table} WHERE
                     day >= :date1 and day <= :date2 and
                     substr(station, 3, 1) != 'C' and
-                    substr(station, 3, 4) != '0000' and station not in :cull
+                    substr(station, 3, 4) != '0000' and
+                    not (station = ANY(:cull))
                     GROUP by station)
 
                 SELECT d.station, t.name, t.wfo,

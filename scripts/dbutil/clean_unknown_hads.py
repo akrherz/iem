@@ -26,8 +26,8 @@ def review_iemaccess():
     pgconn = get_dbconn("mesosite")
     cursor = pgconn.cursor()
     cursor.execute(
-        "UPDATE stations SET online = 't' where iemid in %s",
-        (tuple(df["iemid"].to_list()),),
+        "UPDATE stations SET online = 't' where iemid = ANY(%s)",
+        (df["iemid"].to_list(),),
     )
     cursor.close()
     pgconn.commit()

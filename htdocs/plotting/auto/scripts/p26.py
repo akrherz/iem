@@ -10,11 +10,10 @@ import datetime
 
 import numpy as np
 import pandas as pd
-import psycopg2.extras
 from matplotlib.patches import Rectangle
 from pyiem.exceptions import NoDataFound
 from pyiem.plot import figure_axes
-from pyiem.util import get_autoplot_context, get_dbconn
+from pyiem.util import get_autoplot_context, get_dbconnc
 
 PDICT = {
     "fall": "Minimum Temperature after 1 July",
@@ -61,8 +60,7 @@ def get_description():
 
 def get_context(fdict):
     """Get the raw infromations we need"""
-    pgconn = get_dbconn("coop")
-    cursor = pgconn.cursor(cursor_factory=psycopg2.extras.RealDictCursor)
+    pgconn, cursor = get_dbconnc("coop")
 
     today = datetime.date.today()
     thisyear = today.year
@@ -96,10 +94,11 @@ def get_context(fdict):
             (station, startyear),
         )
     if cursor.rowcount == 0:
+        pgconn.close()
         raise NoDataFound("No Data Found.")
     for row in cursor:
         data[int(row[1] - startyear), int(row[0])] = row[2]
-
+    pgconn.close()
     data.mask = np.where(data == 199, True, False)
 
     doys = []

@@ -113,7 +113,7 @@ def plotter(fdict):
 
     yr = "year as yr"
     if month == "all":
-        months = range(1, 13)
+        months = list(range(1, 13))
     elif month == "fall":
         months = [9, 10, 11]
     elif month == "winter":
@@ -167,14 +167,14 @@ def plotter(fdict):
         (a.avg_temp {op} a.stddev_temp * {smul} {op} {offset})
             then 1 else 0 end) as avg_{which},
         count(*) as days from alldata o, avgs a WHERE o.station = :station
-        and o.sday = a.sday and month in :months
+        and o.sday = a.sday and month = ANY(:months)
         GROUP by yr ORDER by yr ASC
         """
             ),
             conn,
             params={
                 "station": station,
-                "months": tuple(months),
+                "months": months,
             },
             index_col="yr",
         )

@@ -106,14 +106,14 @@ def fetch_daily(form, cols):
       min(t24_c_avg_qc) as soil24tn, max(t24_c_avg_qc) as soil24tx,
       min(t50_c_avg_qc) as soil50tn, max(t50_c_avg_qc) as soil50tx
       from sm_hourly where
-      valid >= :sts and valid < :ets and station in :stations
+      valid >= :sts and valid < :ets and station = ANY(:stations)
       GROUP by station, date
     ), daily as (
       SELECT *,
       t4_c_min_qc as soil04tn, t4_c_max_qc as soil04tx,
       round(gddxx(50, 86, c2f( tair_c_max_qc ),
         c2f( tair_c_min_qc ))::numeric,1) as gdd50 from sm_daily WHERE
-      valid >= :sts and valid < :ets and station in :stations
+      valid >= :sts and valid < :ets and station = ANY(:stations)
     )
     SELECT d.*, s.rh_min, s.rh, s.rh_max,
     s.soil12tn, s.soil12tx, s.soil24tn, s.soil24tx, s.soil50tn, s.soil50tx
@@ -125,7 +125,7 @@ def fetch_daily(form, cols):
             params={
                 "sts": sts,
                 "ets": ets,
-                "stations": tuple(stations),
+                "stations": stations,
             },
             index_col=None,
         )

@@ -3,16 +3,14 @@ import datetime
 import json
 from zoneinfo import ZoneInfo
 
-import psycopg2.extras
 from paste.request import parse_formvars
-from pyiem.util import get_dbconn, html_escape
+from pyiem.util import get_dbconnc, html_escape
 from pymemcache.client import Client
 
 
 def run(ts, fmt):
     """Actually do the hard work of getting the geojson"""
-    pgconn = get_dbconn("radar")
-    cursor = pgconn.cursor(cursor_factory=psycopg2.extras.RealDictCursor)
+    pgconn, cursor = get_dbconnc("radar")
 
     utcnow = datetime.datetime.utcnow()
 
@@ -93,6 +91,7 @@ def run(ts, fmt):
                     },
                 }
             )
+        pgconn.close()
         return json.dumps(res)
     res = (
         "nexrad,storm_id,azimuth,range,tvs,meso,posh,poh,max_size,"
@@ -123,6 +122,7 @@ def run(ts, fmt):
             ]
         )
         res += "\n"
+    pgconn.close()
     return res
 
 

@@ -24,10 +24,10 @@ def get_data(network, ctx, tzinfo, stations):
         SELECT id, t.network, valid, phour {sql}
         from hourly h JOIN stations t on
         (h.iemid = t.iemid) WHERE
-        valid >= %s and valid < %s and t.network = %s and t.id in %s
+        valid >= %s and valid < %s and t.network = %s and t.id = ANY(%s)
         ORDER by valid ASC
         """,
-        (ctx["sts"], ctx["ets"], network, tuple(stations)),
+        (ctx["sts"], ctx["ets"], network, stations),
     )
     for row in cursor:
         res += (

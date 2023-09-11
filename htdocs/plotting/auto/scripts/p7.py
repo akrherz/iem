@@ -9,10 +9,9 @@ import matplotlib.colors as mpcolors
 import matplotlib.dates as mdates
 import numpy as np
 import pandas as pd
-import psycopg2.extras
 from pyiem.exceptions import NoDataFound
 from pyiem.plot import figure, get_cmap
-from pyiem.util import get_autoplot_context, get_dbconn
+from pyiem.util import get_autoplot_context, get_dbconnc
 
 
 def get_description():
@@ -66,8 +65,7 @@ def get_description():
 
 def plotter(fdict):
     """Go"""
-    pgconn = get_dbconn("coop")
-    ccursor = pgconn.cursor(cursor_factory=psycopg2.extras.RealDictCursor)
+    pgconn, cursor = get_dbconnc("coop")
 
     ctx = get_autoplot_context(fdict, get_description())
     station = ctx["station"]
@@ -75,17 +73,17 @@ def plotter(fdict):
     gdd1 = ctx["gdd1"]
     gdd2 = ctx["gdd2"]
 
-    ccursor.execute(
+    cursor.execute(
         "SELECT day, gddxx(%s, %s, high, low) as gdd "
         "from alldata WHERE year = %s and station = %s ORDER by day ASC",
         (ctx["gddbase"], ctx["gddceil"], year, station),
     )
     days = []
     gdds = []
-    for row in ccursor:
+    for row in cursor:
         gdds.append(float(row["gdd"]))
         days.append(row["day"])
-
+    pgconn.close()
     yticks = []
     yticklabels = []
     jan1 = datetime.datetime(year, 1, 1)

@@ -108,11 +108,11 @@ def application(environ, start_response):
     sql = text(
         f"""
         SELECT station, valid at time zone 'UTC' as utc_valid, key, value
-        from raw{sts.year} WHERE station in :ids and
+        from raw{sts.year} WHERE station = ANY(:ids) and
         valid BETWEEN :sts and :ets and value > -999
         """
     )
-    params = {"ids": tuple(stations), "sts": sts, "ets": ets}
+    params = {"ids": stations, "sts": sts, "ets": ets}
 
     with get_sqlalchemy_conn("hads") as conn:
         df = read_sql(sql, conn, params=params)

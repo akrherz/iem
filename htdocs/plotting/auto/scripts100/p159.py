@@ -138,7 +138,7 @@ def plotter(fdict):
     offset = "ts"
     mlabel = MDICT[month] if month != "jul1" else "Jul-Jun [year of Jul shown]"
     totaldays = 0
-    months = range(1, 13)
+    months = list(range(1, 13))
     doylimit = ""
     if month in ["all", "jul1", "ytd"]:
         if month == "jul1":
@@ -189,7 +189,7 @@ def plotter(fdict):
             SELECT extract(year from {offset})::int as year,
             extract(hour from ts)::int as hour,
             sum(hit) as hits, count(*) as obs from hourly
-            WHERE extract(month from ts) in :months {doylimit}
+            WHERE extract(month from ts) = ANY(:months) {doylimit}
             GROUP by year, hour
             """
             ),
@@ -198,7 +198,7 @@ def plotter(fdict):
                 "tzname": ctx["_nt"].sts[station]["tzname"],
                 "t": threshold,
                 "station": station,
-                "months": tuple(months),
+                "months": months,
                 "sday": datetime.date.today().strftime("%m%d"),
                 "sdate": sdate.strftime("%m%d"),
                 "edate": edate.strftime("%m%d"),

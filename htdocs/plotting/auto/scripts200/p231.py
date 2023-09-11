@@ -64,7 +64,7 @@ def compute(state, sdate, edate, days):
                 substr(station, 3, 1) not in ('C', 'D', 'T')
                 and station != '{state}0000'
             ), datum as (
-                SELECT * from obs where sday in %s
+                SELECT * from obs where sday = ANY(%s)
                 ORDER by station ASC, day ASC
             ), agg as (
                 select station, sday, avg(sum) as avg_precip,
@@ -73,7 +73,7 @@ def compute(state, sdate, edate, days):
             ), agg2 as (
                 SELECT d.station, d.day, d.sday, d.sum, a.avg_precip,
                 a.std_precip from datum d, agg a WHERE d.station = a.station
-                and d.sday = a.sday and a.count >= 30 and d.day in %s
+                and d.sday = a.sday and a.count >= 30 and d.day = ANY(%s)
                 ORDER by d.station ASC, d.day ASC
             )
             select a.*, st_x(t.geom) as lon, st_y(t.geom) as lat
@@ -83,8 +83,8 @@ def compute(state, sdate, edate, days):
             conn,
             params=(
                 days - 1,
-                (f"{edate:%m%d}", f"{sdate:%m%d}"),
-                (sdate, edate),
+                [f"{edate:%m%d}", f"{sdate:%m%d}"],
+                [sdate, edate],
             ),
             parse_dates=["day"],
         )

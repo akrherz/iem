@@ -33,9 +33,9 @@ def fetcher(station, sts, ets):
     p.tmpc, p.dwpc, p.drct, round((p.smps * 1.94384)::numeric,0),
     p.bearing, p.range_miles, f.station from
     raob_profile p JOIN raob_flights f on
-    (f.fid = p.fid) WHERE f.station in %s and valid >= %s and valid < %s
+    (f.fid = p.fid) WHERE f.station = ANY(%s) and valid >= %s and valid < %s
     """,
-        (tuple(stations), sts, ets),
+        (stations, sts, ets),
     )
     sio.write(
         (

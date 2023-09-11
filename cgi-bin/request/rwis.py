@@ -59,13 +59,13 @@ def application(environ, start_response):
         stations = list(nt.sts.keys())
     params = {
         "tzname": tzname,
-        "ids": tuple(stations),
+        "ids": stations,
         "ets": ets,
         "sts": sts,
     }
     sql = text(
         f"SELECT *, valid at time zone :tzname as obtime from {tbl} "
-        "WHERE station in :ids and valid BETWEEN :sts and :ets "
+        "WHERE station = ANY(:ids) and valid BETWEEN :sts and :ets "
         "ORDER by valid ASC"
     )
     with get_sqlalchemy_conn("rwis") as conn:

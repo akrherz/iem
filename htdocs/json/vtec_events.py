@@ -2,9 +2,8 @@
 import datetime
 import json
 
-import psycopg2.extras
 from paste.request import parse_formvars
-from pyiem.util import get_dbconn, html_escape, utc
+from pyiem.util import get_dbconnc, html_escape, utc
 from pymemcache.client import Client
 
 ISO9660 = "%Y-%m-%dT%H:%M:%SZ"
@@ -20,8 +19,7 @@ def run(wfo, year, phenomena, significance, combo):
       significance (str, optional): 1 character VTEC significance
       combo (int, optional): special one-offs
     """
-    pgconn = get_dbconn("postgis")
-    cursor = pgconn.cursor(cursor_factory=psycopg2.extras.RealDictCursor)
+    pgconn, cursor = get_dbconnc("postgis")
 
     table = f"warnings_{year}"
     sbwtable = f"sbw_{year}"
@@ -96,7 +94,7 @@ def run(wfo, year, phenomena, significance, combo):
                 fcster=row["fcster"],
             )
         )
-
+    pgconn.close()
     return json.dumps(res)
 
 

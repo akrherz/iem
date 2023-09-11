@@ -25,11 +25,10 @@ import datetime
 
 import numpy as np
 import pandas as pd
-import psycopg2.extras
 import requests
 from pyiem.exceptions import NoDataFound
 from pyiem.plot import figure
-from pyiem.util import get_autoplot_context, get_dbconn
+from pyiem.util import get_autoplot_context, get_dbconnc
 
 PDICT = {
     "dep": "Departure [inch]",
@@ -72,8 +71,7 @@ def get_description():
 
 def get_ctx(fdict):
     """Get the plotting context"""
-    pgconn = get_dbconn("coop")
-    cursor = pgconn.cursor(cursor_factory=psycopg2.extras.RealDictCursor)
+    pgconn, cursor = get_dbconnc("coop")
     ctx = get_autoplot_context(fdict, get_description())
     station = ctx["station"]
     date = ctx["date"]
@@ -85,6 +83,7 @@ def get_ctx(fdict):
         (station,),
     )
     if cursor.rowcount == 0:
+        pgconn.close()
         raise NoDataFound("No Data Found")
 
     ab = ctx["_nt"].sts[station]["archive_begin"]
@@ -105,7 +104,7 @@ def get_ctx(fdict):
         data[int(row["year"] - baseyear - 1), int(row["doy"]) + 366] = row[
             "precip"
         ]
-
+    pgconn.close()
     sts = date - datetime.timedelta(days=14)
     uri = (
         "http://mesonet.agron.iastate.edu/"

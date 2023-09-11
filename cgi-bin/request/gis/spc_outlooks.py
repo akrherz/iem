@@ -75,15 +75,15 @@ def run(ctx, start_response):
             outlook_type as type, day, threshold, category, cycle,
             {ctx["geom_col"]} as geom
             from spc_outlooks WHERE product_issue >= %s and
-            product_issue < %s and outlook_type in %s and day in %s
+            product_issue < %s and outlook_type = ANY(%s) and day = ANY(%s)
             ORDER by product_issue ASC
             """,
             conn,
             params=(
                 ctx["sts"],
                 ctx["ets"],
-                tuple(ctx["types"]),
-                tuple(ctx["days"]),
+                ctx["types"],
+                ctx["days"],
             ),
             geom_col="geom",
         )

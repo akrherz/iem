@@ -2,22 +2,19 @@
 import zipfile
 from io import BytesIO
 
-import psycopg2.extras
 import shapefile
 from paste.request import parse_formvars
 from pyiem import wellknowntext
-from pyiem.util import get_dbconn
-
-POSTGIS = get_dbconn("postgis")
+from pyiem.util import get_dbconnc
 
 
 def main(year, etn, start_response):
     """Go Main Go"""
-    pcursor = POSTGIS.cursor(cursor_factory=psycopg2.extras.RealDictCursor)
+    pgconn, cursor = get_dbconnc("postgis")
 
     basefn = f"watch_{year}_{etn}"
 
-    pcursor.execute(
+    cursor.execute(
         f"""select
         ST_astext(ST_multi(ST_union(ST_SnapToGrid(u.geom,0.0001)))) as tgeom
         from warnings_{year} w JOIN ugcs u on (u.gid = w.gid)
@@ -29,7 +26,7 @@ def main(year, etn, start_response):
         """,
         (etn, etn, year),
     )
-    if pcursor.rowcount == 0:
+    if cursor.rowcount == 0:
         start_response("200 OK", [("Content-type", "text/plain")])
         return b"No Data Found"
 
@@ -40,7 +37,7 @@ def main(year, etn, start_response):
         shp.field("SIG", "C", "1")
         shp.field("ETN", "I", "4")
 
-        row = pcursor.fetchone()
+        row = cursor.fetchone()
         s = row["tgeom"]
         f = wellknowntext.convert_well_known_text(s)
         shp.poly(f)
@@ -60,6 +57,7 @@ def main(year, etn, start_response):
         ("Content-type", "application/octet-stream"),
         ("Content-Disposition", f"attachment; filename={basefn}.zip"),
     ]
+    pgconn.close()
     start_response("200 OK", headers)
     return zio.getvalue()
 

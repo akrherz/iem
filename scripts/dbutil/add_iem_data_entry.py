@@ -4,8 +4,7 @@
 """
 import datetime
 
-import psycopg2.extras
-from pyiem.util import get_dbconn, logger
+from pyiem.util import get_dbconnc, logger
 
 LOG = logger()
 
@@ -26,8 +25,7 @@ def add_summary(cursor, date, iemid):
 
 def main():
     """Go Main Go"""
-    pgconn = get_dbconn("iem")
-    icursor = pgconn.cursor(cursor_factory=psycopg2.extras.RealDictCursor)
+    pgconn, icursor = get_dbconnc("iem")
     icursor2 = pgconn.cursor()
 
     # Find sites that are online and not metasites that are not in the current

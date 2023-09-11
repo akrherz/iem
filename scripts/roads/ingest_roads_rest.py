@@ -37,12 +37,11 @@ import sys
 import zipfile
 
 import pandas as pd
-import psycopg2.extras
 import requests
 import shapefile
 from pyiem.util import (
     exponential_backoff,
-    get_dbconn,
+    get_dbconnc,
     get_sqlalchemy_conn,
     logger,
     utc,
@@ -160,8 +159,7 @@ def export_shapefile(txn, valid):
 
 def main():
     """Go something greatish"""
-    pgconn = get_dbconn("postgis")
-    cursor = pgconn.cursor(cursor_factory=psycopg2.extras.RealDictCursor)
+    pgconn, cursor = get_dbconnc("postgis")
 
     with get_sqlalchemy_conn("postgis") as conn:
         current = pd.read_sql(

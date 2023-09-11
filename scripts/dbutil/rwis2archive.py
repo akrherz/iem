@@ -8,20 +8,18 @@ Run at 0Z and 12Z, provided with a timestamp to process
 import datetime
 import sys
 
-import psycopg2.extras
-from pyiem.util import get_dbconn, logger, utc
+from pyiem.util import get_dbconnc, logger, utc
 
 LOG = logger()
 
 
 def main(argv):
     """Go main"""
-    iemdb = get_dbconn("iem")
-    rwisdb = get_dbconn("rwis")
+    iemdb, icursor = get_dbconnc("iem")
+    rwisdb, rcursor = get_dbconnc("rwis")
 
     ts = utc(int(argv[1]), int(argv[2]), int(argv[3]))
     ts2 = ts + datetime.timedelta(hours=24)
-    rcursor = rwisdb.cursor()
     # Remove previous entries for this UTC date
     for suffix in ["", "_soil", "_traffic"]:
         rcursor.execute(
@@ -31,7 +29,6 @@ def main(argv):
     rcursor.close()
 
     # Always delete stuff 3 or more days old from iemaccess
-    icursor = iemdb.cursor()
     icursor.execute(
         "DELETE from rwis_traffic_data_log WHERE "
         "valid < ('TODAY'::date - '3 days'::interval)"
@@ -43,7 +40,7 @@ def main(argv):
     icursor.close()
 
     # Get traffic obs from access
-    icursor = iemdb.cursor(cursor_factory=psycopg2.extras.RealDictCursor)
+    icursor = iemdb.cursor()
     icursor.execute(
         """SELECT l.nwsli as station, s.lane_id, d.* from
        rwis_traffic_data_log d, rwis_locations l, rwis_traffic_sensors s
@@ -70,7 +67,7 @@ def main(argv):
     rcursor.close()
 
     # Get soil obs from access
-    icursor = iemdb.cursor(cursor_factory=psycopg2.extras.RealDictCursor)
+    icursor = iemdb.cursor()
     sql = """SELECT l.nwsli as station, d.valid,
          max(case when sensor_id = 1 then temp else null end) as tmpf_1in,
          max(case when sensor_id = 3 then temp else null end) as tmpf_3in,
@@ -115,7 +112,7 @@ def main(argv):
     rcursor.close()
 
     # Get regular obs from Access
-    icursor = iemdb.cursor(cursor_factory=psycopg2.extras.RealDictCursor)
+    icursor = iemdb.cursor()
     # Since we store drct in the RWIS archive as NaN, we better make sure
     # we don't attempt to use these values as it will error out
     icursor.execute("update current_log set drct = null where drct = 'NaN'")

@@ -110,7 +110,7 @@ def plotter(fdict):
             ctx["_nt"].sts[station]["name"].split("--")[1].strip().split(" ")
         )
     params = {
-        "stations": tuple(stations),
+        "stations": stations,
         "ts": ts,
     }
     vlimit = ""
@@ -152,7 +152,7 @@ def plotter(fdict):
             min(p.smps) OVER (PARTITION by p.pressure) as smps_min,
             max(p.smps) OVER (PARTITION by p.pressure) as smps_max
             from raob_flights f JOIN raob_profile p on (f.fid = p.fid)
-            WHERE f.station in :stations {hrlimit} {vlimit}
+            WHERE f.station = ANY(:stations) {hrlimit} {vlimit}
             and p.pressure in (925, 850, 700, 500, 400, 300, 250, 200,
             150, 100, 70, 50, 10)  and
             {varname if varname != 'hght' else 'height'} is not null)

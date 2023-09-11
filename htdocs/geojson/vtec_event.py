@@ -1,10 +1,9 @@
 """GeoJSON source for VTEC event"""
 import datetime
 
-import psycopg2.extras
 import simplejson as json
 from paste.request import parse_formvars
-from pyiem.util import get_dbconn, html_escape
+from pyiem.util import get_dbconnc, html_escape
 from pymemcache.client import Client
 
 ISO = "%Y-%m-%dT%H:%M:%SZ"
@@ -12,8 +11,7 @@ ISO = "%Y-%m-%dT%H:%M:%SZ"
 
 def run_lsrs(wfo, year, phenomena, significance, etn, sbw):
     """Do great things"""
-    pgconn = get_dbconn("postgis")
-    cursor = pgconn.cursor(cursor_factory=psycopg2.extras.RealDictCursor)
+    pgconn, cursor = get_dbconnc("postgis")
 
     if sbw == 1:
         sql = f"""
@@ -69,14 +67,13 @@ def run_lsrs(wfo, year, phenomena, significance, etn, sbw):
                 geometry=json.loads(row["geojson"]),
             )
         )
-
+    pgconn.close()
     return json.dumps(res)
 
 
 def run_sbw(wfo, year, phenomena, significance, etn):
     """Do great things"""
-    pgconn = get_dbconn("postgis")
-    cursor = pgconn.cursor(cursor_factory=psycopg2.extras.RealDictCursor)
+    pgconn, cursor = get_dbconnc("postgis")
 
     table = f"sbw_{year}"
     cursor.execute(
@@ -109,14 +106,13 @@ def run_sbw(wfo, year, phenomena, significance, etn):
                 geometry=json.loads(row["geojson"]),
             )
         )
-
+    pgconn.close()
     return json.dumps(res)
 
 
 def run(wfo, year, phenomena, significance, etn):
     """Do great things"""
-    pgconn = get_dbconn("postgis")
-    cursor = pgconn.cursor(cursor_factory=psycopg2.extras.RealDictCursor)
+    pgconn, cursor = get_dbconnc("postgis")
 
     cursor.execute(
         f"""
@@ -150,7 +146,7 @@ def run(wfo, year, phenomena, significance, etn):
                 geometry=json.loads(row["geojson"]),
             )
         )
-
+    pgconn.close()
     return json.dumps(res)
 
 

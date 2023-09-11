@@ -27,10 +27,10 @@ def main(argv):
     rcursor.execute(
         f"""
         SELECT station, min(date(valid)), max(date(valid)) from
-        {ALLDATA.get(network, 'alldata')} WHERE station in %s
+        {ALLDATA.get(network, 'alldata')} WHERE station = ANY(%s)
         GROUP by station ORDER by min ASC
         """,
-        (tuple(ids),),
+        (ids,),
     )
     for row in rcursor:
         station = row[0]

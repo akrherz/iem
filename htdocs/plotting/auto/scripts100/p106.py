@@ -83,7 +83,7 @@ def plotter(fdict):
     month = ctx["month"]
 
     if month == "all":
-        months = range(1, 13)
+        months = list(range(1, 13))
     elif month == "fall":
         months = [9, 10, 11]
     elif month == "winter":
@@ -106,7 +106,7 @@ def plotter(fdict):
         f"""
         WITH obs as (
             SELECT valid, tmpf from alldata WHERE
-            station = %s and extract(month from valid) in %s and tmpf > -80
+            station = %s and extract(month from valid) = ANY(%s) and tmpf > -80
         ),
         events as (
             SELECT distinct date(valid at time zone %s) from obs
@@ -117,7 +117,7 @@ def plotter(fdict):
     """,
         (
             station,
-            tuple(months),
+            months,
             ctx["_nt"].sts[station]["tzname"],
             ctx["_nt"].sts[station]["tzname"],
             ctx["_nt"].sts[station]["tzname"],

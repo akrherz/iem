@@ -2,16 +2,14 @@
 import datetime
 
 import numpy as np
-import psycopg2.extras
 from pyiem.plot import MapPlot
-from pyiem.util import get_dbconn
+from pyiem.util import get_dbconnc
 
 
 def main():
     """Go Main Go"""
     now = datetime.datetime.now()
-    pgconn = get_dbconn("iem")
-    icursor = pgconn.cursor(cursor_factory=psycopg2.extras.RealDictCursor)
+    pgconn, icursor = get_dbconnc("iem")
 
     day1 = datetime.date.today().replace(day=1)
     day2 = (day1 + datetime.timedelta(days=35)).replace(day=1)

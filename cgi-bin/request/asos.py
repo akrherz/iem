@@ -299,8 +299,8 @@ def application(environ, start_response):
         acursor.execute(
             f"SELECT station, valid, {colextra} {sqlcols} from {table} "
             f"WHERE {metalimiter} valid >= %s and valid < %s and "
-            f"station in %s {rlimiter} ORDER by valid {sorder}",
-            (sts, ets, tuple(stations)),
+            f"station = ANY(%s) {rlimiter} ORDER by valid {sorder}",
+            (sts, ets, stations),
         )
     else:
         acursor.execute(

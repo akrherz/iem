@@ -104,7 +104,7 @@ def get_df(ctx, period):
     month = ctx["month"]
     ctx["mlabel"] = f"{month.capitalize()} Season"
     if month == "all":
-        months = range(1, 13)
+        months = list(range(1, 13))
         ctx["mlabel"] = "All Year"
     elif month == "fall":
         months = [9, 10, 11]
@@ -125,7 +125,7 @@ def get_df(ctx, period):
                 SELECT high, low, (high+low)/2. as avgt from alldata WHERE
                 day >= :d1 and day <= :d2 and station = :station
                 and high is not null
-                and low is not null and month in :months
+                and low is not null and month = ANY(:months)
                 """
             ),
             conn,
@@ -133,7 +133,7 @@ def get_df(ctx, period):
                 "d1": date(ctx[f"sy{period}"], 1, 1),
                 "d2": date(ctx[f"ey{period}"], 12, 31),
                 "station": ctx["station"],
-                "months": tuple(months),
+                "months": months,
             },
         )
     return df

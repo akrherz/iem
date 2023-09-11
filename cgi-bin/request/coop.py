@@ -8,11 +8,10 @@ import zipfile
 from io import BytesIO, StringIO
 
 import pandas as pd
-import psycopg2.extras
 from metpy.units import units
 from paste.request import parse_formvars
 from pyiem.network import Table as NetworkTable
-from pyiem.util import get_dbconn, get_dbconnstr, utc
+from pyiem.util import get_dbconnc, get_dbconnstr, utc
 from sqlalchemy import text
 
 DEGC = units.degC
@@ -33,11 +32,6 @@ def get_scenario_period(ctx):
     sts = datetime.date(ctx["scenario_year"], ctx["ets"].month, ctx["ets"].day)
     ets = datetime.date(ctx["scenario_year"], 12, 31)
     return sts, ets
-
-
-def get_database():
-    """Get database"""
-    return get_dbconn("coop")
 
 
 def sane_date(year, month, day):
@@ -83,7 +77,7 @@ def get_cgi_stations(form):
     return reqlist
 
 
-def do_apsim(ctx):
+def do_apsim(cursor, ctx):
     """
     [weather.met.weather]
     latitude = 42.1 (DECIMAL DEGREES)
@@ -98,9 +92,6 @@ def do_apsim(ctx):
             "ERROR: APSIM output is only "
             "permitted for one station at a time."
         ).encode("ascii")
-
-    dbconn = get_database()
-    cursor = dbconn.cursor(cursor_factory=psycopg2.extras.RealDictCursor)
 
     station = ctx["stations"][0]
     table = get_tablename(ctx["stations"])
@@ -226,7 +217,7 @@ def do_apsim(ctx):
     return sio.getvalue().encode("ascii")
 
 
-def do_century(ctx):
+def do_century(cursor, ctx):
     """Materialize the data in Century Format
     * Century format  (precip cm, avg high C, avg low C)
     prec  1980   2.60   6.40   0.90   1.00   0.70   0.00
@@ -244,9 +235,6 @@ def do_century(ctx):
 
     station = ctx["stations"][0]
     nt = NetworkTable(f"{station[:2]}CLIMATE", only_online=False)
-
-    dbconn = get_database()
-    cursor = dbconn.cursor(cursor_factory=psycopg2.extras.RealDictCursor)
 
     # Automatically set dates to start and end of year to make output clean
     sts = datetime.date(ctx["sts"].year, 1, 1)
@@ -325,7 +313,7 @@ def do_century(ctx):
     return sio.getvalue().encode("ascii")
 
 
-def do_daycent(ctx):
+def do_daycent(cursor, ctx):
     """Materialize data for daycent
 
     Daily Weather Data File (use extra weather drivers = 0):
@@ -345,9 +333,6 @@ def do_daycent(ctx):
             "ERROR: Daycent output is only "
             "permitted for one station at a time."
         ).encode("ascii")
-
-    dbconn = get_database()
-    cursor = dbconn.cursor(cursor_factory=psycopg2.extras.RealDictCursor)
 
     table = get_tablename(ctx["stations"])
 
@@ -441,11 +426,8 @@ def get_stationtable(stations):
     return NetworkTable(networks, only_online=False)
 
 
-def do_simple(ctx):
+def do_simple(cursor, ctx):
     """Generate Simple output"""
-
-    dbconn = get_database()
-    cursor = dbconn.cursor(cursor_factory=psycopg2.extras.RealDictCursor)
 
     table = get_tablename(ctx["stations"])
 
@@ -548,7 +530,7 @@ def do_simple(ctx):
     return sio.getvalue().encode("ascii")
 
 
-def do_salus(ctx):
+def do_salus(cursor, ctx):
     """Generate SALUS
     StationID, Year, DOY, SRAD, Tmax, Tmin, Rain, DewP, Wind, Par, dbnum
     CTRL, 1981, 1, 5.62203, 2.79032, -3.53361, 5.43766, NaN, NaN, NaN, 2
@@ -559,9 +541,6 @@ def do_salus(ctx):
             "ERROR: SALUS output is only "
             "permitted for one station at a time."
         ).encode("ascii")
-
-    dbconn = get_database()
-    cursor = dbconn.cursor(cursor_factory=psycopg2.extras.RealDictCursor)
 
     scenario_year = 2030
     asts = datetime.date(2030, 1, 1)
@@ -624,13 +603,11 @@ def do_salus(ctx):
     return sio.getvalue().encode("ascii")
 
 
-def do_dndc(ctx):
+def do_dndc(cursor, ctx):
     """Process DNDC
     * One file per year! named StationName / StationName_YYYY.txt
     * julian day, tmax C , tmin C, precip cm seperated by space
     """
-    dbconn = get_database()
-    cursor = dbconn.cursor(cursor_factory=psycopg2.extras.RealDictCursor)
 
     table = get_tablename(ctx["stations"])
 
@@ -654,10 +631,10 @@ def do_dndc(ctx):
             SELECT
     ('{thisyear}-'||month||'-'||extract(day from day))::date as day,
             high, low, precip, station from {table}
-            WHERE station IN %s and day >= %s and year = %s),
+            WHERE station = ANY(%s) and day >= %s and year = %s),
         obs as (
             SELECT day, high, low, precip, station from {table}
-            WHERE station IN %s and day >= %s and day <= %s),
+            WHERE station = ANY(%s) and day >= %s and day <= %s),
         total as (
             SELECT *, extract(doy from day) as doy from obs UNION
             SELECT *, extract(doy from day) as doy from scenario
@@ -665,10 +642,10 @@ def do_dndc(ctx):
         SELECT * from total ORDER by day ASC
     """,
         (
-            tuple(ctx["stations"]),
+            ctx["stations"],
             asts,
             scenario_year,
-            tuple(ctx["stations"]),
+            ctx["stations"],
             ctx["sts"],
             ctx["ets"],
         ),
@@ -720,10 +697,11 @@ def do_swat(ctx):
             SELECT
             ('{thisyear}-'||month||'-'||extract(day from day))::date as day,
             high, low, precip, station from {table}
-            WHERE station IN :sids and day >= :asts and year = :scenario_year),
+            WHERE station = ANY(:sids) and
+            day >= :asts and year = :scenario_year),
         obs as (
             SELECT day, high, low, precip, station from {table}
-            WHERE station IN :sids and day >= :sts and day <= :ets),
+            WHERE station = ANY(:sids) and day >= :sts and day <= :ets),
         total as (
             SELECT *, extract(doy from day) as doy from obs UNION
             SELECT *, extract(doy from day) as doy from scenario
@@ -733,7 +711,7 @@ def do_swat(ctx):
         ),
         get_dbconnstr("coop"),
         params={
-            "sids": tuple(ctx["stations"]),
+            "sids": ctx["stations"],
             "asts": asts,
             "scenario_year": scenario_year,
             "sts": ctx["sts"],
@@ -830,22 +808,24 @@ def application(environ, start_response):
             ("Content-Disposition", "attachment; filename=nwscoop.xlsx")
         )
 
+    conn, cursor = get_dbconnc("coop")
     start_response("200 OK", headers)
     # OK, now we fret
     if "daycent" in ctx["myvars"]:
-        res = do_daycent(ctx)
+        res = do_daycent(cursor, ctx)
     elif "century" in ctx["myvars"]:
-        res = do_century(ctx)
+        res = do_century(cursor, ctx)
     elif "apsim" in ctx["myvars"]:
-        res = do_apsim(ctx)
+        res = do_apsim(cursor, ctx)
     elif "dndc" in ctx["myvars"]:
-        res = do_dndc(ctx)
+        res = do_dndc(cursor, ctx)
     elif "salus" in ctx["myvars"]:
-        res = do_salus(ctx)
+        res = do_salus(cursor, ctx)
     elif "swat" in ctx["myvars"]:
         res = do_swat(ctx)
     else:
-        res = do_simple(ctx)
+        res = do_simple(cursor, ctx)
+    conn.close()
     return [res]
 
 

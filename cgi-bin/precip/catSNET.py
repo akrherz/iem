@@ -4,12 +4,11 @@ Generate web output for precip data
 import datetime
 from io import StringIO
 
-import psycopg2.extras
 from paste.request import parse_formvars
 from pyiem.network import Table as NetworkTable
-from pyiem.util import get_dbconn
+from pyiem.util import get_dbconnc
 
-nt = NetworkTable(("KCCI", "KIMIT", "KELO"), only_online=False)
+nt = NetworkTable(["KCCI", "KIMIT", "KELO"], only_online=False)
 
 requireHrs = [0] * 25
 stData = {}
@@ -162,8 +161,7 @@ def application(environ, start_response):
         td,
         tm,
     )
-    pgconn = get_dbconn("iem")
-    icursor = pgconn.cursor(cursor_factory=psycopg2.extras.RealDictCursor)
+    pgconn, icursor = get_dbconnc("iem")
 
     icursor.execute(sqlStr)
 
@@ -181,13 +179,14 @@ def application(environ, start_response):
                 stData[row["station"]][vhour] = "&nbsp;"
             except KeyError:
                 continue
+    pgconn.close()
 
     j = 0
     ids = list(nt.sts.keys())
     ids.sort()
     for station in ids:
         j += 1
-        sio.write('<tr class="row' + str(j % 5) + '">')
+        sio.write(f'<tr class="row{j % 5}">')
         sio.write("%s%s%s" % ("<td>", nt.sts[station]["name"], "</td>"))
         for i in range(0, 24):
             sio.write('<td class="style' + str(i % 3) + '">')

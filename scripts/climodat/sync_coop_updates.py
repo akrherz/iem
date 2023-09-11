@@ -8,8 +8,7 @@ run from RUN_NOON.sh and RUN_0Z.sh
 # pylint: disable=cell-var-from-loop
 
 import pandas as pd
-from psycopg2.extras import RealDictCursor
-from pyiem.util import get_dbconn, get_sqlalchemy_conn, logger
+from pyiem.util import get_dbconnc, get_sqlalchemy_conn, logger
 
 LOG = logger()
 
@@ -33,8 +32,7 @@ def load_changes():
 
 def load_xref():
     """Figure out which stations below to whom."""
-    dbconn = get_dbconn("mesosite")
-    cursor = dbconn.cursor()
+    dbconn, cursor = get_dbconnc("mesosite")
     cursor.execute(
         "SELECT id, value from stations t JOIN station_attributes a "
         "on (t.iemid = a.iemid) WHERE t.network ~* 'CLIMATE' and "
@@ -42,8 +40,9 @@ def load_xref():
     )
     xref = {}
     for row in cursor:
-        entry = xref.setdefault(row[1], [])
-        entry.append(row[0])
+        entry = xref.setdefault(row["value"], [])
+        entry.append(row["id"])
+    dbconn.close()
     return xref
 
 
@@ -85,10 +84,8 @@ def compare_and_update(ccursor, currentob, newob):
 
 def main():
     """Go Main Go."""
-    accessdb = get_dbconn("iem")
-    acursor = accessdb.cursor(cursor_factory=RealDictCursor)
-    coopdb = get_dbconn("coop")
-    ccursor = coopdb.cursor(cursor_factory=RealDictCursor)
+    accessdb, acursor = get_dbconnc("iem")
+    coopdb, ccursor = get_dbconnc("coop")
     df = load_changes()
     xref = load_xref()
     updates = 0
@@ -144,7 +141,7 @@ def main():
                 LOG.info("database commit after %s updates", updates)
                 ccursor.close()
                 coopdb.commit()
-                ccursor = coopdb.cursor(cursor_factory=RealDictCursor)
+                ccursor = coopdb.cursor()
 
     logl = LOG.warning if updates < 500 else LOG.info
     logl("synced %s rows, %s unused, %s dups", updates, unused, dups)

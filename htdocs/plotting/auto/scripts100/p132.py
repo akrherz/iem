@@ -93,7 +93,7 @@ def plotter(fdict):
     days = ctx["days"]
 
     if month == "all":
-        months = range(1, 13)
+        months = list(range(1, 13))
     elif month == "fall":
         months = [9, 10, 11]
     elif month == "winter":
@@ -126,8 +126,8 @@ def plotter(fdict):
             from alldata WHERE station = :station)
 
             SELECT day as end_date, start_date, {varname} from data WHERE
-            month in :months and
-            extract(month from start_date) in :months and count = :d2 and
+            month = ANY(:months) and
+            extract(month from start_date) = ANY(:months) and count = :d2 and
             {varname} is not null
             ORDER by {varname} {sorder} LIMIT 10
             """
@@ -136,7 +136,7 @@ def plotter(fdict):
             params={
                 "days": days - 1,
                 "station": station,
-                "months": tuple(months),
+                "months": months,
                 "d2": days,
             },
             index_col=None,

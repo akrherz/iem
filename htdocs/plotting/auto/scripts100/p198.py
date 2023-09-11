@@ -186,7 +186,7 @@ def plotter(fdict):
     agg = ctx["agg"]
     offset = 0
     if month == "all":
-        months = range(1, 13)
+        months = list(range(1, 13))
     elif month == "fall":
         months = [9, 10, 11]
     elif month == "winter":
@@ -199,7 +199,7 @@ def plotter(fdict):
     elif month == "summer":
         months = [6, 7, 8]
     else:
-        ts = datetime.datetime.strptime("2000-" + month + "-01", "%Y-%b-%d")
+        ts = datetime.datetime.strptime(f"2000-{month}-01", "%Y-%b-%d")
         # make sure it is length two for the trick below in SQL
         months = [ts.month]
 
@@ -224,16 +224,16 @@ def plotter(fdict):
                 select {yrcol} as year, {varname},
                 valid at time zone 'UTC' as utc_valid
                 from raob_profile p JOIN raob_flights f on (p.fid = f.fid)
-                WHERE f.station in :stations and p.pressure = :level
-                and {hrlimiter} extract(month from f.valid) in :months
+                WHERE f.station = ANY(:stations) and p.pressure = :level
+                and {hrlimiter} extract(month from f.valid) = ANY(:months)
                 and {varname} is not null
             """
                 ),
                 conn,
                 params={
-                    "stations": tuple(stations),
+                    "stations": stations,
                     "level": level,
-                    "months": tuple(months),
+                    "months": months,
                 },
             )
     else:
@@ -243,15 +243,16 @@ def plotter(fdict):
                 text(
                     f"""
                 select {yrcol} as year, {varname}, valid at time zone 'UTC'
-                as utc_valid from raob_flights f WHERE f.station in :stations
-                and {hrlimiter} extract(month from f.valid) in :months and
+                as utc_valid from raob_flights f WHERE
+                f.station = ANY(:stations)
+                and {hrlimiter} extract(month from f.valid) = ANY(:months) and
                 {varname} is not null
             """
                 ),
                 conn,
                 params={
-                    "stations": tuple(stations),
-                    "months": tuple(months),
+                    "stations": stations,
+                    "months": months,
                 },
             )
     df = compute(dfin, varname)

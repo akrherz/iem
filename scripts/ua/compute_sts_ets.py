@@ -24,8 +24,8 @@ def main():
             stations = nt.sts[station]["name"].split("--")[1].strip().split()
         pcursor.execute(
             "SELECT min(date(valid)), max(date(valid)), count(*) "
-            "from raob_flights WHERE station in %s",
-            (tuple(stations),),
+            "from raob_flights WHERE station = ANY(%s)",
+            (stations,),
         )
         row = pcursor.fetchone()
         current_sts = nt.sts[station]["archive_begin"]

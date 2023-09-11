@@ -178,7 +178,7 @@ def plotter(fdict):
             title2 = f"on {ctx['sdate']:%-d %b}"
     else:
         if month == "all":
-            months = range(1, 13)
+            months = list(range(1, 13))
         elif month == "fall":
             months = [9, 10, 11]
         elif month == "winter":
@@ -194,9 +194,10 @@ def plotter(fdict):
             # make sure it is length two for the trick below in SQL
             months = [ts.month, 999]
         date_limiter = (
-            " and extract(month from valid at time zone :tzname) in :months "
+            " and extract(month from valid at time zone :tzname)"
+            " = ANY(:months) "
         )
-        params["months"] = tuple(months)
+        params["months"] = months
         title2 = MDICT[month]
     if ctx.get("hour") is not None:
         date_limiter += (

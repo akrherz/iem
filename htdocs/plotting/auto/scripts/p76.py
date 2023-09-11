@@ -179,7 +179,7 @@ def get_data(ctx, startyear):
     lastyear = today.year
     deltadays = 0
     if ctx["season"] == "all":
-        months = range(1, 13)
+        months = list(range(1, 13))
     elif ctx["season"] == "water_year":
         deltadays = 92
         months = range(1, 13)
@@ -212,11 +212,11 @@ def get_data(ctx, startyear):
         lastyear += 1
     if startyear >= lastyear:
         raise NoDataFound("Start year should be less than end year.")
-    hours = range(24)
+    hours = list(range(24))
     if ctx.get("hours"):
         try:
             tokens = [int(i.strip()) for i in ctx["hours"].split("-")]
-            hours = range(tokens[0], tokens[1] + 1)
+            hours = list(range(tokens[0], tokens[1] + 1))
         except ValueError as exp:
             raise Exception("malformed hour limiter, sorry.") from exp
         ctx["hour_limiter"] = (
@@ -233,8 +233,8 @@ def get_data(ctx, startyear):
                 coalesce(feel, tmpf) as feel
                 from alldata WHERE station = :station and dwpf > -90
                 and dwpf < 100 and tmpf >= dwpf and
-                extract(month from valid) in :months and
-                extract(hour from valid at time zone :tzname) in :hours
+                extract(month from valid) = ANY(:months) and
+                extract(hour from valid at time zone :tzname) = ANY(:hours)
                 and report_type = 3
             )
         SELECT valid,
@@ -247,8 +247,8 @@ def get_data(ctx, startyear):
             params={
                 "tzname": ctx["_nt"].sts[ctx["station"]]["tzname"],
                 "station": ctx["station"],
-                "months": tuple(months),
-                "hours": tuple(hours),
+                "months": months,
+                "hours": hours,
                 "days": deltadays,
             },
             index_col=None,

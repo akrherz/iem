@@ -12,10 +12,9 @@ import warnings
 from zoneinfo import ZoneInfo
 
 import numpy as np
-import psycopg2.extras
 from netCDF4 import chartostring
 from pyiem.observation import Observation
-from pyiem.util import convert_value, get_dbconn, logger, mm2inch, ncopen
+from pyiem.util import convert_value, get_dbconnc, logger, mm2inch, ncopen
 
 LOG = logger()
 MYDIR = "/mesonet/data/madis/mesonet1"
@@ -84,8 +83,7 @@ def build_roadstate_xref(ncvar):
 
 def main(argv):
     """Do Something"""
-    pgconn = get_dbconn("iem")
-    icursor = pgconn.cursor(cursor_factory=psycopg2.extras.RealDictCursor)
+    pgconn, icursor = get_dbconnc("iem")
     fn = find_file(0 if len(argv) == 1 else int(argv[1]))
     nc = ncopen(fn, timeout=300)
 

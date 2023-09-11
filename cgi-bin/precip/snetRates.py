@@ -3,9 +3,8 @@ import datetime
 from io import StringIO
 from zoneinfo import ZoneInfo
 
-import psycopg2.extras
 from paste.request import parse_formvars
-from pyiem.util import get_dbconn
+from pyiem.util import get_dbconnc
 
 
 def diff(nowVal, pastVal, mulli):
@@ -40,8 +39,7 @@ def application(environ, start_response):
     )
 
     if s.strftime("%Y%m%d") == datetime.datetime.now().strftime("%Y%m%d"):
-        IEM = get_dbconn("iem")
-        cursor = IEM.cursor(cursor_factory=psycopg2.extras.RealDictCursor)
+        IEM, cursor = get_dbconnc("iem")
         cursor.execute(
             """SELECT s.id as station, valid, pday from current_log c JOIN
         stations s on (s.iemid = c.iemid) WHERE
@@ -49,8 +47,7 @@ def application(environ, start_response):
             (station, s, e),
         )
     else:
-        SNET = get_dbconn("snet")
-        cursor = SNET.cursor(cursor_factory=psycopg2.extras.RealDictCursor)
+        SNET, cursor = get_dbconnc("snet")
 
         cursor.execute(
             """SELECT station, valid, pday from t"""

@@ -1,11 +1,10 @@
 """CF6 data."""
 import datetime
 
-import psycopg2.extras
 import simplejson as json
 from paste.request import parse_formvars
 from pyiem.reference import TRACE_VALUE
-from pyiem.util import get_dbconn, html_escape
+from pyiem.util import get_dbconnc, html_escape
 from pymemcache.client import Client
 from simplejson import encoder
 
@@ -48,8 +47,7 @@ def f2_sanitize(val):
 
 def get_data(station, year, fmt):
     """Get the data for this timestamp"""
-    pgconn = get_dbconn("iem")
-    cursor = pgconn.cursor(cursor_factory=psycopg2.extras.RealDictCursor)
+    pgconn, cursor = get_dbconnc("iem")
     data = {"results": []}
     # Fetch the daily values
     cursor.execute(
@@ -98,6 +96,7 @@ def get_data(station, year, fmt):
             }
         )
     if fmt == "json":
+        pgconn.close()
         return json.dumps(data)
     cols = (
         "station,valid,name,state,wfo,high,low,avg_temp,dep_temp,hdd,cdd,"
@@ -113,6 +112,7 @@ def get_data(station, year, fmt):
             else:
                 res += f"{val},"
         res += "\n"
+    pgconn.close()
     return res
 
 

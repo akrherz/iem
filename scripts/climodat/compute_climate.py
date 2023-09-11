@@ -5,13 +5,11 @@ Run for a previous date from RUN_2AM.sh
 import datetime
 import sys
 
-import psycopg2.extras
 from pyiem.network import Table as NetworkTable
 from pyiem.reference import state_names
-from pyiem.util import get_dbconn, logger
+from pyiem.util import get_dbconnc, logger
 
 LOG = logger()
-COOP = get_dbconn("coop")
 
 THISYEAR = datetime.date.today().year
 META = {
@@ -38,6 +36,7 @@ def daily_averages(table, ts):
     """
     Compute and Save the simple daily averages
     """
+    pgconn, cursor = get_dbconnc("coop")
     sday_limiter = ""
     day_limiter = ""
     if ts is not None:
@@ -49,14 +48,13 @@ def daily_averages(table, ts):
             LOG.info("Skipping %s as it has no stations", st)
             continue
         LOG.info("Computing Daily Averages for state: %s", st)
-        ccursor = COOP.cursor()
-        ccursor.execute(
+        cursor.execute(
             f"DELETE from {table} WHERE substr(station, 1, 2) = %s "
             f"{day_limiter}",
             (st,),
         )
-        LOG.info("    removed %s rows from %s", ccursor.rowcount, table)
-        ccursor.execute(
+        LOG.info("    removed %s rows from %s", cursor.rowcount, table)
+        cursor.execute(
             f"""
     INSERT into {table} (station, valid, high, low,
         max_high, min_high,
@@ -86,17 +84,17 @@ def daily_averages(table, ts):
     avg(merra_srad) as srad
     from alldata_{st} WHERE day >= %s and day < %s and
     precip is not null and high is not null and low is not null
-    and station in %s {sday_limiter}
+    and station = ANY(%s) {sday_limiter}
     GROUP by d, station)""",
             (
                 META[table]["sts"].strftime("%Y-%m-%d"),
                 META[table]["ets"].strftime("%Y-%m-%d"),
-                tuple(nt.sts.keys()),
+                list(nt.sts.keys()),
             ),
         )
-        LOG.info("    added %s rows to %s", ccursor.rowcount, table)
-        ccursor.close()
-        COOP.commit()
+        LOG.info("    added %s rows to %s", cursor.rowcount, table)
+    cursor.close()
+    pgconn.commit()
 
 
 def do_date(ccursor2, table, row, col, agg_col):
@@ -131,11 +129,11 @@ def do_date(ccursor2, table, row, col, agg_col):
 
 def set_daily_extremes(table, ts):
     """Set the extremes on a given table"""
+    pgconn, cursor = get_dbconnc("coop")
     sday_limiter = ""
     if ts is not None:
         sday_limiter = f" and valid = '2000-{ts:%m-%d}' "
-    ccursor = COOP.cursor(cursor_factory=psycopg2.extras.RealDictCursor)
-    ccursor.execute(
+    cursor.execute(
         f"""
         SELECT * from {table} WHERE max_high_yr is null and
         max_high is not null
@@ -144,9 +142,9 @@ def set_daily_extremes(table, ts):
         and min_low_yr is null and min_low is not null {sday_limiter}
         """
     )
-    ccursor2 = COOP.cursor()
+    ccursor2 = pgconn.cursor()
     cnt = 0
-    for row in ccursor:
+    for row in cursor:
         data = {}
         data["max_high_yr"] = do_date(ccursor2, table, row, "high", "max_high")
         data["min_high_yr"] = do_date(ccursor2, table, row, "high", "min_high")
@@ -174,11 +172,11 @@ def set_daily_extremes(table, ts):
         cnt += 1
         if cnt % 1000 == 0:
             ccursor2.close()
-            COOP.commit()
-            ccursor2 = COOP.cursor()
+            pgconn.commit()
+            ccursor2 = pgconn.cursor()
     ccursor2.close()
-    ccursor.close()
-    COOP.commit()
+    cursor.close()
+    pgconn.commit()
 
 
 def main(argv):

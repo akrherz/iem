@@ -107,12 +107,12 @@ def plotter(fdict):
             ST_ymin(ST_transform(geom,2163))) as height
             from sbw_{sts.year}
             WHERE status = 'NEW' and issue >= :sts and issue < :ets and
-            phenomena IN :phenomena and eventid is not null
+            phenomena = ANY(:phenomena) and eventid is not null
             ORDER by {opts[sort]["sortby"]}
         """
             ),
             conn,
-            params={"sts": sts, "ets": ets, "phenomena": tuple(phenoms[typ])},
+            params={"sts": sts, "ets": ets, "phenomena": phenoms[typ]},
             geom_col="utmgeom",
             index_col=None,
         )
@@ -125,12 +125,12 @@ def plotter(fdict):
             sum(ST_area2d(ST_transform(u.geom,2163))) as county_size
             from warnings_{sts.year} w JOIN ugcs u on (u.gid = w.gid)
             WHERE issue >= :sts and issue < :ets and
-            significance = 'W' and phenomena IN :phenomena
+            significance = 'W' and phenomena = ANY(:phenomena)
             GROUP by w.wfo, phenomena, eventid
         """
             ),
             conn,
-            params={"sts": sts, "ets": ets, "phenomena": tuple(phenoms[typ])},
+            params={"sts": sts, "ets": ets, "phenomena": phenoms[typ]},
             index_col=["wfo", "phenomena", "eventid"],
         )
     # Join the columns

@@ -4,9 +4,8 @@ Download interface for data from 'other' network
 import datetime
 from io import StringIO
 
-import psycopg2.extras
 from paste.request import parse_formvars
-from pyiem.util import get_dbconn
+from pyiem.util import get_dbconnc
 
 
 def fetcher(station, sts, ets):
@@ -30,9 +29,8 @@ def fetcher(station, sts, ets):
         "c1tmpf",
     ]
 
-    pgconn = get_dbconn("other")
-    ocursor = pgconn.cursor(cursor_factory=psycopg2.extras.RealDictCursor)
-    ocursor.execute(
+    pgconn, cursor = get_dbconnc("other")
+    cursor.execute(
         """
     SELECT * from alldata where station = %s and valid between %s and %s
     ORDER by valid ASC
@@ -50,9 +48,10 @@ def fetcher(station, sts, ets):
         )
     )
 
-    for row in ocursor:
+    for row in cursor:
         sio.write(",".join(f"{row[col]}" for col in cols))
         sio.write("\n")
+    pgconn.close()
     return sio.getvalue().encode("ascii")
 
 

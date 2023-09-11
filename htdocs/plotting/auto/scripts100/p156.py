@@ -152,15 +152,15 @@ def plotter(fdict):
             text(
                 "select extract(year from week_ending) as year, week_ending, "
                 "sum(num_value) as value, state_alpha "
-                "from nass_quickstats where short_desc in :desc and "
-                "num_value is not null and state_alpha in :states "
+                "from nass_quickstats where short_desc = ANY(:desc) and "
+                "num_value is not null and state_alpha = ANY(:states) "
                 "GROUP by year, week_ending, state_alpha "
                 "ORDER by state_alpha, week_ending"
             ),
             conn,
             params={
-                "states": tuple(states),
-                "desc": tuple(desc),
+                "states": states,
+                "desc": desc,
             },
             index_col=None,
             parse_dates="week_ending",

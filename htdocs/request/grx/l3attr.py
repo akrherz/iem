@@ -15,10 +15,9 @@ Add storm tracks.
 import math
 
 import numpy as np
-import psycopg2.extras
 import pyproj
 from paste.request import parse_formvars
-from pyiem.util import convert_value, get_dbconn
+from pyiem.util import convert_value, get_dbconnc
 from pymemcache.client import Client
 
 # Do geo math in US National Atlas Equal Area
@@ -283,8 +282,7 @@ def rabbit_tracks(row):
 
 def produce_content(nexrad, poh, meso, tvs, max_size):
     """Do Stuff"""
-    pgconn = get_dbconn("radar")
-    cursor = pgconn.cursor(cursor_factory=psycopg2.extras.RealDictCursor)
+    pgconn, cursor = get_dbconnc("radar")
     limiter = ""
     threshold = 999
     title = "IEM NEXRAD L3 Attributes"
@@ -354,6 +352,7 @@ def produce_content(nexrad, poh, meso, tvs, max_size):
             "END:\n"
         )
         res += rabbit_tracks(row)
+    pgconn.close()
     return res
 
 

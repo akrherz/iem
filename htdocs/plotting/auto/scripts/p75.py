@@ -5,10 +5,9 @@ import datetime
 
 import numpy as np
 import pandas as pd
-import psycopg2.extras
 from pyiem.exceptions import NoDataFound
 from pyiem.plot import figure_axes
-from pyiem.util import get_autoplot_context, get_dbconn
+from pyiem.util import get_autoplot_context, get_dbconnc
 from scipy import stats
 
 PDICT2 = {
@@ -48,15 +47,14 @@ def get_description():
 
 def plotter(fdict):
     """Go"""
-    pgconn = get_dbconn("coop")
-    ccursor = pgconn.cursor(cursor_factory=psycopg2.extras.RealDictCursor)
+    pgconn, cursor = get_dbconnc("coop")
     ctx = get_autoplot_context(fdict, get_description())
     station = ctx["station"]
     season = ctx["season"]
     _ = PDICT2[season]
     startyear = ctx["year"]
 
-    ccursor.execute(
+    cursor.execute(
         """
       SELECT extract(year from day + '%s month'::interval) as yr,
       sum(case when month in (12, 1, 2)
@@ -74,7 +72,8 @@ def plotter(fdict):
     """,
         (1 if season != "all" else 0, station),
     )
-    if ccursor.rowcount == 0:
+    if cursor.rowcount == 0:
+        pgconn.close()
         raise NoDataFound("No Data Found.")
 
     today = datetime.datetime.now()
@@ -82,10 +81,11 @@ def plotter(fdict):
     if season == "spring" and today.month > 5:
         thisyear += 1
     rows = []
-    for row in ccursor:
+    for row in cursor:
         if row["yr"] < startyear:
             continue
         rows.append(dict(year=int(row["yr"]), data=float(row[season])))
+    pgconn.close()
     df = pd.DataFrame(rows)
 
     data = np.array(df["data"])

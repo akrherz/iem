@@ -216,7 +216,7 @@ def get_context(fdict):
     ctx["station"] = ctx["zstation"]
 
     if ctx["month"] == "all":
-        months = range(1, 13)
+        months = list(range(1, 13))
     elif ctx["month"] == "fall":
         months = [9, 10, 11]
     elif ctx["month"] == "winter":
@@ -237,7 +237,7 @@ def get_context(fdict):
     params = {
         "thres": ctx["threshold"],
         "station": ctx["station"],
-        "months": tuple(months),
+        "months": months,
     }
     if ctx["opt"] == "tmpf_above":
         limiter = "round(tmpf::numeric,0) >= :thres"
@@ -265,7 +265,7 @@ def get_context(fdict):
             drct, sknt * 1.15 as smph from alldata
             where station = :station and {limiter} and sknt > 0
             and drct >= 0 and
-            drct <= 360 and extract(month from valid) in :months
+            drct <= 360 and extract(month from valid) = ANY(:months)
             """
             ),
             conn,

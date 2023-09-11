@@ -2,16 +2,14 @@
 import datetime
 import json
 
-import psycopg2.extras
 from paste.request import parse_formvars
-from pyiem.util import get_dbconn, html_escape
+from pyiem.util import get_dbconnc, html_escape
 from pymemcache.client import Client
 
 
 def run():
     """Actually do the hard work of getting the current SBW in geojson"""
-    pgconn = get_dbconn("mesosite")
-    cursor = pgconn.cursor(cursor_factory=psycopg2.extras.RealDictCursor)
+    pgconn, cursor = get_dbconnc("mesosite")
 
     utcnow = datetime.datetime.utcnow()
 
@@ -35,7 +33,7 @@ def run():
                 geometry=json.loads(row["geojson"]),
             )
         )
-
+    pgconn.close()
     return json.dumps(res)
 
 

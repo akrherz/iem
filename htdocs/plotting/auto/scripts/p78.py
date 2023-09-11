@@ -73,7 +73,7 @@ def plotter(fdict):
     month = ctx["month"]
 
     if month == "all":
-        months = range(1, 13)
+        months = list(range(1, 13))
     elif month == "fall":
         months = [9, 10, 11]
     elif month == "winter":
@@ -96,14 +96,14 @@ def plotter(fdict):
             from alldata where station = :station
             and drct is not null and dwpf is not null and dwpf <= tmpf
             and relh is not null
-            and extract(month from valid) in :months
+            and extract(month from valid) = ANY(:months)
             and report_type = 3
         """
             ),
             conn,
             params={
                 "station": station,
-                "months": tuple(months),
+                "months": months,
                 "tzname": ctx["_nt"].sts[station]["tzname"],
             },
         )
