@@ -5,12 +5,12 @@ import subprocess
 import zipfile
 
 import shapefile
-from pyiem.util import get_dbconn
+from pyiem.util import get_dbconnc
 
 
 def main():
     """Go main!"""
-    pgconn, icursor = get_dbconn("iem")
+    pgconn, icursor = get_dbconnc("iem")
 
     now = datetime.datetime.now()
     ts = now.strftime("%Y%m%d")
@@ -74,7 +74,7 @@ def main():
             continue
         cob[thisStation]["PMOI"] = round(float(thisPrec), 2)
         cob[thisStation]["SMOI"] = round(float(thisSnow), 2)
-
+    pgconn.close()
     with open("coop.csv", "w", encoding="ascii") as csv:
         csv.write(
             (

@@ -7,25 +7,22 @@ import datetime
 import pandas as pd
 import requests
 from pyiem.network import Table as NetworkTable
-from pyiem.util import get_dbconn, get_properties, logger, utc
+from pyiem.util import get_dbconnc, get_properties, logger, utc
 
 LOG = logger()
-DBCONN = get_dbconn("iem")
 NT = NetworkTable("IA_RWIS")
 
 
 def load_metadata():
     """Load up what we know about these traffic sites."""
     meta = {}
-    cur = DBCONN.cursor()
-    cur.execute(
+    conn, icursor = get_dbconnc("iem")
+    icursor.execute(
         "SELECT location_id, lane_id, sensor_id from rwis_traffic_meta"
     )
-    rows = cur.fetchall()
-    cur.close()
-    for row in rows:
-        key = f"{row[0]}_{row[1]}"
-        meta[key] = row[2]
+    for row in icursor:
+        key = f"{row['location_id']}_{row['lane_id']}"
+        meta[key] = row["sensor_id"]
     return meta
 
 
@@ -40,7 +37,7 @@ def create_sensor(cursor, key, row, meta):
             row["sensorName"],
         ),
     )
-    sensor_id = cursor.fetchone()[0]
+    sensor_id = cursor.fetchone()["id"]
     LOG.info(
         "Adding RWIS Traffic Sensor: %s Lane: %s Name: %s DB_SENSOR_ID: %s",
         row["stationId"],
@@ -116,10 +113,11 @@ def main():
                 "DataFrame construction failed with %s\n res: %s", exp, res
             )
             continue
-        cursor = DBCONN.cursor()
+        conn, cursor = get_dbconnc("iem")
         process(cursor, df, meta)
         cursor.close()
-        DBCONN.commit()
+        conn.commit()
+        conn.close()
 
 
 if __name__ == "__main__":

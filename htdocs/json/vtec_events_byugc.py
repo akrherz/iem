@@ -3,7 +3,7 @@ import datetime
 import json
 from io import BytesIO, StringIO
 
-from pandas.io.sql import read_sql
+import pandas as pd
 from paste.request import parse_formvars
 from pyiem.nws.vtec import VTEC_PHENOMENA, VTEC_SIGNIFICANCE, get_ps_string
 from pyiem.util import get_sqlalchemy_conn, html_escape
@@ -22,7 +22,7 @@ def make_url(row):
 def get_df(ugc, sdate, edate):
     """Answer the request!"""
     with get_sqlalchemy_conn("postgis") as conn:
-        df = read_sql(
+        df = pd.read_sql(
             """
             SELECT
             to_char(issue at time zone 'UTC',
@@ -43,7 +43,7 @@ def get_df(ugc, sdate, edate):
     if df.empty:
         return df
     df["name"] = df[["phenomena", "significance"]].apply(
-        lambda x: get_ps_string(x[0], x[1]), axis=1
+        lambda x: get_ps_string(x.iloc[0], x.iloc[1]), axis=1
     )
     df["ph_name"] = df["phenomena"].map(VTEC_PHENOMENA)
     df["sig_name"] = df["significance"].map(VTEC_SIGNIFICANCE)

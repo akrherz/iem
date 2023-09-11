@@ -8,7 +8,7 @@ from zoneinfo import ZoneInfo
 
 import pandas as pd
 from pyiem.observation import Observation
-from pyiem.util import c2f, convert_value, get_dbconn, logger, utc
+from pyiem.util import c2f, convert_value, get_dbconnc, logger, utc
 
 LOG = logger()
 BASEDIR = "/mesonet/home/mesonet/ot/ot0005/incoming/Fluxdata"
@@ -150,17 +150,16 @@ def make_time(string):
 
 def main():
     """Go Main Go"""
-    pgconn = get_dbconn("other")
-    ipgconn = get_dbconn("iem")
-    cursor = pgconn.cursor()
+    pgconn, ocursor = get_dbconnc("other")
+    ipgconn, icursor = get_dbconnc("iem")
 
     # Figure out max valid times
     maxts = {}
-    cursor.execute(
+    ocursor.execute(
         "SELECT station, max(valid) from flux_data GROUP by station"
     )
-    for row in cursor:
-        maxts[row[0]] = row[1]
+    for row in ocursor:
+        maxts[row["station"]] = row["max"]
 
     processed = 0
     for station, fns in FILENAMES.items():
@@ -222,7 +221,6 @@ def main():
             )
             cursor.close()
             pgconn.commit()
-        icursor = ipgconn.cursor()
         for _i, row in df.iterrows():
             iemob = Observation(
                 station, "NSTLFLUX", row["valid"].to_pydatetime()
@@ -244,9 +242,9 @@ def main():
                 if cvar in df.columns:
                     iemob.data[ivar] = row[cvar]
             iemob.save(icursor)
-        icursor.close()
-        ipgconn.commit()
         LOG.debug("Processed %s rows for %s", processed, station)
+    icursor.close()
+    ipgconn.commit()
 
 
 if __name__ == "__main__":
