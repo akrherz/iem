@@ -822,7 +822,7 @@ def application(environ, start_response):
     elif "salus" in ctx["myvars"]:
         res = do_salus(cursor, ctx)
     elif "swat" in ctx["myvars"]:
-        res = do_swat(cursor, ctx)
+        res = do_swat(ctx)
     else:
         res = do_simple(cursor, ctx)
     conn.close()
