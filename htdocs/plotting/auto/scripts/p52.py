@@ -78,7 +78,7 @@ def plotter(fdict):
     events = []
     labels = []
     types = []
-    for i, row in df.iterrows():
+    for row in df.itertuples(index=False):
         endts = max(row[4], row[5]).replace(tzinfo=datetime.timezone.utc)
         events.append(
             (row[3].replace(tzinfo=datetime.timezone.utc), endts, row[2])

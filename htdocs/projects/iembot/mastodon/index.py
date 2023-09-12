@@ -237,7 +237,7 @@ def save_code(mapp, server, code, headers):
             """,
             (server, me["username"]),
         )
-    mapp.iembot_user_id = cursor.fetchone()[0]
+    mapp.iembot_user_id = cursor.fetchone()["id"]
     cursor.execute(
         """
         update iembot_mastodon_oauth SET access_token = %s,

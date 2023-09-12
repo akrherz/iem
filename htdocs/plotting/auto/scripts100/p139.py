@@ -103,7 +103,7 @@ def plot_date(ax, i, date, station, tz) -> bool:
         df["tmpf"].max() - df["tmpf"].min()
     )
     df["xnorm"] = [
-        x.total_seconds() for x in (df["valid"].dt.to_pydatetime() - sts)
+        x.total_seconds() for x in (df["valid"] - pd.Timestamp(sts))
     ]
 
     lp = ax.plot(df["xnorm"], df["norm"] + i)

@@ -12,7 +12,7 @@ import ephem
 import pandas as pd
 import requests
 from paste.request import parse_formvars
-from pyiem.util import get_dbconn, get_sqlalchemy_conn, utc
+from pyiem.util import get_dbconnc, get_sqlalchemy_conn, utc
 from sqlalchemy import text
 
 # DOT plows
@@ -69,7 +69,7 @@ def do_moonphase(lon, lat):
         }
     ).sort_values(ascending=True)
     # Figure out the timezone
-    cursor = get_dbconn("mesosite").cursor()
+    pgconn, cursor = get_dbconnc("mesosite")
     cursor.execute(
         "select tzid from tz_world WHERE "
         "st_contains(geom, st_setsrid(ST_Point(%s, %s), 4326))",
@@ -78,7 +78,8 @@ def do_moonphase(lon, lat):
     if cursor.rowcount == 0:
         tzid = "UTC"
     else:
-        tzid = cursor.fetchone()[0]
+        tzid = cursor.fetchone()["tzid"]
+    pgconn.close()
     tz = ZoneInfo(tzid)
 
     s = series.dt.to_pydatetime()
@@ -126,7 +127,7 @@ def do_moon(lon, lat):
     )
     label = figurePhase(p1, p2)
     # Figure out the timezone
-    cursor = get_dbconn("mesosite").cursor()
+    pgconn, cursor = get_dbconnc("mesosite")
     cursor.execute(
         "select tzid from tz_world WHERE "
         "st_contains(geom, st_setsrid(ST_Point(%s, %s), 4326))",
@@ -135,7 +136,8 @@ def do_moon(lon, lat):
     if cursor.rowcount == 0:
         tzid = "UTC"
     else:
-        tzid = cursor.fetchone()[0]
+        tzid = cursor.fetchone()["tzid"]
+    pgconn.close()
     tz = ZoneInfo(tzid)
     return pd.DataFrame(
         {
@@ -283,8 +285,7 @@ def do_iarwis():
 
 def do_ahps_obs(nwsli):
     """Create a dataframe with AHPS river stage and CFS information"""
-    pgconn = get_dbconn("hml")
-    cursor = pgconn.cursor()
+    pgconn, cursor = get_dbconnc("hml")
     # Get metadata
     cursor.execute(
         """
@@ -294,10 +295,10 @@ def do_ahps_obs(nwsli):
         (nwsli,),
     )
     row = cursor.fetchone()
-    latitude = row[2]
-    longitude = row[1]
-    stationname = row[0]
-    tzinfo = ZoneInfo(row[3])
+    latitude = row["st_y"]
+    longitude = row["st_x"]
+    stationname = row["name"]
+    tzinfo = ZoneInfo(row["tzname"])
     # Figure out which keys we have
     cursor.execute(
         """
@@ -310,8 +311,9 @@ def do_ahps_obs(nwsli):
     )
     if cursor.rowcount != 2:
         return "NO DATA"
-    plabel = cursor.fetchone()[1]
-    slabel = cursor.fetchone()[1]
+    plabel = cursor.fetchone()["label"]
+    slabel = cursor.fetchone()["label"]
+    pgconn.close()
     with get_sqlalchemy_conn("hml") as conn:
         df = pd.read_sql(
             text(
@@ -365,8 +367,7 @@ def do_ahps_obs(nwsli):
 
 def do_ahps_fx(nwsli):
     """Create a dataframe with AHPS river stage and CFS information"""
-    pgconn = get_dbconn("hml")
-    cursor = pgconn.cursor()
+    pgconn, cursor = get_dbconnc("hml")
     # Get metadata
     cursor.execute(
         "SELECT name, st_x(geom), st_y(geom), tzname from stations "
@@ -374,15 +375,15 @@ def do_ahps_fx(nwsli):
         (nwsli,),
     )
     row = cursor.fetchone()
-    latitude = row[2]
-    longitude = row[1]
-    stationname = row[0]
-    tzinfo = ZoneInfo(row[3])
+    latitude = row["st_y"]
+    longitude = row["st_x"]
+    stationname = row["name"]
+    tzinfo = ZoneInfo(row["tzname"])
     # Get the last forecast
     cursor.execute(
         """
-        select id, forecast_sts at time zone 'UTC',
-        generationtime at time zone 'UTC', primaryname, primaryunits,
+        select id, forecast_sts at time zone 'UTC' as fts,
+        generationtime at time zone 'UTC' as gts, primaryname, primaryunits,
         secondaryname, secondaryunits
         from hml_forecast where station = %s
         and generationtime > now() - '7 days'::interval
@@ -391,11 +392,12 @@ def do_ahps_fx(nwsli):
         (nwsli,),
     )
     row = cursor.fetchone()
-    primaryname = row[3]
-    generationtime = row[2]
-    primaryunits = row[4]
-    secondaryname = row[5]
-    secondaryunits = row[6]
+    primaryname = row["primaryname"]
+    generationtime = row["gts"]
+    primaryunits = row["primaryunits"]
+    secondaryname = row["secondaryname"]
+    secondaryunits = row["secondaryunits"]
+    pgconn.close()
     # Get the latest forecast
     with get_sqlalchemy_conn("hml") as conn:
         df = pd.read_sql(
@@ -448,8 +450,7 @@ def feet(val, suffix="'"):
 
 def do_ahps(nwsli):
     """Create a dataframe with AHPS river stage and CFS information"""
-    pgconn = get_dbconn("hml")
-    cursor = pgconn.cursor()
+    pgconn, cursor = get_dbconnc("hml")
     # Get metadata
     cursor.execute(
         "SELECT name, st_x(geom), st_y(geom), tzname from stations "
@@ -457,15 +458,15 @@ def do_ahps(nwsli):
         (nwsli,),
     )
     row = cursor.fetchone()
-    latitude = row[2]
-    longitude = row[1]
-    stationname = row[0].replace(",", " ")
-    tzinfo = ZoneInfo(row[3])
+    latitude = row["st_y"]
+    longitude = row["st_x"]
+    stationname = row["name"].replace(",", " ")
+    tzinfo = ZoneInfo(row["tzname"])
     # Get the last forecast
     cursor.execute(
         """
-        select id, forecast_sts at time zone 'UTC',
-        generationtime at time zone 'UTC', primaryname, primaryunits,
+        select id, forecast_sts at time zone 'UTC' as fts,
+        generationtime at time zone 'UTC' as gts, primaryname, primaryunits,
         secondaryname, secondaryunits
         from hml_forecast where station = %s
         and generationtime > now() - '7 days'::interval
@@ -476,7 +477,7 @@ def do_ahps(nwsli):
     if cursor.rowcount == 0:
         return "NO DATA"
     row = cursor.fetchone()
-    generationtime = row[2]
+    generationtime = row["gts"]
     y = f"{generationtime.year}"
     # Figure out which keys we have
     cursor.execute(
@@ -492,10 +493,10 @@ def do_ahps(nwsli):
         return "NO DATA"
     lookupkey = 14
     for _row in cursor:
-        if _row[1].find("[ft]") > 0:
+        if _row["label"].find("[ft]") > 0:
             lookupkey = _row[0]
             break
-
+    pgconn.close()
     # get observations
     with get_sqlalchemy_conn("hml") as conn:
         odf = pd.read_sql(

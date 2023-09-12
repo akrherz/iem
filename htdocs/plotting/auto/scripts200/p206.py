@@ -122,6 +122,18 @@ def get_df(ctx, buf=2.25):
     else:
         bnds = reference.wfo_bounds[ctx["wfo"]]
         ctx["title"] = f"NWS CWA {ctx['_sname']}"
+    giswkt = "SRID=4326;POLYGON((%s %s, %s %s, %s %s, %s %s, %s %s))" % (
+        bnds[0] - buf,
+        bnds[1] - buf,
+        bnds[0] - buf,
+        bnds[3] + buf,
+        bnds[2] + buf,
+        bnds[3] + buf,
+        bnds[2] + buf,
+        bnds[1] - buf,
+        bnds[0] - buf,
+        bnds[1] - buf,
+    )
     with get_sqlalchemy_conn("iem") as conn:
         df = gpd.read_postgis(
             """
@@ -129,9 +141,7 @@ def get_df(ctx, buf=2.25):
                 select id, st_x(geom) as lon, st_y(geom) as lat,
                 state, wfo, iemid, country, geom from stations
                 where network ~* 'ASOS' and
-                ST_contains(ST_geomfromtext(
-                    'SRID=4326;POLYGON((%s %s, %s %s, %s %s, %s %s, %s %s))'),
-                    geom)
+                ST_contains(ST_geomfromtext(%s), geom)
             )
             SELECT s.day, s.max_tmpf, s.min_tmpf, s.max_dwpf, s.min_dwpf,
             s.min_rh, s.max_rh, s.min_feel, s.max_feel,
@@ -143,16 +153,7 @@ def get_df(ctx, buf=2.25):
         """,
             conn,
             params=(
-                bnds[0] - buf,
-                bnds[1] - buf,
-                bnds[0] - buf,
-                bnds[3] + buf,
-                bnds[2] + buf,
-                bnds[3] + buf,
-                bnds[2] + buf,
-                bnds[1] - buf,
-                bnds[0] - buf,
-                bnds[1] - buf,
+                giswkt,
                 ctx["day"],
             ),
             geom_col="geom",
@@ -247,4 +248,4 @@ def plotter(fdict):
 
 
 if __name__ == "__main__":
-    plotter({"v": "feel"})
+    plotter({})

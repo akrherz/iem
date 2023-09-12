@@ -79,12 +79,16 @@ def plotter(fdict):
         cnt = len(df[(df["temp_hour"] > 1) & (df["temp_hour"] < 12)].index)
         if cnt / len(df.index) > 0.5:
             is_morning = True
-    req = requests.get(
-        "http://mesonet.agron.iastate.edu/json/climodat_dd.py?"
-        f"station={ctx['station']}&gddbase=50&gddceil=86&",
-        timeout=60,
-    )
-    data = req.json()
+    try:
+        # Sub-optimal need to actually have data.
+        req = requests.get(
+            "http://mesonet.agron.iastate.edu/json/climodat_dd.py?"
+            f"station={ctx['station']}&gddbase=50&gddceil=86&",
+            timeout=60,
+        )
+        data = req.json()
+    except Exception:
+        raise NoDataFound("Backend API failure, no data.")
     gfsdf = pd.DataFrame(data["gfs"])
     gfsdf["date"] = pd.to_datetime(gfsdf["date"])
     if is_morning:

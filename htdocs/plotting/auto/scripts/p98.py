@@ -75,7 +75,7 @@ def plotter(fdict):
         df = pd.read_sql(
             f"""
             SELECT sday,
-            sum(case when {varname} {operator} %s then 1 else 0 end)
+            sum(case when {varname}::numeric {operator} %s then 1 else 0 end)
             as hit,
             count(*) as total
             from alldata WHERE station = %s and month = %s
@@ -102,7 +102,7 @@ def plotter(fdict):
         ax.text(
             i + 1,
             mybar.get_height() + 0.3,
-            f"{df['hit'][i]}",
+            f"{df['hit'].iloc[i]}",
             ha="center",
         )
     ax.set_ylabel("Frequency (%)")
@@ -118,12 +118,4 @@ def plotter(fdict):
 
 
 if __name__ == "__main__":
-    plotter(
-        dict(
-            month=9,
-            dir="below",
-            thres=65,
-            station="IA2724",
-            network="IACLIMATE",
-        )
-    )
+    plotter({})
