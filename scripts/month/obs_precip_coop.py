@@ -34,7 +34,7 @@ def main():
     labels = []
     icursor.execute(sql)
     for row in icursor:
-        if row["missing"] > (now.day / 3) or row[1] is None:
+        if row["missing"] > (now.day / 3) or row["precip"] is None:
             continue
 
         sid = row["id"]
