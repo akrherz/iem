@@ -7,7 +7,7 @@ import requests
 from cryptography.fernet import Fernet
 from paste.request import get_cookie_dict, parse_formvars
 from pyiem.templates.iem import TEMPLATE
-from pyiem.util import get_dbconn, get_properties
+from pyiem.util import get_dbconnc, get_properties
 
 PRIVKEY = (get_properties()["mod_wsgi.privkey"]).encode("ascii")
 APP = "https://mesonet.agron.iastate.edu/projects/iembot/mastodon"
@@ -36,8 +36,7 @@ TEST_MESSAGE = "Hello, this is a test message from the IEMBot integration."
 def get_mastodon_app(server):
     """Get or create an app."""
     redirect_uri = f"{APP}/?s={server}"
-    conn = get_dbconn("mesosite")
-    cursor = conn.cursor()
+    conn, cursor = get_dbconnc("mesosite")
     cursor.execute(
         """
         SELECT client_id, client_secret from iembot_mastodon_apps WHERE
@@ -46,7 +45,9 @@ def get_mastodon_app(server):
         (server,),
     )
     if cursor.rowcount == 1:
-        (client_id, client_secret) = cursor.fetchone()
+        row = cursor.fetchone()
+        client_id = row["client_id"]
+        client_secret = row["client_secret"]
     else:
         api = mastodon.Mastodon(api_base_url=f"https://{server}")
         (client_id, client_secret) = api.create_app(
@@ -63,6 +64,7 @@ def get_mastodon_app(server):
         )
         cursor.close()
         conn.commit()
+    conn.close()
     mapp = mastodon.Mastodon(
         client_id=client_id,
         client_secret=client_secret,
@@ -81,8 +83,7 @@ def get_app4user(cookies):
         user_id = int(Fernet(PRIVKEY).decrypt(mm.encode("ascii")))
     except Exception:
         return None
-    conn = get_dbconn("mesosite")
-    cursor = conn.cursor()
+    conn, cursor = get_dbconnc("mesosite")
     cursor.execute(
         """
         select access_token, server from iembot_mastodon_oauth o,
@@ -95,8 +96,8 @@ def get_app4user(cookies):
         return None
     row = cursor.fetchone()
     mapp = mastodon.Mastodon(
-        access_token=row[0],
-        api_base_url=f"https://{row[1]}",
+        access_token=row["access_token"],
+        api_base_url=f"https://{row['server']}",
     )
     try:
         mapp.me()
@@ -111,7 +112,9 @@ def get_app4user(cookies):
         )
         cursor.close()
         conn.commit()
+        conn.close()
         return None
+    conn.close()
     # For better or likely worse, we tag along this attribute
     mapp.iembot_user_id = user_id
     return mapp
@@ -120,13 +123,13 @@ def get_app4user(cookies):
 def build_subui(mapp, fdict):
     """Show the subscriptions."""
     me = mapp.me()
+    # Shrug, got a puzzling error on the server with this
     res = f"""
-    <p>Hi <a href="{me['url']}">@{me['username']}</a>
-    <img src="{me['avatar']}" style="width:20px;">!
+    <p>Hi <a href="{str(me['url'])}">@{str(me['username'])}</a>
+    <img src="{str(me['avatar'])}" style="width:20px;">!
     This page configures your IEMBot channel subscriptions.</p>
     """
-    conn = get_dbconn("mesosite")
-    cursor = conn.cursor()
+    conn, cursor = get_dbconnc("mesosite")
     log = []
     if fdict.get("testmsg") is not None:
         try:
@@ -180,10 +183,14 @@ def build_subui(mapp, fdict):
     <h3>Currently Subscribed Channels.</h3>
     """
     for row in cursor:
-        du = f"/projects/iembot/mastodon/?del={row[0]}"
-        res += f'<p><strong>{row[0]}</strong> <a href="{du}">Delete</a></p>'
+        du = f"/projects/iembot/mastodon/?del={row['channel']}"
+        res += (
+            f'<p><strong>{row["channel"]}</strong> '
+            f'<a href="{du}">Delete</a></p>'
+        )
     cursor.close()
     conn.commit()
+    conn.close()
     return res
 
 
@@ -209,8 +216,7 @@ def save_code(mapp, server, code, headers):
         access_token=access_token,
     )
     me = mapp.me()
-    conn = get_dbconn("mesosite")
-    cursor = conn.cursor()
+    conn, cursor = get_dbconnc("mesosite")
     # Ensure we have no current entry
     cursor.execute(
         """
@@ -241,6 +247,7 @@ def save_code(mapp, server, code, headers):
     )
     cursor.close()
     conn.commit()
+    conn.close()
     # Set a cookie
     text = (
         Fernet(PRIVKEY)

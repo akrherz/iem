@@ -80,15 +80,16 @@ def get_context(fdict):
             f"""SELECT
             day - (
                 (case when month > 6 then year else year - 1 end)::text ||
-                '-07-01')::date,
-            case when month > 6 then year else year - 1 end, {varname}
+                '-07-01')::date as dt,
+            case when month > 6 then year else year - 1 end as yr, {varname}
             from alldata WHERE station = %s and low is not null and
             high is not null and day >= %s ORDER by day ASC""",
             (station, datetime.date(startyear, 7, 1)),
         )
     else:
         cursor.execute(
-            f"""SELECT extract(doy from day) - 1, year, {varname} from
+            f"""SELECT extract(doy from day) - 1 as dt,
+            year as yr, {varname} from
             alldata WHERE station = %s and high is not null and
             low is not null and year >= %s ORDER by day ASC""",
             (station, startyear),
@@ -97,7 +98,7 @@ def get_context(fdict):
         pgconn.close()
         raise NoDataFound("No Data Found.")
     for row in cursor:
-        data[int(row[1] - startyear), int(row[0])] = row[2]
+        data[int(row["yr"] - startyear), int(row["dt"])] = row[varname]
     pgconn.close()
     data.mask = np.where(data == 199, True, False)
 

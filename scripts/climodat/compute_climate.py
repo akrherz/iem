@@ -114,7 +114,7 @@ def do_date(ccursor2, table, row, col, agg_col):
     )
     years = []
     for row2 in ccursor2:
-        years.append(row2[0])
+        years.append(row2["year"])
     if not years:
         LOG.info(
             "None %s %s %s %s %s",

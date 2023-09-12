@@ -4,7 +4,7 @@ import datetime
 
 import pyiem.tracker
 from pyiem.plot import MapPlot
-from pyiem.util import get_dbconn
+from pyiem.util import get_dbconnc
 
 
 def main():
@@ -13,8 +13,7 @@ def main():
 
     qdict = pyiem.tracker.loadqc()
 
-    pgconn = get_dbconn("iem")
-    icursor = pgconn.cursor()
+    pgconn, icursor = get_dbconnc("iem")
 
     # Compute normal from the climate database
     sql = """SELECT id,
@@ -35,15 +34,18 @@ def main():
     labels = []
     icursor.execute(sql)
     for row in icursor:
-        sid = row[0]
+        sid = row["id"]
         labels.append(sid)
-        lats.append(row[3])
-        lons.append(row[2])
-        if not qdict.get(sid, {}).get("precip", False) and row[1] is not None:
-            precip.append("%.2f" % (row[1],))
+        lats.append(row["lat"])
+        lons.append(row["lon"])
+        if (
+            not qdict.get(sid, {}).get("precip", False)
+            and row["precip"] is not None
+        ):
+            precip.append("%.2f" % (row["precip"],))
         else:
             precip.append("M")
-
+    pgconn.close()
     mp = MapPlot(
         title="This Month's Precipitation [inch]",
         subtitle=now.strftime("%b %Y"),

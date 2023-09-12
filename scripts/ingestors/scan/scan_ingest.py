@@ -177,7 +177,7 @@ def load_times(icursor):
     )
     data = {}
     for row in icursor:
-        data[row[0]] = row[1]
+        data[row["id"]] = row["valid"]
     return data
 
 

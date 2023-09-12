@@ -17,7 +17,6 @@ def main():
 
     threshold = utc() - datetime.timedelta(hours=12)
 
-    icursor = IEM.cursor()
     icursor.execute(
         "SELECT id, valid from current c JOIN stations t ON "
         "(t.iemid = c.iemid) WHERE t.network = 'ISUSM'"
