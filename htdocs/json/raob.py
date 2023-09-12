@@ -17,6 +17,7 @@ import datetime
 import json
 from zoneinfo import ZoneInfo
 
+import numpy as np
 import pandas as pd
 from paste.request import parse_formvars
 from pyiem.network import Table as NetworkTable
@@ -29,7 +30,7 @@ json.encoder.FLOAT_REPR = lambda o: format(o, ".2f")
 
 def safe(val):
     """Be careful"""
-    if val is None:
+    if np.isnan(val):
         return None
     return float(val)
 

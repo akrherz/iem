@@ -132,8 +132,8 @@ def plotter(fdict):
     )
     for row in cursor:
         for i in range(5):
-            yearlybins[int(row[0]) - minyear, i] = row[f"bin{i}"]
-            yearlytotals[int(row[0]) - minyear, i] = row[f"tot{i}"]
+            yearlybins[int(row["year"]) - minyear, i] = row[f"bin{i}"]
+            yearlytotals[int(row["year"]) - minyear, i] = row[f"tot{i}"]
     pgconn.close()
     avgs = np.average(yearlybins, 0)
     df["avg_days"] = avgs

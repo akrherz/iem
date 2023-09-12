@@ -1,5 +1,4 @@
 """ISU Agronomy Hall Vantage Pro 2 OT0010"""
-import datetime
 import os
 import re
 import sys
@@ -8,19 +7,16 @@ from zoneinfo import ZoneInfo
 from metpy.calc import dewpoint_from_relative_humidity
 from metpy.units import units
 from pyiem.observation import Observation
-from pyiem.util import convert_value, get_dbconn, logger
+from pyiem.util import convert_value, get_dbconnc, logger, utc
 
 LOG = logger()
 
 
 def main():
     """Go Main Go"""
-    iemaccess = get_dbconn("iem")
-    cursor = iemaccess.cursor()
+    iemaccess, cursor = get_dbconnc("iem")
 
-    valid = datetime.datetime.utcnow()
-    valid = valid.replace(tzinfo=ZoneInfo("UTC"))
-    valid = valid.astimezone(ZoneInfo("America/Chicago"))
+    valid = utc().astimezone(ZoneInfo("America/Chicago"))
     fn = valid.strftime("/mesonet/ARCHIVE/data/%Y/%m/%d/text/ot/ot0010.dat")
 
     if not os.path.isfile(fn):
