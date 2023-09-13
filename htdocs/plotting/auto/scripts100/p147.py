@@ -70,11 +70,11 @@ def plotter(fdict):
             alldata WHERE station = %s)
 
         SELECT extract(doy from o.day) as doy, count(*),
-        sum(case when o.high >= (t.high + %s) then 1 else 0 end) as high_hits,
-        sum(case when o.low >= (t.low + %s) then 1 else 0 end) as low_hits,
+        sum(case when o.high >= (t.high::numeric + %s) then 1 else 0 end) as high_hits,
+        sum(case when o.low >= (t.low::numeric + %s) then 1 else 0 end) as low_hits,
         sum(case when o.precip >= (t.precip + %s) then 1 else 0 end)
         as precip_hits,
-        sum(case when o.avgt >= (t.avgt + %s) then 1 else 0 end) as avgt_hits
+        sum(case when o.avgt >= (t.avgt::numeric + %s) then 1 else 0 end) as avgt_hits
         from obs1 o JOIN obs2 t on (o.day = t.day) GROUP by doy
         ORDER by doy ASC
         """,

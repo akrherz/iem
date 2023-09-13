@@ -98,7 +98,7 @@ def plotter(fdict):
         df = pd.read_sql(
             f"""
             select month,
-            sum(case when {varname} >= %s and {varname} <= %s
+            sum(case when {varname}::numeric >= %s and {varname}::numeric <= %s
                 then 1 else 0 end) as hits, count(*)
             from alldata where station = %s and {varname} is not null
             and year >= %s and year <= %s GROUP by month ORDER by month ASC

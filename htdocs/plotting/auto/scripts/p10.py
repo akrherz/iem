@@ -77,37 +77,37 @@ def plotter(fdict):
 
     if direction == "below":
         sql = f"""select year,
-        max(case when {varname} < %s and month < 7
+        max(case when {varname}::numeric < %s and month < 7
             then extract(doy from day) else 0 end) as spring,
-        max(case when {varname} < %s and month < 7
+        max(case when {varname}::numeric < %s and month < 7
             then day else null end) as spring_date,
-        min(case when {varname} < %s and month > 6
+        min(case when {varname}::numeric < %s and month > 6
             then extract(doy from day) else 388 end) as fall,
-        min(case when {varname} < %s and month > 6
+        min(case when {varname}::numeric < %s and month > 6
             then day else null end) as fall_date
         from alldata where station = %s
         GROUP by year ORDER by year ASC"""
     elif direction == "above":
         sql = f"""select year,
-             min(case when {varname} >= %s and month < 7
+             min(case when {varname}::numeric >= %s and month < 7
                  then extract(doy from day) else 183 end) as spring,
-             min(case when {varname} >= %s and month < 7
+             min(case when {varname}::numeric >= %s and month < 7
                  then day else null end) as spring_date,
-             max(case when {varname} >= %s and month > 6
+             max(case when {varname}::numeric >= %s and month > 6
                  then extract(doy from day) else 183 end) as fall,
-             max(case when {varname} >= %s and month > 6
+             max(case when {varname}::numeric >= %s and month > 6
                  then day else null end) as fall_date
             from alldata where station = %s
             GROUP by year ORDER by year ASC"""
     else:  # above2
         sql = f"""select year,
-             max(case when {varname} >= %s and month < 7
+             max(case when {varname}::numeric >= %s and month < 7
                  then extract(doy from day) else 0 end) as spring,
-             max(case when {varname} >= %s and month < 7
+             max(case when {varname}::numeric >= %s and month < 7
                  then day else null end) as spring_date,
-             min(case when {varname} >= %s and month > 6
+             min(case when {varname}::numeric >= %s and month > 6
                  then extract(doy from day) else 388 end) as fall,
-             min(case when {varname} >= %s and month > 6
+             min(case when {varname}::numeric >= %s and month > 6
                  then day else null end) as fall_date
             from alldata where station = %s
             GROUP by year ORDER by year ASC"""

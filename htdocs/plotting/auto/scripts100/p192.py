@@ -76,6 +76,18 @@ def get_description():
 
 def get_df(ctx, bnds, buf=2.25):
     """Figure out what data we need to fetch here"""
+    giswkt = "SRID=4326;POLYGON((%s %s, %s %s, %s %s, %s %s, %s %s))" % (
+        bnds[0] - buf,
+        bnds[1] - buf,
+        bnds[0] - buf,
+        bnds[3] + buf,
+        bnds[2] + buf,
+        bnds[3] + buf,
+        bnds[2] + buf,
+        bnds[1] - buf,
+        bnds[0] - buf,
+        bnds[1] - buf,
+    )
     if ctx.get("valid"):
         valid = ctx["valid"].replace(tzinfo=ZoneInfo("UTC"))
         with get_sqlalchemy_conn("asos") as conn:
@@ -85,9 +97,7 @@ def get_df(ctx, bnds, buf=2.25):
                 select id, st_x(geom) as lon, st_y(geom) as lat,
                 state, wfo from stations
                 where network ~* 'ASOS' and
-                ST_contains(ST_geomfromtext(
-                    'SRID=4326;POLYGON((%s %s, %s %s, %s %s, %s %s, %s %s))
-                            '), geom)
+                ST_contains(ST_geomfromtext(%s), geom)
             )
             SELECT station, vsby, tmpf, dwpf, sknt, state, wfo, lat, lon, relh,
             abs(extract(epoch from (%s - valid))) as tdiff from
@@ -96,16 +106,7 @@ def get_df(ctx, bnds, buf=2.25):
             """,
                 conn,
                 params=(
-                    bnds[0] - buf,
-                    bnds[1] - buf,
-                    bnds[0] - buf,
-                    bnds[3] + buf,
-                    bnds[2] + buf,
-                    bnds[3] + buf,
-                    bnds[2] + buf,
-                    bnds[1] - buf,
-                    bnds[0] - buf,
-                    bnds[1] - buf,
+                    giswkt,
                     valid,
                     valid - datetime.timedelta(minutes=30),
                     valid + datetime.timedelta(minutes=30),
@@ -124,22 +125,10 @@ def get_df(ctx, bnds, buf=2.25):
         WHERE s.network ~* 'ASOS' and s.country = 'US' and
         valid + '80 minutes'::interval > now() and
         vsby >= 0 and vsby <= 10 and
-        ST_contains(ST_geomfromtext(
-            'SRID=4326;POLYGON((%s %s, %s %s, %s %s, %s %s, %s %s))'), geom)
+        ST_contains(ST_geomfromtext(%s), geom)
             """,
                 conn,
-                params=(
-                    bnds[0] - buf,
-                    bnds[1] - buf,
-                    bnds[0] - buf,
-                    bnds[3] + buf,
-                    bnds[2] + buf,
-                    bnds[3] + buf,
-                    bnds[2] + buf,
-                    bnds[1] - buf,
-                    bnds[0] - buf,
-                    bnds[1] - buf,
-                ),
+                params=(giswkt,),
             )
     return df, valid
 

@@ -263,16 +263,6 @@ def plotter(fdict):
         "day": p.split(".")[0],
         "t": level.split(".", 1)[1],
         "cat": level.split(".")[0],
-        "g1": GRIDWEST,
-        "g2": GRIDSOUTH,
-        "g3": GRIDWEST,
-        "g4": GRIDNORTH,
-        "g5": GRIDEAST,
-        "g6": GRIDNORTH,
-        "g7": GRIDEAST,
-        "g8": GRIDSOUTH,
-        "g9": GRIDWEST,
-        "g10": GRIDSOUTH,
         "months": months,
         "edate": ctx.get("edate", utc() + datetime.timedelta(days=2)),
     }
@@ -282,6 +272,19 @@ def plotter(fdict):
     if hour != "A":
         params["hour"] = int(hour)
         hour_limiter = " and cycle = :hour "
+    giswkt = "SRID=4326;POLYGON((%s %s, %s %s, %s %s, %s %s, %s %s))" % (
+        GRIDWEST,
+        GRIDSOUTH,
+        GRIDWEST,
+        GRIDNORTH,
+        GRIDEAST,
+        GRIDNORTH,
+        GRIDEAST,
+        GRIDSOUTH,
+        GRIDWEST,
+        GRIDSOUTH,
+    )
+    params["giswkt"] = giswkt
     with get_sqlalchemy_conn("postgis") as conn:
         df = gpd.read_postgis(
             text(
@@ -291,8 +294,7 @@ def plotter(fdict):
             from spc_outlooks where outlook_type = :ot and day = :day
             {hour_limiter} and threshold = :t and category = :cat and
             ST_Intersects(geom,
-            ST_GeomFromEWKT('SRID=4326;POLYGON((:g1 :g2, :g3 :g4,
-            :g5 :g6, :g7 :g8, :g9 :g10))'))
+            ST_GeomFromEWKT(:giswkt))
             and extract(month from issue) = ANY(:months)
             and product_issue > '2002-01-01' and
             product_issue < :edate

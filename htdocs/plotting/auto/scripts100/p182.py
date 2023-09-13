@@ -1,4 +1,13 @@
-"""Precip estimates"""
+"""
+This application attempts to assess the
+effectiveness of a calendar day's rainfall based on where the rain fell
+in relation to a previous period of days departure from climatology. So
+for a given date and state, the areal coverage of daily precipitation
+at some given threshold is compared against the departure from climatology
+over some given number of days.  The intention is to answer a question like
+how much of the rain on a given day fell on an area that needed it!  The
+areal coverage percentages are relative to the given state.
+"""
 import datetime
 import os
 
@@ -13,19 +22,7 @@ from pyiem.reference import state_names
 
 def get_description():
     """Return a dict describing how to call this plotter"""
-    desc = {}
-    desc["data"] = False
-    desc[
-        "description"
-    ] = """This application attempts to assess the
-    effectiveness of a calendar day's rainfall based on where the rain fell
-    in relation to a previous period of days departure from climatology. So
-    for a given date and state, the areal coverage of daily precipitation
-    at some given threshold is compared against the departure from climatology
-    over some given number of days.  The intention is to answer a question like
-    how much of the rain on a given day fell on an area that needed it!  The
-    areal coverage percentages are relative to the given state.
-    """
+    desc = {"description": __doc__}
     today = datetime.datetime.today() - datetime.timedelta(days=1)
     desc["arguments"] = [
         dict(
@@ -123,7 +120,10 @@ def plotter(fdict):
                     )
 
     # Get climatology
-    with util.ncopen(iemre.get_dailyc_mrms_ncname()) as nc:
+    ncfn = iemre.get_dailyc_mrms_ncname()
+    if not os.path.isfile(ncfn):
+        raise NoDataFound(f"Missing {ncfn}")
+    with util.ncopen(ncfn) as nc:
         if (idx1 - idx0) < 32:
             c_p01d = util.mm2inch(
                 np.sum(nc.variables[ncvar][idx0:idx1, jslice, islice], 0)

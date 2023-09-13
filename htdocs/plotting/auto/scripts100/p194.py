@@ -131,14 +131,25 @@ def plotter(fdict):
     lats = lats[::-1]
     affine = Affine(griddelta, 0.0, west, 0.0, 0 - griddelta, north)
     # get the geopandas data
+    giswkt = "SRID=4326;POLYGON((%s %s, %s %s, %s %s, %s %s, %s %s))" % (
+        west,
+        south,
+        west,
+        north,
+        east,
+        north,
+        east,
+        south,
+        west,
+        south,
+    )
     with get_sqlalchemy_conn("postgis") as conn:
         df = read_postgis(
             """
         with d as (
             select valid, (ST_Dump(st_simplify(geom, 0.01))).geom from usdm
             where valid >= %s and valid <= %s and dm >= %s and
-            ST_Intersects(geom, ST_GeomFromEWKT('SRID=4326;
-            POLYGON((%s %s, %s %s, %s %s, %s %s, %s %s))'))
+            ST_Intersects(geom, ST_GeomFromEWKT(%s))
         )
         select valid, st_collect(geom) as the_geom from d GROUP by valid
         """,
@@ -147,16 +158,7 @@ def plotter(fdict):
                 sdate,
                 edate,
                 dlevel,
-                west,
-                south,
-                west,
-                north,
-                east,
-                north,
-                east,
-                south,
-                west,
-                south,
+                giswkt,
             ),
             geom_col="the_geom",
         )

@@ -5,8 +5,8 @@ databases.  This will hopefully remove some hackery
 import sys
 
 import numpy as np
-from pandas import read_sql
-from pyiem.util import get_dbconn, get_dbconnstr, logger, utc
+import pandas as pd
+from pyiem.util import get_dbconnc, get_sqlalchemy_conn, logger, utc
 
 LOG = logger()
 
@@ -16,19 +16,21 @@ def sync(df, dbname):
     Actually do the syncing, please
     """
     # connect to synced database
-    dbconn = get_dbconn(dbname)
-    dbcursor = dbconn.cursor()
+    dbconn, dbcursor = get_dbconnc(dbname)
     # Figure out our latest revision
-    dbcursor.execute("SELECT max(modified), max(iemid) from stations")
-    row = dbcursor.fetchone()
-    maxts = row[0] or utc(1980, 1, 1)
-    maxid = row[1] or -1
-    # Check for stations that were removed from mesosite
-    localdf = read_sql(
-        "SELECT iemid, modified from stations ORDER by iemid ASC",
-        get_dbconnstr(dbname),
-        index_col="iemid",
+    dbcursor.execute(
+        "SELECT max(modified) as mm, max(iemid) as mi from stations"
     )
+    row = dbcursor.fetchone()
+    maxts = row["mm"] or utc(1980, 1, 1)
+    maxid = row["mi"] or -1
+    # Check for stations that were removed from mesosite
+    with get_sqlalchemy_conn(dbname) as conn:
+        localdf = pd.read_sql(
+            "SELECT iemid, modified from stations ORDER by iemid ASC",
+            conn,
+            index_col="iemid",
+        )
     localdf["iemid"] = localdf.index.values
     todelete = localdf.index.difference(df.index)
     if not todelete.empty:
@@ -92,23 +94,16 @@ def sync(df, dbname):
 
 def main(argv):
     """Go Main Go"""
-    mesosite = get_dbconnstr("mesosite")
     subscribers = (
         "iem isuag coop hads hml asos asos1min postgis raob"
     ).split()
 
-    if len(argv) == 3:
-        LOG.info(
-            "Running laptop syncing from upstream, assume iemdb is localhost!"
+    with get_sqlalchemy_conn("mesosite") as conn:
+        df = pd.read_sql(
+            "SELECT * from stations ORDER by iemid ASC",
+            conn,
+            index_col="iemid",
         )
-        # HACK
-        mesosite = get_dbconnstr("mesosite", host="172.16.172.1")
-        subscribers.insert(0, "mesosite")
-    df = read_sql(
-        "SELECT * from stations ORDER by iemid ASC",
-        mesosite,
-        index_col="iemid",
-    )
     df["iemid"] = df.index.values
     for sub in subscribers:
         sync(df, sub)
