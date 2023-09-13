@@ -36,7 +36,6 @@ $shpFname =  $filePre;
 $shpFile = new shapeFileObj($shpFname, MS_SHAPEFILE_POINT);
 $dbfFile = dbase_create($shpFname . ".dbf", array(
     array("SITE", "C", 6),
-    array("NAME", "C", 50),
     array("CRECORD", "N", 5, 0),
     array("DATE", "D"),
     array("AVG_HIGH", "N", 3, 0),
@@ -58,7 +57,6 @@ for ($i = 0; $row = pg_fetch_array($rs); $i++) {
 
     dbase_add_record($dbfFile, array(
         $row["station"],
-        $name,
         $row["years"],
         $row["cvalid"],
         $row["high"],

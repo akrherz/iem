@@ -29,7 +29,7 @@ if (! isset($_GET["station"])) {
     xssafe("</script>");
 }
 $gis = isset($_GET["gis"]) ? xssafe($_GET["gis"]) : 'no';
-$delim = isset($_GET["delim"]) ? xssafe($_GET["delim"]) : ",";
+$delim = isset($_GET["delim"]) ? xssafe($_GET["delim"]) : "comma";
 $sample = isset($_GET["sample"]) ? xssafe($_GET["sample"]) : "1min";
 $what = isset($_GET["what"]) ? xssafe($_GET["what"]) : 'dl';
 
@@ -88,7 +88,7 @@ $sampleStr = array(
     "1hour" => "60"
 );
 
-$d = array("space" => " ", "comma" => ",", "tab" => "\t");
+$d = array("space" => " ", "comma" => ",", "tab" => "\t", "," => ",");
 
 $sqlStr .= "to_char(valid, 'YYYY-MM-DD HH24:MI') as dvalid from " . $table;
 $sqlStr .= " WHERE valid >= '" . $sqlTS1 . "' and valid <= '" . $sqlTS2 . "' ";

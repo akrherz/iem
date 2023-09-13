@@ -100,10 +100,14 @@ def plotter(fdict):
         avg(low) as "avg-low",
         max(precip) as "max-precip",
         sum(precip) as "sum-precip",
-        sum(case when high >= %s then 1 else 0 end) as "days-high-above",
-        sum(case when high < %s then 1 else 0 end) as "days-high-below",
-        sum(case when low >= %s then 1 else 0 end) as "days-lows-above",
-        sum(case when low < %s then 1 else 0 end) as "days-lows-below",
+        sum(case when high::numeric >= %s then 1 else 0 end)
+            as "days-high-above",
+        sum(case when high::numeric < %s then 1 else 0 end)
+            as "days-high-below",
+        sum(case when low::numeric >= %s then 1 else 0 end)
+            as "days-lows-above",
+        sum(case when low::numeric < %s then 1 else 0 end)
+            as "days-lows-below",
         avg(precip) as "avg-precip",
         avg(case when precip > 0.009 then precip else null end)
             as "avg-precip2",

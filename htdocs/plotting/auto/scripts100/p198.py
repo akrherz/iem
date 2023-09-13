@@ -159,6 +159,8 @@ def compute(dfin, varname):
     df = dfin.groupby("year").agg(["min", "mean", "max", "count"]).copy()
     df.columns = df.columns.map("_".join)
     df = df.rename({f"{varname}_mean": f"{varname}_avg"}, axis=1)
+    for agg in ["min", "max"]:
+        df[f"{varname}_{agg}_valid"] = ""
     # compute the min and max value timestamps
     for year, df2 in dfin.groupby("year"):
         for agg in ["min", "max"]:
@@ -295,4 +297,4 @@ def plotter(fdict):
 
 
 if __name__ == "__main__":
-    plotter(dict(station="_CRP", month="mjj", var="mlcape_jkg", agg="avg"))
+    plotter({})

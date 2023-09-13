@@ -7,14 +7,13 @@ from zoneinfo import ZoneInfo
 
 import pandas as pd
 from paste.request import parse_formvars
-from pyiem.util import get_dbconn, html_escape
+from pyiem.util import get_dbconnc, html_escape
 from pymemcache.client import Client
 
 
 def pointquery(lon, lat):
     """Do a query for stuff"""
-    postgis = get_dbconn("postgis")
-    cursor = postgis.cursor()
+    pgconn, cursor = get_dbconnc("postgis")
 
     res = dict(
         type="FeatureCollection",
@@ -23,15 +22,15 @@ def pointquery(lon, lat):
         ),
         features=[],
     )
-
+    giswkt = f"SRID=4326;POINT({lon} {lat})"
     cursor.execute(
         """
     SELECT sel, issued at time zone 'UTC', expired at time zone 'UTC', type,
     ST_AsGeoJSON(geom), num from watches
-    where ST_Contains(geom, ST_GeomFromEWKT('SRID=4326;POINT(%s %s)'))
+    where ST_Contains(geom, ST_GeomFromEWKT(%s))
     ORDER by issued DESC
     """,
-        (lon, lat),
+        (giswkt,),
     )
     for row in cursor:
         url = ("https://www.spc.noaa.gov/products/watch/%s/ww%04i.html") % (
@@ -53,14 +52,13 @@ def pointquery(lon, lat):
                 geometry=json.loads(row[4]),
             )
         )
-
+    pgconn.close()
     return json.dumps(res)
 
 
 def dowork(valid):
     """Actually do stuff"""
-    postgis = get_dbconn("postgis")
-    cursor = postgis.cursor()
+    pgconn, cursor = get_dbconnc("postgis")
 
     res = dict(
         type="FeatureCollection",
@@ -98,7 +96,7 @@ def dowork(valid):
                 geometry=json.loads(row[4]),
             )
         )
-
+    pgconn.close()
     return json.dumps(res)
 
 

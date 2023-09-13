@@ -229,10 +229,14 @@ def get_data(ctx):
             avg({lcol}) as avg_low,
             sum(gddxx(50, 86, high, low)) as sum_gdd,
             sum(case when high > 86 then high - 86 else 0 end) as sum_sdd,
-            sum(case when {hcol} >= :t then 1 else 0 end) as days_high_above,
-            sum(case when {hcol} < :t then 1 else 0 end) as days_high_below,
-            sum(case when {lcol} >= :t then 1 else 0 end) as days_low_above,
-            sum(case when {lcol} < :t then 1 else 0 end) as days_low_below
+            sum(case when {hcol}::numeric >= :t then 1 else 0 end)
+                as days_high_above,
+            sum(case when {hcol}::numeric < :t then 1 else 0 end)
+                as days_high_below,
+            sum(case when {lcol}::numeric >= :t then 1 else 0 end)
+                as days_low_above,
+            sum(case when {lcol}::numeric < :t then 1 else 0 end)
+                as days_low_below
             from {table} WHERE year >= :syear1 and year <= :eyear1
             and month = ANY(:months) GROUP by station, year),
         period2 as (
@@ -241,10 +245,14 @@ def get_data(ctx):
             avg({lcol}) as avg_low,
             sum(gddxx(50, 86, high, low)) as sum_gdd,
             sum(case when high > 86 then high - 86 else 0 end) as sum_sdd,
-            sum(case when {hcol} >= :t then 1 else 0 end) as days_high_above,
-            sum(case when {hcol} < :t then 1 else 0 end) as days_high_below,
-            sum(case when {lcol} >= :t then 1 else 0 end) as days_low_above,
-            sum(case when {lcol} < :t then 1 else 0 end) as days_low_below
+            sum(case when {hcol}::numeric >= :t then 1 else 0 end)
+                as days_high_above,
+            sum(case when {hcol}::numeric < :t then 1 else 0 end)
+                as days_high_below,
+            sum(case when {lcol}::numeric >= :t then 1 else 0 end)
+                as days_low_above,
+            sum(case when {lcol}::numeric < :t then 1 else 0 end)
+                as days_low_below
             from {table} WHERE year >= :syear2 and year <= :eyear2
             and month = ANY(:months) GROUP by station, year),
         p1agg as (
@@ -408,4 +416,4 @@ def plotter(fdict):
 
 
 if __name__ == "__main__":
-    plotter({"over": "annual"})
+    plotter({})

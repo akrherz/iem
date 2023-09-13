@@ -93,7 +93,7 @@ def plotter(fdict):
             .reindex(years)
             .fillna(0)
         )
-        maxval = gdf.max()[0]
+        maxval = gdf.max()["high"]
         if maxval == 0:
             continue
         label = ",".join(
@@ -104,8 +104,8 @@ def plotter(fdict):
             thisyear = gdf.at[year, "high"]
         res.append(
             dict(
-                avgval=gdf.iloc[:-1].mean()[0],
-                minval=gdf.iloc[:-1].min()[0],
+                avgval=gdf.iloc[:-1].mean()["high"],
+                minval=gdf.iloc[:-1].min()["high"],
                 level=level,
                 label=label,
                 max=maxval,

@@ -266,15 +266,19 @@ def get_context(fdict):
             max(o.precip) as "max-precip",
             sum(o.precip) as "sum-precip",
             avg(o.high) - avg(o.low) as "range-avghi-avglo",
-            sum(case when o.high >= :t then 1 else 0 end) as "days-high-above",
-            sum(case when o.high < :t then 1 else 0 end) as "days-high-below",
-            sum(case when o.high >= c.high then 1 else 0 end)
+            sum(case when o.high::numeric >= :t then 1 else 0 end)
+                as "days-high-above",
+            sum(case when o.high::numeric < :t then 1 else 0 end)
+                as "days-high-below",
+            sum(case when o.high::numeric >= c.high then 1 else 0 end)
                 as "days-high-above-avg",
-            sum(case when o.low >= :t then 1 else 0 end) as "days-lows-above",
-            sum(case when o.low < c.low then 1 else 0 end)
+            sum(case when o.low::numeric >= :t then 1 else 0 end)
+                as "days-lows-above",
+            sum(case when o.low::numeric < c.low then 1 else 0 end)
                 as "days-lows-below-avg",
-            sum(case when o.low < :t then 1 else 0 end) as "days-lows-below",
-            sum(case when o.precip >= :t then 1 else 0 end)
+            sum(case when o.low::numeric < :t then 1 else 0 end)
+                as "days-lows-below",
+            sum(case when o.precip::numeric >= :t then 1 else 0 end)
                 as "days-precip-above"
             from alldata o JOIN climo c on (o.sday = c.sday)
         where station = :station and month = ANY(:months) GROUP by myyear)

@@ -3,7 +3,7 @@ import json
 import os
 
 from paste.request import parse_formvars
-from pyiem.util import get_dbconn, html_escape
+from pyiem.util import get_dbconnc, html_escape
 from pymemcache.client import Client
 
 ISO9660 = "%Y-%m-%dT%H:%MZ"
@@ -11,11 +11,11 @@ ISO9660 = "%Y-%m-%dT%H:%MZ"
 
 def dowork(lon, lat):
     """Actually do stuff"""
-    pgconn = get_dbconn("postgis")
-    cursor = pgconn.cursor()
+    pgconn, cursor = get_dbconnc("postgis")
 
-    res = dict(mcds=[])
+    res = {"mcds": []}
 
+    giswkt = f"SRID=4326;POINT({lon} {lat})"
     cursor.execute(
         """
         SELECT issue at time zone 'UTC' as i,
@@ -23,28 +23,28 @@ def dowork(lon, lat):
         num,
         product_id, year, concerning
         from mcd WHERE
-        ST_Contains(geom, ST_GeomFromEWKT('SRID=4326;POINT(%s %s)'))
+        ST_Contains(geom, ST_GeomFromEWKT(%s))
         ORDER by product_id DESC
     """,
-        (lon, lat),
+        (giswkt,),
     )
     for row in cursor:
         url = ("https://www.spc.noaa.gov/products/md/%s/md%04i.html") % (
-            row[4],
-            row[2],
+            row["year"],
+            row["num"],
         )
         res["mcds"].append(
             dict(
                 spcurl=url,
-                year=row[4],
-                utc_issue=row[0].strftime(ISO9660),
-                utc_expire=row[1].strftime(ISO9660),
-                product_num=row[2],
-                product_id=row[3],
-                concerning=row[5],
+                year=row["year"],
+                utc_issue=row["i"].strftime(ISO9660),
+                utc_expire=row["e"].strftime(ISO9660),
+                product_num=row["num"],
+                product_id=row["product_id"],
+                concerning=row["concerning"],
             )
         )
-
+    pgconn.close()
     return json.dumps(res)
 
 

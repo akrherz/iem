@@ -1,10 +1,14 @@
-"""Besting previous record"""
+"""
+This chart shows the margin by which a new daily high
+and low temperatures record beat the previously set record.  Ties are not
+presented on this plot.
+"""
 # pylint: disable=no-member
 
 import pandas as pd
 from pyiem.exceptions import NoDataFound
 from pyiem.plot import figure_axes
-from pyiem.util import get_autoplot_context, get_dbconn
+from pyiem.util import get_autoplot_context, get_dbconnc
 
 PDICT = {"0": "Max Highs / Min Lows", "1": "Min Highs / Max Lows"}
 PDICT2 = {
@@ -16,15 +20,7 @@ PDICT2 = {
 
 def get_description():
     """Return a dict describing how to call this plotter"""
-    desc = {}
-    desc["data"] = True
-    desc[
-        "description"
-    ] = """
-    This chart shows the margin by which a new daily high
-    and low temperatures record beat the previously set record.  Ties are not
-    presented on this plot.
-    """
+    desc = {"description": __doc__, "data": True}
     desc["arguments"] = [
         dict(
             type="station",
@@ -53,8 +49,7 @@ def get_description():
 
 def get_context(fdict):
     """Make the pandas Data Frame please"""
-    pgconn = get_dbconn("coop")
-    cursor = pgconn.cursor()
+    pgconn, cursor = get_dbconnc("coop")
     ctx = get_autoplot_context(fdict, get_description())
     station = ctx["station"]
     opt = ctx["opt"]
@@ -76,33 +71,41 @@ def get_context(fdict):
         records = pd.DataFrame(dict(high=-9999, low=9999), index=dates)
         rows = []
         for row in cursor:
-            key = row[0].strftime(aggint)
-            if row[2] > records.at[key, "high"]:
-                margin = row[2] - records.at[key, "high"]
-                records.at[key, "high"] = row[2]
+            key = row["day"].strftime(aggint)
+            if row["high"] > records.at[key, "high"]:
+                margin = row["high"] - records.at[key, "high"]
+                records.at[key, "high"] = row["high"]
                 if margin < 1000:
-                    rows.append(dict(margin=margin, date=row[0], val=row[2]))
-            if row[3] < records.at[key, "low"]:
-                margin = row[3] - records.at[key, "low"]
-                records.at[key, "low"] = row[3]
+                    rows.append(
+                        dict(margin=margin, date=row["day"], val=row["high"])
+                    )
+            if row["low"] < records.at[key, "low"]:
+                margin = row["low"] - records.at[key, "low"]
+                records.at[key, "low"] = row["low"]
                 if margin > -1000:
-                    rows.append(dict(margin=margin, date=row[0], val=row[3]))
+                    rows.append(
+                        dict(margin=margin, date=row["day"], val=row["low"])
+                    )
     else:
         records = pd.DataFrame(dict(high=9999, low=-9999), index=dates)
         rows = []
         for row in cursor:
-            key = row[0].strftime(aggint)
-            if row[2] < records.at[key, "high"]:
-                margin = row[2] - records.at[key, "high"]
-                records.at[key, "high"] = row[2]
+            key = row["day"].strftime(aggint)
+            if row["high"] < records.at[key, "high"]:
+                margin = row["high"] - records.at[key, "high"]
+                records.at[key, "high"] = row["high"]
                 if margin > -1000:
-                    rows.append(dict(margin=margin, date=row[0], val=row[2]))
-            if row[3] > records.at[key, "low"]:
-                margin = row[3] - records.at[key, "low"]
-                records.at[key, "low"] = row[3]
+                    rows.append(
+                        dict(margin=margin, date=row["day"], val=row["high"])
+                    )
+            if row["low"] > records.at[key, "low"]:
+                margin = row["low"] - records.at[key, "low"]
+                records.at[key, "low"] = row["low"]
                 if margin < 1000:
-                    rows.append(dict(margin=margin, date=row[0], val=row[3]))
-
+                    rows.append(
+                        dict(margin=margin, date=row["day"], val=row["low"])
+                    )
+    pgconn.close()
     ctx["df"] = pd.DataFrame(rows)
     ctx["title"] = f"{ctx['_sname']} :: {PDICT2[ctx['w']]} Margin"
     ctx[
@@ -201,4 +204,4 @@ def plotter(fdict):
 
 
 if __name__ == "__main__":
-    highcharts({"station": "WATSEA", "network": "WACLIMATE", "w": "monthly"})
+    highcharts({})

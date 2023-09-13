@@ -66,16 +66,17 @@ def plotter(fdict):
 
     bnds = state_bounds[state]
     with get_sqlalchemy_conn("nldn") as conn:
+        giswkt = f"LINESTRING({bnds[0]} {bnds[1]}, {bnds[2]} {bnds[3]})"
         df = gpd.read_postgis(
             """
             SELECT ST_Transform(geom, 2163) as geo
             from nldn_all WHERE valid >= %s and valid < %s and
             ST_Contains(
-                ST_SetSRID(ST_Envelope('LINESTRING(%s %s, %s %s)'::geometry),
+                ST_SetSRID(ST_Envelope(%s::geometry),
                 4326), geom)
             """,
             conn,
-            params=(sts, ets, *bnds),
+            params=(sts, ets, giswkt),
             geom_col="geo",
         )
     with get_sqlalchemy_conn("postgis") as conn:

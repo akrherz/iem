@@ -153,7 +153,7 @@ def get_df(ctx):
         thisval = sdf.loc[date.strftime("%Y-%m-%d")]["value"]
         # linear interpolate data to get comparables
         newdf = (
-            sdf[~sdf.index.duplicated(keep="first")]
+            sdf[~sdf.index.duplicated(keep="first")][["year", "value"]]
             .resample("D")
             .interpolate(method="linear")
         )
@@ -243,6 +243,4 @@ def plotter(fdict):
 
 
 if __name__ == "__main__":
-    plotter(
-        {"var": "corn_harvest", "w": "avg", "weeks": "1", "date": "2019-11-19"}
-    )
+    plotter({})
