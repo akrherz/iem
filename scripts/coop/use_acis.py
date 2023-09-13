@@ -8,7 +8,7 @@ import requests
 from pyiem.network import Table as NetworkTable
 from pyiem.observation import Observation
 from pyiem.reference import TRACE_VALUE
-from pyiem.util import get_dbconn, get_sqlalchemy_conn, logger
+from pyiem.util import get_dbconnc, get_sqlalchemy_conn, logger
 from tqdm import tqdm
 
 LOG = logger()
@@ -55,7 +55,9 @@ def main(argv):
     nt = NetworkTable(network, only_online=True)
     ets = datetime.date.today() - datetime.timedelta(days=1)
     sts = ets - datetime.timedelta(days=720)
-    pgconn = get_dbconn("iem")
+    pgconn, cursor = get_dbconnc("iem")
+    # Lame for now
+    cursor.close()
     progress = tqdm(nt.sts, total=len(nt.sts), disable=not sys.stdout.isatty())
     for nwsli in progress:
         progress.set_description(nwsli)

@@ -410,7 +410,7 @@ def do_ahps_fx(nwsli):
         """
             ),
             conn,
-            params={"sid": row[0]},
+            params={"sid": row["id"]},
             index_col=None,
         )
     # Get the obs
@@ -494,7 +494,7 @@ def do_ahps(nwsli):
     lookupkey = 14
     for _row in cursor:
         if _row["label"].find("[ft]") > 0:
-            lookupkey = _row[0]
+            lookupkey = _row["id"]
             break
     pgconn.close()
     # get observations
@@ -533,7 +533,7 @@ def do_ahps(nwsli):
         """
             ),
             conn,
-            params={"fid": row[0]},
+            params={"fid": row["id"]},
             index_col=None,
         )
     # Get the obs
