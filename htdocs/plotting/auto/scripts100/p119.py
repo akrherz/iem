@@ -5,9 +5,11 @@ having the first fall temperature at or below a given threshold.
 import datetime
 
 import matplotlib.dates as mdates
+import numpy as np
 import pandas as pd
 from pyiem.exceptions import NoDataFound
 from pyiem.plot import figure_axes
+from pyiem.plot.use_agg import plt
 from pyiem.util import get_autoplot_context, get_sqlalchemy_conn
 
 PDICT = {"low": "Low Temperature", "high": "High Temperature"}
@@ -43,23 +45,28 @@ def plotter(fdict):
     """Go"""
     ctx = get_autoplot_context(fdict, get_description())
     station = ctx["station"]
+    bs = ctx["_nt"].sts[station]["archive_begin"]
+    if bs is None:
+        raise NoDataFound("Unknown metadata")
     thresholds = [ctx["t1"], ctx["t2"], ctx["t3"], ctx["t4"]]
 
     sz = 214 + 304
     df = pd.DataFrame(
         {
             "dates": pd.date_range("2000/08/01", "2001/05/31"),
-            "%scnts" % (thresholds[0],): 0,
-            "%scnts" % (thresholds[1],): 0,
-            "%scnts" % (thresholds[2],): 0,
-            "%scnts" % (thresholds[3],): 0,
+            f"{thresholds[0]}cnts": 0,
+            f"{thresholds[1]}cnts": 0,
+            f"{thresholds[2]}cnts": 0,
+            f"{thresholds[3]}cnts": 0,
         },
         index=range(214, sz),
     )
     df.index.name = "doy"
 
+    mindates = [None, None, None, None]
+    maxdates = [None, None, None, None]
     with get_sqlalchemy_conn("coop") as conn:
-        for base in thresholds:
+        for i, base in enumerate(thresholds):
             # Find first dates by winter season
             df2 = pd.read_sql(
                 f"""
@@ -74,17 +81,25 @@ def plotter(fdict):
                 params=(base, station, datetime.date.today().year),
                 index_col=None,
             )
-            for _, row in df2.iterrows():
+            if df2.empty:
+                raise NoDataFound("No Data Found.")
+            df2["doy"] = np.nan
+            for idx, row in df2.iterrows():
                 if row["mindate"].year == 2099:
                     continue
                 jan1 = datetime.date(row["winter"] - 1, 1, 1)
                 doy = (row["mindate"] - jan1).days
+                df2.at[idx, "doy"] = doy
                 df.loc[doy:sz, f"{base}cnts"] += 1
+            mindates[i] = df2.sort_values(
+                "doy", ascending=True, na_position="last"
+            ).iloc[0]["mindate"]
+            maxdates[i] = df2.sort_values(
+                "doy", ascending=False, na_position="last"
+            ).iloc[0]["mindate"]
+
             df[f"{base}freq"] = df[f"{base}cnts"] / len(df2.index) * 100.0
 
-    bs = ctx["_nt"].sts[station]["archive_begin"]
-    if bs is None:
-        raise NoDataFound("Unknown metadata")
     res = """\
 # IEM Climodat https://mesonet.agron.iastate.edu/climodat/
 # Report Generated: %s
@@ -107,7 +122,7 @@ def plotter(fdict):
         thresholds[2] + 1,
         thresholds[3] + 1,
     )
-    fcols = ["%sfreq" % (s,) for s in thresholds]
+    fcols = [f"{s}freq" for s in thresholds]
     mindate = None
     maxdate = None
     for doy, row in df.iterrows():
@@ -140,11 +155,13 @@ def plotter(fdict):
         datetime.date.today().year,
     )
     (fig, ax) = figure_axes(title=title, apctx=ctx)
+    # shrink the plot to make room for the table
+    ax.set_position([0.1, 0.1, 0.6, 0.8])
     for base in thresholds:
         ax.plot(
             df["dates"].values,
-            df["%sfreq" % (base,)],
-            label="%s" % (base,),
+            df[f"{base}freq"].values,
+            label=f"{base}",
             lw=2,
         )
 
@@ -157,9 +174,54 @@ def plotter(fdict):
     ax.grid(True)
     ax.set_yticks([0, 10, 25, 50, 75, 90, 100])
     ax.set_ylabel("Accumulated to Date Frequency [%]")
-    df = df.reset_index()
-    return fig, df, res
+
+    # Create the cell text as an enpty list of 4 columns by 11 rows
+    celltext = [[""] * 4 for _ in range(11)]
+    cellcolors = [["white"] * 4 for _ in range(11)]
+    # create 12 jet colors to use to color the cells by month of the year
+    colors = plt.cm.jet(np.arange(12) / 12.0)
+    # set the alpha to 0.5
+    colors[:, -1] = 0.5
+
+    # compute the dates for each threshold having 10 thru 90% frequency
+    for i, base in enumerate(thresholds):
+        celltext[0][i] = mindates[i].strftime("%b %d\n%Y")
+        cellcolors[0][i] = colors[mindates[i].month - 1]
+        if df[f"{base}freq"].max() >= 100:
+            celltext[-1][i] = maxdates[i].strftime("%b %d\n%Y")
+            cellcolors[-1][i] = colors[maxdates[i].month - 1]
+
+        for j, percent in enumerate(range(10, 100, 10), start=1):
+            df2 = df[df[f"{base}freq"] >= percent]
+            if df2.empty:
+                continue
+            row = df2.iloc[0]
+            celltext[j][i] = row["dates"].strftime("%b %d")
+            cellcolors[j][i] = colors[row["dates"].month - 1]
+
+    ax2 = fig.add_axes([0.75, 0.1, 0.2, 0.75])
+    # remove all the splines, but show the ylabel
+    ax2.spines["top"].set_visible(False)
+    ax2.spines["bottom"].set_visible(False)
+    ax2.spines["left"].set_visible(False)
+    ax2.spines["right"].set_visible(False)
+    ax2.set_xticks([])
+    ax2.set_yticks([])
+    table = ax2.table(
+        celltext,
+        cellColours=cellcolors,
+        colLabels=[f"{t}" + r"$^\circ$F" for t in thresholds],
+        rowLabels=["Min"] + list(range(10, 100, 10)) + ["Max"],
+        loc="center",
+    )
+    # add some vertical padding to text in the table and keep the borders
+    for cell in table.properties()["celld"].values():
+        cell.set_height(0.08)
+
+    fig.text(0.85, 0.85, "Percentile Dates", ha="center")
+
+    return fig, df.reset_index(), res
 
 
 if __name__ == "__main__":
-    plotter({})
+    plotter({"station": "IA0070"})
