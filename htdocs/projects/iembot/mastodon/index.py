@@ -123,19 +123,18 @@ def get_app4user(cookies):
 def build_subui(mapp, fdict):
     """Show the subscriptions."""
     me = mapp.me()
-    # Shrug, got a puzzling error on the server with this
     res = f"""
-    <p>Hi <a href="{str(me['url'])}">@{str(me['username'])}</a>
-    <img src="{str(me['avatar'])}" style="width:20px;">!
+    <p>Hi <a href="{me['url']}">@{str(me['username'])}</a>
+    <img src="{me['avatar']}" style="width:20px;">!
     This page configures your IEMBot channel subscriptions.</p>
     """
     conn, cursor = get_dbconnc("mesosite")
     log = []
     if fdict.get("testmsg") is not None:
         try:
-            res = mapp.status_post(status=TEST_MESSAGE)
+            _res = mapp.status_post(status=TEST_MESSAGE)
             log.append(
-                f"Test post to Mastodon is <a href=\"{res['uri']}\">here</a>"
+                f"Test post to Mastodon is <a href=\"{_res['uri']}\">here</a>"
             )
         except Exception as exp:
             log.append(f"Posting test message resulted in error: {exp}")
