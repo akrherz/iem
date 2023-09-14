@@ -73,14 +73,19 @@ def plotter(fdict):
                 select
                 case when month > 7 then year + 1 else year end as winter,
                 min(case when {ctx["var"]} <= %s
-                then day else '2099-01-01'::date end) as mindate from alldata
-                WHERE station = %s and month not in (6, 7) and year < %s
+                then day else '2099-01-01'::date end) as mindate,
+                count(*) from alldata
+                WHERE station = %s and month not in (6, 7)
                 GROUP by winter
             """,
                 conn,
-                params=(base, station, datetime.date.today().year),
+                params=(base, station),
                 index_col=None,
             )
+            if df2.empty:
+                raise NoDataFound("No Data Found.")
+            # Require quorum
+            df2 = df2[df2["count"] > 300]
             if df2.empty:
                 raise NoDataFound("No Data Found.")
             df2["doy"] = np.nan
