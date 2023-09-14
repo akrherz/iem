@@ -18,6 +18,10 @@ jobs:
       run: |
         cat .github/workflows/etchosts.txt | sudo tee -a /etc/hosts
 
+    - name: Copy PHP Settings
+      run: |
+        cp config/settings.inc.php.in config/settings.inc.php
+
     - name: Setup CI from ci-tooling
       run: |
         git clone --depth 1 https://github.com/akrherz/iem-database.git database
@@ -75,3 +79,8 @@ jobs:
       run: |
         sudo systemctl status apache2 -l
         sudo cat /var/log/apache2/error.log
+
+    - name: View PHP-FPM Logs
+      if: failure()
+      run: |
+        sudo cat /var/log/php*-fpm.log

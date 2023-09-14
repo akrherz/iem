@@ -488,9 +488,7 @@ def generate_form(apid, fdict, headers, cookies):
             f"{meta['description']}</div>"
         )
     if fmt is None:
-        if meta.get("report", False):
-            fmt = "text"
-        elif meta.get("highcharts", False):
+        if meta.get("highcharts", False):
             fmt = "js"
         elif meta.get("maptable", False):
             fmt = "maptable"

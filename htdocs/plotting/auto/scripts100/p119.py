@@ -1,6 +1,21 @@
 """
-This chart presents the accumulated frequency of
-having the first fall temperature at or below a given threshold.
+This chart presents the accumulated frequency of a temperature threshold being
+the first time observed or last time observed during the fall season. There is
+a complexitiy to the last time metric as it is somewhat undefined as to when
+the fall season ends and the next spring/summer season beings.  So life choices
+are made here:</p>
+
+<p>For <strong>first below</strong>, the first date that the temperature
+happens is considered between 1 August and 31 May of the next year. This is
+generally straight forward.</p>
+
+<p>For <strong>last above</strong>, the last date that the temperature happens
+is considered between 1 August and 31 December of the same year. This is
+nebulous for temperature thresholds that are common throughout the cold
+season. Caveat emptor.</p>
+
+<p><a href="/plotting/auto/?q=120">Autoplot 120</a> is closely related to this
+autoplot and presents the spring season values.</p>
 """
 import datetime
 
@@ -13,6 +28,10 @@ from pyiem.plot.use_agg import plt
 from pyiem.util import get_autoplot_context, get_sqlalchemy_conn
 
 PDICT = {"low": "Low Temperature", "high": "High Temperature"}
+PDICT2 = {
+    "first_below": "First Fall Temperature Below Threshold",
+    "last_above": "Last Fall Temperature Above Threshold",
+}
 
 
 def get_description():
@@ -26,6 +45,13 @@ def get_description():
             label="Select Station",
             network="IACLIMATE",
         ),
+        {
+            "type": "select",
+            "name": "opt",
+            "default": "first_below",
+            "label": "Which metric to compute?",
+            "options": PDICT2,
+        },
         dict(
             type="select",
             options=PDICT,
@@ -44,6 +70,7 @@ def get_description():
 def plotter(fdict):
     """Go"""
     ctx = get_autoplot_context(fdict, get_description())
+    opt = ctx["opt"]
     station = ctx["station"]
     bs = ctx["_nt"].sts[station]["archive_begin"]
     if bs is None:
@@ -65,6 +92,13 @@ def plotter(fdict):
 
     mindates = [None, None, None, None]
     maxdates = [None, None, None, None]
+    comp = "<=" if opt == "first_below" else ">="
+    months = [8, 9, 10, 11, 12]
+    quorum = 150
+    if opt == "first_below":
+        months = [8, 9, 10, 11, 12, 1, 2, 3, 4, 5]
+        quorum = 300
+    sent = "2099-01-01" if opt == "first_below" else "1800-01-01"
     with get_sqlalchemy_conn("coop") as conn:
         for i, base in enumerate(thresholds):
             # Find first dates by winter season
@@ -72,60 +106,53 @@ def plotter(fdict):
                 f"""
                 select
                 case when month > 7 then year + 1 else year end as winter,
-                min(case when {ctx["var"]} <= %s
-                then day else '2099-01-01'::date end) as mindate,
+                {'min' if opt == 'first_below' else 'max'}(
+                case when {ctx["var"]} {comp}
+                %s then day else '{sent}'::date end) as date,
                 count(*) from alldata
-                WHERE station = %s and month not in (6, 7)
+                WHERE station = %s and month = ANY(%s)
                 GROUP by winter
             """,
                 conn,
-                params=(base, station),
+                params=(base, station, months),
                 index_col=None,
             )
             if df2.empty:
                 raise NoDataFound("No Data Found.")
             # Require quorum
-            df2 = df2[df2["count"] > 300]
+            df2 = df2[df2["count"] > quorum]
             if df2.empty:
                 raise NoDataFound("No Data Found.")
             df2["doy"] = np.nan
             for idx, row in df2.iterrows():
-                if row["mindate"].year == 2099:
+                if row["date"].year in [2099, 1800]:
                     continue
                 jan1 = datetime.date(row["winter"] - 1, 1, 1)
-                doy = (row["mindate"] - jan1).days
+                doy = (row["date"] - jan1).days
                 df2.at[idx, "doy"] = doy
                 df.loc[doy:sz, f"{base}cnts"] += 1
             mindates[i] = df2.sort_values(
                 "doy", ascending=True, na_position="last"
-            ).iloc[0]["mindate"]
-            maxdates[i] = df2.sort_values(
-                "doy", ascending=False, na_position="last"
-            ).iloc[0]["mindate"]
+            ).iloc[0]["date"]
+            # Ensure that all doys are filled in
+            if df2["doy"].notna().all():
+                maxdates[i] = df2.sort_values(
+                    "doy", ascending=False, na_position="last"
+                ).iloc[0]["date"]
 
             df[f"{base}freq"] = df[f"{base}cnts"] / len(df2.index) * 100.0
-
-    res = """\
-# IEM Climodat https://mesonet.agron.iastate.edu/climodat/
-# Report Generated: %s
-# Climate Record: %s -> %s
-# Site Information: [%s] %s
-# Contact Information: Daryl Herzmann akrherz@iastate.edu 515.294.5978
-# %s exceedence probabilities
-# (On a certain date, what is the chance a temperature below a certain
-# threshold would have been observed once already during the fall of that year)
- DOY Date    <%s  <%s  <%s  <%s
-""" % (
-        datetime.date.today().strftime("%d %b %Y"),
-        bs,
-        datetime.date.today(),
-        station,
-        ctx["_nt"].sts[station]["name"],
-        PDICT[ctx["var"]],
-        thresholds[0] + 1,
-        thresholds[1] + 1,
-        thresholds[2] + 1,
-        thresholds[3] + 1,
+    res = (
+        "# IEM Climodat https://mesonet.agron.iastate.edu/climodat/\n"
+        f"# Report Generated: {datetime.date.today():%d %b %Y}\n"
+        f"# Climate Record: {bs} -> {datetime.date.today()}\n"
+        f"# Site Information: {ctx['_sname']}\n"
+        "# Contact: Daryl Herzmann akrherz@iastate.edu 515.294.5978\n"
+        f"# {PDICT[ctx['var']]} exceedence probabilities\n"
+        f"# (On a certain date, what is the chance a temperature {opt}\n"
+        "# threshold would have been observed once already during the fall "
+        "of that year)\n"
+        f" DOY Date    {comp}{thresholds[0]}  {comp}{thresholds[1]}  "
+        f"{comp}{thresholds[2]}  {comp}{thresholds[3]}\n"
     )
     fcols = [f"{s}freq" for s in thresholds]
     mindate = None
@@ -147,13 +174,14 @@ def plotter(fdict):
             row[fcols[2]],
             row[fcols[3]],
         )
+    if mindate is None:
+        raise NoDataFound("Error found, try different thresholds.")
     if maxdate is None:
         maxdate = datetime.datetime(2001, 6, 1)
 
-    title = (
-        "Frequency of First Fall %s At or Below Threshold\n%s %s (%s-%s)"
-    ) % (
+    title = ("Frequency of %s %s\n%s %s (%s-%s)") % (
         PDICT[ctx["var"]],
+        PDICT2[opt],
         station,
         ctx["_nt"].sts[station]["name"],
         bs.year,
@@ -190,8 +218,9 @@ def plotter(fdict):
 
     # compute the dates for each threshold having 10 thru 90% frequency
     for i, base in enumerate(thresholds):
-        celltext[0][i] = mindates[i].strftime("%b %d\n%Y")
-        cellcolors[0][i] = colors[mindates[i].month - 1]
+        if df[f"{base}freq"].min() == 0:
+            celltext[0][i] = mindates[i].strftime("%b %d\n%Y")
+            cellcolors[0][i] = colors[mindates[i].month - 1]
         if df[f"{base}freq"].max() >= 100:
             celltext[-1][i] = maxdates[i].strftime("%b %d\n%Y")
             cellcolors[-1][i] = colors[maxdates[i].month - 1]
@@ -229,4 +258,4 @@ def plotter(fdict):
 
 
 if __name__ == "__main__":
-    plotter({"station": "IA0070"})
+    plotter({})
