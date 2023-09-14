@@ -116,18 +116,18 @@ def dowork(lon, lat, last, day, cat):
     running = {}
     for row in cursor:
         if last > 0:
-            running.setdefault(row[3], 0)
-            running[row[3]] += 1
-            if running[row[3]] > last:
+            running.setdefault(row["threshold"], 0)
+            running[row["threshold"]] += 1
+            if running[row["threshold"]] > last:
                 continue
         res["outlooks"].append(
             dict(
                 day=day,
-                utc_issue=row[0].strftime("%Y-%m-%dT%H:%M:%SZ"),
-                utc_expire=row[1].strftime("%Y-%m-%dT%H:%M:%SZ"),
-                utc_product_issue=row[2].strftime("%Y-%m-%dT%H:%M:%SZ"),
-                threshold=row[3],
-                category=row[4],
+                utc_issue=row["i"].strftime("%Y-%m-%dT%H:%M:%SZ"),
+                utc_expire=row["e"].strftime("%Y-%m-%dT%H:%M:%SZ"),
+                utc_product_issue=row["v"].strftime("%Y-%m-%dT%H:%M:%SZ"),
+                threshold=row["threshold"],
+                category=row["category"],
             )
         )
     pgconn.close()

@@ -3,15 +3,14 @@ Set time zones of stations using the shapefile found here:
 
 http://efele.net/maps/tz/world/
 """
-from pyiem.util import get_dbconn, logger
+from pyiem.util import get_dbconnc, logger
 
 LOG = logger()
 
 
 def main():
     """Go Main"""
-    pgconn = get_dbconn("mesosite")
-    mcursor = pgconn.cursor()
+    pgconn, mcursor = get_dbconnc("mesosite")
     mcursor2 = pgconn.cursor()
 
     mcursor.execute(
@@ -20,20 +19,21 @@ def main():
     )
 
     for row in mcursor:
-        lat = row[3]
-        lon = row[2]
-        sid = row[0]
-        network = row[1]
+        lat = row["lat"]
+        lon = row["lon"]
+        sid = row["id"]
+        network = row["network"]
 
+        giswkt = f"SRID=4326;POINT({lon} {lat})"
         mcursor2.execute(
             """
         select tzid from tz_world where ST_Intersects(geom,
-        ST_GeomFromText('SRID=4326;POINT(%s %s)'));
+        ST_GeomFromText(%s));
           """,
-            (lon, lat),
+            (giswkt,),
         )
         row2 = mcursor2.fetchone()
-        if row2 is None or row2[0] == "uninhabited":
+        if row2 is None or row2["tzid"] == "uninhabited":
             LOG.info(
                 "MISSING TZ ID: %s NETWORK: %s LAT: %.2f LON: %.2f",
                 sid,
@@ -43,33 +43,33 @@ def main():
             )
             mcursor2.execute(
                 """
-                SELECT ST_Distance(geom, 'SRID=4326;POINT(%s %s)') as d,
+                SELECT ST_Distance(geom, %s) as d,
                 id, tzname from stations WHERE network = %s
                 and tzname is not null ORDER by d ASC LIMIT 1
             """,
-                (lon, lat, network),
+                (giswkt, network),
             )
             row3 = mcursor2.fetchone()
             if row3 is not None:
                 LOG.info(
                     "FORCING tz to its neighbor: %s Tzname: %s Dist: %.5f",
-                    row3[1],
-                    row3[2],
-                    row3[0],
+                    row3["id"],
+                    row3["tzname"],
+                    row3["d"],
                 )
                 mcursor2.execute(
                     """
                     UPDATE stations SET tzname = %s
                     WHERE id = %s and network = %s
                 """,
-                    (row3[2], sid, network),
+                    (row3["tzname"], sid, network),
                 )
             else:
                 mcursor2.execute(
                     "SELECT tzname from networks where id = %s", (network,)
                 )
                 if mcursor2.rowcount == 1:
-                    tzname = mcursor2.fetchone()[0]
+                    tzname = mcursor2.fetchone()["tzname"]
                     LOG.info("%s using network default of %s", sid, tzname)
                     mcursor2.execute(
                         """
@@ -79,11 +79,13 @@ def main():
                         (tzname, sid, network),
                     )
         else:
-            LOG.info("ID: %s NETWORK: %s TIMEZONE: %s", sid, network, row2[0])
+            LOG.info(
+                "ID: %s NETWORK: %s TIMEZONE: %s", sid, network, row2["tzid"]
+            )
             mcursor2.execute(
                 "UPDATE stations SET tzname = %s "
                 "WHERE id = %s and network = %s",
-                (row2[0], sid, network),
+                (row2["tzid"], sid, network),
             )
 
     mcursor2.close()

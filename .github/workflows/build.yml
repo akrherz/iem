@@ -68,7 +68,7 @@ jobs:
           python database/store_test_data.py
           python scripts/dbutil/sync_stations.py
         fi
-        SERVICE=http://iem.local pytest -n 4 .ipc/tests/test_autoplot.py
+        SERVICE=http://iem.local pytest -n 4 .ipc/tests/test_*.py
 
     - name: View Apache Logs
       if: failure()
