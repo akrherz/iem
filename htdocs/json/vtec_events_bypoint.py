@@ -26,12 +26,13 @@ def get_df(lon, lat, sdate, edate):
       wfo (str): 3 character WFO identifier
       year (int): year to run for
     """
+    giswkt = f"POINT({lon} {lat})"
     with get_sqlalchemy_conn("postgis") as conn:
         df = pd.read_sql(
             """
         WITH myugcs as (
             select gid from ugcs where
-            ST_Contains(geom, ST_SetSRID(ST_GeomFromEWKT('POINT(%s %s)'),4326))
+            ST_Contains(geom, ST_SetSRID(ST_GeomFromEWKT(%s),4326))
         )
         SELECT
         to_char(issue at time zone 'UTC', 'YYYY-MM-DDThh24:MI:SSZ')
@@ -45,7 +46,7 @@ def get_df(lon, lat, sdate, edate):
         issue > %s and issue < %s ORDER by issue ASC
         """,
             conn,
-            params=(lon, lat, sdate, edate),
+            params=(giswkt, sdate, edate),
         )
     if df.empty:
         return df

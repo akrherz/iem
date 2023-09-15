@@ -432,7 +432,7 @@ yearly_opts = [
     {"id": 165, "label": "First / Last Date of Temperature Threshold [map]"},
     {
         "id": 119,
-        "label": "Frequency of First Fall High/Low Temperature by Day of Year",
+        "label": "Frequency of First/Last Fall High/Low Temp by Day of Year",
     },
     {
         "id": 120,
