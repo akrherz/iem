@@ -41,6 +41,7 @@ def get_events(ctx):
         data["valid"] = ctx["valid"].strftime(ISO)
         params["valid"] = ctx["valid"]
 
+    params["giswkt"] = f"POINT({ctx['lon']} {ctx['lat']})"
     with get_sqlalchemy_conn("postgis") as conn:
         df = pd.read_sql(
             text(
@@ -57,7 +58,7 @@ def get_events(ctx):
         eventid,
     tml_direction, tml_sknt, hvtec_nwsli, windtag, hailtag, tornadotag,
     damagetag from sbw where status = 'NEW' and
-    ST_Contains(geom, ST_SetSRID(ST_GeomFromEWKT('POINT(:lon :lat)'),4326)) and
+    ST_Contains(geom, ST_SetSRID(ST_GeomFromEWKT(:giswkt),4326)) and
     issue > :sdate and expire < :edate
     {valid_limiter} ORDER by issue ASC
         """

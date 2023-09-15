@@ -25,31 +25,31 @@ def pointquery(lon, lat):
     giswkt = f"SRID=4326;POINT({lon} {lat})"
     cursor.execute(
         """
-    SELECT sel, issued at time zone 'UTC', expired at time zone 'UTC', type,
-    ST_AsGeoJSON(geom), num from watches
-    where ST_Contains(geom, ST_GeomFromEWKT(%s))
+    SELECT sel, issued at time zone 'UTC' as ii,
+    expired at time zone 'UTC' as ee, type, ST_AsGeoJSON(geom) as geo, num
+    from watches where ST_Contains(geom, ST_GeomFromEWKT(%s))
     ORDER by issued DESC
     """,
         (giswkt,),
     )
     for row in cursor:
         url = ("https://www.spc.noaa.gov/products/watch/%s/ww%04i.html") % (
-            row[1].year,
-            row[5],
+            row["ii"].year,
+            row["num"],
         )
         res["features"].append(
             dict(
                 type="Feature",
-                id=row[5],
+                id=row["num"],
                 properties=dict(
                     spcurl=url,
-                    year=row[1].year,
-                    type=row[3],
-                    number=row[5],
-                    issue=row[1].strftime("%Y-%m-%dT%H:%M:%SZ"),
-                    expire=row[2].strftime("%Y-%m-%dT%H:%M:%SZ"),
+                    year=row["ii"].year,
+                    type=row["type"],
+                    number=row["num"],
+                    issue=row["ii"].strftime("%Y-%m-%dT%H:%M:%SZ"),
+                    expire=row["ee"].strftime("%Y-%m-%dT%H:%M:%SZ"),
                 ),
-                geometry=json.loads(row[4]),
+                geometry=json.loads(row["geo"]),
             )
         )
     pgconn.close()
@@ -70,30 +70,30 @@ def dowork(valid):
 
     cursor.execute(
         """
-    SELECT sel, issued at time zone 'UTC', expired at time zone 'UTC', type,
-    ST_AsGeoJSON(geom), num from watches where issued <= %s and
-    expired > %s
+    SELECT sel, issued at time zone 'UTC' as ii,
+    expired at time zone 'UTC' as ee, type, ST_AsGeoJSON(geom) as geo, num
+    from watches where issued <= %s and expired > %s
     """,
         (valid, valid),
     )
     for row in cursor:
         url = ("https://www.spc.noaa.gov/products/watch/%s/ww%04i.html") % (
-            row[1].year,
-            row[5],
+            row["ii"].year,
+            row["num"],
         )
         res["features"].append(
             dict(
                 type="Feature",
-                id=row[5],
+                id=row["num"],
                 properties=dict(
                     spcurl=url,
-                    year=row[1].year,
-                    type=row[3],
-                    number=row[5],
-                    issue=row[1].strftime("%Y-%m-%dT%H:%M:%SZ"),
-                    expire=row[2].strftime("%Y-%m-%dT%H:%M:%SZ"),
+                    year=row["ii"].year,
+                    type=row["type"],
+                    number=row["num"],
+                    issue=row["ii"].strftime("%Y-%m-%dT%H:%M:%SZ"),
+                    expire=row["ee"].strftime("%Y-%m-%dT%H:%M:%SZ"),
                 ),
-                geometry=json.loads(row[4]),
+                geometry=json.loads(row["geo"]),
             )
         )
     pgconn.close()

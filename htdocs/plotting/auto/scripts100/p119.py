@@ -29,8 +29,8 @@ from pyiem.util import get_autoplot_context, get_sqlalchemy_conn
 
 PDICT = {"low": "Low Temperature", "high": "High Temperature"}
 PDICT2 = {
-    "first_below": "First Fall Temperature Below Threshold",
-    "last_above": "Last Fall Temperature Above Threshold",
+    "first_below": "First Fall Temperature at or below Threshold",
+    "last_above": "Last Fall Temperature at or above Threshold",
 }
 
 
@@ -141,6 +141,15 @@ def plotter(fdict):
                 ).iloc[0]["date"]
 
             df[f"{base}freq"] = df[f"{base}cnts"] / len(df2.index) * 100.0
+    explainer = (
+        "On a certain date, what is the observed frequency that a given\n"
+        "temperature threshold has been first observed by the given date."
+    )
+    if opt == "last_above":
+        explainer = (
+            "On a certain date, what is the observed frequency that a given\n"
+            "temperature threshold has been observed for the last time."
+        )
     res = (
         "# IEM Climodat https://mesonet.agron.iastate.edu/climodat/\n"
         f"# Report Generated: {datetime.date.today():%d %b %Y}\n"
@@ -148,9 +157,7 @@ def plotter(fdict):
         f"# Site Information: {ctx['_sname']}\n"
         "# Contact: Daryl Herzmann akrherz@iastate.edu 515.294.5978\n"
         f"# {PDICT[ctx['var']]} exceedence probabilities\n"
-        f"# (On a certain date, what is the chance a temperature {opt}\n"
-        "# threshold would have been observed once already during the fall "
-        "of that year)\n"
+        f"# {explainer}\n"
         f" DOY Date    {comp}{thresholds[0]}  {comp}{thresholds[1]}  "
         f"{comp}{thresholds[2]}  {comp}{thresholds[3]}\n"
     )
@@ -179,9 +186,8 @@ def plotter(fdict):
     if maxdate is None:
         maxdate = datetime.datetime(2001, 6, 1)
 
-    title = ("Frequency of %s %s\n%s %s (%s-%s)") % (
-        PDICT[ctx["var"]],
-        PDICT2[opt],
+    title = ("Frequency of %s\n%s %s (%s-%s)") % (
+        PDICT2[opt].replace("Temperature", PDICT[ctx["var"]]),
         station,
         ctx["_nt"].sts[station]["name"],
         bs.year,
