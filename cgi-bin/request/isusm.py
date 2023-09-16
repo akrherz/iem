@@ -250,15 +250,17 @@ def fetch_hourly(form, cols):
     with get_sqlalchemy_conn("isuag") as conn:
         df = pd.read_sql(
             text(
-                "SELECT *, valid at time zone 'UTC' as utc_valid "
-                f"{sqlextra} from {table} WHERE valid >= :sts "
-                "and valid < :ets and station in :stations ORDER by valid ASC"
+                f"""
+                SELECT *, valid at time zone 'UTC' as utc_valid {sqlextra}
+                from {table} WHERE valid >= :sts and valid < :ets and
+                station = ANY(:stations) ORDER by valid ASC
+                """
             ),
             conn,
             params={
                 "sts": sts,
                 "ets": ets,
-                "stations": tuple(stations),
+                "stations": stations,
             },
             index_col=None,
         )

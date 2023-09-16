@@ -209,7 +209,10 @@ def application(environ, start_response):
         yield b"ERROR: server over capacity, please try later"
         return
     try:
-        tzinfo = ZoneInfo(form.get("tz", "Etc/UTC"))
+        tzname = form.get("tz", "UTC")
+        if tzname == "etc/utc":
+            tzname = "UTC"
+        tzinfo = ZoneInfo(tzname)
     except ZoneInfoNotFoundError as exp:
         start_response(
             "500 Internal Server Error", [("Content-type", "text/plain")]
@@ -220,20 +223,21 @@ def application(environ, start_response):
     pgconn = get_dbconn("asos")
     cursor_name = f"mystream_{environ.get('REMOTE_ADDR')}"
     if toobusy(pgconn, cursor_name):
+        pgconn.close()
         start_response(
             "503 Service Unavailable", [("Content-type", "text/plain")]
         )
         yield b"ERROR: server over capacity, please try later"
         return
-    acursor = pgconn.cursor(cursor_name)
+    acursor = pgconn.cursor(cursor_name, scrollable=False)
     acursor.itersize = 2000
-    acursor.scrollable = False
 
     # Save direct to disk or view in browser
     direct = form.get("direct", "no") == "yes"
     report_types = [int(i) for i in form.getall("report_type")]
     sts, ets = get_time_bounds(form, tzinfo)
     if sts is None:
+        pgconn.close()
         start_response(
             "500 Internal Server Error", [("Content-type", "text/plain")]
         )
@@ -244,6 +248,7 @@ def application(environ, start_response):
         # We are asking for all-data.  We limit the amount of data returned to
         # one day or less
         if (ets - sts) > datetime.timedelta(hours=24):
+            pgconn.close()
             start_response(
                 "500 Internal Server Error", [("Content-type", "text/plain")]
             )
@@ -374,4 +379,5 @@ def application(environ, start_response):
         if rownum > 0 and rownum % 1000 == 0:
             yield sio.getvalue().encode("ascii", "ignore")
             sio = StringIO()
+    pgconn.close()
     yield sio.getvalue().encode("ascii", "ignore")

@@ -307,11 +307,13 @@ def produce_content(nexrad, poh, meso, tvs, max_size):
     if max_size > 0:
         titleadd += f", Max Size >= {max_size}"
     cursor.execute(
-        "SELECT *, ST_x(geom) as lon, ST_y(geom) as lat, "
-        "valid at time zone 'UTC' as utc_valid "
-        "from nexrad_attributes WHERE valid > now() - '15 minutes'::interval "
-        f"{limiter} and poh >= %s {meso_limiter} {tvs_limiter} and "
-        "max_size >= %s",
+        f"""
+        SELECT *, ST_x(geom) as lon, ST_y(geom) as lat,
+        valid at time zone 'UTC' as utc_valid
+        from nexrad_attributes WHERE valid > now() - '15 minutes'::interval
+        {limiter} and poh >= %s {meso_limiter} {tvs_limiter} and
+        max_size >= %s
+        """,
         (poh, max_size),
     )
     res = (
@@ -367,7 +369,7 @@ def application(environ, start_response):
                 if line.find(lon) > 0:
                     nexrad = line[1:4].upper()
 
-    poh = float(form.get("poh", 0))
+    poh = int(form.get("poh", 0))
     meso = float(form.get("meso", -1))
     tvs = "tvs" in form
     max_size = float(form.get("max_size", 0))
