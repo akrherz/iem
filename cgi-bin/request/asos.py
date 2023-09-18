@@ -214,9 +214,7 @@ def application(environ, start_response):
             tzname = "UTC"
         tzinfo = ZoneInfo(tzname)
     except ZoneInfoNotFoundError as exp:
-        start_response(
-            "500 Internal Server Error", [("Content-type", "text/plain")]
-        )
+        start_response("400 Bad Request", [("Content-type", "text/plain")])
         sys.stderr.write(f"asos.py invalid tz: {exp}\n")
         yield b"Invalid Timezone (tz) provided"
         return
@@ -238,9 +236,7 @@ def application(environ, start_response):
     sts, ets = get_time_bounds(form, tzinfo)
     if sts is None:
         pgconn.close()
-        start_response(
-            "500 Internal Server Error", [("Content-type", "text/plain")]
-        )
+        start_response("400 Bad Request", [("Content-type", "text/plain")])
         yield b"Invalid times provided."
         return
     stations = get_stations(form)
@@ -249,9 +245,7 @@ def application(environ, start_response):
         # one day or less
         if (ets - sts) > datetime.timedelta(hours=24):
             pgconn.close()
-            start_response(
-                "500 Internal Server Error", [("Content-type", "text/plain")]
-            )
+            start_response("400 Bad Request", [("Content-type", "text/plain")])
             yield b"When requesting all-stations, must be less than 24 hours."
             return
     delim = form.get("format", "onlycomma")

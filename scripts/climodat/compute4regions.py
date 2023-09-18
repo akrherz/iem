@@ -46,8 +46,8 @@ def update_database(cursor, stid, valid, row):
             "snowd = %s, temp_hour = 7, precip_hour = 7 "
             "WHERE station = %s and day = %s",
             (
-                _row["high"],
-                _row["low"],
+                int(round(_row["high"], 0)),
+                int(round(_row["low"], 0)),
                 round(zero(_row["precip"]), 2),
                 round(zero(_row["snow"]), 1),
                 round(zero(_row["snowd"]), 1),

@@ -59,7 +59,8 @@ def run(network, month, day, syear, eyear):
     max_precip mp
     WHERE xh.station = a.station and xh.station = nh.station
     and xh.station = xl.station and
-    xh.station = nl.station and xh.station = mp.station ORDER by station ASC
+    xh.station = nl.station and xh.station = mp.station and
+    xh.high is not null ORDER by station ASC
 
     """,
         (sday, syear, eyear),

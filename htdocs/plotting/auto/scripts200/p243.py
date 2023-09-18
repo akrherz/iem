@@ -268,9 +268,10 @@ def plotter(fdict):
     ax.spines["top"].set_visible(False)
     ax.spines["right"].set_visible(False)
     ax.spines["left"].set_visible(False)
+    df2 = df.iloc[:10]
     ax.barh(
-        range(1, 11),
-        df["count"].values[:10],
+        range(1, len(df2.index) + 1),
+        df2["count"].values,
     )
     labels = []
     rank = 0
@@ -284,9 +285,9 @@ def plotter(fdict):
         if opt in ["bystate", "bywfo"]:
             extra = row[opt.replace("by", "")]
         labels.append(f"#{rank} {extra} {md} :: {row['count']}")
-    ax.set_yticks(range(1, 11))
+    ax.set_yticks(range(1, len(df2.index) + 1))
     ax.set_yticklabels(labels)
-    ax.set_ylim(11, 0)
+    ax.set_ylim(len(df2.index) + 1, 0)
     ax.set_xlabel(f"Event Count by Date: {params['tzname']}")
 
     return fig, df
