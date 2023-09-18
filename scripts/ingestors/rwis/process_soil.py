@@ -86,17 +86,18 @@ def main():
     for nwsli, row in df.iterrows():
         if pd.isnull(nwsli) or pd.isnull(row["location_id"]):
             continue
+        location_id = int(row["location_id"])
         cursor.execute(
             "SELECT valid from rwis_soil_data where sensor_id = %s and "
             "location_id = %s",
-            (row["sensor_id"], row["location_id"]),
+            (row["sensor_id"], location_id),
         )
         if cursor.rowcount == 0:
             LOG.info("adding soil entry %s %s", nwsli, row["sensor_id"])
             cursor.execute(
                 "INSERT into rwis_soil_data (valid, sensor_id, location_id) "
                 "VALUES ('1980-01-01', %s, %s) RETURNING valid",
-                (row["sensor_id"], row["location_id"]),
+                (row["sensor_id"], location_id),
             )
         current = cursor.fetchone()[0]
         if row["valid"] <= current:
@@ -108,7 +109,7 @@ def main():
                 row["valid"],
                 clean2(row["tmpf"]),
                 row["sensor_id"],
-                row["location_id"],
+                location_id,
             ),
         )
     cursor.close()

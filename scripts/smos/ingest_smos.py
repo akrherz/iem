@@ -50,12 +50,12 @@ def consume(scursor, fn, ts, grid_ids):
         good += 1
 
     data.seek(0)
-    scursor.copy_from(
-        data,
-        table,
-        columns=("grid_idx", "valid", "soil_moisture", "optical_depth"),
-        null="null",
+    sql = (
+        f"copy {table}(grid_idx, valid, soil_moisture, optical_depth) "
+        "from stdin with null as 'null'"
     )
+    with scursor.copy(sql) as copy:
+        copy.write(data.getvalue())
 
 
 def fn2datetime(fn):

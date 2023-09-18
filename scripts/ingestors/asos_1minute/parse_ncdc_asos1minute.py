@@ -288,7 +288,12 @@ def runner(pgconn, metadata, station):
         sio.write(fmt % (*[entry.get(col) for col in cols[2:]],))
         sio.write("\n")
     sio.seek(0)
-    cursor.copy_from(sio, "alldata_1minute", columns=cols, null="None")
+    sql = (
+        f"copy alldata_1minute({','.join(cols)}) from stdin "
+        "with null as 'None'"
+    )
+    with cursor.copy(sql) as copy:
+        copy.write(sio.read())
     count = cursor.rowcount
     cursor.close()
     pgconn.commit()

@@ -187,14 +187,25 @@ def copy_iemre_12z(ts, ds):
 def use_climodat_12z(ts, ds):
     """Look at what we have in climodat."""
     mybuf = 2
+    giswkt = "SRID=4326;POLYGON((%s %s, %s  %s, %s %s, %s %s, %s %s))" % (
+        iemre.WEST - mybuf,
+        iemre.SOUTH - mybuf,
+        iemre.WEST - mybuf,
+        iemre.NORTH + mybuf,
+        iemre.EAST + mybuf,
+        iemre.NORTH + mybuf,
+        iemre.EAST + mybuf,
+        iemre.SOUTH - mybuf,
+        iemre.WEST - mybuf,
+        iemre.SOUTH - mybuf,
+    )
     with get_sqlalchemy_conn("coop") as conn:
         df = pd.read_sql(
             """
         WITH mystations as (
             SELECT id, ST_X(geom) as lon, ST_Y(geom) as lat, state, name
-            from stations where ST_Contains(
-  ST_GeomFromEWKT('SRID=4326;POLYGON((%s %s, %s  %s, %s %s, %s %s, %s %s))'),
-  geom) and network ~* 'CLIMATE' and substr(id, 3, 1) not in ('C', 'D', 'T')
+            from stations where ST_Contains(ST_GeomFromEWKT(%s), geom) and
+            network ~* 'CLIMATE' and substr(id, 3, 1) not in ('C', 'D', 'T')
             and substr(id, 3, 4) != '0000'
         )
         SELECT m.lon, m.lat, m.state, m.id as station, m.name as name,
@@ -211,16 +222,7 @@ def use_climodat_12z(ts, ds):
         """,
             conn,
             params=(
-                iemre.WEST - mybuf,
-                iemre.SOUTH - mybuf,
-                iemre.WEST - mybuf,
-                iemre.NORTH + mybuf,
-                iemre.EAST + mybuf,
-                iemre.NORTH + mybuf,
-                iemre.EAST + mybuf,
-                iemre.SOUTH - mybuf,
-                iemre.WEST - mybuf,
-                iemre.SOUTH - mybuf,
+                giswkt,
                 ts,
             ),
         )
@@ -245,6 +247,18 @@ def use_coop_12z(ts, ds):
     """Use the COOP data for gridding"""
     LOG.info("12z hi/lo for %s", ts)
     mybuf = 2.0
+    giswkt = "SRID=4326;POLYGON((%s %s, %s  %s, %s %s, %s %s, %s %s))" % (
+        iemre.WEST - mybuf,
+        iemre.SOUTH - mybuf,
+        iemre.WEST - mybuf,
+        iemre.NORTH + mybuf,
+        iemre.EAST + mybuf,
+        iemre.NORTH + mybuf,
+        iemre.EAST + mybuf,
+        iemre.SOUTH - mybuf,
+        iemre.WEST - mybuf,
+        iemre.SOUTH - mybuf,
+    )
     with get_sqlalchemy_conn("iem") as conn:
         df = pd.read_sql(
             f"""
@@ -258,24 +272,14 @@ def use_coop_12z(ts, ds):
            (CASE WHEN min_tmpf > -50 and min_tmpf < 95
                then min_tmpf else null end) as lowdata
            from summary_{ts.year} c, stations s WHERE day = %s and
-           ST_Contains(
-  ST_GeomFromEWKT('SRID=4326;POLYGON((%s %s, %s  %s, %s %s, %s %s, %s %s))'),
-  geom) and s.network ~* 'COOP' and c.iemid = s.iemid and
+           ST_Contains(ST_GeomFromEWKT(%s), geom) and s.network ~* 'COOP'
+           and c.iemid = s.iemid and
   extract(hour from c.coop_valid at time zone s.tzname) between 4 and 11
             """,
             conn,
             params=(
                 ts,
-                iemre.WEST - mybuf,
-                iemre.SOUTH - mybuf,
-                iemre.WEST - mybuf,
-                iemre.NORTH + mybuf,
-                iemre.EAST + mybuf,
-                iemre.NORTH + mybuf,
-                iemre.EAST + mybuf,
-                iemre.SOUTH - mybuf,
-                iemre.WEST - mybuf,
-                iemre.SOUTH - mybuf,
+                giswkt,
             ),
         )
     LOG.info("loaded %s rows from iemaccess database", len(df.index))
@@ -306,6 +310,18 @@ def use_coop_12z(ts, ds):
 def use_asos_daily(ts, ds):
     """Grid out available ASOS data."""
     mybuf = 2.0
+    giswkt = "SRID=4326;POLYGON((%s %s, %s  %s, %s %s, %s %s, %s %s))" % (
+        iemre.WEST - mybuf,
+        iemre.SOUTH - mybuf,
+        iemre.WEST - mybuf,
+        iemre.NORTH + mybuf,
+        iemre.EAST + mybuf,
+        iemre.NORTH + mybuf,
+        iemre.EAST + mybuf,
+        iemre.SOUTH - mybuf,
+        iemre.WEST - mybuf,
+        iemre.SOUTH - mybuf,
+    )
     with get_sqlalchemy_conn("iem") as conn:
         df = pd.read_sql(
             f"""
@@ -325,23 +341,13 @@ def use_asos_daily(ts, ds):
             (CASE WHEN max_rh > 0 and max_rh < 101
              then max_rh else null end) as maxrh
            from summary_{ts.year} c, stations s WHERE day = %s and
-           ST_Contains(
-  ST_GeomFromEWKT('SRID=4326;POLYGON((%s %s, %s  %s, %s %s, %s %s, %s %s))'),
-  geom) and s.network ~* 'ASOS' and c.iemid = s.iemid
+           ST_Contains(ST_GeomFromEWKT(%s), geom) and s.network ~* 'ASOS'
+           and c.iemid = s.iemid
             """,
             conn,
             params=(
                 ts,
-                iemre.WEST - mybuf,
-                iemre.SOUTH - mybuf,
-                iemre.WEST - mybuf,
-                iemre.NORTH + mybuf,
-                iemre.EAST + mybuf,
-                iemre.NORTH + mybuf,
-                iemre.EAST + mybuf,
-                iemre.SOUTH - mybuf,
-                iemre.WEST - mybuf,
-                iemre.SOUTH - mybuf,
+                giswkt,
             ),
         )
     if len(df.index) < 4:
@@ -372,14 +378,25 @@ def use_asos_daily(ts, ds):
 def use_climodat_daily(ts, ds):
     """Do our gridding"""
     mybuf = 2.0
+    giswkt = "SRID=4326;POLYGON((%s %s, %s  %s, %s %s, %s %s, %s %s))" % (
+        iemre.WEST - mybuf,
+        iemre.SOUTH - mybuf,
+        iemre.WEST - mybuf,
+        iemre.NORTH + mybuf,
+        iemre.EAST + mybuf,
+        iemre.NORTH + mybuf,
+        iemre.EAST + mybuf,
+        iemre.SOUTH - mybuf,
+        iemre.WEST - mybuf,
+        iemre.SOUTH - mybuf,
+    )
     with get_sqlalchemy_conn("coop") as conn:
         df = pd.read_sql(
             """
         WITH mystations as (
             SELECT id, ST_X(geom) as lon, ST_Y(geom) as lat, state, name
-            from stations where ST_Contains(
-    ST_GeomFromEWKT('SRID=4326;POLYGON((%s %s, %s  %s, %s %s, %s %s, %s %s))'),
-    geom) and network ~* 'CLIMATE' and substr(id, 3, 1) not in ('C', 'D', 'T')
+            from stations where ST_Contains(ST_GeomFromEWKT(%s), geom) and
+            network ~* 'CLIMATE' and substr(id, 3, 1) not in ('C', 'D', 'T')
             and substr(id, 3, 4) != '0000'
         )
         SELECT m.lon, m.lat, m.state, m.id as station, m.name as name,
@@ -401,16 +418,7 @@ def use_climodat_daily(ts, ds):
         """,
             conn,
             params=(
-                iemre.WEST - mybuf,
-                iemre.SOUTH - mybuf,
-                iemre.WEST - mybuf,
-                iemre.NORTH + mybuf,
-                iemre.EAST + mybuf,
-                iemre.NORTH + mybuf,
-                iemre.EAST + mybuf,
-                iemre.SOUTH - mybuf,
-                iemre.WEST - mybuf,
-                iemre.SOUTH - mybuf,
+                giswkt,
                 ts,
             ),
         )

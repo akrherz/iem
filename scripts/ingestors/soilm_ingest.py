@@ -395,12 +395,11 @@ def common_df_logic(filename, maxts, nwsli, tablename):
     df.to_csv(output, sep="\t", header=False, index=False)
     output.seek(0)
     pgconn, icursor = get_dbconnc("isuag")
-    try:
-        icursor.copy_from(output, tablename, columns=df.columns, null="")
-    except Exception as exp:
-        LOG.exception(exp)
-        icursor.close()
-        return None
+    sql = (
+        f"copy {tablename} ({','.join(df.columns)}) from stdin with null as ''"
+    )
+    with icursor.copy(sql) as copy:
+        copy.write(output.read())
     icursor.close()
     pgconn.commit()
     return df
