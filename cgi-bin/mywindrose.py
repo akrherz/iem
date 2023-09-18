@@ -8,7 +8,6 @@ import datetime
 from io import BytesIO
 from zoneinfo import ZoneInfo
 
-import numpy
 from paste.request import parse_formvars
 from pyiem.network import Table as NetworkTable
 from pyiem.plot.use_agg import plt
@@ -119,17 +118,19 @@ def application(environ, start_response):
     except Exception as exp:
         return [send_error(form, str(exp), start_response)]
     if "hour1" in form and "hourlimit" in form:
-        hours = numpy.array((int(form["hour1"]),))
+        hours = [
+            int(form["hour1"]),
+        ]
     elif "hour1" in form and "hour2" in form and "hourrangelimit" in form:
         if sts.hour > ets.hour:  # over midnight
-            hours = numpy.arange(sts.hour, 24)
-            hours = numpy.append(hours, numpy.arange(0, ets.hour))
+            hours = list(range(sts.hour, 24))
+            hours.extend(range(0, ets.hour))
         else:
             if sts.hour == ets.hour:
                 ets += datetime.timedelta(hours=1)
-            hours = numpy.arange(sts.hour, ets.hour)
+            hours = list(range(sts.hour, ets.hour))
     else:
-        hours = numpy.arange(0, 24)
+        hours = list(range(0, 24))
 
     if "units" in form and form["units"] in ["mph", "kts", "mps", "kph"]:
         units = form["units"]
@@ -137,9 +138,11 @@ def application(environ, start_response):
         units = "mph"
 
     if "month1" in form and "monthlimit" in form:
-        months = numpy.array((int(form["month1"]),))
+        months = [
+            int(form["month1"]),
+        ]
     else:
-        months = numpy.arange(1, 13)
+        months = list(range(1, 13))
 
     try:
         nsector = int(form["nsector"])
