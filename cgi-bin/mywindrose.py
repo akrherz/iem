@@ -154,6 +154,8 @@ def application(environ, start_response):
         rmax = 100
 
     nt = NetworkTable(network, only_online=False)
+    if station not in nt.sts:
+        return [send_error(form, "Unknown station identifier", start_response)]
     tzname = nt.sts[station]["tzname"]
     if network != "RAOB":
         # Assign the station time zone to the sts and ets
