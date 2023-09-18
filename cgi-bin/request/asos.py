@@ -121,7 +121,7 @@ def get_stations(form):
     if "station" not in form:
         if "network" in form:
             nt = NetworkTable(form.get("network"), only_online=False)
-            return nt.sts.keys()
+            return list(nt.sts.keys())
         return []
     stations = form.getall("station")
     if not stations:

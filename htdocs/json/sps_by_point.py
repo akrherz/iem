@@ -30,6 +30,7 @@ def get_events(ctx):
         data["valid"] = ctx["valid"].strftime(ISO)
         params["valid"] = ctx["valid"]
 
+    params["giswkt"] = f"POINT({ctx['lon']} {ctx['lat']})"
     with get_sqlalchemy_conn("postgis") as conn:
         df = pd.read_sql(
             text(
@@ -39,7 +40,7 @@ def get_events(ctx):
     to_char(issue at time zone 'UTC', 'YYYY-MM-DDThh24:MIZ') as issue,
     to_char(expire at time zone 'UTC', 'YYYY-MM-DDThh24:MIZ') as expire
     from sps where
-    ST_Contains(geom, ST_SetSRID(ST_GeomFromEWKT('POINT(:lon :lat)'),4326)) and
+    ST_Contains(geom, ST_SetSRID(ST_GeomFromEWKT(:giswkt),4326)) and
     issue > :sdate and expire < :edate
     {valid_limiter} ORDER by issue ASC
         """
