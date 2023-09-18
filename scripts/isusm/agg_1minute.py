@@ -57,7 +57,7 @@ def hourly_process(cursor, station, hour, mdf, hdf):
     cursor.execute(
         f"UPDATE sm_hourly SET {','.join(tokens)} "
         "WHERE station = %(station)s and valid = %(valid)s",
-        row,
+        row.to_dict(),
     )
 
 

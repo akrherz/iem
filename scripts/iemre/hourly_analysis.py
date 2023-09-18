@@ -206,17 +206,20 @@ def grid_hour(ts):
     ts1 = ts + datetime.timedelta(minutes=10)
 
     mybuf = 2.0
+    giswkt = "SRID=4326;POLYGON((%s %s, %s  %s, %s %s, %s %s, %s %s))" % (
+        iemre.WEST - mybuf,
+        iemre.SOUTH - mybuf,
+        iemre.WEST - mybuf,
+        iemre.NORTH + mybuf,
+        iemre.EAST + mybuf,
+        iemre.NORTH + mybuf,
+        iemre.EAST + mybuf,
+        iemre.SOUTH - mybuf,
+        iemre.WEST - mybuf,
+        iemre.SOUTH - mybuf,
+    )
     params = (
-        iemre.WEST - mybuf,
-        iemre.SOUTH - mybuf,
-        iemre.WEST - mybuf,
-        iemre.NORTH + mybuf,
-        iemre.EAST + mybuf,
-        iemre.NORTH + mybuf,
-        iemre.EAST + mybuf,
-        iemre.SOUTH - mybuf,
-        iemre.WEST - mybuf,
-        iemre.SOUTH - mybuf,
+        giswkt,
         ts0,
         ts1,
     )
@@ -236,9 +239,7 @@ def grid_hour(ts):
     max(case when sknt >= 0 then sknt else 0 end) as sknt,
     max(case when sknt >= 0 then drct else 0 end) as drct
     from alldata a JOIN stations t on (a.station = t.id) WHERE
-    ST_Contains(
-    ST_GeomFromEWKT('SRID=4326;POLYGON((%s %s, %s  %s, %s %s, %s %s, %s %s))'),
-    geom) and t.network ~* 'ASOS' and
+    ST_Contains(ST_GeomFromEWKT(%s), geom) and t.network ~* 'ASOS' and
     valid >= %s and valid < %s and report_type != 1
     GROUP by station, lon, lat""",
             conn,

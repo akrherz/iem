@@ -307,14 +307,25 @@ def do_polygon(ctx):
     if ctx["t"] == "cwa":
         wfolimiter = f" wfo = '{station}' and "
     # do arbitrary buffer to prevent segfaults?
+    giswkt = "SRID=4326;POLYGON((%s %s, %s %s, %s %s, %s %s, %s %s))" % (
+        west,
+        south,
+        west,
+        north,
+        east,
+        north,
+        east,
+        south,
+        west,
+        south,
+    )
     df = read_postgis(
         f"""
     SELECT ST_Forcerhr(ST_Buffer(geom, 0.0005)) as geom, issue, expire,
     extract(epoch from %s::timestamptz - issue) / 86400. as days
     from sbw where {wfolimiter} {daylimiter}
     phenomena = %s and status = 'NEW' and significance = %s
-    and ST_Within(geom, ST_GeomFromEWKT('SRID=4326;POLYGON((%s %s, %s %s,
-    %s %s, %s %s, %s %s))')) and ST_IsValid(geom)
+    and ST_Within(geom, ST_GeomFromEWKT(%s)) and ST_IsValid(geom)
     and issue >= %s and issue <= %s ORDER by issue ASC
     """,
         pgconn,
@@ -322,16 +333,7 @@ def do_polygon(ctx):
             ets,
             phenomena,
             significance,
-            west,
-            south,
-            west,
-            north,
-            east,
-            north,
-            east,
-            south,
-            west,
-            south,
+            giswkt,
             sts,
             ets,
         ),

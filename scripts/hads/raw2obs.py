@@ -66,12 +66,12 @@ def do(ts):
         f"DELETE from {table} WHERE valid between %s and %s", (sts, ets)
     )
     data.seek(0)
-    cursor.copy_from(
-        data,
-        table,
-        columns=("station", "valid", "tmpf", "dwpf", "drct", "sknt"),
-        null="null",
+    sql = (
+        f"copy {table}(station, valid, tmpf, dwpf, drct, sknt) from stdin "
+        "with (delimiter E'\\t') with null as 'null'"
     )
+    with cursor.copy(sql) as copy:
+        copy.write(data.read())
     cursor.close()
     pgconn.commit()
 

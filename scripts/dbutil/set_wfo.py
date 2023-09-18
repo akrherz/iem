@@ -27,11 +27,12 @@ def main():
         iemid = row[1]
         network = row[2]
         # Look for WFO that
+        giswkt = f"POINT({row[3]} {row[4]})"
         pcursor.execute(
             "select wfo from cwa WHERE "
             "ST_Contains(the_geom, "
-            "  ST_SetSrid(ST_GeomFromEWKT('POINT(%s %s)'), 4326)) ",
-            (row[3], row[4]),
+            "  ST_SetSrid(ST_GeomFromEWKT(%s), 4326)) ",
+            (giswkt,),
         )
         if pcursor.rowcount == 0:
             LOG.info(
@@ -42,9 +43,9 @@ def main():
             )
             pcursor.execute(
                 "SELECT wfo, ST_Distance(the_geom, "
-                "  ST_SetSrid(ST_GeomFromEWKT('POINT(%s %s)'), 4326)) as dist "
+                "  ST_SetSrid(ST_GeomFromEWKT(%s), 4326)) as dist "
                 "from cwa ORDER by dist ASC LIMIT 1",
-                (row[3], row[4]),
+                (giswkt,),
             )
             wfo, dist = pcursor.fetchone()
             if dist > 3:

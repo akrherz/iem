@@ -22,13 +22,14 @@ def logic(
     pcursor, mcursor2, ugccode, iemid, station, network, lon, lat, state
 ):
     """Our logic"""
+    giswkt = f"Point({lon} {lat})"
     pcursor.execute(
         """
         SELECT ugc, name from ugcs WHERE
-        ST_Contains(geom, ST_GeomFromText('Point(%s %s)',4326))
+        ST_Contains(geom, ST_GeomFromText(%s,4326))
         and substr(ugc,1,3) = %s and end_ts is null
     """,
-        (lon, lat, state + ugccode),
+        (giswkt, state + ugccode),
     )
 
     result = False
@@ -38,12 +39,12 @@ def logic(
         pcursor.execute(
             """
             SELECT ugc, name,
-            ST_Distance(geom, ST_GeomFromText('Point(%s %s)',4326)) as d
+            ST_Distance(geom, ST_GeomFromText(%s,4326)) as d
             from ugcs WHERE substr(ugc,1,3) = %s and end_ts is null and
-            ST_Distance(geom, ST_GeomFromText('Point(%s %s)',4326)) < 2
+            ST_Distance(geom, ST_GeomFromText(%s,4326)) < 2
             ORDER by d ASC LIMIT 1
         """,
-            (lon, lat, state + ugccode, lon, lat),
+            (giswkt, state + ugccode, giswkt),
         )
         if pcursor.rowcount == 1:
             (ugc, ugcname, dist) = pcursor.fetchone()

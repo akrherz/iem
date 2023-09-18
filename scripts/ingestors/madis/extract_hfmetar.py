@@ -57,7 +57,7 @@ def process_sky(data, skycs, skyls):
             continue
         data[f"skyc{i}"] = skyc
         if skyc != "CLR":
-            data[f"skyl{i}"] = float(np.round(skyl, 0))  # GH287
+            data[f"skyl{i}"] = int(np.round(skyl, 0))  # GH287
             mtr += f"{skyc}{(skyl / 100.):03.0f} "
         else:
             mtr += "CLR "

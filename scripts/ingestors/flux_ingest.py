@@ -216,9 +216,12 @@ def main():
 
             cursor = pgconn.cursor()
             output.seek(0)
-            cursor.copy_from(
-                output, f"flux{year}", columns=gdf2.columns, null=""
+            sql = (
+                f"copy flux{year}({','.join(gdf2.columns)}) from stdin "
+                "with null as ''"
             )
+            with cursor.copy(sql) as copy:
+                copy.write(output.read())
             cursor.close()
             pgconn.commit()
         for _i, row in df.iterrows():

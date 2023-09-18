@@ -48,12 +48,12 @@ def main(argv):
             sio.write(f"{station},{day},{day:%m%d},{day:%Y},{day:%m}\n")
         sio.seek(0)
         cursor = pgconn.cursor()
-        cursor.copy_from(
-            sio,
-            f"alldata_{state.lower()}",
-            columns=("station", "day", "sday", "year", "month"),
-            sep=",",
+        sql = (
+            f"copy alldata_{state.lower()}(station, day, sday, year, month) "
+            "from stdin with (delimiter ',')"
         )
+        with cursor.copy(sql) as copy:
+            copy.write(sio.read())
         del sio
         cursor.close()
         pgconn.commit()
