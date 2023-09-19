@@ -472,7 +472,7 @@ def plotter(fdict):
                     ets,
                     sts - datetime.timedelta(days=90),
                     ets + datetime.timedelta(days=90),
-                    total_minutes,
+                    int(total_minutes),
                 ),
                 index_col="datum",
             )

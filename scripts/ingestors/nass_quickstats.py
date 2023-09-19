@@ -8,7 +8,7 @@ from zoneinfo import ZoneInfo
 import numpy as np
 import pandas as pd
 import requests
-from pyiem.util import get_dbconn, get_properties, logger
+from pyiem.util import get_dbconnc, get_properties, logger
 
 LOG = logger()
 PROPS = get_properties()
@@ -58,8 +58,7 @@ def process(df):
         df["load_time"].str.slice(0, 19), format="%Y-%m-%d %H:%M:%S"
     ).dt.tz_localize(ZoneInfo("America/New_York"))
     df = df.replace({np.nan: None, "": None})
-    pgconn = get_dbconn("coop")
-    cursor = pgconn.cursor()
+    pgconn, cursor = get_dbconnc("coop")
     deleted = 0
     inserted = 0
     dups = 0
@@ -68,8 +67,8 @@ def process(df):
         if row["statisticcat_desc"].find("YEAR") > 0:
             continue
         # fix SQL comparator
-        cc = "is" if row["week_ending"] is None else "="
-        cf = "is" if row["county_ansi"] is None else "="
+        cc = "is not distinct from" if row["week_ending"] is None else "="
+        cf = "is not distinct from" if row["county_ansi"] is None else "="
         # Uniqueness by short_desc, year, state_alpha, week_ending
         cursor.execute(
             "SELECT load_time from nass_quickstats where year = %s "
@@ -86,7 +85,7 @@ def process(df):
             ),
         )
         if cursor.rowcount > 0:
-            lt = cursor.fetchone()[0]
+            lt = cursor.fetchone()["load_time"]
             if lt == row["load_time"].to_pydatetime():
                 dups += 1
                 continue

@@ -81,7 +81,7 @@ def update_climodat(cf6df, xref, valid):
                     continue
                 uvals += 1
                 work.append(f"{col} = %s")
-                params.append(row[col])
+                params.append(row[col] if col == "precip" else int(row[col]))
                 LOG.info("%s %s %s->%s", clsid, col, current[col], row[col])
             if not work:
                 continue

@@ -148,7 +148,7 @@ def dbsave(ts, data):
             cursor.execute(
                 "INSERT into alldata_forecast(modelid, station, day, high, "
                 "low, precip) VALUES (%s, %s, %s, %s, %s, %s)",
-                (modelid, sid, date, high, low, round(precip, 2)),
+                (modelid, sid, date, int(high), int(low), round(precip, 2)),
             )
             found_data = True
     cursor.close()

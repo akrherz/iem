@@ -42,7 +42,7 @@ def main(argv):
     # Get traffic obs from access
     icursor = iemdb.cursor()
     icursor.execute(
-        """SELECT l.nwsli as station, s.lane_id, d.* from
+        """SELECT l.nwsli as station, s.lane_id::int as lane_id, d.* from
        rwis_traffic_data_log d, rwis_locations l, rwis_traffic_sensors s
        WHERE s.id = d.sensor_id and valid >= %s and valid < %s
        and s.location_id = l.id""",
@@ -131,8 +131,8 @@ def main(argv):
         """INSERT into alldata (station, valid, tmpf,
         dwpf, drct, sknt, tfs0, tfs1, tfs2, tfs3, subf, gust, tfs0_text,
         tfs1_text, tfs2_text, tfs3_text, pcpn, vsby) VALUES (%(station)s,
-        %(valid)s,%(tmpf)s,%(dwpf)s,%(drct)s,%(sknt)s,%(tsf0)s,
-        %(tsf1)s,%(tsf2)s,%(tsf3)s,%(rwis_subf)s,%(gust)s,%(scond0)s,
+        %(valid)s,%(tmpf)s,%(dwpf)s,round(%(drct)s::numeric, 0),%(sknt)s,
+        %(tsf0)s,%(tsf1)s,%(tsf2)s,%(tsf3)s,%(rwis_subf)s,%(gust)s,%(scond0)s,
         %(scond1)s,%(scond2)s,%(scond3)s,%(pday)s,%(vsby)s)""",
         rows,
     )
