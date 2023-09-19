@@ -173,7 +173,10 @@ def do(meta, station, acis_station, interactive):
             if newval is False:
                 continue
             work.append(f"{col} = %s")
-            args.append(newval)
+            if col in ["high", "low", "temp_hour", "precip_hour"]:
+                args.append(int(newval))
+            else:
+                args.append(newval)
             if col in ["high", "precip"]:  # suboptimal to exclude low
                 work.append(
                     f"{'precip' if col == 'precip' else 'temp'}_"
