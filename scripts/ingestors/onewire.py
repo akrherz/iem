@@ -1,6 +1,7 @@
 """Onewire ingest."""
 import datetime
 import os
+import subprocess
 import time
 
 os.environ["TZ"] = "CST6CDT"
@@ -35,7 +36,7 @@ def main():
                         data[3],
                     )
                 )
-            os.system("pqinsert %s" % (fp,))
+            subprocess.call(["pqinsert", fp])
             os.remove(fp)
         time.sleep(56)
 

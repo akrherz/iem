@@ -5,13 +5,11 @@ import sys
 from zoneinfo import ZoneInfo
 
 from pyiem.observation import Observation
-from pyiem.util import convert_value, get_dbconn, utc
+from pyiem.util import convert_value, get_dbconnc, utc
 
 
 def main():
     """Go Main Go"""
-    iemaccess = get_dbconn("iem")
-    cursor = iemaccess.cursor()
     valid = utc().astimezone(ZoneInfo("America/Chicago"))
     fn = valid.strftime("/mesonet/ARCHIVE/data/%Y/%m/%d/text/ot/ot0002.dat")
 
@@ -36,8 +34,8 @@ def main():
     iem.data["drct"] = tokens[9]
     iem.data["tmpf"] = tokens[7]
 
+    iemaccess, cursor = get_dbconnc("iem")
     iem.save(cursor)
-
     cursor.close()
     iemaccess.commit()
 

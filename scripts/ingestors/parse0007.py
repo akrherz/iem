@@ -7,16 +7,13 @@ from zoneinfo import ZoneInfo
 from metpy.calc import dewpoint_from_relative_humidity
 from metpy.units import units
 from pyiem.observation import Observation
-from pyiem.util import get_dbconn, logger
+from pyiem.util import get_dbconnc, logger
 
 LOG = logger()
 
 
 def main():
     """Go Main Go"""
-    pgconn = get_dbconn("iem")
-    icursor = pgconn.cursor()
-
     now = datetime.datetime.now()
 
     fn = now.strftime("/mesonet/ARCHIVE/data/%Y/%m/%d/text/ot/ot0007.dat")
@@ -54,8 +51,9 @@ def main():
     iemob.data["sknt"] = float(tokens[7]) * 1.94
     iemob.data["drct"] = tokens[8]
     iemob.data["pres"] = float(tokens[9]) / 960 * 28.36
-    iemob.save(icursor)
 
+    pgconn, icursor = get_dbconnc("iem")
+    iemob.save(icursor)
     icursor.close()
     pgconn.commit()
     pgconn.close()
