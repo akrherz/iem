@@ -44,7 +44,9 @@ def main():
         fn = f"{mydir}/{sid}_{month_abbr[month].lower()}.png"
         res = windrose(
             sid,
-            months=(month,),
+            months=[
+                month,
+            ],
             database=database,
             sname=nt.sts[sid]["name"],
             tzname=nt.sts[sid]["tzname"],

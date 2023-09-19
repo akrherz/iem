@@ -153,7 +153,7 @@ def dbsave(ts, data):
                 station, day, high, low, precip, srad)
                 VALUES (%s, %s, %s, %s, %s, %s, %s)
             """,
-                (modelid, sid, date, high, low, precip, srad),
+                (modelid, sid, date, int(high), int(low), precip, srad),
             )
     cursor.close()
     pgconn.commit()

@@ -102,7 +102,7 @@ def daily_process(cursor, station, date, df, ddf):
     cursor.execute(
         f"UPDATE sm_daily SET {','.join(tokens)} "
         "WHERE station = %(station)s and valid = %(date)s",
-        row,
+        row.to_dict(),
     )
 
 

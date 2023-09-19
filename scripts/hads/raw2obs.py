@@ -68,7 +68,7 @@ def do(ts):
     data.seek(0)
     sql = (
         f"copy {table}(station, valid, tmpf, dwpf, drct, sknt) from stdin "
-        "with (delimiter E'\\t') with null as 'null'"
+        "with (delimiter E'\\t', null 'null')"
     )
     with cursor.copy(sql) as copy:
         copy.write(data.read())
