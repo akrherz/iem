@@ -55,7 +55,7 @@ def add_station(dbconn, nwsli, attrs):
     cursor.execute(
         "INSERT into stations(id, name, plot_name, state, country, geom, "
         "network, online, metasite) VALUES "
-        "(%s, %s, %s, %s, 'US', 'SRID=4326;POINT(%s %s)', "
+        "(%s, %s, %s, %s, 'US', ST_POINT(%s, %s, 4326), "
         "%s, %s, %s) RETURNING iemid",
         (
             nwsli,

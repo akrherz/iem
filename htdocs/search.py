@@ -42,16 +42,15 @@ def geocoder(q):
         return "/sites/locate.php"
     lat = data["results"][0]["geometry"]["location"]["lat"]
     lon = data["results"][0]["geometry"]["location"]["lng"]
-    giswkt = f"SRID=4326;POINT({lon} {lat})"
     with get_sqlalchemy_conn("mesosite") as conn:
         df = pd.read_sql(
-            "SELECT id, network, "
-            "ST_Distance(geom, "
-            "ST_GeomFromEWKT(%s)) as dist "
-            "from stations where ST_PointInsideCircle(geom, %s, %s, 1) "
-            "ORDER by dist ASC LIMIT 50",
+            """SELECT id, network,
+            ST_Distance(geom, ST_Point(%s, %s, 4326)) as dist
+            from stations where ST_PointInsideCircle(geom, %s, %s, 1)
+            ORDER by dist ASC LIMIT 50
+            """,
             conn,
-            params=(giswkt, lon, lat),
+            params=(lon, lat, lon, lat),
         )
     return station_df_handler(df)
 

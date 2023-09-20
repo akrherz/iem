@@ -101,7 +101,7 @@ def workflow():
             underbellyplowstate = %s,
             solid_spread_code = %s,
             road_temp_code = %s,
-            geom = 'SRID=4326;POINT(%s %s)'
+            geom = ST_Point(%s, %s, 4326)
             WHERE label = %s
         """,
             (
@@ -138,7 +138,7 @@ def workflow():
             road_temp_code, geom)
              values
             (%s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s
-            , %s, 'SRID=4326;POINT(%s %s)')
+            , %s, ST_POINT(%s, %s, 4326))
         """,
             (
                 label,

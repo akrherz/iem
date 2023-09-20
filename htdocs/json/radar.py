@@ -44,8 +44,8 @@ def available_radars(fields):
     """
     Return available RADAR sites for the given location and date!
     """
-    lat = fields.get("lat", 41.9)
-    lon = fields.get("lon", -92.3)
+    lat = float(fields.get("lat", 41.9))
+    lon = float(fields.get("lon", -92.3))
     start_gts = parse_time(fields.get("start", "2012-01-27T00:00Z"))
     pgconn = get_dbconn("mesosite")
     mcursor = pgconn.cursor()
@@ -59,9 +59,9 @@ def available_radars(fields):
     else:
         sql = f"""
         select id, name, ST_x(geom) as lon, ST_y(geom) as lat, network,
-        ST_Distance(geom, GeomFromEWKT('SRID=4326;POINT({lon} {lat})')) as dist
+        ST_Distance(geom, ST_POINT({lon}, {lat}, 4326)) as dist
         from stations where network in ('NEXRAD','ASR4','ASR11','TWDR')
-        and ST_Distance(geom, GeomFromEWKT('SRID=4326;POINT({lon} {lat})')) < 3
+        and ST_Distance(geom, ST_POINT({lon}, {lat}, 4326)) < 3
         ORDER by dist asc
         """
     mcursor.execute(sql)

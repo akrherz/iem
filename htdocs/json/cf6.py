@@ -139,6 +139,7 @@ def application(environ, start_response):
         mc.set(mckey, data, 300)
     if cb is not None:
         data = f"{html_escape(cb)}({data})"
+    mc.close()
 
     start_response("200 OK", headers)
     return [data.encode("ascii")]

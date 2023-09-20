@@ -5,8 +5,9 @@
 
 Since we have web scrapers, we need to have empty folders to keep the Server
 from having lots of 404s
+
+called from RUN_0Z.sh
 """
-import grp
 import os
 import subprocess
 import sys
@@ -24,25 +25,6 @@ PILS = (
 ).split("|")
 
 
-def chgrp(filepath, gid):
-    """https://gist.github.com/jmahmood/2505741"""
-    uid = os.stat(filepath).st_uid
-    os.chown(filepath, uid, gid)
-
-
-def supermakedirs(path, mode, group):
-    """ "http://stackoverflow.com/questions/5231901"""
-    if not path or os.path.exists(path):
-        return []
-    (head, _) = os.path.split(path)
-    res = supermakedirs(head, mode, group)
-    os.mkdir(path)
-    os.chmod(path, mode)
-    chgrp(path, group)
-    res += [path]
-    return res
-
-
 def main(argv):
     """Go Main Go"""
     if len(argv) == 1:
@@ -50,23 +32,26 @@ def main(argv):
     else:
         ts = utc(int(argv[1]), int(argv[2]), int(argv[3]))
     nt = NetworkTable(["NEXRAD", "TWDR"])
-    basedir = ts.strftime("/mesonet/ARCHIVE/data/%Y/%m/%d/GIS/ridge")
     for sid in nt.sts:
         for prod in PRODS[nt.sts[sid]["network"]]:
-            mydir = os.path.join(basedir, sid, prod)
-            if os.path.isdir(mydir):
-                continue
-            supermakedirs(mydir, 0o775, grp.getgrnam("iem-friends")[2])
+            pqstr = (
+                f"data d {ts:%Y%m%d%H%M} GIS/ridge/{sid}/{prod} "
+                f"GIS/ridge/{sid}/{prod} bogus"
+            )
+            subprocess.call(["pqinsert", "-i", "-p", pqstr, "/etc/fstab"])
+
     # Do noaaport text
     basedir = ts.strftime("/mesonet/ARCHIVE/data/%Y/%m/%d/text/noaaport")
-    supermakedirs(basedir, 0o775, grp.getgrnam("iem-friends")[2])
-    os.chdir(basedir)
+    if os.path.isdir(basedir):
+        os.chdir(basedir)
     for pil in PILS:
         fn = f"{pil}_{ts:%Y%m%d}.txt"
         if not os.path.isfile(fn):
-            subprocess.call(["touch", fn])
-            os.chmod(fn, 0o664)
-            chgrp(fn, grp.getgrnam("iem-friends")[2])
+            pqstr = (
+                f"data t {ts:%Y%m%d%H%M} text/noaaport/{fn} "
+                f"text/noaaport/{fn} bogus"
+            )
+            subprocess.call(["pqinsert", "-i", "-p", pqstr, "/etc/fstab"])
 
 
 if __name__ == "__main__":

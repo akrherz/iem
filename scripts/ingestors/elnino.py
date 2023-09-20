@@ -3,13 +3,12 @@ import datetime
 
 import pandas as pd
 import requests
-from pyiem.util import get_dbconn, get_sqlalchemy_conn
+from pyiem.util import get_dbconnc, get_sqlalchemy_conn
 
 
 def main():
     """Go Main Go"""
-    mesosite = get_dbconn("coop")
-    mcursor = mesosite.cursor()
+    mesosite, mcursor = get_dbconnc("coop")
 
     # Get max date
     with get_sqlalchemy_conn("coop") as engine:

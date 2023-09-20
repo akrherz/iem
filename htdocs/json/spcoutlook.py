@@ -31,7 +31,6 @@ def dotime(time, lon, lat, day, cat):
         ts = datetime.datetime.strptime(time, "%Y-%m-%dT%H:%MZ")
         ts = ts.replace(tzinfo=ZoneInfo("UTC"))
     with get_sqlalchemy_conn("postgis") as conn:
-        giswkt = f"SRID=4326;POINT({lon} {lat})"
         df = read_sql(
             """
         SELECT issue at time zone 'UTC' as i,
@@ -42,11 +41,11 @@ def dotime(time, lon, lat, day, cat):
             select product_issue from spc_outlook where
             issue <= %s and expire > %s and day = %s
             and outlook_type = 'C' ORDER by product_issue DESC LIMIT 1)
-        and ST_Contains(geom, ST_GeomFromEWKT(%s))
+        and ST_Contains(geom, ST_Point(%s, %s, 4326))
         and day = %s and outlook_type = 'C' and category = %s
         """,
             conn,
-            params=(ts, ts, day, giswkt, day, cat),
+            params=(ts, ts, day, lon, lat, day, cat),
             index_col=None,
         )
     res = {
@@ -80,7 +79,6 @@ def dowork(lon, lat, last, day, cat):
     res = dict(outlooks=[])
 
     # Need to compute SIGN seperately
-    giswkt = f"SRID=4326;POINT({lon} {lat})"
     cursor.execute(
         """
     WITH data as (
@@ -92,7 +90,7 @@ def dowork(lon, lat, last, day, cat):
             ORDER by priority DESC NULLS last, issue ASC) as rank
         from spc_outlooks o, spc_outlook_thresholds t
         where o.threshold = t.threshold and
-        ST_Contains(geom, ST_GeomFromEWKT(%s))
+        ST_Contains(geom, ST_Point(%s, %s, 4326))
         and day = %s and outlook_type = 'C' and category = %s
         and o.threshold not in ('TSTM', 'SIGN') ORDER by issue DESC),
     agg as (
@@ -102,7 +100,7 @@ def dowork(lon, lat, last, day, cat):
         expire at time zone 'UTC' as e,
         product_issue at time zone 'UTC' as v,
         threshold, category from spc_outlooks
-        where ST_Contains(geom, ST_GeomFromEWKT(%s))
+        where ST_Contains(geom, ST_Point(%s, %s, 4326))
         and day = %s and outlook_type = 'C' and category = %s
         and threshold = 'SIGN' ORDER by expire DESC, issue ASC LIMIT 1)
 
@@ -111,7 +109,7 @@ def dowork(lon, lat, last, day, cat):
     (SELECT i, e, v, threshold, category from sign
     ORDER by e DESC, threshold desc)
     """,
-        (giswkt, day, cat, giswkt, day, cat),
+        (lon, lat, day, cat, lon, lat, day, cat),
     )
     running = {}
     for row in cursor:

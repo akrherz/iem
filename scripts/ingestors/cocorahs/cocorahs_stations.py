@@ -66,14 +66,14 @@ def main(argv):
                 lat,
             )
             mcursor.execute(
-                "UPDATE stations SET geom = 'SRID=4326;POINT(%s %s)', "
+                "UPDATE stations SET geom = ST_Point(%s, %s, 4326), "
                 "elevation = -999, ugc_county = null, ugc_zone = null, "
                 "ncdc81 = null, climate_site = null, ncei91 = null WHERE "
                 "id = %s and network = %s",
                 (lon, lat, sid, network),
             )
             if name != nt.sts[sid]["name"]:
-                LOG.info(
+                LOG.warning(
                     "Updating %s name '%s' -> '%s'",
                     sid,
                     nt.sts[sid]["name"],
@@ -86,7 +86,7 @@ def main(argv):
                 )
             continue
 
-        LOG.info(
+        LOG.warning(
             "ADD COCORAHS SID:%s Name:%s County:%s %.3f %.3f",
             sid,
             name,
@@ -99,7 +99,7 @@ def main(argv):
             "INSERT into stations(id, synop, name, state, country, network, "
             "online, geom, county, plot_name , metasite) "
             "VALUES (%s, 99999, %s, %s, 'US', %s, 't', "
-            "'SRID=4326;POINT(%s %s)', %s, %s, 'f')",
+            "ST_POINT(%s, %s, 4326), %s, %s, 'f')",
             (
                 sid,
                 name,

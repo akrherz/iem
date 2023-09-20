@@ -29,7 +29,7 @@ def main():
         cursor.execute(
             """
         UPDATE stations
-        SET geom = 'SRID=4326;POINT(%(LONGITUDE)s %(LATITUDE)s)',
+        SET geom = ST_POINT(%(LONGITUDE)s, %(LATITUDE)s, 4326),
         country = %(COUNTRY)s, state = %(STATE)s,
         name = %(stname)s, elevation = %(ELEVATION)s,
         online = 't', metasite = 'f'

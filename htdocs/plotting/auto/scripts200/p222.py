@@ -63,7 +63,6 @@ def get_data(ctx, meta):
         phenomenas = [
             "FF",
         ]
-    giswkt = f"SRID=4326;POINT({meta['lon']} {meta['lat']})"
     with get_sqlalchemy_conn("postgis") as conn:
         warndf = pd.read_sql(
             text(
@@ -71,12 +70,12 @@ def get_data(ctx, meta):
             SELECT issue, expire from sbw WHERE issue > '2002-01-01' and
             phenomena = ANY(:ph) and significance = 'W' and
             status = 'NEW' and ST_Contains(geom,
-            GeomFromEWKT(:giswkt))
+            ST_Point(:lon, :lat, 4326))
             ORDER by issue ASC
             """
             ),
             conn,
-            params={"ph": phenomenas, "giswkt": giswkt},
+            params={"ph": phenomenas, "lon": meta["lon"], "lat": meta["lat"]},
             index_col=None,
         )
     td = timedelta(hours=1)

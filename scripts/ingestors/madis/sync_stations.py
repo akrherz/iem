@@ -45,7 +45,7 @@ def main(argv):
                 "INSERT into stations(id, network, synop, country, plot_name, "
                 "name, state, online, geom, metasite) "
                 "VALUES (%s, %s, 9999, 'US', %s, %s, %s, 't', "
-                "'SRID=4326;POINT(%s %s)', 'f')",
+                "ST_POINT(%s, %s, 4326), 'f')",
                 (stid, network, name, name, network[:2], lon, lat),
             )
             continue
@@ -65,7 +65,7 @@ def main(argv):
             lat,
         )
         mcursor.execute(
-            "UPDATE stations SET geom = 'SRID=4326;POINT(%s %s)' WHERE "
+            "UPDATE stations SET geom = ST_POINT(%s, %s, 4326) WHERE "
             "id = %s and network = %s",
             (lon, lat, stid, network),
         )
