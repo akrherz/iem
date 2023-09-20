@@ -10,7 +10,7 @@ made available to this plotting application:
     <li><a href="https://www.nssl.noaa.gov/projects/mrms/">NOAA MRMS</a>
     <br />A state of the art gridded analysis of RADAR data using
     observations and model data to help in the processing.</li>
-    <li><a href="http://prism.oregonstate.edu">Oregon State PRISM</a>
+    <li><a href="https://prism.oregonstate.edu">Oregon State PRISM</a>
     <br />The PRISM data is credit Oregon State University,
     created 4 Feb 2004.  This information arrives with a few day lag. The
     plotted totals represent periods typical to COOP data reporting, so
@@ -31,7 +31,7 @@ from pyiem.exceptions import NoDataFound
 from pyiem.plot import get_cmap, pretty_bins
 from pyiem.plot.geoplot import MapPlot
 from pyiem.reference import LATLON
-from pyiem.util import get_dbconn, get_properties
+from pyiem.util import get_dbconnc, get_properties
 
 PDICT2 = {"c": "Contour Plot", "g": "Grid Cell Mesh"}
 SRCDICT = {
@@ -156,7 +156,7 @@ def get_ugc_bounds(ctx, sector):
     """Do custom bounds stuff."""
     if ctx.get("ugc") is None:
         return sector, "", 0, 0, 0, 0
-    cursor = get_dbconn("postgis").cursor()
+    conn, cursor = get_dbconnc("postgis")
     cursor.execute(
         "SELECT st_xmin(geom), st_xmax(geom), st_ymin(geom), st_ymax(geom), "
         "name from ugcs WHERE ugc = %s and end_ts is null",
@@ -165,59 +165,42 @@ def get_ugc_bounds(ctx, sector):
     if cursor.rowcount == 0:
         return sector, "", 0, 0, 0, 0
     row = cursor.fetchone()
+    conn.close()
     b = 0.15  # arb
     return (
         "custom",
-        row[4],
-        row[0] - b,
-        row[3] + b,
-        row[1] + b,
-        row[2] - b,
+        row["name"],
+        row["st_xmin"] - b,
+        row["st_ymax"] + b,
+        row["st_xmax"] + b,
+        row["st_ymin"] - b,
     )
 
 
-def plotter(fdict):
-    """Go"""
-    ctx = util.get_autoplot_context(fdict, get_description())
-    ptype = ctx["ptype"]
-    sdate = ctx["sdate"]
-    edate = ctx["edate"]
-    src = ctx["src"]
-    opt = ctx["opt"]
-    usdm = ctx["usdm"]
-    if sdate.year != edate.year:
-        raise NoDataFound("Sorry, do not support multi-year plots yet!")
-    sector = ctx["sector"]
-
-    state = None
-    if len(sector) == 2:
-        state = sector
-        sector = "state"
-    if ctx.get("cwa") is not None:
-        sector = "cwa"
-
+def set_ncinfo(ctx):
+    """Define the netcdf stuff we need."""
     clncvar = "p01d"
-    if src == "mrms":
-        ncfn = iemre.get_daily_mrms_ncname(sdate.year)
+    if ctx["src"] == "mrms":
+        ncfn = iemre.get_daily_mrms_ncname(ctx["sdate"].year)
         clncfn = iemre.get_dailyc_mrms_ncname()
         ncvar = "p01d"
         source = "MRMS Q3"
         subtitle = "NOAA MRMS Project, MultiSensorPass2 and RadarOnly"
-    elif src == "iemre":
-        ncfn = iemre.get_daily_ncname(sdate.year)
+    elif ctx["src"] == "iemre":
+        ncfn = iemre.get_daily_ncname(ctx["sdate"].year)
         clncfn = iemre.get_dailyc_ncname()
         ncvar = "p01d_12z"
         clncvar = "p01d"
         source = "IEM Reanalysis"
         subtitle = "IEM Reanalysis is derived from various NOAA datasets"
-    elif src == "ifc":
-        ncfn = f"/mesonet/data/iemre/{sdate.year}_ifc_daily.nc"
+    elif ctx["src"] == "ifc":
+        ncfn = f"/mesonet/data/iemre/{ctx['sdate'].year}_ifc_daily.nc"
         clncfn = "/mesonet/data/iemre/ifc_dailyc.nc"
         ncvar = "p01d"
         source = "Iowa Flood Center (Iowa Only)"
         subtitle = "IFC analysis courtesy of U of Iowa IIHR"
-    elif src == "stage4":
-        ncfn = f"/mesonet/data/stage4/{sdate.year}_stage4_daily.nc"
+    elif ctx["src"] == "stage4":
+        ncfn = f"/mesonet/data/stage4/{ctx['sdate'].year}_stage4_daily.nc"
         clncfn = "/mesonet/data/stage4/stage4_dailyc.nc"
         ncvar = "p01d_12z"
         clncvar = "p01d_12z"
@@ -229,8 +212,9 @@ def plotter(fdict):
             get_properties().get("prism.archive_end", "1980-01-01"),
             "%Y-%m-%d",
         ).date()
-        edate = min([archive_end, edate])
-        ncfn = f"/mesonet/data/prism/{sdate.year}_daily.nc"
+        ctx["edate"] = min([archive_end, ctx["edate"]])
+        ctx["sdate"] = min([ctx["edate"], ctx["sdate"]])
+        ncfn = f"/mesonet/data/prism/{ctx['sdate'].year}_daily.nc"
         clncfn = "/mesonet/data/prism/prism_dailyc.nc"
         ncvar = "ppt"
         clncvar = "ppt"
@@ -239,53 +223,41 @@ def plotter(fdict):
             "PRISM Climate Group, Oregon State Univ., "
             "http://prism.oregonstate.edu, created 4 Feb 2004."
         )
-    # important to do here after fixing the edate above
-    title = compute_title(src, sdate, edate)
+    ctx["ncfn"] = ncfn
+    ctx["clncfn"] = clncfn
+    ctx["ncvar"] = ncvar
+    ctx["clncvar"] = clncvar
+    ctx["source"] = source
+    ctx["subtitle"] = subtitle
 
-    sector, name, west, north, east, south = get_ugc_bounds(ctx, sector)
-    if ctx.get("ugc") is not None:
-        subtitle += f", zoomed on [{ctx['ugc']}] {name}"
 
-    mp = MapPlot(
-        sector=sector,
-        cwa=ctx.get("cwa"),
-        state=state,
-        north=north,
-        east=east,
-        south=south,
-        west=west,
-        axisbg="white",
-        nocaption=True,
-        title=f"{source}:: {title} Precip {PDICT3[opt]}",
-        subtitle=f"Data from {subtitle}",
-        titlefontsize=14,
-        apctx=ctx,
-    )
-    (west, east, south, north) = mp.panels[0].get_extent(LATLON)
-
-    idx0 = iemre.daily_offset(sdate)
-    idx1 = iemre.daily_offset(edate) + 1
-    if not os.path.isfile(ncfn):
+def set_gridinfo(ctx):
+    """Do the grid info work."""
+    idx0 = iemre.daily_offset(ctx["sdate"])
+    idx1 = iemre.daily_offset(ctx["edate"]) + 1
+    if not os.path.isfile(ctx["ncfn"]):
         raise NoDataFound("No data for that year, sorry.")
-    with util.ncopen(ncfn) as nc:
+    with util.ncopen(ctx["ncfn"]) as nc:
         x0, y0, x1, y1 = util.grid_bounds(
             nc.variables["lon"][:],
             nc.variables["lat"][:],
-            [west, south, east, north],
+            [ctx["west"], ctx["south"], ctx["east"], ctx["north"]],
         )
-        if sector == "conus":
+        if ctx["sector"] == "conus":
             x0, y0, x1, y1 = 0, 0, -1, -1
-        if src == "stage4":
+        if ctx["src"] == "stage4":
             lats = nc.variables["lat"][y0:y1, x0:x1]
             lons = nc.variables["lon"][y0:y1, x0:x1]
         else:
             lats = nc.variables["lat"][y0:y1]
             lons = nc.variables["lon"][x0:x1]
-        if sdate == edate:
-            p01d = mm2inch(nc.variables[ncvar][idx0, y0:y1, x0:x1])
+        if ctx["sdate"] == ctx["edate"]:
+            p01d = mm2inch(nc.variables[ctx["ncvar"]][idx0, y0:y1, x0:x1])
         elif (idx1 - idx0) < 32:
             p01d = mm2inch(
-                np.nansum(nc.variables[ncvar][idx0:idx1, y0:y1, x0:x1], 0)
+                np.nansum(
+                    nc.variables[ctx["ncvar"]][idx0:idx1, y0:y1, x0:x1], 0
+                )
             )
         else:
             # Too much data can overwhelm this app, need to chunk it
@@ -293,31 +265,51 @@ def plotter(fdict):
                 i2 = min([i + 10, idx1])
                 if idx0 == i:
                     p01d = mm2inch(
-                        np.nansum(nc.variables[ncvar][i:i2, y0:y1, x0:x1], 0)
+                        np.nansum(
+                            nc.variables[ctx["ncvar"]][i:i2, y0:y1, x0:x1], 0
+                        )
                     )
                 else:
                     p01d += mm2inch(
-                        np.nansum(nc.variables[ncvar][i:i2, y0:y1, x0:x1], 0)
+                        np.nansum(
+                            nc.variables[ctx["ncvar"]][i:i2, y0:y1, x0:x1], 0
+                        )
                     )
-    if np.ma.is_masked(np.max(p01d)):
+    ctx["lats"] = lats
+    ctx["lons"] = lons
+    ctx["p01d"] = p01d
+    ctx["idx0"] = idx0
+    ctx["idx1"] = idx1
+    ctx["x0"] = x0
+    ctx["y0"] = y0
+    ctx["x1"] = x1
+    ctx["y1"] = y1
+
+
+def set_data(ctx):
+    """Do the data work."""
+    if np.ma.is_masked(np.max(ctx["p01d"])):
         raise NoDataFound("Data Unavailable")
-    p01d = p01d.filled(np.nan)
+    p01d = ctx["p01d"].filled(np.nan)
     plot_units = "inches"
     cmap = get_cmap(ctx["cmap"])
     cmap.set_bad("white")
-    if opt == "dep":
+    tslice = slice(ctx["idx0"], ctx["idx1"])
+    yslice = slice(ctx["y0"], ctx["y1"])
+    xslice = slice(ctx["x0"], ctx["x1"])
+    if ctx["opt"] == "dep":
         # Do departure work now
-        with util.ncopen(clncfn) as nc:
+        with util.ncopen(ctx["clncfn"]) as nc:
             climo = mm2inch(
-                np.sum(nc.variables[clncvar][idx0:idx1, y0:y1, x0:x1], 0)
+                np.sum(nc.variables[ctx["clncvar"]][tslice, yslice, xslice], 0)
             )
         p01d = p01d - climo
         [maxv] = np.nanpercentile(np.abs(p01d), [99])
         clevs = np.around(np.linspace(0 - maxv, maxv, 11), decimals=2)
-    elif opt == "per":
-        with util.ncopen(clncfn) as nc:
+    elif ctx["opt"] == "per":
+        with util.ncopen(ctx["clncfn"]) as nc:
             climo = mm2inch(
-                np.sum(nc.variables[clncvar][idx0:idx1, y0:y1, x0:x1], 0)
+                np.sum(nc.variables[ctx["clncvar"]][tslice, yslice, xslice], 0)
             )
         p01d = p01d / climo * 100.0
         clevs = [1, 10, 25, 50, 75, 100, 125, 150, 200, 300, 500]
@@ -334,41 +326,99 @@ def plotter(fdict):
             clevs = pretty_bins(0, maxval)
         clevs[0] = 0.01
 
-    if len(lons.shape) == 1:
-        x2d, y2d = np.meshgrid(lons, lats)
+    if len(ctx["lons"].shape) == 1:
+        x2d, y2d = np.meshgrid(ctx["lons"], ctx["lats"])
     else:
-        x2d, y2d = lons, lats
-    if ptype == "c":
-        mp.contourf(
-            x2d,
-            y2d,
-            p01d,
-            clevs,
-            cmap=cmap,
-            units=plot_units,
+        x2d, y2d = ctx["lons"], ctx["lats"]
+
+    ctx["clevs"] = clevs
+    ctx["p01d"] = p01d
+    ctx["plot_units"] = plot_units
+    ctx["cmap"] = cmap
+    ctx["x2d"] = x2d
+    ctx["y2d"] = y2d
+
+
+def set_mapplot(ctx):
+    """Setup the mapplot instance."""
+    state = None
+    sector = ctx["sector"]
+    if len(ctx["sector"]) == 2:
+        state = ctx["sector"]
+        sector = "state"
+    if ctx.get("cwa") is not None:
+        sector = "cwa"
+    ctx["sector"], name, west, north, east, south = get_ugc_bounds(ctx, sector)
+    if ctx.get("ugc") is not None:
+        ctx["subtitle"] += f", zoomed on [{ctx['ugc']}] {name}"
+    title = compute_title(ctx["src"], ctx["sdate"], ctx["edate"])
+    ctx["mp"] = MapPlot(
+        sector=ctx["sector"],
+        cwa=ctx.get("cwa"),
+        state=state,
+        north=north,
+        east=east,
+        south=south,
+        west=west,
+        axisbg="white",
+        nocaption=True,
+        title=f"{ctx['source']}:: {title} Precip {PDICT3[ctx['opt']]}",
+        subtitle=f"Data from {ctx['subtitle']}",
+        titlefontsize=14,
+        apctx=ctx,
+    )
+    ctx["west"], ctx["east"], ctx["south"], ctx["north"] = (
+        ctx["mp"].panels[0].get_extent(LATLON)
+    )
+
+
+def finalize_map(ctx):
+    """Finish it."""
+    if ctx["ptype"] == "c":
+        ctx["mp"].contourf(
+            ctx["x2d"],
+            ctx["y2d"],
+            ctx["p01d"],
+            ctx["clevs"],
+            cmap=ctx["cmap"],
+            units=ctx["plot_units"],
             iline=False,
             clip_on=False,
         )
     else:
-        res = mp.pcolormesh(
-            x2d,
-            y2d,
-            p01d,
-            clevs,
-            cmap=cmap,
-            units=plot_units,
+        res = ctx["mp"].pcolormesh(
+            ctx["x2d"],
+            ctx["y2d"],
+            ctx["p01d"],
+            ctx["clevs"],
+            cmap=ctx["cmap"],
+            units=ctx["plot_units"],
             clip_on=False,
         )
         res.set_rasterized(True)
-    if (east - west) < 10:
-        mp.drawcounties()
-        mp.drawcities(minpop=500 if sector == "custom" else 5000)
-    if usdm == "yes":
-        mp.draw_usdm(edate, filled=False, hatched=True)
+    if (ctx["east"] - ctx["west"]) < 10:
+        ctx["mp"].drawcounties()
+        ctx["mp"].drawcities(minpop=500 if ctx["sector"] == "custom" else 5000)
+    if ctx["usdm"] == "yes":
+        ctx["mp"].draw_usdm(ctx["edate"], filled=False, hatched=True)
     if ctx.get("cwa") is not None:
-        mp.draw_cwas()
-    mp.draw_mask("conus")
-    return mp.fig
+        ctx["mp"].draw_cwas()
+    ctx["mp"].draw_mask("conus")
+
+
+def plotter(fdict):
+    """Go"""
+    ctx = util.get_autoplot_context(fdict, get_description())
+    if ctx["sdate"].year != ctx["edate"].year:
+        raise NoDataFound("Sorry, do not support multi-year plots yet!")
+
+    set_ncinfo(ctx)
+    set_mapplot(ctx)
+    set_gridinfo(ctx)
+    set_data(ctx)
+    finalize_map(ctx)
+
+    return ctx["mp"].fig
 
 
 if __name__ == "__main__":
