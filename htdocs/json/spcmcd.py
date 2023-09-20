@@ -15,7 +15,6 @@ def dowork(lon, lat):
 
     res = {"mcds": []}
 
-    giswkt = f"SRID=4326;POINT({lon} {lat})"
     cursor.execute(
         """
         SELECT issue at time zone 'UTC' as i,
@@ -23,10 +22,10 @@ def dowork(lon, lat):
         num,
         product_id, year, concerning
         from mcd WHERE
-        ST_Contains(geom, ST_GeomFromEWKT(%s))
+        ST_Contains(geom, ST_Point(%s, %s, 4326))
         ORDER by product_id DESC
     """,
-        (giswkt,),
+        (lon, lat),
     )
     for row in cursor:
         url = ("https://www.spc.noaa.gov/products/md/%s/md%04i.html") % (

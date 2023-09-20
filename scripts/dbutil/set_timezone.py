@@ -24,13 +24,12 @@ def main():
         sid = row["id"]
         network = row["network"]
 
-        giswkt = f"SRID=4326;POINT({lon} {lat})"
         mcursor2.execute(
             """
         select tzid from tz_world where ST_Intersects(geom,
-        ST_GeomFromText(%s));
+        ST_Point(%s, %s, 4326));
           """,
-            (giswkt,),
+            (lon, lat),
         )
         row2 = mcursor2.fetchone()
         if row2 is None or row2["tzid"] == "uninhabited":
@@ -43,11 +42,11 @@ def main():
             )
             mcursor2.execute(
                 """
-                SELECT ST_Distance(geom, %s) as d,
+                SELECT ST_Distance(geom, ST_Point(%s, %s, 4326)) as d,
                 id, tzname from stations WHERE network = %s
                 and tzname is not null ORDER by d ASC LIMIT 1
             """,
-                (giswkt, network),
+                (lon, lat, network),
             )
             row3 = mcursor2.fetchone()
             if row3 is not None:

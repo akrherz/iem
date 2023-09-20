@@ -96,7 +96,7 @@ def main():
             INSERT into stations(id, name, network, country, state,
             plot_name, elevation, online, metasite, geom)
             VALUES (%s, %s, %s, %s, %s, %s, %s, 't', 'f',
-            'SRID=4326;POINT(%s %s)');
+            ST_POINT(%s, %s, 4326));
             """,
                 (
                     nwsli,

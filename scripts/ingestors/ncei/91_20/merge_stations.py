@@ -28,7 +28,7 @@ def compute_stations(cursor):
                 INSERT into stations (id, network, geom, elevation, name,
                 country, state, online, plot_name, archive_begin, archive_end,
                 metasite, ncei91)
-                VALUES (%s, 'NCEI91', 'SRID=4326;POINT(%s %s)', %s,
+                VALUES (%s, 'NCEI91', ST_POINT(%s, %s, 4326), %s,
                 %s, %s, %s, 't', %s, '1991-01-01', '2020-12-31', 't', %s)
                 """,
                 (sid, lon, lat, elev, name, sid[:2], state, name, sid),

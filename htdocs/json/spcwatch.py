@@ -22,15 +22,14 @@ def pointquery(lon, lat):
         ),
         features=[],
     )
-    giswkt = f"SRID=4326;POINT({lon} {lat})"
     cursor.execute(
         """
     SELECT sel, issued at time zone 'UTC' as ii,
     expired at time zone 'UTC' as ee, type, ST_AsGeoJSON(geom) as geo, num
-    from watches where ST_Contains(geom, ST_GeomFromEWKT(%s))
+    from watches where ST_Contains(geom, ST_Point(%s, %s, 4326))
     ORDER by issued DESC
     """,
-        (giswkt,),
+        (lon, lat),
     )
     for row in cursor:
         url = ("https://www.spc.noaa.gov/products/watch/%s/ww%04i.html") % (

@@ -14,10 +14,10 @@ $radius = isset($_GET["radius"]) ? floatval(xssafe($_GET["radius"])): 2000.0; # 
 $rs = pg_prepare($postgis, "SELECT", "SELECT ST_x(geom) as lon, ST_y(geom) as lat,
      ST_distance(ST_transform(geom,2163), 
        ST_transform(
-        sT_GeomFromEWKT('SRID=4326;POINT($center_lng $center_lat)'),2163)) as dist,
+        ST_Point($center_lng, $center_lat, 4326),2163)) as dist,
       * from nexrad_attributes WHERE ST_distance(ST_transform(geom,2163), 
        ST_transform(
-        ST_GeomFromEWKT('SRID=4326;POINT($center_lng $center_lat)'),2163)) < $radius");
+        ST_Point($center_lng, $center_lat, 4326),2163)) < $radius");
 
 //header('Content-type: application/json');
 $rs = pg_execute($postgis, "SELECT", Array());
