@@ -9,7 +9,7 @@ import sys
 import tempfile
 
 import requests
-from pyiem.util import exponential_backoff, get_dbconn, logger, utc
+from pyiem.util import exponential_backoff, get_dbconnc, logger, utc
 
 LOG = logger()
 N0QBASE = utc(2010, 11, 14)
@@ -54,8 +54,7 @@ def save(sectorName, file_name, dir_name, ts, routes, bbox=None):
 
 def runtime(ts, routes):
     """Actually run for a time"""
-    pgconn = get_dbconn("postgis")
-    pcursor = pgconn.cursor()
+    pgconn, pcursor = get_dbconnc("postgis")
 
     save("conus", "uscomp.png", "usrad", ts, routes)
     save("iem", "mwcomp.png", "comprad", ts, routes)
@@ -73,19 +72,20 @@ def runtime(ts, routes):
             select sel, rank() OVER (PARTITION by sel ORDER by issued DESC),
             ST_xmax(geom), ST_xmin(geom), ST_ymax(geom), ST_ymin(geom)
             from watches where issued < %s and issued > %s)
-        select trim(sel), st_xmax, st_xmin, st_ymax, st_ymin from data
+        select trim(sel) as ss, st_xmax, st_xmin, st_ymax, st_ymin from data
         where rank = 1
         """,
         (ts, ts - datetime.timedelta(days=120)),
     )
     for row in pcursor:
-        xmin = float(row[2]) - 0.75
-        ymin = float(row[4]) - 0.75
-        xmax = float(row[1]) + 0.75
-        ymax = float(row[3]) + 1.5
+        xmin = float(row["st_xmin"]) - 0.75
+        ymin = float(row["st_ymin"]) - 0.75
+        xmax = float(row["st_xmax"]) + 0.75
+        ymax = float(row["st_ymax"]) + 1.5
         bbox = f"{xmin},{ymin},{xmax},{ymax}"
-        sel = row[0].lower()
+        sel = row["ss"].lower()
         save("custom", f"{sel}comp.png", f"{sel}rad", ts, routes, bbox)
+    pgconn.close()
 
 
 def main(argv):
