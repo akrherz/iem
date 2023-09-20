@@ -12,7 +12,16 @@ $t->refresh = 300;
 $t->title = "SPC Watches Overview";
 
 $metdata = array();
-$rs = pg_query($conn, "SELECT * from watches_current");
+$rs = pg_query(
+    $conn,
+    <<<EOM
+with data as (
+    select sel, rank() OVER (PARTITION by sel ORDER by issued DESC),
+    issued, expired
+    from watches where issued > now() - '120 days'::interval)
+select * from data where rank = 1
+EOM
+    );
 for ($i = 0; $row = pg_fetch_assoc($rs); $i++) {
     $metadata[$row["sel"]] = $row;
     $metadata[$row["sel"]]["sts"] = strtotime(substr($row["issued"], 0, 16));
@@ -52,4 +61,4 @@ $content
 
 EOF;
 }
-$t->render('single.phtml');
+$t->render('full.phtml');
