@@ -54,6 +54,9 @@ jobs:
         cd database; sh bootstrap.sh
         python schema_manager.py
 
+    - name: Install Python requirements from pip
+      run: |
+        python -m pip install -r pip_requirements.txt
     - name: Setup IEM Data
       if: ${{ matrix.WITH_IEM_DATA }} == "YES"
       run: |

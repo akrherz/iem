@@ -44,6 +44,8 @@ dependencies:
   - pip
   # for psql and friends
   - postgresql
+  # database
+  - psycopg
   # for pyiem
   - pyarrow
   # lots of places
