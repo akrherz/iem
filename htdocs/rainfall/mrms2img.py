@@ -43,39 +43,34 @@ def workflow(tmpdir, valid, period, start_response):
         (25.0 + (img - 100) * 1.25) * 10,
         data,
     )
-    # print '2', np.max(data), np.min(data), data[0,0]
     data = np.where(
         np.logical_and(img >= 0, img < 100), (img * 0.25) * 10, data
     )
-    # print '4', np.max(data), np.min(data), data[0,0]
 
     data = data.astype(np.uint16)
-    # print '5', np.max(data), np.min(data), data[0,0]
 
     drv = gdal.GetDriverByName("HFA")
     basefn = f"mrms_{period}h_{valid:%Y%m%d%H%M}"
     outfn = f"{tmpdir}/{basefn}.img"
-    ds = drv.Create(
-        outfn, size[1], size[0], 1, gdal.GDT_UInt16, options=["COMPRESS=YES"]
-    )
     proj = osr.SpatialReference()
     proj.SetWellKnownGeogCS("EPSG:4326")
-    ds.SetProjection(proj.ExportToWkt())
-    ds.GetRasterBand(1).WriteArray(data)
-    ds.GetRasterBand(1).SetNoDataValue(65535)
-    ds.GetRasterBand(1).SetScale(0.1)
-    ds.GetRasterBand(1).SetUnitType("mm")
-    title = valid.strftime("%s UTC %d %b %Y")
-    ds.GetRasterBand(1).SetDescription(
-        f"MRMS {period}HR Precip Ending {title}"
-    )
-    # Optional, allows ArcGIS to auto show a legend
-    ds.GetRasterBand(1).ComputeStatistics(True)
-    # top left x, w-e pixel resolution, rotation,
-    # top left y, rotation, n-s pixel resolution
-    ds.SetGeoTransform([-130.0, 0.01, 0, 55.0, 0, -0.01])
-    # close file
-    del ds
+    with drv.Create(
+        outfn, size[1], size[0], 1, gdal.GDT_UInt16, options=["COMPRESS=YES"]
+    ) as ds:
+        ds.SetProjection(proj.ExportToWkt())
+        ds.GetRasterBand(1).WriteArray(data)
+        ds.GetRasterBand(1).SetNoDataValue(65535)
+        ds.GetRasterBand(1).SetScale(0.1)
+        ds.GetRasterBand(1).SetUnitType("mm")
+        title = valid.strftime("%s UTC %d %b %Y")
+        ds.GetRasterBand(1).SetDescription(
+            f"MRMS {period}HR Precip Ending {title}"
+        )
+        # Optional, allows ArcGIS to auto show a legend
+        ds.GetRasterBand(1).ComputeStatistics(True)
+        # top left x, w-e pixel resolution, rotation,
+        # top left y, rotation, n-s pixel resolution
+        ds.SetGeoTransform([-130.0, 0.01, 0, 55.0, 0, -0.01])
 
     zipfn = f"{tmpdir}/{basefn}.zip"
     with zipfile.ZipFile(zipfn, "w", zipfile.ZIP_DEFLATED) as zfp:
