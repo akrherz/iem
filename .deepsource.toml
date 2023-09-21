@@ -3,11 +3,7 @@ version = 1
 exclude_patterns = [
     "include/vendor/**",
     "include/jpgraph/**",
-    "include/Facebook/**",
 ]
-
-[[analyzers]]
-name = "sql"
 
 [[analyzers]]
 name = "shell"

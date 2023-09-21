@@ -75,7 +75,7 @@ def doit(ts, hours):
     lts = ts.astimezone(ZoneInfo("America/Chicago"))
     subtitle = f"Total up to {lts:%d %B %Y %I:%M %p %Z}"
     mp = MapPlot(
-        title=f"NCEP MRMS Q3 (RADAR Only) {hours} Hour Precipitation [inch]",
+        title=f"NCEP MRMS (RADAR Only) {hours} Hour Precipitation [inch]",
         subtitle=subtitle,
     )
 

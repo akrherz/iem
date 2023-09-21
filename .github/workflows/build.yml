@@ -1,7 +1,17 @@
 name: Install and Test
-on: [push]
+on:
+  pull_request:
+    branches:
+      - main
+  push:
+    branches:
+      - main
 jobs:
   build-linux:
+    defaults:
+      run:
+        # Ensures environment gets sourced right
+        shell: bash -l {0}
     name: Python (${{ matrix.PYTHON_VERSION }}) with IEM Data (${{ matrix.WITH_IEM_DATA }})
     runs-on: ubuntu-latest
     strategy:
@@ -22,21 +32,57 @@ jobs:
       run: |
         cp config/settings.inc.php.in config/settings.inc.php
 
-    - name: Setup CI from ci-tooling
+    # setup conda-forge with micromamba
+    - name: Setup Python
+      uses: mamba-org/setup-micromamba@v1
+      with:
+        environment-file: environment.yml
+        condarc: |
+          channels:
+            - conda-forge
+            - defaults
+        create-args: >-
+          python=${{ env.PYTHON_VERSION }}
+        environment-name: prod
+        cache-environment: true
+
+    - name: Setup Postgres
       run: |
         git clone --depth 1 https://github.com/akrherz/iem-database.git database
         git clone --depth 1 https://github.com/akrherz/ci_tooling.git .ci_tooling
-        git clone --depth 1 https://github.com/akrherz/iem-production-checks.git .ipc
-        . .ci_tooling/iemwebfarm.sh
         . .ci_tooling/postgres.sh
+        cd database; sh bootstrap.sh
+        python schema_manager.py
+
+    - name: Setup Memcached
+      run: |
+        . .ci_tooling/memcached.sh
+
+    - name: Setup Apache
+      run: |
+        # need apache2-dev for mod-wsgi to build
+        sudo apt-get install apache2 apache2-dev
+
+    - name: Install Python requirements from pip
+      run: |
+        # mod_wsgi is here and needs apxs from above
+        python -m pip install -r pip_requirements.txt
+
+    - name: Setup IEM Data
+      if: ${{ matrix.WITH_IEM_DATA }} == "YES"
+      run: |
+        python database/store_test_data.py
+        python scripts/dbutil/sync_stations.py
+
+    - name: Configure Webfarm Server
+      run: |
+        . .ci_tooling/iemwebfarm.sh
         sudo mkdir -p /mesonet/www/logs
         sudo ln -s `pwd` /opt/iem
-        sudo ln -s $HOME/miniconda /opt/miniconda3
+        sudo ln -s $HOME/micromamba /opt/miniconda3
         echo `pwd`
         chmod 755 $HOME
         sudo apt-get install librrd-dev
-        # need apache2-dev for mod-wsgi to build
-        sudo apt-get install apache2 apache2-dev memcached
         sudo service memcached start
         sudo a2enmod headers rewrite proxy proxy_http proxy_balancer ssl lbmethod_byrequests cgi expires authz_groupfile
         # we do things the old fashioned way, we earn it
@@ -46,15 +92,10 @@ jobs:
         cat config/mesonet.inc | sudo tee -a /etc/apache2/sites-enabled/iem.conf > /dev/null
         echo '</VirtualHost>' | sudo tee -a /etc/apache2/sites-enabled/iem.conf > /dev/null
         # This may be a requirement for mod-wsgi to properly find python tooling?
-        echo "export PATH=/home/runner/miniconda/envs/prod/bin:$PATH" | sudo tee -a /etc/apache2/envvars > /dev/null
+        echo "export PATH=/home/runner/micromamba/envs/prod/bin:$PATH" | sudo tee -a /etc/apache2/envvars > /dev/null
         # Newer PROJ needs this
-        echo "export PROJ_LIB=/home/runner/miniconda/envs/prod/share/proj" | sudo tee -a /etc/apache2/envvars > /dev/null
-        . .ci_tooling/miniconda.sh
-        export PATH="/usr/lib/postgresql/14/bin:$PATH"
-        cd database; sh bootstrap.sh
-        python schema_manager.py
-        cd ..
-        MOD_WSGI_SO=$(find $HOME/miniconda/envs/prod -type f -name 'mod_wsgi*.so')
+        echo "export PROJ_LIB=/home/runner/micromamba/envs/prod/share/proj" | sudo tee -a /etc/apache2/envvars > /dev/null
+        MOD_WSGI_SO=$(find $HOME/micromamba/envs/prod -type f -name 'mod_wsgi*.so')
         echo $MOD_WSGI_SO
         echo "LoadModule wsgi_module $MOD_WSGI_SO" | sudo tee -a /etc/apache2/mods-enabled/wsgi.load > /dev/null;
         echo "WSGIApplicationGroup %{GLOBAL}" | sudo tee -a /etc/apache2/mods-enabled/wsgi.load > /dev/null;
@@ -64,15 +105,16 @@ jobs:
         # restart apache
         sudo service apache2 stop
         sudo service apache2 start
-        which python
-        python /opt/iem/deployment/mod_wsgi_startup.py
         sudo systemctl status apache2.service -l
-        if [[ ${{ matrix.WITH_IEM_DATA }} == "YES" ]]; then
-          # Add some test data to the database
-          python database/store_test_data.py
-          python scripts/dbutil/sync_stations.py
-        fi
-        SERVICE=http://iem.local pytest -n 4 .ipc/tests/test_*.py
+
+    - name: Smoke Test mod_wsgi_startup.py
+      run: |
+        python /opt/iem/deployment/mod_wsgi_startup.py
+
+    - name: Run IEM Production checks
+      run: |
+        git clone --depth 1 https://github.com/akrherz/iem-production-checks.git .ipc
+        SERVICE=http://iem.local pytest -n 4 .ipc/tests/test_*.py  
 
     - name: View Apache Logs
       if: failure()
