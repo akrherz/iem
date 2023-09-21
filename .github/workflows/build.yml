@@ -79,7 +79,7 @@ jobs:
         . .ci_tooling/iemwebfarm.sh
         sudo mkdir -p /mesonet/www/logs
         sudo ln -s `pwd` /opt/iem
-        sudo ln -s $HOME/miniconda /opt/miniconda3
+        sudo ln -s $HOME/micromamba /opt/miniconda3
         echo `pwd`
         chmod 755 $HOME
         sudo apt-get install librrd-dev
