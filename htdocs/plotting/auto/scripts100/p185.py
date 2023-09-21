@@ -1,4 +1,10 @@
-"""Precip days to accumulate"""
+"""
+This application will make a map with the number
+of days it takes to accumulate a given amount of precipitation.  This is
+based on progressing daily back in time for up to 90 days to accumulate
+the specified amount.  This plot will take some time to generate, so please
+be patient with it!
+"""
 import datetime
 import os
 
@@ -13,16 +19,7 @@ from pyiem.plot.geoplot import MapPlot
 
 def get_description():
     """Return a dict describing how to call this plotter"""
-    desc = {}
-    desc["data"] = False
-    desc[
-        "description"
-    ] = """This application will make a map with the number
-    of days it takes to accumulate a given amount of precipitation.  This is
-    based on progressing daily back in time for up to 90 days to accumulate
-    the specified amount.  This plot will take some time to generate, so please
-    be patient with it!
-    """
+    desc = {"description": __doc__, "data": False}
     today = datetime.datetime.today() - datetime.timedelta(days=1)
     desc["arguments"] = [
         dict(type="state", name="sector", default="IA", label="Select State:"),
@@ -123,7 +120,7 @@ def plotter(fdict):
         titlefontsize=14,
         subtitlefontsize=12,
         title=(
-            "NOAA MRMS Q3: Number of Recent Days "
+            "NOAA MRMS: Number of Recent Days "
             f'till Accumulating {threshold}" of Precip'
         ),
         subtitle=(

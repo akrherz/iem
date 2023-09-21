@@ -1,5 +1,5 @@
 """
- Create a plot of today's estimated precipitation based on the Q3 data
+ Create a plot of today's estimated precipitation based on the MRMS data
 """
 import datetime
 import os
@@ -76,7 +76,7 @@ def doday(ts, realtime):
             sector,
         )
         mp = MapPlot(
-            title=("%s NCEP MRMS Q3 Today's Precipitation")
+            title=("%s NCEP MRMS Today's Precipitation")
             % (ts.strftime("%-d %b %Y"),),
             subtitle=subtitle,
             sector=sector,

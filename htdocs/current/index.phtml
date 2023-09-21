@@ -1,4 +1,5 @@
 <?php
+define("IEM_APPID", 105);
 require_once '../../config/settings.inc.php';
 require_once '../../include/myview.php';
 
@@ -193,7 +194,7 @@ Multi-RADAR Multi-Sensor (MRMS) hourly precipitation esimates.
 EOM
         ),
         "3hour_mrms_iowa" => array(
-            "label" => "MRMS Q3 Three Hourly Precip",
+            "label" => "MRMS Three Hourly Precip",
             "timemachine" => "#47.{$daylink}",
             "img" => "/data/iowa_q2_3h.png",
             "desc" => <<<EOM
@@ -202,7 +203,7 @@ combining hourly esimates.
 EOM
         ),
         "6hour_mrms_iowa" => array(
-            "label" => "MRMS Q3 Six Hourly Precip",
+            "label" => "MRMS Six Hourly Precip",
             "timemachine" => "#48.{$daylink}",
             "img" => "/data/iowa_q2_6h.png",
             "desc" => <<<EOM

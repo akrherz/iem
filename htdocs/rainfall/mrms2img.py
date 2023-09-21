@@ -67,7 +67,7 @@ def workflow(tmpdir, valid, period, start_response):
     ds.GetRasterBand(1).SetUnitType("mm")
     title = valid.strftime("%s UTC %d %b %Y")
     ds.GetRasterBand(1).SetDescription(
-        f"MRMS Q3 {period}HR Precip Ending {title}"
+        f"MRMS {period}HR Precip Ending {title}"
     )
     # Optional, allows ArcGIS to auto show a legend
     ds.GetRasterBand(1).ComputeStatistics(True)
