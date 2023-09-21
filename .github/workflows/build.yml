@@ -54,18 +54,23 @@ jobs:
         cd database; sh bootstrap.sh
         python schema_manager.py
 
+    - name: Setup Apache
+      run: |
+        . .ci_tooling/iemwebfarm.sh
+
     - name: Install Python requirements from pip
       run: |
+        # mod_wsgi is here and needs apxs from above
         python -m pip install -r pip_requirements.txt
+
     - name: Setup IEM Data
       if: ${{ matrix.WITH_IEM_DATA }} == "YES"
       run: |
         python database/store_test_data.py
         python scripts/dbutil/sync_stations.py
 
-    - name: Setup Apache
+    - name: Configure Webfarm Server
       run: |
-        . .ci_tooling/iemwebfarm.sh
         sudo mkdir -p /mesonet/www/logs
         sudo ln -s `pwd` /opt/iem
         sudo ln -s $HOME/miniconda /opt/miniconda3
