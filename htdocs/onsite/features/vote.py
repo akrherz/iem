@@ -4,7 +4,7 @@ import json
 from http.cookies import SimpleCookie
 
 from paste.request import parse_formvars
-from pyiem.util import get_dbconn
+from pyiem.util import get_dbconnc
 
 
 def do(environ, headers, vote):
@@ -13,15 +13,19 @@ def do(environ, headers, vote):
     myoid = 0
     if "foid" in cookie:
         myoid = int(cookie["foid"].value)
-    pgconn = get_dbconn("mesosite")
-    cursor = pgconn.cursor()
+    pgconn, cursor = get_dbconnc("mesosite")
     cursor.execute(
         "SELECT to_char(valid, 'YYmmdd')::int as oid, good, bad, abstain "
         "from feature WHERE valid < now() ORDER by valid DESC LIMIT 1"
     )
     row = cursor.fetchone()
-    foid = row[0]
-    d = {"good": row[1], "bad": row[2], "abstain": row[3], "can_vote": True}
+    foid = row["oid"]
+    d = {
+        "good": row["good"],
+        "bad": row["bad"],
+        "abstain": row["abstain"],
+        "can_vote": True,
+    }
     if myoid == foid:
         d["can_vote"] = False
 
@@ -45,7 +49,7 @@ def do(environ, headers, vote):
         cursor.close()
         pgconn.commit()
         d["can_vote"] = False
-
+    pgconn.close()
     return d
 
 

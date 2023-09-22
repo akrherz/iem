@@ -84,7 +84,7 @@ $ys = yearSelect2(2003, $year, "year", $jsextra);
 $month_select = monthSelect2($month, "month", $jsextra);
 $ds = daySelect2($day, "day", $jsextra);
 $hs = hourSelect($hour, "hour", $jsextra);
-$ms = minuteSelect2($minute, "minute", $jsextra);
+$ms = minuteSelect($minute, "minute", 1, $jsextra);
 $dd = date("YmdHi", $radts);
 
 $misstxt = "Cameras Missing: ";
@@ -101,6 +101,9 @@ foreach ($cameras as $id => $v) {
 }
 
 $t->content = <<<EOF
+
+<div class="alert alert-danger">This legacy app will be removed at some point
+in the future.  Please use the <a href="/current/webcam.php">newer version</a>.</div>
 
 <strong>Webcam Networks</strong>
 <div style="width:775px; border: 1px dashed #ccc;">

@@ -68,14 +68,14 @@ function selectNetwork($selected, $extra = array())
         if ($selected == $idx) {
             $s .= "SELECTED";
         }
-        $s .= ">$sid</option>\n";
+        $s .= ">[{$idx}] {$sid}</option>\n";
     }
     for ($i = 0; $row = pg_fetch_array($rs); $i++) {
         $s .= "<option value=\"" . $row["id"] . "\" ";
         if ($row["id"] == $selected) {
             $s .= "SELECTED";
         }
-        $s .= ">" . $row["name"] . "</option>\n";
+        $s .= ">[{$row['id']}] {$row['name']}</option>\n";
     }
     return $s;
 }
@@ -195,25 +195,6 @@ function networkSelectAuto($network, $selected, $extra = array())
             $s .= "SELECTED";
         }
         $s .= ">{$sname}</option>\n";
-    }
-    $s .= "</select>\n";
-    return $s;
-}
-
-
-function isuagSelect($selected)
-{
-    $s = "";
-    include_once dirname(__FILE__) . "/network.php";
-    $nt = new NetworkTable("ISUAG");
-    $cities = $nt->table;
-    $s .= '<select name="station">\n';
-    foreach ($cities as $sid => $tbl) {
-        $s .= "<option value=\"$sid\" ";
-        if ($selected == $sid) {
-            $s .= "SELECTED";
-        }
-        $s .= ">" . $tbl["name"] . "</option>\n";
     }
     $s .= "</select>\n";
     return $s;

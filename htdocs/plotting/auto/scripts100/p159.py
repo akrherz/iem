@@ -6,10 +6,9 @@ of hours for a given month or season at a given threshold.
 <p>If you pick a custom day of the year period that crosses 1 January,
 the year of the start date is used within the plot.</p>
 
-<p><strong>Updated 18 Sep 2018:</strong>Plotting tool was updated
-to consider dates prior to 1973 and to shade years that have more than
-20% missing data.  The hourly averages are based on years with sufficient
-data coverage.
+<p>The hourly averages are based on years with sufficient data coverage (
+&lt;20% missing). The blue bars indicate years with such amount of missing
+data.</p>
 """
 import datetime
 
@@ -118,73 +117,75 @@ def get_description():
             label="Year to Highlight",
             name="year",
         ),
+        {
+            "type": "year",
+            "name": "syear",
+            "default": 1920,
+            "label": "Limit Data Analysis to inclusive start year:",
+        },
     ]
     return desc
 
 
-def plotter(fdict):
-    """Go"""
-    ctx = get_autoplot_context(fdict, get_description())
-
-    station = ctx["zstation"]
-    month = ctx["month"]
-    varname = ctx["var"]
-    mydir = ctx["dir"]
-    threshold = ctx["thres"]
-    year = ctx["year"]
-    sdate = ctx["sdate"]
-    edate = ctx["edate"]
-
+def set_df(ctx):
+    """Set the dataframe"""
     offset = "ts"
-    mlabel = MDICT[month] if month != "jul1" else "Jul-Jun [year of Jul shown]"
-    totaldays = 0
+    ctx["mlabel"] = (
+        MDICT[ctx["month"]]
+        if ctx["month"] != "jul1"
+        else "Jul-Jun [year of Jul shown]"
+    )
+    ctx["totaldays"] = 0
     months = list(range(1, 13))
     doylimit = ""
-    if month in ["all", "jul1", "ytd"]:
-        if month == "jul1":
+    if ctx["month"] in ["all", "jul1", "ytd"]:
+        if ctx["month"] == "jul1":
             offset = "ts - '6 months'::interval"
-    elif month == "custom":
+    elif ctx["month"] == "custom":
         doylimit = (
             " and to_char(ts, 'mmdd') >= :sdate and "
             "to_char(ts, 'mmdd') <= :edate "
         )
-        totaldays = (edate - sdate).days + 1
-        mlabel = f" {sdate:%b %-d} thru {edate:%b %-d}"
-        if sdate > edate:
-            totaldays = (edate.replace(year=2001) - sdate).days + 1
-            days = (edate - datetime.date(2000, 1, 1)).days + 1
+        ctx["totaldays"] = (ctx["edate"] - ctx["sdate"]).days + 1
+        ctx["mlabel"] = f" {ctx['sdate']:%b %-d} thru {ctx['edate']:%b %-d}"
+        if ctx["sdate"] > ctx["edate"]:
+            ctx["totaldays"] = (
+                ctx["edate"].replace(year=2001) - ctx["sdate"]
+            ).days + 1
+            days = (ctx["edate"] - datetime.date(2000, 1, 1)).days + 1
             offset = f"ts - '{days} days'::interval"
             doylimit = (
                 " and (to_char(ts, 'mmdd') >= :sdate or "
                 "to_char(ts, 'mmdd') <= :edate) "
             )
-    elif month == "fall":
+    elif ctx["month"] == "fall":
         months = [9, 10, 11]
-    elif month == "winter":
+    elif ctx["month"] == "winter":
         months = [12, 1, 2]
         offset = "ts + '1 month'::interval"
-    elif month == "spring":
+    elif ctx["month"] == "spring":
         months = [3, 4, 5]
-    elif month == "summer":
+    elif ctx["month"] == "summer":
         months = [6, 7, 8]
     else:
-        ts = datetime.datetime.strptime(f"2000-{month}-01", "%Y-%b-%d")
+        ts = datetime.datetime.strptime(f"2000-{ctx['month']}-01", "%Y-%b-%d")
         # make sure it is length two for the trick below in SQL
         months = [ts.month]
+    ctx["months"] = months
+    opp = ">=" if ctx["dir"] == "aoa" else "<"
 
-    opp = ">=" if mydir == "aoa" else "<"
-
-    dbvarname = "(sknt * 1.15)" if varname == "sped" else varname
-    if month == "ytd":
+    dbvarname = "(sknt * 1.15)" if ctx["var"] == "sped" else ctx["var"]
+    if ctx["month"] == "ytd":
         doylimit = " and to_char(ts, 'mmdd') <= :sday "
     with get_sqlalchemy_conn("asos") as conn:
-        df = pd.read_sql(
+        ctx["df"] = pd.read_sql(
             text(
                 f"""WITH hourly as (
             SELECT date_trunc('hour', valid + '10 minutes'::interval)
             at time zone :tzname as ts,
             case when {dbvarname}::int {opp} :t then 1 else 0 end as hit
-            from alldata where station = :station and report_type = 3)
+            from alldata where station = :station and report_type = 3 and
+            valid > :start)
 
             SELECT extract(year from {offset})::int as year,
             extract(hour from ts)::int as hour,
@@ -195,44 +196,48 @@ def plotter(fdict):
             ),
             conn,
             params={
-                "tzname": ctx["_nt"].sts[station]["tzname"],
-                "t": threshold,
-                "station": station,
+                "tzname": ctx["_nt"].sts[ctx["zstation"]]["tzname"],
+                "t": ctx["thres"],
+                "station": ctx["zstation"],
                 "months": months,
                 "sday": datetime.date.today().strftime("%m%d"),
-                "sdate": sdate.strftime("%m%d"),
-                "edate": edate.strftime("%m%d"),
+                "sdate": ctx["sdate"].strftime("%m%d"),
+                "edate": ctx["edate"].strftime("%m%d"),
+                "start": f"{ctx['syear']}-01-01",
             },
             index_col=None,
         )
-    if df.empty:
+    if ctx["df"].empty:
         raise NoDataFound("Error, no results returned!")
 
-    ydf = df.groupby("year").sum()
+
+def set_fig(ctx):
+    """Set the plot"""
+    ydf = ctx["df"].groupby("year").sum()
     title = (
-        f"({mlabel}) {METRICS[varname]} Hours {DIRS[mydir]} "
-        f"{threshold}{UNITS[varname]}\n"
+        f"({ctx['mlabel']}) {METRICS[ctx['var']]} Hours {DIRS[ctx['dir']]} "
+        f"{ctx['thres']}{UNITS[ctx['var']]}\n"
         f"{ctx['_sname']}:: ({ydf.index.min():.0f}-{ydf.index.max():.0f})"
     )
-    fig = figure(apctx=ctx, title=title)
-    ax = fig.subplots(2, 1)
+    ctx["fig"] = figure(apctx=ctx, title=title)
+    ax = ctx["fig"].subplots(2, 1)
     ax[0].bar(
         ydf.index.values, ydf["hits"], align="center", fc="green", ec="green"
     )
     # Loop over plot years and background highlight any years with less than
     # 80% data coverage
-    obscount = len(months) * 30 * 24 * 0.8
-    if month == "ytd":
+    obscount = len(ctx["months"]) * 30 * 24 * 0.8
+    if ctx["month"] == "ytd":
         obscount = int(f"{datetime.date.today():%j}") * 24 * 0.8
-    elif month == "custom":
-        obscount = totaldays * 24 * 0.8
+    elif ctx["month"] == "custom":
+        obscount = ctx["totaldays"] * 24 * 0.8
     for _year in range(ydf.index.values[0], ydf.index.values[-1] + 1):
         if _year not in ydf.index or ydf.at[_year, "obs"] < obscount:
             ax[0].axvspan(_year - 0.5, _year + 0.5, color="#cfebfd", zorder=-3)
-    if year in ydf.index.values:
-        val = ydf.loc[year]
+    if ctx["year"] in ydf.index.values:
+        val = ydf.loc[ctx["year"]]
         ax[0].bar(
-            year,
+            ctx["year"],
             val["hits"],
             align="center",
             fc="orange",
@@ -250,7 +255,7 @@ def plotter(fdict):
 
     df2 = ydf[ydf["obs"] > obscount]
     years = len(df2.index)
-    df2 = df[df["year"].isin(df2.index.values)]
+    df2 = ctx["df"][ctx["df"]["year"].isin(df2.index.values)]
     hdf = df2.groupby("hour").sum() / years
     ax[1].bar(
         hdf.index.values,
@@ -260,7 +265,7 @@ def plotter(fdict):
         ec="b",
         label="Avg",
     )
-    thisyear = df[df["year"] == year]
+    thisyear = ctx["df"][ctx["df"]["year"] == ctx["year"]]
     if not thisyear.empty:
         ax[1].bar(
             thisyear["hour"].values,
@@ -270,7 +275,7 @@ def plotter(fdict):
             zorder=5,
             fc="orange",
             ec="orange",
-            label=f"{year}",
+            label=f"{ctx['year']}",
         )
     ax[1].set_xlim(-0.5, 23.5)
     ax[1].grid(True)
@@ -279,9 +284,18 @@ def plotter(fdict):
     ax[1].set_xticks(range(0, 24, 4))
     ax[1].set_xticklabels(["Mid", "4 AM", "8 AM", "Noon", "4 PM", "8 PM"])
     ax[1].set_xlabel(
-        f"Hour of Day ({ctx['_nt'].sts[station]['tzname']})", ha="right"
+        f"Hour of Day ({ctx['_nt'].sts[ctx['zstation']]['tzname']})",
+        ha="right",
     )
-    return fig, df
+
+
+def plotter(fdict):
+    """Go"""
+    ctx = get_autoplot_context(fdict, get_description())
+    set_df(ctx)
+    set_fig(ctx)
+
+    return ctx["fig"], ctx["df"]
 
 
 if __name__ == "__main__":

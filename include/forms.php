@@ -1,8 +1,6 @@
 <?php
+// Library for doing repetetive forms stuff
 
-/**
- * Library for doing repetetive forms stuff
- */
 //xss mitigation functions
 //https://www.owasp.org/index.php/PHP_Security_Cheat_Sheet#XSS_Cheat_Sheet
 function xssafe($data, $encoding = 'UTF-8')
@@ -18,10 +16,6 @@ function xssafe($data, $encoding = 'UTF-8')
     }
 
     return $res;
-}
-function xecho($data)
-{
-    echo xssafe($data);
 }
 
 // Ensure we get a sane string
@@ -270,22 +264,10 @@ function wfoSelect($selected)
 }
 
 /* Select minute of the hour */
-function minuteSelect($selected, $name, $skip = 1)
+function minuteSelect($selected, $name, $skip = 1, $jsextra = '')
 {
-    $s = "<select name='" . $name . "'>\n";
+    $s = "<select name=\"{$name}\" {$jsextra}>\n";
     for ($i = 0; $i < 60; $i = $i + $skip) {
-        $s .= "<option value='" . $i . "' ";
-        if ($i == intval($selected)) $s .= "SELECTED";
-        $s .= ">" . $i . "</option>";
-    }
-    $s .= "</select>\n";
-    return $s;
-}
-
-function minuteSelect2($selected, $name, $jsextra = '')
-{
-    $s = "<select name='" . $name . "' {$jsextra}>\n";
-    for ($i = 0; $i < 60; $i++) {
         $s .= "<option value='" . $i . "' ";
         if ($i == intval($selected)) $s .= "SELECTED";
         $s .= ">" . $i . "</option>";
