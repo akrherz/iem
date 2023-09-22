@@ -1,8 +1,7 @@
 <?php
-$OL = "7.2.2";
-/*
- * Main landing page for the IEM Sites stuff
- */
+// Main landing page for the IEM Sites stuff
+$OL = "8.1.0";
+define("IEM_APPID", 5);
 require_once "../../include/forms.php";
 if (isset($_GET["station"]) && isset($_GET["network"])) {
     $uri = sprintf(
@@ -16,7 +15,6 @@ if (isset($_GET["station"]) && isset($_GET["network"])) {
 require_once "../../include/mlib.php";
 force_https();
 require_once "../../config/settings.inc.php";
-define("IEM_APPID", 5);
 require_once "../../include/database.inc.php";
 require_once "../../include/imagemaps.php";
 require_once "../../include/myview.php";

@@ -1,5 +1,5 @@
 <?php
-/* Create a table of soil temperature probabilities based on obs? */
+// Create a table of soil temperature probabilities based on obs?
 require_once "../../config/settings.inc.php";
 define("IEM_APPID", 88);
 require_once "../../include/myview.php";
@@ -101,7 +101,7 @@ for ($i = 182; $i < 366; $i = $i + 5) {
 }
 $fall .= "</table>";
 
-$sselect = isuagSelect($station);
+$sselect = networkSelect("ISUAG", $station);
 
 $t->title = "ISUSM - Soil Temperature Probabilities";
 $t->content = <<<EOF
