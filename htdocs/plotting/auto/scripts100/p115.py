@@ -215,6 +215,10 @@ def plotter(fdict):
     df2 = filtered[["month", "year", varname]].pivot(
         index="year", columns="month", values=varname
     )
+    df2 = pd.concat(
+        [df2, df[["month", varname]].groupby("month").mean().transpose()]
+    )
+    df2.index.values[-1] = "MEAN"
     ax = sns.heatmap(
         df2,
         annot=True,
