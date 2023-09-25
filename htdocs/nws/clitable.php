@@ -1,6 +1,7 @@
 <?php
 require_once "../../config/settings.inc.php";
 define("IEM_APPID", 156);
+$DT = "1.13.6";
 require_once "../../include/myview.php";
 require_once "../../include/database.inc.php";
 require_once "../../include/forms.php";
@@ -56,7 +57,8 @@ $table = <<<EOF
 }
 </style>
 <h3>{$title}</h3>
-<table id="thetable" class="table table-condensed table-striped table-bordered table-hover">
+<table id="thetable" class="table table-condensed table-striped table-bordered table-hover"
+ data-column-defs='[{"sortable": false, "targets": [7,14,21]}]'>
 <thead class="sticky">
 <tr class="small">
     <th rowspan="2">{$col1label}</th>
@@ -159,15 +161,19 @@ foreach ($arr as $entry) {
     if ($hrecord != "" || $lrecord != "" || $precord != "" || $srecord != ""){
         $rowlabel = "1";
     }
+    $hd = departure($row["high"], $row["high_normal"]);
+    $ld = departure($row["low"], $row["low_normal"]);
     $table .= sprintf(
         "<tr data-record='%s'>
         <td nowrap><a href=\"/p.php?pid=%s\" target=\"_blank\"><i class=\"fa fa-list-alt\" alt=\"View Text\"></i></a>
             %s</td>
             <td>%s%s</td><td nowrap>%s</td><td>%s</td>
-            <td>%s</td><td>%s</td><td style='background: %s;'>%s</td>
+            <td>%s</td><td>%s</td>
+            <td style=\"background: %s;\" data-sort=\"%s\">%s</td>
             <th class=\"empty\"></th>
             <td>%s%s</td><td nowrap>%s</td><td>%s</td>
-            <td>%s</td><td>%s</td><td style='background: %s;'>%s</td>
+            <td>%s</td><td>%s</td>
+            <td style=\"background: %s;\" data-sort=\"%s\">%s</td>
             <th class=\"empty\"></th>
             <td>%s%s</td><td>%s</td><td>%s</td>
             <td>%s</td><td>%s</td><td>%s</td>
@@ -185,7 +191,8 @@ foreach ($arr as $entry) {
         implode(" ", $row["high_record_years"]),
         $row["high_normal"],
         departcolor($row["high"], $row["high_normal"]),
-        departure($row["high"], $row["high_normal"]),
+        ($hd == "M") ? "": $hd,
+        $hd,
 
         $row["low"],
         $lrecord,
@@ -194,7 +201,8 @@ foreach ($arr as $entry) {
         implode(" ", $row["low_record_years"]),
         $row["low_normal"],
         departcolor($row["low"], $row["low_normal"]),
-        departure($row["low"], $row["low_normal"]),
+        ($ld == "M") ? "": $ld,
+        $ld,
 
         $row["precip"],
         $precord,
@@ -275,11 +283,11 @@ directly access it here:
 EOF;
 $t->headextra = <<<EOF
 <link rel="stylesheet" type="text/css" href="/vendor/select2/4.0.3/select2.min.css"/ >
-<link type="text/css" href="/vendor/jquery-datatables/1.10.20/datatables.min.css" rel="stylesheet" />
+<link type="text/css" href="/vendor/jquery-datatables/{$DT}/datatables.min.css" rel="stylesheet" />
 EOF;
 $t->jsextra = <<<EOF
 <script src="/vendor/select2/4.0.3/select2.min.js"></script>
-<script src='/vendor/jquery-datatables/1.10.20/datatables.min.js'></script>
+<script src='/vendor/jquery-datatables/{$DT}/datatables.min.js'></script>
 <script src="clitable.js"></script>
 EOF;
 $t->render('full.phtml');

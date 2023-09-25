@@ -36,8 +36,13 @@ def main(daysago):
         f"?ReportType=Daily&dtf=1&Format=CSV&State={state}&"
         f"ReportDateType=date&Date={now:%m/%d/%Y}&TimesInGMT=False"
     )
-    LOG.debug(url)
-    data = requests.get(url, timeout=30).content.decode("ascii").split("\r\n")
+    try:
+        data = (
+            requests.get(url, timeout=30).content.decode("ascii").split("\r\n")
+        )
+    except Exception as exp:
+        LOG.exception(exp)
+        return
 
     # Process Header
     header = {}

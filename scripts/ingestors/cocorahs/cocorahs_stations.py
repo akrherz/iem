@@ -23,7 +23,13 @@ def main(argv):
         "http://data.cocorahs.org/cocorahs/export/exportstations.aspx?"
         f"State={state}&Format=CSV&country=usa"
     )
-    data = requests.get(url, timeout=30).content.decode("ascii").split("\r\n")
+    try:
+        data = (
+            requests.get(url, timeout=30).content.decode("ascii").split("\r\n")
+        )
+    except Exception as exp:
+        LOG.exception(exp)
+        sys.exit(1)
 
     # Process Header
     header = {}

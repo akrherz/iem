@@ -200,6 +200,9 @@ def main(argv):
         postvars["sitenum"] = sid[1:]
         try:
             req = requests.get(URI, params=postvars, timeout=10)
+            if req.status_code != 200:
+                LOG.info("Got %s for url %s", req.status_code, req.url)
+                continue
             response = req.content.decode("utf-8", "ignore")
         except Exception as exp:
             LOG.info("Failed to download: %s %s", sid, exp)
