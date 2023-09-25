@@ -30,7 +30,7 @@ json.encoder.FLOAT_REPR = lambda o: format(o, ".2f")
 
 def safe(val):
     """Be careful"""
-    if np.isnan(val):
+    if val is None or np.isnan(val):
         return None
     return float(val)
 
