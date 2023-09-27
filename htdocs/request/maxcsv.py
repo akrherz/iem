@@ -391,6 +391,8 @@ def do_ahps_fx(nwsli):
     """,
         (nwsli,),
     )
+    if cursor.rowcount == 0:
+        return "NO DATA"
     row = cursor.fetchone()
     primaryname = row["primaryname"]
     generationtime = row["gts"]

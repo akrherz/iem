@@ -7,6 +7,7 @@ from io import BytesIO
 from osgeo import ogr
 from paste.request import parse_formvars
 
+ogr.UseExceptions()
 PROJFILE = "/opt/iem/data/gis/meta/4326.prj"
 
 

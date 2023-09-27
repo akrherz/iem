@@ -4,7 +4,7 @@ import json
 from zoneinfo import ZoneInfo
 
 from paste.request import parse_formvars
-from pyiem.util import get_dbconnc, html_escape
+from pyiem.util import get_dbconnc, html_escape, utc
 from pymemcache.client import Client
 
 
@@ -13,7 +13,7 @@ def run(ts):
     pgconn, cursor = get_dbconnc("postgis")
 
     if ts == "":
-        utcnow = datetime.datetime.utcnow().replace(tzinfo=ZoneInfo("UTC"))
+        utcnow = utc()
         t0 = utcnow + datetime.timedelta(days=7)
     else:
         utcnow = datetime.datetime.strptime(ts, "%Y-%m-%dT%H:%M:%SZ").replace(
@@ -72,13 +72,30 @@ def run(ts):
     return json.dumps(res)
 
 
+def validate_ts(val):
+    """see that we have something reasonable."""
+    if val == "":
+        return val
+    year = int(val[:4])
+    if year < 1986 or year > (utc().year + 1):
+        raise ValueError("year invalid")
+    # YYYY-mm-ddTHH:MI
+    if len(val) == 16:
+        val += ":00Z"
+    return val[:24]
+
+
 def application(environ, start_response):
     """Main Workflow"""
     headers = [("Content-type", "application/vnd.geo+json")]
 
     form = parse_formvars(environ)
     cb = form.get("callback", None)
-    ts = form.get("ts", "")[:24]
+    try:
+        ts = validate_ts(form.get("ts", "").strip())
+    except Exception:
+        start_response("500 Internal Server Error", headers)
+        return ["{'error': 'ts is malformed'}".encode("ascii")]
 
     mckey = f"/geojson/sbw.geojson|{ts}"
     mc = Client("iem-memcached:11211")

@@ -7,6 +7,7 @@ import zipfile
 from osgeo import ogr
 from pyiem.util import utc
 
+ogr.UseExceptions()
 PRJFILE = "/opt/iem/data/gis/meta/4326.prj"
 XMLFILE = "/opt/iem/scripts/GIS/current_ww.shp.xml"
 

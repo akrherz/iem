@@ -35,10 +35,10 @@ $content .= "<th>Start:</th>
      ". yearSelect2(2002, date("Y"), "year1") ."
     </td>
     <td>
-     ". monthSelect2(0,"month1") ."
+     ". monthSelect2(1, "month1") ."
     </td>
     <td>
-     ". daySelect2(0, "day1") ."
+     ". daySelect2(1, "day1") ."
     </td>
     <td>
      ". gmtHourSelect(0, "hour1") ."
@@ -54,16 +54,16 @@ $content .= "<th>Start:</th>
      ". yearSelect2(2002, date("Y"), "year2") ."
     </td>
     <td>
-     ". monthSelect2(0,"month2") ."
+     ". monthSelect2(date("m"), "month2") ."
     </td>
     <td>
-     ". daySelect2(0, "day2") ."
+     ". daySelect2(date("d"), "day2") ."
     </td>
     <td>
-     ". gmtHourSelect(0, "hour2") ."
+     ". gmtHourSelect(23, "hour2") ."
     </td>
     <td>
-     ". minuteSelect(0, "minute2") ."
+     ". minuteSelect(59, "minute2") ."
     </td>
   </tr>
 </table>";
@@ -97,5 +97,3 @@ EOM;
 
 $t->content = $content;
 $t->render('single.phtml');
-
-?>

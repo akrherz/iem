@@ -12,6 +12,7 @@ from osgeo import gdal
 from pyiem import iemre
 from pyiem.util import logger, ncopen, utc
 
+gdal.UseExceptions()
 LOG = logger()
 
 

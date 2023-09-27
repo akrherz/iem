@@ -7,13 +7,12 @@ messages come and overwrite the trouble. Run from RUN_10MIN.sh
 import datetime
 
 from pyiem.reference import TRACE_VALUE
-from pyiem.util import get_dbconn
+from pyiem.util import get_dbconnc
 
 
 def main():
     """Go!"""
-    pgconn = get_dbconn("iem")
-    icursor = pgconn.cursor()
+    pgconn, icursor = get_dbconnc("iem")
     icursor2 = pgconn.cursor()
 
     now = datetime.datetime.now()

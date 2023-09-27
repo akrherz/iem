@@ -13,6 +13,7 @@ import requests
 from osgeo import gdal, gdalconst
 from pyiem.util import get_dbconn, logger, utc
 
+gdal.UseExceptions()
 LOG = logger()
 URLBASE = "http://iem.local/GIS/radmap.php?width=1280&height=720&"
 
