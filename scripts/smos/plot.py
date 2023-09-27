@@ -3,10 +3,10 @@ import datetime
 import sys
 
 import numpy as np
-from pandas import read_sql
+import pandas as pd
 from pyiem.plot import get_cmap
 from pyiem.plot.geoplot import MapPlot
-from pyiem.util import get_dbconnstr, logger, utc
+from pyiem.util import get_sqlalchemy_conn, logger, utc
 
 LOG = logger()
 
@@ -15,25 +15,26 @@ def makeplot(ts, routes="ac"):
     """
     Generate two plots for a given time GMT
     """
-    df = read_sql(
-        """
-    WITH obs as (
-        SELECT grid_idx, avg(soil_moisture) * 100. as sm,
-        avg(optical_depth) as od from data where valid BETWEEN %s and %s
-        GROUP by grid_idx)
+    with get_sqlalchemy_conn("smos") as conn:
+        df = pd.read_sql(
+            """
+        WITH obs as (
+            SELECT grid_idx, avg(soil_moisture) * 100. as sm,
+            avg(optical_depth) as od from data where valid BETWEEN %s and %s
+            GROUP by grid_idx)
 
-    SELECT ST_x(geom) as lon, ST_y(geom) as lat,
-    CASE WHEN sm is Null THEN -1 ELSE sm END as sm,
-    CASE WHEN od is Null THEN -1 ELSE od END as od
-    from obs o JOIN grid g ON (o.grid_idx = g.idx)
-    """,
-        get_dbconnstr("smos"),
-        params=(
-            ts - datetime.timedelta(hours=6),
-            ts + datetime.timedelta(hours=6),
-        ),
-        index_col=None,
-    )
+        SELECT ST_x(geom) as lon, ST_y(geom) as lat,
+        CASE WHEN sm is Null THEN -1 ELSE sm END as sm,
+        CASE WHEN od is Null THEN -1 ELSE od END as od
+        from obs o JOIN grid g ON (o.grid_idx = g.idx)
+        """,
+            conn,
+            params=(
+                ts - datetime.timedelta(hours=6),
+                ts + datetime.timedelta(hours=6),
+            ),
+            index_col=None,
+        )
 
     if df.empty:
         LOG.info(
@@ -85,8 +86,7 @@ def makeplot(ts, routes="ac"):
                 "SMOS Satellite: Land Cover Optical Depth "
                 "(microwave L-band)"
             ),
-            subtitle="Satelite passes around %s UTC"
-            % (ts.strftime("%d %B %Y %H"),),
+            subtitle=f"Satelite passes around {ts:%d %B %Y %H} UTC",
         )
         if sector == "iowa":
             mp.drawcounties()

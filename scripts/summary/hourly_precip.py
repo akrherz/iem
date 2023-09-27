@@ -6,7 +6,7 @@ the database.  This updates those totals.
 import datetime
 import sys
 
-from pyiem.util import get_dbconn, utc
+from pyiem.util import get_dbconnc, utc
 
 
 def update(icursor, iemid, valid, phour):
@@ -27,10 +27,9 @@ def archive(ts):
 
     Currently, we only support the METAR database :(
     """
-    asos = get_dbconn("asos")
+    asos, acursor = get_dbconnc("asos")
     acursor = asos.cursor()
-    iem = get_dbconn("iem")
-    icursor = iem.cursor()
+    iem, icursor = get_dbconnc("iem")
 
     acursor.execute(
         f"""WITH data as (
@@ -53,8 +52,7 @@ def archive(ts):
 
 def realtime(ts):
     """realtime"""
-    pgconn = get_dbconn("iem")
-    icursor = pgconn.cursor()
+    pgconn, icursor = get_dbconnc("iem")
     acursor = pgconn.cursor()
     acursor.execute(
         """
@@ -68,7 +66,7 @@ def realtime(ts):
         (ts, ts + datetime.timedelta(minutes=60)),
     )
     for row in acursor:
-        update(icursor, row[1], ts, row[0])
+        update(icursor, row["iemid"], ts, row["p"])
 
     pgconn.commit()
     pgconn.close()
