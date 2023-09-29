@@ -143,16 +143,17 @@ def plotter(fdict):
         f"{product_id[14:17]}\n"
         f"Valid: {valid.strftime('%-d %b %Y %H:%M UTC')}"
     )
+    text = get_text(product_id)
+    if len(text.split("\n")) > 10:
+        raise NoDataFound(f"TAF text {product_id} is too long to plot!")
     fig = figure(title=title, apctx=ctx)
 
     ###
-    text = get_text(product_id)
     res = fig.text(0.43, 0.01, text.strip(), va="bottom", fontsize=12)
     bbox = res.get_window_extent(fig.canvas.get_renderer())
     figbbox = fig.get_window_extent()
     # one-two line TAFs cause the legend to go off-screen
     yndc = max([bbox.y1 / figbbox.y1, 0.13])
-
     # Create the main axes that will hold all our hackery
     ax = fig.add_axes([0.08, yndc + 0.05, 0.9, 0.9 - yndc - 0.05])
     fig.text(0.015, 0.3, "Cloud Coverage & Level", rotation=90)
@@ -324,4 +325,4 @@ def plotter(fdict):
 
 
 if __name__ == "__main__":
-    plotter({})
+    plotter({"station": "PGUM", "valid": "2023-09-28 0542"})

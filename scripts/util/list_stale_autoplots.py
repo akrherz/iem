@@ -2,7 +2,7 @@
 import re
 
 import pandas as pd
-from pyiem.util import get_dbconn
+from pyiem.util import get_dbconnc
 
 QRE = re.compile("q=([0-9]+)")
 NO_FEATURES = [
@@ -35,8 +35,7 @@ NO_FEATURES = [
 
 def main():
     """DO Something"""
-    pgconn = get_dbconn("mesosite")
-    cursor = pgconn.cursor()
+    pgconn, cursor = get_dbconnc("mesosite")
 
     cursor.execute(
         "SELECT valid, appurl from feature WHERE appurl is not null "
@@ -44,8 +43,8 @@ def main():
     )
     rows = {}
     for row in cursor:
-        appurl = row[1]
-        valid = row[0]
+        appurl = row["appurl"]
+        valid = row["valid"]
         if appurl.find("/plotting/auto/") != 0:
             continue
         tokens = QRE.findall(appurl)
@@ -58,7 +57,7 @@ def main():
         res = rows.setdefault(appid, valid)
         if res < valid:
             rows[appid] = valid
-
+    pgconn.close()
     if not rows:
         print("No data found")
         return

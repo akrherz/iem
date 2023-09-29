@@ -2,6 +2,8 @@
 
 Run daily from RUN_2AM.sh
 """
+import os
+import subprocess
 
 import requests
 from pyiem.reference import nwsli2state
@@ -78,6 +80,7 @@ def add_station(dbconn, nwsli, attrs):
 def main():
     """Go Main Go."""
     idp = get_idp()
+    added = 0
     with get_dbconn("mesosite") as dbconn:
         current = get_current(dbconn)
         for nwsli, attrs in idp.items():
@@ -85,7 +88,8 @@ def main():
                 iemid = add_station(dbconn, nwsli, attrs)
                 if iemid is None:
                     continue
-                LOG.info("Adding station %s[%s]", nwsli, iemid)
+                added += 1
+                LOG.warning("Adding station %s[%s]", nwsli, iemid)
                 current[nwsli] = {"pedts": "", "iemid": iemid}
             currentval = current[nwsli]["pedts"]
             if attrs["pedts"] is None or attrs["pedts"] == "N/A":
@@ -108,6 +112,11 @@ def main():
             LOG.info("%s PEDTS %s -> %s", nwsli, currentval, attrs["pedts"])
             cursor.close()
             dbconn.commit()
+
+    if added > 0:
+        LOG.warning("Added %s stations, syncing stations table", added)
+        os.chdir("/opt/iem/scripts/dbutil")
+        subprocess.call(["sh", "SYNC_STATIONS.sh"])
 
 
 if __name__ == "__main__":

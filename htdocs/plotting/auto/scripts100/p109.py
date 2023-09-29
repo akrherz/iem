@@ -41,6 +41,7 @@ from zoneinfo import ZoneInfo
 
 import numpy as np
 import pandas as pd
+from pyiem.exceptions import NoDataFound
 from pyiem.nws import vtec
 from pyiem.plot import MapPlot, get_cmap
 from pyiem.util import get_autoplot_context, get_sqlalchemy_conn
@@ -158,7 +159,7 @@ def get_count_df(ctx, varname, pstr, sts, ets):
         emerg_extra = " and is_emergency "
     if varname.startswith("count_"):
         if (ets - sts).days > 366:
-            raise ValueError("Can't compute over period > 366 days")
+            raise NoDataFound("Can't compute over period > 366 days")
         sday = sts.strftime("%m%d")
         eday = ets.strftime("%m%d")
         slimiter = (
@@ -513,12 +514,4 @@ def plotter(fdict):
 
 
 if __name__ == "__main__":
-    plotter(
-        {
-            "sdate": "2021-05-01 0000",
-            "edate": "2021-06-01 0000",
-            "var": "count",
-            "phenomenav1": "SV",
-            "significancev1": "W",
-        }
-    )
+    plotter({})

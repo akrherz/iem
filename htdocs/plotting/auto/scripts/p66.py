@@ -149,4 +149,4 @@ def plotter(fdict):
 
 
 if __name__ == "__main__":
-    plotter({"var": "precip", "threshold": 0.25})
+    plotter({})

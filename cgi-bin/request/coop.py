@@ -11,7 +11,7 @@ import pandas as pd
 from metpy.units import units
 from paste.request import parse_formvars
 from pyiem.network import Table as NetworkTable
-from pyiem.util import get_dbconnc, get_dbconnstr, utc
+from pyiem.util import get_dbconnc, get_sqlalchemy_conn, utc
 from sqlalchemy import text
 
 DEGC = units.degC
@@ -482,7 +482,8 @@ def do_simple(cursor, ctx):
 
     if ctx["what"] == "excel":
         # Do the excel logic
-        df = pd.read_sql(sql, get_dbconnstr("coop"), params=args)
+        with get_sqlalchemy_conn("coop") as conn:
+            df = pd.read_sql(sql, conn, params=args)
         # Convert day into a python date type
         df["day"] = pd.to_datetime(df["day"]).dt.date
 
@@ -690,35 +691,36 @@ def do_swat(ctx):
         asts = datetime.date(scenario_year, today.month, today.day)
 
     thisyear = datetime.datetime.now().year
-    df = pd.read_sql(
-        text(
-            f"""
-        WITH scenario as (
-            SELECT
-            ('{thisyear}-'||month||'-'||extract(day from day))::date as day,
-            high, low, precip, station from {table}
-            WHERE station = ANY(:sids) and
-            day >= :asts and year = :scenario_year),
-        obs as (
-            SELECT day, high, low, precip, station from {table}
-            WHERE station = ANY(:sids) and day >= :sts and day <= :ets),
-        total as (
-            SELECT *, extract(doy from day) as doy from obs UNION
-            SELECT *, extract(doy from day) as doy from scenario
+    with get_sqlalchemy_conn("coop") as conn:
+        df = pd.read_sql(
+            text(
+                f"""
+            WITH scenario as (
+                SELECT
+                ('{thisyear}-'||month||'-'||extract(day from day))::date as day,
+                high, low, precip, station from {table}
+                WHERE station = ANY(:sids) and
+                day >= :asts and year = :scenario_year),
+            obs as (
+                SELECT day, high, low, precip, station from {table}
+                WHERE station = ANY(:sids) and day >= :sts and day <= :ets),
+            total as (
+                SELECT *, extract(doy from day) as doy from obs UNION
+                SELECT *, extract(doy from day) as doy from scenario
+            )
+            SELECT * from total ORDER by day ASC
+        """
+            ),
+            conn,
+            params={
+                "sids": ctx["stations"],
+                "asts": asts,
+                "scenario_year": scenario_year,
+                "sts": ctx["sts"],
+                "ets": ctx["ets"],
+            },
+            index_col=None,
         )
-        SELECT * from total ORDER by day ASC
-    """
-        ),
-        get_dbconnstr("coop"),
-        params={
-            "sids": ctx["stations"],
-            "asts": asts,
-            "scenario_year": scenario_year,
-            "sts": ctx["sts"],
-            "ets": ctx["ets"],
-        },
-        index_col=None,
-    )
     df["tmax"] = f2c(df["high"].values)
     df["tmin"] = f2c(df["low"].values)
     df["pcpn"] = (df["precip"].values * units("inch")).to(units("mm")).m

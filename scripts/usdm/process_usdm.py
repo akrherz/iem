@@ -9,18 +9,16 @@ import zipfile
 
 import fiona
 import requests
-from pyiem.util import exponential_backoff, get_dbconn, logger
+from pyiem.util import exponential_backoff, get_dbconnc, logger
 from shapely.geometry import MultiPolygon, shape
 
 LOG = logger()
 BASEURL = "https://droughtmonitor.unl.edu/data/shapefiles_m/"
-PQINSERT = "pqinsert"
 
 
 def database_save(date, shpfn):
     """Save to our databasem please"""
-    pgconn = get_dbconn("postgis")
-    cursor = pgconn.cursor()
+    pgconn, cursor = get_dbconnc("postgis")
     cursor.execute("DELETE from usdm where valid = %s", (date,))
     if cursor.rowcount > 0:
         LOG.info("    database delete removed %s rows", cursor.rowcount)
@@ -36,6 +34,7 @@ def database_save(date, shpfn):
             )
     cursor.close()
     pgconn.commit()
+    pgconn.close()
 
 
 def workflow(date, routes):
@@ -61,19 +60,23 @@ def workflow(date, routes):
         with open(f"/tmp/{name}", "wb") as fp:
             fp.write(zipfp.read(name))
         if name[-3:] == "shp":
-            shpfn = "/tmp/" + name
+            shpfn = f"/tmp/{name}"
     # 2. Save it to the database
     database_save(date, shpfn)
     # 3. Send it to LDM for current and archive writing
     for fn in glob.glob(f"/tmp/USDM_{date:%Y%m%d}*"):
         suffix = fn.split("/")[-1].split(".", 1)[1]
-        cmd = (
-            f"{PQINSERT} -i -p 'data {routes} {date:%Y%m%d}0000 "
+        cmd = [
+            "pqinsert",
+            "-i",
+            "-p",
+            f"data {routes} {date:%Y%m%d}0000 "
             f"gis/shape/4326/us/dm_current.{suffix} "
-            f"GIS/usdm/{fn.split('/')[-1]} bogus' {fn}"
-        )
-        LOG.info(cmd)
-        subprocess.call(cmd, shell=True)
+            f"GIS/usdm/{fn.split('/')[-1]} bogus",
+            fn,
+        ]
+        LOG.info(" ".join(cmd))
+        subprocess.call(cmd)
         os.unlink(fn)
     # 4. Clean up after ourself
     os.unlink(tmp.name)

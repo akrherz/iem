@@ -1,4 +1,4 @@
-#  This process copies data around to longer term locations on a monthly basis
+# This process copies data around to longer term locations on a monthly basis
 # run from RUN_2AM.sh on the 2nd each month
 export MM="${2}"
 export YY="${1}"

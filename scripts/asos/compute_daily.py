@@ -11,7 +11,7 @@ import metpy.calc as mcalc
 import numpy as np
 import pandas as pd
 from metpy.units import units as munits
-from pyiem.util import get_dbconn, get_dbconnstr, logger
+from pyiem.util import get_dbconn, get_sqlalchemy_conn, logger
 
 LOG = logger()
 # bad values into mcalc
@@ -67,33 +67,35 @@ def do(ts):
     icursor = iemaccess.cursor()
     table = f"summary_{ts.year}"
     # Get what we currently know, just grab everything
-    current = pd.read_sql(
-        f"SELECT * from {table} WHERE day = %s",
-        get_dbconnstr("iem"),
-        params=(ts.strftime("%Y-%m-%d"),),
-        index_col="iemid",
-    )
-    df = pd.read_sql(
-        """
-    select station, network, iemid, drct, sknt, gust,
-    valid at time zone tzname as localvalid, valid,
-    tmpf, dwpf, relh, feel,
-    peak_wind_gust, peak_wind_drct, peak_wind_time,
-    peak_wind_time at time zone tzname as local_peak_wind_time from
-    alldata d JOIN stations t on (t.id = d.station)
-    where network ~* 'ASOS'
-    and valid between %s and %s and t.tzname is not null
-    and date(valid at time zone tzname) = %s
-    ORDER by valid ASC
-    """,
-        get_dbconnstr("asos"),
-        params=(
-            ts - datetime.timedelta(days=2),
-            ts + datetime.timedelta(days=2),
-            ts.strftime("%Y-%m-%d"),
-        ),
-        index_col=None,
-    )
+    with get_sqlalchemy_conn("iem") as conn:
+        current = pd.read_sql(
+            f"SELECT * from {table} WHERE day = %s",
+            conn,
+            params=(ts.strftime("%Y-%m-%d"),),
+            index_col="iemid",
+        )
+    with get_sqlalchemy_conn("asos") as conn:
+        df = pd.read_sql(
+            """
+        select station, network, iemid, drct, sknt, gust,
+        valid at time zone tzname as localvalid, valid,
+        tmpf, dwpf, relh, feel,
+        peak_wind_gust, peak_wind_drct, peak_wind_time,
+        peak_wind_time at time zone tzname as local_peak_wind_time from
+        alldata d JOIN stations t on (t.id = d.station)
+        where network ~* 'ASOS'
+        and valid between %s and %s and t.tzname is not null
+        and date(valid at time zone tzname) = %s
+        ORDER by valid ASC
+        """,
+            conn,
+            params=(
+                ts - datetime.timedelta(days=2),
+                ts + datetime.timedelta(days=2),
+                ts.strftime("%Y-%m-%d"),
+            ),
+            index_col=None,
+        )
     if df.empty:
         LOG.info("no ASOS database entries for %s", ts)
         return
