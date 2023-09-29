@@ -116,7 +116,7 @@ def plotter(fdict):
         f"with {varname.capitalize()} {label} {threshold} {units}"
     )
     fig, ax = figure_axes(apctx=ctx, title=title)
-    ax.set_position([0.1, 0.1, 0.75, 0.8])
+    ax.set_position([0.1, 0.1, 0.7, 0.8])
     ax.set_ylabel("Frequency of Streak Including Day of Year [%]")
     ax.set_ylim(0, 100)
     ax.set_yticks([0, 5, 10, 25, 50, 75, 90, 95, 100])
@@ -129,7 +129,7 @@ def plotter(fdict):
 
     df = df.sort_values("sday")
     ypos = 0.85
-    xpos = 0.87
+    xpos = 0.83
     fmt = "%.0f" if varname != "precip" else "%.2f"
     fig.text(xpos, ypos + 0.03, "End Date of Streak")
     fig.text(xpos - 0.015, ypos, "Earliest Dates   ", rotation=90, va="top")
