@@ -360,15 +360,4 @@ def plotter(fdict):
 
 
 if __name__ == "__main__":
-    plotter(
-        {
-            "limit": "yes",
-            "station": "UNR",
-            "opt": "state",
-            "state": "IA",
-            "c": "single",
-            "phenomena": "SV",
-            "significance": "W",
-            "s": "jul1",
-        }
-    )
+    plotter({})

@@ -5,9 +5,9 @@ Called from RUN_10_AFTER.sh
 import datetime
 import sys
 
-from pandas import read_sql
+import pandas as pd
 from pyiem.plot import MapPlot
-from pyiem.util import get_dbconnstr
+from pyiem.util import get_sqlalchemy_conn
 
 
 def fmter(val):
@@ -29,19 +29,20 @@ def main(days, argv):
     sixago = today - datetime.timedelta(days=(days - 1))
 
     # Compute normal from the climate database
-    df = read_sql(
-        """
-        select s.id, ST_x(s.geom) as lon, ST_y(s.geom) as lat,
-        sum(pday) as rainfall
-        from summary c JOIN stations s on (c.iemid = s.iemid)
-        WHERE day >= %s and day <= %s
-        and s.network = 'IA_ASOS' and pday >= 0 and pday < 30
-        GROUP by s.id, lon, lat
-    """,
-        get_dbconnstr("iem"),
-        params=(sixago, today),
-        index_col="id",
-    )
+    with get_sqlalchemy_conn("iem") as conn:
+        df = pd.read_sql(
+            """
+            select s.id, ST_x(s.geom) as lon, ST_y(s.geom) as lat,
+            sum(pday) as rainfall
+            from summary c JOIN stations s on (c.iemid = s.iemid)
+            WHERE day >= %s and day <= %s
+            and s.network = 'IA_ASOS' and pday >= 0 and pday < 30
+            GROUP by s.id, lon, lat
+        """,
+            conn,
+            params=(sixago, today),
+            index_col="id",
+        )
     df["label"] = df["rainfall"].apply(fmter)
 
     mp = MapPlot(
