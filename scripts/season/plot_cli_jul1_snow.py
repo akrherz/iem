@@ -3,22 +3,23 @@ import datetime
 
 from pandas import read_sql
 from pyiem.plot import MapPlot
-from pyiem.util import get_dbconnstr
+from pyiem.util import get_sqlalchemy_conn
 
 
 def main():
     """Go Main Go"""
-    df = read_sql(
-        """
-     select station, st_x(geom), st_y(geom), snow_jul1, snow_jul1_normal
-     from cli_data c JOIN stations t on (t.id = c.station)
-     WHERE c.valid = 'YESTERDAY' and t.network = 'NWSCLI'
-     and snow_jul1 is not null and snow_jul1_normal is not null
-     and t.id not in ('RAP', 'DVN', 'FGF', 'OAX', 'MPX')
-    """,
-        get_dbconnstr("iem"),
-        index_col="station",
-    )
+    with get_sqlalchemy_conn("iem") as conn:
+        df = read_sql(
+            """
+        select station, st_x(geom), st_y(geom), snow_jul1, snow_jul1_normal
+        from cli_data c JOIN stations t on (t.id = c.station)
+        WHERE c.valid = 'YESTERDAY' and t.network = 'NWSCLI'
+        and snow_jul1 is not null and snow_jul1_normal is not null
+        and t.id not in ('RAP', 'DVN', 'FGF', 'OAX', 'MPX')
+        """,
+            conn,
+            index_col="station",
+        )
     df["departure"] = df["snow_jul1"] - df["snow_jul1_normal"]
     df["colors"] = df["departure"].apply(
         lambda x: "#ff0000" if x < 0 else "#0000ff"

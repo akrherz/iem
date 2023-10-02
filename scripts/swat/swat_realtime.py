@@ -24,7 +24,7 @@ from affine import Affine
 from geopandas import read_postgis
 from pyiem import iemre, mrms
 from pyiem.grid.zs import CachingZonalStats
-from pyiem.util import convert_value, get_dbconnstr, logger, ncopen
+from pyiem.util import convert_value, get_sqlalchemy_conn, logger, ncopen
 from tqdm import tqdm
 
 LOG = logger()
@@ -133,12 +133,14 @@ def main():
         dtype={"huc12": str},
     )
     # Load up HUC12 geometries
-    huc12s = read_postgis(
-        "SELECT simple_geom, huc12 from wbd_huc12 where umrb_realtime_swat",
-        get_dbconnstr("idep"),
-        geom_col="simple_geom",
-        index_col=None,
-    )
+    with get_sqlalchemy_conn("idep") as conn:
+        huc12s = read_postgis(
+            "SELECT simple_geom, huc12 from wbd_huc12 "
+            "where umrb_realtime_swat",
+            conn,
+            geom_col="simple_geom",
+            index_col=None,
+        )
     # The xref HUC12s are not unique, so we need to do a join
     huc12s = pd.merge(xref, huc12s, how="left", on="huc12")
     huc12s["page"] = huc12s["swat"] // 1800 + 1

@@ -84,7 +84,7 @@ def plotter(fdict):
         )
 
     for _, row in df.iterrows():
-        if row[0] > 52:
+        if row["week"] > 52:
             continue
         data[int(row["hour"]), int(row["week"]) - 1] = row["difference"]
     ab = ctx["_nt"].sts[station]["archive_begin"]

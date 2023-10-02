@@ -16,7 +16,7 @@ from metpy.units import units
 from pyiem import iemre
 from pyiem.network import Table as NetworkTable
 from pyiem.reference import TRACE_VALUE, state_names
-from pyiem.util import get_dbconn, get_dbconnstr, logger
+from pyiem.util import get_dbconn, get_sqlalchemy_conn, logger
 from sqlalchemy import text
 
 LOG = logger()
@@ -63,17 +63,20 @@ def load_table(state, date):
     df = pd.DataFrame(rows)
     df = df.set_index("station")
     # Load up any available observations
-    obs = pd.read_sql(
-        text(
-            "SELECT station, high, low, precip, snow, snowd, temp_hour, "
-            "precip_hour, coalesce(temp_estimated, true) as temp_estimated, "
-            "coalesce(precip_estimated, true) as precip_estimated "
-            f"from alldata_{state} WHERE day = :date and station in :states"
-        ),
-        get_dbconnstr("coop"),
-        params={"date": date, "states": tuple(df.index.values)},
-        index_col="station",
-    )
+    with get_sqlalchemy_conn("coop") as conn:
+        obs = pd.read_sql(
+            text(
+                f"""
+                SELECT station, high, low, precip, snow, snowd, temp_hour,
+                precip_hour, coalesce(temp_estimated, true) as temp_estimated,
+                coalesce(precip_estimated, true) as precip_estimated
+                from alldata_{state} WHERE day = :date and station in :states
+                """
+            ),
+            conn,
+            params={"date": date, "states": tuple(df.index.values)},
+            index_col="station",
+        )
     # combine this back into the main table
     df = df.combine_first(obs)
     # Set the default on the estimated columns to True
@@ -230,20 +233,21 @@ def commit(cursor, table, df, ts):
 
 def merge_obs(df, state, ts):
     """Merge data from observations."""
-    obs = pd.read_sql(
-        """
-        SELECT t.id || '|' || t.network as tracks,
-        max_tmpf as high, min_tmpf as low,
-        pday as precip, snow, snowd,
-        coalesce(extract(hour from (coop_valid + '1 minute'::interval)
-          at time zone tzname), 24) as temp_hour
-        from summary s JOIN stations t
-        on (t.iemid = s.iemid) WHERE t.network in (%s, %s) and s.day = %s
-        """,
-        get_dbconnstr("iem"),
-        params=(f"{state}_COOP", f"{state}_ASOS", ts),
-        index_col="tracks",
-    )
+    with get_sqlalchemy_conn("iem") as conn:
+        obs = pd.read_sql(
+            """
+            SELECT t.id || '|' || t.network as tracks,
+            max_tmpf as high, min_tmpf as low,
+            pday as precip, snow, snowd,
+            coalesce(extract(hour from (coop_valid + '1 minute'::interval)
+            at time zone tzname), 24) as temp_hour
+            from summary s JOIN stations t
+            on (t.iemid = s.iemid) WHERE t.network in (%s, %s) and s.day = %s
+            """,
+            conn,
+            params=(f"{state}_COOP", f"{state}_ASOS", ts),
+            index_col="tracks",
+        )
     if obs.empty:
         LOG.warning("loading obs for state %s yielded no data", state)
         return df

@@ -13,7 +13,7 @@ from pandas import read_sql
 from pyiem.network import Table
 from pyiem.plot import MapPlot, get_cmap
 from pyiem.tracker import loadqc
-from pyiem.util import c2f, convert_value, get_dbconnstr, logger
+from pyiem.util import c2f, convert_value, get_sqlalchemy_conn, logger
 from scipy.signal import convolve2d
 
 LOG = logger()
@@ -94,23 +94,24 @@ def main(argv):
     nam = convolve2d(nam, window / window.sum(), mode="same", boundary="symm")
 
     # Query out the data
-    df = read_sql(
-        """
-        WITH ranges as (
-            select station, count(*), min(t4_c_avg_qc),
-            max(t4_c_avg_qc) from sm_hourly WHERE
-            valid >= %s and valid < %s and t4_c_avg_qc > -40
-            and t4_c_avg_qc < 50 GROUP by station
+    with get_sqlalchemy_conn("isuag") as conn:
+        df = read_sql(
+            """
+            WITH ranges as (
+                select station, count(*), min(t4_c_avg_qc),
+                max(t4_c_avg_qc) from sm_hourly WHERE
+                valid >= %s and valid < %s and t4_c_avg_qc > -40
+                and t4_c_avg_qc < 50 GROUP by station
+            )
+            SELECT d.station, d.t4_c_avg_qc,
+            r.max as hourly_max_c, r.min as hourly_min_c, r.count
+            from sm_daily d JOIN ranges r on (d.station = r.station)
+            where valid = %s and t4_c_avg_qc > -40 and r.count > 19
+        """,
+            conn,
+            params=(ts, ts + datetime.timedelta(days=1), ts),
+            index_col="station",
         )
-        SELECT d.station, d.t4_c_avg_qc,
-        r.max as hourly_max_c, r.min as hourly_min_c, r.count
-         from sm_daily d JOIN ranges r on (d.station = r.station)
-        where valid = %s and t4_c_avg_qc > -40 and r.count > 19
-    """,
-        get_dbconnstr("isuag"),
-        params=(ts, ts + datetime.timedelta(days=1), ts),
-        index_col="station",
-    )
     for col, newcol in zip(
         ["t4_c_avg_qc", "hourly_min_c", "hourly_max_c"],
         ["ob", "min", "max"],
@@ -147,14 +148,15 @@ def main(argv):
         df = df.drop(station)
 
     # Query out centroids of counties...
-    cdf = read_sql(
-        """SELECT ST_x(ST_centroid(the_geom)) as lon,
-        ST_y(ST_centroid(the_geom)) as lat
-        from uscounties WHERE state_name = 'Iowa'
-    """,
-        get_dbconnstr("postgis"),
-        index_col=None,
-    )
+    with get_sqlalchemy_conn("postgis") as conn:
+        cdf = read_sql(
+            """SELECT ST_x(ST_centroid(the_geom)) as lon,
+            ST_y(ST_centroid(the_geom)) as lat
+            from uscounties WHERE state_name = 'Iowa'
+        """,
+            conn,
+            index_col=None,
+        )
     for i, row in cdf.iterrows():
         x, y = get_idx(hlons, hlats, row["lon"], row["lat"])
         cdf.at[i, "nam"] = nam[x, y]

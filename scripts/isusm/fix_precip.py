@@ -15,7 +15,7 @@ from zoneinfo import ZoneInfo
 import pandas as pd
 import requests
 from pyiem.network import Table as NetworkTable
-from pyiem.util import get_dbconn, get_dbconnstr, logger, utc
+from pyiem.util import get_dbconn, get_sqlalchemy_conn, logger, utc
 
 LOG = logger()
 
@@ -165,13 +165,14 @@ def main(argv):
     nt = NetworkTable("ISUSM")
 
     # Get our obs
-    df = pd.read_sql(
-        "SELECT station, rain_in_tot from sm_daily where "
-        "valid = %s ORDER by station ASC",
-        get_dbconnstr("isuag"),
-        params=(date,),
-        index_col="station",
-    )
+    with get_sqlalchemy_conn("isuag") as conn:
+        df = pd.read_sql(
+            "SELECT station, rain_in_tot from sm_daily where "
+            "valid = %s ORDER by station ASC",
+            conn,
+            params=(date,),
+            index_col="station",
+        )
     if df.empty:
         LOG.warning("no observations found for %s, aborting", date)
         return
