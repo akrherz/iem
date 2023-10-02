@@ -10,7 +10,7 @@ import sys
 import pandas as pd
 import requests
 from pyiem.network import Table as NetworkTable
-from pyiem.util import get_dbconn, get_dbconnstr, logger
+from pyiem.util import get_dbconn, get_sqlalchemy_conn, logger
 
 LOG = logger()
 URI = (
@@ -108,13 +108,16 @@ def main(argv):
         return
     nt = NetworkTable(f"{state}CLIMATE", only_online=False)
     pgconn = get_dbconn("coop")
-    df = pd.read_sql(
-        f"SELECT station, year, day, high, low, precip from alldata_{state} "
-        "WHERE (high is null or low is null or precip is null) "
-        "and year >= 1893 and day < 'TODAY' ORDER by station, day",
-        get_dbconnstr("coop"),
-        index_col=None,
-    )
+    with get_sqlalchemy_conn("coop") as conn:
+        df = pd.read_sql(
+            f"""
+            SELECT station, year, day, high, low, precip from alldata_{state}
+            WHERE (high is null or low is null or precip is null)
+            and year >= 1893 and day < 'TODAY' ORDER by station, day
+            """,
+            conn,
+            index_col=None,
+        )
     LOG.warning("Processing %s rows for %s", len(df.index), state)
     for (_year, station), gdf in df.groupby(["year", "station"]):
         if station not in nt.sts:

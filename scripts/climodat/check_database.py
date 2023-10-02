@@ -4,7 +4,7 @@ from io import StringIO
 
 import pandas as pd
 from pyiem.network import Table as NetworkTable
-from pyiem.util import get_dbconn, get_dbconnstr, logger
+from pyiem.util import get_dbconn, get_sqlalchemy_conn, logger
 
 LOG = logger()
 
@@ -14,12 +14,13 @@ def main(argv):
     state = argv[1]
     nt = NetworkTable(f"{state}CLIMATE", only_online=False)
     pgconn = get_dbconn("coop")
-    df = pd.read_sql(
-        f"SELECT station, year, day from alldata_{state} "
-        "ORDER by station, day",
-        get_dbconnstr("coop"),
-        index_col=None,
-    )
+    with get_sqlalchemy_conn("coop") as conn:
+        df = pd.read_sql(
+            f"SELECT station, year, day from alldata_{state} "
+            "ORDER by station, day",
+            conn,
+            index_col=None,
+        )
 
     for station, gdf in df.groupby("station"):
         if station not in nt.sts:

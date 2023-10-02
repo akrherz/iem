@@ -76,6 +76,9 @@ def plotter(fdict):
     if bs is None:
         raise NoDataFound("Unknown metadata")
     thresholds = [ctx["t1"], ctx["t2"], ctx["t3"], ctx["t4"]]
+    # Ensure that thresholds are unique
+    if len(thresholds) != len(set(thresholds)):
+        raise NoDataFound("Thresholds need to be unique.")
 
     sz = 214 + 304
     df = pd.DataFrame(
@@ -227,7 +230,7 @@ def plotter(fdict):
         if df[f"{base}freq"].min() == 0:
             celltext[0][i] = mindates[i].strftime("%b %d\n%Y")
             cellcolors[0][i] = colors[mindates[i].month - 1]
-        if df[f"{base}freq"].max() >= 100:
+        if df[f"{base}freq"].max() >= 100 and maxdates[i] is not None:
             celltext[-1][i] = maxdates[i].strftime("%b %d\n%Y")
             cellcolors[-1][i] = colors[maxdates[i].month - 1]
 

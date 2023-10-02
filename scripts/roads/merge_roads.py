@@ -4,7 +4,7 @@ import datetime
 import requests
 from ingest_roads_rest import URI
 from pandas import read_sql
-from pyiem.util import get_dbconn, get_dbconnstr, logger, utc
+from pyiem.util import get_dbconn, get_sqlalchemy_conn, logger, utc
 from shapely.geometry import LineString, MultiLineString
 
 LOG = logger()
@@ -14,11 +14,13 @@ def main():
     """Go Main, please"""
     pgconn = get_dbconn("postgis")
     cursor = pgconn.cursor()
-    df = read_sql(
-        "SELECT idot_id, longname from roads_base where archive_end is null",
-        get_dbconnstr("postgis"),
-        index_col="idot_id",
-    )
+    with get_sqlalchemy_conn("postgis") as conn:
+        df = read_sql(
+            "SELECT idot_id, longname from roads_base "
+            "where archive_end is null",
+            conn,
+            index_col="idot_id",
+        )
     LOG.info("found %s rows from roads_base", len(df.index))
     req = requests.get(URI, timeout=30)
     jobj = req.json()

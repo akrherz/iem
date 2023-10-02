@@ -11,22 +11,22 @@ import datetime
 import smtplib
 from email.mime.text import MIMEText
 
-from pandas import read_sql
-from pyiem.util import get_dbconnstr, get_properties
+import pandas as pd
+from pyiem.util import get_properties, get_sqlalchemy_conn
 
 
 def generate_report(start_date, end_date):
     """Generate the text report"""
-    pgconn = get_dbconnstr("isuag")
     days = (end_date - start_date).days + 1
     totalobs = days * 24 * 25
-    df = read_sql(
-        "SELECT station, count(*) from sm_hourly WHERE valid >= %s "
-        "and valid < %s GROUP by station ORDER by station",
-        pgconn,
-        params=(start_date, end_date + datetime.timedelta(days=1)),
-        index_col="station",
-    )
+    with get_sqlalchemy_conn("isuag") as pgconn:
+        df = pd.read_sql(
+            "SELECT station, count(*) from sm_hourly WHERE valid >= %s "
+            "and valid < %s GROUP by station ORDER by station",
+            pgconn,
+            params=(start_date, end_date + datetime.timedelta(days=1)),
+            index_col="station",
+        )
     performance = min([100, df["count"].sum() / float(totalobs) * 100.0])
     return """
 Iowa Environmental Mesonet Data Delivery Report

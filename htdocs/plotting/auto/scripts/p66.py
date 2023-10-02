@@ -10,6 +10,11 @@ that participate in a trailing day period that ended in the future.  Rewording,
 an example frequency of 25% of May 1 would indicate that on that date, it had
 an inclusive trailing number of days accumulation above or below the choosen
 threshold.
+
+<p><strong>2 Oct 2023:</strong> The plotting logic was updated to plot
+the frequency of a given day participating in a streak, rather than the
+frequency of a streak ending on that day.  This should be a more useful
+metric for the user.
 """
 import calendar
 
@@ -85,6 +90,7 @@ def plotter(fdict):
         )
     if df.empty:
         raise NoDataFound("No data found for station / threshold.")
+    df["hit"] = False
     syear = df.index[0].year
     eyear = df.index[-1].year
     years = eyear - syear + 1
@@ -97,13 +103,18 @@ def plotter(fdict):
             .agg("min" if mydir == "above" else "max")
         )
     if mydir == "above":
-        df = df.loc[df["trail"] >= threshold]
+        hits = df["trail"] >= threshold
     else:
-        df = df.loc[df["trail"] < threshold]
-    if df.empty:
+        hits = df["trail"] < threshold
+    if hits.sum() == 0:
         raise NoDataFound("No events found for threshold.")
 
-    freq = df.drop(columns="trail").groupby("sday").count() / years * 100.0
+    # Need to compute if a given date participated in a streak
+    # shift hits back in time to match the days
+    for day in range(0, days):
+        df["hit"] = df["hit"] | hits.shift(0 - day)
+
+    freq = df[["sday", "hit"]].groupby("sday").sum() / years * 100.0
     freq = freq.reindex(
         pd.date_range("2000-01-01", "2000-12-31").strftime("%m%d")
     ).fillna(0)
@@ -121,13 +132,13 @@ def plotter(fdict):
     ax.set_ylim(0, 100)
     ax.set_yticks([0, 5, 10, 25, 50, 75, 90, 95, 100])
     ax.grid(True)
-    ax.bar(range(366), freq[varname], width=1)
+    ax.bar(range(366), freq["hit"], width=1)
 
     ax.set_xticks((1, 32, 60, 91, 121, 152, 182, 213, 244, 274, 305, 335))
     ax.set_xticklabels(calendar.month_abbr[1:])
     ax.set_xlim(0, 366)
 
-    df = df.sort_values("sday")
+    df = df[hits].sort_values("sday")
     ypos = 0.85
     xpos = 0.83
     fmt = "%.0f" if varname != "precip" else "%.2f"

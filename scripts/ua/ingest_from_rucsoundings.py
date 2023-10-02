@@ -66,13 +66,13 @@ import datetime
 import sys
 from zoneinfo import ZoneInfo
 
+import pandas as pd
 import requests
-from pandas import read_sql
 from pyiem.network import Table as NetworkTable
 from pyiem.util import (
     exponential_backoff,
     get_dbconn,
-    get_dbconnstr,
+    get_sqlalchemy_conn,
     logger,
     utc,
 )
@@ -249,15 +249,16 @@ def main(valid):
     nt = NetworkTable("RAOB")
     dbconn = get_dbconn("raob")
     # check what we have
-    obs = read_sql(
-        "SELECT station, count(*) from "
-        f"raob_flights f JOIN raob_profile_{valid.year} p "
-        "ON (f.fid = p.fid) where valid = %s GROUP by station "
-        "ORDER by station ASC",
-        get_dbconnstr("raob"),
-        params=(valid,),
-        index_col="station",
-    )
+    with get_sqlalchemy_conn("raob") as conn:
+        obs = pd.read_sql(
+            "SELECT station, count(*) from "
+            f"raob_flights f JOIN raob_profile_{valid.year} p "
+            "ON (f.fid = p.fid) where valid = %s GROUP by station "
+            "ORDER by station ASC",
+            conn,
+            params=(valid,),
+            index_col="station",
+        )
     obs["added"] = 0
     v12 = valid - datetime.timedelta(hours=13)
 

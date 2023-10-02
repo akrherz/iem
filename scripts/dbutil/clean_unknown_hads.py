@@ -6,20 +6,21 @@ Run from RUN_2AM.sh
 """
 
 from pandas import read_sql
-from pyiem.util import get_dbconn, get_dbconnstr, logger
+from pyiem.util import get_dbconn, get_sqlalchemy_conn, logger
 
 LOG = logger()
 
 
 def review_iemaccess():
     """Go find stations that have summary entries, but marked offline."""
-    df = read_sql(
-        """
-        select s.iemid, t.id, t.network from summary s JOIN stations t on
-        (s.iemid = t.iemid) where day = 'YESTERDAY' and not online
-        """,
-        get_dbconnstr("iem"),
-    )
+    with get_sqlalchemy_conn("iem") as conn:
+        df = read_sql(
+            """
+            select s.iemid, t.id, t.network from summary s JOIN stations t on
+            (s.iemid = t.iemid) where day = 'YESTERDAY' and not online
+            """,
+            conn,
+        )
     if df.empty:
         return
     LOG.info("Found %s stations offline, but having data", len(df.index))
