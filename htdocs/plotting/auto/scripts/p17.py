@@ -12,7 +12,11 @@ import pandas as pd
 import requests
 from matplotlib.patches import Rectangle
 from pyiem.plot import figure_axes
-from pyiem.util import LOG, get_autoplot_context, get_sqlalchemy_conn
+from pyiem.util import (
+    exponential_backoff,
+    get_autoplot_context,
+    get_sqlalchemy_conn,
+)
 
 warnings.simplefilter("ignore", UserWarning)
 PDICT = {"temps": "Plot High/Low Temperatures", "precip": "Plot Precipitation"}
@@ -68,15 +72,13 @@ def common(ctx):
             weekends.append(now.day)
         now += datetime.timedelta(days=1)
     req = None
-    try:
-        req = requests.get(
-            f"http://mesonet.agron.iastate.edu/api/1/daily.json?"
-            f"station={station}&"
-            f"network={ctx['network']}&year={year}&month={month}",
-            timeout=15,
-        )
-    except Exception as exp:
-        LOG.info(exp)
+    req = exponential_backoff(
+        requests.get,
+        f"http://mesonet.agron.iastate.edu/api/1/daily.json?"
+        f"station={station}&"
+        f"network={ctx['network']}&year={year}&month={month}",
+        timeout=15,
+    )
     if req is None or req.status_code != 200:
         raise ValueError("Unable to fetch data from API service.")
     jsn = req.json()

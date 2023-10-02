@@ -21,6 +21,19 @@ from pyiem.plot import figure
 from pyiem.util import get_autoplot_context, get_sqlalchemy_conn
 from sqlalchemy import text
 
+LOOKUP = {
+    "avg_high_temp": "max_tmpf",
+    "range_high_temp": "max_tmpf",
+    "avg_low_temp": "min_tmpf",
+    "range_low_temp": "min_tmpf",
+    "avg_temp": "(max_tmpf + min_tmpf)/2.",
+    "avg_dewp": "(max_dwpf + min_dwpf)/2.",
+    "avg_wind_speed": "avg_sknt * 1.15",
+    "max_high": "max_tmpf",
+    "min_high": "max_tmpf",
+    "max_low": "min_tmpf",
+    "min_low": "min_tmpf",
+}
 PDICT = {
     "avg_high_temp": "Average High Temperature",
     "range_high_temp": "Range of High Temperature",
@@ -151,7 +164,7 @@ def plotter(fdict):
         )
     threshold = ctx["thres"]
     mydir = ">=" if ctx["w"] == "aoa" else "<"
-    aggcol = "max_tmpf" if ctx["w"] == "none" else ctx["varname"]
+    aggcol = LOOKUP.get(varname, "max_tmpf")
     dfcol = ctx["varname"] if ctx["w"] == "none" else "count_days"
     with get_sqlalchemy_conn("iem") as conn:
         df = pd.read_sql(
