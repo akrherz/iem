@@ -598,7 +598,7 @@ def plotter(fdict):
         fmt = "%.0f"
         extend = "neither"
     cmap.set_bad("white")
-    if ctx["p"] == "contour":
+    if ctx["p"] == "contour" and len(clevels) > 1:
         mp.contourf(
             df["lon"].values,
             df["lat"].values,
