@@ -138,7 +138,7 @@ def do_insert(source_cursor, reset_times, madis):
         report_type, feel, relh, peak_wind_gust, peak_wind_drct,
         peak_wind_time, snowdepth)
         values(%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,
-        %s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s)
+        %s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s::numeric)
         """
         args = (
             row["id"],

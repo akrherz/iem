@@ -70,11 +70,12 @@ def load_table(state, date):
                 SELECT station, high, low, precip, snow, snowd, temp_hour,
                 precip_hour, coalesce(temp_estimated, true) as temp_estimated,
                 coalesce(precip_estimated, true) as precip_estimated
-                from alldata_{state} WHERE day = :date and station in :states
+                from alldata_{state} WHERE day = :date
+                and station = ANY(:states)
                 """
             ),
             conn,
-            params={"date": date, "states": tuple(df.index.values)},
+            params={"date": date, "states": df.index.values},
             index_col="station",
         )
     # combine this back into the main table
