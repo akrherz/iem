@@ -1,4 +1,7 @@
-"""Pretty Four Inch Depth Iowa Plots"""
+"""Pretty Four Inch Depth Iowa Plots
+
+Called from run_plots.sh
+"""
 # pylint: disable=unbalanced-tuple-unpacking
 # stdlib
 import datetime
@@ -32,13 +35,13 @@ def get_grib(now, fhour):
         f"%H/nam.t%Hz.conusnest.hiresf0{fhour}.tm00.grib2"
     )
     if not os.path.isfile(gribfn):
-        LOG.info("NAM missing: %s", gribfn)
+        LOG.warning("NAM missing: %s", gribfn)
         return None
     grbs = pygrib.open(gribfn)
     try:
         gs = grbs.select(shortName="st")
     except ValueError:
-        LOG.info("failed to find st in %s", gribfn)
+        LOG.warning("failed to find st in %s", gribfn)
         return None
     for g in gs:
         if str(g).find("levels 0.0-0.1 m") > 0:
@@ -64,8 +67,8 @@ def do_nam(valid):
                 lats, lons = grib.latlons()
                 data = np.zeros(np.shape(lats))
     if grib is None or lats is None:
-        LOG.info("Failed to find NAM data for %s", valid)
-        return None
+        LOG.warning("Failed to find NAM data for %s", valid)
+        return None, None, None
     data += grib.values
     count += 1
     return lons, lats, data / float(count)
@@ -89,6 +92,8 @@ def main(argv):
     day_ago = int(argv[1])
     ts = datetime.date.today() - datetime.timedelta(days=day_ago)
     hlons, hlats, hvals = do_nam(ts)
+    if hlons is None:
+        return
     nam = convert_value(hvals, "degK", "degF")
     window = np.ones((3, 3))
     nam = convolve2d(nam, window / window.sum(), mode="same", boundary="symm")

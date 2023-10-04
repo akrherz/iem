@@ -5,22 +5,22 @@ import warnings
 
 from netCDF4 import chartostring
 from pandas import read_sql
-from pyiem.util import get_dbconnstr, ncopen, utc
+from pyiem.util import get_sqlalchemy_conn, ncopen, utc
 
 warnings.filterwarnings("ignore", category=DeprecationWarning)
 
 
 def main():
     """Go Main Go!"""
-    pgconn = get_dbconnstr("hads")
-    udf = read_sql(
-        """
-        SELECT distinct nwsli, 1 as col from unknown
-        WHERE length(nwsli) = 5 ORDER by nwsli
-    """,
-        pgconn,
-        index_col="nwsli",
-    )
+    with get_sqlalchemy_conn("hads") as conn:
+        udf = read_sql(
+            """
+            SELECT distinct nwsli, 1 as col from unknown
+            WHERE length(nwsli) = 5 ORDER by nwsli
+        """,
+            conn,
+            index_col="nwsli",
+        )
     print(f"Found {len(udf.index)} unknown entries")
     # Find latest MADIS netcdf
     now = utc()

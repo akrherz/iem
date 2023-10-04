@@ -499,16 +499,26 @@ def plotter(fdict):
         ),
     )
     func = mp.fill_cwas if ctx["by"] == "wfo" else mp.fill_states
-    func(
-        df2,
-        bins=bins,
-        ilabel=True,
-        units=units,
-        lblformat=lformat,
-        cmap=cmap,
-        extend=extend,
-        labelbuffer=0,
-    )
+    if df2.empty:
+        mp.fig.text(
+            0.5,
+            0.5,
+            "No Events Found",
+            ha="center",
+            va="center",
+            fontsize="large",
+        )
+    else:
+        func(
+            df2,
+            bins=bins,
+            ilabel=True,
+            units=units,
+            lblformat=lformat,
+            cmap=cmap,
+            extend=extend,
+            labelbuffer=0,
+        )
 
     return mp.fig, df
 

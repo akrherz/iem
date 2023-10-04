@@ -3,13 +3,12 @@ import datetime
 import sys
 
 import numpy as np
-from pandas import read_sql
+import pandas as pd
 from pyiem import iemre
-from pyiem.util import convert_value, get_dbconnstr, logger, ncopen
+from pyiem.util import convert_value, get_sqlalchemy_conn, logger, ncopen
 from scipy.interpolate import NearestNDInterpolator
 
 LOG = logger()
-COOP = get_dbconnstr("coop")
 
 
 def generic_gridder(nc, df, idx):
@@ -45,15 +44,15 @@ def grid_day(nc, ts):
     offset = iemre.daily_offset(ts)
     if ts.day == 29 and ts.month == 2:
         ts = datetime.datetime(2000, 3, 1)
-
-    df = read_sql(
-        "select station, st_x(geom) as lon, st_y(geom) as lat, precip "
-        "from ncei_climate91 c JOIN stations t on (c.station = t.id) "
-        "WHERE t.network = 'NCEI91' and c.valid = %s",
-        COOP,
-        params=(ts.strftime("%Y-%m-%d"),),
-        index_col="station",
-    )
+    with get_sqlalchemy_conn("coop") as conn:
+        df = pd.read_sql(
+            "select station, st_x(geom) as lon, st_y(geom) as lat, precip "
+            "from ncei_climate91 c JOIN stations t on (c.station = t.id) "
+            "WHERE t.network = 'NCEI91' and c.valid = %s",
+            conn,
+            params=(ts.strftime("%Y-%m-%d"),),
+            index_col="station",
+        )
     if len(df.index) > 4:
         res = generic_gridder(nc, df, "precip")
         if res is not None:

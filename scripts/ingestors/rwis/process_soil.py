@@ -8,7 +8,12 @@ from zoneinfo import ZoneInfo
 # third party
 import pandas as pd
 import requests
-from pyiem.util import exponential_backoff, get_dbconn, get_dbconnstr, logger
+from pyiem.util import (
+    exponential_backoff,
+    get_dbconn,
+    get_sqlalchemy_conn,
+    logger,
+)
 
 LOG = logger()
 URI = (
@@ -75,11 +80,12 @@ def main():
         return
     df = process_features(data["features"])
     pgconn = get_dbconn("iem")
-    xref = pd.read_sql(
-        "SELECT id, nwsli from rwis_locations",
-        get_dbconnstr("iem"),
-        index_col="nwsli",
-    )
+    with get_sqlalchemy_conn("iem") as conn:
+        xref = pd.read_sql(
+            "SELECT id, nwsli from rwis_locations",
+            conn,
+            index_col="nwsli",
+        )
     df["location_id"] = xref["id"]
 
     cursor = pgconn.cursor()

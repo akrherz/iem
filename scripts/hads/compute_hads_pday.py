@@ -9,7 +9,7 @@ from zoneinfo import ZoneInfo
 
 import numpy as np
 import pandas as pd
-from pyiem.util import get_dbconn, get_dbconnstr, logger, utc
+from pyiem.util import get_dbconn, get_sqlalchemy_conn, logger, utc
 
 LOG = logger()
 
@@ -19,21 +19,22 @@ def workflow(date):
     iem_pgconn = get_dbconn("iem")
     icursor = iem_pgconn.cursor()
     # load up the current obs
-    df = pd.read_sql(
-        f"""
-    WITH dcp as (
-        SELECT id, iemid, tzname from stations where network ~* 'DCP'
-        and tzname is not null
-    ), obs as (
-        SELECT iemid, pday from summary_{date.year}
-        WHERE day = %s)
-    SELECT d.id, d.iemid, d.tzname, coalesce(o.pday, 0) as pday from
-    dcp d LEFT JOIN obs o on (d.iemid = o.iemid)
-    """,
-        get_dbconnstr("iem"),
-        params=(date,),
-        index_col="id",
-    )
+    with get_sqlalchemy_conn("iem") as conn:
+        df = pd.read_sql(
+            f"""
+        WITH dcp as (
+            SELECT id, iemid, tzname from stations where network ~* 'DCP'
+            and tzname is not null
+        ), obs as (
+            SELECT iemid, pday from summary_{date.year}
+            WHERE day = %s)
+        SELECT d.id, d.iemid, d.tzname, coalesce(o.pday, 0) as pday from
+        dcp d LEFT JOIN obs o on (d.iemid = o.iemid)
+        """,
+            conn,
+            params=(date,),
+            index_col="id",
+        )
     bases = {}
     ts = utc(date.year, date.month, date.day, 12)
     for tzname in df["tzname"].unique():
@@ -44,16 +45,17 @@ def workflow(date):
         date.year, date.month, date.day
     ) - datetime.timedelta(hours=12)
     ets = sts + datetime.timedelta(hours=48)
-    obsdf = pd.read_sql(
-        f"""
-    SELECT distinct station, valid at time zone 'UTC' as utc_valid, value
-    from raw{date.year} WHERE valid between %s and %s and
-    substr(key, 1, 3) = 'PPH' and value >= 0
-    """,
-        get_dbconnstr("hads"),
-        params=(sts, ets),
-        index_col=None,
-    )
+    with get_sqlalchemy_conn("hads") as conn:
+        obsdf = pd.read_sql(
+            f"""
+        SELECT distinct station, valid at time zone 'UTC' as utc_valid, value
+        from raw{date.year} WHERE valid between %s and %s and
+        substr(key, 1, 3) = 'PPH' and value >= 0
+        """,
+            conn,
+            params=(sts, ets),
+            index_col=None,
+        )
     if obsdf.empty:
         LOG.info("%s found no data", date)
         return

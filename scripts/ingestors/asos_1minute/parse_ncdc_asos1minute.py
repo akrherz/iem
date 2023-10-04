@@ -23,7 +23,7 @@ import requests
 from pyiem.util import (
     exponential_backoff,
     get_dbconn,
-    get_dbconnstr,
+    get_sqlalchemy_conn,
     logger,
     utc,
 )
@@ -317,24 +317,25 @@ def init_dataframe(argv):
     """Build the processing dataframe."""
     # ASOS query limit keeps other sites out of result that may have 1min
     # Do a time zone trick to figure out UTC offset 1 is ahead
-    df = pd.read_sql(
-        "SELECT id, "
-        "case when extract(year from ('2020-01-01 00:00+00' at time zone "
-        "tzname)) = 2019 then 1 else -1 end as utc_direction from "
-        "stations t JOIN station_attributes a on "
-        "(t.iemid = a.iemid) where a.attr = 'HAS1MIN' and t.network ~* 'ASOS' "
-        "ORDER by id ASC",
-        get_dbconnstr("mesosite"),
-        index_col="id",
-    )
+    with get_sqlalchemy_conn("mesosite") as conn:
+        df = pd.read_sql(
+            """
+            SELECT id,
+            case when extract(year from ('2020-01-01 00:00+00' at time zone
+            tzname)) = 2019 then 1 else -1 end as utc_direction from
+            stations t JOIN station_attributes a on
+            (t.iemid = a.iemid) where a.attr = 'HAS1MIN'
+            and t.network ~* 'ASOS' ORDER by id ASC
+            """,
+            conn,
+            index_col="id",
+        )
     # Set a currently impossible floor for a bounds check.
     df["archive_end"] = utc(1980, 1, 1)
     df["fn5"] = ""
     df["fn6"] = ""
     dt = utc()
-    if len(argv) == 2:  # Hard coded hidden filename
-        dl_realtime(df, dt, filebase=argv[1])
-    elif len(argv) >= 3:
+    if len(argv) >= 3:
         if len(argv) == 4:
             LOG.info("Limiting work to station %s", argv[1])
             df = df.loc[[argv[1]]]
@@ -343,9 +344,16 @@ def init_dataframe(argv):
             dt = utc(int(argv[1]), int(argv[2]))
         dl_archive(df, dt)
     else:
-        merge_archive_end(df, dt)
         df["archive_end"] = df["archive_end"].fillna(DT1980)
-        dl_realtime(df, dt)
+        months = [
+            dt,
+        ]
+        if dt.day < 7:
+            months.insert(0, dt - datetime.timedelta(days=9))
+        for mdt in months:
+            merge_archive_end(df, mdt)
+            for page in [1, 2]:
+                dl_realtime(df, dt, mdt, page)
         update_iemprops(dt)
 
     return df
@@ -353,53 +361,50 @@ def init_dataframe(argv):
 
 def merge_archive_end(df, dt):
     """Figure out our archive end times."""
-    df2 = pd.read_sql(
-        f"SELECT station, max(valid) from t{dt.strftime('%Y%m')}_1minute "
-        "GROUP by station",
-        get_dbconnstr("asos1min"),
-        index_col="station",
-    )
+    with get_sqlalchemy_conn("asos1min") as conn:
+        df2 = pd.read_sql(
+            f"SELECT station, max(valid) from t{dt.strftime('%Y%m')}_1minute "
+            "GROUP by station",
+            conn,
+            index_col="station",
+        )
     LOG.debug("found %s stations in the archive", len(df2.index))
     df["archive_end"] = df2["max"]
 
 
-def dl_realtime(df, dt, filebase=None):
+def dl_realtime(df, dt, mdt, page):
     """Download and stage the 'real-time' processing."""
-    for page in [1, 2]:
-        # Good grief asos-1min-pg1_d202207_c20220721.tar.gz
-        tmpfn = (
-            f"asos-1min-pg{page}_d{dt.strftime('%Y%m')}_c{dt:%Y%m%d}.tar.gz"
-        )
-        if filebase is not None:
-            tmpfn = f"asos-1min-pg{page}_{filebase}.tar.gz"
-        if not os.path.isfile(f"{TMPDIR}/{tmpfn}"):
-            uri = f"{HIDDENURL}/{tmpfn}"
-            res = requests.get(uri, timeout=60, stream=True)
-            if res.status_code != 200:
-                LOG.warning("Got HTTP %s for %s", res.status_code, uri)
+    # Good grief asos-1min-pg1_d202207_c20220721.tar.gz
+    tmpfn = f"asos-1min-pg{page}_d{mdt:%Y%m}_c{dt:%Y%m%d}.tar.gz"
+    if not os.path.isfile(f"{TMPDIR}/{tmpfn}"):
+        uri = f"{HIDDENURL}/{tmpfn}"
+        res = requests.get(uri, timeout=60, stream=True)
+        if res.status_code != 200:
+            loglvl = LOG.info if dt.month != mdt.month else LOG.warning
+            loglvl("Got HTTP %s for %s", res.status_code, uri)
+            return
+        with open(f"{TMPDIR}/{tmpfn}", "wb") as fh:
+            for chunk in res.iter_content(chunk_size=4096):
+                if chunk:
+                    fh.write(chunk)
+    with tarfile.open(f"{TMPDIR}/{tmpfn}", "r:gz") as tar:
+        for tarinfo in tar:
+            if not tarinfo.isreg():
                 continue
-            with open(f"{TMPDIR}/{tmpfn}", "wb") as fh:
-                for chunk in res.iter_content(chunk_size=4096):
-                    if chunk:
-                        fh.write(chunk)
-        with tarfile.open(f"{TMPDIR}/{tmpfn}", "r:gz") as tar:
-            for tarinfo in tar:
-                if not tarinfo.isreg():
-                    continue
-                if not tarinfo.name.startswith("asos-1min-pg"):
-                    LOG.info("Unknown filename %s", tarinfo.name)
-                    continue
-                station = tarinfo.name.split("-")[3]
-                if station[0] == "K":
-                    station = station[1:]
-                if station not in df.index:
-                    LOG.warning("Unknown station %s, FIXME!", station)
-                    continue
-                f = tar.extractfile(tarinfo.name)
-                with open(f"{TMPDIR}/{tarinfo.name}", "wb") as fh:
-                    fh.write(f.read())
-                # sick
-                df.at[station, f"fn{page + 4}"] = f"{TMPDIR}/{tarinfo.name}"
+            if not tarinfo.name.startswith("asos-1min-pg"):
+                LOG.info("Unknown filename %s", tarinfo.name)
+                continue
+            station = tarinfo.name.split("-")[3]
+            if station[0] == "K":
+                station = station[1:]
+            if station not in df.index:
+                LOG.warning("Unknown station %s, FIXME!", station)
+                continue
+            f = tar.extractfile(tarinfo.name)
+            with open(f"{TMPDIR}/{tarinfo.name}", "wb") as fh:
+                fh.write(f.read())
+            # sick
+            df.at[station, f"fn{page + 4}"] = f"{TMPDIR}/{tarinfo.name}"
 
 
 def cleanup(df):
