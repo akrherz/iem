@@ -11,7 +11,7 @@ from zoneinfo import ZoneInfo
 import pandas as pd
 from metpy.units import units
 from pyiem.network import Table as NetworkTable
-from pyiem.util import get_dbconn, get_dbconnstr, logger
+from pyiem.util import get_dbconn, get_sqlalchemy_conn, logger
 
 LOG = logger()
 MM = units("mm")
@@ -23,17 +23,18 @@ def run(valid):
     nt = NetworkTable("USCRN")
     iem_pgconn = get_dbconn("iem")
     LOG.info("Processing %s", valid.date())
-    # Fetch enough data to cross all the dates
-    df = pd.read_sql(
-        "SELECT station, valid at time zone 'UTC' as utc_valid, precip_mm "
-        "from uscrn_alldata where valid > %s and valid < %s",
-        get_dbconnstr("other"),
-        params=(
-            valid - datetime.timedelta(days=1),
-            valid + datetime.timedelta(days=2),
-        ),
-        index_col=None,
-    )
+    with get_sqlalchemy_conn("other") as conn:
+        # Fetch enough data to cross all the dates
+        df = pd.read_sql(
+            "SELECT station, valid at time zone 'UTC' as utc_valid, precip_mm "
+            "from uscrn_alldata where valid > %s and valid < %s",
+            conn,
+            params=(
+                valid - datetime.timedelta(days=1),
+                valid + datetime.timedelta(days=2),
+            ),
+            index_col=None,
+        )
     if df.empty:
         LOG.info("No data found for date: %s", valid.date())
         return

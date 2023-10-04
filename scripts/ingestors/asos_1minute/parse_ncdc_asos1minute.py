@@ -23,7 +23,7 @@ import requests
 from pyiem.util import (
     exponential_backoff,
     get_dbconn,
-    get_dbconnstr,
+    get_sqlalchemy_conn,
     logger,
     utc,
 )
@@ -317,16 +317,19 @@ def init_dataframe(argv):
     """Build the processing dataframe."""
     # ASOS query limit keeps other sites out of result that may have 1min
     # Do a time zone trick to figure out UTC offset 1 is ahead
-    df = pd.read_sql(
-        "SELECT id, "
-        "case when extract(year from ('2020-01-01 00:00+00' at time zone "
-        "tzname)) = 2019 then 1 else -1 end as utc_direction from "
-        "stations t JOIN station_attributes a on "
-        "(t.iemid = a.iemid) where a.attr = 'HAS1MIN' and t.network ~* 'ASOS' "
-        "ORDER by id ASC",
-        get_dbconnstr("mesosite"),
-        index_col="id",
-    )
+    with get_sqlalchemy_conn("mesosite") as conn:
+        df = pd.read_sql(
+            """
+            SELECT id,
+            case when extract(year from ('2020-01-01 00:00+00' at time zone
+            tzname)) = 2019 then 1 else -1 end as utc_direction from
+            stations t JOIN station_attributes a on
+            (t.iemid = a.iemid) where a.attr = 'HAS1MIN'
+            and t.network ~* 'ASOS' ORDER by id ASC
+            """,
+            conn,
+            index_col="id",
+        )
     # Set a currently impossible floor for a bounds check.
     df["archive_end"] = utc(1980, 1, 1)
     df["fn5"] = ""
@@ -353,12 +356,13 @@ def init_dataframe(argv):
 
 def merge_archive_end(df, dt):
     """Figure out our archive end times."""
-    df2 = pd.read_sql(
-        f"SELECT station, max(valid) from t{dt.strftime('%Y%m')}_1minute "
-        "GROUP by station",
-        get_dbconnstr("asos1min"),
-        index_col="station",
-    )
+    with get_sqlalchemy_conn("asos1min") as conn:
+        df2 = pd.read_sql(
+            f"SELECT station, max(valid) from t{dt.strftime('%Y%m')}_1minute "
+            "GROUP by station",
+            conn,
+            index_col="station",
+        )
     LOG.debug("found %s stations in the archive", len(df2.index))
     df["archive_end"] = df2["max"]
 

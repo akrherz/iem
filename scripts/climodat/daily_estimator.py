@@ -238,7 +238,8 @@ def merge_obs(df, state, ts):
         obs = pd.read_sql(
             """
             SELECT t.id || '|' || t.network as tracks,
-            max_tmpf as high, min_tmpf as low,
+            round(max_tmpf::numeric, 0) as high,
+            round(min_tmpf::numeric, 0) as low,
             pday as precip, snow, snowd,
             coalesce(extract(hour from (coop_valid + '1 minute'::interval)
             at time zone tzname), 24) as temp_hour
