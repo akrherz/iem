@@ -335,9 +335,7 @@ def init_dataframe(argv):
     df["fn5"] = ""
     df["fn6"] = ""
     dt = utc()
-    if len(argv) == 2:  # Hard coded hidden filename
-        dl_realtime(df, dt, filebase=argv[1])
-    elif len(argv) >= 3:
+    if len(argv) >= 3:
         if len(argv) == 4:
             LOG.info("Limiting work to station %s", argv[1])
             df = df.loc[[argv[1]]]
@@ -346,9 +344,16 @@ def init_dataframe(argv):
             dt = utc(int(argv[1]), int(argv[2]))
         dl_archive(df, dt)
     else:
-        merge_archive_end(df, dt)
         df["archive_end"] = df["archive_end"].fillna(DT1980)
-        dl_realtime(df, dt)
+        months = [
+            dt,
+        ]
+        if dt.day < 7:
+            months.insert(0, dt - datetime.timedelta(days=9))
+        for mdt in months:
+            merge_archive_end(df, mdt)
+            for page in [1, 2]:
+                dl_realtime(df, dt, mdt, page)
         update_iemprops(dt)
 
     return df
@@ -367,43 +372,39 @@ def merge_archive_end(df, dt):
     df["archive_end"] = df2["max"]
 
 
-def dl_realtime(df, dt, filebase=None):
+def dl_realtime(df, dt, mdt, page):
     """Download and stage the 'real-time' processing."""
-    for page in [1, 2]:
-        # Good grief asos-1min-pg1_d202207_c20220721.tar.gz
-        tmpfn = (
-            f"asos-1min-pg{page}_d{dt.strftime('%Y%m')}_c{dt:%Y%m%d}.tar.gz"
-        )
-        if filebase is not None:
-            tmpfn = f"asos-1min-pg{page}_{filebase}.tar.gz"
-        if not os.path.isfile(f"{TMPDIR}/{tmpfn}"):
-            uri = f"{HIDDENURL}/{tmpfn}"
-            res = requests.get(uri, timeout=60, stream=True)
-            if res.status_code != 200:
-                LOG.warning("Got HTTP %s for %s", res.status_code, uri)
+    # Good grief asos-1min-pg1_d202207_c20220721.tar.gz
+    tmpfn = f"asos-1min-pg{page}_d{mdt:%Y%m}_c{dt:%Y%m%d}.tar.gz"
+    if not os.path.isfile(f"{TMPDIR}/{tmpfn}"):
+        uri = f"{HIDDENURL}/{tmpfn}"
+        res = requests.get(uri, timeout=60, stream=True)
+        if res.status_code != 200:
+            loglvl = LOG.info if dt.month != mdt.month else LOG.warning
+            loglvl("Got HTTP %s for %s", res.status_code, uri)
+            return
+        with open(f"{TMPDIR}/{tmpfn}", "wb") as fh:
+            for chunk in res.iter_content(chunk_size=4096):
+                if chunk:
+                    fh.write(chunk)
+    with tarfile.open(f"{TMPDIR}/{tmpfn}", "r:gz") as tar:
+        for tarinfo in tar:
+            if not tarinfo.isreg():
                 continue
-            with open(f"{TMPDIR}/{tmpfn}", "wb") as fh:
-                for chunk in res.iter_content(chunk_size=4096):
-                    if chunk:
-                        fh.write(chunk)
-        with tarfile.open(f"{TMPDIR}/{tmpfn}", "r:gz") as tar:
-            for tarinfo in tar:
-                if not tarinfo.isreg():
-                    continue
-                if not tarinfo.name.startswith("asos-1min-pg"):
-                    LOG.info("Unknown filename %s", tarinfo.name)
-                    continue
-                station = tarinfo.name.split("-")[3]
-                if station[0] == "K":
-                    station = station[1:]
-                if station not in df.index:
-                    LOG.warning("Unknown station %s, FIXME!", station)
-                    continue
-                f = tar.extractfile(tarinfo.name)
-                with open(f"{TMPDIR}/{tarinfo.name}", "wb") as fh:
-                    fh.write(f.read())
-                # sick
-                df.at[station, f"fn{page + 4}"] = f"{TMPDIR}/{tarinfo.name}"
+            if not tarinfo.name.startswith("asos-1min-pg"):
+                LOG.info("Unknown filename %s", tarinfo.name)
+                continue
+            station = tarinfo.name.split("-")[3]
+            if station[0] == "K":
+                station = station[1:]
+            if station not in df.index:
+                LOG.warning("Unknown station %s, FIXME!", station)
+                continue
+            f = tar.extractfile(tarinfo.name)
+            with open(f"{TMPDIR}/{tarinfo.name}", "wb") as fh:
+                fh.write(f.read())
+            # sick
+            df.at[station, f"fn{page + 4}"] = f"{TMPDIR}/{tarinfo.name}"
 
 
 def cleanup(df):
