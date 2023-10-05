@@ -47,7 +47,8 @@ PDICT3 = {
     "per": "Percent of Average [%]",
 }
 PDICT4 = {
-    "yes": "Yes, overlay Drought Monitor",
+    "yes": "Yes, overlay Drought Monitor (valid near end date)",
+    "yesb": "Yes, overlay Drought Monitor (valid near begin date)",
     "no": "No, do not overlay Drought Monitor",
 }
 
@@ -399,8 +400,12 @@ def finalize_map(ctx):
     if (ctx["east"] - ctx["west"]) < 10:
         ctx["mp"].drawcounties()
         ctx["mp"].drawcities(minpop=500 if ctx["sector"] == "custom" else 5000)
-    if ctx["usdm"] == "yes":
-        ctx["mp"].draw_usdm(ctx["edate"], filled=False, hatched=True)
+    if ctx["usdm"].startswith("yes"):
+        ctx["mp"].draw_usdm(
+            ctx["edate"] if ctx["usdm"] == "yes" else ctx["sdate"],
+            filled=False,
+            hatched=True,
+        )
     if ctx.get("cwa") is not None:
         ctx["mp"].draw_cwas()
     ctx["mp"].draw_mask("conus")
