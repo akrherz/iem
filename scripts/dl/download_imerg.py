@@ -104,30 +104,39 @@ def main(argv):
     }
     with open(f"{tmp.name}.json", "w", encoding="utf8") as fp:
         json.dump(metadata, fp)
-    pqstr = (
-        f"pqinsert -i -p 'plot {routes} {valid:%Y%m%d%H%M} "
-        "gis/images/4326/imerg/p30m.json "
-        f"GIS/imerg/p30m_{valid:%Y%m%d%H%M}.json json' {tmp.name}.json"
-    )
-    subprocess.call(pqstr, shell=True)
+    cmd = [
+        "pqinsert",
+        "-i",
+        "-p",
+        f"plot {routes} {valid:%Y%m%d%H%M} gis/images/4326/imerg/p30m.json "
+        f"GIS/imerg/p30m_{valid:%Y%m%d%H%M}.json json",
+        f"{tmp.name}.json",
+    ]
+    subprocess.call(cmd)
     os.unlink(f"{tmp.name}.json")
 
     with open(f"{tmp.name}.wld", "w", encoding="utf8") as fp:
         fp.write("\n".join(["0.1", "0.0", "0.0", "-0.1", "-179.95", "89.95"]))
-    pqstr = (
-        f"pqinsert -i -p 'plot {routes} {valid:%Y%m%d%H%M} "
-        "gis/images/4326/imerg/p30m.wld "
-        f"GIS/imerg/p30m_{valid:%Y%m%d%H%M}.wld wld' {tmp.name}.wld"
-    )
-    subprocess.call(pqstr, shell=True)
+    cmd = [
+        "pqinsert",
+        "-i",
+        "-p",
+        f"plot {routes} {valid:%Y%m%d%H%M} gis/images/4326/imerg/p30m.wld "
+        f"GIS/imerg/p30m_{valid:%Y%m%d%H%M}.wld wld",
+        f"{tmp.name}.wld",
+    ]
+    subprocess.call(cmd)
     os.unlink(f"{tmp.name}.wld")
 
-    pqstr = (
-        f"pqinsert -i -p 'plot {routes} {valid:%Y%m%d%H%M} "
-        "gis/images/4326/imerg/p30m.png "
-        f"GIS/imerg/p30m_{valid:%Y%m%d%H%M}.png png' {tmp.name}.png"
-    )
-    subprocess.call(pqstr, shell=True)
+    cmd = [
+        "pqinsert",
+        "-i",
+        "-p",
+        f"plot {routes} {valid:%Y%m%d%H%M} gis/images/4326/imerg/p30m.png "
+        f"GIS/imerg/p30m_{valid:%Y%m%d%H%M}.png png",
+        f"{tmp.name}.png",
+    ]
+    subprocess.call(cmd)
     os.unlink(f"{tmp.name}.png")
 
 

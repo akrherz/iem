@@ -75,7 +75,7 @@ def load_table(state, date):
                 """
             ),
             conn,
-            params={"date": date, "states": df.index.values},
+            params={"date": date, "states": df.index.values.tolist()},
             index_col="station",
         )
     # combine this back into the main table
