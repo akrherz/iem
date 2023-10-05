@@ -65,12 +65,16 @@ def dl(now, varname, scenario):
         )
     else:
         # Inject into LDM
-        cmd = (
-            f"pqinsert -p 'data a {now:%Y%m%d%H%M} blah "
+        cmd = [
+            "pqinsert",
+            "-p",
+            f"data a {now:%Y%m%d%H%M} blah "
             f"model/cfs/{now:%H}/{varname}.{s2}.{now:%Y%m%d%H}.daily.grib2 "
-            f"grib' {tmpfd.name}"
-        )
-        subprocess.call(cmd, shell=True)
+            "grib",
+            tmpfd.name,
+        ]
+        LOG.info("Running: %s", " ".join(cmd))
+        subprocess.call(cmd)
 
     os.remove(tmpfd.name)
 

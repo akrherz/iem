@@ -23,6 +23,7 @@ import requests
 from pyiem.util import (
     exponential_backoff,
     get_dbconn,
+    get_dbconnc,
     get_sqlalchemy_conn,
     logger,
     utc,
@@ -302,8 +303,7 @@ def runner(pgconn, metadata, station):
 
 def update_iemprops(ts):
     """db update"""
-    pgconn = get_dbconn("mesosite")
-    cursor = pgconn.cursor()
+    pgconn, cursor = get_dbconnc("mesosite")
     cursor.execute(
         "UPDATE properties SET propvalue = %s "
         "WHERE propname = 'asos.1min.end'",
@@ -313,7 +313,7 @@ def update_iemprops(ts):
     pgconn.commit()
 
 
-def init_dataframe(argv):
+def init_dataframes(argv) -> list:
     """Build the processing dataframe."""
     # ASOS query limit keeps other sites out of result that may have 1min
     # Do a time zone trick to figure out UTC offset 1 is ahead
@@ -331,7 +331,7 @@ def init_dataframe(argv):
             index_col="id",
         )
     # Set a currently impossible floor for a bounds check.
-    df["archive_end"] = utc(1980, 1, 1)
+    df["archive_end"] = DT1980
     df["fn5"] = ""
     df["fn6"] = ""
     dt = utc()
@@ -343,33 +343,36 @@ def init_dataframe(argv):
         else:
             dt = utc(int(argv[1]), int(argv[2]))
         dl_archive(df, dt)
-    else:
-        df["archive_end"] = df["archive_end"].fillna(DT1980)
-        months = [
-            dt,
-        ]
-        if dt.day < 7:
-            months.insert(0, dt - datetime.timedelta(days=9))
-        for mdt in months:
-            merge_archive_end(df, mdt)
-            for page in [1, 2]:
-                dl_realtime(df, dt, mdt, page)
-        update_iemprops(dt)
+        return [df]
+    res = []
+    months = [dt]
+    if dt.day < 7:
+        months.insert(0, dt - datetime.timedelta(days=9))
+    for mdt in months:
+        df["archive_end"] = DT1980
+        df["fn5"] = ""
+        df["fn6"] = ""
+        merge_archive_end(df, mdt)
+        for page in [1, 2]:
+            dl_realtime(df, dt, mdt, page)
+        res.append(df.copy())
+    update_iemprops(dt)
 
-    return df
+    return res
 
 
 def merge_archive_end(df, dt):
     """Figure out our archive end times."""
     with get_sqlalchemy_conn("asos1min") as conn:
         df2 = pd.read_sql(
-            f"SELECT station, max(valid) from t{dt.strftime('%Y%m')}_1minute "
+            f"SELECT station, max(valid) from t{dt:%Y%m}_1minute "
             "GROUP by station",
             conn,
             index_col="station",
         )
-    LOG.debug("found %s stations in the archive", len(df2.index))
+    LOG.info("found %s stations in the archive", len(df2.index))
     df["archive_end"] = df2["max"]
+    df["archive_end"] = df["archive_end"].fillna(DT1980)
 
 
 def dl_realtime(df, dt, mdt, page):
@@ -415,25 +418,25 @@ def cleanup(df):
             if not pd.isnull(fn) and fn.startswith(TMPDIR):
                 os.unlink(fn)
     # Cleanup tmp folder
-    subprocess.call(f"tmpwatch 200 {TMPDIR}", shell=True)
+    subprocess.call(["tmpwatch", "200", TMPDIR])
 
 
 def main(argv):
     """Go Main Go"""
     cronjob = not sys.stdout.isatty()
     # Build a dataframe to do work with
-    df = init_dataframe(argv)
-
-    pgconn = get_dbconn("asos1min")
-    progress = tqdm(df.index.values, disable=cronjob)
     total = 0
-    for station in progress:
-        row = df.loc[station]
-        progress.set_description(f"{station}")
-        total += runner(pgconn, row, station)
+    for df in init_dataframes(argv):
+        pgconn = get_dbconn("asos1min")
+        progress = tqdm(df.index.values, disable=cronjob)
+        for station in progress:
+            row = df.loc[station]
+            progress.set_description(f"{station}")
+            total += runner(pgconn, row, station)
+        pgconn.close()
+        cleanup(df)
     if not cronjob or total < 1e6:
         LOG.info("Ingested %s observations", total)
-    cleanup(df)
 
 
 if __name__ == "__main__":

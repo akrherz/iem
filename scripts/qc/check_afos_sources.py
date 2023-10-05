@@ -16,6 +16,7 @@ pgconn = get_dbconn("afos")
 cursor = pgconn.cursor()
 cursor2 = pgconn.cursor()
 
+KNOWN = ["PANC", "PHBK"]
 nt = NetworkTable(["WFO", "RFC", "NWS", "NCEP", "CWSU", "WSO"])
 BASE = "https://mesonet.agron.iastate.edu/p.php?pid"
 
@@ -48,6 +49,9 @@ def look4(ts):
         source = row[0]
         lookup = source[1:] if source[0] == "K" else source
         if lookup in nt.sts:
+            continue
+        if lookup in KNOWN:
+            LOG.info("Skipping known %s", lookup)
             continue
         print(f"{row[0]} {row[1]}")
         sample(source, ts)
