@@ -1,4 +1,7 @@
-"""Get some soil grids from the NAM"""
+"""Get some soil grids from the NAM.
+
+Run from RUN_40_AFTER.sh for a UTC timestamp 3 hours ago.
+"""
 import datetime
 import os
 import subprocess
@@ -12,7 +15,7 @@ from pyiem.util import exponential_backoff, logger
 LOG = logger()
 
 
-def need_to_run(valid, hr):
+def need_to_run(valid, hr) -> bool:
     """Check to see if we already have the radiation data we need"""
     gribfn = valid.strftime(
         "/mesonet/ARCHIVE/data/%Y/%m/%d/model/nam/%H/"
@@ -33,12 +36,12 @@ def need_to_run(valid, hr):
 def fetch(valid, hr):
     """Fetch the data for this timestamp"""
     uri = valid.strftime(
-        "https://nomads.ncep.noaa.gov/pub/data/nccf/com/nam/prod/"
+        "https://noaa-nam-pds.s3.amazonaws.com/"
         f"nam.%Y%m%d/nam.t%Hz.conusnest.hiresf0{hr}.tm00.grib2.idx"
     )
     req = exponential_backoff(requests.get, uri, timeout=30)
     if req is None or req.status_code != 200:
-        LOG.info("failed to get idx: %s", uri)
+        LOG.warning("failed to get idx: %s", uri)
         return
 
     offsets = []

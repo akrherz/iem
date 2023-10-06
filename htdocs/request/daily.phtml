@@ -15,7 +15,11 @@ $t->title = "Download Daily Summary Data";
 $network = isset($_REQUEST["network"]) ? xssafe($_REQUEST["network"]) : "IA_ASOS";
 
 $ar = Array();
-$rs = pg_query($mesosite, "SELECT id, name from networks ORDER by name ASC");
+$rs = pg_query(
+    $mesosite,
+    "SELECT id, name from networks where id !~* 'CLIMATE' "
+    ."ORDER by name ASC"
+);
 for ($i = 0; $row = pg_fetch_assoc($rs); $i++) {
     $ar[$row["id"]] = $row["name"];
 }

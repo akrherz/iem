@@ -1,6 +1,8 @@
 """Ensure that our RTMA files have all we need."""
 import os
+import subprocess
 import sys
+import tempfile
 
 import pygrib
 import requests
@@ -28,10 +30,6 @@ def main(argv):
     now = utc(int(argv[1]), int(argv[2]), int(argv[3]))
     for hr in range(24):
         now = now.replace(hour=hr)
-        basedir = now.strftime("/mesonet/ARCHIVE/data/%Y/%m/%d/model/rtma/%H/")
-        if not os.path.isdir(basedir):
-            LOG.info("Creating %s", basedir)
-            os.makedirs(basedir)
         fn = now.strftime(
             "/mesonet/ARCHIVE/data/%Y/%m/%d/"
             "model/rtma/%H/rtma.t%Hz.awp2p5f000.grib2"
@@ -48,7 +46,7 @@ def main(argv):
                     jobs.append(key)
             grbs.close()
         if jobs:
-            LOG.info("%s jobs %s", now, jobs)
+            LOG.warning("%s jobs %s", now, jobs)
         for key in jobs:
             url = (
                 "https://www.ncei.noaa.gov/data/national-digital-guidance-"
@@ -65,16 +63,25 @@ def main(argv):
                 fh.write(req.content)
             grbs = pygrib.open("tmp.grb")
             try:
-                grb = grbs.select(
+                grbs.select(
                     shortName=GRIB_XREF[key],
                     typeOfGeneratingProcess=0,
                 )[0]
-                with open(fn, "ab") as fh:
-                    fh.write(grb.tostring())
+                # Caution, we don't use -i here as this name is not unique
+                cmd = [
+                    "pqinsert",
+                    "-p",
+                    f"data u {now:%Y%m%d%H%M} unused model/rtma/{now:%H}/"
+                    f"rtma.t{now:%H}z.awp2p5f000.grib2 grib2",
+                    "tmp.grb",
+                ]
+                subprocess.call(cmd)
             except Exception:
                 LOG.warning("%s not found in %s", key, fn)
             grbs.close()
 
 
 if __name__ == "__main__":
-    main(sys.argv)
+    with tempfile.TemporaryDirectory() as _tmpdir:
+        os.chdir(_tmpdir)
+        main(sys.argv)

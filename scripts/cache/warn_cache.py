@@ -3,7 +3,7 @@
 Sadly, it takes the system 6-10 minutes to generate these online, so best to
 pre-generate them and allow folks to download.
 
-    This is a cron job from RUN_2AM.sh
+This is a cron job from RUN_2AM.sh
 """
 import datetime
 import sys

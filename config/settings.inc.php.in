@@ -6,4 +6,3 @@ $rootcgi='http://localhost/cgi-bin/iem';
 $fb_feature_key='';
 $fb_feature_secret='';
 $fb_feature_id='';
-?>

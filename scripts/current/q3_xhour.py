@@ -24,8 +24,7 @@ def doit(ts, hours):
     ts = ts.replace(minute=0, second=0, microsecond=0)
     now = ts - datetime.timedelta(hours=hours - 1)
     interval = datetime.timedelta(hours=1)
-    ets = datetime.datetime.utcnow()
-    ets = ets.replace(tzinfo=ZoneInfo("UTC"))
+    ets = utc()
     total = None
     while now < ets:
         gmt = now.astimezone(ZoneInfo("UTC"))

@@ -13,4 +13,3 @@ for prefix in $FNS; do
     pqinsert -i -p "plot a ${DSTAMP} bogus cpc/${prefix}.gif gif" /tmp/${prefix}_${DSTAMP}.gif
     rm -f /tmp/${prefix}_${DSTAMP}.gif >& /dev/null
 done
-exit 0

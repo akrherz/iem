@@ -49,10 +49,8 @@ LEVELS = [
 def run(ts, routes):
     """Run for a given UTC timestamp"""
     fn = ts.strftime(
-        (
-            "/mesonet/ARCHIVE/data/%Y/%m/%d/model/rtma/%H/"
-            "rtma.t%Hz.awp2p5f000.grib2"
-        )
+        "/mesonet/ARCHIVE/data/%Y/%m/%d/model/rtma/%H/"
+        "rtma.t%Hz.awp2p5f000.grib2"
     )
     if not os.path.isfile(fn):
         LOG.info("File Not Found: %s", fn)
