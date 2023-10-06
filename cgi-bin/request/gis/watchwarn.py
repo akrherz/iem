@@ -6,9 +6,8 @@ from io import BytesIO
 
 import fiona
 import pandas as pd
-from pandas.io.sql import read_sql
 from paste.request import parse_formvars
-from pyiem.util import get_dbconnc, utc
+from pyiem.util import get_dbconnc, get_sqlalchemy_conn, utc
 from shapely.geometry import mapping
 from shapely.wkb import loads
 
@@ -216,9 +215,10 @@ def build_sql(form):
     )
 
 
-def do_excel(pgconn, sql):
+def do_excel(sql):
     """Generate an Excel format response."""
-    df = read_sql(sql, pgconn, index_col=None)
+    with get_sqlalchemy_conn("postgis") as conn:
+        df = pd.read_sql(sql, conn, index_col=None)
     # Drop troublesome columns
     df = df.drop(
         [
@@ -261,7 +261,7 @@ def application(environ, start_response):
             ("Content-disposition", f"attachment; Filename={fn}.xlsx"),
         ]
         start_response("200 OK", headers)
-        return [do_excel(pgconn, sql)]
+        return [do_excel(sql)]
 
     cursor.execute(sql)
     if cursor.rowcount == 0:
