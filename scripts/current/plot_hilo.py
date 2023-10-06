@@ -4,7 +4,7 @@ import datetime
 import sys
 
 from pyiem.plot import MapPlot
-from pyiem.util import get_dbconn
+from pyiem.util import get_dbconnc
 
 
 def main(argv):
@@ -14,12 +14,11 @@ def main(argv):
     if len(argv) == 4:
         routes = "a"
         now = datetime.date(int(argv[1]), int(argv[2]), int(argv[3]))
-    pgconn = get_dbconn("iem")
-    icursor = pgconn.cursor()
+    pgconn, cursor = get_dbconnc("iem")
 
     # Compute normal from the climate database
     data = []
-    icursor.execute(
+    cursor.execute(
         f"""
     SELECT
       s.id as station, max_tmpf, min_tmpf,
@@ -32,10 +31,17 @@ def main(argv):
     """,
         (now,),
     )
-    for row in icursor:
+    for row in cursor:
         data.append(
-            dict(lat=row[4], lon=row[3], tmpf=row[1], dwpf=row[2], id=row[0])
+            {
+                "lat": row["lat"],
+                "lon": row["lon"],
+                "tmpf": row["max_tmpf"],
+                "dwpf": row["min_tmpf"],
+                "id": row["station"],
+            }
         )
+    pgconn.close()
 
     mp = MapPlot(
         title="Iowa High & Low Air Temperature",
@@ -44,10 +50,7 @@ def main(argv):
     )
     mp.plot_station(data)
     mp.drawcounties()
-    pqstr = "plot %s %s0000 bogus hilow.gif png" % (
-        routes,
-        now.strftime("%Y%m%d"),
-    )
+    pqstr = f"plot {routes} {now:%Y%m%d}0000 bogus hilow.gif png"
     mp.postprocess(view=False, pqstr=pqstr)
     mp.close()
 

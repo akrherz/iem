@@ -115,6 +115,8 @@ def plotter(fdict):
                     if source == "fz":
                         is_fwx = True
                     break
+            if ugcdf.empty:
+                raise NoDataFound("No UGCs found for this SPS, sorry.")
         bounds = ugcdf["simple_geom"].total_bounds
         population = ugcdf["pop"].sum()
     else:
@@ -122,7 +124,6 @@ def plotter(fdict):
         population = row["pop"]
     pp = "Missing" if population <= 0 else f"{population:,}"
     stextra = " for Polygon" if not row["geom"].is_empty else ""
-    # NOTE Can't do background=ne2 yet until we deal with pixelation issue
     mp = MapPlot(
         apctx=ctx,
         title=(

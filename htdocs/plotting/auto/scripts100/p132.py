@@ -47,6 +47,11 @@ METRICS = {
     "max_least_high": "Max Least High",
     "min_greatest_low": "Min Greatest Low",
 }
+TRANSLATION = {
+    "total_precip": "Precipitation",
+    "max_least_high": "Max High Temperature",
+    "min_greatest_low": "Min Low Temperature",
+}
 
 
 def get_description():
@@ -176,10 +181,12 @@ def plotter(fdict):
     ab = ctx["_nt"].sts[station]["archive_begin"]
     if ab is None:
         raise NoDataFound("Unknown station metadata.")
+    tt = f"{METRICS[varname]} [days={days}]"
+    if days == 1:
+        tt = f"Single Day {TRANSLATION[varname]}"
     title = (
         f"{ctx['_sname']}:: Top 10 Events\n"
-        f"{METRICS[varname]} [days={days}] ({MDICT[month]}) "
-        f"({ab.year}-{datetime.datetime.now().year})"
+        f"{tt} ({MDICT[month]}) ({ab.year}-{datetime.datetime.now().year})"
     )
 
     fig = figure(apctx=ctx, title=title)

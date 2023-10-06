@@ -27,6 +27,7 @@ def main():
     )
     for row in icursor:
         data.append(row)
+    pgconn.close()
 
     mp = MapPlot(
         axisbg="white",
