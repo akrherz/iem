@@ -168,6 +168,8 @@ def application(environ, start_response):
         bins = [
             float(v) for v in form.get("bins").split(",") if v.strip() != ""
         ]
+        # Ensure that the bins are in ascending order and unique
+        bins = sorted(list(set(bins)))
     res = windrose(
         station,
         database=dbname,
