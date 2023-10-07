@@ -209,8 +209,8 @@ def application(environ, start_response):
         yield b"ERROR: server over capacity, please try later"
         return
     try:
-        tzname = form.get("tz", "UTC")
-        if tzname == "etc/utc":
+        tzname = form.get("tz", "UTC").strip()
+        if tzname in ["etc/utc", ""]:
             tzname = "UTC"
         tzinfo = ZoneInfo(tzname)
     except ZoneInfoNotFoundError as exp:

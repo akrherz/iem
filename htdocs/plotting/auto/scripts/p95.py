@@ -176,7 +176,7 @@ def plotter(fdict):
 
     sm = plt.cm.ScalarMappable(norm, cmap)
     sm.set_array(zdata)
-    cb = fig.colorbar(sm, extend="both")
+    cb = fig.colorbar(sm, extend="both", ax=ax)
     cb.set_label("<-- El Nino :: SOI :: La Nina -->")
 
     ax.grid(True)
