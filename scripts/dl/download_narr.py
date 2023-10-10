@@ -2,7 +2,7 @@
 
 Appears that data for the previous month is available by the 9th of current mon
 
-    called from RUN_2AM.sh
+called from RUN_2AM.sh
 """
 import datetime
 import glob
@@ -21,7 +21,7 @@ TMP = "/mesonet/tmp"
 def process(tarfn):
     """Process this tarfn"""
     os.chdir(TMP)
-    subprocess.call(f"tar -xf {tarfn}", shell=True)
+    subprocess.call(["tar", "-xf", tarfn])
     for grbfn in glob.glob("merged_AWIP32*sfc"):
         grbs = pygrib.open(grbfn)
         # NB: this sfc file has two DSWRF fields, one is a 3 hour average and
