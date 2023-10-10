@@ -72,6 +72,8 @@ def get_context(fdict):
 
     plimit = "" if varname != "precip" else " and precip > 0.009 "
     comp = ">=" if mydir == "above" else "<"
+    if varname in ["high", "low"]:
+        level = int(level)
     with get_sqlalchemy_conn("coop") as conn:
         df = pd.read_sql(
             f"""

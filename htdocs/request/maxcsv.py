@@ -9,6 +9,7 @@ from zoneinfo import ZoneInfo
 
 # third party
 import ephem
+import numpy as np
 import pandas as pd
 import requests
 from paste.request import parse_formvars
@@ -82,7 +83,7 @@ def do_moonphase(lon, lat):
     pgconn.close()
     tz = ZoneInfo(tzid)
 
-    s = series.dt.to_pydatetime()
+    s = np.array(series)
     return pd.DataFrame(
         {
             "longitude": lon,
