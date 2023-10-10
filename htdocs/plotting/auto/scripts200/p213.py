@@ -106,7 +106,6 @@ def print_table(fig, df, varname):
 
 def plotter(fdict):
     """Go"""
-
     ctx = get_autoplot_context(fdict, get_description())
     station = ctx["zstation"]
     date = ctx["date"]

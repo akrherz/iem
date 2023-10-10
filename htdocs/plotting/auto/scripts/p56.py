@@ -139,11 +139,11 @@ def plotter(fdict):
     ax = fig.subplots(2, 1, sharex=True)
     gdf = df.groupby(ctx["how"]).count()
     xaxis = gdf.index.values
-    width = 1
+    width = 0.8
     xticks = []
     if ctx["how"] == "week":
         xaxis = gdf.index.values * 7
-        width = 7
+        width = 6.5
     if ctx["how"] in ["doy", "week"]:
         sts = datetime.datetime(2012, 1, 1)
         for i in range(1, 13):

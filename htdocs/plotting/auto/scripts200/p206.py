@@ -204,6 +204,8 @@ def plotter(fdict):
         df = df[df[varname] < ctx["above"]]
     if ctx.get("below"):
         df = df[df[varname] > ctx["below"]]
+    if df.empty:
+        raise NoDataFound("No data was found for your query")
     # with QC done, we compute ramps
     if ramp is None:
         ramp = np.linspace(
