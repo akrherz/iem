@@ -11,6 +11,9 @@ automated stations.
 
 <p>A quorum of at least 90% of the days within the choosen period must have
 data in order to be included within the plot.
+
+<p><strong>Updated 12 Oct 2023:</strong> The API for this autoplot was changed
+to use a more user friendly start and end date.
 """
 import datetime
 
@@ -65,6 +68,7 @@ def get_description():
     """Return a dict describing how to call this plotter"""
     desc = {"description": __doc__, "data": True}
     today = datetime.datetime.today() - datetime.timedelta(days=1)
+    sts = today - datetime.timedelta(days=14)
     desc["arguments"] = [
         dict(
             type="station",
@@ -73,19 +77,18 @@ def get_description():
             label="Select Station",
             network="IACLIMATE",
         ),
-        dict(
-            type="month",
-            name="month",
-            default=(today - datetime.timedelta(days=14)).month,
-            label="Start Month:",
-        ),
-        dict(
-            type="day",
-            name="day",
-            default=(today - datetime.timedelta(days=14)).day,
-            label="Start Day:",
-        ),
-        dict(type="int", name="days", default="14", label="Number of Days"),
+        {
+            "type": "sday",
+            "name": "sday",
+            "default": f"{sts:%m%d}",
+            "label": "Inclusive Start Date of the Year",
+        },
+        {
+            "type": "sday",
+            "name": "eday",
+            "default": f"{today:%m%d}",
+            "label": "Inclusise End Date of the Year",
+        },
         dict(
             optional=True,
             type="int",
@@ -156,11 +159,8 @@ def plotter(fdict):
     """Go"""
     ctx = get_autoplot_context(fdict, get_description())
     station = ctx["station"]
-    days = ctx["days"]
     gddbase = ctx["base"]
     gddceil = ctx["ceil"]
-    sts = datetime.date(2012, ctx["month"], ctx["day"])
-    ets = sts + datetime.timedelta(days=days - 1)
     varname = ctx["varname"]
     year = ctx["year"]
     threshold = ctx["thres"]
@@ -170,19 +170,17 @@ def plotter(fdict):
         "gddceil": gddceil,
         "t": threshold,
         "station": station,
+        "sday": ctx["sday"].strftime("%m%d"),
+        "eday": ctx["eday"].strftime("%m%d"),
     }
-    if stop is None:
-        sdays = []
-        for i in range(days):
-            ts = sts + datetime.timedelta(days=i)
-            sdays.append(ts.strftime("%m%d"))
-        daylimit = "sday = ANY(:sdays)"
-        params["sdays"] = sdays
-        doff = (days + 1) if ets.year != sts.year else 0
-    else:
-        daylimit = "sday >= :sday"
-        params["sday"] = sts.strftime("%m%d")
-        doff = 0
+    dtlimiter = "(sday >= :sday and sday <= :eday)"
+    doff = "year"
+    if ctx["eday"] < ctx["sday"]:
+        dtlimiter = "(sday >= :eday or sday <= :sday)"
+        doff = "case when sday < :sday then year - 1 else year end"
+    if stop is not None:
+        dtlimiter = "sday >= :sday"
+        doff = "year"
     culler = ""
     if varname.find("snow") > -1:
         culler = " and snow is not null"
@@ -197,12 +195,12 @@ def plotter(fdict):
         df = pd.read_sql(
             text(
                 f"""
-        SELECT extract(year from day - '{doff} days'::interval)::int as yr,
+        SELECT {doff} as yr,
         day, high, low, precip, snow, (high + low) / 2. as avg_temp,
         high - low as range,
         gddxx(:gddbase, :gddceil, high, low) as gdd, era5land_srad,
         merra_srad, narr_srad
-        from alldata WHERE station = :station and {daylimit}
+        from alldata WHERE station = :station and {dtlimiter}
         {culler} ORDER by day ASC
         """
             ),
@@ -289,25 +287,26 @@ def plotter(fdict):
     )
 
     fmter = intfmt if varname.find("days") > -1 else nice
-    yrfmter = intfmt if sts.year == ets.year else crossesjan1
+    yrfmter = intfmt if ctx["eday"] > ctx["sday"] else crossesjan1
     if stop is None:
         # require at least 90% coverage
-        df = df[df["count"] >= (days * 0.9)]
+        df = df[df["count"] >= (df["count"].max() * 0.9)]
     else:
         # Drop last row
         df = df.iloc[:-1]
         # drop any rows with a min date not equal to sts
-        df = df[df["min_day"].dt.strftime("%m%d") == sts.strftime("%m%d")]
+        mm = ctx["sday"].strftime("%m%d")
+        df = df[df["min_day"].dt.strftime("%m%d") == mm]
     # require values , not nan
     df2 = df[df[varname].notnull()].sort_values(varname, ascending=False)
 
     title = PDICT.get(varname).replace("(threshold)", str(threshold))
     title = (
         f"[{station}] {ctx['_nt'].sts[station]['name']}\n"
-        f"{title} from {sts:%-d %B} "
+        f"{title} from {ctx['sday']:%-d %B} "
     )
     if stop is None:
-        title += f"through {ets:%-d %B}"
+        title += f"through {ctx['eday']:%-d %B}"
     else:
         title += f"until first day after 1 July w/ Low < {stop}F"
     fig = figure(apctx=ctx, title=title)
@@ -406,4 +405,4 @@ def plotter(fdict):
 
 
 if __name__ == "__main__":
-    plotter({"varname": "snow", "thres": 0.01, "stop": 32})
+    plotter({})

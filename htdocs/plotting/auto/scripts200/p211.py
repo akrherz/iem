@@ -345,7 +345,7 @@ def plotter(fdict):
     for col in ["sts", "ets"]:
         ctx[col] = ctx[col].replace(tzinfo=timezone.utc)
     if (ctx["ets"] - ctx["sts"]) > timedelta(days=5):
-        raise ValueError("Too much data requested, only < 5 days supported.")
+        raise NoDataFound("Too much data requested, only < 5 days supported.")
     ctx["df"] = get_data(ctx)
 
     if ctx["ptype"] == "precip":

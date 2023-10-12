@@ -86,7 +86,7 @@ def plotter(fdict):
         hasdata = np.flipud(hasdata)
         datapts = np.sum(np.where(hasdata > 0, 1, 0))
         if datapts == 0:
-            raise ValueError("Application does not work for non-CONUS.")
+            raise NoDataFound("Application does not work for non-CONUS.")
 
         now = datetime.date(year, 1, 1)
         now += datetime.timedelta(days=period - 1)
