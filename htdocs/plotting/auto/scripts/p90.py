@@ -564,6 +564,7 @@ def do_ugc(ctx):
             with data as (
                 select distinct ugc, date(issue) from {table}
                 WHERE wfo = %s and phenomena = %s and significance = %s
+                and issue >= %s and issue < %s
             )
             SELECT ugc, count(*) from data GROUP by ugc
             """,
@@ -571,6 +572,8 @@ def do_ugc(ctx):
                     station if len(station) == 3 else station[1:],
                     phenomena,
                     significance,
+                    sdate,
+                    edate,
                 ),
             )
         else:
@@ -579,10 +582,11 @@ def do_ugc(ctx):
             with data as (
                 select distinct ugc, date(issue) from {table}
                 WHERE substr(ugc, 1, 2) = %s and phenomena = %s
-                and significance = %s)
+                and significance = %s
+                and issue >= %s and issue < %s)
             SELECT ugc, count(*) from data GROUP by ugc
             """,
-                (state, phenomena, significance),
+                (state, phenomena, significance, sdate, edate),
             )
         rows = []
         data = {}
