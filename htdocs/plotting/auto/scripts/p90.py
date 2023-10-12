@@ -16,6 +16,14 @@ concept of "days" is 24 hour periods.</td>
 </tr>
 
 <tr>
+<td>Days With 1+ Events</td>
+<td>Start/End Date Time</td>
+<td>For a central time zone calendar date, this totals the days with at least
+one <strong>issuance</strong> event.</td>
+</tr>
+
+
+<tr>
 <td>Last Year</td>
 <td>Start/End Date Time</td>
 <td>This plots the most recent year of issuance for a given warning type.
@@ -106,6 +114,7 @@ PDICT = {"cwa": "Plot by NWS Forecast Office", "state": "Plot by State"}
 PDICT2 = {
     "yearcount": "Count of Events for Given Year",
     "days": "Days Since Last Issuance",
+    "events": "Days with 1+ Issuances",
     "hour": "Most Frequent Issuance Hour of Day",
     "total": "Total Count between Start and End Date",
     "lastyear": "Year of Last Issuance",
@@ -248,6 +257,8 @@ def do_polygon(ctx):
     """polygon workflow"""
     pgconn = get_dbconn("postgis")
     varname = ctx["v"]
+    if varname == "events":
+        raise NoDataFound("Sorry, not implemented for polygon summaries.")
     station = ctx["station"][:4]
     state = ctx["state"]
     phenomena = ctx["phenomena"]
@@ -391,7 +402,7 @@ def do_polygon(ctx):
         ctx[
             "subtitle"
         ] = f" between {sdate:%d %b %Y %H%M} and {edate:%d %b %Y %H%M} UTC"
-    elif varname == "days":
+    elif varname in "days":
         ctx["title"] = PDICT2[varname]
         bins = np.linspace(
             max([df["days"].min() - 7, 0]), df["days"].max() + 7, 12, dtype="i"
@@ -543,6 +554,44 @@ def do_ugc(ctx):
             rows.append(dict(count=row[1], year=year, ugc=row[0]))
             data[row[0]] = row[1]
         ctx["title"] = f"Count for {year}"
+        ctx["lblformat"] = "%.0f"
+        datavar = "count"
+    elif varname == "events":
+        table = f"warnings_{year}"
+        if t == "cwa":
+            cursor.execute(
+                f"""
+            with data as (
+                select distinct ugc, date(issue) from {table}
+                WHERE wfo = %s and phenomena = %s and significance = %s
+            )
+            SELECT ugc, count(*) from data GROUP by ugc
+            """,
+                (
+                    station if len(station) == 3 else station[1:],
+                    phenomena,
+                    significance,
+                ),
+            )
+        else:
+            cursor.execute(
+                f"""
+            with data as (
+                select distinct ugc, date(issue) from {table}
+                WHERE substr(ugc, 1, 2) = %s and phenomena = %s
+                and significance = %s)
+            SELECT ugc, count(*) from data GROUP by ugc
+            """,
+                (state, phenomena, significance),
+            )
+        rows = []
+        data = {}
+        for row in cursor:
+            rows.append(dict(count=row[1], year=year, ugc=row[0]))
+            data[row[0]] = row[1]
+        ctx[
+            "title"
+        ] = f"{sdate:%-d %b %Y}-{edate:%-d %b %Y} Days with 1+ Events of"
         ctx["lblformat"] = "%.0f"
         datavar = "count"
     elif varname == "total":
