@@ -176,7 +176,7 @@ def plotter(fdict):
         )
         df = df[pd.notna(df["feel"])]
     if df.empty:
-        raise ValueError("No Data Found")
+        raise NoDataFound("No Data Found")
     # Data QC, cough
     if ctx.get("above"):
         df = df[df[varname] < ctx["above"]]
