@@ -557,12 +557,11 @@ def do_ugc(ctx):
         ctx["lblformat"] = "%.0f"
         datavar = "count"
     elif varname == "events":
-        table = f"warnings_{year}"
         if t == "cwa":
             cursor.execute(
-                f"""
+                """
             with data as (
-                select distinct ugc, date(issue) from {table}
+                select distinct ugc, date(issue) from warnings
                 WHERE wfo = %s and phenomena = %s and significance = %s
                 and issue >= %s and issue < %s
             )
@@ -578,9 +577,9 @@ def do_ugc(ctx):
             )
         else:
             cursor.execute(
-                f"""
+                """
             with data as (
-                select distinct ugc, date(issue) from {table}
+                select distinct ugc, date(issue) from warnings
                 WHERE substr(ugc, 1, 2) = %s and phenomena = %s
                 and significance = %s
                 and issue >= %s and issue < %s)
