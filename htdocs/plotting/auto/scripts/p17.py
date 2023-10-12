@@ -11,6 +11,7 @@ import numpy as np
 import pandas as pd
 import requests
 from matplotlib.patches import Rectangle
+from pyiem.exceptions import NoDataFound
 from pyiem.plot import figure_axes
 from pyiem.util import (
     exponential_backoff,
@@ -80,7 +81,7 @@ def common(ctx):
         timeout=15,
     )
     if req is None or req.status_code != 200:
-        raise ValueError("Unable to fetch data from API service.")
+        raise NoDataFound("Unable to fetch data from API service.")
     jsn = req.json()
     df = pd.DataFrame(jsn["data"])
     if not df.empty:

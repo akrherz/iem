@@ -33,8 +33,8 @@ def main():
         # Geometry is [[pt]] and we only have single segments
         path = MultiLineString([LineString(feat["geometry"]["paths"][0])])
         # segid is defined by the database insert
-        major = props["ROUTE_NAME"]
-        minor = props["NAMEID"].split(":", 1)[1]
+        major = props["ROUTE_NAME"].replace("US 61 Business", "US 61")
+        minor = props["NAMEID"].split("--", 1)[1]
         (typ, num) = major.replace("-", " ").split()
         int1 = num if typ == "I" else None
         us1 = num if typ == "US" else None
@@ -52,7 +52,7 @@ def main():
             f"""
             INSERT into roads_base (major, minor, us1, st1, int1, type,
             longname, geom, idot_id, archive_begin, archive_end)
-            VALUES (%s, %s, %s, %s, %s, %s, %s, {geom}
+            VALUES (%s, %s, %s, %s, %s, %s, %s, {geom},
             %s, %s, %s) RETURNING segid
         """,
             (
@@ -95,7 +95,7 @@ def main():
         cursor.execute(
             """
             INSERT into roads_current(segid, valid, cond_code)
-            VALUES (%s, %s, 85)
+            VALUES (%s, %s, 0)
         """,
             (segid, archive_begin),
         )

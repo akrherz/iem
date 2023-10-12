@@ -16,6 +16,7 @@ from zoneinfo import ZoneInfo
 import geopandas as gpd
 import matplotlib.colors as mpcolors
 import numpy as np
+from pyiem.exceptions import NoDataFound
 from pyiem.plot import MapPlot, get_cmap, pretty_bins
 from pyiem.reference import EPSG, Z_CLIP2, state_bounds
 from pyiem.util import get_autoplot_context, get_sqlalchemy_conn, utc
@@ -62,7 +63,7 @@ def plotter(fdict):
     sts = ctx["sts"].replace(tzinfo=ZoneInfo("UTC"))
     ets = ctx["ets"].replace(tzinfo=ZoneInfo("UTC"))
     if (ets - sts).total_seconds() >= (32 * 86400):
-        raise ValueError("Must pick period less than 32 days long")
+        raise NoDataFound("Must pick period less than 32 days long")
 
     bnds = state_bounds[state]
     with get_sqlalchemy_conn("nldn") as conn:

@@ -394,17 +394,18 @@ def plotter(fdict):
     ax.axhline(ctx["avgv"], lw=2, color="k", zorder=2, label=lbl)
     lbl = "1981-2010: " + precision % (ctx["a1981_2010"],)
     ax.axhline(ctx["a1981_2010"], lw=2, color="brown", zorder=2, label=lbl)
-    ax.plot(
-        ctx["df"].index.values,
-        ctx["tavg"],
-        lw=1.5,
-        color="g",
-        zorder=4,
-        label="Trailing 30yr",
-    )
-    ax.plot(
-        ctx["df"].index.values, ctx["tavg"], lw=3, color="yellow", zorder=3
-    )
+    if len(ctx["tavg"]) > 30:
+        ax.plot(
+            ctx["df"].index.values,
+            ctx["tavg"],
+            lw=1.5,
+            color="g",
+            zorder=4,
+            label="Trailing 30yr",
+        )
+        ax.plot(
+            ctx["df"].index.values, ctx["tavg"], lw=3, color="yellow", zorder=3
+        )
     ax.set_xlim(
         ctx["df"].index.min() - 1,
         ctx["df"].index.max() + (11 if ctx["decadal"] else 1),
