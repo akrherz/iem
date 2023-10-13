@@ -22,22 +22,22 @@ $bogus = 0;
 $y1select = yearSelect2(2000, date("Y"), "year1");
 $m1select = monthSelect($bogus, "month1"); 
 $d1select = daySelect2("1", "day1"); 
-$h1select = gmtHourSelect($bogus, "hour1"); 
+$h1select = hourSelect($bogus, "hour1"); 
 $min1select = minuteSelect($bogus, "minute1"); 
 
 $y2select = yearSelect2(2000, date("Y"), "year2");
 $m2select = monthSelect(date("m"), "month2");
 $d2select = daySelect2(date("d"), "day2");
-$h2select = gmtHourSelect($bogus, "hour2");
+$h2select = hourSelect($bogus, "hour2");
 $min2select = minuteSelect($bogus, "minute2");
 
 $t->headextra = <<<EOM
 <style type="text/css">
-        #map {
-            width: 100%;
-            height: 450px;
-            border: 2px solid black;
-        }
+#map {
+    width: 100%;
+    height: 450px;
+    border: 2px solid black;
+}
 </style>
 EOM;
 $t->content = <<<EOF
@@ -56,7 +56,12 @@ archive is available up until:
 a different interface to download the <a href="/request/download.phtml">routine hourly</a>
 observations from this network and for sites over the entire globe.</p>
 
-<form method="GET" action="1min_dl.php" name="dl">
+<p><strong>Updated 12 Oct 2023:</strong> The backend for this portal has been
+updated and a number of bugs / undefined behaviour has been fixed.  My appologies
+if you had automation that was reliant on these quirks.  Missing data is now
+represented by "M".</p>
+
+<form method="GET" action="/cgi-bin/request/asos1min.py" name="dl">
 
 <div class="row">
 <div class="col-md-6">
@@ -64,7 +69,7 @@ observations from this network and for sites over the entire globe.</p>
 <p><h3>1. Select Station:</h3><br>
 <i>Select One or More or All stations in the network.</i><br>
 <br />
-<div id="iemss" data-network="ASOS1MIN" data-name="station[]" data-supports-all="0"></div>
+<div id="iemss" data-network="ASOS1MIN" data-name="station" data-supports-all="0"></div>
 
 </div>
 <div class="col-md-6">
@@ -73,14 +78,16 @@ observations from this network and for sites over the entire globe.</p>
 <i>The timestamps used in the downloaded files will be set in the
 timezone you specify.</i>
 <SELECT name="tz">
-	<option value="UTC">UTC Time</option>
-	<option value="CST6CDT">Central Standard/Daylight Time</option>
+    <option value="UTC">UTC Time</option>
+    <option value="America/New_York">Eastern Time</option>
+    <option value="America/Chicago">Central Time</option>
+    <option value="America/Denver">Mountain Time</option>
+    <option value="America/Los_Angeles">Pacific Time</option>
+    <option value="America/Anchorage">Alaska/Anchorage Time</option>
 </SELECT>
 
 <h3>3. Select Start/End Time:</h3><br>
-<i>If you select "Central Standard/Daylight Time" in #2 above, then these
-times you select for start and end time will be in CST/CDT as well. Otherwise,
-the default is UTC.</i>
+<i>This timestamp is in the timezone you selected above.</i>
 <table class="table table-condensed">
 <thead>
   <tr>
@@ -105,37 +112,37 @@ the default is UTC.</i>
 </table>
 
 <h3>4. Select Variables:</h3><br>
-<select size=5 name="vars[]" MULTIPLE>
-  <option value="tmpf">Air Temperature [F]
-  <option value="dwpf">Dew Point Temperature [F]
-  <option value="sknt">Wind Speed [knots]
-  <option value="drct">Wind Direction
-  <option value="gust_drct">5 sec gust Wind Direction
-  <option value="gust_sknt">5 sec gust Wind Speed [knots]
-  <option value="vis1_coeff">Visibility 1 Coefficient
-  <option value="vis1_nd">Visibility 1 Night/Day
-  <option value="vis2_coeff">Visibility 2 Coefficient
-  <option value="vis2_nd">Visibility 2 Night/Day
-  <option value="vis3_coeff">Visibility 3 Coefficient
-  <option value="vis3_nd">Visibility 3 Night/Day
-  <option value="ptype">Precip Type Code
-  <option value="precip">1 minute precip [inches]
-  <option value="pres1">Sensor 1 Station Pressure [inches]
-  <option value="pres2">Sensor 2 Station Pressure [inches]
-  <option value="pres3">Sensor 3 Station Pressure [inches]
+<select size=5 name="vars" MULTIPLE>
+  <option value="tmpf">Air Temperature [F]</option>
+  <option value="dwpf">Dew Point Temperature [F]</option>
+  <option value="sknt">Wind Speed [knots]</option>
+  <option value="drct">Wind Direction</option>
+  <option value="gust_drct">5 sec gust Wind Direction</option>
+  <option value="gust_sknt">5 sec gust Wind Speed [knots]</option>
+  <option value="vis1_coeff">Visibility 1 Coefficient</option>
+  <option value="vis1_nd">Visibility 1 Night/Day</option>
+  <option value="vis2_coeff">Visibility 2 Coefficient</option>
+  <option value="vis2_nd">Visibility 2 Night/Day</option>
+  <option value="vis3_coeff">Visibility 3 Coefficient</option>
+  <option value="vis3_nd">Visibility 3 Night/Day</option>
+  <option value="ptype">Precip Type Code</option>
+  <option value="precip">1 minute precip [inches]</option>
+  <option value="pres1">Sensor 1 Station Pressure [inches]</option>
+  <option value="pres2">Sensor 2 Station Pressure [inches]</option>
+  <option value="pres3">Sensor 3 Station Pressure [inches]</option>
 </select>
 
 <h3>5. Data Sampling?</h3><br>
 <i>Data is potentially available every minute, but you don't have to download
 it at that frequency. This setting <b>does not bin</b> the values, but rather
 filters based on your interval of choice.</i>
-  <select name="sample">
-    <option value="1min">Every Minute
-    <option value="5min">Every 5 Minutes
-    <option value="10min">Every 10 Minutes
-    <option value="20min">Every 20 Minutes
-    <option value="1hour">Every Hour
-  </select>
+<select name="sample">
+<option value="1min">Every Minute
+<option value="5min">Every 5 Minutes
+<option value="10min">Every 10 Minutes
+<option value="20min">Every 20 Minutes
+<option value="1hour">Every Hour
+</select>
 
 <h3>6. How to view?</h3>
 
@@ -149,12 +156,11 @@ Please try <a href="/plotting/auto/?q=211">Autoplot 211</a> instead.</p>
 
 <h3>7. Data Delimitation:</h3><br>
 How shall the output values be seperated?
-<br><select name="delim">
-    <option value="comma">Comma
-    <option value="space">Space
-    <option value="tab">Tab
-   </select>
-
+<br>
+<select name="delim">
+    <option value="comma">Comma</option>
+    <option value="tab">Tab</option>
+</select>
 
 <h3>8. Include Station Latitude & Longitude values?</h3>
 <img src="/images/gisready.png"><br>
@@ -164,7 +170,8 @@ How shall the output values be seperated?
    <option value="yes">Yes
  </select>
 </div>
-<p><h3 class="subtitle">Submit Form:</h3><br>
+
+<p><h3>Submit Form:</h3><br>
 <input type="submit" value="Process Data Request">
 <input type="reset">
 

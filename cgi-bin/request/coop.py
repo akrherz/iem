@@ -116,7 +116,7 @@ def do_apsim(cursor, ctx):
             (ctx["stations"][0], sts, ets),
         )
         for row in cursor:
-            ts = row[0].replace(year=thisyear)
+            ts = row["day"].replace(year=thisyear)
             extra[ts] = row
             extra[ts]["doy"] = int(ts.strftime("%j"))
         if febtest not in extra:
@@ -354,7 +354,7 @@ def do_daycent(cursor, ctx):
             (ctx["stations"][0], sts, ets),
         )
         for row in cursor:
-            ts = row[0].replace(year=thisyear)
+            ts = row["day"].replace(year=thisyear)
             extra[ts] = row
         if febtest not in extra:
             feb28 = datetime.date(thisyear, 2, 28)
