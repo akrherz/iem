@@ -2,10 +2,10 @@
 import datetime
 from io import StringIO
 
-from paste.request import parse_formvars
 from pyiem.network import Table as NetworkTable
 from pyiem.templates.iem import TEMPLATE
 from pyiem.util import get_dbconn
+from pyiem.webutil import iemapp
 
 nt = NetworkTable("IACLIMATE")
 
@@ -153,6 +153,7 @@ def now_get_day(sio, city, ts):
     sio.write("</div>")
 
 
+@iemapp()
 def application(environ, start_response):
     """Go Main Go."""
     sio = StringIO()
@@ -160,12 +161,11 @@ def application(environ, start_response):
     start_response("200 OK", [("Content-type", "text/html")])
     ctx = {"title": "Weather on Your Birthday"}
 
-    form = parse_formvars(environ)
     try:
-        year = form.get("year")
-        month = form.get("month")
-        day = form.get("day")
-        city = form.get("city").upper()
+        year = environ.get("year")
+        month = environ.get("month")
+        day = environ.get("day")
+        city = environ.get("city").upper()
     except Exception:
         sio.write("<P><P><B>Invalid Post:</B><BR>")
         sio.write(

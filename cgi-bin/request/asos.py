@@ -7,9 +7,9 @@ from io import StringIO
 from zoneinfo import ZoneInfo
 from zoneinfo._common import ZoneInfoNotFoundError
 
-from paste.request import parse_formvars
 from pyiem.network import Table as NetworkTable
 from pyiem.util import get_dbconn, utc
+from pyiem.webutil import iemapp
 
 NULLS = {"M": "M", "null": "null", "empty": ""}
 TRACE_OPTS = {"T": "T", "null": "null", "empty": "", "0.0001": "0.0001"}
@@ -123,7 +123,9 @@ def get_stations(form):
             nt = NetworkTable(form.get("network"), only_online=False)
             return list(nt.sts.keys())
         return []
-    stations = form.getall("station")
+    stations = form.get("station")
+    if not isinstance(stations, list):
+        stations = [stations]
     if not stations:
         return []
     # allow folks to specify the ICAO codes for K*** sites
@@ -165,7 +167,9 @@ def get_time_bounds(form, tzinfo):
 
 def build_querycols(form):
     """Which database columns correspond to our query."""
-    req = form.getall("data")
+    req = form.get("data")
+    if not isinstance(req, list):
+        req = [req]
     if not req or "all" in req:
         return AVAILABLE
     res = []
@@ -195,13 +199,13 @@ def toobusy(pgconn, name):
     return over
 
 
+@iemapp()
 def application(environ, start_response):
     """Go main Go"""
     if environ["REQUEST_METHOD"] == "OPTIONS":
         start_response("400 Bad Request", [("Content-type", "text/plain")])
         yield b"Allow: GET,POST,OPTIONS"
         return
-    form = parse_formvars(environ)
     if overloaded():
         start_response(
             "503 Service Unavailable", [("Content-type", "text/plain")]
@@ -209,7 +213,7 @@ def application(environ, start_response):
         yield b"ERROR: server over capacity, please try later"
         return
     try:
-        tzname = form.get("tz", "UTC").strip()
+        tzname = environ.get("tz", "UTC").strip()
         if tzname in ["etc/utc", ""]:
             tzname = "UTC"
         tzinfo = ZoneInfo(tzname)
@@ -231,15 +235,18 @@ def application(environ, start_response):
     acursor.itersize = 2000
 
     # Save direct to disk or view in browser
-    direct = form.get("direct", "no") == "yes"
-    report_types = [int(i) for i in form.getall("report_type")]
-    sts, ets = get_time_bounds(form, tzinfo)
+    direct = environ.get("direct", "no") == "yes"
+    report_types = environ.get("report_type", [])
+    if not isinstance(report_types, list):
+        report_types = [report_types]
+    report_types = [int(i) for i in report_types]
+    sts, ets = get_time_bounds(environ, tzinfo)
     if sts is None:
         pgconn.close()
         start_response("400 Bad Request", [("Content-type", "text/plain")])
         yield b"Invalid times provided."
         return
-    stations = get_stations(form)
+    stations = get_stations(environ)
     if not stations:
         # We are asking for all-data.  We limit the amount of data returned to
         # one day or less
@@ -248,7 +255,7 @@ def application(environ, start_response):
             start_response("400 Bad Request", [("Content-type", "text/plain")])
             yield b"When requesting all-stations, must be less than 24 hours."
             return
-    delim = form.get("format", "onlycomma")
+    delim = environ.get("format", "onlycomma")
     headers = []
     if direct:
         headers.append(("Content-type", "application/octet-stream"))
@@ -263,19 +270,19 @@ def application(environ, start_response):
     start_response("200 OK", headers)
 
     # How should null values be represented
-    missing = NULLS.get(form.get("missing"), "M")
+    missing = NULLS.get(environ.get("missing"), "M")
     # How should trace values be represented
-    trace = TRACE_OPTS.get(form.get("trace"), "0.0001")
+    trace = TRACE_OPTS.get(environ.get("trace"), "0.0001")
 
-    querycols = build_querycols(form)
+    querycols = build_querycols(environ)
 
     if delim in ["tdf", "onlytdf"]:
         rD = "\t"
     else:
         rD = ","
 
-    gisextra = form.get("latlon", "no") == "yes"
-    elev_extra = form.get("elev", "no") == "yes"
+    gisextra = environ.get("latlon", "no") == "yes"
+    elev_extra = environ.get("elev", "no") == "yes"
     table = "alldata"
     metalimiter = ""
     colextra = "0 as lon, 0 as lat, 0 as elev, "
@@ -293,7 +300,7 @@ def application(environ, start_response):
     elif len(report_types) > 1:
         rlimiter = f" and report_type in {tuple(report_types)}"
     sqlcols = ",".join(querycols)
-    sorder = "DESC" if "hours" in form else "ASC"
+    sorder = "DESC" if "hours" in environ else "ASC"
     if stations:
         acursor.execute(
             f"SELECT station, valid, {colextra} {sqlcols} from {table} "
@@ -320,7 +327,7 @@ def application(environ, start_response):
             )
         )
         sio.write(f"#DEBUG: Entries Found -> {acursor.rowcount}\n")
-    nometa = "nometa" in form
+    nometa = "nometa" in environ
     if not nometa:
         sio.write(f"station{rD}valid{rD}")
         if gisextra:

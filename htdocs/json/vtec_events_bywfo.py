@@ -4,8 +4,8 @@ import json
 from io import BytesIO, StringIO
 
 import pandas as pd
-from paste.request import parse_formvars
 from pyiem.util import get_sqlalchemy_conn, html_escape
+from pyiem.webutil import iemapp
 from sqlalchemy import text
 
 EXL = "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"
@@ -92,20 +92,20 @@ def as_json(df):
     return json.dumps(res)
 
 
+@iemapp()
 def application(environ, start_response):
     """Answer request."""
-    fields = parse_formvars(environ)
-    wfo = fields.get("wfo", "DMX")[:3].upper()
+    wfo = environ.get("wfo", "DMX")[:3].upper()
     start = datetime.datetime.strptime(
-        fields.get("start", "2022-05-01T12:00")[:16], "%Y-%m-%dT%H:%M"
+        environ.get("start", "2022-05-01T12:00")[:16], "%Y-%m-%dT%H:%M"
     ).replace(tzinfo=datetime.timezone.utc)
     end = datetime.datetime.strptime(
-        fields.get("end", "2022-05-02T12:00")[:16], "%Y-%m-%dT%H:%M"
+        environ.get("end", "2022-05-02T12:00")[:16], "%Y-%m-%dT%H:%M"
     ).replace(tzinfo=datetime.timezone.utc)
-    phenomena = fields.get("phenomena")
-    significance = fields.get("significance")
-    cb = fields.get("callback", None)
-    fmt = fields.get("fmt", "json")
+    phenomena = environ.get("phenomena")
+    significance = environ.get("significance")
+    cb = environ.get("callback", None)
+    fmt = environ.get("fmt", "json")
 
     df = get_df(wfo, start, end, phenomena, significance)
     if fmt == "xlsx":

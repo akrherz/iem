@@ -5,8 +5,8 @@ import datetime
 import json
 import os
 
-from paste.request import parse_formvars
 from pyiem.util import html_escape
+from pyiem.webutil import iemapp
 from pymemcache.client import Client
 
 
@@ -45,16 +45,16 @@ def run():
     return json.dumps(res)
 
 
+@iemapp()
 def application(environ, start_response):
     """Answer request."""
-    fields = parse_formvars(environ)
     if environ["REQUEST_METHOD"] not in ["GET", "POST"]:
         headers = [("Content-type", "text/plain")]
         start_response("500 Internal Server Error", headers)
         data = "Invalid Request"
         return [data.encode("ascii")]
 
-    cb = fields.get("callback")
+    cb = environ.get("callback")
 
     mckey = "/json/tms.json"
     mc = Client("iem-memcached:11211")

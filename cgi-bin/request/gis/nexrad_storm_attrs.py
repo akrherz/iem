@@ -7,37 +7,19 @@ from io import BytesIO, StringIO
 
 # import cgitb
 import shapefile
-from paste.request import parse_formvars
-from pyiem.util import get_dbconn, utc
+from pyiem.util import get_dbconn
+from pyiem.webutil import iemapp
 
 
 def get_context(environ):
     """Figure out the CGI variables passed to this script"""
-    form = parse_formvars(environ)
-    if "year" in form:
-        year1 = form.get("year")
-        year2 = year1
-    else:
-        year1 = form.get("year1")
-        year2 = form.get("year2")
-    month1 = form.get("month1")
-    month2 = form.get("month2")
-    day1 = form.get("day1")
-    day2 = form.get("day2")
-    hour1 = form.get("hour1")
-    hour2 = form.get("hour2")
-    minute1 = form.get("minute1")
-    minute2 = form.get("minute2")
+    radar = environ.get("radar", [])
+    if isinstance(radar, str):
+        radar = [radar]
 
-    sts = utc(int(year1), int(month1), int(day1), int(hour1), int(minute1))
-    ets = utc(int(year2), int(month2), int(day2), int(hour2), int(minute2))
-    if ets < sts:
-        sts, ets = ets, sts
-    radar = form.getall("radar")
+    fmt = environ.get("fmt", "shp")
 
-    fmt = form.get("fmt", "shp")
-
-    return dict(sts=sts, ets=ets, radar=radar, fmt=fmt)
+    return dict(sts=environ["sts"], ets=environ["ets"], radar=radar, fmt=fmt)
 
 
 def run(ctx, start_response):
@@ -146,6 +128,7 @@ def run(ctx, start_response):
     return zio.getvalue()
 
 
+@iemapp(default_tz="UTC")
 def application(environ, start_response):
     """Do something fun!"""
     ctx = get_context(environ)

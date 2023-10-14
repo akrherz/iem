@@ -4,9 +4,9 @@ import json
 from io import BytesIO, StringIO
 
 import pandas as pd
-from paste.request import parse_formvars
 from pyiem.nws.vtec import VTEC_PHENOMENA, VTEC_SIGNIFICANCE, get_ps_string
 from pyiem.util import get_sqlalchemy_conn, html_escape
+from pyiem.webutil import iemapp
 
 EXL = "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"
 
@@ -88,19 +88,19 @@ def to_json(df):
     return json.dumps(res)
 
 
+@iemapp()
 def application(environ, start_response):
     """Answer request."""
-    fields = parse_formvars(environ)
-    lat = float(fields.get("lat", 42.5))
-    lon = float(fields.get("lon", -95.5))
+    lat = float(environ.get("lat", 42.5))
+    lon = float(environ.get("lon", -95.5))
     sdate = datetime.datetime.strptime(
-        fields.get("sdate", "1986/1/1"), "%Y/%m/%d"
+        environ.get("sdate", "1986/1/1"), "%Y/%m/%d"
     )
     edate = datetime.datetime.strptime(
-        fields.get("edate", "2099/1/1"), "%Y/%m/%d"
+        environ.get("edate", "2099/1/1"), "%Y/%m/%d"
     )
-    cb = fields.get("callback", None)
-    fmt = fields.get("fmt", "json")
+    cb = environ.get("callback", None)
+    fmt = environ.get("fmt", "json")
 
     df = get_df(lon, lat, sdate, edate)
     if fmt == "xlsx":

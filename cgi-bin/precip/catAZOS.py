@@ -4,9 +4,9 @@ IEM_APPID = 79
 import datetime
 from io import StringIO
 
-from paste.request import parse_formvars
 from pyiem.network import Table as NetworkTable
 from pyiem.util import get_dbconnc
+from pyiem.webutil import iemapp
 
 nt = NetworkTable("IA_ASOS")
 
@@ -32,9 +32,8 @@ Hourly Precipitation [IA_ASOS]
 """
     )
     sio.write('<h3 align="center">Hourly Precip [inches] Grid</h3>')
-    form = parse_formvars(environ)
     try:
-        postDate = form.get("date")
+        postDate = environ.get("date")
         myTime = datetime.datetime.strptime(postDate, "%Y-%m-%d")
     except Exception:
         myTime = datetime.datetime.now()
@@ -129,6 +128,7 @@ def loadstations():
         totp[station] = 0
 
 
+@iemapp()
 def application(environ, start_response):
     """Go Main Go"""
     sio = StringIO()

@@ -5,9 +5,9 @@ import json
 import os
 
 import numpy as np
-from paste.request import parse_formvars
 from pyiem import iemre
 from pyiem.util import html_escape, mm2inch, ncopen, utc
+from pyiem.webutil import iemapp
 from pymemcache.client import Client
 
 
@@ -18,11 +18,11 @@ def myrounder(val, precision):
     return round(val, precision)
 
 
-def dowork(fields):
+def dowork(environ):
     """Do work!"""
-    date = datetime.datetime.strptime(fields.get("valid"), "%Y-%m-%d")
-    lat = float(fields.get("lat"))
-    lon = float(fields.get("lon"))
+    date = datetime.datetime.strptime(environ.get("valid"), "%Y-%m-%d")
+    lat = float(environ.get("lat"))
+    lon = float(environ.get("lon"))
 
     # We want data for the UTC date and timestamps are in the rears, so from
     # 1z through 1z
@@ -58,19 +58,19 @@ def dowork(fields):
     return json.dumps(res)
 
 
+@iemapp()
 def application(environ, start_response):
     """Answer request."""
-    fields = parse_formvars(environ)
-    lat = float(fields.get("lat"))
-    lon = float(fields.get("lon"))
-    valid = fields.get("valid")
-    cb = fields.get("callback", None)
+    lat = float(environ.get("lat"))
+    lon = float(environ.get("lon"))
+    valid = environ.get("valid")
+    cb = environ.get("callback", None)
 
     mckey = "/json/stage4/%.2f/%.2f/%s?callback=%s" % (lon, lat, valid, cb)
     mc = Client("iem-memcached:11211")
     res = mc.get(mckey)
     if not res:
-        res = dowork(fields)
+        res = dowork(environ)
         mc.set(mckey, res, 3600 * 12)
     else:
         res = res.decode("utf-8")

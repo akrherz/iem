@@ -255,7 +255,6 @@ def get_description():
 
 def do_polygon(ctx):
     """polygon workflow"""
-    pgconn = get_dbconn("postgis")
     varname = ctx["v"]
     if varname == "events":
         raise NoDataFound("Sorry, not implemented for polygon summaries.")
@@ -330,27 +329,28 @@ def do_polygon(ctx):
         west,
         south,
     )
-    df = read_postgis(
-        f"""
-    SELECT ST_Forcerhr(ST_Buffer(geom, 0.0005)) as geom, issue, expire,
-    extract(epoch from %s::timestamptz - issue) / 86400. as days
-    from sbw where {wfolimiter} {daylimiter}
-    phenomena = %s and status = 'NEW' and significance = %s
-    and ST_Within(geom, ST_GeomFromEWKT(%s)) and ST_IsValid(geom)
-    and issue >= %s and issue <= %s ORDER by issue ASC
-    """,
-        pgconn,
-        params=(
-            ets,
-            phenomena,
-            significance,
-            giswkt,
-            sts,
-            ets,
-        ),
-        geom_col="geom",
-        index_col=None,
-    )
+    with get_sqlalchemy_conn("postgis") as conn:
+        df = read_postgis(
+            f"""
+        SELECT ST_Forcerhr(ST_Buffer(geom, 0.0005)) as geom, issue, expire,
+        extract(epoch from %s::timestamptz - issue) / 86400. as days
+        from sbw where {wfolimiter} {daylimiter}
+        phenomena = %s and status = 'NEW' and significance = %s
+        and ST_Within(geom, ST_GeomFromEWKT(%s)) and ST_IsValid(geom)
+        and issue >= %s and issue <= %s ORDER by issue ASC
+        """,
+            conn,
+            params=(
+                ets,
+                phenomena,
+                significance,
+                giswkt,
+                sts,
+                ets,
+            ),
+            geom_col="geom",
+            index_col=None,
+        )
     if df.empty:
         raise NoDataFound("No data found for query.")
     zs = zonal_stats(

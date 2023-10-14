@@ -6,8 +6,8 @@ import glob
 import json
 import os
 
-from paste.request import parse_formvars
 from pyiem.util import html_escape
+from pyiem.webutil import iemapp
 
 BIRDS = ["EAST", "WEST"]
 PRODUCTS = ["WV", "VIS", "IR"]
@@ -70,17 +70,17 @@ def list_files(fields):
     return root
 
 
+@iemapp()
 def application(environ, start_response):
     """Answer request."""
-    fields = parse_formvars(environ)
-    operation = fields.get("operation", "list")
-    callback = fields.get("callback")
+    operation = environ.get("operation", "list")
+    callback = environ.get("callback")
     headers = []
     data = ""
     if callback is not None:
         data = f"{html_escape(callback)}("
     if operation == "list":
-        data += json.dumps(list_files(fields))
+        data += json.dumps(list_files(environ))
     if callback is not None:
         data += ")"
     headers = [("Content-type", "application/json")]

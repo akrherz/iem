@@ -1,13 +1,12 @@
 """JSON service emitting observation history for a given date"""
 import datetime
 import json
-import os
 
+import pandas as pd
 from dateutil.parser import parse
-from pandas.io.sql import read_sql
-from paste.request import parse_formvars
 from pyiem.reference import IEMVARS
 from pyiem.util import get_sqlalchemy_conn, html_escape
+from pyiem.webutil import iemapp
 from pymemcache.client import Client
 
 
@@ -16,7 +15,7 @@ def do_today(table, station, network, date):
     cols = ["local_valid", "utc_valid", "tmpf", "sknt", "gust", "drct"]
     table["fields"] = [IEMVARS[col] for col in cols]
     with get_sqlalchemy_conn("iem") as conn:
-        df = read_sql(
+        df = pd.read_sql(
             """
             select
             to_char(valid at time zone tzname,
@@ -39,7 +38,7 @@ def do_asos(table, station, _network, date):
     cols = ["local_valid", "utc_valid", "tmpf", "sknt", "gust", "drct"]
     table["fields"] = [IEMVARS[col] for col in cols]
     with get_sqlalchemy_conn("asos") as conn:
-        df = read_sql(
+        df = pd.read_sql(
             """
             select
             to_char(valid at time zone tzname,
@@ -69,19 +68,17 @@ def workflow(station, network, date):
     return json.dumps(table)
 
 
+@iemapp()
 def application(environ, start_response):
     """Answer request."""
-    fields = parse_formvars(environ)
+    station = environ.get("station", "AMW")
+    network = environ.get("network", "IA_ASOS")
+    date = environ.get("date", "2016-01-01")
+    cb = environ.get("callback", None)
 
-    station = fields.get("station", "AMW")
-    network = fields.get("network", "IA_ASOS")
-    date = fields.get("date", "2016-01-01")
-    cb = fields.get("callback", None)
-
-    hostname = os.environ.get("SERVER_NAME", "")
     mckey = f"/json/obhistory/{station}/{network}/{date}"
     mc = Client("iem-memcached:11211")
-    res = mc.get(mckey) if hostname != "iem.local" else None
+    res = mc.get(mckey)
     if not res:
         res = workflow(station, network, date).replace("NaN", "null")
         mc.set(mckey, res, 3600)

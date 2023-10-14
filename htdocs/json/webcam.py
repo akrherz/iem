@@ -5,8 +5,8 @@ import datetime
 import json
 from zoneinfo import ZoneInfo
 
-from paste.request import parse_formvars
 from pyiem.util import get_dbconn
+from pyiem.webutil import iemapp
 
 
 def dance(cid, start_ts, end_ts):
@@ -33,17 +33,17 @@ def dance(cid, start_ts, end_ts):
                 "href": uri,
             }
         )
-
+    dbconn.close()
     return data
 
 
+@iemapp()
 def application(environ, start_response):
     """Answer request."""
-    fields = parse_formvars(environ)
-    cid = fields.get("cid", "ISUC-006")
-    start_ts = fields.get("start_ts")
-    end_ts = fields.get("end_ts")
-    date = fields.get("date")
+    cid = environ.get("cid", "ISUC-006")
+    start_ts = environ.get("start_ts")
+    end_ts = environ.get("end_ts")
+    date = environ.get("date")
     if date is not None:
         start_ts = datetime.datetime.strptime(date, "%Y%m%d")
         start_ts = start_ts.replace(tzinfo=ZoneInfo("America/Chicago"))

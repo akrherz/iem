@@ -2,8 +2,8 @@
 from io import BytesIO, StringIO
 
 import pandas as pd
-from paste.request import parse_formvars
-from pyiem.util import LOG, get_sqlalchemy_conn, utc
+from pyiem.util import get_sqlalchemy_conn
+from pyiem.webutil import iemapp
 from sqlalchemy import text
 
 EXL = "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"
@@ -57,36 +57,23 @@ def get_data(sts, ets, station, model, fmt):
     return sio.getvalue()
 
 
-def parse_dates(form):
-    """Nicely resolve dates please."""
-    sts = utc(*[int(form[x]) for x in ["year1", "month1", "day1", "hour1"]])
-    ets = utc(*[int(form[x]) for x in ["year2", "month2", "day2", "hour2"]])
-    if ets < sts:
-        sts, ets = ets, sts
-    return sts, ets
-
-
+@iemapp(default_tz="UTC")
 def application(environ, start_response):
     """See how we are called"""
-    form = parse_formvars(environ)
-    try:
-        sts, ets = parse_dates(form)
-    except (ValueError, KeyError) as exp:
-        LOG.info(exp)
-        start_response(
-            "500 Internal Server Error", [("Content-type", "text/plain")]
-        )
-        return [b"Error while parsing provided dates, ensure they are valid."]
 
-    fmt = form.get("format", "csv")
-    station = form.get("station").upper()
-    model = form.get("model").upper()
+    fmt = environ.get("format", "csv")
+    station = environ.get("station").upper()
+    model = environ.get("model").upper()
     if fmt != "excel":
         start_response("200 OK", [("Content-type", "text/plain")])
-        return [get_data(sts, ets, station, model, fmt).encode("ascii")]
+        return [
+            get_data(
+                environ["sts"], environ["ets"], station, model, fmt
+            ).encode("ascii")
+        ]
     headers = [
         ("Content-type", EXL),
         ("Content-disposition", "attachment; Filename=daily.xlsx"),
     ]
     start_response("200 OK", headers)
-    return [get_data(sts, ets, station, model, fmt)]
+    return [get_data(environ["sts"], environ["ets"], station, model, fmt)]

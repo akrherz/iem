@@ -7,9 +7,9 @@ import requests
 
 # Third Party
 from commonregex import CommonRegex
-from paste.request import parse_formvars
 from pyiem.templates.iem import TEMPLATE
 from pyiem.util import get_properties, get_sqlalchemy_conn
+from pyiem.webutil import iemapp
 
 AFOS_RE = re.compile(r"^[A-Z0-9]{6}$", re.I)
 STATION_RE = re.compile(r"^[A-Z0-9]{3,10}$", re.I)
@@ -140,10 +140,10 @@ of supported search values.</p>
     return [TEMPLATE.render(ctx).encode("utf-8")]
 
 
+@iemapp()
 def application(environ, start_response):
     """Here we are, answer with a redirect in most cases."""
-    form = parse_formvars(environ)
-    q = form.get("q", "").strip()
+    q = environ.get("q", "").strip()
     handler, qclean = find_handler(q)
     if handler is None:
         start_response("200 OK", [("Content-type", "text/html")])

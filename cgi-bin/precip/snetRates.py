@@ -3,8 +3,8 @@ import datetime
 from io import StringIO
 from zoneinfo import ZoneInfo
 
-from paste.request import parse_formvars
 from pyiem.util import get_dbconnc
+from pyiem.webutil import iemapp
 
 
 def diff(nowVal, pastVal, mulli):
@@ -18,15 +18,15 @@ def diff(nowVal, pastVal, mulli):
     return "%5.2f," % (differ * mulli)
 
 
+@iemapp()
 def application(environ, start_response):
     """Go Main."""
     sio = StringIO()
     start_response("200 OK", [("Content-type", "text/plain")])
-    form = parse_formvars(environ)
-    year = form.get("year", 2010)
-    month = form.get("month", 6)
-    day = form.get("day", 7)
-    station = form.get("station", "SAMI4")[:5]
+    year = environ.get("year", 2010)
+    month = environ.get("month", 6)
+    day = environ.get("day", 7)
+    station = environ.get("station", "SAMI4")[:5]
     s = datetime.datetime(int(year), int(month), int(day))
     s = s.replace(tzinfo=ZoneInfo("America/Chicago"))
     e = s + datetime.timedelta(days=1)

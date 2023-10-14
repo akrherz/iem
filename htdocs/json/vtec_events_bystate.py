@@ -1,8 +1,8 @@
 """Listing of VTEC events for state and year"""
 import json
 
-from paste.request import parse_formvars
 from pyiem.util import get_dbconnc, html_escape
+from pyiem.webutil import iemapp
 from pymemcache.client import Client
 
 ISO9660 = "%Y-%m-%dT%H:%M:%SZ"
@@ -85,14 +85,14 @@ def run(state, year, phenomena, significance):
     return json.dumps(res)
 
 
+@iemapp()
 def application(environ, start_response):
     """Answer request."""
-    fields = parse_formvars(environ)
-    state = fields.get("state", "IA")[:2]
-    year = int(fields.get("year", 2015))
-    phenomena = fields.get("phenomena", "__")[:2]
-    significance = fields.get("significance", "_")[:1]
-    cb = fields.get("callback")
+    state = environ.get("state", "IA")[:2]
+    year = int(environ.get("year", 2015))
+    phenomena = environ.get("phenomena", "__")[:2]
+    significance = environ.get("significance", "_")[:1]
+    cb = environ.get("callback")
 
     mckey = "/json/vtec_events_bystate/%s/%s/%s/%s" % (
         state,

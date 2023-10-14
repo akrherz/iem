@@ -8,9 +8,9 @@ import datetime
 from io import BytesIO
 
 import requests
-from paste.request import parse_formvars
 from PIL import Image, ImageDraw
 from pyiem.util import get_dbconn, get_properties
+from pyiem.webutil import iemapp
 from pymemcache.client import Client
 from requests.auth import HTTPDigestAuth
 
@@ -83,10 +83,10 @@ def workflow(cid):
     return res
 
 
+@iemapp()
 def application(environ, start_response):
     """Do Fun Things"""
-    form = parse_formvars(environ)
-    cid = form.get("id", "KCCI-027")[:10]  # Default to ISU AgFarm
+    cid = environ.get("id", "KCCI-027")[:10]  # Default to ISU AgFarm
     imagedata = workflow(cid)
     if imagedata is None:
         # TOOD: make a sorry image

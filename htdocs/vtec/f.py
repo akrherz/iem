@@ -3,6 +3,7 @@ import re
 
 from pyiem.nws import vtec
 from pyiem.util import get_dbconn, html_escape, utc
+from pyiem.webutil import iemapp
 
 # sadly, I have a lot of links in the wild without a status?
 VTEC_RE = re.compile(
@@ -44,6 +45,7 @@ def get_data(ctx):
     ctx["is_emergency"] = row[2] == 1
     ctx["is_pds"] = row[3] == 1
     ctx["updated"] = utc() if row[4] is None else row[4]
+    pgconn.close()
 
 
 def as_html(ctx):
@@ -140,6 +142,7 @@ def get_context(url):
     return ctx
 
 
+@iemapp()
 def application(environ, start_response):
     """Answer the bell."""
     ctx = get_context(environ["SCRIPT_URL"])
