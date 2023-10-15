@@ -85,7 +85,7 @@ def plotter(fdict):
     maxval = grp[f"sped_{units}"].max()
     title = (
         f"{ctx['_sname']} [{df['ts'].min().year}-{df['ts'].max().year}]\n"
-        "Monthly Average Wind Speed andVector Average Direction"
+        "Monthly Average Wind Speed and Vector Average Direction"
     )
     (fig, ax) = figure_axes(apctx=ctx, title=title)
     ax.barh(grp.index.values, grp[f"sped_{units}"].values, align="center")
