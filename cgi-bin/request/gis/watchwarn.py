@@ -6,8 +6,8 @@ from io import BytesIO
 
 import fiona
 import pandas as pd
-from paste.request import parse_formvars
 from pyiem.util import get_dbconnc, get_sqlalchemy_conn, utc
+from pyiem.webutil import iemapp
 from shapely.geometry import mapping
 from shapely.wkb import loads
 
@@ -19,29 +19,6 @@ def dfmt(text):
     if text is None or len(text) != 12:
         return ""
     return f"{text[:4]}-{text[4:6]}-{text[6:8]} {text[8:10]}:{text[10:12]}"
-
-
-def get_time_extent(form):
-    """Figure out the time extent of this request"""
-    if "year" in form:
-        year1 = form.get("year")
-        year2 = form.get("year")
-    else:
-        year1 = form.get("year1")
-        year2 = form.get("year2")
-    month1 = form.get("month1")
-    month2 = form.get("month2")
-    day1 = form.get("day1")
-    day2 = form.get("day2")
-    hour1 = form.get("hour1")
-    hour2 = form.get("hour2")
-    minute1 = form.get("minute1")
-    minute2 = form.get("minute2")
-    sts = utc(int(year1), int(month1), int(day1), int(hour1), int(minute1))
-    ets = utc(int(year2), int(month2), int(day2), int(hour2), int(minute2))
-    if ets < sts:
-        sts, ets = ets, sts
-    return sts, ets
 
 
 def char3(wfos):
@@ -56,34 +33,35 @@ def parse_wfo_location_group(form):
     """Parse wfoLimiter"""
     limiter = ""
     if "wfo[]" in form:
-        wfos = form.getall("wfo[]")
+        wfos = form.get("wfo[]", [])
+        if not isinstance(wfos, list):
+            wfos = [wfos]
         wfos.append("XXX")  # Hack to make next section work
         if "ALL" not in wfos:
             limiter = f" and w.wfo in {tuple(char3(wfos))} "
 
     if "wfos[]" in form:
-        wfos = form.getall("wfos[]")
+        wfos = form.get("wfos[]", [])
+        if not isinstance(wfos, list):
+            wfos = [wfos]
         wfos.append("XXX")  # Hack to make next section work
         if "ALL" not in wfos:
             limiter = f" and w.wfo in {tuple(char3(wfos))} "
     return limiter
 
 
-def build_sql(form):
+def build_sql(environ):
     """Build the SQL statement."""
-    try:
-        sts, ets = get_time_extent(form)
-    except Exception as exp:
-        raise ValueError(
-            "An invalid date was specified, please check that the day of the "
-            "month exists for your selection (ie June 31st vs June 30th)."
-        ) from exp
-
+    sts = environ["sts"]
+    ets = environ["ets"]
     table_extra = ""
-    location_group = form.get("location_group", "wfo")
+    location_group = environ.get("location_group", "wfo")
     if location_group == "states":
-        if "states[]" in form:
-            states = [x[:2].upper() for x in form.getall("states[]")]
+        if "states[]" in environ:
+            arstates = environ.get("states[]", [])
+            if not isinstance(arstates, list):
+                arstates = [arstates]
+            states = [x[:2].upper() for x in arstates]
             states.append("XX")  # Hack for 1 length
             wfo_limiter = (
                 " and ST_Intersects(s.the_geom, w.geom) "
@@ -94,7 +72,7 @@ def build_sql(form):
         else:
             raise ValueError("No state specified")
     elif location_group == "wfo":
-        wfo_limiter = parse_wfo_location_group(form)
+        wfo_limiter = parse_wfo_location_group(environ)
         wfo_limiter2 = wfo_limiter
     else:
         # Unknown location_group
@@ -106,29 +84,29 @@ def build_sql(form):
 
     # Change to postgis db once we have the wfo list
     fn = f"wwa_{sts:%Y%m%d%H%M}_{ets:%Y%m%d%H%M}"
-    timeopt = int(form.get("timeopt", [1])[0])
+    timeopt = int(environ.get("timeopt", [1])[0])
     if timeopt == 2:
-        year3 = int(form.get("year3"))
-        month3 = int(form.get("month3"))
-        day3 = int(form.get("day3"))
-        hour3 = int(form.get("hour3"))
-        minute3 = int(form.get("minute3"))
+        year3 = int(environ.get("year3"))
+        month3 = int(environ.get("month3"))
+        day3 = int(environ.get("day3"))
+        hour3 = int(environ.get("hour3"))
+        minute3 = int(environ.get("minute3"))
         sts = utc(year3, month3, day3, hour3, minute3)
         fn = f"wwa_{sts:%Y%m%d%H%M}"
 
     limiter = ""
-    if "limit0" in form:
+    if "limit0" in environ:
         limiter = (
             " and phenomena IN ('TO','SV','FF','MA') and significance = 'W' "
         )
-    if form.get("limitps", "no") == "yes":
-        phenom = form.get("phenomena", "TO")[:2]
-        sig = form.get("significance", "W")[:1]
+    if environ.get("limitps", "no") == "yes":
+        phenom = environ.get("phenomena", "TO")[:2]
+        sig = environ.get("significance", "W")[:1]
         limiter = f" and phenomena = '{phenom}' and significance = '{sig}' "
 
-    sbwlimiter = " WHERE gtype = 'P' " if "limit1" in form else ""
+    sbwlimiter = " WHERE gtype = 'P' " if "limit1" in environ else ""
 
-    elimiter = " and is_emergency " if "limit2" in form else ""
+    elimiter = " and is_emergency " if "limit2" in environ else ""
 
     warnings_table = "warnings"
     sbw_table = "sbw"
@@ -137,7 +115,7 @@ def build_sql(form):
         sbw_table = f"sbw_{sts.year}"
 
     geomcol = "geom"
-    if form.get("simple", "no") == "yes":
+    if environ.get("simple", "no") == "yes":
         geomcol = "simple_geom"
 
     cols = """geo, wfo, utc_issue, utc_expire, utc_prodissue, utc_init_expire,
@@ -155,7 +133,7 @@ def build_sql(form):
         )
     sbwtimelimit = timelimit
     statuslimit = " status = 'NEW' "
-    if form.get("addsvs", "no") == "yes":
+    if environ.get("addsvs", "no") == "yes":
         statuslimit = " status != 'CAN' "
         sbwtimelimit = timelimit.replace(
             "issue",
@@ -244,16 +222,16 @@ def do_excel(sql):
     return bio.getvalue()
 
 
+@iemapp()
 def application(environ, start_response):
     """Go Main Go"""
-    form = parse_formvars(environ)
     try:
-        sql, fn = build_sql(form)
+        sql, fn = build_sql(environ)
     except ValueError as exp:
         start_response("400 Bad Request", [("Content-type", "text/plain")])
         return [str(exp).encode("ascii")]
 
-    accept = form.get("accept", "shapefile")
+    accept = environ.get("accept", "shapefile")
     pgconn, cursor = get_dbconnc("postgis")
     if accept == "excel":
         headers = [

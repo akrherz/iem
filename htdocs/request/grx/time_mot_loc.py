@@ -5,8 +5,8 @@ import re
 from io import StringIO
 from zoneinfo import ZoneInfo
 
-from paste.request import parse_formvars
 from pyiem.util import get_dbconnc, utc
+from pyiem.webutil import iemapp
 
 LOLA = re.compile(r"(?P<lon>[0-9\.\-]+) (?P<lat>[0-9\.\-]+)")
 SQLISO = "YYYY-MM-DDThh24:MI:SSZ"
@@ -79,25 +79,25 @@ def gentext(sio, row, grversion):
     sio.write("Threshold: 999\n")
 
 
+@iemapp()
 def application(environ, start_response):
     """Our WSGI service."""
-    form = parse_formvars(environ)
-    grversion = float(form.get("version", 1.0))
-    is_all = "all" in form
+    grversion = float(environ.get("version", 1.0))
+    is_all = "all" in environ
     phenoms = ["TO", "SV"] if is_all else ["TO"]
     pgconn, cursor = get_dbconnc("postgis")
     valid = utc()
     refresh = 60
-    if "valid" in form:
+    if "valid" in environ:
         # pylint: disable=no-value-for-parameter
         valid = datetime.datetime.strptime(
-            form.get("valid")[:16], "%Y-%m-%dT%H:%M"
+            environ.get("valid")[:16], "%Y-%m-%dT%H:%M"
         ).replace(tzinfo=ZoneInfo("UTC"))
         refresh = 86400
     t1 = valid
     t2 = valid
     tmlabel = valid.strftime("%H%Mz")
-    if grversion >= 1.5 or "valid" in form:
+    if grversion >= 1.5 or "valid" in environ:
         # Pull larger window of data to support TimeRange
         t1 = valid - datetime.timedelta(hours=2)
         t2 = valid + datetime.timedelta(hours=2)

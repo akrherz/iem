@@ -12,8 +12,8 @@ import ephem
 import numpy as np
 import pandas as pd
 import requests
-from paste.request import parse_formvars
 from pyiem.util import get_dbconnc, get_sqlalchemy_conn, utc
+from pyiem.webutil import iemapp
 from sqlalchemy import text
 
 # DOT plows
@@ -650,10 +650,10 @@ def router(appname):
     return df
 
 
+@iemapp()
 def application(environ, start_response):
     """Do Something"""
-    form = parse_formvars(environ)
-    appname = form.get("q")
+    appname = environ.get("q")
     if appname is None:
         start_response("404 File Not Found", [("Content-type", "text/plain")])
         return [b"No such service."]
