@@ -1,0 +1,90 @@
+<?php
+require_once "../../../config/settings.inc.php";
+require_once "../../../include/myview.php";
+$t = new MyView();
+$t->title = "Unidata 2021 Equipment Award Report";
+$t->content = <<<EOF
+
+<div style="text-align: center; width: 800px;">
+<h3>Unidata 2021 Equipment Award Report</h3>
+Rick Cruse
+<br />Daryl Herzmann
+</div>
+
+<p><a href="https://unidata.ucar.edu">Unidata</a> is a community program 
+out of UCAR that provides data and software tools to universities.
+The program is funded by the National Science Foundation.</p>
+
+<p>Unidata offers a yearly competitive equipment grant award to encourge
+adoptation of their software tools and enhancements of data services offered
+to the community.  The IEM submitted a successful proposal for the 
+<a href="https://www.unidata.ucar.edu/community/equipaward/index.html#2021">2021 award</a>.
+This page summarizes the status of deliverables outlined in the proposal.</p>
+
+<p>The proposal funded the purchase of a Dell R7525 server modelled after
+the <a href="https://letsencrypt.org/2021/01/21/next-gen-database-servers.html">specification used by LetsEncrypt</a>
+to increase database server capacity.  The server was purchased in early
+July 2021 with the following specs:</p>
+
+<ul>
+  <li>(x2) AMD EPYC 7302 3GHz,16C</li>
+  <li>256GB RAM</li>
+  <li>(x6) 1.8TB Mixed-use NVMe drives</li>
+  <li>(x2) 480GB SSD (OS Drives)</li>
+</ul>
+
+<p>The server was deployed by mid July with the intention of running
+<a href="https://zfsonlinux.org/">ZFS</a> and PostgreSQL over the NVMe drives.
+While the performance of this combination was an order of magnitude better
+than what the IEM had in place at the time, it was not as fast as using a more
+conventional approach of XFS over software RAID10.  Not to delve too deeply into
+the technical reasons why, but the lack of
+<a href="https://github.com/openzfs/zfs/pull/10018">ZFS Direct IO Support</a> seemed
+to be the main culprit.  Nevertheless, the server was put into production by the
+end of July 2021 and meet the proposal goals.</p>
+
+<h3>Goal: Increase the capacity for processing and delivering hydrological data</h3>
+
+<p>The IEM attempts a robust processing of SHEF formatted hydrological data provided
+by NOAA/NWS via Unidata's <a href="https://www.unidata.ucar.edu/projects/index.html#idd">IDD</a>
+data stream.  Prior to this grant, the
+<a href="https://mesonet.agron.iastate.edu/request/dcp/fe.phtml">IEM download portal</a> had
+some arcane throttles in place to prevent the server from being overwhelmed by
+requests.  These throttles were removed and server successfully delivers
+thousands of requests per day.</p>
+
+<p>Related to this work, but not directly funded by this proposal, were software enhancements 
+made to the open source <a href="https://github.com/akrherz/pyIEM">pyIEM</a> library
+to directly process SHEF encoded data.  Previously, a convoluted process of piping
+the data to an ancient FORTRAN library called SHEFIT was used.  The new approach
+is faster, more robust, and includes a test suite to ensure the library is working
+as expected.</p>
+
+<h3>Goal: Increase capacity for serving data requested by Unidata's Siphon</h3>
+
+<p>Unidata's <a href="https://www.unidata.ucar.edu/software/siphon/">Siphon</a> python
+library allows users to easily access various internet data sources.  One of the
+supported data sources is IEM's Upper Air
+<a href="https://mesonet.agron.iastate.edu/json/#RAOB+Soundings">sounding archive</a>.
+The server purchased allowed this server to perform much better and again, with
+out any throttles in place.</p>
+
+<h3>Goal: Increase web service capacity for serving data to the community</h3>
+
+<p>Unidata community members utilize a number of web services and tools provided by the IEM
+website.  These include:
+<ul>
+ <li><a href="https://mesonet.agron.iastate.edu/request/download.phtml">ASOS/METAR download</a></li>
+ <li><a href="https://mesonet.agron.iastate.edu/wx/afos/list.phtml">NWS Text Product Archive</a></li>
+ <li><a href="https://mesonet.agron.iastate.edu/request/gis/watchwarn.phtml">NWS Watch/Warnings</a></li>
+ <li><a href="https://mesonet.agron.iastate.edu/ogc/">OGC GIS Services</a></li>
+</ul>
+</p>
+
+<p>The purchased server partially supports all of these within the IEM webfarm and
+has improved the performance of each.  Addtionally, besides running a PostgreSQL
+database server, this server also runs a python FastAPI server that provides
+the <a href="https://mesonet.agron.iastate.edu/api/1/docs">IEM API</a>.
+
+EOF;
+$t->render('single.phtml');

@@ -38,7 +38,8 @@ $t->content = <<<EOF
 <h3>Papers/Presentations</h3>
 <ul>
   <li><a href="/present/">IEM Presentation Archive</a></li>
-  <li><a href="/docs/unidata2006">Unidata Equipment Grant Report</a> (21 Aug 2006)</li>
+  <li><a href="/docs/unidata2006/">2006 Unidata Equipment Grant Report</a></li>
+  <li><a href="/docs/unidata2021/">2021 Unidata Equipment Grant Report</a></li>
 </ul>
 
 </div></div>
