@@ -24,31 +24,7 @@ def get_time_domain(form):
         sts = ets - datetime.timedelta(seconds=seconds)
         return sts, ets
 
-    if "sts" in form and "ets" in form:
-        sts = datetime.datetime.strptime(form.get("sts")[:16], ISO8660)
-        ets = datetime.datetime.strptime(form.get("ets")[:16], ISO8660)
-        return (
-            sts.replace(tzinfo=datetime.timezone.utc),
-            ets.replace(tzinfo=datetime.timezone.utc),
-        )
-    if "year" in form:
-        year1 = int(form.get("year"))
-        year2 = int(form.get("year"))
-    else:
-        year1 = int(form.get("year1"))
-        year2 = int(form.get("year2"))
-    month1 = int(form.get("month1"))
-    month2 = int(form.get("month2"))
-    day1 = int(form.get("day1"))
-    day2 = int(form.get("day2"))
-    hour1 = int(form.get("hour1"))
-    hour2 = int(form.get("hour2"))
-    minute1 = int(form.get("minute1"))
-    minute2 = int(form.get("minute2"))
-    sts = utc(year1, month1, day1, hour1, minute1)
-    ets = utc(year2, month2, day2, hour2, minute2)
-
-    return sts, ets
+    return form["sts"], form["ets"]
 
 
 def do_excel_kml(fmt, sts, ets, wfolimiter, statelimiter):
