@@ -33,6 +33,7 @@ LOOKUP = {
     "min_high": "max_tmpf",
     "max_low": "min_tmpf",
     "min_low": "min_tmpf",
+    "precip": "pday",
 }
 PDICT = {
     "avg_high_temp": "Average High Temperature",
@@ -164,7 +165,7 @@ def plotter(fdict):
         )
     threshold = ctx["thres"]
     mydir = ">=" if ctx["w"] == "aoa" else "<"
-    aggcol = LOOKUP.get(varname, "max_tmpf")
+    aggcol = LOOKUP.get(varname, varname)
     dfcol = ctx["varname"] if ctx["w"] == "none" else "count_days"
     with get_sqlalchemy_conn("iem") as conn:
         df = pd.read_sql(
