@@ -7,8 +7,8 @@ import fiona
 import geopandas as gpd
 import pandas as pd
 import shapefile
-from paste.request import parse_formvars
 from pyiem.util import get_dbconn, get_sqlalchemy_conn, utc
+from pyiem.webutil import iemapp
 
 fiona.supported_drivers["KML"] = "rw"
 EXL = "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"
@@ -120,6 +120,7 @@ def do_excel_kml(fmt, sts, ets, wfolimiter, statelimiter):
     return fp.getvalue()
 
 
+@iemapp()
 def application(environ, start_response):
     """Go Main Go"""
     if environ["REQUEST_METHOD"] == "OPTIONS":
@@ -129,11 +130,8 @@ def application(environ, start_response):
     pgconn = get_dbconn("postgis")
     cursor = pgconn.cursor()
 
-    # Get CGI vars
-    form = parse_formvars(environ)
-
     try:
-        sts, ets = get_time_domain(form)
+        sts, ets = get_time_domain(environ)
     except (ValueError, TypeError):
         start_response(
             "500 Internal Server Error", [("Content-type", "text/plain")]
@@ -145,20 +143,24 @@ def application(environ, start_response):
 
     statelimiter = ""
     for opt in ["state", "states", "states[]"]:
-        if opt in form:
-            aStates = form.getall(opt)
+        if opt in environ:
+            aStates = environ.get(opt, [])
+            if isinstance(aStates, str):
+                aStates = [aStates]
             aStates.append("XX")
             if "_ALL" not in aStates:
                 statelimiter = f" and l.state in {tuple(aStates)} "
     wfoLimiter = ""
-    if "wfo[]" in form:
-        aWFO = form.getall("wfo[]")
+    if "wfo[]" in environ:
+        aWFO = environ.get("wfo[]", [])
+        if isinstance(aWFO, str):
+            aWFO = [aWFO]
         aWFO.append("XXX")  # Hack to make next section work
         if "ALL" not in aWFO:
             wfoLimiter = f" and l.wfo in {tuple(aWFO)} "
 
     fn = f"lsr_{sts:%Y%m%d%H%M}_{ets:%Y%m%d%H%M}"
-    if form.get("fmt", "") == "excel":
+    if environ.get("fmt", "") == "excel":
         headers = [
             ("Content-type", EXL),
             ("Content-disposition", f"attachment; Filename={fn}.xlsx"),
@@ -166,7 +168,7 @@ def application(environ, start_response):
         start_response("200 OK", headers)
         return [do_excel_kml("excel", sts, ets, wfoLimiter, statelimiter)]
 
-    if form.get("fmt", "") == "kml":
+    if environ.get("fmt", "") == "kml":
         headers = [
             ("Content-type", "application/octet-stream"),
             ("Content-disposition", f"attachment; Filename={fn}.kml"),
@@ -248,7 +250,7 @@ def application(environ, start_response):
                 f"{row[8]},{row9},{row[13]},{row[14]}\n"
             )
 
-    if "justcsv" in form or form.get("fmt", "") == "csv":
+    if "justcsv" in environ or environ.get("fmt", "") == "csv":
         headers = [
             ("Content-type", "application/octet-stream"),
             ("Content-Disposition", f"attachment; filename={fn}.csv"),

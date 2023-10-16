@@ -6,6 +6,7 @@ import sys
 from io import BytesIO
 
 from pyiem.util import get_dbconn
+from pyiem.webutil import iemapp
 
 PATTERN = re.compile(
     (
@@ -48,6 +49,7 @@ def get_content_type(val):
     return ("Content-type", ct)
 
 
+@iemapp()
 def application(environ, start_response):
     """Process this request
 

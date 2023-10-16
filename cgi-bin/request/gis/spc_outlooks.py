@@ -6,47 +6,32 @@ from io import BytesIO
 
 # Third Party
 import geopandas as gpd
-from paste.request import parse_formvars
-from pyiem.util import get_sqlalchemy_conn, utc
+from pyiem.util import get_sqlalchemy_conn
+from pyiem.webutil import iemapp
 
 PRJFILE = "/opt/iem/data/gis/meta/4326.prj"
 
 
 def get_context(environ):
     """Figure out the CGI variables passed to this script"""
-    form = parse_formvars(environ)
-    if "year" in form:
-        year1 = form.get("year")
-        year2 = year1
-    else:
-        year1 = form.get("year1")
-        year2 = form.get("year2")
-    month1 = form.get("month1")
-    month2 = form.get("month2")
-    day1 = form.get("day1")
-    day2 = form.get("day2")
-    hour1 = form.get("hour1")
-    hour2 = form.get("hour2")
-    minute1 = form.get("minute1")
-    minute2 = form.get("minute2")
-
-    sts = utc(int(year1), int(month1), int(day1), int(hour1), int(minute1))
-    ets = utc(int(year2), int(month2), int(day2), int(hour2), int(minute2))
-    if ets < sts:
-        sts, ets = ets, sts
-
-    types = [x[0].upper() for x in form.getall("type")]
+    artypes = environ.get("type", [])
+    if not isinstance(artypes, list):
+        artypes = [artypes]
+    types = [x[0].upper() for x in artypes]
     if not types:
         types = ["C", "F"]
-    days = [int(x) for x in form.getall("d")]
+    ard = environ.get("d", [])
+    if not isinstance(ard, list):
+        ard = [ard]
+    days = [int(x) for x in ard]
     if not days:
         days = list(range(1, 9))
     return {
-        "sts": sts,
-        "ets": ets,
+        "sts": environ["sts"],
+        "ets": environ["ets"],
         "types": types,
         "days": days,
-        "geom_col": "geom" if form.get("geom") == "geom" else "geom_layers",
+        "geom_col": "geom" if environ.get("geom") == "geom" else "geom_layers",
     }
 
 
@@ -113,6 +98,7 @@ def run(ctx, start_response):
     return zio.getvalue()
 
 
+@iemapp()
 def application(environ, start_response):
     """Do something fun!"""
     ctx = get_context(environ)

@@ -12,12 +12,11 @@ Conductivity (micro-S)
 18.19    ch2_data_t
 48       ch1_data_c
 """
-import datetime
 from io import BytesIO
 
 import pandas as pd
-from paste.request import parse_formvars
 from pyiem.util import get_dbconn, get_sqlalchemy_conn
+from pyiem.webutil import iemapp
 from sqlalchemy import text
 
 LOOKUP = {
@@ -112,24 +111,30 @@ def bubbler_run(sts, ets, excel, start_response):
     return df.to_csv(None, header=headers, index=False).encode("ascii")
 
 
+@iemapp(default_tz="America/Chicago")
 def application(environ, start_response):
     """Go Main Go"""
-    form = parse_formvars(environ)
-    opt = form.get("opt", "bubbler")
+    opt = environ.get("opt", "bubbler")
 
-    year1 = int(form.get("year1"))
-    year2 = int(form.get("year2"))
-    month1 = int(form.get("month1"))
-    month2 = int(form.get("month2"))
-    day1 = int(form.get("day1"))
-    day2 = int(form.get("day2"))
-    stations = form.getall("station")
-
-    sts = datetime.datetime(year1, month1, day1)
-    ets = datetime.datetime(year2, month2, day2)
+    stations = environ.get("station", [])
+    if isinstance(stations, str):
+        stations = [stations]
 
     if opt == "bubbler":
-        return [bubbler_run(sts, ets, form.get("excel", "n"), start_response)]
+        return [
+            bubbler_run(
+                environ["sts"],
+                environ["ets"],
+                environ.get("excel", "n"),
+                start_response,
+            )
+        ]
     return [
-        gage_run(sts, ets, stations, form.get("excel", "n"), start_response)
+        gage_run(
+            environ["sts"],
+            environ["ets"],
+            stations,
+            environ.get("excel", "n"),
+            start_response,
+        )
     ]

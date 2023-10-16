@@ -3,8 +3,8 @@ import datetime
 import json
 from http.cookies import SimpleCookie
 
-from paste.request import parse_formvars
 from pyiem.util import get_dbconnc
+from pyiem.webutil import iemapp
 
 
 def do(environ, headers, vote):
@@ -53,6 +53,7 @@ def do(environ, headers, vote):
     return d
 
 
+@iemapp()
 def application(environ, start_response):
     """Process this request.
 
@@ -60,8 +61,7 @@ def application(environ, start_response):
     or like "/onsite/features/vote/abstain.json".
     """
     headers = [("Content-type", "application/json")]
-    fields = parse_formvars(environ)
-    vote = fields.get("vote", "missing")
+    vote = environ.get("vote", "missing")
     j = do(environ, headers, vote)
     start_response("200 OK", headers)
     return [json.dumps(j).encode("ascii")]

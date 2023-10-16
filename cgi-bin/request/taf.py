@@ -1,12 +1,11 @@
 """TAF."""
 # pylint: disable=abstract-class-instantiated
-import datetime
 from io import BytesIO
 from zoneinfo import ZoneInfo
 
 import pandas as pd
-from paste.request import parse_formvars
 from pyiem.util import LOG, get_sqlalchemy_conn
+from pyiem.webutil import iemapp
 from sqlalchemy import text
 
 EXL = "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"
@@ -70,26 +69,19 @@ def rect(station):
     return station
 
 
+@iemapp()
 def application(environ, start_response):
     """Get stuff"""
-    form = parse_formvars(environ)
     ctx = {}
-    ctx["fmt"] = form.get("fmt")
-    ctx["tz"] = ZoneInfo(form.get("tz", "UTC"))
-    ctx["stations"] = [rect(x) for x in form.getall("station")]
+    ctx["fmt"] = environ.get("fmt")
+    ctx["tz"] = ZoneInfo(environ.get("tz", "UTC"))
+    stations = environ.get("station", [])
+    if not isinstance(stations, list):
+        stations = [stations]
+    ctx["stations"] = [rect(x) for x in stations]
     if not ctx["stations"]:
         start_response(
             "500 Internal Server Error", [("Content-type", "text/plain")]
         )
         return [b"Must specify at least one station!"]
-    year1 = int(form.get("year1"))
-    year2 = int(form.get("year2"))
-    month1 = int(form.get("month1"))
-    month2 = int(form.get("month2"))
-    day1 = int(form.get("day1"))
-    day2 = int(form.get("day2"))
-
-    ctx["sts"] = datetime.datetime(year1, month1, day1, tzinfo=ctx["tz"])
-    ctx["ets"] = datetime.datetime(year2, month2, day2, tzinfo=ctx["tz"])
-
     return [run(start_response, ctx)]
