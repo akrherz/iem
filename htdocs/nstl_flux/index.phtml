@@ -11,8 +11,8 @@ $t = new MyView();
 $t->title = "NLAE Flux Sites";
 
 $ys = yearSelect2(2002, date("Y"), "syear");
-$ms = monthSelect(date("m"), "smonth");
-$ds = daySelect2(date("d"), "sday");
+$ms = monthSelect(1, "smonth");
+$ds = daySelect2(1, "sday");
 
 $ys2 = yearSelect2(2002, date("Y"), "eyear");
 $ms2 = monthSelect(date("m"), "emonth");
@@ -61,7 +61,7 @@ used only with appropriate caution.
 <a href="plots.phtml" class="btn btn-default"><i class="fa fa-signal"></i> Generate daily time series plots</a>
 <a href="vars.phtml" class="btn btn-default"><i class="fa fa-search"></i> View variables collected from this network</a>.
 
-<form method="GET" action="dl.phtml" name="single">
+<form method="GET" action="/cgi-bin/request/nlaeflux.py" name="single">
 <h3>Download Data:</h3><br />
 
 <p>This form will give you all variables for the day interval of your choice.
@@ -74,7 +74,7 @@ used only with appropriate caution.
   <th>Month:</th>
   <th>Day:</th></tr>
 
-<tr>  
+<tr>
   <td rowspan='2'>{$sselect}</td>
   <td>{$ys}</td>
   <td>{$ms}</td>
@@ -88,7 +88,6 @@ used only with appropriate caution.
 </table>
 <input type="submit" value="Download Data">
 </form>
-
 
 <br clear="left" />
 <p>
