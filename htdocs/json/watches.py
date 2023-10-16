@@ -1,8 +1,8 @@
 """Listing of SPC Watches."""
 import json
 
-from paste.request import parse_formvars
 from pyiem.util import get_dbconnc, html_escape
+from pyiem.webutil import iemapp
 from pymemcache.client import Client
 
 ISO9660 = "%Y-%m-%dT%H:%M:%SZ"
@@ -55,12 +55,12 @@ def run(year, is_pds):
     return json.dumps(res)
 
 
+@iemapp()
 def application(environ, start_response):
     """Answer request."""
-    fields = parse_formvars(environ)
-    cb = fields.get("callback", None)
-    is_pds = fields.get("is_pds", "0") == "1"
-    year = int(fields.get("year", 2022))
+    cb = environ.get("callback", None)
+    is_pds = environ.get("is_pds", "0") == "1"
+    year = int(environ.get("year", 2022))
 
     mckey = f"/json/watch/{is_pds}/{year}"
     mc = Client("iem-memcached:11211")

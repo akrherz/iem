@@ -2,8 +2,8 @@
 import datetime
 import json
 
-from paste.request import parse_formvars
 from pyiem.util import get_dbconn, html_escape
+from pyiem.webutil import iemapp
 from pymemcache.client import Client
 
 
@@ -90,17 +90,17 @@ def run(station, syear, eyear):
                 min_range=row[16],
             )
         )
-
+    pgconn.close()
     return json.dumps(res)
 
 
+@iemapp()
 def application(environ, start_response):
     """Answer request."""
-    fields = parse_formvars(environ)
-    station = fields.get("station", "IA0200").upper()[:6]
-    syear = int(fields.get("syear", 1800))
-    eyear = int(fields.get("eyear", datetime.datetime.now().year + 1))
-    cb = fields.get("callback", None)
+    station = environ.get("station", "IA0200").upper()[:6]
+    syear = int(environ.get("syear", 1800))
+    eyear = int(environ.get("eyear", datetime.datetime.now().year + 1))
+    cb = environ.get("callback", None)
 
     mckey = f"/json/climodat_stclimo/{station}/{syear}/{eyear}"
     mc = Client("iem-memcached:11211")

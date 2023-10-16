@@ -4,10 +4,10 @@ import json
 
 import numpy as np
 from metpy.units import units
-from paste.request import parse_formvars
 from pyiem.iemre import find_ij
 from pyiem.meteorology import gdd as calc_gdd
 from pyiem.util import c2f, get_dbconn, ncopen
+from pyiem.webutil import iemapp
 from pymemcache.client import Client
 
 
@@ -77,21 +77,21 @@ def run(station, sdate, edate, gddbase, gddceil):
     return json.dumps(res)
 
 
+@iemapp()
 def application(environ, start_response):
     """Answer request."""
-    fields = parse_formvars(environ)
-    station = fields.get("station", "IATAME")[:6].upper()
+    station = environ.get("station", "IATAME")[:6].upper()
     today = datetime.date.today() - datetime.timedelta(days=1)
     sdate = datetime.datetime.strptime(
-        fields.get("sdate", f"{today.year}-01-01"), "%Y-%m-%d"
+        environ.get("sdate", f"{today.year}-01-01"), "%Y-%m-%d"
     ).date()
     edate = datetime.datetime.strptime(
-        fields.get("edate", f"{today:%Y-%m-%d}"), "%Y-%m-%d"
+        environ.get("edate", f"{today:%Y-%m-%d}"), "%Y-%m-%d"
     ).date()
     if edate < sdate:
         sdate, edate = edate, sdate
-    gddbase = int(fields.get("gddbase", 50))
-    gddceil = int(fields.get("gddceil", 86))
+    gddbase = int(environ.get("gddbase", 50))
+    gddceil = int(environ.get("gddceil", 86))
 
     mckey = f"/json/climodat_dd/{station}/{sdate}/{edate}/{gddbase}/{gddceil}"
     mc = Client("iem-memcached:11211")

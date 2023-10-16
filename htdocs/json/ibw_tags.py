@@ -2,8 +2,9 @@
 import datetime
 import json
 
-from paste.request import parse_formvars
+from pyiem.exceptions import NoDataFound
 from pyiem.util import get_dbconn, html_escape, utc
+from pyiem.webutil import iemapp
 from pymemcache.client import Client
 
 DAMAGE_TAGS = "CONSIDERABLE DESTRUCTIVE CATASTROPHIC".split()
@@ -105,20 +106,15 @@ def run(wfo, damagetag, year):
     return json.dumps(res)
 
 
+@iemapp()
 def application(environ, start_response):
     """Answer request."""
-    fields = parse_formvars(environ)
-    try:
-        wfo = fields.get("wfo", "DMX")[:4]
-        year = int(fields.get("year", 2015))
-        if year < 2000 or year > utc().year:
-            raise ValueError("Invalid year")
-        damagetag = fields.get("damagetag")
-        cb = fields.get("callback")
-    except ValueError:
-        headers = [("Content-type", "text/plain")]
-        start_response("404 File Not Found", headers)
-        return [b"Invalid parameters provided."]
+    wfo = environ.get("wfo", "DMX")[:4]
+    year = int(environ.get("year", 2015))
+    if year < 2000 or year > utc().year:
+        raise NoDataFound("Invalid year")
+    damagetag = environ.get("damagetag")
+    cb = environ.get("callback")
 
     mckey = (
         f"/json/ibw_tags/{damagetag if damagetag is not None else wfo}/{year}"

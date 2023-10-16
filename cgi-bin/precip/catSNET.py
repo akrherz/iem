@@ -4,9 +4,9 @@ Generate web output for precip data
 import datetime
 from io import StringIO
 
-from paste.request import parse_formvars
 from pyiem.network import Table as NetworkTable
 from pyiem.util import get_dbconnc
+from pyiem.webutil import iemapp
 
 nt = NetworkTable(["KCCI", "KIMIT", "KELO"], only_online=False)
 
@@ -35,9 +35,8 @@ KELO sites. SchoolNet data stops on 3 May 2019.
 """
     )
     sio.write('<h3 align="center">Hourly Precip Grid</h3>')
-    form = parse_formvars(environ)
     try:
-        postDate = form.get("date")
+        postDate = environ.get("date")
         myTime = datetime.datetime.strptime(postDate, "%Y-%m-%d")
     except Exception:
         myTime = datetime.datetime(2019, 5, 3)
@@ -140,6 +139,7 @@ def loadstations():
         totp[station] = 0
 
 
+@iemapp()
 def application(environ, start_response):
     """Go Main Go."""
     sio = StringIO()

@@ -6,30 +6,14 @@ from datetime import timedelta
 from io import BytesIO, StringIO
 
 import pandas as pd
-from pandas.io.sql import read_sql
-from paste.request import parse_formvars
+from pyiem.exceptions import NoDataFound
 from pyiem.network import Table as NetworkTable
-from pyiem.util import get_sqlalchemy_conn, utc
+from pyiem.util import get_sqlalchemy_conn
+from pyiem.webutil import iemapp
 from sqlalchemy import text
 
 DELIMITERS = {"comma": ",", "space": " ", "tab": "\t"}
 EXL = "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"
-
-
-def get_time(form):
-    """Get timestamps"""
-    y1 = int(form.get("year"))
-    m1 = int(form.get("month1"))
-    m2 = int(form.get("month2"))
-    d1 = int(form.get("day1"))
-    d2 = int(form.get("day2"))
-    h1 = int(form.get("hour1", 0))
-    h2 = int(form.get("hour2", 0))
-    mi1 = int(form.get("minute1", 0))
-    mi2 = int(form.get("minute2", 0))
-    sts = utc(y1, m1, d1, h1, mi1)
-    ets = utc(y1, m2, d2, h2, mi2)
-    return sts, ets
 
 
 def threshold_search(table, threshold, thresholdvar):
@@ -85,37 +69,38 @@ def threshold_search(table, threshold, thresholdvar):
     return pd.DataFrame(res)
 
 
+@iemapp(default_tz="UTC")
 def application(environ, start_response):
     """Go do something"""
-    form = parse_formvars(environ)
-    network = form.get("network")
-    delimiter = DELIMITERS.get(form.get("delim", "comma"))
-    what = form.get("what", "dl")
-    threshold = form.get("threshold", -99)
+    network = environ.get("network")
+    delimiter = DELIMITERS.get(environ.get("delim", "comma"))
+    what = environ.get("what", "dl")
+    threshold = environ.get("threshold", -99)
     if threshold is not None and threshold != "":
         threshold = float(threshold)
-    thresholdvar = form.get("threshold-var", "RG")
-    sts, ets = get_time(form)
-    stations = form.getall("stations")
+    thresholdvar = environ.get("threshold-var", "RG")
+    stations = environ.get("stations", [])
+    if isinstance(stations, str):
+        stations = [stations]
     if "_ALL" in stations and network is not None:
         stations = list(NetworkTable(network[:10]).sts.keys())
-        if (ets - sts) > timedelta(hours=24):
-            ets = sts + timedelta(hours=24)
+        if (environ["ets"] - environ["sts"]) > timedelta(hours=24):
+            environ["ets"] = environ["sts"] + timedelta(hours=24)
     if not stations:
-        start_response("200 OK", [("Content-type", "text/plain")])
-        return [b"Error, no stations specified for the query!"]
+        raise NoDataFound("Error, no stations specified for the query!")
 
     sql = text(
         f"""
         SELECT station, valid at time zone 'UTC' as utc_valid, key, value
-        from raw{sts.year} WHERE station = ANY(:ids) and
+        from raw{environ['sts'].year} WHERE station = ANY(:ids) and
         valid BETWEEN :sts and :ets and value > -999
+        ORDER by valid ASC
         """
     )
-    params = {"ids": stations, "sts": sts, "ets": ets}
+    params = {"ids": stations, "sts": environ["sts"], "ets": environ["ets"]}
 
     with get_sqlalchemy_conn("hads") as conn:
-        df = read_sql(sql, conn, params=params)
+        df = pd.read_sql(sql, conn, params=params)
     if df.empty:
         start_response("200 OK", [("Content-type", "text/plain")])
         return [b"Error, no results found for query!"]

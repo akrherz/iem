@@ -5,8 +5,8 @@ import datetime
 import glob
 import json
 
-from paste.request import parse_formvars
 from pyiem.util import LOG, html_escape
+from pyiem.webutil import iemapp
 from pymemcache.client import Client
 
 ISO = "%Y-%m-%dT%H:%M:%SZ"
@@ -34,11 +34,11 @@ def run(product):
     return json.dumps(res)
 
 
+@iemapp()
 def application(environ, start_response):
     """Answer request."""
-    fields = parse_formvars(environ)
-    product = fields.get("product", "N0B")[:3].upper()
-    cb = fields.get("callback", None)
+    product = environ.get("product", "N0B")[:3].upper()
+    cb = environ.get("callback", None)
 
     mckey = f"/json/ridge_current_{product}.json"
     mc = Client("iem-memcached:11211")

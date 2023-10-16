@@ -2,8 +2,8 @@
 import datetime
 from zoneinfo import ZoneInfo
 
-from paste.request import parse_formvars
 from pyiem.util import get_dbconn
+from pyiem.webutil import iemapp
 
 
 def get_data(network, ctx, tzinfo, stations):
@@ -38,30 +38,32 @@ def get_data(network, ctx, tzinfo, stations):
     return res.encode("ascii", "ignore")
 
 
+@iemapp()
 def application(environ, start_response):
     """run rabbit run"""
     start_response("200 OK", [("Content-type", "text/plain")])
-    form = parse_formvars(environ)
-    tzinfo = ZoneInfo(form.get("tz", "America/Chicago"))
+    tzinfo = ZoneInfo(environ.get("tz", "America/Chicago"))
     ctx = {
-        "st": form.get("st") == "1",
-        "lalo": form.get("lalo") == "1",
+        "st": environ.get("st") == "1",
+        "lalo": environ.get("lalo") == "1",
     }
     try:
         ctx["sts"] = datetime.date(
-            int(form.get("year1")),
-            int(form.get("month1")),
-            int(form.get("day1")),
+            int(environ.get("year1")),
+            int(environ.get("month1")),
+            int(environ.get("day1")),
         )
         ctx["ets"] = datetime.date(
-            int(form.get("year2")),
-            int(form.get("month2")),
-            int(form.get("day2")),
+            int(environ.get("year2")),
+            int(environ.get("month2")),
+            int(environ.get("day2")),
         )
     except Exception:
         return [b"ERROR: Invalid date provided, please check selected dates."]
-    stations = form.getall("station")
+    stations = environ.get("station", [])
+    if isinstance(stations, str):
+        stations = [stations]
     if not stations:
         return [b"ERROR: No stations specified for request."]
-    network = form.get("network")[:12]
+    network = environ.get("network")[:12]
     return [get_data(network, ctx, tzinfo, stations=stations)]

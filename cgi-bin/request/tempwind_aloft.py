@@ -1,11 +1,9 @@
 """Download tempwinds_aloft dataset"""
-import datetime
 from io import BytesIO, StringIO
-from zoneinfo import ZoneInfo
 
 import pandas as pd
-from paste.request import parse_formvars
 from pyiem.util import get_sqlalchemy_conn
+from pyiem.webutil import iemapp
 from sqlalchemy import text
 
 EXL = "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"
@@ -52,43 +50,27 @@ def get_data(station, sts, ets, tz, na, fmt):
     return sio.getvalue()
 
 
-def parse_dates(form):
-    """Nicely resolve dates please."""
-    sts = datetime.date(
-        int(form.get("year1")), int(form.get("month1")), int(form.get("day1"))
-    )
-    ets = datetime.date(
-        int(form.get("year2")), int(form.get("month2")), int(form.get("day2"))
-    )
-    return sts, ets
-
-
+@iemapp()
 def application(environ, start_response):
     """See how we are called"""
-    form = parse_formvars(environ)
-    try:
-        sts, ets = parse_dates(form)
-    except Exception:
-        start_response(
-            "500 Internal Server Error", [("Content-type", "text/plain")]
-        )
-        return [b"Error while parsing provided dates, ensure they are valid."]
 
-    fmt = form.get("format", "csv")
-    tz = form.get("tz", "UTC")
-    # Ensure this is well formed
-    ZoneInfo(tz)
-    station = form.get("station")[:4]
-    na = form.get("na", "M")
+    fmt = environ.get("format", "csv")
+    tz = environ.get("tz", "UTC")
+    station = environ.get("station")[:4]
+    na = environ.get("na", "M")
     if na not in ["M", "None", "blank"]:
         start_response("200 OK", [("Content-type", "text/plain")])
         return [b"ERROR: Invalid `na` value provided. {M, None, blank}"]
     if fmt != "excel":
         start_response("200 OK", [("Content-type", "text/plain")])
-        return [get_data(station, sts, ets, tz, na, fmt).encode("ascii")]
+        return [
+            get_data(
+                station, environ["sts"], environ["ets"], tz, na, fmt
+            ).encode("ascii")
+        ]
     headers = [
         ("Content-type", EXL),
         ("Content-disposition", f"attachment; Filename={station}.xlsx"),
     ]
     start_response("200 OK", headers)
-    return [get_data(station, sts, ets, tz, na, fmt)]
+    return [get_data(station, environ["sts"], environ["ets"], tz, na, fmt)]

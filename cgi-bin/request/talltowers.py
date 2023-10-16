@@ -4,17 +4,19 @@ from io import BytesIO, StringIO
 from zoneinfo import ZoneInfo
 
 import pandas as pd
-from paste.request import parse_formvars
 from pyiem.util import get_dbconn, get_sqlalchemy_conn
+from pyiem.webutil import iemapp
 
 EXL = "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"
 
 TOWERIDS = {0: "ETTI4", 1: "MCAI4"}
 
 
-def get_stations(form):
+def get_stations(environ):
     """Figure out the requested station"""
-    stations = form.getall("station")
+    stations = environ.get("station", [])
+    if isinstance(stations, str):
+        stations = [stations]
     towers = []
     for tid, nwsli in TOWERIDS.items():
         if nwsli in stations:
@@ -54,26 +56,35 @@ def get_columns(cursor):
     return res
 
 
+@iemapp()
 def application(environ, start_response):
     """Go main Go"""
     pgconn = get_dbconn("talltowers", user="tt_web")
     columns = get_columns(pgconn.cursor())
-    form = parse_formvars(environ)
-    tzname = form.get("tz", "Etc/UTC")
+    tzname = environ.get("tz", "Etc/UTC")
     tzinfo = ZoneInfo(tzname)
 
-    stations = get_stations(form)
+    stations = get_stations(environ)
     if not stations:
         start_response(
             "500 Internal Server Error", [("Content-type", "text/plain")]
         )
         return [b"No stations provided"]
-    sts, ets = get_time_bounds(form, tzinfo)
-    fmt = form.get("format")
+    sts, ets = get_time_bounds(environ, tzinfo)
+    fmt = environ.get("format")
     # Build out our variable list
     tokens = []
-    for z in form.getall("z"):
-        for v in form.getall("var"):
+    zz = environ.get("z", [])
+    if isinstance(zz, str):
+        zz = [zz]
+    varnames = environ.get("var", [])
+    if isinstance(varnames, str):
+        varnames = [varnames]
+    aggs = environ.get("agg", [])
+    if isinstance(aggs, str):
+        aggs = [aggs]
+    for z in zz:
+        for v in varnames:
             v1 = v
             v2 = ""
             if v.find("_") > -1:
@@ -82,10 +93,10 @@ def application(environ, start_response):
             colname = f"{v1}_{z}m{v2}"
             if colname not in columns:
                 continue
-            for agg in form.getall("agg"):
+            for agg in aggs:
                 tokens.append(f"{agg}({colname}) as {colname}_{agg}")
 
-    tw = int(form.get("window", 1))
+    tw = int(environ.get("window", 1))
 
     sql = f"""
     SELECT tower,

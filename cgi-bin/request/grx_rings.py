@@ -3,8 +3,8 @@ import math
 from html import escape
 from io import StringIO
 
-from paste.request import parse_formvars
 from pyiem.util import html_escape
+from pyiem.webutil import iemapp
 
 
 def createCircleAroundWithRadius(lat, lon, radiusMiles):
@@ -45,10 +45,10 @@ def getLocation(lat1, lon1, brng, distanceMiles):
     return lat2, lon2
 
 
+@iemapp()
 def application(environ, start_response):
     """Go Main Go."""
-    form = parse_formvars(environ)
-    fn = escape(form.get("fn", "placefile_rings.txt"))
+    fn = escape(environ.get("fn", "placefile_rings.txt"))
     headers = [
         ("Content-type", "application/octet-stream"),
         ("Content-Disposition", f"attachment; filename={fn}"),
@@ -56,10 +56,10 @@ def application(environ, start_response):
     start_response("200 OK", headers)
 
     # Things for the user to theoretically input:
-    loc = html_escape(form.get("loc", "Jack Trice Stadium"))
+    loc = html_escape(environ.get("loc", "Jack Trice Stadium"))
     try:
-        pointLat = float(form.get("lat", 42.014004))
-        pointLon = float(form.get("lon", -93.635773))
+        pointLat = float(environ.get("lat", 42.014004))
+        pointLon = float(environ.get("lon", -93.635773))
     except ValueError:
         return [b"ERROR: Invalid lat or lon valid provided."]
     sio = StringIO()
@@ -72,14 +72,14 @@ def application(environ, start_response):
     )
 
     for i in range(3):
-        distanceInMiles = float(form.get(f"m{i}", 100))
+        distanceInMiles = float(environ.get(f"m{i}", 100))
         if distanceInMiles <= 0.00001:
             continue
-        r = int(float(form.get(f"r{i}", 255)))
-        g = int(float(form.get(f"g{i}", 255)))
-        b = int(float(form.get(f"b{i}", 0)))
-        a = int(float(form.get(f"a{i}", 255)))
-        t = form.get(f"t{i}", "").replace("\n", "\\n")
+        r = int(float(environ.get(f"r{i}", 255)))
+        g = int(float(environ.get(f"g{i}", 255)))
+        b = int(float(environ.get(f"b{i}", 0)))
+        a = int(float(environ.get(f"a{i}", 255)))
+        t = environ.get(f"t{i}", "").replace("\n", "\\n")
 
         # Create the lon/lat pairs
         X, Y = createCircleAroundWithRadius(

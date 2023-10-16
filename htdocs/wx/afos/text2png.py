@@ -10,8 +10,8 @@ from zoneinfo import ZoneInfo
 import PIL.ImageDraw
 import PIL.ImageFont
 import PIL.ImageOps
-from paste.request import parse_formvars
 from pyiem.util import get_dbconn
+from pyiem.webutil import iemapp
 from pymemcache.client import Client
 
 
@@ -82,14 +82,15 @@ def make_image(e, pil):
     content = ""
     if cursor.rowcount > 0:
         content = cursor.fetchone()[0]
+    pgconn.close()
     return text_image(content)
 
 
+@iemapp()
 def application(environ, start_response):
     """Go Main Go"""
-    form = parse_formvars(environ)
-    e = form.get("e", "201612141916")[:12]
-    pil = form.get("pil", "ADMNFD")[:6].replace(" ", "")
+    e = environ.get("e", "201612141916")[:12]
+    pil = environ.get("pil", "ADMNFD")[:6].replace(" ", "")
     key = f"{e}_{pil}.png"
     mc = Client("iem-memcached:11211")
     res = mc.get(key)

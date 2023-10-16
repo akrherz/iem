@@ -1,12 +1,11 @@
 """Download IEM summary data!"""
-import datetime
 import sys
 from io import BytesIO, StringIO
 
 import pandas as pd
-from paste.request import parse_formvars
 from pyiem.network import Table as NetworkTable
 from pyiem.util import get_dbconn, get_sqlalchemy_conn
+from pyiem.webutil import iemapp
 from sqlalchemy import text
 
 EXL = "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"
@@ -124,27 +123,10 @@ def get_data(network, sts, ets, stations, cols, na, fmt):
     return sio.getvalue()
 
 
-def parse_dates(form):
-    """Nicely resolve dates please."""
-    sts = datetime.date(
-        int(form.get("year1")), int(form.get("month1")), int(form.get("day1"))
-    )
-    ets = datetime.date(
-        int(form.get("year2")), int(form.get("month2")), int(form.get("day2"))
-    )
-    return sts, ets
-
-
+@iemapp()
 def application(environ, start_response):
     """See how we are called"""
-    form = parse_formvars(environ)
-    try:
-        sts, ets = parse_dates(form)
-    except Exception:
-        start_response(
-            "500 Internal Server Error", [("Content-type", "text/plain")]
-        )
-        return [b"Error while parsing provided dates, ensure they are valid."]
+    sts, ets = environ["sts"].date(), environ["ets"].date()
 
     if sts.year != ets.year and overloaded():
         start_response(
@@ -152,16 +134,22 @@ def application(environ, start_response):
         )
         return [b"ERROR: server over capacity, please try later"]
 
-    fmt = form.get("format", "csv")
-    stations = form.getall("stations")
+    fmt = environ.get("format", "csv")
+    stations = environ.get("stations", [])
+    if isinstance(stations, str):
+        stations = [stations]
     if not stations:
-        stations = form.getall("station")
+        stations = environ.get("station", [])
+        if isinstance(stations, str):
+            stations = [stations]
     if not stations:
         start_response("200 OK", [("Content-type", "text/plain")])
         return [b"ERROR: No stations specified for request"]
-    network = form.get("network")[:12]
-    cols = form.getall("var")
-    na = form.get("na", "None")
+    network = environ.get("network")[:12]
+    cols = environ.get("var", [])
+    if isinstance(cols, str):
+        cols = [cols]
+    na = environ.get("na", "None")
     if na not in ["M", "None", "blank"]:
         start_response("200 OK", [("Content-type", "text/plain")])
         return [b"ERROR: Invalid `na` value provided. {M, None, blank}"]

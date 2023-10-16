@@ -2,8 +2,8 @@
 import datetime
 import json
 
-from paste.request import parse_formvars
 from pyiem.util import get_dbconnc, html_escape
+from pyiem.webutil import iemapp
 from pymemcache.client import Client
 
 ISO9660 = "%Y-%m-%dT%H:%M:%SZ"
@@ -92,14 +92,14 @@ def run(wfo, year, phenomena, significance, etn):
     return json.dumps(res)
 
 
+@iemapp()
 def application(environ, start_response):
     """Answer request."""
-    fields = parse_formvars(environ)
-    wfo = fields.get("wfo", "MPX")
+    wfo = environ.get("wfo", "MPX")
     if len(wfo) == 4:
         wfo = wfo[1:]
     try:
-        year = int(fields.get("year", 2015))
+        year = int(environ.get("year", 2015))
     except ValueError:
         year = 0
     if year < 1986 or year > datetime.date.today().year + 1:
@@ -108,16 +108,16 @@ def application(environ, start_response):
         data = "Invalid Year"
         return [data.encode("ascii")]
 
-    phenomena = fields.get("phenomena", "SV")[:2]
-    significance = fields.get("significance", "W")[:1]
+    phenomena = environ.get("phenomena", "SV")[:2]
+    significance = environ.get("significance", "W")[:1]
     try:
-        etn = int(fields.get("etn", 1))
+        etn = int(environ.get("etn", 1))
     except ValueError:
         headers = [("Content-type", "text/plain")]
         start_response("500 Internal Server Error", headers)
         data = "Invalid ETN"
         return [data.encode("ascii")]
-    cb = fields.get("callback", None)
+    cb = environ.get("callback", None)
 
     mckey = f"/json/vtec_event/{wfo}/{year}/{phenomena}/{significance}/{etn}"
     mc = Client("iem-memcached:11211")

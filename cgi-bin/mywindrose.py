@@ -8,10 +8,10 @@ import datetime
 from io import BytesIO
 from zoneinfo import ZoneInfo
 
-from paste.request import parse_formvars
 from pyiem.network import Table as NetworkTable
 from pyiem.plot.use_agg import plt
 from pyiem.util import get_dbconn
+from pyiem.webutil import iemapp
 from pyiem.windrose_utils import windrose
 
 
@@ -36,41 +36,6 @@ def send_error(form, msg, start_response):
     return bio.getvalue()
 
 
-def get_times(form):
-    """get the times of interest"""
-    if (
-        "year1" in form
-        and "year2" in form
-        and "month1" in form
-        and "month2" in form
-        and "day1" in form
-        and "day2" in form
-        and "hour1" in form
-        and "hour2" in form
-        and "minute1" in form
-        and "minute2" in form
-    ):
-        sts = datetime.datetime(
-            int(form["year1"]),
-            int(form["month1"]),
-            int(form["day1"]),
-            int(form["hour1"]),
-            int(form["minute1"]),
-        )
-        ets = datetime.datetime(
-            int(form["year2"]),
-            int(form["month2"]),
-            int(form["day2"]),
-            int(form["hour2"]),
-            int(form["minute2"]),
-        )
-    else:
-        sts = datetime.datetime(1900, 1, 1)
-        ets = datetime.datetime(2050, 1, 1)
-
-    return sts, ets
-
-
 def guess_network(station):
     """Guess the network identifier."""
     with get_dbconn("mesosite") as dbconn:
@@ -88,10 +53,10 @@ def guess_network(station):
     return res
 
 
-def get_station_info(form):
+def get_station_info(environ):
     """Determine some metadata we need to process this form request."""
-    station = form["station"].upper()
-    network = form.get("network")
+    station = environ["station"].upper()
+    network = environ.get("network")
     if network is None:
         network = guess_network(station)
     dbname = "asos"
@@ -109,90 +74,95 @@ def get_station_info(form):
     return dbname, network, station
 
 
+@iemapp()
 def application(environ, start_response):
     """Query out the CGI variables"""
-    form = parse_formvars(environ)
-    try:
-        sts, ets = get_times(form)
-        dbname, network, station = get_station_info(form)
-    except Exception as exp:
-        return [send_error(form, str(exp), start_response)]
-    if "hour1" in form and "hourlimit" in form:
+    if "sts" not in environ:
+        environ["sts"] = datetime.datetime(1900, 1, 1)
+        environ["ets"] = datetime.datetime(2050, 1, 1)
+    dbname, network, station = get_station_info(environ)
+    if "hour1" in environ and "hourlimit" in environ:
         hours = [
-            int(form["hour1"]),
+            int(environ["hour1"]),
         ]
-    elif "hour1" in form and "hour2" in form and "hourrangelimit" in form:
-        if sts.hour > ets.hour:  # over midnight
-            hours = list(range(sts.hour, 24))
-            hours.extend(range(0, ets.hour))
+    elif (
+        "hour1" in environ
+        and "hour2" in environ
+        and "hourrangelimit" in environ
+    ):
+        if environ["sts"].hour > environ["ets"].hour:  # over midnight
+            hours = list(range(environ["sts"].hour, 24))
+            hours.extend(range(0, environ["ets"].hour))
         else:
-            if sts.hour == ets.hour:
-                ets += datetime.timedelta(hours=1)
-            hours = list(range(sts.hour, ets.hour))
+            if environ["sts"].hour == environ["ets"].hour:
+                environ["ets"] += datetime.timedelta(hours=1)
+            hours = list(range(environ["sts"].hour, environ["ets"].hour))
     else:
         hours = list(range(0, 24))
 
-    if "units" in form and form["units"] in ["mph", "kts", "mps", "kph"]:
-        units = form["units"]
+    if "units" in environ and environ["units"] in ["mph", "kts", "mps", "kph"]:
+        units = environ["units"]
     else:
         units = "mph"
 
-    if "month1" in form and "monthlimit" in form:
+    if "month1" in environ and "monthlimit" in environ:
         months = [
-            int(form["month1"]),
+            int(environ["month1"]),
         ]
     else:
         months = list(range(1, 13))
 
     try:
-        nsector = int(form["nsector"])
+        nsector = int(environ["nsector"])
     except Exception:
         nsector = 36
 
     rmax = None
-    if "staticrange" in form and form["staticrange"] == "1":
+    if "staticrange" in environ and environ["staticrange"] == "1":
         rmax = 100
 
     nt = NetworkTable(network, only_online=False)
     if station not in nt.sts:
-        return [send_error(form, "Unknown station identifier", start_response)]
+        return [
+            send_error(environ, "Unknown station identifier", start_response)
+        ]
     tzname = nt.sts[station]["tzname"]
     if network != "RAOB":
         # Assign the station time zone to the sts and ets
-        sts = sts.replace(tzinfo=ZoneInfo(tzname))
-        ets = ets.replace(tzinfo=ZoneInfo(tzname))
+        environ["sts"] = environ["sts"].replace(tzinfo=ZoneInfo(tzname))
+        environ["ets"] = environ["ets"].replace(tzinfo=ZoneInfo(tzname))
     else:
         tzname = "UTC"
     bins = []
-    if "bins" in form:
+    if "bins" in environ:
         bins = [
-            float(v) for v in form.get("bins").split(",") if v.strip() != ""
+            float(v) for v in environ.get("bins").split(",") if v.strip() != ""
         ]
         # Ensure that the bins are in ascending order and unique
         bins = sorted(list(set(bins)))
     res = windrose(
         station,
         database=dbname,
-        sts=sts,
-        ets=ets,
+        sts=environ["sts"],
+        ets=environ["ets"],
         months=months,
         hours=hours,
         units=units,
         nsector=nsector,
-        justdata=("justdata" in form),
+        justdata=("justdata" in environ),
         rmax=rmax,
         sname=nt.sts[station]["name"],
         tzname=tzname,
-        level=form.get("level", None),
-        limit_by_doy=(form.get("limit_by_doy") == "1"),
+        level=environ.get("level", None),
+        limit_by_doy=(environ.get("limit_by_doy") == "1"),
         bins=bins,
-        plot_convention=form.get("conv", "from"),
+        plot_convention=environ.get("conv", "from"),
     )
-    if "justdata" in form:
+    if "justdata" in environ:
         # We want text
         start_response("200 OK", [("Content-type", "text/plain")])
         return [res.encode("utf-8")]
-    fmt = form.get("fmt", "png")
+    fmt = environ.get("fmt", "png")
     if fmt == "png":
         ct = "image/png"
     elif fmt == "pdf":
@@ -200,8 +170,8 @@ def application(environ, start_response):
     elif fmt == "svg":
         ct = "image/svg+xml"
     else:
-        return [send_error(form, "Invalid fmt set", start_response)]
+        return [send_error(environ, "Invalid fmt set", start_response)]
     start_response("200 OK", [("Content-type", ct)])
     bio = BytesIO()
-    res.savefig(bio, format=fmt, dpi=int(form.get("dpi", 100)))
+    res.savefig(bio, format=fmt, dpi=int(environ.get("dpi", 100)))
     return [bio.getvalue()]

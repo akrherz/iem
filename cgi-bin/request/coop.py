@@ -9,9 +9,9 @@ from io import BytesIO, StringIO
 
 import pandas as pd
 from metpy.units import units
-from paste.request import parse_formvars
 from pyiem.network import Table as NetworkTable
 from pyiem.util import get_dbconnc, get_sqlalchemy_conn, utc
+from pyiem.webutil import iemapp
 from sqlalchemy import text
 
 DEGC = units.degC
@@ -64,9 +64,13 @@ def get_cgi_dates(form):
 
 def get_cgi_stations(form):
     """Figure out which stations the user wants, return a list of them"""
-    reqlist = form.getall("station[]")
+    reqlist = form.get("station[]", [])
+    if isinstance(reqlist, str):
+        reqlist = [reqlist]
     if not reqlist:
-        reqlist = form.getall("stations")
+        reqlist = form.get("stations", [])
+        if isinstance(reqlist, str):
+            reqlist = [reqlist]
     if not reqlist:
         return []
     if "_ALL" in reqlist:
@@ -749,30 +753,32 @@ def do_swat(ctx):
     return sio.getvalue()
 
 
+@iemapp()
 def application(environ, start_response):
     """go main go"""
-    form = parse_formvars(environ)
     ctx = {}
-    ctx["stations"] = get_cgi_stations(form)
+    ctx["stations"] = get_cgi_stations(environ)
     if not ctx["stations"]:
         start_response(
             "500 Internal Server Error", [("Content-type", "text/plain")]
         )
         return [b"No stations were specified for the request."]
-    ctx["sts"], ctx["ets"] = get_cgi_dates(form)
-    ctx["myvars"] = form.getall("vars[]")
+    ctx["sts"], ctx["ets"] = get_cgi_dates(environ)
+    ctx["myvars"] = environ.get("vars[]", [])
+    if isinstance(ctx["myvars"], str):
+        ctx["myvars"] = [ctx["myvars"]]
     # Model specification trumps vars[]
-    if form.get("model") is not None:
-        ctx["myvars"] = [form.get("model")]
-    ctx["what"] = form.get("what", "view")
-    ctx["delim"] = form.get("delim", "comma")
-    ctx["inclatlon"] = form.get("gis", "no")
-    ctx["scenario"] = form.get("scenario", "no")
+    if environ.get("model") is not None:
+        ctx["myvars"] = [environ.get("model")]
+    ctx["what"] = environ.get("what", "view")
+    ctx["delim"] = environ.get("delim", "comma")
+    ctx["inclatlon"] = environ.get("gis", "no")
+    ctx["scenario"] = environ.get("scenario", "no")
     ctx["scenario_year"] = 2099
     if ctx["scenario"] == "yes":
-        ctx["scenario_year"] = int(form.get("scenario_year", 2099))
+        ctx["scenario_year"] = int(environ.get("scenario_year", 2099))
     ctx["scenario_sts"], ctx["scenario_ets"] = get_scenario_period(ctx)
-    ctx["with_header"] = form.get("with_header", "yes")
+    ctx["with_header"] = environ.get("with_header", "yes")
 
     # TODO: this code stinks and is likely buggy
     headers = []

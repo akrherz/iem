@@ -3,8 +3,8 @@ import datetime
 import json
 
 import pandas as pd
-from paste.request import parse_formvars
 from pyiem.util import get_dbconn, html_escape
+from pyiem.webutil import iemapp
 from pymemcache.client import Client
 
 
@@ -73,18 +73,18 @@ def run(year, fmt):
     return html
 
 
+@iemapp()
 def application(environ, start_response):
     """Answer request."""
-    fields = parse_formvars(environ)
 
-    year = int(fields.get("year", 2015))
-    fmt = fields.get("format", "json")
+    year = int(environ.get("year", 2015))
+    fmt = environ.get("format", "json")
     if fmt not in ["json", "html"]:
         headers = [("Content-type", "text/plain")]
         start_response("500 Internal Server Error", headers)
         msg = "Invalid format provided."
         return [msg.encode("ascii")]
-    cb = fields.get("callback", None)
+    cb = environ.get("callback", None)
     headers = []
     if fmt == "json":
         headers.append(("Content-type", "application/json"))

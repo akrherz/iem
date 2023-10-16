@@ -5,20 +5,20 @@
 from io import StringIO
 
 import requests
-from paste.request import parse_formvars
 from pyiem.util import get_properties
+from pyiem.webutil import iemapp
 
 SERVICE = "https://maps.googleapis.com/maps/api/geocode/json"
 
 
+@iemapp()
 def application(environ, start_response):
     """Go main go"""
     props = get_properties()
-    form = parse_formvars(environ)
-    if "address" in form:
-        address = form["address"]
-    elif "street" in form and "city" in form:
-        address = "%s, %s" % (form["street"], form["city"])
+    if "address" in environ:
+        address = environ["address"]
+    elif "street" in environ and "city" in environ:
+        address = "%s, %s" % (environ["street"], environ["city"])
     else:
         start_response("200 OK", [("Content-type", "text/plain")])
         return [b"APIFAIL"]

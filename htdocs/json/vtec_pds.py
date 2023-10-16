@@ -1,8 +1,8 @@
 """Listing of VTEC PDS Warnings."""
 import json
 
-from paste.request import parse_formvars
 from pyiem.util import get_dbconnc, html_escape
+from pyiem.webutil import iemapp
 from pymemcache.client import Client
 
 ISO9660 = "%Y-%m-%dT%H:%M:%SZ"
@@ -49,14 +49,14 @@ def run():
                 states=row["states"],
             )
         )
-    pgconn.commit()
+    pgconn.close()
     return json.dumps(res)
 
 
+@iemapp()
 def application(environ, start_response):
     """Answer request."""
-    fields = parse_formvars(environ)
-    cb = fields.get("callback", None)
+    cb = environ.get("callback", None)
 
     mckey = "/json/vtec_pds"
     mc = Client("iem-memcached:11211")

@@ -4,8 +4,8 @@ import zipfile
 from datetime import datetime, timezone
 from io import BytesIO, StringIO
 
-from paste.request import parse_formvars
 from pyiem.util import get_dbconn, html_escape
+from pyiem.webutil import iemapp
 
 DATE_REGEX = re.compile(r"^[0-9]{4}\-\d+\-\d+")
 WARPIL = "FLS FFS AWW TOR SVR FFW SVS LSR SPS WSW FFA WCN NPW".split()
@@ -66,28 +66,28 @@ def zip_handler(cursor):
     return [bio.getvalue()]
 
 
+@iemapp()
 def application(environ, start_response):
     """Process the request"""
     # Attempt to keep the file from downloading and just displaying in chrome
-    form = parse_formvars(environ)
-    pils = pil_logic(form.get("pil", ""))
+    pils = pil_logic(environ.get("pil", ""))
     try:
-        limit = int(form.get("limit", 1))
+        limit = int(environ.get("limit", 1))
     except ValueError:
         limit = 1
-    center = form.get("center", "")[:4]
-    sdate = get_date(form.get("sdate"))
-    edate = get_date(form.get("edate"))
+    center = environ.get("center", "")[:4]
+    sdate = get_date(environ.get("sdate"))
+    edate = get_date(environ.get("edate"))
     if sdate is False or edate is False:
         start_response("200 OK", [("Content-type", "text/plain")])
         return [
             b"Either sdate or edate failed form "
             b"YYYY-mm-dd or YYYY-mm-ddTHH:MM, both are UTC dates"
         ]
-    ttaaii = form.get("ttaaii", "")[:6]
-    fmt = form.get("fmt", "text")
+    ttaaii = environ.get("ttaaii", "")[:6]
+    fmt = environ.get("fmt", "text")
     headers = [("X-Content-Type-Options", "nosniff")]
-    if form.get("dl") == "1" or fmt == "zip":
+    if environ.get("dl") == "1" or fmt == "zip":
         suffix = "zip" if fmt == "zip" else "txt"
         headers.append(("Content-type", "application/octet-stream"))
         headers.append(

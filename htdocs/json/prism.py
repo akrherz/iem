@@ -4,9 +4,9 @@ import json
 import os
 
 import numpy as np
-from paste.request import parse_formvars
 from pyiem import prism
 from pyiem.util import c2f, html_escape, mm2inch, ncopen
+from pyiem.webutil import iemapp
 from pymemcache.client import Client
 
 
@@ -95,14 +95,13 @@ def dowork(valid, lon, lat):
     return json.dumps(res)
 
 
+@iemapp()
 def application(environ, start_response):
     """Answer request."""
-    fields = parse_formvars(environ)
-
-    lat = float(fields.get("lat", 41.9))
-    lon = float(fields.get("lon", -92.0))
-    valid = fields.get("valid", "20191028")
-    cb = fields.get("callback", None)
+    lat = float(environ.get("lat", 41.9))
+    lon = float(environ.get("lon", -92.0))
+    valid = environ.get("valid", "20191028")
+    cb = environ.get("callback", None)
 
     mckey = f"/json/prism/{lon:.2f}/{lat:.2f}/{valid}?callback={cb}"
     mc = Client("iem-memcached:11211")

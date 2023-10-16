@@ -6,8 +6,8 @@ from io import BytesIO, StringIO
 
 import numpy as np
 import pandas as pd
-from paste.request import parse_formvars
 from pyiem.util import get_sqlalchemy_conn, utc
+from pyiem.webutil import iemapp
 from sqlalchemy import text
 
 ISO = "%Y-%m-%dT%H:%M:%SZ"
@@ -73,31 +73,31 @@ def to_json(data, df):
     return data
 
 
-def try_valid(ctx, fields):
+def try_valid(ctx, environ):
     """See if a valid stamp is provided or not."""
-    if fields.get("valid") is None:
+    if environ.get("valid") is None:
         return
     # parse at least the YYYY-mm-ddTHH:MM
-    ts = datetime.datetime.strptime(fields["valid"][:16], "%Y-%m-%dT%H:%M")
+    ts = datetime.datetime.strptime(environ["valid"][:16], "%Y-%m-%dT%H:%M")
     ctx["valid"] = utc(ts.year, ts.month, ts.day, ts.hour, ts.minute)
 
 
+@iemapp()
 def application(environ, start_response):
     """Answer request."""
-    fields = parse_formvars(environ)
     ctx = {}
-    ctx["lat"] = float(fields.get("lat", 41.99))
-    ctx["lon"] = float(fields.get("lon", -92.0))
+    ctx["lat"] = float(environ.get("lat", 41.99))
+    ctx["lon"] = float(environ.get("lon", -92.0))
     ctx["sdate"] = datetime.datetime.strptime(
-        fields.get("sdate", "2002/1/1"), "%Y/%m/%d"
+        environ.get("sdate", "2002/1/1"), "%Y/%m/%d"
     )
     ctx["edate"] = datetime.datetime.strptime(
-        fields.get("edate", "2099/1/1"), "%Y/%m/%d"
+        environ.get("edate", "2099/1/1"), "%Y/%m/%d"
     )
 
-    fmt = fields.get("fmt", "json")
+    fmt = environ.get("fmt", "json")
     try:
-        try_valid(ctx, fields)
+        try_valid(ctx, environ)
     except Exception as exp:
         sys.stderr.write(str(exp))
         headers = [("Content-type", "text/plain")]

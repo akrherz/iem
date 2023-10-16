@@ -2,9 +2,9 @@
 import datetime
 
 import simplejson as json
-from paste.request import parse_formvars
 from pyiem.reference import TRACE_VALUE
 from pyiem.util import get_dbconnc, html_escape
+from pyiem.webutil import iemapp
 from pymemcache.client import Client
 from simplejson import encoder
 
@@ -169,13 +169,13 @@ def get_data(station, year, fmt):
     return res
 
 
+@iemapp()
 def application(environ, start_response):
     """Answer request."""
-    fields = parse_formvars(environ)
-    station = fields.get("station", "KDSM")[:4]
-    year = int(fields.get("year", 2019))
-    cb = fields.get("callback")
-    fmt = fields.get("fmt", "json")
+    station = environ.get("station", "KDSM")[:4]
+    year = int(environ.get("year", 2019))
+    cb = environ.get("callback")
+    fmt = environ.get("fmt", "json")
 
     headers = []
     if fmt == "json":

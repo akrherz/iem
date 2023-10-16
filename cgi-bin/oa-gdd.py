@@ -4,44 +4,27 @@
 import datetime
 from io import BytesIO
 
-from paste.request import parse_formvars
 from pyiem.network import Table as NetworkTable
 from pyiem.plot import MapPlot
-from pyiem.util import get_dbconn
+from pyiem.util import get_dbconn, utc
+from pyiem.webutil import iemapp
 
 
+@iemapp()
 def application(environ, start_response):
     """Go Main Go"""
     pgconn = get_dbconn("coop")
     ccursor = pgconn.cursor()
 
-    form = parse_formvars(environ)
-    if (
-        "year1" in form
-        and "year2" in form
-        and "month1" in form
-        and "month2" in form
-        and "day1" in form
-        and "day2" in form
-    ):
-        sts = datetime.datetime(
-            int(form["year1"]), int(form["month1"]), int(form["day1"])
-        )
-        ets = datetime.datetime(
-            int(form["year2"]), int(form["month2"]), int(form["day2"])
-        )
-    else:
-        sts = datetime.datetime(2011, 5, 1)
-        ets = datetime.datetime(2011, 10, 1)
     baseV = 50
-    if "base" in form:
-        baseV = int(form["base"])
+    if "base" in environ:
+        baseV = int(environ["base"])
     maxV = 86
-    if "max" in form:
-        maxV = int(form["max"])
+    if "max" in environ:
+        maxV = int(environ["max"])
 
     # Make sure we aren't in the future
-    ets = min(datetime.datetime.today(), ets)
+    ets = min(utc(), environ["ets"])
 
     st = NetworkTable("IACLIMATE")
 
@@ -60,12 +43,12 @@ def application(environ, start_response):
         (
             baseV,
             maxV,
-            sts.year,
-            sts.strftime("%Y-%m-%d"),
-            ets.strftime("%Y-%m-%d"),
+            environ["sts"].year,
+            environ["sts"].strftime("%Y-%m-%d"),
+            environ["ets"].strftime("%Y-%m-%d"),
         ),
     )
-    total_days = (ets - sts).days
+    total_days = (environ["ets"] - environ["sts"]).days
     for row in ccursor:
         sid = row[0]
         if sid not in st.sts:
@@ -80,8 +63,8 @@ def application(environ, start_response):
     tt = (ets - datetime.timedelta(days=1)).strftime("%d %b")
     mp = MapPlot(
         title=(
-            f"Iowa {sts:%Y: %d %b} thru {tt} GDD(base={baseV},max={maxV}) "
-            "Accumulation"
+            f"Iowa {environ['sts']:%Y: %d %b} thru {tt} "
+            f"GDD(base={baseV},max={maxV}) Accumulation"
         ),
         axisbg="white",
     )

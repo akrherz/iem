@@ -1,11 +1,10 @@
 """FEEL data download"""
 # pylint: disable=abstract-class-instantiated
-import datetime
 from io import BytesIO
 
 import pandas as pd
-from paste.request import parse_formvars
 from pyiem.util import get_sqlalchemy_conn
+from pyiem.webutil import iemapp
 
 EXL = "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"
 
@@ -40,17 +39,8 @@ def run(sts, ets, start_response):
     return bio.getvalue()
 
 
+@iemapp()
 def application(environ, start_response):
     """Get stuff"""
-    form = parse_formvars(environ)
-    year1 = int(form.get("year1"))
-    year2 = int(form.get("year2"))
-    month1 = int(form.get("month1"))
-    month2 = int(form.get("month2"))
-    day1 = int(form.get("day1"))
-    day2 = int(form.get("day2"))
 
-    sts = datetime.datetime(year1, month1, day1)
-    ets = datetime.datetime(year2, month2, day2)
-
-    return [run(sts, ets, start_response)]
+    return [run(environ["sts"], environ["ets"], start_response)]
