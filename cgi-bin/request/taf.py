@@ -75,6 +75,8 @@ def application(environ, start_response):
     ctx = {}
     ctx["fmt"] = environ.get("fmt")
     ctx["tz"] = ZoneInfo(environ.get("tz", "UTC"))
+    ctx["sts"] = environ["sts"]
+    ctx["ets"] = environ["ets"]
     stations = environ.get("station", [])
     if not isinstance(stations, list):
         stations = [stations]
