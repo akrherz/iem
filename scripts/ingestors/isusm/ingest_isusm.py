@@ -11,7 +11,7 @@ import pandas as pd
 from metpy.calc import dewpoint_from_relative_humidity
 from metpy.units import units
 from pyiem.observation import Observation
-from pyiem.util import c2f, convert_value, get_dbconn, logger, mm2inch
+from pyiem.util import c2f, convert_value, get_dbconnc, logger, mm2inch
 
 LOG = logger()
 DIRPATH = "/var/opt/CampbellSci/LoggerNet"
@@ -180,13 +180,12 @@ def do_inversion(filename, nwsli):
     # convert all columns to lowercase
     df.columns = map(str.lower, df.columns)
     df["valid"] = df["timestamp"].apply(make_time)
-    pgconn = get_dbconn("isuag")
-    cursor = pgconn.cursor()
+    pgconn, cursor = get_dbconnc("isuag")
     cursor.execute(
         "SELECT max(valid) from sm_inversion where station = %s",
         (nwsli,),
     )
-    maxts = cursor.fetchone()[0]
+    maxts = cursor.fetchone()["max"]
     if maxts is not None:
         df = df[df["valid"] > maxts]
     for _, row in df.iterrows():
@@ -218,8 +217,7 @@ def do_inversion(filename, nwsli):
 
 def minute_iemaccess(df):
     """Process dataframe into iemaccess."""
-    pgconn = get_dbconn("iem")
-    cursor = pgconn.cursor()
+    pgconn, cursor = get_dbconnc("iem")
     for _i, row in df.iterrows():
         # Update IEMAccess, pandas.Timestamp causes grief
         ob = Observation(row["station"], "ISUSM", row["valid"].to_pydatetime())
@@ -360,8 +358,7 @@ def process(fullfn):
         df["ws_mph_tmx"] = df["ws_mph_tmx"].apply(make_time)
 
     # Begin database work.
-    pgconn = get_dbconn("isuag")
-    icursor = pgconn.cursor()
+    pgconn, icursor = get_dbconnc("isuag")
     if tabletype == "MinSI":
         tablename = "sm_minute"
     # Convert any nan values to None for purposes of database work
