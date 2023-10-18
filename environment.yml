@@ -20,6 +20,7 @@ dependencies:
   - imageio
   # soft requirement for pandas
   - lxml
+  - mastodon.py
   - matplotlib-base
   # various places
   - metar
@@ -58,6 +59,7 @@ dependencies:
   # for testing
   - pytest
   - pytest-xdist
+  - qrcode
   # various places
   - rasterio
   # various places
