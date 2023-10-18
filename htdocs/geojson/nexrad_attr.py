@@ -3,8 +3,8 @@ import datetime
 import json
 from zoneinfo import ZoneInfo
 
-from paste.request import parse_formvars
 from pyiem.util import get_dbconnc, html_escape
+from pyiem.webutil import iemapp
 from pymemcache.client import Client
 
 
@@ -126,13 +126,13 @@ def run(ts, fmt):
     return res
 
 
+@iemapp()
 def application(environ, start_response):
     """Do Something"""
     # Go Main Go
-    form = parse_formvars(environ)
-    cb = form.get("callback", None)
-    ts = form.get("valid", "")[:19]  # ISO-8601ish
-    fmt = form.get("fmt", "geojson")[:7]
+    cb = environ.get("callback", None)
+    ts = environ.get("valid", "")[:19]  # ISO-8601ish
+    fmt = environ.get("fmt", "geojson")[:7]
     if fmt == "geojson":
         headers = [("Content-type", "application/vnd.geo+json")]
     else:

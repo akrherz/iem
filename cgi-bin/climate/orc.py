@@ -72,10 +72,10 @@ def application(_environ, start_response):
     icursor.execute(
         """SELECT day, max_tmpf, min_tmpf from
         summary s JOIN stations t ON (t.iemid = s.iemid)
-        WHERE t.id = 'SUX' and day >= '%s' and
-        day <= '%s' and max_tmpf is not null and min_tmpf is not null
-        """
-        % (s.strftime("%Y-%m-%d"), e.strftime("%Y-%m-%d"))
+        WHERE t.id = 'SUX' and day >= %s and
+        day <= %s and max_tmpf is not null and min_tmpf is not null
+        """,
+        (s.date(), e.date()),
     )
     for row in icursor:
         db[row[0].strftime("%m%d")]["high"] = row[1] + ADJUSTMENT
@@ -98,8 +98,8 @@ def application(_environ, start_response):
       SELECT station, avg(sknt) from alldata where station in ('SHL', 'ORC')
       and valid BETWEEN '%s' and '%s' and sknt >= 0
       GROUP by station ORDER by station DESC
-      """
-        % (s.strftime("%Y-%m-%d %H:%M"), e.strftime("%Y-%m-%d %H:%M"))
+      """,
+        (s, e),
     )
     awind = -99
     if acursor.rowcount > 0:

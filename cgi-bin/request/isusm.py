@@ -19,11 +19,10 @@ def get_stations(environ):
     """Figure out which stations were requested"""
     # Dragons, sts could now be a datetime, but legacy, it could be a list
     # of stations as legacy frontend used it for a variable
-    stations = ensure_list(environ, "station")
-    if not stations:
-        if not isinstance(environ.get("sts", ""), datetime.datetime):
-            stations = ensure_list(environ, "sts")
-    return stations
+    sts = ensure_list(environ, "station")
+    if not sts and not isinstance(environ.get("sts", ""), datetime.datetime):
+        sts = ensure_list(environ, "sts")
+    return sts
 
 
 def get_delimiter(environ):
