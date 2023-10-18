@@ -2,8 +2,8 @@
 import datetime
 
 import simplejson as json
-from paste.request import parse_formvars
 from pyiem.util import get_dbconnc, html_escape
+from pyiem.webutil import iemapp
 from pymemcache.client import Client
 
 ISO = "%Y-%m-%dT%H:%M:%SZ"
@@ -150,21 +150,21 @@ def run(wfo, year, phenomena, significance, etn):
     return json.dumps(res)
 
 
+@iemapp()
 def application(environ, start_response):
     """Main()"""
     headers = [("Content-type", "application/vnd.geo+json")]
 
-    form = parse_formvars(environ)
-    wfo = form.get("wfo", "MPX")
+    wfo = environ.get("wfo", "MPX")
     if len(wfo) == 4:
         wfo = wfo[1:]
-    year = int(form.get("year", 2015))
-    phenomena = form.get("phenomena", "SV")[:2]
-    significance = form.get("significance", "W")[:1]
-    etn = int(form.get("etn", 1))
-    sbw = int(form.get("sbw", 0))
-    lsrs = int(form.get("lsrs", 0))
-    cb = form.get("callback", None)
+    year = int(environ.get("year", 2015))
+    phenomena = environ.get("phenomena", "SV")[:2]
+    significance = environ.get("significance", "W")[:1]
+    etn = int(environ.get("etn", 1))
+    sbw = int(environ.get("sbw", 0))
+    lsrs = int(environ.get("lsrs", 0))
+    cb = environ.get("callback", None)
 
     mckey = (
         f"/geojson/vtec_event/{wfo}/{year}/{phenomena}/{significance}/"

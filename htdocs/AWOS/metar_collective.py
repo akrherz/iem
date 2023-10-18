@@ -6,6 +6,7 @@ from io import StringIO
 
 import pandas as pd
 from pyiem.util import get_sqlalchemy_conn, utc
+from pyiem.webutil import iemapp
 
 
 def add_output(sio):
@@ -29,6 +30,7 @@ def add_output(sio):
         sio.write(f"{row['raw']}=\r\r\n")
 
 
+@iemapp()
 def application(_environ, start_response):
     """Do Something"""
     headers = [("Content-type", "text/plain")]

@@ -1,9 +1,9 @@
 """ Recent METARs containing some pattern """
 import json
 
-from paste.request import parse_formvars
 from pyiem.reference import TRACE_VALUE
 from pyiem.util import get_dbconnc, html_escape
+from pyiem.webutil import iemapp
 from pymemcache.client import Client
 
 json.encoder.FLOAT_REPR = lambda o: format(o, ".2f")
@@ -83,11 +83,11 @@ def get_data(q):
     return json.dumps(data)
 
 
+@iemapp()
 def application(environ, start_response):
     """see how we are called"""
-    field = parse_formvars(environ)
-    q = field.get("q", "snowdepth")[:10]
-    cb = field.get("callback", None)
+    q = environ.get("q", "snowdepth")[:10]
+    cb = environ.get("callback", None)
 
     headers = [("Content-type", "application/vnd.geo+json")]
 
@@ -105,7 +105,3 @@ def application(environ, start_response):
 
     start_response("200 OK", headers)
     return [res.encode("ascii")]
-
-
-if __name__ == "__main__":
-    print(get_data("50A"))

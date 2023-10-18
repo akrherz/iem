@@ -5,9 +5,9 @@ import os
 from zoneinfo import ZoneInfo
 
 import numpy as np
-from paste.request import parse_formvars
 from pyiem import iemre
 from pyiem.util import convert_value, ncopen, utc
+from pyiem.webutil import iemapp
 from pymemcache.client import Client
 
 ISO = "%Y-%m-%dT%H:%MZ"
@@ -91,12 +91,12 @@ def workflow(sts, ets, i, j):
     return res
 
 
+@iemapp()
 def application(environ, start_response):
     """Do Something Fun!"""
-    form = parse_formvars(environ)
-    sts, ets = get_timerange(form)
-    lat = float(form.get("lat", 41.99))
-    lon = float(form.get("lon", -95.1))
+    sts, ets = get_timerange(environ)
+    lat = float(environ.get("lat", 41.99))
+    lon = float(environ.get("lon", -95.1))
     # fmt = form.get("format", "json")
 
     headers = [("Content-type", "application/json")]

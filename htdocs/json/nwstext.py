@@ -7,10 +7,11 @@ import json
 from zoneinfo import ZoneInfo
 
 # extras
-from paste.request import parse_formvars
 from pyiem.util import get_dbconn, html_escape
+from pyiem.webutil import iemapp
 
 
+@iemapp()
 def application(environ, start_response):
     """Answer request."""
     headers = [("Content-type", "application/json")]
@@ -18,11 +19,10 @@ def application(environ, start_response):
         start_response("405 Method Not Allowed", headers)
         return ['{"error": "Only HTTP GET Supported"}'.encode("utf8")]
 
-    fields = parse_formvars(environ)
     pgconn = get_dbconn("afos")
     acursor = pgconn.cursor()
-    pid = fields.get("product_id", "201302241937-KSLC-NOUS45-PNSSLC")[:35]
-    cb = fields.get("callback")
+    pid = environ.get("product_id", "201302241937-KSLC-NOUS45-PNSSLC")[:35]
+    cb = environ.get("callback")
     tokens = pid.split("-")
     utc = datetime.datetime.strptime(tokens[0], "%Y%m%d%H%M")
     utc = utc.replace(tzinfo=ZoneInfo("UTC"))

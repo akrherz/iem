@@ -2,8 +2,8 @@
 import datetime
 import json
 
-from paste.request import parse_formvars
 from pyiem.util import get_dbconnc, html_escape
+from pyiem.webutil import iemapp
 from pymemcache.client import Client
 
 
@@ -47,12 +47,12 @@ def run():
     return json.dumps(res)
 
 
+@iemapp()
 def application(environ, start_response):
     """Do Main"""
     headers = [("Content-type", "application/vnd.geo+json")]
 
-    form = parse_formvars(environ)
-    cb = form.get("callback", None)
+    cb = environ.get("callback", None)
 
     mckey = "/geojson/sps.geojson"
     mc = Client("iem-memcached:11211")

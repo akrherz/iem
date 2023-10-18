@@ -4,9 +4,9 @@ import json
 import os
 import sys
 
-from paste.request import parse_formvars
 from pyiem.reference import FIGSIZES_NAMES
 from pyiem.util import get_dbconnc
+from pyiem.webutil import iemapp
 
 BASEDIR, WSGI_FILENAME = os.path.split(__file__)
 
@@ -121,11 +121,11 @@ def do_json(pidx):
     return output, status, response_headers
 
 
+@iemapp()
 def application(environ, start_response):
     """Our Application!"""
-    fields = parse_formvars(environ)
-    pidx = int(fields.get("p", 0))
-    fmt = fields.get("_fmt", "json")
+    pidx = int(environ.get("p", 0))
+    fmt = environ.get("_fmt", "json")
     if fmt == "html":
         output, status, response_headers = do_html(pidx)
     else:

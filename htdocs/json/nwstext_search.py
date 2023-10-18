@@ -4,6 +4,7 @@
 import datetime
 import json
 
+from pyiem.exceptions import IncompleteWebRequest
 from pyiem.util import get_dbconn, html_escape
 from pyiem.webutil import iemapp
 from pymemcache.client import Client
@@ -38,6 +39,8 @@ def run(sts, ets, awipsid):
 @iemapp(default_tz="UTC")
 def application(environ, start_response):
     """Answer request."""
+    if "sts" not in environ:
+        raise IncompleteWebRequest("No sts provided")
     headers = [("Content-type", "application/json")]
     if environ.get("REQUEST_METHOD") != "GET":
         start_response("405 Method Not Allowed", headers)
