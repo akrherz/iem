@@ -27,6 +27,7 @@ COL = "hrrr_srad"
 # NOTE: for unsure reasons, the old HRRR data prior to this timestamp gets
 # invalidly decoded by present day pygrib, so we just abort for now.
 SWITCH_DATE = utc(2014, 10, 10, 20)
+GRBNAME = "Mean surface downward short-wave radiation flux"
 
 
 def compute_regions(affine, rsds, df):
@@ -105,7 +106,7 @@ def compute(df, sids, dt, do_regions=False):
         )
         if os.path.isfile(fn):
             grbs = pygrib.open(fn)
-            selgrbs = grbs.select(name="Downward short-wave radiation flux")
+            selgrbs = grbs.select(name=GRBNAME)
             if len(selgrbs) == 4:
                 # Goodie
                 for g in selgrbs:
@@ -133,7 +134,7 @@ def compute(df, sids, dt, do_regions=False):
         grbs = pygrib.open(fn)
         try:
             if now >= SWITCH_DATE:
-                grb = grbs.select(name="Downward short-wave radiation flux")
+                grb = grbs.select(name=GRBNAME)
             else:
                 grb = grbs.select(parameterNumber=192)
         except ValueError:
