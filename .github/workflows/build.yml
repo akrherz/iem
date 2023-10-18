@@ -116,6 +116,11 @@ jobs:
         git clone --depth 1 https://github.com/akrherz/iem-production-checks.git .ipc
         SERVICE=http://iem.local pytest -n 4 .ipc/tests/test_*.py  
 
+    - name: Run mod_wsgi smoke test
+      run: |
+        set -e
+        pytest -n 4 test/test_mod_wsgi.py
+
     - name: View Apache Logs
       if: failure()
       run: |
