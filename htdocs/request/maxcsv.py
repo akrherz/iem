@@ -12,6 +12,7 @@ import ephem
 import numpy as np
 import pandas as pd
 import requests
+from pyiem.exceptions import IncompleteWebRequest
 from pyiem.util import get_dbconnc, get_sqlalchemy_conn, utc
 from pyiem.webutil import iemapp
 from sqlalchemy import text
@@ -653,6 +654,8 @@ def router(appname):
 @iemapp()
 def application(environ, start_response):
     """Do Something"""
+    if "q" not in environ:
+        raise IncompleteWebRequest("Missing q argument")
     appname = environ.get("q", "moonphase_-95_42")
     res = router(appname)
     start_response("200 OK", [("Content-type", "text/plain")])

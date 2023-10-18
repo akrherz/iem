@@ -832,6 +832,9 @@ def generate_overview(apid):
     if apid > 0:
         return ""
     fn = "/mesonet/share/pickup/autoplot/overview.html"
+    if not os.path.isfile(fn):
+        LOG.warning(f"{fn} is missing")
+        return ""
     with open(fn, encoding="utf8") as fh:
         content = fh.read()
     return f"""

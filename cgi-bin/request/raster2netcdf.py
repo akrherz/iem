@@ -12,6 +12,7 @@ from zoneinfo import ZoneInfo
 import netCDF4
 import numpy as np
 from PIL import Image
+from pyiem.exceptions import IncomingRequestError
 from pyiem.util import get_dbconn
 from pyiem.webutil import iemapp
 
@@ -115,7 +116,9 @@ def do_work(valid, prod, start_response):
 def application(environ, start_response):
     """Do great things"""
     dstr = environ.get("dstr", "201710251200")[:12]
-    prod = environ.get("prod", "composite_n0r")[:100]  # arb
+    prod = environ.get("prod", "")[:100]  # arb
+    if prod == "":
+        raise IncomingRequestError("prod is required")
     valid = datetime.datetime.strptime(dstr, "%Y%m%d%H%M").replace(
         tzinfo=ZoneInfo("UTC")
     )
