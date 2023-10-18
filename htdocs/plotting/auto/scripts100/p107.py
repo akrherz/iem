@@ -177,7 +177,7 @@ def plotter(fdict):
     doff = "year"
     if ctx["eday"] < ctx["sday"]:
         dtlimiter = "(sday >= :sday or sday <= :eday)"
-        doff = "case when sday < :eday then year - 1 else year end"
+        doff = "case when sday <= :eday then year - 1 else year end"
     if stop is not None:
         dtlimiter = "sday >= :sday"
         doff = "year"

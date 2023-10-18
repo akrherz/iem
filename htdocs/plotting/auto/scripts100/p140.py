@@ -156,11 +156,11 @@ def plotter(fdict):
     doff = "extract(year from day)"
     if ctx["eday"] < ctx["sday"]:
         dtlimiter = (
-            "(to_char(day, 'mmdd') >= :eday or "
-            "to_char(day, 'mmdd') <= :sday)"
+            "(to_char(day, 'mmdd') >= :sday or "
+            "to_char(day, 'mmdd') <= :eday)"
         )
         doff = (
-            "case when to_char(day, 'mmdd') < :sday then "
+            "case when to_char(day, 'mmdd') <= :eday then "
             "(extract(year from day)::int - 1) else extract(year from day) end"
         )
     threshold = ctx["thres"]
