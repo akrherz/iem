@@ -12,7 +12,7 @@ from zoneinfo import ZoneInfo
 import netCDF4
 import numpy as np
 from PIL import Image
-from pyiem.exceptions import IncomingRequestError
+from pyiem.exceptions import IncompleteWebRequest
 from pyiem.util import get_dbconn
 from pyiem.webutil import iemapp
 
@@ -118,7 +118,7 @@ def application(environ, start_response):
     dstr = environ.get("dstr", "201710251200")[:12]
     prod = environ.get("prod", "")[:100]  # arb
     if prod == "":
-        raise IncomingRequestError("prod is required")
+        raise IncompleteWebRequest("prod is required")
     valid = datetime.datetime.strptime(dstr, "%Y%m%d%H%M").replace(
         tzinfo=ZoneInfo("UTC")
     )

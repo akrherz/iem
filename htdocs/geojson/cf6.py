@@ -2,9 +2,9 @@
 import datetime
 
 import simplejson as json
-from paste.request import parse_formvars
 from pyiem.reference import TRACE_VALUE
 from pyiem.util import get_dbconnc, html_escape
+from pyiem.webutil import iemapp
 from pymemcache.client import Client
 from simplejson import encoder
 
@@ -123,13 +123,13 @@ def get_data(ts, fmt):
     return res
 
 
+@iemapp()
 def application(environ, start_response):
     """see how we are called"""
-    fields = parse_formvars(environ)
-    dt = fields.get("dt", datetime.date.today().strftime("%Y-%m-%d"))
+    dt = environ.get("dt", datetime.date.today().strftime("%Y-%m-%d"))
     ts = datetime.datetime.strptime(dt, "%Y-%m-%d")
-    cb = fields.get("callback", None)
-    fmt = fields.get("fmt", "geojson")
+    cb = environ.get("callback", None)
+    fmt = environ.get("fmt", "geojson")
 
     headers = []
     if fmt == "geojson":
