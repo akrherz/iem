@@ -8,9 +8,9 @@ from io import BytesIO, StringIO
 
 import numpy as np
 import pandas as pd
-from paste.request import parse_formvars
 from pyiem.nws.vtec import VTEC_PHENOMENA, VTEC_SIGNIFICANCE, get_ps_string
 from pyiem.util import get_sqlalchemy_conn, utc
+from pyiem.webutil import iemapp
 from sqlalchemy import text
 
 ISO = "%Y-%m-%dT%H:%M:%SZ"
@@ -121,27 +121,27 @@ def try_valid(ctx, fields):
     ctx["valid"] = utc(ts.year, ts.month, ts.day, ts.hour, ts.minute)
 
 
+@iemapp()
 def application(environ, start_response):
     """Answer request."""
-    fields = parse_formvars(environ)
     ctx = {}
     try:
-        ctx["lat"] = float(fields.get("lat", 41.99))
-        ctx["lon"] = float(fields.get("lon", -92.0))
+        ctx["lat"] = float(environ.get("lat", 41.99))
+        ctx["lon"] = float(environ.get("lon", -92.0))
         ctx["sdate"] = datetime.datetime.strptime(
-            fields.get("sdate", "2002/1/1"), "%Y/%m/%d"
+            environ.get("sdate", "2002/1/1"), "%Y/%m/%d"
         )
         ctx["edate"] = datetime.datetime.strptime(
-            fields.get("edate", "2099/1/1"), "%Y/%m/%d"
+            environ.get("edate", "2099/1/1"), "%Y/%m/%d"
         )
     except ValueError:
         headers = [("Content-type", "text/plain")]
         start_response("404 File Not Found", headers)
         return [b"Failed to parse inputs."]
 
-    fmt = fields.get("fmt", "json")
+    fmt = environ.get("fmt", "json")
     try:
-        try_valid(ctx, fields)
+        try_valid(ctx, environ)
     except Exception as exp:
         sys.stderr.write(str(exp))
         headers = [("Content-type", "text/plain")]

@@ -2,8 +2,8 @@
 import json
 import os
 
-from paste.request import parse_formvars
 from pyiem.util import get_dbconnc, html_escape
+from pyiem.webutil import iemapp
 from pymemcache.client import Client
 
 ISO9660 = "%Y-%m-%dT%H:%MZ"
@@ -47,13 +47,13 @@ def dowork(lon, lat):
     return json.dumps(res)
 
 
+@iemapp()
 def application(environ, start_response):
     """Answer request."""
-    fields = parse_formvars(environ)
-    lat = float(fields.get("lat", 42.0))
-    lon = float(fields.get("lon", -95.0))
+    lat = float(environ.get("lat", 42.0))
+    lon = float(environ.get("lon", -95.0))
 
-    cb = fields.get("callback", None)
+    cb = environ.get("callback", None)
 
     hostname = os.environ.get("SERVER_NAME", "")
     mckey = ("/json/spcmcd/%.4f/%.4f") % (lon, lat)

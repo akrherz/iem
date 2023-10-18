@@ -83,8 +83,7 @@ def application(_environ, start_response):
 
     # Lemars
     ccursor.execute(
-        """SELECT high, low, valid  from climate
-        WHERE station = 'IA4735'"""
+        "SELECT high, low, valid  from climate WHERE station = 'IA4735'"
     )
     for row in ccursor:
         if row[2].strftime("%m%d") not in db:
@@ -96,7 +95,7 @@ def application(_environ, start_response):
     acursor.execute(
         """
       SELECT station, avg(sknt) from alldata where station in ('SHL', 'ORC')
-      and valid BETWEEN '%s' and '%s' and sknt >= 0
+      and valid BETWEEN %s and %s and sknt >= 0
       GROUP by station ORDER by station DESC
       """,
         (s, e),

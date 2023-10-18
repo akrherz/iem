@@ -6,8 +6,8 @@ import glob
 import json
 import os.path
 
-from paste.request import parse_formvars
 from pyiem.util import get_dbconn, html_escape
+from pyiem.webutil import iemapp
 
 NIDS = {
     "N0B": "Base Reflectivity (Super Res)",
@@ -40,13 +40,13 @@ def parse_time(s):
     return date
 
 
-def available_radars(fields):
+def available_radars(environ):
     """
     Return available RADAR sites for the given location and date!
     """
-    lat = float(fields.get("lat", 41.9))
-    lon = float(fields.get("lon", -92.3))
-    start_gts = parse_time(fields.get("start", "2012-01-27T00:00Z"))
+    lat = float(environ.get("lat", 41.9))
+    lon = float(environ.get("lon", -92.3))
+    start_gts = parse_time(environ.get("start", "2012-01-27T00:00Z"))
     pgconn = get_dbconn("mesosite")
     mcursor = pgconn.cursor()
     root = {"radars": []}
@@ -152,14 +152,14 @@ def is_realtime(sts):
     return True
 
 
-def list_files(fields):
+def list_files(environ):
     """
     List available NEXRAD files based on the form request
     """
-    radar = fields.get("radar", "DMX")[:10]
-    product = fields.get("product", "N0Q")[:3]
-    start_gts = parse_time(fields.get("start", "2012-01-27T00:00Z"))
-    end_gts = parse_time(fields.get("end", "2012-01-27T01:00Z"))
+    radar = environ.get("radar", "DMX")[:10]
+    product = environ.get("product", "N0Q")[:3]
+    start_gts = parse_time(environ.get("start", "2012-01-27T00:00Z"))
+    end_gts = parse_time(environ.get("end", "2012-01-27T01:00Z"))
     # practical limit here of 10 days
     if (start_gts + datetime.timedelta(days=10)) < end_gts:
         end_gts = start_gts + datetime.timedelta(days=10)
@@ -172,12 +172,12 @@ def list_files(fields):
     return root
 
 
-def list_products(fields):
+def list_products(environ):
     """
     List available NEXRAD products
     """
-    radar = fields.get("radar", "DMX")[:10]
-    now = parse_time(fields.get("start", "2012-01-27T00:00Z"))
+    radar = environ.get("radar", "DMX")[:10]
+    now = parse_time(environ.get("start", "2012-01-27T00:00Z"))
     root = {"products": []}
     if radar == "USCOMP":
         for dirname in ["N0Q", "N0R"]:
@@ -202,26 +202,26 @@ def list_products(fields):
     return root
 
 
+@iemapp()
 def application(environ, start_response):
     """Answer request."""
-    fields = parse_formvars(environ)
     if environ["REQUEST_METHOD"] not in ["GET", "POST"]:
         headers = [("Content-type", "text/plain")]
         start_response("500 Internal Server Error", headers)
         data = "Invalid Request"
         return [data.encode("ascii")]
 
-    operation = fields.get("operation", "list")
-    callback = fields.get("callback")
+    operation = environ.get("operation", "list")
+    callback = environ.get("callback")
     data = ""
     if callback is not None:
         data += f"{html_escape(callback)}("
     if operation == "list":
-        data += json.dumps(list_files(fields))
+        data += json.dumps(list_files(environ))
     elif operation == "available":
-        data += json.dumps(available_radars(fields))
+        data += json.dumps(available_radars(environ))
     elif operation == "products":
-        data += json.dumps(list_products(fields))
+        data += json.dumps(list_products(environ))
     if callback is not None:
         data += ")"
 
