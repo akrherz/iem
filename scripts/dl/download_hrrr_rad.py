@@ -31,7 +31,7 @@ def need_to_run(valid):
     grbs = pygrib.open(gribfn)
     hits = 0
     for grb in grbs:
-        if grb.shortName == "dswrf":
+        if grb.shortName in ["dswrf", "msdwswrf"]:
             hits += 1
     LOG.info("Found %s dswrf fields in %s", hits, gribfn)
     return hits != 4
@@ -70,13 +70,17 @@ def fetch(valid):
         ):
             offsets.append([int(tokens[1])])
             neednext = True
-    pqstr = valid.strftime(
-        "data u %Y%m%d%H00 bogus model/hrrr/%H/hrrr.t%Hz.3kmf01.grib2 grib2"
-    )
 
     if len(offsets) != 4:
         LOG.warning("warning, found %s gribs for %s", len(offsets), valid)
+    # Force overwrite first
+    routes = "a"
     for pr in offsets:
+        pqstr = valid.strftime(
+            f"data {routes} %Y%m%d%H00 bogus "
+            "model/hrrr/%H/hrrr.t%Hz.3kmf01.grib2 grib2"
+        )
+        routes = "u"
         headers = {"Range": f"bytes={pr[0]}-{pr[1]}"}
         req = exponential_backoff(
             requests.get, uri[:-4], headers=headers, timeout=30
