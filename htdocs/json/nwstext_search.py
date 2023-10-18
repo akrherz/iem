@@ -49,8 +49,8 @@ def application(environ, start_response):
     cb = environ.get("callback", None)
 
     mckey = (
-        f"/json/nwstext_search/{environ['sts']}/{environ['ets']}/"
-        f"{awipsid}?callback={cb}"
+        f"/json/nwstext_search/{environ['sts']:%Y%m%d%H%M}/"
+        f"{environ['ets']:%Y%m%d%H%M}/{awipsid}?callback={cb}"
     )
     mc = Client("iem-memcached:11211")
     res = mc.get(mckey)
