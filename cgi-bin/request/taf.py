@@ -4,6 +4,7 @@ from io import BytesIO
 from zoneinfo import ZoneInfo
 
 import pandas as pd
+from pyiem.exceptions import IncompleteWebRequest
 from pyiem.util import LOG, get_sqlalchemy_conn
 from pyiem.webutil import iemapp
 from sqlalchemy import text
@@ -72,6 +73,8 @@ def rect(station):
 @iemapp()
 def application(environ, start_response):
     """Get stuff"""
+    if "sts" not in environ:
+        raise IncompleteWebRequest("GET start timestamp parameters missing")
     ctx = {}
     ctx["fmt"] = environ.get("fmt")
     ctx["tz"] = ZoneInfo(environ.get("tz", "UTC"))

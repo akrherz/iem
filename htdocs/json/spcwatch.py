@@ -6,8 +6,8 @@ import json
 from zoneinfo import ZoneInfo
 
 import pandas as pd
-from paste.request import parse_formvars
 from pyiem.util import get_dbconnc, html_escape
+from pyiem.webutil import iemapp
 from pymemcache.client import Client
 
 
@@ -99,12 +99,12 @@ def dowork(valid):
     return json.dumps(res)
 
 
+@iemapp()
 def application(environ, start_response):
     """Answer request."""
-    fields = parse_formvars(environ)
-    ts = fields.get("ts", None)
-    lat = float(fields.get("lat", 0))
-    lon = float(fields.get("lon", 0))
+    ts = environ.get("ts", None)
+    lat = float(environ.get("lat", 0))
+    lon = float(environ.get("lon", 0))
     if pd.isna([lat, lon]).any():
         lat, lon = 0, 0
     if ts is None:
@@ -113,7 +113,7 @@ def application(environ, start_response):
         ts = datetime.datetime.strptime(ts, "%Y%m%d%H%M")
     ts = ts.replace(tzinfo=ZoneInfo("UTC"))
 
-    cb = fields.get("callback")
+    cb = environ.get("callback")
 
     if lat != 0 and lon != 0:
         mckey = f"/json/spcwatch/{lon:.4f}/{lat:.4f}"

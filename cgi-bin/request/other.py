@@ -1,11 +1,11 @@
 """
 Download interface for data from 'other' network
 """
-import datetime
 from io import StringIO
 
-from paste.request import parse_formvars
+from pyiem.exceptions import IncompleteWebRequest
 from pyiem.util import get_dbconnc
+from pyiem.webutil import iemapp
 
 
 def fetcher(station, sts, ets):
@@ -55,20 +55,13 @@ def fetcher(station, sts, ets):
     return sio.getvalue().encode("ascii")
 
 
+@iemapp()
 def application(environ, start_response):
     """
     Do something!
     """
-    form = parse_formvars(environ)
-    station = form.get("station", "")[:10]
-    year1 = int(form.get("year1"))
-    year2 = int(form.get("year2"))
-    month1 = int(form.get("month1"))
-    month2 = int(form.get("month2"))
-    day1 = int(form.get("day1"))
-    day2 = int(form.get("day2"))
-
-    sts = datetime.datetime(year1, month1, day1)
-    ets = datetime.datetime(year2, month2, day2)
+    if "sts" not in environ:
+        raise IncompleteWebRequest("GET start time parameters missing")
+    station = environ.get("station", "")[:10]
     start_response("200 OK", [("Content-type", "text/plain")])
-    return [fetcher(station, sts, ets)]
+    return [fetcher(station, environ["sts"], environ["ets"])]

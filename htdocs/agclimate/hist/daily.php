@@ -23,7 +23,7 @@ $dselect2 = daySelect2(date("d"), "day2");
 $sselect = "";
 foreach ($nt->table as $key => $val) {
     $sselect .= sprintf(
-        '<br /><input type="checkbox" name="sts" value="%s" id="%s"> ' .
+        '<br /><input type="checkbox" name="station" value="%s" id="%s"> ' .
             '<label for="%s">%s (%s County, %s)</label>',
         $key,
         $key,

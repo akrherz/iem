@@ -6,6 +6,7 @@ from io import BytesIO
 
 import fiona
 import pandas as pd
+from pyiem.exceptions import IncompleteWebRequest
 from pyiem.util import get_dbconnc, get_sqlalchemy_conn, utc
 from pyiem.webutil import iemapp
 from shapely.geometry import mapping
@@ -225,6 +226,8 @@ def do_excel(sql):
 @iemapp()
 def application(environ, start_response):
     """Go Main Go"""
+    if "sts" not in environ:
+        raise IncompleteWebRequest("Missing start time parameters")
     try:
         sql, fn = build_sql(environ)
     except ValueError as exp:

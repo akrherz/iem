@@ -2,9 +2,9 @@
 import datetime
 import json
 
-from paste.request import parse_formvars
 from pyiem.network import Table as NetworkTable
 from pyiem.util import get_dbconn, html_escape
+from pyiem.webutil import iemapp
 from pymemcache.client import Client
 
 
@@ -111,17 +111,17 @@ def run(network, month, day, syear, eyear):
     return json.dumps(data)
 
 
+@iemapp()
 def application(environ, start_response):
     """Main()"""
     headers = [("Content-type", "application/json")]
 
-    form = parse_formvars(environ)
-    network = form.get("network", "IACLIMATE").upper()
-    month = int(form.get("month", 1))
-    day = int(form.get("day", 1))
-    syear = int(form.get("syear", 1800))
-    eyear = int(form.get("eyear", datetime.datetime.now().year + 1))
-    cb = form.get("callback", None)
+    network = environ.get("network", "IACLIMATE").upper()
+    month = int(environ.get("month", 1))
+    day = int(environ.get("day", 1))
+    syear = int(environ.get("syear", 1800))
+    eyear = int(environ.get("eyear", datetime.datetime.now().year + 1))
+    cb = environ.get("callback", None)
 
     mckey = (
         f"/geojson/climodat_dayclimo/{network}/{month}/{day}/{syear}/{eyear}"

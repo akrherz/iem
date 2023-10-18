@@ -7,15 +7,16 @@ from io import BytesIO, StringIO
 
 # import cgitb
 import shapefile
+from pyiem.exceptions import IncompleteWebRequest
 from pyiem.util import get_dbconn
-from pyiem.webutil import iemapp
+from pyiem.webutil import ensure_list, iemapp
 
 
 def get_context(environ):
     """Figure out the CGI variables passed to this script"""
-    radar = environ.get("radar", [])
-    if isinstance(radar, str):
-        radar = [radar]
+    if "sts" not in environ:
+        raise IncompleteWebRequest("GET start time parameters missing.")
+    radar = ensure_list(environ, "radar")
 
     fmt = environ.get("fmt", "shp")
 

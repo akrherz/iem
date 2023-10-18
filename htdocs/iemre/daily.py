@@ -5,9 +5,9 @@ import os
 
 import numpy as np
 import pyiem.prism as prismutil
-from paste.request import parse_formvars
 from pyiem import iemre
 from pyiem.util import convert_value, ncopen
+from pyiem.webutil import iemapp
 
 
 def myrounder(val, precision):
@@ -17,13 +17,15 @@ def myrounder(val, precision):
     return round(val, precision)
 
 
+@iemapp()
 def application(environ, start_response):
     """Do Something Fun!"""
-    form = parse_formvars(environ)
-    ts = datetime.datetime.strptime(form.get("date", "2019-03-01"), "%Y-%m-%d")
-    lat = float(form.get("lat", 41.99))
-    lon = float(form.get("lon", -95.1))
-    fmt = form.get("format", "json")
+    ts = datetime.datetime.strptime(
+        environ.get("date", "2019-03-01"), "%Y-%m-%d"
+    )
+    lat = float(environ.get("lat", 41.99))
+    lon = float(environ.get("lon", -95.1))
+    fmt = environ.get("format", "json")
     if fmt != "json":
         headers = [("Content-type", "text/plain")]
         start_response("200 OK", headers)

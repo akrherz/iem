@@ -3,9 +3,9 @@ import datetime
 import json
 from zoneinfo import ZoneInfo
 
-from paste.request import parse_formvars
 from pyiem.reference import TRACE_VALUE
 from pyiem.util import get_dbconnc, html_escape
+from pyiem.webutil import iemapp
 from pymemcache.client import Client
 
 
@@ -122,14 +122,14 @@ def run(ts):
     return json.dumps(res)
 
 
+@iemapp()
 def application(environ, start_response):
     """Do Workflow"""
     headers = [("Content-type", "application/vnd.geo+json")]
 
-    form = parse_formvars(environ)
-    group = form.get("group", "coop")
-    cb = form.get("callback", None)
-    dt = form.get("dt", datetime.date.today().strftime("%Y-%m-%d"))
+    group = environ.get("group", "coop")
+    cb = environ.get("callback", None)
+    dt = environ.get("dt", datetime.date.today().strftime("%Y-%m-%d"))
     ts = datetime.datetime.strptime(dt, "%Y-%m-%d")
     ts = ts.replace(hour=12, tzinfo=ZoneInfo("UTC"))
 

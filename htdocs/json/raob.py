@@ -19,9 +19,9 @@ from zoneinfo import ZoneInfo
 
 import numpy as np
 import pandas as pd
-from paste.request import parse_formvars
 from pyiem.network import Table as NetworkTable
 from pyiem.util import get_sqlalchemy_conn, html_escape
+from pyiem.webutil import iemapp
 from pymemcache.client import Client
 from sqlalchemy import text
 
@@ -117,15 +117,15 @@ def parse_time(tstring):
     return dt.replace(tzinfo=ZoneInfo("UTC"))
 
 
+@iemapp()
 def application(environ, start_response):
     """Answer request."""
-    fields = parse_formvars(environ)
-    sid = fields.get("station", "")[:4]
+    sid = environ.get("station", "")[:4]
     if len(sid) == 3:
         sid = "K" + sid
-    ts = parse_time(fields.get("ts"))
-    pressure = int(fields.get("pressure", -1))
-    cb = fields.get("callback")
+    ts = parse_time(environ.get("ts"))
+    pressure = int(environ.get("pressure", -1))
+    cb = environ.get("callback")
 
     mckey = f"/json/raob/{ts:%Y%m%d%H%M}/{sid}/{pressure}?callback={cb}"
     mc = Client("iem-memcached:11211")

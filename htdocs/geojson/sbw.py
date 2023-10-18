@@ -3,8 +3,8 @@ import datetime
 import json
 from zoneinfo import ZoneInfo
 
-from paste.request import parse_formvars
 from pyiem.util import get_dbconnc, html_escape, utc
+from pyiem.webutil import iemapp
 from pymemcache.client import Client
 
 
@@ -85,14 +85,14 @@ def validate_ts(val):
     return val[:24]
 
 
+@iemapp()
 def application(environ, start_response):
     """Main Workflow"""
     headers = [("Content-type", "application/vnd.geo+json")]
 
-    form = parse_formvars(environ)
-    cb = form.get("callback", None)
+    cb = environ.get("callback", None)
     try:
-        ts = validate_ts(form.get("ts", "").strip())
+        ts = validate_ts(environ.get("ts", "").strip())
     except Exception:
         start_response("500 Internal Server Error", headers)
         return ["{'error': 'ts is malformed'}".encode("ascii")]

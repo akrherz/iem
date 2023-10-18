@@ -3,6 +3,7 @@ import datetime
 from io import StringIO
 
 from pyiem.util import get_dbconn
+from pyiem.webutil import iemapp
 
 
 def averageTemp(db, hi="high", lo="low"):
@@ -42,6 +43,7 @@ def cdd(db, hi="high", lo="low"):
     return dd
 
 
+@iemapp()
 def application(_environ, start_response):
     """Go Main Go"""
     COOP = get_dbconn("coop")
@@ -59,10 +61,10 @@ def application(_environ, start_response):
     now = s
     while now <= e:
         db[now.strftime("%m%d")] = {
-            "high": "M",
-            "low": "M",
-            "avg_high": "M",
-            "avg_low": "M",
+            "high": -99,
+            "low": -99,
+            "avg_high": -99,
+            "avg_low": -99,
         }
         now += datetime.timedelta(days=1)
 
@@ -70,9 +72,10 @@ def application(_environ, start_response):
     icursor.execute(
         """SELECT day, max_tmpf, min_tmpf from
         summary s JOIN stations t ON (t.iemid = s.iemid)
-        WHERE t.id = 'SUX' and day >= '%s' and
-        day <= '%s' """
-        % (s.strftime("%Y-%m-%d"), e.strftime("%Y-%m-%d"))
+        WHERE t.id = 'SUX' and day >= %s and
+        day <= %s and max_tmpf is not null and min_tmpf is not null
+        """,
+        (s.date(), e.date()),
     )
     for row in icursor:
         db[row[0].strftime("%m%d")]["high"] = row[1] + ADJUSTMENT
@@ -80,8 +83,7 @@ def application(_environ, start_response):
 
     # Lemars
     ccursor.execute(
-        """SELECT high, low, valid  from climate
-        WHERE station = 'IA4735'"""
+        "SELECT high, low, valid  from climate WHERE station = 'IA4735'"
     )
     for row in ccursor:
         if row[2].strftime("%m%d") not in db:
@@ -93,13 +95,15 @@ def application(_environ, start_response):
     acursor.execute(
         """
       SELECT station, avg(sknt) from alldata where station in ('SHL', 'ORC')
-      and valid BETWEEN '%s' and '%s' and sknt >= 0
+      and valid BETWEEN %s and %s and sknt >= 0
       GROUP by station ORDER by station DESC
-      """
-        % (s.strftime("%Y-%m-%d %H:%M"), e.strftime("%Y-%m-%d %H:%M"))
+      """,
+        (s, e),
     )
-    row = acursor.fetchone()
-    awind = row[1]
+    awind = -99
+    if acursor.rowcount > 0:
+        row = acursor.fetchone()
+        awind = row[1]
 
     headers = [("Content-type", "text/plain")]
     start_response("200 OK", headers)

@@ -5,6 +5,7 @@ import datetime
 import json
 from zoneinfo import ZoneInfo
 
+from pyiem.exceptions import IncompleteWebRequest
 from pyiem.util import get_dbconn
 from pyiem.webutil import iemapp
 
@@ -49,6 +50,8 @@ def application(environ, start_response):
         start_ts = start_ts.replace(tzinfo=ZoneInfo("America/Chicago"))
         end_ts = start_ts + datetime.timedelta(days=1)
     else:
+        if start_ts is None:
+            raise IncompleteWebRequest("GET start_ts= parameter missing")
         start_ts = datetime.datetime.strptime(start_ts, "%Y%m%d%H%M")
         start_ts = start_ts.replace(tzinfo=ZoneInfo("UTC"))
         end_ts = datetime.datetime.strptime(end_ts, "%Y%m%d%H%M")

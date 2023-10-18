@@ -5,9 +5,9 @@ from zoneinfo import ZoneInfo
 
 import pandas as pd
 from pandas.io.sql import read_sql
-from paste.request import parse_formvars
 from pyiem.nws.products.spcpts import THRESHOLD_ORDER
 from pyiem.util import get_dbconnc, get_sqlalchemy_conn, html_escape
+from pyiem.webutil import iemapp
 from pymemcache.client import Client
 
 ISO9660 = "%Y-%m-%dT%H:%MZ"
@@ -132,17 +132,17 @@ def dowork(lon, lat, last, day, cat):
     return json.dumps(res)
 
 
+@iemapp()
 def application(environ, start_response):
     """Answer request."""
-    fields = parse_formvars(environ)
-    lat = float(fields.get("lat", 42.0))
-    lon = float(fields.get("lon", -95.0))
-    time = fields.get("time")
-    last = int(fields.get("last", 0))
-    day = int(fields.get("day", 1))
-    cat = fields.get("cat", "categorical").upper()
+    lat = float(environ.get("lat", 42.0))
+    lon = float(environ.get("lon", -95.0))
+    time = environ.get("time")
+    last = int(environ.get("last", 0))
+    day = int(environ.get("day", 1))
+    cat = environ.get("cat", "categorical").upper()
 
-    cb = fields.get("callback")
+    cb = environ.get("callback")
 
     mckey = f"/json/spcoutlook/{lon:.4f}/{lat:.4f}/{last}/{day}/{cat}/{time}"
     mc = Client("iem-memcached:11211")

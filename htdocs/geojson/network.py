@@ -2,8 +2,8 @@
 import datetime
 import json
 
-from paste.request import parse_formvars
 from pyiem.util import get_dbconnc, html_escape
+from pyiem.webutil import iemapp
 from pymemcache.client import Client
 
 
@@ -86,14 +86,14 @@ def run(network, only_online):
     return json.dumps(res)
 
 
+@iemapp()
 def application(environ, start_response):
     """Main Workflow"""
     headers = [("Content-type", "application/vnd.geo+json")]
 
-    form = parse_formvars(environ)
-    cb = form.get("callback", None)
-    network = form.get("network", "KCCI").replace(" ", "_")[:30]
-    only_online = form.get("only_online", "0") == "1"
+    cb = environ.get("callback", None)
+    network = environ.get("network", "KCCI").replace(" ", "_")[:30]
+    only_online = environ.get("only_online", "0") == "1"
 
     mckey = f"/geojson/network/{network}.geojson|{only_online}"
     mc = Client("iem-memcached:11211")

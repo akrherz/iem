@@ -2,8 +2,9 @@
 import datetime
 import json
 
-from paste.request import parse_formvars
+from pyiem.exceptions import IncompleteWebRequest
 from pyiem.util import get_dbconnc, html_escape
+from pyiem.webutil import iemapp
 from pymemcache.client import Client
 
 
@@ -68,18 +69,20 @@ def run(ts):
     return json.dumps(res)
 
 
+@iemapp()
 def application(environ, start_response):
     """Main Workflow"""
     headers = [("Content-type", "application/vnd.geo+json")]
 
-    form = parse_formvars(environ)
-    cb = form.get("callback", None)
-    tstr = form.get("date", "")
+    cb = environ.get("callback", None)
+    tstr = environ.get("date", "")
     if tstr == "qqq":  # from pyIEM automation
         headers = [("Content-type", "text/plain")]
         start_response("500 Internal Server Error", headers)
         return [b"Sorry, I don't know how to handle this request"]
     ts = rectify_date(tstr)
+    if ts is None:
+        raise IncompleteWebRequest("No valid date provided")
 
     mckey = f"/geojson/usdm.geojson|{ts}"
     mc = Client("iem-memcached:11211")

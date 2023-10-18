@@ -6,6 +6,7 @@ import os
 
 import numpy as np
 from pyiem import iemre
+from pyiem.exceptions import IncompleteWebRequest
 from pyiem.util import html_escape, mm2inch, ncopen, utc
 from pyiem.webutil import iemapp
 from pymemcache.client import Client
@@ -61,6 +62,8 @@ def dowork(environ):
 @iemapp()
 def application(environ, start_response):
     """Answer request."""
+    if "lat" not in environ:
+        raise IncompleteWebRequest("GET parameter lat= missing")
     lat = float(environ.get("lat"))
     lon = float(environ.get("lon"))
     valid = environ.get("valid")

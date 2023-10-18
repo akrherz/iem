@@ -11,9 +11,10 @@ from zoneinfo import ZoneInfo
 
 import netCDF4
 import numpy as np
-from paste.request import parse_formvars
 from PIL import Image
+from pyiem.exceptions import IncompleteWebRequest
 from pyiem.util import get_dbconn
+from pyiem.webutil import iemapp
 
 
 def get_gridinfo(filename, xpoints, ypoints):
@@ -111,11 +112,13 @@ def do_work(valid, prod, start_response):
     return bio.getvalue()
 
 
+@iemapp()
 def application(environ, start_response):
     """Do great things"""
-    form = parse_formvars(environ)
-    dstr = form.get("dstr", "201710251200")[:12]
-    prod = form.get("prod", "composite_n0r")[:100]  # arb
+    dstr = environ.get("dstr", "201710251200")[:12]
+    prod = environ.get("prod", "")[:100]  # arb
+    if prod == "":
+        raise IncompleteWebRequest("prod is required")
     valid = datetime.datetime.strptime(dstr, "%Y%m%d%H%M").replace(
         tzinfo=ZoneInfo("UTC")
     )

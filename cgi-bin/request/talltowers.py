@@ -4,8 +4,9 @@ from io import BytesIO, StringIO
 from zoneinfo import ZoneInfo
 
 import pandas as pd
+from pyiem.exceptions import IncompleteWebRequest
 from pyiem.util import get_dbconn, get_sqlalchemy_conn
-from pyiem.webutil import iemapp
+from pyiem.webutil import ensure_list, iemapp
 
 EXL = "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"
 
@@ -14,9 +15,7 @@ TOWERIDS = {0: "ETTI4", 1: "MCAI4"}
 
 def get_stations(environ):
     """Figure out the requested station"""
-    stations = environ.get("station", [])
-    if isinstance(stations, str):
-        stations = [stations]
+    stations = ensure_list(environ, "station")
     towers = []
     for tid, nwsli in TOWERIDS.items():
         if nwsli in stations:
@@ -66,10 +65,7 @@ def application(environ, start_response):
 
     stations = get_stations(environ)
     if not stations:
-        start_response(
-            "500 Internal Server Error", [("Content-type", "text/plain")]
-        )
-        return [b"No stations provided"]
+        raise IncompleteWebRequest("No stations")
     sts, ets = get_time_bounds(environ, tzinfo)
     fmt = environ.get("format")
     # Build out our variable list

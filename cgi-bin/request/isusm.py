@@ -1,11 +1,13 @@
 """Download interface for ISU-SM data."""
 import datetime
 from io import BytesIO, StringIO
+from zoneinfo import ZoneInfo
 
 import numpy as np
 import pandas as pd
-from paste.request import parse_formvars
+from pyiem.exceptions import IncompleteWebRequest
 from pyiem.util import convert_value, get_sqlalchemy_conn
+from pyiem.webutil import ensure_list, iemapp
 from sqlalchemy import text
 
 EXL = "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"
@@ -13,52 +15,27 @@ MISSING = {"", "M", "-99"}
 SV_DEPTHS = [2, 4, 8, 12, 14, 16, 20, 24, 28, 30, 32, 36, 40, 42, 52]
 
 
-def get_stations(form):
+def get_stations(environ):
     """Figure out which stations were requested"""
-    stations = form.getall("sts")
-    if not stations:
-        stations.append("XXXXX")
-    if len(stations) == 1:
-        stations.append("XXXXX")
-    return stations
+    # Dragons, sts could now be a datetime, but legacy, it could be a list
+    # of stations as legacy frontend used it for a variable
+    sts = ensure_list(environ, "station")
+    if not sts and not isinstance(environ.get("sts", ""), datetime.datetime):
+        sts = ensure_list(environ, "sts")
+    return sts
 
 
-def get_dates(form):
-    """Get the start and end dates requested"""
-    year1 = form.get("year1", 2013)
-    month1 = form.get("month1", 1)
-    day1 = form.get("day1", 1)
-    year2 = form.get("year2", 2013)
-    month2 = form.get("month2", 1)
-    day2 = form.get("day2", 1)
-
-    try:
-        sts = datetime.datetime(int(year1), int(month1), int(day1))
-        ets = datetime.datetime(int(year2), int(month2), int(day2))
-    except Exception:
-        return None, None
-
-    if sts > ets:
-        sts, ets = ets, sts
-    if sts == ets:
-        ets = sts + datetime.timedelta(days=1)
-    return sts, ets
-
-
-def get_delimiter(form):
+def get_delimiter(environ):
     """Figure out what is the requested delimiter"""
-    d = form.getvalue("delim", "comma")
+    d = environ.get("delim", "comma")
     if d == "comma":
         return ","
     return "\t"
 
 
-def fetch_daily(form, cols):
+def fetch_daily(environ, cols):
     """Return a fetching of daily data"""
-    sts, ets = get_dates(form)
-    if sts is None:
-        return None, []
-    stations = get_stations(form)
+    stations = get_stations(environ)
 
     if not cols:
         cols = [
@@ -123,8 +100,8 @@ def fetch_daily(form, cols):
             ),
             conn,
             params={
-                "sts": sts,
-                "ets": ets,
+                "sts": environ["sts"],
+                "ets": environ["ets"],
                 "stations": stations,
             },
             index_col=None,
@@ -207,12 +184,9 @@ def fetch_daily(form, cols):
     return df, cols
 
 
-def fetch_hourly(form, cols):
+def fetch_hourly(environ, cols):
     """Process the request for hourly/minute data."""
-    sts, ets = get_dates(form)
-    if sts is None:
-        return None, []
-    stations = get_stations(form)
+    stations = get_stations(environ)
 
     if not cols:
         cols = [
@@ -239,7 +213,7 @@ def fetch_hourly(form, cols):
 
     table = "sm_hourly"
     sqlextra = ", null as bp_mb_qc "
-    if form.get("timeres") == "minute":
+    if environ.get("timeres") == "minute":
         table = "sm_minute"
         sqlextra = ", null as etalfalfa_qc"
     if "sv" in cols:
@@ -258,8 +232,8 @@ def fetch_hourly(form, cols):
             ),
             conn,
             params={
-                "sts": sts,
-                "ets": ets,
+                "sts": environ["sts"],
+                "ets": environ["ets"],
                 "stations": stations,
             },
             index_col=None,
@@ -268,7 +242,7 @@ def fetch_hourly(form, cols):
         return df, cols
 
     # Muck with the timestamp column
-    if form.get("tz") == "utc":
+    if environ.get("tz") == "utc":
         df["valid"] = df["utc_valid"].dt.strftime("%Y-%m-%d %H:%M+00")
     else:
         df["valid"] = (
@@ -339,25 +313,39 @@ def fetch_hourly(form, cols):
     return df, cols
 
 
+def muck_timestamps(environ):
+    """Atone for previous sins with sts variable..."""
+    # No action necessary
+    if isinstance(environ["sts"], datetime.datetime):
+        return
+    environ["station"] = ensure_list(environ, "sts")
+    environ["sts"] = datetime.datetime(
+        int(environ["year1"]),
+        int(environ["month1"]),
+        int(environ["day1"]),
+        tzinfo=ZoneInfo("America/Chicago"),
+    )
+
+
+@iemapp()
 def application(environ, start_response):
     """Do things"""
-    form = parse_formvars(environ)
-    mode = form.get("mode", "hourly")
-    cols = form.getall("vars")
-    fmt = form.get("format", "csv").lower()
-    todisk = form.get("todisk", "no")
+    if "sts" not in environ:
+        raise IncompleteWebRequest("Missing start time parameters")
+    muck_timestamps(environ)
+    mode = environ.get("mode", "hourly")
+    cols = ensure_list(environ, "vars")
+    fmt = environ.get("format", "csv").lower()
+    todisk = environ.get("todisk", "no")
     if mode == "hourly":
-        df, cols = fetch_hourly(form, cols)
+        df, cols = fetch_hourly(environ, cols)
     else:
-        df, cols = fetch_daily(form, cols)
-
-    if df is None or df.empty:
-        start_response("200 OK", [("Content-type", "text/plain")])
-        return [b"Sorry, no data found for this query."]
-
-    miss = form.get("missing", "-99")
+        df, cols = fetch_daily(environ, cols)
+    miss = environ.get("missing", "-99")
     assert miss in MISSING
     df = df.replace({np.nan: miss})
+    # compute columns present in both cols and df.columns
+    cols = list(set(cols).intersection(df.columns))
 
     if fmt == "excel":
         bio = BytesIO()

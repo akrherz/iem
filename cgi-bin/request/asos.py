@@ -9,7 +9,7 @@ from zoneinfo._common import ZoneInfoNotFoundError
 
 from pyiem.network import Table as NetworkTable
 from pyiem.util import get_dbconn, utc
-from pyiem.webutil import iemapp
+from pyiem.webutil import ensure_list, iemapp
 
 NULLS = {"M": "M", "null": "null", "empty": ""}
 TRACE_OPTS = {"T": "T", "null": "null", "empty": "", "0.0001": "0.0001"}
@@ -123,9 +123,7 @@ def get_stations(form):
             nt = NetworkTable(form.get("network"), only_online=False)
             return list(nt.sts.keys())
         return []
-    stations = form.get("station")
-    if not isinstance(stations, list):
-        stations = [stations]
+    stations = ensure_list(form, "station")
     if not stations:
         return []
     # allow folks to specify the ICAO codes for K*** sites
@@ -167,9 +165,7 @@ def get_time_bounds(form, tzinfo):
 
 def build_querycols(form):
     """Which database columns correspond to our query."""
-    req = form.get("data")
-    if not isinstance(req, list):
-        req = [req]
+    req = ensure_list(form, "data")
     if not req or "all" in req:
         return AVAILABLE
     res = []
@@ -236,14 +232,14 @@ def application(environ, start_response):
 
     # Save direct to disk or view in browser
     direct = environ.get("direct", "no") == "yes"
-    report_types = environ.get("report_type", [])
-    if not isinstance(report_types, list):
-        report_types = [report_types]
+    report_types = ensure_list(environ, "report_type")
     report_types = [int(i) for i in report_types]
     sts, ets = get_time_bounds(environ, tzinfo)
     if sts is None:
         pgconn.close()
-        start_response("400 Bad Request", [("Content-type", "text/plain")])
+        start_response(
+            "422 Unprocessable Entity", [("Content-type", "text/plain")]
+        )
         yield b"Invalid times provided."
         return
     stations = get_stations(environ)

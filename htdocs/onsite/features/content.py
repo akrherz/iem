@@ -5,6 +5,7 @@ import re
 import sys
 from io import BytesIO
 
+from pyiem.exceptions import IncompleteWebRequest
 from pyiem.util import get_dbconn
 from pyiem.webutil import iemapp
 
@@ -59,16 +60,11 @@ def application(environ, start_response):
     uri = environ.get("REQUEST_URI")
     # Option 1, no URI is provided.
     if uri is None:
-        headers.append(get_content_type("text"))
-        start_response("500 Internal Server Error", headers)
-        return [b"ERROR!"]
+        raise IncompleteWebRequest("Missing parameters in request")
     match = PATTERN.match(uri)
     # Option 2, the URI pattern is unknown.
     if match is None:
-        headers.append(get_content_type("text"))
-        start_response("500 Internal Server Error", headers)
-        sys.stderr.write(f"feature content failure: {repr(uri)}\n")
-        return [b"ERROR!"]
+        raise IncompleteWebRequest("Missing parameters in request")
 
     data = match.groupdict()
     fn = (

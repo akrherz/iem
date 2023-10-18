@@ -3,10 +3,10 @@
 """
 from io import BytesIO
 
-from paste.request import parse_formvars
 from pyiem.network import Table as NetworkTable
 from pyiem.plot import MapPlot
 from pyiem.util import c2f, get_dbconn
+from pyiem.webutil import iemapp
 
 CTX = {
     "tmpf": {"title": "2m Air Temperature [F]"},
@@ -89,10 +89,10 @@ def plot(data, v):
     return mp
 
 
+@iemapp()
 def application(environ, start_response):
     """Go Main Go"""
-    form = parse_formvars(environ)
-    v = form.get("v", "tmpf")
+    v = environ.get("v", "tmpf")
     data = get_currents()
     mp = plot(data, v)
     bio = BytesIO()

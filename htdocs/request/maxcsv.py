@@ -12,6 +12,7 @@ import ephem
 import numpy as np
 import pandas as pd
 import requests
+from pyiem.exceptions import IncompleteWebRequest
 from pyiem.util import get_dbconnc, get_sqlalchemy_conn, utc
 from pyiem.webutil import iemapp
 from sqlalchemy import text
@@ -653,10 +654,9 @@ def router(appname):
 @iemapp()
 def application(environ, start_response):
     """Do Something"""
-    appname = environ.get("q")
-    if appname is None:
-        start_response("404 File Not Found", [("Content-type", "text/plain")])
-        return [b"No such service."]
+    if "q" not in environ:
+        raise IncompleteWebRequest("Missing q argument")
+    appname = environ.get("q", "moonphase_-95_42")
     res = router(appname)
     start_response("200 OK", [("Content-type", "text/plain")])
     if isinstance(res, pd.DataFrame):

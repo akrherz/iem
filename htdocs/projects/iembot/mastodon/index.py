@@ -5,11 +5,12 @@ Configure iembot for mastodon, gasp.
 import mastodon
 import requests
 from cryptography.fernet import Fernet
-from paste.request import get_cookie_dict, parse_formvars
+from paste.request import get_cookie_dict
 from pyiem.templates.iem import TEMPLATE
 from pyiem.util import get_dbconnc, get_properties
+from pyiem.webutil import iemapp
 
-PRIVKEY = (get_properties()["mod_wsgi.privkey"]).encode("ascii")
+PRIVKEY = get_properties().get("mod_wsgi.privkey", "").encode("ascii")
 APP = "https://mesonet.agron.iastate.edu/projects/iembot/mastodon"
 HEADER = """
 <ol class="breadcrumb">
@@ -267,9 +268,9 @@ def reload_bot():
     requests.get("http://iembot:9003/reload", timeout=5)
 
 
+@iemapp()
 def application(environ, start_response):
     """mod-wsgi handler."""
-    fdict = parse_formvars(environ)
     cookies = get_cookie_dict(environ)
     headers = [("Content-type", "text/html")]
     res = {"content": HEADER}
@@ -279,11 +280,11 @@ def application(environ, start_response):
     # If we have an app, we can show the subscriptions and be done.
     if mapp is not None:
         start_response("200 OK", headers)
-        res["content"] += build_subui(mapp, fdict)
+        res["content"] += build_subui(mapp, environ)
         return [TEMPLATE.render(res).encode("utf-8")]
 
     # We should now have a server set, if not, we need to prompt for one.
-    server = sanitize_server(fdict.get("s"))
+    server = sanitize_server(environ.get("s"))
     if server is None:
         start_response("200 OK", headers)
         res["content"] += ENTER_HOST_FORM
@@ -291,12 +292,12 @@ def application(environ, start_response):
     # Get the app
     mapp, redirect_uri = get_mastodon_app(server)
     # oauth step
-    if fdict.get("code") is None:
+    if environ.get("code") is None:
         headers = [("Location", redirect_uri)]
         start_response("307 Temporary redirect", headers)
         return [TEMPLATE.render(res).encode("utf-8")]
     # Also sets cookie
-    mapp = save_code(mapp, server, fdict.get("code"), headers)
-    res["content"] += build_subui(mapp, fdict)
+    mapp = save_code(mapp, server, environ.get("code"), headers)
+    res["content"] += build_subui(mapp, environ)
     start_response("200 OK", headers)
     return [TEMPLATE.render(res).encode("utf-8")]

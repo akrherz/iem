@@ -13,12 +13,13 @@ import pandas as pd
 
 # Third Party
 import requests
-from paste.request import get_cookie_dict, parse_formvars
+from paste.request import get_cookie_dict
 from pyiem.htmlgen import make_select, station_select
 from pyiem.nws.vtec import VTEC_PHENOMENA, VTEC_SIGNIFICANCE
 from pyiem.reference import SECTORS_NAME, state_names
 from pyiem.templates.iem import TEMPLATE
 from pyiem.util import LOG, get_dbconnc, get_sqlalchemy_conn, html_escape, utc
+from pyiem.webutil import ensure_list, iemapp
 from sqlalchemy import text
 
 BASEDIR, WSGI_FILENAME = os.path.split(__file__)
@@ -508,7 +509,7 @@ def generate_form(apid, fdict, headers, cookies):
     for arg in meta["arguments"]:
         value = fdict.get(arg["name"], get_cookie_value(arg, cookies))
         if arg.get("multiple", False):
-            value = fdict.getall(arg["name"])
+            value = ensure_list(fdict, arg["name"])
         if isinstance(value, str):
             value = html_escape(value)
         if value is None:
@@ -832,6 +833,9 @@ def generate_overview(apid):
     if apid > 0:
         return ""
     fn = "/mesonet/share/pickup/autoplot/overview.html"
+    if not os.path.isfile(fn):
+        LOG.warning(f"{fn} is missing")
+        return ""
     with open(fn, encoding="utf8") as fh:
         content = fh.read()
     return f"""
@@ -970,15 +974,15 @@ def remove_all_cookies(headers, cookiestr):
         )
 
 
+@iemapp()
 def application(environ, start_response):
     """mod-wsgi handler."""
-    fdict = parse_formvars(environ)
     cookies = get_cookie_dict(environ)
     headers = [("Content-type", "text/html")]
     # invalid cookies may invalidate the entire cookie parsing
     # https://bugs.python.org/issue41945
     if not cookies and environ.get("HTTP_COOKIE", "") != "":
         remove_all_cookies(headers, environ["HTTP_COOKIE"])
-    tdict = generate(fdict, headers, cookies)
+    tdict = generate(environ, headers, cookies)
     start_response("200 OK", headers)
     return [TEMPLATE.render(tdict).encode("utf-8")]

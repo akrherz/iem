@@ -121,7 +121,7 @@ def do_hrrr(ts):
             try:
                 grbs = pygrib.open(fn)
                 selgrbs = grbs.select(
-                    name="Downward short-wave radiation flux"
+                    name="Mean surface downward short-wave radiation flux"
                 )
             except Exception:
                 LOG.warning("Read of %s failed", fn)

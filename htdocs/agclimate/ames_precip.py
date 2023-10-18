@@ -3,8 +3,10 @@ from io import StringIO
 
 import pandas as pd
 from pyiem.util import get_sqlalchemy_conn
+from pyiem.webutil import iemapp
 
 
+@iemapp()
 def application(_environ, start_response):
     """Go Main Go"""
     with get_sqlalchemy_conn("iem") as conn:
@@ -49,21 +51,22 @@ def application(_environ, start_response):
     df2 = df2.sort_index(ascending=True).reset_index()
     df2["valid"] = pd.to_datetime(df2["valid"]).dt.strftime("%Y-%m-%d %-I %p")
     sio = StringIO()
-    df2.to_html(
-        sio,
-        columns=[
-            "valid",
-            "coop",
-            "bucket1_total",
-            "bucket2_total",
-            "bucket1_hourly",
-            "bucket2_hourly",
-        ],
-        classes="table table-striped tableFixHead",
-        na_rep="-",
-        float_format="%.2f",
-        index=False,
-    )
+    if not df2.empty:
+        df2.to_html(
+            sio,
+            columns=[
+                "valid",
+                "coop",
+                "bucket1_total",
+                "bucket2_total",
+                "bucket1_hourly",
+                "bucket2_hourly",
+            ],
+            classes="table table-striped tableFixHead",
+            na_rep="-",
+            float_format="%.2f",
+            index=False,
+        )
     sio.seek(0)
     headers = [("Content-type", "text/html")]
     start_response("200 OK", headers)

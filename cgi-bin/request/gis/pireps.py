@@ -4,6 +4,7 @@ import zipfile
 from io import BytesIO, StringIO
 
 import shapefile
+from pyiem.exceptions import IncompleteWebRequest
 from pyiem.util import get_dbconn
 from pyiem.webutil import iemapp
 
@@ -114,5 +115,7 @@ def run(ctx, start_response):
 @iemapp(default_tz="UTC")
 def application(environ, start_response):
     """Do something fun!"""
+    if "sts" not in environ:
+        raise IncompleteWebRequest("GET start time parameters missing.")
     ctx = get_context(environ)
     return [run(ctx, start_response)]

@@ -3,14 +3,14 @@ Create ERDAS Imagine file from a MRMS Raster
 """
 import datetime
 import os
-import sys
 import tempfile
 import zipfile
 
 import numpy as np
 from imageio import imread
 from osgeo import gdal, osr
-from paste.request import parse_formvars
+from pyiem.exceptions import IncompleteWebRequest, NoDataFound
+from pyiem.webutil import iemapp
 
 # Workaround future
 gdal.UseExceptions()
@@ -22,7 +22,7 @@ def workflow(tmpdir, valid, period, start_response):
         f"/mesonet/ARCHIVE/data/%Y/%m/%d/GIS/mrms/p{period}h_%Y%m%d%H%M.png"
     )
     if not os.path.isfile(fn):
-        raise FileNotFoundError(fn)
+        raise NoDataFound(f"File not found: {fn}")
     img = imread(fn, pilmode="P")
     size = np.shape(img)
     # print 'A', np.max(img), np.min(img), img[0,0], img[-1,-1]
@@ -90,24 +90,20 @@ def workflow(tmpdir, valid, period, start_response):
     return payload
 
 
+@iemapp()
 def application(environ, start_response):
     """Do Something"""
-    form = parse_formvars(environ)
-    year = int(form.get("year", 2016))
-    month = int(form.get("month", 4))
-    day = int(form.get("day", 13))
-    hour = int(form.get("hour", 18))
-    minute = int(form.get("minute", 0))
+    if "year" not in environ:
+        raise IncompleteWebRequest("GET parameter year= missing")
+    year = int(environ.get("year", 2016))
+    month = int(environ.get("month", 4))
+    day = int(environ.get("day", 13))
+    hour = int(environ.get("hour", 18))
+    minute = int(environ.get("minute", 0))
 
-    period = int(form.get("period", 1))
+    period = int(environ.get("period", 1))
 
     valid = datetime.datetime(year, month, day, hour, minute)
 
-    try:
-        with tempfile.TemporaryDirectory() as tmpdir:
-            return [workflow(tmpdir, valid, period, start_response)]
-    except Exception as exp:
-        sys.stderr.write(str(exp) + "\n")
-        headers = [("Content-type", "text/plain")]
-        start_response("500 Internal Server Error", headers)
-        return [b"An error occurred."]
+    with tempfile.TemporaryDirectory() as tmpdir:
+        return [workflow(tmpdir, valid, period, start_response)]

@@ -6,20 +6,19 @@ import tempfile
 
 import geopandas as gpd
 import matplotlib.patheffects as PathEffects
-from paste.request import parse_formvars
+from pyiem.exceptions import IncompleteWebRequest
 from pyiem.nws.product import str2polygon
 from pyiem.plot import fitbox
-
-# third party
 from pyiem.plot.use_agg import plt
 from pyiem.reference import TWITTER_RESOLUTION_INCH
 from pyiem.util import utc
+from pyiem.webutil import iemapp
 
 
-def plot_poly(fig, poly, fields):
+def plot_poly(fig, poly, environ):
     """Add to axes."""
     ax = fig.add_axes([0.15, 0.15, 0.7, 0.7])
-    title = fields.get("title", "")[:120]
+    title = environ.get("title", "")[:120]
     title += (
         f"\npolygon.is_valid: {poly.is_valid} "
         f"linearring.is_valid: {poly.exterior.is_valid}"
@@ -59,9 +58,11 @@ def plot_poly(fig, poly, fields):
         tick.set_rotation(45)
 
 
-def process(fields):
+def process(environ):
     """Make something pretty."""
-    text = fields.get("text")
+    text = environ.get("text")
+    if text is None:
+        raise IncompleteWebRequest("GET text= parameter is missing")
     text = text.replace("LAT...LON", "").replace("\n", " ")
     # Add extra whitespace to account for upstream issues
     poly = str2polygon(text + " \n")
@@ -70,7 +71,7 @@ def process(fields):
 
     res = {}
     if poly is not None:
-        plot_poly(fig, poly, fields)
+        plot_poly(fig, poly, environ)
         res["geojson"] = gpd.GeoSeries([poly]).__geo_interface__
 
     fig.text(0.01, 0.01, f"Generated: {utc().strftime('%Y-%m-%dT%H:%M:%SZ')}")
@@ -82,10 +83,10 @@ def process(fields):
     return res
 
 
+@iemapp()
 def application(environ, start_response):
     """The App."""
-    fields = parse_formvars(environ)
-    res = process(fields)
+    res = process(environ)
     headers = [("Content-type", "application/json")]
     start_response("200 OK", headers)
     return [json.dumps(res).encode("ascii")]

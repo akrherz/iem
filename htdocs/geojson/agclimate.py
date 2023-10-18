@@ -2,10 +2,10 @@
 import datetime
 import json
 
-from paste.request import parse_formvars
 from pyiem.network import Table as NetworkTable
 from pyiem.tracker import loadqc
 from pyiem.util import convert_value, drct2text, get_dbconnc, utc
+from pyiem.webutil import iemapp
 
 
 def safe_t(val, units="degC"):
@@ -233,11 +233,11 @@ def get_data(cursor, ts):
     return json.dumps(data)
 
 
+@iemapp()
 def application(environ, start_response):
     """Go Main Go"""
     headers = [("Content-type", "application/vnd.geo+json")]
-    field = parse_formvars(environ)
-    dt = field.get("dt")
+    dt = environ.get("dt")
     if dt is None:
         ts = utc().replace(minute=0, second=0, microsecond=0)
     else:
@@ -245,7 +245,7 @@ def application(environ, start_response):
         ts = datetime.datetime.strptime(dt, fmt)
         ts = ts.replace(tzinfo=datetime.timezone.utc)
     pgconn, cursor = get_dbconnc("isuag")
-    func = get_data if field.get("inversion") is None else get_inversion_data
+    func = get_data if environ.get("inversion") is None else get_inversion_data
     data = func(cursor, ts)
     pgconn.close()
 

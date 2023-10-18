@@ -2,6 +2,7 @@
 import datetime
 
 from pyiem.util import get_dbconn
+from pyiem.webutil import iemapp
 from pymemcache.client import Client
 
 
@@ -45,6 +46,7 @@ def get_data():
     return data
 
 
+@iemapp()
 def application(_environ, start_response):
     """Go Main Go"""
     start_response("200 OK", [("Content-type", "text/plain")])

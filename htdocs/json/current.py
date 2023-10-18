@@ -1,8 +1,8 @@
 """Current Observation for a station and network"""
 import json
 
-from paste.request import parse_formvars
 from pyiem.util import get_dbconnc, html_escape, utc
+from pyiem.webutil import iemapp
 from pymemcache.client import Client
 
 
@@ -62,12 +62,12 @@ def run(network, station):
     return json.dumps(data)
 
 
+@iemapp()
 def application(environ, start_response):
     """Answer request."""
-    fields = parse_formvars(environ)
-    network = fields.get("network", "IA_ASOS")[:10].upper()
-    station = fields.get("station", "AMW")[:10].upper()
-    cb = fields.get("callback", None)
+    network = environ.get("network", "IA_ASOS")[:10].upper()
+    station = environ.get("station", "AMW")[:10].upper()
+    cb = environ.get("callback", None)
 
     mckey = f"/json/current/{network}/{station}"
     mc = Client("iem-memcached:11211")

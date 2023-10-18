@@ -3,6 +3,7 @@
 from io import BytesIO
 
 import pandas as pd
+from pyiem.exceptions import IncompleteWebRequest
 from pyiem.util import get_sqlalchemy_conn
 from pyiem.webutil import iemapp
 
@@ -42,5 +43,7 @@ def run(sts, ets, start_response):
 @iemapp()
 def application(environ, start_response):
     """Get stuff"""
+    if "sts" not in environ:
+        raise IncompleteWebRequest("GET parameters for start time missing")
 
     return [run(environ["sts"], environ["ets"], start_response)]

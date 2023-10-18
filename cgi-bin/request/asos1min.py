@@ -1,7 +1,7 @@
 """Support download of ASOS 1 minute data."""
 from io import StringIO
 
-from pyiem.exceptions import NoDataFound
+from pyiem.exceptions import IncompleteWebRequest
 from pyiem.util import get_dbconnc
 from pyiem.webutil import iemapp
 
@@ -81,7 +81,7 @@ def application(environ, start_response):
     if isinstance(stations, str):
         stations = [stations]
     if not stations:
-        raise NoDataFound("No station= was specified in request.")
+        raise IncompleteWebRequest("No station= was specified in request.")
     delim = DELIM[environ.get("delim", "comma")]
     sample = SAMPLING[environ.get("sample", "1min")]
     what = environ.get("what", "dl")
@@ -92,7 +92,7 @@ def application(environ, start_response):
     if isinstance(varnames, str):
         varnames = [varnames]
     if not varnames:
-        raise NoDataFound("No vars= was specified in request.")
+        raise IncompleteWebRequest("No vars= was specified in request.")
     pgconn, cursor = get_dbconnc("asos1min")
     cursor.execute(
         """

@@ -6,24 +6,27 @@ import zipfile
 
 import numpy as np
 import shapefile
-from paste.request import parse_formvars
 from pyiem import iemre
+from pyiem.exceptions import IncompleteWebRequest
 from pyiem.util import convert_value, get_dbconn, ncopen
+from pyiem.webutil import iemapp
 
 
+@iemapp()
 def application(environ, start_response):
     """Go main go"""
-    form = parse_formvars(environ)
-    ts0 = datetime.datetime.strptime(form.get("date0"), "%Y-%m-%d")
-    ts1 = datetime.datetime.strptime(form.get("date1"), "%Y-%m-%d")
-    base = int(form.get("base", 50))
-    ceil = int(form.get("ceil", 86))
+    if "date0" not in environ:
+        raise IncompleteWebRequest("GET parameter date0= missing")
+    ts0 = datetime.datetime.strptime(environ.get("date0"), "%Y-%m-%d")
+    ts1 = datetime.datetime.strptime(environ.get("date1"), "%Y-%m-%d")
+    base = int(environ.get("base", 50))
+    ceil = int(environ.get("ceil", 86))
     # Make sure we aren't in the future
     tsend = datetime.date.today()
     if ts1.date() >= tsend:
         ts1 = tsend - datetime.timedelta(days=1)
         ts1 = datetime.datetime(ts1.year, ts1.month, ts1.day)
-    fmt = form.get("format")
+    fmt = environ.get("format")
 
     offset0 = iemre.daily_offset(ts0)
     offset1 = iemre.daily_offset(ts1)
@@ -48,7 +51,7 @@ def application(environ, start_response):
 
     if fmt == "json":
         # For example: 19013
-        ugc = "IAC" + form.get("county")[2:]
+        ugc = "IAC" + environ.get("county")[2:]
         # Go figure out where this is!
         postgis = get_dbconn("postgis")
         pcursor = postgis.cursor()
