@@ -6,6 +6,7 @@ import json
 from datetime import datetime, timedelta
 
 # extras
+from pyiem.exceptions import IncompleteWebRequest
 from pyiem.util import get_dbconn, html_escape, utc
 from pyiem.webutil import iemapp
 
@@ -22,6 +23,8 @@ def application(environ, start_response):
         environ["sts"] = utc(date.year, date.month, date.day)
         environ["ets"] = environ["sts"] + timedelta(days=1)
     else:
+        if environ.get("sts") is None:
+            raise IncompleteWebRequest("No date information provided")
         if (environ["ets"] - environ["sts"]) > timedelta(days=14):
             environ["ets"] = environ["sts"] + timedelta(days=14)
 

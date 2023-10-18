@@ -5,9 +5,10 @@ import warnings
 
 import numpy as np
 import pyiem.prism as prismutil
-from paste.request import parse_formvars
 from pyiem import iemre
+from pyiem.exceptions import IncompleteWebRequest
 from pyiem.util import convert_value, ncopen
+from pyiem.webutil import iemapp
 
 warnings.simplefilter("ignore", UserWarning)
 json.encoder.FLOAT_REPR = lambda o: format(o, ".2f")
@@ -28,11 +29,13 @@ def send_error(start_response, msg):
     return json.dumps({"error": msg}).encode("ascii")
 
 
+@iemapp()
 def application(environ, start_response):
     """Go Main Go"""
-    form = parse_formvars(environ)
-    ts1 = datetime.datetime.strptime(form.get("date1"), "%Y-%m-%d")
-    ts2 = datetime.datetime.strptime(form.get("date2"), "%Y-%m-%d")
+    if "date1" not in environ:
+        raise IncompleteWebRequest("GET date1= parameter missing")
+    ts1 = datetime.datetime.strptime(environ.get("date1"), "%Y-%m-%d")
+    ts2 = datetime.datetime.strptime(environ.get("date2"), "%Y-%m-%d")
     if ts1 > ts2:
         (ts1, ts2) = (ts2, ts1)
     if ts1.year != ts2.year:
@@ -44,8 +47,8 @@ def application(environ, start_response):
     if ts2.date() > tsend:
         ts2 = datetime.datetime.now() - datetime.timedelta(days=1)
 
-    lat = float(form.get("lat"))
-    lon = float(form.get("lon"))
+    lat = float(environ.get("lat"))
+    lon = float(environ.get("lon"))
     if lon < iemre.WEST or lon > iemre.EAST:
         return [
             send_error(

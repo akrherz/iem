@@ -8,6 +8,7 @@ import datetime
 from io import BytesIO
 from zoneinfo import ZoneInfo
 
+from pyiem.exceptions import IncompleteWebRequest
 from pyiem.network import Table as NetworkTable
 from pyiem.plot.use_agg import plt
 from pyiem.util import get_dbconn
@@ -55,6 +56,8 @@ def guess_network(station):
 
 def get_station_info(environ):
     """Determine some metadata we need to process this form request."""
+    if "station" not in environ:
+        raise IncompleteWebRequest("GET parameter station= missing")
     station = environ["station"].upper()
     network = environ.get("network")
     if network is None:

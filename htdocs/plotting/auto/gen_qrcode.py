@@ -6,7 +6,8 @@ from io import BytesIO
 import qrcode
 
 # third party
-from paste.request import parse_formvars
+from pyiem.exceptions import IncompleteWebRequest
+from pyiem.webutil import iemapp
 from pymemcache.client import Client
 
 HTTP200 = "200 OK"
@@ -27,15 +28,18 @@ def q2uri(qstr, pval):
     return uri[:-1]
 
 
+@iemapp()
 def application(environ, start_response):
     """Our Application!"""
-    fields = parse_formvars(environ)
     # HACK
-    if fields.get("q", "").find("network:WFO::wfo:PHEB") > -1:
-        fields["q"] = fields["q"].replace("network:WFO", "network:NWS")
-    if fields.get("q", "").find("network:WFO::wfo:PAAQ") > -1:
-        fields["q"] = fields["q"].replace("network:WFO", "network:NWS")
-    uri = q2uri(fields.get("q"), fields.get("p"))
+    qstr = environ.get("q", "")
+    if qstr == "":
+        raise IncompleteWebRequest("No query string provided")
+    if environ.get("q", "").find("network:WFO::wfo:PHEB") > -1:
+        environ["q"] = environ["q"].replace("network:WFO", "network:NWS")
+    if environ.get("q", "").find("network:WFO::wfo:PAAQ") > -1:
+        environ["q"] = environ["q"].replace("network:WFO", "network:NWS")
+    uri = q2uri(environ.get("q"), environ.get("p"))
     mckey = hashlib.sha256(uri.encode("utf-8")).hexdigest()
     # Figure out what our response headers should be
     response_headers = [("Content-type", "image/png")]

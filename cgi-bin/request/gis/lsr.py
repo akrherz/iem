@@ -7,6 +7,7 @@ import fiona
 import geopandas as gpd
 import pandas as pd
 import shapefile
+from pyiem.exceptions import IncompleteWebRequest
 from pyiem.util import get_dbconn, get_sqlalchemy_conn, utc
 from pyiem.webutil import iemapp
 
@@ -23,6 +24,8 @@ def get_time_domain(form):
         seconds = abs(int(form.get("recent")))
         sts = ets - datetime.timedelta(seconds=seconds)
         return sts, ets
+    if "sts" not in form:
+        raise IncompleteWebRequest("GET start time parameters missing")
 
     return form["sts"], form["ets"]
 
@@ -106,16 +109,7 @@ def application(environ, start_response):
     pgconn = get_dbconn("postgis")
     cursor = pgconn.cursor()
 
-    try:
-        sts, ets = get_time_domain(environ)
-    except (ValueError, TypeError):
-        start_response(
-            "500 Internal Server Error", [("Content-type", "text/plain")]
-        )
-        return [
-            b"An invalid date was specified, please check that the day of the "
-            b"month exists for your selection (ie June 31st vs June 30th)."
-        ]
+    sts, ets = get_time_domain(environ)
 
     statelimiter = ""
     for opt in ["state", "states", "states[]"]:

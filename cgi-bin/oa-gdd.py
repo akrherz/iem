@@ -4,6 +4,7 @@
 import datetime
 from io import BytesIO
 
+from pyiem.exceptions import IncompleteWebRequest
 from pyiem.network import Table as NetworkTable
 from pyiem.plot import MapPlot
 from pyiem.util import get_dbconn, utc
@@ -24,6 +25,8 @@ def application(environ, start_response):
         maxV = int(environ["max"])
 
     # Make sure we aren't in the future
+    if "ets" not in environ:
+        raise IncompleteWebRequest("Missing GET parameter ets=")
     ets = min(utc(), environ["ets"])
 
     st = NetworkTable("IACLIMATE")

@@ -3,6 +3,7 @@ import sys
 from io import BytesIO, StringIO
 
 import pandas as pd
+from pyiem.exceptions import IncompleteWebRequest
 from pyiem.network import Table as NetworkTable
 from pyiem.util import get_dbconn, get_sqlalchemy_conn
 from pyiem.webutil import iemapp
@@ -126,6 +127,8 @@ def get_data(network, sts, ets, stations, cols, na, fmt):
 @iemapp()
 def application(environ, start_response):
     """See how we are called"""
+    if "sts" not in environ:
+        raise IncompleteWebRequest("GET start time parameters missing.")
     sts, ets = environ["sts"].date(), environ["ets"].date()
 
     if sts.year != ets.year and overloaded():

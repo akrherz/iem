@@ -16,8 +16,8 @@ import math
 
 import numpy as np
 import pyproj
-from paste.request import parse_formvars
 from pyiem.util import convert_value, get_dbconnc
+from pyiem.webutil import iemapp
 from pymemcache.client import Client
 
 # Do geo math in US National Atlas Equal Area
@@ -358,21 +358,21 @@ def produce_content(nexrad, poh, meso, tvs, max_size):
     return res
 
 
+@iemapp()
 def application(environ, start_response):
     """Go Main Go"""
-    form = parse_formvars(environ)
-    nexrad = form.get("nexrad", "").upper()[:3]
+    nexrad = environ.get("nexrad", "").upper()[:3]
     if nexrad == "":
-        lon = form.get("lon")
+        lon = environ.get("lon")
         if lon is not None:
             for line in RADARS.split("\n"):
                 if line.find(lon) > 0:
                     nexrad = line[1:4].upper()
 
-    poh = int(form.get("poh", 0))
-    meso = float(form.get("meso", -1))
-    tvs = "tvs" in form
-    max_size = float(form.get("max_size", 0))
+    poh = int(environ.get("poh", 0))
+    meso = float(environ.get("meso", -1))
+    tvs = "tvs" in environ
+    max_size = float(environ.get("max_size", 0))
     mckey = f"/request/grx/i3attr|{nexrad}|{poh}|{meso}|{tvs}|{max_size}"
     mc = Client("iem-memcached:11211")
     res = mc.get(mckey)

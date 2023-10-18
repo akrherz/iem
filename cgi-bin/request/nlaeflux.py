@@ -1,6 +1,7 @@
 """Download backend for NLAE Flux Data."""
 
 import pandas as pd
+from pyiem.exceptions import IncompleteWebRequest
 from pyiem.util import get_sqlalchemy_conn, utc
 from pyiem.webutil import iemapp
 from sqlalchemy import text
@@ -9,6 +10,8 @@ from sqlalchemy import text
 @iemapp()
 def application(environ, start_response):
     """Handle mod_wsgi request."""
+    if "syear" not in environ:
+        raise IncompleteWebRequest("GET syear= parameter is missing")
     sts = utc(
         int(environ["syear"]), int(environ["smonth"]), int(environ["sday"])
     )

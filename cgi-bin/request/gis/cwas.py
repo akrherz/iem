@@ -7,6 +7,7 @@ from io import BytesIO
 # Third Party
 import fiona
 import geopandas as gpd
+from pyiem.exceptions import IncompleteWebRequest
 from pyiem.util import get_sqlalchemy_conn
 from pyiem.webutil import iemapp
 
@@ -83,6 +84,8 @@ def run(ctx, start_response):
 @iemapp(default_tz="UTC")
 def application(environ, start_response):
     """Do something fun!"""
+    if "sts" not in environ:
+        raise IncompleteWebRequest("GET start time parameters missing")
     ctx = {
         "sts": environ["sts"],
         "et": environ["ets"],

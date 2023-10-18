@@ -7,8 +7,8 @@ import sys
 from io import StringIO
 from zoneinfo import ZoneInfo
 
-from paste.request import parse_formvars
 from pyiem.util import get_dbconn
+from pyiem.webutil import iemapp
 
 
 def check_load(cursor):
@@ -26,6 +26,7 @@ def check_load(cursor):
     return True
 
 
+@iemapp()
 def application(environ, start_response):
     """Do Something"""
     pgconn = get_dbconn("asos")
@@ -36,9 +37,8 @@ def application(environ, start_response):
         return [b"ERROR: server over capacity, please try later"]
     acursor = pgconn.cursor("streamer")
     start_response("200 OK", [("Content-type", "text/plain")])
-    form = parse_formvars(environ)
     valid = datetime.datetime.strptime(
-        form.get("valid", "2016010100")[:10], "%Y%m%d%H"
+        environ.get("valid", "2016010100")[:10], "%Y%m%d%H"
     )
     valid = valid.replace(tzinfo=ZoneInfo("UTC"))
     acursor.execute(

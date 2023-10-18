@@ -6,10 +6,10 @@ from datetime import timedelta
 from io import BytesIO, StringIO
 
 import pandas as pd
-from pyiem.exceptions import NoDataFound
+from pyiem.exceptions import IncompleteWebRequest
 from pyiem.network import Table as NetworkTable
 from pyiem.util import get_sqlalchemy_conn
-from pyiem.webutil import iemapp
+from pyiem.webutil import ensure_list, iemapp
 from sqlalchemy import text
 
 DELIMITERS = {"comma": ",", "space": " ", "tab": "\t"}
@@ -79,15 +79,13 @@ def application(environ, start_response):
     if threshold is not None and threshold != "":
         threshold = float(threshold)
     thresholdvar = environ.get("threshold-var", "RG")
-    stations = environ.get("stations", [])
-    if isinstance(stations, str):
-        stations = [stations]
+    stations = ensure_list(environ, "stations")
     if "_ALL" in stations and network is not None:
         stations = list(NetworkTable(network[:10]).sts.keys())
         if (environ["ets"] - environ["sts"]) > timedelta(hours=24):
             environ["ets"] = environ["sts"] + timedelta(hours=24)
     if not stations:
-        raise NoDataFound("Error, no stations specified for the query!")
+        raise IncompleteWebRequest("Error, no stations specified!")
 
     sql = text(
         f"""

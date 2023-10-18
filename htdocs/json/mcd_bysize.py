@@ -1,8 +1,8 @@
 """SPC MCD service."""
 import json
 
-from paste.request import parse_formvars
 from pyiem.util import get_dbconn, html_escape
+from pyiem.webutil import iemapp
 
 ISO9660 = "%Y-%m-%dT%H:%MZ"
 BASEURL = "https://www.spc.noaa.gov/products/md"
@@ -43,18 +43,18 @@ def dowork(count, sort):
     return json.dumps(res)
 
 
+@iemapp()
 def application(environ, start_response):
     """Answer request."""
     headers = [("Content-type", "application/json")]
     start_response("200 OK", headers)
 
-    fields = parse_formvars(environ)
-    count = int(fields.get("count", 10))
-    sort = fields.get("sort", "DESC").upper()
+    count = int(environ.get("count", 10))
+    sort = environ.get("sort", "DESC").upper()
     if sort not in ["ASC", "DESC"]:
         return [b"provided `sort` not in {ASC,DESC}"]
 
-    cb = fields.get("callback")
+    cb = environ.get("callback")
 
     res = dowork(count, sort)
     if cb is None:

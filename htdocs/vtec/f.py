@@ -122,8 +122,17 @@ def get_context(url):
     tokens = url.split("/")[-1].split("_")
     m = VTEC_RE.match(tokens[0])
     if m is None:
-        return {}
-    ctx = m.groupdict()
+        ctx = {
+            "year": "2020",
+            "op": "O",
+            "status": "NEW",
+            "wfo4": "KLWX",
+            "phenomena": "SC",
+            "significance": "Y",
+            "eventid": "0026",
+        }
+    else:
+        ctx = m.groupdict()
     if ctx["status"] is None:
         ctx["status"] = "NEW"
     get_data(ctx)

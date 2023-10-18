@@ -15,11 +15,11 @@ from zoneinfo import ZoneInfo
 import numpy as np
 import pandas as pd
 from pandas.api.types import is_datetime64_any_dtype as isdt
-from paste.request import parse_formvars
 from PIL import Image
-from pyiem.exceptions import NoDataFound
+from pyiem.exceptions import IncompleteWebRequest, NoDataFound
 from pyiem.plot.use_agg import plt
 from pyiem.util import utc
+from pyiem.webutil import iemapp
 from pymemcache.client import Client
 from six import string_types
 
@@ -187,13 +187,13 @@ def get_mckey(scriptnum, fdict, fmt):
     ).replace(" ", "")
 
 
-def workflow(mc, environ, form, fmt):
+def workflow(mc, environ, fmt):
     """we need to return a status and content"""
     # q is the full query string that was rewritten to use by apache
-    q = form.get("q", "")
+    q = environ.get("q", "")
     fdict = parser(q)
     # p=number is the python backend code called by this framework
-    scriptnum = int(form.get("p", 0))
+    scriptnum = int(environ["p"])
     fdict["dpi"] = min([int(float(fdict.get("dpi", 100))), 500])
 
     # memcache keys can not have spaces
@@ -315,26 +315,28 @@ def workflow(mc, environ, form, fmt):
     return HTTP200, content
 
 
+@iemapp()
 def application(environ, start_response):
     """Our Application!"""
+    if "p" not in environ:
+        raise IncompleteWebRequest("GET parameter p is missing.")
     # Parse the request that was sent our way
-    fields = parse_formvars(environ)
     # HACK
-    qstr = fields.get("q", "")
+    qstr = environ.get("q", "")
     if qstr.find("network:WFO::wfo:PHEB") > -1:
-        fields["q"] = qstr.replace("network:WFO", "network:NWS")
+        environ["q"] = qstr.replace("network:WFO", "network:NWS")
     if qstr.find("network:WFO::wfo:NHC") > -1:
-        fields["q"] = qstr.replace("network:WFO", "network:NCEP")
+        environ["q"] = qstr.replace("network:WFO", "network:NCEP")
     if qstr.find("network:WFO::wfo:PAAQ") > -1:
-        fields["q"] = qstr.replace("network:WFO", "network:NWS")
+        environ["q"] = qstr.replace("network:WFO", "network:NWS")
     if qstr.find("network:AWOS") > -1:
-        fields["q"] = qstr.replace("network:AWOS", "network:IA_ASOS")
+        environ["q"] = qstr.replace("network:AWOS", "network:IA_ASOS")
     # Figure out the format that was requested from us, default to png
-    fmt = fields.get("fmt", "png")[:7]
+    fmt = environ.get("fmt", "png")[:7]
     mc = Client("iem-memcached:11211")
     try:
         # do the work!
-        status, output = workflow(mc, environ, fields, fmt)
+        status, output = workflow(mc, environ, fmt)
     except Exception as exp:
         status = HTTP500
         output = handle_error(exp, fmt, environ.get("REQUEST_URI"))

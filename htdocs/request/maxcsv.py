@@ -653,10 +653,7 @@ def router(appname):
 @iemapp()
 def application(environ, start_response):
     """Do Something"""
-    appname = environ.get("q")
-    if appname is None:
-        start_response("404 File Not Found", [("Content-type", "text/plain")])
-        return [b"No such service."]
+    appname = environ.get("q", "moonphase_-95_42")
     res = router(appname)
     start_response("200 OK", [("Content-type", "text/plain")])
     if isinstance(res, pd.DataFrame):

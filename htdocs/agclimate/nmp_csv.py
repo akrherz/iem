@@ -10,6 +10,7 @@ import pandas as pd
 from metpy.units import units
 from pyiem.network import Table as NetworkTable
 from pyiem.util import convert_value, get_sqlalchemy_conn
+from pyiem.webutil import iemapp
 
 INVERSION = [
     "BOOI4",
@@ -132,6 +133,8 @@ def use_table(sio):
             conn,
             index_col=None,
         )
+    if obsdf[obsdf["is_last"]].empty:
+        return
     lastob = obsdf[obsdf["is_last"]].set_index("station")
     hrtotal = (
         obsdf[["station", "rain_in_tot", "slrkj_tot"]].groupby("station").sum()
@@ -192,6 +195,7 @@ def do_output(sio):
     sio.write(".EOO\n")
 
 
+@iemapp()
 def application(_environ, start_response):
     """Do Something"""
     headers = [("Content-type", "text/csv;header=present")]

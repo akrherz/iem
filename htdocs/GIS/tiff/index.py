@@ -7,10 +7,10 @@ import tempfile
 from calendar import month_abbr
 from datetime import datetime, timedelta
 
-from paste.request import parse_formvars
 from pyiem.htmlgen import make_select
 from pyiem.templates.iem import TEMPLATE
 from pyiem.util import utc
+from pyiem.webutil import iemapp
 
 HEADER = """
 <ol class="breadcrumb">
@@ -106,12 +106,12 @@ def workflow(key, tmpdir, ts):
         return fh.read()
 
 
+@iemapp()
 def application(environ, start_response):
     """mod-wsgi handler."""
-    fdict = parse_formvars(environ)
-    service = fdict.get("service")
+    service = environ.get("service")
     if service in SOURCES:
-        ts = fdict.get("ts", "current")[:12]
+        ts = environ.get("ts", "current")[:12]
         headers = [
             ("Content-type", "application/octet-stream"),
             (
@@ -121,7 +121,7 @@ def application(environ, start_response):
         ]
         with tempfile.TemporaryDirectory() as tmpdir:
             try:
-                res = workflow(service, tmpdir, fdict.get("ts"))
+                res = workflow(service, tmpdir, environ.get("ts"))
                 start_response("200 OK", headers)
                 return [res]
             except FileNotFoundError:
@@ -131,9 +131,9 @@ def application(environ, start_response):
                 return [b"File not found for service/ts combination."]
 
     valid = utc(
-        int(fdict.get("year", utc().year)),
-        int(fdict.get("month", utc().month)),
-        int(fdict.get("day", utc().day)),
+        int(environ.get("year", utc().year)),
+        int(environ.get("month", utc().month)),
+        int(environ.get("day", utc().day)),
     )
 
     headers = [("Content-type", "text/html")]

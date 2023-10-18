@@ -9,9 +9,10 @@ from io import BytesIO, StringIO
 
 import pandas as pd
 from metpy.units import units
+from pyiem.exceptions import IncompleteWebRequest
 from pyiem.network import Table as NetworkTable
 from pyiem.util import get_dbconnc, get_sqlalchemy_conn, utc
-from pyiem.webutil import iemapp
+from pyiem.webutil import ensure_list, iemapp
 from sqlalchemy import text
 
 DEGC = units.degC
@@ -64,13 +65,9 @@ def get_cgi_dates(form):
 
 def get_cgi_stations(form):
     """Figure out which stations the user wants, return a list of them"""
-    reqlist = form.get("station[]", [])
-    if isinstance(reqlist, str):
-        reqlist = [reqlist]
+    reqlist = ensure_list(form, "station[]")
     if not reqlist:
-        reqlist = form.get("stations", [])
-        if isinstance(reqlist, str):
-            reqlist = [reqlist]
+        reqlist = ensure_list(form, "stations")
     if not reqlist:
         return []
     if "_ALL" in reqlist:
@@ -759,10 +756,7 @@ def application(environ, start_response):
     ctx = {}
     ctx["stations"] = get_cgi_stations(environ)
     if not ctx["stations"]:
-        start_response(
-            "500 Internal Server Error", [("Content-type", "text/plain")]
-        )
-        return [b"No stations were specified for the request."]
+        raise IncompleteWebRequest("No stations were specified.")
     ctx["sts"], ctx["ets"] = get_cgi_dates(environ)
     ctx["myvars"] = environ.get("vars[]", [])
     if isinstance(ctx["myvars"], str):

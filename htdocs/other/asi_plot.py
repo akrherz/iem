@@ -5,45 +5,45 @@ from zoneinfo import ZoneInfo
 
 import matplotlib.dates as mdates
 import numpy as np
-from paste.request import parse_formvars
 from pyiem.network import Table as NetworkTable
 from pyiem.plot.use_agg import plt
 from pyiem.util import get_dbconnc
+from pyiem.webutil import iemapp
 
 
+@iemapp()
 def application(environ, start_response):
     """Go Main Go"""
     nt = NetworkTable("ISUASI")
-    form = parse_formvars(environ)
     if (
-        "syear" in form
-        and "eyear" in form
-        and "smonth" in form
-        and "emonth" in form
-        and "sday" in form
-        and "eday" in form
-        and "shour" in form
-        and "ehour" in form
+        "syear" in environ
+        and "eyear" in environ
+        and "smonth" in environ
+        and "emonth" in environ
+        and "sday" in environ
+        and "eday" in environ
+        and "shour" in environ
+        and "ehour" in environ
     ):
         sts = datetime.datetime(
-            int(form["syear"].value),
-            int(form["smonth"].value),
-            int(form["sday"].value),
-            int(form["shour"].value),
+            int(environ["syear"].value),
+            int(environ["smonth"].value),
+            int(environ["sday"].value),
+            int(environ["shour"].value),
             0,
         )
         ets = datetime.datetime(
-            int(form["eyear"].value),
-            int(form["emonth"].value),
-            int(form["eday"].value),
-            int(form["ehour"].value),
+            int(environ["eyear"].value),
+            int(environ["emonth"].value),
+            int(environ["eday"].value),
+            int(environ["ehour"].value),
             0,
         )
     else:
         sts = datetime.datetime(2012, 12, 1)
         ets = datetime.datetime(2012, 12, 3)
 
-    station = form.getvalue("station", "ISU4003")
+    station = environ.get("station", "ISU4003")
     if station not in nt.sts:
         start_response("200 OK", [("Content-type", "text/plain")])
         return [b"ERROR"]

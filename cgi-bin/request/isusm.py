@@ -5,7 +5,7 @@ from zoneinfo import ZoneInfo
 
 import numpy as np
 import pandas as pd
-from pyiem.exceptions import NoDataFound
+from pyiem.exceptions import IncompleteWebRequest, NoDataFound
 from pyiem.util import convert_value, get_sqlalchemy_conn
 from pyiem.webutil import ensure_list, iemapp
 from sqlalchemy import text
@@ -331,6 +331,8 @@ def muck_timestamps(environ):
 @iemapp()
 def application(environ, start_response):
     """Do things"""
+    if "sts" not in environ:
+        raise IncompleteWebRequest("Missing start time parameters")
     muck_timestamps(environ)
     mode = environ.get("mode", "hourly")
     cols = ensure_list(environ, "vars")

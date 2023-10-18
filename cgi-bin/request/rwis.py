@@ -1,67 +1,45 @@
 """Download Interface for RWIS data"""
 # pylint: disable=abstract-class-instantiated
 from io import BytesIO, StringIO
-from zoneinfo import ZoneInfo
 
 import pandas as pd
-from paste.request import parse_formvars
+from pyiem.exceptions import IncompleteWebRequest
 from pyiem.network import Table as NetworkTable
-from pyiem.util import get_sqlalchemy_conn, utc
+from pyiem.util import get_sqlalchemy_conn
+from pyiem.webutil import ensure_list, iemapp
 from sqlalchemy import text
 
 DELIMITERS = {"comma": ",", "space": " ", "tab": "\t"}
 EXL = "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"
 
 
-def get_time(form, tzname):
-    """Get timestamps"""
-    ts = utc().astimezone(ZoneInfo(tzname))
-    y1 = int(form.get("year1"))
-    y2 = int(form.get("year2"))
-    m1 = int(form.get("month1"))
-    m2 = int(form.get("month2"))
-    d1 = int(form.get("day1"))
-    d2 = int(form.get("day2"))
-    h1 = int(form.get("hour1"))
-    h2 = int(form.get("hour2"))
-    mi1 = int(form.get("minute1", 0))
-    mi2 = int(form.get("minute2", 0))
-    sts = ts.replace(year=y1, month=m1, day=d1, hour=h1, minute=mi1)
-    ets = ts.replace(year=y2, month=m2, day=d2, hour=h2, minute=mi2)
-    return sts, ets
-
-
+@iemapp(default_tz="America/Chicago")
 def application(environ, start_response):
     """Go do something"""
-    form = parse_formvars(environ)
-    include_latlon = form.get("gis", "no").lower() == "yes"
-    myvars = form.getall("vars")
+    include_latlon = environ.get("gis", "no").lower() == "yes"
+    myvars = ensure_list(environ, "vars")
     myvars.insert(0, "station")
     myvars.insert(1, "obtime")
-    delimiter = DELIMITERS.get(form.get("delim", "comma"))
-    what = form.get("what", "dl")
-    tzname = form.get("tz", "UTC")
-    src = form.get("src", "atmos")
-    sts, ets = get_time(form, tzname)
-    stations = form.getall("stations")
+    delimiter = DELIMITERS.get(environ.get("delim", "comma"))
+    what = environ.get("what", "dl")
+    tzname = environ.get("tz", "UTC")
+    src = environ.get("src", "atmos")
+    stations = ensure_list(environ, "stations")
     if not stations:
-        start_response("200 OK", [("Content-type", "text/plain")])
-        return [b"Error, no stations specified for the query!"]
-    if len(stations) == 1:
-        stations.append("XXXXXXX")
+        raise IncompleteWebRequest("Missing GET parameter stations=")
 
     tbl = "alldata"
     if src in ["soil", "traffic"]:
         tbl = f"alldata_{src}"
-    network = form.get("network", "IA_RWIS")
+    network = environ.get("network", "IA_RWIS")
     nt = NetworkTable(network, only_online=False)
     if "_ALL" in stations:
         stations = list(nt.sts.keys())
     params = {
         "tzname": tzname,
         "ids": stations,
-        "ets": ets,
-        "sts": sts,
+        "sts": environ["sts"],
+        "ets": environ["ets"],
     }
     sql = text(
         f"SELECT *, valid at time zone :tzname as obtime from {tbl} "

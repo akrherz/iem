@@ -3,6 +3,7 @@ import datetime
 from io import StringIO
 
 from pyiem.util import get_dbconn
+from pyiem.webutil import iemapp
 
 
 def averageTemp(db, hi="high", lo="low"):
@@ -42,6 +43,7 @@ def cdd(db, hi="high", lo="low"):
     return dd
 
 
+@iemapp()
 def application(_environ, start_response):
     """Go Main Go"""
     COOP = get_dbconn("coop")
@@ -59,10 +61,10 @@ def application(_environ, start_response):
     now = s
     while now <= e:
         db[now.strftime("%m%d")] = {
-            "high": "M",
-            "low": "M",
-            "avg_high": "M",
-            "avg_low": "M",
+            "high": -99,
+            "low": -99,
+            "avg_high": -99,
+            "avg_low": -99,
         }
         now += datetime.timedelta(days=1)
 
@@ -71,7 +73,8 @@ def application(_environ, start_response):
         """SELECT day, max_tmpf, min_tmpf from
         summary s JOIN stations t ON (t.iemid = s.iemid)
         WHERE t.id = 'SUX' and day >= '%s' and
-        day <= '%s' """
+        day <= '%s' and max_tmpf is not null and min_tmpf is not null
+        """
         % (s.strftime("%Y-%m-%d"), e.strftime("%Y-%m-%d"))
     )
     for row in icursor:
@@ -98,8 +101,10 @@ def application(_environ, start_response):
       """
         % (s.strftime("%Y-%m-%d %H:%M"), e.strftime("%Y-%m-%d %H:%M"))
     )
-    row = acursor.fetchone()
-    awind = row[1]
+    awind = -99
+    if acursor.rowcount > 0:
+        row = acursor.fetchone()
+        awind = row[1]
 
     headers = [("Content-type", "text/plain")]
     start_response("200 OK", headers)

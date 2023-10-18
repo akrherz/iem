@@ -3,9 +3,9 @@ import zipfile
 from io import BytesIO
 
 import shapefile
-from paste.request import parse_formvars
 from pyiem import wellknowntext
 from pyiem.util import get_dbconnc
+from pyiem.webutil import iemapp
 
 
 def main(year, etn, start_response):
@@ -29,6 +29,11 @@ def main(year, etn, start_response):
     if cursor.rowcount == 0:
         start_response("200 OK", [("Content-type", "text/plain")])
         return b"No Data Found"
+    row = cursor.fetchone()
+    s = row["tgeom"]
+    if s is None:
+        start_response("200 OK", [("Content-type", "text/plain")])
+        return b"No Data Found"
 
     shpio = BytesIO()
     shxio = BytesIO()
@@ -37,8 +42,6 @@ def main(year, etn, start_response):
         shp.field("SIG", "C", "1")
         shp.field("ETN", "I", "4")
 
-        row = cursor.fetchone()
-        s = row["tgeom"]
         f = wellknowntext.convert_well_known_text(s)
         shp.poly(f)
         shp.record("A", etn)
@@ -62,10 +65,10 @@ def main(year, etn, start_response):
     return zio.getvalue()
 
 
+@iemapp()
 def application(environ, start_response):
     """Yawn"""
-    form = parse_formvars(environ)
-    year = int(form.get("year", 2018))
-    etn = int(form.get("etn", 1))
+    year = int(environ.get("year", 2018))
+    etn = int(environ.get("etn", 1))
 
     return [main(year, etn, start_response)]

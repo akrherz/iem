@@ -5,31 +5,31 @@ import zipfile
 from io import BytesIO
 
 from osgeo import ogr
-from paste.request import parse_formvars
+from pyiem.webutil import iemapp
 
 ogr.UseExceptions()
 PROJFILE = "/opt/iem/data/gis/meta/4326.prj"
 
 
+@iemapp()
 def application(environ, start_response):
     """Go Main Go"""
     # Get CGI vars
-    form = parse_formvars(environ)
-    if "year" in form:
-        year = int(form.get("year"))
-        month = int(form.get("month"))
-        day = int(form.get("day"))
-        hour = int(form.get("hour"))
-        minute = int(form.get("minute"))
+    if "year" in environ:
+        year = int(environ.get("year"))
+        month = int(environ.get("month"))
+        day = int(environ.get("day"))
+        hour = int(environ.get("hour"))
+        minute = int(environ.get("minute"))
         ts = datetime.datetime(year, month, day, hour, minute)
         fn = f"watch_by_county_{ts:%Y%m%d%H%M}"
     else:
         ts = datetime.datetime.utcnow()
         fn = "watch_by_county"
 
-    if "etn" in form:
-        etnLimiter = f"and eventid = {int(form.get('etn'))}"
-        fn = f"watch_by_county_{ts:Y%m%d%H%M}_{int(form.get('etn'))}"
+    if "etn" in environ:
+        etnLimiter = f"and eventid = {int(environ.get('etn'))}"
+        fn = f"watch_by_county_{ts:Y%m%d%H%M}_{int(environ.get('etn'))}"
     else:
         etnLimiter = ""
 

@@ -2,6 +2,7 @@
 from io import BytesIO, StringIO
 
 import pandas as pd
+from pyiem.exceptions import IncompleteWebRequest
 from pyiem.util import get_sqlalchemy_conn
 from pyiem.webutil import iemapp
 from sqlalchemy import text
@@ -60,6 +61,8 @@ def get_data(sts, ets, station, model, fmt):
 @iemapp(default_tz="UTC")
 def application(environ, start_response):
     """See how we are called"""
+    if "station" not in environ:
+        raise IncompleteWebRequest("GET parameter station= missing")
 
     fmt = environ.get("format", "csv")
     station = environ.get("station").upper()

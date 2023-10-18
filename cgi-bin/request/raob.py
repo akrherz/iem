@@ -5,9 +5,10 @@ import datetime
 from io import StringIO
 from zoneinfo import ZoneInfo
 
-from paste.request import parse_formvars
+from pyiem.exceptions import IncompleteWebRequest
 from pyiem.network import Table as NetworkTable
 from pyiem.util import get_dbconn
+from pyiem.webutil import iemapp
 
 
 def m(val):
@@ -81,19 +82,21 @@ def friendly_date(form, key):
     return dt
 
 
+@iemapp()
 def application(environ, start_response):
     """Go Main Go"""
-    form = parse_formvars(environ)
-    sts = friendly_date(form, "sts")
-    ets = friendly_date(form, "ets")
+    if "sts" not in environ:
+        raise IncompleteWebRequest("GET parameter sts= missing")
+    sts = friendly_date(environ, "sts")
+    ets = friendly_date(environ, "ets")
     for val in [sts, ets]:
         if not isinstance(val, datetime.datetime):
             headers = [("Content-type", "text/plain")]
             start_response("500 Internal Server Error", headers)
             return [val.encode("ascii")]
 
-    station = form.get("station", "KOAX")[:4]
-    if form.get("dl", None) is not None:
+    station = environ.get("station", "KOAX")[:4]
+    if environ.get("dl", None) is not None:
         headers = [
             ("Content-type", "application/octet-stream"),
             (

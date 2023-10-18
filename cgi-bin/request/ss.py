@@ -15,8 +15,9 @@ Conductivity (micro-S)
 from io import BytesIO
 
 import pandas as pd
+from pyiem.exceptions import IncompleteWebRequest
 from pyiem.util import get_dbconn, get_sqlalchemy_conn
-from pyiem.webutil import iemapp
+from pyiem.webutil import ensure_list, iemapp
 from sqlalchemy import text
 
 LOOKUP = {
@@ -114,12 +115,11 @@ def bubbler_run(sts, ets, excel, start_response):
 @iemapp(default_tz="America/Chicago")
 def application(environ, start_response):
     """Go Main Go"""
+    if "sts" not in environ:
+        raise IncompleteWebRequest("GET start time parameters missing")
     opt = environ.get("opt", "bubbler")
 
-    stations = environ.get("station", [])
-    if isinstance(stations, str):
-        stations = [stations]
-
+    stations = ensure_list(environ, "station")
     if opt == "bubbler":
         return [
             bubbler_run(
