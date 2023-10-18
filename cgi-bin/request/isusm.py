@@ -5,7 +5,7 @@ from zoneinfo import ZoneInfo
 
 import numpy as np
 import pandas as pd
-from pyiem.exceptions import IncompleteWebRequest, NoDataFound
+from pyiem.exceptions import IncompleteWebRequest
 from pyiem.util import convert_value, get_sqlalchemy_conn
 from pyiem.webutil import ensure_list, iemapp
 from sqlalchemy import text
@@ -342,13 +342,11 @@ def application(environ, start_response):
         df, cols = fetch_hourly(environ, cols)
     else:
         df, cols = fetch_daily(environ, cols)
-
-    if df is None or df.empty:
-        raise NoDataFound("Sorry, no data found for this query.")
-
     miss = environ.get("missing", "-99")
     assert miss in MISSING
     df = df.replace({np.nan: miss})
+    # compute columns present in both cols and df.columns
+    cols = list(set(cols).intersection(df.columns))
 
     if fmt == "excel":
         bio = BytesIO()
