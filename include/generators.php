@@ -67,10 +67,22 @@ function get_website_stats()
     }
     $bcolor = "success";
     $rcolor = "success";
+    $ocolor = "success";
+    $acolor = "success";
     $bandwidth = 0;
     $req = 0;
+    $ok = 0;
+    $apirate = 0;
     if ($val) {
         $jobj = json_decode($val);
+
+        $ok = $jobj->stats->telemetry_ok;
+        if ($ok < 90) $ocolor = "warning";
+        if ($ok < 80) $ocolor = "danger";
+
+        $apirate = $jobj->stats->telemetry_rate;
+        if ($apirate < 10) $acolor = "warning";
+        if ($apirate < 5) $acolor = "danger";
 
         $bandwidth = $jobj->stats->bandwidth / 1000000.0;
         // grading of the bandwidth (MB/s)
@@ -83,8 +95,12 @@ function get_website_stats()
     }
     $label = sprintf("%.1f MB/s", $bandwidth);
     $bpercent = intval($bandwidth / 124.0  * 100.0);
-    $rlabel = number_format($req);
+    $rlabel = sprintf("%s req/s", number_format($req));
     $rpercent = intval($req / 15000.0 * 100.0);
+    $olabel = sprintf("%.0f%%", $ok);
+    $opercent = intval($ok);
+    $alabel = sprintf("%.1f req/s", $apirate);
+    $apercent = intval($apirate / 100.0 * 100.0);
 
     $s = <<<EOF
 <div class="panel panel-default">
@@ -97,12 +113,26 @@ function get_website_stats()
     </div>
 </div>
 
-  <span>Requests/Second: {$rlabel}</span>
+<span>Total Website: {$rlabel}</span>
 <div class="progress">
     <div class="progress-bar progress-bar-{$rcolor}" role="progressbar" aria-valuenow="{$rpercent}" aria-valuemin="0" aria-valuemax="100" style="width: {$rpercent}%;">
     </div>
 </div>
-            
+
+<span>API/Data Services: {$alabel}</span>
+<div class="progress">
+    <div class="progress-bar progress-bar-{$acolor}" role="progressbar" aria-valuenow="{$apercent}" aria-valuemin="0" aria-valuemax="100" style="width: {$apercent}%;">
+    </div>
+</div>
+
+<span>API Success: {$olabel}</span>
+<div class="progress">
+    <div class="progress-bar progress-bar-{$ocolor}" role="progressbar"
+    aria-valuenow="{$opercent}" aria-valuemin="0" aria-valuemax="100"
+    style="width: {$opercent}%;">
+    </div>
+</div>
+
   </div>
 </div>
 EOF;
