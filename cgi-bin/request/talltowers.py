@@ -70,15 +70,9 @@ def application(environ, start_response):
     fmt = environ.get("format")
     # Build out our variable list
     tokens = []
-    zz = environ.get("z", [])
-    if isinstance(zz, str):
-        zz = [zz]
-    varnames = environ.get("var", [])
-    if isinstance(varnames, str):
-        varnames = [varnames]
-    aggs = environ.get("agg", [])
-    if isinstance(aggs, str):
-        aggs = [aggs]
+    zz = ensure_list(environ, "z")
+    varnames = ensure_list(environ, "var")
+    aggs = ensure_list(environ, "agg")
     for z in zz:
         for v in varnames:
             v1 = v

@@ -6,7 +6,7 @@ import pandas as pd
 from pyiem.exceptions import IncompleteWebRequest
 from pyiem.network import Table as NetworkTable
 from pyiem.util import get_dbconn, get_sqlalchemy_conn
-from pyiem.webutil import iemapp
+from pyiem.webutil import ensure_list, iemapp
 from sqlalchemy import text
 
 EXL = "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"
@@ -138,20 +138,14 @@ def application(environ, start_response):
         return [b"ERROR: server over capacity, please try later"]
 
     fmt = environ.get("format", "csv")
-    stations = environ.get("stations", [])
-    if isinstance(stations, str):
-        stations = [stations]
+    stations = ensure_list(environ, "stations")
     if not stations:
-        stations = environ.get("station", [])
-        if isinstance(stations, str):
-            stations = [stations]
+        stations = ensure_list(environ, "station")
     if not stations:
         start_response("200 OK", [("Content-type", "text/plain")])
         return [b"ERROR: No stations specified for request"]
     network = environ.get("network")[:12]
-    cols = environ.get("var", [])
-    if isinstance(cols, str):
-        cols = [cols]
+    cols = ensure_list(environ, "var")
     na = environ.get("na", "None")
     if na not in ["M", "None", "blank"]:
         start_response("200 OK", [("Content-type", "text/plain")])
