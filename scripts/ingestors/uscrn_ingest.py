@@ -9,6 +9,7 @@ from zoneinfo import ZoneInfo
 import pandas as pd
 import requests
 from metpy.units import units
+from psycopg.rows import dict_row
 from pyiem.observation import Observation
 from pyiem.util import exponential_backoff, get_dbconn, logger
 
@@ -71,6 +72,7 @@ def process_file(icursor, ocursor, year, filename, size, reprocess):
             fp.seek(os.stat(filename).st_size - size)
         df = pd.read_csv(
             fp,
+            low_memory=False,
             sep=r"\s+",
             names=[
                 "WBANNO",
@@ -241,7 +243,7 @@ def main(argv):
         year = int(argv[1])
         reprocess = True
     for [fn, size] in download(year, len(argv) == 2):
-        icursor = iem_pgconn.cursor()
+        icursor = iem_pgconn.cursor(row_factory=dict_row)
         ocursor = other_pgconn.cursor()
         try:
             process_file(icursor, ocursor, year, fn, size, reprocess)

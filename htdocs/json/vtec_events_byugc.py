@@ -4,6 +4,7 @@ import json
 from io import BytesIO, StringIO
 
 import pandas as pd
+from pyiem.exceptions import IncompleteWebRequest
 from pyiem.nws.vtec import VTEC_PHENOMENA, VTEC_SIGNIFICANCE, get_ps_string
 from pyiem.util import get_sqlalchemy_conn, html_escape
 from pyiem.webutil import iemapp
@@ -80,16 +81,20 @@ def as_json(df):
     return json.dumps(res)
 
 
+def parse_date(val):
+    """convert string to date."""
+    return datetime.datetime.strptime(val, "%Y/%m/%d")
+
+
 @iemapp()
 def application(environ, start_response):
     """Answer request."""
     ugc = environ.get("ugc", "IAC001")[:6]
-    sdate = datetime.datetime.strptime(
-        environ.get("sdate", "1986/1/1"), "%Y/%m/%d"
-    )
-    edate = datetime.datetime.strptime(
-        environ.get("edate", "2099/1/1"), "%Y/%m/%d"
-    )
+    try:
+        sdate = parse_date(environ.get("sdate", "1986/1/1"))
+        edate = parse_date(environ.get("edate", "2099/1/1"))
+    except Exception as exp:
+        raise IncompleteWebRequest(str(exp))
     cb = environ.get("callback", None)
     fmt = environ.get("fmt", "json")
 
