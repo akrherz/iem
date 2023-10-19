@@ -55,7 +55,7 @@ def get_data(ctx):
     cursor = pgconn.cursor()
     station = ctx["station"]
     threshold = ctx["threshold"]
-    threshold = TRACE_VALUE if threshold == "T" else float(threshold)
+    threshold = TRACE_VALUE if threshold in ["T", "t"] else float(threshold)
 
     ab = ctx["_nt"].sts[station]["archive_begin"]
     if ab is None:
@@ -234,11 +234,4 @@ def plotter(fdict):
 
 
 if __name__ == "__main__":
-    plotter(
-        {
-            "threshold": "T",
-            "dir": "first",
-            "station": "IATDSM",
-            "network": "IACLIMATE",
-        }
-    )
+    plotter({})
