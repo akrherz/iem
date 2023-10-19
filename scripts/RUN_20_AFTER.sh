@@ -27,9 +27,6 @@ python ndfd2iemre.py &
 cd ../isusm
 python agg_1minute.py
 
-cd ../isuag
-python isusm2rr5.py
-
 cd ../hads
 python compute_hads_pday.py
 
