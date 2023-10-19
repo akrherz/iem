@@ -9,7 +9,7 @@ import pandas as pd
 import shapefile
 from pyiem.exceptions import IncompleteWebRequest
 from pyiem.util import get_dbconn, get_sqlalchemy_conn, utc
-from pyiem.webutil import iemapp
+from pyiem.webutil import ensure_list, iemapp
 
 fiona.supported_drivers["KML"] = "rw"
 EXL = "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"
@@ -114,17 +114,13 @@ def application(environ, start_response):
     statelimiter = ""
     for opt in ["state", "states", "states[]"]:
         if opt in environ:
-            aStates = environ.get(opt, [])
-            if isinstance(aStates, str):
-                aStates = [aStates]
+            aStates = ensure_list(environ, opt)
             aStates.append("XX")
             if "_ALL" not in aStates:
                 statelimiter = f" and l.state in {tuple(aStates)} "
     wfoLimiter = ""
     if "wfo[]" in environ:
-        aWFO = environ.get("wfo[]", [])
-        if isinstance(aWFO, str):
-            aWFO = [aWFO]
+        aWFO = ensure_list(environ, "wfo[]")
         aWFO.append("XXX")  # Hack to make next section work
         if "ALL" not in aWFO:
             wfoLimiter = f" and l.wfo in {tuple(aWFO)} "

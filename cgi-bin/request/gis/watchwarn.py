@@ -8,7 +8,7 @@ import fiona
 import pandas as pd
 from pyiem.exceptions import IncompleteWebRequest
 from pyiem.util import get_dbconnc, get_sqlalchemy_conn, utc
-from pyiem.webutil import iemapp
+from pyiem.webutil import ensure_list, iemapp
 from shapely.geometry import mapping
 from shapely.wkb import loads
 
@@ -34,17 +34,13 @@ def parse_wfo_location_group(form):
     """Parse wfoLimiter"""
     limiter = ""
     if "wfo[]" in form:
-        wfos = form.get("wfo[]", [])
-        if not isinstance(wfos, list):
-            wfos = [wfos]
+        wfos = ensure_list(form, "wfo[]")
         wfos.append("XXX")  # Hack to make next section work
         if "ALL" not in wfos:
             limiter = f" and w.wfo in {tuple(char3(wfos))} "
 
     if "wfos[]" in form:
-        wfos = form.get("wfos[]", [])
-        if not isinstance(wfos, list):
-            wfos = [wfos]
+        wfos = ensure_list(form, "wfos[]")
         wfos.append("XXX")  # Hack to make next section work
         if "ALL" not in wfos:
             limiter = f" and w.wfo in {tuple(char3(wfos))} "
@@ -59,9 +55,7 @@ def build_sql(environ):
     location_group = environ.get("location_group", "wfo")
     if location_group == "states":
         if "states[]" in environ:
-            arstates = environ.get("states[]", [])
-            if not isinstance(arstates, list):
-                arstates = [arstates]
+            arstates = ensure_list(environ, "states[]")
             states = [x[:2].upper() for x in arstates]
             states.append("XX")  # Hack for 1 length
             wfo_limiter = (

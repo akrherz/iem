@@ -3,7 +3,7 @@ from io import StringIO
 
 from pyiem.exceptions import IncompleteWebRequest
 from pyiem.util import get_dbconnc
-from pyiem.webutil import iemapp
+from pyiem.webutil import ensure_list, iemapp
 
 SAMPLING = {
     "1min": 1,
@@ -74,23 +74,18 @@ def compute_prefixes(sio, form, delim, stations, tz) -> dict:
 @iemapp()
 def application(environ, start_response):
     """Handle mod_wsgi request."""
-    stations = environ.get("station", [])
+    stations = ensure_list(environ, "station")
     if not stations:  # legacy php
-        stations = environ.get("station[]", [])
-    # Ensure stations is a list
-    if isinstance(stations, str):
-        stations = [stations]
+        stations = ensure_list(environ, "station[]")
     if not stations:
         raise IncompleteWebRequest("No station= was specified in request.")
     delim = DELIM[environ.get("delim", "comma")]
     sample = SAMPLING[environ.get("sample", "1min")]
     what = environ.get("what", "dl")
     tz = environ.get("tz", "UTC")
-    varnames = environ.get("vars", [])
+    varnames = ensure_list(environ, "vars")
     if not varnames:  # legacy php
-        varnames = environ.get("vars[]", [])
-    if isinstance(varnames, str):
-        varnames = [varnames]
+        varnames = ensure_list(environ, "vars[]")
     if not varnames:
         raise IncompleteWebRequest("No vars= was specified in request.")
     pgconn, cursor = get_dbconnc("asos1min")
