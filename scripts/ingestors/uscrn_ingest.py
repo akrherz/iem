@@ -160,7 +160,7 @@ def process_file(icursor, ocursor, year, filename, size, reprocess):
             200,
         )
         ob.save(icursor, skip_current=reprocess)
-        table = "uscrn_t%s" % (valid.year,)
+        table = f"uscrn_t{valid.year}"
         if not reprocess:
             ocursor.execute(
                 f"DELETE from {table} WHERE station = %s and valid = %s",
@@ -210,7 +210,7 @@ def download(year, reprocess=False):
         size = os.stat(filename).st_size
         req = exponential_backoff(
             requests.get,
-            "%s/%s/%s" % (URI, year, filename),
+            f"{URI}/{year}/{filename}",
             headers={"Range": "bytes=%s-%s" % (size, size + 16000000)},
             timeout=30,
         )
@@ -248,7 +248,7 @@ def main(argv):
         try:
             process_file(icursor, ocursor, year, fn, size, reprocess)
         except Exception as exp:
-            LOG.info("uscrn_ingest %s traceback: %s", fn, exp)
+            LOG.warning("uscrn_ingest %s traceback: %s", fn, exp)
         icursor.close()
         ocursor.close()
         iem_pgconn.commit()

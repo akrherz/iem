@@ -21,7 +21,7 @@ OPENSSL_CONF=openssl.conf python ingest_dot_webcams.py &
 cd ../../summary
 python update_dailyrain.py
 
-cd ../isuag
+cd ../isusm
 python isusm2rr5.py
 
 cd ../outgoing
