@@ -2,12 +2,13 @@
 import datetime
 from io import StringIO
 
+from pyiem.exceptions import NoDataFound
 from pyiem.network import Table as NetworkTable
 from pyiem.templates.iem import TEMPLATE
 from pyiem.util import get_dbconn
 from pyiem.webutil import iemapp
 
-nt = NetworkTable("IACLIMATE")
+nt = NetworkTable("IACLIMATE", only_online=False)
 
 COOP = get_dbconn("coop")
 ccursor = COOP.cursor()
@@ -56,6 +57,8 @@ def get_values(city, dateStr):
     WHERE station = %s and day = %s """
     args = (city, dateStr)
     ccursor.execute(query_str, args)
+    if ccursor.rowcount == 0:
+        raise NoDataFound("No Data Found.")
     row = ccursor.fetchone()
     rain = round(float(row[2]), 2)
     try:
