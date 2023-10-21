@@ -16,7 +16,7 @@ from io import BytesIO
 
 import pandas as pd
 from pyiem.exceptions import IncompleteWebRequest
-from pyiem.util import get_dbconn, get_sqlalchemy_conn
+from pyiem.util import get_sqlalchemy_conn
 from pyiem.webutil import ensure_list, iemapp
 from sqlalchemy import text
 
@@ -47,7 +47,7 @@ def gage_run(sts, ets, stations, excel, start_response):
         df = pd.read_sql(
             sql, conn, params={"sts": sts, "ets": ets, "stations": stations}
         )
-    headers = [
+    eheaders = [
         "date",
         "time",
         "site_serial",
@@ -65,7 +65,7 @@ def gage_run(sts, ets, stations, excel, start_response):
         ]
         start_response("200 OK", headers)
         bio = BytesIO()
-        df.to_excel(bio, header=headers, index=False, engine="openpyxl")
+        df.to_excel(bio, header=eheaders, index=False, engine="openpyxl")
         return bio.getvalue()
     start_response("200 OK", [("Content-type", "text/plain")])
     return df.to_csv(None, header=headers, index=False).encode("ascii")
@@ -73,32 +73,27 @@ def gage_run(sts, ets, stations, excel, start_response):
 
 def bubbler_run(sts, ets, excel, start_response):
     """run()"""
-    dbconn = get_dbconn("other")
-    sql = """
+    sql = text(
+        """
     WITH one as (SELECT valid, value from ss_bubbler WHERE
-    valid between '%s' and '%s' and field = 'Batt Voltage'),
+    valid between :sts and :ets and field = 'Batt Voltage'),
     two as (SELECT valid, value from ss_bubbler WHERE
-    valid between '%s' and '%s' and field = 'STAGE'),
+    valid between :sts and :ets and field = 'STAGE'),
     three as (SELECT valid, value from ss_bubbler WHERE
-    valid between '%s' and '%s' and field = 'Water Temp')
+    valid between :sts and :ets and field = 'Water Temp')
 
     SELECT date(coalesce(one.valid, two.valid, three.valid)) as date,
     to_char(coalesce(one.valid, two.valid, three.valid), 'HH24:MI:SS') as time,
-    one.value, two.value, three.value
+    one.value as "batt voltage",
+    two.value as "stage",
+    three.value as "water temp"
     from one FULL OUTER JOIN two on (one.valid = two.valid)
         FULL OUTER JOIN three on (coalesce(two.valid,one.valid) = three.valid)
     ORDER by date ASC, time ASC
-    """ % (
-        sts,
-        ets,
-        sts,
-        ets,
-        sts,
-        ets,
+    """
     )
-    df = pd.read_sql(sql, dbconn)
-    headers = ["date", "time", "batt voltage", "stage", "water temp"]
-
+    with get_sqlalchemy_conn("other") as conn:
+        df = pd.read_sql(sql, conn, params={"sts": sts, "ets": ets})
     if excel == "yes":
         headers = [
             ("Content-type", "application/vnd.ms-excel"),
@@ -106,7 +101,7 @@ def bubbler_run(sts, ets, excel, start_response):
         ]
         start_response("200 OK", headers)
         bio = BytesIO()
-        df.to_excel(bio, header=headers, index=False)
+        df.to_excel(bio, index=False)
         return bio.getvalue()
     start_response("200 OK", [("Content-type", "text/plain")])
     return df.to_csv(None, header=headers, index=False).encode("ascii")

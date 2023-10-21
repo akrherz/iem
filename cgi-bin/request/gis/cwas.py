@@ -88,7 +88,7 @@ def application(environ, start_response):
         raise IncompleteWebRequest("GET start time parameters missing")
     ctx = {
         "sts": environ["sts"],
-        "et": environ["ets"],
+        "ets": environ["ets"],
         "format": environ.get("format", "shp"),
     }
     return [run(ctx, start_response)]

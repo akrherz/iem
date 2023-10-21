@@ -6,6 +6,7 @@ import glob
 import json
 import os.path
 
+from pyiem.exceptions import BadWebRequest
 from pyiem.util import get_dbconn, html_escape
 from pyiem.webutil import iemapp
 
@@ -46,6 +47,8 @@ def available_radars(environ):
     """
     lat = float(environ.get("lat", 41.9))
     lon = float(environ.get("lon", -92.3))
+    if not (-90 < lat < 90 and -180 < lon < 180):
+        raise BadWebRequest("Invalid lat/lon provided")
     start_gts = parse_time(environ.get("start", "2012-01-27T00:00Z"))
     pgconn = get_dbconn("mesosite")
     mcursor = pgconn.cursor()
@@ -206,10 +209,7 @@ def list_products(environ):
 def application(environ, start_response):
     """Answer request."""
     if environ["REQUEST_METHOD"] not in ["GET", "POST"]:
-        headers = [("Content-type", "text/plain")]
-        start_response("500 Internal Server Error", headers)
-        data = "Invalid Request"
-        return [data.encode("ascii")]
+        raise BadWebRequest("Invalid HTTP Method")
 
     operation = environ.get("operation", "list")
     callback = environ.get("callback")

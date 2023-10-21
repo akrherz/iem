@@ -350,8 +350,9 @@ def application(environ, start_response):
     if fmt == "excel":
         bio = BytesIO()
         # pylint: disable=abstract-class-instantiated
-        with pd.ExcelWriter(bio, engine="xlsxwriter") as writer:
-            df.to_excel(writer, "Data", columns=cols, index=False)
+        if cols:
+            with pd.ExcelWriter(bio, engine="xlsxwriter") as writer:
+                df.to_excel(writer, "Data", columns=cols, index=False)
         headers = [
             ("Content-type", EXL),
             ("Content-disposition", "attachment; Filename=isusm.xlsx"),
