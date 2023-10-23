@@ -8,7 +8,7 @@ import datetime
 from io import BytesIO
 from zoneinfo import ZoneInfo
 
-from pyiem.exceptions import IncompleteWebRequest
+from pyiem.exceptions import BadWebRequest, IncompleteWebRequest
 from pyiem.network import Table as NetworkTable
 from pyiem.plot.use_agg import plt
 from pyiem.util import get_dbconn
@@ -80,6 +80,9 @@ def get_station_info(environ):
 @iemapp()
 def application(environ, start_response):
     """Query out the CGI variables"""
+    dpi = int(environ.get("dpi", 100))
+    if not 10 < dpi < 1000:
+        raise BadWebRequest(f"Invalid dpi of {dpi} specified")
     if "sts" not in environ:
         environ["sts"] = datetime.datetime(1900, 1, 1)
         environ["ets"] = datetime.datetime(2050, 1, 1)
@@ -176,5 +179,5 @@ def application(environ, start_response):
         return [send_error(environ, "Invalid fmt set", start_response)]
     start_response("200 OK", [("Content-type", ct)])
     bio = BytesIO()
-    res.savefig(bio, format=fmt, dpi=int(environ.get("dpi", 100)))
+    res.savefig(bio, format=fmt, dpi=dpi)
     return [bio.getvalue()]

@@ -345,7 +345,8 @@ def application(environ, start_response):
     assert miss in MISSING
     df = df.replace({np.nan: miss})
     # compute columns present in both cols and df.columns
-    cols = list(set(cols).intersection(df.columns))
+    # order here is important to preserve the order of the columns
+    cols = list(df.columns.intersection(set(cols)))
 
     if fmt == "excel":
         bio = BytesIO()

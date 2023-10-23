@@ -2,6 +2,7 @@
 import datetime
 import json
 
+from pyiem.exceptions import IncompleteWebRequest
 from pyiem.network import Table as NetworkTable
 from pyiem.util import get_dbconn, html_escape
 from pyiem.webutil import iemapp
@@ -116,7 +117,9 @@ def application(environ, start_response):
     """Main()"""
     headers = [("Content-type", "application/json")]
 
-    network = environ.get("network", "IACLIMATE").upper()
+    network = environ.get("network", "IACLIMATE").upper().strip()
+    if network == "":
+        raise IncompleteWebRequest("No network specified")
     month = int(environ.get("month", 1))
     day = int(environ.get("day", 1))
     syear = int(environ.get("syear", 1800))
