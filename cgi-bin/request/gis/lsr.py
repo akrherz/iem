@@ -26,6 +26,8 @@ def get_time_domain(form):
         return sts, ets
     if "sts" not in form:
         raise IncompleteWebRequest("GET start time parameters missing")
+    if isinstance(form["ets"], str) and form["ets"] == "":
+        form["ets"] = utc()
 
     return form["sts"], form["ets"]
 

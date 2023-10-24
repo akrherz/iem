@@ -216,7 +216,7 @@ def plotter(fdict):
         ax.text(
             df2.at[idx, col] + 1,
             df2.at[idx, "count"],
-            "%s" % (idx,),
+            f"{idx}",
             ha="left",
         )
     idx = df2[col].idxmin()
@@ -224,7 +224,7 @@ def plotter(fdict):
         ax.text(
             df2.at[idx, col] - 1,
             df2.at[idx, "count"],
-            "%s" % (idx,),
+            f"{idx}",
             va="bottom",
         )
     idx = df2["count"].idxmax()

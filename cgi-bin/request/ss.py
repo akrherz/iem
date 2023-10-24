@@ -33,8 +33,6 @@ def gage_run(sts, ets, stations, excel, start_response):
     """run()"""
     if not stations:
         stations = LOOKUP.keys()
-    if len(stations) == 1:
-        stations.append(0)
 
     sql = text(
         """select date(valid) as date, to_char(valid, 'HH24:MI:SS') as time,
