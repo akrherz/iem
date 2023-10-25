@@ -412,7 +412,7 @@ def get_tablename(stations):
         if sid[:2] not in states:
             states.append(sid[:2])
     if len(states) == 1:
-        return "alldata_%s" % (states[0],)
+        return f"alldata_{states[0]}"
     return "alldata"
 
 
@@ -423,7 +423,7 @@ def get_stationtable(stations):
     for sid in stations:
         if sid[:2] not in states:
             states.append(sid[:2])
-            networks.append("%sCLIMATE" % (sid[:2],))
+            networks.append(f"{sid[:2]}CLIMATE")
     return NetworkTable(networks, only_online=False)
 
 
@@ -434,8 +434,6 @@ def do_simple(cursor, ctx):
 
     nt = get_stationtable(ctx["stations"])
     thisyear = datetime.datetime.now().year
-    if len(ctx["stations"]) == 1:
-        ctx["stations"].append("X")
 
     limitrowcount = "LIMIT 1048000" if ctx["what"] == "excel" else ""
     sql = f"""
@@ -452,7 +450,7 @@ def do_simple(cursor, ctx):
         round((5.0/9.0 * (low - 32.0))::numeric,1) as lowc,
         round((precip * 25.4)::numeric,1) as precipmm
         from {table} WHERE
-        station IN {str(tuple(ctx["stations"]))} and
+        station = ANY(%s) and
         day >= %s and day <= %s
     ), obs as (
         SELECT station, high, low, precip, snow, snowd, narr_srad,
@@ -465,14 +463,21 @@ def do_simple(cursor, ctx):
         round((5.0/9.0 * (high - 32.0))::numeric,1) as highc,
         round((5.0/9.0 * (low - 32.0))::numeric,1) as lowc,
         round((precip * 25.4)::numeric,1) as precipmm
-        from {table} WHERE station IN {str(tuple(ctx["stations"]))} and
+        from {table} WHERE station = ANY(%s) and
         day >= %s and day <= %s
     ), total as (
         SELECT * from obs UNION SELECT * from scenario
     )
 
     SELECT * from total ORDER by day ASC {limitrowcount}"""
-    args = (ctx["scenario_sts"], ctx["scenario_ets"], ctx["sts"], ctx["ets"])
+    args = (
+        ctx["stations"],
+        ctx["scenario_sts"],
+        ctx["scenario_ets"],
+        ctx["stations"],
+        ctx["sts"],
+        ctx["ets"],
+    )
 
     cols = ["station", "station_name", "day", "doy"]
     if ctx["inclatlon"] == "yes":
@@ -615,9 +620,6 @@ def do_dndc(cursor, ctx):
 
     nt = get_stationtable(ctx["stations"])
 
-    if len(ctx["stations"]) == 1:
-        ctx["stations"].append("X")
-
     scenario_year = 2030
     asts = datetime.date(2030, 1, 1)
     if ctx["scenario"] == "yes":
@@ -679,9 +681,6 @@ def do_swat(ctx):
     Two files, one for precip [mm] and one for hi and low temperature [C]
     """
     table = get_tablename(ctx["stations"])
-
-    if len(ctx["stations"]) == 1:
-        ctx["stations"].append("X")
 
     scenario_year = 2030
     asts = datetime.date(2030, 1, 1)

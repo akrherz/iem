@@ -163,6 +163,8 @@ def plotter(fdict):
     ylabel = r"Temperature $^\circ$F"
     if varname in ["total_precip"]:
         ylabel = "Precipitation [inch]"
+    elif varname in ["rain_days"]:
+        ylabel = "Measurable Precipitation Days"
     ax.set_ylabel(ylabel)
     ax.grid(True)
     ax.set_xticks(np.arange(1, 13))

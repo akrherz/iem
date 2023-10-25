@@ -1,4 +1,4 @@
-<?php 
+<?php
 require_once "../../../config/settings.inc.php";
 define("IEM_APPID", 17);
 require_once "../../../include/forms.php";
@@ -10,19 +10,19 @@ $t = new MyView();
 $t->title = "Archived Local Storm Reports";
 
 $ys = yearSelect2(2003, date("Y"), "year1");
-$ms = monthSelect2(0,"month1");
+$ms = monthSelect2(0, "month1");
 $ds = daySelect2(0, "day1");
 $hs = gmtHourSelect(0, "hour1");
 $ns = minuteSelect(0, "minute1");
 $ys2 = yearSelect2(2003, date("Y"), "year2");
-$ms2 = monthSelect2(0,"month2");
-$ds2 = daySelect2(0, "day2");
-$hs2 = gmtHourSelect(0, "hour2");
-$ns2 = minuteSelect(0, "minute2");
+$ms2 = monthSelect2(date("m"), "month2");
+$ds2 = daySelect2(date("d"), "day2");
+$hs2 = gmtHourSelect(23, "hour2");
+$ns2 = minuteSelect(59, "minute2");
 $stateselect = stateSelect("_ALL", '', "state", 5, true, true);
 $ss = "";
-foreach($nt->table as $key => $value){
-	$ss .= "<option value='$key'>[$key] ". $value["name"] ."</option>\n";
+foreach ($nt->table as $key => $value) {
+    $ss .= "<option value='$key'>[$key] " . $value["name"] . "</option>\n";
 }
 
 $t->content = <<<EOF
