@@ -73,7 +73,7 @@ def get_cgi_stations(form):
     if "_ALL" in reqlist:
         network = form.get("network")
         nt = NetworkTable(network, only_online=False)
-        return nt.sts.keys()
+        return list(nt.sts.keys())
 
     return reqlist
 
