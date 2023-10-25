@@ -1,9 +1,9 @@
 """Hourly precip download"""
-import datetime
 from zoneinfo import ZoneInfo
 
+from pyiem.exceptions import IncompleteWebRequest
 from pyiem.util import get_dbconn
-from pyiem.webutil import iemapp
+from pyiem.webutil import ensure_list, iemapp
 
 
 def get_data(network, ctx, tzinfo, stations):
@@ -41,29 +41,18 @@ def get_data(network, ctx, tzinfo, stations):
 @iemapp()
 def application(environ, start_response):
     """run rabbit run"""
-    start_response("200 OK", [("Content-type", "text/plain")])
     tzinfo = ZoneInfo(environ.get("tz", "America/Chicago"))
+    if "sts" not in environ:
+        raise IncompleteWebRequest("No year1,month1,day1 was specified.")
     ctx = {
         "st": environ.get("st") == "1",
         "lalo": environ.get("lalo") == "1",
+        "sts": environ["sts"].date(),
+        "ets": environ["ets"].date(),
     }
-    try:
-        ctx["sts"] = datetime.date(
-            int(environ.get("year1")),
-            int(environ.get("month1")),
-            int(environ.get("day1")),
-        )
-        ctx["ets"] = datetime.date(
-            int(environ.get("year2")),
-            int(environ.get("month2")),
-            int(environ.get("day2")),
-        )
-    except Exception:
-        return [b"ERROR: Invalid date provided, please check selected dates."]
-    stations = environ.get("station", [])
-    if isinstance(stations, str):
-        stations = [stations]
+    stations = ensure_list(environ, "station")
     if not stations:
-        return [b"ERROR: No stations specified for request."]
+        raise IncompleteWebRequest("No station= was specified.")
+    start_response("200 OK", [("Content-type", "text/plain")])
     network = environ.get("network")[:12]
     return [get_data(network, ctx, tzinfo, stations=stations)]
