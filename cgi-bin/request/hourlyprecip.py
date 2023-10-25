@@ -42,6 +42,8 @@ def get_data(network, ctx, tzinfo, stations):
 def application(environ, start_response):
     """run rabbit run"""
     tzinfo = ZoneInfo(environ.get("tz", "America/Chicago"))
+    if "sts" not in environ:
+        raise IncompleteWebRequest("No year1,month1,day1 was specified.")
     ctx = {
         "st": environ.get("st") == "1",
         "lalo": environ.get("lalo") == "1",
