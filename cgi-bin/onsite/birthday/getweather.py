@@ -169,6 +169,8 @@ def application(environ, start_response):
         month = environ.get("month")
         day = environ.get("day")
         city = environ.get("city").upper()
+        if city not in nt.sts:
+            raise NoDataFound("Unknown City")
     except Exception:
         sio.write("<P><P><B>Invalid Post:</B><BR>")
         sio.write(

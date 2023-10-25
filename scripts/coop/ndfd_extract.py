@@ -7,6 +7,7 @@ Minimum temperature
 Attempt to derive climodat data from the NDFD database, we will use the 00 UTC
 files.
 
+Run from RUN_10_AFTER.sh at 1z
 """
 import datetime
 import os
@@ -27,6 +28,7 @@ def do_precip(gribs, ftime, data):
     try:
         sel = gribs.select(parameterName="Total precipitation")
     except Exception:
+        LOG.info("No precip found at %s", ftime)
         return
     if data["x"] is None:
         data["proj"] = pyproj.Proj(sel[0].projparams)
