@@ -34,8 +34,11 @@ def application(environ, start_response):
     """Go Main Go"""
     if "date1" not in environ:
         raise IncompleteWebRequest("GET date1= parameter missing")
-    ts1 = datetime.datetime.strptime(environ.get("date1"), "%Y-%m-%d")
-    ts2 = datetime.datetime.strptime(environ.get("date2"), "%Y-%m-%d")
+    try:
+        ts1 = datetime.datetime.strptime(environ.get("date1"), "%Y-%m-%d")
+        ts2 = datetime.datetime.strptime(environ.get("date2"), "%Y-%m-%d")
+    except ValueError:
+        raise IncompleteWebRequest("Invalid date(s) provided")
     if ts1 > ts2:
         (ts1, ts2) = (ts2, ts1)
     if ts1.year != ts2.year:

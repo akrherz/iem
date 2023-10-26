@@ -54,9 +54,9 @@ def plotter(fdict):
         df = pd.read_sql(
             """
             WITH days as (
-                select generate_series('%s-01-01'::date, '%s-12-31'::date,
+                select generate_series(%s, %s,
                     '1 day'::interval)::date as day,
-                    to_char(generate_series('%s-01-01'::date, '%s-12-31'::date,
+                    to_char(generate_series(%s, %s,
                     '1 day'::interval)::date, 'mmdd') as sday
             ),
             climo as (
@@ -78,7 +78,15 @@ def plotter(fdict):
             (t.sday = c.sday) ORDER by t.day ASC
         """,
             conn,
-            params=(year, year, year, year, station, station, year),
+            params=(
+                datetime.date(year, 1, 1),
+                datetime.date(year, 12, 31),
+                datetime.date(year, 1, 1),
+                datetime.date(year, 12, 31),
+                station,
+                station,
+                year,
+            ),
             index_col="day",
         )
     if df.empty or df["stddev_high"].min() == 0:
