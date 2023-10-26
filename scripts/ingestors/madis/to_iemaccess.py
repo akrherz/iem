@@ -171,6 +171,9 @@ def main(argv):
             db[this_station]["scond3"] = road_state_xref.get(rstate4[recnum])
 
     for sid, val in db.items():
+        # Sigh
+        if sid == "IA065":
+            continue
         iem = Observation(sid, val["network"], val["ts"])
         for colname in ["scond0", "scond1", "scond2", "scond3"]:
             iem.data[colname] = val.get(colname)
