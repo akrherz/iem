@@ -23,7 +23,7 @@ python daily_estimator.py $(date +'%Y %m %d')
 sleep 300
 
 cd ../00z
-python awos_rtp.py
+python generate_rtp.py
 python asos_high.py
 
 cd ../asos
