@@ -20,8 +20,8 @@ HEADER = """
 
 <h3>Highly Experimental IEMBot to Mastodon Configuration:</h3>
 
-<div class="alert alert-danger">There are absolutely no warranties with this service.
-Use at your own risk and peril!</div>
+<div class="alert alert-danger">There are absolutely no warranties with this
+service. Use at your own risk and peril!</div>
 
 """
 ENTER_HOST_FORM = """

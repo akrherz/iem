@@ -138,7 +138,8 @@ def map_select_widget(network, name):
     return f"""
 &nbsp; <button type="button" id="button_{network}_{name}" data-state="0"
 onClick="mapFactory('{network}', '{name}');">Show Map</button>
-<div style="display: none; width: 100%; height: 640px;" id="map_{network}_{name}_wrap">
+<div style="display: none; width: 100%; height: 640px;"
+ id="map_{network}_{name}_wrap">
 <br />Click dot to select in form above. <strong>Key</strong>
 <img src="/images/green_dot.svg" style="height: 15px;"> Online &nbsp;
 <img src="/images/red_dot.svg" style="height: 15px;"> Offline<br />
