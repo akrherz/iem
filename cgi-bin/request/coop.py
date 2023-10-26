@@ -697,8 +697,8 @@ def do_swat(ctx):
                 f"""
             WITH scenario as (
                 SELECT
-                ('{thisyear}-'||month||'-'||extract(day from day))::date as day,
-                high, low, precip, station from {table}
+                ('{thisyear}-'||month||'-'||extract(day from day))::date
+                    as day, high, low, precip, station from {table}
                 WHERE station = ANY(:sids) and
                 day >= :asts and year = :scenario_year),
             obs as (

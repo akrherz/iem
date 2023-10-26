@@ -1,4 +1,25 @@
-"""METAR frequency"""
+"""
+This chart totals the number of distinct calendar
+days or hours per month that a given present weather condition is reported
+within the METAR data feed.  The calendar day is computed for the local time
+zone of the reporting station.
+
+<p>The reporting of present weather codes within METARs has changed over
+the years and there is some non-standard nomenclature used by some sites.
+The thunder (TS) reports are delineated into three categories here to
+hopefully allow more accurate statistics.
+<ul>
+    <li><strong>All Thunder Reports (TS)</strong> includes any
+    <code>TS</code> mention in any present weather code</li>
+    <li><strong>Thunder in Vicinity (VCTS)</strong> includes any
+    <code>VCTS</code> mention in any present weather code, for example,
+    <code>VCTSRA</code> would match.</li>
+    <li><strong>Thunder Reports (excluding VCTS)</strong> includes most
+    <code>TS</code> mentions, but not any including <code>VC</code></li>
+</ul></p>
+
+<p>This autoplot considers both routine and special hourly reports.
+"""
 import calendar
 import datetime
 
@@ -31,32 +52,7 @@ PDICT2 = {
 
 def get_description():
     """Return a dict describing how to call this plotter"""
-    desc = {}
-    desc["data"] = True
-    desc["cache"] = 86400
-    desc[
-        "description"
-    ] = """This chart totals the number of distinct calendar
-    days or hours per month that a given present weather condition is reported within
-    the METAR data feed.  The calendar day is computed for the local time zone
-    of the reporting station.
-
-    <p>The reporting of present weather codes within METARs has changed over
-    the years and there is some non-standard nomenclature used by some sites.
-    The thunder (TS) reports are delineated into three categories here to
-    hopefully allow more accurate statistics.
-    <ul>
-      <li><strong>All Thunder Reports (TS)</strong> includes any
-      <code>TS</code> mention in any present weather code</li>
-      <li><strong>Thunder in Vicinity (VCTS)</strong> includes any
-      <code>VCTS</code> mention in any present weather code, for example,
-      <code>VCTSRA</code> would match.</li>
-      <li><strong>Thunder Reports (excluding VCTS)</strong> includes most
-      <code>TS</code> mentions, but not any including <code>VC</code></li>
-    </ul></p>
-
-    <p>This autoplot considers both routine and special hourly reports.
-    """
+    desc = {"description": __doc__, "data": True, "cache": 86400}
     desc["arguments"] = [
         dict(
             type="zstation",

@@ -61,8 +61,8 @@ def add_plot(ctx):
     """Do plotting."""
     title = (
         f"{ctx['_sname']} :: Daily Average Component Wind Speed\n"
-        f"[{ctx['ab'].year}-{datetime.datetime.now().year}] 7 day smooth filter "
-        f"applied, {len(ctx['df'].index):.0f} obs found"
+        f"[{ctx['ab'].year}-{datetime.datetime.now().year}] 7 day smooth "
+        f"filter applied, {len(ctx['df'].index):.0f} obs found"
     )
     ctx["fig"] = figure(apctx=ctx, title=title)
     axes = ctx["fig"].subplots(2, 1)
