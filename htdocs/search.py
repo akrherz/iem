@@ -14,6 +14,7 @@ from pyiem.webutil import iemapp
 AFOS_RE = re.compile(r"^[A-Z0-9]{6}$", re.I)
 STATION_RE = re.compile(r"^[A-Z0-9]{3,10}$", re.I)
 AUTOPLOT_RE = re.compile(r"^(autoplot|ap)?\s?(?P<n>\d{1,3})$", re.I)
+PRODID_RE = re.compile(r"^[12]\d{11}-[A-Z]{4}-", re.I)
 
 
 def station_df_handler(df):
@@ -60,6 +61,11 @@ def ap_handler(apid):
     return f"/plotting/auto/?q={apid}"
 
 
+def prodid_handler(pid):
+    """Foreward to the product page."""
+    return f"/p.php?pid={pid}"
+
+
 def afos_handler(pil):
     """Forward to AFOS handler."""
     return f"/wx/afos/p.php?pil={pil}"
@@ -97,6 +103,9 @@ def find_handler(q):
     """Do we have a handler for this request?"""
     if q == "":
         return None, None
+    m = PRODID_RE.match(q)
+    if m:
+        return prodid_handler, q
     # Match autoplot first as ### will match STATION_RE
     m = AUTOPLOT_RE.match(q)
     if m:
@@ -132,6 +141,7 @@ of supported search values.</p>
     <li>A NWS AFOS/AWIPS Idenitifer (AFDDMX, SWODY1)</li>
     <li>A station ID (KFWS, AMSI4, DSM, IA0200)</li>
     <li>An autoplot identifier (ap1, ap2, autoplot 100)</li>
+    <li>An IEM Product ID for NWS Prods (201501010000-KDMX-NOUS43-PNSDMX)</li>
     <li>The nearest station to a street address (123 Main St Ames Iowa)</li>
 </ul>
 

@@ -205,7 +205,7 @@ events.</li>
   <li><a href="obs.php">Sortable Currents by WFO</a></li>
 </ul>
 
-<h4>Iowa AWOS RTP First Guess</h4>
+<h4>Iowa RTP First Guess</h4>
 <p>The IEM attempts to get the temperature and precipitation logic correct
 to build the required SHEF fields for the RTP product.</p>
 <ul>
