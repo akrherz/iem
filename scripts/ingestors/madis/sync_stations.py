@@ -32,6 +32,8 @@ def main(argv):
         if network is None:
             continue
         stid = stations[recnum]
+        if stid == "IA065":
+            continue
         mcursor.execute(
             "SELECT st_x(geom), st_y(geom) from stations "
             "where id = %s and network = %s",
