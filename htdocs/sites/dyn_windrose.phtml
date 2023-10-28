@@ -49,6 +49,7 @@ $minute1 = get_int404("minute1", 0);
 $minute2 = get_int404("minute2", 0);
 $units = isset($_GET["units"]) ? xssafe($_GET["units"]) : "mph";
 $nsector = get_int404('nsector', 36);
+$staticrange = get_int404('staticrange', 0);
 $level = isset($_GET["level"]) ? floatval($_GET['level']) : 1000;
 $fmt = isset($_GET["fmt"]) ? xssafe($_GET["fmt"]) : 'png';
 $conv = isset($_GET["conv"]) ? xssafe($_GET["conv"]) : "from";
@@ -87,8 +88,8 @@ if (isset($_GET["hour1"])) {
     if (isset($_GET["hourrangelimit"])) {
         $rose_uri .= "&amp;hourrangelimit=1";
     }
-    if (isset($_GET["staticrange"])) {
-        $rose_uri .= "&amp;staticrange=1";
+    if ($staticrange > 1 && $staticrange < 101) {
+        $rose_uri .= "&amp;staticrange={$staticrange}";
     }
     if ($network == 'RAOB') {
         $rose_uri .= "&amp;level=" . $level;
@@ -198,9 +199,12 @@ $content .= '<br /><input type="checkbox" name="hourrangelimit" value="1" ';
 if (isset($_GET["hourrangelimit"])) $content .= "checked=\"checked\" ";
 $content .= 'id="r3"> <label for="r3">3. Limit to Range of hours given by start and end time</label>';
 
-$content .= '<br /><input type="checkbox" name="staticrange" value="1" ';
-if (isset($_GET["staticrange"])) $content .= "checked=\"checked\" ";
-$content .= 'id="o1"> <label for="o1">Optional: Hard code the frequency axis limit to 100%</label>';
+$content .= <<<EOM
+<br />
+<input type="text" name="staticrange" value="{$staticrange}" size="3"
+ id="staticrange">
+<label for="staticrange">Specify frequency axis limit (1-100%) (0 represents auto-scale).</label>
+EOM;
 
 // Allow setting of wind speed bins
 $missive = <<<EOM

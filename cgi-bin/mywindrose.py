@@ -124,8 +124,9 @@ def application(environ, start_response):
         nsector = 36
 
     rmax = None
-    if "staticrange" in environ and environ["staticrange"] == "1":
-        rmax = 100
+    if "staticrange" in environ:
+        val = int(environ["staticrange"])
+        rmax = val if (1 < val < 100) else 100
 
     nt = NetworkTable(network, only_online=False)
     if station not in nt.sts:
