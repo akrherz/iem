@@ -79,6 +79,7 @@ previous winter seasons that these maps are available for:
     <li><a href="winter2021.html">Winter 2020-2021</a></li>
     <li><a href="winter2122.html">Winter 2021-2022</a></li>
     <li><a href="winter2223.html">Winter 2022-2023</a></li>
+    <li><a href="winter2324.html">Winter 2023-2024</a></li>
 </ul></p>
 
 EOM;
