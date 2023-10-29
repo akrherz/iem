@@ -3,6 +3,9 @@ This chart displays either the first or last date
 of the winter season with a snowfall of a given intensity.  The snowfall
 and snow depth data is not of great quality, so please be careful with
 this plot.
+
+<p>For a `Trace` snowfall event to count, the coincident low temperature needs
+to be below 40F. This is to help filter out hail events.</p>
 """
 import calendar
 import datetime
@@ -66,8 +69,11 @@ def get_data(ctx):
     snow = np.zeros((eyear - syear + 1, 366))
     snowd = np.zeros((eyear - syear + 1, 366))
     cursor.execute(
-        "SELECT extract(doy from day), year, snow, snowd from "
-        "alldata where station = %s and year >= %s",
+        """
+        SELECT extract(doy from day), year,
+        case when snow > 0 and snow < 0.09 and low >= 40 then 0 else snow end,
+        snowd from alldata where station = %s and year >= %s
+        """,
         (station, syear),
     )
     for row in cursor:
