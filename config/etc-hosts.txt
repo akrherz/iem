@@ -122,5 +122,5 @@
 10.24.19.228 pyvbcam.local
 # iem11-dc
 10.90.12.30 iembot
-# metvm6-dc
-10.90.12.26  iem-archive.local
+# metvm6-dc and iemvm6(via iem8-dc)
+10.90.12.49  iem-archive.local

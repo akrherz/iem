@@ -23,8 +23,9 @@ GOES R/S | iem8-dc | iem19 | None
 hrrr | iem8-dc | None | None
 iembot  | iem11-dc | None  | nagios
 iemdb1 | metvm33-dc | iemvm4 | nagios check
-iemdb2 | metvm6-dc | iemvm5 | nagios check
+iemdb2 | metvm4-dc | iemvm5 | nagios check
 iemdb3 | metvm2-dc | iemvm0 | nagios check
+iem-archive | metvm6-dc | iemvm6 | nagios
 iem-web-services | iem27-dc | iem11-dc | nagios check
 letsencrpyt | iem8-dc | None | nagios SSL check
 LDM | iem11 | None | None
