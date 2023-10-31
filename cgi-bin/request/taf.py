@@ -36,10 +36,11 @@ def run(start_response, ctx):
             },
         )
     # muck the timezones
-    for col in ["valid", "fx_valid", "fx_valid_end"]:
-        df[col] = (
-            df[col].dt.tz_localize(ctx["tz"]).dt.strftime("%Y-%m-%d %H:%M")
-        )
+    if not df.empty:
+        for col in ["valid", "fx_valid", "fx_valid_end"]:
+            df[col] = (
+                df[col].dt.tz_localize(ctx["tz"]).dt.strftime("%Y-%m-%d %H:%M")
+            )
 
     bio = BytesIO()
     if ctx["fmt"] == "excel":
