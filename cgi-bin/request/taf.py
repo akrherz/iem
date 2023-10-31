@@ -5,7 +5,7 @@ from zoneinfo import ZoneInfo
 
 import pandas as pd
 from pyiem.exceptions import IncompleteWebRequest
-from pyiem.util import LOG, get_sqlalchemy_conn
+from pyiem.util import get_sqlalchemy_conn
 from pyiem.webutil import iemapp
 from sqlalchemy import text
 
@@ -37,12 +37,9 @@ def run(start_response, ctx):
         )
     # muck the timezones
     for col in ["valid", "fx_valid", "fx_valid_end"]:
-        try:
-            df[col] = (
-                df[col].dt.tz_localize(ctx["tz"]).dt.strftime("%Y-%m-%d %H:%M")
-            )
-        except Exception as exp:
-            LOG.debug(exp)
+        df[col] = (
+            df[col].dt.tz_localize(ctx["tz"]).dt.strftime("%Y-%m-%d %H:%M")
+        )
 
     bio = BytesIO()
     if ctx["fmt"] == "excel":

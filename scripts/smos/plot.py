@@ -1,6 +1,7 @@
 """Create a plot of SMOS data for either 0 or 12z"""
 import datetime
 import sys
+import warnings
 
 import numpy as np
 import pandas as pd
@@ -8,6 +9,8 @@ from pyiem.plot import get_cmap
 from pyiem.plot.geoplot import MapPlot
 from pyiem.util import get_sqlalchemy_conn, logger, utc
 
+# Surpress warning from matplotlib that I have no idea about
+warnings.simplefilter("ignore", RuntimeWarning)
 LOG = logger()
 
 
@@ -35,23 +38,20 @@ def makeplot(ts, routes="ac"):
             ),
             index_col=None,
         )
-
     if df.empty:
-        LOG.info(
+        LOG.warning(
             "Did not find SMOS data for: %s-%s",
             ts - datetime.timedelta(hours=6),
             ts + datetime.timedelta(hours=6),
         )
         return
-
     for sector in ["midwest", "iowa"]:
         clevs = np.arange(0, 71, 5)
         mp = MapPlot(
             sector=sector,
             axisbg="white",
             title="SMOS Satellite: Soil Moisture (0-5cm)",
-            subtitle="Satelite passes around %s UTC"
-            % (ts.strftime("%d %B %Y %H"),),
+            subtitle=f"Satelite passes around {ts:%d %B %Y %H} UTC",
         )
         if sector == "iowa":
             mp.drawcounties()
@@ -61,18 +61,14 @@ def makeplot(ts, routes="ac"):
         mp.hexbin(
             df["lon"].values,
             df["lat"].values,
-            df["sm"],
+            df["sm"].values,
             clevs,
             units="%",
             cmap=cmap,
         )
-        pqstr = "plot %s %s00 smos_%s_sm%s.png smos_%s_sm%s.png png" % (
-            routes,
-            ts.strftime("%Y%m%d%H"),
-            sector,
-            ts.strftime("%H"),
-            sector,
-            ts.strftime("%H"),
+        pqstr = (
+            f"plot {routes} {ts:%Y%m%d%H}00 smos_{sector}_sm{ts:%H}.png "
+            f"smos_{sector}_sm{ts:%H}.png png"
         )
         mp.postprocess(pqstr=pqstr)
         mp.close()
@@ -96,13 +92,9 @@ def makeplot(ts, routes="ac"):
         mp.hexbin(
             df["lon"].values, df["lat"].values, df["od"], clevs, cmap=cmap
         )
-        pqstr = "plot %s %s00 smos_%s_od%s.png smos_%s_od%s.png png" % (
-            routes,
-            ts.strftime("%Y%m%d%H"),
-            sector,
-            ts.strftime("%H"),
-            sector,
-            ts.strftime("%H"),
+        pqstr = (
+            f"plot {routes} {ts:%Y%m%d%H}00 smos_{sector}_sm{ts:%H}.png "
+            f"smos_{sector}_sm{ts:%H}.png png"
         )
         mp.postprocess(pqstr=pqstr)
         mp.close()

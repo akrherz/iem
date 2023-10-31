@@ -68,7 +68,7 @@ def get_text(product_id):
             text = req.content.decode("ascii", "ignore").replace("\001", "")
             text = "\n".join(text.replace("\r", "").split("\n")[5:])
     except Exception as exp:
-        LOG.debug(exp)
+        LOG.warning(exp)
 
     return text
 
