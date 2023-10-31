@@ -390,7 +390,8 @@ def application(environ, start_response):
 
     delim = "," if fmt == "comma" else "\t"
     sio = StringIO()
-    df.to_csv(sio, index=False, columns=cols, sep=delim, float_format="%.2f")
+    # careful of precision here
+    df.to_csv(sio, index=False, columns=cols, sep=delim, float_format="%.4f")
 
     if todisk == "yes":
         headers = [
