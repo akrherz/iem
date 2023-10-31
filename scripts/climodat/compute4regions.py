@@ -3,9 +3,7 @@
 Run from RUN_NOON.sh
 """
 import datetime
-import logging
 import sys
-import warnings
 
 import geopandas as gpd
 import numpy as np
@@ -13,7 +11,7 @@ from pyiem import iemre
 from pyiem.grid.zs import CachingZonalStats
 from pyiem.util import (
     convert_value,
-    get_dbconn,
+    get_dbconnc,
     get_sqlalchemy_conn,
     logger,
     mm2inch,
@@ -21,8 +19,6 @@ from pyiem.util import (
 )
 
 LOG = logger()
-LOG.setLevel(logging.INFO)
-warnings.filterwarnings("ignore", category=FutureWarning)
 
 
 def zero(val):
@@ -112,8 +108,7 @@ def do_day(cursor, valid):
 
 def main(argv):
     """Go Main Go"""
-    conn = get_dbconn("coop")
-    cursor = conn.cursor()
+    conn, cursor = get_dbconnc("coop")
     do_day(cursor, datetime.date(int(argv[1]), int(argv[2]), int(argv[3])))
     cursor.close()
     conn.commit()

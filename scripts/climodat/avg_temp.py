@@ -1,5 +1,7 @@
 """
- Generate maps of Average Temperatures
+Generate maps of Average Temperatures
+
+called from climodat/run.sh
 """
 import datetime
 import sys

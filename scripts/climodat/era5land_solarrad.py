@@ -1,7 +1,6 @@
 """
 Gridcell sample the ERA5Land NetCDF files to save srad to climodat database.
 
-
 Run from RUN_0Z.sh for seven UTC days ago.
 """
 import datetime

@@ -10,7 +10,6 @@
 
  26 Jun 1988 is bad!
 
-
  http://rda.ucar.edu/dataset/ds608.0
 
 Updates of NARR data from April 1, 2009 to January 31, 2015
@@ -23,6 +22,7 @@ are in the precipitation and in the soil moisture fields.
 Review the following pdf file for details.
     http://rda.ucar.edu/datasets/ds608.0/docs/rr4.pdf
 
+Called from dl/download_narr.py
 """
 # pylint: disable=unpacking-non-sequence
 import datetime

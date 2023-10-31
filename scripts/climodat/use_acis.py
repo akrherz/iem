@@ -83,10 +83,18 @@ def do(meta, station, acis_station, interactive):
     table = f"alldata_{station[:2]}"
     today = datetime.date.today()
     fmt = "%Y-%m-%d"
+    # If this station is offline, we don't want to ask for data past the
+    # archive_end date.  The station could be a precip-only site...
+    edate = meta["attributes"].get("CEILING")
+    if edate is None:
+        if meta["online"]:
+            edate = today.strftime(fmt)
+        else:
+            edate = meta["archive_end"].strftime(fmt)
     payload = {
         "sid": acis_station,
         "sdate": meta["attributes"].get("FLOOR", compute_sdate(acis_station)),
-        "edate": meta["attributes"].get("CEILING", today.strftime(fmt)),
+        "edate": edate,
         "elems": [
             {"name": "maxt", "add": "t"},
             {"name": "mint"},
