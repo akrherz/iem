@@ -117,25 +117,70 @@ hourly data.</p>
 
 
 <h4>Options:</h4>
-         
+
 <strong>Select from available variables</strong><br />
 <a href="/agclimate/et.phtml" target="_new">Reference Evapotranspiration (alfalfa)</a>
 
 {$vselect}
 
 <hr>
-<p>The Ames-AEA, Ames-Kitchen, and Jefferson locations have the
+<p>The Ames-AEA, Ames-Kitchen, Ames-Hinds, and Jefferson locations have the
 <a href="https://www.campbellsci.com/soilvue10">CS SoilVue 10</a> installed.<br />
 
 <input type="checkbox" name="vars" value="sv" id="sv">
-<label for="sv">SoilVue Temperature+Moisture Data</label>
+<label for="sv">All SoilVue Temperature + Moisture Data</label>
+
+<br /><strong>or</strong> select from the following depths:<br />
+
+<div class="row">
+<div class="col-md-4">
+<input type="checkbox" name="vars" value="sv2" id="sv2">
+<label for="sv2">2 inch</label>
+<br /><input type="checkbox" name="vars" value="sv12" id="sv12">
+<label for="sv12">12 inch</label>
+<br /><input type="checkbox" name="vars" value="sv20" id="sv20">
+<label for="sv20">20 inch</label>
+<br /><input type="checkbox" name="vars" value="sv30" id="sv30">
+<label for="sv30">30 inch</label>
+<br /><input type="checkbox" name="vars" value="sv40" id="sv40">
+<label for="sv40">40 inch</label>
+</div>
+
+<div class="col-md-4">
+<input type="checkbox" name="vars" value="sv4" id="sv4">
+<label for="sv4">4 inch</label>
+<br /><input type="checkbox" name="vars" value="sv14" id="sv14">
+<label for="sv14">14 inch</label>
+<br /><input type="checkbox" name="vars" value="sv24" id="sv24">
+<label for="sv24">24 inch</label>
+<br /><input type="checkbox" name="vars" value="sv32" id="sv32">
+<label for="sv32">32 inch</label>
+<br /><input type="checkbox" name="vars" value="sv42" id="sv42">
+<label for="sv42">42 inch</label>
+</div>
+
+<div class="col-md-4">
+<input type="checkbox" name="vars" value="sv8" id="sv8">
+<label for="sv8">8 inch</label>
+<br /><input type="checkbox" name="vars" value="sv16" id="sv16">
+<label for="sv16">16 inch</label>
+<br /><input type="checkbox" name="vars" value="sv28" id="sv28">
+<label for="sv28">28 inch</label>
+<br /><input type="checkbox" name="vars" value="sv36" id="sv36">
+<label for="sv36">36 inch</label>
+<br /><input type="checkbox" name="vars" value="sv52" id="sv52">
+<label for="sv52">52 inch</label>
+</div>
+
+</div>
+
 </p>
 
 <hr>
 <p><strong>Vineyard Station-only Variables</strong>
 
 {$vselect2}
-         
+
 {$qcbox}
 
 <p>

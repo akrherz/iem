@@ -68,7 +68,12 @@ def fetch_daily(environ, cols):
         for depth in SV_DEPTHS:
             for c2 in ["t", "vwc"]:
                 cols.append(f"sv_{c2}{depth}")
-
+    else:
+        for col in list(cols):
+            if col.startswith("sv") and len(col) > 2:
+                depth = int(col[2:])
+                for c2 in ["t", "vwc"]:
+                    cols.append(f"sv_{c2}{depth}")
     with get_sqlalchemy_conn("isuag") as conn:
         df = pd.read_sql(
             text(
@@ -163,6 +168,14 @@ def fetch_daily(environ, cols):
             df[f"sv_vwc{depth}"] = df[f"sv_vwc{depth}_qc"]
         # Remove the original
         cols.remove("sv")
+    else:
+        for col in list(cols):
+            if col.startswith("sv_r"):
+                df[col] = convert_value(df[f"{col}_qc"].values, "degC", "degF")
+                cols.remove(col)
+            elif col.startswith("sv_vwc"):
+                df[col] = df[f"{col}_qc"]
+                cols.remove(col)
 
     # Convert solar radiation to J/m2
     if "solar" in cols:
@@ -221,6 +234,12 @@ def fetch_hourly(environ, cols):
         for depth in SV_DEPTHS:
             for c2 in ["t", "vwc"]:
                 cols.append(f"sv_{c2}{depth}")
+    else:
+        for col in list(cols):
+            if col.startswith("sv") and len(col) > 2:
+                depth = int(col[2:])
+                for c2 in ["t", "vwc"]:
+                    cols.append(f"sv_{c2}{depth}")
     with get_sqlalchemy_conn("isuag") as conn:
         df = pd.read_sql(
             text(
@@ -290,6 +309,15 @@ def fetch_hourly(environ, cols):
             df[f"sv_vwc{depth}"] = df[f"sv_vwc{depth}_qc"]
         # Remove the original
         cols.remove("sv")
+    else:
+        for col in list(cols):
+            if col.startswith("sv_t"):
+                df[col] = convert_value(df[f"{col}_qc"].values, "degC", "degF")
+                cols.remove(col)
+            elif col.startswith("sv_vwc"):
+                # Copy
+                df[col] = df[f"{col}_qc"]
+                cols.remove(col)
 
     # Convert solar radiation to J/m2
     if "solar" in cols:
@@ -362,7 +390,8 @@ def application(environ, start_response):
 
     delim = "," if fmt == "comma" else "\t"
     sio = StringIO()
-    df.to_csv(sio, index=False, columns=cols, sep=delim)
+    # careful of precision here
+    df.to_csv(sio, index=False, columns=cols, sep=delim, float_format="%.4f")
 
     if todisk == "yes":
         headers = [

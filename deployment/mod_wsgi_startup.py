@@ -44,5 +44,3 @@ else:
 
 if cartopy.config.get("pre_existing_data_dir", "") == "":
     cartopy.config["pre_existing_data_dir"] = f"{envpath}/share/cartopy"
-
-LOG.debug("Starting up pandas: %s plt: %s", pd.__version__, plt)
