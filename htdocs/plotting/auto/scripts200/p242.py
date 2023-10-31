@@ -117,6 +117,7 @@ def overlay_info(fig, df):
     remark = ""
     if row["remark"] is not None:
         remark = "\n".join(wrap(row["remark"].strip(), width=50))
+    remark = remark.replace("$", "--")
     msg = (
         f"Valid: {row['utc_valid']:%Y-%m-%d %H:%M} UTC\n"
         f"Local Valid: {row['local_valid']:%Y-%m-%d %-I:%M %p}\n"

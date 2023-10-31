@@ -49,7 +49,7 @@ def application(environ, start_response):
         )
     if df.empty:
         start_response("200 OK", [("Content-type", "text/plain")])
-        return b"ERROR: no results found for your query"
+        return [b"ERROR: no results found for your query"]
     df.columns = [s.upper() if s != "geom" else "geom" for s in df.columns]
     fn = f"mpd_{environ['sts']:%Y%m%d%H%M}_{environ['ets']:%Y%m%d%H%M}"
 

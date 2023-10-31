@@ -12,37 +12,71 @@ $dbconn = iemdb("iem");
 
 $wfo = isset($_REQUEST['wfo']) ? xssafe($_REQUEST['wfo']) : 'DMX';
 $by = isset($_REQUEST['by']) ? xssafe($_REQUEST['by']) : 'station';
+$tby = isset($_REQUEST['tby']) ? xssafe($_REQUEST['tby']) : 'month';
 $year = get_int404("year", date("Y"));
 $month = get_int404("month", date("m"));
 
-if ($by == "station") {
-    $rs = pg_prepare($dbconn, "MYSELECT", "select id, name,
-    count(*) as total,
-    sum(case when pday >= 0 then 1 else 0 end) as pobs, 
-    sum(case when snow >= 0 then 1 else 0 end) as sobs, 
-    sum(case when snowd >= 0 then 1 else 0 end) as sdobs, 
-    sum(case when max_tmpf > -60 then 1 else 0 end) as tobs 
-    from summary_$year s JOIN stations t on (t.iemid = s.iemid) 
-    WHERE day >= $1 and day < ($1::date + '1 month'::interval) 
-    and day < 'TOMORROW'::date
-    and t.wfo = $2 and t.network ~* 'COOP' GROUP by id, name ORDER by id ASC");
+$tlabel = "month: {$month}, year: {$year}";
+
+$tstring = sprintf("%s-%02d-01", $year, intval($month));
+// sigh
+if ($tby == "month") {
+    if ($by == "station") {
+        $rs = pg_prepare($dbconn, "MYSELECT", "select id, network, name,
+        count(*) as total,
+        sum(case when pday >= 0 then 1 else 0 end) as pobs, 
+        sum(case when snow >= 0 then 1 else 0 end) as sobs, 
+        sum(case when snowd >= 0 then 1 else 0 end) as sdobs, 
+        sum(case when max_tmpf > -60 then 1 else 0 end) as tobs 
+        from summary_$year s JOIN stations t on (t.iemid = s.iemid) 
+        WHERE day >= $1 and day < ($1::date + '1 month'::interval) 
+        and day < 'TOMORROW'::date
+        and t.wfo = $2 and t.network ~* 'COOP' GROUP by id, network, name
+        ORDER by id ASC");
+    } else {
+        $rs = pg_prepare($dbconn, "MYSELECT", "select day,
+     count(*) as total,
+     sum(case when pday >= 0 then 1 else 0 end) as pobs, 
+     sum(case when snow >= 0 then 1 else 0 end) as sobs, 
+     sum(case when snowd >= 0 then 1 else 0 end) as sdobs, 
+     sum(case when max_tmpf > -60 then 1 else 0 end) as tobs 
+     from summary_$year s JOIN stations t on (t.iemid = s.iemid) 
+     WHERE day >= $1 and day < ($1::date + '1 month'::interval) 
+     and day < 'TOMORROW'::date
+     and t.wfo = $2 and t.network ~* 'COOP' GROUP by day ORDER by day ASC");
+    }
+    $args = array($tstring, $wfo);
 } else {
-    $rs = pg_prepare($dbconn, "MYSELECT", "select day,
- count(*) as total,
- sum(case when pday >= 0 then 1 else 0 end) as pobs, 
- sum(case when snow >= 0 then 1 else 0 end) as sobs, 
- sum(case when snowd >= 0 then 1 else 0 end) as sdobs, 
- sum(case when max_tmpf > -60 then 1 else 0 end) as tobs 
- from summary_$year s JOIN stations t on (t.iemid = s.iemid) 
- WHERE day >= $1 and day < ($1::date + '1 month'::interval) 
- and day < 'TOMORROW'::date
- and t.wfo = $2 and t.network ~* 'COOP' GROUP by day ORDER by day ASC");
+    $tlabel = "year: {$year}";
+    if ($by == "station") {
+        $rs = pg_prepare($dbconn, "MYSELECT", "select id, network, name,
+        count(*) as total,
+        sum(case when pday >= 0 then 1 else 0 end) as pobs, 
+        sum(case when snow >= 0 then 1 else 0 end) as sobs, 
+        sum(case when snowd >= 0 then 1 else 0 end) as sdobs, 
+        sum(case when max_tmpf > -60 then 1 else 0 end) as tobs 
+        from summary_$year s JOIN stations t on (t.iemid = s.iemid) 
+        WHERE day < 'TOMORROW'::date
+        and t.wfo = $1 and t.network ~* 'COOP' GROUP by id, network, name
+        ORDER by id ASC");
+    } else {
+        $rs = pg_prepare($dbconn, "MYSELECT", "select day,
+     count(*) as total,
+     sum(case when pday >= 0 then 1 else 0 end) as pobs, 
+     sum(case when snow >= 0 then 1 else 0 end) as sobs, 
+     sum(case when snowd >= 0 then 1 else 0 end) as sdobs, 
+     sum(case when max_tmpf > -60 then 1 else 0 end) as tobs 
+     from summary_$year s JOIN stations t on (t.iemid = s.iemid) 
+     WHERE day < 'TOMORROW'::date
+     and t.wfo = $1 and t.network ~* 'COOP' GROUP by day ORDER by day ASC");
+    }
+    $args = array($wfo);
 }
 
 $bselect = make_select("by", $by, array("station" => "Station", "day" => "Day"));
+$tselect = make_select("tby", $tby, array("month" => "Month", "year" => "Year"));
 
-$tstring = sprintf("%s-%02d-01", $year, intval($month));
-$data = pg_execute($dbconn, "MYSELECT", array($tstring, $wfo));
+$data = pg_execute($dbconn, "MYSELECT", $args);
 
 $t->title = "NWS COOP Obs per month per WFO";
 
@@ -55,8 +89,11 @@ $table = "";
 for ($i = 0; $row = pg_fetch_assoc($data); $i++) {
     if ($by == "station") {
         $table .= sprintf(
-            "<tr><td>%s</td><td>%s</td><td>%s</td><td>%s</td><td>%s</td>" .
+            "<tr><td><a href=\"/sites/site.php?station=%s&amp;network=%s\">%s</a></td>" .
+                "<td>%s</td><td>%s</td><td>%s</td><td>%s</td>" .
                 "<td>%s</td><td>%s</td></tr>",
+            $row["id"],
+            $row["network"],
             $row["id"],
             $row["name"],
             $row["total"],
@@ -98,6 +135,7 @@ is "missing" data from sites.  Please <a href="/info/contacts.php">let us know</
 <tr>
 <td><strong>Select WFO:</strong> {$wselect} </td>
 <td><strong>Aggregate By:</strong> {$bselect} </td>
+<td><strong>By Month or Year:</strong> {$tselect} </td>
 <td><strong>Select Year:</strong>{$ys}</td>
 <td><strong>Select Month:</strong>{$ms}</td>
 </tr>
@@ -105,7 +143,7 @@ is "missing" data from sites.  Please <a href="/info/contacts.php">let us know</
 <input type="submit" value="View Report" />
 </form>
 
-<h3>COOP Report for wfo: {$wfo}, month: {$month}, year: {$year}</h3>
+<h3>COOP Report for wfo: {$wfo}, {$tlabel}</h3>
 
 <table class="table table-striped table-condensed table-bordered">
 <thead class="sticky">
