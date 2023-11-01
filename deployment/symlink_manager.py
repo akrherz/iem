@@ -14,6 +14,7 @@ PAIRS = [
     ["/mesonet/ARCHIVE/gempak", f"{M2}/longterm/gempak"],
     ["/mesonet/ARCHIVE/raw", f"{M2}/longterm/raw"],
     ["/mesonet/ARCHIVE/rer", f"{M2}/ARCHIVE/rer"],
+    ["/mesonet/data/conus404", f"{M2}/data/conus404"],
     ["/mesonet/data/dotcams", f"{M2}/data/dotcams"],
     ["/mesonet/data/era5", f"{M2}/data/era5"],
     ["/mesonet/data/gempak", f"{M2}/data/gempak"],
