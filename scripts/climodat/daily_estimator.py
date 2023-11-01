@@ -234,9 +234,11 @@ def commit(cursor, table, df, ts):
 
 def merge_obs(df, state, ts):
     """Merge data from observations."""
+    networks = [f"{state}_COOP", f"{state}_ASOS", f"{state}_DCP"]
     with get_sqlalchemy_conn("iem") as conn:
         obs = pd.read_sql(
-            """
+            text(
+                """
             SELECT t.id || '|' || t.network as tracks,
             round(max_tmpf::numeric, 0) as high,
             round(min_tmpf::numeric, 0) as low,
@@ -244,10 +246,12 @@ def merge_obs(df, state, ts):
             coalesce(extract(hour from (coop_valid + '1 minute'::interval)
             at time zone tzname), 24) as temp_hour
             from summary s JOIN stations t
-            on (t.iemid = s.iemid) WHERE t.network in (%s, %s) and s.day = %s
-            """,
+            on (t.iemid = s.iemid) WHERE t.network = ANY(:networks)
+            and s.day = :dt
+            """
+            ),
             conn,
-            params=(f"{state}_COOP", f"{state}_ASOS", ts),
+            params={"networks": networks, "dt": ts},
             index_col="tracks",
         )
     if obs.empty:

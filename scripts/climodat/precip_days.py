@@ -1,5 +1,7 @@
 """
- Generate a map of Number of days with precip
+Generate a map of Number of days with precip
+
+Called from climodat/run.sh
 """
 import datetime
 import sys

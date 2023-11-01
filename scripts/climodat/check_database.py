@@ -1,4 +1,8 @@
-"""Rectify climodat database entries."""
+"""
+Rectify climodat database entries.
+
+called from RUN_CLIMODAT_STATE.sh
+"""
 import sys
 from io import StringIO
 

@@ -1,4 +1,8 @@
-"""Generate a map of Yearly Precipitation."""
+"""
+Generate a map of Yearly Precipitation.
+
+Called from climodat/run.sh
+"""
 import sys
 
 from pyiem.util import logger, web2ldm
