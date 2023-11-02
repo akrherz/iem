@@ -1,6 +1,9 @@
 [tool.black]
 line-length = 79
 
+[tool.pytest.ini_options]
+filterwarnings = ["ignore:numpy.ndarray size changed:RuntimeWarning"]
+
 [tool.ruff]
 line-length = 79
 select = ["E", "F", "I"]
