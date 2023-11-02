@@ -91,7 +91,7 @@ $content .= <<<EOF
 </form>
 
 <p><table class="table table-striped table-bordered table-condensed">
-<thead><tr>
+<thead class="sticky"><tr>
   <th><a href="{$link}station">NWSLI:</a></th>
   <th><a href="{$link}sname">Site Name:</a></th>
   <th><a href="{$link}day">Date:</a></th>
@@ -147,23 +147,23 @@ for ($i = 0; $row = pg_fetch_assoc($rs); $i++) {
 
     $rain = $row["pday"];
     if ($rain == 0.0001) $rain = "T";
-    if ($rain == -99 || $rain == "") $rain = "M";
-    if ($rain > 30 || $rain < 0) $rain = "M";
+    else if ($rain == -99 || $rain == "") $rain = "M";
+    else if ($rain > 30 || $rain < 0) $rain = "M";
 
     $snow = $row["snow"];
     if ($snow == 0.0001) $snow = "T";
-    if ($snow == -99 || $snow == "") $snow = "M";
-    if ($snow > 100 || $snow < 0) $snow = "M";
+    else if ($snow == -99 || $snow == "") $snow = "M";
+    else if ($snow > 100 || $snow < 0) $snow = "M";
 
     $snowd = $row["snowd"];
     if ($snowd == 0.0001) $snowd = "T";
-    if ($snowd == -99 || $snowd == "") $snowd = "M";
-    if ($snowd > 1000 || $snowd < 0) $snowd = "M";
+    else if ($snowd == -99 || $snowd == "") $snowd = "M";
+    else if ($snowd > 1000 || $snowd < 0) $snowd = "M";
 
     $snoww = $row["snoww"];
     if ($snoww == 0.0001) $snoww = "T";
-    if ($snoww == -99 || $snoww == "") $snoww = "M";
-    if ($snoww > 1000 || $snoww < 0) $snoww = "M";
+    else if ($snoww == -99 || $snoww == "") $snoww = "M";
+    else if ($snoww > 1000 || $snoww < 0) $snoww = "M";
 
     $rowcontent = "<tr><td>";
     if (strlen($station) > 0) {
