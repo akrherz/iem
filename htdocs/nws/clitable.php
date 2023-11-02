@@ -69,18 +69,23 @@ $table = <<<EOF
     <th colspan="6">Precip (inches)</th>
     <th class="empty"></th>
     <th colspan="5">Snow (inches)</th>
+    <th class="empty"></th>
+    <th colspan="1">Misc</th>
 </tr>
 <tr class="small">
     <th>Ob</th><th>Time</th><th>Rec</th><th>Years</th><th>Avg</th>
     <th>&Delta;</th><th class="empty"></th>
-    
+
     <th>Ob</th><th>Time</th><th>Rec</th><th>Years</th><th>Avg</th>
     <th>&Delta;</th><th class="empty"></th>
-    
+
     <th>Ob</th><th>Rec</th><th>Years</th>
     <th>Avg</th><th>Mon to Date</th><th>Mon Avg</th><th class="empty"></th>
-            
+
     <th>Ob</th><th>Rec</th><th>Years</th><th>Mon to Date</th><th>Depth</th>
+    <th class="empty"></th>
+
+    <th>Avg Sky Cover</th>
 </tr>
 </thead>
 <tbody>
@@ -180,6 +185,8 @@ foreach ($arr as $entry) {
             <th class=\"empty\"></th>
             <td>%s%s</td><td>%s</td><td>%s</td>
             <td>%s</td><td>%s</td>
+            <th class=\"empty\"></th>
+            <td>%s</td>
             </tr>",
         $rowlabel,
         $row["product"],
@@ -219,6 +226,7 @@ foreach ($arr as $entry) {
         $row["snow_month"],
         $row["snowdepth"],
 
+        $row["average_sky_cover"],
     );
 }
 $table .= "</tbody></table>";
