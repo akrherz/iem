@@ -34,6 +34,7 @@ def run(start_response, ctx):
                 "sts": ctx["sts"],
                 "ets": ctx["ets"],
             },
+            parse_dates=["valid", "fx_valid", "fx_valid_end"],
         )
     # muck the timezones
     if not df.empty:
