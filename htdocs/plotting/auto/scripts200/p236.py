@@ -150,6 +150,7 @@ def plotter(fdict):
             f"{sdate:%-d %b %Y} - {edate:%-d %b %Y}"
         ),
         subtitle="Based on unofficial IEM archives of parsed NWS PIREPs",
+        apctx=ctx,
     )
     height = 0.18
     axes = [

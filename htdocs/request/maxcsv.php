@@ -38,6 +38,18 @@ $t->content = <<<EOF
 </div>
 
 <div class="well">
+<h4>Iowa Soil Moisture Network Currents</h4>
+
+<code>https://mesonet.agron.iastate.edu/request/maxcsv/isusm.txt</code>
+
+<p>Provides <a href="/agclimate/">ISU Soil Moisture Network</a> data, which
+includes four inch depth soil temperatures.  Data is at least valid within
+the previous 30 minutes.
+ <a href="maxcsv/isusm.txt">maxcsv/isusm.txt Example</a></p>
+</div>
+
+
+<div class="well">
 <h4>Iowa Winter Road Conditions</h4>
 
 <code>https://mesonet.agron.iastate.edu/request/maxcsv/iaroadcond.txt</code>
