@@ -20,7 +20,6 @@ from sqlalchemy import text
 # DOT plows
 # RWIS sensor data
 # River gauges
-# Ag data (4" soil temps)
 # Moon
 
 
@@ -172,6 +171,24 @@ def do_iaroadcond():
         ST_y(ST_transform(ST_centroid(b.geom),4326)) as latitude,
         ST_x(ST_transform(ST_centroid(b.geom),4326)) as longitude, cond_code
         from roads_base b JOIN roads_current c on (c.segid = b.segid)
+        """,
+            conn,
+        )
+    return df
+
+
+def do_isusm():
+    """Iowa Soil Moisture Network"""
+    with get_sqlalchemy_conn("iem") as conn:
+        df = pd.read_sql(
+            """
+        select t.id as locationid,
+        replace(t.name, ',', ' ') as locationname,
+        ST_y(t.geom) as latitude,
+        ST_x(t.geom) as longitude, c1tmpf::int as tsoil4
+        from stations t JOIN current c on (t.iemid = c.iemid)
+        and t.network = 'ISUSM' and c.valid > (now() - '30 minutes'::interval)
+        and c1tmpf between -30 and 130
         """,
             conn,
         )
@@ -640,6 +657,8 @@ def router(appname):
         df = do_webcams("KCRG")
     elif appname == "uvi":
         df = do_uvi()
+    elif appname == "isusm":
+        df = do_isusm()
     elif appname.startswith("moonphase"):
         tokens = appname.replace(".txt", "").split("_")
         df = do_moonphase(float(tokens[1]), float(tokens[2]))
