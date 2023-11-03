@@ -85,11 +85,11 @@ def do_network(network):
 def main(argv):
     """Go main Go"""
     if len(argv) == 1:
-        # If we run without args, we pick a "random" network!
+        # If we run without args, we pick a "random" DCP network!
+        # COOP networks can't reliably use this script's logic
         cursor = MESOSITEDB.cursor()
         cursor.execute(
-            "SELECT id from networks where id ~* 'DCP' or id ~* 'COOP' "
-            "ORDER by id ASC"
+            "SELECT id from networks where id ~* 'DCP' ORDER by id ASC"
         )
         networks = []
         for row in cursor:
