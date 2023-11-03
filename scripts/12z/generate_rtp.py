@@ -11,6 +11,7 @@ from pyiem.tracker import loadqc
 from pyiem.util import get_dbconnc, utc
 
 NETWORKS = ["IA_ASOS", "ISUSM", "IA_DCP", "IA_RWIS"]
+PRECIP_WORKS = ["IA_ASOS", "ISUSM"]
 
 
 def main():
@@ -26,7 +27,7 @@ def main():
     yesterday6z = today6z - datetime.timedelta(days=1)
     yesterday12z = now12z - datetime.timedelta(days=1)
 
-    asosfmt = "%-6s:%-19s: %3s / %3s / %5s\n"
+    asosfmt = "%-6s:%-43s: %3s / %3s / %5s\n"
     fmt = "%-6s:%-43s: %3s / %3s\n"
 
     # 6z to 6z high temperature
@@ -88,10 +89,11 @@ def main():
         fh.write("\n\n\n")
         for netid in NETWORKS:
             networkname = "AWOS" if netid == "IA_ASOS" else netid
+            precip_on = netid in PRECIP_WORKS
             fh.write(
                 f".BR DMX {now12z:%m%d} Z "
                 "DH06/TAIRVX/DH12/TAIRVP"
-                f"{'/PPDRVZ' if netid == 'IA_ASOS' else ''}\n"
+                f"{'/PPDRVZ' if precip_on else ''}\n"
                 f": IOWA {networkname} RTP FIRST GUESS "
                 "PROCESSED BY THE IEM\n"
                 f":   06Z to 06Z HIGH TEMPERATURE FOR {tt}\n"
@@ -112,9 +114,7 @@ def main():
                 if netid == "IA_DCP" and nt.sts[sid]["name"].find("RAWS") < 0:
                     continue
                 myp = pcpn.get(sid, "M")
-                if netid != "IA_ASOS":
-                    myp = "M"
-                _fmt = asosfmt if netid == "IA_ASOS" else fmt
+                _fmt = asosfmt if precip_on else fmt
                 args = [
                     sid,
                     nt.sts[sid]["name"],
@@ -122,7 +122,7 @@ def main():
                     lows.get(sid, "M"),
                     myp,
                 ]
-                if netid != "IA_ASOS":
+                if not precip_on:
                     args = args[:-1]
                 fh.write(_fmt % tuple(args))
 

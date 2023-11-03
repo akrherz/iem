@@ -13,6 +13,7 @@ from pyiem.util import get_dbconnc, logger, utc
 
 LOG = logger()
 NETWORKS = ["IA_ASOS", "ISUSM", "IA_DCP", "IA_RWIS"]
+PRECIP_WORKS = ["IA_ASOS", "ISUSM"]
 
 
 def main():
@@ -26,7 +27,7 @@ def main():
     sts6z = ets + datetime.timedelta(hours=-18)
     sts24h = ets + datetime.timedelta(days=-1)
 
-    asosfmt = "%-6s:%-19s: %3s / %3s / %5s\n"
+    asosfmt = "%-6s:%-43s: %3s / %3s / %5s\n"
     fmt = "%-6s:%-43s: %3s / %3s\n"
 
     # We get 18 hour highs
@@ -86,10 +87,11 @@ def main():
         fh.write("\n\n\n")
         for netid in NETWORKS:
             networkname = "AWOS" if netid == "IA_ASOS" else netid
+            precip_on = netid in PRECIP_WORKS
             fh.write(
                 f".BR DMX {ets:%m%d} Z "
                 "DH00/TAIRVS/TAIRVI"
-                f"{'/PPDRVZ' if netid == 'IA_ASOS' else ''}\n"
+                f"{'/PPDRVZ' if precip_on else ''}\n"
                 f": IOWA {networkname} RTP FIRST GUESS PROCESSED BY THE IEM\n"
                 f":   06Z TO 00Z HIGH TEMPERATURE FOR {sts12z:%d %b %Y}\n"
                 f":   06Z TO 00Z LOW TEMPERATURE FOR {sts12z:%d %b %Y}\n"
@@ -107,13 +109,11 @@ def main():
                 if netid == "IA_DCP" and nt.sts[sid]["name"].find("RAWS") < 0:
                     continue
                 myP = pcpn.get(sid, "M")
-                if netid != "IA_ASOS":
-                    myP = "M"
                 myH = highs.get(sid, "M")
                 myL = lows.get(sid, "M")
-                _fmt = asosfmt if netid == "IA_ASOS" else fmt
+                _fmt = asosfmt if precip_on else fmt
                 args = [sid, nt.sts[sid]["name"], myH, myL, myP]
-                if netid != "IA_ASOS":
+                if not precip_on:
                     args = args[:-1]
                 fh.write(_fmt % tuple(args))
 
