@@ -6,10 +6,41 @@ from datetime import datetime, timedelta
 from zoneinfo import ZoneInfo
 
 import pandas as pd
-from pyiem.util import get_dbconn, get_sqlalchemy_conn, logger
+from pyiem.util import get_dbconn, get_dbconnc, get_sqlalchemy_conn, logger
 
 LOG = logger()
 CST = ZoneInfo("Etc/GMT+6")
+
+
+def assign_phour():
+    """Due to lame reasons, IEMAcess  does not have phour set."""
+    # Look in ISUAG for any phour values set
+    with get_sqlalchemy_conn("isuag") as conn:
+        df = pd.read_sql(
+            """
+            select station, iemid, valid, rain_in_tot_qc from sm_hourly h
+            JOIN stations t on (h.station = t.id)
+            where t.network = 'ISUSM' and
+            valid >= now() - '3 hours'::interval and rain_in_tot_qc is not null
+            """,
+            conn,
+        )
+    for _, row in df.iterrows():
+        pgconn, cursor = get_dbconnc("iem")
+        cursor.execute(
+            "UPDATE current_log SET phour = %s WHERE iemid = %s and "
+            "valid = %s",
+            (row["rain_in_tot_qc"], row["iemid"], row["valid"]),
+        )
+        LOG.info(
+            "Updated %s rows for %s[%s][%s]",
+            cursor.rowcount,
+            row["station"],
+            row["valid"],
+            row["rain_in_tot_qc"],
+        )
+        cursor.close()
+        pgconn.commit()
 
 
 def main():
@@ -86,3 +117,4 @@ def main():
 
 if __name__ == "__main__":
     main()
+    assign_phour()

@@ -1,6 +1,5 @@
 """
- Generate a RTP product for the weather bureau as my database as more AWOS
- obs than what they get
+Generate a RTP product for the weather bureau.
 """
 import datetime
 import os
@@ -12,6 +11,7 @@ from pyiem.tracker import loadqc
 from pyiem.util import get_dbconnc, utc
 
 NETWORKS = ["IA_ASOS", "ISUSM", "IA_DCP", "IA_RWIS"]
+PRECIP_WORKS = ["IA_ASOS", "ISUSM"]
 
 
 def main():
@@ -27,8 +27,8 @@ def main():
     yesterday6z = today6z - datetime.timedelta(days=1)
     yesterday12z = now12z - datetime.timedelta(days=1)
 
-    asosfmt = "%-6s:%-19s: %3s / %3s / %5s / %4s / %2s\n"
-    fmt = "%-6s:%-43s: %3s / %3s / %5s / %4s / %2s\n"
+    asosfmt = "%-6s:%-43s: %3s / %3s / %5s\n"
+    fmt = "%-6s:%-43s: %3s / %3s\n"
 
     # 6z to 6z high temperature
     highs = {}
@@ -48,20 +48,23 @@ def main():
     # 12z to 12z precip
     pcpn = {}
     sql = """
-        select id, sum(precip) from
+        select id as station, sum(precip) from
         (select id, extract(hour from valid) as hour,
         max(phour) as precip from current_log c, stations t
         WHERE t.network = ANY(%s) and t.iemid = c.iemid
-        and valid  >= %s and valid < %s
+        and valid >= %s and valid < %s
         GROUP by id, hour) as foo
         GROUP by id
     """
     args = (NETWORKS, yesterday12z, now12z)
     icursor.execute(sql, args)
     for row in icursor:
-        if qdict.get(row["id"], {}).get("precip") or row["sum"] is None:
+        if qdict.get(row["station"], {}).get("precip") or row["sum"] is None:
             continue
-        pcpn[row["id"]] = f"{row['sum']:5.2f}"
+        if 0 < row["sum"] < 0.009:
+            pcpn[row["station"]] = "T"
+        else:
+            pcpn[row["station"]] = f"{row['sum']:5.2f}"
 
     # 0z to 12z low temperature
     lows = {}
@@ -86,9 +89,11 @@ def main():
         fh.write("\n\n\n")
         for netid in NETWORKS:
             networkname = "AWOS" if netid == "IA_ASOS" else netid
+            precip_on = netid in PRECIP_WORKS
             fh.write(
                 f".BR DMX {now12z:%m%d} Z "
-                "DH06/TAIRVX/DH12/TAIRVP/PPDRVZ/SFDRVZ/SDIRVZ\n"
+                "DH06/TAIRVX/DH12/TAIRVP"
+                f"{'/PPDRVZ' if precip_on else ''}\n"
                 f": IOWA {networkname} RTP FIRST GUESS "
                 "PROCESSED BY THE IEM\n"
                 f":   06Z to 06Z HIGH TEMPERATURE FOR {tt}\n"
@@ -109,21 +114,17 @@ def main():
                 if netid == "IA_DCP" and nt.sts[sid]["name"].find("RAWS") < 0:
                     continue
                 myp = pcpn.get(sid, "M")
-                if network != "IA_ASOS":
-                    myp = "M"
-                _fmt = asosfmt if netid == "IA_ASOS" else fmt
-                fh.write(
-                    _fmt
-                    % (
-                        sid,
-                        nt.sts[sid]["name"],
-                        highs.get(sid, "M"),
-                        lows.get(sid, "M"),
-                        myp,
-                        "M",
-                        "M",
-                    )
-                )
+                _fmt = asosfmt if precip_on else fmt
+                args = [
+                    sid,
+                    nt.sts[sid]["name"],
+                    highs.get(sid, "M"),
+                    lows.get(sid, "M"),
+                    myp,
+                ]
+                if not precip_on:
+                    args = args[:-1]
+                fh.write(_fmt % tuple(args))
 
             fh.write(".END\n\n")
 
