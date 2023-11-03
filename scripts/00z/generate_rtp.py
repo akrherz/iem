@@ -26,8 +26,8 @@ def main():
     sts6z = ets + datetime.timedelta(hours=-18)
     sts24h = ets + datetime.timedelta(days=-1)
 
-    asosfmt = "%-6s:%-19s: %3s / %3s / %5s / %4s / %2s\n"
-    fmt = "%-6s:%-43s: %3s / %3s / %5s / %4s / %2s\n"
+    asosfmt = "%-6s:%-19s: %3s / %3s / %5s\n"
+    fmt = "%-6s:%-43s: %3s / %3s\n"
 
     # We get 18 hour highs
     highs = {}
@@ -59,7 +59,10 @@ def main():
     for row in icursor:
         if qdict.get(row["station"], {}).get("precip") or row["sum"] is None:
             continue
-        pcpn[row["station"]] = f"{row['sum']:5.2f}"
+        if 0 < row["sum"] < 0.009:
+            pcpn[row["station"]] = "T"
+        else:
+            pcpn[row["station"]] = f"{row['sum']:5.2f}"
 
     lows = {}
     icursor.execute(
@@ -85,7 +88,8 @@ def main():
             networkname = "AWOS" if netid == "IA_ASOS" else netid
             fh.write(
                 f".BR DMX {ets:%m%d} Z "
-                "DH00/TAIRVS/TAIRVI/PPDRVZ/SFDRVZ/SDIRVZ\n"
+                "DH00/TAIRVS/TAIRVI"
+                f"{'/PPDRVZ' if netid == 'IA_ASOS' else ''}\n"
                 f": IOWA {networkname} RTP FIRST GUESS PROCESSED BY THE IEM\n"
                 f":   06Z TO 00Z HIGH TEMPERATURE FOR {sts12z:%d %b %Y}\n"
                 f":   06Z TO 00Z LOW TEMPERATURE FOR {sts12z:%d %b %Y}\n"
@@ -103,14 +107,15 @@ def main():
                 if netid == "IA_DCP" and nt.sts[sid]["name"].find("RAWS") < 0:
                     continue
                 myP = pcpn.get(sid, "M")
-                if network != "IA_ASOS":
+                if netid != "IA_ASOS":
                     myP = "M"
                 myH = highs.get(sid, "M")
                 myL = lows.get(sid, "M")
                 _fmt = asosfmt if netid == "IA_ASOS" else fmt
-                fh.write(
-                    _fmt % (sid, nt.sts[sid]["name"], myH, myL, myP, "M", "M")
-                )
+                args = [sid, nt.sts[sid]["name"], myH, myL, myP]
+                if netid != "IA_ASOS":
+                    args = args[:-1]
+                fh.write(_fmt % tuple(args))
 
             fh.write(".END\n\n")
 
