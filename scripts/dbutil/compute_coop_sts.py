@@ -14,7 +14,7 @@ TODAY = datetime.date.today()
 
 def do_network(network):
     """Do network"""
-    nt = NetworkTable(network)
+    nt = NetworkTable(network, only_online=False)
     iem, icursor = get_dbconnc("iem")
     for sid in nt.sts:
         icursor.execute(
@@ -33,10 +33,12 @@ def do_network(network):
             ets = None
         osts = nt.sts[sid]["archive_begin"]
         oets = nt.sts[sid]["archive_end"]
-        noop = osts == sts and oets == ets
+        oonline = nt.sts[sid]["online"]
+        online = ets is None
+        noop = osts == sts and oets == ets and oonline == online
         loglvl = LOG.info if noop else LOG.warning
         loglvl(
-            "%s%s [%s] sts:%s->%s ets:%s->%s",
+            "%s%s [%s] sts:%s->%s ets:%s->%s OL:%s->%s",
             "  --> " if not noop else "",
             sid,
             network,
@@ -44,6 +46,8 @@ def do_network(network):
             sts,
             oets,
             ets,
+            oonline,
+            online,
         )
         if noop:
             continue

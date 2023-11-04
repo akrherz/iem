@@ -1,4 +1,7 @@
-"""Determine when a CLIMATE track site started..."""
+"""Determine when a CLIMATE track site started...
+
+Called from RUN_CLIMODAT_STATE.sh
+"""
 import datetime
 import sys
 
@@ -29,44 +32,40 @@ def main(argv):
     )
     for row in acursor:
         station = row[0]
-        sts = row[1]
-        ets = row[2]
         if station not in nt.sts:
             LOG.info("%s is unknown in mesosite table", station)
             continue
-        meta = nt.sts[station]
-        if meta["archive_begin"] is None or meta["archive_begin"] != sts:
-            LOG.warning(
-                "Updated %s STS WAS: %s NOW: %s" "",
-                station,
-                nt.sts[station]["archive_begin"],
-                sts,
-            )
-
-            mcursor.execute(
-                "UPDATE stations SET archive_begin = %s "
-                "WHERE id = %s and network = %s",
-                (sts, station, net),
-            )
-        archive_end = ets
-        if ets > floor:
-            archive_end = None
-        if (
-            archive_end is None and meta["archive_end"] is not None
-        ) or archive_end != meta["archive_end"]:
-            LOG.warning(
-                "Updated %s ETS WAS: %s NOW: %s" "",
-                station,
-                nt.sts[station]["archive_end"],
-                archive_end,
-            )
-
-            mcursor.execute(
-                "UPDATE stations SET archive_end = %s "
-                "WHERE id = %s and network = %s",
-                (archive_end, station, net),
-            )
-
+        sts = row[1]
+        ets = row[2]
+        if ets >= floor:
+            ets = None
+        osts = nt.sts[station]["archive_begin"]
+        oets = nt.sts[station]["archive_end"]
+        oonline = nt.sts[station]["online"]
+        online = ets is None
+        noop = osts == sts and oets == ets and oonline == online
+        loglvl = LOG.info if noop else LOG.warning
+        loglvl(
+            "%s%s [%s] sts:%s->%s ets:%s->%s OL:%s->%s",
+            "  --> " if not noop else "",
+            station,
+            net,
+            osts,
+            sts,
+            oets,
+            ets,
+            oonline,
+            online,
+        )
+        if noop:
+            continue
+        mcursor.execute(
+            """
+            UPDATE stations SET archive_begin = %s, archive_end = %s,
+            online = %s WHERE iemid = %s
+            """,
+            (sts, ets, ets is None, nt.sts[station]["iemid"]),
+        )
     mcursor.close()
     mesosite.commit()
     mesosite.close()
