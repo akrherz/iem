@@ -42,34 +42,32 @@ def get_maxvalid(sid):
 
 def do_network(network):
     """Do network"""
-    nt = NetworkTable(network)
+    nt = NetworkTable(network, only_online=False)
     for sid in nt.sts:
-        sts = get_minvalid(sid)
         osts = nt.sts[sid]["archive_begin"]
+        oets = nt.sts[sid]["archive_end"]
+        sts = get_minvalid(sid)
         ets = get_maxvalid(sid)
         if ets is not None and ets.year >= (TODAY.year - 1):
             ets = None
-        oets = nt.sts[sid]["archive_end"]
-        LOG.info(
-            "%s [%s] sts:%s|%s ets:%s|%s",
+        oonline = nt.sts[sid]["online"]
+        online = ets is None
+        noop = osts == sts and oets == ets and oonline == online
+        loglvl = LOG.info if noop else LOG.warning
+        loglvl(
+            "%s%s [%s] sts:%s->%s ets:%s->%s OL:%s->%s",
+            "  --> " if not noop else "",
             sid,
             network,
             osts,
             sts,
             oets,
             ets,
+            oonline,
+            online,
         )
-        if osts == sts and oets == ets:
+        if noop:
             continue
-        LOG.warning(
-            "%s [%s] sts:%s->%s ets:%s->%s",
-            sid,
-            network,
-            osts,
-            sts,
-            oets,
-            ets,
-        )
         cursor = MESOSITEDB.cursor()
         cursor.execute(
             """
