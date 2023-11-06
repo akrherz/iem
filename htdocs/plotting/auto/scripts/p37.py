@@ -11,8 +11,8 @@ and consider METAR 6-hour max/min temperatures when appropriate.</p>
 <p>The bars represent the ensemble of previously made forecasts valid for the
 given time.
 
-<p><strong>Updated 9 Feb 2023</strong> The data download columns names were
-changed to be more explicit about what is being presented.
+<p>The IEM <a href="/mos/">MOS Mainpage</a> has more details and services
+for this dataset.</p>
 """
 import datetime
 
