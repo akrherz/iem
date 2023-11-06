@@ -78,6 +78,7 @@ def run(network, only_online):
                     county=row["county"],
                     sid=row["id"],
                     network=row["network"],
+                    online=row["online"],
                 ),
                 geometry=json.loads(row["geojson"]),
             )

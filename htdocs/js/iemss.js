@@ -46,6 +46,7 @@ var htmlInterface = ['<div class="panel panel-default">',
     '<br />',
     '<div class="row"><div class="col-sm-12">',
     '<div id="map" style="width:100%; height:400px"></div>',
+    '<p>Green dots are locations with current data.</p>',
     '</div></div>',
     '</div><!-- End of panel-body -->',
     '</div><!-- End of panel -->'];
@@ -93,7 +94,7 @@ function sortListing(option) {
     }));
 }
 
-$().ready(function () {
+$().ready(() => {
 
     // Make sure clicking the submit button selects all of the selected 
     // stations, this avoids user confusion
@@ -167,26 +168,28 @@ $().ready(function () {
     geojsonSource = new ol.source.Vector({
         format: new ol.format.GeoJSON(),
         projection: ol.proj.get('EPSG:3857'),
-        url: '/geojson/network/' + network + '.geojson?only_online=' +
-            (only_online ? "1" : "0")
+        url: `/geojson/network/${network}.geojson?only_online=${only_online ? "1" : "0"}`
     });
     geojson = new ol.layer.Vector({
         source: geojsonSource,
-        style: function (feature, resolution) {
-            var style = [new ol.style.Style({
-                image: new ol.style.Circle({
-                    fill: new ol.style.Fill({
-                        color: 'rgba(255,0,0,1)'
-                    }),
-                    stroke: new ol.style.Stroke({
-                        color: '#3399CC',
-                        width: 1.25
-                    }),
-                    radius: 5
+        style: (feature, _resolution) => {
+            const color = feature.get("online") ? '#00ff00' : '#ffff00';
+            const zindex = feature.get("online") ? 100 : 99;
+            return [
+                new ol.style.Style({
+                    zIndex: zindex,
+                    image: new ol.style.Circle({
+                        fill: new ol.style.Fill({
+                            color
+                        }),
+                        stroke: new ol.style.Stroke({
+                            color: '#000000',
+                            width: 2.25
+                        }),
+                        radius: 7
+                    })
                 })
-
-            })];
-            return style;
+            ];
         }
     });
 
@@ -218,13 +221,19 @@ $().ready(function () {
             });
             sortListing("id");
             $('#stations_in').filterByText($('#stationfilter'), true);
-            map.getView().fit(geojsonSource.getExtent(), map.getSize());
+            map.getView().fit(
+                geojsonSource.getExtent(),
+                {
+                    size: map.getSize(),
+                    padding: [50, 50, 50, 50]
+                }
+            );
         }
     });
 
     var $newdiv = $("<div>", { id: "popup", style: "width: 250px;" });
     $("#map").append($newdiv);
-    var $newdiv2 = $("<div>", { id: "popover-content" });
+    var $newdiv2 = $("<div>", { id: "popover-content", style: "display: none;" });
     $("#map").append($newdiv2);
 
     var element = document.getElementById('popup');
