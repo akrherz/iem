@@ -6,7 +6,7 @@ import os
 import subprocess
 import tempfile
 
-from pyiem import network
+from pyiem.network import Table as NetworkTable
 from pyiem.tracker import loadqc
 from pyiem.util import get_dbconnc, utc
 
@@ -16,7 +16,6 @@ PRECIP_WORKS = ["IA_ASOS", "ISUSM"]
 
 def main():
     """Go Main Go"""
-    nt = network.Table(NETWORKS)
     qdict = loadqc()
     pgconn, icursor = get_dbconnc("iem")
 
@@ -101,11 +100,10 @@ def main():
                 ":   12Z YESTERDAY TO 12Z TODAY RAINFALL\n"
                 ":   ...BASED ON REPORTED OBS...\n"
             )
+            nt = NetworkTable(netid)
             ids = list(nt.sts.keys())
             ids.sort()
             for sid in ids:
-                if nt.sts[sid]["network"] != netid:
-                    continue
                 if (
                     netid == "IA_ASOS"
                     and nt.sts[sid]["attributes"].get("IS_AWOS") != "1"
