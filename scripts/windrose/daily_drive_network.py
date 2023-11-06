@@ -15,7 +15,9 @@ def do_network(network):
     # Update the STS while we are at it, this will help the database get
     # stuff cached too
     if network.find("_ASOS") > 0:
-        subprocess.call(["python", "../dbutil/compute_asos_sts.py", network])
+        subprocess.call(
+            ["python", "../dbutil/compute_alldata_sts.py", "asos", network]
+        )
     elif network.find("_DCP") > 0:
         # Special Logic to compute archive period.
         subprocess.call(["python", "../dbutil/compute_hads_sts.py", network])
