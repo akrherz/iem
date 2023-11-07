@@ -1,13 +1,7 @@
 
-Ext.namespace('iemdata');
+const iemdata = {};
 
-iemdata.nws_products = [
- ['AFD','Area Forecast Discussion'],
- ['HWO','Hazzardous Weather Outlook'],
- ['NOW','Nowcast']
-];
-
-iemdata.vtec_phenomena_dict = [
+iemdata.vtec_phenomena = [
 ['SV','Severe Thunderstorm'],
 ['TO','Tornado'],
 ['MA','Marine'],
@@ -72,13 +66,8 @@ iemdata.vtec_phenomena_dict = [
 ['ZR','Freezing Rain']
 ];
 
-iemdata.vtecPhenomenaStore = new Ext.data.SimpleStore({
-  fields : ['abbr', 'name'],
-  idIndex: 0,
-  data   : iemdata.vtec_phenomena_dict
-});
 
-iemdata.vtec_sig_dict = [
+iemdata.vtec_significance = [
 ['W','Warning'],
 ['Y','Advisory'],
 ['A','Watch'],
@@ -87,13 +76,6 @@ iemdata.vtec_sig_dict = [
 ['O','Outlook'],
 ['N','Synopsis']
 ];
-
-iemdata.vtecSignificanceStore = new Ext.data.SimpleStore({
-  fields : ['abbr', 'name'],
-  idIndex: 0,
-  data   : iemdata.vtec_sig_dict
-});
-
 
 iemdata.wfos = [
  ['ABQ','ALBUQUERQUE'],

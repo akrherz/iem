@@ -13,7 +13,8 @@ $t->jsextra = <<<EOF
 <script src="/vendor/jquery-datatables/1.10.20/datatables.min.js"></script>
 <script src="/vendor/jquery-ui/1.11.4/jquery-ui.js"></script>
 <script src="/vendor/select2/4.1.0rc0/select2.min.js"></script>
-<script type="text/javascript" src="search.js?v=5"></script>
+<script type="text/javascript" src="wfos.js"></script>
+<script type="text/javascript" src="search.js?v=6"></script>
 <script src="https://maps.googleapis.com/maps/api/js?key={$gmapskey}&callback=_load" type="text/javascript"></script>
 EOF;
 $t->headextra = <<<EOF
@@ -36,8 +37,9 @@ Warning, and Advisories.  There are currently two options:
 <ul>
     <li><a href="#bypoint">1. Search for Storm Based Warnings by Point</a></li>
     <li><a href="#byugc">2. Search of Watch/Warning/Advisories by County/Zone or by Point</a></li>
+    <li><a href="#list">3. List Watch/Warning/Advisories by State/WFO by Year</a></li>
 </ul>
-        
+
 <h3><a name="bypoint">1.</a> Search for Storm Based Warnings by Point</h3>
 
 <br />The official warned area for some products the NWS issues is a polygon.
@@ -138,6 +140,48 @@ an office that did not exist at the time.
     </div>
 </div><!-- ./row -->
 </form><!-- ./form2 -->
-        
+
+<br clear="all" />
+<h3><a name="list">3.</a> List NWS Watch/Warning/Advisories by State/WFO by Year</h3>
+<br />
+<p>This section generates a simple list of NWS Watch, Warning, and Advisories
+by state and year.</p>
+<br />
+
+<form id="form3">
+<div class="row">
+    <div class="col-md-4">
+        <input type="radio" name="by3" value="state" checked="checked" id="bystate"/>
+        <label for="bystate">Select By State</label>
+        <br /><select name="state" style="width: 100%" id="state3"></select></p>
+
+        <p><input type="radio" name="by3" value="wfo" id="bywfo"/>
+        <label for="bywfo">Select By WFO</label>
+        <br /><select name="wfo" style="width: 100%" id="wfo3"></select></p>
+
+        <p><label for="ph3">Select VTEC Phenomena:</label>
+        <select name="ph" style="width: 100%" id="ph3"></select></p>
+
+        <p><label for="sig3">Select VTEC Significance:</label>
+        <select name="sig" style="width: 100%" id="sig3"></select></p>
+
+        <p><label for="year3">Select Year:</label>
+        <select name="year" style="width: 100%" id="year3"></select></p>
+
+        <br /><button type="button" class="btn btn-default" id="button3">Update Table</button>
+    </div>
+    <div class="col-md-8">
+    <h4 id="table3title"></h4>
+    <button type="button" data-table="3" data-opt="excel" class="btn btn-default iemtool"><i class="fa fa-download"></i> Export to Excel...</button>
+    <button type="button" data-table="3" data-opt="csv" class="btn btn-default iemtool"><i class="fa fa-download"></i> Export to CSV...</button>
+
+    <table id="table3" data-order='[[ 3, "desc" ]]'>
+    <thead>
+    <tr><th>Event</th><th>WFO</th><th>Locations</th><th>Issued</th>
+    <th>Expired</th></tr></thead>
+    </table>
+    </div>
+</div><!-- ./row -->
+</form><!-- ./form3 -->
 EOF;
 $t->render('full.phtml');
