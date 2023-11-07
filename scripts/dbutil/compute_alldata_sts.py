@@ -16,6 +16,8 @@ ALLDATA = {"USCRN": "uscrn_alldata"}
 START_YEAR = {
     "rwis": 1994,
     "asos": 1928,
+    "other": 2003,
+    "scan": 1983,
 }
 TODAY = datetime.date.today()
 

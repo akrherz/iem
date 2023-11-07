@@ -95,7 +95,7 @@ def main():
                 ":   ...BASED ON REPORTED OBS...\n"
             )
             nt = NetworkTable(netid)
-            ids = nt.sts.keys()
+            ids = list(nt.sts.keys())
             ids.sort()
             for sid in ids:
                 if (

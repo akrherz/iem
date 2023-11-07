@@ -99,7 +99,7 @@ def plotter(fdict):
             text(
                 "SELECT high, low, year, month from alldata "
                 "WHERE station = :station "
-                "and year > 1892 and high >= low and month = ANY(:months) "
+                "and high >= low and month = ANY(:months) "
             ),
             conn,
             params={"station": station, "months": months},
@@ -193,19 +193,34 @@ def plotter(fdict):
 
     xmax = ar[0][0]
     ymax = ar[0][1]
-    ax.text(
-        0.65,
-        0.15,
-        (
-            f"Largest Frequency: {hist[xmax, ymax]:.1f} days\n"
-            f"High: {yedges[ymax]:.0f}-{yedges[ymax + 1]:.0f} "
-            f"Low: {xedges[xmax]:.0f}-{xedges[xmax + 1]:.0f}"
-        ),
-        ha="center",
-        va="center",
-        transform=ax.transAxes,
-        bbox=dict(color="white"),
-    )
+    if binsize == 1:
+        ax.text(
+            0.65,
+            0.15,
+            (
+                f"Largest Frequency: {hist[xmax, ymax]:.1f} days\n"
+                f"High: {yedges[ymax]:.0f} "
+                f"Low: {xedges[xmax]:.0f}"
+            ),
+            ha="center",
+            va="center",
+            transform=ax.transAxes,
+            bbox=dict(color="white"),
+        )
+    else:
+        ax.text(
+            0.65,
+            0.15,
+            (
+                f"Largest Frequency: {hist[xmax, ymax]:.1f} days\n"
+                f"High: {yedges[ymax]:.0f}-{yedges[ymax + 1]:.0f} "
+                f"Low: {xedges[xmax]:.0f}-{xedges[xmax + 1]:.0f}"
+            ),
+            ha="center",
+            va="center",
+            transform=ax.transAxes,
+            bbox=dict(color="white"),
+        )
     if ddf["high"].min() < 32:
         ax.axhline(32, linestyle="-", lw=1, color="k")
     ax.text(
@@ -247,7 +262,7 @@ def plotter(fdict):
             edgecolor="yellow",
             facecolor="red",
         )
-        ax.legend()
+        ax.legend(loc=2)
 
     return fig, df
 
