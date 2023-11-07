@@ -4,6 +4,7 @@ let mapwidget1 = null;
 let mapwidget2 = null;
 let table1 = null;
 let table2 = null;
+let table3 = null;
 let table2IsByPoint = true;
 let hashlinkUGC = null;
 let edate = null;
@@ -13,6 +14,8 @@ let sdate1 = null;
 const BACKEND_EVENTS_BYPOINT = '/json/vtec_events_bypoint.py';
 const BACKEND_EVENTS_BYUGC = '/json/vtec_events_byugc.py';
 const BACKEND_SBW_BYPOINT = '/json/sbw_by_point.py';
+const BACKEND_EVENTS = "/json/vtec_events.py";
+const BACKEND_EVENTS_BYSTATE = "/json/vtec_events_bystate.py";
 
 const states = [["AL", "Alabama"], ["AK", "Alaska"], ["AZ", "Arizona"],
         ["AR", "Arkansas"], ["CA", "California"], ["CO", "Colorado"],
@@ -156,12 +159,46 @@ function updateTable2ByPoint(){
     });
 }
 
+function updateTable3(){
+    // get currently selected by3 radio button
+    const by = text($("input[name='by3']:checked").val());
+    const datum = (by == "state") ? text(stateSelect.val()) : text($("#wfo3").val());
+    const year = text($("#year3").val());
+    const ph = text($("#ph3").val());
+    const sig = text($("#sig3").val());
+    window.location.href = `#list/${by}/${datum}/${year}/${ph}/${sig}`;
+    $("#table3title").text(`Events for ${by} ${datum} in ${year}`);
+    // Do what we need to for table 3
+    $.ajax({
+        data: {
+            wfo: $("#wfo3").val(),
+            state: stateSelect.val(),
+            year: year,
+            phenomena: ph,
+            significance: sig
+        },
+        url: (by == "wfo") ? BACKEND_EVENTS: BACKEND_EVENTS_BYSTATE,
+        dataType: "json",
+        method: "GET",
+        success: (data) => {
+            table3.clear();
+            $.map(data.events, (row) => {
+                const uri = `<a href="${row.uri}" target="_blank">${row.phenomena}.${row.significance}.${row.eventid}</a>`;
+                table3.row.add(
+                    [uri, row.wfo, row.locations, row.issue, row.expire]);
+            });
+            table3.draw();
+        }
+    });
+}
+
+
 function buildUI(){
     // Export Buttons
     $(".iemtool").click(function(){ // this
         const btn = $(this);
         let url = BACKEND_SBW_BYPOINT;
-        const params = {
+        var params = {
             fmt: (btn.data("opt") == "csv") ? "csv" : "xlsx",
             lat: $("#lat").val(),
             lon: $("#lon").val(),
@@ -179,6 +216,18 @@ function buildUI(){
                 params.lat = $("#lat2").val();
             }
         }
+        if (btn.data("table") == "3"){
+            const by = $("input[name='by3']:checked").val();
+            url = (by == "state") ? BACKEND_EVENTS_BYSTATE: BACKEND_EVENTS;
+            params = {
+                fmt: (btn.data("opt") == "csv") ? "csv" : "xlsx",
+                wfo: $("#wfo3").val(),
+                state: stateSelect.val(),
+                year: $("#year3").val(),
+                phenomena: $("#ph3").val(),
+                significance: $("#sig3").val()
+            };
+        }
         window.location = `${url}?${$.param(params)}`;
     });
     // Tables
@@ -190,6 +239,11 @@ function buildUI(){
     table2 = $("#table2").DataTable({
         "language": {
             "emptyTable": "Drag marker on map or select UGC to auto-populate this table"
+        }
+    });
+    table3 = $("#table3").DataTable({
+        "language": {
+            "emptyTable": "Select options to auto-populate this table"
         }
     });
     // Date pickers
@@ -300,7 +354,46 @@ function buildUI(){
         mapwidget2.marker.setPosition(latlng);
         updateMarkerPosition2(lo, la);
     });
-
+    $("#button3").click(() => {
+        updateTable3();
+    });
+    // Populate wfos select with iemdata.wfos data
+    const wfos = $.map(iemdata.wfos, (obj) => {
+        const ee = {};
+        ee.id = obj[0];
+        ee.text = `[${obj[0]}] ${obj[1]}`;
+        return ee;
+    });
+    $("select[name='wfo']").select2({
+        placeholder: "Select a WFO",
+        data: wfos
+    });
+    const ph = $.map(iemdata.vtec_phenomena, (obj) => {
+        const ee = {};
+        ee.id = obj[0];
+        ee.text = obj[1];
+        return ee;
+    });
+    $("select[name='ph']").select2({
+        placeholder: "Select a Phenomena",
+        data: ph
+    });
+    const sig = $.map(iemdata.vtec_significance, (obj) => {
+        const ee = {};
+        ee.id = obj[0];
+        ee.text = obj[1];
+        return ee;
+    });
+    $("select[name='sig']").select2({
+        placeholder: "Select a Phenomena",
+        data: sig
+    });
+    // populate year3 select with values from 1986 to current year
+    const year3 = $("select[name='year']");
+    const currentYear = new Date().getFullYear();
+    for (let i = 1986; i <= currentYear; i++){
+        year3.append(new Option(i, i, false, false));
+    }
 };
 
 function _load() {
@@ -339,6 +432,25 @@ function _load() {
                 default_lon = text(tokens2[1]);
                 updateMarkerPosition2(default_lon, default_lat);
             }
+        }
+        if (tokens2.length == 6){
+            const aTag = $("a[name='list']");
+            $('html,body').animate({scrollTop: aTag.offset().top},'slow');
+            const by = text(tokens2[1]);
+            const datum = text(tokens2[2]);
+            const year = text(tokens2[3]);
+            const ph = text(tokens2[4]);
+            const sig = text(tokens2[5]);
+            $("input[name='by3'][value='"+by+"']").prop("checked", true);
+            $("#year3").val(year);
+            $("#ph3").val(ph);
+            $("#sig3").val(sig);
+            if (by == "state"){
+                stateSelect.val(datum).trigger("change");
+            } else {
+                $("#wfo3").val(datum);
+            }
+            updateTable3();
         }
     }
 

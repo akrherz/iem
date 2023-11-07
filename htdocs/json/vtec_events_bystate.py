@@ -1,14 +1,16 @@
 """Listing of VTEC events for state and year"""
 import json
+from io import BytesIO, StringIO
 
+import pandas as pd
 from pyiem.util import get_dbconnc, html_escape
 from pyiem.webutil import iemapp
-from pymemcache.client import Client
 
 ISO9660 = "%Y-%m-%dT%H:%M:%SZ"
+EXL = "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"
 
 
-def run(state, year, phenomena, significance):
+def get_res(state, year, phenomena, significance):
     """Generate a report of VTEC ETNs used for a WFO and year
 
     Args:
@@ -82,7 +84,7 @@ def run(state, year, phenomena, significance):
             )
         )
     pgconn.close()
-    return json.dumps(res)
+    return res
 
 
 @iemapp()
@@ -93,22 +95,31 @@ def application(environ, start_response):
     phenomena = environ.get("phenomena", "__")[:2]
     significance = environ.get("significance", "_")[:1]
     cb = environ.get("callback")
+    fmt = environ.get("fmt", "json")
+    res = get_res(state, year, phenomena, significance)
 
-    mckey = "/json/vtec_events_bystate/%s/%s/%s/%s" % (
-        state,
-        year,
-        phenomena,
-        significance,
-    )
-    mc = Client("iem-memcached:11211")
-    res = mc.get(mckey)
-    if not res:
-        res = run(state, year, phenomena, significance)
-        mc.set(mckey, res, 60)
-    else:
-        res = res.decode("utf-8")
-    mc.close()
+    if fmt == "xlsx":
+        fn = f"vtec_{state}_{year}_{phenomena}_{significance}.xlsx"
+        headers = [
+            ("Content-type", EXL),
+            ("Content-disposition", f"attachment; Filename={fn}"),
+        ]
+        start_response("200 OK", headers)
+        bio = BytesIO()
+        pd.DataFrame(res["events"]).to_excel(bio, index=False)
+        return [bio.getvalue()]
+    if fmt == "csv":
+        fn = f"vtec_{state}_{year}_{phenomena}_{significance}.csv"
+        headers = [
+            ("Content-type", "application/octet-stream"),
+            ("Content-disposition", f"attachment; Filename={fn}"),
+        ]
+        start_response("200 OK", headers)
+        bio = StringIO()
+        pd.DataFrame(res["events"]).to_csv(bio, index=False)
+        return [bio.getvalue().encode("utf-8")]
 
+    res = json.dumps(res)
     if cb is not None:
         res = f"{html_escape(cb)}({res})"
 
