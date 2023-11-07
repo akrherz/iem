@@ -1,4 +1,5 @@
 let stateSelect = null;
+let stateSelect3 = null;
 let ugcSelect = null;
 let mapwidget1 = null;
 let mapwidget2 = null;
@@ -162,7 +163,7 @@ function updateTable2ByPoint(){
 function updateTable3(){
     // get currently selected by3 radio button
     const by = text($("input[name='by3']:checked").val());
-    const datum = (by == "state") ? text(stateSelect.val()) : text($("#wfo3").val());
+    const datum = (by == "state") ? text(stateSelect3.val()) : text($("#wfo3").val());
     const year = text($("#year3").val());
     const ph = text($("#ph3").val());
     const sig = text($("#sig3").val());
@@ -172,7 +173,7 @@ function updateTable3(){
     $.ajax({
         data: {
             wfo: $("#wfo3").val(),
-            state: stateSelect.val(),
+            state: stateSelect3.val(),
             year: year,
             phenomena: ph,
             significance: sig
@@ -222,7 +223,7 @@ function buildUI(){
             params = {
                 fmt: (btn.data("opt") == "csv") ? "csv" : "xlsx",
                 wfo: $("#wfo3").val(),
-                state: stateSelect.val(),
+                state: stateSelect3.val(),
                 year: $("#year3").val(),
                 phenomena: $("#ph3").val(),
                 significance: $("#sig3").val()
@@ -295,7 +296,12 @@ function buildUI(){
         ee.text = obj[1];
         return ee;
     });
-    stateSelect = $("select[name='state']").select2({
+    stateSelect3 = $("#state3").select2({
+        placeholder: "Select a geography/state",
+        data: data
+    });
+    stateSelect3.val('').trigger("change");
+    stateSelect = $("#state").select2({
         placeholder: "Select a geography/state",
         data: data
     });
@@ -446,7 +452,7 @@ function _load() {
             $("#ph3").val(ph);
             $("#sig3").val(sig);
             if (by == "state"){
-                stateSelect.val(datum).trigger("change");
+                stateSelect3.val(datum).trigger("change");
             } else {
                 $("#wfo3").val(datum);
             }

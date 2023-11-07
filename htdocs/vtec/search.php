@@ -110,7 +110,7 @@ an office that did not exist at the time.
 <div class="row">
     <div class="col-md-4">
         <label for="state">Select State:
-        <select name="state" style="width: 100%"></select></label>
+        <select name="state" style="width: 100%" id="state"></select></label>
         <br /><label for="ugc">Select County/Zone:
         <select name="ugc" style="width: 100%"></select></label>
         <br /><label for="sdate">Start Date:
