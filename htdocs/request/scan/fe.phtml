@@ -3,46 +3,41 @@ require_once "../../../config/settings.inc.php";
 require_once "../../../include/forms.php";
 require_once "../../../include/myview.php";
 $t = new MyView();
+$t->iemss = True;
 $t->title = "SCAN Data Download";
 
-$ys = yearSelect(2000, date("Y"), "year");
-$ms = monthSelect("", "month1");
-$ds = daySelect2("", "day1");
-$hs = gmtHourSelect("", "hour1");
-$ms2 = monthSelect("", "month2");
-$ds2 = daySelect2("", "day2");
-$hs2 = gmtHourSelect("", "hour2");
+$ys = yearSelect(1983, date("Y"), "year");
+$ms = monthSelect(1, "month1");
+$ds = daySelect2(1, "day1");
+$hs = gmtHourSelect(0, "hour1");
+$ms2 = monthSelect(12, "month2");
+$ds2 = daySelect2(31, "day2");
+$hs2 = gmtHourSelect(0, "hour2");
 
 $t->content = <<<EOF
 <ol class="breadcrumb">
     <li><a href="/scan/">SCAN</a></li>
-      <li class="active">Download Data</li>
+    <li class="active">Download Data</li>
  </ol>
 
 <p>Filling out this form will provide you with whatever archive data the
 IEM has from the SCAN network.  The archive has some holes in it....
 
-<form method="GET" action="dl.php">
+<form method="GET" action="/cgi-bin/request/scan.py">
 
-<table>
-<tr><td width="50%">
+<div class="row">
+<div class="col-md-7">
 
-<p><h3 class="subtitle">1. Select Station:</h3><br>
-<select name="station[]" size="5" MULTIPLE>
- <option value="2031">Ames, IA 
- <option value="2068">Shagbark Hills, IA
- <option value="2001">Rodger's Farm, NE
- <option value="2047">Spickard, MO
- <option value="2004">Mason, IL
-</select>
+<div id="iemss" data-network="SCAN"></div>
+
+</div><div class="col-md-5">
 
 <p><h3 class="subtitle">2. Select Start/End Time:</h3><br>
-<i>Times are in UTC. Archive starts in 2000.</i>
+<i>Times are in UTC.</i>
 <table>
   <tr>
     <td></td>
-    <th>Year</th><th>Month</th><th>Day</th>
-    <th>Hour</th>
+    <th>Year</th><th>Month</th><th>Day</th><th>Hour</th>
   </tr>
 
   <tr>
@@ -51,7 +46,6 @@ IEM has from the SCAN network.  The archive has some holes in it....
     <td>{$ms}</td>
     <td>{$ds}</td>
     <td>{$hs}
-    <input type="hidden" name="minute1" value="0">
     </td>
   </tr>
 
@@ -65,13 +59,12 @@ IEM has from the SCAN network.  The archive has some holes in it....
     </td>
     <td>
      {$hs2}
-    <input type="hidden" name="minute2" value="0">
     </td>
   </tr>
 </table>
 
 <p><h3 class="subtitle">3. Select Variables:</h3><br>
-<select size=5 name="vars[]" MULTIPLE>
+<select size=5 name="vars" MULTIPLE>
   <option value="tmpf">Air Temperature
   <option value="dwpf">Dew Point Temperature
   <option value="sknt">Wind Speed [knots]
@@ -91,27 +84,26 @@ IEM has from the SCAN network.  The archive has some holes in it....
   <option value="c5smv">40 inch Volumetric Soil Moisture
 </select>
 
-</td><td valign="TOP">
-
 <p><h3 class="subtitle">4. How to view?</h3><br>
 <select name="what">
   <option value="download">Download to Disk
   <option value="view">View on-line
 </select>
 
-<p><h3 class="subtitle">5. Data Delimitation:</h3><br>
+<p><h3>5. Data Delimitation:</h3><br>
 How shall the output values be seperated?
 <br><select name="delim">
     <option value="comma">Comma
     <option value="space">Space
     <option value="tab">Tab
-   </select>
+</select>
 
-</td></tr></table>
-
-<p><h3 class="subtitle">Submit Form:</h3><br>
+<p><h3>Submit Form:</h3><br>
 <input type="submit" value="Process Data Request">
 <input type="reset">
+
+</div></div>
+
 </form>
 EOF;
 $t->render('single.phtml');
