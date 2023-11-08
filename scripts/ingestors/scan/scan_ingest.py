@@ -142,13 +142,13 @@ def savedata(icursor, scursor, reprocessing, data, maxts):
 
     if reprocessing:
         scursor.execute(
-            """DELETE from t%(year)s_hourly
+            """DELETE from t%(year)s
         WHERE station = '%(station)s' and valid = '%(valid)s'
         """
             % iem.data
         )
     sql = (
-        """INSERT into t%(year)s_hourly (station, valid, tmpf,
+        """INSERT into t%(year)s (station, valid, tmpf,
         dwpf, srad,
          sknt, drct, relh, pres, c1tmpf, c2tmpf, c3tmpf, c4tmpf,
          c5tmpf,

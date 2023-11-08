@@ -59,9 +59,7 @@ def grid_day(nc, ts):
 
     sql = """SELECT * from ncdc_climate71 WHERE valid = '%s' and
              substr(station,3,4) != '0000' and substr(station,3,1) != 'C'
-             """ % (
-        ts.strftime("%Y-%m-%d"),
-    )
+             """ % (ts.strftime("%Y-%m-%d"),)
     cursor.execute(sql)
     if cursor.rowcount > 4:
         res = generic_gridder(nc, cursor, "high")

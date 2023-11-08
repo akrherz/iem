@@ -16,9 +16,7 @@ def get_description():
     desc = {}
     desc["data"] = True
     desc["cache"] = 86400
-    desc[
-        "description"
-    ] = """This chart presents the hourly average wind speeds
+    desc["description"] = """This chart presents the hourly average wind speeds
     by month of the year or by custom periods.
     The hours presented are valid in the local time zone
     of the reporting station.  For example in Iowa, 3 PM would represent

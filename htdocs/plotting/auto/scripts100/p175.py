@@ -23,9 +23,7 @@ def get_description():
     desc = {}
     today = datetime.date.today()
     year = today.year if today.month > 9 else today.year - 1
-    desc[
-        "description"
-    ] = """This chart displays estimated areal coverage of
+    desc["description"] = """This chart displays estimated areal coverage of
     snow cover for a single state.  This estimate is based on a 0.125x0.125
     degree analysis of NWS COOP observations.  The date shown would represent
     snow depth reported approximately at 7 AM.

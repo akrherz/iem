@@ -15,9 +15,11 @@ def workflow(col):
     if col == "climate_site":
         # Update when sites come offline and online
         mcursor.execute(
-            "update stations SET climate_site = null where "
-            "climate_site not in (select id from stations where "
-            "network ~* 'CLIMATE' and online)"
+            """
+            update stations SET climate_site = null where
+            climate_site not in (select id from stations where
+            network ~* 'CLIMATE' and online and archive_begin < '1990-01-01')
+            """
         )
         if mcursor.rowcount > 0:
             LOG.info(
@@ -46,12 +48,13 @@ def workflow(col):
             continue
         # Find the closest site
         if col == "climate_site":
-            sql = (
-                f"select id from stations WHERE network = '{st}CLIMATE' "
-                "and substr(id,3,4) != '0000' and "
-                "substr(id,3,1) not in ('C', 'D') "
-                "and online ORDER by ST_distance(geom, %s) ASC LIMIT 1"
-            )
+            sql = f"""
+                select id from stations WHERE network = '{st}CLIMATE'
+                and substr(id,3,4) != '0000' and
+                substr(id,3,1) not in ('C', 'D')
+                and online and archive_begin < '1990-01-01'
+                ORDER by ST_distance(geom, %s) ASC LIMIT 1
+                """
         else:
             clnetwork = "NCDC81" if col == "ncdc81" else "NCEI91"
             sql = (
