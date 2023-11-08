@@ -18,9 +18,7 @@ def get_description():
     """Return a dict describing how to call this plotter"""
     desc = {}
     desc["data"] = True
-    desc[
-        "description"
-    ] = """This plot presents a summary of the number of year
+    desc["description"] = """This plot presents a summary of the number of year
     to date watches issued by the Storm Prediction Center and the percentage
     of those watches that at least touched the given state.
     """

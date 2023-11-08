@@ -17,9 +17,7 @@ def get_description():
     """Return a dict describing how to call this plotter"""
     desc = {}
     desc["data"] = True
-    desc[
-        "description"
-    ] = """This plot presents the yearly minimum temperature
+    desc["description"] = """This plot presents the yearly minimum temperature
     after the first spring temperature above a given value or the maximum
     temperature after the first fall temperature below a given value.  The
     terms spring and fall are simply representing the first half and second

@@ -13,9 +13,7 @@ def get_description():
     """Return a dict describing how to call this plotter"""
     desc = {}
     desc["data"] = True
-    desc[
-        "description"
-    ] = """This chart presents the last date of fall or first
+    desc["description"] = """This chart presents the last date of fall or first
     date of spring that a given temperature threshold was last or first
     reached.  Note that leap day creates some ambiguity with an analysis like
     this, so for example, the 15th of November is considered equal for each

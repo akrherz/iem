@@ -129,9 +129,7 @@ def find_handler(q):
 def default_form():
     """Page when we don't know what to do."""
     ctx = {}
-    ctx[
-        "content"
-    ] = """
+    ctx["content"] = """
 <h3>IEM Awesome Search Failure</h3>
 
 <p>Sorry, I don't know how to handle your request. Here's a brief listing

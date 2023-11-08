@@ -247,9 +247,7 @@ def cmap_handler(fdict, value, arg, res):
         f'value="on"{checked}> Reverse Colormap?'
     )
     res["pltvars"].append(f"{arg['name']}:{value}{'_r' if reverse_on else ''}")
-    res[
-        "jsextra"
-    ] += """
+    res["jsextra"] += """
 function formatState (state) {
     if (!state.id) {
         return state.text;
@@ -306,9 +304,7 @@ def sday_handler(value, arg, res):
         """convert to a timestamp value."""
         return f"2000/{val[:2]}/{val[2:]}"
 
-    res[
-        "jsextra"
-    ] += f"""
+    res["jsextra"] += f"""
 $( '#{dpname}' ).datepicker({{
     beforeShow: function (input, inst) {{
         inst.dpDiv.addClass('sday');
@@ -340,9 +336,7 @@ def date_handler(value, arg, res):
     dpname = f"datepicker_{arg['name']}"
     vmin = arg.get("min", "1893/1/1")
     vmax = arg.get("max", utc().strftime("%Y/%m/%d"))
-    res[
-        "jsextra"
-    ] += f"""
+    res["jsextra"] += f"""
 $( '#{dpname}' ).datepicker({{
     changeMonth: true,
     changeYear: true,
@@ -364,9 +358,7 @@ def datetime_handler(value, arg, res):
     """Handler for datetime instances."""
     dpname = f"fp_{arg['name']}"
     vmax = arg.get("max", utc().strftime("%Y/%m/%d %H%M"))
-    res[
-        "jsextra"
-    ] += f"""
+    res["jsextra"] += f"""
 $( "#{dpname}" ).flatpickr({{
     enableTime: true,
     dateFormat: "Y/m/d Hi",
@@ -497,9 +489,7 @@ def generate_form(apid, fdict, headers, cookies):
         else:
             fmt = "png"
     if meta.get("nass") is not None:
-        res[
-            "nassmsg"
-        ] = """
+        res["nassmsg"] = """
 <p><div class="alert alert-warning">This data presentation utilizes the
         <a href="http://quickstats.nass.usda.gov/">USDA NASS Quickstats</a>.
         This presentation is not endorsed nor certified by USDA.
@@ -591,9 +581,7 @@ def generate_form(apid, fdict, headers, cookies):
                 '<div id="ap_container" style="width:100%s;height:400px;">'
                 "</div>"
             )
-            res[
-                "extrascripts"
-            ] += f"""
+            res["extrascripts"] += f"""
 <script src="/vendor/highcharts/{HIGHCHARTS}/highcharts.js"></script>
 <script src="/vendor/highcharts/{HIGHCHARTS}/highcharts-more.js"></script>
 <script src="/vendor/highcharts/{HIGHCHARTS}/modules/accessibility.js">
@@ -607,16 +595,12 @@ def generate_form(apid, fdict, headers, cookies):
                 '<div class="iem-maptable row" '
                 f'data-geojson-src="{res["imguri"]}.geojson"></div>'
             )
-            res[
-                "headextra"
-            ] += """
+            res["headextra"] += """
 <link type="text/css"
  href="/vendor/jquery-datatables/1.10.24/datatables.min.css"
  rel="stylesheet" />
             """
-            res[
-                "extrascripts"
-            ] += """
+            res["extrascripts"] += """
 <script src='/vendor/jquery-datatables/1.10.24/datatables.min.js'></script>
 <script src="/js/maptable.js"></script>
 <script>
@@ -628,9 +612,7 @@ $(document).ready(function(){{
             """
         elif fmt in ["png", "svg"]:
             timing_secs = get_timing(apid) + 1
-            res[
-                "image"
-            ] = f"""
+            res["image"] = f"""
 <div id="willload" style="height: 200px;">
         <p><span class="fa fa-arrow-down"></span>
         Based on a sampling of recent timings for this application, plot
@@ -648,9 +630,7 @@ $(document).ready(function(){{
         <img src="{res['imguri']}.{fmt}" class="img img-responsive"
          id="theimage" />
             """
-            res[
-                "jsextra"
-            ] += f"""
+            res["jsextra"] += f"""
 var timing = 0;
 var progressBar = setInterval(function (){{
         if (timing >= {timing_secs} ||
@@ -663,9 +643,7 @@ var progressBar = setInterval(function (){{
 }}, 200);
             """
         elif fmt == "pdf":
-            res[
-                "image"
-            ] = f"""
+            res["image"] = f"""
 <object id="windrose-plot" src="{res['imguri']}.{fmt}" width="700px"
  height="700px">
     <embed src="{res['imguri']}.{fmt}" width="700px" height="700px">
@@ -689,9 +667,7 @@ var progressBar = setInterval(function (){{
         f'</div><div class="col-md-9">{sel}</div></div>'
     )
 
-    res[
-        "formhtml"
-    ] = f"""
+    res["formhtml"] = f"""
 <style>
 .apopts .row:nth-of-type(odd) {{
   background-color: #EEEEEE;
@@ -747,24 +723,18 @@ function onNetworkChange(newnetwork){{
     {res['nassmsg']}
     """
     if meta.get("data"):
-        res[
-            "dataextra"
-        ] += f"""
+        res["dataextra"] += f"""
 <a href="{res['imguri']}.csv" class="btn btn-primary">
 <i class="fa fa-table"></i> View Data (as csv)</a> &nbsp;
 <a href="{res['imguri']}.xlsx" class="btn btn-primary">
 <i class="fa fa-table"></i> Download as Excel</a> &nbsp;
         """
         if meta["maptable"]:
-            res[
-                "dataextra"
-            ] += f"""
+            res["dataextra"] += f"""
 <a href="{res['imguri']}.geojson" class="btn btn-primary">
 <i class="fa fa-map"></i> Download as GeoJSON</a> &nbsp;
             """
-    res[
-        "issues"
-    ] = """
+    res["issues"] = """
     <div><span class="fa fa-info"></span>
     If you notice plotting issues with the image above, please
     do <a class="alert-link" href="/info/contacts.php">let us know</a>

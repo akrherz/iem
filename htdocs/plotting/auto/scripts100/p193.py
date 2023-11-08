@@ -27,9 +27,7 @@ def get_description():
     desc = {}
     desc["data"] = False
     desc["cache"] = 600
-    desc[
-        "description"
-    ] = """Generates a map of WPC Quantitative Precipitation
+    desc["description"] = """Generates a map of WPC Quantitative Precipitation
     Forecast (QPF) and most recent US Drought Monitor to the date choosen to
     plot the WPC forecast."""
     utcnow = datetime.datetime.utcnow()

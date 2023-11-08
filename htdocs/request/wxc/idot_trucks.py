@@ -16,9 +16,7 @@ def get_data():
    9 Lon
    3 Heading
    3 SpeedMPH
-""" % (
-        datetime.datetime.utcnow().strftime("%Y.%m.%d.%H%M"),
-    )
+""" % (datetime.datetime.utcnow().strftime("%Y.%m.%d.%H%M"),)
 
     postgis = get_dbconn("postgis")
     cursor = postgis.cursor()

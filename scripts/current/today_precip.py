@@ -33,9 +33,7 @@ def main():
      and c.day = 'TODAY'
      and s.country = 'US' and s.network ~* 'ASOS'
      and s.state in ('IA','MN','WI','IL','MO','NE','KS','SD','ND')
-    """ % (
-        now.year,
-    )
+    """ % (now.year,)
 
     lats = []
     lons = []
