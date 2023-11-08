@@ -22,8 +22,7 @@ cd ../iemplot
 cd ../ingestors/squaw
 python ingest_squaw.py
 
-cd ../scan
-python scan_ingest.py
+python /opt/iem/scripts/scan/scan_ingest.py &
 
 cd ../madis
 python extract_madis.py
