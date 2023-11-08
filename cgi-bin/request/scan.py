@@ -35,9 +35,9 @@ def application(environ, start_response):
     if "sts" not in environ:
         raise IncompleteWebRequest("GET start time parameters missing")
     stations = ensure_list(environ, "stations")
-    vars = ensure_list(environ, "vars")
-    vars.insert(0, "valid")
-    vars.insert(0, "station")
+    varnames = ensure_list(environ, "vars")
+    varnames.insert(0, "valid")
+    varnames.insert(0, "station")
     what = environ.get("what", "dl")
     delimiter = DELIMITERS.get(environ.get("delim", "comma"))
     df = get_df(stations, environ["sts"], environ["ets"])
@@ -50,5 +50,5 @@ def application(environ, start_response):
         headers = [("Content-type", "text/plain")]
     start_response("200 OK", headers)
     sio = StringIO()
-    df.to_csv(sio, index=False, sep=delimiter, columns=vars)
+    df.to_csv(sio, index=False, sep=delimiter, columns=varnames)
     return [sio.getvalue().encode("ascii")]
