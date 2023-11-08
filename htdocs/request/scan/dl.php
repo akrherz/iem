@@ -64,7 +64,7 @@ for ($i = 0; $i < $num_vars; $i++) {
 
 $sqlTS1 = date("Y-m-d H:i", $ts1);
 $sqlTS2 = date("Y-m-d H:i", $ts2);
-$table = sprintf("t%s_hourly", date("Y", $ts1));
+$table = sprintf("t%s", date("Y", $ts1));
 $nicedate = date("Y-m-d", $ts1);
 
 $sampleStr = array(
