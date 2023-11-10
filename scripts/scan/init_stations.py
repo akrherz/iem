@@ -3,7 +3,10 @@
 import requests
 from pyiem.database import get_dbconnc
 from pyiem.network import Table as NetworkTable
-from pyiem.util import convert_value
+from pyiem.util import convert_value, logger
+
+ATTRNAME = "AWDB.DATA_TIME_ZONE"
+LOG = logger()
 
 
 def main():
@@ -20,7 +23,23 @@ def main():
         if meta["networkCode"] != "SCAN":
             continue
         station = f"S{int(meta['stationId']):04d}"
+        data_time_zone = int(meta["dataTimeZone"])
         if station in nt.sts:
+            # Ensure that the data timezone is correct
+            curval = int(nt.sts[station]["attributes"].get(ATTRNAME, -99))
+            if curval != data_time_zone:
+                LOG.info("New %s %s %s", station, ATTRNAME, data_time_zone)
+                mcursor.execute(
+                    "DELETE from station_attributes where "
+                    "iemid = %s and attr = %s",
+                    (nt.sts[station]["iemid"], ATTRNAME),
+                )
+                mcursor.execute(
+                    "INSERT into station_attributes(iemid, attr, value) "
+                    "VALUES (%s, %s, %s)",
+                    (nt.sts[station]["iemid"], ATTRNAME, data_time_zone),
+                )
+
             continue
         print(f"Adding {station} {meta['name']}")
         mcursor.execute(

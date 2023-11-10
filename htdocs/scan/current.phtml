@@ -29,10 +29,6 @@ foreach ($jobj["data"] as $bogus => $iemob) {
     $mydata[$key] = $iemob;
     $mydata[$key]["ts"] = new DateTime($iemob["local_valid"]);
     $mydata[$key]["sped"] = $mydata[$key]["sknt"] * 1.15078;
-    $mydata[$key]["relh"] = relh(
-        f2c($mydata[$key]["tmpf"]),
-        f2c($mydata[$key]["dwpf"])
-    );
     if ($mydata[$key]["max_gust"] > $mydata[$key]["max_sknt"]) {
         $mydata[$key]["peak"] = $mydata[$key]["max_gust"];
         $mydata[$key]["peak_ts"] = new DateTime($mydata[$key]["local_max_gust_ts"]);
@@ -67,15 +63,12 @@ foreach ($finalA as $key => $val) {
  <td>" . myround($parts["dwpf"], 0) . "</td>
  <td>" . myround($parts["feel"], 0) . "</td>
  <td>" . $parts["relh"] . "</td>
- <td>" . myround($parts["sknt"], 0);
+ <td>" . myround($parts["sknt"], 1);
     if (!is_null($parts["gust"]) && $parts["gust"] > 0) {
-        $t1 .= "G" . $parts["gust"];
+        $t1 .= "G" . round($parts["gust"], 1);
     }
     $t1 .= "</td><td>" . myround($parts["drct"], 0) . "</td>";
-    $t1 .= "<td>";
-    if (array_key_exists("peak_ts", $parts)) {
-        $t1 .= myround($parts["peak"], 0) . "@ " . $parts["peak_ts"]->format("h:i P");
-    }
+    $t1 .= "<td>". myround($parts["peak"], 0);
     $t1 .= "</td><td>" . myround($parts["srad"], 0) . "</td></tr>";
 }
 
@@ -114,7 +107,7 @@ $t->content = <<<EOF
 <h3>Current SCAN Conditions</h3>
 
 Sorted by: <b>({$vals[$sortcol]})</b>  &nbsp; &nbsp; Click on
-a column to sort it.<br>
+a column to sort it. Timestamps are in the local station's timezone.<br>
 
 <form method="GET" action="/my/current.phtml">
 <table class="table table-striped">
