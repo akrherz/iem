@@ -16,6 +16,7 @@ mapping = {
     "Date": {"iemvar": "", "multiplier": 1},
     "Time (CST)": {"iemvar": "", "multiplier": 1},
     "Time (CDT)": {"iemvar": "", "multiplier": 1},
+    "PRCP.I-1 (in)": {"iemvar": "", "multiplier": 1},
     "PREC.I-1 (in)": {"iemvar": "", "multiplier": 1},
     "PREC.I-2 (in)": {"iemvar": "", "multiplier": 1},
     "TOBS.I-1 (degC)": {"iemvar": "tmpc", "multiplier": 1},
@@ -55,19 +56,22 @@ mapping = {
     "WDIRV.H-1:120 (degree)": {"iemvar": "drct", "multiplier": 1},
     "WDIRV.H-1:140 (degree)": {"iemvar": "drct", "multiplier": 1},
     "WDIRV.H-1:117 (degree)": {"iemvar": "drct", "multiplier": 1},
+    "WDIRV.H-1 (degr)": {"iemvar": "drct", "multiplier": 1},
     "WSPDX.H-1:144 (mph)": {"iemvar": "gust", "multiplier": 0.8689},
     "WSPDX.H-1:101 (mph)": {"iemvar": "gust", "multiplier": 0.8689},
     "WSPDX.H-1:120 (mph)": {"iemvar": "gust", "multiplier": 0.8689},
     "WSPDX.H-1:140 (mph)": {"iemvar": "gust", "multiplier": 0.8689},
     "WSPDX.H-1:117 (mph)": {"iemvar": "gust", "multiplier": 0.8689},
+    "WSPDX.H-1 (mph)": {"iemvar": "gust", "multiplier": 0.8689},
     "WSPDV.H-1:144 (mph)": {"iemvar": "sknt", "multiplier": 0.8689},
     "WSPDV.H-1:101 (mph)": {"iemvar": "sknt", "multiplier": 0.8689},
     "WSPDV.H-1:120 (mph)": {"iemvar": "sknt", "multiplier": 0.8689},
     "WSPDV.H-1:140 (mph)": {"iemvar": "sknt", "multiplier": 0.8689},
     "WSPDV.H-1:117 (mph)": {"iemvar": "sknt", "multiplier": 0.8689},
+    "WSPDV.H-1 (mph)": {"iemvar": "sknt", "multiplier": 0.8689},
     "RHUM.I-1 (pct)": {"iemvar": "relh", "multiplier": 1},
     "PRES.I-1 (inch_Hg)": {"iemvar": "pres", "multiplier": 1},
-    "SRADV.H-1 (watt/m2)": {"iemvar": "srad", "multiplier": 1},
+    "SRADV.H-1 (watt)": {"iemvar": "srad", "multiplier": 1},
     "DPTP.H-1 (degC)": {"iemvar": "dwpc", "multiplier": 1},
     "PVPV.H-1 (kPa)": {"iemvar": "", "multiplier": 1},
     "RHUMN.H-1 (pct)": {"iemvar": "", "multiplier": 1},
@@ -124,14 +128,13 @@ def savedata(icursor, scursor, reprocessing, data, maxts):
             and key != "Site Id"
         ):
             iem.data[mapping[key]["iemvar"]] = float(data[key].strip())
-
     iem.data["valid"] = ts
     if iem.data.get("tmpc") is not None:
         iem.data["tmpf"] = c2f(float(iem.data.get("tmpc")))
     if iem.data.get("dwpc") is not None:
         iem.data["dwpf"] = c2f(float(iem.data.get("dwpc")))
     for i in range(1, 6):
-        if iem.data.get(f"c{i}tmpf") is not None:
+        if iem.data.get(f"c{i}tmpc") is not None:
             iem.data[f"c{i}tmpf"] = c2f(float(iem.data.get(f"c{i}tmpc")))
         if iem.data.get(f"c{i}smv") is not None:
             iem.data[f"c{i}smv"] = float(iem.data.get(f"c{i}smv"))
@@ -225,6 +228,12 @@ def main(argv):
                 data[col.strip()] = token
             if "Date" in data:
                 savedata(icursor, scursor, reprocessing, data, maxts)
+                scursor.close()
+                SCAN.commit()
+                scursor = SCAN.cursor()
+                icursor.close()
+                ACCESS.commit()
+                icursor = ACCESS.cursor()
     icursor.close()
     scursor.close()
     ACCESS.commit()
