@@ -58,6 +58,18 @@ if ($network == '_ALL_') {
     for ($i = 0; $row = pg_fetch_array($rs); $i++) {
         $cities[$row["id"]] = $row;
     }
+} else if (isset($_GET["special"]) && $_GET["special"] == 'alldcp') {
+    $rs = pg_query(
+        $pgconn,
+        "SELECT id, name, elevation, archive_begin, archive_end, network, " .
+            "ST_x(geom) as lon, ST_y(geom) as lat, null as attributes, state, " .
+            "synop, country from stations WHERE online and " .
+            "network ~* 'DCP' ORDER by name"
+    );
+    $cities = array();
+    for ($i = 0; $row = pg_fetch_array($rs); $i++) {
+        $cities[$row["id"]] = $row;
+    }
 } else {
     $nt = new NetworkTable($network);
     $cities = $nt->table;
@@ -98,7 +110,7 @@ EOM;
     } else if ($format == "csv") {
         if (!$nohtml) $table .= "<p><b>" . $network . " Network</b></p>\n";
         if (!$nohtml) $table .= "<pre>\n";
-        $table .= "stid,station_name,lat,lon,elev,begints,iem_network\n";
+        $table .= "stid,station_name,lat,lon,elev,begints,endts,iem_network\n";
         foreach ($cities as $sid => $row) {
             $table .= $sid . ","
                 . $row["name"] . ","
@@ -106,6 +118,7 @@ EOM;
                 . round($row["lon"], 5) . ","
                 . $row["elevation"] . ","
                 . pretty_date($row["archive_begin"], 'Y-m-d H:i') . ","
+                . pretty_date($row["archive_end"], 'Y-m-d H:i') . ","
                 . $row["network"] . "\n";
         }
         if (!$nohtml)  $table .= "</pre>\n";
@@ -229,7 +242,8 @@ added stations.
  <li><a href="networks.php?special=allasos&format=gempak&nohtml">Global METAR in GEMPAK Format</a></li>
  <li><a href="networks.php?special=allasos&format=csv&nohtml">Global METAR in CSV Format</a></li>
 <li><a href="/geojson/network/AZOS.geojson">Global METAR/ASOS in GeoJSON</a></li>
- </ul>
+<li><a href="networks.php?special=alldcp&format=csv&nohtml">All DCPs in CSV Format</a></li>
+</ul>
 </div>
 
 
