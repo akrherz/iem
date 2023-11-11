@@ -127,4 +127,4 @@ def plotter(fdict):
 
 
 if __name__ == "__main__":
-    plotter({"year": 2022})
+    plotter({})
