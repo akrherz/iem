@@ -14,7 +14,7 @@ import numpy as np
 import pandas as pd
 from matplotlib.patches import Rectangle
 from pyiem.exceptions import NoDataFound
-from pyiem.plot import figure_axes
+from pyiem.plot import figure
 from pyiem.reference import TRACE_VALUE
 from pyiem.util import get_autoplot_context, get_dbconn
 
@@ -22,6 +22,8 @@ PDICT = {
     "first": "First Snowfall after 1 July",
     "last": "Last Snowfall before 1 July",
 }
+XS = np.array([1, 32, 60, 91, 121, 152, 182, 213, 244, 274, 305, 335])
+XS = np.concatenate([XS, XS + 366])
 
 
 def get_description():
@@ -82,6 +84,7 @@ def get_data(ctx):
             snowd[row[1] - syear, int(row[0])] = row[3]
         snow[row[1] - syear, int(row[0] - 1)] = row[2]
         snowd[row[1] - syear, int(row[0] - 1)] = row[3]
+    pgconn.close()
     # reset any nan
     snow = np.where(np.isnan(snow), 0, snow)
     snowd = np.where(np.isnan(snowd), -1, snowd)
@@ -131,6 +134,44 @@ def get_data(ctx):
     return pd.DataFrame(rows)
 
 
+def plot_yearly_trend(fig, df):
+    """Plot the yearly trend"""
+    ax = fig.add_axes([0.55, 0.15, 0.43, 0.75])
+    x = df["year"].values
+    y = df["snow_doy"].values
+    ax.scatter(x, y)
+    ax.set_xlim(df["year"].min() - 1, df["year"].max() + 1)
+    ax.set_ylabel("Date")
+    ax.grid(True)
+    ax.set_yticks(XS)
+    ax.set_yticklabels(calendar.month_abbr[1:] + calendar.month_abbr[1:])
+    ax.set_ylim(df["snow_doy"].min() - 5, df["snowfree_doy"].max() + 5)
+    ax.set_xlabel("Year")
+    # Add a moving 30 year average
+    ax.plot(
+        df["year"].values,
+        df["snow_doy"].rolling(window=30, center=False).mean(),
+        lw=2,
+        color="r",
+        label="30 year trailing mean",
+    )
+    # Add a trend line
+    xmean = np.mean(x)
+    ymean = np.mean(y)
+    xdiff = x - xmean
+    ydiff = y - ymean
+    slope = np.sum(xdiff * ydiff) / np.sum(xdiff * xdiff)
+    yint = ymean - slope * xmean
+    ax.plot(
+        x,
+        slope * x + yint,
+        lw=2,
+        color="k",
+        label=f"Trend: {(slope * 10):.2f} days / decade",
+    )
+    ax.legend(loc=(0.0, -0.15), ncol=2)
+
+
 def plotter(fdict):
     """Go"""
     ctx = get_autoplot_context(fdict, get_description())
@@ -146,7 +187,9 @@ def plotter(fdict):
         f"({df['year'].min()}-{df['year'].max()})\n"
         "(color is how long snow remained)"
     )
-    (fig, ax) = figure_axes(title=title, apctx=ctx)
+    fig = figure(title=title, apctx=ctx)
+    plot_yearly_trend(fig, df)
+    ax = fig.add_axes([0.08, 0.11, 0.36, 0.79])
 
     ax.scatter(
         df["snow_doy"],
@@ -169,34 +212,7 @@ def plotter(fdict):
             lw="2",
             color=row["color"],
         )
-    ax.set_xticks(
-        [
-            1,
-            32,
-            60,
-            91,
-            121,
-            152,
-            182,
-            213,
-            244,
-            274,
-            305,
-            335,
-            1 + 366,
-            32 + 366,
-            60 + 366,
-            91 + 366,
-            121 + 366,
-            152 + 366,
-            182 + 366,
-            213 + 366,
-            244 + 366,
-            274 + 366,
-            305 + 366,
-            335 + 366,
-        ]
-    )
+    ax.set_xticks(XS)
     ax.set_xticklabels(calendar.month_abbr[1:] + calendar.month_abbr[1:])
     ax.grid(True)
     ax.set_ylim(bottom=0)
@@ -220,7 +236,7 @@ def plotter(fdict):
             "3 - 10 [%s]" % (len(df[df["color"] == "b"].index),),
             "< 3 days [%s]" % (len(df[df["color"] == "r"].index),),
         ),
-        ncol=4,
+        ncol=2,
         fontsize=11,
         loc=(0.0, -0.15),
     )
