@@ -17,7 +17,7 @@ START_YEAR = {
     "rwis": 1994,
     "asos": 1928,
     "other": 2003,
-    "scan": 1983,
+    "scan": 1987,
 }
 TODAY = datetime.date.today()
 

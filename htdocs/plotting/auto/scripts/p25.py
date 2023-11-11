@@ -135,4 +135,4 @@ def plotter(fdict):
 
 
 if __name__ == "__main__":
-    plotter({"month": 11, "day": 2})
+    plotter({})
