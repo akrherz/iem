@@ -286,6 +286,17 @@ to build the required SHEF fields for the RTP product.</p>
 </div>
 
 <div class="panel panel-default">
+  <div class="panel-heading">Snowfall</div>
+  <div class="panel-body">
+<ul>
+ <li><a href="/nws/snowfall_6hour.php">Six Hour Snowfall Totals</a>
+ <br />Simple table of available 6 hour snowfall total reports.</li>
+</ul>
+  </div>
+</div>
+
+
+<div class="panel panel-default">
   <div class="panel-heading">Storm Prediction Center Products</div>
   <div class="panel-body">
 <ul>

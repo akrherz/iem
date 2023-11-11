@@ -131,7 +131,8 @@ def main(argv):
     with get_sqlalchemy_conn("isuag") as conn:
         # Get the minute data
         mdf = pd.read_sql(
-            "SELECT *, valid at time zone 'UTC' as utc_valid from sm_minute "
+            "SELECT *, valid at time zone 'UTC' as utc_valid, "
+            "date(valid) as date from sm_minute "
             "where valid >= %s and valid < %s ORDER by valid ASC",
             conn,
             params=(sts, ets),
@@ -139,7 +140,8 @@ def main(argv):
         ).fillna(np.nan)
         # Get the hourly data
         hdf = pd.read_sql(
-            "SELECT *, valid at time zone 'UTC' as utc_valid from sm_hourly "
+            "SELECT *, valid at time zone 'UTC' as utc_valid, "
+            "date(valid) as date from sm_hourly "
             "where valid >= %s and valid < %s ORDER by valid ASC",
             conn,
             params=(sts, ets),
