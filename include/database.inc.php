@@ -32,4 +32,4 @@ function iemdb($dbname, $force_new = 0, $rw = FALSE)
         database_failure($dbname);
     }
     return $db;
-} // End of iemdb()
+}

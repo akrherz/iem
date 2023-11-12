@@ -12,12 +12,13 @@ from pyiem.network import Table as NetworkTable
 from pyiem.util import get_dbconnc, logger
 
 LOG = logger()
-ALLDATA = {"USCRN": "uscrn_alldata"}
+ALLDATA = {}
 START_YEAR = {
     "rwis": 1994,
     "asos": 1928,
     "other": 2003,
     "scan": 1987,
+    "uscrn": 2001,
 }
 TODAY = datetime.date.today()
 

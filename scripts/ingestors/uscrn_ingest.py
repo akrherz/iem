@@ -235,7 +235,7 @@ def download(year, reprocess=False):
 def main(argv):
     """Go Main Go"""
     iem_pgconn = get_dbconn("iem")
-    other_pgconn = get_dbconn("other")
+    pgconn = get_dbconn("uscrn")
     year = datetime.datetime.utcnow().year
     reprocess = False
     if len(argv) == 2:
@@ -244,7 +244,7 @@ def main(argv):
         reprocess = True
     for [fn, size] in download(year, len(argv) == 2):
         icursor = iem_pgconn.cursor(row_factory=dict_row)
-        ocursor = other_pgconn.cursor()
+        ocursor = pgconn.cursor()
         try:
             process_file(icursor, ocursor, year, fn, size, reprocess)
         except Exception as exp:
@@ -252,7 +252,7 @@ def main(argv):
         icursor.close()
         ocursor.close()
         iem_pgconn.commit()
-        other_pgconn.commit()
+        pgconn.commit()
 
 
 if __name__ == "__main__":
