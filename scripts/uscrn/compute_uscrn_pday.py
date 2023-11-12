@@ -23,11 +23,11 @@ def run(valid):
     nt = NetworkTable("USCRN")
     iem_pgconn = get_dbconn("iem")
     LOG.info("Processing %s", valid.date())
-    with get_sqlalchemy_conn("other") as conn:
+    with get_sqlalchemy_conn("uscrn") as conn:
         # Fetch enough data to cross all the dates
         df = pd.read_sql(
             "SELECT station, valid at time zone 'UTC' as utc_valid, precip_mm "
-            "from uscrn_alldata where valid > %s and valid < %s",
+            "from alldata where valid > %s and valid < %s",
             conn,
             params=(
                 valid - datetime.timedelta(days=1),
