@@ -142,7 +142,10 @@ daily_opts = [
             "High/Low Temp above/below avg OR dry streaks by NWS CLI Sites"
         ),
     },
-    {"id": 19, "label": "Histogram of Daily High/Low Temperatures + Ranges"},
+    {
+        "id": 19,
+        "label": "Histogram (weathergami) of Daily High/Low Temps + Ranges",
+    },
     {"id": 35, "label": "Histogram of X Hour Temp/RH/Dew/Pressure Changes"},
     {
         "id": 60,

@@ -5,6 +5,7 @@ from zoneinfo import ZoneInfo
 
 import pandas as pd
 from pandas.io.sql import read_sql
+from pyiem.exceptions import IncompleteWebRequest
 from pyiem.nws.products.spcpts import THRESHOLD_ORDER
 from pyiem.util import get_dbconnc, get_sqlalchemy_conn, html_escape
 from pyiem.webutil import iemapp
@@ -135,11 +136,14 @@ def dowork(lon, lat, last, day, cat):
 @iemapp()
 def application(environ, start_response):
     """Answer request."""
-    lat = float(environ.get("lat", 42.0))
-    lon = float(environ.get("lon", -95.0))
+    try:
+        lat = float(environ.get("lat", 42.0))
+        lon = float(environ.get("lon", -95.0))
+        last = int(environ.get("last", 0))
+        day = int(environ.get("day", 1))
+    except ValueError as exp:
+        raise IncompleteWebRequest(f"Invalid request parameter {exp}")
     time = environ.get("time")
-    last = int(environ.get("last", 0))
-    day = int(environ.get("day", 1))
     cat = environ.get("cat", "categorical").upper()
 
     cb = environ.get("callback")
