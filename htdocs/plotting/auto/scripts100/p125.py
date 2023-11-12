@@ -15,7 +15,7 @@ import datetime
 import pandas as pd
 from pyiem.exceptions import NoDataFound
 from pyiem.plot import MapPlot, get_cmap, pretty_bins
-from pyiem.reference import LATLON, SECTORS_NAME
+from pyiem.reference import LATLON, SECTORS_NAME, Z_OVERLAY2
 from pyiem.util import get_autoplot_context, get_sqlalchemy_conn
 from sqlalchemy import text
 
@@ -184,7 +184,7 @@ def plotter(fdict):
         months = [ts.month]
 
     if len(months) == 1:
-        title = f"{calendar.month_name[months[0]]} {PDICT3[varname]}"
+        title = calendar.month_name[months[0]]
     else:
         title = MDICT[month]
     params = {}
@@ -227,13 +227,13 @@ def plotter(fdict):
             text(
                 f"""
             WITH mystations as (
-                select {joincol} as myid,
+                select {joincol} as myid, max(state) as state,
                 max(ST_x(geom)) as lon, max(ST_y(geom)) as lat from stations
                 where network ~* 'CLIMATE' and
                 ST_Contains(ST_MakeEnvelope(:b1, :b2, :b3, :b4, 4326), geom)
                 GROUP by myid
             )
-            SELECT station,
+            SELECT station, max(state) as state,
             max(lon) as lon, min(lat) as lat,
             sum(precip) as total_precip,
             avg(high) as avg_high,
@@ -277,6 +277,7 @@ def plotter(fdict):
         # Manual clipping sector
         mp.draw_mask(None if sector == "state" else "conus")
     if sector == "state":
+        df = df[df["state"] == state]
         mp.drawcounties()
     if opt in ["both", "values"]:
         mp.plot_values(
@@ -285,6 +286,7 @@ def plotter(fdict):
             df[varname].values,
             fmt=f"%.{PRECISION.get(varname, 1)}f",
             labelbuffer=5,
+            zorder=Z_OVERLAY2 + 3,  # FIXME in pyIEM someday
         )
 
     return mp.fig, df
