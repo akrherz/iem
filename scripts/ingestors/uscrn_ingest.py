@@ -114,7 +114,7 @@ def process_file(icursor, ocursor, year, filename, size, reprocess):
         )
     if reprocess and not df.empty:
         ocursor.execute(
-            f"DELETE from uscrn_t{year} WHERE station = %s",
+            f"DELETE from t{year} WHERE station = %s",
             (df.iloc[0]["WBANNO"],),
         )
         LOG.info(
@@ -160,7 +160,7 @@ def process_file(icursor, ocursor, year, filename, size, reprocess):
             200,
         )
         ob.save(icursor, skip_current=reprocess)
-        table = f"uscrn_t{valid.year}"
+        table = f"t{valid.year}"
         if not reprocess:
             ocursor.execute(
                 f"DELETE from {table} WHERE station = %s and valid = %s",
