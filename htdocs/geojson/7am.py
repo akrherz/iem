@@ -3,6 +3,7 @@ import datetime
 import json
 from zoneinfo import ZoneInfo
 
+from pyiem.exceptions import IncompleteWebRequest
 from pyiem.reference import TRACE_VALUE
 from pyiem.util import get_dbconnc, html_escape
 from pyiem.webutil import iemapp
@@ -130,7 +131,10 @@ def application(environ, start_response):
     group = environ.get("group", "coop")
     cb = environ.get("callback", None)
     dt = environ.get("dt", datetime.date.today().strftime("%Y-%m-%d"))
-    ts = datetime.datetime.strptime(dt, "%Y-%m-%d")
+    try:
+        ts = datetime.datetime.strptime(dt, "%Y-%m-%d")
+    except ValueError:
+        raise IncompleteWebRequest("dt variable should be in form YYYY-MM-DD")
     ts = ts.replace(hour=12, tzinfo=ZoneInfo("UTC"))
 
     mckey = f"/geojson/7am/{dt}/{group}"

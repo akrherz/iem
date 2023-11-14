@@ -42,6 +42,7 @@ LOOKUP = {
     "-sustainablecorn": IPS[DB1],
     "-talltowers": IPS[DB2],
     "-td": IPS[DB1],
+    "-uscrn": IPS[DB1],
     "-wepp": IPS[DB1],
 }
 

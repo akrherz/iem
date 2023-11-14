@@ -243,6 +243,11 @@ RewriteRule ^/search /search.py [QSA]
     RewriteRule pil_([A-Z0-9]{3,6}).png$ pil.php?pil=$1
   </Directory>
 
+  <Directory "/opt/iem/htdocs/sites">
+    # Allow for python scripts to act has directories NETWORK/SID/TOOL
+    RewriteRule ^([^/]{3,20})/([^/]{3,20})/([^/]+)$ $3.py
+  </Directory>
+
   <Directory "/opt/iem/htdocs/wx/afos">
     RewriteRule ([0-9]{12})_([A-Z0-9\s]+).png$ text2png.py?e=$1&pil=$2 [B,L]
   </Directory>

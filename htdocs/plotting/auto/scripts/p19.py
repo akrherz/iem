@@ -51,7 +51,7 @@ def get_description():
         dict(
             type="int",
             name="binsize",
-            default="10",
+            default=1,
             label="Histogram Bin Size:",
         ),
         dict(
