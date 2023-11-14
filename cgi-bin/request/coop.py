@@ -288,6 +288,8 @@ def do_century(cursor, ctx):
         )
     idxs = ["prec", "tmin", "tmax"]
     for year in range(sts.year, ets.year + 1):
+        if year not in data:
+            continue
         for idx in idxs:
             sio.write(
                 (
