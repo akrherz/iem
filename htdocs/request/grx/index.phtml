@@ -83,28 +83,33 @@ rings specified at the given distance for a point.</p>
 
 <p>
 <table class="table table-striped">
-		<thead><tr><th>Title</th><th>Description</th></tr></thead>
+        <thead><tr><th>v3 Support</th><th>Title</th><th>Description</th></tr></thead>
 <tr>
+  <td>No</td>
   <th><a href="iadot_trucks.txt">Iowa DOT Truck Locations</a></th>
   <td>https://mesonet.agron.iastate.edu/request/grx/iadot_trucks.txt<br />
   <i>Notes:</i>  Locations of Iowa DOT Snow Plows.</td>
 </tr>
 <tr>
+  <td>No</td>
   <th><a href="roadcond.php">Iowa Winter Road Conditions</a></th>
   <td>https://mesonet.agron.iastate.edu/request/grx/roadcond.php<br />
   <i>Notes:</i>  Observations provided by the Iowa State Patrol.</td>
 </tr>
 <tr>
+  <td>No</td>
   <th><a href="asos.php">Iowa ASOS Data</a></th>
   <td>https://mesonet.agron.iastate.edu/request/grx/asos.php<br />
   <i>Notes:</i>  none at this time</td>
 </tr>
 <tr>
+  <td>No</td>
   <th><a href="rwis.php">Iowa RWIS Data</a></th>
   <td>https://mesonet.agron.iastate.edu/request/grx/rwis.php<br />
   <i>Notes:</i>  Could use some data presentation improvements (TODO)</td>
 </tr>
 <tr>
+  <td>No</td>
   <th><a href="webcams.php?overview">IEM Webcam Overview</a></th>
   <td>https://mesonet.agron.iastate.edu/request/grx/webcams.php?overview<br />
   <i>Notes:</i>  This layer provides the locations and direction
@@ -113,6 +118,7 @@ individual network layers...</b> There aren't bandwidth concerns with this
 layer.</td>
 </tr>
 <tr>
+  <td>No</td>
   <th><a href="webcams.php?network=KCCI">KCCI-TV Webcams</a></th>
   <td>https://mesonet.agron.iastate.edu/request/grx/webcams.php?network=KCCI<br />
   <i>Notes:</i>  You will not want to use this on a low bandwidth 
@@ -120,13 +126,7 @@ connection as all of the webcam images are loaded every 1-5 minutes.  Please
 only use this layer when you are using the data!  Thanks...</td>
 </tr>
 <tr>
-  <th><a href="webcams.php?network=KELO">KELO-TV Webcams</a></th>
-  <td>https://mesonet.agron.iastate.edu/request/grx/webcams.php?network=KELO<br />
-  <i>Notes:</i>  You will not want to use this on a low bandwidth
-connection as all of the webcam images are loaded every 1-5 minutes.  Please
-only use this layer when you are using the data!  Thanks...</td>
-</tr>
-<tr>
+  <td>No</td>
   <th><a href="webcams.php?network=KCRG">KCRG-TV Webcams</a></th>
   <td>https://mesonet.agron.iastate.edu/request/grx/webcams.php?network=KCRG<br />
   <i>Notes:</i>  You will not want to use this on a low bandwidth
@@ -135,14 +135,15 @@ only use this layer when you are using the data!  Thanks...</td>
 </tr>
 
 <tr>
+  <td>Yes</td>
   <th><a href="l3attr.txt">NEXRAD Level3 Attributes</a></th>
   <td>https://mesonet.agron.iastate.edu/request/grx/l3attr.txt<br />
   <i>Notes:</i> This is a placefile of the level3 NEXRAD storm attributes. This
 may be useful when looking at level2 data.  You can optionally pass a nexrad
-		3 character ID to limit the display to a certain NEXRAD. ie)
-		<code>l3attr.txt?nexrad=DMX</code>.  Otherwise, the service will utilize the
-		longitude and latitude passed to the server by the Gibson Ridge Client
-		to limit the displayed attributes.
+        3 character ID to limit the display to a certain NEXRAD. ie)
+        <code>l3attr.txt?nexrad=DMX</code>.  Otherwise, the service will utilize the
+        longitude and latitude passed to the server by the Gibson Ridge Client
+        to limit the displayed attributes.
 
     <br /><strong>Additional Query Parameters</strong>: You can provide additional
     URL parameters to limit the returned attributes. For example,
@@ -156,6 +157,7 @@ may be useful when looking at level2 data.  You can optionally pass a nexrad
 </tr>
 
 <tr>
+  <td>No</td>
   <th><a href="watch_by_county.php">SPC Watch by County</a></th>
   <td>https://mesonet.agron.iastate.edu/request/grx/watch_by_county.php?<br />
   <i>Notes:</i> This is a placefile of the union of counties within a
@@ -167,6 +169,7 @@ may be useful when looking at level2 data.  You can optionally pass a nexrad
 </tr>
 
 <tr>
+  <td>No</td>
   <th><a href="time_mot_loc.txt">NWS Warning TIME...MOT...LOC</a> (TOR)</th>
   <td>https://mesonet.agron.iastate.edu/request/grx/time_mot_loc.txt?<br />
   <i>Notes:</i> This provides lines indicating the path of travel for
@@ -174,6 +177,7 @@ may be useful when looking at level2 data.  You can optionally pass a nexrad
 </tr>
 
 <tr>
+  <td>No</td>
   <th><a href="time_mot_loc.txt?all">NWS Warning TIME...MOT...LOC</a> (TOR+SVR)</th>
   <td>https://mesonet.agron.iastate.edu/request/grx/time_mot_loc.txt?all<br />
   <i>Notes:</i> This provides lines indicating the path of travel for
@@ -181,6 +185,7 @@ may be useful when looking at level2 data.  You can optionally pass a nexrad
 </tr>
 
 <tr>
+  <td>No</td>
   <th><a href="time_mot_loc.txt?all&amp;valid=2020-05-25T00:00Z">NWS Warning TIME...MOT...LOC (Historical)</a> (TOR+SVR)</th>
   <td>https://mesonet.agron.iastate.edu/request/grx/time_mot_loc.txt?all&valid=2020-05-25T00:00Z<br />
   <i>Notes:</i> Provides any TIME...MOT...LOC tracks for a four hour window of

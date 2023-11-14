@@ -15,10 +15,12 @@ Add storm tracks.
 import math
 
 import numpy as np
+import pandas as pd
 import pyproj
-from pyiem.util import convert_value, get_dbconnc
+from pyiem.util import convert_value, get_sqlalchemy_conn
 from pyiem.webutil import iemapp
 from pymemcache.client import Client
+from sqlalchemy import text
 
 # Do geo math in US National Atlas Equal Area
 P3857 = pyproj.Proj("EPSG:3857")
@@ -247,7 +249,7 @@ def dir2ccwrot(mydir):
     return 180 + (90 - mydir)
 
 
-def rabbit_tracks(row):
+def rabbit_tracks(row, v3):
     """Generate a rabbit track for this attr"""
     res = ""
     if row["sknt"] is None or row["sknt"] <= 5 or row["drct"] is None:
@@ -266,31 +268,85 @@ def rabbit_tracks(row):
     y = y0 + math.sin(rad) * smps * SECONDS
     # Draw white line out 30 minutes
     lons, lats = P3857(x, y, inverse=True)
-    res += (
-        f"Line: 1, 0, \"Cell [{row['storm_id']}]\"\n"
-        f"{lat0:.4f}, {lon0:.4f}\n"
-        f"{lats[-1]:.4f}, {lons[-1]:.4f}\n"
-        "END:\n"
-    )
-    for i in range(3):
+    if v3:
         res += (
-            f"Icon: {lats[i]:.4f},{lons[i]:.4f},{rotation:.0f},"
-            f'1,10,"+{((i + 1) * 15):.0f} min"\n'
+            "Line {\n"
+            f"Points = {{ {{ {lat0:.4f}, {lon0:.4f} }}, "
+            f"{{ {lats[-1]:.4f}, {lons[-1]:.4f} }} }}\n"
+            f"Hover = \"Cell [{row['storm_id']}]\"\n"
+            "}\n"
         )
+    else:
+        res += (
+            f"Line: 1, 0, \"Cell [{row['storm_id']}]\"\n"
+            f"{lat0:.4f}, {lon0:.4f}\n"
+            f"{lats[-1]:.4f}, {lons[-1]:.4f}\n"
+            "END:\n"
+        )
+    for i in range(3):
+        if v3:
+            res += (
+                "Icon {\n"
+                f"Index = 10\n"
+                f"Pos = {{{lats[i]:.4f},{lons[i]:.4f}}}\n"
+                'Sheet = "1"\n'
+                f"Azimith = {rotation:.0f}\n"
+                f'Hover = "+{((i + 1) * 15):.0f} min"\n'
+                "}\n"
+            )
+        else:
+            res += (
+                f"Icon: {lats[i]:.4f},{lons[i]:.4f},{rotation:.0f},"
+                f'1,10,"+{((i + 1) * 15):.0f} min"\n'
+            )
     return res
 
 
-def produce_content(nexrad, poh, meso, tvs, max_size):
-    """Do Stuff"""
-    pgconn, cursor = get_dbconnc("radar")
+def get_df(nexrad, meso, tvs, poh, max_size):
+    """return a dataframe"""
+    params = {
+        "nexrad": nexrad,
+        "meso": meso,
+        "poh": poh,
+        "max_size": max_size,
+    }
     limiter = ""
+    meso_limiter = ""
+    if nexrad != "":
+        limiter = " and nexrad = :nexrad "
+    if meso >= 0:
+        meso_limiter = " and meso != 'NONE' "
+        if meso > 1:
+            meso_limiter += " and meso::float >= :meso "
+    tvs_limiter = ""
+    if tvs:
+        tvs_limiter = " and tvs = 'TVS' "
+
+    with get_sqlalchemy_conn("radar") as conn:
+        df = pd.read_sql(
+            text(
+                f"""
+                SELECT *, ST_x(geom) as lon, ST_y(geom) as lat,
+                valid at time zone 'UTC' as utc_valid
+                from nexrad_attributes WHERE
+                valid > now() - '15 minutes'::interval
+                {limiter} and poh >= :poh {meso_limiter} {tvs_limiter} and
+                max_size >= :max_size
+                 """
+            ),
+            conn,
+            params=params,
+        )
+    return df
+
+
+def produce_content(nexrad, poh, meso, tvs, max_size, v3):
+    """Do Stuff"""
     threshold = 999
     title = "IEM NEXRAD L3 Attributes"
     if nexrad != "":
-        limiter = f" and nexrad = '{nexrad}' "
         title = f"IEM {nexrad} NEXRAD L3 Attributes"
         threshold = 45
-    meso_limiter = ""
     titleadd = ""
     if meso >= 0:
         titleadd = ", all MESO"
@@ -300,22 +356,68 @@ def produce_content(nexrad, poh, meso, tvs, max_size):
             meso_limiter += f" and meso::float >= {meso} "
     if poh > 0:
         titleadd += f", POH >= {poh}"
-    tvs_limiter = ""
     if tvs:
         titleadd += ", all TVS"
-        tvs_limiter = " and tvs = 'TVS' "
     if max_size > 0:
         titleadd += f", Max Size >= {max_size}"
-    cursor.execute(
-        f"""
-        SELECT *, ST_x(geom) as lon, ST_y(geom) as lat,
-        valid at time zone 'UTC' as utc_valid
-        from nexrad_attributes WHERE valid > now() - '15 minutes'::interval
-        {limiter} and poh >= %s {meso_limiter} {tvs_limiter} and
-        max_size >= %s
-        """,
-        (poh, max_size),
+    df = get_df(nexrad, meso, tvs, poh, max_size)
+    if v3:
+        return produce_content_v3(df, title, titleadd)
+    return produce_content_v2(df, threshold, title, titleadd)
+
+
+def produce_content_v3(df, title, titleadd):
+    """v3 stuff."""
+    res = (
+        "Placefile {\n"
+        f'Title = "{title}{titleadd}"\n'
+        "Refresh = 180\n"
+        "Define Iconsheet\n"
+        "{\n"
+        'Handle = "1"\n'
+        f'File = "{ICONFILE}"\n'
+        "nIcons = {4, 4}\n"
+        "}\n"
     )
+    for _, row in df.iterrows():
+        txt = (
+            f"K{row['nexrad']} [{row['storm_id']}] {row['utc_valid']:%H:%M} "
+            f"Z\\nDrct: {row['drct']} Speed: {row['sknt']} kts\\n"
+        )
+        icon = 9
+        if row["tvs"] != "NONE" or row["meso"] != "NONE":
+            txt += f"TVS: {row['tvs']} MESO: {row['meso']}\\n"
+        if row["poh"] > 0 or row["posh"] > 0:
+            txt += (
+                f"POH: {row['poh']} POSH: {row['posh']} "
+                f"MaxSize: {row['max_size']}\\n"
+            )
+            icon = 2
+        if row["meso"] != "NONE":
+            meso = int(row["meso"])
+            if meso < 4:
+                icon = 8
+            elif meso < 7:
+                icon = 7
+            else:
+                icon = 6
+        if row["tvs"] != "NONE":
+            icon = 5
+        res += (
+            "Icon {\n"
+            f"Index = {icon}\n"
+            f"Pos = {{{row['lat']:.4f}, {row['lon']:.4f}}}\n"
+            "Sheet = \"1\"\n"
+            f"Hover = \"{txt}\"\n"
+            "}\n"
+        )
+        res += rabbit_tracks(row, True)
+    res += "}\n"
+    return res
+
+
+def produce_content_v2(df, threshold, title, titleadd):
+    """Make the content"""
     res = (
         "Refresh: 3\n"
         f"Threshold: {threshold}\n"
@@ -323,16 +425,16 @@ def produce_content(nexrad, poh, meso, tvs, max_size):
         f'IconFile: 1, 32, 32, 16, 16, "{ICONFILE}"\n'
         'Font: 1, 11, 1, "Courier New"\n'
     )
-    for row in cursor:
-        text = (
+    for _, row in df.iterrows():
+        txt = (
             f"K{row['nexrad']} [{row['storm_id']}] {row['utc_valid']:%H:%M} "
             f"Z\\n\" \"Drct: {row['drct']} Speed: {row['sknt']} kts\\n"
         )
         icon = 9
         if row["tvs"] != "NONE" or row["meso"] != "NONE":
-            text += f"TVS: {row['tvs']} MESO: {row['meso']}\\n"
+            txt += f"TVS: {row['tvs']} MESO: {row['meso']}\\n"
         if row["poh"] > 0 or row["posh"] > 0:
-            text += (
+            txt += (
                 f"POH: {row['poh']} POSH: {row['posh']} "
                 f"MaxSize: {row['max_size']}\\n"
             )
@@ -350,11 +452,10 @@ def produce_content(nexrad, poh, meso, tvs, max_size):
         res += (
             f"Object: {row['lat']:.4f},{row['lon']:.4f}\n"
             "Threshold: 999\n"
-            f'Icon: 0,0,0,1,{icon},"{text}"\n'
+            f'Icon: 0,0,0,1,{icon},"{txt}"\n'
             "END:\n"
         )
-        res += rabbit_tracks(row)
-    pgconn.close()
+        res += rabbit_tracks(row, False)
     return res
 
 
@@ -373,11 +474,12 @@ def application(environ, start_response):
     meso = float(environ.get("meso", -1))
     tvs = "tvs" in environ
     max_size = float(environ.get("max_size", 0))
-    mckey = f"/request/grx/i3attr|{nexrad}|{poh}|{meso}|{tvs}|{max_size}"
+    v3 = environ.get("version", "").startswith("3.")
+    mckey = f"/request/grx/i3attr|{nexrad}|{poh}|{meso}|{tvs}|{max_size}|{v3}"
     mc = Client("iem-memcached:11211")
     res = mc.get(mckey)
     if not res:
-        res = produce_content(nexrad, poh, meso, tvs, max_size)
+        res = produce_content(nexrad, poh, meso, tvs, max_size, v3)
         mc.set(mckey, res, 60)
     else:
         res = res.decode("utf-8")
