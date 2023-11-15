@@ -13,6 +13,8 @@ def init_year(ts):
     """
     Create a new NetCDF file for a year of our specification!
     """
+    #  wget -O /tmp/wrfconstants_usgs404.nc
+    # https://data.rda.ucar.edu/ds559.0/INVARIANT/wrfconstants_usgs404.nc
     tplnc = ncopen("/tmp/wrfconstants_usgs404.nc")
 
     ncfn = f"/mesonet/data/conus404/{ts.year}_hourly.nc"
@@ -33,8 +35,8 @@ def init_year(ts):
     nc.comment = "No Comment at this time"
 
     # Setup Dimensions
-    nc.createDimension("lat", tplnc.dimensions["south_north"].size)
-    nc.createDimension("lon", tplnc.dimensions["west_east"].size)
+    nc.createDimension("south_north", tplnc.dimensions["south_north"].size)
+    nc.createDimension("west_east", tplnc.dimensions["west_east"].size)
     ts2 = datetime.datetime(ts.year + 1, 1, 1)
     days = (ts2 - ts).days
     LOG.info("Year %s has %s days", ts.year, days)
@@ -48,14 +50,14 @@ def init_year(ts):
     ncv[:] = tplnc.variables["ZS"][:]
 
     # Setup Coordinate Variables
-    lat = nc.createVariable("lat", float, ("lat", "lon"))
+    lat = nc.createVariable("lat", float, ("south_north", "west_east"))
     lat.units = "degrees_north"
     lat.long_name = "Latitude"
     lat.standard_name = "latitude"
     lat.axis = "Y"
     lat[:] = tplnc.variables["XLAT"][:]
 
-    lon = nc.createVariable("lon", float, ("lat", "lon"))
+    lon = nc.createVariable("lon", float, ("south_north", "west_east"))
     lon.units = "degrees_east"
     lon.long_name = "Longitude"
     lon.standard_name = "longitude"
@@ -72,7 +74,10 @@ def init_year(ts):
 
     # 0->65535 `T2`
     tmpk = nc.createVariable(
-        "tmpk", np.uint16, ("time", "lat", "lon"), fill_value=65535
+        "tmpk",
+        np.uint16,
+        ("time", "south_north", "west_east"),
+        fill_value=65535,
     )
     tmpk.units = "K"
     tmpk.scale_factor = 0.01
@@ -82,7 +87,10 @@ def init_year(ts):
 
     # 0->65535  0 to 655.35 `TD2`
     dwpk = nc.createVariable(
-        "dwpk", np.uint16, ("time", "lat", "lon"), fill_value=65335
+        "dwpk",
+        np.uint16,
+        ("time", "south_north", "west_east"),
+        fill_value=65335,
     )
     dwpk.units = "K"
     dwpk.scale_factor = 0.01
@@ -93,7 +101,10 @@ def init_year(ts):
     # NOTE: we need to store negative numbers here, gasp
     # -32768 to 32767 so -98 to 98 mps `U10`
     uwnd = nc.createVariable(
-        "uwnd", np.int16, ("time", "lat", "lon"), fill_value=32767
+        "uwnd",
+        np.int16,
+        ("time", "south_north", "west_east"),
+        fill_value=32767,
     )
     uwnd.scale_factor = 0.003
     uwnd.units = "meters per second"
@@ -104,7 +115,10 @@ def init_year(ts):
     # NOTE: we need to store negative numbers here, gasp
     # -32768 to 32767 so -98 to 98 mps `V10`
     vwnd = nc.createVariable(
-        "vwnd", np.int16, ("time", "lat", "lon"), fill_value=32767
+        "vwnd",
+        np.int16,
+        ("time", "south_north", "west_east"),
+        fill_value=32767,
     )
     vwnd.scale_factor = 0.003
     vwnd.units = "meters per second"
@@ -114,7 +128,10 @@ def init_year(ts):
 
     # 0->65535  0 to 327.675 `PREC_ACC_NC`
     p01m = nc.createVariable(
-        "p01m", np.uint16, ("time", "lat", "lon"), fill_value=65535
+        "p01m",
+        np.uint16,
+        ("time", "south_north", "west_east"),
+        fill_value=65535,
     )
     p01m.units = "mm"
     p01m.scale_factor = 0.005
@@ -126,7 +143,7 @@ def init_year(ts):
     # NOTE: Condensation is + and Evapration is -
     # -128 to 127 for -25 to 25 `ACETLSM`
     ncv = nc.createVariable(
-        "evap", np.int8, ("time", "lat", "lon"), fill_value=127
+        "evap", np.int8, ("time", "south_north", "west_east"), fill_value=127
     )
     ncv.units = "mm"
     ncv.scale_factor = 0.4
@@ -137,7 +154,10 @@ def init_year(ts):
 
     # 0 -> 65535 so 0 to 1966 `ACSWDNLSM`
     ncv = nc.createVariable(
-        "rsds", np.uint16, ("time", "lat", "lon"), fill_value=65535
+        "rsds",
+        np.uint16,
+        ("time", "south_north", "west_east"),
+        fill_value=65535,
     )
     ncv.units = "W m-2"
     ncv.scale_factor = 0.03
@@ -150,7 +170,7 @@ def init_year(ts):
     ncv = nc.createVariable(
         "soilt",
         np.uint8,
-        ("time", "soil_level", "lat", "lon"),
+        ("time", "soil_level", "south_north", "west_east"),
         fill_value=255,
     )
     ncv.units = "K"
@@ -164,7 +184,7 @@ def init_year(ts):
     ncv = nc.createVariable(
         "soilm",
         np.uint8,
-        ("time", "soil_level", "lat", "lon"),
+        ("time", "soil_level", "south_north", "west_east"),
         fill_value=255,
     )
     ncv.units = "m^3 m^-3"
