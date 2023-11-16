@@ -5,14 +5,19 @@ bit of a work in progress yet, but will be added to as interest is shown!
 
 import pandas as pd
 from pyiem.exceptions import NoDataFound
-from pyiem.plot import MapPlot
+from pyiem.plot import MapPlot, centered_bins, pretty_bins
 from pyiem.util import get_autoplot_context, get_sqlalchemy_conn, utc
 from sqlalchemy import text
 
 PDICT = {
     "corn": "Corn Grain",
+    "soybeans": "Soybeans",
 }
 PDICT2 = {"yes": "Label counties with values", "no": "Don't show values "}
+PDICT3 = {
+    "departure": "Yield Departure from previous 10 year average",
+    "value": "Yield",
+}
 
 
 def get_description():
@@ -34,6 +39,20 @@ def get_description():
         },
         {
             "type": "select",
+            "options": PDICT,
+            "default": "corn",
+            "name": "crop",
+            "label": "Select Crop",
+        },
+        {
+            "type": "select",
+            "options": PDICT3,
+            "default": "departure",
+            "name": "var",
+            "label": "Select variable to plot",
+        },
+        {
+            "type": "select",
             "label": "Label Values?",
             "default": "yes",
             "options": PDICT2,
@@ -48,6 +67,10 @@ def plotter(fdict):
     """Go"""
     ctx = get_autoplot_context(fdict, get_description())
     year1 = max(ctx["year"] - 10, 1981)
+    params = {"y1": year1, "year": ctx["year"], "crop": ctx["crop"].upper()}
+    params["util"] = "GRAIN"
+    if ctx["crop"] == "soybeans":
+        params["util"] = "ALL UTILIZATION PRACTICES"
     with get_sqlalchemy_conn("coop") as conn:
         df = pd.read_sql(
             text(
@@ -56,8 +79,8 @@ def plotter(fdict):
                 select year, state_alpha || 'C' || county_ansi as ugc,
                 avg(num_value) as num_value from
                 nass_quickstats where county_ansi is not null and
-                statisticcat_desc = 'YIELD' and commodity_desc = 'CORN' and
-                util_practice_desc = 'GRAIN' and year >= :y1 and year <= :year
+                statisticcat_desc = 'YIELD' and commodity_desc = :crop and
+                util_practice_desc = :util and year >= :y1 and year <= :year
                 GROUP by year, ugc),
             agg as (
                 select ugc, count(*), avg(num_value) from data
@@ -70,23 +93,27 @@ def plotter(fdict):
             """
             ),
             conn,
-            params={"y1": year1, "year": ctx["year"]},
+            params=params,
             index_col="ugc",
         )
     if df.empty:
         raise NoDataFound("Could not find any data, sorry.")
+    title = "Yield"
+    col = "num_value"
+    bins = pretty_bins(df[col].min(), df[col].max())
+    if ctx["var"] == "departure":
+        title = f"Yield Departure from {year1}-{ctx['year'] - 1} Average"
+        col = "delta"
+        bins = centered_bins(max(df[col].abs().max(), 50))
     mp = MapPlot(
         apctx=ctx,
-        title=(
-            f"USDA NASS {ctx['year']} Corn Yield Deparature from "
-            f"{year1}-{ctx['year'] - 1} Average"
-        ),
+        title=f"USDA NASS {ctx['crop'].capitalize()} {ctx['year']} {title}",
         stateborderwidth=3,
         nocaption=True,
     )
     mp.fill_ugcs(
-        df["delta"].to_dict(),
-        bins=range(-50, 51, 10),
+        df[col].to_dict(),
+        bins=bins,
         cmap=ctx["cmap"],
         units="bu/ac",
         ilabel=ctx["ilabel"] == "yes",
