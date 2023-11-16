@@ -34,7 +34,7 @@ def process(valid):
     lat = nc.variables["lat"][:]
     lon = nc.variables["lon"][:]
     dist = ((lat - 42.03) ** 2 + (lon - -93.65) ** 2) ** 0.5
-    j, i = np.unravel_index(np.argmin(dist), dist.shape)
+    j, i = np.unravel_index(np.argmin(dist), dist.shape)  # (589, 769)
 
     # Radiation is a delta, so we need the previous hour too
     prev = valid - datetime.timedelta(hours=1)
