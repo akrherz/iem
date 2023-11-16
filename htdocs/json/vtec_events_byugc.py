@@ -83,7 +83,8 @@ def as_json(df):
 
 def parse_date(val):
     """convert string to date."""
-    return datetime.datetime.strptime(val, "%Y/%m/%d")
+    fmt = "%Y/%m/%d" if "/" in val else "%Y-%m-%d"
+    return datetime.datetime.strptime(val, fmt)
 
 
 @iemapp()
@@ -91,8 +92,8 @@ def application(environ, start_response):
     """Answer request."""
     ugc = environ.get("ugc", "IAC001")[:6]
     try:
-        sdate = parse_date(environ.get("sdate", "1986/1/1"))
-        edate = parse_date(environ.get("edate", "2099/1/1"))
+        sdate = parse_date(environ.get("sdate", "1986-01-01"))
+        edate = parse_date(environ.get("edate", "2099-01-01"))
     except Exception as exp:
         raise IncompleteWebRequest(str(exp))
     cb = environ.get("callback", None)

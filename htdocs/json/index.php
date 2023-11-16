@@ -508,8 +508,8 @@ $services[] = array(
     "example" => array(
         "{latitude}" => "42.5",
         "{longitude}" => "-95.0",
-        "{sdate}" => "2015/06/01",
-        "{edate}" => "2015/07/01",
+        "{sdate}" => "2015-06-01",
+        "{edate}" => "2015-07-01",
     )
 );
 
@@ -587,14 +587,14 @@ $services[] = array(
           of product issuance is used for the date filtering.",
     "vars" => array(
         "ugc" => "Five character UGC identifier used by the NWS",
-        "sdate" => "YYYY/mm/dd Start Date (UTC)",
-        "edate" => "YYYY/mm/dd End Date (UTC)",
+        "sdate" => "YYYY-mm-dd Start Date (UTC)",
+        "edate" => "YYYY-mm-dd End Date (UTC)",
         "fmt" => "(optional) Format to download as: json (default) or xlsx"
     ),
     "example" => array(
         "{ugc}" => "IAC001",
-        "{sdate}" => "1990/06/01",
-        "{edate}" => "1990/07/01",
+        "{sdate}" => "1990-06-01",
+        "{edate}" => "1990-07-01",
     )
 );
 $services[] = array(

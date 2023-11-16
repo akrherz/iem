@@ -17,6 +17,7 @@ const BACKEND_EVENTS_BYUGC = '/json/vtec_events_byugc.py';
 const BACKEND_SBW_BYPOINT = '/json/sbw_by_point.py';
 const BACKEND_EVENTS = "/json/vtec_events.py";
 const BACKEND_EVENTS_BYSTATE = "/json/vtec_events_bystate.py";
+const DATE_FMT = "yy-mm-dd";
 
 const states = [["AL", "Alabama"], ["AK", "Alaska"], ["AZ", "Arizona"],
         ["AR", "Arkansas"], ["CA", "California"], ["CO", "Colorado"],
@@ -89,8 +90,8 @@ function updateTable(){
         data: {
             lat: $("#lat").val(),
             lon: $("#lon").val(),
-            sdate: $.datepicker.formatDate("yy/mm/dd", sdate1.datepicker("getDate")),
-            edate: $.datepicker.formatDate("yy/mm/dd", edate1.datepicker("getDate"))
+            sdate: $.datepicker.formatDate(DATE_FMT, sdate1.datepicker("getDate")),
+            edate: $.datepicker.formatDate(DATE_FMT, edate1.datepicker("getDate"))
         },
         url: BACKEND_SBW_BYPOINT,
         dataType: "json",
@@ -116,8 +117,8 @@ function updateTable2ByUGC(){
     $.ajax({
         data: {
             ugc: ugcSelect.val(),
-            sdate: $.datepicker.formatDate("yy/mm/dd", sdate.datepicker("getDate")),
-            edate: $.datepicker.formatDate("yy/mm/dd", edate.datepicker("getDate"))
+            sdate: $.datepicker.formatDate(DATE_FMT, sdate.datepicker("getDate")),
+            edate: $.datepicker.formatDate(DATE_FMT, edate.datepicker("getDate"))
         },
         url: BACKEND_EVENTS_BYUGC,
         dataType: "json",
@@ -142,8 +143,8 @@ function updateTable2ByPoint(){
         data: {
             lat: $("#lat2").val(),
             lon: $("#lon2").val(),
-            sdate: $.datepicker.formatDate("yy/mm/dd", sdate.datepicker("getDate")),
-            edate: $.datepicker.formatDate("yy/mm/dd", edate.datepicker("getDate"))
+            sdate: $.datepicker.formatDate(DATE_FMT, sdate.datepicker("getDate")),
+            edate: $.datepicker.formatDate(DATE_FMT, edate.datepicker("getDate"))
         },
         url: BACKEND_EVENTS_BYPOINT,
         dataType: "json",
@@ -203,14 +204,14 @@ function buildUI(){
             fmt: (btn.data("opt") == "csv") ? "csv" : "xlsx",
             lat: $("#lat").val(),
             lon: $("#lon").val(),
-            sdate: $.datepicker.formatDate("yy/mm/dd", sdate1.datepicker("getDate")),
-            edate: $.datepicker.formatDate("yy/mm/dd", edate1.datepicker("getDate"))
+            sdate: $.datepicker.formatDate(DATE_FMT, sdate1.datepicker("getDate")),
+            edate: $.datepicker.formatDate(DATE_FMT, edate1.datepicker("getDate"))
         };
         if (btn.data("table") == "2"){
             url = BACKEND_EVENTS_BYUGC;
             params.ugc = ugcSelect.val();
-            params.sdate = $.datepicker.formatDate("yy/mm/dd", sdate.datepicker("getDate"));
-            params.edate = $.datepicker.formatDate("yy/mm/dd", edate.datepicker("getDate"));
+            params.sdate = $.datepicker.formatDate(DATE_FMT, sdate.datepicker("getDate"));
+            params.edate = $.datepicker.formatDate(DATE_FMT, edate.datepicker("getDate"));
             if (table2IsByPoint) {
                 url = BACKEND_EVENTS_BYPOINT;
                 params.lon = $("#lon2").val();
@@ -250,7 +251,7 @@ function buildUI(){
     // Date pickers
     sdate = $("input[name='sdate']").datepicker({
         dateFormat:"mm/dd/yy",
-        altFormat:"yy/mm/dd",
+        altFormat:DATE_FMT,
         minDate: new Date(1986, 0, 1),
         maxDate: new Date(),
         onClose: () => {
@@ -260,7 +261,7 @@ function buildUI(){
     sdate.datepicker("setDate", new Date(1986, 0, 1));
     edate = $("input[name='edate']").datepicker({
         dateFormat:"mm/dd/yy",
-        altFormat:"yy/mm/dd",
+        altFormat:DATE_FMT,
         minDate: new Date(1986, 0, 1),
         defaultDate: +1,
         onClose: () => {
@@ -270,7 +271,7 @@ function buildUI(){
     edate.datepicker("setDate", +1);
     sdate1 = $("input[name='sdate1']").datepicker({
         dateFormat:"mm/dd/yy",
-        altFormat:"yy/mm/dd",
+        altFormat:DATE_FMT,
         minDate: new Date(2002, 0, 1),
         maxDate: new Date(),
         onClose: () => {
@@ -280,7 +281,7 @@ function buildUI(){
     sdate1.datepicker("setDate", new Date(2002, 0, 1));
     edate1 = $("input[name='edate1']").datepicker({
         dateFormat:"mm/dd/yy",
-        altFormat:"yy/mm/dd",
+        altFormat:DATE_FMT,
         minDate: new Date(2002, 0, 1),
         defaultDate: +1,
         onClose: () => {
