@@ -157,6 +157,35 @@ function hads_formatter($i, $row, $shefcols)
         $html
     );
 }
+function scan_formatter($i, $row){
+    $ts = strtotime(substr($row["local_valid"], 0, 16));
+    return sprintf(
+        "<tr style=\"background: %s;\">" .
+            "<td>%s</td><td>%s</td><td>%s</td>".
+    "<td>%s</td><td>%s</td><td>%s</td><td>%s</td><td>%s</td><td>%s</td>".
+    "<td>%s</td><td>%s</td><td>%s</td><td>%s</td><td>%s</td><td>%s</td>".
+    "<td>%s</td><td>%s</td></tr>",
+        ($i % 2 == 0) ? "#FFF" : "#EEE",
+        date("g:i A", $ts),
+        wind_formatter($row),
+        temp_formatter($row["tmpf"]),
+        temp_formatter($row["dwpf"]),
+        $row["relh"],
+        $row["srad"],
+        precip_formatter($row["phour"]),
+        $row["soilt2"],
+        $row["soilm2"],
+        $row["soilt4"],
+        $row["soilm4"],
+        $row["soilt8"],
+        $row["soilm8"],
+        $row["soilt20"],
+        $row["soilm20"],
+        $row["soilt40"],
+        $row["soilm40"],
+    );
+
+}
 $year = get_int404("year", date("Y"));
 $month = get_int404("month", date("m"));
 $day = get_int404("day", date("d"));
@@ -450,6 +479,32 @@ EOM;
     {$shefextra}
     </tr>
 EOM;
+} else if ($network == "SCAN") {
+    $header = <<<EOM
+    <tr align="center" bgcolor="#b0c4de">
+    <th rowspan="2">Time</th>
+    <th rowspan="2">Wind<br>(mph)</th>
+    <th colspan="2">Temp (&deg;F)</th>
+    <th rowspan="2">RH%</td>
+    <th rowspan="2">Solar (W/m2)</th>
+    <th rowspan="2">Precipitation (in.)</th>
+    <th colspan="2">2 Inch</th>
+    <th colspan="2">4 Inch</th>
+    <th colspan="2">8 Inch</th>
+    <th colspan="2">20 Inch</th>
+    <th colspan="2">40 Inch</th>
+    </tr>
+
+    <tr align="center" bgcolor="#b0c4de">
+    <th>Air</th>
+    <th>Dwpt</th>
+    <th>Temp</th><th>VWC</th>
+    <th>Temp</th><th>VWC</th>
+    <th>Temp</th><th>VWC</th>
+    <th>Temp</th><th>VWC</th>
+    <th>Temp</th><th>VWC</th>
+    </tr>
+EOM;
 } else {
     $header = <<<EOM
     <tr align="center" bgcolor="#b0c4de">
@@ -480,6 +535,8 @@ foreach ($data as $bogus => $row) {
         $table .= asos_formatter($i, $row);
     } else if (preg_match("/DCP|COOP/", $network)) {
         $table .= hads_formatter($i, $row, $shefcols);
+    } else if ($network == "SCAN") {
+        $table .= scan_formatter($i, $row);
     } else {
         $table .= formatter($i, $row);
     }
