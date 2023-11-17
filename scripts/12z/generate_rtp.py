@@ -176,4 +176,5 @@ def main(job):
 
 
 if __name__ == "__main__":
-    [main(job) for job in JOBS]
+    for _job in JOBS:
+        main(_job)
