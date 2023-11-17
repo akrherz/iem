@@ -8,6 +8,7 @@ from io import BytesIO, StringIO
 
 import numpy as np
 import pandas as pd
+from pyiem.exceptions import IncompleteWebRequest
 from pyiem.nws.vtec import VTEC_PHENOMENA, VTEC_SIGNIFICANCE, get_ps_string
 from pyiem.util import get_sqlalchemy_conn, utc
 from pyiem.webutil import iemapp
@@ -121,6 +122,12 @@ def try_valid(ctx, fields):
     ctx["valid"] = utc(ts.year, ts.month, ts.day, ts.hour, ts.minute)
 
 
+def parse_date(val):
+    """convert string to date."""
+    fmt = "%Y/%m/%d" if "/" in val else "%Y-%m-%d"
+    return datetime.datetime.strptime(val, fmt)
+
+
 @iemapp()
 def application(environ, start_response):
     """Answer request."""
@@ -128,16 +135,10 @@ def application(environ, start_response):
     try:
         ctx["lat"] = float(environ.get("lat", 41.99))
         ctx["lon"] = float(environ.get("lon", -92.0))
-        ctx["sdate"] = datetime.datetime.strptime(
-            environ.get("sdate", "2002/1/1"), "%Y/%m/%d"
-        )
-        ctx["edate"] = datetime.datetime.strptime(
-            environ.get("edate", "2099/1/1"), "%Y/%m/%d"
-        )
+        ctx["sdate"] = parse_date(environ.get("sdate", "2002-01-01"))
+        ctx["edate"] = parse_date(environ.get("edate", "2099-01-01"))
     except ValueError:
-        headers = [("Content-type", "text/plain")]
-        start_response("404 File Not Found", headers)
-        return [b"Failed to parse inputs."]
+        raise IncompleteWebRequest("Invalid Parameters")
 
     fmt = environ.get("fmt", "json")
     try:
