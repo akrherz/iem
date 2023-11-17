@@ -28,6 +28,14 @@ $now = new DateTime(sprintf("%s-%s-%s 12:00", $year, $month, $day), new DateTime
 $wfo = isset($_REQUEST["wfo"]) ? xssafe($_REQUEST["wfo"]) : "DMX";
 $w = isset($_REQUEST["w"]) ? xssafe($_REQUEST["w"]) : "all";
 $state = isset($_REQUEST["state"]) ? xssafe($_REQUEST["state"]) : "IA";
+// side logic for when $w is not set
+if (!isset($_REQUEST["w"])){
+    if (isset($_REQUEST["wfo"])){
+        $w = "wfo";
+    } else if (isset($_REQUEST["state"])){
+        $w = "state";
+    }
+}
 
 $t->title = "NWS Six Hour Snowfall Reports";
 $t->refresh = 360;

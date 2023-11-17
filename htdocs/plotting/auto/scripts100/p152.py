@@ -1,6 +1,9 @@
 """
 This map produces an analysis of change in
-the number of days for the growing season.
+the number of days for the growing season. This is defined by the period
+between the last spring low temperature below 32 degrees and the first fall
+date below 32 degrees.  This analysis tends to be very noisy, so picking
+longer periods of time for each period will help some.
 """
 
 import pandas as pd
@@ -8,6 +11,7 @@ from pyiem.exceptions import NoDataFound
 from pyiem.plot import MapPlot, centered_bins, get_cmap
 from pyiem.reference import SECTORS_NAME
 from pyiem.util import get_autoplot_context, get_sqlalchemy_conn
+from sqlalchemy import text
 
 PDICT = {"state": "State Level Maps (select state)"}
 PDICT.update(SECTORS_NAME)
@@ -100,7 +104,8 @@ def plotter(fdict):
         table = f"alldata_{state}"
     with get_sqlalchemy_conn("coop") as conn:
         df = pd.read_sql(
-            f"""
+            text(
+                f"""
         WITH season1 as (
             SELECT station, year,
             min(case when month > 7 and low < 32 then
@@ -108,7 +113,7 @@ def plotter(fdict):
             max(case when month < 7 and low < 32 then
                 extract(doy from day) else 0 end) as last_freeze
             from {table} WHERE
-            year >= %s and year <= %s GROUP by station, year),
+            year >= :p1syear and year <= :p1eyear GROUP by station, year),
         season2 as (
             SELECT station, year,
             min(case when month > 7 and low < 32 then
@@ -116,22 +121,39 @@ def plotter(fdict):
             max(case when month < 7 and low < 32 then
                 extract(doy from day) else 0 end) as last_freeze
             from {table} WHERE
-            year >= %s and year <= %s GROUP by station, year),
+            year >= :p2syear and year <= :p2eyear GROUP by station, year),
+        agg1 as (
+            SELECT station as p1station, avg(first_freeze) as p1_first_fall,
+            avg(last_freeze) as p1_last_spring,
+            count(first_freeze) as p1_count
+            from season1 GROUP by station),
+        agg2 as (
+            SELECT station as p2station, avg(first_freeze) as p2_first_fall,
+            avg(last_freeze) as p2_last_spring,
+            count(first_freeze) as p2_count
+            from season2 GROUP by station),
         agg as (
-            SELECT p1.station, avg(p1.first_freeze) as p1_first_fall,
-            avg(p1.last_freeze) as p1_last_spring,
-            avg(p2.first_freeze) as p2_first_fall,
-            avg(p2.last_freeze) as p2_last_spring
-            from season1 as p1 JOIN season2 as p2 on (p1.station = p2.station)
-            GROUP by p1.station)
-
-        SELECT station, ST_X(geom) as lon, ST_Y(geom) as lat,
+            SELECT a.p1station as station, p1_first_fall, p1_last_spring,
+            p2_first_fall, p2_last_spring, p1_count, p2_count
+            from agg1 a JOIN agg2 b on (a.p1station = b.p2station) WHERE
+            p1_count > :p1quorum and p2_count > :p2quorum
+        )
+        SELECT ST_X(geom) as lon, ST_Y(geom) as lat,
         d.* from agg d JOIN stations t ON (d.station = t.id)
         WHERE t.network ~* 'CLIMATE'
-        and substr(station, 3, 1) != 'C' and substr(station, 3, 4) != '0000'
-        """,
+        and substr(station, 3, 1) not in ('C', 'D')
+        and substr(station, 3, 4) != '0000'
+        """
+            ),
             conn,
-            params=(p1syear, p1eyear, p2syear, p2eyear),
+            params={
+                "p1syear": p1syear,
+                "p1eyear": p1eyear,
+                "p2syear": p2syear,
+                "p2eyear": p2eyear,
+                "p1quorum": (p1eyear - p1syear) - 2,
+                "p2quorum": (p2eyear - p2syear) - 2,
+            },
             index_col="station",
         )
     if df.empty:
@@ -143,7 +165,7 @@ def plotter(fdict):
     df["fall_delta"] = df["p2_first_fall"] - df["p1_first_fall"]
     # Reindex so that most extreme values are first
     df = df.reindex(
-        df[varname + "_delta"].abs().sort_values(ascending=False).index
+        df[f"{varname}_delta"].abs().sort_values(ascending=False).index
     )
 
     title = PDICT3[varname]
