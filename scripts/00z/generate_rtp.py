@@ -26,7 +26,7 @@ JOBS = [
     },
     {
         "filename": "awos_rtp_00z_dvn.shef",
-        "networks": "IA_ASOS ISUSM IA_DCP IA_RWIS IL_RWIS IL_ASOS".split(),
+        "networks": "IL_ASOS IA_ASOS ISUSM IA_DCP IL_RWIS IA_RWIS".split(),
         "precip_works": ["IA_ASOS", "IL_ASOS", "ISUSM"],
         "limiter": "wfo = :wfo",
         "filter": ["wfo", "DVN"],

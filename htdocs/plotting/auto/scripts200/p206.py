@@ -141,7 +141,7 @@ def get_df(ctx, buf=2.25):
                 select id, st_x(geom) as lon, st_y(geom) as lat,
                 state, wfo, iemid, country, geom from stations
                 where network ~* 'ASOS' and
-                ST_contains(ST_geomfromtext(%s), geom)
+                ST_contains(ST_GeomFromEWKT(%s), geom)
             )
             SELECT s.day, s.max_tmpf, s.min_tmpf, s.max_dwpf, s.min_dwpf,
             s.min_rh, s.max_rh, s.min_feel, s.max_feel,
