@@ -12,7 +12,13 @@ import datetime
 import numpy as np
 from pyiem.exceptions import NoDataFound
 from pyiem.plot import figure_axes
-from pyiem.util import get_autoplot_context, get_dbconn
+from pyiem.util import get_autoplot_context, get_dbconnc
+
+PDICT = {
+    "manual": "Select comparison month manually",
+    "high": "Based on effective date, find warmest same month on record",
+    "low": "Based on effective date, find coldest same month on record",
+}
 
 
 def get_description():
@@ -28,6 +34,13 @@ def get_description():
             network="IACLIMATE",
             label="Select Station:",
         ),
+        {
+            "type": "select",
+            "name": "compare",
+            "default": "manual",
+            "label": "How to compare?",
+            "options": PDICT,
+        },
         dict(
             type="year",
             name="year",
@@ -52,16 +65,35 @@ def get_description():
     return desc
 
 
+def compute_compare_month(ctx, cursor):
+    """Figure out what the user wants."""
+    year = ctx["year"]
+    month = ctx["month"]
+    compare = ctx["compare"]
+    if compare == "manual":
+        return year, month
+    station = ctx["station"]
+    effective_date = ctx["date"]
+    cursor.execute(
+        f"""
+        select year, avg((high+low)/2) from alldata
+        where station = %s and month = %s and year != %s
+        GROUP by year
+        ORDER by avg {'desc' if compare == 'high' else 'asc'} LIMIT 1
+        """,
+        (station, effective_date.month, effective_date.year),
+    )
+    return cursor.fetchone()["year"], effective_date.month
+
+
 def plotter(fdict):
     """Go"""
-    pgconn = get_dbconn("coop")
-    cursor = pgconn.cursor()
+    pgconn, cursor = get_dbconnc("coop")
 
     ctx = get_autoplot_context(fdict, get_description())
     station = ctx["station"]
-    year = ctx["year"]
-    month = ctx["month"]
     effective_date = ctx["date"]
+    year, month = compute_compare_month(ctx, cursor)
 
     oldmonth = datetime.date(year, month, 1)
     sts = datetime.date(effective_date.year, effective_date.month, 1)
@@ -70,21 +102,22 @@ def plotter(fdict):
 
     # beat month
     cursor.execute(
-        "SELECT extract(day from day), (high+low)/2. from "
+        "SELECT extract(day from day), (high+low)/2. as t from "
         "alldata WHERE station = %s and year = %s and month = %s "
         "ORDER by day ASC",
         (station, year, month),
     )
     if cursor.rowcount == 0:
+        pgconn.close()
         raise NoDataFound("No Data Found.")
 
     prevmonth = []
     for row in cursor:
-        prevmonth.append(float(row[1]))
+        prevmonth.append(float(row["t"]))
 
     # build history
     cursor.execute(
-        "SELECT year, day, (high+low)/2. from alldata "
+        "SELECT year, day, (high+low)/2. as t from alldata "
         "WHERE station = %s and month = %s and extract(day from day) <= %s "
         "and day < %s ORDER by day ASC",
         (station, effective_date.month, days, ets),
@@ -92,10 +125,12 @@ def plotter(fdict):
 
     for i, row in enumerate(cursor):
         if i == 0:
-            baseyear = row[0]
-            data = np.ma.ones((effective_date.year - row[0] + 1, days)) * -99
-        data[row[0] - baseyear, row[1].day - 1] = row[2]
-
+            baseyear = row["year"]
+            data = (
+                np.ma.ones((effective_date.year - row["year"] + 1, days)) * -99
+            )
+        data[row["year"] - baseyear, row["day"].day - 1] = row["t"]
+    pgconn.close()
     # Do we have data for the effective_date ?
     pos = (
         effective_date.day
