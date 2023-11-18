@@ -33,7 +33,7 @@ $t->title = "NWS Warning Search by Point or County/Zone";
 
 $t->content = <<<EOF
 <p>This application allows you to search for National Weather Service Watch,
-Warning, and Advisories.  There are currently two options:
+Warning, and Advisories.  There are currently three options:
 <ul>
     <li><a href="#bypoint">1. Search for Storm Based Warnings by Point</a></li>
     <li><a href="#byugc">2. Search of Watch/Warning/Advisories by County/Zone or by Point</a></li>

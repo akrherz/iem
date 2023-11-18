@@ -12,6 +12,8 @@ from zoneinfo import ZoneInfo
 import numpy as np
 import pygrib
 import pyproj
+import xarray as xr
+from affine import Affine
 from pyiem import iemre
 from pyiem.util import get_dbconn, logger, ncopen, utc
 from scipy.interpolate import NearestNDInterpolator
@@ -105,8 +107,6 @@ def do_hrrr(ts):
         "+units=m +lat_2=38.5 +lat_1=38.5 +lat_0=38.5"
     )
     total = None
-    xaxis = None
-    yaxis = None
     # So IEMRE is storing data from coast to coast, so we should be
     # aggressive about running for an entire calendar date
     for hr in range(24):
@@ -136,12 +136,8 @@ def do_hrrr(ts):
                         lat1 = g["latitudeOfFirstGridPointInDegrees"]
                         lon1 = g["longitudeOfFirstGridPointInDegrees"]
                         llcrnrx, llcrnry = LCC(lon1, lat1)
-                        nx = g["Nx"]
-                        ny = g["Ny"]
                         dx = g["DxInMetres"]
                         dy = g["DyInMetres"]
-                        xaxis = llcrnrx + dx * np.arange(nx)
-                        yaxis = llcrnry + dy * np.arange(ny)
                     if subtotal is None:
                         subtotal = g.values
                     else:
@@ -179,12 +175,8 @@ def do_hrrr(ts):
             lat1 = g["latitudeOfFirstGridPointInDegrees"]
             lon1 = g["longitudeOfFirstGridPointInDegrees"]
             llcrnrx, llcrnry = LCC(lon1, lat1)
-            nx = g["Nx"]
-            ny = g["Ny"]
             dx = g["DxInMetres"]
             dy = g["DyInMetres"]
-            xaxis = llcrnrx + dx * np.arange(nx)
-            yaxis = llcrnry + dy * np.arange(ny)
         else:
             total += g.values
 
@@ -194,18 +186,16 @@ def do_hrrr(ts):
 
     # We wanna store as W m-2, so we just average out the data by hour
     total = total / 24.0
+    affine_in = Affine(dx, 0.0, llcrnrx, 0.0, dy, llcrnry)
 
-    ds = iemre.get_grids(ts.date(), varnames="rsds")
-    for i, lon in enumerate(iemre.XAXIS):
-        for j, lat in enumerate(iemre.YAXIS):
-            (x, y) = LCC(lon, lat)
-            i2 = np.digitize([x], xaxis)[0]
-            j2 = np.digitize([y], yaxis)[0]
-            try:
-                ds["rsds"].values[j, i] = total[j2, i2]
-            except IndexError:
-                continue
-
+    ds = xr.Dataset(
+        {
+            "rsds": xr.DataArray(
+                iemre.reproject2iemre(total, affine_in, LCC.crs),
+                dims=("y", "x"),
+            )
+        }
+    )
     iemre.set_grids(ts.date(), ds)
     subprocess.call(
         ["python", "db_to_netcdf.py", f"{ts:%Y}", f"{ts:%m}", f"{ts:%d}"]

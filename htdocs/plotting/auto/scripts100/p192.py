@@ -97,7 +97,7 @@ def get_df(ctx, bnds, buf=2.25):
                 select id, st_x(geom) as lon, st_y(geom) as lat,
                 state, wfo from stations
                 where network ~* 'ASOS' and
-                ST_contains(ST_geomfromtext(%s), geom)
+                ST_contains(ST_GeomFromEWKT(%s), geom)
             )
             SELECT station, vsby, tmpf, dwpf, sknt, state, wfo, lat, lon, relh,
             abs(extract(epoch from (%s - valid))) as tdiff from
@@ -125,7 +125,7 @@ def get_df(ctx, bnds, buf=2.25):
         WHERE s.network ~* 'ASOS' and s.country = 'US' and
         valid + '80 minutes'::interval > now() and
         vsby >= 0 and vsby <= 10 and
-        ST_contains(ST_geomfromtext(%s), geom)
+        ST_contains(ST_GeomFromEWKT(%s), geom)
             """,
                 conn,
                 params=(giswkt,),
