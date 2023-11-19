@@ -12,7 +12,7 @@ from PIL import Image, ImageDraw
 from pyiem.util import get_dbconn, get_properties
 from pyiem.webutil import iemapp
 from pymemcache.client import Client
-from requests.auth import HTTPDigestAuth
+from requests.auth import HTTPBasicAuth, HTTPDigestAuth
 
 
 def fetch(cid):
@@ -49,7 +49,15 @@ def fetch(cid):
     if is_vapix:
         uribase = "http://%s:%s/axis-cgi/jpg/image.cgi"
     uri = uribase % (ip if ip is not None else fqdn, port)
-    req = requests.get(uri, auth=HTTPDigestAuth(user, passwd), timeout=15)
+    ham = (
+        HTTPBasicAuth
+        if cid
+        in [
+            "KCRG-010",
+        ]
+        else HTTPDigestAuth
+    )
+    req = requests.get(uri, auth=ham(user, passwd), timeout=15)
     if req.status_code != 200:
         return None
     image = Image.open(BytesIO(req.content))
