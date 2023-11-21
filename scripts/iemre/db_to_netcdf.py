@@ -8,11 +8,14 @@ see: akrherz/iem#199
 """
 import datetime
 import sys
+import warnings
 
 import numpy as np
 from pyiem import iemre
 from pyiem.util import logger, ncopen, utc
 
+# We are going from float64 to uint16, so this appears to be unavoidable
+warnings.simplefilter("ignore", RuntimeWarning)
 LOG = logger()
 
 
@@ -32,7 +35,7 @@ def main(argv):
             if vname not in nc.variables:
                 continue
             # Careful here, ds could contain NaN values
-            nc.variables[vname][idx, :, :] = np.ma.array(
+            nc.variables[vname][idx] = np.ma.array(
                 ds[vname].values, mask=np.isnan(ds[vname].values)
             )
 
