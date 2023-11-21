@@ -9,9 +9,10 @@ The plot
 only considers issuance date. When plotting for a state, an event is
 defined on a per forecast office basis.
 
-<p><strong>Updated 4 Jan 2022:</strong> The week aggregation was
-previously done by iso-week, which is sub-optimal.  The new aggregation
-for week is by day of the year divided by 7.
+<p><strong>Updated 21 Nov 2023:</strong> An experimental attempt is now
+included on the plot to estimate the climatological favored period for the
+given event type.  This algorithm is experimental and attempts to make life
+choices on if it thinks the climatology is bimodal or not.  Feedback welcome!
 """
 import calendar
 
@@ -97,6 +98,66 @@ def get_description():
     return desc
 
 
+def compute_plot_climo(ax, df):
+    """Figure out the climatology."""
+    # Our data frame is by week of the year
+    # Our test for bimodal is if the top 5 weeks have a intermediate
+    # value less than 50% of the top week
+    df2 = df.sort_values(by="count", ascending=False).head(5)
+    df3 = df.loc[df2.index.min() : df2.index.max() + 1]
+    bimodal = df3["count"].max() > (df3["count"].min() * 2)
+
+    # Figure out the indicies that should contain our climos
+    idx1 = df2.index[0]
+    idx2 = None
+    if bimodal:
+        # pick the furthest week from the top week
+        maxdist = 0
+        for idx in df2.index:
+            dist = abs(idx - idx1)
+            if dist > maxdist:
+                maxdist = dist
+                idx2 = idx
+    # apply a 80/20 rule, attempting to minimize number of weeks to find
+    # 80% of the events
+    threshold = df["count"].sum() * (0.3 if bimodal else 0.8)
+    ymax = df["count"].max()
+    hits = 0
+    for weeks in range(4, 44):
+        rolsum = df["count"].rolling(window=weeks, center=False).sum()
+        if rolsum.max() < threshold:
+            continue
+        df2 = df[rolsum == rolsum.max()]
+        # clear some space to plot the climo
+        ax.set_ylim(0, ymax * 1.3)
+        left = df2.index[0] - (weeks * 7)
+        if hits == 1 and bimodal and (left > idx2 or idx2 > df2.index[0]):
+            continue
+        if idx2 is not None and hits == 1 and left <= idx1 <= df2.index[0]:
+            return
+        ax.barh(
+            ymax * 1.1,
+            weeks * 7,
+            left=left,
+            height=(ymax * 0.12),
+            color="tan",
+            label=None if hits > 0 else "Favored Season",
+        )
+        ax.text(
+            left + (weeks * 7) / 2.0,
+            ymax * 1.1,
+            f"{weeks} Weeks\n"
+            f"{rolsum.max() / df['count'].sum() * 100.:.0f}% Events",
+            ha="center",
+            va="center",
+        )
+        if hits == 0:
+            ax.legend(loc=(0.8, 1.01))
+        hits += 1
+        if not bimodal or hits == 2:
+            return
+
+
 def plotter(fdict):
     """Go"""
     ctx = get_autoplot_context(fdict, get_description())
@@ -160,6 +221,13 @@ def plotter(fdict):
         )
         .copy()
     )
+    # We need to fill in missing values
+    if ctx["how"] == "doy":
+        gdf = gdf.reindex(range(1, 367), fill_value=0)
+    elif ctx["how"] == "week":
+        gdf = gdf.reindex(range(0, 53), fill_value=0)
+    elif ctx["how"] == "month":
+        gdf = gdf.reindex(range(1, 13), fill_value=0)
     # Duplicate gdf so that we can plot centered on 1 July
     gdf2 = (
         gdf.reset_index()
@@ -183,6 +251,11 @@ def plotter(fdict):
         xticks = range(1, 25)
         xticklabels = calendar.month_abbr[1:] + calendar.month_abbr[1:]
 
+    if ctx["how"] == "week":
+        if ctx["start"] == "jul":
+            compute_plot_climo(ax[1], gdf.iloc[26:79])  # only send 1 year
+        else:
+            compute_plot_climo(ax[1], gdf.iloc[:53])  # only send 1 year
     ax[0].bar(gdf.index.values, gdf["years"], width=width)
     ax[0].grid()
     ax[0].set_ylabel("Years with 1+ Event")
