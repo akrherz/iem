@@ -462,6 +462,7 @@ def generate_form(apid, fdict, headers, cookies):
         "headextra": "",
         "dataextra": "",
         "issues": "",
+        "frontend": None,
     }
     if apid == 0:
         return res

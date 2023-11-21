@@ -54,11 +54,13 @@ def main(job):
         data = pd.read_sql(
             text(
                 f"""
-        SELECT id, round(max(tmpf)::numeric,0) as max_tmpf,
+        SELECT id, round(
+            max(greatest(max_tmpf_6hr, tmpf))::numeric,0) as max_tmpf,
         count(tmpf) as obs FROM current_log c, stations t
         WHERE t.iemid = c.iemid and t.network = ANY(:networks) and
         valid >= :yesterday6z and valid < :today6z and {job['limiter']}
-        and tmpf > -99 and not id = ANY(:badtemps) GROUP by id
+        and tmpf > -99 and not id = ANY(:badtemps)
+        GROUP by id
                  """
             ),
             conn,
@@ -69,7 +71,8 @@ def main(job):
         lows = pd.read_sql(
             text(
                 f"""
-        SELECT id, round(min(tmpf)::numeric,0) as min_tmpf,
+        SELECT id, round(
+            min(least(min_tmpf_6hr, tmpf))::numeric,0) as min_tmpf,
         count(tmpf) as obs FROM
         current_log c JOIN stations t on (t.iemid = c.iemid)
         WHERE t.network = ANY(:networks) and valid >= :today0z
@@ -129,7 +132,7 @@ def main(job):
                 f":   06Z to 06Z HIGH TEMPERATURE FOR {tt}\n"
                 ":   00Z TO 12Z TODAY LOW TEMPERATURE\n"
                 ":   12Z YESTERDAY TO 12Z TODAY RAINFALL\n"
-                ":   ...BASED ON REPORTED OBS...\n"
+                ":   ...BASED ON REPORTED OBS AND ANY 6HR MAX MIN...\n"
             )
             for sid in ids:
                 if (

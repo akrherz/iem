@@ -54,7 +54,8 @@ def main(job):
         data = pd.read_sql(
             text(
                 f"""
-        SELECT id, round(max(tmpf)::numeric,0) as max_tmpf,
+        SELECT id, round(max(
+            greatest(max_tmpf_6hr, tmpf))::numeric,0) as max_tmpf,
         count(tmpf) as obs FROM current_log c, stations t
         WHERE t.iemid = c.iemid and t.network = ANY(:networks) and
         valid >= :sts6z and valid < :ets and {job['limiter']}
@@ -69,7 +70,8 @@ def main(job):
         lows = pd.read_sql(
             text(
                 f"""
-        SELECT id, round(min(tmpf)::numeric,0) as min_tmpf,
+        SELECT id, round(min(
+            least(min_tmpf_6hr, tmpf))::numeric,0) as min_tmpf,
         count(tmpf) as obs FROM
         current_log c JOIN stations t on (t.iemid = c.iemid)
         WHERE t.network = ANY(:networks) and valid >= :sts6z
@@ -127,7 +129,7 @@ def main(job):
                 ":   06Z TO 00Z LOW TEMPERATURE FOR "
                 f"{job['sts12z']:%d %b %Y}\n"
                 ":   00Z YESTERDAY TO 00Z TODAY RAINFALL\n"
-                ":   ...BASED ON REPORTED OBS...\n"
+                ":   ...BASED ON REPORTED OBS AND ANY 6 HR MAX MIN...\n"
             )
             for sid in ids:
                 if (
