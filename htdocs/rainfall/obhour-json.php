@@ -62,9 +62,9 @@ foreach ($intervals as $key => $interval) {
         if ($val > 0.005) {
             $retval = round($val, 2);
         } else if ($val > 0) {
-            $retval = "T";
+            $retval = 0.0001;
         } else {
-            $retval = "0";
+            $retval = 0;
         }
         $data[$z["station"]]["p$interval"]  = $retval;
     }
