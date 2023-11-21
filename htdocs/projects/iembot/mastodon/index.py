@@ -196,7 +196,7 @@ def build_subui(mapp, fdict):
 
 def sanitize_server(val):
     """Ensure we have something that is like a server."""
-    if val is None:
+    if val is None or val == "":
         return None
     if val.startswith("https://"):
         return val[8:]
