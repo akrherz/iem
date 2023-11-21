@@ -14,7 +14,6 @@ previously done by iso-week, which is sub-optimal.  The new aggregation
 for week is by day of the year divided by 7.
 """
 import calendar
-import datetime
 
 import pandas as pd
 from pyiem import reference
@@ -33,6 +32,15 @@ PDICT = {
     "week": "Week of the Year",
     "month": "Month of the Year",
 }
+OFFSETS = {
+    "doy": 367,
+    "week": 53,
+    "month": 12,
+}
+PDICT2 = {
+    "jan": "January 1",
+    "jul": "July 1",
+}
 
 
 def get_description():
@@ -46,6 +54,13 @@ def get_description():
             label="Partition By:",
             name="how",
         ),
+        {
+            "type": "select",
+            "options": PDICT2,
+            "default": "jan",
+            "label": "Start plot on given date:",
+            "name": "start",
+        },
         dict(
             type="select",
             name="opt",
@@ -126,7 +141,6 @@ def plotter(fdict):
 
     if df.empty:
         raise NoDataFound("ERROR: No Results Found!")
-    df = df.rename(columns={"datum": ctx["how"]})
 
     # Top Panel: count
     title = (
@@ -137,34 +151,60 @@ def plotter(fdict):
     )
     fig = figure(apctx=ctx, title=title)
     ax = fig.subplots(2, 1, sharex=True)
-    gdf = df.groupby(ctx["how"]).count()
-    xaxis = gdf.index.values
+    gdf = (
+        df[["datum", "count"]]
+        .groupby("datum")
+        .agg(
+            years=pd.NamedAgg(column="count", aggfunc="count"),
+            count=pd.NamedAgg(column="count", aggfunc="sum"),
+        )
+        .copy()
+    )
+    # Duplicate gdf so that we can plot centered on 1 July
+    gdf2 = (
+        gdf.reset_index()
+        .assign(datum=lambda x: x["datum"] + OFFSETS[ctx["how"]])
+        .set_index("datum")
+    )
+    gdf = pd.concat([gdf, gdf2])
+    df = df.rename(columns={"datum": ctx["how"]})
     width = 0.8
     xticks = []
+    xticklabels = []
     if ctx["how"] == "week":
-        xaxis = gdf.index.values * 7
+        gdf.index = gdf.index.values * 7
         width = 6.5
     if ctx["how"] in ["doy", "week"]:
-        sts = datetime.datetime(2012, 1, 1)
-        for i in range(1, 13):
-            ts = sts.replace(month=i)
-            xticks.append(int(ts.strftime("%j")))
+        for i, dt in enumerate(pd.date_range("2000/1/1", "2001/12/31")):
+            if dt.day == 1:
+                xticks.append(i + 1)
+                xticklabels.append(dt.strftime("%b"))
     else:
-        xticks = range(1, 13)
+        xticks = range(1, 25)
+        xticklabels = calendar.month_abbr[1:] + calendar.month_abbr[1:]
 
-    ax[0].bar(xaxis, gdf["yr"], width=width)
+    ax[0].bar(gdf.index.values, gdf["years"], width=width)
     ax[0].grid()
     ax[0].set_ylabel("Years with 1+ Event")
 
     # Bottom Panel: events
-    gdf = df.groupby(ctx["how"]).sum()
-    ax[1].bar(xaxis, gdf["count"], width=width)
+    ax[1].bar(gdf.index.values, gdf["count"], width=width)
     ax[1].set_ylabel("Total Event Count")
     ax[1].grid()
     ax[1].set_xlabel(f"Partitioned by {PDICT[ctx['how']]}")
     ax[1].set_xticks(xticks)
-    ax[1].set_xticklabels(calendar.month_abbr[1:])
-    ax[1].set_xlim(0, 13 if ctx["how"] == "month" else 366)
+    ax[1].set_xticklabels(xticklabels)
+    # sharex is on
+    if ctx["start"] == "jul":
+        if ctx["how"] in ["doy", "week"]:
+            ax[1].set_xlim(183, 183 + 365)
+        else:
+            ax[1].set_xlim(6.5, 18.5)
+    else:
+        ax[1].set_xlim(
+            0 if ctx["how"] == "month" else -6.5,
+            13 if ctx["how"] == "month" else 366,
+        )
 
     return fig, df
 
