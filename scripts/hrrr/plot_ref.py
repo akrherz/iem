@@ -117,12 +117,11 @@ def run(valid, routes):
         f"model/hrrr/hrrr_1km_ref_{valid.hour:02.0f}.gif gif"
     )
     subprocess.call(
-        f"pqinsert -p '{pqstr}' /tmp/hrrr_ref_{valid:%Y%m%d%H}.gif",
-        shell=True,
+        ["pqinsert", "-p", pqstr, f"/tmp/hrrr_ref_{valid:%Y%m%d%H}.gif"],
         stderr=subprocess.PIPE,
         stdout=subprocess.PIPE,
     )
-    subprocess.call(f"rm -f /tmp/hrrr_ref_{valid:%Y%m%d%H}*", shell=True)
+    subprocess.call(["rm", "-f", f"/tmp/hrrr_ref_{valid:%Y%m%d%H}*"])
 
 
 def main(argv):

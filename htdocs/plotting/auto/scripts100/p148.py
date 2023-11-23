@@ -27,6 +27,7 @@ PDICT2 = {
     "high": "High Temperature [F]",
     "low": "Low Temperature [F]",
     "precip": "Precipitation [inch]",
+    "snow": "Snowfall [inch]",
 }
 
 
@@ -140,11 +141,10 @@ def get_context(fdict):
         dtoff = datetime.timedelta(days=offset)
         thedate = thedate + dtoff
 
-    table = f"alldata_{station[:2]}"
     if date == "exact":
         with get_sqlalchemy_conn("coop") as conn:
             ctx["df"] = pd.read_sql(
-                f"SELECT year, high, low, day, precip from {table} "
+                "SELECT year, high, low, day, precip, snow from alldata "
                 "WHERE station = %s and sday = %s ORDER by year ASC",
                 conn,
                 params=(station, thedate.strftime("%m%d")),
@@ -172,7 +172,7 @@ def get_context(fdict):
         with get_sqlalchemy_conn("coop") as conn:
             ctx["df"] = pd.read_sql(
                 text(
-                    f"SELECT year, high, day, low, precip from {table} "
+                    "SELECT year, high, day, low, precip, snow from alldata "
                     "WHERE station = :station and day = ANY(:days) "
                     "ORDER by year ASC"
                 ),
@@ -280,7 +280,7 @@ def plotter(fdict):
         ctx["df"].index.values.min() - 1, ctx["df"].index.values.max() + 1
     )
     ax.set_ylabel(PDICT2[ctx["varname"]])
-    if ctx["varname"] != "precip":
+    if ctx["varname"] not in ["precip", "snow"]:
         ax.set_ylim(
             ctx["df"][ctx["varname"]].min() - 5,
             ctx["df"][ctx["varname"]].max() + 5,
