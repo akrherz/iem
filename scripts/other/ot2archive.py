@@ -49,11 +49,12 @@ def dowork(ts, ts2):
             row["gust"],
             row["c1tmpf"],
             row["srad"],
+            row["relh"],
         )
         ocursor.execute(
             "INSERT into alldata(station, valid, tmpf, dwpf, drct, sknt, "
-            "alti, pday, gust, c1tmpf, srad) values "
-            "(%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s)",
+            "alti, pday, gust, c1tmpf, srad, relh) values "
+            "(%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s)",
             args,
         )
 
