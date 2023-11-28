@@ -1,4 +1,5 @@
 <?php
+define("IEM_APPID", 107);
 require_once "../../config/settings.inc.php";
 require_once "../../include/myview.php";
 require_once "../../include/database.inc.php";
@@ -82,7 +83,8 @@ $ar = array(
     "SV" => "Svr T'storm",
     "MA" => "Marine",
     "FF" => "Flash Flood (2008+)",
-    "DS" => "Dust Storm (2018+)"
+    "DS" => "Dust Storm (2018+)",
+    "SQ" => "Snow Squall (2018+)",
 );
 $tselect = "";
 foreach ($ar as $k => $v) {
@@ -104,7 +106,8 @@ $ar = array(
     "G" => "Wind Gust",
     "MA" => "Marine",
     "FF" => "Flash Flood (2008+)",
-    "DS" => "Dust Storm (2018+)"
+    "DS" => "Dust Storm (2018+)",
+    "SQ" => "Snow Squall (Oct 2023+)",
 );
 $ltselect = "";
 foreach ($ar as $k => $v) {
@@ -196,6 +199,7 @@ function wtypeSelect()
     document.getElementById("MA").checked = true;
     document.getElementById("FF").checked = true;
     document.getElementById("DS").checked = true;
+    document.getElementById("SQ").checked = true;
     return false;
 }
 </script>
@@ -213,6 +217,7 @@ function ltypeSelect()
     document.getElementById("FF2").checked = true;
     document.getElementById("MA2").checked = true;
     document.getElementById("DS2").checked = true;
+    document.getElementById("SQ").checked = true;
     return false;
 }
 </script>
@@ -223,9 +228,9 @@ function ltypeSelect()
  {$tagselect}
  {$forecaster_form}
  </td></tr>
-        
+
 </table>
-    
+
     </div>
 </div>
 
@@ -311,6 +316,11 @@ service was improved some, but should all still be backwards compat.</p>
 <p><strong>6 July 2022</strong>: The API returned value for
 <code>unwarned_reports</code> was updated to not include severe thunderstorm
 type reports made during a tornado warning.</p>
+
+<p><strong>28 Nov 2023</strong>: The option to do verification for Snow Squall
+Warnings was added, but note that verifying LSRs only became an option after
+1 October 2023.  So no prior warnings will show as verified prior to that date.
+</p>
 
 <p>The JSON emitting service endpoint is:
 <br /><code>https://mesonet.agron.iastate.edu/api/1/cow.json</code></p>

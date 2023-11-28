@@ -49,6 +49,7 @@ ICONS = {
     "O": "wind.png",
     "P": "other.png",
     "Q": "tropicalstorm.gif",
+    "q": "downburst.png",
     "s": "sleet.png",
     "T": "tornado.png",
     "U": "fire.png",

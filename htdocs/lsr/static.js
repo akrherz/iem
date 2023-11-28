@@ -160,6 +160,7 @@ var lsrLookup = {
     "N": "icons/wind.png",
     "O": "icons/wind.png",
     "P": "icons/other.png",
+    "q": "icons/downburst.png",
     "Q": "icons/tropicalstorm.gif",
     "s": "icons/sleet.png",
     "T": "icons/tornado.png",
