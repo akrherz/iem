@@ -38,11 +38,9 @@ def main():
     iem = Observation("OT0010", "OT", valid)
 
     iem.data["tmpf"] = float(tokens[4])
-    iem.data["max_tmpf"] = float(tokens[5])
-    iem.data["min_tmpf"] = float(tokens[6])
     relh = int(tokens[7])
     if 0 < relh <= 100:
-        iem.data["relh"] = int(tokens[7])
+        iem.data["relh"] = int(tokens[6])
         iem.data["dwpf"] = (
             dewpoint_from_relative_humidity(
                 units("degF") * iem.data["tmpf"],
@@ -59,7 +57,7 @@ def main():
         float(tokens[9]), "mile / hour", "knot"
     )
     iem.data["alti"] = float(tokens[11])
-    iem.data["pday"] = float(tokens[13]) / 100.0
+    iem.data["pday"] = float(tokens[12]) / 100.0
     iem.data["srad"] = float(tokens[17])
 
     iem.save(cursor)
