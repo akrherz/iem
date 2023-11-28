@@ -60,7 +60,7 @@ def main():
     )
     iem.data["alti"] = float(tokens[11])
     iem.data["pday"] = float(tokens[13]) / 100.0
-    iem.data["srad"] = float(tokens[18])
+    iem.data["srad"] = float(tokens[17])
 
     iem.save(cursor)
 

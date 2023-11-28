@@ -58,8 +58,14 @@ def application(environ, start_response):
     # Things for the user to theoretically input:
     loc = html_escape(environ.get("loc", "Jack Trice Stadium"))
     try:
-        pointLat = float(environ.get("lat", 42.014004))
-        pointLon = float(environ.get("lon", -93.635773))
+        lat = environ.get("lat", 42.014004)
+        lon = environ.get("lon", -93.635773)
+        if isinstance(lat, list):
+            lat = lat[0]
+        if isinstance(lon, list):
+            lon = lon[0]
+        pointLat = float(lat)
+        pointLon = float(lon)
     except ValueError:
         return [b"ERROR: Invalid lat or lon valid provided."]
     sio = StringIO()
