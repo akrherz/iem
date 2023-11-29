@@ -6,6 +6,8 @@ dependencies:
   - beautifulsoup4
   # don't download stuff
   - cartopy_offlinedata
+  # command line
+  - click
   # pytest
   - coverage
   # one wxc script
