@@ -52,6 +52,7 @@ PDICT2 = {
     "cdd65_depart": "Cooling Degree Days Departure (base 65)",
     "hdd65_sum": "Heating Degree Days (base 65)",
     "hdd65_depart": "Heating Degree Days Departure (base 65)",
+    "precip_max": "Precipitation Daily Maximum",
     "precip_depart": "Precipitation Departure",
     "precip_percent": "Precipitation Percent of Average",
     "precip_sum": "Precipitation Total",
@@ -87,6 +88,7 @@ UNITS = {
     "hdd65_depart": "F",
     "avg_temp_depart": "F",
     "avg_temp": "F",
+    "precip_max": "inch",
     "precip_depart": "inch",
     "precip_sum": "inch",
     "precip_percent": "%",
@@ -371,6 +373,7 @@ def get_data(ctx):
                 agg as (
                     SELECT station, count(*) as obs,
                     avg(avg_temp) as avg_temp,
+                    max(precip) as precip_max,
                     sum(precip_diff) as precip_depart,
                     sum(precip) / greatest(sum(cprecip), 0.0001) * 100.
                         as precip_percent,
@@ -403,6 +406,7 @@ def get_data(ctx):
                 avg_temp,
                 precip as precip_sum,
                 cprecip as cprecip_sum,
+                precip_max,
                 precip_depart,
                 precip_percent,
                 snow as snow_sum,
@@ -445,6 +449,7 @@ def get_data(ctx):
                     max(high) as max_high_temp,
                     min(low) as min_low_temp,
                     avg(low) as avg_low_temp,
+                    max(precip) as precip_max,
                     sum(precip) as precip_sum,
                     sum(snow) as snow_sum,
                     avg((high + low)/2.) as avg_temp
@@ -457,6 +462,7 @@ def get_data(ctx):
 
                 SELECT d.station, t.name, t.wfo,
                 avg_temp,
+                precip_max,
                 precip_sum,
                 snow_sum,
                 min_low_temp,
@@ -585,7 +591,7 @@ def plotter(fdict):
         clevels = centered_bins(rng)
         if varname == "gdd_depart":
             fmt = "%.0f"
-    elif varname in ["precip_sum", "snow_sum"]:
+    elif varname in ["precip_max", "precip_sum", "snow_sum"]:
         ptiles = df[varname].abs().describe(percentiles=[0.05, 0.95])
         minval = 0 if ptiles["5%"] < 1 else ptiles["5%"]
         clevels = pretty_bins(minval, ptiles["95%"])

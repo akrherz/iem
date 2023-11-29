@@ -66,7 +66,7 @@ def gage_run(sts, ets, stations, excel, start_response):
         df.to_excel(bio, header=eheaders, index=False, engine="openpyxl")
         return bio.getvalue()
     start_response("200 OK", [("Content-type", "text/plain")])
-    return df.to_csv(None, header=headers, index=False).encode("ascii")
+    return df.to_csv(None, index=False).encode("ascii")
 
 
 def bubbler_run(sts, ets, excel, start_response):
@@ -102,7 +102,7 @@ def bubbler_run(sts, ets, excel, start_response):
         df.to_excel(bio, index=False)
         return bio.getvalue()
     start_response("200 OK", [("Content-type", "text/plain")])
-    return df.to_csv(None, header=headers, index=False).encode("ascii")
+    return df.to_csv(None, index=False).encode("ascii")
 
 
 @iemapp(default_tz="America/Chicago")
