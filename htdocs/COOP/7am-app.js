@@ -3,6 +3,7 @@ let map = null;
 let coopLayer = null;
 let azosLayer = null;
 let mrmsLayer = null;
+let cocorahsLayer = null;
 var ol = window.ol || {}; // skipcq: JS-0239
 
 function text(str){
@@ -40,16 +41,28 @@ function updateDate() {
     // We have a changed date, hello!
     const fullDate = $.datepicker.formatDate("yy-mm-dd",
         $("#datepicker").datepicker('getDate'));
+    map.removeLayer(cocorahsLayer);
+    cocorahsLayer = makeVectorLayer(fullDate, 'IA CoCoRaHS Reports', 'cocorahs');
+    map.addLayer(cocorahsLayer);
+
     map.removeLayer(coopLayer);
     coopLayer = makeVectorLayer(fullDate, 'NWS COOP Reports', 'coop');
     map.addLayer(coopLayer);
+
     map.removeLayer(azosLayer);
     azosLayer = makeVectorLayer(fullDate, 'ASOS/AWOS Reports', 'azos');
     map.addLayer(azosLayer);
+
     mrmsLayer.setSource(new ol.source.XYZ({
         url: get_tms_url()
     }));
     updateURL();
+}
+
+function pretty(val){
+    if (val === null || val === undefined) return "M";
+    if (val === 0.0001) return "T";
+    return val;
 }
 
 function makeVectorLayer(dt, title, group) {
@@ -62,7 +75,7 @@ function makeVectorLayer(dt, title, group) {
         }),
         style: function (feature, resolution) {
             let txt = (feature.get(renderattr) == 0.0001) ? "T" : feature.get(renderattr);
-            txt = (txt === null) ? '.' : txt;
+            txt = (txt === null || txt === undefined) ? '.' : txt;
             return [new ol.style.Style({
                 text: new ol.style.Text({
                     font: '14px Calibri,sans-serif',
@@ -112,6 +125,9 @@ $(document).ready(() => {
     buildUI();
     parseHashlink();
 
+    cocorahsLayer = makeVectorLayer($.datepicker.formatDate("yy-mm-dd", new Date()),
+        'IA CoCoRaHS Reports', 'cocorahs');
+
     coopLayer = makeVectorLayer($.datepicker.formatDate("yy-mm-dd", new Date()),
         'NWS COOP Reports', 'coop');
     azosLayer = makeVectorLayer($.datepicker.formatDate("yy-mm-dd", new Date()),
@@ -141,7 +157,7 @@ $(document).ready(() => {
             source: new ol.source.XYZ({
                 url: '/c/tile.py/1.0.0/wfo-900913/{z}/{x}/{y}.png'
             })
-        }), coopLayer, azosLayer
+        }), cocorahsLayer, coopLayer, azosLayer
         ],
         view: new ol.View({
             projection: 'EPSG:3857',
@@ -181,8 +197,18 @@ $(document).ready(() => {
             const geometry = feature.getGeometry();
             const coord = geometry.getCoordinates();
             popup.setPosition(coord);
-            const content = `<p><strong>${feature.getId()} ${feature.get('name')}</strong><br />Hour of Ob: ${feature.get('hour')}<br />High: ${feature.get('high')}<br />Low: ${feature.get('low')}<br />Temp at Ob: ${feature.get('coop_tmpf')}<br />Precip: ${feature.get('pday')}<br />Snow: ${feature.get('snow')}<br />Snow Depth: ${feature.get('snowd')}</p>`;
-            $('#popover-content').html(content);
+            const link = `/sites/site.php?station=${feature.getId()}&network=${feature.get('network')}`;
+            const content = [
+                `<p><strong><a href="${link}" target="_new">${feature.getId()}</a> ${feature.get('name')}</strong>`,
+                `<br />Hour of Ob: ${feature.get('hour')}`,
+                `<br />High: ${pretty(feature.get('high'))}`,
+                `<br />Low: ${pretty(feature.get('low'))}`,
+                `<br />Temp at Ob: ${pretty(feature.get('coop_tmpf'))}`,
+                `<br />Precip: ${pretty(feature.get('pday'))}`,
+                `<br />Snow: ${pretty(feature.get('snow'))}`,
+                `<br />Snow Depth: ${pretty(feature.get('snowd'))}`,
+                `</p>`];
+            $('#popover-content').html(content.join(""));
             $(element).popover('show');
         } else {
             $(element).popover('hide');

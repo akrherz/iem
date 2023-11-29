@@ -1,5 +1,5 @@
 <?php
-$OL = "7.5.1";
+$OL = "8.1.0";
 require_once "../../config/settings.inc.php";
 define("IEM_APPID", 86);
 require_once "../../include/mlib.php";
@@ -27,7 +27,7 @@ $t->jsextra = <<<EOF
 <script src="/vendor/openlayers/{$OL}/ol.js" type="text/javascript"></script>
 <script src="/vendor/jquery-ui/1.11.4/jquery-ui.js"></script>
 <script src='/vendor/openlayers/{$OL}/ol-layerswitcher.js'></script>
-<script src='7am-app.js?v=8'></script>
+<script src='7am-app.js?v=9'></script>
 EOF;
 
 $t->content = <<<EOF
