@@ -171,7 +171,3 @@ def application(environ, start_response):
 
     start_response("200 OK", headers)
     return [res.encode("ascii")]
-
-
-if __name__ == "__main__":
-    run(datetime.datetime(2020, 9, 9))

@@ -207,7 +207,7 @@ $(document).ready(() => {
                 `<br />Precip: ${pretty(feature.get('pday'))}`,
                 `<br />Snow: ${pretty(feature.get('snow'))}`,
                 `<br />Snow Depth: ${pretty(feature.get('snowd'))}`,
-                `</p>`];
+                "</p>"];
             $('#popover-content').html(content.join(""));
             $(element).popover('show');
         } else {
