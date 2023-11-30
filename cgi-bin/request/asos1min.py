@@ -79,6 +79,8 @@ def application(environ, start_response):
         stations = ensure_list(environ, "station[]")
     if not stations:
         raise IncompleteWebRequest("No station= was specified in request.")
+    # Ensure we have uppercase stations
+    stations = [s.upper() for s in stations]
     delim = DELIM[environ.get("delim", "comma")]
     sample = SAMPLING[environ.get("sample", "1min")]
     what = environ.get("what", "dl")
