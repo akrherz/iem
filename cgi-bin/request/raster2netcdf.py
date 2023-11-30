@@ -119,7 +119,10 @@ def application(environ, start_response):
     prod = environ.get("prod", "")[:100]  # arb
     if prod == "":
         raise IncompleteWebRequest("prod is required")
-    valid = datetime.datetime.strptime(dstr, "%Y%m%d%H%M").replace(
-        tzinfo=ZoneInfo("UTC")
-    )
+    try:
+        valid = datetime.datetime.strptime(dstr, "%Y%m%d%H%M").replace(
+            tzinfo=ZoneInfo("UTC")
+        )
+    except Exception:
+        raise IncompleteWebRequest("dstr not in form %Y%m%d%H%M")
     return [do_work(valid, prod, start_response)]

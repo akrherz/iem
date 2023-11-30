@@ -54,6 +54,20 @@ def get_description():
             default=1,
             label="Histogram Bin Size:",
         ),
+        {
+            "type": "text",
+            "name": "x",
+            "default": "-60 130",
+            "label": "X-Axis Limits [min max] (optional):",
+            "optional": True,
+        },
+        {
+            "type": "text",
+            "name": "y",
+            "default": "-60 130",
+            "label": "Y-Axis Limits [min max] (optional):",
+            "optional": True,
+        },
         dict(
             type="select",
             name="month",
@@ -263,6 +277,11 @@ def plotter(fdict):
             facecolor="red",
         )
         ax.legend(loc=2)
+
+    if ctx.get("x"):
+        ax.set_xlim(*[float(x) for x in ctx["x"].split()])
+    if ctx.get("y"):
+        ax.set_ylim(*[float(y) for y in ctx["y"].split()])
 
     return fig, df
 

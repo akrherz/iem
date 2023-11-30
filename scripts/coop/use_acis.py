@@ -3,6 +3,7 @@ import datetime
 import sys
 from zoneinfo import ZoneInfo
 
+import click
 import pandas as pd
 import requests
 from pyiem.network import Table as NetworkTable
@@ -46,19 +47,22 @@ def is_new(newval, oldval):
     return True
 
 
-def main(argv):
+@click.command()
+@click.option("--state")
+@click.option("--station", default=None)
+def main(state, station):
     """Run for a given state."""
-    state = argv[1]
     network = f"{state}_COOP"
     # We are only asking for the last 720 days of data, so might as well only
     # do stations that are currently known to be `online`
-    nt = NetworkTable(network, only_online=True)
+    nt = NetworkTable(network, only_online=station is None)
     ets = datetime.date.today() - datetime.timedelta(days=1)
     sts = ets - datetime.timedelta(days=720)
     pgconn, cursor = get_dbconnc("iem")
     # Lame for now
     cursor.close()
-    progress = tqdm(nt.sts, total=len(nt.sts), disable=not sys.stdout.isatty())
+    ids = nt.sts.keys() if station is None else [station]
+    progress = tqdm(ids, total=len(ids), disable=not sys.stdout.isatty())
     for nwsli in progress:
         progress.set_description(nwsli)
         tz = ZoneInfo(nt.sts[nwsli]["tzname"])
@@ -143,4 +147,4 @@ def main(argv):
 
 
 if __name__ == "__main__":
-    main(sys.argv)
+    main()
