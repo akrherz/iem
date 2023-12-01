@@ -109,12 +109,12 @@ python q3_today_total.py
 cd ../ua
 if [ $HH -eq "04" ]
 then
-    python ingest_from_rucsoundings.py $YYYY $MM $DD 00
+    python ingest_from_rucsoundings.py --valid=${YYYY}-${MM}-${DD}T00:00:00
     python compute_params.py $YYYY
 fi
 if [ $HH -eq "16" ]
 then
-    python ingest_from_rucsoundings.py $YYYY $MM $DD 12
+    python ingest_from_rucsoundings.py --valid=${YYYY}-${MM}-${DD}T12:00:00
     python compute_params.py $YYYY
 fi
 

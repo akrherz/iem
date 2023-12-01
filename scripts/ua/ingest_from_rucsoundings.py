@@ -61,11 +61,13 @@ HHMM:     hour and minute (UTC) that this data line was taken
 BEARING: Bearing from the ground point for this level
 RANGE:   Range (nautical miles) from the ground point for this level.
 
+called from RUN_10_AFTER.sh for 00z and 12z
 """
 import datetime
 import sys
 from zoneinfo import ZoneInfo
 
+import click
 import pandas as pd
 import requests
 from pyiem.network import Table as NetworkTable
@@ -243,7 +245,7 @@ def parse(raw, sid):
         yield rob
 
 
-def main(valid):
+def main(valid, station):
     """Run for the given valid time!"""
     LOG.info("running for %s", valid)
     nt = NetworkTable("RAOB")
@@ -251,27 +253,42 @@ def main(valid):
     # check what we have
     with get_sqlalchemy_conn("raob") as conn:
         obs = pd.read_sql(
-            "SELECT station, count(*) from "
-            f"raob_flights f JOIN raob_profile_{valid.year} p "
-            "ON (f.fid = p.fid) where valid = %s GROUP by station "
-            "ORDER by station ASC",
+            f"""SELECT station, count(*),
+            sum(case when smps is null then 1 else 0 end) as nullcnt from
+            raob_flights f JOIN raob_profile_{valid.year} p
+            ON (f.fid = p.fid) where valid = %s GROUP by station
+            ORDER by station ASC
+            """,
             conn,
             params=(valid,),
             index_col="station",
         )
     obs["added"] = 0
     v12 = valid - datetime.timedelta(hours=13)
+    sids = list(nt.sts.keys())
+    if station in nt.sts:
+        sids = [station]
 
-    progress = tqdm(list(nt.sts.keys()), disable=not sys.stdout.isatty())
+    progress = tqdm(sids, disable=not sys.stdout.isatty())
     for sid in progress:
         # skip virtual sites
         if sid.startswith("_"):
             continue
-        if sid in obs.index and obs.at[sid, "count"] > 10:
+        if (
+            sid in obs.index
+            and obs.at[sid, "count"] > 10
+            and obs.at[sid, "nullcnt"] < 10
+        ):
             continue
         progress.set_description(sid)
+        # rucsoundings has two services,
+        # legacy: get_raobs.cgi which has the long term archive, but less data
+        # get_pbraobs.cgi, which has data since 2022 "prepbufr", but latent
+        service = "get_raobs.cgi"
+        if utc(2022) < valid < (utc() - datetime.timedelta(hours=24)):
+            service = "get_pbraobs.cgi"
         uri = (
-            "https://rucsoundings.noaa.gov/get_raobs.cgi?data_source=RAOB&"
+            f"https://rucsoundings.noaa.gov/{service}?data_source=RAOB&"
             f"start_year={valid:%Y}&start_month_name={valid:%b}&"
             f"start_mday={valid.day}&start_hour={valid.hour}&"
             "start_min=0&n_hrs=12.0&"
@@ -303,14 +320,17 @@ def main(valid):
         LOG.info("%s high missing count of %s", valid, len(df2.index))
 
 
-def frontend(argv):
+@click.command()
+@click.option("--valid", type=click.DateTime())
+@click.option("--station", type=str, default=None)
+def frontend(valid, station):
     """Figure out what we need to do here!"""
-    valid = utc(int(argv[1]), int(argv[2]), int(argv[3]), int(argv[4]))
-    main(valid)
-    for days in [3, 14, 365]:
+    valid = valid.replace(tzinfo=ZoneInfo("UTC"))
+    main(valid, station)
+    for days in [] if station is not None else [3, 14, 365]:
         ts = valid - datetime.timedelta(days=days)
-        main(ts)
+        main(ts, station)
 
 
 if __name__ == "__main__":
-    frontend(sys.argv)
+    frontend()
