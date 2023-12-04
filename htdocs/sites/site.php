@@ -180,6 +180,16 @@ function df($val){
 $ab = df($metadata["archive_begin"]);
 $ae = df($metadata["archive_end"]);
 
+$wigos = "";
+if (! is_null($metadata["wigos"])){
+    $wigos = sprintf(
+        "<tr><th>WIGOS ID:</th>".
+        "<td><a href=\"https://oscar.wmo.int/surface/#/search/station/".
+        "stationReportDetails/%s\">%s</a></td></tr>",
+        $metadata["wigos"],
+        $metadata["wigos"]);
+}
+
 $t->content = <<<EOF
 
 {$alertmsg}
@@ -189,6 +199,7 @@ $t->content = <<<EOF
 
 <table class="table table-condensed table-striped">
 <tr><th>IEM Internal ID:</th><td>{$metadata["iemid"]}</td></tr>
+{$wigos}
 <tr><th>Station Identifier:</th><td>{$station}</td></tr>
 <tr><th>Station Name:</th><td>{$metadata["name"]}</td></tr>
 <tr><th>Network:</th><td>{$network}</td></tr>
