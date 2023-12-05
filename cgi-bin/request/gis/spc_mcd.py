@@ -76,6 +76,8 @@ def application(environ, start_response):
     """Do something fun!"""
     if "sts" not in environ:
         raise IncompleteWebRequest("GET sts parameter not provided")
+    if environ["sts"] > environ["ets"]:
+        environ["sts"], environ["ets"] = environ["ets"], environ["sts"]
     ctx = {
         "sts": environ["sts"],
         "ets": environ["ets"],
