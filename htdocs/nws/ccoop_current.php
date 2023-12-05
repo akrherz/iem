@@ -142,7 +142,7 @@ $t->current_network = "Cellular COOP";
 
 
 $sorts = array("asc" => "Ascending", "desc" => "Descending");
-
+$baseurl = "/nws/ccoop_current.php?";
 $one = get_sortdir($baseurl, "sid", $sortcol, $sortdir);
 $two = get_sortdir($baseurl, "name", $sortcol, $sortdir);
 $three = get_sortdir($baseurl, "county", $sortcol, $sortdir);
