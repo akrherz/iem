@@ -19,6 +19,8 @@ def application(environ, start_response):
     """Do something!"""
     if "sts" not in environ:
         raise IncompleteWebRequest("Missing start time GET params")
+    if environ["sts"] > environ["ets"]:
+        environ["sts"], environ["ets"] = environ["ets"], environ["sts"]
     common = "at time zone 'UTC', 'YYYYMMDDHH24MI'"
     schema = {
         "geometry": "Polygon",
