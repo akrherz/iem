@@ -1,6 +1,10 @@
 """
 This plot displays the accumulated number of days
-that the high or low temperature was above or below some threshold.
+that the high or low temperature was above or below some threshold.  This uses
+somewhat sloppy day-of-year logic that does not necessarily align leap years.
+
+<p>If you split the year on 1 July, the plotted season represents the 1 July
+year. ie 1 July 2023 - 30 Jun 2024 plots as 2023.</p>
 """
 import datetime
 
@@ -8,6 +12,7 @@ import pandas as pd
 from pyiem.exceptions import NoDataFound
 from pyiem.plot import figure_axes
 from pyiem.util import get_autoplot_context, get_sqlalchemy_conn
+from sqlalchemy import text
 
 PDICT = {
     "high_above": "High Temperature At or Above",
@@ -59,7 +64,8 @@ def highcharts(fdict):
     ctx = get_autoplot_context(fdict, get_description())
     station = ctx["station"]
     varname = ctx["var"]
-    df = get_data(ctx)
+    get_data(ctx)
+    df = ctx["df"]
 
     j = {}
     j["tooltip"] = {
@@ -91,7 +97,7 @@ def highcharts(fdict):
     ranges = []
     thisyear = []
     for doy, row in df.iterrows():
-        ts = datetime.date(2001, 1, 1) + datetime.timedelta(days=(doy - 1))
+        ts = datetime.date(2000, 1, 1) + datetime.timedelta(days=(doy - 1))
         ticks = (ts - datetime.date(1970, 1, 1)).total_seconds() * 1000.0
         avgs.append([ticks, row["avg"]])
         ranges.append([ticks, row["min"], row["max"]])
@@ -105,7 +111,7 @@ def highcharts(fdict):
     )
     j["series"] = [
         {
-            "name": "Average",
+            "name": ctx["mean_label"],
             "data": avgs,
             "zIndex": 1,
             "tooltip": {"valueDecimals": 2},
@@ -146,8 +152,6 @@ def get_data(ctx):
     varname = ctx["var"]
     year = ctx["year"]
     split = ctx["split"]
-    table = f"alldata_{station[:2]}"
-    days = 0 if split == "jan1" else 183
     opp = " < " if varname.find("_below") > 0 else " >= "
     col = "high" if varname.find("high") == 0 else "low"
     # We need to do some magic to compute the start date, since we don't want
@@ -158,35 +162,57 @@ def get_data(ctx):
     if sts.month > 1:
         sts = sts + datetime.timedelta(days=365)
         sts = sts.replace(month=1, day=1)
+    doylogic = "extract(doy from day)"
+    seasonlogic = "extract(year from day)"
     if split == "jul1":
         sts = sts.replace(month=7, day=1)
+        doylogic = "doy_after_july1(day)"
+        seasonlogic = "case when month < 7 then year - 1 else year end"
     with get_sqlalchemy_conn("coop") as conn:
-        df = pd.read_sql(
-            f"""
+        obs = pd.read_sql(
+            text(
+                f"""
         with data as (
-            select extract(year from day + '%s days'::interval) as season,
-            extract(doy from day + '%s days'::interval) as doy,
-            (case when {col} {opp} %s then 1 else 0 end) as hit
-            from {table}
-            where station = %s and day >= %s),
-        agg1 as (
-            SELECT season, doy,
-            sum(hit) OVER (PARTITION by season ORDER by doy ASC) from data)
-        SELECT doy - %s as doy, min(sum), avg(sum), max(sum),
-        max(case when season = %s then sum else null end) as thisyear from agg1
-        WHERE doy < 365 GROUP by doy ORDER by doy ASC
-        """,
+            select {seasonlogic} as season,
+            {doylogic} as doy,
+            (case when {col} {opp} :thres then 1 else 0 end) as hit
+            from alldata where station = :sid and day >= :sts)
+        SELECT season, doy,
+        sum(hit) OVER (PARTITION by season ORDER by doy ASC) as hits from data
+        ORDER by season ASC, doy ASC
+        """
+            ),
             conn,
-            params=(days, days, threshold, station, sts, days, year),
+            params={
+                "sid": station,
+                "thres": threshold,
+                "sts": sts,
+            },
             index_col=None,
         )
-    df["datestr"] = df["doy"].apply(
+    if obs.empty:
+        raise NoDataFound("No results returned!")
+    # For all seasons that have 365 days, we need to add a 366th day by
+    # repeating the last day value
+    obs2 = []
+    for season, gdf in obs.groupby("season"):
+        if len(gdf.index) == 365:
+            obs2.append(
+                {"season": season, "doy": 366, "hits": gdf.iloc[-1]["hits"]}
+            )
+    if obs2:
+        obs = pd.concat([obs, pd.DataFrame(obs2)], ignore_index=True)
+    df = obs[["doy", "hits"]].groupby("doy").agg(["mean", "max", "min"]).copy()
+    df.columns = ["avg", "max", "min"]
+    df["datestr"] = df.index.map(
         lambda x: (
             datetime.date(2001, 1, 1) + datetime.timedelta(days=x)
         ).strftime("%-d %b")
     )
-    df = df.set_index("doy")
-    return df
+    df["thisyear"] = obs[obs["season"] == year].set_index("doy")["hits"]
+    ctx["df"] = df
+    ctx["mean_label"] = f"POR Average {df.iloc[-1]['avg']:.1f} days"
+    ctx["obs"] = obs
 
 
 def plotter(fdict):
@@ -196,9 +222,9 @@ def plotter(fdict):
     threshold = ctx["threshold"]
     varname = ctx["var"]
     year = ctx["year"]
-    df = get_data(ctx)
-    if df.empty:
-        raise NoDataFound("Error, no results returned!")
+    get_data(ctx)
+    df = ctx["df"]
+    obs = ctx["obs"]
 
     title = ("%s [%s]\n" r"%s %.0f$^\circ$F") % (
         ctx["_nt"].sts[station]["name"],
@@ -208,15 +234,62 @@ def plotter(fdict):
     )
 
     (fig, ax) = figure_axes(title=title, apctx=ctx)
-    ax.plot(df.index.values, df["avg"], c="k", lw=2, label="Average")
-    ax.plot(df.index.values, df["thisyear"], c="g", lw=2, label=f"{year}")
-    ax.plot(df.index.values, df["max"], c="r", lw=2, label="Max")
-    ax.plot(df.index.values, df["min"], c="b", lw=2, label="Min")
+    ax.set_position([0.1, 0.1, 0.7, 0.8])
+    for _season, gdf in obs.groupby("season"):
+        ax.plot(
+            gdf["doy"],
+            gdf["hits"],
+            zorder=2,
+            lw=1,
+            color="tan",
+        )
+    ax.plot(
+        df.index.values,
+        df["avg"],
+        c="k",
+        lw=2,
+        zorder=3,
+        label=ctx["mean_label"],
+    )
+    ax.plot(
+        df.index.values,
+        df["thisyear"],
+        c="g",
+        lw=2,
+        zorder=3,
+        label=f"{year} ({df['thisyear'].max():.0f})",
+    )
+    maxval = df["max"].max()
+    my = obs[obs["hits"] == maxval]["season"].unique()
+    df2 = obs[obs["season"] == my[-1]]
+    ax.plot(
+        df2["doy"],
+        df2["hits"],
+        c="r",
+        lw=2,
+        zorder=3,
+        label=f"Most {my[-1]:.0f}{'+' if len(my) > 1 else ''} ({maxval:.0f})",
+    )
+    df2 = obs[obs["doy"] == 366]
+    minval = df2["hits"].min()
+    my = df2[df2["hits"] == minval]["season"].unique()
+    df2 = obs[obs["season"] == my[-1]]
+    ax.plot(
+        df2["doy"],
+        df2["hits"],
+        c="b",
+        lw=2,
+        zorder=3,
+        label=f"Least {my[-1]:.0f}{'+' if len(my) > 1 else ''} ({minval:.0f})",
+    )
+
     ax.legend(ncol=1, loc=2)
     xticks = []
     xticklabels = []
-    for x in range(int(df.index.min()) - 1, int(df.index.max()) + 1):
-        ts = datetime.date(2000, 1, 1) + datetime.timedelta(days=x)
+    for x in range(int(df.index.min()) - 1, int(df.index.max())):
+        ts = datetime.date(
+            2000, 7 if ctx["split"] == "jul1" else 1, 1
+        ) + datetime.timedelta(days=x)
         if ts.day == 1:
             xticks.append(x)
             xticklabels.append(ts.strftime("%b"))
@@ -224,7 +297,44 @@ def plotter(fdict):
     ax.set_xticklabels(xticklabels)
     ax.grid(True)
     ax.set_xlim(int(df.index.min()) - 1, int(df.index.max()) + 1)
+    ax.set_ylim(bottom=-1)
     ax.set_ylabel("Accumulated Days")
+
+    ss = (
+        obs[["season", "hits"]]
+        .groupby("season")
+        .agg("max")
+        .sort_values(by="hits", ascending=False)
+    )
+    # ------------------------
+    txt = "Top 10 (Full Year)   \n\n"
+    for season, row in ss.head(10).iterrows():
+        txt += f"{season:.0f} {row['hits']:.0f}\n"
+
+    # put text into a pretty rounded text box
+    fig.text(
+        0.83,
+        0.7,
+        txt[:-1],
+        bbox=dict(boxstyle="round", facecolor="r", alpha=0.4),
+        va="center",
+        ha="left",
+    )
+
+    # ------------------------
+    txt = "Bottom 10 (Full Year)\n\n"
+    for season, row in ss.iloc[::-1].head(10).iterrows():
+        txt += f"{season:.0f} {row['hits']:.0f}\n"
+
+    # put text into a pretty rounded text box
+    fig.text(
+        0.83,
+        0.3,
+        txt[:-1],
+        bbox=dict(boxstyle="round", facecolor="r", alpha=0.4),
+        va="center",
+        ha="left",
+    )
     return fig, df
 
 

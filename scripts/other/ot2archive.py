@@ -24,7 +24,7 @@ def dowork(ts, ts2):
     icursor.execute(
         "SELECT c.*, t.id from current_log c JOIN stations t on "
         "(t.iemid = c.iemid) WHERE valid >= %s and valid < %s "
-        "and t.network = 'OT'",
+        "and t.network in ('OT', 'WMO_BUFR_SRF')",
         (ts, ts2),
     )
     if icursor.rowcount == 0:
