@@ -2,6 +2,9 @@
 This plot displays the accumulated number of days
 that the high or low temperature was above or below some threshold.  This uses
 somewhat sloppy day-of-year logic that does not necessarily align leap years.
+
+<p>If you split the year on 1 July, the plotted season represents the 1 July
+year. ie 1 July 2023 - 30 Jun 2024 plots as 2023.</p>
 """
 import datetime
 
@@ -149,7 +152,6 @@ def get_data(ctx):
     varname = ctx["var"]
     year = ctx["year"]
     split = ctx["split"]
-    days = 0 if split == "jan1" else 183
     opp = " < " if varname.find("_below") > 0 else " >= "
     col = "high" if varname.find("high") == 0 else "low"
     # We need to do some magic to compute the start date, since we don't want
@@ -160,15 +162,19 @@ def get_data(ctx):
     if sts.month > 1:
         sts = sts + datetime.timedelta(days=365)
         sts = sts.replace(month=1, day=1)
+    doylogic = "extract(doy from day)"
+    seasonlogic = "extract(year from day)"
     if split == "jul1":
         sts = sts.replace(month=7, day=1)
+        doylogic = "doy_after_july1(day)"
+        seasonlogic = "case when month < 7 then year - 1 else year end"
     with get_sqlalchemy_conn("coop") as conn:
         obs = pd.read_sql(
             text(
                 f"""
         with data as (
-            select extract(year from day + ':days days'::interval) as season,
-            extract(doy from day + ':days days'::interval) as doy,
+            select {seasonlogic} as season,
+            {doylogic} as doy,
             (case when {col} {opp} :thres then 1 else 0 end) as hit
             from alldata where station = :sid and day >= :sts)
         SELECT season, doy,
@@ -179,7 +185,6 @@ def get_data(ctx):
             conn,
             params={
                 "sid": station,
-                "days": days,
                 "thres": threshold,
                 "sts": sts,
             },
@@ -282,7 +287,9 @@ def plotter(fdict):
     xticks = []
     xticklabels = []
     for x in range(int(df.index.min()) - 1, int(df.index.max())):
-        ts = datetime.date(2000, 1, 1) + datetime.timedelta(days=x)
+        ts = datetime.date(
+            2000, 7 if ctx["split"] == "jul1" else 1, 1
+        ) + datetime.timedelta(days=x)
         if ts.day == 1:
             xticks.append(x)
             xticklabels.append(ts.strftime("%b"))
@@ -300,30 +307,30 @@ def plotter(fdict):
         .sort_values(by="hits", ascending=False)
     )
     # ------------------------
-    text = "Top 10 (Full Year)   \n\n"
+    txt = "Top 10 (Full Year)   \n\n"
     for season, row in ss.head(10).iterrows():
-        text += f"{season:.0f} {row['hits']:.0f}\n"
+        txt += f"{season:.0f} {row['hits']:.0f}\n"
 
     # put text into a pretty rounded text box
     fig.text(
         0.83,
         0.7,
-        text[:-1],
+        txt[:-1],
         bbox=dict(boxstyle="round", facecolor="r", alpha=0.4),
         va="center",
         ha="left",
     )
 
     # ------------------------
-    text = "Bottom 10 (Full Year)\n\n"
+    txt = "Bottom 10 (Full Year)\n\n"
     for season, row in ss.iloc[::-1].head(10).iterrows():
-        text += f"{season:.0f} {row['hits']:.0f}\n"
+        txt += f"{season:.0f} {row['hits']:.0f}\n"
 
     # put text into a pretty rounded text box
     fig.text(
         0.83,
         0.3,
-        text[:-1],
+        txt[:-1],
         bbox=dict(boxstyle="round", facecolor="r", alpha=0.4),
         va="center",
         ha="left",
