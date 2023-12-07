@@ -134,7 +134,10 @@ $wsuri = sprintf("/api/1/daily.json?%s", http_build_query($arr));
 $wsuri_csv = sprintf("/api/1/daily.txt?%s", http_build_query($arr));
 $jobj = iemws_json("daily.json", $arr);
 
-if ($mode == "monthly") {
+if ($jobj === FALSE){
+    $htmlout = "<p>No data was found for this request.</p>";
+}
+else if ($mode == "monthly") {
     $t->title = sprintf("%s Data Calendar for %s", $station, $nicemonthdate);
     $db = array();
     foreach ($jobj["data"] as $bogus => $row) {
@@ -246,7 +249,7 @@ for the peak winds are hopefully the local valid time
 (<strong>{$metadata["tzname"]}</strong>) at the site. There
 is a <a href="/request/daily.phtml?network={$network}">download interface</a> for most of this
 summary information.</p>
-     
+
 <table class="table table-striped table-bordered" id="thetable">
 <thead>
 <tr>

@@ -2,6 +2,7 @@
 import datetime
 
 import simplejson as json
+from pyiem.exceptions import IncompleteWebRequest
 from pyiem.util import get_dbconnc, html_escape
 from pyiem.webutil import iemapp
 from pymemcache.client import Client
@@ -158,12 +159,15 @@ def application(environ, start_response):
     wfo = environ.get("wfo", "MPX")
     if len(wfo) == 4:
         wfo = wfo[1:]
-    year = int(environ.get("year", 2015))
-    phenomena = environ.get("phenomena", "SV")[:2]
-    significance = environ.get("significance", "W")[:1]
-    etn = int(environ.get("etn", 1))
-    sbw = int(environ.get("sbw", 0))
-    lsrs = int(environ.get("lsrs", 0))
+    try:
+        year = int(environ.get("year", 2015))
+        phenomena = environ.get("phenomena", "SV")[:2]
+        significance = environ.get("significance", "W")[:1]
+        etn = int(environ.get("etn", 1))
+        sbw = int(environ.get("sbw", 0))
+        lsrs = int(environ.get("lsrs", 0))
+    except ValueError:
+        raise IncompleteWebRequest("Invalid request, missing required params")
     cb = environ.get("callback", None)
 
     mckey = (
