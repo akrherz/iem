@@ -125,10 +125,12 @@ def get_data(cursor, ts):
                 as srad_wm2,
             coalesce(m.tair_c_avg_qc, h.tair_c_avg_qc) as tair_c_avg,
             coalesce(m.t4_c_avg_qc, h.t4_c_avg_qc) as t4_c_avg_qc,
-            coalesce(m.t12_c_avg_qc, h.t12_c_avg_qc) as t12_c_avg_qc,
+            coalesce(
+                m.t12_c_avg_qc, h.t12_c_avg_qc, m.sv_t14_qc)
+                as t12_c_avg_qc,
             coalesce(m.t24_c_avg_qc, h.t24_c_avg_qc) as t24_c_avg_qc,
             coalesce(m.t50_c_avg_qc, h.t50_c_avg_qc) as t50_c_avg_qc,
-            coalesce(m.vwc12_qc, h.vwc12_qc) as vwc12_qc,
+            coalesce(m.vwc12_qc, h.vwc12_qc, m.sv_vwc14_qc) as vwc12_qc,
             coalesce(m.vwc24_qc, h.vwc24_qc) as vwc24_qc,
             coalesce(m.vwc50_qc, h.vwc50_qc) as vwc50_qc,
             coalesce(m.ws_mph_max, h.ws_mph_max) as ws_mph_max,
