@@ -139,6 +139,13 @@ def get_description():
             label="Which Variable to Plot:",
             options=PDICT2,
         ),
+        {
+            "type": "text",
+            "name": "bins",
+            "default": "0 0.25 0.5 0.75 1",
+            "optional": True,
+            "label": "Hard-code plot bins (space separated) [optional]:",
+        },
         dict(
             type="int",
             default=50,
@@ -603,6 +610,8 @@ def plotter(fdict):
         clevels = pretty_bins(df[varname].min(), df[varname].max())
         fmt = "%.0f"
         extend = "neither"
+    if ctx.get("bins"):
+        clevels = [float(x) for x in ctx["bins"].split()]
     cmap.set_bad("white")
     if ctx["p"] == "contour" and len(clevels) > 1:
         mp.contourf(
