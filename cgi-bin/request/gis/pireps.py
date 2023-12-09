@@ -6,7 +6,7 @@ from io import BytesIO, StringIO
 import shapefile
 from pyiem.exceptions import IncompleteWebRequest
 from pyiem.util import get_dbconn
-from pyiem.webutil import iemapp
+from pyiem.webutil import ensure_list, iemapp
 
 
 def get_context(environ):
@@ -15,12 +15,15 @@ def get_context(environ):
     form["fmt"] = environ.get("fmt", "shp")
     form["sts"] = environ["sts"]
     form["ets"] = environ["ets"]
-
+    form["artcc"] = ensure_list(environ, "artcc")
+    if "_ALL" in form["artcc"]:
+        form["artcc"] = []
     return form
 
 
 def run(ctx, start_response):
     """Go run!"""
+    artcc_sql = "" if not ctx["artcc"] else " artcc = ANY(%s) and "
     pgconn = get_dbconn("postgis")
     cursor = pgconn.cursor()
 
@@ -46,17 +49,20 @@ def run(ctx, start_response):
         substr(trim(substring(replace(report, ',', ' '),
             '/TB([^/]*)/')), 0, 255) as turb,
         artcc, ST_y(geom::geometry) as lat, ST_x(geom::geometry) as lon
-        from pireps WHERE {spatialsql}
+        from pireps WHERE {spatialsql} {artcc_sql}
         valid >= %s and valid < %s ORDER by valid ASC
         """
-    args = (
+    args = [
         ctx["sts"],
         ctx["ets"],
-    )
+    ]
+    if ctx["artcc"]:
+        args.insert(0, ctx["artcc"])
 
     cursor.execute(sql, args)
     if cursor.rowcount == 0:
         start_response("200 OK", [("Content-type", "text/plain")])
+        pgconn.close()
         return b"ERROR: no results found for your query"
 
     fn = f"pireps_{ctx['sts']:%Y%m%d%H%M}_{ctx['ets']:%Y%m%d%H%M}"
@@ -73,6 +79,7 @@ def run(ctx, start_response):
         )
         for row in cursor:
             sio.write(",".join([str(s) for s in row]) + "\n")
+        pgconn.close()
         return sio.getvalue().encode("ascii", "ignore")
 
     shpio = BytesIO()
@@ -108,6 +115,7 @@ def run(ctx, start_response):
         ("Content-type", "application/octet-stream"),
         ("Content-Disposition", f"attachment; filename={fn}.zip"),
     ]
+    pgconn.close()
     start_response("200 OK", headers)
     return zio.getvalue()
 
