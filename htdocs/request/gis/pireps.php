@@ -7,6 +7,32 @@ define("IEM_APPID", 111);
 
 $t = new MyView();
 $t->title = "Download PIREPs";
+$artcc = Array(
+    "ZAB"=> "[ZAB] ALBUQUERQUE",
+    "ZAN"=> "[ZAN] ANCHORAGE",
+    "ZAU"=> "[ZAU] CHICAGO",
+    "ZBW"=> "[ZBW] BOSTON ",
+    "ZDC"=> "[ZDC] WASHINGTON",
+    "ZDV"=> "[ZDV] DENVER",
+    "ZFW"=> "[ZFW] FORT WORTH",
+    "ZHU"=> "[ZHU] HOUSTON",
+    "ZID"=> "[ZID] INDIANAPOLIS",
+    "ZJX"=> "[ZJX] JACKSONVILLE",
+    "ZKC"=> "[ZKC] KANSAS CITY",
+    "ZLA"=> "[ZLA] LOS ANGELES",
+    "ZLC"=> "[ZLC] SALT LAKE CITY",
+    "ZMA"=> "[ZMA] MIAMI",
+    "ZME"=> "[ZME] MEMPHIS",
+    "ZMP"=> "[ZMP] MINNEAPOLIS",
+    "ZNY"=> "[ZNY] NEW YORK",
+    "ZOA"=> "[ZOA] OAKLAND",
+    "ZOB"=> "[ZOB] CLEVELAND ",
+    "ZSE"=> "[ZSE] SEATTLE",
+    "ZTL"=> "[ZTL] ATLANTA",
+    "_ALL" => "No ARTCC Filter",
+);
+$artccSelect = make_select("artcc", "_ALL", $artcc);
+
 $content = <<<EOF
 <p>
 <ul class="breadcrumb">
@@ -50,6 +76,7 @@ longer periods of data.</p>
     <th colspan="6">Time Interval</th>
     <th>Format</th>
     <th>Spatial Filter (Optional)</th>
+    <th>ARTCC Filter (Optional)</th>
     </tr>
 </thead>
 <tr>
@@ -72,6 +99,9 @@ longer periods of data.</p>
         <input type="text" name="lon" size="10" value="-91.99"> East and
         <input type="text" name="lat" size="10" value="41.99"> North
         </div>
+    </td>
+    <td rowspan="3">
+        {$artccSelect}
     </td>
 </tr>
 
