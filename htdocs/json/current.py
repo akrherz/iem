@@ -59,14 +59,17 @@ def run(network, station):
     ob["presentwx"] = [] if row["wxcodes"] is None else row["wxcodes"]
     ob["precip_today[in]"] = row["s_pday"]
     ob["c1tmpf[F]"] = row["c1tmpf"]
+    ob["srad_1h[J m-2]"] = row["srad_1h_j"]
+    for depth in [4, 8, 16, 20, 32, 40, 64, 128]:
+        ob[f"tsoil[{depth}in][F]"] = row[f"tsoil_{depth}in_f"]
     return json.dumps(data)
 
 
 @iemapp()
 def application(environ, start_response):
     """Answer request."""
-    network = environ.get("network", "IA_ASOS")[:10].upper()
-    station = environ.get("station", "AMW")[:10].upper()
+    network = environ.get("network", "IA_ASOS")[:32].upper()
+    station = environ.get("station", "AMW")[:64].upper()
     cb = environ.get("callback", None)
 
     mckey = f"/json/current/{network}/{station}"
