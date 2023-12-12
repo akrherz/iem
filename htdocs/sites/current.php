@@ -165,6 +165,15 @@ EOM;
         "c3smv" => "Soil Moisture [%]",
         "c4smv" => "Soil Moisture [%]",
         "c5smv" => "Soil Moisture [%]",
+        "srad_1h[J m-2]" => "Solar Radiation [past 60 minutes] [J m-2]",
+        "tsoil[4in][F]" => "Soil Temperature [4 inch / 10 cm] [F]",
+        "tsoil[8in][F]" => "Soil Temperature [8 inch / 20 cm] [F]",
+        "tsoil[16in][F]" => "Soil Temperature [16 inch / 40 cm] [F]",
+        "tsoil[20in][F]" => "Soil Temperature [20 inch / 50 cm] [F]",
+        "tsoil[32in][F]" => "Soil Temperature [32 inch / 80 cm] [F]",
+        "tsoil[40in][F]" => "Soil Temperature [40 inch / 100 cm] [F]",
+        "tsoil[64in][F]" => "Soil Temperature [64 inch / 160 cm] [F]",
+        "tsoil[128in][F]" => "Soil Temperature [128 inch / 320 cm] [F]",
         "raw" => "Raw Observation/Product"
     );
 
@@ -204,6 +213,19 @@ EOM;
         } // End if
     } // End if
     $table .= "</table>";
+
+    // Cloud Levels
+    $skyc = $json["last_ob"]["skycover[code]"];
+    $skyl = $json["last_ob"]["skylevel[ft]"];
+    for ($i = 0; $i < 4; $i++) {
+        if (is_null($skyc[$i])) continue;
+        $table .= sprintf(
+            "<b>Cloud Layer %s</b>: %s (%s feet)<br />",
+            $i + 1,
+            $skyc[$i],
+            $skyl[$i]
+        );
+    }
 }
 
 $table .= sprintf("<p>This data was provided by a " .
