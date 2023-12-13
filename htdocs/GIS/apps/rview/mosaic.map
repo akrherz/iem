@@ -598,7 +598,7 @@ LAYER
   NAME cwas
   STATUS OFF
   TYPE POLYGON
-  DATA /mesonet/data/gis/static/shape/4326/us/cwas.shp
+  DATA /mesonet/data/gis/static/shape/4326/nws/cwas.shp
   PROJECTION
    "init=epsg:4326"
   END
