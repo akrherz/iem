@@ -120,7 +120,7 @@ def plotter(fdict):
 
     hrlimit = "and extract(hour from f.valid at time zone 'UTC') = :hour "
     params["hour"] = hour
-    if ctx["h"] == "ALL":
+    if ctx["h"].upper() == "ALL":
         hrlimit = ""
     with get_sqlalchemy_conn("raob") as conn:
         df = pd.read_sql(
