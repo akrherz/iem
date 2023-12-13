@@ -16,7 +16,11 @@ import numpy as np
 import pandas as pd
 from pandas.api.types import is_datetime64_any_dtype as isdt
 from PIL import Image
-from pyiem.exceptions import IncompleteWebRequest, NoDataFound
+from pyiem.exceptions import (
+    IncompleteWebRequest,
+    NoDataFound,
+    UnknownStationException,
+)
 from pyiem.plot.use_agg import plt
 from pyiem.util import utc
 from pyiem.webutil import iemapp
@@ -108,11 +112,12 @@ def handle_error(exp, fmt, uri):
     """Handle errors"""
     exc_type, exc_value, exc_traceback = sys.exc_info()
     tb = traceback.extract_tb(exc_traceback)[-1]
-    sys.stderr.write(
-        f"URI:{uri} {exp.__class__.__name__} "
-        f"method:{tb[2]} lineno:{tb[1]} {exp}\n"
-    )
-    if not isinstance(exp, NoDataFound):
+    if not isinstance(exp, UnknownStationException):
+        sys.stderr.write(
+            f"URI:{uri} {exp.__class__.__name__} "
+            f"method:{tb[2]} lineno:{tb[1]} {exp}\n"
+        )
+    if not isinstance(exp, (NoDataFound, UnknownStationException)):
         traceback.print_exc()
     del (exc_type, exc_value, exc_traceback, tb)
     if fmt in ["png", "svg", "pdf"]:
@@ -208,6 +213,8 @@ def workflow(mc, environ, fmt):
     # res should be a 3 length tuple
     try:
         res, meta = get_res_by_fmt(scriptnum, fmt, fdict)
+    except UnknownStationException as exp:
+        return HTTP400, handle_error(exp, fmt, environ.get("REQUEST_URI"))
     except NoDataFound as exp:
         return HTTP400, handle_error(exp, fmt, environ.get("REQUEST_URI"))
     except Exception as exp:
