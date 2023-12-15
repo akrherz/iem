@@ -8,8 +8,6 @@ cd asos
 python compute_daily.py
 
 cd ../other
-# Important that this runs first, so that srad is there.
-python ot2archive.py $(date --date '1 day ago' +'%Y %m %d')
 python update_daily_srad.py $(date --date '1 day ago' +'%Y %m %d')
 
 # Need this done so that IEMRE daily grids are there for DEP
