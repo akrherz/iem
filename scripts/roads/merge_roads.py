@@ -2,12 +2,10 @@
 import datetime
 
 import requests
-from ingest_roads_rest import URI
+from ingest_roads_rest import LOG, URI
 from pandas import read_sql
-from pyiem.util import get_dbconn, get_sqlalchemy_conn, logger, utc
+from pyiem.util import get_dbconn, get_sqlalchemy_conn, utc
 from shapely.geometry import LineString, MultiLineString
-
-LOG = logger()
 
 
 def main():
@@ -17,7 +15,7 @@ def main():
     with get_sqlalchemy_conn("postgis") as conn:
         df = read_sql(
             "SELECT idot_id, longname from roads_base "
-            "where archive_end is null",
+            "where (archive_end is null or archive_end > now()) ",
             conn,
             index_col="idot_id",
         )
