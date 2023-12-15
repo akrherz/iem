@@ -5,18 +5,17 @@ import datetime
 import glob
 import json
 
+from pyiem.reference import ISO8601
 from pyiem.util import LOG, html_escape
 from pyiem.webutil import iemapp
 from pymemcache.client import Client
-
-ISO = "%Y-%m-%dT%H:%M:%SZ"
 
 
 def run(product):
     """Actually run for this product"""
 
     res = {
-        "generation_time_utc": datetime.datetime.utcnow().strftime(ISO),
+        "generation_time_utc": datetime.datetime.utcnow().strftime(ISO8601),
         "product": product,
         "meta": [],
     }

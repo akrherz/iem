@@ -1,7 +1,7 @@
 """ Recent METARs containing some pattern """
 import json
 
-from pyiem.reference import TRACE_VALUE
+from pyiem.reference import ISO8601, TRACE_VALUE
 from pyiem.util import get_dbconnc, html_escape
 from pyiem.webutil import iemapp
 from pymemcache.client import Client
@@ -71,7 +71,7 @@ def get_data(q):
                     "name": row["name"],
                     "value": trace(row["data"]),
                     "metar": row["raw"],
-                    "valid": row["utc_valid"].strftime("%Y-%m-%dT%H:%M:%SZ"),
+                    "valid": row["utc_valid"].strftime(ISO8601),
                 },
                 "geometry": {
                     "type": "Point",

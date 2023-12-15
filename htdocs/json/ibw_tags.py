@@ -3,6 +3,7 @@ import datetime
 import json
 
 from pyiem.exceptions import NoDataFound
+from pyiem.reference import ISO8601
 from pyiem.util import get_dbconn, html_escape, utc
 from pyiem.webutil import iemapp
 from pymemcache.client import Client
@@ -14,7 +15,7 @@ def ptime(val):
     """Pretty print a timestamp"""
     if val is None:
         return val
-    return val.strftime("%Y-%m-%dT%H:%M:%SZ")
+    return val.strftime(ISO8601)
 
 
 def run(wfo, damagetag, year):

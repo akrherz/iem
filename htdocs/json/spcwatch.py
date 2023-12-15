@@ -6,6 +6,7 @@ import json
 from zoneinfo import ZoneInfo
 
 import pandas as pd
+from pyiem.reference import ISO8601
 from pyiem.util import get_dbconnc, html_escape
 from pyiem.webutil import iemapp
 from pymemcache.client import Client
@@ -45,8 +46,8 @@ def pointquery(lon, lat):
                     year=row["ii"].year,
                     type=row["type"],
                     number=row["num"],
-                    issue=row["ii"].strftime("%Y-%m-%dT%H:%M:%SZ"),
-                    expire=row["ee"].strftime("%Y-%m-%dT%H:%M:%SZ"),
+                    issue=row["ii"].strftime(ISO8601),
+                    expire=row["ee"].strftime(ISO8601),
                 ),
                 geometry=json.loads(row["geo"]),
             )
@@ -89,8 +90,8 @@ def dowork(valid):
                     year=row["ii"].year,
                     type=row["type"],
                     number=row["num"],
-                    issue=row["ii"].strftime("%Y-%m-%dT%H:%M:%SZ"),
-                    expire=row["ee"].strftime("%Y-%m-%dT%H:%M:%SZ"),
+                    issue=row["ii"].strftime(ISO8601),
+                    expire=row["ee"].strftime(ISO8601),
                 ),
                 geometry=json.loads(row["geo"]),
             )

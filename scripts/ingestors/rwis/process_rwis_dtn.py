@@ -7,6 +7,7 @@ import requests
 from metpy.units import masked_array, units
 from pyiem.network import Table as NetworkTable
 from pyiem.observation import Observation
+from pyiem.reference import ISO8601
 from pyiem.util import get_dbconn, get_properties, logger, utc
 
 LOG = logger()
@@ -33,8 +34,8 @@ def main():
     # prevent a clock drift issue
     sts = utc(2020, 8, 10, 16)
     ets = utc(2020, 8, 11, 3)
-    edate = ets.strftime("%Y-%m-%dT%H:%M:%SZ")
-    sdate = sts.strftime("%Y-%m-%dT%H:%M:%SZ")
+    edate = ets.strftime(ISO8601)
+    sdate = sts.strftime(ISO8601)
     props = get_properties()
     apikey = props["dtn.apikey"]
     headers = {"accept": "application/json", "apikey": apikey}

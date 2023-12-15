@@ -1,11 +1,10 @@
 """Listing of VTEC emergencies"""
 import json
 
+from pyiem.reference import ISO8601
 from pyiem.util import get_dbconnc, html_escape
 from pyiem.webutil import iemapp
 from pymemcache.client import Client
-
-ISO9660 = "%Y-%m-%dT%H:%M:%SZ"
 
 
 def run():
@@ -40,10 +39,10 @@ def run():
                 phenomena=row["phenomena"],
                 significance=row["significance"],
                 eventid=row["eventid"],
-                issue=row["utc_issue"].strftime(ISO9660),
-                product_issue=row["utc_product_issue"].strftime(ISO9660),
-                expire=row["utc_expire"].strftime(ISO9660),
-                init_expire=row["utc_init_expire"].strftime(ISO9660),
+                issue=row["utc_issue"].strftime(ISO8601),
+                product_issue=row["utc_product_issue"].strftime(ISO8601),
+                expire=row["utc_expire"].strftime(ISO8601),
+                init_expire=row["utc_init_expire"].strftime(ISO8601),
                 uri=uri,
                 wfo=row["wfo"],
                 states=row["states"],

@@ -20,6 +20,7 @@ from zoneinfo import ZoneInfo
 import numpy as np
 import pandas as pd
 from pyiem.network import Table as NetworkTable
+from pyiem.reference import ISO8601
 from pyiem.util import get_sqlalchemy_conn, html_escape
 from pyiem.webutil import iemapp
 from pymemcache.client import Client
@@ -97,7 +98,7 @@ def run(ts, sid, pressure):
         res["profiles"].append(
             dict(
                 station=station,
-                valid=ts.strftime("%Y-%m-%dT%H:%M:%SZ"),
+                valid=ts.strftime(ISO8601),
                 profile=profile,
             )
         )

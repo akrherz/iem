@@ -1,10 +1,10 @@
 """SPC MCD service."""
 import json
 
+from pyiem.reference import ISO8601
 from pyiem.util import get_dbconn, html_escape
 from pyiem.webutil import iemapp
 
-ISO9660 = "%Y-%m-%dT%H:%MZ"
 BASEURL = "https://www.spc.noaa.gov/products/md"
 
 
@@ -31,8 +31,8 @@ def dowork(count, sort):
             dict(
                 spcurl=url,
                 year=row[4],
-                utc_issue=row[0].strftime(ISO9660),
-                utc_expire=row[1].strftime(ISO9660),
+                utc_issue=row[0].strftime(ISO8601),
+                utc_expire=row[1].strftime(ISO8601),
                 product_num=row[2],
                 product_id=row[3],
                 area_sqkm=row[5],

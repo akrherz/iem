@@ -1,11 +1,10 @@
 """Listing of SPC Watches."""
 import json
 
+from pyiem.reference import ISO8601
 from pyiem.util import get_dbconnc, html_escape
 from pyiem.webutil import iemapp
 from pymemcache.client import Client
-
-ISO9660 = "%Y-%m-%dT%H:%M:%SZ"
 
 
 def run(year, is_pds):
@@ -39,8 +38,8 @@ def run(year, is_pds):
                 year=row["year"],
                 num=row["num"],
                 type=row["type"],
-                issue=row["utc_issued"].strftime(ISO9660),
-                expire=row["utc_expired"].strftime(ISO9660),
+                issue=row["utc_issued"].strftime(ISO8601),
+                expire=row["utc_expired"].strftime(ISO8601),
                 product_id_sel=row["product_id_sel"],
                 product_id_wwp=row["product_id_wwp"],
                 tornadoes_1m_strong=row["tornadoes_1m_strong"],

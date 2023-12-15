@@ -9,6 +9,7 @@ import tempfile
 import numpy as np
 import pygrib
 from PIL import Image
+from pyiem.reference import ISO8601
 from pyiem.util import logger, utc
 
 LOG = logger()
@@ -91,9 +92,9 @@ def do_grb(grib, valid, routes):
     subprocess.call(cmd)
     # Do json metadata
     jdict = {
-        "model_init_utc": valid.strftime("%Y-%m-%dT%H:%M:%SZ"),
+        "model_init_utc": valid.strftime(ISO8601),
         "forecast_minute": fxminutes,
-        "model_forecast_utc": fxvalid.strftime("%Y-%m-%dT%H:%M:%SZ"),
+        "model_forecast_utc": fxvalid.strftime(ISO8601),
     }
     with tempfile.NamedTemporaryFile(delete=False, mode="w") as jsontmp:
         json.dump(jdict, jsontmp)

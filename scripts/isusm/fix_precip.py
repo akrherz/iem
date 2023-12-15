@@ -15,6 +15,7 @@ from zoneinfo import ZoneInfo
 import pandas as pd
 import requests
 from pyiem.network import Table as NetworkTable
+from pyiem.reference import ISO8601
 from pyiem.util import get_dbconn, get_sqlalchemy_conn, logger, utc
 
 LOG = logger()
@@ -57,7 +58,7 @@ def get_hdf(nt, date):
                     dict(
                         station=station,
                         valid=datetime.datetime.strptime(
-                            entry["end_valid"], "%Y-%m-%dT%H:%M:%SZ"
+                            entry["end_valid"], ISO8601
                         ).replace(tzinfo=ZoneInfo("UTC")),
                         precip_in=entry["precip_in"],
                     )

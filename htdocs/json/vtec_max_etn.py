@@ -3,6 +3,7 @@ import datetime
 import json
 
 import pandas as pd
+from pyiem.reference import ISO8601
 from pyiem.util import get_dbconn, html_escape
 from pyiem.webutil import iemapp
 from pymemcache.client import Client
@@ -32,7 +33,7 @@ def run(year, fmt):
     )
     res = {
         "count": cursor.rowcount,
-        "generated_at": utcnow.strftime("%Y-%m-%dT%H:%M:%SZ"),
+        "generated_at": utcnow.strftime(ISO8601),
         "columns": [
             {"name": "wfo", "type": "str"},
             {"name": "phenomena", "type": "str"},

@@ -3,6 +3,7 @@ import datetime
 import json
 from zoneinfo import ZoneInfo
 
+from pyiem.reference import ISO8601
 from pyiem.util import get_dbconnc, html_escape, utc
 from pyiem.webutil import iemapp
 from pymemcache.client import Client
@@ -16,7 +17,7 @@ def run(ts):
         utcnow = utc()
         t0 = utcnow + datetime.timedelta(days=7)
     else:
-        utcnow = datetime.datetime.strptime(ts, "%Y-%m-%dT%H:%M:%SZ").replace(
+        utcnow = datetime.datetime.strptime(ts, ISO8601).replace(
             tzinfo=ZoneInfo("UTC")
         )
         t0 = utcnow
@@ -40,7 +41,7 @@ def run(ts):
     res = {
         "type": "FeatureCollection",
         "features": [],
-        "generation_time": utcnow.strftime("%Y-%m-%dT%H:%M:%SZ"),
+        "generation_time": utcnow.strftime(ISO8601),
         "count": cursor.rowcount,
     }
     for row in cursor:
@@ -48,8 +49,8 @@ def run(ts):
             f"{row['wfo']}.{row['phenomena']}.{row['significance']}."
             f"{row['eventid']:04.0f}"
         )
-        ets = row["utc_polygon_end"].strftime("%Y-%m-%dT%H:%M:%SZ")
-        sts = row["utc_polygon_begin"].strftime("%Y-%m-%dT%H:%M:%SZ")
+        ets = row["utc_polygon_end"].strftime(ISO8601)
+        sts = row["utc_polygon_begin"].strftime(ISO8601)
         sid += "." + sts
         res["features"].append(
             dict(

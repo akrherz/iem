@@ -26,6 +26,7 @@ import numpy as np
 import requests
 from PIL import Image
 from pyiem import mrms
+from pyiem.reference import ISO8601
 from pyiem.util import exponential_backoff, logger, ncopen, utc
 
 LOG = logger()
@@ -94,13 +95,16 @@ def main(argv):
     png.putpalette(mrms.make_colorramp())
     png.save(f"{tmp.name}.png")
 
-    ISO = "%Y-%m-%dT%H:%M:%SZ"
     metadata = {
-        "start_valid": (valid - datetime.timedelta(minutes=15)).strftime(ISO),
-        "end_valid": (valid + datetime.timedelta(minutes=15)).strftime(ISO),
+        "start_valid": (valid - datetime.timedelta(minutes=15)).strftime(
+            ISO8601
+        ),
+        "end_valid": (valid + datetime.timedelta(minutes=15)).strftime(
+            ISO8601
+        ),
         "units": "mm",
         "source": "F" if source == "" else source,  # E, L, F
-        "generation_time": utc().strftime(ISO),
+        "generation_time": utc().strftime(ISO8601),
     }
     with open(f"{tmp.name}.json", "w", encoding="utf8") as fp:
         json.dump(metadata, fp)

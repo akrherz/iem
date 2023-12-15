@@ -3,10 +3,10 @@ import json
 from io import BytesIO, StringIO
 
 import pandas as pd
+from pyiem.reference import ISO8601
 from pyiem.util import get_dbconnc, html_escape
 from pyiem.webutil import iemapp
 
-ISO9660 = "%Y-%m-%dT%H:%M:%SZ"
 EXL = "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"
 
 
@@ -75,10 +75,10 @@ def get_res(state, year, phenomena, significance):
                 hvtec_nwsli=row["nwsli"],
                 area=float(row["myarea"]),
                 locations=row["locations"],
-                issue=row["utc_issue"].strftime(ISO9660),
-                product_issue=row["utc_product_issue"].strftime(ISO9660),
-                expire=row["utc_expire"].strftime(ISO9660),
-                init_expire=row["utc_init_expire"].strftime(ISO9660),
+                issue=row["utc_issue"].strftime(ISO8601),
+                product_issue=row["utc_product_issue"].strftime(ISO8601),
+                expire=row["utc_expire"].strftime(ISO8601),
+                init_expire=row["utc_init_expire"].strftime(ISO8601),
                 uri=uri,
                 wfo=row["wfo"],
             )

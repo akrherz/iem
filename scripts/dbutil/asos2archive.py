@@ -12,11 +12,11 @@ Run from RUN_10MIN.sh
 import datetime
 import sys
 
+from pyiem.reference import ISO8601
 from pyiem.util import get_dbconnc, logger, utc
 
 LOG = logger()
 PROPERTY_NAME = "asos2archive_last"
-ISO9660 = "%Y-%m-%dT%H:%M:%SZ"
 RMTHRES = utc(1996, 7, 1)
 
 
@@ -45,7 +45,7 @@ def get_first_updated():
         LOG.warning("iem property %s is not set, abort!", PROPERTY_NAME)
         sys.exit()
 
-    dt = datetime.datetime.strptime(cursor.fetchone()["propvalue"], ISO9660)
+    dt = datetime.datetime.strptime(cursor.fetchone()["propvalue"], ISO8601)
     return dt.replace(tzinfo=datetime.timezone.utc)
 
 
@@ -54,7 +54,7 @@ def set_last_updated(value):
     pgconn, cursor = get_dbconnc("mesosite")
     cursor.execute(
         "UPDATE properties SET propvalue = %s where propname = %s",
-        (value.strftime(ISO9660), PROPERTY_NAME),
+        (value.strftime(ISO8601), PROPERTY_NAME),
     )
     if cursor.rowcount == 0:
         LOG.info("iem property %s did not update, abort!", PROPERTY_NAME)
@@ -208,8 +208,8 @@ def main():
 
     LOG.info(
         "Processing %s thru %s",
-        first_updated.strftime(ISO9660),
-        last_updated.strftime(ISO9660),
+        first_updated.strftime(ISO8601),
+        last_updated.strftime(ISO8601),
     )
 
     for madis in [False, True]:

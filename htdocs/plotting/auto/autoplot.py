@@ -22,6 +22,7 @@ from pyiem.exceptions import (
     UnknownStationException,
 )
 from pyiem.plot.use_agg import plt
+from pyiem.reference import ISO8601
 from pyiem.util import utc
 from pyiem.webutil import iemapp
 from pymemcache.client import Client
@@ -266,7 +267,7 @@ def workflow(mc, environ, fmt):
                     ZoneInfo("UTC"),
                     timezone.utc,
                 ]:
-                    df[column] = df[column].dt.strftime("%Y-%m-%dT%H:%M:%SZ")
+                    df[column] = df[column].dt.strftime(ISO8601)
                 else:
                     df[column] = df[column].dt.strftime("%Y-%m-%dT%H:%M:%S")
 

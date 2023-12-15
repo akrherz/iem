@@ -1,6 +1,7 @@
 """Current Observation for a station and network"""
 import json
 
+from pyiem.reference import ISO8601
 from pyiem.util import get_dbconnc, html_escape, utc
 from pyiem.webutil import iemapp
 from pymemcache.client import Client
@@ -28,12 +29,12 @@ def run(network, station):
     row = cursor.fetchone()
     pgconn.close()
     data = {}
-    data["server_gentime"] = utc().strftime("%Y-%m-%dT%H:%M:%SZ")
+    data["server_gentime"] = utc().strftime(ISO8601)
     data["id"] = station
     data["network"] = network
     ob = data.setdefault("last_ob", {})
     ob["local_valid"] = row["localtime"].strftime("%Y-%m-%d %H:%M")
-    ob["utc_valid"] = row["utctime"].strftime("%Y-%m-%dT%H:%M:00Z")
+    ob["utc_valid"] = row["utctime"].strftime(ISO8601)
     ob["airtemp[F]"] = row["tmpf"]
     ob["max_dayairtemp[F]"] = row["max_tmpf"]
     ob["min_dayairtemp[F]"] = row["min_tmpf"]

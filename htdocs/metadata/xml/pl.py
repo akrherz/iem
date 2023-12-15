@@ -2,6 +2,7 @@
 
 from pyiem.exceptions import IncompleteWebRequest
 from pyiem.network import Table as NetworkTable
+from pyiem.reference import ISO8601
 from pyiem.webutil import iemapp
 
 
@@ -93,7 +94,7 @@ gml:id="%(network)s_%(station)s">
         lat=nt.sts[station]["lat"],
         elev=nt.sts[station]["elevation"],
         lon=nt.sts[station]["lon"],
-        sts=nt.sts[station]["archive_begin"].strftime("%Y-%m-%dT%H:%M:%SZ"),
+        sts=nt.sts[station]["archive_begin"].strftime(ISO8601),
     )
 
     headers = [("Content-type", "text/xml")]

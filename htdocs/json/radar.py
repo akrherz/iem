@@ -7,6 +7,7 @@ import json
 import os.path
 
 from pyiem.exceptions import BadWebRequest
+from pyiem.reference import ISO8601
 from pyiem.util import get_dbconn, html_escape
 from pyiem.webutil import iemapp
 
@@ -33,7 +34,7 @@ def parse_time(s):
         if len(s) == 17:
             date = datetime.datetime.strptime(s, "%Y-%m-%dT%H:%MZ")
         elif len(s) == 20:
-            date = datetime.datetime.strptime(s, "%Y-%m-%dT%H:%M:%SZ")
+            date = datetime.datetime.strptime(s, ISO8601)
         else:
             date = datetime.datetime.utcnow()
     except Exception:

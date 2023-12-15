@@ -350,7 +350,7 @@ the parameters are required.</p>
  </tr>
 <tr><th colspan="3">Time Specification Option 1</th></tr>
 <tr>
- <td>begints=ISO9660<br />endts=ISO9660</td>
+ <td>begints=ISO8601<br />endts=ISO8601</td>
  <td>Last 4 Hour Period</td>
  <td>This start time and end time sets the window to look for NWS Storm Based
  Warnings and Local Storm Reports.  For the case of warnings, the warning must
@@ -458,7 +458,7 @@ example, <code>fcster=forecaster10</code></td></tr>
 <h4>Resulting JSON Schema.</h4>
 
 <pre>
-{"generated_at": "ISO9660",
+{"generated_at": "ISO8601",
  "params": {dictionary of how API was called},
  "stats": {dictionary of generated statistics},
    "area_verify%": float # percent of polygon area verified

@@ -2,6 +2,7 @@
 import datetime
 import json
 
+from pyiem.reference import ISO8601
 from pyiem.util import get_dbconnc, html_escape
 from pyiem.webutil import iemapp
 from pymemcache.client import Client
@@ -28,12 +29,12 @@ def run():
     res = {
         "type": "FeatureCollection",
         "features": [],
-        "generation_time": utcnow.strftime("%Y-%m-%dT%H:%M:%SZ"),
+        "generation_time": utcnow.strftime(ISO8601),
         "count": cursor.rowcount,
     }
     for row in cursor:
-        sts = row["utc_issue"].strftime("%Y-%m-%dT%H:%M:%SZ")
-        ets = row["utc_expire"].strftime("%Y-%m-%dT%H:%M:%SZ")
+        sts = row["utc_issue"].strftime(ISO8601)
+        ets = row["utc_expire"].strftime(ISO8601)
         href = f"/api/1/nwstext/{row['product_id']}"
         res["features"].append(
             dict(

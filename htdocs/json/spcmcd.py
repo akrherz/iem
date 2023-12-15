@@ -2,11 +2,10 @@
 import json
 import os
 
+from pyiem.reference import ISO8601
 from pyiem.util import get_dbconnc, html_escape
 from pyiem.webutil import iemapp
 from pymemcache.client import Client
-
-ISO9660 = "%Y-%m-%dT%H:%MZ"
 
 
 def dowork(lon, lat):
@@ -36,8 +35,8 @@ def dowork(lon, lat):
             dict(
                 spcurl=url,
                 year=row["year"],
-                utc_issue=row["i"].strftime(ISO9660),
-                utc_expire=row["e"].strftime(ISO9660),
+                utc_issue=row["i"].strftime(ISO8601),
+                utc_expire=row["e"].strftime(ISO8601),
                 product_num=row["num"],
                 product_id=row["product_id"],
                 concerning=row["concerning"],

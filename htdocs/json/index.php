@@ -478,13 +478,13 @@ $services[] = array(
     "url" => "/json/sbw_by_point.py?lon={longitude}&lat={latitude}&valid={valid}",
     "desc" => "Provides a listing of storm based (polygon) warnings 
     based on the provided latitude and longitude pair for warnings 
-  dating back to 1 Jan 2005.  You also provide an ISO-9660
+  dating back to 1 Jan 2005.  You also provide an ISO-8601
   <code>valid</code> parameter to get any storm based warnings active
   at the given UTC time and location.",
     "vars" => array(
         "lat" => "Latitude in degrees",
         "lon" => "Longitude in (degrees east)",
-        "valid" => "UTC ISO-9660 timestamp"
+        "valid" => "UTC ISO-8601 timestamp"
     ),
     "example" => array(
         "{latitude}" => "42.5",

@@ -9,6 +9,7 @@ from datetime import date, timedelta
 import numpy as np
 import pygrib
 from pyiem import iemre
+from pyiem.reference import ISO8601
 from pyiem.util import logger, ncopen, utc
 from scipy.interpolate import NearestNDInterpolator
 
@@ -23,7 +24,7 @@ def create(ts):
     with ncopen(fn, "w") as nc:
         nc.title = "NDFD on IEMRE Grid."
         nc.contact = "Daryl Herzmann, akrherz@iastate.edu, 515-294-5978"
-        nc.ndfd_forecast = f"{ts:%Y-%m-%dT%H:%M:%SZ}"
+        nc.ndfd_forecast = ts.strftime(ISO8601)
         nc.history = f"{date.today():%d %B %Y} Generated"
 
         # Setup Dimensions

@@ -3,6 +3,7 @@ import datetime
 import json
 from zoneinfo import ZoneInfo
 
+from pyiem.reference import ISO8601
 from pyiem.util import get_dbconnc, html_escape
 from pyiem.webutil import iemapp
 from pymemcache.client import Client
@@ -57,7 +58,7 @@ def run(ts, fmt):
         res = {
             "type": "FeatureCollection",
             "features": [],
-            "generation_time": utcnow.strftime("%Y-%m-%dT%H:%M:%SZ"),
+            "generation_time": utcnow.strftime(ISO8601),
             "count": cursor.rowcount,
         }
         for i, row in enumerate(cursor):
@@ -81,9 +82,7 @@ def run(ts, fmt):
                         "top": row["top"],
                         "drct": row["drct"],
                         "sknt": row["sknt"],
-                        "valid": row["utc_valid"].strftime(
-                            "%Y-%m-%dT%H:%M:%SZ"
-                        ),
+                        "valid": row["utc_valid"].strftime(ISO8601),
                     },
                     "geometry": {
                         "type": "Point",
@@ -117,7 +116,7 @@ def run(ts, fmt):
                     row["top"],
                     row["drct"],
                     row["sknt"],
-                    row["utc_valid"].strftime("%Y-%m-%dT%H:%M:%SZ"),
+                    row["utc_valid"].strftime(ISO8601),
                 ]
             ]
         )
