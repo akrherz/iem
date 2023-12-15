@@ -26,7 +26,6 @@ def fetcher(station, sts, ets):
         "pday",
         "pmonth",
         "srad",
-        "c1tmpf",
     ]
 
     pgconn, cursor = get_dbconnc("other")
@@ -44,7 +43,7 @@ def fetcher(station, sts, ets):
             "station,valid_CST_CDT,air_tmp_F,dew_point_F,"
             "wind_dir_deg,wind_sped_kts,wind_gust_kts,relh_%,"
             "alti_in,pcpncnt_in,precip_day_in,precip_month_in,"
-            "solar_rad_wms,c1tmpf\n"
+            "solar_rad_wms\n"
         )
     )
 
