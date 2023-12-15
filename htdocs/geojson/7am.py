@@ -4,7 +4,7 @@ import json
 from zoneinfo import ZoneInfo
 
 from pyiem.exceptions import IncompleteWebRequest
-from pyiem.reference import TRACE_VALUE
+from pyiem.reference import ISO8601, TRACE_VALUE
 from pyiem.util import get_dbconnc, html_escape
 from pyiem.webutil import iemapp
 from pymemcache.client import Client
@@ -70,7 +70,7 @@ def run_azos(ts):
     res = {
         "type": "FeatureCollection",
         "features": [],
-        "generation_time": utcnow.strftime("%Y-%m-%dT%H:%M:%SZ"),
+        "generation_time": utcnow.strftime(ISO8601),
         "count": cursor.rowcount,
     }
     for row in cursor:
@@ -115,7 +115,7 @@ def run(ts, networks):
     res = {
         "type": "FeatureCollection",
         "features": [],
-        "generation_time": utcnow.strftime("%Y-%m-%dT%H:%M:%SZ"),
+        "generation_time": utcnow.strftime(ISO8601),
         "count": cursor.rowcount,
     }
     for row in cursor:

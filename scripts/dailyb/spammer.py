@@ -12,6 +12,7 @@ from zoneinfo import ZoneInfo
 
 import requests
 import wwa  # @UnresolvedImport
+from pyiem.reference import ISO8601
 from pyiem.util import (
     exponential_backoff,
     get_dbconnc,
@@ -47,7 +48,7 @@ def get_github_commits():
     utcnow = datetime.datetime.utcnow()
     yesterday = utcnow - datetime.timedelta(hours=24)
     yesterday = yesterday.replace(hour=12, minute=0, second=0)
-    iso = yesterday.strftime("%Y-%m-%dT%H:%M:%SZ")
+    iso = yesterday.strftime(ISO8601)
 
     txt = ["> IEM Code Pushes <to branch> on Github\n"]
     html = ["<h3>IEM Code Pushes &lt;to branch&gt; on Github</h3>"]
@@ -74,9 +75,7 @@ def get_github_commits():
                 continue
             hashes.append(commit["sha"])
             timestring = commit["commit"]["author"]["date"]
-            utcvalid = datetime.datetime.strptime(
-                timestring, "%Y-%m-%dT%H:%M:%SZ"
-            )
+            utcvalid = datetime.datetime.strptime(timestring, ISO8601)
             valid = utcvalid.replace(tzinfo=ZoneInfo("UTC")).astimezone(
                 ZoneInfo("America/Chicago")
             )

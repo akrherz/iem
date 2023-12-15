@@ -9,6 +9,7 @@ import numpy as np
 import pandas as pd
 from metpy.units import units
 from pyiem.network import Table as NetworkTable
+from pyiem.reference import ISO8601
 from pyiem.util import convert_value, get_sqlalchemy_conn
 from pyiem.webutil import iemapp
 
@@ -147,7 +148,7 @@ def use_table(sio):
                 sid,
                 nt.sts[sid]["lat"],
                 nt.sts[sid]["lon"],
-                row["utc_valid"].strftime("%Y-%m-%dT%H:%M:%SZ"),
+                row["utc_valid"].strftime(ISO8601),
                 nt.sts[sid]["elevation"],
                 do_soil_moisture(row),
                 p(hr_row["slrkj_tot"] * 1000.0 / 3600.0, 1, 0, 1600),

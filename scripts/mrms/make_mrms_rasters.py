@@ -16,6 +16,7 @@ import numpy as np
 import pygrib
 from PIL import Image
 from pyiem import mrms
+from pyiem.reference import ISO8601
 from pyiem.util import logger
 
 LOG = logger()
@@ -103,8 +104,8 @@ def doit(gts, hr):
     if hr == 72:
         times.append(gts - datetime.timedelta(hours=48))
     metadata = {
-        "start_valid": sts.strftime("%Y-%m-%dT%H:%M:%SZ"),
-        "end_valid": gts.strftime("%Y-%m-%dT%H:%M:%SZ"),
+        "start_valid": sts.strftime(ISO8601),
+        "end_valid": gts.strftime(ISO8601),
         "units": "mm",
     }
 

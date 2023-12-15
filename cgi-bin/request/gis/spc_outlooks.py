@@ -99,7 +99,7 @@ def run(ctx, start_response):
     return zio.getvalue()
 
 
-@iemapp()
+@iemapp(default_tz="UTC")
 def application(environ, start_response):
     """Do something fun!"""
     if "sts" not in environ:

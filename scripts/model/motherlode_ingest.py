@@ -11,6 +11,7 @@ from zoneinfo import ZoneInfo
 import pandas as pd
 import requests
 from pyiem.network import Table as NetworkTable
+from pyiem.reference import ISO8601
 from pyiem.util import get_dbconn, logger
 
 LOG = logger()
@@ -119,7 +120,7 @@ def run(mcursor, model, station, lon, lat, ts):
         sbcape = xref(row, "sbcape", model)
         sbcin = xref(row, "sbcin", model)
         pwater = xref(row, "pwater", model)
-        fts = datetime.datetime.strptime(row["time"], "%Y-%m-%dT%H:%M:%SZ")
+        fts = datetime.datetime.strptime(row["time"], ISO8601)
         fts = fts.replace(tzinfo=ZoneInfo("UTC"))
         sql = f"""INSERT into {table} (station, model, runtime,
               ftime, sbcape, sbcin, pwater)

@@ -217,7 +217,7 @@ def do_excel(sql):
     return bio.getvalue()
 
 
-@iemapp()
+@iemapp(default_tz="UTC")
 def application(environ, start_response):
     """Go Main Go"""
     if "sts" not in environ:

@@ -3,11 +3,10 @@ import datetime
 
 import simplejson as json
 from pyiem.exceptions import IncompleteWebRequest
+from pyiem.reference import ISO8601
 from pyiem.util import get_dbconnc, html_escape
 from pyiem.webutil import iemapp
 from pymemcache.client import Client
-
-ISO = "%Y-%m-%dT%H:%M:%SZ"
 
 
 def run_lsrs(wfo, year, phenomena, significance, etn, sbw):
@@ -47,9 +46,7 @@ def run_lsrs(wfo, year, phenomena, significance, etn, sbw):
     res = {
         "type": "FeatureCollection",
         "features": [],
-        "generation_time": datetime.datetime.utcnow().strftime(
-            "%Y-%m-%dT%H:%M:%SZ"
-        ),
+        "generation_time": datetime.datetime.utcnow().strftime(ISO8601),
         "count": cursor.rowcount,
     }
     for row in cursor:
@@ -57,7 +54,7 @@ def run_lsrs(wfo, year, phenomena, significance, etn, sbw):
             dict(
                 type="Feature",
                 properties=dict(
-                    utc_valid=row["utc_valid"].strftime(ISO),
+                    utc_valid=row["utc_valid"].strftime(ISO8601),
                     event=row["typetext"],
                     type=row["type"],
                     magnitude=row["magnitude"],
@@ -92,9 +89,7 @@ def run_sbw(wfo, year, phenomena, significance, etn):
     res = {
         "type": "FeatureCollection",
         "features": [],
-        "generation_time": datetime.datetime.utcnow().strftime(
-            "%Y-%m-%dT%H:%M:%SZ"
-        ),
+        "generation_time": datetime.datetime.utcnow().strftime(ISO8601),
         "count": cursor.rowcount,
     }
     for row in cursor:
@@ -131,9 +126,7 @@ def run(wfo, year, phenomena, significance, etn):
     res = {
         "type": "FeatureCollection",
         "features": [],
-        "generation_time": datetime.datetime.utcnow().strftime(
-            "%Y-%m-%dT%H:%M:%SZ"
-        ),
+        "generation_time": datetime.datetime.utcnow().strftime(ISO8601),
         "count": cursor.rowcount,
     }
     for row in cursor:

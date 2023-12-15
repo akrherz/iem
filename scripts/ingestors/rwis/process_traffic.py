@@ -7,6 +7,7 @@ import datetime
 import pandas as pd
 import requests
 from pyiem.network import Table as NetworkTable
+from pyiem.reference import ISO8601
 from pyiem.util import get_dbconnc, get_properties, logger, utc
 
 LOG = logger()
@@ -81,8 +82,8 @@ def main():
     # prevent a clock drift issue
     ets = utc() - datetime.timedelta(minutes=1)
     sts = ets - datetime.timedelta(hours=4)
-    edate = ets.strftime("%Y-%m-%dT%H:%M:%SZ")
-    sdate = sts.strftime("%Y-%m-%dT%H:%M:%SZ")
+    edate = ets.strftime(ISO8601)
+    sdate = sts.strftime(ISO8601)
     meta = load_metadata()
     props = get_properties()
     apikey = props["dtn.apikey"]

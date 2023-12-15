@@ -7,11 +7,10 @@ import pandas as pd
 from pandas.io.sql import read_sql
 from pyiem.exceptions import IncompleteWebRequest
 from pyiem.nws.products.spcpts import THRESHOLD_ORDER
+from pyiem.reference import ISO8601
 from pyiem.util import get_dbconnc, get_sqlalchemy_conn, html_escape
 from pyiem.webutil import iemapp
 from pymemcache.client import Client
-
-ISO9660 = "%Y-%m-%dT%H:%MZ"
 
 
 def get_order(threshold):
@@ -50,9 +49,9 @@ def dotime(time, lon, lat, day, cat):
             index_col=None,
         )
     res = {
-        "generation_time": datetime.datetime.utcnow().strftime(ISO9660),
+        "generation_time": datetime.datetime.utcnow().strftime(ISO8601),
         "query_params": {
-            "time": ts.strftime(ISO9660),
+            "time": ts.strftime(ISO8601),
             "lon": lon,
             "lat": lat,
             "cat": cat,
@@ -66,9 +65,9 @@ def dotime(time, lon, lat, day, cat):
     df = df.sort_values("threshold_rank", ascending=False)
     res["outlook"] = {
         "threshold": df.iloc[0]["threshold"],
-        "utc_product_issue": pd.Timestamp(df.iloc[0]["v"]).strftime(ISO9660),
-        "utc_issue": pd.Timestamp(df.iloc[0]["i"]).strftime(ISO9660),
-        "utc_expire": pd.Timestamp(df.iloc[0]["e"]).strftime(ISO9660),
+        "utc_product_issue": pd.Timestamp(df.iloc[0]["v"]).strftime(ISO8601),
+        "utc_issue": pd.Timestamp(df.iloc[0]["i"]).strftime(ISO8601),
+        "utc_expire": pd.Timestamp(df.iloc[0]["e"]).strftime(ISO8601),
     }
     return json.dumps(res)
 
@@ -122,9 +121,9 @@ def dowork(lon, lat, last, day, cat):
         res["outlooks"].append(
             dict(
                 day=day,
-                utc_issue=row["i"].strftime("%Y-%m-%dT%H:%M:%SZ"),
-                utc_expire=row["e"].strftime("%Y-%m-%dT%H:%M:%SZ"),
-                utc_product_issue=row["v"].strftime("%Y-%m-%dT%H:%M:%SZ"),
+                utc_issue=row["i"].strftime(ISO8601),
+                utc_expire=row["e"].strftime(ISO8601),
+                utc_product_issue=row["v"].strftime(ISO8601),
                 threshold=row["threshold"],
                 category=row["category"],
             )

@@ -9,6 +9,7 @@ from pyiem.util import (
     get_dbconn,
     get_properties,
     logger,
+    set_property,
     utc,
 )
 
@@ -31,14 +32,7 @@ def website_enable_check():
     if status == has_lsrs:
         return
     LOG.warning("Setting homepage.lsrmap.on to %s", has_lsrs)
-    mesosite = get_dbconn("mesosite")
-    cursor = mesosite.cursor()
-    cursor.execute(
-        "UPDATE properties SET propvalue = %s where propname = %s",
-        ("true" if has_lsrs else "false", "homepage.lsrmap.on"),
-    )
-    cursor.close()
-    mesosite.commit()
+    set_property("homepage.lsrmap.on", "true" if has_lsrs else "false")
 
 
 def do(url, fn):

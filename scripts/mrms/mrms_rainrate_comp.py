@@ -17,6 +17,7 @@ import numpy as np
 import pygrib
 from PIL import Image
 from pyiem import mrms
+from pyiem.reference import ISO8601
 from pyiem.util import logger, utc
 
 LOG = logger()
@@ -32,8 +33,8 @@ def workflow(now, realtime):
     sts = now - datetime.timedelta(minutes=2)
     prefix = f"a{minutes}m"
     metadata = {
-        "start_valid": sts.strftime("%Y-%m-%dT%H:%M:%SZ"),
-        "end_valid": now.strftime("%Y-%m-%dT%H:%M:%SZ"),
+        "start_valid": sts.strftime(ISO8601),
+        "end_valid": now.strftime(ISO8601),
         "product": prefix,
         "units": "0.02 mm",
     }

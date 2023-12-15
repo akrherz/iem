@@ -6,18 +6,18 @@ from io import BytesIO, StringIO
 
 import numpy as np
 import pandas as pd
+from pyiem.reference import ISO8601
 from pyiem.util import get_sqlalchemy_conn, utc
 from pyiem.webutil import iemapp
 from sqlalchemy import text
 
-ISO = "%Y-%m-%dT%H:%M:%SZ"
 EXL = "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"
 
 
 def get_events(ctx):
     """Get Events"""
     data = {"data": [], "lon": ctx["lon"], "lat": ctx["lat"], "valid": None}
-    data["generation_time"] = utc().strftime(ISO)
+    data["generation_time"] = utc().strftime(ISO8601)
     valid_limiter = ""
     params = {
         "lon": ctx["lon"],
@@ -27,7 +27,7 @@ def get_events(ctx):
     }
     if "valid" in ctx:
         valid_limiter = " and issue <= :valid and expire > :valid "
-        data["valid"] = ctx["valid"].strftime(ISO)
+        data["valid"] = ctx["valid"].strftime(ISO8601)
         params["valid"] = ctx["valid"]
 
     params["giswkt"] = f"POINT({ctx['lon']} {ctx['lat']})"

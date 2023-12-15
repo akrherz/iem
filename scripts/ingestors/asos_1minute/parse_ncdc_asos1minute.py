@@ -23,9 +23,9 @@ import requests
 from pyiem.util import (
     exponential_backoff,
     get_dbconn,
-    get_dbconnc,
     get_sqlalchemy_conn,
     logger,
+    set_property,
     utc,
 )
 from tqdm import tqdm
@@ -301,18 +301,6 @@ def runner(pgconn, metadata, station):
     return count
 
 
-def update_iemprops(ts):
-    """db update"""
-    pgconn, cursor = get_dbconnc("mesosite")
-    cursor.execute(
-        "UPDATE properties SET propvalue = %s "
-        "WHERE propname = 'asos.1min.end'",
-        (ts.strftime("%Y-%m-%d"),),
-    )
-    cursor.close()
-    pgconn.commit()
-
-
 def init_dataframes(argv) -> list:
     """Build the processing dataframe."""
     # ASOS query limit keeps other sites out of result that may have 1min
@@ -356,7 +344,7 @@ def init_dataframes(argv) -> list:
         for page in [1, 2]:
             dl_realtime(df, dt, mdt, page)
         res.append(df.copy())
-    update_iemprops(dt)
+    set_property("asos.1min.end", dt.strftime("%Y-%m-%d"))
 
     return res
 

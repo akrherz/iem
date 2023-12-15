@@ -3,6 +3,7 @@ import datetime
 import json
 
 from pyiem.network import Table as NetworkTable
+from pyiem.reference import ISO8601
 from pyiem.tracker import loadqc
 from pyiem.util import convert_value, drct2text, get_dbconnc, utc
 from pyiem.webutil import iemapp
@@ -69,7 +70,7 @@ def get_inversion_data(cursor, ts):
                 "id": sid,
                 "properties": {
                     "name": nt.sts[sid]["name"],
-                    "valid_utc": ts.strftime("%Y-%m-%dT%H:%M:%SZ"),
+                    "valid_utc": ts.strftime(ISO8601),
                     "tmpf_15": safe_t(row["tair_15_c_avg"]),
                     "tmpf_5": safe_t(row["tair_5_c_avg"]),
                     "tmpf_10": safe_t(row["tair_10_c_avg"]),
@@ -159,7 +160,7 @@ def get_data(cursor, ts):
                 "type": "Feature",
                 "id": sid,
                 "properties": {
-                    "valid_utc": ts.strftime("%Y-%m-%dT%H:%M:%SZ"),
+                    "valid_utc": ts.strftime(ISO8601),
                     "plant_water_6_30": compute_plant_water(row),
                     "encrh_avg": (
                         f"{safe(row['encrh_avg'], 1)}%"

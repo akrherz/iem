@@ -12,12 +12,12 @@ import numpy as np
 import pygrib
 import rasterio
 from pyiem.mrms import NORTH, WEST
+from pyiem.reference import ISO8601
 from pyiem.util import logger
 from rasterio.transform import from_origin
 
 LOG = logger()
 VERSION = 1
-ISO9660 = "%Y-%m-%dT%H:%M:00Z"
 
 
 def pqinsert(tmpfn, ets, interval):
@@ -127,9 +127,9 @@ def main(argv):
         make_contours(tmp.name)
         os.unlink(f"{tmp.name}.tif")
         mydict = {
-            "generated_at": datetime.datetime.utcnow().strftime(ISO9660),
-            "start_time_utc": sts.strftime(ISO9660),
-            "end_time_utc": ets.strftime(ISO9660),
+            "generated_at": datetime.datetime.utcnow().strftime(ISO8601),
+            "start_time_utc": sts.strftime(ISO8601),
+            "end_time_utc": ets.strftime(ISO8601),
             "2min_files_used": hits,
             "2min_files_missed": misses,
             "script_version": VERSION,

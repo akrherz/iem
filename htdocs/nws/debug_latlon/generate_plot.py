@@ -10,7 +10,7 @@ from pyiem.exceptions import IncompleteWebRequest
 from pyiem.nws.product import str2polygon
 from pyiem.plot import fitbox
 from pyiem.plot.use_agg import plt
-from pyiem.reference import TWITTER_RESOLUTION_INCH
+from pyiem.reference import ISO8601, TWITTER_RESOLUTION_INCH
 from pyiem.util import utc
 from pyiem.webutil import iemapp
 
@@ -74,7 +74,7 @@ def process(environ):
         plot_poly(fig, poly, environ)
         res["geojson"] = gpd.GeoSeries([poly]).__geo_interface__
 
-    fig.text(0.01, 0.01, f"Generated: {utc().strftime('%Y-%m-%dT%H:%M:%SZ')}")
+    fig.text(0.01, 0.01, f"Generated: {utc().strftime(ISO8601)}")
     with tempfile.NamedTemporaryFile() as tmpfd:
         name = os.path.basename(tmpfd.name)
         fig.savefig(f"/var/webtmp/{name}.png")

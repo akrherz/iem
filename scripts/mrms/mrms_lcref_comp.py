@@ -13,6 +13,7 @@ import numpy as np
 import pygrib
 import pyiem.mrms as mrms
 from PIL import Image
+from pyiem.reference import ISO8601
 from pyiem.util import logger, utc
 
 LOG = logger()
@@ -43,8 +44,8 @@ def do(now, realtime=False):
     # Create the image data
     imgdata = np.zeros((szy, szx), "u1")
     metadata = {
-        "start_valid": now.strftime("%Y-%m-%dT%H:%M:%SZ"),
-        "end_valid": now.strftime("%Y-%m-%dT%H:%M:%SZ"),
+        "start_valid": now.strftime(ISO8601),
+        "end_valid": now.strftime(ISO8601),
         "product": "lcref",
         "units": "0.5 dBZ",
     }

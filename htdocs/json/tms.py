@@ -5,6 +5,7 @@ import datetime
 import json
 import os
 
+from pyiem.reference import ISO8601
 from pyiem.util import html_escape
 from pyiem.webutil import iemapp
 from pymemcache.client import Client
@@ -12,9 +13,8 @@ from pymemcache.client import Client
 
 def run():
     """Generate json response"""
-    iso = "%Y-%m-%dT%H:%M:%SZ"
     res = {
-        "generation_utc_time": datetime.datetime.utcnow().strftime(iso),
+        "generation_utc_time": datetime.datetime.utcnow().strftime(ISO8601),
         "services": [],
     }
     fn = "/mesonet/ldmdata/gis/images/4326/USCOMP/n0q_0.json"
@@ -22,7 +22,7 @@ def run():
         return "ERROR"
     with open(fn, encoding="utf-8") as fh:
         j = json.load(fh)
-    vt = datetime.datetime.strptime(j["meta"]["valid"], iso)
+    vt = datetime.datetime.strptime(j["meta"]["valid"], ISO8601)
     res["services"].append(
         {
             "id": "ridge_uscomp_n0q",
@@ -33,7 +33,7 @@ def run():
     fn = "/mesonet/ldmdata/gis/images/4326/USCOMP/n0r_0.json"
     with open(fn, encoding="utf-8") as fh:
         j = json.load(fh)
-    vt = datetime.datetime.strptime(j["meta"]["valid"], iso)
+    vt = datetime.datetime.strptime(j["meta"]["valid"], ISO8601)
     res["services"].append(
         {
             "id": "ridge_uscomp_n0r",

@@ -2,6 +2,7 @@
 import datetime
 import json
 
+from pyiem.reference import ISO8601
 from pyiem.util import get_dbconnc, html_escape
 from pyiem.webutil import iemapp
 from pymemcache.client import Client
@@ -21,7 +22,7 @@ def run():
     res = {
         "type": "FeatureCollection",
         "features": [],
-        "generation_time": utcnow.strftime("%Y-%m-%dT%H:%M:%SZ"),
+        "generation_time": utcnow.strftime(ISO8601),
         "count": cursor.rowcount,
     }
     for row in cursor:

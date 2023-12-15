@@ -2,11 +2,10 @@
 import datetime
 import json
 
+from pyiem.reference import ISO8601
 from pyiem.util import get_dbconnc, html_escape
 from pyiem.webutil import iemapp
 from pymemcache.client import Client
-
-ISO9660 = "%Y-%m-%dT%H:%M:%SZ"
 
 
 def run(wfo, year, phenomena, significance, etn):
@@ -31,7 +30,7 @@ def run(wfo, year, phenomena, significance, etn):
         (wfo, etn, phenomena, significance),
     )
     res = {
-        "generation_time": datetime.datetime.utcnow().strftime(ISO9660),
+        "generation_time": datetime.datetime.utcnow().strftime(ISO8601),
         "year": year,
         "phenomena": phenomena,
         "significance": significance,
@@ -49,8 +48,8 @@ def run(wfo, year, phenomena, significance, etn):
         for token in row["svs_updates"].split("__"):
             if token.strip() != "":
                 res["svs"].append({"text": token})
-    res["utc_issue"] = row["utc_issue"].strftime(ISO9660)
-    res["utc_expire"] = row["utc_expire"].strftime(ISO9660)
+    res["utc_issue"] = row["utc_issue"].strftime(ISO8601)
+    res["utc_expire"] = row["utc_expire"].strftime(ISO8601)
 
     # Now lets get UGC information
     cursor.execute(
@@ -80,12 +79,12 @@ def run(wfo, year, phenomena, significance, etn):
                 "status": row["status"],
                 "hvtec_nwsli": row["hvtec_nwsli"],
                 "utc_product_issue": row["utc_product_issue"].strftime(
-                    ISO9660
+                    ISO8601
                 ),
-                "utc_issue": row["utc_issue"].strftime(ISO9660),
-                "utc_init_expire": row["utc_init_expire"].strftime(ISO9660),
-                "utc_expire": row["utc_expire"].strftime(ISO9660),
-                "utc_updated": row["utc_updated"].strftime(ISO9660),
+                "utc_issue": row["utc_issue"].strftime(ISO8601),
+                "utc_init_expire": row["utc_init_expire"].strftime(ISO8601),
+                "utc_expire": row["utc_expire"].strftime(ISO8601),
+                "utc_updated": row["utc_updated"].strftime(ISO8601),
             }
         )
     pgconn.close()
