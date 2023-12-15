@@ -28,7 +28,6 @@ def get_time_domain(form):
         raise IncompleteWebRequest("GET start time parameters missing")
     if isinstance(form["ets"], str) and form["ets"] == "":
         form["ets"] = utc()
-
     return form["sts"], form["ets"]
 
 
@@ -101,7 +100,7 @@ def do_excel_kml(fmt, sts, ets, wfolimiter, statelimiter):
     return fp.getvalue()
 
 
-@iemapp()
+@iemapp(default_tz="UTC")
 def application(environ, start_response):
     """Go Main Go"""
     if environ["REQUEST_METHOD"] == "OPTIONS":
@@ -171,6 +170,7 @@ def application(environ, start_response):
 
     if cursor.rowcount == 0:
         start_response("200 OK", [("Content-type", "text/plain")])
+        pgconn.close()
         return [b"No results found for query."]
 
     shpio = BytesIO()
@@ -224,6 +224,7 @@ def application(environ, start_response):
             ("Content-Disposition", f"attachment; filename={fn}.csv"),
         ]
         start_response("200 OK", headers)
+        pgconn.close()
         return [csv.getvalue().encode("ascii", "ignore")]
 
     zio = BytesIO()
@@ -241,4 +242,5 @@ def application(environ, start_response):
         ("Content-Disposition", f"attachment; filename={fn}.zip"),
     ]
     start_response("200 OK", headers)
+    pgconn.close()
     return [zio.getvalue()]
