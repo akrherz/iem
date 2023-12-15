@@ -6,7 +6,7 @@ Run from RUN_0Z.sh
 import pandas as pd
 import requests
 from pyiem.reference import ncei_state_codes
-from pyiem.util import get_dbconn, get_properties, logger
+from pyiem.util import get_dbconn, get_properties, logger, set_property
 
 LOG = logger()
 ELEMENT2IEM = {
@@ -109,18 +109,6 @@ def dbsave(df):
     conn.commit()
 
 
-def set_procdate(procdate):
-    """Update properties."""
-    conn = get_dbconn("mesosite")
-    cursor = conn.cursor()
-    cursor.execute(
-        "UPDATE properties SET propvalue = %s where propname = %s",
-        (procdate, "ncei.climdiv.procdate"),
-    )
-    cursor.close()
-    conn.commit()
-
-
 def main():
     """Go Main Go."""
     procdate = requests.get(
@@ -135,7 +123,7 @@ def main():
     for region in ["dv", "st"]:
         df = process(procdate, region)
         dbsave(df)
-    set_procdate(procdate)
+    set_property("ncei.climdiv.procdate", procdate.strftime("%Y-%m-%d"))
 
 
 if __name__ == "__main__":

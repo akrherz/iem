@@ -11,7 +11,7 @@ import sys
 import numpy as np
 import rasterio
 from pyiem.iemre import daily_offset
-from pyiem.util import get_dbconn, get_properties, logger, ncopen
+from pyiem.util import get_properties, logger, ncopen, set_property
 
 LOG = logger()
 PROPNAME = "prism.archive_end"
@@ -82,21 +82,7 @@ def update_properties(valid):
     ).date()
     if current > valid:
         return
-    with get_dbconn("mesosite") as dbconn:
-        cursor = dbconn.cursor()
-        args = (valid.strftime("%Y-%m-%d"), PROPNAME)
-        LOG.info("setting %s", args)
-        cursor.execute(
-            "UPDATE properties SET propvalue = %s where propname = %s",
-            args,
-        )
-        if cursor.rowcount == 0:
-            cursor.execute(
-                "INSERT into properties(propvalue, propname) VALUES (%s, %s)",
-                args,
-            )
-        cursor.close()
-        dbconn.commit()
+    set_property(PROPNAME, valid.strftime("%Y-%m-%d"))
 
 
 def main(argv):

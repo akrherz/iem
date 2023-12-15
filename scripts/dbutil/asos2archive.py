@@ -13,7 +13,7 @@ import datetime
 import sys
 
 from pyiem.reference import ISO8601
-from pyiem.util import get_dbconnc, logger, utc
+from pyiem.util import get_dbconnc, get_properties, logger, set_property, utc
 
 LOG = logger()
 PROPERTY_NAME = "asos2archive_last"
@@ -36,32 +36,14 @@ def build_reset_times() -> dict:
 
 def get_first_updated():
     """Figure out which is the last updated timestamp we ran for."""
-    pgconn, cursor = get_dbconnc("mesosite")
-    cursor.execute(
-        "SELECT propvalue from properties where propname = %s",
-        (PROPERTY_NAME,),
-    )
-    if cursor.rowcount == 0:
+    props = get_properties()
+    propvalue = props.get(PROPERTY_NAME)
+    if propvalue is None:
         LOG.warning("iem property %s is not set, abort!", PROPERTY_NAME)
         sys.exit()
 
-    dt = datetime.datetime.strptime(cursor.fetchone()["propvalue"], ISO8601)
+    dt = datetime.datetime.strptime(propvalue, ISO8601)
     return dt.replace(tzinfo=datetime.timezone.utc)
-
-
-def set_last_updated(value):
-    """Update the database."""
-    pgconn, cursor = get_dbconnc("mesosite")
-    cursor.execute(
-        "UPDATE properties SET propvalue = %s where propname = %s",
-        (value.strftime(ISO8601), PROPERTY_NAME),
-    )
-    if cursor.rowcount == 0:
-        LOG.info("iem property %s did not update, abort!", PROPERTY_NAME)
-        sys.exit()
-
-    cursor.close()
-    pgconn.commit()
 
 
 def compute_time(argv):
@@ -242,7 +224,7 @@ def main():
                 first_updated.strftime("%Y-%m-%dT%H:%M"),
                 last_updated.strftime("%Y-%m-%dT%H:%M"),
             )
-    set_last_updated(last_updated)
+    set_property(PROPERTY_NAME, last_updated)
 
 
 if __name__ == "__main__":
