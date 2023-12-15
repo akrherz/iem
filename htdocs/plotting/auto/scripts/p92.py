@@ -97,9 +97,8 @@ def plotter(fdict):
     data = {}
     rows = []
     for row in cursor:
-        wfo = row[0] if row[0] != "JSJ" else "SJU"
-        rows.append(dict(wfo=wfo, days=row[1], date_central=row[2]))
-        data[wfo] = max([row[1], 0])
+        rows.append(dict(wfo=row[0], days=row[1], date_central=row[2]))
+        data[row[0]] = max([row[1], 0])
     df = pd.DataFrame(rows)
     df = df.set_index("wfo")
 

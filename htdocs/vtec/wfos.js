@@ -192,7 +192,7 @@ iemdata.wfos = [
  ['SGX','SAN_DIEGO'],
  ['SHV','SHREVEPORT'],
  ['SJT','SAN_ANGELO'],
- ['SJU','SAN_JUAN'],
+ ['JSJ','SAN_JUAN'],
  ['SLC','SALT_LAKE_CITY'],
  ['STO','SACRAMENTO'],
  ['TAE','TALLAHASSEE'],

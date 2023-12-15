@@ -137,8 +137,6 @@ def plotter(fdict):
         if source == "PABR":
             continue
         key = source[1:]
-        if key == "JSJ":
-            key = "SJU"
         if ctx["var"] == "count":
             data[key] = row["count"]
         else:
