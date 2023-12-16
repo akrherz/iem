@@ -6,20 +6,26 @@ import pandas as pd
 from pyiem.exceptions import IncompleteWebRequest
 from pyiem.util import get_sqlalchemy_conn
 from pyiem.webutil import iemapp
+from sqlalchemy import text
 
 EXL = "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"
 
 
 def run(sts, ets, start_response):
     """Get data!"""
+    params = {"sts": sts, "ets": ets}
     with get_sqlalchemy_conn("other") as dbconn:
-        sql = """SELECT * from feel_data_daily where
-        valid >= %s and valid < %s ORDER by valid ASC"""
-        df = pd.read_sql(sql, dbconn, params=(sts, ets))
+        sql = (
+            "SELECT * from feel_data_daily where "
+            "valid >= :sts and valid < :ets ORDER by valid ASC"
+        )
+        df = pd.read_sql(text(sql), dbconn, params=params)
 
-        sql = """SELECT * from feel_data_hourly where
-        valid >= %s and valid < %s ORDER by valid ASC"""
-        df2 = pd.read_sql(sql, dbconn, params=(sts, ets))
+        sql = (
+            "SELECT * from feel_data_hourly where "
+            "valid >= :sts and valid < :ets ORDER by valid ASC"
+        )
+        df2 = pd.read_sql(text(sql), dbconn, params=params)
 
     def fmt(val):
         """Lovely hack."""

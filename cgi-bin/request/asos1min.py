@@ -29,6 +29,9 @@ def get_station_metadata(stations) -> dict:
     res = {}
     for row in cursor:
         res[row["id"]] = dict(name=row["name"], lon=row["lon"], lat=row["lat"])
+    for station in stations:
+        if station not in res:
+            raise IncompleteWebRequest(f"Unknown station provided: {station}")
     pgconn.close()
     return res
 

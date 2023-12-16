@@ -4,8 +4,7 @@ Download interface for ASOS data from the asos database
 import datetime
 import sys
 from io import StringIO
-from zoneinfo import ZoneInfo
-from zoneinfo._common import ZoneInfoNotFoundError
+from zoneinfo import ZoneInfo, ZoneInfoNotFoundError
 
 from pyiem.network import Table as NetworkTable
 from pyiem.util import get_dbconn, utc
