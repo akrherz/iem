@@ -15,10 +15,10 @@ $d1select = daySelect2(1, "day1");
 $y2select = yearSelect2(2012, date("Y"), "year2");
 $m2select = monthSelect(date("m"), "month2");
 $d2select = daySelect2(date("d"), "day2");
-$y12select = yearSelect2(2003, date("Y"), "year1");
+$y12select = yearSelect2(2003, 2003, "year1");
 $y22select = yearSelect2(2003, date("Y"), "year2");
-$y13select = yearSelect2(2014, date("Y"), "year1");
-$y23select = yearSelect2(2014, date("Y"), "year2");
+$y13select = yearSelect2(2013, 2013, "year1");
+$y23select = yearSelect2(2013, date("Y"), "year2");
 $nselect = networkSelect("OT", "");
 
 $t->content = <<<EOF
@@ -43,7 +43,6 @@ equipment has been removed.</p>
 <ul>
 <li><a href="daily_plot.phtml?station=OT0008&year=2007&month=2&day=13">Reiman Gardens station</a>, only some limited data from 2007 for the site.</li>
 </ul>
-
 
 <h3>Stuart Smith Park Hydrology Learning Lab, Ames</h3>
 
