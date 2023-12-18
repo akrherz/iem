@@ -12,6 +12,7 @@ import pandas as pd
 # third party
 import requests
 from pyiem import util
+from pyiem.database import get_sqlalchemy_conn
 from pyiem.network import Table as NetworkTable
 from pyiem.observation import Observation
 from pyiem.tracker import TrackerEngine
@@ -92,10 +93,11 @@ RWIS2METAR = {
     "70": "XKYI",
     "72": "XCTI",
 }
+# STATUS 1 is online
 ATMOS_URI = (
     "https://services.arcgis.com/8lRhdTsQyJpO52F1/arcgis/rest/services/"
-    "RWIS_Atmospheric_Data_View/FeatureServer/0/query?where=STATUS%3D1"
-    "&f=json&outFields=DATA_LAST_UPDATED,AIR_TEMP,RELATIVE_HUMIDITY,DEW_POINT,"
+    "RWIS_Atmospheric_Data_View/FeatureServer/0/query?where=STATUS%3D1&"
+    "f=json&outFields=DATA_LAST_UPDATED,AIR_TEMP,RELATIVE_HUMIDITY,DEW_POINT,"
     "VISIBILITY,AVG_WINDSPEED_KNOTS,MAX_WINDSPEED_KNOTS,WIND_DIRECTION_DEG,"
     "PRECIPITATION_RATE,PRECIPITATION_ACCUMULATION,NWS_ID"
 )
@@ -117,6 +119,17 @@ def merge(atmos, surface):
     Returns:
       dictionary of values
     """
+    # Figure out our most recent obs as the RWIS service will only emit online
+    with get_sqlalchemy_conn("iem") as conn:
+        currents = pd.read_sql(
+            """
+            select id, valid from current c JOIN stations t
+                on (c.iemid = t.iemid) WHERE t.network = 'IA_RWIS'
+            """,
+            conn,
+            index_col="id",
+        )
+
     atmos = atmos.set_index("NWS_ID")
     # pivot
     surface["SENSOR_ID"] = surface["SENSOR_ID"].astype(int)
@@ -142,6 +155,7 @@ def merge(atmos, surface):
             continue
         data[nwsli] = {
             "valid": row["valid"].to_pydatetime(),
+            "online": True,
             "tmpf": row["AIR_TEMP"],
             "dwpf": row["DEW_POINT"],
             "relh": row["RELATIVE_HUMIDITY"],
@@ -156,6 +170,10 @@ def merge(atmos, surface):
                 data[nwsli][f"tsf{sid}"] = row[("SURFACE_TEMP", sid)]
             except KeyError as exp:
                 LOG.info("KeyError raised for nwsli: '%s' %s", nwsli, exp)
+    for sid in NT.sts:
+        if sid not in data and sid in currents.index:
+            LOG.info("station %s is missing, adding", sid)
+            data[sid] = {"valid": currents.at[sid, "valid"], "online": False}
     return data
 
 
@@ -340,6 +358,8 @@ def main():
         return
     obs = merge(atmos, surface)
     do_iemtracker(obs)
+    # Remove back out those stations that are offline
+    obs = {k: v for k, v in obs.items() if v["online"]}
 
     ts = util.utc().strftime("%d%H%M")
     fn1 = f"/tmp/IArwis{ts}.sao"
