@@ -5,7 +5,7 @@ import json
 from pyiem.network import Table as NetworkTable
 from pyiem.reference import ISO8601
 from pyiem.tracker import loadqc
-from pyiem.util import convert_value, drct2text, get_dbconnc, utc
+from pyiem.util import convert_value, drct2text, get_dbconnc, mm2inch, utc
 from pyiem.webutil import iemapp
 
 
@@ -98,6 +98,7 @@ def get_data(cursor, ts):
             h.station,
             max(coalesce(h.tair_c_avg_qc, m.tair_c_avg_qc)) as max_tmpc,
             min(coalesce(h.tair_c_avg_qc, m.tair_c_avg_qc)) as min_tmpc,
+            sum(coalesce(etalfalfa_qc, 0)) as dailyet,
             sum(h.rain_in_tot_qc) as pday from
             sm_minute m LEFT JOIN sm_hourly h on (m.station = h.station and
             m.valid = h.valid) WHERE m.valid > %s and m.valid <= %s
@@ -117,7 +118,7 @@ def get_data(cursor, ts):
             h.encrh_avg,
             coalesce(m.rh_avg_qc, h.rh_avg_qc) as rh,
             h.rain_in_tot,
-            etalfalfa,
+            coalesce(etalfalfa_qc, 0) as etalfalfa_qc,
             battv_min,
             coalesce(m.slrkj_tot_qc * 60 / 1000, h.slrkj_tot_qc / 1000.)
                 as slrmj_tot,
@@ -142,8 +143,9 @@ def get_data(cursor, ts):
                 h.valid = date_trunc('hour', m.valid))
             where h.valid = %s and m.valid = %s
         )
-        SELECT a.*, c.max_tmpc, c.min_tmpc, c.pday, h.p24m, h.pmonth from
-        agg a LEFT JOIN calendar_day c on (a.station = c.station)
+        SELECT a.*, c.max_tmpc, c.min_tmpc, c.pday, h.p24m, h.pmonth,
+        c.dailyet
+        from agg a LEFT JOIN calendar_day c on (a.station = c.station)
         LEFT JOIN twentyfour_hour h on (a.station = h.station)
     """,
         (midnight, ts, h24, mon_ts0, ts, tophour, ts),
@@ -174,7 +176,8 @@ def get_data(cursor, ts):
                         if not q.get("precip", False)
                         else "M"
                     ),
-                    "et": safe_p(row["etalfalfa"]),
+                    "et": safe_p(mm2inch(row["etalfalfa_qc"])),
+                    "dailyet": safe_p(mm2inch(row["dailyet"])),
                     "bat": safe(row["battv_min"], 2),
                     "radmj": safe(row["slrmj_tot"], 2),
                     "srad_wm2": safe(row["srad_wm2"], 2),

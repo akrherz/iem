@@ -54,12 +54,13 @@ cd ../plots
 cd ../ingestors
 python flux_ingest.py
 
+cd ../nass
 if [ $LHH -eq "15" ]
 then
     python nass_quickstats.py &
 fi
 
-cd rwis
+cd ../ingestors/rwis
 python process_traffic.py &
 
 cd ../../current
