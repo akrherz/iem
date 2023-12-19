@@ -11,6 +11,7 @@ import click
 import httpx
 import pytesseract
 from pdf2image import convert_from_path
+from pdfminer.high_level import extract_text
 from pyiem.database import get_dbconnc
 from pyiem.util import logger
 
@@ -23,7 +24,10 @@ BASEURL = (
 REMAPED = {
     "hay, alfalfa, first cutting": "hay, alfalfa, 1st cutting",
     "alfalfa hay first cutting": "hay, alfalfa, 1st cutting",
+    "alfalfa hay, first cuttin": "hay, alfalfa, 1st cutting",
     "alfalfa hay, first cutting": "hay, alfalfa, 1st cutting",
+    "hay, alfalfa - first crop harvested": "hay, alfalfa, 1st cutting",
+    "hay, alfalfa - 1st cutting": "hay, alfalfa, 1st cutting",
     "hay, alfalfa, second cutting": "hay, alfalfa, 2nd cutting",
     "alfalfa hay second cutting": "hay, alfalfa, 2nd cutting",
     "alfalfa hay, second cutting": "hay, alfalfa, 2nd cutting",
@@ -31,6 +35,10 @@ REMAPED = {
     "alfalfa hay third cutting": "hay, alfalfa, 3rd cutting",
     "alfalfa hay, third cutting": "hay, alfalfa, 3rd cutting",
     "oats harvested": "oats harvested for grain",
+    "oats emerge": "oats emerged",
+    "oats emerget": "oats emerged",
+    "cor planted": "corn planted",
+    "subsoil moisture adequat": "subsoil moisture adequate",
 }
 DOMAIN = [
     "corn dented",
@@ -41,6 +49,7 @@ DOMAIN = [
     "corn harvested for grain",
     "corn silking",
     "days suitable",
+    "fertilizer application completed",
     "hay, alfalfa, 1st cutting",
     "hay, alfalfa, 2nd cutting",
     "hay, alfalfa, 3rd cutting",
@@ -49,6 +58,7 @@ DOMAIN = [
     "oats harvested for grain",
     "oats headed",
     "oats planted",
+    "oats turning color",
     "soybeans blooming",
     "soybeans coloring",
     "soybeans dropping leaves",
@@ -75,6 +85,53 @@ def is_number(s):
         return False
 
 
+def glean_labels(label) -> list:
+    """Figure out what we have here."""
+    res = []
+    prefix = ""
+    for token in [x.strip().lower() for x in label.split("\n")]:
+        token = token.replace(".", "").strip()
+        if token == "ubsoil moisture":
+            token = "subsoil moisture"
+        token = REMAPED.get(token, token)
+        if token.find("moisture") > -1:
+            prefix = f"{token} "
+            continue
+        token = f"{prefix}{token}"
+        if token in DOMAIN:
+            res.append(token)
+    return res
+
+
+def process_lines_pdfminer(valid, lines) -> int:
+    """Special magic here."""
+    labels = ""
+    numbers = []
+    for line in lines:
+        line = line.strip().lower()
+        if line in [""]:
+            continue
+        if line in ["topsoil moisture", "subsoil moisture"]:
+            labels += line + "\n"
+            continue
+        if line.find("...") > -1:
+            labels += line.replace(".", "") + "\n"
+            continue
+        if labels != "":
+            if is_number(line):
+                numbers.append(line)
+                continue
+            metrics = glean_labels(labels)
+            if metrics and len(numbers) > (len(metrics) * 10):
+                for i, metric in enumerate(metrics):
+                    nums = []
+                    for j in range(0, 10):
+                        nums.append(numbers[j * len(metrics) + i])
+                    ingest(valid, metric, nums)
+            labels = ""
+            numbers = []
+
+
 def process_lines(valid, lines) -> int:
     """Process a table."""
     # Quacks like a duck here
@@ -89,6 +146,7 @@ def process_lines(valid, lines) -> int:
             .replace("g1", "91")
             .replace("plante:", "planted")
             .replace("0c cece", "")
+            .replace("00.c ceed", "")
         )
         if line in ["topsoil moisture", "subsoil moisture"]:
             prefix = line + " "
@@ -126,6 +184,18 @@ def process_lines(valid, lines) -> int:
 def ingest(valid, label, numbers):
     """We have content."""
     # Some QC
+    if numbers[1] == "|":
+        numbers.pop(1)
+    numbers = [
+        x.replace("]", "")
+        .replace("l", "1")
+        .replace("|", "")
+        .replace(")", "")
+        .replace("}", "")
+        .replace(",", "")
+        .replace("5a", "54")
+        for x in numbers
+    ]
     if label == "days suitable":
         numbers = [float(x) for x in numbers[:10]]
         for i in range(0, 10):
@@ -160,46 +230,59 @@ def get_url(valid):
     )
     if valid.year <= 2017:
         uri = uri.replace("-", "_")
-    if valid.year <= 2016:
+    if datetime.datetime(2013, 6, 1) < valid < datetime.datetime(2014, 1, 1):
+        uri = uri.replace("_Crop_Progress_", "")
+    elif valid.year <= 2016:
         uri = uri.replace("_Crop_Progress", "")
+    if datetime.datetime(2014, 5, 20) < valid < datetime.datetime(2014, 6, 29):
+        uri = uri.replace("_14", "__14")
     return uri
 
 
-def workflow(sunday):
+def workflow(sunday, engine, remotefn):
     """Do Work."""
     # Find the PDF by looking at Monday, Tuesday, and Wednesday
     found = False
-    for day in [1, 2, 3, 0]:
-        valid = sunday + datetime.timedelta(days=day)
-        uri = get_url(valid)
-        LOG.info("Attempting %s", uri)
-        req = httpx.get(uri)
-        if req.status_code == 200:
-            found = True
-            break
-    if not found:
-        LOG.info("Failed to find PDF for %s", sunday)
-        return
+    if remotefn is not None:
+        req = httpx.get(f"{BASEURL}/{sunday:%Y}/{remotefn}")
+    else:
+        for day in [1, 2, 3, 0]:
+            valid = sunday + datetime.timedelta(days=day)
+            uri = get_url(valid)
+            LOG.info("Attempting %s", uri)
+            req = httpx.get(uri)
+            if req.status_code == 200:
+                found = True
+                break
+        if not found:
+            LOG.info("Failed to find PDF for %s", sunday)
+            return
     with tempfile.NamedTemporaryFile("wb", delete=False) as fh:
         fh.write(req.content)
     pdffn = fh.name + ".pdf"
     os.rename(fh.name, pdffn)
-    pages = convert_from_path(pdffn, 200, first_page=1, last_page=1)
-    extracted_text = ""
-    # Loop through each image and extract the text
-    for page in pages:
-        extracted_text += pytesseract.image_to_string(page)
-    process_lines(sunday, extracted_text.split("\n"))
+    if engine == "pdfminer":
+        extracted_text = extract_text(pdffn, maxpages=1)
+        process_lines_pdfminer(sunday, extracted_text.split("\n"))
+    else:
+        pages = convert_from_path(pdffn, 200, first_page=1, last_page=1)
+        extracted_text = ""
+        # Loop through each image and extract the text
+        for page in pages:
+            extracted_text += pytesseract.image_to_string(page)
+        process_lines(sunday, extracted_text.split("\n"))
     os.unlink(pdffn)
 
 
 @click.command()
 @click.option("--sunday", help="NASS Analysis Date", type=click.DateTime())
 @click.option("--weeks", help="Number of weeks to run", type=int, default=1)
-def main(sunday, weeks):
+@click.option("--engine", help="PDF Engine", default="pytesseract")
+@click.option("--remotefn", help="Remote Filename", default=None)
+def main(sunday, weeks, engine, remotefn):
     """Go Main Go."""
-    for i in range(weeks):
-        workflow(sunday)
+    for _ in range(weeks):
+        workflow(sunday, engine, remotefn)
         sunday += datetime.timedelta(days=7)
 
 
