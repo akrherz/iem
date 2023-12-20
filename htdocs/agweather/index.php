@@ -23,6 +23,7 @@ questions!</p>
 <a role="button" class="btn btn-success" href="/climodat/"><i class="fa fa-list-alt"></i> Climodat</a>
 <a role="button" class="btn btn-success" href="/explorer/"><i class="fa fa-map"></i> IEM Explorer</a>
 <a role="button" class="btn btn-success" href="/plotting/auto/?q=108"><i class="fa fa-signal"></i> Single Site Graphs</a>
+<a role="button" class="btn btn-success" href="#nass"><i class="fa fa-list-alt"></i> USDA NASS Products</a>
 </p>
 
 
@@ -253,12 +254,17 @@ same for other locations.</p>
 </tbody>
 </table>
 
-<h4>Aridity Index for Corn Belt</h4>
+<a name="nass"></a>
+<h4>USDA NASS Products</h4>
 
-<blockquote>
- How Temperature and Precipitation have influenced corn by reporting district. 
- <a href="/~windmill/AIpage.html">view here</a>.
-</blockquote>
+<p>The IEM attempts to sync much of the <a href="http://www.nass.usda.gov/">USDA NASS</a>
+data into our database.  A number of <a href="/plotting/auto/">automated plots</a>
+are available for this data (search for NASS in the dropdown menu).</p>
+
+<p>The IEM also attempts to glean the Iowa Ag Reporting District data found in the
+weekly <a href="https://www.nass.usda.gov/Statistics_by_State/Iowa/Publications/Crop_Progress_&_Condition/">weekly crop progress</a>
+PDF reports.  You can download the IEM's entire database as this
+<a href="/cgi-bin/request/nass_iowa.py"><i class="fa fa-download"></i> Excel file</a>.</p>
 
 <h4>Historical Freeze Risk</h4>
 
