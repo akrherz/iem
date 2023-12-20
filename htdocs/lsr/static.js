@@ -421,6 +421,14 @@ function handleSBWClick(feature) {
     ).show().draw(false);
 
 }
+function copyToClipboard(text, msg) {
+    const $temp = $("<input>");
+    $("body").append($temp);
+    $temp.val(text).select();
+    document.execCommand("copy");
+    $temp.remove();
+    alert(msg);
+}
 function initUI() {
     // Generate UI components of the page
     const handle = $("#radartime");
@@ -514,6 +522,12 @@ function initUI() {
     $("#lsrkml").click(() => {
         window.location.href = `${getShapefileLink("lsr")}&fmt=kml`;
     });
+    $("#lsrgeojson").click(() => {
+        const opts = buildOpts();
+        const url = `https://mesonet.agron.iastate.edu/geojson/lsr.php?${$.param(opts)}`;
+        copyToClipboard(url, "GeoJSON URL copied to clipboard");
+    });
+    // =======
     $("#warnshapefile").click(() => {
         window.location.href = getShapefileLink("watchwarn");
     });
@@ -522,6 +536,11 @@ function initUI() {
     });
     $("#sbwshapefile").click(() => {
         window.location.href = `${getShapefileLink("watchwarn")}&limit1=yes`;
+    });
+    $("#sbwgeojson").click(() => {
+        const opts = buildOpts();
+        const url = `https://mesonet.agron.iastate.edu/geojson/sbw.php?${$.param(opts)}`;
+        copyToClipboard(url, "GeoJSON URL copied to clipboard");
     });
     $("#realtime").click(function() {
         realtime = this.checked;
@@ -812,18 +831,12 @@ function updateRADARTimes() {
         .slider("option", "max", times - 1)
         .slider("value", realtime ? times - 1 : 0);
 }
-function loadData() {
-    // Load up the data please!
-    if ($(".tab .active > a").attr("href") != "#2a") {
-        $("#lsrtab").click();
-    }
+function buildOpts() {
     const wfos = $("#wfo").val();  // null for all or array
     const states = $("#state").val();  // null for all or array
     const by = $("input[type=radio][name=by]:checked").val();
     const sts = moment($("#sts").val(), 'L LT').utc().format(dateFormat1);
     const ets = moment($("#ets").val(), 'L LT').utc().format(dateFormat1);
-    updateRADARTimes();
-
     const opts = {
         sts,
         ets
@@ -833,13 +846,21 @@ function loadData() {
     } else {
         opts.wfos = (wfos === null) ? "" : text(wfos.join(","));
     }
+    return opts;
+}
+function loadData() {
+    // Load up the data please!
+    if ($(".tab .active > a").attr("href") != "#2a") {
+        $("#lsrtab").click();
+    }
+    updateRADARTimes();
+
     lsrLayer.getSource().clear(true);
     sbwLayer.getSource().clear(true);
-
+    const opts = buildOpts();
     $.ajax({
-        data: opts,
         method: "GET",
-        url: "/geojson/lsr.php",
+        url: `/geojson/lsr.php?${$.param(opts)}`,
         dataType: 'json',
         success: (data) => {
             if (data.features.length == 10000) {
@@ -852,9 +873,8 @@ function loadData() {
         }
     });
     $.ajax({
-        data: opts,
         method: "GET",
-        url: "/geojson/sbw.php",
+        url: `/geojson/sbw.php?${$.param(opts)}`,
         dataType: 'json',
         success: (data) => {
             sbwLayer.getSource().addFeatures(

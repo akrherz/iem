@@ -3,7 +3,7 @@ require_once "../../config/settings.inc.php";
 require_once "../../include/mlib.php";
 force_https();
 require_once "../../include/myview.php";
-$OL = "7.5.1";
+$OL = "8.2.0";
 $DT = "1.11.1";
 $S2 = "4.1.0rc0";
 
@@ -21,7 +21,7 @@ $t->jsextra = <<<EOF
 <script src='/vendor/openlayers/{$OL}/ol-layerswitcher.js'></script>
 
 <script type="text/javascript" src="wfos.js"></script>
-<script type="text/javascript" src="static.js?v=1"></script>
+<script type="text/javascript" src="static.js?v=2"></script>
 <script>
 $(document).ready(function(){
     initUI(); // static.js
@@ -58,8 +58,8 @@ generate a listing of Storm Based Warnings (SBW)s valid for some portion
 of the period of interest.  You can switch between these data listings
 by click on the tabs found just above this text.</p>
 <br />
-<p>The map interface on the right hand side visually presents these LSRs
-and SBWSs.  Clicking on the icon or polygon, highlights the corresponding
+<p>The map interface on the left hand side visually presents these LSRs
+and SBWs.  Clicking on the icon or polygon, highlights the corresponding
 data in the two tables.</p>
 <br />
 <p>You also have the ability to overlay NEXRAD base reflectivity information
@@ -97,6 +97,7 @@ $tab2a = <<<EOM
 <p>
 <strong>Tools:</strong> &nbsp;
 <button id="lsrexcel" class="btn btn-primary" role="button"><i class="fa fa-download"></i> Excel</button>
+<button id="lsrgeojson" class="btn btn-primary" role="button"><i class="fa fa-clone"></i> GeoJSON</button>
 <button id="lsrkml" class="btn btn-primary" role="button"><i class="fa fa-download"></i> KML</button>
 <button id="lsrshapefile" class="btn btn-primary" role="button"><i class="fa fa-download"></i> Shapefile</button>
 <select name="lt" id="lsrtypefilter" class="form-control"></select>
@@ -124,12 +125,12 @@ $tab3a = <<<EOM
 <br />
 <p>
 <strong>Tools:</strong> &nbsp;
-<button id="warnshapefile" class="btn btn-primary" role="button">Get Shapefile</button>
-<button id="warnexcel" class="btn btn-primary" role="button">Get Excel</button>
-<button id="sbwshapefile" class="btn btn-primary" role="button">Get SBW Shapefile</button>
+<button id="warnexcel" class="btn btn-primary" role="button"><i class="fa fa-download"></i> Excel</button>
+<button id="sbwgeojson" class="btn btn-primary" role="button"><i class="fa fa-clone"></i> SBW GeoJSON</button>
+<button id="sbwshapefile" class="btn btn-primary" role="button"><i class="fa fa-download"></i> SBW Shapefile</button>
+<button id="warnshapefile" class="btn btn-primary" role="button"><i class="fa fa-download"></i> Shapefile</button>
 <select name="lt" id="sbwtypefilter" class="form-control"></select>
 </p>
-
 
 <table id="sbwtable">
 <thead>
