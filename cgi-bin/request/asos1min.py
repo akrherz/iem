@@ -94,6 +94,21 @@ def application(environ, start_response):
     if not varnames:
         raise IncompleteWebRequest("No vars= was specified in request.")
     pgconn, cursor = get_dbconnc("asos1min")
+    # get a list of columns we have in the alldata_1minute table
+    cursor.execute(
+        "select column_name from information_schema.columns where "
+        "table_name = 'alldata_1minute' ORDER by column_name"
+    )
+    columns = []
+    for row in cursor:
+        columns.append(row["column_name"])
+    # cross check varnames now
+    for varname in varnames:
+        if varname not in columns:
+            pgconn.close()
+            raise IncompleteWebRequest(
+                f"Unknown variable {varname} specified in request."
+            )
     cursor.execute(
         """
         select *,

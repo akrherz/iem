@@ -118,6 +118,8 @@ def build_sql(environ):
         utc_updated, hvtec_nwsli, hvtec_severity, hvtec_cause, hvtec_record,
         is_emergency, utc_polygon_begin, utc_polygon_end, windtag, hailtag,
         tornadotag, damagetag """
+    if environ.get("accept") == "excel":
+        cols = cols[4:]
 
     timelimit = f"issue >= '{sts}' and issue < '{ets}'"
     if timeopt == 2:
@@ -192,14 +194,6 @@ def do_excel(sql):
     """Generate an Excel format response."""
     with get_sqlalchemy_conn("postgis") as conn:
         df = pd.read_sql(sql, conn, index_col=None)
-    # Drop troublesome columns
-    df = df.drop(
-        [
-            "geo",
-        ],
-        axis=1,
-        errors="ignore",
-    )
     # Back-convert datetimes :/
     for col in (
         "utc_issue utc_expire utc_prodissue utc_updated utc_polygon_begin "
@@ -229,7 +223,6 @@ def application(environ, start_response):
         return [str(exp).encode("ascii")]
 
     accept = environ.get("accept", "shapefile")
-    pgconn, cursor = get_dbconnc("postgis")
     if accept == "excel":
         headers = [
             ("Content-type", EXL),
@@ -237,11 +230,14 @@ def application(environ, start_response):
         ]
         start_response("200 OK", headers)
         return [do_excel(sql)]
+    pgconn, cursor = get_dbconnc("postgis")
+    cursor.close()  # lazy
+    cursor = pgconn.cursor("streaming")
 
     cursor.execute(sql)
-    if cursor.rowcount == 0:
-        start_response("200 OK", [("Content-type", "text/plain")])
-        return [b"ERROR: No results found for query, please try again"]
+    # TODO if cursor.rowcount == 0:
+    #    start_response("200 OK", [("Content-type", "text/plain")])
+    #    return [b"ERROR: No results found for query, please try again"]
 
     # Filenames are racy, so we need to have a temp folder
     with tempfile.TemporaryDirectory() as tmpdir:
