@@ -1,4 +1,7 @@
-"""Ensure that our RTMA files have all we need."""
+"""Ensure that our RTMA files have all we need.
+
+Called from RUN_2AM.sh for 3 days ago.
+"""
 import os
 import subprocess
 import sys

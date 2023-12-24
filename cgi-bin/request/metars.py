@@ -7,7 +7,6 @@ import sys
 from io import StringIO
 from zoneinfo import ZoneInfo
 
-from pyiem.util import get_dbconn
 from pyiem.webutil import iemapp
 
 
@@ -18,7 +17,7 @@ def check_load(cursor):
         "select pid from pg_stat_activity where query ~* 'FETCH' "
         "and datname = 'asos'"
     )
-    if cursor.rowcount > 9:
+    if len(cursor.fetchall()) > 9:
         sys.stderr.write(
             f"/cgi-bin/request/metars.py over capacity: {cursor.rowcount}\n"
         )
@@ -26,22 +25,21 @@ def check_load(cursor):
     return True
 
 
-@iemapp()
+@iemapp(iemdb="asos", iemdb_cursorname="streamer")
 def application(environ, start_response):
     """Do Something"""
-    pgconn = get_dbconn("asos")
-    if not check_load(pgconn.cursor()):
+    cursor = environ["iemdb.asos.cursor"]
+    if not check_load(cursor):
         start_response(
             "503 Service Unavailable", [("Content-type", "text/plain")]
         )
         return [b"ERROR: server over capacity, please try later"]
-    acursor = pgconn.cursor("streamer")
     start_response("200 OK", [("Content-type", "text/plain")])
     valid = datetime.datetime.strptime(
         environ.get("valid", "2016010100")[:10], "%Y%m%d%H"
     )
     valid = valid.replace(tzinfo=ZoneInfo("UTC"))
-    acursor.execute(
+    cursor.execute(
         """
         SELECT metar from alldata
         WHERE valid >= %s and valid < %s and metar is not null
@@ -50,6 +48,6 @@ def application(environ, start_response):
         (valid, valid + datetime.timedelta(hours=1)),
     )
     sio = StringIO()
-    for row in acursor:
-        sio.write("%s\n" % (row[0].replace("\n", " "),))
+    for row in cursor:
+        sio.write("%s\n" % (row["metar"].replace("\n", " "),))
     return [sio.getvalue().encode("ascii", "ignore")]

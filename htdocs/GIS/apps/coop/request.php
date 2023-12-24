@@ -21,15 +21,16 @@ $sqlDate = $ts->format('Y-m-d');
 $filePre = $ts->format('md') . "_coop";
 
 $pgcon = iemdb("coop");
-$rs = pg_exec($pgcon, "select c.*, ST_X(s.geom) as lon, ST_Y(s.geom) as lat,
-        s.name,
-   to_char(c.valid, 'YYYYMMDD') as cvalid from 
-   climate c JOIN stations s ON (c.station = s.id)
-   WHERE c.valid = '" . $sqlDate . "' and s.network ~* 'CLIMATE'");
+$rs = pg_exec(
+    $pgcon,
+    "select c.*, ST_X(s.geom) as lon, ST_Y(s.geom) as lat, s.name, ".
+    "to_char(c.valid, 'YYYYMMDD') as cvalid from climate c JOIN stations s ".
+    "ON (c.station = s.id) WHERE c.valid = '{$sqlDate}' and ".
+    "s.network ~* 'CLIMATE'");
 
 pg_close($pgcon);
 
-@mkdir("/tmp/cli2shp");
+@mkdir("/tmp/cli2shp", 0755);
 chdir("/tmp/cli2shp");
 
 $shpFname =  $filePre;

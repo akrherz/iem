@@ -91,7 +91,7 @@ def plotter(fdict):
     for i, _ in enumerate(bars):
         ax.text(i + 1 - 0.25, monthly[i] + 1, f"{monthly[i]:.0f}", ha="center")
     thisyear = df["count"].values.tolist()
-    if not all([a is None for a in thisyear]):
+    if not all(a is None for a in thisyear):
         bars = ax.bar(
             np.arange(1, 13) + 0.2,
             thisyear,

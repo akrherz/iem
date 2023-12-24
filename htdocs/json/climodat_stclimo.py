@@ -2,16 +2,13 @@
 import datetime
 import json
 
-from pyiem.util import get_dbconn, html_escape
+from pyiem.util import html_escape
 from pyiem.webutil import iemapp
 from pymemcache.client import Client
 
 
-def run(station, syear, eyear):
+def run(cursor, station, syear, eyear):
     """Do something"""
-    pgconn = get_dbconn("coop")
-    cursor = pgconn.cursor()
-
     cursor.execute(
         """
     WITH data as (
@@ -51,9 +48,12 @@ def run(station, syear, eyear):
       max(max_range) as max_range, min(min_range) as min_range,
       max(avg_high) as h, max(avg_low) as l from data GROUP by sday)
 
-    SELECT a.sday, a.cnt, a.h, xh.high, xh.years,
-    nh.high, nh.years, a.l, xl.low, xl.years,
-    nl.low, nl.years, a.p, mp.precip, mp.years, a.max_range, a.min_range
+    SELECT a.sday, a.cnt,
+    a.h, xh.high as xh_high, xh.years as xh_years,
+    nh.high as nh_high, nh.years as nh_years,
+    a.l, xl.low as xl_low, xl.years as xl_years,
+    nl.low as nl_low, nl.years as nl_years,
+    a.p, mp.precip, mp.years as mp_years, a.max_range, a.min_range
     from avgs a, max_highs xh, min_highs nh, max_lows xl, min_lows nl,
     max_precip mp
     WHERE xh.sday = a.sday and xh.sday = nh.sday and xh.sday = xl.sday and
@@ -70,31 +70,30 @@ def run(station, syear, eyear):
     for row in cursor:
         res["climatology"].append(
             dict(
-                month=int(row[0][:2]),
-                day=int(row[0][2:]),
-                years=row[1],
-                avg_high=float(row[2]),
-                max_high=row[3],
-                max_high_years=row[4],
-                min_high=row[5],
-                min_high_years=row[6],
-                avg_low=float(row[7]),
-                max_low=row[8],
-                max_low_years=row[9],
-                min_low=row[10],
-                min_low_years=row[11],
-                avg_precip=float(row[12]),
-                max_precip=row[13],
-                max_precip_years=row[14],
-                max_range=row[15],
-                min_range=row[16],
+                month=int(row["sday"][:2]),
+                day=int(row["sday"][2:]),
+                years=row["cnt"],
+                avg_high=float(row["h"]),
+                max_high=row["xh_high"],
+                max_high_years=row["xh_years"],
+                min_high=row["nh_high"],
+                min_high_years=row["nh_years"],
+                avg_low=float(row["l"]),
+                max_low=row["xl_low"],
+                max_low_years=row["xl_years"],
+                min_low=row["nl_low"],
+                min_low_years=row["nl_years"],
+                avg_precip=float(row["p"]),
+                max_precip=row["precip"],
+                max_precip_years=row["mp_years"],
+                max_range=row["max_range"],
+                min_range=row["min_range"],
             )
         )
-    pgconn.close()
     return json.dumps(res)
 
 
-@iemapp()
+@iemapp(iemdb="coop", iemdb_cursorname="cursor")
 def application(environ, start_response):
     """Answer request."""
     station = environ.get("station", "IA0200").upper()[:6]
@@ -106,7 +105,7 @@ def application(environ, start_response):
     mc = Client("iem-memcached:11211")
     res = mc.get(mckey)
     if not res:
-        res = run(station, syear, eyear)
+        res = run(environ["iemdb.coop.cursor"], station, syear, eyear)
         mc.set(mckey, res, 86400)
     else:
         res = res.decode("utf-8")

@@ -112,7 +112,7 @@ def application(environ, start_response):
         fn = f"vtec_{wfo}_{start:%Y%m%d%H%M}_{end:%Y%m%d%H%M}.xlsx"
         headers = [
             ("Content-type", EXL),
-            ("Content-disposition", "attachment; Filename=" + fn),
+            ("Content-disposition", f"attachment; Filename={fn}"),
         ]
         start_response("200 OK", headers)
         bio = BytesIO()
@@ -122,7 +122,7 @@ def application(environ, start_response):
         fn = f"vtec_{wfo}_{start:%Y%m%d%H%M}_{end:%Y%m%d%H%M}.csv"
         headers = [
             ("Content-type", "application/octet-stream"),
-            ("Content-disposition", "attachment; Filename=" + fn),
+            ("Content-disposition", f"attachment; Filename={fn}"),
         ]
         start_response("200 OK", headers)
         bio = StringIO()

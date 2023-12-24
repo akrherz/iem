@@ -3,7 +3,7 @@ import datetime
 
 import simplejson as json
 from pyiem.reference import TRACE_VALUE
-from pyiem.util import get_dbconnc, html_escape
+from pyiem.util import html_escape
 from pyiem.webutil import iemapp
 from pymemcache.client import Client
 from simplejson import encoder
@@ -45,9 +45,8 @@ def f2_sanitize(val):
     return round(val, 2)
 
 
-def get_data(station, year, fmt):
+def get_data(cursor, station, year, fmt):
     """Get the data for this timestamp"""
-    pgconn, cursor = get_dbconnc("iem")
     data = {"results": []}
     # Fetch the daily values
     cursor.execute(
@@ -96,7 +95,6 @@ def get_data(station, year, fmt):
             }
         )
     if fmt == "json":
-        pgconn.close()
         return json.dumps(data)
     cols = (
         "station,valid,name,state,wfo,high,low,avg_temp,dep_temp,hdd,cdd,"
@@ -112,11 +110,10 @@ def get_data(station, year, fmt):
             else:
                 res += f"{val},"
         res += "\n"
-    pgconn.close()
     return res
 
 
-@iemapp()
+@iemapp(iemdb="iem", iemdb_cursorname="cursor")
 def application(environ, start_response):
     """Answer request."""
     station = environ.get("station", "KDSM")[:4]
@@ -135,7 +132,7 @@ def application(environ, start_response):
     if data is not None:
         data = data.decode("ascii")
     else:
-        data = get_data(station, year, fmt)
+        data = get_data(environ["iemdb.iem.cursor"], station, year, fmt)
         mc.set(mckey, data, 300)
     if cb is not None:
         data = f"{html_escape(cb)}({data})"

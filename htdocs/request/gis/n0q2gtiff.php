@@ -19,7 +19,7 @@ $now = time();
 if ($ts > $now) {
     die("Request from the future?");
 }
-@mkdir("/tmp/png2gtiff");
+@mkdir("/tmp/png2gtiff", 0755);
 chdir("/tmp/png2gtiff");
 
 $outFile = sprintf("n0q_%s", date("YmdHi", $ts));
