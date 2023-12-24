@@ -1,8 +1,7 @@
 """
- My purpose in life is to sync the mesosite stations table to other
+My purpose in life is to sync the mesosite stations table to other
 databases.  This will hopefully remove some hackery
 """
-import sys
 
 import numpy as np
 import pandas as pd
@@ -93,7 +92,7 @@ def sync(df, dbname):
     dbconn.close()
 
 
-def main(argv):
+def main():
     """Go Main Go"""
     subscribers = (
         "iem isuag coop hads hml asos asos1min postgis raob"
@@ -114,4 +113,4 @@ def main(argv):
 
 
 if __name__ == "__main__":
-    main(sys.argv)
+    main()

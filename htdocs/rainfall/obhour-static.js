@@ -62,7 +62,7 @@ function updateURI(network) {
     window.history.pushState({}, '', url);
 }
 function rpv(val){
-    if ((0 < val) && (val < 0.009)) return "T";
+    if ((val > 0) && (val < 0.009)) return "T";
     return val;
 }
 

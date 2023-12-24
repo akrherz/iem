@@ -34,7 +34,7 @@ def process(procdate, region):
                 f"climdiv-{element}{region}-v1.0.0-{procdate}",
                 names="stcode 1 2 3 4 5 6 7 8 9 10 11 12".split(),
                 dtype={"stcode": str},
-                sep="\s+",
+                sep=r"\s+",
                 na_values=["-9.99", "-99.90"],
             )
             .assign(
@@ -123,7 +123,7 @@ def main():
     for region in ["dv", "st"]:
         df = process(procdate, region)
         dbsave(df)
-    set_property("ncei.climdiv.procdate", procdate.strftime("%Y-%m-%d"))
+    set_property("ncei.climdiv.procdate", procdate)
 
 
 if __name__ == "__main__":

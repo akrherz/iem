@@ -2,7 +2,6 @@
 from io import StringIO
 
 from pyiem.exceptions import IncompleteWebRequest
-from pyiem.util import get_dbconnc
 from pyiem.webutil import ensure_list, iemapp
 
 SAMPLING = {
@@ -15,9 +14,9 @@ SAMPLING = {
 DELIM = {"space": " ", "comma": ",", "tab": "\t", ",": ","}
 
 
-def get_station_metadata(stations) -> dict:
+def get_station_metadata(eviron, stations) -> dict:
     """build a dictionary."""
-    pgconn, cursor = get_dbconnc("mesosite")
+    cursor = eviron["iemdb.mesosite.cursor"]
     cursor.execute(
         """
         SELECT id, name, round(ST_x(geom)::numeric, 4) as lon,
@@ -32,14 +31,13 @@ def get_station_metadata(stations) -> dict:
     for station in stations:
         if station not in res:
             raise IncompleteWebRequest(f"Unknown station provided: {station}")
-    pgconn.close()
     return res
 
 
-def compute_prefixes(sio, form, delim, stations, tz) -> dict:
+def compute_prefixes(sio, environ, delim, stations, tz) -> dict:
     """"""
-    station_meta = get_station_metadata(stations)
-    gis = form.get("gis", "no")
+    station_meta = get_station_metadata(environ, stations)
+    gis = environ.get("gis", "no")
     prefixes = {}
     if gis == "yes":
         sio.write(
@@ -74,7 +72,7 @@ def compute_prefixes(sio, form, delim, stations, tz) -> dict:
     return prefixes
 
 
-@iemapp()
+@iemapp(iemdb=["asos1min", "mesosite"], iemdb_cursor="blah")
 def application(environ, start_response):
     """Handle mod_wsgi request."""
     stations = ensure_list(environ, "station")
@@ -82,6 +80,8 @@ def application(environ, start_response):
         stations = ensure_list(environ, "station[]")
     if not stations:
         raise IncompleteWebRequest("No station= was specified in request.")
+    if "sts" not in environ:
+        raise IncompleteWebRequest("Insufficient start timestamp variables.")
     # Ensure we have uppercase stations
     stations = [s.upper() for s in stations]
     delim = DELIM[environ.get("delim", "comma")]
@@ -93,7 +93,7 @@ def application(environ, start_response):
         varnames = ensure_list(environ, "vars[]")
     if not varnames:
         raise IncompleteWebRequest("No vars= was specified in request.")
-    pgconn, cursor = get_dbconnc("asos1min")
+    cursor = environ["iemdb.asos1min.cursor"]
     # get a list of columns we have in the alldata_1minute table
     cursor.execute(
         "select column_name from information_schema.columns where "
@@ -105,7 +105,6 @@ def application(environ, start_response):
     # cross check varnames now
     for varname in varnames:
         if varname not in columns:
-            pgconn.close()
             raise IncompleteWebRequest(
                 f"Unknown variable {varname} specified in request."
             )
@@ -138,7 +137,6 @@ def application(environ, start_response):
         sio.write(f"{row['local_valid']}{delim}")
         sio.write((rowfmt % row).replace("None", "M"))
         sio.write("\n")
-    pgconn.close()
 
     start_response("200 OK", headers)
     return [sio.getvalue().encode("ascii")]

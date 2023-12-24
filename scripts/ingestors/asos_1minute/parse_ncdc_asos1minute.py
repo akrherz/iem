@@ -167,15 +167,15 @@ def p1_parser(line, metadata):
             # Ideally, we find 4 ints in a row in the -5 to -2 positions as the
             # last is the runway value
             if len(ints) > 4 and all(
-                [INT_RE.match(t) is not None for t in ints[-5:-1]]
+                INT_RE.match(t) is not None for t in ints[-5:-1]
             ):
                 ints = ints[-5:-1]
             # So if that failed, try the first four positions
-            elif all([INT_RE.match(t) is not None for t in ints[:4]]):
+            elif all(INT_RE.match(t) is not None for t in ints[:4]):
                 ints = ints[:4]
             # So if that failed, try the last four positions
             elif len(ints) > 4 and all(
-                [INT_RE.match(t) is not None for t in ints[-4:]]
+                INT_RE.match(t) is not None for t in ints[-4:]
             ):
                 ints = ints[-4:]
             else:

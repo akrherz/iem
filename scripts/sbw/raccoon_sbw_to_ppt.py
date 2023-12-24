@@ -275,9 +275,7 @@ def do_job(job):
             f"&lsrbuffer=15&vtec={job['sts']:%Y}.O.NEW.K{job['wfo']}."
             f"{warning['phenomena']}.W.{warning['eventid']:04.0f}"
         )
-
-        cmd = f"wget -q -O {i}.png '{url}'"
-        os.system(cmd)
+        subprocess.call(["wget", "-q", "-O", f"{i}.png", url])
         photoframe = Frame(
             stylename=photostyle,
             width="480pt",
@@ -342,9 +340,7 @@ def do_job(job):
                 f"{job['sts']:%Y}.O.NEW.K{job['wfo']}.{warning['phenomena']}."
                 f"W.{warning['eventid']:04.0f}&ts={now:%Y%m%d%H%M}"
             )
-
-            cmd = f"wget -q -O {i}.png '{url}'"
-            os.system(cmd)
+            subprocess.call(["wget", "-q", "-O", f"{i}.png", url])
             photoframe = Frame(
                 stylename=photostyle,
                 width="640pt",
