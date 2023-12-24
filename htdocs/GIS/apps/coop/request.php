@@ -30,7 +30,9 @@ $rs = pg_exec(
 
 pg_close($pgcon);
 
-@mkdir("/tmp/cli2shp", 0755);
+if (! is_dir("/tmp/cli2shp")){
+    mkdir("/tmp/cli2shp", 0755);
+}
 chdir("/tmp/cli2shp");
 
 $shpFname =  $filePre;
