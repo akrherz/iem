@@ -2,8 +2,9 @@
 import datetime
 
 import simplejson as json
+from pyiem.exceptions import IncompleteWebRequest
 from pyiem.reference import TRACE_VALUE
-from pyiem.util import get_dbconnc, html_escape
+from pyiem.util import html_escape
 from pyiem.webutil import iemapp
 from pymemcache.client import Client
 from simplejson import encoder
@@ -45,9 +46,8 @@ def f2_sanitize(val):
     return round(val, 2)
 
 
-def get_data(ts, fmt):
+def get_data(cursor, ts, fmt):
     """Get the data for this timestamp"""
-    pgconn, cursor = get_dbconnc("iem")
     data = {"type": "FeatureCollection", "features": []}
     # Fetch the daily values
     cursor.execute(
@@ -171,7 +171,6 @@ def get_data(ts, fmt):
                 },
             }
         )
-    pgconn.close()
     if fmt == "geojson":
         return json.dumps(data)
     cols = (
@@ -197,11 +196,14 @@ def get_data(ts, fmt):
     return res
 
 
-@iemapp()
+@iemapp(iemdb="iem", iemdb_cursorname="cursor")
 def application(environ, start_response):
     """see how we are called"""
     dt = environ.get("dt", datetime.date.today().strftime("%Y-%m-%d"))
-    ts = datetime.datetime.strptime(dt, "%Y-%m-%d")
+    try:
+        ts = datetime.datetime.strptime(dt, "%Y-%m-%d")
+    except Exception:
+        raise IncompleteWebRequest("Invalid dt provided.")
     cb = environ.get("callback", None)
     fmt = environ.get("fmt", "geojson")
 
@@ -225,7 +227,7 @@ def application(environ, start_response):
     mc = Client("iem-memcached:11211")
     data = mc.get(mckey)
     if data is None:
-        data = get_data(ts, fmt)
+        data = get_data(environ["iemdb.iem.cursor"], ts, fmt)
         mc.set(mckey, data.encode("utf-8"), 300)
     else:
         data = data.decode("utf-8")

@@ -5,7 +5,7 @@ import json
 from pyiem.network import Table as NetworkTable
 from pyiem.reference import ISO8601
 from pyiem.tracker import loadqc
-from pyiem.util import convert_value, drct2text, get_dbconnc, mm2inch, utc
+from pyiem.util import convert_value, drct2text, mm2inch, utc
 from pyiem.webutil import iemapp
 
 
@@ -177,7 +177,11 @@ def get_data(cursor, ts):
                         else "M"
                     ),
                     "et": safe_p(mm2inch(row["etalfalfa_qc"])),
-                    "dailyet": safe_p(mm2inch(row["dailyet"])),
+                    "dailyet": (
+                        safe_p(mm2inch(row["dailyet"]))
+                        if row["dailyet"] is not None
+                        else "M"
+                    ),
                     "bat": safe(row["battv_min"], 2),
                     "radmj": safe(row["slrmj_tot"], 2),
                     "srad_wm2": safe(row["srad_wm2"], 2),
@@ -239,7 +243,7 @@ def get_data(cursor, ts):
     return json.dumps(data)
 
 
-@iemapp()
+@iemapp(iemdb="isuag")
 def application(environ, start_response):
     """Go Main Go"""
     headers = [("Content-type", "application/vnd.geo+json")]
@@ -250,10 +254,8 @@ def application(environ, start_response):
         fmt = "%Y-%m-%dT%H:%M:%S.000Z" if len(dt) == 24 else "%Y-%m-%dT%H:%MZ"
         ts = datetime.datetime.strptime(dt, fmt)
         ts = ts.replace(tzinfo=datetime.timezone.utc)
-    pgconn, cursor = get_dbconnc("isuag")
     func = get_data if environ.get("inversion") is None else get_inversion_data
-    data = func(cursor, ts)
-    pgconn.close()
+    data = func(environ["iemdb.isuag.cursor"], ts)
 
     start_response("200 OK", headers)
     return [data.encode("ascii")]

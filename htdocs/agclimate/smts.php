@@ -10,7 +10,7 @@ $t->title = "ISU Soil Moisture Plots";
 
 $now = time();
 $d2 = time() - 5 * 86400;
-$station = isset($_GET["station"]) ? xssafe($_GET["station"]) : "AEEI4";
+$station = isset($_GET["station"]) ? xssafe($_GET["station"]) : "BOOI4";
 $year1 = get_int404('year1', date("Y", $d2));
 $month1 = get_int404('month1', date("m", $d2));
 $day1 = get_int404('day1', date("d", $d2));
