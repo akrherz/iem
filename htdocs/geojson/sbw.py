@@ -4,15 +4,13 @@ import json
 from zoneinfo import ZoneInfo
 
 from pyiem.reference import ISO8601
-from pyiem.util import get_dbconnc, html_escape, utc
+from pyiem.util import html_escape, utc
 from pyiem.webutil import iemapp
 from pymemcache.client import Client
 
 
-def run(ts):
+def run(cursor, ts):
     """Actually do the hard work of getting the current SBW in geojson"""
-    pgconn, cursor = get_dbconnc("postgis")
-
     if ts == "":
         utcnow = utc()
         t0 = utcnow + datetime.timedelta(days=7)
@@ -69,7 +67,6 @@ def run(ts):
                 geometry=json.loads(row["geojson"]),
             )
         )
-    pgconn.close()
     return json.dumps(res)
 
 
@@ -86,7 +83,7 @@ def validate_ts(val):
     return val[:24]
 
 
-@iemapp()
+@iemapp(iemdb="postgis", iemdb_cursorname="cursor")
 def application(environ, start_response):
     """Main Workflow"""
     headers = [("Content-type", "application/vnd.geo+json")]
@@ -102,7 +99,7 @@ def application(environ, start_response):
     mc = Client("iem-memcached:11211")
     res = mc.get(mckey)
     if not res:
-        res = run(ts)
+        res = run(environ["iemdb.postgis.cursor"], ts)
         mc.set(mckey, res, 15 if ts == "" else 3600)
     else:
         res = res.decode("utf-8")
