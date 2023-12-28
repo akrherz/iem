@@ -4,7 +4,7 @@
     <title>Top</title>
 </head>
 
-<body bgcolor="white">
+<body>
 
     <form method="GET" action="/cgi-bin/afos/retrieve.py" target="display">
 

@@ -21,10 +21,10 @@ python prism_adjust_stage4.py $(date --date '1 days ago' +'%Y %m %d')
 python precip_ingest.py $(date --date '1 days ago' +'%Y %m %d')
 
 cd ../climodat
-python daily_estimator.py $(date +'%Y %m %d')
-python daily_estimator.py $(date --date '1 days ago'  +'%Y %m %d')
+python daily_estimator.py --date=$(date +'%Y-%m-%d')
+python daily_estimator.py --date=$(date --date '1 days ago'  +'%Y-%m-%d')
 # Perhaps some more QC happened, that we now need to pick up
-python daily_estimator.py $(date --date '7 days ago'  +'%Y %m %d')
+python daily_estimator.py --date=$(date --date '7 days ago'  +'%Y-%m-%d')
 python compute4regions.py $(date +'%Y %m %d')
 python compute4regions.py $(date --date '1 days ago'  +'%Y %m %d')
 python hrrr_solarrad.py $(date --date '1 days ago'  +'%Y %m %d')

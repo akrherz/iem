@@ -1,5 +1,5 @@
 <?php
-// 1 Aug 2022 still being used...
+// 27 Dec 2023 still being used...
 $pil = isset($_REQUEST["pil"]) ? strtoupper($_REQUEST["pil"]) : 'AFDDMX';
 $cnt = isset($_REQUEST["cnt"]) ? intval($_REQUEST["cnt"]) : 1;
 $center = isset($_REQUEST["center"]) ? substr($_REQUEST["center"], 0, 4) : "";

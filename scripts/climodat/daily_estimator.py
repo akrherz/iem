@@ -1,6 +1,6 @@
 """Climodat Daily Data Estimator.
 
-   python daily_estimator.py YYYY MM DD
+python daily_estimator.py --date=YYYY-MM-DD
 
 RUN_NOON.sh - processes the current date, this skips any calendar day sites
 RUN_NOON.sh - processes yesterday, running all sites
@@ -8,8 +8,8 @@ RUN_0Z.sh - processes the current date and gets the prelim calday sites data.
 RUN_2AM.sh - processes yesterday, which should run all sites
 """
 import datetime
-import sys
 
+import click
 import numpy as np
 import pandas as pd
 from metpy.units import units
@@ -138,7 +138,7 @@ def estimate_hilo(df, ds):
     lowgrid00 = k2f(ds["low_tmpk"].values)
 
     for sid, row in df[pd.isna(df["high"])].iterrows():
-        if row["temp24_hour"] in [0, 22, 23]:
+        if row["temp24_hour"] in [0, 22, 23, 24]:
             val = highgrid00[row["gridj"], row["gridi"]]
             temp_hour = 0
         else:
@@ -150,7 +150,7 @@ def estimate_hilo(df, ds):
             df.at[sid, "high"] = val
             df.at[sid, "dirty"] = True
     for sid, row in df[pd.isna(df["low"])].iterrows():
-        if row["temp24_hour"] in [0, 22, 23]:
+        if row["temp24_hour"] in [0, 22, 23, 24]:
             val = lowgrid00[row["gridj"], row["gridi"]]
             temp_hour = 0
         else:
@@ -180,11 +180,15 @@ def commit(cursor, table, df, ts):
     allowed_failures = 10
     for sid, row in df[df["dirty"]].iterrows():
         LOG.info(
-            "sid: %s high: %s low: %s precip: %s snow: %s snowd: %s",
+            "%s high(%s): %s[%s] low: %s prec(%s): %s[%s] snow: %s snowd: %s",
             sid,
+            row["temp_estimated"],
             row["high"],
+            row["temp_hour"],
             row["low"],
+            row["precip_estimated"],
             row["precip"],
+            row["precip_hour"],
             row["snow"],
             row["snowd"],
         )
@@ -243,8 +247,8 @@ def merge_obs(df, state, ts):
             round(max_tmpf::numeric, 0) as high,
             round(min_tmpf::numeric, 0) as low,
             pday as precip, snow, snowd,
-            coalesce(extract(hour from (coop_valid + '1 minute'::interval)
-            at time zone tzname), 24) as temp_hour
+            extract(hour from (coop_valid + '1 minute'::interval)
+            at time zone tzname) as temp_hour
             from summary s JOIN stations t
             on (t.iemid = s.iemid) WHERE t.network = ANY(:networks)
             and s.day = :dt
@@ -314,18 +318,15 @@ def merge_threaded(df, threaded):
             df.loc[sid] = df.loc[copysid]
 
 
-def main(argv):
+@click.command()
+@click.option("--date", type=click.DateTime(), help="Date to process")
+@click.option("--state", default=None, help="State to process")
+def main(date, state):
     """Go Main Go."""
-    date = datetime.date(int(argv[1]), int(argv[2]), int(argv[3]))
+    date = date.date()
     ds = iemre.get_grids(date)
     pgconn = get_dbconn("coop")
-    states = (
-        state_names.keys()
-        if len(argv) < 5
-        else [
-            argv[4],
-        ]
-    )
+    states = state_names.keys() if state is None else [state]
     for state in states:
         cursor = pgconn.cursor()
         df, threaded = load_table(state, date)
@@ -347,5 +348,4 @@ def main(argv):
 
 
 if __name__ == "__main__":
-    # See how we are called
-    main(sys.argv)
+    main()
