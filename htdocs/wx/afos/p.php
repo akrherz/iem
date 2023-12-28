@@ -1,11 +1,11 @@
 <?php
+define("IEM_APPID", 47);
+
 require_once "../../../config/settings.inc.php";
 require_once "../../../include/database.inc.php";
 require_once "../../../include/myview.php";
 require_once "../../../include/forms.php";
 $t = new MyView();
-
-define("IEM_APPID", 47);
 
 $e = get_int404("e", null);
 $pil = isset($_GET['pil']) ? strtoupper(substr(xssafe($_GET['pil']), 0, 6)) : null;
@@ -164,10 +164,21 @@ if (pg_num_rows($rs) > 1) {
     $content .= '<div class="alert alert-danger"><i class="fa fa-file"></i> ' .
         "Found {$rows} products at the given pil and timestamp. Scroll down to see them all.</div>";
 }
+$extratools = "";
 $img = "";
 for ($i = 0; $row = pg_fetch_assoc($rs); $i++) {
     if ($i == 0) {
         $basets = strtotime($row["mytime"]);
+        if (substr($pil, 0, 3) == "CLI" || substr($pil, 0, 3) == "CF6") {
+            $station = sprintf("%s%s", substr($row["source"], 0, 1), substr($pil, 3, 3));
+            $year = date("Y", $basets);
+            $ccc = substr($pil, 0, 3);
+            $cc = strtolower($ccc);
+            $extratools = <<<EOM
+            <p><a class="btn btn-success" href="/nws/{$cc}table.php?station={$station}&opt=bystation&year={$year}">
+            <i class="fa fa-list"></i> Daily {$ccc} Table for {$station}</a></p>
+EOM;
+        }
         $newe = date("YmdHi", $basets);
         $rawtext = sprintf(
             "/api/1/nwstext/%s-%s-%s-%s",
@@ -252,28 +263,30 @@ for ($i = 0; $row = pg_fetch_assoc($rs); $i++) {
         $year2 = intval($year) + 1;
         $content .= <<<EOF
 <div class="row">
-<div class="col-sm-6 col-md-6">
+<div class="col-sm-7 col-md-7">
 <p>Displaying AFOS PIL: <strong>$pil</strong> 
 Received: <strong>{$dstamp} UTC</strong>
 
-<a rel="nofollow" class="btn btn-primary" 
+<p><a class="btn btn-primary" 
  href="p.php?dir=prev&pil=$pil&e=$newe"><i class="fa fa-arrow-left"></i> 
  Previous in Time</a>
-<a rel="nofollow" class="btn btn-primary" 
+<a class="btn btn-primary" 
  href="p.php?pil=$pil">Latest Product</a>
-<a rel="nofollow" class="btn btn-primary" 
+<a class="btn btn-primary" 
  href="p.php?dir=next&pil=$pil&e=$newe">Next in Time <i class="fa fa-arrow-right"></i></a>
 
-<p><a rel="nofollow" class="btn btn-primary" 
+<p><a class="btn btn-primary" 
  href="{$listlink}">View All {$row["source"]} Products for {$date2}</a>
- <a rel="nofollow" class="btn btn-primary" 
+ <a class="btn btn-primary" 
  href="{$pil_listlink}">View All {$pil3} Products for {$date2}</a>
-<a rel="nofollow" class="btn btn-primary"
+<a class="btn btn-primary"
  href="{$t->twitter_image}">View As Image</a>
 <a class="btn btn-primary" href="{$rawtext}">Download As Text</a></p>
 
+{$extratools}
+
 </div>
-<div class="col-sm-6 col-md-6 well">
+<div class="col-sm-5 col-md-5 well">
 <form method="GET" action="/cgi-bin/afos/retrieve.py" name="bulk">
 <input type="hidden" name="dl" value="1">
 <input type="hidden" name="limit" value="9999">

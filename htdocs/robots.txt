@@ -9,6 +9,4 @@ Disallow: /data/NIDS/
 Disallow: /data/nexrd2/
 Disallow: /data/model/
 Disallow: /archive/nexrad/
-Disallow: /nwnwebsite/
-Disallow: /archive/data/
 Disallow: /archive/raw/snet/

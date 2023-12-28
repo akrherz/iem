@@ -17,7 +17,7 @@ python daily_analysis.py $(date +'%Y %m %d')
 
 cd ../climodat
 python sync_coop_updates.py
-python daily_estimator.py $(date +'%Y %m %d')
+python daily_estimator.py --date=$(date +'%Y-%m-%d')
 
 # Wait a bit, so that more obs can come in
 sleep 300
