@@ -71,11 +71,11 @@ def load_table(state, date):
                 precip_hour, coalesce(temp_estimated, true) as temp_estimated,
                 coalesce(precip_estimated, true) as precip_estimated
                 from alldata_{state} WHERE day = :date
-                and station = ANY(:states)
+                and station = ANY(:stations)
                 """
             ),
             conn,
-            params={"date": date, "states": df.index.values.tolist()},
+            params={"date": date, "stations": df.index.values.tolist()},
             index_col="station",
         )
     # combine this back into the main table
@@ -91,14 +91,15 @@ def estimate_precip(df, ds):
     grid12 = mm2in(ds["p01d_12z"].values)
     grid00 = mm2in(ds["p01d"].values)
 
-    for sid, row in df[pd.isna(df["precip"])].iterrows():
+    # We want the estimator to run anywhere that precip is estimated as
+    # estimates may improve with time.
+    for sid, row in df[df["precip_estimated"]].iterrows():
         if row["precip24_hour"] in [0, 22, 23, 24]:
             precip = grid00[row["gridj"], row["gridi"]]
             precip_hour = 0
         else:
             precip = grid12[row["gridj"], row["gridi"]]
             precip_hour = 7  # not precise
-        df.at[sid, "precip_estimated"] = True
         df.at[sid, "precip_hour"] = precip_hour
         df.at[sid, "dirty"] = True
         # denote trace
@@ -137,7 +138,8 @@ def estimate_hilo(df, ds):
     highgrid00 = k2f(ds["high_tmpk"].values)
     lowgrid00 = k2f(ds["low_tmpk"].values)
 
-    for sid, row in df[pd.isna(df["high"])].iterrows():
+    # We want this to rerun for anything already estimated
+    for sid, row in df[df["temp_estimated"]].iterrows():
         if row["temp24_hour"] in [0, 22, 23, 24]:
             val = highgrid00[row["gridj"], row["gridi"]]
             temp_hour = 0
@@ -146,20 +148,14 @@ def estimate_hilo(df, ds):
             temp_hour = 7  # Not precise
         if not np.ma.is_masked(val):
             df.at[sid, "temp_hour"] = temp_hour
-            df.at[sid, "temp_estimated"] = True
-            df.at[sid, "high"] = val
+            df.at[sid, "high"] = int(round(val, 0))
             df.at[sid, "dirty"] = True
-    for sid, row in df[pd.isna(df["low"])].iterrows():
         if row["temp24_hour"] in [0, 22, 23, 24]:
             val = lowgrid00[row["gridj"], row["gridi"]]
-            temp_hour = 0
         else:
             val = lowgrid12[row["gridj"], row["gridi"]]
-            temp_hour = 7  # Not precise
         if not np.ma.is_masked(val):
-            df.at[sid, "temp_hour"] = temp_hour
-            df.at[sid, "temp_estimated"] = True
-            df.at[sid, "low"] = val
+            df.at[sid, "low"] = int(round(val, 0))
             df.at[sid, "dirty"] = True
 
 
