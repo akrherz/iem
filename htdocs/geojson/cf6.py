@@ -3,7 +3,7 @@ import datetime
 
 import simplejson as json
 from pyiem.reference import TRACE_VALUE
-from pyiem.util import get_dbconnc, html_escape
+from pyiem.util import html_escape
 from pyiem.webutil import iemapp
 from pymemcache.client import Client
 from simplejson import encoder
@@ -45,9 +45,8 @@ def f2_sanitize(val):
     return round(val, 2)
 
 
-def get_data(ts, fmt):
+def get_data(cursor, ts, fmt):
     """Get the data for this timestamp"""
-    pgconn, cursor = get_dbconnc("iem")
     data = {"type": "FeatureCollection", "features": []}
     # Fetch the daily values
     cursor.execute(
@@ -119,11 +118,10 @@ def get_data(ts, fmt):
             else:
                 res += "%s," % (val,)
         res += "\n"
-    pgconn.close()
     return res
 
 
-@iemapp()
+@iemapp(iemdb="iem", iemdb_cursorname="cursor")
 def application(environ, start_response):
     """see how we are called"""
     dt = environ.get("dt", datetime.date.today().strftime("%Y-%m-%d"))
@@ -145,7 +143,7 @@ def application(environ, start_response):
     mc = Client("iem-memcached:11211")
     res = mc.get(mckey)
     if not res:
-        res = get_data(ts, fmt)
+        res = get_data(environ["iemdb.iem.cursor"], ts, fmt)
         mc.set(mckey, res, 300)
     else:
         res = res.decode("utf-8")
