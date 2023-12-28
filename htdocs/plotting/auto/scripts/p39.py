@@ -45,7 +45,7 @@ def get_description():
             type="year",
             name="year",
             default=lastmonth.year,
-            min=1893,
+            min=1800,
             label="Select Year to Compare With:",
         ),
         dict(
@@ -78,6 +78,7 @@ def compute_compare_month(ctx, cursor):
         f"""
         select year, avg((high+low)/2) from alldata
         where station = %s and month = %s and year != %s
+        and high is not null and low is not null
         GROUP by year
         ORDER by avg {'desc' if compare == 'high' else 'asc'} LIMIT 1
         """,
