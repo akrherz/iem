@@ -99,13 +99,12 @@ def plotter(fdict):
                 SELECT extract(year from day) as year,
                 to_char(day, 'mmdd') as sday,
                 day, avg_sknt as sknt, vector_avg_drct as drct
-                from summary s JOIN stations t
-                ON (t.iemid = s.iemid) WHERE t.id = %s and t.network = %s and
+                from summary s WHERE iemid = %s and
                 extract(month from day) = %s and avg_sknt is not null
                 and vector_avg_drct is not null ORDER by day ASC
         """,
             conn,
-            params=(station, ctx["network"], month),
+            params=(ctx["_nt"].sts[station]["iemid"], month),
             parse_dates=["day"],
         )
     title = (

@@ -214,17 +214,19 @@ EOM;
     } // End if
     $table .= "</table>";
 
-    // Cloud Levels
-    $skyc = $json["last_ob"]["skycover[code]"];
-    $skyl = $json["last_ob"]["skylevel[ft]"];
-    for ($i = 0; $i < 4; $i++) {
-        if (is_null($skyc[$i])) continue;
-        $table .= sprintf(
-            "<b>Cloud Layer %s</b>: %s (%s feet)<br />",
-            $i + 1,
-            $skyc[$i],
-            $skyl[$i]
-        );
+    if (array_key_exists("last_ob", $json)){
+        // Cloud Levels
+        $skyc = $json["last_ob"]["skycover[code]"];
+        $skyl = $json["last_ob"]["skylevel[ft]"];
+        for ($i = 0; $i < 4; $i++) {
+            if (is_null($skyc[$i])) continue;
+            $table .= sprintf(
+                "<b>Cloud Layer %s</b>: %s (%s feet)<br />",
+                $i + 1,
+                $skyc[$i],
+                $skyl[$i]
+            );
+        }
     }
 }
 
