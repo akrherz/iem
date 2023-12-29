@@ -24,7 +24,7 @@ NON_CONUS = ["AK", "HI", "PR", "VI", "GU", "AS"]
 
 
 def load_table(state, date):
-    """Update the station table"""
+    """Build up a dataframe for further processing."""
     # IMPORTANT: Only consider sites that are in an online state, so to
     # not run the estimator for `offline` sites
     nt = NetworkTable(f"{state}CLIMATE", only_online=True)
@@ -51,8 +51,8 @@ def load_table(state, date):
                 "gridi": i,
                 "gridj": j,
                 "state": nt.sts[sid]["state"],
-                "temp24_hour": nt.sts[sid]["temp24_hour"],
-                "precip24_hour": nt.sts[sid]["precip24_hour"],
+                "temp_hour_default": nt.sts[sid]["temp24_hour"],
+                "precip_hour_default": nt.sts[sid]["precip24_hour"],
                 "dirty": False,
                 "tracks": (nt.sts[sid]["attributes"].get("TRACKS_STATION")),
             }
@@ -60,16 +60,14 @@ def load_table(state, date):
     if not rows:
         LOG.info("No applicable stations found for state: %s", state)
         return None, threaded
-    df = pd.DataFrame(rows)
-    df = df.set_index("station")
+    df = pd.DataFrame(rows).set_index("station")
     # Load up any available observations
     with get_sqlalchemy_conn("coop") as conn:
         obs = pd.read_sql(
             text(
                 f"""
                 SELECT station, high, low, precip, snow, snowd, temp_hour,
-                precip_hour, coalesce(temp_estimated, true) as temp_estimated,
-                coalesce(precip_estimated, true) as precip_estimated
+                precip_hour, temp_estimated, precip_estimated
                 from alldata_{state} WHERE day = :date
                 and station = ANY(:stations)
                 """
@@ -83,6 +81,11 @@ def load_table(state, date):
     # Set the default on the estimated columns to True
     for col in ["temp_estimated", "precip_estimated"]:
         df[col] = df[col].fillna(True)
+    # Fix any nulls
+    df.loc[pd.isna(df["temp_hour"]), "temp_hour"] = df["temp_hour_default"]
+    df.loc[pd.isna(df["precip_hour"]), "precip_hour"] = df[
+        "precip_hour_default"
+    ]
     return df, threaded
 
 
@@ -93,8 +96,9 @@ def estimate_precip(df, ds):
 
     # We want the estimator to run anywhere that precip is estimated as
     # estimates may improve with time.
-    for sid, row in df[df["precip_estimated"]].iterrows():
-        if row["precip24_hour"] in [0, 22, 23, 24]:
+    idx = df["precip_estimated"] | pd.isnull(df["precip"])
+    for sid, row in df[idx].iterrows():
+        if row["precip_hour"] in [0, 22, 23, 24]:
             precip = grid00[row["gridj"], row["gridi"]]
             precip_hour = 0
         else:
@@ -139,8 +143,9 @@ def estimate_hilo(df, ds):
     lowgrid00 = k2f(ds["low_tmpk"].values)
 
     # We want this to rerun for anything already estimated
-    for sid, row in df[df["temp_estimated"]].iterrows():
-        if row["temp24_hour"] in [0, 22, 23, 24]:
+    idx = df["temp_estimated"] | pd.isnull(df["high"]) | pd.isnull(df["low"])
+    for sid, row in df[idx].iterrows():
+        if row["temp_hour"] in [0, 22, 23, 24]:
             val = highgrid00[row["gridj"], row["gridi"]]
             temp_hour = 0
         else:
@@ -150,7 +155,7 @@ def estimate_hilo(df, ds):
             df.at[sid, "temp_hour"] = temp_hour
             df.at[sid, "high"] = int(round(val, 0))
             df.at[sid, "dirty"] = True
-        if row["temp24_hour"] in [0, 22, 23, 24]:
+        if row["temp_hour"] in [0, 22, 23, 24]:
             val = lowgrid00[row["gridj"], row["gridi"]]
         else:
             val = lowgrid12[row["gridj"], row["gridi"]]
@@ -268,10 +273,10 @@ def merge_obs(df, state, ts):
     df = df.join(obs, how="left", on="tracks", rsuffix="b")
     # HACK the `high` and `precip` columns end up modifying the estimated
     # column, which fouls up subsequent logic
-    for col in "low temp_hour high snow snowd precip_hour precip".split():
+    for col in "low temp_hour high snow snowd precip".split():
         estcol = (
             "precip_estimated"
-            if col in ["precip", "snow", "snowd", "precip_hour"]
+            if col in ["precip", "snow", "snowd"]
             else "temp_estimated"
         )
         # Use obs if the current entry is null or is estimated and new
@@ -316,13 +321,13 @@ def merge_threaded(df, threaded):
 
 @click.command()
 @click.option("--date", type=click.DateTime(), help="Date to process")
-@click.option("--state", default=None, help="State to process")
-def main(date, state):
+@click.option("--st", default=None, help="Single state to process")
+def main(date, st):
     """Go Main Go."""
     date = date.date()
     ds = iemre.get_grids(date)
     pgconn = get_dbconn("coop")
-    states = state_names.keys() if state is None else [state]
+    states = state_names.keys() if st is None else [st]
     for state in states:
         cursor = pgconn.cursor()
         df, threaded = load_table(state, date)
