@@ -100,7 +100,7 @@ def estimate_precip(df, ds):
     for sid, row in df[idx].iterrows():
         if row["precip_hour"] in [0, 22, 23, 24]:
             precip = grid00[row["gridj"], row["gridi"]]
-            precip_hour = 0
+            precip_hour = 24
         else:
             precip = grid12[row["gridj"], row["gridi"]]
             precip_hour = 7  # not precise
@@ -147,7 +147,7 @@ def estimate_hilo(df, ds):
     for sid, row in df[idx].iterrows():
         if row["temp_hour"] in [0, 22, 23, 24]:
             val = highgrid00[row["gridj"], row["gridi"]]
-            temp_hour = 0
+            temp_hour = 24
         else:
             val = highgrid12[row["gridj"], row["gridi"]]
             temp_hour = 7  # Not precise
