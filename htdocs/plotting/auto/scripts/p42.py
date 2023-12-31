@@ -12,6 +12,7 @@ than three hours.
 autoplot compute streaks within a range of values.</p>
 """
 import datetime
+from zoneinfo import ZoneInfo
 
 import pandas as pd
 from pyiem.exceptions import NoDataFound
@@ -30,9 +31,9 @@ MDICT = {
     "all": "Entire Year",
     "spring": "Spring (MAM)",
     "fall": "Fall (SON)",
-    # no worky ('winter', 'Winter (DJF)'),
+    "winter": "Winter (DJF)",
     "summer": "Summer (JJA)",
-    # no worky ('octmar', 'October thru March'),
+    "octmar": "October thru March",
     "jan": "January",
     "feb": "February",
     "mar": "March",
@@ -114,10 +115,10 @@ def get_description():
     return desc
 
 
-def plot(ax, interval, valid, tmpf, lines, mydir, month):
+def plot(ax, xbase, interval, valid, tmpf, lines) -> bool:
     """Our plotting function"""
     if len(lines) > 10 or len(valid) < 2 or (valid[-1] - valid[0]) < interval:
-        return lines
+        return True
     if len(lines) == 10:
         ax.text(
             0.5,
@@ -125,18 +126,14 @@ def plot(ax, interval, valid, tmpf, lines, mydir, month):
             "ERROR: Limit of 10 lines reached",
             transform=ax.transAxes,
         )
-        return lines
+        return False
     delta = (valid[-1] - valid[0]).total_seconds()
     i = tmpf.index(min(tmpf))
     mylbl = (
         f"{valid[0].year}\n{int(delta / 86400):.0f}d"
         f"{((delta % 86400) / 3600.0):.0f}h"
     )
-    x0 = valid[0].replace(month=1, day=1, hour=0, minute=0)
-    offset = 0
-    if mydir == "below" and valid[0].month < 7 and month == "all":
-        offset = 366.0 * 86400.0
-    seconds = [((v - x0).total_seconds() + offset) for v in valid]
+    seconds = [(v - xbase).total_seconds() for v in valid]
     lines.append(
         ax.plot(seconds, tmpf, lw=2, label=mylbl.replace("\n", " "))[0]
     )
@@ -151,19 +148,19 @@ def plot(ax, interval, valid, tmpf, lines, mydir, month):
         mylbl,
         ha="center",
         va="center",
-        bbox=dict(color=lines[-1].get_color()),
+        bbox={"color": lines[-1].get_color()},
         color="white",
     )
-    return lines
+    return True
 
 
-def compute_xlabels(ax):
+def compute_xlabels(ax, xbase):
     """Figure out how to make pretty xaxis labels"""
     # values are in seconds
     xlim = ax.get_xlim()
-    x0 = datetime.datetime(2000, 1, 1) + datetime.timedelta(seconds=xlim[0])
+    x0 = xbase + datetime.timedelta(seconds=xlim[0])
     x0 = x0.replace(hour=0, minute=0)
-    x1 = datetime.datetime(2000, 1, 1) + datetime.timedelta(seconds=xlim[1])
+    x1 = xbase + datetime.timedelta(seconds=xlim[1])
     x1 = x1.replace(hour=0, minute=0) + datetime.timedelta(days=1)
     xticks = []
     xticklabels = []
@@ -172,12 +169,12 @@ def compute_xlabels(ax):
     if delta == 0:
         delta = 1
     for x in range(
-        int((x0 - datetime.datetime(2000, 1, 1)).total_seconds()),
-        int((x1 - datetime.datetime(2000, 1, 1)).total_seconds()),
+        int((x0 - xbase).total_seconds()),
+        int((x1 - xbase).total_seconds()),
         86400 * delta,
     ):
         xticks.append(x)
-        ts = datetime.datetime(2000, 1, 1) + datetime.timedelta(seconds=x)
+        ts = xbase + datetime.timedelta(seconds=x)
         xticklabels.append(ts.strftime("%-d\n%b"))
     ax.set_xticks(xticks)
     ax.set_xticklabels(xticklabels)
@@ -207,28 +204,35 @@ def plotter(fdict):
         months = list(range(1, 13))
     elif month == "fall":
         months = [9, 10, 11]
+    elif month == "winter":
+        months = [12, 1, 2]
+    elif month == "octmar":
+        months = [10, 11, 12, 1, 2, 3]
     elif month == "spring":
         months = [3, 4, 5]
     elif month == "summer":
         months = [6, 7, 8]
     else:
         ts = datetime.datetime.strptime(f"2000-{month}-01", "%Y-%b-%d")
-        # make sure it is length two for the trick below in SQL
-        months = [ts.month, 999]
+        months = [ts.month]
 
-    rnd = 0 if varname not in ["mslp", "vsby"] else 2
-    cursor.execute(
-        f"""
-        SELECT valid, round({varname}::numeric,{rnd}) as d
-        from alldata where station = %s {year_limiter}
-        and {varname} is not null and extract(month from valid) = ANY(%s)
-        ORDER by valid ASC
-        """,
-        (station, months),
-    )
     ab = ctx["_nt"].sts[station]["archive_begin"]
     if ab is None:
         raise NoDataFound("Unknown station metadata.")
+    tzname = ctx["_nt"].sts[station]["tzname"]
+    tzinfo = ZoneInfo(tzname)
+    rnd = 0 if varname not in ["mslp", "vsby"] else 2
+    cursor.execute(
+        f"""
+        SELECT valid at time zone 'UTC' as utc_valid,
+        round({varname}::numeric,{rnd}) as d
+        from alldata where station = %s {year_limiter}
+        and {varname} is not null and
+        extract(month from valid at time zone %s) = ANY(%s)
+        ORDER by valid ASC
+        """,
+        (station, tzname, months),
+    )
     units = r"$^\circ$F"
     if varname == "mslp":
         units = "mb"
@@ -241,9 +245,8 @@ def plotter(fdict):
     )
     interval = datetime.timedelta(hours=hours)
 
-    valid = []
+    valids = []
     tmpf = []
-    year = 0
     lines = []
     # Figure out bounds check values
     lower = threshold
@@ -264,34 +267,53 @@ def plotter(fdict):
     )
     (fig, ax) = figure_axes(title=title, subtitle=subtitle, apctx=ctx)
 
+    threshold = datetime.timedelta(hours=3)
+    reset_valid = datetime.datetime(1910, 1, 1, tzinfo=tzinfo)
+    xbase = reset_valid
     for row in cursor:
-        if (month != "all" and year != row["valid"].year) or (
-            valid and (row["valid"] - valid[-1]) > datetime.timedelta(hours=3)
-        ):
-            year = row["valid"].year
-            lines = plot(ax, interval, valid, tmpf, lines, mydir, month)
-            valid = []
+        valid = row["utc_valid"].replace(tzinfo=datetime.timezone.utc)
+        ireset = False
+        # This is tricky, we need to resolve when time resets.
+        if valid > reset_valid:
+            _tmp = (
+                datetime.datetime(valid.year, months[-1], 1)
+                + datetime.timedelta(days=32)
+            ).replace(day=1)
+            if month in ["winter", "octmar"]:
+                _tmp = _tmp.replace(year=valid.year + 1)
+            reset_valid = datetime.datetime(
+                _tmp.year, _tmp.month, 1, tzinfo=tzinfo
+            )
+            xbase = datetime.datetime(
+                _tmp.year - 1, _tmp.month, 1, tzinfo=tzinfo
+            )
+            ireset = True
+        if ireset or (valids and ((valid - valids[-1]) > threshold)):
+            if not plot(ax, xbase, interval, valids, tmpf, lines):
+                break
+            valids = []
             tmpf = []
         if lower <= row["d"] < upper:
-            valid.append(row["valid"])
+            valids.append(valid)
             tmpf.append(row["d"])
         else:
-            valid.append(row["valid"])
+            valids.append(valid)
             tmpf.append(row["d"])
-            lines = plot(ax, interval, valid, tmpf, lines, mydir, month)
-            valid = []
+            if not plot(ax, xbase, interval, valids, tmpf, lines):
+                break
+            valids = []
             tmpf = []
     pgconn.close()
 
-    lines = plot(ax, interval, valid, tmpf, lines, mydir, month)
-    compute_xlabels(ax)
+    plot(ax, xbase, interval, valids, tmpf, lines)
+    compute_xlabels(ax, xbase)
     rows = []
     for line in lines:
         # Ensure we don't send datetimes to pandas
         rows.append(
             dict(
-                start=line.period_start.strftime("%Y-%m-%d %H:%M"),
-                end=line.period_end.strftime("%Y-%m-%d %H:%M"),
+                start_utc=line.period_start.strftime("%Y-%m-%d %H:%M+00"),
+                end_utc=line.period_end.strftime("%Y-%m-%d %H:%M+00"),
                 hours=line.hours,
                 days=line.days,
             )
@@ -320,4 +342,4 @@ def plotter(fdict):
 
 
 if __name__ == "__main__":
-    plotter({})
+    plotter({"m": "winter", "dir": "below", "threshold": 0})
