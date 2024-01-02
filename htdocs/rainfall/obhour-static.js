@@ -184,7 +184,9 @@ Ext.onReady(function () {
             { name: 'p48' },
             { name: 'p72' },
             { name: 'p168' },
-            { name: 'p720' }
+            { name: 'p720' },
+            { name: 'p2160' },
+            { name: 'p8760' }
         ])
     });
 
@@ -233,7 +235,9 @@ Ext.onReady(function () {
             { header: "48 Hour", toffset: 48, width: 80, sortable: true, dataIndex: 'p48', renderer: rpv },
             { header: "72 Hour", toffset: 72, width: 80, sortable: true, dataIndex: 'p72', renderer: rpv },
             { header: "168 Hour", toffset: 168, width: 80, sortable: true, dataIndex: 'p168', renderer: rpv },
-            { header: "720 Hour", toffset: 720, width: 80, sortable: true, dataIndex: 'p720', renderer: rpv }
+            { header: "720 Hour", toffset: 720, width: 80, sortable: true, dataIndex: 'p720', renderer: rpv },
+            { header: "2160 Hour", toffset: 2160, width: 80, sortable: true, dataIndex: 'p2160', renderer: rpv },
+            { header: "8760 Hour", toffset: 8760, width: 80, sortable: true, dataIndex: 'p8760', renderer: rpv }
         ]),
         stripeRows: true,
         title: 'Accumulated Precipitation by Interval',
