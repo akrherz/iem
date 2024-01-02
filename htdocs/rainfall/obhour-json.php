@@ -45,12 +45,17 @@ foreach ($intervals as $key => $interval) {
         $ts0 = clone $ts;
         $ts0->sub(new DateInterval("PT{$interval}H"));
     }
+    // Lame, but is a faster
+    $table = sprintf("hourly_%s", $ts0->format("Y"));
+    if ($ts0->format("Y") != $ts->format("Y")) {
+        $table = "hourly";
+    }
     $sql = sprintf(
-        "select id as station, sum(phour) as p1 from hourly_%s h " .
+        "select id as station, sum(phour) as p1 from %s h " .
             "JOIN stations t on (h.iemid = t.iemid) WHERE valid >= '%s+00' and " .
             "valid < '%s+00' and t.network IN (%s) " .
             "GROUP by t.id",
-        $ts->format("Y"),
+        $table,
         $ts0->format("Y-m-d H:i"),
         $ts->format("Y-m-d H:i"),
         $networks
