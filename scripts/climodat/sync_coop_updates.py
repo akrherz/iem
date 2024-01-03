@@ -66,6 +66,9 @@ def compare_and_update(ccursor, currentob, newob):
                 f"{'temp' if col != 'precip' else 'precip'}_estimated = 'f'"
             )
             chour = "null" if pd.isna(newob["chour"]) else newob["chour"]
+            # Rectify the hour
+            if chour == 0:
+                chour = 24
             updates.append(
                 f"{'temp' if col != 'precip' else 'precip'}_hour = {chour}"
             )
