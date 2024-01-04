@@ -1,8 +1,11 @@
 """Do the gridding of Solar Radiation Data
 
+This used to use MERRAv2 for non-realtime data, but a crude assessment found
+ERA5land to produce better results.
+
 Called from:
  - RUN_MIDNIGHT.sh for previous day
- - RUN_MIDNIGHT.sh on the 28th for the previous month
+ - RUN_0Z.sh for 8 days ago
  - RUN_10_AFTER.sh at 11 PM for the current day
 """
 # pylint: disable=unpacking-non-sequence
@@ -18,83 +21,53 @@ import pyproj
 import xarray as xr
 from affine import Affine
 from pyiem import iemre
-from pyiem.util import get_dbconn, logger, ncopen, utc
-from scipy.interpolate import NearestNDInterpolator
+from pyiem.util import logger, ncopen, utc
 
 LOG = logger()
 P4326 = pyproj.Proj("EPSG:4326")
 SWITCH_DATE = utc(2014, 10, 10, 20)
 
 
-def do_coop(ts):
-    """Use COOP solar radiation data"""
-    pgconn = get_dbconn("coop")
-    cursor = pgconn.cursor()
-
-    cursor.execute(
-        """
-        SELECT ST_x(geom), ST_y(geom),
-        coalesce(narr_srad, merra_srad) from alldata a JOIN stations t
-        ON (a.station = t.id) WHERE
-        day = %s and t.network ~* 'CLIMATE' and
-        substr(id, 3, 1) not in ('C', 'D', 'T')
-        and substr(id, 3, 4) != '0000'
-    """,
-        (ts.strftime("%Y-%m-%d"),),
-    )
-    lons = []
-    lats = []
-    vals = []
-    for row in cursor:
-        if row[2] is None or row[2] < 0:
-            continue
-        lons.append(row[0])
-        lats.append(row[1])
-        vals.append(row[2])
-
-    nn = NearestNDInterpolator(
-        (np.array(lons), np.array(lats)), np.array(vals)
-    )
-    xi, yi = np.meshgrid(iemre.XAXIS, iemre.YAXIS)
-
-    ds = iemre.get_grids(ts.date(), varnames="rsds")
-    # Convert MJ/d to Wm2
-    ds["rsds"].values = nn(xi, yi) * 1000000.0 / 86400.0
-    iemre.set_grids(ts.date(), ds)
-    subprocess.call(
-        ["python", "db_to_netcdf.py", f"{ts:%Y}", f"{ts:%m}", f"{ts:%d}"]
-    )
-
-
-def try_merra(ts):
-    """Attempt to use MERRA data."""
+def try_era5land(ts):
+    """Attempt to use ERA5Land data."""
     # Our files are UTC date based :/
-    ncfn1 = ts.strftime("/mesonet/data/merra2/%Y/%Y%m%d.nc")
-    ncfn2 = (ts + datetime.timedelta(days=1)).strftime(
-        "/mesonet/data/merra2/%Y/%Y%m%d.nc"
-    )
+    ncfn1 = ts.strftime("/mesonet/data/era5/%Y_era5land_hourly.nc")
+    tomorrow = ts + datetime.timedelta(days=1)
+    ncfn2 = tomorrow.strftime("/mesonet/data/era5/%Y_era5land_hourly.nc")
     if not os.path.isfile(ncfn1) or not os.path.isfile(ncfn2):
         return False
     with ncopen(ncfn1) as nc:
-        # Total up from 6z to end of file for today
-        total = np.sum(nc.variables["SWGDN"][5:, :, :], axis=0)
+        # 7z through 23z
+        idx0 = iemre.hourly_offset(ts.replace(hour=7))
+        idx1 = iemre.hourly_offset(ts.replace(hour=23)) + 1
+        total = np.ma.sum(nc.variables["rsds"][idx0:idx1, :, :], axis=0)
     with ncopen(ncfn2) as nc:
-        lat1d = nc.variables["lat"][:]
-        lon1d = nc.variables["lon"][:]
-        # Total up to 6z
-        total += np.sum(nc.variables["SWGDN"][:6, :, :], axis=0)
+        # 0z through 6z of next day
+        idx0 = iemre.hourly_offset(tomorrow.replace(hour=0))
+        idx1 = iemre.hourly_offset(tomorrow.replace(hour=6)) + 1
+        # Total through 6z
+        total += np.ma.sum(nc.variables["rsds"][idx0:idx1, :, :], axis=0)
 
     # We wanna store as W m-2, so we just average out the data by hour
     total = total / 24.0
 
-    lons, lats = np.meshgrid(lon1d, lat1d)
-    nn = NearestNDInterpolator(
-        (lons.flatten(), lats.flatten()), total.flatten()
-    )
-    xi, yi = np.meshgrid(iemre.XAXIS, iemre.YAXIS)
+    aff = Affine(0.1, 0, iemre.WEST, 0, -0.1, iemre.NORTH)
+    vals = iemre.reproject2iemre(np.flipud(total), aff, P4326.crs)
+    for shift in (-4, 4):
+        for axis in (0, 1):
+            vals_shifted = np.roll(vals, shift=shift, axis=axis)
+            idx = ~vals_shifted.mask * vals.mask
+            vals[idx] = vals_shifted[idx]
 
-    ds = iemre.get_grids(ts.date(), varnames="rsds")
-    ds["rsds"].values = nn(xi, yi)
+    # Jitter the grid to fill out edges along the coasts
+    ds = xr.Dataset(
+        {
+            "rsds": xr.DataArray(
+                vals,
+                dims=("y", "x"),
+            )
+        }
+    )
     iemre.set_grids(ts.date(), ds)
     subprocess.call(
         ["python", "db_to_netcdf.py", f"{ts:%Y}", f"{ts:%m}", f"{ts:%d}"]
@@ -222,11 +195,11 @@ def main(argv):
         queue.append(sts)
     for sts in queue:
         sts = sts.replace(tzinfo=ZoneInfo("America/Chicago"))
-        if not try_merra(sts):
+        if not try_era5land(sts):
+            LOG.info("try_era5land failed to find data")
             if sts.year >= 2014:
+                LOG.info("trying hrrr")
                 do_hrrr(sts)
-            else:
-                do_coop(sts)
 
 
 if __name__ == "__main__":

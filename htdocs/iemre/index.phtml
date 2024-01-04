@@ -24,6 +24,12 @@ site observational data, but for some purposes, this dataset will be easier
 to work with.  <strong>No dataset is perfect and this dataset is provided
 without warranty.</strong></p>
 
+<div class="alert alert-info">
+ <strong>Use better products!</strong>
+ <br />The IEM Reanalysis is nothing special. It was cool maybe 15 years ago,
+ but now days there are superior products available.  Use those instead!
+</div>
+
 <ul>
  <li><strong>Why do this?</strong>
  <br />Previously, the IEM has only provided raw observations with limited
@@ -36,9 +42,9 @@ a means of spatial interpolation.</li>
  <li><strong>Isn't this a duplication of effort?</strong>
  <br />While there are other "reanalysis" type projects out there with
 data freely available, many times their data does not update in near real-time
-and does not include many of the datasets the IEM uniquely collects. We may
-also produce an analysis on sub-hourly timescales.
+and does not include many of the datasets the IEM uniquely collects.
 <br />Having said that, here are some alternatives:
+<br /><a href="https://www.ecmwf.int/en/era5-land">ERA5Land</a>
 <br /><a href="https://daymet.ornl.gov/">DayMet</a>
 <br /><a href="http://www.climatologylab.org/gridmet.html">GridMet</a>
 <br /><a href="https://prism.oregonstate.edu/">PRISM</a>
@@ -50,10 +56,16 @@ also produce an analysis on sub-hourly timescales.
 
 <h3>Product Changes</h3>
 
-<p><strong>1 May 2018:</strong> Grid domain expanded to cover CONUS.  It will
+<ul>
+<li><strong>4 Jan 2023:</strong> Near realtime solar radiation is sourced from
+the HRRR model.  For dates prior to 8 days ago, it is sourced from ERA5Land.
+This is a change as it used to be sourced from MERRAv2.  It will take
+a number of days to update the archive to use this new source.</li>
+<li><strong>1 May 2018:</strong> Grid domain expanded to cover CONUS.  It will
 take a while to fully populate the grids.  At the moment, just the previous
 midwestern US data is available.  Grid resolution increased to 0.125x0.125
-degree.</p>
+degree.</li>
+</ul>
 
 <h3>Data Flow</h3>
  
@@ -114,15 +126,24 @@ degree.</p>
          <tr>
 <td>
 <ul>
- <li>2 Meter Air Temperature</li>
+ <li>2 Meter Air and Dew Point Temperature</li>
  <li>10 Meter Wind Speed and Direction</li>
  <li>Precipitation</li>
+ <li>Approx 4inch Soil Temperature</li>
+ <li>Sky Coverage Percentage</li>
 </ul>
 </td>
 <td>
 <ul>
  <li>High and Low 2 Meter Air Temperature</li>
+ <li>High and Low ~4 inch soil temperature</li>
+ <li>Average wind speed magnitude</li>
  <li>Precipitation</li>
+ <li>Snowfall at 12 UTC</li>
+ <li>Snow Depth at 12 UTC</li>
+ <li>Solar Radiation</li>
+ <li>Solar Radiation via NASA POWER</li>
+ <li>Average Dew Point Temperature</li>
 </ul>
 </td>
 </tr>
@@ -162,7 +183,8 @@ file format to store these gridded datasets.  You can find individual web direct
 IEMRE related datasets: 
 <ul>
   <li><a href="/onsite/iemre/">IEMRE Files</a></li>
-  <li><a href="/onsite/mrms/">MRMS CST Daily Netcdf File</a></li>
+  <li><a href="/onsite/era5land/">ERA5Land Hourly Netcdf Files</a></li>
+  <li><a href="/onsite/mrms/">MRMS CST Daily Netcdf Files</a></li>
   <li><a href="/onsite/stage4/">NCEP Stage IV Hourly Data</a></li>
   <li><a href="/onsite/prism/">Oregon State PRISM Daily Data</a></li>
 </ul>
