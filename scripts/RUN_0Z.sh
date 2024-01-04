@@ -57,3 +57,5 @@ cd ../iemre
 python stage4_12z_adjust.py $(date +'%Y %m %d')
 # Run precip ingest to copy this to IEMRE
 python precip_ingest.py $(date +'%Y %m %d')
+# grid rsds using ERA5Land for 8 days ago, to be safe
+python grid_rsds.py $(date -u --date '8 days ago' +'%Y %m %d')

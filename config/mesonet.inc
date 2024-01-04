@@ -133,6 +133,7 @@ RewriteRule ^/search /search.py [QSA]
   Alias "/onsite/mrms" "/mesonet/data/mrms"
   Alias "/onsite/prism" "/mesonet/data/prism"
   Alias "/onsite/stage4" "/mesonet/data/stage4"
+  Alias "/onsite/era5land" "/mesonet/data/era5land"
   Alias "/present" "/mesonet/share/present"
   Alias "/cases" "/mesonet/share/cases"
   Alias "/GIS/data/gis" "/mesonet/data/gis"
