@@ -287,6 +287,8 @@ def plotter(fdict):
     )
 
     fmter = intfmt if varname.find("days") > -1 else nice
+    if varname in ["min_low", "max_low", "min_high", "max_high"]:
+        fmter = intfmt
     yrfmter = intfmt if ctx["eday"] > ctx["sday"] else crossesjan1
     if stop is None:
         # require at least 90% coverage
@@ -317,7 +319,7 @@ def plotter(fdict):
 
     # Print top 10
     dy = 0.03
-    ypos = 0.9
+    ypos = 0.88
     fig.text(0.86, ypos, "Top 10")
     for yr, row in df2.head(10).iterrows():
         ypos -= dy
