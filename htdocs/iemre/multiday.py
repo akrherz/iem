@@ -15,11 +15,11 @@ json.encoder.FLOAT_REPR = lambda o: format(o, ".2f")
 json.encoder.c_make_encoder = None
 
 
-def clean(val):
+def clean(val, precision=2):
     """My filter"""
     if val is None or np.isnan(val) or np.ma.is_masked(val):
         return None
-    return float(val)
+    return round(float(val), precision)
 
 
 def send_error(start_response, msg):
@@ -95,6 +95,8 @@ def application(environ, start_response):
         )
         precip = nc.variables["p01d"][offset1:offset2, j, i] / 25.4
         precip12 = nc.variables["p01d_12z"][offset1:offset2, j, i] / 25.4
+        # Solar radiation is average W/m2, we want MJ/day
+        srad = nc.variables["rsds"][offset1:offset2, j, i] / 1e6 * 86400.0
 
     # Get our climatology vars
     c2000 = ts1.replace(year=2000)
@@ -145,6 +147,7 @@ def application(environ, start_response):
                 "daily_precip_in": clean(precip[i]),
                 "12z_precip_in": clean(precip12[i]),
                 "climate_daily_precip_in": clean(cprecip[i]),
+                "solar_mj": clean(srad[i]),
             }
         )
 
