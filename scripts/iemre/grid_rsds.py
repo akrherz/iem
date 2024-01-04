@@ -1,6 +1,9 @@
 """Do the gridding of Solar Radiation Data
 
-Called from RUN_MIDNIGHT.sh
+Called from:
+ - RUN_MIDNIGHT.sh for previous day
+ - RUN_MIDNIGHT.sh on the 28th for the previous month
+ - RUN_10_AFTER.sh at 11 PM for the current day
 """
 # pylint: disable=unpacking-non-sequence
 import datetime
