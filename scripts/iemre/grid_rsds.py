@@ -28,7 +28,7 @@ P4326 = pyproj.Proj("EPSG:4326")
 SWITCH_DATE = utc(2014, 10, 10, 20)
 
 
-def try_era5land(ts):
+def try_era5land(ts) -> bool:
     """Attempt to use ERA5Land data."""
     # Our files are UTC date based :/
     ncfn1 = ts.strftime("/mesonet/data/era5/%Y_era5land_hourly.nc")
@@ -48,6 +48,9 @@ def try_era5land(ts):
         # Total through 6z
         total += np.ma.sum(nc.variables["rsds"][idx0:idx1, :, :], axis=0)
 
+    # If total is all missing, then we have no data
+    if total.mask.all():
+        return False
     # We wanna store as W m-2, so we just average out the data by hour
     total = total / 24.0
 
