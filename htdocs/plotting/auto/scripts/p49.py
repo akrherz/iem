@@ -15,6 +15,7 @@ import pandas as pd
 from pyiem.exceptions import NoDataFound
 from pyiem.plot import figure_axes
 from pyiem.util import get_autoplot_context, get_sqlalchemy_conn
+from sqlalchemy import text
 
 PDICT = {
     "high": "High Temp (F)",
@@ -23,7 +24,11 @@ PDICT = {
     "snow": "Snowfall (inch)",
     "snowd": "Snow Depth (inch)",
 }
-PDICT2 = {"gte": "Greater than or equal to", "lt": "Less than"}
+PDICT2 = {
+    "gte": "Greater than or equal to {threshold}",
+    "lt": "Less than {threshold}",
+    "rng": "Between Inclusive {threshold} and {threshold2}",
+}
 XREF = {"gte": ">=", "lt": "<"}
 PDICT3 = {
     "min": "Minimum",
@@ -88,6 +93,12 @@ def get_description():
         dict(
             type="float", name="threshold", default="0.1", label="Threshold:"
         ),
+        {
+            "type": "float",
+            "name": "threshold2",
+            "default": 0.2,
+            "label": "Threshold2 (when range is selected) (inclusive value)",
+        },
     ]
     return desc
 
@@ -97,29 +108,49 @@ def plotter(fdict):
     ctx = get_autoplot_context(fdict, get_description())
 
     station = ctx["station"]
+    params = {"station": station, "syear": ctx["syear"], "eyear": ctx["eyear"]}
     threshold = ctx["threshold"]
+    params["threshold"] = threshold
     varname = ctx["var"]
-    opt = XREF[ctx["opt"]]
+    if ctx["opt"] == "rng":
+        threshold2 = ctx["threshold2"]
+        if threshold > threshold2:
+            threshold, threshold2 = threshold2, threshold
+        params["threshold"] = threshold
+        params["threshold2"] = threshold2
+        sql = "val >= :threshold and val <= :threshold2"
+        vv = (
+            PDICT2[ctx["opt"]]
+            .replace("{threshold}", str(threshold))
+            .replace("{threshold2}", str(threshold2))
+        )
+        subtitle = f"Frequency of {PDICT[varname]} {vv}"
+    else:
+        sql = f"val {XREF[ctx['opt']]} :threshold"
+        vv = PDICT2[ctx["opt"]].replace("{threshold}", str(threshold))
+        subtitle = f"Frequency of {PDICT[varname]} {vv} "
     days = int(ctx["days"])
     func = "avg" if days == 1 else ctx["f"]
     with get_sqlalchemy_conn("coop") as conn:
         df = pd.read_sql(
             (
-                f"""
+                text(
+                    f"""
                 WITH data as (
                 SELECT sday, {func}({varname})
                 OVER (ORDER by day ASC ROWS between
                 CURRENT ROW and {days - 1} FOLLOWING) as val, day from alldata
-                WHERE station = %s and {varname} is not null and year >= %s
-                and year <= %s)
-                SELECT sday, sum(case when val {opt} {threshold} then 1 else 0
+                WHERE station = :station and {varname} is not null and
+                year >= :syear and year <= :eyear)
+                SELECT sday, sum(case when {sql} then 1 else 0
                 end) as hits, count(*) as total,
                 min(day) as min_date, max(day) as max_date from data
                 WHERE sday != '0229' GROUP by sday ORDER by sday ASC
             """
+                )
             ),
             conn,
-            params=(station, ctx["syear"], ctx["eyear"]),
+            params=params,
             index_col=None,
         )
     if df.empty:
@@ -133,9 +164,6 @@ def plotter(fdict):
     title = (
         f"{ctx['_sname']} "
         f"({df['min_date'].min().year}-{df['max_date'].max().year})"
-    )
-    subtitle = (
-        f"Frequency of {PDICT[varname]} {PDICT2[ctx['opt']]} {threshold}"
     )
     if days > 1:
         subtitle += f" {PDICT3[func]} over inclusive forward {days} days"

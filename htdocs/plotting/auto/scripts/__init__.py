@@ -99,7 +99,7 @@ daily_opts = [
     {
         "id": 49,
         "label": (
-            "Daily/Multi-Day Frequency of Some Threshold "
+            "Daily/Multi-Day Frequency of Some Threshold/Range "
             "(snow, precip, temps)"
         ),
     },
