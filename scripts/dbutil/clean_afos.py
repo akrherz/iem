@@ -17,9 +17,10 @@ def main():
     # reflect changes to docs/datasets/afos.md
     # RRM removed due to request
     pil3 = (
-        "^(RR[1-9RSAZ]|ECM|ECS|ECX|LAV|LEV|MAV|MET|MTR|MEX|NBE|NBH|NBP|NBS|"
-        "NBX|OSO|RSD|RWR|STO|HML|WRK|SCV|LLL)"
-    )
+        "RR1 RR2 RR3 RR4 RR5 RR6 RR7 RR8 RR9 RRA RRS RRZ ECM ECS ECX LAV "
+        "LEV MAV MET MTR MEX NBE NBH NBP NBS NBX OSO RSD RWR STO HML WRK "
+        "SCV LLL"
+    ).split()
     pils = (
         "HPTNCF WTSNCF TSTNCF HD3RSA XF03DY XOBUS ECMNC1 SYNBOU MISWTM MISWTX "
         "MISMA1 MISAM1"
@@ -32,10 +33,11 @@ def main():
         delete from products WHERE
         entered < ('YESTERDAY'::date - '7 days'::interval) and
         entered > ('YESTERDAY'::date - '31 days'::interval) and
-        (pil ~* %s or pil = ANY(%s))
+        (substr(pil, 1, 3) = ANY(%s) or pil = ANY(%s))
         """,
         (pil3, pils),
     )
+    LOG.info("deleted %s rows", acursor.rowcount)
     if acursor.rowcount == 0:
         LOG.warning("Found no products to delete between 7-31 days")
     acursor.close()
