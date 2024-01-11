@@ -12,6 +12,7 @@ than three hours.
 autoplot compute streaks within a range of values.</p>
 """
 import datetime
+import operator
 from zoneinfo import ZoneInfo
 
 import pandas as pd
@@ -19,7 +20,11 @@ from pyiem.exceptions import NoDataFound
 from pyiem.plot import figure_axes
 from pyiem.util import get_autoplot_context, get_dbconnc
 
-PDICT = {"above": "At or Above Threshold...", "below": "Below Threshold..."}
+PDICT = {
+    "above": "At or Above Threshold...",
+    "below": "Below Threshold...",
+    "aob": "At or Below Threshold...",
+}
 PDICT2 = {
     "tmpf": "Air Temperature",
     "feel": "Feels Like Temperature",
@@ -252,15 +257,18 @@ def plotter(fdict):
     lower = threshold
     upper = 9999
     if ctx.get("t2") is None:
-        if mydir == "below":
+        if mydir in ["below", "aob"]:
             lower = -9999
             upper = threshold
         label = f"{mydir} {threshold}"
     else:
         upper = ctx["t2"]
-        if mydir == "below":
+        if mydir in ["below", "aob"]:
             lower, upper = upper, lower
-        label = f"within range {lower} <= x < {upper}"
+        label = (
+            f"within range {lower} <= x"
+            f" {'<' if mydir == 'below' else '<='} {upper}"
+        )
     subtitle = (
         f"{MDICT.get(month)} :: {int(hours / 24)}d{(hours % 24):.0f}h+ "
         f"Streaks {label} {units}"
@@ -270,6 +278,8 @@ def plotter(fdict):
     threshold = datetime.timedelta(hours=3)
     reset_valid = datetime.datetime(1910, 1, 1, tzinfo=tzinfo)
     xbase = reset_valid
+
+    op2 = operator.lt if mydir == "below" else operator.le
     for row in cursor:
         valid = row["utc_valid"].replace(tzinfo=datetime.timezone.utc)
         ireset = False
@@ -293,7 +303,7 @@ def plotter(fdict):
                 break
             valids = []
             tmpf = []
-        if lower <= row["d"] < upper:
+        if operator.ge(row["d"], lower) and op2(row["d"], upper):
             valids.append(valid)
             tmpf.append(row["d"])
         else:
