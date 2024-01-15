@@ -84,7 +84,11 @@ def application(environ, start_response):
         raise IncompleteWebRequest("Insufficient start timestamp variables.")
     # Ensure we have uppercase stations
     stations = [s.upper() for s in stations]
-    delim = DELIM[environ.get("delim", "comma")]
+    delim = DELIM.get(environ.get("delim", "comma"))
+    if delim is None:
+        raise IncompleteWebRequest(
+            f"Unknown delimiter specified, please choose one of {DELIM.keys()}"
+        )
     sample = SAMPLING[environ.get("sample", "1min")]
     what = environ.get("what", "dl")
     tz = environ.get("tz", "UTC")
