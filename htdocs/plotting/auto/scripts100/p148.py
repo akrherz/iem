@@ -18,6 +18,7 @@ from sqlalchemy import text
 PDICT = {
     "easter": "Easter (Western Church Dates)",
     "labor": "Labor Day",
+    "mlk": "Martin Luther King Day",
     "memorial": "Memorial Day",
     "mother": "Mothers Day",
     "exact": "Same Date each Year",
@@ -71,6 +72,23 @@ def get_description():
         ),
     ]
     return desc
+
+
+def mlk():
+    """MLK Day"""
+    days = []
+    for year in range(1986, datetime.date.today().year + 1):
+        jan1 = datetime.date(year, 1, 1)
+        if jan1.weekday() == 0:  # If Jan 1 is a Monday
+            first_monday = jan1
+        else:
+            # Calculate the number of days until the next Monday
+            days_until_monday = 7 - jan1.weekday()
+            first_monday = jan1 + datetime.timedelta(days=days_until_monday)
+        # Add 14 days to the first Monday to get the third Monday
+        third_monday = first_monday + datetime.timedelta(days=14)
+        days.append(third_monday)
+    return days
 
 
 def mothers_day():
@@ -160,6 +178,8 @@ def get_context(fdict):
             days = easter()
         elif date == "mother":
             days = mothers_day()
+        elif date == "mlk":
+            days = mlk()
         else:
             days = labor_days()
         ctx["subtitle"] = PDICT[date]
