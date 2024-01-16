@@ -56,11 +56,17 @@ def try_era5land(ts) -> bool:
 
     aff = Affine(0.1, 0, iemre.WEST, 0, -0.1, iemre.NORTH)
     vals = iemre.reproject2iemre(np.flipud(total), aff, P4326.crs)
-    for shift in (-4, 4):
+    # 4 was found to be not enough to appease DEP's needs
+    for shift in (-7, 7):
         for axis in (0, 1):
             vals_shifted = np.roll(vals, shift=shift, axis=axis)
             idx = ~vals_shifted.mask * vals.mask
             vals[idx] = vals_shifted[idx]
+
+    avgval = np.ma.mean(vals)
+    if avgval < 50:
+        LOG.info("ERA5Land average value is %.2f, skipping", avgval)
+        return False
 
     # Jitter the grid to fill out edges along the coasts
     ds = xr.Dataset(

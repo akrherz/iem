@@ -3,13 +3,16 @@ Based on hourly or better METAR reports, this
 plot displays the longest periods above or below a given temperature
 threshold.  There are plenty of caveats to this plot, including missing
 data periods and data during the 1960s that only has
-reports every three hours.  This plot also limits the number of lines
-drawn to 10, so if you hit the limit, please change the thresholds.  This
+reports every three hours. This
 plot also stops any computed streak when it encounters a data gap greater
 than three hours.
 
 <p>You can additionally set a secondary threshold which then makes this
 autoplot compute streaks within a range of values.</p>
+
+<p><strong>Updated 16 Jan 2024:</strong> The option to control the minimum
+number of hours was removed.  This option did not add much value as folks
+generally wish to see the top 10 longest streaks.</p>
 """
 import datetime
 import operator
@@ -17,7 +20,7 @@ from zoneinfo import ZoneInfo
 
 import pandas as pd
 from pyiem.exceptions import NoDataFound
-from pyiem.plot import figure_axes
+from pyiem.plot import figure
 from pyiem.util import get_autoplot_context, get_dbconnc
 
 PDICT = {
@@ -33,7 +36,7 @@ PDICT2 = {
     "vsby": "Visibility",
 }
 MDICT = {
-    "all": "Entire Year",
+    "all": "Calendar Year",
     "spring": "Spring (MAM)",
     "fall": "Fall (SON)",
     "winter": "Winter (DJF)",
@@ -110,53 +113,65 @@ def get_description():
                 "Threshold (for range queries)"
             ),
         ),
-        dict(
-            type="int",
-            name="hours",
-            default=36,
-            label="Minimum Period to Plot (Hours):",
-        ),
     ]
     return desc
 
 
-def plot(ax, xbase, interval, valid, tmpf, lines) -> bool:
+def plot(ax, xbase, valid, tmpf, lines: list) -> bool:
     """Our plotting function"""
-    if len(lines) > 10 or len(valid) < 2 or (valid[-1] - valid[0]) < interval:
+    if len(valid) < 2:
         return True
+    interval = datetime.timedelta(hours=1)
+    # lines are sorted from shortest to longest, so the first one is the
+    # minimum length when we are full
     if len(lines) == 10:
-        ax.text(
-            0.5,
-            0.9,
-            "ERROR: Limit of 10 lines reached",
-            transform=ax.transAxes,
-        )
-        return False
+        interval = lines[0].interval
+
+    thisinterval = valid[-1] - valid[0]
+    if thisinterval < interval:
+        return True
+    # Figure out the position that this line should be inserted into
+    pos = None
+    for i, line in enumerate(lines):
+        if thisinterval < line.interval:
+            pos = i
+            break
+    if pos is None:
+        pos = len(lines)
+
     delta = (valid[-1] - valid[0]).total_seconds()
-    i = tmpf.index(min(tmpf))
     mylbl = (
         f"{valid[0].year}\n{int(delta / 86400):.0f}d"
         f"{((delta % 86400) / 3600.0):.0f}h"
     )
     seconds = [(v - xbase).total_seconds() for v in valid]
-    lines.append(
-        ax.plot(seconds, tmpf, lw=2, label=mylbl.replace("\n", " "))[0]
-    )
-    lines[-1].hours = round((valid[-1] - valid[0]).seconds / 3600.0, 2)
-    lines[-1].days = (valid[-1] - valid[0]).days
-    lines[-1].mylbl = mylbl
-    lines[-1].period_start = valid[0]
-    lines[-1].period_end = valid[-1]
-    ax.text(
-        seconds[i],
-        tmpf[i],
-        mylbl,
-        ha="center",
-        va="center",
-        bbox={"color": lines[-1].get_color()},
-        color="white",
-    )
+    line = ax.plot(seconds, tmpf, lw=2, label=mylbl.replace("\n", " "))[0]
+    line.hours = round((valid[-1] - valid[0]).seconds / 3600.0, 2)
+    line.days = (valid[-1] - valid[0]).days
+    line.mylbl = mylbl
+    line.period_start = valid[0]
+    line.period_end = valid[-1]
+    line.interval = thisinterval
+    line.labelx = seconds[tmpf.index(min(tmpf))]
+    line.labely = min(tmpf)
+    lines.insert(pos, line)
+    if len(lines) > 10:
+        lines.pop(0).remove()
     return True
+
+
+def plot_text(ax, lines):
+    """Add text to ax"""
+    for line in lines:
+        ax.text(
+            line.labelx,
+            line.labely,
+            line.mylbl,
+            ha="center",
+            va="center",
+            bbox={"color": line.get_color()},
+            color="white",
+        )
 
 
 def compute_xlabels(ax, xbase):
@@ -193,7 +208,6 @@ def plotter(fdict):
     station = ctx["zstation"]
     threshold = ctx["threshold"]
     mydir = ctx["dir"]
-    hours = ctx["hours"]
     varname = ctx["var"]
     month = ctx["m"] if fdict.get("month") is None else fdict.get("month")
 
@@ -248,7 +262,6 @@ def plotter(fdict):
         f"{y2 if y2 is not None else datetime.datetime.now().year} "
         f"{ctx['_sname']}"
     )
-    interval = datetime.timedelta(hours=hours)
 
     valids = []
     tmpf = []
@@ -270,10 +283,10 @@ def plotter(fdict):
             f" {'<' if mydir == 'below' else '<='} {upper}"
         )
     subtitle = (
-        f"{MDICT.get(month)} :: {int(hours / 24)}d{(hours % 24):.0f}h+ "
-        f"Streaks {label} {units}"
+        f"{MDICT.get(month)} :: Streaks {PDICT2[varname]} {label} {units}"
     )
-    (fig, ax) = figure_axes(title=title, subtitle=subtitle, apctx=ctx)
+    fig = figure(title=title, subtitle=subtitle, apctx=ctx)
+    ax = fig.add_axes([0.07, 0.25, 0.6, 0.65])
 
     threshold = datetime.timedelta(hours=3)
     reset_valid = datetime.datetime(1910, 1, 1, tzinfo=tzinfo)
@@ -299,7 +312,7 @@ def plotter(fdict):
             )
             ireset = True
         if ireset or (valids and ((valid - valids[-1]) > threshold)):
-            if not plot(ax, xbase, interval, valids, tmpf, lines):
+            if not plot(ax, xbase, valids, tmpf, lines):
                 break
             valids = []
             tmpf = []
@@ -309,13 +322,13 @@ def plotter(fdict):
         else:
             valids.append(valid)
             tmpf.append(row["d"])
-            if not plot(ax, xbase, interval, valids, tmpf, lines):
+            if not plot(ax, xbase, valids, tmpf, lines):
                 break
             valids = []
             tmpf = []
     pgconn.close()
 
-    plot(ax, xbase, interval, valids, tmpf, lines)
+    plot(ax, xbase, valids, tmpf, lines)
     compute_xlabels(ax, xbase)
     rows = []
     for line in lines:
@@ -338,18 +351,29 @@ def plotter(fdict):
         "* Due to timezones and leapday, there is some ambiguity"
         " with the plotted dates"
     )
-    ax.set_position([0.1, 0.25, 0.85, 0.65])
     ax.legend(
         loc="upper center",
-        bbox_to_anchor=(0.5, -0.165),
+        bbox_to_anchor=(0.7, -0.165),
         fancybox=True,
         shadow=True,
         ncol=5,
         fontsize=12,
         columnspacing=1,
     )
+    plot_text(ax, lines)
+    label = "Start                     End   Hours\n"
+    for line in lines:
+        sts = line.period_start.astimezone(tzinfo)
+        ets = line.period_end.astimezone(tzinfo)
+        label += (
+            f" {sts.strftime('%m/%d/%y %I:%M %p')} "
+            f"{ets.strftime('%m/%d/%y %I:%M %p')} "
+            f"{line.interval.total_seconds() / 3600.:4.0f}\n"
+        )
+    label += tzname
+    fig.text(0.99, 0.9, label, ha="right", va="top", fontsize=10)
     return fig, df
 
 
 if __name__ == "__main__":
-    plotter({"m": "winter", "dir": "below", "threshold": 0})
+    plotter({"m": "all", "dir": "above", "threshold": 50})
