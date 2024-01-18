@@ -26,6 +26,9 @@ if ($limit == "TO") {
 } else if ($limit == 'MA') {
     $lstring = "'MA'";
 }
+} else if ($limit == 'SQ') {
+    $lstring = "'SQ'";
+}
 
 $tstring = '1980-01-01';
 if ($tlimit == '2007') {
@@ -58,7 +61,8 @@ $ar = array(
     "TO" => "Tornado Only",
     "SV" => "Severe Thunderstorm Only",
     "FF" => "Flash Flood Only",
-    "MA" => "Marine Only"
+    "MA" => "Marine Only",
+    "SQ" => "Snow Squall",
 );
 
 $lselect = make_select("limit", $limit, $ar);
