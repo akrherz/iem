@@ -30,6 +30,7 @@ SWITCH_DATE = utc(2014, 10, 10, 20)
 
 def try_era5land(ts) -> bool:
     """Attempt to use ERA5Land data."""
+    ts = ts.astimezone(ZoneInfo("UTC"))
     # Our files are UTC date based :/
     ncfn1 = ts.strftime("/mesonet/data/era5/%Y_era5land_hourly.nc")
     tomorrow = ts + datetime.timedelta(days=1)

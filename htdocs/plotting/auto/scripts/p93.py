@@ -225,7 +225,7 @@ def plotter(fdict):
     xloc = 1.13
     yrlabel = (
         f"{highlightyear}"
-        if varname != "windchill"
+        if varname not in ["windchill", "tmpf_cold", "dwpf_cold"]
         else f"{highlightyear}-{highlightyear + 1}"
     )
     ax.text(

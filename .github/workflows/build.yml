@@ -48,6 +48,7 @@ jobs:
 
     - name: Setup Postgres
       run: |
+        set -e
         git clone --depth 1 https://github.com/akrherz/iem-database.git database
         git clone --depth 1 https://github.com/akrherz/ci_tooling.git .ci_tooling
         . .ci_tooling/postgres.sh
@@ -76,7 +77,10 @@ jobs:
 
     - name: Configure Webfarm Server
       run: |
-        . .ci_tooling/iemwebfarm.sh
+        set -e
+        cd .ci_tooling
+        . iemwebfarm.sh
+        cd ..
         sudo mkdir -p /mesonet/www/logs
         sudo ln -s `pwd` /opt/iem
         sudo ln -s $HOME/micromamba /opt/miniconda3
