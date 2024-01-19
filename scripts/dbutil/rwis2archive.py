@@ -37,6 +37,7 @@ def process_traffic(first_updated, last_updated):
         (first_updated, last_updated),
     )
     deleted = 0
+    inserts = 0
     for row in icursor:
         rcursor.execute(
             "delete from alldata_traffic where station = %s and valid = %s",
@@ -52,6 +53,7 @@ def process_traffic(first_updated, last_updated):
             """,
             row,
         )
+        inserts += 1
     icursor.execute(
         "delete from rwis_traffic_data_log where "
         "updated >= %s and updated < %s",
@@ -63,7 +65,7 @@ def process_traffic(first_updated, last_updated):
     icursor.close()
     ipgconn.commit()
     ipgconn.close()
-    LOG.info("access: %s rows, rwis: %s dels", icursor.rowcount, deleted)
+    LOG.info("access: %s rows, rwis: %s dels", inserts, deleted)
 
 
 def process_soil(first_updated, last_updated):
@@ -94,6 +96,7 @@ def process_soil(first_updated, last_updated):
         (first_updated, last_updated),
     )
     deleted = 0
+    inserts = 0
     for row in icursor:
         rcursor.execute(
             "delete from alldata_soil where station = %s and valid = %s",
@@ -115,6 +118,7 @@ def process_soil(first_updated, last_updated):
             """,
             row,
         )
+        inserts += 1
     icursor.execute(
         "delete from rwis_soil_data_log where "
         "updated >= %s and updated < %s",
@@ -126,7 +130,7 @@ def process_soil(first_updated, last_updated):
     icursor.close()
     ipgconn.commit()
     ipgconn.close()
-    LOG.info("access: %s rows, rwis: %s dels", icursor.rowcount, deleted)
+    LOG.info("access: %s rows, rwis: %s dels", inserts, deleted)
 
 
 def process_obs(first_updated, last_updated):
@@ -149,7 +153,7 @@ def process_obs(first_updated, last_updated):
             (row["station"], row["valid"]),
         )
         deleted += rcursor.rowcount
-        rcursor.executemany(
+        rcursor.execute(
             """INSERT into alldata (station, valid, tmpf,
             dwpf, drct, sknt, tfs0, tfs1, tfs2, tfs3, subf, gust, tfs0_text,
             tfs1_text, tfs2_text, tfs3_text, pcpn, vsby) VALUES (%(station)s,
