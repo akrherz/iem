@@ -1,8 +1,16 @@
 """
-Gantt chart of watch, warning, and advisories issued
+Gantt chart of watch, warning, and advisories (WaWa) issued
 by an NWS Forecast Office for a start date and number of days of your
-choice. The duration of the individual alert is the maximum found between
-the earliest issuance and latest expiration.
+choice.
+
+<p>The width of the bar is the duration of the event and is a bit difficult
+to explain for some WaWa types.  The color shaded area represents the maximum
+period at least one county/zone was included in the event.  The hallow area
+represents the period between when the NWS created the event to when it
+first hit its issuance time.  This is a quirk of how VTEC works with things
+like winter storm watches going "into effect" at some time in the future. When
+there is no hallow area, these are events that went into effect immediately
+at issuance.  For example, Severe Thunderstorm Warnings are all this way.
 """
 import datetime
 from zoneinfo import ZoneInfo
@@ -10,10 +18,12 @@ from zoneinfo import ZoneInfo
 import matplotlib.dates as mdates
 import pandas as pd
 from matplotlib import ticker
+from matplotlib.patches import Rectangle
 from pyiem.exceptions import NoDataFound
 from pyiem.nws import vtec
 from pyiem.plot import figure
 from pyiem.util import get_autoplot_context, get_sqlalchemy_conn
+from sqlalchemy import text
 
 
 def get_description():
@@ -33,12 +43,60 @@ def get_description():
             default="2015/01/01",
             label="Start Date:",
             min="2005/10/01",
-        ),  # Comes back to python as yyyy-mm-dd
+        ),
         dict(
             type="int", name="days", default=10, label="Number of Days in Plot"
         ),
     ]
     return desc
+
+
+def make_key(fig):
+    """Make a cartoon in the lower right corner to illustrate bar."""
+    ax = fig.add_axes([0, 0, 1, 1], frameon=False, zorder=-1)
+    ax.text(0.81, 0.16, "Details of bar", fontsize=10)
+    ax.add_patch(
+        Rectangle(
+            (0.80, 0.1),
+            0.15,
+            0.05,
+            fc="None",
+            ec="k",
+            zorder=5,
+        )
+    )
+    ax.text(0.84, 0.12, "Event\nCreated", fontsize=8, ha="center", va="center")
+    ax.add_patch(
+        Rectangle(
+            (0.87, 0.1),
+            0.08,
+            0.05,
+            color=vtec.NWS_COLORS.get("WC.Y"),
+            zorder=4,
+        )
+    )
+    ax.text(
+        0.91,
+        0.12,
+        "Min Issue to\nMax Expire",
+        fontsize=8,
+        ha="center",
+        va="center",
+        zorder=6,
+    )
+
+
+def make_url(row, state):
+    """Turn it into a URL"""
+    wfo = f"K{row['wfo']}"
+    if state in ["AK", "HI", "GU"]:
+        wfo = f"P{row['wfo']}"
+    elif state in ["PR"]:
+        wfo = f"T{row['wfo']}"
+    return (
+        f"https://mesonet.agron.iastate.edu/vtec/f/{row['year']}-O-NEW-{wfo}-"
+        f"{row['phenomena']}-{row['significance']}-{row['eventid']:04d}"
+    )
 
 
 def plotter(fdict):
@@ -53,9 +111,12 @@ def plotter(fdict):
     days = ctx["days"]
 
     ets = sts + datetime.timedelta(days=days)
+    params = {"wfo": station, "sts": sts, "ets": ets}
+    date_cols = ["minproductissue", "minissue", "maxexpire", "maxinitexpire"]
     with get_sqlalchemy_conn("postgis") as conn:
         df = pd.read_sql(
-            """
+            text(
+                """
             SELECT phenomena, significance, eventid,
             min(product_issue at time zone 'UTC') as minproductissue,
             min(issue at time zone 'UTC') as minissue,
@@ -64,28 +125,31 @@ def plotter(fdict):
                 as maxinitexpire,
             extract(year from product_issue)::int as year
             from warnings
-            WHERE wfo = %s and issue > %s and issue < %s
+            WHERE wfo = :wfo and issue > :sts and issue < :ets
             GROUP by phenomena, significance, eventid, year
             ORDER by minproductissue ASC
-        """,
+        """
+            ),
             conn,
-            params=(station, sts, ets),
+            params=params,
             index_col=None,
+            parse_dates=date_cols,
         )
     if df.empty:
         raise NoDataFound("No events were found for WFO and time period.")
-
-    events = []
-    labels = []
-    types = []
-    for row in df.itertuples(index=False):
-        endts = max(row[4], row[5]).replace(tzinfo=datetime.timezone.utc)
-        events.append(
-            (row[3].replace(tzinfo=datetime.timezone.utc), endts, row[2])
-        )
-        labels.append(vtec.get_ps_string(row[0], row[1]))
-        types.append(f"{row[0]}.{row[1]}")
-
+    for col in date_cols:
+        df[col] = df[col].dt.tz_localize(ZoneInfo("UTC"))
+    df["wfo"] = station
+    df["endts"] = df[["maxexpire", "maxinitexpire"]].max(axis=1)
+    df["label"] = df.apply(
+        lambda x: vtec.get_ps_string(x["phenomena"], x["significance"]),
+        axis=1,
+    )
+    df["duration_secs"] = (
+        (df["endts"] - df["minissue"]).dt.total_seconds().astype("int")
+    )
+    state = ctx["_nt"].sts[station]["state"]
+    df["link"] = df.apply(lambda x: make_url(x, state), axis=1)
     # If we have lots of WWA, we need to expand vertically a bunch, lets
     # assume we can plot 5 WAA per 100 pixels
     title = (
@@ -96,8 +160,8 @@ def plotter(fdict):
     )
     fig = figure(title=title, apctx=ctx)
     ax = fig.add_axes([0.05, 0.08, 0.73, 0.82])
-    if len(events) > 20:
-        height = int(len(events) / 6.0) + 1
+    if len(df.index) > 20:
+        height = int(len(df.index) / 6.0) + 1
         fig.set_size_inches(12, height)
         fontsize = 8
     else:
@@ -105,37 +169,48 @@ def plotter(fdict):
 
     used = []
 
-    def get_label(i):
-        if types[i] in used:
-            return ""
-        used.append(types[i])
-        return f"{labels[i]} ({types[i]})"
-
-    halfway = sts + datetime.timedelta(days=days / 2.0)
-
-    for i, e in enumerate(events):
-        secs = abs((e[1] - e[0]).days * 86400.0 + (e[1] - e[0]).seconds)
+    for i, row in df.iterrows():
+        phsig = f"{row['phenomena']}.{row['significance']}"
         ax.barh(
             i + 1,
-            secs / 86400.0,
-            left=e[0],
+            row["duration_secs"] / 86400.0,
+            left=row["minissue"],
             align="center",
-            fc=vtec.NWS_COLORS.get(types[i], "k"),
-            ec=vtec.NWS_COLORS.get(types[i], "k"),
-            label=get_label(i),
+            fc=vtec.NWS_COLORS.get(phsig, "k"),
+            ec=vtec.NWS_COLORS.get(phsig, "k"),
+            label=None if phsig in used else row["label"],
+            zorder=3,
         )
-        align = "left"
-        xpos = e[0] + datetime.timedelta(seconds=secs + 3600)
-        if xpos > halfway:
+        if row["minissue"] != row["minproductissue"]:
+            # Draw a empty bar with black outline
+            duration = (
+                row["endts"] - row["minproductissue"]
+            ).total_seconds() / 86400.0
+            ax.barh(
+                i + 1,
+                duration,
+                left=row["minproductissue"],
+                align="center",
+                fc="None",
+                ec="k",
+                label=None,
+                zorder=4,
+            )
+        used.append(phsig)
+        # Figure out where there is room for the label to go.
+        x1 = (row["endts"] - sts).total_seconds() / (86400.0 * days)
+        # place to the right if end of bar is less than 70% of the way
+        if x1 < 0.7:
+            align = "left"
+            xpos = row["endts"] + datetime.timedelta(minutes=90)
+        else:
             align = "right"
-            xpos = e[0] - datetime.timedelta(minutes=90)
-        textcolor = vtec.NWS_COLORS.get(
-            types[i] if types[i] != "TO.A" else "X", "k"
-        )
+            xpos = row["minproductissue"] - datetime.timedelta(minutes=90)
+        textcolor = vtec.NWS_COLORS.get(phsig if phsig != "TO.A" else "X", "k")
         ax.text(
             xpos,
             i + 1,
-            labels[i].replace("Weather", "Wx") + " " + str(e[2]),
+            row["label"].replace("Weather", "Wx") + " " + str(row["eventid"]),
             color=textcolor,
             ha=align,
             va="center",
@@ -145,7 +220,7 @@ def plotter(fdict):
 
     ax.set_ylabel("Sequential Product Issuance")
 
-    ax.set_ylim(0, len(events) + 1)
+    ax.set_ylim(0, len(df.index) + 1)
     ax.yaxis.set_major_locator(ticker.MaxNLocator(integer=True))
     ax.xaxis.set_minor_locator(mdates.DayLocator(interval=1, tz=tz))
     xinterval = int(days / 7) + 1
@@ -155,6 +230,7 @@ def plotter(fdict):
     ax.grid(True)
 
     ax.set_xlim(sts, ets)
+    ax.set_xlabel(f"Timezone: {ctx['_nt'].sts[station]['tzname']}")
 
     ax.legend(
         loc="upper left",
@@ -165,7 +241,10 @@ def plotter(fdict):
         scatterpoints=1,
         fontsize=8,
     )
-
+    make_key(fig)
+    # worried about breaking API
+    for col in date_cols:
+        df[col] = df[col].dt.strftime("%Y-%m-%dT%H:%M:%S")
     return fig, df
 
 
