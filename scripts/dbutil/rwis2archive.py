@@ -1,74 +1,78 @@
 """
 Copy RWIS data from iem database to its final resting home in 'rwis'
 
-The RWIS data is partitioned by UTC timestamp
-
-Run at 0Z and 12Z, provided with a timestamp to process
+called from RUN_10_AFTER.sh
 """
 import datetime
 import sys
 
-from pyiem.util import get_dbconnc, logger, utc
+from pyiem.reference import ISO8601
+from pyiem.util import get_dbconnc, get_properties, logger, set_property, utc
 
 LOG = logger()
+PROPERTY_NAME = "rwis2archive_last"
 
 
-def main(argv):
-    """Go main"""
-    iemdb, icursor = get_dbconnc("iem")
-    rwisdb, rcursor = get_dbconnc("rwis")
+def get_first_updated():
+    """Figure out which is the last updated timestamp we ran for."""
+    props = get_properties()
+    propvalue = props.get(PROPERTY_NAME)
+    if propvalue is None:
+        LOG.warning("iem property %s is not set, abort!", PROPERTY_NAME)
+        sys.exit()
 
-    ts = utc(int(argv[1]), int(argv[2]), int(argv[3]))
-    ts2 = ts + datetime.timedelta(hours=24)
-    # Remove previous entries for this UTC date
-    for suffix in ["", "_soil", "_traffic"]:
-        rcursor.execute(
-            f"DELETE from alldata{suffix} WHERE valid >= %s and valid < %s",
-            (ts, ts2),
-        )
-    rcursor.close()
+    dt = datetime.datetime.strptime(propvalue, ISO8601)
+    return dt.replace(tzinfo=datetime.timezone.utc)
 
-    # Always delete stuff 3 or more days old from iemaccess
-    icursor.execute(
-        "DELETE from rwis_traffic_data_log WHERE "
-        "valid < ('TODAY'::date - '3 days'::interval)"
-    )
-    icursor.execute(
-        "DELETE from rwis_soil_data_log WHERE "
-        "valid < ('TODAY'::date - '3 days'::interval)"
-    )
-    icursor.close()
 
-    # Get traffic obs from access
-    icursor = iemdb.cursor()
+def process_traffic(first_updated, last_updated):
+    """Process what traffic has."""
+    ipgconn, icursor = get_dbconnc("iem")
+    rpgconn, rcursor = get_dbconnc("rwis")
     icursor.execute(
         """SELECT l.nwsli as station, s.lane_id::int as lane_id, d.* from
        rwis_traffic_data_log d, rwis_locations l, rwis_traffic_sensors s
-       WHERE s.id = d.sensor_id and valid >= %s and valid < %s
+       WHERE s.id = d.sensor_id and updated >= %s and updated < %s
        and s.location_id = l.id""",
-        (ts, ts2),
+        (first_updated, last_updated),
     )
-    rows = icursor.fetchall()
-    if not rows:
-        LOG.warning("No traffic found between %s and %s", ts, ts2)
-    icursor.close()
-
-    # Write to archive
-    rcursor = rwisdb.cursor()
-    rcursor.executemany(
-        """INSERT into alldata_traffic (station, valid,
-        lane_id, avg_speed, avg_headway, normal_vol, long_vol, occupancy)
-        VALUES (%(station)s,%(valid)s,
-        %(lane_id)s, %(avg_speed)s, %(avg_headway)s, %(normal_vol)s,
-        %(long_vol)s, %(occupancy)s)
-        """,
-        rows,
+    deleted = 0
+    for row in icursor:
+        rcursor.execute(
+            "delete from alldata_traffic where station = %s and valid = %s",
+            (row["station"], row["valid"]),
+        )
+        deleted += rcursor.rowcount
+        rcursor.execute(
+            """INSERT into alldata_traffic (station, valid,
+            lane_id, avg_speed, avg_headway, normal_vol, long_vol, occupancy)
+            VALUES (%(station)s,%(valid)s,
+            %(lane_id)s, %(avg_speed)s, %(avg_headway)s, %(normal_vol)s,
+            %(long_vol)s, %(occupancy)s)
+            """,
+            row,
+        )
+    icursor.execute(
+        "delete from rwis_traffic_data_log where "
+        "updated >= %s and updated < %s",
+        (first_updated, last_updated),
     )
     rcursor.close()
+    rpgconn.commit()
+    rpgconn.close()
+    icursor.close()
+    ipgconn.commit()
+    ipgconn.close()
+    LOG.info("access: %s rows, rwis: %s dels", icursor.rowcount, deleted)
 
-    # Get soil obs from access
-    icursor = iemdb.cursor()
-    sql = """SELECT l.nwsli as station, d.valid,
+
+def process_soil(first_updated, last_updated):
+    """Do the soil work."""
+    ipgconn, icursor = get_dbconnc("iem")
+    rpgconn, rcursor = get_dbconnc("rwis")
+
+    icursor.execute(
+        """SELECT l.nwsli as station, d.valid,
          max(case when sensor_id = 1 then temp else null end) as tmpf_1in,
          max(case when sensor_id = 3 then temp else null end) as tmpf_3in,
          max(case when sensor_id = 6 then temp else null end) as tmpf_6in,
@@ -85,64 +89,94 @@ def main(argv):
          max(case when sensor_id = 66 then temp else null end) as tmpf_66in,
          max(case when sensor_id = 72 then temp else null end) as tmpf_72in
          from rwis_soil_data_log d, rwis_locations l
-         WHERE valid >= %s and valid < %s and d.location_id = l.id
-         GROUP by station, valid"""
-    icursor.execute(sql, (ts, ts2))
-    rows = icursor.fetchall()
-    if not rows:
-        LOG.warning("No RWIS soil obs found between %s and %s", ts, ts2)
-    icursor.close()
-
-    # Write to RWIS Archive
-    rcursor = rwisdb.cursor()
-    rcursor.executemany(
-        """INSERT into alldata_soil
-        (station, valid,
-        tmpf_1in, tmpf_3in, tmpf_6in, tmpf_9in, tmpf_12in, tmpf_18in,
-        tmpf_24in, tmpf_30in, tmpf_36in, tmpf_42in, tmpf_48in, tmpf_54in,
-        tmpf_60in, tmpf_66in, tmpf_72in) VALUES (
-        %(station)s,%(valid)s,
-        %(tmpf_1in)s, %(tmpf_3in)s, %(tmpf_6in)s, %(tmpf_9in)s, %(tmpf_12in)s,
-        %(tmpf_18in)s, %(tmpf_24in)s, %(tmpf_30in)s, %(tmpf_36in)s,
-        %(tmpf_42in)s, %(tmpf_48in)s, %(tmpf_54in)s, %(tmpf_60in)s,
-        %(tmpf_66in)s, %(tmpf_72in)s)
-        """,
-        rows,
+         WHERE updated >= %s and updated < %s and d.location_id = l.id
+         GROUP by station, valid""",
+        (first_updated, last_updated),
+    )
+    deleted = 0
+    for row in icursor:
+        rcursor.execute(
+            "delete from alldata_soil where station = %s and valid = %s",
+            (row["station"], row["valid"]),
+        )
+        deleted += rcursor.rowcount
+        rcursor.execute(
+            """INSERT into alldata_soil
+            (station, valid,
+            tmpf_1in, tmpf_3in, tmpf_6in, tmpf_9in, tmpf_12in, tmpf_18in,
+            tmpf_24in, tmpf_30in, tmpf_36in, tmpf_42in, tmpf_48in, tmpf_54in,
+            tmpf_60in, tmpf_66in, tmpf_72in) VALUES (
+            %(station)s,%(valid)s,
+            %(tmpf_1in)s, %(tmpf_3in)s, %(tmpf_6in)s, %(tmpf_9in)s,
+            %(tmpf_12in)s,
+            %(tmpf_18in)s, %(tmpf_24in)s, %(tmpf_30in)s, %(tmpf_36in)s,
+            %(tmpf_42in)s, %(tmpf_48in)s, %(tmpf_54in)s, %(tmpf_60in)s,
+            %(tmpf_66in)s, %(tmpf_72in)s)
+            """,
+            row,
+        )
+    icursor.execute(
+        "delete from rwis_soil_data_log where "
+        "updated >= %s and updated < %s",
+        (first_updated, last_updated),
     )
     rcursor.close()
-
-    # Get regular obs from Access
-    icursor = iemdb.cursor()
-    # Since we store drct in the RWIS archive as NaN, we better make sure
-    # we don't attempt to use these values as it will error out
-    icursor.execute("update current_log set drct = null where drct = 'NaN'")
-    sql = """SELECT c.*, t.id as station from current_log c, stations t
-        WHERE valid >= %s and valid < %s
-          and t.network ~* 'RWIS' and t.iemid = c.iemid"""
-    icursor.execute(sql, (ts, ts2))
-    rows = icursor.fetchall()
-    if not rows:
-        LOG.warning("No RWIS obs found between %s and %s", ts, ts2)
+    rpgconn.commit()
+    rpgconn.close()
     icursor.close()
+    ipgconn.commit()
+    ipgconn.close()
+    LOG.info("access: %s rows, rwis: %s dels", icursor.rowcount, deleted)
 
-    # Write to RWIS Archive
-    rcursor = rwisdb.cursor()
-    rcursor.executemany(
-        """INSERT into alldata (station, valid, tmpf,
-        dwpf, drct, sknt, tfs0, tfs1, tfs2, tfs3, subf, gust, tfs0_text,
-        tfs1_text, tfs2_text, tfs3_text, pcpn, vsby) VALUES (%(station)s,
-        %(valid)s,%(tmpf)s,%(dwpf)s,round(%(drct)s::numeric, 0),%(sknt)s,
-        %(tsf0)s,%(tsf1)s,%(tsf2)s,%(tsf3)s,%(rwis_subf)s,%(gust)s,%(scond0)s,
-        %(scond1)s,%(scond2)s,%(scond3)s,%(pday)s,%(vsby)s)""",
-        rows,
+
+def process_obs(first_updated, last_updated):
+    """Take obs."""
+    ipgconn, icursor = get_dbconnc("iem")
+    rpgconn, rcursor = get_dbconnc("rwis")
+
+    icursor.execute(
+        """
+        SELECT c.*, t.id as station from current_log c, stations t
+        WHERE updated >= %s and updated < %s
+          and t.network ~* 'RWIS' and t.iemid = c.iemid
+                    """,
+        (first_updated, last_updated),
     )
+    deleted = 0
+    for row in icursor:
+        rcursor.execute(
+            "delete from alldata where station = %s and valid = %s",
+            (row["station"], row["valid"]),
+        )
+        deleted += rcursor.rowcount
+        rcursor.executemany(
+            """INSERT into alldata (station, valid, tmpf,
+            dwpf, drct, sknt, tfs0, tfs1, tfs2, tfs3, subf, gust, tfs0_text,
+            tfs1_text, tfs2_text, tfs3_text, pcpn, vsby) VALUES (%(station)s,
+            %(valid)s,%(tmpf)s,%(dwpf)s,round(%(drct)s::numeric, 0),%(sknt)s,
+            %(tsf0)s,%(tsf1)s,%(tsf2)s,%(tsf3)s,%(rwis_subf)s,%(gust)s,
+            %(scond0)s,
+            %(scond1)s,%(scond2)s,%(scond3)s,%(pday)s,%(vsby)s)""",
+            row,
+        )
     rcursor.close()
+    rpgconn.commit()
+    rpgconn.close()
+    ipgconn.close()
+    LOG.info("access: %s rows, rwis: %s dels", icursor.rowcount, deleted)
 
-    rwisdb.commit()
-    iemdb.commit()
-    rwisdb.close()
-    iemdb.close()
+
+def main():
+    """Go main"""
+    last_updated = utc()
+    first_updated = get_first_updated()
+
+    process_traffic(first_updated, last_updated)
+    process_soil(first_updated, last_updated)
+    process_obs(first_updated, last_updated)
+
+    set_property(PROPERTY_NAME, last_updated)
 
 
 if __name__ == "__main__":
-    main(sys.argv)
+    main()

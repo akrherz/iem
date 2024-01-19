@@ -100,6 +100,7 @@ python check_awos_online.py
 
 cd ../dbutil
 python mine_autoplot.py &
+python rwis2archive.py &
 
 cd ../current
 python q3_xhour.py 6
