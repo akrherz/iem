@@ -18,8 +18,8 @@ from pyiem.util import (
 LOG = logger()
 URI = (
     "https://services.arcgis.com/8lRhdTsQyJpO52F1/arcgis/rest/services/"
-    "RWIS_SubSurface_All_View/FeatureServer/0/query?where=STATUS%3D1&f=json&"
-    "outFields=NWS_ID,TEMPERATURE,DATA_LAST_UPDATED,SENSOR_ID"
+    "RWIS_SubSurface_All_View/FeatureServer/0/query?where=TEMPERATURE<999&"
+    "f=json&outFields=NWS_ID,TEMPERATURE,DATA_LAST_UPDATED,SENSOR_ID"
 )
 
 
@@ -89,6 +89,7 @@ def main():
     df["location_id"] = xref["id"]
 
     cursor = pgconn.cursor()
+    updates = 0
     for nwsli, row in df.iterrows():
         if pd.isnull(nwsli) or pd.isnull(row["location_id"]):
             continue
@@ -99,7 +100,7 @@ def main():
             (row["sensor_id"], location_id),
         )
         if cursor.rowcount == 0:
-            LOG.info("adding soil entry %s %s", nwsli, row["sensor_id"])
+            LOG.warning("adding soil entry %s %s", nwsli, row["sensor_id"])
             cursor.execute(
                 "INSERT into rwis_soil_data (valid, sensor_id, location_id) "
                 "VALUES ('1980-01-01', %s, %s) RETURNING valid",
@@ -109,8 +110,10 @@ def main():
         if row["valid"] <= current:
             continue
         cursor.execute(
-            "UPDATE rwis_soil_data SET valid = %s, temp = %s "
-            "WHERE sensor_id = %s and location_id = %s",
+            """
+            UPDATE rwis_soil_data SET valid = %s, temp = %s, updated = now()
+            WHERE sensor_id = %s and location_id = %s
+            """,
             (
                 row["valid"],
                 clean2(row["tmpf"]),
@@ -118,6 +121,8 @@ def main():
                 location_id,
             ),
         )
+        updates += 1
+    LOG.info("updated %s rows", updates)
     cursor.close()
     pgconn.commit()
     pgconn.close()

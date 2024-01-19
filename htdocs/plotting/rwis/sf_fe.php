@@ -1,5 +1,5 @@
 <?php
-$OL = "7.5.1";
+$OL = "8.2.0";
 require_once "../../../config/settings.inc.php";
 require_once "../../../include/myview.php";
 $t = new MyView();
@@ -7,10 +7,9 @@ require_once "../../../include/database.inc.php";
 require_once "../../../include/forms.php";
 require_once "../../../include/imagemaps.php";
 
-$network = 'IA_RWIS';
+$network = isset($_GET["network"]) ? xssafe($_GET["network"]) : "IA_RWIS";
 $ostation = isset($_GET["ostation"]) ? xssafe($_GET["ostation"]) : "";
 $station = isset($_GET['station']) ? xssafe($_GET["station"]) : "";
-$mode = isset($_GET["mode"]) ? xssafe($_GET["mode"]) : "rt";
 $syear = isset($_GET["syear"]) ? xssafe($_GET["syear"]) : date("Y");
 $smonth = isset($_GET["smonth"]) ? xssafe($_GET["smonth"]) : date("m");
 $sday = isset($_GET["sday"]) ? xssafe($_GET["sday"]) : date("d");
@@ -47,6 +46,24 @@ $(document).ready(function(){
 EOF;
 $t->title = "RWIS Timeseries Plots";
 
+$mesosite = iemdb('mesosite');
+$nselect = "<select name=\"network\">";
+$rs = pg_query($mesosite, "SELECT id, name from networks where id ~* 'RWIS' ORDER by name ASC");
+for ($i = 0; $row = pg_fetch_assoc($rs); $i++) {
+    $sel = '';
+    if ($network == $row["id"]) {
+        $sel = " selected='SELECTED'";
+    }
+    $nselect .= sprintf(
+        "<option value='%s'%s>%s</option>\n",
+        $row["id"],
+        $sel,
+        $row["name"]
+    );
+}
+$nselect .= "</select>";
+
+
 $content = <<<EOF
 <style type="text/css">
         #map {
@@ -60,31 +77,42 @@ $content = <<<EOF
     <li class="current">RWIS Temperature Time Series Plots</li>
 </ol>
 
+<form method="GET" action="sf_fe.php" name="sts">
+{$nselect}
+<input type="submit" value="Show State">
+</form>
+
+
 <p>This application plots a timeseries of data from an Iowa RWIS site 
 of your choice.  You can optionally select which variables to plot and
 for which time period in the archive.</p>
 
 <form method="GET" action="sf_fe.php" name="olselect">
+<input type="hidden" name="network" value="{$network}">
 EOF;
 if (strlen($station) > 0) {
     $ys = yearSelect2(1995, $syear, "syear");
     $ms =  monthSelect2($smonth, "smonth");
     $ds = daySelect2($sday, "sday");
     $ds2 = daySelect2($days, "days");
-    $nselect = networkSelect("IA_RWIS", $station);
+    $nselect = networkSelect($network, $station);
 
     $c0 = iemdb('rwis');
-    $q0 = "SELECT * from sensors WHERE station = '" . $station . "' ";
-    $r0 = pg_exec($c0, $q0);
-
-    $row = pg_fetch_array($r0);
-    $ns0 = $row['sensor0'];
-    $ns1 = $row['sensor1'];
-    $ns2 = $row['sensor2'];
-    $ns3 = $row['sensor3'];
-
+    $res = pg_prepare($c0, "META", "SELECT * from sensors WHERE station = $1");
+    $r0 = pg_execute($c0, "META", Array($station));
+    $ns0 = "Sensor 1";
+    $ns1 = "Sensor 2";
+    $ns2 = "Sensor 3";
+    $ns3 = "Sensor 4";
+    if (pg_num_rows($r0) > 0){
+        $row = pg_fetch_array($r0);
+        $ns0 = $row['sensor0'];
+        $ns1 = $row['sensor1'];
+        $ns2 = $row['sensor2'];
+        $ns3 = $row['sensor3'];
+    }
     pg_close($c0);
-    $cgiStr = "&mode=$mode&sday=$sday&smonth=$smonth&syear=$syear&days=$days&";
+    $cgiStr = "&sday=$sday&smonth=$smonth&syear=$syear&days=$days&";
 
     $table = "<table class=\"table table-bordered\">
       <tr><th colspan=\"3\">Plot Options</th></tr>
@@ -154,22 +182,25 @@ if (strlen($station) > 0) {
     $table .= "</td></tr></table>";
 
     if (isset($_GET["limit"]))  $cgiStr .= "&limit=yes";
+    $plots = "<p>No Soil/Traffic data for non-Iowa RWIS sites</p>";
+    if ($network == "IA_RWIS"){
+        $plots = <<<EOM
+<br><img src="plot_traffic.php?station={$station}&network={$network}{$cgiStr}" alt="Time Series" class="img img-responsive"/>
+<br><img src="plot_soil.php?station={$station}&network={$network}{$cgiStr}" alt="Time Series" class="img img-responsive"/>
+EOM; 
+    }
 
-    $rtcheck = ($mode == "rt") ? " CHECKED" : "";
-    $hcheck = ($mode == "hist") ? " CHECKED" : "";
     $content .= <<<EOF
 <table class="table table-bordered">
 <thead>
-<tr><th>Select Station</th><th colspan="5">Timespan</th></tr>
+<tr><th>Select Station</th><th colspan="4">Timespan</th></tr>
 </thead>
 <tbody>
 <tr><td rowspan="2">
   {$nselect}
   <br />Or from <a href="sf_fe.php">a map</a></td>
 
-   <td rowspan="2" valign="TOP">
-  <input type="radio" name="mode" value="rt"{$rtcheck}>Current</td>
-   <td colspan="4"><input type="radio" name="mode" value="hist"{$hcheck}>Historical</td></tr>
+   <td colspan="4">Select Date</td></tr>
 
 <tr>
   <td>Start Year:<br />{$ys}</td>
@@ -187,12 +218,11 @@ if (strlen($station) > 0) {
   <input type="submit" value="Generate Plot">
   </form>
 
- <br><img src="SFtemps.php?station={$station}{$cgiStr}" alt="Time Series" class="img img-responsive"/>
-<br><img src="plot_traffic.php?station={$station}{$cgiStr}" alt="Time Series" class="img img-responsive"/>
-<br><img src="plot_soil.php?station={$station}{$cgiStr}" alt="Time Series" class="img img-responsive"/>
+ <br><img src="SFtemps.php?station={$station}&network={$network}{$cgiStr}" alt="Time Series" class="img img-responsive"/>
+ $plots
 EOF;
 } else {
-    $nselect = networkSelect("IA_RWIS", "");
+    $nselect = networkSelect($network, "");
     $content .= <<<EOF
 <input type="hidden" name="s0" value="yes" />
 <input type="hidden" name="s1" value="yes" />

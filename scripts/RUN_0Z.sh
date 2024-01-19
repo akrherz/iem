@@ -36,10 +36,6 @@ python elnino.py
 cd ../summary
 python max_reflect.py $(date -u --date '1 days ago' +'%Y %m %d') 0
 
-# Rerun today
-cd ../dbutil
-python rwis2archive.py $(date -u --date '1 days ago' +'%Y %m %d')
-
 cd ../nldas
 python process_nldasv2_noah.py $(date -u --date '5 days ago' +'%Y %m %d') &
 

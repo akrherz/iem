@@ -29,12 +29,7 @@ python spammer.py
 cd ../ingestors/other
 python feel_ingest.py
 
-# Rerun yesterday and today
-cd ../../dbutil
-python rwis2archive.py $(date -u --date '1 days ago' +'%Y %m %d')
-python rwis2archive.py $(date -u +'%Y %m %d')
-
-cd ../util
+cd ../../util
 csh BACKUP.csh
 
 cd ../uscrn
