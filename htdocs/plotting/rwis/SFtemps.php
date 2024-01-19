@@ -2,11 +2,13 @@
 require_once "../../../config/settings.inc.php";
 require_once "../../../include/database.inc.php";
 require_once "../../../include/forms.php";
+require_once "../../../include/mlib.php";
 require_once "../../../include/network.php";
 require_once "../../../include/jpgraph/jpgraph.php";
 require_once "../../../include/jpgraph/jpgraph_line.php";
 require_once "../../../include/jpgraph/jpgraph_bar.php";
 require_once "../../../include/jpgraph/jpgraph_date.php";
+require_once "../../../include/jpgraph/jpgraph_led.php";
 
 /** We need these vars to make this work */
 $subc = isset($_GET["subc"]) ? $_GET["subc"] : "";
@@ -22,112 +24,51 @@ $smonth = get_int404("smonth", date("m"));
 $sday = get_int404("sday", date("d"));
 $days = get_int404("days", 2);
 $station = isset($_GET['station']) ? xssafe($_GET["station"]) : "";
-$mode = isset($_GET["mode"]) ? xssafe($_GET["mode"]) : "rt";
+$network = isset($_GET["network"]) ? xssafe($_GET["network"]) : "IA_RWIS";
 
 /** Lets assemble a time period if this plot is historical */
-if (strlen($days) > 0) {
-    $sts = mktime(0, 0, 0, $smonth, $sday, $syear);
-    $dbDateString = "'" . date('Y-m-d', $sts) . "'";
-    $plotTitle = date('d M Y', $sts) . "\n";
-    for ($i = 1; $i < intval($days); $i++) {
-        $tts = $sts + ($i * 86400);
-        $dbDateString .= ",'" . date('Y-m-d', $tts) . "'";
-        $plotTitle .= date('d M Y', $tts) . "\n";
-    }
-}
+$sts = new DateTime("$syear-$smonth-$sday");
+$ets = new DateTime("$syear-$smonth-$sday");
+$ets->modify("+$days days");
 
-$dbName = "iowa";
-//$station = 'RAME';
-
-
-$val = "> -50";
 if (isset($_GET["limit"])) $val = "between 25 and 35";
 
-if ($mode == "rt") {
-    $c1 = iemdb('rwis');
-    $c0 = iemdb("iem");
-    $q0 = "SELECT
-    valid, gvalid, max(tmpf) as tmpf, max(pday) as pcpn,
-    max(dwpf) as dwpf, max(tcs0) as tcs0, max(tcs1) as tcs1,
-    max(tcs2) as tcs2, max(tcs3) as tcs3, max(subc) as subc
- FROM
-  (SELECT
-  to_char(valid, 'mm/dd HH PM') as valid,
-  newd || ':' || (case
-              when minute > 39 THEN '40'::text
-              WHEN minute > 19 THEN '20'::text
-              ELSE '00'::text END)::text as gvalid, pday,
-  CASE WHEN tmpf " . $val . " THEN tmpf ELSE NULL END as tmpf,
-  CASE WHEN dwpf " . $val . " THEN dwpf ELSE NULL END as dwpf,
-  CASE WHEN tsf0 " . $val . " THEN tsf0 ELSE NULL END as tcs0,
-  CASE WHEN tsf1 " . $val . " THEN tsf1 ELSE NULL END as tcs1,
-  CASE WHEN tsf2 " . $val . " THEN tsf2 ELSE NULL END as tcs2,
-  CASE WHEN tsf3 " . $val . " THEN tsf3 ELSE NULL END as tcs3,
-  CASE WHEN rwis_subf " . $val . " THEN rwis_subf ELSE NULL END as subc
- FROM
-   (SELECT
-      *,
-      to_char(valid, 'YYYY-MM-DD HH24') as newd,
-      extract(minute from valid) as minute
-    FROM
-      current_log c JOIN stations s on (s.iemid = c.iemid)
-    WHERE
-      s.id = '$station' 
-    ORDER by valid ASC) as foo)  as bar
- GROUP by valid, gvalid ORDER by gvalid ASC";
-    $minInterval = 20;
-} else {
-    $c0 = iemdb('rwis');
-    $c1 = $c0;
-    $q0 = "SELECT
-    valid, gvalid, max(tmpf) as tmpf, max(pcpn) as pcpn,
-    max(dwpf) as dwpf, max(tcs0) as tcs0, max(tcs1) as tcs1,
-    max(tcs2) as tcs2, max(tcs3) as tcs3, max(subc) as subc
- FROM
-  (SELECT 
-  to_char(valid, 'mm/dd HH PM') as valid,
-  newd || ':' || (case 
-              when minute > 39 THEN '40'::text
-              WHEN minute > 19 THEN '20'::text 
-              ELSE '00'::text END)::text as gvalid, pcpn,
-  CASE WHEN tmpf " . $val . " THEN tmpf ELSE NULL END as tmpf,
-  CASE WHEN dwpf " . $val . " THEN dwpf ELSE NULL END as dwpf,
-  CASE WHEN tfs0 " . $val . " THEN tfs0 ELSE NULL END as tcs0,
-  CASE WHEN tfs1 " . $val . " THEN tfs1 ELSE NULL END as tcs1,
-  CASE WHEN tfs2 " . $val . " THEN tfs2 ELSE NULL END as tcs2,
-  CASE WHEN tfs3 " . $val . " THEN tfs3 ELSE NULL END as tcs3,
-  CASE WHEN subf " . $val . " THEN subf ELSE NULL END as subc
- FROM 
-   (SELECT 
-      *, 
-      to_char(valid, 'YYYY-MM-DD HH24') as newd, 
-      extract(minute from valid) as minute 
-    FROM 
-      alldata
-    WHERE 
-      station = '$station' and 
-      date(valid) IN ($dbDateString) 
-    ORDER by valid ASC) as foo)  as bar 
- GROUP by valid, gvalid ORDER by gvalid ASC";
-    $minInterval = 20;
+$rwisdb = iemdb('rwis');
+$rs = pg_prepare($rwisdb, "OBS", "
+ SELECT * FROM alldata WHERE 
+ station = $1 and valid >= $2 and valid < $3 
+ ORDER by valid ASC");
+$minInterval = 20;
+$result = pg_execute($rwisdb, "OBS", array($station, $sts->format("Y-m-d H:i"), $ets->format("Y-m-d H:i")));
+
+$minInterval = 20;
+
+$rs = pg_prepare($rwisdb, "META", "SELECT * from sensors WHERE station = $1");
+$r1 = pg_execute($rwisdb, "META", array($station));
+
+$ns0 = "Sensor 1";
+$ns1 = "Sensor 2";
+$ns2 = "Sensor 3";
+$ns3 = "Sensor 4";
+if (pg_num_rows($r1) > 0) {
+    $row = pg_fetch_array($r1);
+    $ns0 = $row['sensor0'];
+    $ns1 = $row['sensor1'];
+    $ns2 = $row['sensor2'];
+    $ns3 = $row['sensor3'];
 }
 
-$q1 = "SELECT * from sensors WHERE station = '" . $station . "' ";
+if (pg_num_rows($result) == 0) {
+    $led = new DigitalLED74();
+    $led->StrokeNumber('NO DATA AVAILABLE', LEDC_GREEN);
+    die();
+}
 
-//echo $q0;
-$result = pg_exec($c0, $q0);
-$r1 = pg_exec($c1, $q1);
 
-$row = pg_fetch_array($r1);
-$ns0 = $row['sensor0'];
-$ns1 = $row['sensor1'];
-$ns2 = $row['sensor2'];
-$ns3 = $row['sensor3'];
-
-$tcs0 = array();
-$tcs1 = array();
-$tcs2 = array();
-$tcs3 = array();
+$tfs0 = array();
+$tfs1 = array();
+$tfs2 = array();
+$tfs3 = array();
 $pcpn = array();
 $Asubc = array();
 $Atmpf = array();
@@ -148,12 +89,12 @@ function checker($v)
 
 $lastp = 0;
 for ($i = 0; $row = pg_fetch_array($result); $i++) {
-    $times[] = strtotime(substr($row["gvalid"], 0, 16));
-    $tcs0[] = checker($row["tcs0"]);
-    $tcs1[] = checker($row["tcs1"]);
-    $tcs2[] = checker($row["tcs2"]);
-    $tcs3[] = checker($row["tcs3"]);
-    $Asubc[] = checker($row["subc"]);
+    $times[] = strtotime(substr($row["valid"], 0, 16));
+    $tfs0[] = checker($row["tfs0"]);
+    $tfs1[] = checker($row["tfs1"]);
+    $tfs2[] = checker($row["tfs2"]);
+    $tfs3[] = checker($row["tfs3"]);
+    $Asubc[] = checker($row["subf"]);
     $Atmpf[] = checker($row["tmpf"]);
     $Adwpf[] = checker($row["dwpf"]);
     $p = floatval($row["pcpn"]);
@@ -168,19 +109,19 @@ for ($i = 0; $row = pg_fetch_array($result); $i++) {
     $lastp = $p;
     $freezing[] = 32;
 }
-pg_close($c0);
+pg_close($rwisdb);
 
-$nt = new NetworkTable("IA_RWIS");
+$nt = new NetworkTable($network);
 $cities = $nt->table;
 
 // Create the graph. These two calls are always required
-$graph = new Graph(650, 550, "example1");
+$graph = new Graph(800, 600);
 $graph->SetScale("datlin");
 $graph->SetMarginColor("white");
 $graph->SetColor("lightyellow");
 if (max($pcpn) != "" && isset($_GET["pcpn"])) $graph->SetY2Scale("lin");
 if (isset($limit))  $graph->SetScale("datlin", 25, 35);
-$graph->img->SetMargin(40, 55, 105, 105);
+$graph->img->SetMargin(40, 55, 105, 115);
 //$graph->xaxis->SetFont(FS_FONT1,FS_BOLD);
 
 if (max($pcpn) != "" && isset($_GET["pcpn"])) {
@@ -192,8 +133,7 @@ $graph->yaxis->SetTitle("Temperature [F]");
 $graph->yaxis->title->SetFont(FF_FONT1, FS_BOLD, 12);
 
 $graph->xaxis->SetTitle("Time Period: " . date('Y-m-d h:i A', $times[0]) . " thru " . date('Y-m-d h:i A', max($times)));
-$graph->xaxis->SetTitleMargin(67);
-$graph->xaxis->title->SetFont(FF_VERA, FS_BOLD, 12);
+$graph->xaxis->SetTitleMargin(90);
 $graph->xaxis->title->SetColor("brown");
 $graph->xaxis->SetPos("min");
 $graph->xaxis->SetLabelAngle(90);
@@ -203,25 +143,25 @@ $graph->legend->Pos(0.01, 0.01);
 $graph->legend->SetLayout(LEGEND_VERT);
 
 // Create the linear plot
-$lineplot = new LinePlot($tcs0, $times);
+$lineplot = new LinePlot($tfs0, $times);
 $lineplot->SetLegend("0: " . $ns0);
 $lineplot->SetColor("blue");
 $lineplot->SetWeight(3);
 
 // Create the linear plot
-$lineplot2 = new LinePlot($tcs1, $times);
+$lineplot2 = new LinePlot($tfs1, $times);
 $lineplot2->SetLegend("1: " . $ns1);
 $lineplot2->SetColor("pink");
 $lineplot2->SetWeight(3);
 
 // Create the linear plot
-$lineplot3 = new LinePlot($tcs2, $times);
+$lineplot3 = new LinePlot($tfs2, $times);
 $lineplot3->SetLegend("2: " . $ns2);
 $lineplot3->SetColor("gray");
 $lineplot3->SetWeight(3);
 
 // Create the linear plot
-$lineplot4 = new LinePlot($tcs3, $times);
+$lineplot4 = new LinePlot($tfs3, $times);
 $lineplot4->SetLegend("3: " . $ns3);
 $lineplot4->SetColor("purple");
 $lineplot4->SetWeight(3);
@@ -264,26 +204,20 @@ $tx2 = new Text("Time series showing temperatures
 $tx2->SetPos(0.01, 0.11, 'left', 'top');
 $tx2->SetFont(FF_FONT1, FS_NORMAL, 10);
 
-require_once "../../../include/mlib.php";
-$mySOb = array();
-
-
-if ($mode == "hist") {
-    $ptext = "Historical Plot for dates:\n";
-    $tx3 = new Text($ptext . $plotTitle);
-}
+$ptext = "Historical Plot for dates:\n";
+$tx3 = new Text($ptext);
 $graph->AddText($tx1);
 $graph->AddText($tx2);
 
 // Add the plot to the graph
 $graph->Add($fz);
-if (max($tcs0) != "" && isset($_GET["s0"]))
+if (max($tfs0) != "" && isset($_GET["s0"]))
     $graph->Add($lineplot);
-if (max($tcs1) != "" && isset($_GET["s1"]))
+if (max($tfs1) != "" && isset($_GET["s1"]))
     $graph->Add($lineplot2);
-if (max($tcs2) != "" && isset($_GET["s2"]))
+if (max($tfs2) != "" && isset($_GET["s2"]))
     $graph->Add($lineplot3);
-if (max($tcs3) != "" && isset($_GET["s3"]))
+if (max($tfs3) != "" && isset($_GET["s3"]))
     $graph->Add($lineplot4);
 if (max($Asubc) != "" && isset($_GET["subc"]))
     $graph->Add($lineplot5);

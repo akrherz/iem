@@ -7,7 +7,6 @@ require_once "../../../include/jpgraph/jpgraph_bar.php";
 require_once "../../../include/jpgraph/jpgraph_date.php";
 require_once "../../../include/jpgraph/jpgraph_led.php";
 require_once "../../../include/network.php";
-$nt = new NetworkTable("IA_RWIS");
 
 /** We need these vars to make this work */
 $syear = isset($_GET["syear"]) ? $_GET["syear"] : date("Y");
@@ -15,16 +14,15 @@ $smonth = isset($_GET["smonth"]) ? $_GET["smonth"] : date("m");
 $sday = isset($_GET["sday"]) ? $_GET["sday"] : date("d");
 $days = isset($_GET["days"]) ? $_GET["days"] : 2;
 $station = isset($_GET['station']) ? $_GET["station"] : "";
-$mode = isset($_GET["mode"]) ? $_GET["mode"] : "rt";
+$network = isset($_GET["network"]) ? $_GET["network"] : "IA_RWIS";
+$nt = new NetworkTable($network);
 
 $sts = time() - (3. * 86400.);
 $ets = time();
 
 /** Lets assemble a time period if this plot is historical */
-if ($mode != 'rt') {
-    $sts = mktime(0, 0, 0, $smonth, $sday, $syear);
-    $ets = $sts + ($days * 86400.0);
-}
+$sts = mktime(0, 0, 0, $smonth, $sday, $syear);
+$ets = $sts + ($days * 86400.0);
 
 $iemdb = iemdb('iem');
 $rs = pg_prepare($iemdb, "SELECTMETA", "SELECT * from 
@@ -66,7 +64,6 @@ pg_close($iemdb);
 
 
 if (pg_num_rows($rs) == 0) {
-
     $led = new DigitalLED74();
     $led->StrokeNumber('NO TRAFFIC DATA AVAILABLE', LEDC_GREEN);
     die();
@@ -84,9 +81,8 @@ $graph->img->SetMargin(40, 55, 105, 105);
 $graph->yaxis->SetTitle("Average Speed [mph]");
 $graph->yaxis->title->SetFont(FF_FONT1, FS_BOLD, 12);
 
-$graph->xaxis->SetTitle("Time Period: " . date('Y-m-d h:i A', $times[0][0]) . " thru " . date('Y-m-d h:i A', max($times[0])));
+//$graph->xaxis->SetTitle("Time Period: " . date('Y-m-d h:i A', $times[0][0]) . " thru " . date('Y-m-d h:i A', max($times[0])));
 $graph->xaxis->SetTitleMargin(67);
-$graph->xaxis->title->SetFont(FF_VERA, FS_BOLD, 12);
 $graph->xaxis->title->SetColor("brown");
 $graph->xaxis->SetPos("min");
 $graph->xaxis->SetLabelAngle(90);
@@ -100,6 +96,9 @@ $colors = array(
     4 => "purple", 5 => "tan", 6 => "pink", 7 => "lavendar"
 );
 foreach ($times as $k => $v) {
+    if (sizeof($times[$k]) < 2) {
+        continue;
+    }
     // Create the linear plot
     $lineplot = new LinePlot($avg_speed[$k], $times[$k]);
     $lineplot->SetLegend($labels[$k]);

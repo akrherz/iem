@@ -9,56 +9,38 @@ $syear = get_int404("syear", date("Y"));
 $smonth = get_int404("smonth", date("m"));
 $sday = get_int404("sday", date("d"));
 $days = get_int404("days", 2);
+$network = isset($_GET["network"]) ? xssafe($_GET["network"]) : "IA_RWIS";
 $station = isset($_GET['station']) ? xssafe($_GET["station"]) : "";
-$mode = isset($_GET["mode"]) ? xssafe($_GET["mode"]) : "rt";
 
 $sts = time() - (3. * 86400.);
 $ets = time();
 
-$data = array();
 $times = array();
-for ($i = 0; $i < 15; $i++) {
-    $data["s{$i}temp"] = array();
+$depths = Array(1, 3, 6, 9, 12, 18, 24, 30, 36, 42, 48, 54, 60, 66, 72);
+$data = array();
+// initialize the data array for each depth
+foreach($depths as $depth){
+    $data["s{$depth}temp"] = array();
 }
 
-/** Lets assemble a time period if this plot is historical */
-if ($mode != 'rt') {
-    $sts = mktime(0, 0, 0, $smonth, $sday, $syear);
-    $ets = $sts + ($days * 86400.0);
+$sts = mktime(0, 0, 0, $smonth, $sday, $syear);
+$ets = $sts + ($days * 86400.0);
 
-    $dbconn = iemdb('rwis');
-    $rs = pg_prepare($dbconn, "SELECT", "SELECT * from alldata_soil
-  WHERE station = $1 and valid > $2 and valid < $3 ORDER by valid ASC");
-    $rs = pg_execute($dbconn, "SELECT", array(
-        $station,
-        date("Y-m-d H:i", $sts), date("Y-m-d H:i", $ets)
-    ));
+$dbconn = iemdb('rwis');
+$rs = pg_prepare($dbconn, "SELECT", "SELECT * from alldata_soil
+WHERE station = $1 and valid > $2 and valid < $3 ORDER by valid ASC");
+$rs = pg_execute($dbconn, "SELECT", array(
+    $station,
+    date("Y-m-d H:i", $sts), date("Y-m-d H:i", $ets)
+));
 
-    for ($i = 0; $row = pg_fetch_array($rs); $i++) {
-        $times[] = strtotime(substr($row["valid"], 0, 16));
-        for ($j = 0; $j < 15; $j++) {
-            $data["s{$j}temp"][] = $row["s{$j}temp"];
-        }
+for ($i = 0; $row = pg_fetch_array($rs); $i++) {
+    $times[] = strtotime(substr($row["valid"], 0, 16));
+    foreach ($depths as $j) {
+        $data["s{$j}temp"][] = $row["tmpf_{$j}in"];
     }
-    pg_close($dbconn);
-} else {
-    $dbconn = iemdb('iem');
-    $rs = pg_prepare($dbconn, "SELECT", "SELECT d.* from 
-        rwis_soil_data_log d, rwis_locations l
-        WHERE l.id = d.location_id and l.nwsli = $1
-        ORDER by valid ASC");
-    $rs = pg_execute($dbconn, "SELECT", array($station));
-    $lts = 0;
-    for ($i = 0; $row = pg_fetch_array($rs); $i++) {
-        $ts = strtotime(substr($row["valid"], 0, 16));
-        if ($lts != $ts) {
-            $times[] = $ts;
-            $lts = $ts;
-        }
-        $data["s" . $row["sensor_id"] . "temp"][] = $row["temp"];
-    }
-    pg_close($dbconn);
 }
+pg_close($dbconn);
 
 require_once "../../../include/jpgraph/jpgraph.php";
 require_once "../../../include/jpgraph/jpgraph_line.php";
@@ -72,7 +54,7 @@ if (pg_num_rows($rs) == 0) {
     die();
 }
 
-$nt = new NetworkTable("IA_RWIS");
+$nt = new NetworkTable($network);
 $cities = $nt->table;
 
 // Create the graph. These two calls are always required
@@ -91,7 +73,6 @@ $graph->yaxis->title->SetFont(FF_FONT1, FS_BOLD, 12);
 
 //$graph->xaxis->SetTitle("Time Period:");
 $graph->xaxis->SetTitleMargin(67);
-$graph->xaxis->title->SetFont(FF_VERA, FS_BOLD, 12);
 $graph->xaxis->title->SetColor("brown");
 $graph->xaxis->SetPos("min");
 $graph->xaxis->SetLabelAngle(90);
@@ -99,19 +80,12 @@ $graph->xaxis->SetLabelFormatString("M-j h A", true);
 
 $graph->legend->Pos(0.01, 0.01);
 $graph->legend->SetLayout(LEGEND_VERT);
+$graph->legend->SetColumns(3);
 
-$labels = array(1, 3, 6, 9, 12, 18, 24, 30, 36, 42, 48, 54, 60, 66, 72);
-$colors = array(
-    "green", "black", "blue", "red",
-    "purple", "tan", "pink", "lavender", "teal", "maroon", "brown", "yellow",
-    "skyblue", "skyblue", "white"
-);
-
-for ($j = 0; $j < 15; $j++) {
+foreach ($depths as $j) {
     // Create the linear plot
     $lineplot = new LinePlot($data["s{$j}temp"], $times);
-    $lineplot->SetLegend($labels[$j]);
-    $lineplot->SetColor($colors[$j]);
+    $lineplot->SetLegend($j);
     $lineplot->SetWeight(3);
     $graph->add($lineplot);
 }
