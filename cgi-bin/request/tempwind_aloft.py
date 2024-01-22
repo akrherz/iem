@@ -43,7 +43,7 @@ def get_data(station, sts, ets, tz, na, fmt):
     if fmt == "excel":
         bio = BytesIO()
         with pd.ExcelWriter(bio, engine="xlsxwriter") as writer:
-            df.to_excel(writer, "Data", index=False)
+            df.to_excel(writer, sheet_name="Data", index=False)
         return bio.getvalue()
 
     sio = StringIO()

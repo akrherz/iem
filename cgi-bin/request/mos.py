@@ -50,7 +50,7 @@ def get_data(sts, ets, station, model, fmt):
         bio = BytesIO()
         # pylint: disable=abstract-class-instantiated
         with pd.ExcelWriter(bio, engine="xlsxwriter") as writer:
-            df.to_excel(writer, "Data", index=False)
+            df.to_excel(writer, sheet_name="Data", index=False)
         return bio.getvalue()
 
     sio = StringIO()

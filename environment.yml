@@ -36,8 +36,8 @@ dependencies:
   - odfpy
   # excel output
   - openpyxl
-  # yo
-  - pandas
+  # due to config settings
+  - pandas>=2.2
   # mod-wsgi
   - paste
   # PIL

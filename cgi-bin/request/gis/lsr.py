@@ -82,7 +82,7 @@ def do_excel_kml(fmt, sts, ets, wfolimiter, statelimiter):
         bio = BytesIO()
         # pylint: disable=abstract-class-instantiated
         writer = pd.ExcelWriter(bio, engine="xlsxwriter")
-        df.to_excel(writer, "Local Storm Reports", index=False)
+        df.to_excel(writer, sheet_name="Local Storm Reports", index=False)
         worksheet = writer.sheets["Local Storm Reports"]
         worksheet.set_column("B:C", 36)
         worksheet.set_column("D:E", 24)

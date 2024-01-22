@@ -33,6 +33,9 @@ def warn_with_traceback(
     )
 
 
+# pandas 2.2 warning with fillna
+pd.set_option("future.no_silent_downcasting", True)
+
 warnings.showwarning = warn_with_traceback
 # Stop pandas UserWarning for now in prod
 if os.path.exists("/etc/IEMDEV"):

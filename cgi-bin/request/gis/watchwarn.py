@@ -207,7 +207,7 @@ def do_excel(sql):
     bio = BytesIO()
     # pylint: disable=abstract-class-instantiated
     with pd.ExcelWriter(bio, engine="xlsxwriter") as writer:
-        df.to_excel(writer, "VTEC WaWA", index=False)
+        df.to_excel(writer, sheet_name="VTEC WaWA", index=False)
     return bio.getvalue()
 
 

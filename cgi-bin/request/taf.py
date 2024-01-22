@@ -46,7 +46,7 @@ def run(start_response, ctx):
     bio = BytesIO()
     if ctx["fmt"] == "excel":
         with pd.ExcelWriter(bio, engine="openpyxl") as writer:
-            df.to_excel(writer, "TAF Data", index=False)
+            df.to_excel(writer, sheet_name="TAF Data", index=False)
         headers = [
             ("Content-type", EXL),
             ("Content-disposition", "attachment;Filename=taf.xlsx"),

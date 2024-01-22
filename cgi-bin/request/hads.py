@@ -128,7 +128,7 @@ def application(environ, start_response):
     if what == "excel":
         bio = BytesIO()
         with pd.ExcelWriter(bio, engine="openpyxl") as writer:
-            table.to_excel(writer, "Data", index=True)
+            table.to_excel(writer, sheet_name="Data", index=True)
 
         headers = [
             ("Content-type", EXL),
