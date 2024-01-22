@@ -98,6 +98,8 @@ def estimate_precip(df, ds):
     # estimates may improve with time.
     idx = df["precip_estimated"] | pd.isnull(df["precip"])
     for sid, row in df[idx].iterrows():
+        # ensure precip_etimated is set
+        df.at[sid, "precip_estimated"] = True
         if row["precip_hour"] in [0, 22, 23, 24]:
             precip = grid00[row["gridj"], row["gridi"]]
             precip_hour = 24
@@ -145,6 +147,8 @@ def estimate_hilo(df, ds):
     # We want this to rerun for anything already estimated
     idx = df["temp_estimated"] | pd.isnull(df["high"]) | pd.isnull(df["low"])
     for sid, row in df[idx].iterrows():
+        # ensure temp_etimated is set
+        df.at[sid, "temp_estimated"] = True
         if row["temp_hour"] in [0, 22, 23, 24]:
             val = highgrid00[row["gridj"], row["gridi"]]
             temp_hour = 24

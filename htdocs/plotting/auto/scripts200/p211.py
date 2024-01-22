@@ -81,7 +81,9 @@ def get_data(ctx):
     df.index = df.index.tz_localize(timezone.utc)
     # Complete the dataframe for the time period of interest
     df = df.reindex(
-        pd.date_range(ctx["sts"], ctx["ets"] - timedelta(minutes=1), freq="1T")
+        pd.date_range(
+            ctx["sts"], ctx["ets"] - timedelta(minutes=1), freq="1min"
+        )
     )
     df.index.name = "utc_valid"
     df = df.reset_index()
