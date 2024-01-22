@@ -120,7 +120,7 @@ def application(environ, start_response):
     bio = BytesIO()
     # pylint: disable=abstract-class-instantiated
     with pd.ExcelWriter(bio, engine="xlsxwriter") as writer:
-        df.to_excel(writer, "Data", index=False)
+        df.to_excel(writer, sheet_name="Data", index=False)
     headers = [
         ("Content-type", EXL),
         ("Content-disposition", "attachment; Filename=talltowers.xlsx"),

@@ -85,7 +85,7 @@ def application(environ, start_response):
             return [b"Dataset too large for excel format."]
         bio = BytesIO()
         with pd.ExcelWriter(bio) as writer:
-            df.to_excel(writer, "Data", index=False, columns=myvars)
+            df.to_excel(writer, sheet_name="Data", index=False, columns=myvars)
 
         headers = [
             ("Content-type", EXL),

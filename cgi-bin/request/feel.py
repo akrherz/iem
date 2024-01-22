@@ -35,8 +35,8 @@ def run(sts, ets, start_response):
 
     bio = BytesIO()
     with pd.ExcelWriter(bio, engine="openpyxl") as writer:
-        df.to_excel(writer, "Daily Data", index=False)
-        df2.to_excel(writer, "Hourly Data", index=False)
+        df.to_excel(writer, sheet_name="Daily Data", index=False)
+        df2.to_excel(writer, sheet_name="Hourly Data", index=False)
 
     headers = [
         ("Content-type", EXL),
