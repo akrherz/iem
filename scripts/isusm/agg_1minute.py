@@ -173,7 +173,7 @@ def main(argv):
     # Hourly work
     cursor = pgconn.cursor()
     for station, gdf in mdf.groupby("station"):
-        for hour, hgdf in gdf.set_index("utc_valid").resample("H"):
+        for hour, hgdf in gdf.set_index("utc_valid").resample("h"):
             if station not in hdf.index:
                 LOG.warning("%s is not in hourly", station)
                 continue

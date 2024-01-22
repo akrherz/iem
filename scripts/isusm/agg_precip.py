@@ -79,7 +79,7 @@ def main():
             LOG.info("Skipping %s as got just %s rows", station, len(df.index))
             continue
         df = (
-            df.reindex(pd.date_range(df.index[0], df.index[-1], freq="60S"))
+            df.reindex(pd.date_range(df.index[0], df.index[-1], freq="60s"))
             .fillna(0)
             .assign(
                 phour=lambda df_: df_.phour.fillna(0),
