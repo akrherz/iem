@@ -189,8 +189,13 @@ def plotter(fdict):
     title = f"{ctx['_sname']} :: Observations during NWS Headlines"
     subtitle = f"Plot customized for {PDICT[ctx['mode']]}."
     fig = figure(title=title, subtitle=subtitle, apctx=ctx)
-    ax = fig.add_axes([0.1, 0.15, 0.82, 0.65])
-    top_ax = fig.add_axes([0.1, 0.8, 0.82, 0.1], frame_on=False)
+    box1 = [0.1, 0.15, 0.82, 0.65]
+    box2 = [0.1, 0.8, 0.82, 0.1]
+    if len(wwa.index) > 4:
+        box1 = [0.1, 0.15, 0.82, 0.55]
+        box2 = [0.1, 0.7, 0.82, 0.2]
+    ax = fig.add_axes(box1)
+    top_ax = fig.add_axes(box2, frame_on=False)
     if ctx["mode"] == "BZ":
         obs = obs[pd.notna(obs["max_wind"]) & pd.notna(obs["vsby"])]
         plot_bz(ax, obs)
@@ -252,9 +257,14 @@ def plotter(fdict):
         mdates.DateFormatter("|\n%d %b %Y", tz=tzinfo)
     )
 
-    ax.xaxis.set_minor_locator(
-        mdates.HourLocator(byhour=[6, 12, 18], tz=tzinfo)
+    byhour = (
+        [6, 12, 18]
+        if ctx["hours"] < 73
+        else [
+            12,
+        ]
     )
+    ax.xaxis.set_minor_locator(mdates.HourLocator(byhour=byhour, tz=tzinfo))
     ax.xaxis.set_minor_formatter(mdates.DateFormatter("%I %p", tz=tzinfo))
     ax.set_xlabel(
         f"{sts.astimezone(tzinfo):%-d %b %Y %-H:%M %p} to "
