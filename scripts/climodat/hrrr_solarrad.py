@@ -97,7 +97,7 @@ def compute(df, sids, dt, do_regions=False):
     yaxis = None
     # date_range is inclusive
     for now in pd.date_range(
-        sts, sts + datetime.timedelta(hours=23), freq="1H"
+        sts, sts + datetime.timedelta(hours=23), freq="1h"
     ):
         # Try the newer f01 files, which have better data!
         fn = now.strftime(

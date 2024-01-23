@@ -10,6 +10,7 @@ import numpy as np
 import pandas as pd
 from pyiem.util import get_dbconn, get_sqlalchemy_conn, logger, utc
 
+pd.set_option("future.no_silent_downcasting", True)
 LOG = logger()
 TIME_FORMAT = "%Y-%m-%d %H:%M-06"
 

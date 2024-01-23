@@ -19,6 +19,7 @@ from pyiem.reference import TRACE_VALUE, state_names
 from pyiem.util import get_dbconn, get_sqlalchemy_conn, logger
 from sqlalchemy import text
 
+pd.set_option("future.no_silent_downcasting", True)
 LOG = logger()
 NON_CONUS = ["AK", "HI", "PR", "VI", "GU", "AS"]
 
