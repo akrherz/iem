@@ -72,7 +72,7 @@ def get_description():
 
 def plot(ax, obs, col):
     """Plot simple."""
-    ax.scatter(obs.utc_valid, obs[col], marker="o", s=40, color="b", zorder=2)
+    ax.scatter(obs.utc_valid, obs[col], marker="o", s=40, color="b", zorder=3)
     ax.set_ylabel(r"Feels Like Temperature [$^\circ$F]", color="b")
 
 
@@ -207,8 +207,16 @@ def plotter(fdict):
         obs = obs[pd.notna(obs["feel"])]
         plot(ax, obs, "feel")
     for i, row in wwa.iterrows():
-        ax.axvline(row["utc_issue"], lw=2, color=NWS_COLORS[row["key"]])
-        ax.axvline(row["utc_expire"], lw=2, color=NWS_COLORS[row["key"]])
+        color = NWS_COLORS[row["key"]]
+        ax.axvspan(
+            row["utc_issue"],
+            row["utc_expire"],
+            color=color,
+            zorder=1,
+            alpha=0.4,
+        )
+        ax.axvline(row["utc_issue"], lw=2, zorder=2, color=color)
+        ax.axvline(row["utc_expire"], lw=2, zorder=2, color=color)
         delta = row["utc_expire"] - row["utc_issue"]
         top_ax.plot(
             [
@@ -219,7 +227,7 @@ def plotter(fdict):
             ],
             [0, i + 1, i + 1, 0],
             lw=2,
-            c=NWS_COLORS[row["key"]],
+            c=color,
         )
         xloc = row["utc_issue"] + delta / 2
         ha = "center"
@@ -232,7 +240,7 @@ def plotter(fdict):
             f"{get_ps_string(*row['key'].split('.'))} #{row['eventid']}",
             va="center",
             ha=ha,
-            color=NWS_COLORS[row["key"]],
+            color=color,
         )
     ax.grid(True)
     top_ax.set_ylim(0, len(wwa.index) + 1)
