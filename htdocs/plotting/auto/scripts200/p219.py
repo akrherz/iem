@@ -112,7 +112,6 @@ def plotter(fdict):
     """Go"""
     ctx = get_autoplot_context(fdict, get_description())
     valid = ctx["valid"].replace(tzinfo=datetime.timezone.utc)
-    pgconn = get_dbconn("asos")
 
     def fetch(ts):
         """Getme data."""
@@ -129,11 +128,14 @@ def plotter(fdict):
 
     df = fetch(valid)
     if df.empty:
+        pgconn = get_dbconn("asos")
         valid = taf_search(pgconn, ctx["station"], valid)
+        pgconn.close()
         if valid is None:
             raise NoDataFound("TAF data was not found!")
         df = fetch(valid)
-    df = df.fillna(np.nan)
+    # prevent all nan from becoming an object
+    df = df.fillna(np.nan).infer_objects()
     df["next_valid"] = (
         df.reset_index().shift(-1)["valid"].values - df.index.values
     )
@@ -325,4 +327,4 @@ def plotter(fdict):
 
 
 if __name__ == "__main__":
-    plotter({"station": "PGUM", "valid": "2023-09-28 0542"})
+    plotter({})

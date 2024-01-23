@@ -14,6 +14,7 @@ from pyiem.util import (
     logger,
 )
 
+pd.set_option("future.no_silent_downcasting", True)
 LOG = logger()
 SERVICE = "http://data.rcc-acis.org/StnData"
 METASERVICE = "http://data.rcc-acis.org/StnMeta"
