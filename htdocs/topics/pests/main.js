@@ -24,8 +24,11 @@ function hideImageLoad() {
     }
 }
 function rectify_start_date(pest) {
-    const month = (pest === "western_bean_cutworm") ? 2: 0; // le sigh
-    $("#sdate").datepicker("setDate", new Date((new Date()).getFullYear(), month, 1));
+    const month = (pest === "western_bean_cutworm") ? "03": "01"; // le sigh
+    // Get the year from the edate datepicker
+    const edate = text($("#edate").val());
+    const year = parseInt(edate.substring(0, 4), 10);
+    $("#sdate").val(`${year}-${month}-01`);
 }
 
 function updateStationForecast() {
@@ -106,18 +109,12 @@ function setupUI() {
         hideImageLoad();
     }
 
-    $("#sdate").datepicker({
-        dateFormat: 'yy-mm-dd',
-        changeMonth: true,
-        changeYear: true,
-        onSelect(_dateText, _inst) {
-            updateImage();
-        }
-    });
     $("#edate").datepicker({
         dateFormat: 'yy-mm-dd',
         changeMonth: true,
         changeYear: true,
+        minDate: new Date(1893, 0, 1),
+        maxDate: 0,
         onSelect(_dateText, _inst) {
             updateImage();
         }

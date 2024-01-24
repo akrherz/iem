@@ -33,11 +33,11 @@ $sselect = selectClimodatNetwork($network, "network");
 $t = new MyView();
 $t->title = "Pest Forecasting Maps";
 $t->jsextra = <<<EOM
-<script src="/vendor/jquery-ui/1.11.4/jquery-ui.js"></script>
-<script type="text/javascript" src="main.js?v=3"></script>
+<script src="/vendor/jquery-ui/1.13.2/jquery-ui.js"></script>
+<script type="text/javascript" src="main.js"></script>
 EOM;
 $t->headextra = <<<EOM
-<link rel="stylesheet" href="/vendor/jquery-ui/1.11.4/jquery-ui.min.css" />
+<link rel="stylesheet" href="/vendor/jquery-ui/1.13.2/jquery-ui.min.css" />
 <style>
 #theimage {
   display: block;
@@ -89,8 +89,8 @@ the backend that generates the maps/data here.</p>
 <br />{$pselect}
 </div>
 <div class="col-md-3">
-<label for="sdate">Start Date</label>
-<input type="text" name="sdate" id="sdate" value="$sdate" class="form-control" placeholder="Start Date">
+<label for="sdate">Start Date for Selected Pest</label>
+<input type="text" name="sdate" id="sdate" value="$sdate" class="form-control" readonly>
 </div>
 <div class="col-md-3">
 <input type="checkbox" name="edate_off" id="edate_off" value="1" $edatechecked>
