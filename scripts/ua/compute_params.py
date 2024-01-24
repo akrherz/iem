@@ -4,6 +4,7 @@ Run from RUN_10AFTER.sh
 """
 # pylint: disable=no-member
 import sys
+import warnings
 
 import numpy as np
 import pandas as pd
@@ -27,6 +28,8 @@ from pyiem.util import get_dbconn, get_sqlalchemy_conn, logger, utc
 from scipy.interpolate import interp1d
 from tqdm import tqdm
 
+# metpy can be noisy and we don't care about runtime warnings
+warnings.simplefilter("ignore", category=RuntimeWarning)
 LOG = logger()
 
 
