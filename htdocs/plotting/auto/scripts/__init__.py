@@ -373,6 +373,10 @@ yearly_opts = [
         "label": "Accumulated Days with High/Low Above/Below Threshold",
     },
     {
+        "id": 246,
+        "label": "Accumulated GDD/Precip Threshold Frequency by Day of Year",
+    },
+    {
         "id": 76,
         "label": (
             "Dew Point / Vapor Pressure Deficit / RH Distributions "
