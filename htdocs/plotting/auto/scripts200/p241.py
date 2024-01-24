@@ -102,7 +102,7 @@ def get_data(ctx):
     total = 0
     mindt = None
     maxdt = None
-    for dt in pd.date_range(sts, ets, freq="900s" if use_ru else "1H"):
+    for dt in pd.date_range(sts, ets, freq="900s" if use_ru else "1h"):
         total += 1
         mydir = f"/mesonet/ARCHIVE/data/{dt:%Y/%m/%d}/model/rtma/{dt:%H}/"
         fn = mydir + (

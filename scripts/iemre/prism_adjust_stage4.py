@@ -102,7 +102,7 @@ def workflow(valid):
     sts = valid - datetime.timedelta(hours=23)
     # Through 12z file
     ets = valid
-    for now in pd.date_range(sts, ets, freq="1H"):
+    for now in pd.date_range(sts, ets, freq="1h"):
         idx = hourly_offset(now)
         ncfn = f"/mesonet/data/stage4/{now.year}_stage4_hourly.nc"
         if not os.path.isfile(ncfn):

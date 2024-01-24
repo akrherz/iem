@@ -313,6 +313,8 @@ def do_ahps_obs(nwsli):
     """,
         (nwsli,),
     )
+    if cursor.rowcount == 0:
+        return "NO DATA"
     row = cursor.fetchone()
     latitude = row["st_y"]
     longitude = row["st_x"]
@@ -478,6 +480,8 @@ def do_ahps(nwsli):
         "where id = %s and network ~* 'DCP'",
         (nwsli,),
     )
+    if cursor.rowcount == 0:
+        return "NO DATA"
     row = cursor.fetchone()
     latitude = row["st_y"]
     longitude = row["st_x"]
