@@ -115,7 +115,7 @@ def fetch_daily(environ, cols):
     if df.empty:
         return df, []
 
-    df = df.fillna(np.nan)
+    df = df.fillna(np.nan).infer_objects()
 
     # Direct copy / rename
     xref = {
@@ -271,7 +271,7 @@ def fetch_hourly(environ, cols):
             .dt.strftime("%Y-%m-%d %H:%M")
         )
 
-    df = df.fillna(np.nan)
+    df = df.fillna(np.nan).infer_objects()
     # Direct copy / rename
     xref = {
         "rh_avg_qc": "relh",

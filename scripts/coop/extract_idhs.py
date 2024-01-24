@@ -1,12 +1,13 @@
 """Extraction as requested by IA Public Health"""
-import sys
 
+import click
 from pyiem.util import get_dbconn
 
 
-def main(argv):
+@click.command()
+@click.option("--year", type=int)
+def main(year):
     """Do Something"""
-    year = int(argv[1])
     pgconn = get_dbconn("postgis")
     cursor = pgconn.cursor()
     cursor2 = pgconn.cursor()
@@ -21,8 +22,7 @@ def main(argv):
         fips = row[0][3:]
         # Get closest climodat site
         cursor2.execute(
-            "SELECT id, ST_Distance(geom, "
-            "ST_SetSRID(ST_GeomFromText('POINT(%s %s)'), 4326)) "
+            "SELECT id, ST_Distance(geom, ST_POINT(%s, %s, 4326)) "
             "from stations where network = 'IACLIMATE' and id != 'IA0000' "
             "and substr(id,3,1) != 'C' and online "
             "ORDER by st_distance ASC LIMIT 1",
@@ -59,4 +59,4 @@ def main(argv):
 
 
 if __name__ == "__main__":
-    main(sys.argv)
+    main()

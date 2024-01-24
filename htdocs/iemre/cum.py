@@ -41,12 +41,12 @@ def application(environ, start_response):
         H = convert_value(
             nc.variables["high_tmpk"][offset0:offset1], "degK", "degF"
         )
-        H = np.where(H < base, base, H)
-        H = np.where(H > ceil, ceil, H)
+        H[H < base] = base
+        H[H > ceil] = ceil
         L = convert_value(
             nc.variables["low_tmpk"][offset0:offset1], "degK", "degF"
         )
-        L = np.where(L < base, base, L)
+        L[L < base] = base
         gdd = np.sum((H + L) / 2.0 - base, axis=0)
 
     if fmt == "json":

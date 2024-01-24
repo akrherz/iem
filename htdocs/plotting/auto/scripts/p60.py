@@ -195,7 +195,7 @@ def highcharts(fdict):
     for dt in pd.date_range("2000/1/1", "2000/12/31", freq="7D"):
         xlabels.append(dt.strftime("%b %-d"))
     ylabels = []
-    for dt in pd.date_range("2000/1/1", "2000/1/1 23:59", freq="1H"):
+    for dt in pd.date_range("2000/1/1", "2000/1/1 23:59", freq="1h"):
         ylabels.append(dt.strftime("%-I %p"))
     ylabels.append("")  # shrug
     title = ctx["title"].replace(r"$^\circ$", "&deg;").replace("\n", "<br />")
