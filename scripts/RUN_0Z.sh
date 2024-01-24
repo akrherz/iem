@@ -46,7 +46,7 @@ cd ../era5
 python fetch_era5.py $(date -u --date '6 days ago' +'%Y %m %d')
 
 cd ../climodat
-python era5land_solarrad.py $(date -u --date '7 days ago' +'%Y %m %d')
+python era5land_extract.py --valid=$(date -u --date '7 days ago' +'%Y-%m-%d')
 
 cd ../iemre
 # We have hopefully gotten a refreshed 12z stage4 file, so we chunk it again
