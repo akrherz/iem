@@ -26,20 +26,25 @@ NON_CONUS = ["AK", "HI", "PR", "VI", "GU", "AS"]
 
 def load_table(state, date):
     """Build up a dataframe for further processing."""
-    # IMPORTANT: Only consider sites that are in an online state, so to
-    # not run the estimator for `offline` sites
-    nt = NetworkTable(f"{state}CLIMATE", only_online=True)
+    # NB: we need to load all stations and then later cull those that are
+    # not relevent for this given date
+    nt = NetworkTable(f"{state}CLIMATE", only_online=False)
     rows = []
     # Logic to determine if we can generate data for today's date or not
     skip_calday_sites = (
         date == datetime.date.today() and datetime.datetime.now().hour < 18
     )
     threaded = {}
-    for sid in nt.sts:
+    for sid, entry in nt.sts.items():
         # handled by compute4regions
         if sid[2:] == "0000" or sid[2] in ["C", "D"]:
             continue
-        entry = nt.sts[sid]
+        # clicken/egg status
+        ab = date if entry["archive_begin"] is None else entry["archive_begin"]
+        ae = date if entry["archive_end"] is None else entry["archive_end"]
+        # out of bounds
+        if date < ab or date > ae:
+            continue
         if skip_calday_sites and entry["temp24_hour"] not in range(3, 12):
             continue
         if entry["threading"]:
@@ -82,6 +87,10 @@ def load_table(state, date):
     # Set the default on the estimated columns to True
     for col in ["temp_estimated", "precip_estimated"]:
         df[col] = df[col].fillna(True)
+    # Anything estimated needs to reset the hour to the default as the
+    # database may be wrong
+    df.loc[df["temp_estimated"], "temp_hour"] = df["temp_hour_default"]
+    df.loc[df["precip_estimated"], "precip_hour"] = df["precip_hour_default"]
     # Fix any nulls
     df.loc[pd.isna(df["temp_hour"]), "temp_hour"] = df["temp_hour_default"]
     df.loc[pd.isna(df["precip_hour"]), "precip_hour"] = df[
