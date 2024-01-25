@@ -45,9 +45,9 @@ def run(ctx, start_response):
         substr(replace(aircraft_type, ',', ' '), 0, 40),
         substr(replace(report, ',', ' '), 0, 255),
         substr(trim(substring(replace(report, ',', ' '),
-            '/IC([^/]*)/')), 0, 255) as icing,
+            '/IC([^/]*)/?')), 0, 255) as icing,
         substr(trim(substring(replace(report, ',', ' '),
-            '/TB([^/]*)/')), 0, 255) as turb,
+            '/TB([^/]*)/?')), 0, 255) as turb,
         artcc, ST_y(geom::geometry) as lat, ST_x(geom::geometry) as lon
         from pireps WHERE {spatialsql} {artcc_sql}
         valid >= %s and valid < %s ORDER by valid ASC
