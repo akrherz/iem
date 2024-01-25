@@ -436,7 +436,10 @@ yearly_opts = [
         "id": 27,
         "label": "First Fall Temp Below Threshold (First Freeze/Frost)",
     },
-    {"id": 165, "label": "First / Last Date of Temperature Threshold [map]"},
+    {
+        "id": 165,
+        "label": "First / Last Date of Air/Soil Temperature Threshold [map]",
+    },
     {
         "id": 119,
         "label": "Frequency of First/Last Fall High/Low Temp by Day of Year",

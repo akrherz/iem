@@ -27,7 +27,11 @@ from pyiem.plot import figure_axes
 from pyiem.plot.use_agg import plt
 from pyiem.util import get_autoplot_context, get_sqlalchemy_conn
 
-PDICT = {"low": "Low Temperature", "high": "High Temperature"}
+PDICT = {
+    "era5land_soilt4_avg": "ERA5Land 0-10cm Avg Soil Temp",
+    "low": "Low Temperature",
+    "high": "High Temperature",
+}
 PDICT2 = {
     "first_below": "First Fall Temperature at or below Threshold",
     "last_above": "Last Fall Temperature at or above Threshold",
@@ -189,11 +193,14 @@ def plotter(fdict):
     if maxdate is None:
         maxdate = datetime.datetime(2001, 6, 1)
 
+    byear = bs.year
+    if ctx["var"] == "era5land_soilt4_avg":
+        byear = max(1951, byear)
     title = ("Frequency of %s\n%s %s (%s-%s)") % (
         PDICT2[opt].replace("Temperature", PDICT[ctx["var"]]),
         station,
         ctx["_nt"].sts[station]["name"],
-        bs.year,
+        byear,
         datetime.date.today().year,
     )
     (fig, ax) = figure_axes(title=title, apctx=ctx)
