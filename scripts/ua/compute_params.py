@@ -309,7 +309,7 @@ def do_profile(cursor, fid, gdf, nt):
         srh_sfc_3km_pos = %s, srh_sfc_3km_neg = %s, srh_sfc_3km_total = %s,
         shear_sfc_1km_smps = %s, shear_sfc_3km_smps = %s,
         shear_sfc_6km_smps = %s,
-        computed = 't' WHERE fid = %s
+        computed = 't', computed_at = now() WHERE fid = %s
     """,
         args,
     )
@@ -327,7 +327,7 @@ def main(argv):
             select f.fid, f.station, pressure, dwpc, tmpc, drct, smps, height,
             levelcode from raob_profile_{year} p JOIN raob_flights f
             on (p.fid = f.fid) WHERE (not computed or computed is null)
-            and height is not null and pressure is not null
+            and height is not null and pressure is not null and not locked
             ORDER by pressure DESC
         """,
             conn,
@@ -354,7 +354,9 @@ def main(argv):
                 exp,
             )
             cursor.execute(
-                "UPDATE raob_flights SET computed = 't' WHERE fid = %s", (fid,)
+                "UPDATE raob_flights SET computed = 't', "
+                "computed_at = now() WHERE fid = %s",
+                (fid,),
             )
         if count % 100 == 0:
             cursor.close()
