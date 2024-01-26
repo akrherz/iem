@@ -25,7 +25,11 @@ $wfo = substr(xssafe($wfo), 1, 3);
 $phenomena = substr(xssafe($phenomena), 0, 2);
 $significance = substr(xssafe($significance), 0, 1);
 
-$rs = pg_prepare($postgis, "SELECT", "SELECT ST_xmax(geom), ST_ymax(geom), 
+$rs = pg_prepare(
+    $postgis,
+    "SELECT",
+    "SELECT polygon_begin at time zone 'UTC' as utc_polygon_begin, ".
+    "ST_xmax(geom), ST_ymax(geom),
         ST_xmin(geom), ST_ymin(geom), *,
         round((ST_area2d(ST_transform(geom,2163))/1000000)::numeric,0 ) as area
         from sbw_$year WHERE phenomena = $1 and 
@@ -89,10 +93,6 @@ for ($i = 0; $row = pg_fetch_array($rs); $i++) {
         $ymin = $yc - ($cross / 2) - (.5 * $buffer);
         $ymax = $yc + ($cross / 2) + (1.5 * $buffer);
         $xmax = $xc + ($cross / 2) + $buffer;
-        //echo $xmin ."<br />";
-        //echo $xmax ."<br />";
-        //echo $ymin ."<br />";
-        //echo $ymax ."<br />";
         $bar640t = $map2->getLayerByName("bar640t");
         $bar640t->__set("status", MS_ON);
         $bar640t->draw($map2, $img2);
@@ -122,11 +122,6 @@ for ($i = 0; $row = pg_fetch_array($rs); $i++) {
         $sz0 = $row["area"];
     }
 
-    $ts = strtotime($row["polygon_begin"]);
-    if (time() - $ts > 300) {
-        $radts = $ts - (intval(date("i", $ts) % 5) * 60);
-    }
-
     $map = new mapObj($mapFile);
     $map->__set("width", $twidth);
     $map->__set("height", $theight);
@@ -142,20 +137,23 @@ for ($i = 0; $row = pg_fetch_array($rs); $i++) {
     $lakes->__set("status", MS_ON);
     $lakes->draw($map, $img);
 
-    /* Draw NEXRAD Layer */
-    $radarfp = "/mesonet/ldmdata/gis/images/4326/USCOMP/n0r_0.tif";
-    if (($ts + 300) < time()) {
-        $radts = new DateTime(date("Y-m-d H:i", $radts), new DateTimeZone(("UTC")));
-        $radarfp = sprintf(
-            "/mesonet/ARCHIVE/data/%s/GIS/uscomp/n0r_%s.png",
-            $radts->format("Y/m/d"),
-            $radts->format("YmdHi"),
-        );
+    $polygon_begin = new DateTime($row["utc_polygon_begin"], new DateTimeZone("UTC"));
+    // Ensure we have a timestamp modulo 5 minutes to match archive RADAR
+    $radts = clone $polygon_begin;
+    $mins = intval($radts->format("i")) % 5;
+    if ($mins > 0) {
+        $radts->sub(new DateInterval("PT{$mins}M"));
     }
-    if (is_file($radarfp)) {
-        $radar = $map->getLayerByName("nexrad_n0r");
+    $rtype = (intval($radts->format("Y")) > 2010) ? "n0q": "n0r";
+    $radarfn = sprintf(
+        "/mesonet/ARCHIVE/data/%s/GIS/uscomp/{$rtype}_%s.png",
+        $radts->format("Y/m/d"),
+        $radts->format("YmdHi"),
+    );
+    if (is_file($radarfn)) {
+        $radar = $map->getLayerByName("nexrad_{$rtype}");
         $radar->__set("status", MS_ON);
-        $radar->__set("data", $radarfp);
+        $radar->__set("data", $radarfn);
         $radar->draw($map, $img);
     }
 
@@ -232,7 +230,7 @@ for ($i = 0; $row = pg_fetch_array($rs); $i++) {
 
     $point = new pointObj();
     $point->setXY(2, 25);
-    $d = date("d M Y h:i A T",  $ts);
+    $d = date("d M Y h:i A T",  strtotime($row["polygon_begin"]));
     $point->draw($map, $tlayer, $img, 1, "$d");
 
     $map->embedLegend($img);
