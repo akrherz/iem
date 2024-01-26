@@ -284,7 +284,7 @@ def main(valid, station):
                 LOG.warning("skipping locked %s", sid)
                 continue
             # arb decision that we have enough data already
-            if obs.at[sid, "count"] > 10 and obs.at[sid, "nullcnt"] < 10:
+            if obs.at[sid, "nullcnt"] < 10 < obs.at[sid, "count"]:
                 continue
         progress.set_description(sid)
         # rucsoundings has two services,
