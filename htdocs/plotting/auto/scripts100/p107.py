@@ -19,6 +19,7 @@ import datetime
 
 import numpy as np
 import pandas as pd
+from matplotlib.ticker import MaxNLocator
 from pyiem.exceptions import NoDataFound
 from pyiem.plot import figure
 from pyiem.util import get_autoplot_context, get_sqlalchemy_conn
@@ -44,6 +45,7 @@ PDICT = {
     "min_low": "Minimum Low Temperature",
     "max_low": "Maximum Low Temperature",
     "range_low": "Range of Low Temperature",
+    "avg_era5land_soilt4_avg": "Avg Daily Soil (0-10cm) Temp (ERA5 Land)",
     "avg_era5land_srad": "Average Daily Solar Radiation (ERA5 Land)",
     "max_era5land_srad": "Max Daily Solar Radiation (ERA5 Land)",
     "min_era5land_srad": "Min Daily Solar Radiation (ERA5 Land)",
@@ -184,8 +186,10 @@ def plotter(fdict):
     culler = ""
     if varname.find("snow") > -1:
         culler = " and snow is not null"
-    elif varname.find("era5") > -1:
+    elif varname.find("era5land_srad") > -1:
         culler = " and era5land_srad is not null"
+    elif varname.find("era5land_soilt4") > -1:
+        culler = " and era5land_soilt4_avg is not null"
     elif varname.find("merra") > -1:
         culler = " and merra_srad is not null"
     elif varname.find("narr") > -1:
@@ -199,6 +203,7 @@ def plotter(fdict):
         day, high, low, precip, snow, (high + low) / 2. as avg_temp,
         high - low as range,
         gddxx(:gddbase, :gddceil, high, low) as gdd, era5land_srad,
+        era5land_soilt4_avg,
         merra_srad, narr_srad
         from alldata WHERE station = :station and {dtlimiter}
         {culler} ORDER by day ASC
@@ -258,6 +263,7 @@ def plotter(fdict):
             days_precip_above=("precip", lambda x: (x >= threshold).sum()),
             count=("high", "count"),
             min_day=("day", "min"),
+            avg_era5land_soilt4_avg=("era5land_soilt4_avg", "mean"),
             avg_era5land_srad=("era5land_srad", "mean"),
             min_era5land_srad=("era5land_srad", "min"),
             max_era5land_srad=("era5land_srad", "max"),
@@ -327,7 +333,7 @@ def plotter(fdict):
         fig.text(0.86, ypos, yrfmter(yr), font_properties=_fp)
         fig.text(0.95, ypos, fmter(row[varname]), font_properties=_fp)
 
-    ypos -= 2 * dy
+    ypos -= 4 * dy
     fig.text(0.86, ypos, "Bottom 10")
     ypos = ypos - 10 * dy
     for yr, row in df2.tail(10).iterrows():
@@ -372,6 +378,8 @@ def plotter(fdict):
         )
     box = ax[0].get_position()
     ax[0].set_position([box.x0, box.y0 + 0.02, box.width, box.height * 0.98])
+    # Ensure that the x-axis labels are integer values
+    ax[0].xaxis.set_major_locator(MaxNLocator(10, integer=True))
 
     # Plot 2: CDF
     df2 = df[df[varname].notnull()]

@@ -54,7 +54,7 @@ $t->content = <<<EOF
  values are not on a local calendar day, so please be very careful before
  use.  Unfortunately, long term observations that are on local calendar 
  days does not exist for many locations!</div>
- 
+
 <form target="_blank" method="GET" action="/cgi-bin/request/coop.py" name="iemss">
 <input type="hidden" name="network" value="{$network}" />
 
@@ -89,8 +89,8 @@ for one day, set the start and end times to the same value.</i>
    </tr>
 </table>
 
-<p><h4>3. Select Variables / Model Input Format:</h4>
-<i>Select either one or more data variables</i>
+<h4>3. Select Variables:</h4>
+<p>If you select a model format in option 4 below, this selection is ignored.</p>
 <select size="5" name="vars[]" MULTIPLE>
   <option value="gdd_50_86">Computed: Growing Degree Days (base=50,max=86) [F]</option>
   <option value="gdd_40_86">Computed: Growing Degree Days (base=40,max=86) [F]</option>
@@ -108,6 +108,10 @@ for one day, set the start and end times to the same value.</i>
   <option value="hrrr_srad">Estimate: HRRR Sampled Solar Radiation [MJ/day] (2013-)</option>
   <option value="merra_srad">Estimate: MERRA-2 Sampled Solar Radiation [MJ/day] (1979-)</option>
   <option value="narr_srad">Estimate: NARR Sampled Solar Radiation [MJ/day] (1979-)</option>
+  <option value="era5land_soilt4_avg">Estimate: ERA5 Land Soil Temperature 0-10cm [F] (1951-)</option>
+  <option value="era5land_soilm4_avg">Estimate: ERA5 Land Soil Moisture 0-10cm [m3/m3] (1951-)</option>
+  <option value="nldas_soilt4_avg">Estimate: NLDASv2 NOAHv2 Soil Temperature 0-10cm [F] (1979-)</option>
+  <option value="nldas_soilm4_avg">Estimate: NLDASv2 NOAHv2 Soil Moisture 0-10cm [m3/m3] (1979-)</option>
 </select>
 
 <p><h4>4. Specialized Data/Model Formats</h4>
@@ -124,7 +128,6 @@ to have your format added to the list!</i>
   <option value="salus">Model: SALUS</option> 
   <option value="swat">Model: SWAT (daily precip and temperatures)</option> 
 </select></p>
-
 
 <p><h4>5. How to view?</h4>
 
@@ -158,8 +161,8 @@ future and observations do not exist! This option allows you to fill
 out the current year with data from a previous year. If data for Feb 29 is
 needed and not available from past year, Feb 28 data is simply repeated.</i> 
 <br />
-<input type="checkbox" name="scenario" value="yes"> Yes, use this year
-for replacement: {$sy_select}
+<input type="checkbox" name="scenario" value="yes" id="scen">
+<label for="scen">Yes, use this year for replacement:</label> {$sy_select}
 
 <p><h4>9. Submit Form:</h4>
 <i>Please be patient and only submit this form once.  It may take 10-20

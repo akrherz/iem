@@ -29,6 +29,10 @@ PDICT2 = {
     "high_above": "First Date of Year At or Above",
     "fall_below": "First Fall Date Below",
 }
+PDICT = {
+    "air": "Air Temperature",
+    "soil": "0-10cm ERA5Land Avg Soil Temperature",
+}
 
 MONTH_DOMAIN = {
     "spring_below": list(range(1, 7)),
@@ -53,6 +57,13 @@ def get_description():
     desc = {"description": __doc__, "data": True}
     today = datetime.datetime.today() - datetime.timedelta(days=1)
     desc["arguments"] = [
+        {
+            "type": "select",
+            "name": "w",
+            "default": "air",
+            "label": "Which Temperature:",
+            "options": PDICT,
+        },
         dict(type="state", name="sector", default="IA", label="Select State:"),
         dict(
             type="select",
@@ -149,6 +160,9 @@ def plotter(fdict):
     nt = NetworkTable(f"{sector}CLIMATE")
     syear = ctx.get("syear", 1893)
     eyear = ctx.get("eyear", datetime.date.today().year)
+    sql = SQLOPT[varname]
+    if ctx["w"] == "soil":
+        sql = sql.replace("high", "soil").replace("low", "soil")
     with get_sqlalchemy_conn("coop") as conn:
         df = pd.read_sql(
             text(
@@ -156,6 +170,7 @@ def plotter(fdict):
             -- create virtual table with winter_year included
             WITH events as (
                 SELECT station, day, year, high, low,
+                era5land_soilt4_avg as soil,
                 case when month < 7 then year - 1 else year end as winter_year,
                 extract(doy from day) as doy
                 from alldata_{sector} WHERE month = ANY(:months) and
@@ -164,7 +179,7 @@ def plotter(fdict):
             )
             SELECT station, {YRGP[varname]},
             {ORDER[varname]}(
-                case when {SQLOPT[varname]} then day else null end) as event,
+                case when {sql} then day else null end) as event,
             count(*),
             min(day) as min_day,
             max(day) as max_day
@@ -200,7 +215,7 @@ def plotter(fdict):
         )
         title = (
             f"{ctx['p']:.0f}{th(str(ctx['p']))} Percentile Date of "
-            f"{PDICT2[varname]} {threshold}"
+            f"{PDICT[ctx['w']]} {PDICT2[varname]} {threshold}"
             r"$^\circ$F"
         )
         extra = (
@@ -241,13 +256,16 @@ def plotter(fdict):
         df2.at[station, "lon"] = nt.sts[station]["lon"]
 
     df2 = df2[df2["lat"].notna()]
+    subtitle = f"based on NWS COOP and IEM Daily Estimates{extra}"
+    if ctx["w"] == "soil":
+        subtitle = "based on ERA5 Land Grid Point Estimates"
     mp = MapPlot(
         apctx=ctx,
         sector="state",
         state=ctx["sector"],
         continental_color="white",
         title=title,
-        subtitle=f"based on NWS COOP and IEM Daily Estimates{extra}",
+        subtitle=subtitle,
         nocaption=True,
     )
     if ctx.get("p") is None and ctx.get("sday") is not None:
@@ -302,16 +320,4 @@ def plotter(fdict):
 
 
 if __name__ == "__main__":
-    plotter(
-        {
-            "sector": "ia",
-            "var": "high_above",
-            "popt": "contour",
-            "year": 2022,
-            "threshold": 80,
-            "p": 70,
-            "sday": "0223",
-            "syear": 1893,
-            "eyear": 2022,
-        }
-    )
+    plotter({})
