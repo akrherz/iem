@@ -159,13 +159,8 @@ def plotter(fdict):
         f"{(ets - datetime.timedelta(days=1)):%-d %b %Y}"
     )
     fig = figure(title=title, apctx=ctx)
-    ax = fig.add_axes([0.05, 0.08, 0.73, 0.82])
-    if len(df.index) > 20:
-        height = int(len(df.index) / 6.0) + 1
-        fig.set_size_inches(12, height)
-        fontsize = 8
-    else:
-        fontsize = 10
+    ax = fig.add_axes([0.07, 0.09, 0.71, 0.81])
+    fontsize = 8 if len(df.index) > 20 else 10
 
     used = []
 
