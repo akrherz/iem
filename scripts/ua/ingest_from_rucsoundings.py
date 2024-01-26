@@ -141,8 +141,12 @@ class RAOB:
                     self.tropo_level,
                 ),
             )
-        row = txn.fetchone()
-        fid = row[0]
+        fid = txn.fetchone()[0]
+        # update ingested_at timestamp
+        txn.execute(
+            "UPDATE raob_flights SET ingested_at = now() where fid = %s",
+            (fid,),
+        )
         txn.execute("DELETE from raob_profile where fid = %s", (fid,))
         if txn.rowcount > 0 and self.valid.hour in [0, 12]:
             if self.station != "KSYA":  # noisey
@@ -253,10 +257,10 @@ def main(valid, station):
     # check what we have
     with get_sqlalchemy_conn("raob") as conn:
         obs = pd.read_sql(
-            f"""SELECT station, count(*),
+            f"""SELECT station, locked, count(*),
             sum(case when smps is null then 1 else 0 end) as nullcnt from
             raob_flights f JOIN raob_profile_{valid.year} p
-            ON (f.fid = p.fid) where valid = %s GROUP by station
+            ON (f.fid = p.fid) where valid = %s GROUP by station, locked
             ORDER by station ASC
             """,
             conn,
@@ -274,12 +278,14 @@ def main(valid, station):
         # skip virtual sites
         if sid.startswith("_"):
             continue
-        if (
-            sid in obs.index
-            and obs.at[sid, "count"] > 10
-            and obs.at[sid, "nullcnt"] < 10
-        ):
-            continue
+        if sid in obs.index:
+            # skip sites that are locked
+            if obs.at[sid, "locked"]:
+                LOG.warning("skipping locked %s", sid)
+                continue
+            # arb decision that we have enough data already
+            if obs.at[sid, "count"] > 10 and obs.at[sid, "nullcnt"] < 10:
+                continue
         progress.set_description(sid)
         # rucsoundings has two services,
         # legacy: get_raobs.cgi which has the long term archive, but less data
