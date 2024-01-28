@@ -268,6 +268,8 @@ def merge_obs(df: pd.DataFrame, state, ts):
     if obs.empty:
         LOG.warning("loading obs for state %s yielded no data", state)
         return df
+    # Fill out obs with nan
+    obs = obs.fillna(np.nan).infer_objects()
     # If a site has either a null high or low, we need to estimate both to
     # avoid troubles with having only one estimated flag column :/
     obs.loc[obs[["high", "low"]].isna().any(axis=1), ("high", "low")] = np.nan
