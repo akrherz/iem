@@ -21,6 +21,7 @@ PDICT = {
     "avg-high": "Average Daily High [F]",
     "avg-low": "Average Daily Low [F]",
     "avg-t": "Average Daily Temp [F]",
+    "avg-era5land_srad": "Average Daily Solar Radiation (ERA5Land) [MJ m-2]",
 }
 
 
@@ -66,13 +67,17 @@ def plotter(fdict):
         WITH yearly as (
             SELECT station, year, sum(precip) as sum_precip,
             avg(high) as avg_high, avg(low) as avg_low,
+            avg(era5land_srad) as avg_era5land_srad,
             avg((high+low)/2.) as avg_temp from alldata_{state}
             WHERE month = %s GROUP by station, year)
 
         SELECT avg(sum_precip) as avg_precip, stddev(sum_precip) as std_precip,
         avg(avg_high) as avg_high, stddev(avg_high) as std_high,
         avg(avg_temp) as avg_t, stddev(avg_high) as std_t,
-        avg(avg_low) as avg_low, stddev(avg_low) as std_low from yearly
+        avg(avg_low) as avg_low, stddev(avg_low) as std_low,
+        avg(avg_era5land_srad) as avg_era5land_srad,
+        stddev(avg_era5land_srad) as std_era5land_srad
+        from yearly
     """,
             conn,
             params=(month,),
@@ -88,20 +93,24 @@ def plotter(fdict):
         WITH yearly as (
             SELECT station, year, sum(precip) as sum_precip,
             avg(high) as avg_high, avg(low) as avg_low,
+            avg(era5land_srad) as avg_era5land_srad,
             avg((high+low)/2.) as avg_temp from alldata_{state}
             WHERE month = %s GROUP by station, year),
         agg1 as (
             SELECT station, avg(sum_precip) as precip,
             avg(avg_high) as high, avg(avg_low) as low,
+            avg(avg_era5land_srad) as era5land_srad,
             avg(avg_temp) as temp from yearly GROUP by station),
         thisyear as (
-            SELECT station, sum_precip, avg_high, avg_low, avg_temp from yearly
-            WHERE year = %s)
+            SELECT station, sum_precip, avg_high, avg_low, avg_temp,
+            avg_era5land_srad from yearly WHERE year = %s)
 
         SELECT a.station, a.precip as climo_precip, a.high as climo_high,
         a.low as climo_low, a.temp as climo_t,
         t.sum_precip as "sum-precip", t.avg_high as "avg-high",
-        t.avg_low as "avg-low", t.avg_temp as "avg-t"
+        t.avg_low as "avg-low", t.avg_temp as "avg-t",
+        t.avg_era5land_srad as "avg-era5land_srad",
+        a.era5land_srad as "climo_era5land_srad"
         FROM agg1 a JOIN thisyear t on (a.station = t.station)
         """,
             conn,
@@ -180,4 +189,4 @@ def plotter(fdict):
 
 
 if __name__ == "__main__":
-    plotter({"type": "avg-low", "year": 2014, "month": 12})
+    plotter({})

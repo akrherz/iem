@@ -291,7 +291,7 @@ monthly_opts = [
     {"id": 161, "label": "Days per month/season above/below some threshold"},
     {
         "id": 29,
-        "label": "Frequency of Hourly Temperature within Range by Month",
+        "label": "Frequency of Hourly Variable within Range by Month",
     },
     {"id": 116, "label": ("Cooling/Heating Degree Days monthly totals")},
     {
