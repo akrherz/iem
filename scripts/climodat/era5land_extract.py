@@ -59,7 +59,12 @@ def build_stations(dt) -> pd.DataFrame:
             params=(dt,),
             index_col="station",
         )
-    for col in ["era5land_srad", "era5land_soilt4_avg", "era5land_soilm4_avg"]:
+    for col in [
+        "era5land_srad",
+        "era5land_soilt4_avg",
+        "era5land_soilm4_avg",
+        "era5land_soilm1m_avg",
+    ]:
         df[col] = np.nan
     df["i"] = np.nan
     df["j"] = np.nan
@@ -85,6 +90,11 @@ def compute(df, sids, dt, do_regions=False):
             rsds = np.sum(nc.variables["rsds"][idx0:], 0) * factor
             # Close enough
             soilm = np.mean(nc.variables["soilm"][idx0:, 0], 0)
+            soilm1m = (
+                np.mean(nc.variables["soilm"][idx0:, 0], 0) * 7.0
+                + np.mean(nc.variables["soilm"][idx0:, 1], 0) * 21.0
+                + np.mean(nc.variables["soilm"][idx0:, 2], 0) * 72.0
+            ) / 100.0
             soilt = np.mean(nc.variables["soilt"][idx0:, 0], 0)
             ncfn2 = f"/mesonet/data/era5/{ets.year}_era5land_hourly.nc"
             with ncopen(ncfn2) as nc2:
@@ -92,23 +102,33 @@ def compute(df, sids, dt, do_regions=False):
         else:
             rsds = np.sum(nc.variables["rsds"][idx0:idx1], 0) * factor
             soilm = np.mean(nc.variables["soilm"][idx0:idx1, 0], 0)
+            soilm1m = (
+                np.mean(nc.variables["soilm"][idx0:idx1, 0], 0) * 7.0
+                + np.mean(nc.variables["soilm"][idx0:idx1, 1], 0) * 21.0
+                + np.mean(nc.variables["soilm"][idx0:idx1, 2], 0) * 72.0
+            ) / 100.0
             soilt = np.mean(nc.variables["soilt"][idx0:idx1, 0], 0)
 
     df["i"] = np.digitize(df["lon"].values, lons)
     df["j"] = np.digitize(df["lat"].values, lats)
     rsds = rsds.filled(np.nan)
     soilm = soilm.filled(np.nan)
+    soilm1m = soilm1m.filled(np.nan)
     soilt = soilt.filled(np.nan)
 
     for sid, row in df.loc[sids].iterrows():
         df.at[sid, "era5land_srad"] = rsds[int(row["j"]), int(row["i"])]
         df.at[sid, "era5land_soilt4_avg"] = soilt[int(row["j"]), int(row["i"])]
         df.at[sid, "era5land_soilm4_avg"] = soilm[int(row["j"]), int(row["i"])]
+        df.at[sid, "era5land_soilm1m_avg"] = soilm1m[
+            int(row["j"]), int(row["i"])
+        ]
 
     if do_regions:
         compute_regions(rsds, "era5land_srad", df)
         compute_regions(soilt, "era5land_soilt4_avg", df)
         compute_regions(soilm, "era5land_soilm4_avg", df)
+        compute_regions(soilm1m, "era5land_soilm1m_avg", df)
 
     LOG.info("IA0200 %s", df.loc["IA0200"])
 
@@ -139,7 +159,8 @@ def do(dt):
         """
         UPDATE alldata set era5land_srad = %(era5land_srad)s,
         era5land_soilt4_avg = %(era5land_soilt4_avg)s,
-        era5land_soilm4_avg = %(era5land_soilm4_avg)s
+        era5land_soilm4_avg = %(era5land_soilm4_avg)s,
+        era5land_soilm1m_avg = %(era5land_soilm1m_avg)s
         where station = %(station)s and day = %(day)s
         """,
         df.to_dict("records"),
