@@ -216,7 +216,7 @@ def highcharts(fdict):
     ctx = get_autoplot_context(fdict, get_description())
     get_data(ctx)
     df = ctx["df"]
-    df["ticks"] = df["utc_valid"].view("int64") // 1e6
+    df["ticks"] = df["utc_valid"].astype("int64") // 1e6
     units = PDICT3[ctx["var"]].split()[-1].replace("(", "").replace(")", "")
     myyearcol = f"{ctx['var']}_{ctx['year']}"
     title = ctx["title"].replace("\n", "\\n")
