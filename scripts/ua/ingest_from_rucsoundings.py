@@ -268,7 +268,7 @@ def main(valid, station):
             index_col="station",
         )
     obs["added"] = 0
-    v12 = valid - datetime.timedelta(hours=13)
+    v12 = valid - datetime.timedelta(hours=12)
     sids = list(nt.sts.keys())
     if station in nt.sts:
         sids = [station]
@@ -300,7 +300,8 @@ def main(valid, station):
             "start_min=0&n_hrs=12.0&"
             f"fcst_len=shortest&airport={sid}&"
             "text=Ascii%20text%20%28GSD%20format%29&"
-            f"hydrometeors=false&startSecs={v12:%s}&endSecs={valid:%s}"
+            f"hydrometeors=false&startSecs={v12.timestamp():.0f}&"
+            f"endSecs={valid.timestamp():.0f}"
         )
         req = exponential_backoff(requests.get, uri, timeout=30)
         if req is None or req.status_code != 200:
