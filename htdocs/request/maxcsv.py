@@ -270,6 +270,25 @@ def do_iowa_azos(date, itoday=False):
     return df
 
 
+def do_lsrsnowfall():
+    """Dump Recent Local Storm Reports"""
+    with get_sqlalchemy_conn("postgis") as conn:
+        df = pd.read_sql(
+            text(
+                """
+        select max(product_id) as locationid, city as locationname,
+        st_y(geom) as latitude,
+        st_x(geom) as longitude, magnitude as snowfall
+        from lsrs WHERE type = 'S' and valid > (now() - '1 days'::interval)
+        GROUP by locationname, st_y(geom), st_x(geom), magnitude
+        ORDER by locationid asc
+        """
+            ),
+            conn,
+        )
+    return df
+
+
 def do_iarwis():
     """Dump RWIS data"""
     with get_sqlalchemy_conn("iem") as conn:
@@ -663,6 +682,8 @@ def router(appname):
         df = do_uvi()
     elif appname == "isusm":
         df = do_isusm()
+    elif appname == "lsrsnowfall":
+        df = do_lsrsnowfall()
     elif appname.startswith("moonphase"):
         tokens = appname.replace(".txt", "").split("_")
         df = do_moonphase(float(tokens[1]), float(tokens[2]))

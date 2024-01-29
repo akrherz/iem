@@ -96,6 +96,16 @@ interactivity/symbology.
 </div>
 
 <div class="well">
+<h4>Local Storm Reports (LSR): Recent Snowfall LSRs</h4>
+
+<code>https://mesonet.agron.iastate.edu/request/maxcsv/lsrsnowfall.txt</code>
+
+<p>Provides any recent (past 24 hours) snowfall reports provided by the NWS
+within their LSR products.
+<a href="maxcsv/lsrsnowfall.txt">maxcsv/lsrsnowfall.txt Example</a></p>
+</div>
+
+<div class="well">
 <h4>UV Index Data</h4>
 
 <code>https://mesonet.agron.iastate.edu/request/maxcsv/uvi.txt</code>
