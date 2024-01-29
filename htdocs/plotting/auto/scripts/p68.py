@@ -14,8 +14,9 @@ image size at this time.
 import pandas as pd
 from matplotlib.ticker import MaxNLocator
 from pyiem.exceptions import NoDataFound
-from pyiem.plot import figure
+from pyiem.plot import figure, fitbox
 from pyiem.util import get_autoplot_context, get_sqlalchemy_conn
+from sqlalchemy import text
 
 
 def get_description():
@@ -41,51 +42,53 @@ def plotter(fdict):
     station = ctx["station"][:4]
     ctx["_nt"].sts["_ALL"] = {"name": "All Offices"}
 
-    fig = figure(figsize=(10, 14 if station != "_ALL" else 21), apctx=ctx)
-    ax = [None, None]
-    ax[0] = fig.add_axes([0.1, 0.75, 0.85, 0.2])
-    ax[1] = fig.add_axes([0.1, 0.05, 0.85, 0.65])
-
+    params = {"wfo": station}
+    sqllim = "wfo = :wfo and " if station != "_ALL" else ""
     with get_sqlalchemy_conn("postgis") as conn:
-        if station == "_ALL":
-            df = pd.read_sql(
-                """
-                SELECT distinct extract(year from issue) as year,
-                phenomena, significance from warnings WHERE
-                phenomena is not null and significance is not null and
-                issue > '2005-01-01'
-                """,
-                conn,
-                index_col=None,
-            )
-        else:
-            df = pd.read_sql(
-                """
-                SELECT distinct extract(year from issue) as year,
-                phenomena, significance from warnings WHERE
-                wfo = %s and phenomena is not null and significance is not null
-                and issue > '2005-01-01'
-                """,
-                conn,
-                params=(station,),
-                index_col=None,
-            )
+        df = pd.read_sql(
+            text(
+                f"""
+            SELECT distinct extract(year from issue) as year,
+            phenomena, significance from warnings WHERE
+            {sqllim} phenomena is not null and significance is not null
+            and issue > '2005-01-01'
+            """
+            ),
+            conn,
+            params=params,
+            index_col=None,
+        )
     if df.empty:
-        raise NoDataFound("No data was found for this WFO.")
+        raise NoDataFound("No data was found.")
     df["wfo"] = station
     df["year"] = df["year"].astype("i")
     gdf = df.groupby("year").count()
 
-    ax[0].bar(
-        gdf.index.values, gdf["wfo"], width=0.8, fc="b", ec="b", align="center"
-    )
-    for yr, row in gdf.iterrows():
-        ax[0].text(yr, row["wfo"] + 1, row["wfo"], ha="center")
-    ax[0].set_title(
-        f"[{station}] NWS {ctx['_nt'].sts[station]['name']}\n"
+    title = f"[{station}] NWS {ctx['_nt'].sts[station]['name']}"
+    subtitle = (
         "Count of Distinct VTEC Phenomena/Significance - "
         f"{df['year'].min():.0f} to {df['year'].max():.0f}"
     )
+    fig = figure(figsize=(10, 14 if station != "_ALL" else 21), apctx=ctx)
+    fitbox(fig, title, 0.1, 0.97, 0.97, 0.99)
+    fitbox(fig, subtitle, 0.1, 0.97, 0.95, 0.97)
+    ax = [None, None]
+    ax[0] = fig.add_axes([0.05, 0.75, 0.93, 0.2])
+    ax[1] = fig.add_axes([0.05, 0.03, 0.93, 0.68])
+
+    ax[0].bar(
+        gdf.index.values, gdf["wfo"], width=0.8, fc="b", ec="b", align="center"
+    )
+    yoff = gdf["wfo"].max() * 0.05
+    for yr, row in gdf.iterrows():
+        ax[0].text(
+            yr,
+            row["wfo"] + yoff,
+            row["wfo"],
+            ha="center",
+            bbox=dict(color="white"),
+        )
+    ax[0].set_ylim(0, gdf["wfo"].max() * 1.1)
     ax[0].grid()
     ax[0].set_ylabel("Count")
     ax[0].set_xlim(gdf.index.values.min() - 0.5, gdf.index.values.max() + 0.5)
@@ -106,7 +109,6 @@ def plotter(fdict):
             ha="center",
             va="center",
             fontsize=10,
-            bbox={"color": "white"},
         )
 
     ax[1].set_title("VTEC <Phenomena.Significance> Issued by Year")
