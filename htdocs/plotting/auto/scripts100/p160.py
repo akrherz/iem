@@ -183,7 +183,7 @@ def highcharts(fdict):
     if "df" not in ctx:
         raise NoDataFound("No Data Found.")
     df = ctx["df"]
-    df["ticks"] = df["valid"].view(np.int64) // 10**6
+    df["ticks"] = df["valid"].astype(np.int64) // 10**6
     lines = []
     if "id" in df.columns:
         fxs = df["id"].unique()
