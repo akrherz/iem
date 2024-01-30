@@ -57,7 +57,7 @@ daily_opts = [
     {"id": 180, "label": "Daily Temperature/Precip/Snowfall Climatology"},
     {
         "id": 32,
-        "label": "Daily Temperature Departures / Percentiles for One Year",
+        "label": "Daily Departures / Percentiles / Ranges for One Year",
     },
     {
         "id": 21,

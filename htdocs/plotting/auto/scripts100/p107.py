@@ -45,7 +45,7 @@ PDICT = {
     "min_low": "Minimum Low Temperature",
     "max_low": "Maximum Low Temperature",
     "range_low": "Range of Low Temperature",
-    "avg_era5land_soilt4_avg": "Avg Daily Soil (0-10cm) Temp (ERA5 Land)",
+    "avg_era5land_soilt4_avg": "Avg Daily Soil (0-7cm) Temp (ERA5 Land)",
     "avg_era5land_srad": "Average Daily Solar Radiation (ERA5 Land)",
     "max_era5land_srad": "Max Daily Solar Radiation (ERA5 Land)",
     "min_era5land_srad": "Min Daily Solar Radiation (ERA5 Land)",

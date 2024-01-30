@@ -442,7 +442,7 @@ def do_simple(cursor, ctx):
     WITH scenario as (
         SELECT station, high, low, precip, snow, snowd, narr_srad,
         era5land_srad, temp_estimated, precip_estimated,
-        era5land_soilt4_avg, era5land_soilm4_avg,
+        era5land_soilt4_avg, era5land_soilm4_avg, era5land_soilm1m_avg,
         nldas_soilt4_avg, nldas_soilm4_avg,
         merra_srad, hrrr_srad,
         to_char(('{thisyear}-'||month||'-'||extract(day from day))::date,
@@ -459,7 +459,7 @@ def do_simple(cursor, ctx):
     ), obs as (
         SELECT station, high, low, precip, snow, snowd, narr_srad,
         era5land_srad, temp_estimated, precip_estimated,
-        era5land_soilt4_avg, era5land_soilm4_avg,
+        era5land_soilt4_avg, era5land_soilm4_avg, era5land_soilm1m_avg,
         nldas_soilt4_avg, nldas_soilm4_avg,
         merra_srad, hrrr_srad,
         to_char(day, 'YYYY/mm/dd') as day,

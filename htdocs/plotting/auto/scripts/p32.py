@@ -1,27 +1,37 @@
 """
-This plot presents the daily high, low, or
-average temperature departure.  The average temperature is simply the
+This plot presents a daily time series of variable of your choice.
+The average temperature is simply the
 average of the daily high and low.  The daily climatology is simply based
 on the period of record observations for the site.
+
+<p><strong>Updated 30 Jan 2024:</strong> The returned data is now only for the
+variable you selected for plotting.
 """
 import datetime
 
 import matplotlib.colors as mpcolors
 import matplotlib.dates as mdates
 import pandas as pd
+from pyiem.exceptions import NoDataFound
 from pyiem.plot import figure_axes, get_cmap
 from pyiem.util import get_autoplot_context, get_sqlalchemy_conn
+from sqlalchemy import text
 
 PDICT = {
-    "avg": "Daily Average Temperature",
-    "gdd": "Growing Degree Days",
-    "high": "High Temperature",
-    "low": "Low Temperature",
+    "avg": "Daily Average Temperature (F)",
+    "gdd": "Growing Degree Days (F)",
+    "high": "High Temperature (F)",
+    "low": "Low Temperature (F)",
+    "era5land_soilm4_avg": "ERA5-Land 0-7cm Soil Moisture (m3/m3)",
+    "era5land_soilm1m_avg": "ERA5-Land 0-1m Soil Moisture (m3/m3)",
+    "era5land_soilt4_avg": "ERA5-Land 0-7cm Soil Temperature (F)",
+    "era5land_srad": "ERA5-Land Solar Radiation (MJ/m2)",
 }
 OPTDICT = {
-    "diff": "Difference in Degrees F",
+    "diff": "Absolute Difference",
     "sigma": "Difference in Standard Deviations",
     "ptile": "Percentile",
+    "valrange": "Value within Observed Range",
 }
 
 
@@ -88,108 +98,137 @@ def plotter(fdict):
     gddbase = ctx["gddbase"]
     gddceil = ctx["gddceil"]
 
+    params = {
+        "station": station,
+        "gddbase": gddbase,
+        "gddceil": gddceil,
+    }
     with get_sqlalchemy_conn("coop") as conn:
         df = pd.read_sql(
-            """
-        WITH data as (
+            text(
+                f"""
             select day, year, sday,
-            high,
-            low,
             (high+low)/2. as temp,
-            gddxx(%s, %s, high, low) as gdd,
-            rank() OVER (PARTITION by sday ORDER by high ASC) as high_ptile,
-            rank() OVER (PARTITION by sday ORDER by (high+low)/2. ASC)
-                as temp_ptile,
-            rank() OVER (PARTITION by sday ORDER by low ASC) as low_ptile,
-            rank() OVER (PARTITION by sday
-                ORDER by gddxx(%s, %s, high, low) ASC) as gdd_ptile,
-            coalesce(merra_srad, hrrr_srad) as srad,
-            rank() OVER (PARTITION by sday
-                ORDER by coalesce(merra_srad, hrrr_srad) ASC) as srad_ptile
-            from alldata where station = %s
-        ), climo as (
-            SELECT sday, avg(high) as avg_high, avg(low) as avg_low,
-            avg((high+low)/2.) as avg_temp, stddev(high) as stddev_high,
-            stddev(low) as stddev_low, stddev((high+low)/2.) as stddev_temp,
-            avg(gddxx(%s, %s, high, low)) as avg_gdd,
-            stddev(gddxx(%s, %s, high, low)) as stddev_gdd,
-            avg(coalesce(era5land_srad, merra_srad, hrrr_srad)) as avg_srad,
-            stddev(coalesce(era5land_srad, merra_srad, hrrr_srad))
-                as stddev_srad,
-            count(*)::float as years
-            from alldata WHERE station = %s GROUP by sday
-        )
-        SELECT day,
-        d.high - c.avg_high as high_diff,
-        (d.high - c.avg_high) / c.stddev_high as high_sigma,
-        d.low - c.avg_low as low_diff,
-        (d.low - c.avg_low) / c.stddev_low as low_sigma,
-        d.temp - c.avg_temp as avg_diff,
-        (d.temp - c.avg_temp) / c.stddev_temp as avg_sigma,
-        d.gdd - c.avg_gdd as gdd_diff,
-        (d.gdd - c.avg_gdd) / greatest(c.stddev_gdd, 0.1) as gdd_sigma,
-        d.srad - c.avg_srad as srad_diff,
-        (d.srad - c.avg_srad) / greatest(c.stddev_srad, 0.1) as srad_sigma,
-        d.high, c.avg_high,
-        d.low, c.avg_low,
-        d.temp, c.avg_temp,
-        d.gdd, c.avg_gdd,
-        d.srad, c.avg_srad,
-        high_ptile / years * 100. as high_ptile,
-        low_ptile / years * 100. as low_ptile,
-        temp_ptile / years * 100. as temp_ptile,
-        gdd_ptile / years * 100. as gdd_ptile,
-        0 as srad_ptile
-        from data d JOIN climo c on
-        (c.sday = d.sday) WHERE d.year = %s ORDER by day ASC
-        """,
-            conn,
-            params=(
-                gddbase,
-                gddceil,
-                gddbase,
-                gddceil,
-                station,
-                gddbase,
-                gddceil,
-                gddbase,
-                gddceil,
-                station,
-                year,
+            gddxx(:gddbase, :gddceil, high, low) as gdd, {varname}
+            from alldata where station = :station and
+            {varname} is not null ORDER by day ASC
+        """
             ),
+            conn,
+            params=params,
             index_col=None,
         )
-    tt = "Departure" if how != "ptile" else "Percentile"
-    title = f"{ctx['_sname']}:: Year {year} Daily {PDICT[varname]} {tt}"
+    if df.empty:
+        raise NoDataFound("No Data Found.")
+    # Compute the ranks of the daily values by sday
+    df["rank"] = df.groupby("sday")[varname].rank(method="min")
+    thisyear = (
+        df[df["year"] == year]
+        .set_index("sday")
+        .copy()
+        .reindex(
+            pd.date_range(f"{year}/1/1", f"{year}/12/31").strftime("%m%d")
+        )
+        .assign(
+            day=lambda x: pd.date_range(f"{year}/1/1", f"{year}/12/31").values
+        )
+    )
+    thisyear[f"{varname}_ptile"] = thisyear["rank"] / df["rank"].max() * 100.0
+    climo = (
+        df[["sday", varname]]
+        .groupby("sday")
+        .agg(["mean", "std", "min", "max"])
+    )
+    climo.columns = climo.columns.droplevel()
+    thisyear[f"{varname}_mean"] = climo["mean"]
+    thisyear[f"{varname}_min"] = climo["min"]
+    thisyear[f"{varname}_max"] = climo["max"]
+    thisyear[f"{varname}_std"] = climo["std"]
+    thisyear[f"{varname}_range"] = climo["max"] - climo["min"]
+    thisyear[f"{varname}_diff"] = thisyear[varname] - climo["mean"]
+    thisyear[f"{varname}_sigma"] = thisyear[f"{varname}_diff"] / climo["std"]
 
-    (fig, ax) = figure_axes(apctx=ctx, title=title)
-    diff = df[varname + "_" + how].values
-    if how == "ptile" and "cmap" in ctx:
-        bins = range(0, 101, 10)
-        cmap = get_cmap(ctx["cmap"])
-        norm = mpcolors.BoundaryNorm(bins, cmap.N)
-        colors = cmap(norm(diff))
-        ax.bar(df["day"].values, diff, color=colors, align="center")
-        ax.set_yticks(bins)
+    tt = "Departure" if how != "ptile" else "Percentile"
+    if how == "valrange":
+        tt = ""
+    title = f"{ctx['_sname']}:: Year {year} Daily {PDICT[varname]} {tt}"
+    subtitle = (
+        f"{year} data till "
+        f"{thisyear.loc[thisyear[varname].notna(), 'day'].max():%-d %b %Y}"
+    )
+    (fig, ax) = figure_axes(apctx=ctx, title=title, subtitle=subtitle)
+    if how == "valrange":
+        ax.bar(
+            thisyear["day"].values,
+            thisyear[f"{varname}_range"].values,
+            bottom=thisyear[f"{varname}_min"].values,
+            color="tan",
+            width=1.0,
+            label=f"Observed Range {df.iloc[0]['year']}-{df.iloc[-1]['year']}",
+        )
+        ax.bar(
+            thisyear["day"].values,
+            thisyear[f"{varname}_std"].values * 2.0,
+            bottom=(
+                thisyear[f"{varname}_mean"].values
+                - thisyear[f"{varname}_std"].values
+            ),
+            color="green",
+            width=1.0,
+            label="+/- 1 Std Dev",
+        )
+        ax.plot(
+            thisyear["day"].values,
+            thisyear[varname].values,
+            color="k",
+            label=str(year),
+        )
+        ax.plot(
+            thisyear["day"].values,
+            thisyear[f"{varname}_mean"].values,
+            color="r",
+            label="Climatology",
+        )
+        ax.legend(loc="best", ncol=4)
     else:
-        bars = ax.bar(df["day"].values, diff, fc="b", ec="b", align="center")
-        for i, _bar in enumerate(bars):
-            if diff[i] > 0:
-                _bar.set_facecolor("r")
-                _bar.set_edgecolor("r")
-    ax.grid(True)
+        values = thisyear[f"{varname}_{how}"].values
+        if how == "ptile" and "cmap" in ctx:
+            bins = range(0, 101, 10)
+            cmap = get_cmap(ctx["cmap"])
+            norm = mpcolors.BoundaryNorm(bins, cmap.N)
+            colors = cmap(norm(values))
+            ax.bar(
+                thisyear["day"].values, values, color=colors, align="center"
+            )
+            ax.set_yticks(bins)
+        else:
+            abovecolor = "r" if how != "diff" else "b"
+            belowcolor = "b" if how != "diff" else "r"
+            bars = ax.bar(
+                thisyear["day"].values,
+                values,
+                color=belowcolor,
+                align="center",
+            )
+            for i, _bar in enumerate(bars):
+                if values[i] > 0:
+                    _bar.set_facecolor(abovecolor)
+                    _bar.set_edgecolor(abovecolor)
     if how == "diff":
-        ax.set_ylabel(f"{PDICT[varname]} Departure " r"$^\circ$F")
+        ax.set_ylabel(f"{PDICT[varname]} Departure")
     elif how == "ptile":
         ax.set_ylabel(f"{PDICT[varname]} Percentile (100 highest)")
+    elif how == "valrange":
+        ax.set_ylabel(PDICT[varname])
     else:
-        ax.set_ylabel(f"{PDICT[varname]} Std Dev Departure " r"($\sigma$)")
+        ax.set_ylabel(f"{PDICT[varname]} Std Dev Departure")
     if varname == "gdd":
         ax.set_xlabel(f"Growing Degree Day Base: {gddbase} Ceiling: {gddceil}")
+    ax.grid(True)
     ax.xaxis.set_major_formatter(mdates.DateFormatter("%b"))
     ax.xaxis.set_major_locator(mdates.DayLocator(1))
 
-    return fig, df
+    return fig, thisyear
 
 
 if __name__ == "__main__":
