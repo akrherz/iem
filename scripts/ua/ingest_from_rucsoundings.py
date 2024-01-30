@@ -101,6 +101,10 @@ class RAOB:
         """Convert string to timestamp"""
         if raw == "99999":
             return None
+        if int(raw) < 100:
+            return self.valid.replace(hour=0, minute=0) + datetime.timedelta(
+                minutes=int(raw)
+            )
         ts = self.valid.replace(hour=int(raw[:-2]), minute=int(raw[-2:]))
         if ts.hour > 20 and self.valid.hour < 2:
             ts -= datetime.timedelta(days=1)
@@ -268,7 +272,7 @@ def main(valid, station):
             index_col="station",
         )
     obs["added"] = 0
-    v12 = valid - datetime.timedelta(hours=12)
+    v12 = valid + datetime.timedelta(hours=11)
     sids = list(nt.sts.keys())
     if station in nt.sts:
         sids = [station]
@@ -297,11 +301,11 @@ def main(valid, station):
             f"https://rucsoundings.noaa.gov/{service}?data_source=RAOB&"
             f"start_year={valid:%Y}&start_month_name={valid:%b}&"
             f"start_mday={valid.day}&start_hour={valid.hour}&"
-            "start_min=0&n_hrs=12.0&"
+            "start_min=0&n_hrs=11.0&"
             f"fcst_len=shortest&airport={sid}&"
             "text=Ascii%20text%20%28GSD%20format%29&"
-            f"hydrometeors=false&startSecs={v12.timestamp():.0f}&"
-            f"endSecs={valid.timestamp():.0f}"
+            f"hydrometeors=false&startSecs={valid.timestamp():.0f}&"
+            f"endSecs={v12.timestamp():.0f}"
         )
         req = exponential_backoff(requests.get, uri, timeout=30)
         if req is None or req.status_code != 200:
@@ -316,7 +320,7 @@ def main(valid, station):
         except Exception as exp:
             fn = f"/tmp/{sid}_{valid:%Y%m%d%H%M}_fail"
             LOG.info("FAIL %s %s %s, check %s for data", sid, valid, exp, fn)
-            with open(fn, "w", encoding="utf-8") as fh:
+            with open(fn, "wb") as fh:
                 fh.write(req.content)
         finally:
             cursor.close()
