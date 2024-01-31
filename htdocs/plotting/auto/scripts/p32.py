@@ -103,15 +103,16 @@ def plotter(fdict):
         "gddbase": gddbase,
         "gddceil": gddceil,
     }
+    sqlvarname = "temp_hour" if varname in ["avg", "gdd"] else varname
     with get_sqlalchemy_conn("coop") as conn:
         df = pd.read_sql(
             text(
                 f"""
             select day, year, sday,
-            (high+low)/2. as temp,
-            gddxx(:gddbase, :gddceil, high, low) as gdd, {varname}
+            (high+low)/2. as avg,
+            gddxx(:gddbase, :gddceil, high, low) as gdd, {sqlvarname}
             from alldata where station = :station and
-            {varname} is not null ORDER by day ASC
+            {sqlvarname} is not null ORDER by day ASC
         """
             ),
             conn,
