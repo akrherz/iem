@@ -132,5 +132,16 @@ within their LSR products.
 <a href="maxcsv/moonphase_-95.44_41.99.txt">maxcsv/moonphase_-95.44_41.99.txt Example</a></p>
 </div>
 
+<div class="well">
+<h4>Month to Date Summary Information</h4>
+
+<code>https://mesonet.agron.iastate.edu/request/maxcsv/monthlysummary_\$station_\$year_\$month.txt</code>
+
+<p>Using a four character station identifier, provide a summary of the given month.  This is only
+available for <a href="/nws/clitable.php">NWS CLI</a> reporting sites.
+<a href="maxcsv/monthlysummary_KCID_2024_1.txt">maxcsv/monthlysummary_KCID_2024_1.txt Example</a></p>
+</div>
+
+
 EOF;
 $t->render('single.phtml');

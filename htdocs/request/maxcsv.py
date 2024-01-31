@@ -47,6 +47,53 @@ def figurePhase(p1, p2):
     return "Full Moon"
 
 
+def do_monthly_summary(station, year, month):
+    """Compute some requested monthly summary stats."""
+    sts = datetime.date(year, month, 1)
+    ets = (sts + datetime.timedelta(days=35)).replace(day=1)
+    with get_sqlalchemy_conn("iem") as conn:
+        df = pd.read_sql(
+            text(
+                """
+                select station as location_id, valid, high, low,
+                high - high_normal as high_dep,
+                low - low_normal as low_dep, precip, precip_month,
+                precip_month_normal
+                from cli_data where station = :station and
+                valid >= :sts and valid < :ets ORDER by valid ASC
+                """
+            ),
+            conn,
+            params={"station": station, "sts": sts, "ets": ets},
+            index_col=None,
+        )
+    if df.empty:
+        return "NO DATA"
+    # running month average high and running monthly average low,
+    df["high_mtd_avg"] = df["high"].expanding().mean()
+    df["low_mtd_avg"] = df["low"].expanding().mean()
+    # avg high and low departures to date,
+    df["high_mtd_departure"] = df["high_dep"].expanding().mean()
+    df["low_mtd_departure"] = df["low_dep"].expanding().mean()
+    # total days above normal,
+    df["high_days_above"] = np.where(df["high_dep"] > 0, 1, 0).cumsum()
+    df["low_days_above"] = np.where(df["low_dep"] > 0, 1, 0).cumsum()
+    # total days near normal (+- 3 degrees if possible),
+    df["high_days_+-3"] = np.where(
+        (df["high_dep"] <= 3) & (df["high_dep"] >= -3), 1, 0
+    ).cumsum()
+    df["low_days_+-3"] = np.where(
+        (df["low_dep"] <= 3) & (df["low_dep"] >= -3), 1, 0
+    ).cumsum()
+    # total days below normal
+    df["high_days_below"] = np.where(df["high_dep"] < 0, 1, 0).cumsum()
+    df["low_days_below"] = np.where(df["low_dep"] < 0, 1, 0).cumsum()
+    # rain or snow data month to date
+    df["precip_departure"] = df["precip_month"] - df["precip_month_normal"]
+    # return just the last row as a dataframe
+    return df.iloc[-1:]
+
+
 def do_moonphase(lon, lat):
     """Get the next four phases of the moon."""
     obs = ephem.Observer()
@@ -690,6 +737,9 @@ def router(appname):
     elif appname.startswith("moon"):
         tokens = appname.replace(".txt", "").split("_")
         df = do_moon(float(tokens[1]), float(tokens[2]))
+    elif appname.startswith("monthlysummary"):
+        tokens = appname.replace(".txt", "").split("_")
+        df = do_monthly_summary(tokens[1], int(tokens[2]), int(tokens[3]))
     else:
         df = "ERROR, unknown report specified"
     return df
