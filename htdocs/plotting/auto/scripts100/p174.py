@@ -106,14 +106,18 @@ def plotter(fdict):
     df["high_diff"] = df["one_high"] - df["two_high"]
     df["low_diff"] = df["one_low"] - df["two_low"]
 
-    fig = figure(apctx=ctx)
-    ax = fig.subplots(2, 1, sharex=True)
-
-    ax[0].set_title(
-        f"[{station1}] {ctx['_nt1'].sts[station1]['name']} minus "
-        f"[{station2}] {ctx['_nt2'].sts[station2]['name']}\n"
-        f"{PDICT[varname]} Difference: {sdate:%-d %b %Y} - {edate:%-d %b %Y}"
+    fig = figure(
+        title=(
+            f"[{station1}] {ctx['_nt1'].sts[station1]['name']} minus "
+            f"[{station2}] {ctx['_nt2'].sts[station2]['name']}"
+        ),
+        subtitle=(
+            f"{PDICT[varname]} Difference: "
+            f"{sdate:%-d %b %Y} - {edate:%-d %b %Y}"
+        ),
+        apctx=ctx,
     )
+    ax = fig.subplots(2, 1, sharex=True)
 
     for i, vname in enumerate(["high", "low"]):
         col = f"{vname}_diff"
@@ -132,6 +136,7 @@ def plotter(fdict):
             transform=ax[i].transAxes,
             va="top",
             ha="center",
+            bbox={"color": "w"},
             color="r",
             fontsize=8,
         )
@@ -142,6 +147,7 @@ def plotter(fdict):
             transform=ax[i].transAxes,
             va="bottom",
             ha="center",
+            bbox={"color": "w"},
             color="b",
             fontsize=8,
         )
@@ -153,25 +159,18 @@ def plotter(fdict):
             va="top",
             ha="right",
             color="k",
+            bbox={"color": "w"},
             fontsize=8,
         )
         ax[i].set_ylabel(
             f"{vname.capitalize()} {varname.capitalize()} Difference "
             r"$^\circ$F"
         )
-        y0 = min([df[col].min(), -1])
-        y1 = max([df[col].max(), 1])
-        ax[i].set_ylim(y0 * 1.2, y1 * 1.2)
+        rng = df[col].max() - df[col].min()
+        ax[i].set_ylim(df[col].min() - 0.2 * rng, df[col].max() + 0.2 * rng)
 
     return fig, df
 
 
 if __name__ == "__main__":
-    plotter(
-        {
-            "zstation1": "CAR",
-            "network1": "ME_ASOS",
-            "zstation2": "PHX",
-            "network2": "AZ_ASOS",
-        }
-    )
+    plotter({})
