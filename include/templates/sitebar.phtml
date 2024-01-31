@@ -41,6 +41,8 @@ $o = Array(
           "metaok" => TRUE, "icon" => "info-circle"),
   "current" => Array("name" => "Last Ob", "uri" => "current.php?",
           "icon" => "clock"),
+  "porclimo" => Array("name" => "Daily Climatology", "uri" => "porclimo.php?",
+          "icon" => "table", "metaok" => TRUE),
   "pics" => Array("name" => "Photographs", "uri" => "pics.php?",
           "icon" => "camera"),
   "cal" => Array("name" => "Calibration", "uri" => "cal.phtml?",
@@ -67,6 +69,9 @@ $o = Array(
 foreach($o as $key => $val)
 {
     if (($key == "obhistory") && preg_match('/COCORAHS/', $network) > 0){
+        continue;
+    }
+    if (($key == "porclimo") && preg_match('/CLIMATE/', $network) === FALSE){
         continue;
     }
      if ((array_key_exists("azos", $val) &&  preg_match('/ASOS|ISUSM/', $network) <= 0) &&
