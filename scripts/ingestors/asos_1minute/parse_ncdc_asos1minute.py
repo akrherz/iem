@@ -31,6 +31,7 @@ from pyiem.util import (
 from tqdm import tqdm
 
 LOG = logger()
+pd.set_option("future.no_silent_downcasting", True)
 HIDDENURL = "https://www.ncei.noaa.gov/pub/download/hidden/onemin"
 BASEDIR = "/mesonet/ARCHIVE/raw/asos/data"
 TMPDIR = "/mesonet/tmp/asos1min"
@@ -360,7 +361,7 @@ def merge_archive_end(df, dt):
         )
     LOG.info("found %s stations in the archive", len(df2.index))
     df["archive_end"] = df2["max"]
-    df["archive_end"] = df["archive_end"].fillna(DT1980)
+    df["archive_end"] = df["archive_end"].fillna(DT1980).infer_objects()
 
 
 def dl_realtime(df, dt, mdt, page):
