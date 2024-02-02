@@ -70,11 +70,10 @@ from zoneinfo import ZoneInfo
 import click
 import pandas as pd
 import requests
+from pyiem.database import get_dbconn, get_sqlalchemy_conn
 from pyiem.network import Table as NetworkTable
 from pyiem.util import (
     exponential_backoff,
-    get_dbconn,
-    get_sqlalchemy_conn,
     logger,
     utc,
 )
@@ -105,7 +104,12 @@ class RAOB:
             return self.valid.replace(hour=0, minute=0) + datetime.timedelta(
                 minutes=int(raw)
             )
-        ts = self.valid.replace(hour=int(raw[:-2]), minute=int(raw[-2:]))
+        minute = int(raw[-2:])
+        hour = int(raw[:-2])
+        if minute > 59:
+            minute = minute - 60
+            hour += 1
+        ts = self.valid.replace(hour=hour, minute=minute)
         if ts.hour > 20 and self.valid.hour < 2:
             ts -= datetime.timedelta(days=1)
         return ts
@@ -153,13 +157,12 @@ class RAOB:
         )
         txn.execute("DELETE from raob_profile where fid = %s", (fid,))
         if txn.rowcount > 0 and self.valid.hour in [0, 12]:
-            if self.station != "KSYA":  # noisey
-                LOG.warning(
-                    "RAOB del %s rows for sid: %s valid: %s",
-                    txn.rowcount,
-                    self.station,
-                    self.valid.strftime("%Y-%m-%d %H"),
-                )
+            LOG.info(
+                "RAOB del %s rows for sid: %s valid: %s",
+                txn.rowcount,
+                self.station,
+                self.valid.strftime("%Y-%m-%d %H"),
+            )
         table = f"raob_profile_{self.valid.year}"
         for d in self.profile:
             txn.execute(
@@ -319,7 +322,7 @@ def main(valid, station):
                 rob.database_save(cursor)
         except Exception as exp:
             fn = f"/tmp/{sid}_{valid:%Y%m%d%H%M}_fail"
-            LOG.info("FAIL %s %s %s, check %s for data", sid, valid, exp, fn)
+            LOG.warning("FAIL %s %s %s, content at %s", sid, valid, exp, fn)
             with open(fn, "wb") as fh:
                 fh.write(req.content)
         finally:
