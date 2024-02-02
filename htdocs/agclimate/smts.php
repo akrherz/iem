@@ -42,21 +42,17 @@ $m2 = monthSelect($month2, "month2");
 $d2 = daySelect2($day2, "day2");
 $h2 = hourSelect($hour2, "hour2");
 
-$ar = array(
-    "1" => "3 Panel Plot",
-    "2" => "Just Soil Temps",
-    "sm" => "Just Soil Moisture",
-    "3" => "Daily Max/Min 4 Inch Soil Temps",
-    "4" => "Daily Solar Radiation",
-    "5" => "Daily Potential Evapotranspiration",
-    "encrh" => "Enclosure Relative Humidity",
-    "6" => "Histogram of Volumetric Soil Moisture",
-    "7" => "Daily Soil Water + Change",
-    "8" => "Battery Voltage",
-    "9" => "Daily Rainfall, 4 inch Soil Temp, and RH",
-    "10" => "Inversion Diagnostic Plot (BOOI4, CAMI4, CRFI4)",
-    "11" => "Inversion Timing (BOOI4, CAMI4, CRFI4)",
-);
+// Retreive the autoplot description JSON
+$content = file_get_contents("http://iem.local/plotting/auto/meta/177.json");
+$meta = json_decode($content, $assoc=TRUE);
+
+foreach ($meta["arguments"] as $arg) {
+    if ($arg["name"] == "opt") {
+        $ar = $arg["options"];
+        break;
+    }
+}
+
 $dd = "This plot is a time series graph of
 observations from a time period and ISU Soil Moisture station of your choice.";
 $desc = array(
@@ -70,6 +66,12 @@ $desc = array(
     "7" => $dd,
     "8" => $dd
 );
+$desc["m"] = <<<EOM
+This plot presents a Meteogram, which is just a time series of common weather
+variables including temperature, dew point, wind speed, and wind direction. If
+the plot covers more than five days, an hourly interval dataset is used,
+otherwise the values are plotted at one minute interval.
+EOM;
 $desc["6"] = <<<EOF
 This plot presents a histogram of hourly volumetric soil moisture observations.
 The y-axis is expressed in logarithmic to better show the low frequency obs
