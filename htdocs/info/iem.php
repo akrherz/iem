@@ -7,15 +7,17 @@ $t->content = <<<EOF
 
 <h3>Iowa Environmental Mesonet</h3>
 
+<p><strong>Last Updated:</strong> 2 February 2024</p>
+
 <br><div><h3>Background</h3>
 <p>The Iowa Environmental Mesonet [IEM] aims to gather, collect,
-compare, disseminate and archive observations made in Iowa.  Unlike other 
+compare, disseminate and archive observations made in Iowa and beyond.  Unlike other 
 mesonet projects, the IEM does not own or operate any of the automated stations.
-Rather, the IEM collects data from existing resources in the state.  The result
+Rather, the IEM collects data from existing public resources.  The result
 is a low-cost, high resolution mesonet for use in a wide 
-range of disciplines.
+range of disciplines.</p>
 
-<br><br>One of the first questions we are often asked is, 'What does
+<p>One of the first questions we are often asked is, 'What does
 Mesonet mean?' <i>Meso-net</i> is a combination of two meteorological
 terms.  <i>Meso</i> refers to a spatial scale on which Meteorologists
 define certain weather phenomena. In the context of an observing network,
@@ -31,22 +33,21 @@ requests made by the IEM. Among these include...
 <ul>
  <li>Iowa Department of Transportation [IaDOT]</li>
  <li>Iowa State University & Department of Agronomy [ISU]</li>
- <li>KCCI-TV8 Des Moines, Iowa [KCCI]</li>
+ <li>Various broadcast TV stations</li>
  <li>National Weather Service [NWS]</li>
 </ul>
 
 <br><h3>Data Networks</h3>
-<p>As of 1 April 2002, the IEM is gathering information from 
-over 7 permanent observing networks in the State.  These networks include...
+<p>As of the year 2024, the IEM is gathering information from the following:
 <ul>
- <li>Automated Surface Observing System [<a href="/ASOS/">ASOS</a>]</li>
- <li>Automated Weather Observing System [<a href="/AWOS/">AWOS</a>]</li>
+ <li>Automated Surface Observing System [<a href="/ASOS/">ASOS/AWOS</a>]</li>
  <li>Cooperative Observer Program [<a href="/COOP/">COOP</a>]</li>
+ <li>Community Collaborative Rain, Hail and Snow Network [<a href="https://cocorahs.org">CoCoRaHS</a>]</li>
  <li>River Gauges / Data Collection Platforms [<a href="/DCP/">DCP</a>]</li>
- <li>Iowa State Agricultural Climate Network [<a href="/agclimate">ISUAG</a>]</li>
+ <li>Iowa State University Soil Moisture Network [<a href="/agclimate">ISUAG</a>]</li>
  <li>Roadway Weather Information System [<a href="/RWIS/">RWIS</a>]</li>
  <li>Soil Climate Analysis Network [<a href="/scan/">SCAN</a>]</li>
- <li>KCCI-TV8 School Network [<a href="/schoolnet/">SNET</a>]</li>
+ <li>US Climate Reference Network [<a href="/current/uscrn.phtml">USCRN</a>]</li>
 </ul></p>
 
 <p>Clearly, the aforementioned list provides a wide range of
@@ -57,14 +58,12 @@ provides detailed information about soil conditions and has no direct
 application for use in aviation.  The RWIS sites are located near major
 highways and provide pavement temperatures for frost forecasting and
 chemical application guidance.  The ISUAG sites primarily monitor soil
-temperatures and augment precipitation observations in the state. The
-schoolnet sites, while located in poor meteorological locations, are
-intended to give public visibility to the local station and serve as a
-learning tool for students.  The DCP network provides river gauging needed
+temperatures and augment precipitation observations in the state. 
+ The DCP network provides river gauging needed
 for flood prediction and observation.  The COOP provides a daily weather 
-record for climatological use.
+record for climatological use.</p>
 
-<br><br>If you put all of these networks together, you can see the value
+<p>If you put all of these networks together, you can see the value
 that each network brings.  Combining them into one product is very
 difficult, hence the need for the IEM.  Sites in different networks are 
 not always similar in reporting
@@ -74,24 +73,8 @@ at the same height or not every station averages the same way or not every
 station reports in the same units.  These issues are important to consider
 before beginning any quality control work.</p>
 
-<br><h3>Future of the IEM</h3>
-<p>Public response to the IEM have and continue to be 
-very positive.  It would be unproductive for the IEM to work on 
-projects/products that the public has no interest in.  Feedback from 
-end-users of the data is always welcome.  Currently, we are moving forward 
-on these projects...
-<ul>
- <li>Back-filling the IEM data archive from times before the IEM came into 
-existance.</li>
- <li>Identifying locations in the state where new sensors/sites would be 
-most beneficially placed.</li>
- <li>Building climatologies of stations and networks in the state.</li>
- <li>Maintaining/enhancing a meta-database of site information.</li>
- <li>Creating data products in GIS-ready formats.</li>
- <li>Meeting the data needs of end-users.</li>
- <li>Quality control issues.</li>
-</ul>
-<br><br>If you have any questions or comments, please
+
+<p>If you have any questions or comments, please
 <a href="contacts.php">let us know</a>.
 
 EOF;
