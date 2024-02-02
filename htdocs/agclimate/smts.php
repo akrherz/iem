@@ -21,7 +21,7 @@ $month2 = get_int404('month2', date("m", $now));
 $day2 = get_int404('day2', date("d", $now));
 $hour2 = get_int404('hour2', date("H", $now));
 
-$opt = isset($_GET["opt"]) ? xssafe($_GET["opt"]) : 1;
+$opt = isset($_GET["opt"]) ? xssafe($_GET["opt"]) : "1";
 
 $sts = mktime($hour1, 0, 0, $month1, $day1, $year1);
 $ets = mktime($hour2, 0, 0, $month2, $day2, $year2);

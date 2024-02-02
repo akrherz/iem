@@ -1055,7 +1055,7 @@ def plotter(fdict):
 
     if ctx["opt"] == "1":
         fig, df = plot1(ctx)
-    if ctx["opt"] == "m":
+    elif ctx["opt"] == "m":
         fig, df = plot_meteogram(ctx)
     elif ctx["opt"] == "2":
         fig, df = plot2(ctx)
