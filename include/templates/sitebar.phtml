@@ -71,7 +71,7 @@ foreach($o as $key => $val)
     if (($key == "obhistory") && preg_match('/COCORAHS/', $network) > 0){
         continue;
     }
-    if (($key == "porclimo") && preg_match('/CLIMATE/', $network) === FALSE){
+    if (($key == "porclimo") && (preg_match('/CLIMATE/', $network) == 0)){
         continue;
     }
      if ((array_key_exists("azos", $val) &&  preg_match('/ASOS|ISUSM/', $network) <= 0) &&
