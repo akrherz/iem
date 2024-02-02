@@ -43,7 +43,7 @@ COLORS = "white #ffff72 #ffc672 #ff7272 #e28eff".split()
 
 def get_description():
     """Return a dict describing how to call this plotter"""
-    desc = {"description": __doc__, "data": True}
+    desc = {"description": __doc__, "data": True, "cache": 600}
     today = datetime.date.today()
     m90 = today - datetime.timedelta(days=90)
     desc["arguments"] = [

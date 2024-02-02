@@ -45,10 +45,11 @@ PDICT = {
     "min_low": "Minimum Low Temperature",
     "max_low": "Maximum Low Temperature",
     "range_low": "Range of Low Temperature",
-    "avg_era5land_soilt4_avg": "Avg Daily Soil (0-7cm) Temp (ERA5 Land)",
-    "avg_era5land_srad": "Average Daily Solar Radiation (ERA5 Land)",
-    "max_era5land_srad": "Max Daily Solar Radiation (ERA5 Land)",
-    "min_era5land_srad": "Min Daily Solar Radiation (ERA5 Land)",
+    "avg_era5land_soilt4_avg": "Avg Daily Soil (0-7cm) Temp (ERA5-Land)",
+    "avg_era5land_soilm1m_avg": "Avg Daily Soil (0-1m) Moisture (ERA5-Land)",
+    "avg_era5land_srad": "Average Daily Solar Radiation (ERA5-Land)",
+    "max_era5land_srad": "Max Daily Solar Radiation (ERA5-Land)",
+    "min_era5land_srad": "Min Daily Solar Radiation (ERA5-Land)",
     "avg_merra_srad": "Average Daily Solar Radiation (MERRAv2)",
     "max_merra_srad": "Max Daily Solar Radiation (MERRAv2)",
     "min_merra_srad": "Min Daily Solar Radiation (MERRAv2)",
@@ -190,6 +191,8 @@ def plotter(fdict):
         culler = " and era5land_srad is not null"
     elif varname.find("era5land_soilt4") > -1:
         culler = " and era5land_soilt4_avg is not null"
+    elif varname.find("era5land_soilm1m") > -1:
+        culler = " and era5land_soilm1m_avg is not null"
     elif varname.find("merra") > -1:
         culler = " and merra_srad is not null"
     elif varname.find("narr") > -1:
@@ -203,7 +206,7 @@ def plotter(fdict):
         day, high, low, precip, snow, (high + low) / 2. as avg_temp,
         high - low as range,
         gddxx(:gddbase, :gddceil, high, low) as gdd, era5land_srad,
-        era5land_soilt4_avg,
+        era5land_soilt4_avg, era5land_soilm1m_avg,
         merra_srad, narr_srad
         from alldata WHERE station = :station and {dtlimiter}
         {culler} ORDER by day ASC
@@ -264,6 +267,7 @@ def plotter(fdict):
             count=("high", "count"),
             min_day=("day", "min"),
             avg_era5land_soilt4_avg=("era5land_soilt4_avg", "mean"),
+            avg_era5land_soilm1m_avg=("era5land_soilm1m_avg", "mean"),
             avg_era5land_srad=("era5land_srad", "mean"),
             min_era5land_srad=("era5land_srad", "min"),
             max_era5land_srad=("era5land_srad", "max"),
@@ -365,6 +369,8 @@ def plotter(fdict):
         ylabel = "Days"
     elif varname == "gdd":
         ylabel = f"Growing Degree Days ({gddbase},{gddceil}) " r"$^\circ$F"
+    elif varname.find("soilm") > -1:
+        ylabel = "Soil Moisture $kg/kg$"
     ax[0].set_ylabel(ylabel)
     ax[0].grid(True)
     ax[0].legend(ncol=2, fontsize=10)
