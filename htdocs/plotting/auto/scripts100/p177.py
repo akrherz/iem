@@ -2,7 +2,6 @@
 This application generates time series charts using data from the
 ISU Soil Moisture Network.
 """
-# pylint: disable=no-member,too-many-lines
 import datetime
 from zoneinfo import ZoneInfo
 
@@ -12,20 +11,22 @@ import numpy as np
 import pandas as pd
 from matplotlib.lines import Line2D
 from matplotlib.patches import Patch
+from metpy.calc import dewpoint_from_relative_humidity
+from metpy.units import units
 from pyiem import meteorology
+from pyiem.database import get_dbconn, get_sqlalchemy_conn
 from pyiem.exceptions import NoDataFound
 from pyiem.plot import figure, figure_axes, get_cmap
 from pyiem.util import (
     c2f,
     convert_value,
     get_autoplot_context,
-    get_dbconn,
-    get_sqlalchemy_conn,
 )
 
 CENTRAL = ZoneInfo("America/Chicago")
 PLOTTYPES = {
     "1": "3 Panel Plot",
+    "m": "Meteogram (Temperature, Dew Point, Wind)",
     "8": "Battery Voltage",
     "3": "Daily Max/Min 4 Inch Soil Temps",
     "9": "Daily Rainfall, 4 inch Soil Temp, and RH",
@@ -52,7 +53,7 @@ def get_description():
         dict(
             type="networkselect",
             name="station",
-            default="AEEI4",
+            default="BOOI4",
             label="Select Station:",
             network="ISUSM",
         ),
@@ -232,7 +233,8 @@ def make_inversion_plot(ctx):
 
 def make_daily_pet_plot(ctx):
     """Generate a daily PET plot"""
-    icursor = ctx["pgconn"].cursor()
+    pgconn = get_dbconn("isuag")
+    icursor = pgconn.cursor()
     icursor.execute(
         """WITH climo as (
         select to_char(valid, 'mmdd') as mmdd, avg(c70) as  et
@@ -836,6 +838,73 @@ def plot_at(ctx):
     return fig, df
 
 
+def plot_meteogram(ctx):
+    """Do main plotting logic"""
+    table = "sm_minute"
+    barwidth = 1 / 1440.0
+    if (ctx["ets"] - ctx["sts"]) > datetime.timedelta(days=5):
+        table = "sm_hourly"
+        barwidth = 1 / 24.0
+    with get_sqlalchemy_conn("isuag") as conn:
+        df = pd.read_sql(
+            f"SELECT * from {table} WHERE "
+            "station = %s and valid BETWEEN %s and %s ORDER by valid ASC",
+            conn,
+            params=(ctx["station"], ctx["sts"], ctx["ets"]),
+            index_col="valid",
+        )
+    if df.empty:
+        raise NoDataFound("No Data Found for This Plot.")
+    fig = figure(
+        title=f"ISUSM Station: {ctx['_sname']} Timeseries",
+        apctx=ctx,
+    )
+    axes = fig.subplots(2, 1, sharex=True)
+    ax = axes[0]
+    ax.plot(df.index.values, c2f(df["tair_c_avg_qc"]), color="r", label="Air")
+    dwpf = (
+        dewpoint_from_relative_humidity(
+            units("degC") * df["tair_c_avg_qc"].values,
+            units("percent") * df["rh_avg_qc"].values,
+        )
+        .to(units("degF"))
+        .m
+    )
+    ax.plot(df.index.values, dwpf, color="g", label="Dew Point")
+    ax.grid(True)
+    ax.set_ylabel(r"Temperature $^\circ$F")
+    ax.legend(loc="best", ncol=2)
+
+    # ----------------
+    ax = axes[1]
+    ax.bar(df.index.values, df["ws_mph_max_qc"], width=barwidth, color="r")
+    ax.bar(df.index.values, df["ws_mph_qc"], width=barwidth, color="b")
+    ax.grid(True)
+    ax.set_ylabel("Wind Speed [MPH]")
+
+    ax2 = ax.twinx()
+    ax2.scatter(df.index.values, df["winddir_d1_wvt_qc"], color="g")
+    ax2.set_ylabel("Wind Direction [deg]")
+    ax2.set_ylim(-1, 361)
+    ax2.set_yticks(range(0, 361, 45))
+    ax2.set_yticklabels(["N", "NE", "E", "SE", "S", "SW", "W", "NW", "N"])
+
+    handles = [
+        Line2D([0], [0], color="r", lw=2, label="Max Gust"),
+        Line2D([0], [0], color="b", lw=2, label="Avg Wind"),
+        Line2D([0], [0], color="g", lw=2, label="Wind Dir"),
+    ]
+    ax.legend(
+        handles=handles,
+        loc=(0.5, 1.04),
+        ncol=3,
+        fontsize=10,
+    )
+
+    xaxis_magic(ctx, ax)
+    return fig, df
+
+
 def plot1(ctx):
     """Do main plotting logic"""
     with get_sqlalchemy_conn("isuag") as conn:
@@ -983,10 +1052,11 @@ def xaxis_magic(ctx, ax):
 def plotter(fdict):
     """Go"""
     ctx = get_autoplot_context(fdict, get_description())
-    ctx["pgconn"] = get_dbconn("isuag")
 
     if ctx["opt"] == "1":
         fig, df = plot1(ctx)
+    if ctx["opt"] == "m":
+        fig, df = plot_meteogram(ctx)
     elif ctx["opt"] == "2":
         fig, df = plot2(ctx)
     elif ctx["opt"] == "at":
@@ -1038,10 +1108,4 @@ def plotter(fdict):
 
 
 if __name__ == "__main__":
-    plotter(
-        {
-            "station": "BOOI4",
-            "opt": "11",
-            "sts": "2012-01-01 0000",
-        }
-    )
+    plotter({})
