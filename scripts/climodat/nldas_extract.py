@@ -10,12 +10,11 @@ import geopandas as gpd
 import numpy as np
 import pandas as pd
 from affine import Affine
+from pyiem.database import get_dbconnc, get_sqlalchemy_conn
 from pyiem.grid.zs import CachingZonalStats
 from pyiem.iemre import hourly_offset
 from pyiem.util import (
     convert_value,
-    get_dbconn,
-    get_sqlalchemy_conn,
     logger,
     ncopen,
     utc,
@@ -59,7 +58,7 @@ def build_stations(dt) -> pd.DataFrame:
             params=(dt,),
             index_col="station",
         )
-    for col in ["nldas_soilt4_avg", "nldas_soilm4_avg"]:
+    for col in ["nldas_soilt4_avg", "nldas_soilm4_avg", "nldas_soilm1m_avg"]:
         df[col] = np.nan
     df["i"] = np.nan
     df["j"] = np.nan
@@ -79,26 +78,33 @@ def compute(df, sids, dt, do_regions=False):
     with ncopen(ncfn) as nc:
         lons = nc.variables["lon"][:]
         lats = nc.variables["lat"][:]
+        tsel = slice(idx0, idx1)
         if f"{dt:%m%d}" == "1231":
             # Close enough
-            soilm = np.mean(nc.variables["soilm"][idx0:, 0], 0)
-            soilt = np.mean(nc.variables["soilt"][idx0:, 0], 0)
-        else:
-            soilm = np.mean(nc.variables["soilm"][idx0:idx1, 0], 0)
-            soilt = np.mean(nc.variables["soilt"][idx0:idx1, 0], 0)
+            tsel = slice(idx0, None)
+        soilm = np.mean(nc.variables["soilm"][tsel, 0], 0)
+        soilm1m = (
+            np.mean(nc.variables["soilm"][tsel, 0], 0) * 10.0
+            + np.mean(nc.variables["soilm"][tsel, 1], 0) * 30.0
+            + np.mean(nc.variables["soilm"][tsel, 2], 0) * 60.0
+        ) / 100.0
+        soilt = np.mean(nc.variables["soilt"][tsel, 0], 0)
 
     df["i"] = np.digitize(df["lon"].values, lons)
     df["j"] = np.digitize(df["lat"].values, lats)
     soilm = soilm.filled(np.nan)
+    soilm1m = soilm1m.filled(np.nan)
     soilt = soilt.filled(np.nan)
 
     for sid, row in df.loc[sids].iterrows():
         df.at[sid, "nldas_soilt4_avg"] = soilt[int(row["j"]), int(row["i"])]
         df.at[sid, "nldas_soilm4_avg"] = soilm[int(row["j"]), int(row["i"])]
+        df.at[sid, "nldas_soilm1m_avg"] = soilm1m[int(row["j"]), int(row["i"])]
 
     if do_regions:
         compute_regions(soilt, "nldas_soilt4_avg", df)
         compute_regions(soilm, "nldas_soilm4_avg", df)
+        compute_regions(soilm, "nldas_soilm1m_avg", df)
 
     LOG.info("IA0200 %s", df.loc["IA0200"])
 
@@ -123,13 +129,13 @@ def do(dt):
 
     # prevent NaN from being inserted
     df = df.replace({np.nan: None})
-    pgconn = get_dbconn("coop")
-    cursor = pgconn.cursor()
+    pgconn, cursor = get_dbconnc("coop")
     cursor.executemany(
         """
         UPDATE alldata set
         nldas_soilt4_avg = %(nldas_soilt4_avg)s,
-        nldas_soilm4_avg = %(nldas_soilm4_avg)s
+        nldas_soilm4_avg = %(nldas_soilm4_avg)s,
+        nldas_soilm1m_avg = %(nldas_soilm1m_avg)s
         where station = %(station)s and day = %(day)s
         """,
         df.to_dict("records"),
