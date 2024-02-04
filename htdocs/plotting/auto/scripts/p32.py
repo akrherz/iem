@@ -24,6 +24,7 @@ PDICT = {
     "low": "Low Temperature (F)",
     "era5land_soilm4_avg": "ERA5-Land 0-7cm Soil Moisture (m3/m3)",
     "era5land_soilm1m_avg": "ERA5-Land 0-1m Soil Moisture (m3/m3)",
+    "era5land_soilm1m_sw": "ERA5-Land 0-39inch Soil Water Depth (inch)",
     "era5land_soilt4_avg": "ERA5-Land 0-7cm Soil Temperature (F)",
     "era5land_srad": "ERA5-Land Solar Radiation (MJ/m2)",
 }
@@ -104,6 +105,8 @@ def plotter(fdict):
         "gddceil": gddceil,
     }
     sqlvarname = "temp_hour" if varname in ["avg", "gdd"] else varname
+    if varname == "era5land_soilm1m_sw":
+        sqlvarname = "era5land_soilm1m_avg"
     with get_sqlalchemy_conn("coop") as conn:
         df = pd.read_sql(
             text(
@@ -121,6 +124,8 @@ def plotter(fdict):
         )
     if df.empty:
         raise NoDataFound("No Data Found.")
+    if varname == "era5land_soilm1m_sw":
+        df[varname] = df["era5land_soilm1m_avg"] * 39.3701
     # Compute the ranks of the daily values by sday
     df["rank"] = df.groupby("sday")[varname].rank(method="min")
     thisyear = (
@@ -157,6 +162,9 @@ def plotter(fdict):
         f"{year} data till "
         f"{thisyear.loc[thisyear[varname].notna(), 'day'].max():%-d %b %Y}"
     )
+    if varname.startswith("era5land_soilm"):
+        slt = ctx["_nt"].sts[station]["attributes"].get("ERA5LAND_SOILTYPE")
+        subtitle += f", ERA5-Land Soil Type: {slt}"
     (fig, ax) = figure_axes(apctx=ctx, title=title, subtitle=subtitle)
     if how == "valrange":
         ax.bar(
