@@ -141,6 +141,13 @@ def plotter(fdict):
         df[col] = df[col].dt.tz_localize(ZoneInfo("UTC"))
     df["wfo"] = station
     df["endts"] = df[["maxexpire", "maxinitexpire"]].max(axis=1)
+    # Flood warnings, for example, could have an issuance until-further-notice
+    # which is not helpful for this plot, so don't allow a maxinitexpire
+    # to be 5 days greater than the maxexpire
+    df.loc[
+        (df["maxinitexpire"] - df["maxexpire"]).dt.total_seconds() > 432000,
+        "endts",
+    ] = df["maxexpire"]
     df["label"] = df.apply(
         lambda x: vtec.get_ps_string(x["phenomena"], x["significance"]),
         axis=1,
