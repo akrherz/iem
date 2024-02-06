@@ -10,12 +10,14 @@ from zoneinfo import ZoneInfo
 import geopandas as gpd
 import matplotlib.patheffects as PathEffects
 from matplotlib.offsetbox import AnnotationBbox, OffsetImage
+from pyiem.database import get_sqlalchemy_conn
 from pyiem.exceptions import NoDataFound
 from pyiem.network import Table as NetworkTable
-from pyiem.plot import MapPlot, plt
+from pyiem.plot import MapPlot
 from pyiem.plot.geoplot import MAIN_AX_BOUNDS
+from pyiem.plot.use_agg import plt
 from pyiem.reference import Z_OVERLAY2
-from pyiem.util import get_autoplot_context, get_sqlalchemy_conn
+from pyiem.util import get_autoplot_context
 from sqlalchemy import text
 
 ICONS = {

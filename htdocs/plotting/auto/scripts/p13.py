@@ -7,9 +7,11 @@ import datetime
 import matplotlib.colors as mpcolors
 import numpy as np
 import pandas as pd
+from matplotlib import cm
+from pyiem.database import get_sqlalchemy_conn
 from pyiem.exceptions import NoDataFound
-from pyiem.plot import centered_bins, figure_axes, get_cmap, plt
-from pyiem.util import get_autoplot_context, get_sqlalchemy_conn
+from pyiem.plot import centered_bins, figure_axes, get_cmap
+from pyiem.util import get_autoplot_context
 from scipy import stats
 from sqlalchemy import text
 
@@ -93,7 +95,7 @@ def plotter(fdict):
     ax.grid(True)
     ax.set_ylabel(f"{t1} Date")
 
-    sm = plt.cm.ScalarMappable(norm, cmap)
+    sm = cm.ScalarMappable(norm, cmap)
     sm.set_array(bins)
     cb = fig.colorbar(sm, extend="neither", ax=ax)
     cb.set_label(r"Summer Avg Temperature Departure $^\circ$F")

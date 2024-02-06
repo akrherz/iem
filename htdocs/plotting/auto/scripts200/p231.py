@@ -10,10 +10,11 @@ are colorized as green for improvements and red for degradations.
 import datetime
 
 import pandas as pd
+from pyiem.database import get_sqlalchemy_conn
 from pyiem.exceptions import NoDataFound
-from pyiem.plot import MapPlot, plt
+from pyiem.plot import MapPlot
 from pyiem.reference import state_names
-from pyiem.util import get_autoplot_context, get_sqlalchemy_conn
+from pyiem.util import get_autoplot_context
 
 
 def get_description():
@@ -203,7 +204,7 @@ def plotter(fdict):
             t.extend([(0.5, 1, 0.5)] * (11 - i - 1))
         cellcolors.append(t)
 
-    plt.table(
+    ax.table(
         celltext,
         cellColours=cellcolors,
         rowLabels=dlabels,
