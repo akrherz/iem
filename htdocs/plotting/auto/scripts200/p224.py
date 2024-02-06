@@ -27,16 +27,20 @@ issuance time before the given timestamp.</li>
 that have been created, but not necessarily having an issuance time prior
 to the given timestamp.  This is why we can't have nice things!
 </p>
+
+<p><a href="/plotting/auto/?q=247">Autoplot 247</a> is closely related to
+this app and provides a map of WaWa + stats.</p>
 """
 from datetime import timezone
 from zoneinfo import ZoneInfo
 
 import pandas as pd
 from matplotlib.patches import Rectangle
+from pyiem.database import get_sqlalchemy_conn
 from pyiem.exceptions import NoDataFound
 from pyiem.nws.vtec import NWS_COLORS, get_ps_string
 from pyiem.plot import figure
-from pyiem.util import get_autoplot_context, get_sqlalchemy_conn, utc
+from pyiem.util import get_autoplot_context, utc
 from sqlalchemy import text
 
 PDICT = {
