@@ -9,6 +9,12 @@ $station = $ctx->station;
 $network = $ctx->network;
 $metadata = $ctx->metadata;
 
+// silly bots
+if (strpos($network, "CLIMATE") === false){
+    header("HTTP/1.1 404 Not Found");
+    die();
+}
+
 $t = new MyView();
 $t->title = "Period of Record Daily Climatology";
 $t->sites_current = "porclimo";
