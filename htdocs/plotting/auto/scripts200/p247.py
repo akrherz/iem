@@ -109,10 +109,10 @@ def plotsbw(mp, df):
         )
 
 
-def get_ps(str):
+def get_ps(pstr):
     """."""
     return (
-        get_ps_string(*str.split("."))
+        get_ps_string(*pstr.split("."))
         .replace("Advisory", "Adv")
         .replace("Small Craft for", "SC")
     )
