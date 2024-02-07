@@ -20,14 +20,11 @@ jobs:
     - name: Setup CI from ci-tooling
       run: |
         set -e
-        git clone --depth 1 https://github.com/akrherz/iem-database.git database
         git clone --depth 1 https://github.com/akrherz/ci_tooling.git .ci_tooling
         cd .ci_tooling
-        . iemwebfarm.sh
         . postgres.sh
         cd ..
         sudo ln -s `pwd` /opt/iem
-        sudo ln -s $HOME/miniconda /opt/miniconda3
         sudo apt-get install mapserver-bin
         sudo mkdir -p /mesonet/ldmdata/
         wget -q http://mesonet.agron.iastate.edu/pickup/ci_msinc.tgz

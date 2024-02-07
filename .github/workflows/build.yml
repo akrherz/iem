@@ -24,11 +24,13 @@ jobs:
     steps:
     - uses: actions/checkout@v4
 
+    # Lots of daryl's codes use aliases defined in /etc/hosts
     - name: Add /etc/hosts entries
       run: |
         cat .github/workflows/etchosts.txt | sudo tee -a /etc/hosts
 
-    - name: Copy PHP Settings
+    # Copy repo's default settings into the real position
+    - name: Copy PHP Setting Defaults
       run: |
         cp config/settings.inc.php.in config/settings.inc.php
 
@@ -46,27 +48,35 @@ jobs:
         environment-name: prod
         cache-environment: true
 
+    # Get postgresql running and setup the database
     - name: Setup Postgres
       run: |
         set -e
         git clone --depth 1 https://github.com/akrherz/iem-database.git database
         git clone --depth 1 https://github.com/akrherz/ci_tooling.git .ci_tooling
-        . .ci_tooling/postgres.sh
+        cd .ci_tooling
+        . postgres.sh
+        cd ..
         cd database; sh bootstrap.sh
         python schema_manager.py
 
+    # Get memcached running
     - name: Setup Memcached
       run: |
-        . .ci_tooling/memcached.sh
+        set -e
+        cd .ci_tooling
+        . memcached.sh
 
-    - name: Setup Apache
+    # Get apache running, which is needed to build mod_wsgi
+    - name: Configure IEM Webfarm Server
       run: |
-        # need apache2-dev for mod-wsgi to build
-        sudo apt-get install apache2 apache2-dev
+        set -e
+        cd .ci_tooling
+        . iemwebfarm.sh
 
+    # conda-forge does not have everything we need, yet
     - name: Install Python requirements from pip
       run: |
-        # mod_wsgi is here and needs apxs from above
         python -m pip install -r pip_requirements.txt
 
     - name: Setup IEM Data
@@ -75,40 +85,24 @@ jobs:
         python database/store_test_data.py
         python scripts/dbutil/sync_stations.py
 
+    - name: Setup Directory Paths
+      run: |
+        set -e
+        sudo ln -s `pwd` /opt/iem
+        sudo ln -s $HOME/micromamba /opt/miniconda3
+
     - name: Configure Webfarm Server
       run: |
         set -e
-        cd .ci_tooling
-        . iemwebfarm.sh
-        cd ..
-        sudo mkdir -p /mesonet/www/logs
-        sudo ln -s `pwd` /opt/iem
-        sudo ln -s $HOME/micromamba /opt/miniconda3
-        echo `pwd`
-        chmod 755 $HOME
-        sudo apt-get install librrd-dev
-        sudo service memcached start
-        sudo a2enmod headers rewrite proxy proxy_http proxy_balancer ssl lbmethod_byrequests cgi expires authz_groupfile
-        # we do things the old fashioned way, we earn it
-        sudo a2dissite 000-default.conf
-        sudo cp .github/ci_support/mod_wsgi.conf /etc/apache2/sites-enabled/
         echo '<VirtualHost *:80>' | sudo tee /etc/apache2/sites-enabled/iem.conf > /dev/null
         cat config/mesonet.inc | sudo tee -a /etc/apache2/sites-enabled/iem.conf > /dev/null
         echo '</VirtualHost>' | sudo tee -a /etc/apache2/sites-enabled/iem.conf > /dev/null
-        # This may be a requirement for mod-wsgi to properly find python tooling?
-        echo "export PATH=/home/runner/micromamba/envs/prod/bin:$PATH" | sudo tee -a /etc/apache2/envvars > /dev/null
-        # Newer PROJ needs this
-        echo "export PROJ_LIB=/home/runner/micromamba/envs/prod/share/proj" | sudo tee -a /etc/apache2/envvars > /dev/null
-        MOD_WSGI_SO=$(find $HOME/micromamba/envs/prod -type f -name 'mod_wsgi*.so')
-        echo $MOD_WSGI_SO
-        echo "LoadModule wsgi_module $MOD_WSGI_SO" | sudo tee -a /etc/apache2/mods-enabled/wsgi.load > /dev/null;
-        echo "WSGIApplicationGroup %{GLOBAL}" | sudo tee -a /etc/apache2/mods-enabled/wsgi.load > /dev/null;
-        # Create tmp folder for matplotlib
-        sudo mkdir -p /var/cache/matplotlib
-        sudo chown www-data /var/cache/matplotlib
+
+        # ci_tooling places a mod_wsgi conf with startup disabled, we enable it
+        sudo sed -i 's/# WSGIImportScript/WSGIImportScript/' /etc/apache2/sites-enabled/mod_wsgi.conf
+
         # restart apache
-        sudo service apache2 stop
-        sudo service apache2 start
+        sudo service apache2 restart
         sudo systemctl status apache2.service -l
 
     - name: Smoke Test mod_wsgi_startup.py
