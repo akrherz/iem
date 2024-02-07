@@ -1,7 +1,6 @@
 --extra-index-url https://pypi.anaconda.org/pypi/simple
 commonregex
 inotify
-mod_wsgi
 git+https://github.com/akrherz/windrose.git@darylchanges
 git+https://github.com/akrherz/pyIEM.git
 git+https://github.com/akrherz/tilecache.git
