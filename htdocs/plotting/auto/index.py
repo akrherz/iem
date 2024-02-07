@@ -14,11 +14,12 @@ import pandas as pd
 # Third Party
 import requests
 from paste.request import get_cookie_dict
+from pyiem.database import get_dbconnc, get_sqlalchemy_conn
 from pyiem.htmlgen import make_select, station_select
 from pyiem.nws.vtec import VTEC_PHENOMENA, VTEC_SIGNIFICANCE
 from pyiem.reference import SECTORS_NAME, state_names
 from pyiem.templates.iem import TEMPLATE
-from pyiem.util import LOG, get_dbconnc, get_sqlalchemy_conn, html_escape, utc
+from pyiem.util import LOG, html_escape, utc
 from pyiem.webutil import ensure_list, iemapp
 from sqlalchemy import text
 
@@ -800,6 +801,36 @@ def generate_autoplot_list(apid):
     return s
 
 
+def generate_trending():
+    """Build the trending list."""
+    res = "<h3>Trending Autoplots over Past 6 Hours</h3>"
+    res += '<table class="table table-striped table-bordered">\n'
+    res += "<tr><th>Plot</th><th>Requests</th></tr>\n"
+    try:
+        data = requests.get(
+            "http://iem.local/api/1/iem/trending_autoplots.json", timeout=5
+        ).json()
+        for entry in data["data"][:5]:
+            label = "Unknown"
+            for ap in scripts.data["plots"]:
+                if label != "Unknown":
+                    break
+                for opt in ap["options"]:
+                    if opt["id"] == entry["appid"]:
+                        label = opt["label"]
+                        break
+            res += (
+                f"<tr><td><a href=\"/plotting/auto/?q={entry['appid']}\">"
+                f"#{entry['appid']}. {label}</a></td><td>{entry['count']:,}"
+                "</td></tr>\n"
+            )
+    except Exception as exp:
+        LOG.exception(exp)
+        res += '<tr><th colspan="2">Failed to Load</th></tr>'
+    res += "</table>"
+    return res
+
+
 def generate_overview(apid):
     """If we don't have an apid set (==0), then fill in the overview."""
     if apid > 0:
@@ -811,12 +842,19 @@ def generate_overview(apid):
     with open(fn, encoding="utf8") as fh:
         content = fh.read()
     return f"""
+<div class="row">
+    <div class="col-md-6">
 <h1>Visual Overview of All Autoplots</h1>
-
 <p>Below you will find an example resulting image from each of the autoplots
 available.  Click on the image or title to navigate to that autoplot. These are
 grouped into sections as they also appear grouped in the dropdown selection
 box above.</p>
+    </div>
+    <div class="col-md-6">
+    {generate_trending()}
+    </div>
+</div>
+
 
     {content}
     """

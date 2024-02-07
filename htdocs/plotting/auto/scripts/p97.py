@@ -4,26 +4,21 @@ data for a period of your choice.  Spatially aggregated values like those
 for climate districts and statewide averages are not included.  The IEM
 computed climatologies are based on simple daily averages of observations.
 
-<p><strong>Change 1 Dec 2022:</strong> When you select a plot variable that
-does need climatology, the resulting download does not contain those
-climatology fields as they are computationally expensive to compute
-on-the-fly.  This was done as an optimization to speed up the app.
+<p><strong>Updated 7 Feb 2024:</strong> When plotting snowfall, the application
+requires a 90% observation coverage for the period of interest.  The issue is
+that the IEM currently does not estimate snowfall, like it does for high, low,
+and precipitation.
 """
-# pylint: disable=invalid-unary-operand-type
 import datetime
 
 import geopandas as gpd
 import numpy as np
 import pandas as pd
+from pyiem.database import get_dbconn, get_sqlalchemy_conn
 from pyiem.exceptions import NoDataFound
 from pyiem.plot import MapPlot, centered_bins, get_cmap, pretty_bins
 from pyiem.reference import wfo_bounds
-from pyiem.util import (
-    get_autoplot_context,
-    get_dbconn,
-    get_sqlalchemy_conn,
-    logger,
-)
+from pyiem.util import get_autoplot_context, logger
 from sqlalchemy import text
 
 LOG = logger()
@@ -342,11 +337,12 @@ def get_data(ctx):
         "date2": date2,
         "cull": cull,
     }
-    for table in tables:
-        # Only compute expensive climatology, when necessary
-        if ctx["var"].endswith("_depart") or ctx["var"].endswith("_percent"):
-            sql = text(
-                f"""
+    with get_sqlalchemy_conn("coop") as conn:
+        for table in tables:
+            LOG.info("Starting %s table query", table)
+            df = gpd.read_postgis(
+                text(
+                    f"""
                 WITH obs as (
                     SELECT station,
                     gddxx(:gddbase, :gddceil, high, low) as gdd,
@@ -356,7 +352,7 @@ def get_data(ctx):
                     (high + low)/2. as avg_temp
                     from {table} WHERE
                     day >= :date1 and day <= :date2 and
-                    substr(station, 3, 1) != 'C' and
+                    substr(station, 3, 1) not in ('C', 'K', 'D') and
                     substr(station, 3, 4) != '0000'
                     and not (station = ANY(:cull))),
                 climo as ({build_climate_sql(ctx, table)}),
@@ -406,7 +402,9 @@ def get_data(ctx):
                     sum(cdd65) as cdd65_sum,
                     sum(hdd65) as hdd65_sum,
                     sum(cdd65_diff) as cdd65_depart,
-                    sum(hdd65_diff) as hdd65_depart
+                    sum(hdd65_diff) as hdd65_depart,
+                    sum(case when snow is not null then 1 else 0 end)
+                        as snow_quorum
                     from combo GROUP by station)
 
                 SELECT d.station, t.name, t.wfo,
@@ -437,58 +435,11 @@ def get_data(ctx):
                 avg_low_temp,
                 cdd65_sum, hdd65_sum, cdd65_depart, hdd65_depart,
                 ST_x(t.geom) as lon, ST_y(t.geom) as lat,
-                t.geom, obs
+                t.geom, obs, snow_quorum
                 from agg d JOIN stations t on (d.station = t.id)
                 WHERE t.network ~* 'CLIMATE' and t.online {wfo_limiter}
                 """
-            )
-        else:
-            sql = text(
-                f"""
-                WITH obs as (
-                    SELECT station, count(*) as obs,
-                    sum(gddxx(:gddbase, :gddceil, high, low)) as gdd_sum,
-                    sum(cdd(high, low, 65)) as cdd65_sum,
-                    sum(hdd(high, low, 65)) as hdd65_sum,
-                    sum(case when high > 86 then high - 86 else 0 end)
-                        as sdd86_sum,
-                    avg(high) as avg_high_temp,
-                    max(high) as max_high_temp,
-                    min(low) as min_low_temp,
-                    avg(low) as avg_low_temp,
-                    max(precip) as precip_max,
-                    sum(precip) as precip_sum,
-                    sum(snow) as snow_sum,
-                    avg((high + low)/2.) as avg_temp
-                    from {table} WHERE
-                    day >= :date1 and day <= :date2 and
-                    substr(station, 3, 1) != 'C' and
-                    substr(station, 3, 4) != '0000' and
-                    not (station = ANY(:cull))
-                    GROUP by station)
-
-                SELECT d.station, t.name, t.wfo,
-                avg_temp,
-                precip_max,
-                precip_sum,
-                snow_sum,
-                min_low_temp,
-                gdd_sum,
-                sdd86_sum,
-                max_high_temp,
-                avg_high_temp,
-                avg_low_temp,
-                cdd65_sum, hdd65_sum,
-                ST_x(t.geom) as lon, ST_y(t.geom) as lat,
-                t.geom, obs
-                from obs d JOIN stations t on (d.station = t.id)
-                WHERE t.network ~* 'CLIMATE' and t.online {wfo_limiter}
-                """
-            )
-        with get_sqlalchemy_conn("coop") as conn:
-            LOG.info("Starting %s table query", table)
-            df = gpd.read_postgis(
-                sql,
+                ),
                 conn,
                 params=params,
                 index_col="station",
@@ -502,6 +453,9 @@ def get_data(ctx):
     df = pd.concat(dfs)
     if df.empty:
         raise NoDataFound("No Data Found.")
+    if ctx["var"].find("snow") > -1:
+        quorum = (date2 - date1).days * 0.9
+        df = df[df["snow_quorum"] >= quorum].drop(columns="snow_quorum")
     # Drop any entries with NaN
     df = df[~pd.isna(df[ctx["var"]])]
     if df.empty:
@@ -603,6 +557,8 @@ def plotter(fdict):
         minval = 0 if ptiles["5%"] < 1 else ptiles["5%"]
         clevels = pretty_bins(minval, ptiles["95%"])
         extend = "max"
+        if varname == "snow_sum":
+            fmt = "%.1f"
     elif varname.endswith("_percent"):
         clevels = np.array([10, 25, 50, 75, 100, 125, 150, 175, 200])
         fmt = "%.0f"
