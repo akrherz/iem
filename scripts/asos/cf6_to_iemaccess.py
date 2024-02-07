@@ -2,16 +2,13 @@
 
 Run from RUN_12Z.sh, RUN_0Z.sh for past 48 hours of data
 """
-# pylint: disable=no-member
-# stdlib
 import sys
 from datetime import date
 
 import pandas as pd
 from metpy.units import units
-
-# third party
-from pyiem.util import get_dbconn, get_sqlalchemy_conn, logger
+from pyiem.database import get_dbconn, get_sqlalchemy_conn
+from pyiem.util import logger
 from sqlalchemy import text
 
 LOG = logger()
@@ -19,9 +16,10 @@ LOG = logger()
 
 def comp(old, new):
     """Figure out if this value is new or not."""
-    if pd.isnull(new):
+    if pd.isnull(new) and pd.isnull(old):
         return False
-    if pd.isnull(old):
+    # If the new value is null, we want this as the value should be null
+    if pd.isnull(new):
         return True
     if old == new:
         return False
@@ -81,7 +79,12 @@ def update_climodat(cf6df, xref, valid):
                     continue
                 uvals += 1
                 work.append(f"{col} = %s")
-                params.append(row[col] if col == "precip" else int(row[col]))
+                if pd.isna(row[col]):
+                    params.append(None)
+                else:
+                    params.append(
+                        row[col] if col == "precip" else int(row[col])
+                    )
                 LOG.info("%s %s %s->%s", clsid, col, current[col], row[col])
             if not work:
                 continue
@@ -104,15 +107,15 @@ def update_iemaccess(cf6df, valid):
     dbconn = get_dbconn("iem")
     table = f"summary_{valid.year}"
     with get_sqlalchemy_conn("iem") as conn:
+        # NB: we should not have any of these station IDs in the COOP network
         obs = pd.read_sql(
             f"""
             SELECT s.*, t.network,
             case when length(t.id) = 3 then 'K'||t.id else t.id end
             as station from {table} s JOIN
             stations t on (s.iemid = t.iemid) WHERE s.day = %s and
-            (t.network ~* 'ASOS' or
-                (t.network ~* 'COOP' and length(id) < 5)
-            ) ORDER by station ASC
+            (t.network ~* 'ASOS' or (t.network ~* 'DCP' and length(id) < 5))
+            ORDER by station ASC
             """,
             conn,
             params=(valid,),
@@ -145,7 +148,7 @@ def update_iemaccess(cf6df, valid):
                 continue
             uvals += 1
             work.append(f"{ocol.replace('_ob', '')} = %s")
-            params.append(row[ccol])
+            params.append(None if pd.isna(row[ccol]) else row[ccol])
         if not work:
             continue
         params.append(int(row["iemid"]))

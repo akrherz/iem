@@ -4,7 +4,7 @@
 Run from RUN_2AM.sh
 """
 
-from pyiem.util import get_dbconn
+from pyiem.database import get_dbconn, get_dbconnc
 
 
 def do_asos():
@@ -23,6 +23,27 @@ def do_asos():
         acursor2.execute("DELETE from unknown where id = %s", (row[0],))
 
     asos.commit()
+
+
+def check_asos_in_coop_network():
+    """We don't want this situation for convoluted reasons."""
+    pgconn, cursor = get_dbconnc("mesosite")
+    cursor.execute(
+        """
+        with data as (
+            select id,
+            max(case when network ~* 'COOP' then 1 else 0 end) as is_coop,
+            max(case when network ~* 'ASOS' then 1 else 0 end) as is_asos,
+            max(case when network ~* 'DCP' then 1 else 0 end) as is_dcp
+            from stations GROUP by id)
+        select id from data where is_coop > 0 and is_asos > 0"""
+    )
+    if cursor.rowcount > 0:
+        print("------ ASOS in COOP Network ------")
+        for row in cursor:
+            print(f"ASOS Site in COOP, not DCP: {row['id']}")
+    cursor.close()
+    pgconn.close()
 
 
 def print_blank_sname():
@@ -82,6 +103,7 @@ def main():
     do_asos()
     do_hads()
     print_blank_sname()
+    check_asos_in_coop_network()
 
 
 if __name__ == "__main__":
