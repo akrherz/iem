@@ -15,6 +15,9 @@ yet to fully debug :(</p>
 was added to lump all of the issuance times together.  So you can do
 generic requests now like for any Day 1 Outlook, instead of limiting to
 just the 13z issuance, for example.</p>
+
+<p>Autoplot <a href="/plotting/auto/?q=248">248</a> is similar, but generates
+chart of days per year by WFO, state.</p>
 """
 import datetime
 
