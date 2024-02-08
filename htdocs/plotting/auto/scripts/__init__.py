@@ -743,6 +743,10 @@ nopts = [
         "label": "Period between First and Last VTEC Product Each Year",
     },
     {
+        "id": 248,
+        "label": "Period between First and Last SPC/WPC Outlook each Year",
+    },
+    {
         "id": 224,
         "label": "Population/Area under NWS Watch/Warning/Advisory at Time",
     },
