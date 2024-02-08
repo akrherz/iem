@@ -1,8 +1,12 @@
 """
 This chart displays the period each year between the first and last SPC/WPC
-outlook type for a given NWS forecast office or state.  The dates presented
+outlook type for a given NWS forecast office, state or county.
+The dates presented
 are the commonly considered date of outlook being valid for.  Technically,
 the outlooks end at 12 UTC of the following day.</p>
+
+<p>If you select the "View by Contiguous US" option, there is no spatial
+overlay check possible at this time.</p>
 
 <p>An option exists to threshold the amount of spatial overlap between the
 outlook geometry and the NWS forecast office or state.  This is useful for
@@ -22,7 +26,7 @@ import pandas as pd
 from matplotlib.font_manager import FontProperties
 from matplotlib.ticker import MaxNLocator
 from pyiem import reference
-from pyiem.database import get_sqlalchemy_conn
+from pyiem.database import get_dbconnc, get_sqlalchemy_conn
 from pyiem.exceptions import NoDataFound
 from pyiem.plot import figure
 from pyiem.plot.use_agg import plt
@@ -36,8 +40,10 @@ PDICT = {
     "99": "Engulfs",
 }
 PDICT2 = {
+    "conus": "View by Contiguous US",
     "wfo": "View by Single NWS Forecast Office",
     "state": "View by State",
+    "ugc": "View by Selected County/Zone",
 }
 PDICT3 = {
     "C": "SPC Convective Outlook",
@@ -109,6 +115,13 @@ def get_description():
     desc = {"description": __doc__, "data": True, "cache": 86400}
     desc["arguments"] = [
         {
+            "type": "year",
+            "name": "year",
+            "default": 1986,
+            "label": "Start Year of Plot:",
+            "min": 1986,
+        },
+        {
             "type": "select",
             "options": PDICT3,
             "default": "c",
@@ -134,7 +147,7 @@ def get_description():
             name="opt",
             default="wfo",
             options=PDICT2,
-            label="View by WFO or State?",
+            label="View by WFO, State or Zone?",
         ),
         dict(
             type="networkselect",
@@ -144,6 +157,12 @@ def get_description():
             label="Select WFO:",
         ),
         dict(type="state", default="IA", name="state", label="Select State:"),
+        {
+            "type": "ugc",
+            "name": "ugc",
+            "default": "IAZ048",
+            "label": "Select County/Zone:",
+        },
         {
             "type": "select",
             "options": PDICT,
@@ -166,6 +185,7 @@ def plotter(fdict):
     opt = ctx["opt"]
     overlap = ctx["overlap"]
     state = ctx["state"]
+    ugc = ctx["ugc"]
     (category, threshold) = ctx["threshold"].split(".", 1)
 
     params = {
@@ -175,33 +195,71 @@ def plotter(fdict):
         "threshold": threshold,
         "category": category,
         "day": ctx["day"],
+        "ugc": ugc,
+        "sts": datetime.date(ctx["year"], 1, 1),
         "outlook_type": ctx["outlook_type"].upper(),
     }
-    geomtable = "cwa" if opt == "wfo" else "states"
+    geomtable = "cwa"
+    limiter = "g.wfo = :wfo"
+    geomcol = "the_geom"
+    ugcname = ""
+    if opt == "wfo":
+        geomtable = "states"
+        limiter = "g.state_abbr = :state"
+    elif opt == "ugc":
+        geomtable = "ugcs"
+        limiter = "g.ugc = :ugc and end_ts is null"
+        geomcol = "geom"
+        pgconn, cursor = get_dbconnc("postgis")
+        cursor.execute(
+            "select name from ugcs where ugc = %s and end_ts is null",
+            (ugc,),
+        )
+        ugcname = cursor.fetchone()["name"]
+        cursor.close()
+        pgconn.close()
     overlapsql = ""
-    limiter = "g.wfo = :wfo" if opt == "wfo" else "g.state_abbr = :state"
     if overlap != "0":
         overlapsql = (
-            "and ST_Area(ST_Intersection(o.geom, g.the_geom)::geography) / "
-            f"(select ST_Area(the_geom::geography) from {geomtable} g "
+            f"and ST_Area(ST_Intersection(o.geom, g.{geomcol})::geography) / "
+            f"(select ST_Area({geomcol}::geography) from {geomtable} g "
             f"where {limiter}) > :overlap"
         )
     with get_sqlalchemy_conn("postgis") as conn:
-        df = pd.read_sql(
-            text(
-                f"""
-            select distinct date(expire - '12 hours'::interval) as date
-            from spc_outlooks o, {geomtable} g WHERE {limiter}
-            and o.outlook_type = :outlook_type and o.day = :day
-            and o.threshold = :threshold and o.category = :category and
-            ST_Intersects(o.geom, g.the_geom) {overlapsql}
-            """
-            ),
-            conn,
-            params=params,
-            index_col=None,
-            parse_dates="date",
-        )
+        if opt == "conus":
+            df = pd.read_sql(
+                text(
+                    """
+                select distinct date(expire - '12 hours'::interval) as date
+                from spc_outlooks o WHERE o.outlook_type = :outlook_type and
+                o.day = :day
+                and o.threshold = :threshold and o.category = :category and
+                o.expire > :sts
+                """
+                ),
+                conn,
+                params=params,
+                index_col=None,
+                parse_dates="date",
+            )
+
+        else:
+            df = pd.read_sql(
+                text(
+                    f"""
+                select distinct date(expire - '12 hours'::interval) as date
+                from spc_outlooks o, {geomtable} g WHERE {limiter}
+                and o.outlook_type = :outlook_type and o.day = :day
+                and o.threshold = :threshold and o.category = :category and
+                ST_Intersects(o.geom, g.{geomcol}) {overlapsql} and
+                o.expire > :sts
+                """
+                ),
+                conn,
+                params=params,
+                index_col=None,
+                parse_dates="date",
+            )
     if df.empty:
         raise NoDataFound("No data found for query")
     df["doy"] = df["date"].dt.dayofyear
@@ -219,6 +277,10 @@ def plotter(fdict):
     )
     if opt == "state":
         subtitle = f"{verb} State of {reference.state_names[state]}"
+    elif opt == "ugc":
+        subtitle = f"{verb} County/Zone {ugcname} [{ugc}]"
+    elif opt == "conus":
+        subtitle = "Based on Unofficial IEM Archives, Contiguous US"
     if ctx["overlap"] not in ["0", "99"]:
         subtitle += f" with >= {overlap}% overlap"
     fig = figure(apctx=ctx, title=title, subtitle=subtitle)
