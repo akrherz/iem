@@ -3,8 +3,9 @@
 called from RUN_2AM.sh
 """
 
+from pyiem.database import get_dbconn
 from pyiem.reference import state_names
-from pyiem.util import get_dbconn, logger
+from pyiem.util import logger
 
 LOG = logger()
 

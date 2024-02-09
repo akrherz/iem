@@ -4,7 +4,8 @@
 """
 import datetime
 
-from pyiem.util import get_dbconnc, logger
+from pyiem.database import get_dbconnc
+from pyiem.util import logger
 
 LOG = logger()
 

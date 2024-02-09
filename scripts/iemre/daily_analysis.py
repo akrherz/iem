@@ -133,28 +133,28 @@ def copy_iemre_hourly(ts, ds):
         ds[vname].values = res
 
     # One off
-    for vname in ["wind_speed"]:
-        hours = 0
-        runningsum = None
-        for pair in pairs:
-            ncfn = iemre.get_hourly_ncname(pair[0].year)
-            tidx1 = iemre.hourly_offset(pair[0])
-            tidx2 = iemre.hourly_offset(pair[1])
-            with ncopen(ncfn, timeout=600) as nc:
-                uwnd = nc.variables["uwnd"]
-                vwnd = nc.variables["vwnd"]
-                for offset in range(tidx1, tidx2 + 1):
-                    val = (uwnd[offset] ** 2 + vwnd[offset] ** 2) ** 0.5
-                    if val.mask.all():
-                        LOG.info("No wind for offset: %s", offset)
-                        continue
-                    if runningsum is None:
-                        runningsum = val
-                    else:
-                        runningsum += val
-                    hours += 1
-        if hours > 0:
-            ds["wind_speed"].values = runningsum / hours
+    hours = 0
+    runningsum = None
+    for pair in pairs:
+        ncfn = iemre.get_hourly_ncname(pair[0].year)
+        tidx1 = iemre.hourly_offset(pair[0])
+        tidx2 = iemre.hourly_offset(pair[1])
+        with ncopen(ncfn, timeout=600) as nc:
+            uwnd = nc.variables["uwnd"]
+            vwnd = nc.variables["vwnd"]
+            for offset in range(tidx1, tidx2 + 1):
+                val = (uwnd[offset] ** 2 + vwnd[offset] ** 2) ** 0.5
+                if val.mask.all():
+                    LOG.info("No wind for offset: %s", offset)
+                    continue
+                if runningsum is None:
+                    runningsum = val
+                else:
+                    runningsum += val
+                hours += 1
+    if hours > 0:
+        ds["wind_speed"].values = runningsum / hours
+    # -----------------------------------------------------------------
     for vname in (
         "high_tmpk low_tmpk p01d high_soil4t avg_dwpk "
         "low_soil4t high_tmpk_12z low_tmpk_12z p01d_12z"

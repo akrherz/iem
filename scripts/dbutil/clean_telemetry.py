@@ -4,7 +4,8 @@ called from RUN_2AM.sh
 """
 from datetime import datetime, timedelta
 
-from pyiem.util import get_dbconnc, logger
+from pyiem.database import get_dbconnc
+from pyiem.util import logger
 
 LOG = logger()
 
