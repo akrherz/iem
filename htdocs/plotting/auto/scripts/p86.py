@@ -28,6 +28,8 @@ PDICT = {
     "high_tmpk_12z": "Maximum Temperature at 12 UTC",
     "high_soil4t": "Maximum 4 Inch Soil Temperature",
     "low_soil4t": "Minimum 4 Inch Soil Temperature",
+    "min_rh": "Minimum Relative Humidity",
+    "max_rh": "Maximum Relative Humidity",
     "power_swdn": "NASA POWER :: Incident Shortwave Down",
     "rsds": "Solar Radiation",
     "avg_dwpk": "Average Dew Point",
@@ -80,7 +82,9 @@ def unit_convert(nc, varname, idx0, jslice, islice):
     data = None
     if not varname.startswith("range"):
         data = nc.variables[varname][idx0, jslice, islice]
-    if varname in ["rsds", "power_swdn"]:
+    if varname in ["min_rh", "max_rh"]:
+        pass
+    elif varname in ["rsds", "power_swdn"]:
         # Value is in W m**-2, we want MJ
         multi = (86400.0 / 1000000.0) if varname == "rsds" else 1
         data = data * multi
@@ -105,7 +109,6 @@ def unit_convert(nc, varname, idx0, jslice, islice):
         "high_soil4t",
         "low_soil4t",
     ]:
-        # Value is in W m**-2, we want MJ
         data = masked_array(data, units("degK")).to(units("degF")).m
     else:  # range_tmpk range_tmpk_12z
         vname2 = f"low_tmpk{'_12z' if varname == 'range_tmpk_12z' else ''}"
@@ -161,6 +164,9 @@ def plotter(fdict):
             plot_units = "mph"
             clevs = pretty_bins(0, ptiles[1])
             clevs[0] = 0.01
+        elif varname in ["min_rh", "max_rh"]:
+            plot_units = "%"
+            clevs = pretty_bins(0, 100)
         elif varname in ["p01d", "p01d_12z", "snow_12z", "snowd_12z"]:
             # Value is in W m**-2, we want MJ
             plot_units = "inch"
