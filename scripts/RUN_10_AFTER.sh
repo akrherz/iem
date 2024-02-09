@@ -86,8 +86,8 @@ cd ../iemplot
 ./RUN.csh
 
 cd ../iemre
-python hourly_analysis.py `date -u +'%Y %m %d %H'`
-python hourly_analysis.py `date -u --date '2 hours ago' +'%Y %m %d %H'`
+python hourly_analysis.py `date -u +'%Y-%m-%dT%H:00:00'`
+python hourly_analysis.py `date -u --date '2 hours ago' +'%Y-%m-%dT%H:00:00'`
 
 cd ../mrms
 python make_mrms_rasters.py $YYYY $MM $DD $HH
@@ -137,5 +137,5 @@ fi
 
 # Additional hourly_analysis for a number of days ago, to pick up new data
 cd ../iemre
-python hourly_analysis.py `date -u --date '1 days ago' +'%Y %m %d %H'`
-python hourly_analysis.py `date -u --date '9 days ago' +'%Y %m %d %H'`
+python hourly_analysis.py `date -u --date '1 days ago' +'%Y-%m-%dT%H:00:00'`
+python hourly_analysis.py `date -u --date '9 days ago' +'%Y-%m-%dT%H:00:00'`

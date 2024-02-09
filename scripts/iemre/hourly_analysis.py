@@ -4,19 +4,20 @@ Run from RUN_10_AFTER.sh
 """
 import datetime
 import os
-import sys
 import warnings
 
+import click
 import numpy as np
 import pandas as pd
 import pygrib
+from affine import Affine
 from metpy.calc import wind_components
 from metpy.interpolate import inverse_distance_to_grid
 from metpy.units import masked_array, units
 from pyiem import iemre
-from pyiem.iemre import hourly_offset
-from pyiem.util import get_sqlalchemy_conn, logger, ncopen, utc
-from scipy.interpolate import NearestNDInterpolator, RegularGridInterpolator
+from pyiem.database import get_sqlalchemy_conn
+from pyiem.iemre import grb2iemre, hourly_offset, reproject2iemre
+from pyiem.util import logger, ncopen
 
 # Prevent invalid value encountered in cast
 warnings.simplefilter("ignore", RuntimeWarning)
@@ -28,20 +29,26 @@ def use_era5land(ts, kind):
     """Use the ERA5Land dataset."""
     tasks = {
         "wind": ["uwnd", "vwnd"],
-        "soilt": ["soilt"],
     }
     ncfn = f"/mesonet/data/era5/{ts:%Y}_era5land_hourly.nc"
     if not os.path.isfile(ncfn):
         LOG.warning("Failed to find %s", ncfn)
         return None
+    tidx = hourly_offset(ts)
     try:
-        tidx = hourly_offset(ts)
         with ncopen(ncfn) as nc:
             lats = nc.variables["lat"][:]
             lons = nc.variables["lon"][:]
+            aff = Affine(
+                lons[1] - lons[0],
+                0,
+                lons[0],
+                0,
+                lats[1] - lats[0],
+                lats[0],
+            )
             res = []
-            xi, yi = np.meshgrid(iemre.XAXIS, iemre.YAXIS)
-            for task in tasks[kind]:
+            for task in tasks.get(kind, [kind]):
                 if task == "soilt":
                     vals = nc.variables[task][tidx, 0, :, :]
                 else:
@@ -56,11 +63,11 @@ def use_era5land(ts, kind):
                         vals_shifted = np.roll(vals, shift=shift, axis=axis)
                         idx = ~vals_shifted.mask * vals.mask
                         vals[idx] = vals_shifted[idx]
-                nn = RegularGridInterpolator((lats, lons), vals.filled(np.nan))
-                data = np.ma.array(nn((yi, xi)))
-                data.mask = np.isnan(data)
-                res.append(data)
+                res.append(
+                    reproject2iemre(vals.filled(np.nan), aff, "epsg:4326")
+                )
         if res:
+            LOG.info("found %s", kind)
             return res[0] if len(res) == 1 else res
 
     except Exception as exp:
@@ -86,17 +93,13 @@ def use_hrrr_soilt(ts):
         return None
     try:
         grbs = pygrib.open(fn)
-        lats = None
         for grb in grbs:
             if grb.shortName != "st" or str(grb).find("level 0.1 m") == -1:
                 continue
-            lats, lons = [np.ravel(x) for x in grb.latlons()]
-            xi, yi = np.meshgrid(iemre.XAXIS, iemre.YAXIS)
-            nn = NearestNDInterpolator((lons, lats), np.ravel(grb.values))
-            return nn(xi, yi)
+            return grb2iemre(grb)
         grbs.close()
     except Exception as exp:
-        LOG.debug("%s exp:%s", fn, exp)
+        LOG.info("%s exp:%s", fn, exp)
     return None
 
 
@@ -119,22 +122,17 @@ def use_rtma(ts, kind):
         ],
     }
     if not os.path.isfile(fn):
-        LOG.debug("Failed to find %s", fn)
+        LOG.info("Failed to find %s", fn)
         return None
+    res = []
     try:
         grbs = pygrib.open(fn)
-        lats = None
-        res = []
         for task in tasks[kind]:
             grb = grbs.select(shortName=task)[0]
-            if lats is None:
-                lats, lons = [np.ravel(x) for x in grb.latlons()]
-            xi, yi = np.meshgrid(iemre.XAXIS, iemre.YAXIS)
-            nn = NearestNDInterpolator((lons, lats), np.ravel(grb.values))
-            res.append(nn(xi, yi))
+            res.append(grb2iemre(grb))
         return res
     except Exception as exp:
-        LOG.debug("%s exp:%s", fn, exp)
+        LOG.info("%s exp:%s", fn, exp)
     return None
 
 
@@ -275,9 +273,12 @@ def grid_hour(ts):
 
     # try first to use RTMA
     res = use_rtma(ts, "tmp")
+    if res is None:
+        # try ERA5Land
+        res = use_era5land(ts, "tmpk")
     did_gridding = False
     if res is not None:
-        tmpf = masked_array(res[0], data_units="degK").to("degF").m
+        tmpf = masked_array(res, data_units="degK").to("degF").m
     else:
         if df.empty:
             LOG.warning("%s has no entries, FAIL", ts)
@@ -287,9 +288,12 @@ def grid_hour(ts):
 
     # try first to use RTMA
     res = use_rtma(ts, "dwp")
+    if res is None:
+        # try ERA5Land
+        res = use_era5land(ts, "dwpk")
     # Ensure we have RTMA temps available
     if not did_gridding and res is not None:
-        dwpf = masked_array(res[0], data_units="degK").to("degF").m
+        dwpf = masked_array(res, data_units="degK").to("degF").m
     else:
         if df.empty:
             LOG.warning("%s has no entries, FAIL", ts)
@@ -305,7 +309,7 @@ def grid_hour(ts):
 
     res = grid_skyc(df, domain)
     if res is None:
-        LOG.warning("Failure for skyc at %s", ts)
+        LOG.warning("No obs for skyc at %s", ts)
     else:
         write_grid(ts, "skyc", res)
 
@@ -329,11 +333,12 @@ def write_grid(valid, vname, grid):
         nc.variables[vname][offset] = grid
 
 
-def main(argv):
+@click.command()
+@click.option("--valid", required=True, type=click.DateTime(), help="UTC")
+def main(valid):
     """Go Main"""
-    ts = utc(int(argv[1]), int(argv[2]), int(argv[3]), int(argv[4]))
-    grid_hour(ts)
+    grid_hour(valid.replace(tzinfo=datetime.timezone.utc))
 
 
 if __name__ == "__main__":
-    main(sys.argv)
+    main()
