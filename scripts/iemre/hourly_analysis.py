@@ -9,6 +9,7 @@ import warnings
 import click
 import numpy as np
 import pandas as pd
+import pint
 import pygrib
 from affine import Affine
 from metpy.calc import wind_components
@@ -17,7 +18,7 @@ from metpy.units import masked_array, units
 from pyiem import iemre
 from pyiem.database import get_sqlalchemy_conn
 from pyiem.iemre import grb2iemre, hourly_offset, reproject2iemre
-from pyiem.util import logger, ncopen
+from pyiem.util import archive_fetch, logger, ncopen
 
 # Prevent invalid value encountered in cast
 warnings.simplefilter("ignore", RuntimeWarning)
@@ -79,61 +80,57 @@ def use_hrrr_soilt(ts):
     """Verbatim copy HRRR, if it exists."""
     # We may be running close to real-time, so it makes some sense to take
     # files from the recent past.
-    grbfn = None
     for offset in range(5):
         fn = (ts - datetime.timedelta(hours=offset)).strftime(
-            "/mesonet/ARCHIVE/data/%Y/%m/%d/model/hrrr/%H/"
-            "hrrr.t%Hz.3kmf00.grib2"
+            "%Y/%m/%d/model/hrrr/%H/hrrr.t%Hz.3kmf00.grib2"
         )
-        if os.path.isfile(fn):
-            grbfn = fn
-            break
-    if grbfn is None:
-        LOG.info("Failed to find any HRRR grib files")
-        return None
-    try:
-        grbs = pygrib.open(fn)
-        for grb in grbs:
-            if grb.shortName != "st" or str(grb).find("level 0.1 m") == -1:
+        with archive_fetch(fn) as fn:
+            if fn is None:
                 continue
-            return grb2iemre(grb)
-        grbs.close()
-    except Exception as exp:
-        LOG.info("%s exp:%s", fn, exp)
+            try:
+                grbs = pygrib.open(fn)
+                for grb in grbs:
+                    if (
+                        grb.shortName != "st"
+                        or str(grb).find("level 0.1 m") == -1
+                    ):
+                        continue
+                    return grb2iemre(grb)
+                grbs.close()
+            except Exception as exp:
+                LOG.info("%s exp:%s", fn, exp)
     return None
 
 
 def use_rtma(ts, kind):
     """Verbatim copy RTMA, if it exists."""
-    fn = ts.strftime(
-        "/mesonet/ARCHIVE/data/%Y/%m/%d/model/rtma/%H/"
-        "rtma.t%Hz.awp2p5f000.grib2"
-    )
-    tasks = {
-        "wind": [
-            "10u",
-            "10v",
-        ],
-        "tmp": [
-            "2t",
-        ],
-        "dwp": [
-            "2d",
-        ],
-    }
-    if not os.path.isfile(fn):
-        LOG.info("Failed to find %s", fn)
+    if ts.year < 2011:
         return None
-    res = []
-    try:
-        grbs = pygrib.open(fn)
-        for task in tasks[kind]:
-            grb = grbs.select(shortName=task)[0]
-            res.append(grb2iemre(grb))
-        return res
-    except Exception as exp:
-        LOG.info("%s exp:%s", fn, exp)
-    return None
+    ppath = ts.strftime("%Y/%m/%d/model/rtma/%H/rtma.t%Hz.awp2p5f000.grib2")
+    with archive_fetch(ppath) as fn:
+        if fn is None:
+            return None
+        tasks = {
+            "wind": [
+                "10u",
+                "10v",
+            ],
+            "tmp": [
+                "2t",
+            ],
+            "dwp": [
+                "2d",
+            ],
+        }
+        res = []
+        try:
+            grbs = pygrib.open(fn)
+            for task in tasks[kind]:
+                grb = grbs.select(shortName=task)[0]
+                res.append(grb2iemre(grb))
+            return res[0] if len(res) == 1 else res
+        except Exception as exp:
+            LOG.info("%s exp:%s", fn, exp)
 
 
 def grid_wind(df, domain):
@@ -306,7 +303,6 @@ def grid_hour(ts):
     dwpf = np.where(mask, tmpf, dwpf)
     write_grid(ts, "tmpk", masked_array(tmpf, data_units="degF").to("degK"))
     write_grid(ts, "dwpk", masked_array(dwpf, data_units="degF").to("degK"))
-
     res = grid_skyc(df, domain)
     if res is None:
         LOG.warning("No obs for skyc at %s", ts)
@@ -320,6 +316,8 @@ def write_grid(valid, vname, grid):
     This is isolated so that we don't 'lock' up our file while intensive
     work is done
     """
+    if isinstance(grid, pint.Quantity):
+        grid = grid.m
     offset = iemre.hourly_offset(valid)
     with ncopen(iemre.get_hourly_ncname(valid.year), "a", timeout=300) as nc:
         LOG.info(

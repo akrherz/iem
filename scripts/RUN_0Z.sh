@@ -13,7 +13,7 @@ python ingest_climdiv.py &
 
 cd ../iemre
 # need to run daily analysis for climodat estimator to then work
-python daily_analysis.py $(date +'%Y %m %d')
+python daily_analysis.py --date=$(date +'%Y-%m-%d')
 
 cd ../climodat
 python sync_coop_updates.py
