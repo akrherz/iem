@@ -95,6 +95,8 @@ def copy_iemre_hourly(ts, ds):
             (sts + datetime.timedelta(hours=18), ets),
         ]
     windhours = 0
+    max_tmpk = None
+    min_tmpk = None
     hi_soil4t = None
     lo_soil4t = None
     sped = None
@@ -112,6 +114,7 @@ def copy_iemre_hourly(ts, ds):
             nc_uwnd = nc.variables["uwnd"]
             nc_vwnd = nc.variables["vwnd"]
             nc_t4 = nc.variables["soil4t"]
+            nc_tmpk = nc.variables["tmpk"]
             # Caution: precip is stored arrears, so we have ugliness
             _idx1 = 0 if tidx1 == 0 else tidx1 + 1
             LOG.info("precip read [%s<%s]", _idx1, tidx2 + 2)
@@ -130,6 +133,16 @@ def copy_iemre_hourly(ts, ds):
                 lo_soil4t = mint4
             else:
                 lo_soil4t = np.ma.maximum(lo_soil4t, mint4)
+            maxt = np.ma.max(nc_tmpk[tidx1 : (tidx2 + 1), :, :], axis=0)
+            if max_tmpk is None:
+                max_tmpk = maxt
+            else:
+                max_tmpk = np.ma.maximum(max_tmpk, maxt)
+            mint = np.ma.min(nc_tmpk[tidx1 : (tidx2 + 1), :, :], axis=0)
+            if min_tmpk is None:
+                min_tmpk = mint
+            else:
+                min_tmpk = np.ma.minimum(min_tmpk, mint)
             for offset in range(tidx1, tidx2 + 1):
                 uwnd = nc_uwnd[offset, :, :]
                 vwnd = nc_vwnd[offset, :, :]
@@ -145,6 +158,9 @@ def copy_iemre_hourly(ts, ds):
     if hi_soil4t is not None:
         ds["high_soil4t"].values = hi_soil4t
         ds["low_soil4t"].values = lo_soil4t
+    # NB: these are crude bias offsets involved when using hourly data
+    ds["high_tmpk"].values = max_tmpk + 0.8
+    ds["low_tmpk"].values = min_tmpk - 0.8
     ds["p01d"].values = totalprecip
     if windhours > 0:
         ds["wind_speed"].values = sped / windhours
