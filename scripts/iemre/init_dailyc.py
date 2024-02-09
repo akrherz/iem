@@ -5,8 +5,9 @@ import os
 import geopandas as gpd
 import numpy as np
 from pyiem import iemre
+from pyiem.database import get_dbconn
 from pyiem.grid.zs import CachingZonalStats
-from pyiem.util import get_dbconn, logger, ncopen
+from pyiem.util import logger, ncopen
 
 LOG = logger()
 

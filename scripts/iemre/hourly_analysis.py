@@ -131,6 +131,9 @@ def use_rtma(ts, kind):
             return res[0] if len(res) == 1 else res
         except Exception as exp:
             LOG.info("%s exp:%s", fn, exp)
+        finally:
+            grbs.close()
+    return None
 
 
 def grid_wind(df, domain):
