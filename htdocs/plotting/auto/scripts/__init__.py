@@ -151,7 +151,8 @@ daily_opts = [
         "id": 60,
         "label": ("Hourly Variable Frequencies/Min/Max by Week of Year"),
     },
-    {"id": 86, "label": "IEM Daily Reanalysis Plots"},
+    {"id": 86, "label": "IEMRE Daily Reanalysis Plots"},
+    {"id": 249, "label": "IEMRE Hourly Reanalysis Plots"},
     {
         "id": 139,
         "label": (
