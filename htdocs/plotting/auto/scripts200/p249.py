@@ -1,9 +1,6 @@
 """
-This map presents a daily <a href="/iemre/">IEM ReAnalysis</a> variable
-of your choice.  The concept of a day within this dataset is a period
-between 6 UTC to 6 UTC, which is Central Standard Time all year round.</p>
-
-<p><a href="/plotting/auto/?q=249">Autoplot 249</a> is the hourly
+This map presents an hourly <a href="/iemre/">IEM ReAnalysis</a> variable
+of your choice. <a href="/plotting/auto/?q=86">Autoplot 86</a> is the daily
 variant of this plot.
 """
 import datetime
@@ -18,22 +15,12 @@ from pyiem.reference import LATLON
 from pyiem.util import get_autoplot_context, ncopen
 
 PDICT = {
-    "p01d_12z": "24 Hour Precipitation at 12 UTC",
-    "p01d": "Calendar Day Precipitation",
-    "range_tmpk": "Range between Min and Max Temp",
-    "range_tmpk_12z": "Range between Min and Max Temp at 12 UTC",
-    "low_tmpk": "Minimum Temperature",
-    "low_tmpk_12z": "Minimum Temperature at 12 UTC",
-    "high_tmpk": "Maximum Temperature",
-    "high_tmpk_12z": "Maximum Temperature at 12 UTC",
-    "high_soil4t": "Maximum 4 Inch Soil Temperature",
-    "low_soil4t": "Minimum 4 Inch Soil Temperature",
-    "power_swdn": "NASA POWER :: Incident Shortwave Down",
-    "rsds": "Solar Radiation",
-    "avg_dwpk": "Average Dew Point",
-    "wind_speed": "Average Wind Speed",
-    "snow_12z": "Experimental 24-Hour Snowfall at 12 UTC",
-    "snowd_12z": "Experimental 24-Hour Snow Depth at 12 UTC",
+    "tmpk": "2m Air Temperature",
+    "dwpk": "2m Dew Point Temperature",
+    "skyc": "Sky Coverage",
+    "wind_speed": "10m Wind Speed",
+    "p01m": "1 Hour Precipitation",
+    "soil4t": "~0-10cm Soil Temperature",
 }
 PDICT2 = {"c": "Contour Plot", "g": "Grid Cell Mesh"}
 
@@ -52,7 +39,7 @@ def get_description():
         dict(
             type="select",
             name="var",
-            default="rsds",
+            default="tmpk",
             label="Select Plot Variable:",
             options=PDICT,
         ),
@@ -64,11 +51,11 @@ def get_description():
             options=PDICT2,
         ),
         dict(
-            type="date",
-            name="date",
-            default=today.strftime("%Y/%m/%d"),
+            type="datetime",
+            name="valid",
+            default=today.strftime("%Y/%m/%d 0000"),
             label="Date:",
-            min="1893/01/01",
+            min="1997/01/01 0000",
         ),
         dict(type="cmap", name="cmap", default="magma", label="Color Ramp:"),
     ]
@@ -77,14 +64,11 @@ def get_description():
 
 def unit_convert(nc, varname, idx0, jslice, islice):
     """Convert units."""
-    data = None
-    if not varname.startswith("range"):
-        data = nc.variables[varname][idx0, jslice, islice]
-    if varname in ["rsds", "power_swdn"]:
-        # Value is in W m**-2, we want MJ
-        multi = (86400.0 / 1000000.0) if varname == "rsds" else 1
-        data = data * multi
-    elif varname in ["wind_speed"]:
+    if varname == "wind_speed":
+        data = (
+            nc.variables["uwnd"][idx0, jslice, islice] ** 2
+            + nc.variables["vwnd"][idx0, jslice, islice] ** 2
+        ) ** 0.5
         data = (
             masked_array(
                 data,
@@ -93,29 +77,18 @@ def unit_convert(nc, varname, idx0, jslice, islice):
             .to(units("mile / hour"))
             .m
         )
-    elif varname in ["p01d", "p01d_12z", "snow_12z", "snowd_12z"]:
-        # Value is in W m**-2, we want MJ
+    else:
+        data = nc.variables[varname][idx0, jslice, islice]
+    if varname in [
+        "p01m",
+    ]:
         data = masked_array(data, units("mm")).to(units("inch")).m
     elif varname in [
-        "high_tmpk",
-        "low_tmpk",
-        "high_tmpk_12z",
-        "low_tmpk_12z",
-        "avg_dwpk",
-        "high_soil4t",
-        "low_soil4t",
+        "tmpk",
+        "dwpk",
+        "soil4t",
     ]:
-        # Value is in W m**-2, we want MJ
         data = masked_array(data, units("degK")).to(units("degF")).m
-    else:  # range_tmpk range_tmpk_12z
-        vname2 = f"low_tmpk{'_12z' if varname == 'range_tmpk_12z' else ''}"
-        vname1 = vname2.replace("low", "high")
-        d1 = nc.variables[vname1][idx0, jslice, islice]
-        d2 = nc.variables[vname2][idx0, jslice, islice]
-        data = (
-            masked_array(d1, units("degK")).to(units("degF")).m
-            - masked_array(d2, units("degK")).to(units("degF")).m
-        )
     return data
 
 
@@ -123,15 +96,15 @@ def plotter(fdict):
     """Go"""
     ctx = get_autoplot_context(fdict, get_description())
     ptype = ctx["ptype"]
-    date = ctx["date"]
+    valid = ctx["valid"].replace(tzinfo=datetime.timezone.utc)
     varname = ctx["var"]
-    title = date.strftime("%-d %B %Y")
+    title = valid.strftime("%-d %B %Y %H:%M UTC")
     mp = MapPlot(
         apctx=ctx,
         axisbg="white",
         nocaption=True,
         title=f"IEM Reanalysis of {PDICT.get(varname)} for {title}",
-        subtitle="Data derived from various NOAA datasets",
+        subtitle="Data derived from various NOAA/ERA5-Land datasets",
     )
     (west, east, south, north) = mp.panels[0].get_extent(LATLON)
     i0, j0 = iemre.find_ij(west, south)
@@ -140,8 +113,8 @@ def plotter(fdict):
     islice = slice(i0, i1)
 
     plot_units = ""
-    idx0 = iemre.daily_offset(date)
-    ncfn = iemre.get_daily_ncname(date.year)
+    idx0 = iemre.hourly_offset(valid)
+    ncfn = iemre.get_hourly_ncname(valid.year)
     if not os.path.isfile(ncfn):
         raise NoDataFound("No Data Found.")
     with ncopen(ncfn) as nc:
@@ -152,16 +125,13 @@ def plotter(fdict):
         if np.ma.is_masked(np.max(data)):
             raise NoDataFound("Data Unavailable")
         ptiles = np.nanpercentile(data.filled(np.nan), [5, 95, 99.9])
-        if varname in ["rsds", "power_swdn"]:
-            plot_units = "MJ d-1"
-            clevs = pretty_bins(0, ptiles[1])
-            clevs[0] = 0.01
-            cmap.set_under("white")
-        elif varname in ["wind_speed"]:
+        if varname in ["wind_speed"]:
             plot_units = "mph"
             clevs = pretty_bins(0, ptiles[1])
             clevs[0] = 0.01
-        elif varname in ["p01d", "p01d_12z", "snow_12z", "snowd_12z"]:
+        elif varname in [
+            "p01m",
+        ]:
             # Value is in W m**-2, we want MJ
             plot_units = "inch"
             if ptiles[2] < 1:
@@ -171,15 +141,9 @@ def plotter(fdict):
             clevs[0] = 0.01
             cmap.set_under("white")
         elif varname in [
-            "high_tmpk",
-            "low_tmpk",
-            "high_tmpk_12z",
-            "low_tmpk_12z",
-            "avg_dwpk",
-            "high_soil4t",
-            "low_soil4t",
-            "range_tmpk",
-            "range_tmpk_12z",
+            "tmpk",
+            "dwpk",
+            "soil4t",
         ]:
             plot_units = "F"
             clevs = pretty_bins(ptiles[0], ptiles[1])
