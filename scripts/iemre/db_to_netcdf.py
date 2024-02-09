@@ -33,6 +33,7 @@ def main(argv):
     with ncopen(ncfn, "a", timeout=600) as nc:
         for vname in ds:
             if vname not in nc.variables:
+                LOG.warning("Variable %s not in netcdf file, skipping", vname)
                 continue
             # Careful here, ds could contain NaN values
             nc.variables[vname][idx] = np.ma.array(

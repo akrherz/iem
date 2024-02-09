@@ -207,6 +207,24 @@ def init_year(ts):
     v1.standard_name = "4inch Soil Temperature"
     v1.coordinates = "lon lat"
 
+    v1 = nc.createVariable(
+        "min_rh", np.ubyte, ("time", "lat", "lon"), fill_value=255
+    )
+    v1.units = "%"
+    v1.scale_factor = 0.5
+    v1.long_name = "Minimum Relative Humidity"
+    v1.standard_name = "Minimum Relative Humidity"
+    v1.coordinates = "lon lat"
+
+    v1 = nc.createVariable(
+        "max_rh", np.ubyte, ("time", "lat", "lon"), fill_value=255
+    )
+    v1.units = "%"
+    v1.scale_factor = 0.5
+    v1.long_name = "Maximum Relative Humidity"
+    v1.standard_name = "Maximum Relative Humidity"
+    v1.coordinates = "lon lat"
+
     nc.close()
 
 

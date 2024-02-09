@@ -115,38 +115,77 @@ degree.</li>
      </ul>
      </div>
 </div>
-         
-<br clear="all" />
-<h3>Data Availability</h3>
 
-<table class="table">
-         <thead>
-<tr><th>Hourly Interval</th><th>Daily Interval</th></tr>
-</thead>
-         <tr>
-<td>
-<ul>
- <li>2 Meter Air and Dew Point Temperature</li>
- <li>10 Meter Wind Speed and Direction</li>
- <li>Precipitation</li>
- <li>Approx 4inch Soil Temperature</li>
- <li>Sky Coverage Percentage</li>
-</ul>
-</td>
-<td>
-<ul>
- <li>High and Low 2 Meter Air Temperature</li>
- <li>High and Low ~4 inch soil temperature</li>
- <li>Average wind speed magnitude</li>
- <li>Precipitation</li>
- <li>Snowfall at 12 UTC</li>
- <li>Snow Depth at 12 UTC</li>
- <li>Solar Radiation</li>
- <li>Solar Radiation via NASA POWER</li>
- <li>Average Dew Point Temperature</li>
-</ul>
-</td>
+<br clear="all" />
+<h3>Hourly Data Sources</h3>
+
+<p>Yearly <a href="/onsite/iemre/">netcdf files</a> since 1950, with updates
+at about 10 after the hour.  Since we want real-time data, some of these
+model sources are not available immediately, so the denoted intermediate source
+fills the gap until the final source is available.</p>
+
+<table class="table-striped">
+<thead><tr><th>Variable</th><th>Intermediate Source</th><th>Final Source</th></tr></thead>
+<tbody>
+
+<tr>
+<th>Precipitation</th>
+<td>Stage IV</td>
+<td>1997+ Stage IV adjusted by PRISM
+<br />1950-1997 ERA5-Land</td>
 </tr>
+
+<tr>
+<th>2m Air Temperature
+<br />2 m Dew Point Temperature
+<br />10m Wind Speed
+</th>
+<td>Crude ASOS grid analysis</td>
+<td>2010+: RTMA, once available
+<br />1950-2010 ERA5-Land</td>
+</tr>
+
+<tr>
+<th>4 inch (cough 0-10 or 0-7cm) Soil Temperature</th>
+<td>HRRR</td>
+<td>1950+: ERA5-Land</td>
+</tr>
+
+<tr>
+<th>Sky Coverage</th>
+<td>Crude ASOS grid analysis</td>
+<td>Crude ASOS grid analysis</td>
+</tr>
+
+</tbody>
+</table>
+
+<!-- ......................................................... -->
+<h3>Daily Data Sources</h3>
+
+<p>Yearly <a href="/onsite/iemre/">netcdf files</a> since 1893. Some of these
+variables are directly sourced from the hourly grids above.  The concept of
+a daily variable is a bit nebulous, but is intended to be a 6 to 6 UTC period.
+</p>
+
+<table class="table-striped">
+<thead><tr><th>Variable</th><th>Intermediate Source</th><th>Final Source</th></tr></thead>
+<tbody>
+
+<tr>
+<th>High/Low 4 inch (cough 0-10 or 0-7cm) Soil Temperature</th>
+<td>HRRR</td>
+<td>1950+: ERA5-Land</td>
+</tr>
+
+<tr>
+<th>Average 2m Dew Point Temperature</th>
+<td>Simple average of hourly RTMA</td>
+<td>2010+: RTMA, once available
+<br />1950-2010 ERA5-Land</td>
+</tr>
+
+</tbody>
 </table>
 
 <h3>Data Access</h3>
@@ -177,7 +216,7 @@ Example: https://mesonet.agron.iastate.edu/iemre/hourly/2010-05-01/42.54/-96.40/
 
 
 <h4>Raw Data Access</h4>
-                 
+
 <p>The IEM makes extensive use of the <a href="https://www.unidata.ucar.edu/software/netcdf/">NetCDF</a>
 file format to store these gridded datasets.  You can find individual web directories for various
 IEMRE related datasets: 
