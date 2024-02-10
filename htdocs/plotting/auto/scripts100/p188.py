@@ -1,11 +1,21 @@
-"""Min temp after, max temp after, count of days"""
+"""
+This plot presents the yearly minimum temperature
+after the first spring temperature above a given value or the maximum
+temperature after the first fall temperature below a given value.  The
+terms spring and fall are simply representing the first half and second
+half of the year respectively.  So for example using the default plot
+options, this chart displays the maximum high temperature after the first
+fall season sub 32 low temperature and then the number of days that the
+high reached 60+ degrees until the end of each year.
+"""
 import calendar
 import datetime
 
 import pandas as pd
+from pyiem.database import get_sqlalchemy_conn
 from pyiem.exceptions import NoDataFound
 from pyiem.plot import figure
-from pyiem.util import get_autoplot_context, get_sqlalchemy_conn
+from pyiem.util import get_autoplot_context
 
 PDICT = {
     "spring": "Min Temp after first Spring Temp above",
@@ -15,17 +25,7 @@ PDICT = {
 
 def get_description():
     """Return a dict describing how to call this plotter"""
-    desc = {}
-    desc["data"] = True
-    desc["description"] = """This plot presents the yearly minimum temperature
-    after the first spring temperature above a given value or the maximum
-    temperature after the first fall temperature below a given value.  The
-    terms spring and fall are simply representing the first half and second
-    half of the year respectively.  So for example using the default plot
-    options, this chart displays the maximum high temperature after the first
-    fall season sub 32 low temperature and then the number of days that the
-    high reached 60+ degrees until the end of each year.
-    """
+    desc = {"data": True, "description": __doc__}
     today = datetime.date.today()
     desc["arguments"] = [
         dict(
@@ -71,16 +71,15 @@ def plotter(fdict):
     varname = ctx["var"]
     thres = ctx["thres"]
     thres2 = ctx["thres2"]
-    table = f"alldata_{station[:2]}"
     if varname == "fall":
-        sql = f"""
+        sql = """
         WITH doy as (
-            SELECT year, min(day) from {table} WHERE station = %s
+            SELECT year, min(day) from alldata WHERE station = %s
             and low < %s and month > 6 GROUP by year),
         agg as (
             SELECT a.year, max(high) as peak_value,
             sum(case when high >= %s then 1 else 0 end) as count_days
-            from {table} a, doy d
+            from alldata a, doy d
             WHERE a.station = %s and a.year = d.year and a.day > d.min
             GROUP by a.year)
 
@@ -94,14 +93,14 @@ def plotter(fdict):
         ctx["ax1_ylabel"] = r"Max High Temperature $^\circ$F"
         ctx["ax2_xlabel"] = "Date of First Sub %.0f Low" % (thres,)
     else:
-        sql = f"""
+        sql = """
         WITH doy as (
-            SELECT year, min(day) from {table} WHERE station = %s
+            SELECT year, min(day) from alldata WHERE station = %s
             and high >= %s and month < 6 GROUP by year),
         agg as (
             SELECT a.year, min(low) as peak_value,
             sum(case when low < %s then 1 else 0 end) as count_days
-            from {table} a, doy d
+            from alldata a, doy d
             WHERE a.station = %s and a.year = d.year and a.day > d.min
             and a.month < 6
             GROUP by a.year)

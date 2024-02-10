@@ -1,4 +1,13 @@
-"""First fall or last spring"""
+"""
+This chart presents the last date of fall or first
+date of spring that a given temperature threshold was last or first
+reached.  Note that leap day creates some ambiguity with an analysis like
+this, so for example, the 15th of November is considered equal for each
+year.  The plot truncates once you reach the 20th of December.  If you use
+the downloaded file, please note that you need to consider the levels
+above the given threshold as the latest date.  The downloaded file simply
+provides the latest date at a given temperature.
+"""
 import calendar
 import datetime
 
@@ -11,17 +20,7 @@ from pyiem.plot import figure_axes
 
 def get_description():
     """Return a dict describing how to call this plotter"""
-    desc = {}
-    desc["data"] = True
-    desc["description"] = """This chart presents the last date of fall or first
-    date of spring that a given temperature threshold was last or first
-    reached.  Note that leap day creates some ambiguity with an analysis like
-    this, so for example, the 15th of November is considered equal for each
-    year.  The plot truncates once you reach the 20th of December.  If you use
-    the downloaded file, please note that you need to consider the levels
-    above the given threshold as the latest date.  The downloaded file simply
-    provides the latest date at a given temperature.
-    """
+    desc = {"data": True, "description": __doc__}
     desc["arguments"] = [
         dict(
             type="station",
@@ -106,4 +105,4 @@ def plotter(fdict):
 
 
 if __name__ == "__main__":
-    plotter(dict(station="IA7594", network="IACLIMATE"))
+    plotter({})

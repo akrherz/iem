@@ -16,7 +16,7 @@ $rs = pg_prepare(
         "ORDER by name ASC"
 );
 
-$st = isset($_REQUEST["state"]) ? $_REQUEST["state"] : 'IA';
+$st = isset($_REQUEST["state"]) ? xssafe($_REQUEST["state"]) : 'IA';
 
 $rs = pg_execute($dbconn, "SELECT", array($st));
 

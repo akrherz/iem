@@ -8,8 +8,8 @@ require_once "../../include/database.inc.php";
 require_once "../../include/forms.php";
 
 // This should be a UTC timestamp, gasp!
-$ts = isset($_REQUEST["ts"]) ? strtotime($_REQUEST["ts"]) : 0;
-$network = isset($_REQUEST["network"]) ? substr($_REQUEST["network"], 0, 4) : "KCCI";
+$ts = isset($_REQUEST["ts"]) ? strtotime(xssafe($_REQUEST["ts"])) : 0;
+$network = isset($_REQUEST["network"]) ? substr(xssafe($_REQUEST["network"]), 0, 4) : "KCCI";
 
 $connect = iemdb("mesosite");
 pg_exec($connect, "SET TIME ZONE 'UTC'");

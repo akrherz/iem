@@ -1,20 +1,23 @@
-"""Create plots of yearly totals and optionally fit
-    a linear trendline.  Here is a brief description of some of the
-    available metrics.
-    <ul>
-     <li><strong>Frost Free Days</strong>: Number of days each year between
-     the last spring sub 32F temperature and first fall sub 32F temperature.
-     </li>
-    </ul>
+"""
+Create plots of yearly totals and optionally fit
+a linear trendline.  Here is a brief description of some of the
+available metrics.
+<ul>
+    <li><strong>Frost Free Days</strong>: Number of days each year between
+    the last spring sub 32F temperature and first fall sub 32F temperature.
+    </li>
+</ul>
 
-    <p>If you plot the DJF period, the year shown is the year of the
-    December within the three year period."""
+<p>If you plot the DJF period, the year shown is the year of the
+December within the three year period.
+"""
 import datetime
 
 import pandas as pd
+from pyiem.database import get_sqlalchemy_conn
 from pyiem.exceptions import NoDataFound
 from pyiem.plot import figure_axes
-from pyiem.util import get_autoplot_context, get_sqlalchemy_conn
+from pyiem.util import get_autoplot_context
 from scipy.stats import linregress
 
 BOOLS = {
@@ -99,6 +102,14 @@ META = {
         "ylabel": "Temperature [F]",
         "xlabel": "Year",
         "func": "avg(low)",
+        "month_bounds": "and month in (6,7,8)",
+        "valid_offset": " ",
+    },
+    "summer_avg_era5land_soilm1m_avg": {
+        "title": "Summer [JJA] Average ERA5-Land 0-1m Soil Moisture",
+        "ylabel": "Soil Moisture [m3/m3]",
+        "xlabel": "Year",
+        "func": "avg(era5land_soilm1m_avg)",
         "month_bounds": "and month in (6,7,8)",
         "valid_offset": " ",
     },

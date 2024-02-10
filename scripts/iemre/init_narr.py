@@ -5,12 +5,10 @@ import sys
 
 import numpy as np
 import pygrib
-from pyiem.util import logger, ncopen
+from pyiem.util import archive_fetch, logger, ncopen
 
 # This exists on dev laptop :/
-TEMPLATE_FN = (
-    "/mesonet/ARCHIVE/data/1980/01/01/model/NARR/apcp_198001010000.grib"
-)
+TEMPLATE_FN = "1980/01/01/model/NARR/apcp_198001010000.grib"
 BASEDIR = "/mesonet/data/iemre"
 LOG = logger()
 
@@ -20,10 +18,11 @@ def init_year(ts):
     Create a new NetCDF file for a year of our specification!
     """
     # Load up the example grib file to base our file on
-    grbs = pygrib.open(TEMPLATE_FN)
-    grb = grbs[1]
-    # grid shape is y, x
-    lats, lons = grb.latlons()
+    with archive_fetch(TEMPLATE_FN) as fn:
+        grbs = pygrib.open(fn)
+        grb = grbs[1]
+        # grid shape is y, x
+        lats, lons = grb.latlons()
 
     fp = f"{BASEDIR}/{ts.year}_narr.nc"
     if os.path.isfile(fp):

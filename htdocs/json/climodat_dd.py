@@ -4,10 +4,11 @@ import json
 
 import numpy as np
 from metpy.units import units
+from pyiem.database import get_dbconn
 from pyiem.exceptions import IncompleteWebRequest
 from pyiem.iemre import find_ij
 from pyiem.meteorology import gdd as calc_gdd
-from pyiem.util import c2f, get_dbconn, ncopen
+from pyiem.util import c2f, ncopen
 from pyiem.webutil import iemapp
 from pymemcache.client import Client
 
@@ -64,16 +65,17 @@ def run(station, sdate, edate, gddbase, gddceil):
         "accum": accum,
     }
     idx, jdx = find_ij(lon, lat)
-    for model in ["gfs", "ndfd"]:
-        with ncopen(f"/mesonet/data/iemre/{model}_current.nc") as nc:
-            highs = c2f(nc.variables["high_tmpk"][:, jdx, idx] - 273.15)
-            lows = c2f(nc.variables["low_tmpk"][:, jdx, idx] - 273.15)
-            taxis = compute_taxis(nc.variables["time"])
-            gdds, total = compute(taxis, highs, lows, gddbase, gddceil)
-            res[model] = gdds
-            res[f"{model}_accum"] = total
-            res[f"{model}_sdate"] = f"{gdds[0]['date']}"
-            res[f"{model}_edate"] = f"{gdds[-1]['date']}"
+    if idx is not None:
+        for model in ["gfs", "ndfd"]:
+            with ncopen(f"/mesonet/data/iemre/{model}_current.nc") as nc:
+                highs = c2f(nc.variables["high_tmpk"][:, jdx, idx] - 273.15)
+                lows = c2f(nc.variables["low_tmpk"][:, jdx, idx] - 273.15)
+                taxis = compute_taxis(nc.variables["time"])
+                gdds, total = compute(taxis, highs, lows, gddbase, gddceil)
+                res[model] = gdds
+                res[f"{model}_accum"] = total
+                res[f"{model}_sdate"] = f"{gdds[0]['date']}"
+                res[f"{model}_edate"] = f"{gdds[-1]['date']}"
 
     return json.dumps(res)
 

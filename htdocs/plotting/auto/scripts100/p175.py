@@ -1,4 +1,9 @@
-"""snow cover coverage."""
+"""
+This chart displays estimated areal coverage of
+snow cover for a single state.  This estimate is based on a 0.125x0.125
+degree analysis of NWS COOP observations.  The date shown would represent
+snow depth reported approximately at 7 AM.
+"""
 import datetime
 import os
 
@@ -7,28 +12,18 @@ import matplotlib.dates as mdates
 import numpy as np
 import pandas as pd
 from pyiem import iemre, reference
+from pyiem.database import get_sqlalchemy_conn
 from pyiem.exceptions import NoDataFound
 from pyiem.grid.zs import CachingZonalStats
 from pyiem.plot import figure_axes
-from pyiem.util import (
-    convert_value,
-    get_autoplot_context,
-    get_sqlalchemy_conn,
-    ncopen,
-)
+from pyiem.util import convert_value, get_autoplot_context, ncopen
 
 
 def get_description():
     """Return a dict describing how to call this plotter"""
-    desc = {}
+    desc = {"description": __doc__, "data": True, "cache": 86400}
     today = datetime.date.today()
     year = today.year if today.month > 9 else today.year - 1
-    desc["description"] = """This chart displays estimated areal coverage of
-    snow cover for a single state.  This estimate is based on a 0.125x0.125
-    degree analysis of NWS COOP observations.  The date shown would represent
-    snow depth reported approximately at 7 AM.
-    """
-    desc["data"] = True
     desc["arguments"] = [
         dict(
             type="year",

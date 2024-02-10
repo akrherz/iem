@@ -20,7 +20,7 @@ def init_year(ts):
         LOG.warn("Cowardly refusing to overwrite %s", fn)
         return
     nc = ncopen(fn, "w")
-    nc.title = "MRMS Daily Precipitation %s" % (ts.year,)
+    nc.title = f"MRMS Daily Precipitation {ts.year}"
     nc.platform = "Grided Estimates"
     nc.description = "MRMS 0.01 degree grid"
     nc.institution = "Iowa State University, Ames, IA, USA"

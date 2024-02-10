@@ -31,8 +31,7 @@ def main():
     # Plot departure from normal
     mp = MapPlot(
         sector="midwest",
-        title=("Precipitation Departure %s - %s")
-        % (sts.strftime("%b %d %Y"), ets.strftime("%b %d %Y")),
+        title=f"Precipitation Departure {sts:%b %d %Y} - {ets:%b %d %Y}",
         subtitle="based on IEM Estimates",
     )
 
@@ -47,8 +46,7 @@ def main():
     # Plot normals
     mp = MapPlot(
         sector="midwest",
-        title=("Normal Precipitation:: %s - %s")
-        % (sts.strftime("%b %d %Y"), ets.strftime("%b %d %Y")),
+        title=f"Normal Precipitation:: {sts:%b %d %Y} - {ets:%b %d %Y}",
         subtitle="based on IEM Estimates",
     )
 
@@ -61,8 +59,7 @@ def main():
     # Plot Obs
     mp = MapPlot(
         sector="midwest",
-        title=("Estimated Precipitation:: %s - %s")
-        % (sts.strftime("%b %d %Y"), ets.strftime("%b %d %Y")),
+        title=f"Estimated Precipitation:: {sts:%b %d %Y} - {ets:%b %d %Y}",
         subtitle="based on IEM Estimates",
     )
 

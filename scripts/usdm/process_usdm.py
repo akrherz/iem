@@ -9,7 +9,8 @@ import zipfile
 
 import fiona
 import requests
-from pyiem.util import exponential_backoff, get_dbconnc, logger
+from pyiem.database import get_dbconnc
+from pyiem.util import exponential_backoff, logger
 from shapely.geometry import MultiPolygon, shape
 
 LOG = logger()

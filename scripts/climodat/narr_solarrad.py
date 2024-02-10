@@ -35,8 +35,9 @@ import pandas as pd
 import pygrib
 import pyproj
 from affine import Affine
+from pyiem.database import get_dbconn, get_sqlalchemy_conn
 from pyiem.grid.zs import CachingZonalStats
-from pyiem.util import get_dbconn, get_sqlalchemy_conn, logger, utc
+from pyiem.util import archive_fetch, logger, utc
 
 LOG = logger()
 LCC = (
@@ -89,29 +90,29 @@ def compute(df, sids, dt, do_regions=False):
     yaxis = None
     while now < ets:
         # See if we have Grib data first
-        fn = now.strftime(
-            "/mesonet/ARCHIVE/data/%Y/%m/%d/model/NARR/rad_%Y%m%d%H00.grib"
-        )
-        if not os.path.isfile(fn):
-            LOG.warning("Missing %s", fn)
-        else:
-            grb = pygrib.open(fn)[1]
-            if total is None:
-                xaxis, yaxis = get_grid(grb)
-                affine = Affine(
-                    grb["DxInMetres"],
-                    0,
-                    xaxis[0],
-                    0,
-                    0 - grb["DyInMetres"],
-                    yaxis[-1],
-                )
-
-                # W/m2 over 3 hours J/m2 to MJ/m2
-                total = grb["values"] * 10800.0 / 1_000_000.0
+        with archive_fetch(
+            now.strftime("%Y/%m/%d/model/NARR/rad_%Y%m%d%H00.grib")
+        ) as fn:
+            if not os.path.isfile(fn):
+                LOG.warning("Missing %s", fn)
             else:
-                total += grb["values"] * 10800.0 / 1_000_000.0
-        now += datetime.timedelta(hours=3)
+                grb = pygrib.open(fn)[1]
+                if total is None:
+                    xaxis, yaxis = get_grid(grb)
+                    affine = Affine(
+                        grb["DxInMetres"],
+                        0,
+                        xaxis[0],
+                        0,
+                        0 - grb["DyInMetres"],
+                        yaxis[-1],
+                    )
+
+                    # W/m2 over 3 hours J/m2 to MJ/m2
+                    total = grb["values"] * 10800.0 / 1_000_000.0
+                else:
+                    total += grb["values"] * 10800.0 / 1_000_000.0
+            now += datetime.timedelta(hours=3)
 
     df["i"] = np.digitize(df["projx"].values, xaxis)
     df["j"] = np.digitize(df["projy"].values, yaxis)
@@ -143,6 +144,7 @@ def build_stations(dt) -> pd.DataFrame:
     df[COL] = np.nan
     df["i"] = np.nan
     df["j"] = np.nan
+    df["day"] = dt
     LOG.info("Found %s database entries", len(df.index))
     return df
 
@@ -163,11 +165,11 @@ def do(dt):
     pgconn = get_dbconn("coop")
     cursor = pgconn.cursor()
 
-    for sid, row in df[df[COL].notna()].iterrows():
-        cursor.execute(
-            f"UPDATE alldata set {COL} = %s where station = %s and day = %s",
-            (row["narr_srad"], sid, dt),
-        )
+    cursor.executemany(
+        f"UPDATE alldata set {COL} = %({COL})s where station = %(station)s "
+        "and day = %(day)s",
+        df[df[COL].notna()].reset_index().to_dict(orient="records"),
+    )
 
     cursor.close()
     pgconn.commit()

@@ -18,7 +18,7 @@ HH=$(date +%H)
 if [ "$HH" -eq "22" ]
     then
         cd ../../climodat
-        python hrrr_solarrad.py $(date +'%Y %m %d')	
+        python hrrr_solarrad.py --date=$(date +'%Y-%m-%d')	
 fi
 
 # END

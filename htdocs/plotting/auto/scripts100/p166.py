@@ -1,4 +1,8 @@
-"""Watches"""
+"""
+This plot presents a summary of the number of year
+to date watches issued by the Storm Prediction Center and the percentage
+of those watches that at least touched the given state.
+"""
 import datetime
 
 import matplotlib.ticker as ticker
@@ -16,12 +20,7 @@ MDICT = {
 
 def get_description():
     """Return a dict describing how to call this plotter"""
-    desc = {}
-    desc["data"] = True
-    desc["description"] = """This plot presents a summary of the number of year
-    to date watches issued by the Storm Prediction Center and the percentage
-    of those watches that at least touched the given state.
-    """
+    desc = {"data": True, "description": __doc__}
     desc["arguments"] = [
         dict(type="state", name="state", default="IA", label="Select State:"),
         dict(
