@@ -163,7 +163,9 @@ def copy_iemre_hourly(ts, ds):
         aggfunc = np.ma.max
         if vname.startswith("p01d"):
             aggfunc = np.ma.sum  # was np.nansum, better check this
-        if vname == "avg_dwpk":
+        elif vname in ["low_tmpk", "low_tmpk_12z"]:
+            aggfunc = np.ma.min
+        elif vname == "avg_dwpk":
             aggfunc = np.ma.mean
         ncvarname = (
             vname.replace("high_", "")
