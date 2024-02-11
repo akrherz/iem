@@ -166,8 +166,8 @@ def do(dt):
     cursor = pgconn.cursor()
 
     cursor.executemany(
-        f"UPDATE alldata set {COL} = %({COL})s where station = %(station)s "
-        "and day = %(day)s",
+        "UPDATE alldata set narr_srad = %(narr_srad)s where "
+        "station = %(station)s and day = %(day)s",
         df[df[COL].notna()].reset_index().to_dict(orient="records"),
     )
 
