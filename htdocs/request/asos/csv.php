@@ -2,6 +2,7 @@
 /* Generate a CSV file based on a request */
 require_once "../../../config/settings.inc.php";
 require_once "../../../include/database.inc.php";
+require_once "../../../include/forms.php";
 $mesosite = iemdb("mesosite");
 $access = iemdb("iem");
 $asos = iemdb("asos");
@@ -15,7 +16,7 @@ if (isset($_GET["lat"]) && isset($_GET["lon"])) {
     $sql = sprintf("SELECT id, 
       ST_DistanceSphere(geom, ST_geometryfromtext('POINT(%.4f %.4f)',4326)) as dist from stations
       WHERE network ~* 'ASOS' ORDER by dist ASC
-      LIMIT 5", $_GET["lon"], $_GET["lat"]);
+      LIMIT 5", xssafe($_GET["lon"]), xssafe($_GET["lat"]));
     $rs = pg_exec($mesosite, $sql);
     for ($i = 0; $row = pg_fetch_array($rs); $i++) {
         $stations[$i] = $row["id"];

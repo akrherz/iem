@@ -1,4 +1,4 @@
-<?php 
+<?php
 require_once "../../../config/settings.inc.php";
 define("IEM_APPID", 155);
 require_once "../../../include/myview.php";
@@ -12,20 +12,25 @@ $t = new MyView();
 $t->iemss = True;
 $t->title = "Download Hourly Precipitation Data";
 
-$network = isset($_REQUEST["network"]) ? xssafe($_REQUEST["network"]): "IA_ASOS";
+$network = isset($_REQUEST["network"]) ? xssafe($_REQUEST["network"]) : "IA_ASOS";
 
 $nselect = "<select name=\"network\">";
 $rs = pg_query(
     $mesosite,
-    "SELECT id, name from networks WHERE id ~* 'ASOS' and ".
-    "length(id) = 7 ORDER by name ASC");
-for ($i=0;$row=pg_fetch_assoc($rs);$i++){
-	$sel = '';
-	if ($network == $row["id"]){
-		$sel = " selected='SELECTED'";
-	}
-	$nselect .= sprintf("<option value='%s'%s>%s</option>\n",
-	  $row["id"], $sel, $row["name"]);
+    "SELECT id, name from networks WHERE id ~* 'ASOS' and " .
+        "length(id) = 7 ORDER by name ASC"
+);
+for ($i = 0; $row = pg_fetch_assoc($rs); $i++) {
+    $sel = '';
+    if ($network == $row["id"]) {
+        $sel = " selected='SELECTED'";
+    }
+    $nselect .= sprintf(
+        "<option value='%s'%s>%s</option>\n",
+        $row["id"],
+        $sel,
+        $row["name"]
+    );
 }
 $nselect .= "</select>";
 
@@ -36,7 +41,7 @@ $y2 = yearSelect2(1941, date("Y"), "year2");
 $m2 = monthSelect(date("m"), "month2");
 $d2 = daySelect2(date("d"), "day2");
 
-$ar = Array(
+$ar = array(
     "Etc/UTC" => "Coordinated Universal Time (UTC)",
     "America/New_York" => "America/New_York (EST/EDT)",
     "America/Chicago" => "America/Chicago (CST/CDT)",
@@ -49,10 +54,10 @@ $tzselect = make_select("tz", "America/Chicago", $ar);
 
 $t->content = <<<EOF
 <ol class="breadcrumb">
-	<li><a href="/ASOS/">ASOS Mainpage</a></li>
-	<li class="current">IEM Computed Hourly Precipitation Totals</li>
+    <li><a href="/ASOS/">ASOS Mainpage</a></li>
+    <li class="current">IEM Computed Hourly Precipitation Totals</li>
 </ol>
-		
+
 <p>The IEM attempts to take the METAR reports of precipitation and then 
 provide just the hourly precipitation totals.  These totals are not for the
 true hour (00 to 59 after), but for the hour between the standard METAR
@@ -93,7 +98,7 @@ data prior to 2010 for missing hours.</div>
   <tr>
     <th>Start:</th>
     <td>{$y1}</td><td>{$m1}</td><td>{$d1}</td>
-		</tr>
+        </tr>
 
   <tr>
     <th>End:</th>
@@ -109,7 +114,7 @@ data prior to 2010 for missing hours.</div>
 
 <h4>4) Timezone of Observation Times:</h4>
 <p><i>The following options are available for how the observation time is 
-	presented.</i></p>
+    presented.</i></p>
 {$tzselect}
 
 <input type="submit" value="Request Data">

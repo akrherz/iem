@@ -6,16 +6,17 @@ Run again with RUN_NOON.sh when the regular estimator runs
 # pylint: disable=unpacking-non-sequence
 import datetime
 import os
-import sys
 
+import click
 import geopandas as gpd
 import numpy as np
 import pandas as pd
 import pygrib
 import pyproj
 from affine import Affine
+from pyiem.database import get_dbconnc, get_sqlalchemy_conn
 from pyiem.grid.zs import CachingZonalStats
-from pyiem.util import get_dbconn, get_sqlalchemy_conn, logger, utc
+from pyiem.util import archive_fetch, logger, utc
 
 LOG = logger()
 LCC = (
@@ -69,6 +70,7 @@ def build_stations(dt) -> pd.DataFrame:
     df[COL] = np.nan
     df["i"] = np.nan
     df["j"] = np.nan
+    df["day"] = dt
     LOG.info("Found %s database entries", len(df.index))
     return df
 
@@ -100,54 +102,57 @@ def compute(df, sids, dt, do_regions=False):
         sts, sts + datetime.timedelta(hours=23), freq="1h"
     ):
         # Try the newer f01 files, which have better data!
-        fn = now.strftime(
-            "/mesonet/ARCHIVE/data/%Y/%m/%d/model/hrrr/%H/"
-            "hrrr.t%Hz.3kmf01.grib2"
-        )
-        if os.path.isfile(fn):
-            grbs = pygrib.open(fn)
-            selgrbs = grbs.select(name=GRBNAME)
-            if len(selgrbs) == 4:
-                # Goodie
-                for g in selgrbs:
-                    if total is None:
-                        xaxis, yaxis = get_grid(g)
-                        affine = Affine(
-                            g["DxInMetres"],
-                            0,
-                            xaxis[0],
-                            0,
-                            0 - g["DyInMetres"],
-                            yaxis[-1],
-                        )
-                        total = g.values * 900.0  # 15 min data
-                    else:
-                        total += g.values * 900.0
+        with archive_fetch(
+            now.strftime("%Y/%m/%d/model/hrrr/%H/hrrr.t%Hz.3kmf01.grib2")
+        ) as fn:
+            if os.path.isfile(fn):
+                grbs = pygrib.open(fn)
+                selgrbs = grbs.select(name=GRBNAME)
+                if len(selgrbs) == 4:
+                    # Goodie
+                    for g in selgrbs:
+                        if total is None:
+                            xaxis, yaxis = get_grid(g)
+                            affine = Affine(
+                                g["DxInMetres"],
+                                0,
+                                xaxis[0],
+                                0,
+                                0 - g["DyInMetres"],
+                                yaxis[-1],
+                            )
+                            total = g.values * 900.0  # 15 min data
+                        else:
+                            total += g.values * 900.0
+                    continue
+        with archive_fetch(
+            now.strftime("%Y/%m/%d/model/hrrr/%H/hrrr.t%Hz.3kmf00.grib2")
+        ) as fn:
+            if not os.path.isfile(fn):
+                LOG.info("Missing %s", fn)
                 continue
-        fn = now.strftime(
-            "/mesonet/ARCHIVE/data/%Y/%m/%d/model/hrrr/%H/"
-            "hrrr.t%Hz.3kmf00.grib2"
-        )
-        if not os.path.isfile(fn):
-            LOG.info("Missing %s", fn)
-            continue
-        grbs = pygrib.open(fn)
-        try:
-            if now >= SWITCH_DATE:
-                grb = grbs.select(name=GRBNAME)
+            grbs = pygrib.open(fn)
+            try:
+                if now >= SWITCH_DATE:
+                    grb = grbs.select(name=GRBNAME)
+                else:
+                    grb = grbs.select(parameterNumber=192)
+            except ValueError:
+                continue
+            g = grb[0]
+            if total is None:
+                xaxis, yaxis = get_grid(g)
+                affine = Affine(
+                    g["DxInMetres"],
+                    0,
+                    xaxis[0],
+                    0,
+                    0 - g["DyInMetres"],
+                    yaxis[-1],
+                )
+                total = g.values * 3600.0
             else:
-                grb = grbs.select(parameterNumber=192)
-        except ValueError:
-            continue
-        g = grb[0]
-        if total is None:
-            xaxis, yaxis = get_grid(g)
-            affine = Affine(
-                g["DxInMetres"], 0, xaxis[0], 0, 0 - g["DyInMetres"], yaxis[-1]
-            )
-            total = g.values * 3600.0
-        else:
-            total += g.values * 3600.0
+                total += g.values * 3600.0
 
     if total is None:
         LOG.warning("No HRRR data for %s", dt)
@@ -168,9 +173,11 @@ def compute(df, sids, dt, do_regions=False):
     LOG.info("IA0200 %s", df.at["IA0200", COL])
 
 
-def main(argv):
+@click.command()
+@click.option("--date", "dt", type=click.DateTime(), help="UTC Valid Time")
+def main(dt):
     """Do Something"""
-    dt = datetime.date(int(argv[1]), int(argv[2]), int(argv[3]))
+    dt = dt.date()
     df = build_stations(dt)
     # We currently do two options
     # 1. For morning sites 1-11 AM, they get yesterday's radiation
@@ -180,18 +187,15 @@ def main(argv):
     sids = df[df[COL].isna()].index.values
     compute(df, sids, dt)
 
-    pgconn = get_dbconn("coop")
-    cursor = pgconn.cursor()
-    for sid, row in df[df[COL].notna()].iterrows():
-        cursor.execute(
-            f"UPDATE alldata set {COL} = %s where station = %s and "
-            "day = %s",
-            (row[COL], sid, dt),
-        )
+    pgconn, cursor = get_dbconnc("coop")
+    cursor.executemany(
+        f"UPDATE alldata set {COL} = %({COL})s where station = %(station)s "
+        "and day = %(day)s",
+        df[df[COL].notna()].reset_index().to_dict("records"),
+    )
     cursor.close()
     pgconn.commit()
 
 
 if __name__ == "__main__":
-    # run main() run
-    main(sys.argv)
+    main()

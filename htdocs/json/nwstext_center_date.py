@@ -7,15 +7,13 @@ from datetime import datetime, timedelta
 
 # extras
 from pyiem.exceptions import IncompleteWebRequest
-from pyiem.util import get_dbconn, html_escape, utc
+from pyiem.util import html_escape, utc
 from pyiem.webutil import iemapp
 
 
-@iemapp(default_tz="UTC")
+@iemapp(default_tz="UTC", iemdb="afos")
 def application(environ, start_response):
     """Answer request."""
-    pgconn = get_dbconn("afos")
-    acursor = pgconn.cursor()
     center = environ.get("center", "KOKX")[:4]
     cb = environ.get("callback")
     if environ.get("date") is not None:
@@ -38,15 +36,15 @@ def application(environ, start_response):
             'SRF', 'SQW', 'SVR', 'SVS', 'TCV', 'TOR', 'TSU', 'WCN', 'WSW')
         """
 
-    acursor.execute(
+    environ["iemdb.afos.cursor"].execute(
         "SELECT data, to_char(entered at time zone 'UTC', "
-        "'YYYY-MM-DDThh24:MI:00Z') from products "
+        "'YYYY-MM-DDThh24:MI:00Z') as ee from products "
         "where source = %s and entered >= %s and "
         f"entered < %s {pil_limiter} ORDER by entered ASC",
         (center, environ["sts"], environ["ets"]),
     )
-    for row in acursor:
-        root["products"].append({"data": row[0], "entered": row[1]})
+    for row in environ["iemdb.afos.cursor"]:
+        root["products"].append({"data": row["data"], "entered": row["ee"]})
 
     data = json.dumps(root)
     if cb is not None:

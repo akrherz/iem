@@ -8,8 +8,9 @@ import subprocess
 import tempfile
 import zipfile
 
-from geopandas import read_postgis
-from pyiem.util import get_sqlalchemy_conn, logger, utc
+import geopandas as gpd
+from pyiem.database import get_sqlalchemy_conn
+from pyiem.util import logger, utc
 
 LOG = logger()
 FIELDS = {
@@ -37,7 +38,7 @@ def main():
     # out of the shapefile
     ets = utc() + datetime.timedelta(minutes=+1)
     with get_sqlalchemy_conn("postgis") as conn:
-        df = read_postgis(
+        df = gpd.read_postgis(
             """
             SELECT distinct l.geom,
             to_char(valid at time zone 'UTC', 'YYYYMMDDHH24MI') as VALID,

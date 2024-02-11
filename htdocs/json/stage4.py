@@ -32,7 +32,7 @@ def dowork(environ):
     sidx = iemre.hourly_offset(sts)
     eidx = iemre.hourly_offset(ets)
 
-    ncfn = "/mesonet/data/stage4/%s_stage4_hourly.nc" % (date.year,)
+    ncfn = f"/mesonet/data/stage4/{date.year}_stage4_hourly.nc"
     res = {"gridi": -1, "gridj": -1, "data": []}
     if not os.path.isfile(ncfn):
         return json.dumps(res)
@@ -69,7 +69,7 @@ def application(environ, start_response):
     valid = environ.get("valid")
     cb = environ.get("callback", None)
 
-    mckey = "/json/stage4/%.2f/%.2f/%s?callback=%s" % (lon, lat, valid, cb)
+    mckey = f"/json/stage4/{lon:.2f}/{lat:.2f}/{valid}?callback={cb}"
     mc = Client("iem-memcached:11211")
     res = mc.get(mckey)
     if not res:
@@ -80,7 +80,7 @@ def application(environ, start_response):
     mc.close()
 
     if cb is not None:
-        res = "%s(%s)" % (html_escape(cb), res)
+        res = f"{html_escape(cb)}({res})"
 
     headers = [("Content-type", "application/json")]
     start_response("200 OK", headers)

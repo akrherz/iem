@@ -8,7 +8,7 @@ require_once "../../include/database.inc.php";
 require_once "../../include/network.php";
 require_once "../../include/forms.php";
 
-$network = isset($_REQUEST["network"]) ? $_REQUEST["network"] : "KCCI";
+$network = isset($_REQUEST["network"]) ? xssafe($_REQUEST["network"]) : "KCCI";
 $nt = new NetworkTable($network);
 
 $ar = array("stations" => array());

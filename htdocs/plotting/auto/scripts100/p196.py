@@ -16,10 +16,11 @@ the automated weather station resides in.
 """
 
 import pandas as pd
+from pyiem.database import get_sqlalchemy_conn
 from pyiem.exceptions import NoDataFound
 from pyiem.nws.vtec import NWS_COLORS, get_ps_string
 from pyiem.plot import figure_axes
-from pyiem.util import get_autoplot_context, get_sqlalchemy_conn
+from pyiem.util import get_autoplot_context
 
 PDICT = {
     "no": "Consider all Heat Index / Wind Chill Values",
@@ -179,4 +180,4 @@ def plotter(fdict):
 
 
 if __name__ == "__main__":
-    plotter(dict(opt="no", var="chill"))
+    plotter({})

@@ -1,4 +1,4 @@
-<?php 
+<?php
 require_once "../../../config/settings.inc.php";
 require_once "../../../include/myview.php";
 require_once "../../../include/imagemaps.php";
@@ -13,17 +13,17 @@ $t->title = "ASOS One Minute Data Download";
 
 $aend = get_iemprop("asos.1min.end");
 $archive_end = "N/A";
-if (! is_null($aend)){
+if (!is_null($aend)) {
     $asos_archive_end = new DateTime($aend);
     $archive_end = $asos_archive_end->format('d M Y');
 }
 $bogus = 0;
 
 $y1select = yearSelect2(2000, date("Y"), "year1");
-$m1select = monthSelect($bogus, "month1"); 
-$d1select = daySelect2("1", "day1"); 
-$h1select = hourSelect($bogus, "hour1"); 
-$min1select = minuteSelect($bogus, "minute1"); 
+$m1select = monthSelect($bogus, "month1");
+$d1select = daySelect2("1", "day1");
+$h1select = hourSelect($bogus, "hour1");
+$min1select = minuteSelect($bogus, "minute1");
 
 $y2select = yearSelect2(2000, date("Y"), "year2");
 $m2select = monthSelect(date("m"), "month2");
@@ -40,7 +40,7 @@ $t->headextra = <<<EOM
 }
 </style>
 EOM;
-$t->content = <<<EOF
+$t->content = <<<EOM
 <ol class="breadcrumb">
  <li><a href="/ASOS/">ASOS Mainpage</a></li>
  <li class="active">Download ASOS 1 minute interval data</li>
@@ -179,5 +179,5 @@ How shall the output values be seperated?
 
 </form>
 
-EOF;
+EOM;
 $t->render('full.phtml');

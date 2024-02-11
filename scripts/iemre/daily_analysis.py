@@ -163,7 +163,9 @@ def copy_iemre_hourly(ts, ds):
         aggfunc = np.ma.max
         if vname.startswith("p01d"):
             aggfunc = np.ma.sum  # was np.nansum, better check this
-        if vname == "avg_dwpk":
+        elif vname in ["low_tmpk", "low_tmpk_12z"]:
+            aggfunc = np.ma.min
+        elif vname == "avg_dwpk":
             aggfunc = np.ma.mean
         ncvarname = (
             vname.replace("high_", "")
@@ -324,7 +326,7 @@ def use_asos_daily(ts, ds):
         ds["max_rh"].values = res
 
 
-def use_climodat_daily(ts, ds):
+def use_climodat_daily(ts: datetime.date, ds):
     """Do our gridding"""
     mybuf = 2.0
     giswkt = "SRID=4326;POLYGON((%s %s, %s  %s, %s %s, %s %s, %s %s))" % (
@@ -372,7 +374,8 @@ def use_climodat_daily(ts, ds):
             ),
         )
     if len(df.index) < 4:
-        LOG.warning("Failed quorum")
+        if ts != datetime.date.today():
+            LOG.warning("Failed quorum")
         return
     suffix = "_all" if ts.year < 1951 else ""
     res = generic_gridder(df, f"highdata{suffix}")
@@ -386,7 +389,7 @@ def use_climodat_daily(ts, ds):
         ds["p01d"].values = convert_value(res, "inch", "mm")
 
 
-def workflow(ts):
+def workflow(ts: datetime.date):
     """Do Work"""
     # load up our current data
     ds = iemre.get_grids(ts)

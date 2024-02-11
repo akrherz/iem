@@ -6,8 +6,8 @@ import os
 import subprocess
 import tempfile
 
+from pyiem.database import get_dbconn
 from pyiem.network import Table as NetworkTable
-from pyiem.util import get_dbconn
 
 
 def main():

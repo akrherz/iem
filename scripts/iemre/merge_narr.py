@@ -11,7 +11,7 @@ import sys
 import numpy as np
 import pygrib
 from pyiem import iemre
-from pyiem.util import logger, ncopen
+from pyiem.util import archive_fetch, logger, ncopen
 
 LOG = logger()
 
@@ -20,16 +20,15 @@ def to_netcdf(valid):
     """Persist this 1 hour precip information to the netcdf storage
 
     Recall that this timestep has data for the previous hour"""
-    fn = (
-        f"/mesonet/ARCHIVE/data/{valid:%Y/%m/%d}/model/NARR/"
-        f"apcp_{valid:%Y%m%d%H%M}.grib"
-    )
-    if not os.path.isfile(fn):
-        LOG.warning("Missing file %s", fn)
-        return False
-    gribs = pygrib.open(fn)
-    grb = gribs[1]
-    val = grb.values
+    with archive_fetch(
+        f"{valid:%Y/%m/%d}/model/NARR/apcp_{valid:%Y%m%d%H%M}.grib"
+    ) as fn:
+        if not os.path.isfile(fn):
+            LOG.warning("Missing file %s", fn)
+            return False
+        gribs = pygrib.open(fn)
+        grb = gribs[1]
+        val = grb.values
 
     tidx = int((iemre.hourly_offset(valid) + 1) / 3)
     LOG.info("%s np.min: %s np.max: %s", tidx, np.min(val), np.max(val))

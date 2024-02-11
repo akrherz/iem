@@ -6,11 +6,12 @@ import datetime
 
 import pandas as pd
 from metpy.units import units
+from pyiem.database import get_sqlalchemy_conn
 from pyiem.exceptions import NoDataFound
 from pyiem.network import Table as NetworkTable  # This is needed.
 from pyiem.plot.geoplot import MapPlot
 from pyiem.tracker import loadqc
-from pyiem.util import get_autoplot_context, get_sqlalchemy_conn, mm2inch
+from pyiem.util import get_autoplot_context, mm2inch
 
 PLOTTYPES = {
     "1": "Max/Min 4 Inch Soil Temps",
@@ -415,4 +416,4 @@ def plotter(fdict):
 
 
 if __name__ == "__main__":
-    plotter(dict(opt="5", date="2019-04-21"))
+    plotter({})

@@ -17,7 +17,7 @@ $rs = pg_prepare(
     "SELECT distinct key from $table WHERE station = $1"
 );
 
-$station = isset($_REQUEST["station"]) ? strtoupper($_REQUEST["station"]) :
+$station = isset($_REQUEST["station"]) ? strtoupper(xssafe($_REQUEST["station"])) :
     die(json_encode('Please provide a station variable (NWSLI)'));
 
 $rs = pg_execute($hads, "SELECT", array($station));

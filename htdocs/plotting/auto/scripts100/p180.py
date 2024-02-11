@@ -1,17 +1,17 @@
-"""This application plots daily climatology for
-    a location or two of your choice.  You can pick which climatology to use
-    and effectively build a difference plot when picking the same station,
-    but using a different climatology."""
-# stdlib
+"""
+This application plots daily climatology for
+a location or two of your choice.  You can pick which climatology to use
+and effectively build a difference plot when picking the same station,
+but using a different climatology.
+"""
 import calendar
 
 import matplotlib.dates as mdates
-
-# third party
 import pandas as pd
+from pyiem.database import get_sqlalchemy_conn
 from pyiem.exceptions import NoDataFound
 from pyiem.plot import figure, fitbox
-from pyiem.util import get_autoplot_context, get_sqlalchemy_conn
+from pyiem.util import get_autoplot_context
 
 PDICT = {
     "por": "Period of Record (por) Climatology",
@@ -347,19 +347,4 @@ def plotter(fdict):
 
 
 if __name__ == "__main__":
-    plotter(
-        dict(
-            v="snow",
-            network1="IACLIMATE",
-            station1="IA0112",
-            c1="1951",
-            network2="IACLIMATE",
-            station2="IA0112",
-            c2="ncei81",
-            s="0",
-            sy1=1981,
-            ey1=2010,
-            sy2=1991,
-            ey2=2020,
-        )
-    )
+    plotter({})

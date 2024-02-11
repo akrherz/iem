@@ -9,7 +9,7 @@ from email import encoders
 from email.mime.base import MIMEBase
 from email.mime.multipart import MIMEMultipart
 
-from pyiem.util import get_dbconn
+from pyiem.database import get_dbconn
 
 WFOS = ["KDMX", "KARX", "KDVN", "KFSD", "KOAX"]
 

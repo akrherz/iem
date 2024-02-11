@@ -77,6 +77,8 @@ def validate_ts(val):
     year = int(val[:4])
     if year < 1986 or year > (utc().year + 1):
         raise ValueError("year invalid")
+    if len(val) == 10:
+        val += "T00:00:00Z"
     # YYYY-mm-ddTHH:MI
     if len(val) == 16:
         val += ":00Z"

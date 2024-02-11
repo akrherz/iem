@@ -1,4 +1,13 @@
-"""autoplot ya'll"""
+"""
+This chart presents the hourly average wind speeds
+by month of the year or by custom periods.
+The hours presented are valid in the local time zone
+of the reporting station.  For example in Iowa, 3 PM would represent
+3 PM CDT in the summer and 3 PM CST in the winter.  Please complain to us
+if this logic causes you heartburn!  The format of the date periods is
+two digit month followed by two digit day for both the start and end
+date.
+"""
 import calendar
 import datetime
 
@@ -13,17 +22,7 @@ UNITCONV = {"mph": "mile / hour", "kt": "knot", "mps": "meter / second"}
 
 def get_description():
     """Return a dict describing how to call this plotter"""
-    desc = {}
-    desc["data"] = True
-    desc["cache"] = 86400
-    desc["description"] = """This chart presents the hourly average wind speeds
-    by month of the year or by custom periods.
-    The hours presented are valid in the local time zone
-    of the reporting station.  For example in Iowa, 3 PM would represent
-    3 PM CDT in the summer and 3 PM CST in the winter.  Please complain to us
-    if this logic causes you heartburn!  The format of the date periods is
-    two digit month followed by two digit day for both the start and end
-    date."""
+    desc = {"description": __doc__, "data": True, "cache": 86400}
     today = datetime.date.today()
     desc["arguments"] = [
         dict(

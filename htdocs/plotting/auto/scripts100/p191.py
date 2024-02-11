@@ -14,11 +14,12 @@ doing so the time zone used to compute the calendar dates is US Central.
 import datetime
 
 import pandas as pd
+from pyiem.database import get_dbconn, get_sqlalchemy_conn
 from pyiem.exceptions import NoDataFound
 from pyiem.nws import vtec
 from pyiem.plot import calendar_plot
 from pyiem.reference import state_names
-from pyiem.util import get_autoplot_context, get_dbconn, get_sqlalchemy_conn
+from pyiem.util import get_autoplot_context
 from sqlalchemy import text
 
 PDICT = {"yes": "Colorize Cells in Chart", "no": "Just plot values please"}
@@ -236,12 +237,4 @@ def plotter(fdict):
 
 
 if __name__ == "__main__":
-    plotter(
-        dict(
-            phenomenav1="FG",
-            significancev1="Y",
-            sdate="2017-01-01",
-            edate="2017-12-31",
-            wfo="OUN",
-        )
-    )
+    plotter({})

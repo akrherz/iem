@@ -6,10 +6,11 @@ from zoneinfo import ZoneInfo
 import click
 import pandas as pd
 import requests
+from pyiem.database import get_dbconnc, get_sqlalchemy_conn
 from pyiem.network import Table as NetworkTable
 from pyiem.observation import Observation
 from pyiem.reference import TRACE_VALUE
-from pyiem.util import get_dbconnc, get_sqlalchemy_conn, logger
+from pyiem.util import logger
 from tqdm import tqdm
 
 LOG = logger()

@@ -1,13 +1,15 @@
-"""This chart presents the rank a station's yearly
-    summary value has against an unweighted population of available
-    observations in the state.  The green line is a simple average of the
-    plot.
+"""
+This chart presents the rank a station's yearly
+summary value has against an unweighted population of available
+observations in the state.  The green line is a simple average of the
+plot.
 """
 
 import pandas as pd
+from pyiem.database import get_sqlalchemy_conn
 from pyiem.exceptions import NoDataFound
 from pyiem.plot import figure
-from pyiem.util import get_autoplot_context, get_sqlalchemy_conn
+from pyiem.util import get_autoplot_context
 
 PDICT = {
     "precip": "Total Precipitation",
