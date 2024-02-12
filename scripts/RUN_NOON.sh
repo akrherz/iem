@@ -8,7 +8,7 @@ cd ../iemre
 # We hopefully have a 12z 24h file by now
 python stage4_12z_adjust.py $(date +'%Y %m %d')
 # Copy the data to IEMRE hourly
-python precip_ingest.py $(date +'%Y %m %d')
+python precip_ingest.py --valid12z=$(date +'%Y-%m-%dT12:00:00')
 python daily_analysis.py --date=$(date +'%Y-%m-%d')
 
 cd ../prism
@@ -18,7 +18,7 @@ cd ../iemre
 # adjusts stage IV hourly file to PRISM reality
 python prism_adjust_stage4.py $(date --date '1 days ago' +'%Y %m %d')
 # Copies updated stage IV hourly into IEMRE hourly
-python precip_ingest.py $(date --date '1 days ago' +'%Y %m %d')
+python precip_ingest.py --valid12z=$(date --date '1 days ago' +'%Y-%m-%dT12:00:00')
 
 cd ../climodat
 python daily_estimator.py --date=$(date +'%Y-%m-%d')

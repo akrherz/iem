@@ -5,12 +5,12 @@
 """
 import datetime
 import os
-import sys
 
+import click
 import numpy as np
 import pygrib
 from pyiem import iemre
-from pyiem.util import logger, ncopen, utc
+from pyiem.util import logger, ncopen
 from scipy.interpolate import NearestNDInterpolator
 
 LOG = logger()
@@ -112,14 +112,17 @@ def workflow(valid, force_copy):
     copy_to_iemre(valid)
 
 
-def main(argv):
+@click.command()
+@click.option("--valid", "ts", type=click.DateTime(), help="Specific UTC")
+@click.option("--valid12z", "ets", type=click.DateTime(), help="12z UTC")
+def main(ts, ets):
     """Go Main"""
-    if len(argv) == 5:
-        ts = utc(int(argv[1]), int(argv[2]), int(argv[3]), int(argv[4]))
+    if ts is not None:
+        ts = ts.replace(tzinfo=datetime.timezone.utc)
         workflow(ts, True)
         return
     # Otherwise we are running for an explicit 12z to 12z period, copy only
-    ets = utc(int(argv[1]), int(argv[2]), int(argv[3]), 12)
+    ets = ets.replace(tzinfo=datetime.timezone.utc)
     now = ets - datetime.timedelta(hours=23)
     while now <= ets:
         workflow(now, False)
@@ -127,4 +130,4 @@ def main(argv):
 
 
 if __name__ == "__main__":
-    main(sys.argv)
+    main()
