@@ -5,7 +5,6 @@ Run again with RUN_NOON.sh when the regular estimator runs
 """
 # pylint: disable=unpacking-non-sequence
 import datetime
-import os
 
 import click
 import geopandas as gpd
@@ -105,7 +104,7 @@ def compute(df, sids, dt, do_regions=False):
         with archive_fetch(
             now.strftime("%Y/%m/%d/model/hrrr/%H/hrrr.t%Hz.3kmf01.grib2")
         ) as fn:
-            if os.path.isfile(fn):
+            if fn is not None:
                 grbs = pygrib.open(fn)
                 selgrbs = grbs.select(name=GRBNAME)
                 if len(selgrbs) == 4:
@@ -128,8 +127,8 @@ def compute(df, sids, dt, do_regions=False):
         with archive_fetch(
             now.strftime("%Y/%m/%d/model/hrrr/%H/hrrr.t%Hz.3kmf00.grib2")
         ) as fn:
-            if not os.path.isfile(fn):
-                LOG.info("Missing %s", fn)
+            if fn is None:
+                LOG.info("Missing %s", now)
                 continue
             grbs = pygrib.open(fn)
             try:

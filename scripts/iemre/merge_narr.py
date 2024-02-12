@@ -5,7 +5,6 @@ Unsure if I have any code that uses these .nc files, alas.
 Called from dl/download_narr.py each month around the 9th.
 """
 import datetime
-import os
 import sys
 
 import numpy as np
@@ -23,8 +22,8 @@ def to_netcdf(valid):
     with archive_fetch(
         f"{valid:%Y/%m/%d}/model/NARR/apcp_{valid:%Y%m%d%H%M}.grib"
     ) as fn:
-        if not os.path.isfile(fn):
-            LOG.warning("Missing file %s", fn)
+        if fn is None:
+            LOG.warning("Missing file %s", valid)
             return False
         gribs = pygrib.open(fn)
         grb = gribs[1]
