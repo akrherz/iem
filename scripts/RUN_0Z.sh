@@ -53,6 +53,6 @@ cd ../iemre
 # We have hopefully gotten a refreshed 12z stage4 file, so we chunk it again
 python stage4_12z_adjust.py $(date +'%Y %m %d')
 # Run precip ingest to copy this to IEMRE
-python precip_ingest.py $(date +'%Y %m %d')
+python precip_ingest.py --valid12z=$(date +'%Y-%m-%dT12:00:00')
 # grid rsds using ERA5Land for 8 days ago, to be safe
 python grid_rsds.py $(date -u --date '8 days ago' +'%Y %m %d')
