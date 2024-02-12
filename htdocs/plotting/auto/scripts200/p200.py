@@ -25,12 +25,13 @@ import geopandas as gpd
 import numpy as np
 import pandas as pd
 from affine import Affine
+from pyiem.database import get_sqlalchemy_conn
 from pyiem.exceptions import NoDataFound
 from pyiem.grid.zs import CachingZonalStats
 from pyiem.plot import get_cmap
 from pyiem.plot.geoplot import MapPlot
 from pyiem.reference import LATLON
-from pyiem.util import get_autoplot_context, get_sqlalchemy_conn, utc
+from pyiem.util import get_autoplot_context, utc
 from sqlalchemy import text
 
 PDICT5 = {
@@ -292,12 +293,12 @@ def plotter(fdict):
         df = gpd.read_postgis(
             text(
                 f"""
-            select expire, min(issue) as min_issue, st_union(geom) as geom,
+            select expire, min(issue) as min_issue,
+            st_union(geom_layers) as geom,
             min(extract(year from issue at time zone 'UTC')) as year
             from spc_outlooks where outlook_type = :ot and day = :day
             {hour_limiter} and threshold = :t and category = :cat and
-            ST_Intersects(geom,
-            ST_GeomFromEWKT(:giswkt))
+            ST_Intersects(geom, ST_GeomFromEWKT(:giswkt))
             and extract(month from issue) = ANY(:months)
             and product_issue > '2002-01-01' and
             product_issue < :edate
@@ -380,6 +381,8 @@ def plotter(fdict):
         df2 = pd.DataFrame(
             {"lat": lats.ravel(), "lon": lons.ravel(), "freq": domain.ravel()}
         )
+    if np.nanmax(domain) == 0:
+        raise NoDataFound("No Data Found")
     if ctx["w"] == "lastyear":
         if np.ma.max(domain) < 1:
             domain = np.where(domain < 1, np.nan, domain)
