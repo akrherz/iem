@@ -2,13 +2,12 @@
     Plot the hourly stage IV precip data
 """
 import datetime
-import os
-import sys
 from zoneinfo import ZoneInfo
 
+import click
 import pygrib
 from pyiem.plot import MapPlot, get_cmap
-from pyiem.util import logger, mm2inch, utc
+from pyiem.util import archive_fetch, logger, mm2inch, utc
 
 LOG = logger()
 
@@ -22,22 +21,19 @@ def doit(ts):
     if ((gmtnow - ts).days * 86400.0 + (gmtnow - ts).seconds) < 7200:
         routes = "ac"
 
-    fn = "/mesonet/ARCHIVE/data/%s/stage4/ST4.%s.01h.grib" % (
-        ts.strftime("%Y/%m/%d"),
-        ts.strftime("%Y%m%d%H"),
-    )
-    if not os.path.isfile(fn):
-        LOG.info("Missing stage4 %s", fn)
-        return
-
-    try:
-        grbs = pygrib.open(fn)
-        grib = grbs[1]
-    except Exception:
-        LOG.warning("Read %s failure", fn)
-        return
-    lats, lons = grib.latlons()
-    vals = mm2inch(grib.values)
+    ppath = f"{ts:%Y/%m/%d}/stage4/ST4.{ts:%Y%m%d%H}.01h.grib"
+    with archive_fetch(ppath) as fn:
+        if fn is None:
+            LOG.info("Missing stage4 %s", ppath)
+            return
+        try:
+            grbs = pygrib.open(fn)
+            grib = grbs[1]
+        except Exception:
+            LOG.warning("Read %s failure", fn)
+            return
+        lats, lons = grib.latlons()
+        vals = mm2inch(grib.values)
 
     cmap = get_cmap("jet")
     cmap.set_under("white")
@@ -82,10 +78,12 @@ def doit(ts):
         mp.close()
 
 
-def main(argv):
+@click.command()
+@click.option("--valid", "ts", type=click.DateTime(), help="UTC Timestamp")
+def main(ts):
     """Go main Go"""
-    if len(argv) == 5:
-        ts = utc(int(argv[1]), int(argv[2]), int(argv[3]), int(argv[4]))
+    if ts is not None:
+        ts = ts.replace(tzinfo=ZoneInfo("UTC"))
         doit(ts)
     else:
         ts = utc()
@@ -95,4 +93,4 @@ def main(argv):
 
 
 if __name__ == "__main__":
-    main(sys.argv)
+    main()

@@ -15,6 +15,7 @@ import pandas as pd
 import requests
 from paste.request import get_cookie_dict
 from pyiem.database import get_dbconnc, get_sqlalchemy_conn
+from pyiem.exceptions import BadWebRequest
 from pyiem.htmlgen import make_select, station_select
 from pyiem.nws.vtec import VTEC_PHENOMENA, VTEC_SIGNIFICANCE
 from pyiem.reference import SECTORS_NAME, state_names
@@ -533,7 +534,10 @@ def generate_form(apid, fdict, headers, cookies):
                 f'value="{value}">'
             )
         elif arg["type"] in ["month", "zhour", "hour", "day", "year"]:
-            form = datetypes_handler(arg, int(value))
+            try:
+                form = datetypes_handler(arg, int(value))
+            except ValueError:
+                raise BadWebRequest("Invalid value provided")
         elif arg["type"] == "select":
             form = make_select(
                 arg["name"],

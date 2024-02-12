@@ -7,66 +7,67 @@ Minimum temperature
 Run at 5 AM local from RUN_10_AFTER.sh
 """
 import datetime
-import os
 
 import numpy as np
 import pygrib
+from pyiem.database import get_dbconn
 from pyiem.network import Table as NetworkTable
-from pyiem.util import convert_value, get_dbconn, logger, utc
+from pyiem.util import archive_fetch, convert_value, logger, utc
 
 LOG = logger()
 
 
 def do_agg(dkey, fname, ts, data):
     """Do aggregate"""
-    fn = ts.strftime(
-        f"/mesonet/ARCHIVE/data/%Y/%m/%d/model/cfs/%H/{fname}.01."
-        "%Y%m%d%H.daily.grib2"
+    ppath = ts.strftime(
+        f"%Y/%m/%d/model/cfs/%H/{fname}.01.%Y%m%d%H.daily.grib2"
     )
-    if not os.path.isfile(fn):
-        LOG.info("missing %s", fn)
-        return
-    # Precip
-    gribs = pygrib.open(fn)
-    for grib in gribs:
-        if data["x"] is None:
-            lat, lon = grib.latlons()
-            data["y"] = lat[:, 0]
-            data["x"] = lon[0, :]
-        ftime = ts + datetime.timedelta(hours=grib.forecastTime)
-        cst = ftime - datetime.timedelta(hours=7)
-        key = cst.strftime("%Y-%m-%d")
-        d = data["fx"].setdefault(
-            key, dict(precip=None, high=None, low=None, srad=None)
-        )
-        LOG.info("Writting %s %s from ftime: %s", dkey, key, ftime)
-        if d[dkey] is None:
-            d[dkey] = grib.values * 6 * 3600.0
-        else:
-            d[dkey] += grib.values * 6 * 3600.0
+    with archive_fetch(ppath) as fn:
+        if fn is None:
+            LOG.info("missing %s", ppath)
+            return
+        # Precip
+        gribs = pygrib.open(fn)
+        for grib in gribs:
+            if data["x"] is None:
+                lat, lon = grib.latlons()
+                data["y"] = lat[:, 0]
+                data["x"] = lon[0, :]
+            ftime = ts + datetime.timedelta(hours=grib.forecastTime)
+            cst = ftime - datetime.timedelta(hours=7)
+            key = cst.strftime("%Y-%m-%d")
+            d = data["fx"].setdefault(
+                key, dict(precip=None, high=None, low=None, srad=None)
+            )
+            LOG.info("Writting %s %s from ftime: %s", dkey, key, ftime)
+            if d[dkey] is None:
+                d[dkey] = grib.values * 6 * 3600.0
+            else:
+                d[dkey] += grib.values * 6 * 3600.0
 
 
 def do_temp(dkey, fname, func, ts, data):
     """Do Temperatures"""
-    fn = ts.strftime(
-        f"/mesonet/ARCHIVE/data/%Y/%m/%d/model/cfs/%H/{fname}"
-        ".01.%Y%m%d%H.daily.grib2"
+    ppath = ts.strftime(
+        f"%Y/%m/%d/model/cfs/%H/{fname}.01.%Y%m%d%H.daily.grib2"
     )
-    if not os.path.isfile(fn):
-        return
-    gribs = pygrib.open(fn)
-    for grib in gribs:
-        ftime = ts + datetime.timedelta(hours=grib.forecastTime)
-        cst = ftime - datetime.timedelta(hours=7)
-        key = cst.strftime("%Y-%m-%d")
-        if key not in data["fx"]:
-            continue
-        d = data["fx"][key]
-        LOG.info("Writting %s %s from ftime: %s", dkey, key, ftime)
-        if d[dkey] is None:
-            d[dkey] = grib.values
-        else:
-            d[dkey] = func(d[dkey], grib.values)
+    with archive_fetch(ppath) as fn:
+        if fn is None:
+            LOG.info("missing %s", ppath)
+            return
+        gribs = pygrib.open(fn)
+        for grib in gribs:
+            ftime = ts + datetime.timedelta(hours=grib.forecastTime)
+            cst = ftime - datetime.timedelta(hours=7)
+            key = cst.strftime("%Y-%m-%d")
+            if key not in data["fx"]:
+                continue
+            d = data["fx"][key]
+            LOG.info("Writting %s %s from ftime: %s", dkey, key, ftime)
+            if d[dkey] is None:
+                d[dkey] = grib.values
+            else:
+                d[dkey] = func(d[dkey], grib.values)
 
 
 def process(ts):

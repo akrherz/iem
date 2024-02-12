@@ -10,14 +10,14 @@ files.
 Run from RUN_10_AFTER.sh at 1z
 """
 import datetime
-import os
-import sys
 
+import click
 import numpy as np
 import pygrib
 import pyproj
+from pyiem.database import get_dbconn
 from pyiem.network import Table as NetworkTable
-from pyiem.util import convert_value, get_dbconn, logger, utc
+from pyiem.util import archive_fetch, convert_value, logger, utc
 
 LOG = logger()
 nt = NetworkTable("IACLIMATE")
@@ -76,18 +76,19 @@ def process(ts):
         if fhour > 72 and fhour % 6 != 0:
             continue
         ftime = ts + datetime.timedelta(hours=fhour)
-        fn = (
-            f"/mesonet/ARCHIVE/data/{ts:%Y/%m/%d}/model/ndfd/{ts:%H}/"
+        ppath = (
+            f"{ts:%Y/%m/%d}/model/ndfd/{ts:%H}/"
             f"ndfd.t{ts:%H}z.awp2p5f{fhour:03.0f}.grib2"
         )
-        if not os.path.isfile(fn):
-            LOG.warning("missing: %s", fn)
-            continue
-        LOG.info("-> %s", fn)
-        gribs = pygrib.open(fn)
-        do_precip(gribs, ftime, data)
-        do_temp("Maximum temperature", "high", gribs, ftime, data)
-        do_temp("Minimum temperature", "low", gribs, ftime, data)
+        with archive_fetch(ppath) as fn:
+            if fn is None:
+                LOG.warning("missing: %s", ppath)
+                continue
+            LOG.info("-> %s", fn)
+            gribs = pygrib.open(fn)
+            do_precip(gribs, ftime, data)
+            do_temp("Maximum temperature", "high", gribs, ftime, data)
+            do_temp("Minimum temperature", "low", gribs, ftime, data)
 
     return data
 
@@ -159,11 +160,13 @@ def dbsave(ts, data):
         pgconn.commit()
 
 
-def main(argv):
+@click.command()
+@click.option("--date", "ts", help="Date to process")
+def main(ts):
     """Go!"""
     # Extract 00 UTC Data
-    if len(argv) == 4:
-        ts = utc(int(argv[1]), int(argv[2]), int(argv[3]))
+    if ts is not None:
+        ts = ts.replace(tzinfo=datetime.timezone.utc)
     else:
         ts = utc().replace(hour=0, minute=0, second=0, microsecond=0)
     data = process(ts)
@@ -174,4 +177,4 @@ def main(argv):
 
 
 if __name__ == "__main__":
-    main(sys.argv)
+    main()
