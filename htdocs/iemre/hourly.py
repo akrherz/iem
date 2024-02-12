@@ -6,6 +6,7 @@ from zoneinfo import ZoneInfo
 
 import numpy as np
 from pyiem import iemre
+from pyiem.exceptions import BadWebRequest
 from pyiem.util import convert_value, ncopen, utc
 from pyiem.webutil import iemapp
 from pymemcache.client import Client
@@ -94,7 +95,10 @@ def workflow(sts, ets, i, j):
 @iemapp()
 def application(environ, start_response):
     """Do Something Fun!"""
-    sts, ets = get_timerange(environ)
+    try:
+        sts, ets = get_timerange(environ)
+    except ValueError:
+        raise BadWebRequest("Invalid date provided")
     lat = float(environ.get("lat", 41.99))
     lon = float(environ.get("lon", -95.1))
     # fmt = form.get("format", "json")

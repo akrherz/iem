@@ -5,15 +5,15 @@ import zipfile
 from io import BytesIO
 
 from osgeo import ogr
+from pyiem.exceptions import IncompleteWebRequest
 from pyiem.webutil import iemapp
 
 ogr.UseExceptions()
 PROJFILE = "/opt/iem/data/gis/meta/4326.prj"
 
 
-@iemapp()
-def application(environ, start_response):
-    """Go Main Go"""
+def get_ts_fn(environ):
+    """Figure out what is requested."""
     # Get CGI vars
     if "year" in environ:
         year = int(environ.get("year"))
@@ -26,7 +26,18 @@ def application(environ, start_response):
     else:
         ts = datetime.datetime.utcnow()
         fn = "watch_by_county"
+    if "etn" in environ:
+        int(environ.get("etn"))
+    return ts, fn
 
+
+@iemapp()
+def application(environ, start_response):
+    """Go Main Go"""
+    try:
+        ts, fn = get_ts_fn(environ)
+    except Exception:
+        raise IncompleteWebRequest("bad input provided")
     if "etn" in environ:
         etnLimiter = f"and eventid = {int(environ.get('etn'))}"
         fn = f"watch_by_county_{ts:Y%m%d%H%M}_{int(environ.get('etn'))}"

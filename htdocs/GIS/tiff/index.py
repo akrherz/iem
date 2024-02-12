@@ -7,6 +7,7 @@ import tempfile
 from calendar import month_abbr
 from datetime import datetime, timedelta
 
+from pyiem.exceptions import IncompleteWebRequest
 from pyiem.htmlgen import make_select
 from pyiem.templates.iem import TEMPLATE
 from pyiem.util import utc
@@ -85,7 +86,10 @@ def workflow(key, tmpdir, ts):
             raise FileNotFoundError("Failed to find recent file for service")
 
     else:
-        valid = datetime.strptime(ts, "%Y%m%d%H%M")
+        try:
+            valid = datetime.strptime(ts, "%Y%m%d%H%M")
+        except Exception:
+            raise IncompleteWebRequest("Invalid ts provided")
         testfn = (
             f"/mesonet/ARCHIVE/data/{valid:%Y/%m/%d}/model/ffg/5kmffg_"
             f"{valid:%Y%m%d%H}.grib2"
