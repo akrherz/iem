@@ -360,7 +360,10 @@ def application(environ, start_response):
     """Do things"""
     if "sts" not in environ:
         raise IncompleteWebRequest("Missing start time parameters")
-    muck_timestamps(environ)
+    try:
+        muck_timestamps(environ)
+    except Exception:
+        raise IncompleteWebRequest("Invalid date/station provided")
     mode = environ.get("mode", "hourly")
     cols = ensure_list(environ, "vars")
     fmt = environ.get("format", "csv").lower()
