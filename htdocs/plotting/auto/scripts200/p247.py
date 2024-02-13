@@ -47,6 +47,10 @@ PDICT2 = {
     "none": "None",
     "stats": "Include Population and Area Statistics",
 }
+PDICT3 = {
+    "yes": "Yes. Show counties",
+    "no": "No. Do not show counties",
+}
 
 
 def get_description():
@@ -84,6 +88,13 @@ def get_description():
             "name": "add",
             "default": "none",
             "label": "Include Statistics in Legend (slows down plot)",
+        },
+        {
+            "type": "select",
+            "options": PDICT3,
+            "name": "sc",
+            "default": "yes",
+            "label": "Show Counties",
         },
     ]
     return desc
@@ -296,7 +307,8 @@ def plotter(fdict):
         plotdf(mp, ugcdf)
         if not sbwdf.empty:
             plotsbw(mp, sbwdf)
-    mp.drawcounties()
+    if ctx["sc"] == "yes":
+        mp.drawcounties()
     return mp.fig
 
 
