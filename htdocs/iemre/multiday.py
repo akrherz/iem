@@ -70,33 +70,37 @@ def application(environ, start_response):
     i, j = iemre.find_ij(lon, lat)
     offset1 = iemre.daily_offset(ts1)
     offset2 = iemre.daily_offset(ts2) + 1
+    tslice = slice(offset1, offset2)
 
     # Get our netCDF vars
     with ncopen(iemre.get_daily_ncname(ts1.year)) as nc:
         hightemp = convert_value(
-            nc.variables["high_tmpk"][offset1:offset2, j, i], "degK", "degF"
+            nc.variables["high_tmpk"][tslice, j, i], "degK", "degF"
         )
         high12temp = convert_value(
-            nc.variables["high_tmpk_12z"][offset1:offset2, j, i],
+            nc.variables["high_tmpk_12z"][tslice, j, i],
             "degK",
             "degF",
         )
         lowtemp = convert_value(
-            nc.variables["low_tmpk"][offset1:offset2, j, i], "degK", "degF"
+            nc.variables["low_tmpk"][tslice, j, i], "degK", "degF"
+        )
+        avgdwpf = convert_value(
+            nc.variables["avg_dwpk"][tslice, j, i], "degK", "degF"
         )
         low12temp = convert_value(
-            nc.variables["low_tmpk_12z"][offset1:offset2, j, i], "degK", "degF"
+            nc.variables["low_tmpk_12z"][tslice, j, i], "degK", "degF"
         )
         high_soil4t = convert_value(
-            nc.variables["high_soil4t"][offset1:offset2, j, i], "degK", "degF"
+            nc.variables["high_soil4t"][tslice, j, i], "degK", "degF"
         )
         low_soil4t = convert_value(
-            nc.variables["low_soil4t"][offset1:offset2, j, i], "degK", "degF"
+            nc.variables["low_soil4t"][tslice, j, i], "degK", "degF"
         )
-        precip = nc.variables["p01d"][offset1:offset2, j, i] / 25.4
-        precip12 = nc.variables["p01d_12z"][offset1:offset2, j, i] / 25.4
+        precip = nc.variables["p01d"][tslice, j, i] / 25.4
+        precip12 = nc.variables["p01d_12z"][tslice, j, i] / 25.4
         # Solar radiation is average W/m2, we want MJ/day
-        srad = nc.variables["rsds"][offset1:offset2, j, i] / 1e6 * 86400.0
+        srad = nc.variables["rsds"][tslice, j, i] / 1e6 * 86400.0
 
     # Get our climatology vars
     c2000 = ts1.replace(year=2000)
@@ -115,7 +119,7 @@ def application(environ, start_response):
     if ts1.year > 1980:
         i2, j2 = prismutil.find_ij(lon, lat)
         with ncopen(f"/mesonet/data/prism/{ts1.year}_daily.nc") as nc:
-            prism_precip = nc.variables["ppt"][offset1:offset2, j2, i2] / 25.4
+            prism_precip = nc.variables["ppt"][tslice, j2, i2] / 25.4
     else:
         prism_precip = [None] * (offset2 - offset1)
 
@@ -123,7 +127,7 @@ def application(environ, start_response):
         j2 = int((lat - iemre.SOUTH) * 100.0)
         i2 = int((lon - iemre.WEST) * 100.0)
         with ncopen(iemre.get_daily_mrms_ncname(ts1.year)) as nc:
-            mrms_precip = nc.variables["p01d"][offset1:offset2, j2, i2] / 25.4
+            mrms_precip = nc.variables["p01d"][tslice, j2, i2] / 25.4
     else:
         mrms_precip = [None] * (offset2 - offset1)
 
@@ -141,6 +145,7 @@ def application(environ, start_response):
                 "climate_daily_high_f": clean(chigh[i]),
                 "daily_low_f": clean(lowtemp[i]),
                 "12z_low_f": clean(low12temp[i]),
+                "avg_dewpoint_f": clean(avgdwpf[i]),
                 "soil4t_high_f": clean(high_soil4t[i]),
                 "soil4t_low_f": clean(low_soil4t[i]),
                 "climate_daily_low_f": clean(clow[i]),
