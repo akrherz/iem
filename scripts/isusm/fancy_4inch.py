@@ -3,20 +3,17 @@
 Called from run_plots.sh
 """
 # pylint: disable=unbalanced-tuple-unpacking
-# stdlib
 import datetime
-import os
 import sys
 
 import numpy as np
+import pandas as pd
 import pygrib
-
-# thirdparty
-from pandas import read_sql
+from pyiem.database import get_sqlalchemy_conn
 from pyiem.network import Table
 from pyiem.plot import MapPlot, get_cmap
 from pyiem.tracker import loadqc
-from pyiem.util import c2f, convert_value, get_sqlalchemy_conn, logger
+from pyiem.util import archive_fetch, c2f, convert_value, logger
 from scipy.signal import convolve2d
 
 LOG = logger()
@@ -30,22 +27,22 @@ def get_idx(lons, lats, lon, lat):
 
 def get_grib(now, fhour):
     """Find the desired grib within the grib messages"""
-    gribfn = now.strftime(
-        "/mesonet/ARCHIVE/data/%Y/%m/%d/model/nam/"
-        f"%H/nam.t%Hz.conusnest.hiresf0{fhour}.tm00.grib2"
+    ppath = now.strftime(
+        f"%Y/%m/%d/model/nam/%H/nam.t%Hz.conusnest.hiresf0{fhour}.tm00.grib2"
     )
-    if not os.path.isfile(gribfn):
-        LOG.warning("NAM missing: %s", gribfn)
-        return None
-    grbs = pygrib.open(gribfn)
-    try:
-        gs = grbs.select(shortName="st")
-    except ValueError:
-        LOG.warning("failed to find st in %s", gribfn)
-        return None
-    for g in gs:
-        if str(g).find("levels 0.0-0.1 m") > 0:
-            return g
+    with archive_fetch(ppath) as gribfn:
+        if gribfn is None:
+            LOG.warning("NAM missing: %s", ppath)
+            return None
+        grbs = pygrib.open(gribfn)
+        try:
+            gs = grbs.select(shortName="st")
+        except ValueError:
+            LOG.warning("failed to find st in %s", gribfn)
+            return None
+        for g in gs:
+            if str(g).find("levels 0.0-0.1 m") > 0:
+                return g
     return None
 
 
@@ -100,7 +97,7 @@ def main(argv):
 
     # Query out the data
     with get_sqlalchemy_conn("isuag") as conn:
-        df = read_sql(
+        df = pd.read_sql(
             """
             WITH ranges as (
                 select station, count(*), min(t4_c_avg_qc),
@@ -117,6 +114,9 @@ def main(argv):
             params=(ts, ts + datetime.timedelta(days=1), ts),
             index_col="station",
         )
+    if df.empty:
+        LOG.info("No data found for %s", ts)
+        return
     for col, newcol in zip(
         ["t4_c_avg_qc", "hourly_min_c", "hourly_max_c"],
         ["ob", "min", "max"],
@@ -154,7 +154,7 @@ def main(argv):
 
     # Query out centroids of counties...
     with get_sqlalchemy_conn("postgis") as conn:
-        cdf = read_sql(
+        cdf = pd.read_sql(
             """SELECT ST_x(ST_centroid(the_geom)) as lon,
             ST_y(ST_centroid(the_geom)) as lat
             from uscounties WHERE state_name = 'Iowa'

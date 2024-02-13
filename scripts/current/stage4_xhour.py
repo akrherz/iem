@@ -2,13 +2,12 @@
 Create a variable X hour plot of stage IV estimates
 """
 import datetime
-import os
 import sys
 from zoneinfo import ZoneInfo
 
 import pygrib
 from pyiem.plot import MapPlot, get_cmap
-from pyiem.util import logger, mm2inch
+from pyiem.util import archive_fetch, logger, mm2inch
 
 LOG = logger()
 
@@ -25,22 +24,19 @@ def do(ts, hours):
     total = None
     lts = None
     while now < ets:
-        fn = ("/mesonet/ARCHIVE/data/%s/stage4/ST4.%s.01h.grib") % (
-            now.strftime("%Y/%m/%d"),
-            now.strftime("%Y%m%d%H"),
-        )
+        ppath = f"{now:%Y/%m/%d}/stage4/ST4.{now:%Y%m%d%H}.01h.grib"
+        with archive_fetch(ppath) as fn:
+            if fn is not None:
+                lts = now
+                grbs = pygrib.open(fn)
 
-        if os.path.isfile(fn):
-            lts = now
-            grbs = pygrib.open(fn)
-
-            if total is None:
-                g = grbs[1]
-                total = g["values"].filled(0)
-                lats, lons = g.latlons()
-            else:
-                total += grbs[1]["values"].filled(0)
-            grbs.close()
+                if total is None:
+                    g = grbs[1]
+                    total = g["values"].filled(0)
+                    lats, lons = g.latlons()
+                else:
+                    total += grbs[1]["values"].filled(0)
+                grbs.close()
         now += interval
 
     if lts is None and ts.hour > 1:

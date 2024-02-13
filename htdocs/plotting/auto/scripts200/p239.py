@@ -13,10 +13,11 @@ import matplotlib.colors as mpcolors
 import pandas as pd
 from matplotlib.colorbar import ColorbarBase
 from matplotlib.ticker import MaxNLocator
+from pyiem.database import get_dbconn, get_sqlalchemy_conn
 from pyiem.exceptions import NoDataFound
 from pyiem.plot import figure, get_cmap, pretty_bins
 from pyiem.reference import state_names
-from pyiem.util import get_autoplot_context, get_dbconn, get_sqlalchemy_conn
+from pyiem.util import get_autoplot_context
 from sklearn.linear_model import LinearRegression
 from sqlalchemy import text
 

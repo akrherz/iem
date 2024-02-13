@@ -20,16 +20,16 @@ web service that provides the raw values.</p>
 of county/zone based FFG guidance found in the FFG text products.
 """
 import datetime
-import os
 from zoneinfo import ZoneInfo
 
 import pandas as pd
 import pygrib
 from metpy.units import masked_array, units
+from pyiem.database import get_sqlalchemy_conn
 from pyiem.exceptions import NoDataFound
 from pyiem.plot import MapPlot, get_cmap
 from pyiem.reference import SECTORS_NAME
-from pyiem.util import get_autoplot_context, get_sqlalchemy_conn
+from pyiem.util import archive_fetch, get_autoplot_context
 
 HOURS = {
     "1": "One Hour",
@@ -183,21 +183,20 @@ def plotter(fdict):
         # use grib data
         ts -= datetime.timedelta(hours=(ts.hour % 6))
         ts = ts.replace(minute=0)
-        fn = None
+        lats = None
         for offset in range(0, 24, 4):
             ts2 = ts - datetime.timedelta(hours=offset)
-            testfn = ts2.strftime(
-                "/mesonet/ARCHIVE/data/%Y/%m/%d/"
-                "model/ffg/5kmffg_%Y%m%d%H.grib2"
-            )
-            if os.path.isfile(testfn):
-                fn = testfn
-                break
-        if fn is None:
+            with archive_fetch(
+                ts2.strftime("%Y/%m/%d/model/ffg/5kmffg_%Y%m%d%H.grib2")
+            ) as testfn:
+                if testfn is not None:
+                    grbs = pygrib.index(testfn, "stepRange")
+                    grb = grbs.select(stepRange="0-%s" % (hour,))[0]
+                    lats, lons = grb.latlons()
+                    break
+
+        if lats is None:
             raise NoDataFound("No valid grib data found!")
-        grbs = pygrib.index(fn, "stepRange")
-        grb = grbs.select(stepRange="0-%s" % (hour,))[0]
-        lats, lons = grb.latlons()
         data = (
             masked_array(grb.values, data_units=units("mm"))
             .to(units("inch"))

@@ -6,8 +6,9 @@ import sys
 from io import StringIO
 from zoneinfo import ZoneInfo, ZoneInfoNotFoundError
 
+from pyiem.database import get_dbconn
 from pyiem.network import Table as NetworkTable
-from pyiem.util import get_dbconn, utc
+from pyiem.util import utc
 from pyiem.webutil import ensure_list, iemapp
 
 NULLS = {"M": "M", "null": "null", "empty": ""}

@@ -18,11 +18,12 @@ import geopandas as gpd
 import matplotlib.colors as mpcolors
 import numpy as np
 import pandas as pd
+from pyiem.database import get_sqlalchemy_conn
 from pyiem.exceptions import NoDataFound
 from pyiem.network import Table as NetworkTable
 from pyiem.plot import MapPlot
 from pyiem.reference import Z_OVERLAY2, state_bounds
-from pyiem.util import get_autoplot_context, get_sqlalchemy_conn
+from pyiem.util import get_autoplot_context
 from sqlalchemy import text
 from tqdm import tqdm
 
