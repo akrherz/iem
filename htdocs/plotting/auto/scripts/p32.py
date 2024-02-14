@@ -12,9 +12,10 @@ import datetime
 import matplotlib.colors as mpcolors
 import matplotlib.dates as mdates
 import pandas as pd
+from pyiem.database import get_sqlalchemy_conn
 from pyiem.exceptions import NoDataFound
 from pyiem.plot import figure_axes, get_cmap
-from pyiem.util import get_autoplot_context, get_sqlalchemy_conn
+from pyiem.util import get_autoplot_context
 from sqlalchemy import text
 
 PDICT = {
@@ -211,8 +212,8 @@ def plotter(fdict):
             )
             ax.set_yticks(bins)
         else:
-            abovecolor = "r" if how != "diff" else "b"
-            belowcolor = "b" if how != "diff" else "r"
+            abovecolor = "r" if how == "diff" else "b"
+            belowcolor = "b" if how == "diff" else "r"
             bars = ax.bar(
                 thisyear["day"].values,
                 values,
