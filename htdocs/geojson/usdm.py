@@ -2,9 +2,10 @@
 import datetime
 import json
 
+from pyiem.database import get_dbconnc
 from pyiem.exceptions import IncompleteWebRequest
 from pyiem.reference import ISO8601
-from pyiem.util import get_dbconnc, html_escape
+from pyiem.util import html_escape
 from pyiem.webutil import iemapp
 from pymemcache.client import Client
 
@@ -16,7 +17,7 @@ def rectify_date(tstamp):
     if between tuesday and thursday at 8 AM, go back to last week
     back to tuesday
     """
-    if tstamp == "":
+    if tstamp in ["", "{date}"]:
         pgconn, cursor = get_dbconnc("postgis")
         # Go get the latest USDM stored in the database!
         cursor.execute("SELECT max(valid) from usdm")
