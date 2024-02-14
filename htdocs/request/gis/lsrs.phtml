@@ -24,6 +24,62 @@ $ss = "";
 foreach ($nt->table as $key => $value) {
     $ss .= "<option value='$key'>[$key] " . $value["name"] . "</option>\n";
 }
+$types = Array(
+    "ALL" => "All Types / No Limit",
+    "AVALANCHE" => "Avalanche",
+    "BLIZZARD" => "Blizzard",
+    "BLOWING DUST" => "Blowing Dust",
+    "COASTAL FLOOD" => "Coastal Flood",
+    "DEBRIS FLOW" => "Debris Flow",
+    "DENSE FOG" => "Dense Fog",
+    "DOWNBURST" => "Downburst",
+    "DUST STORM" => "Dust Storm",
+    "EXCESSIVE HEAT" => "Excessive Heat",
+    "EXTREME COLD" => "Extreme Cold",
+    "EXTREME HEAT" => "Extreme Heat",
+    "EXTR WIND CHILL" => "Extreme Wind Chill",
+    "FLASH FLOOD" => "Flash Flood",
+    "FLOOD" => "Flood",
+    "FOG" => "Fog",
+    "FREEZE" => "Freeze",
+    "FREEZING RAIN" => "Freezing Rain",
+    "FUNNEL CLOUD" => "Funnel Cloud",
+    "HAIL" => "Hail",
+    "HEAVY RAIN" => "Heavy Rain",
+    "HEAVY SLEET" => "Heavy Sleet",
+    "HEAVY SNOW" => "Heavy Snow",
+    "HIGH ASTR TIDES" => "High Astronomical Tides",
+    "HIGH SURF" => "High Surf",
+    "HIGH SUST WINDS" => "High Sustained Winds",
+    "ICE JAM" => "Ice Jam",
+    "ICE STORM" => "Ice Storm",
+    "LANDSLIDE" => "Landslide",
+    "LANDSPOUT" => "Landspout",
+    "LIGHTNING" => "Lightning",
+    "LOW ASTR TIDES" => "Low Astronomical Tides",
+    "MARINE TSTM WIND" => "Marine Thunderstorm Wind",
+    "MISC MRN/SRF HZD" => "Misc Marine/Surf Hazard",
+    "NON-TSTM WND DMG" => "Non-Thunderstorm Wind Damage",
+    "NON-TSTM WND GST" => "Non-Thunderstorm Wind Gust",
+    "RAIN" => "Rain",
+    "RIP CURRENTS" => "Rip Currents",
+    "SEICHE" => "Seiche",
+    "SLEET" => "Sleet",
+    "SNOW" => "Snow",
+    "SNOW/ICE DMG" => "Snow/Ice Damage",
+    "SNOW SQUALL" => "Snow Squall",
+    "STORM SURGE" => "Storm Surge",
+    "TORNADO" => "Tornado",
+    "TROPICAL CYCLONE" => "Tropical Cyclone",
+    "TROPICAL STORM" => "Tropical Storm",
+    "TSTM WND DMG" => "Thunderstorm Wind Damage",
+    "TSTM WND GST" => "Thunderstorm Wind Gust",
+    "WATER SPOUT" => "Waterspout",
+    "WATERSPOUT" => "Waterspout",
+    "WILDFIRE" => "Wildfire",
+    "WIND CHILL" => "Wind Chill",
+);
+$typeselect = make_select("type", "ALL", $types, "", "", TRUE, TRUE, FALSE);
 
 $t->content = <<<EOF
 <ol class="breadcrumb">
@@ -56,16 +112,20 @@ not the issuance of the text product itself that contained the LSR.
 
 <form method="GET" action="/cgi-bin/request/gis/lsr.py">
 <div class="row">
-<div class="col-md-6">
+<div class="col-md-4">
     <h4>Limit Weather Forecast Office (WFO)</h4>
     <select name="wfo[]" MULTIPLE size="5">
     <option value="ALL" SELECTED>All Available</option>
     {$ss}
     </select>
 </div>
-<div class="col-md-6">
+<div class="col-md-4">
     <h4>Limit by State</h4>
     {$stateselect}
+</div>
+<div class="col-md-4">
+    <h4>Limit by Report Type</h4>
+    {$typeselect}
 </div>
 </div><!-- ./row -->
 

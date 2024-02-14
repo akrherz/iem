@@ -89,7 +89,8 @@ function make_select(
     $jscallback = "",
     $cssclass = '',
     $multiple = FALSE,
-    $showvalue = FALSE
+    $showvalue = FALSE,
+    $appendbrackets = TRUE,
 ) {
     // Create a simple HTML select box
     // If multiple, then we arb append [] onto the $name
@@ -101,7 +102,7 @@ function make_select(
     $s = sprintf(
         "<select name=\"%s%s\"%s%s%s>\n",
         $name,
-        ($multiple === FALSE) ? '' : '[]',
+        ($multiple === FALSE || $appendbrackets === FALSE) ? '' : '[]',
         ($jscallback != "") ? " onChange=\"$jscallback(this.value)\"" : "",
         ($cssclass != "") ? " class=\"$cssclass\"" : "",
         ($multiple === FALSE) ? '' : ' MULTIPLE'

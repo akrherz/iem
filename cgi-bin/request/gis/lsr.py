@@ -7,9 +7,11 @@ import fiona
 import geopandas as gpd
 import pandas as pd
 import shapefile
+from pyiem.database import get_sqlalchemy_conn
 from pyiem.exceptions import IncompleteWebRequest
-from pyiem.util import get_dbconn, get_sqlalchemy_conn, utc
+from pyiem.util import utc
 from pyiem.webutil import ensure_list, iemapp
+from sqlalchemy import text
 
 fiona.supported_drivers["KML"] = "rw"
 EXL = "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"
@@ -31,11 +33,12 @@ def get_time_domain(form):
     return form["sts"], form["ets"]
 
 
-def do_excel_kml(fmt, sts, ets, wfolimiter, statelimiter):
+def do_excel_kml(fmt, params, sql_filters):
     """Export as Excel or KML."""
     with get_sqlalchemy_conn("postgis") as conn:
         df = gpd.read_postgis(
-            f"""
+            text(
+                f"""
             WITH wfos as (
                 select case when length(id) = 4 then substr(id, 1, 3)
                 else id end as cwa, tzname from stations where network = 'WFO'
@@ -45,7 +48,7 @@ def do_excel_kml(fmt, sts, ets, wfolimiter, statelimiter):
                 coalesce(remark, '') as remark, u.ugc, u.name as ugcname,
                 l.geom
                 from lsrs l LEFT JOIN ugcs u on (l.gid = u.gid) WHERE
-                valid >= %s and valid < %s {wfolimiter} {statelimiter}
+                valid >= :sts and valid < :ets {sql_filters}
             )
             SELECT l.wfo as office,
             to_char(valid at time zone w.tzname,
@@ -55,9 +58,10 @@ def do_excel_kml(fmt, sts, ets, wfolimiter, statelimiter):
             county, city, state, typetext, magnitude, source, lat, lon,
             remark, ugc, ugcname, geom
             from reports l JOIN wfos w on (l.wfo = w.cwa)
-            ORDER by utcvalid ASC""",
+            ORDER by utcvalid ASC"""
+            ),
             conn,
-            params=(sts, ets),
+            params=params,
             geom_col="geom",
         )
     df = df.rename(
@@ -107,33 +111,32 @@ def application(environ, start_response):
         start_response("400 Bad Request", [("Content-type", "text/plain")])
         return [b"Allow: GET,POST,OPTIONS"]
 
-    pgconn = get_dbconn("postgis")
-    cursor = pgconn.cursor()
+    params = {}
+    params["sts"], params["ets"] = get_time_domain(environ)
 
-    sts, ets = get_time_domain(environ)
-
-    statelimiter = ""
+    sql_filters = ""
     for opt in ["state", "states", "states[]"]:
         if opt in environ:
-            aStates = ensure_list(environ, opt)
-            aStates.append("XX")
-            if "_ALL" not in aStates:
-                statelimiter = f" and l.state in {tuple(aStates)} "
-    wfoLimiter = ""
+            params["states"] = ensure_list(environ, opt)
+            if "_ALL" not in params["states"]:
+                sql_filters += " and l.state = ANY(:states) "
     if "wfo[]" in environ:
-        aWFO = ensure_list(environ, "wfo[]")
-        aWFO.append("XXX")  # Hack to make next section work
-        if "ALL" not in aWFO:
-            wfoLimiter = f" and l.wfo in {tuple(aWFO)} "
+        params["wfos"] = ensure_list(environ, "wfo[]")
+        if "ALL" not in params["wfos"]:
+            sql_filters += " and l.wfo = ANY(:wfos) "
+    if "type" in environ:
+        params["types"] = ensure_list(environ, "type")
+        if "ALL" not in params["types"]:
+            sql_filters += " and l.typetext = ANY(:types) "
 
-    fn = f"lsr_{sts:%Y%m%d%H%M}_{ets:%Y%m%d%H%M}"
+    fn = f"lsr_{params['sts']:%Y%m%d%H%M}_{params['ets']:%Y%m%d%H%M}"
     if environ.get("fmt", "") == "excel":
         headers = [
             ("Content-type", EXL),
             ("Content-disposition", f"attachment; Filename={fn}.xlsx"),
         ]
         start_response("200 OK", headers)
-        return [do_excel_kml("excel", sts, ets, wfoLimiter, statelimiter)]
+        return [do_excel_kml("excel", params, sql_filters)]
 
     if environ.get("fmt", "") == "kml":
         headers = [
@@ -141,7 +144,7 @@ def application(environ, start_response):
             ("Content-disposition", f"attachment; Filename={fn}.kml"),
         ]
         start_response("200 OK", headers)
-        return [do_excel_kml("kml", sts, ets, wfoLimiter, statelimiter)]
+        return [do_excel_kml("kml", params, sql_filters)]
 
     csv = StringIO()
     csv.write(
@@ -151,72 +154,75 @@ def application(environ, start_response):
         )
     )
 
-    cursor.execute(
-        f"""
-        SELECT distinct
-        to_char(valid at time zone 'UTC', 'YYYYMMDDHH24MI') as dvalid,
-        magnitude, l.wfo, type, typetext,
-        city, county, l.state, l.source,
-        substr(coalesce(remark, ''),0,200) as tremark,
-        ST_y(l.geom), ST_x(l.geom),
-        to_char(valid at time zone 'UTC', 'YYYY/MM/DD HH24:MI') as dvalid2,
-        u.ugc, u.name as ugcname
-        from lsrs l LEFT JOIN ugcs u on (l.gid = u.gid) WHERE
-        valid >= %s and valid < %s {wfoLimiter} {statelimiter}
-        ORDER by dvalid ASC
-        """,
-        (sts, ets),
-    )
+    with get_sqlalchemy_conn("postgis") as conn:
+        res = conn.execute(
+            text(
+                f"""
+            SELECT distinct
+            to_char(valid at time zone 'UTC', 'YYYYMMDDHH24MI') as dvalid,
+            magnitude, l.wfo, type, typetext,
+            city, county, l.state, l.source,
+            substr(coalesce(remark, ''),0,200) as tremark,
+            ST_y(l.geom), ST_x(l.geom),
+            to_char(valid at time zone 'UTC', 'YYYY/MM/DD HH24:MI') as dvalid2,
+            u.ugc, u.name as ugcname
+            from lsrs l LEFT JOIN ugcs u on (l.gid = u.gid) WHERE
+            valid >= :sts and valid < :ets {sql_filters}
+            ORDER by dvalid ASC
+            """
+            ),
+            params,
+        )
+        if res.rowcount == 0:
+            start_response("200 OK", [("Content-type", "text/plain")])
+            return [b"No results found for query."]
 
-    if cursor.rowcount == 0:
-        start_response("200 OK", [("Content-type", "text/plain")])
-        pgconn.close()
-        return [b"No results found for query."]
+        shpio = BytesIO()
+        shxio = BytesIO()
+        dbfio = BytesIO()
 
-    shpio = BytesIO()
-    shxio = BytesIO()
-    dbfio = BytesIO()
-
-    with shapefile.Writer(shp=shpio, shx=shxio, dbf=dbfio) as shp:
-        shp.field("VALID", "C", 12)
-        shp.field("MAG", "F", 5, 2)
-        shp.field("WFO", "C", 3)
-        shp.field("TYPECODE", "C", 1)
-        shp.field("TYPETEXT", "C", 40)
-        shp.field("CITY", "C", 40)
-        shp.field("COUNTY", "C", 40)
-        shp.field("STATE", "C", 2)
-        shp.field("SOURCE", "C", 40)
-        shp.field("REMARK", "C", 200)
-        shp.field("LAT", "F", 7, 4)
-        shp.field("LON", "F", 9, 4)
-        shp.field("UGC", "C", 6)
-        shp.field("UGCNAME", "C", 128)
-        for row in cursor:
-            row = list(row)
-            shp.point(row[11], row[10])
-            if row[9] is not None:
-                row[9] = (
-                    row[9]
-                    .encode("utf-8", "ignore")
-                    .decode("ascii", "ignore")
-                    .replace(",", "_")
+        with shapefile.Writer(shp=shpio, shx=shxio, dbf=dbfio) as shp:
+            shp.field("VALID", "C", 12)
+            shp.field("MAG", "F", 5, 2)
+            shp.field("WFO", "C", 3)
+            shp.field("TYPECODE", "C", 1)
+            shp.field("TYPETEXT", "C", 40)
+            shp.field("CITY", "C", 40)
+            shp.field("COUNTY", "C", 40)
+            shp.field("STATE", "C", 2)
+            shp.field("SOURCE", "C", 40)
+            shp.field("REMARK", "C", 200)
+            shp.field("LAT", "F", 7, 4)
+            shp.field("LON", "F", 9, 4)
+            shp.field("UGC", "C", 6)
+            shp.field("UGCNAME", "C", 128)
+            for row in res:
+                row = list(row)
+                shp.point(row[11], row[10])
+                if row[9] is not None:
+                    row[9] = (
+                        row[9]
+                        .encode("utf-8", "ignore")
+                        .decode("ascii", "ignore")
+                        .replace(",", "_")
+                    )
+                if row[14] is not None:
+                    row[14] = (
+                        row[14]
+                        .encode("utf-8", "ignore")
+                        .decode("ascii", "ignore")
+                        .replace(",", "_")
+                    )
+                shp.record(*row[:-1])
+                row5 = (
+                    row[5].encode("utf-8", "ignore").decode("ascii", "ignore")
                 )
-            if row[14] is not None:
-                row[14] = (
-                    row[14]
-                    .encode("utf-8", "ignore")
-                    .decode("ascii", "ignore")
-                    .replace(",", "_")
+                row9 = row[9] if row[9] is not None else ""
+                csv.write(
+                    f"{row[0]},{row[12]},{row[10]:.2f},{row[11]:.2f},{row[1]},"
+                    f"{row[2]},{row[3]},{row[4]},{row5},{row[6]},{row[7]},"
+                    f"{row[8]},{row9},{row[13]},{row[14]}\n"
                 )
-            shp.record(*row[:-1])
-            row5 = row[5].encode("utf-8", "ignore").decode("ascii", "ignore")
-            row9 = row[9] if row[9] is not None else ""
-            csv.write(
-                f"{row[0]},{row[12]},{row[10]:.2f},{row[11]:.2f},{row[1]},"
-                f"{row[2]},{row[3]},{row[4]},{row5},{row[6]},{row[7]},"
-                f"{row[8]},{row9},{row[13]},{row[14]}\n"
-            )
 
     if "justcsv" in environ or environ.get("fmt", "") == "csv":
         headers = [
@@ -224,7 +230,6 @@ def application(environ, start_response):
             ("Content-Disposition", f"attachment; filename={fn}.csv"),
         ]
         start_response("200 OK", headers)
-        pgconn.close()
         return [csv.getvalue().encode("ascii", "ignore")]
 
     zio = BytesIO()
@@ -242,5 +247,4 @@ def application(environ, start_response):
         ("Content-Disposition", f"attachment; filename={fn}.zip"),
     ]
     start_response("200 OK", headers)
-    pgconn.close()
     return [zio.getvalue()]
