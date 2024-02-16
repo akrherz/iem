@@ -203,7 +203,7 @@ def plotter(fdict):
     limiter = "g.wfo = :wfo"
     geomcol = "the_geom"
     ugcname = ""
-    if opt == "wfo":
+    if opt == "state":
         geomtable = "states"
         limiter = "g.state_abbr = :state"
     elif opt == "ugc":
