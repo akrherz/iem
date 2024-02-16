@@ -19,7 +19,10 @@ issuance time before the given timestamp.</li>
 that have been created, but not necessarily having an issuance time prior
 to the given timestamp.  This is why we can't have nice things!</p>
 
-<p>If you turn on statistics, the legend displays active events nationwide.</p>
+<p>If you turn on statistics, the legend displays active events nationwide.
+Central Region NWS maintains a
+<a href="https://www.weather.gov/images/crh/dhs/wwa_population.png"
+>similar map</a>, but is near real-time only.</p>
 
 <p><a href="/plotting/auto/?q=224">Autoplot 224</a> is closely related to
 this app and provides a table of stats.</p>

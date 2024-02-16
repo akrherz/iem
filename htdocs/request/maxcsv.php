@@ -106,6 +106,17 @@ within their LSR products.
 </div>
 
 <div class="well">
+<h4>Local Storm Reports (LSR): Recent Snowfall LSRs by state</h4>
+
+<code>https://mesonet.agron.iastate.edu/request/maxcsv/lsrsnowfall_ia.txt</code>
+
+<p>Provides any recent (past 24 hours) snowfall reports provided by the NWS
+within their LSR products by state.  Substitute the state abbreviation for IA.
+<a href="maxcsv/lsrsnowfall_ia.txt">maxcsv/lsrsnowfall_ia.txt Example</a></p>
+</div>
+
+
+<div class="well">
 <h4>UV Index Data</h4>
 
 <code>https://mesonet.agron.iastate.edu/request/maxcsv/uvi.txt</code>
