@@ -6,10 +6,12 @@ from datetime import datetime, timedelta
 from zoneinfo import ZoneInfo
 
 import pandas as pd
-from pyiem.util import get_dbconn, get_dbconnc, get_sqlalchemy_conn, logger
+from pyiem.database import get_dbconn, get_dbconnc, get_sqlalchemy_conn
+from pyiem.util import logger
 
 LOG = logger()
 CST = ZoneInfo("Etc/GMT+6")
+pd.set_option("future.no_silent_downcasting", True)
 
 
 def assign_phour():
