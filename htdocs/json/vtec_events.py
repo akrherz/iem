@@ -5,13 +5,13 @@ from io import BytesIO, StringIO
 
 import pandas as pd
 from pyiem.reference import ISO8601
-from pyiem.util import get_dbconnc, html_escape, utc
+from pyiem.util import html_escape, utc
 from pyiem.webutil import iemapp
 
 EXL = "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"
 
 
-def get_res(wfo, year, phenomena, significance, combo):
+def get_res(cursor, wfo, year, phenomena, significance, combo):
     """Generate a report of VTEC ETNs used for a WFO and year
 
     Args:
@@ -21,8 +21,6 @@ def get_res(wfo, year, phenomena, significance, combo):
       significance (str, optional): 1 character VTEC significance
       combo (int, optional): special one-offs
     """
-    pgconn, cursor = get_dbconnc("postgis")
-
     table = f"warnings_{year}"
     sbwtable = f"sbw_{year}"
     limits = ["phenomena is not null", "significance is not null"]
@@ -92,15 +90,15 @@ def get_res(wfo, year, phenomena, significance, combo):
                 expire=row["utc_expire"].strftime(ISO8601),
                 init_expire=row["utc_init_expire"].strftime(ISO8601),
                 uri=uri,
+                url=f"https://mesonet.agron.iastate.edu{uri}",
                 wfo=wfo,
                 fcster=row["fcster"],
             )
         )
-    pgconn.close()
     return res
 
 
-@iemapp()
+@iemapp(iemdb="postgis")
 def application(environ, start_response):
     """Answer request."""
     wfo = environ.get("wfo", "MPX")
@@ -122,7 +120,14 @@ def application(environ, start_response):
     combo = int(environ.get("combo", 0))
 
     fmt = environ.get("fmt", "json")
-    res = get_res(wfo, year, phenomena, significance, combo)
+    res = get_res(
+        environ["iemdb.postgis.cursor"],
+        wfo,
+        year,
+        phenomena,
+        significance,
+        combo,
+    )
 
     if fmt == "xlsx":
         fn = f"vtec_{wfo}_{year}_{phenomena}_{significance}.xlsx"

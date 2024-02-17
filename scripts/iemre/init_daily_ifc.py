@@ -14,7 +14,7 @@ def init_year(ts):
     Create a new NetCDF file for a year of our specification!
     """
 
-    fp = "/mesonet/data/iemre/%s_ifc_daily.nc" % (ts.year,)
+    fp = f"/mesonet/data/iemre/{ts.year}_ifc_daily.nc"
     if os.path.isfile(fp):
         LOG.info("Cowardly refusing to overwrite file %s.", fp)
         sys.exit()

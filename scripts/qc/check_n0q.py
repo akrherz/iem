@@ -6,7 +6,7 @@ import datetime
 import os
 import sys
 
-from pyiem.util import logger, utc
+from pyiem.util import archive_fetch, logger, utc
 
 LOG = logger()
 
@@ -18,18 +18,17 @@ def run(sts, ets):
     interval = datetime.timedelta(minutes=5)
     while now < ets:
         for comp in ["us", "ak", "hi", "pr", "gu"]:
-            fn = (
-                f"/mesonet/ARCHIVE/data/{now:%Y/%m/%d}/GIS/{comp}comp/"
-                f"n0q_{now:%Y%m%d%H%M}.png"
-            )
-            if not os.path.isfile(fn):
-                LOG.warning("[%s]%s is missing", comp, os.path.basename(fn))
-            elif comp == "us" and os.stat(fn)[6] < 200000:
-                LOG.warning(
-                    "check_n0q.py %s too small, size: %s",
-                    os.path.basename(fn),
-                    os.stat(fn)[6],
-                )
+            ppath = f"{now:%Y/%m/%d}/GIS/{comp}comp/n0q_{now:%Y%m%d%H%M}.png"
+            with archive_fetch(ppath) as fn:
+                if fn is None:
+                    LOG.warning("[%s]%s is missing", comp, ppath)
+                    continue
+                if comp == "us" and os.stat(fn)[6] < 200000:
+                    LOG.warning(
+                        "%s too small, size: %s",
+                        ppath,
+                        os.stat(fn)[6],
+                    )
         now += interval
 
 

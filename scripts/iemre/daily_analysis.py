@@ -242,7 +242,8 @@ def use_climodat_12z(ts, ds):
         )
     LOG.info("loaded %s rows from climodat database", len(df.index))
     if len(df.index) < 50:
-        LOG.warning("Failed quorum")
+        if ts != datetime.date.today():
+            LOG.warning("Failed quorum")
         return
     if ts.year < 1951:
         res = generic_gridder(df, "highdata")
