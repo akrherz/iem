@@ -62,26 +62,37 @@ def main(argv):
             if req.status_code != 200:
                 LOG.info("Failed to get %s got %s", url, req.status_code)
                 continue
-            with open("tmp.grb", "wb") as fh:
+            # We need to inspect this file as we do not want the forecast
+            # analysis error grib data, ie some of these files have 2 messages
+            with tempfile.NamedTemporaryFile(delete=False) as fh:
                 fh.write(req.content)
-            grbs = pygrib.open("tmp.grb")
             try:
-                grbs.select(
+                grbs = pygrib.open(fh.name)
+                msgs = grbs.select(
                     shortName=GRIB_XREF[key],
                     typeOfGeneratingProcess=0,
-                )[0]
+                )
+                if not msgs:
+                    LOG.info("No %s found in %s", key, fh.name)
+                    os.unlink(fh.name)
+                    continue
+                if grbs.messages > 1:
+                    LOG.info("Found %s messages, trimming", grbs.messages)
+                    with open(fh.name, "wb") as fh2:
+                        fh2.write(msgs[0].tostring())
                 # Caution, we don't use -i here as this name is not unique
                 cmd = [
                     "pqinsert",
                     "-p",
                     f"data u {now:%Y%m%d%H%M} unused model/rtma/{now:%H}/"
                     f"rtma.t{now:%H}z.awp2p5f000.grib2 grib2",
-                    "tmp.grb",
+                    fh.name,
                 ]
                 subprocess.call(cmd)
+                grbs.close()
             except Exception:
                 LOG.warning("%s not found in %s", key, fn)
-            grbs.close()
+            os.unlink(fh.name)
 
 
 if __name__ == "__main__":
