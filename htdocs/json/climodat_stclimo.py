@@ -14,13 +14,18 @@ def run(cursor, station, syear, eyear):
     WITH data as (
       SELECT sday, year, precip,
       avg(precip) OVER (PARTITION by sday) as avg_precip,
-      high, rank() OVER (PARTITION by sday ORDER by high DESC) as max_high,
+      high, rank() OVER (PARTITION by sday ORDER by high DESC nulls last)
+        as max_high,
       avg(high) OVER (PARTITION by sday) as avg_high,
-      rank() OVER (PARTITION by sday ORDER by high ASC) as min_high,
-      low, rank() OVER (PARTITION by sday ORDER by low DESC) as max_low,
+      rank() OVER (PARTITION by sday ORDER by high ASC nulls last)
+        as min_high,
+      low, rank() OVER (PARTITION by sday ORDER by low DESC nulls last)
+        as max_low,
       avg(low) OVER (PARTITION by sday) as avg_low,
-      rank() OVER (PARTITION by sday ORDER by low ASC) as min_low,
-      rank() OVER (PARTITION by sday ORDER by precip DESC) as max_precip,
+      rank() OVER (PARTITION by sday ORDER by low ASC nulls last)
+        as min_low,
+      rank() OVER (PARTITION by sday ORDER by precip DESC nulls last)
+        as max_precip,
       max(high - low) OVER (PARTITION by sday) as max_range,
       min(high - low) OVER (PARTITION by sday) as min_range
       from alldata WHERE station = %s and year >= %s and year < %s),
