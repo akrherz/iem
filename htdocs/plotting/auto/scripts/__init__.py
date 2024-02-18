@@ -589,6 +589,13 @@ mopts = [
         ),
     },
     {
+        "id": 250,
+        "label": (
+            "Difference between two ASOS/METAR stations "
+            "for a given hourly variable"
+        ),
+    },
+    {
         "id": 167,
         "label": (
             "Flight / Aviation Condition (VFR, MVFR, IFR, LIFR) "
