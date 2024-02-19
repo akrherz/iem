@@ -9,11 +9,12 @@ Warning.
 import datetime
 
 import pandas as pd
+from pyiem.database import get_sqlalchemy_conn
 from pyiem.exceptions import NoDataFound
 from pyiem.plot import figure_axes
 from pyiem.plot.use_agg import plt
 from pyiem.reference import state_names
-from pyiem.util import get_autoplot_context, get_sqlalchemy_conn
+from pyiem.util import get_autoplot_context
 
 PDICT = {"state": "Aggregate by State", "wfo": "Aggregate by WFO"}
 PDICT2 = {"percent": "Frequency [%]", "count": "Count"}
