@@ -5,14 +5,10 @@ import time
 
 import pandas as pd
 import requests
+from pyiem.database import get_dbconn, get_sqlalchemy_conn
 from pyiem.network import Table as NetworkTable
 from pyiem.reference import TRACE_VALUE, ncei_state_codes
-from pyiem.util import (
-    exponential_backoff,
-    get_dbconn,
-    get_sqlalchemy_conn,
-    logger,
-)
+from pyiem.util import exponential_backoff, logger
 
 pd.set_option("future.no_silent_downcasting", True)
 LOG = logger()
@@ -45,6 +41,11 @@ def compare(row, colname):
         est = row[f"{'precip' if colname == 'precip' else 'temp'}_estimated"]
         # If we have an estimated flag and ACIS is not None, do things.
         if est is None or est:
+            return newval
+    # If ACIS is missing, we had better set estimated to true
+    if newval is None and oldval is not None:
+        est = row[f"{'precip' if colname == 'precip' else 'temp'}_estimated"]
+        if not est:
             return newval
     if oldval is None and newval is not None:
         return newval
@@ -182,15 +183,18 @@ def do(meta, station, acis_station, interactive):
             if newval is False:
                 continue
             work.append(f"{col} = %s")
-            if col in ["high", "low", "temp_hour", "precip_hour"]:
+            if newval is None:
+                args.append(None)
+            elif col in ["high", "low", "temp_hour", "precip_hour"]:
                 args.append(int(newval))
             else:
                 args.append(newval)
             if col in ["high", "precip"]:  # suboptimal to exclude low
                 work.append(
                     f"{'precip' if col == 'precip' else 'temp'}_"
-                    "estimated = 'f'"
+                    "estimated = %s"
                 )
+                args.append(newval is None)
             if row["dbhas"]:
                 updates[col] += 1
         if not work:

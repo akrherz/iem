@@ -1,6 +1,8 @@
 """
-Presents the simple daily climatology as
-computed by period of record data.
+Presents the simple daily climatology as computed by period of record data. If
+you select a start date that is later than the end date, the plot will wrap
+over 1 January.  In such a case, if you select certain years to plot, the year
+will be from the start of the two year period that crosses 1 January.
 """
 import datetime
 
@@ -67,6 +69,48 @@ def get_description():
         },
     ]
     return desc
+
+
+def do_year_overlay(ctx, ax, pname, color, crosses_jan1):
+    """Overlay the observed data for the given years."""
+    year = ctx.get(pname)
+    if year is None:
+        return
+    sts = datetime.date(year, ctx["sday"].month, ctx["sday"].day)
+    ets = datetime.date(year, ctx["eday"].month, ctx["eday"].day)
+    if crosses_jan1:
+        ets = datetime.date(year + 1, ctx["eday"].month, ctx["eday"].day)
+
+    with get_sqlalchemy_conn("coop") as conn:
+        obs = pd.read_sql(
+            text(
+                """select day, year, high, low from alldata
+            WHERE station = :station and day >= :sts and day <= :ets
+            order by day ASC"""
+            ),
+            conn,
+            parse_dates="day",
+            params={"station": ctx["station"], "sts": sts, "ets": ets},
+        )
+    if obs.empty:
+        return
+    obs["day"] = obs["day"].dt.date
+    obs["day"] = obs["day"].map(lambda x: x.replace(year=2000))
+    if crosses_jan1:
+        obs.loc[obs["day"] >= ctx["eday"], "day"] = obs.loc[
+            obs["day"] >= ctx["eday"], "day"
+        ].map(lambda x: x.replace(year=1999))
+    lbl = f"{year}-{year + 1}" if crosses_jan1 else f"{year}"
+    ax.bar(
+        obs["day"].values,
+        obs["high"] - obs["low"],
+        bottom=obs["low"],
+        color=color,
+        align="edge",
+        label=f"Observed {lbl}",
+        width=0.8,
+        alpha=0.8,
+    )
 
 
 def plotter(fdict):
@@ -170,6 +214,16 @@ def plotter(fdict):
             subtitle += f" and {ctx['year2']}"
     fig = figure(title=title, subtitle=subtitle, apctx=ctx)
     ax = fig.add_axes([0.08, 0.1, 0.9, 0.8])
+    # Wants to cross 1 Jan on x-axis
+    crosses_jan1 = ctx["sday"] > ctx["eday"]
+    if crosses_jan1:
+        if ctx["eday"].month == 2 and ctx["eday"].day == 29:
+            ctx["eday"] = datetime.date(ctx["eday"].year, 2, 28)
+        dfnew = df.loc[ctx["sday"] :].copy()
+        dfnew.index = dfnew.index.map(lambda x: x.replace(year=1999))
+        df = pd.concat([dfnew, df.loc[: ctx["sday"]]])
+        ctx["sday"] = ctx["sday"].replace(year=1999)
+
     x = df.index.date
     ax.fill_between(
         x,
@@ -210,36 +264,8 @@ def plotter(fdict):
         drawstyle="steps-post",
     )
 
-    if ctx.get("year1") is not None:
-        years = [ctx["year1"]]
-        if ctx.get("year2") is not None:
-            years.append(ctx["year2"])
-        with get_sqlalchemy_conn("coop") as conn:
-            obs = pd.read_sql(
-                text(
-                    """select day, year, high, low from alldata
-                WHERE station = :station and year = ANY(:years)
-                     order by day ASC"""
-                ),
-                conn,
-                parse_dates="day",
-                params={"station": station, "years": years},
-            )
-        if not obs.empty:
-            obs["day"] = obs["day"].map(lambda x: x.replace(year=2000))
-            colors = ["#593700", "#49aaf0"]
-            for i, year in enumerate(years):
-                obs2 = obs[obs["year"] == year]
-                ax.bar(
-                    obs2["day"].values,
-                    obs2["high"] - obs2["low"],
-                    bottom=obs2["low"],
-                    color=colors[i],
-                    align="edge",
-                    label=f"Observed {year}",
-                    width=0.8,
-                    alpha=0.8 if len(years) > 1 else 1.0,
-                )
+    do_year_overlay(ctx, ax, "year1", "#593700", crosses_jan1)
+    do_year_overlay(ctx, ax, "year2", "#49aaf0", crosses_jan1)
 
     ax.grid(True)
     ax.legend(ncol=5)

@@ -266,6 +266,17 @@ def workflow(mc, environ, fmt):
     elif fmt == "txt" and report is not None:
         content = report
     elif fmt in ["csv", "xlsx"] and df is not None:
+        # If the index is a datetime object, we need to convert it to a string
+        if isdt(df.index):
+            dtz = df.index.tz
+            # We could have timezone or zoneinfo :/
+            if dtz is not None and dtz in [
+                ZoneInfo("UTC"),
+                timezone.utc,
+            ]:
+                df.index = df.index.strftime(ISO8601)
+            else:
+                df.index = df.index.strftime("%Y-%m-%dT%H:%M:%S")
         # Dragons: do timestamp conversion as pandas has many bugs
         for column in df.columns:
             if isdt(df[column]):
