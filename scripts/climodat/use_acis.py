@@ -194,7 +194,7 @@ def do(meta, station, acis_station, interactive):
                     f"{'precip' if col == 'precip' else 'temp'}_"
                     "estimated = %s"
                 )
-                args.append(True if newval is None else False)
+                args.append(newval is None)
             if row["dbhas"]:
                 updates[col] += 1
         if not work:
