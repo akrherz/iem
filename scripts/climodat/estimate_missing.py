@@ -9,8 +9,9 @@ import sys
 
 import pandas as pd
 import requests
+from pyiem.database import get_dbconn, get_sqlalchemy_conn
 from pyiem.network import Table as NetworkTable
-from pyiem.util import get_dbconn, get_sqlalchemy_conn, logger
+from pyiem.util import logger
 
 LOG = logger()
 URI = (
@@ -48,16 +49,14 @@ def process(cursor, station, df, meta):
 
     for _, row in df.iterrows():
         newvals = row.to_dict()
-        precip_estimated = False
-        temp_estimated = False
         for col in ["high", "low", "precip"]:
             # If current ob is not null, don't replace it with an estimate!
-            if not pd.isna(row[col]):
+            if pd.notna(row[col]):
                 continue
             if col in ["high", "low"]:
-                temp_estimated = True
+                newvals["temp_estimated"] = True
             elif col == "precip":
-                precip_estimated = True
+                newvals["precip_estimated"] = True
             units = "f" if col != "precip" else "in"
             if (
                 col == "precip"
@@ -82,15 +81,15 @@ def process(cursor, station, df, meta):
             station,
             row["day"],
             newvals["high"],
-            temp_estimated,
+            newvals["temp_estimated"],
             newvals["low"],
-            temp_estimated,
+            newvals["temp_estimated"],
             newvals["precip"],
-            precip_estimated,
+            newvals["precip_estimated"],
         )
         sql = f"""
-            UPDATE alldata SET temp_estimated = {temp_estimated},
-            precip_estimated = {precip_estimated},
+            UPDATE alldata SET temp_estimated = {newvals['temp_estimated']},
+            precip_estimated = {newvals['precip_estimated']},
             high = {newvals['high']:.0f}, low = {newvals['low']:.0f},
             precip = {newvals['precip']:.2f},
             temp_hour = coalesce(temp_hour, {hour}),
@@ -111,7 +110,8 @@ def main(argv):
     with get_sqlalchemy_conn("coop") as conn:
         df = pd.read_sql(
             f"""
-            SELECT station, year, day, high, low, precip from alldata_{state}
+            SELECT station, year, day, high, low, precip, temp_estimated,
+            precip_estimated from alldata_{state}
             WHERE (high is null or low is null or precip is null)
             and year >= 1893 and day < 'TODAY' ORDER by station, day
             """,
