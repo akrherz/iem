@@ -1,5 +1,4 @@
 """Our mod_wsgi frontend to autoplot generation"""
-# pylint: disable=abstract-class-instantiated
 import importlib.machinery
 import importlib.util
 import json
@@ -24,7 +23,7 @@ from pyiem.exceptions import (
 from pyiem.plot.use_agg import plt
 from pyiem.reference import ISO8601
 from pyiem.util import utc
-from pyiem.webutil import iemapp
+from pyiem.webutil import TELEMETRY, iemapp, write_telemetry
 from pymemcache.client import Client
 from six import string_types
 
@@ -219,6 +218,16 @@ def workflow(mc, environ, fmt):
     except NoDataFound as exp:
         return HTTP400, handle_error(exp, fmt, environ.get("REQUEST_URI"))
     except Exception as exp:
+        # Log this so that my review scripts see it.
+        write_telemetry(
+            TELEMETRY(
+                (utc() - start_time).total_seconds(),
+                500,
+                environ.get("REMOTE_ADDR"),
+                environ.get("SCRIPT_NAME"),
+                environ.get("REQUEST_URI"),
+            )
+        )
         # Everything else should be considered fatal
         return HTTP500, handle_error(exp, fmt, environ.get("REQUEST_URI"))
 

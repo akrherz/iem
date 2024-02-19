@@ -19,7 +19,7 @@ def comp(old, new):
     if pd.isnull(new) and pd.isnull(old):
         return False
     # If the new value is null, we want this as the value should be null
-    if pd.isnull(new):
+    if pd.isnull(new) or pd.isnull(old):
         return True
     if old == new:
         return False
