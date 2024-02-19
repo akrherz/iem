@@ -146,7 +146,7 @@ def get_context(fdict):
             index_col=None,
         )
     # Figure out which mode we are going to do
-    if all([a is None for a in [p1, p2, p3, p4, p5, p6]]):
+    if all(a is None for a in [p1, p2, p3, p4, p5, p6]):
         df = (
             df.drop(columns="day")
             .groupby(["month", "hour"])

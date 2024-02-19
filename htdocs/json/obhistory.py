@@ -4,9 +4,10 @@ import json
 
 import pandas as pd
 from dateutil.parser import parse
+from pyiem.database import get_sqlalchemy_conn
 from pyiem.exceptions import IncompleteWebRequest
 from pyiem.reference import IEMVARS
-from pyiem.util import get_sqlalchemy_conn, html_escape
+from pyiem.util import html_escape
 from pyiem.webutil import iemapp
 from pymemcache.client import Client
 
@@ -31,7 +32,7 @@ def do_today(table, station, network, date):
             params=(date, station, network),
             index_col=None,
         )
-    table["rows"] = [row for row in df.itertuples(index=False)]
+    table["rows"] = list(df.itertuples(index=False))
 
 
 def do_asos(table, station, _network, date):
@@ -54,7 +55,7 @@ def do_asos(table, station, _network, date):
             params=(date, station),
             index_col=None,
         )
-    table["rows"] = [row for row in df.itertuples(index=False)]
+    table["rows"] = list(df.itertuples(index=False))
 
 
 def workflow(station, network, date):

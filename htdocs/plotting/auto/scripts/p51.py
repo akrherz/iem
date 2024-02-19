@@ -147,7 +147,7 @@ def plotter(fdict):
     sacc[:] = np.nan
     for year in range(baseyear, datetime.datetime.now().year + 1):
         sts = sdate.replace(year=year)
-        ets = sts + datetime.timedelta(days=(xlen - 1))
+        ets = sts + datetime.timedelta(days=xlen - 1)
         x = climo.loc[sts:ets, glabel].cumsum()
         if x.empty:
             continue
@@ -241,7 +241,7 @@ def plotter(fdict):
         if year == 0:
             continue
         sts = sdate.replace(year=year)
-        ets = sts + datetime.timedelta(days=(xlen - 1))
+        ets = sts + datetime.timedelta(days=xlen - 1)
         color = yearcolors[wantedyears.index(year)]
         yearlabel = sts.year
         x = df.loc[sts:ets]
