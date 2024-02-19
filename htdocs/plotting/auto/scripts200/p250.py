@@ -1,8 +1,10 @@
 """
 This autoplot presents some metrics when comparing a single variable between
 two airport weather stations.  The time zone of the first station is used for
-the various subplots.  The main panel shows a time series difference over the
-period you selected.  The top right panel shows a heatmap of the frequency of
+the various subplots.  The top left panel shows a time series difference over
+the period you selected.  The lower left panel shows a yearly mean value and
+a +/- one standard deviation.
+The top right panel shows a heatmap of the frequency of
 the first station having a value greater than the second station by a certain
 threshold.  The bottom right panel shows a violin plot of the monthly
 distribution of differences.
@@ -141,8 +143,8 @@ def plotter(fdict):
         ),
         apctx=ctx,
     )
-    ax = fig.add_axes([0.08, 0.1, 0.5, 0.8])
     # Plot the specified data period
+    ax = fig.add_axes([0.08, 0.55, 0.5, 0.35])
     df2 = df.loc[sts:ets]
     if not df2.empty:
         ax.plot(df2.index.values, df2["diff"], label="Difference", lw=2)
@@ -153,6 +155,22 @@ def plotter(fdict):
         else:
             fmt = "%-d %b\n%Y"
         ax.xaxis.set_major_formatter(DateFormatter(fmt, tz=tz))
+
+    # Plot the yearly means and standard deviation
+    ax = fig.add_axes([0.08, 0.1, 0.5, 0.35])
+    yearly = df["diff"].groupby(df.index.year).agg(["mean", "std"])
+    ax.fill_between(
+        yearly.index.values,
+        yearly["mean"] - yearly["std"],
+        yearly["mean"] + yearly["std"],
+        color="lightgrey",
+        label="+/- 1 \u03C3",
+    )
+    ax.plot(yearly.index.values, yearly["mean"], label="Mean", lw=2)
+    ax.set_ylabel(f"{PDICT[varname]} Difference")
+    ax.set_xlabel("Year")
+    ax.grid(True)
+    ax.legend(loc="best", ncol=2)
 
     # Plot the monthly distribution of differences as half violin plot
     ax = fig.add_axes([0.65, 0.1, 0.32, 0.3])
@@ -165,7 +183,7 @@ def plotter(fdict):
     ax.set_xticklabels(calendar.month_abbr[1:])
     ax.set_title("Monthly Distribution")
     ax.grid(True)
-    ptiles = df["diff"].quantile([0.05, 0.95])
+    ptiles = df["diff"].quantile([0.01, 0.99])
     ax.set_ylim(ptiles.iloc[0], ptiles.iloc[1])
 
     # Plot the frequency of differences by week of year and hour of day

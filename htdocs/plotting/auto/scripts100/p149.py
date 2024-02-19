@@ -19,9 +19,10 @@ import datetime
 import matplotlib.dates as mdates
 import numpy as np
 import pandas as pd
+from pyiem.database import get_sqlalchemy_conn
 from pyiem.exceptions import NoDataFound
 from pyiem.plot import figure_axes
-from pyiem.util import get_autoplot_context, get_sqlalchemy_conn
+from pyiem.util import get_autoplot_context
 
 
 def get_description():
@@ -93,6 +94,8 @@ def plotter(fdict):
     _days3 = days3 if days3 > 0 else 1
     sts = ctx["sdate"]
     ets = ctx["edate"]
+    if ets < sts:
+        sts, ets = ets, sts
     yrrange = ets.year - sts.year
     year2 = ctx.get("year2")  # could be null!
     year3 = ctx.get("year3")  # could be null!

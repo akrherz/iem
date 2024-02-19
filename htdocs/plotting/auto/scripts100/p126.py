@@ -14,9 +14,10 @@ import datetime
 import metpy.calc as mcalc
 import pandas as pd
 from metpy.units import units
+from pyiem.database import get_sqlalchemy_conn
 from pyiem.exceptions import NoDataFound
 from pyiem.plot import figure
-from pyiem.util import get_autoplot_context, get_sqlalchemy_conn
+from pyiem.util import get_autoplot_context
 
 PDICT = {
     "mixing_ratio": "Mixing Ratio [g/kg]",
@@ -194,4 +195,4 @@ def plotter(fdict):
 
 
 if __name__ == "__main__":
-    plotter({"var": "mixing_ratio"})
+    plotter({})

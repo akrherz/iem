@@ -25,11 +25,12 @@ from zoneinfo import ZoneInfo
 
 import geopandas as gpd
 import pandas as pd
+from pyiem.database import get_sqlalchemy_conn
 from pyiem.exceptions import NoDataFound
 from pyiem.nws import vtec
 from pyiem.plot.geoplot import MapPlot
 from pyiem.reference import LATLON, Z_FILL, Z_OVERLAY2, Z_OVERLAY2_LABEL
-from pyiem.util import get_autoplot_context, get_sqlalchemy_conn, utc
+from pyiem.util import get_autoplot_context, utc
 from sqlalchemy import text
 
 TFORMAT = "%b %-d %Y %-I:%M %p %Z"
@@ -102,6 +103,8 @@ def plotter(fdict):
     ctx = get_autoplot_context(fdict, get_description())
     utcvalid = ctx.get("valid")
     wfo = ctx["wfo"]
+    if wfo == "_ALL":
+        wfo = "DMX"
     if wfo == "NHC":
         ctx["opt"] = "expand"
     tzname = ctx["_nt"].sts[wfo]["tzname"]

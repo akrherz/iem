@@ -78,7 +78,7 @@ function doOutlook(lon, lat) {
                 tbody.append(`<tr><td>${ol.day}</td><td>${ol.threshold}</td><td>${ol.utc_product_issue}</td><td>${ol.utc_issue}</td><td>${ol.utc_expire}</td></tr>`)
             });
             if (data.outlooks.length === 0) {
-                tbody.append(`<tr><td colspan="5">No Results Found!</td></tr>`);
+                tbody.append('<tr><td colspan="5">No Results Found!</td></tr>');
             }
         }
     });
@@ -97,7 +97,7 @@ function doMCD(lon, lat) {
                 tbody.append(`<tr><td><a href="${mcd.spcurl}" target="_blank">${mcd.year} ${mcd.product_num}</a></td><td>${mcd.utc_issue}</td><td>${mcd.utc_expire}</td></tr>`)
             });
             if (data.mcds.length === 0) {
-                tbody.append(`<tr><td colspan="3">No Results Found!</td></tr>`);
+                tbody.append('<tr><td colspan="3">No Results Found!</td></tr>');
             }
         }
     });
@@ -118,7 +118,7 @@ function doWatch(lon, lat) {
                 tbody.append(`<tr><td><a href="${watch.spcurl}" target="_blank">${watch.year} ${watch.number}</a></td><td>${watch.type}</td><td>${watch.issue}</td><td>${watch.expire}</td></tr>`)
             });
             if (data.features.length === 0) {
-                tbody.append(`<tr><td colspan="4">No Results Found!</td></tr>`);
+                tbody.append('<tr><td colspan="4">No Results Found!</td></tr>');
             }
         }
     });

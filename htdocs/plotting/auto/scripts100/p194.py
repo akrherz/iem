@@ -17,12 +17,13 @@ import numpy as np
 import pandas as pd
 from affine import Affine
 from geopandas import read_postgis
+from pyiem.database import get_dbconn, get_sqlalchemy_conn
 from pyiem.exceptions import NoDataFound
 from pyiem.grid.zs import CachingZonalStats
 from pyiem.plot import MapPlot
 from pyiem.plot.colormaps import stretch_cmap
 from pyiem.reference import LATLON
-from pyiem.util import get_autoplot_context, get_dbconn, get_sqlalchemy_conn
+from pyiem.util import get_autoplot_context
 
 PDICT = {
     "0": "D0: Abnormally Dry",
@@ -215,6 +216,4 @@ def plotter(fdict):
 
 
 if __name__ == "__main__":
-    plotter({"d": "4", "w": "weeks", "csector": "midwest"})[0].savefig(
-        "/tmp/bah.png"
-    )
+    plotter({})

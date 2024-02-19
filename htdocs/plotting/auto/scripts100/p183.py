@@ -168,4 +168,4 @@ def plotter(fdict):
 
 
 if __name__ == "__main__":
-    plotter({"state": "CA"})
+    plotter({})

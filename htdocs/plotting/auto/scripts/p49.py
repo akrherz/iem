@@ -12,9 +12,10 @@ import datetime
 
 import matplotlib.dates as mdates
 import pandas as pd
+from pyiem.database import get_sqlalchemy_conn
 from pyiem.exceptions import NoDataFound
 from pyiem.plot import figure_axes
-from pyiem.util import get_autoplot_context, get_sqlalchemy_conn
+from pyiem.util import get_autoplot_context
 from sqlalchemy import text
 
 PDICT = {
@@ -126,7 +127,7 @@ def plotter(fdict):
         )
         subtitle = f"Frequency of {PDICT[varname]} {vv}"
     else:
-        sql = f"val {XREF[ctx['opt']]} :threshold"
+        sql = f"val::numeric {XREF[ctx['opt']]} :threshold"
         vv = PDICT2[ctx["opt"]].replace("{threshold}", str(threshold))
         subtitle = f"Frequency of {PDICT[varname]} {vv} "
     days = int(ctx["days"])
