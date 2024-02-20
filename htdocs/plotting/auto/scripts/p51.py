@@ -103,6 +103,8 @@ def plotter(fdict):
     station = ctx["station"]
     sdate = ctx["sdate"]
     edate = ctx["edate"]
+    if sdate > edate:
+        sdate, edate = edate, sdate
     year2 = ctx.get("year2", 0)
     year3 = ctx.get("year3", 0)
     year4 = ctx.get("year4", 0)

@@ -10,7 +10,6 @@ minute interval samples, so these will not fully capture the actual high nor
 low temperature.  When the 15 minute data is available, it should certainly
 do a better job than the hourly.
 """
-import os
 from datetime import timedelta
 
 import matplotlib.colors as mpcolors
@@ -20,7 +19,7 @@ import pygrib
 from pyiem.exceptions import NoDataFound
 from pyiem.plot import MapPlot, pretty_bins
 from pyiem.reference import LATLON
-from pyiem.util import convert_value, get_autoplot_context, utc
+from pyiem.util import archive_fetch, convert_value, get_autoplot_context, utc
 
 PDICT = {
     "max": "Maximum",
@@ -89,11 +88,12 @@ def get_data(ctx):
     """Do the computation!"""
     sts = ctx["sts"]
     ets = ctx["ets"]
-    testfn = (
-        f"/mesonet/ARCHIVE/data/{sts:%Y/%m/%d}/model/rtma/{sts:%H}/"
+    ppath = (
+        f"{sts:%Y/%m/%d}/model/rtma/{sts:%H}/"
         f"rtma2p5_ru.t{sts:%H%M}z.2dvaranl_ndfd.grb2"
     )
-    use_ru = os.path.isfile(testfn)
+    with archive_fetch(ppath) as testfn:
+        use_ru = testfn is not None
     lons = None
     lats = None
     vals = None
@@ -104,28 +104,29 @@ def get_data(ctx):
     maxdt = None
     for dt in pd.date_range(sts, ets, freq="900s" if use_ru else "1h"):
         total += 1
-        mydir = f"/mesonet/ARCHIVE/data/{dt:%Y/%m/%d}/model/rtma/{dt:%H}/"
-        fn = mydir + (
+        mydir = f"{dt:%Y/%m/%d}/model/rtma/{dt:%H}/"
+        ppath = mydir + (
             f"rtma2p5_ru.t{dt:%H%M}z.2dvaranl_ndfd.grb2"
             if use_ru
             else f"rtma.t{dt:%H}z.awp2p5f000.grib2"
         )
-        if not os.path.isfile(fn):
-            missing_count += 1
-            continue
-        try:
-            grbs = pygrib.open(fn)
-            grb = grbs.select(shortName="2t")[0]
-            if lons is None:
-                lats, lons = grb.latlons()
-                vals = grb.values
-            vals = func(vals, grb.values)
-            grbs.close()
-            if mindt is None:
-                mindt = dt
-            maxdt = dt
-        except Exception:
-            continue
+        with archive_fetch(ppath) as fn:
+            if fn is None:
+                missing_count += 1
+                continue
+            try:
+                grbs = pygrib.open(fn)
+                grb = grbs.select(shortName="2t")[0]
+                if lons is None:
+                    lats, lons = grb.latlons()
+                    vals = grb.values
+                vals = func(vals, grb.values)
+                grbs.close()
+                if mindt is None:
+                    mindt = dt
+                maxdt = dt
+            except Exception:
+                continue
     if vals is None:
         raise NoDataFound("Failed to find any RTMA data, sorry.")
     return {
@@ -176,13 +177,13 @@ def plotter(fdict):
         dist = np.sqrt(
             (res["lons"] - bnds[0]) ** 2 + (res["lats"] - bnds[2]) ** 2
         )
-        x1, y1 = np.unravel_index(dist.argmin(), dist.shape)
+        y1, x1 = np.unravel_index(dist.argmin(), dist.shape)
         dist = np.sqrt(
             (res["lons"] - bnds[1]) ** 2 + (res["lats"] - bnds[3]) ** 2
         )
-        x2, y2 = np.unravel_index(dist.argmin(), dist.shape)
-        domain = res["vals"][y1:y2, x1:x2]
-        ptile = np.percentile(domain, [5, 95])
+        y2, x2 = np.unravel_index(dist.argmin(), dist.shape)
+        domain = res["vals"][y1:y2, x1:x2].filled(np.nan)
+        ptile = np.nanpercentile(domain, [5, 95])
         bins = pretty_bins(ptile[0], ptile[1])
         cmap = ctx["cmap"]
     mp.pcolormesh(

@@ -11,9 +11,10 @@ import numpy as np
 import pandas as pd
 import seaborn as sns
 from pyiem import reference
+from pyiem.database import get_dbconn, get_sqlalchemy_conn
 from pyiem.exceptions import NoDataFound
 from pyiem.plot import figure_axes
-from pyiem.util import get_autoplot_context, get_dbconn, get_sqlalchemy_conn
+from pyiem.util import get_autoplot_context
 from sqlalchemy import text
 
 MDICT = {
@@ -193,7 +194,7 @@ def plotter(fdict):
                 text(
                     f"""
                 with data as (
-                SELECT distinct valid, geom, typetext, magnitude
+                SELECT distinct valid, l.geom, typetext, magnitude
                 from lsrs l JOIN ugcs u on (l.gid = u.gid)
                 where 1 = 1 {tlimiter} {wfo_limiter}
                 )
