@@ -30,7 +30,7 @@ if BASEDIR not in sys.path:
 # Local
 import scripts  # noqa
 
-HIGHCHARTS = "11.1.0"
+HIGHCHARTS = "11.3.0"
 OPENLAYERS = "7.5.1"
 CSECTORS = state_names.copy()
 CSECTORS.update(SECTORS_NAME)
@@ -706,6 +706,9 @@ var progressBar = setInterval(function (){{
     padding-left: 20px;
     padding-right: 20px;
     z-index: 10002;
+}}
+.highcharts-root {{
+  font-size: 16px !important;
 }}
 </style>
 <script>
