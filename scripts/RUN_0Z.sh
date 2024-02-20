@@ -8,6 +8,12 @@ fi
 cd util
 python make_archive_baseline.py
 
+cd ../00z
+# Wait a bit, so that more obs can come in
+sleep 300
+python generate_rtp.py
+python asos_high.py
+
 cd ../ncei
 python ingest_climdiv.py &
 
@@ -18,13 +24,6 @@ python daily_analysis.py --date=$(date +'%Y-%m-%d')
 cd ../climodat
 python sync_coop_updates.py
 python daily_estimator.py --date=$(date +'%Y-%m-%d')
-
-# Wait a bit, so that more obs can come in
-sleep 300
-
-cd ../00z
-python generate_rtp.py
-python asos_high.py
 
 cd ../asos
 python cf6_to_iemaccess.py
