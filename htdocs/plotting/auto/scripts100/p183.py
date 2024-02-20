@@ -89,7 +89,7 @@ def plotter(fdict):
         & (df["Date"] <= pd.Timestamp(edate))
     ]
     df = df.sort_values("Date", ascending=True)
-    df["x"] = df["Date"] + datetime.timedelta(hours=(3.5 * 24))
+    df["x"] = df["Date"] + datetime.timedelta(hours=3.5 * 24)
     df = df.set_index("Date")
     df.index.name = "Date"
 
