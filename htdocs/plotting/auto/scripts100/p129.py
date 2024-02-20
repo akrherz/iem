@@ -8,11 +8,11 @@ for precipitation are computed with dry days omitted.
 import calendar
 import datetime
 
-import numpy as np
 import pandas as pd
+from pyiem.database import get_sqlalchemy_conn
 from pyiem.exceptions import NoDataFound
 from pyiem.plot import figure_axes
-from pyiem.util import get_autoplot_context, get_sqlalchemy_conn
+from pyiem.util import get_autoplot_context
 
 PDICT = {
     "high": "High Temperature",
@@ -68,30 +68,41 @@ def get_context(fdict):
     bs = ctx["_nt"].sts[station]["archive_begin"]
     if bs is None:
         raise NoDataFound("Unknown station metadata.")
-    years = datetime.date.today().year - bs.year + 1.0
 
     plimit = "" if varname != "precip" else " and precip > 0.009 "
     comp = ">=" if mydir == "above" else "<"
     if varname in ["high", "low"]:
         level = int(level)
     with get_sqlalchemy_conn("coop") as conn:
-        df = pd.read_sql(
+        monthly = pd.read_sql(
             f"""
-        SELECT month,
+        SELECT month, year,
         sum(case when {varname} {comp} %s then 1 else 0 end) as hits,
         count(*) from alldata WHERE station = %s {plimit}
-        GROUP by month ORDER by month ASC
+        and day < %s
+        GROUP by year, month ORDER by year desc, month ASC
         """,
             conn,
-            params=(level, station),
-            index_col="month",
+            params=(level, station, datetime.date.today().replace(day=1)),
+            index_col=None,
         )
-    if df.empty:
+    if monthly.empty:
         raise NoDataFound("Did not find any data.")
+    quorum = [0, 31, 28, 31, 30, 31, 30, 31, 31, 30, 31, 30, 31]
+    monthly["quorum"] = monthly["month"].apply(lambda x: quorum[x])
+    monthly = monthly[monthly["count"] >= monthly["quorum"]]
+    years = monthly["month"].value_counts()
+    df = monthly.groupby("month").agg({"hits": "sum", "count": "sum"}).copy()
+    df["hits_max"] = monthly.groupby("month").agg({"hits": "max"})["hits"]
+    df["hits_max_year"] = monthly.loc[
+        monthly.groupby("month").agg({"hits": "idxmax"})["hits"]
+    ].set_index("month")["year"]
+    df["hits_min"] = monthly.groupby("month").agg({"hits": "min"})["hits"]
+    df["hits_min_year"] = monthly.loc[
+        monthly.groupby("month").agg({"hits": "idxmin"})["hits"]
+    ].set_index("month")["year"]
     df["rank"] = (df["count"] - df["hits"]) / df["count"] * 100.0
     df["avg_days"] = df["hits"] / years
-    df["return_interval"] = 1.0 / df["avg_days"]
-    df = df.replace([np.inf, -np.inf], np.nan)
     ctx["df"] = df
     ctx["station"] = station
     ctx["mydir"] = mydir
@@ -118,79 +129,63 @@ def highcharts(fdict):
     ctx = get_context(fdict)
     containername = fdict.get("_e", "ap_container")
 
-    return (
-        """
-    var avg_days = """
-        + str(ctx["df"]["avg_days"].values.tolist())
-        + """;
-Highcharts.chart('"""
-        + containername
-        + """', {
-    title: {text: '"""
-        + ctx["title"]
-        + """'},
-    subtitle: {text: '"""
-        + ctx["subtitle"]
-        + """'},
-    yAxis: [{
+    return f"""
+Highcharts.chart('{containername}', {{
+    title: {{text: '{ctx['title']}'}},
+    subtitle: {{text: '{ctx['subtitle']}'}},
+    yAxis: [{{
             min: 0, max: 100,
-            title: {
+            title: {{
                 text: 'Percentile'
-            }
-        }, {
+            }}
+        }}, {{
             min: 0,
-            title: {
-                text: 'Return Period (years)'
-            },
+            title: {{
+                text: 'Avg Days per Month'
+            }},
             opposite: true
-    }],
-    tooltip: {
+    }}],
+    tooltip: {{
             shared: true,
-            formatter: function() {
+            formatter: function() {{
                 var s = '<b>' + this.x +'</b>';
                 s += '<br /><b>Percentile:</b> '+ this.points[0].y.toFixed(2);
-s += '<br /><b>Return Interval:</b> '+ this.points[1].y.toFixed(2) +" years";
-s += '<br /><b>Avg Days per Month:</b> '+ (1. / this.points[1].y).toFixed(2);
+s += '<br /><b>Avg Days per Month:</b> '+ this.points[1].y.toFixed(2);
                 return s;
-            }
-    },
-    plotOptions: {
-            column: {
+            }}
+    }},
+    plotOptions: {{
+            column: {{
                 grouping: false,
                 shadow: false,
                 borderWidth: 0
-            }
-    },
-    series : [{
+            }}
+    }},
+    series : [{{
         name: 'Percentile',
-        data: """
-        + str(ctx["df"]["rank"].values.tolist())
-        + """,
+        data: {ctx['df']['rank'].values.tolist()},
         pointPadding: 0.2,
         pointPlacement: -0.2
-    },{
-        name: 'Return Interval',
-        data: """
-        + ctx["df"]["return_interval"].to_json(orient="records")
-        + """,
-        pointPadding: 0.2,
-        pointPlacement: 0.2,
-        yAxis: 1
-    }],
-    chart: {type: 'column'},
-    xAxis: {categories: """
-        + str(calendar.month_abbr[1:])
-        + """}
-
-});
+    }},{{
+        name: 'Avg Days per Month',
+        data: {ctx['df']['avg_days'].values.tolist()},
+        yAxis: 1,
+        pointPadding: 0.4,
+        pointPlacement: -0.2
+    }}],
+    chart: {{type: 'column'}},
+    xAxis: {{categories: {calendar.month_abbr[1:]}}}
+}});
     """
-    )
 
 
 def plotter(fdict):
     """Go"""
     ctx = get_context(fdict)
-    (fig, ax) = figure_axes(apctx=ctx)
+    (fig, ax) = figure_axes(
+        title=ctx["title"], subtitle=ctx["subtitle"], apctx=ctx
+    )
+    ax.set_position([0.1, 0.2, 0.8, 0.7])
     df = ctx["df"]
 
     ax.bar(
@@ -203,14 +198,13 @@ def plotter(fdict):
         width=0.4,
     )
 
-    ax.set_title("%s\n%s" % (ctx["title"], ctx["subtitle"]))
     ax.grid(True)
     ax.set_ylabel("Percentile [%]", color="tan")
     ax.set_ylim(0, 105)
     ax2 = ax.twinx()
     ax2.bar(
         df.index.values,
-        df["return_interval"],
+        df["avg_days"],
         width=-0.4,
         align="edge",
         fc="blue",
@@ -218,13 +212,20 @@ def plotter(fdict):
         zorder=1,
     )
     ax2.set_ylabel(
-        "Return Interval (years) (%.2f Days per Year)"
-        % (df["avg_days"].sum(),),
+        f"Avg Days per Month ({df['avg_days'].sum():.2f} days per year)",
         color="b",
     )
-    ax2.set_ylim(0, df["return_interval"].max() * 1.1)
+    ax2.set_ylim(0, 32)
     ax.set_xticks(range(1, 13))
-    ax.set_xticklabels(calendar.month_abbr[1:])
+    labels = []
+    for i in range(1, 13):
+        labels.append(
+            f"{calendar.month_abbr[i]}\n"
+            f"{df.at[i, 'hits_min']:.0f}:{df.at[i, 'hits_min_year']:.0f}\n"
+            f"{df.at[i, 'hits_max']:.0f}:{df.at[i, 'hits_max_year']:.0f}"
+        )
+    ax.set_xticklabels(labels)
+    ax.set_xlabel("Month of the Year (min+min days for month and last year)")
     ax.set_xlim(0.5, 12.5)
     for idx, row in df.iterrows():
         ax.text(
@@ -236,18 +237,15 @@ def plotter(fdict):
             zorder=5,
             fontsize=11,
         )
-        if not np.isnan(row["return_interval"]):
-            ax2.text(
-                idx,
-                row["return_interval"],
-                "%.1f" % (row["return_interval"],),
-                ha="right",
-                color="k",
-                zorder=5,
-                fontsize=11,
-            )
-        else:
-            ax2.text(idx, 0.0, "n/a", ha="right")
+        ax2.text(
+            idx,
+            row["avg_days"],
+            f"{row['avg_days']:.1f}",
+            ha="right",
+            color="k",
+            zorder=5,
+            fontsize=11,
+        )
 
     return fig, df
 
