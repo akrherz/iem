@@ -212,6 +212,36 @@ EOM;
             substr($pil, 3, 3),
             date("d M Y H:i", $basets)
         );
+        if (substr($pil, 0, 3) == "CWA") {
+            $pconn = iemdb("postgis");
+            $rs2 = pg_prepare(
+                $pconn,
+                "_SELECT", "SELECT num, issue, center from cwas WHERE ".
+                "issue > $1 and issue < $2 and product_id = $3");
+            $rs2 = pg_execute(
+                $pconn, "_SELECT", array(
+                    date("Y-m-d H:i+00", $basets - 3600),
+                    date("Y-m-d H:i+00", $basets + 3600),
+                    $product_id,
+                )
+            );
+            if (pg_num_rows($rs2) > 0) {
+                $row2 = pg_fetch_assoc($rs2, 0);
+                $t->twitter_image = sprintf(
+                    "/plotting/auto/plot/226/network:CWSU::cwsu:%s::num:%s::".
+                    "issue:%s%%20%s.png",
+                    $row2["center"],
+                    $row2["num"],
+                    date("Y-m-d", strtotime($row2["issue"])),
+                    date("Hi", strtotime($row2["issue"])),
+                );
+                $img = sprintf(
+                    '<p><img src="%s" class="img img-responsive"></p>',
+                    $t->twitter_image,
+                );
+            }
+            pg_close($pconn);
+        }
         if (substr($pil, 0, 3) == "SPS") {
             // Account for multi-segment SPS by counting $$ occurrences
             $segments = substr_count($row["data"], "$$");
