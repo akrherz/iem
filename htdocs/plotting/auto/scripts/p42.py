@@ -19,9 +19,10 @@ import operator
 from zoneinfo import ZoneInfo
 
 import pandas as pd
+from pyiem.database import get_dbconnc
 from pyiem.exceptions import NoDataFound
 from pyiem.plot import figure
-from pyiem.util import get_autoplot_context, get_dbconnc
+from pyiem.util import get_autoplot_context
 
 PDICT = {
     "above": "At or Above Threshold...",
@@ -376,4 +377,4 @@ def plotter(fdict):
 
 
 if __name__ == "__main__":
-    plotter({"m": "all", "dir": "above", "threshold": 50})
+    plotter({})

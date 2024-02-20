@@ -64,9 +64,9 @@ const lsrLookup = {
     "O": "/lsr/icons/wind.png",
     "P": "/lsr/icons/other.png",
     "Q": "/lsr/icons/tropicalstorm.gif",
-    "R": "/vendor/icons/lsr/rain/${magnitude}.png",
+    "R": "/vendor/icons/lsr/rain/{{magnitude}}.png",
     "s": "/lsr/icons/sleet.png",
-    "S": "/vendor/icons/lsr/snow/${magnitude}.png",
+    "S": "/vendor/icons/lsr/snow/{{magnitude}}.png",
     "T": "/lsr/icons/tornado.png",
     "U": "/lsr/icons/fire.png",
     "V": "/lsr/icons/avalanche.gif",
@@ -280,7 +280,7 @@ function buildMap() {
             }
             let url = lsrLookup[feature.get('type')];
             if (url) {
-                url = url.replace("${magnitude}", feature.get('magnitude'));
+                url = url.replace("{{magnitude}}", feature.get('magnitude'));
                 const icon = new ol.style.Icon({
                     src: url
                 });
@@ -627,8 +627,8 @@ function loadTabs() {
             const tabcontent = $("#textdata div.tab-content");
             tabs.empty();
             tabcontent.empty();
-            tabs.append(`<li><a href="#tall" data-toggle="tab">All</a></li>`);
-            tabs.append(`<li class="active"><a href="#t0" data-toggle="tab">Issuance</a></li>`);
+            tabs.append('<li><a href="#tall" data-toggle="tab">All</a></li>');
+            tabs.append('<li class="active"><a href="#t0" data-toggle="tab">Issuance</a></li>');
             tabcontent.append(`<div class="tab-pane" id="tall"><pre>${data.report.text}</pre></div>`);
             tabcontent.append(`<div class="tab-pane active" id="t0"><pre>${data.report.text}</pre></div>`);
             let tidx = 1;

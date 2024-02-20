@@ -19,9 +19,10 @@ import datetime
 import matplotlib.dates as mdates
 import numpy as np
 import pandas as pd
+from pyiem.database import get_sqlalchemy_conn
 from pyiem.exceptions import NoDataFound
 from pyiem.plot import figure_axes
-from pyiem.util import get_autoplot_context, get_sqlalchemy_conn
+from pyiem.util import get_autoplot_context
 
 
 def get_description():
@@ -93,6 +94,8 @@ def plotter(fdict):
     _days3 = days3 if days3 > 0 else 1
     sts = ctx["sdate"]
     ets = ctx["edate"]
+    if ets < sts:
+        sts, ets = ets, sts
     yrrange = ets.year - sts.year
     year2 = ctx.get("year2")  # could be null!
     year3 = ctx.get("year3")  # could be null!
@@ -199,7 +202,7 @@ def plotter(fdict):
         )
         maxval = df2["aridity"].abs().max() + 0.25
         if year2 is not None:
-            sts2 = sts.replace(year=(year2 - yrrange))
+            sts2 = sts.replace(year=year2 - yrrange)
             ets2 = ets.replace(year=year2)
             xticks = []
             xticklabels = []
@@ -223,7 +226,7 @@ def plotter(fdict):
             )
             maxval = max([maxval, df2["aridity"].abs().max() + 0.25])
         if year3 is not None:
-            sts2 = sts.replace(year=(year3 - yrrange))
+            sts2 = sts.replace(year=year3 - yrrange)
             ets2 = ets.replace(year=year3)
             df2 = df.loc[sts2:ets2]
             ax.plot(
@@ -242,7 +245,7 @@ def plotter(fdict):
         for _year in range(1951, datetime.date.today().year + 1):
             if _year == ets.year:
                 continue
-            sts2 = sts.replace(year=(_year - yrrange))
+            sts2 = sts.replace(year=_year - yrrange)
             ets2 = ets.replace(year=_year)
             aridity2 = df.loc[sts2:ets2, "aridity"].values
             sz = min([len(aridity2), len(aridity)])
@@ -251,7 +254,7 @@ def plotter(fdict):
                 mae = error
                 useyear = _year
         if useyear:
-            sts2 = sts.replace(year=(useyear - yrrange))
+            sts2 = sts.replace(year=useyear - yrrange)
             ets2 = ets.replace(year=useyear)
             df2 = df.loc[sts2:ets2]
             ax.plot(

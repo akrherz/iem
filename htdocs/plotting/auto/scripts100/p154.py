@@ -8,13 +8,14 @@ import datetime
 
 import pandas as pd
 from matplotlib.font_manager import FontProperties
+from pyiem.database import get_sqlalchemy_conn
 from pyiem.exceptions import NoDataFound
 from pyiem.plot import figure_axes
-from pyiem.util import get_autoplot_context, get_sqlalchemy_conn
+from pyiem.util import get_autoplot_context
 from scipy import stats
 from sqlalchemy import text
 
-PDICT = dict([("avg_tmpf", "Average Temperature")])
+PDICT = {"avg_tmpf": "Average Temperature"}
 UNITS = {"avg_tmpf": "F"}
 MDICT = {
     "all": "No Month Limit",
