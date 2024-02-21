@@ -10,9 +10,10 @@ import calendar
 import datetime
 
 import numpy as np
+from pyiem.database import get_dbconnc
 from pyiem.exceptions import NoDataFound
 from pyiem.plot import figure_axes
-from pyiem.util import get_autoplot_context, get_dbconnc
+from pyiem.util import get_autoplot_context
 
 PDICT = {
     "manual": "Select comparison month manually",
@@ -89,9 +90,8 @@ def compute_compare_month(ctx, cursor):
 
 def plotter(fdict):
     """Go"""
-    pgconn, cursor = get_dbconnc("coop")
-
     ctx = get_autoplot_context(fdict, get_description())
+    pgconn, cursor = get_dbconnc("coop")
     station = ctx["station"]
     effective_date = ctx["date"]
     year, month = compute_compare_month(ctx, cursor)
@@ -138,19 +138,20 @@ def plotter(fdict):
         if data[-1, effective_date.day - 1] > -99
         else (effective_date.day - 1)
     )
-
     # overwrite our current month's data
     currentdata = data[-1, :pos]
-    for i in range(np.shape(data)[0] - 1):
-        data[i, :pos] = currentdata
+    data[:-1, :pos] = currentdata
     data.mask = data < -98
     avgs = np.ma.zeros(np.shape(data))
-    days = np.shape(data)[1]
     prevavg = []
     for i in range(days):
-        avgs[:, i] = np.sum(data[:, : i + 1], 1) / float(i + 1)
-        prevavg.append(np.sum(prevmonth[: i + 1]) / float(i + 1))
+        avgs[:, i] = np.nanmean(data[:, : i + 1], 1)
+        prevavg.append(np.nanmean(prevmonth[: i + 1]))
     avgs.mask = data.mask
+    # duplicate the last day for each year, if the value is missing
+    for yr in range(np.shape(data)[0] - 1):
+        if np.ma.is_masked(avgs[yr, -1]):
+            avgs[yr, -1] = avgs[yr, -2]
 
     beats = 0
     for yr in range(np.shape(data)[0] - 1):

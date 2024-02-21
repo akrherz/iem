@@ -2,10 +2,10 @@
 import datetime
 from io import StringIO
 
+from pyiem.database import get_dbconn
 from pyiem.exceptions import NoDataFound
 from pyiem.network import Table as NetworkTable
 from pyiem.templates.iem import TEMPLATE
-from pyiem.util import get_dbconn
 from pyiem.webutil import iemapp
 
 nt = NetworkTable("IACLIMATE", only_online=False)
@@ -66,10 +66,8 @@ def get_values(city, dateStr):
     except Exception:
         snow = 0
 
-    if rain < 0:
-        rain = 0
-    if snow < 0:
-        snow = 0
+    rain = max(rain, 0)
+    snow = max(snow, 0)
 
     return row[0], row[1], str(rain), str(snow)
 
