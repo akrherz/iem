@@ -1,8 +1,15 @@
-"""Use data provided by ACIS to replace climodat data."""
+"""Use data provided by ACIS to replace climodat data.
+
+# Implementation Notes
+
+- If either high or low temperature is missing in ACIS, we will not update
+  the database other than to ensure temp_estimated is set to True.
+"""
 import datetime
 import sys
 import time
 
+import numpy as np
 import pandas as pd
 import requests
 from pyiem.database import get_dbconn, get_sqlalchemy_conn
@@ -12,46 +19,8 @@ from pyiem.util import exponential_backoff, logger
 
 pd.set_option("future.no_silent_downcasting", True)
 LOG = logger()
-SERVICE = "http://data.rcc-acis.org/StnData"
-METASERVICE = "http://data.rcc-acis.org/StnMeta"
-
-
-def safe(val):
-    """Hack"""
-    if pd.isnull(val):
-        return None
-    # Multi-day we can't support
-    if isinstance(val, str) and val.endswith("A"):
-        return None
-    try:
-        return float(val)
-    except ValueError:
-        LOG.info("failed to convert %s to float, using None", repr(val))
-    return None
-
-
-def compare(row, colname):
-    """Do we need to update this column?"""
-    oldval = safe(row[colname])
-    newval = safe(row[f"a{colname}"])
-    # If both values are missing, we are good.
-    if newval is None and oldval is None:
-        return False
-    if newval is not None and colname in ["high", "low", "precip"]:
-        est = row[f"{'precip' if colname == 'precip' else 'temp'}_estimated"]
-        # If we have an estimated flag and ACIS is not None, do things.
-        if est is None or est:
-            return newval
-    # If ACIS is missing, we had better set estimated to true
-    if newval is None and oldval is not None:
-        est = row[f"{'precip' if colname == 'precip' else 'temp'}_estimated"]
-        if not est:
-            return newval
-    if oldval is None and newval is not None:
-        return newval
-    if newval is not None and oldval != newval:
-        return newval
-    return False
+SERVICE = "https://data.rcc-acis.org/StnData"
+METASERVICE = "https://data.rcc-acis.org/StnMeta"
 
 
 def compute_sdate(acis_station):
@@ -75,7 +44,7 @@ def compute_sdate(acis_station):
     return minval
 
 
-def do(meta, station, acis_station, interactive):
+def do(meta, station, acis_station, interactive) -> int:
     """Do the query and work
 
     Args:
@@ -141,11 +110,22 @@ def do(meta, station, acis_station, interactive):
             index=acis.index,
         )
         # hour values of -1 are missing
-        acis.loc[acis[f"{col}_hour"] < 0, f"{col}_hour"] = pd.NA
+        acis.loc[acis[f"{col}_hour"] < 0, f"{col}_hour"] = np.nan
+    # If either ahigh or alow is missing, set both to missing
+    acis.loc[
+        (acis["ahigh"] == "M") | (acis["alow"] == "M"),
+        ["ahigh", "alow", "ahigh_hour"],
+    ] = np.nan
+    # if either aprecip or asnow has a `A` character, set to missing
+    acis.loc[acis["aprecip"].str.contains("A"), "aprecip"] = np.nan
+    acis.loc[acis["asnow"].str.contains("A"), "asnow"] = np.nan
     # Rectify the name to match IEM database
     acis = acis.rename(columns={"ahigh_hour": "atemp_hour"}).replace(
-        {"T": TRACE_VALUE, "M": pd.NA, "S": pd.NA}
+        {"T": TRACE_VALUE, "M": np.nan, "S": np.nan}
     )
+    # fill out estimated flags
+    acis["atemp_estimated"] = acis["ahigh"].isna()
+    acis["aprecip_estimated"] = acis["aprecip"].isna()
 
     LOG.info("Loaded %s rows from ACIS", len(acis.index))
     acis["day"] = pd.to_datetime(acis["day"])
@@ -155,66 +135,95 @@ def do(meta, station, acis_station, interactive):
         obs = pd.read_sql(
             """
             SELECT day, high, low, precip, snow, snowd, temp_hour, precip_hour,
-            temp_estimated, precip_estimated
+            temp_estimated, precip_estimated, true as dbhas
             from alldata WHERE station = %s ORDER by day ASC
             """,
             conn,
             params=(station,),
             index_col="day",
         )
-        obs["dbhas"] = True
     LOG.info("Loaded %s rows from IEM", len(obs.index))
     cursor = pgconn.cursor()
     # join the tables
     df = acis.join(obs, how="left")
+    df["temp_estimated"] = df["temp_estimated"].fillna(True)
+    df["precip_estimated"] = df["precip_estimated"].fillna(True)
     df["dbhas"] = df["dbhas"].fillna(False)
-    inserts = 0
+    # If the database does not have this, we need to update it
+    df["dirty"] = ~df["dbhas"]
+    for col in ["high", "low", "temp_hour", "precip_hour"]:
+        for prefix in ["a", ""]:
+            df[f"{prefix}{col}"] = df[f"{prefix}{col}"].astype(
+                "Int64", errors="raise"
+            )
+    for col in ["precip", "snow", "snowd"]:
+        for prefix in ["a", ""]:
+            df[f"{prefix}{col}"] = (
+                df[f"{prefix}{col}"]
+                .fillna(np.nan)
+                .astype("float64", errors="raise")
+            )
+    for col in ["temp_estimated", "precip_estimated"]:
+        for prefix in ["a", ""]:
+            df[f"{prefix}{col}"] = (
+                df[f"{prefix}{col}"]
+                .fillna(True)
+                .astype("bool", errors="raise")
+            )
+    df["dbhas"] = df["dbhas"].astype("bool", errors="raise")
+
     updates = {}
-    minday = None
-    maxday = None
     cols = "high low precip snow snowd temp_hour precip_hour".split()
     for col in cols:
         updates[col] = 0
-    for day, row in df.iterrows():
-        work = []
-        args = []
-        for col in cols:
-            newval = compare(row, col)
-            if newval is False:
-                continue
-            work.append(f"{col} = %s")
-            if newval is None:
-                args.append(None)
-            elif col in ["high", "low", "temp_hour", "precip_hour"]:
-                args.append(int(newval))
-            else:
-                args.append(newval)
-            if col in ["high", "precip"]:  # suboptimal to exclude low
-                work.append(
-                    f"{'precip' if col == 'precip' else 'temp'}_"
-                    "estimated = %s"
-                )
-                args.append(newval is None)
-            if row["dbhas"]:
-                updates[col] += 1
-        if not work:
-            continue
-        if minday is None:
-            minday = day
-        maxday = day
-        if not row["dbhas"]:
-            inserts += 1
-            cursor.execute(
-                f"INSERT into {table} (station, day, sday, year, month) "
-                "VALUES (%s, %s, %s, %s, %s)",
-                (station, day, day.strftime("%m%d"), day.year, day.month),
-            )
-        cursor.execute(
-            f"UPDATE {table} SET {','.join(work)} WHERE station = %s and "
-            "day = %s",
-            (*args, station, day),
+    # Ensure we have no columns of object dtype
+    if df.select_dtypes(include="object").columns.any():
+        LOG.info(df.select_dtypes(include="object").columns)
+        LOG.info(df.dtypes)
+        raise ValueError("We have object dtype columns")
+    df["station"] = station
+    # find rows whereby we should be using ACIS
+    for col in ["high", "low", "precip"]:
+        ecol = "precip" if col == "precip" else "temp"
+        idx = (
+            (df[f"a{col}"].notna() & (df[f"a{col}"] != df[col]))
+            | (df[f"a{col}"].isna() & ~df[f"{ecol}_estimated"])
+            | (df[f"{ecol}_estimated"] & df[f"a{col}"].notna())
         )
+        if idx.any():
+            df.loc[idx, col] = df.loc[idx, f"a{col}"]
+            df.loc[idx, f"{ecol}_hour"] = df.loc[idx, f"a{ecol}_hour"]
+            df.loc[idx, f"{ecol}_estimated"] = df.loc[
+                idx, f"a{ecol}_estimated"
+            ]
+            df.loc[idx, "dirty"] = True
+            updates[col] = idx.sum()
+    # for snow and snowd, it is simplier
+    for col in ["snow", "snowd", "temp_hour", "precip_hour"]:
+        idx = df[f"a{col}"].notna() & (df[f"a{col}"] != df[col])
+        if idx.any():
+            df.loc[idx, col] = df.loc[idx, f"a{col}"]
+            df.loc[idx, "dirty"] = True
+            updates[col] = idx.sum()
 
+    cursor.executemany(
+        f"insert into {table} (station, day, sday, year, month) "
+        "values (%(station)s, %(day)s, "
+        "to_char(%(day)s::date, 'mmdd'), "
+        "extract(year from %(day)s::date), "
+        "extract(month from %(day)s::date)) ",
+        df[~df["dbhas"]].reset_index().to_dict("records"),
+    )
+    inserts = cursor.rowcount
+    cursor.executemany(
+        f"update {table} SET high = %(high)s, low = %(low)s, "
+        "precip = %(precip)s, snow = %(snow)s, temp_hour = %(temp_hour)s, "
+        "precip_hour = %(precip_hour)s, snowd = %(snowd)s, "
+        "temp_estimated = %(temp_estimated)s, "
+        "precip_estimated = %(precip_estimated)s "
+        "WHERE station = %(station)s and day = %(day)s",
+        df[df["dirty"]].reset_index().to_dict("records"),
+    )
     uu = [
         updates["high"],
         updates["temp_hour"],
@@ -224,12 +233,10 @@ def do(meta, station, acis_station, interactive):
         updates["snow"],
         updates["snowd"],
     ]
-    if minday is not None:
+    if df["dirty"].any() or inserts > 0:
         LOG.warning(
-            "%s[%s %s] New:%s Updates H:%s HH:%s L:%s P:%s PH:%s S:%s D:%s",
+            "%s New:%s Updates H:%s HH:%s L:%s P:%s PH:%s S:%s D:%s",
             station,
-            minday.date(),
-            maxday.date(),
             inserts,
             *uu,
         )
