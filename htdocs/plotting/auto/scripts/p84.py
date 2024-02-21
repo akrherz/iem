@@ -27,11 +27,12 @@ from datetime import datetime, timedelta
 import numpy as np
 from metpy.units import masked_array, units
 from pyiem import iemre, util
+from pyiem.database import get_dbconnc
 from pyiem.exceptions import NoDataFound
 from pyiem.plot import get_cmap, pretty_bins
 from pyiem.plot.geoplot import MapPlot
 from pyiem.reference import LATLON
-from pyiem.util import get_dbconnc, get_properties
+from pyiem.util import get_properties
 
 PDICT2 = {"c": "Contour Plot", "g": "Grid Cell Mesh"}
 SRCDICT = {
@@ -350,6 +351,9 @@ def set_mapplot(ctx):
     if ctx.get("cwa") is not None:
         sector = "cwa"
     ctx["sector"], name, west, north, east, south = get_ugc_bounds(ctx, sector)
+    if ctx["sector"] == "iowa":
+        ctx["sector"] = "state"
+        state = "IA"
     if ctx.get("ugc") is not None:
         ctx["subtitle"] += f", zoomed on [{ctx['ugc']}] {name}"
     title = compute_title(ctx["src"], ctx["sdate"], ctx["edate"])
