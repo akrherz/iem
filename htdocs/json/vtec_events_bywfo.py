@@ -4,7 +4,8 @@ import json
 from io import BytesIO, StringIO
 
 import pandas as pd
-from pyiem.util import get_sqlalchemy_conn, html_escape
+from pyiem.database import get_sqlalchemy_conn
+from pyiem.util import html_escape
 from pyiem.webutil import iemapp
 from sqlalchemy import text
 
@@ -96,11 +97,12 @@ def as_json(df):
 def application(environ, start_response):
     """Answer request."""
     wfo = environ.get("wfo", "DMX")[:3].upper()
+    year = int(environ.get("year", datetime.date.today().year))
     start = datetime.datetime.strptime(
-        environ.get("start", "2022-05-01T12:00")[:16], "%Y-%m-%dT%H:%M"
+        environ.get("start", f"{year}-01-01T00:00")[:16], "%Y-%m-%dT%H:%M"
     ).replace(tzinfo=datetime.timezone.utc)
     end = datetime.datetime.strptime(
-        environ.get("end", "2022-05-02T12:00")[:16], "%Y-%m-%dT%H:%M"
+        environ.get("end", f"{year}-12-31T23:59")[:16], "%Y-%m-%dT%H:%M"
     ).replace(tzinfo=datetime.timezone.utc)
     phenomena = environ.get("phenomena")
     significance = environ.get("significance")

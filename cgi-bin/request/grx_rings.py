@@ -81,10 +81,13 @@ def application(environ, start_response):
         distanceInMiles = float(environ.get(f"m{i}", 100))
         if distanceInMiles <= 0.00001:
             continue
-        r = int(float(environ.get(f"r{i}", 255)))
-        g = int(float(environ.get(f"g{i}", 255)))
-        b = int(float(environ.get(f"b{i}", 0)))
-        a = int(float(environ.get(f"a{i}", 255)))
+        try:
+            r = int(float(environ.get(f"r{i}", 255)))
+            g = int(float(environ.get(f"g{i}", 255)))
+            b = int(float(environ.get(f"b{i}", 0)))
+            a = int(float(environ.get(f"a{i}", 255)))
+        except ValueError:
+            return [b"ERROR: Invalid color provided."]
         t = environ.get(f"t{i}", "").replace("\n", "\\n")
 
         # Create the lon/lat pairs
