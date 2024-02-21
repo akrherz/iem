@@ -172,7 +172,7 @@ def plotter(fdict):
     ax.bar(df["yr"], df["count"], align="center")
     ax.set_xlim(df["yr"].min() - 0.5, df["yr"].max() + 0.5)
     ymax = df["count"].max()
-    ax.set_ylim(top=(ymax * 1.2))
+    ax.set_ylim(top=ymax * 1.2)
     for _, row in df.iterrows():
         ax.text(
             row["yr"],
