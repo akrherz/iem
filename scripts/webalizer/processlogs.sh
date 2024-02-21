@@ -8,11 +8,11 @@
 # RPM requirements for this workflow
 # yum -y install libdb-cxx libmaxminddb gd lftp tcsh tmpwatch
 
-export yyyymmdd="`date --date '1 day ago' +'%Y%m%d'`"
-export yyyy="`date --date '1 day ago' +'%Y'`"
-export mm="`date --date '1 day ago' +'%m'`"
-export dd="`date --date '1 day ago' +'%d'`"
-export yyyymm="`date --date '1 day ago' +'%Y%m'`"
+export yyyymmdd=$(date --date '1 day ago' +'%Y%m%d')
+export yyyy=$(date --date '1 day ago' +'%Y')
+export mm=$(date --date '1 day ago' +'%m')
+export dd=$(date --date '1 day ago' +'%d')
+export yyyymm=$(date --date '1 day ago' +'%Y%m')
 
 PREFIXES="iem iemssl iemapps datateam sustainablecorn weatherim depbackend"
 MACHINES="iemvs35-dc iemvs36-dc iemvs37-dc iemvs38-dc \
@@ -41,7 +41,7 @@ for PREF in $PREFIXES
 do
     echo "============== $PREF ============="
     wc -l ${PREF}-*.log
-    csh -c "(/usr/local/bin/mergelog ${PREF}-*.log > combined-${PREF}.log) >& /dev/null"	
+    csh -c "(/usr/local/bin/mergelog ${PREF}-*.log > combined-${PREF}.log) >& /dev/null"
     rm -f ${PREF}-*.log
 done
 

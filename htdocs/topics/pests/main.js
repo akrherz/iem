@@ -13,15 +13,13 @@ function text(str) {
 }
 
 function hideImageLoad() {
-    {
-        $('#willload').css('display', 'none');
-        const url = $("#theimage").attr("src").replace(".png", "");
-        $("#thedata").html(
-            '<p>Download point data: <a href="' + url + '.txt" class="btn btn-primary">' +
-            '<i class="fa fa-table"></i> As CSV</a> &nbsp;' +
-            '<a href="' + url + '.xlsx" class="btn btn-primary">' +
-            '<i class="fa fa-table"></i> As Excel</a></p>');
-    }
+    $('#willload').css('display', 'none');
+    const url = $("#theimage").attr("src").replace(".png", "");
+    $("#thedata").html(
+        `<p>Download point data: <a href="${url}.txt" class="btn btn-primary">` +
+        '<i class="fa fa-table"></i> As CSV</a> &nbsp;' +
+        `<a href="${url}.xlsx" class="btn btn-primary">` +
+        '<i class="fa fa-table"></i> As Excel</a></p>');
 }
 function rectify_start_date(pest) {
     const month = (pest === "western_bean_cutworm") ? "03": "01"; // le sigh

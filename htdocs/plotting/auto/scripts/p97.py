@@ -521,7 +521,7 @@ def plotter(fdict):
     # This causes grief
     ctx.pop("csector", None)
     _gt = (
-        PDICT2.get(varname)
+        PDICT2[varname]
         .replace("$base", str(ctx["gddbase"]))
         .replace("$ceil", str(ctx["gddceil"]))
     )

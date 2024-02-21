@@ -14,11 +14,12 @@ import datetime
 
 import pandas as pd
 from matplotlib.ticker import MaxNLocator
+from pyiem.database import get_dbconn, get_sqlalchemy_conn
 from pyiem.exceptions import NoDataFound
 from pyiem.nws import vtec
 from pyiem.plot import figure_axes
 from pyiem.reference import state_names
-from pyiem.util import get_autoplot_context, get_dbconn, get_sqlalchemy_conn
+from pyiem.util import get_autoplot_context
 from sqlalchemy import text
 
 PDICT = {"yes": "Limit Plot to Year-to-Date", "no": "Plot Entire Year"}
@@ -171,7 +172,7 @@ def plotter(fdict):
     ax.bar(df["yr"], df["count"], align="center")
     ax.set_xlim(df["yr"].min() - 0.5, df["yr"].max() + 0.5)
     ymax = df["count"].max()
-    ax.set_ylim(top=(ymax * 1.2))
+    ax.set_ylim(top=ymax * 1.2)
     for _, row in df.iterrows():
         ax.text(
             row["yr"],

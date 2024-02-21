@@ -90,7 +90,8 @@ def get_context(fdict):
         raise NoDataFound("Did not find any data.")
     quorum = [0, 31, 28, 31, 30, 31, 30, 31, 31, 30, 31, 30, 31]
     monthly["quorum"] = monthly["month"].apply(lambda x: quorum[x])
-    monthly = monthly[monthly["count"] >= monthly["quorum"]]
+    if varname != "precip":
+        monthly = monthly[monthly["count"] >= monthly["quorum"]]
     years = monthly["month"].value_counts()
     df = monthly.groupby("month").agg({"hits": "sum", "count": "sum"}).copy()
     df["hits_max"] = monthly.groupby("month").agg({"hits": "max"})["hits"]

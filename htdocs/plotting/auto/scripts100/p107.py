@@ -20,9 +20,10 @@ import datetime
 import numpy as np
 import pandas as pd
 from matplotlib.ticker import MaxNLocator
+from pyiem.database import get_sqlalchemy_conn
 from pyiem.exceptions import NoDataFound
 from pyiem.plot import figure
-from pyiem.util import get_autoplot_context, get_sqlalchemy_conn
+from pyiem.util import get_autoplot_context
 from sqlalchemy import text
 
 PDICT = {
@@ -312,7 +313,7 @@ def plotter(fdict):
     # require values , not nan
     df2 = df[df[varname].notnull()].sort_values(varname, ascending=False)
 
-    title = PDICT.get(varname).replace("(threshold)", str(threshold))
+    title = PDICT[varname].replace("(threshold)", str(threshold))
     title = (
         f"[{station}] {ctx['_nt'].sts[station]['name']}\n"
         f"{title} from {ctx['sday']:%-d %B} "
