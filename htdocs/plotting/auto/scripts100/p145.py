@@ -8,9 +8,10 @@ import calendar
 import datetime
 
 import pandas as pd
-from pyiem import util
+from pyiem.database import get_sqlalchemy_conn
 from pyiem.network import Table as NetworkTable  # This is needed.
 from pyiem.plot import figure_axes
+from pyiem.util import get_autoplot_context
 
 VARS = {
     "tsoil": "4 inch Soil Temperature",
@@ -73,12 +74,12 @@ def plotter(fdict):
     """Go"""
     nt = NetworkTable("ISUSM", only_online=False)
     oldnt = NetworkTable("ISUAG", only_online=False)
-    ctx = util.get_autoplot_context(fdict, get_description())
+    ctx = get_autoplot_context(fdict, get_description())
     station = ctx["station"]
     highlightyear = ctx["year"]
     varname = ctx["var"]
     oldstation = XREF.get(station, "A130209")
-    with util.get_sqlalchemy_conn("isuag") as conn:
+    with get_sqlalchemy_conn("isuag") as conn:
         df = pd.read_sql(
             """
         WITH legacy as (

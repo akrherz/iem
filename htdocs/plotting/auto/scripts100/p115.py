@@ -10,9 +10,10 @@ import datetime
 
 import pandas as pd
 import seaborn as sns
+from pyiem.database import get_sqlalchemy_conn
 from pyiem.exceptions import NoDataFound
 from pyiem.plot import figure_axes
-from pyiem.util import get_autoplot_context, get_sqlalchemy_conn
+from pyiem.util import get_autoplot_context
 
 PDICT = {
     "precip": "Total Precipitation",
@@ -210,7 +211,7 @@ def plotter(fdict):
         apctx=ctx,
     )
     filtered = df[(df["year"] >= y1) & (df["year"] <= (y1 + 20))]
-    if filtered.empty:
+    if filtered.empty or filtered[varname].isnull().all():
         raise NoDataFound("No data for specified period")
     df2 = filtered[["month", "year", varname]].pivot(
         index="year", columns="month", values=varname

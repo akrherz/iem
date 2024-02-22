@@ -170,7 +170,8 @@ def do(meta, station, acis_station, interactive) -> int:
                 .fillna(True)
                 .astype("bool", errors="raise")
             )
-    df["dbhas"] = df["dbhas"].astype("bool", errors="raise")
+    for col in ["dbhas", "dirty"]:
+        df[col] = df[col].astype("bool", errors="raise")
 
     updates = {}
     cols = "high low precip snow snowd temp_hour precip_hour".split()
