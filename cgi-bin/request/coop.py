@@ -9,9 +9,10 @@ from io import BytesIO, StringIO
 
 import pandas as pd
 from metpy.units import units
+from pyiem.database import get_dbconnc, get_sqlalchemy_conn
 from pyiem.exceptions import IncompleteWebRequest
 from pyiem.network import Table as NetworkTable
-from pyiem.util import get_dbconnc, get_sqlalchemy_conn, utc
+from pyiem.util import utc
 from pyiem.webutil import ensure_list, iemapp
 from sqlalchemy import text
 
@@ -787,7 +788,13 @@ def application(environ, start_response):
         or "century" in ctx["myvars"]
         or "salus" in ctx["myvars"]
     ):
-        headers.append(("Content-type", "text/plain"))
+        if ctx["what"] == "download":
+            headers.append(("Content-type", "application/octet-stream"))
+            headers.append(
+                ("Content-Disposition", "attachment; filename=metdata.txt")
+            )
+        else:
+            headers.append(("Content-type", "text/plain"))
     elif "dndc" not in ctx["myvars"] and ctx["what"] != "excel":
         if ctx["what"] == "download":
             headers.append(("Content-type", "application/octet-stream"))

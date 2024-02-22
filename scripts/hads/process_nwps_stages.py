@@ -5,8 +5,9 @@ Called from windrose/daily_drive_network.py
 import sys
 
 import requests
+from pyiem.database import get_dbconn
 from pyiem.network import Table as NetworkTable
-from pyiem.util import get_dbconn, logger
+from pyiem.util import logger
 
 LOG = logger()
 
@@ -14,10 +15,14 @@ LOG = logger()
 def process_site(mcursor, nwsli, meta):
     """Do our processing work"""
 
-    url = f"https://preview-api.water.noaa.gov/v1/gauges/{nwsli}"
+    url = f"https://preview-api.water.noaa.gov/nwps/v1/gauges/{nwsli}"
 
     try:
-        res = requests.get(url, timeout=30).json()
+        res = requests.get(url, timeout=30)
+        if res.status_code != 200:
+            LOG.info("Failed to fetch %s, got %s", url, res.status_code)
+            return
+        res = res.json()
         if res.get("code") == 5:
             LOG.info("No data found for %s", nwsli)
             return
