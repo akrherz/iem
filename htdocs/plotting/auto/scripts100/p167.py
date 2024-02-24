@@ -28,9 +28,10 @@ import matplotlib.colors as mpcolors
 import numpy as np
 import pandas as pd
 from matplotlib.patches import Rectangle
+from pyiem.database import get_sqlalchemy_conn
 from pyiem.exceptions import NoDataFound
 from pyiem.plot import figure_axes
-from pyiem.util import get_autoplot_context, get_sqlalchemy_conn, utc
+from pyiem.util import get_autoplot_context, utc
 
 
 def get_description():
@@ -183,6 +184,4 @@ def plotter(fdict):
 
 
 if __name__ == "__main__":
-    plotter(
-        {"zstation": "NFFN", "year": 2015, "month": 11, "network": "FJ__ASOS"}
-    )
+    plotter({})

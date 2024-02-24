@@ -376,7 +376,3 @@ def application(environ, start_response):
     if sys.version_info[0] > 2 and isinstance(output, str):
         output = output.encode("UTF-8")
     return [output]
-
-
-# from paste.exceptions.errormiddleware import ErrorMiddleware
-# application = ErrorMiddleware(application, debug=True)

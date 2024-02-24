@@ -9,9 +9,10 @@ import calendar
 import datetime
 
 import pandas as pd
+from pyiem.database import get_sqlalchemy_conn
 from pyiem.exceptions import NoDataFound
 from pyiem.plot import figure
-from pyiem.util import get_autoplot_context, get_sqlalchemy_conn
+from pyiem.util import get_autoplot_context
 
 
 def get_description():
@@ -132,13 +133,16 @@ def plotter(fdict):
 
     # Plot second one now
     obs = df[df["month"] == month]
-    ax[1].bar(obs["year"].values, obs["freq"].values, fc="tan", ec="orange")
-    ax[1].set_ylim(0, 100)
-    ax[1].grid(True)
-    ax[1].set_yticks([0, 10, 25, 50, 75, 90, 100])
-    ax[1].axhline(obs["freq"].mean())
-    ax[1].set_ylabel(f"{calendar.month_abbr[month]} Frequency [%]")
-    ax[1].set_xlim(obs["year"].min() - 2, obs["year"].max() + 2)
+    if not obs.empty:
+        ax[1].bar(
+            obs["year"].values, obs["freq"].values, fc="tan", ec="orange"
+        )
+        ax[1].set_ylim(0, 100)
+        ax[1].grid(True)
+        ax[1].set_yticks([0, 10, 25, 50, 75, 90, 100])
+        ax[1].axhline(obs["freq"].mean())
+        ax[1].set_ylabel(f"{calendar.month_abbr[month]} Frequency [%]")
+        ax[1].set_xlim(obs["year"].min() - 2, obs["year"].max() + 2)
     return fig, df
 
 

@@ -9,15 +9,15 @@ wished to see added to this analysis, please
 
 <p>The five years with the most extreme values are labelled on the chart.
 """
-# pylint: disable=unsubscriptable-object,unsupported-assignment-operation
 import calendar
 import datetime
 
 import numpy as np
 import pandas as pd
-from pyiem import util
+from pyiem.database import get_sqlalchemy_conn
 from pyiem.exceptions import NoDataFound
 from pyiem.plot import figure_axes
+from pyiem.util import get_autoplot_context
 from scipy import stats
 
 PDICT = {
@@ -181,7 +181,7 @@ def combine(df, months, offsets) -> pd.DataFrame:
 def plotter(fdict):
     """Go"""
     today = datetime.date.today() + datetime.timedelta(days=1)
-    ctx = util.get_autoplot_context(fdict, get_description())
+    ctx = get_autoplot_context(fdict, get_description())
     station = ctx["station"]
     threshold = ctx["threshold"]
     month1 = ctx["month1"]
@@ -193,7 +193,7 @@ def plotter(fdict):
     months1, offsets1 = compute_months_and_offsets(month1, num1)
     months2, offsets2 = compute_months_and_offsets(month2, num2)
     # Compute the monthly totals
-    with util.get_sqlalchemy_conn("coop") as conn:
+    with get_sqlalchemy_conn("coop") as conn:
         df = pd.read_sql(
             """
         SELECT year, month, avg((high+low)/2.) as avg_temp,

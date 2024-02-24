@@ -25,11 +25,12 @@ import pandas as pd
 from matplotlib.colorbar import ColorbarBase
 from matplotlib.ticker import FormatStrFormatter
 from pyiem import reference
+from pyiem.database import get_sqlalchemy_conn
 from pyiem.exceptions import NoDataFound
 from pyiem.nws import vtec
 from pyiem.plot import figure, get_cmap
 from pyiem.plot.use_agg import plt
-from pyiem.util import get_autoplot_context, get_sqlalchemy_conn
+from pyiem.util import get_autoplot_context
 
 PDICT = {"jan1": "January 1", "jul1": "July 1"}
 PDICT2 = {

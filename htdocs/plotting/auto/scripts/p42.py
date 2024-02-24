@@ -346,8 +346,6 @@ def plotter(fdict):
 
     ax.grid(True)
     ax.set_ylabel(f"{PDICT2.get(varname)} {units}")
-    # ax.axhline(32, linestyle='-.', linewidth=2, color='k')
-    # ax.set_ylim(bottom=43)
     ax.set_xlabel(
         "* Due to timezones and leapday, there is some ambiguity"
         " with the plotted dates"

@@ -46,7 +46,7 @@ def guess_network(station):
             (station,),
         )
         if cursor.rowcount == 0:
-            raise ValueError(
+            raise IncompleteWebRequest(
                 "Failed to guess network for given station. Please provide "
                 "explicit network= to service."
             )

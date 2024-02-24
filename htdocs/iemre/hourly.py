@@ -101,7 +101,6 @@ def application(environ, start_response):
         raise BadWebRequest("Invalid date provided")
     lat = float(environ.get("lat", 41.99))
     lon = float(environ.get("lon", -95.1))
-    # fmt = form.get("format", "json")
 
     headers = [("Content-type", "application/json")]
     start_response("200 OK", headers)

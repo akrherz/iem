@@ -8,11 +8,12 @@ averages over some period of years.
 import datetime
 
 import numpy as np
-from geopandas import read_postgis
+import pandas as pd
+from pyiem.database import get_sqlalchemy_conn
 from pyiem.exceptions import NoDataFound
 from pyiem.plot import MapPlot, centered_bins, get_cmap
 from pyiem.reference import SECTORS_NAME
-from pyiem.util import get_autoplot_context, get_sqlalchemy_conn
+from pyiem.util import get_autoplot_context
 from sqlalchemy import text
 
 PDICT = {
@@ -191,7 +192,9 @@ def get_data(ctx):
     p2eyear = ctx["p2eyear"]
     p2years = p2eyear - p2syear + 1
 
+    mlimiter = "and month = ANY(:months)"
     if month == "all":
+        mlimiter = ""
         months = list(range(1, 13))
     elif month == "fall":
         months = [9, 10, 11]
@@ -219,86 +222,58 @@ def get_data(ctx):
         lcol = "f2c(low)"
         pcol = "precip * 25.4"
 
+    sqlopts = {
+        "total_precip": f"sum({pcol})",
+        "gdd": "sum(gddxx(50, 86, high, low))",
+        "sdd": "sum(case when high > 86 then high - 86 else 0 end)",
+        "avg_temp": f"avg(({hcol}+{lcol})/2.0)",
+        "avg_high": f"avg({hcol})",
+        "avg_low": f"avg({lcol})",
+        "days_high_above": (
+            f"sum(case when {hcol}::numeric >= :t then 1 else 0 end)"
+        ),
+        "days_high_below": (
+            f"sum(case when {hcol}::numeric < :t then 1 else 0 end)"
+        ),
+        "days_low_above": (
+            f"sum(case when {lcol}::numeric >= :t then 1 else 0 end)"
+        ),
+        "days_low_below": (
+            f"sum(case when {lcol}::numeric < :t then 1 else 0 end)"
+        ),
+    }
+
     with get_sqlalchemy_conn("coop") as conn:
-        df = read_postgis(
+        df = pd.read_sql(
             text(
                 f"""
         WITH period1 as (
-            SELECT station, year, sum({pcol}) as total_precip,
-            avg(({hcol}+{lcol}) / 2.) as avg_temp, avg({hcol}) as avg_high,
-            avg({lcol}) as avg_low,
-            sum(gddxx(50, 86, high, low)) as sum_gdd,
-            sum(case when high > 86 then high - 86 else 0 end) as sum_sdd,
-            sum(case when {hcol}::numeric >= :t then 1 else 0 end)
-                as days_high_above,
-            sum(case when {hcol}::numeric < :t then 1 else 0 end)
-                as days_high_below,
-            sum(case when {lcol}::numeric >= :t then 1 else 0 end)
-                as days_low_above,
-            sum(case when {lcol}::numeric < :t then 1 else 0 end)
-                as days_low_below
+            SELECT station, year,
+            {sqlopts[ctx['var']]} as {ctx['var']}
             from {table} WHERE year >= :syear1 and year <= :eyear1
-            and month = ANY(:months) GROUP by station, year),
+            {mlimiter} GROUP by station, year),
         period2 as (
-            SELECT station, year, sum({pcol}) as total_precip,
-            avg(({hcol}+{lcol}) / 2.) as avg_temp, avg({hcol}) as avg_high,
-            avg({lcol}) as avg_low,
-            sum(gddxx(50, 86, high, low)) as sum_gdd,
-            sum(case when high > 86 then high - 86 else 0 end) as sum_sdd,
-            sum(case when {hcol}::numeric >= :t then 1 else 0 end)
-                as days_high_above,
-            sum(case when {hcol}::numeric < :t then 1 else 0 end)
-                as days_high_below,
-            sum(case when {lcol}::numeric >= :t then 1 else 0 end)
-                as days_low_above,
-            sum(case when {lcol}::numeric < :t then 1 else 0 end)
-                as days_low_below
+            SELECT station, year,
+            {sqlopts[ctx['var']]} as {ctx['var']}
             from {table} WHERE year >= :syear2 and year <= :eyear2
-            and month = ANY(:months) GROUP by station, year),
+            {mlimiter} GROUP by station, year),
         p1agg as (
-            SELECT station, avg(total_precip) as precip,
-            avg(avg_temp) as avg_temp, avg(avg_high) as avg_high,
-            avg(avg_low) as avg_low, avg(sum_sdd) as sdd,
-            avg(sum_gdd) as gdd,
-            avg(days_high_above) as avg_days_high_above,
-            avg(days_high_below) as avg_days_high_below,
-            avg(days_low_above) as avg_days_low_above,
-            avg(days_low_below) as avg_days_low_below,
-            count(*) as count
+            SELECT station,
+            avg({ctx['var']}) as {ctx['var']}, count(*) as count
             from period1 GROUP by station),
         p2agg as (
-            SELECT station, avg(total_precip) as precip,
-            avg(avg_temp) as avg_temp, avg(avg_high) as avg_high,
-            avg(avg_low) as avg_low, avg(sum_sdd) as sdd,
-            avg(sum_gdd) as gdd,
-            avg(days_high_above) as avg_days_high_above,
-            avg(days_high_below) as avg_days_high_below,
-            avg(days_low_above) as avg_days_low_above,
-            avg(days_low_below) as avg_days_low_below,
-            count(*) as count
+            SELECT station,
+            avg({ctx['var']}) as {ctx['var']}, count(*) as count
             from period2 GROUP by station),
         agg as (
             SELECT p2.station,
-            p2.precip as p2_total_precip,
-            p1.precip as p1_total_precip,
-            p2.gdd as p2_gdd, p1.gdd as p1_gdd,
-            p2.sdd as p2_sdd, p1.sdd as p1_sdd,
-            p2.avg_temp as p2_avg_temp, p1.avg_temp as p1_avg_temp,
-            p1.avg_high as p1_avg_high, p2.avg_high as p2_avg_high,
-            p1.avg_low as p1_avg_low, p2.avg_low as p2_avg_low,
-            p1.avg_days_high_above as p1_days_high_above,
-            p2.avg_days_high_above as p2_days_high_above,
-            p1.avg_days_high_below as p1_days_high_below,
-            p2.avg_days_high_below as p2_days_high_below,
-            p1.avg_days_low_above as p1_days_low_above,
-            p2.avg_days_low_above as p2_days_low_above,
-            p1.avg_days_low_below as p1_days_low_below,
-            p2.avg_days_low_below as p2_days_low_below
+            p2.{ctx['var']} as p2_{ctx['var']},
+            p1.{ctx['var']} as p1_{ctx['var']}
             from p1agg p1 JOIN p2agg p2 on
             (p1.station = p2.station)
             WHERE p1.count >= :p1years and p2.count >= :p2years)
 
-        SELECT ST_X(geom) as lon, ST_Y(geom) as lat, t.geom,
+        SELECT ST_X(geom) as lon, ST_Y(geom) as lat,
         d.* from agg d JOIN stations t ON (d.station = t.id)
         WHERE t.network ~* 'CLIMATE'
         and substr(station, 3, 1) != 'C' and substr(station, 3, 4) != '0000'
@@ -316,20 +291,10 @@ def get_data(ctx):
                 "p2years": p2years,
             },
             index_col="station",
-            geom_col="geom",
         )
     if df.empty:
         raise NoDataFound("No Data Found.")
-    df["total_precip"] = df["p2_total_precip"] - df["p1_total_precip"]
-    df["avg_temp"] = df["p2_avg_temp"] - df["p1_avg_temp"]
-    df["avg_high"] = df["p2_avg_high"] - df["p1_avg_high"]
-    df["avg_low"] = df["p2_avg_low"] - df["p1_avg_low"]
-    df["gdd"] = df["p2_gdd"] - df["p1_gdd"]
-    df["sdd"] = df["p2_sdd"] - df["p1_sdd"]
-    df["days_high_above"] = df["p2_days_high_above"] - df["p1_days_high_above"]
-    df["days_high_below"] = df["p2_days_high_below"] - df["p1_days_high_below"]
-    df["days_low_above"] = df["p2_days_low_above"] - df["p1_days_low_above"]
-    df["days_low_below"] = df["p2_days_low_below"] - df["p1_days_low_below"]
+    df[ctx["var"]] = df[f"p2_{ctx['var']}"] - df[f"p1_{ctx['var']}"]
     return df
 
 
@@ -379,7 +344,7 @@ def plotter(fdict):
         state=state,
         axisbg="white",
         title=title,
-        subtitle=("based on IEM Archives"),
+        subtitle="based on IEM Archives",
         titlefontsize=12,
         nocaption=True,
     )
@@ -412,7 +377,7 @@ def plotter(fdict):
             labelbuffer=5,
         )
 
-    return mp.fig, df.drop("geom", axis=1).round(2)
+    return mp.fig, df.round(2)
 
 
 if __name__ == "__main__":

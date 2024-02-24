@@ -90,7 +90,7 @@ def plotter(fdict):
     if req is None or req.status_code != 200:
         raise NoDataFound("Drought Web Service failed to deliver data.")
     jdata = req.json()
-    if "d" not in jdata:
+    if not jdata.get("d"):
         raise NoDataFound("Data Not Found.")
     df = pd.DataFrame(jdata["d"])
     for c in ["0", "1", "2", "3", "4"]:
