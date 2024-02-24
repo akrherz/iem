@@ -253,7 +253,7 @@ def get_data(ctx):
             from {table} WHERE year >= :syear1 and year <= :eyear1
             {mlimiter} GROUP by station, year),
         period2 as (
-            SELECT station, year, 
+            SELECT station, year,
             {sqlopts[ctx['var']]} as {ctx['var']}
             from {table} WHERE year >= :syear2 and year <= :eyear2
             {mlimiter} GROUP by station, year),

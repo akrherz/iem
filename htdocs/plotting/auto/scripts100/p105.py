@@ -9,9 +9,10 @@ import calendar
 
 import numpy as np
 import pandas as pd
+from pyiem.database import get_sqlalchemy_conn
 from pyiem.exceptions import NoDataFound
 from pyiem.plot import figure
-from pyiem.util import get_autoplot_context, get_sqlalchemy_conn
+from pyiem.util import get_autoplot_context
 
 PDICT = {"yes": "Yes, consider trace reports", "no": "No, omit trace reports"}
 
