@@ -16,8 +16,9 @@ import numpy as np
 import pandas as pd
 from metpy.calc import dewpoint_from_relative_humidity
 from metpy.units import units
+from pyiem.database import get_dbconnc
 from pyiem.observation import Observation
-from pyiem.util import c2f, convert_value, get_dbconnc, logger, mm2inch, utc
+from pyiem.util import c2f, convert_value, logger, mm2inch, utc
 
 LOG = logger()
 
@@ -642,7 +643,8 @@ def dump_raw_to_ldm(nwsli, dyprocessed, hrprocessed):
     if not os.path.isfile(filename):
         return
     # Sometimes this file has corrupted characters?
-    fdata = open(filename, "rb").read().decode("ascii", "ignore")
+    with open(filename, "rb") as fh:
+        fdata = fh.read().decode("ascii", "ignore")
     lines = fdata.split("\n")
     if len(lines) < 5:
         return

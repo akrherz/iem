@@ -70,7 +70,6 @@ def doday(ts, realtime):
         clevs = [0.01, 0.1, 0.3, 0.5, 1, 1.5, 2, 2.5, 3, 3.5, 4, 5, 6, 8, 10]
         mp.pcolormesh(lons, lats, total, clevs, cmap=nwsprecip(), units="inch")
 
-        # map.drawstates(zorder=2)
         if sector == "iowa":
             mp.drawcounties()
         mp.postprocess(pqstr=pqstr)

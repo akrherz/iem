@@ -18,7 +18,7 @@ def weather_logic(month, high, low, rain, snow):
     """Do Something."""
     deltaT = high - low
 
-    if month > 4 and month < 11:  # It is summer
+    if 4 < month < 11:  # It is summer
         if deltaT >= 30:
             if rain == 0.00:
                 return "Sunny!!"

@@ -57,7 +57,6 @@ def workflow(date, routes):
     zipfp = zipfile.ZipFile(tmp.name, "r")
     shpfn = None
     for name in zipfp.namelist():
-        # print("    extracting: %s" % (name, ))
         with open(f"/tmp/{name}", "wb") as fp:
             fp.write(zipfp.read(name))
         if name[-3:] == "shp":

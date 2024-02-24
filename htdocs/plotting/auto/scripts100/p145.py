@@ -164,7 +164,6 @@ def plotter(fdict):
     if varname != "tsoil":
         ax.set_ylim(0, 1)
     ax.axhline(32, lw=2, color="purple", zorder=4)
-    # ax.set_yticks(range(-10, 90, 20))
     ax.legend(loc="best")
 
     return fig, df

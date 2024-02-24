@@ -97,17 +97,13 @@ import numpy as np
 import pandas as pd
 from affine import Affine
 from geopandas import read_postgis
+from pyiem.database import get_dbconn, get_sqlalchemy_conn
 from pyiem.exceptions import NoDataFound
 from pyiem.nws import vtec
 from pyiem.plot import get_cmap
 from pyiem.plot.geoplot import MapPlot
 from pyiem.reference import state_bounds, state_names, wfo_bounds
-from pyiem.util import (
-    get_autoplot_context,
-    get_dbconn,
-    get_sqlalchemy_conn,
-    utc,
-)
+from pyiem.util import get_autoplot_context, utc
 from rasterstats import zonal_stats
 
 PDICT = {"cwa": "Plot by NWS Forecast Office", "state": "Plot by State"}
@@ -827,8 +823,8 @@ def do_ugc(ctx):
     if varname in ["yearavg", "periodavg"]:
         years = maxv.year - minv.year + 1
         df["average"] = df[datavar] / years
-        for key in data:
-            data[key] = round(data[key] / float(years), 2)
+        for key, item in data.items():
+            data[key] = round(item / float(years), 2)
         maxv = df["average"].max()
         if ctx.get("interval") is not None:
             interval = float(ctx["interval"])

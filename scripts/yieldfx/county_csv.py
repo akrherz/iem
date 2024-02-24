@@ -10,8 +10,8 @@ from pyiem.util import ncopen
 
 def process(df, ncfn, south, west):
     """Do some extraction."""
-    fn1 = "/mesonet/share/pickup/yieldfx/baseline/%s" % (ncfn,)
-    fn2 = "/mesonet/share/pickup/yieldfx/2019/%s" % (ncfn,)
+    fn1 = f"/mesonet/share/pickup/yieldfx/baseline/{ncfn}"
+    fn2 = f"/mesonet/share/pickup/yieldfx/2019/{ncfn}"
     if not os.path.isfile(fn1) or not os.path.isfile(fn2):
         print("Missing %s or %s" % (fn1, fn2))
         return
@@ -46,7 +46,7 @@ def process(df, ncfn, south, west):
                 nc2019_tmin = nc2019.variables["tmin"][:, j, i]
                 nc2019_srad = nc2019.variables["srad"][:, j, i]
 
-                fp = open(
+                with open(
                     (
                         "/mesonet/share/pickup/yieldfx/county/"
                         "%s_%s_%.4f_%.4f.csv"
@@ -58,42 +58,39 @@ def process(df, ncfn, south, west):
                         row["lat"],
                     ),
                     "w",
-                )
-                fp.write(
-                    (
+                ) as fp:
+                    fp.write(
                         "year,yday,prcp (mm/day),srad (W/m^2),tmax (deg c),"
                         "tmin (deg c)\n"
                     )
-                )
-                base = datetime.date(1980, 1, 1)
-                for tstep, days in enumerate(nc.variables["time"]):
-                    ts = base + datetime.timedelta(days=int(days))
-                    fp.write(
-                        "%s,%s,%.3f,%.3f,%.3f,%.3f\n"
-                        % (
-                            ts.year,
-                            int(ts.strftime("%j")),
-                            nc_prcp[tstep],
-                            nc_srad[tstep] * 1e6 / 86400.0,
-                            nc_tmax[tstep],
-                            nc_tmin[tstep],
+                    base = datetime.date(1980, 1, 1)
+                    for tstep, days in enumerate(nc.variables["time"]):
+                        ts = base + datetime.timedelta(days=int(days))
+                        fp.write(
+                            "%s,%s,%.3f,%.3f,%.3f,%.3f\n"
+                            % (
+                                ts.year,
+                                int(ts.strftime("%j")),
+                                nc_prcp[tstep],
+                                nc_srad[tstep] * 1e6 / 86400.0,
+                                nc_tmax[tstep],
+                                nc_tmin[tstep],
+                            )
                         )
-                    )
-                base = datetime.date(2019, 1, 1)
-                for tstep, days in enumerate(nc2019.variables["time"]):
-                    ts = base + datetime.timedelta(days=int(days))
-                    fp.write(
-                        "%s,%s,%.3f,%.3f,%.3f,%.3f\n"
-                        % (
-                            ts.year,
-                            int(ts.strftime("%j")),
-                            nc2019_prcp[tstep],
-                            nc2019_srad[tstep] * 1e6 / 86400.0,
-                            nc2019_tmax[tstep],
-                            nc2019_tmin[tstep],
+                    base = datetime.date(2019, 1, 1)
+                    for tstep, days in enumerate(nc2019.variables["time"]):
+                        ts = base + datetime.timedelta(days=int(days))
+                        fp.write(
+                            "%s,%s,%.3f,%.3f,%.3f,%.3f\n"
+                            % (
+                                ts.year,
+                                int(ts.strftime("%j")),
+                                nc2019_prcp[tstep],
+                                nc2019_srad[tstep] * 1e6 / 86400.0,
+                                nc2019_tmax[tstep],
+                                nc2019_tmin[tstep],
+                            )
                         )
-                    )
-                fp.close()
 
 
 def main():

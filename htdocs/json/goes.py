@@ -45,7 +45,7 @@ def find_scans(root, bird, product, start_gts, end_gts):
                 ts = datetime.datetime.strptime(
                     filename[:-4].split("_")[3], "%Y%m%d%H%M"
                 )
-                if ts >= start_gts and ts <= end_gts:
+                if start_gts <= ts <= end_gts:
                     root["scans"].append(ts.strftime("%Y-%m-%dT%H:%M:00Z"))
         now += datetime.timedelta(hours=24)
 

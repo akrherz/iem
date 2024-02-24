@@ -125,7 +125,7 @@ def do(meta, acis_station, interactive):
     cursor = pgconn.cursor()
     # join the tables
     df = acis.join(obs, how="left")
-    df["dbhas"] = df["dbhas"].fillna(False)
+    df["dbhas"] = df["dbhas"].fillna(False).infer_objects(copy=False)
     inserts = 0
     updates = {}
     minday = None

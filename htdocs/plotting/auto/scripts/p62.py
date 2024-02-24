@@ -86,7 +86,6 @@ def plotter(fdict):
         obs[int(row["winter_year"]) - syear, int(doy) + 61] = row["snowd"]
 
     obs.mask = np.where(obs < 0, True, False)
-    # obs[obs == 0] = -1
 
     title = (
         f"{ctx['_sname']}\n" f"Daily Snow Depth ({minyear}-{eyear}) [inches]"
