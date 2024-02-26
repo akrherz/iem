@@ -5,11 +5,9 @@ python cache/cache_autoplots.py &
 python dl/download_rtma_ru.py &
 
 cd gfs
-# Le Sigh on paths
-python gfs2iemre.py $(date -u --date '6 hours ago' +'%Y %m %d %H') &
-cd ..
+python gfs2iemre.py $(date -u --date '7 hours ago' +'%Y %m %d %H') &
 
-cd ingestors/madis
+cd ../ingestors/madis
 python extract_hfmetar.py 2 &
 
 # Run HRRR radiation ingest at 10 PM, so that we have this available

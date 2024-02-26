@@ -2,7 +2,7 @@
 import re
 
 import pandas as pd
-from pyiem.util import get_dbconnc
+from pyiem.database import get_dbconnc
 
 QRE = re.compile("q=([0-9]+)")
 NO_FEATURES = [

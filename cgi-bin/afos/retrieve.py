@@ -4,7 +4,9 @@ import zipfile
 from datetime import datetime, timezone
 from io import BytesIO, StringIO
 
-from pyiem.util import get_dbconn, html_escape
+from pyiem.database import get_dbconn
+from pyiem.exceptions import IncompleteWebRequest
+from pyiem.util import html_escape
 from pyiem.webutil import iemapp
 
 DATE_REGEX = re.compile(r"^[0-9]{4}\-\d+\-\d+")
@@ -45,13 +47,13 @@ def get_date(raw):
     if not DATE_REGEX.match(raw):
         return False
     # Option 1, provided just YYYY-MM-DD
-    if len(raw) <= 10:
-        dt = datetime.strptime(raw, "%Y-%m-%d")
-    else:
-        try:
+    try:
+        if len(raw) <= 10:
+            dt = datetime.strptime(raw, "%Y-%m-%d")
+        else:
             dt = datetime.strptime(raw[:16], "%Y-%m-%dT%H:%M")
-        except ValueError:
-            return False
+    except ValueError:
+        raise IncompleteWebRequest("Invalid date provided")
 
     return dt.replace(tzinfo=timezone.utc)
 
