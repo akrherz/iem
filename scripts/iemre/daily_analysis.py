@@ -18,12 +18,7 @@ from metpy.interpolate import inverse_distance_to_grid
 from metpy.units import units
 from pyiem import iemre
 from pyiem.database import get_sqlalchemy_conn
-from pyiem.util import (
-    convert_value,
-    logger,
-    ncopen,
-    utc,
-)
+from pyiem.util import convert_value, logger, ncopen, utc
 from scipy.stats import zscore
 
 LOG = logger()
@@ -253,10 +248,12 @@ def use_climodat_12z(ts, ds):
         ds["low_tmpk_12z"].values = convert_value(res, "degF", "degK")
 
     res = generic_gridder(df, "snowdata")
-    ds["snow_12z"].values = convert_value(res, "inch", "millimeter")
+    if res is not None:
+        ds["snow_12z"].values = convert_value(res, "inch", "millimeter")
 
     res = generic_gridder(df, "snowddata")
-    ds["snowd_12z"].values = convert_value(res, "inch", "millimeter")
+    if res is not None:
+        ds["snowd_12z"].values = convert_value(res, "inch", "millimeter")
 
 
 def use_asos_daily(ts, ds):

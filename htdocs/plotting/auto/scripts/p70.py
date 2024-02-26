@@ -23,7 +23,7 @@ import matplotlib.colors as mpcolors
 import numpy as np
 import pandas as pd
 from matplotlib.colorbar import ColorbarBase
-from matplotlib.ticker import FormatStrFormatter
+from matplotlib.ticker import MaxNLocator
 from pyiem import reference
 from pyiem.database import get_sqlalchemy_conn
 from pyiem.exceptions import NoDataFound
@@ -207,6 +207,7 @@ def plotter(fdict):
                 gdf["year"].values,
                 [1] * len(gdf.index),
                 left=gdf["doy"].values,
+                align="center",
                 zorder=3,
                 color=cmap(norm([gdf["count"]]))[0],
             )
@@ -218,6 +219,7 @@ def plotter(fdict):
             gdf["doy"].values[::-1] - gdf["doy"].values[0] + 1,
             left=[gdf["doy"].values[0]] * len(gdf.index),
             zorder=3,
+            align="center",
             color=cmap(norm([gdf["cumsum"].values[::-1]]))[0],
         )
     gdf = df[["year", "doy"]].groupby("year").agg(["min", "max"])
@@ -245,8 +247,7 @@ def plotter(fdict):
     ax.set_xlim(df["doy"].min() - 10, df["doy"].max() + 10)
     ax.set_ylabel("Year")
     ax.set_ylim(df["year"].min() - 0.5, df["year"].max() + 0.5)
-    xFormatter = FormatStrFormatter("%d")
-    ax.yaxis.set_major_formatter(xFormatter)
+    ax.yaxis.set_major_locator(MaxNLocator(integer=True))
 
     # ______________________________________________
     ax = fig.add_axes([0.75, 0.1, 0.1, 0.8])
@@ -261,9 +262,9 @@ def plotter(fdict):
     plt.setp(ax.get_yticklabels(), visible=False)
     ax.grid(True)
     ax.set_xlabel("# Events")
-    ax.yaxis.set_major_formatter(xFormatter)
     xloc = plt.MaxNLocator(3)
     ax.xaxis.set_major_locator(xloc)
+    ax.yaxis.set_major_locator(MaxNLocator(integer=True))
 
     # __________________________________________
     ax = fig.add_axes([0.88, 0.1, 0.1, 0.8])
@@ -273,9 +274,9 @@ def plotter(fdict):
     plt.setp(ax.get_yticklabels(), visible=False)
     ax.grid(True)
     ax.set_xlabel("# Dates")
-    ax.yaxis.set_major_formatter(xFormatter)
     xloc = plt.MaxNLocator(3)
     ax.xaxis.set_major_locator(xloc)
+    ax.yaxis.set_major_locator(MaxNLocator(integer=True))
 
     return fig, df
 

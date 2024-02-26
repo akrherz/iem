@@ -3,19 +3,21 @@ Rectify climodat database entries.
 
 called from RUN_CLIMODAT_STATE.sh
 """
-import sys
 from io import StringIO
 
+import click
 import pandas as pd
+from pyiem.database import get_dbconn, get_sqlalchemy_conn
 from pyiem.network import Table as NetworkTable
-from pyiem.util import get_dbconn, get_sqlalchemy_conn, logger
+from pyiem.util import logger
 
 LOG = logger()
 
 
-def main(argv):
+@click.command()
+@click.option("--state")
+def main(state):
     """Go Main"""
-    state = argv[1]
     nt = NetworkTable(f"{state}CLIMATE", only_online=False)
     pgconn = get_dbconn("coop")
     with get_sqlalchemy_conn("coop") as conn:
@@ -65,4 +67,4 @@ def main(argv):
 
 
 if __name__ == "__main__":
-    main(sys.argv)
+    main()
