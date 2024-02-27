@@ -87,7 +87,7 @@ var CONFIG = {
 };
 </script>
 <script src="site.js" type="text/javascript"></script>
-<script src="https://maps.googleapis.com/maps/api/js?key={$gmapskey}&amp;callback=load" type="text/javascript"></script>
+<script src="https://maps.googleapis.com/maps/api/js?key={$gmapskey}&amp;callback=load&amp;loading=async" type="text/javascript"></script>
 EOF;
 $t->sites_current = "base";
 

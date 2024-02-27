@@ -29,9 +29,10 @@ from datetime import date, datetime, timedelta
 from zoneinfo import ZoneInfo
 
 import pandas as pd
+from pyiem.database import get_sqlalchemy_conn
 from pyiem.exceptions import NoDataFound
 from pyiem.plot import figure
-from pyiem.util import get_autoplot_context, get_sqlalchemy_conn
+from pyiem.util import get_autoplot_context
 from sqlalchemy import text
 
 MDICT = {"warm": "Rise", "cool": "Drop"}
@@ -61,6 +62,7 @@ PDICT = {
 PDICT2 = {
     "tmpf": "Air Temperature",
     "dwpf": "Dew Point Temperature",
+    "feel": "Feels Like Temperature",
     "alti": "Pressure Altimeter",
     "mslp": "Sea Level Pressure",
 }
@@ -295,6 +297,7 @@ def plotter(fdict):
     units = {
         "tmpf": "Delta Degrees Fahrenheit",
         "dwpf": "Delta Degrees Fahrenheit",
+        "feel": "Delta Degrees Fahrenheit",
         "alti": "Altimeter Change [inch]",
         "mslp": "Sea Level Pressure Change [mb]",
     }
@@ -307,12 +310,4 @@ def plotter(fdict):
 
 
 if __name__ == "__main__":
-    plotter(
-        {
-            "zstation": "DEN",
-            "network": "CO_ASOS",
-            "hours": 24,
-            "dir": "warm",
-            "how": "over",
-        }
-    )
+    plotter({})
