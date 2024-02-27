@@ -21,9 +21,10 @@ import pandas as pd
 import xarray as xr
 from metpy.units import units
 from pyiem import iemre
+from pyiem.database import get_dbconn, get_sqlalchemy_conn
 from pyiem.network import Table as NetworkTable
 from pyiem.reference import TRACE_VALUE, state_names
-from pyiem.util import get_dbconn, get_sqlalchemy_conn, logger, mm2inch
+from pyiem.util import logger, mm2inch
 from sqlalchemy import text
 
 pd.set_option("future.no_silent_downcasting", True)
@@ -312,7 +313,7 @@ def merge_threaded(df, threaded):
 
 @click.command()
 @click.option("--date", required=True, type=click.DateTime())
-@click.option("--st", default=None, help="Single state to process")
+@click.option("--state", "st", default=None, help="Single state to process")
 def main(date, st):
     """Go Main Go."""
     date = date.date()
