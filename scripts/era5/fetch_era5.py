@@ -3,10 +3,10 @@
 Run from RUN_0Z.sh for 5 days ago.
 """
 import os
-import sys
 from datetime import timedelta
 
 import cdsapi
+import click
 import numpy as np
 from pyiem import iemre
 from pyiem.util import logger, ncopen, utc
@@ -141,18 +141,14 @@ def run(valid):
     os.unlink(ncfn)
 
 
-def main(argv):
+@click.command()
+@click.option("--date", "valid", required=True, type=click.DateTime())
+def main(valid):
     """Go!"""
-    valid = utc(*[int(a) for a in argv[1:]])
-    offsets = []
-    if len(argv) == 5:
-        offsets = [0]
-    elif len(argv) == 4:
-        # Best to run for 1z through 0z as 0z has the 24hr sum to consider
-        offsets = range(1, 25)
-    for offset in offsets:
+    valid = utc(valid.year, valid.month, valid.day)
+    for offset in range(1, 25):
         run(valid + timedelta(hours=offset))
 
 
 if __name__ == "__main__":
-    main(sys.argv)
+    main()

@@ -41,11 +41,7 @@ python process_nldasv2_noah.py $(date -u --date '5 days ago' +'%Y %m %d') &
 cd ../qc
 python check_n0q.py
 
-cd ../era5
-python fetch_era5.py $(date -u --date '6 days ago' +'%Y %m %d')
-
 cd ../climodat
-python era5land_extract.py --valid=$(date -u --date '7 days ago' +'%Y-%m-%d')
 python nldas_extract.py --valid=$(date -u --date '6 days ago' +'%Y-%m-%d')
 
 cd ../iemre

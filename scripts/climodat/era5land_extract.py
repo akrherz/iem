@@ -170,7 +170,7 @@ def do(dt):
 
 
 @click.command()
-@click.option("--valid", type=click.DateTime())
+@click.option("--date", "valid", type=click.DateTime())
 def main(valid):
     """Go Main Go"""
     do(valid.date())
