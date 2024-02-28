@@ -229,9 +229,8 @@ def plotter(fdict):
         )
 
     hlabel = "Over Exactly" if ctx["how"] == "exact" else "Within"
-    tt = PDICT2[varname].rsplit(" ", maxsplit=1)[0]
     title = (
-        f"{ctx['_sname']}:: Top 10 {tt} {MDICT[mydir]}\n"
+        f"{ctx['_sname']}:: Top 10 {PDICT2[varname]} {MDICT[mydir]}\n"
         f"{hlabel} {hours} Hour Period ({ab.year}-{date.today().year}) "
         f"[{MDICT2[month]}]"
     )
