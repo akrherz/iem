@@ -4,7 +4,6 @@ Forecast (QPF) and most recent US Drought Monitor to the date choosen to
 plot the WPC forecast
 """
 import datetime
-import os
 
 import numpy as np
 import pygrib
@@ -91,7 +90,7 @@ def plotter(fdict):
     with archive_fetch(
         valid.strftime(f"%Y/%m/%d/model/wpc/p{period}m_%Y%m%d%Hf{period}.grb")
     ) as gribfn:
-        if not os.path.isfile(gribfn):
+        if gribfn is None:
             raise NoDataFound(f"gribfn {gribfn} missing")
         grbs = pygrib.open(gribfn)
         grb = grbs[1]

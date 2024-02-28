@@ -199,6 +199,7 @@ def plotter(fdict):
                 df,
                 left_on="end_valid",
                 right_on="utc_valid",
+                how="left",
                 suffixes=("", "2"),
             )
             .drop(columns=["utc_valid2", "end_valid2"])
@@ -210,7 +211,7 @@ def plotter(fdict):
             df["delta"] = df[deltacol] - df[varname]
         else:
             df["delta"] = df[varname] - df[deltacol]
-        events = df.sort_values("delta", ascending=False).head(100).copy()
+        events = df.sort_values("delta", ascending=False).head(500).copy()
     else:  # "over"
         # Create aggregate
         gdf = df.rolling(f"{hours}h", closed="both").agg(["max", "min"])
@@ -290,7 +291,7 @@ def plotter(fdict):
     sparkax.set_ylim(1, 11)
     sparkax.axis("off")
 
-    ax.set_yticks(range(1, 11))
+    ax.set_yticks(range(1, len(labels) + 1))
     ax.set_yticklabels(labels)
     ax.set_ylim(10.5, 0.5)
     ax.grid(True)
