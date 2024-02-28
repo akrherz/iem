@@ -239,6 +239,7 @@ def plotter(fdict):
             avg(high) as avg_high,
             avg(low) as avg_low,
             avg((high+low)/2.) as avg_temp,
+            sum(sdd86) as total_sdd86,
             sum(cdd65) as total_cdd65,
             sum(hdd65) as total_hdd65,
             sum(gdd32) as total_gdd32,
