@@ -2,6 +2,7 @@
 
 Called from RUN_2AM.sh script
 """
+
 import subprocess
 
 from pyiem.util import get_dbconn, logger

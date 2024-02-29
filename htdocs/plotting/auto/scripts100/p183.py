@@ -4,6 +4,7 @@ of United States Drought Monitor for a given state of your choice. This
 plot uses a JSON data service provided by the
 <a href="https://droughtmonitor.unl.edu">Drought Monitor</a> website.
 """
+
 import datetime
 
 import matplotlib.dates as mdates

@@ -1,4 +1,5 @@
 """Process the IDOT RWIS Data files"""
+
 # stdlib
 import datetime
 import json

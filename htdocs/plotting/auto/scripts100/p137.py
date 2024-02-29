@@ -7,6 +7,7 @@ warmest 91 day stretch.  91 days being approximately 1/4 of the year,
 assuming the four seasons are to be equal duration.  Of course, this is
 arbitrary, but interesting to look at!
 """
+
 import datetime
 
 import matplotlib.dates as mdates

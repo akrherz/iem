@@ -1,6 +1,7 @@
 """
 Return JSON metadata for nexrad information
 """
+
 import datetime
 import glob
 import json

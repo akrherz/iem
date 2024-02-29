@@ -8,6 +8,7 @@ the numbers presented.  There are four sources of solar radiation made
 available for this plot.  The HRRR data is the only one in 'real-time',
 the MERRAv2/NARR lag by about a month, and the ERA5 Land lags by 8-9 days.
 """
+
 import calendar
 import datetime
 import itertools

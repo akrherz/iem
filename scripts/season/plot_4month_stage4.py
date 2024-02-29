@@ -1,11 +1,12 @@
 """
- Generate a number of plots showing:
-  1) Last 4 month's precipitation
-  2) Normal for past 4 months
-  3) Departure for this period
+Generate a number of plots showing:
+ 1) Last 4 month's precipitation
+ 2) Normal for past 4 months
+ 3) Departure for this period
 
-  We care about 4 months as it is used in drought analysis
+ We care about 4 months as it is used in drought analysis
 """
+
 import datetime
 
 import numpy as np

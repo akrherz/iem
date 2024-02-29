@@ -1,6 +1,7 @@
 """
 Download interface for data from 'other' network
 """
+
 from io import StringIO
 
 from pyiem.exceptions import IncompleteWebRequest

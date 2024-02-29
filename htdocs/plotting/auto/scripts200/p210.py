@@ -19,6 +19,7 @@ positive.</p>
 <p><a href="?q=235">Autoplot 235</a> presents a monthly/yearly chart of
 issuance counts for a single Weather Forecast Offices.</p>
 """
+
 import datetime
 from zoneinfo import ZoneInfo
 

@@ -1,4 +1,5 @@
-""" Generate a GeoJSON of US Drought Monitor"""
+"""Generate a GeoJSON of US Drought Monitor"""
+
 import datetime
 import json
 

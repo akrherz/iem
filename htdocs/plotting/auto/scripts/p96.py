@@ -6,6 +6,7 @@ be patient.  This chart attempts to address the question of if computing
 24 hour precip totals at midnight or 7 AM biases the totals.  Such biases
 are commmon when computing this metric for high or low temperature.
 """
+
 import datetime
 from zoneinfo import ZoneInfo
 

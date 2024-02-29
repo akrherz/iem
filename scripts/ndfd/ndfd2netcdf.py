@@ -1,4 +1,5 @@
 """Copy NDFD grib data to netcdf."""
+
 import datetime
 import os
 import sys

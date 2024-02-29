@@ -5,6 +5,7 @@ observations of mixing ratio, averaging those, and then back computing
 the dew point temperature.  With that averaged dew point temperature a
 relative humidity value is computed.
 """
+
 import datetime
 
 import matplotlib.ticker as mticker

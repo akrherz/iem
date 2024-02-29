@@ -8,6 +8,7 @@ computed for each hour of the day. This plot is one of the main reasons
 that comparing climate data for a station that changed hour of day
 observation over the years is problematic.
 """
+
 import datetime
 
 import numpy as np

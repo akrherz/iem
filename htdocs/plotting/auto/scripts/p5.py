@@ -3,6 +3,7 @@ This plot displays the dates with the monthly
 record of your choice displayed. In the case of ties, only the most
 recent occurence is shown.
 """
+
 import calendar
 import datetime
 

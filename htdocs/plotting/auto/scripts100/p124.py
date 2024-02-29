@@ -1,4 +1,5 @@
 """text report of number of days with precip above threshold"""
+
 import datetime
 
 import numpy as np

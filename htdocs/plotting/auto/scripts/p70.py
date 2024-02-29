@@ -17,6 +17,7 @@ over the years excluding the first and last year.</p>
 <p>When you split this plot by 1 July, the year shown is for the year of
 the second half of this period, ie 2020 is 1 Jul 2019 - 30 Jun 2020.</p>
 """
+
 import datetime
 
 import matplotlib.colors as mpcolors

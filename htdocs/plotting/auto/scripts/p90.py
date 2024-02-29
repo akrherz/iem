@@ -90,6 +90,7 @@ enforcement of these unofficial polygons to stay within CWA bounds.</p>
 <p><strong>This app can be very slow</strong>, so please let it grind
 away as sometimes it will take 3-5 minutes to generate a map :(
 """
+
 import datetime
 from zoneinfo import ZoneInfo
 
@@ -395,18 +396,18 @@ def do_polygon(ctx):
         else:
             bins = range(int(minv.year), int(maxv.year) + 2)
         ctx["units"] = "year"
-        ctx[
-            "subtitle"
-        ] = f" between {sdate:%d %b %Y %H%M} and {edate:%d %b %Y %H%M} UTC"
+        ctx["subtitle"] = (
+            f" between {sdate:%d %b %Y %H%M} and {edate:%d %b %Y %H%M} UTC"
+        )
     elif varname in "days":
         ctx["title"] = PDICT2[varname]
         bins = np.linspace(
             max([df["days"].min() - 7, 0]), df["days"].max() + 7, 12, dtype="i"
         )
         counts = np.where(counts < 0.0001, -1, counts)
-        ctx[
-            "subtitle"
-        ] = f" between {sdate:%d %b %Y %H%M} and {edate:%d %b %Y %H%M} UTC"
+        ctx["subtitle"] = (
+            f" between {sdate:%d %b %Y %H%M} and {edate:%d %b %Y %H%M} UTC"
+        )
         ctx["units"] = "days"
         ctx["extend"] = "neither"
     elif varname == "yearcount":
@@ -414,9 +415,9 @@ def do_polygon(ctx):
         ctx["units"] = "count"
     elif varname == "total":
         ctx["title"] = "Total"
-        ctx[
-            "subtitle"
-        ] = f" between {sdate:%d %b %Y %H%M} and {edate:%d %b %Y %H%M} UTC"
+        ctx["subtitle"] = (
+            f" between {sdate:%d %b %Y %H%M} and {edate:%d %b %Y %H%M} UTC"
+        )
         ctx["units"] = "count"
     elif varname == "yearavg":
         ctx["title"] = f"Yearly Avg: {minv:%d %b %Y} and {maxv:%d %b %Y}"
@@ -588,9 +589,9 @@ def do_ugc(ctx):
         for row in cursor:
             rows.append(dict(count=row[1], year=year, ugc=row[0]))
             data[row[0]] = row[1]
-        ctx[
-            "title"
-        ] = f"{sdate:%-d %b %Y}-{edate:%-d %b %Y} Days with 1+ Events of"
+        ctx["title"] = (
+            f"{sdate:%-d %b %Y}-{edate:%-d %b %Y} Days with 1+ Events of"
+        )
         ctx["lblformat"] = "%.0f"
         datavar = "count"
     elif varname == "total":
@@ -636,9 +637,9 @@ def do_ugc(ctx):
             )
             data[row[0]] = row[1]
         ctx["title"] = "Total"
-        ctx[
-            "subtitle"
-        ] = f" between {sdate:%d %b %Y %H%M} and {edate:%d %b %Y %H%M} UTC"
+        ctx["subtitle"] = (
+            f" between {sdate:%d %b %Y %H%M} and {edate:%d %b %Y %H%M} UTC"
+        )
         ctx["lblformat"] = "%.0f"
         datavar = "count"
     elif varname == "hour":
@@ -672,9 +673,9 @@ def do_ugc(ctx):
             ctx["labels"][row[0]] = (
                 midnight + datetime.timedelta(hours=int(row[1]))
             ).strftime("%-I %p")
-        ctx[
-            "title"
-        ] = f"Most Freq. Issue Hour: {sdate:%d %b %Y} and {edate:%d %b %Y}"
+        ctx["title"] = (
+            f"Most Freq. Issue Hour: {sdate:%d %b %Y} and {edate:%d %b %Y}"
+        )
         datavar = "hour"
     elif varname == "yearavg":
         if t == "cwa":

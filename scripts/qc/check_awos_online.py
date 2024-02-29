@@ -2,6 +2,7 @@
 Check the status of our AWOS sites being offline or online
 run from RUN_10_AFTER.sh
 """
+
 import datetime
 
 from pyiem.network import Table as NetworkTable

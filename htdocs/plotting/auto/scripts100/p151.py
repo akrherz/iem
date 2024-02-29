@@ -5,6 +5,7 @@ years between the first period.  This app is meant to address the question
 about changes in climate or just to produce a simple plot of yearly
 averages over some period of years.
 """
+
 import datetime
 
 import numpy as np

@@ -5,6 +5,7 @@ chart is that much of the long term daily climate data is for a 24 hour
 period ending at around 7 AM.  This chart will also not plot for dates
 prior to the holiday's inception.
 """
+
 import calendar
 import datetime
 

@@ -1,4 +1,5 @@
 """A specialized report"""
+
 import datetime
 from io import StringIO
 

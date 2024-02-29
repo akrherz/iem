@@ -14,6 +14,7 @@ autoplot compute streaks within a range of values.</p>
 number of hours was removed.  This option did not add much value as folks
 generally wish to see the top 10 longest streaks.</p>
 """
+
 import datetime
 import operator
 from zoneinfo import ZoneInfo

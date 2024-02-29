@@ -1,4 +1,5 @@
 """Create a pretty aGIF."""
+
 import datetime
 import os
 import subprocess

@@ -1,4 +1,5 @@
 """CLI data."""
+
 import datetime
 
 import simplejson as json

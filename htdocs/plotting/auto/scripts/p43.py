@@ -3,6 +3,7 @@ This plot presents a time series of
 observations.  Please note the colors and axes labels used to denote
 which variable is which in the combination plots.
 """
+
 import datetime
 from zoneinfo import ZoneInfo
 

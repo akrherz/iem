@@ -1,4 +1,5 @@
 """Download and archive 1000 ft reflectivity from the NCEP HRRR"""
+
 import datetime
 import logging
 import os

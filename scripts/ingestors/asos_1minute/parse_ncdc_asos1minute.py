@@ -7,6 +7,7 @@ https://www.ncei.noaa.gov/pub/download/hidden/onemin/
 
 NCEI generates these at about 1530EDT, so we run a bit after that via crontab
 """
+
 # stdlib
 import codecs
 import datetime

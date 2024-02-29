@@ -1,4 +1,5 @@
-""" Generate a GeoJSON of current storm based warnings """
+"""Generate a GeoJSON of current storm based warnings"""
+
 import datetime
 import json
 

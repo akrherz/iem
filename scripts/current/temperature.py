@@ -1,4 +1,5 @@
 """Generate current plot of Temperature"""
+
 import datetime
 
 import pandas as pd

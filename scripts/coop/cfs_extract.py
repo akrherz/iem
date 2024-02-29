@@ -6,6 +6,7 @@ Minimum temperature
 
 Run at 5 AM local from RUN_10_AFTER.sh
 """
+
 import datetime
 
 import numpy as np

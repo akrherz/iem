@@ -10,6 +10,7 @@ that is valid for the station location.  If you plot a climate district
 station, you get the US Drought Monitor valid for the district centroid.
 If you plot a statewide average, you get no USDM included.
 """
+
 import datetime
 import sys
 

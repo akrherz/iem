@@ -3,6 +3,7 @@ Download interface for the data stored in coop database (alldata)
 
 This is called from /request/coop/fe.phtml
 """
+
 import datetime
 import zipfile
 from io import BytesIO, StringIO

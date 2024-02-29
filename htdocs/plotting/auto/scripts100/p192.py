@@ -1,4 +1,5 @@
 """Generates analysis maps of ASOS station data."""
+
 import datetime
 from zoneinfo import ZoneInfo
 

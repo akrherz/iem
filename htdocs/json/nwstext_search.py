@@ -1,6 +1,7 @@
 """
- Search for NWS Text, return JSON
+Search for NWS Text, return JSON
 """
+
 import datetime
 import json
 

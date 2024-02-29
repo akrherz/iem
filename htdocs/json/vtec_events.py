@@ -1,4 +1,5 @@
 """Listing of VTEC events for a WFO and year"""
+
 import datetime
 import json
 from io import BytesIO, StringIO

@@ -1,4 +1,5 @@
-""" Generate a map of today's average high and low temperature"""
+"""Generate a map of today's average high and low temperature"""
+
 import datetime
 
 from pyiem.network import Table as NetworkTable

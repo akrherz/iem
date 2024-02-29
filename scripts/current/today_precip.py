@@ -1,6 +1,7 @@
 """
- Generate analysis of precipitation
+Generate analysis of precipitation
 """
+
 import datetime
 
 from pyiem.plot import MapPlot

@@ -3,6 +3,7 @@ Merge hourly values.
 
 Not called from anywhere as dataset does not update, yet.
 """
+
 import datetime
 import os
 import subprocess

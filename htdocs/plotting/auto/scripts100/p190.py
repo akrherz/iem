@@ -1,6 +1,7 @@
 """
 This chart presents the year that the present day climatology record resides.
 """
+
 import calendar
 
 import matplotlib.colors as mpcolors

@@ -1,4 +1,5 @@
 """See if MADIS knows any station metadata."""
+
 import datetime
 import os
 import warnings

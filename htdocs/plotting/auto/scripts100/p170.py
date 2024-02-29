@@ -20,6 +20,7 @@ hopefully allow more accurate statistics.
 
 <p>This autoplot considers both routine and special hourly reports.
 """
+
 import calendar
 import datetime
 

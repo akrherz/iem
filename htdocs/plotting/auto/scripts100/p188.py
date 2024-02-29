@@ -8,6 +8,7 @@ options, this chart displays the maximum high temperature after the first
 fall season sub 32 low temperature and then the number of days that the
 high reached 60+ degrees until the end of each year.
 """
+
 import calendar
 import datetime
 

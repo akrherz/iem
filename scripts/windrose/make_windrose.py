@@ -1,6 +1,7 @@
 """
 Drive a windrose for a given network and site
 """
+
 import os
 import sys
 from calendar import month_abbr

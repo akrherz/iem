@@ -3,6 +3,7 @@ This application plots the number of days for a
 given month or period of months that a given variable was above or below
 some threshold.
 """
+
 import datetime
 
 import pandas as pd

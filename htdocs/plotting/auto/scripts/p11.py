@@ -5,6 +5,7 @@ year.  Some of these values are only computed based on hourly reports,
 so they would be represent a true min and max of a continuously observed
 variable.
 """
+
 import datetime
 
 import matplotlib.dates as mdates

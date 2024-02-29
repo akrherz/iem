@@ -9,6 +9,7 @@ daily low temperatures. See also
 <a class="alert-link" href="/plotting/auto/?q=103">autoplot 103</a>
 for more details.
 """
+
 from calendar import month_abbr
 from datetime import date
 

@@ -4,6 +4,7 @@ Appears that data for the previous month is available by the 9th of current mon
 
 called from RUN_2AM.sh
 """
+
 import datetime
 import glob
 import os

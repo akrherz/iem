@@ -1,4 +1,5 @@
 """Generate QR codes on-the-fly."""
+
 # stdlib
 import hashlib
 from io import BytesIO

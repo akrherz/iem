@@ -1,7 +1,8 @@
 """
- Main script that adds a site into the appropriate tables
- called from SYNC_STATIONS.sh
+Main script that adds a site into the appropriate tables
+called from SYNC_STATIONS.sh
 """
+
 import datetime
 
 from pyiem.database import get_dbconnc

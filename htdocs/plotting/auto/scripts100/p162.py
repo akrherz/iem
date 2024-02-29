@@ -3,6 +3,7 @@ This plot presents a 2-D histogram of overcast
 conditions reported by the automated sensor.  Please note that the yaxis
 uses an irregular spacing.
 """
+
 import datetime
 
 import matplotlib.colors as mpcolors

@@ -3,6 +3,7 @@
 Called from `RUN_20_AFTER.sh` for current date.
 Called from `RUN_12Z.sh` for yesterday and a week ago.
 """
+
 # pylint: disable=cell-var-from-loop
 import datetime
 import sys

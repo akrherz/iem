@@ -10,6 +10,7 @@ plot.
 various phenomena, when this app encounters those years as the starting
 point of the plot, they are droppped from the display.
 """
+
 import datetime
 
 import pandas as pd

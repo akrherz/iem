@@ -1,4 +1,5 @@
 """Generate a windrose for each site in the specified network..."""
+
 import subprocess
 import sys
 

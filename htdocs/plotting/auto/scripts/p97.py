@@ -9,6 +9,7 @@ requires a 90% observation coverage for the period of interest.  The issue is
 that the IEM currently does not estimate snowfall, like it does for high, low,
 and precipitation.
 """
+
 import datetime
 
 import geopandas as gpd

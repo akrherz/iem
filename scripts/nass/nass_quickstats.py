@@ -1,6 +1,7 @@
 """Dump NASS Quickstats to the IEM database.
 
 Run from RUN_10_AFTER.sh at 3 PM each day."""
+
 import sys
 from datetime import datetime, timedelta
 from zoneinfo import ZoneInfo

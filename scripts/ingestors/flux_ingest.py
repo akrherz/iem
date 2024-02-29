@@ -1,6 +1,7 @@
 """
 Ingest files provided by NLAE containing flux information
 """
+
 import datetime
 import os
 from io import StringIO

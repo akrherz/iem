@@ -1,4 +1,5 @@
 """Current Observation for a station and network"""
+
 import json
 
 from pyiem.reference import ISO8601

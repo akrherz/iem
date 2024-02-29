@@ -7,6 +7,7 @@ on the period of record observations for the site.
 <p><strong>Updated 30 Jan 2024:</strong> The returned data is now only for the
 variable you selected for plotting.
 """
+
 import datetime
 
 import matplotlib.colors as mpcolors

@@ -3,6 +3,7 @@ This chart produces the daily climatology of
 Degree Days for a location of your choice. Please note that
 Feb 29 is not considered for this analysis.
 """
+
 import datetime
 
 import matplotlib.dates as mdates

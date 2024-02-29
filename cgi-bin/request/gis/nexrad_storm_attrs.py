@@ -1,6 +1,7 @@
 """
-    Dump storm attributes from the database to a shapefile for the users
+Dump storm attributes from the database to a shapefile for the users
 """
+
 import datetime
 import zipfile
 from io import BytesIO, StringIO

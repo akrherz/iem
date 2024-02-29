@@ -1,4 +1,5 @@
 """Listing of SPC Watches."""
+
 import json
 
 from pyiem.reference import ISO8601

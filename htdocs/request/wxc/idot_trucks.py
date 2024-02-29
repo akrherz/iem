@@ -1,4 +1,5 @@
 """Generate a WXC formatted file of DOT Snowplow positions"""
+
 import datetime
 
 from pyiem.util import get_dbconn

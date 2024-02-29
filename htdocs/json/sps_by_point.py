@@ -1,4 +1,5 @@
 """Get SPS by point."""
+
 import datetime
 import json
 import sys

@@ -3,6 +3,7 @@ This application generates a wind rose for a given
 criterion being meet. A wind rose plot is a convenient way of summarizing
 wind speed and direction.
 """
+
 import datetime
 
 import numpy as np

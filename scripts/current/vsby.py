@@ -1,4 +1,5 @@
 """Generate current plot of visibility"""
+
 import datetime
 import warnings
 

@@ -1,4 +1,5 @@
 """Create an analysis of LSR snowfall reports"""
+
 import os
 import subprocess
 import tempfile

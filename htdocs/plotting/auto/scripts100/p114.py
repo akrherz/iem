@@ -1,4 +1,5 @@
 """Days per year"""
+
 import datetime
 
 import pandas as pd

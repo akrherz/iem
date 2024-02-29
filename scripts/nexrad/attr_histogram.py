@@ -1,4 +1,5 @@
 """Generates the nice histograms on the IEM website"""
+
 import calendar
 import sys
 

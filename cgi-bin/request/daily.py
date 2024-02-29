@@ -1,4 +1,5 @@
 """Download IEM summary data!"""
+
 import sys
 from io import BytesIO, StringIO
 

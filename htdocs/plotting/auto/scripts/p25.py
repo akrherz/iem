@@ -4,6 +4,7 @@ daily high and low temperatures for a given day and given state.  The
 dataset is fit with a simple normal distribution based on the simple
 population statistics.
 """
+
 import datetime
 
 import numpy as np

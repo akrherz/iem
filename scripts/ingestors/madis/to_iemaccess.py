@@ -4,6 +4,7 @@ Run from RUN_20MIN.sh
 RUN_20_AFTER for previous hour
 RUN_40_AFTER for 2 hours ago.
 """
+
 import datetime
 import os
 import subprocess

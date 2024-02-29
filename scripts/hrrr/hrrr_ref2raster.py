@@ -1,4 +1,5 @@
 """Convert HRRR Grib Reflectivity to RASTERS matching ramp used with N0Q"""
+
 import datetime
 import json
 import os

@@ -1,6 +1,7 @@
 """
- Produce a OA GDD Plot, dynamically!
+Produce a OA GDD Plot, dynamically!
 """
+
 import datetime
 from io import BytesIO
 

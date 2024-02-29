@@ -1,4 +1,5 @@
-""" Find VTEC events by a given UGC code. """
+"""Find VTEC events by a given UGC code."""
+
 import datetime
 import json
 from io import BytesIO, StringIO

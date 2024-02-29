@@ -8,6 +8,7 @@ So 1000 W m-2 x 3600 is 3,600,000 W s m-2 is 86 langleys
 
 RUN_MIDNIGHT.sh every 28th of the month.
 """
+
 import datetime
 import os
 import sys

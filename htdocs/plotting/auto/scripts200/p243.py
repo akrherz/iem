@@ -10,6 +10,7 @@ is shown.</p>
 <p><a href="/plotting/auto/?q=171">Autoplot 171</a> is similar to this app, but
 produces monthly heatmaps.
 """
+
 import datetime
 
 import pandas as pd

@@ -18,6 +18,7 @@ difficult for offices that have marine zones.</p>
 <p>Autoplot <a href="/plotting/auto/?q=200">200</a> is similar, but generates
 spatial heatmaps.</p>
 """
+
 import calendar
 import datetime
 

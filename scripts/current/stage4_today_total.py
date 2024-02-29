@@ -3,6 +3,7 @@ Sum up the hourly precipitation from NCEP stage IV and produce maps
 
 called from RUN_STAGE4.sh
 """
+
 import datetime
 import sys
 from zoneinfo import ZoneInfo

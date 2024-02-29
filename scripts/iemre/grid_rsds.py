@@ -8,6 +8,7 @@ Called from:
  - RUN_0Z.sh for 8 days ago
  - RUN_10_AFTER.sh at 11 PM for the current day
 """
+
 # pylint: disable=unpacking-non-sequence
 import datetime
 import os

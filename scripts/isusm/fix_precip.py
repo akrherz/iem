@@ -7,6 +7,7 @@ Implementation Thoughts:
 3. We won't update the 'raw' precip tables
 4. This uses the flag 'E' for estimated
 """
+
 # pylint: disable=unsubscriptable-object
 import datetime
 import sys

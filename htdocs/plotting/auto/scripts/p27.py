@@ -5,6 +5,7 @@ days after that date until threshold 2 was reached. The slanted dashed
 lines are used to translate the dots to the date of occurrence for the
 second threshold.
 """
+
 import datetime
 
 import numpy as np

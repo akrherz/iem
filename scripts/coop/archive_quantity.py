@@ -1,4 +1,5 @@
-""" Create a simple prinout of observation quanity in the database """
+"""Create a simple prinout of observation quanity in the database"""
+
 import datetime
 import sys
 

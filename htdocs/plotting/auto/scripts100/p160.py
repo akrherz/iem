@@ -12,6 +12,7 @@ forecasts, observations, or both are plotted.  For the Interactive Chart
 version, this is controlled by clicking on the legend items which will
 hide and show the various lines.
 """
+
 import datetime
 from zoneinfo import ZoneInfo
 

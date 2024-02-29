@@ -16,6 +16,7 @@ extremes for that date.</p>
 <p>The CSV/Excel download option for this autoplot will return 100
 unfiltered events for further usage as you see fit.</p>
 """
+
 import datetime
 
 import pandas as pd

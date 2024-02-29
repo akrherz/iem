@@ -1,4 +1,5 @@
 """yieldfx plot"""
+
 import calendar
 import datetime
 import os

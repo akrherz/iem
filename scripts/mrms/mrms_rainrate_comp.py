@@ -5,6 +5,7 @@ which is 5 mm.  So if we want to store 5mm in 250 bins, we have a resolution
 of 0.02 mm per index.
 
 """
+
 import datetime
 import gzip
 import json

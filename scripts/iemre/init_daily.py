@@ -1,4 +1,5 @@
 """Generate the IEMRE daily analysis file for a year"""
+
 import datetime
 import os
 import sys

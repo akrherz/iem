@@ -1,4 +1,5 @@
 """Ingest the El Nino"""
+
 import datetime
 
 import pandas as pd

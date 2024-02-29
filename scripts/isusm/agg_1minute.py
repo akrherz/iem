@@ -3,6 +3,7 @@ Need to do some custom 1 minute data aggregation to fill out hourly table.
 
 RUN_20_AFTER.sh
 """
+
 import datetime
 import sys
 

@@ -2,6 +2,7 @@
 This plot presents the daily frequency of the
 first station having a higher value than the second station.
 """
+
 import calendar
 
 import pandas as pd

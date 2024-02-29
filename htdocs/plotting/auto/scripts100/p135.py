@@ -6,6 +6,7 @@ somewhat sloppy day-of-year logic that does not necessarily align leap years.
 <p>If you split the year on 1 July, the plotted season represents the 1 July
 year. ie 1 July 2023 - 30 Jun 2024 plots as 2023.</p>
 """
+
 import datetime
 
 import pandas as pd

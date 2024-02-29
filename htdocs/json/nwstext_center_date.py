@@ -1,6 +1,7 @@
 """
 Provide nws text for one center for one date, or not.
 """
+
 # stdlib
 import json
 from datetime import datetime, timedelta

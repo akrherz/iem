@@ -5,6 +5,7 @@ plots the speed vs direction of the vector and includes a kernel density
 estimate (KDE) overlay.  You can optionally pick a date to highlight on the
 chart.  This date is a central time zone date.
 """
+
 # pylint: disable=consider-using-f-string
 import datetime
 import json

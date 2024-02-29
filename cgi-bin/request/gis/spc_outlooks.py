@@ -1,4 +1,5 @@
 """Dump SPC Outlooks."""
+
 # Local
 import tempfile
 import zipfile

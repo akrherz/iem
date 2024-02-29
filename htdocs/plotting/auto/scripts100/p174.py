@@ -3,6 +3,7 @@ This application generates a comparison of daily
 high and low temperatures between two automated ASOS sites of your
 choosing.
 """
+
 import datetime
 
 import matplotlib.dates as mdates

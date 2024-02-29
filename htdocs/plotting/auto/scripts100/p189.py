@@ -11,6 +11,7 @@ available metrics.
 <p>If you plot the DJF period, the year shown is the year of the
 December within the three year period.
 """
+
 import datetime
 
 import pandas as pd

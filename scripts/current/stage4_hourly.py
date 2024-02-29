@@ -1,6 +1,7 @@
 """
-    Plot the hourly stage IV precip data
+Plot the hourly stage IV precip data
 """
+
 import datetime
 from zoneinfo import ZoneInfo
 

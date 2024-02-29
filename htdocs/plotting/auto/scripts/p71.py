@@ -8,6 +8,7 @@ You can download daily summary data
 The average wind direction
 is computed by vector averaging of the wind speed and direction reports.
 """
+
 import datetime
 
 import matplotlib.patheffects as PathEffects

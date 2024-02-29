@@ -13,6 +13,7 @@ RUN_NOON.sh - processes yesterday, running all sites
 RUN_0Z.sh - processes the current date and gets the prelim calday sites data.
 RUN_2AM.sh - processes yesterday, which should run all sites
 """
+
 import datetime
 
 import click

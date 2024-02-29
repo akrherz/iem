@@ -17,6 +17,7 @@ and <code>1</code> forward days (Whatever, does not matter for 1 day
 aggregate),
 this example evaluates to a jump of 20 degrees.
 """
+
 import calendar
 import datetime
 

@@ -1,4 +1,5 @@
 """Generate a plot of GDD"""
+
 import datetime
 
 from pyiem.util import logger, web2ldm

@@ -10,6 +10,7 @@ may take a while to generate a plot, so please be patient!</p>
 <p><a href="/plotting/auto/?q=250">Autoplot 250</a> generates a comparison
 of an hourly variable between two sites.</p>
 """
+
 import calendar
 import datetime
 

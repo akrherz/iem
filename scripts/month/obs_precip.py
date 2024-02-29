@@ -1,4 +1,4 @@
-""" Generate a map of this month's observed precip"""
+"""Generate a map of this month's observed precip"""
 
 import datetime
 

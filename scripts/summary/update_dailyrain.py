@@ -4,6 +4,7 @@ Some care has to be made here such that trace values do not accumulate when
 there are actual measurable precip.  Eventually, the DSM or other summary
 messages come and overwrite the trouble. Run from RUN_10MIN.sh
 """
+
 import datetime
 
 from pyiem.reference import TRACE_VALUE

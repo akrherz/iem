@@ -3,6 +3,7 @@ This autoplot generates some metrics on the distribution of temps
 over a given period of years.  The plotted distribution in the upper panel
 is using a guassian kernel density estimate.
 """
+
 import calendar
 from datetime import date, datetime
 

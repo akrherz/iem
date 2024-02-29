@@ -7,6 +7,7 @@ Run from `RUN_MIDNIGHT.sh` for previous UTC date.
 
 see akrherz/iem#104
 """
+
 import datetime
 import sys
 

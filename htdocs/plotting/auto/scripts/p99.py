@@ -4,6 +4,7 @@ between daily high and low temperatures against climatology. For this
 context, the climatology is the simple daily average based on period of
 record data.
 """
+
 import datetime
 
 import matplotlib.dates as mdates

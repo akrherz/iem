@@ -4,6 +4,7 @@ You need not provide an exact valid timestamp for the TAF issuance, the
 app will search backwards in time up to 24 hours to find the nearest
 issuance stored in the database.
 """
+
 import datetime
 
 import matplotlib.patheffects as PathEffects

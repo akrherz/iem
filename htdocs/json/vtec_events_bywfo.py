@@ -1,4 +1,5 @@
-"""Pidgin-holed service for some WFO data... """
+"""Pidgin-holed service for some WFO data..."""
+
 import datetime
 import json
 from io import BytesIO, StringIO

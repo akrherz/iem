@@ -3,6 +3,7 @@ This chart presents the crop progress by year.
 The most recent value for the current year is denoted on each of the
 previous years on record.
 """
+
 import calendar
 
 import numpy as np

@@ -1,8 +1,9 @@
 """Convert a NWS Text Product into a PNG
 
-    /wx/afos/201612141916_ADMNFD.png
-    Rewritten by apache to text2png?e=201612141916&pil=ADMNFD
+/wx/afos/201612141916_ADMNFD.png
+Rewritten by apache to text2png?e=201612141916&pil=ADMNFD
 """
+
 import datetime
 from io import BytesIO
 from zoneinfo import ZoneInfo

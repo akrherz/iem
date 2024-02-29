@@ -3,6 +3,7 @@
 For better or worse, we have a manual accounting of precipitation totals within
 the database.  This updates those totals.
 """
+
 import datetime
 import sys
 

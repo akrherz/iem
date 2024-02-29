@@ -1,4 +1,5 @@
 """Some of our solar radiation data is not good!"""
+
 import datetime
 import json
 import sys

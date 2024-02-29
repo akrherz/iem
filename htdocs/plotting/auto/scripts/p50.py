@@ -6,6 +6,7 @@ warning's lifecycle (including SVSs).  The maximum wind and hail tags
 are computed independently over the lifecycle of the Severe Thunderstorm
 Warning.
 """
+
 import datetime
 
 import pandas as pd

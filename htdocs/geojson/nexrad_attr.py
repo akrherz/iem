@@ -1,4 +1,5 @@
-""" Generate a GeoJSON of nexrad attributes"""
+"""Generate a GeoJSON of nexrad attributes"""
+
 import datetime
 import json
 from zoneinfo import ZoneInfo

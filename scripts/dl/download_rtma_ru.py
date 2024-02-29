@@ -3,6 +3,7 @@ Download RTMA Rapid Updates grids
 
 Run from RUN_50_AFTER.sh for previous hour
 """
+
 import datetime
 import os
 import subprocess

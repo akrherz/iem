@@ -7,6 +7,7 @@ This is tricky as some variables we can compute sooner than others.
     RUN_0Z.sh
     RUN_10_AFTER.sh
 """
+
 import datetime
 import subprocess
 

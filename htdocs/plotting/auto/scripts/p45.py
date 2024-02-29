@@ -5,6 +5,7 @@ are a number of caveats to this plot as sensors and observing techniques
 have changed over the years!  The algorithm specifically looks for the
 OVC condition to be reported in the METAR observation.
 """
+
 import calendar
 import datetime
 

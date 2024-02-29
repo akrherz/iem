@@ -13,6 +13,7 @@ for line in open('/tmp/SCIA1107.txt'):
 
 sys.exit()
 """
+
 import datetime
 import os
 import smtplib

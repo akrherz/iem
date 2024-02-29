@@ -4,6 +4,7 @@ Some of the variables don't get properly updated in the summary table.
 
 cronjob from RUN_2AM.sh
 """
+
 import sys
 from datetime import timedelta
 

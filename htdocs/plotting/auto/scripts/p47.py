@@ -6,6 +6,7 @@ the combination of non-frozen vs frozen precipitation. For a given winter
 month, not all precipitation falls as snow, so you can not assume that
 the liquid equivalent did not include some liquid rainfall.
 """
+
 import calendar
 
 import pandas as pd

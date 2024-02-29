@@ -1,4 +1,5 @@
 """This chart presents crop condition reports from USDA/NASS."""
+
 import calendar
 import datetime
 

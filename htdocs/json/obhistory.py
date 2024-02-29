@@ -1,4 +1,5 @@
 """JSON service emitting observation history for a given date"""
+
 import datetime
 import json
 

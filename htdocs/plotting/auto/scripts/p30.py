@@ -4,6 +4,7 @@ high temperature and the coldest low temperature for a given month for
 each year.  The bottom panel displays the range between those two values.
 The black lines represent the simple averages of the data.
 """
+
 import calendar
 import datetime
 

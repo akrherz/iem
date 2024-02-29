@@ -1,6 +1,7 @@
 """
- Return GeoJSON of valid watches for a provided timestamp or just now
+Return GeoJSON of valid watches for a provided timestamp or just now
 """
+
 import datetime
 import json
 from zoneinfo import ZoneInfo

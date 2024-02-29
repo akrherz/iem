@@ -4,6 +4,7 @@ a location or two of your choice.  You can pick which climatology to use
 and effectively build a difference plot when picking the same station,
 but using a different climatology.
 """
+
 import calendar
 
 import matplotlib.dates as mdates

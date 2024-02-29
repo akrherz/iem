@@ -5,6 +5,7 @@ date is not used in either statistical value.  If you select a period that
 includes leap day, there is likely some small ambiguity with the resulting
 plot labels.
 """
+
 import datetime
 
 import numpy as np

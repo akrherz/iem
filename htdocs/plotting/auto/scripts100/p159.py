@@ -10,6 +10,7 @@ the year of the start date is used within the plot.</p>
 &lt;20% missing). The blue bars indicate years with such amount of missing
 data.</p>
 """
+
 import datetime
 
 import pandas as pd

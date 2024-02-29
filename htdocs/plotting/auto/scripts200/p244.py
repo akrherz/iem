@@ -4,6 +4,7 @@ with its "Climdiv" dataset.  This autoplot creates comparisons between the two.
 
 <p>Variances shown are problems with IEM's database/processing, not NCEI!
 """
+
 import datetime
 
 import pandas as pd

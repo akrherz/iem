@@ -1,4 +1,5 @@
 """Serve Time Motion Location Vectors."""
+
 import datetime
 import math
 import re

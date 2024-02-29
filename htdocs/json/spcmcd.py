@@ -1,4 +1,5 @@
 """SPC MCD service."""
+
 import json
 import os
 

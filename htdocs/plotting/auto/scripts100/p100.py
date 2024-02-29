@@ -3,6 +3,7 @@ This plot displays a metric for each year.
 In most cases, you can access the raw data for these plots
 <a href="/climodat/" class="alert-link">here.</a>
 """
+
 import datetime
 
 import numpy as np

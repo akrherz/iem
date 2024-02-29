@@ -1,4 +1,5 @@
 """Process talltowers data request."""
+
 import datetime
 from io import BytesIO, StringIO
 from zoneinfo import ZoneInfo

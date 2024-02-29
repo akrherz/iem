@@ -1,4 +1,5 @@
 """TAF."""
+
 # pylint: disable=abstract-class-instantiated
 from io import BytesIO
 from zoneinfo import ZoneInfo

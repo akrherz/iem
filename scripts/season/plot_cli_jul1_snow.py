@@ -1,4 +1,5 @@
 """Plot CLI snow"""
+
 import datetime
 
 from pandas import read_sql

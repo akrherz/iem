@@ -1,4 +1,5 @@
-""" Generate a GeoJSON of 7 AM precip data """
+"""Generate a GeoJSON of 7 AM precip data"""
+
 import datetime
 import json
 from zoneinfo import ZoneInfo

@@ -1,6 +1,7 @@
 """
- Create a plot of minimum wind chill
+Create a plot of minimum wind chill
 """
+
 import datetime
 import sys
 

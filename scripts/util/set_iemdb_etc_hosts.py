@@ -1,4 +1,5 @@
 """A util script used on daryl's laptop to switch 'iemdb' /etc/hosts entry."""
+
 import os
 import sys
 import tempfile

@@ -1,4 +1,5 @@
-""" Find VTEC events by a given Lat / Lon pair """
+"""Find VTEC events by a given Lat / Lon pair"""
+
 import datetime
 import json
 from io import BytesIO, StringIO

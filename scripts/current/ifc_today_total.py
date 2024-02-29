@@ -1,6 +1,7 @@
 """
- Create a plot of today's IFC estimated precip
+Create a plot of today's IFC estimated precip
 """
+
 import datetime
 import sys
 

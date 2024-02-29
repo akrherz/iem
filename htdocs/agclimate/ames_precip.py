@@ -1,4 +1,5 @@
 """Report on our second tipping bucket"""
+
 from io import StringIO
 
 import pandas as pd

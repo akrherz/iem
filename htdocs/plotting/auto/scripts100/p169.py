@@ -25,6 +25,7 @@ flakey.</p>
 <p><a href="/plotting/auto/?q=139">Autoplot 139</a> is similar to this
 plot, but only considers a calendar day.</p>
 """
+
 from datetime import date, datetime, timedelta
 from zoneinfo import ZoneInfo
 

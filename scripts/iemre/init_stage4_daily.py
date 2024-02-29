@@ -1,4 +1,5 @@
 """Generate the StageIV "daily" file at 12z."""
+
 import datetime
 import os
 import sys

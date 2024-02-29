@@ -5,6 +5,7 @@ precipitation rank for each month of the year.  Having a two inch event
 in December would certainly rank higher than one in May. Percentiles
 for precipitation are computed with dry days omitted.
 """
+
 import calendar
 import datetime
 

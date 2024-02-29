@@ -1,4 +1,5 @@
 """Climodat consec days"""
+
 import datetime
 
 import numpy as np

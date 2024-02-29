@@ -8,6 +8,7 @@ if this logic causes you heartburn!  The format of the date periods is
 two digit month followed by two digit day for both the start and end
 date.
 """
+
 import calendar
 import datetime
 

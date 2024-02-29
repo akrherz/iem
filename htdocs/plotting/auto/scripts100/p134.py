@@ -11,6 +11,7 @@ arthimetic mean of dew point temperatures.
 averages of the daily minimum or maximum values, not an average of an
 average feels like temperature.  This is why we can't have nice things.</p>
 """
+
 import datetime
 
 import matplotlib.colors as mpcolors

@@ -7,6 +7,7 @@ and sets the new daily records.  A general model of the number of new
 records to be set each year would be 365 / (number of years).  So you would
 expect to set 365 records the first year, 183 the second, and so on...
 """
+
 import datetime
 
 import pandas as pd

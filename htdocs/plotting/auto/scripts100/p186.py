@@ -11,6 +11,7 @@ plot uses a JSON data service provided by the
 values is multiplied by five as drought changes at that scale are slower than
 at the state scale when normalized by area.
 """
+
 import calendar
 import datetime
 

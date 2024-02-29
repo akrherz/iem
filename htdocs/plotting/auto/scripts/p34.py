@@ -2,6 +2,7 @@
 This plot displays the maximum number of consec
 days above or below some threshold for high or low temperature.
 """
+
 import calendar
 import datetime
 

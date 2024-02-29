@@ -2,6 +2,7 @@
 
 For now, we just run each Monday for the current year RUN_2AM.sh
 """
+
 import datetime
 import subprocess
 import sys
@@ -97,9 +98,9 @@ def main(argv):
                 ]
                 if present.mean() == data.mean():
                     continue
-                current[date]["data"]["power_swdn"].values[
-                    jslice, islice
-                ] = data
+                current[date]["data"]["power_swdn"].values[jslice, islice] = (
+                    data
+                )
                 current[date]["dirty"] = True
     for date, item in current.items():
         if not item["dirty"]:

@@ -3,6 +3,7 @@ This plot presents the period over which growing
 degree days were accumulated between the two thresholds provided by
 the user.  The colors represent the number of days for the period shown.
 """
+
 import datetime
 
 import matplotlib.colors as mpcolors

@@ -1,5 +1,5 @@
 """
- Assign a climate site to each site in the mesosite database, within reason
+Assign a climate site to each site in the mesosite database, within reason
 """
 
 from pyiem.util import get_dbconn, logger

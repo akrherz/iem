@@ -8,6 +8,7 @@ sets the year-to-date period used for each year.
 <p><strong>Updated 17 March 2021</strong>: The range parameters were
 updated to be space delimited so to allow negative numbers to be used.
 """
+
 import datetime
 
 import numpy as np

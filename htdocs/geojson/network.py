@@ -1,4 +1,5 @@
 """GeoJSON of a given IEM network code"""
+
 import datetime
 import json
 

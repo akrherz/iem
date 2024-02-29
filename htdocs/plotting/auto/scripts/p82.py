@@ -6,6 +6,7 @@ climate station, which in most cases is the same station.  Climatology
 values are rounded to the nearest whole degree Fahrenheit and then compared
 against the observed value to compute a departure.
 """
+
 import datetime
 
 import numpy as np

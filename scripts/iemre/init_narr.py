@@ -1,4 +1,5 @@
 """Generate the storage of NARR 3 hourly products"""
+
 import datetime
 import os
 import sys

@@ -2,6 +2,7 @@
 
 Run every minute from RUN_1MIN.sh
 """
+
 import datetime
 import os
 import subprocess

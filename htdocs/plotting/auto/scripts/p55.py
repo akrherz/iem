@@ -6,6 +6,7 @@ data is smoothed to remove day to day variability.  The raw daily averages
 are shown computed from the daily observation archive maintained by the
 IEM.
 """
+
 import calendar
 import datetime
 

@@ -4,6 +4,7 @@ low temperature during the fall season and the number of steps up in
 high temperature during the spring season.  These steps are simply having
 a newer colder low or warmer high for the season to date period.
 """
+
 import calendar
 
 import numpy as np

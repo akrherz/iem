@@ -1,4 +1,5 @@
 """CF6 data."""
+
 import datetime
 
 import simplejson as json

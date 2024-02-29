@@ -1,4 +1,5 @@
 """Generate a map of this month's observed precip"""
+
 import datetime
 
 from pyiem.plot import MapPlot

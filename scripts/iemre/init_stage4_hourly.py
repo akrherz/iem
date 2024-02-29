@@ -1,4 +1,5 @@
 """Generate the storage of stage IV hourly products"""
+
 import datetime
 import os
 import sys

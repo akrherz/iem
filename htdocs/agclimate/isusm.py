@@ -1,6 +1,7 @@
 """
- Generate various plots for ISUSM data
+Generate various plots for ISUSM data
 """
+
 from io import BytesIO
 
 from pyiem.network import Table as NetworkTable

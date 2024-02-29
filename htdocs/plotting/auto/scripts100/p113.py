@@ -4,6 +4,7 @@ you select a start date that is later than the end date, the plot will wrap
 over 1 January.  In such a case, if you select certain years to plot, the year
 will be from the start of the two year period that crosses 1 January.
 """
+
 import datetime
 
 import pandas as pd

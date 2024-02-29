@@ -3,6 +3,7 @@ Gridcell sample the NLDAS NetCDF files to save srad to climodat database.
 
 Run from RUN_0Z.sh for six UTC days ago.
 """
+
 import datetime
 
 import click

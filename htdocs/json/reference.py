@@ -1,4 +1,5 @@
 """pyIEM reference tables."""
+
 import json
 
 from pyiem import reference

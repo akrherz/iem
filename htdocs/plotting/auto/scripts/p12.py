@@ -7,6 +7,7 @@ the season displayed in the chart and available download spreadsheet
 represents the start year of the winter season.  Rewording, the year 2016
 would represent the period of 1 July 2016 to 30 Jun 2017.
 """
+
 import datetime
 
 import numpy as np

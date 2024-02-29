@@ -13,6 +13,7 @@ first/last temperature exceedance.  As a practical example of the 50th
 percentile, the date plotted means that 50% of the previous years on
 record experienced that temperature threshold by the given date.
 """
+
 import datetime
 
 import numpy as np

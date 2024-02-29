@@ -5,6 +5,7 @@ that was reported at the same time.  This chart makes an assumption
 about the two values being coincident, whereas in actuality they may not
 have been.
 """
+
 import calendar
 import datetime
 

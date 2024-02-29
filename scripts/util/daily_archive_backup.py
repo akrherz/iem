@@ -2,6 +2,7 @@
 
 Lets run at 12z for the previous date
 """
+
 import datetime
 import os
 import subprocess

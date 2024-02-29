@@ -7,6 +7,7 @@ value with monthly totals for a period a few months after the validity of
 the SOI value.  The thought is that there is some lag time for the impacts
 of a given SOI to be felt in the midwestern US.
 """
+
 import datetime
 
 import matplotlib.colors as mpcolors

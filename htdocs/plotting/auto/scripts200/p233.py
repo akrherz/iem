@@ -4,6 +4,7 @@ that contain polygons issued per day.
 <a href="/plotting/auto/?q=143">Autoplot 143</a> presents this same data,
 but as yearly and monthly totals.
 """
+
 import datetime
 
 import pandas as pd

@@ -2,6 +2,7 @@
 This chart presents the longest daily streaks of having some
 temperature threshold meet.
 """
+
 import datetime
 
 import numpy as np

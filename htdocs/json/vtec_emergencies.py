@@ -1,4 +1,5 @@
 """Listing of VTEC emergencies"""
+
 import json
 
 from pyiem.reference import ISO8601

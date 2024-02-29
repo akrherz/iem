@@ -1,4 +1,4 @@
-""" Plot the High + Low Temperatures"""
+"""Plot the High + Low Temperatures"""
 
 import datetime
 import sys

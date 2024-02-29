@@ -1,4 +1,5 @@
 """Delete a station and all references to it!"""
+
 import sys
 
 from pyiem.util import get_dbconn

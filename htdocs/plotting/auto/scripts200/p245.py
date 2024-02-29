@@ -5,6 +5,7 @@ NWS by month and year.
 <p><a href="/plotting/auto/?q=171">Autoplot 171</a> produces a similar plot,
 but contains totals of Watch, Warnings, and Advisories issued.</p>
 """
+
 import calendar
 
 import numpy as np

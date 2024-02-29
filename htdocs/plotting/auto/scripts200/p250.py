@@ -9,6 +9,7 @@ the first station having a value greater than the second station by a certain
 threshold.  The bottom right panel shows a violin plot of the monthly
 distribution of differences.
 """
+
 import calendar
 import datetime
 from zoneinfo import ZoneInfo
@@ -164,7 +165,7 @@ def plotter(fdict):
         yearly["mean"] - yearly["std"],
         yearly["mean"] + yearly["std"],
         color="lightgrey",
-        label="+/- 1 \u03C3",
+        label="+/- 1 \u03c3",
     )
     ax.plot(yearly.index.values, yearly["mean"], label="Mean", lw=2)
     ax.set_ylabel(f"{PDICT[varname]} Difference")

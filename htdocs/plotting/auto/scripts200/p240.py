@@ -14,6 +14,7 @@ why we can't have nice things.
 <p>This app uses <a href="/plotting/auto/?q=9">Autoplot #9</a> to generate the
 GDD Climatology.
 """
+
 from datetime import date, timedelta
 
 import matplotlib.dates as mdates

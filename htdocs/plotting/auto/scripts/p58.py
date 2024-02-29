@@ -4,6 +4,7 @@ precipitation was greater than some portion of the monthly total. The
 default settings provide the frequency of getting half of the month's
 precipitation within one 24 hour period.
 """
+
 import calendar
 
 import pandas as pd

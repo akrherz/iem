@@ -4,6 +4,7 @@ NOTE: Local ~/.netrc file must be configured with NASA Earthdata credentials.
 
 Run from RUN_0Z.sh for 5 day old data.
 """
+
 import os
 import subprocess
 import sys
@@ -39,9 +40,10 @@ def process(valid):
         "SoilT_100_200cm",
     ]
     DEPTH_MM = [100.0, 300.0, 600.0, 1000.0]
-    with ncopen(fn) as ncin, ncopen(
-        f"/mesonet/data/nldas/{valid:%Y}_hourly.nc", "a"
-    ) as ncout:
+    with (
+        ncopen(fn) as ncin,
+        ncopen(f"/mesonet/data/nldas/{valid:%Y}_hourly.nc", "a") as ncout,
+    ):
         for i, ncvar in enumerate(SOILTVARS):
             ncout.variables["soilt"][idx, i] = ncin.variables[ncvar][0]
             # mm over depth, we want fraction

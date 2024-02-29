@@ -6,6 +6,7 @@ spatial weighting is done, so one should not interpret this as an areal
 coverage of some condition.  For temperature, sites with an average
 temperature for that date are omitted.
 """
+
 import datetime
 
 import pandas as pd

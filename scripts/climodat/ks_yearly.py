@@ -2,6 +2,7 @@
 
 Called from climodat/run.sh
 """
+
 import datetime
 
 from pyiem.database import get_dbconnc

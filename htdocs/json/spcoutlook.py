@@ -1,4 +1,5 @@
 """SPC Outlook JSON service."""
+
 import datetime
 import json
 from zoneinfo import ZoneInfo

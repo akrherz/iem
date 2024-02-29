@@ -14,6 +14,7 @@ clock.  For example, '8-16' would indicate a period between 8 AM and 4 PM
 inclusive.  If you want to plot one hour, just set the start and end hour
 to the same value.</p>
 """
+
 import datetime
 
 import metpy.calc as mcalc

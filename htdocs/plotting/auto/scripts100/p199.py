@@ -2,6 +2,7 @@
 This application generates maps of daily ISU
 Soil Moisture Network Data.
 """
+
 import datetime
 
 import pandas as pd

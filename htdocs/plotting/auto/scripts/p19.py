@@ -6,6 +6,7 @@ the December is used for the plot. For example, the winter of 2017 is
 Dec 2017 thru Feb 2018.  The plot details the temperature bin with the
 highest frequency.
 """
+
 import datetime
 
 import numpy as np

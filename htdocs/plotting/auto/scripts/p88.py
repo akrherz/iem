@@ -6,6 +6,7 @@ temperature by hour and by week of the year.  The input data for this
 chart is limited to post 1973 as cloud cover data since then is more
 reliable/comparable.
 """
+
 import datetime
 
 import numpy as np

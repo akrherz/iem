@@ -16,6 +16,7 @@ the frequency of a given day participating in a streak, rather than the
 frequency of a streak ending on that day.  This should be a more useful
 metric for the user.
 """
+
 import calendar
 
 import pandas as pd

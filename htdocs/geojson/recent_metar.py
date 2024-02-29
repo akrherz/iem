@@ -1,4 +1,5 @@
-""" Recent METARs containing some pattern """
+"""Recent METARs containing some pattern"""
+
 import json
 
 from pyiem.reference import ISO8601, TRACE_VALUE

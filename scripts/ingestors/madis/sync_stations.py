@@ -1,4 +1,5 @@
 """Compare IEM station metadata with what current MADIS netcdf has."""
+
 import sys
 import warnings
 

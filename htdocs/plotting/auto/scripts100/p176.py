@@ -108,9 +108,9 @@ def get_context(fdict):
     pgconn.close()
     ctx["df"] = pd.DataFrame(rows)
     ctx["title"] = f"{ctx['_sname']} :: {PDICT2[ctx['w']]} Margin"
-    ctx[
-        "subtitle"
-    ] = f"By how much did a new record beat the previous {PDICT[opt]}"
+    ctx["subtitle"] = (
+        f"By how much did a new record beat the previous {PDICT[opt]}"
+    )
     return ctx
 
 

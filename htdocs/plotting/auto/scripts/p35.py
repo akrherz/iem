@@ -2,6 +2,7 @@
 This plot presents a histogram of the change
 in some observed variable over a given number of hours.
 """
+
 import calendar
 import datetime
 

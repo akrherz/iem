@@ -2,6 +2,7 @@
 
 Run from RUN_20_AFTER.sh
 """
+
 import os
 import shutil
 from datetime import date, timedelta

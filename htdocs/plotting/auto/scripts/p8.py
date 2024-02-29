@@ -5,6 +5,7 @@ is compared against the long term climatology for the site and month. This
 plot is designed to answer the question about reliability of monthly
 precipitation for a period of your choice.
 """
+
 import calendar
 import datetime
 

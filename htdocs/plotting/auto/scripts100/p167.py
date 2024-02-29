@@ -21,6 +21,7 @@ Ceiling &gt; 3000' AGL and visibility &gt; 5 statutes miles (green)</td></tr>
 </tbody>
 </table>
 """
+
 import datetime
 from zoneinfo import ZoneInfo
 

@@ -1,4 +1,5 @@
 """Onewire ingest."""
+
 import datetime
 import os
 import subprocess

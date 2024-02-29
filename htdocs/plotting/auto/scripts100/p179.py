@@ -10,6 +10,7 @@ year's data to provide frequencies.  The right hand plot is meant to
 provide current frequencies / probabilities of what could potentially
 happen this year.
 """
+
 import datetime
 
 import matplotlib.colors as mpcolors

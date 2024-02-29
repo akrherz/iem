@@ -1,8 +1,9 @@
 """
- Our HADS database gets loaded up with duplicates, this cleans it up.
+Our HADS database gets loaded up with duplicates, this cleans it up.
 
- called from RUN_MIDNIGHT.sh
+called from RUN_MIDNIGHT.sh
 """
+
 import datetime
 import sys
 

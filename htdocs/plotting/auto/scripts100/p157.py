@@ -7,6 +7,7 @@ can also plot a frequency of the RH value being above or below
 some threshold. This frequency is grouped by week of the year to
 provide some smoothing to the metric.
 """
+
 import calendar
 import datetime
 

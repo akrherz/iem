@@ -1,4 +1,5 @@
 """Hit up ESRIs elevation REST service to compute a station elevation."""
+
 import sys
 import time
 

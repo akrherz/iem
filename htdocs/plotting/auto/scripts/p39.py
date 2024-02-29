@@ -6,6 +6,7 @@ with the scenarios of the remaining days for this month from each of
 the past years.  These scenarios provide a good approximation of what is
 possible for the remainder of the month.
 """
+
 import calendar
 import datetime
 
