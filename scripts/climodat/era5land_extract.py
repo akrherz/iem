@@ -10,16 +10,10 @@ import geopandas as gpd
 import numpy as np
 import pandas as pd
 from affine import Affine
+from pyiem.database import get_dbconn, get_sqlalchemy_conn
 from pyiem.grid.zs import CachingZonalStats
 from pyiem.iemre import NORTH, WEST, hourly_offset
-from pyiem.util import (
-    convert_value,
-    get_dbconn,
-    get_sqlalchemy_conn,
-    logger,
-    ncopen,
-    utc,
-)
+from pyiem.util import convert_value, logger, ncopen, utc
 
 LOG = logger()
 
@@ -170,7 +164,7 @@ def do(dt):
 
 
 @click.command()
-@click.option("--valid", type=click.DateTime())
+@click.option("--date", "valid", type=click.DateTime())
 def main(valid):
     """Go Main Go"""
     do(valid.date())

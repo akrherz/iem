@@ -106,7 +106,7 @@ def do_year_overlay(ctx, ax, pname, color, crosses_jan1):
         obs["high"] - obs["low"],
         bottom=obs["low"],
         color=color,
-        align="edge",
+        align="center",
         label=f"Observed {lbl}",
         width=0.8,
         alpha=0.8,
@@ -122,10 +122,13 @@ def plotter(fdict):
     bs = ctx["_nt"].sts[station]["archive_begin"]
     if bs is None:
         raise NoDataFound("No Metadata found.")
+    be = ctx["_nt"].sts[station]["archive_end"]
+    if be is None:
+        be = datetime.date.today()
     res = (
         "# IEM Climodat https://mesonet.agron.iastate.edu/climodat/\n"
         f"# Report Generated: {datetime.date.today():%d %b %Y}\n"
-        f"# Climate Record: {bs} -> {datetime.date.today()}\n"
+        f"# Climate Record: {bs} -> {be}\n"
         f"# Site Information: [{station}] {ctx['_nt'].sts[station]['name']}\n"
         "# Contact Information: "
         "Daryl Herzmann akrherz@iastate.edu 515.294.5978\n"
@@ -207,9 +210,9 @@ def plotter(fdict):
         res += "\n"
 
     title = f"{ctx['_sname']}:: Daily High/Low Temperature Climatology"
-    subtitle = ""
+    subtitle = f"Simple climatology over {bs.year}-{be.year}."
     if ctx.get("year1") is not None:
-        subtitle = f"Observed High/Low for {ctx['year1']}"
+        subtitle += f" Observed High/Low for {ctx['year1']}"
         if ctx.get("year2") is not None:
             subtitle += f" and {ctx['year2']}"
     fig = figure(title=title, subtitle=subtitle, apctx=ctx)
@@ -230,21 +233,21 @@ def plotter(fdict):
         df["avg_high"].values,
         df["max_high"].values,
         color="#f2c2a7",
-        step="post",
+        step="mid",
     )
     ax.fill_between(
         x,
         df["avg_low"].values,
         df["min_low"].values,
         color="#bbbbe2",
-        step="post",
+        step="mid",
     )
     ax.fill_between(
         x,
         df["avg_low"].values,
         df["avg_high"].values,
         color="#b4dab3",
-        step="post",
+        step="mid",
         label="Range of Ave High/Low",
     )
     ax.plot(
@@ -253,7 +256,7 @@ def plotter(fdict):
         color="#dc300b",
         label="Record High",
         lw=1,
-        drawstyle="steps-post",
+        drawstyle="steps-mid",
     )
     ax.plot(
         x,
@@ -261,7 +264,7 @@ def plotter(fdict):
         color="#444e9f",
         label="Record Low",
         lw=1,
-        drawstyle="steps-post",
+        drawstyle="steps-mid",
     )
 
     do_year_overlay(ctx, ax, "year1", "#593700", crosses_jan1)
@@ -270,10 +273,7 @@ def plotter(fdict):
     ax.grid(True)
     ax.legend(ncol=5)
     ax.set_ylabel(r"Temperature $^\circ$F")
-    ax.set_xlim(
-        ctx["sday"] - datetime.timedelta(days=1),
-        ctx["eday"] + datetime.timedelta(days=1),
-    )
+    ax.set_xlim(ctx["sday"], ctx["eday"] + datetime.timedelta(days=1))
     days = 1
     if ctx["eday"] - ctx["sday"] < datetime.timedelta(days=71):
         days = [1, 8, 15, 22, 29]

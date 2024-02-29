@@ -7,9 +7,9 @@ import datetime
 import sys
 
 import pandas as pd
+from pyiem.database import get_sqlalchemy_conn
 from pyiem.network import Table as NetworkTable
 from pyiem.plot import MapPlot
-from pyiem.util import get_sqlalchemy_conn
 
 
 def runYear(year):

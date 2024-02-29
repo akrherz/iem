@@ -16,8 +16,9 @@ import geopandas as gpd
 import numpy as np
 import pandas as pd
 from affine import Affine
+from pyiem.database import get_dbconn, get_sqlalchemy_conn
 from pyiem.grid.zs import CachingZonalStats
-from pyiem.util import get_dbconn, get_sqlalchemy_conn, logger, ncopen
+from pyiem.util import logger, ncopen
 
 LOG = logger()
 COL = "merra_srad"
