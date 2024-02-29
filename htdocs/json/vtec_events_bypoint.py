@@ -4,9 +4,10 @@ import json
 from io import BytesIO, StringIO
 
 import pandas as pd
+from pyiem.database import get_sqlalchemy_conn
 from pyiem.exceptions import IncompleteWebRequest
 from pyiem.nws.vtec import VTEC_PHENOMENA, VTEC_SIGNIFICANCE, get_ps_string
-from pyiem.util import get_sqlalchemy_conn, html_escape
+from pyiem.util import html_escape
 from pyiem.webutil import iemapp
 
 EXL = "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"
@@ -98,9 +99,9 @@ def parse_date(val):
 @iemapp()
 def application(environ, start_response):
     """Answer request."""
-    lat = float(environ.get("lat", 42.5))
-    lon = float(environ.get("lon", -95.5))
     try:
+        lat = float(environ.get("lat", 42.5))
+        lon = float(environ.get("lon", -95.5))
         sdate = parse_date(environ.get("sdate", "1986-01-01"))
         edate = parse_date(environ.get("edate", "2099-01-01"))
     except Exception as exp:

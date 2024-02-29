@@ -23,8 +23,9 @@ from metpy.calc import (
     wind_speed,
 )
 from metpy.units import units
+from pyiem.database import get_dbconn, get_sqlalchemy_conn
 from pyiem.network import Table as NetworkTable
-from pyiem.util import get_dbconn, get_sqlalchemy_conn, logger, utc
+from pyiem.util import logger, utc
 from scipy.interpolate import interp1d
 from tqdm import tqdm
 

@@ -5,9 +5,10 @@ Run for a previous date from RUN_2AM.sh
 import datetime
 import sys
 
+from pyiem.database import get_dbconnc
 from pyiem.network import Table as NetworkTable
 from pyiem.reference import state_names
-from pyiem.util import get_dbconnc, logger
+from pyiem.util import logger
 
 LOG = logger()
 

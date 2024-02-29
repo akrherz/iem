@@ -3,7 +3,8 @@ import datetime
 import glob
 import os
 
-from pyiem.util import convert_value, get_dbconn, logger
+from pyiem.database import get_dbconn
+from pyiem.util import convert_value, logger
 
 LOG = logger()
 

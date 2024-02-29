@@ -4,8 +4,8 @@ Called from climodat/run.sh
 """
 import datetime
 
+from pyiem.database import get_dbconnc
 from pyiem.network import Table as NetworkTable
-from pyiem.util import get_dbconnc
 
 pgconn, cursor = get_dbconnc("coop")
 

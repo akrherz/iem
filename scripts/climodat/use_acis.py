@@ -39,7 +39,7 @@ def compute_sdate(acis_station):
     minval = "2023-01-01"
     if j["meta"]:
         for sid_date in j["meta"][0]["sid_dates"]:
-            if sid_date[0] == f"{acis_station} 2":
+            if sid_date[0].startswith(f"{acis_station} "):
                 minval = min([sid_date[1], minval])
     return minval
 

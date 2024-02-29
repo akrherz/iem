@@ -549,7 +549,8 @@ hopts = [
     {
         "id": 193,
         "label": (
-            "US Drought Monitor + Weather Prediction Center Forecasted Rain"
+            "US Drought Monitor + Weather Prediction Center (WPC) "
+            "Forecast Rain (QPF)"
         ),
     },
     {

@@ -6,9 +6,9 @@ Called from climodat/run.sh
 import datetime
 import sys
 
+from pyiem.database import get_dbconnc
 from pyiem.network import Table as NetworkTable
 from pyiem.plot import MapPlot
-from pyiem.util import get_dbconnc
 
 
 def runYear(year):
