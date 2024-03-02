@@ -182,7 +182,7 @@ def plotter(fdict):
         )
     else:
         # use grib data
-        ts -= datetime.timedelta(hours=(ts.hour % 6))
+        ts -= datetime.timedelta(hours=ts.hour % 6)
         ts = ts.replace(minute=0)
         lats = None
         for offset in range(0, 24, 4):

@@ -17,9 +17,10 @@ import calendar
 import datetime
 
 import pandas as pd
+from pyiem.database import get_sqlalchemy_conn
 from pyiem.exceptions import NoDataFound
 from pyiem.plot import figure
-from pyiem.util import get_autoplot_context, get_sqlalchemy_conn
+from pyiem.util import get_autoplot_context
 from sqlalchemy import text
 
 MDICT = {
@@ -155,7 +156,7 @@ def plotter(fdict):
         # no strftime support for old days, so we hack at it
         lbl = fmt % (row[varname],)
         if days > 1:
-            sts = row["end_date"] - datetime.timedelta(days=(days - 1))
+            sts = row["end_date"] - datetime.timedelta(days=days - 1)
             if sts.month == row["end_date"].month:
                 lbl += " -- %s %s-%s, %s" % (
                     calendar.month_abbr[sts.month],

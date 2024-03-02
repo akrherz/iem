@@ -12,9 +12,10 @@ import datetime
 
 import matplotlib.dates as mdates
 import pandas as pd
+from pyiem.database import get_sqlalchemy_conn
 from pyiem.exceptions import NoDataFound
 from pyiem.plot import figure
-from pyiem.util import get_autoplot_context, get_sqlalchemy_conn
+from pyiem.util import get_autoplot_context
 from scipy import stats
 
 PDICT = {"spring": "Spring Season", "fall": "Fall Season"}
@@ -175,7 +176,7 @@ def plotter(fdict):
     yticks = []
     yticklabels = []
     for doy in range(int(df[p2col].min()), int(df[p2col].max())):
-        date = datetime.date(2000, 1, 1) + datetime.timedelta(days=(doy - 1))
+        date = datetime.date(2000, 1, 1) + datetime.timedelta(days=doy - 1)
         if date.day in [1, 15]:
             yticks.append(doy)
             yticklabels.append(date.strftime("%-d %b"))
@@ -202,7 +203,7 @@ def plotter(fdict):
         va="bottom",
         transform=ax[1].transAxes,
     )
-    ax[1].set_ylim(bottom=(ax[1].get_ylim()[0] - 10))
+    ax[1].set_ylim(bottom=ax[1].get_ylim()[0] - 10)
 
     p3col = "spring_length" if season == "spring" else "fall_length"
     slp, intercept, r, _, _ = stats.linregress(df2.index.values, df2[p3col])
@@ -221,7 +222,7 @@ def plotter(fdict):
         va="bottom",
         transform=ax[2].transAxes,
     )
-    ax[2].set_ylim(bottom=(ax[2].get_ylim()[0] - 15))
+    ax[2].set_ylim(bottom=ax[2].get_ylim()[0] - 15)
 
     return fig, df
 

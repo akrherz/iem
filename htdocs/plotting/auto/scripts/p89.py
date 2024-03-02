@@ -17,10 +17,11 @@ import numpy as np
 import pandas as pd
 from metpy.units import units
 from pyiem import iemre, reference
+from pyiem.database import get_sqlalchemy_conn
 from pyiem.exceptions import NoDataFound
 from pyiem.grid.zs import CachingZonalStats
 from pyiem.plot import figure
-from pyiem.util import get_autoplot_context, get_sqlalchemy_conn, ncopen
+from pyiem.util import get_autoplot_context, ncopen
 
 
 def get_description():
@@ -115,7 +116,7 @@ def get_data(ctx):
         ctx["iowapts"] = float(np.sum(np.where(hasdata > 0, 1, 0)))
 
         now = datetime.datetime(ctx["year"], 1, 1)
-        now += datetime.timedelta(days=(ctx["period"] - 1))
+        now += datetime.timedelta(days=ctx["period"] - 1)
         ets = datetime.datetime(ctx["year"], 12, 31)
         today = datetime.datetime.now()
         if ets > today:

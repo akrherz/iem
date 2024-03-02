@@ -269,7 +269,7 @@ def replace_cfs(df, location):
     # OK, if our last row does not equal dec31, we have some more work to do
     LOG.info("Replacing %s->%s with previous year's data", now, dec31)
     while now <= dec31:
-        lastyear = now.replace(year=(now.year - 1))
+        lastyear = now.replace(year=now.year - 1)
         df.loc[now, rcols] = df.loc[lastyear, rcols]
         now += datetime.timedelta(days=1)
 

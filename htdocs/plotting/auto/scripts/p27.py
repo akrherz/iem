@@ -10,9 +10,10 @@ import datetime
 
 import numpy as np
 import pandas as pd
+from pyiem.database import get_sqlalchemy_conn
 from pyiem.exceptions import NoDataFound
 from pyiem.plot import figure_axes
-from pyiem.util import get_autoplot_context, get_sqlalchemy_conn
+from pyiem.util import get_autoplot_context
 from scipy.stats import linregress
 
 
@@ -84,7 +85,7 @@ def plotter(fdict):
     ax.scatter(doy, doy2 - doy)
 
     for x in xticks:
-        ax.plot((x - 100, x), (100, 0), ":", c=("#000000"))
+        ax.plot((x - 100, x), (100, 0), ":", c="#000000")
 
     h_slope, intercept, r_value, _, _ = linregress(
         df["t1_doy"].values, df["t2_doy"].values - df["t1_doy"].values

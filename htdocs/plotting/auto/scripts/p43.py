@@ -11,10 +11,11 @@ import matplotlib.dates as mdates
 import pandas as pd
 from matplotlib import ticker
 from metpy.units import units
+from pyiem.database import get_sqlalchemy_conn
 from pyiem.exceptions import NoDataFound
 from pyiem.plot import figure
 from pyiem.plot.use_agg import plt
-from pyiem.util import get_autoplot_context, get_sqlalchemy_conn, utc
+from pyiem.util import get_autoplot_context, utc
 
 PDICT = {
     "default": "Temperatures | Winds | Clouds + Vis",
@@ -197,7 +198,7 @@ def plotter(fdict):
         verticalalignment="bottom",
     )
     if not df2.empty:
-        ax.set_ylim(bottom=(df["dwpf"].min() - 3))
+        ax.set_ylim(bottom=df["dwpf"].min() - 3)
     plt.setp(ax.get_xticklabels(), visible=True)
     date_ticker(ax, ZoneInfo(tzname))
     ax.set_xlim(xmin, xmax)
@@ -274,7 +275,7 @@ def plotter(fdict):
         ax.grid(True)
         vals = (df2["alti"].values * units("inch_Hg")).to(units("hPa")).m
         ax.fill_between(df2.index.values, 0, vals, color="#a16334")
-        ax.set_ylim(bottom=(vals.min() - 1), top=(vals.max() + 1))
+        ax.set_ylim(bottom=(vals.min() - 1), top=vals.max() + 1)
         ax.set_ylabel("Pressure [mb]")
 
     ax.set_xlim(xmin, xmax)
