@@ -12,6 +12,7 @@ of the statistical metric being computed.  For example, if the climatology
 accumation is 2 inches, the max negative departure can only be two
 inches.</p>
 """
+
 import calendar
 
 import pandas as pd

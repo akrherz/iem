@@ -1,7 +1,8 @@
 """
- Generate and email a report to the IASS folks with summarized IEM estimated
- COOP data included...
+Generate and email a report to the IASS folks with summarized IEM estimated
+COOP data included...
 """
+
 import datetime
 import smtplib
 import sys

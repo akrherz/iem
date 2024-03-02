@@ -1,6 +1,7 @@
 """
- Placefile for DOT trucks and webcam images
+Placefile for DOT trucks and webcam images
 """
+
 import datetime
 
 from pyiem.util import get_dbconn

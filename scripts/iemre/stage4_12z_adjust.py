@@ -5,6 +5,7 @@ No need to run for previous days as PRISM is available.
 Called from:
   RUN_NOON.sh and RUN_0Z.sh for today.
 """
+
 import datetime
 import os
 import sys

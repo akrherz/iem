@@ -1,5 +1,5 @@
-"""Iowa RWIS station plot!
-"""
+"""Iowa RWIS station plot!"""
+
 import datetime
 
 from pyiem.plot import MapPlot

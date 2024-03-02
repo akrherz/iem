@@ -1,4 +1,5 @@
 """Download MOS data."""
+
 from io import BytesIO, StringIO
 
 import pandas as pd

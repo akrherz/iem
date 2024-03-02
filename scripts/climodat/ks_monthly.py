@@ -3,6 +3,7 @@ Need something to generate a kitchen sink report of Climate Data
 
 Called from climodat/run.sh
 """
+
 import datetime
 import os
 import sys

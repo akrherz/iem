@@ -3,6 +3,7 @@
 Run from `RUN_12Z.sh` for previous day
 Run from `RUN_20_AFTER.sh` for current day
 """
+
 import datetime
 import sys
 from zoneinfo import ZoneInfo

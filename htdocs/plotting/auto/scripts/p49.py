@@ -8,6 +8,7 @@ date during the year 2001 is used.</p>
 threshold to happen.  Please be sure to review the aggregate function that
 you want used over this period of days.
 """
+
 import datetime
 
 import matplotlib.dates as mdates

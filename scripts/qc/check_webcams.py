@@ -1,6 +1,7 @@
 """
 Check to see if there are webcams offline, generate emails and such
 """
+
 import datetime
 import os
 import stat

@@ -14,6 +14,7 @@ included on the plot to estimate the climatological favored period for the
 given event type.  This algorithm is experimental and attempts to make life
 choices on if it thinks the climatology is bimodal or not.  Feedback welcome!
 """
+
 import calendar
 
 import pandas as pd

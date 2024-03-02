@@ -5,6 +5,7 @@ having the last spring temperature at or below a given threshold.
 <p><a href="/plotting/auto/?q=119">Autoplot 119</a> is closely related to this
 autoplot and presents the fall season values.</p>
 """
+
 import datetime
 
 import matplotlib.dates as mdates

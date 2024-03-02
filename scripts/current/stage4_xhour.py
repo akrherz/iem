@@ -1,6 +1,7 @@
 """
 Create a variable X hour plot of stage IV estimates
 """
+
 import datetime
 import sys
 from zoneinfo import ZoneInfo

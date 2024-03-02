@@ -1,4 +1,5 @@
-"""Generate the yearly PRISM file to hold our data """
+"""Generate the yearly PRISM file to hold our data"""
+
 import datetime
 import os
 import sys

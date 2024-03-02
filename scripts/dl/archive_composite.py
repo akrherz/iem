@@ -1,4 +1,5 @@
 """Regenerate composites to fulfill various reasons."""
+
 import datetime
 import subprocess
 import sys

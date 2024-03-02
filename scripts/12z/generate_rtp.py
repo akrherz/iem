@@ -1,6 +1,7 @@
 """
 Generate a RTP product for the weather bureau.
 """
+
 import datetime
 import os
 import subprocess

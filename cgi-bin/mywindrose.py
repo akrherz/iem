@@ -4,6 +4,7 @@ Generate a PNG windrose based on the CGI parameters, called from
     htdocs/sites/dyn_windrose.phtml
     htdocs/sites/windrose.phtml
 """
+
 import datetime
 from io import BytesIO
 from zoneinfo import ZoneInfo

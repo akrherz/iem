@@ -5,6 +5,7 @@ month and year.
 <p><a href="?q=210">Autoplot 210</a> presents a map of issuance counts
 for all Weather Forecast Offices.</p>
 """
+
 import calendar
 
 import numpy as np

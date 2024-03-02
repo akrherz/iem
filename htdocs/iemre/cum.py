@@ -1,4 +1,5 @@
 """Fun."""
+
 import datetime
 import json
 import tempfile

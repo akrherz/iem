@@ -1,4 +1,5 @@
 """Generate a plot of SDD"""
+
 import datetime
 import sys
 

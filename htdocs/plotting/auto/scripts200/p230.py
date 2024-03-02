@@ -5,6 +5,7 @@ date of a given SPC outlook threshold as per IEM unofficial archives.
 <p>Note that the probability data can get a little wonky with the changing
 usage of levels with time.
 """
+
 import datetime
 
 import pandas as pd

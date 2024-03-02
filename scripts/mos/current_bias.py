@@ -1,4 +1,5 @@
 """Analysis of current MOS temperature bias."""
+
 import sys
 from zoneinfo import ZoneInfo
 

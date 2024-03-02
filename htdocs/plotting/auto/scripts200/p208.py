@@ -20,6 +20,7 @@ total inclusion of any zones/counties that were added to the alert.
 </ul>
 </p>
 """
+
 from datetime import timezone
 from zoneinfo import ZoneInfo
 

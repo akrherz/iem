@@ -1,7 +1,8 @@
 """Provide an UTC hour's worth of METARs
 
- Called from nowhere known at the moment
+Called from nowhere known at the moment
 """
+
 import datetime
 import sys
 from io import StringIO

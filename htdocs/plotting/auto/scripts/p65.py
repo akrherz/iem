@@ -3,6 +3,7 @@ This plot displays the frequency of a given day
 in the month having the coldest high or low temperature of that month for
 a year.
 """
+
 import calendar
 import datetime
 

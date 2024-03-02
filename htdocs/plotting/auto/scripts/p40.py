@@ -7,6 +7,7 @@ of overcast, it can no longer sense clouds above that level.  So while the
 chart will indicate cloudiness up to the top, it may not have been like
 that in reality.
 """
+
 import datetime
 
 import numpy as np

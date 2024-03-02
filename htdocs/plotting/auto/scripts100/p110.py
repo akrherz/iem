@@ -2,6 +2,7 @@
 This plot presents the weekly percentage of
 precipitation events within a given rainfall bin.
 """
+
 import datetime
 from calendar import month_abbr
 

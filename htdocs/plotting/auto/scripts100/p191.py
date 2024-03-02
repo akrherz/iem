@@ -11,6 +11,7 @@ plotting a given state.
 <p>You can also generate this plot considering "ALL" NWS Offices, when
 doing so the time zone used to compute the calendar dates is US Central.
 """
+
 import datetime
 
 import pandas as pd

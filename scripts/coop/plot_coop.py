@@ -1,4 +1,5 @@
 """Plot of Precip reports"""
+
 import datetime
 
 from pyiem.plot import MapPlot

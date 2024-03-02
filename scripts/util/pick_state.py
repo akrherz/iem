@@ -1,4 +1,5 @@
 """Pick a state to run."""
+
 import datetime
 
 from pyiem.reference import state_names

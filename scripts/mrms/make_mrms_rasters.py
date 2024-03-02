@@ -1,9 +1,10 @@
 """
- Generate a raster of XXhour precipitation totals from MRMS
+Generate a raster of XXhour precipitation totals from MRMS
 
- run from RUN_10_AFTER.sh
+run from RUN_10_AFTER.sh
 
 """
+
 import datetime
 import gzip
 import json

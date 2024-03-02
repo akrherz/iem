@@ -2,6 +2,7 @@
   Check to make sure the station metadata is reasonable!
 called from RUN_MIDNIGHT.sh
 """
+
 from pyiem.util import get_dbconn, logger
 
 LOG = logger()

@@ -6,6 +6,7 @@ month had snowcover.  There
 are a number of caveats due to the timing of the daily temperature and
 snow cover report.  Also with the quality of the snow cover data.
 """
+
 import calendar
 
 import numpy as np

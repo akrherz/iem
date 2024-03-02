@@ -2,6 +2,7 @@
 This autoplot is a bit of a catch-all for mapping event counts at a WFO or
 CWSU map unit.  These are events that do not have VTEC.
 """
+
 import datetime
 
 import pandas as pd

@@ -2,6 +2,7 @@
 This plot is not meant for interactive use, but a backend for
 NWEM plots.
 """
+
 from zoneinfo import ZoneInfo
 
 # third party

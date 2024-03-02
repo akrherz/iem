@@ -8,6 +8,7 @@ this period of record information comes from a nearby weather station. This
 informatiom also provides the coldest high temperature and warmest low
 temperature, both of which are not found within the raw CLI text product.
 """
+
 # Local
 from dataclasses import dataclass
 from datetime import date, timedelta

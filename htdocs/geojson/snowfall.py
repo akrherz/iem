@@ -1,4 +1,5 @@
-""" Produce geojson of Snowfall data """
+"""Produce geojson of Snowfall data"""
+
 import datetime
 import json
 

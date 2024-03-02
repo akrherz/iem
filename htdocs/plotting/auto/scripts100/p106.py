@@ -5,6 +5,7 @@ distributions are presented as "violins" with the width of the violin
 providing some insight into the population density at the given
 temperature.
 """
+
 import datetime
 
 from pyiem.exceptions import NoDataFound

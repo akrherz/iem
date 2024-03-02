@@ -2,6 +2,7 @@
 
 Run from RUN_12Z.sh, RUN_0Z.sh for past 48 hours of data
 """
+
 import sys
 from datetime import date
 

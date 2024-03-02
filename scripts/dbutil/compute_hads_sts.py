@@ -2,6 +2,7 @@
 
 called from windrose/daily_drive_network.py
 """
+
 import datetime
 import sys
 

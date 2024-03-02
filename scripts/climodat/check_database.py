@@ -3,6 +3,7 @@ Rectify climodat database entries.
 
 called from RUN_CLIMODAT_STATE.sh
 """
+
 from io import StringIO
 
 import click

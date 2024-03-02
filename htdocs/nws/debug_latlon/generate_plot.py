@@ -1,4 +1,5 @@
 """Generate a pretty plot, please."""
+
 # stdlib
 import json
 import os

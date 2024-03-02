@@ -4,6 +4,7 @@ temperature at or above a given threshold.  You can optionally generate
 this plot for the year to date period.  The present year is not used for
 the computation of the average nor minimum value.
 """
+
 import datetime
 
 import pandas as pd

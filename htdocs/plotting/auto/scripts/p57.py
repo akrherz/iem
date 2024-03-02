@@ -3,6 +3,7 @@ This plot displays the monthly records or climatology for
 a station of your choice.  The current month for the current day is not
 considered for the analysis, except for total precipitation.
 """
+
 import calendar
 import datetime
 

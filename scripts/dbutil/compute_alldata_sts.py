@@ -5,6 +5,7 @@ query plan.  So we iterate over t<year> tables.
 
 called from daily_drive_network.py for {asos,rwis}
 """
+
 import datetime
 import sys
 

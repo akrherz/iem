@@ -2,6 +2,7 @@
 This application totals growing degree days by
 month and year.
 """
+
 import datetime
 
 import numpy as np

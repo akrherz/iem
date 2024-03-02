@@ -1,4 +1,5 @@
 """Compare the REST service with our current database."""
+
 import datetime
 
 import requests

@@ -1,4 +1,5 @@
 """Generate analysis of Peak Wind Gust."""
+
 import datetime
 import os
 import subprocess

@@ -6,6 +6,7 @@ If hour and minute are omitted, this is a daily copy, otherwise hourly.
 
 see: akrherz/iem#199
 """
+
 import datetime
 import sys
 import warnings

@@ -5,6 +5,7 @@ reporting anything he finds after an investigation.
 
 called from RUN_MIDNIGHT.sh
 """
+
 import datetime
 
 from pyiem.database import get_dbconn

@@ -9,6 +9,7 @@ available at this time.
 date, the logic then has the period cross the 1 January boundary.  For
 example, a period between Dec 15 and Jan 15 will be computed.</p>
 """
+
 import calendar
 import datetime
 

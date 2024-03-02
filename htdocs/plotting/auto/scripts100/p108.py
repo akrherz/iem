@@ -6,6 +6,7 @@ are not considered for this plot. The light blue area represents the
 range of accumulated values based on the observation history at the
 site.
 """
+
 import datetime
 
 import numpy as np

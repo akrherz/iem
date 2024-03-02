@@ -6,12 +6,14 @@ somewhat sloppy day-of-year logic that does not necessarily align leap years.
 <p>If you split the year on 1 July, the plotted season represents the 1 July
 year. ie 1 July 2023 - 30 Jun 2024 plots as 2023.</p>
 """
+
 import datetime
 
 import pandas as pd
+from pyiem.database import get_sqlalchemy_conn
 from pyiem.exceptions import NoDataFound
 from pyiem.plot import figure_axes
-from pyiem.util import get_autoplot_context, get_sqlalchemy_conn
+from pyiem.util import get_autoplot_context
 from sqlalchemy import text
 
 PDICT = {
@@ -97,7 +99,7 @@ def highcharts(fdict):
     ranges = []
     thisyear = []
     for doy, row in df.iterrows():
-        ts = datetime.date(2000, 1, 1) + datetime.timedelta(days=(doy - 1))
+        ts = datetime.date(2000, 1, 1) + datetime.timedelta(days=doy - 1)
         ticks = (ts - datetime.date(1970, 1, 1)).total_seconds() * 1000.0
         avgs.append([ticks, row["avg"]])
         ranges.append([ticks, row["min"], row["max"]])

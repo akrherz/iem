@@ -6,6 +6,7 @@ are rounded forward in time such that an observation at :54 after the
 hour is moved to the top of the hour.  This autoplot attempts to consider only
 one observation per hour.
 """
+
 import calendar
 from zoneinfo import ZoneInfo
 

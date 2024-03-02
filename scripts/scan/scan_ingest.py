@@ -2,6 +2,7 @@
 
 The data is provided in a standard local timestamp, yikes.
 """
+
 import datetime
 import sys
 from zoneinfo import ZoneInfo

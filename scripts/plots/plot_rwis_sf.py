@@ -1,4 +1,5 @@
 """Plot of current RWIS surface temperatures"""
+
 import datetime
 
 import numpy as np

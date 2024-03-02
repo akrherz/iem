@@ -17,6 +17,7 @@ season. Caveat emptor.</p>
 <p><a href="/plotting/auto/?q=120">Autoplot 120</a> is closely related to this
 autoplot and presents the spring season values.</p>
 """
+
 import datetime
 
 import matplotlib.dates as mdates

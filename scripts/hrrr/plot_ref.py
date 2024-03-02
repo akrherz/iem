@@ -3,6 +3,7 @@ Generate an animated GIF of HRRR forecasted 1km reflectivity
 
 Run from RUN_40AFTER.sh and for the previous hour's HRRR run
 """
+
 import datetime
 import os
 import subprocess

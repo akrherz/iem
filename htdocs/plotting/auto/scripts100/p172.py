@@ -15,6 +15,7 @@ to 30 Sep 2021.</p>
 you do it!  The app has a tight requirement of no less than 3 days of
 missing data for the year to be considered in the plot.</p>
 """
+
 import datetime
 
 import pandas as pd

@@ -5,6 +5,7 @@ components.  The bottom panel is the simple average of the wind speed
 magnitude.  The plotted information contains a seven day smoother.  If you
 download the raw data, it will not contain this smoothing.
 """
+
 import calendar
 import datetime
 

@@ -3,6 +3,7 @@ This plot presents a summary of the number of year
 to date watches issued by the Storm Prediction Center and the percentage
 of those watches that at least touched the given state.
 """
+
 import datetime
 
 import matplotlib.ticker as ticker

@@ -1,6 +1,7 @@
 """
- Dump a CSV file of the MADIS data, kind of sad that I do this, but alas
+Dump a CSV file of the MADIS data, kind of sad that I do this, but alas
 """
+
 import datetime
 import os
 import subprocess

@@ -4,6 +4,7 @@ as a image.  Each box represents an individual day's report with the
 color denoting the amount.  Values in light gray are missing in the
 database.
 """
+
 import copy
 import datetime
 

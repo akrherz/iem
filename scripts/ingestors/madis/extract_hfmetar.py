@@ -3,6 +3,7 @@
 Run from RUN_10MIN.sh
 Run from RUN_40_AFTER.sh for two hours ago
 """
+
 import datetime
 import os
 import sys

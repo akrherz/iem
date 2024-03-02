@@ -4,6 +4,7 @@ events that are just below severe limits and/or not covered by other
 headline products.  Sometimes these SPS products have polygons.  This
 app provides a monthly total of the number of such SPS products.
 """
+
 import calendar
 
 import numpy as np

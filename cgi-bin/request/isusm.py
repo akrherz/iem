@@ -1,4 +1,5 @@
 """Download interface for ISU-SM data."""
+
 import datetime
 from io import BytesIO, StringIO
 from zoneinfo import ZoneInfo

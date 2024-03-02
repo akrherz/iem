@@ -1,4 +1,5 @@
 """Dump AIRMETs."""
+
 # Local
 import tempfile
 import zipfile

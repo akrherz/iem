@@ -1,4 +1,5 @@
 """Ingest the RWIS rainwise data"""
+
 import datetime
 from io import StringIO
 from zoneinfo import ZoneInfo

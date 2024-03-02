@@ -7,6 +7,7 @@ Period of performance is previous month 7th thru this month 6th
 Run on the 7th from `RUN_2AM.sh`
 
 """
+
 import datetime
 import smtplib
 from email.mime.text import MIMEText

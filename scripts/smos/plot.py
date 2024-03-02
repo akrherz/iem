@@ -1,4 +1,5 @@
 """Create a plot of SMOS data for either 0 or 12z"""
+
 import datetime
 import sys
 import warnings

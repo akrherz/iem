@@ -5,6 +5,7 @@ days worth of data into /mesonet/tmp/gfs/
 
 RUN from RUN_20_AFTER.sh
 """
+
 import datetime
 import os
 import sys

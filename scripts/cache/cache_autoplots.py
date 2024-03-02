@@ -1,4 +1,5 @@
 """Run hourly to ensure somethings are cached."""
+
 # third party
 import requests
 from pyiem.util import logger

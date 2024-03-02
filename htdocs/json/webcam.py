@@ -1,6 +1,7 @@
 """
 JSON webservice providing timestamps of available webcam images
 """
+
 import datetime
 import json
 from zoneinfo import ZoneInfo

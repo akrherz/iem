@@ -1,6 +1,7 @@
 """
 Download NASS Iowa data.
 """
+
 from io import BytesIO
 
 import pandas as pd

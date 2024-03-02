@@ -7,6 +7,7 @@ that year with 1 indicating the largest.  The values following the LSR
 event type in parenthesis are the raw LSR counts for that year. You need
 to graph at least two years worth of data to make this plot type work.
 """
+
 import datetime
 
 import numpy as np

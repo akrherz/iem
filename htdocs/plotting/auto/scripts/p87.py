@@ -6,6 +6,7 @@ favorite METAR code is not available in the listing, please let us know!
 If multiple reports occurred within the same hour during one day/week,
 it would only count as one in this analysis.
 """
+
 import calendar
 import datetime
 

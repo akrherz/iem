@@ -12,6 +12,7 @@ long term COOP data.
 <p><strong>Updated 27 Aug 2023:</strong> The API for this autoplot was changed
 to use a more user friendly start and end date.
 """
+
 import datetime
 
 import numpy as np

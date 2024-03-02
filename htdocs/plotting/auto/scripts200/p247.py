@@ -27,6 +27,7 @@ Central Region NWS maintains a
 <p><a href="/plotting/auto/?q=224">Autoplot 224</a> is closely related to
 this app and provides a table of stats.</p>
 """
+
 from datetime import timezone
 from io import StringIO
 

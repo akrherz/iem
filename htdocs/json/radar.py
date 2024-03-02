@@ -1,14 +1,16 @@
 """
 Return JSON metadata for nexrad information
 """
+
 import datetime
 import glob
 import json
 import os.path
 
+from pyiem.database import get_dbconn
 from pyiem.exceptions import BadWebRequest
 from pyiem.reference import ISO8601
-from pyiem.util import get_dbconn, html_escape
+from pyiem.util import html_escape
 from pyiem.webutil import iemapp
 
 NIDS = {
@@ -118,7 +120,7 @@ def find_scans(root, radar, product, sts, ets):
     times = []
     if radar in ["USCOMP"]:
         # These are every 5 minutes, so 288 per day
-        now -= datetime.timedelta(minutes=(now.minute % 5))
+        now -= datetime.timedelta(minutes=now.minute % 5)
         while now < ets:
             if os.path.isfile(
                 now.strftime(

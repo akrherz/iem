@@ -5,6 +5,7 @@ The simple average is presented along with the percentile intervals. When
 plotting the after 1 July period, the calendar year of the fall season
 is shown.  For example, 1 Jul 2019 to 30 Jun 2020 is 2019 for this plot.
 """
+
 import calendar
 import datetime
 

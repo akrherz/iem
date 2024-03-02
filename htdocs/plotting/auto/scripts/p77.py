@@ -4,6 +4,7 @@ a given temperature is computed.  The values are then averaged and plotted
 to represent the period between these occurences and also the number of
 days represented by the period.
 """
+
 import calendar
 import datetime
 

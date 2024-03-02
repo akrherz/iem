@@ -5,6 +5,7 @@ reason.  The main data estimator is found at `daily_estimator.py`.
 
 This script utilizes the IEMRE web service to provide data.
 """
+
 import sys
 
 import pandas as pd

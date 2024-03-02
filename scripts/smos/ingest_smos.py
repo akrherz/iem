@@ -1,4 +1,5 @@
 """Ingest SMOS data, please!"""
+
 import datetime
 import glob
 import os

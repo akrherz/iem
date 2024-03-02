@@ -6,6 +6,7 @@ does not properly account for the trailing period of precipitation during
 the first few days of January.  This application only works for CONUS
 states eventhough it presents non-CONUS states as an option, sorry.
 """
+
 import datetime
 import os
 

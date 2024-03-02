@@ -1,4 +1,5 @@
 """Test any mod_wsgi apps in this repo."""
+
 import os
 
 import pytest

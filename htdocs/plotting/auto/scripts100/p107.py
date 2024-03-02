@@ -15,6 +15,7 @@ data in order to be included within the plot.
 <p><strong>Updated 12 Oct 2023:</strong> The API for this autoplot was changed
 to use a more user friendly start and end date.
 """
+
 import datetime
 
 import numpy as np

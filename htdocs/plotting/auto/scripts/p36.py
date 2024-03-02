@@ -2,6 +2,7 @@
 This plot summarizes the frequency of one month
 being warmer than another month for that calendar year.
 """
+
 import calendar
 import datetime
 

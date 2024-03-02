@@ -8,6 +8,7 @@ zones, you may need to try twice to get the proper one selected.
 <p><a href="/plotting/auto/?q=72">Autoplot 72</a> is similar to this, but
 plots for a single WFO at a time.
 """
+
 import numpy as np
 import pandas as pd
 from pyiem.exceptions import NoDataFound

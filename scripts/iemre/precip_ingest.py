@@ -1,8 +1,9 @@
 """Ingest Stage IV Hourly Files.
 
-    1. Copies to hourly stage IV netCDF files
-    2. Copies hourly stage IV netCDF to hourly IEMRE
+1. Copies to hourly stage IV netCDF files
+2. Copies hourly stage IV netCDF to hourly IEMRE
 """
+
 import datetime
 import os
 

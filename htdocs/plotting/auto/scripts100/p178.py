@@ -19,6 +19,7 @@ web service that provides the raw values.</p>
 <p>For dates before 1 Jan 2019, this dataset is based on IEM processing
 of county/zone based FFG guidance found in the FFG text products.
 """
+
 import datetime
 from zoneinfo import ZoneInfo
 
@@ -181,7 +182,7 @@ def plotter(fdict):
         )
     else:
         # use grib data
-        ts -= datetime.timedelta(hours=(ts.hour % 6))
+        ts -= datetime.timedelta(hours=ts.hour % 6)
         ts = ts.replace(minute=0)
         lats = None
         for offset in range(0, 24, 4):

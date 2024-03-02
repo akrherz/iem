@@ -8,6 +8,7 @@ over some given number of days.  The intention is to answer a question like
 how much of the rain on a given day fell on an area that needed it!  The
 areal coverage percentages are relative to the given state.
 """
+
 import datetime
 import os
 

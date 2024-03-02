@@ -1,4 +1,5 @@
-""" Feature Voting"""
+"""Feature Voting"""
+
 import datetime
 import json
 from http.cookies import SimpleCookie

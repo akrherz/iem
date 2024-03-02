@@ -1,4 +1,5 @@
-""" Produce geojson of CLI data """
+"""Produce geojson of CLI data"""
+
 import datetime
 
 import simplejson as json

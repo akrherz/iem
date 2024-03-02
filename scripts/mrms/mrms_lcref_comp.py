@@ -1,6 +1,7 @@
 """
- Generate a composite of the MRMS Lowest Composite Reflectvity
+Generate a composite of the MRMS Lowest Composite Reflectvity
 """
+
 import datetime
 import gzip
 import json

@@ -1,6 +1,7 @@
 """
- Generate the dailyb spam, run from RUN_12Z.sh
+Generate the dailyb spam, run from RUN_12Z.sh
 """
+
 import datetime
 import os
 import re

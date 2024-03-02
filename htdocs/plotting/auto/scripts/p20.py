@@ -4,6 +4,7 @@ observations each month that reported measurable precipitation.  Sites
 are able to report trace amounts, but those reports are not considered
 in hopes of making the long term climatology comparable.
 """
+
 import calendar
 import datetime
 

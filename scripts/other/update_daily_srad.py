@@ -2,6 +2,7 @@
 
 Run from: RUN_MIDNIGHT.sh
 """
+
 import sys
 from datetime import timedelta
 

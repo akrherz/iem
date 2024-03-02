@@ -1,4 +1,5 @@
-""" ASI Data Timeseries """
+"""ASI Data Timeseries"""
+
 import datetime
 from io import BytesIO
 from zoneinfo import ZoneInfo

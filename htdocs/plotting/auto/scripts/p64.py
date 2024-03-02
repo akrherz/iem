@@ -7,6 +7,7 @@ this plot.
 <p>For a `Trace` snowfall event to count, the coincident low temperature needs
 to be below 40F. This is to help filter out hail events.</p>
 """
+
 import calendar
 import datetime
 

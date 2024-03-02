@@ -4,6 +4,7 @@ URIs look like so:
     /live.py?id=KCRG-006
     /live/KCRG-006.jpg
 """
+
 import datetime
 from io import BytesIO
 

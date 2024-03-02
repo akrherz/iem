@@ -10,6 +10,7 @@ minute interval samples, so these will not fully capture the actual high nor
 low temperature.  When the 15 minute data is available, it should certainly
 do a better job than the hourly.
 """
+
 from datetime import timedelta
 
 import matplotlib.colors as mpcolors

@@ -4,6 +4,7 @@ Progress report variable.  The units of the change are expressed as percentage
 points and not a true percentage.  For example, if the first value was 30% and
 the next value was 50%, the change in percentage points is 20.
 """
+
 import datetime
 
 import matplotlib.colors as mpcolors

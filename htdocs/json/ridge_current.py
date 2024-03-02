@@ -1,6 +1,7 @@
 """
- Aggregate the RIDGE current files
+Aggregate the RIDGE current files
 """
+
 import datetime
 import glob
 import json

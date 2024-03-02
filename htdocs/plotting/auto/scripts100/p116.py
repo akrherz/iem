@@ -4,6 +4,7 @@ or heating degree days for a 20 year period of your choice.  The 20 year
 limit is for plot usability only, the data download has all available
 years contained.
 """
+
 import datetime
 
 import pandas as pd

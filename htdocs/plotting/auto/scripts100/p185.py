@@ -5,6 +5,7 @@ based on progressing daily back in time for up to 90 days to accumulate
 the specified amount.  This plot will take some time to generate, so please
 be patient with it!
 """
+
 import datetime
 import os
 

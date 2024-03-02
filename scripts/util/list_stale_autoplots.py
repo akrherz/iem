@@ -1,4 +1,5 @@
 """Look into which autoplots have not been used in a while"""
+
 import re
 
 import pandas as pd

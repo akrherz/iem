@@ -1,4 +1,5 @@
 """Consume a REST service of DOT Snowplow locations and data."""
+
 import datetime
 import json
 

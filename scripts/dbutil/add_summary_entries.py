@@ -1,4 +1,5 @@
 """Initialize entries in the IEM summary table"""
+
 import datetime
 import sys
 

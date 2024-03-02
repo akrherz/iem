@@ -1,4 +1,5 @@
 """Download Interface for RWIS data"""
+
 # pylint: disable=abstract-class-instantiated
 from io import BytesIO, StringIO
 

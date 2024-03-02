@@ -2,6 +2,7 @@
 
 Run for a previous date from RUN_2AM.sh
 """
+
 import datetime
 import sys
 

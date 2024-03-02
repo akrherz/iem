@@ -17,6 +17,7 @@ Not listed due to having no PNG output
 111, 112, 114, 115, 117, 118, 121, 122, 123, 124, 141, 143
 
 """
+
 # Association of plots
 daily_opts = [
     {

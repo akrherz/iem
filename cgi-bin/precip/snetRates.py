@@ -1,4 +1,5 @@
 """Legacy stuff."""
+
 import datetime
 from io import StringIO
 from zoneinfo import ZoneInfo

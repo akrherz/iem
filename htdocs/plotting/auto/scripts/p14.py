@@ -5,6 +5,7 @@ total.  Using these 5 bins, an individual year's worth of data is
 compared.  With this comparison, you can say that one's years worth of
 departures can be explained by these differences in precipitation bins.
 """
+
 import datetime
 
 import numpy as np

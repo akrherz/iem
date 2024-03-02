@@ -2,6 +2,7 @@
 
 Called from run_plots.sh
 """
+
 # pylint: disable=unbalanced-tuple-unpacking
 import datetime
 import sys

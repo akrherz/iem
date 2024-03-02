@@ -1,6 +1,7 @@
 """
 Simple plot of seasonal/yearly precipitation totals.
 """
+
 import datetime
 
 import numpy as np

@@ -1,6 +1,7 @@
 """
 Return JSON metadata for GOES Imagery
 """
+
 import datetime
 import glob
 import json

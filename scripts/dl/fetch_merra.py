@@ -15,6 +15,7 @@ SWGDN       surface incoming shortwave flux
 SWGDNCLR    surface incoming shortwave flux assuming clear sky
 
 """
+
 import datetime
 import os
 import subprocess

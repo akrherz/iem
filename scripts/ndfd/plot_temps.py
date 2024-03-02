@@ -1,4 +1,5 @@
 """Generate some plots."""
+
 import datetime
 import sys
 

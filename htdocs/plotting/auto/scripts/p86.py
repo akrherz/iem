@@ -6,6 +6,7 @@ between 6 UTC to 6 UTC, which is Central Standard Time all year round.</p>
 <p><a href="/plotting/auto/?q=249">Autoplot 249</a> is the hourly
 variant of this plot.
 """
+
 import datetime
 import os
 

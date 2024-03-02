@@ -2,6 +2,7 @@
 This map displays an analysis of the change in
 average high or low temperature over a time period of your choice.
 """
+
 import datetime
 
 import pandas as pd

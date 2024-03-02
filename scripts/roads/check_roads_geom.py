@@ -1,6 +1,6 @@
 """Use the REST service to setup any new segments for the new season
 
- * JSON data is in 3857
+* JSON data is in 3857
 """
 
 import requests

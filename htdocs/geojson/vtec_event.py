@@ -1,4 +1,5 @@
 """GeoJSON source for VTEC event"""
+
 import datetime
 
 import simplejson as json

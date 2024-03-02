@@ -1,4 +1,5 @@
-""" JSON service providing PRISM data for a given point """
+"""JSON service providing PRISM data for a given point"""
+
 import datetime
 import json
 import os

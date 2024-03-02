@@ -13,6 +13,7 @@ considers the wall clock issuance time of the watch as the start time
 and the wall clock time when the watch was either cancelled or upgraded.
 In this case, both lines are presented as equal.
 """
+
 import numpy as np
 import pandas as pd
 import pyiem.nws.vtec as vtec

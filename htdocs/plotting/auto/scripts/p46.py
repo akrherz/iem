@@ -5,6 +5,7 @@ record for the observation site.  Please note that this application
 requires the feels like temperature to be additive, so heat index
 greater than air temperature and wind chill less than air temperature.
 """
+
 import datetime
 
 import numpy as np

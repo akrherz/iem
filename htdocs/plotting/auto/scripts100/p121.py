@@ -3,6 +3,7 @@ This report displays the number of cycles between
 two temperature thresholds of your choice.  A cycle representing one
 round trip from below some threshold to above the second threshold.
 """
+
 import datetime
 
 import pandas as pd

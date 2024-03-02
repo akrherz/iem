@@ -1,4 +1,5 @@
 """Support download of ASOS 1 minute data."""
+
 from io import StringIO
 
 from pyiem.exceptions import IncompleteWebRequest

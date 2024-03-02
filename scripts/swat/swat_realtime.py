@@ -9,6 +9,7 @@ We are generating the format directly used by the distrubuted SWAT. Notes:
 
 Run from RUN_2AM.sh
 """
+
 # stdlib
 import glob
 import os

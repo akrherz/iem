@@ -2,6 +2,7 @@
 
 IEM_APPID 92
 """
+
 # pylint: disable=wrong-import-position
 # stdlib
 import calendar
@@ -202,9 +203,9 @@ def ugc_select(state, ugc):
     )
     ar = {}
     for row in cursor:
-        ar[
-            row["ugc"]
-        ] = f"{row['name']} {'(Zone)' if row['ugc'][2] == 'Z' else ''}"
+        ar[row["ugc"]] = (
+            f"{row['name']} {'(Zone)' if row['ugc'][2] == 'Z' else ''}"
+        )
     pgconn.close()
     return make_select("ugc", ugc, ar, cssclass="iemselect2")
 

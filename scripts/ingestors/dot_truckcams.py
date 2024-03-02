@@ -1,8 +1,9 @@
 """
-  Iowa DOT Truck dash camera imagery.  Save this to the IEM archives
+Iowa DOT Truck dash camera imagery.  Save this to the IEM archives
 
-  /YYYY/mm/dd/camera/idot_trucks/keyhash/keyhash_timestamp.jpg
+/YYYY/mm/dd/camera/idot_trucks/keyhash/keyhash_timestamp.jpg
 """
+
 # pylint: disable=unsubscriptable-object
 import datetime
 import json

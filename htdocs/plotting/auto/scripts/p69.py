@@ -4,6 +4,7 @@ was above/below average.  Data is shown for the current year as well, so
 you should consider the representativity of that value when compared with
 other years with a full year's worth of data.
 """
+
 import datetime
 
 import matplotlib.patheffects as PathEffects

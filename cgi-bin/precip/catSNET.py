@@ -1,6 +1,7 @@
 """
 Generate web output for precip data
 """
+
 import datetime
 from io import StringIO
 

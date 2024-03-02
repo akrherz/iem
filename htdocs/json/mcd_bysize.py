@@ -1,4 +1,5 @@
 """SPC MCD service."""
+
 import json
 
 from pyiem.reference import ISO8601

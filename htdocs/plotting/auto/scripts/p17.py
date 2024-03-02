@@ -3,6 +3,7 @@ Daily plot of observed high and low temperatures or precipitation
 along with the daily climatology for the nearest (sometimes same) location.
 The vertical highlighted stripes on the plot are just the weekend dates.
 """
+
 import datetime
 import warnings
 

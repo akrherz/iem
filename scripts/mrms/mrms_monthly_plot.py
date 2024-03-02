@@ -1,4 +1,5 @@
 """Plot monthly MRMS"""
+
 import datetime
 import sys
 

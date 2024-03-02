@@ -1,4 +1,5 @@
 """Copy the provided baseline data to the database"""
+
 import datetime
 import glob
 import os

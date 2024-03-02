@@ -19,6 +19,7 @@ just the 13z issuance, for example.</p>
 <p>Autoplot <a href="/plotting/auto/?q=248">248</a> is similar, but generates
 chart of days per year by WFO, state.</p>
 """
+
 import datetime
 
 import geopandas as gpd

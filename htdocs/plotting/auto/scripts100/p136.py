@@ -6,6 +6,7 @@ would be from July 2015 to June 2016.  Hours with no wind are included
 in this analysis with the wind chill temperature being the air temperature
 in those instances.
 """
+
 import datetime
 
 import pandas as pd

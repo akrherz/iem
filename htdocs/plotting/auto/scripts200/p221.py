@@ -7,6 +7,7 @@ NEXRAD base reflectivity.
 <p><strong>Caution:</strong> This autoplot is very slow to generate,
 please be patient!
 """
+
 import datetime
 import os
 from io import BytesIO
@@ -91,7 +92,7 @@ def add_forecast(img, ctx, valid, fhour, x, y):
         return
     grbs = pygrib.open(gribfn)
     try:
-        gs = grbs.select(level=1000, forecastTime=(fhour * 60))
+        gs = grbs.select(level=1000, forecastTime=fhour * 60)
     except ValueError:
         grbs.close()
         return

@@ -2,6 +2,7 @@
 
 Called from windrose/daily_drive_network.py
 """
+
 import sys
 
 import requests

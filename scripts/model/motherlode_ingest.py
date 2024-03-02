@@ -1,8 +1,9 @@
 """
- Mine grid point extracted values for our good and the good of the IEM
- Use Unidata's motherlode server :)
+Mine grid point extracted values for our good and the good of the IEM
+Use Unidata's motherlode server :)
 
 """
+
 import datetime
 import sys
 from io import StringIO

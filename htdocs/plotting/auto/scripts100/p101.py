@@ -6,6 +6,7 @@ Severe Thunderstorm Warning covering portions of two counties would
 count as two events in this summary. The values plotted are relative to the
 most frequent product.
 """
+
 import datetime
 
 import numpy as np

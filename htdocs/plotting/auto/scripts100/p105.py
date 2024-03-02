@@ -5,6 +5,7 @@ in between precip events of either greater than 0.01" (labelled no rain)
 and then of a threshold of your choice.  The bottom plot provides the
 maximum 24 hour period precip as reported by the once daily observatons
 """
+
 import calendar
 
 import numpy as np

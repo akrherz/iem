@@ -1,6 +1,7 @@
 """
 Download Interface for HADS data
 """
+
 # pylint: disable=abstract-class-instantiated
 from datetime import timedelta
 from io import BytesIO, StringIO

@@ -1,8 +1,9 @@
 """Ingest the Fisher/Porter rain gage data from NCEI
 
-    Run from RUN_2AM.sh for 3, 6, and 12 months in the past
-    on the 15th each month
+Run from RUN_2AM.sh for 3, 6, and 12 months in the past
+on the 15th each month
 """
+
 import datetime
 import sys
 

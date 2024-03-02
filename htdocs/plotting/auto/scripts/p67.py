@@ -3,6 +3,7 @@ This plot displays the frequency of having a
 reported wind speed be above a given threshold by reported temperature
 and by month.
 """
+
 import calendar
 import datetime
 

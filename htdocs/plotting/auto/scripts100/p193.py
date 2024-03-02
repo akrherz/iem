@@ -3,6 +3,7 @@ Generates a map of WPC Quantitative Precipitation
 Forecast (QPF) and most recent US Drought Monitor to the date choosen to
 plot the WPC forecast
 """
+
 import datetime
 
 import numpy as np

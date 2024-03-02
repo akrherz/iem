@@ -11,6 +11,7 @@ duration of Drought Monitor classfication and due to complexities with
 how the grid analysis is done, the exact pixel location is nebulous.
 Having said that, it should be close!
 """
+
 import datetime
 
 import numpy as np

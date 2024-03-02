@@ -11,6 +11,7 @@ very similiar tool</a> that you may want to check out.</p>
 <p>If you select to plot both 00 and 12 UTC, the climatology is computed
 seperately at 00 and 12 UTC.  The chart gets more noisey when doing so.</p>
 """
+
 import datetime
 
 import matplotlib.dates as mdates
@@ -305,7 +306,7 @@ Highcharts.chart("{containername}", {{
                 tooltip: {{
                     pointFormatter: function() {{
                         var s = '<span style="color:' + this.color +
-                            '">\u25CF</span> '+
+                            '">\u25cf</span> '+
                             this.series.name + ': <b>' + this.low + ' (' +
                             min_years[this.index] +') to ' + this.high + ' ('+
                             max_years[this.index] +')</b><br/>';

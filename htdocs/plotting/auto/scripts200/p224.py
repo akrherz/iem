@@ -31,6 +31,7 @@ to the given timestamp.  This is why we can't have nice things!
 <p><a href="/plotting/auto/?q=247">Autoplot 247</a> is closely related to
 this app and provides a map of WaWa + stats.</p>
 """
+
 from datetime import timezone
 from zoneinfo import ZoneInfo
 

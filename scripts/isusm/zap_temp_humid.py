@@ -1,4 +1,5 @@
 """Properly zap a period of data from the database"""
+
 import datetime
 import subprocess
 import sys

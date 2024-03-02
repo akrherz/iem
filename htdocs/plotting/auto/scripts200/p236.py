@@ -6,6 +6,7 @@ icing (/IC), turbulence (/TB), icing or turbulence and all reports.</p>
 <p>Each chart presents a simple average over the plot and a trailing
 30 day average.
 """
+
 from datetime import date, timedelta
 
 import matplotlib.dates as mdates

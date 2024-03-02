@@ -1,7 +1,8 @@
 """
- Geocoder used by:
-  - IEM Rainfall App
+Geocoder used by:
+ - IEM Rainfall App
 """
+
 from io import StringIO
 
 import requests

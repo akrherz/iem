@@ -12,6 +12,7 @@ and everything during winter is near the bottom.  More understandable
 results are found with shorter time windows of time to compute the
 percentiles.
 """
+
 import datetime
 from zoneinfo import ZoneInfo
 

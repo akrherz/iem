@@ -1,4 +1,5 @@
 """Some simple summary stats for the IEM Daily Bulletin..."""
+
 import datetime
 from zoneinfo import ZoneInfo
 

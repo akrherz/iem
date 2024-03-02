@@ -1,4 +1,5 @@
 """Climodat degree days service."""
+
 import datetime
 import json
 

@@ -1,4 +1,5 @@
-""" Plot the average temperature for the month"""
+"""Plot the average temperature for the month"""
+
 import datetime
 
 import numpy as np

@@ -4,6 +4,7 @@ observed climate variable is observed.  Rewording, what percentage of
 a given year's daily reports at the given threshold range occur within
 the given month and season.
 """
+
 import calendar
 import datetime
 

@@ -1,4 +1,5 @@
 """Create a plot of the X Hour interval precipitation"""
+
 import datetime
 import gzip
 import os

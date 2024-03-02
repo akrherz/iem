@@ -1,4 +1,5 @@
-""" Generate a GeoJSON of current SPS Polygons """
+"""Generate a GeoJSON of current SPS Polygons"""
+
 import datetime
 import json
 

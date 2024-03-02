@@ -1,4 +1,5 @@
 """Generates analysis maps of ASOS station data for a given date."""
+
 import datetime
 
 import geopandas as gpd

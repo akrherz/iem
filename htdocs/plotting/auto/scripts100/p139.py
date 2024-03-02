@@ -11,6 +11,7 @@ temperature change was an increase during the day or decrease.
 <p><a href="/plotting/auto/?q=169">Autoplot 169</a> is similar to this
 plot, but computes the change over arbitrary time windows.</p>
 """
+
 import datetime
 from zoneinfo import ZoneInfo
 

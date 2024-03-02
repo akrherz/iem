@@ -3,6 +3,7 @@ This plot produces the daily frequency of
 a given criterion being meet for a station and month of your choice. The
 number labeled above each bar is the actual number of years.
 """
+
 import calendar
 
 import numpy as np

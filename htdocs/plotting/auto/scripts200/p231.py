@@ -7,6 +7,7 @@ are colorized as green for improvements and red for degradations.
 
 <p>Caution, this chart does take a number of seconds to generate.
 """
+
 import datetime
 
 import pandas as pd

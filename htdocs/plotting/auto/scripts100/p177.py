@@ -2,6 +2,7 @@
 This application generates time series charts using data from the
 ISU Soil Moisture Network.
 """
+
 import datetime
 from zoneinfo import ZoneInfo
 

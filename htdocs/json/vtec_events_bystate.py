@@ -1,4 +1,5 @@
 """Listing of VTEC events for state and year"""
+
 import json
 from io import BytesIO, StringIO
 

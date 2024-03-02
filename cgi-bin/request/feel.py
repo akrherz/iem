@@ -1,4 +1,5 @@
 """FEEL data download"""
+
 # pylint: disable=abstract-class-instantiated
 from io import BytesIO
 

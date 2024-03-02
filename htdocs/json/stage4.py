@@ -1,4 +1,4 @@
-""" JSON service providing hourly Stage IV data for a given point """
+"""JSON service providing hourly Stage IV data for a given point"""
 
 import datetime
 import json

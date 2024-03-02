@@ -5,6 +5,7 @@ are not considered for this plot. The light blue area represents the
 range of accumulated values based on the climatology for the site. The
 climatology is based on the closest nearby long-term climate site.
 """
+
 import datetime
 
 import numpy as np

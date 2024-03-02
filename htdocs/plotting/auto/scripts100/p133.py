@@ -4,6 +4,7 @@ a period prior to a given date and then after the date for the winter
 season.  When you select a date to split the winter season, the year
 shown in the date can be ignored.
 """
+
 import datetime
 
 import pandas as pd

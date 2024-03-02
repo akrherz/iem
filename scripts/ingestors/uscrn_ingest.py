@@ -1,4 +1,5 @@
 """Process the US Climate Reference Network"""
+
 import datetime
 import glob
 import os

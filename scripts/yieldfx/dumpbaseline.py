@@ -1,4 +1,5 @@
 """Dump baseline file as CSV, with GDD computed"""
+
 import datetime
 import glob
 import os
@@ -12,9 +13,10 @@ def main():
     os.chdir("baseline")
     for fn in glob.glob("*.met"):
         location = fn[:-4]
-        with open(f"{location}.csv", "w", encoding="ascii") as fh, open(
-            fn, encoding="ascii"
-        ) as fhh:
+        with (
+            open(f"{location}.csv", "w", encoding="ascii") as fh,
+            open(fn, encoding="ascii") as fhh,
+        ):
             fh.write("date,high[F],low[F],precip[inch],gdd[F]\n")
             for line in fhh:
                 line = line.strip()

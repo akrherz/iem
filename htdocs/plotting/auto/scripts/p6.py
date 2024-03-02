@@ -4,6 +4,7 @@ some monthly metric for single month for all tracked sites within one
 state.  The plot presents the distribution and normalized frequency
 for a specific year and for all years combined for the given month.
 """
+
 # pylint: disable=no-member
 import calendar
 import datetime

@@ -8,6 +8,7 @@ express the evolution of the departures.  Since the plot is bounded by
 physical processes, the plot tends to cycle.  In economics, a classic
 comparable plot to this one is of suply vs demand.
 """
+
 import datetime
 
 import numpy as np

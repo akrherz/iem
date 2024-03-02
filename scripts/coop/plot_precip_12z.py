@@ -1,6 +1,7 @@
 """
- Generate simple plots of 12z COOP preciptiation
+Generate simple plots of 12z COOP preciptiation
 """
+
 import datetime
 import sys
 import warnings

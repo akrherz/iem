@@ -5,6 +5,7 @@ You can also plot the number of days since last measurable precipitation
 event (trace events are counted as dry).
 This plot is based off of NWS CLI sites.
 """
+
 import datetime
 
 import geopandas as gpd

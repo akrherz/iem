@@ -1,12 +1,13 @@
 """The Daily Processor of Wx Data for Yield Forecast Project
 
- - Read the baseline from the database
- - Add columns GDD(F) ST4(C) ST12 ST24 ST50 SM12[frac] SM24 SM50
- - For each year, replace the Jan 1 to yesterday data with actual data
- - Replace today to day + 3 with forecast data
- - For this year, replace day + 4 to Dec 31 with CFS :)
- - Upload the resulting file <site>_YYYYmmdd.met
+- Read the baseline from the database
+- Add columns GDD(F) ST4(C) ST12 ST24 ST50 SM12[frac] SM24 SM50
+- For each year, replace the Jan 1 to yesterday data with actual data
+- Replace today to day + 3 with forecast data
+- For this year, replace day + 4 to Dec 31 with CFS :)
+- Upload the resulting file <site>_YYYYmmdd.met
 """
+
 import datetime
 import os
 import subprocess
@@ -268,7 +269,7 @@ def replace_cfs(df, location):
     # OK, if our last row does not equal dec31, we have some more work to do
     LOG.info("Replacing %s->%s with previous year's data", now, dec31)
     while now <= dec31:
-        lastyear = now.replace(year=(now.year - 1))
+        lastyear = now.replace(year=now.year - 1)
         df.loc[now, rcols] = df.loc[lastyear, rcols]
         now += datetime.timedelta(days=1)
 

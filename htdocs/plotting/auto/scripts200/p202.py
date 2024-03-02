@@ -11,6 +11,7 @@ taken from the next day.
 <p>The chart displays a two dimensional histogram / heatmap underneath
 the plotted lines covering the period of record data.
 """
+
 import calendar
 import datetime
 

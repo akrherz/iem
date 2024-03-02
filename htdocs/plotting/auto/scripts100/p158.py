@@ -5,6 +5,7 @@ The plot limits the number of times plotted to approximately 1,000 so to
 prevent web browser crashes.  If you select a time period greater than
 20 minutes, you will get strided results.
 """
+
 import datetime
 from zoneinfo import ZoneInfo
 

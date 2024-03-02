@@ -1,8 +1,9 @@
 """Process a network's worth of ISD data, please
 
-    python run_network_isd_ingest.py <network> <lastyr_exclusive>
-    ftp://ftp.ncdc.noaa.gov/pub/data/noaa
+python run_network_isd_ingest.py <network> <lastyr_exclusive>
+ftp://ftp.ncdc.noaa.gov/pub/data/noaa
 """
+
 import datetime
 import subprocess
 import sys

@@ -1,4 +1,5 @@
-"""Generate a Watch Outline for a given SPC convective watch """
+"""Generate a Watch Outline for a given SPC convective watch"""
+
 import zipfile
 from io import BytesIO
 

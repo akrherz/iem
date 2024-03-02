@@ -14,6 +14,7 @@ years, only "Number of Days #1' is considered.  An additional year is
 plotted representing the best root mean squared error fit to the selected
 year's data.
 """
+
 import datetime
 
 import matplotlib.dates as mdates

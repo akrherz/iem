@@ -1,4 +1,5 @@
 """Convert the raw table data into something faster for website to use"""
+
 import datetime
 import sys
 from io import StringIO

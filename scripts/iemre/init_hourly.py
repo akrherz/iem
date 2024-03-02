@@ -1,4 +1,5 @@
 """Generate the IEMRE hourly analysis file for a year"""
+
 import datetime
 import os
 import sys

@@ -1,6 +1,7 @@
 """
 Create ERDAS Imagine file from a MRMS Raster
 """
+
 import datetime
 import os
 import tempfile

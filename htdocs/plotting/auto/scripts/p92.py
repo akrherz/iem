@@ -4,6 +4,7 @@ Weather Forecast Office has issued a given VTEC product.  You can
 set the plot to a retroactive date, which computes the number of number
 of days prior to that date.
 """
+
 import datetime
 
 import pandas as pd

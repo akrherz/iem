@@ -1,4 +1,5 @@
 """VTEC event metadata"""
+
 import datetime
 import json
 

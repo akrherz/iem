@@ -2,6 +2,7 @@
 This plot displays the directional frequency of
 day to day changes in high or low temperature summarized by month.
 """
+
 import calendar
 import datetime
 

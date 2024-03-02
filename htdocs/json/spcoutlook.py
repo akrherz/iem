@@ -1,14 +1,16 @@
 """SPC Outlook JSON service."""
+
 import datetime
 import json
 from zoneinfo import ZoneInfo
 
 import pandas as pd
 from pandas.io.sql import read_sql
+from pyiem.database import get_dbconnc, get_sqlalchemy_conn
 from pyiem.exceptions import IncompleteWebRequest
 from pyiem.nws.products.spcpts import THRESHOLD_ORDER
 from pyiem.reference import ISO8601
-from pyiem.util import get_dbconnc, get_sqlalchemy_conn, html_escape
+from pyiem.util import html_escape
 from pyiem.webutil import iemapp
 from pymemcache.client import Client
 
@@ -25,7 +27,7 @@ def dotime(time, lon, lat, day, cat):
     if time in ["", "current", "now"]:
         ts = datetime.datetime.utcnow().replace(tzinfo=ZoneInfo("UTC"))
         if day > 1:
-            ts += datetime.timedelta(days=(day - 1))
+            ts += datetime.timedelta(days=day - 1)
     else:
         # ISO formatting
         ts = datetime.datetime.strptime(time, "%Y-%m-%dT%H:%MZ")

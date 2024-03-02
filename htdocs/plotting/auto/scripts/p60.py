@@ -9,6 +9,7 @@ done by taking the day of the year divided by 7 instead of iso-week
 calculation.  This hopefully makes the data presentation more straight
 forward.
 """
+
 import calendar
 import datetime
 

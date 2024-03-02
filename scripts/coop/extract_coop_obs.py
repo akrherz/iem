@@ -1,4 +1,5 @@
-""" Dump out obs from the database for use by other apps """
+"""Dump out obs from the database for use by other apps"""
+
 import datetime
 import os
 import subprocess

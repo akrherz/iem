@@ -13,6 +13,7 @@ precipitation would stricly include the period of 7 AM 31 May
 to 7 AM 30 June. Data for the current date is available at approximately
 noon central time each day.
 """
+
 import datetime
 
 import numpy as np

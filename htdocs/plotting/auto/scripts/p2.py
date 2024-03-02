@@ -9,6 +9,7 @@ The circle represents a line of equal extremity as compared with the year
 of your choosing.  The dots greater than 2.5 sigma from center are
 labelled with the year they represent.
 """
+
 import calendar
 import datetime
 

@@ -3,6 +3,7 @@ Based on IEM archives of METAR reports, this
 application produces the hourly frequency of a temperature at or
 above or below a temperature thresold.
 """
+
 import calendar
 
 import pandas as pd

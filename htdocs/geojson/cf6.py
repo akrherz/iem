@@ -1,4 +1,5 @@
-""" Produce geojson of CF6 data """
+"""Produce geojson of CF6 data"""
+
 import datetime
 
 import simplejson as json

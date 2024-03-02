@@ -4,6 +4,7 @@ snow cover for a single state.  This estimate is based on a 0.125x0.125
 degree analysis of NWS COOP observations.  The date shown would represent
 snow depth reported approximately at 7 AM.
 """
+
 import datetime
 import os
 

@@ -5,6 +5,7 @@ UTC date.
 <p>Due to the plot's oblong nature, there is no present way to control the
 plot's resolution.
 """
+
 import datetime
 import os
 from io import StringIO

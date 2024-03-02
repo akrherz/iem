@@ -3,6 +3,7 @@ This map presents an hourly <a href="/iemre/">IEM ReAnalysis</a> variable
 of your choice. <a href="/plotting/auto/?q=86">Autoplot 86</a> is the daily
 variant of this plot.
 """
+
 import datetime
 import os
 

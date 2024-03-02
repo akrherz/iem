@@ -1,6 +1,7 @@
 """Send autolapse tar files to staging for archival.
 
 Run from RUN_MIDNIGHT.sh for the previous date"""
+
 import datetime
 import glob
 import os

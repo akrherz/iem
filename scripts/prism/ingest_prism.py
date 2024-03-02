@@ -2,6 +2,7 @@
 
 Called from RUN_NOON.sh and RUN_2AM.sh
 """
+
 import datetime
 import glob
 import os

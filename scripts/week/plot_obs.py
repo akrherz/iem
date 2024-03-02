@@ -2,12 +2,13 @@
 
 Called from RUN_10_AFTER.sh
 """
+
 import datetime
 import sys
 
 import pandas as pd
+from pyiem.database import get_sqlalchemy_conn
 from pyiem.plot import MapPlot
-from pyiem.util import get_sqlalchemy_conn
 
 
 def fmter(val):
@@ -26,7 +27,7 @@ def main(days, argv):
     if len(argv) == 4:
         today = datetime.date(int(argv[1]), int(argv[2]), int(argv[3]))
         routes = "a"
-    sixago = today - datetime.timedelta(days=(days - 1))
+    sixago = today - datetime.timedelta(days=days - 1)
 
     # Compute normal from the climate database
     with get_sqlalchemy_conn("iem") as conn:

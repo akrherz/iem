@@ -1,4 +1,5 @@
 """Legacy."""
+
 import datetime
 from io import StringIO
 

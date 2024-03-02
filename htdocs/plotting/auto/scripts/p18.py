@@ -4,6 +4,7 @@ an observed variable for a location of your choice.  For sites in the
 US, the daily high and low temperature climatology is presented as a
 filled bar for each day plotted when Air Temperature is selected.
 """
+
 import datetime
 from zoneinfo import ZoneInfo
 

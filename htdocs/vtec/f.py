@@ -1,4 +1,5 @@
 """Generate a web crawler friendly page."""
+
 import re
 
 from pyiem.nws import vtec

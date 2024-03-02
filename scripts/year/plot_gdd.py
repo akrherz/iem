@@ -1,4 +1,5 @@
-""" Generate a plot of GDD for the ASOS network"""
+"""Generate a plot of GDD for the ASOS network"""
+
 import datetime
 import sys
 

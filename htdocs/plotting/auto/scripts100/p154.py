@@ -4,6 +4,7 @@ a given month or season over the years covering the period of record
 for the site.  For the year to plot, at least 80% data availability needs
 to be obtained.
 """
+
 import datetime
 
 import pandas as pd

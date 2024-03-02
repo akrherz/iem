@@ -4,6 +4,7 @@ or last date for spring and fall season that the temperature was above or
 below some threshold.  The year is split into two seasons on 1 July. A
 simple linear trend line is placed on both dates.
 """
+
 import calendar
 import datetime
 

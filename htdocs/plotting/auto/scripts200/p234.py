@@ -4,6 +4,7 @@ Report totals by NWS Weather Forecast Office (WFO) or State.  The calendar
 date is based on the local timezone of the WFO selected.  The calendar plot
 type only supports up to 12 months plotted at once.
 """
+
 import datetime
 
 import pandas as pd

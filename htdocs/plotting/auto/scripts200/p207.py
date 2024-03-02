@@ -25,6 +25,7 @@ that attempts to omit too low of reports.
 <br /><br />Having trouble with this app?  If so, please copy/paste the URL
 showing the bad image and <a href="/info/contacts.php">email it to us</a>!
 """
+
 # pylint: disable=unpacking-non-sequence
 import datetime
 

@@ -1,6 +1,7 @@
 """
- Create a plot of today's estimated precipitation based on the MRMS data
+Create a plot of today's estimated precipitation based on the MRMS data
 """
+
 import datetime
 import os
 import sys

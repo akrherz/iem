@@ -2,6 +2,7 @@
 A simple accounting of the number of days with a low temperature below the
 given threshold or above the given threshold by year.
 """
+
 import datetime
 
 import pandas as pd

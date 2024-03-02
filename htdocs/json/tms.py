@@ -1,6 +1,7 @@
 """
- Tile Map service metadata
+Tile Map service metadata
 """
+
 import datetime
 import json
 import os

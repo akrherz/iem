@@ -5,6 +5,7 @@ on available hourly data.  This chart presents the frequency combination
 of one or more variables.  Please let us know if you want additional
 fields added to this tool.
 """
+
 import calendar
 import itertools
 

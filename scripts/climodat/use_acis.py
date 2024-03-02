@@ -5,6 +5,7 @@
 - If either high or low temperature is missing in ACIS, we will not update
   the database other than to ensure temp_estimated is set to True.
 """
+
 import datetime
 import sys
 import time

@@ -2,6 +2,7 @@
 This graph presents monthly average wind speed
 values along with vector-averaged average wind direction.
 """
+
 import calendar
 
 import pandas as pd

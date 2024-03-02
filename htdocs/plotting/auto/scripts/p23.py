@@ -2,6 +2,7 @@
 This plot presents the combination of monthly
 temperature or precipitation departures and El Nino index values.
 """
+
 import datetime
 
 import pandas as pd

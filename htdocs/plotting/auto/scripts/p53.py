@@ -6,6 +6,7 @@ during a certain time of the year.  The data for this plot is partitioned
 by week of the year.  Each plot legend entry contains the overall
 frequency for that bin.
 """
+
 import calendar
 import datetime
 

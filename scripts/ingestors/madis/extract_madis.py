@@ -1,4 +1,5 @@
 """extract_madis.py Get the latest MADIS numbers from the data file!"""
+
 import datetime
 import os
 from zoneinfo import ZoneInfo

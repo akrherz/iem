@@ -1,4 +1,5 @@
-""" Produce geojson of ISUSM data """
+"""Produce geojson of ISUSM data"""
+
 import datetime
 import json
 

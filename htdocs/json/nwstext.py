@@ -1,6 +1,7 @@
 """
 Provide nws text in JSON format
 """
+
 # stdlib
 import datetime
 import json

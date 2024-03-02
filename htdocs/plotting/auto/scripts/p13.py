@@ -2,6 +2,7 @@
 This chart presents the start or end date of the
 warmest 91 day period each year.
 """
+
 import datetime
 
 import matplotlib.colors as mpcolors
