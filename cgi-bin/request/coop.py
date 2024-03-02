@@ -32,7 +32,12 @@ def get_scenario_period(ctx):
     Arguments:
         ctx dictionary context this app was called with
     """
-    sts = datetime.date(ctx["scenario_year"], ctx["ets"].month, ctx["ets"].day)
+    if ctx["ets"].month == 2 and ctx["ets"].day == 29:
+        sts = datetime.date(ctx["scenario_year"], ctx["ets"].month, 28)
+    else:
+        sts = datetime.date(
+            ctx["scenario_year"], ctx["ets"].month, ctx["ets"].day
+        )
     ets = datetime.date(ctx["scenario_year"], 12, 31)
     return sts, ets
 
