@@ -25,10 +25,11 @@ and duration of stretches of hot or cold weather.
 import numpy as np
 import pandas as pd
 from matplotlib.font_manager import FontProperties
+from pyiem.database import get_sqlalchemy_conn
 from pyiem.exceptions import NoDataFound
 from pyiem.plot import figure
 from pyiem.plot.use_agg import plt
-from pyiem.util import get_autoplot_context, get_sqlalchemy_conn
+from pyiem.util import get_autoplot_context
 from scipy import stats
 
 ODICT = {"max": "Maximum", "min": "Minimum", "avg": "Average"}
