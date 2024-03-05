@@ -12,9 +12,10 @@ import datetime
 
 import numpy as np
 import pandas as pd
+from pyiem.database import get_sqlalchemy_conn
 from pyiem.exceptions import NoDataFound
 from pyiem.plot import figure_axes
-from pyiem.util import get_autoplot_context, get_sqlalchemy_conn
+from pyiem.util import get_autoplot_context
 
 PDICT = {
     "last_high_above": "Last Date At or Above (High Temperature)",
@@ -159,6 +160,7 @@ def plotter(fdict):
         r"$^\circ$F"
     )
     (fig, ax) = figure_axes(title=title, apctx=ctx)
+    ax.set_position([0.1, 0.1, 0.65, 0.8])
     # The present year value may be so low that it destorts the plot
     lastval = df2.iloc[-1]["count"]
     minval = df2[df2["count"] > lastval]["count"].min()
@@ -210,7 +212,7 @@ def plotter(fdict):
     )
 
     ax.set_xlim(df2[col].min() - 10, df2[col].max() + 10)
-    ax2.set_ylim(0, 100)
+    ax2.set_ylim(-0.1, 100)
 
     idx = df2[col].idxmax()
     if idx != year:
@@ -251,12 +253,38 @@ def plotter(fdict):
         ax.axvline(df3[col])
         ax.annotate(
             str(year),
-            (df3[col], 0.99),
+            (df3[col], 0.79),
             xycoords=("data", "axes fraction"),
             color="b",
             rotation=90,
             va="top",
         )
+    # print the earliest 10 dates
+    label = "Earliest First Dates"
+    for _, row in (
+        df.sort_values("nday_doy", ascending=True).head(10).iterrows()
+    ):
+        label += f"\n{row['nday']:%d %b %Y}"
+    fig.text(
+        0.85,
+        0.9,
+        label,
+        ha="left",
+        va="top",
+    )
+    label = "Latest First Dates"
+    for _, row in (
+        df.sort_values("nday_doy", ascending=False).head(10).iterrows()
+    ):
+        label += f"\n{row['nday']:%d %b %Y}"
+    fig.text(
+        0.85,
+        0.5,
+        label,
+        ha="left",
+        va="top",
+    )
+
     return fig, df
 
 

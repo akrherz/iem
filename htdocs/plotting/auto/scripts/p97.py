@@ -454,10 +454,6 @@ def get_data(ctx):
     df = pd.concat(dfs)
     if df.empty:
         raise NoDataFound("No Data Found.")
-    # Le sigh
-    # if ctx["var"].find("snow") > -1:
-    #    quorum = (date2 - date1).days * 0.9
-    #    df = df[df["snow_quorum"] >= quorum].drop(columns="snow_quorum")
     # Drop any entries with NaN
     df = df[~pd.isna(df[ctx["var"]])]
     if df.empty:

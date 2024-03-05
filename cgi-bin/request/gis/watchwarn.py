@@ -7,8 +7,9 @@ from io import BytesIO
 
 import fiona
 import pandas as pd
+from pyiem.database import get_dbconnc, get_sqlalchemy_conn
 from pyiem.exceptions import IncompleteWebRequest
-from pyiem.util import get_dbconnc, get_sqlalchemy_conn, utc
+from pyiem.util import utc
 from pyiem.webutil import ensure_list, iemapp
 from shapely.geometry import mapping
 from shapely.wkb import loads
@@ -114,13 +115,15 @@ def build_sql(environ):
     if environ.get("simple", "no") == "yes":
         geomcol = "simple_geom"
 
-    cols = """geo, wfo, utc_issue, utc_expire, utc_prodissue, utc_init_expire,
-        phenomena, gtype, significance, eventid,  status, ugc, area2d,
-        utc_updated, hvtec_nwsli, hvtec_severity, hvtec_cause, hvtec_record,
-        is_emergency, utc_polygon_begin, utc_polygon_end, windtag, hailtag,
-        tornadotag, damagetag """
-    if environ.get("accept") == "excel":
-        cols = cols[4:]
+    cols = (
+        "wfo, utc_issue, utc_expire, utc_prodissue, utc_init_expire, "
+        "phenomena, gtype, significance, eventid,  status, ugc, area2d, "
+        "utc_updated, hvtec_nwsli, hvtec_severity, hvtec_cause, hvtec_record, "
+        "is_emergency, utc_polygon_begin, utc_polygon_end, windtag, hailtag, "
+        "tornadotag, damagetag, product_id "
+    )
+    if environ.get("accept") != "excel":
+        cols = f"geo, {cols}"
 
     timelimit = f"issue >= '{sts}' and issue < '{ets}'"
     if timeopt == 2:
@@ -158,7 +161,8 @@ def build_sql(environ):
              'YYYYMMDDHH24MI') as utc_updated,
      hvtec_nwsli, hvtec_severity, hvtec_cause, hvtec_record, is_emergency,
      windtag, hailtag, tornadotag,
-     coalesce(damagetag, floodtag_damage) as damagetag
+     coalesce(damagetag, floodtag_damage) as damagetag,
+     product_id
      from {sbw_table} w {table_extra}
      WHERE {statuslimit} and {sbwtimelimit}
      {wfo_limiter} {limiter} {elimiter}
@@ -180,7 +184,8 @@ def build_sql(environ):
              'YYYYMMDDHH24MI') as utc_updated,
      hvtec_nwsli, hvtec_severity, hvtec_cause, hvtec_record, is_emergency,
      null::real as windtag, null::real as hailtag, null::varchar as tornadotag,
-     null::varchar as damagetag
+     null::varchar as damagetag,
+     product_ids[1] as product_id
      from {warnings_table} w JOIN ugcs u on (u.gid = w.gid) WHERE
      {timelimit} {wfo_limiter2} {limiter} {elimiter}
      )
@@ -247,7 +252,7 @@ def application(environ, start_response):
                 "WFO,ISSUED,EXPIRED,INIT_ISS,INIT_EXP,PHENOM,GTYPE,SIG,ETN,"
                 "STATUS,NWS_UGC,AREA_KM2,UPDATED,HVTEC_NWSLI,HVTEC_SEVERITY,"
                 "HVTEC_CAUSE,HVTEC_RECORD,IS_EMERGENCY,POLYBEGIN,POLYEND,"
-                "WINDTAG,HAILTAG,TORNADOTAG,DAMAGETAG\n"
+                "WINDTAG,HAILTAG,TORNADOTAG,DAMAGETAG,PRODUCT_ID\n"
             )
             with fiona.open(
                 f"{tmpdir}/{fn}.shp",
@@ -281,6 +286,7 @@ def application(environ, start_response):
                         "HAILTAG": "float",
                         "TORNTAG": "str:16",
                         "DAMAGTAG": "str:16",
+                        "PROD_ID": "str:36",
                     },
                 },
             ) as output:
@@ -304,7 +310,7 @@ def application(environ, start_response):
                         f"{dfmt(row['utc_polygon_begin'])},"
                         f"{dfmt(row['utc_polygon_end'])},{row['windtag']},"
                         f"{row['hailtag']},{row['tornadotag']},"
-                        f"{row['damagetag']}\n"
+                        f"{row['damagetag']},{row['product_id']}\n"
                     )
                     output.write(
                         {
@@ -333,6 +339,7 @@ def application(environ, start_response):
                                 "HAILTAG": row["hailtag"],
                                 "TORNTAG": row["tornadotag"],
                                 "DAMAGTAG": row["damagetag"],
+                                "PROD_ID": row["product_id"],
                             },
                             "geometry": mapping(mp),
                         }

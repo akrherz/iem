@@ -3,33 +3,40 @@
 import datetime
 import json
 
+import httpx
+import pandas as pd
+from pyiem.database import get_sqlalchemy_conn
 from pyiem.reference import ISO8601
-from pyiem.util import get_dbconnc, html_escape
+from pyiem.util import LOG, html_escape
 from pyiem.webutil import iemapp
 from pymemcache.client import Client
+from sqlalchemy import text
 
 
 def run(wfo, year, phenomena, significance, etn):
     """Do great things"""
-    pgconn, cursor = get_dbconnc("postgis")
+    with get_sqlalchemy_conn("postgis") as conn:
+        df = pd.read_sql(
+            text(f"""
+            select product_ids, name, status, hvtec_nwsli,
+            product_issue at time zone 'UTC' as utc_product_issue,
+            init_expire at time zone 'UTC' as utc_init_expire,
+            updated at time zone 'UTC' as utc_updated,
+            issue at time zone 'UTC' as utc_issue,
+            expire at time zone 'UTC' as utc_expire,
+            w.ugc from warnings_{year} w JOIN ugcs u on (w.gid = u.gid) where
+            w.wfo = :wfo and eventid = :etn and phenomena = :phenomena and
+            significance = :significance
+            """),
+            conn,
+            params={
+                "wfo": wfo,
+                "etn": etn,
+                "phenomena": phenomena,
+                "significance": significance,
+            },
+        )
 
-    # This is really a BUG here and we need to rearch the database
-    cursor.execute(
-        f"""
-    SELECT
-    first_value(report) OVER (ORDER by product_issue ASC) as report,
-    first_value(svs) OVER (ORDER by length(svs) DESC NULLS LAST
-        ) as svs_updates,
-    first_value(issue at time zone 'UTC')
-        OVER (ORDER by issue ASC NULLS LAST) as utc_issue,
-    first_value(expire at time zone 'UTC')
-        OVER (ORDER by expire DESC NULLS LAST) as utc_expire
-    from warnings_{year} w
-    WHERE w.wfo = %s and eventid = %s and
-    phenomena = %s and significance = %s
-    """,
-        (wfo, etn, phenomena, significance),
-    )
     res = {
         "generation_time": datetime.datetime.utcnow().strftime(ISO8601),
         "year": year,
@@ -38,41 +45,39 @@ def run(wfo, year, phenomena, significance, etn):
         "etn": etn,
         "wfo": wfo,
     }
-    if cursor.rowcount == 0:
-        pgconn.close()
+    if df.empty:
         return json.dumps(res)
 
-    row = cursor.fetchone()
-    res["report"] = {"text": row["report"]}
-    res["svs"] = []
-    if row["svs_updates"] is not None:
-        for token in row["svs_updates"].split("__"):
-            if token.strip() != "":
-                res["svs"].append({"text": token})
-    res["utc_issue"] = row["utc_issue"].strftime(ISO8601)
-    res["utc_expire"] = row["utc_expire"].strftime(ISO8601)
+    # Get a list of unique product_ids
+    product_ids = df["product_ids"].explode().unique()
+    product_ids.sort()
+    report = ""
+    try:
+        req = httpx.get(
+            f"http://iem.local/api/1/nwstext/{product_ids[0]}", timeout=5
+        )
+        req.raise_for_status()
+        report = req.text
+    except Exception as exp:
+        LOG.exception(exp)
 
-    # Now lets get UGC information
-    cursor.execute(
-        f"""
-    SELECT
-    u.ugc,
-    u.name,
-    w.status,
-    w.product_issue at time zone 'UTC' utc_product_issue,
-    w.issue at time zone 'UTC' utc_issue,
-    w.expire at time zone 'UTC' utc_expire,
-    w.init_expire at time zone 'UTC' utc_init_expire,
-    w.updated at time zone 'UTC' utc_updated, hvtec_nwsli
-    from warnings_{year} w JOIN ugcs u on (w.gid = u.gid)
-    WHERE w.wfo = %s and eventid = %s and
-    phenomena = %s and significance = %s
-    ORDER by u.ugc ASC
-    """,
-        (wfo, etn, phenomena, significance),
-    )
+    res["report"] = {"text": report}
+    res["svs"] = []
+    for product_id in product_ids[1:]:
+        try:
+            req = httpx.get(
+                f"http://iem.local/api/1/nwstext/{product_id}", timeout=5
+            )
+            req.raise_for_status()
+            res["svs"].append({"text": req.text})
+        except Exception as exp:
+            LOG.exception(exp)
+
+    res["utc_issue"] = df["utc_issue"].min().strftime(ISO8601)
+    res["utc_expire"] = df["utc_expire"].max().strftime(ISO8601)
+
     res["ugcs"] = []
-    for row in cursor:
+    for _, row in df.iterrows():
         res["ugcs"].append(
             {
                 "ugc": row["ugc"],
@@ -88,7 +93,6 @@ def run(wfo, year, phenomena, significance, etn):
                 "utc_updated": row["utc_updated"].strftime(ISO8601),
             }
         )
-    pgconn.close()
     return json.dumps(res)
 
 

@@ -3,9 +3,10 @@
 import datetime
 import json
 
+from pyiem.database import get_dbconn
 from pyiem.exceptions import IncompleteWebRequest
 from pyiem.network import Table as NetworkTable
-from pyiem.util import get_dbconn, html_escape
+from pyiem.util import html_escape
 from pyiem.webutil import iemapp
 from pymemcache.client import Client
 
@@ -121,10 +122,13 @@ def application(environ, start_response):
     network = environ.get("network", "IACLIMATE").upper().strip()
     if network == "":
         raise IncompleteWebRequest("No network specified")
-    month = int(environ.get("month", 1))
-    day = int(environ.get("day", 1))
-    syear = int(environ.get("syear", 1800))
-    eyear = int(environ.get("eyear", datetime.datetime.now().year + 1))
+    try:
+        month = int(environ.get("month", 1))
+        day = int(environ.get("day", 1))
+        syear = int(environ.get("syear", 1800))
+        eyear = int(environ.get("eyear", datetime.datetime.now().year + 1))
+    except ValueError:
+        raise IncompleteWebRequest("Invalid arguments")
     cb = environ.get("callback", None)
 
     mckey = (

@@ -6,8 +6,8 @@ from zoneinfo import ZoneInfo
 
 import pandas as pd
 import requests
+from pyiem.database import get_dbconnc
 from pyiem.observation import Observation
-from pyiem.util import get_dbconnc
 
 URI = (
     "http://www.rainwise.net/inview/api/stationdata-iowa.php?"
@@ -59,14 +59,6 @@ def process(today, icursor, nwsli, lastts):
     except Exception as exp:
         print(f"ingest_rw.py pandas fail for sid: {nwsli}\nreason: {exp}")
         return
-    # Index([u'utc', u'mac', u'serial', u'tia', u'til', u'tih', u'tdl',
-    # u'tdh', u'ria', u'ril', u'rih', u'rdl', u'rdh', u'bia', u'bil',
-    # u'bih', u'bdl', u'bdh', u'wia', u'dia', u'wih', u'dih', u'wdh',
-    # u'ddh', u'ris', u'rds', u'lis', u'lds', u'sia', u'sis', u'sds',
-    # u'unt', u'ver', u'heatindex', u'windchill', u'dewpoint', u'uv',
-    # u'batt', u'evpt', u't', u'flg', u'ip', u't1ia', u't1il', u't1ih',
-    # u't1dl', u't1dh', u't2ia', u't2il', u't2ih', u't2dl', u't2dh'],
-    # dtype=object)
 
     conv = {
         "tmpf": "tmpf",

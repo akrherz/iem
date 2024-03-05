@@ -67,6 +67,7 @@ The pyIEM parsers send emails to the IEM developer when issues are found.  The p
 | WINDTAG | Number | The IBW wind gust tag (MPH).  See HAILTAG. |
 | TORNTAG | 16 Char | The IBW tornado tag.  See HAILTAG. |
 | DAMAGTAG | 16 Char | The IBW damage tag. See HAILTAG. |
+| PROD_ID | 36 Char | Issuance text. IEM identifier used to uniquely (99% of the time) identify NWS Text Products. The value can be passed to ``https://mesonet.agron.iastate.edu/p.php?pid=PROD_ID`` for a website viewer or against the IEM API service ``https://mesonet.agron.iastate.edu/api/1/nwstext/PROD_ID``. |
 
 1. I notice entires with an `expire` timestamp before the `issue` timestamp. How can this be?
 

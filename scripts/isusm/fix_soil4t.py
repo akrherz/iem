@@ -8,10 +8,23 @@ import json
 import sys
 
 import requests
+from pyiem.database import get_dbconn
 from pyiem.network import Table as NetworkTable
-from pyiem.util import convert_value, get_dbconn, logger
+from pyiem.util import convert_value, logger
 
 LOG = logger()
+
+
+def setval(cursor2, station, ob, date, newval):
+    """We have something to set."""
+    LOG.warning("%s soil4t %s -> %s [E]", station, ob, newval)
+    cursor2.execute(
+        """
+        UPDATE sm_daily SET t4_c_avg_qc = %s, t4_c_avg_f = 'E' WHERE
+        station = %s and valid = %s
+        """,
+        (newval, station, date),
+    )
 
 
 def check_date(date):
@@ -29,17 +42,6 @@ def check_date(date):
     for row in cursor:
         station = row[0]
         ob = row[1]
-
-        def setval(newval):
-            """We have something to set."""
-            LOG.warning("%s soil4t %s -> %s [E]", station, ob, newval)
-            cursor2.execute(
-                """
-                UPDATE sm_daily SET t4_c_avg_qc = %s, t4_c_avg_f = 'E' WHERE
-                station = %s and valid = %s
-                """,
-                (newval, station, date),
-            )
 
         # Go fetch me the IEMRE value!
         uri = (
@@ -61,7 +63,7 @@ def check_date(date):
             if nt.sts[station]["attributes"].get("NO_4INCH") == "1":
                 LOG.info("Skipping %s as NO_4INCH", station)
                 continue
-            setval(iemre_avg)
+            setval(cursor2, station, ob, date, iemre_avg)
             continue
         # Passes if value within 2 C of IEMRE
         if abs(iemre_avg - ob) <= 2:
@@ -74,7 +76,7 @@ def check_date(date):
             LOG.info("%s passesbnd ob:%.2f iemre:%.2f", station, ob, iemre_avg)
             continue
         # We fail
-        setval(iemre_avg)
+        setval(cursor2, station, ob, date, iemre_avg)
 
     cursor2.close()
     pgconn.commit()
