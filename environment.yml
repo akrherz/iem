@@ -18,6 +18,8 @@ dependencies:
   - gdal
   # important
   - geopandas
+  # Get stuff
+  - httpx
   # mrms script
   - imageio
   # soft requirement for pandas
