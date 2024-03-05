@@ -1,11 +1,10 @@
 <?php
-/* Giveme JSON data for zones affected by warning 
- * This is used by some random AWS EC2 host to get lastsvs=y 
- * 25 May 2021: still used
- */
+// Giveme JSON data for zones affected by warning
+// 4 March 2024: Still being actively used, sigh
 require_once '../../config/settings.inc.php';
 require_once "../../include/database.inc.php";
 require_once "../../include/forms.php";
+require_once "../../include/mlib.php";
 
 $connect = iemdb("postgis");
 pg_exec($connect, "SET TIME ZONE 'UTC'");
@@ -18,33 +17,36 @@ $phenomena = isset($_GET["phenomena"]) ? substr(xssafe($_GET["phenomena"]), 0, 2
 $significance = isset($_GET["significance"]) ? substr(xssafe($_GET["significance"]), 0, 1) : "W";
 $lastsvs = isset($_GET["lastsvs"]) ? xssafe($_GET["lastsvs"]) : 'n';
 
-$sql = "SELECT replace(report,'\001','') as report, 
-               replace(svs,'\001','') as svs
-        from warnings_$year w WHERE w.wfo = '$wfo' and 
-        w.phenomena = '$phenomena' and w.eventid = $eventid and 
-        w.significance = '$significance' ORDER by length(svs) DESC LIMIT 1";
-
-
-$result = pg_exec($connect, $sql);
+$rs = pg_prepare(
+    $connect,
+    "SELECT",
+    "SELECT array_to_json(product_ids) as ja ".
+    "from warnings_$year WHERE wfo = $1 and ". 
+    "phenomena = $2 and eventid = $3 and significance = $4 ".
+    "ORDER by cardinality(product_ids) DESC LIMIT 1"
+);
+$rs = pg_execute($connect, "SELECT", Array($wfo, $phenomena, $eventid, $significance));
 
 $ar = array("data" => array());
-for ($i = 0; $row  = pg_fetch_array($result); $i++) {
-    $z = array();
-    $z["id"] = $i + 1;
-    $z["report"] = preg_replace("/\r\r\n/", "\n", $row["report"]);
-    $z["svs"] = array();
-    $tokens = is_null($row["svs"]) ? Array(): explode('__', $row["svs"]);
-    $lsvs = "";
-    foreach ($tokens as $key => $val) {
-        if ($val == "") continue;
-        $lsvs = htmlspecialchars($val);
-        $z["svs"][] = preg_replace("/\r\r\n/", "\n", $lsvs);
-    }
-    if ($lastsvs == "y") {
-        $z["svs"] = preg_replace("/\r\r\n/", "\n", $lsvs);
-    }
-    $ar["data"][] = $z;
+$row = pg_fetch_assoc($rs, 0);
+$product_ids = json_decode($row["ja"]);
+
+$z = array();
+$z["id"] = 1;
+$report = file_get_contents("http://iem.local/api/1/nwstext/". $product_ids[0]);
+$z["report"] = preg_replace("/\001/", "",
+    preg_replace("/\r\r\n/", "\n", $report));
+$z["svs"] = array();
+$lsvs = "";
+for ($i=1; $i < sizeof($product_ids); $i++) {
+    $report = file_get_contents("http://iem.local/api/1/nwstext/". $product_ids[$i]);
+    $lsvs = preg_replace("/\001/", "", htmlspecialchars($report));
+    $z["svs"][] = preg_replace("/\r\r\n/", "\n", $lsvs);
 }
+if ($lastsvs == "y") {
+    $z["svs"] = preg_replace("/\r\r\n/", "\n", $lsvs);
+}
+$ar["data"][] = $z;
 
 header("Content-type: application/json");
 echo json_encode($ar);
