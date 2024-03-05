@@ -32,9 +32,10 @@ import datetime
 
 import numpy as np
 import pandas as pd
+from pyiem.database import get_sqlalchemy_conn
 from pyiem.exceptions import NoDataFound
 from pyiem.plot import figure_axes
-from pyiem.util import get_autoplot_context, get_sqlalchemy_conn
+from pyiem.util import get_autoplot_context
 from sqlalchemy import text
 
 PDICT = {
@@ -124,7 +125,7 @@ def get_description():
         ),
         dict(
             type="year",
-            default=1890,
+            default=1850,
             label="Potential Minimum Year (inclusive) to use in plot:",
             name="syear",
             min=1850,
@@ -373,6 +374,7 @@ def plotter(fdict):
         subtitle=ctx["subtitle"],
         apctx=ctx,
     )
+    ax.set_position([0.1, 0.1, 0.7, 0.8])
 
     colorabove = "tomato"
     colorbelow = "dodgerblue"
@@ -418,6 +420,41 @@ def plotter(fdict):
     ax.set_ylabel(ctx["ylabel"])
     ax.grid(True)
     ax.legend(ncol=3, loc="best", fontsize=10)
+
+    # Print out the top 10 years and bottom 10 years
+    if not ctx["decadal"]:
+        label = "Top 10 Years"
+        for idx, row in (
+            ctx["df"]
+            .sort_values(ctx["ptype"], ascending=False)
+            .head(10)
+            .iterrows()
+        ):
+            yr = f"{idx - 1}-{idx}" if ctx["month"] == "winter" else f"{idx}"
+            label += f"\n{yr}: {precision % row[ctx['ptype']]}"
+        fig.text(
+            0.81,
+            0.89,
+            label,
+            ha="left",
+            va="top",
+        )
+        label = "Bottom 10 Years"
+        for idx, row in (
+            ctx["df"]
+            .sort_values(ctx["ptype"], ascending=True)
+            .head(10)
+            .iterrows()
+        ):
+            yr = f"{idx - 1}-{idx}" if ctx["month"] == "winter" else f"{idx}"
+            label += f"\n{yr}: {precision % row[ctx['ptype']]}"
+        fig.text(
+            0.81,
+            0.49,
+            label,
+            ha="left",
+            va="top",
+        )
 
     return fig, ctx["df"]
 

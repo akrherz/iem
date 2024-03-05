@@ -11,8 +11,9 @@ provides actual streaks and yearly maximum values.
 
 import numpy as np
 import pandas as pd
+from pyiem.database import get_dbconn
 from pyiem.plot import figure_axes
-from pyiem.util import get_autoplot_context, get_dbconn
+from pyiem.util import get_autoplot_context
 
 PDICT = {
     "high": "High Temperature",

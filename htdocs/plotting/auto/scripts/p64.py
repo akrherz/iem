@@ -14,10 +14,11 @@ import datetime
 import numpy as np
 import pandas as pd
 from matplotlib.patches import Rectangle
+from pyiem.database import get_dbconn
 from pyiem.exceptions import NoDataFound
 from pyiem.plot import figure
 from pyiem.reference import TRACE_VALUE
-from pyiem.util import get_autoplot_context, get_dbconn
+from pyiem.util import get_autoplot_context
 
 PDICT = {
     "first": "First Snowfall after 1 July",
@@ -116,7 +117,6 @@ def get_data(ctx):
             color = "b"
         else:
             color = "r"
-        # print("year: %s idx: %s days: %s %s" % (year, idx, days, snowdepth))
         dt = datetime.date(year, 1, 1) + datetime.timedelta(
             days=(int(idx) + 183 - 1)
         )
