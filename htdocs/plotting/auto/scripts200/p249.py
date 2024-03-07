@@ -56,7 +56,7 @@ def get_description():
             name="valid",
             default=today.strftime("%Y/%m/%d 0000"),
             label="Date:",
-            min="1997/01/01 0000",
+            min="1950/01/01 0000",
         ),
         dict(type="cmap", name="cmap", default="magma", label="Color Ramp:"),
     ]

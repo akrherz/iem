@@ -6,14 +6,17 @@
 
 import datetime
 import os
+import warnings
 
 import click
 import numpy as np
 import pygrib
+from affine import Affine
 from pyiem import iemre
 from pyiem.util import logger, ncopen
 from scipy.interpolate import NearestNDInterpolator
 
+warnings.filterwarnings("ignore", category=RuntimeWarning)
 LOG = logger()
 
 
@@ -102,8 +105,25 @@ def copy_to_iemre(valid):
     )
 
 
+def era5workflow(valid):
+    """Copy ERA5Land to IEMRE."""
+    # NOTE, this may be off-by-one
+    idx = iemre.hourly_offset(valid)
+    with ncopen(f"/mesonet/data/era5/{valid:%Y}_era5land_hourly.nc") as nc:
+        p01m = nc.variables["p01m"][idx]
+    # Convert trace/drizzle to 0, values < 0.01in or .254mm
+    p01m[p01m < 0.254] = 0
+    affine_in = Affine(0.1, 0, iemre.WEST, 0, -0.1, iemre.NORTH)
+    val = iemre.reproject2iemre(np.flipud(p01m), affine_in, "EPSG:4326")
+    with ncopen(iemre.get_hourly_ncname(valid.year), "a", timeout=300) as nc:
+        nc.variables["p01m"][idx] = val
+
+
 def workflow(valid, force_copy):
     """Our stage IV workflow."""
+    if valid.year < 1997:
+        era5workflow(valid)
+        return
     # Figure out what the current status is
     p01m_status = get_p01m_status(valid)
     if np.ma.is_masked(p01m_status) or p01m_status < 2 or force_copy:

@@ -184,6 +184,11 @@ def do(meta, station, acis_station, interactive) -> int:
         LOG.info(df.dtypes)
         raise ValueError("We have object dtype columns")
     df["station"] = station
+    # account for the case where we have a high or low, but not both
+    idx = df["ahigh"].isna() | df["alow"].isna()
+    if idx.any():
+        df.loc[idx, "ahigh"] = np.nan
+        df.loc[idx, "alow"] = np.nan
     # find rows whereby we should be using ACIS
     for col in ["high", "low", "precip"]:
         ecol = "precip" if col == "precip" else "temp"
@@ -200,6 +205,7 @@ def do(meta, station, acis_station, interactive) -> int:
             ]
             df.loc[idx, "dirty"] = True
             updates[col] = idx.sum()
+
     # for snow and snowd, it is simplier
     for col in ["snow", "snowd", "temp_hour", "precip_hour"]:
         idx = df[f"a{col}"].notna() & (df[f"a{col}"] != df[col])
