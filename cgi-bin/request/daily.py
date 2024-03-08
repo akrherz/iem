@@ -145,7 +145,10 @@ def application(environ, start_response):
     if not stations:
         start_response("200 OK", [("Content-type", "text/plain")])
         return [b"ERROR: No stations specified for request"]
-    network = environ.get("network")[:12]
+    network = environ.get("network", "")[:12]
+    if network == "":
+        start_response("200 OK", [("Content-type", "text/plain")])
+        return [b"ERROR: No network specified for request"]
     cols = ensure_list(environ, "var")
     na = environ.get("na", "None")
     if na not in ["M", "None", "blank"]:

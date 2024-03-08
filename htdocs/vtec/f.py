@@ -2,8 +2,9 @@
 
 import re
 
+from pyiem.database import get_dbconn
 from pyiem.nws import vtec
-from pyiem.util import get_dbconn, html_escape, utc
+from pyiem.util import html_escape, utc
 from pyiem.webutil import iemapp
 
 # sadly, I have a lot of links in the wild without a status?
@@ -20,18 +21,19 @@ def get_data(ctx):
     """Get aux data from the database about this event."""
     pgconn = get_dbconn("postgis")
     cursor = pgconn.cursor()
-    table = "warnings_%s" % (ctx["year"],)
     cursor.execute(
         (
-            "SELECT max(report) as r, sumtxt(name::text || ', ') as cnties, "
+            "SELECT max(product_ids[cardinality(product_ids)]) as r, "
+            "sumtxt(name::text || ', ') as cnties, "
             "max(case when is_emergency then 1 else 0 end), "
             "max(case when is_pds then 1 else 0 end), "
             "max(updated at time zone 'UTC') from "
-            f"{table} w JOIN ugcs u on (w.gid = u.gid) WHERE "
-            "w.wfo = %s and phenomena = %s and significance = %s "
+            "warnings w JOIN ugcs u on (w.gid = u.gid) WHERE vtec_year = %s "
+            "and w.wfo = %s and phenomena = %s and significance = %s "
             "and eventid = %s"
         ),
         (
+            ctx["year"],
             ctx["wfo4"][-3:],
             ctx["phenomena"],
             ctx["significance"],

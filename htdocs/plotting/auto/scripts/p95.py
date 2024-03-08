@@ -13,10 +13,11 @@ import datetime
 import matplotlib.colors as mpcolors
 import numpy as np
 import pandas as pd
+from pyiem.database import get_dbconn
 from pyiem.exceptions import NoDataFound
 from pyiem.plot import figure, get_cmap
 from pyiem.plot.use_agg import plt
-from pyiem.util import get_autoplot_context, get_dbconn
+from pyiem.util import get_autoplot_context
 from scipy import stats
 
 PDICT = {"none": "Show all values", "hide": 'Show "strong" events'}
@@ -89,7 +90,7 @@ def plotter(fdict):
     wantmonth = month + lagmonths
     yearoffset = 0
     if month + lagmonths < 1:
-        wantmonth = 12 - (month + lagmonths)
+        wantmonth = 12 + (month + lagmonths)
         yearoffset = 1
 
     wanted = []

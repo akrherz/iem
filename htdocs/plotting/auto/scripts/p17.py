@@ -12,13 +12,10 @@ import numpy as np
 import pandas as pd
 import requests
 from matplotlib.patches import Rectangle
+from pyiem.database import get_sqlalchemy_conn
 from pyiem.exceptions import NoDataFound
 from pyiem.plot import figure_axes
-from pyiem.util import (
-    exponential_backoff,
-    get_autoplot_context,
-    get_sqlalchemy_conn,
-)
+from pyiem.util import exponential_backoff, get_autoplot_context
 
 warnings.simplefilter("ignore", UserWarning)
 PDICT = {"temps": "Plot High/Low Temperatures", "precip": "Plot Precipitation"}
@@ -275,10 +272,11 @@ def do_temperature_plot(ctx) -> bool:
                 [PathEffects.withStroke(linewidth=2, foreground="w")]
             )
             i += 1
-        ax.set_ylim(
-            np.nanmin([df["climo_low"].min(), df["min_tmpf"].min()]) - 5,
-            np.nanmax([df["climo_high"].max(), df["max_tmpf"].max()]) + 5,
-        )
+        if df["min_tmpf"].notnull().any():
+            ax.set_ylim(
+                np.nanmin([df["climo_low"].min(), df["min_tmpf"].min()]) - 5,
+                np.nanmax([df["climo_high"].max(), df["max_tmpf"].max()]) + 5,
+            )
     ax.set_ylabel(r"Temperature $^\circ$F")
     return hasdata
 
