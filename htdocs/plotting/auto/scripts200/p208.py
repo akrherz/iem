@@ -118,6 +118,7 @@ def plotter(fdict):
         "etn": etn,
         "s1": s1,
         "p1": p1,
+        "year": year,
     }
     with get_sqlalchemy_conn("postgis") as conn:
         wfolim = "w.wfo = :wfo and" if wfo != "NHC" else ""
@@ -130,9 +131,9 @@ def plotter(fdict):
             init_expire at time zone 'UTC' as init_expire,
             1 as val,
             status, is_emergency, is_pds, w.wfo
-            from warnings_{year} w JOIN ugcs u on (w.gid = u.gid)
-            WHERE {wfolim} eventid = :etn and significance = :s1 and
-            phenomena = :p1 ORDER by issue ASC
+            from warnings w JOIN ugcs u on (w.gid = u.gid)
+            WHERE {wfolim} vtec_year = :year and eventid = :etn and
+            significance = :s1 and phenomena = :p1 ORDER by issue ASC
         """
             ),
             conn,
@@ -146,19 +147,25 @@ def plotter(fdict):
         # Get all phenomena coincident with the above alert
         with get_sqlalchemy_conn("postgis") as conn:
             df = gpd.read_postgis(
-                f"""
+                text("""
                 SELECT w.ugc, simple_geom, u.name,
                 issue at time zone 'UTC' as issue,
                 expire at time zone 'UTC' as expire,
                 init_expire at time zone 'UTC' as init_expire,
                 status, is_emergency, is_pds, w.wfo
-                from warnings_{year} w JOIN ugcs u on (w.gid = u.gid)
-                WHERE significance = %s and
-                phenomena = %s and issue < %s and expire > %s
+                from warnings w JOIN ugcs u on (w.gid = u.gid)
+                WHERE vtec_year = :year and significance = :s1 and
+                phenomena = :p1 and issue < :expire and expire > :issue
                 ORDER by issue ASC
-            """,
+            """),
                 conn,
-                params=(s1, p1, df["expire"].min(), df["issue"].min()),
+                params={
+                    "year": year,
+                    "s1": s1,
+                    "p1": p1,
+                    "expire": df["expire"].min(),
+                    "issue": df["issue"].min(),
+                },
                 index_col="ugc",
                 geom_col="simple_geom",
             )
@@ -166,19 +173,19 @@ def plotter(fdict):
         # Get all phenomena coincident with the above alert
         with get_sqlalchemy_conn("postgis") as conn:
             df = gpd.read_postgis(
-                f"""
+                text("""
                 SELECT w.ugc, simple_geom, u.name,
                 issue at time zone 'UTC' as issue,
                 expire at time zone 'UTC' as expire,
                 init_expire at time zone 'UTC' as init_expire,
                 status, is_emergency, is_pds, w.wfo
-                from warnings_{year} w JOIN ugcs u on (w.gid = u.gid)
-                WHERE significance = %s and
-                phenomena = %s and eventid = %s
+                from warnings w JOIN ugcs u on (w.gid = u.gid)
+                WHERE vtec_year = :year and significance = :s1 and
+                phenomena = :p1 and eventid = :etn
                 ORDER by issue ASC
-            """,
+            """),
                 conn,
-                params=(s1, p1, etn),
+                params=params,
                 index_col="ugc",
                 geom_col="simple_geom",
             )
@@ -186,47 +193,55 @@ def plotter(fdict):
         raise NoDataFound("VTEC Event was not found, sorry.")
     with get_sqlalchemy_conn("postgis") as conn:
         sbwdf = gpd.read_postgis(
-            f"""
+            text("""
             SELECT status, geom, wfo,
             polygon_begin at time zone 'UTC' as polygon_begin,
-            polygon_end at time zone 'UTC' as polygon_end from sbw_{year}
-            WHERE wfo = %s and eventid = %s and significance = %s and
-            phenomena = %s ORDER by polygon_begin ASC
-        """,
+            polygon_end at time zone 'UTC' as polygon_end from sbw
+            WHERE vtec_year = :year and wfo = :wfo and eventid = :etn and
+            significance = :s1 and
+            phenomena = :p1 ORDER by polygon_begin ASC
+        """),
             conn,
-            params=(wfo[-3:], etn, s1, p1),
+            params=params,
             geom_col="geom",
         )
     if not sbwdf.empty and ctx["opt"] == "expand":
         # Get all phenomena coincident with the above alert
         with get_sqlalchemy_conn("postgis") as conn:
             sbwdf = gpd.read_postgis(
-                f"""
+                text("""
                 SELECT status, geom, wfo,
                 polygon_begin at time zone 'UTC' as polygon_begin,
-                polygon_end at time zone 'UTC' as polygon_end from sbw_{year}
-                WHERE status = 'NEW' and significance = %s and
-                phenomena = %s and issue < %s and expire > %s
+                polygon_end at time zone 'UTC' as polygon_end from sbw
+                WHERE vtec_year = :year and status = 'NEW' and
+                significance = :s1 and
+                phenomena = :p1 and issue < :expire and expire > :issue
                 ORDER by polygon_begin ASC
-            """,
+            """),
                 conn,
-                params=(s1, p1, df["expire"].min(), df["issue"].min()),
+                params={
+                    "year": year,
+                    "s1": s1,
+                    "p1": p1,
+                    "expire": df["expire"].min(),
+                    "issue": df["issue"].min(),
+                },
                 geom_col="geom",
             )
     elif not sbwdf.empty and ctx["opt"] == "etn":
         # Get all phenomena coincident with the above alert
         with get_sqlalchemy_conn("postgis") as conn:
             sbwdf = gpd.read_postgis(
-                f"""
+                text("""
                 SELECT status, geom, wfo,
                 polygon_begin at time zone 'UTC' as polygon_begin,
-                polygon_end at time zone 'UTC' as polygon_end from sbw_{year}
-                WHERE status = 'NEW' and significance = %s and
-                phenomena = %s and eventid = %s
+                polygon_end at time zone 'UTC' as polygon_end from sbw
+                WHERE vtec_year = :year and status = 'NEW' and
+                significance = :s1 and phenomena = :p1 and eventid = :etn
                 ORDER by polygon_begin ASC
-            """,
+            """),
                 conn,
-                params=(s1, p1, etn),
+                params=params,
                 geom_col="geom",
             )
 
@@ -369,16 +384,4 @@ def plotter(fdict):
 
 
 if __name__ == "__main__":
-    plotter(
-        dict(
-            phenomenav="TO",
-            significancev="W",
-            wfo="PAH",
-            year=2019,
-            etn=1,
-            valid="2021-12-11 0339",
-            network="WFO",
-            opt="expand",
-            n="auto",
-        )
-    )
+    plotter({})

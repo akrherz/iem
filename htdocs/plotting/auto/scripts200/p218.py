@@ -18,13 +18,19 @@ from math import pi
 import numpy as np
 import pandas as pd
 from matplotlib.patches import Rectangle
+from pyiem.database import get_sqlalchemy_conn
 from pyiem.exceptions import NoDataFound
 from pyiem.plot import figure
 from pyiem.reference import TRACE_VALUE
-from pyiem.util import get_autoplot_context, get_sqlalchemy_conn, logger
+from pyiem.util import get_autoplot_context, logger
 
 LOG = logger()
 TFORMAT = "%b %-d %Y %-I:%M %p %Z"
+
+PDICT = {
+    "set": "Use Provided Date.",
+    "current": "Use Most Recent Date with Data.",
+}
 
 
 @dataclass
@@ -44,6 +50,13 @@ def get_description():
     desc["defaults"] = {"_r": "t"}
     yest = date.today() - timedelta(days=1)
     desc["arguments"] = [
+        {
+            "type": "select",
+            "name": "w",
+            "default": "set",
+            "label": "Date Selection Method:",
+            "options": PDICT,
+        },
         dict(
             type="networkselect",
             name="station",
@@ -303,9 +316,8 @@ def build_params(clsite, dt):
     return hp, lp
 
 
-def plotter(fdict):
-    """Go"""
-    ctx = get_autoplot_context(fdict, get_description())
+def get_data(ctx):
+    """Get the data."""
     with get_sqlalchemy_conn("iem") as conn:
         df = pd.read_sql(
             "SELECT * from cli_data where station = %s and valid = %s",
@@ -313,6 +325,22 @@ def plotter(fdict):
             params=(ctx["station"], ctx["date"]),
             index_col=None,
         )
+    return df
+
+
+def plotter(fdict):
+    """Go"""
+    ctx = get_autoplot_context(fdict, get_description())
+    if ctx["w"] == "current":
+        ctx["date"] = date.today()
+        df = get_data(ctx)
+        if df.empty:
+            ctx["date"] -= timedelta(days=1)
+            df = get_data(ctx)
+            if df.empty:
+                raise NoDataFound("No CLI data found for date/station.")
+    else:
+        df = get_data(ctx)
     if df.empty:
         raise NoDataFound("No CLI data found for date/station.")
     # Build temperature gauge params
