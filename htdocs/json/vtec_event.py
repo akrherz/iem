@@ -17,19 +17,20 @@ def run(wfo, year, phenomena, significance, etn):
     """Do great things"""
     with get_sqlalchemy_conn("postgis") as conn:
         df = pd.read_sql(
-            text(f"""
+            text("""
             select product_ids, name, status, hvtec_nwsli,
             product_issue at time zone 'UTC' as utc_product_issue,
             init_expire at time zone 'UTC' as utc_init_expire,
             updated at time zone 'UTC' as utc_updated,
             issue at time zone 'UTC' as utc_issue,
             expire at time zone 'UTC' as utc_expire,
-            w.ugc from warnings_{year} w JOIN ugcs u on (w.gid = u.gid) where
-            w.wfo = :wfo and eventid = :etn and phenomena = :phenomena and
-            significance = :significance
+            w.ugc from warnings w JOIN ugcs u on (w.gid = u.gid) where
+            vtec_year = :year and w.wfo = :wfo and eventid = :etn and
+            phenomena = :phenomena and significance = :significance
             """),
             conn,
             params={
+                "year": year,
                 "wfo": wfo,
                 "etn": etn,
                 "phenomena": phenomena,
