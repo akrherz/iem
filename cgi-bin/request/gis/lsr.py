@@ -83,6 +83,8 @@ def do_excel_kml(fmt, params, sql_filters):
         axis=1,
     )
     if fmt == "excel":
+        if len(df.index) >= 1048576:
+            raise IncompleteWebRequest("Too many results for Excel export.")
         df = df.drop(columns="geom")
         bio = BytesIO()
         # pylint: disable=abstract-class-instantiated

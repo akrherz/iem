@@ -5,9 +5,10 @@ import sys
 from zoneinfo import ZoneInfo
 
 import requests
+from pyiem.database import get_dbconnc
 from pyiem.observation import Observation
 from pyiem.reference import TRACE_VALUE
-from pyiem.util import get_dbconnc, logger, utc
+from pyiem.util import logger, utc
 
 LOG = logger()
 

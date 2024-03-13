@@ -308,7 +308,12 @@ def merge_threaded(df, threaded):
     for sid in threaded:
         copysid = threaded[sid]
         if copysid in df.index:
+            # This gets tricky, but we need to retain the dbhas flag
+            dbhas = df.at[copysid, "dbhas"]
+            if sid in df.index:
+                dbhas = df.at[sid, "dbhas"]
             df.loc[sid] = df.loc[copysid]
+            df.at[sid, "dbhas"] = dbhas
     return df
 
 

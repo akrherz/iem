@@ -10,9 +10,10 @@ from unittest import mock
 
 import requests
 import tqdm
+from pyiem.database import get_dbconn
 from pyiem.ncei import ds3505
 from pyiem.nws.products.metarcollect import normid, to_iemaccess, to_metar
-from pyiem.util import exponential_backoff, get_dbconn, logger, utc
+from pyiem.util import exponential_backoff, logger, utc
 
 LOG = logger()
 TMPDIR = "/mesonet/tmp"

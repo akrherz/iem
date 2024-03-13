@@ -10,7 +10,7 @@ import re
 import sys
 
 import pandas as pd
-from pyiem.util import get_dbconn
+from pyiem.database import get_dbconn
 
 # These sites have old sensors that still can be calibrated
 CALSITES = "TVK CKP FXY GGI IIB IFA MPZ I75 OOA PEA PRO VTI".split()
