@@ -4,9 +4,10 @@ bit of a work in progress yet, but will be added to as interest is shown!
 """
 
 import pandas as pd
+from pyiem.database import get_sqlalchemy_conn
 from pyiem.exceptions import NoDataFound
 from pyiem.plot import MapPlot, centered_bins, pretty_bins
-from pyiem.util import get_autoplot_context, get_sqlalchemy_conn, utc
+from pyiem.util import get_autoplot_context, utc
 from sqlalchemy import text
 
 PDICT = {

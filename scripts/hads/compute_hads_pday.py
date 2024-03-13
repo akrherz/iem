@@ -10,7 +10,8 @@ from zoneinfo import ZoneInfo
 
 import numpy as np
 import pandas as pd
-from pyiem.util import get_dbconn, get_sqlalchemy_conn, logger, utc
+from pyiem.database import get_dbconn, get_sqlalchemy_conn
+from pyiem.util import logger, utc
 
 LOG = logger()
 

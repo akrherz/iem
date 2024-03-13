@@ -10,9 +10,10 @@ import datetime
 
 import matplotlib.dates as mdates
 import pandas as pd
+from pyiem.database import get_sqlalchemy_conn
 from pyiem.exceptions import NoDataFound
 from pyiem.plot import figure
-from pyiem.util import get_autoplot_context, get_sqlalchemy_conn
+from pyiem.util import get_autoplot_context
 
 PDICT = {
     "below": "Daily Range Below Emphasis",
