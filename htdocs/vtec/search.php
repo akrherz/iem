@@ -7,10 +7,11 @@ require_once "../../include/myview.php";
 require_once "../../include/iemprop.php";
 $gmapskey = get_iemprop("google.maps.key");
 $t = new MyView();
+$DT = "2.0.2";
 
 $t->jsextra = <<<EOF
 <script type="text/javascript" src="/js/mapping.js"></script>
-<script src="/vendor/jquery-datatables/1.10.20/datatables.min.js"></script>
+<script src="/vendor/jquery-datatables/{$DT}/datatables.min.js"></script>
 <script src="/vendor/jquery-ui/1.11.4/jquery-ui.js"></script>
 <script src="/vendor/select2/4.1.0rc0/select2.min.js"></script>
 <script type="text/javascript" src="wfos.js"></script>
@@ -18,7 +19,7 @@ $t->jsextra = <<<EOF
 <script src="https://maps.googleapis.com/maps/api/js?key={$gmapskey}&callback=_load" type="text/javascript"></script>
 EOF;
 $t->headextra = <<<EOF
-<link rel="stylesheet" href="/vendor/jquery-datatables/1.10.20/datatables.min.css" />
+<link rel="stylesheet" href="/vendor/jquery-datatables/{$DT}/datatables.min.css" />
 <link rel="stylesheet" href="/vendor/jquery-ui/1.11.4/jquery-ui.min.css" />
 <link rel="stylesheet" type="text/css" href="/vendor/select2/4.1.0rc0/select2.min.css"/ >
 <style>

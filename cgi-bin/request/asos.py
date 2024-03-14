@@ -1,5 +1,67 @@
-"""
-Download interface for ASOS data from the asos database
+""".. title:: ASOS/METAR Backend Service
+
+Documentation on /cgi-bin/request/asos.py
+-----------------------------------------
+
+This cgi-bin script provides METAR/ASOS data.  It has a IP-based rate limit for
+requests to prevent abuse.  A `503 Service Unavailable` response will be
+returned if the server is under heavy load.
+
+Changelog
+---------
+
+- 2024-03-14: Initial documentation release.
+
+Example Usage
+-------------
+
+Get the past 24 hours of air temperature and dew point for Des Moines and
+Mason City, Iowa.
+
+.. code-block:: http
+
+    https://mesonet.agron.iastate.edu/cgi-bin/request/asos.py?data=tmpf&data=dwpf&station=DSM&station=MCW&hours=24
+
+CGI Arguments
+-------------
+
+:data: (optional) The data columns to return, defaults to all.  The
+    available options are: tmpf, dwpf, relh, drct, sknt, p01i, alti, mslp,
+    vsby,
+    gust, skyc1, skyc2, skyc3, skyc4, skyl1, skyl2, skyl3, skyl4, wxcodes,
+    ice_accretion_1hr, ice_accretion_3hr, ice_accretion_6hr, peak_wind_gust,
+    peak_wind_drct, peak_wind_time, feel, metar, snowdepth
+:direct: (optional) If set to 'yes', the data will be directly downloaded
+    as a file.
+:elev: (optional) If set to 'yes', the elevation (m) of the station will be
+    included in the output.
+:format: (optional) The format of the data, defaults to onlycomma.  The
+    available options are: onlycomma, tdf.
+:hours: (optional) The number of hours of data to return prior to the current
+    timestamp.  Can not be more than 24 if no stations are specified.
+:latlon: (optional) If set to 'yes', the latitude and longitude of the station
+    will be included in the output.
+:missing: (optional) How to represent missing values, defaults to M.  Other
+    options are 'null' and 'empty'.
+:network: (optional) The network to query, defaults to all networks.
+:report_type: (optional) The report type to query, defaults to all.  The
+    available options are: 1 (HFMETAR), 3 (Routine), 4 (Specials).
+:station: (optional) The station identifier to query, defaults to all stations
+    and if you do not specify any stations, you can only request 24 hours of
+    data.
+:trace: (optional) How to represent trace values, defaults to 0.0001.  Other
+    options are 'null' and 'empty'.
+:tz: (optional) The timezone to use for timestamps, defaults to UTC. It
+    should be in a form that the Python `zoneinfo` module can understand.
+:year1 year2: (optional) The year of the start and end time, defaults to the
+    time zone provided by `tzname`.
+:month1 month2: (optional) The month of the start and end time, defaults to
+    the time zone provided by `tzname`.
+:day1 day2: (optional) The day of the start and end time, defaults to the time
+    zone provided by `tzname`.
+:hour1 hour2: (optional) The hour of the start and end time, defaults to 0.
+:minute1 minute2: (optional) The minute of the start and end time, defaults to
+    0.
 """
 
 import datetime
@@ -196,9 +258,9 @@ def toobusy(pgconn, name):
     return over
 
 
-@iemapp()
+@iemapp(help=__doc__)
 def application(environ, start_response):
-    """Go main Go"""
+    """Go main"""
     if environ["REQUEST_METHOD"] == "OPTIONS":
         start_response("400 Bad Request", [("Content-type", "text/plain")])
         yield b"Allow: GET,POST,OPTIONS"

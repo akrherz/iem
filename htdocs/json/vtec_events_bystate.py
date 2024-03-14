@@ -4,8 +4,9 @@ import json
 from io import BytesIO, StringIO
 
 import pandas as pd
+from pyiem.database import get_dbconnc
 from pyiem.reference import ISO8601
-from pyiem.util import get_dbconnc, html_escape
+from pyiem.util import html_escape
 from pyiem.webutil import iemapp
 
 EXL = "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"

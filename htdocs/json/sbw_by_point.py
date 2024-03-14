@@ -9,10 +9,11 @@ from io import BytesIO, StringIO
 
 import numpy as np
 import pandas as pd
+from pyiem.database import get_sqlalchemy_conn
 from pyiem.exceptions import IncompleteWebRequest
 from pyiem.nws.vtec import VTEC_PHENOMENA, VTEC_SIGNIFICANCE, get_ps_string
 from pyiem.reference import ISO8601
-from pyiem.util import get_sqlalchemy_conn, utc
+from pyiem.util import utc
 from pyiem.webutil import iemapp
 from sqlalchemy import text
 
@@ -22,7 +23,7 @@ EXL = "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"
 def make_url(row):
     """Build URL."""
     return (
-        f"/vtec/#{row['iso_issued'][:4]}-O-NEW-K{row['wfo']}-"
+        f"/vtec/#{row['vtec_year']}-O-NEW-K{row['wfo']}-"
         f"{row['phenomena']}-{row['significance']}-{row['eventid']:04.0f}"
     )
 
@@ -48,7 +49,7 @@ def get_events(ctx):
         df = pd.read_sql(
             text(
                 f"""
-    select wfo, significance, phenomena,
+    select vtec_year, wfo, significance, phenomena,
     to_char(issue at time zone 'UTC',
                 'YYYY-MM-DDThh24:MIZ') as iso_issued,
         to_char(expire at time zone 'UTC',
