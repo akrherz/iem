@@ -17,7 +17,7 @@ EXL = "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"
 def make_url(row):
     """Build URL."""
     return (
-        f"/vtec/#{row['iso_issued'][:4]}-O-NEW-K{row['wfo']}-"
+        f"/vtec/#{row['vtec_year']}-O-NEW-K{row['wfo']}-"
         f"{row['phenomena']}-{row['significance']}-{row['eventid']:04.0f}"
     )
 
@@ -37,7 +37,7 @@ def get_df(lon, lat, sdate, edate):
             select gid from ugcs where
             ST_Contains(geom, ST_SetSRID(ST_GeomFromEWKT(%s),4326))
         )
-        SELECT
+        SELECT vtec_year,
         to_char(issue at time zone 'UTC', 'YYYY-MM-DDThh24:MI:SSZ')
             as iso_issued,
         to_char(expire at time zone 'UTC', 'YYYY-MM-DDThh24:MI:SSZ')

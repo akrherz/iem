@@ -32,9 +32,10 @@ import datetime
 import numpy as np
 import pandas as pd
 from geopandas import GeoDataFrame, read_postgis
+from pyiem.database import get_sqlalchemy_conn
 from pyiem.plot import MapPlot, nwssnow
 from pyiem.reference import EPSG
-from pyiem.util import get_autoplot_context, get_sqlalchemy_conn, logger
+from pyiem.util import get_autoplot_context, logger
 from pyproj import Transformer
 from scipy.interpolate import Rbf
 from shapely.geometry import Point, Polygon

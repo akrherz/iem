@@ -10,13 +10,13 @@ import datetime
 import sys
 import time
 
+import httpx
 import numpy as np
 import pandas as pd
-import requests
 from pyiem.database import get_dbconn, get_sqlalchemy_conn
 from pyiem.network import Table as NetworkTable
 from pyiem.reference import TRACE_VALUE, ncei_state_codes
-from pyiem.util import exponential_backoff, logger
+from pyiem.util import logger
 
 pd.set_option("future.no_silent_downcasting", True)
 LOG = logger()
@@ -30,9 +30,7 @@ def compute_sdate(acis_station):
         "sids": acis_station,
         "meta": "sid_dates",
     }
-    req = exponential_backoff(
-        requests.post, METASERVICE, json=payload, timeout=30
-    )
+    req = httpx.post(METASERVICE, json=payload, timeout=30)
     if req is None or req.status_code != 200:
         LOG.warning("Meta download failure for %s", acis_station)
         return "2023-01-01"
@@ -84,15 +82,17 @@ def do(meta, station, acis_station, interactive) -> int:
         payload["edate"],
         station,
     )
-    req = exponential_backoff(requests.post, SERVICE, json=payload, timeout=30)
-    if req is None:
-        LOG.warning("Total download failure for %s", acis_station)
-        return 0
-    if req.status_code != 200:
-        LOG.warning("Got status_code %s for %s", req.status_code, acis_station)
-        # Give server some time to recover from transient errors
-        time.sleep(60)
-        return 0
+    for _ in range(3):
+        req = httpx.post(SERVICE, json=payload, timeout=30)
+        if req is None:
+            LOG.warning("Total download failure for %s", acis_station)
+            return 0
+        if req.status_code != 200:
+            LOG.warning(
+                "Got status_code %s for %s", req.status_code, acis_station
+            )
+            # Give server some time to recover from transient errors
+            time.sleep(60)
     try:
         j = req.json()
     except Exception as exp:

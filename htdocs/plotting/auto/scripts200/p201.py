@@ -25,10 +25,11 @@ import numpy as np
 import pandas as pd
 from matplotlib.patches import Rectangle
 from matplotlib.ticker import MaxNLocator
+from pyiem.database import get_dbconn, get_sqlalchemy_conn
 from pyiem.exceptions import NoDataFound
 from pyiem.plot import calendar_plot, figure
 from pyiem.reference import state_names
-from pyiem.util import get_autoplot_context, get_dbconn, get_sqlalchemy_conn
+from pyiem.util import get_autoplot_context
 
 PDICT = {
     "C": "Convective (Categorical)",
