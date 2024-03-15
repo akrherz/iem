@@ -1,5 +1,7 @@
 """.. title:: ASOS/METAR Backend Service
 
+`IEM API Mainpage <https://mesonet.agron.iastate.edu/api/>`_
+
 Documentation on /cgi-bin/request/asos.py
 -----------------------------------------
 
@@ -22,10 +24,15 @@ Mason City, Iowa.
 
     https://mesonet.agron.iastate.edu/cgi-bin/request/asos.py?data=tmpf&data=dwpf&station=DSM&station=MCW&hours=24
 
-CGI Arguments
--------------
+CGI Parameters
+--------------
 
-:data: (optional) The data columns to return, defaults to all.  The
+The term ``multi`` below implies that you can either specify the parameter as
+a single key value pair, or a single key with a value that is a comma
+separated, or multiple key value pairs.  For example, `data=tmpf&data=dwpf` or
+`data=tmpf,dwpf`.
+
+:data: (optional,multi) The data columns to return, defaults to all.  The
     available options are: tmpf, dwpf, relh, drct, sknt, p01i, alti, mslp,
     vsby,
     gust, skyc1, skyc2, skyc3, skyc4, skyl1, skyl2, skyl3, skyl4, wxcodes,
@@ -46,9 +53,9 @@ CGI Arguments
 :network: (optional) The network to query, defaults to all networks.
 :report_type: (optional) The report type to query, defaults to all.  The
     available options are: 1 (HFMETAR), 3 (Routine), 4 (Specials).
-:station: (optional) The station identifier to query, defaults to all stations
-    and if you do not specify any stations, you can only request 24 hours of
-    data.
+:station: (optional,multi) The station identifier to query, defaults to all
+    stations and if you do not specify any stations, you can only request
+    24 hours of data.
 :trace: (optional) How to represent trace values, defaults to 0.0001.  Other
     options are 'null' and 'empty'.
 :tz: (optional) The timezone to use for timestamps, defaults to UTC. It

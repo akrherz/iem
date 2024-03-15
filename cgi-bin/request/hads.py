@@ -1,5 +1,32 @@
-"""
-Download Interface for HADS data
+""".. title:: HADS Data Request
+
+`IEM API Mainpage <https://mesonet.agron.iastate.edu/api/>`_
+
+Documentation on /cgi-bin/request/hads.py
+-----------------------------------------
+
+The backend database for this application has many billion rows of data, so
+requests are limited in temporal scope to just one UTC year.
+
+Changelog
+---------
+
+- 2024-03-15: Initial documentation added
+
+CGI Parameters
+--------------
+
+The term ``multi`` below implies that you can either specify the parameter as
+a single key value pair, or a single key with a value that is a comma
+separated, or multiple key value pairs.  For example, `data=tmpf&data=dwpf` or
+`data=tmpf,dwpf`.
+
+- `delim`: (optional) The delimiter to use for the output file, defaults to
+    comma.  Options are comma, space, or tab.
+- `network`: (optional) The IEM network identifier to limit the stations to.
+- `stations`: (required,multi) A list of station identifiers to query.
+- `what`: (optional) The output format, defaults to dl.  Options are dl, txt,
+
 """
 
 # pylint: disable=abstract-class-instantiated
@@ -7,9 +34,9 @@ from datetime import timedelta
 from io import BytesIO, StringIO
 
 import pandas as pd
+from pyiem.database import get_sqlalchemy_conn
 from pyiem.exceptions import IncompleteWebRequest
 from pyiem.network import Table as NetworkTable
-from pyiem.util import get_sqlalchemy_conn
 from pyiem.webutil import ensure_list, iemapp
 from sqlalchemy import text
 
@@ -70,7 +97,7 @@ def threshold_search(table, threshold, thresholdvar):
     return pd.DataFrame(res)
 
 
-@iemapp(default_tz="UTC")
+@iemapp(default_tz="UTC", help=__doc__)
 def application(environ, start_response):
     """Go do something"""
     network = environ.get("network")

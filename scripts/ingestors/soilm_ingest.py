@@ -126,7 +126,7 @@ STATIONS = {
     "CIRI4": "CedarRapids",
     "MCSI4": "Marcus",
     "AMFI4": "AmesFinch",
-    # Temporary?
+    # Temporary
     # 'REFI4': 'Adel',
     # Vineyward
     "AHTI4": "AmesHort",
@@ -429,14 +429,12 @@ def m15_process(nwsli, maxts):
             ob.data["dwpf"] = (
                 dewpoint_from_relative_humidity(tmpc, relh).to(units("degF")).m
             )
-        # ob.data["srad"] = row["slrkw_avg_qc"]
         ob.data["sknt"] = convert_value(
             row["ws_mph_qc"], "mile / hour", "knot"
         )
         ob.data["gust"] = convert_value(
             row["ws_mph_max_qc"], "mile / hour", "knot"
         )
-        # ob.data["max_gust_ts"] = row["ws_mph_tmx"]
         ob.data["drct"] = row["winddir_d1_wvt_qc"]
         if "t4_c_avg" in df.columns:
             ob.data["c1tmpf"] = c2f(row["t4_c_avg_qc"])
@@ -567,10 +565,7 @@ def get_max_timestamps(nwsli):
         "daily": datetime.date(2012, 1, 1),
     }
     icursor.execute(
-        """
-        SELECT max(valid) from sm_daily
-        WHERE station = %s
-    """,
+        "SELECT max(valid) from sm_daily WHERE station = %s",
         (nwsli,),
     )
     row = icursor.fetchone()
@@ -578,9 +573,7 @@ def get_max_timestamps(nwsli):
         data["daily"] = row["max"]
 
     icursor.execute(
-        """
-        SELECT max(valid) from sm_hourly WHERE station = %s
-    """,
+        "SELECT max(valid) from sm_hourly WHERE station = %s",
         (nwsli,),
     )
     row = icursor.fetchone()
@@ -588,10 +581,7 @@ def get_max_timestamps(nwsli):
         data["hourly"] = row["max"]
 
     icursor.execute(
-        """
-        SELECT max(valid) from sm_minute
-        WHERE station = %s
-    """,
+        "SELECT max(valid) from sm_minute WHERE station = %s",
         (nwsli,),
     )
     row = icursor.fetchone()
