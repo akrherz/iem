@@ -24,7 +24,7 @@ SERVICE = "https://data.rcc-acis.org/StnData"
 METASERVICE = "https://data.rcc-acis.org/StnMeta"
 
 
-def compute_sdate(acis_station):
+def compute_sdate(acis_station, edate):
     """Figure out when we should have some data."""
     payload = {
         "sids": acis_station,
@@ -38,8 +38,13 @@ def compute_sdate(acis_station):
     minval = "2023-01-01"
     if j["meta"]:
         for sid_date in j["meta"][0]["sid_dates"]:
-            if sid_date[0].startswith(f"{acis_station} "):
+            if (
+                sid_date[0].startswith(f"{acis_station} ")
+                and int(sid_date[1][:4]) > 1800
+            ):
                 minval = min([sid_date[1], minval])
+    if minval > edate:
+        minval = f"{int(edate[:4]) - 1}-01-01"
     return minval
 
 
@@ -63,7 +68,9 @@ def do(meta, station, acis_station, interactive) -> int:
             edate = meta["archive_end"].strftime(fmt)
     payload = {
         "sid": acis_station,
-        "sdate": meta["attributes"].get("FLOOR", compute_sdate(acis_station)),
+        "sdate": meta["attributes"].get(
+            "FLOOR", compute_sdate(acis_station, edate)
+        ),
         "edate": edate,
         "elems": [
             {"name": "maxt", "add": "t"},
