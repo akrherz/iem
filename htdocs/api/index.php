@@ -47,6 +47,19 @@ two portals with information about IEM APIs:
   significant expansion during 2020.</li> 
 </ol>
 
+<h3>Scriptable CGI Services</h3>
+
+<p>Some of the IEM data services are not ammenable to being used within a API
+service that aims for sub-second response times.  These services also consume
+a lot of resources and are not as scalable.  As such, we have a few services
+rooted within <code>/cgi-bin/</code> style 2000s era web services.  There are primative
+help pages for these services:</p>
+
+<ul>
+<li><a href="/cgi-bin/request/asos.py?help">ASOS/METAR data</a></li>
+<li><a href="/cgi-bin/request/hads.py?help">HADS/DCP/SHEF data</a></li>
+</ul>
+
 <h3>API Stability?</h3>
 
 <p>In general, we do not try to break things but bugs happen.  The plan is to
