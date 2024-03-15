@@ -10,6 +10,8 @@ dependencies:
   - click
   # pytest
   - coverage
+  # ?help support
+  - docutils
   # one wxc script
   - ephem
   # various places

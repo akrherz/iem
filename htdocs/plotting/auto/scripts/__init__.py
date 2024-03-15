@@ -749,6 +749,10 @@ nopts = [
         "label": "NWS Watch Warning Advisory (WaWa) Map + Population Stats",
     },
     {
+        "id": 251,
+        "label": "NWS Warning Load Time Series",
+    },
+    {
         "id": 70,
         "label": "Period between First and Last VTEC Product Each Year",
     },
