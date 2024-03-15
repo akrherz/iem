@@ -26,7 +26,8 @@ from odf.style import (
     TextProperties,
 )
 from odf.text import P
-from pyiem.util import get_dbconnc, logger, utc
+from pyiem.database import get_dbconnc
+from pyiem.util import logger, utc
 
 os.putenv("DISPLAY", "localhost:1")
 

@@ -86,7 +86,6 @@ def replace_cfs(nc, valid, islice, jslice):
     cfsnc = ncopen(valid.strftime("/mesonet/data/iemre/cfs_%Y%m%d%H.nc"))
     tidx = iemre.daily_offset(valid + datetime.timedelta(days=1))
     tslice = slice(tidx0 + 1, tidx1 + 1)
-    # print("replace_cfs filling %s from %s" % (tslice, tidx))
     # CFS is W m-2, we want MJ
     nc.variables["srad"][tslice, :, :] = (
         cfsnc.variables["srad"][tidx:, jslice, islice] * 86400.0 / 1000000.0

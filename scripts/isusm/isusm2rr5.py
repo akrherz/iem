@@ -9,8 +9,9 @@ import tempfile
 from zoneinfo import ZoneInfo
 
 import pandas as pd
+from pyiem.database import get_sqlalchemy_conn
 from pyiem.tracker import loadqc
-from pyiem.util import c2f, get_sqlalchemy_conn, utc
+from pyiem.util import c2f, utc
 
 
 def mt(prefix, tmpf, depth, q):

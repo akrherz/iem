@@ -9,7 +9,8 @@ import sys
 
 import numpy as np
 import pandas as pd
-from pyiem.util import get_dbconn, get_sqlalchemy_conn, logger, utc
+from pyiem.database import get_dbconn, get_sqlalchemy_conn
+from pyiem.util import logger, utc
 
 pd.set_option("future.no_silent_downcasting", True)
 LOG = logger()
@@ -132,14 +133,18 @@ def main(argv):
     ets = sts + datetime.timedelta(days=8)
     with get_sqlalchemy_conn("isuag") as conn:
         # Get the minute data
-        mdf = pd.read_sql(
-            "SELECT *, valid at time zone 'UTC' as utc_valid, "
-            "date(valid) as date from sm_minute "
-            "where valid >= %s and valid < %s ORDER by valid ASC",
-            conn,
-            params=(sts, ets),
-            index_col=None,
-        ).fillna(np.nan)
+        mdf = (
+            pd.read_sql(
+                "SELECT *, valid at time zone 'UTC' as utc_valid, "
+                "date(valid) as date from sm_minute "
+                "where valid >= %s and valid < %s ORDER by valid ASC",
+                conn,
+                params=(sts, ets),
+                index_col=None,
+            )
+            .fillna(np.nan)
+            .infer_objects()
+        )
         # Get the hourly data
         hdf = pd.read_sql(
             "SELECT *, valid at time zone 'UTC' as utc_valid, "
