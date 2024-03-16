@@ -1,4 +1,38 @@
-"""Support download of ASOS 1 minute data."""
+""".. title:: ASOS 1 Minute Data Request
+
+Documentation for /cgi-bin/request/asos1min.py
+----------------------------------------------
+
+This service provides the ASOS 1 minute data provided by NCEI and is not the
+"one minute data" via MADIS.  There is an availability delay of about 24 hours
+due to the way NCEI collects the data from the ASOS sites.
+
+CGI Parameters
+~~~~~~~~~~~~~~
+
+The term ``multi`` in the parameter description means that the parameter can
+be specified multiple times.  You can either do this by specifying the key
+and value pair multiple times or specifying the value as a comma separated
+value.  For example, `station=KAMW&station=KDSM` is the same as
+`station=KAMW,KDSM`.
+
+- `delim` (optional) - The delimiter to use in the output, defaults to comma.
+- `gis` (optional) - Should GIS information be included in the output, defaults
+    to no.  The options are `yes` and `no`.
+- `station` (required,multi) - The station identifier(s) to request data for.
+- `sample` (optional) - The sampling period to request data for, defaults to
+    1 minute.  The options are `1min`, `5min`, `10min`, `20min`, and `1hour`.
+- `tz` (optional) - The timezone to report the data in, defaults to UTC. This
+    value should be a valid timezone identifier like ``America/Chicago``.
+- `what` (optional) - The output format, defaults to `download`.  The options
+    are `download` and `view`.
+- `vars` (required,multi) - The variable(s) to request data for.
+- `{year,month,day,hour,min}1` (required) - The start timestamp for the data
+    in the timezone provided by ``tz``.
+- `{year,month,day,hour,min}2` (required) - The end timestamp for the data in
+    the timezone provided by ``tz``.
+
+"""
 
 from io import StringIO
 
@@ -73,7 +107,7 @@ def compute_prefixes(sio, environ, delim, stations, tz) -> dict:
     return prefixes
 
 
-@iemapp(iemdb=["asos1min", "mesosite"], iemdb_cursor="blah")
+@iemapp(iemdb=["asos1min", "mesosite"], iemdb_cursor="blah", help=__doc__)
 def application(environ, start_response):
     """Handle mod_wsgi request."""
     stations = ensure_list(environ, "station")

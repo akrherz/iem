@@ -56,8 +56,9 @@ rooted within <code>/cgi-bin/</code> style 2000s era web services.  There are pr
 help pages for these services:</p>
 
 <ul>
-<li><a href="/cgi-bin/request/asos.py?help">ASOS/METAR data</a></li>
-<li><a href="/cgi-bin/request/hads.py?help">HADS/DCP/SHEF data</a></li>
+<li><a href="/cgi-bin/request/asos.py?help">ASOS/METAR Data</a></li>
+<li><a href="/cgi-bin/request/asos1min.py?help">ASOS 1 Minute NCEI Data</a></li>
+<li><a href="/cgi-bin/request/hads.py?help">HADS/DCP/SHEF Data</a></li>
 </ul>
 
 <h3>API Stability?</h3>
