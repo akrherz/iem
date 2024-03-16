@@ -1,18 +1,20 @@
-"""
-Generate a PNG windrose based on the CGI parameters, called from
+""".. title:: Windrose Plotting/Data Service
 
-    htdocs/sites/dyn_windrose.phtml
-    htdocs/sites/windrose.phtml
+Documentation for /cgi-bin/windrose.py
+--------------------------------------
+
+This service returns plots and data in windrose format.
+
 """
 
 import datetime
 from io import BytesIO
 from zoneinfo import ZoneInfo
 
+from pyiem.database import get_dbconn
 from pyiem.exceptions import BadWebRequest, IncompleteWebRequest
 from pyiem.network import Table as NetworkTable
 from pyiem.plot.use_agg import plt
-from pyiem.util import get_dbconn
 from pyiem.webutil import iemapp
 from pyiem.windrose_utils import windrose
 
@@ -78,7 +80,7 @@ def get_station_info(environ):
     return dbname, network, station
 
 
-@iemapp()
+@iemapp(help=__doc__)
 def application(environ, start_response):
     """Query out the CGI variables"""
     dpi = int(environ.get("dpi", 100))

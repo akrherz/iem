@@ -1,4 +1,10 @@
-"""Download IEM summary data!"""
+""".. title:: IEM Computed Daily Summaries
+
+Documentation for /cgi-bin/request/daily.py
+-------------------------------------------
+
+To be written.
+"""
 
 import sys
 from io import BytesIO, StringIO
@@ -125,7 +131,7 @@ def get_data(network, sts, ets, stations, cols, na, fmt):
     return sio.getvalue()
 
 
-@iemapp()
+@iemapp(help=__doc__)
 def application(environ, start_response):
     """See how we are called"""
     if "sts" not in environ or "ets" not in environ:

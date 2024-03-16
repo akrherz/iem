@@ -1,4 +1,11 @@
-"""Dump AIRMETs."""
+""".. title:: SIGMET Data Service
+
+Documentation for /cgi-bin/request/gis/sigmets.py
+-------------------------------------------------
+
+To be written.
+
+"""
 
 # Local
 import tempfile
@@ -8,8 +15,8 @@ from io import BytesIO
 # Third Party
 import fiona
 import geopandas as gpd
+from pyiem.database import get_sqlalchemy_conn
 from pyiem.exceptions import IncompleteWebRequest
-from pyiem.util import get_sqlalchemy_conn
 from pyiem.webutil import iemapp
 
 # cgitb.enable()
@@ -81,7 +88,7 @@ def run(ctx, start_response):
     return zio.getvalue()
 
 
-@iemapp(default_tz="UTC")
+@iemapp(default_tz="UTC", help=__doc__)
 def application(environ, start_response):
     """Do something fun!"""
     if "sts" not in environ:

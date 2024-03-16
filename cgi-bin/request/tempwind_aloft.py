@@ -1,10 +1,17 @@
-"""Download tempwinds_aloft dataset"""
+""".. title:: Temperature and Wind Aloft Data Service
+
+Documentation for /cgi-bin/request/tempwind_aloft.py
+----------------------------------------------------
+
+To be written.
+
+"""
 
 from io import BytesIO, StringIO
 
 import pandas as pd
+from pyiem.database import get_sqlalchemy_conn
 from pyiem.exceptions import IncompleteWebRequest
-from pyiem.util import get_sqlalchemy_conn
 from pyiem.webutil import iemapp
 from sqlalchemy import text
 
@@ -52,7 +59,7 @@ def get_data(station, sts, ets, tz, na, fmt):
     return sio.getvalue()
 
 
-@iemapp()
+@iemapp(help=__doc__)
 def application(environ, start_response):
     """See how we are called"""
 

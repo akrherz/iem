@@ -1,7 +1,9 @@
-"""Service providing netcdf files of a requested IEM RASTER
+""".. title:: Raster to NetCDF Data Service
 
-https://mesonet.agron.iastate.edu/cgi-bin/request/raster2netcdf.py?
-dstr=201710251200&prod=composite_n0r
+Documentation for /cgi-bin/request/raster2netcdf.py
+---------------------------------------------------
+
+To be written.
 """
 
 import datetime
@@ -13,8 +15,8 @@ from zoneinfo import ZoneInfo
 import netCDF4
 import numpy as np
 from PIL import Image
+from pyiem.database import get_dbconn
 from pyiem.exceptions import IncompleteWebRequest
-from pyiem.util import get_dbconn
 from pyiem.webutil import iemapp
 
 
@@ -113,7 +115,7 @@ def do_work(valid, prod, start_response):
     return bio.getvalue()
 
 
-@iemapp()
+@iemapp(help=__doc__)
 def application(environ, start_response):
     """Do great things"""
     dstr = environ.get("dstr", "201710251200")[:12]

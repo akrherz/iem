@@ -1,4 +1,11 @@
-"""give me some AFOS data please."""
+""".. title:: Retrieve NWS Text Products
+
+Documentation for /cgi-bin/afos/retrieve.py
+-------------------------------------------
+
+To be written.
+
+"""
 
 import re
 import zipfile
@@ -69,7 +76,7 @@ def zip_handler(cursor):
     return [bio.getvalue()]
 
 
-@iemapp()
+@iemapp(help=__doc__)
 def application(environ, start_response):
     """Process the request"""
     # Attempt to keep the file from downloading and just displaying in chrome

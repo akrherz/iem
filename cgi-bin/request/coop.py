@@ -1,7 +1,11 @@
-"""
-Download interface for the data stored in coop database (alldata)
+""".. title:: IEM Climodat Data Export
 
-This is called from /request/coop/fe.phtml
+Documentation for /cgi-bin/request/coop.py
+------------------------------------------
+
+This service is somewhat poorly named ``coop.py``, but is providing the IEM
+Climodat data, which is a combination of NWS COOP and NWS ASOS/AWOS data.
+
 """
 
 import datetime
@@ -762,7 +766,7 @@ def do_swat(ctx):
     return sio.getvalue()
 
 
-@iemapp()
+@iemapp(help=__doc__)
 def application(environ, start_response):
     """go main go"""
     ctx = {}

@@ -1,4 +1,10 @@
-"""Generate a shapefile of warnings based on the CGI request"""
+""".. title:: NWS Watch/Warning/Advisory (WWA) Data Service
+
+Documentation for /cgi-bin/request/gis/watchwarn.py
+---------------------------------------------------
+
+To be written.
+"""
 
 import datetime
 import tempfile
@@ -217,7 +223,7 @@ def do_excel(sql):
     return bio.getvalue()
 
 
-@iemapp(default_tz="UTC")
+@iemapp(default_tz="UTC", help=__doc__)
 def application(environ, start_response):
     """Go Main Go"""
     if "sts" not in environ:
@@ -241,9 +247,6 @@ def application(environ, start_response):
     cursor = pgconn.cursor("streaming")
 
     cursor.execute(sql)
-    # TODO if cursor.rowcount == 0:
-    #    start_response("200 OK", [("Content-type", "text/plain")])
-    #    return [b"ERROR: No results found for query, please try again"]
 
     # Filenames are racy, so we need to have a temp folder
     with tempfile.TemporaryDirectory() as tmpdir:

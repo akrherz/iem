@@ -1,9 +1,16 @@
-"""Hourly precip download"""
+""".. title:: Hourly Precipitation Data Service
+
+Documentation for /cgi-bin/request/hourlyprecip.py
+--------------------------------------------------
+
+To be written.
+
+"""
 
 from zoneinfo import ZoneInfo
 
+from pyiem.database import get_dbconn
 from pyiem.exceptions import IncompleteWebRequest
-from pyiem.util import get_dbconn
 from pyiem.webutil import ensure_list, iemapp
 
 
@@ -39,7 +46,7 @@ def get_data(network, ctx, tzinfo, stations):
     return res.encode("ascii", "ignore")
 
 
-@iemapp()
+@iemapp(help=__doc__)
 def application(environ, start_response):
     """run rabbit run"""
     tzinfo = ZoneInfo(environ.get("tz", "America/Chicago"))
