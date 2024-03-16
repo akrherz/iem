@@ -7,6 +7,7 @@ python dbutil/compute_climate_sts.py ${STATE}CLIMATE
 python dbutil/compute_coop_sts.py ${STATE}_COOP
 # 3. Use ACIS
 python climodat/use_acis.py $STATE
+python dbutil/compute_climate_sts.py ${STATE}CLIMATE
 # 4. Look for any gaps that need estimating
 python climodat/estimate_missing.py $STATE
 # 5. Sync our COOP archives the same

@@ -1,4 +1,11 @@
-"""Dumps Local Storm Reports on-demand for web requests."""
+""".. title:: Local Storm Report Data Service
+
+Documentation for /cgi-bin/request/gis/lsr.py
+---------------------------------------------
+
+To be written.
+
+"""
 
 import datetime
 import zipfile
@@ -107,7 +114,7 @@ def do_excel_kml(fmt, params, sql_filters):
     return fp.getvalue()
 
 
-@iemapp(default_tz="UTC")
+@iemapp(default_tz="UTC", help=__doc__)
 def application(environ, start_response):
     """Go Main Go"""
     if environ["REQUEST_METHOD"] == "OPTIONS":

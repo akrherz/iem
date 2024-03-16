@@ -1,4 +1,11 @@
-"""Dump SPS."""
+""".. title:: Special Weather Statement (SPS) Data Service
+
+Documentation for /cgi-bin/request/gis/sps.py
+---------------------------------------------
+
+To be written.
+
+"""
 
 # Local
 import tempfile
@@ -75,7 +82,7 @@ def run(ctx, start_response):
     return zio.getvalue()
 
 
-@iemapp(default_tz="UTC")
+@iemapp(default_tz="UTC", help=__doc__)
 def application(environ, start_response):
     """Do something fun!"""
     if "sts" not in environ:

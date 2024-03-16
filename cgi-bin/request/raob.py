@@ -1,14 +1,18 @@
-"""
-Download interface for data from RAOB network
+""".. title:: RAOB Data Service
+
+Documentation for /cgi-bin/request/raob.py
+------------------------------------------
+
+To be written.
 """
 
 import datetime
 from io import StringIO
 from zoneinfo import ZoneInfo
 
+from pyiem.database import get_dbconn
 from pyiem.exceptions import IncompleteWebRequest
 from pyiem.network import Table as NetworkTable
-from pyiem.util import get_dbconn
 from pyiem.webutil import iemapp
 
 
@@ -83,7 +87,7 @@ def friendly_date(form, key):
     return dt
 
 
-@iemapp()
+@iemapp(help=__doc__)
 def application(environ, start_response):
     """Go Main Go"""
     if "sts" not in environ:

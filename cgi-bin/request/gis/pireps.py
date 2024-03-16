@@ -1,12 +1,19 @@
-"""Provide PIREPs."""
+""".. title:: Pilot Weather Report (PIREP) Data Service
+
+Documentation for /cgi-bin/request/gis/pireps.py
+------------------------------------------------
+
+To be written.
+
+"""
 
 import datetime
 import zipfile
 from io import BytesIO, StringIO
 
 import shapefile
+from pyiem.database import get_dbconn
 from pyiem.exceptions import IncompleteWebRequest
-from pyiem.util import get_dbconn
 from pyiem.webutil import ensure_list, iemapp
 
 
@@ -121,7 +128,7 @@ def run(ctx, start_response):
     return zio.getvalue()
 
 
-@iemapp(default_tz="UTC")
+@iemapp(default_tz="UTC", help=__doc__)
 def application(environ, start_response):
     """Do something fun!"""
     if "sts" not in environ:

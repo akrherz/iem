@@ -1,6 +1,25 @@
-"""Provide an UTC hour's worth of METARs
+""".. title:: Request Hour's worth of METARs
 
-Called from nowhere known at the moment
+Documentation for /cgi-bin/request/metars.py
+--------------------------------------------
+
+This is a very simple service that intends on emitting a text file of METARs
+that is ammenable to being ingested by other software.  Each METAR is on a
+single line and the file is sorted by the observation time.
+
+Example Usage:
+--------------
+
+Retrieve all METARs for the hour starting at 00 UTC on 1 January 2016:
+
+    https://mesonet.agron.iastate.edu/cgi-bin/request/metars.py?valid=2016010100
+
+CGI Parameters:
+---------------
+
+* `valid`: The hour over which to return data.  The format is `YYYYMMDDHH` and
+    would include any observations between that time and the next hour.
+
 """
 
 import datetime
@@ -26,7 +45,7 @@ def check_load(cursor):
     return True
 
 
-@iemapp(iemdb="asos", iemdb_cursorname="streamer")
+@iemapp(iemdb="asos", iemdb_cursorname="streamer", help=__doc__)
 def application(environ, start_response):
     """Do Something"""
     cursor = environ["iemdb.asos.cursor"]
