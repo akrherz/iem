@@ -66,7 +66,7 @@ def main(argv):
                 option[1],
                 "--faa",
                 stid,
-                "--year",
+                "--year1",
                 str(option[2].year),
                 "--year2",
                 str(eyear),

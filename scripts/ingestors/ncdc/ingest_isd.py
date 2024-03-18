@@ -42,9 +42,9 @@ def get_metadata(faa):
 @click.option("--airforce", type=int, required=True)
 @click.option("--wban", type=int, required=True)
 @click.option("--faa", type=str, required=True)
-@click.option("--year", type=int, required=True)
+@click.option("--year1", type=int, required=True)
 @click.option("--year2", type=int, required=True)
-def main(airforce, wban, faa, year, year2):
+def main(airforce, wban, faa, year1, year2):
     """Go"""
     asosdb = get_dbconn("asos")
     iemdb = get_dbconn("iem")
@@ -52,11 +52,11 @@ def main(airforce, wban, faa, year, year2):
         LOG.error("Provided faa ID should be 4 chars, abort")
         return
     tzname, iemid = get_metadata(faa)
-    year = max(year, 1928)  # database starts in 1928
+    year1 = max(year1, 1928)  # database starts in 1928
     failedyears = []
     msgs = []
     dbid = normid(faa)
-    for year in tqdm.tqdm(range(year, year2)):
+    for year in tqdm.tqdm(range(year1, year2)):
         sts = utc(year, 1, 1)
         ets = sts.replace(year=year + 1)
         acursor = asosdb.cursor()
