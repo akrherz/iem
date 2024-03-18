@@ -424,7 +424,8 @@ to diagnose when the file is valid.  You can provide a timestamp
 to provide archived warnings back to 2002 or so.  The polygons returned are the
 actualy ones valid at the given timestamp or realtime, so any polygon updates
 done with warning event are included here.  There should only be one polygon
-per warning event.
+per warning event. You can optionally pass a <code>wfo=WFO3Char</code> to
+limit the polygons to a single office.
 EOM
     ,
     "vars" => array(
