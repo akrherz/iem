@@ -11,7 +11,7 @@ from zoneinfo import ZoneInfo
 import PIL.ImageDraw
 import PIL.ImageFont
 import PIL.ImageOps
-from pyiem.util import get_dbconn
+from pyiem.database import get_dbconn
 from pyiem.webutil import iemapp
 from pymemcache.client import Client
 
@@ -44,7 +44,7 @@ def text_image(content):
     bbox = font.getbbox(test_string)
     max_height = bbox[3] - bbox[1]
     max_width = font.getlength(max_width_line)
-    height = max_height * len(lines)  # perfect or a little oversized
+    height = (max_height + 2) * len(lines)  # perfect or a little oversized
     width = int(round(max_width + 40))  # a little oversized
     # A limit of PIL
     if (height * width) > 90_000_000:
