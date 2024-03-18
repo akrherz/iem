@@ -4,7 +4,8 @@ import datetime
 import json
 
 import requests
-from pyiem.util import exponential_backoff, get_dbconn, logger, utc
+from pyiem.database import get_dbconn
+from pyiem.util import exponential_backoff, logger, utc
 
 LOG = logger()
 
@@ -56,8 +57,6 @@ def workflow():
         ts = datetime.datetime.utcfromtimestamp(logdt / 1000.0)
         valid = utc(ts.year, ts.month, ts.day, ts.hour, ts.minute, ts.second)
         if valid > CEILING:
-            # print(json.dumps(feat, sort_keys=True,
-            #                 indent=4, separators=(',', ': ')))
             continue
         if len(label) > 20:
             LOG.info("Invalid dot_plow feed label of %s", repr(label))

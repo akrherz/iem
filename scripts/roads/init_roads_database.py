@@ -5,7 +5,7 @@
 
 import requests
 from ingest_roads_rest import LOG, URI
-from pyiem.util import get_dbconn
+from pyiem.database import get_dbconn
 from shapely.geometry import LineString, MultiLineString
 
 
@@ -13,8 +13,6 @@ def main():
     """Go Main, please"""
     pgconn = get_dbconn("postgis")
     cursor = pgconn.cursor()
-    # cursor.execute("DELETE from roads_current")
-    # LOG.info("removed %s rows from roads_current", cursor.rowcount)
     req = requests.get(URI, timeout=30)
     jobj = req.json()
     archive_begin = "2022-12-20 12:00"

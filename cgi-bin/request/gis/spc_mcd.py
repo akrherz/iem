@@ -11,7 +11,6 @@ from pyiem.exceptions import IncompleteWebRequest
 from pyiem.util import get_sqlalchemy_conn
 from pyiem.webutil import iemapp
 
-# cgitb.enable()
 PRJFILE = "/opt/iem/data/gis/meta/4326.prj"
 
 

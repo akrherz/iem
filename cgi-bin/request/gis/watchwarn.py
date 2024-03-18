@@ -206,6 +206,8 @@ def do_excel(sql):
     """Generate an Excel format response."""
     with get_sqlalchemy_conn("postgis") as conn:
         df = pd.read_sql(sql, conn, index_col=None)
+    if len(df.index) >= 1048576:
+        raise IncompleteWebRequest("Result too large for Excel download")
     # Back-convert datetimes :/
     for col in (
         "utc_issue utc_expire utc_prodissue utc_updated utc_polygon_begin "

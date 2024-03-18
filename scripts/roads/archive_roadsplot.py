@@ -10,7 +10,7 @@ import sys
 import tempfile
 from zoneinfo import ZoneInfo
 
-import requests
+import httpx
 from pyiem.util import logger, utc
 
 LOG = logger()
@@ -34,10 +34,9 @@ def do(now):
     if routes == "ac":
         service = "http://iem.local/roads/iem.php"
 
-    req = requests.get(service, timeout=60)
-    tmpfd = tempfile.NamedTemporaryFile(delete=False)
-    tmpfd.write(req.content)
-    tmpfd.close()
+    req = httpx.get(service, timeout=60)
+    with tempfile.NamedTemporaryFile(delete=False) as tmpfd:
+        tmpfd.write(req.content)
     pqstr = (
         f"plot {routes} {now:%Y%m%d%H%M} iaroads.png "
         f"iaroads/iaroads_{now:%H%M}.png png"

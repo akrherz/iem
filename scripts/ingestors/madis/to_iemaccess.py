@@ -14,8 +14,9 @@ from zoneinfo import ZoneInfo
 
 import numpy as np
 from netCDF4 import chartostring
+from pyiem.database import get_dbconnc
 from pyiem.observation import Observation
-from pyiem.util import convert_value, get_dbconnc, logger, mm2inch, ncopen
+from pyiem.util import convert_value, logger, mm2inch, ncopen
 
 LOG = logger()
 MYDIR = "/mesonet/data/madis/mesonet1"
@@ -114,12 +115,9 @@ def main(argv):
     )
     obtime = nc.variables["observationTime"][:]
     pressure = nc.variables["stationPressure"][:]
-    # altimeter = nc.variables["altimeter"][:]
-    # slp = nc.variables["seaLevelPressure"][:]
     drct = nc.variables["windDir"][:]
     smps = nc.variables["windSpeed"][:]
     gmps = nc.variables["windGust"][:]
-    # gmps_drct = nc.variables["windDirMax"][:]
     pcpn = nc.variables["precipAccum"][:]
     rtk1 = nc.variables["roadTemperature1"][:]
     rtk2 = nc.variables["roadTemperature2"][:]

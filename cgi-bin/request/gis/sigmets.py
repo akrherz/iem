@@ -3,7 +3,14 @@
 Documentation for /cgi-bin/request/gis/sigmets.py
 -------------------------------------------------
 
-To be written.
+This service emits Shapefiles or KML of SIGMET data for a given time period.
+
+CGI Parameters
+--------------
+
+- `{year,month,day,hour,min}1`: The start time of the data request in UTC.
+- `{year,month,day,hour,min}2`: The end time of the data request in UTC.
+- `format`: The format of the output, either `shp` or `kml`.
 
 """
 
@@ -19,7 +26,6 @@ from pyiem.database import get_sqlalchemy_conn
 from pyiem.exceptions import IncompleteWebRequest
 from pyiem.webutil import iemapp
 
-# cgitb.enable()
 fiona.supported_drivers["KML"] = "rw"
 PRJFILE = "/opt/iem/data/gis/meta/4326.prj"
 

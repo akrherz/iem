@@ -19,7 +19,6 @@ from pyiem.database import get_sqlalchemy_conn
 from pyiem.exceptions import IncompleteWebRequest
 from pyiem.webutil import iemapp
 
-# cgitb.enable()
 fiona.supported_drivers["KML"] = "rw"
 PRJFILE = "/opt/iem/data/gis/meta/4326.prj"
 
