@@ -23,12 +23,8 @@ $content = <<<EOF
 <a class="btn btn-primary" href="/request/tempwind_aloft.php">Temp/Winds Aloft</a>
 </p>
 
-<div class="alert alert-warning">
-<p>The data presented here is beta quality and refinements are being made yet
-to improve text parsing robustness.  This message will be removed once more
-quality control checks are done to ensure fidelity.</p>
-</div>
-
+<p><a href="/cgi-bin/request/gis/sigmets.py?help"><i class="fa fa-file"></i> Backend documentation</a>
+for those wishing to script against this download portal.</p>
 
 <form method="GET" action="/cgi-bin/request/gis/sigmets.py">
 <table class="table">

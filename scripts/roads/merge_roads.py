@@ -5,7 +5,8 @@ import datetime
 import requests
 from ingest_roads_rest import LOG, URI
 from pandas import read_sql
-from pyiem.util import get_dbconn, get_sqlalchemy_conn, utc
+from pyiem.database import get_dbconn, get_sqlalchemy_conn
+from pyiem.util import utc
 from shapely.geometry import LineString, MultiLineString
 
 

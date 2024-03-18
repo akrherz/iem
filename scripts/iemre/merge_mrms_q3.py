@@ -77,8 +77,6 @@ def run(ts):
     y1 = int((lats[0, 0] - iemre.SOUTH) * 100.0)
     x0 = int((iemre.WEST - mrms.WEST) * 100.0)
     x1 = int((iemre.EAST - mrms.WEST) * 100.0)
-    # print(('y0:%s y1:%s x0:%s x1:%s lat0:%s offset:%s '
-    #       ) % (y0, y1, x0, x1, lats[0, 0], offset))
     ncprecip[offset, :, :] = np.flipud(total[y0:y1, x0:x1])
     nc.close()
 

@@ -4,7 +4,7 @@
 """
 
 import requests
-from pyiem.util import get_dbconn
+from pyiem.database import get_dbconn
 from shapely.geometry import LineString, MultiLineString
 
 URI = (

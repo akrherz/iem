@@ -212,7 +212,9 @@ def do_apsim(cursor, ctx):
         dec31 = datetime.date(thisyear, 12, 31)
         now = row["day"]
         while now <= dec31:
-            row = extra[now]
+            row = extra.get(now)
+            if row is None:
+                raise IncompleteWebRequest("Missing data for scenario year!")
             srad = -99 if row["srad"] is None else row["srad"]
             sio.write(
                 ("%4s %10.0f %10.3f %10.1f %10.1f %10.2f\n")

@@ -4,14 +4,13 @@ called from RUN_10_AFTER.sh
 """
 
 import datetime
-import os
 import sys
 from zoneinfo import ZoneInfo
 
 import numpy as np
 from osgeo import gdal
 from pyiem import iemre
-from pyiem.util import logger, ncopen, utc
+from pyiem.util import archive_fetch, logger, ncopen, utc
 
 gdal.UseExceptions()
 LOG = logger()
@@ -30,20 +29,18 @@ def run(ts):
         gmt = now.astimezone(ZoneInfo("UTC"))
         if gmt > currenttime:
             break
-        fn = gmt.strftime(
-            "/mesonet/ARCHIVE/data/%Y/%m/%d/GIS/ifc/p05m_%Y%m%d%H%M.png"
-        )
-        if not os.path.isfile(fn):
-            now += interval
-            continue
-        png = gdal.Open(fn, 0)
-        data = png.ReadAsArray()  # units are mm per 5 minutes
-        data = np.where(data > 254, 0, data) / 10.0
-        if total is None:
-            total = data
-        else:
-            total += data
-
+        ppath = gmt.strftime("%Y/%m/%d/GIS/ifc/p05m_%Y%m%d%H%M.png")
+        with archive_fetch(ppath) as fn:
+            if fn is None:
+                now += interval
+                continue
+            png = gdal.Open(fn, 0)
+            data = png.ReadAsArray()  # units are mm per 5 minutes
+            data = np.where(data > 254, 0, data) / 10.0
+            if total is None:
+                total = data
+            else:
+                total += data
         now += interval
     if total is None:
         LOG.info("No IFC Data found for date: %s", now)

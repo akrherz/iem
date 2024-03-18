@@ -14,9 +14,10 @@ import numpy as np
 from metar import Metar
 from metpy.units import masked_array, units
 from netCDF4 import chartostring
+from pyiem.database import get_dbconnc
 from pyiem.observation import Observation
 from pyiem.reference import TRACE_VALUE
-from pyiem.util import convert_value, get_dbconnc, logger, mm2inch, ncopen
+from pyiem.util import convert_value, logger, mm2inch, ncopen
 from tqdm import tqdm
 
 warnings.filterwarnings("ignore", category=DeprecationWarning)
@@ -130,7 +131,6 @@ def process(ncfn):
             return data[fieldname][i]
         # Now we have work to do
         departure = np.ma.max(np.ma.abs(data[f"{fieldname}QCD"][i, :]))
-        # print("departure: %s tolerance: %s" % (departure, tolerance))
         if departure <= tolerance:
             return data[fieldname][i]
         return None
@@ -191,7 +191,6 @@ def process(ncfn):
         val = decision(i, "temperature", 10)
         if val is not None:
             # Recall the pain enabling this
-            # iem.data['tmpf'] = float(data['temperature'][i])
             tmpc = float(data["temperatureC"][i])
             tc = tmpc if tmpc > 0 else (0 - tmpc)
             tf = "M" if tmpc < 0 else ""
@@ -200,7 +199,6 @@ def process(ncfn):
             tgroup += f"{tf}{(tc * 10.):03.0f}"
         val = decision(i, "dewpoint", 10)
         if t != "" and val is not None:
-            # iem.data['dwpf'] = float(data['dewpoint'][i])
             tmpc = float(data["dewpointC"][i])
             tc = tmpc if tmpc > 0 else (0 - tmpc)
             tf = "M" if tmpc < 0 else ""
@@ -282,17 +280,3 @@ def main(argv):
 
 if __name__ == "__main__":
     main(sys.argv)
-
-
-def test_sky():
-    """Test that we get good numbers with sky coverage."""
-    res = process_sky(
-        {},
-        [
-            "BRK",
-        ],
-        [
-            7999.9,
-        ],
-    )
-    assert res == "BRK080 "

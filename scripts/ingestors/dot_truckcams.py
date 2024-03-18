@@ -14,7 +14,8 @@ from zoneinfo import ZoneInfo
 
 import pyproj
 import requests
-from pyiem.util import exponential_backoff, get_dbconn, logger
+from pyiem.database import get_dbconn
+from pyiem.util import exponential_backoff, logger
 
 LOG = logger()
 P3857 = pyproj.Proj("EPSG:3857")
@@ -103,7 +104,6 @@ def process_features(features):
             continue
         photourl = feat["attributes"]["PHOTO_URL"]
         # Go get the URL for saving!
-        # print label, utc, feat['attributes']['PHOTO_URL']
         LOG.debug("Fetch %s", photourl)
         req = exponential_backoff(requests.get, photourl, timeout=15)
         if req is None or req.status_code != 200:

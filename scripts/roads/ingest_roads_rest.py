@@ -40,13 +40,8 @@ import zipfile
 import pandas as pd
 import requests
 import shapefile
-from pyiem.util import (
-    exponential_backoff,
-    get_dbconnc,
-    get_sqlalchemy_conn,
-    logger,
-    utc,
-)
+from pyiem.database import get_dbconnc, get_sqlalchemy_conn
+from pyiem.util import exponential_backoff, logger, utc
 from shapely.wkb import loads
 
 LOG = logger()
@@ -213,7 +208,6 @@ def main():
             continue
         # Timestamps appear to be UTC now
         if props["CARS_MSG_UPDATE_DATE"] is not None:
-            # print(json.dumps(feat, indent=4))
             valid = utc(1970, 1, 1) + datetime.timedelta(
                 seconds=props["CARS_MSG_UPDATE_DATE"] / 1000.0
             )

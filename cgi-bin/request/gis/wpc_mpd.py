@@ -1,4 +1,11 @@
-"""Dump WPC MPDs."""
+""".. title:: WPC MPD Shapefile Download
+
+Documentation for /cgi-bin/request/gis/wpc_mpd.py
+-------------------------------------------------
+
+To be written.
+
+"""
 
 # Local
 import tempfile
@@ -11,11 +18,10 @@ from pyiem.exceptions import IncompleteWebRequest
 from pyiem.util import get_sqlalchemy_conn
 from pyiem.webutil import iemapp
 
-# cgitb.enable()
 PRJFILE = "/opt/iem/data/gis/meta/4326.prj"
 
 
-@iemapp(default_tz="UTC")
+@iemapp(default_tz="UTC", help=__doc__)
 def application(environ, start_response):
     """Do something!"""
     if "sts" not in environ:
