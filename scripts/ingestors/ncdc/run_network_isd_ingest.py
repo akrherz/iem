@@ -60,10 +60,15 @@ def main(argv):
             cmd = [
                 "python",
                 "ingest_isd.py",
+                "--airforce",
                 option[0],
+                "--wban",
                 option[1],
+                "--faa",
                 stid,
+                "--year",
                 str(option[2].year),
+                "--year2",
                 str(eyear),
             ]
             LOG.info(" ".join(cmd))

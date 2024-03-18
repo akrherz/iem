@@ -8,6 +8,7 @@ import subprocess
 import sys
 from unittest import mock
 
+import click
 import requests
 import tqdm
 from pyiem.database import get_dbconn
@@ -37,19 +38,21 @@ def get_metadata(faa):
     return tzname, iemid
 
 
-def main(argv):
+@click.command()
+@click.option("--airforce", type=int, required=True)
+@click.option("--wban", type=int, required=True)
+@click.option("--faa", type=str, required=True)
+@click.option("--year", type=int, required=True)
+@click.option("--year2", type=int, required=True)
+def main(airforce, wban, faa, year, year2):
     """Go"""
     asosdb = get_dbconn("asos")
     iemdb = get_dbconn("iem")
-    airforce = int(argv[1])
-    wban = int(argv[2])
-    faa = argv[3]
     if len(faa) == 3:
         LOG.error("Provided faa ID should be 4 chars, abort")
         return
     tzname, iemid = get_metadata(faa)
-    year = max([int(argv[4]), 1928])  # database starts in 1928
-    year2 = int(argv[5])
+    year = max(year, 1928)  # database starts in 1928
     failedyears = []
     msgs = []
     dbid = normid(faa)
@@ -75,6 +78,7 @@ def main(argv):
         added = 0
         bad = 0
         skipped = 0
+        empty = 0
         current = []
         # build out our current obs
         acursor.execute(
@@ -105,6 +109,10 @@ def main(argv):
                 textprod.valid = data["valid"]
                 textprod.utcnow = data["valid"]
                 mtr = to_metar(textprod, data["metar"])
+                # Avoid KDSM 150559Z AUTO RMK IEM_DS3505
+                if len(mtr.code) == 32:
+                    empty += 1
+                    continue
                 to_iemaccess(
                     icursor,
                     mtr,
@@ -115,7 +123,8 @@ def main(argv):
                 )
                 added += 1
         msgs.append(
-            f"  {year}: {faa} added: {added} bad: {bad} skipped: {skipped}"
+            f"  {year}: {faa} added: {added} bad: {bad} skipped: {skipped} "
+            f"empty: {empty}"
         )
         icursor.close()
         iemdb.commit()
@@ -125,4 +134,4 @@ def main(argv):
 
 
 if __name__ == "__main__":
-    main(sys.argv)
+    main()
