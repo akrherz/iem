@@ -58,7 +58,6 @@ def init_df(state, date):
             continue
         if entry["threading"]:
             threaded[sid] = nt.get_threading_id(sid, date)
-            continue
         i, j = iemre.find_ij(entry["lon"], entry["lat"])
         rows.append(
             {
@@ -309,9 +308,7 @@ def merge_threaded(df, threaded):
         copysid = threaded[sid]
         if copysid in df.index:
             # This gets tricky, but we need to retain the dbhas flag
-            dbhas = df.at[copysid, "dbhas"]
-            if sid in df.index:
-                dbhas = df.at[sid, "dbhas"]
+            dbhas = sid in df.index and df.at[sid, "dbhas"]
             df.loc[sid] = df.loc[copysid]
             df.at[sid, "dbhas"] = dbhas
     return df
