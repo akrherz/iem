@@ -45,7 +45,7 @@ def do(meta, station, acis_station, interactive) -> int:
     payload = {
         "sid": acis_station,
         "sdate": meta["attributes"].get("FLOOR", "por"),
-        "edate": meta["attributes"].get("CEIL", "por"),
+        "edate": meta["attributes"].get("CEIL", edate),
         "elems": [
             {"name": "maxt", "add": "t"},
             {"name": "mint"},
