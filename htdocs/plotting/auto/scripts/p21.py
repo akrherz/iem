@@ -1,17 +1,23 @@
 """
-This map displays an analysis of the change in
-average high or low temperature over a time period of your choice.
+This autoplot intends to show the spatial distribution of the change in
+temperature or precipitation climatology over a given period of days. The
+climatology is based on the 1991-2020 period from NCEI.
 """
 
 import datetime
 
 import pandas as pd
+from pyiem.database import get_sqlalchemy_conn
 from pyiem.exceptions import NoDataFound
 from pyiem.plot import centered_bins, get_cmap
 from pyiem.plot.geoplot import MapPlot
-from pyiem.util import get_autoplot_context, get_sqlalchemy_conn
+from pyiem.util import get_autoplot_context
 
-PDICT = {"high": "High temperature", "low": "Low Temperature"}
+PDICT = {
+    "high": "High temperature",
+    "low": "Low Temperature",
+    "precip": "Precipitation",
+}
 
 
 def get_description():
@@ -59,6 +65,10 @@ def plotter(fdict):
     ctx = get_autoplot_context(fdict, get_description())
     date1 = ctx["date1"]
     date2 = ctx["date2"]
+    if date2 < date1:
+        days = int((date1 - date2).days)
+    else:
+        days = int((date2 - date1).days)
     date1 = date1.replace(year=2000)
     date2 = date2.replace(year=2000)
 
@@ -67,20 +77,22 @@ def plotter(fdict):
         df = pd.read_sql(
             """
         WITH t2 as (
-            SELECT station, high, low from ncei_climate91 WHERE
+            SELECT station, high, low, precip from ncei_climate91 WHERE
             valid = %s
         ), t1 as (
-            SELECT station, high, low from ncei_climate91 where
+            SELECT station, high, low, precip from ncei_climate91 where
             valid = %s
         ), data as (
             SELECT t2.station, t1.high as t1_high, t2.high as t2_high,
-            t1.low as t1_low, t2.low as t2_low from t1 JOIN t2 on
+            t1.low as t1_low, t2.low as t2_low,
+            t1.precip as t1_precip, t2.precip as t2_precip
+            from t1 JOIN t2 on
             (t1.station = t2.station)
         )
         SELECT d.station, ST_x(geom) as lon, ST_y(geom) as lat,
-        t2_high -  t1_high as high, t2_low - t1_low as low from data d JOIN
+        t2_high -  t1_high as high, t2_low - t1_low as low,
+        t2_precip - t1_precip as precip from data d JOIN
         stations s on (s.id = d.station) where s.network = 'NCEI91'
-        and s.state not in ('HI', 'AK')
         """,
             conn,
             params=(date2, date1),
@@ -89,7 +101,6 @@ def plotter(fdict):
     if df.empty:
         raise NoDataFound("No Data Found.")
 
-    days = int((date2 - date1).days)
     mp = MapPlot(
         apctx=ctx,
         title=(
@@ -106,7 +117,7 @@ def plotter(fdict):
         df[varname].values,
         centered_bins(rng, bins=10),
         cmap=get_cmap(ctx["cmap"]),
-        units="F",
+        units="inch" if varname == "precip" else "F",
     )
 
     return mp.fig, df

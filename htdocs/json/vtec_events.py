@@ -22,8 +22,6 @@ def get_res(cursor, wfo, year, phenomena, significance, combo):
       significance (str, optional): 1 character VTEC significance
       combo (int, optional): special one-offs
     """
-    table = f"warnings_{year}"
-    sbwtable = f"sbw_{year}"
     limits = ["phenomena is not null", "significance is not null"]
     orderby = "u.phenomena ASC, u.significance ASC, u.utc_issue ASC"
     if phenomena != "":
@@ -42,7 +40,7 @@ def get_res(cursor, wfo, year, phenomena, significance, combo):
     WITH polyareas as (
         SELECT phenomena, significance, eventid, round((ST_area(
         ST_transform(geom,2163)) / 1000000.0)::numeric,0) as area
-        from {sbwtable} WHERE wfo = %s and eventid is not null and
+        from sbw WHERE vtec_year = %s and wfo = %s and eventid is not null and
         {plimit} and status = 'NEW'
     ), ugcareas as (
         SELECT
@@ -55,17 +53,17 @@ def get_res(cursor, wfo, year, phenomena, significance, combo):
         min(product_issue) at time zone 'UTC' as utc_product_issue,
         max(init_expire) at time zone 'UTC' as utc_init_expire,
         max(hvtec_nwsli) as nwsli,
-        max(fcster) as fcster from {table} w JOIN ugcs u on (w.gid = u.gid)
-        WHERE w.wfo = %s and eventid is not null and {plimit}
+        max(fcster) as fcster from warnings w JOIN ugcs u on (w.gid = u.gid)
+        WHERE vtec_year = %s and w.wfo = %s and eventid is not null
+        and {plimit}
         GROUP by phenomena, significance, eventid)
 
     SELECT u.*, coalesce(p.area, u.area) as myarea
     from ugcareas u LEFT JOIN polyareas p on
     (u.phenomena = p.phenomena and u.significance = p.significance
-     and u.eventid = p.eventid)
-        ORDER by {orderby}
+     and u.eventid = p.eventid) ORDER by {orderby}
     """,
-        (wfo, wfo),
+        (year, wfo, year, wfo),
     )
     res = {
         "wfo": wfo,
