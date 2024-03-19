@@ -16,7 +16,7 @@ EXL = "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"
 def make_url(row):
     """Build URL."""
     return (
-        f"https://mesonet.agron.iastate.edu/vtec/#{row['issued'][:4]}-"
+        f"https://mesonet.agron.iastate.edu/vtec/#{row['vtec_year']}-"
         f"O-NEW-K{row['wfo']}-"
         f"{row['phenomena']}-{row['significance']}-{row['eventid']:04.0f}"
     )
@@ -53,7 +53,9 @@ def get_df(wfo, start, end, phenomena, significance):
                 'YYYY-MM-DDThh24:MI:SSZ') as updated,
             to_char(purge_time at time zone 'UTC',
                 'YYYY-MM-DDThh24:MI:SSZ') as purge_time,
-            eventid, phenomena, significance, hvtec_nwsli, wfo, ugc
+            eventid, phenomena, significance, hvtec_nwsli, wfo, ugc,
+            product_ids[1] as product_id,
+            vtec_year, product_ids[cardinality(product_ids)] as last_product_id
             from warnings WHERE wfo = :wfo and issue < :end
             and (expire > :start or init_expire > :start)
             {plimiter} ORDER by issue ASC
@@ -86,6 +88,8 @@ def as_json(df):
                 "phenomena": row["phenomena"],
                 "hvtec_nwsli": row["hvtec_nwsli"],
                 "significance": row["significance"],
+                "last_product_id": row["last_product_id"],
+                "product_id": row["product_id"],
                 "wfo": row["wfo"],
                 "ugc": row["ugc"],
             }
