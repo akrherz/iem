@@ -9,6 +9,7 @@ cd ../iemre
 python stage4_12z_adjust.py $(date +'%Y %m %d')
 # Copy the data to IEMRE hourly
 python precip_ingest.py --valid12z=$(date +'%Y-%m-%dT12:00:00')
+python ingest_nohrsc.py --date=$(date +'%Y-%m-%d')
 python daily_analysis.py --date=$(date +'%Y-%m-%d')
 
 cd ../prism
@@ -34,7 +35,9 @@ python sync_coop_updates.py
 cd ../iemre
 # Since we have now adjusted the 12z precip 1 day ago, we should rerun
 # iemre for two days ago
+python ingest_nohrsc.py --date=$(date --date '2 days ago' +'%Y-%m-%d')
 python daily_analysis.py --date=$(date --date '2 days ago' +'%Y-%m-%d')
+python ingest_nohrsc.py --date=$(date --date '10 days ago' +'%Y-%m-%d')
 # Updated soil temperature data from ERA5
 python daily_analysis.py --date=$(date --date '10 days ago' +'%Y-%m-%d')
 

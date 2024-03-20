@@ -169,7 +169,6 @@ def plotter(fdict):
             plot_units = "%"
             clevs = pretty_bins(0, 100)
         elif varname in ["p01d", "p01d_12z", "snow_12z", "snowd_12z"]:
-            # Value is in W m**-2, we want MJ
             plot_units = "inch"
             if ptiles[2] < 1:
                 clevs = np.arange(0, 1.01, 0.1)

@@ -249,7 +249,7 @@ def use_climodat_12z(ts, ds):
         ds["low_tmpk_12z"].values = convert_value(res, "degF", "degK")
 
     res = generic_gridder(df, "snowdata")
-    if res is not None:
+    if res is not None and ts < datetime.date(2008, 10, 1):  # NOHRSC covers
         ds["snow_12z"].values = convert_value(res, "inch", "millimeter")
 
     res = generic_gridder(df, "snowddata")
