@@ -3,7 +3,61 @@
 Documentation for /cgi-bin/request/gis/watchwarn.py
 ---------------------------------------------------
 
-To be written.
+This service emits shapefiles (with additional csv included),
+or even Excel files.  This service is
+rather blunt force and perhaps you should review the mountain of adhoc JSON/API
+services found at
+IEM Legacy JSON Services https://mesonet.agron.iastate.edu/json/ or at IEM API
+Services https://mesonet.agron.iastate.edu/api/1/docs/ .
+
+CGI Parameters
+--------------
+
+* `accept`: The format to return, either "shapefile" or "excel".  Note that the
+    "shapefile" format returns as a ZIP file and also includes a simple CSV
+    file within.
+* `addsvs`: If "yes", include polygons that were included within any followup
+    statements after issuance.  The default is to only return the initial
+    polygon.
+* `ets`: The end timestamp in UTC. The format is ISO8601, e.g.
+    2010-06-01T00:00Z.
+* `limit0`: If "yes", only include Tornado, Severe Thunderstorm, Flash Flood,
+    and Marine Warnings.
+* `limit1`: If "yes", only include Storm Based Warnings.
+* `limit2`: If "yes", only include Emergency Warnings.
+* `limitps`: If "yes", only include the specified phenomena and significance.
+* `location_group`: The location group to use, either "wfo" or "states".
+* `phenomena`: The two character VTEC phenomena to include, default is "TO"
+    when `limitps` is set.
+* `simple`: If "yes", use a simplified geometry for the UGC counties/zones.
+    This can be useful for reducing the size of the shapefile.
+* `significance`: The two character VTEC significance to include,
+    default is "W" when `limitps` is set.
+* `states[]`: List (either multiple params or comma seperated list) of states
+    to include data for.
+* `sts`: The start timestamp in UTC. The format is ISO8601, e.g.
+    2010-06-01T00:00Z.
+* `timeopt`: The time option to use, either 1 or 2, default is 1, which uses
+    the start and end timestamps to determine which events to include. Option
+    2 uses the at timestamp to determine which events to include.
+* `wfo[]` or `wfos[]`: List (either multiple params or comma seperated list) of
+    WFOs to include data for.
+* `{year,month,day,hour,minute}1`: The start timestamp components in UTC, if
+    you specify a `sts` parameter, these are ignored.
+* `{year,month,day,hour,minute}2`: The end timestamp components in UTC, if
+    you specify a `ets` parameter, these are ignored.
+* `{year,month,day,hour,minute}3`: The at timestamp components in UTC.  When
+    `timeopt` is 2, this is used to find all events that were valid at this
+    time.
+
+Example Usage
+-------------
+
+Return all Tornado Warnings for the Des Moines WFO in shapefile format during
+2023.
+
+    https://mesonet.agron.iastate.edu/cgi-bin/request/gis/watchwarn.py?accept=shapefile&sts=2023-01-01T00:00Z&ets=2024-01-01T00:00Z&wfo[]=DMX&limitps=yes&phenomena=TO&significance=W
+
 """
 
 import datetime
