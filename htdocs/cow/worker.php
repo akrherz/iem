@@ -11,7 +11,7 @@ function printLSR($lsr, $verified = FALSE)
 {
     $valid = new DateTime($lsr["valid"]);
     $lt = array(
-        "x" => "Debris Flow",
+        "x" => "Debris Flow", "q" => "Snow Squall",
         "F" => "Flash Flood", "T" => "Tornado", "D" => "Tstm Wnd Dmg",
         "H" => "Hail", "G" => "Wind Gust", "W" => "Waterspout",
         "M" => "Marine Tstm Wnd", "2" => "Dust Storm"
