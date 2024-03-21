@@ -118,7 +118,9 @@ def handle_error(exp, fmt, uri):
             f"URI:{uri} {exp.__class__.__name__} "
             f"method:{tb[2]} lineno:{tb[1]} {exp}\n"
         )
-    if not isinstance(exp, (NoDataFound, UnknownStationException)):
+    if not isinstance(
+        exp, (IncompleteWebRequest, NoDataFound, UnknownStationException)
+    ):
         traceback.print_exc()
     del (exc_type, exc_value, exc_traceback, tb)
     if fmt in ["png", "svg", "pdf"]:
@@ -214,9 +216,7 @@ def workflow(mc, environ, fmt):
     # res should be a 3 length tuple
     try:
         res, meta = get_res_by_fmt(scriptnum, fmt, fdict)
-    except UnknownStationException as exp:
-        return HTTP400, handle_error(exp, fmt, environ.get("REQUEST_URI"))
-    except NoDataFound as exp:
+    except (IncompleteWebRequest, NoDataFound, UnknownStationException) as exp:
         return HTTP400, handle_error(exp, fmt, environ.get("REQUEST_URI"))
     except Exception as exp:
         # Log this so that my review scripts see it.
