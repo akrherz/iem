@@ -272,7 +272,8 @@ def do_century(cursor, ctx):
     )
 
     SELECT year, month, avg(high) as tmax, avg(low) as tmin,
-    sum(precip) as prec from data GROUP by year, month
+    sum(precip) as prec from data where high is not null and low is not null
+    and precip is not null GROUP by year, month
     """,
         (station, ctx["scenario_sts"], ctx["scenario_ets"], station, sts, ets),
     )
