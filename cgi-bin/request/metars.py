@@ -14,12 +14,6 @@ Retrieve all METARs for the hour starting at 00 UTC on 1 January 2016:
 
     https://mesonet.agron.iastate.edu/cgi-bin/request/metars.py?valid=2016010100
 
-CGI Parameters:
----------------
-
-* `valid`: The hour over which to return data.  The format is `YYYYMMDDHH` and
-    would include any observations between that time and the next hour.
-
 """
 
 import datetime
@@ -27,7 +21,27 @@ import sys
 from io import StringIO
 from zoneinfo import ZoneInfo
 
-from pyiem.webutil import iemapp
+from pydantic import AwareDatetime, Field, field_validator
+from pyiem.webutil import CGIModel, iemapp
+
+
+class Schema(CGIModel):
+    """Our schema for this request"""
+
+    valid: AwareDatetime = Field(
+        ...,
+        description=(
+            "Hour truncated UTC timestamp to request data for. The "
+            "format is `YYYYMMDDHH`."
+        ),
+    )
+
+    @field_validator("valid", mode="before")
+    def parse_valid(cls, value):
+        """Ensure valid is a valid datetime"""
+        return datetime.datetime.strptime(value, "%Y%m%d%H").replace(
+            tzinfo=ZoneInfo("UTC")
+        )
 
 
 def check_load(cursor):
@@ -45,7 +59,7 @@ def check_load(cursor):
     return True
 
 
-@iemapp(iemdb="asos", iemdb_cursorname="streamer", help=__doc__)
+@iemapp(iemdb="asos", iemdb_cursorname="streamer", schema=Schema, help=__doc__)
 def application(environ, start_response):
     """Do Something"""
     cursor = environ["iemdb.asos.cursor"]
@@ -55,10 +69,7 @@ def application(environ, start_response):
         )
         return [b"ERROR: server over capacity, please try later"]
     start_response("200 OK", [("Content-type", "text/plain")])
-    valid = datetime.datetime.strptime(
-        environ.get("valid", "2016010100")[:10], "%Y%m%d%H"
-    )
-    valid = valid.replace(tzinfo=ZoneInfo("UTC"))
+    valid = environ["valid"]
     cursor.execute(
         """
         SELECT metar from alldata
