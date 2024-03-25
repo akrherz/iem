@@ -3,7 +3,25 @@
 Documentation for /cgi-bin/windrose.py
 --------------------------------------
 
-This service returns plots and data in windrose format.
+This service returns a windrose plot or data table.  There's a lot of options
+here to consider, so perhaps some examples are in order.
+
+Example Usage
+-------------
+
+Plot a windrose for Ames, IA for the month of June 2021:
+
+https://mesonet.agron.iastate.edu/cgi-bin/mywindrose.py?station=AMW&network=IA_ASOS&year1=2021&month1=6&day1=1&year2=2021&month2=6&day2=30&hour2=23&fmt=png
+
+Changelog
+---------
+
+- `2024-03-25`
+    The backend was migrated to use a pydantic schema, which will
+    generate more structured error messages when the user provides invalid
+    input.
+- `2024-03-25`
+    The `sts` and `ets` parameters were formalized and are timezone aware.
 
 """
 
@@ -11,12 +29,102 @@ import datetime
 from io import BytesIO
 from zoneinfo import ZoneInfo
 
+from pydantic import AwareDatetime, Field
 from pyiem.database import get_dbconn
-from pyiem.exceptions import BadWebRequest, IncompleteWebRequest
+from pyiem.exceptions import IncompleteWebRequest
 from pyiem.network import Table as NetworkTable
 from pyiem.plot.use_agg import plt
-from pyiem.webutil import iemapp
+from pyiem.webutil import CGIModel, iemapp
 from pyiem.windrose_utils import windrose
+
+
+class Schema(CGIModel):
+    bins: str = Field(None, description="Wind Speed Bins separated by comma")
+    conv: str = Field(
+        "from",
+        description=(
+            "Wind Convention, either from (meteorology) or to (engineering)"
+        ),
+    )
+    dpi: int = Field(
+        100, description="Image Dots per inch (DPI)", ge=10, le=1000
+    )
+    ets: AwareDatetime = Field(
+        None,
+        description=(
+            "End time with timezone included, otherwise "
+            "{year,month,day,hour,minute}2 values used"
+        ),
+    )
+    fmt: str = Field(
+        "png",
+        description="Output image format, one of png, pdf, svg",
+    )
+    hourlimit: bool = Field(
+        False,
+        description="Limit the data to the hour provided",
+    )
+    hourrangelimit: bool = Field(
+        False,
+        description="Limit the data to the hour range provided",
+    )
+    justdata: bool = Field(
+        False,
+        description="Return data table instead of plot",
+    )
+    level: int = Field(
+        None,
+        description="In the case of RAOB data, the hPa level to use",
+        ge=0,
+        le=1050,
+    )
+    limit_by_doy: bool = Field(
+        False,
+        description="Limit the data to the day of year range provided",
+    )
+    monthlimit: bool = Field(
+        False,
+        description="Limit the data to the start month provided",
+    )
+    network: str = Field(
+        None,
+        description="Network Identifier, best to provide otherwise guessed",
+    )
+    nsector: int = Field(
+        36,
+        description="Number of sectors to use for windrose plot",
+        ge=4,
+        le=180,
+    )
+    staticrange: int = Field(
+        None,
+        description="Static range for windrose plot",
+        ge=1,
+        le=100,
+    )
+    station: str = Field(..., description="Station Identifier")
+    sts: AwareDatetime = Field(
+        None,
+        description=(
+            "Start time with timezone included, otherwise "
+            "{year,month,day,hour,minute}1 values used"
+        ),
+    )
+    units: str = Field(
+        "mph",
+        description="Units to use for speed, one of mph, kts, mps, kph",
+        pattern="^(mph|kts|mps|kph)$",
+    )
+    year1: int = Field(1900, description="Start Year, if sts not provided")
+    month1: int = Field(1, description="Start Month, if sts not provided")
+    day1: int = Field(1, description="Start Day, if sts not provided")
+    hour1: int = Field(0, description="Start Hour, if sts not provided")
+    minute1: int = Field(0, description="Start Minute, if sts not provided")
+    year2: int = Field(2050, description="End Year, if ets not provided")
+    month2: int = Field(1, description="End Month, if ets not provided")
+    day2: int = Field(1, description="End Day, if ets not provided")
+    hour2: int = Field(0, description="End Hour, if ets not provided")
+    minute2: int = Field(0, description="End Minute, if ets not provided")
 
 
 def send_error(form, msg, start_response):
@@ -59,8 +167,6 @@ def guess_network(station):
 
 def get_station_info(environ):
     """Determine some metadata we need to process this form request."""
-    if "station" not in environ:
-        raise IncompleteWebRequest("GET parameter station= missing")
     station = environ["station"].upper()
     network = environ.get("network")
     if network is None:
@@ -80,25 +186,36 @@ def get_station_info(environ):
     return dbname, network, station
 
 
-@iemapp(help=__doc__)
+@iemapp(help=__doc__, parse_times=False, schema=Schema)
 def application(environ, start_response):
     """Query out the CGI variables"""
-    dpi = int(environ.get("dpi", 100))
-    if not 10 < dpi < 1000:
-        raise BadWebRequest(f"Invalid dpi of {dpi} specified")
-    if "sts" not in environ:
-        environ["sts"] = datetime.datetime(1900, 1, 1)
-        environ["ets"] = datetime.datetime(2050, 1, 1)
     dbname, network, station = get_station_info(environ)
-    if "hour1" in environ and "hourlimit" in environ:
-        hours = [
-            int(environ["hour1"]),
+    nt = NetworkTable(network, only_online=False)
+    if station not in nt.sts:
+        return [
+            send_error(environ, "Unknown station identifier", start_response)
         ]
-    elif (
-        "hour1" in environ
-        and "hour2" in environ
-        and "hourrangelimit" in environ
-    ):
+    tzname = nt.sts[station]["tzname"] if network != "RAOB" else "UTC"
+    if environ["sts"] is None:
+        environ["sts"] = datetime.datetime(
+            int(environ.get("year1", 1900)),
+            int(environ.get("month1", 1)),
+            int(environ.get("day1", 1)),
+            int(environ.get("hour1", 0)),
+            int(environ.get("minute1", 0)),
+            tzinfo=ZoneInfo(tzname),
+        )
+        environ["ets"] = datetime.datetime(
+            int(environ.get("year2", 2050)),
+            int(environ.get("month2", 1)),
+            int(environ.get("day2", 1)),
+            int(environ.get("hour2", 0)),
+            int(environ.get("minute2", 0)),
+            tzinfo=ZoneInfo(tzname),
+        )
+    if environ["hourlimit"]:
+        hours = [environ["sts"].hour]
+    elif environ["hourrangelimit"]:
         if environ["sts"].hour > environ["ets"].hour:  # over midnight
             hours = list(range(environ["sts"].hour, 24))
             hours.extend(range(0, environ["ets"].hour))
@@ -109,44 +226,15 @@ def application(environ, start_response):
     else:
         hours = list(range(0, 24))
 
-    if "units" in environ and environ["units"] in ["mph", "kts", "mps", "kph"]:
-        units = environ["units"]
-    else:
-        units = "mph"
-
-    if "month1" in environ and "monthlimit" in environ:
-        months = [
-            int(environ["month1"]),
-        ]
+    if environ["monthlimit"]:
+        months = [environ["sts"].month]
     else:
         months = list(range(1, 13))
 
-    try:
-        nsector = int(environ["nsector"])
-    except Exception:
-        nsector = 36
-
-    rmax = None
-    if "staticrange" in environ:
-        val = int(environ["staticrange"])
-        rmax = val if (1 < val < 100) else 100
-
-    nt = NetworkTable(network, only_online=False)
-    if station not in nt.sts:
-        return [
-            send_error(environ, "Unknown station identifier", start_response)
-        ]
-    tzname = nt.sts[station]["tzname"]
-    if network != "RAOB":
-        # Assign the station time zone to the sts and ets
-        environ["sts"] = environ["sts"].replace(tzinfo=ZoneInfo(tzname))
-        environ["ets"] = environ["ets"].replace(tzinfo=ZoneInfo(tzname))
-    else:
-        tzname = "UTC"
     bins = []
-    if "bins" in environ:
+    if environ["bins"] is not None:
         bins = [
-            float(v) for v in environ.get("bins").split(",") if v.strip() != ""
+            float(v) for v in environ["bins"].split(",") if v.strip() != ""
         ]
         # Ensure that the bins are in ascending order and unique
         bins = sorted(list(set(bins)))
@@ -157,22 +245,22 @@ def application(environ, start_response):
         ets=environ["ets"],
         months=months,
         hours=hours,
-        units=units,
-        nsector=nsector,
-        justdata=("justdata" in environ),
-        rmax=rmax,
+        units=environ["units"],
+        nsector=environ["nsector"],
+        justdata=environ["justdata"],
+        rmax=environ["staticrange"],
         sname=nt.sts[station]["name"],
         tzname=tzname,
-        level=environ.get("level", None),
-        limit_by_doy=(environ.get("limit_by_doy") == "1"),
+        level=environ["level"],
+        limit_by_doy=environ["limit_by_doy"],
         bins=bins,
-        plot_convention=environ.get("conv", "from"),
+        plot_convention=environ["conv"],
     )
-    if "justdata" in environ:
+    if environ["justdata"]:
         # We want text
         start_response("200 OK", [("Content-type", "text/plain")])
         return [res.encode("utf-8")]
-    fmt = environ.get("fmt", "png")
+    fmt = environ["fmt"]
     if fmt == "png":
         ct = "image/png"
     elif fmt == "pdf":
@@ -183,5 +271,5 @@ def application(environ, start_response):
         return [send_error(environ, "Invalid fmt set", start_response)]
     start_response("200 OK", [("Content-type", ct)])
     bio = BytesIO()
-    res.savefig(bio, format=fmt, dpi=dpi)
+    res.savefig(bio, format=fmt, dpi=environ["dpi"])
     return [bio.getvalue()]
