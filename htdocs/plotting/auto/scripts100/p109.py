@@ -42,10 +42,11 @@ from zoneinfo import ZoneInfo
 
 import numpy as np
 import pandas as pd
+from pyiem.database import get_sqlalchemy_conn
 from pyiem.exceptions import NoDataFound
 from pyiem.nws import vtec
 from pyiem.plot import MapPlot, get_cmap
-from pyiem.util import get_autoplot_context, get_sqlalchemy_conn
+from pyiem.util import get_autoplot_context
 
 PDICT = {
     "count": "Event Count",
@@ -264,6 +265,8 @@ def get_count_bins(df, varname):
     """Figure out sensible bins."""
     minv = df[varname].min()
     maxv = df[varname].max()
+    if pd.isna(maxv):
+        return np.arange(1, 10, 1)
     if varname == "count_rank":
         bins = np.arange(1, maxv + 2)
     elif varname == "count":
