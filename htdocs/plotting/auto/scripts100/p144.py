@@ -7,16 +7,12 @@ subsequent periods below 50 degrees for that year.
 """
 
 import pandas as pd
+from pyiem.database import get_sqlalchemy_conn
 from pyiem.exceptions import NoDataFound
 from pyiem.network import Table as NetworkTable  # This is needed.
 from pyiem.plot import figure_axes
 from pyiem.plot.use_agg import plt
-from pyiem.util import (
-    convert_value,
-    get_autoplot_context,
-    get_sqlalchemy_conn,
-    utc,
-)
+from pyiem.util import convert_value, get_autoplot_context, utc
 
 XREF = {
     "AEEI4": "A130209",

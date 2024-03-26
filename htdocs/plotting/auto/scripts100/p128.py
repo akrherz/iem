@@ -2,12 +2,12 @@
 This chart compares yearly summaries between two long term climate sites. Only
 years with similiar observation counts are used in this data presentation.
 """
-# pylint: disable=no-member
 
 import pandas as pd
+from pyiem.database import get_sqlalchemy_conn
 from pyiem.exceptions import NoDataFound
 from pyiem.plot import figure_axes
-from pyiem.util import get_autoplot_context, get_sqlalchemy_conn
+from pyiem.util import get_autoplot_context
 
 PDICT = {
     "avg_high": "Average High Temperature",

@@ -1,17 +1,29 @@
-"""
-Download NASS Iowa data.
+""".. title:: Download NASS Iowa Data
+
+Documentation for /cgi-bin/request/nass_iowa.py
+-----------------------------------------------
+
+This service provides a download of the NASS Iowa data that is ingested into
+the IEM database.  The data is available in Excel format.  There are no options
+to this service at this time.
+
+Example Usage
+~~~~~~~~~~~~~
+
+   https://mesonet.agron.iastate.edu/cgi-bin/request/nass_iowa.py
+
 """
 
 from io import BytesIO
 
 import pandas as pd
-from pyiem.util import get_sqlalchemy_conn
+from pyiem.database import get_sqlalchemy_conn
 from pyiem.webutil import iemapp
 
 EXL = "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"
 
 
-@iemapp()
+@iemapp(help=__doc__)
 def application(_environ, start_response):
     """Go Main Go"""
     headers = [

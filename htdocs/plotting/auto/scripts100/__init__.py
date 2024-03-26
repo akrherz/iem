@@ -1,1 +1,1 @@
-"""Placeholder so that directory can be loaded as a lib"""
+"""Placeholder so that directory can be loaded as a lib."""
