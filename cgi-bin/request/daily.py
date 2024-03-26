@@ -3,20 +3,84 @@
 Documentation for /cgi-bin/request/daily.py
 -------------------------------------------
 
-To be written.
+This data source contains a combination of IEM computed calendar day summaries
+and some more official totals with some sites reporting explicit values.  One
+should also note that typically the airport stations are for a 24 hour period
+over standard time, which means 1 AM to 1 AM daylight time.
+
+Example Usage
+-------------
+
+Request all high temperature data for Ames, IA (AMW) for the month of January
+2019:
+
+    https://mesonet.agron.iastate.edu/cgi-bin/request/daily.py?sts=2019-01-01&ets=2019-01-31&network=IA_ASOS&stations=AMW&var=max_temp_f&format=csv
+
+
+Request daily precipitation and the climatology for all stations in Washington
+state on 23 June 2023 in Excel format:
+
+    https://mesonet.agron.iastate.edu/cgi-bin/request/daily.py?sts=2023-06-23&ets=2023-06-23&network=WA_ASOS&stations=_ALL&var=precip_in,climo_precip_in&format=excel
+
 """
 
+import copy
 import sys
+from datetime import datetime
 from io import BytesIO, StringIO
 
 import pandas as pd
+from pydantic import Field
 from pyiem.database import get_dbconn, get_sqlalchemy_conn
-from pyiem.exceptions import IncompleteWebRequest
 from pyiem.network import Table as NetworkTable
-from pyiem.webutil import ensure_list, iemapp
+from pyiem.webutil import CGIModel, ListOrCSVType, iemapp
 from sqlalchemy import text
 
 EXL = "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"
+DEFAULT_COLS = (
+    "max_temp_f,min_temp_f,max_dewpoint_f,min_dewpoint_f,precip_in,"
+    "avg_wind_speed_kts,avg_wind_drct,min_rh,avg_rh,max_rh,"
+    "climo_high_f,climo_low_f,climo_precip_in,snow_in,snowd_in,"
+    "min_feel,avg_feel,max_feel,max_wind_speed_kts,max_wind_gust_kts,"
+    "srad_mj"
+).split(",")
+
+
+class MyCGI(CGIModel):
+    ets: datetime = Field(None, description="End date to query")
+    format: str = Field("csv", description="The format of the output")
+    na: str = Field("None", description="The NA value to use")
+    network: str = Field(..., description="Network Identifier")
+    station: ListOrCSVType = Field(
+        [],
+        description=(
+            "Comma delimited or multi-param station identifiers, "
+            "_ALL for all stations in network (deprecated)"
+        ),
+    )
+    stations: ListOrCSVType = Field(
+        [],
+        description=(
+            "Comma delimited or multi-param station identifiers, "
+            "_ALL for all stations in network"
+        ),
+    )
+    sts: datetime = Field(None, description="Start date to query")
+    var: ListOrCSVType = Field(
+        None,
+        description=(
+            "Comma delimited or multi-param variable names to include in "
+            f"output, columns are: {DEFAULT_COLS}"
+        ),
+    )
+    year1: int = Field(None, description="Start year when sts is not provided")
+    month1: int = Field(
+        None, description="Start month when sts is not provided"
+    )
+    day1: int = Field(None, description="Start day when sts is not provided")
+    year2: int = Field(None, description="End year when ets is not provided")
+    month2: int = Field(None, description="End month when ets is not provided")
+    day2: int = Field(None, description="End day when ets is not provided")
 
 
 def overloaded():
@@ -68,13 +132,7 @@ def get_climate(network, stations):
 def get_data(network, sts, ets, stations, cols, na, fmt):
     """Go fetch data please"""
     if not cols:
-        cols = (
-            "max_temp_f,min_temp_f,max_dewpoint_f,min_dewpoint_f,precip_in,"
-            "avg_wind_speed_kts,avg_wind_drct,min_rh,avg_rh,max_rh,"
-            "climo_high_f,climo_low_f,climo_precip_in,snow_in,snowd_in,"
-            "min_feel,avg_feel,max_feel,max_wind_speed_kts,max_wind_gust_kts,"
-            "srad_mj"
-        ).split(",")
+        cols = copy.deepcopy(DEFAULT_COLS)
     cols.insert(0, "day")
     cols.insert(0, "station")
     climate = get_climate(network, stations)
@@ -131,11 +189,17 @@ def get_data(network, sts, ets, stations, cols, na, fmt):
     return sio.getvalue()
 
 
-@iemapp(help=__doc__)
+@iemapp(help=__doc__, schema=MyCGI, parse_times=False)
 def application(environ, start_response):
     """See how we are called"""
-    if "sts" not in environ or "ets" not in environ:
-        raise IncompleteWebRequest("GET start or end time parameters missing.")
+    if environ["sts"] is None:
+        environ["sts"] = datetime(
+            environ["year1"], environ["month1"], environ["day1"]
+        )
+    if environ["ets"] is None:
+        environ["ets"] = datetime(
+            environ["year2"], environ["month2"], environ["day2"]
+        )
     sts, ets = environ["sts"].date(), environ["ets"].date()
 
     if sts.year != ets.year and overloaded():
@@ -145,18 +209,17 @@ def application(environ, start_response):
         return [b"ERROR: server over capacity, please try later"]
 
     fmt = environ.get("format", "csv")
-    stations = ensure_list(environ, "stations")
+    stations = environ["stations"]
     if not stations:
-        stations = ensure_list(environ, "station")
+        stations = environ["station"]
     if not stations:
         start_response("200 OK", [("Content-type", "text/plain")])
         return [b"ERROR: No stations specified for request"]
-    network = environ.get("network", "")[:12]
-    if network == "":
-        start_response("200 OK", [("Content-type", "text/plain")])
-        return [b"ERROR: No network specified for request"]
-    cols = ensure_list(environ, "var")
-    na = environ.get("na", "None")
+    network = environ["network"][:20]
+    if "_ALL" in stations:
+        stations = list(NetworkTable(network, only_online=False).sts.keys())
+    cols = environ["var"]
+    na = environ["na"]
     if na not in ["M", "None", "blank"]:
         start_response("200 OK", [("Content-type", "text/plain")])
         return [b"ERROR: Invalid `na` value provided. {M, None, blank}"]
