@@ -122,6 +122,13 @@ daily_opts = [
         ),
     },
     {
+        "id": 252,
+        "label": (
+            "Frequency of Daily Variable Above/Below Threshold over "
+            "period of days (map)"
+        ),
+    },
+    {
         "id": 7,
         "label": "Growing Degree Day Periods for One Year by Planting Date",
     },
