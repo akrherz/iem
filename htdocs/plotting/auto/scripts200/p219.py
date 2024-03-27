@@ -16,15 +16,10 @@ import requests
 from matplotlib.patches import Rectangle
 from metpy.calc import wind_components
 from metpy.units import units
+from pyiem.database import get_dbconn, get_sqlalchemy_conn
 from pyiem.exceptions import NoDataFound
 from pyiem.plot import figure
-from pyiem.util import (
-    LOG,
-    get_autoplot_context,
-    get_dbconn,
-    get_sqlalchemy_conn,
-    utc,
-)
+from pyiem.util import LOG, get_autoplot_context, utc
 
 VIS = "visibility"
 TEXTARGS = {
@@ -94,6 +89,8 @@ def compute_flight_condition(row):
     if row["is_tempo"] and (not row["skyc"] or pd.isna(row[VIS])):
         return None
     level = 10000
+    if "SKC" in row["skyc"]:
+        return "VFR"
     if "OVC" in row["skyc"]:
         level = row["skyl"][row["skyc"].index("OVC")]
     if level == 10000 and "BKN" in row["skyc"]:
@@ -186,10 +183,12 @@ def plotter(fdict):
             valid = valid + (row["end_valid"] - valid) / 2
         # Between 1-3 plot the clouds
         for j, skyc in enumerate(row["skyc"]):
-            level = min([3200, row["skyl"][j]]) / 1600 + 1
-            if j + 1 == len(row["skyc"]):
-                clevelx.append(valid)
-                clevels.append(level)
+            level = 3
+            if skyc != "SKC":
+                level = min([3200, row["skyl"][j]]) / 1600 + 1
+                if j + 1 == len(row["skyc"]):
+                    clevelx.append(valid)
+                    clevels.append(level)
             ax.text(valid, level, skyc, **TEXTARGS).set_path_effects(PE)
 
         # At 0.9 present weather
