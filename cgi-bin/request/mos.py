@@ -1,14 +1,90 @@
-"""Download MOS data."""
+""".. title:: Model Output Statistics (MOS) Data
 
+Documentation for /cgi-bin/request/mos.py
+-----------------------------------------
+
+This application provides access to the Model Output Statistics (MOS) data
+that the IEM processes and archives.
+
+Example Usage
+~~~~~~~~~~~~~
+
+Return all the NBS MOS data for KDSM for MOS runs made on 14 Dec 2023
+
+  https://mesonet.agron.iastate.edu/cgi-bin/request/mos.py?\
+station=KDSM&model=NBS&sts=2023-12-14T00:00Z&ets=2023-12-15T00:00Z&format=csv
+
+"""
+
+from datetime import datetime
 from io import BytesIO, StringIO
+from zoneinfo import ZoneInfo
 
 import pandas as pd
+from pydantic import AwareDatetime, Field
 from pyiem.database import get_sqlalchemy_conn
-from pyiem.exceptions import IncompleteWebRequest
-from pyiem.webutil import iemapp
+from pyiem.webutil import CGIModel, iemapp
 from sqlalchemy import text
 
 EXL = "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"
+
+
+class MyModel(CGIModel):
+    """Our model"""
+
+    format: str = Field(
+        "csv",
+        description="The format of the data response. csv, json, or excel",
+        pattern=r"^(csv|json|excel)$",
+    )
+    model: str = Field(
+        ...,
+        description="The model to query",
+        pattern=r"^(AVN|ETA|GFS|LAV|MEX|NAM|NBE|NBS)$",
+    )
+    ets: AwareDatetime = Field(
+        None,
+        description="The end time for the data request",
+    )
+    station: str = Field(..., description="The 4 character station identifier")
+    sts: AwareDatetime = Field(
+        None,
+        description="The start time for the data request",
+    )
+    year1: int = Field(
+        None,
+        description="The start year for the data request, when sts is not set",
+    )
+    month1: int = Field(
+        None,
+        description=(
+            "The start month for the data request, when sts is not set"
+        ),
+    )
+    day1: int = Field(
+        None,
+        description="The start day for the data request, when sts is not set",
+    )
+    hour1: int = Field(
+        None,
+        description="The start hour for the data request, when sts is not set",
+    )
+    year2: int = Field(
+        None,
+        description="The end year for the data request, when ets is not set",
+    )
+    month2: int = Field(
+        None,
+        description="The end month for the data request, when ets is not set",
+    )
+    day2: int = Field(
+        None,
+        description="The end day for the data request, when ets is not set",
+    )
+    hour2: int = Field(
+        None,
+        description="The end hour for the data request, when ets is not set",
+    )
 
 
 def get_data(sts, ets, station, model, fmt):
@@ -59,17 +135,29 @@ def get_data(sts, ets, station, model, fmt):
     return sio.getvalue()
 
 
-@iemapp(default_tz="UTC")
+@iemapp(help=__doc__, schema=MyModel, parse_times=False)
 def application(environ, start_response):
     """See how we are called"""
-    if "station" not in environ:
-        raise IncompleteWebRequest("GET parameter station= missing")
-    if "sts" not in environ or "ets" not in environ:
-        raise IncompleteWebRequest("GET start or end time parameters missing.")
+    if environ["sts"] is None:
+        environ["sts"] = datetime(
+            environ["year1"],
+            environ["month1"],
+            environ["day1"],
+            environ["hour1"],
+            tzinfo=ZoneInfo("UTC"),
+        )
+    if environ["ets"] is None:
+        environ["ets"] = datetime(
+            environ["year2"],
+            environ["month2"],
+            environ["day2"],
+            environ["hour2"],
+            tzinfo=ZoneInfo("UTC"),
+        )
 
-    fmt = environ.get("format", "csv")
-    station = environ.get("station").upper()
-    model = environ.get("model").upper()
+    fmt = environ["format"]
+    station = environ["station"].upper()
+    model = environ["model"]
     if fmt != "excel":
         start_response("200 OK", [("Content-type", "text/plain")])
         return [
@@ -79,7 +167,7 @@ def application(environ, start_response):
         ]
     headers = [
         ("Content-type", EXL),
-        ("Content-disposition", "attachment; Filename=daily.xlsx"),
+        ("Content-disposition", "attachment; Filename=mos.xlsx"),
     ]
     start_response("200 OK", headers)
     return [get_data(environ["sts"], environ["ets"], station, model, fmt)]
