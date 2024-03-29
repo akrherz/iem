@@ -17,7 +17,7 @@ def apps():
     for _rt, _dirs, files in os.walk("."):
         if _rt.startswith("./htdocs/plotting/auto/scripts"):
             continue
-        if _rt.startswith("./htdocs") or _rt.startswith("./cgi-bin"):
+        if _rt.startswith(["./htdocs", "./cgi-bin"]):
             for file in files:
                 fullpath = os.path.join(_rt, file)
                 if fullpath.endswith(".py") and fullpath != "__init__.py":

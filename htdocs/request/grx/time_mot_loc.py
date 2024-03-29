@@ -72,7 +72,7 @@ def gentext(sio, row, grversion):
     # Now we place places along the track.
     sio.write("Color: 255 255 255\nThreshold:10\n\n")
     for lon, lat in zip(lons, lats):
-        for minute in range(0, int(duration / 60.0) + 1):
+        for minute in range(int(duration / 60.0) + 1):
             valid = tml_valid + datetime.timedelta(minutes=minute)
             ts = valid.strftime("%H%Mz")
             lon2, lat2 = extrapolate(lon, lat, smps * minute * 60, drct)

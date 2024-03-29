@@ -13,9 +13,10 @@ import datetime
 
 import numpy as np
 import pandas as pd
+from pyiem.database import get_dbconn
 from pyiem.exceptions import NoDataFound
 from pyiem.plot import figure_axes
-from pyiem.util import get_autoplot_context, get_dbconn
+from pyiem.util import get_autoplot_context
 
 
 def get_description():
@@ -180,7 +181,7 @@ def plotter(fdict):
         fontsize=10,
         ha="right",
     )
-    for lbl, t, p, a in zip(lbls, tsigma, psigma, aligns):
+    for lbl, t, p in zip(lbls, tsigma, psigma):
         ax.text(pos[0], y, f"{lbl}", transform=ax.transAxes, fontsize=10)
         ax.text(
             pos[1],

@@ -102,7 +102,7 @@ def plotter(fdict):
     # We want bins centered on zero
     bins = compute_bins(interval)
 
-    hist, xedges, yedges = np.histogram2d(weeks, deltas, [range(0, 54), bins])
+    hist, xedges, yedges = np.histogram2d(weeks, deltas, [range(54), bins])
     ab = ctx["_nt"].sts[station]["archive_begin"]
     if ab is None:
         raise NoDataFound("Unknown station metadata.")

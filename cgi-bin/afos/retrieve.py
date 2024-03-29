@@ -60,8 +60,8 @@ def get_date(raw):
             dt = datetime.strptime(raw, "%Y-%m-%d")
         else:
             dt = datetime.strptime(raw[:16], "%Y-%m-%dT%H:%M")
-    except ValueError:
-        raise IncompleteWebRequest("Invalid date provided")
+    except ValueError as exp:
+        raise IncompleteWebRequest("Invalid date provided") from exp
 
     return dt.replace(tzinfo=timezone.utc)
 

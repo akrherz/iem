@@ -96,7 +96,7 @@ def application(environ, start_response):
         sdate = parse_date(environ.get("sdate", "1986-01-01"))
         edate = parse_date(environ.get("edate", "2099-01-01"))
     except Exception as exp:
-        raise IncompleteWebRequest(str(exp))
+        raise IncompleteWebRequest(str(exp)) from exp
     cb = environ.get("callback", None)
     fmt = environ.get("fmt", "json")
 

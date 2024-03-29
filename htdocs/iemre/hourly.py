@@ -98,8 +98,8 @@ def application(environ, start_response):
     """Do Something Fun!"""
     try:
         sts, ets = get_timerange(environ)
-    except ValueError:
-        raise BadWebRequest("Invalid date provided")
+    except ValueError as exp:
+        raise BadWebRequest("Invalid date provided") from exp
     lat = float(environ.get("lat", 41.99))
     lon = float(environ.get("lon", -95.1))
 

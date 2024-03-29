@@ -139,8 +139,8 @@ def application(environ, start_response):
         ctx["lon"] = float(environ.get("lon", -92.0))
         ctx["sdate"] = parse_date(environ.get("sdate", "2002-01-01"))
         ctx["edate"] = parse_date(environ.get("edate", "2099-01-01"))
-    except ValueError:
-        raise IncompleteWebRequest("Invalid Parameters")
+    except ValueError as exp:
+        raise IncompleteWebRequest("Invalid Parameters") from exp
 
     fmt = environ.get("fmt", "json")
     try:

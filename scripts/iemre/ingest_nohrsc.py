@@ -24,7 +24,7 @@ def main(valid):
     with httpx.Client() as client:
         req = client.get(url)
         if req.status_code != 200:
-            LOG.warning(f"{url} got status code {req.status_code}")
+            LOG.warning("%s got status code %s", url, req.status_code)
             return
         with tempfile.NamedTemporaryFile(delete=False) as tmp:
             tmp.write(req.content)

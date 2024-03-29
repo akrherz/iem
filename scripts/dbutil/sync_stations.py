@@ -5,7 +5,8 @@ databases.  This will hopefully remove some hackery
 
 import numpy as np
 import pandas as pd
-from pyiem.util import get_dbconnc, get_sqlalchemy_conn, logger, utc
+from pyiem.database import get_dbconnc, get_sqlalchemy_conn
+from pyiem.util import logger, utc
 
 LOG = logger()
 
@@ -43,7 +44,7 @@ def sync(df, dbname):
         dbcursor = dbconn.cursor()
 
     changes = df[(df["iemid"] > maxid) | (df["modified"] > maxts)]
-    for iemid, row in changes.iterrows():
+    for _iemid, row in changes.iterrows():
         prow = row.replace({np.nan: None}).to_dict()
         if prow["iemid"] not in localdf.index:
             dbcursor.execute(

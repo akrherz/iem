@@ -3,9 +3,10 @@
 import datetime
 
 import simplejson as json
+from pyiem.database import get_dbconnc
 from pyiem.exceptions import IncompleteWebRequest
 from pyiem.reference import ISO8601
-from pyiem.util import get_dbconnc, html_escape
+from pyiem.util import html_escape
 from pyiem.webutil import iemapp
 from pymemcache.client import Client
 
@@ -160,8 +161,10 @@ def application(environ, start_response):
         etn = int(environ.get("etn", 1))
         sbw = int(environ.get("sbw", 0))
         lsrs = int(environ.get("lsrs", 0))
-    except ValueError:
-        raise IncompleteWebRequest("Invalid request, missing required params")
+    except ValueError as exp:
+        raise IncompleteWebRequest(
+            "Invalid request, missing required params"
+        ) from exp
     cb = environ.get("callback", None)
 
     mckey = (

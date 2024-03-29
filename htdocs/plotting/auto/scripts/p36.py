@@ -113,9 +113,9 @@ def plotter(fdict):
                     [PathEffects.withStroke(linewidth=2, foreground="k")]
                 )
 
-    ax.set_xticks(range(0, 12))
+    ax.set_xticks(range(12))
     ax.set_xticklabels(calendar.month_abbr[1:])
-    ax.set_yticks(range(0, 12))
+    ax.set_yticks(range(12))
     ax.set_yticklabels(calendar.month_abbr[1:])
     ax.set_xlim(-0.5, 11.5)
     ax.set_ylim(-0.5, 11.5)

@@ -10,9 +10,10 @@ import datetime
 
 import numpy as np
 import pandas as pd
+from pyiem.database import get_sqlalchemy_conn
 from pyiem.exceptions import NoDataFound
 from pyiem.plot import figure_axes
-from pyiem.util import get_autoplot_context, get_sqlalchemy_conn
+from pyiem.util import get_autoplot_context
 
 
 def get_description():
@@ -120,14 +121,14 @@ def plotter(fdict):
         zorder=2,
         color="g",
     )
-    for i, row in df.iterrows():
+    for _, row in df.iterrows():
         ax.text(
             row["month"],
             row["max"],
             f"{row['max_year']:.0f}\n{row['max']:.0f} ",
             ha="right",
         )
-    ax.set_xticks(range(0, 13))
+    ax.set_xticks(range(13))
     ax.set_xticklabels(calendar.month_abbr)
     ax.set_xlim(0, 13)
     maxval = df["count"].max()

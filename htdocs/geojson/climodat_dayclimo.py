@@ -127,8 +127,8 @@ def application(environ, start_response):
         day = int(environ.get("day", 1))
         syear = int(environ.get("syear", 1800))
         eyear = int(environ.get("eyear", datetime.datetime.now().year + 1))
-    except ValueError:
-        raise IncompleteWebRequest("Invalid arguments")
+    except ValueError as exp:
+        raise IncompleteWebRequest("Invalid arguments") from exp
     cb = environ.get("callback", None)
 
     mckey = (

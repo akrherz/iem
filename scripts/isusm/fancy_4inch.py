@@ -126,7 +126,7 @@ def main(argv):
         df = df.drop(columns=col)
 
     df["ticket"] = False
-    for stid, row in df.iterrows():
+    for stid in df.index:
         df.at[stid, "ticket"] = qdict.get(stid, {}).get("soil4", False)
         x, y = get_idx(hlons, hlats, nt.sts[stid]["lon"], nt.sts[stid]["lat"])
         df.at[stid, "nam"] = nam[x, y]

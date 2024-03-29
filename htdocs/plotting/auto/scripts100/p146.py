@@ -68,7 +68,7 @@ def plotter(fdict):
 
     bins = np.arange(df["tmpf"].min() - 5, df["tmpf"].max() + 5, 2)
     H, xedges, yedges = np.histogram2d(
-        df["week"].values, df["tmpf"].values, [range(0, 54), bins]
+        df["week"].values, df["tmpf"].values, [range(54), bins]
     )
     rows = []
     for i, x in enumerate(xedges[:-1]):

@@ -141,7 +141,7 @@ def plotter(fdict):
     bars = ax.bar(
         np.arange(1, 6) - 0.25, gdf.mean().values, width=-0.25, label="Average"
     )
-    for i, mybar in enumerate(bars):
+    for mybar in bars:
         ax.text(
             mybar.get_x() - 0.125,
             mybar.get_height() + 0.5,
@@ -153,7 +153,7 @@ def plotter(fdict):
     bars = ax.bar(
         range(1, 6), gdf.loc[year].values, width=0.25, label=str(year)
     )
-    for i, mybar in enumerate(bars):
+    for mybar in bars:
         ax.text(
             mybar.get_x() + 0.125,
             mybar.get_height() + 0.5,
@@ -169,7 +169,7 @@ def plotter(fdict):
             width=0.25,
             label=str(date.year),
         )
-        for i, mybar in enumerate(bars):
+        for mybar in bars:
             ax.text(
                 mybar.get_x() + 0.125,
                 mybar.get_height() + 0.5,
