@@ -11,6 +11,8 @@ returned if the server is under heavy load.
 
 Changelog:
 
+- **2024-03-29** This service had an intermediate bug whereby if the `tz` value
+  was not provided, it would default to `America/Chicago` instead of `UTC`.
 - **2024-03-29** Migrated to pydantic based request validation.  Will be
   monitoring for any issues.
 - **2024-03-14** Initial documentation release.
@@ -178,12 +180,12 @@ class MyModel(CGIModel):
         pattern="^(0.0001|null|empty|T)$",
     )
     tz: str = Field(
-        "America/Chicago",
+        "UTC",
         description=(
             "The timezone to use for the request timestamps (when not "
-            "providing already aware ``sts`` and ``ets`` values) and the "
+            "providing already tz-aware ``sts`` and ``ets`` values) and the "
             "output valid timestamp.  It is highly recommended to set this to "
-            "UTC, but it defaults to America/Chicago.  This string should be "
+            "UTC to ensure it is set.  This string should be "
             "something that the Python ``zoneinfo`` library can understand."
         ),
     )
