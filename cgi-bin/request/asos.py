@@ -9,10 +9,11 @@ This cgi-bin script provides METAR/ASOS data.  It has a IP-based rate limit for
 requests to prevent abuse.  A `503 Service Unavailable` response will be
 returned if the server is under heavy load.
 
-Changelog
----------
+Changelog:
 
-- 2024-03-14: Initial documentation release.
+- **2024-03-29** Migrated to pydantic based request validation.  Will be
+  monitoring for any issues.
+- **2024-03-14** Initial documentation release.
 
 Example Usage
 -------------
@@ -20,55 +21,8 @@ Example Usage
 Get the past 24 hours of air temperature and dew point for Des Moines and
 Mason City, Iowa.
 
-.. code-block:: http
-
     https://mesonet.agron.iastate.edu/cgi-bin/request/asos.py?data=tmpf&data=dwpf&station=DSM&station=MCW&hours=24
 
-CGI Parameters
---------------
-
-The term ``multi`` below implies that you can either specify the parameter as
-a single key value pair, or a single key with a value that is a comma
-separated, or multiple key value pairs.  For example, `data=tmpf&data=dwpf` or
-`data=tmpf,dwpf`.
-
-:data: (optional,multi) The data columns to return, defaults to all.  The
-    available options are: tmpf, dwpf, relh, drct, sknt, p01i, alti, mslp,
-    vsby,
-    gust, skyc1, skyc2, skyc3, skyc4, skyl1, skyl2, skyl3, skyl4, wxcodes,
-    ice_accretion_1hr, ice_accretion_3hr, ice_accretion_6hr, peak_wind_gust,
-    peak_wind_drct, peak_wind_time, feel, metar, snowdepth
-:direct: (optional) If set to 'yes', the data will be directly downloaded
-    as a file.
-:elev: (optional) If set to 'yes', the elevation (m) of the station will be
-    included in the output.
-:format: (optional) The format of the data, defaults to onlycomma.  The
-    available options are: onlycomma, tdf.
-:hours: (optional) The number of hours of data to return prior to the current
-    timestamp.  Can not be more than 24 if no stations are specified.
-:latlon: (optional) If set to 'yes', the latitude and longitude of the station
-    will be included in the output.
-:missing: (optional) How to represent missing values, defaults to M.  Other
-    options are 'null' and 'empty'.
-:network: (optional) The network to query, defaults to all networks.
-:report_type: (optional) The report type to query, defaults to all.  The
-    available options are: 1 (HFMETAR), 3 (Routine), 4 (Specials).
-:station: (optional,multi) The station identifier to query, defaults to all
-    stations and if you do not specify any stations, you can only request
-    24 hours of data.
-:trace: (optional) How to represent trace values, defaults to 0.0001.  Other
-    options are 'null' and 'empty'.
-:tz: (optional) The timezone to use for timestamps, defaults to UTC. It
-    should be in a form that the Python `zoneinfo` module can understand.
-:year1 year2: (optional) The year of the start and end time, defaults to the
-    time zone provided by `tzname`.
-:month1 month2: (optional) The month of the start and end time, defaults to
-    the time zone provided by `tzname`.
-:day1 day2: (optional) The day of the start and end time, defaults to the time
-    zone provided by `tzname`.
-:hour1 hour2: (optional) The hour of the start and end time, defaults to 0.
-:minute1 minute2: (optional) The minute of the start and end time, defaults to
-    0.
 """
 
 import datetime
@@ -76,10 +30,11 @@ import sys
 from io import StringIO
 from zoneinfo import ZoneInfo, ZoneInfoNotFoundError
 
+from pydantic import AwareDatetime, Field
 from pyiem.database import get_dbconn
 from pyiem.network import Table as NetworkTable
 from pyiem.util import utc
-from pyiem.webutil import ensure_list, iemapp
+from pyiem.webutil import CGIModel, ListOrCSVType, iemapp
 
 NULLS = {"M": "M", "null": "null", "empty": ""}
 TRACE_OPTS = {"T": "T", "null": "null", "empty": "", "0.0001": "0.0001"}
@@ -122,6 +77,183 @@ CONV_COLS = {
     "gust_mph": "gust * 1.15 as gust_mph",
     "peak_wind_gust_mph": "peak_wind_gust * 1.15 as peak_wind_gust_mph",
 }
+
+
+class MyModel(CGIModel):
+    """Request Model."""
+
+    data: ListOrCSVType = Field(
+        None,
+        description=(
+            "The data columns to return, defaults to all.  The available "
+            "options are: tmpf, dwpf, relh, drct, sknt, p01i, alti, mslp, "
+            "vsby, gust, skyc1, skyc2, skyc3, skyc4, skyl1, skyl2, skyl3, "
+            "skyl4, wxcodes, ice_accretion_1hr, ice_accretion_3hr, "
+            "ice_accretion_6hr, peak_wind_gust, peak_wind_drct, "
+            "peak_wind_time, feel, metar, snowdepth"
+        ),
+    )
+    direct: bool = Field(
+        False,
+        description=(
+            "If set to 'yes', the data will be directly downloaded as a file."
+        ),
+    )
+    elev: bool = Field(
+        False,
+        description=(
+            "If set to 'yes', the elevation (m) of the station will be "
+            "included in the output."
+        ),
+    )
+    ets: AwareDatetime = Field(
+        None,
+        description=("The end time of the data request."),
+    )
+    format: str = Field(
+        "onlycomma",
+        description=(
+            "The format of the data, defaults to onlycomma.  The available "
+            "options are: onlycomma, tdf."
+        ),
+    )
+    hours: int = Field(
+        None,
+        description=(
+            "The number of hours of data to return prior to the current "
+            "timestamp.  Can not be more than 24 if no stations are specified."
+        ),
+    )
+    latlon: bool = Field(
+        False,
+        description=(
+            "If set to 'yes', the latitude and longitude of the station will "
+            "be included in the output."
+        ),
+    )
+    missing: str = Field(
+        "M",
+        description=(
+            "How to represent missing values, defaults to M.  Other options "
+            "are 'null' and 'empty'."
+        ),
+        pattern="^(M|null|empty)$",
+    )
+    nometa: bool = Field(
+        False,
+        description=(
+            "If set to 'yes', the column headers will not be included in the "
+            "output."
+        ),
+    )
+    network: ListOrCSVType = Field(
+        None,
+        description="The network to query, defaults to all networks.",
+    )
+    report_type: ListOrCSVType = Field(
+        [],
+        description=(
+            "The report type to query, defaults to all.  The available "
+            "options are: 1 (HFMETAR), 3 (Routine), 4 (Specials)."
+        ),
+    )
+    station: ListOrCSVType = Field(
+        None,
+        description=(
+            "The station identifier to query, defaults to all stations and "
+            "if you do not specify any stations, you can only request 24 "
+            "hours of data."
+        ),
+    )
+    sts: AwareDatetime = Field(
+        None,
+        description=("The start time of the data request."),
+    )
+    trace: str = Field(
+        "0.0001",
+        description=(
+            "How to represent trace values, defaults to 0.0001.  Other "
+            "options are 'null' and 'empty'."
+        ),
+        pattern="^(0.0001|null|empty|T)$",
+    )
+    tz: str = Field(
+        "UTC",
+        description=(
+            "The timezone to use for timestamps, defaults to UTC. It should "
+            "be in a form that the Python `zoneinfo` module can understand."
+        ),
+    )
+    year1: int = Field(
+        None,
+        description=(
+            "The year of the start time, defaults to the time zone provided "
+            "by `tzname`. If `sts` is not provided."
+        ),
+    )
+    month1: int = Field(
+        None,
+        description=(
+            "The month of the start time, defaults to the time zone provided "
+            "by `tzname`. If `sts` is not provided."
+        ),
+    )
+    day1: int = Field(
+        None,
+        description=(
+            "The day of the start time, defaults to the time zone provided by "
+            "`tzname`. If `sts` is not provided."
+        ),
+    )
+    hour1: int = Field(
+        0,
+        description=(
+            "The hour of the start time, defaults to the time zone provided "
+            "by `tzname`. If `sts` is not provided."
+        ),
+    )
+    minute1: int = Field(
+        0,
+        description=(
+            "The minute of the start time, defaults to the time zone provided "
+            "by `tzname`. If `sts` is not provided."
+        ),
+    )
+    year2: int = Field(
+        None,
+        description=(
+            "The year of the end time, defaults to the time zone provided by "
+            "`tzname`. If `ets` is not provided."
+        ),
+    )
+    month2: int = Field(
+        None,
+        description=(
+            "The month of the end time, defaults to the time zone provided by "
+            "`tzname`. If `ets` is not provided."
+        ),
+    )
+    day2: int = Field(
+        None,
+        description=(
+            "The day of the end time, defaults to the time zone provided by "
+            "`tzname`. If `ets` is not provided."
+        ),
+    )
+    hour2: int = Field(
+        0,
+        description=(
+            "The hour of the end time, defaults to the time zone provided by "
+            "`tzname`. If `ets` is not provided."
+        ),
+    )
+    minute2: int = Field(
+        0,
+        description=(
+            "The minute of the end time, defaults to the time zone provided "
+            "by `tzname`. If `ets` is not provided."
+        ),
+    )
 
 
 def fmt_time(val, missing, _trace, tzinfo):
@@ -188,12 +320,12 @@ def overloaded():
 
 def get_stations(form):
     """Figure out the requested station"""
-    if "station" not in form:
-        if "network" in form:
-            nt = NetworkTable(form.get("network"), only_online=False)
+    if not form["station"]:
+        if form["network"] is not None:
+            nt = NetworkTable(form["network"], only_online=False)
             return list(nt.sts.keys())
         return []
-    stations = ensure_list(form, "station")
+    stations = form["station"]
     if not stations:
         return []
     # allow folks to specify the ICAO codes for K*** sites
@@ -205,7 +337,7 @@ def get_stations(form):
 
 def get_time_bounds(form, tzinfo):
     """Figure out the exact time bounds desired"""
-    if "hours" in form:
+    if form["hours"] is not None:
         ets = utc()
         sts = ets - datetime.timedelta(hours=int(form.get("hours")))
         return sts, ets
@@ -214,28 +346,31 @@ def get_time_bounds(form, tzinfo):
 
         def _get(num):
             return datetime.datetime(
-                int(form[f"year{num}"]),
-                int(form[f"month{num}"]),
-                int(form[f"day{num}"]),
-                int(form.get(f"hour{num}", 0)),
-                int(form.get(f"minute{num}", 0)),
+                form[f"year{num}"],
+                form[f"month{num}"],
+                form[f"day{num}"],
+                form[f"hour{num}"],
+                form[f"minute{num}"],
             )
 
-        sts = _get("1").replace(tzinfo=tzinfo)
-        ets = _get("2").replace(tzinfo=tzinfo)
-    except Exception:
+        if form["sts"] is None:
+            form["sts"] = _get("1").replace(tzinfo=tzinfo)
+        if form["ets"] is None:
+            form["ets"] = _get("2").replace(tzinfo=tzinfo)
+    except Exception as exp:
+        print(exp)
         return None, None
 
-    if sts == ets:
-        ets += datetime.timedelta(days=1)
-    if sts > ets:
-        sts, ets = ets, sts
-    return sts, ets
+    if form["sts"] == form["ets"]:
+        form["ets"] += datetime.timedelta(days=1)
+    if form["sts"] > form["ets"]:
+        form["sts"], form["ets"] = form["ets"], form["sts"]
+    return form["sts"], form["ets"]
 
 
 def build_querycols(form):
     """Which database columns correspond to our query."""
-    req = ensure_list(form, "data")
+    req = form["data"]
     if not req or "all" in req:
         return AVAILABLE
     res = []
@@ -265,7 +400,7 @@ def toobusy(pgconn, name):
     return over
 
 
-@iemapp(help=__doc__)
+@iemapp(help=__doc__, parse_times=False, schema=MyModel)
 def application(environ, start_response):
     """Go main"""
     if environ["REQUEST_METHOD"] == "OPTIONS":
@@ -279,7 +414,7 @@ def application(environ, start_response):
         yield b"ERROR: server over capacity, please try later"
         return
     try:
-        tzname = environ.get("tz", "UTC").strip()
+        tzname = environ["tz"].strip()
         if tzname in ["etc/utc", ""]:
             tzname = "UTC"
         tzinfo = ZoneInfo(tzname)
@@ -300,10 +435,7 @@ def application(environ, start_response):
     acursor = pgconn.cursor(cursor_name, scrollable=False)
     acursor.itersize = 2000
 
-    # Save direct to disk or view in browser
-    direct = environ.get("direct", "no") == "yes"
-    report_types = ensure_list(environ, "report_type")
-    report_types = [int(i) for i in report_types]
+    report_types = [int(i) for i in environ["report_type"]]
     sts, ets = get_time_bounds(environ, tzinfo)
     if sts is None:
         pgconn.close()
@@ -321,9 +453,9 @@ def application(environ, start_response):
             start_response("400 Bad Request", [("Content-type", "text/plain")])
             yield b"When requesting all-stations, must be less than 24 hours."
             return
-    delim = environ.get("format", "onlycomma")
+    delim = environ["format"]
     headers = []
-    if direct:
+    if environ["direct"]:
         headers.append(("Content-type", "application/octet-stream"))
         suffix = "tsv" if delim in ["tdf", "onlytdf"] else "csv"
         if not stations or len(stations) > 1:
@@ -336,9 +468,9 @@ def application(environ, start_response):
     start_response("200 OK", headers)
 
     # How should null values be represented
-    missing = NULLS.get(environ.get("missing"), "M")
+    missing = NULLS[environ["missing"]]
     # How should trace values be represented
-    trace = TRACE_OPTS.get(environ.get("trace"), "0.0001")
+    trace = TRACE_OPTS[environ["trace"]]
 
     querycols = build_querycols(environ)
 
@@ -347,8 +479,8 @@ def application(environ, start_response):
     else:
         rD = ","
 
-    gisextra = environ.get("latlon", "no") == "yes"
-    elev_extra = environ.get("elev", "no") == "yes"
+    gisextra = environ["latlon"]
+    elev_extra = environ["elev"]
     table = "alldata"
     metalimiter = ""
     colextra = "0 as lon, 0 as lat, 0 as elev, "
@@ -393,7 +525,7 @@ def application(environ, start_response):
             )
         )
         sio.write(f"#DEBUG: Entries Found -> {acursor.rowcount}\n")
-    nometa = "nometa" in environ
+    nometa = environ["nometa"]
     if not nometa:
         sio.write(f"station{rD}valid{rD}")
         if gisextra:
@@ -446,5 +578,6 @@ def application(environ, start_response):
         if rownum > 0 and rownum % 1000 == 0:
             yield sio.getvalue().encode("ascii", "ignore")
             sio = StringIO()
+    acursor.close()
     pgconn.close()
     yield sio.getvalue().encode("ascii", "ignore")
