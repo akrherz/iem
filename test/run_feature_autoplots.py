@@ -15,28 +15,28 @@ LOG = logger()
 
 def run_plot(uri):
     """Run this plot"""
-    uri = "http://iem.local/%s" % (uri,)
+    uri = f"http://iem.local/{uri}"
     try:
         res = requests.get(uri, timeout=600)
         soup = BeautifulSoup(res.content, "html.parser")
         img = soup.find_all(id="theimage")
         if not img:
             return True
-        uri = "http://iem.local%s" % (img[0]["src"],)
+        uri = "http://iem.local{}".format(img[0]["src"])
         res = requests.get(uri, timeout=600)
     except requests.exceptions.ReadTimeout:
-        print("%s -> Read Timeout" % (uri[16:],))
+        print(f"{uri[16:]} -> Read Timeout")
         return False
     # Known failures likely due to missing data
     if res.status_code == 400:
         return True
     if res.status_code == 504:
-        print("%s -> HTTP: %s (timeout)" % (uri, res.status_code))
+        print(f"{uri} -> HTTP: {res.status_code} (timeout)")
         return False
     if res.status_code != 200 or res.content == "":
         print(
-            "%s -> HTTP: %s len(content): %s"
-            % (uri[16:], res.status_code, len(res.content))
+            f"{uri[16:]} -> HTTP: {res.status_code} "
+            "len(content): {len(res.content)}"
         )
 
         return False
@@ -89,7 +89,7 @@ def main():
     if failed:
         print("Failures:")
         for f in failed:
-            print("%s %s" % (f["i"], f["fmt"]))
+            print("{} {}".format(f["i"], f["fmt"]))
         sys.exit(1)
 
 

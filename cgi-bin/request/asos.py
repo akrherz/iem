@@ -524,10 +524,8 @@ def application(environ, start_response):
         sio.write(f"#DEBUG: Time Period   -> {sts} {ets}\n")
         sio.write(f"#DEBUG: Time Zone     -> {tzinfo}\n")
         sio.write(
-            (
-                "#DEBUG: Data Contact   -> daryl herzmann "
-                "akrherz@iastate.edu 515-294-5978\n"
-            )
+            "#DEBUG: Data Contact   -> daryl herzmann "
+            "akrherz@iastate.edu 515-294-5978\n"
         )
         sio.write(f"#DEBUG: Entries Found -> {acursor.rowcount}\n")
     nometa = environ["nometa"]

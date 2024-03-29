@@ -126,7 +126,7 @@ def process_lines_pdfminer(valid, lines) -> int:
             if metrics and len(numbers) > (len(metrics) * 10):
                 for i, metric in enumerate(metrics):
                     nums = []
-                    for j in range(0, 10):
+                    for j in range(10):
                         nums.append(numbers[j * len(metrics) + i])
                     ingest(valid, metric, nums)
             labels = ""
@@ -199,11 +199,11 @@ def ingest(valid, label, numbers):
     ]
     if label == "days suitable":
         numbers = [float(x) for x in numbers[:10]]
-        for i in range(0, 10):
+        for i in range(10):
             if numbers[i] >= 10:
                 numbers[i] = numbers[i] / 10.0  # OCR Fail
     # OCR Fail
-    for i in range(0, 10):
+    for i in range(10):
         if numbers[i] in ["(", ")"]:
             numbers[i] = 0
     LOG.info("Ingesting %s %s", label, numbers[:10])

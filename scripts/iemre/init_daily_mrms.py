@@ -18,7 +18,7 @@ def init_year(ts):
 
     fn = iemre.get_daily_mrms_ncname(ts.year)
     if os.path.isfile(fn):
-        LOG.warn("Cowardly refusing to overwrite %s", fn)
+        LOG.warning("Cowardly refusing to overwrite %s", fn)
         return
     nc = ncopen(fn, "w")
     nc.title = f"MRMS Daily Precipitation {ts.year}"

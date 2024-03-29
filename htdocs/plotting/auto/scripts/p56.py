@@ -227,7 +227,7 @@ def plotter(fdict):
     if ctx["how"] == "doy":
         gdf = gdf.reindex(range(1, 367), fill_value=0)
     elif ctx["how"] == "week":
-        gdf = gdf.reindex(range(0, 53), fill_value=0)
+        gdf = gdf.reindex(range(53), fill_value=0)
     elif ctx["how"] == "month":
         gdf = gdf.reindex(range(1, 13), fill_value=0)
     # Duplicate gdf so that we can plot centered on 1 July

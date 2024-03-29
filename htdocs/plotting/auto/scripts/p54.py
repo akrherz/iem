@@ -121,7 +121,7 @@ def plotter(fdict):
 
     bins = np.arange(-20.5, 20.5, 1)
     H, xedges, yedges = np.histogram2d(
-        df["week"].values, df["delta"].values, [range(0, 54), bins]
+        df["week"].values, df["delta"].values, [range(54), bins]
     )
     H = np.ma.array(H)
     H.mask = np.ma.where(H < 1, True, False)
@@ -165,7 +165,7 @@ def plotter(fdict):
     )
 
     H, xedges, yedges = np.histogram2d(
-        df["sknt"].values, df["delta"].values, [range(0, 31), bins]
+        df["sknt"].values, df["delta"].values, [range(31), bins]
     )
     H = np.ma.array(H)
     H.mask = np.where(H < 1, True, False)

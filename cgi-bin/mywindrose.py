@@ -218,13 +218,13 @@ def application(environ, start_response):
     elif environ["hourrangelimit"]:
         if environ["sts"].hour > environ["ets"].hour:  # over midnight
             hours = list(range(environ["sts"].hour, 24))
-            hours.extend(range(0, environ["ets"].hour))
+            hours.extend(range(environ["ets"].hour))
         else:
             if environ["sts"].hour == environ["ets"].hour:
                 environ["ets"] += datetime.timedelta(hours=1)
             hours = list(range(environ["sts"].hour, environ["ets"].hour))
     else:
-        hours = list(range(0, 24))
+        hours = list(range(24))
 
     if environ["monthlimit"]:
         months = [environ["sts"].month]

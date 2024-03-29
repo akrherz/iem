@@ -163,7 +163,7 @@ def plotter(fdict):
             fontsize=12,
             zorder=4,
         )
-    ax.set_xticks(range(0, 13))
+    ax.set_xticks(range(13))
     ax.set_xticklabels(calendar.month_abbr)
     ax.grid(True)
     ax.set_ylim(0, 100)

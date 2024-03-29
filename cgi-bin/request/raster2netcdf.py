@@ -126,6 +126,6 @@ def application(environ, start_response):
         valid = datetime.datetime.strptime(dstr, "%Y%m%d%H%M").replace(
             tzinfo=ZoneInfo("UTC")
         )
-    except Exception:
-        raise IncompleteWebRequest("dstr not in form %Y%m%d%H%M")
+    except Exception as exp:
+        raise IncompleteWebRequest("dstr not in form %Y%m%d%H%M") from exp
     return [do_work(valid, prod, start_response)]

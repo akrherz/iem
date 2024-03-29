@@ -203,8 +203,8 @@ def application(environ, start_response):
     dt = environ.get("dt", datetime.date.today().strftime("%Y-%m-%d"))
     try:
         ts = datetime.datetime.strptime(dt, "%Y-%m-%d")
-    except Exception:
-        raise IncompleteWebRequest("Invalid dt provided.")
+    except Exception as exp:
+        raise IncompleteWebRequest("Invalid dt provided.") from exp
     cb = environ.get("callback", None)
     fmt = environ.get("fmt", "geojson")
 

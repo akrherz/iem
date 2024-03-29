@@ -189,7 +189,7 @@ def application(environ, start_response):
         j += 1
         sio.write(f'<tr class="row{j % 5}">')
         sio.write("%s%s%s" % ("<td>", nt.sts[station]["name"], "</td>"))
-        for i in range(0, 24):
+        for i in range(24):
             sio.write('<td class="style' + str(i % 3) + '">')
             sio.write("%s%s " % (stData[station][i], "</td>"))
             try:

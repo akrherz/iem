@@ -112,7 +112,7 @@ def plotter(fdict):
 
     # Need to compute if a given date participated in a streak
     # shift hits back in time to match the days
-    for day in range(0, days):
+    for day in range(days):
         df["hit"] = df["hit"] | hits.shift(0 - day)
 
     freq = df[["sday", "hit"]].groupby("sday").sum() / years * 100.0

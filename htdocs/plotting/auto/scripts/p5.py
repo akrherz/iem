@@ -107,7 +107,7 @@ def plotter(fdict):
     (fig, ax) = figure_axes(title=title, apctx=ctx)
 
     ax.barh(np.arange(1, 13), ranges, align="center")
-    ax.set_yticks(range(0, 13))
+    ax.set_yticks(range(13))
     ax.set_yticklabels(calendar.month_name)
     ax.set_ylim(0, 13)
     ax.set_xlabel(

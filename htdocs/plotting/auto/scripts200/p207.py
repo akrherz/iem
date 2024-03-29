@@ -337,7 +337,7 @@ def add_zeros(df, ctx):
     df["xcell"] = ((df["geo"].x - ctx["bnds2163"][0]) / cellsize).astype(int)
     df["ycell"] = ((df["geo"].y - ctx["bnds2163"][1]) / cellsize).astype(int)
 
-    for (x, y), gdf in df.groupby(["xcell", "ycell"]):
+    for _, gdf in df.groupby(["xcell", "ycell"]):
         if len(gdf.index) == 1:
             continue
         # Find the max value in this cell

@@ -45,7 +45,7 @@ def main(argv):
             grbs = pygrib.open(fn)
             for key, sn in GRIB_XREF.items():
                 try:
-                    grbs.select(shortName=sn)[0].values
+                    _ = grbs.select(shortName=sn)[0].values
                 except Exception:
                     jobs.append(key)
             grbs.close()

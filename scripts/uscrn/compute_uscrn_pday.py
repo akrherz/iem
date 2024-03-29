@@ -4,19 +4,29 @@ Called from `RUN_20_AFTER.sh` for current date.
 Called from `RUN_12Z.sh` for yesterday and a week ago.
 """
 
-# pylint: disable=cell-var-from-loop
 import datetime
 import sys
 from zoneinfo import ZoneInfo
 
 import pandas as pd
 from metpy.units import units
+from pyiem.database import get_dbconn, get_sqlalchemy_conn
 from pyiem.network import Table as NetworkTable
-from pyiem.util import get_dbconn, get_sqlalchemy_conn, logger
+from pyiem.util import logger
 
 LOG = logger()
 MM = units("mm")
 INCH = units("inch")
+
+
+def _do_update(icursor, valid, iemid, precip):
+    """Inline."""
+    icursor.execute(
+        f"UPDATE summary_{valid.year} SET pday = %s "
+        "WHERE day = %s and iemid = %s",
+        (precip, valid.date(), iemid),
+    )
+    return icursor.rowcount
 
 
 def run(valid):
@@ -56,23 +66,14 @@ def run(valid):
         LOG.info("station: %s precip: %.2f", station, precip)
         icursor = iem_pgconn.cursor()
 
-        def _do_update():
-            """Inline."""
-            icursor.execute(
-                f"UPDATE summary_{valid.year} SET pday = %s "
-                "WHERE day = %s and iemid = %s",
-                (precip, valid.date(), iemid),
-            )
-            return icursor.rowcount
-
-        if _do_update() == 0:
+        if _do_update(icursor, valid, iemid, precip) == 0:
             LOG.info("Adding summary table entry for %s %s", iemid, valid)
             icursor.execute(
                 f"INSERT into summary_{valid.year}(iemid, day) "
                 "VALUES (%s, %s)",
                 (iemid, valid.date()),
             )
-            _do_update()
+            _do_update(icursor, valid, iemid, precip)
         icursor.close()
         iem_pgconn.commit()
 

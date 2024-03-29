@@ -116,7 +116,7 @@ def plotter(fdict):
             label=str(year),
             align="center",
         )
-    for i, row in thisyear.iterrows():
+    for _, row in thisyear.iterrows():
         ax[0].text(
             row["month"] + 0.2,
             row["freq"] + 1,

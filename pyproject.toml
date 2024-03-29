@@ -3,5 +3,19 @@ filterwarnings = ["ignore:numpy.ndarray size changed:RuntimeWarning"]
 
 [tool.ruff]
 line-length = 79
-lint.select = ["E", "F", "I"]
+lint.select = [
+    "A",  # builtins
+    "B",  # bugbear
+    "E",  # pycodestyle
+    # "ERA",  # eradicate
+    "EXE",  # shebang
+    "F",  # pyflakes
+    "G",  # logging-format
+    # "FIX",  # has fixme
+    "I",  # isort
+    # "PD",  # pandas-vet
+    "PIE",  # flake8-pie
+    # "SIM",  # simplify
+    # "UP",  # pyupgrade
+]
 target-version = "py39"

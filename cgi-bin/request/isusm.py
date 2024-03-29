@@ -366,8 +366,8 @@ def application(environ, start_response):
         raise IncompleteWebRequest("Missing start time parameters")
     try:
         muck_timestamps(environ)
-    except Exception:
-        raise IncompleteWebRequest("Invalid date/station provided")
+    except Exception as exp:
+        raise IncompleteWebRequest("Invalid date/station provided") from exp
     mode = environ.get("mode", "hourly")
     cols = ensure_list(environ, "vars")
     fmt = environ.get("format", "csv").lower()

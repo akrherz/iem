@@ -45,7 +45,7 @@ def run(valid):
             logging.debug(exp)
     tmpfn = f"/tmp/{valid:%Y%m%d%H}.grib2"
     with open(tmpfn, "wb") as output:
-        for hr in range(0, HOURS[valid.hour] + 1):
+        for hr in range(HOURS[valid.hour] + 1):
             if should_throttle and hr > 30:
                 # Add some delays to work around upstream connection throttling
                 time.sleep(15)

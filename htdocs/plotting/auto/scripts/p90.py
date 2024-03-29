@@ -841,7 +841,7 @@ def do_ugc(ctx):
             bins[0] = 0.01
         ctx["units"] = "count per year"
     elif varname == "hour":
-        bins = list(range(0, 25))
+        bins = list(range(25))
         ctx["units"] = "hour of day"
     else:
         bins = list(

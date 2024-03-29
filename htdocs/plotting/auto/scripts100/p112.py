@@ -157,7 +157,7 @@ def plotter(fdict):
         monthly[i] = {"40": [], "48": [], "50": [], "XX": []}
 
     db = {}
-    for i, row in df.iterrows():
+    for _, row in df.iterrows():
         ts = datetime.date(int(row["year"]), int(row["month"]), 1)
         db[ts] = {
             "40": float(row["gdd40"]),

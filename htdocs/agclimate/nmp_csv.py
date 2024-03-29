@@ -9,9 +9,10 @@ from io import StringIO
 import numpy as np
 import pandas as pd
 from metpy.units import units
+from pyiem.database import get_sqlalchemy_conn
 from pyiem.network import Table as NetworkTable
 from pyiem.reference import ISO8601
-from pyiem.util import convert_value, get_sqlalchemy_conn
+from pyiem.util import convert_value
 from pyiem.webutil import iemapp
 
 INVERSION = [
@@ -205,12 +206,3 @@ def application(_environ, start_response):
     sio = StringIO()
     do_output(sio)
     return [sio.getvalue().encode("ascii")]
-
-
-def test_basic():
-    """Test that we can do things we need to do!"""
-    sio = StringIO()
-    do_output(sio)
-    with open("/tmp/pytest_isusm.csv", "w", encoding="utf-8") as fh:
-        fh.write(sio.getvalue())
-    assert False

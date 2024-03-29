@@ -38,8 +38,8 @@ def application(environ, start_response):
     try:
         ts1 = datetime.datetime.strptime(environ.get("date1"), "%Y-%m-%d")
         ts2 = datetime.datetime.strptime(environ.get("date2"), "%Y-%m-%d")
-    except ValueError:
-        raise IncompleteWebRequest("Invalid date(s) provided")
+    except ValueError as exp:
+        raise IncompleteWebRequest("Invalid date(s) provided") from exp
     if ts1 > ts2:
         (ts1, ts2) = (ts2, ts1)
     if ts1.year != ts2.year:
@@ -134,7 +134,7 @@ def application(environ, start_response):
 
     res = {"data": []}
 
-    for i in range(0, offset2 - offset1):
+    for i in range(offset2 - offset1):
         now = ts1 + datetime.timedelta(days=i)
         res["data"].append(
             {

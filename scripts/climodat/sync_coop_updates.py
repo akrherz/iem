@@ -8,7 +8,8 @@ run from RUN_NOON.sh and RUN_0Z.sh
 # pylint: disable=cell-var-from-loop
 
 import pandas as pd
-from pyiem.util import get_dbconnc, get_sqlalchemy_conn, logger
+from pyiem.database import get_dbconnc, get_sqlalchemy_conn
+from pyiem.util import logger
 
 LOG = logger()
 
@@ -85,6 +86,15 @@ def compare_and_update(ccursor, currentob, newob):
     return ccursor.rowcount
 
 
+def _fetch(ccursor, climostation, row, table):
+    ccursor.execute(
+        "SELECT high, low, precip, snow, snowd, station, day from "
+        f"{table} WHERE station = %s and day = %s",
+        (climostation, row["date"]),
+    )
+    return ccursor.fetchone()
+
+
 def main():
     """Go Main Go."""
     accessdb, acursor = get_dbconnc("iem")
@@ -112,16 +122,7 @@ def main():
         for climostation in xref[key]:
             table = f"alldata_{climostation[:2]}"
             # Load the current data for the station
-
-            def _fetch():
-                ccursor.execute(
-                    "SELECT high, low, precip, snow, snowd, station, day from "
-                    f"{table} WHERE station = %s and day = %s",
-                    (climostation, row["date"]),
-                )
-                return ccursor.fetchone()
-
-            currentob = _fetch()
+            currentob = _fetch(ccursor, climostation, row, table)
             if currentob is None:
                 ccursor.execute(
                     f"INSERT into {table}(station, day, year, month, sday) "
@@ -134,7 +135,7 @@ def main():
                         row["date"].strftime("%m%d"),
                     ),
                 )
-                currentob = _fetch()
+                currentob = _fetch(ccursor, climostation, row, table)
             updated = compare_and_update(ccursor, currentob, newob)
             if updated == 0:
                 dups += 1

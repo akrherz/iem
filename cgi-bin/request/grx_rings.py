@@ -13,7 +13,7 @@ def createCircleAroundWithRadius(lat, lon, radiusMiles):
     latArray = []
     lonArray = []
 
-    for brng in range(0, 360):
+    for brng in range(360):
         lat2, lon2 = getLocation(lat, lon, brng, radiusMiles)
         latArray.append(lat2)
         lonArray.append(lon2)

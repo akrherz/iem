@@ -89,8 +89,8 @@ def workflow(key, tmpdir, ts):
     else:
         try:
             valid = datetime.strptime(ts, "%Y%m%d%H%M")
-        except Exception:
-            raise IncompleteWebRequest("Invalid ts provided")
+        except Exception as exp:
+            raise IncompleteWebRequest("Invalid ts provided") from exp
         testfn = (
             f"/mesonet/ARCHIVE/data/{valid:%Y/%m/%d}/model/ffg/5kmffg_"
             f"{valid:%Y%m%d%H}.grib2"

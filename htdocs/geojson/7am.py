@@ -154,8 +154,10 @@ def application(environ, start_response):
     dt = environ.get("dt", datetime.date.today().strftime("%Y-%m-%d"))
     try:
         ts = datetime.datetime.strptime(dt, "%Y-%m-%d")
-    except ValueError:
-        raise IncompleteWebRequest("dt variable should be in form YYYY-MM-DD")
+    except ValueError as exp:
+        raise IncompleteWebRequest(
+            "dt variable should be in form YYYY-MM-DD"
+        ) from exp
     ts = ts.replace(hour=12, tzinfo=ZoneInfo("UTC"))
 
     mckey = f"/geojson/7am/{dt}/{group}"

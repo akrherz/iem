@@ -37,8 +37,8 @@ def application(environ, start_response):
     """Go Main Go"""
     try:
         ts, fn = get_ts_fn(environ)
-    except Exception:
-        raise IncompleteWebRequest("bad input provided")
+    except Exception as exp:
+        raise IncompleteWebRequest("bad input provided") from exp
     if "etn" in environ:
         etnLimiter = f"and eventid = {int(environ.get('etn'))}"
         fn = f"watch_by_county_{ts:Y%m%d%H%M}_{int(environ.get('etn'))}"

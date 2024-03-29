@@ -93,7 +93,7 @@ def main():
             nc.variables["time"].units.split()[2],
             "%Y-%m-%d",
         )
-        for day in range(0, 20):
+        for day in range(20):
             dt = basedt + datetime.timedelta(days=day)
             soilk = nc.variables["tsoil"][day, :, :]
             if np.ma.is_masked(np.ma.max(soilk)):

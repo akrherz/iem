@@ -537,8 +537,8 @@ def generate_form(apid, fdict, headers, cookies):
         elif arg["type"] in ["month", "zhour", "hour", "day", "year"]:
             try:
                 form = datetypes_handler(arg, int(value))
-            except ValueError:
-                raise BadWebRequest("Invalid value provided")
+            except ValueError as exp:
+                raise BadWebRequest("Invalid value provided") from exp
         elif arg["type"] == "select":
             form = make_select(
                 arg["name"],

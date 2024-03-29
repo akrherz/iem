@@ -20,9 +20,10 @@ from datetime import date, timedelta
 import matplotlib.dates as mdates
 import pandas as pd
 import requests
+from pyiem.database import get_sqlalchemy_conn
 from pyiem.exceptions import NoDataFound
 from pyiem.plot import figure
-from pyiem.util import get_autoplot_context, get_sqlalchemy_conn
+from pyiem.util import get_autoplot_context
 from sqlalchemy import text
 
 
@@ -88,8 +89,8 @@ def plotter(fdict):
             timeout=60,
         )
         data = req.json()
-    except Exception:
-        raise NoDataFound("Backend API failure, no data.")
+    except Exception as exp:
+        raise NoDataFound("Backend API failure, no data.") from exp
     gfsdf = pd.DataFrame(data["gfs"])
     gfsdf["date"] = pd.to_datetime(gfsdf["date"])
     if is_morning:

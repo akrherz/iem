@@ -143,7 +143,7 @@ def application(environ, start_response):
         last = int(environ.get("last", 0))
         day = int(environ.get("day", 1))
     except ValueError as exp:
-        raise IncompleteWebRequest(f"Invalid request parameter {exp}")
+        raise IncompleteWebRequest(f"Invalid request parameter {exp}") from exp
     time = environ.get("time")
     cat = environ.get("cat", "categorical").upper()
 
