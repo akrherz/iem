@@ -24,7 +24,7 @@ SERVICE = "https://data.rcc-acis.org/StnData"
 METASERVICE = "https://data.rcc-acis.org/StnMeta"
 
 
-def do(meta, station, acis_station, interactive) -> int:
+def do(meta, station, acis_station) -> int:
     """Do the query and work
 
     Args:
@@ -54,8 +54,6 @@ def do(meta, station, acis_station, interactive) -> int:
             {"name": "snwd"},
         ],
     }
-    if not interactive:
-        payload["sdate"] = (today - datetime.timedelta(days=365)).strftime(fmt)
     LOG.info(
         "Call ACIS for: %s[%s %s] to update: %s",
         acis_station,
@@ -239,17 +237,13 @@ def do(meta, station, acis_station, interactive) -> int:
 
 def main(argv):
     """Do what is asked."""
-    interactive = sys.stdout.isatty()
     arg = argv[1]
     # Only run cron job for online sites
-    nt = NetworkTable(f"{arg[:2]}CLIMATE", only_online=not interactive)
+    nt = NetworkTable(f"{arg[:2]}CLIMATE", only_online=False)
 
     def _worker(sid, acis_station):
         """Do work."""
-        updates = do(nt.sts[sid], sid, acis_station, interactive)
-        # If we found a lot of updates over the previous year, rerun for all
-        if not interactive and updates > 100:
-            do(nt.sts[sid], sid, acis_station, True)
+        do(nt.sts[sid], sid, acis_station)
 
     if len(argv) == 2:
         if len(arg) == 2:
