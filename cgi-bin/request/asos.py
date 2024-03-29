@@ -178,10 +178,13 @@ class MyModel(CGIModel):
         pattern="^(0.0001|null|empty|T)$",
     )
     tz: str = Field(
-        "UTC",
+        "America/Chicago",
         description=(
-            "The timezone to use for timestamps, defaults to UTC. It should "
-            "be in a form that the Python `zoneinfo` module can understand."
+            "The timezone to use for the request timestamps (when not "
+            "providing already aware ``sts`` and ``ets`` values) and the "
+            "output valid timestamp.  It is highly recommended to set this to "
+            "UTC, but it defaults to America/Chicago.  This string should be "
+            "something that the Python ``zoneinfo`` library can understand."
         ),
     )
     year1: int = Field(
