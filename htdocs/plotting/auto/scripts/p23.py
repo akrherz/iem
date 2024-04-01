@@ -6,9 +6,12 @@ temperature or precipitation departures and El Nino index values.
 import datetime
 
 import pandas as pd
+from matplotlib.lines import Line2D
+from matplotlib.patches import Rectangle
+from pyiem.database import get_sqlalchemy_conn
 from pyiem.exceptions import NoDataFound
 from pyiem.plot import figure_axes
-from pyiem.util import get_autoplot_context, get_sqlalchemy_conn
+from pyiem.util import get_autoplot_context
 
 PDICT = {
     "avg_high": "Average High Temperature [F]",
@@ -176,6 +179,17 @@ def plotter(fdict):
     ax.set_xlim(sts, ets)
     maxv = df[varname].abs().max() + 2
     ax.set_ylim(0 - maxv, maxv)
+
+    ax.legend(
+        [
+            Rectangle((0, 0), 1, 1, fc=_a),
+            Rectangle((0, 0), 1, 1, fc=_b),
+            Line2D((0, 1), (0, 1), color="k", lw=2),
+        ],
+        [f"Above Normal {varname}", f"Below Normal {varname}", "Nino 3.5"],
+        ncol=3,
+        loc="best",
+    )
 
     return fig, df
 
