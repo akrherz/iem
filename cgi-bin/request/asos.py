@@ -11,6 +11,7 @@ returned if the server is under heavy load.
 
 Changelog:
 
+- **2024-04-01** Fix recently introduced bug with time sort order.
 - **2024-03-29** This service had an intermediate bug whereby if the `tz` value
   was not provided, it would default to `America/Chicago` instead of `UTC`.
 - **2024-03-29** Migrated to pydantic based request validation.  Will be
@@ -503,7 +504,7 @@ def application(environ, start_response):
     elif len(report_types) > 1:
         rlimiter = f" and report_type in {tuple(report_types)}"
     sqlcols = ",".join(querycols)
-    sorder = "DESC" if "hours" in environ else "ASC"
+    sorder = "DESC" if environ["hours"] is not None else "ASC"
     if stations:
         acursor.execute(
             f"SELECT station, valid, {colextra} {sqlcols} from {table} "
