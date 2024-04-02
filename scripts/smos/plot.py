@@ -6,9 +6,10 @@ import warnings
 
 import numpy as np
 import pandas as pd
+from pyiem.database import get_sqlalchemy_conn
 from pyiem.plot import get_cmap
 from pyiem.plot.geoplot import MapPlot
-from pyiem.util import get_sqlalchemy_conn, logger, utc
+from pyiem.util import logger, utc
 
 # Surpress warning from matplotlib that I have no idea about
 warnings.simplefilter("ignore", RuntimeWarning)
@@ -94,8 +95,8 @@ def makeplot(ts, routes="ac"):
             df["lon"].values, df["lat"].values, df["od"], clevs, cmap=cmap
         )
         pqstr = (
-            f"plot {routes} {ts:%Y%m%d%H}00 smos_{sector}_sm{ts:%H}.png "
-            f"smos_{sector}_sm{ts:%H}.png png"
+            f"plot {routes} {ts:%Y%m%d%H}00 smos_{sector}_od{ts:%H}.png "
+            f"smos_{sector}_od{ts:%H}.png png"
         )
         mp.postprocess(pqstr=pqstr)
         mp.close()
