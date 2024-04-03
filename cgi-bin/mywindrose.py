@@ -186,7 +186,7 @@ def get_station_info(environ):
     return dbname, network, station
 
 
-@iemapp(help=__doc__, parse_times=False, schema=Schema)
+@iemapp(help=__doc__, parse_times=True, schema=Schema)
 def application(environ, start_response):
     """Query out the CGI variables"""
     dbname, network, station = get_station_info(environ)
@@ -196,23 +196,18 @@ def application(environ, start_response):
             send_error(environ, "Unknown station identifier", start_response)
         ]
     tzname = nt.sts[station]["tzname"] if network != "RAOB" else "UTC"
-    if environ["sts"] is None:
-        environ["sts"] = datetime.datetime(
-            int(environ.get("year1", 1900)),
-            int(environ.get("month1", 1)),
-            int(environ.get("day1", 1)),
-            int(environ.get("hour1", 0)),
-            int(environ.get("minute1", 0)),
-            tzinfo=ZoneInfo(tzname),
-        )
-        environ["ets"] = datetime.datetime(
-            int(environ.get("year2", 2050)),
-            int(environ.get("month2", 1)),
-            int(environ.get("day2", 1)),
-            int(environ.get("hour2", 0)),
-            int(environ.get("minute2", 0)),
-            tzinfo=ZoneInfo(tzname),
-        )
+    if environ["sts"] is None or environ["ets"] is None:
+        return [
+            send_error(
+                environ,
+                "You must provide both a start and end time",
+                start_response,
+            )
+        ]
+    for key in ["sts", "ets"]:
+        if environ[key].tzinfo is None:
+            environ[key] = environ[key].replace(tzinfo=ZoneInfo(tzname))
+
     if environ["hourlimit"]:
         hours = [environ["sts"].hour]
     elif environ["hourrangelimit"]:
