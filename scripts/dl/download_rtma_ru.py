@@ -74,7 +74,7 @@ def fetch(dt):
         LOG.info("Skipping as we have data %s", localfn)
         return
     uri = (
-        "https://nomads.weather.gov/pub/data/nccf/com/rtma/prod/"
+        "https://nomads.ncep.noaa.gov/pub/data/nccf/com/rtma/prod/"
         f"rtma2p5_ru.{dt:%Y%m%d}/rtma2p5_ru.t{dt:%H%M}z.2dvaranl_ndfd.grb2.idx"
     )
     req = exponential_backoff(requests.get, uri, timeout=30)

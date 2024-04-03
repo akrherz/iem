@@ -90,6 +90,10 @@ def plotter(fdict):
     bounds = np.concatenate((bounds, np.arange(1.2, 2.2, 0.2)))
     cmap = get_cmap(ctx["cmap"])
     cmap.set_under("#F9CCCC")
+    # If the number of bounds is greater than the cmap colors, we need to
+    # adjust
+    if len(bounds) > cmap.N:
+        bounds = np.linspace(0, 2, cmap.N)
     norm = mpcolors.BoundaryNorm(bounds, cmap.N)
 
     years = (datetime.date.today().year - syear) + 1.0
