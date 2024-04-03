@@ -16,9 +16,10 @@ import datetime
 import matplotlib.colors as mpcolors
 import numpy as np
 import pandas as pd
+from pyiem.database import get_sqlalchemy_conn
 from pyiem.exceptions import NoDataFound
 from pyiem.plot import figure_axes, get_cmap, pretty_bins
-from pyiem.util import get_autoplot_context, get_sqlalchemy_conn
+from pyiem.util import get_autoplot_context
 from sqlalchemy import text
 
 PDICT = {"above": "At or Above Threshold", "below": "Below Threshold"}
@@ -162,7 +163,7 @@ def get_df(ctx):
         )
         .reset_index()
         .assign(
-            freq=lambda df_: (df_["sum"] / df["count"] * 100.0)
+            freq=lambda df_: (df_["sum"] / df_["count"] * 100.0)
             .fillna(0)
             .round(1)
         )
