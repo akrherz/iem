@@ -227,6 +227,7 @@ def workflow(mc, environ, fmt):
                 environ.get("REMOTE_ADDR"),
                 environ.get("SCRIPT_NAME"),
                 environ.get("REQUEST_URI"),
+                environ.get("HTTP_HOST"),
             )
         )
         # Everything else should be considered fatal
