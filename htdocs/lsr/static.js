@@ -892,13 +892,13 @@ function getShapefileLink(base) {
     const wfos = $("#wfo").val();
     if (wfos && by === "wfo") {
         for (let i = 0; i < wfos.length; i++) {
-            uri += `&wfo[]=${text(wfos[i])}`;
+            uri += `&wfo=${text(wfos[i])}`;
         }
     }
     const states = $("#state").val();
     if (states && by == "state") {
         for (let i = 0; i < states.length; i++) {
-            uri += `&states[]=${text(states[i])}`;
+            uri += `&state=${text(states[i])}`;
         }
     }
     const sts = moment($("#sts").val(), 'L LT');

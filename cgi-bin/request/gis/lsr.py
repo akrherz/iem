@@ -3,7 +3,15 @@
 Documentation for /cgi-bin/request/gis/lsr.py
 ---------------------------------------------
 
-To be written.
+This service emits NWS Local Storm Report (LSR) data in various formats. This
+dataset is as live as when you query it as reports are ingested in realtime.
+
+Changelog
+---------
+
+- 2024-04-05: Initial documentation release and migration to pydantic.
+- 2024-04-05: The legacy usage of wfo[] for CGI arguments is still supported,
+  but migration to wfo is encouraged.
 
 """
 
@@ -15,10 +23,11 @@ import fiona
 import geopandas as gpd
 import pandas as pd
 import shapefile
+from pydantic import AwareDatetime, Field
 from pyiem.database import get_sqlalchemy_conn
 from pyiem.exceptions import IncompleteWebRequest
 from pyiem.util import utc
-from pyiem.webutil import ensure_list, iemapp
+from pyiem.webutil import CGIModel, ListOrCSVType, iemapp
 from sqlalchemy import text
 
 fiona.supported_drivers["KML"] = "rw"
@@ -26,17 +35,101 @@ EXL = "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"
 ISO8660 = "%Y-%m-%dT%H:%M"
 
 
+class Schema(CGIModel):
+    """See how we are called."""
+
+    ets: AwareDatetime = Field(
+        None,
+        description="The end of the period you are interested in.",
+    )
+    fmt: str = Field(
+        None,
+        description="The output format you desire.",
+        pattern="^(csv|kml|excel)$",
+    )
+    justcsv: bool = Field(
+        False,
+        description="If set, only the CSV file is returned.",
+    )
+    recent: int = Field(
+        None,
+        description=(
+            "For near realtime requests, the number of seconds to go back in "
+            "time.  The timestamp query is the time of the LSR report, not "
+            "the time it was disseminated by the NWS. Must be less than "
+            "1,000,000 seconds."
+        ),
+        ge=1,
+        le=1_000_000,
+    )
+    state: ListOrCSVType = Field(
+        None,
+        description="Limit results to these states.",
+    )
+    sts: AwareDatetime = Field(
+        None,
+        description="The start of the period you are interested in.",
+    )
+    type: ListOrCSVType = Field(
+        None,
+        description="Limit results to these event types.",
+    )
+    wfo: ListOrCSVType = Field(
+        None,
+        description="Limit results to these WFOs.",
+    )
+    year1: int = Field(
+        None,
+        description="If sts unset, the start year value in UTC.",
+    )
+    month1: int = Field(
+        None,
+        description="If sts unset, the start month value in UTC.",
+    )
+    day1: int = Field(
+        None,
+        description="If sts unset, the start day value in UTC.",
+    )
+    hour1: int = Field(
+        0,
+        description="If sts unset, the start hour value in UTC.",
+    )
+    minute1: int = Field(
+        0,
+        description="If sts unset, the start minute value in UTC.",
+    )
+    year2: int = Field(
+        None,
+        description="If ets unset, the end year value in UTC.",
+    )
+    month2: int = Field(
+        None,
+        description="If ets unset, the end month value in UTC.",
+    )
+    day2: int = Field(
+        None,
+        description="If ets unset, the end day value in UTC.",
+    )
+    hour2: int = Field(
+        0,
+        description="If ets unset, the end hour value in UTC.",
+    )
+    minute2: int = Field(
+        0,
+        description="If ets unset, the end minute value in UTC.",
+    )
+
+
 def get_time_domain(form):
     """Figure out the start and end timestamps"""
-    if "recent" in form:
+    if form["recent"] is not None:
         # Allow for specifying a recent number of seconds
         ets = utc()
-        seconds = abs(int(form.get("recent")))
-        sts = ets - datetime.timedelta(seconds=seconds)
+        sts = ets - datetime.timedelta(seconds=form["recent"])
         return sts, ets
-    if "sts" not in form:
+    if form["sts"] is None:
         raise IncompleteWebRequest("GET start time parameters missing")
-    if isinstance(form["ets"], str) and form["ets"] == "":
+    if form["ets"] is None:
         form["ets"] = utc()
     return form["sts"], form["ets"]
 
@@ -114,7 +207,7 @@ def do_excel_kml(fmt, params, sql_filters):
     return fp.getvalue()
 
 
-@iemapp(default_tz="UTC", help=__doc__)
+@iemapp(default_tz="UTC", help=__doc__, schema=Schema)
 def application(environ, start_response):
     """Go Main Go"""
     if environ["REQUEST_METHOD"] == "OPTIONS":
@@ -123,24 +216,20 @@ def application(environ, start_response):
 
     params = {}
     params["sts"], params["ets"] = get_time_domain(environ)
+    params["states"] = environ["state"]
+    params["wfos"] = environ["wfo"]
+    params["types"] = environ["type"]
 
     sql_filters = ""
-    for opt in ["state", "states", "states[]"]:
-        if opt in environ:
-            params["states"] = ensure_list(environ, opt)
-            if "_ALL" not in params["states"]:
-                sql_filters += " and l.state = ANY(:states) "
-    if "wfo[]" in environ:
-        params["wfos"] = ensure_list(environ, "wfo[]")
-        if "ALL" not in params["wfos"]:
-            sql_filters += " and l.wfo = ANY(:wfos) "
-    if "type" in environ:
-        params["types"] = ensure_list(environ, "type")
-        if "ALL" not in params["types"]:
-            sql_filters += " and l.typetext = ANY(:types) "
+    if params["states"] and "_ALL" not in params["states"]:
+        sql_filters += " and l.state = ANY(:states) "
+    if params["wfos"] and "ALL" not in params["wfos"]:
+        sql_filters += " and l.wfo = ANY(:wfos) "
+    if params["types"] and "ALL" not in params["types"]:
+        sql_filters += " and l.typetext = ANY(:types) "
 
     fn = f"lsr_{params['sts']:%Y%m%d%H%M}_{params['ets']:%Y%m%d%H%M}"
-    if environ.get("fmt", "") == "excel":
+    if environ["fmt"] == "excel":
         headers = [
             ("Content-type", EXL),
             ("Content-disposition", f"attachment; Filename={fn}.xlsx"),
@@ -148,7 +237,7 @@ def application(environ, start_response):
         start_response("200 OK", headers)
         return [do_excel_kml("excel", params, sql_filters)]
 
-    if environ.get("fmt", "") == "kml":
+    if environ["fmt"] == "kml":
         headers = [
             ("Content-type", "application/octet-stream"),
             ("Content-disposition", f"attachment; Filename={fn}.kml"),
@@ -158,10 +247,8 @@ def application(environ, start_response):
 
     csv = StringIO()
     csv.write(
-        (
-            "VALID,VALID2,LAT,LON,MAG,WFO,TYPECODE,TYPETEXT,CITY,"
-            "COUNTY,STATE,SOURCE,REMARK,UGC,UGCNAME\n"
-        )
+        "VALID,VALID2,LAT,LON,MAG,WFO,TYPECODE,TYPETEXT,CITY,"
+        "COUNTY,STATE,SOURCE,REMARK,UGC,UGCNAME\n"
     )
 
     with get_sqlalchemy_conn("postgis") as conn:
@@ -234,7 +321,7 @@ def application(environ, start_response):
                     f"{row[8]},{row9},{row[13]},{row[14]}\n"
                 )
 
-    if "justcsv" in environ or environ.get("fmt", "") == "csv":
+    if environ["justcsv"] or environ["fmt"] == "csv":
         headers = [
             ("Content-type", "application/octet-stream"),
             ("Content-Disposition", f"attachment; filename={fn}.csv"),
