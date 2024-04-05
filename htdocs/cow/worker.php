@@ -274,7 +274,7 @@ $shpuri = sprintf(
 );
 
 $lsruri = sprintf(
-    '/cgi-bin/request/gis/lsr.py?wfo[]=%s&amp;sts=%sZ&amp;ets=%sZ',
+    '/cgi-bin/request/gis/lsr.py?wfo=%s&amp;sts=%sZ&amp;ets=%sZ',
     $wfo,
     $sts->format("Y-m-d\\TH:i"),
     $ets->format("Y-m-d\\TH:i"),

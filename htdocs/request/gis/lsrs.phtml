@@ -101,20 +101,23 @@ files generated every 5 minutes:  <a href="/data/gis/shape/4326/us/lsr_24hour.zi
 <br />You can use the following URI form to get the most recent number of seconds
 worth of LSRs.  Note that these times are based on the valid time of the LSR and
 not the issuance of the text product itself that contained the LSR.
-<br /><code>https://mesonet.agron.iastate.edu/cgi-bin/request/gis/lsr.py?wfo[]=ALL&amp;recent=86400&amp;fmt=csv</code>
-<br /><code>https://mesonet.agron.iastate.edu/cgi-bin/request/gis/lsr.py?wfo[]=DMX&amp;wfo[]=DVN&amp;recent=86400&amp;fmt=csv</code>
+<br /><code>https://mesonet.agron.iastate.edu/cgi-bin/request/gis/lsr.py?wfo=ALL&amp;recent=86400&amp;fmt=csv</code>
+<br /><code>https://mesonet.agron.iastate.edu/cgi-bin/request/gis/lsr.py?wfo=DMX,DVN&amp;recent=86400&amp;fmt=csv</code>
 <br /><code>https://mesonet.agron.iastate.edu/cgi-bin/request/gis/lsr.py?state=IA&amp;recent=86400&amp;fmt=csv</code>
 <br />Omit the <code>fmt=csv</code> portion to return the zipped shapefile.</p>
 
 <p>Example to fetch a month's worth of data
-<br /><code>https://mesonet.agron.iastate.edu/cgi-bin/request/gis/lsr.py?wfo[]=JAN&amp;sts=2020-08-01T00:00Z&amp;ets=2020-09-01T00:00Z&amp;fmt=csv</code>
+<br /><code>https://mesonet.agron.iastate.edu/cgi-bin/request/gis/lsr.py?wfo=JAN&amp;sts=2020-08-01T00:00Z&amp;ets=2020-09-01T00:00Z&amp;fmt=csv</code>
 </p>
+
+<p><a class="btn btn-default" href="/cgi-bin/request/gis/lsr.py?help"><i class="fa fa-file"></i> Backend documentation</a> exists
+for those wishing to script against this service.</p>
 
 <form method="GET" action="/cgi-bin/request/gis/lsr.py">
 <div class="row">
 <div class="col-md-4">
     <h4>Limit Weather Forecast Office (WFO)</h4>
-    <select name="wfo[]" MULTIPLE size="5">
+    <select name="wfo" MULTIPLE size="5">
     <option value="ALL" SELECTED>All Available</option>
     {$ss}
     </select>
