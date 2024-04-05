@@ -32,6 +32,7 @@ from io import BytesIO, StringIO
 import pandas as pd
 from pydantic import Field
 from pyiem.database import get_dbconn, get_sqlalchemy_conn
+from pyiem.exceptions import IncompleteWebRequest
 from pyiem.network import Table as NetworkTable
 from pyiem.webutil import CGIModel, ListOrCSVType, iemapp
 from sqlalchemy import text
@@ -217,6 +218,10 @@ def application(environ, start_response):
         return [b"ERROR: No stations specified for request"]
     network = environ["network"][:20]
     if "_ALL" in stations:
+        if (ets - sts).days > 366:
+            raise IncompleteWebRequest(
+                "Must request a year or less when requesting all stations"
+            )
         stations = list(NetworkTable(network, only_online=False).sts.keys())
     cols = environ["var"]
     na = environ["na"]
