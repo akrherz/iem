@@ -80,10 +80,10 @@ class Schema(CGIModel):
             "Day to request data for, this is an alternative to sts/ets."
         ),
     )
-    hour1: int = Field(0, description=("Hour to request data for."))
-    hour2: int = Field(0, description=("Hour to request data for."))
-    minute1: int = Field(0, description=("Minute to request data for."))
-    minute2: int = Field(0, description=("Minute to request data for."))
+    hour1: int = Field(0, description="Hour to request data for.")
+    hour2: int = Field(0, description="Hour to request data for.")
+    minute1: int = Field(0, description="Minute to request data for.")
+    minute2: int = Field(0, description="Minute to request data for.")
 
 
 @iemapp(schema=Schema, help=__doc__)
