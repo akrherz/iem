@@ -58,6 +58,7 @@ help pages for these services:</p>
 <ul>
 <li><a href="/cgi-bin/request/asos.py?help">ASOS/METAR Data (/cgi-bin/request/asos.py)</a></li>
 <li><a href="/cgi-bin/request/asos1min.py?help">ASOS 1 Minute NCEI Data (/cgi-bin/request/asos1min.py)</a></li>
+<li><a href="/cgi-bin/request/scp.py?help">ASOS Satellite + Cloud Product (/cgi-bin/request/scp.py)</a></li>
 <li><a href="/cgi-bin/request/gis/awc_gairmets.py?help">AWC Graphical Airmets (/cgi-bin/request/gis/awc_gairmets.py)</a></li>
 <li><a href="/cgi-bin/request/gis/cwas.py?help">Center Weather Advisories (/cgi-bin/request/gis/cwas.py)</a></li>
 <li><a href="/cgi-bin/request/hads.py?help">HADS/DCP/SHEF Data (/cgi-bin/request/hads.py)</a></li>
