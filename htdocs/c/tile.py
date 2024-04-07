@@ -3,6 +3,7 @@
 import os
 
 from pyiem.database import get_sqlalchemy_conn
+from sqlalchemy import text
 
 # https://github.com/akrherz/tilecache
 from TileCache import InvalidTMSRequest
@@ -22,16 +23,16 @@ def application(environ, start_response):
     except InvalidTMSRequest:
         with get_sqlalchemy_conn("mesosite") as conn:
             conn.execute(
-                """
+                text("""
                 insert into weblog(client_addr, uri, referer, http_status)
-                VALUES (%s, %s, %s, %s)
-                """,
-                (
-                    environ.get("REMOTE_ADDR"),
-                    environ.get("PATH_INFO"),
-                    environ.get("HTTP_REFERER"),
-                    404,
-                ),
+                VALUES (:addr, :uri, :ref, :status)
+                """),
+                {
+                    "addr": environ.get("REMOTE_ADDR"),
+                    "uri": environ.get("PATH_INFO"),
+                    "ref": environ.get("HTTP_REFERER"),
+                    "status": 404,
+                },
             )
             conn.commit()
         start_response("404 Not Found", [("Content-Type", "text/plain")])
