@@ -19,6 +19,7 @@ from io import StringIO
 
 from pydantic import AwareDatetime, Field
 from pyiem.database import get_sqlalchemy_conn
+from pyiem.exceptions import IncompleteWebRequest
 from pyiem.webutil import CGIModel, ListOrCSVType, iemapp
 from sqlalchemy import text
 
@@ -89,6 +90,8 @@ class Schema(CGIModel):
 @iemapp(schema=Schema, help=__doc__)
 def application(environ, start_response):
     """Do Something"""
+    if environ["sts"] is None or environ["ets"] is None:
+        raise IncompleteWebRequest("Both start and end time must be provided!")
     start_response("200 OK", [("Content-type", "text/plain")])
     slimiter = ""
     params = {
