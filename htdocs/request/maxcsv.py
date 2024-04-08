@@ -633,8 +633,6 @@ def do_ahps(nwsli):
             index_col=None,
         )
     # Get the obs
-    # plabel = "{}[{}]".format(primaryname, primaryunits)
-    # slabel = "{}[{}]".format(secondaryname, secondaryunits)
     odf = odf.rename(columns={"value": "obstage"})
     df = df.join(odf[["obtime", "obstage"]], how="outer")
     # hoop jumping to get a timestamp in the local time of this sensor
@@ -646,7 +644,6 @@ def do_ahps(nwsli):
         .dt.strftime("%a. %-I %p")
     )
     df["forecaststage"] = df["primary_value"]
-    # df[slabel] = df['secondary_value']
     # we have to do the writing from here
     res = (
         "locationid,locationname,latitude,longitude,obtime,obstage,"

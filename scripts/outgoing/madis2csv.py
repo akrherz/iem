@@ -64,7 +64,6 @@ def main():
         providers = chartostring(nc.variables["dataProvider"][:])
         lat = nc.variables["latitude"][:]
         lon = nc.variables["longitude"][:]
-        # ele = nc.variables["elevation"][:]
         p01m = nc.variables["precipAccum"][:] * 25.4
         ptmp1 = convert_value(
             nc.variables["roadTemperature1"][:], "degK", "degF"

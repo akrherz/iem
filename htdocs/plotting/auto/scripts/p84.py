@@ -291,6 +291,8 @@ def set_gridinfo(ctx):
 
 def set_data(ctx):
     """Do the data work."""
+    if 0 in ctx["p01d"].shape:
+        raise NoDataFound("Data Unavailable")
     if np.ma.is_masked(np.max(ctx["p01d"])):
         raise NoDataFound("Data Unavailable")
     p01d = ctx["p01d"].filled(np.nan)
@@ -321,7 +323,6 @@ def set_data(ctx):
         p01d = np.where(p01d < 0.001, np.nan, p01d)
         cmap.set_under("white")
         # Dynamic Range based on min/max grid value, since we restrict plot
-        # minval = np.floor(np.nanmin(p01d))
         maxval = np.ceil(np.nanpercentile(p01d, [99])[0])
         if np.isnan(maxval) or maxval < 1:
             clevs = np.arange(0, 1.01, 0.1)

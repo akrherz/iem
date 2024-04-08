@@ -190,17 +190,11 @@ def get_data(network, sts, ets, stations, cols, na, fmt):
     return sio.getvalue()
 
 
-@iemapp(help=__doc__, schema=MyCGI, parse_times=False)
+@iemapp(help=__doc__, schema=MyCGI, parse_times=True)
 def application(environ, start_response):
     """See how we are called"""
-    if environ["sts"] is None:
-        environ["sts"] = datetime(
-            environ["year1"], environ["month1"], environ["day1"]
-        )
-    if environ["ets"] is None:
-        environ["ets"] = datetime(
-            environ["year2"], environ["month2"], environ["day2"]
-        )
+    if environ["sts"] is None or environ["ets"] is None:
+        raise IncompleteWebRequest("Missing start and end times")
     sts, ets = environ["sts"].date(), environ["ets"].date()
 
     if sts.year != ets.year and overloaded():

@@ -45,10 +45,6 @@ def doday(ts, realtime):
     routes = "ac"
     if not realtime:
         routes = "a"
-
-    # clevs = np.arange(0, 0.25, 0.05)
-    # clevs = np.append(clevs, np.arange(0.25, 3., 0.25))
-    # clevs = np.append(clevs, np.arange(3., 10.0, 1))
     clevs = [
         0.01,
         0.1,

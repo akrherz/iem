@@ -4,13 +4,32 @@ import datetime
 import json
 
 import pandas as pd
-from dateutil.parser import parse
+from pydantic import Field
 from pyiem.database import get_sqlalchemy_conn
-from pyiem.exceptions import IncompleteWebRequest
 from pyiem.reference import IEMVARS
 from pyiem.util import html_escape
-from pyiem.webutil import iemapp
+from pyiem.webutil import CGIModel, iemapp
 from pymemcache.client import Client
+
+
+class Schema(CGIModel):
+    """See how we are called."""
+
+    station: str = Field(
+        ...,
+        description="The station identifier to query for",
+        pattern=r"^[A-Z0-9\-]*$",
+    )
+    network: str = Field(
+        ...,
+        description="The network identifier to query for",
+        pattern="^[A-Z0-9_]*$",
+    )
+    date: datetime.date = Field(
+        ...,
+        description="The date to query for",
+    )
+    cb: str = Field(None, description="Callback function for JSONP output")
 
 
 def do_today(table, station, network, date):
@@ -61,7 +80,6 @@ def do_asos(table, station, _network, date):
 
 def workflow(station, network, date):
     """Go get the dictionary of data we need and deserve"""
-    date = parse(date).date()
     table = {"fields": [], "rows": []}
     if date == datetime.date.today():
         do_today(table, station, network, date)
@@ -71,15 +89,12 @@ def workflow(station, network, date):
     return json.dumps(table)
 
 
-@iemapp()
+@iemapp(help=__doc__, schema=Schema)
 def application(environ, start_response):
     """Answer request."""
-    station = environ.get("station", "AMW")
-    if isinstance(station, list):
-        raise IncompleteWebRequest("Multiple stations specified")
-    network = environ.get("network", "IA_ASOS")
-    date = environ.get("date", "2016-01-01")
-    cb = environ.get("callback", None)
+    station = environ["station"]
+    network = environ["network"]
+    date = environ["date"]
 
     mckey = f"/json/obhistory/{station}/{network}/{date}"
     mc = Client("iem-memcached:11211")
@@ -90,8 +105,8 @@ def application(environ, start_response):
     else:
         res = res.decode("utf-8")
     mc.close()
-    if cb is not None:
-        res = f"{html_escape(cb)}({res})"
+    if environ["cb"] is not None:
+        res = f"{html_escape(environ['cb'])}({res})"
 
     headers = [("Content-type", "application/json")]
     start_response("200 OK", headers)

@@ -41,7 +41,6 @@ def database_save(date, shpfn):
 
 def workflow(date, routes):
     """Do work for this date"""
-    # print("process_usdm workflow for %s" % (date, ))
     # 1. get file from USDM website
     url = f"{BASEURL}USDM_{date:%Y%m%d}_M.zip"
     LOG.info("Fetching %s", url)

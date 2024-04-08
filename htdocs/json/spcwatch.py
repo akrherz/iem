@@ -6,11 +6,31 @@ import datetime
 import json
 from zoneinfo import ZoneInfo
 
-import pandas as pd
+from pydantic import Field
+from pyiem.database import get_dbconnc
 from pyiem.reference import ISO8601
-from pyiem.util import get_dbconnc, html_escape
-from pyiem.webutil import iemapp
+from pyiem.util import html_escape
+from pyiem.webutil import CGIModel, iemapp
 from pymemcache.client import Client
+
+
+class Schema(CGIModel):
+    """See how we are called."""
+
+    ts: str = Field(
+        None, description="The timestamp to query for", pattern="^[0-9]{12}$"
+    )
+    lat: float = Field(
+        0,
+        description="The latitude to query for",
+    )
+    lon: float = Field(
+        0,
+        description="The longitude to query for",
+    )
+    callback: str = Field(
+        None, description="Callback function for JSONP output"
+    )
 
 
 def pointquery(lon, lat):
@@ -101,31 +121,26 @@ def dowork(valid):
     return json.dumps(res)
 
 
-@iemapp()
+@iemapp(help=__doc__, schema=Schema)
 def application(environ, start_response):
     """Answer request."""
-    ts = environ.get("ts", None)
-    lat = float(environ.get("lat", 0))
-    lon = float(environ.get("lon", 0))
-    if pd.isna([lat, lon]).any():
-        lat, lon = 0, 0
-    if ts is None:
+    if environ["ts"] is None:
         ts = datetime.datetime.utcnow()
     else:
-        ts = datetime.datetime.strptime(ts, "%Y%m%d%H%M")
+        ts = datetime.datetime.strptime(environ["ts"], "%Y%m%d%H%M")
     ts = ts.replace(tzinfo=ZoneInfo("UTC"))
 
     cb = environ.get("callback")
 
-    if lat != 0 and lon != 0:
-        mckey = f"/json/spcwatch/{lon:.4f}/{lat:.4f}"
-    else:
-        mckey = f"/json/spcwatch/{ts:%Y%m%d%H%M}"
+    mckey = (
+        f"/json/spcwatch/{environ['lon']:.4f}/{environ['lat']:.4f}/"
+        f"{ts:%Y%m%d%H%M}"
+    )
     mc = Client("iem-memcached:11211")
     res = mc.get(mckey)
     if not res:
-        if lat != 0 and lon != 0:
-            res = pointquery(lon, lat)
+        if environ["lon"] != 0 and environ["lat"] != 0:
+            res = pointquery(environ["lon"], environ["lat"])
         else:
             res = dowork(ts)
         mc.set(mckey, res)

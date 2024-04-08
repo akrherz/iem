@@ -457,8 +457,6 @@ def do(location):
     df = qc(df)
     # 8. Write and upload the file
     write_and_upload(df, location)
-    # 9. Upload summary plots
-    # upload_summary_plots()
 
 
 def main(argv):
@@ -472,4 +470,3 @@ def main(argv):
 
 if __name__ == "__main__":
     main(sys.argv)
-    # do('cobs')

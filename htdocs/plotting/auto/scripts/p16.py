@@ -9,9 +9,10 @@ import datetime
 import numpy as np
 import pandas as pd
 from metpy.units import units
+from pyiem.database import get_sqlalchemy_conn
 from pyiem.exceptions import NoDataFound
 from pyiem.plot.windrose import WindrosePlot, histogram
-from pyiem.util import drct2text, get_autoplot_context, get_sqlalchemy_conn
+from pyiem.util import drct2text, get_autoplot_context
 from sqlalchemy import text
 
 PDICT = {

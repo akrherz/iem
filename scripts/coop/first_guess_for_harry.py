@@ -402,7 +402,6 @@ def main():
         msg = MIMEMultipart()
         msg["Subject"] = f"IEM COOP Report for {lastmonth:%b %Y}"
         msg["From"] = "akrherz@iastate.edu"
-        # msg['To'] = 'akrherz@localhost'
         msg["To"] = "justin.glisan@iowaagriculture.gov"
         msg.preamble = "COOP Report"
 

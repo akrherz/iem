@@ -82,7 +82,6 @@ def replace_cfs(nc, valid, islice, jslice):
     cfsnc = ncopen(valid.strftime("/mesonet/data/iemre/cfs_%Y%m%d%H.nc"))
     tidx = iemre.daily_offset(valid + datetime.timedelta(days=1))
     tslice = slice(tidx0 + 1, tidx1 + 1)
-    # print("replace_cfs filling %s from %s" % (tslice, tidx))
     # CFS is W m-2, we want MJ
     nc.variables["srad"][tslice, :, :] = (
         cfsnc.variables["srad"][tidx:, jslice, islice] * 86400.0 / 1000000.0
@@ -121,9 +120,6 @@ def copy_iemre(nc, fromyear, ncdate0, ncdate1, islice, jslice):
         retslice = slice(0, tsteps)
     else:
         retslice = slice(0 - tsteps, None)
-    # print("copy_iemre from %s filling %s steps nc: %s iemre: %s" % (
-    #    fromyear, tsteps, tslice, retslice
-    # ))
     highc = convert_value(
         renc.variables["high_tmpk"][retslice, jslice, islice], "degK", "degC"
     )
@@ -180,7 +176,6 @@ def qc(nc):
         if avgv > 0:
             continue
         print("ts: %s avgv: %s" % (ts, avgv))
-    # print("done...")
 
 
 def workflow(valid, ncfn, west, south):
@@ -190,7 +185,6 @@ def workflow(valid, ncfn, west, south):
         os.makedirs(basedir)
     nc = make_netcdf("%s/%s" % (basedir, ncfn), valid, west, south)
     tile_extraction(nc, valid, west, south)
-    # qc(nc)
     nc.close()
 
 

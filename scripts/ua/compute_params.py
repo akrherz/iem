@@ -96,7 +96,6 @@ def gt1(val):
 
 def compute_total_totals(profile):
     """Total Totals."""
-    # (T850 - T500) + (Td850 - T500)
     l850 = profile[profile["pressure"] == 850]
     l500 = profile[profile["pressure"] == 500]
     if l850.empty or l500.empty:
@@ -110,14 +109,6 @@ def compute_sweat_index(profile, total_totals):
     """Compute the Sweat Index."""
     if pd.isnull(total_totals):
         return np.nan
-    # 	SWET	= 12 * TD850 + 20 * TERM2 + 2 * SKT850 + SKT500 + SHEAR
-    # TERM2	= MAX ( TOTL - 49, 0 )
-    # TOTL	= Total totals index
-    # SKT850	= 850 mb wind speed in knots
-    # SKT500	= 500 mb wind speed in knots
-    # SHEAR	= 125 * [ SIN ( DIR500 - DIR850 ) + .2 ]
-    # DIR500	= 500 mb wind direction
-    # DIR850	= 850 mb wind direction
     l850 = profile[profile["pressure"] == 850]
     l500 = profile[profile["pressure"] == 500]
     if l850.empty or l500.empty:

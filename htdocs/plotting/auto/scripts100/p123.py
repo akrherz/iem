@@ -38,7 +38,6 @@ def contiguous_regions(condition):
     second column is the end index."""
 
     # Find the indicies of changes in "condition"
-    # d = np.diff(condition)
     d = np.subtract(condition[1:], condition[:-1], dtype=float)
     (idx,) = d.nonzero()
 

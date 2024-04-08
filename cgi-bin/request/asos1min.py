@@ -7,37 +7,23 @@ This service provides the ASOS 1 minute data provided by NCEI and is not the
 "one minute data" via MADIS.  There is an availability delay of about 24 hours
 due to the way NCEI collects the data from the ASOS sites.
 
-CGI Parameters
-~~~~~~~~~~~~~~
+Examples
+--------
 
-The term ``multi`` in the parameter description means that the parameter can
-be specified multiple times.  You can either do this by specifying the key
-and value pair multiple times or specifying the value as a comma separated
-value.  For example, `station=KAMW&station=KDSM` is the same as
-`station=KAMW,KDSM`.
+Request air temperature data for Ames IA KAMW for 2022, but only provide data
+at 1 hour intervals.  Provide timestamps in UTC timezone.
 
-- `delim` (optional) - The delimiter to use in the output, defaults to comma.
-- `gis` (optional) - Should GIS information be included in the output, defaults
-    to no.  The options are `yes` and `no`.
-- `station` (required,multi) - The station identifier(s) to request data for.
-- `sample` (optional) - The sampling period to request data for, defaults to
-    1 minute.  The options are `1min`, `5min`, `10min`, `20min`, and `1hour`.
-- `tz` (optional) - The timezone to report the data in, defaults to UTC. This
-    value should be a valid timezone identifier like ``America/Chicago``.
-- `what` (optional) - The output format, defaults to `download`.  The options
-    are `download` and `view`.
-- `vars` (required,multi) - The variable(s) to request data for.
-- `{year,month,day,hour,min}1` (required) - The start timestamp for the data
-    in the timezone provided by ``tz``.
-- `{year,month,day,hour,min}2` (required) - The end timestamp for the data in
-    the timezone provided by ``tz``.
+  https://mesonet.agron.iastate.edu/cgi-bin/request/asos1min.py?station=KAMW\
+&vars=tmpf&sts=2022-01-01T00:00Z&ets=2023-01-01T00:00Z&sample=1hour\
+&what=download&tz=UTC
 
 """
 
 from io import StringIO
 
+from pydantic import AwareDatetime, Field
 from pyiem.exceptions import IncompleteWebRequest
-from pyiem.webutil import ensure_list, iemapp
+from pyiem.webutil import CGIModel, ListOrCSVType, iemapp
 
 SAMPLING = {
     "1min": 1,
@@ -49,9 +35,52 @@ SAMPLING = {
 DELIM = {"space": " ", "comma": ",", "tab": "\t", ",": ","}
 
 
-def get_station_metadata(eviron, stations) -> dict:
+class Schema(CGIModel):
+    """See how we are called."""
+
+    delim: str = Field(
+        "comma",
+        description="Delimiter to use in output",
+        pattern="^(comma|space|tab|,)$",
+    )
+    ets: AwareDatetime = Field(None, description="End timestamp for data")
+    gis: bool = Field(
+        False, description="Include Lat/Lon information in output"
+    )
+    sample: str = Field(
+        "1min",
+        description="Sampling period for data",
+        pattern="^(1min|5min|10min|20min|1hour)$",
+    )
+    station: ListOrCSVType = Field(
+        ..., description="Station(s) to request data for"
+    )
+    sts: AwareDatetime = Field(None, description="Start timestamp for data")
+    tz: str = Field(
+        "UTC",
+        description="Timezone to use for the output and input timestamps",
+    )
+    vars: ListOrCSVType = Field(
+        None, description="Variable(s) to request data for"
+    )
+    what: str = Field(
+        "dl", description="Output format", pattern="^(download|view)$"
+    )
+    year1: int = Field(None, description="Start year for data")
+    month1: int = Field(None, description="Start month for data")
+    day1: int = Field(None, description="Start day for data")
+    hour1: int = Field(0, description="Start hour for data")
+    minute1: int = Field(0, description="Start minute for data")
+    year2: int = Field(None, description="End year for data")
+    month2: int = Field(None, description="End month for data")
+    day2: int = Field(None, description="End day for data")
+    hour2: int = Field(0, description="End hour for data")
+    minute2: int = Field(0, description="End minute for data")
+
+
+def get_station_metadata(environ, stations) -> dict:
     """build a dictionary."""
-    cursor = eviron["iemdb.mesosite.cursor"]
+    cursor = environ["iemdb.mesosite.cursor"]
     cursor.execute(
         """
         SELECT id, name, round(ST_x(geom)::numeric, 4) as lon,
@@ -72,9 +101,8 @@ def get_station_metadata(eviron, stations) -> dict:
 def compute_prefixes(sio, environ, delim, stations, tz) -> dict:
     """"""
     station_meta = get_station_metadata(environ, stations)
-    gis = environ.get("gis", "no")
     prefixes = {}
-    if gis == "yes":
+    if environ["gis"]:
         sio.write(
             delim.join(
                 ["station", "station_name", "lat", "lon", f"valid({tz})", ""]
@@ -107,29 +135,24 @@ def compute_prefixes(sio, environ, delim, stations, tz) -> dict:
     return prefixes
 
 
-@iemapp(iemdb=["asos1min", "mesosite"], iemdb_cursor="blah", help=__doc__)
+@iemapp(
+    iemdb=["asos1min", "mesosite"],
+    iemdb_cursor="blah",
+    help=__doc__,
+    schema=Schema,
+)
 def application(environ, start_response):
     """Handle mod_wsgi request."""
-    stations = ensure_list(environ, "station")
-    if not stations:  # legacy php
-        stations = ensure_list(environ, "station[]")
-    if not stations:
+    if environ["station"] is None:
         raise IncompleteWebRequest("No station= was specified in request.")
-    if "sts" not in environ:
+    if environ["sts"] is None or environ["ets"] is None:
         raise IncompleteWebRequest("Insufficient start timestamp variables.")
     # Ensure we have uppercase stations
-    stations = [s.upper() for s in stations]
-    delim = DELIM.get(environ.get("delim", "comma"))
-    if delim is None:
-        raise IncompleteWebRequest(
-            f"Unknown delimiter specified, please choose one of {DELIM.keys()}"
-        )
-    sample = SAMPLING[environ.get("sample", "1min")]
-    what = environ.get("what", "dl")
-    tz = environ.get("tz", "UTC")
-    varnames = ensure_list(environ, "vars")
-    if not varnames:  # legacy php
-        varnames = ensure_list(environ, "vars[]")
+    stations = [s.upper() for s in environ["station"]]
+    delim = DELIM[environ["delim"]]
+    sample = SAMPLING[environ["sample"]]
+    tz = environ["tz"]
+    varnames = environ["vars"]
     if not varnames:
         raise IncompleteWebRequest("No vars= was specified in request.")
     cursor = environ["iemdb.asos1min.cursor"]
@@ -158,7 +181,7 @@ def application(environ, start_response):
         (tz, stations, environ["sts"], environ["ets"], sample),
     )
     headers = []
-    if what == "download":
+    if environ["what"] == "download":
         headers.append(("Content-type", "application/octet-stream"))
         headers.append(
             ("Content-Disposition", "attachment; filename=changeme.txt")

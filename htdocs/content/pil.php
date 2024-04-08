@@ -1,8 +1,6 @@
 <?php
 require "../../include/forms.php";
-/* Generate Cheezy PIL image
- * 
- */
+// Generate Cheezy PIL image
 $pil = isset($_REQUEST["pil"]) ? substr(xssafe($_REQUEST["pil"]), 0, 6) : 'AFDDMX';
 
 // Try to get it from memcached
@@ -21,8 +19,6 @@ $white = imagecolorallocate($img, 255, 255, 255);
 $black = imagecolorallocate($img, 0, 0, 0);
 $ee = imagecolorallocate($img, 150, 150, 150);
 imagefilledrectangle($img, 0, 0, 85, 85, $white);
-//$logo = imagecreatefrompng("../images/logo_small.png");
-//imagecopy($img, $logo, 0, 0, 0, 0, 85, 65);
 imagettftext(
     $img,
     32,
