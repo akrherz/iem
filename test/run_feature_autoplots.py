@@ -65,7 +65,7 @@ def main():
         ORDER by valid ASC
     """
     )
-    queue = [row for row in cursor]
+    queue = cursor.fetchall()
     LOG.info("found %s features", len(queue))
     timing = []
     failed = []

@@ -117,7 +117,7 @@ def get_warnings(sts, ets, wfo, wtypes):
     on (c.eventid = s.eventid and c.phenomena = s.phenomena)
     """
     pcursor.execute(sql)
-    res = [row for row in pcursor]
+    res = pcursor.fetchall()
     pgconn.close()
     return res
 

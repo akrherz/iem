@@ -18,7 +18,7 @@ class Schema(CGIModel):
     station: str = Field(
         ...,
         description="The station identifier to query for",
-        pattern="^[A-Z0-9\-]*$",
+        pattern=r"^[A-Z0-9\-]*$",
     )
     network: str = Field(
         ...,
