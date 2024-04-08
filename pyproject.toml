@@ -6,8 +6,9 @@ line-length = 79
 lint.select = [
     "A",  # builtins
     "B",  # bugbear
+    # "BLE",  # blind exception
     "E",  # pycodestyle
-    # "ERA",  # eradicate
+    "ERA",  # eradicate
     "EXE",  # shebang
     "F",  # pyflakes
     "G",  # logging-format
@@ -15,7 +16,10 @@ lint.select = [
     "I",  # isort
     # "PD",  # pandas-vet
     "PIE",  # flake8-pie
+    # "PERF",  # performance
+    # "PL",  # pylint
     # "SIM",  # simplify
+    # "TRY",  # try-except-raise
     # "UP",  # pyupgrade
 ]
 target-version = "py39"

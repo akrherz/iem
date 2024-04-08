@@ -11,9 +11,10 @@ expect to set 365 records the first year, 183 the second, and so on...
 import datetime
 
 import pandas as pd
+from pyiem.database import get_dbconnc
 from pyiem.exceptions import NoDataFound
 from pyiem.plot import figure
-from pyiem.util import get_autoplot_context, get_dbconnc
+from pyiem.util import get_autoplot_context
 
 
 def get_description():
@@ -62,7 +63,6 @@ def plotter(fdict):
     pyears = [0] * (eyear - syear)
     expect = [0] * (eyear - syear)
 
-    # hstraight = 0
     for row in cursor:
         sday = row["sday"]
         year = row["year"]

@@ -128,8 +128,6 @@ STATIONS = {
     "AmesFinch": "AMFI4",
     "AmesHinds": "AHDI4",
     "AmesKitchen": "AKCI4",
-    # Temporary?
-    # 'REFI4': 'Adel',
     # Vineyward
     "AmesHort": "AHTI4",
     "TasselRidge": "OSTI4",
@@ -211,7 +209,6 @@ def do_inversion(filename, nwsli):
                 row["ws_ms_max"],
             ),
         )
-    # LOG.debug("Inserted %s inversion rows for %s", len(df.index), nwsli)
     cursor.close()
     pgconn.commit()
 
@@ -409,7 +406,6 @@ def main():
         if event is None:
             continue
         (_header, type_names, watch_path, fn) = event
-        # LOG.debug("fn: %s type_names: %s", fn, str(type_names))
         if "IN_CLOSE_WRITE" not in type_names:
             continue
         if not fn.endswith(".dat"):

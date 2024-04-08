@@ -118,9 +118,7 @@ def main():
     service += startts.strftime("year1=%Y&month1=%m&day1=%d&")
     service += endts.strftime("year2=%Y&month2=%m&day2=%d&")
 
-    # Two examples of how to specify a list of stations
     stations = get_stations_from_networks()
-    # stations = get_stations_from_filelist("mystations.txt")
     for station in stations:
         uri = f"{service}&station={station}"
         print(f"Downloading: {station}")
@@ -132,4 +130,3 @@ def main():
 
 if __name__ == "__main__":
     download_alldata()
-    # main()

@@ -72,8 +72,6 @@ def do(now, realtime=False):
     # -99 is missing , go to 255
 
     val = np.where(val >= -32, (val + 32) * 2.0, val)
-    # val = np.where(val < -990., 0., val)
-    # val = np.where(val < -90., 255., val)
     # This is an upstream BUG
     val = np.where(val < 0.0, 0.0, val)
     imgdata[:, :] = np.flipud(val.astype("int"))

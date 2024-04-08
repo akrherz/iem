@@ -6,9 +6,9 @@ import datetime
 import sys
 import warnings
 
+from pyiem.database import get_dbconn
 from pyiem.network import Table as NetworkTable
 from pyiem.plot import MapPlot
-from pyiem.util import get_dbconn
 
 warnings.simplefilter("ignore", UserWarning)
 
@@ -46,7 +46,6 @@ def doit(now):
         sid = row[0]
         if sid not in st.sts:
             continue
-        # labels.append( id[2:] )
         lats.append(st.sts[sid]["lat"])
         lons.append(st.sts[sid]["lon"])
         vals.append(row[1])

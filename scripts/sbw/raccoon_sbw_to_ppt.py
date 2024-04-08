@@ -117,9 +117,7 @@ def get_warnings(sts, ets, wfo, wtypes):
     on (c.eventid = s.eventid and c.phenomena = s.phenomena)
     """
     pcursor.execute(sql)
-    res = []
-    for row in pcursor:
-        res.append(row)
+    res = [row for row in pcursor]
     pgconn.close()
     return res
 
@@ -180,8 +178,6 @@ def do_job(job):
     doc.masterstyles.addElement(masterpage)
 
     dpstyle = Style(name="dp1", family="drawing-page")
-    # dpstyle.addElement(DrawingPageProperties(transitiontype="automatic",
-    #   transitionstyle="move-from-top", duration="PT5S"))
     doc.automaticstyles.addElement(dpstyle)
 
     # Title slide

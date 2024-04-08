@@ -126,8 +126,6 @@ STATIONS = {
     "CIRI4": "CedarRapids",
     "MCSI4": "Marcus",
     "AMFI4": "AmesFinch",
-    # Temporary
-    # 'REFI4': 'Adel',
     # Vineyward
     "AHTI4": "AmesHort",
     "OSTI4": "TasselRidge",
