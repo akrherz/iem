@@ -291,6 +291,8 @@ def set_gridinfo(ctx):
 
 def set_data(ctx):
     """Do the data work."""
+    if 0 in ctx["p01d"].shape:
+        raise NoDataFound("Data Unavailable")
     if np.ma.is_masked(np.max(ctx["p01d"])):
         raise NoDataFound("Data Unavailable")
     p01d = ctx["p01d"].filled(np.nan)
