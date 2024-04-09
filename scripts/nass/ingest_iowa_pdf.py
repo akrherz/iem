@@ -1,6 +1,6 @@
 """Sucks that the raw data is only found in the PDFs.
 
-Run from TBD
+Run from RUN_12Z.sh on Tuesdays
 """
 
 import datetime
@@ -194,6 +194,7 @@ def ingest(valid, label, numbers):
         .replace("}", "")
         .replace(",", "")
         .replace("5a", "54")
+        .replace("a", "")
         for x in numbers
     ]
     if label == "days suitable":
@@ -203,7 +204,7 @@ def ingest(valid, label, numbers):
                 numbers[i] = numbers[i] / 10.0  # OCR Fail
     # OCR Fail
     for i in range(10):
-        if numbers[i] in ["(", ")"]:
+        if numbers[i] in ["(", ")", ""]:
             numbers[i] = 0
     LOG.info("Ingesting %s %s", label, numbers[:10])
     conn, cursor = get_dbconnc("coop")
