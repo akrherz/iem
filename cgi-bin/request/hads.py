@@ -11,37 +11,95 @@ requests are limited in temporal scope to just one UTC year.
 Changelog
 ---------
 
+- 2024-04-09: Migrated to pydantic based CGI field validation.
 - 2024-03-15: Initial documentation added
-
-CGI Parameters
---------------
-
-The term ``multi`` below implies that you can either specify the parameter as
-a single key value pair, or a single key with a value that is a comma
-separated, or multiple key value pairs.  For example, `data=tmpf&data=dwpf` or
-`data=tmpf,dwpf`.
-
-- `delim`: (optional) The delimiter to use for the output file, defaults to
-    comma.  Options are comma, space, or tab.
-- `network`: (optional) The IEM network identifier to limit the stations to.
-- `stations`: (required,multi) A list of station identifiers to query.
-- `what`: (optional) The output format, defaults to dl.  Options are dl, txt,
 
 """
 
 # pylint: disable=abstract-class-instantiated
 from datetime import timedelta
 from io import BytesIO, StringIO
+from typing import Optional
 
 import pandas as pd
+from pydantic import AwareDatetime, Field, field_validator
 from pyiem.database import get_sqlalchemy_conn
 from pyiem.exceptions import IncompleteWebRequest
 from pyiem.network import Table as NetworkTable
-from pyiem.webutil import ensure_list, iemapp
+from pyiem.webutil import CGIModel, ListOrCSVType, iemapp
 from sqlalchemy import text
 
 DELIMITERS = {"comma": ",", "space": " ", "tab": "\t"}
 EXL = "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"
+
+
+class Schema(CGIModel):
+    """See how we are called."""
+
+    delim: str = Field(
+        "comma",
+        description="Delimiter for output",
+        pattern="^(comma|space|tab)$",
+    )
+    ets: AwareDatetime = Field(None, description="End Time for request")
+    network: str = Field(None, description="Network Identifier")
+    stations: ListOrCSVType = Field(..., description="Station Identifier(s)")
+    sts: AwareDatetime = Field(None, description="Start Time for request")
+    threshold: Optional[float] = Field(
+        None, description="Threshold Value for Searching"
+    )
+    thresholdvar: str = Field(
+        None,
+        description="Threshold Variable for Searching",
+        pattern="^(RG|PCP)$",
+    )
+    what: str = Field(
+        "dl", description="Output format", pattern="^(dl|txt|html|excel)$"
+    )
+    year: int = Field(
+        None,
+        description=(
+            "This service only allows a download over a given UTC ."
+            "year, so there is no year1 and year2 variants."
+        ),
+    )
+    month1: int = Field(
+        None,
+        description="Start month for request, when sts not set.",
+    )
+    month2: int = Field(
+        None,
+        description="End month for request, when ets not set.",
+    )
+    day1: int = Field(
+        None,
+        description="Start day for request, when sts not set.",
+    )
+    day2: int = Field(
+        None,
+        description="End day for request, when ets not set.",
+    )
+    hour1: int = Field(
+        0,
+        description="Start hour for request, when sts not set.",
+    )
+    hour2: int = Field(
+        0,
+        description="End hour for request, when ets not set.",
+    )
+    minute1: int = Field(
+        0,
+        description="Start minute for request, when sts not set.",
+    )
+    minute2: int = Field(
+        0,
+        description="End minute for request, when ets not set.",
+    )
+
+    @field_validator("threshold", mode="before")
+    def check_threshold(cls, value):
+        """Allow empty string."""
+        return None if value == "" else value
 
 
 def threshold_search(table, threshold, thresholdvar):
@@ -97,24 +155,19 @@ def threshold_search(table, threshold, thresholdvar):
     return pd.DataFrame(res)
 
 
-@iemapp(default_tz="UTC", help=__doc__)
+@iemapp(default_tz="UTC", help=__doc__, schema=Schema)
 def application(environ, start_response):
     """Go do something"""
-    network = environ.get("network")
-    delimiter = DELIMITERS.get(environ.get("delim", "comma"))
-    what = environ.get("what", "dl")
-    threshold = environ.get("threshold", -99)
-    if threshold is not None and threshold != "":
-        threshold = float(threshold)
-    thresholdvar = environ.get("threshold-var", "RG")
-    stations = ensure_list(environ, "stations")
-    if "_ALL" in stations and network is not None:
-        stations = list(NetworkTable(network[:10]).sts.keys())
+    if environ["sts"] is None or environ["ets"] is None:
+        raise IncompleteWebRequest("Error, missing start or end time")
+    delimiter = DELIMITERS[environ["delim"]]
+    stations = environ["stations"]
+    if "_ALL" in stations and environ["network"] is not None:
+        stations = list(NetworkTable(environ["network"][:10]).sts.keys())
         if (environ["ets"] - environ["sts"]) > timedelta(hours=24):
             environ["ets"] = environ["sts"] + timedelta(hours=24)
     if not stations:
         raise IncompleteWebRequest("Error, no stations specified!")
-
     sql = text(
         f"""
         SELECT station, valid at time zone 'UTC' as utc_valid, key, value
@@ -133,14 +186,16 @@ def application(environ, start_response):
     table = df.pivot_table(
         values="value", columns=["key"], index=["station", "utc_valid"]
     )
-    if threshold != "" and threshold >= 0:
-        if "XXXXXXX" not in stations:
+    if environ["threshold"] is not None:
+        if len(stations) > 1:
             start_response("200 OK", [("Content-type", "text/plain")])
             return [b"Can not do threshold search for more than one station"]
-        table = threshold_search(table, threshold, thresholdvar)
+        table = threshold_search(
+            table, environ["threshold"], environ["thresholdvar"]
+        )
 
     sio = StringIO()
-    if what == "txt":
+    if environ["what"] == "txt":
         headers = [
             ("Content-type", "application/octet-stream"),
             ("Content-Disposition", "attachment; filename=hads.txt"),
@@ -148,12 +203,12 @@ def application(environ, start_response):
         start_response("200 OK", headers)
         table.to_csv(sio, sep=delimiter)
         return [sio.getvalue().encode("ascii")]
-    if what == "html":
+    if environ["what"] == "html":
         headers = [("Content-type", "text/html")]
         start_response("200 OK", headers)
         table.to_html(sio)
         return [sio.getvalue().encode("ascii")]
-    if what == "excel":
+    if environ["what"] == "excel":
         bio = BytesIO()
         with pd.ExcelWriter(bio, engine="openpyxl") as writer:
             table.to_excel(writer, sheet_name="Data", index=True)
