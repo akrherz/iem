@@ -1,6 +1,6 @@
 """Sucks that the raw data is only found in the PDFs.
 
-Run from TBD
+Run from RUN_12Z.sh on Tuesdays
 """
 
 import datetime
@@ -40,6 +40,7 @@ REMAPED = {
     "oats emerget": "oats emerged",
     "cor planted": "corn planted",
     "subsoil moisture adequat": "subsoil moisture adequate",
+    "ubsoil moisture": "subsoil moisture",
 }
 DOMAIN = [
     "corn dented",
@@ -92,8 +93,6 @@ def glean_labels(label) -> list:
     prefix = ""
     for token in [x.strip().lower() for x in label.split("\n")]:
         token = token.replace(".", "").strip()
-        if token == "ubsoil moisture":
-            token = "subsoil moisture"
         token = REMAPED.get(token, token)
         if token.find("moisture") > -1:
             prefix = f"{token} "
@@ -195,6 +194,7 @@ def ingest(valid, label, numbers):
         .replace("}", "")
         .replace(",", "")
         .replace("5a", "54")
+        .replace("a", "")
         for x in numbers
     ]
     if label == "days suitable":
@@ -204,7 +204,7 @@ def ingest(valid, label, numbers):
                 numbers[i] = numbers[i] / 10.0  # OCR Fail
     # OCR Fail
     for i in range(10):
-        if numbers[i] in ["(", ")"]:
+        if numbers[i] in ["(", ")", ""]:
             numbers[i] = 0
     LOG.info("Ingesting %s %s", label, numbers[:10])
     conn, cursor = get_dbconnc("coop")

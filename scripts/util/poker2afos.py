@@ -7,8 +7,9 @@ import re
 import subprocess
 from zoneinfo import ZoneInfo
 
+from pyiem.database import get_dbconn
 from pyiem.nws.product import TextProduct
-from pyiem.util import get_dbconn, noaaport_text
+from pyiem.util import noaaport_text
 
 BAD_CHARS = r"[^\n\r\001\003a-zA-Z0-9:\(\)\%\.,\s\*\-\?\|/><&$=\+\@]"
 PGCONN = get_dbconn("afos")
@@ -470,8 +471,6 @@ def process(order):
                 bad += 1
                 continue
             if prod.valid < base or prod.valid > ceiling:
-                # print('Timestamp out of bounds %s %s %s' % (base, prod.valid,
-                #                                            ceiling))
                 bad += 1
                 continue
 
