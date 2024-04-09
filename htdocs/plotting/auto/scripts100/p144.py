@@ -16,6 +16,7 @@ from pyiem.util import convert_value, get_autoplot_context, utc
 
 XREF = {
     "AEEI4": "A130209",
+    "AHDI4": "A130209",
     "BOOI4": "A130209",
     "CAMI4": "A138019",
     "CHAI4": "A131559",
@@ -70,7 +71,7 @@ def plotter(fdict):
     hours1 = ctx["hours1"]
     hours2 = ctx["hours2"]
     station = ctx["station"]
-    oldstation = XREF[station]
+    oldstation = XREF.get(station, "A130209")
     with get_sqlalchemy_conn("isuag") as conn:
         df = pd.read_sql(
             """

@@ -40,6 +40,7 @@ REMAPED = {
     "oats emerget": "oats emerged",
     "cor planted": "corn planted",
     "subsoil moisture adequat": "subsoil moisture adequate",
+    "ubsoil moisture": "subsoil moisture",
 }
 DOMAIN = [
     "corn dented",
@@ -92,8 +93,6 @@ def glean_labels(label) -> list:
     prefix = ""
     for token in [x.strip().lower() for x in label.split("\n")]:
         token = token.replace(".", "").strip()
-        if token == "ubsoil moisture":
-            token = "subsoil moisture"
         token = REMAPED.get(token, token)
         if token.find("moisture") > -1:
             prefix = f"{token} "

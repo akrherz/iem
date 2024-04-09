@@ -230,7 +230,6 @@ def get_context(fdict):
     df2 = pd.DataFrame()
     for i in range(32, -51, -1):
         df2[i] = df[df["wcht"] < i].groupby("season")["timedelta"].sum()
-        df2[i] = df[df["wcht"] < i].groupby("season")["timedelta"].sum()
     ctx["df"] = df2
     ctx["title"] = (
         f"{ctx['_sname']}:: Wind Chill Hours {textra} "
