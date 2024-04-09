@@ -10,9 +10,10 @@ import calendar
 import itertools
 
 import pandas as pd
+from pyiem.database import get_sqlalchemy_conn
 from pyiem.exceptions import NoDataFound
 from pyiem.plot import figure_axes
-from pyiem.util import get_autoplot_context, get_sqlalchemy_conn
+from pyiem.util import get_autoplot_context
 
 
 def get_description():
@@ -82,6 +83,13 @@ def get_description():
             optional=True,
             label="Daily Average Wind Speed Below (threshold MPH): [optional]",
         ),
+        {
+            "type": "int",
+            "name": "max_gust_above",
+            "default": 50,
+            "optional": True,
+            "label": "Daily Max Wind Gust Above (threshold MPH): [optional]",
+        },
         dict(
             type="text",
             name="max_tmpf_range",
@@ -126,6 +134,12 @@ def plotter(fdict):
             "then 1 else 0 end as smph_hit"
         )
         labels["smph_hit"] = f"Avg Wind < {ctx['avg_smph_below']:.0f}MPH"
+    if ctx.get("max_gust_above"):
+        params.append(
+            f"case when max_gust * 1.15 > {ctx['max_gust_above']:.0f} "
+            "then 1 else 0 end as gust_hit"
+        )
+        labels["gust_hit"] = f"Wind Gust > {ctx['max_gust_above']:.0f}MPH"
     if not params:
         raise NoDataFound("Please select some options for plotting.")
     with get_sqlalchemy_conn("iem") as conn:

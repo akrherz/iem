@@ -24,13 +24,18 @@ def run(network, month, day, syear, eyear):
     WITH data as (
       SELECT station, year, precip,
       avg(precip) OVER (PARTITION by station) as avg_precip,
-      high, rank() OVER (PARTITION by station ORDER by high DESC) as max_high,
+      high, rank() OVER (PARTITION by station ORDER by high DESC nulls last)
+        as max_high,
       avg(high) OVER (PARTITION by station) as avg_high,
-      rank() OVER (PARTITION by station ORDER by high ASC) as min_high,
-      low, rank() OVER (PARTITION by station ORDER by low DESC) as max_low,
+      rank() OVER (PARTITION by station ORDER by high ASC nulls last)
+        as min_high,
+      low, rank() OVER (PARTITION by station ORDER by low DESC nulls last)
+        as max_low,
       avg(low) OVER (PARTITION by station) as avg_low,
-      rank() OVER (PARTITION by station ORDER by low ASC) as min_low,
-      rank() OVER (PARTITION by station ORDER by precip DESC) as max_precip
+      rank() OVER (PARTITION by station ORDER by low ASC nulls last)
+        as min_low,
+      rank() OVER (PARTITION by station ORDER by precip DESC nulls last)
+        as max_precip
       from {table} WHERE sday = %s and year >= %s and year < %s),
 
     max_highs as (
