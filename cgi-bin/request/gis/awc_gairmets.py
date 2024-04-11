@@ -1,4 +1,12 @@
-"""Dump AWC G-AIRMETs."""
+""".. title:: AWC Graphical AIRMETs
+
+Documentation for /cgi-bin/request/gis/awc_gairmets.py
+------------------------------------------------------
+
+This service emits the archive of IEM's best attempt at processing graphical
+AIRMETs.
+
+"""
 
 # Local
 import tempfile
@@ -8,12 +16,39 @@ from io import BytesIO
 # Third Party
 import fiona
 import geopandas as gpd
+from pydantic import AwareDatetime, Field
+from pyiem.database import get_sqlalchemy_conn
 from pyiem.exceptions import IncompleteWebRequest
-from pyiem.util import get_sqlalchemy_conn
-from pyiem.webutil import iemapp
+from pyiem.webutil import CGIModel, iemapp
 
 fiona.supported_drivers["KML"] = "rw"
 PRJFILE = "/opt/iem/data/gis/meta/4326.prj"
+
+
+class Schema(CGIModel):
+    """See how we are called."""
+
+    format: str = Field("shp", description="Output Format")
+    sts: AwareDatetime = Field(None, description="Start Time")
+    ets: AwareDatetime = Field(None, description="End Time")
+    year1: int = Field(
+        None, description="Start Year in UTC, when sts not set."
+    )
+    month1: int = Field(
+        None, description="Start Month in UTC, when sts not set."
+    )
+    day1: int = Field(None, description="Start Day in UTC, when sts not set.")
+    hour1: int = Field(0, description="Start Hour in UTC, when sts not set.")
+    minute1: int = Field(
+        0, description="Start Minute in UTC, when sts not set."
+    )
+    year2: int = Field(None, description="End Year in UTC, when ets not set.")
+    month2: int = Field(
+        None, description="End Month in UTC, when ets not set."
+    )
+    day2: int = Field(None, description="End Day in UTC, when ets not set.")
+    hour2: int = Field(0, description="End Hour in UTC, when ets not set.")
+    minute2: int = Field(0, description="End Minute in UTC, when ets not set.")
 
 
 def run(ctx, start_response):
@@ -90,14 +125,14 @@ def run(ctx, start_response):
     return zio.getvalue()
 
 
-@iemapp(default_tz="UTC")
+@iemapp(default_tz="UTC", help=__doc__, schema=Schema)
 def application(environ, start_response):
     """Do something fun!"""
-    if "sts" not in environ:
-        raise IncompleteWebRequest("GET start time parameters missing")
+    if environ["sts"] is None or environ["ets"] is None:
+        raise IncompleteWebRequest("Start and End Time are required!")
     ctx = {
         "sts": environ["sts"],
         "ets": environ["ets"],
-        "format": environ.get("format", "shp"),
+        "format": environ["format"],
     }
     return [run(ctx, start_response)]
