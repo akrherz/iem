@@ -136,8 +136,9 @@ the fly.</div>
 
 <div class="row"><div class="col-sm-6">
 
-<p><a href="/cgi-bin/request/gis/watchwarn.py?help"><i class="fa fa-file"></i> Documentation</a>
-for scripting against the backend service.</p>
+<p><a class="btn btn-default" href="/cgi-bin/request/gis/watchwarn.py?help">
+<i class="fa fa-file"></i> Backend documentation</a>
+for scripting against this service.</p>
 
 <div style="background: #EEEEEE; border: #000 solid 1px; padding: 5px;">
 
@@ -281,6 +282,10 @@ when they were generated.</p>
 
 <h4>Service changes:</h4>
 <ul>
+    <li><strong>10 Apr 2024</strong>: Polygons associated with CANcel VTEC
+    events when the event is still active for other areas have been culled from
+    the database and thus this portal.  These were not providing any value and
+    were confusing users.</li>
     <li><strong>12 Mar 2019</strong>: Added <code>UPDATED</code> column to the
     dataset providing the timestamp of the most recent NWS Text Product for
     the event.</li>
@@ -289,7 +294,7 @@ when they were generated.</p>
     of these polygons would overwhelm the backend data service.  So now
     this service only returns the simplified county/zone polygons. You
     may wish to do a join against the
-    <a href="http://www.nws.noaa.gov/geodata/">AWIPS Geodatabase</a> to
+    <a href="https://www.weather.gov/gis/AWIPSShapefiles">AWIPS Geodatabase</a> to
     get the high resolution depiction. The <code>NWS_UGC</code> column is what
     you would use to join.</li>	
 </ul>
