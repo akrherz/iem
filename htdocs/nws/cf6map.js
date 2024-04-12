@@ -3,7 +3,6 @@ let vectorLayer = null;
 let map = null;
 let element = null;
 let fontSize = 14;
-var ol = window.ol || {};  // skipcq: JS-0239
 
 function text(str){
     // XSS shim
@@ -16,6 +15,7 @@ function updateURL() {
     window.location.href = `#${tt}/${renderattr}`;
 }
 
+// eslint-disable-next-line no-unused-vars
 function updateMap() {
     renderattr = text($('#renderattr').val());
     vectorLayer.setStyle(vectorLayer.getStyle());
@@ -31,7 +31,7 @@ function updateDate() {
     updateURL();
 }
 
-var vectorStyleFunction = function (feature, resolution) {
+var vectorStyleFunction = function (feature) {
     let style = null;
     const value = feature.get(renderattr);
     let color = "#FFFFFF";
@@ -162,7 +162,7 @@ $(document).ready(() => {
     // display popup on click
     map.on('click', (evt) => {
         const feature = map.forEachFeatureAtPixel(evt.pixel,
-            (feature2, _layer) => {
+            (feature2) => {
                 return feature2;
             });
         if (feature) {

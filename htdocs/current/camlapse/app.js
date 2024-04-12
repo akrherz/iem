@@ -1,5 +1,4 @@
-
-var flowplayer = window.flowplayer || {}; // skipcq: JS-0239
+/* global flowplayer */
 
 // https://stackoverflow.com/questions/5202085
 String.prototype.rsplit = function (sep, maxsplit) {
@@ -11,7 +10,7 @@ function text(str) {
     return $("<p>").text(str).html();
 }
 
-flowplayer((api, _root) => {
+flowplayer((api) => {
     api.on("error", (_e, api2, err) => {
         if (err.code === 4) { // Video file not found
             // reset state

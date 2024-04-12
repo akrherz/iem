@@ -1,3 +1,4 @@
+/* global CONFIG */
 // previous hashlinking looks like 2017-O-NEW-KALY-WI-Y-0015
 
 let olmap = null;
@@ -12,10 +13,6 @@ let ugcTable = null;
 let lsrTable = null;
 let sbwLsrTable = null;
 let element = null;
-// CONFIG is set in the base HTML page
-var CONFIG = window.CONFIG || {};  // skipcq: JS-0239
-var ol = window.ol || {};  // skipcq: JS-0239
-var moment = window.moment || {};  // skipcq: JS-0239
 
 Number.prototype.padLeft = function (n, str) { // this
     return Array(n - String(this).length + 1).join(str || '0') + this;
@@ -130,6 +127,7 @@ function urlencode() {
 }
 
 // https://stackoverflow.com/questions/2044616
+// eslint-disable-next-line no-unused-vars
 function selectElementContents(elid) {
     const el = document.getElementById(elid);
     const body = document.body;
@@ -142,7 +140,7 @@ function selectElementContents(elid) {
         try {
             range.selectNodeContents(el);
             sel.addRange(range);
-        } catch (e) {
+        } catch {
             range.selectNode(el);
             sel.addRange(range);
         }
@@ -238,7 +236,7 @@ function buildMap() {
     });
     productVectorCountyLayer = new ol.layer.Vector({
         title: 'VTEC Product Geometry',
-        style: (_feature, _resolution) => {
+        style: () => {
             return [new ol.style.Style({
                 stroke: new ol.style.Stroke({
                     color: '#000000',
@@ -262,7 +260,7 @@ function buildMap() {
 
     productVectorPolygonLayer = new ol.layer.Vector({
         title: 'VTEC Product Polygon',
-        style: (feature, _resolution) => {
+        style: (feature) => {
             sbwStyle[1].getStroke().setColor(sbwLookup[feature.get('phenomena')]);
             return sbwStyle;
         },
@@ -273,7 +271,7 @@ function buildMap() {
 
     lsrLayer = new ol.layer.Vector({
         title: 'Local Storm Reports',
-        style: (feature, _resolution) => {
+        style: (feature) => {
             if (feature.get('type') == 'S' || feature.get('type') == 'R') {
                 textStyle.getText().setText(feature.get('magnitude').toString());
                 return textStyle;
@@ -725,7 +723,7 @@ function makeLSRTable(div) {
         }
     });
 
-    table.on("user-select", (e, _dt, _type, cell, _originalEvent) => {
+    table.on("user-select", (e, _dt, _type, cell) => {
         if ($(cell.node()).hasClass("details-control")) {
             e.preventDefault();
         }
@@ -795,7 +793,7 @@ function buildUI() {
         max: 100,
         value: 100,
         slide: (_event, ui) => {
-            radarTMSLayer.setOpacity(parseInt(ui.value) / 100.);
+            radarTMSLayer.setOpacity(parseInt(ui.value) / 100.0);
         }
     });
     $("#timeslider").slider({
@@ -859,7 +857,7 @@ $(() => {
     //onReady
     try {
         parseHash();
-    } catch (err) { 
+    } catch { 
         // Nothing?
     };
     buildUI();

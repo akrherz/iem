@@ -10,8 +10,6 @@ let realtimeMode = true;
 let currentCameraFeature = null;
 let cameraID = "ISUC-006";
 const ISOFMT = "Y-MM-DD[T]HH:mm:ss[Z]";
-var ol = window.ol || {};  // skipcq: JS-0239
-var moment = window.moment || {};  // skipcq: JS-0239
 
 const sbwLookup = {
     "TO": 'red',
@@ -69,6 +67,7 @@ function text(str) {
     return $("<p>").text(str).html();
 }
 
+// eslint-disable-next-line no-unused-vars
 function liveShot() {
     if (aqlive) return;
     aqlive = true;
@@ -113,6 +112,7 @@ function findFeatureByCid(cid) {
     return feature;
 }
 
+// eslint-disable-next-line no-unused-vars
 function handleRWISClick(img){
     $("#rwismain").attr('src', $(img).attr("src"));
 }
@@ -259,6 +259,7 @@ function refreshJSON() {
 }
 
 // Set the current camera by cid
+// eslint-disable-next-line no-unused-vars
 function setCamera(cid) {
     const feature = findFeatureByCid(cid);
     if (feature) {
@@ -327,7 +328,7 @@ $().ready(() => {
             url: "/geojson/sbw.geojson",
             format: new ol.format.GeoJSON()
         }),
-        style: (feature, _resolution) => {
+        style: (feature) => {
             const color = sbwLookup[feature.get('phenomena')];
             if (color === undefined) return;
             sbwStyle[1].getStroke().setColor(color);
@@ -336,7 +337,7 @@ $().ready(() => {
     });
     idotdashcamGeoJsonLayer = new ol.layer.Vector({
         title: 'Iowa DOT Truck Dashcams (2014-)',
-        style: (feature, _resolution) => {
+        style: (feature) => {
             if (currentCameraFeature &&
                 currentCameraFeature.get("cid") == feature.get("cid")) {
                 currentCameraFeature = feature;
@@ -347,7 +348,7 @@ $().ready(() => {
     });
     idotRWISLayer = new ol.layer.Vector({
         title: 'Iowa DOT RWIS Webcams (2010-)',
-        style: function (feature, resolution) {
+        style: function (feature) {
             if (currentCameraFeature &&
                 currentCameraFeature.get("cid") == feature.get("cid")) {
                 currentCameraFeature = feature;
@@ -358,17 +359,17 @@ $().ready(() => {
     });
     webcamGeoJsonLayer = new ol.layer.Vector({
         title: 'Webcams (2003-)',
-        style: (feature, _resolution) => {
+        style: (feature) => {
             if (currentCameraFeature &&
                 currentCameraFeature.get("cid") == feature.get("cid")) {
                 currentCameraFeature = feature;
                 // OL rotation is in radians!
                 cameraStyle2.getImage().setRotation(
-                    parseInt(feature.get('angle')) / 180. * 3.14, 10);
+                    parseInt(feature.get('angle')) / 180.0 * 3.14, 10);
                 return [cameraStyle2];
             }
             cameraStyle.getImage().setRotation(
-                parseInt(feature.get('angle')) / 180. * 3.14, 10);
+                parseInt(feature.get('angle')) / 180.0 * 3.14, 10);
             return [cameraStyle];
         }
     });
@@ -400,7 +401,7 @@ $().ready(() => {
 
     map.on('click', (evt) => {
         const feature = map.forEachFeatureAtPixel(evt.pixel,
-            function (feature2, _layer) {
+            function (feature2) {
                 return feature2;
             }
         );
@@ -416,7 +417,7 @@ $().ready(() => {
         // Set new styling
         if (feature.get("angle") !== undefined) {
             cameraStyle2.getImage().setRotation(
-                parseInt(feature.get('angle')) / 180. * 3.14, 10);
+                parseInt(feature.get('angle')) / 180.0 * 3.14, 10);
             feature.setStyle(cameraStyle2);
         }
         updateCamera();

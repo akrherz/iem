@@ -1,8 +1,6 @@
 
 var marker;
 var map;
-var google = window.google || {}; // skipcq: JS-0239
-
 
 function text(str) {
     // XSS
@@ -123,6 +121,7 @@ function doWatch(lon, lat) {
         }
     });
 }
+// eslint-disable-next-line no-unused-vars
 function initialize() { // skipcq: JS-0128
     buildUI();
     const latLng = new google.maps.LatLng(41.53, -93.653);

@@ -4,10 +4,9 @@ let invgj = null;
 let dtpicker = null;
 let n0q = null;
 let varname = 'tmpf';
-var defaultdt = window.defaultdt || {}; // skipcq: JS-0239
+var defaultdt = window.defaultdt || {};
 let currentdt = new Date(defaultdt);
 let timeChanged = false;
-var ol = window.ol || {}; // skipcq: JS-0239
 
 function pad(number) {
     let r = String(number);
@@ -45,8 +44,7 @@ function text(str) {
     return $("<p>").text(str).html();
 }
 
-function logic(dstring) {
-    //console.log("logic() was called...");
+function logic() {
     timeChanged = true;
     currentdt = dtpicker.datetimepicker('getDate'); // toISOString()
     updateMap();
@@ -118,7 +116,7 @@ $().ready(() => {
             url: "/geojson/agclimate.py",
             format: new ol.format.GeoJSON()
         }),
-        style(feature, _resolution) {
+        style(feature) {
             mystyle.getText().setText(feature.get(varname).toString());
             return [mystyle];
         }
@@ -129,7 +127,7 @@ $().ready(() => {
             url: "/geojson/agclimate.py?inversion",
             format: new ol.format.GeoJSON()
         }),
-        style(feature, _resolution) {
+        style(feature) {
             // Update the img src to the appropriate arrow
             $(`#${feature.getId()}_arrow`).attr(
                 "src",
@@ -171,7 +169,7 @@ $().ready(() => {
         const element = popup.getElement();
         $(element).popover('destroy');
         const pixel = map.getEventPixel(evt.originalEvent);
-        const feature = map.forEachFeatureAtPixel(pixel, (feature2, _layer) => {
+        const feature = map.forEachFeatureAtPixel(pixel, (feature2) => {
             return feature2;
         });
         if (feature) {
@@ -228,7 +226,7 @@ $().ready(() => {
             }
             gj.setStyle(gj.getStyle());
         }
-    } catch (err) {
+    } catch {
         varname = 'tmpf';
         currentdt = new Date(defaultdt);
     }
@@ -244,7 +242,7 @@ function setDate() {
 }
 
 function setupUI() {
-    $(".dt").click(function (e) {
+    $(".dt").click(function () {
         timeChanged = true;
         $(this).removeClass('focus');
         currentdt = new Date(currentdt.valueOf() + parseInt($(this).data('delta')));

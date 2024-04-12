@@ -1,3 +1,4 @@
+/* global MapMarkerWidget */
 let stateSelect = null;
 let stateSelect3 = null;
 let ugcSelect = null;
@@ -56,7 +57,6 @@ const states = [["AL", "Alabama"], ["AK", "Alaska"], ["AZ", "Arizona"],
         ["PZ", "Pacific Ocean PZ"],
         ["SL", "St. Lawrence River"]
 ];
-var google = window.google || {};  // skipcq: JS-0239
 
 function text(str) {
     // XSS
@@ -403,6 +403,7 @@ function buildUI(){
     }
 };
 
+// eslint-disable-next-line no-unused-vars
 function _load() {
     buildUI();
     let default_lon = -93.653;

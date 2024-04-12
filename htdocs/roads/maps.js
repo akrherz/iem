@@ -1,4 +1,3 @@
-var ol = window.ol || {}; // skipcq: JS-0239
 
 const style = new ol.style.Style({
     fill: new ol.style.Fill({
@@ -41,10 +40,10 @@ $(document).ready(() => {
             url: '/geojson/winter_roads.geojson',
             format: new ol.format.GeoJSON()
         }),
-        style: (feature, _resolution) => {
+        style: (feature) => {
             try{
                 style.getStroke().setColor(rcLookup[feature.get('code')]);
-            } catch(e) {
+            } catch {
                 // empty
             }
             return [style];

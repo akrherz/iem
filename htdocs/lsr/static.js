@@ -13,9 +13,6 @@ var sbwtypefilter;
 var dateFormat1 = "YYYYMMDDHHmm";
 var realtime = false;
 var TABLE_FILTERED_EVENT = "tfe";
-var moment = window.moment || {}; // skipcq: JS-0239
-var ol = window.ol || {}; // skipcq: JS-0239
-var iemdata = window.iemdata || {}; // skipcq: JS-0239
 let nexradBaseTime = moment().utc().subtract(moment().minutes() % 5, "minutes");
 
 // Use momentjs for formatting
@@ -48,6 +45,7 @@ function text(str) {
     return $("<p>").text(str).html();
 }
 
+// eslint-disable-next-line no-unused-vars
 function parse_href() {
     // Figure out how we were called
     let sts = null;
@@ -89,6 +87,7 @@ function parse_href() {
     }
     setTimeout(loadData, 0);
 }
+// eslint-disable-next-line no-unused-vars
 function cronMinute() {
     if (!realtime) return;
     // Compute the delta
@@ -213,7 +212,7 @@ const lsrLayer = new ol.layer.Vector({
     source: new ol.source.Vector({
         format: new ol.format.GeoJSON()
     }),
-    style: (feature, _resolution) => {
+    style: (feature) => {
         if (feature.hidden === true) {
             return new ol.style.Style();
         }
@@ -244,12 +243,12 @@ lsrLayer.addEventListener(TABLE_FILTERED_EVENT, () => {
         feat.hidden = false;
     });
     // Filter out the map too
-    lsrtable.rows({ "search": "removed" }).every(function (_idx) { // this
+    lsrtable.rows({ "search": "removed" }).every(function () { // this
         lsrLayer.getSource().getFeatureById(this.data().id).hidden = true;
     });
     lsrLayer.changed();
 });
-lsrLayer.getSource().on('change', (_e) => {
+lsrLayer.getSource().on('change', () => {
     if (lsrLayer.getSource().isEmpty()) {
         return;
     }
@@ -272,7 +271,7 @@ lsrLayer.getSource().on('change', (_e) => {
     lsrtable.rows.add(data).draw();
 
     // Build type filter
-    lsrtable.column(7).data().unique().sort().each((d, _j) => {
+    lsrtable.column(7).data().unique().sort().each((d) => {
         lsrtypefilter.append(`<option value="${d}">${d}</option`);
     });
 });
@@ -284,7 +283,7 @@ const sbwLayer = new ol.layer.Vector({
         format: new ol.format.GeoJSON()
     }),
     visible: true,
-    style: (feature, _resolution) => {
+    style: (feature) => {
         if (feature.hidden === true) {
             return new ol.style.Style();
         }
@@ -301,12 +300,12 @@ sbwLayer.addEventListener(TABLE_FILTERED_EVENT, () => {
         feat.hidden = false;
     });
     // Filter out the map too
-    sbwtable.rows({ "search": "removed" }).every(function(_idx) {  // this
+    sbwtable.rows({ "search": "removed" }).every(function() {  // this
         sbwLayer.getSource().getFeatureById(this.data().id).hidden = true;
     });
     sbwLayer.changed();
 });
-sbwLayer.getSource().on('change', (_e) => {
+sbwLayer.getSource().on('change', () => {
     sbwtable.rows().remove();
     const data = [];
     sbwLayer.getSource().getFeatures().forEach(function (feat) {
@@ -317,7 +316,7 @@ sbwLayer.getSource().on('change', (_e) => {
     sbwtable.rows.add(data).draw();
 
     // Build type filter
-    sbwtable.column(3).data().unique().sort().each((d, _j) => {
+    sbwtable.column(3).data().unique().sort().each((d) => {
         sbwtypefilter.append(`<option value="${iemdata.vtec_phenomena[d]}">${iemdata.vtec_phenomena[d]}</option`);
     });
 
@@ -393,7 +392,7 @@ function handleSBWClick(feature) {
         dragging: false
     });
     olmap.addOverlay(marker);
-    div.addEventListener('mousedown', (_evt) => {
+    div.addEventListener('mousedown', () => {
         dragPan.setActive(false);
         marker.set('dragging', true);
     });
@@ -402,7 +401,7 @@ function handleSBWClick(feature) {
             marker.setPosition(evt.coordinate);
         }
     });
-    olmap.on('pointerup', (_evt) => {
+    olmap.on('pointerup', () => {
         if (marker.get('dragging') === true) {
             dragPan.setActive(true);
             marker.set('dragging', false);
@@ -411,7 +410,7 @@ function handleSBWClick(feature) {
     const id = feature.getId();
     sbwtable.rows().deselect();
     sbwtable.row(
-        sbwtable.rows((idx, data, _node) => {
+        sbwtable.rows((idx, data) => {
             if (data["id"] === id) {
                 sbwtable.row(idx).select();
                 return true;
@@ -429,6 +428,7 @@ function copyToClipboard(text, msg) {
     $temp.remove();
     alert(msg);
 }
+// eslint-disable-next-line no-unused-vars
 function initUI() {
     // Generate UI components of the page
     const handle = $("#radartime");
@@ -500,7 +500,7 @@ function initUI() {
         step: 1,
         maxDate: '+1970/01/03',
         minDate: '2003/01/01',
-        onClose: (_dp, _input) => {
+        onClose: () => {
             setTimeout(loadData, 0);
         }
     });
@@ -630,7 +630,7 @@ function initUI() {
             dragging: false
         });
         olmap.addOverlay(marker);
-        div.addEventListener('mousedown', (_evt) => {
+        div.addEventListener('mousedown', () => {
             dragPan.setActive(false);
             marker.set('dragging', true);
         });
@@ -639,7 +639,7 @@ function initUI() {
                 marker.setPosition(evt2.coordinate);
             }
         });
-        olmap.on('pointerup', (_evt) => {
+        olmap.on('pointerup', () => {
             if (marker.get('dragging') === true) {
                 dragPan.setActive(true);
                 marker.set('dragging', false);
@@ -648,7 +648,7 @@ function initUI() {
         const id = feature.getId();
         lsrtable.rows().deselect();
         lsrtable.row(
-            lsrtable.rows((idx, data, _node) => {
+            lsrtable.rows((idx, data) => {
                 if (data["id"] === id) {
                     lsrtable.row(idx).select();
                     return true;
@@ -755,7 +755,7 @@ function initUI() {
                 }
             }, {
                 targets: 5,
-                render: (_data, type, row, _meta) => {
+                render: (_data, type, row) => {
                     if (type == 'display') {
                         return `<a href="${row.href}">${row.eventid}</a>`;
                     }
