@@ -8,10 +8,10 @@ RUN from RUN_20_AFTER.sh
 
 import datetime
 import os
-import sys
 
+import click
 import requests
-from pyiem.util import exponential_backoff, logger, utc
+from pyiem.util import exponential_backoff, logger
 
 LOG = logger()
 BASEDIR = "/mesonet/tmp/gfs"
@@ -93,21 +93,23 @@ def fetch(valid, hr):
             fh.write(req.content)
 
 
-def main(argv):
+@click.command()
+@click.option("--valid", type=click.DateTime(), help="Valid UTC Timestamp")
+def main(valid):
     """Go Main Go"""
-    ts = utc(*[int(s) for s in argv[1:5]])
+    valid = valid.replace(tzinfo=datetime.timezone.utc)
     # script is called every hour, just short circuit the un-needed hours
-    if ts.hour % 6 != 0:
+    if valid.hour % 6 != 0:
         return
-    times = [ts, ts - datetime.timedelta(hours=6)]
+    times = [valid, valid - datetime.timedelta(hours=6)]
     for ts in times:
         for hr in range(0, 385, 6):
             if need_to_run(ts, hr):
                 fetch(ts, hr)
     # now cull old content
     for hr in range(72, 97, 6):
-        cull(ts - datetime.timedelta(hours=hr))
+        cull(valid - datetime.timedelta(hours=hr))
 
 
 if __name__ == "__main__":
-    main(sys.argv)
+    main()
