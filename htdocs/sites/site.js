@@ -1,6 +1,4 @@
-var CONFIG = window.CONFIG || {};  // skipcq: JS-0239
-var google = window.google || {};  // skipcq: JS-0239
-
+/* global CONFIG */
 
 //callback on when the marker is done moving    		
 function displayCoordinates(pnt) {
@@ -10,6 +8,7 @@ function displayCoordinates(pnt) {
     $("#newlon").val(lng);
 }
 
+// eslint-disable-next-line no-unused-vars
 function load() { // skipcq: JS-0128
     const mapOptions = {
         zoom: 15,

@@ -1,9 +1,9 @@
+/* global MapMarkerWidget */
 let mapwidget1 = null;
 let table1 = null;
 let edate = null;
 let sdate = null;
 const BACKEND_SPS_BYPOINT = '/json/sps_by_point.py';
-var google = window.google || {};  // skipcq: JS-0239
 
 
 function updateMarkerPosition(lon, lat) {
@@ -71,7 +71,7 @@ function buildUI(){
         minDate: new Date(1986, 0, 1),
         maxDate: new Date(),
         onClose: () => {
-            updateTable2ByUGC();
+            updateTable();
         }
     });
     sdate.datepicker("setDate", new Date(1986, 0, 1));
@@ -81,7 +81,7 @@ function buildUI(){
         minDate: new Date(1986, 0, 1),
         defaultDate: +1,
         onClose: () => {
-            updateTable2ByUGC();
+            updateTable();
         }
     });
     edate.datepicker("setDate", +1);
@@ -99,6 +99,7 @@ function buildUI(){
 
 };
 // Callback from Google Load
+// eslint-disable-next-line no-unused-vars
 function _gcb() {
     buildUI();
     let default_lon = -93.653;

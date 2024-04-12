@@ -1,8 +1,6 @@
 let olmap = null;
 let elayer = null;
 let element = null;
-var ol = window.ol || {};  // skipcq: JS-0239
-var moment = window.moment || {};  // skipcq: JS-0239
 
 const sbwStyle = [new ol.style.Style({
     stroke: new ol.style.Stroke({
@@ -68,7 +66,7 @@ function init_map() {
     element = document.getElementById('popup');
     elayer = new ol.layer.Vector({
         title: 'Emergencies',
-        style: (feature, _resolution) => {
+        style: (feature) => {
             sbwStyle[1].getStroke().setColor(sbwLookup[feature.get('phenomena')]);
             sbwStyle[1].getFill().setColor(`${sbwLookup[feature.get('phenomena')]}30`);
             return sbwStyle;

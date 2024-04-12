@@ -1,9 +1,9 @@
+/* global windowFactory */
 var epoch = 0;
 var olMap;
 var overviewMap;
 var popup;
 var stationLayer;
-var ol = window.ol || {}; // skipcq: JS-0239
 
 const airportStyle = new ol.style.Style({
     zIndex: 99,
@@ -109,7 +109,7 @@ function mapClickHandler(event){
     windowFactory(div, classID);
 }
 
-function stationLayerStyleFunc(feature, _resolution){
+function stationLayerStyleFunc(feature){
     const network = feature.get("network");
     if (network.search("ASOS") > 0){
         return airportStyle.enabled ? airportStyle: null;
@@ -288,6 +288,7 @@ function loadAutoplot(container, uri, divid){
     }
 
 }
+// eslint-disable-next-line no-unused-vars
 function changeStations(elem){
     const netclass = $(elem).attr("id");
     if (netclass === "asos"){
@@ -307,6 +308,7 @@ function changeStations(elem){
     }
     stationLayer.changed();
 }
+// eslint-disable-next-line no-unused-vars
 function loaderClicked(elem){
     const $elem = $(elem);
     const container = $elem.closest(".datadiv");

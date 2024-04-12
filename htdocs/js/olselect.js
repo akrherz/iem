@@ -3,7 +3,6 @@ let vectorLayer = null;
 let element = null;
 let popup = null;
 let network = null;
-var ol = window.ol || {}; // skipcq: JS-0239
 
 $(document).ready(() => {
     network = $("#map").data("network");
@@ -16,7 +15,7 @@ $(document).ready(() => {
             url: `/api/1/network/${network}.geojson`,
             format: new ol.format.GeoJSON()
         }),
-        style: (feature, _resolution) => {
+        style: (feature) => {
             const color = feature.get("online") ? '#00ff00' : '#ffff00';
             const zindex = feature.get("online") ? 100 : 99;
             return [
@@ -36,7 +35,7 @@ $(document).ready(() => {
             ];
         }
     });
-    vectorLayer.getSource().on('change', (_e) => {
+    vectorLayer.getSource().on('change', () => {
         if (vectorLayer.getSource().getState() === 'ready') {
             map.getView().fit(
                 vectorLayer.getSource().getExtent(),
@@ -75,7 +74,7 @@ $(document).ready(() => {
     const layerSwitcher = new ol.control.LayerSwitcher();
     map.addControl(layerSwitcher);
 
-    jQuery('<div/>', {
+    $('<div/>', {
         id: 'mappopup',
         style: 'width: 200px;'
     }).appendTo('#map');
@@ -90,7 +89,7 @@ $(document).ready(() => {
     // display popup on click
     map.on('click', (evt) => {
         const feature = map.forEachFeatureAtPixel(evt.pixel,
-            (feature2, _layer) => {
+            (feature2) => {
                 return feature2;
             });
         $(element).popover('destroy');

@@ -15,5 +15,10 @@
   "bugs": {
     "url": "https://github.com/akrherz/iem/issues"
   },
-  "homepage": "https://github.com/akrherz/iem#readme"
+  "homepage": "https://github.com/akrherz/iem#readme",
+  "devDependencies": {
+    "@eslint/js": "^9.0.0",
+    "eslint": "^9.0.0",
+    "globals": "^15.0.0"
+  }
 }

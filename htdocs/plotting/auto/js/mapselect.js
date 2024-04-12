@@ -1,5 +1,4 @@
 // Map select widget that can appear
-var ol = window.ol || {}; // skipcq: JS-0239
 
 const climateStyle = new ol.style.Style({
     zIndex: 100,
@@ -56,7 +55,7 @@ const stateStyle = new ol.style.Style({
 });
 
 
-function stationLayerStyleFunc(feature, _resolution) {
+function stationLayerStyleFunc(feature) {
     const network = feature.get("network");
     if (network.search("CLIMATE") > 0) {
         const sid = feature.get("sid");
@@ -73,6 +72,7 @@ function stationLayerStyleFunc(feature, _resolution) {
     return climateStyle;
 }
 
+// eslint-disable-next-line no-unused-vars
 function mapFactory(network, formname) {
     // Check the state of our button
     const state = parseInt($(`#button_${network}_${formname}`).data("state"), 10);
@@ -122,7 +122,7 @@ function mapFactory(network, formname) {
         }),
         style: stationLayerStyleFunc
     });
-    stationLayer.getSource().on('change', (_e) => {
+    stationLayer.getSource().on('change', () => {
         if (stationLayer.getSource().getState() === 'ready') {
             olMap.getView().fit(
                 stationLayer.getSource().getExtent(),

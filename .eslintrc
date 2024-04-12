@@ -1,6 +1,16 @@
 {
-    "root": true,
+    "rules": {
+    },
     "env": {
-        "es6": true
+        "browser": true,
+        "es2020": true
+    },
+    "globals": {
+        "$": false,
+        "jQuery": false,
+        "ol": false,
+        "iemdata": false,
+        "moment": false,
+        "google": false
     }
 }

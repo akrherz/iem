@@ -1,9 +1,9 @@
+/* global Cookies */
 /*
  * NWS Text Product Finder
  *  - uses cookies and hashlinks to save info
  */
 const NO_DATE_SET = 'No Limit';
-var Cookies = window.Cookies || {};  // skipcq: JS-0239
 
 function text(str){
     // XSS shim
@@ -104,6 +104,7 @@ function addTab(pil, center, ttaaii, limit, sdate, edate, doCookieSave) {
         saveCookies();
     }
 }
+// eslint-disable-next-line no-unused-vars
 function dlbtn(btn, fmt) {
     const pil = $(".nav-tabs li.active").data('pil');
     if (pil === undefined) {

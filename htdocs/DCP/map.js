@@ -5,7 +5,6 @@ var vectorLayer;
 var map;
 var element;
 var fontSize = 14;
-var ol = window.ol || {}; // skipcq: JS-0239
 
 function updateURL() {
     window.location.href = `#${physical_code}.${duration}.${days}`;
@@ -25,7 +24,7 @@ function updateMap() {
     updateURL();
 }
 
-const vectorStyleFunction = (feature, _resolution) => {
+const vectorStyleFunction = (feature) => {
     let style = null;
     if (feature.get("value") !== "M") {
         style = [new ol.style.Style({
@@ -133,7 +132,7 @@ $(document).ready(() => {
     // display popup on click
     map.on('click', (evt) => {
         const feature = map.forEachFeatureAtPixel(evt.pixel,
-            (feature2, _layer) => {
+            (feature2) => {
                 return feature2;
             });
         if (feature) {

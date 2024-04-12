@@ -4,7 +4,6 @@ let coopLayer = null;
 let azosLayer = null;
 let mrmsLayer = null;
 let cocorahsLayer = null;
-var ol = window.ol || {}; // skipcq: JS-0239
 
 function text(str){
     // XSS
@@ -30,6 +29,7 @@ function updateURL() {
     window.location.href = `#${tt}/${renderattr}`;
 }
 
+// eslint-disable-next-line no-unused-vars
 function updateMap() {
     renderattr = text($('#renderattr').val());
     coopLayer.setStyle(coopLayer.getStyle());
@@ -73,7 +73,7 @@ function makeVectorLayer(dt, title, group) {
             projection: ol.proj.get('EPSG:3857'),
             url: `/geojson/7am.py?group=${group}&dt=${dt}`
         }),
-        style: function (feature, resolution) {
+        style: function (feature) {
             let txt = (feature.get(renderattr) == 0.0001) ? "T" : feature.get(renderattr);
             txt = (txt === null || txt === undefined) ? '.' : txt;
             return [new ol.style.Style({
@@ -190,7 +190,7 @@ $(document).ready(() => {
     // display popup on click
     map.on('click', (evt) => {
         const feature = map.forEachFeatureAtPixel(evt.pixel,
-            (feature2, _layer) => {
+            (feature2) => {
                 return feature2;
             });
         if (feature) {

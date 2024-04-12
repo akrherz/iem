@@ -8,9 +8,10 @@ but as yearly and monthly totals.
 import datetime
 
 import pandas as pd
+from pyiem.database import get_sqlalchemy_conn
 from pyiem.exceptions import NoDataFound
 from pyiem.plot import calendar_plot
-from pyiem.util import get_autoplot_context, get_sqlalchemy_conn
+from pyiem.util import get_autoplot_context
 from sqlalchemy import text
 
 PDICT = {"yes": "Colorize Cells in Chart", "no": "Just plot values please"}
@@ -67,7 +68,6 @@ def plotter(fdict):
     if (ets - sts).days > 366:
         raise NoDataFound("Chart duration needs to be less than 1 year.")
     wfo = ctx["wfo"]
-    title = ""
     params = {}
     params["tzname"] = ctx["_nt"].sts[wfo]["tzname"]
     params["sts"] = sts - datetime.timedelta(days=2)
@@ -115,7 +115,7 @@ def plotter(fdict):
         apctx=ctx,
         heatmap=(ctx["heatmap"] == "yes"),
         title=f"Number of SPS Polygons for {title2} by Local Calendar Date",
-        subtitle=f"Valid {sts:%d %b %Y} - {ets:%d %b %Y} for {title}",
+        subtitle=f"Valid {sts:%d %b %Y} - {ets:%d %b %Y}",
     )
     return fig, df
 
