@@ -420,10 +420,10 @@ function handleSBWClick(feature) {
     ).show().draw(false);
 
 }
-function copyToClipboard(text, msg) {
+function copyToClipboard(ttext, msg) {
     const $temp = $("<input>");
     $("body").append($temp);
-    $temp.val(text).select();
+    $temp.val(ttext).select();
     document.execCommand("copy");
     $temp.remove();
     alert(msg);

@@ -4,7 +4,7 @@ let invgj = null;
 let dtpicker = null;
 let n0q = null;
 let varname = 'tmpf';
-var defaultdt = window.defaultdt || {};
+let defaultdt = window.defaultdt || {};
 let currentdt = new Date(defaultdt);
 let timeChanged = false;
 
