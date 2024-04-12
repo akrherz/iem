@@ -5,6 +5,8 @@ repos:
     rev: 'v9.0.0'
     hooks:
       - id: eslint
+        additional_dependencies:
+          - globals
   - repo: https://github.com/astral-sh/ruff-pre-commit
     rev: "v0.3.7"
     hooks:
