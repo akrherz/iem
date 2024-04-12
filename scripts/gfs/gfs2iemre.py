@@ -5,9 +5,9 @@ Run from RUN_50_AFTER.sh
 
 import shutil
 import subprocess
-import sys
-from datetime import date, timedelta
+from datetime import date, timedelta, timezone
 
+import click
 import numpy as np
 import pygrib
 from pyiem import iemre
@@ -172,15 +172,17 @@ def merge_grib(nc, now):
             hits = 0
 
 
-def main(argv):
+@click.command()
+@click.option("--valid", type=click.DateTime(), help="Specify UTC valid time")
+def main(valid):
     """Do the work."""
-    now = utc(*[int(s) for s in argv[1:5]])
+    valid = valid.replace(tzinfo=timezone.utc)
     # Run every hour, filter those we don't run
-    if now.hour % 6 != 0:
+    if valid.hour % 6 != 0:
         return
-    create(now)
+    create(valid)
     with ncopen("/mesonet/data/iemre/gfs_current_new.nc", "a") as nc:
-        merge_grib(nc, now)
+        merge_grib(nc, valid)
     shutil.move(
         "/mesonet/data/iemre/gfs_current_new.nc",
         "/mesonet/data/iemre/gfs_current.nc",
@@ -191,17 +193,17 @@ def main(argv):
         "-i",
         "-p",
         (
-            f"data a {now:%Y%m%d%H%M} bogus "
-            f"model/gfs/gfs_{now:%Y%m%d%H}_iemre.nc nc"
+            f"data a {valid:%Y%m%d%H%M} bogus "
+            f"model/gfs/gfs_{valid:%Y%m%d%H}_iemre.nc nc"
         ),
         "/mesonet/data/iemre/gfs_current.nc",
     ]
     subprocess.call(cmd)
 
     # Generate 4inch plots based on 6z GFS
-    if now.hour == 6:
+    if valid.hour == 6 and (utc() - valid).days < 2:
         subprocess.call(["python", "gfs_4inch.py"])
 
 
 if __name__ == "__main__":
-    main(sys.argv)
+    main()
