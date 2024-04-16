@@ -1,10 +1,10 @@
+/* global defaultdt */
 let map = null;
 let gj = null;
 let invgj = null;
 let dtpicker = null;
 let n0q = null;
 let varname = 'tmpf';
-const defaultdt = window.defaultdt || {};
 let currentdt = new Date(defaultdt);
 let timeChanged = false;
 
