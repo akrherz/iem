@@ -211,6 +211,8 @@ RewriteRule ^/search /search.py [QSA]
   </Directory>
 
   <LocationMatch "/api/1">
+    # As a reminder, we are going via this route to take advantage of caching
+    # running with the apache on this vhost
     ProxyPass "https://iem-web-services.agron.iastate.edu"
     ProxyPassReverse "https://iem-web-services.agron.iastate.edu"
   </LocationMatch>
