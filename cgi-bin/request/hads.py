@@ -6,11 +6,13 @@ Documentation on /cgi-bin/request/hads.py
 -----------------------------------------
 
 The backend database for this application has many billion rows of data, so
-requests are limited in temporal scope to just one UTC year.
+requests can be slow.
 
 Changelog
 ---------
 
+- 2024-04-18: Allowed cross-year requests, but limited to 365 days when
+  requesting more than one station.
 - 2024-04-09: Migrated to pydantic based CGI field validation.
 - 2024-03-15: Initial documentation added
 
@@ -59,9 +61,17 @@ class Schema(CGIModel):
     year: int = Field(
         None,
         description=(
-            "This service only allows a download over a given UTC ."
-            "year, so there is no year1 and year2 variants."
+            "Legacy year value when this service only supported 1 year at a "
+            "time."
         ),
+    )
+    year1: Optional[int] = Field(
+        None,
+        description="Start year for request, when sts not set.",
+    )
+    year2: Optional[int] = Field(
+        None,
+        description="End year for request, when ets not set.",
     )
     month1: int = Field(
         None,
@@ -166,12 +176,18 @@ def application(environ, start_response):
         stations = list(NetworkTable(environ["network"][:10]).sts.keys())
         if (environ["ets"] - environ["sts"]) > timedelta(hours=24):
             environ["ets"] = environ["sts"] + timedelta(hours=24)
+    if len(stations) > 1 and (environ["ets"] - environ["sts"]) > timedelta(
+        days=365
+    ):
+        raise IncompleteWebRequest(
+            "Error, more than one station and more than 365 days requested"
+        )
     if not stations:
         raise IncompleteWebRequest("Error, no stations specified!")
     sql = text(
-        f"""
+        """
         SELECT station, valid at time zone 'UTC' as utc_valid, key, value
-        from raw{environ['sts'].year} WHERE station = ANY(:ids) and
+        from raw WHERE station = ANY(:ids) and
         valid BETWEEN :sts and :ets and value > -999
         ORDER by valid ASC
         """

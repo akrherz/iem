@@ -31,10 +31,11 @@ for ($i = 0; $row = pg_fetch_assoc($rs); $i++) {
 }
 $nselect .= "</select>";
 
-$ys = yearSelect(2002, date("Y"), "year");
+$ys1 = yearSelect(2002, date("Y"), "year1");
 $ms1 = monthSelect("1", "month1");
 $ds1 = daySelect2("1", "day1");
 $hs1 = gmtHourSelect("0", "hour1");
+$ys2 = yearSelect(2002, date("Y"), "year2");
 $ms2 = monthSelect(date("m"), "month2");
 $ds2 = daySelect2(date("d"), "day2");
 $hs2 = gmtHourSelect("0", "hour2");
@@ -77,8 +78,8 @@ wish to script against this service.</p>
 <h3>2. Select Start/End Time:</h3>
 
 <p>Times are specified in UTC. Archive starts in 2002 for Iowa and on
-9 Dec 2010 for all others.  You can only download data within one year at a
-time due to size/speed contraints.  When requesting all stations, you can
+9 Dec 2010 for all others. You can request up to one year of data when
+requesting multiple stations. When requesting all stations, you can
 only request 24 hours worth of data.</p>
 
 <table class="table table-condensed">
@@ -90,7 +91,7 @@ only request 24 hours worth of data.</p>
 
   <tr>
     <th>Start:</th>
-    <td rowspan="2">{$ys}</td>
+    <td>{$ys1}</td>
     <td>{$ms1}</td>
     <td>{$ds1}</td>
     <td>{$hs1}
@@ -100,6 +101,7 @@ only request 24 hours worth of data.</p>
 
   <tr>
     <th>End:</th>
+    <td>{$ys2}</td>
     <td>{$ms2}</td>
     <td>{$ds2}</td>
     <td>{$hs2}
