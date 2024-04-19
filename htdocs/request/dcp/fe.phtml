@@ -31,11 +31,11 @@ for ($i = 0; $row = pg_fetch_assoc($rs); $i++) {
 }
 $nselect .= "</select>";
 
-$ys1 = yearSelect(2002, date("Y"), "year1");
+$ys1 = yearSelect2(2002, date("Y"), "year1");
 $ms1 = monthSelect("1", "month1");
 $ds1 = daySelect2("1", "day1");
 $hs1 = gmtHourSelect("0", "hour1");
-$ys2 = yearSelect(2002, date("Y"), "year2");
+$ys2 = yearSelect2(2002, date("Y"), "year2");
 $ms2 = monthSelect(date("m"), "month2");
 $ds2 = daySelect2(date("d"), "day2");
 $hs2 = gmtHourSelect("0", "hour2");
