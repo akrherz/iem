@@ -17,9 +17,10 @@ import datetime
 
 import numpy as np
 import pandas as pd
+from pyiem.database import get_sqlalchemy_conn
 from pyiem.exceptions import NoDataFound
 from pyiem.plot import figure
-from pyiem.util import get_autoplot_context, get_sqlalchemy_conn
+from pyiem.util import get_autoplot_context
 from sqlalchemy import text
 
 LOOKUP = {
@@ -30,6 +31,7 @@ LOOKUP = {
     "avg_temp": "(max_tmpf + min_tmpf)/2.",
     "avg_dewp": "(max_dwpf + min_dwpf)/2.",
     "avg_wind_speed": "avg_sknt * 1.15",
+    "avg_wind_gust": "coalesce(max_gust, max_sknt) * 1.15",
     "max_high": "max_tmpf",
     "min_high": "max_tmpf",
     "max_low": "min_tmpf",
@@ -44,6 +46,7 @@ PDICT = {
     "avg_temp": "Average Temperature",
     "avg_dewp": "Average Dew Point Temp",
     "avg_wind_speed": "Average Wind Speed",
+    "avg_wind_gust": "Average Wind Gust",
     "max_high": "Maximum High Temperature",
     "min_high": "Minimum High Temperature",
     "max_low": "Maximum Low Temperature",
@@ -216,7 +219,7 @@ def plotter(fdict):
     if varname in ["precip"]:
         ylabel = "Precipitation [inch]"
         units = "[inch]"
-    elif varname in ["avg_wind_speed"]:
+    elif varname.find("wind") > -1:
         ylabel = "Wind Speed [MPH]"
         units = "[MPH]"
     elif varname.find("rh") > -1:
@@ -236,6 +239,8 @@ def plotter(fdict):
             f"{tt} {units} for {PDICT.get(varname)} "
             f"from {ctx['sday']:%d %b} through {ctx['eday']:%d %b}"
         )
+    if ctx["w"] != "none":
+        title = title.replace("Average ", "")
     fig = figure(apctx=ctx, title=title)
     ax = fig.subplots(2, 1)
     ax[0].set_position([0.07, 0.53, 0.78, 0.36])
