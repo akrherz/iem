@@ -1,6 +1,7 @@
-"""
-Look at the sources saved to the AFOS database and then whine about
-sources we do not understand!
+"""Check AFOS database for problems we don't want.
+
+- [ ] Unknown sources
+- [ ] Duplicated VTEC product_ids
 
 called from RUN_MIDNIGHT.sh
 """
@@ -9,8 +10,9 @@ import datetime
 import sys
 from zoneinfo import ZoneInfo
 
+from pyiem.database import get_dbconn
 from pyiem.network import Table as NetworkTable
-from pyiem.util import get_dbconn, logger, utc
+from pyiem.util import logger, utc
 
 LOG = logger()
 pgconn = get_dbconn("afos")
@@ -20,6 +22,25 @@ cursor2 = pgconn.cursor()
 KNOWN = ["PANC", "PHBK"]
 nt = NetworkTable(["WFO", "RFC", "NWS", "NCEP", "CWSU", "WSO"])
 BASE = "https://mesonet.agron.iastate.edu/p.php?pid"
+
+
+def check_vtec_dups(ts):
+    """Ensure the database doesn't have duplicated product_id."""
+    cursor.execute(
+        """
+        with data as (
+            select entered, source, pil, bbb, count(*) from products
+            where entered > %s and entered < %s and
+            substr(pil, 1, 3) in ('SVR', 'FFW', 'TOR', 'SVS', 'FLW', 'FFS')
+            group by entered, source, pil, bbb)
+        select * from data where count > 1
+        """,
+        (ts - datetime.timedelta(hours=2), ts + datetime.timedelta(hours=26)),
+    )
+    if cursor.rowcount > 0:
+        LOG.warning("Found %s VTEC relevant product_id dups", cursor.rowcount)
+    for row in cursor:
+        print(f"DUP: {row[0]} {row[1]} {row[2]} {row[3]} {row[4]}")
 
 
 def sample(source, ts):
