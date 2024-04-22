@@ -180,6 +180,7 @@ def plotter(fdict):
         avg(max_tmpf) as avg_high_temp,
         avg(min_tmpf) as avg_low_temp,
         sum(pday) as precip, avg(avg_sknt) * 1.15 as avg_wind_speed,
+        avg(coalesce(max_gust, max_sknt)) * 1.15 as avg_wind_gust,
         min(min_tmpf) as min_low,
         max(min_tmpf) as max_low,
         max(max_tmpf) as max_high,
