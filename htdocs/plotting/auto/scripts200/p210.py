@@ -25,10 +25,11 @@ from zoneinfo import ZoneInfo
 
 import numpy as np
 import pandas as pd
+from pyiem.database import get_sqlalchemy_conn
 from pyiem.exceptions import NoDataFound
 from pyiem.plot.geoplot import MapPlot
 from pyiem.reference import prodDefinitions
-from pyiem.util import get_autoplot_context, get_sqlalchemy_conn, utc
+from pyiem.util import get_autoplot_context, utc
 
 PDICT = {
     "count": "Issuance Count",
@@ -145,7 +146,7 @@ def plotter(fdict):
 
     mp = MapPlot(
         apctx=ctx,
-        title=f"NWS {PDICT[ctx['var']]} of {prodDefinitions[pil]}",
+        title=f"NWS {PDICT[ctx['var']]} of {prodDefinitions.get(pil, pil)}",
         subtitle=(
             f"Plot valid between {ctx['sts']:%d %b %Y %H:%M} UTC "
             f"and {ctx['ets']:%d %b %Y %H:%M} UTC, "

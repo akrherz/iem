@@ -213,10 +213,12 @@ def application(environ, start_response):
     centerlimit = "" if environ["center"] == "" else " and source = :center "
     ttlimit = "" if environ["ttaaii"] == "" else " and wmo = :ttaaii "
     plimit = " pil = ANY(:pils) "
-    if len(pils) == 1 and len(pils[0].strip()) == 3:
+    if len(pils) == 1:
+        plimit = " pil = :pil "
         params["pil"] = pils[0].strip()
-        # There's a database index on this
-        plimit = " substr(pil, 1, 3) = :pil "
+        if len(pils[0].strip()) == 3:
+            # There's a database index on this
+            plimit = " substr(pil, 1, 3) = :pil "
     sql = (
         "SELECT data, pil, "
         "to_char(entered at time zone 'UTC', 'YYYYMMDDHH24MI') as ts "
