@@ -146,7 +146,7 @@ def plotter(fdict):
 
     mp = MapPlot(
         apctx=ctx,
-        title=f"NWS {PDICT[ctx['var']]} of {prodDefinitions.get(pil,pil)}",
+        title=f"NWS {PDICT[ctx['var']]} of {prodDefinitions.get(pil, pil)}",
         subtitle=(
             f"Plot valid between {ctx['sts']:%d %b %Y %H:%M} UTC "
             f"and {ctx['ets']:%d %b %Y %H:%M} UTC, "
