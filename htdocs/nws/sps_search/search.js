@@ -1,5 +1,5 @@
-/* global MapMarkerWidget */
 let mapwidget1 = null;
+let marker = null;
 let table1 = null;
 let edate = null;
 let sdate = null;
@@ -7,13 +7,10 @@ const BACKEND_SPS_BYPOINT = '/json/sps_by_point.py';
 
 
 function updateMarkerPosition(lon, lat) {
-    const latLng = new google.maps.LatLng(parseFloat(lat), parseFloat(lon))
-    $("#lat").val(latLng.lat().toFixed(4));
-    $("#lon").val(latLng.lng().toFixed(4));
-    window.location.href = `#bypoint/${latLng.lng().toFixed(4)}/${latLng.lat().toFixed(4)}`;
-    if (mapwidget1){
-        mapwidget1.map.setCenter(latLng);
-    }
+    $("#lat").val(lat.toFixed(4));
+    $("#lon").val(lon.toFixed(4));
+    window.location.href = `#bypoint/${lon.toFixed(4)}/${lat.toFixed(4)}`;
+    marker.setGeometry(new ol.geom.Point(ol.proj.fromLonLat([lon, lat])));
     updateTable();
 }
 
@@ -87,20 +84,17 @@ function buildUI(){
     edate.datepicker("setDate", +1);
     // Manual Point Entry
     $("#manualpt").click(function(){
-        const la = $("#lat").val();
-        const lo = $("#lon").val();
-        if (la == "" || lo == ""){
+        const la = parseFloat($("#lat").val());
+        const lo = parseFloat($("#lon").val());
+        if (isNaN(la) || isNaN(lo)){
             return;
         }
-        const latlng = new google.maps.LatLng(parseFloat(la), parseFloat(lo))
-        mapwidget1.marker.setPosition(latlng);
+        marker.setGeometry(new ol.geom.Point(ol.proj.fromLonLat([lo, la])));
         updateMarkerPosition(lo, la);
     });
 
 };
-// Callback from Google Load
-// eslint-disable-next-line no-unused-vars
-function _gcb() {
+$(document).ready(() => {
     buildUI();
     let default_lon = -93.653;
     let default_lat = 41.53;
@@ -117,7 +111,8 @@ function _gcb() {
             }
         }
     }
+    let res = olSelectLonLat("map", default_lon, default_lat, updateMarkerPosition);
+    mapwidget1 = res.map;
+    marker = res.marker;
 
-    mapwidget1 = new MapMarkerWidget("map", default_lon, default_lat);
-    mapwidget1.register(updateMarkerPosition);
-}
+});

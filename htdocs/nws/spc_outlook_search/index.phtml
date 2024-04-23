@@ -5,14 +5,16 @@ require_once "../../../include/mlib.php";
 force_https();
 require_once "../../../include/myview.php";
 require_once "../../../include/iemprop.php";
-$gmapskey = get_iemprop("google.maps.key");
 $t = new MyView();
+$OL = "9.1.0";
 
 $t->jsextra = <<<EOF
-<script type="text/javascript" src="search.js?v=6"></script>
-<script src="https://maps.googleapis.com/maps/api/js?key={$gmapskey}&amp;callback=initialize" type="text/javascript"></script>
+<script src='/vendor/openlayers/{$OL}/ol.js'></script>
+<script type="text/javascript" src="/js/olselect-lonlat.js"></script>
+<script type="text/javascript" src="search.js"></script>
 EOF;
 $t->headextra = <<<EOF
+<link rel="stylesheet" type="text/css" href="/vendor/openlayers/{$OL}/ol.css" />
 <style>
   .map {
     width: 100%;

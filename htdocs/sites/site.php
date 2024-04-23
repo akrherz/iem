@@ -7,8 +7,7 @@ require_once "../../include/myview.php";
 require_once "../../include/forms.php";
 require_once "../../include/sites.php";
 require_once "../../include/iemprop.php";
-$gmapskey = get_iemprop("google.maps.key");
-
+$OL = "9.1.0";
 $ctx = get_sites_context();
 $station = $ctx->station;
 $network = $ctx->network;
@@ -79,6 +78,9 @@ $lon = sprintf("%.5f", $metadata["lon"]);
 
 $t = new MyView();
 $t->title = sprintf("Site Info: %s %s", $station, $metadata["name"]);
+$t->headextra = <<<EOM
+<link rel='stylesheet' href="/vendor/openlayers/{$OL}/ol.css" type='text/css'>
+EOM;
 $t->jsextra = <<<EOF
 <script>
 var CONFIG = {
@@ -86,8 +88,9 @@ var CONFIG = {
     lon: {$lon}
 };
 </script>
+<script src='/vendor/openlayers/{$OL}/ol.js'></script>
+<script type="text/javascript" src="/js/olselect-lonlat.js"></script>\
 <script src="site.js" type="text/javascript"></script>
-<script src="https://maps.googleapis.com/maps/api/js?key={$gmapskey}&amp;callback=load&amp;loading=async" type="text/javascript"></script>
 EOF;
 $t->sites_current = "base";
 

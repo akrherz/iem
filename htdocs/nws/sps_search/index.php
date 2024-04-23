@@ -5,19 +5,21 @@ require_once "../../../include/mlib.php";
 force_https();
 require_once "../../../include/myview.php";
 require_once "../../../include/iemprop.php";
-$gmapskey = get_iemprop("google.maps.key");
 $t = new MyView();
+$OL = "9.1.0";
 
 $t->jsextra = <<<EOF
 <script type="text/javascript" src="/js/mapping.js"></script>
 <script src="/vendor/jquery-datatables/1.10.20/datatables.min.js"></script>
 <script src="/vendor/jquery-ui/1.11.4/jquery-ui.js"></script>
 <script src="/vendor/select2/4.1.0rc0/select2.min.js"></script>
-<script type="text/javascript" src="search.js?v=2"></script>
-<script src="https://maps.googleapis.com/maps/api/js?key={$gmapskey}&callback=_gcb" type="text/javascript"></script>
+<script src='/vendor/openlayers/{$OL}/ol.js'></script>
+<script type="text/javascript" src="/js/olselect-lonlat.js"></script>
+<script type="text/javascript" src="search.js"></script>
 EOF;
 
 $t->headextra = <<<EOF
+<link rel='stylesheet' href="/vendor/openlayers/{$OL}/ol.css" type='text/css'>
 <link rel="stylesheet" href="/vendor/jquery-datatables/1.10.20/datatables.min.css" />
 <link rel="stylesheet" href="/vendor/jquery-ui/1.11.4/jquery-ui.min.css" />
 <link rel="stylesheet" type="text/css" href="/vendor/select2/4.1.0rc0/select2.min.css"/ >
