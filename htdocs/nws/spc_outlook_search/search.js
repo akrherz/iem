@@ -1,6 +1,6 @@
 
-var marker;
-var map;
+let marker = null;
+let map = null;
 
 function text(str) {
     // XSS
@@ -21,11 +21,10 @@ function workflow() {
 
 function buildUI() {
     $("#manualpt").click(() => {
-        const la = $("#lat").val();
-        const lo = $("#lon").val();
-        const latlng = new google.maps.LatLng(parseFloat(la), parseFloat(lo));
-        marker.setPosition(latlng);
-        updateMarkerPosition(latlng);
+        const la = parseFloat($("#lat").val());
+        const lo = parseFloat($("#lon").val());
+        marker.setGeometry(new ol.geom.Point(ol.proj.fromLonLat([lo, la])));
+        updateMarkerPosition(lon, lat);
     });
     $('#last').change(() => {
         workflow();
@@ -51,11 +50,10 @@ function updateTableTitle(lon, lat) {
     $('#mcds').find("caption").text(`Mesoscale Convective Discussions for ${txt}`);
 }
 
-function updateMarkerPosition(latLng) {
-    $("#lat").val(latLng.lat().toFixed(4));
-    $("#lon").val(latLng.lng().toFixed(4));
-    window.location.href = `#bypoint/${latLng.lng().toFixed(4)}/${latLng.lat().toFixed(4)}`;
-    map.setCenter(latLng);
+function updateMarkerPosition(lon, lat) {
+    $("#lat").val(lat.toFixed(4));
+    $("#lon").val(lon.toFixed(4));
+    window.location.href = `#bypoint/${lon.toFixed(4)}/${lat.toFixed(4)}`;
     workflow();
 }
 
@@ -121,25 +119,12 @@ function doWatch(lon, lat) {
         }
     });
 }
-// eslint-disable-next-line no-unused-vars
-function initialize() { // skipcq: JS-0128
-    buildUI();
-    const latLng = new google.maps.LatLng(41.53, -93.653);
-    map = new google.maps.Map(document.getElementById('map'), {
-        zoom: 5,
-        center: latLng,
-        mapTypeId: google.maps.MapTypeId.ROADMAP
-    });
-    marker = new google.maps.Marker({
-        position: latLng,
-        title: 'Point A',
-        map,
-        draggable: true
-    });
 
-    google.maps.event.addListener(marker, 'dragend', () => {
-        updateMarkerPosition(marker.getPosition());
-    });
+$(document).ready(() => {
+    buildUI();
+    let res = olSelectLonLat("map", -93.653, 41.53, updateMarkerPosition);
+    map = res.map;
+    marker = res.marker;
 
     // Do the anchor tag linking, please
     const tokens = window.location.href.split("#");
@@ -147,11 +132,12 @@ function initialize() { // skipcq: JS-0128
         const tokens2 = tokens[1].split("/");
         if (tokens2.length === 3) {
             if (tokens2[0] === 'bypoint') {
-                const latlng = new google.maps.LatLng(text(tokens2[2]), text(tokens2[1]));
-                marker.setPosition(latlng);
-                updateMarkerPosition(latlng);
+                const lon = parseFloat(tokens2[1]);
+                const lat = parseFloat(tokens2[2]);
+                marker.setGeometry(new ol.geom.Point(ol.proj.fromLonLat([lon, lat])));
+                updateMarkerPosition(lon, lat);
             }
         }
     }
 
-}
+});

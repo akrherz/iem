@@ -1,14 +1,15 @@
-/* global MapMarkerWidget */
 let stateSelect = null;
 let stateSelect3 = null;
 let ugcSelect = null;
-let mapwidget1 = null;
-let mapwidget2 = null;
 let table1 = null;
 let table2 = null;
 let table3 = null;
 let table2IsByPoint = true;
 let hashlinkUGC = null;
+let mapwidget1 = null;
+let mapwidget2 = null;
+let marker1 = null;
+let marker2 = null;
 let edate = null;
 let sdate = null;
 let edate1 = null;
@@ -64,23 +65,15 @@ function text(str) {
 }
 
 function updateMarkerPosition(lon, lat) {
-    const latLng = new google.maps.LatLng(parseFloat(lat), parseFloat(lon))
-    $("#lat").val(latLng.lat().toFixed(4));
-    $("#lon").val(latLng.lng().toFixed(4));
-    window.location.href = `#bypoint/${latLng.lng().toFixed(4)}/${latLng.lat().toFixed(4)}`;
-    if (mapwidget1){
-        mapwidget1.map.setCenter(latLng);
-    }
+    $("#lat").val(lat.toFixed(4));
+    $("#lon").val(lon.toFixed(4));
+    window.location.href = `#bypoint/${lon.toFixed(4)}/${lat.toFixed(4)}`;
     updateTable();
 }
 function updateMarkerPosition2(lon, lat) {
-    const latLng = new google.maps.LatLng(parseFloat(lat), parseFloat(lon))
-    $("#lat2").val(latLng.lat().toFixed(4));
-    $("#lon2").val(latLng.lng().toFixed(4));
-    window.location.href = `#eventsbypoint/${latLng.lng().toFixed(4)}/${latLng.lat().toFixed(4)}`;
-    if (mapwidget2){
-        mapwidget2.map.setCenter(latLng);
-    }
+    $("#lat2").val(lat.toFixed(4));
+    $("#lon2").val(lon.toFixed(4));
+    window.location.href = `#eventsbypoint/${lat.toFixed(4)}/${lon.toFixed(4)}`;
     updateTable2ByPoint();
 }
 function updateTable(){
@@ -342,23 +335,22 @@ function buildUI(){
     });
     // Manual Point Entry
     $("#manualpt").click(() => {
-        const la = $("#lat").val();
-        const lo = $("#lon").val();
-        if (la == "" || lo == ""){
+        const la = parseFloat($("#lat").val());
+        const lo = parseFloat($("#lon").val());
+        if (isNaN(la) || isNaN(lo)){
             return;
         }
-        const latlng = new google.maps.LatLng(parseFloat(la), parseFloat(lo))
-        mapwidget1.marker.setPosition(latlng);
+        // Update the marker's position
+        marker1.setGeometry(new ol.geom.Point(ol.proj.fromLonLat([lo, la])));
         updateMarkerPosition(lo, la);
     });
     $("#manualpt2").click(() => {
-        const la = $("#lat2").val();
-        const lo = $("#lon2").val();
-        if (la == "" || lo == ""){
+        const la = parseFloat($("#lat2").val());
+        const lo = parseFloat($("#lon2").val());
+        if (isNaN(la) || isNaN(lo)){
             return;
         }
-        const latlng = new google.maps.LatLng(parseFloat(la), parseFloat(lo))
-        mapwidget2.marker.setPosition(latlng);
+        marker2.setGeometry(new ol.geom.Point(ol.proj.fromLonLat([lo, la])));
         updateMarkerPosition2(lo, la);
     });
     $("#button3").click(() => {
@@ -403,8 +395,7 @@ function buildUI(){
     }
 };
 
-// eslint-disable-next-line no-unused-vars
-function _load() {
+$(document).ready(() => {
     buildUI();
     let default_lon = -93.653;
     let default_lat = 41.53;
@@ -431,13 +422,13 @@ function _load() {
         }
         if (tokens2.length == 3){
             if (tokens2[0] == 'bypoint'){
-                default_lat = text(tokens2[2]);
-                default_lon = text(tokens2[1]);
+                default_lat = parseFloat(text(tokens2[2]));
+                default_lon = parseFloat(text(tokens2[1]));
                 updateMarkerPosition(default_lon, default_lat);
             }
             if (tokens2[0] == 'eventsbypoint'){
-                default_lat = text(tokens2[2]);
-                default_lon = text(tokens2[1]);
+                default_lat = parseFloat(text(tokens2[2]));
+                default_lon = parseFloat(text(tokens2[1]));
                 updateMarkerPosition2(default_lon, default_lat);
             }
         }
@@ -461,11 +452,11 @@ function _load() {
             updateTable3();
         }
     }
+    let res1 = olSelectLonLat("map", default_lon, default_lat, updateMarkerPosition);
+    mapwidget1 = res1.map;
+    marker1 = res1.marker;
+    let res2 = olSelectLonLat("map2", default_lon, default_lat, updateMarkerPosition2);
+    mapwidget2 = res2.map;
+    marker2 = res2.marker;
 
-    mapwidget1 = new MapMarkerWidget("map", default_lon, default_lat);
-    mapwidget1.register(updateMarkerPosition);
-
-    mapwidget2 = new MapMarkerWidget("map2", default_lon, default_lat);
-    mapwidget2.register(updateMarkerPosition2);
-
-}
+});
