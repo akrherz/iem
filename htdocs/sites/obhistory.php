@@ -189,8 +189,8 @@ function scan_formatter($i, $row){
 $year = get_int404("year", date("Y"));
 $month = get_int404("month", date("m"));
 $day = get_int404("day", date("d"));
-$metar = (isset($_GET["metar"]) && $_GET["metar"] == "1") ? "1" : "0";
-$madis = (isset($_GET["madis"]) && $_GET["madis"] == "1") ? "1" : "0";
+$metar = (isset($_GET["metar"]) && xssafe($_GET["metar"]) == "1") ? "1" : "0";
+$madis = (isset($_GET["madis"]) && xssafe($_GET["madis"]) == "1") ? "1" : "0";
 $sortdir = isset($_GET["sortdir"]) ? xssafe($_GET["sortdir"]) : "asc";
 $date = mktime(0, 0, 0, $month, $day, $year);
 $yesterday = $date - 86400;

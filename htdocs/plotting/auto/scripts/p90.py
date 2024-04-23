@@ -812,7 +812,7 @@ def do_ugc(ctx):
             datavar = "total"
         elif varname == "periodmin":
             years = maxv.year - minv.year + 1
-            df.at[df["years"] != years, "datum"] = 0
+            df.loc[df["years"] != years, "datum"] = 0
             data = df["datum"].to_dict()
         else:
             data = df["datum"].to_dict()

@@ -10,10 +10,10 @@ import datetime
 import matplotlib.dates as mdates
 import pandas as pd
 import requests
-from pyiem import util
 from pyiem.exceptions import NoDataFound
 from pyiem.plot import figure_axes
 from pyiem.reference import state_fips, state_names
+from pyiem.util import get_autoplot_context
 
 SERVICE = (
     "https://droughtmonitor.unl.edu"
@@ -57,7 +57,7 @@ def get_description():
 
 def plotter(fdict):
     """Go"""
-    ctx = util.get_autoplot_context(fdict, get_description())
+    ctx = get_autoplot_context(fdict, get_description())
     sdate = ctx["sdate"]
     edate = ctx["edate"]
     state = ctx["state"].upper()
