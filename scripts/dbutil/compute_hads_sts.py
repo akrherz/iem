@@ -90,9 +90,7 @@ def main(argv):
         cursor.execute(
             "SELECT id from networks where id ~* 'DCP' ORDER by id ASC"
         )
-        networks = []
-        for row in cursor:
-            networks.append(row[0])
+        networks = [row[0] for row in cursor]
         jday = int(datetime.date.today().strftime("%j"))
         network = networks[jday % len(networks)]
         LOG.info("auto-picked %s", network)

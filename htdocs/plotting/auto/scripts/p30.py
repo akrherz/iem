@@ -10,9 +10,10 @@ import datetime
 
 import numpy as np
 import pandas as pd
+from pyiem.database import get_sqlalchemy_conn
 from pyiem.exceptions import NoDataFound
 from pyiem.plot import figure
-from pyiem.util import get_autoplot_context, get_sqlalchemy_conn
+from pyiem.util import get_autoplot_context
 
 PDICT = {"monthly": "Plot Single Month", "yearly": "Plot Entire Year"}
 
@@ -61,10 +62,8 @@ def get_description():
 
 def plot_trailing(ax, df, colname):
     """Plot some things"""
-    trail = []
     vals = df[colname].values
-    for i in range(30, len(vals)):
-        trail.append(np.mean(vals[i - 30 : i]))
+    trail = [np.mean(vals[i - 30 : i]) for i in range(30, len(vals))]
     ax.plot(df.index.values[30:], trail, lw=4, color="yellow", zorder=4)
     ax.plot(
         df.index.values[30:],

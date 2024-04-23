@@ -189,7 +189,7 @@ def get_mckey(scriptnum, fdict, fmt):
         # Internal app controls should not be used on the memcache key
         # except when they should be, sigh
         if not key.startswith("_") or key in ["_r", "_"]:
-            vals.append(f"{key}:{fdict[key]}")
+            vals.append(f"{key}:{fdict[key]}")  # noqa
     return (
         f"/plotting/auto/plot/{scriptnum}/{'::'.join(vals)}.{fmt}"
     ).replace(" ", "")

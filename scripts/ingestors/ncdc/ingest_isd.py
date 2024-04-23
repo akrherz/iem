@@ -79,7 +79,6 @@ def main(airforce, wban, faa, year1, year2):
         bad = 0
         skipped = 0
         empty = 0
-        current = []
         # build out our current obs
         acursor.execute(
             "SELECT valid at time zone 'UTC' from alldata where "
@@ -87,8 +86,7 @@ def main(airforce, wban, faa, year1, year2):
             "ORDER by valid ASC",
             (dbid, sts, ets),
         )
-        for row in acursor:
-            current.append(row[0].strftime("%Y%m%d%H%M"))
+        current = [f"{row[0]:%Y%m%d%H%M}" for row in acursor]
         acursor.close()
         # ignore any bad bytes, sigh
         with open(f"{TMPDIR}/{lfn}", errors="ignore", encoding="utf-8") as fh:

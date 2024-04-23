@@ -99,7 +99,7 @@ def plotter(fdict):
 
         snowd = nc.variables["snowd_12z"][sidx:, :, :]
     for i in range(snowd.shape[0]):
-        rows.append(
+        rows.append(  # noqa
             {
                 "valid": sts + datetime.timedelta(days=i),
                 "coverage": f(st, snowd[i], metric, stpts),
@@ -113,7 +113,7 @@ def plotter(fdict):
     with ncopen(ncfn) as nc:
         snowd = nc.variables["snowd_12z"][:eidx, :, :]
     for i in range(snowd.shape[0]):
-        rows.append(
+        rows.append(  # noqa
             {
                 "valid": datetime.datetime(ets.year, 1, 1, 12)
                 + datetime.timedelta(days=i),

@@ -2,9 +2,9 @@
 
 import datetime
 
+from pyiem.database import get_dbconn
 from pyiem.plot import MapPlot
 from pyiem.reference import TRACE_VALUE
-from pyiem.util import get_dbconn
 
 
 def pretty(val, precision=2):
@@ -43,7 +43,7 @@ def plot_hilo(valid):
     )
     data = []
     for row in cursor:
-        data.append(
+        data.append(  # noqa
             dict(lat=row[4], lon=row[3], tmpf=row[0], dwpf=row[1], id=row[2])
         )
 

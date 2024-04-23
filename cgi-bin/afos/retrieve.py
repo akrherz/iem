@@ -122,7 +122,7 @@ def pil_logic(pils):
     for pil in pils:
         if pil[:3] == "WAR":
             for q in WARPIL:
-                res.append(f"{q}{pil[3:6]}")
+                res.append(f"{q}{pil[3:6]}")  # noqa
         else:
             # whitespace pad
             res.append(f"{pil.strip():6.6s}")

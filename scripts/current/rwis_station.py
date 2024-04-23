@@ -12,7 +12,6 @@ def main():
     pgconn, icursor = get_dbconnc("iem")
 
     # Compute normal from the climate database
-    data = []
     icursor.execute(
         """
     SELECT
@@ -25,8 +24,7 @@ def main():
       tmpf > -50 and dwpf > -50 and drct is not null
     """
     )
-    for row in icursor:
-        data.append(row)
+    data = icursor.fetchall()
     pgconn.close()
 
     mp = MapPlot(

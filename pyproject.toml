@@ -3,10 +3,12 @@ filterwarnings = ["ignore:numpy.ndarray size changed:RuntimeWarning"]
 
 [tool.ruff]
 line-length = 79
-lint.select = [
+target-version = "py39"
+
+[tool.ruff.lint]
+select = [
     "A",  # builtins
     "B",  # bugbear
-    # "BLE",  # blind exception
     "E",  # pycodestyle
     "ERA",  # eradicate
     "EXE",  # shebang
@@ -16,10 +18,12 @@ lint.select = [
     "I",  # isort
     # "PD",  # pandas-vet
     "PIE",  # flake8-pie
-    # "PERF",  # performance
+    "PERF",  # performance
     # "PL",  # pylint
     # "SIM",  # simplify
     # "TRY",  # try-except-raise
     # "UP",  # pyupgrade
 ]
-target-version = "py39"
+ignore = [
+    "PERF203",  # try,except within a loop
+]

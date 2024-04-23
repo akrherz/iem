@@ -104,7 +104,7 @@ def plotter(fdict):
     while now <= date2:
         sdays = []
         for i in range(0, 0 - days, -1):
-            sdays.append((now + datetime.timedelta(days=i)).strftime("%m%d"))
+            sdays.append((now + datetime.timedelta(days=i)).strftime("%m%d"))  # noqa
         cursor.execute(
             """
         SELECT avg(p), stddev(p), avg(t), stddev(t),

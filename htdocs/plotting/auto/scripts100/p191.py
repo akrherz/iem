@@ -141,18 +141,12 @@ def plotter(fdict):
     p2 = ctx["phenomenav2"]
     p3 = ctx["phenomenav3"]
     p4 = ctx["phenomenav4"]
-    phenomena = []
-    for p in [p1, p2, p3, p4]:
-        if p is not None:
-            phenomena.append(p[:2])
+    phenomena = [p[:2] for p in [p1, p2, p3, p4] if p is not None]
     s1 = ctx["significancev1"]
     s2 = ctx["significancev2"]
     s3 = ctx["significancev3"]
     s4 = ctx["significancev4"]
-    significance = []
-    for s in [s1, s2, s3, s4]:
-        if s is not None:
-            significance.append(s[0])
+    significance = [s[0] for s in [s1, s2, s3, s4] if s is not None]
 
     pstr = []
     title = []

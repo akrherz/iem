@@ -161,9 +161,7 @@ def application(environ, start_response):
         "select column_name from information_schema.columns where "
         "table_name = 'alldata_1minute' ORDER by column_name"
     )
-    columns = []
-    for row in cursor:
-        columns.append(row["column_name"])
+    columns = [row["column_name"] for row in cursor]
     # cross check varnames now
     for varname in varnames:
         if varname not in columns:

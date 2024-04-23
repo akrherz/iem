@@ -159,9 +159,7 @@ def plotter(fdict):
     ax.set_ylabel(f"Hour of Local Day ({tzname})")
     ax.set_xlabel(f"Day of {sts:%b %Y}")
 
-    rects = []
-    for color in colors:
-        rects.append(Rectangle((0, 0), 1, 1, fc=color))
+    rects = [Rectangle((0, 0), 1, 1, fc=color) for color in colors]
 
     ax.grid(True)
     # Shrink current axis's height by 10% on the bottom

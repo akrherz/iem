@@ -193,12 +193,14 @@ def highcharts(fdict):
     ctx = get_autoplot_context(fdict, get_description())
     df = get_df(ctx)
     data = df[["week", "hour", ctx["w"]]].values.tolist()
-    xlabels = []
-    for dt in pd.date_range("2000/1/1", "2000/12/31", freq="7D"):
-        xlabels.append(dt.strftime("%b %-d"))
-    ylabels = []
-    for dt in pd.date_range("2000/1/1", "2000/1/1 23:59", freq="1h"):
-        ylabels.append(dt.strftime("%-I %p"))
+    xlabels = [
+        f"{dt:%b %-d}"
+        for dt in pd.date_range("2000/1/1", "2000/12/31", freq="7D")
+    ]
+    ylabels = [
+        f"{dt:%-I %p}"
+        for dt in pd.date_range("2000/1/1", "2000/1/1 23:59", freq="1h")
+    ]
     ylabels.append("")  # shrug
     title = ctx["title"].replace(r"$^\circ$", "&deg;").replace("\n", "<br />")
     containername = fdict.get("_e", "ap_container")

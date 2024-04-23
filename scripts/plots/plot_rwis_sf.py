@@ -3,18 +3,15 @@
 import datetime
 
 import numpy as np
+from pyiem.database import get_dbconn
 from pyiem.plot import MapPlot
-from pyiem.util import get_dbconn
 
 IEM = get_dbconn("iem")
 
 
 def cln(vals):
     """Clean the value for plotting"""
-    a = []
-    for v in vals:
-        if v is not None:
-            a.append(v)
+    a = [v for v in vals if v is not None]
     if not a:
         return None
     return np.average(a)

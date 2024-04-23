@@ -50,9 +50,7 @@ def get_columns(cursor):
         "SELECT column_name FROM information_schema.columns "
         "WHERE table_schema = 'public' AND table_name   = 'data_analog'"
     )
-    res = []
-    for row in cursor:
-        res.append(row[0])
+    res = [row[0] for row in cursor]
     return res
 
 
@@ -85,7 +83,7 @@ def application(environ, start_response):
             if colname not in columns:
                 continue
             for agg in aggs:
-                tokens.append(f"{agg}({colname}) as {colname}_{agg}")
+                tokens.append(f"{agg}({colname}) as {colname}_{agg}")  # noqa
 
     tw = int(environ.get("window", 1))
 

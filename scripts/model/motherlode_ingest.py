@@ -11,9 +11,10 @@ from zoneinfo import ZoneInfo
 
 import pandas as pd
 import requests
+from pyiem.database import get_dbconn
 from pyiem.network import Table as NetworkTable
 from pyiem.reference import ISO8601
-from pyiem.util import get_dbconn, logger
+from pyiem.util import logger
 
 LOG = logger()
 NT = NetworkTable("IA_ASOS")
@@ -61,7 +62,7 @@ def run(mcursor, model, station, lon, lat, ts):
     """
 
     vstring = ""
-    for _k, val in VLOOKUP.items():
+    for val in VLOOKUP.values():
         if val[model] is not None:
             vstring += f"var={val[model]}&"
 

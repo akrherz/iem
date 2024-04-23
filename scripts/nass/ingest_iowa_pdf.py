@@ -124,9 +124,7 @@ def process_lines_pdfminer(valid, lines) -> int:
             metrics = glean_labels(labels)
             if metrics and len(numbers) > (len(metrics) * 10):
                 for i, metric in enumerate(metrics):
-                    nums = []
-                    for j in range(10):
-                        nums.append(numbers[j * len(metrics) + i])
+                    nums = [numbers[j * len(metrics) + i] for j in range(10)]
                     ingest(valid, metric, nums)
             labels = ""
             numbers = []

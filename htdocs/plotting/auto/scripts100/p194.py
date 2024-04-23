@@ -209,7 +209,7 @@ def plotter(fdict):
     rows = []
     for j in range(raster2.shape[0]):
         for i in range(raster2.shape[1]):
-            rows.append(
+            rows.append(  # noqa
                 {"lon": lons[i], "lat": lats[j], "value": raster2[j, i]}
             )
 

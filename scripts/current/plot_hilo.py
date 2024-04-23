@@ -32,7 +32,7 @@ def main(argv):
         (now,),
     )
     for row in cursor:
-        data.append(
+        data.append(  # noqa
             {
                 "lat": row["lat"],
                 "lon": row["lon"],
