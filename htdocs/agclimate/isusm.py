@@ -4,9 +4,10 @@ Generate various plots for ISUSM data
 
 from io import BytesIO
 
+from pyiem.database import get_dbconn
 from pyiem.network import Table as NetworkTable
 from pyiem.plot import MapPlot
-from pyiem.util import c2f, get_dbconn
+from pyiem.util import c2f
 from pyiem.webutil import iemapp
 
 CTX = {

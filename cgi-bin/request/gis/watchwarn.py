@@ -88,7 +88,7 @@ def char3(wfos):
     """Make sure we don't have any 4 char IDs."""
     res = []
     for wfo in wfos:
-        res.append(wfo[1:] if len(wfo) == 4 else wfo)
+        res.append(wfo[1:] if len(wfo) == 4 else wfo)  # noqa
     return res
 
 

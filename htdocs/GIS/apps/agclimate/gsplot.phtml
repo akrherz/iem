@@ -10,7 +10,7 @@ $smonth = get_int404("smonth", 5);
 $emonth = get_int404("emonth", 9);
 $sday = get_int404("sday", 1);
 $eday = get_int404("eday", 30);
-$imgsz = isset($_GET["imgsz"]) ? xssafe($_GET["imgsz"]): "640x480";
+$imgsz = isset($_GET["imgsz"]) ? xssafe($_GET["imgsz"]) : "640x480";
 $ar = explode("x", $imgsz);
 $width = $ar[0];
 $height = $ar[1];
@@ -18,12 +18,12 @@ $height = $ar[1];
 // Make sure our edate is not too late
 $today = time() - 86400;
 $edate = mktime(0, 0, 0, $emonth, $eday, $year);
-if ($edate > $today){
+if ($edate > $today) {
     $emonth = date("m", $today);
     $eday = date("d", $today);
 }
 
-$varDef = Array(
+$varDef = array(
     "gdd32" => "Growing Degree Days (base=32)",
     "gdd41" => "Growing Degree Days (base=41)",
     "gdd46" => "Growing Degree Days (base=46)",
@@ -36,60 +36,83 @@ $varDef = Array(
     "srad" => "Solar Radiation (langleys)",
     "sgdd50" => "Soil Growing Degree Days (base=50)",
     "sgdd52" => "Soil Growing Degree Days (base=52)"
-  );
-if (!array_key_exists($var, $varDef)){
+);
+if (!array_key_exists($var, $varDef)) {
     die("variable undefined.");
 }
 $gddbase = 50;
 $datavar = $var;
-if (substr($var, 0, 3) == "gdd"){
+if (substr($var, 0, 3) == "gdd") {
     $gddbase = intval(str_replace("gdd", "", $var));
     $datavar = "gdd";
 }
-if (substr($var, 0, 4) == "sgdd"){
+if (substr($var, 0, 4) == "sgdd") {
     $gddbase = intval(str_replace("sgdd", "", $var));
     $datavar = "sgdd";
 }
 
 $wsuri = sprintf(
-    "/api/1/isusm/daily.geojson?sdate=%s-%02.0f-%02.0f&edate=%s-%02.0f-%02.0f&".
-    "gddbase=%s&gddceil=%s",
-    $year, $smonth, $sday, $year, $emonth, $eday, $gddbase, 86
+    "/api/1/isusm/daily.geojson?sdate=%s-%02.0f-%02.0f&edate=%s-%02.0f-%02.0f&" .
+        "gddbase=%s&gddceil=%s",
+    $year,
+    $smonth,
+    $sday,
+    $year,
+    $emonth,
+    $eday,
+    $gddbase,
+    86
 );
 
-$imgurl = sprintf("gsplot.php?var=%s&amp;year=%s&amp;smonth=%s&amp;".
+$imgurl = sprintf(
+    "gsplot.php?var=%s&amp;year=%s&amp;smonth=%s&amp;" .
         "emonth=%s&amp;eday=%s&amp;sday=%s&amp;imgsz=%s",
-        $var, $year, $smonth, $emonth, $eday, $sday, $imgsz);
+    $var,
+    $year,
+    $smonth,
+    $emonth,
+    $eday,
+    $sday,
+    $imgsz
+);
 
-$round = Array("precip" => 2, "gdd" => 0, "sgdd" => 0, "et" => 2, "srad" => 0);
+$round = array("precip" => 2, "gdd" => 0, "sgdd" => 0, "et" => 2, "srad" => 0);
 
 
-$jdata = file_get_contents("http://iem.local". $wsuri);
-$jobj = json_decode($jdata, $assoc=TRUE);
+$jdata = file_get_contents("http://iem.local" . $wsuri);
+$jobj = json_decode($jdata, $assoc = TRUE);
 
-$tr = "# ".$year." ". $varDef[$var] ." ({$smonth}/{$sday} - {$emonth}/{$eday})\n";
+$tr = "# " . $year . " " . $varDef[$var] . " ({$smonth}/{$sday} - {$emonth}/{$eday})\n";
 $tr .= "#-----------------------snip------------------\n";
 $tr .= sprintf(
     "%-5s,%-40s,%-15s,%-10s,%-10s,%-10s,climate_%s\n",
-    'ID', 'StationName', 'City', 'Latitude', 'Longitude', $var, $var);
+    'ID',
+    'StationName',
+    'City',
+    'Latitude',
+    'Longitude',
+    $var,
+    $var
+);
 
-$climovar = "climo_". $datavar;
-foreach($jobj["features"] as $bogus => $value) {
+$climovar = "climo_" . $datavar;
+foreach ($jobj["features"] as $bogus => $value) {
     $props = $value["properties"];
-    if ($props[$datavar] === null){
+    if ($props[$datavar] === null) {
         continue;
     }
     $climo = "M";
-    if (array_key_exists($climovar, $props)){
-        $climo = round($props["climo_". $datavar], $round[$datavar]);
+    if (array_key_exists($climovar, $props)) {
+        $climo = round($props["climo_" . $datavar], $round[$datavar]);
     }
-    
+
     $tr .= sprintf(
         "%s,%-40.40s,%-15.15s,%10.4f,%10.4f,%10s,%10s\n",
         $props["station"],
         $props['name'],
         $props["city"],
-        $props['lat'], $props['lon'], 
+        $props['lat'],
+        $props['lon'],
         round($props[$datavar], $round[$datavar]),
         $climo
     );
@@ -101,10 +124,8 @@ $t->headextra = <<<EOF
 <script language="JavaScript" type="text/javascript">
 <!--//BEGIN Script
 function new_window(url) {
-        link = 
-       
-window.open(url,"_new","toolbar=0,location=0,directories=0,status=0,menubar=no,scrollbars=yes,resizable=yes,width=450,height=400");
-} 
+    link = window.open(url,"_new","toolbar=0,location=0,directories=0,status=0,menubar=no,scrollbars=yes,resizable=yes,width=450,height=400");
+}
 //END Script-->
 </script>
 EOF;
@@ -112,8 +133,7 @@ EOF;
 $vselect = make_select("var", $var, $varDef);
 
 $h3 = "";
-if ($datavar == "gdd" ||  $var == "precip")
-{
+if ($datavar == "gdd" ||  $var == "precip") {
     $h3 = "Departure from climatology is shown below the accumulated value.";
 }
 $yselect = yearSelect(1986, $year, "year");
@@ -122,9 +142,11 @@ $sdselect = daySelect2($sday, 'sday');
 $emselect = monthSelect2($emonth, 'emonth');
 $edselect = daySelect2($eday, 'eday');
 
-$ar = Array("640x480" => "640x480",
-        "720x496" => "720x496",
-        "1024x768" => "1024x768");
+$ar = array(
+    "640x480" => "640x480",
+    "720x496" => "720x496",
+    "1024x768" => "1024x768"
+);
 $iselect = make_select("imgsz", $imgsz, $ar);
 
 $t->content = <<<EOF
@@ -163,7 +185,6 @@ is of higher quality for temperature and precipitation.
   <td>{$edselect}</td>
   </tr>
 </table>
- 
 
 <div class="row">
 <div class="col-sm-3">

@@ -15,9 +15,10 @@ from zoneinfo import ZoneInfo
 
 import pandas as pd
 import requests
+from pyiem.database import get_dbconn, get_sqlalchemy_conn
 from pyiem.network import Table as NetworkTable
 from pyiem.reference import ISO8601
-from pyiem.util import get_dbconn, get_sqlalchemy_conn, logger, utc
+from pyiem.util import logger, utc
 
 LOG = logger()
 
@@ -55,14 +56,14 @@ def get_hdf(nt, date):
                 LOG.warning("JSON stage4 service failed\n%s\n%s", uri, exp)
                 continue
             for entry in j["data"]:
-                rows.append(
-                    dict(
-                        station=station,
-                        valid=datetime.datetime.strptime(
+                rows.append(  # noqa
+                    {
+                        "station": station,
+                        "valid": datetime.datetime.strptime(
                             entry["end_valid"], ISO8601
                         ).replace(tzinfo=ZoneInfo("UTC")),
-                        precip_in=entry["precip_in"],
-                    )
+                        "precip_in": entry["precip_in"],
+                    }
                 )
     df = pd.DataFrame(rows)
     df = df.fillna(0)

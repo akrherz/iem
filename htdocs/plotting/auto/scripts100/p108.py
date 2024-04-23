@@ -107,6 +107,8 @@ def plotter(fdict):
     edate = ctx["edate"]
     if edate < sdate:
         sdate, edate = edate, sdate
+    if f"{sdate:%m%d}" == "0229":
+        sdate = sdate.replace(day=1)
     year2 = ctx.get("year2", 0)
     year3 = ctx.get("year3", 0)
     year4 = ctx.get("year4", 0)

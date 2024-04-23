@@ -302,9 +302,9 @@ def plotter(fdict):
             alpha=0.5,
             zorder=2,
         )
-    rects = []
-    for _, item in colors.items():
-        rects.append(Rectangle((0, 0), 1, 1, fc=item, alpha=0.5))
+    rects = [
+        Rectangle((0, 0), 1, 1, fc=item, alpha=0.5) for item in colors.values()
+    ]
     ax.legend(
         rects,
         colors.keys(),

@@ -699,7 +699,7 @@ def do_uvi():
             continue
         data = m.groupdict()
         for i in ["1", "2"]:
-            rows.append(
+            rows.append(  # noqa
                 {
                     "City": data[f"c{i}"].strip(),
                     "State": data[f"s{i}"].strip(),

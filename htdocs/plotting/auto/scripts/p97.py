@@ -226,7 +226,7 @@ def cull_to_list(vals):
     res = ["ZZZZZZ"]
     vals = vals.replace(",", " ")
     for val in vals.strip().split():
-        res.append(val.upper()[:6])
+        res.append(val.upper()[:6])  # noqa
     return res
 
 
@@ -239,7 +239,6 @@ def compute_tables_wfo(wfo):
     xmax += 0.5
     ymax += 0.5
     pgconn = get_dbconn("mesosite")
-    tables = []
     cursor = pgconn.cursor()
     cursor.execute(
         "SELECT distinct substr(id, 1, 2) from stations where "
@@ -247,8 +246,7 @@ def compute_tables_wfo(wfo):
         "ST_MakeEnvelope(%s, %s, %s, %s, 4326), geom)",
         (xmin, ymin, xmax, ymax),
     )
-    for row in cursor:
-        tables.append(f"alldata_{row[0].lower()}")
+    tables = [f"alldata_{row[0].lower()}" for row in cursor]
     return tables, [xmin, ymin, xmax, ymax]
 
 

@@ -42,7 +42,7 @@ def main(argv):
     # 10x10 degree chunk is the max request size...
     for x0 in np.arange(iemre.WEST, iemre.EAST, 10.0):
         for y0 in np.arange(iemre.SOUTH, iemre.NORTH, 10.0):
-            queue.append([x0, y0])
+            queue.append([x0, y0])  # noqa
     for x0, y0 in tqdm(queue, disable=not sys.stdout.isatty()):
         url = (
             "https://power.larc.nasa.gov/api/temporal/daily/regional?"

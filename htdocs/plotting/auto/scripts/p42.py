@@ -335,7 +335,7 @@ def plotter(fdict):
     rows = []
     for line in lines:
         # Ensure we don't send datetimes to pandas
-        rows.append(
+        rows.append(  # noqa
             dict(
                 start_utc=line.period_start.strftime("%Y-%m-%d %H:%M+00"),
                 end_utc=line.period_end.strftime("%Y-%m-%d %H:%M+00"),

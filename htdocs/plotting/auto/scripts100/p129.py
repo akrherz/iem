@@ -221,7 +221,7 @@ def plotter(fdict):
     ax.set_xticks(range(1, 13))
     labels = []
     for i in range(1, 13):
-        labels.append(
+        labels.append(  # noqa
             f"{calendar.month_abbr[i]}\n"
             f"{df.at[i, 'hits_min']:.0f}:{df.at[i, 'hits_min_year']:.0f}\n"
             f"{df.at[i, 'hits_max']:.0f}:{df.at[i, 'hits_max_year']:.0f}"

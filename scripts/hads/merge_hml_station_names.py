@@ -36,9 +36,7 @@ def should_delete_coop(rwcursor, icursor, nwsli):
     from current_shef WHERE station = %s""",
         (nwsli,),
     )
-    codes = []
-    for row in icursor:
-        codes.append(row[0])
+    codes = [row[0] for row in icursor]
     iscoop = True in [c[2] == "D" for c in codes]
     if iscoop:
         # Leave as is...
@@ -57,9 +55,7 @@ def should_switch_2dcp(rwcursor, icursor, nwsli, iemid):
     from current_shef WHERE station = %s""",
         (nwsli,),
     )
-    codes = []
-    for row in icursor:
-        codes.append(row[0])
+    codes = [row[0] for row in icursor]
     iscoop = True in [c[2] == "D" for c in codes]
     network = "%s_DCP" % (nwsli2state[nwsli[3:5]],)
     if iscoop:

@@ -113,9 +113,7 @@ def plotter(fdict):
         pgconn.close()
         raise NoDataFound("No Data Found.")
 
-    prevmonth = []
-    for row in cursor:
-        prevmonth.append(float(row["t"]))
+    prevmonth = [float(row["t"]) for row in cursor]
 
     # build history
     cursor.execute(

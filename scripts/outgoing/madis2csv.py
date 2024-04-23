@@ -11,7 +11,7 @@ from tempfile import NamedTemporaryFile
 from zoneinfo import ZoneInfo
 
 import numpy.ma
-from netCDF4 import chartostring  # @UnresolvedImport
+from netCDF4 import chartostring
 from pyiem.util import convert_value, logger, ncopen
 
 LOG = logger()
@@ -128,7 +128,7 @@ def main():
 
     with NamedTemporaryFile("w", encoding="utf-8", delete=False) as fh:
         fh.write(f"{fmt}\n")
-        for _stid, entry in db.items():
+        for entry in db.values():
             for key in format_tokens:
                 if key in entry:
                     fh.write(f"{entry[key]}")
@@ -141,7 +141,7 @@ def main():
 
     with NamedTemporaryFile("w", encoding="utf-8", delete=False) as fh:
         fh.write(f"{fmt}\n")
-        for _stid, entry in db.items():
+        for entry in db.values():
             if entry["PROVIDER"] not in ["IADOT", "NEDOR"]:
                 continue
             for key in format_tokens:

@@ -17,9 +17,10 @@ In this case, both lines are presented as equal.
 import numpy as np
 import pandas as pd
 import pyiem.nws.vtec as vtec
+from pyiem.database import get_dbconn
 from pyiem.exceptions import NoDataFound
 from pyiem.plot import figure_axes
-from pyiem.util import get_autoplot_context, get_dbconn
+from pyiem.util import get_autoplot_context
 
 
 def get_description():
@@ -94,7 +95,7 @@ def plotter(fdict):
 
     rows = []
     for row in cursor:
-        rows.append(
+        rows.append(  # noqa
             dict(
                 final=row[0].total_seconds() / 60.0,
                 initial=row[1].total_seconds() / 60.0,

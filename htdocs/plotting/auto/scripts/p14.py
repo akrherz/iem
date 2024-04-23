@@ -221,9 +221,7 @@ def plotter(fdict):
         ha="center",
     )
     ax.set_xticks(np.arange(0, 5))
-    xlabels = []
-    for i in range(5):
-        xlabels.append(f"{bins[i]:.2f}-{bins[i + 1]:.2f}")
+    xlabels = [f"{bins[i]:.2f}-{bins[i + 1]:.2f}" for i in range(5)]
     ax.set_xticklabels(xlabels)
     ax.set_ylim(top=ax.get_ylim()[1] * 1.1)
 

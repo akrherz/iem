@@ -12,7 +12,7 @@ $(document).ready(() => {
     const span = document.getElementsByClassName("close")[0];
 
     // When the user clicks on <span> (x), close the modal
-    span.onclick = function() {
+    span.onclick = () => {
         modal.style.display = "none";
     }
 });

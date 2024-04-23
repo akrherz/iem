@@ -134,7 +134,7 @@ def plotter(fdict):
 
     y = []
     for i in range(np.shape(H)[0]):
-        y.append(np.ma.sum(H[i, :] * (bins[:-1] + 0.5)) / np.ma.sum(H[i, :]))
+        y.append(np.ma.sum(H[i, :] * (bins[:-1] + 0.5)) / np.ma.sum(H[i, :]))  # noqa
 
     ax[0].plot(xedges[:-1] * 7, y, zorder=3, lw=3, color="k")
     ax[0].plot(xedges[:-1] * 7, y, zorder=3, lw=1, color="w")

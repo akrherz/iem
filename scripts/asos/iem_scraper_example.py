@@ -50,25 +50,23 @@ def get_stations_from_filelist(filename):
 
     The file should simply have one station per line.
     """
-    stations = []
     if not os.path.isfile(filename):
         print(f"Filename {filename} does not exist, aborting!")
         sys.exit()
     with open(filename, encoding="ascii") as fh:
-        for line in fh:
-            stations.append(line.strip())
+        stations = [line.strip() for line in fh]
     return stations
 
 
 def get_stations_from_networks():
     """Build a station list by using a bunch of IEM networks."""
     stations = []
-    states = """AK AL AR AZ CA CO CT DE FL GA HI IA ID IL IN KS KY LA MA MD ME
-     MI MN MO MS MT NC ND NE NH NJ NM NV NY OH OK OR PA RI SC SD TN TX UT VA VT
-     WA WI WV WY"""
-    networks = []
-    for state in states.split():
-        networks.append(f"{state}_ASOS")
+    states = (
+        "AK AL AR AZ CA CO CT DE FL GA HI IA ID IL IN KS KY LA MA MD ME MI MN "
+        "MO MS MT NC ND NE NH NJ NM NV NY OH OK OR PA RI SC SD TN TX UT VA VT "
+        "WA WI WV WY"
+    )
+    networks = [f"{state}_ASOS" for state in states.split()]
 
     for network in networks:
         # Get metadata
@@ -79,7 +77,7 @@ def get_stations_from_networks():
         data = urlopen(uri)
         jdict = json.load(data)
         for site in jdict["features"]:
-            stations.append(site["properties"]["sid"])
+            stations.append(site["properties"]["sid"])  # noqa
     return stations
 
 

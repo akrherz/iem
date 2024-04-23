@@ -16,13 +16,10 @@ from pymemcache.client import Client
 
 def compute_taxis(ncvar):
     """Figure out our dates."""
-    res = []
     basets = datetime.datetime.strptime(
         ncvar.units[:21], "Days since %Y-%m-%d"
     ).date()
-    for val in ncvar[:]:
-        res.append(basets + datetime.timedelta(days=val))
-    return res
+    return [basets + datetime.timedelta(days=val) for val in ncvar[:]]
 
 
 def compute(taxis, highs, lows, gddbase, gddceil):

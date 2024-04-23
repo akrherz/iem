@@ -27,9 +27,7 @@ def main():
         "vtec_missing_events WHERE year = %s",
         (year,),
     )
-    missing = []
-    for row in pcursor:
-        missing.append(f"{row[0]}.{row[1]}.{row[2]}.{row[3]}")
+    missing = [f"{row[0]}.{row[1]}.{row[2]}.{row[3]}" for row in pcursor]
 
     # Gap analysis!
     sql = f"""

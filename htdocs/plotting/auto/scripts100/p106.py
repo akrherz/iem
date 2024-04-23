@@ -8,9 +8,10 @@ temperature.
 
 import datetime
 
+from pyiem.database import get_dbconn
 from pyiem.exceptions import NoDataFound
 from pyiem.plot import figure_axes
-from pyiem.util import get_autoplot_context, get_dbconn
+from pyiem.util import get_autoplot_context
 
 PDICT = {
     "tmpf_above": "Temperature At or Above Threshold (F)",
@@ -124,9 +125,7 @@ def plotter(fdict):
             ctx["_nt"].sts[station]["tzname"],
         ),
     )
-    data = []
-    for _ in range(24):
-        data.append([])
+    data = [[] for _ in range(24)]
     if cursor.rowcount == 0:
         raise NoDataFound("Failed to find any data for station.")
     for row in cursor:

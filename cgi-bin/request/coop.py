@@ -550,9 +550,7 @@ def do_simple(cursor, ctx):
         dc["lat"] = "%.4f" % (nt.sts[sid]["lat"],)
         dc["lon"] = "%.4f" % (nt.sts[sid]["lon"],)
         dc["doy"] = "%.0f" % (dc["doy"],)
-        res = []
-        for n in cols:
-            res.append(str(dc[n]))
+        res = [str(dc[n]) for n in cols]
         sio.write((d.join(res)).replace("None", "M") + "\r\n")
     return sio.getvalue().encode("ascii")
 

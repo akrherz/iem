@@ -18,10 +18,11 @@ import matplotlib.dates as mdates
 import pandas as pd
 import requests
 from matplotlib.patches import Rectangle
+from pyiem.database import get_sqlalchemy_conn
 from pyiem.exceptions import NoDataFound
 from pyiem.plot import figure_axes
 from pyiem.plot.use_agg import plt
-from pyiem.util import get_autoplot_context, get_sqlalchemy_conn
+from pyiem.util import get_autoplot_context
 
 UNITS = {"precip": "inch", "avgt": "F", "high": "F", "low": "F"}
 PDICT = {
@@ -92,9 +93,7 @@ def underlay_usdm(axis, sts, ets, lon, lat):
             transform=axis.transAxes,
         )
         return
-    rects = []
-    for color in COLORS:
-        rects.append(Rectangle((0, 0), 1, 1, fc=color))
+    rects = [Rectangle((0, 0), 1, 1, fc=color) for color in COLORS]
     axis.text(
         0.0, 1.03, "Drought Category Underlain", transform=axis.transAxes
     )
