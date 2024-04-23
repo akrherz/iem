@@ -112,7 +112,7 @@ class MyModel(CGIModel):
     @field_validator("sdate", "edate", mode="before")
     def allow_str_or_none(cls, v):
         """pydantic can't seem to handle this."""
-        if len(v) < 10:
+        if 8 <= len(v) < 10:
             # zero pad
             return "-".join(f"{int(v):02.0f}" for v in v.split("-"))
         return None if v == "" else v
