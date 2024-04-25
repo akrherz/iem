@@ -14,6 +14,7 @@ python parse0007.py &
 python dot_plows.py &
 
 cd other
+python purpleair.py &
 python parse0006.py &
 python parse0010.py &
 

@@ -20,15 +20,26 @@ from zoneinfo import ZoneInfo
 
 import numpy as np
 import pandas as pd
+from pydantic import Field
 from pyiem.database import get_sqlalchemy_conn
+from pyiem.exceptions import IncompleteWebRequest
 from pyiem.network import Table as NetworkTable
 from pyiem.reference import ISO8601
 from pyiem.util import html_escape
-from pyiem.webutil import iemapp
+from pyiem.webutil import CGIModel, iemapp
 from pymemcache.client import Client
 from sqlalchemy import text
 
 json.encoder.FLOAT_REPR = lambda o: format(o, ".2f")
+
+
+class Schema(CGIModel):
+    """See how we are called."""
+
+    callback: str = Field(None, description="JSONP Callback")
+    pressure: int = Field(-1, description="Pressure Level of Interest")
+    station: str = Field(..., description="Station Identifier", max_length=4)
+    ts: str = Field(..., description="Timestamp of Interest")
 
 
 def safe(val):
@@ -109,8 +120,8 @@ def run(ts, sid, pressure):
 
 def parse_time(tstring):
     """Allow for various timestamp formats"""
-    if tstring is None or tstring == "":
-        tstring = "201308211200"
+    if tstring is None or tstring == "" or len(tstring) < 12:
+        raise IncompleteWebRequest("ts parameter is required")
     if tstring.find("T") > 0:
         # Assume ISO
         dt = datetime.datetime.strptime(tstring[:16], "%Y-%m-%dT%H:%M")
@@ -120,15 +131,15 @@ def parse_time(tstring):
     return dt.replace(tzinfo=ZoneInfo("UTC"))
 
 
-@iemapp()
+@iemapp(help=__doc__, schema=Schema)
 def application(environ, start_response):
     """Answer request."""
-    sid = environ.get("station", "")[:4]
+    sid = environ["station"]
     if len(sid) == 3:
-        sid = "K" + sid
-    ts = parse_time(environ.get("ts"))
-    pressure = int(environ.get("pressure", -1))
-    cb = environ.get("callback")
+        sid = f"K{sid}"
+    ts = parse_time(environ["ts"])
+    pressure = environ["pressure"]
+    cb = environ["callback"]
 
     mckey = f"/json/raob/{ts:%Y%m%d%H%M}/{sid}/{pressure}?callback={cb}"
     mc = Client("iem-memcached:11211")

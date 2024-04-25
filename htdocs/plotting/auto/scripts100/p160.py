@@ -19,9 +19,10 @@ from zoneinfo import ZoneInfo
 import matplotlib.dates as mdates
 import numpy as np
 import pandas as pd
+from pyiem.database import get_sqlalchemy_conn
 from pyiem.exceptions import NoDataFound
 from pyiem.plot import figure_axes
-from pyiem.util import get_autoplot_context, get_sqlalchemy_conn
+from pyiem.util import get_autoplot_context
 
 STAGES = "low action bankfull flood moderate major record".split()
 COLORS = {
@@ -310,6 +311,7 @@ def plotter(fdict):
         ctx["w"] in ["obs", "both"]
         and not ctx["odf"].empty
         and ctx["var"] in ctx
+        and ctx[ctx["var"]] in ctx["odf"].columns
     ):
         ax.plot(
             ctx["odf"].index.values,
