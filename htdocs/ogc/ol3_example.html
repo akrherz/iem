@@ -1,14 +1,26 @@
 <html>
 <head>
   <title>IEM TMS + OpenLayers Example</title>
-  <link type="text/css" href="/vendor/openlayers/7.2.2/ol.css" rel="stylesheet" />
-  <link type="text/css" href="/vendor/openlayers/7.2.2/ol-layerswitcher.css" rel="stylesheet" />
-  <script src="/vendor/openlayers/7.2.2/ol.js"></script> 
-  <script src="/vendor/openlayers/7.2.2/ol-layerswitcher.js"></script> 
+  <link type="text/css" href="/vendor/openlayers/9.1.0/ol.css" rel="stylesheet" />
+  <link type="text/css" href="/vendor/openlayers/9.1.0/ol-layerswitcher.css" rel="stylesheet" />
+  <script src="/vendor/openlayers/9.1.0/ol.js"></script> 
+  <script src="/vendor/openlayers/9.1.0/ol-layerswitcher.js"></script> 
   
 <script type="text/javascript">
 var map;
 var n0q;
+
+function layerChanged(sel){
+    const title = sel.options[sel.selectedIndex].text;
+    const layer = sel.options[sel.selectedIndex].value;
+    const lyr = new ol.layer.Tile({
+        title: title,
+        source: new ol.source.XYZ({
+                url : layer+'/{z}/{x}/{y}.png'
+        })
+    });
+    map.getLayers().push(lyr);
+}
 
 /*
  * You need to wrap your DOM manipulators into a function that is called after
@@ -77,15 +89,23 @@ function init(){
     window.setInterval(function(){
         refresher();
     }, 5*60000);
-    
-    
+
 }
 </script>
 </head>
 <body onload="init()">
-    
-<div style="width:100%; height:100%" id="map"></div>
-    
+
+<!-- a simple pull down to select a TMS layer to add to the map -->
+<form>
+<strong>Choose a Layer:</strong>
+<select id="layer" onchange="layerChanged(this);">
+<option value="/c/tile.py/1.0.0/uscounties">uscounties (US County Borders)</option>
+<option value="/c/tile.py/1.0.0/depmask">depmap (Daily Erosion Project Mask)</option>
+</select>
+</form>
+
+<div style="width:100%; height:90%" id="map"></div>
+
 <script src="/vendor/jquery/1.11.3/jquery-1.11.3.min.js"></script>
 </body>
 </html>
