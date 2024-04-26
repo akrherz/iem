@@ -79,7 +79,10 @@ def application(environ, start_response):
     )
 
     for i in range(3):
-        distanceInMiles = float(environ.get(f"m{i}", 100))
+        try:
+            distanceInMiles = float(environ.get(f"m{i}", 100))
+        except ValueError:
+            return [f"ERROR: Invalid m{i} provided.".encode("ascii")]
         if distanceInMiles <= 0.00001:
             continue
         try:

@@ -2,10 +2,30 @@
 
 import json
 
+from pydantic import Field
+from pyiem.database import get_dbconnc
 from pyiem.reference import ISO8601
-from pyiem.util import get_dbconnc, html_escape, utc
-from pyiem.webutil import iemapp
+from pyiem.util import html_escape, utc
+from pyiem.webutil import CGIModel, iemapp
 from pymemcache.client import Client
+
+
+class Schema(CGIModel):
+    """See how we are called."""
+
+    network: str = Field(
+        ...,
+        description="The network identifier, such as IA_ASOS",
+        pattern="^[A-Z0-9_]{1,32}$",
+    )
+    station: str = Field(
+        ...,
+        description="The station identifier, such as AMW",
+        pattern=r"^[A-Z0-9_\-]{1,64}$",
+    )
+    callback: str = Field(
+        None, description="Optional JSONP callback function name"
+    )
 
 
 def run(network, station):
@@ -67,12 +87,12 @@ def run(network, station):
     return json.dumps(data)
 
 
-@iemapp()
+@iemapp(help=__doc__, schema=Schema)
 def application(environ, start_response):
     """Answer request."""
-    network = environ.get("network", "IA_ASOS")[:32].upper()
-    station = environ.get("station", "AMW")[:64].upper()
-    cb = environ.get("callback", None)
+    network = environ["network"]
+    station = environ["station"]
+    cb = environ["callback"]
 
     mckey = f"/json/current/{network}/{station}"
     mc = Client("iem-memcached:11211")

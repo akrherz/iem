@@ -248,6 +248,8 @@ def plotter(fdict):
         color = yearcolors[wantedyears.index(year)]
         yearlabel = sts.year
         x = df.loc[sts:ets]
+        if x.empty:
+            continue
         if sts.year != ets.year:
             yearlabel = f"{sts.year}-{ets.year}"
         if whichplots in ["gdd", "all"]:
@@ -384,7 +386,7 @@ def plotter(fdict):
     while now <= edate:
         if now.day in wanted:
             xticks.append(i)
-            xticklabels.append(now.strftime("%-d\n%b"))
+            xticklabels.append(now.strftime("%-d %b"))
         now += datetime.timedelta(days=1)
         i += 1
     if whichplots in ["all", "gdd"]:
