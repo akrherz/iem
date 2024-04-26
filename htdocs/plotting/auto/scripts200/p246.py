@@ -1,7 +1,7 @@
 """
 This autoplot generates a probability of a specified accumulation threshold
 being reached by the given calendar date.  This is based on period of record
-observations, so it is an observed probability.
+observations, so it is an observed frequency.
 """
 
 import pandas as pd
@@ -117,16 +117,18 @@ def plotter(fdict):
     if ctx["var"] == "accum_gdd":
         title += f" ({ctx['gddbase']}/{ctx['gddceil']})"
 
+    units = "inch" if ctx["var"] == "accum_precip" else "GDD"
     fig = figure(
         title=(
             f"({df.index[0].year}-{df.index[-1].year}) "
             f"{ctx['_sname']}:: {title}"
         ),
         subtitle=(
-            f"Accumulation over {ctx['threshold']} after {ctx['sday']:%b %-d}"
+            f"Accumulation over {ctx['threshold']} {units} "
+            f"after {ctx['sday']:%b %-d}"
         ),
     )
-    ax = fig.add_axes([0.06, 0.1, 0.65, 0.75])
+    ax = fig.add_axes([0.06, 0.1, 0.65, 0.78])
     ax.plot(df2.index.values, df2["over_threshold"].values, color="k")
 
     ax.set_ylim(0, 101)
@@ -139,8 +141,11 @@ def plotter(fdict):
     ax.grid(True)
     xticks = []
     xticklabels = []
-    dt1 = pd.Timestamp("2000-01-01") + pd.Timedelta(days=df3.index.min() - 5)
-    dt2 = pd.Timestamp("2000-01-01") + pd.Timedelta(days=df3.index.max() + 5)
+    # careful
+    mindoy = max(0, df3.index.min() - 5)
+    maxdoy = min(365, df3.index.max() + 5)
+    dt1 = pd.Timestamp("2000-01-01") + pd.Timedelta(days=mindoy)
+    dt2 = pd.Timestamp("2000-01-01") + pd.Timedelta(days=maxdoy)
     every = [1, 8, 15, 22]
     if dt2.dayofyear - dt1.dayofyear > 60:
         every = [1, 15]
