@@ -29,6 +29,21 @@ $t->content = <<<EOF
 
 <h3>Tile Map Service (TMS)</h3>
 
+<p>The IEM has two base endpoints for its TMS services. They are partitioned
+by their cache header settings.</p>
+
+<table class="table table-striped table-condensed">
+<thead><tr><th>Endpoint</th><th>Cache Header</th></tr></thead>
+<tbody>
+<tr><td><a href="/c/tile.py/1.0.0">/c/tile.py/1.0.0</a></td><td>14 days</td></tr>
+<tr><td><a href="/cache/tile.py/1.0.0">/cache/tile.py/1.0.0</a></td><td>5 minutes</td></tr>
+</tbody>
+</table>
+
+<p>The IEM also runs a customized version of <a href="https://github.com/akrherz/TileCache">TileCache</a>
+that allows some argument loading into the service layer name.  For example,
+including timestamp information in the layer name.</p>
+
 <p>Here are working examples using IEM TMS services within various Javascript
 libraries.</p>
 
@@ -65,19 +80,61 @@ was contributed by Derek Swingley.
 
 </div><!-- ./row -->
 
-<h4>Listing of Tile Map Services</h4>
+<div class="panel panel-primary">
+<div class="panel-heading">Tile Map Services at both <code>/c/tile.py/1.0.0/</code>
+and <code>/cache/tile.py/1.0.0/</code></div>
+<div class="panel-body">
 
-<p>The following services are for Spherical Mercator (EPSG:3857) maps only.</p>
+<p><strong>Why both?</strong> If you are using stable layer names (ie with a
+umabiguous timestamp), you likely want to use the <code>/c/</code> service so to
+have better client side caching.</p>
 
 <table class="table table-striped table-condensed">
-<thead>
-<tr><th>Service Name</th><th>Description</th><th>Legend</th></tr>
+<thead class="sticky">
+<tr><th>Layer Name</th><th>Description</th><th>Legend</th></tr>
 </thead>
 
 <tbody>
-<tr><td>uscounties</td><td>US County Borders</td></tr>
-<tr><td>usstates</td><td>US State Borders</td></tr>
 
+<tr><td>Template: ridge::XXX-XXX-0</td><td>Latest individual RADAR XXX data for product XXX 
+<a href="/GIS/ridge.phtml">more info</a></td></tr>
+<tr><td>Template: ridge::XXX-XXX-YYYYMMDDHHMI</td><td>Archived individual RADAR XXX data for product XXX 
+<a href="/GIS/ridge.phtml">more info</a></td></tr>
+
+</tbody>
+</table>
+
+</div><!-- ./panel-body -->
+</div><!-- ./panel -->
+
+<div class="panel panel-primary">
+<div class="panel-heading">Tile Map Services only at <code>/c/tile.py/1.0.0/</code></div>
+<div class="panel-body">
+
+<table class="table table-striped table-condensed">
+<thead class="sticky">
+<tr><th>Layer Name</th><th>Description</th><th>Legend</th></tr>
+</thead>
+
+<tbody>
+<tr><td>uscounties</td><td>US County Borders</td><td></td></tr>
+<tr><td>usstates</td><td>US State Borders</td><td></td></tr>
+</tbody>
+</table>
+
+</div><!-- ./panel-body -->
+</div><!-- ./panel -->
+
+<div class="panel panel-primary">
+<div class="panel-heading">Tile Map Services only at <code>/cache/tile.py/1.0.0/</code></div>
+<div class="panel-body">
+
+<table class="table table-striped table-condensed">
+<thead class="sticky">
+<tr><th>Layer Name</th><th>Description</th><th>Legend</th></tr>
+</thead>
+
+<tbody>
 <tr>
 <td>Template: goes_<i>bird</i>_<i>sector</i>_ch<i>channel</i><br />
 Example: goes_east_conus_ch02
@@ -95,10 +152,6 @@ Example: goes_east_conus_ch02
 <tr><td>Template: hrrr::REFD-FXXXX-YYYYMMDDHHMI</td><td>Archived HRRR Reflectivity Forecasts, FXXXX is the forecast minute 
 <a href="/GIS/model.phtml">more info</a></td></tr>
 
-<tr><td>Template: ridge::XXX-XXX-0</td><td>Latest individual RADAR XXX data for product XXX 
-<a href="/GIS/ridge.phtml">more info</a></td></tr>
-<tr><td>Template: ridge::XXX-XXX-YYYYMMDDHHMI</td><td>Archived individual RADAR XXX data for product XXX 
-<a href="/GIS/ridge.phtml">more info</a></td></tr>
 <tr><td>nexrad-n0q-900913</td><td>NEXRAD Base Reflectivity current</td></tr>
 <tr><td>nexrad-n0q-900913-mXXm</td><td>... where <code>XX</code> is a zero padded number modulo 5 between
 05 and 55 minutes old.</td></tr>
@@ -155,6 +208,9 @@ Example: goes_east_conus_ch02
 
 </tbody>
 </table>
+
+</div><!-- ./panel-body -->
+</div><!-- ./panel -->
 
 <h4>Web Map Service (WMS)</h4>
 
