@@ -6,9 +6,10 @@
   the database other than to ensure temp_estimated is set to True.
 """
 
-import datetime
 import sys
 import time
+from datetime import date, datetime
+from typing import Tuple
 
 import httpx
 import numpy as np
@@ -24,6 +25,30 @@ SERVICE = "https://data.rcc-acis.org/StnData"
 METASERVICE = "https://data.rcc-acis.org/StnMeta"
 
 
+def compute_por(acis_station) -> Tuple[date, date]:
+    """Need to ask ACIS what the POR is based on variables, not SIDs.
+
+    Result payload looks like:
+     {"meta":[{"valid_daterange":[["1904-02-06","2024-04-25"],...]}]}
+    """
+    payload = {
+        "sids": acis_station,
+        "meta": "valid_daterange",
+        "elems": "maxt,mint,pcpn",
+    }
+    with httpx.Client() as client:
+        meta = client.post(
+            f"{METASERVICE}?sid={acis_station}", json=payload, timeout=60
+        ).json()
+    dates = []
+    for pair in meta["meta"][0]["valid_daterange"]:
+        for stamp in pair:
+            if stamp.startswith(("0001", "9999")):
+                continue
+            dates.append(datetime.strptime(stamp, "%Y-%m-%d").date())
+    return min(dates), max(dates)
+
+
 def do(meta, station, acis_station) -> int:
     """Do the query and work
 
@@ -32,19 +57,23 @@ def do(meta, station, acis_station) -> int:
       acis_station (str): the ACIS identifier ie 130197
     """
     table = f"alldata_{station[:2]}"
-    today = datetime.date.today()
     fmt = "%Y-%m-%d"
+    try:
+        meta_mindt, meta_maxdt = compute_por(acis_station)
+    except Exception as exp:
+        LOG.exception(exp)
+        return 0
     # If this station is offline, we don't want to ask for data past the
     # archive_end date.  The station could be a precip-only site...
     edate = meta["attributes"].get("CEILING")
     if edate is None:
         if meta["online"]:
-            edate = today.strftime(fmt)
+            edate = f"{meta_maxdt:%Y-%m-%d}"
         else:
             edate = meta["archive_end"].strftime(fmt)
     payload = {
         "sid": acis_station,
-        "sdate": meta["attributes"].get("FLOOR", "por"),
+        "sdate": meta["attributes"].get("FLOOR", f"{meta_mindt:%Y-%m-%d}"),
         "edate": meta["attributes"].get("CEIL", edate),
         "elems": [
             {"name": "maxt", "add": "t"},
