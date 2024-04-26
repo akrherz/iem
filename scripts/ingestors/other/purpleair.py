@@ -17,8 +17,8 @@ XREF = {
 
 def save_other(data):
     """Write to the database."""
-    for key in XREF:
-        data[key] = data[XREF[key]]
+    for key, val in XREF.items():
+        data[key] = data[val]
     data["station"] = "OT0017"
     data["valid"] = utc()
     with get_sqlalchemy_conn("other") as conn:

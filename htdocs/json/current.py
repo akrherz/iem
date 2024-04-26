@@ -21,7 +21,7 @@ class Schema(CGIModel):
     station: str = Field(
         ...,
         description="The station identifier, such as AMW",
-        pattern="^[A-Z0-9_\-]{1,64}$",
+        pattern=r"^[A-Z0-9_\-]{1,64}$",
     )
     callback: str = Field(
         None, description="Optional JSONP callback function name"
