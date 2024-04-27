@@ -27,7 +27,7 @@
             zoom: 4 
           });
           var subs = [ "mesonet", "mesonet1", "mesonet2", "mesonet3" ];
-          var nexrad = new esri.layers.WebTiledLayer("http://${subDomain}.agron.iastate.edu/cache/tile.py/1.0.0/nexrad-n0q-900913/${level}/${col}/${row}.png", {
+          var nexrad = new esri.layers.WebTiledLayer("http://${subDomain}.agron.iastate.edu/cache/tile.py/1.0.0/nexrad-n0q/${level}/${col}/${row}.png", {
             id: "nexrad",
             subDomains: subs
           });

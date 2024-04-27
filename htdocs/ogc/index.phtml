@@ -15,6 +15,8 @@ $t->content = <<<EOF
 
 <h4>Some items of note:</h4>
 <ol>
+ <li>Not all TMS services are documented here as some of them are not directly
+ usuable without loading up parameters into the layer name.</li>
  <li>All of these services are available via https:// connections.</li>
  <li>There are four DNS aliases for the website to allow web browers to make
     many simultaneous requests against these services.<br />
@@ -28,6 +30,21 @@ $t->content = <<<EOF
 </ol>
 
 <h3>Tile Map Service (TMS)</h3>
+
+<p>The IEM has two base endpoints for its TMS services. They are partitioned
+by their cache header settings.</p>
+
+<table class="table table-striped table-condensed">
+<thead><tr><th>Endpoint</th><th>Cache Header</th></tr></thead>
+<tbody>
+<tr><td><a href="/c/tile.py/1.0.0">/c/tile.py/1.0.0</a></td><td>14 days</td></tr>
+<tr><td><a href="/cache/tile.py/1.0.0">/cache/tile.py/1.0.0</a></td><td>5 minutes</td></tr>
+</tbody>
+</table>
+
+<p>The IEM also runs a customized version of <a href="https://github.com/akrherz/TileCache">TileCache</a>
+that allows some argument loading into the service layer name.  For example,
+including timestamp information in the layer name.</p>
 
 <p>Here are working examples using IEM TMS services within various Javascript
 libraries.</p>
@@ -65,19 +82,84 @@ was contributed by Derek Swingley.
 
 </div><!-- ./row -->
 
-<h4>Listing of Tile Map Services</h4>
+<div class="panel panel-primary">
+<div class="panel-heading">Tile Map Services at both <code>/c/tile.py/1.0.0/</code>
+and <code>/cache/tile.py/1.0.0/</code></div>
+<div class="panel-body">
 
-<p>The following services are for Spherical Mercator (EPSG:3857) maps only.</p>
+<p><strong>Why both?</strong> If you are using stable layer names (ie with a
+umabiguous timestamp), you likely want to use the <code>/c/</code> service so to
+have better client side caching.</p>
 
 <table class="table table-striped table-condensed">
-<thead>
-<tr><th>Service Name</th><th>Description</th><th>Legend</th></tr>
+<thead class="sticky">
+<tr><th>Layer Name</th><th>Description</th><th>Legend</th></tr>
 </thead>
 
 <tbody>
-<tr><td>uscounties</td><td>US County Borders</td></tr>
-<tr><td>usstates</td><td>US State Borders</td></tr>
 
+<tr><td>Template: ridge::XXX-XXX-0</td><td>Latest individual RADAR XXX data for product XXX 
+<a href="/GIS/ridge.phtml">more info</a></td></tr>
+<tr><td>Template: ridge::XXX-XXX-YYYYMMDDHHMI</td><td>Archived individual RADAR XXX data for product XXX 
+<a href="/GIS/ridge.phtml">more info</a></td></tr>
+
+</tbody>
+</table>
+
+</div><!-- ./panel-body -->
+</div><!-- ./panel -->
+
+<div class="panel panel-primary">
+<div class="panel-heading">Tile Map Services only at <code>/c/tile.py/1.0.0/</code></div>
+<div class="panel-body">
+
+<table class="table table-striped table-condensed">
+<thead class="sticky">
+<tr><th>Layer Name</th><th>Description</th><th>Legend</th></tr>
+</thead>
+
+<tbody>
+<tr><td>depmask</td><td><a href="https://dailyerosion.org/">Daily Erosion Project</a> mask
+for HUC12s that are not modelled.</td><td></td></tr>
+<tr><td>uscounties</td><td>US County Borders</td><td></td></tr>
+<tr><td>usstates</td><td>US State Borders</td><td></td></tr>
+</tbody>
+</table>
+
+</div><!-- ./panel-body -->
+</div><!-- ./panel -->
+
+<div class="panel panel-primary">
+<div class="panel-heading">Tile Map Services only at <code>/cache/tile.py/1.0.0/</code></div>
+<div class="panel-body">
+
+<table class="table table-striped table-condensed">
+<thead class="sticky">
+<tr><th>Layer Name</th><th>Description</th><th>Legend</th></tr>
+</thead>
+
+<tbody>
+
+<tr class="info"><th colspan="3">GOES Satellite Imagery</th></tr>
+
+<tr>
+<td>goes-vis-1km
+<br />goes-ir-4km
+<br />goes-wv-4km
+<br />conus-goes-vis-1km
+<br />conus-goes-ir-4km
+<br />conus-goes-wv-4km</td>
+<td>
+These are legacy service names that all pointing at the same GOES East products.
+Channel 02 for visible, channel 13 for IR, and channel 09 for WV.  The conus
+here is poorly named as it is only just GOES east. These layers update in
+near realtime and you can find <a href="/data/gis/images/GOES/conus/channel02/GOES-16_C02.json">JSON metadata</a>
+files for each channel that denote the valid time.
+</td>
+<td><a href="/GIS/goes.phtml">more info</a></td>
+</tr>
+
+</tr>
 <tr>
 <td>Template: goes_<i>bird</i>_<i>sector</i>_ch<i>channel</i><br />
 Example: goes_east_conus_ch02
@@ -86,46 +168,48 @@ Example: goes_east_conus_ch02
  <i>bird</i> is "east" or "west"<br />
  <i>sector</i> is "fulldisk", "alaska" (west only), "conus", "hawaii" (west only),
  "mesoscale-1", "mesoscale-2", "puertorico" (east only)<br />
- <i>channel</i> is two-digit, zero padded 01-16 <br />
- <a href="/GIS/goes.phtml">more info</a>.</td>
-</tr>
+ <i>channel</i> is two-digit, zero padded 01-16</td>
+ <td><a href="/GIS/goes.phtml">more info</a></td>
+ </tr>
+
+<tr class="info"><th colspan="3">HRRR Weather Forecast Model</th></tr>
 
 <tr><td>Template: hrrr::REFD-FXXXX-0</td><td>Latest HRRR Reflectivity Forecasts, FXXXX is the forecast minute 
 <a href="/GIS/model.phtml">more info</a></td></tr>
 <tr><td>Template: hrrr::REFD-FXXXX-YYYYMMDDHHMI</td><td>Archived HRRR Reflectivity Forecasts, FXXXX is the forecast minute 
 <a href="/GIS/model.phtml">more info</a></td></tr>
 
-<tr><td>Template: ridge::XXX-XXX-0</td><td>Latest individual RADAR XXX data for product XXX 
-<a href="/GIS/ridge.phtml">more info</a></td></tr>
-<tr><td>Template: ridge::XXX-XXX-YYYYMMDDHHMI</td><td>Archived individual RADAR XXX data for product XXX 
-<a href="/GIS/ridge.phtml">more info</a></td></tr>
-<tr><td>nexrad-n0q-900913</td><td>NEXRAD Base Reflectivity current</td></tr>
-<tr><td>nexrad-n0q-900913-mXXm</td><td>... where <code>XX</code> is a zero padded number modulo 5 between
+<tr class="info"><th colspan="3">NEXRAD Mosaics</th></tr>
+
+<tr><td>nexrad-n0q</td><td>NEXRAD Base Reflectivity current</td></tr>
+<tr><td>nexrad-n0q-mXXm</td><td>... where <code>XX</code> is a zero padded number modulo 5 between
 05 and 55 minutes old.</td></tr>
 
-<tr><td>nexrad-eet-900913</td><td>NEXRAD Echo Tops EET current</td></tr>
-<tr><td>nexrad-eet-900913-mXXm</td><td>... where <code>XX</code> is a zero padded number module 5 between
+<tr><td>nexrad-eet</td><td>NEXRAD Echo Tops EET current</td></tr>
+<tr><td>nexrad-eet-mXXm</td><td>... where <code>XX</code> is a zero padded number module 5 between
 05 and 55 minutes old.</td></tr>
 
-<tr><td>q2-n1p-900913</td>
+<tr class="info"><th colspan="3">MRMS Products</th></tr>
+
+<tr><td>q2-n1p</td>
   <td>MRMS 1 Hour Precipitation</td>
   <td><img src="/images/mrms_q3_p1h.png"></td>
   </tr> 
-<tr><td>q2-p24h-900913</td>
+<tr><td>q2-p24h</td>
   <td>MRMS 24 Hour Precipitation</td>
   <td><img src="/images/mrms_q3_p24h.png"></td>
   </tr> 
-<tr><td>q2-p48h-900913</td>
+<tr><td>q2-p48h</td>
   <td>MRMS 48 Hour Precipitation</td>
   <td><img src="/images/mrms_q3_p24h.png"></td>
   </tr> 
-<tr><td>q2-p72h-900913</td>
+<tr><td>q2-p72h</td>
   <td>MRMS 72 Hour Precipitation</td>
   <td><img src="/images/mrms_q3_p24h.png"></td>
   </tr> 
 
 <tr>
-  <td>q2-hsr-900913</td>
+  <td>q2-hsr</td>
   <td>MRMS Hybrid-Scan Reflectivity Composite (SeamlessHSR).</td>
   <td><img src="/images/mrms_lcref.png"></td>
   </tr>
@@ -155,6 +239,9 @@ Example: goes_east_conus_ch02
 
 </tbody>
 </table>
+
+</div><!-- ./panel-body -->
+</div><!-- ./panel -->
 
 <h4>Web Map Service (WMS)</h4>
 
