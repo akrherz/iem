@@ -15,10 +15,8 @@ $t->content = <<<EOF
 
 <h4>Some items of note:</h4>
 <ol>
- <li>Many of these services have a strange looking <code>900913</code> in the
- layer name.  Welcome to the mid 2000s when Google Maps was the only game in
-    town and they used a non-standard projection.
-    This is the <a href="https://epsg.io/900913">EPSG:900913</a> projection.</li>
+ <li>Not all TMS services are documented here as some of them are not directly
+ usuable without loading up parameters into the layer name.</li>
  <li>All of these services are available via https:// connections.</li>
  <li>There are four DNS aliases for the website to allow web browers to make
     many simultaneous requests against these services.<br />
@@ -145,12 +143,12 @@ for HUC12s that are not modelled.</td><td></td></tr>
 <tr class="info"><th colspan="3">GOES Satellite Imagery</th></tr>
 
 <tr>
-<td>goes-vis-1km-900913
-<br />goes-ir-4km-900913
-<br />goes-wv-4km-900913
-<br />conus-goes-vis-1km-900913
-<br />conus-goes-ir-4km-900913
-<br />conus-goes-wv-4km-900913</td>
+<td>goes-vis-1km
+<br />goes-ir-4km
+<br />goes-wv-4km
+<br />conus-goes-vis-1km
+<br />conus-goes-ir-4km
+<br />conus-goes-wv-4km</td>
 <td>
 These are legacy service names that all pointing at the same GOES East products.
 Channel 02 for visible, channel 13 for IR, and channel 09 for WV.  The conus
@@ -183,35 +181,35 @@ Example: goes_east_conus_ch02
 
 <tr class="info"><th colspan="3">NEXRAD Mosaics</th></tr>
 
-<tr><td>nexrad-n0q-900913</td><td>NEXRAD Base Reflectivity current</td></tr>
-<tr><td>nexrad-n0q-900913-mXXm</td><td>... where <code>XX</code> is a zero padded number modulo 5 between
+<tr><td>nexrad-n0q</td><td>NEXRAD Base Reflectivity current</td></tr>
+<tr><td>nexrad-n0q-mXXm</td><td>... where <code>XX</code> is a zero padded number modulo 5 between
 05 and 55 minutes old.</td></tr>
 
-<tr><td>nexrad-eet-900913</td><td>NEXRAD Echo Tops EET current</td></tr>
-<tr><td>nexrad-eet-900913-mXXm</td><td>... where <code>XX</code> is a zero padded number module 5 between
+<tr><td>nexrad-eet</td><td>NEXRAD Echo Tops EET current</td></tr>
+<tr><td>nexrad-eet-mXXm</td><td>... where <code>XX</code> is a zero padded number module 5 between
 05 and 55 minutes old.</td></tr>
 
 <tr class="info"><th colspan="3">MRMS Products</th></tr>
 
-<tr><td>q2-n1p-900913</td>
+<tr><td>q2-n1p</td>
   <td>MRMS 1 Hour Precipitation</td>
   <td><img src="/images/mrms_q3_p1h.png"></td>
   </tr> 
-<tr><td>q2-p24h-900913</td>
+<tr><td>q2-p24h</td>
   <td>MRMS 24 Hour Precipitation</td>
   <td><img src="/images/mrms_q3_p24h.png"></td>
   </tr> 
-<tr><td>q2-p48h-900913</td>
+<tr><td>q2-p48h</td>
   <td>MRMS 48 Hour Precipitation</td>
   <td><img src="/images/mrms_q3_p24h.png"></td>
   </tr> 
-<tr><td>q2-p72h-900913</td>
+<tr><td>q2-p72h</td>
   <td>MRMS 72 Hour Precipitation</td>
   <td><img src="/images/mrms_q3_p24h.png"></td>
   </tr> 
 
 <tr>
-  <td>q2-hsr-900913</td>
+  <td>q2-hsr</td>
   <td>MRMS Hybrid-Scan Reflectivity Composite (SeamlessHSR).</td>
   <td><img src="/images/mrms_lcref.png"></td>
   </tr>

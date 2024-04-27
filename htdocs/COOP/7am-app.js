@@ -155,7 +155,7 @@ $(document).ready(() => {
         }), new ol.layer.Tile({
             title: 'NWS CWA Boundaries',
             source: new ol.source.XYZ({
-                url: '/c/tile.py/1.0.0/wfo-900913/{z}/{x}/{y}.png'
+                url: '/c/tile.py/1.0.0/wfo/{z}/{x}/{y}.png'
             })
         }), cocorahsLayer, coopLayer, azosLayer
         ],
