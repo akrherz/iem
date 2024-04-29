@@ -38,7 +38,7 @@ class Schema(CGIModel):
 
     callback: str = Field(None, description="JSONP Callback")
     pressure: int = Field(-1, description="Pressure Level of Interest")
-    station: str = Field(..., description="Station Identifier", max_length=4)
+    station: str = Field(None, description="Station Identifier", max_length=4)
     ts: str = Field(..., description="Timestamp of Interest")
 
 
@@ -57,7 +57,7 @@ def run(ts, sid, pressure):
 
     stationlimiter = ""
     params = {"valid": ts}
-    if sid != "":
+    if sid is not None:
         stationlimiter = " f.station = :sid and "
         params["sid"] = sid
         if sid.startswith("_"):
@@ -135,7 +135,7 @@ def parse_time(tstring):
 def application(environ, start_response):
     """Answer request."""
     sid = environ["station"]
-    if len(sid) == 3:
+    if sid is not None and len(sid) == 3:
         sid = f"K{sid}"
     ts = parse_time(environ["ts"])
     pressure = environ["pressure"]
