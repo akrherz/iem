@@ -9,15 +9,16 @@ LHH=$(date +'%H')
 YEST=$(date --date '1 day ago' +'%Y %m %d')
 TODAY=$(date +'%Y %m %d')
 
-cd iemre
+cd mrms
 # MRMS hourly totals arrive shortly after the top of the hour
 if [ $LHH -eq "00" ]
 then
-    python merge_mrms_q3.py	$YEST
+    python merge_mrms_q3.py	--date=$(date --date '1 days ago' +'%Y-%m-%d')
 else
-    python merge_mrms_q3.py	
+    python merge_mrms_q3.py --date=$(date +'%Y-%m-%d')
 fi
 
+cd ../iemre
 python merge_ifc.py $TODAY
 if [ $LHH -eq "01" ]
 then

@@ -1,9 +1,9 @@
-"""Generate the storage netcdf file for 0.01deg MRMS data over the Midwest"""
+"""Generate the storage netcdf file for 0.01deg MRMS data."""
 
 import datetime
 import os
-import sys
 
+import click
 import numpy as np
 from pyiem import iemre
 from pyiem.util import logger, ncopen
@@ -11,12 +11,17 @@ from pyiem.util import logger, ncopen
 LOG = logger()
 
 
-def init_year(ts):
-    """
-    Create a new NetCDF file for a year of our specification!
+def init_year(ts, for_dep=False):
+    """Create the netcdf file for a given year.
+
+    Args:
+        ts (datetime): timestamp to use for year
+        for_dep (bool): are we doing this for the Daily Erosion Project?
     """
 
     fn = iemre.get_daily_mrms_ncname(ts.year)
+    if for_dep:
+        fn = fn.replace("daily", "dep")
     if os.path.isfile(fn):
         LOG.warning("Cowardly refusing to overwrite %s", fn)
         return
@@ -30,15 +35,19 @@ def init_year(ts):
     nc.realization = 1
     nc.Conventions = "CF-1.0"
     nc.contact = "Daryl Herzmann, akrherz@iastate.edu, 515-294-5978"
-    nc.history = "%s Generated" % (
-        datetime.datetime.now().strftime("%d %B %Y"),
-    )
+    nc.history = f"{datetime.datetime.now():%d %B %Y} Generated"
     nc.comment = "No Comment at this time"
 
     # Setup Dimensions
     nc.createDimension("lat", (iemre.NORTH - iemre.SOUTH) * 100.0)
     nc.createDimension("lon", (iemre.EAST - iemre.WEST) * 100.0)
     days = ((ts.replace(year=ts.year + 1)) - ts).days
+    day_axis = np.arange(0, int(days))
+    if for_dep:
+        # April 15 through May 31
+        days = 16 + 31
+        tidx0 = iemre.daily_offset(ts.replace(month=4, day=15))
+        day_axis = np.arange(tidx0, tidx0 + days)
     nc.createDimension("time", int(days))
     nc.createDimension("nv", 2)
 
@@ -69,12 +78,12 @@ def init_year(ts):
     lon_bnds[:, 1] = np.arange(iemre.WEST + 0.01, iemre.EAST + 0.01, 0.01)
 
     tm = nc.createVariable("time", float, ("time",))
-    tm.units = "Days since %s-01-01 00:00:0.0" % (ts.year,)
+    tm.units = f"Days since {ts.year}-01-01 00:00:0.0"
     tm.long_name = "Time"
     tm.standard_name = "time"
     tm.axis = "T"
     tm.calendar = "gregorian"
-    tm[:] = np.arange(0, int(days))
+    tm[:] = day_axis
 
     # 0 to 65535 by 0.01
     p01d = nc.createVariable(
@@ -90,5 +99,13 @@ def init_year(ts):
     nc.close()
 
 
+@click.command()
+@click.option("--year", type=int, help="Year to initialize")
+def main(year):
+    """Go Main Go."""
+    init_year(datetime.datetime(year, 1, 1), False)
+    init_year(datetime.datetime(year, 1, 1), True)
+
+
 if __name__ == "__main__":
-    init_year(datetime.datetime(int(sys.argv[1]), 1, 1))
+    main()
