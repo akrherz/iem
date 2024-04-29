@@ -50,9 +50,7 @@ def run(wfo, year, phenomena, significance, etn):
         return json.dumps(res)
 
     # Get a list of unique product_ids
-    product_ids = df["product_ids"].explode().unique()
-    # Remove nan values
-    product_ids = [i for i in product_ids if i == i]
+    product_ids = df["product_ids"].explode().dropna().unique()
     product_ids.sort()
     report = ""
     try:
