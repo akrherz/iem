@@ -9,6 +9,8 @@ if [ $DD -eq "07" ]
     then
         python nmp_monthly_email.py
 fi
+python fix_high_low.py --date=$(date --date '1 days ago' +'%Y-%m-%d')
+python fix_high_low.py --date=$(date --date '10 days ago' +'%Y-%m-%d')
 
 cd ../swat
 python swat_realtime.py &
