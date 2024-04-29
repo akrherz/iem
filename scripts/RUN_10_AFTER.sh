@@ -9,15 +9,26 @@ LHH=$(date +'%H')
 YEST=$(date --date '1 day ago' +'%Y %m %d')
 TODAY=$(date +'%Y %m %d')
 
-cd iemre
+cd mrms
 # MRMS hourly totals arrive shortly after the top of the hour
 if [ $LHH -eq "00" ]
 then
-    python merge_mrms_q3.py	$YEST
+    python merge_mrms_q3.py	--date=$(date --date '1 days ago' +'%Y-%m-%d')
 else
-    python merge_mrms_q3.py	
+    python merge_mrms_q3.py --date=$(date +'%Y-%m-%d')
+fi
+# QC comes about an hour delayed, so rerun the previous day
+if [ $LHH -eq "03" ]
+then
+    python merge_mrms_q3.py	--date=$(date --date '1 days ago' +'%Y-%m-%d')
+fi
+# Special processing for DEP, to run at 5 PM, as DEP runs at 6 PM
+if [ $LHH -eq "17" ]
+then
+    python merge_mrms_q3.py	--date=$(date --date +'%Y-%m-%d') --for-dep
 fi
 
+cd ../iemre
 python merge_ifc.py $TODAY
 if [ $LHH -eq "01" ]
 then
