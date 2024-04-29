@@ -2,8 +2,9 @@
 
 import json
 
+from pyiem.database import get_dbconn
 from pyiem.reference import ISO8601
-from pyiem.util import get_dbconn, html_escape
+from pyiem.util import html_escape
 from pyiem.webutil import iemapp
 
 BASEURL = "https://www.spc.noaa.gov/products/md"

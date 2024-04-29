@@ -46,7 +46,11 @@ def main():
     """Go Main Go."""
     # http://10.26.117.91/json?live=false
     with httpx.Client() as client:
-        req = client.get("http://10.26.117.91/json?live=false", timeout=15)
+        try:
+            req = client.get("http://10.26.117.91/json?live=false", timeout=15)
+        except Exception as exp:
+            print(exp)
+            return
         data = req.json()
 
     save_other(data)
