@@ -25,7 +25,7 @@ fi
 # Special processing for DEP, to run at 5 PM, as DEP runs at 6 PM
 if [ $LHH -eq "17" ]
 then
-    python merge_mrms_q3.py	--date=$(date --date +'%Y-%m-%d') --for-dep
+    python merge_mrms_q3.py	--date=$(date +'%Y-%m-%d') --for-dep
 fi
 
 cd ../iemre
@@ -37,7 +37,6 @@ fi
 
 if [ $HH -eq "12" ]
 then
-    python merge_mrms_q3.py	$YEST
     cd ../current
     python q3_today_total.py $YEST
 fi

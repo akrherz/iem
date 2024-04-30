@@ -418,7 +418,8 @@ if ($loop === 1 || $loop === 2) {
     // Save this animation to memcache for future potential use
     $memcache = new Memcached();
     $memcache->addServer('iem-memcached', 11211);
-    $fts = time();
+    // UNIX time is not unique enough, so we multiply by a random int
+    $fts = time() * rand(1, 100);
     $memcache->set("/GIS/apps/rview/warnings.phtml?fts={$fts}", $urls, 86400);
 
     $content .= "</form>";
