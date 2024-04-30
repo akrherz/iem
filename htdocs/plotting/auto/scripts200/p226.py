@@ -7,10 +7,11 @@ from datetime import timedelta, timezone
 
 # third party
 from geopandas import read_postgis
+from pyiem.database import get_sqlalchemy_conn
 from pyiem.exceptions import NoDataFound
 from pyiem.plot.geoplot import MapPlot
 from pyiem.reference import Z_OVERLAY2
-from pyiem.util import get_autoplot_context, get_sqlalchemy_conn
+from pyiem.util import get_autoplot_context
 
 
 def get_description():
@@ -39,7 +40,7 @@ def get_description():
                 "UTC Timestamp of the CWA Issuance "
                 "(or will search backwards < 1 day):"
             ),
-            min="2021/03/01 0000",
+            min="2015/12/31 0000",
         ),
     ]
     return desc
@@ -50,7 +51,6 @@ def plotter(fdict):
     ctx = get_autoplot_context(fdict, get_description())
     num = ctx["num"]
 
-    # Compute a population estimate
     with get_sqlalchemy_conn("postgis") as conn:
         df = read_postgis(
             "select geom, expire at time zone 'UTC' as expire, "
