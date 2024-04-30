@@ -25,11 +25,11 @@ foreach ($urls as $k => $v) {
     $f = fopen($fn, 'wb');
     fwrite($f, $res);
     fclose($f);
-    `convert $fn $gfn`;
+    $output = shell_exec("convert $fn $gfn");
     $cmdstr .= " {$gfn} ";
 }
 
-`$cmdstr`;
+$output = shell_exec($cmdstr);
 
 header("Content-type: application/octet-stream");
 header("Content-Disposition: attachment; filename=myanimation.gif");
