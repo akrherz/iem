@@ -78,7 +78,7 @@ def daily_process(cursor, station, date, df, ddf):
     # For daily, we want the average for some of these columns
     for colname in (
         "t4_c_avg t12_c_avg t24_c_avg t50_c_avg vwc12 vwc24 vwc50 rh_avg "
-        "ws_mph"
+        "ws_mph tair_c_avg"
     ).split():
         row[colname] = float(avgdf[f"{colname}_qc"])
     # Soil Vue Madness
