@@ -35,7 +35,7 @@ def run(dt: datetime.date, for_dep: bool):
     nc = ncopen(ncfn, "a", timeout=300)
     offset = iemre.daily_offset(dt)
     if for_dep:
-        offset = offset - iemre.daily_offset(datetime.date(dt.year, 4, 15))
+        offset = offset - iemre.daily_offset(datetime.date(dt.year, 4, 11))
     ncprecip = nc.variables["p01d"]
 
     midnight = datetime.datetime(
@@ -103,6 +103,9 @@ def run(dt: datetime.date, for_dep: bool):
 @click.option("--for-dep", is_flag=True, help="For Daily Erosion Project")
 def main(dt, for_dep):
     """go main go"""
+    if for_dep and (f"{dt:%m%d}" < "0411" or f"{dt:%m%d}" > "0531"):
+        LOG.info("DEP not needed for %s", dt)
+        return
     run(dt.date(), for_dep)
 
 
