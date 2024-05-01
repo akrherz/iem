@@ -115,7 +115,7 @@ function get_sites_context()
     $station = get_str404("station", "", 20);
     $network = get_str404("network", "", 14);  // could be 10?
 
-    if ($station == "") {
+    if ($station == "" || $network == "") {
         header("Location: /sites/locate.php");
         die();
     }

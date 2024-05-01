@@ -40,7 +40,7 @@ def run(sts, ets, awipsid):
 @iemapp(default_tz="UTC")
 def application(environ, start_response):
     """Answer request."""
-    if "sts" not in environ:
+    if "sts" not in environ or environ["sts"] == "":
         raise IncompleteWebRequest("No sts provided")
     headers = [("Content-type", "application/json")]
     if environ.get("REQUEST_METHOD") != "GET":
