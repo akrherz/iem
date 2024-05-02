@@ -14,6 +14,8 @@ let edate = null;
 let sdate = null;
 let edate1 = null;
 let sdate1 = null;
+let default_lon = -93.653;
+let default_lat = 41.53;
 const BACKEND_EVENTS_BYPOINT = '/json/vtec_events_bypoint.py';
 const BACKEND_EVENTS_BYUGC = '/json/vtec_events_byugc.py';
 const BACKEND_SBW_BYPOINT = '/json/sbw_by_point.py';
@@ -449,8 +451,6 @@ function process_hash(hash){
 
 $(document).ready(() => {
     buildUI();
-    let default_lon = -93.653;
-    let default_lat = 41.53;
 
     // Do the anchor tag linking, please
     const tokens = window.location.href.split("#");
