@@ -14,6 +14,8 @@ let edate = null;
 let sdate = null;
 let edate1 = null;
 let sdate1 = null;
+let default_lon = -93.653;
+let default_lat = 41.53;
 const BACKEND_EVENTS_BYPOINT = '/json/vtec_events_bypoint.py';
 const BACKEND_EVENTS_BYUGC = '/json/vtec_events_byugc.py';
 const BACKEND_SBW_BYPOINT = '/json/sbw_by_point.py';
@@ -395,62 +397,65 @@ function buildUI(){
     }
 };
 
+function process_hash(hash){
+    const tokens2 = hash.split("/");
+    if (tokens2.length == 2){
+        if (tokens2[0] == 'byugc'){
+            const aTag = $("a[name='byugc']");
+            $('html,body').animate({scrollTop: aTag.offset().top},'slow');
+            hashlinkUGC = tokens2[1];
+            stateSelect.val(tokens2[1].substr(0, 2)).trigger("change");
+            stateSelect.val(tokens2[1].substr(0, 2)).trigger({
+                type: "select2:select",
+                params: {
+                    data: {
+                        id: tokens2[1].substr(0, 2)
+                    }
+                }
+            });
+        }
+    }
+    if (tokens2.length == 3){
+        if (tokens2[0] == 'bypoint'){
+            default_lat = parseFloat(text(tokens2[2]));
+            default_lon = parseFloat(text(tokens2[1]));
+            updateMarkerPosition(default_lon, default_lat);
+        }
+        if (tokens2[0] == 'eventsbypoint'){
+            default_lat = parseFloat(text(tokens2[2]));
+            default_lon = parseFloat(text(tokens2[1]));
+            updateMarkerPosition2(default_lon, default_lat);
+        }
+    }
+    if (tokens2.length == 6){
+        // list
+        const aTag = $("a[name='list']");
+        $('html,body').animate({scrollTop: aTag.offset().top},'slow');
+        const by = text(tokens2[1]);
+        const datum = text(tokens2[2]);
+        const year = text(tokens2[3]);
+        const ph = text(tokens2[4]);
+        const sig = text(tokens2[5]);
+        $("input[name='by3'][value='"+by+"']").prop("checked", true);
+        $("#year3").val(year);
+        $("#ph3").val(ph);
+        $("#sig3").val(sig);
+        if (by == "state"){
+            stateSelect3.val(datum).trigger("change");
+        } else {
+            $("#wfo3").val(datum).trigger("change");
+        }
+        updateTable3();
+    }
+}
+
 $(document).ready(() => {
     buildUI();
-    let default_lon = -93.653;
-    let default_lat = 41.53;
 
     // Do the anchor tag linking, please
     const tokens = window.location.href.split("#");
     if (tokens.length == 2){
-        const tokens2 = tokens[1].split("/");
-        if (tokens2.length == 2){
-            if (tokens2[0] == 'byugc'){
-                const aTag = $("a[name='byugc']");
-                $('html,body').animate({scrollTop: aTag.offset().top},'slow');
-                hashlinkUGC = tokens2[1];
-                stateSelect.val(tokens2[1].substr(0, 2)).trigger("change");
-                stateSelect.val(tokens2[1].substr(0, 2)).trigger({
-                    type: "select2:select",
-                    params: {
-                        data: {
-                            id: tokens2[1].substr(0, 2)
-                        }
-                    }
-                });
-            }
-        }
-        if (tokens2.length == 3){
-            if (tokens2[0] == 'bypoint'){
-                default_lat = parseFloat(text(tokens2[2]));
-                default_lon = parseFloat(text(tokens2[1]));
-                updateMarkerPosition(default_lon, default_lat);
-            }
-            if (tokens2[0] == 'eventsbypoint'){
-                default_lat = parseFloat(text(tokens2[2]));
-                default_lon = parseFloat(text(tokens2[1]));
-                updateMarkerPosition2(default_lon, default_lat);
-            }
-        }
-        if (tokens2.length == 6){
-            const aTag = $("a[name='list']");
-            $('html,body').animate({scrollTop: aTag.offset().top},'slow');
-            const by = text(tokens2[1]);
-            const datum = text(tokens2[2]);
-            const year = text(tokens2[3]);
-            const ph = text(tokens2[4]);
-            const sig = text(tokens2[5]);
-            $("input[name='by3'][value='"+by+"']").prop("checked", true);
-            $("#year3").val(year);
-            $("#ph3").val(ph);
-            $("#sig3").val(sig);
-            if (by == "state"){
-                stateSelect3.val(datum).trigger("change");
-            } else {
-                $("#wfo3").val(datum);
-            }
-            updateTable3();
-        }
+        process_hash(tokens[1]);
     }
     let res1 = olSelectLonLat("map", default_lon, default_lat, updateMarkerPosition);
     mapwidget1 = res1.map;

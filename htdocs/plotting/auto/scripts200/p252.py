@@ -167,7 +167,7 @@ def plotter(fdict):
     if "syear" in ctx:
         subtitle += f" [{syear}-{eyear}]"
     title = (
-        f"Yearly Frequency of {PDICT[varname]} "
+        f"Percent of Years with 1+ Days of {PDICT[varname]} "
         f"{comp} {threshold} {UNITS[varname]} between "
         f"{ctx['sday']:%-d %b} and {ctx['eday']:%-d %b}"
     )

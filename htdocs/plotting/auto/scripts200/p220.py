@@ -20,15 +20,11 @@ from zoneinfo import ZoneInfo
 import pandas as pd
 from geopandas import read_postgis
 from matplotlib.patches import Rectangle
+from pyiem.database import get_dbconn, get_sqlalchemy_conn
 from pyiem.exceptions import NoDataFound
 from pyiem.plot import MapPlot
 from pyiem.reference import LATLON, Z_OVERLAY2_LABEL, Z_POLITICAL
-from pyiem.util import (
-    get_autoplot_context,
-    get_dbconn,
-    get_sqlalchemy_conn,
-    utc,
-)
+from pyiem.util import get_autoplot_context, utc
 from sqlalchemy import text
 
 CENTRALTZ = ZoneInfo("America/Chicago")
@@ -230,7 +226,10 @@ def plotter(fdict):
     valid = ctx["valid"].replace(tzinfo=datetime.timezone.utc)
     day, outlook_type = int(ctx["which"][0]), ctx["which"][1]
     category = ctx["cat"].upper()
-    if outlook_type == "F":
+    # Ensure we don't have an incompatable combo
+    if outlook_type == "E":
+        category = "CATEGORICAL"
+    elif outlook_type == "F":
         category = "FIRE WEATHER CATEGORICAL"
     if (day == 0 or day > 2) and outlook_type == "F":
         category = "CRITICAL FIRE WEATHER AREA"
