@@ -59,6 +59,9 @@ $astart = array(
     "sel9rad" => $jan2007,
     "lotrad" => mktime(0, 0, 0, 1, 1, 1995)
 );
+if (!array_key_exists($prod, $astart)) {
+    xssafe("</script>");
+}
 
 $now = time() - 60;
 $aend = time();
