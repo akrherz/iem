@@ -13,15 +13,19 @@ Request all of Des Moines TAF for the month of January 2024 in CSV format:
 
     https://mesonet.agron.iastate.edu/cgi-bin/request/taf.py?station=DSM&sts=2024-01-01T00:00Z&ets=2024-02-01T00:00Z&fmt=csv
 
+Request the past 240 hours of TAF data for Chicago O'Hare in Excel format:
+
+    https://mesonet.agron.iastate.edu/cgi-bin/request/taf.py?station=ORD&hours=240&fmt=excel
 """
 
-from datetime import datetime
+from datetime import timedelta
 from io import BytesIO
 from zoneinfo import ZoneInfo
 
 import pandas as pd
 from pydantic import AwareDatetime, Field
 from pyiem.database import get_sqlalchemy_conn
+from pyiem.util import utc
 from pyiem.webutil import CGIModel, ListOrCSVType, iemapp
 from sqlalchemy import text
 
@@ -31,6 +35,15 @@ EXL = "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"
 class MyModel(CGIModel):
     """Our model"""
 
+    hours: int = Field(
+        None,
+        description=(
+            "Request data for the time period from now until this many hours "
+            "in the past. Overrides any sts or ets values."
+        ),
+        le=2400,
+        gt=0,
+    )
     fmt: str = Field(
         "csv",
         description="The format of the output file, either 'csv' or 'excel'",
@@ -61,7 +74,7 @@ class MyModel(CGIModel):
     minute2: int = Field(0, description="The end minute, if not using ets")
 
 
-def run(start_response, ctx):
+def run(start_response, environ):
     """Get data!"""
     with get_sqlalchemy_conn("asos") as dbconn:
         df = pd.read_sql(
@@ -79,21 +92,22 @@ def run(start_response, ctx):
             ),
             dbconn,
             params={
-                "stations": ctx["station"],
-                "sts": ctx["sts"],
-                "ets": ctx["ets"],
+                "stations": environ["station"],
+                "sts": environ["sts"],
+                "ets": environ["ets"],
             },
             parse_dates=["valid", "fx_valid", "fx_valid_end"],
         )
     # muck the timezones
     if not df.empty:
+        tzinfo = ZoneInfo(environ["tz"])
         for col in ["valid", "fx_valid", "fx_valid_end"]:
             df[col] = (
-                df[col].dt.tz_localize(ctx["tz"]).dt.strftime("%Y-%m-%d %H:%M")
+                df[col].dt.tz_localize(tzinfo).dt.strftime("%Y-%m-%d %H:%M")
             )
 
     bio = BytesIO()
-    if ctx["fmt"] == "excel":
+    if environ["fmt"] == "excel":
         with pd.ExcelWriter(bio, engine="openpyxl") as writer:
             df.to_excel(writer, sheet_name="TAF Data", index=False)
         headers = [
@@ -118,27 +132,11 @@ def rect(station):
     return station
 
 
-@iemapp(help=__doc__, schema=MyModel, parse_times=False)
+@iemapp(help=__doc__, schema=MyModel)
 def application(environ, start_response):
     """Get stuff"""
-    environ["tz"] = ZoneInfo(environ["tz"])
-    if environ["sts"] is None:
-        environ["sts"] = datetime(
-            environ["year1"],
-            environ["month1"],
-            environ["day1"],
-            environ["hour1"],
-            environ["minute1"],
-            tzinfo=environ["tz"],
-        )
-    if environ["ets"] is None:
-        environ["ets"] = datetime(
-            environ["year2"],
-            environ["month2"],
-            environ["day2"],
-            environ["hour2"],
-            environ["minute2"],
-            tzinfo=environ["tz"],
-        )
+    if environ["hours"] is not None:
+        environ["ets"] = utc()
+        environ["sts"] = environ["ets"] - timedelta(hours=environ["hours"])
     environ["station"] = [rect(x) for x in environ["station"]]
     return [run(start_response, environ)]
