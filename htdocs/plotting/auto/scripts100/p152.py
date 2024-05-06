@@ -186,11 +186,11 @@ def plotter(fdict):
     # Create 9 levels centered on zero
     abval = df[varname + "_delta"].abs().max()
     levels = centered_bins(abval)
-    if opt in ["both", "contour"]:
+    if opt in ["both", "contour"] and len(levels) > 1:
         mp.contourf(
             df["lon"].values,
             df["lat"].values,
-            df[varname + "_delta"].values,
+            df[f"{varname}_delta"].values,
             levels,
             cmap=get_cmap(ctx["cmap"]),
             units="days",

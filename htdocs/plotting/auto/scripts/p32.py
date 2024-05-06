@@ -106,7 +106,7 @@ def plotter(fdict):
         "gddbase": gddbase,
         "gddceil": gddceil,
     }
-    sqlvarname = "temp_hour" if varname in ["avg", "gdd"] else varname
+    sqlvarname = "high" if varname in ["avg", "gdd"] else varname
     if varname == "era5land_soilm1m_sw":
         sqlvarname = "era5land_soilm1m_avg"
     with get_sqlalchemy_conn("coop") as conn:
@@ -141,6 +141,8 @@ def plotter(fdict):
             day=lambda x: pd.date_range(f"{year}/1/1", f"{year}/12/31").values
         )
     )
+    if thisyear[varname].isna().all():
+        raise NoDataFound("No Data Found.")
     thisyear[f"{varname}_ptile"] = thisyear["rank"] / df["rank"].max() * 100.0
     climo = (
         df[["sday", varname]]

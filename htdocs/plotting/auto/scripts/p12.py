@@ -264,6 +264,8 @@ def plotter(fdict):
     for _, row in (
         df.sort_values("nday_doy", ascending=True).head(10).iterrows()
     ):
+        if row["nday"] is None:
+            continue
         label += f"\n{row['nday']:%d %b %Y}"
     fig.text(
         0.85,
@@ -276,6 +278,8 @@ def plotter(fdict):
     for _, row in (
         df.sort_values("nday_doy", ascending=False).head(10).iterrows()
     ):
+        if row["nday"] is None:
+            continue
         label += f"\n{row['nday']:%d %b %Y}"
     fig.text(
         0.85,

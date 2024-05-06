@@ -47,7 +47,7 @@ $t->content = <<<EOF
 <p>This page allows for download of raw data found within products like this:
 <a href="/wx/afos/p.php?pil=FD1US1">FD1US1</a>.  They contain
 near term forecasts of temperatures and wind speed aloft.  More details on the 
-product can be found with the <a href="https://www.nws.noaa.gov/directives/sym/pd01008012curr.pdf">NWS Directive 10-812</a>.</p>
+product can be found with the <a href="https://weather.gov/directives/sym/pd01008012curr.pdf">NWS Directive 10-812</a>.</p>
 
 <p><a href="/cgi-bin/request/tempwind_aloft.py?help" class="btn btn-default">
 <i class="fa fa-file"></i> Backend documentation</a> exists for those wishing to script against this

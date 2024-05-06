@@ -302,9 +302,16 @@ to build the required SHEF fields for the RTP product.</p>
 <ul>
 <li><a href="/request/gis/spc_mcd.phtml">
 <i class="fa fa-download"></i> SPC Mesoscale Discussion Shapefile Download</a></li>
+
+<li><a href="mcd_top10.phtml">
+<i class="fa fa-list"></i> SPC Top 10 MCD Sizes</a></li>
+
 <li><a href="/request/gis/outlooks.phtml">
  <i class="fa fa-download"></i> SPC/WPC Outlook Shapefile Download</a></li>
 
+ <li><a href="spc_top10.phtml">
+ <i class="fa fa-list"></i> SPC Top 10 Outlook Sizes</a></li>
+ 
  <li><a href="/request/gis/spc_watch.phtml">
  <i class="fa fa-download"></i> SPC Watch Polygon Shapefile Download</a></li>
 
