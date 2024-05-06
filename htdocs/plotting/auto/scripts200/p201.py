@@ -164,6 +164,8 @@ def plotter(fdict):
     ctx = get_autoplot_context(fdict, get_description())
     sts = ctx["sdate"]
     ets = ctx["edate"]
+    if ets < sts:
+        sts, ets = ets, sts
     wfo = ctx["wfo"]
     outlook_type = ctx["outlook_type"]
     day = int(ctx["day"])

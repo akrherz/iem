@@ -119,7 +119,7 @@ for ($i = 0; $row = pg_fetch_array($rs); $i++) {
         $map2->drawLabelCache($img2);
         $gdimg_dest = imagecreatefromstring($img2->getBytes());
 
-        $sz0 = $row["area"];
+        $sz0 = ($row["area"] < 0.001) ? 0.001 : $row["area"];
     }
 
     $map = new mapObj($mapFile);
