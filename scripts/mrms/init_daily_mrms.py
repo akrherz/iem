@@ -44,8 +44,8 @@ def init_year(ts, for_dep=False):
     days = ((ts.replace(year=ts.year + 1)) - ts).days
     day_axis = np.arange(0, int(days))
     if for_dep:
-        # April 11 through May 31
-        days = 20 + 31
+        # April 11 through June 15
+        days = 20 + 31 + 15
         tidx0 = iemre.daily_offset(ts.replace(month=4, day=11))
         day_axis = np.arange(tidx0, tidx0 + days)
     nc.createDimension("time", int(days))
