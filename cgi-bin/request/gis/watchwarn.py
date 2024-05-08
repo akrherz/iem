@@ -348,7 +348,7 @@ def build_sql(environ):
      SELECT distinct w.geom as geo, 'P'::text as gtype, significance, wfo,
      status, eventid, ''::text as ugc,
      phenomena,
-     ST_area( ST_transform(w.geom,2163) ) / 1000000.0 as area2d,
+     ST_area( ST_transform(w.geom,9311) ) / 1000000.0 as area2d,
      to_char(expire at time zone 'UTC', 'YYYYMMDDHH24MI') as utc_expire,
      to_char(issue at time zone 'UTC', 'YYYYMMDDHH24MI') as utc_issue,
      to_char(issue at time zone 'UTC', 'YYYYMMDDHH24MI') as utc_prodissue,

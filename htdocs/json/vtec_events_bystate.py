@@ -31,7 +31,7 @@ def get_res(state, year, phenomena, significance):
         f"""
     WITH polyareas as (
         SELECT wfo, phenomena, significance, eventid, round((ST_area(
-        ST_transform(geom,2163)) / 1000000.0)::numeric,0) as area
+        ST_transform(geom,9311)) / 1000000.0)::numeric,0) as area
         from sbw_{year} s, states t WHERE
         ST_Overlaps(s.geom, t.the_geom) and
         t.state_abbr = %s and eventid is not null and {plimit}
@@ -39,7 +39,7 @@ def get_res(state, year, phenomena, significance):
     ), ugcareas as (
         SELECT w.wfo,
         round(sum(ST_area(
-            ST_transform(u.geom,2163)) / 1000000.0)::numeric,0) as area,
+            ST_transform(u.geom,9311)) / 1000000.0)::numeric,0) as area,
         string_agg(u.name || ' ['||u.state||']', ', ') as locations,
         eventid, phenomena, significance,
         min(issue) at time zone 'UTC' as utc_issue,

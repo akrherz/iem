@@ -39,13 +39,13 @@ def get_res(cursor, wfo, year, phenomena, significance, combo):
         f"""
     WITH polyareas as (
         SELECT phenomena, significance, eventid, round((ST_area(
-        ST_transform(geom,2163)) / 1000000.0)::numeric,0) as area
+        ST_transform(geom,9311)) / 1000000.0)::numeric,0) as area
         from sbw WHERE vtec_year = %s and wfo = %s and eventid is not null and
         {plimit} and status = 'NEW'
     ), ugcareas as (
         SELECT
         round(sum(ST_area(
-            ST_transform(u.geom,2163)) / 1000000.0)::numeric,0) as area,
+            ST_transform(u.geom,9311)) / 1000000.0)::numeric,0) as area,
         string_agg(u.name || ' ['||u.state||']', ', ') as locations,
         eventid, phenomena, significance,
         min(issue) at time zone 'UTC' as utc_issue,

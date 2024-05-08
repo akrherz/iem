@@ -279,7 +279,7 @@ produces.  The following is a brief description of these values.
 <ul>
 <li><strong>SBW Area: (P)</strong> (<i>black/white outline polygon</i>) This is 
 the areal size of the polygon expressed in square kilometers.  The computation
-is done in the projection "US National Atlas Equal Area" (EPSG 2163).</li>
+is done in the projection "US National Atlas Equal Area" (EPSG 9311).</li>
 <li><strong>County Area: (C)</strong> (<i>red outline polygon</i>) Each storm 
 based warning is associated with one or more counties.  This value is the total
 area of the associated counties.  Same projected used as above.</li>
@@ -405,7 +405,7 @@ only considers one value, i.e. <code>hailsize=1.50</code></td></tr>
 <td>15 km</td>
 <td>IEM Cow attempts to provide an areal verification percentage within the polygons,
 this areal value is computed by buffering out the point LSR reports by the given radius
-in kilometers.  The GIS operation is done in USGS Albers (EPSG:2163).
+in kilometers.  The GIS operation is done in USGS Albers (EPSG:9311).
 example, <code>lsrbuffer=15</code></td></tr>
 
 <tr>
@@ -493,8 +493,8 @@ example, <code>fcster=forecaster10</code></td></tr>
        "lat0": float # latitude of polygon centroid
        "lead0": int # leadtime in minutes of the first verifying LSR
        "lon0": float # longitude of polygon centroid
-       "parea": float # sq km area of polygon computed in EPSG:2163
-       "perimeter": float # perimeter of polygon computed in EPSG:2163
+       "parea": float # sq km area of polygon computed in EPSG:9311
+       "perimeter": float # perimeter of polygon computed in EPSG:9311
        "phenomena": str # VTEC Phenomena Two-Letter Code
        "sharedborder": float # perimeter of polygon shared with political border
        "significance": str # VTEC Significance One-Letter Code

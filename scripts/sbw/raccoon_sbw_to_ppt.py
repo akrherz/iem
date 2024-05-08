@@ -95,14 +95,14 @@ def get_warnings(sts, ets, wfo, wtypes):
     sql = f"""
     WITH stormbased as (
         SELECT phenomena, eventid, issue, expire,
-        ST_Area(ST_Transform(geom,2163))/1000000.0 as polyarea
+        ST_Area(ST_Transform(geom,9311))/1000000.0 as polyarea
         from sbw_{sts:%Y} WHERE issue BETWEEN
         '{sts:%Y-%m-%d %H:%M}+00' and '{ets:%Y-%m-%d %H:%M}+00' and
         wfo = '{wfo}' and phenomena in {phenomenas} and significance = 'W'
         and status = 'NEW'
     ), countybased as (
         SELECT phenomena, eventid,
-        sum(ST_Area(ST_Transform(u.geom,2163))/1000000.0) as countyarea
+        sum(ST_Area(ST_Transform(u.geom,9311))/1000000.0) as countyarea
         from warnings_{sts:%Y} w JOIN ugcs u on (u.gid = w.gid) WHERE
         issue BETWEEN '{sts:%Y-%m-%d %H:%M}+00' and
         '{ets:%Y-%m-%d %H:%M}+00' and

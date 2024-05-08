@@ -96,16 +96,16 @@ def plotter(fdict):
             text(
                 f"""
             SELECT wfo, phenomena, eventid, issue,
-            ST_area2d(ST_transform(geom,2163)) as size,
-            (ST_xmax(ST_transform(geom,2163)) +
-            ST_xmin(ST_transform(geom,2163))) /2.0 as xc,
-            (ST_ymax(ST_transform(geom,2163)) +
-            ST_ymin(ST_transform(geom,2163))) /2.0 as yc,
-            ST_transform(geom, 2163) as utmgeom,
-            (ST_xmax(ST_transform(geom,2163)) -
-            ST_xmin(ST_transform(geom,2163))) as width,
-            (ST_ymax(ST_transform(geom,2163)) -
-            ST_ymin(ST_transform(geom,2163))) as height
+            ST_area2d(ST_transform(geom,9311)) as size,
+            (ST_xmax(ST_transform(geom,9311)) +
+            ST_xmin(ST_transform(geom,9311))) /2.0 as xc,
+            (ST_ymax(ST_transform(geom,9311)) +
+            ST_ymin(ST_transform(geom,9311))) /2.0 as yc,
+            ST_transform(geom, 9311) as utmgeom,
+            (ST_xmax(ST_transform(geom,9311)) -
+            ST_xmin(ST_transform(geom,9311))) as width,
+            (ST_ymax(ST_transform(geom,9311)) -
+            ST_ymin(ST_transform(geom,9311))) as height
             from sbw_{sts.year}
             WHERE status = 'NEW' and issue >= :sts and issue < :ets and
             phenomena = ANY(:phenomena) and eventid is not null
@@ -123,7 +123,7 @@ def plotter(fdict):
             text(
                 f"""
             SELECT w.wfo, phenomena, eventid,
-            sum(ST_area2d(ST_transform(u.geom,2163))) as county_size
+            sum(ST_area2d(ST_transform(u.geom,9311))) as county_size
             from warnings_{sts.year} w JOIN ugcs u on (u.gid = w.gid)
             WHERE issue >= :sts and issue < :ets and
             significance = 'W' and phenomena = ANY(:phenomena)

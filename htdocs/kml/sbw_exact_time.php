@@ -13,7 +13,7 @@ $significance = isset($_GET["significance"]) ? substr($_GET["significance"],0,1)
 
 $rs = pg_prepare($connect, "SELECT", "SELECT issue, expire, status, 
            ST_askml(geom) as kml,
-           round(ST_area(ST_transform(geom,2163)) / 1000000.0) as psize
+           round(ST_area(ST_transform(geom,9311)) / 1000000.0) as psize
            from sbw_$year 
            WHERE wfo = $1 and phenomena = $2 and 
            eventid = $3 and significance = $4 and status = 'NEW'");

@@ -31,7 +31,7 @@ $rs = pg_prepare(
     "SELECT polygon_begin at time zone 'UTC' as utc_polygon_begin, ".
     "ST_xmax(geom), ST_ymax(geom),
         ST_xmin(geom), ST_ymin(geom), *,
-        round((ST_area2d(ST_transform(geom,2163))/1000000)::numeric,0 ) as area
+        round((ST_area2d(ST_transform(geom,9311))/1000000)::numeric,0 ) as area
         from sbw_$year WHERE phenomena = $1 and 
         eventid = $2 and wfo = $3 and significance = $4
         ORDER by polygon_begin ASC");

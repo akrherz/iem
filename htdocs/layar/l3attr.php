@@ -12,12 +12,12 @@ $center_lng = isset($_GET["lon"]) ? floatval(xssafe($_GET["lon"])): -97.0;
 $radius = isset($_GET["radius"]) ? floatval(xssafe($_GET["radius"])): 2000.0; # in meters
 
 $rs = pg_prepare($postgis, "SELECT", "SELECT ST_x(geom) as lon, ST_y(geom) as lat,
-     ST_distance(ST_transform(geom,2163), 
+     ST_distance(ST_transform(geom,9311), 
        ST_transform(
-        ST_Point($center_lng, $center_lat, 4326),2163)) as dist,
-      * from nexrad_attributes WHERE ST_distance(ST_transform(geom,2163), 
+        ST_Point($center_lng, $center_lat, 4326),9311)) as dist,
+      * from nexrad_attributes WHERE ST_distance(ST_transform(geom,9311), 
        ST_transform(
-        ST_Point($center_lng, $center_lat, 4326),2163)) < $radius");
+        ST_Point($center_lng, $center_lat, 4326),9311)) < $radius");
 
 //header('Content-type: application/json');
 $rs = pg_execute($postgis, "SELECT", Array());

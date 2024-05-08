@@ -1,16 +1,15 @@
 """SPC Outlook service."""
 
 import json
+import time
 from datetime import date, timedelta
 
 from pydantic import Field
-from pyiem.database import get_sqlalchemy_conn
+from pyiem.database import get_dbconnc
+from pyiem.nws.products.spcpts import imgsrc_from_row
 from pyiem.reference import ISO8601
-from pyiem.util import html_escape
+from pyiem.util import html_escape, utc
 from pyiem.webutil import CGIModel, iemapp
-from sqlalchemy import text
-
-BASEURL = "https://www.spc.noaa.gov/products/md"
 
 
 class Schema(CGIModel):
@@ -26,42 +25,47 @@ class Schema(CGIModel):
 def dowork(environ):
     """Actually do stuff"""
 
-    data = {"outlooks": []}
+    data = {"generated_at": f"{utc():%Y-%m-%dT%H:%M:%SZ}", "outlooks": []}
     hits = []
-    with get_sqlalchemy_conn("postgis") as conn:
-        res = conn.execute(
-            text("""
-            SELECT product_issue at time zone 'UTC' as i,
-            expire at time zone 'UTC' as e,
-            ST_Area(geom::geography) / 1000000. as area_sqkm
-            from spc_outlooks WHERE outlook_type = :ot and
-            day = :day and threshold = :threshold
-            and category = :category and issue > :sdate
-            ORDER by area_sqkm DESC NULLS LAST LIMIT 100
-        """),
+    dbconn, cursor = get_dbconnc("postgis")
+    sts = time.perf_counter()
+    cursor.execute(
+        """
+        SELECT product_issue at time zone 'UTC' as i,
+        expire at time zone 'UTC' as e,
+        ST_Area(st_transform(geom, 9311)) / 1000000. as area_sqkm, cycle,
+        product_issue at time zone 'UTC' as product_issue, category, day
+        from spc_outlooks WHERE outlook_type = %(ot)s and
+        day = %(day)s and threshold = %(threshold)s
+        and category = %(category)s and issue > %(sdate)s and geom is not null
+        ORDER by area_sqkm DESC NULLS LAST LIMIT 100
+    """,
+        {
+            "day": environ["day"],
+            "threshold": environ["threshold"],
+            "category": environ["category"],
+            "ot": "F" if environ["category"].startswith("F") else "C",
+            "sdate": date(environ["syear"], 1, 1),
+        },
+    )
+    data["query_time[s]"] = round(time.perf_counter() - sts, 2)
+    for row in cursor:
+        key = f"{row['e']:%Y%m%d}"
+        if key in hits:
+            continue
+        hits.append(key)
+        data["outlooks"].append(
             {
-                "day": environ["day"],
-                "threshold": environ["threshold"],
-                "category": environ["category"],
-                "ot": "F" if environ["category"].startswith("F") else "C",
-                "sdate": date(environ["syear"], 1, 1),
-            },
+                "date": f"{(row['e'] - timedelta(hours=13)):%Y-%m-%d}",
+                "issued": row["i"].strftime(ISO8601),
+                "area_sqkm": round(row["area_sqkm"], 2),
+                "imgsrc": imgsrc_from_row(row),
+                "cycle": row["cycle"],
+            }
         )
-        for row in res:
-            key = f"{row[1]:%Y%m%d}"
-            if key in hits:
-                continue
-            hits.append(key)
-            data["outlooks"].append(
-                {
-                    "date": f"{(row[1] - timedelta(hours=13)):%Y-%m-%d}",
-                    "issued": row[0].strftime(ISO8601),
-                    "area_sqkm": round(row[2], 2),
-                }
-            )
-            if len(data["outlooks"]) >= 10:
-                break
-
+        if len(data["outlooks"]) >= 10:
+            break
+    dbconn.close()
     return json.dumps(data)
 
 
