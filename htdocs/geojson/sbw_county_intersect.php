@@ -23,7 +23,7 @@ $sql = <<<EOF
         WHERE w.wfo = '$wfo' and eventid = $eventid and
         significance = '$significance' and phenomena = '$phenomena')
 
-    SELECT ST_asgeojson(geo) as geojson, ST_Length(ST_transform(geo,2163)) as sz from
+    SELECT ST_asgeojson(geo) as geojson, ST_Length(ST_transform(geo,9311)) as sz from
         (SELECT ST_SetSRID(ST_intersection(
           ST_buffer(ST_exteriorring(ST_geometryn(ST_multi(c.geom),1)),0.02),
           ST_exteriorring(ST_geometryn(ST_multi(s.geom),1))

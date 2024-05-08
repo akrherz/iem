@@ -505,14 +505,14 @@ if (in_array("bufferedlsr", $layers)) {
     $blsr->connection = get_dbconn_str("postgis");
     $blsr->status = in_array("bufferedlsr", $layers);
     $sql = "geo from (select distinct city, magnitude, valid, "
-        . "ST_Transform(ST_Buffer(ST_Transform(geom,2163),{$lsrbuffer}000),4326) as geo, "
+        . "ST_Transform(ST_Buffer(ST_Transform(geom,9311),{$lsrbuffer}000),4326) as geo, "
         . "type as ltype, city || magnitude || ST_x(geom) || ST_y(geom) as k "
         . "from lsrs WHERE "
         . "ST_Overlaps((select geom from sbw_" . $ts->format("Y") . " WHERE "
         . "wfo = '$wfo' and phenomena = '$phenomena' and "
         . "significance = '$significance' and eventid = $eventid "
         . "and status = 'NEW' LIMIT 1), "
-        . "ST_Transform(ST_Buffer(ST_Transform(geom,2163),{$lsrbuffer}000),4326) "
+        . "ST_Transform(ST_Buffer(ST_Transform(geom,9311),{$lsrbuffer}000),4326) "
         . ") and "
         . "valid >= '" . $ts->format("Y-m-d H:i") . "' and "
         . "valid < '" . $ts2->format("Y-m-d H:i") . "' and "

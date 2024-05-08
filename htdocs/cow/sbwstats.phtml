@@ -38,10 +38,10 @@ $gis_url = sprintf(
 );
 
 $rs = pg_prepare($postgis, "SELECT", "SELECT wfo, phenomena, count(*) as cnt,
-  sum( st_area2d( ST_transform(geom,2163) ) ) as sum_polysize,
-  avg( st_area2d( ST_transform(geom,2163) ) ) as avg_polysize,
-  sum( st_perimeter( ST_transform(geom,2163) ) ) as sum_perimsize,
-  avg( st_perimeter( ST_transform(geom,2163) ) ) as avg_perimsize
+  sum( st_area2d( ST_transform(geom,9311) ) ) as sum_polysize,
+  avg( st_area2d( ST_transform(geom,9311) ) ) as avg_polysize,
+  sum( st_perimeter( ST_transform(geom,9311) ) ) as sum_perimsize,
+  avg( st_perimeter( ST_transform(geom,9311) ) ) as avg_perimsize
   from sbw WHERE status = 'NEW' and 
   phenomena IN ('SV','TO','MA','FF','FA','DS','SQ') and significance = 'W'
   and issue BETWEEN $1 and $2 GROUP by wfo, phenomena ORDER by $sortby ASC");

@@ -41,11 +41,11 @@ if ($wfo == 'ALL') {
 }
 
 pg_query($postgis, "SET TIME ZONE 'UTC'");
-$rs = pg_prepare($postgis, "SELECTASC", "select round((ST_AREA(ST_Transform(geom,2163)) / 1000000.0)::numeric,2) as area, 
+$rs = pg_prepare($postgis, "SELECTASC", "select round((ST_AREA(ST_Transform(geom,9311)) / 1000000.0)::numeric,2) as area, 
 eventid, date(issue), phenomena, significance, wfo from sbw
 WHERE status = 'NEW' and phenomena in ($lstring) $wlimit and 
 significance = 'W' and issue > '$tstring' and ST_Area(geom) > 0 ORDER by area ASC LIMIT 10");
-$rs = pg_prepare($postgis, "SELECTDESC", "select round((ST_AREA(ST_Transform(geom,2163)) / 1000000.0)::numeric,2) as area, 
+$rs = pg_prepare($postgis, "SELECTDESC", "select round((ST_AREA(ST_Transform(geom,9311)) / 1000000.0)::numeric,2) as area, 
 eventid, date(issue), phenomena, significance, wfo from sbw 
 WHERE status = 'NEW' and phenomena in ($lstring) $wlimit and 
 significance = 'W' and issue > '$tstring'  ORDER by area DESC LIMIT 10");
@@ -137,7 +137,7 @@ Event ID to get more information on that warning. This page defaults to show the
 largest and smallest warnings from any WFO.  Storm Based Warnings did not become
 operational until 1 Oct 2007, so warning polygons prior to that date were only
 experimental at best.  The areas shown are computed using
-<a href="https://epsg.io/2163">EPSG:2163</a> (US National Atlas Equal Area).</p>
+<a href="https://spatialreference.org/ref/epsg/9311/">EPSG:9311</a> (US National Atlas Equal Area).</p>
 
 <div class="alert alert-info">Please be patient for page to load...</div>
 

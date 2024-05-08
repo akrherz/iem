@@ -33,7 +33,7 @@ def dowork(environ):
         """
         SELECT product_issue at time zone 'UTC' as i,
         expire at time zone 'UTC' as e,
-        ST_Area(st_transform(geom, 2163)) / 1000000. as area_sqkm, cycle,
+        ST_Area(st_transform(geom, 9311)) / 1000000. as area_sqkm, cycle,
         product_issue at time zone 'UTC' as product_issue, category, day
         from spc_outlooks WHERE outlook_type = %(ot)s and
         day = %(day)s and threshold = %(threshold)s

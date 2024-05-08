@@ -2,7 +2,7 @@
 This data is courtesy of <a href="{LL}">Vaisala NLDN</a>.  The IEM
 processes a data stream by NLDN to construct this heatmap. The stroke
 density is computed over a two by two kilometer grid constructed using
-a US National Atlas Albers (EPSG:2163) projection.  You are limited to plot
+a US National Atlas Albers (EPSG:9311) projection.  You are limited to plot
 less than 32 days worth of data at a time.</p>
 
 <p><strong>Note:</strong> Due to some lame reasons, it is difficult to
@@ -71,7 +71,7 @@ def plotter(fdict):
         giswkt = f"LINESTRING({bnds[0]} {bnds[1]}, {bnds[2]} {bnds[3]})"
         df = gpd.read_postgis(
             """
-            SELECT ST_Transform(geom, 2163) as geo
+            SELECT ST_Transform(geom, 9311) as geo
             from nldn_all WHERE valid >= %s and valid < %s and
             ST_Contains(
                 ST_SetSRID(ST_Envelope(%s::geometry),
@@ -83,7 +83,7 @@ def plotter(fdict):
         )
     with get_sqlalchemy_conn("postgis") as conn:
         statedf = gpd.read_postgis(
-            "SELECT st_transform(the_geom, 2163) as geo from states "
+            "SELECT st_transform(the_geom, 9311) as geo from states "
             "WHERE state_abbr = %s",
             conn,
             params=(state,),

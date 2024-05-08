@@ -54,7 +54,7 @@ The pyIEM parsers send emails to the IEM developer when issues are found.  The p
 | ETN | Int | The VTEC event identifier.  A tracking number that should be unique for this event, but sometimes it is not.  Yes, more headaches. Note that the uniqueness is not based on the combination of a UGC code, but the issuance center and a continuous spatial region for the event. |
 | STATUS | 3 Char | The VTEC status code denoting the state the event is during its life cycle.  This is purely based on any updates the event got and not some logic on the IEM's end denoting if the event is in the past or not. |
 | NWS_UGC | 6 Char | For county,zone,parish warnings `GTYPE=C`, the Universal Geographic Code that the NWS uses.  Sadly, this is not exactly FIPS. |
-| AREA_KM2 | Number | The IEM computed area of this event, this area computation is done in Albers (EPSG:2163). |
+| AREA_KM2 | Number | The IEM computed area of this event, this area computation is done in Albers (EPSG:9311). |
 | UPDATED | 12 Char | The timestamp when this event's lifecycle was last updated by the NWS. |
 | HV_NWSLI | 5 Char | For events that have H-VTEC (Hydro VTEC), this is the five character NWS Location Identifier. |
 | HV_SEV | 1 Char | For events that have H-VTEC (Hydro VTEC), this is the one character flood severity __at issuance__. |
