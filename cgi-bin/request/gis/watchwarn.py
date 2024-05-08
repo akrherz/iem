@@ -10,48 +10,22 @@ services found at
 IEM Legacy JSON Services https://mesonet.agron.iastate.edu/json/ or at IEM API
 Services https://mesonet.agron.iastate.edu/api/1/docs/ .
 
-CGI Parameters
---------------
+Changelog
+---------
 
-* `accept`: The format to return, either "shapefile" or "excel".  Note that the
-    "shapefile" format returns as a ZIP file and also includes a simple CSV
-    file within.
-* `addsvs`: If "yes", include polygons that were included within any followup
-    statements after issuance.  The default is to only return the initial
-    polygon.
-* `ets`: The end timestamp in UTC. The format is ISO8601, e.g.
-    2010-06-01T00:00Z.
-* `limit0`: If "yes", only include Tornado, Severe Thunderstorm, Flash Flood,
-    and Marine Warnings.
-* `limit1`: If "yes", only include Storm Based Warnings.
-* `limit2`: If "yes", only include Emergency Warnings.
-* `limitps`: If "yes", only include the specified phenomena and significance.
-* `location_group`: The location group to use, either "wfo" or "states".
-* `phenomena`: The two character VTEC phenomena to include, default is "TO"
-    when `limitps` is set.
-* `simple`: If "yes", use a simplified geometry for the UGC counties/zones.
-    This can be useful for reducing the size of the shapefile.
-* `significance`: The two character VTEC significance to include,
-    default is "W" when `limitps` is set.
-* `states[]`: List (either multiple params or comma seperated list) of states
-    to include data for.
-* `sts`: The start timestamp in UTC. The format is ISO8601, e.g.
-    2010-06-01T00:00Z.
-* `timeopt`: The time option to use, either 1 or 2, default is 1, which uses
-    the start and end timestamps to determine which events to include. Option
-    2 uses the at timestamp to determine which events to include.
-* `wfo[]` or `wfos[]`: List (either multiple params or comma seperated list) of
-    WFOs to include data for.
-* `{year,month,day,hour,minute}1`: The start timestamp components in UTC, if
-    you specify a `sts` parameter, these are ignored.
-* `{year,month,day,hour,minute}2`: The end timestamp components in UTC, if
-    you specify a `ets` parameter, these are ignored.
-* `{year,month,day,hour,minute}3`: The at timestamp components in UTC.  When
-    `timeopt` is 2, this is used to find all events that were valid at this
-    time.
+- 2024-05-09: Migrated to pydantic based CGI input validation.
 
 Example Usage
 -------------
+
+Return all Areal Flood, Flash Flood, Severe Thunderstorm, and Tornado Watch
+and Warnings for the state of Mississippi during 2024.  Note how the phenomena
+and significance parameters are repeated so that each combination is present.
+
+    https://mesonet.agron.iastate.edu/cgi-bin/request/gis/watchwarn.py?\
+accept=shapefile&sts=2024-01-01T00:00Z&ets=2025-01-01T00:00Z&\
+location_group=states&states=MS&limitps=yes&phenomena=FF,FA,SV,TO,FF,FA,SV,TO&\
+significance=W,W,W,W,A,A,A,A
 
 Return all Tornado Warnings for the Des Moines WFO in shapefile format during
 2023.
@@ -67,14 +41,182 @@ from io import BytesIO
 
 import fiona
 import pandas as pd
+from pydantic import AwareDatetime, Field
 from pyiem.database import get_dbconnc, get_sqlalchemy_conn
 from pyiem.exceptions import IncompleteWebRequest
 from pyiem.util import utc
-from pyiem.webutil import ensure_list, iemapp
+from pyiem.webutil import CGIModel, ListOrCSVType, iemapp
 from shapely.geometry import mapping
 from shapely.wkb import loads
 
 EXL = "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"
+
+
+class Schema(CGIModel):
+    """See how we are called."""
+
+    accept: str = Field(
+        "shapefile",
+        pattern="^(shapefile|excel)$",
+        description="The format to return, either shapefile or excel.",
+    )
+    addsvs: str = Field(
+        "no",
+        pattern="^(yes|no)$",
+        description="Include polygons that were included within any followup "
+        "statements after issuance.",
+    )
+    ets: AwareDatetime = Field(
+        None,
+        description="The end timestamp in UTC. The format is ISO8601, e.g. "
+        "2010-06-01T00:00Z.",
+    )
+    limit0: str = Field(
+        "no",
+        pattern="^(yes|no)$",
+        description="If yes, only include Tornado, Severe Thunderstorm, "
+        "Flash Flood, and Marine Warnings.",
+    )
+    limit1: str = Field(
+        "no",
+        pattern="^(yes|no)$",
+        description="If yes, only include Storm Based Warnings.",
+    )
+    limit2: str = Field(
+        "no",
+        pattern="^(yes|no)$",
+        description="If yes, only include Emergency Warnings.",
+    )
+    limitps: str = Field(
+        "no",
+        pattern="^(yes|no)$",
+        description="If yes, only include the specified phenomena and "
+        "significance.",
+    )
+    location_group: str = Field(
+        "wfo",
+        pattern="^(wfo|states)$",
+        description="The location group to use, either wfo or states.",
+    )
+    phenomena: ListOrCSVType = Field(
+        "TO",
+        description="The two character VTEC phenomena(s) to include. If you "
+        "provide more than one value, the length must correspond and align "
+        "with the ``significance`` parameter.",
+    )
+    simple: str = Field(
+        "no",
+        pattern="^(yes|no)$",
+        description="If yes, use a simplified geometry for the UGC "
+        "counties/zones.",
+    )
+    significance: ListOrCSVType = Field(
+        "W",
+        description="The one character VTEC significance to include, if you "
+        "provide more than one value, the length must correspond "
+        "and align with the ``phenomena`` parameter.",
+    )
+    states: ListOrCSVType = Field(
+        None, description="List of states to include data for."
+    )
+    sts: AwareDatetime = Field(
+        None,
+        description="The start timestamp in UTC. The format is ISO8601, e.g. "
+        "2010-06-01T00:00Z.",
+    )
+    timeopt: int = Field(
+        1,
+        description="The time option to use, either 1 or 2, default is 1, "
+        "which uses the start and end timestamps to determine "
+        "which events to include. Option 2 uses the at timestamp "
+        "to determine which events to include.",
+    )
+    wfo: ListOrCSVType = Field(
+        None, description="List of WFOs to include data for."
+    )
+    wfos: ListOrCSVType = Field(
+        None, description="Legacy parameter, update to use ``wfo``."
+    )
+    year1: int = Field(
+        None,
+        description="The start timestamp components in UTC, if you specify a "
+        "sts parameter, these are ignored.",
+    )
+    year2: int = Field(
+        None,
+        description="The end timestamp components in UTC, if you specify a "
+        "ets parameter, these are ignored.",
+    )
+    year3: int = Field(
+        None,
+        description="The at timestamp components in UTC.  When timeopt is 2, "
+        "this is used to find all events that were valid at this "
+        "time.",
+    )
+    month1: int = Field(
+        None,
+        description="The start timestamp components in UTC, if you specify a "
+        "sts parameter, these are ignored.",
+    )
+    month2: int = Field(
+        None,
+        description="The end timestamp components in UTC, if you specify a "
+        "ets parameter, these are ignored.",
+    )
+    month3: int = Field(
+        None,
+        description="The at timestamp components in UTC.  When timeopt is 2, "
+        "this is used to find all events that were valid at this "
+        "time.",
+    )
+    day1: int = Field(
+        None,
+        description="The start timestamp components in UTC, if you specify a "
+        "sts parameter, these are ignored.",
+    )
+    day2: int = Field(
+        None,
+        description="The end timestamp components in UTC, if you specify a "
+        "ets parameter, these are ignored.",
+    )
+    day3: int = Field(
+        None,
+        description="The at timestamp components in UTC.  When timeopt is 2, "
+        "this is used to find all events that were valid at this "
+        "time.",
+    )
+    hour1: int = Field(
+        None,
+        description="The start timestamp components in UTC, if you specify a "
+        "sts parameter, these are ignored.",
+    )
+    hour2: int = Field(
+        None,
+        description="The end timestamp components in UTC, if you specify a "
+        "ets parameter, these are ignored.",
+    )
+    hour3: int = Field(
+        None,
+        description="The at timestamp components in UTC.  When timeopt is 2, "
+        "this is used to find all events that were valid at this "
+        "time.",
+    )
+    minute1: int = Field(
+        None,
+        description="The start timestamp components in UTC, if you specify a "
+        "sts parameter, these are ignored.",
+    )
+    minute2: int = Field(
+        None,
+        description="The end timestamp components in UTC, if you specify a "
+        "ets parameter, these are ignored.",
+    )
+    minute3: int = Field(
+        None,
+        description="The at timestamp components in UTC.  When timeopt is 2, "
+        "this is used to find all events that were valid at this "
+        "time.",
+    )
 
 
 def dfmt(text):
@@ -92,20 +234,20 @@ def char3(wfos):
     return res
 
 
-def parse_wfo_location_group(form):
+def parse_wfo_location_group(environ):
     """Parse wfoLimiter"""
     limiter = ""
-    if "wfo[]" in form:
-        wfos = ensure_list(form, "wfo[]")
-        wfos.append("XXX")  # Hack to make next section work
-        if "ALL" not in wfos:
+    wfos = environ["wfo"]
+    if environ["wfos"]:
+        wfos = environ["wfos"]
+    if "ALL" not in wfos:
+        if len(wfos) == 1:
+            wfo = wfos[0]
+            wfo = wfo[1:] if len(wfo) == 4 else wfo
+            limiter = f" and w.wfo = '{wfo}' "
+        else:
             limiter = f" and w.wfo in {tuple(char3(wfos))} "
 
-    if "wfos[]" in form:
-        wfos = ensure_list(form, "wfos[]")
-        wfos.append("XXX")  # Hack to make next section work
-        if "ALL" not in wfos:
-            limiter = f" and w.wfo in {tuple(char3(wfos))} "
     return limiter
 
 
@@ -114,11 +256,9 @@ def build_sql(environ):
     sts = environ["sts"]
     ets = environ["ets"]
     table_extra = ""
-    location_group = environ.get("location_group", "wfo")
-    if location_group == "states":
-        if "states[]" in environ:
-            arstates = ensure_list(environ, "states[]")
-            states = [x[:2].upper() for x in arstates]
+    if environ["location_group"] == "states":
+        if environ["states"]:
+            states = [x[:2].upper() for x in environ["states"]]
             states.append("XX")  # Hack for 1 length
             wfo_limiter = (
                 " and ST_Intersects(s.the_geom, w.geom) "
@@ -128,12 +268,9 @@ def build_sql(environ):
             table_extra = " , states s "
         else:
             raise ValueError("No state specified")
-    elif location_group == "wfo":
+    else:  # wfo
         wfo_limiter = parse_wfo_location_group(environ)
         wfo_limiter2 = wfo_limiter
-    else:
-        # Unknown location_group
-        raise ValueError(f"Unknown location_group ({location_group})")
 
     # Keep size low
     if wfo_limiter == "" and (ets - sts) > datetime.timedelta(days=5 * 365.25):
@@ -141,8 +278,7 @@ def build_sql(environ):
 
     # Change to postgis db once we have the wfo list
     fn = f"wwa_{sts:%Y%m%d%H%M}_{ets:%Y%m%d%H%M}"
-    timeopt = int(environ.get("timeopt", [1])[0])
-    if timeopt == 2:
+    if environ["timeopt"] == 2:
         year3 = int(environ.get("year3"))
         month3 = int(environ.get("month3"))
         day3 = int(environ.get("day3"))
@@ -152,18 +288,23 @@ def build_sql(environ):
         fn = f"wwa_{sts:%Y%m%d%H%M}"
 
     limiter = ""
-    if "limit0" in environ:
+    if environ["limit0"] == "yes":
         limiter = (
             " and phenomena IN ('TO','SV','FF','MA') and significance = 'W' "
         )
-    if environ.get("limitps", "no") == "yes":
-        phenom = environ.get("phenomena", "TO")[:2]
-        sig = environ.get("significance", "W")[:1]
-        limiter = f" and phenomena = '{phenom}' and significance = '{sig}' "
+    if environ["limitps"] == "yes":
+        phenom = environ["phenomena"]
+        sig = environ["significance"]
+        parts = []
+        for p, s in zip(phenom, sig):
+            parts.append(
+                f"(phenomena = '{p[:2]}' and significance = '{s[:1]}') "
+            )
+        limiter = f" and ({' or '.join(parts)}) "
 
-    sbwlimiter = " WHERE gtype = 'P' " if "limit1" in environ else ""
+    sbwlimiter = " WHERE gtype = 'P' " if environ["limit1"] == "yes" else ""
 
-    elimiter = " and is_emergency " if "limit2" in environ else ""
+    elimiter = " and is_emergency " if environ["limit2"] == "yes" else ""
 
     warnings_table = "warnings"
     sbw_table = "sbw"
@@ -172,7 +313,7 @@ def build_sql(environ):
         sbw_table = f"sbw_{sts.year}"
 
     geomcol = "geom"
-    if environ.get("simple", "no") == "yes":
+    if environ["simple"] == "yes":
         geomcol = "simple_geom"
 
     cols = (
@@ -182,11 +323,11 @@ def build_sql(environ):
         "is_emergency, utc_polygon_begin, utc_polygon_end, windtag, hailtag, "
         "tornadotag, damagetag, product_id "
     )
-    if environ.get("accept") != "excel":
+    if environ["accept"] != "excel":
         cols = f"geo, {cols}"
 
     timelimit = f"issue >= '{sts}' and issue < '{ets}'"
-    if timeopt == 2:
+    if environ["timeopt"] == 2:
         timelimit = (
             f"issue <= '{sts}' and "
             f"issue > '{sts + datetime.timedelta(days=-30)}' and "
@@ -194,7 +335,7 @@ def build_sql(environ):
         )
     sbwtimelimit = timelimit
     statuslimit = " status = 'NEW' "
-    if environ.get("addsvs", "no") == "yes":
+    if environ["addsvs"] == "yes":
         statuslimit = " status != 'CAN' "
         sbwtimelimit = timelimit.replace(
             "issue",
@@ -279,10 +420,10 @@ def do_excel(sql):
     return bio.getvalue()
 
 
-@iemapp(default_tz="UTC", help=__doc__)
+@iemapp(default_tz="UTC", help=__doc__, schema=Schema)
 def application(environ, start_response):
     """Go Main Go"""
-    if "sts" not in environ:
+    if environ["sts"] is None:
         raise IncompleteWebRequest("Missing start time parameters")
     try:
         sql, fn = build_sql(environ)
@@ -290,17 +431,14 @@ def application(environ, start_response):
         start_response("400 Bad Request", [("Content-type", "text/plain")])
         return [str(exp).encode("ascii")]
 
-    accept = environ.get("accept", "shapefile")
-    if accept == "excel":
+    if environ["accept"] == "excel":
         headers = [
             ("Content-type", EXL),
             ("Content-disposition", f"attachment; Filename={fn}.xlsx"),
         ]
         start_response("200 OK", headers)
         return [do_excel(sql)]
-    pgconn, cursor = get_dbconnc("postgis")
-    cursor.close()  # lazy
-    cursor = pgconn.cursor("streaming")
+    pgconn, cursor = get_dbconnc("postgis", cursor_name="streaming")
 
     cursor.execute(sql)
 
@@ -411,6 +549,7 @@ def application(environ, start_response):
                 zf.write(f"{tmpdir}/{fn}.{suffix}", f"{fn}.{suffix}")
         with open(f"{tmpdir}/{fn}.zip", "rb") as fh:
             payload = fh.read()
+    cursor.close()
     pgconn.close()
     headers = [
         ("Content-type", "application/octet-stream"),
