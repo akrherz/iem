@@ -99,7 +99,7 @@ class Schema(CGIModel):
         description="The location group to use, either wfo or states.",
     )
     phenomena: ListOrCSVType = Field(
-        "TO",
+        ["TO"],
         description="The two character VTEC phenomena(s) to include. If you "
         "provide more than one value, the length must correspond and align "
         "with the ``significance`` parameter.",
@@ -111,7 +111,7 @@ class Schema(CGIModel):
         "counties/zones.",
     )
     significance: ListOrCSVType = Field(
-        "W",
+        ["W"],
         description="The one character VTEC significance to include, if you "
         "provide more than one value, the length must correspond "
         "and align with the ``phenomena`` parameter.",
@@ -240,7 +240,7 @@ def parse_wfo_location_group(environ):
     wfos = environ["wfo"]
     if environ["wfos"]:
         wfos = environ["wfos"]
-    if "ALL" not in wfos:
+    if wfos is not None and "ALL" not in wfos:
         if len(wfos) == 1:
             wfo = wfos[0]
             wfo = wfo[1:] if len(wfo) == 4 else wfo
