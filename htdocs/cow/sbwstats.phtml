@@ -85,8 +85,9 @@ $table = "
 .phds { background: #FFE4C4;}
 .phsq { background: #C71585;}
 </style>
-<table border=\"1\" cellpadding=\"3\" cellspacing=\"0\">
+<table border=\"1\" class=\"table\">
 <caption>Data valid for warnings issued between " . date('d M Y H:i', $sts) . " and " . date('d M Y H:i', $ets) . " UTC</caption>
+<thead class=\"sticky\">
 <tr>
   <th colspan='2'>Weather Forecast Office</th>
   <th colspan='3'>Summary</th>
@@ -109,6 +110,8 @@ $table = "
  <th class='phds'>Cnt</th><th class='phds'>Perim</th><th class='phds'>Area</th>
  <th class='phsq'>Cnt</th><th class='phsq'>Perim</th><th class='phsq'>Area</th>
 </tr>
+</thead>
+<tbody>
 ";
 $totals = array(
     "TO_cnt" => 0, "TO_perim" => 0, "TO_area" => 0,
@@ -223,32 +226,32 @@ $table .= sprintf(
         "<th class='phsq'>%s</th><th class='phsq'>%.1f</th><th class='phsq'>%.1f</th>" .
         "</tr>",
     $tcount,
-    mydiv($tperim, $tcount / 1000.0),
-    mydiv($tpoly, $tcount / 1000000.0),
+    mydiv($tperim, $tcount) / 1000.0,
+    mydiv($tpoly, $tcount) / 1000000.0,
     $totals["TO_cnt"],
-    mydiv($totals["TO_perim"], $counts["TO"] / 1000.0),
-    mydiv($totals["TO_area"], $counts["TO"] / 1000000.0),
+    mydiv($totals["TO_perim"], $counts["TO"]) / 1000.0,
+    mydiv($totals["TO_area"], $counts["TO"]) / 1000000.0,
     $totals["SV_cnt"],
-    mydiv($totals["SV_perim"], $counts["SV"] / 1000.0),
-    mydiv($totals["SV_area"], $counts["SV"] / 1000000.0),
+    mydiv($totals["SV_perim"], $counts["SV"]) / 1000.0,
+    mydiv($totals["SV_area"], $counts["SV"]) / 1000000.0,
     $totals["MA_cnt"],
-    mydiv($totals["MA_perim"], $counts["MA"] / 1000.0),
-    mydiv($totals["MA_area"], $counts["MA"] / 1000000.0),
+    mydiv($totals["MA_perim"], $counts["MA"]) / 1000.0,
+    mydiv($totals["MA_area"], $counts["MA"]) / 1000000.0,
     $totals["FF_cnt"],
-    mydiv($totals["FF_perim"], $counts["FF"] / 1000.0),
-    mydiv($totals["FF_area"], $counts["FF"] / 1000000.0),
+    mydiv($totals["FF_perim"], $counts["FF"]) / 1000.0,
+    mydiv($totals["FF_area"], $counts["FF"]) / 1000000.0,
     $totals["FA_cnt"],
-    mydiv($totals["FA_perim"], $counts["FA"] / 1000.0),
-    mydiv($totals["FA_area"], $counts["FA"] / 1000000.0),
+    mydiv($totals["FA_perim"], $counts["FA"]) / 1000.0,
+    mydiv($totals["FA_area"], $counts["FA"]) / 1000000.0,
     $totals["DS_cnt"],
-    mydiv($totals["DS_perim"], $counts["DS"] / 1000.0),
-    mydiv($totals["DS_area"], $counts["DS"] / 1000000.0),
+    mydiv($totals["DS_perim"], $counts["DS"]) / 1000.0,
+    mydiv($totals["DS_area"], $counts["DS"]) / 1000000.0,
     $totals["SQ_cnt"],
-    mydiv($totals["SQ_perim"], $counts["SQ"] / 1000.0),
-    mydiv($totals["SQ_area"], $counts["SQ"] / 1000000.0)
+    mydiv($totals["SQ_perim"], $counts["SQ"]) / 1000.0,
+    mydiv($totals["SQ_area"], $counts["SQ"]) / 1000000.0
 );
 
-$table .= "</table>";
+$table .= "</tbody></table>";
 
 $y1select = yearSelect2(2002, $syear, "syear");
 $m1select = monthSelect($smonth, "smonth");
@@ -276,7 +279,7 @@ since summer of 2007.
 
 
 <form method="GET" name="a21234">
-<table cellpadding="3" cellspacing="0" border="1">
+<table cellpadding="3" class="table table-striped">
 <thead class="sticky">
  <tr><td></td><th>Year</th><th>Month</th><th>Day</th><th>Hour</th><td></td></tr>
 </thead>
