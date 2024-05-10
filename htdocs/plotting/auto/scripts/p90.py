@@ -402,7 +402,7 @@ def do_polygon(ctx):
     elif varname in "days":
         ctx["title"] = PDICT2[varname]
         bins = np.linspace(
-            max([df["days"].min() - 7, 0]), df["days"].max() + 7, 12, dtype="i"
+            max([df["days"].min() - 7, 1]), df["days"].max() + 7, 12, dtype="i"
         )
         counts = np.where(counts < 0.0001, -1, counts)
         ctx["subtitle"] = (
@@ -443,7 +443,7 @@ def do_polygon(ctx):
             interval = float(ctx["interval"])
             bins = np.arange(0, interval * 10.1, interval)
             bins[0] = 0.01
-        elif varname == "total":
+        elif varname in ["total", "yearcount"]:
             counts = np.where(counts < 1, np.nan, counts)
             ctx["extend"] = "neither"
             if maxv < 8:
