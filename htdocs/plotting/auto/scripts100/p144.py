@@ -2,7 +2,7 @@
 This plot uses hourly 4 inch depth soil
 temperature observations from the ISU Soil Moisture Network.  It first
 plots the first period each year that the soil temperature was at or
-above 50 degrees for at least X number of hours.  It then plots any
+above a threshold degrees for at least X number of hours.  It then plots any
 subsequent periods below 50 degrees for that year.
 """
 
@@ -47,6 +47,12 @@ def get_description():
             default="BOOI4",
             label="Select Station:",
         ),
+        {
+            "type": "int",
+            "name": "threshold",
+            "default": 50,
+            "label": "Threshold Temperature (F)",
+        },
         dict(
             type="int",
             name="hours1",
@@ -66,7 +72,7 @@ def get_description():
 def plotter(fdict):
     """Go"""
     ctx = get_autoplot_context(fdict, get_description())
-    threshold = 50
+    threshold = ctx["threshold"]
     threshold_c = convert_value(threshold, "degF", "degC")
     hours1 = ctx["hours1"]
     hours2 = ctx["hours2"]

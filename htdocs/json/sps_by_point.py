@@ -7,8 +7,10 @@ from io import BytesIO, StringIO
 
 import numpy as np
 import pandas as pd
+from pyiem.database import get_sqlalchemy_conn
+from pyiem.exceptions import IncompleteWebRequest
 from pyiem.reference import ISO8601
-from pyiem.util import get_sqlalchemy_conn, utc
+from pyiem.util import utc
 from pyiem.webutil import iemapp
 from sqlalchemy import text
 
@@ -89,13 +91,15 @@ def application(environ, start_response):
     ctx = {}
     ctx["lat"] = float(environ.get("lat", 41.99))
     ctx["lon"] = float(environ.get("lon", -92.0))
-    ctx["sdate"] = datetime.datetime.strptime(
-        environ.get("sdate", "2002/1/1"), "%Y/%m/%d"
-    )
-    ctx["edate"] = datetime.datetime.strptime(
-        environ.get("edate", "2099/1/1"), "%Y/%m/%d"
-    )
-
+    try:
+        ctx["sdate"] = datetime.datetime.strptime(
+            environ.get("sdate", "2002/1/1"), "%Y/%m/%d"
+        )
+        ctx["edate"] = datetime.datetime.strptime(
+            environ.get("edate", "2099/1/1"), "%Y/%m/%d"
+        )
+    except Exception as exp:
+        raise IncompleteWebRequest("Invalid sdate or edate provided") from exp
     fmt = environ.get("fmt", "json")
     try:
         try_valid(ctx, environ)

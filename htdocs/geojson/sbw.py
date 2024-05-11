@@ -92,6 +92,8 @@ def validate_ts(val):
     # YYYY-mm-ddTHH:MI
     if len(val) == 16:
         val += ":00Z"
+    if len(val) == 19:
+        val += "Z"
     return val[:24]
 
 
