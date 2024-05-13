@@ -67,7 +67,7 @@ function text(str) {
     return $("<p>").text(str).html();
 }
 
-// eslint-disable-next-line no-unused-vars
+ 
 function liveShot() {
     if (aqlive) return;
     aqlive = true;
@@ -112,7 +112,7 @@ function findFeatureByCid(cid) {
     return feature;
 }
 
-// eslint-disable-next-line no-unused-vars
+ 
 function handleRWISClick(img){
     $("#rwismain").attr('src', $(img).attr("src"));
 }
@@ -259,7 +259,7 @@ function refreshJSON() {
 }
 
 // Set the current camera by cid
-// eslint-disable-next-line no-unused-vars
+ 
 function setCamera(cid) {
     const feature = findFeatureByCid(cid);
     if (feature) {

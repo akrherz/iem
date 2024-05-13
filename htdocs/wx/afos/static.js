@@ -104,7 +104,7 @@ function addTab(pil, center, ttaaii, limit, sdate, edate, doCookieSave) {
         saveCookies();
     }
 }
-// eslint-disable-next-line no-unused-vars
+ 
 function dlbtn(btn, fmt) {
     const pil = $(".nav-tabs li.active").data('pil');
     if (pil === undefined) {

@@ -72,7 +72,7 @@ function stationLayerStyleFunc(feature) {
     return climateStyle;
 }
 
-// eslint-disable-next-line no-unused-vars
+ 
 function mapFactory(network, formname) {
     // Check the state of our button
     const state = parseInt($(`#button_${network}_${formname}`).data("state"), 10);
