@@ -127,7 +127,7 @@ function urlencode() {
 }
 
 // https://stackoverflow.com/questions/2044616
-// eslint-disable-next-line no-unused-vars
+ 
 function selectElementContents(elid) {
     const el = document.getElementById(elid);
     const body = document.body;

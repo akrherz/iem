@@ -29,7 +29,7 @@ function updateURL() {
     window.location.href = `#${tt}/${renderattr}`;
 }
 
-// eslint-disable-next-line no-unused-vars
+ 
 function updateMap() {
     renderattr = text($('#renderattr').val());
     coopLayer.setStyle(coopLayer.getStyle());

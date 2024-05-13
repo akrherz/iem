@@ -288,7 +288,6 @@ function loadAutoplot(container, uri, divid){
     }
 
 }
-// eslint-disable-next-line no-unused-vars
 function changeStations(elem){
     const netclass = $(elem).attr("id");
     if (netclass === "asos"){
@@ -308,7 +307,6 @@ function changeStations(elem){
     }
     stationLayer.changed();
 }
-// eslint-disable-next-line no-unused-vars
 function loaderClicked(elem){
     const $elem = $(elem);
     const container = $elem.closest(".datadiv");

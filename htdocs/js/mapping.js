@@ -1,7 +1,7 @@
 
 // A Map Widget with a dragable marker that has callbacks
 
-// eslint-disable-next-line no-unused-vars
+ 
 class MapMarkerWidget {
 
     constructor(mapdiv, lon, lat){

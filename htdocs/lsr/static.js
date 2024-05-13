@@ -45,7 +45,7 @@ function text(str) {
     return $("<p>").text(str).html();
 }
 
-// eslint-disable-next-line no-unused-vars
+ 
 function parse_href() {
     // Figure out how we were called
     let sts = null;
@@ -87,7 +87,7 @@ function parse_href() {
     }
     setTimeout(loadData, 0);
 }
-// eslint-disable-next-line no-unused-vars
+ 
 function cronMinute() {
     if (!realtime) return;
     // Compute the delta
@@ -428,7 +428,7 @@ function copyToClipboard(ttext, msg) {
     $temp.remove();
     alert(msg);
 }
-// eslint-disable-next-line no-unused-vars
+ 
 function initUI() {
     // Generate UI components of the page
     const handle = $("#radartime");
