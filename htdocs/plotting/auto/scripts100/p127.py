@@ -1,7 +1,8 @@
 """
-This chart presents the crop progress by year.
-The most recent value for the current year is denoted on each of the
-previous years on record.
+This chart presents the crop progress by year.  Since the NASS data is weekly,
+a linear interpolation is performed to estimate the daily values.  The chart
+presents a yearly trendline as well for a given threshold value.  Due to leap
+days, the plotted day of year values are not an exact science.
 """
 
 import calendar
@@ -9,10 +10,11 @@ import calendar
 import numpy as np
 import pandas as pd
 from matplotlib import ticker
+from pyiem.database import get_sqlalchemy_conn
 from pyiem.exceptions import NoDataFound
-from pyiem.plot import figure_axes, get_cmap
+from pyiem.plot import figure, get_cmap
 from pyiem.reference import state_names
-from pyiem.util import get_autoplot_context, get_sqlalchemy_conn
+from pyiem.util import get_autoplot_context
 
 PDICT = {
     "CPR": "CORN - PROGRESS, MEASURED IN PCT SEEDBED PREPARED",
@@ -37,6 +39,10 @@ PDICT = {
     "SH": "SOYBEANS - PROGRESS, MEASURED IN PCT HARVESTED",
     "FD": "FIELDWORK - DAYS SUITABLE, MEASURED IN DAYS / WEEK",
 }
+PDICT2 = {
+    "last": "Current value for the most recent week",
+    "thres": "Threshold value defined by user",
+}
 
 
 def get_description():
@@ -51,9 +57,81 @@ def get_description():
             options=PDICT,
             label="Which Statistical Category?",
         ),
+        {
+            "type": "select",
+            "name": "w",
+            "default": "last",
+            "options": PDICT2,
+            "label": "Plot trendline for given threshold value",
+        },
+        {
+            "type": "int",
+            "name": "threshold",
+            "default": 50,
+            "label": "Threshold Value [% or days] when set above:",
+        },
         dict(type="cmap", name="cmap", default="jet", label="Color Ramp:"),
     ]
     return desc
+
+
+def plot_trendline(fig, ctx, data, year0, lastyear):
+    """Add the right hand side plot of trendline."""
+    ax = fig.add_axes([0.55, 0.1, 0.4, 0.8])
+    threshold = ctx["threshold"]
+    if ctx["w"] == "last":
+        threshold = np.max(data[-1, :])
+    years = []
+    doys = []
+    for year in range(year0, lastyear):
+        idx = np.digitize([threshold], data[year - year0, :], right=True)
+        years.append(year)
+        doys.append(idx[0])
+
+    ax.scatter(years, doys, s=40)
+    ax.set_xlim(year0 - 0.5, lastyear + 0.5)
+    ax.set_ylim(min(doys) - 5, max(doys) + 5)
+    ylabels = []
+    yticks = []
+    every = [1, 15] if max(doys) - min(doys) > 60 else [1, 8, 15, 22, 29]
+    for doy in range(min(doys) - 5, max(doys) + 5):
+        ts = pd.Timestamp("2000-01-01") + pd.Timedelta(days=doy)
+        if ts.day in every:
+            ylabels.append(ts.strftime("%b %d"))
+            yticks.append(doy)
+    ax.set_yticks(yticks)
+    ax.set_yticklabels(ylabels)
+    unit = "% Progress" if ctx["short_desc"] != "FD" else " days"
+    ax.set_ylabel(f"Date of {threshold:.0f}{unit}")
+    ax.grid(True)
+
+    # fit a trendline with a R-squared denoted
+    x = np.array(years)
+    y = np.array(doys)
+    z = np.polyfit(x, y, 1)
+    p = np.poly1d(z)
+    ax.plot(x, p(x), "r--")
+    yhat = p(x)
+    ybar = np.sum(y) / len(y)
+    ssreg = np.sum((yhat - ybar) ** 2)
+    sstot = np.sum((y - ybar) ** 2)
+    r2 = ssreg / sstot
+    meany = np.mean(doys)
+    ax.axhline(meany, lw=2, color="k")
+    dt = pd.Timestamp("2000-01-01") + pd.Timedelta(days=int(meany))
+    ax.annotate(
+        f"Mean: {dt.strftime('%b %d')}",
+        xy=(0.9, meany),
+        xycoords=("axes fraction", "data"),
+        va="top",
+    )
+    ax.text(
+        0.9,
+        0.9,
+        f"R2={r2:.2f}",
+        transform=ax.transAxes,
+        ha="center",
+    )
 
 
 def plotter(fdict):
@@ -93,7 +171,8 @@ def plotter(fdict):
         f"USDA NASS {year0:.0f}-{lastyear:.0f} -- "
         "Daily Linear Interpolated Values Between Weekly Reports"
     )
-    (fig, ax) = figure_axes(title=title, apctx=ctx)
+    fig = figure(title=title, apctx=ctx)
+    ax = fig.add_axes([0.05, 0.1, 0.35, 0.8])
 
     data = np.ma.ones((df["yeari"].max() + 1, 366), "f") * -1
     data.mask = np.where(data == -1, True, False)
@@ -119,7 +198,11 @@ def plotter(fdict):
 
         lastrow = row
 
+    plot_trendline(fig, ctx, data, year0, lastyear)
+
     dlast = np.max(data[-1, :])
+    if ctx["w"] == "thres":
+        dlast = ctx["threshold"]
     for year in range(year0, lastyear):
         idx = np.digitize([dlast], data[year - year0, :], right=True)
         ax.text(idx[0], year, "X", va="center", zorder=2, color="white")
@@ -132,7 +215,8 @@ def plotter(fdict):
         interpolation="none",
         cmap=cmap,
     )
-    fig.colorbar(res)
+    cax = fig.add_axes([0.42, 0.1, 0.02, 0.8])
+    fig.colorbar(res, cax=cax)
     ax.set_xticks((1, 32, 60, 91, 121, 152, 182, 213, 244, 274, 305, 335))
     ax.set_xticklabels(calendar.month_abbr[1:])
     # We need to compute the domain of this plot
@@ -148,9 +232,14 @@ def plotter(fdict):
     ax.set_ylim(lastyear + 0.5, year0 - 0.5)
     ax.yaxis.set_major_locator(ticker.MaxNLocator(integer=True))
     ax.grid(True)
-    lastweek = df["week_ending"].max()
     unit = "%" if ctx["short_desc"] != "FD" else " days"
-    ax.set_xlabel(f"X denotes {lastweek:%d %b %Y} value of {dlast:.1f}{unit}")
+    if ctx["w"] == "thres":
+        ax.set_xlabel(f"X denotes value of {dlast:.1f}{unit}")
+    else:
+        lastweek = df["week_ending"].max()
+        ax.set_xlabel(
+            f"X denotes {lastweek:%d %b %Y} value of {dlast:.1f}{unit}"
+        )
 
     return fig, df
 
