@@ -13,6 +13,9 @@ Services https://mesonet.agron.iastate.edu/api/1/docs/ .
 Changelog
 ---------
 
+- 2024-05-14: To mitigate against large requests that overwhelm the server, a
+limit of one year's worth of data is now in place for requests that do not
+limit the request by either state, phenomena, nor wfo.
 - 2024-05-09: Migrated to pydantic based CGI input validation.
 
 Example Usage
@@ -271,7 +274,6 @@ def build_sql(environ):
     else:  # wfo
         wfo_limiter = parse_wfo_location_group(environ)
         wfo_limiter2 = wfo_limiter
-
     # Keep size low
     if wfo_limiter == "" and (ets - sts) > datetime.timedelta(days=5 * 365.25):
         raise ValueError("Please shorten request to less than 5 years.")
@@ -333,6 +335,11 @@ def build_sql(environ):
             f"issue > '{sts + datetime.timedelta(days=-30)}' and "
             f"expire > '{sts}'"
         )
+    else:
+        if wfo_limiter == "" and limiter == "" and (ets - sts).days > 366:
+            raise IncompleteWebRequest(
+                "You must limit your request to a year or less."
+            )
     sbwtimelimit = timelimit
     statuslimit = " status = 'NEW' "
     if environ["addsvs"] == "yes":
