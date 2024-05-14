@@ -274,19 +274,23 @@ def build_sql(environ):
     else:  # wfo
         wfo_limiter = parse_wfo_location_group(environ)
         wfo_limiter2 = wfo_limiter
-    # Keep size low
-    if wfo_limiter == "" and (ets - sts) > datetime.timedelta(days=5 * 365.25):
-        raise ValueError("Please shorten request to less than 5 years.")
 
-    # Change to postgis db once we have the wfo list
-    fn = f"wwa_{sts:%Y%m%d%H%M}_{ets:%Y%m%d%H%M}"
-    if environ["timeopt"] == 2:
+    if environ["timeopt"] != 2:
+        if sts is None or ets is None:
+            raise IncompleteWebRequest("Missing start or end time parameters")
+        # Keep size low
+        if wfo_limiter == "" and (ets - sts) > datetime.timedelta(days=366):
+            raise IncompleteWebRequest("Please shorten request to <1 year.")
+        # Change to postgis db once we have the wfo list
+        fn = f"wwa_{sts:%Y%m%d%H%M}_{ets:%Y%m%d%H%M}"
+    else:
         year3 = int(environ.get("year3"))
         month3 = int(environ.get("month3"))
         day3 = int(environ.get("day3"))
         hour3 = int(environ.get("hour3"))
         minute3 = int(environ.get("minute3"))
         sts = utc(year3, month3, day3, hour3, minute3)
+        ets = sts
         fn = f"wwa_{sts:%Y%m%d%H%M}"
 
     limiter = ""

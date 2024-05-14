@@ -119,8 +119,11 @@ def application(environ, start_response):
 
     if ts1.year > 1980:
         i2, j2 = prismutil.find_ij(lon, lat)
-        with ncopen(f"/mesonet/data/prism/{ts1.year}_daily.nc") as nc:
-            prism_precip = nc.variables["ppt"][tslice, j2, i2] / 25.4
+        if i2 is None or j2 is None:
+            prism_precip = [None] * (offset2 - offset1)
+        else:
+            with ncopen(f"/mesonet/data/prism/{ts1.year}_daily.nc") as nc:
+                prism_precip = nc.variables["ppt"][tslice, j2, i2] / 25.4
     else:
         prism_precip = [None] * (offset2 - offset1)
 
