@@ -13,6 +13,9 @@ Services https://mesonet.agron.iastate.edu/api/1/docs/ .
 Changelog
 ---------
 
+- 2024-05-14: To mitigate against large requests that overwhelm the server, a
+limit of one year's worth of data is now in place for requests that do not
+limit the request by either state, phenomena, nor wfo.
 - 2024-05-09: Migrated to pydantic based CGI input validation.
 
 Example Usage
@@ -272,19 +275,22 @@ def build_sql(environ):
         wfo_limiter = parse_wfo_location_group(environ)
         wfo_limiter2 = wfo_limiter
 
-    # Keep size low
-    if wfo_limiter == "" and (ets - sts) > datetime.timedelta(days=5 * 365.25):
-        raise ValueError("Please shorten request to less than 5 years.")
-
-    # Change to postgis db once we have the wfo list
-    fn = f"wwa_{sts:%Y%m%d%H%M}_{ets:%Y%m%d%H%M}"
-    if environ["timeopt"] == 2:
+    if environ["timeopt"] != 2:
+        if sts is None or ets is None:
+            raise IncompleteWebRequest("Missing start or end time parameters")
+        # Keep size low
+        if wfo_limiter == "" and (ets - sts) > datetime.timedelta(days=366):
+            raise IncompleteWebRequest("Please shorten request to <1 year.")
+        # Change to postgis db once we have the wfo list
+        fn = f"wwa_{sts:%Y%m%d%H%M}_{ets:%Y%m%d%H%M}"
+    else:
         year3 = int(environ.get("year3"))
         month3 = int(environ.get("month3"))
         day3 = int(environ.get("day3"))
         hour3 = int(environ.get("hour3"))
         minute3 = int(environ.get("minute3"))
         sts = utc(year3, month3, day3, hour3, minute3)
+        ets = sts
         fn = f"wwa_{sts:%Y%m%d%H%M}"
 
     limiter = ""
@@ -333,6 +339,11 @@ def build_sql(environ):
             f"issue > '{sts + datetime.timedelta(days=-30)}' and "
             f"expire > '{sts}'"
         )
+    else:
+        if wfo_limiter == "" and limiter == "" and (ets - sts).days > 366:
+            raise IncompleteWebRequest(
+                "You must limit your request to a year or less."
+            )
     sbwtimelimit = timelimit
     statuslimit = " status = 'NEW' "
     if environ["addsvs"] == "yes":
