@@ -13,10 +13,12 @@ $y1select = yearSelect2(2012, 2012, "year1");
 $m1select = monthSelect(1, "month1");
 $d1select = daySelect2(1, "day1");
 $y2select = yearSelect2(2012, date("Y"), "year2");
+$y242select = yearSelect2(2024, 2024, "year1");
 $m2select = monthSelect(date("m"), "month2");
 $d2select = daySelect2(date("d"), "day2");
 $y12select = yearSelect2(2003, 2003, "year1");
 $y22select = yearSelect2(2003, date("Y"), "year2");
+$y24select = yearSelect2(2024, date("Y"), "year2");
 $y13select = yearSelect2(2013, 2013, "year1");
 $y23select = yearSelect2(2013, date("Y"), "year2");
 $nselect = networkSelect("OT", "");
@@ -104,6 +106,31 @@ are freely available to others.
 </form>
 
 </div></div>
+
+<h3><a name="purpleair"><i class="fa fa-file"></i></a> ISU Agronomy Hall - Purple Air Quality Sensor</h3>
+
+<p>Data is collected every minute since 26 April 2024.  Values represent a
+two minute average.</p>
+
+<form name="purple" action="/cgi-bin/request/purpleair.py">
+<table>
+<tr>
+ <th>Start Date:</th> 
+  <td>{$y24select}</td>
+  <td>{$m1select}</td>
+  <td>{$d1select}</td></tr>
+
+<tr>
+ <th>End Date:</th>
+  <td>{$y242select}</td>
+  <td>{$m2select}</td>
+  <td>{$d2select}</td></tr>
+
+</table>
+<button type="submit" name="excel" value="yes">Download Excel File</button>
+
+<input type="submit" value="Download CSV">
+</form>
 
 
 <h3>ISU FEEL Data</h3>
