@@ -13,10 +13,11 @@ import numpy as np
 import pandas as pd
 from matplotlib.dates import DateFormatter
 from metpy.units import masked_array, units
+from pyiem.database import get_sqlalchemy_conn
 from pyiem.exceptions import NoDataFound
 from pyiem.plot import figure, figure_axes
 from pyiem.plot.use_agg import plt
-from pyiem.util import get_autoplot_context, get_sqlalchemy_conn, utc
+from pyiem.util import get_autoplot_context, utc
 
 PDICT = {
     "meteo": "Meteogram Style (Temp/Wind/Pressure)",
@@ -227,6 +228,8 @@ def make_precip_plot(ctx):
         )
         y -= 0.06
         for i in range(max([0, idx - 8]), idx + 8):
+            if i >= len(df.index):
+                break
             row = df.iloc[i]
             ax.text(
                 x,

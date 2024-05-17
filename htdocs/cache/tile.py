@@ -22,10 +22,15 @@ def application(environ, start_response):
         return wsgiHandler(environ, start_response, theService["app"])
     except InvalidTMSRequest:
         with get_sqlalchemy_conn("mesosite") as conn:
+            # 5x the 404 logging
             conn.execute(
                 text("""
                 insert into weblog(client_addr, uri, referer, http_status)
-                VALUES (:addr, :uri, :ref, :status)
+                VALUES (:addr, :uri, :ref, :status),
+                     (:addr, :uri, :ref, :status),
+                     (:addr, :uri, :ref, :status),
+                     (:addr, :uri, :ref, :status),
+                     (:addr, :uri, :ref, :status)
                 """),
                 {
                     "addr": environ.get("REMOTE_ADDR"),
