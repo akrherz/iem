@@ -6,6 +6,7 @@ import json
 import numpy as np
 from metpy.units import units
 from pyiem.database import get_dbconn
+from pyiem.exceptions import IncompleteWebRequest
 from pyiem.iemre import find_ij
 from pyiem.meteorology import gdd as calc_gdd
 from pyiem.util import c2f, ncopen
@@ -48,10 +49,12 @@ def run(station, sdate, edate, gddbase, gddceil):
                 select sum(gddxx(%s, %s, high, low)) from alldata
                 where station = %s and day >= %s and day <= %s)
             select o.sum, st_x(t.geom) as lon, st_y(t.geom) as lat
-            from obs o, stations t WHERE t.id = %s
+            from obs o, stations t WHERE t.id = %s and sum is not null
             """,
             (gddbase, gddceil, station, sdate, edate, station),
         )
+        if cursor.rowcount == 0:
+            raise IncompleteWebRequest("No Data Found.")
         accum, lon, lat = [float(x) for x in cursor.fetchone()]
     res = {
         "station": station,
