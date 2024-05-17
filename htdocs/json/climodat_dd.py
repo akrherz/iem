@@ -6,7 +6,6 @@ import json
 import numpy as np
 from metpy.units import units
 from pyiem.database import get_dbconn
-from pyiem.exceptions import IncompleteWebRequest
 from pyiem.iemre import find_ij
 from pyiem.meteorology import gdd as calc_gdd
 from pyiem.util import c2f, ncopen
@@ -81,8 +80,6 @@ def run(station, sdate, edate, gddbase, gddceil):
 @iemapp()
 def application(environ, start_response):
     """Answer request."""
-    if "sdate" not in environ:
-        raise IncompleteWebRequest("GET sdate= parameter is missing")
     station = environ.get("station", "IATAME")[:6].upper()
     today = datetime.date.today() - datetime.timedelta(days=1)
     sdate = datetime.datetime.strptime(

@@ -84,7 +84,7 @@ def plotter(fdict):
     try:
         # Sub-optimal need to actually have data.
         req = requests.get(
-            "http://mesonet.agron.iastate.edu/json/climodat_dd.py?"
+            "http://iem.local/json/climodat_dd.py?"
             f"station={ctx['station']}&gddbase=50&gddceil=86&",
             timeout=60,
         )
