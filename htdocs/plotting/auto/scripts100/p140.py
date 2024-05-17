@@ -44,7 +44,9 @@ PDICT = {
     "avg_low_temp": "Average Low Temperature",
     "range_low_temp": "Range of Low Temperature",
     "avg_temp": "Average Temperature",
+    "max_dwpf": "Maximum Dew Point Temp",
     "avg_dewp": "Average Dew Point Temp",
+    "min_dwpf": "Minimum Dew Point Temp",
     "avg_wind_speed": "Average Wind Speed",
     "avg_wind_gust": "Average Wind Gust",
     "max_high": "Maximum High Temperature",
@@ -188,7 +190,9 @@ def plotter(fdict):
         max(max_rh) as max_rh,
         max(avg_rh) as avg_rh,
         min(min_rh) as min_rh,
+        max(max_dwpf) as max_dwpf,
         avg((max_dwpf + min_dwpf)/2.) as avg_dewp,
+        min(min_dwpf) as min_dwpf,
         max(max_feel) as max_feel, min(min_feel) as min_feel,
         sum(case when {aggcol} {mydir} {threshold} then 1 else 0 end) as
             count_days

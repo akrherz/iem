@@ -24,9 +24,9 @@ python plot_cli_jul1_snow.py
 cd ../year
 python plot_stage4.py
 python precip.py
-python plot_gdd.py 50
-python plot_gdd.py 52
-python plot_gdd.py 48
+python plot_gdd.py --gddbase=50
+python plot_gdd.py --gddbase=52
+python plot_gdd.py --gddbase=48
 
 cd ../gs
 python plot_gdd.py

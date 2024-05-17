@@ -1,23 +1,24 @@
 """Generate a plot of GDD for the ASOS network"""
 
 import datetime
-import sys
 
+import click
 from pyiem.util import logger, web2ldm
 
 LOG = logger()
 
 
-def main(argv):
+@click.command()
+@click.option("--gddbase", default=50, type=int, help="GDD Base Temperature")
+def main(gddbase):
     """Go Main Go"""
-    gddbase = int(argv[1])
     now = datetime.date.today() - datetime.timedelta(days=1)
     jan1 = now.replace(month=1, day=1)
 
     url = (
         "http://iem.local/plotting/auto/plot/97/d:sector::sector:IA::"
         f"var:gdd_sum::gddbase:{gddbase}::gddceil:86::"
-        f"date1:{jan1.strftime('%Y-%m-%d')}::usdm:no::"
+        f"date1:{jan1.strftime('%Y-%m-%d')}::usdm:no::_cb:1::"
         f"date2:{now.strftime('%Y-%m-%d')}::p:contour::cmap:RdBu_r::c:yes"
         ".png"
     )
@@ -31,4 +32,4 @@ def main(argv):
 
 
 if __name__ == "__main__":
-    main(sys.argv)
+    main()
