@@ -49,10 +49,12 @@ def run(station, sdate, edate, gddbase, gddceil):
                 select sum(gddxx(%s, %s, high, low)) from alldata
                 where station = %s and day >= %s and day <= %s)
             select o.sum, st_x(t.geom) as lon, st_y(t.geom) as lat
-            from obs o, stations t WHERE t.id = %s
+            from obs o, stations t WHERE t.id = %s and sum is not null
             """,
             (gddbase, gddceil, station, sdate, edate, station),
         )
+        if cursor.rowcount == 0:
+            raise IncompleteWebRequest("No Data Found.")
         accum, lon, lat = [float(x) for x in cursor.fetchone()]
     res = {
         "station": station,
@@ -81,8 +83,6 @@ def run(station, sdate, edate, gddbase, gddceil):
 @iemapp()
 def application(environ, start_response):
     """Answer request."""
-    if "sdate" not in environ:
-        raise IncompleteWebRequest("GET sdate= parameter is missing")
     station = environ.get("station", "IATAME")[:6].upper()
     today = datetime.date.today() - datetime.timedelta(days=1)
     sdate = datetime.datetime.strptime(
