@@ -20,11 +20,18 @@ from sqlalchemy import text
 
 MDICT = {
     "NONE": "All LSR Types",
+    "CMG": "Convective minus automated station gusts",
+    "DMG": "TSTM and NON-TSTM Wind Damage",
     "NRS": "All LSR Types except HEAVY RAIN + SNOW",
     "H1": "One Inch and Larger Hail ",
     "H2": "Two Inch and Larger Hail ",
+    "H3": "Three Inch and Larger Hail ",
+    "H4": "Four Inch and Larger Hail ",
     "G58": "Thunderstorm Wind Gust >= 58 MPH ",
     "G75": "Thunderstorm Wind Gust >= 75 MPH ",
+    "G100": "Thunderstorm Wind Gust >= 100 MPH ",
+    "WP": "Winter Precipitation (Snow, Sleet, Freezing Rain)",
+    "TT": "Tornado + Waterspout + Funnel Cloud",
     "CON": "Convective LSRs (Tornado, TStorm Gst/Dmg, Hail)",
     "AVALANCHE": "AVALANCHE",
     "BLIZZARD": "BLIZZARD",
@@ -70,6 +77,31 @@ MDICT = {
     "WALL CLOUD": "WALL CLOUD",
     "WATER SPOUT": "WATER SPOUT",
     "WILDFIRE": "WILDFIRE",
+}
+FILTERS = {
+    "NONE": "",
+    "NRS": " and typetext not in ('HEAVY RAIN', 'SNOW', 'HEAVY SNOW') ",
+    "H1": " and typetext = 'HAIL' and magnitude >= 1 ",
+    "H2": " and typetext = 'HAIL' and magnitude >= 2 ",
+    "H3": " and typetext = 'HAIL' and magnitude >= 3 ",
+    "H4": " and typetext = 'HAIL' and magnitude >= 4 ",
+    "G58": " and type = 'G' and magnitude >= 58 ",
+    "G75": " and type = 'G' and magnitude >= 75 ",
+    "G100": " and type = 'G' and magnitude >= 100 ",
+    "CON": (
+        " and typetext in ('TORNADO', 'HAIL', 'TSTM WND GST', "
+        "'TSTM WND DMG') "
+    ),
+    "CMG": (
+        " and typetext in ('TORNADO', 'HAIL', 'TSTM WND GST', "
+        "'TSTM WND DMG') and upper(source) not in ('MESONET', 'ASOS') "
+    ),
+    "DMG": " and typetext in ('TSTM WND DMG', 'NON-TSTM WND DMG') ",
+    "WP": (
+        " and typetext in ('SNOW', 'SLEET', 'FREEZING RAIN', 'HEAVY SNOW', "
+        "'BLIZZARD') "
+    ),
+    "TT": " and typetext in ('TORNADO', 'WATERSPOUT', 'FUNNEL CLOUD')",
 }
 PDICT = {
     "wfo": "Select by NWS Forecast Office",
@@ -136,31 +168,14 @@ def plotter(fdict):
         "tzname": "America/Chicago",
     }
     myfilter = ctx["filter"]
-    if myfilter == "NONE":
-        tlimiter = ""
-    elif myfilter == "NRS":
-        tlimiter = " and typetext not in ('HEAVY RAIN', 'SNOW', 'HEAVY SNOW') "
-    elif myfilter == "H1":
-        tlimiter = " and typetext = 'HAIL' and magnitude >= 1 "
-    elif myfilter == "H2":
-        tlimiter = " and typetext = 'HAIL' and magnitude >= 2 "
-    elif myfilter == "G58":
-        tlimiter = " and type = 'G' and magnitude >= 58 "
-    elif myfilter == "G75":
-        tlimiter = " and type = 'G' and magnitude >= 75 "
-    elif myfilter == "CON":
-        tlimiter = (
-            " and typetext in ('TORNADO', 'HAIL', 'TSTM WND GST', "
-            "'TSTM WND DMG') "
-        )
-    else:
-        tlimiter = f" and typetext = '{myfilter}' "
+    tlimiter = FILTERS.get(myfilter, " and typetext = :typetext ")
     ctx["_nt"].sts["_ALL"] = {
         "name": "All Offices",
         "tzname": "America/Chicago",
     }
     params = {
         "tzname": ctx["_nt"].sts[station]["tzname"],
+        "typetext": myfilter,
     }
     wfo_limiter = " and wfo = :wfo "
     params["wfo"] = station if len(station) == 3 else station[1:]
