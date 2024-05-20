@@ -176,9 +176,9 @@ def plotter(fdict):
     for yr in range(np.shape(data)[0] - 1):
         ax.plot(np.arange(1, days + 1), avgs[yr, :], zorder=1, color="tan")
 
-    lv = avgs[-1, pos]
+    lv = avgs[-1, pos - 1]
     if np.ma.is_masked(lv):
-        lv = avgs[-1, pos - 1]
+        lv = avgs[-1, pos - 2]
     ax.plot(
         np.arange(1, pos + 1),
         avgs[-1, :pos],

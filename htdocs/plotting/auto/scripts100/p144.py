@@ -13,6 +13,7 @@ from pyiem.network import Table as NetworkTable  # This is needed.
 from pyiem.plot import figure_axes
 from pyiem.plot.use_agg import plt
 from pyiem.util import convert_value, get_autoplot_context, utc
+from sqlalchemy import text
 
 XREF = {
     "AEEI4": "A130209",
@@ -124,15 +125,15 @@ def plotter(fdict):
         raise NoDataFound("No Data Found")
     with get_sqlalchemy_conn("isuag") as conn:
         df2 = pd.read_sql(
-            """
+            text("""
         with obs as (
-            select valid, t4_c_avg,
-            lag(t4_c_avg) OVER (ORDER by valid ASC) from sm_hourly
-            where station = %s),
+            select valid, t4_c_avg_qc,
+            lag(t4_c_avg_qc) OVER (ORDER by valid ASC) from sm_hourly
+            where station = :station),
         agg1 as (
             select valid,
-            case when t4_c_avg > %s and lag < %s then 1
-                when t4_c_avg < %s and lag > %s then -1
+            case when t4_c_avg_qc > :t and lag < :t then 1
+                when t4_c_avg_qc < :t and lag > :t then -1
                 else 0 end as t from obs),
         agg2 as (
             SELECT valid, t from agg1 where t != 0),
@@ -144,7 +145,7 @@ def plotter(fdict):
             rank() OVER (PARTITION by extract(year from valid)
             ORDER by valid ASC)
             from agg3 where t = 1
-            and (lead - valid) >= '%s hours'::interval),
+            and (lead - valid) >= ':hrs hours'::interval),
         agg5 as (
             select extract(year from valid) as yr, valid, lead
             from agg3 where t = -1)
@@ -153,16 +154,13 @@ def plotter(fdict):
         d.lead as dlead from agg4 f JOIN agg5 d ON (f.yr = d.yr)
         where f.rank = 1 and d.valid > f.valid
         ORDER by fup ASC
-        """,
+        """),
             conn,
-            params=(
-                station,
-                threshold_c,
-                threshold_c,
-                threshold_c,
-                threshold_c,
-                hours1,
-            ),
+            params={
+                "station": station,
+                "t": threshold_c,
+                "hrs": hours1,
+            },
             index_col=None,
         )
     if df2.empty:
