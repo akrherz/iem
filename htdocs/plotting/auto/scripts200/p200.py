@@ -226,7 +226,12 @@ def get_description():
             min="2002/01/01",
             default=utc().strftime("%Y/%m/%d"),
         ),
-        dict(type="cmap", name="cmap", default="jet", label="Color Ramp:"),
+        {
+            "type": "cmap",
+            "name": "cmap",
+            "default": "jet",
+            "label": "Color Ramp:",
+        },
     ]
     return desc
 
