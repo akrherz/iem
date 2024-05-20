@@ -111,6 +111,16 @@ Ext.onReady(function(){
 ';
 
 
+function do_text($row)
+{
+    if (is_null($row["product_id"])) {
+        return "";
+    }
+    return sprintf(
+        "<a href=\"http://mesonet.agron.iastate.edu/p.php?pid=%s\" target=\"_new\">Text</a>",
+        $row["product_id"],
+    );
+}
 function do_col1($row)
 {
     if ($row["status"] == 'NEW') {
@@ -138,9 +148,10 @@ function do_col3($row)
 function do_row($row)
 {
     return sprintf(
-        "<tr><td>%s</td><td>%s</td><td nowrap>%s</td><td>%s</td><td>%s</td>"
+        "<tr><td>%s</td><td>%s</td><td>%s</td><td nowrap>%s</td><td>%s</td><td>%s</td>"
             . "<td>%02.0f</td><td>%4.2f</td><td>%s</td><td>%s</td><td>%02.0f</td></tr>",
         do_col1($row),
+        do_text($row),
         $row["wfo"],
         do_col2($row),
         do_col3($row),
@@ -155,9 +166,10 @@ function do_row($row)
 function do_row_ma($row)
 {
     return sprintf(
-        "<tr><td>%s</td><td>%s</td><td nowrap>%s</td><td>%s</td><td>%s</td>"
+        "<tr><td>%s</td><td>%s</td><td>%s</td><td nowrap>%s</td><td>%s</td><td>%s</td>"
             . "<td>%02.0f</td><td>%4.2f</td><td>%s</td><td>%02.0f</td></tr>",
         do_col1($row),
+        do_text($row),
         $row["wfo"],
         do_col2($row),
         do_col3($row),
@@ -172,10 +184,11 @@ function do_row_ma($row)
 function do_row_ffw($row)
 {
     return sprintf(
-        "<tr><td>%s</td><td>%s</td><td nowrap>%s</td><td>%s</td><td>%s</td>" .
+        "<tr><td>%s</td><td>%s</td><td>%s</td><td nowrap>%s</td><td>%s</td><td>%s</td>" .
             "<td>%s</td><td>%s</td><td>%s</td><td>%s</td>" .
             "<td>%s</td></tr>",
         do_col1($row),
+        do_text($row),
         $row["wfo"],
         do_col2($row),
         do_col3($row),
@@ -190,7 +203,7 @@ function do_row_ffw($row)
 
 $svrtable = <<<EOF
  <table id='svr' class="table table-condensed table-striped table-bordered">
- <thead><tr><th>Eventid</th><th>WFO</th><th>Start (UTC)</th><th>End</th>
+ <thead><tr><th>Eventid</th><th>Product</th><th>WFO</th><th>Start (UTC)</th><th>End</th>
  <th>Counties/Parishes</th>
  <th>Wind Tag</th><th>Hail Tag</th><th>Tornado Tag</th><th>Damage Tag</th>
  <th>Storm Speed (kts)</th></tr></thead>
@@ -199,7 +212,7 @@ EOF;
 $tortable = str_replace('svr', 'tor', $svrtable);
 $smwtable = <<<EOM
  <table id='svr' class="table table-condensed table-striped table-bordered">
- <thead><tr><th>Eventid</th><th>WFO</th><th>Start (UTC)</th><th>End</th>
+ <thead><tr><th>Eventid</th><th>Product</th><th>WFO</th><th>Start (UTC)</th><th>End</th>
  <th>Counties/Parishes</th>
  <th>Wind Tag</th><th>Hail Tag</th><th>Waterspout Tag</th>
  <th>Storm Speed (kts)</th></tr></thead>
@@ -207,7 +220,7 @@ $smwtable = <<<EOM
 EOM;
 $ffwtable = <<<EOF
  <table id='ffw' class="table table-condensed table-striped table-bordered">
- <thead><tr><th>Eventid</th><th>WFO</th><th>Start (UTC)</th><th>End</th>
+ <thead><tr><th>Eventid</th><th>Product</th><th>WFO</th><th>Start (UTC)</th><th>End</th>
  <th>Counties/Parishes</th>
  <th>Flash Flood Tag</th><th>Damage Tag</th>
  <th>Heavy Rain Tag</th><th>Dam Tag</th>
@@ -278,25 +291,25 @@ $t->content = <<<EOF
  that provides the data found in this table.  The direct URL is:<br />
  <code>{$publicjsonuri}</code></div>
  
- <p><strong>This table is based on data generated at: {$gentime}</strong>.  There is about
+ <p><strong>This table is based on data generated at: <code>{$json["generated_at"]}</code>.  There is about
  an hour worth of caching involved with this page, so please check back later for updated
  values.</p>
- 
+
  <h3>Tornado Warnings</h3>
  <button id="create-grid2" class="btn btn-info" type="button">Make Table Sortable</button>
  {$tortable}
- 
+
  <h3>Severe Thunderstorm Warnings</h3>
 <button id="create-grid1" class="btn btn-info" type="button">Make Table Sortable</button>
-         {$svrtable}
+{$svrtable}
 
 <h3>Flash Flood Warnings</h3>
 <button id="create-grid3" class="btn btn-info" type="button">Make Table Sortable</button>
-        {$ffwtable}
+{$ffwtable}
 
 <h3>Marine Warnings</h3>
 <button id="create-grid4" class="btn btn-info" type="button">Make Table Sortable</button>
-        {$smwtable}
+{$smwtable}
 
 EOF;
 $t->render('full.phtml');

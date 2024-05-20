@@ -29,7 +29,7 @@ MDICT = {
     "H4": "Four Inch and Larger Hail ",
     "G58": "Thunderstorm Wind Gust >= 58 MPH ",
     "G75": "Thunderstorm Wind Gust >= 75 MPH ",
-    "G100": "Thunderstorm Wind Gust >= 100 MPH ",
+    "G100": "Any Wind Gust >= 100 MPH ",
     "WP": "Winter Precipitation (Snow, Sleet, Freezing Rain)",
     "TT": "Tornado + Waterspout + Funnel Cloud",
     "CON": "Convective LSRs (Tornado, TStorm Gst/Dmg, Hail)",
@@ -87,7 +87,10 @@ FILTERS = {
     "H4": " and typetext = 'HAIL' and magnitude >= 4 ",
     "G58": " and type = 'G' and magnitude >= 58 ",
     "G75": " and type = 'G' and magnitude >= 75 ",
-    "G100": " and type = 'G' and magnitude >= 100 ",
+    "G100": (
+        " and typetext in ('DOWNBURST', 'HIGH SUST WINDS', 'MARINE TSTM WIND',"
+        "'NON-TSTM WND GST', 'TSTM WND GST') and magnitude >= 100 "
+    ),
     "CON": (
         " and typetext in ('TORNADO', 'HAIL', 'TSTM WND GST', "
         "'TSTM WND DMG') "
@@ -112,7 +115,16 @@ PDICT = {
 
 def get_description():
     """Return a dict describing how to call this plotter"""
-    desc = {"description": __doc__, "data": True, "cache": 86400}
+    doc = str(__doc__)
+    doc += (
+        "<p>This is how some of the LSR summary types map to database "
+        "queries, FWIW:</p>"
+        "<ul>"
+    )
+    for key, val in FILTERS.items():
+        doc += f"<li>{MDICT[key]} - <code>{val}</code></li>\n"
+    doc += "</ul>"
+    desc = {"description": doc, "data": True, "cache": 86400}
     desc["arguments"] = [
         dict(
             type="select",

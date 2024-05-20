@@ -1,30 +1,35 @@
 """Download backend for NLAE Flux Data."""
 
 import pandas as pd
-from pyiem.exceptions import IncompleteWebRequest
-from pyiem.util import get_sqlalchemy_conn, utc
-from pyiem.webutil import iemapp
+from pydantic import Field
+from pyiem.database import get_sqlalchemy_conn
+from pyiem.util import utc
+from pyiem.webutil import CGIModel, ListOrCSVType, iemapp
 from sqlalchemy import text
 
 
-@iemapp()
+class Schema(CGIModel):
+    """Request arguments."""
+
+    syear: int = Field(..., description="Start Year")
+    smonth: int = Field(..., description="Start Month")
+    sday: int = Field(..., description="Start Day")
+    eyear: int = Field(..., description="End Year")
+    emonth: int = Field(..., description="End Month")
+    eday: int = Field(..., description="End Day")
+    station: ListOrCSVType = Field(..., description="Station Identifier")
+
+
+@iemapp(help=__doc__, schema=Schema)
 def application(environ, start_response):
     """Handle mod_wsgi request."""
-    if "syear" not in environ:
-        raise IncompleteWebRequest("GET syear= parameter is missing")
     sts = utc(
         int(environ["syear"]), int(environ["smonth"]), int(environ["sday"])
     )
     ets = utc(
         int(environ["eyear"]), int(environ["emonth"]), int(environ["eday"])
     )
-    stations = environ.get("station", [])
-    if not isinstance(stations, list):
-        stations = [stations]
-    if not stations:
-        stations = environ.get("station[]", [])
-        if not isinstance(stations, list):
-            stations = [stations]
+    stations = environ["station"]
     with get_sqlalchemy_conn("other") as conn:
         df = pd.read_sql(
             text(
