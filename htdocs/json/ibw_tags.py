@@ -1,13 +1,14 @@
 """Service to dump out IBW tags for a WFO / Year"""
 
-import datetime
 import json
 
+from pyiem.database import get_sqlalchemy_conn
 from pyiem.exceptions import NoDataFound
 from pyiem.reference import ISO8601
-from pyiem.util import get_dbconn, html_escape, utc
+from pyiem.util import html_escape, utc
 from pyiem.webutil import iemapp
 from pymemcache.client import Client
+from sqlalchemy import text
 
 DAMAGE_TAGS = "CONSIDERABLE DESTRUCTIVE CATASTROPHIC".split()
 
@@ -21,20 +22,30 @@ def ptime(val):
 
 def run(wfo, damagetag, year):
     """Actually generate output"""
-    pgconn = get_dbconn("postgis")
-    cursor = pgconn.cursor()
-    wfolimiter = f" w.wfo = '{wfo}' and "
+    params = {
+        "wfo": wfo,
+        "year": year,
+    }
+    wfolimiter = " w.wfo = :wfo and "
     damagelimiter = ""
     if damagetag is not None:
         damagetag = damagetag.upper()
         assert damagetag in DAMAGE_TAGS
         wfolimiter = ""
+        params["damagetag"] = damagetag
         damagelimiter = (
-            f" (damagetag = '{damagetag}' or "
-            f"floodtag_damage = '{damagetag}') and "
+            " (damagetag = :damagetag or floodtag_damage = :damagetag) and "
         )
-    cursor.execute(
-        f"""
+    res = {
+        "year": year,
+        "wfo": wfo,
+        "generated_at": utc().strftime(ISO8601),
+        "gentime": utc().strftime(ISO8601),
+        "results": [],
+    }
+    with get_sqlalchemy_conn("postgis") as conn:
+        cursor = conn.execute(
+            text(f"""
     WITH stormbased as (
      SELECT eventid, phenomena, issue at time zone 'UTC' as utc_issue,
      expire at time zone 'UTC' as utc_expire,
@@ -42,7 +53,7 @@ def run(wfo, damagetag, year):
      polygon_end at time zone 'UTC' as utc_polygon_end,
      status, windtag, hailtag, tornadotag, tml_sknt, damagetag, wfo,
      floodtag_flashflood, floodtag_damage, floodtag_heavyrain,
-     floodtag_dam, floodtag_leeve, waterspouttag
+     floodtag_dam, floodtag_leeve, waterspouttag, product_id
      from sbw_{year} w WHERE {damagelimiter} {wfolimiter}
      phenomena in ('SV', 'TO', 'FF', 'MA')
      and significance = 'W' and status != 'EXP' and status != 'CAN'
@@ -58,52 +69,54 @@ def run(wfo, damagetag, year):
 
  SELECT c.eventid, c.locations, s.utc_issue, s.utc_expire,
  s.utc_polygon_begin, s.utc_polygon_end, s.status, s.windtag, s.hailtag,
- s.tornadotag, s.tml_sknt, s.damagetag, s.wfo, s.phenomena,
+ s.tornadotag, s.tml_sknt, s.damagetag, s.wfo, s.phenomena as ph,
  s.floodtag_flashflood, s.floodtag_damage, s.floodtag_heavyrain,
- s.floodtag_dam, s.floodtag_leeve, s.waterspouttag
+ s.floodtag_dam, s.floodtag_leeve, s.waterspouttag, product_id
  from countybased c JOIN stormbased s ON (c.eventid = s.eventid and
  c.phenomena = s.phenomena and c.wfo = s.wfo)
  ORDER by s.wfo ASC, eventid ASC, utc_polygon_begin ASC
-     """,
-    )
+     """),
+            params,
+        )
 
-    res = dict(
-        year=year,
-        wfo=wfo,
-        gentime=ptime(datetime.datetime.utcnow()),
-        results=[],
-    )
-    for row in cursor:
-        # TODO the wfo here is a bug without it being 4 char
-        href = (
-            f"/vtec/#{year}-O-{row[6]}-K{row[12]}-{row[13]}-W-{row[0]:04.0f}"
-        )
-        data = dict(
-            eventid=row[0],
-            locations=row[1],
-            issue=ptime(row[2]),
-            expire=ptime(row[3]),
-            polygon_begin=ptime(row[4]),
-            polygon_end=ptime(row[5]),
-            status=row[6],
-            windtag=row[7],
-            hailtag=row[8],
-            tornadotag=row[9],
-            tml_sknt=row[10],
-            damagetag=row[11],
-            tornadodamagetag=row[11] if row[13] == "TO" else None,
-            thunderstormdamagetag=row[11] if row[13] == "SV" else None,
-            href=href,
-            wfo=row[12],
-            phenomena=row[13],
-            floodtag_flashflood=row[14],
-            floodtag_damage=row[15],
-            floodtag_heavyrain=row[16],
-            floodtag_dam=row[17],
-            floodtag_leeve=row[18],
-            waterspouttag=row[19],
-        )
-        res["results"].append(data)
+        for row in cursor:
+            row = row._asdict()
+            # TODO the wfo here is a bug without it being 4 char
+            href = (
+                f"/vtec/#{year}-O-{row['status']}-K{row['wfo']}-"
+                f"{row['ph']}-W-{row['eventid']:04.0f}"
+            )
+            data = dict(
+                eventid=row["eventid"],
+                locations=row["locations"],
+                issue=ptime(row["utc_issue"]),
+                expire=ptime(row["utc_expire"]),
+                polygon_begin=ptime(row["utc_polygon_begin"]),
+                polygon_end=ptime(row["utc_polygon_end"]),
+                status=row["status"],
+                windtag=row["windtag"],
+                hailtag=row["hailtag"],
+                tornadotag=row["tornadotag"],
+                tml_sknt=row["tml_sknt"],
+                damagetag=row["damagetag"],
+                tornadodamagetag=row["damagetag"]
+                if row["ph"] == "TO"
+                else None,
+                thunderstormdamagetag=row["damagetag"]
+                if row["ph"] == "SV"
+                else None,
+                href=href,
+                wfo=row["wfo"],
+                phenomena=row["ph"],
+                floodtag_flashflood=row["floodtag_flashflood"],
+                floodtag_damage=row["floodtag_damage"],
+                floodtag_heavyrain=row["floodtag_heavyrain"],
+                floodtag_dam=row["floodtag_dam"],
+                floodtag_leeve=row["floodtag_leeve"],
+                waterspouttag=row["waterspouttag"],
+                product_id=row["product_id"],
+            )
+            res["results"].append(data)
 
     return json.dumps(res)
 

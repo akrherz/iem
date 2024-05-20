@@ -2,8 +2,9 @@
 
 import json
 
+from pyiem.database import get_dbconnc
 from pyiem.reference import ISO8601
-from pyiem.util import get_dbconnc, html_escape
+from pyiem.util import html_escape, utc
 from pyiem.webutil import iemapp
 from pymemcache.client import Client
 
@@ -28,7 +29,7 @@ def run():
         ORDER by utc_issue ASC
     """
     )
-    res = {"events": []}
+    res = {"generated_at": utc().strftime(ISO8601), "events": []}
     for row in cursor:
         uri = (
             f"/vtec/#{row['year']}-O-NEW-K{row['wfo']}-{row['phenomena']}-"
