@@ -224,7 +224,7 @@ def plotter(fdict):
         overlapsql = (
             f"and ST_Area(ST_Intersection(o.geom, g.{geomcol})::geography) / "
             f"(select ST_Area({geomcol}::geography) from {geomtable} g "
-            f"where {limiter}) > :overlap"
+            f"where {limiter} limit 1) > :overlap"
         )
     with get_sqlalchemy_conn("postgis") as conn:
         if opt == "conus":

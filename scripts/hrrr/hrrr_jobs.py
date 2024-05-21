@@ -12,9 +12,10 @@ def main(argv):
         int(argv[1]), int(argv[2]), int(argv[3]), int(argv[4])
     )
     tstring = valid.strftime("%Y %m %d %H")
+    extra = " --is-realtime" if argv[5] == "RT" else ""
     cmds = [
         f"python dl_hrrrref.py {tstring}",
-        f"python plot_ref.py {tstring} {argv[5]}",
+        f"python plot_ref.py --valid={valid:%Y-%m-%dT%H:%M:%S}{extra}",
         f"python hrrr_ref2raster.py {tstring} {argv[5]}",
     ]
     for cmd in cmds:
