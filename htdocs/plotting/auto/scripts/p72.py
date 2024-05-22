@@ -17,10 +17,11 @@ plots for a single county/zone/parish at a time.
 import datetime
 
 import pandas as pd
+from pyiem.database import get_sqlalchemy_conn
 from pyiem.exceptions import NoDataFound
 from pyiem.nws import vtec
 from pyiem.plot import figure_axes
-from pyiem.util import get_autoplot_context, get_sqlalchemy_conn
+from pyiem.util import get_autoplot_context
 from sqlalchemy import text
 
 MDICT = {
@@ -87,10 +88,8 @@ def plotter(fdict):
     wfo = ctx["station"]
     phenomena = ctx["phenomena"]
     significance = ctx["significance"]
-    if ctx["season"] == "all":
+    if ctx["season"] in ["all", "water_year"]:
         months = list(range(1, 13))
-    elif ctx["season"] == "water_year":
-        months = range(1, 13)
     elif ctx["season"] == "spring":
         months = [3, 4, 5]
     elif ctx["season"] == "spring2":

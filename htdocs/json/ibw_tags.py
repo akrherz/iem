@@ -2,15 +2,25 @@
 
 import json
 
+from pydantic import Field
 from pyiem.database import get_sqlalchemy_conn
-from pyiem.exceptions import NoDataFound
+from pyiem.exceptions import IncompleteWebRequest
 from pyiem.reference import ISO8601
 from pyiem.util import html_escape, utc
-from pyiem.webutil import iemapp
+from pyiem.webutil import CGIModel, iemapp
 from pymemcache.client import Client
 from sqlalchemy import text
 
 DAMAGE_TAGS = "CONSIDERABLE DESTRUCTIVE CATASTROPHIC".split()
+
+
+class Schema(CGIModel):
+    """See how we are called."""
+
+    callback: str = Field(None, description="JSONP Callback Name")
+    damagetag: str = Field(None, description="Damage Tag", max_length=20)
+    wfo: str = Field(None, description="WFO Identifier", max_length=4)
+    year: int = Field(..., description="Year to query", ge=2000, le=utc().year)
 
 
 def ptime(val):
@@ -121,15 +131,15 @@ def run(wfo, damagetag, year):
     return json.dumps(res)
 
 
-@iemapp()
+@iemapp(help=__doc__, schema=Schema)
 def application(environ, start_response):
     """Answer request."""
-    wfo = environ.get("wfo", "DMX")[:4]
-    year = int(environ.get("year", 2015))
-    if year < 2000 or year > utc().year:
-        raise NoDataFound("Invalid year")
-    damagetag = environ.get("damagetag")
-    cb = environ.get("callback")
+    year = environ["year"]
+    wfo = environ["wfo"]
+    damagetag = environ["damagetag"]
+    cb = environ["callback"]
+    if wfo is None and damagetag is None:
+        raise IncompleteWebRequest("wfo or damagetag is required")
 
     mckey = (
         f"/json/ibw_tags/{damagetag if damagetag is not None else wfo}/{year}"

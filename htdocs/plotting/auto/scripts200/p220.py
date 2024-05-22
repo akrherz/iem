@@ -315,6 +315,10 @@ def plotter(fdict):
         else:
             fc = COLORS.get(row["threshold"], "red")
             ec = OUTLINE_COLORS.get(row["threshold"], "k")
+            if day > 3 and row["threshold"] in ["0.15", "0.30"]:
+                _xref = {"0.15": "SLGT", "0.30": "ENH"}
+                fc = COLORS[_xref[row["threshold"]]]
+                ec = OUTLINE_COLORS[_xref[row["threshold"]]]
             if day == 0:
                 fc, ec = "None", DAY_COLORS[row["day"]]
                 if row["threshold"] == "0.30":
