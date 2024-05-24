@@ -70,6 +70,40 @@ def plot_points(mp, pts):
     )
 
 
+def plot_tow(tow, mp, tzinfo):
+    """Plot the tornado warnings."""
+    tow.to_crs(mp.panels[0].crs).plot(
+        ax=mp.panels[0].ax,
+        aspect=None,
+        facecolor="r",
+        edgecolor="r",
+        alpha=0.2,
+        lw=2,
+        zorder=9,
+    )
+    # draw some fancy labels for these warnings
+    yloc = 0.3
+    for _, row in tow.to_crs(mp.panels[0].crs).iterrows():
+        label = "%s Tor Warning #%s\n%s till %s" % (
+            row["wfo"],
+            row["eventid"],
+            row["utc_issue"].astimezone(tzinfo).strftime("%-I:%M %p"),
+            row["utc_expire"].astimezone(tzinfo).strftime("%-I:%M %p"),
+        )
+        mp.panels[0].ax.annotate(
+            label,
+            xy=(row["geom"].centroid.x, row["geom"].centroid.y),
+            xytext=(0.1, yloc),
+            textcoords="axes fraction",
+            arrowprops=dict(facecolor="black", shrink=0.05, width=2),
+            bbox=dict(color="#f1bebe", boxstyle="round,pad=0.1"),
+            ha="center",
+            color="k",
+            zorder=12,
+        )
+        yloc += 0.1
+
+
 def plotter(fdict):
     """Go"""
     ctx = get_autoplot_context(fdict, get_description())
@@ -131,6 +165,8 @@ def plotter(fdict):
             tow[col] = tow[col].dt.tz_localize(datetime.timezone.utc)
 
     minutes = int((track_ets - track_sts).total_seconds() / 60.0)
+    if minutes <= 0:
+        raise NoDataFound("Tornado track has no time duration in DAT!")
     # Do work in US Albers
     utm_track = trackgdf.to_crs(epsg=2163).geometry[0]
     speed = utm_track.length / minutes * 60.0  # km/hr
@@ -223,36 +259,8 @@ def plotter(fdict):
             bbox=dict(color="white", alpha=0.8, boxstyle="round,pad=0.1"),
             zorder=20,
         )
-    tow.to_crs(mp.panels[0].crs).plot(
-        ax=mp.panels[0].ax,
-        aspect=None,
-        facecolor="r",
-        edgecolor="r",
-        alpha=0.2,
-        lw=2,
-        zorder=9,
-    )
-    # draw some fancy labels for these warnings
-    yloc = 0.3
-    for _, row in tow.to_crs(mp.panels[0].crs).iterrows():
-        label = "%s Tor Warning #%s\n%s till %s" % (
-            row["wfo"],
-            row["eventid"],
-            row["utc_issue"].astimezone(tzinfo).strftime("%-I:%M %p"),
-            row["utc_expire"].astimezone(tzinfo).strftime("%-I:%M %p"),
-        )
-        mp.panels[0].ax.annotate(
-            label,
-            xy=(row["geom"].centroid.x, row["geom"].centroid.y),
-            xytext=(0.1, yloc),
-            textcoords="axes fraction",
-            arrowprops=dict(facecolor="black", shrink=0.05, width=2),
-            bbox=dict(color="#f1bebe", boxstyle="round,pad=0.1"),
-            ha="center",
-            color="k",
-            zorder=12,
-        )
-        yloc += 0.1
+    if not tow.empty:
+        plot_tow(tow, mp, tzinfo)
     # Draw a color bar
     ncb = ColorbarBase(
         mp.cax,
