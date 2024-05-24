@@ -133,7 +133,7 @@ def run(tmpdir, valid, routes):
 
 @click.command()
 @click.option("--valid", required=True, type=click.DateTime())
-@click.option("--is_realtime", default=False, is_flag=True)
+@click.option("--is-realtime", default=False, is_flag=True)
 def main(valid, is_realtime):
     """Go Main"""
     valid = valid.replace(tzinfo=ZoneInfo("UTC"))

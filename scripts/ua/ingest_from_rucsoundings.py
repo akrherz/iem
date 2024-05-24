@@ -73,11 +73,7 @@ import pandas as pd
 import requests
 from pyiem.database import get_dbconn, get_sqlalchemy_conn
 from pyiem.network import Table as NetworkTable
-from pyiem.util import (
-    exponential_backoff,
-    logger,
-    utc,
-)
+from pyiem.util import exponential_backoff, logger, utc
 from tqdm import tqdm
 
 LOG = logger()
