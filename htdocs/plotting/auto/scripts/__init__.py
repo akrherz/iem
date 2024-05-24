@@ -709,6 +709,12 @@ nopts = [
         "id": 191,
         "label": "Calendar Plot of Watch/Warn/Adv Daily Counts",
     },
+    {
+        "id": "253",
+        "label": (
+            "NWS Damage Assessment Toolkit (DAT) Tornado Tracks + Lead Time"
+        ),
+    },
     {"id": 92, "label": "Days since Last Watch/Warning/Advisory by WFO"},
     {
         "id": 72,

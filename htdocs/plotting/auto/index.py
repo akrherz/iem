@@ -8,11 +8,12 @@ IEM_APPID 92
 import calendar
 import os
 import sys
-from datetime import date, datetime
-
-import pandas as pd
+from datetime import date, datetime, timedelta
+from zoneinfo import ZoneInfo
 
 # Third Party
+import httpx
+import pandas as pd
 import requests
 from paste.request import get_cookie_dict
 from pyiem.database import get_dbconnc, get_sqlalchemy_conn
@@ -451,6 +452,68 @@ def get_timing(apid):
     return timing if timing is not None else -1
 
 
+def compute_dat_label(attribs: dict) -> str:
+    """This is suboptimal."""
+    event_id = attribs.get("event_id", "")
+    wfo = attribs.get("wfo", "")
+    efscale = attribs.get("efscale", "")
+    try:
+        length = attribs.get("length")
+    except ValueError:
+        length = 0
+    sts = pd.Timestamp(attribs.get("starttime") / 1000, unit="s", tz="UTC")
+    return f"{wfo} {efscale} {event_id} {sts:%H%M}Z {length:.0f} miles"
+
+
+def dat_handler(fdict, res):
+    """Generate the Damage Assessment Tool form."""
+    dt = fdict.get("dat", "2024/05/21")
+    gid = fdict.get("datglobalid", "")
+    # Ensure that gid looks like a guid
+    if len(gid) != 38:
+        gid = "{495DE596-B299-41FE-9C90-13C87E43FE0B}"
+    res["pltvars"].append(f"datglobalid:{gid}")
+    # Query DAT for the list of events
+    ss = '<select name="datglobalid">\n'
+    with httpx.Client() as client:
+        sts = datetime.strptime(dt, "%Y/%m/%d").replace(tzinfo=ZoneInfo("UTC"))
+        ets = sts + timedelta(hours=36)
+        url = (
+            "https://services.dat.noaa.gov/arcgis/rest/services/"
+            "nws_damageassessmenttoolkit/DamageViewer/FeatureServer/1/query?"
+            "f=json&returnGeometry=false&outFields=*&"
+            "geometryType=esriGeometryPolyline&"
+            f"time={sts:%s}000%2C{ets:%s}000"
+        )
+        datjson = client.get(url, timeout=30).json()
+        for feat in datjson["features"]:
+            _globalid = feat["attributes"]["globalid"]
+            ss += (
+                f'<option value="{_globalid}" '
+                f'{"selected=" if _globalid == gid else ""}>'
+                f"{compute_dat_label(feat['attributes'])} </option>\n"
+            )
+    ss += "</select>"
+    res["jsextra"] += f"""
+$("#dat").datepicker({{
+    changeMonth: true,
+    changeYear: true,
+    dateFormat: "yy/mm/dd",
+    startDate: new Date('2001/01/01'),
+    endDate: new Date('{utc():%Y/%m/%d}'),
+    onSelect: function(dateText) {{
+        onNetworkChange(dateText);
+    }}
+}});
+$("#dat").datepicker(
+    'setDate', new Date('{dt}')
+);
+    """
+    return (
+        '<input type="text" name="dat" id="dat"> (YYYY/mm/dd) &nbsp; ' f"{ss}"
+    )
+
+
 def generate_form(apid, fdict, headers, cookies):
     """Generate out the form, oh boy!"""
     res = {
@@ -553,6 +616,8 @@ def generate_form(apid, fdict, headers, cookies):
             form = date_handler(value, arg, res)
         elif arg["type"] == "sday":
             form = sday_handler(value, arg, res)
+        elif arg["type"] == "dat":
+            form = dat_handler(fdict, res)
         # Handle the fun that is having it be optional
         if arg.get("optional", False):
             opton = fdict.get(f"_opt_{arg['name']}") == "on"
