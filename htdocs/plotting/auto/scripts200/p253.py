@@ -5,7 +5,15 @@ NWS Damage Assessment Toolkit</a> (DAT) tornado tracks
 (lines) with Tornado Warning (polygons) to provide along track estimates of
 lead time.  This is all unofficial, of course, and makes assumptions about
 constant travel speed of the tornado along the track.  The lead time is
-evaluated at 1 minute intervals.</p>
+evaluated at 1 minute intervals and follows a method found in:
+Stumpf 2024: <a
+href="https://journals.ametsoc.org/view/journals/wefo/39/5/WAF-D-23-0153.1.xml">
+A Geospatial Verification Method for Severe Convective Weather
+Warnings: Implications for Current and Future Warning Methods</a>. Points
+receiving a warning after observation are assigned a negative lead time. Points
+receiving no warning are assigned a no lead time and not considered in the
+lead time average.
+</p>
 
 <p>The data download option will provide the discritized points along the
 tornado track with the lead time in minutes.</p>
@@ -17,6 +25,8 @@ from zoneinfo import ZoneInfo
 
 import geopandas as gpd
 import matplotlib.colors as mpcolors
+import matplotlib.dates as mpdates
+import numpy as np
 import pandas as pd
 from matplotlib.colorbar import ColorbarBase
 from matplotlib.colors import rgb2hex
@@ -26,7 +36,7 @@ from pyiem.database import get_sqlalchemy_conn
 from pyiem.exceptions import NoDataFound
 from pyiem.network import Table as NetworkTable
 from pyiem.plot import get_cmap
-from pyiem.plot.geoplot import MapPlot
+from pyiem.plot.geoplot import MAIN_AX_BOUNDS, MapPlot
 from pyiem.util import get_autoplot_context
 from sqlalchemy import text
 
@@ -54,20 +64,32 @@ def get_description():
 def plot_points(mp, pts):
     """Plot the discritized points."""
     pos = pts[pts["lead"] >= 0]
-    pos.to_crs(mp.panels[0].crs).plot(
-        ax=mp.panels[0].ax,
-        aspect=None,
-        fc=pos["color"],
-        ec="k",
-        zorder=11,
-    )
-    pts[pts["lead"] < 0].to_crs(mp.panels[0].crs).plot(
-        ax=mp.panels[0].ax,
-        aspect=None,
-        c="k",
-        marker="x",
-        zorder=11,
-    )
+    if not pos.empty:
+        pos.to_crs(mp.panels[0].crs).plot(
+            ax=mp.panels[0].ax,
+            aspect=None,
+            fc=pos["color"],
+            ec="k",
+            zorder=11,
+        )
+    pos = pts[pts["lead"] < 0]
+    if not pos.empty:
+        pos.to_crs(mp.panels[0].crs).plot(
+            ax=mp.panels[0].ax,
+            aspect=None,
+            c="k",
+            marker="*",
+            zorder=11,
+        )
+    pos = pts[pts["lead"].isna()]
+    if not pos.empty:
+        pos.to_crs(mp.panels[0].crs).plot(
+            ax=mp.panels[0].ax,
+            aspect=None,
+            c="k",
+            marker="x",
+            zorder=11,
+        )
 
 
 def plot_tow(tow, mp, tzinfo):
@@ -75,14 +97,20 @@ def plot_tow(tow, mp, tzinfo):
     tow.to_crs(mp.panels[0].crs).plot(
         ax=mp.panels[0].ax,
         aspect=None,
-        facecolor="r",
-        edgecolor="r",
-        alpha=0.2,
-        lw=2,
+        facecolor="#ff000033",
+        edgecolor="#ff0000ff",
+        lw=1.5,
         zorder=9,
     )
-    # draw some fancy labels for these warnings
-    yloc = 0.3
+    bounds = mp.panels[0].ax.get_xlim() + mp.panels[0].ax.get_ylim()
+    # status positions for label placement
+    # LL, UR, UL, LR
+    status = [
+        (0.1, 0.1),
+        (0.3, 0.9),  # legend
+        (0.9, 0.9),
+        (0.9, 0.1),
+    ]
     for _, row in tow.to_crs(mp.panels[0].crs).iterrows():
         label = "%s Tor Warning #%s\n%s till %s" % (
             row["wfo"],
@@ -90,10 +118,25 @@ def plot_tow(tow, mp, tzinfo):
             row["utc_issue"].astimezone(tzinfo).strftime("%-I:%M %p"),
             row["utc_expire"].astimezone(tzinfo).strftime("%-I:%M %p"),
         )
+        x_frac = (row["geom"].centroid.x - bounds[0]) / (bounds[1] - bounds[0])
+        y_frac = (row["geom"].centroid.y - bounds[2]) / (bounds[3] - bounds[2])
+        if x_frac < 0.5 and y_frac < 0.5:  # LL
+            pos = status[0]
+            status[0] = (status[0][0], status[0][1] + 0.1)
+        elif x_frac <= 0.5 and y_frac >= 0.5:  # UL
+            pos = status[1]
+            status[1] = (status[1][0], status[1][1] - 0.1)
+        elif x_frac > 0.5 and y_frac >= 0.5:  # UR
+            pos = status[2]
+            status[2] = (status[2][0], status[2][1] - 0.1)
+        else:
+            pos = status[3]
+            status[3] = (status[3][0], status[3][1] + 0.1)
         mp.panels[0].ax.annotate(
             label,
-            xy=(row["geom"].centroid.x, row["geom"].centroid.y),
-            xytext=(0.1, yloc),
+            xy=(max(min(0.98, x_frac), 0.02), max(min(0.98, y_frac), 0.02)),
+            xytext=pos,
+            xycoords="axes fraction",
             textcoords="axes fraction",
             arrowprops=dict(facecolor="black", shrink=0.05, width=2),
             bbox=dict(color="#f1bebe", boxstyle="round,pad=0.1"),
@@ -101,7 +144,29 @@ def plot_tow(tow, mp, tzinfo):
             color="k",
             zorder=12,
         )
-        yloc += 0.1
+
+
+def plot_timeseries(mp, pts, tzinfo):
+    """Show a time profile of the lead time."""
+    ax = mp.fig.add_axes([0.4, 0.06, 0.35, 0.13])
+    ax.plot(pts["valid"], pts["lead"], lw=2, color="k", zorder=1)
+    ax.scatter(pts["valid"], pts["lead"], c=pts["color"], zorder=2)
+    ax.set_xlim(pts["valid"].min(), pts["valid"].max())
+    ax.set_yticks(range(0, 61, 15))
+    ax.xaxis.set_major_formatter(
+        mpdates.DateFormatter("%-I:%M\n%p", tz=tzinfo)
+    )
+    ax.grid(True)
+    ax.text(
+        0.01,
+        1.01,
+        f"Lead Time Profile (minutes) [min: {pts['lead'].min():.0f} "
+        f"max: {pts['lead'].max():.0f}]",
+        transform=ax.transAxes,
+        va="bottom",
+        ha="left",
+        bbox=dict(facecolor="white", edgecolor="tan", pad=1),
+    )
 
 
 def plotter(fdict):
@@ -187,24 +252,34 @@ def plotter(fdict):
     ).to_crs("EPSG:4326")
     pts["lat"] = pts["geom"].y
     pts["lon"] = pts["geom"].x
-    pts["lead"] = -1
+    pts["lead"] = np.nan
     for idx, row in pts.iterrows():
-        # Find candidate warnings
+        valid = row["valid"]
+        # Find candidate warnings, these are sorted by issue time, so the
+        # first one is the one we care about
         ol = tow[tow.intersects(row.geom)]
-        valid = row.valid
-        # Find ones that overlap in time now
+        if ol.empty:
+            continue
+        # Find ones that overlap in time first
         dol = ol[(ol["utc_issue"] <= valid) & (ol["utc_expire"] >= valid)]
         if not dol.empty:
             pts.at[idx, "lead"] = (
-                row.valid - dol.iloc[0].utc_issue
+                valid - dol.iloc[0].utc_issue
+            ).total_seconds() / 60.0
+            continue
+        # Look for the next warning after this time
+        dol = ol[ol["utc_issue"] > valid]
+        if not dol.empty:
+            pts.at[idx, "lead"] = (
+                valid - dol.iloc[0].utc_issue
             ).total_seconds() / 60.0
     pts["color"] = pts["lead"].apply(
         lambda x: rgb2hex(cmap(norm(x))) if x >= 0 else "#000000"
     )
     stats = pts["lead"].describe()
-    # Time to plot
-    bounds = trackgdf.bounds
-    buffer = 0.05
+    bounds = trackgdf.total_bounds
+
+    buffer = 0.01
     label = trackgdf.iloc[0]["event_id"]
     if label is None or label == "":
         label = (
@@ -225,11 +300,18 @@ def plotter(fdict):
             f"Assuming constant {speed_mph:.0f} MPH movement, "
             f"Average Lead Time: {stats['mean']:.0f} minutes"
         ),
-        west=bounds.minx.min() - buffer,
-        east=bounds.maxx.max() + buffer,
-        south=bounds.miny.min() - buffer,
-        north=bounds.maxy.max() + buffer,
+        west=bounds[0] - buffer,
+        east=bounds[2] + buffer,
+        south=bounds[1] - buffer,
+        north=bounds[3] + buffer,
+        axes_position=[
+            MAIN_AX_BOUNDS[0],
+            MAIN_AX_BOUNDS[1] + 0.15,
+            MAIN_AX_BOUNDS[2],
+            MAIN_AX_BOUNDS[3] - 0.15,
+        ],
     )
+    plot_timeseries(mp, pts, tzinfo)
 
     trackgdf.to_crs(mp.panels[0].crs).plot(
         ax=mp.panels[0].ax,
@@ -241,24 +323,18 @@ def plotter(fdict):
     )
     plot_points(mp, pts)
 
-    # label the first and last point on the track with the timestamps
-    for idx in [0, -1]:
-        label = "Start" if idx == 0 else "End"
-        tt = pts.iloc[idx].valid.astimezone(tzinfo).strftime("%-I:%M %p")
-        mp.panels[0].ax.annotate(
-            f"{label} {tt}",
-            xy=(
-                pts.to_crs(mp.panels[0].crs).iloc[idx].geom.x,
-                pts.to_crs(mp.panels[0].crs).iloc[idx].geom.y,
-            ),
-            xytext=(-10, 30),
-            textcoords="offset points",
-            ha="center",
-            color="k",
-            arrowprops=dict(facecolor="black", shrink=0.05),
-            bbox=dict(color="white", alpha=0.8, boxstyle="round,pad=0.1"),
-            zorder=20,
-        )
+    mp.panels[0].ax.text(
+        0.01,
+        -0.02,
+        (
+            f"Start: {track_sts.astimezone(tzinfo).strftime('%-I:%M %p %Z')}\n"
+            f"End: {track_ets.astimezone(tzinfo).strftime('%-I:%M %p %Z')}\n"
+            f"Duration: {minutes} minutes\n"
+        ),
+        va="top",
+        transform=mp.panels[0].ax.transAxes,
+        ha="left",
+    )
     if not tow.empty:
         plot_tow(tow, mp, tzinfo)
     # Draw a color bar
@@ -286,8 +362,14 @@ def plotter(fdict):
                 markersize=10,
             ),
             Line2D([0], [0], marker="x", color="k", linestyle="None"),
+            Line2D([0], [0], marker="*", color="k", linestyle="None"),
         ],
-        ["Tornado Warning", "Positive Lead Time", "No Lead Time"],
+        [
+            "Tornado Warning",
+            "Positive Lead Time",
+            "No Lead Time",
+            "Negative Lead Time",
+        ],
         loc=2,
         framealpha=1,
     )
