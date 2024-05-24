@@ -3,12 +3,30 @@
 import datetime
 import json
 
+from pydantic import Field
 from pyiem.database import get_dbconn
 from pyiem.exceptions import IncompleteWebRequest
 from pyiem.network import Table as NetworkTable
 from pyiem.util import html_escape
-from pyiem.webutil import iemapp
+from pyiem.webutil import CGIModel, iemapp
 from pymemcache.client import Client
+
+
+class Schema(CGIModel):
+    """See how we are called."""
+
+    callback: str = Field(default=None, title="JSONP Callback")
+    day: int = Field(default=1, ge=1, le=31)
+    month: int = Field(default=1, ge=1, le=12)
+    syear: int = Field(default=1800, ge=1800, le=2050)
+    eyear: int = Field(
+        default=datetime.datetime.now().year + 1, ge=1800, le=2050
+    )
+    network: str = Field(
+        default="IACLIMATE",
+        title="Network Identifier",
+        pattern="^[A-Z][A-Z][A-Z_0-9]{2,30}$",
+    )
 
 
 def run(network, month, day, syear, eyear):
@@ -119,22 +137,19 @@ def run(network, month, day, syear, eyear):
     return json.dumps(data)
 
 
-@iemapp()
+@iemapp(help=__doc__, schema=Schema)
 def application(environ, start_response):
     """Main()"""
     headers = [("Content-type", "application/json")]
 
-    network = environ.get("network", "IACLIMATE").upper().strip()
+    network = environ["network"]
     if network == "":
         raise IncompleteWebRequest("No network specified")
-    try:
-        month = int(environ.get("month", 1))
-        day = int(environ.get("day", 1))
-        syear = int(environ.get("syear", 1800))
-        eyear = int(environ.get("eyear", datetime.datetime.now().year + 1))
-    except ValueError as exp:
-        raise IncompleteWebRequest("Invalid arguments") from exp
-    cb = environ.get("callback", None)
+    month = environ["month"]
+    day = environ["day"]
+    syear = environ["syear"]
+    eyear = environ["eyear"]
+    cb = environ["callback"]
 
     mckey = (
         f"/geojson/climodat_dayclimo/{network}/{month}/{day}/{syear}/{eyear}"
