@@ -33,9 +33,10 @@ $imgurl = sprintf(
 );
 
 $gis_url = sprintf(
-    "/cgi-bin/request/gis/watchwarn.py?year=%s&amp;" .
+    "/cgi-bin/request/gis/watchwarn.py?year1=%s&amp;year2=%s&amp;" .
         "month1=%s&amp;day1=%s&amp;hour1=0&amp;minute1=0&amp;month2=%s&amp;" .
         "day2=%s&amp;hour2=0&amp;minute2=0&amp;limit1=yes",
+    date("Y", $ts),
     date("Y", $ts),
     date("m", $ts),
     date("d", $ts),
