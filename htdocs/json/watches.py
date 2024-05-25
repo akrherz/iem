@@ -2,10 +2,20 @@
 
 import json
 
+from pydantic import Field
+from pyiem.database import get_dbconnc
 from pyiem.reference import ISO8601
-from pyiem.util import get_dbconnc, html_escape
-from pyiem.webutil import iemapp
+from pyiem.util import html_escape
+from pyiem.webutil import CGIModel, iemapp
 from pymemcache.client import Client
+
+
+class Schema(CGIModel):
+    """see how we are called."""
+
+    callback: str = Field(default=None, description="JSONP callback function")
+    is_pds: bool = Field(default=False, description="Only PDS Watches")
+    year: int = Field(default=2022, description="Year to limit to")
 
 
 def run(year, is_pds):
@@ -19,7 +29,8 @@ def run(year, is_pds):
     cursor.execute(
         f"""
         with data as (
-            select w.ctid, string_agg(state_abbr, ',') as states
+            select w.ctid,
+            string_agg(state_abbr, ',' order by state_abbr) as states
             from watches w, states s where {limiter} and
             st_intersects(w.geom, s.the_geom) and issued is not null
             and expired is not null GROUP by w.ctid)
@@ -55,12 +66,12 @@ def run(year, is_pds):
     return json.dumps(res)
 
 
-@iemapp()
+@iemapp(help=__doc__, schema=Schema)
 def application(environ, start_response):
     """Answer request."""
-    cb = environ.get("callback", None)
-    is_pds = environ.get("is_pds", "0") == "1"
-    year = int(environ.get("year", 2022))
+    cb = environ["callback"]
+    is_pds = environ["is_pds"]
+    year = environ["year"]
 
     mckey = f"/json/watch/{is_pds}/{year}"
     mc = Client("iem-memcached:11211")
