@@ -67,7 +67,7 @@ function text(str) {
     return $("<p>").text(str).html();
 }
 
- 
+
 function liveShot() {
     if (aqlive) return;
     aqlive = true;
@@ -78,7 +78,7 @@ function liveShot() {
 
 // Updates the window location shown for deep linking
 function updateHashLink() {
-    if (!currentCameraFeature){
+    if (!currentCameraFeature) {
         return;
     }
     const extra = realtimeMode ? "" : `/${$('#dtpicker').data('DateTimePicker').date().utc().format(ISOFMT)}`;
@@ -112,21 +112,21 @@ function findFeatureByCid(cid) {
     return feature;
 }
 
- 
-function handleRWISClick(img){
+function handleRWISClick(img) {
     $("#rwismain").attr('src', $(img).attr("src"));
 }
-function doRWISView(){
+
+function doRWISView() {
     // Do the magic that is the multi-view RWIS data...
     $("#singleimageview").css("display", "none");
     $("#rwisview").css("display", "block");
     $("#rwislist").empty();
     let i = 0;
     let hit = false;
-    while (i < 10){
+    while (i < 10) {
         const url = currentCameraFeature.get(`imgurl${i}`);
-        if (url !== null && url !== undefined){
-            if (!hit){
+        if (url !== null && url !== undefined) {
+            if (!hit) {
                 $("#rwismain").attr('src', url);
                 hit = true;
                 continue;
@@ -139,14 +139,14 @@ function doRWISView(){
 
 // main workflow for updating the webcam image shown to the user
 function updateCamera() {
-    if (!currentCameraFeature){
+    if (!currentCameraFeature) {
         currentCameraFeature = findFeatureByCid(cameraID);
-        if (!currentCameraFeature){
+        if (!currentCameraFeature) {
             return;
         }
     }
     const cid = currentCameraFeature.get("cid");
-    if (cid.startsWith("IDOT-")){
+    if (cid.startsWith("IDOT-")) {
         doRWISView();
         updateHashLink();
     }
@@ -175,7 +175,7 @@ function updateCamera() {
             $("#webcam_title").html(
                 `[${currentCameraFeature.get("cid")}] ${name} @ ${moment(valid).format("D MMM YYYY h:mm A")}`);
             updateHashLink();
-            }
+        }
     }
 
 }
@@ -259,7 +259,7 @@ function refreshJSON() {
 }
 
 // Set the current camera by cid
- 
+
 function setCamera(cid) {
     const feature = findFeatureByCid(cid);
     if (feature) {
@@ -285,6 +285,16 @@ function parseURI() {
 }
 
 function buildUI() {
+
+    // Time increment and decrement buttons
+    $("button.timecontrol").click((evt) => {
+        const offset = parseInt($(evt.target).data('offset'));
+        const dt = $('#dtpicker').data('DateTimePicker').date();
+        dt.add(offset, 'minutes');
+        $('#dtpicker').data('DateTimePicker').date(dt);
+        // unblur the button
+        $(evt.target).blur();
+    });
 
     // Thanks to http://jsfiddle.net/hmgyu371/
     $('#toggle_event_mode button').click(function () { // this
@@ -409,7 +419,7 @@ $().ready(() => {
             return;
         }
         // Remove styling
-        if (currentCameraFeature){
+        if (currentCameraFeature) {
             currentCameraFeature.setStyle(feature.getStyle());
         }
         // Update
