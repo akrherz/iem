@@ -9,9 +9,10 @@ import calendar
 import datetime
 
 import pandas as pd
+from pyiem.database import get_sqlalchemy_conn
 from pyiem.exceptions import NoDataFound
 from pyiem.plot import figure_axes
-from pyiem.util import get_autoplot_context, get_sqlalchemy_conn
+from pyiem.util import get_autoplot_context
 
 PDICT = {
     "month": "Grouped by Month",
@@ -93,6 +94,8 @@ def plotter(fdict):
     """Go"""
     ctx = get_autoplot_context(fdict, get_description())
     station = ctx["station"]
+    if ctx["rng"].find("-") == -1:
+        raise NoDataFound("Invalid range provided.")
     low, high = [float(x) for x in ctx["rng"].split("-")]
     varname = ctx["var"]
     with get_sqlalchemy_conn("coop") as conn:

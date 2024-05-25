@@ -89,6 +89,8 @@ def plotter(fdict):
         (df["Date"] >= pd.Timestamp(sdate))
         & (df["Date"] <= pd.Timestamp(edate))
     ]
+    if df.empty:
+        raise NoDataFound("No data Found.")
     df = df.sort_values("Date", ascending=True)
     df["x"] = df["Date"] + datetime.timedelta(hours=3.5 * 24)
     df = df.set_index("Date")

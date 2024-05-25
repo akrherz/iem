@@ -1,5 +1,5 @@
 <?php
-$OL = "7.5.1";
+$OL = "9.1.0";
 require_once "../../config/settings.inc.php";
 define("IEM_APPID", 95);
 require_once "../../include/mlib.php";
@@ -14,7 +14,7 @@ $t->title =  "Current + Live Web Camera Shots";
 $t->jsextra = <<<EOF
  <script src='/vendor/openlayers/{$OL}/ol.js'></script>
  <script src='/vendor/openlayers/{$OL}/ol-layerswitcher.js'></script>
- <script src="/vendor/moment/2.13.0/moment.min.js"></script>
+ <script src="/vendor/moment/2.30.1/moment.min.js"></script>
  <script src="/vendor/bootstrap-datetimepicker/4.17.47/bootstrap-datetimepicker.min.js"></script>
  <script src='viewer.js'></script>
 EOF;
@@ -30,11 +30,11 @@ $t->content = <<<EOF
    margin-top: 0px;
 }
 </style>
-     <div class="row">
-         <div class="col-sm-4">
-         <h3><i class="fa fa-camera"></i> IEM Webcam Viewer</h3>
-         </div>
-        <div class='col-sm-4'>
+<div class="row">
+<div class="col-sm-4">
+<h3><i class="fa fa-camera"></i> IEM Webcam Viewer</h3>
+</div>
+<div class='col-sm-4'>
     <strong>Mode:</strong>
 <div class="btn-group" id="toggle_event_mode">
     <button type="button" class="btn btn-info locked_active">Realtime</button>
@@ -42,17 +42,25 @@ $t->content = <<<EOF
 </div>
         </div>
         <div class='col-sm-4'>
-        <div id="dtdiv" style="display: none;">
-    <strong>Date &amp; Time:</strong> (click calendar icon)
-        <div class="form-group">
-                <div class='input-group date' id='dtpicker'>
-                    <input type='text' class="form-control" />
-                    <span class="input-group-addon">
-                        <span class="fa fa-calendar"></span>
-                    </span>
-                </div>
-            </div>
-        </div>
+<div id="dtdiv" style="display: none;">
+<strong>Date &amp; Time:</strong> (click calendar icon)
+<br />
+<button data-offset="-60" class="btn btn-default timecontrol" type="button">-1h</button>
+<button data-offset="-5" class="btn btn-default timecontrol" type="button">-5min</button>
+<button data-offset="-1" class="btn btn-default timecontrol" type="button">-1min</button>
+<button data-offset="1" class="btn btn-default timecontrol" type="button">+1min</button>
+<button data-offset="5" class="btn btn-default timecontrol" type="button">+5min</button>
+<button data-offset="60" class="btn btn-default timecontrol" type="button">+1h</button>
+<br />
+<div class="form-group">
+    <div class='input-group date' id='dtpicker'>
+    <input type='text' class="form-control" />
+<span class="input-group-addon">
+    <span class="fa fa-calendar"></span>
+</span>
+    </div>
+</div>
+</div>
         </div>
      </div>
 
@@ -102,11 +110,11 @@ $t->content = <<<EOF
     interesting weather, this interval is decreased to every 1 minute.  So
     if you pick a minute (ie 35) divisible by 5, you are most likely to
     get an archived image.</p>
-        
+
 <p>The media webcams have pan-tilt-zoom capabilities along with the option to request
 a live image.  The arrows on the map indicate the direction the webcam is pointed in, but
 can sometimes be wrong for various painful reasons.</p>
-        
+
 <p>More information on the IEM's webcam work can be found
     <a href="/projects/webcam.php">here</a>.</p>
 

@@ -24,9 +24,10 @@ import pandas as pd
 import pyiem.nws.vtec as vtec
 import seaborn as sns
 from pyiem import reference
+from pyiem.database import get_dbconn, get_sqlalchemy_conn
 from pyiem.exceptions import NoDataFound
 from pyiem.plot import figure_axes
-from pyiem.util import get_autoplot_context, get_dbconn, get_sqlalchemy_conn
+from pyiem.util import get_autoplot_context
 from sqlalchemy import text
 
 PDICT = {
