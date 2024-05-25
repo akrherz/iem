@@ -179,7 +179,10 @@ def plotter(fdict):
         pt = utm_track.interpolate(minute / minutes * utm_track.length)
         rows.append({"geom": pt, "valid": valid})
     cmap = get_cmap(ctx["cmap"])
-    bins = list(range(0, 61, 5))
+    if cmap.N < 13:
+        bins = list(range(0, 61, 10))
+    else:
+        bins = list(range(0, 61, 5))
     norm = mpcolors.BoundaryNorm(bins, cmap.N)
 
     pts = gpd.GeoDataFrame(

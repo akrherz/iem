@@ -137,6 +137,8 @@ def plotter(fdict):
 
     # Set xlim to something that covers the range of data
     df3 = df2[(df2["over_threshold"] > 0) & (df2["over_threshold"] < 100)]
+    if df3.empty:
+        raise NoDataFound("No values found over threshold.")
     ax.set_xlim(df3.index.min() - 5, df3.index.max() + 5)
     ax.grid(True)
     xticks = []
