@@ -3,9 +3,17 @@
 import datetime
 import json
 
-from pyiem.util import html_escape
-from pyiem.webutil import iemapp
-from pymemcache.client import Client
+from pydantic import Field
+from pyiem.webutil import CGIModel, iemapp
+
+
+class Schema(CGIModel):
+    """See how we are called."""
+
+    callback: str = Field(None, title="JSONP Callback")
+    eyear: int = Field(datetime.datetime.now().year + 1, title="End Year")
+    station: str = Field("IA0200", title="Station Identifier", max_length=6)
+    syear: int = Field(1800, title="Start Year")
 
 
 def run(cursor, station, syear, eyear):
@@ -99,26 +107,28 @@ def run(cursor, station, syear, eyear):
     return json.dumps(res)
 
 
-@iemapp(iemdb="coop", iemdb_cursorname="cursor")
+def get_key(environ):
+    """Figure out the cache key"""
+    return (
+        f"/json/climodat_stclimo/{environ['station']}/"
+        f"{environ['syear']}/{environ['eyear']}"
+    )
+
+
+@iemapp(
+    iemdb="coop",
+    iemdb_cursorname="cursor",
+    help=__doc__,
+    schema=Schema,
+    memcachekey=get_key,
+)
 def application(environ, start_response):
     """Answer request."""
-    station = environ.get("station", "IA0200").upper()[:6]
-    syear = int(environ.get("syear", 1800))
-    eyear = int(environ.get("eyear", datetime.datetime.now().year + 1))
-    cb = environ.get("callback", None)
+    station = environ["station"]
+    syear = environ["syear"]
+    eyear = environ["eyear"]
 
-    mckey = f"/json/climodat_stclimo/{station}/{syear}/{eyear}"
-    mc = Client("iem-memcached:11211")
-    res = mc.get(mckey)
-    if not res:
-        res = run(environ["iemdb.coop.cursor"], station, syear, eyear)
-        mc.set(mckey, res, 86400)
-    else:
-        res = res.decode("utf-8")
-    mc.close()
-    if cb is not None:
-        res = f"{html_escape(cb)}({res})"
-
+    res = run(environ["iemdb.coop.cursor"], station, syear, eyear)
     headers = [("Content-type", "application/json")]
     start_response("200 OK", headers)
-    return [res.encode("ascii")]
+    return res

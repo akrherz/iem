@@ -5,9 +5,7 @@ import json
 from pydantic import Field
 from pyiem.database import get_dbconnc
 from pyiem.reference import ISO8601
-from pyiem.util import html_escape
 from pyiem.webutil import CGIModel, iemapp
-from pymemcache.client import Client
 
 
 class Schema(CGIModel):
@@ -66,25 +64,14 @@ def run(year, is_pds):
     return json.dumps(res)
 
 
-@iemapp(help=__doc__, schema=Schema)
+def mckey(environ):
+    """Generate a cache key."""
+    return f"/json/watch/{environ['is_pds']}/{environ['year']}"
+
+
+@iemapp(help=__doc__, schema=Schema, memcachekey=mckey)
 def application(environ, start_response):
     """Answer request."""
-    cb = environ["callback"]
-    is_pds = environ["is_pds"]
-    year = environ["year"]
-
-    mckey = f"/json/watch/{is_pds}/{year}"
-    mc = Client("iem-memcached:11211")
-    res = mc.get(mckey)
-    if not res:
-        res = run(year, is_pds)
-        mc.set(mckey, res, 3600)
-    else:
-        res = res.decode("utf-8")
-    mc.close()
-    if cb is not None:
-        res = f"{html_escape(cb)}({res})"
-
     headers = [("Content-type", "application/json")]
     start_response("200 OK", headers)
-    return [res.encode("ascii")]
+    return run(environ["year"], environ["is_pds"])

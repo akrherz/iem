@@ -3,13 +3,23 @@
 import datetime
 
 import simplejson as json
+from pydantic import Field
 from pyiem.reference import TRACE_VALUE
-from pyiem.util import html_escape
-from pyiem.webutil import iemapp
-from pymemcache.client import Client
+from pyiem.webutil import CGIModel, iemapp
 from simplejson import encoder
 
 encoder.FLOAT_REPR = lambda o: format(o, ".2f")
+
+
+class Schema(CGIModel):
+    """See how we are called."""
+
+    callback: str = Field(None, description="JSONP callback function name")
+    fmt: str = Field("json", description="The format of the output")
+    station: str = Field(
+        "KDSM", description="The station identifier", max_length=4
+    )
+    year: int = Field(2019, description="The year of interest")
 
 
 def departure(ob, climo):
@@ -114,30 +124,32 @@ def get_data(cursor, station, year, fmt):
     return res
 
 
-@iemapp(iemdb="iem", iemdb_cursorname="cursor")
+def get_mckey(environ):
+    """Generate the memcache key"""
+    return f"/json/cf6/{environ['station']}/{environ['year']}/{environ['fmt']}"
+
+
+def get_ct(environ):
+    """Get the content type."""
+    if environ["fmt"] == "json":
+        return "application/json"
+    return "text/plain"
+
+
+@iemapp(
+    iemdb="iem",
+    iemdb_cursorname="cursor",
+    help=__doc__,
+    schema=Schema,
+    memcachekey=get_mckey,
+    content_type=get_ct,
+)
 def application(environ, start_response):
     """Answer request."""
-    station = environ.get("station", "KDSM")[:4]
-    year = int(environ.get("year", 2019))
-    cb = environ.get("callback")
-    fmt = environ.get("fmt", "json")
+    station = environ["station"]
+    year = environ["year"]
 
-    headers = []
-    if fmt == "json":
-        headers.append(("Content-type", "application/json"))
-    else:
-        headers.append(("Content-type", "text/plain"))
-    mckey = f"/json/cf6/{station}/{year}?callback={cb}&fmt={fmt}"
-    mc = Client("iem-memcached:11211")
-    data = mc.get(mckey)
-    if data is not None:
-        data = data.decode("ascii")
-    else:
-        data = get_data(environ["iemdb.iem.cursor"], station, year, fmt)
-        mc.set(mckey, data, 300)
-    if cb is not None:
-        data = f"{html_escape(cb)}({data})"
-    mc.close()
-
+    res = get_data(environ["iemdb.iem.cursor"], station, year, environ["fmt"])
+    headers = [("Content-type", get_ct(environ))]
     start_response("200 OK", headers)
-    return [data.encode("ascii")]
+    return res
