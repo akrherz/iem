@@ -5,7 +5,7 @@ require_once "../../include/mlib.php";
 force_https();
 
 define("IEM_APPID", 10);
-$OL = "7.5.1";
+$OL = "9.1.0";
 $t = new MyView();
 $t->title = "ISU Soil Moisture Network";
 
@@ -113,6 +113,8 @@ during 2012.
 <h4>Select Variable:</h4>
 <select name="varname" id="varpicker">
     <option value="tmpf">Air Temperature [F]</option>
+    <option value="cci">Comprehensive Climate Index</option>
+    <option value="thi">Temperature Humidity Index</option>
     <option value="bat">Battery Voltage [V]</option>
     <option value="encrh_avg">Logger Enclosure Rel Humid [%]</option>
     <option value="et">Hourly Evapotranspiration [inch]</option>

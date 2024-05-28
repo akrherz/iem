@@ -374,6 +374,7 @@ def plotter(fdict):
     if ctx["e"] == "yes":
         emerg_extra = " and is_emergency "
         title += " (Emergencies) "
+    subtitle_extra = ""
     if varname.startswith("count"):
         df = get_count_df(ctx, varname, pstr, sts, ets)
 
@@ -382,6 +383,10 @@ def plotter(fdict):
         units = "Count"
         if varname == "count":
             extend = "max"
+            subtitle_extra = (
+                f" {df['count'].sum():,.0f} Events over {len(df.index):.0f} "
+                f"{'WFOs' if ctx['by'] == 'wfo' else 'States/Territories'}"
+            )
         elif varname == "count_rank":
             extend = "neither"
             units = "Rank"
@@ -494,6 +499,7 @@ def plotter(fdict):
         subtitle=(
             f"Valid {sts:%d %b %Y %H:%M} - {ets:%d %b %Y %H:%M} UTC, "
             f"based on VTEC: {subtitle} {ctx.get('_subtitle', '')}"
+            f"{subtitle_extra}"
         ),
     )
     func = mp.fill_cwas if ctx["by"] == "wfo" else mp.fill_states

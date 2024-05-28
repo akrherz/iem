@@ -105,13 +105,6 @@ def plotter(fdict):
         # make sure it is length two for the trick below in SQL
         months = [ts.month, 999]
 
-    title = f"{ctx['_sname']} :: Time of Day Frequency"
-    subtitle = (
-        f"{vtec.get_ps_string(phenomena, significance)} "
-        f"({phenomena}.{significance}) [{MDICT[ctx['season']]}]"
-    )
-    (fig, ax) = figure_axes(title=title, subtitle=subtitle, apctx=ctx)
-
     tzname = ctx["_nt"].sts[wfo]["tzname"]
     with get_sqlalchemy_conn("postgis") as conn:
         df = pd.read_sql(
@@ -120,12 +113,14 @@ def plotter(fdict):
         WITH data as (
             SELECT extract(year from issue) as yr, eventid,
             min(issue at time zone :tzname) as minissue,
+            max(issue at time zone :tzname) as maxissue,
             max(expire at time zone :tzname) as maxexpire from warnings WHERE
             phenomena = :phenomena and significance = :significance
             and wfo = :wfo and
             extract(month from issue) = ANY(:months) GROUP by yr, eventid),
         events as (
-            select count(*) from data),
+            select count(*), min(minissue) as min_issue,
+            max(maxissue) as max_issue from data),
         timedomain as (
             SELECT generate_series(minissue,
                 least(maxexpire, minissue + '24 hours'::interval)
@@ -137,7 +132,8 @@ def plotter(fdict):
             extract(hour from ts)::int * 60 + extract(minute from ts)::int
             as minute, count(*) from timedomain
             GROUP by minute ORDER by minute ASC)
-        select d.minute, d.count, e.count as total from data2 d, events e
+        select d.minute, d.count, e.count as total, min_issue, max_issue
+        from data2 d, events e
         """
             ),
             conn,
@@ -152,6 +148,14 @@ def plotter(fdict):
         )
     if df.empty:
         raise NoDataFound("No Results Found")
+    title = f"{ctx['_sname']} :: Time of Day Frequency"
+    subtitle = (
+        f"{vtec.get_ps_string(phenomena, significance)} "
+        f"({phenomena}.{significance}) [{MDICT[ctx['season']]}], Period: "
+        f"{df['min_issue'].min().strftime('%d %b %Y')} - "
+        f"{df['max_issue'].max().strftime('%d %b %Y')}"
+    )
+    (fig, ax) = figure_axes(title=title, subtitle=subtitle, apctx=ctx)
     df["frequency"] = df["count"] / df["total"] * 100.0
     ax.bar(
         df.index.values, df["frequency"].values, ec="b", fc="b", align="center"
@@ -193,7 +197,7 @@ def plotter(fdict):
     ax.set_xlabel(f"Timezone: {tzname} (Daylight or Standard)")
     ax.set_ylabel(f"Percentage [%] out of {df['total'].max():.0f} Events")
 
-    return fig, df
+    return fig, df.drop(columns=["min_issue", "max_issue"])
 
 
 if __name__ == "__main__":
