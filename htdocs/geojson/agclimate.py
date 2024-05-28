@@ -56,11 +56,11 @@ def cci(row, shade_effect):
     )
 
 
-def safe_t(val, units="degC"):
+def safe_t(val, _units="degC"):
     """Safe value."""
     if val is None:
         return "M"
-    return f"{convert_value(val, units, 'degF'):.1f}"
+    return f"{convert_value(val, _units, 'degF'):.1f}"
 
 
 def safe_p(val):
