@@ -3,11 +3,57 @@
 import datetime
 import json
 
+from metpy.units import units
+from pydantic import Field
+from pyiem.meteorology import (
+    comprehensive_climate_index,
+    temperature_humidity_index,
+)
 from pyiem.network import Table as NetworkTable
 from pyiem.reference import ISO8601
 from pyiem.tracker import loadqc
 from pyiem.util import convert_value, drct2text, mm2inch, utc
-from pyiem.webutil import iemapp
+from pyiem.webutil import CGIModel, iemapp
+
+
+class Schema(CGIModel):
+    """See how we are called."""
+
+    dt: str = Field(None, description="ISO8601 timestamp")
+    inversion: str = Field(None, description="Set to 1 to get inversion data")
+
+
+def thi(row):
+    """Set to M if null."""
+    if row["tair_c_avg"] is None or row["rh"] is None:
+        return "M"
+    return safe(
+        temperature_humidity_index(
+            units("degC") * row["tair_c_avg"], units("percent") * row["rh"]
+        ),
+        2,
+    )
+
+
+def cci(row, shade_effect):
+    """Set to zero if null."""
+    if (
+        row["srad_wm2"] is None
+        or row["ws_mph"] is None
+        or row["rh"] is None
+        or row["tair_c_avg"] is None
+    ):
+        return "M"
+    return safe(
+        comprehensive_climate_index(
+            units("degC") * row["tair_c_avg"],
+            units("percent") * row["rh"],
+            units("miles per hour") * row["ws_mph"],
+            units("W m^-2") * row["srad_wm2"],
+            shade_effect=shade_effect,
+        ),
+        2,
+    )
 
 
 def safe_t(val, units="degC"):
@@ -184,6 +230,9 @@ def get_data(cursor, ts):
                         else "M"
                     ),
                     "bat": safe(row["battv_min"], 2),
+                    "cci": cci(row, False),
+                    "cci_shade": cci(row, True),
+                    "thi": thi(row),
                     "radmj": safe(row["slrmj_tot"], 2),
                     "srad_wm2": safe(row["srad_wm2"], 2),
                     "tmpf": (
@@ -244,19 +293,26 @@ def get_data(cursor, ts):
     return json.dumps(data)
 
 
-@iemapp(iemdb="isuag")
+@iemapp(
+    iemdb="isuag",
+    help=__doc__,
+    schema=Schema,
+    content_type="application/vnd.geo+json",
+    memcachekey=lambda env: f"{env['dt']}_{env['inversion']}",
+    memcacheexpire=300,
+)
 def application(environ, start_response):
     """Go Main Go"""
     headers = [("Content-type", "application/vnd.geo+json")]
-    dt = environ.get("dt")
+    dt = environ["dt"]
     if dt is None:
         ts = utc().replace(minute=0, second=0, microsecond=0)
     else:
         fmt = "%Y-%m-%dT%H:%M:%S.000Z" if len(dt) == 24 else "%Y-%m-%dT%H:%MZ"
         ts = datetime.datetime.strptime(dt, fmt)
         ts = ts.replace(tzinfo=datetime.timezone.utc)
-    func = get_data if environ.get("inversion") is None else get_inversion_data
+    func = get_data if environ["inversion"] is None else get_inversion_data
     data = func(environ["iemdb.isuag.cursor"], ts)
 
     start_response("200 OK", headers)
-    return [data.encode("ascii")]
+    return data
