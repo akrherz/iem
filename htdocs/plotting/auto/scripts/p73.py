@@ -23,7 +23,11 @@ from pyiem.reference import state_names
 from pyiem.util import get_autoplot_context
 from sqlalchemy import text
 
-PDICT = {"yes": "Limit Plot to Year-to-Date", "no": "Plot Entire Year"}
+PDICT = {
+    "yes": "Limit Plot to Year-to-Date",
+    "no": "Plot Entire Year",
+    "udf": "User Defined Period",
+}
 PDICT2 = {
     "wfo": "View by Single NWS Forecast Office",
     "state": "View by State",
@@ -61,9 +65,21 @@ def get_description():
             type="select",
             name="limit",
             default="no",
-            label="End Date Limit to Plot:",
+            label="Date Limit to Plot:",
             options=PDICT,
         ),
+        {
+            "type": "sday",
+            "name": "sday",
+            "default": "0101",
+            "label": "Start Date (if User Defined Period) [inclusive]:",
+        },
+        {
+            "type": "sday",
+            "name": "eday",
+            "default": "1231",
+            "label": "End Date (if User Defined Period) [inclusive]:",
+        },
         dict(
             type="phenomena",
             name="phenomena",
@@ -127,6 +143,14 @@ def plotter(fdict):
             " and extract(doy from issue) <= "
             "extract(doy from 'TODAY'::date) "
         )
+    elif limit.lower() == "udf":
+        title = f"{ctx['sday']:%-d %b} thru {ctx['eday']:%-d %b}"
+        doy_limiter = (
+            " and to_char(issue, 'mmdd') >= :sday "
+            " and to_char(issue, 'mmdd') <= :eday "
+        )
+        params["sday"] = f"{ctx['sday']:%m%d}"
+        params["eday"] = f"{ctx['eday']:%m%d}"
 
     desc = "wfo, "
     if phenomena in ["TR", "HU"]:
@@ -185,7 +209,10 @@ def plotter(fdict):
     ax.grid(True)
     ax.set_ylabel("Yearly Count")
     xx = "" if limit == "yes" else datetime.date.today().year
-    ax.set_xlabel(f"{xx} thru approximately {datetime.date.today():%-d %b}")
+    if limit != "udf":
+        ax.set_xlabel(
+            f"{xx} thru approximately {datetime.date.today():%-d %b}"
+        )
     ax.yaxis.set_major_locator(MaxNLocator(integer=True))
     return fig, df
 
