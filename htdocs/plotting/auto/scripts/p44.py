@@ -17,7 +17,11 @@ portion of the cold season (1 Jul 2021 - 30 Jun 2022 is 2021).</p>
 
 <p><strong>Updated 26 Jan 2023</strong> When selecting to limit to a year
 to date period, a more exact algorithm is now used to accumulate warnings
-through the end of the current date in central timezone.</p>"""
+through the end of the current date in central timezone.</p>
+
+<p><a href="/plotting/auto/?q=73">Autoplot 73</a> is very similiar to this
+plot, but allows for a user defined period to be selected.</p>
+"""
 
 import calendar
 import datetime
