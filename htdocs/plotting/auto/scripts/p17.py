@@ -41,7 +41,7 @@ def get_description():
             name="year",
             default=yr,
             label="Select Year",
-            minvalue=2000,
+            min=1928,
         ),
         dict(
             type="select",
