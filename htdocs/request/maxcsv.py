@@ -19,11 +19,6 @@ from pyiem.util import utc
 from pyiem.webutil import iemapp
 from sqlalchemy import text
 
-# DOT plows
-# RWIS sensor data
-# River gauges
-# Moon
-
 
 def figurePhase(p1, p2):
     """Return a string of the moon phase!"""
@@ -527,10 +522,10 @@ def do_ahps_fx(nwsli):
     res = f"Forecast Data (Issued {generationtime:%m-%d-%Y %H:%M:%S} UTC):,\n"
     res += "|Date|,|Stage|,|--Flow-|\n"
     odf = df[df["type"] == "F"]
+    col = "Stage[ft]" if "Stage[ft]" in odf.columns else "Tailwater[ft]"
     for _, row in odf.iterrows():
         res += (
-            f"{row['Time']},{row['Stage[ft]']:.2f}ft,"
-            f"{row['Flow[kcfs]']:.1f}kcfs\n"
+            f"{row['Time']},{row[col]:.2f}ft," f"{row['Flow[kcfs]']:.1f}kcfs\n"
         )
     return res
 

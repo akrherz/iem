@@ -5,10 +5,19 @@ import json
 import os
 
 import numpy as np
+from pydantic import Field
 from pyiem import prism
-from pyiem.util import c2f, html_escape, mm2inch, ncopen
-from pyiem.webutil import iemapp
-from pymemcache.client import Client
+from pyiem.util import c2f, mm2inch, ncopen
+from pyiem.webutil import CGIModel, iemapp
+
+
+class Schema(CGIModel):
+    """See how we are called."""
+
+    callback: str = Field(None, description="JSONP callback function")
+    lat: float = Field(41.9, description="Latitude of point")
+    lon: float = Field(-92.0, description="Longitude of point")
+    valid: str = Field("20191028", description="Valid date to query")
 
 
 def myrounder(val, precision):
@@ -96,26 +105,26 @@ def dowork(valid, lon, lat):
     return json.dumps(res)
 
 
-@iemapp()
+def get_mckey(environ):
+    """get key."""
+    return (
+        f"/json/prism/{environ['lon']:.2f}/"
+        f"{environ['lat']:.2f}/{environ['valid']}"
+    )
+
+
+@iemapp(
+    help=__doc__,
+    schema=Schema,
+    memcachekey=get_mckey,
+)
 def application(environ, start_response):
     """Answer request."""
-    lat = float(environ.get("lat", 41.9))
-    lon = float(environ.get("lon", -92.0))
-    valid = environ.get("valid", "20191028")
-    cb = environ.get("callback", None)
+    lat = environ["lat"]
+    lon = environ["lon"]
+    valid = environ["valid"]
 
-    mckey = f"/json/prism/{lon:.2f}/{lat:.2f}/{valid}?callback={cb}"
-    mc = Client("iem-memcached:11211")
-    res = mc.get(mckey)
-    if res is None:
-        res = dowork(valid, lon, lat)
-        mc.set(mckey, res, 3600 * 12)
-    else:
-        res = res.decode("utf-8")
-    mc.close()
-    if cb is not None:
-        res = f"{html_escape(cb)}({res})"
-
+    res = dowork(valid, lon, lat)
     headers = [("Content-type", "application/json")]
     start_response("200 OK", headers)
-    return [res.encode("ascii")]
+    return res

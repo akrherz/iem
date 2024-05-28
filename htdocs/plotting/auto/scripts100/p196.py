@@ -21,6 +21,7 @@ from pyiem.exceptions import NoDataFound
 from pyiem.nws.vtec import NWS_COLORS, get_ps_string
 from pyiem.plot import figure_axes
 from pyiem.util import get_autoplot_context
+from sqlalchemy import text
 
 PDICT = {
     "no": "Consider all Heat Index / Wind Chill Values",
@@ -72,17 +73,23 @@ def get_df(ctx):
     # Thankfully, all the above are zone based
     with get_sqlalchemy_conn("postgis") as conn:
         events = pd.read_sql(
-            """
+            text("""
             SELECT generate_series(issue, expire, '1 minute'::interval)
             as valid,
             (phenomena ||'.'|| significance) as vtec
-            from warnings WHERE ugc = %s and (
-                (phenomena = %s and significance = %s) or
-                (phenomena = %s and significance = %s)
+            from warnings WHERE ugc = :ugc and (
+                (phenomena = :p1 and significance = :s1) or
+                (phenomena = :p2 and significance = :s2)
             ) ORDER by issue ASC
-        """,
+        """),
             conn,
-            params=(ctx["ugc"], ctx["p1"], ctx["s1"], ctx["p2"], ctx["s2"]),
+            params={
+                "ugc": ctx["ugc"],
+                "p1": ctx["p1"],
+                "s1": ctx["s1"],
+                "p2": ctx["p2"],
+                "s2": ctx["s2"],
+            },
             index_col="valid",
         )
     if events.empty:

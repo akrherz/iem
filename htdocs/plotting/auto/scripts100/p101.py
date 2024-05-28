@@ -11,11 +11,12 @@ import datetime
 
 import numpy as np
 import pandas as pd
-from pyiem.database import get_dbconn
+from pyiem.database import get_sqlalchemy_conn
 from pyiem.exceptions import NoDataFound
 from pyiem.nws import vtec
 from pyiem.plot import figure_axes
 from pyiem.util import get_autoplot_context
+from sqlalchemy import text
 
 
 def get_description():
@@ -50,8 +51,6 @@ def get_description():
 
 def plotter(fdict):
     """Go"""
-    pgconn = get_dbconn("postgis")
-    pcursor = pgconn.cursor()
     ctx = get_autoplot_context(fdict, get_description())
     ctx["_nt"].sts["_ALL"] = dict(name="ALL WFOs")
     syear = ctx["syear"]
@@ -59,43 +58,48 @@ def plotter(fdict):
     station = ctx["station"][:4]
     sts = datetime.date(syear, 1, 1)
     ets = datetime.date(eyear, 1, 1)
-    wfo_limiter = (
-        f" and wfo = '{station if len(station) == 3 else station[1:5]}' "
-    )
+    params = {
+        "sts": sts,
+        "ets": ets,
+        "wfo": station if len(station) == 3 else station[1:5],
+    }
+    wfo_limiter = " and wfo = :wfo "
     if station == "_ALL":
         wfo_limiter = ""
 
-    pcursor.execute(
-        f"""
-        select phenomena, significance, min(issue), count(*) from warnings
-        where ugc is not null and issue > %s
-        and issue < %s {wfo_limiter}
-        GROUP by phenomena, significance ORDER by count DESC
-    """,
-        (sts, ets),
-    )
-    if pcursor.rowcount == 0:
-        raise NoDataFound("No data found.")
     labels = []
     vals = []
     cnt = 1
     rows = []
-    for row in pcursor:
-        label = (
-            f"{cnt}. {vtec.get_ps_string(row[0], row[1])} ({row[0]}.{row[1]})"
+    with get_sqlalchemy_conn("postgis") as conn:
+        res = conn.execute(
+            text(f"""
+            select phenomena, significance, min(issue), count(*) from warnings
+            where ugc is not null and issue > :sts
+            and issue < :ets {wfo_limiter}
+            GROUP by phenomena, significance ORDER by count DESC
+        """),
+            params,
         )
-        if cnt < 26:
-            labels.append(label)
-            vals.append(row[3])
-        rows.append(
-            dict(
-                phenomena=row[0],
-                significance=row[1],
-                count=row[3],
-                wfo=station,
+        if res.rowcount == 0:
+            raise NoDataFound("No data found.")
+        for row in res:
+            label = (
+                f"{cnt}. "
+                f"{vtec.get_ps_string(row[0], row[1])} ({row[0]}.{row[1]})"
             )
-        )
-        cnt += 1
+            if cnt < 26:
+                labels.append(label)
+                vals.append(row[3])
+            rows.append(
+                dict(
+                    phenomena=row[0],
+                    significance=row[1],
+                    count=row[3],
+                    wfo=station,
+                )
+            )
+            cnt += 1
     df = pd.DataFrame(rows)
     (fig, ax) = figure_axes(apctx=ctx)
     vals = np.array(vals)
