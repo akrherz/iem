@@ -15,9 +15,21 @@ from zoneinfo import ZoneInfo
 import netCDF4
 import numpy as np
 from PIL import Image
+from pydantic import Field
 from pyiem.database import get_dbconn
 from pyiem.exceptions import IncompleteWebRequest
-from pyiem.webutil import iemapp
+from pyiem.webutil import CGIModel, iemapp
+
+
+class Schema(CGIModel):
+    """See how we are called."""
+
+    dstr: str = Field(
+        "201710251200",
+        description="UTC Datetime to request data for",
+        max_length=12,
+    )
+    prod: str = Field("", description="Product to request", max_length=100)
 
 
 def get_gridinfo(filename, xpoints, ypoints):
@@ -44,6 +56,8 @@ def get_table(prod):
         "from iemrasters where name = %s",
         (prod,),
     )
+    if cursor.rowcount == 0:
+        raise IncompleteWebRequest("Unknown product")
     (rid, template, units, long_name) = cursor.fetchone()
     cursor.execute(
         """
@@ -115,11 +129,11 @@ def do_work(valid, prod, start_response):
     return bio.getvalue()
 
 
-@iemapp(help=__doc__)
+@iemapp(help=__doc__, schema=Schema)
 def application(environ, start_response):
     """Do great things"""
-    dstr = environ.get("dstr", "201710251200")[:12]
-    prod = environ.get("prod", "")[:100]  # arb
+    dstr = environ["dstr"]
+    prod = environ["prod"]
     if prod == "":
         raise IncompleteWebRequest("prod is required")
     try:

@@ -115,14 +115,19 @@ def plotter(fdict):
     opt = ctx["opt"]
     state = ctx["state"]
 
-    ctx["_nt"].sts["_ALL"] = {"name": "All Offices"}
+    ctx["_nt"].sts["_ALL"] = {
+        "name": "All Offices",
+        "tzname": "America/Chicago",
+    }
     params = {}
+    tzname = "America/Chicago"
     if opt == "wfo":
         wfo_limiter = " and wfo = :wfo "
         params["wfo"] = station if len(station) == 3 else station[1:]
         if station == "_ALL":
             wfo_limiter = ""
         title1 = f"NWS {ctx['_nt'].sts[station]['name']}"
+        tzname = ctx["_nt"].sts[station]["tzname"]
     elif opt == "ugc":
         wfo_limiter = " and ugc = :ugc "
         params["ugc"] = ctx["ugc"]
@@ -140,14 +145,14 @@ def plotter(fdict):
     if limit.lower() == "yes":
         title = f"thru ~{datetime.date.today():%-d %b}"
         doy_limiter = (
-            " and extract(doy from issue) <= "
+            " and extract(doy from issue at time zone :tzname) <= "
             "extract(doy from 'TODAY'::date) "
         )
     elif limit.lower() == "udf":
         title = f"{ctx['sday']:%-d %b} thru {ctx['eday']:%-d %b}"
         doy_limiter = (
-            " and to_char(issue, 'mmdd') >= :sday "
-            " and to_char(issue, 'mmdd') <= :eday "
+            " and to_char(issue at time zone :tzname, 'mmdd') >= :sday "
+            " and to_char(issue at time zone :tzname, 'mmdd') <= :eday "
         )
         params["sday"] = f"{ctx['sday']:%m%d}"
         params["eday"] = f"{ctx['eday']:%m%d}"
@@ -159,12 +164,14 @@ def plotter(fdict):
         desc = ""
     params["sig"] = significance
     params["ph"] = phenomena
+    params["tzname"] = tzname
     with get_sqlalchemy_conn("postgis") as conn:
         df = pd.read_sql(
             text(
                 f"""
             with data as (
-                SELECT distinct extract(year from issue)::int as yr,
+                SELECT distinct
+                extract(year from issue at time zone :tzname)::int as yr,
                 {desc} eventid
                 from warnings where phenomena = :ph and significance = :sig
                 {wfo_limiter} {doy_limiter})
@@ -188,12 +195,12 @@ def plotter(fdict):
         df = df[df["yr"] > 2005]
     elif df["yr"].min() == 2008:
         df = df[df["yr"] > 2008]
-    title = (
-        f"{title1} [{title}]\n"
+    title = f"{title1} [{title}]"
+    subtitle = (
         f"{vtec.get_ps_string(phenomena, significance)} "
         f"({phenomena}.{significance}) Count"
     )
-    (fig, ax) = figure_axes(title=title, apctx=ctx)
+    (fig, ax) = figure_axes(title=title, subtitle=subtitle, apctx=ctx)
     ax.bar(df["yr"], df["count"], align="center")
     ax.set_xlim(df["yr"].min() - 0.5, df["yr"].max() + 0.5)
     ymax = df["count"].max()
@@ -209,10 +216,10 @@ def plotter(fdict):
     ax.grid(True)
     ax.set_ylabel("Yearly Count")
     xx = "" if limit == "yes" else datetime.date.today().year
+    xlabel = ""
     if limit != "udf":
-        ax.set_xlabel(
-            f"{xx} thru approximately {datetime.date.today():%-d %b}"
-        )
+        xlabel = f"{xx} thru approximately {datetime.date.today():%-d %b}."
+    ax.set_xlabel(f"{xlabel} Timezone: {tzname}")
     ax.yaxis.set_major_locator(MaxNLocator(integer=True))
     return fig, df
 

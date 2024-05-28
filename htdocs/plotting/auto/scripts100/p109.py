@@ -47,6 +47,7 @@ from pyiem.exceptions import NoDataFound
 from pyiem.nws import vtec
 from pyiem.plot import MapPlot, get_cmap
 from pyiem.util import get_autoplot_context
+from sqlalchemy import text
 
 PDICT = {
     "count": "Event Count",
@@ -159,28 +160,29 @@ def get_count_df(ctx, varname, pstr, sts, ets):
     emerg_extra = ""
     if ctx["e"] == "yes":
         emerg_extra = " and is_emergency "
+    params = {}
     if varname.startswith("count_"):
         if (ets - sts).days > 366:
             raise NoDataFound("Can't compute over period > 366 days")
-        sday = sts.strftime("%m%d")
-        eday = ets.strftime("%m%d")
+        params["sday"] = f"{sts:%m%d}"
+        params["eday"] = f"{ets:%m%d}"
         slimiter = (
-            f" (to_char(issue, 'mmdd') >= '{sday}' and "
-            f"to_char(issue, 'mmdd') <= '{eday}' ) "
+            " (to_char(issue, 'mmdd') >= :sday and "
+            "to_char(issue, 'mmdd') <= :eday ) "
         )
         yearcol = "extract(year from issue)"
-        if eday <= sday:
+        if ets <= sts:
             slimiter = slimiter.replace(" and ", " or ")
             yearcol = (
-                f"case when to_char(issue, 'mmdd') <= '{eday}' then "
+                "case when to_char(issue, 'mmdd') <= :eday then "
                 "extract(year from issue)::int - 1 else "
                 "extract(year from issue) end"
             )
 
         # compute all the things.
-        sdate = "2002-01-01"
+        ctx["sdate"] = "2002-01-01"
         if pstr.find("1=1") > -1:
-            sdate = "2005-10-01"
+            ctx["sdate"] = "2005-10-01"
         with get_sqlalchemy_conn("postgis") as conn:
             if ctx["by"] == "state":
                 sql = f"""
@@ -188,7 +190,7 @@ def get_count_df(ctx, varname, pstr, sts, ets):
                     select distinct wfo, substr(ugc, 1, 2) as state,
                     {yearcol} as year,
                     phenomena, eventid from warnings where {pstr} and
-                    {slimiter} and issue > '{sdate}' {emerg_extra})
+                    {slimiter} and issue > :sdate {emerg_extra})
                 select state as datum, year::int as year, count(*) from events
                 group by datum, year
                 """
@@ -197,11 +199,11 @@ def get_count_df(ctx, varname, pstr, sts, ets):
                 with events as (
                     select distinct wfo, {yearcol} as year,
                     phenomena, eventid from warnings where {pstr} and
-                    {slimiter} and issue > '{sdate}' {emerg_extra})
+                    {slimiter} and issue > :sdate {emerg_extra})
                 select wfo as datum, year::int as year, count(*) from events
                 group by datum, year
                 """
-            df = pd.read_sql(sql, conn, index_col=None)
+            df = pd.read_sql(text(sql), conn, params=params, index_col=None)
         # enlarge by wfo and year cartesian product
         ctx["_subtitle"] = (
             ", Period of Record: "
@@ -239,7 +241,7 @@ def get_count_df(ctx, varname, pstr, sts, ets):
                 select distinct wfo, substr(ugc, 1, 2) as state,
                 extract(year from issue at time zone 'UTC') as year,
                 phenomena, significance, eventid from warnings
-                where {pstr} and issue >= %s and issue < %s {emerg_extra}
+                where {pstr} and issue >=:sts and issue < :ets {emerg_extra}
                 )
 
                 SELECT state as datum, count(*) from total
@@ -251,13 +253,18 @@ def get_count_df(ctx, varname, pstr, sts, ets):
                 select distinct wfo,
                 extract(year from issue at time zone 'UTC') as year,
                 phenomena, significance, eventid from warnings
-                where {pstr} and issue >= %s and issue < %s {emerg_extra}
+                where {pstr} and issue >= :sts and issue < :ets {emerg_extra}
                 )
 
                 SELECT wfo as datum, count(*) from total
                 GROUP by datum
                 """
-            df = pd.read_sql(sql, conn, params=(sts, ets), index_col="datum")
+            df = pd.read_sql(
+                text(sql),
+                conn,
+                params={"sts": sts, "ets": ets},
+                index_col="datum",
+            )
     return df
 
 
@@ -383,10 +390,12 @@ def plotter(fdict):
         units = "Count"
         if varname == "count":
             extend = "max"
-            subtitle_extra = (
-                f" {df['count'].sum():,.0f} Events over {len(df.index):.0f} "
-                f"{'WFOs' if ctx['by'] == 'wfo' else 'States/Territories'}"
-            )
+            # Can't do state as events are double counted
+            if ctx["by"] == "wfo":
+                subtitle_extra = (
+                    f" {df['count'].sum():,.0f} Events over "
+                    f"{len(df.index):.0f} WFOs"
+                )
         elif varname == "count_rank":
             extend = "neither"
             units = "Rank"
@@ -404,7 +413,7 @@ def plotter(fdict):
                 SELECT distinct substr(ugc, 1, 2) as state,
                 generate_series(greatest(issue, %s),
                 least(expire, %s), '1 minute'::interval) as ts from warnings
-                WHERE issue > %s and expire < %s and {pstr} {emerg_extra}
+                WHERE issue > :sts and expire < :ets and {pstr} {emerg_extra}
             ), agg as (
                 SELECT distinct state, date(ts) from data
             )
@@ -414,9 +423,9 @@ def plotter(fdict):
             else:
                 sql = f"""
             WITH data as (
-                SELECT distinct wfo, generate_series(greatest(issue, %s),
-                least(expire, %s), '1 minute'::interval) as ts from warnings
-                WHERE issue > %s and expire < %s and {pstr} {emerg_extra}
+                SELECT distinct wfo, generate_series(greatest(issue, :sts),
+                least(expire, :ets), '1 minute'::interval) as ts from warnings
+                WHERE issue > :sts2 and expire < :ets2 and {pstr} {emerg_extra}
             ), agg as (
                 SELECT distinct wfo, date(ts) from data
             )
@@ -424,14 +433,14 @@ def plotter(fdict):
             GROUP by datum ORDER by days DESC
             """
             df = pd.read_sql(
-                sql,
+                text(sql),
                 conn,
-                params=(
-                    sts,
-                    ets,
-                    sts - datetime.timedelta(days=90),
-                    ets + datetime.timedelta(days=90),
-                ),
+                params={
+                    "sts": sts,
+                    "ets": ets,
+                    "sts2": sts - datetime.timedelta(days=90),
+                    "ets2": ets + datetime.timedelta(days=90),
+                },
                 index_col="datum",
             )
 
@@ -451,9 +460,9 @@ def plotter(fdict):
                 sql = f"""
             WITH data as (
                 SELECT distinct substr(ugc, 1, 2) as state,
-                generate_series(greatest(issue, %s),
-                least(expire, %s), '1 minute'::interval) as ts from warnings
-                WHERE issue > %s and expire < %s and {pstr} {emerg_extra}
+                generate_series(greatest(issue, :sts),
+                least(expire, :ets), '1 minute'::interval) as ts from warnings
+                WHERE issue > :sts2 and expire < :ets2 and {pstr} {emerg_extra}
             )
             select state as datum, count(*) / %s * 100. as tpercent from data
             GROUP by datum ORDER by tpercent DESC
@@ -461,23 +470,23 @@ def plotter(fdict):
             else:
                 sql = f"""
             WITH data as (
-                SELECT distinct wfo, generate_series(greatest(issue, %s),
-                least(expire, %s), '1 minute'::interval) as ts from warnings
-                WHERE issue > %s and expire < %s and {pstr} {emerg_extra}
+                SELECT distinct wfo, generate_series(greatest(issue, :sts),
+                least(expire, :ets), '1 minute'::interval) as ts from warnings
+                WHERE issue > :sts2 and expire < :ets2 and {pstr} {emerg_extra}
             )
-            select wfo as datum, count(*) / %s * 100. as tpercent from data
+            select wfo as datum, count(*) / :mins * 100. as tpercent from data
             GROUP by datum ORDER by tpercent DESC
             """
             df = pd.read_sql(
-                sql,
+                text(sql),
                 conn,
-                params=(
-                    sts,
-                    ets,
-                    sts - datetime.timedelta(days=90),
-                    ets + datetime.timedelta(days=90),
-                    int(total_minutes),
-                ),
+                params={
+                    "sts": sts,
+                    "ets": ets,
+                    "sts2": sts - datetime.timedelta(days=90),
+                    "ets2": ets + datetime.timedelta(days=90),
+                    "mins": int(total_minutes),
+                },
                 index_col="datum",
             )
 
@@ -497,7 +506,7 @@ def plotter(fdict):
         nocaption=True,
         title=f"{title} {PDICT[varname]} {PDICT4[ctx['by']]}",
         subtitle=(
-            f"Valid {sts:%d %b %Y %H:%M} - {ets:%d %b %Y %H:%M} UTC, "
+            f"Issued between {sts:%d %b %Y %H:%M} - {ets:%d %b %Y %H:%M} UTC, "
             f"based on VTEC: {subtitle} {ctx.get('_subtitle', '')}"
             f"{subtitle_extra}"
         ),
