@@ -22,7 +22,6 @@ concept of "days" is 24 hour periods.</td>
 one <strong>issuance</strong> event.</td>
 </tr>
 
-
 <tr>
 <td>Last Year</td>
 <td>Start/End Date Time</td>
@@ -889,16 +888,17 @@ def plotter(fdict):
         )
     else:
         subtitle = f"Plotted for {state_names[state]}, {subtitle}"
-    m = MapPlot(
+    title = (
+        f"{ctx['title']} {vtec.get_ps_string(phenomena, significance)} "
+        f"({phenomena}.{significance})"
+    )
+    mp = MapPlot(
         apctx=ctx,
         sector=("state" if t == "state" else "cwa"),
         state=state,
         cwa=(station if len(station) == 3 else station[1:]),
         axisbg="white",
-        title=(
-            f"{ctx['title']} {vtec.get_ps_string(phenomena, significance)} "
-            f"({phenomena}.{significance})"
-        ),
+        title=title,
         subtitle=subtitle,
         nocaption=True,
         titlefontsize=16,
@@ -935,7 +935,7 @@ def plotter(fdict):
                 "",
                 "",
             ]
-            m.fill_ugcs(
+            mp.fill_ugcs(
                 ctx["data"],
                 bins=ctx["bins"],
                 cmap=cmap,
@@ -948,7 +948,7 @@ def plotter(fdict):
                 is_firewx=(phenomena == "FW"),
             )
         else:
-            m.fill_ugcs(
+            mp.fill_ugcs(
                 ctx["data"],
                 bins=ctx["bins"],
                 cmap=cmap,
@@ -959,7 +959,7 @@ def plotter(fdict):
                 is_firewx=(phenomena == "FW"),
             )
     else:
-        res = m.pcolormesh(
+        res = mp.pcolormesh(
             ctx["lons"],
             ctx["lats"],
             ctx["data"],
@@ -971,27 +971,10 @@ def plotter(fdict):
         # Cut down on SVG et al size
         res.set_rasterized(True)
         if ctx["drawc"] == "yes":
-            m.drawcounties()
+            mp.drawcounties()
 
-    return m.fig, ctx["df"]
+    return mp.fig, ctx["df"]
 
 
 if __name__ == "__main__":
-    plotter(
-        dict(
-            network="WFO",
-            station="GJT",
-            geo="ugc",
-            drawc="yes",
-            state="IA",
-            phenomena="SV",
-            significance="W",
-            v="total",
-            ilabel="yes",
-            t="state",
-            year=1986,
-            year2=2020,
-            sdate="2021-12-14 0000",
-            edate="2021-12-16 1200",
-        )
-    )[0].savefig("/tmp/test.png")
+    plotter({})

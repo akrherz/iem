@@ -27,9 +27,10 @@ import datetime
 import numpy as np
 import pandas as pd
 import requests
+from pyiem.database import get_dbconnc
 from pyiem.exceptions import NoDataFound
 from pyiem.plot import figure
-from pyiem.util import get_autoplot_context, get_dbconnc
+from pyiem.util import get_autoplot_context
 
 PDICT = {
     "dep": "Departure [inch]",
