@@ -180,9 +180,9 @@ def get_count_df(ctx, varname, pstr, sts, ets):
             )
 
         # compute all the things.
-        ctx["sdate"] = "2002-01-01"
+        params["sdate"] = "2002-01-01"
         if pstr.find("1=1") > -1:
-            ctx["sdate"] = "2005-10-01"
+            params["sdate"] = "2005-10-01"
         with get_sqlalchemy_conn("postgis") as conn:
             if ctx["by"] == "state":
                 sql = f"""

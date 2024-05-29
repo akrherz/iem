@@ -6,8 +6,8 @@ URI="http://${WEBHOST}/plotting/auto/plot/199"
 runner () {
   fn=$1
   wget -q ${URI}/opt:${2}::date:${dstr}.png -O ${fn}.png
-  convert ${fn}.png ${fn}.jpg
-  convert ${fn}.jpg ${fn}.gif
+  magick ${fn}.png ${fn}.jpg
+  magick ${fn}.jpg ${fn}.gif
   gifsicle -b -O2 ${fn}.gif
   $PQI -p "plot c 000000000000 agclimate/${fn}.png bogus png" ${fn}.png
   $PQI -p "plot c 000000000000 agclimate/${fn}.gif bogus gif" ${fn}.gif
