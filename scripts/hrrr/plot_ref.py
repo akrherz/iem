@@ -100,7 +100,7 @@ def run(tmpdir, valid, routes):
             pngfn = f"{tmpdir}/hrrr_ref_{i:03.0f}.png"
             mp.postprocess(filename=pngfn)
             mp.close()
-            subprocess.call(["convert", pngfn, f"{pngfn[:-4]}.gif"])
+            subprocess.call(["magick", pngfn, f"{pngfn[:-4]}.gif"])
 
             i += 1
 

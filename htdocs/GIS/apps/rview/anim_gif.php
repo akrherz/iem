@@ -25,7 +25,7 @@ foreach ($urls as $k => $v) {
     $f = fopen($fn, 'wb');
     fwrite($f, $res);
     fclose($f);
-    $output = shell_exec("convert $fn $gfn");
+    $output = shell_exec("magick $fn $gfn");
     $cmdstr .= " {$gfn} ";
 }
 

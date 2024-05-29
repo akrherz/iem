@@ -12,7 +12,8 @@ import time
 import numpy as np
 import requests
 from osgeo import gdal, gdalconst
-from pyiem.util import get_dbconn, logger, utc
+from pyiem.database import get_dbconn
+from pyiem.util import logger, utc
 
 gdal.UseExceptions()
 LOG = logger()
@@ -95,8 +96,7 @@ def run(prod, sts):
     del outdataset
 
     subprocess.call(
-        f"convert /tmp/{sts:%Y%m%d%H}.tiff /tmp/{sts:%Y%m%d%H}.png",
-        shell=True,
+        ["magick", f"/tmp/{sts:%Y%m%d%H}.tiff", f"/tmp/{sts:%Y%m%d%H}.png"],
     )
     # Insert into LDM
     cmd = [
