@@ -82,7 +82,17 @@ function printWARN($lsrs, $warn)
     }
     $windhail = "";
     if ($warn["windtag"] != null) {
-        $windhail = sprintf("<br />H: %s\"<br />W: %s", $warn["hailtag"], $warn["windtag"]);
+        $windhail = sprintf(
+            "<br />H: %s\"<br />W: %s",
+            $warn["hailtag"],
+            $warn["windtag"],
+        );
+    }
+    if ($warn["phenomena"] == "SV"){
+        $windhail .= sprintf(
+            "<br />T: %s",
+            $warn["tor_in_svrtorpossible"] ? "Poss" : "N",
+        );
     }
 
     $s = sprintf(
@@ -314,6 +324,8 @@ $content .= <<<EOF
     </div>
     <div class="col-sm-5">
  <table class="table table-condensed">
+ <tr><th>SVRs with Tornado Possible Tag</th><th>{$stats["svr_with_torpossible_total"]}</th></tr>
+ <tr><th>SVRs with Tornado Possible Tag and Tor LSR</th><th>{$stats["svr_with_torpossible_verified"]}</th></tr>
  <tr><th>FAR == C / (A<sub>w</sub>+C)</th><th>{$far}</th></tr>
  <tr><th>POD == A<sub>e</sub> / (A<sub>e</sub> + B)</th><th>{$pod}</th></tr>
  <tr><th>CSI == ((POD)<sup>-1</sup> + (1-FAR)<sup>-1</sup> - 1)<sup>-1</sup></th><th>{$csi}</th></tr>

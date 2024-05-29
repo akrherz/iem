@@ -270,11 +270,4 @@ def plotter(fdict):
 
 
 if __name__ == "__main__":
-    plotter(
-        {
-            "sdate": "0101",
-            "station": "OK6382",
-            "var": "snow",
-            "network": "OKCLIMATE",
-        }
-    )
+    plotter({})

@@ -20,10 +20,11 @@ import matplotlib.dates as mdates
 import pandas as pd
 from matplotlib import ticker
 from matplotlib.patches import Rectangle
+from pyiem.database import get_sqlalchemy_conn
 from pyiem.exceptions import NoDataFound
 from pyiem.nws import vtec
 from pyiem.plot import figure
-from pyiem.util import get_autoplot_context, get_sqlalchemy_conn
+from pyiem.util import get_autoplot_context
 from sqlalchemy import text
 
 
@@ -112,7 +113,11 @@ def plotter(fdict):
     days = ctx["days"]
 
     ets = sts + datetime.timedelta(days=days)
-    params = {"wfo": station, "sts": sts, "ets": ets}
+    params = {
+        "wfo": station if len(station) == 3 else station[1:],
+        "sts": sts,
+        "ets": ets,
+    }
     date_cols = ["minproductissue", "minissue", "maxexpire", "maxinitexpire"]
     with get_sqlalchemy_conn("postgis") as conn:
         df = pd.read_sql(

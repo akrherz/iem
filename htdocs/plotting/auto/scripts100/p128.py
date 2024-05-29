@@ -148,12 +148,4 @@ def plotter(fdict):
 
 
 if __name__ == "__main__":
-    plotter(
-        dict(
-            var="max_low",
-            network1="NYCLIMATE",
-            station1="NYTNYC",
-            network2="MACLIMATE",
-            station2="MATBOS",
-        )
-    )
+    plotter({})

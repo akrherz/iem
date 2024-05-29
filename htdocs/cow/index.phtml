@@ -322,6 +322,10 @@ Warnings was added, but note that verifying LSRs only became an option after
 1 October 2023.  So no prior warnings will show as verified prior to that date.
 </p>
 
+<p><strong>29 May 2024</strong>: A few updates were made to provide some
+accounting of tornado <code>POSSIBLE</code> tags within Severe Thunderstorm
+Warnings.</p>
+
 <p>The JSON emitting service endpoint is:
 <br /><code>https://mesonet.agron.iastate.edu/api/1/cow.json</code></p>
 
@@ -476,6 +480,8 @@ example, <code>fcster=forecaster10</code></td></tr>
    "size_poly_vs_county[%s]" : float # percent of polygon size compared to county size
    "tdq_stormreports": int # number of non-verifying storm reports in a TOR but outside SVR
    "unwarned_reports": int # number of LSRs without a warning
+   "svr_with_torpossible_total": int # number of SVRs with a TORNADO POSSIBLE at issuance
+   "svr_with_torpossible_verified": int # number of SVRs with a TORNADO POSSIBLE at issuance that got Tornado LSR
 
  "events": GeoJSON-style object of warnings,
    "features": []
@@ -506,6 +512,7 @@ example, <code>fcster=forecaster10</code></td></tr>
        "wfo": str # WFO that issued warning
        "windtag": float # IBW Wind Speed (mph) at issuance
        "year": int # year of warning
+       "tor_in_svrtorpossible": bool # did the SVR warning have a tornado POSSIBLE at issuance
  "stormreports": GeoJSON-style object on LSRS
    "features": []
      "id": int # Sequential LSR identifier used for cross-references

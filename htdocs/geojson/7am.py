@@ -4,11 +4,28 @@ import datetime
 import json
 from zoneinfo import ZoneInfo
 
-from pyiem.exceptions import IncompleteWebRequest
+from pydantic import Field
+from pyiem.database import get_dbconnc
 from pyiem.reference import ISO8601, TRACE_VALUE
-from pyiem.util import get_dbconnc, html_escape
-from pyiem.webutil import iemapp
-from pymemcache.client import Client
+from pyiem.util import utc
+from pyiem.webutil import CGIModel, iemapp
+
+
+class Schema(CGIModel):
+    """See how we are called."""
+
+    callback: str = Field(
+        None,
+        description="Optional JSONP callback function name",
+    )
+    group: str = Field(
+        "coop",
+        description="The group of stations to generate data for",
+    )
+    dt: datetime.date = Field(
+        datetime.date.today(),
+        description="Date to generate data for",
+    )
 
 
 def p(val, precision=2):
@@ -144,33 +161,20 @@ def run(ts, networks):
     return json.dumps(res)
 
 
-@iemapp()
+@iemapp(
+    help=__doc__,
+    schema=Schema,
+    memcachekey=lambda x: f"/geojson/7am/{x['dt']}/{x['group']}",
+    memcacheexpire=15,
+    content_type="application/vnd.geo+json",
+)
 def application(environ, start_response):
     """Do Workflow"""
+    group = environ["group"]
+    dt = environ["dt"]
+    ts = utc(dt.year, dt.month, dt.day, 12)
+
+    res = router(group, ts)
     headers = [("Content-type", "application/vnd.geo+json")]
-
-    group = environ.get("group", "coop")
-    cb = environ.get("callback", None)
-    dt = environ.get("dt", datetime.date.today().strftime("%Y-%m-%d"))
-    try:
-        ts = datetime.datetime.strptime(dt, "%Y-%m-%d")
-    except ValueError as exp:
-        raise IncompleteWebRequest(
-            "dt variable should be in form YYYY-MM-DD"
-        ) from exp
-    ts = ts.replace(hour=12, tzinfo=ZoneInfo("UTC"))
-
-    mckey = f"/geojson/7am/{dt}/{group}"
-    mc = Client("iem-memcached:11211")
-    res = mc.get(mckey)
-    if res is None:
-        res = router(group, ts)
-        mc.set(mckey, res, 15)
-    else:
-        res = res.decode("utf-8")
-    mc.close()
-    if cb is not None:
-        res = f"{html_escape(cb)}({res})"
-
     start_response("200 OK", headers)
-    return [res.encode("ascii")]
+    return res

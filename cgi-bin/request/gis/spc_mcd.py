@@ -1,4 +1,27 @@
-"""Dump SPC MCDs."""
+""".. title:: Storm Prediction Center Mesoscale Convective Discussion
+
+Documentation for /cgi-bin/request/gis/spc_mcd.py
+-------------------------------------------------
+
+The IEM archives Storm Prediction Center Mesoscale Convective Discussions (MCD)
+in real-time and makes them available for download via this service.  The
+raw product text is not emitted here, but the ``prod_id`` is included, which
+is a reference to the raw product text.
+
+Changelog
+---------
+
+- 2024-05-29: Initial documentation
+
+Example Usage
+-------------
+
+Return all MCDs for 2023
+
+https://mesonet.agron.iastate.edu/cgi-bin/request/gis/spc_mcd.py?\
+sts=2023-01-01T00:00Z&ets=2024-01-01T00:00Z
+
+"""
 
 # Local
 import tempfile
@@ -7,11 +30,47 @@ from io import BytesIO
 
 # Third Party
 import geopandas as gpd
+from pydantic import AwareDatetime, Field
+from pyiem.database import get_sqlalchemy_conn
 from pyiem.exceptions import IncompleteWebRequest
-from pyiem.util import get_sqlalchemy_conn
-from pyiem.webutil import iemapp
+from pyiem.webutil import CGIModel, iemapp
 
 PRJFILE = "/opt/iem/data/gis/meta/4326.prj"
+
+
+class Schema(CGIModel):
+    """See how we are called."""
+
+    sts: AwareDatetime = Field(None, description="Start Time")
+    ets: AwareDatetime = Field(None, description="End Time")
+    year1: int = Field(
+        None, description="Start UTC Year when sts is not provided"
+    )
+    year2: int = Field(
+        None, description="End UTC Year when ets is not provided"
+    )
+    month1: int = Field(
+        None, description="Start UTC Month when sts is not provided"
+    )
+    month2: int = Field(
+        None, description="End UTC Month when ets is not provided"
+    )
+    day1: int = Field(
+        None, description="Start UTC Day when sts is not provided"
+    )
+    day2: int = Field(None, description="End UTC Day when ets is not provided")
+    hour1: int = Field(
+        None, description="Start UTC Hour when sts is not provided"
+    )
+    hour2: int = Field(
+        None, description="End UTC Hour when ets is not provided"
+    )
+    minute1: int = Field(
+        None, description="Start UTC Minute when sts is not provided"
+    )
+    minute2: int = Field(
+        None, description="End UTC Minute when ets is not provided"
+    )
 
 
 def run(ctx, start_response):
@@ -71,11 +130,11 @@ def run(ctx, start_response):
     return zio.getvalue()
 
 
-@iemapp(default_tz="UTC")
+@iemapp(default_tz="UTC", help=__doc__, schema=Schema)
 def application(environ, start_response):
     """Do something fun!"""
-    if "sts" not in environ:
-        raise IncompleteWebRequest("GET sts parameter not provided")
+    if environ["sts"] is None or environ["ets"] is None:
+        raise IncompleteWebRequest("GET sts/ets parameter not provided")
     if environ["sts"] > environ["ets"]:
         environ["sts"], environ["ets"] = environ["ets"], environ["sts"]
     ctx = {

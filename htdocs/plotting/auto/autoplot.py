@@ -202,7 +202,7 @@ def workflow(mc, environ, fmt):
     fdict = parser(q)
     # p=number is the python backend code called by this framework
     scriptnum = int(environ["p"])
-    fdict["dpi"] = min([int(float(fdict.get("dpi", 100))), 500])
+    fdict["dpi"] = max(min([int(float(fdict.get("dpi", 100))), 500]), 50)
 
     # memcache keys can not have spaces
     mckey = get_mckey(scriptnum, fdict, fmt)
