@@ -13,9 +13,10 @@ import calendar
 import datetime
 
 import pandas as pd
+from pyiem.database import get_sqlalchemy_conn
 from pyiem.exceptions import NoDataFound
 from pyiem.plot import figure_axes
-from pyiem.util import convert_value, get_autoplot_context, get_sqlalchemy_conn
+from pyiem.util import convert_value, get_autoplot_context
 
 UNITS = {"mph": "miles per hour", "kt": "knots", "mps": "meters per second"}
 UNITCONV = {"mph": "mile / hour", "kt": "knot", "mps": "meter / second"}

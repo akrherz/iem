@@ -14,7 +14,9 @@ one event in this listing.  Sorry, tough issue to get around.  In the case
 of warnings and advisories, the totals should be good.</p>
 
 <p><a href="/plotting/auto/?q=245">Autoplot 245</a> produces a similar plot to
-this one, but with Local Storm Report (LSR) totals.</p>
+this one, but with Local Storm Report (LSR) totals.
+<a href="/plotting/auto/?q=109">Autoplot 109</a> produces maps in a similiar
+manner to this plot.</p>
 """
 
 import calendar
@@ -156,8 +158,8 @@ def plotter(fdict):
             text(
                 f"""
                 SELECT
-                extract(year from issue)::int as yr,
-                extract(month from issue)::int as mo,
+                extract(year from issue at time zone :tzname)::int as yr,
+                extract(month from issue at time zone :tzname)::int as mo,
                 min(date(issue at time zone :tzname)) as min_date,
                 wfo,
                 phenomena, significance, eventid
@@ -245,17 +247,10 @@ def plotter(fdict):
     ax.set_xticks(np.arange(12) + 0.5)
     ax.set_xticklabels(calendar.month_abbr[1:], rotation=0)
     ax.set_ylabel("Year")
-    ax.set_xlabel("Month")
+    ax.set_xlabel(f"Month (Timezone: {params['tzname']})")
 
     return fig, df
 
 
 if __name__ == "__main__":
-    plotter(
-        {
-            "wfo": "BOX",
-            "network": "WFO",
-            "phenomena": "SV",
-            "significance": "W",
-        }
-    )
+    plotter({})
