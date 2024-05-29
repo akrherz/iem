@@ -133,8 +133,8 @@ def run(ctx, start_response):
 @iemapp(default_tz="UTC", help=__doc__, schema=Schema)
 def application(environ, start_response):
     """Do something fun!"""
-    if "sts" not in environ:
-        raise IncompleteWebRequest("GET sts parameter not provided")
+    if environ["sts"] is None or environ["ets"] is None:
+        raise IncompleteWebRequest("GET sts/ets parameter not provided")
     if environ["sts"] > environ["ets"]:
         environ["sts"], environ["ets"] = environ["ets"], environ["sts"]
     ctx = {
