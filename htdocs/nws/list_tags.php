@@ -117,8 +117,8 @@ function do_text($row)
         return "";
     }
     return sprintf(
-        "<a href=\"http://mesonet.agron.iastate.edu/p.php?pid=%s\" target=\"_new\">Text</a>",
-        $row["product_id"],
+        "<a href=\"%s\" target=\"_new\">Text</a>",
+        $row["product_href"],
     );
 }
 function do_col1($row)

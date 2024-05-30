@@ -6,12 +6,12 @@ from pydantic import Field
 from pyiem.database import get_sqlalchemy_conn
 from pyiem.exceptions import IncompleteWebRequest
 from pyiem.reference import ISO8601
-from pyiem.util import html_escape, utc
+from pyiem.util import utc
 from pyiem.webutil import CGIModel, iemapp
-from pymemcache.client import Client
 from sqlalchemy import text
 
 DAMAGE_TAGS = "CONSIDERABLE DESTRUCTIVE CATASTROPHIC".split()
+IEM = "https://mesonet.agron.iastate.edu"
 
 
 class Schema(CGIModel):
@@ -93,7 +93,7 @@ def run(wfo, damagetag, year):
             row = row._asdict()
             # TODO the wfo here is a bug without it being 4 char
             href = (
-                f"/vtec/#{year}-O-{row['status']}-K{row['wfo']}-"
+                f"{IEM}/vtec/#{year}-O-{row['status']}-K{row['wfo']}-"
                 f"{row['ph']}-W-{row['eventid']:04.0f}"
             )
             data = dict(
@@ -125,36 +125,34 @@ def run(wfo, damagetag, year):
                 floodtag_leeve=row["floodtag_leeve"],
                 waterspouttag=row["waterspouttag"],
                 product_id=row["product_id"],
+                product_href=f"{IEM}/p.php?pid={row['product_id']}",
+                product_text=f"{IEM}/api/1/nwstext/{row['product_id']}",
             )
             res["results"].append(data)
 
     return json.dumps(res)
 
 
-@iemapp(help=__doc__, schema=Schema)
+def get_mckey(environ):
+    """ "Get the key."""
+    damagetag = environ["damagetag"]
+    year = environ["year"]
+    wfo = environ["wfo"]
+    return (
+        f"/json/ibw_tags/{damagetag if damagetag is not None else wfo}/{year}"
+    )
+
+
+@iemapp(help=__doc__, schema=Schema, memcachekey=get_mckey)
 def application(environ, start_response):
     """Answer request."""
     year = environ["year"]
     wfo = environ["wfo"]
     damagetag = environ["damagetag"]
-    cb = environ["callback"]
     if wfo is None and damagetag is None:
         raise IncompleteWebRequest("wfo or damagetag is required")
 
-    mckey = (
-        f"/json/ibw_tags/{damagetag if damagetag is not None else wfo}/{year}"
-    )
-    mc = Client("iem-memcached:11211")
-    res = mc.get(mckey)
-    if not res:
-        res = run(wfo, damagetag, year)
-        mc.set(mckey, res, 3600)
-    else:
-        res = res.decode("utf-8")
-    mc.close()
-    if cb is not None:
-        res = f"{html_escape(cb)}({res})"
-
+    res = run(wfo, damagetag, year)
     headers = [("Content-type", "application/json")]
     start_response("200 OK", headers)
-    return [res.encode("ascii")]
+    return res

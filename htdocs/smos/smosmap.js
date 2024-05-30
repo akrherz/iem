@@ -70,7 +70,7 @@ app.Drag.prototype.handleDownEvent = function (evt) {
         this.feature_ = feature;
     }
 
-    return !!feature;
+    return Boolean(feature);
 };
 
 

@@ -1,74 +1,78 @@
 """SPC MCD service."""
 
 import json
-import os
 
+from pydantic import Field
+from pyiem.database import get_sqlalchemy_conn
 from pyiem.reference import ISO8601
-from pyiem.util import get_dbconnc, html_escape
-from pyiem.webutil import iemapp
-from pymemcache.client import Client
+from pyiem.util import utc
+from pyiem.webutil import CGIModel, iemapp
+from sqlalchemy import text
+
+
+class Schema(CGIModel):
+    """See how we are called."""
+
+    callback: str = Field(None, description="JSONP Callback Name")
+    lat: float = Field(
+        42.0, description="Latitude of point in decimal degrees"
+    )
+    lon: float = Field(
+        -95.0, description="Longitude of point in decimal degrees"
+    )
 
 
 def dowork(lon, lat):
     """Actually do stuff"""
-    pgconn, cursor = get_dbconnc("postgis")
-
-    res = {"mcds": []}
-
-    cursor.execute(
-        """
+    data = {"generated_at": utc().strftime(ISO8601), "mcds": []}
+    with get_sqlalchemy_conn("postgis") as conn:
+        res = conn.execute(
+            text("""
         SELECT issue at time zone 'UTC' as i,
-        expire at time zone 'UTC' as e,
-        num,
-        product_id, year, concerning
-        from mcd WHERE
-        ST_Contains(geom, ST_Point(%s, %s, 4326))
+        expire at time zone 'UTC' as e, watch_confidence,
+        num, product_id, year, concerning from mcd WHERE
+        ST_Contains(geom, ST_Point(:lon, :lat, 4326))
         ORDER by product_id DESC
-    """,
-        (lon, lat),
-    )
-    for row in cursor:
-        url = ("https://www.spc.noaa.gov/products/md/%s/md%04i.html") % (
-            row["year"],
-            row["num"],
+    """),
+            {"lon": lon, "lat": lat},
         )
-        res["mcds"].append(
-            dict(
-                spcurl=url,
-                year=row["year"],
-                utc_issue=row["i"].strftime(ISO8601),
-                utc_expire=row["e"].strftime(ISO8601),
-                product_num=row["num"],
-                product_id=row["product_id"],
-                concerning=row["concerning"],
+        for row in res:
+            row = row._asdict()
+            url = (
+                "https://www.spc.noaa.gov/products/md/"
+                f"{row['year']}/md{row['num']:04.0f}.html"
             )
-        )
-    pgconn.close()
-    return json.dumps(res)
+            data["mcds"].append(
+                dict(
+                    spcurl=url,
+                    year=row["year"],
+                    utc_issue=row["i"].strftime(ISO8601),
+                    utc_expire=row["e"].strftime(ISO8601),
+                    product_num=row["num"],
+                    product_id=row["product_id"],
+                    product_href=(
+                        "https://mesonet.agron.iastate.edu/"
+                        f"p.php?pid={row['product_id']}"
+                    ),
+                    concerning=row["concerning"],
+                    watch_confidence=row["watch_confidence"],
+                )
+            )
+    return json.dumps(data)
 
 
-@iemapp()
+def get_mckey(environ):
+    """Get memcache key."""
+    return f"/json/spcmcd/{environ['lon']:.4f}/{environ['lat']:.4f}"
+
+
+@iemapp(help=__doc__, schema=Schema, memcachekey=get_mckey)
 def application(environ, start_response):
     """Answer request."""
-    lat = float(environ.get("lat", 42.0))
-    lon = float(environ.get("lon", -95.0))
+    lat = environ["lat"]
+    lon = environ["lon"]
 
-    cb = environ.get("callback", None)
-
-    hostname = os.environ.get("SERVER_NAME", "")
-    mckey = ("/json/spcmcd/%.4f/%.4f") % (lon, lat)
-    mc = Client("iem-memcached:11211")
-    res = mc.get(mckey) if hostname != "iem.local" else None
-    if not res:
-        res = dowork(lon, lat)
-        mc.set(mckey, res, 3600)
-    else:
-        res = res.decode("utf-8")
-    mc.close()
-
-    if cb is not None:
-        res = "%s(%s)" % (html_escape(cb), res)
-
+    res = dowork(lon, lat)
     headers = [("Content-type", "application/json")]
     start_response("200 OK", headers)
-    return [res.encode("ascii")]
+    return res

@@ -218,8 +218,8 @@ const lsrLayer = new ol.layer.Vector({
         }
         const mag = feature.get('magnitude').toString();
         const typ = feature.get('type');
-        if (mag != "") {
-            if (typ == 'S' || typ == 'R' || typ == '5') {
+        if (mag !== "") {
+            if (typ === 'S' || typ === 'R' || typ === '5') {
                 textStyle.getText().setText(mag);
                 textStyle.getText().getBackgroundFill().setColor(
                     lsrTextBackgroundColor[typ]
@@ -756,7 +756,7 @@ function initUI() {
             }, {
                 targets: 5,
                 render: (_data, type, row) => {
-                    if (type == 'display') {
+                    if (type === 'display') {
                         return `<a href="${row.href}">${row.eventid}</a>`;
                     }
                     return row.eventid;
@@ -850,7 +850,7 @@ function buildOpts() {
 }
 function loadData() {
     // Load up the data please!
-    if ($(".tab .active > a").attr("href") != "#2a") {
+    if ($(".tab .active > a").attr("href") !== "#2a") {
         $("#lsrtab").click();
     }
     updateRADARTimes();
@@ -863,7 +863,7 @@ function loadData() {
         url: `/geojson/lsr.php?${$.param(opts)}`,
         dataType: 'json',
         success: (data) => {
-            if (data.features.length == 10000) {
+            if (data.features.length === 10000) {
                 alert("App limit of 10,000 LSRs reached.");
             }
             lsrLayer.getSource().addFeatures(
@@ -896,7 +896,7 @@ function getShapefileLink(base) {
         }
     }
     const states = $("#state").val();
-    if (states && by == "state") {
+    if (states && by === "state") {
         for (let i = 0; i < states.length; i++) {
             uri += `&state=${text(states[i])}`;
         }
