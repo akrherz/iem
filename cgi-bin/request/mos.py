@@ -16,13 +16,12 @@ station=KDSM&model=NBS&sts=2023-12-14T00:00Z&ets=2023-12-15T00:00Z&format=csv
 
 """
 
-from datetime import datetime
 from io import BytesIO, StringIO
-from zoneinfo import ZoneInfo
 
 import pandas as pd
 from pydantic import AwareDatetime, Field
 from pyiem.database import get_sqlalchemy_conn
+from pyiem.exceptions import IncompleteWebRequest
 from pyiem.webutil import CGIModel, iemapp
 from sqlalchemy import text
 
@@ -135,26 +134,11 @@ def get_data(sts, ets, station, model, fmt):
     return sio.getvalue()
 
 
-@iemapp(help=__doc__, schema=MyModel, parse_times=False)
+@iemapp(help=__doc__, schema=MyModel, default_tz="UTC")
 def application(environ, start_response):
     """See how we are called"""
-    if environ["sts"] is None:
-        environ["sts"] = datetime(
-            environ["year1"],
-            environ["month1"],
-            environ["day1"],
-            environ["hour1"],
-            tzinfo=ZoneInfo("UTC"),
-        )
-    if environ["ets"] is None:
-        environ["ets"] = datetime(
-            environ["year2"],
-            environ["month2"],
-            environ["day2"],
-            environ["hour2"],
-            tzinfo=ZoneInfo("UTC"),
-        )
-
+    if environ["sts"] is None or environ["ets"] is None:
+        raise IncompleteWebRequest("Missing sts and/or ets")
     fmt = environ["format"]
     station = environ["station"].upper()
     model = environ["model"]

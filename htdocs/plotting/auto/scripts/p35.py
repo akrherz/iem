@@ -7,9 +7,10 @@ import calendar
 import datetime
 
 import numpy as np
+from pyiem.database import get_dbconn
 from pyiem.exceptions import NoDataFound
 from pyiem.plot import figure_axes
-from pyiem.util import get_autoplot_context, get_dbconn
+from pyiem.util import get_autoplot_context
 
 PDICT = {
     "tmpf": "Air Temp (F)",
@@ -87,6 +88,8 @@ def plotter(fdict):
     """,
         (station, hours),
     )
+    if cursor.rowcount == 0:
+        raise NoDataFound("No non-null data found")
     weeks = []
     deltas = []
     for row in cursor:

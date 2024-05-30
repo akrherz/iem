@@ -8,8 +8,9 @@ import json
 from zoneinfo import ZoneInfo
 
 # extras
+from pyiem.database import get_dbconn
 from pyiem.exceptions import IncompleteWebRequest
-from pyiem.util import get_dbconn, html_escape
+from pyiem.util import html_escape
 from pyiem.webutil import iemapp
 
 

@@ -106,4 +106,4 @@ def application(environ, start_response):
         for x, y in zip(X, Y):
             sio.write(f" {y}, {x}\n")
         sio.write("End:\n\n")
-    return [sio.getvalue().encode("ascii")]
+    return [sio.getvalue().encode("utf-8")]

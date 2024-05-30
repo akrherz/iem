@@ -90,7 +90,15 @@ function doMCD(lon, lat) {
         success(data) {
             $("#mcd_spinner").hide();
             $.each(data.mcds, (_index, mcd) => {
-                tbody.append(`<tr><td><a href="${mcd.spcurl}" target="_blank">${mcd.year} ${mcd.product_num}</a></td><td>${mcd.utc_issue}</td><td>${mcd.utc_expire}</td></tr>`)
+
+                tbody.append(
+                    `<tr><td><a href="${mcd.spcurl}" target="_blank">${mcd.year} ` +
+                    `${mcd.product_num}</a></td>` +
+                    `<td>${mcd.utc_issue}</td>` +
+                    `<td>${mcd.utc_expire}</td>` +
+                    `<td>${mcd.watch_confidence || ''}</td>` +
+                    `<td>${mcd.concerning}</td>` +
+                    `</tr>`);
             });
             if (data.mcds.length === 0) {
                 tbody.append('<tr><td colspan="3">No Results Found!</td></tr>');
