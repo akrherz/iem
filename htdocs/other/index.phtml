@@ -174,5 +174,16 @@ two minute average.</p>
 </table>
 <input type="submit" value="Request Data" />
 </form>
+
+<h3>WMO BUFR Surface</h3>
+
+<p>During December 2023, the IEM started an ingest of surface data
+disseminated via NOAA in BUFR format.  There are thousands of stations within
+this IEM classified network.  The processing remains a work-in-progress, but
+you can <a href="/request/wmo_bufr_srf.php">download data</a> and view a large
+<a href="/sites/networks.php?network=WMO_BUFR_SRF">network table</a> or
+<a href="/sites/locate.php?network=WMO_BUFR_SRF">station map</a> to see
+what is available.</p>
+
 EOF;
 $t->render('single.phtml');
