@@ -123,14 +123,13 @@ foreach ($datequeue as $dt) {
     if ($view == "prod") {
         foreach ($rows as $row) {
             $ts = strtotime($row["entered"]);
-            $url = sprintf("p.php?pil=%s&e=%s", $row["pil"], gmdate("YmdHi", $ts));
             if (!array_key_exists($row[$antiby], $prods)) {
                 $prods[$row[$antiby]] = "";
             }
             $prods[$row[$antiby]] .= sprintf(
                 "<tr><td>%s</td><td><a href=\"%s\">%s</a>%s</td><td>%s</td><td>%s</td></tr>",
                 $row["cccc"],
-                $url,
+                $row["link"],
                 $row["pil"],
                 ($row["count"] > 1) ? " {$row['count']}x": "",
                 gmdate("Y-m-d", $ts),
@@ -140,13 +139,12 @@ foreach ($datequeue as $dt) {
     } else if ($view == "grid") {
         foreach ($rows as $row) {
             $ts = strtotime($row["entered"]);
-            $url = sprintf("p.php?pil=%s&e=%s", $row["pil"], gmdate("YmdHi", $ts));
             if (!array_key_exists($row[$antiby], $columns)) {
                 $columns[$row[$antiby]] = "";
             }
             $columns[$row[$antiby]] .= sprintf(
                 "<a href=\"%s\">%s</a> %s@%s<br />",
-                $url,
+                $row["link"],
                 $row["pil"],
                 ($row["count"] > 1) ? "{$row['count']}x": "",
                 gmdate($timeformat, $ts)
@@ -158,7 +156,6 @@ foreach ($datequeue as $dt) {
         $atags .= '<div class="clearfix"></div><strong>Skip to Hour:</strong> ';
         foreach ($rows as $row) {
             $ts = strtotime($row["entered"]);
-            $url = sprintf("p.php?pil=%s&e=%s", $row["pil"], gmdate("YmdHi", $ts));
             if (gmdate("H", $ts) != $lasthour) {
                 if ($lasthour != "") {
                     // End previous col-
@@ -183,7 +180,7 @@ foreach ($datequeue as $dt) {
             }
             $table .= sprintf(
                 "<a href=\"%s\">%s</a> %s@%s<br />",
-                $url,
+                $row["link"],
                 $row["pil"],
                 ($row["count"] > 1) ? "{$row['count']}x": "",
                 gmdate("H:i", $ts)

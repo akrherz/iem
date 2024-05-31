@@ -32,25 +32,19 @@ function printLSR($lsr, $verified = FALSE)
     if ($lsr["magnitude"] == 0) {
         $lsr["magnitude"] = "";
     }
-    $uri = sprintf(
-        "/lsr/#%s/%s/%s",
-        $lsr["wfo"],
-        $valid->format("YmdHi"),
-        $valid->format("YmdHi")
-    );
     return sprintf(
         '<tr style="background: #eee;"><td></td>' .
             '<td><a href="%s" target="_new">%s</a></td>' .
             '<td style="background: %s;">%s</td><td>%s,%s</td>' .
             '<td><a href="%s" target="_new">%s</a></td><td>%s</td><td>%s</td>' .
             '<td colspan="5">%s</td></tr>',
-        $uri,
+        $lsr["link"],
         $valid->format("m/d/Y H:i"),
         $background,
         $leadtime,
         $lsr["county"],
         $lsr["state"],
-        $uri,
+        $lsr["link"],
         $lsr["city"],
         $lt[strval($lsr["type"])],
         $lsr["magnitude"],
@@ -63,15 +57,6 @@ function printWARN($lsrs, $warn)
     global $lsrbuffer;
     $issue = new DateTime($warn["issue"]);
     $expire = new DateTime($warn["expire"]);
-    $uri = sprintf(
-        "/vtec/#%s-O-%s-K%s-%s-%s-%04d",
-        $issue->format("Y"),
-        $warn["status"],
-        $warn["wfo"],
-        $warn["phenomena"],
-        $warn["significance"],
-        $warn["eventid"]
-    );
     $background = "#0f0";
     if ($warn["verify"] == False) {
         $background = "#f00";
@@ -101,29 +86,24 @@ function printWARN($lsrs, $warn)
             "<td colspan=\"2\"><a href=\"%s\" target=\"_new\">%s</a></td>" .
             "<td><a href=\"%s\">%s</a></td><td>%.0f sq km</td>" .
             "<td>%.0f sq km</td><td>%.0f %%</td>" .
-            "<td>%.0f%% <a href=\"/GIS/radmap.php?layers[]=legend&layers[]=ci&layers[]=cbw&layers[]=sbw&layers[]=uscounties&layers[]=bufferedlsr&vtec=%s.K%s.%s.%s.%04d&lsrbuffer=%s\">Visual</a></td>" .
+            "<td>%.0f%% <a href=\"%s\">Visual</a></td>" .
             "<td>%.0f%%</td><td>%s</td></tr>\n",
         $background,
-        $uri,
+        $warn["link"],
         $warn["phenomena"],
         $warn["eventid"],
         $windhail,
         $issue->format("m/d/Y H:i"),
         $expire->format("m/d/Y H:i"),
-        $uri,
+        $warn["link"],
         implode(", ", $warn["ar_ugcname"]),
-        $uri,
+        $warn["link"],
         $warn["status"],
         $warn["parea"],
         $warn["carea"],
         ($warn["carea"] - $warn["parea"]) / $warn["carea"]  * 100,
         $bratio,
-        $issue->format("Y"),
-        $warn["wfo"],
-        $warn["phenomena"],
-        $warn["significance"],
-        $warn["eventid"],
-        $lsrbuffer,
+        $warn["visual_imgurl"],
         $warn["areaverify"] / $warn["parea"] * 100.,
         $warn["fcster"]
     );
