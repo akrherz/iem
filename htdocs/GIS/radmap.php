@@ -120,11 +120,17 @@ $sectors = array(
     ),
 );
 
+
 /* Setup layers */
 $layers = isset($_GET["layers"]) ? $_GET["layers"] : array("n0q");
 // Make sure layers is an array...
 if (gettype($layers) == "string") {
     $layers = array($layers);
+}
+
+// Alias for visual plot of VTEC
+if (isset($_GET["visual"])){
+    $layers = array("legend", "ci", "cbw", "sbw", "uscounties", "bufferedlsr");
 }
 
 /* Straight CGI Butter */
