@@ -7,6 +7,7 @@ import os
 import numpy as np
 from pydantic import Field
 from pyiem import prism
+from pyiem.exceptions import NoDataFound
 from pyiem.util import c2f, mm2inch, ncopen
 from pyiem.webutil import CGIModel, iemapp
 
@@ -63,6 +64,8 @@ def dowork(valid, lon, lat):
     dates = compute_dates(valid)
 
     i, j = prism.find_ij(lon, lat)
+    if i is None or j is None:
+        raise NoDataFound("Coordinates outside of domain")
 
     res = {
         "gridi": int(i),

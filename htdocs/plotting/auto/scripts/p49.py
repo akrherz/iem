@@ -112,10 +112,10 @@ def plotter(fdict):
     station = ctx["station"]
     params = {"station": station, "syear": ctx["syear"], "eyear": ctx["eyear"]}
     threshold = ctx["threshold"]
+    threshold2 = ctx["threshold2"]
     params["threshold"] = threshold
     varname = ctx["var"]
     if ctx["opt"] == "rng":
-        threshold2 = ctx["threshold2"]
         if threshold > threshold2:
             threshold, threshold2 = threshold2, threshold
         params["threshold"] = threshold
@@ -131,6 +131,9 @@ def plotter(fdict):
         sql = f"val::numeric {XREF[ctx['opt']]} :threshold"
         vv = PDICT2[ctx["opt"]].replace("{threshold}", str(threshold))
         subtitle = f"Frequency of {PDICT[varname]} {vv} "
+    if varname in ["high", "low"]:
+        params["threshold"] = int(threshold)
+        params["threshold2"] = int(threshold2)
     days = int(ctx["days"])
     func = "avg" if days == 1 else ctx["f"]
     with get_sqlalchemy_conn("coop") as conn:

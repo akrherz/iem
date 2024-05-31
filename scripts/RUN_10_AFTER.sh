@@ -86,7 +86,7 @@ cd ../summary
 python hourly_precip.py
 if [ $LHH -eq "06" ]
 then
-    python max_reflect.py $(date -u --date '1 days ago' +'%Y %m %d') 6 &
+    python max_reflect.py --valid=$(date -u --date '1 days ago' +'%Y-%m-%dT06:00:00') &
 fi
 
 cd ../week

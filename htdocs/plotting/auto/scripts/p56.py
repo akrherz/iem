@@ -175,6 +175,8 @@ def plotter(fdict):
         "wfo": station,
     }
     limiter = " wfo = :wfo "
+    if station not in ctx["_nt"].sts:
+        raise NoDataFound("ERROR: Unknown WFO Identifier.")
     title = f"[{station}] NWS {ctx['_nt'].sts[station]['name']}"
     if opt == "state":
         title = f"State of {reference.state_names[state]}"

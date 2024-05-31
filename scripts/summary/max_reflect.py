@@ -4,16 +4,16 @@ Run from RUN_0Z.sh, RUN_10_AFTER.sh (6z)
 """
 
 import datetime
-import os
 import subprocess
-import sys
+import tempfile
 import time
 
+import click
 import numpy as np
 import requests
 from osgeo import gdal, gdalconst
 from pyiem.database import get_dbconn
-from pyiem.util import logger, utc
+from pyiem.util import archive_fetch, logger, utc
 
 gdal.UseExceptions()
 LOG = logger()
@@ -44,7 +44,7 @@ def get_colortable(prod):
     return ct
 
 
-def run(prod, sts):
+def run(tmpdir, prod, sts):
     """Create a max dbZ plot
 
     Args:
@@ -64,15 +64,14 @@ def run(prod, sts):
     maxn0r = None
     now = sts
     while now < ets:
-        fn = now.strftime(
-            f"/mesonet/ARCHIVE/data/%Y/%m/%d/GIS/uscomp/{prod}_%Y%m%d%H%M.png"
-        )
-        if not os.path.isfile(fn):
-            LOG.warning("missing file: %s", fn)
-            now += interval
-            continue
-        n0r = gdal.Open(fn, 0)
-        n0rd = n0r.ReadAsArray()
+        ppath = now.strftime(f"%Y/%m/%d/GIS/uscomp/{prod}_%Y%m%d%H%M.png")
+        with archive_fetch(ppath) as fn:
+            if fn is None:
+                LOG.warning("missing file: %s", ppath)
+                now += interval
+                continue
+            n0r = gdal.Open(fn, 0)
+            n0rd = n0r.ReadAsArray()
         LOG.info(
             "%s %s %s %s", now, n0rd.dtype, np.shape(n0rd), n0r.RasterCount
         )
@@ -84,7 +83,7 @@ def run(prod, sts):
 
     out_driver = gdal.GetDriverByName("gtiff")
     outdataset = out_driver.Create(
-        f"/tmp/{sts:%Y%m%d%H}.tiff",
+        f"{tmpdir}/{sts:%Y%m%d%H}.tiff",
         n0r.RasterXSize,
         n0r.RasterYSize,
         n0r.RasterCount,
@@ -96,7 +95,11 @@ def run(prod, sts):
     del outdataset
 
     subprocess.call(
-        ["magick", f"/tmp/{sts:%Y%m%d%H}.tiff", f"/tmp/{sts:%Y%m%d%H}.png"],
+        [
+            "magick",
+            f"{tmpdir}/{sts:%Y%m%d%H}.tiff",
+            f"{tmpdir}/{sts:%Y%m%d%H}.png",
+        ],
     )
     # Insert into LDM
     cmd = [
@@ -104,13 +107,13 @@ def run(prod, sts):
         "-p",
         f"plot a {sts:%Y%m%d%H}00 bogus "
         f"GIS/uscomp/max_{prod}_{label}_{sts:%Y%m%d}.png png",
-        f"/tmp/{sts:%Y%m%d%H}.png",
+        f"{tmpdir}/{sts:%Y%m%d%H}.png",
     ]
     LOG.info(" ".join(cmd))
     subprocess.call(cmd)
 
     # Create tmp world file
-    wldfn = f"/tmp/tmpwld{sts:%Y%m%d%H}.wld"
+    wldfn = f"{tmpdir}/tmpwld{sts:%Y%m%d%H}.wld"
     with open(wldfn, "w", encoding="utf-8") as fh:
         if prod == "n0r":
             fh.write("0.01\n0.0\n0.0\n-0.01\n-126.0\n50.0")
@@ -118,17 +121,18 @@ def run(prod, sts):
             fh.write("0.005\n0.0\n0.0\n-0.005\n-126.0\n50.0")
 
     # Insert world file as well
-    cmd = (
-        f"pqinsert -i -p 'plot a {sts:%Y%m%d%H}00 bogus "
-        f"GIS/uscomp/max_{prod}_{label}_{sts:%Y%m%d}.wld wld' {wldfn}"
-    )
-    LOG.info(cmd)
-    subprocess.call(cmd, shell=True)
-
-    # cleanup
-    os.remove(f"/tmp/{sts:%Y%m%d%H}.tiff")
-    os.remove(f"/tmp/{sts:%Y%m%d%H}.png")
-    os.remove(wldfn)
+    cmd = [
+        "pqinsert",
+        "-i",
+        "-p",
+        (
+            f"plot a {sts:%Y%m%d%H}00 bogus "
+            f"GIS/uscomp/max_{prod}_{label}_{sts:%Y%m%d}.wld wld"
+        ),
+        wldfn,
+    ]
+    LOG.info(" ".join(cmd))
+    subprocess.call(cmd)
 
     # 60s was too tight it appears
     LOG.info("sleeping 180s to allow LDM to propogate")
@@ -142,16 +146,20 @@ def run(prod, sts):
         f"{URLBASE}layers[]=uscounties&layers[]={layer}&ts={sts:%Y%m%d%H%M}",
         timeout=120,
     )
-    with open(f"/tmp/{sts:%Y%m%d%H}.png", "wb") as fh:
+    with open(f"{tmpdir}/{sts:%Y%m%d%H}.png", "wb") as fh:
         fh.write(png.content)
-    cmd = (
-        f"pqinsert -p 'plot {routes} {sts:%Y%m%d%H}00 "
-        f"summary/max_{prod}_{label}_comprad.png "
-        f"comprad/max_{prod}_{label}_{sts:%Y%m%d}.png png' "
-        f"/tmp/{sts:%Y%m%d%H}.png"
-    )
-    LOG.info(cmd)
-    subprocess.call(cmd, shell=True)
+    cmd = [
+        "pqinsert",
+        "-p",
+        (
+            f"plot {routes} {sts:%Y%m%d%H}00 "
+            f"summary/max_{prod}_{label}_comprad.png "
+            f"comprad/max_{prod}_{label}_{sts:%Y%m%d}.png png"
+        ),
+        f"{tmpdir}/{sts:%Y%m%d%H}.png",
+    ]
+    LOG.info(" ".join(cmd))
+    subprocess.call(cmd)
 
     # US
     url = f"{URLBASE}sector=conus&layers[]={layer}&ts={sts:%Y%m%d%H%M}"
@@ -159,27 +167,35 @@ def run(prod, sts):
     if png.status_code != 200:
         LOG.warning("Got status_code %s for %s", png.status_code, url)
     else:
-        with open(f"/tmp/{sts:%Y%m%d%H}.png", "wb") as fh:
+        with open(f"{tmpdir}/{sts:%Y%m%d%H}.png", "wb") as fh:
             fh.write(png.content)
-        cmd = (
-            f"pqinsert -p 'plot {routes} {sts:%Y%m%d%H}00 "
-            f"summary/max_{prod}_{label}_usrad.png "
-            f"usrad/max_{prod}_{label}_{sts:%Y%m%d}.png png' "
-            f"/tmp/{sts:%Y%m%d%H}.png"
-        )
-        LOG.info(cmd)
-        subprocess.call(cmd, shell=True)
-        os.remove(f"/tmp/{sts:%Y%m%d%H}.png")
+        cmd = [
+            "pqinsert",
+            "-p",
+            (
+                f"plot {routes} {sts:%Y%m%d%H}00 "
+                f"summary/max_{prod}_{label}_usrad.png "
+                f"usrad/max_{prod}_{label}_{sts:%Y%m%d}.png png"
+            ),
+            f"{tmpdir}/{sts:%Y%m%d%H}.png",
+        ]
+        LOG.info(" ".join(cmd))
+        subprocess.call(cmd)
 
 
-def main(argv):
+@click.command()
+@click.option(
+    "--valid", type=click.DateTime(), help="UTC Valid Time", required=True
+)
+def main(valid):
     """Run main()"""
-    ts = utc(*[int(i) for i in argv[1:5]])
+    valid = valid.replace(tzinfo=datetime.timezone.utc)
     for prod in ["n0r", "n0q"]:
-        if ts < utc(2010, 11, 13) and prod == "n0q":
+        if valid < utc(2010, 11, 13) and prod == "n0q":
             continue
-        run(prod, ts)
+        with tempfile.TemporaryDirectory() as tmpdir:
+            run(tmpdir, prod, valid)
 
 
 if __name__ == "__main__":
-    main(sys.argv)
+    main()
