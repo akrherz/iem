@@ -1,7 +1,5 @@
 <?php
-/* 
- * Generate GeoJSON SBW information for a period of choice
- */
+//Generate GeoJSON SBW information for a period of choice
 header("Content-type: application/vnd.geo+json");
 require_once "../../config/settings.inc.php";
 require_once "../../include/database.inc.php";
