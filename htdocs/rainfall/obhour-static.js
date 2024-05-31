@@ -1,5 +1,6 @@
 Ext.namespace('iemdata');
 
+let gpanel;
 iemdata.networks = [
     ['IA_ASOS', 'Iowa ASOS/AWOS'],
     ['AL_ASOS', 'Alabama ASOS/AWOS'],
@@ -211,7 +212,7 @@ Ext.onReady(function () {
         }
     };
 
-    var gpanel = new Ext.grid.GridPanel({
+    gpanel = new Ext.grid.GridPanel({
         id: 'precipgrid',
         isLoaded: false,
         store: pstore,

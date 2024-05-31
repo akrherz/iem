@@ -112,10 +112,10 @@ def plotter(fdict):
     station = ctx["station"]
     params = {"station": station, "syear": ctx["syear"], "eyear": ctx["eyear"]}
     threshold = ctx["threshold"]
+    threshold2 = ctx["threshold2"]
     params["threshold"] = threshold
     varname = ctx["var"]
     if ctx["opt"] == "rng":
-        threshold2 = ctx["threshold2"]
         if threshold > threshold2:
             threshold, threshold2 = threshold2, threshold
         params["threshold"] = threshold
