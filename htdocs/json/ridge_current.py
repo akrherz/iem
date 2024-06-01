@@ -2,21 +2,29 @@
 Aggregate the RIDGE current files
 """
 
-import datetime
 import glob
 import json
 
+from pydantic import Field
 from pyiem.reference import ISO8601
-from pyiem.util import LOG, html_escape
-from pyiem.webutil import iemapp
-from pymemcache.client import Client
+from pyiem.util import LOG, utc
+from pyiem.webutil import CGIModel, iemapp
+
+
+class Schema(CGIModel):
+    """See how we are called."""
+
+    callback: str = Field(None, description="JSONP callback function name")
+    product: str = Field(
+        "N0B", description="Radar product to aggregate", max_length=3
+    )
 
 
 def run(product):
     """Actually run for this product"""
 
     res = {
-        "generation_time_utc": datetime.datetime.utcnow().strftime(ISO8601),
+        "generation_time_utc": utc().strftime(ISO8601),
         "product": product,
         "meta": [],
     }
@@ -34,24 +42,17 @@ def run(product):
     return json.dumps(res)
 
 
-@iemapp()
+@iemapp(
+    help=__doc__,
+    schema=Schema,
+    memcachekey=lambda x: f"/json/ridge_current_{x['product']}.json",
+    memcacheexpire=30,
+)
 def application(environ, start_response):
     """Answer request."""
-    product = environ.get("product", "N0B")[:3].upper()
-    cb = environ.get("callback", None)
+    product = environ["product"].upper()
 
-    mckey = f"/json/ridge_current_{product}.json"
-    mc = Client("iem-memcached:11211")
-    res = mc.get(mckey)
-    if not res:
-        res = run(product)
-        mc.set(mckey, res, 30)
-    else:
-        res = res.decode("ascii")
-    mc.close()
-    if cb is not None:
-        res = f"{html_escape(cb)}({res})"
-
+    res = run(product)
     headers = [("Content-type", "application/json")]
     start_response("200 OK", headers)
-    return [res.encode("ascii")]
+    return res

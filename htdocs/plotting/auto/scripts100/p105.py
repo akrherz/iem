@@ -14,6 +14,7 @@ from pyiem.database import get_sqlalchemy_conn
 from pyiem.exceptions import NoDataFound
 from pyiem.plot import figure
 from pyiem.util import get_autoplot_context
+from sqlalchemy import text
 
 PDICT = {"yes": "Yes, consider trace reports", "no": "No, omit trace reports"}
 
@@ -65,16 +66,16 @@ def plotter(fdict):
     use_trace = ctx["trace"] == "yes"
     with get_sqlalchemy_conn("coop") as conn:
         df = pd.read_sql(
-            """
+            text("""
         with data as (
         select sday, day, precip from alldata
-        where station = %s),
+        where station = :station),
 
         rains as (
-        SELECT day from alldata WHERE station = %s and precip >= %s),
+        SELECT day from alldata WHERE station = :station and precip >= :t),
 
         rains2 as (
-        SELECT day from alldata WHERE station = %s and precip >= %s),
+        SELECT day from alldata WHERE station = :station and precip >= :t2),
 
         agg as (
         SELECT d.sday, d.day, d.precip, r.day as rday
@@ -91,15 +92,13 @@ def plotter(fdict):
         SELECT sday, max(precip) as maxp, max(diff) as d1, max(diff2) as d2
         from agg3 WHERE sday != '0229'
         GROUP by sday ORDER by sday ASC
-        """,
+        """),
             conn,
-            params=(
-                station,
-                station,
-                0.0001 if use_trace else 0.01,
-                station,
-                threshold,
-            ),
+            params={
+                "station": station,
+                "t": 0.0001 if use_trace else 0.01,
+                "t2": threshold,
+            },
             index_col="sday",
         )
     if df.empty:

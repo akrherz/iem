@@ -2,34 +2,25 @@
 
 import json
 
+from pydantic import Field
 from pyiem import reference
-from pyiem.util import html_escape
-from pyiem.webutil import iemapp
-from pymemcache.client import Client
+from pyiem.webutil import CGIModel, iemapp
 
 
-def run():
-    """Generate data."""
-    return json.dumps({"prodDefinitions": reference.prodDefinitions})
+class Schema(CGIModel):
+    """See how we are called."""
+
+    callback: str = Field(None, description="JSONP callback function name")
 
 
-@iemapp()
+@iemapp(
+    memcachekey="/json/reference/v2",
+    help=__doc__,
+    schema=Schema,
+    memcacheexpire=0,
+)
 def application(environ, start_response):
     """Answer request."""
-    cb = environ.get("callback", None)
-
-    mckey = "/json/reference/v2"
-    mc = Client("iem-memcached:11211")
-    res = mc.get(mckey)
-    if not res:
-        res = run()
-        mc.set(mckey, res, 0)
-    else:
-        res = res.decode("utf-8")
-    mc.close()
-    if cb is not None:
-        res = f"{html_escape(cb)}({res})"
-
     headers = [("Content-type", "application/json")]
     start_response("200 OK", headers)
-    return [res.encode("ascii")]
+    return json.dumps({"prodDefinitions": reference.prodDefinitions})
