@@ -19,7 +19,7 @@ class Schema(CGIModel):
     schema=Schema,
     memcacheexpire=0,
 )
-def application(environ, start_response):
+def application(_environ, start_response):
     """Answer request."""
     headers = [("Content-type", "application/json")]
     start_response("200 OK", headers)

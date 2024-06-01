@@ -366,10 +366,10 @@ Ext.onReady(function () {
             });
             window.location.href = "#" + Ext.getCmp("networkSelect").getValue() + "-" + Ext.Date.format(dt, 'YmdHi');
         } else if (s.length == 6) {
-            var tokens2 = s.split("-");
-            Ext.getCmp("networkSelect").setValue(tokens2[0]);
+            const tokens3 = s.split("-");
+            Ext.getCmp("networkSelect").setValue(tokens3[0]);
             imagestore.load({
-                add: false, params: { 'network': tokens2[0] }
+                add: false, params: { 'network': tokens3[0] }
             });
         } else {
             imagestore.load();
