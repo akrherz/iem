@@ -13,6 +13,7 @@ from pyiem.database import get_sqlalchemy_conn
 from pyiem.exceptions import NoDataFound
 from pyiem.plot import figure
 from pyiem.util import get_autoplot_context
+from sqlalchemy import text
 
 PDICT = {"spring": "1 January - 31 December", "fall": "1 July - 30 June"}
 
@@ -52,10 +53,10 @@ def plotter(fdict):
     )
     with get_sqlalchemy_conn("coop") as conn:
         df = pd.read_sql(
-            f"""
+            text(f"""
         WITH obs as (
             SELECT day, month, high, low, {year} as season
-            from alldata WHERE station = %s),
+            from alldata WHERE station = :station),
         data as (
             SELECT season, day,
             max(high) OVER (PARTITION by season ORDER by day ASC
@@ -74,9 +75,9 @@ def plotter(fdict):
         level, 'fall' as typ from lows WHERE rank = 1) UNION
         (SELECT season as year, day, extract(doy from day) as doy,
         level, 'spring' as typ from highs WHERE rank = 1)
-        """,
+        """),
             conn,
-            params=(station,),
+            params={"station": station},
         )
     if df.empty:
         raise NoDataFound("No Data Found.")

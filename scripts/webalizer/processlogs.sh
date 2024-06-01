@@ -73,11 +73,11 @@ done
 
 # Step 5, copy files to staging for cloud storage
 rsync -a --rsync-path "mkdir -p /stage/IEMWWWLogs/$yyyy/$mm && rsync " \
- *-${yyyymmdd}.log.gz metl60.agron.iastate.edu:/stage/IEMWWWLogs/$yyyy/$mm/
+ ./*-${yyyymmdd}.log.gz metl60.agron.iastate.edu:/stage/IEMWWWLogs/$yyyy/$mm/
 
 # Step 6, mv files to local cache
 mkdir -p ../save/$yyyy/$mm
-mv *-${yyyymmdd}.log.gz ../save/$yyyy/$mm/
+mv ./*-${yyyymmdd}.log.gz ../save/$yyyy/$mm/
 
 # Step 7, delete files from local cache
 cd ../save

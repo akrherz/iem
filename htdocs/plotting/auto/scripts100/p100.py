@@ -11,6 +11,7 @@ import pandas as pd
 from pyiem import util
 from pyiem.exceptions import NoDataFound
 from pyiem.plot import figure_axes
+from sqlalchemy import text
 
 PDICT = {
     "max-high": "Maximum High",
@@ -91,7 +92,7 @@ def plotter(fdict):
 
     with util.get_sqlalchemy_conn("coop") as conn:
         df = pd.read_sql(
-            """
+            text("""
         SELECT year,
         max(high) as "max-high",
         min(high) as "min-high",
@@ -101,33 +102,29 @@ def plotter(fdict):
         avg(low) as "avg-low",
         max(precip) as "max-precip",
         sum(precip) as "sum-precip",
-        sum(case when high::numeric >= %s then 1 else 0 end)
+        sum(case when high::numeric >= :t then 1 else 0 end)
             as "days-high-above",
-        sum(case when high::numeric < %s then 1 else 0 end)
+        sum(case when high::numeric < :t then 1 else 0 end)
             as "days-high-below",
-        sum(case when low::numeric >= %s then 1 else 0 end)
+        sum(case when low::numeric >= :t then 1 else 0 end)
             as "days-lows-above",
-        sum(case when low::numeric < %s then 1 else 0 end)
+        sum(case when low::numeric < :t then 1 else 0 end)
             as "days-lows-below",
         avg(precip) as "avg-precip",
         avg(case when precip > 0.009 then precip else null end)
             as "avg-precip2",
-        sum(case when precip >= %s then 1 else 0 end) as "days-precip"
+        sum(case when precip >= :t then 1 else 0 end) as "days-precip"
         from alldata
-        where station = %s and year >= %s and year <= %s
+        where station = :station and year >= :syear and year <= :eyear
         GROUP by year ORDER by year ASC
-        """,
+        """),
             conn,
-            params=(
-                threshold,
-                threshold,
-                threshold,
-                threshold,
-                threshold,
-                station,
-                syear,
-                eyear,
-            ),
+            params={
+                "t": threshold,
+                "station": station,
+                "syear": syear,
+                "eyear": eyear,
+            },
             index_col="year",
         )
     if df.empty:
