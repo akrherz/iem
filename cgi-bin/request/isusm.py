@@ -359,6 +359,71 @@ def muck_timestamps(environ):
         environ["ets"] = environ["sts"] + datetime.timedelta(days=1)
 
 
+def fetch_inversion(environ, cols):
+    """Process the request for inversion data."""
+    stations = get_stations(environ)
+
+    cols = [
+        "station",
+        "valid",
+        "tair_15",
+        "tair_5",
+        "tair_10",
+        "speed",
+        "gust",
+    ]
+
+    with get_sqlalchemy_conn("isuag") as conn:
+        df = pd.read_sql(
+            text(
+                """
+                SELECT station, valid at time zone 'UTC' as utc_valid,
+                tair_15_c_avg_qc, tair_5_c_avg_qc, tair_10_c_avg_qc,
+                ws_ms_avg_qc, ws_ms_max_qc
+                from sm_inversion WHERE valid >= :sts and valid < :ets and
+                station = ANY(:stations) ORDER by valid ASC
+                """
+            ),
+            conn,
+            params={
+                "sts": environ["sts"],
+                "ets": environ["ets"],
+                "stations": stations,
+            },
+            index_col=None,
+        )
+    if df.empty:
+        return df, cols
+
+    # Muck with the timestamp column
+    if environ.get("tz") == "utc":
+        df["valid"] = df["utc_valid"].dt.strftime("%Y-%m-%d %H:%M+00")
+    else:
+        df["valid"] = (
+            df["utc_valid"]
+            .dt.tz_localize("UTC")
+            .dt.tz_convert("US/Central")
+            .dt.strftime("%Y-%m-%d %H:%M")
+        )
+
+    df = df.fillna(np.nan).infer_objects()
+    # Direct copy / rename
+    # Now we need to do some mass data conversion, sigh
+    tc = {
+        "tair_15": "tair_15_c_avg_qc",
+        "tair_5": "tair_5_c_avg_qc",
+        "tair_10": "tair_10_c_avg_qc",
+    }
+    for key, col in tc.items():
+        # Do the work
+        df[key] = convert_value(df[col].values, "degC", "degF")
+
+    df["speed"] = convert_value(df["ws_ms_avg_qc"].values, "mps", "mph")
+    df["gust"] = convert_value(df["ws_ms_max_qc"].values, "mps", "mph")
+
+    return df, cols
+
+
 @iemapp()
 def application(environ, start_response):
     """Do things"""
@@ -374,6 +439,8 @@ def application(environ, start_response):
     todisk = environ.get("todisk", "no")
     if mode == "hourly":
         df, cols = fetch_hourly(environ, cols)
+    elif mode == "inversion":
+        df, cols = fetch_inversion(environ, cols)
     else:
         df, cols = fetch_daily(environ, cols)
     miss = environ.get("missing", "-99")

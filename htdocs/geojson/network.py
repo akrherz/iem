@@ -3,10 +3,22 @@
 import datetime
 import json
 
+from pydantic import Field
+from pyiem.database import get_dbconnc
 from pyiem.reference import ISO8601
-from pyiem.util import get_dbconnc, html_escape
-from pyiem.webutil import iemapp
-from pymemcache.client import Client
+from pyiem.webutil import CGIModel, iemapp
+
+
+class Schema(CGIModel):
+    """See how we are called."""
+
+    callback: str = Field(None, description="JSONP callback function name")
+    network: str = Field(
+        "IA_ASOS", description="IEM Network Code", max_length=30
+    )
+    only_online: bool = Field(
+        False, description="Only include online stations"
+    )
 
 
 def run(network, only_online):
@@ -87,26 +99,28 @@ def run(network, only_online):
     return json.dumps(res)
 
 
-@iemapp()
+def get_mckey(environ) -> str:
+    """Get the memcache key"""
+    return (
+        "/geojson/network/"
+        f"{environ['network']}.geojson|{environ['only_online']}"
+    )
+
+
+@iemapp(
+    memcachekey=get_mckey,
+    memcacheexpire=86400,
+    content_type="application/vnd.geo+json",
+    help=__doc__,
+    schema=Schema,
+)
 def application(environ, start_response):
     """Main Workflow"""
     headers = [("Content-type", "application/vnd.geo+json")]
 
-    cb = environ.get("callback", None)
-    network = environ.get("network", "KCCI").replace(" ", "_")[:30]
-    only_online = environ.get("only_online", "0") == "1"
+    network = environ["network"]
+    only_online = environ["only_online"]
 
-    mckey = f"/geojson/network/{network}.geojson|{only_online}"
-    mc = Client("iem-memcached:11211")
-    res = mc.get(mckey)
-    if not res:
-        res = run(network, only_online)
-        mc.set(mckey, res, 86400 if network == "FPS" else 3600)
-    else:
-        res = res.decode("utf-8")
-    mc.close()
-    if cb is not None:
-        res = f"{html_escape(cb)}({res})"
-
+    res = run(network, only_online)
     start_response("200 OK", headers)
-    return [res.encode("ascii")]
+    return res

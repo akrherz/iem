@@ -9,12 +9,11 @@ require_once "../../include/vtec.php";
 $postgis = iemdb("postgis");
 
 $rs = pg_query($postgis, "SET TIME ZONE 'UTC'");
-$rs = pg_prepare($postgis, "SELECT", "SELECT *, 
-      ST_asGeoJson(geom) as geojson
-      FROM sigmets_current WHERE sigmet_type = 'C' and expire > now() ");
+$rs = pg_prepare($postgis, "SELECT", "SELECT *, ".
+      "ST_asGeoJson(geom) as geojson ".
+      "FROM sigmets_current WHERE sigmet_type = 'C' and expire > now() ");
 
 $rs = pg_execute($postgis, "SELECT", array());
-
 
 $ar = array(
     "type" => "FeatureCollection",
@@ -27,7 +26,6 @@ $subs = array();
 for ($i = 0; $row = pg_fetch_array($rs); $i++) {
     $reps[] = "\"REPLACEME$i\"";
     $subs[] = $row["geojson"];
-
 
     $z = array(
         "type" => "Feature", "id" => $i,

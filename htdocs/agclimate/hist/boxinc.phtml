@@ -5,6 +5,7 @@ $lh = '';
 $ld = '';
 $ch = '';
 $cd = '';
+$ci = '';
 $highlight = "<i class=\"fa fa-check\"></i> &nbsp; ";
 if ($uri == '/agclimate/hist/dailyRequest.php'){
     $ld = $highlight;
@@ -17,6 +18,9 @@ elseif ($uri == '/agclimate/hist/hourly.php'){
 }
 elseif ($uri == '/agclimate/hist/daily.php'){
     $cd = $highlight;
+}
+elseif ($uri == '/agclimate/hist/inversion.php'){
+    $ci = $highlight;
 }
 
 $box = <<<EOM
@@ -37,8 +41,9 @@ $box = <<<EOM
   <div class="panel-heading">"ISU Soil Moisture Network" ~2013-present</div>
   <div class="panel-body">
         <div class="row">
-            <div class="col-sm-6">{$ch}<a href="hourly.php">Hourly Data</a></div>
-            <div class="col-sm-6">{$cd}<a href="daily.php">Daily Data</a></div>
+            <div class="col-sm-4">{$ch}<a href="hourly.php">Hourly Data</a></div>
+            <div class="col-sm-4">{$ci}<a href="inversion.php">Inversion Data</a></div>
+            <div class="col-sm-4">{$cd}<a href="daily.php">Daily Data</a></div>
         </div>
     </div>
 </div>
