@@ -25,7 +25,8 @@ foreach ($urls as $k => $v) {
     $f = fopen($fn, 'wb');
     fwrite($f, $res);
     fclose($f);
-    $output = shell_exec("magick $fn $gfn");
+    // magick is not in PATH
+    $output = shell_exec("convert $fn $gfn");
     $cmdstr .= " {$gfn} ";
 }
 
