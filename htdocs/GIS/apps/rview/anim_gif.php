@@ -25,12 +25,15 @@ foreach ($urls as $k => $v) {
     $f = fopen($fn, 'wb');
     fwrite($f, $res);
     fclose($f);
-    // magick is not in PATH
-    $output = shell_exec("convert $fn $gfn");
+    if (exec(escapeshellcmd("magick $fn $gfn")) === FALSE) {
+        die("magick failed");
+    };
     $cmdstr .= " {$gfn} ";
 }
 
-$output = shell_exec($cmdstr);
+if (exec(escapeshellcmd($cmdstr)) === FALSE){
+    die("gifsicle failed");
+};
 
 header("Content-type: application/octet-stream");
 header("Content-Disposition: attachment; filename=myanimation.gif");
