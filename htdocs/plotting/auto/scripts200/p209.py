@@ -11,10 +11,12 @@ import matplotlib.colors as mpcolors
 import numpy as np
 import pandas as pd
 from matplotlib.colorbar import ColorbarBase
+from pyiem.database import get_sqlalchemy_conn
 from pyiem.exceptions import NoDataFound
 from pyiem.plot import figure_axes, get_cmap
 from pyiem.reference import state_names
-from pyiem.util import get_autoplot_context, get_sqlalchemy_conn
+from pyiem.util import get_autoplot_context
+from sqlalchemy import text
 
 PDICT = {
     "PCT PLANTED": "Planting",
@@ -78,25 +80,25 @@ def get_data(ctx):
         if (unit_desc == "PCT HARVESTED" and commodity_desc == "CORN")
         else "ALL UTILIZATION PRACTICES"
     )
-    params = (
-        commodity_desc,
-        unit_desc,
-        ctx["state"][:2],
-        util_practice_desc,
-        ctx["syear"],
-        ctx["eyear"],
-    )
+    params = {
+        "cd": commodity_desc,
+        "ud": unit_desc,
+        "state": ctx["state"][:2],
+        "upd": util_practice_desc,
+        "syear": ctx["syear"],
+        "eyear": ctx["eyear"],
+    }
     with get_sqlalchemy_conn("coop") as conn:
         df = pd.read_sql(
-            """
+            text("""
             select year, week_ending, num_value, state_alpha
             from nass_quickstats
-            where commodity_desc = %s and statisticcat_desc = 'PROGRESS'
-            and unit_desc = %s and state_alpha = %s and
-            util_practice_desc = %s and year >= %s and year <= %s
+            where commodity_desc = :cd and statisticcat_desc = 'PROGRESS'
+            and unit_desc = :ud and state_alpha = :state and
+            util_practice_desc = :upd and year >= :syear and year <= :eyear
             and num_value is not null
             ORDER by state_alpha, week_ending
-        """,
+        """),
             conn,
             params=params,
             index_col=None,

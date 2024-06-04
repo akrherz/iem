@@ -3,13 +3,22 @@
 import datetime
 
 import simplejson as json
+from pydantic import Field
 from pyiem.reference import TRACE_VALUE
-from pyiem.util import html_escape
-from pyiem.webutil import iemapp
-from pymemcache.client import Client
+from pyiem.webutil import CGIModel, iemapp
 from simplejson import encoder
 
 encoder.FLOAT_REPR = lambda o: format(o, ".2f")
+
+
+class Schema(CGIModel):
+    """See how we are called."""
+
+    dt: datetime.date = Field(
+        default=datetime.date.today(), description="Date to query for"
+    )
+    callback: str = Field(None, description="JSONP callback function name")
+    fmt: str = Field(description="Format of output", default="geojson")
 
 
 def departure(ob, climo):
@@ -61,7 +70,7 @@ def get_data(cursor, ts, fmt):
     from cf6_data c JOIN stations s on (c.station = s.id)
     WHERE s.network = 'NWSCLI' and c.valid = %s
     """,
-        (ts.date(),),
+        (ts,),
     )
     for i, row in enumerate(cursor):
         data["features"].append(
@@ -122,35 +131,33 @@ def get_data(cursor, ts, fmt):
     return res
 
 
-@iemapp(iemdb="iem", iemdb_cursorname="cursor")
+def get_mckey(environ: dict) -> str:
+    """Figure out our memcache key."""
+    return f"/geojson/cf6/{environ['dt']:%Y%m%d}?fmt={environ['fmt']}"
+
+
+def get_ct(environ: dict) -> str:
+    """Figure out our content type."""
+    fmt = environ["fmt"]
+    if fmt == "geojson":
+        return "application/vnd.geo+json"
+    return "text/plain"
+
+
+@iemapp(
+    iemdb="iem",
+    iemdb_cursorname="cursor",
+    help=__doc__,
+    schema=Schema,
+    memcachekey=get_mckey,
+    memcacheexpire=300,
+    content_type=get_ct,
+)
 def application(environ, start_response):
     """see how we are called"""
-    dt = environ.get("dt", datetime.date.today().strftime("%Y-%m-%d"))
-    ts = datetime.datetime.strptime(dt, "%Y-%m-%d")
-    cb = environ.get("callback", None)
-    fmt = environ.get("fmt", "geojson")
-
-    headers = []
-    if fmt == "geojson":
-        headers.append(("Content-type", "application/vnd.geo+json"))
-    else:
-        headers.append(("Content-type", "text/plain"))
-
-    mckey = "/geojson/cf6/%s?callback=%s&fmt=%s" % (
-        ts.strftime("%Y%m%d"),
-        cb,
-        fmt,
-    )
-    mc = Client("iem-memcached:11211")
-    res = mc.get(mckey)
-    if not res:
-        res = get_data(environ["iemdb.iem.cursor"], ts, fmt)
-        mc.set(mckey, res, 300)
-    else:
-        res = res.decode("utf-8")
-    mc.close()
-    if cb is not None:
-        res = f"{html_escape(cb)}({res})"
-
+    dt = environ["dt"]
+    fmt = environ["fmt"]
+    headers = [("Content-type", get_ct(environ))]
+    res = get_data(environ["iemdb.iem.cursor"], dt, fmt)
     start_response("200 OK", headers)
-    return [res.encode("ascii")]
+    return res

@@ -411,7 +411,7 @@ function handleSBWClick(feature) {
     sbwtable.rows().deselect();
     sbwtable.row(
         sbwtable.rows((idx, data) => {
-            if (data["id"] === id) {
+            if (data.id === id) {
                 sbwtable.row(idx).select();
                 return true;
             }
@@ -649,7 +649,7 @@ function initUI() {
         lsrtable.rows().deselect();
         lsrtable.row(
             lsrtable.rows((idx, data) => {
-                if (data["id"] === id) {
+                if (data.id === id) {
                     lsrtable.row(idx).select();
                     return true;
                 }

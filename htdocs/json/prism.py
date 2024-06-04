@@ -77,9 +77,6 @@ def dowork(valid, lon, lat):
         ),
     }
 
-    if i is None or j is None:
-        return "Coordinates outside of domain"
-
     for dpair in dates:
         sts = dpair[0]
         ets = dpair[-1]

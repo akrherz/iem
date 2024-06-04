@@ -10,10 +10,11 @@ from datetime import date, datetime
 import numpy as np
 import pandas as pd
 from matplotlib.ticker import MaxNLocator
+from pyiem.database import get_sqlalchemy_conn
 from pyiem.exceptions import NoDataFound
 from pyiem.plot import figure
 from pyiem.plot.util import fitbox
-from pyiem.util import get_autoplot_context, get_sqlalchemy_conn
+from pyiem.util import get_autoplot_context
 from scipy.stats import gaussian_kde
 from sqlalchemy import text
 
