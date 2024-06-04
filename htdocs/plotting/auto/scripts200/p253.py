@@ -43,22 +43,29 @@ from sqlalchemy import text
 
 def get_description():
     """Return a dict describing how to call this plotter"""
-    desc = {"description": __doc__, "data": True, "cache": 86400}
-    desc["arguments"] = [
-        {
-            "type": "dat",
-            "name": "dat",
-            "default": "2024-05-21",
-            "label": "Select Date + Tornado Track to plot:",
+    return {
+        "description": __doc__,
+        "data": True,
+        "cache": 86400,
+        "gallery": {
+            "dat": "2024-05-21",
+            "datglobalid": "{495DE596-B299-41FE-9C90-13C87E43FE0B}",
         },
-        {
-            "type": "cmap",
-            "name": "cmap",
-            "default": "gist_rainbow",
-            "label": "Color Ramp:",
-        },
-    ]
-    return desc
+        "arguments": [
+            {
+                "type": "dat",
+                "name": "dat",
+                "default": "2024-05-21",
+                "label": "Select Date + Tornado Track to plot:",
+            },
+            {
+                "type": "cmap",
+                "name": "cmap",
+                "default": "gist_rainbow",
+                "label": "Color Ramp:",
+            },
+        ],
+    }
 
 
 def plot_points(mp, pts):

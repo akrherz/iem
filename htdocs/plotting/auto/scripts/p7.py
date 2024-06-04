@@ -10,9 +10,10 @@ import matplotlib.colors as mpcolors
 import matplotlib.dates as mdates
 import numpy as np
 import pandas as pd
+from pyiem.database import get_dbconnc
 from pyiem.exceptions import NoDataFound
 from pyiem.plot import figure, get_cmap
-from pyiem.util import get_autoplot_context, get_dbconnc
+from pyiem.util import get_autoplot_context
 
 
 def get_description():
@@ -20,6 +21,9 @@ def get_description():
     desc = {"description": __doc__, "data": True}
     today = datetime.date.today()
     year = today.year if today.month > 5 else today.year - 1
+    desc["gallery"] = {
+        "year": 2023,
+    }
     desc["arguments"] = [
         dict(
             type="station",

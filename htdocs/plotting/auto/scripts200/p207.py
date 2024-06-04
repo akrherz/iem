@@ -88,6 +88,10 @@ def get_description():
     """Return a dict describing how to call this plotter"""
     desc = {"description": __doc__, "data": True, "cache": 60}
     now = datetime.datetime.now()
+    desc["gallery"] = {
+        "endts": "2024-01-10 1300",
+        "hours": 24,
+    }
     desc["arguments"] = [
         dict(
             type="select",
