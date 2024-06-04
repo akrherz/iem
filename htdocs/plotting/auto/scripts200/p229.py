@@ -30,31 +30,43 @@ LL = (
 
 def get_description():
     """Return a dict describing how to call this plotter"""
-    desc = {"data": False, "description": __doc__.replace("{LL}", LL)}
-    desc["arguments"] = [
-        dict(
-            type="state",
-            name="state",
-            default="IA",
-            label="Select CONUS-Only State:",
-        ),
-        dict(
-            type="datetime",
-            default=f"{(utc() - datetime.timedelta(hours=24)):%Y/%m/%d %H%M}",
-            name="sts",
-            label="Start Timestamp (UTC):",
-            min="2016/10/12 0000",
-        ),
-        dict(
-            type="datetime",
-            default=f"{utc():%Y/%m/%d %H%M}",
-            name="ets",
-            label="End Timestamp (UTC):",
-            min="2016/10/12 0000",
-        ),
-        dict(type="cmap", name="cmap", default="inferno", label="Color Ramp:"),
-    ]
-    return desc
+    t24 = utc() - datetime.timedelta(hours=24)
+    return {
+        "data": False,
+        "description": __doc__.replace("{LL}", LL),
+        "gallery": {
+            "sts": "2024-05-21 1600",
+            "ets": "2024-05-21 2300",
+        },
+        "arguments": [
+            dict(
+                type="state",
+                name="state",
+                default="IA",
+                label="Select CONUS-Only State:",
+            ),
+            dict(
+                type="datetime",
+                default=f"{t24:%Y/%m/%d %H%M}",
+                name="sts",
+                label="Start Timestamp (UTC):",
+                min="2016/10/12 0000",
+            ),
+            dict(
+                type="datetime",
+                default=f"{utc():%Y/%m/%d %H%M}",
+                name="ets",
+                label="End Timestamp (UTC):",
+                min="2016/10/12 0000",
+            ),
+            dict(
+                type="cmap",
+                name="cmap",
+                default="inferno",
+                label="Color Ramp:",
+            ),
+        ],
+    }
 
 
 def plotter(fdict):

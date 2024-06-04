@@ -13,10 +13,11 @@ from io import StringIO
 import matplotlib.image as mpimage
 import pandas as pd
 from geopandas import read_postgis
+from pyiem.database import get_sqlalchemy_conn
 from pyiem.nws.vtec import VTEC_PHENOMENA
 from pyiem.plot import figure
 from pyiem.plot.util import fitbox
-from pyiem.util import get_autoplot_context, get_sqlalchemy_conn, utc
+from pyiem.util import get_autoplot_context, utc
 from sqlalchemy import text
 
 PDICT = {
@@ -34,10 +35,17 @@ COLORS = {"SV": "#ffff00", "TO": "#ff0000", "FF": "#00ff00", "MA": "#00ff00"}
 
 def get_description():
     """Return a dict describing how to call this plotter"""
-    desc = {"description": __doc__, "data": True, "text": True}
-    desc["defaults"] = {"_r": None}
-    desc["cache"] = 600
-    desc["plotmetadata"] = False
+    desc = {
+        "description": __doc__,
+        "data": True,
+        "text": True,
+        "defaults": {"_r": None},
+        "cache": 600,
+        "plotmetadata": False,
+        "gallery": {
+            "date": "2024-05-05",  # pick a date with not too many
+        },
+    }
     today = datetime.date.today()
     desc["arguments"] = [
         dict(

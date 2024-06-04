@@ -31,6 +31,12 @@ def get_description():
     """Return a dict describing how to call this plotter"""
     desc = {"data": True, "description": __doc__}
     sts = utc() - timedelta(days=5)
+    desc["gallery"] = {
+        "sts": "2023-08-05 0600",
+        "ets": "2023-08-05 0930",
+        "zstation": "BRL",
+        "network": "IA_ASOS",
+    }
     desc["arguments"] = [
         dict(
             type="select",

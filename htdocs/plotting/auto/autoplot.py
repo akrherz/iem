@@ -144,6 +144,9 @@ def get_res_by_fmt(p, fmt, fdict):
     loader.exec_module(mod)
 
     meta = mod.get_description()
+    # When _gallery is set, inspect meta to see if it has something hardcoded
+    if fdict.get("_gallery") is not None and meta.get("gallery") is not None:
+        fdict.update(meta["gallery"])
     # Allow returning of javascript as a string
     if fmt == "js":
         res = mod.highcharts(fdict)
