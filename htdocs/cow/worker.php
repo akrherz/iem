@@ -76,7 +76,7 @@ function printWARN($lsrs, $warn)
     if ($warn["phenomena"] == "SV"){
         $windhail .= sprintf(
             "<br />T: %s",
-            $warn["tor_in_svrtorpossible"] ? "Poss" : "N",
+            $warn["svr_tornado_possible"] ? "Poss" : "N",
         );
     }
 
