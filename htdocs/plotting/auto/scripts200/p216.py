@@ -8,9 +8,11 @@ import datetime
 import numpy as np
 import pandas as pd
 from matplotlib.font_manager import FontProperties
+from pyiem.database import get_sqlalchemy_conn
 from pyiem.exceptions import NoDataFound
 from pyiem.plot import figure
-from pyiem.util import get_autoplot_context, get_dbconn
+from pyiem.util import get_autoplot_context
+from sqlalchemy import text
 
 PDICT = {
     "above": "Temperature At or Above (AOA) Threshold",
@@ -56,8 +58,6 @@ def get_description():
 
 def plotter(fdict):
     """Go"""
-    pgconn = get_dbconn("coop")
-    cursor = pgconn.cursor()
     ctx = get_autoplot_context(fdict, get_description())
     station = ctx["station"]
     threshold = ctx["threshold"]
@@ -65,46 +65,48 @@ def plotter(fdict):
     mydir = ctx["dir"]
 
     op = np.greater_equal if mydir == "above" else np.less
-    cursor.execute(
-        f"""
-        select day, {varname},
-        case when month > 6 then year + 1 else year end
-        from alldata where station = %s and {varname} is not null
-        ORDER by day ASC
-    """,
-        (station,),
-    )
-    if cursor.rowcount == 0:
-        raise NoDataFound("Did not find any observations for station.")
     rows = []
     startdate = None
     running = 0
-    for row in cursor:
-        if op(row[1], threshold):
+    row = None
+    with get_sqlalchemy_conn("coop") as conn:
+        res = conn.execute(
+            text(f"""
+            select day, {varname},
+            case when month > 6 then year + 1 else year end
+            from alldata where station = :station and {varname} is not null
+            ORDER by day ASC
+        """),
+            {"station": station},
+        )
+        if res.rowcount == 0:
+            raise NoDataFound("Did not find any observations for station.")
+        for row in res:
+            if op(row[1], threshold):
+                if running == 0:
+                    startdate = row[0]
+                running += 1
+                continue
             if running == 0:
-                startdate = row[0]
-            running += 1
-            continue
-        if running == 0:
-            continue
-        rows.append(
-            {
-                "days": running,
-                "season": row[0].year if mydir == "above" else row[2],
-                "startdate": startdate,
-                "enddate": row[0] - datetime.timedelta(days=1),
-            }
-        )
-        running = 0
-    if running > 0:
-        rows.append(
-            {
-                "days": running,
-                "season": row[0].year if mydir == "above" else row[2],
-                "startdate": startdate,
-                "enddate": row[0],
-            }
-        )
+                continue
+            rows.append(
+                {
+                    "days": running,
+                    "season": row[0].year if mydir == "above" else row[2],
+                    "startdate": startdate,
+                    "enddate": row[0] - datetime.timedelta(days=1),
+                }
+            )
+            running = 0
+        if running > 0:
+            rows.append(
+                {
+                    "days": running,
+                    "season": row[0].year if mydir == "above" else row[2],
+                    "startdate": startdate,
+                    "enddate": row[0],
+                }
+            )
     if not rows:
         raise NoDataFound("Failed to find any streaks for given threshold.")
     df = pd.DataFrame(rows)

@@ -123,7 +123,7 @@ function init_map(idx, inst) {
         inst.table.rows().deselect();
         inst.table.row(
             inst.table.rows((idx2, data, _node) => {
-                if (data["id"] === id) {
+                if (data.id === id) {
                     inst.table.row(idx2).select();
                     return true;
                 }
