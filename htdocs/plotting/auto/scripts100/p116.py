@@ -9,9 +9,10 @@ import datetime
 
 import pandas as pd
 import seaborn as sns
+from pyiem.database import get_sqlalchemy_conn
 from pyiem.exceptions import NoDataFound
 from pyiem.plot import figure_axes
-from pyiem.util import get_autoplot_context, get_sqlalchemy_conn
+from pyiem.util import get_autoplot_context
 
 PDICT = {"cdd": "Cooling Degree Days", "hdd": "Heating Degree Days"}
 

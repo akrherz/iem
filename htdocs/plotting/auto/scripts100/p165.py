@@ -256,7 +256,8 @@ def plotter(fdict):
             continue
         df2.at[station, "lat"] = nt.sts[station]["lat"]
         df2.at[station, "lon"] = nt.sts[station]["lon"]
-
+    if "lat" not in df2.columns:
+        raise NoDataFound("No Data was found")
     df2 = df2[df2["lat"].notna()]
     subtitle = f"based on NWS COOP and IEM Daily Estimates{extra}"
     if ctx["w"] == "soil":

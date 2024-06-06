@@ -1,13 +1,15 @@
 <?php
 require_once "../../../config/settings.inc.php";
+require_once "../../../include/forms.php";
+
 require_once "../../../include/jpgraph/jpgraph.php";
 require_once "../../../include/jpgraph/jpgraph_line.php";
 require_once "../../../include/jpgraph/jpgraph_scatter.php";
 require_once "../../../include/jpgraph/jpgraph_date.php";
 
-$year = isset($_GET["year"]) ? $_GET["year"] : date("Y");
-$month = isset($_GET["month"]) ? $_GET["month"] : date("m");
-$day = isset($_GET["day"]) ? $_GET["day"] : date("d");
+$year = get_int404("year", date("Y"));
+$month = get_int404("month", date("m"));
+$day = get_int404("day", date("d"));
 $station = isset($_REQUEST['station']) ? $_REQUEST['station']: null;
 
 if (strlen($year) == 4 && strlen($month) > 0 && strlen($day) > 0 ){
@@ -64,8 +66,8 @@ if ($station == null){
             continue;
         }
         $valid[] = $v;
-          $mph[] = $speed;
-          $drct[] = $tokens[10];
+        $mph[] = $speed;
+        $drct[] = $tokens[10];
      } // End of while
     
 }

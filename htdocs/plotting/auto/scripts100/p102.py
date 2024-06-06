@@ -12,10 +12,11 @@ import datetime
 
 import numpy as np
 import pandas as pd
-from pyiem import util
+from pyiem.database import get_sqlalchemy_conn
 from pyiem.exceptions import NoDataFound
 from pyiem.plot import figure_axes
 from pyiem.reference import lsr_events
+from pyiem.util import get_autoplot_context
 from sqlalchemy import text
 
 MARKERS = ["8", ">", "<", "v", "o", "h", "*"]
@@ -66,7 +67,7 @@ def get_description():
 
 def plotter(fdict):
     """Go"""
-    ctx = util.get_autoplot_context(fdict, get_description())
+    ctx = get_autoplot_context(fdict, get_description())
     ctx["_nt"].sts["_ALL"] = dict(name="All WFOs")
     station = ctx["station"][:4]
     syear = ctx["year"]
@@ -87,7 +88,7 @@ def plotter(fdict):
         else:
             typetext_limiter = " and typetext = ANY(:tt)"
             params["tt"] = ltype
-    with util.get_sqlalchemy_conn("postgis") as conn:
+    with get_sqlalchemy_conn("postgis") as conn:
         df = pd.read_sql(
             text(
                 f"""
