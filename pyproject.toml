@@ -21,9 +21,15 @@ select = [
     "PERF",  # performance
     # "PL",  # pylint
     # "SIM",  # simplify
+    "T20",  # print
     # "TRY",  # try-except-raise
     # "UP",  # pyupgrade
 ]
 ignore = [
     "PERF203",  # try,except within a loop
+]
+
+[tool.ruff.lint.per-file-ignores]
+"{scripts,tests}/**/*.py" = [
+    "T20",  # print
 ]

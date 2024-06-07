@@ -117,7 +117,3 @@ def application(environ, start_response):
         mc.set(mckey, res, 3600)
     mc.close()
     return [res]
-
-
-if __name__ == "__main__":
-    print(workflow(utc(2018, 6, 1, 21), utc(2018, 6, 1, 21), 259, 151))
