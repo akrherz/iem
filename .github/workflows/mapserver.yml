@@ -33,4 +33,4 @@ jobs:
     - name: Run map2img
       run: |
         set -e
-        bash test/run_mapserver.sh
+        bash tests/run_mapserver.sh
