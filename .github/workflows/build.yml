@@ -117,7 +117,7 @@ jobs:
     - name: Run mod_wsgi smoke test
       run: |
         set -e
-        pytest -n 4 test/test_mod_wsgi.py
+        pytest -n 4 tests/test_mod_wsgi.py
 
     - name: View Apache Logs
       if: failure()
