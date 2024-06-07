@@ -1,10 +1,10 @@
 """mod_wsgi handler for autoplot cache needs"""
 
-import importlib
 import json
 import os
-import sys
 
+from iemweb.autoplot import data as autoplot_data
+from iemweb.autoplot import import_script
 from pyiem.reference import FIGSIZES_NAMES
 from pyiem.util import get_dbconnc
 from pyiem.webutil import iemapp
@@ -36,61 +36,24 @@ def generate_html(appdata):
 def do_html(pidx):
     """Generate the HTML interface for this autoplot."""
     response_headers = [("Content-type", "text/html")]
-    name = get_script_name(pidx)
-    if not os.path.isfile(name):
-        sys.stderr.write(f"autoplot/meta 404 {name}\n")
-        status = "404 Not Found"
-        output = ""
-        return output.encode(), status, response_headers
-    loader = importlib.machinery.SourceFileLoader(f"p{pidx}", name)
-    spec = importlib.util.spec_from_loader(loader.name, loader)
-    mod = importlib.util.module_from_spec(spec)
-    loader.exec_module(mod)
+    mod = import_script(pidx)
     # see how we are called, finally
     appdata = mod.get_description()
     html = generate_html(appdata)
     return html, "200 OK", response_headers
 
 
-def get_script_name(pidx):
-    """Return where this script resides, so we can load it!"""
-    suffix = ""
-    if pidx >= 200:
-        suffix = "200"
-    elif pidx >= 100:
-        suffix = "100"
-    return f"{BASEDIR}/scripts{suffix}/p{pidx}.py"
-
-
 def do_json(pidx):
     """Do what needs to be done for JSON requests."""
     status = "200 OK"
     if pidx == 0:
-        name = f"{BASEDIR}/scripts/__init__.py"
-        loader = importlib.machinery.SourceFileLoader("scripts", name)
-        spec = importlib.util.spec_from_loader(loader.name, loader)
-        mod = importlib.util.module_from_spec(spec)
-        loader.exec_module(mod)
-        data = mod.data
+        data = autoplot_data
     else:
-        name = get_script_name(pidx)
-        if not os.path.isfile(name):
-            sys.stderr.write(f"autoplot/meta 404 {name}\n")
-            status = "404 Not Found"
-            output = ""
-            response_headers = [
-                ("Content-type", "application/json"),
-                ("Content-Length", str(len(output))),
-            ]
-            return output, status, response_headers
         try:
             timing = get_timing(pidx)
         except Exception:
             timing = -1
-        loader = importlib.machinery.SourceFileLoader(f"p{pidx}", name)
-        spec = importlib.util.spec_from_loader(loader.name, loader)
-        mod = importlib.util.module_from_spec(spec)
-        loader.exec_module(mod)
+        mod = import_script(pidx)
         data = mod.get_description()
         defaults = data.pop("defaults", {"_r": "t", "dpi": "100"})
         data["maptable"] = hasattr(mod, "geojson")

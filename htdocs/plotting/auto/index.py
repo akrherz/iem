@@ -7,7 +7,6 @@ IEM_APPID 92
 # stdlib
 import calendar
 import os
-import sys
 from datetime import date, datetime, timedelta
 from zoneinfo import ZoneInfo
 
@@ -15,6 +14,7 @@ from zoneinfo import ZoneInfo
 import httpx
 import pandas as pd
 import requests
+from iemweb.autoplot import data as autoplot_data
 from paste.request import get_cookie_dict
 from pyiem.database import get_dbconnc, get_sqlalchemy_conn
 from pyiem.exceptions import BadWebRequest
@@ -25,12 +25,6 @@ from pyiem.templates.iem import TEMPLATE
 from pyiem.util import LOG, html_escape, utc
 from pyiem.webutil import ensure_list, iemapp
 from sqlalchemy import text
-
-BASEDIR, WSGI_FILENAME = os.path.split(__file__)
-if BASEDIR not in sys.path:
-    sys.path.insert(0, BASEDIR)
-# Local
-import scripts  # noqa
 
 HIGHCHARTS = "11.3.0"
 OPENLAYERS = "7.5.1"
@@ -860,7 +854,7 @@ plot type.</p>
 def generate_autoplot_list(apid):
     """The select list of available autoplots."""
     s = '<select name="q" class="iemselect2" data-width="100%">\n'
-    for entry in scripts.data["plots"]:
+    for entry in autoplot_data["plots"]:
         s += f"<optgroup label=\"{entry['label']}\">\n"
         for opt in entry["options"]:
             selected = ' selected="selected"' if opt["id"] == apid else ""
@@ -885,7 +879,7 @@ def generate_trending():
         ).json()
         for entry in data["data"][:5]:
             label = "Unknown"
-            for ap in scripts.data["plots"]:
+            for ap in autoplot_data["plots"]:
                 if label != "Unknown":
                     break
                 for opt in ap["options"]:

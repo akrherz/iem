@@ -1,7 +1,5 @@
 """Our mod_wsgi frontend to autoplot generation"""
 
-import importlib.machinery
-import importlib.util
 import json
 import os
 import sys
@@ -14,6 +12,7 @@ from zoneinfo import ZoneInfo
 
 import numpy as np
 import pandas as pd
+from iemweb.autoplot import import_script
 from pandas.api.types import is_datetime64_any_dtype as isdt
 from PIL import Image
 from pyiem.exceptions import (
@@ -132,16 +131,7 @@ def handle_error(exp, fmt, uri):
 
 def get_res_by_fmt(p, fmt, fdict):
     """Do the work of actually calling things"""
-    suffix = ""
-    if p >= 200:
-        suffix = "200"
-    elif p >= 100:
-        suffix = "100"
-    fn = f"{BASEDIR}/scripts{suffix}/p{p}.py"
-    loader = importlib.machinery.SourceFileLoader(f"p{p}", fn)
-    spec = importlib.util.spec_from_loader(loader.name, loader)
-    mod = importlib.util.module_from_spec(spec)
-    loader.exec_module(mod)
+    mod = import_script(p)
 
     meta = mod.get_description()
     # When _gallery is set, inspect meta to see if it has something hardcoded
