@@ -1,4 +1,4 @@
-name: Install and Test
+name: IEM CI
 on:
   pull_request:
     branches:
@@ -6,21 +6,28 @@ on:
   push:
     branches:
       - main
+
 jobs:
-  build-linux:
+  build:
     defaults:
       run:
         # Ensures environment gets sourced right
         shell: bash -l {0}
-    name: Python (${{ matrix.PYTHON_VERSION }}) with IEM Data (${{ matrix.WITH_IEM_DATA }})
+    name: Python (${{ matrix.PYTHON_VERSION }}) Data (${{ matrix.WITH_IEM_DATA }}) Web (${{ matrix.WITH_WEB }})
     runs-on: ubuntu-latest
     strategy:
       matrix:
         PYTHON_VERSION: ["3.11"]
         WITH_IEM_DATA: ["YES", "NO"]
+        WITH_WEB: ["YES", "NO"]
+        exclude:
+          - PYTHON_VERSION: "3.11"
+            WITH_WEB: "NO"
+            WITH_IEM_DATA: "NO"
     env:
       PYTHON_VERSION: ${{ matrix.PYTHON_VERSION }}
       WITH_IEM_DATA: ${{ matrix.WITH_IEM_DATA }}
+      WITH_WEB: ${{ matrix.WITH_WEB }}
     steps:
     - uses: actions/checkout@v4
 
@@ -28,11 +35,6 @@ jobs:
     - name: Add /etc/hosts entries
       run: |
         cat .github/workflows/etchosts.txt | sudo tee -a /etc/hosts
-
-    # Copy repo's default settings into the real position
-    - name: Copy PHP Setting Defaults
-      run: |
-        cp config/settings.inc.php.in config/settings.inc.php
 
     # setup conda-forge with micromamba
     - name: Setup Python
@@ -60,19 +62,11 @@ jobs:
         cd database; sh bootstrap.sh
         python schema_manager.py
 
-    # Get memcached running
-    - name: Setup Memcached
+    # Copy repo's default settings into the real position
+    - name: Copy PHP Setting Defaults
+      if: ${{ matrix.WITH_WEB == 'YES' }}
       run: |
-        set -e
-        cd .ci_tooling
-        . memcached.sh
-
-    # Get apache running, which is needed to build mod_wsgi
-    - name: Configure IEM Webfarm Server
-      run: |
-        set -e
-        cd .ci_tooling
-        . iemwebfarm.sh
+        cp config/settings.inc.php.in config/settings.inc.php
 
     # conda-forge does not have everything we need, yet
     - name: Install Python requirements from pip
@@ -80,7 +74,7 @@ jobs:
         python -m pip install -r pip_requirements.txt
 
     - name: Setup IEM Data
-      if: ${{ matrix.WITH_IEM_DATA }} == "YES"
+      if: ${{ matrix.WITH_IEM_DATA == 'YES' }}
       run: |
         python database/store_test_data.py
         python scripts/dbutil/sync_stations.py
@@ -91,7 +85,23 @@ jobs:
         sudo ln -s `pwd` /opt/iem
         sudo ln -s $HOME/micromamba /opt/miniconda3
 
+    # Get memcached running
+    - name: Setup Memcached
+      run: |
+        set -e
+        cd .ci_tooling
+        . memcached.sh
+
+    # Get apache running, which is needed to build mod_wsgi
+    - name: Configure IEM Webfarm Server
+      if: ${{ matrix.WITH_WEB == 'YES' }}
+      run: |
+        set -e
+        cd .ci_tooling
+        . iemwebfarm.sh
+
     - name: Configure Webfarm Server
+      if: ${{ matrix.WITH_WEB == 'YES' }}
       run: |
         set -e
         echo '<VirtualHost *:80>' | sudo tee /etc/apache2/sites-enabled/iem.conf > /dev/null
@@ -106,26 +116,44 @@ jobs:
         sudo systemctl status apache2.service -l
 
     - name: Smoke Test mod_wsgi_startup.py
+      if: ${{ matrix.WITH_WEB == 'YES' }}
       run: |
         python /opt/iem/deployment/mod_wsgi_startup.py
 
     - name: Run IEM Production checks
+      if: ${{ matrix.WITH_WEB == 'YES' }}
       run: |
         git clone --depth 1 https://github.com/akrherz/iem-production-checks.git .ipc
         SERVICE=http://iem.local pytest -n 4 .ipc/tests/test_*.py  
 
     - name: Run mod_wsgi smoke test
+      if: ${{ matrix.WITH_WEB == 'YES' }}
       run: |
         set -e
         pytest -n 4 tests/test_mod_wsgi.py
 
     - name: View Apache Logs
-      if: failure()
+      if: ${{ failure() && matrix.WITH_WEB == 'YES' }}
       run: |
         sudo systemctl status apache2 -l
         sudo cat /var/log/apache2/error.log
 
     - name: View PHP-FPM Logs
-      if: failure()
+      if: ${{ failure() && matrix.WITH_WEB == 'YES' }}
       run: |
         sudo cat /var/log/php*-fpm.log
+
+    - name: Run IEMWeb Python Check
+      if: ${{ matrix.WITH_WEB == 'NO' && matrix.WITH_IEM_DATA == 'YES' }}
+      run: |
+        set -e
+        export PYTHONPATH=/opt/iem/pylib
+        python -m pytest --cov=iemweb -n 4 tests/iemweb/
+        python -m coverage xml
+
+    - name: Upload to Codecov
+      if: ${{ matrix.WITH_WEB == 'NO' && matrix.WITH_IEM_DATA == 'YES' }}
+      uses: codecov/codecov-action@v4
+      with:
+        token: ${{ secrets.CODECOV_TOKEN }}
+        files: coverage.xml

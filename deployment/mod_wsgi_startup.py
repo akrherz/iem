@@ -15,6 +15,9 @@ os.environ["PROJ_NETWORK"] = "off"
 os.environ["MPLCONFIGDIR"] = "/var/cache/matplotlib"
 os.environ["CARTOPY_OFFLINE_SHARED"] = f"{envpath}/share/cartopy"
 
+# Have our local pylib module as the first place to look
+sys.path.insert(0, "/opt/iem/pylib")
+
 from pyiem.plot.use_agg import plt  # noqa
 from pyiem.util import LOG  # noqa
 import pandas as pd  # noqa

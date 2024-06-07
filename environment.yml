@@ -64,6 +64,9 @@ dependencies:
   - pyshp>=2
   # for testing
   - pytest
+  - pytest-cov
+  - pytest-mpl
+  - pytest-runner
   - pytest-xdist
   - qrcode
   # various places
