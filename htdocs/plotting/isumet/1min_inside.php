@@ -1,8 +1,7 @@
 <?php
-include("../../../config/settings.inc.php");
-include_once "../../../include/mlib.php";
-include_once "../../../include/form.php";
-//  1 minute data plotter 
+require_once "../../../config/settings.inc.php";
+require_once "../../../include/mlib.php";
+require_once "../../../include/forms.php";
 
 $year = get_int404("year", date("Y"));
 $month = get_int404("month", date("m"));
