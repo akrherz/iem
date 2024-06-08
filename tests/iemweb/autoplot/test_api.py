@@ -3,6 +3,7 @@
 import pytest
 from iemweb.autoplot import data as autoplot_data
 from iemweb.autoplot import import_script
+from pyiem.exceptions import NoDataFound
 
 
 def genmod():
@@ -16,4 +17,7 @@ def genmod():
 @pytest.mark.parametrize("mod", genmod())
 def test_import_all_scripts(mod):
     """Just import things."""
-    assert isinstance(mod.get_description(), dict)
+    try:
+        mod.plotter({})
+    except NoDataFound:
+        pass

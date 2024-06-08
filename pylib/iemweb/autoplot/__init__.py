@@ -28,7 +28,11 @@ def import_script(p: int):
         s = "200"
     elif p >= 100:
         s = "100"
-    return importlib.import_module(f"iemweb.autoplot.scripts{s}.p{p}")
+    module = importlib.import_module(f"iemweb.autoplot.scripts{s}.p{p}")
+    # When bugs get fixed, mod_wsgi may have the old module cached and not
+    # load it until it gets cycled, so this may have a small perf hit, alas
+    importlib.reload(module)
+    return module
 
 
 # Association of plots

@@ -263,7 +263,9 @@ def plotter(fdict):
         if ctx["thres"] is None
         else rf"\nBack Threshold of at least {ctx['thres']:.0f} $^\circ$F"
     )
-    tt = max([ctx["_nt"].sts[station]["archive_begin"].year, syear])
+    tt = syear
+    if ctx["_nt"].sts[station]["archive_begin"] is not None:
+        tt = max([ctx["_nt"].sts[station]["archive_begin"].year, syear])
     title = (
         f"{ctx['_sname']} ({tt:.0f}-{eyear:.0f}) Max Change in "
         f"{PDICT3[ctx['var']].replace('Temperature', 'Temp')} "
