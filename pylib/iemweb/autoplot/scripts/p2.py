@@ -78,6 +78,8 @@ def plotter(fdict):
 
     gstats = df.gdd.describe()
     pstats = df.total_precip.describe()
+    if "mean" not in pstats:
+        raise NoDataFound("ERROR: No Data Found")
 
     df["precip_sigma"] = (df.total_precip - pstats["mean"]) / pstats["std"]
     df["gdd_sigma"] = (df.gdd - gstats["mean"]) / gstats["std"]

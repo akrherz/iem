@@ -3,12 +3,12 @@ This chart shows the margin by which a new daily high
 and low temperatures record beat the previously set record.  Ties are not
 presented on this plot.
 """
-# pylint: disable=no-member
 
 import pandas as pd
+from pyiem.database import get_dbconnc
 from pyiem.exceptions import NoDataFound
 from pyiem.plot import figure_axes
-from pyiem.util import get_autoplot_context, get_dbconnc
+from pyiem.util import get_autoplot_context
 
 PDICT = {"0": "Max Highs / Min Lows", "1": "Min Highs / Max Lows"}
 PDICT2 = {
@@ -53,9 +53,8 @@ def get_context(fdict):
     ctx = get_autoplot_context(fdict, get_description())
     station = ctx["station"]
     opt = ctx["opt"]
-    table = f"alldata_{station[:2]}"
     cursor.execute(
-        f"SELECT day, sday, high, low from {table} WHERE station = %s "
+        "SELECT day, sday, high, low from alldata WHERE station = %s "
         "and high is not null and low is not null ORDER by day ASC",
         (station,),
     )

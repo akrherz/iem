@@ -234,6 +234,8 @@ def plotter(fdict):
     )
     xdata = df[f"{varname1}_1"]
     ydata = df[f"{varname2}_2"]
+    if xdata.isna().all() or ydata.isna().all():
+        raise NoDataFound("No Data Found.")
     df = df.dropna()
     title = (
         f"{df.index.min()}-{df.index.max()} {ctx['_sname']}\n"

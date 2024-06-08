@@ -150,17 +150,18 @@ def plotter(fdict):
             ha="center",
         )
 
-    bars = ax.bar(
-        range(1, 6), gdf.loc[year].values, width=0.25, label=str(year)
-    )
-    for mybar in bars:
-        ax.text(
-            mybar.get_x() + 0.125,
-            mybar.get_height() + 0.5,
-            f"{mybar.get_height():.0f}",
-            fontsize=14,
-            ha="center",
+    if year in gdf.index:
+        bars = ax.bar(
+            range(1, 6), gdf.loc[year].values, width=0.25, label=str(year)
         )
+        for mybar in bars:
+            ax.text(
+                mybar.get_x() + 0.125,
+                mybar.get_height() + 0.5,
+                f"{mybar.get_height():.0f}",
+                fontsize=14,
+                ha="center",
+            )
 
     if date.year in gdf.index:
         bars = ax.bar(

@@ -168,7 +168,10 @@ def plotter(fdict):
     for col in df.columns:
         if col == "doy":
             continue
-        color = "k" if col == "all_hit" else next(colors)
+        try:
+            color = "k" if col == "all_hit" else next(colors)
+        except StopIteration:
+            color = "k"
         ax.plot(
             gdf.index.values,
             gdf[col].values * 100.0,

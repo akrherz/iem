@@ -102,8 +102,7 @@ def get_app4user(cookies):
     )
     try:
         mapp.me()
-    except Exception as exp:
-        print(f"Removing access_token for {user_id} due to {exp}")
+    except Exception:
         cursor.execute(
             """
             update iembot_mastodon_oauth SET access_token = null,

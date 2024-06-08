@@ -122,10 +122,9 @@ def add_forecast(img, ctx, valid, fhour, x, y):
     buf = BytesIO()
     mp.fig.savefig(buf, format="png")
     buf.seek(0)
-    tmp = Image.open(buf).resize((512, 386))
+    with Image.open(buf).resize((512, 386)) as tmp:
+        img.paste(tmp, (x, y))
     buf.close()
-    img.paste(tmp, (x, y))
-    del tmp
     mp.close()
 
 
@@ -145,10 +144,9 @@ def add_obs(img, ctx, valid):
     buf = BytesIO()
     mp.fig.savefig(buf, format="png")
     buf.seek(0)
-    tmp = Image.open(buf).resize((512, 386))
+    with Image.open(buf).resize((512, 386)) as tmp:
+        img.paste(tmp, (0, 0))
     buf.close()
-    img.paste(tmp, (0, 0))
-    del tmp
     mp.close()
 
 

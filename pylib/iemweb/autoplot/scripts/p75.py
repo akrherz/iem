@@ -6,9 +6,10 @@ import datetime
 
 import numpy as np
 import pandas as pd
+from pyiem.database import get_dbconnc
 from pyiem.exceptions import NoDataFound
 from pyiem.plot import figure_axes
-from pyiem.util import get_autoplot_context, get_dbconnc
+from pyiem.util import get_autoplot_context
 from scipy import stats
 
 PDICT2 = {
@@ -85,7 +86,8 @@ def plotter(fdict):
     for row in cursor:
         if row["yr"] < startyear:
             continue
-        rows.append(dict(year=int(row["yr"]), data=float(row[season])))
+        if row[season] is not None:
+            rows.append(dict(year=int(row["yr"]), data=float(row[season])))
     pgconn.close()
     df = pd.DataFrame(rows)
 

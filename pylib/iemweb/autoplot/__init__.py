@@ -18,6 +18,23 @@ Not listed due to having no PNG output
 
 """
 
+import importlib
+
+
+def import_script(p: int):
+    """Import the script for the given product ID"""
+    s = ""
+    if p >= 200:
+        s = "200"
+    elif p >= 100:
+        s = "100"
+    module = importlib.import_module(f"iemweb.autoplot.scripts{s}.p{p}")
+    # When bugs get fixed, mod_wsgi may have the old module cached and not
+    # load it until it gets cycled, so this may have a small perf hit, alas
+    importlib.reload(module)
+    return module
+
+
 # Association of plots
 daily_opts = [
     {
@@ -710,7 +727,7 @@ nopts = [
         "label": "Calendar Plot of Watch/Warn/Adv Daily Counts",
     },
     {
-        "id": "253",
+        "id": 253,
         "label": (
             "NWS Damage Assessment Toolkit (DAT) Tornado Tracks + Lead Time"
         ),

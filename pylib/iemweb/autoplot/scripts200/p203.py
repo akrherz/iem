@@ -166,7 +166,10 @@ def plotter(fdict):
 
     # Write metadata to image
     mydir = os.sep.join(
-        [os.path.dirname(os.path.abspath(__file__)), "../../../images"]
+        [
+            os.path.dirname(os.path.abspath(__file__)),
+            "../../../../htdocs/images",
+        ]
     )
     logo = mpimage.imread(f"{mydir}/logo_reallysmall.png")
     y0 = fig.get_figheight() * 100.0 - logo.shape[0] - 5

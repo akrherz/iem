@@ -112,7 +112,8 @@ def plotter(fdict):
 
     ccursor.execute(
         "SELECT year, month, sum(precip), avg((high+low)/2.) "
-        "from alldata where station = %s GROUP by year, month",
+        "from alldata where station = %s and precip is not null and "
+        "high is not null and low is not null GROUP by year, month",
         (station,),
     )
     if ccursor.rowcount == 0:

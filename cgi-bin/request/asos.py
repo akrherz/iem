@@ -363,8 +363,7 @@ def get_time_bounds(form, tzinfo):
             form["sts"] = _get("1").replace(tzinfo=tzinfo)
         if form["ets"] is None:
             form["ets"] = _get("2").replace(tzinfo=tzinfo)
-    except Exception as exp:
-        print(exp)
+    except Exception:
         return None, None
 
     if form["sts"] == form["ets"]:
