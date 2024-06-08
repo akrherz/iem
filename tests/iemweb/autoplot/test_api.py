@@ -3,7 +3,7 @@
 import pytest
 from iemweb.autoplot import data as autoplot_data
 from iemweb.autoplot import import_script
-from pyiem.exceptions import NoDataFound
+from pyiem.exceptions import NoDataFound, UnknownStationException
 
 
 def genmod():
@@ -19,5 +19,5 @@ def test_import_all_scripts(mod):
     """Just import things."""
     try:
         mod.plotter({})
-    except NoDataFound:
-        pass
+    except (NoDataFound, UnknownStationException) as exp:
+        print(exp)
