@@ -19,7 +19,8 @@ select = [
     # "PD",  # pandas-vet
     "PIE",  # flake8-pie
     "PERF",  # performance
-    # "PL",  # pylint
+    "PLE",  # pylint error
+    # "PLW",  # pylint warning
     # "SIM",  # simplify
     "T20",  # print
     # "TRY",  # try-except-raise

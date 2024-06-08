@@ -178,11 +178,11 @@ def plotter(fdict):
         dist = np.sqrt(
             (res["lons"] - bnds[0]) ** 2 + (res["lats"] - bnds[2]) ** 2
         )
-        y1, x1 = np.unravel_index(dist.argmin(), dist.shape)
+        (y1, x1) = np.unravel_index(dist.argmin(), dist.shape)
         dist = np.sqrt(
             (res["lons"] - bnds[1]) ** 2 + (res["lats"] - bnds[3]) ** 2
         )
-        y2, x2 = np.unravel_index(dist.argmin(), dist.shape)
+        (y2, x2) = np.unravel_index(dist.argmin(), dist.shape)
         domain = res["vals"][y1:y2, x1:x2].filled(np.nan)
         ptile = np.nanpercentile(domain, [5, 95])
         bins = pretty_bins(ptile[0], ptile[1])

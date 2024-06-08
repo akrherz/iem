@@ -587,11 +587,10 @@ def plotter(fdict):
             fmt=fmt,
             labelbuffer=5,
         )
-    if state is not None or sector == "iailin" or ctx["d"] == "wfo":
-        if sector not in [
-            "conus",
-        ]:
-            mp.drawcounties()
+    if (
+        state is not None or sector == "iailin" or ctx["d"] == "wfo"
+    ) and sector != "conus":
+        mp.drawcounties()
     if ctx["usdm"] == "yes":
         mp.draw_usdm(date2, filled=False, hatched=True)
 

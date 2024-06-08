@@ -130,7 +130,7 @@ def plot_tow(tow, mp, tzinfo):
         if x_frac < 0.5 and y_frac < 0.5:  # LL
             pos = status[0]
             status[0] = (status[0][0], status[0][1] + 0.1)
-        elif x_frac <= 0.5 and y_frac >= 0.5:  # UL
+        elif x_frac <= 0.5 <= y_frac:  # UL
             pos = status[1]
             status[1] = (status[1][0], status[1][1] - 0.1)
         elif x_frac > 0.5 and y_frac >= 0.5:  # UR

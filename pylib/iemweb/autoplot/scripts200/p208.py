@@ -353,25 +353,24 @@ def plotter(fdict):
                 edgecolor="k",
                 zorder=Z_OVERLAY2,
             )
-    if ctx["n"] != "off":
-        if (p1 in ["SV", "TO", "FF", "MA"] and s1 == "W") or ctx["n"] == "on":
-            radval = mp.overlay_nexrad(
-                utcvalid.to_pydatetime().replace(tzinfo=timezone.utc),
-                caxpos=(0.02, 0.07, 0.3, 0.005),
+    if ctx["n"] != "off" and (
+        (p1 in ["SV", "TO", "FF", "MA"] and s1 == "W") or ctx["n"] == "on"
+    ):
+        radval = mp.overlay_nexrad(
+            utcvalid.to_pydatetime().replace(tzinfo=timezone.utc),
+            caxpos=(0.02, 0.07, 0.3, 0.005),
+        )
+        if radval is not None:
+            tstamp = radval.astimezone(ZoneInfo(tzname)).strftime("%-I:%M %p")
+            mp.ax.text(
+                0.01,
+                0.99,
+                f"NEXRAD: {tstamp}",
+                transform=mp.ax.transAxes,
+                bbox=dict(color="white"),
+                va="top",
+                zorder=Z_OVERLAY2_LABEL + 100,
             )
-            if radval is not None:
-                tstamp = radval.astimezone(ZoneInfo(tzname)).strftime(
-                    "%-I:%M %p"
-                )
-                mp.ax.text(
-                    0.01,
-                    0.99,
-                    f"NEXRAD: {tstamp}",
-                    transform=mp.ax.transAxes,
-                    bbox=dict(color="white"),
-                    va="top",
-                    zorder=Z_OVERLAY2_LABEL + 100,
-                )
     mp.fill_cwas(
         {"HFO": 0},
         ec="green",

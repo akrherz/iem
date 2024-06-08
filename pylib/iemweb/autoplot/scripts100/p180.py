@@ -13,6 +13,7 @@ from pyiem.database import get_sqlalchemy_conn
 from pyiem.exceptions import NoDataFound
 from pyiem.plot import figure, fitbox
 from pyiem.util import get_autoplot_context
+from sqlalchemy import text
 
 PDICT = {
     "por": "Period of Record (por) Climatology",
@@ -151,14 +152,20 @@ def plotter(fdict):
     if c1 == "custom":
         with get_sqlalchemy_conn("coop") as conn:
             df = pd.read_sql(
-                "SELECT sday, station, avg(high) as high, avg(low) as low, "
-                "avg(precip) as precip, avg(snow) as snow "
-                "from alldata WHERE "
-                "station = %s and sday != '0229' and year >= %s and "
-                "year <= %s and high is not null and "
-                "low is not null GROUP by sday, station ORDER by sday ASC",
+                text("""
+                     SELECT sday, station, avg(high) as high, avg(low) as low,
+                avg(precip) as precip, avg(snow) as snow
+                from alldata WHERE
+                station = :station and sday != '0229' and year >= :sy1 and
+                year <= :ey1 and high is not null and
+                low is not null GROUP by sday, station ORDER by sday ASC
+                     """),
                 conn,
-                params=(station1, ctx["sy1"], ctx["ey1"]),
+                params={
+                    "station": station1,
+                    "sy1": ctx["sy1"],
+                    "ey1": ctx["ey1"],
+                },
                 index_col=None,
             )
         df["valid"] = pd.to_datetime(df["sday"] + "2000", format="%m%d%Y")
@@ -166,11 +173,11 @@ def plotter(fdict):
     else:
         with get_sqlalchemy_conn("coop") as conn:
             df = pd.read_sql(
-                "SELECT valid, station, high, low, precip, snow from "
-                f"{cltable1} WHERE station = %s and valid != '2000-02-29' "
-                "ORDER by valid ASC",
+                text(f"""SELECT valid, station, high, low, precip, snow from
+                {cltable1} WHERE station = :station and valid != '2000-02-29'
+                ORDER by valid ASC"""),
                 conn,
-                params=(clstation1,),
+                params={"station": clstation1},
                 parse_dates="valid",
                 index_col="valid",
             )
@@ -181,14 +188,20 @@ def plotter(fdict):
         if c2 == "custom":
             with get_sqlalchemy_conn("coop") as conn:
                 df2 = pd.read_sql(
-                    "SELECT sday, station, avg(high) as high, "
-                    "avg(low) as low, avg(precip) as precip, "
-                    "avg(snow) as snow from alldata WHERE "
-                    "station = %s and sday != '0229' and year >= %s and "
-                    "year <= %s and high is not null and "
-                    "low is not null GROUP by sday, station ORDER by sday ASC",
+                    text("""
+                         SELECT sday, station, avg(high) as high,
+                    avg(low) as low, avg(precip) as precip,
+                    avg(snow) as snow from alldata WHERE
+                    station = :station and sday != '0229' and year >= :sy2 and
+                    year <= :ey2 and high is not null and
+                    low is not null GROUP by sday, station ORDER by sday ASC
+                         """),
                     conn,
-                    params=(station2, ctx["sy2"], ctx["ey2"]),
+                    params={
+                        "station": station2,
+                        "sy2": ctx["sy2"],
+                        "ey2": ctx["ey2"],
+                    },
                     index_col=None,
                 )
             df2["valid"] = pd.to_datetime(
@@ -199,11 +212,14 @@ def plotter(fdict):
         else:
             with get_sqlalchemy_conn("coop") as conn:
                 df2 = pd.read_sql(
-                    "SELECT valid, station, high, low, precip, snow from "
-                    f"{cltable2} WHERE station = %s and valid != '2000-02-29' "
-                    "ORDER by valid ASC",
+                    text(f"""
+                         SELECT valid, station, high, low, precip, snow from
+                    {cltable2} WHERE station = :station
+                    and valid != '2000-02-29'
+                    ORDER by valid ASC
+                    """),
                     conn,
-                    params=(clstation2,),
+                    params={"station": clstation2},
                     parse_dates="valid",
                     index_col="valid",
                 )
