@@ -1,4 +1,4 @@
-/* global CONFIG iemdata moment ol */
+/* global CONFIG, iemdata, moment, ol */
 // previous hashlinking looks like 2017-O-NEW-KALY-WI-Y-0015
 
 let olmap = null;
