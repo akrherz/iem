@@ -424,5 +424,3 @@ def plotter(fdict):
     )
 
     return fig, df
-
-    highcharts({})

@@ -315,12 +315,3 @@ def plotter(fdict):
     )
 
     return wr.fig, ctx["df"]
-
-    highcharts(
-        {
-            "station": "AMW",
-            "month": "all",
-            "opt": "ts",
-            "threshold": 32,
-        }
-    )

@@ -238,5 +238,3 @@ def plotter(fdict):
     g.ax_joint.grid()
     g.fig.subplots_adjust(top=0.9, bottom=0.1, left=0.1)
     return g.fig, df
-
-    highcharts({})

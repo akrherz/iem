@@ -350,5 +350,3 @@ def plotter(fdict):
         df["issued"] = df["issued"].apply(lambda x: x.strftime(fmt))
     df["valid"] = df["valid"].apply(lambda x: x.strftime(fmt))
     return fig, df
-
-    highcharts({})
