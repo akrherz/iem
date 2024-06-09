@@ -154,7 +154,3 @@ def plotter(fdict):
     ax.set_xticks(range(1, 25, 3))
     ax.set_xticklabels("Mid,3 AM,6 AM,9 AM,Noon,3 PM,6 PM,9 PM".split(","))
     return fig
-
-
-if __name__ == "__main__":
-    plotter({})

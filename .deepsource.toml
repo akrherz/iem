@@ -10,7 +10,6 @@ name = "shell"
 
 [[analyzers]]
 name = "javascript"
-enabled = false
 
   [analyzers.meta]
   environment = ["jquery", "browser"]

@@ -305,7 +305,3 @@ def plotter(fdict):
     ax.set_xlim(df.index.min() - offset, df.index.max() + offset)
 
     return fig, df
-
-
-if __name__ == "__main__":
-    plotter({})

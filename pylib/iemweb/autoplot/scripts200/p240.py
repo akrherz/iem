@@ -196,7 +196,3 @@ def plotter(fdict):
     if is_morning:
         ax.set_xlabel("* Observations shifted one day due to morning reports")
     return fig, df
-
-
-if __name__ == "__main__":
-    plotter({})

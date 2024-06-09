@@ -183,7 +183,3 @@ def plotter(fdict):
     ax.set_xlabel(f"Average {(days_per_year):.1f} Days per Year")
 
     return fig, df
-
-
-if __name__ == "__main__":
-    plotter({})

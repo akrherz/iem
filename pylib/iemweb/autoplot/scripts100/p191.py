@@ -229,7 +229,3 @@ def plotter(fdict):
         subtitle=f"Valid {sts:%d %b %Y} - {ets:%d %b %Y} for {title}",
     )
     return fig, df
-
-
-if __name__ == "__main__":
-    plotter({})

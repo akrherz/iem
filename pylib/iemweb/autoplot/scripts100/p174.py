@@ -171,7 +171,3 @@ def plotter(fdict):
         ax[i].set_ylim(df[col].min() - 0.2 * rng, df[col].max() + 0.2 * rng)
 
     return fig, df
-
-
-if __name__ == "__main__":
-    plotter({})

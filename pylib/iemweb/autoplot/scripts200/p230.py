@@ -353,7 +353,3 @@ def plotter(fdict):
         ypos -= boxheight
 
     return fig, df.drop(columns=["max_expire"])
-
-
-if __name__ == "__main__":
-    plotter({})

@@ -58,7 +58,3 @@ def plotter(fdict):
         )
 
     return None, df, res
-
-
-if __name__ == "__main__":
-    plotter({})

@@ -200,7 +200,3 @@ def plotter(fdict):
     ax.set_ylabel(r"Temperature Beat Margin $^\circ$F")
 
     return fig, ctx["df"]
-
-
-if __name__ == "__main__":
-    highcharts({})

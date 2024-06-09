@@ -478,7 +478,3 @@ def plotter(fdict):
                 labelbuffer=0,
             )
     return mp.fig, df.drop(["geo", "plotme"], axis=1)
-
-
-if __name__ == "__main__":
-    plotter({})

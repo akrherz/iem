@@ -212,7 +212,3 @@ def plotter(fdict):
     df = df.set_index("thres")
     df.index.name = "threshold"
     return None, df, res
-
-
-if __name__ == "__main__":
-    plotter({})

@@ -115,7 +115,3 @@ def plotter(fdict):
     res += "%6.1f\n" % (tot,)
 
     return None, df, res
-
-
-if __name__ == "__main__":
-    plotter({})

@@ -210,7 +210,3 @@ def plotter(fdict):
     fig.text(0.7, ypos, "* Overlapping Periods Not Listed")
 
     return fig, df
-
-
-if __name__ == "__main__":
-    plotter({})

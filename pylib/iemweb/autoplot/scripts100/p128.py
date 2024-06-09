@@ -145,7 +145,3 @@ def plotter(fdict):
     ymax = df["diff_" + varname].abs().max() * 1.1
     ax.set_ylim(0 - ymax, ymax)
     return fig, df
-
-
-if __name__ == "__main__":
-    plotter({})

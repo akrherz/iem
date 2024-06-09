@@ -323,7 +323,3 @@ def plotter(fdict):
         fitbox(fig, "No warnings Found!", 0.2, 0.8, 0.2, 0.5, color="white")
 
     return fig, gdf.drop(columns=["utmgeom", "issue"]), imagemap.read()
-
-
-if __name__ == "__main__":
-    plotter({})

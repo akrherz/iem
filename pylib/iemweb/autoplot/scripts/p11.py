@@ -148,7 +148,3 @@ def plotter(fdict):
     delta = datetime.timedelta(days=1)
     ax.set_xlim(df.index.values[0] - delta, df.index.values[-1] + delta)
     return fig, df
-
-
-if __name__ == "__main__":
-    plotter({})

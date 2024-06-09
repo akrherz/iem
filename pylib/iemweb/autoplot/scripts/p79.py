@@ -198,7 +198,3 @@ def plotter(fdict):
     ax.set_xlabel("Wind Direction")
 
     return fig, means
-
-
-if __name__ == "__main__":
-    plotter({})

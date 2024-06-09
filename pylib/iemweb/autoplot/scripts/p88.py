@@ -129,7 +129,3 @@ def plotter(fdict):
     ax.set_yticklabels(("Mid", "4 AM", "8 AM", "Noon", "4 PM", "8 PM"))
 
     return fig, df
-
-
-if __name__ == "__main__":
-    plotter({})

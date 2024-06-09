@@ -238,7 +238,3 @@ def plotter(fdict):
         fig.text(0.95, y, f"{v2:.1f}")
 
     return fig, df
-
-
-if __name__ == "__main__":
-    plotter({})

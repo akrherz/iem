@@ -95,7 +95,3 @@ def plotter(fdict):
                 res += "   M\n"
 
     return None, df, res
-
-
-if __name__ == "__main__":
-    plotter({})

@@ -211,7 +211,3 @@ def plotter(fdict):
     rax.grid(True)
 
     return fig, df
-
-
-if __name__ == "__main__":
-    plotter({})

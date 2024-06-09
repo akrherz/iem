@@ -178,7 +178,3 @@ def plotter(fdict):
     ax.text(df2["t"].min() + 5, avg + 2, f"Avg: {avg:.1f}%")
 
     return fig, df
-
-
-if __name__ == "__main__":
-    plotter({})

@@ -430,7 +430,3 @@ def plotter(fdict):
     finalize_map(ctx)
 
     return ctx["mp"].fig
-
-
-if __name__ == "__main__":
-    plotter({})

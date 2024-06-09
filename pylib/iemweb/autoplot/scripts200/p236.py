@@ -205,7 +205,3 @@ def plotter(fdict):
     axes[0].xaxis.set_major_formatter(mdates.DateFormatter("%-d %b\n%Y"))
 
     return fig, df
-
-
-if __name__ == "__main__":
-    plotter({})

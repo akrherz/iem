@@ -117,7 +117,3 @@ def plotter(fdict):
     g.ax_joint.set_xlabel("Precipitation Total (liquid + melted) [inch]")
     g.ax_joint.legend(loc=1, scatterpoints=1)
     return g.fig, df
-
-
-if __name__ == "__main__":
-    plotter({})

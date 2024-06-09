@@ -254,7 +254,3 @@ def plotter(fdict):
     ax2.set_ylim(0, 101)
     df = df.set_index("year").drop(columns=["color"])
     return fig, df
-
-
-if __name__ == "__main__":
-    plotter({})

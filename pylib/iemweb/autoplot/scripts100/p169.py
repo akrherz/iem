@@ -308,7 +308,3 @@ def plotter(fdict):
         .reset_index()
         .drop(columns=["utc_valid", "end_valid", "use"], errors="ignore")
     )
-
-
-if __name__ == "__main__":
-    plotter({})

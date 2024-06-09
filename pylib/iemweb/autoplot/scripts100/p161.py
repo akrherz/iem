@@ -217,7 +217,3 @@ def plotter(fdict):
     ax.axhline(avgv)
     ax.text(df.index.max() + 1, avgv, "%.1f" % (avgv,))
     return fig, df
-
-
-if __name__ == "__main__":
-    plotter({})

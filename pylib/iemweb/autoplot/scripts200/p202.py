@@ -272,7 +272,3 @@ def plotter(fdict):
     ax.legend(loc="best", ncol=5)
 
     return fig, df
-
-
-if __name__ == "__main__":
-    plotter({})

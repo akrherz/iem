@@ -304,7 +304,3 @@ def plotter(fdict):
     ax.set_xlabel(r"Wind Chill Temperature $^\circ$F")
     ax.set_ylabel("Total Time Hours [expressed in days]")
     return fig, ctx["df"]
-
-
-if __name__ == "__main__":
-    plotter({})

@@ -183,7 +183,3 @@ def plotter(fdict):
     ax.set_ylabel(f"Average Wind Speed [{PDICT[plot_units]}]")
 
     return fig, df
-
-
-if __name__ == "__main__":
-    plotter({})

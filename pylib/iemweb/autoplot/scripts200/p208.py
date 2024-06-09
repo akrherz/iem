@@ -380,7 +380,3 @@ def plotter(fdict):
         lw=2,
     )
     return mp.fig, df.drop("simple_geom", axis=1)
-
-
-if __name__ == "__main__":
-    plotter({})

@@ -301,7 +301,3 @@ def plotter(fdict):
     ax.set_xlim(0, 23)
 
     return fig, ctx["df"]
-
-
-if __name__ == "__main__":
-    plotter({})

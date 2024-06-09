@@ -118,7 +118,3 @@ def plotter(fdict):
     ax.set_ylim(maxyear + 0.5, minyear - 0.5)
 
     return fig, df
-
-
-if __name__ == "__main__":
-    plotter({})

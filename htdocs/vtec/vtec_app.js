@@ -1,4 +1,4 @@
-/* global CONFIG */
+/* global CONFIG, iemdata, moment, ol */
 // previous hashlinking looks like 2017-O-NEW-KALY-WI-Y-0015
 
 let olmap = null;
@@ -13,10 +13,6 @@ let ugcTable = null;
 let lsrTable = null;
 let sbwLsrTable = null;
 let element = null;
-
-Number.prototype.padLeft = function (n, str) { // this
-    return Array(n - String(this).length + 1).join(str || '0') + this;
-};
 
 const sbwLookup = {
     "TO": 'red',
@@ -127,7 +123,7 @@ function urlencode() {
 }
 
 // https://stackoverflow.com/questions/2044616
- 
+
 function selectElementContents(elid) {
     const el = document.getElementById(elid);
     const body = document.body;
@@ -155,7 +151,7 @@ function selectElementContents(elid) {
 
 function updateHash() {
     // Set the hashlink as per our current CONFIG
-    let href = `#${CONFIG.year}-O-NEW-${CONFIG.wfo}-${CONFIG.phenomena}-${CONFIG.significance}-${CONFIG.etn.padLeft(4)}`;
+    let href = `#${CONFIG.year}-O-NEW-${CONFIG.wfo}-${CONFIG.phenomena}-${CONFIG.significance}-${String(CONFIG.etn).padStart(4, '0')}`;
     if (CONFIG.radarProductTime !== null && CONFIG.radarProduct !== null &&
         CONFIG.radar !== null) {
         href += "/" + CONFIG.radar + "-" + CONFIG.radarProduct +
@@ -597,8 +593,8 @@ function getVTECGeometry() {
 
 function loadTabs() {
     // OK, lets load up the tab content
-    const vstring = `${CONFIG.year}.O.NEW.${CONFIG.wfo}.${CONFIG.phenomena}.${CONFIG.significance}.${CONFIG.etn.padLeft(4)}`;
-    const vstring2 = `${CONFIG.year}.${CONFIG.wfo}.${CONFIG.phenomena}.${CONFIG.significance}.${CONFIG.etn.padLeft(4)}`;
+    const vstring = `${CONFIG.year}.O.NEW.${CONFIG.wfo}.${CONFIG.phenomena}.${CONFIG.significance}.${String(CONFIG.etn).padStart(4, '0')}`;
+    const vstring2 = `${CONFIG.year}.${CONFIG.wfo}.${CONFIG.phenomena}.${CONFIG.significance}.${String(CONFIG.etn).padStart(4, '0')}`;
     $("#radarmap").html(`<img src="/GIS/radmap.php?layers[]=nexrad&layers[]=sbw&layers[]=sbwh&layers[]=uscounties&vtec=${vstring}" class="img img-responsive">`);
     $("#sbwhistory").html(`<img src="/GIS/sbw-history.php?vtec=${vstring2}" class="img img-responsive">`);
 
@@ -857,7 +853,7 @@ $(() => {
     //onReady
     try {
         parseHash();
-    } catch { 
+    } catch {
         // Nothing?
     };
     buildUI();

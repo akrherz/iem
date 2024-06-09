@@ -310,7 +310,3 @@ def plotter(fdict):
     cb.set_ticks(bins)
 
     return fig, df
-
-
-if __name__ == "__main__":
-    plotter({})

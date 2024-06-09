@@ -155,7 +155,3 @@ def plotter(fdict):
     mp.drawcounties()
 
     return mp.fig, None
-
-
-if __name__ == "__main__":
-    plotter({})

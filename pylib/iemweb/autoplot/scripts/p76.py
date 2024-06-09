@@ -369,7 +369,3 @@ def plotter(fdict):
     fig, means = make_plot(df, ctx)
 
     return fig, means
-
-
-if __name__ == "__main__":
-    plotter({})

@@ -178,7 +178,3 @@ def plotter(fdict):
     g.plot_marginals(sns.histplot, element="step", color="#03012d")
     g.ax_marg_x.remove()
     return g.figure, df
-
-
-if __name__ == "__main__":
-    plotter({})

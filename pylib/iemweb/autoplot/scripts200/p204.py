@@ -135,7 +135,3 @@ def plotter(fdict):
     ax.set_yticklabels(yticklabels[::-1], rotation=0)
     ax.xaxis.grid(True, color="k")
     return fig, df
-
-
-if __name__ == "__main__":
-    plotter({})

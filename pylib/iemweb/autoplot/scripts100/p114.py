@@ -61,7 +61,3 @@ def plotter(fdict):
     res += "MEAN %3i\n" % (df["count"].mean(),)
 
     return None, df, res
-
-
-if __name__ == "__main__":
-    plotter({})

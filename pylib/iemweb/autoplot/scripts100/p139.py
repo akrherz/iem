@@ -218,7 +218,3 @@ def plotter(fdict):
     ax.axvline(36 * 3600, color="tan")
     ax.axis("off")
     return fig, df
-
-
-if __name__ == "__main__":
-    plotter({})

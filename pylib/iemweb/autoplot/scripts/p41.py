@@ -370,7 +370,3 @@ def plotter(fdict):
         y -= 0.04
 
     return fig, df
-
-
-if __name__ == "__main__":
-    plotter({})

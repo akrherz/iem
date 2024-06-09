@@ -254,7 +254,3 @@ def plotter(fdict):
     for col in date_cols:
         df[col] = df[col].dt.strftime("%Y-%m-%dT%H:%M:%S")
     return fig, df
-
-
-if __name__ == "__main__":
-    plotter({})

@@ -246,7 +246,3 @@ def plotter(fdict):
     ax.set_ylabel(ctx["ylabel"])
     df = df.rename({"x": VDICT[ctx["x"]], "y": VDICT[ctx["y"]]}, axis=1)
     return fig, df
-
-
-if __name__ == "__main__":
-    plotter({})

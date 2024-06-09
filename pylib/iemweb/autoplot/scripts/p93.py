@@ -281,7 +281,3 @@ def plotter(fdict):
     ax.set_xlabel(f"{VDICT[varname].split('::')[0]} {unit}")
     ax.legend(loc=legloc, scatterpoints=1)
     return fig, rdf
-
-
-if __name__ == "__main__":
-    plotter({})

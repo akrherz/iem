@@ -232,7 +232,3 @@ def plotter(fdict):
     ax.set_xticklabels(calendar.month_abbr[1:])
 
     return fig, resdf, res
-
-
-if __name__ == "__main__":
-    plotter({})

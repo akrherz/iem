@@ -331,7 +331,3 @@ def plotter(fdict):
         bbox=dict(facecolor="white", edgecolor="k"),
     )
     return fig, df
-
-
-if __name__ == "__main__":
-    plotter({})

@@ -195,7 +195,3 @@ def plotter(fdict):
     ax2.set_position([0.1, 0.2, 0.75, 0.7])
     ax2.set_yticks([0, 5, 10, 25, 50, 75, 90, 95, 100])
     return fig, gdf
-
-
-if __name__ == "__main__":
-    plotter({})

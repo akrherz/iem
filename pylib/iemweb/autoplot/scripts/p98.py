@@ -116,7 +116,3 @@ def plotter(fdict):
     ax.set_ylim(0, df["freq"].max() + 5)
 
     return fig, df
-
-
-if __name__ == "__main__":
-    plotter({})

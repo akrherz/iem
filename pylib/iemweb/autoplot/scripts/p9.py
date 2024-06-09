@@ -195,7 +195,3 @@ def plotter(fdict):
     ax.legend(ncol=2)
 
     return fig, retdf
-
-
-if __name__ == "__main__":
-    plotter({})

@@ -242,7 +242,3 @@ def plotter(fdict):
     ax.xaxis.set_major_locator(mdates.DayLocator(1))
 
     return fig, thisyear
-
-
-if __name__ == "__main__":
-    plotter({})
