@@ -137,16 +137,8 @@ app.Drag.prototype.handleUpEvent = function (evt) {
 $(document).ready(
     function () {
         feature = new ol.Feature(new ol.geom.Point(
-            ol.proj.transform([-93., 42.], 'EPSG:4326', 'EPSG:3857')
+            ol.proj.transform([-93.0, 42.0], 'EPSG:4326', 'EPSG:3857')
         ));
-        /*
-         * controls = { drag: new OpenLayers.Control.DragFeature(vectors, {
-         * onComplete: function(feature, pixel) { geo =
-         * feature.geometry.clone();
-         * geo.transform(map.getProjectionObject(), proj);
-         * document.getElementById('lon').value = geo.x;
-         * document.getElementById('lat').value = geo.y; } }) };
-         */
         new ol.Map({
             interactions: ol.interaction.defaults().extend([new app.Drag()]),
             target: 'map',

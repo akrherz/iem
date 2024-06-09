@@ -6,16 +6,22 @@ import datetime
 import json
 import os
 
+from pydantic import Field
 from pyiem.reference import ISO8601
-from pyiem.util import html_escape
-from pyiem.webutil import iemapp
-from pymemcache.client import Client
+from pyiem.util import utc
+from pyiem.webutil import CGIModel, iemapp
+
+
+class Schema(CGIModel):
+    """See how we are called."""
+
+    callback: str = Field(None, description="JSONP callback function name")
 
 
 def run():
     """Generate json response"""
     res = {
-        "generation_utc_time": datetime.datetime.utcnow().strftime(ISO8601),
+        "generation_utc_time": utc().strftime(ISO8601),
         "services": [],
     }
     fn = "/mesonet/ldmdata/gis/images/4326/USCOMP/n0q_0.json"
@@ -46,7 +52,12 @@ def run():
     return json.dumps(res)
 
 
-@iemapp()
+@iemapp(
+    help=__doc__,
+    schema=Schema,
+    memcachekey="/json/tms.json",
+    memcacheexpire=15,
+)
 def application(environ, start_response):
     """Answer request."""
     if environ["REQUEST_METHOD"] not in ["GET", "POST"]:
@@ -55,20 +66,7 @@ def application(environ, start_response):
         data = "Invalid Request"
         return [data.encode("ascii")]
 
-    cb = environ.get("callback")
-
-    mckey = "/json/tms.json"
-    mc = Client("iem-memcached:11211")
-    res = mc.get(mckey)
-    if res is None:
-        res = run()
-        mc.set(mckey, res, 15)
-    else:
-        res = res.decode("utf-8")
-    mc.close()
-    if cb is not None:
-        res = f"{html_escape(cb)}({res})"
-
+    res = run()
     headers = [("Content-type", "application/json")]
     start_response("200 OK", headers)
-    return [res.encode("ascii")]
+    return res
