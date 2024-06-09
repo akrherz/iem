@@ -347,7 +347,3 @@ def plotter(fdict):
             zorder=4,
         )
     return fig, df
-
-
-if __name__ == "__main__":
-    plotter({})

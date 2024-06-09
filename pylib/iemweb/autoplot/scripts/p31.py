@@ -351,7 +351,3 @@ def plotter(fdict):
     )
 
     return fig, df.rename({"datum": agg})
-
-
-if __name__ == "__main__":
-    plotter({})

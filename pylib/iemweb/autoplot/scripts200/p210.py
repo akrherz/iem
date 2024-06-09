@@ -171,7 +171,3 @@ def plotter(fdict):
         labelbuffer=0,
     )
     return mp.fig, df
-
-
-if __name__ == "__main__":
-    plotter({})

@@ -239,6 +239,4 @@ def plotter(fdict):
     g.fig.subplots_adjust(top=0.9, bottom=0.1, left=0.1)
     return g.fig, df
 
-
-if __name__ == "__main__":
     highcharts({})

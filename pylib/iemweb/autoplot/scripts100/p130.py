@@ -142,7 +142,3 @@ def plotter(fdict):
     ax[1].set_ylabel(r"Daily Low Temp $^\circ$F")
 
     return fig, pd.DataFrame(res)
-
-
-if __name__ == "__main__":
-    plotter({})

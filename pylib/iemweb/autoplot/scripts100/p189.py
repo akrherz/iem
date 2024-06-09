@@ -292,7 +292,3 @@ def plotter(fdict):
     fig, df = yearly_plot(ctx)
 
     return fig, df
-
-
-if __name__ == "__main__":
-    plotter({})

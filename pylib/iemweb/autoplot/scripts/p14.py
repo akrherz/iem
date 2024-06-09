@@ -226,7 +226,3 @@ def plotter(fdict):
     ax.set_ylim(top=ax.get_ylim()[1] * 1.1)
 
     return fig, df
-
-
-if __name__ == "__main__":
-    plotter({})

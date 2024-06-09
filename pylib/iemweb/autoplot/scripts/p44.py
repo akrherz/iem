@@ -362,7 +362,3 @@ def plotter(fdict):
     ax.set_xlim(0, lastdoy)
 
     return fig, df.drop(columns=["xaxis"])
-
-
-if __name__ == "__main__":
-    plotter({})

@@ -129,7 +129,3 @@ def plotter(fdict):
     ax.set_ylim(0 - rng * 1.3, rng * 1.3)
 
     return fig
-
-
-if __name__ == "__main__":
-    plotter({})

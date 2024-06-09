@@ -316,8 +316,6 @@ def plotter(fdict):
 
     return wr.fig, ctx["df"]
 
-
-if __name__ == "__main__":
     highcharts(
         {
             "station": "AMW",

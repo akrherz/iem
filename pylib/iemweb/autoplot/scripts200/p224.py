@@ -216,7 +216,3 @@ def plotter(fdict):
         ypos -= 0.08
 
     return fig, df
-
-
-if __name__ == "__main__":
-    plotter({})

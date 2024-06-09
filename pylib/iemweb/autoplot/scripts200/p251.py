@@ -211,7 +211,3 @@ def plotter(fdict):
     )
 
     return fig, df.reset_index()
-
-
-if __name__ == "__main__":
-    plotter({})

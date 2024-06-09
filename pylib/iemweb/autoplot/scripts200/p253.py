@@ -386,7 +386,3 @@ def plotter(fdict):
     lng.set_zorder(12)
 
     return mp.fig, pts.drop(columns=["geom"])
-
-
-if __name__ == "__main__":
-    plotter({})

@@ -474,7 +474,3 @@ def plotter(fdict):
     # remove timezone since excel no likely
     ctx["df"].index = ctx["df"].index.tz_localize(None)
     return fig, ctx["df"]
-
-
-if __name__ == "__main__":
-    plotter({})

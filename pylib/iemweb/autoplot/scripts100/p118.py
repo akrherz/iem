@@ -83,7 +83,3 @@ YEAR   JAN FEB MAR APR MAY JUN JUL AUG SEP OCT NOV DEC ANN
                 res += "    "
         res += " %3i\n" % (total,)
     return None, df, res
-
-
-if __name__ == "__main__":
-    plotter({})

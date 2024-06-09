@@ -119,7 +119,3 @@ def plotter(fdict):
     ax[1].set_xlim(gdf.index.values.min() - 0.5, gdf.index.values.max() + 0.5)
     ax[1].xaxis.set_major_locator(MaxNLocator(integer=True))
     return fig, df
-
-
-if __name__ == "__main__":
-    plotter({})

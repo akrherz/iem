@@ -185,7 +185,3 @@ def plotter(fdict):
     fig.colorbar(res, cax=cbar_ax, orientation="horizontal")
 
     return fig, df
-
-
-if __name__ == "__main__":
-    plotter({})

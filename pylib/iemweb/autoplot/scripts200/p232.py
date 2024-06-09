@@ -275,7 +275,3 @@ def plotter(fdict):
     top_ax.set_xlim(sts, ets + datetime.timedelta(minutes=5))
 
     return fig, obs
-
-
-if __name__ == "__main__":
-    plotter({})

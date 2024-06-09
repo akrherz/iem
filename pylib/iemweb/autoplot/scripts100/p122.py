@@ -90,7 +90,3 @@ def plotter(fdict):
         ) % row
 
     return None, df, res
-
-
-if __name__ == "__main__":
-    plotter({})

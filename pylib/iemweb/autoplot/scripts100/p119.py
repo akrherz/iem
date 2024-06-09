@@ -273,7 +273,3 @@ def plotter(fdict):
     fig.text(0.85, 0.85, "Percentile Dates", ha="center")
 
     return fig, df.reset_index(), res
-
-
-if __name__ == "__main__":
-    plotter({})

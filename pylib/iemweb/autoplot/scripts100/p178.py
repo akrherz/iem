@@ -208,7 +208,3 @@ def plotter(fdict):
             plot.drawcounties()
         df = pd.DataFrame()
     return plot.fig, df
-
-
-if __name__ == "__main__":
-    plotter({})

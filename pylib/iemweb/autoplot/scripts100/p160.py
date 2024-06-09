@@ -351,6 +351,4 @@ def plotter(fdict):
     df["valid"] = df["valid"].apply(lambda x: x.strftime(fmt))
     return fig, df
 
-
-if __name__ == "__main__":
     highcharts({})

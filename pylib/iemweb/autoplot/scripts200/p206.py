@@ -249,7 +249,3 @@ def plotter(fdict):
             "geom",
         ]
     )
-
-
-if __name__ == "__main__":
-    plotter({})

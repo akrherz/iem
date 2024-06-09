@@ -136,7 +136,3 @@ def plotter(fdict):
     ax.set_ylim(df["plot_doy"].min() - 5, df["plot_doy"].max() + 5)
 
     return fig, df
-
-
-if __name__ == "__main__":
-    plotter({})

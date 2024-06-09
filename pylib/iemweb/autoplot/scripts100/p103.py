@@ -131,7 +131,3 @@ def plotter(fdict):
     ax[2].set_xlabel("Day of Year, 3 Day Bins")
 
     return fig, df
-
-
-if __name__ == "__main__":
-    plotter({})

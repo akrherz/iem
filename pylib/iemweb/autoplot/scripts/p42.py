@@ -373,7 +373,3 @@ def plotter(fdict):
     label += tzname
     fig.text(0.99, 0.9, label, ha="right", va="top", fontsize=10)
     return fig, df
-
-
-if __name__ == "__main__":
-    plotter({})

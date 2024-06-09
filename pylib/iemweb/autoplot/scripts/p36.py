@@ -124,7 +124,3 @@ def plotter(fdict):
     ax.set_ylabel("...this month for same year")
 
     return fig, df
-
-
-if __name__ == "__main__":
-    plotter({})

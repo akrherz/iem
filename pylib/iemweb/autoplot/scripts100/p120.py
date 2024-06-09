@@ -152,7 +152,3 @@ def plotter(fdict):
     ax.grid(True)
     df = df.reset_index()
     return fig, df, res
-
-
-if __name__ == "__main__":
-    plotter({})

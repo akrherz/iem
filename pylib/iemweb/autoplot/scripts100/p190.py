@@ -115,7 +115,3 @@ def plotter(fdict):
     magic(fig, ax, df, "max_precip_rank", "Maximum Precipitation", ctx)
 
     return fig, df
-
-
-if __name__ == "__main__":
-    plotter({})

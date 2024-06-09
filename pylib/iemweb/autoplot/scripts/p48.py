@@ -156,7 +156,3 @@ def plotter(fdict):
     ax.set_ylabel(f"Frequency [%] out of {cnt} Events")
     ax.set_xlim(0, 1441)
     return fig, df
-
-
-if __name__ == "__main__":
-    plotter({})

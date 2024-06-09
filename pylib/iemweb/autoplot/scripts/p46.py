@@ -152,7 +152,3 @@ def plotter(fdict):
         ax[1].set_xlabel("Year label for spring portion of season")
 
     return fig, df
-
-
-if __name__ == "__main__":
-    plotter({})

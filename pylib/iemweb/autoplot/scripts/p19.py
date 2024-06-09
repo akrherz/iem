@@ -286,7 +286,3 @@ def plotter(fdict):
         ax.set_ylim(*[float(y) for y in ctx["y"].split()])
 
     return fig, df
-
-
-if __name__ == "__main__":
-    plotter({})

@@ -225,7 +225,3 @@ def plotter(fdict):
     ax[2].set_ylim(bottom=ax[2].get_ylim()[0] - 15)
 
     return fig, df
-
-
-if __name__ == "__main__":
-    plotter({})

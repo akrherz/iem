@@ -189,7 +189,3 @@ def plotter(fdict):
     fig.text(0.85, 0.88, f"{eyear}", fontsize=14, ha="center")
 
     return fig, df
-
-
-if __name__ == "__main__":
-    plotter({})

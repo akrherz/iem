@@ -595,7 +595,3 @@ def plotter(fdict):
         mp.draw_usdm(date2, filled=False, hatched=True)
 
     return mp.fig, df.round(2)
-
-
-if __name__ == "__main__":
-    plotter({})

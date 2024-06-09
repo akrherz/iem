@@ -201,6 +201,4 @@ def plotter(fdict):
 
     return fig, ctx["df"]
 
-
-if __name__ == "__main__":
     highcharts({})

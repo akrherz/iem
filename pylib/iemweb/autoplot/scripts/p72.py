@@ -198,7 +198,3 @@ def plotter(fdict):
     ax.set_ylabel(f"Percentage [%] out of {df['total'].max():.0f} Events")
 
     return fig, df.drop(columns=["min_issue", "max_issue"])
-
-
-if __name__ == "__main__":
-    plotter({})

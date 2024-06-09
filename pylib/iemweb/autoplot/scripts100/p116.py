@@ -147,7 +147,3 @@ def plotter(fdict):
     sns.heatmap(df2, annot=True, fmt=".0f", linewidths=0.5, ax=ax)
 
     return fig, df, res
-
-
-if __name__ == "__main__":
-    plotter({})

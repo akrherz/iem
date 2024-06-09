@@ -134,7 +134,3 @@ def plotter(fdict):
     ax[0].set_xlim(df.index.values[0] - 1, df.index.values[-1] + 1)
     ax[0].xaxis.set_major_locator(ticker.MaxNLocator(integer=True))
     return fig, df
-
-
-if __name__ == "__main__":
-    plotter({})

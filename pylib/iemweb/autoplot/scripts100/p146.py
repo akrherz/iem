@@ -105,7 +105,3 @@ def plotter(fdict):
     ax.set_ylabel(r"Temperature [$^\circ$F]")
 
     return fig, resdf
-
-
-if __name__ == "__main__":
-    plotter({})

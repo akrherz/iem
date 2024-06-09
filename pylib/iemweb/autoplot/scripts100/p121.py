@@ -177,7 +177,3 @@ YEAR   SPRING  FALL    SPRING  FALL    SPRING  FALL    SPRING  FALL
     )
 
     return None, df, res
-
-
-if __name__ == "__main__":
-    plotter({})

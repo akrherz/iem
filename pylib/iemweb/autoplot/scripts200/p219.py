@@ -324,7 +324,3 @@ def plotter(fdict):
             lambda x: x.strftime("%Y-%m-%d %H:%M")
         )
     return fig, df.drop("next_valid", axis=1)
-
-
-if __name__ == "__main__":
-    plotter({})

@@ -214,7 +214,3 @@ def plotter(fdict):
             )
 
     return mp.fig, pd.DataFrame(rows)
-
-
-if __name__ == "__main__":
-    plotter({})

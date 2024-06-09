@@ -132,7 +132,3 @@ def plotter(fdict):
     ax.set_xticks([0, 10, 25, 50, 75, 90, 100])
 
     return fig, df
-
-
-if __name__ == "__main__":
-    plotter({})

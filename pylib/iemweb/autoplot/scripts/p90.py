@@ -974,7 +974,3 @@ def plotter(fdict):
             mp.drawcounties()
 
     return mp.fig, ctx["df"]
-
-
-if __name__ == "__main__":
-    plotter({})

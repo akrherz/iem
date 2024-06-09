@@ -408,7 +408,3 @@ def plotter(fdict):
     ax.set_xlim(x[0], x[-1])
 
     return fig, df
-
-
-if __name__ == "__main__":
-    plotter({})

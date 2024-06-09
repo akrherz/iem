@@ -370,7 +370,3 @@ def plotter(fdict):
     for col in ["utc_valid", "local_valid"]:
         ctx["df"][col] = ctx["df"][col].dt.tz_localize(None)
     return fig, ctx["df"]
-
-
-if __name__ == "__main__":
-    plotter({})

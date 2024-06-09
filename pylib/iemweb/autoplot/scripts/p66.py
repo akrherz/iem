@@ -158,7 +158,3 @@ def plotter(fdict):
         fig.text(xpos, ypos, f"{day.strftime('%-2d %b %Y')} {txt}")
 
     return fig, freq
-
-
-if __name__ == "__main__":
-    plotter({})

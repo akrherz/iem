@@ -161,7 +161,3 @@ def plotter(fdict):
     ctx["df"] = df
     add_plot(ctx)
     return ctx["fig"], df2
-
-
-if __name__ == "__main__":
-    plotter({})

@@ -108,7 +108,3 @@ def plotter(fdict):
     ax.set_xlim(0.5, 12.5)
     ax.set_ylabel(f"Percentage of Months, n={df['total'].max():.0f} years")
     return fig, df
-
-
-if __name__ == "__main__":
-    plotter({})

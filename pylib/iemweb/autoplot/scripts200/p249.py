@@ -174,7 +174,3 @@ def plotter(fdict):
         )
 
     return mp.fig
-
-
-if __name__ == "__main__":
-    plotter({})

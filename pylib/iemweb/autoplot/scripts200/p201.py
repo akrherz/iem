@@ -388,7 +388,3 @@ def plotter(fdict):
         ax.yaxis.set_major_locator(MaxNLocator(min_n_ticks=1, integer=True))
 
     return fig, df
-
-
-if __name__ == "__main__":
-    plotter({})

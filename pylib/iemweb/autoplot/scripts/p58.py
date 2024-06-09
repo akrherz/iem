@@ -90,7 +90,3 @@ def plotter(fdict):
     ax.set_xlabel("Year of last occurrence shown")
 
     return fig, df
-
-
-if __name__ == "__main__":
-    plotter({})

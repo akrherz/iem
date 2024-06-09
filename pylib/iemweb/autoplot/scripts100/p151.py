@@ -379,7 +379,3 @@ def plotter(fdict):
         )
 
     return mp.fig, df.round(2)
-
-
-if __name__ == "__main__":
-    plotter({})

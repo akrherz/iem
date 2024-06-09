@@ -273,7 +273,3 @@ def plotter(fdict):
     )
 
     return fig, df, res
-
-
-if __name__ == "__main__":
-    plotter({})

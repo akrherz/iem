@@ -168,7 +168,3 @@ def plotter(fdict):
     ax.xaxis.set_major_formatter(mdates.DateFormatter("%b\n%Y"))
 
     return fig, df[["Date", "None", "D0", "D1", "D2", "D3", "D4"]]
-
-
-if __name__ == "__main__":
-    plotter({})

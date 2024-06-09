@@ -160,7 +160,3 @@ def plotter(fdict):
         ax.set_xlabel("Days")
 
     return fig, df
-
-
-if __name__ == "__main__":
-    plotter({})

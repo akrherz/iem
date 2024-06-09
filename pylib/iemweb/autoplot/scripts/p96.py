@@ -127,7 +127,3 @@ def plotter(fdict):
         fontsize=10,
     )
     return fig, df
-
-
-if __name__ == "__main__":
-    plotter({})

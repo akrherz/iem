@@ -201,7 +201,3 @@ def plotter(fdict):
     ax.set_xlim(-0.5, 7.5)
     ax.set_ylim(0, max([max(x2), max(x)]) + 5)
     return fig
-
-
-if __name__ == "__main__":
-    plotter({})

@@ -230,7 +230,3 @@ def plotter(fdict):
     ax.set_position([pos.x0, pos.y0 + 0.05, pos.width, pos.height * 0.95])
 
     return fig, resdf
-
-
-if __name__ == "__main__":
-    plotter({})

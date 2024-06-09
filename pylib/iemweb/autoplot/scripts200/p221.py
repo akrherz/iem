@@ -170,7 +170,3 @@ def plotter(fdict):
         col = fhour % 4
         add_forecast(img, ctx, valid, fhour, width * col, height * row)
     return img
-
-
-if __name__ == "__main__":
-    plotter({})

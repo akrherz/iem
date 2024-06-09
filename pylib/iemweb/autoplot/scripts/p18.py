@@ -255,6 +255,4 @@ def plotter(fdict):
     ax.grid(True)
     return fig, ctx["df"]
 
-
-if __name__ == "__main__":
     highcharts({})

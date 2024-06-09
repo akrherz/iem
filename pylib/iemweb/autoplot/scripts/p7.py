@@ -183,7 +183,3 @@ def plotter(fdict):
     ax2.set_xlim(0, 1)
 
     return fig, df
-
-
-if __name__ == "__main__":
-    plotter({})

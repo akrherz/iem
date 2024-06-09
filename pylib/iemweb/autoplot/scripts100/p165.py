@@ -320,7 +320,3 @@ def plotter(fdict):
     mp.drawcounties()
 
     return mp.fig, df[[YRGP[varname], "event", "doy"]]
-
-
-if __name__ == "__main__":
-    plotter({})

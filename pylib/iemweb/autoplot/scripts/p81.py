@@ -92,7 +92,3 @@ def plotter(fdict):
     ax[1].set_xticklabels(calendar.month_abbr[1:])
     ax[1].set_xlim(0, 366)
     return fig, df
-
-
-if __name__ == "__main__":
-    plotter({})

@@ -145,7 +145,3 @@ def plotter(fdict):
 
     mp.drawcounties()
     return mp.fig, df.drop("geom", axis=1)
-
-
-if __name__ == "__main__":
-    plotter({})

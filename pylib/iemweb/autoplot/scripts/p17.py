@@ -299,7 +299,3 @@ def plotter(fdict):
             borderaxespad=0.0,
         )
     return ctx["fig"], ctx["df"]
-
-
-if __name__ == "__main__":
-    plotter({})

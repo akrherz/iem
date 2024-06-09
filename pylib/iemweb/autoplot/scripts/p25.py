@@ -134,7 +134,3 @@ def plotter(fdict):
     ax.set_ylabel("Probability")
 
     return fig, df
-
-
-if __name__ == "__main__":
-    plotter({})

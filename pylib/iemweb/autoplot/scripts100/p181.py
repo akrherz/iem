@@ -189,7 +189,3 @@ def plotter(fdict):
     ax.set_xlabel(f"{PDICT[varname]} (Ranges Inclusive)")
 
     return fig, gdf
-
-
-if __name__ == "__main__":
-    plotter({})

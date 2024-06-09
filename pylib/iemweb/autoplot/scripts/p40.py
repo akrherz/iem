@@ -241,7 +241,3 @@ def plotter(fdict):
         fig = plot_sky(days, vsby, data, ctx, sts)
 
     return fig, df
-
-
-if __name__ == "__main__":
-    plotter({})

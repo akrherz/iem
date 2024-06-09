@@ -122,7 +122,3 @@ def plotter(fdict):
     b = fig.colorbar(c)
     b.set_label("Hourly Obs per week per year")
     return fig, resdf
-
-
-if __name__ == "__main__":
-    plotter({})

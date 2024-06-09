@@ -115,7 +115,3 @@ def plotter(fdict):
     ax.set_ylim(12.5, 0.5)
 
     return fig, grp
-
-
-if __name__ == "__main__":
-    plotter({})

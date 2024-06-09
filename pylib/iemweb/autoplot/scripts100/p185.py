@@ -142,7 +142,3 @@ def plotter(fdict):
     mp.drawcities()
 
     return mp.fig
-
-
-if __name__ == "__main__":
-    plotter({})

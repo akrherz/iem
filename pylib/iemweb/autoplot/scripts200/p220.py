@@ -378,7 +378,3 @@ def plotter(fdict):
         # some rows could be NaN
         df[col] = df[~pd.isna(df[col])][col].apply(lambda x: x.strftime(ISO))
     return mp.fig, df.drop("geom", axis=1)
-
-
-if __name__ == "__main__":
-    plotter({})

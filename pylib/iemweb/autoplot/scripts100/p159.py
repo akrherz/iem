@@ -298,7 +298,3 @@ def plotter(fdict):
     set_fig(ctx)
 
     return ctx["fig"], ctx["df"]
-
-
-if __name__ == "__main__":
-    plotter({})

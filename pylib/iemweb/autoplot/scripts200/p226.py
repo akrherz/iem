@@ -110,7 +110,3 @@ def plotter(fdict):
         )
 
     return mp.fig, df.drop(["geom", "issue", "expire"], axis=1)
-
-
-if __name__ == "__main__":
-    plotter({})

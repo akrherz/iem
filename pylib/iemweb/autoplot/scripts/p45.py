@@ -145,7 +145,3 @@ def plotter(fdict):
         ax[1].set_ylabel(f"{calendar.month_abbr[month]} Frequency [%]")
         ax[1].set_xlim(obs["year"].min() - 2, obs["year"].max() + 2)
     return fig, df
-
-
-if __name__ == "__main__":
-    plotter({})

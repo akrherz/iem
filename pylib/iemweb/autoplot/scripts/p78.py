@@ -204,7 +204,3 @@ def plotter(fdict):
     ax.legend(loc=4, ncol=4)
 
     return fig, means[["tmpf", "dwpf", "relh"]]
-
-
-if __name__ == "__main__":
-    plotter({})

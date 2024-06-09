@@ -314,7 +314,3 @@ def plotter(fdict):
     if ctx["sc"] == "yes":
         mp.drawcounties()
     return mp.fig
-
-
-if __name__ == "__main__":
-    plotter({})

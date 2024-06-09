@@ -307,7 +307,3 @@ def plotter(fdict):
             ctx["df"][ctx["varname"]].max() + 5,
         )
     return fig, ctx["df"]
-
-
-if __name__ == "__main__":
-    plotter({})

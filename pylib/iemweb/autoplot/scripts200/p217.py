@@ -215,7 +215,3 @@ def plotter(fdict):
     mp.drawcities()
     mp.drawcounties()
     return mp.fig, df.drop(["geom", "product"], axis=1)
-
-
-if __name__ == "__main__":
-    plotter({})

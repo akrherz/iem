@@ -238,7 +238,3 @@ def plotter(fdict):
         sidep.text(0.1, 1.01, "Histogram", transform=sidep.transAxes)
 
     return fig, qtile
-
-
-if __name__ == "__main__":
-    plotter({})

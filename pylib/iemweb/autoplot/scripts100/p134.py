@@ -303,7 +303,3 @@ def plotter(fdict):
     ax.grid(True)
     ax.set_xlabel(units)
     return fig, df
-
-
-if __name__ == "__main__":
-    plotter({})

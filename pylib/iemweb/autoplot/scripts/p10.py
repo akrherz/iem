@@ -251,7 +251,3 @@ def plotter(fdict):
     ax.set_ylim(min(spring) - 5, max(fall) + 30)
     ax.set_xlim(min(years) - 1, max(years) + 1)
     return fig, df, res
-
-
-if __name__ == "__main__":
-    plotter({})

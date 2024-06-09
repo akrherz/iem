@@ -338,7 +338,3 @@ def plotter(fdict):
         ha="left",
     )
     return fig, df
-
-
-if __name__ == "__main__":
-    plotter({})
