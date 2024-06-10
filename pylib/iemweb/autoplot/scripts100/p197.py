@@ -10,10 +10,11 @@ is done!
 import datetime
 
 import pandas as pd
+from pyiem.database import get_sqlalchemy_conn
 from pyiem.exceptions import NoDataFound
 from pyiem.plot import get_cmap
 from pyiem.plot.geoplot import MapPlot
-from pyiem.util import get_autoplot_context, get_sqlalchemy_conn
+from pyiem.util import get_autoplot_context
 from sqlalchemy import text
 
 NASS_CROP_PROGRESS = {
@@ -66,7 +67,7 @@ def get_description():
     """Return a dict describing how to call this plotter"""
     desc = {"data": True, "cache": 3600, "description": __doc__}
     # Compute a better default for corn planting.
-    today = datetime.date.today()
+    today = datetime.date.today() - datetime.timedelta(days=7)
     if today.month < 5 or today.month > 6:
         today = datetime.date(today.year - 1, 5, 15)
     desc["arguments"] = [
