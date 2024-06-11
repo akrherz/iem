@@ -39,7 +39,9 @@ $content = <<<EOF
 <p>The archive behind this application is large, so please be patient after clicking
  the Givme button below.  If you request all RADARs, you can only request up to 
  seven days worth of data.  If you can request a single RADAR, there is no 
- date restriction, but the download will be slow! 
+ date restriction, but the download will be slow! <a href="/cgi-bin/request/gis/nexrad_storm_attrs.py?help"
+ class="btn btn-info"><i class="fa fa-file"></i> Backend documentation</a> exists
+ for those wishing to script against this service.</p>
 
 <p><a class="btn btn-default" href="#histograms" role="button">
         <i class="fa fa-stats"></i> View Histograms</a>

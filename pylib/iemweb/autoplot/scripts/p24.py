@@ -254,6 +254,8 @@ def plotter(fdict):
     if ctx["var"] == "aridity":
         subtitle = "Std Average High Temp Departure minus Std Precip Departure"
         title = ""
+        if ctx["w"] == "dep":
+            raise NoDataFound("Aridity does not have departures")
     elif ctx["w"] == "dep":
         title = "Departure "
         if ctx["var"] in ["high", "low", "avgt"]:
