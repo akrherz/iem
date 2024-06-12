@@ -23,6 +23,7 @@ import pandas as pd
 import requests
 from pyiem.database import get_dbconn, get_sqlalchemy_conn
 from pyiem.util import exponential_backoff, logger, set_property, utc
+from sqlalchemy import text
 from tqdm import tqdm
 
 LOG = logger()
@@ -349,8 +350,10 @@ def merge_archive_end(df, dt):
     """Figure out our archive end times."""
     with get_sqlalchemy_conn("asos1min") as conn:
         df2 = pd.read_sql(
-            f"SELECT station, max(valid) from t{dt:%Y%m}_1minute "
-            "GROUP by station",
+            text(
+                f"SELECT station, max(valid) from t{dt:%Y%m}_1minute "
+                "GROUP by station"
+            ),
             conn,
             index_col="station",
         )

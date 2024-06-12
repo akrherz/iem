@@ -22,27 +22,6 @@ $services[] = array(
     )
 );
 
-$services[] = array(
-    "table_schema" => TRUE,
-    "title" => "United States Drought Monitor by Point",
-    "url" => "/api/1/usdm_bypoint.json?sdate={sdate}&amp;edate={edate}&amp;" .
-        "lon={lon}&amp;lat={lat}",
-    "desc" => "The US Drought Monitor query by latitude and longitude point." .
-        " The start and end dates are optional and default to period of record " .
-        "data. The archive begins on Jan 2000.",
-    "vars" => array(
-        "sdate" => "Start Date (optional)",
-        "edate" => "End Date (optional)",
-        "lon" => "East Longitude (deg)",
-        "lat" => "North Latitude (deg)"
-    ),
-    "example" => array(
-        "{sdate}" => "2014-01-01",
-        "{edate}" => "2016-01-01",
-        "{lon}" => -96.54,
-        "{lat}" => 43.21,
-    )
-);
 
 $services[] = array(
     "title" => "Single Station Last Observation",
@@ -902,12 +881,16 @@ $t->content = <<<EOF
          src="https://mesonet.agron.iastate.edu/json/example.php?callback=gotData"&gt;
  
  </pre>
- 
+
  <p>This &lt;script&gt; tag above that requests data from this server will return
  javascript that looks like:
  <br /><pre>
  gotData({"Name": "daryl", "Profession": "nerd", "Age": 99});
  </pre>
+
+<p>These services are generally legacy with more modern services being
+provided in <a class="btn btn-primary" href="/api/1/docs">
+<i class="fa fa-file"></i> our API</a>.</p>
 
 <h3>But first, perhaps there are better alternatives</h3>
 
@@ -925,8 +908,8 @@ not be implied as an endorsement. Of course, you can just search google for
 
  <p>Okay, so you are all set for documentation on what services are available!
 {$table}
- 
+
  <p>That is all for now. Enjoy!
- 
+
 EOF;
 $t->render('single.phtml');

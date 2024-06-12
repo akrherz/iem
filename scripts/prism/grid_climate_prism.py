@@ -5,13 +5,14 @@ import sys
 
 import numpy as np
 from pyiem import iemre
+from pyiem.database import get_dbconnc
 from pyiem.network import Table as NetworkTable
 from pyiem.reference import state_names
-from pyiem.util import convert_value, get_dbconnc, logger, ncopen
+from pyiem.util import convert_value, logger, ncopen
 from scipy.interpolate import NearestNDInterpolator
 
 LOG = logger()
-NT = NetworkTable(["%sCLIMATE" % (abbr,) for abbr in state_names])
+NT = NetworkTable([f"{abbr}CLIMATE" for abbr in state_names])
 
 
 def generic_gridder(nc, cursor, idx):

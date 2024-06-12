@@ -1,13 +1,21 @@
 """Show Max ETNs by wfo, phenomena, sig, by year"""
 
-import datetime
 import json
 
 import pandas as pd
+from pydantic import Field
+from pyiem.database import get_dbconn
 from pyiem.reference import ISO8601
-from pyiem.util import get_dbconn, html_escape
-from pyiem.webutil import iemapp
-from pymemcache.client import Client
+from pyiem.util import utc
+from pyiem.webutil import CGIModel, iemapp
+
+
+class Schema(CGIModel):
+    """See how we are called."""
+
+    callback: str = Field(default=None, title="JSONP Callback")
+    year: int = Field(default=2015, title="Year")
+    format: str = Field(default="json", title="Format", pattern="json|html")
 
 
 def run(year, fmt):
@@ -18,7 +26,6 @@ def run(year, fmt):
     """
     pgconn = get_dbconn("postgis")
     cursor = pgconn.cursor()
-    utcnow = datetime.datetime.utcnow()
 
     cursor.execute(
         f"""
@@ -34,7 +41,7 @@ def run(year, fmt):
     )
     res = {
         "count": cursor.rowcount,
-        "generated_at": utcnow.strftime(ISO8601),
+        "generated_at": utc().strftime(ISO8601),
         "columns": [
             {"name": "wfo", "type": "str"},
             {"name": "phenomena", "type": "str"},
@@ -44,6 +51,8 @@ def run(year, fmt):
         ],
         "table": cursor.fetchall(),
     }
+    cursor.close()
+    pgconn.close()
 
     if fmt == "json":
         return json.dumps(res)
@@ -75,36 +84,37 @@ def run(year, fmt):
     return html
 
 
-@iemapp()
+def get_ct(environ):
+    """Figure out the content type."""
+    fmt = environ["format"]
+    if fmt == "json":
+        return "application/json"
+    return "text/html"
+
+
+def get_mckey(environ):
+    """Figure out the key."""
+    year = environ["year"]
+    fmt = environ["format"]
+    return f"/json/vtec_max_etn/{year}/{fmt}"
+
+
+@iemapp(
+    help=__doc__,
+    schema=Schema,
+    content_type=get_ct,
+    memcachekey=get_mckey,
+    memcacheexpire=300,
+)
 def application(environ, start_response):
     """Answer request."""
 
-    year = int(environ.get("year", 2015))
-    fmt = environ.get("format", "json")
-    if fmt not in ["json", "html"]:
-        headers = [("Content-type", "text/plain")]
-        start_response("500 Internal Server Error", headers)
-        msg = "Invalid format provided."
-        return [msg.encode("ascii")]
-    cb = environ.get("callback", None)
-    headers = []
-    if fmt == "json":
-        headers.append(("Content-type", "application/json"))
-    else:
-        headers.append(("Content-type", "text/html"))
+    year = environ["year"]
+    fmt = environ["format"]
+    headers = [
+        ("Content-type", get_ct(environ)),
+    ]
 
-    mckey = f"/json/vtec_max_etn/{year}/{fmt}"
-    mc = Client("iem-memcached:11211")
-    res = mc.get(mckey)
-    if res is None:
-        res = run(year, fmt)
-        mc.set(mckey, res, 3600)
-    else:
-        res = res.decode("utf-8")
-    mc.close()
-
-    if cb is not None:
-        res = f"{html_escape(cb)}({res})"
-
+    res = run(year, fmt)
     start_response("200 OK", headers)
-    return [res.encode("ascii")]
+    return res

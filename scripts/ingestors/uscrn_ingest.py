@@ -11,13 +11,14 @@ import pandas as pd
 import requests
 from metpy.units import units
 from psycopg.rows import dict_row
+from pyiem.database import get_dbconn
 from pyiem.observation import Observation
-from pyiem.util import exponential_backoff, get_dbconn, logger
+from pyiem.util import exponential_backoff, logger
 
 LOG = logger()
 BASE = "/mesonet/tmp/uscrn"
 URI = "https://www.ncei.noaa.gov/pub/data/uscrn/products/subhourly01"
-FTP = "ftp://ftp.ncdc.noaa.gov/pub/data/uscrn/products/subhourly01"
+FTP = "ftp://ftp.ncei.noaa.gov/pub/data/uscrn/products/subhourly01"
 
 
 def n2n(val):
