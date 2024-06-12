@@ -8,6 +8,8 @@ from pyiem.database import get_dbconnc
 QRE = re.compile("q=([0-9]+)")
 NO_FEATURES = [
     17,  # is referenced by canonical page
+    31,  # not useful
+    33,  # too pidgeon-holed
     68,  # nws unique VTEC types per year
     81,  # stddev daily temps, too boring
     91,  # hated by myself and the general public
@@ -68,7 +70,7 @@ def main():
         if i not in rows and i not in NO_FEATURES:
             print(f"No entries for: {i:4.0f}")
     df = df.sort_values(by="valid")
-    print(df.head(10))
+    print(df.head(20))
 
 
 if __name__ == "__main__":

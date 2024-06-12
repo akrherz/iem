@@ -21,14 +21,8 @@ from io import StringIO
 # third party
 import pandas as pd
 import requests
-from pyiem.util import (
-    exponential_backoff,
-    get_dbconn,
-    get_sqlalchemy_conn,
-    logger,
-    set_property,
-    utc,
-)
+from pyiem.database import get_dbconn, get_sqlalchemy_conn
+from pyiem.util import exponential_backoff, logger, set_property, utc
 from tqdm import tqdm
 
 LOG = logger()

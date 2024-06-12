@@ -116,12 +116,14 @@ def process_features(features):
         tmp = tempfile.NamedTemporaryFile(delete=False)
         tmp.write(req.content)
         tmp.close()
-        cmd = (
-            f"pqinsert -p 'plot ac {valid:%Y%m%d%H%M} "
-            f"{get_current_fn(label)} {get_archive_fn(label, valid)} "
-            f"jpg' {tmp.name}"
-        )
-        with subprocess.Popen(cmd, shell=True, stderr=subprocess.PIPE) as proc:
+        cmd = [
+            "pqinsert",
+            "-p",
+            f"plot ac {valid:%Y%m%d%H%M} {get_current_fn(label)} "
+            f"{get_archive_fn(label, valid)} jpg",
+            tmp.name,
+        ]
+        with subprocess.Popen(cmd, stderr=subprocess.PIPE) as proc:
             proc.stderr.read()
         os.unlink(tmp.name)
 

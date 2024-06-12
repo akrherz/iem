@@ -38,7 +38,7 @@ cd ../ingestors/other
 python feel_ingest.py
 
 cd ../../util
-csh BACKUP.csh
+sh BACKUP.sh
 
 cd ../uscrn
 python compute_uscrn_pday.py $(date --date '1 days ago' +'%Y %m %d')
