@@ -1,11 +1,8 @@
 # Super Script to backup data to some location, run from RUN_12Z
 
-YYYY_mm=$(date --date "1 day ago" +"%Y_%m")
 yymmdd=$(date --date "1 day ago" +"%y%m%d")
 yyyymmdd=$(date --date "1 day ago" +"%Y%m%d")
 dd=$(date --date "1 day ago" +"%d")
-
-tardate=$(date --date "2 days ago" +"%m/%d/%Y")
 
 cd /mesonet/tmp
 
