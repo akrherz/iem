@@ -1,10 +1,10 @@
 """Process the USCRN station table
 
-ftp://ftp.ncdc.noaa.gov/pub/data/uscrn/products/stations.tsv
+https://www.ncei.noaa.gov/pub/data/uscrn/products/stations.tsv
 """
 
 import pandas as pd
-from pyiem.util import get_dbconn
+from pyiem.database import get_dbconn
 
 
 def main():
