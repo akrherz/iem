@@ -58,7 +58,7 @@ def run():
     memcacheexpire=120,
     content_type="application/vnd.geo+json",
 )
-def application(environ, start_response):
+def application(_environ, start_response):
     """Main Workflow"""
     headers = [("Content-type", "application/vnd.geo+json")]
     res = run()
