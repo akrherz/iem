@@ -223,6 +223,26 @@ def plotter(fdict):
                 color=belowcolor,
                 align="center",
             )
+            ax.text(
+                0.9,
+                0.95,
+                f"Days Above {(values > 0).sum()}",
+                transform=ax.transAxes,
+                color="r",
+                ha="center",
+                va="top",
+                bbox=dict(facecolor="white", edgecolor="white"),
+            )
+            ax.text(
+                0.9,
+                0.05,
+                f"Days Below {(values < 0).sum()}",
+                transform=ax.transAxes,
+                color="b",
+                ha="center",
+                va="top",
+                bbox=dict(facecolor="white", edgecolor="white"),
+            )
             for i, _bar in enumerate(bars):
                 if values[i] > 0:
                     _bar.set_facecolor(abovecolor)

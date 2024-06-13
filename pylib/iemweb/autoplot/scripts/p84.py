@@ -139,7 +139,9 @@ def compute_title(src, sdate, edate):
         if sdate == edate:
             title = sdate.strftime("%-d %B %Y")
         else:
-            title = f"{sdate:%-d %b} to {edate:%-d %b %Y} (inclusive)"
+            title = (
+                f"{sdate:%-d %b} to {edate:%-d %b %Y} (US Central, inclusive)"
+            )
     else:
         # This is 12z to 12z totals.
         if sdate == edate:
