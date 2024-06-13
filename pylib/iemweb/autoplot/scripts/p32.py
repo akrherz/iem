@@ -12,12 +12,15 @@ import datetime
 
 import matplotlib.colors as mpcolors
 import matplotlib.dates as mdates
+import numpy as np
 import pandas as pd
 from pyiem.database import get_sqlalchemy_conn
 from pyiem.exceptions import NoDataFound
 from pyiem.plot import figure_axes, get_cmap
 from pyiem.util import get_autoplot_context
 from sqlalchemy import text
+
+from iemweb.autoplot.barchart import barchar_with_top10
 
 PDICT = {
     "avg": "Daily Average Temperature (F)",
@@ -143,6 +146,7 @@ def plotter(fdict):
     )
     if thisyear[varname].isna().all():
         raise NoDataFound("No Data Found.")
+    thisyear.index.name = "MonDay"
     thisyear[f"{varname}_ptile"] = thisyear["rank"] / df["rank"].max() * 100.0
     climo = (
         df[["sday", varname]]
@@ -217,12 +221,27 @@ def plotter(fdict):
         else:
             abovecolor = "r" if how == "diff" else "b"
             belowcolor = "b" if how == "diff" else "r"
-            bars = ax.bar(
-                thisyear["day"].values,
-                values,
-                color=belowcolor,
-                align="center",
+            thisyear["color"] = abovecolor
+            thisyear.loc[values < 0, "color"] = belowcolor
+            ax.set_position([0.1, 0.1, 0.7, 0.8])
+            ax = barchar_with_top10(
+                fig,
+                thisyear.rename(columns={f"{varname}_{how}": "Diff"}),
+                "Diff",
+                ax=ax,
+                color=thisyear["color"].values,
             )
+            ax.text(
+                0.99,
+                1.01,
+                f"Mean: {np.nanmean(values):.1f}",
+                transform=ax.transAxes,
+                color="k",
+                ha="right",
+                va="bottom",
+                bbox=dict(facecolor="white", edgecolor="white"),
+            )
+
             ax.text(
                 0.9,
                 0.95,
@@ -243,10 +262,6 @@ def plotter(fdict):
                 va="top",
                 bbox=dict(facecolor="white", edgecolor="white"),
             )
-            for i, _bar in enumerate(bars):
-                if values[i] > 0:
-                    _bar.set_facecolor(abovecolor)
-                    _bar.set_edgecolor(abovecolor)
     if how == "diff":
         ax.set_ylabel(f"{PDICT[varname]} Departure")
     elif how == "ptile":
