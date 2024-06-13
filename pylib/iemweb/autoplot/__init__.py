@@ -31,8 +31,7 @@ def import_script(p: int):
     module = importlib.import_module(f"iemweb.autoplot.scripts{s}.p{p}")
     # When bugs get fixed, mod_wsgi may have the old module cached and not
     # load it until it gets cycled, so this may have a small perf hit, alas
-    importlib.reload(module)
-    return module
+    return importlib.reload(module)
 
 
 # Association of plots
