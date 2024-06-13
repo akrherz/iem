@@ -148,7 +148,7 @@ jobs:
       run: |
         set -e
         export PYTHONPATH=/opt/iem/pylib
-        python -m pytest --cov=iemweb -n 4 tests/iemweb/
+        python -m pytest --mpl --cov=iemweb -n 4 tests/iemweb/
         python -m coverage xml
 
     - name: Upload to Codecov
