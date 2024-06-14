@@ -41,7 +41,7 @@ class Schema(CGIModel):
     """See how we are called."""
 
     d: ListOrCSVType = Field(
-        [1, 2, 3, 4, 5, 6, 7, 8], description="Days to include"
+        ["1", "2", "3", "4", "5", "6", "7", "8"], description="Days to include"
     )
     ets: AwareDatetime = Field(
         None, description="End of the period to include"

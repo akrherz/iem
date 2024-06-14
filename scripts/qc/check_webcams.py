@@ -7,9 +7,10 @@ import os
 import stat
 from zoneinfo import ZoneInfo
 
+from pyiem.database import get_dbconnc
 from pyiem.network import Table as NetworkTable
 from pyiem.tracker import TrackerEngine
-from pyiem.util import get_dbconnc, utc
+from pyiem.util import utc
 
 
 def workflow(netname, pname):
@@ -58,6 +59,7 @@ def workflow(netname, pname):
     tracker.send_emails()
     pgconn_iem.commit()
     pgconn_portfolio.commit()
+    pgconn_mesosite.close()
 
 
 def main():
