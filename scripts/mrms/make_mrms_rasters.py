@@ -18,7 +18,7 @@ import pygrib
 from PIL import Image
 from pyiem import mrms
 from pyiem.reference import ISO8601
-from pyiem.util import logger
+from pyiem.util import archive_fetch, logger
 
 LOG = logger()
 TMP = "/mesonet/tmp"
@@ -80,11 +80,12 @@ def is_realtime(gts):
 
 def need_not_run(gts, hr) -> bool:
     """Do we need to run for this combination?"""
-    testfn = (
-        f"/mesonet/ARCHIVE/data/{gts:%Y/%m/%d}/GIS/mrms/p{hr}h_"
-        f"{gts:%Y%m%d%H%M}.png"
-    )
-    return os.path.isfile(testfn)
+    with archive_fetch(
+        f"{gts:%Y/%m/%d}/GIS/mrms/p{hr}h_{gts:%Y%m%d%H%M}.png"
+    ) as fh:
+        if fh is None:
+            return False
+    return True
 
 
 def doit(gts, hr):
@@ -164,84 +165,129 @@ def doit(gts, hr):
         mrms.write_worldfile(f"{tmpfn}_nn.wld")
     # Inject WLD file
     tstr = gts.strftime("%Y%m%d%H%M")
-    cmd = (
-        f"pqinsert -i -p 'plot {routes} {tstr} "
-        f"gis/images/4326/mrms/p{hr}h.wld GIS/mrms/p{hr}h_{tstr}.wld wld' "
-        f"{tmpfn}.wld"
-    )
-    subprocess.call(cmd, shell=True)
+    cmd = [
+        "pqinsert",
+        "-i",
+        "-p",
+        f"plot {routes} {tstr} gis/images/4326/mrms/p{hr}h.wld "
+        f"GIS/mrms/p{hr}h_{tstr}.wld wld",
+        f"{tmpfn}.wld",
+    ]
+    subprocess.call(cmd)
 
     if irealtime:
-        pqstr = (
-            f"pqinsert -i -p 'plot c {tstr} "
-            f"gis/images/4326/mrms/p{hr}h_nn.wld "
-            f"GIS/mrms/p{hr}h_{tstr}.wld wld' "
-            f"{tmpfn}_nn.wld"
-        )
-        subprocess.call(pqstr, shell=True)
+        cmd = [
+            "pqinsert",
+            "-i",
+            "-p",
+            f"plot c {tstr} gis/images/4326/mrms/p{hr}h_nn.wld "
+            f"GIS/mrms/p{hr}h_{tstr}.wld wld",
+            f"{tmpfn}_nn.wld",
+        ]
+        subprocess.call(cmd)
 
     # Now we inject into LDM
-    pqstr = (
-        f"pqinsert -i -p 'plot {routes} {tstr} "
-        f"gis/images/4326/mrms/p{hr}h.png GIS/mrms/p{hr}h_{tstr}.png png' "
-        f"{tmpfn}.png"
-    )
-    subprocess.call(pqstr, shell=True)
+    cmd = [
+        "pqinsert",
+        "-i",
+        "-p",
+        f"plot {routes} {tstr} gis/images/4326/mrms/p{hr}h.png "
+        f"GIS/mrms/p{hr}h_{tstr}.png png",
+        f"{tmpfn}.png",
+    ]
+    subprocess.call(cmd)
 
     if irealtime:
         # Now we inject into LDM
-        pqstr = (
-            f"pqinsert -i -p 'plot c {tstr} "
-            f"gis/images/4326/mrms/p{hr}h_nn.png "
-            f"GIS/mrms/p{hr}h_{tstr}.png png' {tmpfn}_nn.png"
-        )
-        subprocess.call(pqstr, shell=True)
+        cmd = [
+            "pqinsert",
+            "-i",
+            "-p",
+            f"plot c {tstr} gis/images/4326/mrms/p{hr}h_nn.png "
+            f"GIS/mrms/p{hr}h_{tstr}.png png",
+            f"{tmpfn}_nn.png",
+        ]
+        subprocess.call(cmd)
 
         # Create 3857 image
-        cmd = (
-            "gdalwarp -s_srs EPSG:4326 -t_srs EPSG:3857 -q -of GTiff "
-            f"-tr 1000.0 1000.0 {tmpfn}.png {tmpfn}.tif"
-        )
-        subprocess.call(cmd, shell=True)
+        cmd = [
+            "gdalwarp",
+            "-s_srs",
+            "EPSG:4326",
+            "-t_srs",
+            "EPSG:3857",
+            "-q",
+            "-of",
+            "GTiff",
+            "-tr",
+            "1000.0",
+            "1000.0",
+            f"{tmpfn}.png",
+            f"{tmpfn}.tif",
+        ]
+        subprocess.call(cmd)
 
-        cmd = (
-            "gdalwarp -s_srs EPSG:4326 -t_srs EPSG:3857 -q -of GTiff "
-            f"-tr 1000.0 1000.0 {tmpfn}_nn.png {tmpfn}_nn.tif"
-        )
-        subprocess.call(cmd, shell=True)
+        cmd = [
+            "gdalwarp",
+            "-s_srs",
+            "EPSG:4326",
+            "-t_srs",
+            "EPSG:3857",
+            "-q",
+            "-of",
+            "GTiff",
+            "-tr",
+            "1000.0",
+            "1000.0",
+            f"{tmpfn}_nn.png",
+            f"{tmpfn}_nn.tif",
+        ]
+        subprocess.call(cmd)
 
         # Insert into LDM
-        pqstr = (
-            f"pqinsert -i -p 'plot c {tstr} "
-            f"gis/images/3857/mrms/p{hr}h.tif "
-            f"GIS/mrms/p{hr}h_{tstr}.tif tif' {tmpfn}.tif"
-        )
-        subprocess.call(pqstr, shell=True)
+        cmd = [
+            "pqinsert",
+            "-i",
+            "-p",
+            f"plot c {tstr} gis/images/3857/mrms/p{hr}h.tif "
+            f"GIS/mrms/p{hr}h_{tstr}.tif tif",
+            f"{tmpfn}.tif",
+        ]
+        subprocess.call(cmd)
 
-        pqstr = (
-            f"pqinsert -i -p 'plot c {tstr} "
-            f"gis/images/3857/mrms/p{hr}h_nn.tif "
-            f"GIS/mrms/p{hr}h_{tstr}.tif tif' {tmpfn}_nn.tif"
-        )
-        subprocess.call(pqstr, shell=True)
+        cmd = [
+            "pqinsert",
+            "-i",
+            "-p",
+            f"plot c {tstr} gis/images/3857/mrms/p{hr}h_nn.tif "
+            f"GIS/mrms/p{hr}h_{tstr}.tif tif",
+            f"{tmpfn}_nn.tif",
+        ]
+        subprocess.call(cmd)
 
         with open(f"{tmpfn}.json", "w", encoding="utf8") as fh:
             json.dump({"meta": metadata}, fh)
 
         # Insert into LDM
-        pqstr = (
-            f"pqinsert -i -p 'plot c {tstr} "
-            f"gis/images/4326/mrms/p{hr}h.json "
-            f"GIS/mrms/p{hr}h_{tstr}.json json' {tmpfn}.json"
-        )
-        subprocess.call(pqstr, shell=True)
+        cmd = [
+            "pqinsert",
+            "-i",
+            "-p",
+            f"plot c {tstr} gis/images/4326/mrms/p{hr}h.json "
+            f"GIS/mrms/p{hr}h_{tstr}.json json",
+            f"{tmpfn}.json",
+        ]
+        subprocess.call(cmd)
 
-        pqstr = (
-            f"pqinsert -i -p 'plot c {tstr} "
-            f"gis/images/4326/mrms/p{hr}h_nn.json "
-            f"GIS/mrms/p{hr}h_{tstr}.json json' {tmpfn}.json"
-        )
-        subprocess.call(pqstr, shell=True)
+        cmd = [
+            "pqinsert",
+            "-i",
+            "-p",
+            f"plot c {tstr} gis/images/4326/mrms/p{hr}h_nn.json "
+            f"GIS/mrms/p{hr}h_{tstr}.json json",
+            f"{tmpfn}.json",
+        ]
+        subprocess.call(cmd)
     for suffix in ["tif", "json", "png", "wld"]:
         fn = f"{tmpfn}.{suffix}"
         if os.path.isfile(fn):

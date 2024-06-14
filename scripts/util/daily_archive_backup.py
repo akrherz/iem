@@ -26,13 +26,17 @@ def run(date):
     ]
     LOG.info(" ".join(cmd))
     subprocess.call(cmd, stderr=subprocess.PIPE)
-    cmd = date.strftime(
-        f"rsync -a --remove-source-files "
-        f"--rsync-path 'mkdir -p /stage/IEMArchive/%Y/%m && rsync' {tarfn} "
-        "mesonet@metl60.agron.iastate.edu:/stage/IEMArchive/%Y/%m"
-    )
-    LOG.info(cmd)
-    subprocess.call(cmd, shell=True)
+    cmd = [
+        "rsync",
+        "-a",
+        "--remove-source-files",
+        "--rsync-path",
+        f"mkdir -p /stage/IEMArchive/{date:%Y/%m} && rsync",
+        tarfn,
+        f"mesonet@metl60.agron.iastate.edu:/stage/IEMArchive/{date:%Y/%m}",
+    ]
+    LOG.info(" ".join(cmd))
+    subprocess.call(cmd)
 
 
 def main(argv):
