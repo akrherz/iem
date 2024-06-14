@@ -1,3 +1,4 @@
+/* global iemdata, ol, $, olSelectLonLat */
 let stateSelect = null;
 let stateSelect3 = null;
 let ugcSelect = null;

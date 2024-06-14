@@ -25,6 +25,7 @@ select = [
     "T20",  # print
     # "TRY",  # try-except-raise
     # "UP",  # pyupgrade
+    "W",  # pycodestyle
 ]
 ignore = [
     "PERF203",  # try,except within a loop

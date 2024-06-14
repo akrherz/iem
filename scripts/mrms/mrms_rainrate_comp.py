@@ -4,6 +4,7 @@ Within a two minute window, maybe the max rate we could see is 0.2 inches,
 which is 5 mm.  So if we want to store 5mm in 250 bins, we have a resolution
 of 0.02 mm per index.
 
+Run from RUN_1MIN.sh
 """
 
 import datetime
@@ -11,15 +12,15 @@ import gzip
 import json
 import os
 import subprocess
-import sys
 import tempfile
 
+import click
 import numpy as np
 import pygrib
 from PIL import Image
 from pyiem import mrms
 from pyiem.reference import ISO8601
-from pyiem.util import logger, utc
+from pyiem.util import archive_fetch, logger, utc
 
 LOG = logger()
 
@@ -81,44 +82,69 @@ def workflow(now, realtime):
     mrms.write_worldfile(f"{tmpfn}.wld")
     # Inject WLD file
     routes = "c" if realtime else ""
-    pqstr = (
-        f"pqinsert -i -p 'plot a{routes} {now:%Y%m%d%H%M} "
+    cmd = [
+        "pqinsert",
+        "-i",
+        "-p",
+        f"plot a{routes} {now:%Y%m%d%H%M} "
         f"gis/images/4326/mrms/{prefix}.wld GIS/mrms/{prefix}_"
-        f"{now:%Y%m%d%H%M}.wld wld' {tmpfn}.wld"
-    )
-    subprocess.call(pqstr, shell=True)
+        f"{now:%Y%m%d%H%M}.wld wld",
+        f"{tmpfn}.wld",
+    ]
+    subprocess.call(cmd)
     # Now we inject into LDM
-    pqstr = (
-        f"pqinsert -i -p 'plot a{routes} {now:%Y%m%d%H%M} "
+    cmd = [
+        "pqinsert",
+        "-i",
+        "-p",
+        f"plot a{routes} {now:%Y%m%d%H%M} "
         f"gis/images/4326/mrms/{prefix}.png GIS/mrms/{prefix}_"
-        f"{now:%Y%m%d%H%M}.png png' {tmpfn}.png"
-    )
-    subprocess.call(pqstr, shell=True)
+        f"{now:%Y%m%d%H%M}.png png",
+        f"{tmpfn}.png",
+    ]
+    subprocess.call(cmd)
 
     if realtime:
         # Create 3857 image
-        cmd = (
-            "gdalwarp -s_srs EPSG:4326 -t_srs EPSG:3857 -q -of GTiff "
-            f"-tr 1000.0 1000.0 {tmpfn}.png {tmpfn}.tif"
-        )
-        subprocess.call(cmd, shell=True)
+        cmd = [
+            "gdalwarp",
+            "-s_srs",
+            "EPSG:4326",
+            "-t_srs",
+            "EPSG:3857",
+            "-q",
+            "-of",
+            "GTiff",
+            "-tr",
+            "1000.0",
+            "1000.0",
+            f"{tmpfn}.png",
+            f"{tmpfn}.tif",
+        ]
+        subprocess.call(cmd)
         # Insert into LDM
-        pqstr = (
-            f"pqinsert -i -p 'plot c {now:%Y%m%d%H%M} "
-            f"gis/images/3857/mrms/{prefix}.tif GIS/mrms/{prefix}_"
-            f"{now:%Y%m%d%H%M}.tif tif' {tmpfn}.tif"
-        )
-        subprocess.call(pqstr, shell=True)
+        cmd = [
+            "pqinsert",
+            "-i",
+            "-p",
+            f"plot c {now:%Y%m%d%H%M} gis/images/3857/mrms/{prefix}.tif "
+            f"GIS/mrms/{prefix}_{now:%Y%m%d%H%M}.tif tif",
+            f"{tmpfn}.tif",
+        ]
+        subprocess.call(cmd)
 
         with open(f"{tmpfn}.json", "w", encoding="utf8") as fh:
             json.dump({"meta": metadata}, fh)
         # Insert into LDM
-        pqstr = (
-            f"pqinsert -i -p 'plot c {now:%Y%m%d%H%M} "
-            f"gis/images/4326/mrms/{prefix}.json GIS/mrms/{prefix}_"
-            f"{now:%Y%m%d%H%M}.json json' {tmpfn}.json"
-        )
-        subprocess.call(pqstr, shell=True)
+        cmd = [
+            "pqinsert",
+            "-i",
+            "-p",
+            f"plot c {now:%Y%m%d%H%M} gis/images/4326/mrms/{prefix}.json "
+            f"GIS/mrms/{prefix}_{now:%Y%m%d%H%M}.json json",
+            f"{tmpfn}.json",
+        ]
+        subprocess.call(cmd)
     for suffix in ["tif", "json", "png", "wld"]:
         if os.path.isfile(f"{tmpfn}.{suffix}"):
             os.unlink(f"{tmpfn}.{suffix}")
@@ -127,28 +153,27 @@ def workflow(now, realtime):
     os.unlink(tmpfn)
 
 
-def main(argv):
+@click.command()
+@click.option("--valid", type=click.DateTime(), help="UTC Timestamp")
+def main(valid):
     """Go Main Go"""
-    utcnow = utc()
-    if len(argv) == 6:
-        utcnow = utc(*[int(x) for x in argv[1:6]])
-        workflow(utcnow, False)
-    else:
-        # If our time is an odd time, run 5 minutes ago
-        utcnow = utcnow.replace(second=0, microsecond=0)
-        if utcnow.minute % 2 != 1:
-            return
-        utcnow = utcnow - datetime.timedelta(minutes=5)
-        workflow(utcnow, True)
-        # Also check old dates
-        for delta in [30, 90, 600, 1440, 2880]:
-            ts = utcnow - datetime.timedelta(minutes=delta)
-            fn = ts.strftime(
-                "/mesonet/ARCHIVE/data/%Y/%m/%d/GIS/mrms/a2m_%Y%m%d%H%M.png"
-            )
-            if not os.path.isfile(fn):
+    valid = valid.replace(tzinfo=datetime.timezone.utc)
+    realtime = False
+    if utc() - valid < datetime.timedelta(minutes=10):
+        realtime = True
+    # Present reality
+    if realtime and valid.minute % 2 != 0:
+        LOG.info("Skipping realtime %s as minute not even", valid)
+        return
+    workflow(valid, True)
+    # Also check old dates
+    for delta in [30, 90, 600, 1440, 2880]:
+        ts = valid - datetime.timedelta(minutes=delta)
+        ppath = ts.strftime("%Y/%m/%d/GIS/mrms/a2m_%Y%m%d%H%M.png")
+        with archive_fetch(ppath) as fn:
+            if fn is None:
                 workflow(ts, False)
 
 
 if __name__ == "__main__":
-    main(sys.argv)
+    main()

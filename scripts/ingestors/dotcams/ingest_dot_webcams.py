@@ -16,9 +16,10 @@ from datetime import datetime, timedelta, timezone
 
 # third party
 import requests
-from pyiem import util
+from pyiem.database import get_dbconn
+from pyiem.util import exponential_backoff, logger, utc
 
-LOG = util.logger()
+LOG = logger()
 URI = (
     "https://services.arcgis.com/8lRhdTsQyJpO52F1/ArcGIS/rest/services/"
     "RWIS_Camera_Info_View/FeatureServer/0/query?where=1%3D1&outFields=*&"
@@ -26,7 +27,7 @@ URI = (
 )
 CLOUD404 = "/mesonet/tmp/dotcloud404.txt"
 # prevent things from the future.
-CEILING = util.utc() + timedelta(minutes=30)
+CEILING = utc() + timedelta(minutes=30)
 
 
 def add_entry(cursor, cam, props):
@@ -114,17 +115,21 @@ def process_feature(cursor, domain, feat):
         routes = "a"
         if valid > lastvalid:
             routes = "ac"
-        cmd = (
-            f"pqinsert -p 'webcam {routes} {valid:%Y%m%d%H%M} "
-            f"camera/stills/{cam}.jpg "
-            f"camera/{cam}/{cam}_{valid:%Y%m%d%H%M}.jpg jpg' {tmpfd.name}"
-        )
+        cmd = [
+            "pqinsert",
+            "-p",
+            f"webcam {routes} {valid:%Y%m%d%H%M} camera/stills/{cam}.jpg "
+            f"camera/{cam}/{cam}_{valid:%Y%m%d%H%M}.jpg jpg",
+            tmpfd.name,
+        ]
         with subprocess.Popen(
-            cmd, shell=True, stdout=subprocess.PIPE, stderr=subprocess.PIPE
+            cmd, stdout=subprocess.PIPE, stderr=subprocess.PIPE
         ) as proc:
             stdout, stderr = proc.communicate()
             if stderr != b"" or stdout != b"":
-                LOG.info("%s stdout: %s stderr: %s", cmd, stdout, stderr)
+                LOG.info(
+                    "%s stdout: %s stderr: %s", " ".join(cmd), stdout, stderr
+                )
                 continue
         os.unlink(tmpfd.name)
         # Create log entry
@@ -141,7 +146,7 @@ def process_feature(cursor, domain, feat):
 
 def main():
     """Go Main Go"""
-    pgconn = util.get_dbconn("mesosite")
+    pgconn = get_dbconn("mesosite")
     # Create a dictionary of current webcams
     cursor = pgconn.cursor()
     cursor.execute("select id from webcams where network = 'IDOT'")
@@ -149,7 +154,7 @@ def main():
     cursor.close()
 
     # Fetch the REST service
-    req = util.exponential_backoff(requests.get, URI, timeout=30)
+    req = exponential_backoff(requests.get, URI, timeout=30)
     if req is None:
         LOG.info("Failed to fetch REST service, aborting.")
         return
