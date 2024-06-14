@@ -272,7 +272,8 @@ def plotter(fdict):
         fig.text(0.86, ypos, yrfmter(yr), font_properties=_fp)
         fig.text(0.95, ypos, fmter(row[dfcol]), font_properties=_fp)
         ypos += dy
-
+    if df[dfcol].isnull().all():
+        raise NoDataFound("No data found for this station and year range.")
     bars = ax[0].bar(
         df.index, df[dfcol], facecolor="r", edgecolor="r", align="center"
     )

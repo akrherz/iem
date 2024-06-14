@@ -11,7 +11,11 @@ period is limited to 1 year or less.
 reporting each day at approximately 7 AM.  So for example, a plot of June
 precipitation would stricly include the period of 7 AM 31 May
 to 7 AM 30 June. Data for the current date is available at approximately
-noon central time each day.
+noon central time each day.</p>
+
+<p><strong>Aridity Note</strong>: Presently, this autoplot can only plot the
+value and not departures nor ranks.  Hopefully, this can be implemented in
+the near future.</p>
 """
 
 import datetime
@@ -290,7 +294,11 @@ def plotter(fdict):
     cmap = get_cmap(ctx["cmap"])
     pvar = f"{ctx['var']}_{ctx['w']}"
     fmt = "%.2f"
-    if ctx["w"] == "rank":
+    if ctx["var"] == "aridity":
+        bins = np.arange(-4, 4.1, 1)
+        pvar = ctx["var"]
+        fmt = "%.1f"
+    elif ctx["w"] == "rank":
         bins = [
             1,
             5,
@@ -308,10 +316,6 @@ def plotter(fdict):
         bins = pretty_bins(ctx["df"][pvar].min(), ctx["df"][pvar].max())
     else:  # dep
         bins = centered_bins(ctx["df"][pvar].abs().max())
-    if ctx["var"] == "aridity":
-        bins = np.arange(-4, 4.1, 1)
-        pvar = ctx["var"]
-        fmt = "%.1f"
     if ctx["which"] == "st":
         ctx["df"].index = ctx["df"].index.str.slice(0, 2)
         mp.fill_states(
