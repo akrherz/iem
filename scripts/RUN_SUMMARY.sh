@@ -1,4 +1,3 @@
-# set -x
 
 cd current
 python plot_hilo.py $(date --date '1 day ago' +'%Y %m %d')
