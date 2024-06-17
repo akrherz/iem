@@ -5,25 +5,34 @@ Produce a OA GDD Plot, dynamically!
 import datetime
 from io import BytesIO
 
+from pydantic import Field
 from pyiem.exceptions import IncompleteWebRequest
 from pyiem.network import Table as NetworkTable
 from pyiem.plot import MapPlot
 from pyiem.util import get_dbconn, utc
-from pyiem.webutil import iemapp
+from pyiem.webutil import CGIModel, iemapp
 
 
-@iemapp()
+class Schema(CGIModel):
+    """See how we are called."""
+
+    base: int = Field(default=50, description="Base Temperature")
+    max: int = Field(default=86, description="Max Temperature")
+    sts: datetime.date = Field(None, description="Start Date")
+    ets: datetime.date = Field(None, description="End Date")
+    year1: int = Field(None, description="Year 1")
+    year2: int = Field(None, description="Year 2")
+    month1: int = Field(None, description="Month 1")
+    month2: int = Field(None, description="Month 2")
+    day1: int = Field(None, description="Day 1")
+    day2: int = Field(None, description="Day 2")
+
+
+@iemapp(help=__doc__, schema=Schema)
 def application(environ, start_response):
     """Go Main Go"""
     pgconn = get_dbconn("coop")
     ccursor = pgconn.cursor()
-
-    baseV = 50
-    if "base" in environ:
-        baseV = int(environ["base"])
-    maxV = 86
-    if "max" in environ:
-        maxV = int(environ["max"])
 
     # Make sure we aren't in the future
     if "ets" not in environ:
@@ -45,8 +54,8 @@ def application(environ, start_response):
         GROUP by station
     """,
         (
-            baseV,
-            maxV,
+            environ["base"],
+            environ["max"],
             environ["sts"].year,
             environ["sts"].strftime("%Y-%m-%d"),
             environ["ets"].strftime("%Y-%m-%d"),
@@ -68,7 +77,7 @@ def application(environ, start_response):
     mp = MapPlot(
         title=(
             f"Iowa {environ['sts']:%Y: %d %b} thru {tt} "
-            f"GDD(base={baseV},max={maxV}) Accumulation"
+            f"GDD(base={environ['base']},max={environ['max']}) Accumulation"
         ),
         axisbg="white",
     )
