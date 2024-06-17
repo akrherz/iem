@@ -35,7 +35,7 @@ def application(environ, start_response):
     ccursor = pgconn.cursor()
 
     # Make sure we aren't in the future
-    if "ets" not in environ:
+    if environ["sts"] is None or environ["ets"] is None:
         raise IncompleteWebRequest("Missing GET parameter ets=")
     ets = min(utc(), environ["ets"])
 
