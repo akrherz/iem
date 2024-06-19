@@ -1,6 +1,7 @@
 """
 This plot displays the distribution of observed
-daily high and low temperatures for a given day and given state.  The
+daily high and low temperatures for a given day and given state or station.
+The
 dataset is fit with a simple normal distribution based on the simple
 population statistics.
 """
@@ -15,13 +16,33 @@ from pyiem.exceptions import NoDataFound
 from pyiem.plot import figure_axes
 from pyiem.util import get_autoplot_context
 from scipy.stats import norm
+from sqlalchemy import text
+
+PDICT = {
+    "state": "Plot for a Specific State",
+    "station": "Plot for a Specific Station",
+}
 
 
 def get_description():
     """Return a dict describing how to call this plotter"""
     desc = {"description": __doc__, "data": True}
     desc["arguments"] = [
+        {
+            "type": "select",
+            "name": "opt",
+            "default": "state",
+            "label": "Plot all stations in state or single station:",
+            "options": PDICT,
+        },
         dict(type="state", name="state", default="IA", label="Which state?"),
+        {
+            "type": "station",
+            "default": "IATAME",
+            "name": "station",
+            "network": "IACLIMATE",
+            "label": "Select Station:",
+        },
         dict(type="month", name="month", default="10", label="Select Month:"),
         dict(type="day", name="day", default="7", label="Select Day:"),
     ]
@@ -34,24 +55,42 @@ def plotter(fdict):
 
     month = ctx["month"]
     day = ctx["day"]
-    state = ctx["state"][:2]
-    with get_sqlalchemy_conn("coop") as conn:
-        df = pd.read_sql(
-            f"SELECT high, low from alldata_{state} "
-            "where sday = %s and high is not null and low is not null and "
-            "substr(station, 3, 1) != 'T' and substr(station, 3, 4) != '0000'",
-            conn,
-            params=(f"{month:02.0f}{day:02.0f}",),
+    ts = datetime.datetime(2000, month, day)
+    if ctx["opt"] == "station":
+        title = f"{ctx['_sname']} {ts:%d %B} Temperature Distribution"
+        with get_sqlalchemy_conn("coop") as conn:
+            df = pd.read_sql(
+                text("""SELECT high, low from alldata
+                where station = :station and sday = :sday and high is not null
+                and low is not null
+                """),
+                conn,
+                params={
+                    "station": ctx["station"],
+                    "sday": f"{month:02.0f}{day:02.0f}",
+                },
+            )
+    else:
+        state = ctx["state"][:2]
+        title = (
+            f"{reference.state_names[state]} {ts:%d %B} "
+            "Temperature Distribution"
         )
+        with get_sqlalchemy_conn("coop") as conn:
+            df = pd.read_sql(
+                text(f"""SELECT high, low from alldata_{state}
+                where sday = :sday and high is not null and low is not null and
+                substr(station, 3, 1) != 'T' and
+                substr(station, 3, 4) != '0000'
+                """),
+                conn,
+                params={"sday": f"{month:02.0f}{day:02.0f}"},
+            )
     if df.empty:
         raise NoDataFound("No Data Found.")
     highs = df["high"].values
     lows = df["low"].values
 
-    ts = datetime.datetime(2000, month, day)
-    title = (
-        f"{reference.state_names[state]} {ts:%d %B} Temperature Distribution"
-    )
     (fig, ax) = figure_axes(title=title, apctx=ctx)
 
     n, bins, _ = ax.hist(
