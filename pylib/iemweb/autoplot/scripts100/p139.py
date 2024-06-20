@@ -169,9 +169,6 @@ def plotter(fdict):
         )
     if df.empty:
         raise NoDataFound("No Data Found,")
-    df["rank"] = df["difference"].rank(
-        ascending=(ctx["v"] == "smallest"), method="min"
-    )
     ab = ctx["_nt"].sts[station]["archive_begin"]
     if ab is None:
         raise NoDataFound("Unknown station metadata.")
@@ -190,13 +187,13 @@ def plotter(fdict):
     i = 10
     hits = 0
     rank = 0
-    rankval = 999
+    rankval = -999
     for _, row in df.iterrows():
         if hits >= 10:
             break
         if not plot_date(ax, i, row["date"], station, tz):
             continue
-        if row["difference"] < rankval:
+        if row["difference"] > rankval:
             rank += 1
             rankval = row["difference"]
         hits += 1
