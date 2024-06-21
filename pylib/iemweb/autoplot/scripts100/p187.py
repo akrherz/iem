@@ -11,6 +11,8 @@ from pyiem.exceptions import NoDataFound
 from pyiem.plot import figure
 from pyiem.util import get_autoplot_context
 
+from iemweb.autoplot.barchart import barchar_with_top10
+
 PDICT = {
     "precip": "Total Precipitation",
     "high": "Average High Temperature",
@@ -79,13 +81,27 @@ def plotter(fdict):
     if df.empty:
         raise NoDataFound("No Data Found.")
 
-    fig = figure(apctx=ctx)
-    ax = fig.add_axes([0.13, 0.52, 0.78, 0.4])
+    fig = figure(
+        title=ctx["_sname"],
+        subtitle=(
+            f"Yearly {PDICT[varname]} Percentile for all "
+            f"{station[:2]} stations"
+        ),
+        apctx=ctx,
+    )
+    overcolor = "b" if varname == "precip" else "r"
+    undercolor = "r" if varname == "precip" else "b"
+    df["color"] = overcolor
+    df.loc[df["percentile"] < 50, "color"] = undercolor
+    ax = barchar_with_top10(
+        fig,
+        df,
+        "percentile",
+        color=df["color"].tolist(),
+    )
+    current_pos = ax.get_position()
+    ax.set_position([current_pos.x0, 0.5, current_pos.width, 0.4])
     meanval = df["percentile"].mean()
-    bars = ax.bar(df.index.values, df["percentile"], color="b")
-    for mybar in bars:
-        if mybar.get_height() > meanval:
-            mybar.set_color("red")
     ax.axhline(meanval, color="green", lw=2, zorder=5)
     ax.text(df.index.max() + 1, meanval, f"{meanval:.1f}", color="green")
     ax.set_xlim(df.index.min() - 1, df.index.max() + 1)
@@ -93,13 +109,9 @@ def plotter(fdict):
     ax.set_yticks([0, 5, 10, 25, 50, 75, 90, 95, 100])
     ax.set_ylabel("Percentile (no spatial weighting)")
     ax.grid(True)
-    ax.set_title(
-        f"{ctx['_sname']}\n"
-        f"Yearly {PDICT[varname]} Percentile for all {station[:2]} stations"
-    )
 
     # second plot
-    ax = fig.add_axes([0.13, 0.07, 0.78, 0.4])
+    ax = fig.add_axes([current_pos.x0, 0.1, current_pos.width, 0.35])
     ax.bar(df.index.values, df[varname] - df["avgval"])
     meanval = (df[varname] - df["avgval"]).mean()
     ax.axhline(meanval, color="green", lw=2, zorder=5)
