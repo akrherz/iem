@@ -3,27 +3,59 @@
 Documentation for /cgi-bin/request/hourlyprecip.py
 --------------------------------------------------
 
-To be written.
+This service emits hourly precipitation data based on processed METAR
+observations by the IEM.
 
 """
 
 from zoneinfo import ZoneInfo
 
+from pydantic import AwareDatetime, Field
 from pyiem.database import get_dbconn
 from pyiem.exceptions import IncompleteWebRequest
-from pyiem.webutil import ensure_list, iemapp
+from pyiem.webutil import CGIModel, ListOrCSVType, iemapp
 
 
-def get_data(network, ctx, tzinfo, stations):
+class Schema(CGIModel):
+    """See how we are called."""
+
+    ets: AwareDatetime = Field(
+        None, description="The end of the requested interval."
+    )
+    lalo: bool = Field(False, description="Include the lat/lon in the output.")
+    st: bool = Field(False, description="Include the state in the output.")
+    station: ListOrCSVType = Field(
+        [], description="The station(s) to request data for."
+    )
+    sts: AwareDatetime = Field(
+        None, description="The start of the requested interval."
+    )
+    tz: str = Field(
+        "America/Chicago",
+        description=(
+            "The timezone to present the data in and for requested interval."
+        ),
+    )
+    year1: int = Field(None, description="The start year, when sts is unset.")
+    month1: int = Field(
+        None, description="The start month, when sts is unset."
+    )
+    day1: int = Field(None, description="The start day, when sts is unset.")
+    year2: int = Field(None, description="The end year, when ets is unset.")
+    month2: int = Field(None, description="The end month, when ets is unset.")
+    day2: int = Field(None, description="The end day, when ets is unset.")
+
+
+def get_data(network, environ, tzinfo):
     """Go fetch data please"""
     pgconn = get_dbconn("iem")
     cursor = pgconn.cursor()
     res = "station,network,valid,precip_in"
     sql = ""
-    if ctx["lalo"]:
+    if environ["lalo"]:
         res += ",lat,lon"
         sql += " , st_y(geom) as lat, st_x(geom) as lon "
-    if ctx["st"]:
+    if environ["st"]:
         res += ",st"
         sql += ", state "
     res += "\n"
@@ -35,7 +67,7 @@ def get_data(network, ctx, tzinfo, stations):
         valid >= %s and valid < %s and t.network = %s and t.id = ANY(%s)
         ORDER by valid ASC
         """,
-        (ctx["sts"], ctx["ets"], network, stations),
+        (environ["sts"], environ["ets"], network, environ["station"]),
     )
     for row in cursor:
         res += (
@@ -46,21 +78,14 @@ def get_data(network, ctx, tzinfo, stations):
     return res.encode("ascii", "ignore")
 
 
-@iemapp(help=__doc__)
+@iemapp(help=__doc__, default_tz="America/Chicago", schema=Schema)
 def application(environ, start_response):
     """run rabbit run"""
-    tzinfo = ZoneInfo(environ.get("tz", "America/Chicago"))
-    if "sts" not in environ:
-        raise IncompleteWebRequest("No year1,month1,day1 was specified.")
-    ctx = {
-        "st": environ.get("st") == "1",
-        "lalo": environ.get("lalo") == "1",
-        "sts": environ["sts"].date(),
-        "ets": environ["ets"].date(),
-    }
-    stations = ensure_list(environ, "station")
-    if not stations:
+    tzinfo = ZoneInfo(environ["tz"])
+    if environ["sts"] is None or environ["ets"] is None:
+        raise IncompleteWebRequest("Missing start or end time.")
+    if not environ["station"]:
         raise IncompleteWebRequest("No station= was specified.")
     start_response("200 OK", [("Content-type", "text/plain")])
     network = environ.get("network")[:12]
-    return [get_data(network, ctx, tzinfo, stations=stations)]
+    return [get_data(network, environ, tzinfo)]
