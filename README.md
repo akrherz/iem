@@ -7,6 +7,8 @@ web presence of the [IEM](https://mesonet.agron.iastate.edu).  Hopefully it can
 be found useful for others to at least look at to see how some of the magic happens.
 
 Limited integration testing is done on Github Actions: [![Build Status](https://github.com/akrherz/iem/workflows/Install%20and%20Test/badge.svg)](https://github.com/akrherz/iem)
+[![DeepSource](https://app.deepsource.com/gh/akrherz/iem.svg/?label=active+issues&show_trend=true&token=WvZunVBligt7HgkO2JGg5uMe)](https://app.deepsource.com/gh/akrherz/iem/)
+[![codecov](https://codecov.io/gh/akrherz/iem/graph/badge.svg?token=zKXnLZdxIk)](https://codecov.io/gh/akrherz/iem)
 
 Database schema is in [akrherz/iem-database](https://github.com/akrherz/iem-database).
 
