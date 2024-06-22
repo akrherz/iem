@@ -86,7 +86,8 @@ def do_apsim(cursor, ctx):
             extra[ts]["doy"] = int(ts.strftime("%j"))
         if febtest not in extra:
             feb28 = date(thisyear, 2, 28)
-            extra[febtest] = extra[feb28]
+            if feb28 in extra:
+                extra[febtest] = extra[feb28]
 
     sio = StringIO()
     sio.write("! Iowa Environmental Mesonet -- NWS Cooperative Data\n")
@@ -111,7 +112,7 @@ def do_apsim(cursor, ctx):
     )
     row = cursor.fetchone()
     sio.write(
-        f"tav = {f2c(row['avgt']):.3f} (oC) "
+        f"tav = {f2c(-99 if row['avgt'] is None else row['avgt']):.3f} (oC) "
         "! annual average ambient temperature\n"
     )
 
@@ -126,10 +127,11 @@ def do_apsim(cursor, ctx):
         (nt.sts[station]["ncei91"],),
     )
     row = cursor.fetchone()
-    sio.write(
-        ("amp = %.3f (oC) ! annual amplitude in mean monthly temperature\n")
-        % (f2c(row["h"]) - f2c(row["l"]),)
-    )
+    if row["h"] is not None:
+        sio.write(
+            f"amp = {f2c(row['h']) - f2c(row['l']):.3f} (oC) ! "
+            "annual amplitude in mean monthly temperature\n"
+        )
 
     sio.write(
         """year        day       radn       maxt       mint      rain
@@ -325,7 +327,8 @@ def do_daycent(cursor, ctx):
             extra[ts] = row
         if febtest not in extra:
             feb28 = date(thisyear, 2, 28)
-            extra[febtest] = extra[feb28]
+            if feb28 in extra:
+                extra[febtest] = extra[feb28]
     cursor.execute(
         """
         SELECT day, high, low, precip,
@@ -621,7 +624,7 @@ def do_dndc(cursor, ctx):
     return sio.getvalue()
 
 
-def do_swat(ctx):
+def do_swat(_cursor, ctx):
     """SWAT
 
     Two files, one for precip [mm] and one for hi and low temperature [C]

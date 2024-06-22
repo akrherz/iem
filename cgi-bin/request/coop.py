@@ -50,11 +50,11 @@ class Schema(CGIModel):
     )
     gis: bool = Field(
         False,
-        description=("Include latitude and longitude columns in the output."),
+        description="Include latitude and longitude columns in the output.",
     )
     inclatlon: bool = Field(
         False,
-        description=("Include latitude and longitude columns in the output."),
+        description="Include latitude and longitude columns in the output.",
     )
     model: str = Field(
         None,
@@ -65,7 +65,7 @@ class Schema(CGIModel):
         ),
     )
     network: str = Field(
-        "IACLIMATE", description=("The network to use for station lookups.")
+        "IACLIMATE", description="The network to use for station lookups."
     )
     scenario: bool = Field(
         False,
@@ -81,7 +81,7 @@ class Schema(CGIModel):
         ),
     )
     station: ListOrCSVType = Field(
-        [], description=("List of stations to include in the output.")
+        [], description="List of stations to include in the output."
     )
     stations: ListOrCSVType = Field(
         [],
@@ -90,33 +90,35 @@ class Schema(CGIModel):
         ),
     )
     vars: ListOrCSVType = Field(
-        [], description=("List of variables to include in the output.")
+        [], description="List of variables to include in the output."
     )
-    what: str = Field("view", description=("The type of output to generate."))
+    what: str = Field("view", description="The type of output to generate.")
     with_header: bool = Field(
-        True, description=("Include a header row in the output.")
+        True, description="Include a header row in the output."
     )
     year1: int = Field(
         datetime.date.today().year,
-        description=("The starting year for the data request."),
+        description="The starting year for the data request.",
     )
     month1: int = Field(
-        1, description=("The starting month for the data request.")
+        1,
+        description="The starting month for the data request.",
     )
     day1: int = Field(
-        1, description=("The starting day for the data request.")
+        1,
+        description="The starting day for the data request.",
     )
     year2: int = Field(
         datetime.date.today().year,
-        description=("The ending year for the data request."),
+        description="The ending year for the data request.",
     )
     month2: int = Field(
         datetime.date.today().month,
-        description=("The ending month for the data request."),
+        description="The ending month for the data request.",
     )
     day2: int = Field(
         datetime.date.today().day,
-        description=("The ending day for the data request."),
+        description="The ending day for the data request.",
     )
 
 
@@ -252,7 +254,7 @@ def application(environ, start_response):
     elif "salus" in ctx["myvars"]:
         res = do_salus(cursor, ctx)
     elif "swat" in ctx["myvars"]:
-        res = do_swat(ctx)
+        res = do_swat(None, ctx)
     else:
         res = do_simple(cursor, ctx)
     cursor.close()

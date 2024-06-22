@@ -98,7 +98,7 @@ function doMCD(lon, lat) {
                     `<td>${mcd.utc_expire}</td>` +
                     `<td>${mcd.watch_confidence || ''}</td>` +
                     `<td>${mcd.concerning}</td>` +
-                    `</tr>`);
+                    '</tr>');
             });
             if (data.mcds.length === 0) {
                 tbody.append('<tr><td colspan="3">No Results Found!</td></tr>');
