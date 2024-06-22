@@ -23,6 +23,11 @@ class Schema(CGIModel):
         None, description="The end of the requested interval."
     )
     lalo: bool = Field(False, description="Include the lat/lon in the output.")
+    network: str = Field(
+        "IA_ASOS",
+        description="The network to request data for.",
+        max_length=12,
+    )
     st: bool = Field(False, description="Include the state in the output.")
     station: ListOrCSVType = Field(
         [], description="The station(s) to request data for."
@@ -87,5 +92,5 @@ def application(environ, start_response):
     if not environ["station"]:
         raise IncompleteWebRequest("No station= was specified.")
     start_response("200 OK", [("Content-type", "text/plain")])
-    network = environ.get("network")[:12]
+    network = environ["network"]
     return [get_data(network, environ, tzinfo)]
