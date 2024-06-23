@@ -34,7 +34,6 @@ np.seterr(all="ignore")
 HTTP200 = "200 OK"
 HTTP400 = "400 Bad Request"
 HTTP500 = "500 Internal Server Error"
-BASEDIR, WSGI_FILENAME = os.path.split(__file__)
 
 
 def format_geojson_response(gdf, defaultcol):

@@ -1,9 +1,4 @@
-/*
- * IEM Time Machine
- * 
- *  Basically, a browser of archived products that have RESTish URIs
- *  
- */
+/* global moment, $ */
 var dt = moment(); // Current application time
 var irealtime = true; // Is our application in realtime mode or not
 

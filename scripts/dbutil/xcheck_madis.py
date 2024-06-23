@@ -6,7 +6,8 @@ import warnings
 
 from netCDF4 import chartostring
 from pandas import read_sql
-from pyiem.util import get_sqlalchemy_conn, ncopen, utc
+from pyiem.database import get_sqlalchemy_conn
+from pyiem.util import ncopen, utc
 
 warnings.filterwarnings("ignore", category=DeprecationWarning)
 
