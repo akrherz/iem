@@ -7,8 +7,6 @@ let table2 = null;
 let table3 = null;
 let table2IsByPoint = true;
 let hashlinkUGC = null;
-let mapwidget1 = null;
-let mapwidget2 = null;
 let marker1 = null;
 let marker2 = null;
 let edate = null;
@@ -459,10 +457,8 @@ $(document).ready(() => {
         process_hash(tokens[1]);
     }
     let res1 = olSelectLonLat("map", default_lon, default_lat, updateMarkerPosition);
-    mapwidget1 = res1.map;
     marker1 = res1.marker;
     let res2 = olSelectLonLat("map2", default_lon, default_lat, updateMarkerPosition2);
-    mapwidget2 = res2.map;
     marker2 = res2.marker;
 
 });

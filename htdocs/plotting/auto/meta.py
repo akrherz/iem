@@ -1,15 +1,12 @@
 """mod_wsgi handler for autoplot cache needs"""
 
 import json
-import os
 
 from iemweb.autoplot import data as autoplot_data
 from iemweb.autoplot import import_script
+from pyiem.database import get_dbconnc
 from pyiem.reference import FIGSIZES_NAMES
-from pyiem.util import get_dbconnc
 from pyiem.webutil import iemapp
-
-BASEDIR, WSGI_FILENAME = os.path.split(__file__)
 
 
 def get_timing(pidx):

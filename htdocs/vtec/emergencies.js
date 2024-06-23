@@ -1,3 +1,4 @@
+/* global moment, ol */
 let olmap = null;
 let elayer = null;
 let element = null;
