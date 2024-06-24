@@ -63,7 +63,7 @@ def run(ctx, start_response):
     fn = f"sps_{ctx['sts']:%Y%m%d%H%M}_{ctx['ets']:%Y%m%d%H%M}"
 
     with tempfile.TemporaryDirectory() as tmpdir:
-        df.to_file(f"{tmpdir}/{fn}.shp", schema=schema)
+        df.to_file(f"{tmpdir}/{fn}.shp", schema=schema, engine="fiona")
 
         zio = BytesIO()
         with zipfile.ZipFile(
