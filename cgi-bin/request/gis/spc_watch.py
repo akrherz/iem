@@ -151,7 +151,7 @@ def run(environ, start_response):
         )
         fp = BytesIO()
         with fiona.drivers():
-            df.to_file(fp, driver="KML", NameField="NAME")
+            df.to_file(fp, driver="KML", NameField="NAME", engine="fiona")
         return fp.getvalue()
 
     with tempfile.TemporaryDirectory() as tmpdir:
