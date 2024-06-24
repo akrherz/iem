@@ -97,7 +97,7 @@ def run(ctx, start_response):
     if ctx["format"] == "kml":
         fp = BytesIO()
         with fiona.drivers():
-            df.to_file(fp, driver="KML", NameField="NAME")
+            df.to_file(fp, driver="KML", NameField="NAME", engine="fiona")
         headers = [
             ("Content-type", "application/octet-stream"),
             ("Content-Disposition", f"attachment; filename={fn}.kml"),
