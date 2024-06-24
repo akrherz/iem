@@ -111,13 +111,14 @@ def plotter(fdict):
     )
     # Encapsulate most of the data
     rng = df[varname].abs().describe(percentiles=[0.95])["95%"]
-    mp.contourf(
-        df["lon"].values,
-        df["lat"].values,
-        df[varname].values,
-        centered_bins(rng, bins=10),
-        cmap=get_cmap(ctx["cmap"]),
-        units="inch" if varname == "precip" else "F",
-    )
+    if rng != 0:
+        mp.contourf(
+            df["lon"].values,
+            df["lat"].values,
+            df[varname].values,
+            centered_bins(rng, bins=10),
+            cmap=get_cmap(ctx["cmap"]),
+            units="inch" if varname == "precip" else "F",
+        )
 
     return mp.fig, df

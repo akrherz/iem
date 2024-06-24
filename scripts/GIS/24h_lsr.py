@@ -67,7 +67,7 @@ def main():
     if df.empty:
         return
     df.columns = [s.upper() if s != "geom" else "geom" for s in df.columns]
-    df.to_file("lsr_24hour.shp", schema=SCHEMA)
+    df.to_file("lsr_24hour.shp", schema=SCHEMA, engine="fiona")
     df.to_file("lsr_24hour.geojson", driver="GeoJSON")
     df.to_csv("lsr_24hour.csv", index=False)
 

@@ -75,7 +75,7 @@ def run(ctx, start_response):
         return fp.getvalue()
 
     with tempfile.TemporaryDirectory() as tmpdir:
-        df.to_file(f"{tmpdir}/{fn}.shp", schema=schema)
+        df.to_file(f"{tmpdir}/{fn}.shp", schema=schema, engine="fiona")
 
         zio = BytesIO()
         with zipfile.ZipFile(

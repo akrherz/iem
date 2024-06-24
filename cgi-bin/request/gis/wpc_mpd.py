@@ -63,7 +63,7 @@ def application(environ, start_response):
     fn = f"mpd_{environ['sts']:%Y%m%d%H%M}_{environ['ets']:%Y%m%d%H%M}"
 
     with tempfile.TemporaryDirectory() as tmpdir:
-        df.to_file(f"{tmpdir}/{fn}.shp", schema=schema)
+        df.to_file(f"{tmpdir}/{fn}.shp", schema=schema, engine="fiona")
 
         zio = BytesIO()
         with zipfile.ZipFile(

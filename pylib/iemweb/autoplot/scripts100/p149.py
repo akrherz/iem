@@ -21,7 +21,7 @@ import matplotlib.dates as mdates
 import numpy as np
 import pandas as pd
 from pyiem.database import get_sqlalchemy_conn
-from pyiem.exceptions import NoDataFound
+from pyiem.exceptions import IncompleteWebRequest, NoDataFound
 from pyiem.plot import figure_axes
 from pyiem.util import get_autoplot_context
 
@@ -89,6 +89,8 @@ def plotter(fdict):
     ctx = get_autoplot_context(fdict, get_description())
     station = ctx["station"]
     days = ctx["days"]
+    if days < 1:
+        raise IncompleteWebRequest("Days argument needs to be positive.")
     days2 = ctx["days2"]
     _days2 = days2 if days2 > 0 else 1
     days3 = ctx["days3"]
@@ -127,11 +129,11 @@ def plotter(fdict):
 
         SELECT day,
         (a.avgt - b.avg_avgt) / b.std_avgt as t,
-        (a.sump - b.avg_sump) / b.std_sump as p,
+        (a.sump - b.avg_sump) / greatest(b.std_sump, 0.01) as p,
         (a.avgt2 - b.avg_avgt2) / b.std_avgt2 as t2,
-        (a.sump2 - b.avg_sump2) / b.std_sump2 as p2,
+        (a.sump2 - b.avg_sump2) / greatest(b.std_sump2, 0.01) as p2,
         (a.avgt3 - b.avg_avgt3) / b.std_avgt3 as t3,
-        (a.sump3 - b.avg_sump3) / b.std_sump3 as p3
+        (a.sump3 - b.avg_sump3) / greatest(b.std_sump3, 0.01) as p3
         from agg a JOIN agg2 b on (a.sday = b.sday)
         ORDER by day ASC
         """,
@@ -269,7 +271,8 @@ def plotter(fdict):
         ax.set_xlabel(f"{sts:%-d %b} to {ets:%-d %b}")
     ax.grid(True)
 
-    ax.set_ylim(0 - maxval, maxval)
+    if not pd.isna(maxval):
+        ax.set_ylim(0 - maxval, maxval)
     ax.set_ylabel("Aridity Index")
     ax.text(
         1.01,
