@@ -1,9 +1,7 @@
+/* global $, ol */
 var controls;
 var vectors;
 var feature;
-/**
-     * Define a namespace for the application.
-     */
 window.app = {};
 var app = window.app;
 

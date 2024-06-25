@@ -30,8 +30,9 @@ def run(valid):
             try:
                 grbs = pygrib.open(gribfn)
                 if grbs.messages == (18 * 4 + (HOURS[valid.hour] - 18) + 1):
+                    grbs.close()
                     return
-                del grbs
+                grbs.close()
             except Exception as exp:
                 logging.debug(exp)
     tmpfn = f"/tmp/{valid:%Y%m%d%H}.grib2"
