@@ -4,7 +4,7 @@ var vectors;
 var feature;
 window.app = {};
 var app = window.app;
-
+let theMap = null;
 /**
  * @constructor
  * @extends {ol.interaction.Pointer}
@@ -58,9 +58,9 @@ ol_ext_inherits(app.Drag, ol.interaction.Pointer);
 app.Drag.prototype.handleDownEvent = function (evt) {
     var map = evt.map;
 
-    var feature_ = map.forEachFeatureAtPixel(evt.pixel,
-        function (feature_) {
-            return feature_;
+    const feature_ = map.forEachFeatureAtPixel(evt.pixel,
+        function (feat) {
+            return feat;
         });
 
     if (feature_) {
@@ -79,8 +79,8 @@ app.Drag.prototype.handleDragEvent = function (evt) {
     var map = evt.map;
 
     map.forEachFeatureAtPixel(evt.pixel,
-        function (feature_, layer) {
-            return feature_;
+        function (feat) {
+            return feat;
         });
 
     var deltaX = evt.coordinate[0] - this.coordinate_[0];
@@ -101,9 +101,9 @@ app.Drag.prototype.handleDragEvent = function (evt) {
 app.Drag.prototype.handleMoveEvent = function (evt) {
     if (this.cursor_) {
         var map = evt.map;
-        var feature_ = map.forEachFeatureAtPixel(evt.pixel,
-            function (feature_) {
-                return feature_;
+        const feature_ = map.forEachFeatureAtPixel(evt.pixel,
+            function (feat) {
+                return feat;
             });
         var element = evt.map.getTargetElement();
         if (feature_) {
@@ -136,7 +136,7 @@ $(document).ready(() => {
     feature = new ol.Feature(new ol.geom.Point(
         ol.proj.transform([-93.0, 42.0], 'EPSG:4326', 'EPSG:3857')
     ));
-    new ol.Map({
+    theMap = new ol.Map({
         interactions: ol.interaction.defaults().extend([new app.Drag()]),
         target: 'map',
         controls: [new ol.control.Zoom()],
