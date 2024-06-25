@@ -58,17 +58,17 @@ ol_ext_inherits(app.Drag, ol.interaction.Pointer);
 app.Drag.prototype.handleDownEvent = function (evt) {
     var map = evt.map;
 
-    var feature = map.forEachFeatureAtPixel(evt.pixel,
-        function (feature, layer) {
-            return feature;
+    var feature_ = map.forEachFeatureAtPixel(evt.pixel,
+        function (feature_) {
+            return feature_;
         });
 
-    if (feature) {
+    if (feature_) {
         this.coordinate_ = evt.coordinate;
-        this.feature_ = feature;
+        this.feature_ = feature_;
     }
 
-    return Boolean(feature);
+    return Boolean(feature_);
 };
 
 
@@ -79,8 +79,8 @@ app.Drag.prototype.handleDragEvent = function (evt) {
     var map = evt.map;
 
     map.forEachFeatureAtPixel(evt.pixel,
-        function (feature, layer) {
-            return feature;
+        function (feature_, layer) {
+            return feature_;
         });
 
     var deltaX = evt.coordinate[0] - this.coordinate_[0];
@@ -101,12 +101,12 @@ app.Drag.prototype.handleDragEvent = function (evt) {
 app.Drag.prototype.handleMoveEvent = function (evt) {
     if (this.cursor_) {
         var map = evt.map;
-        var feature = map.forEachFeatureAtPixel(evt.pixel,
-            function (feature, layer) {
-                return feature;
+        var feature_ = map.forEachFeatureAtPixel(evt.pixel,
+            function (feature_) {
+                return feature_;
             });
         var element = evt.map.getTargetElement();
-        if (feature) {
+        if (feature_) {
             if (element.style.cursor != this.cursor_) {
                 this.previousCursor_ = element.style.cursor;
                 element.style.cursor = this.cursor_;
@@ -132,47 +132,46 @@ app.Drag.prototype.handleUpEvent = function (evt) {
     return false;
 };
 
-$(document).ready(
-    function () {
-        feature = new ol.Feature(new ol.geom.Point(
-            ol.proj.transform([-93.0, 42.0], 'EPSG:4326', 'EPSG:3857')
-        ));
-        new ol.Map({
-            interactions: ol.interaction.defaults().extend([new app.Drag()]),
-            target: 'map',
-            controls: [new ol.control.Zoom()],
-            layers: [new ol.layer.Tile({
-                title: 'OpenStreetMap',
-                visible: true,
-                source: new ol.source.OSM()
-            }), new ol.layer.Vector({
-                source: new ol.source.Vector({
-                    projection: 'EPSG:3857',
-                    features: [feature]
-                }),
-                style: new ol.style.Style({
-                    image: new ol.style.Icon(/** @type {olx.style.IconOptions} */
-                        ({
-                            anchor: [0.5, 46],
-                            anchorXUnits: 'fraction',
-                            anchorYUnits: 'pixels',
-                            opacity: 0.95,
-                            src: '/images/marker.png'
-                        })),
-                    stroke: new ol.style.Stroke({
-                        width: 3,
-                        color: [255, 0, 0, 1]
-                    }),
-                    fill: new ol.style.Fill({
-                        color: [0, 0, 255, 0.6]
-                    })
-                })
-            })],
-            view: new ol.View({
+$(document).ready(() => {
+    feature = new ol.Feature(new ol.geom.Point(
+        ol.proj.transform([-93.0, 42.0], 'EPSG:4326', 'EPSG:3857')
+    ));
+    new ol.Map({
+        interactions: ol.interaction.defaults().extend([new app.Drag()]),
+        target: 'map',
+        controls: [new ol.control.Zoom()],
+        layers: [new ol.layer.Tile({
+            title: 'OpenStreetMap',
+            visible: true,
+            source: new ol.source.OSM()
+        }), new ol.layer.Vector({
+            source: new ol.source.Vector({
                 projection: 'EPSG:3857',
-                center: ol.proj.transform([-94.5, 42.1], 'EPSG:4326',
-                    'EPSG:3857'),
-                zoom: 7
+                features: [feature]
+            }),
+            style: new ol.style.Style({
+                image: new ol.style.Icon(/** @type {olx.style.IconOptions} */
+                    ({
+                        anchor: [0.5, 46],
+                        anchorXUnits: 'fraction',
+                        anchorYUnits: 'pixels',
+                        opacity: 0.95,
+                        src: '/images/marker.png'
+                    })),
+                stroke: new ol.style.Stroke({
+                    width: 3,
+                    color: [255, 0, 0, 1]
+                }),
+                fill: new ol.style.Fill({
+                    color: [0, 0, 255, 0.6]
+                })
             })
-        }); // end of map
-    }); // end of onReady()
+        })],
+        view: new ol.View({
+            projection: 'EPSG:3857',
+            center: ol.proj.transform([-94.5, 42.1], 'EPSG:4326',
+                'EPSG:3857'),
+            zoom: 7
+        })
+    }); // end of map
+}); // end of onReady()
