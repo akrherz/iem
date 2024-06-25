@@ -9,10 +9,9 @@ import datetime
 import os
 import subprocess
 import tempfile
-import time
 
-import requests
-from pyiem.util import exponential_backoff, logger, utc
+import httpx
+from pyiem.util import logger, utc
 
 LOG = logger()
 
@@ -29,24 +28,25 @@ def download(now, offset):
     if now.hour == 12:
         hours.append(24)
     for hr in hours:
-        url = (
-            "https://ftpprd.ncep.noaa.gov/data/nccf/com/pcpanl/"
+        upath = (
+            "/data/nccf/com/pcpanl/"
             f"prod/pcpanl.{now:%Y%m%d}/st4_conus.{now:%Y%m%d%H}."
             f"{hr:02.0f}h.grb2"
         )
-        LOG.info("fetching %s", url)
         response = None
-        for attempt in range(2):
-            response = exponential_backoff(requests.get, url, timeout=60)
-            if response is not None and response.status_code == 200:
-                break
+        for center in ["ftpprd.ncep.noaa.gov", "nomads.ncep.noaa.gov/pub"]:
+            try:
+                url = f"https://{center}{upath}"
+                LOG.info("fetching %s", url)
+                response = httpx.get(url, timeout=60)
+                response.raise_for_status()
+            except httpx.HTTPError as exp:
+                LOG.info("dl %s failed: %s", url, exp)
+                continue
             if offset > 23:
                 LOG.warning("dl %s failed", url)
             if offset > 0:
                 break
-            if attempt == 0:
-                LOG.info("Sleeping 600 after dl fail %s", url)
-                time.sleep(600)
         if response is None or response.status_code != 200:
             LOG.info("Full fail for %s", url)
             continue
