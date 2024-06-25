@@ -56,9 +56,8 @@ ol_ext_inherits(app.Drag, ol.interaction.Pointer);
  * @return {boolean} `true` to start the drag sequence.
  */
 app.Drag.prototype.handleDownEvent = function (evt) {
-    var map = evt.map;
 
-    const feature_ = map.forEachFeatureAtPixel(evt.pixel,
+    const feature_ = theMap.forEachFeatureAtPixel(evt.pixel,
         function (feat) {
             return feat;
         });
