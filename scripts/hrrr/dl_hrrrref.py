@@ -1,16 +1,16 @@
 """Download and archive 1000 ft reflectivity from the NCEP HRRR"""
 
-import datetime
 import logging
 import os
 import subprocess
 import sys
 import time
 
+import httpx
 import pygrib
-import requests
-from pyiem.util import exponential_backoff, logger, utc
+from pyiem.util import archive_fetch, exponential_backoff, logger, utc
 
+AWS = "https://noaa-hrrr-bdp-pds.s3.amazonaws.com/"
 LOG = logger()
 # HRRR model hours available
 HOURS = [18] * 24
@@ -18,31 +18,23 @@ for _hr in range(0, 24, 6):
     HOURS[_hr] = 48
 
 
-def get_service(valid):
-    """Does data exist upstream to even attempt a download"""
-    # NCEP should have at least 24 hours of data
-    if (utc() - datetime.timedelta(hours=24)) < valid:
-        return "https://nomads.ncep.noaa.gov/pub/data/nccf/com/hrrr/prod/"
-    return "https://noaa-hrrr-bdp-pds.s3.amazonaws.com/"
-
-
 def run(valid):
     """run for this valid time!"""
-    service = get_service(valid)
+    service = AWS
     should_throttle = service.find("noaa.gov") > -1
     LOG.info("using %s as dl service", service)
-    gribfn = valid.strftime(
-        "/mesonet/ARCHIVE/data/%Y/%m/%d/model/hrrr/%H/hrrr.t%Hz.refd.grib2"
-    )
-    if os.path.isfile(gribfn):
-        # See how many grib messages we have
-        try:
-            grbs = pygrib.open(gribfn)
-            if grbs.messages == (18 * 4 + (HOURS[valid.hour] - 18) + 1):
-                return
-            del grbs
-        except Exception as exp:
-            logging.debug(exp)
+    ppath = valid.strftime("%Y/%m/%d/model/hrrr/%H/hrrr.t%Hz.refd.grib2")
+    with archive_fetch(ppath) as gribfn:
+        if gribfn is not None:
+            # See how many grib messages we have
+            try:
+                grbs = pygrib.open(gribfn)
+                if grbs.messages == (18 * 4 + (HOURS[valid.hour] - 18) + 1):
+                    grbs.close()
+                    return
+                grbs.close()
+            except Exception as exp:
+                logging.debug(exp)
     tmpfn = f"/tmp/{valid:%Y%m%d%H}.grib2"
     with open(tmpfn, "wb") as output:
         for hr in range(HOURS[valid.hour] + 1):
@@ -61,7 +53,7 @@ def run(valid):
                     f"hrrr.t%Hz.wrfsfcf{shr}.grib2.idx"
                 )
             LOG.info(uri)
-            req = exponential_backoff(requests.get, uri, timeout=30)
+            req = exponential_backoff(httpx.get, uri, timeout=30)
             if req is None or req.status_code != 200:
                 LOG.info("failed to fetch %s", uri)
                 if hr > 18:
@@ -93,7 +85,7 @@ def run(valid):
             for pr in offsets:
                 headers = {"Range": f"bytes={pr[0]}-{pr[1]}"}
                 req = exponential_backoff(
-                    requests.get,
+                    httpx.get,
                     uri[:-4],
                     headers=headers,
                     timeout=30,

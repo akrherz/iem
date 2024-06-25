@@ -1,3 +1,4 @@
+/* global $, ol */
 var renderattr = "pday";
 let map = null;
 let coopLayer = null;

@@ -7,8 +7,8 @@ import subprocess
 import sys
 from zoneinfo import ZoneInfo
 
+import httpx
 import pandas as pd
-import requests
 from metpy.units import units
 from psycopg.rows import dict_row
 from pyiem.database import get_dbconn
@@ -40,7 +40,7 @@ def is_within(val, floor, ceiling):
 def init_year(year):
     """We need to do great things, for a great new year"""
     # We need FTP first, since that does proper wild card expansion
-    subprocess.call(f"wget -q '{FTP}/{year}/*.txt'", shell=True)
+    subprocess.call(["wget", "-q", f"{FTP}/{year}/*.txt'"])
 
 
 def process_file(icursor, ocursor, year, filename, size, reprocess):
@@ -211,7 +211,7 @@ def download(year, reprocess=False):
     for filename in files:
         size = os.stat(filename).st_size
         req = exponential_backoff(
-            requests.get,
+            httpx.get,
             f"{URI}/{year}/{filename}",
             headers={"Range": "bytes=%s-%s" % (size, size + 16000000)},
             timeout=30,
