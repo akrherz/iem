@@ -6,7 +6,8 @@ from zoneinfo import ZoneInfo
 
 import numpy as np
 from netCDF4 import chartostring
-from pyiem.util import convert_value, get_dbconn, logger, ncopen
+from pyiem.database import get_dbconn
+from pyiem.util import convert_value, logger, ncopen
 
 LOG = logger()
 
@@ -53,8 +54,8 @@ def main():
         if fn is not None:
             break
 
-    if not os.path.isfile(fn):
-        LOG.warning("Found no files? last: %s", fn)
+    if fn is None:
+        LOG.warning("Found no files? last tried: %s", testfn)
         return
 
     with ncopen(fn) as nc:
