@@ -226,6 +226,8 @@ def plotter(fdict):
     daily = daily[daily["mo"].isin(months)].sort_values(
         "min_date", ascending=True
     )
+    if daily.empty:
+        raise NoDataFound("Sorry, no data found for given months.")
     if opt in ["bystate", "bywfo"]:
         col = opt.replace("by", "")
         df = (
