@@ -45,7 +45,7 @@ class Schema(CGIModel):
     fmt: str = Field(
         None,
         description="The output format you desire.",
-        pattern="^(csv|kml|excel)$",
+        pattern="^(csv|kml|excel|shp)$",
     )
     justcsv: bool = Field(
         False,
