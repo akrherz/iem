@@ -30,7 +30,7 @@ foreach ($json['events'] as $key => $val) {
 }
 
 $t = new MyView();
-$t->title = "Particularly Dangerous Situation Tornado Warnings Listing";
+$t->title = "Particularly Dangerous Situation (PDS) Listing";
 $t->headextra = <<<EOM
 <link type="text/css" href="/vendor/jquery-datatables/1.10.20/datatables.min.css" rel="stylesheet" />
 EOM;
@@ -47,15 +47,16 @@ EOM;
 $t->content = <<<EOF
 <ol class="breadcrumb">
  <li><a href="/nws/">NWS Resources</a></li>
- <li class="active">Particularly Dangerous Situation Warnings</li>
+ <li class="active">PDS List</li>
 </ol>
-<h3>Particularly Dangerous Situation Tornado / Flash Flood Warnings</h3>
+<h3>Particularly Dangerous Situation Watch/Warnings</h3>
 
 <p>This page presents the current and
 <strong>unofficial</strong> IEM
-accounting of Warnings that contain the special Particularly Dangerous Situation
-phrasing. This phrasing is the only key used to identify such events.  The phrasing
-can occur in either the issuance and/or followup statements.</p>
+accounting of watches/warnings that contain the special
+Particularly Dangerous Situation
+phrasing. This phrasing is the only key used to identify such events.
+The phrasing can occur in either the issuance and/or followup statements.</p>
 
 <p>There is a <a href="/json/">JSON(P) webservice</a> that backends this table presentation, you can
 directly access it here:
@@ -74,7 +75,8 @@ regenerated hourly. <button id="makefancy">Make Table Interactive</button></p>
 
 <div id="thetable">
 <table class="table table-striped table-condensed">
-<thead><tr><th>Year</th><th>WFO</th><th>State(s)</th><th>Event ID</th>
+<thead class="sticky">
+<tr><th>Year</th><th>WFO</th><th>State(s)</th><th>Event ID</th>
 <th>PH</th><th>SIG</th><th>Event</th><th>Issue</th><th>Expire</th></tr>
 </thead>
 {$table}
