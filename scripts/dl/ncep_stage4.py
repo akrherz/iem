@@ -40,15 +40,12 @@ def download(now, offset):
                 LOG.info("fetching %s", url)
                 response = httpx.get(url, timeout=60)
                 response.raise_for_status()
-            except httpx.HTTPError as exp:
-                LOG.info("dl %s failed: %s", url, exp)
-                continue
-            if offset > 23:
-                LOG.warning("dl %s failed", url)
-            if offset > 0:
                 break
+            except httpx.HTTPError as exp:
+                lvl = LOG.info if offset < 24 else LOG.warning
+                lvl("dl %s failed: %s", url, exp)
         if response is None or response.status_code != 200:
-            LOG.info("Full fail for %s", url)
+            LOG.warning("Full fail for %s", url)
             continue
         # Same temp file
         with open("tmp.grib", "wb") as fh:

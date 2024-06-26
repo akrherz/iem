@@ -3,16 +3,26 @@
 import datetime
 from io import StringIO
 
+from pydantic import Field
 from pyiem.database import get_dbconn
 from pyiem.exceptions import NoDataFound
 from pyiem.network import Table as NetworkTable
 from pyiem.templates.iem import TEMPLATE
-from pyiem.webutil import iemapp
+from pyiem.webutil import CGIModel, iemapp
 
 nt = NetworkTable("IACLIMATE", only_online=False)
 
 COOP = get_dbconn("coop")
 ccursor = COOP.cursor()
+
+
+class Schema(CGIModel):
+    """See how we are called."""
+
+    city: str = Field(..., description="City Code")
+    year: int = Field(..., description="Year")
+    month: int = Field(..., description="Month")
+    day: int = Field(..., description="Day")
 
 
 def weather_logic(month, high, low, rain, snow):
@@ -155,7 +165,7 @@ def now_get_day(sio, city, ts):
     sio.write("</div>")
 
 
-@iemapp()
+@iemapp(help=__doc__, schema=Schema)
 def application(environ, start_response):
     """Go Main Go."""
     sio = StringIO()
@@ -163,23 +173,12 @@ def application(environ, start_response):
     start_response("200 OK", [("Content-type", "text/html")])
     ctx = {"title": "Weather on Your Birthday"}
 
-    try:
-        year = environ.get("year")
-        month = environ.get("month")
-        day = environ.get("day")
-        city = environ.get("city").upper()
-        if city not in nt.sts:
-            raise NoDataFound("Unknown City")
-    except Exception:
-        sio.write("<P><P><B>Invalid Post:</B><BR>")
-        sio.write(
-            "Please use this URL <a href='/onsite/birthday/'>"
-            "https://mesonet.agron.iastate.edu/onsite/birthday/</a>"
-        )
-        return [sio.getvalue().encode("ascii")]
+    city = environ["city"].upper()
+    if city not in nt.sts:
+        raise NoDataFound("Unknown City")
 
     cityName = nt.sts[city]["name"]
-    now = datetime.datetime(int(year), int(month), int(day))
+    now = datetime.datetime(environ["year"], environ["month"], environ["day"])
     nowM2 = now + datetime.timedelta(days=-2)
     nowM1 = now + datetime.timedelta(days=-1)
     nowP1 = now + datetime.timedelta(days=1)
