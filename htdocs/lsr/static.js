@@ -1,4 +1,4 @@
-// TODO print grid
+/* global $, moment, ol, iemdata */
 var dragPan;
 var olmap; // Openlayers map
 var lsrtable; // LSR DataTable
