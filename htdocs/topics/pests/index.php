@@ -34,7 +34,7 @@ $t = new MyView();
 $t->title = "Pest Forecasting Maps";
 $t->jsextra = <<<EOM
 <script src="/vendor/jquery-ui/1.13.2/jquery-ui.js"></script>
-<script type="text/javascript" src="main.js"></script>
+<script type="text/javascript" src="main.js?v2"></script>
 EOM;
 $t->headextra = <<<EOM
 <link rel="stylesheet" href="/vendor/jquery-ui/1.13.2/jquery-ui.min.css" />
@@ -61,8 +61,9 @@ $ar = array(
     "common_stalk_borer" => "Common Stalk Borer (Papaipema nebris)",
     "japanese_beetle" => "Japanese Beetle (Popillia japonica)",
     "western_bean_cutworm" => "Western Bean Cutworm (Striacosta albicosta)",
+    "european_corn_borer" => "European Corn Borer (Ostrinia nubilalis)",
 );
-$pselect = make_select("pest", $pest, $ar, "updateImage", "form-control");
+$pselect = make_select("pest", $pest, $ar, "updatePest", "form-control");
 $nselect = networkSelect($network, $station, array(), "station", TRUE);
 
 $t->content = <<<EOM
@@ -90,7 +91,7 @@ the backend that generates the maps/data here.</p>
 </div>
 <div class="col-md-3">
 <label for="sdate">Start Date for Selected Pest</label>
-<input type="text" name="sdate" id="sdate" value="$sdate" class="form-control" readonly>
+<input type="text" name="sdate" id="sdate" value="$sdate" class="form-control">
 </div>
 <div class="col-md-3">
 <input type="checkbox" name="edate_off" id="edate_off" value="1" $edatechecked>
@@ -168,6 +169,18 @@ the backend that generates the maps/data here.</p>
 </ul>
 
 <p><a href="https://cropwatch.unl.edu/2021/degree-days-prediction-western-bean-cutworm-flight">Learn more here!</a></p>
+</div>
+
+<div id="european_corn_borer" class="pinfo" style="display: none;">
+<h3>European Corn Borer (Ostrinia nubilalis)</h3>
+<p>Key Degree Day Levels:</p>
+<ul>
+ <li><strong>May 20:</strong> Approximate Start Date</li>
+ <li><strong>212</strong>: 1st generation egg hatch</li>
+ <li><strong>1,192</strong>: Egg-laying occurs</li>
+</ul>
+
+<p></p>
 </div>
 
 
