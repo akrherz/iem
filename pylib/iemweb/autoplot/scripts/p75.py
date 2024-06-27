@@ -8,14 +8,17 @@ import numpy as np
 import pandas as pd
 from pyiem.database import get_dbconnc
 from pyiem.exceptions import NoDataFound
-from pyiem.plot import figure_axes
+from pyiem.plot import figure
 from pyiem.util import get_autoplot_context
 from scipy import stats
+
+from iemweb.autoplot.barchart import barchar_with_top10
 
 PDICT2 = {
     "winter": "Winter (Dec, Jan, Feb)",
     "fma": "FMA (Feb, Mar, Apr)",
     "spring": "Spring (Mar, Apr, May)",
+    "amj": "AMJ (Apr, May, Jun)",
     "summer": "Summer (Jun, Jul, Aug)",
     "fall": "Fall (Sep, Oct, Nov)",
     "all": "Entire Year",
@@ -65,6 +68,8 @@ def plotter(fdict):
       then precip else 0 end) as fma,
       sum(case when month in (3, 4, 5)
       then precip else 0 end) as spring,
+      sum(case when month in (4, 5, 6)
+      then precip else 0 end) as amj,
       sum(case when month in (6, 7, 8)
       then precip else 0 end) as summer,
       sum(case when month in (9, 10, 11)
@@ -87,31 +92,31 @@ def plotter(fdict):
         if row["yr"] < startyear:
             continue
         if row[season] is not None:
-            rows.append(dict(year=int(row["yr"]), data=float(row[season])))
+            rows.append(dict(year=int(row["yr"]), value=float(row[season])))
+    cursor.close()
     pgconn.close()
-    df = pd.DataFrame(rows)
+    df = pd.DataFrame(rows).set_index("year")
 
-    data = np.array(df["data"])
-    years = np.array(df["year"])
     title = (
-        f"{ctx['_sname']} {min(years):.0f}-{max(years):.0f} :: "
+        f"{ctx['_sname']} {df.index[0]:.0f}-{df.index[-1]:.0f} :: "
         f"Precipitation [{PDICT2[season]}] "
     )
-    (fig, ax) = figure_axes(title=title, apctx=ctx)
-    avgv = np.average(data)
+    fig = figure(title=title, apctx=ctx)
+    avgv = df["value"].mean()
 
     colorabove = "seagreen"
     colorbelow = "lightsalmon"
-    bars = ax.bar(years, data, fc=colorabove, ec=colorabove, align="center")
-    for i, mybar in enumerate(bars):
-        if data[i] < avgv:
-            mybar.set_facecolor(colorbelow)
-            mybar.set_edgecolor(colorbelow)
+    df["color"] = np.where(df["value"] < avgv, colorbelow, colorabove)
+    ax = barchar_with_top10(
+        fig, df, "value", color=df["color"].to_list(), labelformat="%.2f"
+    )
     ax.axhline(avgv, lw=2, color="k", zorder=2, label="Average")
-    h_slope, intercept, r_value, _, _ = stats.linregress(years, data)
+    h_slope, intercept, r_value, _, _ = stats.linregress(
+        df.index.values, df["value"].values
+    )
     ax.plot(
-        years,
-        h_slope * np.array(years) + intercept,
+        df.index.values,
+        h_slope * df.index.values + intercept,
         "--",
         lw=2,
         color="k",
@@ -127,10 +132,10 @@ def plotter(fdict):
         bbox=dict(color="white"),
     )
     ax.set_xlabel("Year")
-    ax.set_xlim(min(years) - 1, max(years) + 1)
-    ax.set_ylim(0, max(data) + max(data) / 10.0)
+    ax.set_xlim(df.index[0] - 1, df.index[-1] + 1)
+    ax.set_ylim(0, df["value"].max() + df["value"].max() / 10.0)
     ax.set_ylabel("Precipitation [inches]")
     ax.grid(True)
     ax.legend(ncol=2, fontsize=10)
 
-    return fig, df
+    return fig, df.drop(columns="color")

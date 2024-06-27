@@ -13,6 +13,8 @@ Services https://mesonet.agron.iastate.edu/api/1/docs/ .
 Changelog
 ---------
 
+- 2024-06-26: Added `limitpds` parameter to limit the request to only include
+products that have a PDS (Particularly Dangerous Situation) tag or phrasing.
 - 2024-05-14: To mitigate against large requests that overwhelm the server, a
 limit of one year's worth of data is now in place for requests that do not
 limit the request by either state, phenomena, nor wfo.
@@ -89,6 +91,13 @@ class Schema(CGIModel):
         "no",
         pattern="^(yes|no)$",
         description="If yes, only include Emergency Warnings.",
+    )
+    limitpds: bool = Field(
+        False,
+        description=(
+            "If yes, only include products that have a PDS "
+            "(Particularly Dangerous Situation) tag or phrasing."
+        ),
     )
     limitps: str = Field(
         "no",
@@ -311,6 +320,7 @@ def build_sql(environ):
     sbwlimiter = " WHERE gtype = 'P' " if environ["limit1"] == "yes" else ""
 
     elimiter = " and is_emergency " if environ["limit2"] == "yes" else ""
+    pdslimiter = " and is_pds " if environ["limitpds"] else ""
 
     warnings_table = "warnings"
     sbw_table = "sbw"
@@ -377,7 +387,7 @@ def build_sql(environ):
      product_id
      from {sbw_table} w {table_extra}
      WHERE {statuslimit} and {sbwtimelimit}
-     {wfo_limiter} {limiter} {elimiter}
+     {wfo_limiter} {limiter} {elimiter} {pdslimiter}
     ),
     countybased as (
      SELECT u.{geomcol} as geo, 'C'::text as gtype,
@@ -399,7 +409,7 @@ def build_sql(environ):
      null::varchar as damagetag,
      product_ids[1] as product_id
      from {warnings_table} w JOIN ugcs u on (u.gid = w.gid) WHERE
-     {timelimit} {wfo_limiter2} {limiter} {elimiter}
+     {timelimit} {wfo_limiter2} {limiter} {elimiter} {pdslimiter}
      )
      SELECT {cols} from stormbased UNION ALL
      SELECT {cols} from countybased {sbwlimiter}
