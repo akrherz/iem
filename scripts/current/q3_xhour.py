@@ -39,13 +39,15 @@ def doit(ts, hours):
             LOG.info("%s MISSING %s", hours, now)
             now += interval
             continue
-        fp = gzip.GzipFile(gribfn, "rb")
-        (tmpfp, tmpfn) = tempfile.mkstemp()
-        with open(tmpfn, "wb") as tmpfp:
-            tmpfp.write(fp.read())
-        grbs = pygrib.open(tmpfn)
+        with (
+            gzip.GzipFile(gribfn, "rb") as gzfp,
+            tempfile.NamedTemporaryFile(delete=False) as fp,
+        ):
+            fp.write(gzfp.read())
+        grbs = pygrib.open(fp.name)
         grb = grbs[1]
-        os.unlink(tmpfn)
+        grbs.close()
+        os.unlink(fp.name)
         # careful here, how we deal with the two missing values!
         if total is None:
             total = grb["values"]

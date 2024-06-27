@@ -1,4 +1,4 @@
-// Data structure to hold the pest data
+/* global $ */
 var pestData = {};
 pestData.seedcorn_maggot = { 'gddbase': 39, 'gddceil': 84 };
 pestData.alfalfa_weevil = { 'gddbase': 48, 'gddceil': 90 };
@@ -6,6 +6,7 @@ pestData.soybean_aphid = { 'gddbase': 50, 'gddceil': 90 };
 pestData.common_stalk_borer = { 'gddbase': 41, 'gddceil': 90 };
 pestData.japanese_beetle = { 'gddbase': 50, 'gddceil': 90 };
 pestData.western_bean_cutworm = { 'gddbase': 38, 'gddceil': 75 };
+pestData.european_corn_borer = { 'gddbase': 50, 'gddceil': 86 };
 
 function text(str) {
     // XSS
@@ -22,11 +23,16 @@ function hideImageLoad() {
         '<i class="fa fa-table"></i> As Excel</a></p>');
 }
 function rectify_start_date(pest) {
-    const month = (pest === "western_bean_cutworm") ? "03": "01"; // le sigh
+    let month = (pest === "western_bean_cutworm") ? "03": "01"; // le sigh
+    let day = "01";
+    if (pest === "european_corn_borer") {
+        month = "05";
+        day = "20";
+    }
     // Get the year from the edate datepicker
     const edate = text($("#edate").val());
     const year = parseInt(edate.substring(0, 4), 10);
-    $("#sdate").val(`${year}-${month}-01`);
+    $("#sdate").val(`${year}-${month}-${day}`);
 }
 
 function updateStationForecast() {
@@ -62,7 +68,6 @@ function updateImage() {
     // Show this pest's pinfo container
     $('#' + pest).css('display', 'block');
     const opts = pestData[pest];
-    rectify_start_date(pest);
     const sdate = text($("#sdate").val());
     const edate = text($("#edate").val());
     let state = text($("select[name='network']").val());
@@ -117,13 +122,28 @@ function setupUI() {
             updateImage();
         }
     });
+    $("#sdate").datepicker({
+        dateFormat: 'yy-mm-dd',
+        changeMonth: true,
+        changeYear: true,
+        minDate: new Date(1893, 0, 1),
+        maxDate: 0,
+        onSelect(_dateText, _inst) {
+            updateImage();
+        }
+    });
 
     $("select[name='station']").change(() => {
         updateStationForecast();
     });
 }
+function updatePest() { // skipcq: JS-0128
+    const pest = text($("select[name='pest']").val());
+    rectify_start_date(pest);
+    updateImage();
+}
 
-$(document).ready(function () {
+$(document).ready(() => {
     updateImage();
     updateStationForecast();
     showProgressBar();

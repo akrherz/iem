@@ -12,6 +12,8 @@ watch geographic extent.
 Changelog
 ---------
 
+- 2024-06-27: Default `hour1`,`hour2`,`minute1`,`minute2` to 0, so they do not
+need to be provided.
 - 2024-06-09: Initial Documentation
 
 Example Usage
@@ -56,14 +58,12 @@ class Schema(CGIModel):
     month2: int = Field(None, description="End month when ets is not provided")
     day1: int = Field(None, description="Start day when sts is not provided")
     day2: int = Field(None, description="End day when ets is not provided")
-    hour1: int = Field(None, description="Start hour when sts is not provided")
-    hour2: int = Field(None, description="End hour when ets is not provided")
+    hour1: int = Field(0, description="Start hour when sts is not provided")
+    hour2: int = Field(0, description="End hour when ets is not provided")
     minute1: int = Field(
-        None, description="Start minute when sts is not provided"
+        0, description="Start minute when sts is not provided"
     )
-    minute2: int = Field(
-        None, description="End minute when ets is not provided"
-    )
+    minute2: int = Field(0, description="End minute when ets is not provided")
 
 
 def start_headers(start_response, ctx, fn):
