@@ -9,6 +9,7 @@
 127.0.0.1 iemdb-afos.local
 127.0.0.1 iemdb-asos.local
 127.0.0.1 iemdb-hml.local
+127.0.0.1 iemdb-id3b.local
 127.0.0.1 iemdb-nldn.local
 127.0.0.1 iemdb-snet.local
 127.0.0.1 iemdb-mos.local
