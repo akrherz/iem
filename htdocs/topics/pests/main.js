@@ -25,7 +25,7 @@ function hideImageLoad() {
 function rectify_start_date(pest) {
     let month = (pest === "western_bean_cutworm") ? "03": "01"; // le sigh
     let day = "01";
-    if (pest == "european_corn_borer") {
+    if (pest === "european_corn_borer") {
         month = "05";
         day = "20";
     }
@@ -137,13 +137,13 @@ function setupUI() {
         updateStationForecast();
     });
 }
-function updatePest() {
+function updatePest() { // skipcq: JS-0128
     const pest = text($("select[name='pest']").val());
     rectify_start_date(pest);
     updateImage();
 }
 
-$(document).ready(function () {
+$(document).ready(() => {
     updateImage();
     updateStationForecast();
     showProgressBar();

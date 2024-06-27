@@ -125,13 +125,15 @@ def doit(gts, hr):
             MISSED_FILES.append(gribfn)
             return
         DOWNLOADED_FILES.append(gribfn)
-        (tmpfp, tmpfn) = tempfile.mkstemp()
-        with gzip.GzipFile(gribfn, "rb") as fp:
-            with open(tmpfn, "wb") as tmpfp:
-                tmpfp.write(fp.read())
-        grbs = pygrib.open(tmpfn)
+        with (
+            gzip.GzipFile(gribfn, "rb") as fp,
+            tempfile.NamedTemporaryFile(delete=False) as tmpfp,
+        ):
+            tmpfp.write(fp.read())
+        grbs = pygrib.open(tmpfp.name)
         grb = grbs[1]
-        os.unlink(tmpfn)
+        grbs.close()
+        os.unlink(tmpfp.name)
 
         # careful here, how we deal with the two missing values!
         if total is None:

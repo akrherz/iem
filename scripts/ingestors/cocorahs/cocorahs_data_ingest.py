@@ -47,10 +47,8 @@ def main(daysago):
         return
 
     # Process Header
-    header = {}
     h = data[0].split(",")
-    for i, _h in enumerate(h):
-        header[_h] = i
+    header = {_h: i for i, _h in enumerate(h)}
 
     if "StationNumber" not in header:
         return
