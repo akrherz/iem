@@ -6,7 +6,7 @@ force_https();
 require_once "../../../include/myview.php";
 require_once "../../../include/iemprop.php";
 $t = new MyView();
-$OL = "9.1.0";
+$OL = "9.2.4";
 
 $t->jsextra = <<<EOF
 <script type="text/javascript" src="/js/mapping.js"></script>
@@ -41,10 +41,11 @@ $t->content = <<<EOF
 </ul>
 </p>
 
-<p>The IEM processes NWS Special Weather Statements (SPS).  These SPS products
-can sometimes contain polygons.  This interface allows searching for SPS products
-by a given lat/lon point.  The archive is current up to the moment of loading the
-table.</p>
+<p>This page allows a point based search of NWS Special Weather Statements
+(SPS) that <strong>contained a polygon</strong>.  These polygons provide a
+latitude/longitude specific area that the SPS is valid for.  Not all SPS
+products have a polygon, so this interface <strong>does not show them</strong>.
+</p>
 
 <p>
 <strong>Related:</strong> &nbsp;
