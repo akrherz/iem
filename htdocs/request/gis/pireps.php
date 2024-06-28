@@ -57,7 +57,9 @@ considered 'complete'.</p>
 
 <p>Due to filesize and speed, you can only request up to 120 days of data
 at a time!  If you request data with the spatial filter, you can download
-longer periods of data.</p>
+longer periods of data. <a href="/cgi-bin/request/gis/pireps.py?help"
+class="btn btn-default"><i class="fa fa-file"></i> Backend documentation</a>
+exists for those wishing to script against this service.</p>
 
 <p><strong>Related:</strong>
 <a class="btn btn-primary" href="cwas.phtml">CWSU Center Weather Advisories</a>
