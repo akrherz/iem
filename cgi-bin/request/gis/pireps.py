@@ -3,7 +3,21 @@
 Documentation for /cgi-bin/request/gis/pireps.py
 ------------------------------------------------
 
-To be written.
+This service emits processed and raw PIREP data.  At this time, you must
+request 120 days or less of data at one time if you do not filter the request.
+
+Changelog
+---------
+
+- 2024-06-28: Initital documentation release
+
+Example Requests
+----------------
+
+Provide all PIREPs for the month of June 2024 over Chicago ARTCC in CSV:
+
+https://mesonet.agron.iastate.edu/cgi-bin/request/gis/pireps.py?\
+sts=2024-06-01T00:00:00Z&ets=2024-07-01T00:00:00Z&artcc=ZAU&fmt=csv
 
 """
 
@@ -12,41 +26,112 @@ import zipfile
 from io import BytesIO, StringIO
 
 import shapefile
-from pyiem.database import get_dbconn
+from pydantic import AwareDatetime, Field
+from pyiem.database import get_sqlalchemy_conn
 from pyiem.exceptions import IncompleteWebRequest
-from pyiem.webutil import ensure_list, iemapp
+from pyiem.webutil import CGIModel, ListOrCSVType, iemapp
+from sqlalchemy import text
 
 
-def get_context(environ):
-    """Figure out the CGI variables passed to this script"""
-    form = {}
-    form["fmt"] = environ.get("fmt", "shp")
-    form["sts"] = environ["sts"]
-    form["ets"] = environ["ets"]
-    form["artcc"] = ensure_list(environ, "artcc")
-    if "_ALL" in form["artcc"]:
-        form["artcc"] = []
-    return form
+class Schema(CGIModel):
+    """See how we are called."""
+
+    artcc: ListOrCSVType = Field(
+        default=[],
+        description="The ARTCC to limit the query to, use _ALL for all",
+    )
+    ets: AwareDatetime = Field(
+        default=None, description="The end time of the query"
+    )
+    fmt: str = Field(
+        default="shp", description="The format of the output file"
+    )
+    sts: AwareDatetime = Field(
+        default=None, description="The start time of the query"
+    )
+    year1: int = Field(
+        default=2000,
+        description="The start year of the query, when sts is not provided",
+    )
+    month1: int = Field(
+        default=1,
+        description="The start month of the query, when sts is not provided",
+    )
+    day1: int = Field(
+        default=1,
+        description="The start day of the query, when sts is not provided",
+    )
+    degrees: float = Field(
+        default=1.0,
+        description="The distance in degrees for a spatial filter",
+        gt=0,
+        lt=90,
+    )
+    filter: bool = Field(
+        default=False,
+        description="Should we filter by distance from a point?",
+    )
+    lat: float = Field(
+        default=41.99,
+        description="The latitude of the point to filter by",
+    )
+    lon: float = Field(
+        default=-91.99,
+        description="The longitude of the point to filter by",
+    )
+    hour1: int = Field(
+        default=0,
+        description="The start hour of the query, when sts is not provided",
+    )
+    minute1: int = Field(
+        default=0,
+        description="The start minute of the query, when sts is not provided",
+    )
+    year2: int = Field(
+        default=2000,
+        description="The end year of the query, when ets is not provided",
+    )
+    month2: int = Field(
+        default=1,
+        description="The end month of the query, when ets is not provided",
+    )
+    day2: int = Field(
+        default=1,
+        description="The end day of the query, when ets is not provided",
+    )
+    hour2: int = Field(
+        default=0,
+        description="The end hour of the query, when ets is not provided",
+    )
+    minute2: int = Field(
+        default=0,
+        description="The end minute of the query, when ets is not provided",
+    )
 
 
-def run(ctx, start_response):
+def run(environ, start_response):
     """Go run!"""
-    artcc_sql = "" if not ctx["artcc"] else " artcc = ANY(%s) and "
-    pgconn = get_dbconn("postgis")
-    cursor = pgconn.cursor()
+    artcc_sql = ""
+    if "_ALL" not in environ["artcc"] and environ["artcc"]:
+        artcc_sql = " artcc = ANY(:artcc) and "
+    params = {
+        "artcc": environ["artcc"],
+        "distance": environ["degrees"],
+        "lat": environ["lat"],
+        "lon": environ["lon"],
+        "sts": environ["sts"],
+        "ets": environ["ets"],
+    }
 
     spatialsql = ""
-    if ctx.get("filter", "0") == "1":
-        distance = float(ctx.get("degrees", 1.0))
-        lon = float(ctx.get("lon", -91.99))
-        lat = float(ctx.get("lat", 41.99))
+    if environ["filter"]:
         spatialsql = (
-            f"ST_Distance(geom::geometry, ST_SetSRID(ST_Point({lon}, {lat}), "
-            f"4326)) <= {distance} and "
+            "ST_Distance(geom::geometry, ST_SetSRID(ST_Point(:lon, :lat), "
+            "4326)) <= :distance and "
         )
     else:
-        if (ctx["ets"] - ctx["sts"]).days > 120:
-            ctx["ets"] = ctx["sts"] + datetime.timedelta(days=120)
+        if (environ["ets"] - environ["sts"]).days > 120:
+            environ["ets"] = environ["sts"] + datetime.timedelta(days=120)
     sql = f"""
         SELECT to_char(valid at time zone 'UTC', 'YYYYMMDDHH24MI') as utctime,
         case when is_urgent then 'T' else 'F' end,
@@ -58,57 +143,49 @@ def run(ctx, start_response):
             '/TB([^/]*)/?')), 0, 255) as turb,
         artcc, ST_y(geom::geometry) as lat, ST_x(geom::geometry) as lon
         from pireps WHERE {spatialsql} {artcc_sql}
-        valid >= %s and valid < %s ORDER by valid ASC
+        valid >= :sts and valid < :ets ORDER by valid ASC
         """
-    args = [
-        ctx["sts"],
-        ctx["ets"],
-    ]
-    if ctx["artcc"]:
-        args.insert(0, ctx["artcc"])
+    fn = f"pireps_{environ['sts']:%Y%m%d%H%M}_{environ['ets']:%Y%m%d%H%M}"
 
-    cursor.execute(sql, args)
-    if cursor.rowcount == 0:
-        start_response("200 OK", [("Content-type", "text/plain")])
-        pgconn.close()
-        return b"ERROR: no results found for your query"
+    with get_sqlalchemy_conn("postgis") as conn:
+        res = conn.execute(text(sql), params)
+        if res.rowcount == 0:
+            start_response("200 OK", [("Content-type", "text/plain")])
+            return b"ERROR: no results found for your query"
 
-    fn = f"pireps_{ctx['sts']:%Y%m%d%H%M}_{ctx['ets']:%Y%m%d%H%M}"
+        if environ["fmt"] == "csv":
+            sio = StringIO()
+            headers = [
+                ("Content-type", "application/octet-stream"),
+                ("Content-Disposition", f"attachment; filename={fn}.csv"),
+            ]
+            start_response("200 OK", headers)
+            sio.write(
+                "VALID,URGENT,AIRCRAFT,REPORT,ICING,TURBULENCE,ATRCC,LAT,LON\n"
+            )
+            for row in res:
+                sio.write(",".join([str(s) for s in row]) + "\n")
+            return sio.getvalue().encode("ascii", "ignore")
 
-    if ctx["fmt"] == "csv":
-        sio = StringIO()
-        headers = [
-            ("Content-type", "application/octet-stream"),
-            ("Content-Disposition", f"attachment; filename={fn}.csv"),
-        ]
-        start_response("200 OK", headers)
-        sio.write(
-            "VALID,URGENT,AIRCRAFT,REPORT,ICING,TURBULENCE,ATRCC,LAT,LON\n"
-        )
-        for row in cursor:
-            sio.write(",".join([str(s) for s in row]) + "\n")
-        pgconn.close()
-        return sio.getvalue().encode("ascii", "ignore")
+        shpio = BytesIO()
+        shxio = BytesIO()
+        dbfio = BytesIO()
 
-    shpio = BytesIO()
-    shxio = BytesIO()
-    dbfio = BytesIO()
-
-    with shapefile.Writer(shx=shxio, dbf=dbfio, shp=shpio) as shp:
-        shp.field("VALID", "C", 12)
-        shp.field("URGENT", "C", 1)
-        shp.field("AIRCRAFT", "C", 40)
-        shp.field("REPORT", "C", 255)  # Max field size is 255
-        shp.field("ICING", "C", 255)  # Max field size is 255
-        shp.field("TURB", "C", 255)  # Max field size is 255
-        shp.field("ARTCC", "C", 3)
-        shp.field("LAT", "F", 7, 4)
-        shp.field("LON", "F", 9, 4)
-        for row in cursor:
-            if row[-1] is None:
-                continue
-            shp.point(row[-1], row[-2])
-            shp.record(*row)
+        with shapefile.Writer(shx=shxio, dbf=dbfio, shp=shpio) as shp:
+            shp.field("VALID", "C", 12)
+            shp.field("URGENT", "C", 1)
+            shp.field("AIRCRAFT", "C", 40)
+            shp.field("REPORT", "C", 255)  # Max field size is 255
+            shp.field("ICING", "C", 255)  # Max field size is 255
+            shp.field("TURB", "C", 255)  # Max field size is 255
+            shp.field("ARTCC", "C", 3)
+            shp.field("LAT", "F", 7, 4)
+            shp.field("LON", "F", 9, 4)
+            for row in res:
+                if row[-1] is None:
+                    continue
+                shp.point(row[-1], row[-2])
+                shp.record(*row)
 
     zio = BytesIO()
     with zipfile.ZipFile(
@@ -123,15 +200,13 @@ def run(ctx, start_response):
         ("Content-type", "application/octet-stream"),
         ("Content-Disposition", f"attachment; filename={fn}.zip"),
     ]
-    pgconn.close()
     start_response("200 OK", headers)
     return zio.getvalue()
 
 
-@iemapp(default_tz="UTC", help=__doc__)
+@iemapp(default_tz="UTC", help=__doc__, schema=Schema)
 def application(environ, start_response):
     """Do something fun!"""
-    if "sts" not in environ:
+    if environ["sts"] is None or environ["ets"] is None:
         raise IncompleteWebRequest("GET start time parameters missing.")
-    ctx = get_context(environ)
-    return [run(ctx, start_response)]
+    return [run(environ, start_response)]

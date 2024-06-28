@@ -86,7 +86,6 @@ help pages for these services:</p>
 <li><a href="/cgi-bin/request/gis/spc_watch.py?help">SPC Convective Watches (/cgi-bin/request/gis/spc_watch.py)</a></li>
 <li><a href="/cgi-bin/request/gis/sps.py?help">Special Weather Statements SPS (/cgi-bin/request/gis/sps.py)</a></li>
 <li><a href="/cgi-bin/request/gis/watch_by_county.py?help">SPC Watch by County (/cgi-bin/request/gis/watch_by_county.py)</a></li>
-<li><a href="/cgi-bin/request/gis/wou_outline.py?help">SPC Watch Outlines (/cgi-bin/request/gis/wou_outline.py)</a></li>
 <li><a href="/cgi-bin/request/tempwind_aloft.py?help">Temp Winds Aloft (/cgi-bin/request/tempwind_aloft.py)</a></li>
 <li><a href="/cgi-bin/request/taf.py?help">Terminal Aerodome Forecast TAF (/cgi-bin/request/taf.py)</a></li>
 <li><a href="/cgi-bin/request/gis/wpc_mpd.py?help">WPC Mesoscale Precip Discussions (/cgi-bin/request/gis/wpc_mpd.py)</a></li>
