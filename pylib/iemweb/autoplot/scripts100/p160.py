@@ -23,6 +23,7 @@ from pyiem.database import get_sqlalchemy_conn
 from pyiem.exceptions import NoDataFound
 from pyiem.plot import figure_axes
 from pyiem.util import get_autoplot_context
+from sqlalchemy import text
 
 STAGES = "low action bankfull flood moderate major record".split()
 COLORS = {
@@ -140,18 +141,21 @@ def get_context(fdict):
         maxts = dt + datetime.timedelta(days=3)
     with get_sqlalchemy_conn("hml") as conn:
         df = pd.read_sql(
-            "SELECT distinct valid at time zone 'UTC' as valid, "
-            "h.label, value from hml_observed_data d "
-            "JOIN hml_observed_keys h on (d.key = h.id) "
-            "WHERE station = %s and "
-            "valid between %s and %s ORDER by valid ASC",
+            text("""
+            SELECT valid at time zone 'UTC' as valid,
+            h.label, value from hml_observed_data d
+            JOIN hml_observed_keys h on (d.key = h.id)
+            WHERE station = :station and
+            valid between :mints and :maxts ORDER by valid ASC
+            """),
             conn,
-            params=(station, mints, maxts),
+            params={"station": station, "mints": mints, "maxts": maxts},
             index_col=None,
         )
     if df.empty:
         raise NoDataFound("No Data Found.")
     df["valid"] = df["valid"].dt.tz_localize(UTC)
+    df = df.groupby(["valid", "label"]).first().reset_index()
     ctx["odf"] = df.pivot(index="valid", columns="label", values="value")
     if ctx["fdf"].empty:
         ctx["df"] = ctx["odf"].reset_index()
