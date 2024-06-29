@@ -862,16 +862,20 @@ def plot_meteogram(ctx):
     )
     axes = fig.subplots(2, 1, sharex=True)
     ax = axes[0]
-    ax.plot(df.index.values, c2f(df["tair_c_avg_qc"]), color="r", label="Air")
-    dwpf = (
-        dewpoint_from_relative_humidity(
-            units("degC") * df["tair_c_avg_qc"].values,
-            units("percent") * df["rh_avg_qc"].values,
+    df2 = df[df["tair_c_avg_qc"] > -30]
+    if not df2.empty:
+        ax.plot(
+            df2.index.values, c2f(df2["tair_c_avg_qc"]), color="r", label="Air"
         )
-        .to(units("degF"))
-        .m
-    )
-    ax.plot(df.index.values, dwpf, color="g", label="Dew Point")
+        dwpf = (
+            dewpoint_from_relative_humidity(
+                units("degC") * df2["tair_c_avg_qc"].values,
+                units("percent") * df2["rh_avg_qc"].values,
+            )
+            .to(units("degF"))
+            .m
+        )
+        ax.plot(df2.index.values, dwpf, color="g", label="Dew Point")
     ax.grid(True)
     ax.set_ylabel(r"Temperature $^\circ$F")
     ax.legend(loc="best", ncol=2)
