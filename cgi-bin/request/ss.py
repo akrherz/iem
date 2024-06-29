@@ -16,9 +16,10 @@ Conductivity (micro-S)
 from io import BytesIO
 
 import pandas as pd
+from pydantic import AwareDatetime, Field
+from pyiem.database import get_sqlalchemy_conn
 from pyiem.exceptions import IncompleteWebRequest
-from pyiem.util import get_sqlalchemy_conn
-from pyiem.webutil import ensure_list, iemapp
+from pyiem.webutil import CGIModel, ListOrCSVType, iemapp
 from sqlalchemy import text
 
 LOOKUP = {
@@ -28,6 +29,36 @@ LOOKUP = {
     9100156: "SSP #7",
 }
 EXL = "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"
+
+
+class Schema(CGIModel):
+    """See how we are called."""
+
+    excel: bool = Field(description="Return Excel File", default=False)
+    opt: str = Field(description="bubbler or gage", default="gage")
+    station: ListOrCSVType = Field(
+        default=[], description="Station ID to query"
+    )
+    sts: AwareDatetime = Field(description="Start Time", default=None)
+    ets: AwareDatetime = Field(description="End Time", default=None)
+    year1: int = Field(
+        description="Start year, when sts is not set.", default=None
+    )
+    month1: int = Field(
+        description="Start month, when sts is not set.", default=None
+    )
+    day1: int = Field(
+        description="Start day, when sts is not set.", default=None
+    )
+    year2: int = Field(
+        description="End year, when ets is not set.", default=None
+    )
+    month2: int = Field(
+        description="End month, when ets is not set.", default=None
+    )
+    day2: int = Field(
+        description="End day, when ets is not set.", default=None
+    )
 
 
 def gage_run(sts, ets, stations, excel, start_response):
@@ -57,7 +88,7 @@ def gage_run(sts, ets, stations, excel, start_response):
         "Conductivity (micro-S)",
     ]
 
-    if excel == "yes":
+    if excel:
         headers = [
             ("Content-type", EXL),
             ("Content-disposition", "attachment; Filename=stuartsmith.xlsx"),
@@ -93,7 +124,7 @@ def bubbler_run(sts, ets, excel, start_response):
     )
     with get_sqlalchemy_conn("other") as conn:
         df = pd.read_sql(sql, conn, params={"sts": sts, "ets": ets})
-    if excel == "yes":
+    if excel:
         headers = [
             ("Content-type", "application/vnd.ms-excel"),
             ("Content-disposition", "attachment; Filename=stuartsmith.xls"),
@@ -106,20 +137,20 @@ def bubbler_run(sts, ets, excel, start_response):
     return df.to_csv(None, index=False).encode("ascii")
 
 
-@iemapp(default_tz="America/Chicago")
+@iemapp(default_tz="America/Chicago", help=__doc__, schema=Schema)
 def application(environ, start_response):
     """Go Main Go"""
-    if "sts" not in environ:
+    if environ["sts"] is None or environ["ets"] is None:
         raise IncompleteWebRequest("GET start time parameters missing")
-    opt = environ.get("opt", "bubbler")
+    opt = environ["opt"]
 
-    stations = ensure_list(environ, "station")
+    stations = environ["station"]
     if opt == "bubbler":
         return [
             bubbler_run(
                 environ["sts"],
                 environ["ets"],
-                environ.get("excel", "n"),
+                environ["excel"],
                 start_response,
             )
         ]
@@ -128,7 +159,7 @@ def application(environ, start_response):
             environ["sts"],
             environ["ets"],
             stations,
-            environ.get("excel", "n"),
+            environ["excel"],
             start_response,
         )
     ]
