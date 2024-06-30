@@ -207,7 +207,7 @@ function refreshJSON() {
     let url = "/geojson/webcam.geojson?network=TV";
     if (!realtimeMode) {
         // Append the current timestamp to the URI
-        url += "&valid=" + $('#dtpicker').data('DateTimePicker').date().utc().format(ISOFMT);
+        url += `&valid=${$('#dtpicker').data('DateTimePicker').date().utc().format(ISOFMT)}`;
     }
     let newsource = new ol.source.Vector({
         url,
@@ -222,7 +222,7 @@ function refreshJSON() {
     url = "/api/1/idot_dashcam.geojson";
     if (!realtimeMode) {
         // Append the current timestamp to the URI
-        url += "?valid=" + $('#dtpicker').data('DateTimePicker').date().utc().format(ISOFMT);
+        url += `?valid=${$('#dtpicker').data('DateTimePicker').date().utc().format(ISOFMT)}`;
     }
     newsource = new ol.source.Vector({
         url,
@@ -237,7 +237,7 @@ function refreshJSON() {
     url = "/api/1/idot_rwiscam.geojson";
     if (!realtimeMode) {
         // Append the current timestamp to the URI
-        url += "?valid=" + $('#dtpicker').data('DateTimePicker').date().utc().format(ISOFMT);
+        url += `?valid=${$('#dtpicker').data('DateTimePicker').date().utc().format(ISOFMT)}`;
     }
     newsource = new ol.source.Vector({
         url,
