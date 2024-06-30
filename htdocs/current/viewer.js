@@ -251,7 +251,7 @@ function refreshJSON() {
     url = "/geojson/sbw.geojson";
     if (!realtimeMode) {
         // Append the current timestamp to the URI
-        url += "?ts=" + $('#dtpicker').data('DateTimePicker').date().utc().format(ISOFMT);
+        url += `?ts=${$('#dtpicker').data('DateTimePicker').date().utc().format(ISOFMT)}`;
     }
     sbwlayer.setSource(new ol.source.Vector({
         url,
