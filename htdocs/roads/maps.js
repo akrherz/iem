@@ -1,4 +1,4 @@
-
+/* global $, ol */
 const style = new ol.style.Style({
     fill: new ol.style.Fill({
         color: 'rgba(255, 255, 255, 0)'

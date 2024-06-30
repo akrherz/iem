@@ -264,6 +264,8 @@ RewriteRule ^/search /search.py [QSA]
     RewriteRule network/(.*).geojson network.py?network=$1 [QSA]
     # 7 Dec 2016: Rewrote service as Python
     RewriteRule network.php(.*) network.py$1 [QSA]
+    RewriteRule webcam.php(.*) webcam.py$1 [QSA]
+    RewriteRule webcam.geojson(.*) webcam.py$1 [QSA]
     RewriteRule sbw.geojson(.*) sbw.py$1 [QSA]
     RewriteRule sps.geojson(.*) sps.py$1 [QSA]
     RewriteRule winter_roads.geojson(.*) winter_roads.py$1 [QSA]

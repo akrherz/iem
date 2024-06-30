@@ -1,45 +1,56 @@
 """Watch by county, a one-off"""
 
-import datetime
 import tempfile
 import zipfile
 from io import BytesIO
 
 from osgeo import ogr
+from pydantic import Field
 from pyiem.exceptions import IncompleteWebRequest
-from pyiem.webutil import iemapp
+from pyiem.util import utc
+from pyiem.webutil import CGIModel, iemapp
 
 ogr.UseExceptions()
 PROJFILE = "/opt/iem/data/gis/meta/4326.prj"
 
 
+class Schema(CGIModel):
+    """See how we are called."""
+
+    etn: int = Field(None, description="Event ID")
+    year: int = Field(None, description="Year of valid timestamp")
+    month: int = Field(None, description="Month of valid timestamp")
+    day: int = Field(None, description="Day of valid timestamp")
+    hour: int = Field(None, description="Hour of valid timestamp")
+    minute: int = Field(None, description="Minute of valid timestamp")
+
+
 def get_ts_fn(environ):
     """Figure out what is requested."""
     # Get CGI vars
-    if "year" in environ:
-        year = int(environ.get("year"))
-        month = int(environ.get("month"))
-        day = int(environ.get("day"))
-        hour = int(environ.get("hour"))
-        minute = int(environ.get("minute"))
-        ts = datetime.datetime(year, month, day, hour, minute)
+    if environ["year"] is not None:
+        ts = utc(
+            environ["year"],
+            environ["month"],
+            environ["day"],
+            environ["hour"],
+            environ["minute"],
+        )
         fn = f"watch_by_county_{ts:%Y%m%d%H%M}"
     else:
-        ts = datetime.datetime.utcnow()
+        ts = utc()
         fn = "watch_by_county"
-    if "etn" in environ:
-        int(environ.get("etn"))
     return ts, fn
 
 
-@iemapp()
+@iemapp(help=__doc__, schema=Schema)
 def application(environ, start_response):
     """Go Main Go"""
     try:
         ts, fn = get_ts_fn(environ)
     except Exception as exp:
         raise IncompleteWebRequest("bad input provided") from exp
-    if "etn" in environ:
+    if environ["etn"] is not None:
         etnLimiter = f"and eventid = {int(environ.get('etn'))}"
         fn = f"watch_by_county_{ts:Y%m%d%H%M}_{int(environ.get('etn'))}"
     else:

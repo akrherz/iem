@@ -1,3 +1,4 @@
+/* global Ext, Date */
 Ext.namespace('iemdata');
 
 let gpanel;
