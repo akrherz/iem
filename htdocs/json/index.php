@@ -551,12 +551,8 @@ $services[] = array(
 );
 
 $services[] = array(
-    "title" => "Current Polygons from Special Weather Statements (SPS)",
-    "url" => "/geojson/sps.geojson",
-    "desc" => "Provides a geojson format of current National Weather Service
-          polygons that are included with some Special Weather Statements (SPS).",
-    "vars" => array(),
-    "example" => array()
+    "title" => "Special Weather Statements (SPS) Polygons in GeoJSON Format",
+    "url" => "/geojson/sps.geojson?help",
 );
 
 $services[] = array(
@@ -809,6 +805,24 @@ for returned content.
 EOM;
 foreach ($services as $key => $ws) {
     $url = $ws['url'];
+    if (strpos($url, "?help") !== FALSE) {
+        $table .= sprintf(
+            '<div class="panel panel-default">' .
+                '<div class="panel-heading">' .
+                '<h3 class="panel-title"><strong><a href="#%s">' .
+                '<i class="fa fa-bookmark"></i></a> <a name="%s">%s</a></strong></h3>' .
+                '</div>' .
+                '<div class="panel-body">' .
+                'This service has a dedicated help page, <a href="%s">click here</a>.' .
+                '</div>' .
+                '</div>',
+            urlencode($ws["title"]),
+            urlencode($ws["title"]),
+            $ws["title"],
+            $ws["url"],
+        );
+        continue;
+    }
     $uriadd = (strpos($url, "?") === FALSE) ? "?" : "&amp;";
     $ts = array_key_exists("table_schema", $ws) ? $TABLE_SCHEMA : "";
     $tc = '';

@@ -1,3 +1,4 @@
+/* global $, ol, moment */
 let map = null;
 let n0q = null;
 let webcamGeoJsonLayer = null;
@@ -203,10 +204,10 @@ function refreshRADAR() {
     }
 }
 function refreshJSON() {
-    let url = "/geojson/webcam.php?network=TV";
+    let url = "/geojson/webcam.geojson?network=TV";
     if (!realtimeMode) {
         // Append the current timestamp to the URI
-        url += "&ts=" + $('#dtpicker').data('DateTimePicker').date().utc().format(ISOFMT);
+        url += "&valid=" + $('#dtpicker').data('DateTimePicker').date().utc().format(ISOFMT);
     }
     let newsource = new ol.source.Vector({
         url,
