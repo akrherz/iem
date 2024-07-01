@@ -15,6 +15,7 @@ from pyiem.exceptions import NoDataFound
 from pyiem.plot import figure_axes, get_cmap
 from pyiem.util import get_autoplot_context
 from seaborn import heatmap
+from sqlalchemy import text
 
 PDICT = {
     "trail_precip_percent": "Trailing XX Days Precip Percent of Average",
@@ -69,11 +70,13 @@ def plotter(fdict):
     ctx = get_autoplot_context(fdict, get_description())
     with get_sqlalchemy_conn("coop") as conn:
         df = pd.read_sql(
-            "select day, sday, precip, high, "
-            "extract(doy from day)::int as doy, "
-            "year from alldata WHERE station = %s ORDER by day ASC",
+            text("""
+            select day, sday, precip, high,
+            extract(doy from day)::int as doy,
+            year from alldata WHERE station = :station ORDER by day ASC
+            """),
             conn,
-            params=(ctx["station"],),
+            params={"station": ctx["station"]},
             index_col="day",
             parse_dates="day",
         )
@@ -103,6 +106,8 @@ def plotter(fdict):
     baseyear = max([df["year"].min(), ctx["syear"]])
     endyear = min([df["year"].max(), ctx["eyear"]])
     years = endyear - baseyear + 1
+    if years < 1:
+        raise NoDataFound("Station data does not exist for the period picked.")
     cmap = get_cmap(ctx["cmap"])
     norm = mpcolors.BoundaryNorm(levels, cmap.N)
     data = np.full((years, 366), np.nan)
