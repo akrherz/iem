@@ -2,7 +2,7 @@
 require_once "../../config/settings.inc.php";
 define("IEM_APPID", 138);
 require_once "../../include/myview.php";
-$OL = "7.1.0";
+$OL = "9.2.4";
 $t = new MyView();
 $t->title = "IEM Explorer";
 $t->headextra = <<<EOM
@@ -62,7 +62,7 @@ $t->content = <<<EOM
             data-target="https://mesonet.agron.iastate.edu">
 
             <br /><strong>Precipitation Departure</strong>
-            <img src="/plotting/auto/plot/84/sector:IA::src:mrms::opt:dep::usdm:yes::ptype:g::sdate:2022-08-01::edate:2022-10-10::cmap:BrBG::_r:43.png"
+            <img src="/plotting/auto/plot/84/sector:IA::src:mrms::opt:dep::usdm:yes::ptype:g::sdate:2023-08-01::edate:2023-10-10::cmap:BrBG::_r:43.png"
             role="button" title="Precip Departure Aug 1"
             data-target="https://mesonet.agron.iastate.edu">
 
@@ -72,7 +72,7 @@ $t->content = <<<EOM
             data-target="https://mesonet.agron.iastate.edu">
 
             <br /><strong>Iowa Drought Coverage</strong>
-            <img src="/plotting/auto/plot/183/s:state::state:IA::sdate:2021-01-01::_r:43.png" role="button"
+            <img src="/plotting/auto/plot/183/s:state::state:IA::sdate:2024-01-01::_r:43.png" role="button"
             title="Iowa Drought Coverage"
             data-target="https://mesonet.agron.iastate.edu">
 
@@ -125,17 +125,16 @@ $t->content = <<<EOM
             <i class="fa fa-table"></i> 2022 Heat Index Hrs</button>
 
             <button role="button" onClick="loaderClicked(this);"
-            data-url-template="/plotting/auto/plot/82/network:{network}::station:{station}::var:high_departure::sdate:2022-05-01::edate:2022-08-31::_r:43.png">
+            data-url-template="/plotting/auto/plot/82/network:{network}::station:{station}::var:high_departure::sdate:2024-05-01::edate:2024-08-31::_r:43.png">
             <i class="fa fa-calendar"></i> 2022 Highs Calendar</button>
 
             <button role="button" onClick="loaderClicked(this);"
-            data-url-template="/plotting/auto/plot/51/network:{network}::station:{station}::sdate:2022-05-01::base:50::ceil:86::year2:2021::year3:2019::which:gdd::_r:43.png">
-            <i class="fa fa-fire"></i> 2022 GS Accum GDD</button>
+            data-url-template="/plotting/auto/plot/51/network:{network}::station:{station}::sdate:2024-05-01::base:50::ceil:86::year2:2023::year3:2019::which:gdd::_r:43.png">
+            <i class="fa fa-fire"></i> 2024 GS Accum GDD</button>
 
             <button role="button" onClick="loaderClicked(this);"
-            data-url-template="/plotting/auto/plot/51/network:{network}::station:{station}::sdate:2022-05-01::base:50::ceil:86::year2:2021::year3:2019::which:precip::_r:43.png">
-            <i class="fa fa-tint"></i> 2022 GS Accum Precip</button>
-
+            data-url-template="/plotting/auto/plot/51/network:{network}::station:{station}::sdate:2024-05-01::base:50::ceil:86::year2:2023::year3:2019::which:precip::_r:43.png">
+            <i class="fa fa-tint"></i> 2024 GS Accum Precip</button>
 
             <h3>Wind Roses</h3>
             <strong>Month/Season:</strong>

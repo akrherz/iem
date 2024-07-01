@@ -57,7 +57,7 @@ $table = <<<EOF
 </style>
 <h3>{$title}</h3>
 <table id="thetable" class="table table-condensed table-striped table-bordered table-hover">
-<thead>
+<thead class="sticky">
 <tr class="small">
     <th rowspan="2">{$col1label}</th>
     <th colspan="6">Temperature &deg;F</th>
@@ -75,6 +75,7 @@ $table = <<<EOF
     <th>Cloud SS</th><th>Weather Codes</th>
 </tr>
 </thead>
+<tbody>
 EOF;
 function trace($val)
 {
@@ -138,7 +139,7 @@ foreach ($arr as $entry) {
         $row["wxcodes"],
     );
 }
-$table .= "</table>";
+$table .= "</tbody></table>";
 
 $sselect = networkSelect("NWSCLI", $station);
 
@@ -178,8 +179,8 @@ $t->content = <<<EOF
     {$ys} {$ms} {$ds}
     <br /><input type="submit" value="Generate Table" />
 </form>
-    
-    
+
+
     </div>
 </div>
 
@@ -189,9 +190,8 @@ directly access it here:
 
 <p><button id="makefancy">Make Table Interactive</button></p>
 
-<div class="table-responsive">
-    {$table}
-</div>
+{$table}
+
 EOF;
 $t->headextra = <<<EOF
 <link rel="stylesheet" type="text/css" href="/vendor/select2/4.0.3/select2.min.css"/ >

@@ -1,3 +1,4 @@
+/* global $, ol */
 /* A combination Openlayers Map + DataTable
 
 Example:

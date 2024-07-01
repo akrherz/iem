@@ -1,3 +1,4 @@
+/* global ol */
 // A factory to generate an OpenLayers map with a single marker on the page
 // that is dragable, which then callbacks a given function with the lat/lon
 // values of the marker.
@@ -53,8 +54,8 @@ function olSelectLonLat(div, initialLon, initialLat, callback) {
         let lonLat = ol.proj.toLonLat(coords);
         try {
             callback(lonLat[0], lonLat[1]);
-        } catch (e) {
-            console.log(e);
+        } catch (exp) {
+            console.log(exp);
         }
     });
 

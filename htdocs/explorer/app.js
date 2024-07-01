@@ -1,4 +1,4 @@
-/* global windowFactory */
+/* global windowFactory, ol, $ */
 var epoch = 0;
 var olMap;
 var overviewMap;

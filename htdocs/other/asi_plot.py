@@ -6,9 +6,9 @@ from zoneinfo import ZoneInfo
 
 import matplotlib.dates as mdates
 import numpy as np
+from pyiem.database import get_dbconnc
 from pyiem.network import Table as NetworkTable
 from pyiem.plot.use_agg import plt
-from pyiem.util import get_dbconnc
 from pyiem.webutil import iemapp
 
 

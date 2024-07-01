@@ -117,7 +117,10 @@ fun.</p>
 
 <div id="thetable">
 <table class="table table-striped table-condensed table-bordered">
-<thead><tr><th>Date</th><th>Min &deg;F</th><th>Location(s)</th><th>Max &deg;F</th><th>Location(s)</tr></thead>
+<thead class="sticky">
+<tr><th>Date</th><th>Min &deg;F</th><th>Location(s)</th><th>Max &deg;F</th>
+<th>Location(s)</tr>
+</thead>
 <tbody>
 {$table}
 </tbody>

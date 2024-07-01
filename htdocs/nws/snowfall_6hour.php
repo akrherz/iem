@@ -150,11 +150,13 @@ refresh every 6 minutes.</p>
 
 <div id="thetable">
 <table class="table table-striped table-condensed table-bordered">
-<thead class="sticky"><tr><th>Station/Network</th><th>Name</th><th>State</th>
+<thead class="sticky">
+<tr><th>Station/Network</th><th>Name</th><th>State</th>
 <th>WFO</th>
 <th>12 UTC<br />(6 AM CST)</th><th>18 UTC<br />(12 PM CST)</th>
 <th>0 UTC<br />(6 PM CST)</th>
-<th>6 UTC<br />(12 AM CST)</th></tr></thead>
+<th>6 UTC<br />(12 AM CST)</th></tr>
+</thead>
 <tbody>
 {$table}
 </tbody>

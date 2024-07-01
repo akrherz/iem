@@ -169,7 +169,7 @@ Timestamps displayed are for <strong>{$tzname}</strong> timezone.
 <form method="GET" action="/my/current.phtml">
 
 <table class="table table-striped table-condensed table-bordered">
-<thead>
+<thead class="sticky">
 <tr>
   <th rowspan="2">ADD:</th>
   <th rowspan="2">Station:</th>

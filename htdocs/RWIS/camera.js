@@ -1,4 +1,4 @@
-
+/* global $ */
 //http://stackoverflow.com/questions/5802461/javascript-which-browsers-support-parsing-of-iso-8601-date-string-with-date-par
 (() => {
     //ISO-8601 Date Matching

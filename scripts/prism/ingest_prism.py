@@ -69,9 +69,8 @@ def do_download(valid):
 
 def do_cleanup(valid):
     """do cleanup"""
-    subprocess.call(
-        "rm -f PRISM*%s*" % (valid.strftime("%Y%m%d"),), shell=True
-    )
+    for fn in glob.glob(f"PRISM*{valid:%Y%m%d}*"):
+        os.unlink(fn)
 
 
 def update_properties(valid):

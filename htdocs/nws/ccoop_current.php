@@ -152,7 +152,7 @@ $six = get_sortdir($baseurl, "max_tmpf", $sortcol, $sortdir);
 $seven = get_sortdir($baseurl, "min_tmpf", $sortcol, $sortdir);
 $eight = get_sortdir($baseurl, "pday", $sortcol, $sortdir);
 
-$content = <<<EOF
+$t->content = <<<EOF
 
 <p>Sorted by: <strong>{$cols[$sortcol]} {$sorts[$sortdir]}</strong>. 
 Times are presented in the local time of the site. Click on the identifier to
@@ -162,7 +162,7 @@ again will reverse the sort.
  
 <form name="st" action="/my/current.phtml" method="GET">
 <table class="table table-striped table-condensed table-bordered">
-<thead>
+<thead class="sticky">
 <tr>
   <th rowspan=2>Add:</th><th rowspan=2>Raw:</th>
   <th rowspan=2><a href="{$one}">SiteID:</a></th>
@@ -178,10 +178,6 @@ again will reverse the sort.
   <th><a href="{$eight}">24hour Rain</a></th>
 </tr></thead>
 <tbody>
-EOF;
-
-
-$content .= <<<EOF
 {$firstsection}
 {$lastsection}
 </tbody>
@@ -189,5 +185,4 @@ $content .= <<<EOF
 <input type="submit" value="Add to Favorites">
 </form>
 EOF;
-$t->content = $content;
 $t->render('sortables.phtml');

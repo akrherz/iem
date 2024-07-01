@@ -1,3 +1,4 @@
+/* global $, ol */
 let map = null;
 let vectorLayer = null;
 let element = null;

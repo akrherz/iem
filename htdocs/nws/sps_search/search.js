@@ -1,3 +1,4 @@
+/* global $, ol, olSelectLonLat */
 let mapwidget1 = null;
 let marker = null;
 let table1 = null;
