@@ -68,7 +68,7 @@ jQuery.fn.filterByText = function (textbox, selectSingleMatch) {
             var search = $.trim($(this).val());
             var regex = new RegExp(search, 'gi');
 
-            $.each(opts, function (i) {
+            $.each(opts, (i) => {
                 var option = options[i];
                 if (option.text.match(regex) !== null) {
                     $(select).append(
