@@ -539,7 +539,7 @@ function initUI() {
     });
     $("#sbwgeojson").click(() => {
         const opts = buildOpts();
-        const url = `https://mesonet.agron.iastate.edu/geojson/sbw.php?${$.param(opts)}`;
+        const url = `https://mesonet.agron.iastate.edu/geojson/sbw.geojson?${$.param(opts)}`;
         copyToClipboard(url, "GeoJSON URL copied to clipboard");
     });
     $("#realtime").click(function() {
@@ -874,7 +874,7 @@ function loadData() {
     });
     $.ajax({
         method: "GET",
-        url: `/geojson/sbw.php?${$.param(opts)}`,
+        url: `/geojson/sbw.geojson?${$.param(opts)}`,
         dataType: 'json',
         success: (data) => {
             sbwLayer.getSource().addFeatures(

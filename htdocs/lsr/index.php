@@ -21,7 +21,7 @@ $t->jsextra = <<<EOF
 <script src='/vendor/openlayers/{$OL}/ol-layerswitcher.js'></script>
 
 <script type="text/javascript" src="wfos.js"></script>
-<script type="text/javascript" src="static.js?v=2"></script>
+<script type="text/javascript" src="static.js?v=3"></script>
 <script>
 $(document).ready(function(){
     initUI(); // static.js

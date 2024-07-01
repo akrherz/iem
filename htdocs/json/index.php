@@ -417,23 +417,7 @@ EOM
 
 $services[] = array(
     "title" => "Storm Based Warnings Issued Between Interval",
-    "url" => "/geojson/sbw.php?sts={sts}&ets={ets}",
-    "desc" => <<<EOM
-This service returns a GeoJSON of storm based warnings over a UTC time period
-of your coice.  The start time is inclusive and the end time exclusive.  The
-time domain denotes the issuance time of the storm based warning, so actual
-events returned could span over the end timestamp.  The polygons returned are
-just the issuance and not any polygons with subsequent product updates.
-EOM
-    ,
-    "vars" => array(
-        "sts" => "UTC Start Time YYYYmmddHMI",
-        "ets" => "UTC End Time YYYYmmddHMI",
-    ),
-    "example" => array(
-        "{sts}" => "201104272200",
-        "{ets}" => "201104280200",
-    )
+    "url" => "/geojson/sbw.geojson?help",
 );
 
 
