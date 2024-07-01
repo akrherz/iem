@@ -1,7 +1,4 @@
-<?php 
-/* I actually generate a plot for us to see!
- * 
- */
+<?php
 require_once "../../config/settings.inc.php";
 require_once "../../include/database.inc.php";
 require_once "../../include/network.php";

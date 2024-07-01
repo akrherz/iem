@@ -303,7 +303,7 @@ $t->content = <<<EOF
     </table>
     <input type="submit" value="Generate Report"/>
   </form>
-  
+
 {$table}
 EOF;
 $t->render('full.phtml');

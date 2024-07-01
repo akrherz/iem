@@ -101,11 +101,13 @@ you can <a href="list_ugcs.php?just_firewx=1">list all fire weather UGCs</a>.</p
 
 <div id="thetable">
 <table class="table table-striped table-condensed table-bordered">
-<thead class="sticky"><tr><th>UGC</th><th>Warning Search</th><th>Name</th><th>WFO</th></tr></thead>
+<thead class="sticky">
+<tr><th>UGC</th><th>Warning Search</th><th>Name</th><th>WFO</th></tr>
+</thead>
 <tbody>
 {$table}
 </tbody>
 </table>
 </div>
 EOF;
-$t->render('single.phtml');
+$t->render('full.phtml');

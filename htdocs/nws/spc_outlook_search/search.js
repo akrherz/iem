@@ -1,5 +1,5 @@
 
-/* global ol */
+/* global $, ol */
 let marker = null;
 let map = null;
 

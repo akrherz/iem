@@ -1,3 +1,4 @@
+/* global ol */
 // A factory to generate an OpenLayers map with a single marker on the page
 // that is dragable, which then callbacks a given function with the lat/lon
 // values of the marker.

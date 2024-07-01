@@ -337,8 +337,7 @@ def ldm_insert_metars(fn1, fn2):
     """Insert into LDM please"""
     for fn in [fn1, fn2]:
         proc = subprocess.Popen(
-            ("pqinsert -p '%s' %s") % (fn.replace("/tmp/", ""), fn),
-            shell=True,
+            ["pqinsert", "-p", fn.replace("/tmp/", ""), fn],
             stderr=subprocess.PIPE,
             stdout=subprocess.PIPE,
         )

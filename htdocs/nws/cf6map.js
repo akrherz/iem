@@ -1,3 +1,4 @@
+/* global $, ol */
 let renderattr = "high";
 let vectorLayer = null;
 let map = null;

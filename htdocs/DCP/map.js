@@ -1,3 +1,4 @@
+/* global $, ol */
 var physical_code = "EP";
 var duration = "D";
 var days = 2;

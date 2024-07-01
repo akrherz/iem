@@ -148,11 +148,12 @@ is "missing" data from sites.  Please <a href="/info/contacts.php">let us know</
 <table class="table table-striped table-condensed table-bordered">
 <thead class="sticky">
 <tr>{$header}<th>Possible</th>
-<th>Precip Obs</th><th>Temperature Obs</th><th>Snowfall Obs</th><th>Snowdepth Obs</th></tr>
+<th>Precip Obs</th><th>Temperature Obs</th><th>Snowfall Obs</th>
+<th>Snowdepth Obs</th></tr>
 </thead>
 <tbody>
 {$table}
 </tbody>
 </table>
 EOF;
-$t->render('single.phtml');
+$t->render('full.phtml');

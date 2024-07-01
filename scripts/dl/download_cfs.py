@@ -10,12 +10,12 @@ dswsfc
 
 import os
 import subprocess
-import sys
 import tempfile
 
+import click
 import pygrib
 import requests
-from pyiem.util import exponential_backoff, logger, utc
+from pyiem.util import archive_fetch, exponential_backoff, logger, utc
 
 LOG = logger()
 # Should have at least 9 months of data, so roughtly
@@ -24,15 +24,16 @@ REQUIRED_MSGS = 9 * 30 * 4
 
 def check(now, varname, scenario) -> bool:
     """See what the IEM already has."""
-    fn = (
-        f"/mesonet/ARCHIVE/data/{now:%Y/%m/%d}/model/cfs/{now:%H}/"
+    ppath = (
+        f"{now:%Y/%m/%d}/model/cfs/{now:%H}/"
         f"{varname}.{scenario:02d}.{now:%Y%m%d%H}.daily.grib2"
     )
-    if not os.path.isfile(fn):
-        return False
-    grbs = pygrib.open(fn)
-    messages = grbs.messages
-    grbs.close()
+    with archive_fetch(ppath) as fn:
+        if fn is None:
+            return False
+        grbs = pygrib.open(fn)
+        messages = grbs.messages
+        grbs.close()
     LOG.info("Found %s with %s messages", fn, messages)
     return messages > REQUIRED_MSGS
 
@@ -80,9 +81,11 @@ def dl(now, varname, scenario):
     os.remove(tmpfd.name)
 
 
-def main(argv):
+@click.command()
+@click.option("--date", "valid", type=click.DateTime(), help="UTC date")
+def main(valid):
     """Do main"""
-    now = utc(*[int(x) for x in argv[1:4]])
+    now = utc(valid.year, valid.month, valid.day)
     for hour in [0, 6, 12, 18]:
         now = now.replace(hour=hour)
         for varname in ["tmax", "tmin", "prate", "dswsfc"]:
@@ -92,4 +95,4 @@ def main(argv):
 
 
 if __name__ == "__main__":
-    main(sys.argv)
+    main()

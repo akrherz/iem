@@ -1,7 +1,7 @@
-
+/* global google */
 // A Map Widget with a dragable marker that has callbacks
 
- 
+
 class MapMarkerWidget {
 
     constructor(mapdiv, lon, lat){

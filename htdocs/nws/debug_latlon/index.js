@@ -1,3 +1,4 @@
+/* global $ */
 $("#thebutton").click(() => {
     const text = $("#thetext").val();
     const title = $("#thetitle").val();

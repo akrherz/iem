@@ -1,4 +1,4 @@
-/* global Ext, Date */
+/* global Ext, Date, iemdata, defaultnetwork */
 Ext.namespace('iemdata');
 
 let gpanel;

@@ -81,7 +81,8 @@ directly access it here:
 
 <div id="thetable">
 <table class="table table-striped table-condensed">
-<thead class="sticky"><tr><th>Year</th><th>Watch Num</th><th>State(s)</th><th>Issued</th>
+<thead class="sticky">
+<tr><th>Year</th><th>Watch Num</th><th>State(s)</th><th>Issued</th>
 <th>Expired</th><th>Prob EF2+ Tor</th><th>Prob Hail 2+in</th><th>Max Hail Size</th>
 <th>Max Wind Gust kts</th></tr>
 </thead>

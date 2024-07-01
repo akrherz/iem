@@ -1,3 +1,4 @@
+/* global Highcharts, $ */
 var dockPosition = 0;
 
 // https://stackoverflow.com/questions/48712560

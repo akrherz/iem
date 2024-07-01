@@ -13,10 +13,10 @@ $mselect = monthSelect2("1", "month");
 $dselect = daySelect2("1", "day");
 
 $t->content = <<<EOF
-<H3 class="heading">The Weather on your Birthday!!</H3>
+<h3>The Weather on your Birthday!!</h3>
 <BR>
 
-If you were born in Iowa between 1900 and 2005, you can fill out the form below and discover the weather
+If you were born in Iowa, you can fill out the form below and discover the weather
 conditions at a location near to you.  Just follow the instructions below.
 
 
@@ -24,10 +24,10 @@ conditions at a location near to you.  Just follow the instructions below.
 
 <form method="GET" action="/cgi-bin/onsite/birthday/getweather.py">
 
-<p><H3 class="subtitle">1. Select the city nearest to you:</H3><p>
+<p><H3>1. Select the city nearest to you:</H3><p>
 {$cselect}
 
-<p><H3 class="subtitle">2. Enter your Birthdate:</H3><p>
+<p><H3>2. Enter your Birthdate:</H3><p>
 
 <table><TR><TH>Year:</TH><TH>Month:</TH><TH>Day:</TH></TR>
 <TR>
@@ -39,7 +39,7 @@ conditions at a location near to you.  Just follow the instructions below.
 
 </TR></TABLE><p>
 
-<H3 class="subtitle">4. Submit your values:</H3><p>
+<H3>4. Submit your values:</H3><p>
 <input type="SUBMIT" value="Get Weather"><input type="RESET">
 
 </form>

@@ -1,3 +1,4 @@
+/* global $, ol */
 var htmlInterface = ['<div class="panel panel-default">',
     '<div class="panel-heading">',
     '<a class="btn btn-default pull-right" href="/" id="iemss-metadata-link" target="_new">',

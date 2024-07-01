@@ -1,3 +1,4 @@
+/* global $ */
 let report = 'snowdepth';
 
 function fetch() {
