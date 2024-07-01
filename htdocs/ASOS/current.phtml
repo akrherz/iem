@@ -13,10 +13,7 @@ $metar = isset($_GET['metar']) ? xssafe($_GET["metar"]) : "no";
 $sortcol = isset($_GET['sortcol'])  ? xssafe($_GET['sortcol']) : "ts";
 $sorder = isset($_GET['sorder']) ? xssafe($_GET['sorder']) : "desc";
 $format = isset($_REQUEST["format"]) ? xssafe($_REQUEST['format']) : 'html';
-if ($format == 'jsonp') {
-    header("Location: /geojson/network_obs.php?network=$network&callback=mycallback");
-    die();
-}
+
 $t = new MyView();
 $t->title = "{$network} Current Conditions";
 $t->refresh = 1200;
@@ -147,7 +144,6 @@ $sselect = make_select("sorder", $sorder, $ar);
 $ar = array(
     "html" => "Web Page",
     "csv" => "Comma Delimited",
-    "jsonp" => "Geo-JSON-P"
 );
 $fselect = make_select("format", $format, $ar);
 
