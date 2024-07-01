@@ -1,4 +1,4 @@
-// Map select widget that can appear
+/* global $, ol */
 
 const climateStyle = new ol.style.Style({
     zIndex: 100,
