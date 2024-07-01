@@ -54,8 +54,8 @@ function olSelectLonLat(div, initialLon, initialLat, callback) {
         let lonLat = ol.proj.toLonLat(coords);
         try {
             callback(lonLat[0], lonLat[1]);
-        } catch (e) {
-            console.log(e);
+        } catch (exp) {
+            console.log(exp);
         }
     });
 

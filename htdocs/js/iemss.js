@@ -64,11 +64,11 @@ jQuery.fn.filterByText = function (textbox, selectSingleMatch) {
         });
         $(select).data('options', options);
         $(textbox).bind('change keyup', function () {
-            var options = $(select).empty().scrollTop(0).data('options');
+            const opts = $(select).empty().scrollTop(0).data('options');
             var search = $.trim($(this).val());
             var regex = new RegExp(search, 'gi');
 
-            $.each(options, function (i) {
+            $.each(opts, function (i) {
                 var option = options[i];
                 if (option.text.match(regex) !== null) {
                     $(select).append(
@@ -254,8 +254,8 @@ $().ready(() => {
     // display popup on click
     map.on('click', function (evt) {
         var feature = map.forEachFeatureAtPixel(evt.pixel,
-            function (feature, layer) {
-                return feature;
+            function (feat, _layer) {
+                return feat;
             });
         if (feature) {
             var geometry = feature.getGeometry();
