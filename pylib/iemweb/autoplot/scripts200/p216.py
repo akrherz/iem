@@ -7,12 +7,13 @@ import datetime
 
 import numpy as np
 import pandas as pd
-from matplotlib.font_manager import FontProperties
 from pyiem.database import get_sqlalchemy_conn
 from pyiem.exceptions import NoDataFound
 from pyiem.plot import figure
 from pyiem.util import get_autoplot_context
 from sqlalchemy import text
+
+from iemweb.autoplot import get_monofont
 
 PDICT = {
     "above": "Temperature At or Above (AOA) Threshold",
@@ -136,7 +137,8 @@ def plotter(fdict):
     ax.set_xlabel(label2)
 
     # List out longest
-    monofont = FontProperties(family="monospace", size=14)
+    monofont = get_monofont()
+    monofont.set_size(14)
     y = 0.84
     fig.text(
         0.65,

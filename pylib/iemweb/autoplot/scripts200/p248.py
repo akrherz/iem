@@ -24,7 +24,6 @@ import datetime
 
 import numpy as np
 import pandas as pd
-from matplotlib.font_manager import FontProperties
 from matplotlib.ticker import MaxNLocator
 from pyiem import reference
 from pyiem.database import get_dbconnc, get_sqlalchemy_conn
@@ -33,6 +32,8 @@ from pyiem.plot import figure
 from pyiem.plot.use_agg import plt
 from pyiem.util import get_autoplot_context
 from sqlalchemy import text
+
+from iemweb.autoplot import get_monofont
 
 PDICT = {
     "0": "At least touches",
@@ -286,7 +287,7 @@ def plotter(fdict):
         subtitle += f" with >= {overlap}% overlap"
     fig = figure(apctx=ctx, title=title, subtitle=subtitle)
     ax = fig.add_axes([0.08, 0.1, 0.58, 0.8])
-    monofont = FontProperties(family="monospace")
+    monofont = get_monofont()
     for year, gdf in df.groupby("year"):
         size = max(gdf["doy"].max() - gdf["doy"].min(), 1)
         ax.barh(

@@ -11,12 +11,13 @@ import datetime
 
 import numpy as np
 import pandas as pd
-from matplotlib.font_manager import FontProperties
 from pyiem.database import get_sqlalchemy_conn
 from pyiem.exceptions import NoDataFound
 from pyiem.plot import figure, get_cmap
 from pyiem.util import get_autoplot_context
 from sqlalchemy import text
+
+from iemweb.autoplot import get_monofont
 
 MDICT = {
     "all": "No Month/Time Limit",
@@ -186,7 +187,7 @@ def plotter(fdict):
     )
     fig.text(xpos - 0.01, ypos - 0.01, "Percentile   Value")
     ypos -= 0.01
-    monofont = FontProperties(family="monospace")
+    monofont = get_monofont()
     for q, val in ranks.items():
         if 0.02 < q < 0.98 and (q * 100.0 % 10) != 0:
             continue

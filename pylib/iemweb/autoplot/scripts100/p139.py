@@ -16,12 +16,13 @@ import datetime
 from zoneinfo import ZoneInfo
 
 import pandas as pd
-from matplotlib.font_manager import FontProperties
 from pyiem.database import get_sqlalchemy_conn
 from pyiem.exceptions import NoDataFound
 from pyiem.plot import figure
 from pyiem.util import get_autoplot_context
 from sqlalchemy import text
+
+from iemweb.autoplot import get_monofont
 
 MDICT = {
     "all": "No Month/Time Limit",
@@ -121,8 +122,7 @@ def plot_date(ax, i, date, station, tz) -> bool:
 
 def plotter(fdict):
     """Go"""
-    font0 = FontProperties()
-    font0.set_family("monospace")
+    font0 = get_monofont()
     font0.set_size(16)
     ctx = get_autoplot_context(fdict, get_description())
     station = ctx["zstation"]

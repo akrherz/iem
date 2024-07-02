@@ -20,12 +20,13 @@ import matplotlib.dates as mdates
 import numpy as np
 import pandas as pd
 from matplotlib.colorbar import ColorbarBase
-from matplotlib.font_manager import FontProperties
 from pyiem.database import get_sqlalchemy_conn
 from pyiem.exceptions import NoDataFound
 from pyiem.plot import figure, get_cmap
 from pyiem.plot.util import fitbox
 from pyiem.util import get_autoplot_context
+
+from iemweb.autoplot import get_monofont
 
 PDICT = {
     "tmpf": "Air Temperature [F]",
@@ -79,7 +80,7 @@ def get_description():
 
 def print_table(fig, df, varname):
     """Add a pretty table."""
-    monofont = FontProperties(family="monospace")
+    monofont = get_monofont()
     ranks = df[varname].quantile(np.arange(0, 1.0001, 0.0025))
     xpos = 0.72
     ypos = 0.8
