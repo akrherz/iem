@@ -20,6 +20,8 @@ from pyiem.plot import figure_axes
 from pyiem.util import get_autoplot_context, get_sqlalchemy_conn
 from sqlalchemy import text
 
+from iemweb.autoplot import get_monofont
+
 PDICT = {
     "max_dwpf": "Highest Dew Point Temperature",
     "min_dwpf": "Lowest Dew Point Temperature",
@@ -120,8 +122,7 @@ def rounder(row, varname):
 
 def plotter(fdict):
     """Go"""
-    font0 = FontProperties()
-    font0.set_family("monospace")
+    font0 = get_monofont()
     font0.set_size(16)
     font1 = FontProperties()
     font1.set_size(16)

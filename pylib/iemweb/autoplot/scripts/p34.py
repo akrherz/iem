@@ -8,11 +8,12 @@ import datetime
 
 import numpy as np
 import pandas as pd
-from matplotlib.font_manager import FontProperties
 from pyiem.database import get_sqlalchemy_conn
 from pyiem.exceptions import NoDataFound
 from pyiem.plot import figure, fitbox
 from pyiem.util import get_autoplot_context
+
+from iemweb.autoplot import get_monofont
 
 PDICT = {
     "high_over": "High Temperature At or Above",
@@ -191,7 +192,7 @@ def plotter(fdict):
     ypos = 0.8
     fig.text(0.7, ypos, "Top 20 Distinct Periods\nDays - Inclusive Period")
     ypos -= 0.06
-    monofont = FontProperties(family="monospace")
+    monofont = get_monofont()
     today = datetime.date.today()
     for idx, row in (
         sdf.sort_values("period", ascending=False).head(20).iterrows()

@@ -21,6 +21,13 @@ Not listed due to having no PNG output
 import importlib
 
 
+def get_monofont():
+    """Return the monospace font"""
+    from matplotlib.font_manager import FontProperties
+
+    return FontProperties(family="monospace")
+
+
 def import_script(p: int):
     """Import the script for the given product ID"""
     s = ""
