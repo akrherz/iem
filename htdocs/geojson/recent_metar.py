@@ -1,13 +1,31 @@
-"""Recent METARs containing some pattern"""
+""".. title:: Recent METAR GeoJSON
+
+Service returns interesting METAR reports.
+
+"""
 
 import json
 
+from pydantic import Field
 from pyiem.reference import ISO8601, TRACE_VALUE
-from pyiem.util import get_dbconnc, html_escape
-from pyiem.webutil import iemapp
-from pymemcache.client import Client
+from pyiem.util import get_dbconnc
+from pyiem.webutil import CGIModel, iemapp
 
 json.encoder.FLOAT_REPR = lambda o: format(o, ".2f")
+
+
+class Schema(CGIModel):
+    """See how we are called."""
+
+    callback: str = Field(None, description="JSONP callback function name")
+    q: str = Field(
+        "snowdepth",
+        description=(
+            "The query to perform, one of snowdepth, "
+            "i1, i3, i6, fc, gr, pno, 50, 50A"
+        ),
+        pattern="^(snowdepth|i1|i3|i6|fc|gr|pno|50|50A)$",
+    )
 
 
 def trace(val):
@@ -84,25 +102,15 @@ def get_data(q):
     return json.dumps(data)
 
 
-@iemapp()
+@iemapp(
+    content_type="application/vnd.geo+json",
+    memcachekey=lambda req: f"/geojson/recent_metar?{req['q']}",
+    help=__doc__,
+    schema=Schema,
+)
 def application(environ, start_response):
     """see how we are called"""
-    q = environ.get("q", "snowdepth")[:10]
-    cb = environ.get("callback", None)
-
     headers = [("Content-type", "application/vnd.geo+json")]
-
-    mckey = f"/geojson/recent_metar?callback={cb}&q={q}"
-    mc = Client("iem-memcached:11211")
-    res = mc.get(mckey)
-    if not res:
-        res = get_data(q)
-        mc.set(mckey, res, 300)
-    else:
-        res = res.decode("utf-8")
-    mc.close()
-    if cb is not None:
-        res = f"{html_escape(cb)}({res})"
-
+    res = get_data(environ["q"])
     start_response("200 OK", headers)
-    return [res.encode("ascii")]
+    return res.encode("ascii")
