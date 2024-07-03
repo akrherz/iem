@@ -235,19 +235,20 @@ phenomena and significance below.</label>
 statements. [<sup>1</sup>]</label></p>
 
 
-  <script type="text/javascript">
+<script type="text/javascript">
 function kmlsub(f, url){
     f.action = url;
     f.submit();
 }
-function excel(f){
-    $("#accept").val("excel");
+function set_accept(f, val){
+    $("#accept").val(val);
     f.submit();
 }
 </script>
 <p>
 <input type="submit" value="Request Shapefile" onclick="kmlsub(this.form, '/cgi-bin/request/gis/watchwarn.py');"/>
-<input type="submit" value="Request Excel" onclick="excel(this.form);"/>
+<input type="submit" value="Request CSV" onclick="set_accept(this.form, 'csv');"/>
+<input type="submit" value="Request Excel" onclick="set_accept(this.form, 'excel');"/>
 <input type="submit" value="Request KML (*)" onclick="kmlsub(this.form, '/kml/sbw_interval.php');" />
  <input type="reset" />
 <br />* Only Storm Based Warnings are available via KML.
