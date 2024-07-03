@@ -1,69 +1,96 @@
-"""Generate a GeoJSON of nexrad attributes"""
+""".. title:: Service for NEXRAD Attributes GeoJSON
+
+Documentation for /geojson/nexrad_attr.geojson
+----------------------------------------------
+
+This service emits GeoJSON of NEXRAD attributes.  If no `valid` parameter is
+provided, it provides the most recent storm attributes per NEXRAD that are
+valid within the past 30 minutes.  If a `valid` parameter is provided, it will
+search for the nearest in time volume scan and provide attributes for that
+time.
+
+Changelog
+---------
+
+- 2024-07-03: Initial documentation release.
+
+"""
 
 import datetime
 import json
 from zoneinfo import ZoneInfo
 
+from pydantic import Field
+from pyiem.database import get_sqlalchemy_conn
 from pyiem.reference import ISO8601
-from pyiem.util import get_dbconnc, html_escape
-from pyiem.webutil import iemapp
-from pymemcache.client import Client
+from pyiem.util import utc
+from pyiem.webutil import CGIModel, iemapp
+from sqlalchemy import text
 
 
-def run(ts, fmt):
+class Schema(CGIModel):
+    """See how we are called."""
+
+    callback: str = Field(
+        default=None, description="Optional JSONP callback function name"
+    )
+    fmt: str = Field(
+        default="geojson",
+        description="The format of the output, geojson or csv",
+        pattern="^(geojson|csv)$",
+    )
+    valid: datetime.datetime = Field(
+        default=None, description="The timestamp to request data for, in UTC."
+    )
+
+
+def run(conn, valid, fmt):
     """Actually do the hard work of getting the geojson"""
-    pgconn, cursor = get_dbconnc("radar")
 
-    utcnow = datetime.datetime.utcnow()
-
-    if ts == "":
-        cursor.execute(
-            """
+    if valid is None:
+        res = conn.execute(
+            text("""
             SELECT ST_x(geom) as lon, ST_y(geom) as lat, *,
             valid at time zone 'UTC' as utc_valid from
             nexrad_attributes WHERE valid > now() - '30 minutes'::interval
-        """
+            """)
         )
     else:
-        try:
-            valid = datetime.datetime.strptime(ts, "%Y-%m-%dT%H:%M:%S")
-        except ValueError:
-            return "ERROR"
         valid = valid.replace(tzinfo=ZoneInfo("UTC"))
-        tbl = "nexrad_attributes_%s" % (valid.year,)
-        cursor.execute(
-            f"""
-        with vcps as (
-            SELECT distinct nexrad, valid from {tbl}
-            where valid between %s and %s),
-        agg as (
-            select nexrad, valid,
-            row_number() OVER (PARTITION by nexrad
-                ORDER by (greatest(valid, %s) - least(valid, %s)) ASC)
-            as rank from vcps)
-        SELECT n.*, ST_x(geom) as lon, ST_y(geom) as lat,
-        n.valid at time zone 'UTC' as utc_valid
-        from {tbl} n, agg a WHERE
-        a.rank = 1 and a.nexrad = n.nexrad and a.valid = n.valid
-        ORDER by n.nexrad ASC
-        """,
-            (
-                valid - datetime.timedelta(minutes=10),
-                valid + datetime.timedelta(minutes=10),
-                valid,
-                valid,
-            ),
+        tbl = f"nexrad_attributes_{valid:%Y}"
+        res = conn.execute(
+            text(f"""
+    with vcps as (
+        SELECT distinct nexrad, valid from {tbl}
+        where valid between :sts and :ets),
+    agg as (
+        select nexrad, valid,
+        row_number() OVER (PARTITION by nexrad
+            ORDER by (greatest(valid, :valid) - least(valid, :valid)) ASC)
+        as rank from vcps)
+    SELECT n.*, ST_x(geom) as lon, ST_y(geom) as lat,
+    n.valid at time zone 'UTC' as utc_valid
+    from {tbl} n, agg a WHERE
+    a.rank = 1 and a.nexrad = n.nexrad and a.valid = n.valid
+    ORDER by n.nexrad ASC
+    """),
+            {
+                "sts": valid - datetime.timedelta(minutes=10),
+                "ets": valid + datetime.timedelta(minutes=10),
+                "valid": valid,
+            },
         )
 
     if fmt == "geojson":
-        res = {
+        data = {
             "type": "FeatureCollection",
             "features": [],
-            "generation_time": utcnow.strftime(ISO8601),
-            "count": cursor.rowcount,
+            "generation_time": utc().strftime(ISO8601),
+            "count": res.rowcount,
         }
-        for i, row in enumerate(cursor):
-            res["features"].append(
+        for i, row in enumerate(res):
+            row = row._asdict()
+            data["features"].append(
                 {
                     "type": "Feature",
                     "id": i,
@@ -91,14 +118,14 @@ def run(ts, fmt):
                     },
                 }
             )
-        pgconn.close()
-        return json.dumps(res)
-    res = (
+        return json.dumps(data)
+    data = (
         "nexrad,storm_id,azimuth,range,tvs,meso,posh,poh,max_size,"
         "vil,max_dbz,max_dbz_height,top,drct,sknt,valid\n"
     )
-    for row in cursor:
-        res += ",".join(
+    for row in res:
+        row = row._asdict()
+        data += ",".join(
             [
                 str(x)
                 for x in [
@@ -121,35 +148,42 @@ def run(ts, fmt):
                 ]
             ]
         )
-        res += "\n"
-    pgconn.close()
-    return res
+        data += "\n"
+    return data
 
 
-@iemapp()
+def get_ct(environ):
+    """Figure out the content type."""
+    fmt = environ["fmt"]
+    if fmt == "geojson":
+        return "application/vnd.geo+json"
+    return "text/csv"
+
+
+def get_mckey(environ):
+    """Figure out our memcache key."""
+    valid = environ["valid"]
+    if valid is None:
+        valid = utc()
+    return f"/geojson/nexrad_attr.{environ['fmt']}|{valid:%Y%m%d%H%M%S}"
+
+
+@iemapp(
+    help=__doc__,
+    schema=Schema,
+    content_type=get_ct,
+    memcachekey=get_mckey,
+    memcacheexpire=60,
+)
 def application(environ, start_response):
     """Do Something"""
-    # Go Main Go
-    cb = environ.get("callback", None)
-    ts = environ.get("valid", "")[:19]  # ISO-8601ish
-    fmt = environ.get("fmt", "geojson")[:7]
+    fmt = environ["fmt"]
     if fmt == "geojson":
         headers = [("Content-type", "application/vnd.geo+json")]
     else:
         headers = [("Content-type", "text/csv")]
 
-    mckey = f"/geojson/nexrad_attr.{fmt}|{ts}"
-    mc = Client("iem-memcached:11211")
-    res = mc.get(mckey)
-    if not res:
-        res = run(ts, fmt)
-        mc.set(mckey, res, 30 if ts == "" else 3600)
-    else:
-        res = res.decode("utf-8")
-    mc.close()
-
-    if cb is not None and fmt != "csv":
-        res = f"{html_escape(cb)}({res})"
-
+    with get_sqlalchemy_conn("radar") as conn:
+        res = run(conn, environ["valid"], fmt)
     start_response("200 OK", headers)
-    return [res.encode("ascii")]
+    return res.encode("ascii")

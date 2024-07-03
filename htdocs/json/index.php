@@ -121,26 +121,10 @@ $services[] = array(
 
 
 $services[] = array(
-    "title" => "Current NEXRAD Storm Attribute Table",
-    "url" => "/geojson/nexrad_attr.geojson",
-    "desc" => "A GeoJSON summary of current NEXRAD Storm Attributes",
-    "vars" => array(),
-    "example" => array()
+    "title" => "Archived or Current NEXRAD Storm Attribute Table",
+    "url" => "/geojson/nexrad_attr.geojson?help",
 );
 
-$services[] = array(
-    "title" => "Archived NEXRAD Storm Attribute Table",
-    "url" => "/geojson/nexrad_attr.geojson?valid={valid}",
-    "desc" => "A GeoJSON summary of archived NEXRAD Storm Attributes." .
-        " For the supplied UTC timestamp, the closest scan time within a 20 minute" .
-        " window is found for each RADAR.  That scan time is returned.",
-    "vars" => array(
-        "valid" => "ISO-8601 timestamp YYYY-mm-ddTHH:MM:SSZ"
-    ),
-    "example" => array(
-        "{valid}" => "2016-05-10T00:01:00Z"
-    )
-);
 
 $services[] = array(
     "title" => "IEM Tracked Networks Metadata",
