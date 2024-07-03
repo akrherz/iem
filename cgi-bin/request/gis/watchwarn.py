@@ -1,5 +1,7 @@
 """.. title:: NWS Watch/Warning/Advisory (WWA) Data Service
 
+Return to `Download User Interface </request/gis/watchwarn.phtml>`_.
+
 Documentation for /cgi-bin/request/gis/watchwarn.py
 ---------------------------------------------------
 
@@ -7,12 +9,13 @@ This service emits shapefiles (with additional csv included),
 or even Excel files.  This service is
 rather blunt force and perhaps you should review the mountain of adhoc JSON/API
 services found at
-IEM Legacy JSON Services https://mesonet.agron.iastate.edu/json/ or at IEM API
-Services https://mesonet.agron.iastate.edu/api/1/docs/ .
+`IEM Legacy JSON Services <https://mesonet.agron.iastate.edu/json/>`_ or at
+`IEM API Services <https://mesonet.agron.iastate.edu/api/1/docs/>`_ .
 
 Changelog
 ---------
 
+- 2024-07-03: Added a `accept=csv` option to allow for CSV output.
 - 2024-06-26: Added `limitpds` parameter to limit the request to only include
 products that have a PDS (Particularly Dangerous Situation) tag or phrasing.
 - 2024-05-14: To mitigate against large requests that overwhelm the server, a
@@ -62,7 +65,7 @@ class Schema(CGIModel):
 
     accept: str = Field(
         "shapefile",
-        pattern="^(shapefile|excel)$",
+        pattern="^(shapefile|excel|csv)$",
         description="The format to return, either shapefile or excel.",
     )
     addsvs: str = Field(
@@ -339,7 +342,7 @@ def build_sql(environ):
         "is_emergency, utc_polygon_begin, utc_polygon_end, windtag, hailtag, "
         "tornadotag, damagetag, product_id "
     )
-    if environ["accept"] != "excel":
+    if environ["accept"] not in ["excel", "csv"]:
         cols = f"geo, {cols}"
 
     timelimit = f"issue >= '{sts}' and issue < '{ets}'"
@@ -418,11 +421,11 @@ def build_sql(environ):
     )
 
 
-def do_excel(sql):
+def do_excel(sql, fmt):
     """Generate an Excel format response."""
     with get_sqlalchemy_conn("postgis") as conn:
         df = pd.read_sql(sql, conn, index_col=None)
-    if len(df.index) >= 1048576:
+    if fmt == "excel" and len(df.index) >= 1048576:
         raise IncompleteWebRequest("Result too large for Excel download")
     # Back-convert datetimes :/
     for col in (
@@ -434,6 +437,8 @@ def do_excel(sql):
             errors="coerce",
             format="%Y%m%d%H%M",
         ).dt.strftime("%Y-%m-%d %H:%M")
+    if fmt == "csv":
+        return df.to_csv(index=False).encode("ascii")
     bio = BytesIO()
     # pylint: disable=abstract-class-instantiated
     with pd.ExcelWriter(bio, engine="xlsxwriter") as writer:
@@ -458,7 +463,14 @@ def application(environ, start_response):
             ("Content-disposition", f"attachment; Filename={fn}.xlsx"),
         ]
         start_response("200 OK", headers)
-        return [do_excel(sql)]
+        return [do_excel(sql, environ["accept"])]
+    if environ["accept"] == "csv":
+        headers = [
+            ("Content-type", "text/csv"),
+            ("Content-disposition", f"attachment; Filename={fn}.csv"),
+        ]
+        start_response("200 OK", headers)
+        return [do_excel(sql, environ["accept"])]
     pgconn, cursor = get_dbconnc("postgis", cursor_name="streaming")
 
     cursor.execute(sql)

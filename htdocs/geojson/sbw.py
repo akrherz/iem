@@ -48,6 +48,7 @@ class Schema(CGIModel):
         ),
         max_length=12,
         min_length=12,
+        pattern=r"^\d{12}$",
     )
     sts: str = Field(
         default=None,
@@ -56,6 +57,7 @@ class Schema(CGIModel):
         ),
         max_length=12,
         min_length=12,
+        pattern=r"^\d{12}$",
     )
     ts: AwareDatetime = Field(
         default=None,

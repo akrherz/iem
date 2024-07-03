@@ -293,7 +293,7 @@ def do_polygon(ctx):
             )
     # We need to figure out how to get the warnings either by state or by wfo
     if t == "cwa":
-        (west, south, east, north) = wfo_bounds[station]
+        (west, south, east, north) = wfo_bounds[station[-3:]]
     else:
         (west, south, east, north) = state_bounds[state]
     # buffer by 5 degrees so to hopefully get all polys
