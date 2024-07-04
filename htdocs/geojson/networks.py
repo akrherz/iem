@@ -1,63 +1,68 @@
-"""Generate a GeoJSON of current storm based warnings"""
+""".. title:: IEM Networks GeoJSON
 
-import datetime
+Return to `JSON Services </json/>`_
+
+This service provides a GeoJSON representation of the IEM Networks.
+
+"""
+
 import json
 
+from pydantic import Field
+from pyiem.database import get_sqlalchemy_conn
 from pyiem.reference import ISO8601
-from pyiem.util import get_dbconnc, html_escape
-from pyiem.webutil import iemapp
-from pymemcache.client import Client
+from pyiem.util import utc
+from pyiem.webutil import CGIModel, iemapp
+from sqlalchemy import text
+
+
+class Schema(CGIModel):
+    """See how we are called."""
+
+    callback: str = Field(None, description="JSONP callback function")
 
 
 def run():
     """Actually do the hard work of getting the current SBW in geojson"""
-    pgconn, cursor = get_dbconnc("mesosite")
-
-    utcnow = datetime.datetime.utcnow()
-
-    cursor.execute(
-        "SELECT ST_asGeoJson(extent) as geojson, id, name "
-        "from networks WHERE extent is not null ORDER by id ASC"
-    )
-
-    res = {
-        "type": "FeatureCollection",
-        "features": [],
-        "generation_time": utcnow.strftime(ISO8601),
-        "count": cursor.rowcount,
-    }
-    for row in cursor:
-        res["features"].append(
-            dict(
-                type="Feature",
-                id=row["id"],
-                properties=dict(name=row["name"]),
-                geometry=json.loads(row["geojson"]),
+    with get_sqlalchemy_conn("mesosite") as conn:
+        res = conn.execute(
+            text(
+                "SELECT ST_asGeoJson(extent) as geojson, id, name "
+                "from networks WHERE extent is not null ORDER by id ASC"
             )
         )
-    pgconn.close()
-    return json.dumps(res)
+
+        data = {
+            "type": "FeatureCollection",
+            "features": [],
+            "generation_time": utc().strftime(ISO8601),
+            "count": res.rowcount,
+        }
+        for row in res:
+            row = row._asdict()
+            data["features"].append(
+                dict(
+                    type="Feature",
+                    id=row["id"],
+                    properties=dict(name=row["name"]),
+                    geometry=json.loads(row["geojson"]),
+                )
+            )
+    return json.dumps(data)
 
 
-@iemapp()
-def application(environ, start_response):
+@iemapp(
+    memcacheexpire=86400,
+    memcachekey="/geojson/network.geojson",
+    content_type="application/vnd.geo+json",
+    help=__doc__,
+    schema=Schema,
+)
+def application(_environ, start_response):
     """Do Something"""
     # Go Main Go
     headers = [("Content-type", "application/vnd.geo+json")]
 
-    cb = environ.get("callback", None)
-
-    mckey = "/geojson/network.geojson"
-    mc = Client("iem-memcached:11211")
-    res = mc.get(mckey)
-    if not res:
-        res = run()
-        mc.set(mckey, res, 86400)
-    else:
-        res = res.decode("utf-8")
-    mc.close()
-    if cb is not None:
-        res = f"{html_escape(cb)}({res})"
-
+    res = run()
     start_response("200 OK", headers)
-    return [res.encode("ascii")]
+    return res.encode("ascii")

@@ -1,14 +1,31 @@
-"""GeoJSON source for VTEC event"""
+""".. title:: VTEC Event GeoJSON Service
+
+Return to `JSON Services </json/>`_
+
+"""
 
 import datetime
 
 import simplejson as json
+from pydantic import Field
 from pyiem.database import get_dbconnc
-from pyiem.exceptions import IncompleteWebRequest
 from pyiem.reference import ISO8601
-from pyiem.util import html_escape
-from pyiem.webutil import iemapp
-from pymemcache.client import Client
+from pyiem.webutil import CGIModel, iemapp
+
+
+class Schema(CGIModel):
+    """See how we are called."""
+
+    callback: str = Field(None, description="JSONP callback function name")
+    wfo: str = Field("MPX", description="3 or 4 character WFO Identifier")
+    year: int = Field(2015, description="Year of interest")
+    phenomena: str = Field("SV", description="VTEC Phenomena", max_length=2)
+    significance: str = Field(
+        "W", description="VTEC Significance", max_length=1
+    )
+    etn: int = Field(1, description="VTEC Event ID")
+    sbw: bool = Field(False, description="Include SBW polygons")
+    lsrs: bool = Field(False, description="Include LSRs in the VTEC Event")
 
 
 def run_lsrs(wfo, year, phenomena, significance, etn, sbw):
@@ -146,48 +163,56 @@ def run(wfo, year, phenomena, significance, etn):
     return json.dumps(res)
 
 
-@iemapp()
+def get_mckey(environ):
+    """Return the key."""
+    return (
+        f"/geojson/vtec_event/{environ['wfo']}/{environ['year']}/"
+        f"{environ['phenomena']}/{environ['significance']}/"
+        f"{environ['etn']}/{environ['sbw']}/{environ['lsrs']}"
+    )
+
+
+@iemapp(
+    schema=Schema,
+    help=__doc__,
+    content_type="application/vnd.geo+json",
+    memcacheexpire=3600,
+    memcachekey=get_mckey,
+)
 def application(environ, start_response):
     """Main()"""
     headers = [("Content-type", "application/vnd.geo+json")]
 
-    wfo = environ.get("wfo", "MPX")
+    wfo = environ["wfo"]
     if len(wfo) == 4:
         wfo = wfo[1:]
-    try:
-        year = int(environ.get("year", 2015))
-        phenomena = environ.get("phenomena", "SV")[:2]
-        significance = environ.get("significance", "W")[:1]
-        etn = int(environ.get("etn", 1))
-        sbw = int(environ.get("sbw", 0))
-        lsrs = int(environ.get("lsrs", 0))
-    except ValueError as exp:
-        raise IncompleteWebRequest(
-            "Invalid request, missing required params"
-        ) from exp
-    cb = environ.get("callback", None)
 
-    mckey = (
-        f"/geojson/vtec_event/{wfo}/{year}/{phenomena}/{significance}/"
-        f"{etn}/{sbw}/{lsrs}"
-    )
-    mc = Client("iem-memcached:11211")
-    res = mc.get(mckey)
-    if not res:
-        if lsrs == 1:
-            res = run_lsrs(wfo, year, phenomena, significance, etn, sbw)
-        else:
-            if sbw == 1:
-                res = run_sbw(wfo, year, phenomena, significance, etn)
-            else:
-                res = run(wfo, year, phenomena, significance, etn)
-        mc.set(mckey, res, 3600)
+    if environ["lsrs"]:
+        res = run_lsrs(
+            wfo,
+            environ["year"],
+            environ["phenomena"],
+            environ["significance"],
+            environ["etn"],
+            environ["sbw"],
+        )
     else:
-        res = res.decode("utf-8")
-    mc.close()
-
-    if cb is not None:
-        res = f"{html_escape(cb)}({res})"
+        if environ["sbw"]:
+            res = run_sbw(
+                wfo,
+                environ["year"],
+                environ["phenomena"],
+                environ["significance"],
+                environ["etn"],
+            )
+        else:
+            res = run(
+                wfo,
+                environ["year"],
+                environ["phenomena"],
+                environ["significance"],
+                environ["etn"],
+            )
 
     start_response("200 OK", headers)
-    return [res.encode("ascii")]
+    return res.encode("ascii")

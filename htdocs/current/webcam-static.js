@@ -1,8 +1,4 @@
-/*
- * Javascript that drives the still image display of webcams.
- * 
- * Feel free to use this for whatever! 
- */
+/* global Ext */
 Ext.namespace('app');
 var imagestore;
 var disableStore;
@@ -70,14 +66,14 @@ Ext.onReady(function () {
                 name: record.get("cid"),
                 checked: checked,
                 listeners: {
-                    change: function (cb, checked, oldValue) {
+                    change: (cb, isChecked) => {
                         var id = cb.getName();
                         //console.log("cid: "+ id +" checked: "+ checked);
                         if (!imagestore.isLoaded) { return; }
 
                         var rec = imagestore.getAt(imagestore.find("cid", id));
-                        rec.set('show', checked, { silent: true });
-                        if (checked) {
+                        rec.set('show', isChecked, { silent: true });
+                        if (isChecked) {
                             rec = disableStore.getAt(disableStore.find('cid', id));
                             disableStore.remove(rec);
                             imagestore.sort(Ext.getCmp("sortSelect").getValue(), "ASC");

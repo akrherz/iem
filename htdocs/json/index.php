@@ -128,10 +128,7 @@ $services[] = array(
 
 $services[] = array(
     "title" => "IEM Tracked Networks Metadata",
-    "url" => "/geojson/networks.geojson",
-    "desc" => "A GeoJSON listing of IEM labelled networks.",
-    "vars" => array(),
-    "example" => array()
+    "url" => "/geojson/networks.geojson?help",
 );
 
 $services[] = array(

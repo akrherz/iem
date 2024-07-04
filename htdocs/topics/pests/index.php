@@ -175,11 +175,12 @@ the backend that generates the maps/data here.</p>
 <h3>European Corn Borer (Ostrinia nubilalis)</h3>
 <p>Key Degree Day Levels:</p>
 <ul>
- <li><strong>May 20:</strong> Approximate Start Date</li>
+ <li><strong>May 20:</strong> Approximate Start Date (actual start date is first spring moth capture)</li>
  <li><strong>212</strong>: 1st generation egg hatch</li>
  <li><strong>1,192</strong>: Egg-laying occurs</li>
 </ul>
 
+<p><a href="https://crops.extension.iastate.edu/encyclopedia/european-corn-borer">Learn more here!</a></p>
 <p></p>
 </div>
 
