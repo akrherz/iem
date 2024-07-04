@@ -1,8 +1,4 @@
-/*
- * Javascript that drives the still image display of webcams.
- * 
- * Feel free to use this for whatever! 
- */
+/* global Ext */
 Ext.namespace('app');
 var imagestore;
 var disableStore;

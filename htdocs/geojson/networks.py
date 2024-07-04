@@ -58,7 +58,7 @@ def run():
     help=__doc__,
     schema=Schema,
 )
-def application(environ, start_response):
+def application(_environ, start_response):
     """Do Something"""
     # Go Main Go
     headers = [("Content-type", "application/vnd.geo+json")]
