@@ -1,16 +1,44 @@
-"""Produce geojson of CLI data"""
+""".. title:: Daily CLImate Reports
+
+Return to `JSON Services </json/>`_ | View `Map Frontend </nws/climap.php>`_
+or `Table Frontend </nws/clitable.php>`_
+
+Documentation for /geojson/cli.py
+---------------------------------
+
+This service emits atomic data for a given date of NWS CLImate reporting.  This
+is based on a parsing of the `CLI` product, which contains daily climate
+summaries for mostly airport weather stations.  This service primarily is used
+to output GeoJSON, but there is a CSV option as well.
+
+"""
 
 import datetime
 
 import simplejson as json
-from pyiem.exceptions import IncompleteWebRequest
+from pydantic import Field
 from pyiem.reference import TRACE_VALUE
-from pyiem.util import html_escape
-from pyiem.webutil import iemapp
-from pymemcache.client import Client
+from pyiem.webutil import CGIModel, iemapp
 from simplejson import encoder
 
 encoder.FLOAT_REPR = lambda o: format(o, ".2f")
+
+
+class Schema(CGIModel):
+    """See how we are called."""
+
+    callback: str = Field(
+        default=None, description="JSONP callback function name."
+    )
+    dl: bool = Field(default=False, description="Force download of CSV file.")
+    dt: datetime.date = Field(
+        default=datetime.date.today(), description="Date of interest."
+    )
+    fmt: str = Field(
+        default="geojson",
+        description="The output format requested.",
+        pattern="^(geojson|csv)$",
+    )
 
 
 def departure(ob, climo):
@@ -77,7 +105,7 @@ def get_data(cursor, ts, fmt):
     from cli_data c JOIN stations s on (c.station = s.id)
     WHERE s.network = 'NWSCLI' and c.valid = %s
     """,
-        (ts.date(),),
+        (ts,),
     )
     for i, row in enumerate(cursor):
         data["features"].append(
@@ -197,44 +225,52 @@ def get_data(cursor, ts, fmt):
     return res
 
 
-@iemapp(iemdb="iem", iemdb_cursorname="cursor")
+def get_ct(environ):
+    """Get the content-type."""
+    fmt = environ["fmt"]
+    if fmt == "geojson":
+        return "application/vnd.geo+json"
+    if fmt == "csv" and environ["dl"]:
+        return "application/octet-stream"
+    if fmt == "csv":
+        return "text/plain"
+    return "text/plain"
+
+
+def get_mckey(environ):
+    """Figure out the memcache key."""
+    return f"/geojson/cli/{environ['dt']:%Y%m%d}?fmt={environ['fmt']}"
+
+
+@iemapp(
+    help=__doc__,
+    schema=Schema,
+    content_type=get_ct,
+    memcachekey=get_mckey,
+    memcacheexpire=300,
+    iemdb="iem",
+    iemdb_cursorname="cursor",
+)
 def application(environ, start_response):
     """see how we are called"""
-    dt = environ.get("dt", datetime.date.today().strftime("%Y-%m-%d"))
-    try:
-        ts = datetime.datetime.strptime(dt, "%Y-%m-%d")
-    except Exception as exp:
-        raise IncompleteWebRequest("Invalid dt provided.") from exp
-    cb = environ.get("callback", None)
-    fmt = environ.get("fmt", "geojson")
+    fmt = environ["fmt"]
 
     headers = []
     if fmt == "geojson":
         headers.append(("Content-type", "application/vnd.geo+json"))
-    elif fmt == "csv" and environ.get("dl", None) is not None:
+    elif fmt == "csv" and environ["dl"]:
         headers.extend(
             [
                 ("Content-type", "application/octet-stream"),
                 (
                     "Content-disposition",
-                    f"attachment; filename=cli{ts:%Y%m%d}.csv",
+                    f"attachment; filename=cli{environ['dt']:%Y%m%d}.csv",
                 ),
             ]
         )
     else:
         headers.append(("Content-type", "text/plain"))
 
-    mckey = f"/geojson/cli/{ts:%Y%m%d}?callback={cb}&fmt={fmt}"
-    mc = Client("iem-memcached:11211")
-    data = mc.get(mckey)
-    if data is None:
-        data = get_data(environ["iemdb.iem.cursor"], ts, fmt)
-        mc.set(mckey, data.encode("utf-8"), 300)
-    else:
-        data = data.decode("utf-8")
-    mc.close()
-    if cb is not None:
-        data = f"{html_escape(cb)}({data})"
-
+    data = get_data(environ["iemdb.iem.cursor"], environ["dt"], fmt)
     start_response("200 OK", headers)
-    return [data.encode("ascii")]
+    return data.encode("ascii")
