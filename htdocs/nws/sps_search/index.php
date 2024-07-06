@@ -15,7 +15,7 @@ $t->jsextra = <<<EOF
 <script src="/vendor/select2/4.1.0rc0/select2.min.js"></script>
 <script src='/vendor/openlayers/{$OL}/ol.js'></script>
 <script type="text/javascript" src="/js/olselect-lonlat.js"></script>
-<script type="text/javascript" src="search.js"></script>
+<script type="text/javascript" src="search.js?v=2"></script>
 EOF;
 
 $t->headextra = <<<EOF

@@ -22,8 +22,8 @@ function updateTable(){
         data: {
             lat: $("#lat").val(),
             lon: $("#lon").val(),
-            sdate: $.datepicker.formatDate("yy/mm/dd", sdate.datepicker("getDate")),
-            edate: $.datepicker.formatDate("yy/mm/dd", edate.datepicker("getDate"))
+            sdate: $.datepicker.formatDate("yy-mm-dd", sdate.datepicker("getDate")),
+            edate: $.datepicker.formatDate("yy-mm-dd", edate.datepicker("getDate"))
         },
         url: BACKEND_SPS_BYPOINT,
         dataType: "json",
@@ -50,8 +50,8 @@ function buildUI(){
             fmt: (btn.data("opt") == "csv") ? "csv" : "xlsx",
             lat: $("#lat").val(),
             lon: $("#lon").val(),
-            sdate: $.datepicker.formatDate("yy/mm/dd", sdate.datepicker("getDate")),
-            edate: $.datepicker.formatDate("yy/mm/dd", edate.datepicker("getDate"))
+            sdate: $.datepicker.formatDate("yy-mm-dd", sdate.datepicker("getDate")),
+            edate: $.datepicker.formatDate("yy-mm-dd", edate.datepicker("getDate"))
         };
         window.location = `${url}?${$.param(params)}`;
     });

@@ -33,7 +33,7 @@ height="350"></embed></object>
 </div>
 </div>
 
-<h4>Available Tools:</h4>
+<h3>Available Tools:</h3>
 <ul>
     <li><a href="/current/webcam.php">Current/Archived Still Images</a>
         <br />This page contains a simple listing of webcam images</li>
@@ -53,8 +53,28 @@ height="350"></embed></object>
         <a href="https://youtube.com/akrherz">daryl's youtube channel</a>.</li>
 </ul>
 
-<h4>Frequently Asked Questions</h4>
-        
+<h3>Accessing the Archive</h3>
+
+<p>Unfortunately, there is no simple means to quickly download large chunks of
+webcam images. Here are a few options though:</p>
+
+<ol>
+<li>Run a web mirror/scraper against the per-UTC
+<a href="/archive/data/2024/07/06/camera/">date folders</a></li>
+<li>Hit the <a href="/json/#IEM+Webcam+Availability">Webcam JSON API</a>
+without providing a network parameter and get all imagery close to a given
+timestamp.  The JSON metadata will contain the URL to the image.</li>
+<li><strong>Blunt Force Method</strong>: The IEM creates per UTC date tarballs
+of the archive/data folder.  Inside of these will be a <code>camera</code>
+folder with all the images for that day.  You can download these tarballs
+<a href="https://iastate.box.com/s/f8pnccjpedqmd4jnppafnkbjxjgxgqwj">here</a>,
+but box.com does not allow this to be very programatic.  But if you share with
+us your box.com account, there is then a means to share that folder with you
+and you can then automate a download.</li>
+</ol>
+
+<h3>Frequently Asked Questions</h3>
+
 <p><strong>What hardware are you using?</strong>
 <br />The TV networks contain a mix of Canon VB-C10, VB-C50 and VB-C60 model
         webcams.  The newer webcams are Axis brand, due to the requirement for
