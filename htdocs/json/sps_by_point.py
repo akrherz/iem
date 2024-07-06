@@ -1,39 +1,80 @@
-"""Get SPS by point."""
+""".. title:: Special Weather Statements (SPS) by Point
+
+Return to `JSON Services </json/>`_
+
+This service returns any Special Weather Statements (SPS) that included a
+polygon threat area.
+
+Changelog
+---------
+
+- 2024-07-06: The `sdate` and `edate` parameters were rectified to be in the
+format of `YYYY-mm-dd` instead of `YYYY/mm/dd`.
+
+"""
 
 import datetime
 import json
-import sys
 from io import BytesIO, StringIO
 
 import numpy as np
 import pandas as pd
+from pydantic import AwareDatetime, Field
 from pyiem.database import get_sqlalchemy_conn
-from pyiem.exceptions import IncompleteWebRequest
 from pyiem.reference import ISO8601
 from pyiem.util import utc
-from pyiem.webutil import iemapp
+from pyiem.webutil import CGIModel, iemapp
 from sqlalchemy import text
 
 EXL = "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"
 
 
-def get_events(ctx):
+class Schema(CGIModel):
+    """See how we are called."""
+
+    callback: str = Field(None, description="JSONP callback function name")
+    fmt: str = Field(
+        "json",
+        pattern="^(json|csv|xlsx)$",
+        description="The format of the output, either json, csv, or xlsx",
+    )
+    lat: float = Field(default=41.99, description="Latitude of point")
+    lon: float = Field(default=-92.0, description="Longitude of point")
+    sdate: datetime.date = Field(
+        default=datetime.date(2002, 1, 1),
+        description="Start date of search",
+    )
+    edate: datetime.date = Field(
+        default=datetime.date(2099, 1, 1),
+        description="End date of search",
+    )
+    valid: AwareDatetime = Field(
+        default=None,
+        description="If provided, only include events valid at this time.",
+    )
+
+
+def get_events(environ):
     """Get Events"""
-    data = {"data": [], "lon": ctx["lon"], "lat": ctx["lat"], "valid": None}
+    data = {
+        "data": [],
+        "lon": environ["lon"],
+        "lat": environ["lat"],
+        "valid": environ["valid"],
+    }
     data["generation_time"] = utc().strftime(ISO8601)
     valid_limiter = ""
     params = {
-        "lon": ctx["lon"],
-        "lat": ctx["lat"],
-        "sdate": ctx["sdate"],
-        "edate": ctx["edate"],
+        "lon": environ["lon"],
+        "lat": environ["lat"],
+        "sdate": environ["sdate"],
+        "edate": environ["edate"],
+        "valid": environ["valid"],
     }
-    if "valid" in ctx:
+    if environ["valid"] is not None:
         valid_limiter = " and issue <= :valid and expire > :valid "
-        data["valid"] = ctx["valid"].strftime(ISO8601)
-        params["valid"] = ctx["valid"]
+        data["valid"] = environ["valid"].strftime(ISO8601)
 
-    params["giswkt"] = f"POINT({ctx['lon']} {ctx['lat']})"
     with get_sqlalchemy_conn("postgis") as conn:
         df = pd.read_sql(
             text(
@@ -43,7 +84,7 @@ def get_events(ctx):
     to_char(issue at time zone 'UTC', 'YYYY-MM-DDThh24:MIZ') as issue,
     to_char(expire at time zone 'UTC', 'YYYY-MM-DDThh24:MIZ') as expire
     from sps where
-    ST_Contains(geom, ST_SetSRID(ST_GeomFromEWKT(:giswkt),4326)) and
+    ST_Contains(geom, ST_Point(:lon, :lat, 4326)) and
     issue > :sdate and expire < :edate
     {valid_limiter} ORDER by issue ASC
         """
@@ -76,42 +117,16 @@ def to_json(data, df):
     return data
 
 
-def try_valid(ctx, environ):
-    """See if a valid stamp is provided or not."""
-    if environ.get("valid") is None:
-        return
-    # parse at least the YYYY-mm-ddTHH:MM
-    ts = datetime.datetime.strptime(environ["valid"][:16], "%Y-%m-%dT%H:%M")
-    ctx["valid"] = utc(ts.year, ts.month, ts.day, ts.hour, ts.minute)
-
-
-@iemapp()
+@iemapp(
+    help=__doc__,
+    schema=Schema,
+)
 def application(environ, start_response):
     """Answer request."""
-    ctx = {}
-    ctx["lat"] = float(environ.get("lat", 41.99))
-    ctx["lon"] = float(environ.get("lon", -92.0))
-    try:
-        ctx["sdate"] = datetime.datetime.strptime(
-            environ.get("sdate", "2002/1/1"), "%Y/%m/%d"
-        )
-        ctx["edate"] = datetime.datetime.strptime(
-            environ.get("edate", "2099/1/1"), "%Y/%m/%d"
-        )
-    except Exception as exp:
-        raise IncompleteWebRequest("Invalid sdate or edate provided") from exp
     fmt = environ.get("fmt", "json")
-    try:
-        try_valid(ctx, environ)
-    except Exception as exp:
-        sys.stderr.write(str(exp))
-        headers = [("Content-type", "text/plain")]
-        start_response("500 Internal Server Error", headers)
-        return [b"Failed to parse valid, ensure YYYY-mm-ddTHH:MM:SSZ"]
-
-    data, df = get_events(ctx)
+    data, df = get_events(environ)
     if fmt == "xlsx":
-        fn = f"sps_{ctx['lat']:.4f}N_{(0 - ctx['lon']):.4f}W.xlsx"
+        fn = f"sps_{environ['lat']:.4f}N_{(0 - environ['lon']):.4f}W.xlsx"
         headers = [
             ("Content-type", EXL),
             ("Content-disposition", f"attachment; Filename={fn}"),
@@ -121,7 +136,7 @@ def application(environ, start_response):
         df.to_excel(bio, index=False)
         return [bio.getvalue()]
     if fmt == "csv":
-        fn = f"sps_{ctx['lat']:.4f}N_{(0 - ctx['lon']):.4f}W.csv"
+        fn = f"sps_{environ['lat']:.4f}N_{(0 - environ['lon']):.4f}W.csv"
         headers = [
             ("Content-type", "application/octet-stream"),
             ("Content-disposition", f"attachment; Filename={fn}"),

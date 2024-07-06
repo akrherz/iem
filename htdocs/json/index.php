@@ -509,6 +509,12 @@ $services[] = array(
 );
 
 $services[] = array(
+    "title" => "Special Weather Statements (SPS) Polygons Query by Point",
+    "url" => "/json/sps_by_point.py?help",
+);
+
+
+$services[] = array(
     "title" => "Search for Warnings by UGC Code and Date Interval",
     "url" => "/json/vtec_events_byugc.py?ugc={ugc}&edate={edate}&sdate={sdate}",
     "desc" => "Provides a json response of archived warnings valid for the

@@ -184,7 +184,7 @@ def get_data(ctx, startyear):
         months = list(range(1, 13))
     elif ctx["season"] == "water_year":
         deltadays = 92
-        months = range(1, 13)
+        months = list(range(1, 13))
         lastyear += 1
     elif ctx["season"] == "spring":
         months = [3, 4, 5]
