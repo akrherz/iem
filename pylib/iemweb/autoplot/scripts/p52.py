@@ -27,11 +27,23 @@ from pyiem.plot import figure
 from pyiem.util import get_autoplot_context
 from sqlalchemy import text
 
+PDICT = {
+    "wfo": "NWS Forecast Office",
+    "ugc": "County/Zone",
+}
+
 
 def get_description():
     """Return a dict describing how to call this plotter"""
     desc = {"description": __doc__, "cache": 600, "data": True}
     desc["arguments"] = [
+        {
+            "type": "select",
+            "name": "for",
+            "default": "wfo",
+            "label": "Plot for:",
+            "options": PDICT,
+        },
         dict(
             type="networkselect",
             name="station",
@@ -39,6 +51,12 @@ def get_description():
             default="DMX",
             label="Select WFO:",
         ),
+        {
+            "type": "ugc",
+            "name": "ugc",
+            "label": "Select UGC Zone:",
+            "default": "IAC169",
+        },
         dict(
             type="date",
             name="sdate",
@@ -101,6 +119,34 @@ def make_url(row, state):
     )
 
 
+def compute_ugcs(ugc, valid):
+    """Figure out UGCS that overlap this one in space and time."""
+    ugcs = []
+    name = ""
+    with get_sqlalchemy_conn("postgis") as conn:
+        res = conn.execute(
+            text(
+                """
+            with useme as (
+            SELECT geom, st_area(geom) from ugcs
+            where (end_ts > :valid or end_ts is null) and
+            begin_ts < :valid and ugc = :ugc LIMIT 1
+            )
+            select ugc, name from ugcs u, useme m where
+            st_area(st_intersection(u.geom, m.geom)) / m.st_area > 0.5
+            and (u.end_ts > :valid or u.end_ts is null) and
+            u.begin_ts < :valid
+        """
+            ),
+            {"valid": valid, "ugc": ugc},
+        )
+        for row in res:
+            ugcs.append(row[0])
+            if row[0] == ugc:
+                name = row[1]
+    return list(set(ugcs)), name
+
+
 def plotter(fdict):
     """Go"""
     ctx = get_autoplot_context(fdict, get_description())
@@ -117,13 +163,22 @@ def plotter(fdict):
         "wfo": station if len(station) == 3 else station[1:],
         "sts": sts,
         "ets": ets,
+        "ugcs": [
+            ctx["ugc"],
+        ],
     }
+    title = f"NWS {ctx['_nt'].sts[station]['name']} issued "
+    limiter = "wfo = :wfo"
+    if ctx["for"] == "ugc":
+        limiter = "ugc = ANY(:ugcs)"
+        params["ugcs"], name = compute_ugcs(ctx["ugc"], sts)
+        title = f"NWS issued for {name} [{', '.join(params['ugcs'])}] "
     date_cols = ["minproductissue", "minissue", "maxexpire", "maxinitexpire"]
     with get_sqlalchemy_conn("postgis") as conn:
         df = pd.read_sql(
             text(
-                """
-            SELECT phenomena, significance, eventid,
+                f"""
+            SELECT wfo, phenomena, significance, eventid,
             min(product_issue at time zone 'UTC') as minproductissue,
             min(issue at time zone 'UTC') as minissue,
             max(expire at time zone 'UTC') as maxexpire,
@@ -131,8 +186,8 @@ def plotter(fdict):
                 as maxinitexpire,
             extract(year from product_issue)::int as year
             from warnings
-            WHERE wfo = :wfo and issue > :sts and issue < :ets
-            GROUP by phenomena, significance, eventid, year
+            WHERE {limiter} and issue > :sts and issue < :ets
+            GROUP by wfo, phenomena, significance, eventid, year
             ORDER by minproductissue ASC
         """
             ),
@@ -145,7 +200,6 @@ def plotter(fdict):
         raise NoDataFound("No events were found for WFO and time period.")
     for col in date_cols:
         df[col] = df[col].dt.tz_localize(ZoneInfo("UTC"))
-    df["wfo"] = station
     df["endts"] = df[["maxexpire", "maxinitexpire"]].max(axis=1)
     # Flood warnings, for example, could have an issuance until-further-notice
     # which is not helpful for this plot, so don't allow a maxinitexpire
@@ -166,8 +220,7 @@ def plotter(fdict):
     # If we have lots of WWA, we need to expand vertically a bunch, lets
     # assume we can plot 5 WAA per 100 pixels
     title = (
-        f"NWS {ctx['_nt'].sts[station]['name']} "
-        "issued Watch/Warning/Advisories\n"
+        f"{title} Watch/Warning/Advisories\n"
         f"{sts:%-d %b %Y} through "
         f"{(ets - datetime.timedelta(days=1)):%-d %b %Y}"
     )
