@@ -66,6 +66,10 @@ function doOutlook(lon, lat) {
     $("#outlook_spinner").show();
     const jsonurl = `/json/spcoutlook.py?lon=${lon}&lat=${lat}&last=${last}&day=${day}&cat=${cat}`;
     $("#outlooks_link").attr('href', jsonurl);
+    const excelurl = `/json/spcoutlook.py?lon=${lon}&lat=${lat}&last=${last}&day=${day}&cat=${cat}&fmt=excel`;
+    $("#outlooks_excel").attr('href', excelurl);
+    const csvurl = `/json/spcoutlook.py?lon=${lon}&lat=${lat}&last=${last}&day=${day}&cat=${cat}&fmt=csv`;
+    $("#outlooks_csv").attr('href', csvurl);
     $.ajax({
         dataType: "json",
         url: jsonurl,
@@ -85,10 +89,15 @@ function doMCD(lon, lat) {
     $("#mcd_spinner").show();
     const jsonurl = `/json/spcmcd.py?lon=${lon}&lat=${lat}`;
     $("#mcds_link").attr('href', jsonurl);
+    const excelurl = `/json/spcmcd.py?lon=${lon}&lat=${lat}&fmt=excel`;
+    $("#mcds_excel").attr('href', excelurl);
+    const csvurl = `/json/spcmcd.py?lon=${lon}&lat=${lat}&fmt=csv`;
+    $("#mcds_csv").attr('href', csvurl);
     $.ajax({
         dataType: "json",
         url: jsonurl,
         success(data) {
+            console.log("Hello?");
             $("#mcd_spinner").hide();
             $.each(data.mcds, (_index, mcd) => {
 
@@ -113,6 +122,10 @@ function doWatch(lon, lat) {
     $("#watch_spinner").show();
     const jsonurl = `/json/spcwatch.py?lon=${lon}&lat=${lat}`;
     $("#watches_link").attr('href', jsonurl);
+    const excelurl = `/json/spcwatch.py?lon=${lon}&lat=${lat}&fmt=excel`;
+    $("#watches_excel").attr('href', excelurl);
+    const csvurl = `/json/spcwatch.py?lon=${lon}&lat=${lat}&fmt=csv`;
+    $("#watches_csv").attr('href', csvurl);
     $.ajax({
         dataType: "json",
         url: jsonurl,
@@ -120,7 +133,12 @@ function doWatch(lon, lat) {
             $("#watch_spinner").hide();
             $.each(data.features, (_index, feature) => {
                 const watch = feature.properties;
-                tbody.append(`<tr><td><a href="${watch.spcurl}" target="_blank">${watch.year} ${watch.number}</a></td><td>${watch.type}</td><td>${watch.issue}</td><td>${watch.expire}</td></tr>`)
+                tbody.append(
+                    `<tr><td><a href="${watch.spcurl}" target="_blank">${watch.year} `+
+                    `${watch.number}</a></td><td>${watch.type}</td><td>${watch.issue}</td>`+
+                    `<td>${watch.expire}</td><td>${watch.max_hail_size}</td>`+
+                    `<td>${watch.max_wind_gust_knots}</td>`+
+                    `<td>${watch.is_pds}</td></tr>`)
             });
             if (data.features.length === 0) {
                 tbody.append('<tr><td colspan="4">No Results Found!</td></tr>');

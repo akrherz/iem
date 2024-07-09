@@ -11,16 +11,16 @@ $OL = "9.2.4";
 $t->jsextra = <<<EOF
 <script src='/vendor/openlayers/{$OL}/ol.js'></script>
 <script type="text/javascript" src="/js/olselect-lonlat.js"></script>
-<script type="text/javascript" src="search.js"></script>
+<script type="text/javascript" src="search.js?v=2"></script>
 EOF;
 $t->headextra = <<<EOF
 <link rel="stylesheet" type="text/css" href="/vendor/openlayers/{$OL}/ol.css" />
 <style>
-  .map {
+.map {
     width: 100%;
     height: 400px;
     float: left;
-  }
+}
 </style>
 EOF;
 $t->title = "SPC Convective Outlook + Discussion + Watch Search by Point";
@@ -33,8 +33,9 @@ $t->content = <<<EOF
 <p>This application allows you to search an archive of Storm Prediction Center (SPC)
 Convective Outlooks, Mesoscale Convective Discussions (MCD)s, and Convective Watches.
 This archive is <strong>unofficial</strong> and based on IEM's processing of text products issued by
-the SPC. The "Copy ... to Clipboard" button allows you to automatically copy the table to
-your system clipboard and then within your Spreadsheet application, paste the table!</p>
+the SPC. Each tab presents buttons that allow for a download of the data in
+Excel or CSV format and a direct link to the JSON service backending the
+table.</p>
 
 <div class="clearfix"></div>
 
@@ -78,10 +79,10 @@ your system clipboard and then within your Spreadsheet application, paste the ta
 <p>This archive dates back until <strong>1987</strong>.</p>
 
 <div class="pull-right">
-    <button class="btn btn-default"
-    onclick="selectElementContents('outlooks');">
-    <i class="fa fa-clipboard"></i> Copy Outlooks to Clipboard
-    </button>
+    <a class="btn btn-default" href="/" target="_blank" id="outlooks_excel">
+    <i class="fa fa-table"></i> Download as Excel</a>
+    <a class="btn btn-default" href="/" target="_blank" id="outlooks_csv">
+    <i class="fa fa-table"></i> Download as CSV</a>
     <a class="btn btn-default" href="/" target="_blank" id="outlooks_link">
     <i class="fa fa-link"></i> JSON-P Webservice</a>
 </div>
@@ -105,10 +106,10 @@ your system clipboard and then within your Spreadsheet application, paste the ta
 on the MCD polygon included within the text.</p>
 
 <div class="pull-right">
-    <button class="btn btn-default"
-    onclick="selectElementContents('mcds');">
-    <i class="fa fa-clipboard"></i> Copy MCDs to Clipboard
-    </button>
+    <a class="btn btn-default" href="/" target="_blank" id="mcds_excel">
+    <i class="fa fa-table"></i> Download as Excel</a>
+    <a class="btn btn-default" href="/" target="_blank" id="mcds_csv">
+    <i class="fa fa-table"></i> Download as CSV</a>
     <a class="btn btn-default" href="/" target="_blank" id="mcds_link">
     <i class="fa fa-link"></i> JSON-P Webservice</a>
 </div>
@@ -138,10 +139,10 @@ watches!</strong>  You should use the <a href="/vtec/search.php">VTEC Search</a>
 tool to get more accurate results for the watch-by-county era.</p>
 
 <div class="pull-right">
-    <button class="btn btn-default"
-    onclick="selectElementContents('watches');">
-    <i class="fa fa-clipboard"></i> Copy Watches to Clipboard
-    </button>
+    <a class="btn btn-default" href="/" target="_blank" id="watches_excel">
+    <i class="fa fa-table"></i> Download as Excel</a>
+    <a class="btn btn-default" href="/" target="_blank" id="watches_csv">
+    <i class="fa fa-table"></i> Download as CSV</a>
     <a class="btn btn-default" href="/" target="_blank" id="watches_link">
     <i class="fa fa-link"></i> GeoJSON-P Webservice</a>
 </div>
@@ -149,7 +150,9 @@ tool to get more accurate results for the watch-by-county era.</p>
 <table id="watches" class="table table-condensed table-bordered table-striped">
 <caption></caption>
 <thead>
-<tr><th>Watch Number</th><th>Type</th><th>UTC Valid</th><th>UTC Expire</th></tr>
+<tr><th>Watch Number</th><th>Type</th><th>UTC Valid</th><th>UTC Expire</th>
+<th>Max Hail Size</th><th>Max Wind Speed</th><th>Is PDS?</th>
+</tr>
 </thead>
 <tbody>
 
@@ -163,6 +166,5 @@ tool to get more accurate results for the watch-by-county era.</p>
     </div><!-- ./col-md-8 -->
 </div><!-- ./row -->
 
-        
 EOF;
 $t->render('full.phtml');
