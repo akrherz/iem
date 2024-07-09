@@ -448,59 +448,16 @@ $services[] = array(
 
 $services[] = array(
     "title" => "Storm Prediction Center Mesoscale Convection Discussions by Lat/Lon Point",
-    "url" => "/json/spcmcd.py?lon={longitude}&amp;lat={latitude}",
-    "desc" => "Provides a listing of Mesoscale Convective Discussions (MCD)s dating back to" .
-        " October 2008.",
-    "vars" => array(
-        "lat" => "Latitude in degrees",
-        "lon" => "Longitude in (degrees east)",
-    ),
-    "example" => array(
-        "{latitude}" => "42.5",
-        "{longitude}" => "-95.0",
-    )
+    "url" => "/json/spcmcd.py?help",
 );
 
 $services[] = array(
     "title" => "Storm Prediction Center Convective Outlooks by Lat/Lon Point",
-    "url" => "/json/spcoutlook.py?lon={longitude}&amp;lat={latitude}&amp;last={last}&amp;day={day}&amp;cat={cat}",
-    "desc" => "Provides a listing of convective outlooks dating back to" .
-        " March 2002.",
-    "vars" => array(
-        "lat" => "Latitude in degrees",
-        "lon" => "Longitude in (degrees east)",
-        "last" => "(Optional) Include only the last number of outlooks for each category, 0 is all",
-        "day" => "(Optional) Which outlook day to request, defaults to 1",
-        "cat" => "(Optional) Which outlook category to request, defaults to CATEGORICAL",
-    ),
-    "example" => array(
-        "{latitude}" => "42.5",
-        "{longitude}" => "-95.0",
-        "{last}" => "0",
-        "{day}" => "1",
-        "{cat}" => "CATEGORICAL",
-    )
+    "url" => "/json/spcoutlook.py?help",
 );
 $services[] = array(
     "title" => "Storm Prediction Center Convective Outlooks by Lat/Lon Point by Time",
-    "url" => "/json/spcoutlook.py?lon={longitude}&amp;lat={latitude}&amp;time={time}&amp;day={day}&amp;cat={cat}",
-    "desc" => "Provides a listing of convective outlooks dating back to" .
-        " March 2002 for a given timestamp.",
-    "vars" => array(
-        "lat" => "Latitude in degrees",
-        "lon" => "Longitude in (degrees east)",
-        "time" => "Return the outlook valid at that time.  This time can be a generic" .
-            " 'now' or some ISO-ish timestamp in the format YYYY-mm-ddTHH:MMZ.",
-        "day" => "(Optional) Which outlook day to request, defaults to 1",
-        "cat" => "(Optional) Which outlook category to request, defaults to CATEGORICAL",
-    ),
-    "example" => array(
-        "{latitude}" => "42.5",
-        "{longitude}" => "-95.0",
-        "{time}" => "2014-06-29T14:00Z",
-        "{day}" => "1",
-        "{cat}" => "CATEGORICAL",
-    )
+    "url" => "/json/spcoutlook.py?help",
 );
 
 $services[] = array(
@@ -534,30 +491,11 @@ $services[] = array(
 );
 $services[] = array(
     "title" => "Storm Prediction Center Watches by Time",
-    "url" => "/json/spcwatch.py?ts={timestamp}",
-    "desc" => "Provides a geojson format of SPC watches valid at given time
-        or current time if no time specified.",
-    "vars" => array(
-        "timestamp" => "YYYYMMDDHHMI UTC Timestamp (optional)"
-    ),
-    "example" => array(
-        "{timestamp}" => "201104280000"
-    )
+    "url" => "/json/spcwatch.py?help",
 );
 $services[] = array(
     "title" => "Storm Prediction Center Watches by Point",
-    "url" => "/json/spcwatch.py?lon={lon}&lat={lat}",
-    "desc" => "Provides a geojson format of SPC watches valid for a " .
-        "give latitude and longitude pair.  Note that these polygons are not " .
-        "the official watch boundaries.",
-    "vars" => array(
-        "lat" => "Latitude in degrees",
-        "lon" => "Longitude in (degrees east)",
-    ),
-    "example" => array(
-        "{lat}" => "42.5",
-        "{lon}" => "-95.0",
-    )
+    "url" => "/json/spcwatch.py?help",
 );
 $services[] = array(
     "title" => "RAOB Soundings",
