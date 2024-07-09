@@ -444,11 +444,12 @@ def do_ahps_obs(nwsli):
     res = "Observed Data:,,\n"
     res += "|Date|,|Stage|,|--Flow-|\n"
     odf = df[df["type"] == "O"]
-    for _, row in odf.iterrows():
-        res += (
-            f"{row['Time']},{row['Stage[ft]']:.2f}ft,"
-            f"{row['Flow[kcfs]']:.1f}kcfs\n"
-        )
+    if "Stage[ft]" in odf.columns and "Flow[kcfs]" in odf.columns:
+        for _, row in odf.iterrows():
+            res += (
+                f"{row['Time']},{row['Stage[ft]']:.2f}ft,"
+                f"{row['Flow[kcfs]']:.1f}kcfs\n"
+            )
     return res
 
 

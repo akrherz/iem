@@ -13,7 +13,9 @@ single watch issued by multiple WFOs would potentially count as more than
 one event in this listing.  Sorry, tough issue to get around.  In the case
 of warnings and advisories, the totals should be good.</p>
 
-<p><a href="/plotting/auto/?q=245">Autoplot 245</a> produces a similar plot to
+<p><a href="/plotting/auto/?q=243">Autoplot 243</a> allows for more direct
+plotting of daily record totals.
+<a href="/plotting/auto/?q=245">Autoplot 245</a> produces a similar plot to
 this one, but with Local Storm Report (LSR) totals.
 <a href="/plotting/auto/?q=109">Autoplot 109</a> produces maps in a similiar
 manner to this plot.</p>
@@ -204,7 +206,7 @@ def plotter(fdict):
     elif opt == "ugc":
         name, wfo = get_ugc_name(ctx["ugc"])
         title = (
-            f"NWS [{wfo}] {ctx['_nt'].sts[wfo]['name']} Issued for "
+            f"NWS [{wfo}] {ctx['_nt'].sts[station]['name']} Issued for "
             f"[{ctx['ugc']}] {name}"
         )
     (fig, ax) = figure_axes(title=title, subtitle=subtitle, apctx=ctx)

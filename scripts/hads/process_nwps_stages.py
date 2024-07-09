@@ -3,8 +3,7 @@
 Called from windrose/daily_drive_network.py
 """
 
-import sys
-
+import click
 import requests
 from pyiem.database import get_dbconn
 from pyiem.network import Table as NetworkTable
@@ -16,7 +15,7 @@ LOG = logger()
 def process_site(mcursor, nwsli, meta):
     """Do our processing work"""
 
-    url = f"https://preview-api.water.noaa.gov/nwps/v1/gauges/{nwsli}"
+    url = f"https://api.water.noaa.gov/nwps/v1/gauges/{nwsli}"
 
     try:
         res = requests.get(url, timeout=30)
@@ -70,9 +69,11 @@ def process_site(mcursor, nwsli, meta):
     )
 
 
-def main(argv):
+@click.command()
+@click.option("--network", required=True, help="IEM Network Identifier")
+def main(network):
     """Go Main Go"""
-    nt = NetworkTable(argv[1])
+    nt = NetworkTable(network)
     with get_dbconn("mesosite") as dbconn:
         for sid, meta in nt.sts.items():
             mcursor = dbconn.cursor()
@@ -82,4 +83,4 @@ def main(argv):
 
 
 if __name__ == "__main__":
-    main(sys.argv)
+    main()

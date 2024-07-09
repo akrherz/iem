@@ -23,7 +23,13 @@ def do_network(network):
         # Special Logic to compute archive period.
         subprocess.call(["python", "../dbutil/compute_hads_sts.py", network])
         # Update stage details.
-        subprocess.call(["python", "../hads/process_nwps_stages.py", network])
+        subprocess.call(
+            [
+                "python",
+                "../hads/process_nwps_stages.py",
+                f"--network={network}",
+            ]
+        )
     elif network.find("_RWIS") > 0:
         subprocess.call(
             ["python", "../dbutil/compute_alldata_sts.py", "rwis", network],
