@@ -97,7 +97,6 @@ function doMCD(lon, lat) {
         dataType: "json",
         url: jsonurl,
         success(data) {
-            console.log("Hello?");
             $("#mcd_spinner").hide();
             $.each(data.mcds, (_index, mcd) => {
 

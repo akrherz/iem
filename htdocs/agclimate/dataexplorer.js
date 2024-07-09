@@ -1,4 +1,4 @@
-/* global defaultdt */
+/* global defaultdt, ol, $ */
 let map = null;
 let gj = null;
 let invgj = null;
