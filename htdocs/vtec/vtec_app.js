@@ -520,7 +520,7 @@ function getVTECGeometry() {
             eventid: CONFIG.etn,
             year: CONFIG.year
         },
-        url: "/geojson/sbw_county_intersect.php",
+        url: "/geojson/sbw_county_intersect.geojson",
         method: "GET",
         dataType: "json",
         success: (geodata) => {
