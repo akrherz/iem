@@ -649,10 +649,12 @@ def do_swat(_cursor, ctx):
                 ('{thisyear}-'||month||'-'||extract(day from day))::date
                     as day, high, low, precip, station from {table}
                 WHERE station = ANY(:sids) and
-                day >= :asts and year = :scenario_year),
+                day >= :asts and year = :scenario_year and
+                high is not null and low is not null),
             obs as (
                 SELECT day, high, low, precip, station from {table}
-                WHERE station = ANY(:sids) and day >= :sts and day <= :ets),
+                WHERE station = ANY(:sids) and day >= :sts and day <= :ets
+                and high is not null and low is not null),
             total as (
                 SELECT *, extract(doy from day) as doy from obs UNION
                 SELECT *, extract(doy from day) as doy from scenario
