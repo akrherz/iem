@@ -129,6 +129,7 @@ def run(ctx, start_response):
             "TYPE": "str:1",
             "ISSUE": "str:20",
             "EXPIRE": "str:20",
+            "PROD_ID": "str:36",
         },
     }
     with tempfile.TemporaryDirectory() as tmpdir:

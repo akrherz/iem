@@ -34,7 +34,9 @@ def do_network(network):
         subprocess.call(
             ["python", "../dbutil/compute_alldata_sts.py", "rwis", network],
         )
-    subprocess.call(["python", "drive_network_windrose.py", network])
+    subprocess.call(
+        ["python", "drive_network_windrose.py", "--network", network]
+    )
 
 
 def main():
