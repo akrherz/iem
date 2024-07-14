@@ -260,21 +260,12 @@ RewriteRule ^/search /search.py [QSA]
   </Directory>
 
   <Directory "/opt/iem/htdocs/geojson">
-    ## QSA causes the query string to be appended
+    # QSA causes the query string to be appended
     RewriteRule network/(.*).geojson network.py?network=$1 [QSA]
-    # 7 Dec 2016: Rewrote service as Python
-    RewriteRule network.php(.*) network.py$1 [QSA]
-    RewriteRule webcam.php(.*) webcam.py$1 [QSA]
-    RewriteRule webcam.geojson(.*) webcam.py$1 [QSA]
-    RewriteRule sbw.geojson(.*) sbw.py$1 [QSA]
-    RewriteRule sbw.php(.*) sbw.py$1 [QSA]
-    RewriteRule sps.geojson(.*) sps.py$1 [QSA]
-    RewriteRule winter_roads.geojson(.*) winter_roads.py$1 [QSA]
-    RewriteRule networks.geojson(.*) networks.py$1 [QSA]
+    # Le Sigh
     RewriteRule network_obs.php(.*) /api/1/currents.geojson$1 [QSA]
-    RewriteRule nexrad_attr.geojson(.*) nexrad_attr.py$1 [QSA]
-    RewriteRule nexrad_attr.csv(.*) nexrad_attr.py?$1&fmt=csv [QSA]
-    RewriteRule sbw_county_intersect.(geojson|php)(.*) sbw_county_intersect.py$2 [QSA]
+    # General rewrite of anything .php or .geojson to python
+    RewriteRule ^([a-z_]+)\.(php|geojson) $1.py [QSA]
   </Directory>
 
   <Directory "/opt/iem/htdocs/iemre">

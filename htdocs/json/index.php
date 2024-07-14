@@ -77,46 +77,12 @@ $services[] = array(
 
 $services[] = array(
     "title" => "Local Storm Reports for One Storm Based Warning",
-    "url" => "/geojson/lsr.php?year={year}&amp;wfo={wfo}" .
-        "&amp;eventid={eventid}&amp;phenomena={phenomena}" .
-        "&amp;significance={significance}",
-    "desc" => "Produces the storm reports that spatially and temporally
-          coincide with a given Storm Based Warning. This only works for
-          warnings that had polygons associated with them and not other VTEC
-          products.",
-    "vars" => array(
-        "wfo" => "3 character NWS Office",
-        "year" => "Year of VTEC Issuance",
-        "phenomena" => "2 character VTEC Phenomena Code",
-        "significance" => "1 character VTEC Significance Code",
-        "eventid" => "VTEC Event ID",
-    ),
-    "example" => array(
-        "{wfo}" => "DVN",
-        "{year}" => "2015",
-        "{phenomena}" => "TO",
-        "{significance}" => "W",
-        "{eventid}" => 10,
-    )
+    "url" => "/geojson/lsr.geojson?help",
 );
 
 $services[] = array(
     "title" => "Local Storm Reports for a given period",
-    "url" => "/geojson/lsr.php?sts={sts}&amp;ets={ets}" .
-        "&amp;wfos={wfos}",
-    "desc" => "Produces the storm reports for a given office or offices
-          valid for a specified period (inclusive).",
-    "vars" => array(
-        "wfo" => "3 character NWS Office " .
-            "(comma seperated for multiple, leave blank for all)",
-        "sts" => "UTC Start Timestamp YYYYmmddHHMM",
-        "ets" => "UTC End Timestamp YYYYmmddHHMM",
-    ),
-    "example" => array(
-        "{wfos}" => "DVN,DMX,ARX",
-        "{sts}" => "201605100000",
-        "{ets}" => "201605110000",
-    )
+    "url" => "/geojson/lsr.geojson?help",
 );
 
 

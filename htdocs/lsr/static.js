@@ -524,7 +524,7 @@ function initUI() {
     });
     $("#lsrgeojson").click(() => {
         const opts = buildOpts();
-        const url = `https://mesonet.agron.iastate.edu/geojson/lsr.php?${$.param(opts)}`;
+        const url = `https://mesonet.agron.iastate.edu/geojson/lsr.geojson?${$.param(opts)}`;
         copyToClipboard(url, "GeoJSON URL copied to clipboard");
     });
     // =======
@@ -860,7 +860,7 @@ function loadData() {
     const opts = buildOpts();
     $.ajax({
         method: "GET",
-        url: `/geojson/lsr.php?${$.param(opts)}`,
+        url: `/geojson/lsr.geojson?${$.param(opts)}`,
         dataType: 'json',
         success: (data) => {
             if (data.features.length === 10000) {
