@@ -271,7 +271,13 @@ daily_opts = [
         "label": "Real-Time Mesoscale Analysis (RTMA) Max/Min Air Temperature",
     },
     {"id": 43, "label": "Recent (Past 2-3 Days) Timeseries (Meteogram)"},
-    {"id": 157, "label": "Relative Humidity Max/Min/Avg by Day of Year"},
+    {
+        "id": 157,
+        "label": (
+            "Relative Humidity, Feels Like, "
+            "Dew Point Climatology by Day of Year"
+        ),
+    },
     {"id": 62, "label": "Snow Depth"},
     {"id": 199, "label": "ISU Soil Moisture Network Daily Plots"},
     {
