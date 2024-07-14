@@ -72,7 +72,8 @@ if (isset($_REQUEST["phenomena"])) {
         $str_wfo_list = "";
     }
 
-    $rs = pg_prepare($postgis, "SELECT", "SELECT distinct *, 
+    $rs = pg_prepare($postgis, "SELECT", "SELECT distinct wfo, type, magnitude,
+        county, typetext, state, remark, city, source, unit,
         to_char(valid, 'YYYY-MM-DDThh24:MI:SSZ') as iso_valid,
         ST_x(geom) as lon, ST_y(geom) as lat 
           FROM lsrs WHERE
@@ -98,7 +99,7 @@ for ($i = 0; $row = pg_fetch_assoc($rs); $i++) {
     if (isset($_GET["inc_ap"]) && $_GET["inc_ap"] == "yes") {
         /* Lets go looking for warnings for this particular LSR, fast please */
         $sql = sprintf(
-            "SELECT distinct phenomena, significance, eventid 
+            "SELECT distinct phenomena, significance, eventid
         from sbw_%s
         WHERE wfo = '%s' and issue <= '%s' 
         and issue > '%s'::timestamp - '7 days'::interval and expire > '%s'
