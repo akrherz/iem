@@ -180,8 +180,8 @@ def plotter(fdict):
     )
     ax2.set_ylim(0, 100)
     ax2.set_yticks([0, 5, 10, 25, 50, 75, 90, 95, 100])
-    ax.set_xticks((1, 32, 60, 91, 121, 152, 182, 213, 244, 274, 305, 335))
-    ax.set_xticklabels(calendar.month_abbr[1:])
-    ax.set_xlim(1, 365)
+    ax2.set_xticks((1, 32, 60, 91, 121, 152, 182, 213, 244, 274, 305, 335))
+    ax2.set_xticklabels(calendar.month_abbr[1:])
+    ax2.set_xlim(1, 365)
     ax2.grid(True)
     return fig, bydoy
