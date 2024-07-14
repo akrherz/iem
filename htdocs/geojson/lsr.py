@@ -81,15 +81,14 @@ class Schema(CGIModel):
 
     @field_validator("ets", "sts", mode="before")
     @classmethod
-    def parse_valid(_cls, value, _info):
+    def parse_valid(cls, value, _info):
         """Ensure we have a valid time."""
         if value is None:
             return None
         fmt = "%Y%m%d%H%M"
-        if value.find("T") > 0:
-            if len(value) >= 16:
-                fmt = "%Y-%m-%dT%H:%M"
-                value = value[:16]
+        if value.find("T") > 0 and len(value) >= 16:
+            fmt = "%Y-%m-%dT%H:%M"
+            value = value[:16]
         return datetime.strptime(value, fmt).replace(tzinfo=timezone.utc)
 
 
