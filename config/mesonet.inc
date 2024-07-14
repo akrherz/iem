@@ -262,6 +262,8 @@ RewriteRule ^/search /search.py [QSA]
   <Directory "/opt/iem/htdocs/geojson">
     # QSA causes the query string to be appended
     RewriteRule network/(.*).geojson network.py?network=$1 [QSA]
+    # still used
+    RewriteRule nexrad_attr.csv(.*) nexrad_attr.py?$1&fmt=csv [QSA]
     # Le Sigh
     RewriteRule network_obs.php(.*) /api/1/currents.geojson$1 [QSA]
     # General rewrite of anything .php or .geojson to python
