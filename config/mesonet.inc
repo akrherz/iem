@@ -275,6 +275,7 @@ RewriteRule ^/search /search.py [QSA]
     RewriteRule nexrad_attr.geojson(.*) nexrad_attr.py$1 [QSA]
     RewriteRule nexrad_attr.csv(.*) nexrad_attr.py?$1&fmt=csv [QSA]
     RewriteRule sbw_county_intersect.(geojson|php)(.*) sbw_county_intersect.py$2 [QSA]
+    RewriteRule convective_sigmet.(geojson|php)(.*) convective_sigmet.py$2 [QSA]
   </Directory>
 
   <Directory "/opt/iem/htdocs/iemre">
