@@ -156,7 +156,7 @@ def do_default(environ: dict) -> gpd.GeoDataFrame:
     """Actually do the hard work of getting the current SBW in geojson"""
     wfo_limiter = ""
     if environ["wfos"]:
-        wfo_limiter = " and w.wfo = ANY(:wfos) "
+        wfo_limiter = " and wfo = ANY(:wfos) "
     with get_sqlalchemy_conn("postgis") as conn:
         lsrdf = gpd.read_postgis(
             text(
