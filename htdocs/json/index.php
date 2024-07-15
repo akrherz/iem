@@ -634,16 +634,7 @@ $services[] = array(
 
 $services[] = array(
     "title" => "IEM Tracked Station Metadata Changes",
-    "url" => "/json/stations.php?date={date}",
-    "desc" => "This service returns metadata for any IEM tracked
-station locations with changed metadata since the given date.  This provides
-a programic mechanism to keep up with metadata updates done on a daily basis.",
-    "vars" => array(
-        "date" => "Request changes since this date",
-    ),
-    "example" => array(
-        "{date}" => date('Y-m-d')
-    )
+    "url" => "/json/stations.json?help",
 );
 
 $services[] = array(

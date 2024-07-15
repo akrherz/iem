@@ -288,6 +288,7 @@ RewriteRule ^/search /search.py [QSA]
     RewriteRule network/([0-9\.\-A-Z]+).geojson network.py?network=$1 [QSA]
     # 15 Feb 2020 migration from PHP to python
     RewriteRule vtec_events_byugc.php(.*) vtec_events_byugc.py$1 [QSA]
+    RewriteRule stations.(php|json) stations.py [QSA]
   </Directory>
 
   <Directory "/opt/iem/htdocs/kml">
