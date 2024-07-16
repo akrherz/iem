@@ -196,10 +196,10 @@ def add_warnings(lsrdf: gpd.GeoDataFrame) -> None:
                 WHERE vtec_year = :year and wfo = :wfo and issue <= :valid
                 and issue > :valid  - '7 days'::interval and expire > :valid
                 and ST_POINT(:lon, :lat, 4326) && geom
-                and ST_contains(geom, ST_POINT(:lon, :lat, 4326)
+                and ST_contains(geom, ST_POINT(:lon, :lat, 4326))
                 """),
                 {
-                    "year": row["valid"].year,
+                    "year": row["valid"][:4],
                     "wfo": row["wfo"],
                     "valid": row["valid"],
                     "lon": row["lon"],

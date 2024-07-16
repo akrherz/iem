@@ -74,6 +74,7 @@ def use_era5land(ts, kind):
 
     except Exception as exp:
         LOG.warning("%s exp:%s", ncfn, exp)
+    LOG.info("returning None for %s", kind)
     return None
 
 
@@ -131,7 +132,7 @@ def use_rtma(ts, kind):
                 res.append(grb2iemre(grb))
             return res[0] if len(res) == 1 else res
         except Exception as exp:
-            LOG.info("%s exp:%s", fn, exp)
+            LOG.info("%s exp:%s for %s", fn, exp, kind)
         finally:
             grbs.close()
     return None
@@ -274,6 +275,7 @@ def grid_hour(ts):
 
     # try first to use RTMA
     res = use_rtma(ts, "tmp")
+    tmp_used_rtma = res is not None
     if res is None:
         # try ERA5Land
         res = use_era5land(ts, "tmpk")
@@ -287,8 +289,10 @@ def grid_hour(ts):
         did_gridding = True
         tmpf = generic_gridder(df, "max_tmpf", domain)
 
-    # try first to use RTMA
-    res = use_rtma(ts, "dwp")
+    # only use RTMA if tmp worked
+    res = None
+    if tmp_used_rtma:
+        res = use_rtma(ts, "dwp")
     if res is None:
         # try ERA5Land
         res = use_era5land(ts, "dwpk")
@@ -301,10 +305,12 @@ def grid_hour(ts):
             return
         dwpf = generic_gridder(df, "max_dwpf", domain)
 
-    # require that dwpk <= tmpk
-    mask = ~np.isnan(dwpf)
-    mask[mask] &= dwpf[mask] > tmpf[mask]
-    dwpf = np.where(mask, tmpf, dwpf)
+    # Only keep cases when tmpf >= dwpf and they are both not masked
+    # Note some truncation issues here, so our comparison is not perfect
+    idx = (tmpf >= (dwpf - 1)) & (~tmpf.mask) & (~dwpf.mask)
+    dwpf[~idx] = np.nan
+    tmpf[~idx] = np.nan
+
     write_grid(ts, "tmpk", masked_array(tmpf, data_units="degF").to("degK"))
     write_grid(ts, "dwpk", masked_array(dwpf, data_units="degF").to("degK"))
     res = grid_skyc(df, domain)

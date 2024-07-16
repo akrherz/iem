@@ -561,7 +561,7 @@ def do_ahps(nwsli):
         generationtime at time zone 'UTC' as gts, primaryname, primaryunits,
         secondaryname, secondaryunits
         from hml_forecast where station = %s
-        and generationtime > now() - '7 days'::interval
+        and generationtime > now() - '3 days'::interval
         ORDER by issued DESC LIMIT 1
     """,
         (nwsli,),
@@ -594,7 +594,7 @@ def do_ahps(nwsli):
         odf = pd.read_sql(
             text(
                 """
-        SELECT valid at time zone 'UTC' as valid,
+        SELECT valid at time zone 'UTC' as valid, null as obtime,
         value from hml_observed_data WHERE station = :nwsli
         and key = :lookupkey and valid > now() - '3 day'::interval
         and extract(minute from valid) = 0
@@ -607,12 +607,13 @@ def do_ahps(nwsli):
         )
     # hoop jumping to get a timestamp in the local time of this sensor
     # see akrherz/iem#187
-    odf["obtime"] = (
-        odf["valid"]
-        .dt.tz_localize(ZoneInfo("UTC"))
-        .dt.tz_convert(tzinfo)
-        .dt.strftime("%a. %-I %p")
-    )
+    if not odf.empty:
+        odf["obtime"] = (
+            odf["valid"]
+            .dt.tz_localize(ZoneInfo("UTC"))
+            .dt.tz_convert(tzinfo)
+            .dt.strftime("%a. %-I %p")
+        )
     # Get the latest forecast
     with get_sqlalchemy_conn("hml") as conn:
         df = pd.read_sql(
