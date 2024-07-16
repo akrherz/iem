@@ -101,7 +101,8 @@ def do_vtec(environ: dict) -> gpd.GeoDataFrame:
             SELECT l.wfo, l.type,
             l.magnitude as magf, l,county, l.typetext,
             l.state, l.remark, l.city, l.source, l.unit, l.geom,
-            to_char(valid, 'YYYY-MM-DDThh24:MI:SSZ') as valid,
+            to_char(valid at time zone 'UTC', 'YYYY-MM-DDThh24:MI:SSZ')
+                as valid,
             ST_x(l.geom) as lon, ST_y(l.geom) as lat
             from sbw w, lsrs l
             WHERE w.vtec_year = :year and w.wfo = :wfo and
@@ -133,7 +134,8 @@ def do_states(environ: dict) -> gpd.GeoDataFrame:
             SELECT distinct l.wfo, l.type,
             l.magnitude as magf, l,county, l.typetext,
             l.state, l.remark, l.city, l.source, l.unit, l.geom,
-            to_char(valid, 'YYYY-MM-DDThh24:MI:SSZ') as valid,
+            to_char(valid at time zone 'UTC', 'YYYY-MM-DDThh24:MI:SSZ')
+                as valid,
             ST_x(l.geom) as lon, ST_y(l.geom) as lat
             FROM lsrs l, states s WHERE
             valid BETWEEN :sts and :ets and state_abbr = ANY(:states)
@@ -163,7 +165,8 @@ def do_default(environ: dict) -> gpd.GeoDataFrame:
                 f"""
             SELECT distinct wfo, type, magnitude as magf,
             county, typetext, state, remark, city, source, unit,
-            to_char(valid, 'YYYY-MM-DDThh24:MI:SSZ') as iso_valid,
+            to_char(valid at time zone 'UTC', 'YYYY-MM-DDThh24:MI:SSZ')
+                as valid,
             ST_x(geom) as lon, ST_y(geom) as lat, geom
             FROM lsrs WHERE
             valid BETWEEN :sts and :ets {wfo_limiter}
