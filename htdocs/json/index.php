@@ -512,13 +512,7 @@ can be found on <a href='/sites/locate.php'>this page.</a>",
 
 $services[] = array(
     "title" => "IEM Archived Data Products",
-    "url" => "/json/products.php",
-    "desc" => "The IEM generates and archives a large number of products.
- This service provides some metadata details necessary to build programic URIs
- against this archive of data.  This service drives the <a href='/timemachine'>Timemachine</a>
- application.",
-    "vars" => array(),
-    "example" => array()
+    "url" => "/json/products.json?help",
 );
 
 $services[] = array(
@@ -746,7 +740,7 @@ $t->content = <<<EOF
   }
  &lt;/script&gt;
  &lt;script type="text/javascript"
-         src="https://mesonet.agron.iastate.edu/json/example.php?callback=gotData"&gt;
+         src="https://mesonet.agron.iastate.edu/json/example.json?callback=gotData"&gt;
  
  </pre>
 

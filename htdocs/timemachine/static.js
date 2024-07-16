@@ -242,7 +242,7 @@ function refresh() {
 }
 function onReady() {
     buildUI();
-    $.ajax("/json/products.php", {
+    $.ajax("/json/products.json", {
         success: (data) => {
             addproducts(data);
         }
