@@ -23,7 +23,7 @@ $t->jsextra = <<<EOF
 <script src="/vendor/jquery-ui-slider-pips/1.11.4/jquery-ui-slider-pips.js"></script>
 <script src="/vendor/select2/4.0.3/select2.min.js"></script>
 <script src="/vendor/moment/2.13.0/moment.min.js"></script>
-<script type="text/javascript" src="static.js?v=23"></script>
+<script type="text/javascript" src="static.js"></script>
 EOF;
 
 $t->content = <<<EOF

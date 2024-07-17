@@ -16,9 +16,9 @@ Ext.namespace('cfg');
 cfg.refreshint = 60000;
 cfg.header = 'iem-header';
 cfg.headerHeight = 60;
-cfg.jsonSource = '/json/webcams.php';
+cfg.jsonSource = '/json/webcams.json';
 </script>
-  <script type='text/javascript' src='webcam-static.js?v=7'></script>
+<script type='text/javascript' src='webcam-static.js'></script>
 <style>
 .webimage {
   height: 240px;
