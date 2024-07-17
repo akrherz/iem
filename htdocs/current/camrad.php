@@ -42,7 +42,8 @@ if (! is_null($ts)) {
 
     /* Now we compute the RADAR timestamp, yippee */
     $mins = intval($ts->format("i")) % 5;
-    $radts = $ts->sub(new DateInterval("PT{$mins}M"));
+    $radts = clone $ts;
+    $radts->sub(new DateInterval("PT{$mins}M"));
 } else {
     $ts = new DateTime();
     $sql = "SELECT * from camera_current WHERE valid > (now() - '30 minutes'::interval)";

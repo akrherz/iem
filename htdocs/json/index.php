@@ -486,14 +486,7 @@ $services[] = array(
 
 $services[] = array(
     "title" => "SHEF Station Variables",
-    "url" => "/json/dcp_vars.php?station={station}",
-    "desc" => "Provides SHEF variables provided by this station.",
-    "vars" => array(
-        "station" => "National Weather Service Location Identifier (nwsli)",
-    ),
-    "example" => array(
-        "{station}" => "AMWI4",
-    )
+    "url" => "/json/dcp_vars.json?help",
 );
 
 $services[] = array(
@@ -603,15 +596,7 @@ RADAR, level 3 product, and start/end timestamp.",
 
 $services[] = array(
     "title" => "NWS State UGC Codes",
-    "url" => "/json/state_ugc.php?state={state}",
-    "desc" => "This service returns metadata for UGC codes used by the
-National Weather Service to issue warnings for in a given state.",
-    "vars" => array(
-        "state" => "Two character state identifier",
-    ),
-    "example" => array(
-        "{state}" => 'IA'
-    )
+    "url" => "/json/state_ugc.json?help",
 );
 
 $services[] = array(
@@ -633,17 +618,7 @@ $services[] = array(
 
 $services[] = array(
     "title" => "IEM Webcam Availability",
-    "url" => "/json/webcams.php?network={network}&amp;ts={ts}",
-    "desc" => "This service returns metadata on available webcam imagery
-for a given network that collects webcams and a UTC timestamp.",
-    "vars" => array(
-        "network" => "IEM Webcam network (KCCI, KELO, KCRG, IDOT)",
-        "ts" => "UTC Timestamp that you want images for",
-    ),
-    "example" => array(
-        "{network}" => "KCCI",
-        "{ts}" => "201212070600",
-    )
+    "url" => "/json/webcams.json?help",
 );
 $table = "";
 $TABLE_SCHEMA = <<<EOM

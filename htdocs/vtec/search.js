@@ -308,7 +308,7 @@ function buildUI(){
             data: {
                 state
             },
-            url: "/json/state_ugc.php",
+            url: "/json/state_ugc.json",
             method: "GET",
             dataType: "json",
             success: (data2) => {

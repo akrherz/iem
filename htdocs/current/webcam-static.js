@@ -2,6 +2,7 @@
 Ext.namespace('app');
 var imagestore;
 var disableStore;
+const ISO8601 = 'Y-m-d\\TH:i:s\\Z';
 
 Ext.onReady(function () {
 
@@ -227,7 +228,7 @@ Ext.onReady(function () {
                             + " " + Ext.getCmp("timepicker").getRawValue();
                         var dt = new Date(ts);
                         if (Ext.getCmp("timemode").realtime) { ts = 0; }
-                        else { ts = Ext.Date.format(dt.toUTC(), 'YmdHi'); }
+                        else { ts = Ext.Date.format(dt.toUTC(), ISO8601); }
                         imagestore.reload({
                             add: false,
                             params: {
@@ -284,7 +285,7 @@ Ext.onReady(function () {
                         imagestore.reload({
                             add: false,
                             params: {
-                                'ts': Ext.Date.format(dt.toUTC(), 'YmdHi'),
+                                'ts': Ext.Date.format(dt.toUTC(), ISO8601),
                                 'network': Ext.getCmp("networkSelect").getValue()
                             }
                         });
@@ -310,7 +311,7 @@ Ext.onReady(function () {
                         imagestore.reload({
                             add: false,
                             params: {
-                                'ts': Ext.Date.format(dt.toUTC(), 'YmdHi'),
+                                'ts': Ext.Date.format(dt.toUTC(), ISO8601),
                                 'network': Ext.getCmp("networkSelect").getValue()
                             }
                         });
@@ -356,7 +357,7 @@ Ext.onReady(function () {
             imagestore.reload({
                 add: false,
                 params: {
-                    'ts': Ext.Date.format(dt, 'YmdHi'),
+                    'ts': Ext.Date.format(dt, ISO8601),
                     'network': Ext.getCmp("networkSelect").getValue()
                 }
             });
