@@ -90,6 +90,8 @@ dependencies:
   - tqdm
   # AHPS scripts
   - twisted
+  # testing
+  - werkzeug
   # need to use more
   - verde
   # Excel
