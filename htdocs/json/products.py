@@ -22,8 +22,8 @@ def add_webcam(conn, data):
     """Append."""
     res = conn.execute(
         text(
-            "SELECT * from webcams WHERE  network != 'IDOT' "
-            "ORDER by network, name"
+            "SELECT * from webcams WHERE network != 'IDOT' "
+            "and sts is not null ORDER by network, name"
         )
     )
     for row in res:
@@ -49,7 +49,10 @@ def add_webcam(conn, data):
 def add_archive_products(conn, data):
     """Append."""
     res = conn.execute(
-        text("SELECT * from archive_products ORDER by groupname, name")
+        text(
+            "SELECT * from archive_products WHERE sts is not null "
+            "ORDER by groupname, name"
+        )
     )
     for row in res:
         row = row._asdict()
