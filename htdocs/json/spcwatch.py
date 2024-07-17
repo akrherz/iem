@@ -110,21 +110,7 @@ def get_ct(environ) -> str:
     return "text/csv"
 
 
-def get_mckey(environ) -> str:
-    """Compute the key for this request."""
-    if environ["ts"] is None:
-        ts = utc()
-    else:
-        ts = datetime.datetime.strptime(environ["ts"], "%Y%m%d%H%M")
-    return (
-        f"/json/spcwatch/{environ['lon']:.4f}/{environ['lat']:.4f}/"
-        f"{ts:%Y%m%d%H%M}/{environ['fmt']}/v2"
-    )
-
-
-@iemapp(
-    memcachekey=get_mckey, content_type=get_ct, help=__doc__, schema=Schema
-)
+@iemapp(content_type=get_ct, help=__doc__, schema=Schema)
 def application(environ, start_response):
     """Answer request."""
     if environ["ts"] is None:

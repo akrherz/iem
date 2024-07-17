@@ -67,15 +67,7 @@ def dowork(lon, lat) -> pd.DataFrame:
     return mcds.drop(columns=["i", "e"])
 
 
-def get_mckey(environ):
-    """Get memcache key."""
-    return (
-        f"/json/spcmcd/{environ['lon']:.4f}/{environ['lat']:.4f}/"
-        f"{environ['fmt']}/v3"
-    )
-
-
-@iemapp(help=__doc__, schema=Schema, memcachekey=get_mckey)
+@iemapp(help=__doc__, schema=Schema)
 def application(environ, start_response):
     """Answer request."""
     lat = environ["lat"]
