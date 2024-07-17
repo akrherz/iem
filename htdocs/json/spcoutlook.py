@@ -2,10 +2,18 @@
 
 Return to `JSON Services </json/>`_.
 
+Documentation for /json/spcoutlook.py
+-------------------------------------
+
+This service provides access to the Storm Prediction Center's Convective
+Outlook products.  The service is designed to be called with a latitude and
+longitude point.
+
 Changelog
 ---------
 
 - 2024-07-09: Add csv and excel output formats
+- 2024-07-17: Fix problems with CSV and Excel output, sigh.
 
 """
 
@@ -142,21 +150,10 @@ def get_ct(environ) -> str:
     return "text/csv"
 
 
-def get_mckey(environ) -> str:
-    """Figure out the key."""
-    return (
-        f"/json/spcoutlook/{environ['lon']:.4f}/{environ['lat']:.4f}/"
-        f"{environ['last']}/{environ['day']}/{environ['cat']}/"
-        f"{environ['time']}/v2"
-    )
-
-
 @iemapp(
     help=__doc__,
     schema=Schema,
     content_type=get_ct,
-    memcachekey=get_mckey,
-    memcacheexpire=3600,
 )
 def application(environ, start_response):
     """Answer request."""
