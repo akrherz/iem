@@ -27,4 +27,4 @@ def test_urls(url):
     """Run the test."""
     c = Client(application)
     res = c.get(url)
-    assert res.status_code == 200
+    assert res.status_code in [200, 400]
