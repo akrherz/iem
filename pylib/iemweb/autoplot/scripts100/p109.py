@@ -411,8 +411,8 @@ def plotter(fdict):
                 sql = f"""
             WITH data as (
                 SELECT distinct substr(ugc, 1, 2) as state,
-                generate_series(greatest(issue, %s),
-                least(expire, %s), '1 minute'::interval) as ts from warnings
+                generate_series(greatest(issue, :sts),
+                least(expire, :ets), '1 minute'::interval) as ts from warnings
                 WHERE issue > :sts and expire < :ets and {pstr} {emerg_extra}
             ), agg as (
                 SELECT distinct state, date(ts) from data
