@@ -224,6 +224,13 @@ def application(environ, start_response):
         start_response("200 OK", headers)
         return json.dumps(res)
 
+    outlooks = outlooks.rename(
+        columns={
+            "i": "utc_issue",
+            "e": "utc_expire",
+            "v": "utc_product_issue",
+        },
+    )
     if fmt == "excel":
         headers = [
             ("Content-type", "application/vnd.ms-excel"),
