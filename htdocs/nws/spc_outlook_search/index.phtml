@@ -49,15 +49,22 @@ table.</p>
         <br />
         <input type="checkbox" id="last" name="last" value="1">
     List Most Recent <input id="events" type="text" name="events" size="3" value="1"> Event(s)	
-        <br />Select Outlook: <input type="radio" name="day" value="1" checked>Day 1 &nbsp;
-        <input type="radio" name="day" value="2">Day 2 &nbsp;
-        <input type="radio" name="day" value="3">Day 3
+        <br />Select Outlook: <input type="radio" name="day" value="1" checked id="d1">
+        <label for="d1">Day 1</label> &nbsp;
+        <input type="radio" name="day" value="2" id="d2">
+        <label for="d2">Day 2</label> &nbsp;
+        <input type="radio" name="day" value="3" id="d3">
+        <label for="d3">Day 3</label>
 
-        <br />Select Category:
-        <input type="radio" name="cat" value="categorical" checked>Categorical &nbsp;
-        <input type="radio" name="cat" value="hail">Hail &nbsp;
-        <input type="radio" name="cat" value="tornado">Tornado &nbsp;
-        <input type="radio" name="cat" value="wind">Wind
+        <br />Select Category:<br/>
+        <input type="radio" name="cat" value="categorical" checked id="categorical">
+        <label for="categorical">Categorical</label> &nbsp;
+        <input type="radio" name="cat" value="hail" id="hail">
+        <label for="hail">Hail</label> &nbsp;
+        <input type="radio" name="cat" value="tornado" id="tornado">
+        <label for="tornado">Tornado</label> &nbsp;
+        <input type="radio" name="cat" value="wind" id="wind">
+        <label for="wind">Wind</label>
 
         <br /><button class="btn btn-default" id="manualpt">Update</button>
         </p>
