@@ -109,7 +109,7 @@ daily_opts = [
     {
         "id": 216,
         "label": (
-            "Consecutive Days by Year with High/Low Temp "
+            "Consecutive Days by Year with Daily Summary Variable "
             "Above/Below Threshold"
         ),
     },
