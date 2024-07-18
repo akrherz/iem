@@ -96,7 +96,7 @@ class Schema(CGIModel):
         True, description="Include a header row in the output."
     )
     year1: int = Field(
-        datetime.date.today().year,
+        date.today().year,
         description="The starting year for the data request.",
     )
     month1: int = Field(
@@ -108,15 +108,15 @@ class Schema(CGIModel):
         description="The starting day for the data request.",
     )
     year2: int = Field(
-        datetime.date.today().year,
+        date.today().year,
         description="The ending year for the data request.",
     )
     month2: int = Field(
-        datetime.date.today().month,
+        date.today().month,
         description="The ending month for the data request.",
     )
     day2: int = Field(
-        datetime.date.today().day,
+        date.today().day,
         description="The ending day for the data request.",
     )
 
@@ -127,12 +127,10 @@ def get_scenario_period(ctx):
         ctx dictionary context this app was called with
     """
     if ctx["ets"].month == 2 and ctx["ets"].day == 29:
-        sts = datetime.date(ctx["scenario_year"], ctx["ets"].month, 28)
+        sts = date(ctx["scenario_year"], ctx["ets"].month, 28)
     else:
-        sts = datetime.date(
-            ctx["scenario_year"], ctx["ets"].month, ctx["ets"].day
-        )
-    ets = datetime.date(ctx["scenario_year"], 12, 31)
+        sts = date(ctx["scenario_year"], ctx["ets"].month, ctx["ets"].day)
+    ets = date(ctx["scenario_year"], 12, 31)
     return sts, ets
 
 
@@ -140,9 +138,9 @@ def sane_date(year, month, day):
     """Attempt to account for usage of days outside of the bounds for
     a given month"""
     # Calculate the last date of the given month
-    nextmonth = datetime.date(year, month, 1) + datetime.timedelta(days=35)
-    lastday = nextmonth.replace(day=1) - datetime.timedelta(days=1)
-    return datetime.date(year, month, min(day, lastday.day))
+    nextmonth = date(year, month, 1) + timedelta(days=35)
+    lastday = nextmonth.replace(day=1) - timedelta(days=1)
+    return date(year, month, min(day, lastday.day))
 
 
 def get_cgi_dates(environ):
@@ -151,7 +149,7 @@ def get_cgi_dates(environ):
 
     ets = min(
         sane_date(environ["year2"], environ["month2"], environ["day2"]),
-        datetime.date.today() - datetime.timedelta(days=1),
+        date.today() - timedelta(days=1),
     )
 
     return [
