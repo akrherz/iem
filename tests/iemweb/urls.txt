@@ -1,3 +1,6 @@
+/json/cli.json?station=KDSM&year=2024&fmt=csv
+/json/cli.json?station=KDSM&year=2024&fmt=json
 /json/vtec_events_byugc.json?ugc=IAC169&fmt=csv
 /json/vtec_events_byugc.json?ugc=IAC169&fmt=excel
 /json/vtec_events_byugc.json?ugc=IAC169&fmt=json
+/search.py?q=DSM

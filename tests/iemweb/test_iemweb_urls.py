@@ -28,4 +28,5 @@ def test_urls(arg):
     """Test what urls.txt tells us to."""
     c = Client(arg[0])
     res = c.get(arg[1])
-    assert res.status_code == 200
+    # Allow apps that redirect to check OK
+    assert res.status_code in [200, 302]
