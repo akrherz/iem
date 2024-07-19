@@ -265,6 +265,8 @@ class MyModel(CGIModel):
     @classmethod
     def valid_tz(cls, value):
         """Ensure the timezone is valid."""
+        if value in ["", "etc/utc"]:
+            return "UTC"
         try:
             ZoneInfo(value)
         except ZoneInfoNotFoundError as exp:
@@ -428,16 +430,7 @@ def application(environ, start_response):
         )
         yield b"ERROR: server over capacity, please try later"
         return
-    try:
-        tzname = environ["tz"].strip()
-        if tzname in ["etc/utc", ""]:
-            tzname = "UTC"
-        tzinfo = ZoneInfo(tzname)
-    except ZoneInfoNotFoundError as exp:
-        start_response("400 Bad Request", [("Content-type", "text/plain")])
-        sys.stderr.write(f"asos.py invalid tz: {exp}\n")
-        yield b"Invalid Timezone (tz) provided"
-        return
+    tzinfo = ZoneInfo(environ["tz"])
     pgconn = get_dbconn("asos")
     cursor_name = f"mystream_{environ.get('REMOTE_ADDR')}"
     if toobusy(pgconn, cursor_name):
