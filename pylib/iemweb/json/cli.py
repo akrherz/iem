@@ -1,15 +1,40 @@
-"""CLI data."""
+""".. title:: NWS Daily CLImate Data
+
+Return to `JSON Services </json/>`_.
+
+Documentation for /json/cli.json
+--------------------------------
+
+This service returns atomic daily climate data found in the NWS CLI text
+products.
+
+"""
 
 import datetime
 
 import simplejson as json
+from pydantic import Field
 from pyiem.reference import TRACE_VALUE
-from pyiem.util import html_escape
-from pyiem.webutil import iemapp
-from pymemcache.client import Client
+from pyiem.webutil import CGIModel, iemapp
 from simplejson import encoder
 
 encoder.FLOAT_REPR = lambda o: format(o, ".2f")
+
+
+class Schema(CGIModel):
+    """See how we are called."""
+
+    callback: str = Field(None, description="JSONP callback function name")
+    fmt: str = Field(
+        default="json",
+        description="The format of the output, either json or csv",
+    )
+    station: str = Field(
+        default="KDSM",
+        description="The station identifier to query for",
+        max_length=4,
+    )
+    year: int = Field(default=2019, description="The year to query for")
 
 
 def departure(ob, climo):
@@ -167,30 +192,32 @@ def get_data(cursor, station, year, fmt):
     return res
 
 
-@iemapp(iemdb="iem")
+def get_mckey(environ: dict):
+    """Get the memcache key."""
+    return f"/json/cli/{environ['station']}/{environ['year']}/{environ['fmt']}"
+
+
+def get_ct(environ: dict) -> str:
+    """Get the content type."""
+    if environ["fmt"] == "json":
+        return "application/json"
+    return "text/plain"
+
+
+@iemapp(
+    help=__doc__,
+    schema=Schema,
+    content_type=get_ct,
+    memcachekey=get_mckey,
+    memcacheexpire=300,
+    iemdb="iem",
+)
 def application(environ, start_response):
     """Answer request."""
-    station = environ.get("station", "KDSM")[:4]
-    year = int(environ.get("year", 2019))
-    cb = environ.get("callback")
-    fmt = environ.get("fmt", "json")
+    station = environ["station"]
+    year = environ["year"]
+    fmt = environ["fmt"]
 
-    headers = []
-    if fmt == "json":
-        headers.append(("Content-type", "application/json"))
-    else:
-        headers.append(("Content-type", "text/plain"))
-    mckey = f"/json/cli/{station}/{year}?callback={cb}&fmt={fmt}"
-    mc = Client("iem-memcached:11211")
-    data = mc.get(mckey)
-    if data is not None:
-        data = data.decode("ascii")
-    else:
-        data = get_data(environ["iemdb.iem.cursor"], station, year, fmt)
-        mc.set(mckey, data, 300)
-    mc.close()
-    if cb is not None:
-        data = f"{html_escape(cb)}({data})"
-
-    start_response("200 OK", headers)
-    return [data.encode("ascii")]
+    data = get_data(environ["iemdb.iem.cursor"], station, year, fmt)
+    start_response("200 OK", [("Content-type", get_ct(environ))])
+    return data.encode("ascii")
