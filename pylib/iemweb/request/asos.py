@@ -1,6 +1,6 @@
 """.. title:: ASOS/METAR Backend Service
 
-`IEM API Mainpage <https://mesonet.agron.iastate.edu/api/>`_
+`IEM API Mainpage </api/>`_
 
 Documentation on /cgi-bin/request/asos.py
 -----------------------------------------
@@ -33,7 +33,7 @@ import sys
 from io import StringIO
 from zoneinfo import ZoneInfo, ZoneInfoNotFoundError
 
-from pydantic import AwareDatetime, Field
+from pydantic import AwareDatetime, Field, field_validator
 from pyiem.database import get_dbconn
 from pyiem.network import Table as NetworkTable
 from pyiem.util import utc
@@ -261,6 +261,18 @@ class MyModel(CGIModel):
         ),
     )
 
+    @field_validator("tz")
+    @classmethod
+    def valid_tz(cls, value):
+        """Ensure the timezone is valid."""
+        if value in ["", "etc/utc"]:
+            return "UTC"
+        try:
+            ZoneInfo(value)
+        except ZoneInfoNotFoundError as exp:
+            raise ValueError(f"Unknown timezone: {value}") from exp
+        return value
+
 
 def fmt_time(val, missing, _trace, tzinfo):
     """Format timestamp."""
@@ -418,16 +430,7 @@ def application(environ, start_response):
         )
         yield b"ERROR: server over capacity, please try later"
         return
-    try:
-        tzname = environ["tz"].strip()
-        if tzname in ["etc/utc", ""]:
-            tzname = "UTC"
-        tzinfo = ZoneInfo(tzname)
-    except ZoneInfoNotFoundError as exp:
-        start_response("400 Bad Request", [("Content-type", "text/plain")])
-        sys.stderr.write(f"asos.py invalid tz: {exp}\n")
-        yield b"Invalid Timezone (tz) provided"
-        return
+    tzinfo = ZoneInfo(environ["tz"])
     pgconn = get_dbconn("asos")
     cursor_name = f"mystream_{environ.get('REMOTE_ADDR')}"
     if toobusy(pgconn, cursor_name):
