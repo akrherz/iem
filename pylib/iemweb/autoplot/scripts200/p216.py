@@ -14,7 +14,7 @@ import matplotlib.ticker as mticker
 import numpy as np
 import pandas as pd
 from pyiem.database import get_sqlalchemy_conn
-from pyiem.exceptions import NoDataFound
+from pyiem.exceptions import IncompleteWebRequest, NoDataFound
 from pyiem.plot import figure
 from pyiem.util import get_autoplot_context
 from sqlalchemy import text
@@ -88,6 +88,8 @@ def get_data(ctx):
     varname = ctx["var"]
     station = ctx["station"]
     if ctx["network"].find("CLIMATE") > 0:
+        if varname not in ["high", "low"]:
+            raise IncompleteWebRequest("Invalid variable for Climate network.")
         with get_sqlalchemy_conn("coop") as conn:
             obsdf = pd.read_sql(
                 text(f"""
@@ -102,11 +104,12 @@ def get_data(ctx):
                 index_col="day",
             )
     else:
+        vin = varname
         varname = {"high": "max_tmpf", "low": "min_tmpf"}.get(varname, varname)
         with get_sqlalchemy_conn("iem") as conn:
             obsdf = pd.read_sql(
                 text(f"""
-                select day, {varname},
+                select day, {varname} as {vin},
                 case when extract(month from day) > 6 then
                     extract(year from day) + 1 else extract(year from day)
                     end as season

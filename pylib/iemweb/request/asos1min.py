@@ -20,8 +20,9 @@ at 1 hour intervals.  Provide timestamps in UTC timezone.
 """
 
 from io import StringIO
+from zoneinfo import ZoneInfo, ZoneInfoNotFoundError
 
-from pydantic import AwareDatetime, Field
+from pydantic import AwareDatetime, Field, field_validator
 from pyiem.exceptions import IncompleteWebRequest
 from pyiem.webutil import CGIModel, ListOrCSVType, iemapp
 
@@ -76,6 +77,16 @@ class Schema(CGIModel):
     day2: int = Field(None, description="End day for data")
     hour2: int = Field(0, description="End hour for data")
     minute2: int = Field(0, description="End minute for data")
+
+    @field_validator("tz")
+    @classmethod
+    def valid_tz(cls, value):
+        """Ensure the timezone is valid."""
+        try:
+            ZoneInfo(value)
+        except ZoneInfoNotFoundError as exp:
+            raise ValueError(f"Unknown timezone: {value}") from exp
+        return value
 
 
 def get_station_metadata(environ, stations) -> dict:

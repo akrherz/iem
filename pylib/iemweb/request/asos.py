@@ -1,6 +1,6 @@
 """.. title:: ASOS/METAR Backend Service
 
-`IEM API Mainpage <https://mesonet.agron.iastate.edu/api/>`_
+`IEM API Mainpage </api/>`_
 
 Documentation on /cgi-bin/request/asos.py
 -----------------------------------------
@@ -33,7 +33,7 @@ import sys
 from io import StringIO
 from zoneinfo import ZoneInfo, ZoneInfoNotFoundError
 
-from pydantic import AwareDatetime, Field
+from pydantic import AwareDatetime, Field, field_validator
 from pyiem.database import get_dbconn
 from pyiem.network import Table as NetworkTable
 from pyiem.util import utc
@@ -260,6 +260,16 @@ class MyModel(CGIModel):
             "by `tzname`. If `ets` is not provided."
         ),
     )
+
+    @field_validator("tz")
+    @classmethod
+    def valid_tz(cls, value):
+        """Ensure the timezone is valid."""
+        try:
+            ZoneInfo(value)
+        except ZoneInfoNotFoundError as exp:
+            raise ValueError(f"Unknown timezone: {value}") from exp
+        return value
 
 
 def fmt_time(val, missing, _trace, tzinfo):
