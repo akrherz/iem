@@ -1,3 +1,5 @@
+/json/cf6.py?station=KDSM&year=2024&fmt=json
+/json/cf6.py?station=KDSM&year=2024&fmt=csv
 /json/cli.json?station=KDSM&year=2024&fmt=csv
 /json/cli.json?station=KDSM&year=2024&fmt=json
 /json/ibw_tags.py?wfo=MEG&year=2024

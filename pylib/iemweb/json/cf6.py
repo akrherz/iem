@@ -1,4 +1,13 @@
-"""CF6 data."""
+""".. title:: NWS CF6 JSON Service
+
+Return to `JSON Services</json/>`_
+
+Documentation for /json/cf6.py
+------------------------------
+
+This service emits atomic parsed data from the NWS CF6 product.
+
+"""
 
 import datetime
 
@@ -15,7 +24,11 @@ class Schema(CGIModel):
     """See how we are called."""
 
     callback: str = Field(None, description="JSONP callback function name")
-    fmt: str = Field("json", description="The format of the output")
+    fmt: str = Field(
+        default="json",
+        description="The format of the output, either csv or json",
+        pattern="^(json|csv)$",
+    )
     station: str = Field(
         "KDSM", description="The station identifier", max_length=4
     )
