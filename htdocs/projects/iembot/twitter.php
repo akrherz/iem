@@ -172,14 +172,11 @@ $t->content = <<<EOM
 
 {$msghtml}
 
-<div class="alert alert-info">Policy and API changes at Twitter likely mean that
-this integration will stop working very soon.  The exact date is unknown as Twitter
-does not tell developers of changes.  What a time to be alive.</div>
-
 <h3>IEMBOT + Twitter Integration</h3>
-        
+
 <p>This page allows for the subscription of a Twitter Account to one or more
-"<a href="/projects/iembot/#channels" target="_blank">IEMBot channels</a>".  The automated processing of National Weather Service text
+"<a href="/projects/iembot/#channels" target="_blank">IEMBot channels</a>".
+The automated processing of National Weather Service text
 products converts each product into a tweet sized message and is associated
 with one or more channels.  These channels are then used to route the messages
 to subscribed twitter pages.  A deduplication process should prevent a single
