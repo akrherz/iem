@@ -9,12 +9,14 @@ import sys
 from unittest import mock
 
 import click
-import requests
+import httpx
+import pandas as pd
 import tqdm
-from pyiem.database import get_dbconn
+from pyiem.database import get_dbconn, get_sqlalchemy_conn
 from pyiem.ncei import ds3505
 from pyiem.nws.products.metarcollect import normid, to_iemaccess, to_metar
-from pyiem.util import exponential_backoff, logger, utc
+from pyiem.util import c2f, logger, utc
+from sqlalchemy import text
 
 LOG = logger()
 TMPDIR = "/mesonet/tmp"
@@ -56,16 +58,17 @@ def main(airforce, wban, faa, year1, year2):
     failedyears = []
     msgs = []
     dbid = normid(faa)
-    for year in tqdm.tqdm(range(year1, year2)):
+    for year in tqdm.tqdm(range(year1, year2 + 1)):
         sts = utc(year, 1, 1)
         ets = sts.replace(year=year + 1)
-        acursor = asosdb.cursor()
         icursor = iemdb.cursor()
         lfn = f"{airforce:06.0f}-{wban:05.0f}-{year}"
         if not os.path.isfile(f"{TMPDIR}/{lfn}"):
             uri = f"https://www.ncei.noaa.gov/pub/data/noaa/{year}/{lfn}.gz"
-            req = exponential_backoff(requests.get, uri, timeout=30)
-            if req is None or req.status_code != 200:
+            try:
+                req = httpx.get(uri, timeout=30)
+                req.raise_for_status()
+            except Exception:
                 LOG.info("Failed to fetch %s", uri)
                 failedyears.append(year)
                 continue
@@ -79,15 +82,21 @@ def main(airforce, wban, faa, year1, year2):
         bad = 0
         skipped = 0
         empty = 0
-        # build out our current obs
-        acursor.execute(
-            "SELECT valid at time zone 'UTC' from alldata where "
-            "station = %s and valid >= %s and valid < %s "
-            "ORDER by valid ASC",
-            (dbid, sts, ets),
-        )
-        current = [f"{row[0]:%Y%m%d%H%M}" for row in acursor]
-        acursor.close()
+        deleted = 0
+        with get_sqlalchemy_conn("asos") as asosconn:
+            # build out our current obs
+            obsdf = pd.read_sql(
+                text("""
+            SELECT valid, tmpf, metar, editable from alldata where
+            station = :station and valid >= :sts and valid < :ets
+            ORDER by valid ASC
+                """),
+                asosconn,
+                params={"station": dbid, "sts": sts, "ets": ets},
+            )
+        if not obsdf.empty:
+            obsdf["valid"] = obsdf["valid"].dt.tz_convert("UTC")
+            obsdf = obsdf.set_index("valid")
         # ignore any bad bytes, sigh
         with open(f"{TMPDIR}/{lfn}", errors="ignore", encoding="utf-8") as fh:
             for line in fh:
@@ -100,7 +109,29 @@ def main(airforce, wban, faa, year1, year2):
                 if data is None:
                     bad += 1
                     continue
-                if data["valid"].strftime("%Y%m%d%H%M") in current:
+                current_tmpf = None
+                current_metar = None
+                new_tmpf = (
+                    None
+                    if data["airtemp_c"] is None
+                    else c2f(data["airtemp_c"])
+                )
+                if data["report_type"] not in ["FM-15", "FM-16"]:
+                    continue
+                if data["valid"].minute == 0:
+                    continue
+                if data["valid"] in obsdf.index:
+                    if new_tmpf is None:
+                        continue
+                    if not obsdf.at[data["valid"], "editable"]:
+                        continue
+                    current_metar = obsdf.at[data["valid"], "metar"]
+                    current_tmpf = obsdf.at[data["valid"], "tmpf"]
+                if (
+                    pd.notna(current_tmpf)
+                    and new_tmpf is not None
+                    and abs(current_tmpf - new_tmpf) < 1
+                ):
                     skipped += 1
                     continue
                 textprod = mock.Mock()
@@ -111,6 +142,33 @@ def main(airforce, wban, faa, year1, year2):
                 if len(mtr.code) == 32:
                     empty += 1
                     continue
+                if current_metar is not None:
+                    acursor = asosdb.cursor()
+                    # Life choices, if this is first, we need to delete lots
+                    if data["valid"].day == 1:
+                        acursor.execute(
+                            f"delete from t{data['valid'].year} "
+                            "where station = %s and valid >= %s "
+                            "and valid < %s",
+                            (
+                                dbid,
+                                data["valid"].replace(hour=0, minute=0),
+                                data["valid"].replace(hour=8, minute=0),
+                            ),
+                        )
+                        deleted += acursor.rowcount
+                    acursor.execute(
+                        f"delete from t{data['valid'].year} "
+                        "where station = %s and valid = %s",
+                        (dbid, data["valid"]),
+                    )
+                    deleted += acursor.rowcount
+                    acursor.close()
+                    asosdb.commit()
+                    print(
+                        f"{data['valid']} {current_tmpf} -> {new_tmpf} | "
+                        f"{current_metar} -> {mtr.code}"
+                    )
                 to_iemaccess(
                     icursor,
                     mtr,
@@ -122,7 +180,7 @@ def main(airforce, wban, faa, year1, year2):
                 added += 1
         msgs.append(
             f"  {year}: {faa} added: {added} bad: {bad} skipped: {skipped} "
-            f"empty: {empty}"
+            f"empty: {empty} deleted: {deleted}"
         )
         icursor.close()
         iemdb.commit()

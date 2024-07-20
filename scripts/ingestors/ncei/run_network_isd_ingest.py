@@ -61,15 +61,15 @@ def main(argv):
                 "python",
                 "ingest_isd.py",
                 "--airforce",
-                option[0],
+                str(option[0]),
                 "--wban",
-                option[1],
+                str(option[1]),
                 "--faa",
                 stid,
                 "--year1",
-                str(option[2].year),
+                "1998",
                 "--year2",
-                str(eyear),
+                f"{eyear}",
             ]
             LOG.info(" ".join(cmd))
             subprocess.call(cmd)
