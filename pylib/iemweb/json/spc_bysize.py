@@ -1,4 +1,15 @@
-"""SPC Outlook service."""
+""".. title:: SPC Outlooks Sorted by Size
+
+Return to `JSON Services</json/>`_
+
+Documentation for /json/spc_bysize.py
+-------------------------------------
+
+This service emits unofficial IEM accounting of SPC outlooks sorted by size.
+This service is great at finding problems in the IEM archive :(  Attempts
+are made to generate links to the SPC website, to confirm the entries listed.
+
+"""
 
 import json
 import time
@@ -8,7 +19,7 @@ from pydantic import Field
 from pyiem.database import get_dbconnc
 from pyiem.nws.products.spcpts import imgsrc_from_row
 from pyiem.reference import ISO8601
-from pyiem.util import html_escape, utc
+from pyiem.util import utc
 from pyiem.webutil import CGIModel, iemapp
 
 
@@ -69,18 +80,18 @@ def dowork(environ):
     return json.dumps(data)
 
 
-@iemapp(help=__doc__, schema=Schema)
+def get_mckey(environ: dict) -> str:
+    """Figure out the key for this request."""
+    return (
+        f"/json/spc_bysize.json|{environ['category']}|{environ['day']}|"
+        f"{environ['syear']}|{environ['threshold']}"
+    )
+
+
+@iemapp(help=__doc__, schema=Schema, memcachekey=get_mckey, memcacheexpire=300)
 def application(environ, start_response):
     """Answer request."""
     headers = [("Content-type", "application/json")]
     start_response("200 OK", headers)
-
-    cb = environ["callback"]
-
     res = dowork(environ)
-    if cb is None:
-        data = res
-    else:
-        data = f"{html_escape(cb)}({res})"
-
-    return [data.encode("ascii")]
+    return res.encode("ascii")
