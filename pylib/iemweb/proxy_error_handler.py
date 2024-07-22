@@ -8,7 +8,7 @@ from pyiem.webutil import TELEMETRY, write_telemetry
 
 def application(environ, start_response):
     """Handle Apache proxy errors."""
-    status_code = int(environ.get("REDIRECT_STATUS", 500))
+    status_code = int(environ.get("REDIRECT_STATUS", 200))
     sys.stderr.write(f"{status_code} {environ.get('REQUEST_URI')}\n")
     write_telemetry(
         TELEMETRY(

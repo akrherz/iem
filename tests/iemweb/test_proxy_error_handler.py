@@ -8,4 +8,4 @@ def test_simple():
     """Test simple."""
     c = Client(application)
     res = c.get("/")
-    assert res.status_code == 500
+    assert res.status_code == 200
