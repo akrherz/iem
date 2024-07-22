@@ -422,6 +422,10 @@ $services[] = array(
     "url" => "/json/spcoutlook.py?help",
 );
 $services[] = array(
+    "title" => "Storm Prediction Center Convective Outlooks by Size",
+    "url" => "/json/spc_bysize.py?help",
+);
+$services[] = array(
     "title" => "Storm Prediction Center Convective Outlooks by Lat/Lon Point by Time",
     "url" => "/json/spcoutlook.py?help",
 );
