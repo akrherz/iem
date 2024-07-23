@@ -36,6 +36,30 @@ JOBS = [
 ]
 
 
+def fix_isusm(df, yesterday, today):
+    """Manually correct this."""
+    with get_sqlalchemy_conn("isuag") as conn:
+        corrected = pd.read_sql(
+            text(
+                """
+            SELECT station, sum(rain_in_tot_qc) from sm_hourly where
+            valid > :yesterday and valid <= :today and
+            station = ANY(:stations) GROUP by station
+            """
+            ),
+            conn,
+            params={
+                "yesterday": yesterday,
+                "today": today,
+                "stations": df.index.values.tolist(),
+            },
+            index_col="station",
+        )
+    if corrected.empty:
+        return
+    df.loc[corrected.index, "sum"] = corrected["sum"]
+
+
 def main(job):
     """Go Main Go."""
     qdict = loadqc()
@@ -104,6 +128,7 @@ def main(job):
             params=job,
             index_col="station",
         )
+        fix_isusm(pcpn, job["sts24h"], job["ets"])
         pcpn = pcpn[pcpn["sum"].notna()]
         data["precip"] = pcpn["sum"]
 

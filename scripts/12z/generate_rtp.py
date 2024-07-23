@@ -8,9 +8,10 @@ import subprocess
 import tempfile
 
 import pandas as pd
+from pyiem.database import get_sqlalchemy_conn
 from pyiem.network import Table as NetworkTable
 from pyiem.tracker import loadqc
-from pyiem.util import get_sqlalchemy_conn, utc
+from pyiem.util import utc
 from sqlalchemy import text
 
 JOBS = [
@@ -32,6 +33,30 @@ JOBS = [
         "wfo": "DVN",
     },
 ]
+
+
+def fix_isusm(df, yesterday, today):
+    """Manually correct this."""
+    with get_sqlalchemy_conn("isuag") as conn:
+        corrected = pd.read_sql(
+            text(
+                """
+            SELECT station, sum(rain_in_tot_qc) from sm_hourly where
+            valid > :yesterday and valid <= :today and
+            station = ANY(:stations) GROUP by station
+            """
+            ),
+            conn,
+            params={
+                "yesterday": yesterday,
+                "today": today,
+                "stations": df.index.values.tolist(),
+            },
+            index_col="station",
+        )
+    if corrected.empty:
+        return
+    df.loc[corrected.index, "sum"] = corrected["sum"]
 
 
 def main(job):
@@ -105,6 +130,8 @@ def main(job):
             params=job,
             index_col="station",
         )
+        # phour accounting for ISUSM is wrong, so we need to fix
+        fix_isusm(pcpn, job["yesterday12z"], job["now12z"])
         pcpn = pcpn[pcpn["sum"].notna()]
         data["precip"] = pcpn["sum"]
 
