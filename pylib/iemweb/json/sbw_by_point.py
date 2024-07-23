@@ -1,23 +1,78 @@
-"""
-Get storm based warnings by lat lon point, optionally a time
+""".. title:: Storm Based Warnings by Latitude and Longitude Point
+
+Return to `JSON Services </json/>`_
+
+Documentation for /json/sbw_by_point.py
+---------------------------------------
+
+Returns NWS Storm Based Warnings for a provided latitude and longitude point.
+
+Changelog
+---------
+
+- 2024-07-23: Initial documentation update and migration to pydantic.
+
+Examples
+--------
+
+Return all storm based warnings that were active at a given time for a given
+latitude and longitude point.
+
+https::/mesonet.agron.iastate.edu/json/sbw_by_point.py?lat=41.99&lon=-92.0\
+&valid=2024-07-23T12:00:00Z
+
+Return all storm based warnings for a given latitude and longitude point valid
+during 2023 in Excel format.
+
+https::/mesonet.agron.iastate.edu/json/sbw_by_point.py?lat=41.99&lon=-92.0\
+&sdate=2023-01-01&edate=2024-01-01&fmt=xlsx
+
 """
 
 import datetime
 import json
-import sys
 from io import BytesIO, StringIO
 
 import numpy as np
 import pandas as pd
+from pydantic import AwareDatetime, Field, field_validator
 from pyiem.database import get_sqlalchemy_conn
-from pyiem.exceptions import IncompleteWebRequest
 from pyiem.nws.vtec import VTEC_PHENOMENA, VTEC_SIGNIFICANCE, get_ps_string
 from pyiem.reference import ISO8601
 from pyiem.util import utc
-from pyiem.webutil import iemapp
+from pyiem.webutil import CGIModel, iemapp
 from sqlalchemy import text
 
 EXL = "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"
+
+
+class Schema(CGIModel):
+    """See how we are called."""
+
+    callback: str = Field(None, description="JSONP callback function name")
+    fmt: str = Field("json", description="The format of the response")
+    lat: float = Field(41.99, description="Latitude of point")
+    lon: float = Field(-92.0, description="Longitude of point")
+    sdate: datetime.date = Field(
+        default=datetime.date(2002, 1, 1), description="Start Date"
+    )
+    edate: datetime.date = Field(
+        default=datetime.date(2099, 1, 1), description="End Date"
+    )
+    valid: AwareDatetime = Field(
+        default=None,
+        description="If provided, only provide results valid at this time.",
+    )
+
+    @field_validator("sdate", "edate", mode="before")
+    @classmethod
+    def check_dates(cls, value):
+        """Forgive some things."""
+        if value is None:
+            return None
+        return datetime.datetime.strptime(
+            value.replace("/", "-"), "%Y-%m-%d"
+        ).date()
 
 
 def make_url(row):
@@ -28,23 +83,27 @@ def make_url(row):
     )
 
 
-def get_events(ctx):
+def get_events(environ):
     """Get Events"""
-    data = {"sbws": [], "lon": ctx["lon"], "lat": ctx["lat"], "valid": None}
+    data = {
+        "sbws": [],
+        "lon": environ["lon"],
+        "lat": environ["lat"],
+        "valid": None,
+    }
     data["generation_time"] = utc().strftime(ISO8601)
     valid_limiter = ""
     params = {
-        "lon": ctx["lon"],
-        "lat": ctx["lat"],
-        "sdate": ctx["sdate"],
-        "edate": ctx["edate"],
+        "lon": environ["lon"],
+        "lat": environ["lat"],
+        "sdate": environ["sdate"],
+        "edate": environ["edate"],
+        "valid": environ["valid"],
     }
-    if "valid" in ctx:
+    if environ["valid"] is not None:
         valid_limiter = " and issue <= :valid and expire > :valid "
-        data["valid"] = ctx["valid"].strftime(ISO8601)
-        params["valid"] = ctx["valid"]
+        data["valid"] = environ["valid"].strftime(ISO8601)
 
-    params["giswkt"] = f"POINT({ctx['lon']} {ctx['lat']})"
     with get_sqlalchemy_conn("postgis") as conn:
         df = pd.read_sql(
             text(
@@ -61,7 +120,7 @@ def get_events(ctx):
         eventid,
     tml_direction, tml_sknt, hvtec_nwsli, windtag, hailtag, tornadotag,
     damagetag from sbw where status = 'NEW' and
-    ST_Contains(geom, ST_SetSRID(ST_GeomFromEWKT(:giswkt),4326)) and
+    ST_Contains(geom, ST_Point(:lon, :lat, 4326)) and
     issue > :sdate and expire < :edate
     {valid_limiter} ORDER by issue ASC
         """
@@ -115,45 +174,18 @@ def to_json(data, df):
     return data
 
 
-def try_valid(ctx, fields):
-    """See if a valid stamp is provided or not."""
-    if fields.get("valid") is None:
-        return
-    # parse at least the YYYY-mm-ddTHH:MM
-    ts = datetime.datetime.strptime(fields["valid"][:16], "%Y-%m-%dT%H:%M")
-    ctx["valid"] = utc(ts.year, ts.month, ts.day, ts.hour, ts.minute)
-
-
-def parse_date(val):
-    """convert string to date."""
-    fmt = "%Y/%m/%d" if "/" in val else "%Y-%m-%d"
-    return datetime.datetime.strptime(val, fmt)
-
-
-@iemapp()
+@iemapp(
+    help=__doc__,
+    schema=Schema,
+    parse_times=False,
+)
 def application(environ, start_response):
     """Answer request."""
-    ctx = {}
-    try:
-        ctx["lat"] = float(environ.get("lat", 41.99))
-        ctx["lon"] = float(environ.get("lon", -92.0))
-        ctx["sdate"] = parse_date(environ.get("sdate", "2002-01-01"))
-        ctx["edate"] = parse_date(environ.get("edate", "2099-01-01"))
-    except ValueError as exp:
-        raise IncompleteWebRequest("Invalid Parameters") from exp
 
-    fmt = environ.get("fmt", "json")
-    try:
-        try_valid(ctx, environ)
-    except Exception as exp:
-        sys.stderr.write(str(exp))
-        headers = [("Content-type", "text/plain")]
-        start_response("500 Internal Server Error", headers)
-        return [b"Failed to parse valid, ensure YYYY-mm-ddTHH:MM:SSZ"]
-
-    data, df = get_events(ctx)
+    fmt = environ["fmt"]
+    data, df = get_events(environ)
     if fmt == "xlsx":
-        fn = f"sbw_{ctx['lat']:.4f}N_{0 - ctx['lon']:.4f}W.xlsx"
+        fn = f"sbw_{environ['lat']:.4f}N_{0 - environ['lon']:.4f}W.xlsx"
         headers = [
             ("Content-type", EXL),
             ("Content-disposition", f"attachment; Filename={fn}"),
@@ -163,10 +195,10 @@ def application(environ, start_response):
         df.to_excel(bio, index=False)
         return [bio.getvalue()]
     if fmt == "csv":
-        fn = f"sbw_{ctx['lat']:.4f}N_{0 - ctx['lon']:.4f}W.csv"
+        fn = f"sbw_{environ['lat']:.4f}N_{0 - environ['lon']:.4f}W.csv"
         headers = [
             ("Content-type", "application/octet-stream"),
-            ("Content-disposition", "attachment; Filename=" + fn),
+            ("Content-disposition", f"attachment; Filename={fn}"),
         ]
         start_response("200 OK", headers)
         bio = StringIO()
