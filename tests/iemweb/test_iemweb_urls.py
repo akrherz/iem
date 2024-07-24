@@ -7,9 +7,9 @@ import pytest
 from werkzeug.test import Client
 
 
-def get_mods_and_urls():
+def get_mods_and_urls(extra=""):
     """yield up things we can run."""
-    with open(os.path.dirname(__file__) + "/urls.txt") as fh:
+    with open(f"{os.path.dirname(__file__)}/urls{extra}.txt") as fh:
         for line in fh:
             if line.startswith("#") or line.strip() == "":
                 continue
@@ -30,3 +30,12 @@ def test_urls(arg):
     res = c.get(arg[1])
     # Allow apps that redirect to check OK
     assert res.status_code in [200, 302]
+
+
+@pytest.mark.parametrize("arg", get_mods_and_urls("422"))
+def test_urls422(arg):
+    """Test what urls422.txt tells us to."""
+    c = Client(arg[0])
+    res = c.get(arg[1])
+    # Allow apps that redirect to check OK
+    assert res.status_code == 422

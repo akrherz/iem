@@ -1,4 +1,20 @@
-"""pyIEM reference tables."""
+""".. title:: IEM Reference Data from pyIEM python library
+
+Return to `JSON Services </json/>`_
+
+Documentation for /json/reference.py
+------------------------------------
+
+This service simply exposes the reference data bundled within the
+`pyIEM <https://github.com/akrherz/pyiem>`_ python library.  Not all fields
+from the `pyiem.reference` namespace are exposed at the moment.
+
+Changelog
+---------
+
+- 2024-07-24: Initial documentation release
+
+"""
 
 import json
 
