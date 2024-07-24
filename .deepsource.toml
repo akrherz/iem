@@ -22,3 +22,6 @@ name = "python"
 
 [[analyzers]]
 name = "php"
+
+  [analyzers.meta]
+  bootstrap_files = ["include/dbase.stub.php", "config/settings.inc.php.in"]
