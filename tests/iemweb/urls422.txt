@@ -1,1 +1,3 @@
+/cgi-bin/request/coop.py?network=%22IA%22CLIMATE&stations=%22IA%220000&year1=1988&month1=1&day1=1&year2=2024&month2=12&day2=31&vars%5B%5D=high&vars%5B%5D=highc&vars%5B%5D=low&vars%5B%5D=lowc&vars%5B%5D=precip&vars%5B%5D=precipmm&model=apsim&what=view&delim=comma&gis=no&scenario_year=2023
+/geojson/sbw.geojson?sts=200809130559&ets=000007231555&wfos=HGX
 /json/raob.py?ts=1930-01-01T12:00:00Z
