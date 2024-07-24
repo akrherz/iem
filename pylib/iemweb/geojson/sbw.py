@@ -27,6 +27,7 @@ from datetime import datetime, timedelta, timezone
 
 from pydantic import AwareDatetime, Field
 from pyiem.database import get_sqlalchemy_conn
+from pyiem.exceptions import IncompleteWebRequest
 from pyiem.nws.vtec import get_ps_string
 from pyiem.reference import ISO8601
 from pyiem.util import utc
@@ -100,9 +101,14 @@ def run(environ):
         environ["ts"] = utc()
     for col in ["sts", "ets"]:
         if environ[col] is not None:
-            environ[col] = datetime.strptime(
-                environ[col], "%Y%m%d%H%M"
-            ).replace(tzinfo=timezone.utc)
+            try:
+                environ[col] = datetime.strptime(
+                    environ[col], "%Y%m%d%H%M"
+                ).replace(tzinfo=timezone.utc)
+            except ValueError as exp:
+                raise IncompleteWebRequest(
+                    f"Provided timestamp {col}={environ[col]} is invalid"
+                ) from exp
 
     params = {
         "wfos": wfos,

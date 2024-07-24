@@ -14,7 +14,10 @@ def get_mods_and_urls(extra=""):
             if line.startswith("#") or line.strip() == "":
                 continue
             modname = (
-                line.split("?")[0].rsplit(".", maxsplit=1)[0].replace("/", ".")
+                line.replace("/cgi-bin", "")
+                .split("?")[0]
+                .rsplit(".", maxsplit=1)[0]
+                .replace("/", ".")
             )
             cgi = ""
             if line.find("?") > 0:
