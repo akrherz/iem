@@ -38,6 +38,7 @@ from pydantic import Field, field_validator
 from pyiem.database import get_sqlalchemy_conn
 from pyiem.network import Table as NetworkTable
 from pyiem.reference import ISO8601
+from pyiem.util import utc
 from pyiem.webutil import CGIModel, iemapp
 from sqlalchemy import text
 
@@ -70,6 +71,10 @@ class Schema(CGIModel):
         else:
             dt = datetime.datetime.strptime(value[:12], "%Y%m%d%H%M")
 
+        # Matches the archive range
+        if dt.year < 1946 or dt.year > utc().year:
+            raise ValueError("Timestamp out of archive bounds.")
+
         return dt.replace(tzinfo=datetime.timezone.utc)
 
     @field_validator("station", mode="before")
@@ -91,8 +96,6 @@ def safe(val):
 def run(ts, sid, pressure):
     """Actually do some work!"""
     res = {"profiles": []}
-    if ts.year > datetime.datetime.utcnow().year or ts.year < 1946:
-        return json.dumps(res)
 
     stationlimiter = ""
     params = {"valid": ts, "pid": pressure}
