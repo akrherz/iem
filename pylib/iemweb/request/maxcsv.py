@@ -831,6 +831,7 @@ def router(appname):
 
 @iemapp(
     help=__doc__,
+    schema=Schema,
     memcachekey=lambda x: f"/request/maxcsv|{x['q']}",
     memcacheexpire=60,
 )
