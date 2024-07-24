@@ -73,18 +73,21 @@ jobs:
       run: |
         python -m pip install -r pip_requirements.txt
 
+    - name: Setup Directory Paths
+      run: |
+        set -e
+        sudo ln -s `pwd` /opt/iem
+        sudo ln -s $HOME/micromamba /opt/miniconda3
+        mkdir _mesonet
+        sudo ln -s `pwd`/_mesonet /mesonet
+
     - name: Setup IEM Data
       if: ${{ matrix.WITH_IEM_DATA == 'YES' }}
       run: |
         set -x
         python database/store_test_data.py
         python scripts/dbutil/sync_stations.py
-
-    - name: Setup Directory Paths
-      run: |
-        set -e
-        sudo ln -s `pwd` /opt/iem
-        sudo ln -s $HOME/micromamba /opt/miniconda3
+        python scripts/prism/init_daily.py --year=2024
 
     # Get memcached running
     - name: Setup Memcached
