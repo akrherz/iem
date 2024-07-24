@@ -28,7 +28,7 @@ class MyView {
     public int $twitter_video_width = 0;
     public int $twitter_video_height = 0;
 
-    public function __construct($template_dir = null) {
+    public function __construct() {
             $this->template_dir =  dirname(__FILE__).'/templates/';
     }
     public function render($template_file) {
