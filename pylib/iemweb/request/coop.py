@@ -219,6 +219,8 @@ def do_apsim(cursor, ctx):
     station = ctx["stations"][0]
     network = f"{station[:2]}CLIMATE"
     nt = NetworkTable(network, only_online=False)
+    if station not in nt.sts:
+        raise IncompleteWebRequest("Unknown station provided")
 
     thisyear = datetime.now().year
     extra = {}

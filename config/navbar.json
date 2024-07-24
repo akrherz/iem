@@ -299,7 +299,7 @@
                 },
                 {
                     "title": "Max CSV",
-                    "url": "/request/maxcsv.php"
+                    "url": "/request/maxcsv.py?help"
                 },
                 {
                     "title": "OGC Webservices",

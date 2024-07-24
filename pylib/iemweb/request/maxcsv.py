@@ -1,7 +1,82 @@
-"""Provide some CSV Files
+""".. title:: CSV Service for MAX
 
-first four columns need to be
-ID,Station,Latitude,Longitude
+..
+    NODOCTEST
+
+This service is designed to emit CSV format data for a specific usage case
+within a software system called MAX.  The primary interface for this service
+is accomplished via an Apache mod_rewrite rule, so you would not likely want
+to approach this service directly, but use the examples below to fire the
+rewrite.
+
+Changelog
+---------
+
+- 2024-07-24: Initial documentation release
+
+Example Requests
+----------------
+
+Summarize Cedar Rapids NWS CLI Reporting Site for January 2024
+
+https://mesonet.agron.iastate.edu/request/maxcsv/monthlysummary_KCID_2024_1.txt
+
+Compute the next moon rise and set for a given longitude and latitude.  Note
+that the generated documentation link here is incomplete for lame reasons, just
+copy/paste the entire string.
+
+``https://mesonet.agron.iastate.edu/request/maxcsv/moonphase_-95.44_41.99.txt``
+
+Provides the current UV Index data from
+`CPC <https://www.cpc.ncep.noaa.gov/products/stratosphere/uv_index/bulletin.txt>`_
+
+https://mesonet.agron.iastate.edu/request/maxcsv/uvi.txt
+
+Provides recent 24-hours worth of snowfall Local Storm Reports for a given
+state.
+
+https://mesonet.agron.iastate.edu/request/maxcsv/lsrsnowfall_ia.txt
+
+Provides all recent 24-hours worth of snowfall Local Storm Reports
+
+https://mesonet.agron.iastate.edu/request/maxcsv/lsrsnowfall.txt
+
+KCRG-TV CityCam Telemetry
+
+https://mesonet.agron.iastate.edu/request/maxcsv/kcrgcitycam.txt
+
+Iowa Airport data for today
+
+https://mesonet.agron.iastate.edu/request/maxcsv/iowatoday.txt
+
+Iowa Airport data for yesterday
+
+https://mesonet.agron.iastate.edu/request/maxcsv/iowayesterday.txt
+
+Iowa RWIS data
+
+https://mesonet.agron.iastate.edu/request/maxcsv/iarwis.txt
+
+Iowa Winter Road Conditions
+
+https://mesonet.agron.iastate.edu/request/maxcsv/iaroadcond.txt
+
+Iowa Soil Moisture Network Currents
+
+https://mesonet.agron.iastate.edu/request/maxcsv/isusm.txt
+
+AHPS Obs + Forecast for a given NWS Location Identifier
+
+https://mesonet.agron.iastate.edu/request/maxcsv/ahps_DEWI4.txt
+
+AHPS Forecast for a given NWS Location Identifier
+
+https://mesonet.agron.iastate.edu/request/maxcsv/ahpsfx_DEWI4.txt
+
+AHPS Obs for a given NWS Location Identifier
+
+https://mesonet.agron.iastate.edu/request/maxcsv/ahpsobs_DEWI4.txt
+
 """
 
 import datetime
@@ -13,11 +88,17 @@ import ephem
 import numpy as np
 import pandas as pd
 import requests
+from pydantic import Field
 from pyiem.database import get_dbconnc, get_sqlalchemy_conn
-from pyiem.exceptions import IncompleteWebRequest
 from pyiem.util import utc
-from pyiem.webutil import iemapp
+from pyiem.webutil import CGIModel, iemapp
 from sqlalchemy import text
+
+
+class Schema(CGIModel):
+    """See how we are called."""
+
+    q: str = Field(..., description="Apache mod_rewrite query string.")
 
 
 def figurePhase(p1, p2):
@@ -748,20 +829,16 @@ def router(appname):
     return df
 
 
-@iemapp()
+@iemapp(
+    help=__doc__,
+    memcachekey=lambda x: f"/request/maxcsv|{x['q']}",
+    memcacheexpire=60,
+)
 def application(environ, start_response):
     """Do Something"""
-    if "q" not in environ:
-        raise IncompleteWebRequest("Missing q argument")
-    appname = environ.get("q", "moonphase_-95_42")
+    appname = environ["q"]
     res = router(appname)
     start_response("200 OK", [("Content-type", "text/plain")])
     if isinstance(res, pd.DataFrame):
-        return [res.to_csv(None, index=False).encode("ascii")]
-    return [res.encode("ascii")]
-
-
-def test_hml():
-    """Can we do it?"""
-    do_ahps("DBQI4")
-    do_ahps_obs("ESSV1")
+        return res.to_csv(None, index=False).encode("ascii")
+    return res.encode("ascii")
