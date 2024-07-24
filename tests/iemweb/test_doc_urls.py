@@ -26,16 +26,7 @@ def get_mods_and_urls():
         for line in doc.split("\n"):
             if not line.startswith("https://mesonet.agron.iastate.edu/"):
                 continue
-            modname = (
-                line.replace("https://mesonet.agron.iastate.edu", "")
-                .replace("/cgi-bin", "")
-                .split("?")[0]
-                .rsplit(".", maxsplit=1)[0]
-                .replace("/", ".")
-            )
-            cgi = ""
-            if line.find("?") > 0:
-                cgi = line.split("?")[1]
+            cgi = "" if line.find("?") == -1 else line.split("?")[1]
             yield mod.application, f"?{cgi}"
 
 
