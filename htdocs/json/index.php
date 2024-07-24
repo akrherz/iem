@@ -522,15 +522,7 @@ imagery available for the timestamp and latitude / longitude location you specif
 
 $services[] = array(
     "title" => "RIDGE Current Metadata by Product",
-    "url" => "/json/ridge_current.py?product={product}",
-    "desc" => "This service returns a listing of the most recent image for
-          a given product from all collected RADAR sites.",
-    "vars" => array(
-        "product" => "Level III Product {N0B, N0S, N0U, N0Z, NET}"
-    ),
-    "example" => array(
-        "{product}" => 'N0B'
-    )
+    "url" => "/json/ridge_current.py?help",
 );
 
 $services[] = array(

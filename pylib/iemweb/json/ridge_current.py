@@ -1,5 +1,21 @@
-"""
-Aggregate the RIDGE current files
+""".. service:: IEM RIDGE Current Metadata
+
+Return to `JSON Services </json/>`_
+
+Documentation for /json/ridge_current.py
+----------------------------------------
+
+The IEM processes a number of NWS Level III products into a geo-referenced
+PNG format.  This service provides a metadata overview of the most recent
+images for a given product.
+
+Example Usage
+-------------
+
+Provide the most recent N0B product metadata:
+
+https://mesonet.agron.iastate.edu/json/ridge_current.py?product=N0B
+
 """
 
 import glob
