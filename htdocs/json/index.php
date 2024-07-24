@@ -548,9 +548,9 @@ foreach ($services as $key => $ws) {
         "<a class=\"btn btn-default\" href=\"%s%s\">Example JSON</a>" .
             "&nbsp; <a class=\"btn btn-default\" " .
             "href=\"%s%s%scallback=gotData\">Example JSONP</a>",
-        ROOTURL,
+        "https://mesonet.agron.iastate.edu",
         $url,
-        ROOTURL,
+        "https://mesonet.agron.iastate.edu",
         $url,
         $uriadd
     );
@@ -575,7 +575,7 @@ foreach ($services as $key => $ws) {
         urlencode($ws["title"]),
         $ws["title"],
         $td,
-        ROOTURL,
+        "https://mesonet.agron.iastate.edu",
         $ws["url"],
         $uriadd,
         $ws["desc"],
