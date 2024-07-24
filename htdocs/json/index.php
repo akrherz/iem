@@ -438,23 +438,7 @@ $services[] = array(
 );
 $services[] = array(
     "title" => "RAOB Soundings",
-    "url" => "/json/raob.py?ts={timestamp}&station={station}",
-    "desc" => "When provided a station and timestamp, returns a single
-          RAOB profile.  When provided no station and a timestamp, returns
-          all profiles in the database for that timestamp.  When provided a
-          pressure [mb], returns just that pressure level's data.  Realtime data
-        from this service is typically available within 2 hours of observation
-        time.  For some RAOB sites, the IEM has a special identifier that merges
-        period of record data for a general location.  For example, _OAX merges
-        the long term data for KOMA, KOAX, and KOVN.",
-    "vars" => array(
-        "sid" => "3 or 4 character site ID used in North America",
-        "timestamp" => "YYYYMMDDHHMI UTC Timestamp"
-    ),
-    "example" => array(
-        "{timestamp}" => "199905031200",
-        "{station}" => "KOUN",
-    )
+    "url" => "/json/raob.py?help",
 );
 
 $services[] = array(

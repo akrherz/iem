@@ -4,6 +4,8 @@
 /json/cli.json?station=KDSM&year=2024&fmt=json
 /json/ibw_tags.py?wfo=MEG&year=2024
 /json/radar?radar=USCOMP&start=2020-05-07T15%3A00%3A00Z&operation=products
+/json/raob.py?station=_OAX&ts=2024-07-19T12:00:00Z
+/json/raob.py?ts=202407191200
 /json/ridge_current.py?product=N0B
 /json/sbw_by_point.py?lat=42&lon=-95&valid=2024-07-19T12:00:00Z
 /json/sbw_by_point.py?lat=42&lon=-95&sdate=2024/01/01&edate=2024-07-19
