@@ -291,7 +291,6 @@ RewriteRule ^/search /search.py [QSA]
     RewriteRule ^([^i][a-z_]+)\.(php|json) $1.py [QSA]
     RewriteRule qpe/([0-9\.\-]+)/([0-9\.\-]+)/(json) qpe.py?lat=$2&lon=$1&format=$3
     RewriteRule raob/([0-9]{12})/([A-Z0-9]{3,4})$ raob.py?ts=$1&station=$2 [QSA]
-    RewriteRule prism/([0-9\.\-]+)/([0-9\.\-]+)/([0-9\.\-]+)$ prism.py?lon=$1&lat=$2&valid=$3 [QSA]
     RewriteRule stage4/([0-9\.\-]+)/([0-9\.\-]+)/([0-9\.\-]+)$ stage4.py?lon=$1&lat=$2&valid=$3 [QSA]
     RewriteRule network/([0-9\.\-A-Z]+).geojson network.py?network=$1 [QSA]
   </Directory>

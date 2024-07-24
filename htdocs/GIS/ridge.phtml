@@ -110,7 +110,7 @@ which RADAR sites are available?  If you do not specific a location, the
 service returns an estimate of RADARs available for the date of your timestamp.
 <br />
 <pre class="coded">
-URI: https://mesonet.agron.iastate.edu/json/radar?operation=available
+URI: https://mesonet.agron.iastate.edu/json/radar.py?operation=available
 HTTPD GET Variables:
  lat    - (optional) Latitude of your interested point 
  lon    - (optional) Longitude (-180 to 180) of your interested point
@@ -120,7 +120,7 @@ HTTPD GET Variables:
 <p><strong>Available Products for RADAR:</strong><br /> This service returns
 what products are available for this RADAR near a given time. <br />
 <pre class="coded">
-URI: https://mesonet.agron.iastate.edu/json/radar?operation=products
+URI: https://mesonet.agron.iastate.edu/json/radar.py?operation=products
 HTTPD GET Variables:
  radar  - RADAR identifier 
  start  - UTC timestamp in ISO-8601 format YYYY-mm-ddTHH:MMZ
@@ -132,7 +132,7 @@ radar, product, and during a period of time.  The results of this query can
 then be fed back to request actual images or tiles from the Tile Map Service.
 <strong>This service has a 500 scan limit return for each query.</strong><br />
 <pre class="coded">
-URI: https://mesonet.agron.iastate.edu/json/radar?operation=list
+URI: https://mesonet.agron.iastate.edu/json/radar.py?operation=list
 HTTPD GET Variables:
  radar  - RADAR identifier 
  product- level3 product identifier

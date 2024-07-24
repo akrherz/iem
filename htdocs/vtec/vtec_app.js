@@ -371,7 +371,7 @@ function updateRADARTimeSlider() {
             end: CONFIG.expire.utc().format(),
             operation: 'list'
         },
-        url: '/json/radar',
+        url: '/json/radar.py',
         method: 'GET',
         dataType: 'json',
         success: (data) => {
@@ -403,7 +403,7 @@ function updateRADARProducts() {
             start: (CONFIG.issue !== null) ? CONFIG.issue.utc().format() : '',
             operation: 'products'
         },
-        url: '/json/radar',
+        url: '/json/radar.py',
         method: 'GET',
         dataType: 'json',
         success: (data) => {
@@ -434,7 +434,7 @@ function updateRADARSources() {
             start: (CONFIG.issue !== null) ? CONFIG.issue.utc().format() : '',
             operation: 'available'
         },
-        url: '/json/radar',
+        url: '/json/radar.py',
         method: 'GET',
         dataType: 'json',
         success: (data) => {

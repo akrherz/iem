@@ -1,13 +1,41 @@
-"""JSON service providing PRISM data for a given point"""
+""".. title :: PRISM Data by Point
+
+Return to `JSON Services </json/>`_
+
+Documentation for /json/prism.py
+--------------------------------
+
+This service emits a JSON response of PRISM data for a given point.
+
+Changelog
+---------
+
+- 2024-07-24: Initial documentation release and rectify the dates.
+
+Example Usage
+-------------
+
+Request PRISM data for January 2024 at a point in Iowa:
+
+https://mesonet.agron.iastate.edu/json/prism.py?lat=41.9&lon=-92.0&\
+sdate=2024-01-01&edate=2024-01-31
+
+Request PRISM data for January 10th 2024 at a point in Iowa:
+
+https://mesonet.agron.iastate.edu/json/prism.py?lat=41.9&lon=-92.0&\
+valid=2024-01-10
+
+"""
 
 import datetime
 import json
 import os
 
 import numpy as np
+import pandas as pd
 from pydantic import Field
 from pyiem import prism
-from pyiem.exceptions import NoDataFound
+from pyiem.exceptions import IncompleteWebRequest
 from pyiem.util import c2f, mm2inch, ncopen
 from pyiem.webutil import CGIModel, iemapp
 
@@ -18,7 +46,18 @@ class Schema(CGIModel):
     callback: str = Field(None, description="JSONP callback function")
     lat: float = Field(41.9, description="Latitude of point")
     lon: float = Field(-92.0, description="Longitude of point")
-    valid: str = Field("20191028", description="Valid date to query")
+    valid: datetime.date = Field(
+        default=None,
+        description="Provide data valid for this date (~12 UTC)",
+    )
+    sdate: datetime.date = Field(
+        default=None,
+        description="Inclusive start date for data request",
+    )
+    edate: datetime.date = Field(
+        default=None,
+        description="Inclusive end date for data request",
+    )
 
 
 def myrounder(val, precision):
@@ -28,44 +67,19 @@ def myrounder(val, precision):
     return round(val, precision)
 
 
-def compute_dates(dstring):
-    """Convert the date string into useful things"""
-    if len(dstring) == 8:
-        return [
-            [
-                datetime.date(
-                    int(dstring[:4]), int(dstring[4:6]), int(dstring[6:8])
-                )
-            ]
-        ]
-    if len(dstring) == 17:
-        ts1 = datetime.date(
-            int(dstring[:4]), int(dstring[4:6]), int(dstring[6:8])
-        )
-        ts2 = datetime.date(
-            int(dstring[9:13]), int(dstring[13:15]), int(dstring[15:17])
-        )
-        interval = datetime.timedelta(days=1)
-        res = [[ts1]]
-        now = ts1
-        while now <= ts2:
-            if now.year != res[-1][0].year:
-                res[-1].append(now - datetime.timedelta(days=1))
-                res.append([now])
-            now += interval
-        res[-1].append(now - datetime.timedelta(days=1))
-        return res
-
-    return None
-
-
-def dowork(valid, lon, lat):
+def dowork(environ: dict):
     """Do work!"""
-    dates = compute_dates(valid)
+    dates = []
+    if environ["valid"] is not None:
+        dates.append(environ["valid"])
+    elif environ["sdate"] is not None and environ["edate"] is not None:
+        dates = pd.date_range(environ["sdate"], environ["edate"]).tolist()
+    else:
+        raise IncompleteWebRequest("Need valid or sdate/edate")
 
-    i, j = prism.find_ij(lon, lat)
+    i, j = prism.find_ij(environ["lon"], environ["lat"])
     if i is None or j is None:
-        raise NoDataFound("Coordinates outside of domain")
+        raise IncompleteWebRequest("Coordinates outside of domain")
 
     res = {
         "gridi": int(i),
@@ -73,26 +87,21 @@ def dowork(valid, lon, lat):
         "data": [],
         "disclaimer": (
             "PRISM Climate Group, Oregon State University, "
-            "http://prism.oregonstate.edu, created 4 Feb 2004."
+            "https://prism.oregonstate.edu, created 4 Feb 2004."
         ),
     }
 
-    for dpair in dates:
-        sts = dpair[0]
-        ets = dpair[-1]
-        sidx = prism.daily_offset(sts)
-        eidx = prism.daily_offset(ets) + 1
+    sidx = prism.daily_offset(dates[0])
+    eidx = prism.daily_offset(dates[-1]) + 1
 
-        ncfn = "/mesonet/data/prism/%s_daily.nc" % (sts.year,)
-        if not os.path.isfile(ncfn):
-            continue
+    ncfn = f"/mesonet/data/prism/{dates[0]:%Y}_daily.nc"
+    if os.path.isfile(ncfn):
         with ncopen(ncfn) as nc:
             tmax = nc.variables["tmax"][sidx:eidx, j, i]
             tmin = nc.variables["tmin"][sidx:eidx, j, i]
             ppt = nc.variables["ppt"][sidx:eidx, j, i]
 
-        for tx, (mt, nt, pt) in enumerate(zip(tmax, tmin, ppt)):
-            valid = sts + datetime.timedelta(days=tx)
+        for mt, nt, pt, valid in zip(tmax, tmin, ppt, dates):
             res["data"].append(
                 {
                     "valid": valid.strftime("%Y-%m-%dT12:00:00Z"),
@@ -109,7 +118,8 @@ def get_mckey(environ):
     """get key."""
     return (
         f"/json/prism/{environ['lon']:.2f}/"
-        f"{environ['lat']:.2f}/{environ['valid']}"
+        f"{environ['lat']:.2f}/{environ['valid']}/{environ['sdate']}/"
+        f"{environ['edate']}"
     )
 
 
@@ -120,11 +130,7 @@ def get_mckey(environ):
 )
 def application(environ, start_response):
     """Answer request."""
-    lat = environ["lat"]
-    lon = environ["lon"]
-    valid = environ["valid"]
-
-    res = dowork(valid, lon, lat)
+    res = dowork(environ)
     headers = [("Content-type", "application/json")]
     start_response("200 OK", headers)
     return res

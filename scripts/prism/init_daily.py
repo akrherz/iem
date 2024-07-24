@@ -4,6 +4,7 @@ import datetime
 import os
 import sys
 
+import click
 import numpy as np
 from pyiem import prism
 from pyiem.util import logger, ncopen
@@ -93,5 +94,13 @@ def init_year(ts):
     nc.close()
 
 
+@click.command()
+@click.option("--year", type=int, required=True, help="Year to initialize")
+def main(year):
+    """Run for the year."""
+    os.makedirs("/mesonet/data/prism", exist_ok=True)
+    init_year(datetime.datetime(year, 1, 1))
+
+
 if __name__ == "__main__":
-    init_year(datetime.datetime(int(sys.argv[1]), 1, 1))
+    main()

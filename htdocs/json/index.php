@@ -39,21 +39,7 @@ $services[] = array(
 
 $services[] = array(
     "title" => "Oregon State PRISM Grid Cell Daily Sample",
-    "url" => "/json/prism/{lon}/{lat}/{date_or_daterange}",
-    "desc" => "Produces a daily time series for a grid cell that covers" .
-        " the specified latitude and longitude (negative E values)." .
-        " Credit: <a href='http://prism.oregonstate.edu'>PRISM Climate Group</a>," .
-        " Oregon State University, created 4 Feb 2004.",
-    "vars" => array(
-        "lat" => "Latitude (deg N)",
-        "lon" => "Longitude (deg E)",
-        "date_or_daterange" => "YYYYmmdd or YYYYmmdd-YYYYmmdd (inclusive)",
-    ),
-    "example" => array(
-        "{lat}" => "41.99",
-        "{lon}" => "-95.55",
-        "{date_or_daterange}" => "20151215-20160115"
-    )
+    "url" => "/json/prism.py?help",
 );
 
 $services[] = array(
@@ -489,58 +475,12 @@ $services[] = array(
 
 $services[] = array(
     "title" => "RIDGE Single Site Available NEXRADs",
-    "url" => "/json/radar?operation=available&amp;lat={lat}&amp;lon={lon}&amp;start={start}",
-    "desc" => "This service returns an estimate of which NEXRAD RADARs have
-imagery available for the timestamp and latitude / longitude location you specify.",
-    "vars" => array(
-        "lat" => "Point location latitude (degrees north)",
-        "lon" => "Point location longitude (degrees east)",
-        "start" => "ISO-8601 UTC Timestamp"
-    ),
-    "example" => array(
-        "{lat}" => 41.99,
-        "{lon}" => 93.50,
-        "{start}" => "2012-12-01T00:00:00Z",
-    )
+    "url" => "/json/radar.py?help",
 );
 
 $services[] = array(
     "title" => "RIDGE Current Metadata by Product",
     "url" => "/json/ridge_current.py?help",
-);
-
-$services[] = array(
-    "title" => "RIDGE Single Site Available Products for single NEXRAD",
-    "url" => "/json/radar?operation=products&amp;radar={radar}&amp;start={start}",
-    "desc" => "This service returns available NEXRAD level 3 products for
-a given RADAR and date.",
-    "vars" => array(
-        "radar" => "NEXRAD 3 character identifier",
-        "start" => "ISO-8601 UTC Timestamp"
-    ),
-    "example" => array(
-        "{radar}" => 'DMX',
-        "{start}" => "2012-12-01T00:00:00Z",
-    )
-);
-
-$services[] = array(
-    "title" => "RIDGE Single Site Available Volume Scan Times",
-    "url" => "/json/radar?operation=list&amp;radar={radar}&amp;product={product}&amp;start={start}&amp;end={end}",
-    "desc" => "This service returns NEXRAD volume scan times for a given
-RADAR, level 3 product, and start/end timestamp.",
-    "vars" => array(
-        "radar" => "NEXRAD 3 character identifier",
-        "product" => "Three character level 3 NEXRAD product identifier.",
-        "start" => "ISO-8601 UTC Timestamp",
-        "end" => "ISO-8601 UTC Timestamp"
-    ),
-    "example" => array(
-        "{radar}" => 'DMX',
-        "{product}" => 'N0Q',
-        "{start}" => "2012-12-01T00:00:00Z",
-        "{end}" => "2012-12-01T23:59:59Z",
-    )
 );
 
 $services[] = array(

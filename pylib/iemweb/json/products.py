@@ -2,6 +2,24 @@
 
 Return to `JSON Services </json/>`.
 
+Documentation for /json/products.py
+-----------------------------------
+
+This service emits a JSON response that drives the
+`IEM Time Machine <https://mesonet.agron.iastate.edu/timemachine/>`_.
+
+Changelog
+---------
+
+- 2024-07-24: Initital documentation release.
+
+Example Usage
+-------------
+
+Nothing much to see here.
+
+https://mesonet.agron.iastate.edu/json/products.py
+
 """
 
 import json
