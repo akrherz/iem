@@ -15,7 +15,7 @@ from matplotlib.patches import Patch
 from metpy.calc import dewpoint_from_relative_humidity
 from metpy.units import units
 from pyiem import meteorology
-from pyiem.database import get_dbconn, get_sqlalchemy_conn
+from pyiem.database import get_sqlalchemy_conn
 from pyiem.exceptions import NoDataFound
 from pyiem.plot import figure, figure_axes, get_cmap
 from pyiem.util import (
@@ -23,6 +23,7 @@ from pyiem.util import (
     convert_value,
     get_autoplot_context,
 )
+from sqlalchemy import text
 
 CENTRAL = ZoneInfo("America/Chicago")
 PLOTTYPES = {
@@ -234,33 +235,34 @@ def make_inversion_plot(ctx):
 
 def make_daily_pet_plot(ctx):
     """Generate a daily PET plot"""
-    pgconn = get_dbconn("isuag")
-    icursor = pgconn.cursor()
-    icursor.execute(
-        """WITH climo as (
-        select to_char(valid, 'mmdd') as mmdd, avg(c70) as  et
-        from daily where station = 'A130209' GROUP by mmdd
-    ), obs as (
-        SELECT valid, dailyet_qc / 25.4 as et, to_char(valid, 'mmdd') as mmdd
-        from sm_daily WHERE station = %s and valid >= %s and valid <= %s
-    )
+    with get_sqlalchemy_conn("isuag") as conn:
+        res = conn.execute(
+            text("""WITH climo as (
+            select to_char(valid, 'mmdd') as mmdd, avg(c70) as  et
+            from daily where station = 'A130209' GROUP by mmdd
+        ), obs as (
+            SELECT valid, dailyet_qc / 25.4 as et,
+            to_char(valid, 'mmdd') as mmdd
+            from sm_daily WHERE station = :station and valid >= :sts
+            and valid <= :ets
+        )
 
-    select o.valid, o.et, c.et from obs o
-    JOIN climo c on (c.mmdd = o.mmdd) ORDER by o.valid ASC
-    """,
-        (
-            ctx["station"],
-            ctx["sts"].strftime("%Y-%m-%d"),
-            ctx["ets"].strftime("%Y-%m-%d"),
-        ),
-    )
-    dates = []
-    o_dailyet = []
-    c_et = []
-    for row in icursor:
-        dates.append(row[0])
-        o_dailyet.append(row[1] if row[1] is not None else 0)
-        c_et.append(row[2])
+        select o.valid, o.et, c.et from obs o
+        JOIN climo c on (c.mmdd = o.mmdd) ORDER by o.valid ASC
+        """),
+            {
+                "station": ctx["station"],
+                "sts": ctx["sts"].date(),
+                "ets": ctx["ets"].date(),
+            },
+        )
+        dates = []
+        o_dailyet = []
+        c_et = []
+        for row in res:
+            dates.append(row[0])
+            o_dailyet.append(row[1] if row[1] is not None else 0)
+            c_et.append(row[2])
 
     df = pd.DataFrame(dict(dates=dates, dailyet=o_dailyet, climo_dailyet=c_et))
     if df.empty:
