@@ -10,9 +10,11 @@ import datetime
 
 import pandas as pd
 from pyiem.database import get_sqlalchemy_conn
+from pyiem.exceptions import NoDataFound
 from pyiem.network import Table as NetworkTable  # This is needed.
 from pyiem.plot import figure_axes
 from pyiem.util import get_autoplot_context
+from sqlalchemy import text
 
 VARS = {
     "tsoil": "4 inch Soil Temperature",
@@ -82,25 +84,27 @@ def plotter(fdict):
     oldstation = XREF.get(station, "A130209")
     with get_sqlalchemy_conn("isuag") as conn:
         df = pd.read_sql(
-            """
+            text("""
         WITH legacy as (
             SELECT valid, c30 as tsoil, 'L' as dtype
-            from daily where station = %s
+            from daily where station = :oldstation
             and c30 > -20 and c30 < 40 ORDER by valid ASC
         ), present as (
             SELECT valid, t4_c_avg_qc * 9./5. + 32. as tsoil,
             'C' as dtype, vwc12, vwc24, vwc50
             from sm_daily
-            where station = %s and t4_c_avg_qc > -20 and t4_c_avg_qc < 40
+            where station = :station and t4_c_avg_qc > -20 and t4_c_avg_qc < 40
             ORDER by valid ASC
         )
         SELECT valid, tsoil, dtype, null as vwc12, null as vwc24, null as vwc50
         from legacy UNION ALL select * from present
-        """,
+        """),
             conn,
-            params=(oldstation, station),
+            params={"station": station, "oldstation": oldstation},
             index_col=None,
         )
+    if df.empty:
+        raise NoDataFound("No Data Found.")
     df["valid"] = pd.to_datetime(df["valid"])
     df["doy"] = pd.to_numeric(df["valid"].dt.strftime("%j"))
     df["year"] = df["valid"].dt.year

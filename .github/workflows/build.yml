@@ -12,7 +12,7 @@ jobs:
     defaults:
       run:
         # Ensures environment gets sourced right
-        shell: bash -l {0}
+        shell: bash -l -e {0}
     name: Python (${{ matrix.PYTHON_VERSION }}) Data (${{ matrix.WITH_IEM_DATA }}) Web (${{ matrix.WITH_WEB }})
     runs-on: ubuntu-latest
     strategy:
@@ -53,7 +53,6 @@ jobs:
     # Get postgresql running and setup the database
     - name: Setup Postgres
       run: |
-        set -e
         git clone --depth 1 https://github.com/akrherz/iem-database.git database
         git clone --depth 1 https://github.com/akrherz/ci_tooling.git .ci_tooling
         cd .ci_tooling
@@ -75,7 +74,6 @@ jobs:
 
     - name: Setup Directory Paths
       run: |
-        set -e
         sudo ln -s `pwd` /opt/iem
         sudo ln -s $HOME/micromamba /opt/miniconda3
         mkdir _mesonet
@@ -84,15 +82,13 @@ jobs:
     - name: Setup IEM Data
       if: ${{ matrix.WITH_IEM_DATA == 'YES' }}
       run: |
-        set -x
-        python database/store_test_data.py
+        python database/store_test_data.py $(which psql)
         python scripts/dbutil/sync_stations.py
         python scripts/prism/init_daily.py --year=2024
 
     # Get memcached running
     - name: Setup Memcached
       run: |
-        set -e
         cd .ci_tooling
         . memcached.sh
 
@@ -100,14 +96,12 @@ jobs:
     - name: Configure IEM Webfarm Server
       if: ${{ matrix.WITH_WEB == 'YES' }}
       run: |
-        set -e
         cd .ci_tooling
         . iemwebfarm.sh
 
     - name: Configure Webfarm Server
       if: ${{ matrix.WITH_WEB == 'YES' }}
       run: |
-        set -e
         echo '<VirtualHost *:80>' | sudo tee /etc/apache2/sites-enabled/iem.conf > /dev/null
         cat config/mesonet.inc | sudo tee -a /etc/apache2/sites-enabled/iem.conf > /dev/null
         echo '</VirtualHost>' | sudo tee -a /etc/apache2/sites-enabled/iem.conf > /dev/null
@@ -132,9 +126,7 @@ jobs:
 
     - name: Run mod_wsgi smoke test
       if: ${{ matrix.WITH_WEB == 'YES' }}
-      run: |
-        set -e
-        pytest -n 4 tests/test_mod_wsgi.py
+      run: pytest -n 4 tests/test_mod_wsgi.py
 
     - name: View Apache Logs
       if: ${{ failure() && matrix.WITH_WEB == 'YES' }}
@@ -150,7 +142,6 @@ jobs:
     - name: Run IEMWeb Python Check
       if: ${{ matrix.WITH_WEB == 'NO' && matrix.WITH_IEM_DATA == 'YES' }}
       run: |
-        set -e
         export PYTHONPATH=/opt/iem/pylib
         python -m pytest --mpl --cov=iemweb -n 4 tests/iemweb/
         python -m coverage xml

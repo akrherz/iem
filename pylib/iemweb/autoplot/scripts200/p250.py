@@ -50,7 +50,7 @@ def get_description():
         dict(
             type="zstation",
             name="zstation2",
-            default="BNW",
+            default="DSM",
             network="IA_ASOS",
             label="Select Station 2:",
         ),
@@ -117,7 +117,7 @@ def plotter(fdict):
             params={"stids": [station1, station2]},
             index_col=None,
         )
-    if df.empty:
+    if df.empty or station1 not in df.columns or station2 not in df.columns:
         raise NoDataFound("No Data Found.")
     df["utc_valid"] = df["utc_valid"].dt.tz_localize(datetime.timezone.utc)
     tz = ZoneInfo(ctx["_nt1"].sts[station1]["tzname"])

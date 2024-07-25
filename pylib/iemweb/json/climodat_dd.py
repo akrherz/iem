@@ -2,6 +2,7 @@
 
 import datetime
 import json
+import os
 
 import numpy as np
 from metpy.units import units
@@ -67,7 +68,10 @@ def run(station, sdate, edate, gddbase, gddceil):
     idx, jdx = find_ij(lon, lat)
     if idx is not None:
         for model in ["gfs", "ndfd"]:
-            with ncopen(f"/mesonet/data/iemre/{model}_current.nc") as nc:
+            ncfn = f"/mesonet/data/iemre/{model}_current.nc"
+            if not os.path.isfile(ncfn):
+                continue
+            with ncopen(ncfn) as nc:
                 highs = c2f(nc.variables["high_tmpk"][:, jdx, idx] - 273.15)
                 lows = c2f(nc.variables["low_tmpk"][:, jdx, idx] - 273.15)
                 taxis = compute_taxis(nc.variables["time"])

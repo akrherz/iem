@@ -15,7 +15,7 @@ from matplotlib.patches import Patch
 from metpy.calc import dewpoint_from_relative_humidity
 from metpy.units import units
 from pyiem import meteorology
-from pyiem.database import get_dbconn, get_sqlalchemy_conn
+from pyiem.database import get_sqlalchemy_conn
 from pyiem.exceptions import NoDataFound
 from pyiem.plot import figure, figure_axes, get_cmap
 from pyiem.util import (
@@ -23,6 +23,7 @@ from pyiem.util import (
     convert_value,
     get_autoplot_context,
 )
+from sqlalchemy import text
 
 CENTRAL = ZoneInfo("America/Chicago")
 PLOTTYPES = {
@@ -234,33 +235,34 @@ def make_inversion_plot(ctx):
 
 def make_daily_pet_plot(ctx):
     """Generate a daily PET plot"""
-    pgconn = get_dbconn("isuag")
-    icursor = pgconn.cursor()
-    icursor.execute(
-        """WITH climo as (
-        select to_char(valid, 'mmdd') as mmdd, avg(c70) as  et
-        from daily where station = 'A130209' GROUP by mmdd
-    ), obs as (
-        SELECT valid, dailyet_qc / 25.4 as et, to_char(valid, 'mmdd') as mmdd
-        from sm_daily WHERE station = %s and valid >= %s and valid <= %s
-    )
+    with get_sqlalchemy_conn("isuag") as conn:
+        res = conn.execute(
+            text("""WITH climo as (
+            select to_char(valid, 'mmdd') as mmdd, avg(c70) as  et
+            from daily where station = 'A130209' GROUP by mmdd
+        ), obs as (
+            SELECT valid, dailyet_qc / 25.4 as et,
+            to_char(valid, 'mmdd') as mmdd
+            from sm_daily WHERE station = :station and valid >= :sts
+            and valid <= :ets
+        )
 
-    select o.valid, o.et, c.et from obs o
-    JOIN climo c on (c.mmdd = o.mmdd) ORDER by o.valid ASC
-    """,
-        (
-            ctx["station"],
-            ctx["sts"].strftime("%Y-%m-%d"),
-            ctx["ets"].strftime("%Y-%m-%d"),
-        ),
-    )
-    dates = []
-    o_dailyet = []
-    c_et = []
-    for row in icursor:
-        dates.append(row[0])
-        o_dailyet.append(row[1] if row[1] is not None else 0)
-        c_et.append(row[2])
+        select o.valid, o.et, c.et from obs o
+        JOIN climo c on (c.mmdd = o.mmdd) ORDER by o.valid ASC
+        """),
+            {
+                "station": ctx["station"],
+                "sts": ctx["sts"].date(),
+                "ets": ctx["ets"].date(),
+            },
+        )
+        dates = []
+        o_dailyet = []
+        c_et = []
+        for row in res:
+            dates.append(row[0])
+            o_dailyet.append(row[1] if row[1] is not None else 0)
+            c_et.append(row[2])
 
     df = pd.DataFrame(dict(dates=dates, dailyet=o_dailyet, climo_dailyet=c_et))
     if df.empty:
@@ -557,15 +559,23 @@ def make_daily_water_change_plot(ctx):
     # Get daily precip
     with get_sqlalchemy_conn("isuag") as conn:
         pdf = pd.read_sql(
-            "SELECT valid, rain_in_tot_qc from sm_daily where station = %s "
-            "and valid >= %s and valid <= %s ORDER by valid ASC",
+            text("""
+                SELECT valid, rain_in_tot_qc from sm_daily
+                where station = :station
+                and valid >= :sts and valid <= :ets ORDER by valid ASC
+                """),
             conn,
-            params=(ctx["station"], ctx["sts"].date(), ctx["ets"].date()),
+            params={
+                "station": ctx["station"],
+                "sts": ctx["sts"].date(),
+                "ets": ctx["ets"].date(),
+            },
             index_col="valid",
+            parse_dates="valid",
         )
 
         df = pd.read_sql(
-            """
+            text("""
         WITH obs as (
             SELECT valid,
             CASE WHEN t12_c_avg_qc > 1 then vwc12_qc else null end
@@ -575,18 +585,25 @@ def make_daily_water_change_plot(ctx):
             CASE WHEN t50_c_avg_qc > 1 then vwc50_qc else null end
             as v50
             from sm_daily
-            where station = %s and valid >= %s and valid < %s)
+            where station = :station and valid >= :sts and valid < :ets)
 
         SELECT valid,
         v12, v12 - lag(v12) OVER (ORDER by valid ASC) as v12_delta,
         v24, v24 - lag(v24) OVER (ORDER by valid ASC) as v24_delta,
         v50, v50 - lag(v50) OVER (ORDER by valid ASC) as v50_delta
         from obs ORDER by valid ASC
-        """,
+        """),
             conn,
-            params=(ctx["station"], ctx["sts"], ctx["ets"]),
+            params={
+                "station": ctx["station"],
+                "sts": ctx["sts"],
+                "ets": ctx["ets"],
+            },
             index_col=None,
+            parse_dates="valid",
         )
+    if pdf.empty or df.empty:
+        raise NoDataFound("No Data Found for Query")
     # 12inch covers 6-18 inches, 24inch covers 18-30 inches, 50inch excluded
     l1 = 12.0
     l2 = 12.0

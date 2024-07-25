@@ -1,3 +1,7 @@
+/cgi-bin/request/isusm.py?mode=hourly&timeres=hourly&station=AMFI4&year1=2024&month1=7&day1=1&year2=2024&month2=7&day2=25&vars=tmpf&vars=relh&vars=sv&vars=sv2&todisk=yes&format=excel&missing=-99&tz=America%2FChicago
+/cgi-bin/request/isusm.py?mode=hourly&timeres=hourly&station=AMFI4&year1=2024&month1=7&day1=1&year2=2024&month2=7&day2=25&vars=tmpf&vars=relh&vars=sv&vars=sv2&todisk=yes&format=comma&missing=-99&tz=America%2FChicago
+/cgi-bin/request/isusm.py?mode=inversion&station=BOOI4&year1=2021&month1=1&day1=1&year2=2024&month2=7&day2=25&todisk=yes&format=comma&missing=-99&tz=America%2FChicago
+/cgi-bin/request/isusm.py?mode=daily&station=AHTI4&station=CNAI4&year1=2024&month1=7&day1=1&year2=2024&month2=7&day2=25&vars=high&vars=low&vars=bpres_avg&vars=sv&format=comma&missing=
 /json/cf6.py?station=KDSM&year=2024&fmt=json
 /json/cf6.py?station=KDSM&year=2024&fmt=csv
 /json/cli.json?station=KDSM&year=2024&fmt=csv
