@@ -85,8 +85,7 @@ jobs:
       if: ${{ matrix.WITH_IEM_DATA == 'YES' }}
       run: |
         set -e
-        which psql
-        python database/store_test_data.py
+        python database/store_test_data.py $(which psql)
         python scripts/dbutil/sync_stations.py
         python scripts/prism/init_daily.py --year=2024
 
