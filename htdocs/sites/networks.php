@@ -133,7 +133,7 @@ EOM;
                 $fn = "{$shpFname}.{$suff}";
                 if (is_file($fn)) unlink($fn);
             }
-            $shpFile = new shapeFileObj($shpFname, MS_SHAPEFILE_POINT);
+            $shpFile = new shapeFileObj($shpFname, mapscript::MS_SHAPEFILE_POINT);
             $dbfFile = dbase_create($shpFname . ".dbf", array(
                 array("ID", "C", 6),
                 array("NAME", "C", 50),
