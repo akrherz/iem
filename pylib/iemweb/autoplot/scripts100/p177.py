@@ -559,15 +559,23 @@ def make_daily_water_change_plot(ctx):
     # Get daily precip
     with get_sqlalchemy_conn("isuag") as conn:
         pdf = pd.read_sql(
-            "SELECT valid, rain_in_tot_qc from sm_daily where station = %s "
-            "and valid >= %s and valid <= %s ORDER by valid ASC",
+            text("""
+                SELECT valid, rain_in_tot_qc from sm_daily
+                where station = :station
+                and valid >= :sts and valid <= :ets ORDER by valid ASC
+                """),
             conn,
-            params=(ctx["station"], ctx["sts"].date(), ctx["ets"].date()),
+            params={
+                "station": ctx["station"],
+                "sts": ctx["sts"].date(),
+                "ets": ctx["ets"].date(),
+            },
             index_col="valid",
+            parse_dates="valid",
         )
 
         df = pd.read_sql(
-            """
+            text("""
         WITH obs as (
             SELECT valid,
             CASE WHEN t12_c_avg_qc > 1 then vwc12_qc else null end
@@ -577,17 +585,22 @@ def make_daily_water_change_plot(ctx):
             CASE WHEN t50_c_avg_qc > 1 then vwc50_qc else null end
             as v50
             from sm_daily
-            where station = %s and valid >= %s and valid < %s)
+            where station = :station and valid >= :sts and valid < :ets)
 
         SELECT valid,
         v12, v12 - lag(v12) OVER (ORDER by valid ASC) as v12_delta,
         v24, v24 - lag(v24) OVER (ORDER by valid ASC) as v24_delta,
         v50, v50 - lag(v50) OVER (ORDER by valid ASC) as v50_delta
         from obs ORDER by valid ASC
-        """,
+        """),
             conn,
-            params=(ctx["station"], ctx["sts"], ctx["ets"]),
+            params={
+                "station": ctx["station"],
+                "sts": ctx["sts"],
+                "ets": ctx["ets"],
+            },
             index_col=None,
+            parse_dates="valid",
         )
     # 12inch covers 6-18 inches, 24inch covers 18-30 inches, 50inch excluded
     l1 = 12.0
