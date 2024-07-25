@@ -54,7 +54,7 @@ def get_description():
         {
             "type": "sid",
             "name": "station",
-            "default": "IATDSM",
+            "default": "IATAME",
             "label": "Select Station:",
             "network": "IACLIMATE",
             "include_climodat": True,

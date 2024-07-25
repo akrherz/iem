@@ -23,6 +23,8 @@ from pyiem.plot import figure
 from pyiem.util import get_autoplot_context
 from sqlalchemy import text
 
+from iemweb.autoplot import ARG_STATION
+
 MDICT = {
     "all": "Entire Year",
     "spring": "Spring (MAM)",
@@ -60,13 +62,7 @@ def get_description():
     """Return a dict describing how to call this plotter"""
     desc = {"description": __doc__, "data": True, "cache": 86400}
     desc["arguments"] = [
-        dict(
-            type="station",
-            name="station",
-            default="IATDSM",
-            label="Select Station:",
-            network="IACLIMATE",
-        ),
+        ARG_STATION,
         dict(
             type="select",
             name="var",

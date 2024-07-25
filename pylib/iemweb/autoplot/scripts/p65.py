@@ -11,6 +11,8 @@ import pandas as pd
 from pyiem.plot import figure
 from pyiem.util import get_autoplot_context, get_sqlalchemy_conn
 
+from iemweb.autoplot import ARG_STATION
+
 PDICT = {"cold": "Coldest Temperature", "hot": "Hottest Temperature"}
 
 
@@ -19,13 +21,7 @@ def get_description():
     desc = {"description": __doc__, "data": True}
     today = datetime.date.today()
     desc["arguments"] = [
-        dict(
-            type="station",
-            name="station",
-            default="IATDSM",
-            label="Select Station:",
-            network="IACLIMATE",
-        ),
+        ARG_STATION,
         dict(
             type="month",
             name="month",

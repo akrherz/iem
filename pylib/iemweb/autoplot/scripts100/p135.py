@@ -16,6 +16,8 @@ from pyiem.plot import figure_axes
 from pyiem.util import get_autoplot_context
 from sqlalchemy import text
 
+from iemweb.autoplot import ARG_STATION
+
 PDICT = {
     "high_above": "High Temperature At or Above",
     "high_below": "High Temperature Below",
@@ -29,13 +31,7 @@ def get_description():
     """Return a dict describing how to call this plotter"""
     desc = {"description": __doc__, "data": True, "cache": 86400}
     desc["arguments"] = [
-        dict(
-            type="station",
-            name="station",
-            default="IATDSM",
-            label="Select Station:",
-            network="IACLIMATE",
-        ),
+        ARG_STATION,
         dict(
             type="select",
             name="var",

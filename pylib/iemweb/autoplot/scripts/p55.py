@@ -16,19 +16,14 @@ from pyiem.exceptions import NoDataFound
 from pyiem.plot import figure
 from pyiem.util import get_autoplot_context
 
+from iemweb.autoplot import ARG_STATION
+
 
 def get_description():
     """Return a dict describing how to call this plotter"""
     desc = {"description": __doc__, "data": True}
     desc["arguments"] = [
-        # IATDSM has some troubles here
-        dict(
-            type="station",
-            name="station",
-            default="IATDSM",
-            network="IACLIMATE",
-            label="Select Station:",
-        ),
+        ARG_STATION,
         dict(
             type="month",
             name="month",

@@ -21,6 +21,8 @@ from pyiem.util import get_autoplot_context
 from sklearn.linear_model import LinearRegression
 from sqlalchemy import text
 
+from iemweb.autoplot import ARG_STATION
+
 PDICT = {
     "corn": "Corn Grain",
     "soybeans": "Soybeans",
@@ -43,13 +45,7 @@ def get_description():
             "name": "crop",
             "label": "Select Crop",
         },
-        {
-            "type": "station",
-            "name": "station",
-            "default": "IATDSM",
-            "label": "Select Station:",
-            "network": "IACLIMATE",
-        },
+        ARG_STATION,
         {
             "type": "sday",
             "default": "0501",

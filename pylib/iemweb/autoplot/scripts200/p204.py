@@ -17,6 +17,8 @@ from pyiem.util import get_autoplot_context
 from seaborn import heatmap
 from sqlalchemy import text
 
+from iemweb.autoplot import ARG_STATION
+
 PDICT = {
     "trail_precip_percent": "Trailing XX Days Precip Percent of Average",
     "daily_high_depart": "Daily High Temperature Departure",
@@ -35,13 +37,7 @@ def get_description():
             name="var",
             label="Available variables to plot:",
         ),
-        dict(
-            type="station",
-            name="station",
-            default="IATDSM",
-            label="Select station:",
-            network="IACLIMATE",
-        ),
+        ARG_STATION,
         dict(
             type="int",
             name="days",

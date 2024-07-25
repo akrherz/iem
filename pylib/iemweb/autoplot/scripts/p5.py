@@ -13,6 +13,8 @@ from pyiem.exceptions import NoDataFound
 from pyiem.plot import figure_axes
 from pyiem.util import get_autoplot_context, get_sqlalchemy_conn
 
+from iemweb.autoplot import ARG_STATION
+
 PDICT = {
     "min_range": "Minimum Daily High to Low Temperature Range",
     "max_range": "Maximum Daily High to Low Temperature Range",
@@ -29,13 +31,7 @@ def get_description():
     """Return a dict describing how to call this plotter"""
     desc = {"data": True, "description": __doc__}
     desc["arguments"] = [
-        dict(
-            type="station",
-            name="station",
-            default="IATDSM",
-            label="Select Station",
-            network="IACLIMATE",
-        ),
+        ARG_STATION,
         dict(
             type="select",
             name="var",

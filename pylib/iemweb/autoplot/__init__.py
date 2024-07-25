@@ -20,6 +20,14 @@ Not listed due to having no PNG output
 
 import importlib
 
+ARG_STATION = {
+    "type": "station",
+    "name": "station",
+    "default": "IATAME",
+    "label": "Select Station (STC000? are climate district, ST0000 state avg)",
+    "network": "IACLIMATE",
+}
+
 
 def get_monofont():
     """Return the monospace font"""

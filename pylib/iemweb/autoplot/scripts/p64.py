@@ -20,6 +20,8 @@ from pyiem.plot import figure
 from pyiem.reference import TRACE_VALUE
 from pyiem.util import get_autoplot_context
 
+from iemweb.autoplot import ARG_STATION
+
 PDICT = {
     "first": "First Snowfall after 1 July",
     "last": "Last Snowfall before 1 July",
@@ -32,13 +34,7 @@ def get_description():
     """Return a dict describing how to call this plotter"""
     desc = {"description": __doc__, "data": True}
     desc["arguments"] = [
-        dict(
-            type="station",
-            name="station",
-            default="IATDSM",
-            label="Select Station:",
-            network="IACLIMATE",
-        ),
+        ARG_STATION,
         dict(
             type="text",
             name="threshold",
