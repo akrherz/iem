@@ -21,6 +21,10 @@ Return all Des Moines Area Forecast Discussions for 2024
 https://mesonet.agron.iastate.edu/json/nwstext_search.py?awipsid=AFDDMX&\
 sts=2024-01-01T00:00Z&ets=2025-01-01T00:00Z
 
+Return all Severe Thunderstorm Warnings for 10 July 2024 UTC
+
+https://mesonet.agron.iastate.edu/json/nwstext_search.py?awipsid=SVR&\
+sts=2024-07-10T00:00Z&ets=2024-07-11T00:00Z
 
 """
 
