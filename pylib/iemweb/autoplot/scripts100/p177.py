@@ -602,6 +602,8 @@ def make_daily_water_change_plot(ctx):
             index_col=None,
             parse_dates="valid",
         )
+    if pdf.empty or df.empty:
+        raise NoDataFound("No Data Found for Query")
     # 12inch covers 6-18 inches, 24inch covers 18-30 inches, 50inch excluded
     l1 = 12.0
     l2 = 12.0
