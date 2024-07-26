@@ -79,7 +79,7 @@ def sync(df, dbname):
        """,
             prow,
         )
-    LOG.info(
+    LOG.warning(
         "DB: %-7s Del %3s Mod %4s rows TS: %s IEMID: %s",
         dbname,
         len(todelete),
