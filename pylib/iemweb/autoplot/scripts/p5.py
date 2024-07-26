@@ -96,7 +96,9 @@ def plotter(fdict):
             labels.append(f"{row[tokens[1]]} - {row['dd']}")
         ranges.append(row[tokens[1]])
 
-    syear = ctx["_nt"].sts[station]["archive_begin"].year
+    syear = "n/a"
+    if ctx["_nt"].sts[station]["archive_begin"] is not None:
+        syear = ctx["_nt"].sts[station]["archive_begin"].year
     eyear = datetime.date.today().year
     title = f"{ctx['_sname']} ({syear}-{eyear})\n" f"{PDICT[varname]} by Month"
 

@@ -120,6 +120,8 @@ def get_data(conn, params):
     if not df.empty:
         df = df.reindex(range(24 * 60))
         df["frequency"] = df["count"] / df["total"] * 100.0
+    else:
+        df["frequency"] = 0
     return df
 
 
