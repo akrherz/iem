@@ -87,6 +87,8 @@ def plotter(fdict):
         data = req.json()
     except Exception as exp:
         raise NoDataFound("Backend API failure, no data.") from exp
+    if "gfs" not in data or "ndfd" not in data:
+        raise NoDataFound("No GFS or NDFD data found!")
     gfsdf = pd.DataFrame(data["gfs"])
     gfsdf["date"] = pd.to_datetime(gfsdf["date"])
     if is_morning:
