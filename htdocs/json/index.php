@@ -474,15 +474,8 @@ $services[] = array(
 );
 
 $services[] = array(
-    "title" => "NWS Text Product",
-    "url" => "/json/nwstext.py?product_id={product_id}",
-    "desc" => "This service returns the raw text of a NWS Text Product.",
-    "vars" => array(
-        "product_id" => "String that uniquely (not fully) indentifies a text product.",
-    ),
-    "example" => array(
-        "{product_id}" => '201302241745-KDMX-FXUS63-AFDDMX'
-    )
+    "title" => "NWS Single Text Product",
+    "url" => "/json/nwstext.py?help",
 );
 
 $services[] = array(
