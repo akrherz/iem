@@ -15,10 +15,11 @@ def get_test_urls():
             line = line.strip()
             if line == "" or line.startswith("#"):
                 continue
-            # Do apache rewrite magic here
+            # Do apache rewrite magic here, example urllist entry
+            # /plotting/auto/plot/199/opt:1::date:2024-07-24::_r:t::dpi:100.png
             line = line.replace("/plotting/auto/plot/", "")
             num, qstr = line.split("/", maxsplit=1)
-            qstr, fmt = line.rsplit(".", 1)
+            qstr, fmt = qstr.rsplit(".", 1)
             yield f"/?p={num}&q={qstr}&fmt={fmt}"
 
 
