@@ -24,13 +24,15 @@ interactive chart version.
 
 import datetime
 
+import httpx
 import numpy as np
 import pandas as pd
-import requests
 from pyiem.database import get_dbconnc
 from pyiem.exceptions import NoDataFound
 from pyiem.plot import figure
 from pyiem.util import get_autoplot_context
+
+from iemweb.autoplot import ARG_STATION
 
 PDICT = {
     "dep": "Departure [inch]",
@@ -46,13 +48,7 @@ def get_description():
     desc = {"description": __doc__, "data": True}
     today = datetime.date.today()
     desc["arguments"] = [
-        dict(
-            type="station",
-            name="station",
-            default="IATAME",
-            label="Select Station:",
-            network="IACLIMATE",
-        ),
+        ARG_STATION,
         dict(
             type="select",
             name="opt",
@@ -108,16 +104,21 @@ def get_ctx(fdict):
         ]
     pgconn.close()
     sts = date - datetime.timedelta(days=14)
-    uri = (
-        "http://mesonet.agron.iastate.edu/"
-        "api/1/usdm_bypoint.json?sdate=%s&edate=%s&lon=%s&lat=%s"
-    ) % (
-        sts.strftime("%Y-%m-%d"),
-        date.strftime("%Y-%m-%d"),
-        ctx["_nt"].sts[station]["lon"],
-        ctx["_nt"].sts[station]["lat"],
-    )
-    jdata = requests.get(uri, timeout=30).json()
+    try:
+        resp = httpx.get(
+            "http://mesonet.agron.iastate.edu/api/1/usdm_bypoint.json",
+            params={
+                "sdate": sts.strftime("%Y-%m-%d"),
+                "edate": date.strftime("%Y-%m-%d"),
+                "lon": ctx["_nt"].sts[station]["lon"],
+                "lat": ctx["_nt"].sts[station]["lat"],
+            },
+            timeout=30,
+        )
+        resp.raise_for_status()
+    except Exception as exp:
+        raise NoDataFound("Unable to fetch USDM data") from exp
+    jdata = resp.json()
     dclass = "No Drought"
     if jdata["data"]:
         lastrow = jdata["data"][-1]
@@ -168,17 +169,12 @@ def get_ctx(fdict):
         f"[{baseyear + 2}-{datetime.datetime.now().year}] {ctx['_sname']}"
     )
     ctx["subtitle"] = (
-        "%s from given x-axis date until %s, US Drought Monitor: %s"
-    ) % (
-        PDICT[opt],
-        date.strftime("%-d %b %Y"),
-        dclass,
+        f"{PDICT[opt]} from given x-axis date until {date:%-d %b %Y}, "
+        f"US Drought Monitor: {dclass}"
     )
     ctx["subtitle2"] = (
-        "From given x-axis date until %s, US Drought Monitor: %s"
-    ) % (
-        date.strftime("%-d %b %Y"),
-        dclass,
+        f"From given x-axis date until {date:%-d %b %Y}, "
+        f"US Drought Monitor: {dclass}"
     )
 
     ctx["ranks"] = ranks

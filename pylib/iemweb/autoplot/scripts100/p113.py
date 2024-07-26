@@ -7,8 +7,8 @@ will be from the start of the two year period that crosses 1 January.
 
 import datetime
 
+import httpx
 import pandas as pd
-import requests
 from matplotlib.dates import DateFormatter, DayLocator
 from pyiem.database import get_sqlalchemy_conn
 from pyiem.exceptions import NoDataFound
@@ -130,12 +130,16 @@ def plotter(fdict):
         "# Contact Information: "
         "Daryl Herzmann akrherz@iastate.edu 515.294.5978\n"
     )
-    df = pd.DataFrame(
-        requests.get(
-            f"http://iem.local/json/climodat_stclimo.py?station={station}",
-            timeout=10,
-        ).json()["climatology"]
-    )
+    try:
+        resp = httpx.get(
+            "http://iem.local/json/climodat_stclimo.py",
+            params={"station": station},
+            timeout=30,
+        )
+        resp.raise_for_status()
+    except Exception as exp:
+        raise NoDataFound(f"Failed to fetch data: {exp}") from exp
+    df = pd.DataFrame(resp.json()["climatology"])
     if df.empty:
         raise NoDataFound("Climatology was not found.")
     df["valid"] = pd.to_datetime(

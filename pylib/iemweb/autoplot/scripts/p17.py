@@ -7,15 +7,15 @@ The vertical highlighted stripes on the plot are just the weekend dates.
 import datetime
 import warnings
 
+import httpx
 import matplotlib.patheffects as PathEffects
 import numpy as np
 import pandas as pd
-import requests
 from matplotlib.patches import Rectangle
 from pyiem.database import get_sqlalchemy_conn
 from pyiem.exceptions import NoDataFound
 from pyiem.plot import figure_axes
-from pyiem.util import exponential_backoff, get_autoplot_context
+from pyiem.util import get_autoplot_context
 
 warnings.simplefilter("ignore", UserWarning)
 PDICT = {"temps": "Plot High/Low Temperatures", "precip": "Plot Precipitation"}
@@ -70,17 +70,21 @@ def common(ctx):
         if now.weekday() in [5, 6]:
             weekends.append(now.day)
         now += datetime.timedelta(days=1)
-    req = None
-    req = exponential_backoff(
-        requests.get,
-        f"http://mesonet.agron.iastate.edu/api/1/daily.json?"
-        f"station={station}&"
-        f"network={ctx['network']}&year={year}&month={month}",
-        timeout=15,
-    )
-    if req is None or req.status_code != 200:
-        raise NoDataFound("Unable to fetch data from API service.")
-    jsn = req.json()
+    try:
+        resp = httpx.get(
+            "http://mesonet.agron.iastate.edu/api/1/daily.json",
+            params={
+                "station": station,
+                "network": ctx["network"],
+                "year": year,
+                "month": month,
+            },
+            timeout=15,
+        )
+        resp.raise_for_status()
+    except Exception as exp:
+        raise NoDataFound("Unable to fetch data from API service.") from exp
+    jsn = resp.json()
     df = pd.DataFrame(jsn["data"])
     if not df.empty:
         df["day_of_month"] = pd.to_datetime(df["date"]).dt.day
