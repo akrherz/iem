@@ -10,9 +10,9 @@ import datetime
 import os
 from io import StringIO
 
+import geopandas as gpd
 import matplotlib.image as mpimage
 import pandas as pd
-from geopandas import read_postgis
 from pyiem.database import get_sqlalchemy_conn
 from pyiem.nws.vtec import VTEC_PHENOMENA
 from pyiem.plot import figure
@@ -98,9 +98,16 @@ def plotter(fdict):
     mybuffer = 10000
     header = 35
 
+    params = {
+        "year": sts.year,
+        "sts": sts,
+        "ets": ets,
+        "phenomena": phenoms[typ],
+    }
+
     # Find largest polygon either in height or width
     with get_sqlalchemy_conn("postgis") as conn:
-        gdf = read_postgis(
+        gdf = gpd.read_postgis(
             text(
                 f"""
             SELECT wfo, phenomena, eventid, issue,
@@ -114,14 +121,15 @@ def plotter(fdict):
             ST_xmin(ST_transform(geom,9311))) as width,
             (ST_ymax(ST_transform(geom,9311)) -
             ST_ymin(ST_transform(geom,9311))) as height
-            from sbw_{sts.year}
-            WHERE status = 'NEW' and issue >= :sts and issue < :ets and
+            from sbw
+            WHERE vtec_year = :year and
+            status = 'NEW' and issue >= :sts and issue < :ets and
             phenomena = ANY(:phenomena) and eventid is not null
             ORDER by {opts[sort]["sortby"]}
         """
             ),
             conn,
-            params={"sts": sts, "ets": ets, "phenomena": phenoms[typ]},
+            params=params,
             geom_col="utmgeom",
             index_col=None,
         )
@@ -129,17 +137,17 @@ def plotter(fdict):
         # For size reduction work
         df = pd.read_sql(
             text(
-                f"""
+                """
             SELECT w.wfo, phenomena, eventid,
             sum(ST_area2d(ST_transform(u.geom,9311))) as county_size
-            from warnings_{sts.year} w JOIN ugcs u on (u.gid = w.gid)
-            WHERE issue >= :sts and issue < :ets and
+            from warnings w JOIN ugcs u on (u.gid = w.gid)
+            WHERE vtec_year = :year and issue >= :sts and issue < :ets and
             significance = 'W' and phenomena = ANY(:phenomena)
             GROUP by w.wfo, phenomena, eventid
         """
             ),
             conn,
-            params={"sts": sts, "ets": ets, "phenomena": phenoms[typ]},
+            params=params,
             index_col=["wfo", "phenomena", "eventid"],
         )
     # Join the columns

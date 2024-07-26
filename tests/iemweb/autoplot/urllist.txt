@@ -1,6 +1,11 @@
 /plotting/auto/plot/28/network:IACLIMATE::station:IATAME::opt:rank::date:2024-07-26::_r:t::dpi:100::_cb:1.png
 /plotting/auto/plot/72/network:WFO::station:DMX::phenomena:TO::significance:W::season:jul.png
 /plotting/auto/plot/72/network:WFO::station:DMX::phenomena:TO::significance:W::season:all.png
+/plotting/auto/plot/90/t:state::v:lastyear::ilabel:yes::geo:polygon::drawc:yes::year:2024::year2:2024::sdate:2006-01-01%200000::edate:2024-07-29%200000::network:WFO::station:DMX::state:IA::phenomena:TO::significance:W::cmap:jet::_r:t::dpi:100::_cb:1.png
+/plotting/auto/plot/90/t:state::v:yearcount::ilabel:yes::geo:ugc::drawc:yes::year:2024::year2:2024::sdate:2006-01-01%200000::edate:2024-07-29%200000::network:WFO::station:DMX::state:IA::phenomena:TO::significance:W::cmap:jet::_r:t::dpi:100.png
+/plotting/auto/plot/90/t:state::v:periodavg::ilabel:yes::geo:ugc::drawc:yes::year:2024::year2:2024::sdate:2006-01-01%200000::edate:2024-07-29%200000::network:WFO::station:DMX::state:IA::phenomena:TO::significance:W::cmap:jet::_r:t::dpi:100::_cb:1.png
+/plotting/auto/plot/90/t:cwa::v:periodavg::ilabel:yes::geo:ugc::drawc:yes::year:2024::year2:2024::sdate:2006-01-01%200000::edate:2024-07-29%200000::network:WFO::station:DMX::state:IA::phenomena:TO::significance:W::cmap:jet::_r:t::dpi:100.png
+/plotting/auto/plot/90/t:cwa::v:periodmax::ilabel:yes::geo:ugc::drawc:yes::year:2024::year2:2024::sdate:2006-01-01%200000::edate:2024-07-29%200000::network:WFO::station:DMX::state:IA::phenomena:TO::significance:W::cmap:jet::_r:t::dpi:100.png
 /plotting/auto/plot/109/by:state::sdate:2024-01-01%200000::edate:2024-07-17%202359::var:days::w:set::phenomenav1:TO::significancev1:W::e:all::cmap:jet::_r:t::dpi:100.png
 /plotting/auto/plot/140/network:IA_ASOS::station:DSM::syear:1928::sday:0711::eday:0725::varname:avg_temp::w:none::thres:1::year:2024::_r:t::dpi:100.png
 /plotting/auto/plot/177/network:ISUSM::station:BOOI4::opt:1::sts:2024-07-18%201000::ets:2024-07-25%201000::_r:t::dpi:100.png
@@ -28,4 +33,6 @@
 /plotting/auto/plot/199/opt:7::date:2024-07-24::_r:t::dpi:100.png
 /plotting/auto/plot/199/opt:8::date:2024-07-24::_r:t::dpi:100.png
 /plotting/auto/plot/199/opt:9::date:2024-07-24::_r:t::dpi:100.png
+/plotting/auto/plot/203/typ:W::sort:W::date:2024-05-21::dpi:100.png
+/plotting/auto/plot/203/typ:W::sort:S::date:2024-05-21::dpi:100.png
 /plotting/auto/plot/216/network:MA_ASOS::station:BOS::var:max_dwpf::dir:above::threshold:70::_r:43::dpi:100.png
