@@ -93,10 +93,10 @@ away as sometimes it will take 3-5 minutes to generate a map :(
 import datetime
 from zoneinfo import ZoneInfo
 
+import geopandas as gpd
 import numpy as np
 import pandas as pd
 from affine import Affine
-from geopandas import read_postgis
 from pyiem.database import get_dbconn, get_sqlalchemy_conn
 from pyiem.exceptions import NoDataFound
 from pyiem.nws import vtec
@@ -105,6 +105,7 @@ from pyiem.plot.geoplot import MapPlot
 from pyiem.reference import state_bounds, state_names, wfo_bounds
 from pyiem.util import get_autoplot_context, utc
 from rasterstats import zonal_stats
+from sqlalchemy import text
 
 PDICT = {"cwa": "Plot by NWS Forecast Office", "state": "Plot by State"}
 PDICT2 = {
@@ -282,14 +283,14 @@ def do_polygon(ctx):
     if varname.startswith("period"):
         if sdate.strftime("%m%d") > edate.strftime("%m%d"):
             daylimiter = (
-                f"(to_char(issue, 'mmdd') >= '{sdate:%m%d}' or "
-                f"to_char(issue, 'mmdd') < '{edate:%m%d}') and "
+                "(to_char(issue, 'mmdd') >= :sdate or "
+                "to_char(issue, 'mmdd') < :edate) and "
             )
             (sdate, edate) = (edate, sdate)
         else:
             daylimiter = (
-                f"to_char(issue, 'mmdd') >= '{sdate:%m%d}' and "
-                f"to_char(issue, 'mmdd') < '{edate:%m%d}' and "
+                "to_char(issue, 'mmdd') >= :sdate and "
+                "to_char(issue, 'mmdd') < :edate and "
             )
     # We need to figure out how to get the warnings either by state or by wfo
     if t == "cwa":
@@ -311,39 +312,35 @@ def do_polygon(ctx):
     counts = np.zeros((int(YSZ), int(XSZ)))
     wfolimiter = ""
     if ctx["t"] == "cwa":
-        wfolimiter = f" wfo = '{station}' and "
-    # do arbitrary buffer to prevent segfaults?
-    giswkt = "SRID=4326;POLYGON((%s %s, %s %s, %s %s, %s %s, %s %s))" % (
-        west,
-        south,
-        west,
-        north,
-        east,
-        north,
-        east,
-        south,
-        west,
-        south,
-    )
+        wfolimiter = " wfo = :wfo and "
+    params = {
+        "sdate": f"{sdate:%m%d}",
+        "edate": f"{edate:%m%d}",
+        "wfo": station,
+        "phenomena": phenomena,
+        "significance": significance,
+        "west": west,
+        "south": south,
+        "east": east,
+        "north": north,
+        "sts": sts,
+        "ets": ets,
+    }
     with get_sqlalchemy_conn("postgis") as conn:
-        df = read_postgis(
-            f"""
+        df = gpd.read_postgis(
+            text(f"""
         SELECT ST_Forcerhr(ST_Buffer(geom, 0.0005)) as geom, issue, expire,
-        extract(epoch from %s::timestamptz - issue) / 86400. as days
+        extract(epoch from :ets - issue) / 86400. as days
         from sbw where {wfolimiter} {daylimiter}
-        phenomena = %s and status = 'NEW' and significance = %s
-        and ST_Within(geom, ST_GeomFromEWKT(%s)) and ST_IsValid(geom)
-        and issue >= %s and issue <= %s ORDER by issue ASC
-        """,
+        phenomena = :phenomena and status = 'NEW'
+        and significance = :significance
+        and ST_Within(geom,
+            ST_MakeEnvelope(:west, :south, :east, :north, 4326))
+        and ST_IsValid(geom)
+        and issue >= :sts and issue <= :ets ORDER by issue ASC
+        """),
             conn,
-            params=(
-                ets,
-                phenomena,
-                significance,
-                giswkt,
-                sts,
-                ets,
-            ),
+            params=params,
             geom_col="geom",
             index_col=None,
         )
@@ -521,15 +518,15 @@ def do_ugc(ctx):
         ctx["title"] = f"{sdate:%-d %b %Y}-{edate:%-d %b %Y} {tt}"
         datavar = "year" if varname == "lastyear" else "days"
     elif varname == "yearcount":
-        table = f"warnings_{year}"
         if t == "cwa":
             cursor.execute(
-                f"""
-            select ugc, count(*) from {table}
-            WHERE wfo = %s and phenomena = %s and significance = %s
-            GROUP by ugc
+                """
+            select ugc, count(*) from warnings
+            WHERE vtec_year = %s and wfo = %s and phenomena = %s
+            and significance = %s GROUP by ugc
             """,
                 (
+                    year,
                     station if len(station) == 3 else station[1:],
                     phenomena,
                     significance,
@@ -537,12 +534,12 @@ def do_ugc(ctx):
             )
         else:
             cursor.execute(
-                f"""
-            select ugc, count(*) from {table}
-            WHERE substr(ugc, 1, 2) = %s and phenomena = %s
+                """
+            select ugc, count(*) from warnings
+            WHERE vtec_year = %s and substr(ugc, 1, 2) = %s and phenomena = %s
             and significance = %s GROUP by ugc
             """,
-                (state, phenomena, significance),
+                (year, state, phenomena, significance),
             )
         rows = []
         data = {}
@@ -736,63 +733,62 @@ def do_ugc(ctx):
     else:  # period
         if sdate.strftime("%m%d") > edate.strftime("%m%d"):
             daylimiter = (
-                f"and (to_char(issue, 'mmdd') >= '{sdate:%m%d}' "
-                f"or to_char(issue, 'mmdd') < '{edate:%m%d}') "
+                "and (to_char(issue, 'mmdd') >= :sdate "
+                "or to_char(issue, 'mmdd') < :edate) "
             )
         else:
             daylimiter = (
-                f"and to_char(issue, 'mmdd') >= '{sdate:%m%d}' "
-                f"and to_char(issue, 'mmdd') < '{edate:%m%d}' "
+                "and to_char(issue, 'mmdd') >= :sdate "
+                "and to_char(issue, 'mmdd') < :edate "
             )
         aggstat = varname.replace("period", "")
+        params = {
+            "wfo": station if len(station) == 3 else station[1:],
+            "phenomena": phenomena,
+            "significance": significance,
+            "sts": datetime.date(year, 1, 1),
+            "ets": datetime.date(year2 + 1, 1, 1),
+            "sdate": sdate.strftime("%m%d"),
+            "edate": edate.strftime("%m%d"),
+            "state": state,
+        }
         if t == "cwa":
             with get_sqlalchemy_conn("postgis") as conn:
                 df = pd.read_sql(
-                    f"""WITH data as (
+                    text(f"""WITH data as (
                 select ugc, extract(year from issue) as year,
                 count(*), min(issue at time zone 'UTC') as nv,
                 max(issue at time zone 'UTC') as mv from warnings
-                WHERE wfo = %s and phenomena = %s and significance = %s
-                and issue >= %s and issue <= %s {daylimiter}
+                WHERE wfo = :wfo and phenomena = :phenomena and
+                significance = :significance
+                and issue >= :sts and issue <= :ets {daylimiter}
                 GROUP by ugc, year
                 )
                 SELECT ugc, sum(count) as total, {aggstat}(count) as datum,
                 min(nv) as minvalid, max(mv) as maxvalid,
                 count(*)::int as years from data GROUP by ugc
-                """,
+                """),
                     conn,
-                    params=(
-                        station if len(station) == 3 else station[1:],
-                        phenomena,
-                        significance,
-                        datetime.date(year, 1, 1),
-                        datetime.date(year2 + 1, 1, 1),
-                    ),
+                    params=params,
                     index_col="ugc",
                 )
         else:
             with get_sqlalchemy_conn("postgis") as conn:
                 df = pd.read_sql(
-                    f"""WITH data as (
+                    text(f"""WITH data as (
                 select ugc, extract(year from issue) as year,
                 count(*), min(issue at time zone 'UTC') as nv,
                 max(issue at time zone 'UTC') as mv from warnings
-                WHERE substr(ugc, 1, 2) = %s and phenomena = %s
-                and significance = %s and issue >= %s and issue < %s
-                {daylimiter} GROUP by ugc, year
+                WHERE substr(ugc, 1, 2) = :state and phenomena = :phenomena
+                and significance = :significance and issue >= :sts and
+                issue < :ets {daylimiter} GROUP by ugc, year
                 )
                 SELECT ugc, sum(count) as total, {aggstat}(count) as datum,
                 min(nv) as minvalid, max(mv) as maxvalid,
                 count(*)::int as years from data GROUP by ugc
-                """,
+                """),
                     conn,
-                    params=(
-                        state,
-                        phenomena,
-                        significance,
-                        datetime.date(year, 1, 1),
-                        datetime.date(year2 + 1, 1, 1),
-                    ),
+                    params=params,
                     index_col="ugc",
                 )
         if df.empty:
@@ -860,6 +856,8 @@ def do_ugc(ctx):
     ctx["bins"] = bins
     ctx["data"] = data
     ctx["df"] = df
+    cursor.close()
+    pgconn.close()
 
 
 def plotter(fdict):

@@ -140,12 +140,13 @@ def make_legend(mp, df, statdf, year):
         with get_sqlalchemy_conn("postgis") as conn:
             domain = pd.read_sql(
                 text(
-                    f"""
+                    """
                 select distinct phenomena || '.' || significance as key from
-                warnings_{year}
+                warnings WHERE vtec_year = :year
                 """
                 ),
                 conn,
+                params={"year": year},
                 index_col="key",
             )
     else:

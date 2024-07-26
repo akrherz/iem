@@ -3,6 +3,7 @@
 import re
 
 from pyiem.database import get_dbconn
+from pyiem.exceptions import IncompleteWebRequest
 from pyiem.nws import vtec
 from pyiem.util import html_escape, utc
 from pyiem.webutil import iemapp
@@ -157,7 +158,10 @@ def get_context(url):
 @iemapp()
 def application(environ, start_response):
     """Answer the bell."""
-    ctx = get_context(environ["SCRIPT_URL"])
+    script_url = environ.get("SCRIPT_URL")
+    if script_url is None:
+        raise IncompleteWebRequest("SCRIPT_URL is required")
+    ctx = get_context(script_url)
     if not ctx:
         start_response("404 Not Found", [("Content-type", "text/plain")])
         return [b"Resource Not Found"]

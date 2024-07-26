@@ -2,8 +2,8 @@
 
 import os
 
+import httpx
 import pytest
-import requests
 
 
 def apps():
@@ -27,6 +27,6 @@ def apps():
 @pytest.mark.parametrize("app", apps())
 def test_app(app):
     """Test the app."""
-    req = requests.get(f"http://iem.local{app}", timeout=30)
+    resp = httpx.get(f"http://iem.local{app}", timeout=30)
     # 422 IncompleteWebRequest when there's missing CGI params
-    assert req.status_code in [422, 200]
+    assert resp.status_code in [422, 200]
