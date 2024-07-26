@@ -54,6 +54,8 @@ dependencies:
   - psycopg
   # for pyiem
   - pyarrow
+  # validation
+  - pydantic
   # lots of places
   - pygrib
   # caching
