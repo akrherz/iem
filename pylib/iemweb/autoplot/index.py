@@ -13,7 +13,6 @@ from zoneinfo import ZoneInfo
 # Third Party
 import httpx
 import pandas as pd
-import requests
 from paste.request import get_cookie_dict
 from pyiem.database import get_dbconnc, get_sqlalchemy_conn
 from pyiem.exceptions import BadWebRequest
@@ -530,13 +529,16 @@ def generate_form(apid, fdict, headers, cookies):
     fmt = fdict.get("_fmt")
     # This should be instant, but the other end may be doing a thread
     # restart, which takes a bit of time.
-    req = requests.get(
-        f"http://iem.local/plotting/auto/meta/{apid}.json",
-        timeout=60,
-    )
-    if req.status_code != 200:
+    try:
+        resp = httpx.get(
+            f"http://iem.local/plotting/auto/meta/{apid}.json",
+            timeout=60,
+        )
+        resp.raise_for_status()
+    except Exception as exp:
+        LOG.exception(exp)
         return res
-    meta = req.json()
+    meta = resp.json()
     res["frontend"] = meta.get("frontend")
     if meta.get("description"):
         res["description"] = (
@@ -638,7 +640,7 @@ def generate_form(apid, fdict, headers, cookies):
     res["imguri"] += "::".join(res["pltvars"]).replace("/", "-")
     if fdict.get("_wait") != "yes":
         if fmt == "text":
-            content = requests.get(
+            content = httpx.get(
                 f"http://iem.local{res['imguri']}.txt",
                 timeout=300,
             ).text
@@ -875,7 +877,7 @@ def generate_trending():
     res += '<table class="table table-striped table-bordered">\n'
     res += "<tr><th>Plot</th><th>Requests</th></tr>\n"
     try:
-        data = requests.get(
+        data = httpx.get(
             "http://iem.local/api/1/iem/trending_autoplots.json", timeout=5
         ).json()
         for entry in data["data"][:5]:
