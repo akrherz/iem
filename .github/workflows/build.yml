@@ -125,6 +125,12 @@ jobs:
       if: ${{ matrix.TEST_WEB == 'YES' }}
       run: pytest -n 4 tests/test_mod_wsgi.py
 
+    # - name: Setup upterm session
+    #  if: ${{ matrix.TEST_WEB == 'NO' && matrix.WITH_IEM_DATA == 'YES' }}
+    #  uses: lhotari/action-upterm@v1
+    #  with:
+    #    limit-access-to-actor: true
+
     - name: Run IEMWeb Python Check
       if: ${{ matrix.TEST_WEB == 'NO' && matrix.WITH_IEM_DATA == 'YES' }}
       run: |
