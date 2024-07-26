@@ -1,4 +1,6 @@
 /plotting/auto/plot/109/by:state::sdate:2024-01-01%200000::edate:2024-07-17%202359::var:days::w:set::phenomenav1:TO::significancev1:W::e:all::cmap:jet::_r:t::dpi:100.png
+/plotting/auto/plot/72/network:WFO::station:DMX::phenomena:TO::significance:W::season:jul.png
+/plotting/auto/plot/72/network:WFO::station:DMX::phenomena:TO::significance:W::season:all.png
 /plotting/auto/plot/177/network:ISUSM::station:BOOI4::opt:1::sts:2024-07-18%201000::ets:2024-07-25%201000::_r:t::dpi:100.png
 /plotting/auto/plot/177/network:ISUSM::station:BOOI4::opt:m::sts:2024-07-18%201000::ets:2024-07-25%201000::_r:t::dpi:100.png
 /plotting/auto/plot/177/network:ISUSM::station:BOOI4::opt:8::sts:2024-07-18%201000::ets:2024-07-25%201000::_r:t::dpi:100.png

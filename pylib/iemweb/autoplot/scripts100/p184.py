@@ -13,6 +13,8 @@ from pyiem.plot import figure_axes
 from pyiem.util import get_autoplot_context, get_sqlalchemy_conn
 from sqlalchemy import text
 
+from iemweb.autoplot import ARG_STATION
+
 PDICT = {
     "full": "Show Full Year Totals",
     "ytd": "Limit to Year to Date Period",
@@ -24,13 +26,7 @@ def get_description():
     desc = {"description": __doc__, "data": True}
     today = datetime.date.today()
     desc["arguments"] = [
-        dict(
-            type="station",
-            name="station",
-            default="IATDSM",
-            label="Select Station:",
-            network="IACLIMATE",
-        ),
+        ARG_STATION,
         dict(
             type="year",
             name="year",

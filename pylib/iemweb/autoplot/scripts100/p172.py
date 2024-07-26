@@ -23,6 +23,8 @@ from pyiem.exceptions import NoDataFound
 from pyiem.plot import figure_axes
 from pyiem.util import get_autoplot_context, get_sqlalchemy_conn
 
+from iemweb.autoplot import ARG_STATION
+
 PDICT = {
     "precip": "Precipitation",
     "snow": "Snow",
@@ -35,13 +37,7 @@ def get_description():
     today = datetime.date.today()
     thisyear = today.year
     desc["arguments"] = [
-        dict(
-            type="station",
-            name="station",
-            default="IATDSM",
-            label="Select Station:",
-            network="IACLIMATE",
-        ),
+        ARG_STATION,
         dict(
             type="select",
             options=PDICT,

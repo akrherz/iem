@@ -16,6 +16,8 @@ from pyiem.exceptions import NoDataFound
 from pyiem.plot import figure
 from pyiem.util import get_autoplot_context
 
+from iemweb.autoplot import ARG_STATION
+
 PDICT = {
     "all": "Show All Three Plots",
     "gdd": "Show just Growing Degree Days",
@@ -33,13 +35,7 @@ def get_description():
     sts = today.replace(month=5, day=1)
 
     desc["arguments"] = [
-        dict(
-            type="station",
-            name="station",
-            default="IATDSM",
-            label="Select Station",
-            network="IACLIMATE",
-        ),
+        ARG_STATION,
         dict(
             type="date",
             name="sdate",

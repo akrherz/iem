@@ -18,6 +18,8 @@ from pyiem.exceptions import NoDataFound
 from pyiem.plot import figure_axes
 from pyiem.util import get_autoplot_context
 
+from iemweb.autoplot import ARG_STATION
+
 PDICT = {
     "avgt": "Average Temperature",
     "high": "High Temperature",
@@ -37,13 +39,7 @@ def get_description():
     desc = {"description": __doc__, "data": True}
     today = datetime.date.today()
     desc["arguments"] = [
-        dict(
-            type="station",
-            name="station",
-            default="IATDSM",
-            label="Select Station:",
-            network="IACLIMATE",
-        ),
+        ARG_STATION,
         dict(
             type="date",
             name="date",

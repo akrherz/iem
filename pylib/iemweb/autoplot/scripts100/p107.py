@@ -27,6 +27,8 @@ from pyiem.plot import figure
 from pyiem.util import get_autoplot_context
 from sqlalchemy import text
 
+from iemweb.autoplot import ARG_STATION
+
 PDICT = {
     "avg_high_temp": "Average High Temperature",
     "avg_low_temp": "Average Low Temperature",
@@ -75,13 +77,7 @@ def get_description():
     today = datetime.datetime.today() - datetime.timedelta(days=1)
     sts = today - datetime.timedelta(days=14)
     desc["arguments"] = [
-        dict(
-            type="station",
-            name="station",
-            default="IATDSM",
-            label="Select Station",
-            network="IACLIMATE",
-        ),
+        ARG_STATION,
         {
             "type": "sday",
             "name": "sday",

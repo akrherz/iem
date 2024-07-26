@@ -13,6 +13,8 @@ from pyiem.exceptions import NoDataFound
 from pyiem.plot import figure
 from pyiem.util import get_autoplot_context
 
+from iemweb.autoplot import ARG_STATION
+
 CWEEK = {
     1: "3/1-->3/7   ",
     2: "3/8-->3/14  ",
@@ -74,13 +76,7 @@ def get_description():
     """Return a dict describing how to call this plotter"""
     desc = {"description": __doc__, "data": True, "report": True}
     desc["arguments"] = [
-        dict(
-            type="station",
-            name="station",
-            default="IATDSM",
-            network="IACLIMATE",
-            label="Select Station",
-        )
+        ARG_STATION,
     ]
     return desc
 

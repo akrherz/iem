@@ -17,6 +17,8 @@ from pyiem.plot import figure
 from pyiem.plot.colormaps import nwssnow
 from pyiem.util import get_autoplot_context
 
+from iemweb.autoplot import ARG_STATION
+
 LEVELS = [0.1, 1, 2, 3, 4, 6, 8, 12, 18, 24, 30, 36]
 
 
@@ -26,13 +28,7 @@ def get_description():
     today = datetime.datetime.today()
     lyear = today.year if today.month > 8 else (today.year - 1)
     desc["arguments"] = [
-        dict(
-            type="station",
-            name="station",
-            default="IATDSM",
-            label="Select Station:",
-            network="IACLIMATE",
-        ),
+        ARG_STATION,
         dict(
             type="year",
             name="syear",

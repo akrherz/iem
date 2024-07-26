@@ -13,6 +13,8 @@ from pyiem.exceptions import NoDataFound
 from pyiem.plot import figure_axes
 from pyiem.util import get_autoplot_context, get_sqlalchemy_conn
 
+from iemweb.autoplot import ARG_STATION
+
 PDICT = {
     "avg_temp": "Average Daily Temperature",
     "avg_high_temp": "Average High Temperature",
@@ -27,13 +29,7 @@ def get_description():
     """Return a dict describing how to call this plotter"""
     desc = {"description": __doc__, "data": True}
     desc["arguments"] = [
-        dict(
-            type="station",
-            name="station",
-            default="IATDSM",
-            network="IACLIMATE",
-            label="Select Station:",
-        ),
+        ARG_STATION,
         dict(
             type="select",
             options=PDICT,

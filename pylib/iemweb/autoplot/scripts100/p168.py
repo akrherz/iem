@@ -18,18 +18,14 @@ from pyiem import util
 from pyiem.exceptions import NoDataFound
 from pyiem.plot import figure_axes
 
+from iemweb.autoplot import ARG_STATION
+
 
 def get_description():
     """Return a dict describing how to call this plotter"""
     desc = {"data": True, "description": __doc__}
     desc["arguments"] = [
-        dict(
-            type="station",
-            name="station",
-            default="IATDSM",
-            label="Select Station:",
-            network="IACLIMATE",
-        )
+        ARG_STATION,
     ]
     return desc
 

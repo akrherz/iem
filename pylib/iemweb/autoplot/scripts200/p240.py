@@ -26,18 +26,14 @@ from pyiem.plot import figure
 from pyiem.util import get_autoplot_context
 from sqlalchemy import text
 
+from iemweb.autoplot import ARG_STATION
+
 
 def get_description():
     """Return a dict describing how to call this plotter"""
     desc = {"description": __doc__, "data": True}
     desc["arguments"] = [
-        {
-            "type": "station",
-            "name": "station",
-            "default": "IATDSM",
-            "label": "Select Station:",
-            "network": "IACLIMATE",
-        },
+        ARG_STATION,
         {
             "type": "date",
             "default": f"{date.today() - timedelta(days=7):%Y/%m/%d}",
@@ -91,6 +87,8 @@ def plotter(fdict):
         data = req.json()
     except Exception as exp:
         raise NoDataFound("Backend API failure, no data.") from exp
+    if "gfs" not in data or "ndfd" not in data:
+        raise NoDataFound("No GFS or NDFD data found!")
     gfsdf = pd.DataFrame(data["gfs"])
     gfsdf["date"] = pd.to_datetime(gfsdf["date"])
     if is_morning:

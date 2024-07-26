@@ -18,6 +18,8 @@ from pyiem.util import get_autoplot_context
 from scipy.stats import gaussian_kde
 from sqlalchemy import text
 
+from iemweb.autoplot import ARG_STATION
+
 PDICT = {
     "high": "High Temperature [F]",
     "low": "Low Temperature [F]",
@@ -48,13 +50,7 @@ def get_description():
     """Return a dict describing how to call this plotter"""
     desc = {"description": __doc__, "cache": 3600, "data": True}
     desc["arguments"] = [
-        dict(
-            type="station",
-            name="station",
-            default="IATDSM",
-            label="Select station:",
-            network="IACLIMATE",
-        ),
+        ARG_STATION,
         dict(
             type="select",
             options=PDICT,
