@@ -12,7 +12,7 @@ def get_test_urls():
     jdata = c.get("?q=0").json
     for plot in jdata["plots"]:
         for option in plot["options"]:
-            yield f"?p={option['id']}"
+            yield f"?p={option['id']}&q=_cb:1"
 
 
 @pytest.mark.parametrize("url", get_test_urls())

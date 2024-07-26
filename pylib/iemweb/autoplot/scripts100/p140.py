@@ -247,9 +247,10 @@ def plotter(fdict):
     if ctx["w"] != "none":
         title = title.replace("Average ", "")
     fig = figure(apctx=ctx, title=title)
-    ax = fig.subplots(2, 1)
-    ax[0].set_position([0.07, 0.53, 0.78, 0.36])
-    ax[1].set_position([0.07, 0.1, 0.78, 0.36])
+    ax = [
+        fig.add_axes([0.07, 0.53, 0.78, 0.36]),
+        fig.add_axes([0.07, 0.1, 0.78, 0.36]),
+    ]
 
     fmter = intfmt if ctx["w"] != "none" else nice
     yrfmter = intfmt if ctx["eday"] > ctx["sday"] else crossesjan1
