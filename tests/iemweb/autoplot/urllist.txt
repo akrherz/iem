@@ -17,4 +17,13 @@
 /plotting/auto/plot/177/network:ISUSM::station:BOOI4::opt:sm::sts:2024-07-18%201000::ets:2024-07-25%201000::_r:t::dpi:100.png
 /plotting/auto/plot/177/network:ISUSM::station:BOOI4::opt:at::sts:2024-07-18%201000::ets:2024-07-25%201000::_r:t::dpi:100.png
 /plotting/auto/plot/194/csector:midwest::sdate:2020-05-01::edate:2024-07-17::d:0::w:percent::cmap:plasma::_r:t::dpi:100.png
+/plotting/auto/plot/199/opt:1::date:2024-07-24::_r:t::dpi:100.png
+/plotting/auto/plot/199/opt:2::date:2024-07-24::_r:t::dpi:100.png
+/plotting/auto/plot/199/opt:3::date:2024-07-24::_r:t::dpi:100.png
+/plotting/auto/plot/199/opt:4::date:2024-07-24::_r:t::dpi:100.png
+/plotting/auto/plot/199/opt:5::date:2024-07-24::_r:t::dpi:100.png
+/plotting/auto/plot/199/opt:6::date:2024-07-24::_r:t::dpi:100.png
+/plotting/auto/plot/199/opt:7::date:2024-07-24::_r:t::dpi:100.png
+/plotting/auto/plot/199/opt:8::date:2024-07-24::_r:t::dpi:100.png
+/plotting/auto/plot/199/opt:9::date:2024-07-24::_r:t::dpi:100.png
 /plotting/auto/plot/216/network:MA_ASOS::station:BOS::var:max_dwpf::dir:above::threshold:70::_r:43::dpi:100.png

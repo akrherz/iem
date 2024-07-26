@@ -1,50 +1,88 @@
-"""
-Provide nws text in JSON format
+""".. title:: Single Instance NWS Text Product JSON Service
+
+Return to `JSON Services </json/>`_
+
+Documentation for /json/nwstext.py
+----------------------------------
+
+Note: This is a legacy service that should not be used for new development.
+The `CGI version </cgi-bin/afos/retrieve.py?help>`_ is the preferred method
+at the moment.  This service does do a needed job of returning multiple
+product texts for a single product identifier, which is sadly still a thing
+in the world of NWS text products.
+
+This service requires that you know the ``product_id`` ahead of time.  This is
+an identifier created by the IEM attempting to uniquely identify a text
+product.
+
+Changelog
+---------
+
+- 2024-07-26: Initial documentation Release
+
+Example Usage
+-------------
+
+Return the Area Forecast Discussion for NWS Des Moines issued at 2024-07-16
+04:52 UTC:
+
+https://mesonet.agron.iastate.edu/json/nwstext.py?\
+product_id=202407160452-KDMX-FXUS63-AFDDMX
+
 """
 
 # stdlib
 import datetime
 import json
-from zoneinfo import ZoneInfo
 
-# extras
-from pyiem.database import get_dbconn
-from pyiem.exceptions import IncompleteWebRequest
-from pyiem.util import html_escape
-from pyiem.webutil import iemapp
+from pydantic import Field
+from pyiem.database import get_sqlalchemy_conn
+from pyiem.webutil import CGIModel, iemapp
+from sqlalchemy import text
 
 
-@iemapp()
+class Schema(CGIModel):
+    """See how we are called."""
+
+    callback: str = Field(
+        None, description="Optional JSONP callback function name"
+    )
+    product_id: str = Field(
+        ...,
+        description="Product Identifier to retrieve text for",
+        max_length=36,
+        min_length=28,
+        pattern=r"^\d{12}-[A-Z0-9]{4}-[A-Z0-9]{6}-[A-Z0-9]{3,6}$",
+    )
+
+
+@iemapp(
+    help=__doc__,
+    memcachekey=lambda x: f"/json/nwstext|{x['product_id']}",
+    memcacheexpire=300,
+    schema=Schema,
+)
 def application(environ, start_response):
     """Answer request."""
     headers = [("Content-type", "application/json")]
-    if environ.get("REQUEST_METHOD") != "GET":
-        start_response("405 Method Not Allowed", headers)
-        return ['{"error": "Only HTTP GET Supported"}'.encode("utf8")]
 
-    pid = environ.get("product_id", "201302241937-KSLC-NOUS45-PNSSLC")[:35]
-    cb = environ.get("callback")
+    pid = environ["product_id"]
     tokens = pid.split("-")
-    if len(tokens) not in [4, 5]:
-        raise IncompleteWebRequest("Invalid product_id specified")
     utc = datetime.datetime.strptime(tokens[0], "%Y%m%d%H%M")
-    utc = utc.replace(tzinfo=ZoneInfo("UTC"))
+    utc = utc.replace(tzinfo=datetime.timezone.utc)
     root = {"products": []}
 
-    pgconn = get_dbconn("afos")
-    acursor = pgconn.cursor()
-    acursor.execute(
-        "SELECT data from products where pil = %s and entered = %s",
-        (tokens[3], utc),
-    )
-    for row in acursor:
-        root["products"].append({"data": row[0]})
-    pgconn.close()
+    with get_sqlalchemy_conn("afos") as conn:
+        res = conn.execute(
+            text(
+                "SELECT data from products "
+                "where pil = :pil and entered = :entered"
+            ),
+            {"pil": tokens[3], "entered": utc},
+        )
+        for row in res:
+            root["products"].append({"data": row[0]})
 
-    if cb is None:
-        data = json.dumps(root)
-    else:
-        data = f"{html_escape(cb)}({json.dumps(root)})"
-
+    data = json.dumps(root)
     start_response("200 OK", headers)
-    return [data.encode("ascii")]
+    return data.encode("ascii")
