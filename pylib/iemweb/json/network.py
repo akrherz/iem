@@ -2,6 +2,18 @@
 
 Return to `JSON Services </json/>`.
 
+Changelog
+---------
+
+- 2024-07-26: Initial documentation release
+
+Example Requests
+----------------
+
+Return metadata for the IA_ASOS network:
+
+https://mesonet.agron.iastate.edu/json/network.py?network=IA_ASOS
+
 """
 
 import json
