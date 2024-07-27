@@ -35,4 +35,9 @@
 /plotting/auto/plot/199/opt:9::date:2024-07-24::_r:t::dpi:100.png
 /plotting/auto/plot/203/typ:W::sort:W::date:2024-05-21::dpi:100.png
 /plotting/auto/plot/203/typ:W::sort:S::date:2024-05-21::dpi:100.png
+/plotting/auto/plot/211/ptype:precip::network:IA_ASOS::zstation:AMW::sts:2024-07-10%200000::ets:2024-07-12%202359::_r:t::dpi:100.png
+/plotting/auto/plot/211/ptype:meteo::network:IA_ASOS::zstation:AMW::sts:2024-07-10%200000::ets:2024-07-12%202359::_r:t::dpi:100.png
+/plotting/auto/plot/211/ptype:wind::network:IA_ASOS::zstation:AMW::sts:2024-07-10%200000::ets:2024-07-12%202359::_r:t::dpi:100.png
+/plotting/auto/plot/211/ptype:wind::network:IA_ASOS::zstation:AMW::sts:2024-07-10%200000::ets:2024-07-12%202359::_r:t::dpi:100::_cb:1.png
+/plotting/auto/plot/211/ptype:windkt::network:IA_ASOS::zstation:AMW::sts:2024-07-10%200000::ets:2024-07-12%202359::_r:t::dpi:100.png
 /plotting/auto/plot/216/network:MA_ASOS::station:BOS::var:max_dwpf::dir:above::threshold:70::_r:43::dpi:100.png
