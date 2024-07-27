@@ -16,7 +16,6 @@ from metpy.units import masked_array, units
 from pyiem.database import get_sqlalchemy_conn
 from pyiem.exceptions import NoDataFound
 from pyiem.plot import figure, figure_axes
-from pyiem.plot.use_agg import plt
 from pyiem.util import get_autoplot_context, utc
 
 PDICT = {
@@ -118,7 +117,6 @@ def do_xaxis(ctx, ax, show_label=True):
 def make_wind_plot(ctx, ptype):
     """Generate a wind plot, please."""
     df = ctx["df"]
-    (fig, ax) = plt.subplots(1, 1)
     gust = df["gust_sknt"].values
     sknt = df["sknt"].values
     unit = "kt"
@@ -126,6 +124,14 @@ def make_wind_plot(ctx, ptype):
         gust = masked_array(gust, units("knots")).to(units("miles per hour")).m
         sknt = masked_array(sknt, units("knots")).to(units("miles per hour")).m
         unit = "mph"
+    title = f"{get_ttitle(df)} {ctx['_sname']}"
+    subtitle = (
+        "One Minute Interval Wind Speed + Direction, "
+        f"{df['sknt'].isna().sum()} missing minutes,"
+        f"Peak Speed: {np.nanmax(sknt):.1f} {unit} "
+        f"Peak Gust: {np.nanmax(gust):.1f} {unit}"
+    )
+    (fig, ax) = figure_axes(title=title, subtitle=subtitle, apctx=ctx)
     ax.bar(
         df["local_valid"].values,
         gust,
@@ -149,13 +155,7 @@ def make_wind_plot(ctx, ptype):
     ax2.set_yticks(np.arange(0, 361, 45))
     ax2.set_yticklabels(["N", "NE", "E", "SE", "S", "SW", "W", "NW", "N"])
     ax2.set_ylim(-1, 361)
-    ax.set_title(
-        f"{get_ttitle(df)} {ctx['_sname']}\n"
-        "One Minute Interval Wind Speed + Direction, "
-        f"{df['sknt'].isna().sum()} missing minutes\n"
-        f"Peak Speed: {np.nanmax(sknt):.1f} {unit} "
-        f"Peak Gust: {np.nanmax(gust):.1f} {unit}"
-    )
+
     do_xaxis(ctx, ax)
     ax.set_xlim(df["local_valid"].min(), df["local_valid"].max())
     return fig
