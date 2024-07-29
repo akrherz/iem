@@ -1,3 +1,9 @@
+/cgi-bin/request/asos.py?station=AMW&data=all&year1=2020&month1=7&day1=1&year2=2020&month2=7&day2=28&tz=Etc%2FUTC&format=onlytdf&latlon=yes&elev=no&missing=empty&trace=null&direct=no&report_type=1&report_type=3&report_type=4
+/cgi-bin/request/coop.py?network=IACLIMATE&stations=IATAME&year1=2018&month1=1&day1=1&year2=2018&month2=7&day2=28&model=salus&what=excel&delim=comma&gis=no&scenario_year=2023
+/cgi-bin/request/coop.py?network=IACLIMATE&stations=IATAME&year1=2018&month1=1&day1=1&year2=2018&month2=7&day2=28&model=dndc&what=excel&delim=comma&gis=no&scenario_year=2023
+/cgi-bin/request/coop.py?network=IACLIMATE&stations=IATAME&year1=2018&month1=1&day1=1&year2=2018&month2=7&day2=28&model=daycent&what=excel&delim=comma&gis=no&scenario_year=2023
+/cgi-bin/request/coop.py?network=IACLIMATE&stations=IATAME&year1=2018&month1=1&day1=1&year2=2018&month2=7&day2=28&model=century&what=excel&delim=comma&gis=no&scenario_year=2023
+/cgi-bin/request/coop.py?network=IACLIMATE&stations=IATAME&year1=2018&month1=1&day1=1&year2=2018&month2=7&day2=28&model=apsim&what=excel&delim=comma&gis=no&scenario_year=2023
 /cgi-bin/request/isusm.py?mode=hourly&timeres=hourly&station=AMFI4&year1=2024&month1=7&day1=1&year2=2024&month2=7&day2=25&vars=tmpf&vars=relh&vars=sv&vars=sv2&todisk=yes&format=excel&missing=-99&tz=America%2FChicago
 /cgi-bin/request/isusm.py?mode=hourly&timeres=hourly&station=AMFI4&year1=2024&month1=7&day1=1&year2=2024&month2=7&day2=25&vars=tmpf&vars=relh&vars=sv&vars=sv2&todisk=yes&format=comma&missing=-99&tz=America%2FChicago
 /cgi-bin/request/isusm.py?mode=inversion&station=BOOI4&year1=2021&month1=1&day1=1&year2=2024&month2=7&day2=25&todisk=yes&format=comma&missing=-99&tz=America%2FChicago
