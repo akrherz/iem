@@ -4,6 +4,7 @@
 /cgi-bin/request/coop.py?network=IACLIMATE&stations=IATAME&year1=2018&month1=1&day1=1&year2=2018&month2=7&day2=28&model=daycent&what=excel&delim=comma&gis=no&scenario_year=2023
 /cgi-bin/request/coop.py?network=IACLIMATE&stations=IATAME&year1=2018&month1=1&day1=1&year2=2018&month2=7&day2=28&model=century&what=excel&delim=comma&gis=no&scenario_year=2023
 /cgi-bin/request/coop.py?network=IACLIMATE&stations=IATAME&year1=2018&month1=1&day1=1&year2=2018&month2=7&day2=28&model=apsim&what=excel&delim=comma&gis=no&scenario_year=2023
+/cgi-bin/request/gis/spc_mcd.py?year1=2024&month1=1&day1=1&hour1=0&minute1=0&year2=2024&month2=7&day2=29&hour2=0&minute2=0
 /cgi-bin/request/isusm.py?mode=hourly&timeres=hourly&station=AMFI4&year1=2024&month1=7&day1=1&year2=2024&month2=7&day2=25&vars=tmpf&vars=relh&vars=sv&vars=sv2&todisk=yes&format=excel&missing=-99&tz=America%2FChicago
 /cgi-bin/request/isusm.py?mode=hourly&timeres=hourly&station=AMFI4&year1=2024&month1=7&day1=1&year2=2024&month2=7&day2=25&vars=tmpf&vars=relh&vars=sv&vars=sv2&todisk=yes&format=comma&missing=-99&tz=America%2FChicago
 /cgi-bin/request/isusm.py?mode=inversion&station=BOOI4&year1=2021&month1=1&day1=1&year2=2024&month2=7&day2=25&todisk=yes&format=comma&missing=-99&tz=America%2FChicago
@@ -13,6 +14,7 @@
 /json/cli.json?station=KDSM&year=2024&fmt=csv
 /json/cli.json?station=KDSM&year=2024&fmt=json
 /json/ibw_tags.py?wfo=MEG&year=2024
+/json/mcd_bysize.py?count=20&sort=ASC
 /json/radar.py?radar=USCOMP&start=2020-05-07T15%3A00%3A00Z&operation=products
 /json/raob.py?station=_OAX&ts=2024-07-19T12:00:00Z
 /json/raob.py?ts=202407191200
