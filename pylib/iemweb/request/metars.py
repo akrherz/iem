@@ -12,7 +12,8 @@ Example Usage:
 
 Retrieve all METARs for the hour starting at 00 UTC on 1 January 2016:
 
-    https://mesonet.agron.iastate.edu/cgi-bin/request/metars.py?valid=2016010100
+    https://mesonet.agron.iastate.edu/cgi-bin/request/metars.py\
+?valid=2016010100
 
 """
 
@@ -23,6 +24,8 @@ from zoneinfo import ZoneInfo
 
 from pydantic import AwareDatetime, Field, field_validator
 from pyiem.webutil import CGIModel, iemapp
+
+SIMULTANEOUS_REQUESTS = 10
 
 
 class Schema(CGIModel):
@@ -51,10 +54,9 @@ def check_load(cursor):
         "select pid from pg_stat_activity where query ~* 'FETCH' "
         "and datname = 'asos'"
     )
-    if len(cursor.fetchall()) > 9:
-        sys.stderr.write(
-            f"/cgi-bin/request/metars.py over capacity: {cursor.rowcount}\n"
-        )
+    load = len(cursor.fetchall())
+    if load > SIMULTANEOUS_REQUESTS:
+        sys.stderr.write(f"/cgi-bin/request/metars.py over capacity: {load}\n")
         return False
     return True
 

@@ -10,6 +10,8 @@ Changelog
 ---------
 
 - 2024-06-28: Initital documentation release
+- 2024-07-31: A `product_id` field was added to the output, but only non-null
+for PIREPs after about 18 UTC on 31 July 2024.  Someday, a backfill may happen.
 
 Example Requests
 ----------------
@@ -141,7 +143,8 @@ def run(environ, start_response):
             '/IC([^/]*)/?')), 0, 255) as icing,
         substr(trim(substring(replace(report, ',', ' '),
             '/TB([^/]*)/?')), 0, 255) as turb,
-        artcc, ST_y(geom::geometry) as lat, ST_x(geom::geometry) as lon
+        artcc, product_id,
+        ST_y(geom::geometry) as lat, ST_x(geom::geometry) as lon
         from pireps WHERE {spatialsql} {artcc_sql}
         valid >= :sts and valid < :ets ORDER by valid ASC
         """
@@ -161,7 +164,8 @@ def run(environ, start_response):
             ]
             start_response("200 OK", headers)
             sio.write(
-                "VALID,URGENT,AIRCRAFT,REPORT,ICING,TURBULENCE,ATRCC,LAT,LON\n"
+                "VALID,URGENT,AIRCRAFT,REPORT,ICING,TURBULENCE,ATRCC,LAT,LON,"
+                "PRODUCT_ID\n"
             )
             for row in res:
                 sio.write(",".join([str(s) for s in row]) + "\n")
@@ -179,6 +183,7 @@ def run(environ, start_response):
             shp.field("ICING", "C", 255)  # Max field size is 255
             shp.field("TURB", "C", 255)  # Max field size is 255
             shp.field("ARTCC", "C", 3)
+            shp.field("PROD_ID", "C", 36)
             shp.field("LAT", "F", 7, 4)
             shp.field("LON", "F", 9, 4)
             for row in res:

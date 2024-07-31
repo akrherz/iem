@@ -163,6 +163,7 @@ Field 5: Type=C/String, Title='TURB', The turbulence /TB portion of the PIREP
 Field 6: Type=C/String, Title='ARTCC', The ARTCC identifier, when applicable.
 Field 7: Type=N/Double, Title='LAT', Latitude
 Field 8: Type=N/Double, Title='LON', Longitude 
+Field 9: Type=C/String, Title='PROD_ID', The IEM NWS text product identifier.
 </pre>
 
 <h4>Archive notes:</h4>
@@ -184,6 +185,9 @@ Field 8: Type=N/Double, Title='LON', Longitude
  <li><strong>30 January 2023:</strong> Added extraction of icing and turbulence
  portions of the PIREP. Added the associated, when applicable, ARTCC
  identifier for the location of the PIREP.</li>
+ <li><strong>31 July 2024:</strong> Going forward, a IEM product identifier
+ field has been added to allow the retrieval of the raw NWS text product that
+ the report was extracted from.  Hope to backfill this, at some point.</li> 
  </ul>
 EOF;
 $t->content = $content;

@@ -52,4 +52,5 @@
 /plotting/auto/plot/211/ptype:windkt::network:IA_ASOS::zstation:AMW::sts:2024-07-10%200000::ets:2024-07-12%202359::_r:t::dpi:100.png
 /plotting/auto/plot/216/network:MA_ASOS::station:BOS::var:max_dwpf::dir:above::threshold:70::_r:43::dpi:100.png
 /plotting/auto/plot/218/w:set::network:NWSCLI::station:KDSM::date:2024-07-26::_r:t::dpi:100.png
+/plotting/auto/plot/236/ident:ZMP::sdate:2024-07-31::edate:2024-08-01::_r:43::dpi:100.png
 /plotting/auto/plot/253/datglobalid:%7B495DE596-B299-41FE-9C90-13C87E43FE0B%7D::dat:2024-05-21::cmap:gist_rainbow::_r:t::dpi:100.png

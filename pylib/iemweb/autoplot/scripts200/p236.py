@@ -94,7 +94,7 @@ def get_description():
             type="date",
             name="edate",
             default=today.strftime("%Y/%m/%d"),
-            label="Start UTC Date (inclusive):",
+            label="End UTC Date (inclusive):",
             min="2003/03/01",
         ),
     ]
