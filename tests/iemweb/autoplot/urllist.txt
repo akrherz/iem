@@ -11,6 +11,7 @@
 /plotting/auto/plot/90/t:cwa::v:periodavg::ilabel:yes::geo:ugc::drawc:yes::year:2024::year2:2024::sdate:2006-01-01%200000::edate:2024-07-29%200000::network:WFO::station:DMX::state:IA::phenomena:TO::significance:W::cmap:jet::_r:t::dpi:100.png
 /plotting/auto/plot/90/t:cwa::v:periodmax::ilabel:yes::geo:ugc::drawc:yes::year:2024::year2:2024::sdate:2006-01-01%200000::edate:2024-07-29%200000::network:WFO::station:DMX::state:IA::phenomena:TO::significance:W::cmap:jet::_r:t::dpi:100.png
 /plotting/auto/plot/109/by:state::sdate:2024-01-01%200000::edate:2024-07-17%202359::var:days::w:set::phenomenav1:TO::significancev1:W::e:all::cmap:jet::_r:t::dpi:100.png
+/plotting/auto/plot/125/month:summer::sector:midwest::src:ncdc_climate71::state:WI::opt:both::var:avg_temp::cmap:jet::_r:t::dpi:100.png
 /plotting/auto/plot/140/network:IA_ASOS::station:DSM::syear:1928::sday:0711::eday:0725::varname:avg_temp::w:none::thres:1::year:2024::_r:t::dpi:100.png
 /plotting/auto/plot/177/network:ISUSM::station:BOOI4::opt:1::sts:2024-07-18%201000::ets:2024-07-25%201000::_r:t::dpi:100.png
 /plotting/auto/plot/177/network:ISUSM::station:BOOI4::opt:m::sts:2024-07-18%201000::ets:2024-07-25%201000::_r:t::dpi:100.png
