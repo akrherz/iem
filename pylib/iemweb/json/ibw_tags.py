@@ -1,4 +1,14 @@
-"""Service to dump out IBW tags for a WFO / Year"""
+""".. title:: Impact Based Warning Tags by WFO and Year
+
+Return to `JSON Services </json/>`_
+
+Documentation for /json/ibw_tags.py
+-----------------------------------
+
+This service returns a JSON representation of Impact Based Warning Tags
+(IBW) for a given year and WFO identifier.
+
+"""
 
 import json
 
