@@ -616,19 +616,22 @@ function loadTabs() {
         method: "GET",
         dataType: "json",
         success: (data) => {
-            //$("#textdata").html("<pre>"+ data.report +"</pre>");
             const tabs = $("#textdata ul");
             const tabcontent = $("#textdata div.tab-content");
             tabs.empty();
             tabcontent.empty();
             tabs.append('<li><a href="#tall" data-toggle="tab">All</a></li>');
-            tabs.append('<li class="active"><a href="#t0" data-toggle="tab">Issuance</a></li>');
+            const stamp = moment.utc(data.report.valid).local().format("DD/h:mm A");
+            tabs.append(`<li class="active"><a href="#t0" data-toggle="tab">Issue ${stamp}</a></li>`);
+            const plink = `<a href="/p.php?pid=${data.report.product_id}" target="_new">Permaink to ${data.report.product_id}</a><br />`;
             tabcontent.append(`<div class="tab-pane" id="tall"><pre>${data.report.text}</pre></div>`);
-            tabcontent.append(`<div class="tab-pane active" id="t0"><pre>${data.report.text}</pre></div>`);
+            tabcontent.append(`<div class="tab-pane active" id="t0">${plink}<pre>${data.report.text}</pre></div>`);
             let tidx = 1;
             $.each(data.svs, (_idx, svs) => {
-                tabs.append(`<li><a href="#t${tidx}" data-toggle="tab">Update ${tidx}</a></li>`);
-                tabcontent.append(`<div class="tab-pane" id="t${tidx}"><pre>${svs.text}</pre></div>`);
+                const splink = `<a href="/p.php?pid=${svs.product_id}" target="_new">Permalink to ${svs.product_id}</a><br />`;
+                const sstamp = moment.utc(svs.valid).local().format("DD/h:mm A");
+                tabs.append(`<li><a href="#t${tidx}" data-toggle="tab">U${tidx}: ${sstamp}</a></li>`);
+                tabcontent.append(`<div class="tab-pane" id="t${tidx}">${splink}<pre>${svs.text}</pre></div>`);
                 $("#tall").append(`<pre>${svs.text}</pre>`);
                 tidx += 1;
             });

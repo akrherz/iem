@@ -1,20 +1,89 @@
-"""VTEC event metadata"""
+""".. title:: Metadata for a single VTEC event
 
-import datetime
+Return to `JSON Services </json/>`_
+
+Documentation for /json/vtec_event.py
+-------------------------------------
+
+This metadata service drives what is shown on the IEM's `VTEC Event </vtec/>`_
+page.  This service requires that you already know the VTEC identifiers that
+reference the event.  By default, this service attempts to bundle the raw NWS
+text within the resulting JSON response.  This can be disabled by setting the
+`include_text` parameter to something falsey.
+
+Changelog
+---------
+
+- 2024-07-31: Initial documentation release and pydantic validation
+
+Example Requests
+----------------
+
+Provide information about Des Moines Tornado Warning 110 during 2024.
+
+https://mesonet.agron.iastate.edu/json/vtec_event.py\
+?wfo=KDMX&phenomena=TO&significance=W&etn=110&year=2024
+
+Provide information about Des Moines Tornado Warning 45 during 2024, but do
+not include any text.
+
+https://mesonet.agron.iastate.edu/json/vtec_event.py\
+?wfo=KDMX&phenomena=TO&significance=W&etn=45&year=2024&include_text=0
+
+"""
+
 import json
+from datetime import datetime
 
 import httpx
 import pandas as pd
+from pydantic import Field
 from pyiem.database import get_sqlalchemy_conn
 from pyiem.reference import ISO8601
-from pyiem.util import LOG, html_escape
-from pyiem.webutil import iemapp
-from pymemcache.client import Client
+from pyiem.util import LOG, utc
+from pyiem.webutil import CGIModel, iemapp
 from sqlalchemy import text
 
 
-def run(wfo, year, phenomena, significance, etn):
+class Schema(CGIModel):
+    """See how we are called."""
+
+    callback: str = Field(None, description="JSONP callback function name")
+    include_text: bool = Field(
+        default=True,
+        description=(
+            "Include the raw NWS text in the response, default is True"
+        ),
+    )
+    wfo: str = Field(
+        ...,
+        description="Three character WFO identifier",
+        min_length=3,
+        max_length=4,
+    )
+    year: int = Field(
+        ..., description="Year of the event", ge=1986, le=utc().year + 1
+    )
+    phenomena: str = Field(
+        ..., description="VTEC Phenomena", min_length=2, max_length=2
+    )
+    significance: str = Field(
+        ..., description="VTEC Significance", min_length=1, max_length=1
+    )
+    etn: int = Field(..., description="Event Tracking Number", ge=1, le=9999)
+
+
+def run(environ):
     """Do great things"""
+    wfo = environ["wfo"]
+    if len(wfo) == 4:
+        wfo = wfo[1:]
+
+    phenomena = environ["phenomena"]
+    significance = environ["significance"]
+    etn = environ["etn"]
+    year = environ["year"]
+
     with get_sqlalchemy_conn("postgis") as conn:
         df = pd.read_sql(
             text("""
@@ -39,38 +108,57 @@ def run(wfo, year, phenomena, significance, etn):
         )
 
     res = {
-        "generation_time": datetime.datetime.utcnow().strftime(ISO8601),
+        "generation_time": utc().strftime(ISO8601),
         "year": year,
         "phenomena": phenomena,
         "significance": significance,
         "etn": etn,
         "wfo": wfo,
+        "report": {},
+        "svs": [],
     }
     if df.empty:
         return json.dumps(res)
 
     # Get a list of unique product_ids
-    product_ids = df["product_ids"].explode().dropna().unique()
+    product_ids = df["product_ids"].explode().dropna().unique().tolist()
     product_ids.sort()
-    report = ""
-    try:
-        req = httpx.get(
-            f"http://iem.local/api/1/nwstext/{product_ids[0]}", timeout=5
+    if product_ids:
+        report = None
+        valid = datetime.strptime(product_ids[0][:12], "%Y%m%d%H%M").strftime(
+            ISO8601
         )
-        req.raise_for_status()
-        report = req.text
-    except Exception as exp:
-        LOG.exception(exp)
+        if environ["include_text"]:
+            try:
+                resp = httpx.get(
+                    f"http://iem.local/api/1/nwstext/{product_ids[0]}",
+                    timeout=5,
+                )
+                resp.raise_for_status()
+                report = resp.text
+            except Exception as exp:
+                LOG.exception(exp)
 
-    res["report"] = {"text": report}
-    res["svs"] = []
+        res["report"] = {
+            "text": report,
+            "valid": valid,
+            "product_id": product_ids[0],
+        }
     for product_id in product_ids[1:]:
         try:
-            req = httpx.get(
-                f"http://iem.local/api/1/nwstext/{product_id}", timeout=5
+            valid = datetime.strptime(product_id[:12], "%Y%m%d%H%M").strftime(
+                ISO8601
             )
-            req.raise_for_status()
-            res["svs"].append({"text": req.text})
+            report = ""
+            if environ["include_text"]:
+                resp = httpx.get(
+                    f"http://iem.local/api/1/nwstext/{product_id}", timeout=5
+                )
+                resp.raise_for_status()
+                report = resp.text
+            res["svs"].append(
+                {"text": report, "valid": valid, "product_id": product_id}
+            )
         except Exception as exp:
             LOG.exception(exp)
 
@@ -97,46 +185,25 @@ def run(wfo, year, phenomena, significance, etn):
     return json.dumps(res)
 
 
-@iemapp()
+def get_mckey(environ: dict) -> str:
+    """Compute the key."""
+    return (
+        f"/json/vtec_event/{environ['wfo']}/{environ['year']}/"
+        f"{environ['phenomena']}/{environ['significance']}/{environ['etn']}/"
+        f"{environ['include_text']}"
+    )
+
+
+@iemapp(
+    help=__doc__,
+    schema=Schema,
+    memcachekey=get_mckey,
+    memcacheexpire=300,
+)
 def application(environ, start_response):
     """Answer request."""
-    wfo = environ.get("wfo", "MPX")
-    if len(wfo) == 4:
-        wfo = wfo[1:]
-    try:
-        year = int(environ.get("year", 2015))
-    except ValueError:
-        year = 0
-    if year < 1986 or year > datetime.date.today().year + 1:
-        headers = [("Content-type", "text/plain")]
-        start_response("500 Internal Server Error", headers)
-        data = "Invalid Year"
-        return [data.encode("ascii")]
-
-    phenomena = environ.get("phenomena", "SV")[:2]
-    significance = environ.get("significance", "W")[:1]
-    try:
-        etn = int(environ.get("etn", 1))
-    except ValueError:
-        headers = [("Content-type", "text/plain")]
-        start_response("500 Internal Server Error", headers)
-        data = "Invalid ETN"
-        return [data.encode("ascii")]
-    cb = environ.get("callback", None)
-
-    mckey = f"/json/vtec_event/{wfo}/{year}/{phenomena}/{significance}/{etn}"
-    mc = Client("iem-memcached:11211")
-    res = mc.get(mckey)
-    if not res:
-        res = run(wfo, year, phenomena, significance, etn)
-        mc.set(mckey, res, 300)
-    else:
-        res = res.decode("utf-8")
-    mc.close()
-
-    if cb is not None:
-        res = f"{html_escape(cb)}({res})"
+    res = run(environ)
 
     headers = [("Content-type", "application/json")]
     start_response("200 OK", headers)
-    return [res.encode("utf-8")]
+    return res.encode("utf-8")
