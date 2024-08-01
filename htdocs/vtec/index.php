@@ -4,12 +4,12 @@ require_once "../../include/mlib.php";
 require_once "../../include/forms.php";
 force_https();
 require_once "../../include/myview.php";
-$OL = "7.2.2";
+$OL = "9.2.4";
 $JQUERYUI = "1.13.2";
 $t = new MyView();
 $t->title = "Valid Time Event Code (VTEC) App";
 
-$v = isset($_GET["vtec"]) ? xssafe($_GET["vtec"]) : "2022-O-NEW-KDMX-TO-W-0012";
+$v = isset($_GET["vtec"]) ? xssafe($_GET["vtec"]) : "2024-O-NEW-KDMX-TO-W-0045";
 $tokens = preg_split('/-/', $v);
 $year = $tokens[0];
 $operation = $tokens[1];

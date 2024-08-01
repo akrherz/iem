@@ -1,38 +1,181 @@
-"""Download Interface for RWIS data"""
+""".. title:: RWIS Download
 
-# pylint: disable=abstract-class-instantiated
+Documentation for /cgi-bin/request/rwis.py
+------------------------------------------
+
+This service emits RWIS data.
+
+Changelog
+---------
+
+- 2024-08-01: Initital documentation release and pydantic validation
+
+Example Requests
+----------------
+
+Provide all Iowa RWIS data for 1 July 2024 in Excel format:
+
+https://mesonet.agron.iastate.edu/cgi-bin/request/rwis.py?network=IA_RWIS&\
+stations=_ALL&tz=America%2FChicago&what=excel&src=atmos&\
+sts=2024-07-01T00:00&ets=2024-07-02T00:00
+
+Provide all traffic data on 1 July 2024 for Iowa RWIS station RAVI4
+in CSV format:
+
+https://mesonet.agron.iastate.edu/cgi-bin/request/rwis.py?network=IA_RWIS&\
+stations=RAVI4&tz=America%2FChicago&what=download&src=traffic&\
+sts=2024-07-01T00:00&ets=2024-07-02T00:00
+
+Provide all soil data on 1 July 2024 for Iowa RWIS stations RAKI4 in a HTML
+table:
+
+https://mesonet.agron.iastate.edu/cgi-bin/request/rwis.py?network=IA_RWIS&\
+stations=RAKI4&tz=America%2FChicago&what=html&src=soil&\
+sts=2024-07-01T00:00&ets=2024-07-02T00:00
+
+Provide all atmospheric data on 1 July 2024 for Iowa RWIS stations RAKI4 in
+a text file:
+
+https://mesonet.agron.iastate.edu/cgi-bin/request/rwis.py?network=IA_RWIS&\
+stations=RAKI4&tz=America%2FChicago&what=txt&src=atmos&\
+sts=2024-07-01T00:00:00&ets=2024-07-02T00:00:00
+
+Provide all atmospheric data for 31 July 2024 in UTC timezone for
+Minnesota RWIS stations:
+
+https://mesonet.agron.iastate.edu/cgi-bin/request/rwis.py?network=MN_RWIS&\
+stations=_ALL&tz=UTC&what=download&src=atmos&\
+sts=2024-07-31T00:00&ets=2024-08-01T00:00
+
+"""
+
+from datetime import datetime
 from io import BytesIO, StringIO
 
 import pandas as pd
+from pydantic import Field
+from pyiem.database import get_sqlalchemy_conn
 from pyiem.exceptions import IncompleteWebRequest
 from pyiem.network import Table as NetworkTable
-from pyiem.util import get_sqlalchemy_conn
-from pyiem.webutil import ensure_list, iemapp
+from pyiem.webutil import CGIModel, ListOrCSVType, iemapp
 from sqlalchemy import text
 
 DELIMITERS = {"comma": ",", "space": " ", "tab": "\t"}
 EXL = "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"
 
 
-@iemapp(default_tz="America/Chicago")
+class Schema(CGIModel):
+    """See how we are called."""
+
+    delim: str = Field(
+        default="comma",
+        description="Delimiter to use in output file",
+        pattern="^(comma|space|tab)$",
+    )
+    gis: bool = Field(
+        default=False,
+        description="Include latitude and longitude columns in output",
+    )
+    vars: ListOrCSVType = Field(
+        default=[],
+        description="List of variables to include in output",
+    )
+    what: str = Field(
+        default="dl",
+        description="What to do with the data",
+        pattern="^(dl|txt|html|excel|download)$",
+    )
+    tz: str = Field(
+        default="UTC",
+        description="Timezone to use for timestamps",
+    )
+    src: str = Field(
+        default="atmos",
+        description="Data source to use",
+        pattern="^(atmos|soil|traffic)$",
+    )
+    stations: ListOrCSVType = Field(
+        default=[],
+        description=(
+            "List of stations to include in output, `_ALL` for all stations"
+        ),
+    )
+    network: str = Field(
+        default="IA_RWIS",
+        description="Network to use",
+        pattern="RWIS",
+    )
+    sts: datetime = Field(
+        default=None,
+        description="Start timestamp",
+    )
+    ets: datetime = Field(
+        default=None,
+        description="End timestamp",
+    )
+    year1: int = Field(
+        default=None,
+        description="Year to start from, if sts is not set.",
+    )
+    month1: int = Field(
+        default=None,
+        description="Month to start from, if sts is not set.",
+    )
+    day1: int = Field(
+        default=None,
+        description="Day to start from, if sts is not set.",
+    )
+    hour1: int = Field(
+        default=None,
+        description="Hour to start from, if sts is not set.",
+    )
+    minute1: int = Field(
+        default=None,
+        description="Minute to start from, if sts is not set.",
+    )
+    year2: int = Field(
+        default=None,
+        description="Year to end at, if ets is not set.",
+    )
+    month2: int = Field(
+        default=None,
+        description="Month to end at, if ets is not set.",
+    )
+    day2: int = Field(
+        default=None,
+        description="Day to end at, if ets is not set.",
+    )
+    hour2: int = Field(
+        default=None,
+        description="Hour to end at, if ets is not set.",
+    )
+    minute2: int = Field(
+        default=None,
+        description="Minute to end at, if ets is not set.",
+    )
+
+
+@iemapp(default_tz="America/Chicago", help=__doc__, schema=Schema)
 def application(environ, start_response):
     """Go do something"""
-    include_latlon = environ.get("gis", "no").lower() == "yes"
-    myvars = ensure_list(environ, "vars")
+    if environ["sts"] is None or environ["ets"] is None:
+        raise IncompleteWebRequest("Missing GET parameter sts or ets")
+    include_latlon = environ["gis"]
+    myvars = environ["vars"]
     myvars.insert(0, "station")
     myvars.insert(1, "obtime")
-    delimiter = DELIMITERS.get(environ.get("delim", "comma"))
-    what = environ.get("what", "dl")
-    tzname = environ.get("tz", "UTC")
-    src = environ.get("src", "atmos")
-    stations = ensure_list(environ, "stations")
+    delimiter = DELIMITERS[environ["delim"]]
+    what = environ["what"]
+    tzname = environ["tz"]
+    src = environ["src"]
+    stations = environ["stations"]
     if not stations:
         raise IncompleteWebRequest("Missing GET parameter stations=")
 
     tbl = "alldata"
     if src in ["soil", "traffic"]:
         tbl = f"alldata_{src}"
-    network = environ.get("network", "IA_RWIS")
+    network = environ["network"]
     nt = NetworkTable(network, only_online=False)
     if "_ALL" in stations:
         stations = list(nt.sts.keys())

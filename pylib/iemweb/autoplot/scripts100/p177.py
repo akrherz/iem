@@ -361,15 +361,18 @@ def make_daily_rainfall_soil_rh(ctx):
     """Give them what they want."""
     with get_sqlalchemy_conn("isuag") as conn:
         df = pd.read_sql(
-            "SELECT valid, rain_in_tot_qc, t4_c_avg_qc, rh_avg_qc "
-            "from sm_daily where station = %s and valid >= %s and valid <= %s "
-            "ORDER by valid ASC",
+            text("""
+            SELECT valid, rain_in_tot_qc, t4_c_avg_qc, rh_avg_qc
+            from sm_daily where station = :station and valid >= :sts
+            and valid <= :ets and t4_c_avg_qc is not null
+            ORDER by valid ASC
+            """),
             conn,
-            params=(
-                ctx["station"],
-                ctx["sts"].strftime("%Y-%m-%d"),
-                ctx["ets"].strftime("%Y-%m-%d"),
-            ),
+            params={
+                "station": ctx["station"],
+                "sts": ctx["sts"].strftime("%Y-%m-%d"),
+                "ets": ctx["ets"].strftime("%Y-%m-%d"),
+            },
             index_col="valid",
         )
     if df.empty:

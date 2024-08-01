@@ -32,7 +32,6 @@
 /json/spcoutlook.py?lon=-96.36&lat=41.33&time=now&day=2&cat=CATEGORICAL&last=1
 /json/stage4.py?lon=-81.7576&lat=26.1256&valid=2024-07-19
 /json/tms.json?callback=jQuery18307623279004695058_1720815997583&_=1721389351274
-/json/vtec_event.py?wfo=KMFL&phenomena=FW&significance=W&etn=1&year=2020
 /json/vtec_events_byugc.json?ugc=IAC169&fmt=csv
 /json/vtec_events_byugc.json?ugc=IAC169&fmt=excel
 /json/vtec_events_byugc.json?ugc=IAC169&fmt=json
