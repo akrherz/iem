@@ -216,8 +216,8 @@ RewriteRule ^/search /search.py [QSA]
     # Always immediately retry a connection
     # We wait up to 5 seconds to connect to the remote server
     # We wait up to 60 seconds for the remote server to respond
-    ProxyPass "https://iem-web-services.agron.iastate.edu" retry=0 connectiontimeout=5 timeout=60
-    ProxyPassReverse "https://iem-web-services.agron.iastate.edu"
+    ProxyPass "http://iem-web-services.agron.iastate.edu:8080" retry=0 connectiontimeout=5 timeout=60
+    ProxyPassReverse "http://iem-web-services.agron.iastate.edu:8080"
     ProxyErrorOverride On 502 503 504
     ErrorDocument 502 /api/proxy_error_handler.py
     ErrorDocument 503 /api/proxy_error_handler.py
