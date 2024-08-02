@@ -23,24 +23,6 @@ def get_timing(pidx):
     return timing if timing is not None else -1
 
 
-def generate_html(appdata):
-    """Fun to be had here!"""
-    html = ""
-    for arg in appdata["arguments"]:
-        html += f"type: {arg['type']}"
-    return html
-
-
-def do_html(pidx):
-    """Generate the HTML interface for this autoplot."""
-    response_headers = [("Content-type", "text/html")]
-    mod = import_script(pidx)
-    # see how we are called, finally
-    appdata = mod.get_description()
-    html = generate_html(appdata)
-    return html, "200 OK", response_headers
-
-
 def do_json(pidx):
     """Do what needs to be done for JSON requests."""
     status = "200 OK"
@@ -87,11 +69,7 @@ def do_json(pidx):
 def application(environ, start_response):
     """Our Application!"""
     pidx = int(environ.get("p", 0))
-    fmt = environ.get("_fmt", "json")
-    if fmt == "html":
-        output, status, response_headers = do_html(pidx)
-    else:
-        output, status, response_headers = do_json(pidx)
+    output, status, response_headers = do_json(pidx)
 
     start_response(status, response_headers)
     # json.dumps returns str, we need bytes here
