@@ -1,13 +1,35 @@
-"""Current Observation for a station and network"""
+""".. title:: Single station currents
+
+Return to `JSON Services </json/>`_
+
+Documentation for /json/current.py
+----------------------------------
+
+This is a legacy service that emits the most recent observation for a given
+site and network combination.
+
+Changelog
+---------
+
+- 2024-08-01: Documentation update
+
+Example Requests
+----------------
+
+Return the latest observation for the Ames Airport
+
+https://mesonet.agron.iastate.edu/json/current.py?station=AMW&network=IA_ASOS
+
+"""
 
 import json
 
 from pydantic import Field
-from pyiem.database import get_dbconnc
+from pyiem.database import get_sqlalchemy_conn
 from pyiem.reference import ISO8601
-from pyiem.util import html_escape, utc
+from pyiem.util import utc
 from pyiem.webutil import CGIModel, iemapp
-from pymemcache.client import Client
+from sqlalchemy import text
 
 
 class Schema(CGIModel):
@@ -28,12 +50,12 @@ class Schema(CGIModel):
     )
 
 
-def run(network, station):
+def run(conn, network, station):
     """Get last ob!"""
-    pgconn, cursor = get_dbconnc("iem")
-    cursor.execute(
-        """
-    WITH mystation as (SELECT * from stations where id = %s and network = %s),
+    res = conn.execute(
+        text("""
+    WITH mystation as (
+             SELECT * from stations where id = :id and network = :net),
     lastob as (select *, m.iemid as miemid,
         valid at time zone 'UTC' as utctime,
         valid at time zone m.tzname as localtime
@@ -41,14 +63,12 @@ def run(network, station):
     summ as (SELECT *, s.pday as s_pday from summary s JOIN lastob o
     on (s.iemid = o.miemid and s.day = date(o.localtime)))
     select * from summ
-    """,
-        (station, network),
+    """),
+        {"id": station, "net": network},
     )
-    if cursor.rowcount == 0:
-        pgconn.close()
+    if res.rowcount == 0:
         return "{}"
-    row = cursor.fetchone()
-    pgconn.close()
+    row = res.fetchone()._asdict()
     data = {}
     data["server_gentime"] = utc().strftime(ISO8601)
     data["id"] = station
@@ -87,26 +107,19 @@ def run(network, station):
     return json.dumps(data)
 
 
-@iemapp(help=__doc__, schema=Schema)
+@iemapp(
+    memcachekey=lambda x: f"/json/current/{x['network']}/{x['station']}",
+    memcacheexpire=120,
+    help=__doc__,
+    schema=Schema,
+)
 def application(environ, start_response):
     """Answer request."""
     network = environ["network"]
     station = environ["station"]
-    cb = environ["callback"]
 
-    mckey = f"/json/current/{network}/{station}"
-    mc = Client("iem-memcached:11211")
-    res = mc.get(mckey)
-    if not res:
-        res = run(network, station)
-        mc.set(mckey, res, 60)
-    else:
-        res = res.decode("utf-8")
-    mc.close()
-
-    if cb is not None:
-        res = f"{html_escape(cb)}({res})"
-
+    with get_sqlalchemy_conn("iem") as conn:
+        res = run(conn, network, station)
     headers = [("Content-type", "application/json")]
     start_response("200 OK", headers)
-    return [res.encode("ascii")]
+    return res.encode("ascii")

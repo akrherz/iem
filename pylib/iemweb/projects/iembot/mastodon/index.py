@@ -2,15 +2,15 @@
 Configure iembot for mastodon, gasp.
 """
 
+import cryptocode
 import mastodon
 import requests
-from cryptography.fernet import Fernet
 from paste.request import get_cookie_dict
 from pyiem.templates.iem import TEMPLATE
 from pyiem.util import get_dbconnc, get_properties
 from pyiem.webutil import iemapp
 
-PRIVKEY = get_properties().get("mod_wsgi.privkey", "").encode("ascii")
+PRIVKEY = get_properties().get("mod_wsgi.privkey", "")
 APP = "https://mesonet.agron.iastate.edu/projects/iembot/mastodon"
 HEADER = """
 <ol class="breadcrumb">
@@ -81,7 +81,7 @@ def get_app4user(cookies):
         return None
     # Decrpyt this
     try:
-        user_id = int(Fernet(PRIVKEY).decrypt(mm.encode("ascii")))
+        user_id = int(cryptocode.decrypt(mm, PRIVKEY))
     except Exception:
         return None
     conn, cursor = get_dbconnc("mesosite")
@@ -248,11 +248,7 @@ def save_code(mapp, server, code, headers):
     conn.commit()
     conn.close()
     # Set a cookie
-    text = (
-        Fernet(PRIVKEY)
-        .encrypt(str(mapp.iembot_user_id).encode("ascii"))
-        .decode("ascii")
-    )
+    text = cryptocode.encrypt(str(mapp.iembot_user_id), PRIVKEY)
     headers.append(
         (
             "Set-Cookie",
