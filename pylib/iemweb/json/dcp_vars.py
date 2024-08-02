@@ -10,6 +10,18 @@ SHEF format carries a huge number of potential variable names.  This service
 emits the variable names that are currently available
 (within the present month) for the provided station identifier.
 
+Changelog
+---------
+
+- 2024-08-01: Initial documentation update
+
+Example Requests
+----------------
+
+Turn the unique SHEF variables reported by AESI4
+
+https://mesonet.agron.iastate.edu/json/dcp_vars.py?station=AESI4
+
 """
 
 import json
@@ -28,6 +40,7 @@ class Schema(CGIModel):
     station: str = Field(
         ...,
         description="Station identifier to look for variables for.",
+        max_length=8,
     )
 
 
@@ -46,20 +59,15 @@ def application(environ, start_response):
     table = f"raw{utc():%Y_%m}"
     with get_sqlalchemy_conn("hads") as conn:
         res = conn.execute(
-            text(
-                f"""
-            select distinct key from {table} where station = :station
-        """
-            ),
+            text(f"select distinct key from {table} where station = :station"),
             {
                 "station": environ["station"],
             },
         )
         for row in res:
-            row = row._asdict()
             data["vars"].append(
                 {
-                    "id": row["key"],
+                    "id": row[0],
                 }
             )
     headers = [("Content-type", "application/json")]

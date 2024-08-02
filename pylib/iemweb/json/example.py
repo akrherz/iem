@@ -2,6 +2,13 @@
 
 Return to `JSON Services </json/>`.
 
+Example Requests
+----------------
+
+Just exercise the example.
+
+https://mesonet.agron.iastate.edu/json/example.py
+
 """
 
 import json

@@ -25,16 +25,7 @@ $services[] = array(
 
 $services[] = array(
     "title" => "Single Station Last Observation",
-    "url" => "/json/current.py?station={station}&amp;network={network}",
-    "desc" => "The most recent observation for an IEM tracked site.",
-    "vars" => array(
-        "station" => "Station Identifier",
-        "network" => "Network Identifier",
-    ),
-    "example" => array(
-        "{station}" => "AMW",
-        "{network}" => "IA_ASOS",
-    )
+    "url" => "/json/current.py?help",
 );
 
 $services[] = array(
