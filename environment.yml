@@ -10,6 +10,8 @@ dependencies:
   - click
   # pytest
   - coverage
+  # mastodon iembot page
+  - cryptocode
   # ?help support
   - docutils
   # one wxc script
