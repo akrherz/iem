@@ -21,7 +21,7 @@ from pyiem.exceptions import (
 )
 from pyiem.plot.use_agg import plt
 from pyiem.reference import ISO8601
-from pyiem.util import utc
+from pyiem.util import get_autoplot_context, utc
 from pyiem.webutil import TELEMETRY, iemapp, write_telemetry
 from pymemcache.client import Client
 from six import string_types
@@ -139,7 +139,10 @@ def get_res_by_fmt(p, fmt, fdict):
         fdict.update(meta["gallery"])
     # Allow returning of javascript as a string
     if fmt == "js":
-        res = mod.highcharts(fdict)
+        # Need to pass the container name
+        ctx = get_autoplot_context(fdict, mod.get_description())
+        ctx["_e"] = fdict.get("_e", "ap_container")
+        res = mod.get_highcharts(ctx)
     elif fmt == "geojson":
         res = format_geojson_response(*mod.geojson(fdict))
     else:

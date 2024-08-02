@@ -96,9 +96,8 @@ def get_description():
     return desc
 
 
-def get_context(fdict):
+def add_context(ctx):
     """Do the processing work"""
-    ctx = get_autoplot_context(fdict, get_description())
 
     station = ctx["zstation"]
     month = ctx["month"]
@@ -153,15 +152,14 @@ def get_context(fdict):
         ctx["thres"],
     )
     ctx["subtitle"] = ctx["_sname"]
-    return ctx
 
 
-def highcharts(fdict):
+def get_highcharts(ctx: dict) -> str:
     """Highcharts output"""
-    ctx = get_context(fdict)
+    add_context(ctx)
     ctx["df"] = ctx["df"].reset_index()
     data = ctx["df"][["year", "count"]].to_json(orient="values")
-    containername = fdict.get("_e", "ap_container")
+    containername = ctx["_e"]
 
     return (
         """
@@ -191,7 +189,8 @@ Highcharts.chart('"""
 
 def plotter(fdict):
     """Go"""
-    ctx = get_context(fdict)
+    ctx = get_autoplot_context(fdict, get_description())
+    add_context(ctx)
     df = ctx["df"]
     if df.empty:
         raise NoDataFound("Error, no results returned!")

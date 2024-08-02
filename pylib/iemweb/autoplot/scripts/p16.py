@@ -102,9 +102,9 @@ def get_ramp(ctx):
     return np.array(arr)
 
 
-def highcharts(fdict):
+def get_highcharts(ctx: dict) -> str:
     """Generate the highcharts variant"""
-    ctx = get_context(fdict)
+    add_ctx(ctx)
     bins = get_ramp(ctx)
     _, dir_edges, table = histogram(
         units("mile / hour") * ctx["df"]["smph"].values,
@@ -115,7 +115,7 @@ def highcharts(fdict):
     table = table.m
     dir_edges = dir_edges.m
     arr = [drct2text(mydir) for mydir in dir_edges]
-    containername = fdict.get("_e", "ap_container")
+    containername = ctx["_e"]
     return f"""
     var arr = {arr};
     Highcharts.chart("{containername}", {{
@@ -212,9 +212,8 @@ def highcharts(fdict):
     """
 
 
-def get_context(fdict):
+def add_ctx(ctx):
     """Do the agnostic stuff"""
-    ctx = get_autoplot_context(fdict, get_description())
     ctx["station"] = ctx["zstation"]
 
     if ctx["month"] == "all":
@@ -296,7 +295,8 @@ def get_context(fdict):
 
 def plotter(fdict):
     """Go"""
-    ctx = get_context(fdict)
+    ctx = get_autoplot_context(fdict, get_description())
+    add_ctx(ctx)
 
     wr = WindrosePlot(
         title=ctx["plottitle"],

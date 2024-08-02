@@ -148,11 +148,11 @@ def get_description():
     return desc
 
 
-def highcharts(fdict):
+def get_highcharts(ctx: dict) -> str:
     """Go high charts"""
-    ctx = get_context(fdict)
+    add_ctx(ctx)
     ptinterval = "10" if ctx["decadal"] else "1"
-    containername = fdict.get("_e", "ap_container")
+    containername = ctx["_e"]
     ylabel = ctx["ylabel"].replace(r"$^\circ$", "")
     return f"""
 Highcharts.chart('{containername}', {{
@@ -195,9 +195,8 @@ Highcharts.chart('{containername}', {{
     """
 
 
-def get_context(fdict):
+def add_ctx(ctx):
     """Get the context"""
-    ctx = get_autoplot_context(fdict, get_description())
     ctx["decadal"] = ctx.get("decadal") == "yes"
     # Lower the start year if decadal
     if ctx["decadal"]:
@@ -367,7 +366,8 @@ def get_context(fdict):
 
 def plotter(fdict):
     """Go"""
-    ctx = get_context(fdict)
+    ctx = get_autoplot_context(fdict, get_description())
+    add_ctx(ctx)
 
     (fig, ax) = figure_axes(
         title=ctx["title"],

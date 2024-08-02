@@ -147,9 +147,8 @@ def memorial_days():
     return days
 
 
-def get_context(fdict):
+def add_context(ctx):
     """Do the dirty work"""
-    ctx = get_autoplot_context(fdict, get_description())
     station = ctx["station"]
     ctx["varname"] = ctx["var"]
     thedate = ctx["thedate"]
@@ -207,12 +206,11 @@ def get_context(fdict):
     if ctx["df"].empty:
         raise NoDataFound("No Data Found.")
     ctx["title"] = f"{ctx['_sname']} :: Daily {PDICT2[ctx['varname']]}"
-    return ctx
 
 
-def highcharts(fdict):
+def get_highcharts(ctx: dict) -> str:
     """Generate javascript (Highcharts) variant"""
-    ctx = get_context(fdict)
+    add_context(ctx)
     ctx["df"] = ctx["df"].reset_index()
     v2 = ctx["df"][["year", ctx["varname"]]].to_json(orient="values")
     avgval = ctx["df"][ctx["varname"]].mean()
@@ -229,7 +227,7 @@ def highcharts(fdict):
     }
     """
     )
-    containername = fdict.get("_e", "ap_container")
+    containername = ctx["_e"]
 
     return (
         """
@@ -275,7 +273,8 @@ def highcharts(fdict):
 
 def plotter(fdict):
     """Go"""
-    ctx = get_context(fdict)
+    ctx = get_autoplot_context(fdict, get_description())
+    add_context(ctx)
 
     (fig, ax) = figure_axes(apctx=ctx)
 

@@ -67,10 +67,9 @@ def get_description():
     return desc
 
 
-def get_ctx(fdict):
+def add_ctx(ctx):
     """Get the plotting context"""
     pgconn, cursor = get_dbconnc("coop")
-    ctx = get_autoplot_context(fdict, get_description())
     station = ctx["station"]
     date = ctx["date"]
     opt = ctx["opt"]
@@ -199,18 +198,17 @@ def get_ctx(fdict):
     ctx["xticklabels"] = xticklabels
     ctx["station"] = station
     ctx["y2label"] = PDICT[opt]
-    return ctx
 
 
-def highcharts(fdict):
+def get_highcharts(ctx: dict) -> str:
     """Go"""
-    ctx = get_ctx(fdict)
+    add_ctx(ctx)
     dstart = "Date.UTC(%s, %s, %s)" % (
         ctx["sdate"].year,
         ctx["sdate"].month - 1,
         ctx["sdate"].day,
     )
-    containername = fdict.get("_e", "ap_container")
+    containername = ctx["_e"]
     return (
         """
 Highcharts.chart('"""
@@ -310,7 +308,8 @@ Highcharts.chart('"""
 
 def plotter(fdict):
     """Go"""
-    ctx = get_ctx(fdict)
+    ctx = get_autoplot_context(fdict, get_description())
+    add_ctx(ctx)
 
     fig = figure(title=ctx["title"], subtitle=ctx["subtitle2"], apctx=ctx)
     width = 0.26

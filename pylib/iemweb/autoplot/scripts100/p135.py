@@ -57,9 +57,8 @@ def get_description():
     return desc
 
 
-def highcharts(fdict):
+def get_highcharts(ctx: dict) -> dict:
     """Highcharts Output"""
-    ctx = get_autoplot_context(fdict, get_description())
     station = ctx["station"]
     varname = ctx["var"]
     get_data(ctx)
@@ -78,7 +77,7 @@ def highcharts(fdict):
             ctx["_nt"].sts[station]["name"],
             station,
             PDICT[varname],
-            int(fdict.get("threshold", 32)),
+            int(ctx.get("threshold", 32)),
         )
     }
     j["yAxis"] = {"title": {"text": "Accumulated Days"}, "startOnTick": False}
@@ -102,10 +101,10 @@ def highcharts(fdict):
         if row["thisyear"] is not None:
             thisyear.append([ticks, row["thisyear"]])
     lbl = (
-        "%s" % (fdict.get("year", 2015),)
-        if fdict.get("split", "jan1") == "jan1"
+        "%s" % (ctx.get("year", 2015),)
+        if ctx.get("split", "jan1") == "jan1"
         else "%s - %s"
-        % (int(fdict.get("year", 2015)) - 1, int(fdict.get("year", 2015)))
+        % (int(ctx.get("year", 2015)) - 1, int(ctx.get("year", 2015)))
     )
     j["series"] = [
         {

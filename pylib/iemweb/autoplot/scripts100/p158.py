@@ -46,9 +46,8 @@ def get_description():
     return desc
 
 
-def get_context(fdict):
+def add_context(ctx):
     """Get plot context"""
-    ctx = get_autoplot_context(fdict, get_description())
     ctx["dt"] = ctx["dt"].replace(tzinfo=ZoneInfo("UTC"))
     dt = ctx["dt"]
     station = ctx["station"]
@@ -80,12 +79,11 @@ def get_context(fdict):
         )
     if ctx["df"].empty:
         raise NoDataFound("Failed to find any data.")
-    return ctx
 
 
-def highcharts(fdict):
+def get_highcharts(ctx: dict) -> str:
     """Do highcharts variant"""
-    ctx = get_context(fdict)
+    add_context(ctx)
     df = ctx["df"]
     df["ticks"] = df.index.values.view(np.int64) // 10**6
     lines = []
@@ -428,7 +426,8 @@ $('<div class="chart">')
 
 def plotter(fdict):
     """Go"""
-    ctx = get_context(fdict)
+    ctx = get_autoplot_context(fdict, get_description())
+    add_context(ctx)
 
     fig = figure(apctx=ctx)
     [ax1, ax2, ax3, ax4] = fig.subplots(4, 1, sharex=True)

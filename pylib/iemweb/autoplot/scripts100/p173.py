@@ -101,10 +101,8 @@ def get_description():
     return desc
 
 
-def get_context(fdict):
+def add_context(ctx):
     """get context for both output types"""
-    ctx = get_autoplot_context(fdict, get_description())
-
     station = ctx["zstation"]
     ctx["station"] = station
     units = ctx["units"]
@@ -198,12 +196,11 @@ def get_context(fdict):
         ctx["_nt"].sts[station]["tzname"],
     )
     ctx["title"] = f"{ctx['_sname']} [{y1}-{y2}]"
-    return ctx
 
 
-def highcharts(fdict):
+def get_highcharts(ctx: dict) -> str:
     """highcharts output"""
-    ctx = get_context(fdict)
+    add_context(ctx)
     lines = []
     for month, df2 in ctx["df"].groupby("month"):
         v = df2[["hour", "avg_" + ctx["units"]]].to_json(orient="values")
@@ -221,7 +218,7 @@ def highcharts(fdict):
         """
         )
     series = ",".join(lines)
-    containername = fdict.get("_e", "ap_container")
+    containername = ctx["_e"]
     return (
         """
 Highcharts.chart('"""
@@ -257,7 +254,8 @@ Highcharts.chart('"""
 
 def plotter(fdict):
     """Go"""
-    ctx = get_context(fdict)
+    ctx = get_autoplot_context(fdict, get_description())
+    add_context(ctx)
     (fig, ax) = figure_axes(
         apctx=ctx, title=ctx["title"], subtitle=ctx["subtitle"]
     )

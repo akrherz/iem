@@ -64,9 +64,9 @@ def get_description():
     return desc
 
 
-def highcharts(fdict):
+def get_highcharts(ctx: dict) -> dict:
     """Highcharts output"""
-    ctx = get_data(fdict)
+    add_ctx(ctx)
     ranges = []
     now = ctx["sdate"]
     oneday = datetime.timedelta(days=1)
@@ -138,9 +138,8 @@ def highcharts(fdict):
     return j
 
 
-def get_data(fdict):
+def add_ctx(ctx):
     """Get data common to both methods"""
-    ctx = get_autoplot_context(fdict, get_description())
     coop_pgconn, ccursor = get_dbconnc("coop")
     ctx["station"] = ctx["zstation"]
     sdate = ctx["sdate"]
@@ -183,12 +182,11 @@ def get_data(fdict):
     if ctx["df"].empty:
         raise NoDataFound("No data found.")
 
-    return ctx
-
 
 def plotter(fdict):
     """Go"""
-    ctx = get_data(fdict)
+    ctx = get_autoplot_context(fdict, get_description())
+    add_ctx(ctx)
     title = (
         f"{ctx['_sname']}\n"
         f"{MDICT[ctx['var']]} Timeseries {ctx['sdate']:%d %b %Y} - "

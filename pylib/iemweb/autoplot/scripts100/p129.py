@@ -55,9 +55,8 @@ def get_description():
     return desc
 
 
-def get_context(fdict):
+def add_ctx(ctx):
     """Get the context"""
-    ctx = get_autoplot_context(fdict, get_description())
     station = ctx["station"].upper()
     varname = ctx["var"]
     level = ctx["level"]
@@ -122,10 +121,10 @@ def get_context(fdict):
     return ctx
 
 
-def highcharts(fdict):
+def get_highcharts(ctx: dict) -> str:
     """Go"""
-    ctx = get_context(fdict)
-    containername = fdict.get("_e", "ap_container")
+    add_ctx(ctx)
+    containername = ctx["_e"]
 
     return f"""
 Highcharts.chart('{containername}', {{
@@ -179,7 +178,8 @@ s += '<br /><b>Avg Days per Month:</b> '+ this.points[1].y.toFixed(2);
 
 def plotter(fdict):
     """Go"""
-    ctx = get_context(fdict)
+    ctx = get_autoplot_context(fdict, get_description())
+    add_ctx(ctx)
     (fig, ax) = figure_axes(
         title=ctx["title"], subtitle=ctx["subtitle"], apctx=ctx
     )
