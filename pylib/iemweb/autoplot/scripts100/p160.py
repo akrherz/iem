@@ -77,9 +77,8 @@ def get_description():
     return desc
 
 
-def get_context(fdict):
+def add_context(ctx):
     """Do the common work"""
-    ctx = get_autoplot_context(fdict, get_description())
 
     ctx["station"] = ctx["station"].upper()[:8]
     station = ctx["station"]
@@ -180,12 +179,11 @@ def get_context(fdict):
     for i, col in enumerate(["primary", "secondary"]):
         if col not in ctx and i < len(ctx["odf"].columns):
             ctx[col] = ctx["odf"].columns[i]
-    return ctx
 
 
-def highcharts(fdict):
+def get_highcharts(ctx: dict) -> str:
     """generate highcharts"""
-    ctx = get_context(fdict)
+    add_context(ctx)
     if "df" not in ctx:
         raise NoDataFound("No Data Found.")
     df = ctx["df"]
@@ -243,7 +241,7 @@ def highcharts(fdict):
         )
 
     plotlines = ",".join(lines)
-    containername = fdict.get("_e", "ap_container")
+    containername = ctx["_e"]
     return (
         """
 Highcharts.chart('"""
@@ -290,7 +288,8 @@ Highcharts.chart('"""
 
 def plotter(fdict):
     """Go"""
-    ctx = get_context(fdict)
+    ctx = get_autoplot_context(fdict, get_description())
+    add_context(ctx)
     if "df" not in ctx or (ctx["df"].empty and ctx["odf"].empty):
         raise NoDataFound("No Data Found!")
     df = ctx["df"]

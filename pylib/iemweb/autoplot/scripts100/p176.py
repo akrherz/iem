@@ -43,10 +43,9 @@ def get_description():
     return desc
 
 
-def get_context(fdict):
+def add_context(ctx):
     """Make the pandas Data Frame please"""
     pgconn, cursor = get_dbconnc("coop")
-    ctx = get_autoplot_context(fdict, get_description())
     station = ctx["station"]
     opt = ctx["opt"]
     cursor.execute(
@@ -106,12 +105,11 @@ def get_context(fdict):
     ctx["subtitle"] = (
         f"By how much did a new record beat the previous {PDICT[opt]}"
     )
-    return ctx
 
 
-def highcharts(fdict):
+def get_highcharts(ctx: dict) -> str:
     """Do highcharts option"""
-    ctx = get_context(fdict)
+    add_context(ctx)
     ctx["df"]["date"] = pd.to_datetime(ctx["df"]["date"])
     df2 = ctx["df"][ctx["df"]["margin"] > 0]
     cols = ["date", "margin", "val"]
@@ -141,7 +139,7 @@ def highcharts(fdict):
     }
     """
     )
-    containername = fdict.get("_e", "ap_container")
+    containername = ctx["_e"]
     return (
         """
 Highcharts.chart('"""
@@ -181,7 +179,8 @@ Highcharts.chart('"""
 
 def plotter(fdict):
     """Go"""
-    ctx = get_context(fdict)
+    ctx = get_autoplot_context(fdict, get_description())
+    add_context(ctx)
 
     (fig, ax) = figure_axes(
         title=ctx["title"], subtitle=ctx["subtitle"], apctx=ctx

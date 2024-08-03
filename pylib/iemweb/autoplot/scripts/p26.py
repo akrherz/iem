@@ -60,13 +60,12 @@ def get_description():
     return desc
 
 
-def get_context(fdict):
+def add_ctx(ctx):
     """Get the raw infromations we need"""
     pgconn, cursor = get_dbconnc("coop")
 
     today = datetime.date.today()
     thisyear = today.year
-    ctx = get_autoplot_context(fdict, get_description())
     year = ctx["year"]
     station = ctx["station"]
     varname = ctx["var"]
@@ -158,10 +157,9 @@ def get_context(fdict):
     return ctx
 
 
-def highcharts(fdict):
+def get_highcharts(ctx: dict) -> str:
     """Do highcharts"""
-    ctx = get_context(fdict)
-
+    add_ctx(ctx)
     rng = ctx["df"][["dates", "mins", "maxs"]].to_json(orient="values")
     p95 = ctx["df"][["dates", "p2p5", "p97p5"]].to_json(orient="values")
     p50 = ctx["df"][["dates", "p25", "p75"]].to_json(orient="values")
@@ -170,7 +168,7 @@ def highcharts(fdict):
         thisyear = ctx["df"][["dates", "thisyear"]].to_json(orient="values")
     except Exception:
         thisyear = "[]"
-    containername = fdict.get("_e", "ap_container")
+    containername = ctx["_e"]
     return (
         """
 Highcharts.chart('"""
@@ -240,7 +238,8 @@ Highcharts.chart('"""
 
 def plotter(fdict):
     """Go"""
-    ctx = get_context(fdict)
+    ctx = get_autoplot_context(fdict, get_description())
+    add_ctx(ctx)
     df = ctx["df"]
 
     (fig, ax) = figure_axes(title=ctx["title"], apctx=ctx)

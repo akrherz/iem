@@ -31,9 +31,8 @@ def get_description():
     return desc
 
 
-def get_data(fdict):
+def get_data(ctx):
     """Get the data"""
-    ctx = get_autoplot_context(fdict, get_description())
     station = ctx["station"]
     date = ctx["date"]
     jul1 = datetime.date(date.year if date.month > 6 else date.year - 1, 7, 1)
@@ -63,11 +62,10 @@ def get_data(fdict):
     return df
 
 
-def highcharts(fdict):
+def get_highcharts(ctx: dict) -> dict:
     """Highcharts Output"""
-    ctx = get_autoplot_context(fdict, get_description())
     date = ctx["date"]
-    df = get_data(fdict)
+    df = get_data(ctx)
 
     j = {}
     j["title"] = {"text": f"{ctx['_sname']}:: Snowfall Totals"}
@@ -134,7 +132,7 @@ def plotter(fdict):
     """Go"""
     ctx = get_autoplot_context(fdict, get_description())
     date = ctx["date"]
-    df = get_data(fdict)
+    df = get_data(ctx)
     if df.empty:
         raise NoDataFound("Error, no results returned!")
 

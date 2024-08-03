@@ -102,12 +102,12 @@ def get_description():
     return desc
 
 
-def highcharts(fdict):
+def get_highcharts(ctx: dict) -> str:
     """Fancy plot."""
-    ctx = get_data(fdict)
+    add_data(ctx)
     df = ctx["df"]
     ISO = "%Y-%m-%d %H:%M Z"
-    containername = fdict.get("_e", "ap_container")
+    containername = ctx["_e"]
     return (
         """
 var x = """
@@ -157,9 +157,8 @@ Highcharts.chart('"""
     )
 
 
-def get_data(fdict):
+def add_data(ctx):
     """Build out the context."""
-    ctx = get_autoplot_context(fdict, get_description())
     station = ctx["zstation"]
     month = ctx["month"]
     agg = ctx["agg"]
@@ -231,12 +230,12 @@ def get_data(fdict):
         minyear,
         datetime.datetime.now().year,
     )
-    return ctx
 
 
 def plotter(fdict):
     """Go"""
-    ctx = get_data(fdict)
+    ctx = get_autoplot_context(fdict, get_description())
+    add_data(ctx)
     df = ctx["df"]
     (fig, ax) = figure_axes(apctx=ctx)
     ax.bar(df["x"].values, df["y"].values, color="blue")

@@ -38,6 +38,8 @@ from pyiem.plot import figure_axes
 from pyiem.util import get_autoplot_context
 from sqlalchemy import text
 
+from iemweb.autoplot import ARG_STATION
+
 PDICT = {
     "max-high": "Maximum High",
     "avg-high": "Average High",
@@ -96,13 +98,7 @@ def get_description():
     desc = {"description": __doc__, "data": True}
     today = datetime.date.today()
     desc["arguments"] = [
-        dict(
-            type="station",
-            name="station",
-            default="IA0000",
-            label="Select Station",
-            network="IACLIMATE",
-        ),
+        ARG_STATION,
         dict(
             type="select",
             name="month",
@@ -148,11 +144,11 @@ def get_description():
     return desc
 
 
-def highcharts(fdict):
+def get_highcharts(ctx: dict) -> str:
     """Go high charts"""
-    ctx = get_context(fdict)
+    add_ctx(ctx)
     ptinterval = "10" if ctx["decadal"] else "1"
-    containername = fdict.get("_e", "ap_container")
+    containername = ctx["_e"]
     ylabel = ctx["ylabel"].replace(r"$^\circ$", "")
     return f"""
 Highcharts.chart('{containername}', {{
@@ -195,9 +191,8 @@ Highcharts.chart('{containername}', {{
     """
 
 
-def get_context(fdict):
+def add_ctx(ctx):
     """Get the context"""
-    ctx = get_autoplot_context(fdict, get_description())
     ctx["decadal"] = ctx.get("decadal") == "yes"
     # Lower the start year if decadal
     if ctx["decadal"]:
@@ -367,7 +362,8 @@ def get_context(fdict):
 
 def plotter(fdict):
     """Go"""
-    ctx = get_context(fdict)
+    ctx = get_autoplot_context(fdict, get_description())
+    add_ctx(ctx)
 
     (fig, ax) = figure_axes(
         title=ctx["title"],

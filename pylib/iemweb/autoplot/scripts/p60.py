@@ -188,9 +188,8 @@ def get_df(ctx):
     return df
 
 
-def highcharts(fdict):
+def get_highcharts(ctx: dict) -> str:
     """Do highcharts."""
-    ctx = get_autoplot_context(fdict, get_description())
     df = get_df(ctx)
     data = df[["week", "hour", ctx["w"]]].values.tolist()
     xlabels = [
@@ -203,7 +202,7 @@ def highcharts(fdict):
     ]
     ylabels.append("")  # shrug
     title = ctx["title"].replace(r"$^\circ$", "&deg;").replace("\n", "<br />")
-    containername = fdict.get("_e", "ap_container")
+    containername = ctx["_e"]
 
     return f"""
     var units = {repr(ctx['units'])};

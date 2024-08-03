@@ -213,9 +213,8 @@ def get_data(ctx):
     )
 
 
-def highcharts(fdict):
+def get_highcharts(ctx: dict) -> str:
     """Make highcharts output."""
-    ctx = get_autoplot_context(fdict, get_description())
     get_data(ctx)
     df = ctx["df"]
     df["ticks"] = df["utc_valid"].astype("int64") // 1e6
@@ -225,7 +224,7 @@ def highcharts(fdict):
     tc = ("ticks", "")
     mx = df[f"{ctx['var']}_max_year"]
     mn = df[f"{ctx['var']}_min_year"]
-    containername = fdict.get("_e", "ap_container")
+    containername = ctx["_e"]
     res = f"""
     var max_years = {mx.values.tolist()};
     var min_years = {mn.values.tolist()};

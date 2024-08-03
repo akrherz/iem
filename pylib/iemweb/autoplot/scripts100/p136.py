@@ -57,9 +57,9 @@ def get_description():
     return desc
 
 
-def highcharts(fdict):
+def get_highcharts(ctx: dict) -> str:
     """Do highcharts"""
-    ctx = get_context(fdict)
+    add_ctx(ctx)
     season = ""
     if "season" in ctx["lines"]:
         season = (
@@ -112,7 +112,7 @@ def highcharts(fdict):
             for a in zip(ctx["lines"]["max"]["x"], ctx["lines"]["max"]["y"])
         ]
     )
-    containername = fdict.get("_e", "ap_container")
+    containername = ctx["_e"]
     res = (
         """
 Highcharts.chart('"""
@@ -193,9 +193,8 @@ Highcharts.chart('"""
     return res
 
 
-def get_context(fdict):
+def add_ctx(ctx):
     """Get the data"""
-    ctx = get_autoplot_context(fdict, get_description())
     station = ctx["zstation"]
     sknt = ctx["wind"]
     today = datetime.date.today()
@@ -237,7 +236,7 @@ def get_context(fdict):
     )
     ctx["subtitle"] = f"Hours below threshold by season (wind >= {sknt} kts)"
     ctx["dfdescribe"] = df2.iloc[:-1].describe()
-    ctx["season"] = int(fdict.get("season", datetime.datetime.now().year))
+    ctx["season"] = int(ctx.get("season", datetime.datetime.now().year))
     ctx["lines"] = {}
 
     if ctx["season"] in ctx["df"].index.values:
@@ -268,7 +267,8 @@ def get_context(fdict):
 
 def plotter(fdict):
     """Go"""
-    ctx = get_context(fdict)
+    ctx = get_autoplot_context(fdict, get_description())
+    add_ctx(ctx)
 
     (fig, ax) = figure_axes(
         apctx=ctx,
