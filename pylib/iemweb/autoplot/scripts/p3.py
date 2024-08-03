@@ -38,6 +38,8 @@ from pyiem.plot import figure_axes
 from pyiem.util import get_autoplot_context
 from sqlalchemy import text
 
+from iemweb.autoplot import ARG_STATION
+
 PDICT = {
     "max-high": "Maximum High",
     "avg-high": "Average High",
@@ -96,13 +98,7 @@ def get_description():
     desc = {"description": __doc__, "data": True}
     today = datetime.date.today()
     desc["arguments"] = [
-        dict(
-            type="station",
-            name="station",
-            default="IA0000",
-            label="Select Station",
-            network="IACLIMATE",
-        ),
+        ARG_STATION,
         dict(
             type="select",
             name="month",
