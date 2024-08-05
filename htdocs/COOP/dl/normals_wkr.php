@@ -21,11 +21,7 @@ $datestr = "2000-$month-$day";
 $con = iemdb('coop');
 
 // If NCDC climatology, then we have to look at a different station
-if ($source == 'ncdc_climate71') {
-    $station = $cities[$station]['climate_site'];
-    $nt = new NetworkTable("NCDC71");
-    $cities = $nt->table;
-} else if ($source == 'ncdc_climate81') {
+if ($source == 'ncdc_climate81') {
     $station = $cities[$station]['ncdc81'];
     $nt = new NetworkTable("NCDC81");
     $cities = $nt->table;

@@ -4,8 +4,8 @@ Run for a previous date from RUN_2AM.sh
 """
 
 import datetime
-import sys
 
+import click
 from pyiem.database import get_dbconnc
 from pyiem.network import Table as NetworkTable
 from pyiem.reference import state_names
@@ -179,15 +179,16 @@ def set_daily_extremes(table, ts):
     pgconn.commit()
 
 
-def main(argv):
+@click.command()
+@click.option("--date", "dt", help="Date to process", type=click.DateTime())
+def main(dt):
     """Go Main Go"""
-    ts = None
-    if len(argv) == 4:
-        ts = datetime.date(int(argv[1]), int(argv[2]), int(argv[3]))
+    if dt is not None:
+        dt = dt.date()
     for table in META:
-        daily_averages(table, ts)
-        set_daily_extremes(table, ts)
+        daily_averages(table, dt)
+        set_daily_extremes(table, dt)
 
 
 if __name__ == "__main__":
-    main(sys.argv)
+    main()

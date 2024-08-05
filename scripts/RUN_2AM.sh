@@ -18,7 +18,7 @@ python swat_realtime.py &
 # Run the climodat estimator to get sites that are valid at midnight
 cd ../climodat
 python daily_estimator.py --date=$(date --date '1 days ago' +'%Y-%m-%d')
-python compute_climate.py $(date --date '1 days ago' +'%Y %m %d')
+python compute_climate.py --date=$(date --date '1 days ago' +'%Y-%m-%d')
 
 # Look for stuff we missed with noaaport ingest
 cd ../rtma
