@@ -7,7 +7,7 @@ require_once "../../include/myview.php";
 require_once "../../include/iemprop.php";
 $t = new MyView();
 $DT = "2.0.2";
-$OL = "9.1.0";
+$OL = "9.2.4";
 
 $t->jsextra = <<<EOF
 <script type="text/javascript" src="/js/mapping.js"></script>
