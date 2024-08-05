@@ -1,4 +1,13 @@
-"""Show Max ETNs by wfo, phenomena, sig, by year"""
+""".. title:: VTEC Max EventID by Year
+
+Return to `JSON Services </json/>`_
+
+Changelog
+---------
+
+- 2024-08-05: Initial documtation update
+
+"""
 
 import json
 
@@ -13,9 +22,11 @@ from pyiem.webutil import CGIModel, iemapp
 class Schema(CGIModel):
     """See how we are called."""
 
-    callback: str = Field(default=None, title="JSONP Callback")
-    year: int = Field(default=2015, title="Year")
-    format: str = Field(default="json", title="Format", pattern="json|html")
+    callback: str = Field(default=None, description="JSONP Callback")
+    year: int = Field(default=2015, description="Year")
+    format: str = Field(
+        default="json", description="Format", pattern="json|html"
+    )
 
 
 def run(year, fmt):

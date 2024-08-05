@@ -1,4 +1,4 @@
-""".. service:: IEM Archived RADAR Metadata Service
+""".. title:: IEM Archived RADAR Metadata Service
 
 Return to `JSON Services </json/>`_
 

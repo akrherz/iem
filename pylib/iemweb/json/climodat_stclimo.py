@@ -1,4 +1,25 @@
-"""Dump daily computed climatology direct from the database"""
+""".. title:: Climodat Station Climatology
+
+Return to `JSON Services </json/>`_
+
+Documentation for /json/climodat_stclimo.py
+-------------------------------------------
+
+This provides computed climatologies based on period of record data.
+
+Changelog
+---------
+
+- 2024-08-05: Initial documtation update
+
+Example Requests
+----------------
+
+Provide the computed climatology for Ames, IA
+
+https://mesonet.agron.iastate.edu/json/climodat_stclimo.py?station=IATAME
+
+"""
 
 import datetime
 import json
@@ -10,10 +31,14 @@ from pyiem.webutil import CGIModel, iemapp
 class Schema(CGIModel):
     """See how we are called."""
 
-    callback: str = Field(None, title="JSONP Callback")
-    eyear: int = Field(datetime.datetime.now().year + 1, title="End Year")
-    station: str = Field("IA0200", title="Station Identifier", max_length=6)
-    syear: int = Field(1800, title="Start Year")
+    callback: str = Field(None, description="JSONP Callback")
+    eyear: int = Field(
+        datetime.datetime.now().year + 1, description="End Year"
+    )
+    station: str = Field(
+        "IA0200", description="Station Identifier", max_length=6
+    )
+    syear: int = Field(1800, description="Start Year")
 
 
 def run(cursor, station, syear, eyear):

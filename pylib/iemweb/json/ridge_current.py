@@ -1,4 +1,4 @@
-""".. service:: IEM RIDGE Current Metadata
+""".. title:: IEM RIDGE Current Metadata
 
 Return to `JSON Services </json/>`_
 

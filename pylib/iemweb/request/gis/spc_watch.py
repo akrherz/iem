@@ -13,7 +13,7 @@ Changelog
 ---------
 
 - 2024-06-27: Default `hour1`,`hour2`,`minute1`,`minute2` to 0, so they do not
-need to be provided.
+  need to be provided.
 - 2024-06-09: Initial Documentation
 
 Example Usage
@@ -23,6 +23,21 @@ Return all watch polygons for UTC 2024 in GeoJSON.
 
 https://mesonet.agron.iastate.edu/cgi-bin/request/gis/spc_watch.py?\
 sts=2024-01-01T00:00:00Z&ets=2025-01-01T00:00:00Z&format=geojson
+
+Same as above, but in KML format.
+
+https://mesonet.agron.iastate.edu/cgi-bin/request/gis/spc_watch.py?\
+sts=2024-01-01T00:00:00Z&ets=2025-01-01T00:00:00Z&format=kml
+
+Same as above, but in CSV format.
+
+https://mesonet.agron.iastate.edu/cgi-bin/request/gis/spc_watch.py?\
+sts=2024-01-01T00:00:00Z&ets=2025-01-01T00:00:00Z&format=csv
+
+Same as above, but in Shapefile format.
+
+https://mesonet.agron.iastate.edu/cgi-bin/request/gis/spc_watch.py?\
+sts=2024-01-01T00:00:00Z&ets=2025-01-01T00:00:00Z&format=shp
 
 """
 

@@ -1,4 +1,13 @@
-"""Listing of VTEC PDS Warnings."""
+""".. title:: VTEC PDS Events
+
+Return to `JSON Services </json/>`_
+
+Changelog
+---------
+
+- 2024-08-05: Initial documtation update
+
+"""
 
 import json
 
@@ -13,7 +22,7 @@ from sqlalchemy import text
 class Schema(CGIModel):
     """See how we are called."""
 
-    callback: str = Field(None, title="JSONP Callback")
+    callback: str = Field(None, description="JSONP Callback")
 
 
 def run():

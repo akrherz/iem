@@ -25,7 +25,7 @@ function buildUI() {
         const la = parseFloat($("#lat").val());
         const lo = parseFloat($("#lon").val());
         marker.setGeometry(new ol.geom.Point(ol.proj.fromLonLat([lo, la])));
-        updateMarkerPosition(lon, lat);
+        updateMarkerPosition(lo, la);
     });
     $('#last').change(() => {
         workflow();

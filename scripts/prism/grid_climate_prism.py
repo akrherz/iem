@@ -59,7 +59,7 @@ def grid_day(nc, ts):
     if ts.day == 29 and ts.month == 2:
         ts = datetime.datetime(2000, 3, 1)
 
-    sql = """SELECT * from ncdc_climate71 WHERE valid = '%s' and
+    sql = """SELECT * from ncei_climate91 WHERE valid = '%s' and
              substr(station,3,4) != '0000' and substr(station,3,1) != 'C'
              """ % (ts.strftime("%Y-%m-%d"),)
     cursor.execute(sql)

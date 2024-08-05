@@ -101,19 +101,7 @@ $services[] = array(
 
 $services[] = array(
     "title" => "NWS COOP Station Climatology",
-    "url" => "/json/climodat_stclimo.py?station={station}&amp;syear={syear}&amp;eyear={eyear}",
-    "desc" => "Produces a listing of daily climatology for an IEM tracked
-          long term climodat site in the midwestern US.",
-    "vars" => array(
-        "station" => "6 character station identifier",
-        "syear" => "Inclusive start year of the period of interest",
-        "eyear" => "Exclusive end year of the period of interest"
-    ),
-    "example" => array(
-        "{station}" => "IA0200",
-        "{syear}" => "1800",
-        "{eyear}" => "2016",
-    )
+    "url" => "/json/climodat_stclimo.py?help",
 );
 
 $services[] = array(
