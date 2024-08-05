@@ -36,7 +36,7 @@ cd ../summary
 python max_reflect.py --valid=$(date -u --date '1 days ago' +'%Y-%m-%dT00:00:00')
 
 cd ../nldas
-python process_nldasv2_noah.py $(date -u --date '5 days ago' +'%Y %m %d') &
+python process_nldasv2_noah.py --date=$(date -u --date '5 days ago' +'%Y-%m-%d') &
 
 cd ../qc
 python check_n0q.py

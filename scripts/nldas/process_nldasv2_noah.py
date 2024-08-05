@@ -7,10 +7,12 @@ Run from RUN_0Z.sh for 5 day old data.
 
 import os
 import subprocess
-import sys
 
+import click
 from pyiem.iemre import hourly_offset
-from pyiem.util import ncopen, utc
+from pyiem.util import logger, ncopen, utc
+
+LOG = logger()
 
 
 def process(valid):
@@ -32,6 +34,8 @@ def process(valid):
     ]
     if not os.path.isfile(fn):
         subprocess.call(cmd)
+    if not os.path.isfile(fn):
+        LOG.warning("download failed for %s", fn)
     idx = hourly_offset(valid)
     SOILTVARS = [
         "SoilT_0_10cm",
@@ -55,12 +59,20 @@ def process(valid):
     os.unlink(fn)
 
 
-def main(argv):
+@click.command()
+@click.option(
+    "--date",
+    "dt",
+    default="",
+    help="UTC date to process",
+    type=click.DateTime(),
+)
+def main(dt):
     """Run for a given UTC date."""
-    valid = utc(int(argv[1]), int(argv[2]), int(argv[3]))
+    valid = utc(dt.year, dt.month, dt.day)
     for hr in range(24):
         process(valid.replace(hour=hr))
 
 
 if __name__ == "__main__":
-    main(sys.argv)
+    main()

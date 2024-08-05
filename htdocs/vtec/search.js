@@ -74,7 +74,7 @@ function updateMarkerPosition(lon, lat) {
 function updateMarkerPosition2(lon, lat) {
     $("#lat2").val(lat.toFixed(4));
     $("#lon2").val(lon.toFixed(4));
-    window.location.href = `#eventsbypoint/${lat.toFixed(4)}/${lon.toFixed(4)}`;
+    window.location.href = `#eventsbypoint/${lon.toFixed(4)}/${lat.toFixed(4)}`;
     updateTable2ByPoint();
 }
 function updateTable(){
