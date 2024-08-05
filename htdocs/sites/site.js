@@ -1,4 +1,4 @@
-/* global CONFIG */
+/* global CONFIG olSelectLonLat */
 
 //callback on when the marker is done moving    		
 function displayCoordinates(lon, lat) {
