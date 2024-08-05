@@ -1,5 +1,12 @@
-"""
-JSON webservice providing timestamps of available webcam images
+""".. title:: JSON Webcam Data
+
+Return to `JSON Services </json/>`_
+
+Changelog
+---------
+
+- 2024-08-05: Initial documtation update
+
 """
 
 import datetime
@@ -16,11 +23,13 @@ from sqlalchemy import text
 class Schema(CGIModel):
     """See how we are called."""
 
-    cid: str = Field(default="ISUC-006", title="Camera ID")
-    date: str = Field(default=None, title="Date in YYYYMMDD format")
-    end_ts: str = Field(default="202101012359", title="End Timestamp in UTC")
+    cid: str = Field(default="ISUC-006", description="Camera ID")
+    date: str = Field(default=None, description="Date in YYYYMMDD format")
+    end_ts: str = Field(
+        default="202101012359", description="End Timestamp in UTC"
+    )
     start_ts: str = Field(
-        default="202101010000", title="Start Timestamp in UTC"
+        default="202101010000", description="Start Timestamp in UTC"
     )
 
 
