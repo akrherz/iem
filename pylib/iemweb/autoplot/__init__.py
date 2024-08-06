@@ -20,6 +20,17 @@ Not listed due to having no PNG output
 
 import importlib
 
+ARG_IEMRE_DOMAIN = {
+    "type": "select",
+    "name": "domain",
+    "default": "",
+    "label": "Select IEMRE Analysis Domain (China/Europe not working yet):",
+    "options": {
+        "": "Contiguous USA",
+        "china": "China",
+        "europe": "Europe",
+    },
+}
 ARG_STATION = {
     "type": "station",
     "name": "station",

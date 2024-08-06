@@ -6,8 +6,8 @@ Take the PRISM data, valid at 12z and bias correct the hourly stage IV data
 
 import datetime
 import os
-import sys
 
+import click
 import numpy as np
 import pandas as pd
 from pyiem import prism as prismutil
@@ -138,11 +138,12 @@ def workflow(valid):
                 )
 
 
-def main(argv):
+@click.command()
+@click.option("--date", "dt", type=click.DateTime(), required=True)
+def main(dt: datetime.datetime):
     """Go Main"""
-    valid = utc(int(argv[1]), int(argv[2]), int(argv[3]), 12)
-    workflow(valid)
+    workflow(utc(dt.year, dt.month, dt.day, 12))
 
 
 if __name__ == "__main__":
-    main(sys.argv)
+    main()

@@ -2,27 +2,29 @@
 
 import datetime
 import os
-import sys
 
+import click
 import geopandas as gpd
 import numpy as np
 from pyiem import iemre
+from pyiem.database import get_sqlalchemy_conn
 from pyiem.grid.zs import CachingZonalStats
-from pyiem.util import get_sqlalchemy_conn, logger, ncopen, utc
+from pyiem.util import logger, ncopen, utc
 
 LOG = logger()
 
 
-def init_year(ts):
+def init_year(ts: datetime.datetime, domain: str) -> None:
     """
     Create a new NetCDF file for a year of our specification!
     """
-    fn = iemre.get_hourly_ncname(ts.year)
+    dom = iemre.DOMAINS[domain]
+    fn = iemre.get_hourly_ncname(ts.year, domain)
     if os.path.isfile(fn):
         LOG.info("Cowardly refusing to overwrite: %s", fn)
         return
     nc = ncopen(fn, "w")
-    nc.title = f"IEM Hourly Reanalysis {ts.year}"
+    nc.title = f"IEM Hourly Reanalysis {ts.year} for domain: {domain}"
     nc.platform = "Grided Observations"
     nc.description = "IEM hourly analysis on a 0.125 degree grid"
     nc.institution = "Iowa State University, Ames, IA, USA"
@@ -35,8 +37,8 @@ def init_year(ts):
     nc.comment = "No Comment at this time"
 
     # Setup Dimensions
-    nc.createDimension("lat", iemre.NY)
-    nc.createDimension("lon", iemre.NX)
+    nc.createDimension("lat", dom["ny"])
+    nc.createDimension("lon", dom["nx"])
     ts2 = datetime.datetime(ts.year + 1, 1, 1)
     days = (ts2 - ts).days
     LOG.info("Year %s has %s days", ts.year, days)
@@ -48,14 +50,14 @@ def init_year(ts):
     lat.long_name = "Latitude"
     lat.standard_name = "latitude"
     lat.axis = "Y"
-    lat[:] = iemre.YAXIS
+    lat[:] = np.arange(dom["south"], dom["north"], iemre.DY)
 
     lon = nc.createVariable("lon", float, ("lon",))
     lon.units = "degrees_east"
     lon.long_name = "Longitude"
     lon.standard_name = "longitude"
     lon.axis = "X"
-    lon[:] = iemre.XAXIS
+    lon[:] = np.arange(dom["west"], dom["east"], iemre.DX)
 
     tm = nc.createVariable("time", float, ("time",))
     tm.units = f"Hours since {ts.year}-01-01 00:00:0.0"
@@ -70,7 +72,7 @@ def init_year(ts):
     hasdata.units = "1"
     hasdata.long_name = "Analysis Available for Grid Cell"
     hasdata.coordinates = "lon lat"
-    hasdata[:] = 0
+    hasdata[:] = 0 if domain == "" else 1
 
     # can storage -128->127 actual values are 0 to 100
     skyc = nc.createVariable(
@@ -172,12 +174,15 @@ def compute_hasdata(year):
     nc.close()
 
 
-def main(argv):
+@click.command()
+@click.option("--year", type=int, required=True, help="Year to initialize")
+def main(year):
     """Go Main Go"""
-    year = int(argv[1])
-    init_year(datetime.datetime(year, 1, 1))
-    compute_hasdata(year)
+    for domain in iemre.DOMAINS:
+        init_year(datetime.datetime(year, 1, 1), domain)
+        if domain == "":
+            compute_hasdata(year)
 
 
 if __name__ == "__main__":
-    main(sys.argv)
+    main()

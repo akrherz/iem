@@ -2,8 +2,8 @@
 
 import datetime
 import os
-import sys
 
+import click
 import numpy as np
 from pyiem import iemre
 from pyiem.util import logger, ncopen
@@ -11,11 +11,13 @@ from pyiem.util import logger, ncopen
 LOG = logger()
 
 
-def init_year(ts):
+def init_year(ts, domain):
     """
     Create a new NetCDF file for a year of our specification!
     """
-    ncfn = f"/mesonet/data/era5/{ts.year}_era5land_hourly.nc"
+    dd = "" if domain == "" else f"_{domain}"
+    dom = iemre.DOMAINS[domain]
+    ncfn = f"/mesonet/data/era5{dd}/{ts.year}_era5land_hourly.nc"
     if os.path.isfile(ncfn):
         LOG.info("Cowardly refusing to overwrite: %s", ncfn)
         return
@@ -33,8 +35,14 @@ def init_year(ts):
     nc.comment = "No Comment at this time"
 
     # Setup Dimensions
-    nc.createDimension("lat", (iemre.NORTH - iemre.SOUTH) * 10.0 + 1)
-    nc.createDimension("lon", (iemre.EAST - iemre.WEST) * 10.0 + 1)
+    nc.createDimension(
+        "lat",
+        (dom["north"] - dom["south"]) * 10.0 + 1,
+    )
+    nc.createDimension(
+        "lon",
+        (dom["east"] - dom["west"]) * 10.0 + 1,
+    )
     ts2 = datetime.datetime(ts.year + 1, 1, 1)
     days = (ts2 - ts).days
     LOG.info("Year %s has %s days", ts.year, days)
@@ -52,14 +60,14 @@ def init_year(ts):
     lat.long_name = "Latitude"
     lat.standard_name = "latitude"
     lat.axis = "Y"
-    lat[:] = np.arange(iemre.SOUTH, iemre.NORTH + 0.001, 0.1)
+    lat[:] = np.arange(dom["south"], dom["north"] + 0.001, 0.1)
 
     lon = nc.createVariable("lon", float, ("lon",))
     lon.units = "degrees_east"
     lon.long_name = "Longitude"
     lon.standard_name = "longitude"
     lon.axis = "X"
-    lon[:] = np.arange(iemre.WEST, iemre.EAST + 0.001, 0.1)
+    lon[:] = np.arange(dom["west"], dom["east"] + 0.001, 0.1)
 
     tm = nc.createVariable("time", float, ("time",))
     tm.units = f"Hours since {ts.year}-01-01 00:00:0.0"
@@ -175,11 +183,13 @@ def init_year(ts):
     nc.close()
 
 
-def main(argv):
+@click.command()
+@click.option("--year", type=int, required=True, help="Year to initialize")
+@click.option("--domain", default="", help="IEMRE Domain")
+def main(year, domain):
     """Go Main Go"""
-    year = int(argv[1])
-    init_year(datetime.datetime(year, 1, 1))
+    init_year(datetime.datetime(year, 1, 1), domain)
 
 
 if __name__ == "__main__":
-    main(sys.argv)
+    main()

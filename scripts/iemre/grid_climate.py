@@ -6,7 +6,8 @@ import sys
 import numpy as np
 import pandas as pd
 from pyiem import iemre
-from pyiem.util import convert_value, get_sqlalchemy_conn, logger, ncopen
+from pyiem.database import get_sqlalchemy_conn
+from pyiem.util import convert_value, logger, ncopen
 from scipy.interpolate import NearestNDInterpolator
 from sqlalchemy import text
 
@@ -103,11 +104,13 @@ def workflow(ts):
     """Do Work"""
 
     # Load up our netcdf file!
-    with ncopen(iemre.get_dailyc_ncname(), "a", timeout=300) as nc:
+    with ncopen(iemre.get_dailyc_ncname(domain=""), "a", timeout=300) as nc:
         grid_day(nc, ts)
         grid_solar(nc, ts)
 
-    with ncopen(iemre.get_dailyc_mrms_ncname(), "a", timeout=300) as nc:
+    with ncopen(
+        iemre.get_dailyc_mrms_ncname(domain=""), "a", timeout=300
+    ) as nc:
         grid_day(nc, ts)
 
 

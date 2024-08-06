@@ -8,12 +8,12 @@ Called from:
 
 import datetime
 import os
-import sys
 
+import click
 import numpy as np
 import pygrib
 from pyiem import iemre
-from pyiem.util import logger, ncopen, utc
+from pyiem.util import archive_fetch, logger, ncopen, utc
 
 LOG = logger()
 
@@ -40,17 +40,15 @@ def merge(ts):
     """
 
     # Load up the 12z 24h total, this is what we base our deltas on
-    fn = (
-        "/mesonet/ARCHIVE/data/"
-        f"{ts:%Y/%m/%d}/stage4/ST4.{ts:%Y%m%d%H}.24h.grib"
-    )
-    if not os.path.isfile(fn):
-        LOG.warning("stage4_12z_adjust %s is missing", fn)
-        return
-
-    grbs = pygrib.open(fn)
-    grb = grbs[1]
-    val = grb.values
+    ppath = f"{ts:%Y/%m/%d}/stage4/ST4.{ts:%Y%m%d%H}.24h.grib"
+    with archive_fetch(ppath) as fn:
+        if fn is None:
+            LOG.info("stage4_12z_adjust %s is missing", ppath)
+            return
+        grbs = pygrib.open(fn)
+        grb = grbs[1]
+        val = grb.values
+        grbs.close()
     save12z(ts, val)
 
     # storage is in the arrears
@@ -105,11 +103,12 @@ def merge(ts):
                 )
 
 
-def main(argv):
+@click.command()
+@click.option("--date", "dt", type=click.DateTime(), required=True)
+def main(dt: datetime.datetime):
     """Go Main Go"""
-    ts = utc(int(argv[1]), int(argv[2]), int(argv[3]), 12)
-    merge(ts)
+    merge(utc(dt.year, dt.month, dt.day, 12))
 
 
 if __name__ == "__main__":
-    main(sys.argv)
+    main()

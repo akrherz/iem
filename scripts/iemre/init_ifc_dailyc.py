@@ -12,7 +12,7 @@ BASEDIR = "/mesonet/data/iemre"
 
 def init_year(ts):
     """Create a new NetCDF file for a year of our specification!"""
-    fn = "%s/ifc_dailyc.nc" % (BASEDIR,)
+    fn = f"{BASEDIR}/ifc_dailyc.nc"
     if os.path.isfile(fn):
         LOG.info("Cowardly refusing to overwrite %s", fn)
         return

@@ -15,7 +15,7 @@ def init_year(ts):
     # Get existing stageIV netcdf file to copy its cordinates from
     tmplnc = ncopen(f"{BASEDIR}/2020_stage4_hourly.nc", "r")
 
-    fn = "%s/stage4_dailyc.nc" % (BASEDIR,)
+    fn = f"{BASEDIR}/stage4_dailyc.nc"
     if os.path.isfile(fn):
         LOG.info("Cowardly refusing to overwrite %s", fn)
         return

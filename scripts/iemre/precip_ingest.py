@@ -95,7 +95,9 @@ def copy_to_iemre(valid):
     res = np.where(np.logical_or(res < 0, res > 250), 0.0, res)
 
     # Open up our RE file
-    with ncopen(iemre.get_hourly_ncname(valid.year), "a", timeout=300) as nc:
+    with ncopen(
+        iemre.get_hourly_ncname(valid.year, domain=""), "a", timeout=300
+    ) as nc:
         nc.variables["p01m"][tidx, :, :] = res
     LOG.info(
         "wrote data to hourly IEMRE min: %.2f avg: %.2f max: %.2f",
@@ -115,7 +117,9 @@ def era5workflow(valid):
     p01m[p01m < 0.254] = 0
     affine_in = Affine(0.1, 0, iemre.WEST, 0, -0.1, iemre.NORTH)
     val = iemre.reproject2iemre(np.flipud(p01m), affine_in, "EPSG:4326")
-    with ncopen(iemre.get_hourly_ncname(valid.year), "a", timeout=300) as nc:
+    with ncopen(
+        iemre.get_hourly_ncname(valid.year, domain=""), "a", timeout=300
+    ) as nc:
         nc.variables["p01m"][idx] = val
 
 
