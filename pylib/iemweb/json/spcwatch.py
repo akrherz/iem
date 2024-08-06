@@ -10,6 +10,26 @@ Changelog
 
 - 2024-07-09: Add csv and excel output formats
 
+Example Requests
+----------------
+
+Return all watches that had a polygon coincident with the point at 41.9N, 93.6W
+
+https://mesonet.agron.iastate.edu/json/spcwatch.py?lat=41.9&lon=-93.6
+
+Return all watches that were valid at 2024-08-01 00 UTC, sorry that this uses
+a lame format, will update to ISO8601 soon.
+
+https://mesonet.agron.iastate.edu/json/spcwatch.py?ts=202408010000
+
+Return the above, but in CSV format
+
+https://mesonet.agron.iastate.edu/json/spcwatch.py?ts=202408010000&fmt=csv
+
+And now excel
+
+https://mesonet.agron.iastate.edu/json/spcwatch.py?ts=202408010000&fmt=excel
+
 """
 
 import datetime
@@ -37,11 +57,11 @@ class Schema(CGIModel):
         None, description="The timestamp to query for", pattern="^[0-9]{12}$"
     )
     lat: float = Field(
-        0,
+        default=None,
         description="The latitude to query for",
     )
     lon: float = Field(
-        0,
+        default=None,
         description="The longitude to query for",
     )
     callback: str = Field(
@@ -119,7 +139,7 @@ def application(environ, start_response):
         ts = datetime.datetime.strptime(environ["ts"], "%Y%m%d%H%M")
     ts = ts.replace(tzinfo=ZoneInfo("UTC"))
     fmt = environ["fmt"]
-    if environ["lon"] != 0 and environ["lat"] != 0:
+    if environ["lon"] is not None and environ["lat"] is not None:
         watches = pointquery(environ["lon"], environ["lat"])
     else:
         watches = dowork(ts)

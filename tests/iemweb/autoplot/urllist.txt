@@ -16,6 +16,7 @@
 /plotting/auto/plot/90/t:state::v:periodavg::ilabel:yes::geo:ugc::drawc:yes::year:2024::year2:2024::sdate:2006-01-01%200000::edate:2024-07-29%200000::network:WFO::station:DMX::state:IA::phenomena:TO::significance:W::cmap:jet::_r:t::dpi:100::_cb:1.png
 /plotting/auto/plot/90/t:cwa::v:periodavg::ilabel:yes::geo:ugc::drawc:yes::year:2024::year2:2024::sdate:2006-01-01%200000::edate:2024-07-29%200000::network:WFO::station:DMX::state:IA::phenomena:TO::significance:W::cmap:jet::_r:t::dpi:100.png
 /plotting/auto/plot/90/t:cwa::v:periodmax::ilabel:yes::geo:ugc::drawc:yes::year:2024::year2:2024::sdate:2006-01-01%200000::edate:2024-07-29%200000::network:WFO::station:DMX::state:IA::phenomena:TO::significance:W::cmap:jet::_r:t::dpi:100.png
+/plotting/auto/plot/104/network:IACLIMATE::station:IATAME::date1:2024-05-07::date2:2024-08-05::days:14::days2:7::_r:t::dpi:100.png
 /plotting/auto/plot/109/by:state::sdate:2024-01-01%200000::edate:2024-07-17%202359::var:days::w:set::phenomenav1:TO::significancev1:W::e:all::cmap:jet::_r:t::dpi:100.png
 /plotting/auto/plot/125/month:summer::sector:midwest::src:ncdc_climate81::state:WI::opt:both::var:avg_temp::cmap:jet::_r:t::dpi:100.png
 /plotting/auto/plot/140/network:IA_ASOS::station:DSM::syear:1928::sday:0711::eday:0725::varname:avg_temp::w:none::thres:1::year:2024::_r:t::dpi:100.png
@@ -54,4 +55,6 @@
 /plotting/auto/plot/216/network:MA_ASOS::station:BOS::var:max_dwpf::dir:above::threshold:70::_r:43::dpi:100.png
 /plotting/auto/plot/218/w:set::network:NWSCLI::station:KDSM::date:2024-07-26::_r:t::dpi:100.png
 /plotting/auto/plot/236/ident:ZMP::sdate:2024-07-31::edate:2024-08-01::_r:43::dpi:100.png
+/plotting/auto/plot/241/sts:2000-08-06%200900::ets:2000-08-06%200900::w:min::csector:IA::mode:user::cmap:gnuplot2::_r:t::dpi:100.png
+/plotting/auto/plot/241/sts:2024-08-06%200900::ets:2024-08-06%200900::w:min::csector:IA::mode:user::cmap:gnuplot2::_r:t::dpi:100.png
 /plotting/auto/plot/253/datglobalid:%7B495DE596-B299-41FE-9C90-13C87E43FE0B%7D::dat:2024-05-21::cmap:gist_rainbow::_r:t::dpi:100.png
