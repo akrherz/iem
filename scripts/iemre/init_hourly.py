@@ -151,7 +151,7 @@ def init_year(ts: datetime.datetime, domain: str) -> None:
 
 def compute_hasdata(year):
     """Compute the has_data grid"""
-    nc = ncopen(iemre.get_hourly_ncname(year), "a", timeout=300)
+    nc = ncopen(iemre.get_hourly_ncname(year, domain=""), "a", timeout=300)
     czs = CachingZonalStats(iemre.AFFINE)
     with get_sqlalchemy_conn("postgis") as conn:
         states = gpd.GeoDataFrame.from_postgis(

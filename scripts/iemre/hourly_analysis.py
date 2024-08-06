@@ -208,7 +208,9 @@ def grid_hour(ts, domain):
     @param ts Timestamp of the analysis, we'll consider a 20 minute window
     """
     LOG.info("Processing %s", ts)
-    with ncopen(iemre.get_hourly_ncname(ts.year), "r", timeout=300) as nc:
+    with ncopen(
+        iemre.get_hourly_ncname(ts.year, domain=domain), "r", timeout=300
+    ) as nc:
         hasdata = nc.variables["hasdata"][:, :]
     ts0 = ts - datetime.timedelta(minutes=10)
     ts1 = ts + datetime.timedelta(minutes=10)
