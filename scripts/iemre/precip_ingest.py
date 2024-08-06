@@ -115,7 +115,8 @@ def era5workflow(valid):
         p01m = nc.variables["p01m"][idx]
     # Convert trace/drizzle to 0, values < 0.01in or .254mm
     p01m[p01m < 0.254] = 0
-    affine_in = Affine(0.1, 0, iemre.WEST, 0, -0.1, iemre.NORTH)
+    dom = iemre.DOMAINS[""]
+    affine_in = Affine(0.1, 0, dom["west"], 0, -0.1, dom["north"])
     val = iemre.reproject2iemre(np.flipud(p01m), affine_in, "EPSG:4326")
     with ncopen(
         iemre.get_hourly_ncname(valid.year, domain=""), "a", timeout=300

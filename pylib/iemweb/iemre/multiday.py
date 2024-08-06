@@ -1,4 +1,22 @@
-"""Provide multiday values for IEMRE and friends"""
+""".. title:: IEMRE Multi-Day Data
+
+Return to `JSON Services </json/>`_
+
+Documentation for /iemre/multiday.py
+------------------------------------
+
+This application provides a JSON service for multi-day data from the IEM
+Reanalysis project.
+
+Example Usage
+-------------
+
+Get July 2024 data for Ames, IA:
+
+https:://mesonet.agron.iastate.edu/iemre/multiday.py?date1=2024-07-01&\
+date2=2024-07-31&lat=42.0308&lon=-93.6319
+
+"""
 
 import datetime
 import json
@@ -6,14 +24,38 @@ import warnings
 
 import numpy as np
 import pyiem.prism as prismutil
+from pydantic import Field
 from pyiem import iemre
-from pyiem.exceptions import IncompleteWebRequest
 from pyiem.util import convert_value, ncopen
-from pyiem.webutil import iemapp
+from pyiem.webutil import CGIModel, iemapp
 
 warnings.simplefilter("ignore", UserWarning)
 json.encoder.FLOAT_REPR = lambda o: format(o, ".2f")
 json.encoder.c_make_encoder = None
+
+
+class Schema(CGIModel):
+    """See how we are called."""
+
+    callback: str = Field(None, description="JSONP callback function name")
+    date1: datetime.date = Field(
+        ..., description="Start date for the data request, YYYY-MM-DD"
+    )
+    date2: datetime.date = Field(
+        ..., description="End date for the data request, YYYY-MM-DD"
+    )
+    lat: float = Field(
+        ...,
+        description="Latitude of the point of interest, decimal degrees",
+        ge=-90,
+        le=90,
+    )
+    lon: float = Field(
+        ...,
+        description="Longitude of the point of interest, decimal degrees",
+        ge=-180,
+        le=180,
+    )
 
 
 def clean(val, precision=2):
@@ -30,16 +72,11 @@ def send_error(start_response, msg):
     return json.dumps({"error": msg}).encode("ascii")
 
 
-@iemapp()
+@iemapp(help=__doc__, schema=Schema)
 def application(environ, start_response):
     """Go Main Go"""
-    if "date1" not in environ:
-        raise IncompleteWebRequest("GET date1= parameter missing")
-    try:
-        ts1 = datetime.datetime.strptime(environ.get("date1"), "%Y-%m-%d")
-        ts2 = datetime.datetime.strptime(environ.get("date2"), "%Y-%m-%d")
-    except ValueError as exp:
-        raise IncompleteWebRequest("Invalid date(s) provided") from exp
+    ts1 = environ["date1"]
+    ts2 = environ["date2"]
     if ts1 > ts2:
         (ts1, ts2) = (ts2, ts1)
     if ts1.year != ts2.year:
@@ -48,33 +85,27 @@ def application(environ, start_response):
         ]
     # Make sure we aren't in the future
     tsend = datetime.date.today()
-    if ts2.date() > tsend:
+    if ts2 > tsend:
         ts2 = datetime.datetime.now() - datetime.timedelta(days=1)
 
-    lat = float(environ.get("lat"))
-    lon = float(environ.get("lon"))
-    if lon < iemre.WEST or lon > iemre.EAST:
+    lon = environ["lon"]
+    lat = environ["lat"]
+    domain = iemre.get_domain(lon, lat)
+    if domain is None:
         return [
             send_error(
                 start_response,
-                f"lon value outside of bounds: {iemre.WEST} to {iemre.EAST}",
+                "Point not within any domain",
             )
         ]
-    if lat < iemre.SOUTH or lat > iemre.NORTH:
-        return [
-            send_error(
-                start_response,
-                f"lat value outside of bounds: {iemre.SOUTH} to {iemre.NORTH}",
-            )
-        ]
-
-    i, j = iemre.find_ij(lon, lat)
+    dom = iemre.DOMAINS[domain]
+    i, j = iemre.find_ij(lon, lat, domain=domain)
     offset1 = iemre.daily_offset(ts1)
     offset2 = iemre.daily_offset(ts2) + 1
     tslice = slice(offset1, offset2)
 
     # Get our netCDF vars
-    with ncopen(iemre.get_daily_ncname(ts1.year)) as nc:
+    with ncopen(iemre.get_daily_ncname(ts1.year, domain=domain)) as nc:
         hightemp = convert_value(
             nc.variables["high_tmpk"][tslice, j, i], "degK", "degF"
         )
@@ -108,7 +139,7 @@ def application(environ, start_response):
     coffset1 = iemre.daily_offset(c2000)
     c2000 = ts2.replace(year=2000)
     coffset2 = iemre.daily_offset(c2000) + 1
-    with ncopen(iemre.get_dailyc_ncname()) as cnc:
+    with ncopen(iemre.get_dailyc_ncname(domain=domain)) as cnc:
         chigh = convert_value(
             cnc.variables["high_tmpk"][coffset1:coffset2, j, i], "degK", "degF"
         )
@@ -117,7 +148,7 @@ def application(environ, start_response):
         )
         cprecip = cnc.variables["p01d"][coffset1:coffset2, j, i] / 25.4
 
-    if ts1.year > 1980:
+    if ts1.year > 1980 and domain == "":
         i2, j2 = prismutil.find_ij(lon, lat)
         if i2 is None or j2 is None:
             prism_precip = [None] * (offset2 - offset1)
@@ -127,9 +158,9 @@ def application(environ, start_response):
     else:
         prism_precip = [None] * (offset2 - offset1)
 
-    if ts1.year > 2000:
-        j2 = int((lat - iemre.SOUTH) * 100.0)
-        i2 = int((lon - iemre.WEST) * 100.0)
+    if ts1.year > 2000 and domain == "":
+        j2 = int((lat - dom["south"]) * 100.0)
+        i2 = int((lon - dom["west"]) * 100.0)
         with ncopen(iemre.get_daily_mrms_ncname(ts1.year)) as nc:
             mrms_precip = nc.variables["p01d"][tslice, j2, i2] / 25.4
     else:

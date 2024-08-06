@@ -26,15 +26,16 @@ from sqlalchemy import text
 LOG = logger()
 
 
-def generic_gridder(df, idx):
+def generic_gridder(df, idx, domain: str):
     """
     Generic gridding algorithm for easy variables
     """
+    dom = iemre.DOMAINS[domain]
     if not idx.startswith("precip"):
         window = 2.0
         f1 = df[df[idx].notnull()]
-        for lat in np.arange(iemre.SOUTH, iemre.NORTH, window):
-            for lon in np.arange(iemre.WEST, iemre.EAST, window):
+        for lat in np.arange(dom["south"], dom["north"], window):
+            for lon in np.arange(dom["west"], dom["east"], window):
                 (west, east, south, north) = (
                     lon,
                     lon + window,
@@ -204,6 +205,7 @@ def copy_iemre_hourly(ts, ds, domain):
 def use_climodat_12z(ts, ds):
     """Look at what we have in climodat."""
     mybuf = 2
+    dom = iemre.DOMAINS[""]
     with get_sqlalchemy_conn("coop") as conn:
         df = pd.read_sql(
             text("""
@@ -228,10 +230,10 @@ def use_climodat_12z(ts, ds):
         """),
             conn,
             params={
-                "west": iemre.WEST - mybuf,
-                "south": iemre.SOUTH - mybuf,
-                "east": iemre.EAST + mybuf,
-                "north": iemre.NORTH + mybuf,
+                "west": dom["west"] - mybuf,
+                "south": dom["south"] - mybuf,
+                "east": dom["east"] + mybuf,
+                "north": dom["north"] + mybuf,
                 "ts": ts,
             },
         )
@@ -241,17 +243,17 @@ def use_climodat_12z(ts, ds):
             LOG.warning("Failed quorum")
         return
     if ts.year < 1951:
-        res = generic_gridder(df, "highdata")
+        res = generic_gridder(df, "highdata", "")
         ds["high_tmpk_12z"].values = convert_value(res, "degF", "degK")
 
-        res = generic_gridder(df, "lowdata")
+        res = generic_gridder(df, "lowdata", "")
         ds["low_tmpk_12z"].values = convert_value(res, "degF", "degK")
 
-    res = generic_gridder(df, "snowdata")
+    res = generic_gridder(df, "snowdata", "")
     if res is not None and ts < datetime.date(2008, 10, 1):  # NOHRSC covers
         ds["snow_12z"].values = convert_value(res, "inch", "millimeter")
 
-    res = generic_gridder(df, "snowddata")
+    res = generic_gridder(df, "snowddata", "")
     if res is not None:
         ds["snowd_12z"].values = convert_value(res, "inch", "millimeter")
 
@@ -259,6 +261,7 @@ def use_climodat_12z(ts, ds):
 def use_asos_daily(ts, ds, domain):
     """Grid out available ASOS data."""
     mybuf = 2.0
+    dom = iemre.DOMAINS[domain]
     with get_sqlalchemy_conn("iem") as conn:
         df = pd.read_sql(
             text(f"""
@@ -284,10 +287,10 @@ def use_asos_daily(ts, ds, domain):
             """),
             conn,
             params={
-                "west": iemre.WEST - mybuf,
-                "south": iemre.SOUTH - mybuf,
-                "east": iemre.EAST + mybuf,
-                "north": iemre.NORTH + mybuf,
+                "west": dom["west"] - mybuf,
+                "south": dom["south"] - mybuf,
+                "east": dom["east"] + mybuf,
+                "north": dom["north"] + mybuf,
                 "ts": ts,
             },
         )
@@ -296,22 +299,22 @@ def use_asos_daily(ts, ds, domain):
         return
     if len(df.index) > 300:
         LOG.info("Using ASOS for high/low")
-        res = generic_gridder(df, "highdata")
+        res = generic_gridder(df, "highdata", domain)
         ds["high_tmpk"].values = convert_value(res, "degF", "degK")
-        res = generic_gridder(df, "lowdata")
+        res = generic_gridder(df, "lowdata", domain)
         ds["low_tmpk"].values = convert_value(res, "degF", "degK")
 
     # We have alternative
-    hres = generic_gridder(df, "highdwpf")
-    lres = generic_gridder(df, "lowdwpf")
+    hres = generic_gridder(df, "highdwpf", domain)
+    lres = generic_gridder(df, "lowdwpf", domain)
     if hres is not None and lres is not None:
         ds["avg_dwpk"].values = convert_value(
             (hres + lres) / 2.0, "degF", "degK"
         )
-    res = generic_gridder(df, "minrh")
+    res = generic_gridder(df, "minrh", domain)
     if res is not None:
         ds["min_rh"].values = res
-    res = generic_gridder(df, "maxrh")
+    res = generic_gridder(df, "maxrh", domain)
     if res is not None:
         ds["max_rh"].values = res
 
@@ -319,6 +322,7 @@ def use_asos_daily(ts, ds, domain):
 def use_climodat_daily(ts: datetime.date, ds):
     """Do our gridding"""
     mybuf = 2.0
+    dom = iemre.DOMAINS[""]
     with get_sqlalchemy_conn("coop") as conn:
         df = pd.read_sql(
             text("""
@@ -348,10 +352,10 @@ def use_climodat_daily(ts: datetime.date, ds):
         """),
             conn,
             params={
-                "west": iemre.WEST - mybuf,
-                "south": iemre.SOUTH - mybuf,
-                "east": iemre.EAST + mybuf,
-                "north": iemre.NORTH + mybuf,
+                "west": dom["west"] - mybuf,
+                "south": dom["south"] - mybuf,
+                "east": dom["east"] + mybuf,
+                "north": dom["north"] + mybuf,
                 "ts": ts,
             },
         )
@@ -360,13 +364,13 @@ def use_climodat_daily(ts: datetime.date, ds):
             LOG.warning("Failed quorum")
         return
     suffix = "_all" if ts.year < 1951 else ""
-    res = generic_gridder(df, f"highdata{suffix}")
+    res = generic_gridder(df, f"highdata{suffix}", "")
     if res is not None:
         ds["high_tmpk"].values = convert_value(res, "degF", "degK")
-    res = generic_gridder(df, f"lowdata{suffix}")
+    res = generic_gridder(df, f"lowdata{suffix}", "")
     if res is not None:
         ds["low_tmpk"].values = convert_value(res, "degF", "degK")
-    res = generic_gridder(df, f"precipdata{suffix}")
+    res = generic_gridder(df, f"precipdata{suffix}", "")
     if res is not None:
         ds["p01d"].values = convert_value(res, "inch", "mm")
 

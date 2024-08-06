@@ -98,7 +98,7 @@ def try_era5land(ts: datetime.datetime, domain: str, dom: dict) -> bool:
     return True
 
 
-def do_gfs(ts: datetime.datetime, domain: str, dom: dict):
+def do_gfs(ts: datetime.datetime, domain: str):
     """Attempt to use the GFS."""
     # Major complications with GFS 6 hour data being averaged and which
     # time period to use to get a "daily" value.
@@ -259,7 +259,7 @@ def main(dt, year, month):
                     do_hrrr(sts)
                 else:
                     LOG.info("trying GFS for domain %s", domain)
-                    do_gfs(sts, domain, dom)
+                    do_gfs(sts, domain)
 
 
 if __name__ == "__main__":

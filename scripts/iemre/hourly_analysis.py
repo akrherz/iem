@@ -214,6 +214,7 @@ def grid_hour(ts, domain):
     ts1 = ts + datetime.timedelta(minutes=10)
 
     mybuf = 2.0
+    dom = iemre.DOMAINS[domain]
     with get_sqlalchemy_conn("asos") as conn:
         df = pd.read_sql(
             text("""SELECT station, ST_x(geom) as lon, st_y(geom) as lat,
@@ -236,10 +237,10 @@ def grid_hour(ts, domain):
     GROUP by station, lon, lat"""),
             conn,
             params={
-                "west": iemre.WEST - mybuf,
-                "south": iemre.SOUTH - mybuf,
-                "east": iemre.EAST + mybuf,
-                "north": iemre.NORTH + mybuf,
+                "west": dom["west"] - mybuf,
+                "south": dom["south"] - mybuf,
+                "east": dom["east"] + mybuf,
+                "north": dom["north"] + mybuf,
                 "ts0": ts0,
                 "ts1": ts1,
             },
