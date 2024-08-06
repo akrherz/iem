@@ -144,10 +144,6 @@ def plotter(fdict):
         color="tan",
     )
     for lbl, t, p, a in zip(lbls, tsigma, psigma, aligns):
-        # Manual move label some for readiability
-        if lbl == "7/15":
-            t = float(t) + 0.1
-            p = float(p) + -0.2
         ax.text(t, p, lbl, va=a, zorder=2)
 
     tmax = max([abs(np.min(tsigma)), abs(np.max(tsigma))]) + 0.5
