@@ -21,19 +21,21 @@ from pyiem import iemre
 from pyiem.database import get_sqlalchemy_conn
 from pyiem.util import convert_value, logger, ncopen, utc
 from scipy.stats import zscore
+from sqlalchemy import text
 
 LOG = logger()
 
 
-def generic_gridder(df, idx):
+def generic_gridder(df, idx, domain: str):
     """
     Generic gridding algorithm for easy variables
     """
+    dom = iemre.DOMAINS[domain]
     if not idx.startswith("precip"):
         window = 2.0
         f1 = df[df[idx].notnull()]
-        for lat in np.arange(iemre.SOUTH, iemre.NORTH, window):
-            for lon in np.arange(iemre.WEST, iemre.EAST, window):
+        for lat in np.arange(dom["south"], dom["north"], window):
+            for lon in np.arange(dom["west"], dom["east"], window):
                 (west, east, south, north) = (
                     lon,
                     lon + window,
@@ -79,9 +81,15 @@ def generic_gridder(df, idx):
     return np.ma.array(res, mask=np.isnan(res))
 
 
-def copy_iemre_hourly(ts, ds):
+def copy_iemre_hourly(ts, ds, domain):
     """Lots of work to do here..."""
-    sts = utc(ts.year, ts.month, ts.day, 6)
+    # tricky
+    if domain == "":
+        sts = utc(ts.year, ts.month, ts.day, 6)
+    elif domain == "europe":
+        sts = utc(ts.year, ts.month, ts.day, 0)
+    else:
+        sts = utc(ts.year, ts.month, ts.day, 18) - datetime.timedelta(days=1)
     ets = sts + datetime.timedelta(hours=23)
     pairs = [(sts, ets)]
     if sts.year != ets.year:
@@ -108,7 +116,7 @@ def copy_iemre_hourly(ts, ds):
         aggfunc = np.ma.max if vname == "max_rh" else np.ma.min
         res = None
         for pair in pairs:
-            ncfn = iemre.get_hourly_ncname(pair[0].year)
+            ncfn = iemre.get_hourly_ncname(pair[0].year, domain)
             tidx1 = iemre.hourly_offset(pair[0])
             tidx2 = iemre.hourly_offset(pair[1])
             with ncopen(ncfn, timeout=600) as nc:
@@ -132,7 +140,7 @@ def copy_iemre_hourly(ts, ds):
     hours = 0
     runningsum = None
     for pair in pairs:
-        ncfn = iemre.get_hourly_ncname(pair[0].year)
+        ncfn = iemre.get_hourly_ncname(pair[0].year, domain)
         tidx1 = iemre.hourly_offset(pair[0])
         tidx2 = iemre.hourly_offset(pair[1])
         with ncopen(ncfn, timeout=600) as nc:
@@ -171,7 +179,7 @@ def copy_iemre_hourly(ts, ds):
         )
         ncvarname = "p01m" if ncvarname == "p01d" else ncvarname
         for pair in pairs12z if vname.endswith("12z") else pairs:
-            ncfn = iemre.get_hourly_ncname(pair[0].year)
+            ncfn = iemre.get_hourly_ncname(pair[0].year, domain)
             tidx1 = iemre.hourly_offset(pair[0])
             tidx2 = iemre.hourly_offset(pair[1])
             tslice = slice(tidx1, tidx2 + 1)
@@ -197,24 +205,14 @@ def copy_iemre_hourly(ts, ds):
 def use_climodat_12z(ts, ds):
     """Look at what we have in climodat."""
     mybuf = 2
-    giswkt = "SRID=4326;POLYGON((%s %s, %s  %s, %s %s, %s %s, %s %s))" % (
-        iemre.WEST - mybuf,
-        iemre.SOUTH - mybuf,
-        iemre.WEST - mybuf,
-        iemre.NORTH + mybuf,
-        iemre.EAST + mybuf,
-        iemre.NORTH + mybuf,
-        iemre.EAST + mybuf,
-        iemre.SOUTH - mybuf,
-        iemre.WEST - mybuf,
-        iemre.SOUTH - mybuf,
-    )
+    dom = iemre.DOMAINS[""]
     with get_sqlalchemy_conn("coop") as conn:
         df = pd.read_sql(
-            """
+            text("""
         WITH mystations as (
             SELECT id, ST_X(geom) as lon, ST_Y(geom) as lat, state, name
-            from stations where ST_Contains(ST_GeomFromEWKT(%s), geom) and
+            from stations where ST_Contains(
+            ST_MakeEnvelope(:west, :south, :east, :north, 4326), geom) and
             network ~* 'CLIMATE' and substr(id, 3, 1) not in ('C', 'D', 'T')
             and substr(id, 3, 4) != '0000'
         )
@@ -228,13 +226,16 @@ def use_climodat_12z(ts, ds):
         case when (temp_estimated or temp_hour is null or temp_hour < 4
             or temp_hour > 11) then null else low end as lowdata
         from alldata a JOIN mystations m
-        ON (a.station = m.id) WHERE a.day = %s
-        """,
+        ON (a.station = m.id) WHERE a.day = :ts
+        """),
             conn,
-            params=(
-                giswkt,
-                ts,
-            ),
+            params={
+                "west": dom["west"] - mybuf,
+                "south": dom["south"] - mybuf,
+                "east": dom["east"] + mybuf,
+                "north": dom["north"] + mybuf,
+                "ts": ts,
+            },
         )
     LOG.info("loaded %s rows from climodat database", len(df.index))
     if len(df.index) < 50:
@@ -242,39 +243,28 @@ def use_climodat_12z(ts, ds):
             LOG.warning("Failed quorum")
         return
     if ts.year < 1951:
-        res = generic_gridder(df, "highdata")
+        res = generic_gridder(df, "highdata", "")
         ds["high_tmpk_12z"].values = convert_value(res, "degF", "degK")
 
-        res = generic_gridder(df, "lowdata")
+        res = generic_gridder(df, "lowdata", "")
         ds["low_tmpk_12z"].values = convert_value(res, "degF", "degK")
 
-    res = generic_gridder(df, "snowdata")
+    res = generic_gridder(df, "snowdata", "")
     if res is not None and ts < datetime.date(2008, 10, 1):  # NOHRSC covers
         ds["snow_12z"].values = convert_value(res, "inch", "millimeter")
 
-    res = generic_gridder(df, "snowddata")
+    res = generic_gridder(df, "snowddata", "")
     if res is not None:
         ds["snowd_12z"].values = convert_value(res, "inch", "millimeter")
 
 
-def use_asos_daily(ts, ds):
+def use_asos_daily(ts, ds, domain):
     """Grid out available ASOS data."""
     mybuf = 2.0
-    giswkt = "SRID=4326;POLYGON((%s %s, %s  %s, %s %s, %s %s, %s %s))" % (
-        iemre.WEST - mybuf,
-        iemre.SOUTH - mybuf,
-        iemre.WEST - mybuf,
-        iemre.NORTH + mybuf,
-        iemre.EAST + mybuf,
-        iemre.NORTH + mybuf,
-        iemre.EAST + mybuf,
-        iemre.SOUTH - mybuf,
-        iemre.WEST - mybuf,
-        iemre.SOUTH - mybuf,
-    )
+    dom = iemre.DOMAINS[domain]
     with get_sqlalchemy_conn("iem") as conn:
         df = pd.read_sql(
-            f"""
+            text(f"""
            SELECT ST_x(s.geom) as lon, ST_y(s.geom) as lat, s.state,
            s.name, s.id as station,
            (CASE WHEN pday >= 0 then pday else null end) as precipdata,
@@ -290,37 +280,41 @@ def use_asos_daily(ts, ds):
              then min_rh else null end) as minrh,
             (CASE WHEN max_rh > 0 and max_rh < 101
              then max_rh else null end) as maxrh
-           from summary_{ts.year} c, stations s WHERE day = %s and
-           ST_Contains(ST_GeomFromEWKT(%s), geom) and s.network ~* 'ASOS'
+           from summary_{ts.year} c, stations s WHERE day = :ts and
+           ST_Contains(ST_MakeEnvelope(:west, :south, :east, :north, 4326),
+           geom) and s.network ~* 'ASOS'
            and c.iemid = s.iemid
-            """,
+            """),
             conn,
-            params=(
-                ts,
-                giswkt,
-            ),
+            params={
+                "west": dom["west"] - mybuf,
+                "south": dom["south"] - mybuf,
+                "east": dom["east"] + mybuf,
+                "north": dom["north"] + mybuf,
+                "ts": ts,
+            },
         )
     if len(df.index) < 4:
         LOG.warning("Failed data quorum")
         return
     if len(df.index) > 300:
         LOG.info("Using ASOS for high/low")
-        res = generic_gridder(df, "highdata")
+        res = generic_gridder(df, "highdata", domain)
         ds["high_tmpk"].values = convert_value(res, "degF", "degK")
-        res = generic_gridder(df, "lowdata")
+        res = generic_gridder(df, "lowdata", domain)
         ds["low_tmpk"].values = convert_value(res, "degF", "degK")
 
     # We have alternative
-    hres = generic_gridder(df, "highdwpf")
-    lres = generic_gridder(df, "lowdwpf")
+    hres = generic_gridder(df, "highdwpf", domain)
+    lres = generic_gridder(df, "lowdwpf", domain)
     if hres is not None and lres is not None:
         ds["avg_dwpk"].values = convert_value(
             (hres + lres) / 2.0, "degF", "degK"
         )
-    res = generic_gridder(df, "minrh")
+    res = generic_gridder(df, "minrh", domain)
     if res is not None:
         ds["min_rh"].values = res
-    res = generic_gridder(df, "maxrh")
+    res = generic_gridder(df, "maxrh", domain)
     if res is not None:
         ds["max_rh"].values = res
 
@@ -328,24 +322,14 @@ def use_asos_daily(ts, ds):
 def use_climodat_daily(ts: datetime.date, ds):
     """Do our gridding"""
     mybuf = 2.0
-    giswkt = "SRID=4326;POLYGON((%s %s, %s  %s, %s %s, %s %s, %s %s))" % (
-        iemre.WEST - mybuf,
-        iemre.SOUTH - mybuf,
-        iemre.WEST - mybuf,
-        iemre.NORTH + mybuf,
-        iemre.EAST + mybuf,
-        iemre.NORTH + mybuf,
-        iemre.EAST + mybuf,
-        iemre.SOUTH - mybuf,
-        iemre.WEST - mybuf,
-        iemre.SOUTH - mybuf,
-    )
+    dom = iemre.DOMAINS[""]
     with get_sqlalchemy_conn("coop") as conn:
         df = pd.read_sql(
-            """
+            text("""
         WITH mystations as (
             SELECT id, ST_X(geom) as lon, ST_Y(geom) as lat, state, name
-            from stations where ST_Contains(ST_GeomFromEWKT(%s), geom) and
+            from stations where ST_Contains(
+            ST_MakeEnvelope(:west, :south, :east, :north, 4326), geom) and
             network ~* 'CLIMATE' and substr(id, 3, 1) not in ('C', 'D', 'T')
             and substr(id, 3, 4) != '0000'
         )
@@ -364,34 +348,37 @@ def use_climodat_daily(ts: datetime.date, ds):
         (precip_hour > 4 and precip_hour < 13) then null else precip end
             as precipdata
         from alldata a JOIN mystations m
-        ON (a.station = m.id) WHERE a.day = %s
-        """,
+        ON (a.station = m.id) WHERE a.day = :ts
+        """),
             conn,
-            params=(
-                giswkt,
-                ts,
-            ),
+            params={
+                "west": dom["west"] - mybuf,
+                "south": dom["south"] - mybuf,
+                "east": dom["east"] + mybuf,
+                "north": dom["north"] + mybuf,
+                "ts": ts,
+            },
         )
     if len(df.index) < 4:
         if ts != datetime.date.today():
             LOG.warning("Failed quorum")
         return
     suffix = "_all" if ts.year < 1951 else ""
-    res = generic_gridder(df, f"highdata{suffix}")
+    res = generic_gridder(df, f"highdata{suffix}", "")
     if res is not None:
         ds["high_tmpk"].values = convert_value(res, "degF", "degK")
-    res = generic_gridder(df, f"lowdata{suffix}")
+    res = generic_gridder(df, f"lowdata{suffix}", "")
     if res is not None:
         ds["low_tmpk"].values = convert_value(res, "degF", "degK")
-    res = generic_gridder(df, f"precipdata{suffix}")
+    res = generic_gridder(df, f"precipdata{suffix}", "")
     if res is not None:
         ds["p01d"].values = convert_value(res, "inch", "mm")
 
 
-def workflow(ts: datetime.date):
+def workflow(ts: datetime.date, domain: str):
     """Do Work"""
     # load up our current data
-    ds = iemre.get_grids(ts)
+    ds = iemre.get_grids(ts, domain=domain)
     LOG.info("loaded %s variables from IEMRE database", len(ds))
 
     # rsds -> grid_rsds.py
@@ -400,14 +387,16 @@ def workflow(ts: datetime.date):
     # high_tmpk, low_tmpk, p01d, wind_speed, min_rh, max_rh, high_soil4t,
     # low_soil4t, high_tmpk_12z low_tmpk_12z p01d_12z
     if ts.year > 1949:
-        copy_iemre_hourly(ts, ds)
+        copy_iemre_hourly(ts, ds, domain)
     else:
         LOG.info("Using ASOS for daily summary variables")
-        use_asos_daily(ts, ds)
-        use_climodat_daily(ts, ds)
+        use_asos_daily(ts, ds, domain)
+        if domain == "":
+            use_climodat_daily(ts, inverse_distance_to_grid)
 
-    # snow_12z snowd_12z
-    use_climodat_12z(ts, ds)
+    if domain == "":
+        # snow_12z snowd_12z
+        use_climodat_12z(ts, ds)
 
     for vname in list(ds.keys()):
         # Some grids are too tight to the CONUS boundary, so we smear things
@@ -421,18 +410,27 @@ def workflow(ts: datetime.date):
         ds[vname].values = vals
         msg = f"{vname:14s} {ds[vname].min():6.2f} {ds[vname].max():6.2f}"
         LOG.info(msg)
-    iemre.set_grids(ts, ds)
+    iemre.set_grids(ts, ds, domain=domain)
     subprocess.call(
-        ["python", "db_to_netcdf.py", f"{ts:%Y}", f"{ts:%m}", f"{ts:%d}"]
+        [
+            "python",
+            "db_to_netcdf.py",
+            f"--date={ts:%Y-%m-%d}",
+            f"--domain={domain}",
+        ]
     )
 
 
 @click.command()
-@click.option("--date", "valid", type=click.DateTime(), help="Date")
-def main(valid: datetime.datetime):
+@click.option(
+    "--date", "valid", type=click.DateTime(), help="Date", required=True
+)
+@click.option("--domain", default="", help="Domain to process", type=str)
+def main(valid: datetime.datetime, domain: str):
     """Go Main Go"""
-    LOG.info("Run %s", valid)
-    workflow(valid.date())
+    dt = valid.date()
+    LOG.info("Run %s for domain: '%s'", dt, domain)
+    workflow(dt, domain)
     LOG.info("Done.")
 
 

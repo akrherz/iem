@@ -8,8 +8,9 @@ import subprocess
 import sys
 import time
 
+import click
+import httpx
 import numpy as np
-import requests
 from pyiem import iemre
 from pyiem.util import exponential_backoff, logger, ncopen
 from tqdm import tqdm
@@ -17,15 +18,18 @@ from tqdm import tqdm
 LOG = logger()
 
 
-def main(argv):
+@click.command()
+@click.option("--year", type=int, required=True)
+@click.option("--domain", default="", type=str, help="IEMRE Domain")
+def main(year: int, domain: str):
     """Go Main Go."""
-    year = int(argv[1])
+    dom = iemre.DOMAINS[domain]
     sts = datetime.date(year, 1, 1)
     ets = min([datetime.date(year, 12, 31), datetime.date.today()])
     current = {}
     now = ets
     while now >= sts:
-        ds = iemre.get_grids(now, varnames="power_swdn")
+        ds = iemre.get_grids(now, varnames="power_swdn", domain=domain)
         maxval = ds["power_swdn"].values.max()
         if np.isnan(maxval) or maxval < 0:
             LOG.info("adding %s as currently empty", now)
@@ -40,8 +44,8 @@ def main(argv):
 
     queue = []
     # 10x10 degree chunk is the max request size...
-    for x0 in np.arange(iemre.WEST, iemre.EAST, 10.0):
-        for y0 in np.arange(iemre.SOUTH, iemre.NORTH, 10.0):
+    for x0 in np.arange(dom["west"], dom["east"], 10.0):
+        for y0 in np.arange(dom["south"], dom["north"], 10.0):
             queue.append([x0, y0])  # noqa
     for x0, y0 in tqdm(queue, disable=not sys.stdout.isatty()):
         url = (
@@ -51,12 +55,12 @@ def main(argv):
             f"longitude-max={x0 + 9.9}&parameters=ALLSKY_SFC_SW_DWN&"
             f"community=SB&start={sts:%Y%m%d}&end={ets:%Y%m%d}&format=netcdf"
         )
-        req = exponential_backoff(requests.get, url, timeout=60)
+        req = exponential_backoff(httpx.get, url, timeout=60)
         # Can't find docs on how many requests/sec are allowed...
         if req is not None and req.status_code == 429:
             LOG.info("Got 429 (too-many-requests), sleeping 60")
             time.sleep(60)
-            req = exponential_backoff(requests.get, url, timeout=60)
+            req = exponential_backoff(httpx.get, url, timeout=60)
         if req is None or req.status_code != 200:
             LOG.warning(
                 "failed to download %s with %s %s",
@@ -67,7 +71,7 @@ def main(argv):
             continue
         ncfn = f"/tmp/power{year}.nc"
         with open(ncfn, "wb") as fh:
-            for chunk in req.iter_content(chunk_size=1024):
+            for chunk in req.iter_bytes(chunk_size=1024):
                 if chunk:
                     fh.write(chunk)
         with ncopen(ncfn) as nc:
@@ -80,13 +84,13 @@ def main(argv):
                 # Sometimes there are missing values?
                 if np.ma.is_masked(data):
                     data[data.mask] = np.mean(data)
-                i, j = iemre.find_ij(x0, y0)
+                i, j = iemre.find_ij(x0, y0, domain=domain)
                 # resample data is 0.5, iemre is 0.125
                 data = np.repeat(np.repeat(data, 4, axis=0), 4, axis=1)
                 data = np.where(data < 0, np.nan, data)
                 shp = np.shape(data)
-                jslice = slice(j, min([j + shp[0], iemre.NY]))
-                islice = slice(i, min([i + shp[1], iemre.NX]))
+                jslice = slice(j, min([j + shp[0], dom["ny"]]))
+                islice = slice(i, min([i + shp[1], dom["nx"]]))
                 # align grids
                 data = data[
                     slice(0, jslice.stop - jslice.start),
@@ -106,17 +110,16 @@ def main(argv):
         if not item["dirty"]:
             continue
         LOG.info("saving %s", date)
-        iemre.set_grids(date, item["data"])
+        iemre.set_grids(date, item["data"], domain=domain)
         subprocess.call(
             [
                 "python",
                 "../iemre/db_to_netcdf.py",
-                f"{date:%Y}",
-                f"{date:%m}",
-                f"{date:%d}",
+                f"--date={date:%Y-%m-%d}",
+                f"--domain={domain}",
             ]
         )
 
 
 if __name__ == "__main__":
-    main(sys.argv)
+    main()

@@ -43,9 +43,8 @@ def main(valid):
         [
             "python",
             "db_to_netcdf.py",
-            f"{valid:%Y}",
-            f"{valid:%m}",
-            f"{valid:%d}",
+            f"--date={valid:%Y-%m-%d}",
+            "--domain=",
         ]
     )
 

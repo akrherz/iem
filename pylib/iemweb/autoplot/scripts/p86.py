@@ -18,6 +18,8 @@ from pyiem.plot import MapPlot, get_cmap, pretty_bins
 from pyiem.reference import LATLON
 from pyiem.util import get_autoplot_context, ncopen
 
+from iemweb.autoplot import ARG_IEMRE_DOMAIN
+
 PDICT = {
     "p01d_12z": "24 Hour Precipitation at 12 UTC",
     "p01d": "Calendar Day Precipitation",
@@ -46,6 +48,7 @@ def get_description():
     desc = {"description": __doc__}
     today = datetime.datetime.today() - datetime.timedelta(days=1)
     desc["arguments"] = [
+        ARG_IEMRE_DOMAIN,
         dict(
             type="csector",
             name="csector",
@@ -126,26 +129,35 @@ def unit_convert(nc, varname, idx0, jslice, islice):
 def plotter(fdict):
     """Go"""
     ctx = get_autoplot_context(fdict, get_description())
+    domain = ctx["domain"]
     ptype = ctx["ptype"]
     date = ctx["date"]
     varname = ctx["var"]
     title = date.strftime("%-d %B %Y")
-    mp = MapPlot(
-        apctx=ctx,
-        axisbg="white",
-        nocaption=True,
-        title=f"IEM Reanalysis of {PDICT.get(varname)} for {title}",
-        subtitle="Data derived from various NOAA datasets",
-    )
+    mpargs = {
+        "title": f"IEM Reanalysis of {PDICT.get(varname)} for {title}",
+        "subtitle": "Data derived from various NOAA datasets",
+        "axisbg": "white",
+        "nocaption": True,
+        "apctx": ctx,
+    }
+    if domain != "":
+        ctx["csector"] = "custom"
+        mpargs["west"] = iemre.DOMAINS[domain]["west"]
+        mpargs["east"] = iemre.DOMAINS[domain]["east"]
+        mpargs["south"] = iemre.DOMAINS[domain]["south"]
+        mpargs["north"] = iemre.DOMAINS[domain]["north"]
+
+    mp = MapPlot(**mpargs)
     (west, east, south, north) = mp.panels[0].get_extent(LATLON)
-    i0, j0 = iemre.find_ij(west, south)
-    i1, j1 = iemre.find_ij(east, north)
+    i0, j0 = iemre.find_ij(west, south, domain=domain)
+    i1, j1 = iemre.find_ij(east, north, domain=domain)
     jslice = slice(j0, j1)
     islice = slice(i0, i1)
 
     plot_units = ""
     idx0 = iemre.daily_offset(date)
-    ncfn = iemre.get_daily_ncname(date.year)
+    ncfn = iemre.get_daily_ncname(date.year, domain=domain)
     if not os.path.isfile(ncfn):
         raise NoDataFound("No Data Found.")
     with ncopen(ncfn) as nc:

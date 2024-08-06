@@ -69,8 +69,9 @@ def workflow(page, huc12s):
     mrms_czs = CachingZonalStats(
         mrmsaffine,
     )
+    dom = iemre.DOMAINS[""]
     iemreaffine = Affine(
-        iemre.DX, 0.0, iemre.WEST, 0.0, 0 - iemre.DY, iemre.NORTH
+        iemre.DX, 0.0, dom["west"], 0.0, 0 - iemre.DY, dom["north"]
     )
     iemre_czs = CachingZonalStats(
         iemreaffine,

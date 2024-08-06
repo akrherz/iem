@@ -15,6 +15,8 @@ from pyiem.plot import MapPlot, get_cmap, pretty_bins
 from pyiem.reference import LATLON
 from pyiem.util import get_autoplot_context, ncopen
 
+from iemweb.autoplot import ARG_IEMRE_DOMAIN
+
 PDICT = {
     "tmpk": "2m Air Temperature",
     "dwpk": "2m Dew Point Temperature",
@@ -31,6 +33,7 @@ def get_description():
     desc = {"description": __doc__}
     today = datetime.datetime.today() - datetime.timedelta(days=1)
     desc["arguments"] = [
+        ARG_IEMRE_DOMAIN,
         dict(
             type="csector",
             name="csector",
@@ -96,20 +99,29 @@ def unit_convert(nc, varname, idx0, jslice, islice):
 def plotter(fdict):
     """Go"""
     ctx = get_autoplot_context(fdict, get_description())
+    domain = ctx["domain"]
     ptype = ctx["ptype"]
     valid = ctx["valid"].replace(tzinfo=datetime.timezone.utc)
     varname = ctx["var"]
     title = valid.strftime("%-d %B %Y %H:%M UTC")
-    mp = MapPlot(
-        apctx=ctx,
-        axisbg="white",
-        nocaption=True,
-        title=f"IEM Reanalysis of {PDICT.get(varname)} for {title}",
-        subtitle="Data derived from various NOAA/ERA5-Land datasets",
-    )
+    mpargs = {
+        "apctx": ctx,
+        "axisbg": "white",
+        "nocaption": True,
+        "title": f"IEM Reanalysis of {PDICT.get(varname)} for {title}",
+        "subtitle": "Data derived from various NOAA/ERA5-Land datasets",
+    }
+    if domain != "":
+        ctx["csector"] = "custom"
+        mpargs["east"] = iemre.DOMAINS[domain]["east"]
+        mpargs["west"] = iemre.DOMAINS[domain]["west"]
+        mpargs["south"] = iemre.DOMAINS[domain]["south"]
+        mpargs["north"] = iemre.DOMAINS[domain]["north"]
+
+    mp = MapPlot(**mpargs)
     (west, east, south, north) = mp.panels[0].get_extent(LATLON)
-    i0, j0 = iemre.find_ij(west, south)
-    i1, j1 = iemre.find_ij(east, north)
+    i0, j0 = iemre.find_ij(west, south, domain=domain)
+    i1, j1 = iemre.find_ij(east, north, domain=domain)
     jslice = slice(j0, j1)
     islice = slice(i0, i1)
 

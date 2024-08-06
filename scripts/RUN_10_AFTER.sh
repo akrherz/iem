@@ -45,8 +45,8 @@ fi
 # we run at 11 PM for today as well
 if [ $LHH -eq "23" ]
 then
-    python daily_analysis.py --date=$(date +'%Y-%m-%d')
-    python grid_rsds.py	$TODAY
+    python daily_analysis.py --date=$(date +'%Y-%m-%d') --domain=
+    python grid_rsds.py	--date=$(date +'%Y-%m-%d')
 fi
 
 if [ $LHH -eq "05" ]

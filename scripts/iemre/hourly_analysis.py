@@ -20,6 +20,7 @@ from pyiem import iemre
 from pyiem.database import get_sqlalchemy_conn
 from pyiem.iemre import grb2iemre, hourly_offset, reproject2iemre
 from pyiem.util import archive_fetch, logger, ncopen
+from sqlalchemy import text
 
 # Prevent invalid value encountered in cast
 warnings.simplefilter("ignore", RuntimeWarning)
@@ -27,12 +28,13 @@ LOG = logger()
 MEMORY = {"ts": datetime.datetime.now()}
 
 
-def use_era5land(ts, kind):
+def use_era5land(ts, kind, domain):
     """Use the ERA5Land dataset."""
     tasks = {
         "wind": ["uwnd", "vwnd"],
     }
-    ncfn = f"/mesonet/data/era5/{ts:%Y}_era5land_hourly.nc"
+    dd = "" if domain == "" else f"_{domain}"
+    ncfn = f"/mesonet/data/era5{dd}/{ts:%Y}_era5land_hourly.nc"
     if not os.path.isfile(ncfn):
         LOG.warning("Failed to find %s", ncfn)
         return None
@@ -66,7 +68,9 @@ def use_era5land(ts, kind):
                         idx = ~vals_shifted.mask * vals.mask
                         vals[idx] = vals_shifted[idx]
                 res.append(
-                    reproject2iemre(vals.filled(np.nan), aff, "epsg:4326")
+                    reproject2iemre(
+                        vals.filled(np.nan), aff, "epsg:4326", domain=domain
+                    )
                 )
         if res:
             LOG.info("found %s", kind)
@@ -138,7 +142,7 @@ def use_rtma(ts, kind):
     return None
 
 
-def grid_wind(df, domain):
+def grid_wind(df, hasdata, domain):
     """
     Grid winds based on u and v components
     @return uwnd, vwnd
@@ -154,26 +158,30 @@ def grid_wind(df, domain):
         v.append(_v.to("meter / second").m)
     df["u"] = u
     df["v"] = v
-    ugrid = generic_gridder(df, "u", domain, applymask=False)
-    vgrid = generic_gridder(df, "v", domain, applymask=False)
+    ugrid = generic_gridder(df, "u", hasdata, applymask=False, domain=domain)
+    vgrid = generic_gridder(df, "v", hasdata, applymask=False, domain=domain)
     return ugrid, vgrid
 
 
-def grid_skyc(df, domain):
+def grid_skyc(df, hasdata, domain):
     """Take the max sky coverage value."""
     cols = ["max_skyc1", "max_skyc2", "max_skyc3", "max_skyc4"]
     df["skyc"] = df[cols].max(axis="columns")
-    return generic_gridder(df, "skyc", domain)
+    return generic_gridder(df, "skyc", hasdata, domain=domain)
 
 
-def generic_gridder(df, idx, domain, applymask=True):
+def generic_gridder(df, idx, hasdata, applymask=True, domain=""):
     """Generic gridding algorithm for easy variables"""
+    dom = iemre.DOMAINS[domain]
     df2 = df[pd.notnull(df[idx])]
-    xi, yi = np.meshgrid(iemre.XAXIS, iemre.YAXIS)
+    xi, yi = np.meshgrid(
+        np.arange(dom["west"], dom["east"], iemre.DX),
+        np.arange(dom["south"], dom["north"], iemre.DY),
+    )
     res = np.ones(xi.shape) * np.nan
     # set a sentinel of where we won't be estimating
     if applymask:
-        res = np.where(domain > 0, res, -9999)
+        res = np.where(hasdata > 0, res, -9999)
     # do our gridding
     grid = inverse_distance_to_grid(
         df2["lon"].values, df2["lat"].values, df2[idx].values, xi, yi, 1.5
@@ -194,38 +202,22 @@ def generic_gridder(df, idx, domain, applymask=True):
     return np.ma.array(res, mask=np.isnan(res))
 
 
-def grid_hour(ts):
+def grid_hour(ts, domain):
     """
     I proctor the gridding of data on an hourly basis
     @param ts Timestamp of the analysis, we'll consider a 20 minute window
     """
     LOG.info("Processing %s", ts)
     with ncopen(iemre.get_hourly_ncname(ts.year), "r", timeout=300) as nc:
-        domain = nc.variables["hasdata"][:, :]
+        hasdata = nc.variables["hasdata"][:, :]
     ts0 = ts - datetime.timedelta(minutes=10)
     ts1 = ts + datetime.timedelta(minutes=10)
 
     mybuf = 2.0
-    giswkt = "SRID=4326;POLYGON((%s %s, %s  %s, %s %s, %s %s, %s %s))" % (
-        iemre.WEST - mybuf,
-        iemre.SOUTH - mybuf,
-        iemre.WEST - mybuf,
-        iemre.NORTH + mybuf,
-        iemre.EAST + mybuf,
-        iemre.NORTH + mybuf,
-        iemre.EAST + mybuf,
-        iemre.SOUTH - mybuf,
-        iemre.WEST - mybuf,
-        iemre.SOUTH - mybuf,
-    )
-    params = (
-        giswkt,
-        ts0,
-        ts1,
-    )
+    dom = iemre.DOMAINS[domain]
     with get_sqlalchemy_conn("asos") as conn:
         df = pd.read_sql(
-            """SELECT station, ST_x(geom) as lon, st_y(geom) as lat,
+            text("""SELECT station, ST_x(geom) as lon, st_y(geom) as lat,
     max(case when tmpf > -60 and tmpf < 130 THEN tmpf else null end)
         as max_tmpf,
     max(case when sknt > 0 and sknt < 100 then sknt else 0 end) as max_sknt,
@@ -239,46 +231,58 @@ def grid_hour(ts):
     max(case when sknt >= 0 then sknt else 0 end) as sknt,
     max(case when sknt >= 0 then drct else 0 end) as drct
     from alldata a JOIN stations t on (a.station = t.id) WHERE
-    ST_Contains(ST_GeomFromEWKT(%s), geom) and t.network ~* 'ASOS' and
-    valid >= %s and valid < %s and report_type != 1
-    GROUP by station, lon, lat""",
+    ST_Contains(ST_MakeEnvelope(:west, :south, :east, :north, 4326), geom)
+    and t.network ~* 'ASOS' and
+    valid >= :ts0 and valid < :ts1 and report_type != 1
+    GROUP by station, lon, lat"""),
             conn,
-            params=params,
+            params={
+                "west": dom["west"] - mybuf,
+                "south": dom["south"] - mybuf,
+                "east": dom["east"] + mybuf,
+                "north": dom["north"] + mybuf,
+                "ts0": ts0,
+                "ts1": ts1,
+            },
             index_col="station",
         )
 
     # Soil Temperature, try ERA5Land
-    res = use_era5land(ts, "soilt")
-    if res is None:
+    res = use_era5land(ts, "soilt", domain)
+    if res is None and domain == "":
         # Use HRRR
         res = use_hrrr_soilt(ts)
     if res is not None:
-        write_grid(ts, "soil4t", res)
+        write_grid(ts, "soil4t", res, domain)
 
     # try first to use RTMA
-    res = use_rtma(ts, "wind")
+    res = None
+    if domain == "":
+        res = use_rtma(ts, "wind")
     if res is None:
         # try ERA5Land
-        res = use_era5land(ts, "wind")
+        res = use_era5land(ts, "wind", domain)
     if res is not None:
         ures, vres = res
     else:
         if df.empty:
             LOG.warning("%s has no entries, FAIL", ts)
             return
-        ures, vres = grid_wind(df, domain)
+        ures, vres = grid_wind(df, hasdata, domain)
     if ures is None:
         LOG.warning("Failure for uwnd at %s", ts)
     else:
-        write_grid(ts, "uwnd", ures)
-        write_grid(ts, "vwnd", vres)
+        write_grid(ts, "uwnd", ures, domain)
+        write_grid(ts, "vwnd", vres, domain)
 
     # try first to use RTMA
-    res = use_rtma(ts, "tmp")
+    res = None
+    if domain == "":
+        res = use_rtma(ts, "tmp")
     tmp_used_rtma = res is not None
     if res is None:
         # try ERA5Land
-        res = use_era5land(ts, "tmpk")
+        res = use_era5land(ts, "tmpk", domain)
     did_gridding = False
     if res is not None:
         tmpf = masked_array(res, data_units="degK").to("degF").m
@@ -287,7 +291,7 @@ def grid_hour(ts):
             LOG.warning("%s has no entries, FAIL", ts)
             return
         did_gridding = True
-        tmpf = generic_gridder(df, "max_tmpf", domain)
+        tmpf = generic_gridder(df, "max_tmpf", hasdata, domain=domain)
 
     # only use RTMA if tmp worked
     res = None
@@ -295,7 +299,7 @@ def grid_hour(ts):
         res = use_rtma(ts, "dwp")
     if res is None:
         # try ERA5Land
-        res = use_era5land(ts, "dwpk")
+        res = use_era5land(ts, "dwpk", domain)
     # Ensure we have RTMA temps available
     if not did_gridding and res is not None:
         dwpf = masked_array(res, data_units="degK").to("degF").m
@@ -303,7 +307,7 @@ def grid_hour(ts):
         if df.empty:
             LOG.warning("%s has no entries, FAIL", ts)
             return
-        dwpf = generic_gridder(df, "max_dwpf", domain)
+        dwpf = generic_gridder(df, "max_dwpf", hasdata, domain=domain)
 
     # Only keep cases when tmpf >= dwpf and they are both not masked
     # Note some truncation issues here, so our comparison is not perfect
@@ -311,16 +315,20 @@ def grid_hour(ts):
     dwpf[~idx] = np.nan
     tmpf[~idx] = np.nan
 
-    write_grid(ts, "tmpk", masked_array(tmpf, data_units="degF").to("degK"))
-    write_grid(ts, "dwpk", masked_array(dwpf, data_units="degF").to("degK"))
-    res = grid_skyc(df, domain)
+    write_grid(
+        ts, "tmpk", masked_array(tmpf, data_units="degF").to("degK"), domain
+    )
+    write_grid(
+        ts, "dwpk", masked_array(dwpf, data_units="degF").to("degK"), domain
+    )
+    res = grid_skyc(df, hasdata, domain)
     if res is None:
         LOG.warning("No obs for skyc at %s", ts)
     else:
-        write_grid(ts, "skyc", res)
+        write_grid(ts, "skyc", res, domain)
 
 
-def write_grid(valid, vname, grid):
+def write_grid(valid, vname, grid, domain):
     """Atomic write of data to our netcdf storage
 
     This is isolated so that we don't 'lock' up our file while intensive
@@ -329,7 +337,9 @@ def write_grid(valid, vname, grid):
     if isinstance(grid, pint.Quantity):
         grid = grid.m
     offset = iemre.hourly_offset(valid)
-    with ncopen(iemre.get_hourly_ncname(valid.year), "a", timeout=300) as nc:
+    with ncopen(
+        iemre.get_hourly_ncname(valid.year, domain), "a", timeout=300
+    ) as nc:
         LOG.info(
             "offset: %s writing %s with min: %s max: %s Ames: %s",
             offset,
@@ -343,9 +353,10 @@ def write_grid(valid, vname, grid):
 
 @click.command()
 @click.option("--valid", required=True, type=click.DateTime(), help="UTC")
-def main(valid):
+@click.option("--domain", default="", help="Domain to process")
+def main(valid, domain):
     """Go Main"""
-    grid_hour(valid.replace(tzinfo=datetime.timezone.utc))
+    grid_hour(valid.replace(tzinfo=datetime.timezone.utc), domain)
 
 
 if __name__ == "__main__":

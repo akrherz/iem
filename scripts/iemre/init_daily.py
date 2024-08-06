@@ -4,6 +4,7 @@ import datetime
 import os
 import sys
 
+import click
 import geopandas as gpd
 import numpy as np
 from pyiem import iemre
@@ -13,19 +14,19 @@ from pyiem.util import get_sqlalchemy_conn, logger, ncopen
 LOG = logger()
 
 
-def init_year(ts):
+def init_year(ts, domain):
     """
     Create a new NetCDF file for a year of our specification!
     """
 
-    fn = iemre.get_daily_ncname(ts.year)
+    fn = iemre.get_daily_ncname(ts.year, domain)
     if os.path.isfile(fn):
         LOG.info("cowardly refusing to overwrite: %s", fn)
         sys.exit()
     nc = ncopen(fn, "w")
     nc.title = f"IEM Daily Reanalysis {ts.year}"
     nc.platform = "Grided Observations"
-    nc.description = "IEM daily analysis on a 0.125 degree grid"
+    nc.description = f"IEM daily analysis on a {iemre.DX} degree grid"
     nc.institution = "Iowa State University, Ames, IA, USA"
     nc.source = "Iowa Environmental Mesonet"
     nc.project_id = "IEM"
@@ -36,8 +37,8 @@ def init_year(ts):
     nc.comment = "No Comment at this time"
 
     # Setup Dimensions
-    nc.createDimension("lat", iemre.NY)
-    nc.createDimension("lon", iemre.NX)
+    nc.createDimension("lat", iemre.DOMAINS[domain]["ny"])
+    nc.createDimension("lon", iemre.DOMAINS[domain]["nx"])
     days = ((ts.replace(year=ts.year + 1)) - ts).days
     nc.createDimension("time", int(days))
 
@@ -47,14 +48,22 @@ def init_year(ts):
     lat.long_name = "Latitude"
     lat.standard_name = "latitude"
     lat.axis = "Y"
-    lat[:] = iemre.YAXIS
+    lat[:] = np.arange(
+        iemre.DOMAINS[domain]["south"],
+        iemre.DOMAINS[domain]["north"],
+        iemre.DY,
+    )
 
     lon = nc.createVariable("lon", float, ("lon",))
     lon.units = "degrees_east"
     lon.long_name = "Longitude"
     lon.standard_name = "longitude"
     lon.axis = "X"
-    lon[:] = iemre.XAXIS
+    lon[:] = np.arange(
+        iemre.DOMAINS[domain]["west"],
+        iemre.DOMAINS[domain]["east"],
+        iemre.DX,
+    )
 
     tm = nc.createVariable("time", float, ("time",))
     tm.units = f"Days since {ts.year}-01-01 00:00:0.0"
@@ -229,10 +238,10 @@ def init_year(ts):
     nc.close()
 
 
-def compute_hasdata(year):
+def compute_hasdata(year, domain):
     """Compute the has_data grid"""
-    nc = ncopen(iemre.get_daily_ncname(year), "a", timeout=300)
-    czs = CachingZonalStats(iemre.AFFINE)
+    nc = ncopen(iemre.get_daily_ncname(year, domain), "a", timeout=300)
+    czs = CachingZonalStats(iemre.DOMAINS[domain]["affine"])
     with get_sqlalchemy_conn("postgis") as conn:
         states = gpd.read_postgis(
             "SELECT the_geom, state_abbr from states",
@@ -254,12 +263,14 @@ def compute_hasdata(year):
     nc.close()
 
 
-def main(argv):
+@click.command()
+@click.option("--year", type=int, required=True, help="Year to initialize")
+@click.option("--domain", default="", help="IEMRE Domain to run for")
+def main(year, domain):
     """Go Main Go"""
-    year = int(argv[1])
-    init_year(datetime.datetime(year, 1, 1))
-    compute_hasdata(year)
+    init_year(datetime.datetime(year, 1, 1), domain)
+    compute_hasdata(year, domain)
 
 
 if __name__ == "__main__":
-    main(sys.argv)
+    main()

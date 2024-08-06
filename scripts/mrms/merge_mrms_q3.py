@@ -89,10 +89,11 @@ def run(dt: datetime.date, for_dep: bool):
         return
     # CAREFUL HERE!  The MRMS grid is North to South
     # set top (smallest y)
-    y0 = int((lats[0, 0] - iemre.NORTH) * 100.0)
-    y1 = int((lats[0, 0] - iemre.SOUTH) * 100.0)
-    x0 = int((iemre.WEST - mrms.WEST) * 100.0)
-    x1 = int((iemre.EAST - mrms.WEST) * 100.0)
+    dom = iemre.DOMAINS[""]
+    y0 = int((lats[0, 0] - dom["north"]) * 100.0)
+    y1 = int((lats[0, 0] - dom["south"]) * 100.0)
+    x0 = int((dom["west"] - mrms.WEST) * 100.0)
+    x1 = int((dom["east"] - mrms.WEST) * 100.0)
     LOG.info("Writing precip at offset: %s [for_dep:%s]", offset, for_dep)
     ncprecip[offset, :, :] = np.flipud(total[y0:y1, x0:x1])
     nc.close()

@@ -25,7 +25,7 @@ def create(ts: datetime, domain: str, dom: dict) -> str:
     Create a new NetCDF file for a year of our specification!
     """
     dd = "" if domain == "" else f"_{domain}"
-    fn = f"/mesonet/data/iemre/gfs_current{dd}_new.nc"
+    fn = f"/mesonet/data/iemre{dd}/gfs_current{dd}_new.nc"
     with ncopen(fn, "w") as nc:
         nc.title = (
             f"GFS on IEMRE Grid for Domain: {domain}. Approximating a date "

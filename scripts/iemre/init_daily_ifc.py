@@ -4,6 +4,7 @@ import datetime
 import os
 import sys
 
+import click
 import numpy as np
 from pyiem.util import logger, ncopen
 
@@ -79,5 +80,12 @@ def init_year(ts):
     nc.close()
 
 
+@click.command()
+@click.option("--year", required=True, type=int, help="Year to initialize")
+def main(year):
+    """Go Main Go"""
+    init_year(datetime.datetime(year, 1, 1))
+
+
 if __name__ == "__main__":
-    init_year(datetime.datetime(int(sys.argv[1]), 1, 1))
+    main()

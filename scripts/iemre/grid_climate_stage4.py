@@ -6,7 +6,8 @@ import sys
 import numpy as np
 import pandas as pd
 from pyiem import iemre
-from pyiem.util import convert_value, get_sqlalchemy_conn, logger, ncopen
+from pyiem.database import get_sqlalchemy_conn
+from pyiem.util import convert_value, logger, ncopen
 from scipy.interpolate import NearestNDInterpolator
 
 LOG = logger()

@@ -8,29 +8,27 @@ see: akrherz/iem#199
 """
 
 import datetime
-import sys
 import warnings
 
+import click
 import numpy as np
 from pyiem import iemre
-from pyiem.util import logger, ncopen, utc
+from pyiem.util import logger, ncopen
 
 # We are going from float64 to uint16, so this appears to be unavoidable
 warnings.simplefilter("ignore", RuntimeWarning)
 LOG = logger()
 
 
-def main(argv):
+@click.command()
+@click.option("--date", "dt", type=click.DateTime(), help="Valid timestamp")
+@click.option("--domain", default="", help="Domain to process")
+def main(dt: datetime.datetime, domain: str):
     """Go Main Go."""
-    if len(argv) == 6:
-        valid = utc(int(argv[1]), int(argv[2]), int(argv[3]), int(argv[4]))
-        ncfn = iemre.get_hourly_ncname(valid.year)
-        idx = iemre.hourly_offset(valid)
-    else:
-        valid = datetime.date(int(argv[1]), int(argv[2]), int(argv[3]))
-        ncfn = iemre.get_daily_ncname(valid.year)
-        idx = iemre.daily_offset(valid)
-    ds = iemre.get_grids(valid)
+    dt = dt.date()
+    ncfn = iemre.get_daily_ncname(dt.year, domain=domain)
+    idx = iemre.daily_offset(dt)
+    ds = iemre.get_grids(dt, domain=domain)
     with ncopen(ncfn, "a", timeout=600) as nc:
         for vname in ds:
             if vname not in nc.variables:
@@ -43,4 +41,4 @@ def main(argv):
 
 
 if __name__ == "__main__":
-    main(sys.argv)
+    main()

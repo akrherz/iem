@@ -31,25 +31,20 @@ VERBATIM = {
 
 def ingest(ncin, nc, valid):
     """Consume this grib file."""
-    ames_i = int((-93.61 - iemre.WEST) * 10)
-    ames_j = int((41.99 - iemre.SOUTH) * 10)
     tidx = iemre.hourly_offset(valid)
 
     for ekey, key in VERBATIM.items():
         nc.variables[key][tidx] = np.flipud(ncin.variables[ekey][0])
-        LOG.info("%s %s", key, nc.variables[key][tidx, ames_j, ames_i])
 
     nc.variables["soilt"][tidx, 0] = np.flipud(ncin.variables["stl1"][0])
     nc.variables["soilt"][tidx, 1] = np.flipud(ncin.variables["stl2"][0])
     nc.variables["soilt"][tidx, 2] = np.flipud(ncin.variables["stl3"][0])
     nc.variables["soilt"][tidx, 3] = np.flipud(ncin.variables["stl4"][0])
-    LOG.info("soilt %s", nc.variables["soilt"][tidx, :, ames_j, ames_i])
 
     nc.variables["soilm"][tidx, 0] = np.flipud(ncin.variables["swvl1"][0])
     nc.variables["soilm"][tidx, 1] = np.flipud(ncin.variables["swvl2"][0])
     nc.variables["soilm"][tidx, 2] = np.flipud(ncin.variables["swvl3"][0])
     nc.variables["soilm"][tidx, 3] = np.flipud(ncin.variables["swvl4"][0])
-    LOG.info("soilm %s", nc.variables["soilm"][tidx, :, ames_j, ames_i])
 
     # -- these vars are accumulated since 0z, so 0z is the 24hr sum
     rsds = nc.variables["rsds"]
@@ -85,36 +80,22 @@ def ingest(ncin, nc, valid):
     newval = (val - tsolar) / 3600.0
     # Le Sigh, sometimes things are negative, somehow?
     nc.variables["rsds"][tidx] = np.ma.where(newval < 0, 0, newval)
-    LOG.info(
-        "rsds nc:%s tsolar:%s netcdf:%s",
-        nc.variables["rsds"][tidx, ames_j, ames_i],
-        tsolar[ames_j, ames_i],
-        val[ames_j, ames_i],
-    )
     # m to mm
     val = np.flipud(ncin.variables["e"][0])
     newval = (val * 1000.0) - tevap
     nc.variables["evap"][tidx] = np.ma.where(newval < 0, 0, newval)
-    LOG.info(
-        "evap %s grib:%s",
-        nc.variables["evap"][tidx, ames_j, ames_i],
-        val[ames_j, ames_i],
-    )
     # m to mm
     val = np.flipud(ncin.variables["tp"][0])
     newval = (val * 1000.0) - tp01m
     nc.variables["p01m"][tidx] = np.ma.where(newval < 0, 0, newval)
-    LOG.info(
-        "p01m %s grib:%s",
-        nc.variables["p01m"][tidx, ames_j, ames_i],
-        val[ames_j, ames_i],
-    )
 
 
-def run(valid):
+def run(valid, domain):
     """Run for the given valid time."""
-    LOG.info("Running for %s", valid)
-    ncfn = f"{valid:%Y%m%d%H}.nc"
+    dd = "" if domain == "" else f"_{domain}"
+    dom = iemre.DOMAINS[domain]
+    LOG.info("Running for %s[domain=%s]", valid, domain)
+    ncfn = f"{domain}_{valid:%Y%m%d%H}.nc"
 
     cds = cdsapi.Client(quiet=True)
 
@@ -127,16 +108,16 @@ def run(valid):
             "day": f"{valid.day}",
             "time": f"{valid:%H}:00",
             "area": [
-                iemre.NORTH,
-                iemre.WEST,
-                iemre.SOUTH,
-                iemre.EAST,
+                dom["north"],
+                dom["west"],
+                dom["south"],
+                dom["east"],
             ],
             "format": "netcdf",
         },
         ncfn,
     )
-    ncoutfn = f"/mesonet/data/era5/{valid.year}_era5land_hourly.nc"
+    ncoutfn = f"/mesonet/data/era5{dd}/{valid.year}_era5land_hourly.nc"
     with ncopen(ncfn) as ncin, ncopen(ncoutfn, "a") as nc:
         ingest(ncin, nc, valid)
     os.unlink(ncfn)
@@ -144,11 +125,16 @@ def run(valid):
 
 @click.command()
 @click.option("--date", "valid", required=True, type=click.DateTime())
-def main(valid):
+@click.option("--domain", default=None, help="IEMRE Domain to run for")
+def main(valid, domain):
     """Go!"""
     valid = utc(valid.year, valid.month, valid.day)
+    domains = iemre.DOMAINS.keys()
+    if domain is not None:
+        domains = [domain]
     for offset in range(1, 25):
-        run(valid + timedelta(hours=offset))
+        for _domain in domains:
+            run(valid + timedelta(hours=offset), _domain)
 
 
 if __name__ == "__main__":

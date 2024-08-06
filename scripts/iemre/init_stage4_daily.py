@@ -2,8 +2,8 @@
 
 import datetime
 import os
-import sys
 
+import click
 import numpy as np
 from pyiem.util import logger, ncopen
 
@@ -79,10 +79,12 @@ def init_year(ts):
     tmplnc.close()
 
 
-def main(argv):
+@click.command()
+@click.option("--year", type=int, required=True)
+def main(year: int):
     """Go Main"""
-    init_year(datetime.datetime(int(argv[1]), 1, 1))
+    init_year(datetime.datetime(year, 1, 1))
 
 
 if __name__ == "__main__":
-    main(sys.argv)
+    main()

@@ -47,7 +47,9 @@ fi
 # run every Monday
 if [ $DD -eq "1" ]
     then
-        python fetch_power.py $(date --date '7 days ago' +'%Y')
+        python fetch_power.py --year=$(date --date '7 days ago' +'%Y') --domain=
+        python fetch_power.py --year=$(date --date '7 days ago' +'%Y') --domain=china
+        python fetch_power.py --year=$(date --date '7 days ago' +'%Y') --domain=europe
 fi
 
 cd ../cache

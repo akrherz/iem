@@ -6,14 +6,15 @@ python plot.py 0
 
 cd ../iemre
 # We hopefully have a 12z 24h file by now
-python stage4_12z_adjust.py $(date +'%Y %m %d')
+python stage4_12z_adjust.py --date=$(date +'%Y-%m-%d')
 # Copy the data to IEMRE hourly
 python precip_ingest.py --valid12z=$(date +'%Y-%m-%dT12:00:00')
 python ingest_nohrsc.py --date=$(date +'%Y-%m-%d')
-python daily_analysis.py --date=$(date +'%Y-%m-%d')
+python daily_analysis.py --date=$(date +'%Y-%m-%d') --domain=
+python daily_analysis.py --date=$(date --date '1 day ago' +'%Y-%m-%d') --domain=china
 
 cd ../prism
-python ingest_prism.py $(date --date '1 days ago' +'%Y %m %d')
+python ingest_prism.py --date=$(date --date '1 days ago' +'%Y-%m-%d')
 
 cd ../iemre
 # adjusts stage IV hourly file to PRISM reality
@@ -36,10 +37,14 @@ cd ../iemre
 # Since we have now adjusted the 12z precip 1 day ago, we should rerun
 # iemre for two days ago
 python ingest_nohrsc.py --date=$(date --date '2 days ago' +'%Y-%m-%d')
-python daily_analysis.py --date=$(date --date '2 days ago' +'%Y-%m-%d')
+python daily_analysis.py --date=$(date --date '2 days ago' +'%Y-%m-%d') --domain=
+python daily_analysis.py --date=$(date --date '2 days ago' +'%Y-%m-%d') --domain=china
+python daily_analysis.py --date=$(date --date '2 days ago' +'%Y-%m-%d') --domain=europe
 python ingest_nohrsc.py --date=$(date --date '10 days ago' +'%Y-%m-%d')
 # Updated soil temperature data from ERA5
-python daily_analysis.py --date=$(date --date '10 days ago' +'%Y-%m-%d')
+python daily_analysis.py --date=$(date --date '10 days ago' +'%Y-%m-%d') --domain=
+python daily_analysis.py --date=$(date --date '10 days ago' +'%Y-%m-%d') --domain=china
+python daily_analysis.py --date=$(date --date '10 days ago' +'%Y-%m-%d') --domain=europe
 
 # and now recompute climodat statewide/climate from two days ago
 cd ../climodat

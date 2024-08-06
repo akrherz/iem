@@ -127,7 +127,7 @@ def compute_hasdata(nc):
 def main():
     """Go Main"""
     init_year(datetime.datetime(2000, 1, 1))
-    with ncopen(iemre.get_dailyc_ncname(), "a", timeout=300) as nc:
+    with ncopen(iemre.get_dailyc_ncname(domain=""), "a", timeout=300) as nc:
         compute_hasdata(nc)
 
 

@@ -28,7 +28,7 @@ python check_vtec_eventids.py
 python check_afos.py
 
 cd ../iemre
-python grid_rsds.py
+python grid_rsds.py --date=$(date --date '1 day ago' +'%Y-%m-%d')
 
 cd ../dbutil 
 python hads_delete_dups.py

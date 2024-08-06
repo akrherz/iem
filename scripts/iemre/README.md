@@ -2,7 +2,8 @@
 
 daryl can't keep the code logic of all these straight, so I had better document
 this for myself!  There is also some chicken/egg stuff that goes on here, so we
-shall clarify that as well.
+shall clarify that as well.  Additionally, there are `china` and `europe` domains
+at play here, so there is no hope.
 
 ## Yearly NetCDF storage
 

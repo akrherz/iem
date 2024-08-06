@@ -20,6 +20,7 @@ def init_year(ts, for_dep=False):
     """
 
     fn = iemre.get_daily_mrms_ncname(ts.year)
+    dom = iemre.DOMAINS[""]
     if for_dep:
         fn = fn.replace("daily", "dep")
     if os.path.isfile(fn):
@@ -39,8 +40,8 @@ def init_year(ts, for_dep=False):
     nc.comment = "No Comment at this time"
 
     # Setup Dimensions
-    nc.createDimension("lat", (iemre.NORTH - iemre.SOUTH) * 100.0)
-    nc.createDimension("lon", (iemre.EAST - iemre.WEST) * 100.0)
+    nc.createDimension("lat", (dom["north"] - dom["south"]) * 100.0)
+    nc.createDimension("lon", (dom["east"] - dom["west"]) * 100.0)
     days = ((ts.replace(year=ts.year + 1)) - ts).days
     day_axis = np.arange(0, int(days))
     if for_dep:
@@ -59,11 +60,11 @@ def init_year(ts, for_dep=False):
     lat.bounds = "lat_bnds"
     lat.axis = "Y"
     # Grid centers
-    lat[:] = np.arange(iemre.SOUTH + 0.005, iemre.NORTH, 0.01)
+    lat[:] = np.arange(dom["south"] + 0.005, dom["north"], 0.01)
 
     lat_bnds = nc.createVariable("lat_bnds", float, ("lat", "nv"))
-    lat_bnds[:, 0] = np.arange(iemre.SOUTH, iemre.NORTH, 0.01)
-    lat_bnds[:, 1] = np.arange(iemre.SOUTH + 0.01, iemre.NORTH + 0.01, 0.01)
+    lat_bnds[:, 0] = np.arange(dom["south"], dom["north"], 0.01)
+    lat_bnds[:, 1] = np.arange(dom["south"] + 0.01, dom["north"] + 0.01, 0.01)
 
     lon = nc.createVariable("lon", float, ("lon",))
     lon.units = "degrees_east"
@@ -71,11 +72,11 @@ def init_year(ts, for_dep=False):
     lon.standard_name = "longitude"
     lon.bounds = "lon_bnds"
     lon.axis = "X"
-    lon[:] = np.arange(iemre.WEST, iemre.EAST, 0.01)
+    lon[:] = np.arange(dom["west"], dom["east"], 0.01)
 
     lon_bnds = nc.createVariable("lon_bnds", float, ("lon", "nv"))
-    lon_bnds[:, 0] = np.arange(iemre.WEST, iemre.EAST, 0.01)
-    lon_bnds[:, 1] = np.arange(iemre.WEST + 0.01, iemre.EAST + 0.01, 0.01)
+    lon_bnds[:, 0] = np.arange(dom["west"], dom["east"], 0.01)
+    lon_bnds[:, 1] = np.arange(dom["west"] + 0.01, dom["east"] + 0.01, 0.01)
 
     tm = nc.createVariable("time", float, ("time",))
     tm.units = f"Days since {ts.year}-01-01 00:00:0.0"
