@@ -1,6 +1,6 @@
 """Download an hour worth of ERA5.
 
-Run from RUN_0Z.sh for 5 days ago.
+Run from RUN_0Z_ERA5LAND.sh for 5 days ago.
 """
 
 import os
@@ -29,9 +29,10 @@ VERBATIM = {
 }
 
 
-def ingest(ncin, nc, valid):
+def ingest(ncin, nc, valid, domain):
     """Consume this grib file."""
     tidx = iemre.hourly_offset(valid)
+    dd = "" if domain == "" else f"_{domain}"
 
     for ekey, key in VERBATIM.items():
         nc.variables[key][tidx] = np.flipud(ncin.variables[ekey][0])
@@ -55,7 +56,7 @@ def ingest(ncin, nc, valid):
         # Special 1 Jan consideration
         if valid.month == 1 and valid.day == 1 and valid.year > 1950:
             with ncopen(
-                (f"/mesonet/data/era5/{valid.year - 1}_era5land_hourly.nc")
+                f"/mesonet/data/era5{dd}/{valid.year - 1}_era5land_hourly.nc"
             ) as nc2:
                 tsolar = (
                     np.sum(nc2.variables["rsds"][(tidx0 + 1) :], 0) * 3600.0
@@ -72,9 +73,9 @@ def ingest(ncin, nc, valid):
         tp01m = np.sum(p01m[tidx0:tidx], 0)
         tevap = np.sum(evap[tidx0:tidx], 0)
     else:
-        tsolar = np.zeros((271, 611))
-        tp01m = np.zeros((271, 611))
-        tevap = np.zeros((271, 611))
+        tsolar = np.zeros(rsds.shape[1:])
+        tp01m = np.zeros(rsds.shape[1:])
+        tevap = np.zeros(rsds.shape[1:])
     # J m-2 to W/m2
     val = np.flipud(ncin.variables["ssrd"][0])
     newval = (val - tsolar) / 3600.0
@@ -119,7 +120,7 @@ def run(valid, domain):
     )
     ncoutfn = f"/mesonet/data/era5{dd}/{valid.year}_era5land_hourly.nc"
     with ncopen(ncfn) as ncin, ncopen(ncoutfn, "a") as nc:
-        ingest(ncin, nc, valid)
+        ingest(ncin, nc, valid, domain)
     os.unlink(ncfn)
 
 

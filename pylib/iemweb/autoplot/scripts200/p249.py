@@ -127,7 +127,7 @@ def plotter(fdict):
 
     plot_units = ""
     idx0 = iemre.hourly_offset(valid)
-    ncfn = iemre.get_hourly_ncname(valid.year)
+    ncfn = iemre.get_hourly_ncname(valid.year, domain=domain)
     if not os.path.isfile(ncfn):
         raise NoDataFound("No Data Found.")
     with ncopen(ncfn) as nc:

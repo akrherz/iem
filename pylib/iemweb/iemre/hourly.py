@@ -34,12 +34,12 @@ def get_timerange(form):
     return ts.replace(hour=0), ts.replace(hour=23)
 
 
-def workflow(sts, ets, i, j):
+def workflow(sts, ets, i, j, domain):
     """Return a dict of our data."""
     res = {"data": [], "generated_at": utc().strftime(ISO)}
 
     # BUG here for Dec 31.
-    fn = iemre.get_hourly_ncname(sts.year)
+    fn = iemre.get_hourly_ncname(sts.year, domain=domain)
 
     if not os.path.isfile(fn):
         return res
@@ -102,17 +102,18 @@ def application(environ, start_response):
         raise BadWebRequest("Invalid date provided") from exp
     lat = float(environ.get("lat", 41.99))
     lon = float(environ.get("lon", -95.1))
+    domain = iemre.get_domain(lon, lat)
 
     headers = [("Content-type", "application/json")]
     start_response("200 OK", headers)
 
-    i, j = iemre.find_ij(lon, lat)
-    mckey = f"iemre/hourly/{sts:%Y%m%d}/{i}/{j}"
+    i, j = iemre.find_ij(lon, lat, domain=domain)
+    mckey = f"iemre/hourly/{domain}/{sts:%Y%m%d}/{i}/{j}"
 
     mc = Client("iem-memcached:11211")
     res = mc.get(mckey)
     if res is None:
-        res = workflow(sts, ets, i, j)
+        res = workflow(sts, ets, i, j, domain)
         res = json.dumps(res).encode("ascii")
         mc.set(mckey, res, 3600)
     mc.close()
