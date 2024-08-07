@@ -18,7 +18,7 @@ python ingest_prism.py --date=$(date --date '1 days ago' +'%Y-%m-%d')
 
 cd ../iemre
 # adjusts stage IV hourly file to PRISM reality
-python prism_adjust_stage4.py $(date --date '1 days ago' +'%Y %m %d')
+python prism_adjust_stage4.py --date=$(date --date '1 days ago' +'%Y-%m-%d')
 # Copies updated stage IV hourly into IEMRE hourly
 python precip_ingest.py --valid12z=$(date --date '1 days ago' +'%Y-%m-%dT12:00:00')
 

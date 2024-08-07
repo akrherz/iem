@@ -7,8 +7,8 @@ import datetime
 import glob
 import os
 import subprocess
-import sys
 
+import click
 import numpy as np
 import rasterio
 from pyiem.iemre import daily_offset
@@ -85,17 +85,21 @@ def update_properties(valid):
     set_property(PROPNAME, valid.strftime("%Y-%m-%d"))
 
 
-def main(argv):
+@click.command()
+@click.option(
+    "--date", "dt", type=click.DateTime(), required=True, help="Date"
+)
+def main(dt: datetime.datetime):
     """Do Something"""
     os.chdir("/mesonet/tmp")
-    valid = datetime.date(int(argv[1]), int(argv[2]), int(argv[3]))
-    files = do_download(valid)
+    dt = dt.date()
+    files = do_download(dt)
     for fn in files:
-        do_process(valid, fn)
+        do_process(dt, fn)
 
-    do_cleanup(valid)
-    update_properties(valid)
+    do_cleanup(dt)
+    update_properties(dt)
 
 
 if __name__ == "__main__":
-    main(sys.argv)
+    main()
