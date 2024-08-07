@@ -76,9 +76,9 @@ cd ../yieldfx
 python psims_baseline.py $(date --date '1 days ago' +'%Y %m %d')
 
 cd ../prism
-python ingest_prism.py $(date --date '7 days ago' +'%Y %m %d')
-python ingest_prism.py $(date --date '60 days ago' +'%Y %m %d')
-python ingest_prism.py $(date --date '365 days ago' +'%Y %m %d')
+python ingest_prism.py --date=$(date --date '7 days ago' +'%Y-%m-%d')
+python ingest_prism.py --date=$(date --date '60 days ago' +'%Y-%m-%d')
+python ingest_prism.py --date=$(date --date '365 days ago' +'%Y-%m-%d')
 
 cd ../hads
 python sync_idpgis.py

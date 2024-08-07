@@ -91,9 +91,7 @@ def try_era5land(ts: datetime.datetime, domain: str, dom: dict) -> bool:
         }
     )
     iemre.set_grids(ts.date(), ds)
-    subprocess.call(
-        ["python", "db_to_netcdf.py", f"{ts:%Y}", f"{ts:%m}", f"{ts:%d}"]
-    )
+    subprocess.call(["python", "db_to_netcdf.py", f"--date={ts:%Y-%m-%d}"])
 
     return True
 
