@@ -10,10 +10,11 @@ import datetime
 
 import pandas as pd
 from matplotlib.patches import Rectangle
+from pyiem.database import get_dbconn, get_sqlalchemy_conn
 from pyiem.exceptions import NoDataFound
 from pyiem.plot import figure
 from pyiem.reference import state_names
-from pyiem.util import get_autoplot_context, get_dbconn, get_sqlalchemy_conn
+from pyiem.util import get_autoplot_context
 from sqlalchemy import text
 
 MDICT = {
@@ -299,7 +300,7 @@ def plotter(fdict):
     rowcount = len(df.index)
     if rowcount > 6:
         boxheight = 0.08
-    dmax = df["days"].max()
+    dmax = max(df["days"].max(), 1)
     for thres, row in df.iterrows():
         if outlook_type in ["C", "F", "E"]:
             if thres not in COLORS:
