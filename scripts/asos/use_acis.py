@@ -6,6 +6,7 @@ import datetime
 import sys
 import time
 
+import click
 import pandas as pd
 import requests
 from pyiem.network import Table as NetworkTable
@@ -126,7 +127,8 @@ def do(meta, acis_station, interactive):
     cursor = pgconn.cursor()
     # join the tables
     df = acis.join(obs, how="left")
-    df["dbhas"] = df["dbhas"].fillna(False).infer_objects(copy=False)
+    with pd.option_context("future.no_silent_downcasting", True):
+        df["dbhas"] = df["dbhas"].fillna(False).astype(bool)
     inserts = 0
     updates = {}
     minday = None
@@ -181,12 +183,16 @@ def do(meta, acis_station, interactive):
     return max(uu)
 
 
-def main(argv):
+@click.command()
+@click.option("--state", required=True, help="State to process")
+def main(state):
     """Do what is asked."""
     interactive = sys.stdout.isatty()
-    state = argv[1]
     # Only run cron job for online sites
     nt = NetworkTable(f"{state}_ASOS", only_online=not interactive)
+    if not nt.sts:
+        LOG.warning("No stations found for %s_ASOS", state)
+        return
 
     for sid in nt.sts:
         if nt.sts[sid]["archive_begin"] is None:
@@ -198,4 +204,4 @@ def main(argv):
 
 
 if __name__ == "__main__":
-    main(sys.argv)
+    main()

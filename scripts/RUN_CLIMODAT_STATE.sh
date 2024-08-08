@@ -13,4 +13,4 @@ python climodat/estimate_missing.py $STATE
 # 5. Sync our COOP archives the same
 python coop/use_acis.py --state=$STATE
 # 6. Sync our IEMAccess (ASOS) archives
-python asos/use_acis.py $STATE
+python asos/use_acis.py --state=$STATE

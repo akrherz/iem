@@ -132,6 +132,7 @@ def plotter(fdict):
         wfo_limiter = " and ugc = :ugc "
         params["ugc"] = ctx["ugc"]
         name, wfo = get_ugc_name(ctx["ugc"])
+        wfo = wfo[:3]  # some have multiple WFOs
         title1 = (
             f"NWS {ctx['_nt'].sts[wfo]['name']} Issued for [{ctx['ugc']}] "
             f"{name}"
