@@ -187,23 +187,7 @@ $services[] = array(
 
 $services[] = array(
     "title" => "NWS VTEC Event Listing by WFO by Year",
-    "url" => "/json/vtec_events.py?wfo={wfo}&year={year}",
-    "desc" => <<<EOM
-Produces a listing of VTEC Events (watch, warning,advisories) by year by weather
-forecast office.  You can optionally pass a <code>phenomena=XX</code> and
-<code>significance=X</code> to the service to only return that VTEC event
-type for the given WFO and year.  Additionally, there is a one-off feature
-flag of <code>combo=1</code>, which has the service return and Tornado,
-Severe Thunderstorm, and Flash Flood Watches/Warnings in chronological order.
-EOM,
-    "vars" => array(
-        "wfo" => "3 character WFO identifier",
-        "year" => "YYYY year"
-    ),
-    "example" => array(
-        "{wfo}" => "DMX",
-        "{year}" => "2015"
-    )
+    "url" => "/json/vtec_events.py?help",
 );
 
 $services[] = array(

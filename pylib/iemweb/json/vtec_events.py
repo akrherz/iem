@@ -1,18 +1,83 @@
-"""Listing of VTEC events for a WFO and year"""
+""".. title:: VTEC Events by WFO and Year
 
-import datetime
+Return to `JSON Services </json/>`_
+
+Documentation for /json/vtec_events.py
+--------------------------------------
+
+This provides metadata on VTEC events for a given WFO and year.
+
+Changelog
+---------
+
+- 2024-08-08: Migration to pydantic validation
+
+Example Usage
+-------------
+
+Provide all NWS Des Moines Tornado Warnings for 2024:
+
+https://mesonet.agron.iastate.edu/json/vtec_events.py?wfo=DMX&year=2024\
+&phenomena=TO&significance=W
+
+Provide all SV, TO, FF, MA events for NWS Des Moines in 2024 in csv format:
+
+https://mesonet.agron.iastate.edu/json/vtec_events.py?wfo=DMX&year=2024\
+&combo=1&fmt=csv
+
+Provide all 2024 tornado warnings for NWS Des Moines in xlsx format:
+
+https://mesonet.agron.iastate.edu/json/vtec_events.py?wfo=DMX&year=2024\
+&phenomena=TO&significance=W&fmt=xlsx
+
+"""
+
 import json
 from io import BytesIO, StringIO
 
 import pandas as pd
+from pydantic import Field
+from pyiem.database import get_sqlalchemy_conn
 from pyiem.reference import ISO8601
-from pyiem.util import html_escape, utc
-from pyiem.webutil import iemapp
+from pyiem.util import utc
+from pyiem.webutil import CGIModel, iemapp
+from sqlalchemy import text
 
 EXL = "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"
 
 
-def get_res(cursor, wfo, year, phenomena, significance, combo):
+class Schema(CGIModel):
+    """See how we are called."""
+
+    callback: str = Field(None, description="optional JSONP callback")
+    combo: bool = Field(
+        default=False,
+        description="Special one-off to get all SV, TO, FF, MA events",
+    )
+    fmt: str = Field(
+        default="json",
+        description="Output format, json, csv, xlsx",
+        pattern="^(json|csv|xlsx)$",
+    )
+    phenomena: str = Field(
+        default=None,
+        description="2 character phenomena to limit results to",
+        max_length=2,
+    )
+    significance: str = Field(
+        default=None,
+        description="1 character significance to limit results to",
+        max_length=1,
+    )
+    wfo: str = Field(
+        "MPX", description="3 character WFO identifier", max_length=4
+    )
+    year: int = Field(
+        2015, description="Year to query", ge=1986, le=utc().year
+    )
+
+
+def get_res(conn, wfo, year, phenomena, significance, combo):
     """Generate a report of VTEC ETNs used for a WFO and year
 
     Args:
@@ -22,26 +87,32 @@ def get_res(cursor, wfo, year, phenomena, significance, combo):
       significance (str, optional): 1 character VTEC significance
       combo (int, optional): special one-offs
     """
+    params = {
+        "year": year,
+        "wfo": wfo,
+        "phenomena": phenomena,
+        "significance": significance,
+    }
     limits = ["phenomena is not null", "significance is not null"]
     orderby = "u.phenomena ASC, u.significance ASC, u.utc_issue ASC"
-    if phenomena != "":
-        limits[0] = f"phenomena = '{phenomena}'"
-    if significance != "":
-        limits[1] = f"significance = '{significance}'"
+    if phenomena is not None:
+        limits[0] = "phenomena = :phenomena"
+    if significance is not None:
+        limits[1] = "significance = :significance"
     plimit = " and ".join(limits)
-    if combo == 1:
+    if combo:
         plimit = (
             "phenomena in ('SV', 'TO', 'FF', 'MA') and "
             "significance in ('W', 'A')"
         )
         orderby = "u.utc_issue ASC"
-    cursor.execute(
-        f"""
+    res = conn.execute(
+        text(f"""
     WITH polyareas as (
         SELECT phenomena, significance, eventid, round((ST_area(
         ST_transform(geom,9311)) / 1000000.0)::numeric,0) as area
-        from sbw WHERE vtec_year = %s and wfo = %s and eventid is not null and
-        {plimit} and status = 'NEW'
+        from sbw WHERE vtec_year = :year and wfo = :wfo
+        and eventid is not null and {plimit} and status = 'NEW'
     ), ugcareas as (
         SELECT
         round(sum(ST_area(
@@ -54,7 +125,7 @@ def get_res(cursor, wfo, year, phenomena, significance, combo):
         max(init_expire) at time zone 'UTC' as utc_init_expire,
         max(hvtec_nwsli) as nwsli,
         max(fcster) as fcster from warnings w JOIN ugcs u on (w.gid = u.gid)
-        WHERE vtec_year = %s and w.wfo = %s and eventid is not null
+        WHERE vtec_year = :year and w.wfo = :wfo and eventid is not null
         and {plimit}
         GROUP by phenomena, significance, eventid)
 
@@ -62,21 +133,22 @@ def get_res(cursor, wfo, year, phenomena, significance, combo):
     from ugcareas u LEFT JOIN polyareas p on
     (u.phenomena = p.phenomena and u.significance = p.significance
      and u.eventid = p.eventid) ORDER by {orderby}
-    """,
-        (year, wfo, year, wfo),
+    """),
+        params,
     )
-    res = {
+    data = {
         "wfo": wfo,
         "generated_at": utc().strftime(ISO8601),
         "year": year,
         "events": [],
     }
-    for row in cursor:
+    for row in res:
+        row = row._asdict()
         uri = (
             f"/vtec/#{year}-O-NEW-K{wfo}-{row['phenomena']}-"
             f"{row['significance']}-{row['eventid']:04.0f}"
         )
-        res["events"].append(
+        data["events"].append(
             dict(
                 phenomena=row["phenomena"],
                 significance=row["significance"],
@@ -94,39 +166,31 @@ def get_res(cursor, wfo, year, phenomena, significance, combo):
                 fcster=row["fcster"],
             )
         )
-    return res
+    return data
 
 
-@iemapp(iemdb="postgis")
+@iemapp(help=__doc__, schema=Schema)
 def application(environ, start_response):
     """Answer request."""
-    wfo = environ.get("wfo", "MPX")
+    wfo = environ["wfo"]
     if len(wfo) == 4:
         wfo = wfo[1:]
-    try:
-        year = int(environ.get("year", 2015))
-    except ValueError:
-        year = 0
-    if year < 1986 or year > datetime.date.today().year + 1:
-        headers = [("Content-type", "text/plain")]
-        start_response("500 Internal Server Error", headers)
-        data = "Invalid Year"
-        return [data.encode("ascii")]
+    year = environ["year"]
 
-    phenomena = environ.get("phenomena", "")[:2]
-    significance = environ.get("significance", "")[:1]
-    cb = environ.get("callback")
-    combo = int(environ.get("combo", 0))
+    phenomena = environ["phenomena"]
+    significance = environ["significance"]
+    combo = environ["combo"]
 
-    fmt = environ.get("fmt", "json")
-    res = get_res(
-        environ["iemdb.postgis.cursor"],
-        wfo,
-        year,
-        phenomena,
-        significance,
-        combo,
-    )
+    fmt = environ["fmt"]
+    with get_sqlalchemy_conn("postgis") as pgconn:
+        res = get_res(
+            pgconn,
+            wfo,
+            year,
+            phenomena,
+            significance,
+            combo,
+        )
 
     if fmt == "xlsx":
         fn = f"vtec_{wfo}_{year}_{phenomena}_{significance}.xlsx"
@@ -150,9 +214,7 @@ def application(environ, start_response):
         return [bio.getvalue().encode("utf-8")]
 
     res = json.dumps(res)
-    if cb is not None:
-        res = f"{html_escape(cb)}({res})"
 
     headers = [("Content-type", "application/json")]
     start_response("200 OK", headers)
-    return [res.encode("ascii")]
+    return res.encode("ascii")

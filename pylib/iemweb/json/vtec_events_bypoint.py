@@ -1,17 +1,69 @@
-"""Find VTEC events by a given Lat / Lon pair"""
+""".. title:: VTEC Events by Point
+
+Return to `JSON Services </json/>`_
+
+Documentation for /json/vtec_events_bypoint.py
+----------------------------------------------
+
+This service returns VTEC event metadata for a given latitude and longitude
+point.
+
+Changelog
+---------
+
+- 2024-08-08: Initial documentation and use pydantic
+
+Example Usage
+-------------
+
+Get VTEC events for a point in Iowa
+
+https://mesonet.agron.iastate.edu/json/vtec_events_bypoint.py?\
+lat=41.99&lon=-93.61
+
+Same request, but in Excel format
+
+https://mesonet.agron.iastate.edu/json/vtec_events_bypoint.py?\
+lat=41.99&lon=-93.61&fmt=xlsx
+
+Same request, but in csv
+
+https://mesonet.agron.iastate.edu/json/vtec_events_bypoint.py?\
+lat=41.99&lon=-93.61&fmt=csv
+
+"""
 
 import datetime
 import json
 from io import BytesIO, StringIO
 
 import pandas as pd
+from pydantic import Field
 from pyiem.database import get_sqlalchemy_conn
-from pyiem.exceptions import IncompleteWebRequest
 from pyiem.nws.vtec import VTEC_PHENOMENA, VTEC_SIGNIFICANCE, get_ps_string
-from pyiem.util import html_escape
-from pyiem.webutil import iemapp
+from pyiem.webutil import CGIModel, iemapp
+from sqlalchemy import text
 
 EXL = "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"
+
+
+class Schema(CGIModel):
+    """See how we are called."""
+
+    callback: str = Field(None, description="JSONP callback function name")
+    fmt: str = Field(
+        default="json",
+        description="The format to return the data in, either json or csv",
+        pattern="^(json|csv|xlsx)$",
+    )
+    sdate: datetime.date = Field(
+        datetime.date(1986, 1, 1), description="Start Date"
+    )
+    edate: datetime.date = Field(
+        datetime.date(2099, 1, 1), description="End Date"
+    )
+    lat: float = Field(42.5, description="Latitude", ge=-90, le=90)
+    lon: float = Field(-95.5, description="Longitude", ge=-180, le=180)
 
 
 def make_url(row):
@@ -29,13 +81,12 @@ def get_df(lon, lat, sdate, edate):
       wfo (str): 3 character WFO identifier
       year (int): year to run for
     """
-    giswkt = f"POINT({lon} {lat})"
     with get_sqlalchemy_conn("postgis") as conn:
         df = pd.read_sql(
-            """
+            text("""
         WITH myugcs as (
             select gid from ugcs where
-            ST_Contains(geom, ST_SetSRID(ST_GeomFromEWKT(%s),4326))
+            ST_Contains(geom, ST_Point(:lon, :lat, 4326))
         )
         SELECT vtec_year,
         to_char(issue at time zone 'UTC', 'YYYY-MM-DDThh24:MI:SSZ')
@@ -46,10 +97,10 @@ def get_df(lon, lat, sdate, edate):
         to_char(expire at time zone 'UTC', 'YYYY-MM-DD hh24:MI') as expired,
         eventid, phenomena, significance, wfo, hvtec_nwsli, w.ugc
         from warnings w JOIN myugcs u on (w.gid = u.gid) WHERE
-        issue > %s and issue < %s ORDER by issue ASC
-        """,
+        issue > :sdate and issue < :edate ORDER by issue ASC
+        """),
             conn,
-            params=(giswkt, sdate, edate),
+            params={"lon": lon, "lat": lat, "sdate": sdate, "edate": edate},
         )
     if df.empty:
         return df
@@ -97,18 +148,23 @@ def parse_date(val):
     return datetime.datetime.strptime(val, fmt)
 
 
-@iemapp()
+def get_mckey(environ: dict) -> str:
+    """Construct the key."""
+    return (
+        f"/json/vtec_events_bypoint.py?lat={environ['lat']:.2f}&"
+        f"lon={environ['lon']:.2f}&sdate={environ['sdate']:%Y-%m-%d}&"
+        f"edate={environ['edate']:%Y-%m-%d}&fmt={environ['fmt']}"
+    )
+
+
+@iemapp(help=__doc__, schema=Schema, memcachekey=get_mckey, memcacheexpire=300)
 def application(environ, start_response):
     """Answer request."""
-    try:
-        lat = float(environ.get("lat", 42.5))
-        lon = float(environ.get("lon", -95.5))
-        sdate = parse_date(environ.get("sdate", "1986-01-01"))
-        edate = parse_date(environ.get("edate", "2099-01-01"))
-    except Exception as exp:
-        raise IncompleteWebRequest(str(exp)) from exp
-    cb = environ.get("callback", None)
-    fmt = environ.get("fmt", "json")
+    lat = environ["lat"]
+    lon = environ["lon"]
+    sdate = environ["sdate"]
+    edate = environ["edate"]
+    fmt = environ["fmt"]
 
     df = get_df(lon, lat, sdate, edate)
     if fmt == "xlsx":
@@ -139,9 +195,7 @@ def application(environ, start_response):
         return [bio.getvalue().encode("utf-8")]
 
     res = to_json(df)
-    if cb is not None:
-        res = f"{html_escape(cb)}({res})"
 
     headers = [("Content-type", "application/json")]
     start_response("200 OK", headers)
-    return [res.encode("ascii")]
+    return res.encode("ascii")
