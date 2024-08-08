@@ -14,7 +14,8 @@ from pyiem.database import get_sqlalchemy_conn
 from pyiem.exceptions import NoDataFound
 from pyiem.plot import figure, get_cmap
 from pyiem.reference import state_names
-from pyiem.util import get_autoplot_context
+from pyiem.util import get_autoplot_context, utc
+from sqlalchemy import text
 
 PDICT = {
     "CPR": "CORN - PROGRESS, MEASURED IN PCT SEEDBED PREPARED",
@@ -134,6 +135,28 @@ def plot_trendline(fig, ctx, data, year0, lastyear):
     )
 
 
+def fill100(df: pd.DataFrame) -> pd.DataFrame:
+    """Need to account for a NASS quirk."""
+    newrows = []
+    for year, maxrow in (
+        df[["year", "num_value"]].groupby("year").max().iterrows()
+    ):
+        if maxrow["num_value"] > 99 or year == utc().year:
+            continue
+        lastrow = df[df["year"] == year].iloc[-1]
+        newrows.append(
+            {
+                "year": year,
+                "week_ending": lastrow["week_ending"] + pd.Timedelta(days=7),
+                "num_value": 100,
+                "day_of_year": lastrow["day_of_year"] + 7,
+            }
+        )
+    if newrows:
+        df = pd.concat([df, pd.DataFrame(newrows)])
+    return df.sort_values("week_ending", ascending=True)
+
+
 def plotter(fdict):
     """Go"""
     ctx = get_autoplot_context(fdict, get_description())
@@ -141,20 +164,23 @@ def plotter(fdict):
     short_desc = PDICT[ctx["short_desc"].upper()]
     with get_sqlalchemy_conn("coop") as conn:
         df = pd.read_sql(
-            """
+            text("""
             select distinct year, week_ending, num_value,
             extract(doy from week_ending)::int as day_of_year
             from nass_quickstats
-            where short_desc = %s and state_alpha = %s and
+            where short_desc = :sd and state_alpha = :sa and
             num_value is not null and week_ending is not null
             ORDER by week_ending ASC
-        """,
+        """),
             conn,
-            params=(short_desc, state),
+            params={"sd": short_desc, "sa": state},
             index_col=None,
         )
     if df.empty:
         raise NoDataFound("ERROR: No data found!")
+    if short_desc != "FD":
+        # Need to fill out trailing weeks with 100s
+        df = fill100(df)
     df["yeari"] = df["year"] - df["year"].min()
     if ctx["short_desc"] == "FD":
         df["num_value"] = df[["num_value", "year"]].groupby("year").cumsum()
