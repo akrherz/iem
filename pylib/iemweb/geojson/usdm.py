@@ -121,6 +121,9 @@ def application(environ, start_response):
     headers = [("Content-type", "application/vnd.geo+json")]
 
     ts = rectify_date(environ["date"])
+    if ts is None:
+        start_response("404 Not Found", headers)
+        return [b"ERROR: No USDM found for date provided."]
     res = run(ts)
     start_response("200 OK", headers)
     return res
