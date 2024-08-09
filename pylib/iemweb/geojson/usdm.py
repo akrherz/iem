@@ -29,6 +29,7 @@ import json
 
 from pydantic import Field
 from pyiem.database import get_sqlalchemy_conn
+from pyiem.exceptions import IncompleteWebRequest
 from pyiem.reference import ISO8601
 from pyiem.util import utc
 from pyiem.webutil import CGIModel, iemapp
@@ -122,8 +123,7 @@ def application(environ, start_response):
 
     ts = rectify_date(environ["date"])
     if ts is None:
-        start_response("404 Not Found", headers)
-        return [b"ERROR: No USDM found for date provided."]
+        raise IncompleteWebRequest("No USDM data found.")
     res = run(ts)
     start_response("200 OK", headers)
     return res
