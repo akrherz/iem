@@ -8,20 +8,8 @@ $services = array();
 
 $services[] = array(
     "title" => "United States Drought Monitor",
-    "url" => "/geojson/usdm.py?date={date}",
-    "desc" => "The US Drought Monitor valid for the given date.  You do not" .
-        " need to specify the exact date on which the Drought Monitor was issued." .
-        " The service will compute the date on which the Drought Monitor was issued" .
-        " given the provided date.  Not specifying a date will provide the current" .
-        " Drought Monitor. Archive begins on Jan 2000.",
-    "vars" => array(
-        "date" => "Date (optional)"
-    ),
-    "example" => array(
-        "{date}" => "2017-07-18"
-    )
+    "url" => "/geojson/usdm.py?help",
 );
-
 
 $services[] = array(
     "title" => "Single Station Last Observation",
