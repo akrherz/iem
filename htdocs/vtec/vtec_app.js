@@ -623,7 +623,7 @@ function loadTabs() {
             tabs.append('<li><a href="#tall" data-toggle="tab">All</a></li>');
             const stamp = moment.utc(data.report.valid).local().format("DD/h:mm A");
             tabs.append(`<li class="active"><a href="#t0" data-toggle="tab">Issue ${stamp}</a></li>`);
-            const plink = `<a href="/p.php?pid=${data.report.product_id}" target="_new">Permaink to ${data.report.product_id}</a><br />`;
+            const plink = `<a href="/p.php?pid=${data.report.product_id}" target="_new">Permalink to ${data.report.product_id}</a><br />`;
             tabcontent.append(`<div class="tab-pane" id="tall"><pre>${data.report.text}</pre></div>`);
             tabcontent.append(`<div class="tab-pane active" id="t0">${plink}<pre>${data.report.text}</pre></div>`);
             let tidx = 1;

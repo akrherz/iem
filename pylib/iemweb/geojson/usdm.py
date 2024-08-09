@@ -1,13 +1,38 @@
-"""Generate a GeoJSON of US Drought Monitor"""
+""".. title:: US Drought Monitor GeoJSON
+
+Return to `JSON Services </json/>`_
+
+Documentation for /geojson/usdm.py
+----------------------------------
+
+This service returns a GeoJSON representation of the US Drought Monitor
+for a given date.  The date is specified in the `date` parameter, which
+should be in the format of `YYYY-MM-DD`.  If no date is provided, the
+latest valid USDM is returned.
+
+Changelog
+---------
+
+- 2024-08-09: Initial documentation release
+
+Example Usage
+-------------
+
+Fetch the latest USDM:
+
+https://mesonet.agron.iastate.edu/geojson/usdm.py
+
+"""
 
 import datetime
 import json
 
 from pydantic import Field
-from pyiem.database import get_dbconnc
-from pyiem.exceptions import IncompleteWebRequest
+from pyiem.database import get_sqlalchemy_conn
 from pyiem.reference import ISO8601
+from pyiem.util import utc
 from pyiem.webutil import CGIModel, iemapp
+from sqlalchemy import text
 
 
 class Schema(CGIModel):
@@ -27,12 +52,10 @@ def rectify_date(dt):
     back to tuesday
     """
     if dt is None:
-        pgconn, cursor = get_dbconnc("postgis")
-        # Go get the latest USDM stored in the database!
-        cursor.execute("SELECT max(valid) from usdm")
-        res = cursor.fetchone()["max"]
-        cursor.close()
-        pgconn.close()
+        with get_sqlalchemy_conn("postgis") as conn:
+            # Go get the latest USDM stored in the database!
+            res = conn.execute(text("SELECT max(valid) from usdm"))
+            res = res.fetchone()[0]
         return res
 
     offset = (dt.weekday() - 1) % 7
@@ -41,43 +64,44 @@ def rectify_date(dt):
 
 def run(ts):
     """Actually do the hard work of getting the USDM in geojson"""
-    pgconn, cursor = get_dbconnc("postgis")
-
-    # Look for polygons into the future as well as we now have Flood products
-    # with a start time in the future
-    cursor.execute(
-        "SELECT ST_asGeoJson(geom) as geojson, dm, valid "
-        "from usdm WHERE valid = %s ORDER by dm ASC",
-        (ts,),
-    )
-    if cursor.rowcount == 0:
-        # go back one week
-        cursor.execute(
-            "SELECT ST_asGeoJson(geom) as geojson, dm, valid "
-            "from usdm WHERE valid = %s ORDER by dm ASC",
-            (ts - datetime.timedelta(days=7),),
+    utcnow = utc()
+    with get_sqlalchemy_conn("postgis") as conn:
+        res = conn.execute(
+            text(
+                "SELECT ST_asGeoJson(geom) as geojson, dm, valid "
+                "from usdm WHERE valid = :ts ORDER by dm ASC"
+            ),
+            {"ts": ts},
         )
-
-    utcnow = datetime.datetime.utcnow()
-    res = {
-        "type": "FeatureCollection",
-        "features": [],
-        "generation_time": utcnow.strftime(ISO8601),
-        "count": cursor.rowcount,
-    }
-    for row in cursor:
-        res["features"].append(
-            dict(
-                type="Feature",
-                id=row["dm"],
-                properties=dict(
-                    date=row["valid"].strftime("%Y-%m-%d"), dm=row["dm"]
+        if res.rowcount == 0:
+            # go back one week
+            res = conn.execute(
+                text(
+                    "SELECT ST_asGeoJson(geom) as geojson, dm, valid "
+                    "from usdm WHERE valid = :ts ORDER by dm ASC"
                 ),
-                geometry=json.loads(row["geojson"]),
+                {"ts": ts - datetime.timedelta(days=7)},
             )
-        )
-    pgconn.close()
-    return json.dumps(res)
+
+        data = {
+            "type": "FeatureCollection",
+            "features": [],
+            "generation_time": utcnow.strftime(ISO8601),
+            "count": res.rowcount,
+        }
+        for row in res:
+            row = row._asdict()
+            data["features"].append(
+                dict(
+                    type="Feature",
+                    id=row["dm"],
+                    properties=dict(
+                        date=row["valid"].strftime("%Y-%m-%d"), dm=row["dm"]
+                    ),
+                    geometry=json.loads(row["geojson"]),
+                )
+            )
+    return json.dumps(data)
 
 
 def get_mckey(environ):
@@ -97,9 +121,6 @@ def application(environ, start_response):
     headers = [("Content-type", "application/vnd.geo+json")]
 
     ts = rectify_date(environ["date"])
-    if ts is None:
-        raise IncompleteWebRequest("No valid date provided")
-
     res = run(ts)
     start_response("200 OK", headers)
     return res
