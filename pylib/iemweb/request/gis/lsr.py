@@ -12,8 +12,19 @@ Changelog
 - 2024-07-18: Instead of returning a `No results found for query` when no
   database entries are found, we return an empty result.
 - 2024-04-05: Initial documentation release and migration to pydantic.
-- 2024-04-05: The legacy usage of wfo[] for CGI arguments is still supported,
-  but migration to wfo is encouraged.
+- 2024-04-05: The legacy usage of ``wfo[]`` for CGI arguments is still
+  supported, but migration to ``wfo`` is encouraged.
+
+Example Requests
+----------------
+
+Provide all Iowa LSRs for 2024 in KML format and then shapefile format.
+
+https://mesonet.agron.iastate.edu/cgi-bin/request/gis/lsr.py\
+?sts=2024-01-01T00:00Z&ets=2025-01-01T00:00Z&state=IA&fmt=kml
+
+https://mesonet.agron.iastate.edu/cgi-bin/request/gis/lsr.py\
+?sts=2024-01-01T00:00Z&ets=2025-01-01T00:00Z&state=IA&fmt=shp
 
 """
 

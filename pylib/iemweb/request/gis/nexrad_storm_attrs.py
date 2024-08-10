@@ -17,10 +17,19 @@ Changelog
 Example Usage
 -------------
 
-Provide all attributes between 2024-06-11 00:00 and 2024-06-11 23:59 UTC
+Provide all attributes for Aug 10, 2024 UTC.  First as a shapefile, then as
+a CSV file.
 
 https://mesonet.agron.iastate.edu/cgi-bin/request/gis/nexrad_storm_attrs.py?\
-fmt=shp&sts=2024-06-11T00:00:00Z&ets=2024-06-11T23:59:59Z
+fmt=shp&sts=2024-08-10T00:00:00Z&ets=2024-08-11T00:00:00Z
+
+https://mesonet.agron.iastate.edu/cgi-bin/request/gis/nexrad_storm_attrs.py?\
+fmt=csv&sts=2024-08-10T00:00:00Z&ets=2024-08-11T00:00:00Z
+
+Provide all attributes for the Tallahassee, FL radar site for Aug 10, 2024 UTC.
+
+https://mesonet.agron.iastate.edu/cgi-bin/request/gis/nexrad_storm_attrs.py?\
+fmt=shp&sts=2024-08-10T00:00:00Z&ets=2024-08-11T00:00:00Z&radar=TLH
 
 """
 
