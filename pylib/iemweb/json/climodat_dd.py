@@ -1,4 +1,29 @@
-"""Climodat degree days service."""
+""".. title:: Climodat Degree Days service with GFS/NDFD forecast
+
+Return to `JSON Services </json/>`_
+
+Documentation for /json/climodat_dd.py
+--------------------------------------
+
+This service emits some degree day data along with forecast from the most
+recent GFS and NDFD model runs.  Note that the model forecast data does not
+support archived usage.
+
+Changelog
+---------
+
+- 2024-08-10: Initial documentation release and pydantic validation
+
+Example Usage
+-------------
+
+Get the GDD data for Ames, Iowa from 2023-06-01 to 2023-06-10 with a base of
+50 and ceiling of 86 degrees Fahrenheit.
+
+https://mesonet.agron.iastate.edu/json/climodat_dd.py\
+?station=IATAME&sdate=2023-06-01&edate=2023-06-10&gddbase=50&gddceil=86
+
+"""
 
 import datetime
 import json
@@ -6,13 +31,45 @@ import os
 
 import numpy as np
 from metpy.units import units
-from pyiem.database import get_dbconn
+from pydantic import Field
+from pyiem.database import get_sqlalchemy_conn
 from pyiem.exceptions import IncompleteWebRequest
 from pyiem.iemre import find_ij
 from pyiem.meteorology import gdd as calc_gdd
 from pyiem.util import c2f, ncopen
-from pyiem.webutil import iemapp
-from pymemcache.client import Client
+from pyiem.webutil import CGIModel, iemapp
+from sqlalchemy import text
+
+
+class Schema(CGIModel):
+    """See how we are called."""
+
+    callback: str = Field(
+        default=None,
+        description="Optional JSONP callback function name.",
+    )
+    edate: datetime.date = Field(
+        ...,
+        description="The end date for the period of interest.",
+    )
+    gddbase: int = Field(
+        50,
+        description="The base temperature for GDD computation.",
+    )
+    gddceil: int = Field(
+        86,
+        description="The ceiling temperature for GDD computation.",
+    )
+    sdate: datetime.date = Field(
+        ...,
+        description="The start date for the period of interest.",
+    )
+    station: str = Field(
+        ...,
+        description="The station identifier to query.",
+        max_length=6,
+        min_length=6,
+    )
 
 
 def compute_taxis(ncvar):
@@ -42,22 +99,27 @@ def compute(taxis, highs, lows, gddbase, gddceil):
 
 def run(station, sdate, edate, gddbase, gddceil):
     """Do something"""
-    with get_dbconn("coop") as conn:
-        cursor = conn.cursor()
-        cursor.execute(
-            """
+    with get_sqlalchemy_conn("coop") as conn:
+        res = conn.execute(
+            text("""
             WITH obs as (
-                select sum(gddxx(%s, %s, high, low)) from alldata
-                where station = %s and day >= %s and day <= %s)
+                select sum(gddxx(:gddbase, :gddceil, high, low)) from alldata
+                where station = :station and day >= :sdate and day <= :edate)
             select o.sum, st_x(t.geom) as lon, st_y(t.geom) as lat
-            from obs o, stations t WHERE t.id = %s and sum is not null
-            """,
-            (gddbase, gddceil, station, sdate, edate, station),
+            from obs o, stations t WHERE t.id = :station and sum is not null
+            """),
+            {
+                "station": station,
+                "sdate": sdate,
+                "edate": edate,
+                "gddbase": gddbase,
+                "gddceil": gddceil,
+            },
         )
-        if cursor.rowcount == 0:
+        if res.rowcount == 0:
             raise IncompleteWebRequest("No Data Found.")
-        accum, lon, lat = [float(x) for x in cursor.fetchone()]
-    res = {
+        accum, lon, lat = [float(x) for x in res.fetchone()]
+    data = {
         "station": station,
         "sdate": f"{sdate:%Y-%m-%d}",
         "edate": f"{edate:%Y-%m-%d}",
@@ -76,40 +138,37 @@ def run(station, sdate, edate, gddbase, gddceil):
                 lows = c2f(nc.variables["low_tmpk"][:, jdx, idx] - 273.15)
                 taxis = compute_taxis(nc.variables["time"])
                 gdds, total = compute(taxis, highs, lows, gddbase, gddceil)
-                res[model] = gdds
-                res[f"{model}_accum"] = total
-                res[f"{model}_sdate"] = f"{gdds[0]['date']}"
-                res[f"{model}_edate"] = f"{gdds[-1]['date']}"
+                data[model] = gdds
+                data[f"{model}_accum"] = total
+                data[f"{model}_sdate"] = f"{gdds[0]['date']}"
+                data[f"{model}_edate"] = f"{gdds[-1]['date']}"
 
-    return json.dumps(res)
+    return json.dumps(data)
 
 
-@iemapp()
+def get_mckey(environ):
+    """Get the memcache key."""
+    return (
+        f"/json/climodat_dd/{environ['station']}/{environ['sdate']}/"
+        f"{environ['edate']}/{environ['gddbase']}/{environ['gddceil']}"
+    )
+
+
+@iemapp(
+    help=__doc__, schema=Schema, memcachekey=get_mckey, memcacheexpire=32200
+)
 def application(environ, start_response):
     """Answer request."""
-    station = environ.get("station", "IATAME")[:6].upper()
-    today = datetime.date.today() - datetime.timedelta(days=1)
-    sdate = datetime.datetime.strptime(
-        environ.get("sdate", f"{today.year}-01-01"), "%Y-%m-%d"
-    ).date()
-    edate = datetime.datetime.strptime(
-        environ.get("edate", f"{today:%Y-%m-%d}"), "%Y-%m-%d"
-    ).date()
+    station = environ["station"]
+    sdate = environ["sdate"]
+    edate = environ["edate"]
     if edate < sdate:
         sdate, edate = edate, sdate
-    gddbase = int(environ.get("gddbase", 50))
-    gddceil = int(environ.get("gddceil", 86))
+    gddbase = environ["gddbase"]
+    gddceil = environ["gddceil"]
 
-    mckey = f"/json/climodat_dd/{station}/{sdate}/{edate}/{gddbase}/{gddceil}"
-    mc = Client("iem-memcached:11211")
-    res = mc.get(mckey)
-    if res is None:
-        res = run(station, sdate, edate, gddbase, gddceil)
-        mc.set(mckey, res, 86400)
-    else:
-        res = res.decode("utf-8")
-    mc.close()
+    res = run(station, sdate, edate, gddbase, gddceil)
 
     headers = [("Content-type", "application/json")]
     start_response("200 OK", headers)
-    return [res.encode("ascii")]
+    return res.encode("ascii")

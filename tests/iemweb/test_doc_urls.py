@@ -24,7 +24,9 @@ def get_mods_and_urls():
         if doc.find("NODOCTEST") > 0:
             continue
         for line in doc.split("\n"):
-            if not line.startswith("https://mesonet.agron.iastate.edu/"):
+            if not line.strip().startswith(
+                "https://mesonet.agron.iastate.edu/"
+            ):
                 continue
             cgi = "" if line.find("?") == -1 else line.split("?")[1]
             yield mod.application, f"?{cgi}"

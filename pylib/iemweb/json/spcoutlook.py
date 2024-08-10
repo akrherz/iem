@@ -15,6 +15,24 @@ Changelog
 - 2024-07-09: Add csv and excel output formats
 - 2024-07-17: Fix problems with CSV and Excel output, sigh.
 
+Example Usage
+-------------
+
+Get all the day 1 outlooks for Piere, South Dakota.  First in JSON, then
+CSV, and finally Excel.
+
+https://mesonet.agron.iastate.edu/json/spcoutlook.py\
+?lat=44.368&lon=-100.336&day=1
+https://mesonet.agron.iastate.edu/json/spcoutlook.py\
+?lat=44.368&lon=-100.336&day=1&fmt=csv
+https://mesonet.agron.iastate.edu/json/spcoutlook.py\
+?lat=44.368&lon=-100.336&day=1&fmt=excel
+
+Get only the last day 2 outlook for Washington, DC
+
+https://mesonet.agron.iastate.edu/json/spcoutlook.py\
+?lat=38.907&lon=-77.037&day=2&last=1
+
 """
 
 import datetime

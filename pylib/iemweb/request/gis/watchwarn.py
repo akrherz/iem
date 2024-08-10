@@ -38,7 +38,9 @@ significance=W,W,W,W,A,A,A,A
 Return all Tornado Warnings for the Des Moines WFO in shapefile format during
 2023.
 
-    https://mesonet.agron.iastate.edu/cgi-bin/request/gis/watchwarn.py?accept=shapefile&sts=2023-01-01T00:00Z&ets=2024-01-01T00:00Z&wfo[]=DMX&limitps=yes&phenomena=TO&significance=W
+    https://mesonet.agron.iastate.edu/cgi-bin/request/gis/watchwarn.py\
+?accept=shapefile&sts=2023-01-01T00:00Z&ets=2024-01-01T00:00Z&wfo[]=DMX\
+&limitps=yes&phenomena=TO&significance=W
 
 """
 
