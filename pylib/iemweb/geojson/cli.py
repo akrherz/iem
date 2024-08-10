@@ -11,6 +11,26 @@ is based on a parsing of the `CLI` product, which contains daily climate
 summaries for mostly airport weather stations.  This service primarily is used
 to output GeoJSON, but there is a CSV option as well.
 
+Changelog
+---------
+
+- 2024-08-09: Initial documentation update
+
+Example Usage
+-------------
+
+Provide CLI data for 2024-07-01 in GeoJSON format:
+
+https://mesonet.agron.iastate.edu/geojson/cli.py?dt=2024-07-01&fmt=geojson
+
+Same data, but in CSV format:
+
+https://mesonet.agron.iastate.edu/geojson/cli.py?dt=2024-07-01&fmt=csv
+
+Same data, but in CSV format and force download:
+
+https://mesonet.agron.iastate.edu/geojson/cli.py?dt=2024-07-01&fmt=csv&dl=1
+
 """
 
 import datetime

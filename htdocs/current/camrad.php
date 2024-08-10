@@ -87,9 +87,9 @@ $c0->__set("status", MS_ON);
 $db_ts = $ts->format("Y-m-d H:i");
 $year = $ts->format("Y");
 $c0->__set("data", "geom from "
-    . " (select significance, phenomena, geom, random() as oid from sbw_$year "
-    . " WHERE polygon_end > '$db_ts' and polygon_begin <= '$db_ts' and "
-    . " issue <= '$db_ts' "
+    . " (select significance, phenomena, geom, random() as oid from sbw "
+    . " WHERE vtec_year = $year and polygon_end > '$db_ts' and "
+    ." polygon_begin <= '$db_ts' and issue <= '$db_ts' "
     . " and significance = 'W' ORDER by phenomena ASC) as foo "
     . " using unique oid using SRID=4326");
 

@@ -23,21 +23,7 @@ $services[] = array(
 
 $services[] = array(
     "title" => "NCEP Stage IV Hourly Precipitation",
-    "url" => "/json/stage4/{lon}/{lat}/{utc_date}",
-    "desc" => "This service provides a grid point sampling of the NCEP" .
-        " Stage IV product.  The date provided the service is a UTC date. Note" .
-        " that the hourly stage IV data does not receive the level of QC that" .
-        " the 6, 12, and 24 hour summaries do.",
-    "vars" => array(
-        "lat" => "Latitude (deg N)",
-        "lon" => "Longitude (deg E)",
-        "utc_date" => "YYYY-mm-dd",
-    ),
-    "example" => array(
-        "{lat}" => "41.99",
-        "{lon}" => "-95.55",
-        "{utc_date}" => "2017-08-21"
-    )
+    "url" => "/json/stage4.py?help",
 );
 
 $services[] = array(

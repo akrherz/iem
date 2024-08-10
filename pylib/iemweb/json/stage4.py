@@ -1,4 +1,14 @@
-"""JSON service providing hourly Stage IV data for a given point"""
+""".. title:: JSON Service for Stage IV Precipitation Data
+
+Return to `JSON Services </json/>`_
+
+Documentation for /json/stage4.py
+---------------------------------
+
+This emits hourly precipitation data from the Stage IV precipitation dataset
+for a given UTC date.
+
+"""
 
 import datetime
 import json
@@ -79,7 +89,7 @@ def get_mckey(environ):
 
 
 @iemapp(
-    help=__doc__, schema=Schema, memcachekey=get_mckey, memcacheexpire=30000
+    help=__doc__, schema=Schema, memcachekey=get_mckey, memcacheexpire=3600
 )
 def application(environ, start_response):
     """Answer request."""
