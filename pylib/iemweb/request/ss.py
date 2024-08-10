@@ -1,16 +1,18 @@
-"""
-Return a simple CSV of stuart smith data
+""".. title:: Download Stuart Smith Data
 
-Levelogger Reading (ft)
-Barologger Reading
-Temp (C)
-Barologger Air Temp (C)
-Conductivity (micro-S)
-7.20473    ch1_data_p
-2.68857     ch2_data_p
-21.1       ch1_data_t
-18.19    ch2_data_t
-48       ch1_data_c
+Example Requests
+----------------
+
+Provide data for all of 2012 and 2013
+
+https://mesonet.agron.iastate.edu/cgi-bin/request/ss.py\
+?sts=2012-01-01T00:00Z&ets=2014-01-01T00:00Z&opt=gage
+
+Provide data for all of 2012 and 2013 for a specific station
+
+https://mesonet.agron.iastate.edu/cgi-bin/request/ss.py\
+?sts=2012-01-01T00:00Z&ets=2014-01-01T00:00Z&opt=bubbler
+
 """
 
 from io import BytesIO

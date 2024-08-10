@@ -1,5 +1,12 @@
-"""
-Purple Air Quality Sensor
+""".. title:: Download PurpleAir Data
+
+Example Requests
+----------------
+
+Provide data for 10 August 2024
+
+https://mesonet.agron.iastate.edu/cgi-bin/request/purpleair.py?sts=2024-08-10T00:00Z&ets=2024-08-11T00:00Z
+
 """
 
 from io import BytesIO
@@ -47,7 +54,7 @@ def run(environ, start_response):
     return df.to_csv(None, index=False).encode("ascii")
 
 
-@iemapp(default_tz="America/Chicago")
+@iemapp(default_tz="America/Chicago", help=__doc__)
 def application(environ, start_response):
     """Go Main Go"""
     if "sts" not in environ:
