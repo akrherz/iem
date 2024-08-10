@@ -64,7 +64,7 @@ class Schema(CGIModel):
 def gage_run(sts, ets, stations, excel, start_response):
     """run()"""
     if not stations:
-        stations = LOOKUP.keys()
+        stations = list(LOOKUP.keys())
 
     sql = text(
         """select date(valid) as date, to_char(valid, 'HH24:MI:SS') as time,

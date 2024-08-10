@@ -1,4 +1,13 @@
-"""Listing of VTEC emergencies"""
+""".. title:: NWS Warnings with Emergency Significance
+
+Return to `JSON Services </json/>`_
+
+Changelog
+---------
+
+- 2024-08-09: Initial documentation update
+
+"""
 
 import json
 

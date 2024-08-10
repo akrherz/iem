@@ -26,6 +26,7 @@ def run(environ, start_response):
             sql, conn, params={"sts": environ["sts"], "ets": environ["ets"]}
         )
     if environ.get("excel", "no") == "yes":
+        df["valid"] = df["valid"].dt.strftime("%Y-%m-%d %H:%M")
         start_response(
             "200 OK",
             [

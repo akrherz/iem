@@ -1,4 +1,23 @@
-"""Produce geojson of ISUSM data"""
+""".. title:: ISU Ag Climate GeoJSON Service
+
+Return to `JSON Services </json/>`_
+
+This service provides access to the ISU Ag Climate Network data in a GeoJSON
+format.
+
+Example Requests
+----------------
+
+Provide the data valid at 12 UTC on 24 July 2024:
+
+https://mesonet.agron.iastate.edu/geojson/agclimate.py?dt=2024-07-24T12:00Z
+
+Provide the inversion data valid at 12 UTC on 24 July 2024:
+
+https://mesonet.agron.iastate.edu/geojson/agclimate.py\
+?dt=2024-07-24T12:00Z&inversion=1
+
+"""
 
 import datetime
 import json
