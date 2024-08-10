@@ -13,7 +13,7 @@ Examples
 Request air temperature data for Ames IA KAMW for 2022, but only provide data
 at 1 hour intervals.  Provide timestamps in UTC timezone.
 
-  https://mesonet.agron.iastate.edu/cgi-bin/request/asos1min.py?station=KAMW\
+https://mesonet.agron.iastate.edu/cgi-bin/request/asos1min.py?station=AMW\
 &vars=tmpf&sts=2022-01-01T00:00Z&ets=2023-01-01T00:00Z&sample=1hour\
 &what=download&tz=UTC
 
