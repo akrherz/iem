@@ -6,6 +6,17 @@ Documentation for /cgi-bin/request/gis/awc_gairmets.py
 This service emits the archive of IEM's best attempt at processing graphical
 AIRMETs.
 
+Example Requests
+----------------
+
+Provide all AIRMETs for 10 Aug 2024 as a shapefile or a KML file.
+
+https://mesonet.agron.iastate.edu/cgi-bin/request/gis/awc_gairmets.py\
+?sts=2024-08-10T00:00Z&ets=2024-08-11T00:00Z
+
+https://mesonet.agron.iastate.edu/cgi-bin/request/gis/awc_gairmets.py\
+?sts=2024-08-10T00:00Z&ets=2024-08-11T00:00Z&format=kml
+
 """
 
 # Local
@@ -130,9 +141,4 @@ def application(environ, start_response):
     """Do something fun!"""
     if environ["sts"] is None or environ["ets"] is None:
         raise IncompleteWebRequest("Start and End Time are required!")
-    ctx = {
-        "sts": environ["sts"],
-        "ets": environ["ets"],
-        "format": environ["format"],
-    }
-    return [run(ctx, start_response)]
+    return [run(environ, start_response)]

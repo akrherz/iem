@@ -13,6 +13,17 @@ Changelog
 - 2024-07-11: Migration to pydantic validation and added CSV,Excel format
   options.
 
+Example Requests
+----------------
+
+Provide all SIGMETs for 10 Aug 2024 as a shapefile or a KML file.
+
+https://mesonet.agron.iastate.edu/cgi-bin/request/gis/sigmets.py\
+?sts=2024-08-10T00:00Z&ets=2024-08-11T00:00Z
+
+https://mesonet.agron.iastate.edu/cgi-bin/request/gis/sigmets.py\
+?sts=2024-08-10T00:00Z&ets=2024-08-11T00:00Z&format=kml
+
 """
 
 # Local
@@ -157,9 +168,4 @@ def application(environ, start_response):
     """Do something fun!"""
     if environ["sts"] is None or environ["ets"] is None:
         raise IncompleteWebRequest("GET start or end time parameters missing")
-    ctx = {
-        "sts": environ["sts"],
-        "ets": environ["ets"],
-        "format": environ["format"],
-    }
-    return [run(ctx, start_response)]
+    return [run(environ, start_response)]

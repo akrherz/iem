@@ -4,6 +4,7 @@
 /cgi-bin/request/coop.py?network=IACLIMATE&stations=IATAME&year1=2018&month1=1&day1=1&year2=2018&month2=7&day2=28&model=daycent&what=excel&delim=comma&gis=no&scenario_year=2023
 /cgi-bin/request/coop.py?network=IACLIMATE&stations=IATAME&year1=2018&month1=1&day1=1&year2=2018&month2=7&day2=28&model=century&what=excel&delim=comma&gis=no&scenario_year=2023
 /cgi-bin/request/coop.py?network=IACLIMATE&stations=IATAME&year1=2018&month1=1&day1=1&year2=2018&month2=7&day2=28&model=apsim&what=excel&delim=comma&gis=no&scenario_year=2023
+/cgi-bin/request/gis/nexrad_storm_attrs.py?sts=2024-01-01T00:00:00Z&ets=2024-07-31T23:59:59Z&radar=DMX,DVN,FSD,ARX
 /cgi-bin/request/gis/pireps.py?fmt=csv&degrees=3.0&lon=-91.99&lat=41.99&artcc=_ALL&year1=2024&month1=7&day1=31&hour1=0&minute1=0&year2=2024&month2=7&day2=31&hour2=23&minute2=59
 /cgi-bin/request/gis/pireps.py?fmt=shp&degrees=3.0&lon=-91.99&lat=41.99&artcc=_ALL&year1=2024&month1=7&day1=31&hour1=0&minute1=0&year2=2024&month2=7&day2=31&hour2=23&minute2=59
 /cgi-bin/request/gis/pireps.py?fmt=csv&filter=1&degrees=10.0&lon=-91.99&lat=41.99&artcc=_ALL&year1=2024&month1=7&day1=31&hour1=0&minute1=0&year2=2024&month2=7&day2=31&hour2=23&minute2=59
