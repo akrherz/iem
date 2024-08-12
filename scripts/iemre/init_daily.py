@@ -8,8 +8,9 @@ import click
 import geopandas as gpd
 import numpy as np
 from pyiem import iemre
+from pyiem.database import get_sqlalchemy_conn
 from pyiem.grid.zs import CachingZonalStats
-from pyiem.util import get_sqlalchemy_conn, logger, ncopen
+from pyiem.util import logger, ncopen
 
 LOG = logger()
 
@@ -20,6 +21,7 @@ def init_year(ts, domain):
     """
 
     fn = iemre.get_daily_ncname(ts.year, domain)
+    os.makedirs(os.path.dirname(fn), exist_ok=True)
     if os.path.isfile(fn):
         LOG.info("cowardly refusing to overwrite: %s", fn)
         sys.exit()

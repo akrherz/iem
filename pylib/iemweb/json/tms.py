@@ -1,5 +1,25 @@
-"""
-Tile Map service metadata
+""".. title:  IEM Tile Map Service metadata
+
+Return to `JSON Services </json/>`_
+
+Documentation for /json/tms.json
+--------------------------------
+
+This service provides a JSON response that describes the Tile Map Services
+(TMS) available from the IEM.
+
+Changelog
+---------
+
+- 2024-08-12: Initial documentation update.
+
+Example Usage
+-------------
+
+Nothing much for configuration, just call the service.
+
+https://mesonet.agron.iastate.edu/json/tms.json
+
 """
 
 import datetime

@@ -20,6 +20,7 @@ def init_year(ts: datetime.datetime, domain: str) -> None:
     """
     dom = iemre.DOMAINS[domain]
     fn = iemre.get_hourly_ncname(ts.year, domain)
+    os.makedirs(os.path.dirname(fn), exist_ok=True)
     if os.path.isfile(fn):
         LOG.info("Cowardly refusing to overwrite: %s", fn)
         return
