@@ -12,12 +12,12 @@ from pyiem.util import logger, ncopen
 LOG = logger()
 
 
-def init_year(ts):
+def init_year(ts: datetime.datetime):
     """
     Create a new NetCDF file for a year of our specification!
     """
 
-    fn = "/mesonet/data/prism/%s_daily.nc" % (ts.year,)
+    fn = f"/mesonet/data/prism/{ts:%Y}_daily.nc"
     if os.path.isfile(fn):
         LOG.info("Cowardly refusing to overwrite file %s.", fn)
         sys.exit()

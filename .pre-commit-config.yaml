@@ -2,7 +2,7 @@ ci:
   autoupdate_schedule: quarterly
 repos:
   - repo: https://github.com/pre-commit/mirrors-eslint
-    rev: 'v9.8.0'
+    rev: 'v9.9.0'
     hooks:
       - id: eslint
   - repo: https://github.com/astral-sh/ruff-pre-commit
