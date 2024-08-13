@@ -60,7 +60,7 @@ if (strlen($date) > 0) {
 <h3>COOP obs listed by date</h3>
 (<i>Click on the NWSLI to view all obs from one station.</i>)
  
- <p>Enter Date: <input type="text" size="11" maxlength="10" name="date" value="{$date}">
+ <p>Enter Date: <input type="date" name="date" value="{$date}">
 EOF;
 }
 
@@ -226,4 +226,4 @@ function hiderows(){
 }
 </script>
 EOF;
-$t->render('single.phtml');
+$t->render('full.phtml');
