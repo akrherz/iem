@@ -162,7 +162,7 @@ def plotter(fdict):
     if ptype in ["gdd", "rain"]:
         ax.plot(
             thisyear.index.values,
-            thisyear[ptype + "cum"],
+            thisyear[f"{ptype}cum"],
             zorder=4,
             color="b",
             lw=2,

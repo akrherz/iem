@@ -18,6 +18,8 @@ from pyiem.util import get_autoplot_context
 from scipy.stats import norm
 from sqlalchemy import text
 
+from iemweb.autoplot import ARG_STATION
+
 PDICT = {
     "state": "Plot for a Specific State",
     "station": "Plot for a Specific Station",
@@ -36,13 +38,7 @@ def get_description():
             "options": PDICT,
         },
         dict(type="state", name="state", default="IA", label="Which state?"),
-        {
-            "type": "station",
-            "default": "IATAME",
-            "name": "station",
-            "network": "IACLIMATE",
-            "label": "Select Station:",
-        },
+        ARG_STATION,
         dict(type="month", name="month", default="10", label="Select Month:"),
         dict(type="day", name="day", default="7", label="Select Day:"),
     ]

@@ -17,7 +17,7 @@ from pyiem.plot import figure, get_cmap
 from pyiem.util import get_autoplot_context
 from sqlalchemy import text
 
-from iemweb.autoplot import get_monofont
+from iemweb.autoplot import ARG_STATION, get_monofont
 
 MDICT = {
     "all": "No Month/Time Limit",
@@ -44,13 +44,7 @@ def get_description():
     """Return a dict describing how to call this plotter"""
     desc = {"description": __doc__, "data": True}
     desc["arguments"] = [
-        dict(
-            type="station",
-            name="station",
-            default="IATAME",
-            label="Select Station:",
-            network="IACLIMATE",
-        ),
+        ARG_STATION,
         dict(
             type="int",
             name="binsize",

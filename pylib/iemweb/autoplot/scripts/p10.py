@@ -16,6 +16,8 @@ from pyiem.plot import figure_axes
 from pyiem.util import get_autoplot_context
 from scipy import stats
 
+from iemweb.autoplot import ARG_STATION
+
 PDICT = {
     "above": "First Spring/Last Fall Temperature Above (>=) Threshold",
     "above2": "Last Spring/First Fall Temperature Above (>=) Threshold",
@@ -33,13 +35,7 @@ def get_description():
     """Return a dict describing how to call this plotter"""
     desc = {"description": __doc__, "data": True, "report": True}
     desc["arguments"] = [
-        dict(
-            type="station",
-            name="station",
-            default="IATAME",
-            label="Select Station:",
-            network="IACLIMATE",
-        ),
+        ARG_STATION,
         dict(
             type="select",
             name="direction",
