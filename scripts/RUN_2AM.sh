@@ -45,11 +45,13 @@ if [ $DD -eq "09" ]
          python download_narr.py $(date --date '13 days ago' +'%Y %m') &
 fi
 # run every Monday
-if [ $DD -eq "1" ]
+if [ $DOW -eq "1" ]
     then
         python fetch_power.py --year=$(date --date '7 days ago' +'%Y') --domain=
         python fetch_power.py --year=$(date --date '7 days ago' +'%Y') --domain=china
         python fetch_power.py --year=$(date --date '7 days ago' +'%Y') --domain=europe
+        cd ../climodat
+        python power_extract.py &
 fi
 
 cd ../cache

@@ -32,6 +32,7 @@ PDICT = {
     "era5land_soilm1m_sw": "ERA5-Land 0-39inch Soil Water Depth (inch)",
     "era5land_soilt4_avg": "ERA5-Land 0-7cm Soil Temperature (F)",
     "era5land_srad": "ERA5-Land Solar Radiation (MJ/m2)",
+    "power_srad": "NASA POWER Solar Radiation (MJ/m2)",
 }
 OPTDICT = {
     "diff": "Absolute Difference",
