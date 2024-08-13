@@ -5,6 +5,18 @@ Return to `JSON Services </json/>`_
 This service emits station metadata for those stations that have recently
 received updates by the IEM.  There is a 1000 result limit to what is returned.
 
+Changelog
+---------
+
+- 2024-08-12: Initial documentation update
+
+Example Requests
+----------------
+
+Return the metadata for stations with a metadata change done today.
+
+https://mesonet.agron.iastate.edu/json/stations.py
+
 """
 
 import datetime

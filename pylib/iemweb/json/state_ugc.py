@@ -6,7 +6,20 @@ Documentation for /json/state_ugc.json
 --------------------------------------
 
 This service returns a simple listing of NWS UGC codes associated with the
-given state code.
+given state code.  Presently, this only returns those codes that are presently
+valid.
+
+Changelog
+---------
+
+- 2024-08-12: Initial documentation update
+
+Example Requests
+----------------
+
+Return any zone codes associated with Lake Michigan (LM).
+
+https://mesonet.agron.iastate.edu/json/state_ugc.py?state=LM
 
 """
 

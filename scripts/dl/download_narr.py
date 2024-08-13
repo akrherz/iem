@@ -13,7 +13,7 @@ import sys
 
 import pygrib
 import requests
-from pyiem.util import exponential_backoff, get_properties, logger
+from pyiem.util import exponential_backoff, logger
 
 LOG = logger()
 TMP = "/mesonet/tmp"
@@ -49,21 +49,6 @@ def process(tarfn):
 
 def fetch_rda(year, month):
     """Get data please from RDA"""
-    props = get_properties()
-    req = requests.post(
-        "https://rda.ucar.edu/cgi-bin/login",
-        dict(
-            email=props["rda.user"],
-            passwd=props["rda.password"],
-            action="login",
-        ),
-        timeout=30,
-    )
-    if req.status_code != 200:
-        LOG.info("RDA login failed with code %s", req.status_code)
-        return
-    cookies = req.cookies
-
     days = ["0109", "1019"]
     lastday = (
         datetime.date(year, month, 1) + datetime.timedelta(days=35)
@@ -74,9 +59,7 @@ def fetch_rda(year, month):
             "https://data.rda.ucar.edu/ds608.0/3HRLY/"
             f"{year}/NARRsfc_{year}{month:02.0f}_{day}.tar"
         )
-        req = exponential_backoff(
-            requests.get, uri, timeout=30, cookies=cookies, stream=True
-        )
+        req = exponential_backoff(requests.get, uri, timeout=30, stream=True)
         tmpfn = f"{TMP}/narr.tar"
         with open(tmpfn, "wb") as fh:
             for chunk in req.iter_content(chunk_size=1024):

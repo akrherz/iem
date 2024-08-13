@@ -11,6 +11,24 @@ Changelog
 - 2024-07-06: The `sdate` and `edate` parameters were rectified to be in the
 format of `YYYY-mm-dd` instead of `YYYY/mm/dd`.
 
+Example Requests
+----------------
+
+Provide SPS metadata for those with a polygon that covered Newport, NC.
+
+https://mesonet.agron.iastate.edu/json/sps_by_point.py?lat=34.77&lon=-76.88
+
+Return the same, in Excel format this time and only those valid at 6z on
+10 Aug 2024.
+
+https://mesonet.agron.iastate.edu/json/sps_by_point.py\
+?lat=34.77&lon=-76.88&valid=2024-08-10T06:00:00Z&fmt=xlsx
+
+The same, but CSV this time
+
+https://mesonet.agron.iastate.edu/json/sps_by_point.py\
+?lat=34.77&lon=-76.88&valid=2024-08-10T06:00:00Z&fmt=csv
+
 """
 
 import datetime
@@ -38,8 +56,12 @@ class Schema(CGIModel):
         pattern="^(json|csv|xlsx)$",
         description="The format of the output, either json, csv, or xlsx",
     )
-    lat: float = Field(default=41.99, description="Latitude of point")
-    lon: float = Field(default=-92.0, description="Longitude of point")
+    lat: float = Field(
+        default=41.99, description="Latitude of point", ge=-90, le=90
+    )
+    lon: float = Field(
+        default=-92.0, description="Longitude of point", ge=-180, le=180
+    )
     sdate: datetime.date = Field(
         default=datetime.date(2002, 1, 1),
         description="Start date of search",
