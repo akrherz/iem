@@ -39,6 +39,7 @@
 /json/vtec_events_byugc.json?ugc=IAC169&fmt=json
 /request/maxcsv.py?q=monthlysummary_KCID_2024_1
 /request/maxcsv.py?q=moonphase_-95.44_41.99
+/request/maxcsv.py?q=moon_-95.44_41.99
 /request/maxcsv.py?q=uvi
 /request/maxcsv.py?q=lsrsnowfall_ia
 /request/maxcsv.py?q=lsrsnowfall

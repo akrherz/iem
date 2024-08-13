@@ -9,10 +9,11 @@ see akrherz/iem#104
 """
 
 import datetime
-import sys
 
+import click
 import pandas as pd
-from pyiem.util import get_dbconn, get_sqlalchemy_conn, logger, utc
+from pyiem.database import get_dbconn, get_sqlalchemy_conn
+from pyiem.util import logger, utc
 
 LOG = logger()
 
@@ -30,9 +31,13 @@ def arbpick(asosdb, year, station, gdf):
     asosdb.commit()
 
 
-def main(argv):
+@click.command()
+@click.option(
+    "--date", "dt", type=click.DateTime(), required=True, help="UTC Date"
+)
+def main(dt: datetime.datetime):
     """Go."""
-    sts = utc(*[int(v) for v in argv[1:4]])
+    sts = utc(dt.year, dt.month, dt.day)
     ets = sts + datetime.timedelta(hours=24)
     asosdb = get_dbconn("asos")
     with get_sqlalchemy_conn("asos") as conn:
@@ -70,4 +75,4 @@ def main(argv):
 
 
 if __name__ == "__main__":
-    main(sys.argv)
+    main()

@@ -96,12 +96,14 @@ def get_description():
     return desc
 
 
-def get_ugc_name(ugc):
+def get_ugc_name(ugc, defaultwfo):
     """Return the WFO and county name."""
     cursor = get_dbconn("postgis").cursor()
     cursor.execute(
         "SELECT name, wfo from ugcs where ugc = %s and end_ts is null", (ugc,)
     )
+    if cursor.rowcount == 0:
+        return "Unknown", defaultwfo
     return cursor.fetchone()
 
 
@@ -131,7 +133,7 @@ def plotter(fdict):
     elif opt == "ugc":
         wfo_limiter = " and ugc = :ugc "
         params["ugc"] = ctx["ugc"]
-        name, wfo = get_ugc_name(ctx["ugc"])
+        name, wfo = get_ugc_name(ctx["ugc"], station)
         wfo = wfo[:3]  # some have multiple WFOs
         title1 = (
             f"NWS {ctx['_nt'].sts[wfo]['name']} Issued for [{ctx['ugc']}] "

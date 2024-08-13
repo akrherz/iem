@@ -15,7 +15,7 @@ cd ../iemre
 python daily_analysis.py --date=$(date --date '1 day ago' +'%Y-%m-%d')
 
 cd ../asos
-python adjust_report_type.py $(date -u --date '1 day ago' +'%Y %m %d')
+python adjust_report_type.py --date=$(date -u --date '1 day ago' +'%Y-%m-%d')
 
 cd ../smos
 python plot.py 12

@@ -18,13 +18,9 @@ from io import StringIO
 import numpy as np
 import pandas as pd
 from metpy.units import units
+from pyiem.database import get_dbconn, get_sqlalchemy_conn
 from pyiem.meteorology import gdd
-from pyiem.util import (
-    convert_value,
-    get_dbconn,
-    get_sqlalchemy_conn,
-    logger,
-)
+from pyiem.util import convert_value, logger
 
 LOG = logger()
 XREF = {

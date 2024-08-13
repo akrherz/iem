@@ -1,4 +1,4 @@
-"""Download and archive 1000 ft reflectivity from the NCEP HRRR"""
+"""Download and archive 1km reflectivity from the NCEP HRRR"""
 
 import logging
 import os

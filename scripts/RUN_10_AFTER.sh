@@ -149,3 +149,7 @@ fi
 cd ../iemre
 python hourly_analysis.py --valid=$(date -u --date '1 days ago' +'%Y-%m-%dT%H:00:00')
 python hourly_analysis.py --valid=$(date -u --date '9 days ago' +'%Y-%m-%dT%H:00:00')
+python hourly_analysis.py --valid=$(date -u --date '1 days ago' +'%Y-%m-%dT%H:00:00') --domain=europe
+python hourly_analysis.py --valid=$(date -u --date '1 days ago' +'%Y-%m-%dT%H:00:00') --domain=china
+python hourly_analysis.py --valid=$(date -u --date '9 days ago' +'%Y-%m-%dT%H:00:00') --domain=europe
+python hourly_analysis.py --valid=$(date -u --date '9 days ago' +'%Y-%m-%dT%H:00:00') --domain=china
