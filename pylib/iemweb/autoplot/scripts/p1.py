@@ -21,6 +21,8 @@ from pyiem.plot import figure_axes
 from pyiem.util import get_autoplot_context
 from scipy import stats
 
+from iemweb.autoplot import ARG_STATION
+
 PDICT = {
     "total_precip": "Total Precipitation",
     "avg_temp": "Average Temperature",
@@ -74,13 +76,7 @@ def get_description():
     today = datetime.date.today()
     yesterday = today - datetime.timedelta(days=60)
     desc["arguments"] = [
-        dict(
-            type="station",
-            name="station",
-            default="IA0000",
-            label="Select Station",
-            network="IACLIMATE",
-        ),
+        ARG_STATION,
         dict(
             type="int",
             name="threshold",

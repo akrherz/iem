@@ -15,6 +15,8 @@ from pyiem.exceptions import NoDataFound
 from pyiem.plot import figure
 from pyiem.util import get_autoplot_context
 
+from iemweb.autoplot import ARG_STATION
+
 PDICT = {"monthly": "Plot Single Month", "yearly": "Plot Entire Year"}
 
 
@@ -24,13 +26,7 @@ def get_description():
     desc["defaults"] = {"_r": "96"}
     today = datetime.date.today()
     desc["arguments"] = [
-        dict(
-            type="station",
-            name="station",
-            default="IATAME",
-            label="Select Station:",
-            network="IACLIMATE",
-        ),
+        ARG_STATION,
         dict(
             type="select",
             name="opt",

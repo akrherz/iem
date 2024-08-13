@@ -9,3 +9,6 @@ curl -o /mesonet/ldmdata/gis/images/4326/USCOMP/n0q_0.json \
 https://mesonet.agron.iastate.edu/data/gis/images/4326/USCOMP/n0q_0.json
 curl -o /mesonet/ldmdata/gis/images/4326/USCOMP/n0r_0.json \
 https://mesonet.agron.iastate.edu/data/gis/images/4326/USCOMP/n0r_0.json
+
+curl -o /mesonet/share/pickup/yieldfx/ames.met \
+https://mesonet.agron.iastate.edu/pickup/yieldfx/ames.met

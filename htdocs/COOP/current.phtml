@@ -1,7 +1,4 @@
 <?php
-/*
- * NWS COOP currents lister
- */
 require_once "../../config/settings.inc.php";
 define("IEM_APPID", 41);
 require_once "../../include/network.php";
@@ -35,8 +32,7 @@ function make_row($dict, $oddrow)
     $s .= ">";
 
     $sitesurl = sprintf(
-        "%s/sites/site.php?station=%s&network=%s",
-        BASEURL,
+        "/sites/site.php?station=%s&network=%s",
         $dict["sid"],
         $dict["network"]
     );
@@ -148,15 +144,6 @@ function get_sortdir($baseurl, $column, $sortCol, $sortDir)
 }
 
 $t->title = "NWS COOP Current Sortables";
-$t->headextra = <<<EOF
- <script language="JavaScript" type="text/javascript">
-    <!--//BEGIN Script
-    function new_window(url) {
-     link = window.open(url,"_new","toolbar=0,location=0,directories=0,status=0,menubar=no,scrollbars=yes,resizable=yes,width=800,height=600");
-    }
-    //END Script-->
-    </script>
-EOF;
 
 $cols = array(
     "ts" => "Valid", "county" => "County",
@@ -221,6 +208,13 @@ Option 2: <strong>View by WFO:</strong> {$wselect}
 <input type="submit" value="Go!">
 </form>
 
+<form method="GET" action="cat.phtml" name="cat">
+<input type="hidden" name="network" value="{$network}">
+Option 3: <strong>COOP Reports for Date:</strong>
+<input type="date" name="date">
+<input type="submit" value="Go!">
+</form>
+
 <p>Sorted by: <strong>{$cols[$sortcol]} {$sorts[$sortdir]}</strong>. 
 Times are presented in the local time of the site. Click on the identifier to
 get all daily observations for the site.  Click on the site name to get more
@@ -231,12 +225,13 @@ again will reverse the sort.
 <table class="table table-striped table-condensed table-bordered">
 <thead>
 <tr>
-  <th rowspan=2>Add:</th><th rowspan=2>Raw:</th>
-  <th rowspan=2><a href="{$one}">SiteID:</a></th>
-  <th rowspan=2><a href="{$two}">Station Name:</a></th>
-  <th rowspan=2><a href="{$three}">County:</a></th>
-  <th rowspan=2><a href="{$four}">Valid:</a></th>
-  <th colspan=3>Temperatures [F]</th>
+  <th rowspan="2">Add:</th>
+  <th rowspan="2">Source Text:</th>
+  <th rowspan="2"><a href="{$one}">SiteID:</a></th>
+  <th rowspan="2"><a href="{$two}">Station Name:</a></th>
+  <th rowspan="2"><a href="{$three}">County:</a></th>
+  <th rowspan="2"><a href="{$four}">Valid:</a></th>
+  <th colspan="3">Temperatures [F]</th>
   <th colspan="5">Hydro</th></tr>
 
 <tr>
