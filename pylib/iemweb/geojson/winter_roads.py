@@ -1,4 +1,15 @@
-"""Generate a GeoJSON of current storm based warnings"""
+""".. title:: Winter Road Conditions GeoJSON
+
+Return to `API Services </json/#json>`_
+
+Example Requests
+----------------
+
+Get the current winter road conditions:
+
+https://mesonet.agron.iastate.edu/geojson/winter_roads.geojson
+
+"""
 
 import json
 

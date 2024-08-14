@@ -1,4 +1,8 @@
-"""Watch by county, a one-off"""
+"""..title :: Watch By County Shapefile Export
+
+Return to `API Services </api/#cgi>`_
+
+"""
 
 import tempfile
 import zipfile
@@ -93,8 +97,9 @@ def application(environ, start_response):
                 as utcexpire,
             min(to_char(issue at time zone 'UTC', 'YYYYMMDDHH24MI'))
                 as utcissue
-            from warnings_{ts.year} w JOIN ugcs u on (u.gid = w.gid)
-            WHERE significance = 'A' and phenomena IN ('TO','SV')
+            from warnings w JOIN ugcs u on (u.gid = w.gid)
+            WHERE vtec_year = {ts.year} and
+            significance = 'A' and phenomena IN ('TO','SV')
             and issue > '{tt}'::timestamp -'3 days':: interval
             and issue <= '{tt}' and
             expire > '{tt}' {etnLimiter}

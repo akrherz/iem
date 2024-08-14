@@ -278,8 +278,12 @@
             "title": "Services",
             "subs": [
                 {
-                    "title": "API",
+                    "title": "API Mainpage",
                     "url": "/api/"
+                },
+                {
+                    "title": "CGI / Bulk Data",
+                    "url": "/api/#cgi"
                 },
                 {
                     "title": "Gibson Ridge Placefiles",
@@ -291,7 +295,7 @@
                 },
                 {
                     "title": "JSON Webservices",
-                    "url": "/json/"
+                    "url": "/api/#json"
                 },
                 {
                     "title": "LDM",
