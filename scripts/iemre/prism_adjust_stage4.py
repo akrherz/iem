@@ -2,6 +2,7 @@
 
 Take the PRISM data, valid at 12z and bias correct the hourly stage IV data
 
+RUN_NOON.sh for 1 day ago
 """
 
 import datetime

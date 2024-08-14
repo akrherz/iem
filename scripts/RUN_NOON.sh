@@ -19,6 +19,8 @@ python ingest_prism.py --date=$(date --date '1 days ago' +'%Y-%m-%d')
 cd ../iemre
 # adjusts stage IV hourly file to PRISM reality
 python prism_adjust_stage4.py --date=$(date --date '1 days ago' +'%Y-%m-%d')
+# Prepare for daily analysis update for t-10 days
+python prism_adjust_stage4.py --date=$(date --date '9 days ago' +'%Y-%m-%d')
 # Copies updated stage IV hourly into IEMRE hourly
 python precip_ingest.py --valid12z=$(date --date '1 days ago' +'%Y-%m-%dT12:00:00')
 
@@ -40,6 +42,7 @@ python ingest_nohrsc.py --date=$(date --date '2 days ago' +'%Y-%m-%d')
 python daily_analysis.py --date=$(date --date '2 days ago' +'%Y-%m-%d') --domain=
 python daily_analysis.py --date=$(date --date '2 days ago' +'%Y-%m-%d') --domain=china
 python daily_analysis.py --date=$(date --date '2 days ago' +'%Y-%m-%d') --domain=europe
+# NOTE: Careful to align this date with DEP reprocessing at 8 PM
 python ingest_nohrsc.py --date=$(date --date '10 days ago' +'%Y-%m-%d')
 # Updated soil temperature data from ERA5
 python daily_analysis.py --date=$(date --date '10 days ago' +'%Y-%m-%d') --domain=
