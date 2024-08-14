@@ -6,10 +6,8 @@ import os
 import click
 import numpy as np
 import pygrib
-from pyiem.util import logger, ncopen
+from pyiem.util import archive_fetch, logger, ncopen
 
-# This exists on dev laptop :/
-TEMPLATE_FN = "/mesonet/ARCHIVE/data/2014/09/09/stage4/ST4.2014090900.01h.grib"
 BASEDIR = "/mesonet/data/stage4"
 LOG = logger()
 
@@ -19,11 +17,13 @@ def init_year(ts):
     Create a new NetCDF file for a year of our specification!
     """
     # Load up the example grib file to base our file on
-    grbs = pygrib.open(TEMPLATE_FN)
+    with archive_fetch("2014/09/09/stage4/ST4.2014090900.01h.grib") as fn:
+        grbs = pygrib.open(fn)
     grb = grbs[1]
     # grid shape is y, x
     lats, lons = grb.latlons()
 
+    os.makedirs(BASEDIR, exist_ok=True)
     fp = f"{BASEDIR}/{ts:%Y}_stage4_hourly.nc"
     if os.path.isfile(fp):
         LOG.warning("Cowardly refusing to overwrite %s", fp)

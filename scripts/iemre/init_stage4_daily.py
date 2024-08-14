@@ -11,17 +11,17 @@ LOG = logger()
 BASEDIR = "/mesonet/data/stage4"
 
 
-def init_year(ts):
+def init_year(ts: datetime.datetime):
     """Create a new NetCDF file for a year of our specification!"""
     # Get existing stageIV netcdf file to copy its cordinates from
-    tmplnc = ncopen(f"{BASEDIR}/2020_stage4_hourly.nc", "r")
+    tmplnc = ncopen(f"{BASEDIR}/{ts.year}_stage4_hourly.nc", "r")
 
     fn = f"{BASEDIR}/{ts.year}_stage4_daily.nc"
     if os.path.isfile(fn):
         LOG.info("Cowardly refusing to overwrite %s", fn)
         return
     nc = ncopen(fn, "w")
-    nc.title = "StageIV 12z-12z Totals for %s" % (ts.year,)
+    nc.title = f"StageIV 12z-12z Totals for {ts.year}"
     nc.platform = "Grided"
     nc.description = "StageIV"
     nc.institution = "Iowa State University, Ames, IA, USA"

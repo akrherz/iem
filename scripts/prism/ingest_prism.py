@@ -1,6 +1,7 @@
 """Ingest the PRISM data into a local yearly netCDF file
 
-Called from RUN_NOON.sh and RUN_2AM.sh
+RUN_2AM.sh for 7,60,365 days ago
+RUN_NOON.sh for 1 day ago
 """
 
 import datetime
