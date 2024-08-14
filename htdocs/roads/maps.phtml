@@ -7,7 +7,7 @@ require_once "../../include/database.inc.php";
 require_once "../../include/myview.php";
 $t = new MyView();
 
-$OL = '6.2.1';
+$OL = '9.2.4';
 $con = iemdb("postgis");
 $sql = "SELECT max(valid) as valid from roads_current";
 $rs = pg_query($con, $sql);
@@ -34,7 +34,7 @@ $t->content = <<<EOF
 </ol>
 <style type="text/css">
 #map {
-	width: 100%;
+    width: 100%;
     height: 600px;
     border: 2px solid black;
 }
@@ -42,7 +42,7 @@ $t->content = <<<EOF
 <h3>Interactive Data Map</h3>
 <div id="map"></div>
 
-<p>This map utilizes various <a href="/json/">GeoJSON Services</a> and
+<p>This map utilizes various <a href="/api/#json">GeoJSON Services</a> and
 <a href="/ogc/">OGC WebMap Services</a> provided by the IEM.</p>
 EOF;
 $t->render('single.phtml');

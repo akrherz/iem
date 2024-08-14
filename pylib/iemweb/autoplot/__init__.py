@@ -94,7 +94,9 @@ daily_opts = [
     {"id": 96, "label": "Bias of 24 Hour Precip Computation by Hour"},
     {
         "id": 82,
-        "label": "Calendar of Daily Observations from Automated Stations",
+        "label": (
+            "Calendar of Daily Observations from Automated or Climate Sites"
+        ),
     },
     {"id": 218, "label": "Daily NWS CLImate Report Infographic"},
     {"id": 180, "label": "Daily Temperature/Precip/Snowfall Climatology"},

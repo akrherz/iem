@@ -16,6 +16,8 @@ from pyiem.exceptions import NoDataFound
 from pyiem.plot import figure_axes
 from pyiem.util import get_autoplot_context
 
+from iemweb.autoplot import ARG_STATION
+
 PDICT = {
     "manual": "Select comparison month manually",
     "high": "Based on effective date, find warmest same month on record",
@@ -29,13 +31,7 @@ def get_description():
     today = datetime.date.today()
     lastmonth = (today.replace(day=1)) - datetime.timedelta(days=25)
     desc["arguments"] = [
-        dict(
-            type="station",
-            name="station",
-            default="IATAME",
-            network="IACLIMATE",
-            label="Select Station:",
-        ),
+        ARG_STATION,
         {
             "type": "select",
             "name": "compare",

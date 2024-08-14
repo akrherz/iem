@@ -1,11 +1,23 @@
 """.. title:: NWS CF6 JSON Service
 
-Return to `JSON Services</json/>`_
+Return to `API Services </json/#json>`_
 
 Documentation for /json/cf6.py
 ------------------------------
 
 This service emits atomic parsed data from the NWS CF6 product.
+
+Changelog
+---------
+
+- 2024-08-14: Documentation update
+
+Example Requests
+----------------
+
+Get all daily climate data for Des Moines, IA during 2024
+
+https://mesonet.agron.iastate.edu/json/cf6.py?station=KDSM&year=2024
 
 """
 

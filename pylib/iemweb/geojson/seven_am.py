@@ -1,4 +1,20 @@
-"""Generate a GeoJSON of 7 AM precip data"""
+""".. title:: Generate GeoJSON of 7 AM reports
+
+Return to `API Services </json/#json>`_
+
+Changelog
+---------
+
+- 2024-08-14: Documentation Update
+
+Example Requests
+----------------
+
+Get reports for 7 AM on 1 July 2024
+
+https://mesonet.agron.iastate.edu/geojson/7am.py?dt=2024-07-01
+
+"""
 
 import datetime
 import json

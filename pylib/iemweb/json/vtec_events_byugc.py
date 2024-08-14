@@ -1,9 +1,9 @@
 """.. title:: VTEC Events by UGC
 
-Return to `JSON Services</json/>`_.
+Return to `API Services </api/#json>`_
 
-Documentation for /json/vtec_events_byugc.json
-----------------------------------------------
+Documentation for /json/vtec_events_byugc.py
+--------------------------------------------
 
 This metadata service returns VTEC events for the given UGC.
 
@@ -11,6 +11,24 @@ Changelog
 ---------
 
 - 2024-07-18: Initial documentation release and migration to pydantic.
+
+Example Requests
+----------------
+
+Get all events during 2024 for Story County, Iowa IAC169
+
+https://mesonet.agron.iastate.edu/json/vtec_events_byugc.py\
+?ugc=IAC169&sdate=2024-01-01&edate=2024-12-31
+
+Same request, but in CSV format
+
+https://mesonet.agron.iastate.edu/json/vtec_events_byugc.py\
+?ugc=IAC169&sdate=2024-01-01&edate=2024-12-31&fmt=csv
+
+Same request, but in Excel format
+
+https://mesonet.agron.iastate.edu/json/vtec_events_byugc.py\
+?ugc=IAC169&sdate=2024-01-01&edate=2024-12-31&fmt=xlsx
 
 """
 

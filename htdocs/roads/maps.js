@@ -68,11 +68,4 @@ $(document).ready(() => {
     const layerSwitcher = new ol.control.LayerSwitcher();
     map.addControl(layerSwitcher);
 
-    //TODO add hover support
-    //TODO add warnings overlay
-    //TODO add pavementtemps
-    //TODO add airtemps
-    //TODO add nexrad
-    //TODO add refreshing of layers
-
 }); // End of onready

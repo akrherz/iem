@@ -1,12 +1,24 @@
 """.. title:: NWS Daily CLImate Data
 
-Return to `JSON Services </json/>`_.
+Return to `API Services </api/#json>`_
 
-Documentation for /json/cli.json
---------------------------------
+Documentation for /json/cli.py
+------------------------------
 
 This service returns atomic daily climate data found in the NWS CLI text
 products.
+
+Changelog
+---------
+
+- 2024-08-14: Documentation update
+
+Example Requests
+----------------
+
+Get all daily climate data for Des Moines, IA during 2024
+
+https://mesonet.agron.iastate.edu/json/cli.py?station=KDSM&year=2024
 
 """
 
