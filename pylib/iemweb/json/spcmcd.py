@@ -1,9 +1,22 @@
 """.. title:: SPC MCD Service
 
+Return to `JSON Services </json/>`_
+
 Changelog
 ---------
 
 - 2024-07-09: Add csv and excel output formats
+
+Example Requests
+----------------
+
+Return MCDs issued for Ames, IA in JSON, then CSV, then Excel format.
+
+https://mesonet.agron.iastate.edu/json/spcmcd.py?lat=42.0&lon=-95.0
+
+https://mesonet.agron.iastate.edu/json/spcmcd.py?lat=42.0&lon=-95.0&fmt=csv
+
+https://mesonet.agron.iastate.edu/json/spcmcd.py?lat=42.0&lon=-95.0&fmt=excel
 
 """
 
@@ -29,10 +42,16 @@ class Schema(CGIModel):
         pattern="^(json|excel|csv)$",
     )
     lat: float = Field(
-        42.0, description="Latitude of point in decimal degrees"
+        42.0,
+        description="Latitude of point in decimal degrees",
+        ge=-90,
+        le=90,
     )
     lon: float = Field(
-        -95.0, description="Longitude of point in decimal degrees"
+        -95.0,
+        description="Longitude of point in decimal degrees",
+        ge=-180,
+        le=180,
     )
 
 

@@ -1,15 +1,75 @@
-"""Listing of VTEC events for state and year"""
+""".. title:: VTEC Events by State and Year
+
+Return to `JSON Services </json/>`_
+
+Changelog
+---------
+
+- 2024-08-14: Initital documentation update and pydantic validation
+
+Example Requests
+----------------
+
+Get all Iowa events for 2024 in JSON, then CSV, then XLSX format.
+
+https://mesonet.agron.iastate.edu/json/vtec_events_bystate.py\
+?state=IA&year=2024
+
+https://mesonet.agron.iastate.edu/json/vtec_events_bystate.py\
+?state=IA&year=2024&fmt=csv
+
+https://mesonet.agron.iastate.edu/json/vtec_events_bystate.py\
+?state=IA&year=2024&fmt=xlsx
+
+Get all Tornado Warnings for Iowa during 2024.
+
+https://mesonet.agron.iastate.edu/json/vtec_events_bystate.py\
+?state=IA&year=2024&phenomena=TO&significance=W
+
+"""
 
 import json
 from io import BytesIO, StringIO
 
 import pandas as pd
-from pyiem.database import get_dbconnc
+from pydantic import Field
+from pyiem.database import get_sqlalchemy_conn
 from pyiem.reference import ISO8601
-from pyiem.util import html_escape
-from pyiem.webutil import iemapp
+from pyiem.util import utc
+from pyiem.webutil import CGIModel, iemapp
+from sqlalchemy import text
 
 EXL = "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"
+
+
+class Schema(CGIModel):
+    """See how we are called."""
+
+    callback: str = Field(default=None, description="optional JSONP callback")
+    fmt: str = Field(
+        default="json",
+        description="The format of the response, json, csv, or xlsx",
+        pattern="^(json|csv|xlsx)$",
+    )
+    phenomena: str = Field(
+        default="__",
+        description="2 character phenomena identifier",
+        max_length=2,
+    )
+    significance: str = Field(
+        default="_",
+        description="1 character significance identifier",
+        max_length=1,
+    )
+    state: str = Field(
+        default=..., description="2 character state identifier", max_length=2
+    )
+    year: int = Field(
+        default=...,
+        description="Year to query for",
+        ge=1986,
+        le=utc().year,
+    )
 
 
 def get_res(state, year, phenomena, significance):
@@ -19,22 +79,23 @@ def get_res(state, year, phenomena, significance):
       wfo (str): 3 character WFO identifier
       year (int): year to run for
     """
-    pgconn, cursor = get_dbconnc("postgis")
 
     limits = ["phenomena is not null", "significance is not null"]
     if phenomena != "__":
-        limits[0] = f"phenomena = '{phenomena}'"
+        limits[0] = "phenomena = :ph"
     if significance != "_":
-        limits[1] = f"significance = '{significance}'"
+        limits[1] = "significance = :sig"
     plimit = " and ".join(limits)
-    cursor.execute(
-        f"""
+    data = {"state": state, "year": year, "events": []}
+    with get_sqlalchemy_conn("postgis") as conn:
+        res = conn.execute(
+            text(f"""
     WITH polyareas as (
         SELECT wfo, phenomena, significance, eventid, round((ST_area(
         ST_transform(geom,9311)) / 1000000.0)::numeric,0) as area
-        from sbw_{year} s, states t WHERE
-        ST_Overlaps(s.geom, t.the_geom) and
-        t.state_abbr = %s and eventid is not null and {plimit}
+        from sbw s, states t WHERE
+        vtec_year = :year and ST_Overlaps(s.geom, t.the_geom) and
+        t.state_abbr = :st and eventid is not null and {plimit}
         and status = 'NEW'
     ), ugcareas as (
         SELECT w.wfo,
@@ -48,8 +109,9 @@ def get_res(state, year, phenomena, significance):
         max(init_expire) at time zone 'UTC' as utc_init_expire,
         max(hvtec_nwsli) as nwsli,
         max(fcster) as fcster from
-        warnings_{year} w JOIN ugcs u on (w.gid = u.gid)
-        WHERE substr(u.ugc, 1, 2) = %s and eventid is not null and {plimit}
+        warnings w JOIN ugcs u on (w.gid = u.gid)
+        WHERE vtec_year = :year and substr(u.ugc, 1, 2) = :st
+        and eventid is not null and {plimit}
         GROUP by w.wfo, phenomena, significance, eventid)
 
     SELECT u.*, coalesce(p.area, u.area) as myarea
@@ -57,47 +119,45 @@ def get_res(state, year, phenomena, significance):
     (u.phenomena = p.phenomena and u.significance = p.significance
      and u.eventid = p.eventid and u.wfo = p.wfo)
         ORDER by u.phenomena ASC, u.significance ASC, u.utc_issue ASC
-    """,
-        (state, state),
-    )
-    res = {"state": state, "year": year, "events": []}
-    for row in cursor:
-        uri = "/vtec/#%s-O-NEW-K%s-%s-%s-%04i" % (
-            year,
-            row["wfo"],
-            row["phenomena"],
-            row["significance"],
-            row["eventid"],
+    """),
+            {"year": year, "st": state, "ph": phenomena, "sig": significance},
         )
-        res["events"].append(
-            dict(
-                phenomena=row["phenomena"],
-                significance=row["significance"],
-                eventid=row["eventid"],
-                hvtec_nwsli=row["nwsli"],
-                area=float(row["myarea"]),
-                locations=row["locations"],
-                issue=row["utc_issue"].strftime(ISO8601),
-                product_issue=row["utc_product_issue"].strftime(ISO8601),
-                expire=row["utc_expire"].strftime(ISO8601),
-                init_expire=row["utc_init_expire"].strftime(ISO8601),
-                uri=uri,
-                wfo=row["wfo"],
+        for row in res:
+            row = row._asdict()
+            uri = "/vtec/#%s-O-NEW-K%s-%s-%s-%04i" % (
+                year,
+                row["wfo"],
+                row["phenomena"],
+                row["significance"],
+                row["eventid"],
             )
-        )
-    pgconn.close()
-    return res
+            data["events"].append(
+                dict(
+                    phenomena=row["phenomena"],
+                    significance=row["significance"],
+                    eventid=row["eventid"],
+                    hvtec_nwsli=row["nwsli"],
+                    area=float(row["myarea"]),
+                    locations=row["locations"],
+                    issue=row["utc_issue"].strftime(ISO8601),
+                    product_issue=row["utc_product_issue"].strftime(ISO8601),
+                    expire=row["utc_expire"].strftime(ISO8601),
+                    init_expire=row["utc_init_expire"].strftime(ISO8601),
+                    uri=uri,
+                    wfo=row["wfo"],
+                )
+            )
+    return data
 
 
-@iemapp()
+@iemapp(help=__doc__, schema=Schema)
 def application(environ, start_response):
     """Answer request."""
-    state = environ.get("state", "IA")[:2]
-    year = int(environ.get("year", 2015))
-    phenomena = environ.get("phenomena", "__")[:2]
-    significance = environ.get("significance", "_")[:1]
-    cb = environ.get("callback")
-    fmt = environ.get("fmt", "json")
+    state = environ["state"]
+    year = environ["year"]
+    phenomena = environ["phenomena"]
+    significance = environ["significance"]
+    fmt = environ["fmt"]
     res = get_res(state, year, phenomena, significance)
 
     if fmt == "xlsx":
@@ -122,9 +182,7 @@ def application(environ, start_response):
         return [bio.getvalue().encode("utf-8")]
 
     res = json.dumps(res)
-    if cb is not None:
-        res = f"{html_escape(cb)}({res})"
 
     headers = [("Content-type", "application/json")]
     start_response("200 OK", headers)
-    return [res.encode("ascii")]
+    return res.encode("ascii")

@@ -1,5 +1,8 @@
 """.. title:: Local Storm Report Data Service
 
+Return to `API Services </api/#cgi>`_ or
+`User Frontend </request/gis/lsrs.phtml>`_.
+
 Documentation for /cgi-bin/request/gis/lsr.py
 ---------------------------------------------
 
@@ -9,6 +12,7 @@ dataset is as live as when you query it as reports are ingested in realtime.
 Changelog
 ---------
 
+- 2024-08-14: Correct bug with reports for Puerto Rico were not included.
 - 2024-07-18: Instead of returning a `No results found for query` when no
   database entries are found, we return an empty result.
 - 2024-04-05: Initial documentation release and migration to pydantic.
@@ -154,7 +158,7 @@ def do_excel_kml(fmt, params, sql_filters):
             text(
                 f"""
             WITH wfos as (
-                select case when length(id) = 4 then substr(id, 1, 3)
+                select case when length(id) = 4 then substr(id, 2, 3)
                 else id end as cwa, tzname from stations where network = 'WFO'
             ), reports as (
                 select distinct l.wfo, valid, county, city, l.state, typetext,
