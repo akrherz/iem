@@ -1,6 +1,44 @@
 """.. title:: Recent METAR GeoJSON
 
+Return to `API Services </api/#json>`_
+
 Service returns interesting METAR reports.
+
+Changelog
+---------
+
+- 2024-08-14: Documentation Update
+
+Example Requests
+----------------
+
+Get the most recent snow depth reports
+
+https://mesonet.agron.iastate.edu/geojson/recent_metar.py?q=snowdepth
+
+Get the recent ice accretion 1 hour reports
+
+https://mesonet.agron.iastate.edu/geojson/recent_metar.py?q=i1
+
+Get the recent ice accretion 3 hour reports
+
+https://mesonet.agron.iastate.edu/geojson/recent_metar.py?q=i3
+
+Get the recent ice accretion 6 hour reports
+
+https://mesonet.agron.iastate.edu/geojson/recent_metar.py?q=i6
+
+Get any recent funnel cloud / tornado reports
+
+https://mesonet.agron.iastate.edu/geojson/recent_metar.py?q=fc
+
+Get any recent 50 knot wind reports
+
+https://mesonet.agron.iastate.edu/geojson/recent_metar.py?q=50
+
+Get any recent reports with `PNO` in the METAR
+
+https://mesonet.agron.iastate.edu/geojson/recent_metar.py?q=pno
 
 """
 
@@ -45,21 +83,13 @@ def get_data(q):
     if q == "snowdepth":
         datasql = "substring(raw, ' 4/([0-9]{3})')::int"
         wheresql = "raw ~* ' 4/'"
-    elif q == "i1":
-        datasql = "ice_accretion_1hr"
-        wheresql = "ice_accretion_1hr >= 0"
-    elif q == "i3":
-        datasql = "ice_accretion_3hr"
-        wheresql = "ice_accretion_3hr >= 0"
-    elif q == "i6":
-        datasql = "ice_accretion_6hr"
-        wheresql = "ice_accretion_6hr >= 0"
-    elif q == "fc":
+    elif q in ["i1", "i3", "i6"]:
+        i = int(q[1])
+        datasql = f"ice_accretion_{i}hr"
+        wheresql = f"ice_accretion_{i}hr >= 0"
+    elif q in ["fc", "gr"]:
         datasql = "''"
-        wheresql = "'FC' = ANY(wxcodes)"
-    elif q == "gr":
-        datasql = "''"
-        wheresql = "'GR' = ANY(wxcodes)"
+        wheresql = f"'{q.upper()}' = ANY(wxcodes)"
     elif q == "pno":
         datasql = "''"
         wheresql = "raw ~* ' PNO'"

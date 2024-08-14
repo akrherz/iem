@@ -1,6 +1,6 @@
 """.. title:: SPC Outlooks Sorted by Size
 
-Return to `JSON Services</json/>`_
+Return to `API Services </api/#json>`_
 
 Documentation for /json/spc_bysize.py
 -------------------------------------
@@ -8,6 +8,19 @@ Documentation for /json/spc_bysize.py
 This service emits unofficial IEM accounting of SPC outlooks sorted by size.
 This service is great at finding problems in the IEM archive :(  Attempts
 are made to generate links to the SPC website, to confirm the entries listed.
+
+Changelog
+---------
+
+- 2024-08-14: Documentation Update
+
+Example Requests
+----------------
+
+Get the largest day 3 slight risks since 2020
+
+https://mesonet.agron.iastate.edu/json/spc_bysize.py\
+?day=3&threshold=SLGT&category=CATEGORICAL&syear=2020
 
 """
 

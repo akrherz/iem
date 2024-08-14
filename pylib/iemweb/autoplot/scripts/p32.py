@@ -12,7 +12,6 @@ import datetime
 
 import matplotlib.colors as mpcolors
 import matplotlib.dates as mdates
-import numpy as np
 import pandas as pd
 from pyiem.database import get_sqlalchemy_conn
 from pyiem.exceptions import NoDataFound
@@ -217,6 +216,9 @@ def plotter(fdict):
         else:
             abovecolor = "r" if how == "diff" else "b"
             belowcolor = "b" if how == "diff" else "r"
+            if varname.find("soilm") > 0:
+                abovecolor = "b"
+                belowcolor = "r"
             thisyear["color"] = abovecolor
             thisyear.loc[values < 0, "color"] = belowcolor
             ax.set_position([0.1, 0.1, 0.7, 0.8])
@@ -227,10 +229,11 @@ def plotter(fdict):
                 ax=ax,
                 color=thisyear["color"].values,
             )
+            meanval = thisyear[f"{varname}_mean"].mean()
             ax.text(
                 0.99,
                 1.01,
-                f"Mean: {np.nanmean(values):.1f}",
+                f"Mean: {meanval:.1f}",
                 transform=ax.transAxes,
                 color="k",
                 ha="right",
@@ -243,7 +246,7 @@ def plotter(fdict):
                 0.95,
                 f"Days Above {(values > 0).sum()}",
                 transform=ax.transAxes,
-                color="r",
+                color=abovecolor,
                 ha="center",
                 va="top",
                 bbox=dict(facecolor="white", edgecolor="white"),
@@ -253,7 +256,7 @@ def plotter(fdict):
                 0.05,
                 f"Days Below {(values < 0).sum()}",
                 transform=ax.transAxes,
-                color="b",
+                color=belowcolor,
                 ha="center",
                 va="top",
                 bbox=dict(facecolor="white", edgecolor="white"),

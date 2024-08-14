@@ -1,16 +1,81 @@
-"""Pidgin-holed service for some WFO data..."""
+""".. title:: VTEC Events by WFO
 
-import datetime
+Return to `API Services </api/#json>`_
+
+Changelog
+---------
+
+- 2024-08-14: Initial documentation and pydantic validation
+
+Example Requests
+----------------
+
+Return all Des Moines Tornado Warnings for 2024
+
+https://mesonet.agron.iastate.edu/json/vtec_events_bywfo.py?\
+wfo=DMX&year=2024&phenomena=TO&significance=W
+
+Same request, csv format
+
+https://mesonet.agron.iastate.edu/json/vtec_events_bywfo.py?\
+wfo=DMX&year=2024&phenomena=TO&significance=W&fmt=csv
+
+Same request, xlsx format
+
+https://mesonet.agron.iastate.edu/json/vtec_events_bywfo.py?\
+wfo=DMX&year=2024&phenomena=TO&significance=W&fmt=xlsx
+
+"""
+
 import json
 from io import BytesIO, StringIO
 
 import pandas as pd
+from pydantic import AwareDatetime, Field
 from pyiem.database import get_sqlalchemy_conn
-from pyiem.util import html_escape
-from pyiem.webutil import iemapp
+from pyiem.util import utc
+from pyiem.webutil import CGIModel, iemapp
 from sqlalchemy import text
 
 EXL = "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"
+
+
+class Schema(CGIModel):
+    """See how we are called."""
+
+    callback: str = Field(default=None, description="JSONP callback function")
+    fmt: str = Field(
+        default="json",
+        description="The format of the response, either json or csv or xlsx",
+        pattern="^(json|csv|xlsx)$",
+    )
+    start: AwareDatetime = Field(
+        default=None,
+        description="Start of period of interest",
+    )
+    end: AwareDatetime = Field(
+        default=None,
+        description="End of period of interest",
+    )
+    phenomena: str = Field(
+        default=None,
+        description="VTEC phenomena of interest",
+        max_length=2,
+    )
+    significance: str = Field(
+        default=None,
+        description="VTEC significance of interest",
+        max_length=1,
+    )
+    wfo: str = Field(
+        default="DMX", description="3 character WFO identifier", max_length=3
+    )
+    year: int = Field(
+        default=utc().year,
+        ge=1986,
+        le=utc().year,
+        description="Year of interest",
+    )
 
 
 def make_url(row):
@@ -98,21 +163,19 @@ def as_json(df):
     return json.dumps(res)
 
 
-@iemapp()
+@iemapp(help=__doc__, schema=Schema)
 def application(environ, start_response):
     """Answer request."""
-    wfo = environ.get("wfo", "DMX")[:3].upper()
-    year = int(environ.get("year", datetime.date.today().year))
-    start = datetime.datetime.strptime(
-        environ.get("start", f"{year}-01-01T00:00")[:16], "%Y-%m-%dT%H:%M"
-    ).replace(tzinfo=datetime.timezone.utc)
-    end = datetime.datetime.strptime(
-        environ.get("end", f"{year}-12-31T23:59")[:16], "%Y-%m-%dT%H:%M"
-    ).replace(tzinfo=datetime.timezone.utc)
-    phenomena = environ.get("phenomena")
-    significance = environ.get("significance")
-    cb = environ.get("callback", None)
-    fmt = environ.get("fmt", "json")
+    wfo = environ["wfo"]
+    year = environ["year"]
+    start = environ["start"]
+    end = environ["end"]
+    if start is None or end is None:
+        start = utc(year)
+        end = utc(year + 1)
+    phenomena = environ["phenomena"]
+    significance = environ["significance"]
+    fmt = environ["fmt"]
 
     df = get_df(wfo, start, end, phenomena, significance)
     if fmt == "xlsx":
@@ -137,9 +200,7 @@ def application(environ, start_response):
         return [bio.getvalue().encode("utf-8")]
 
     res = as_json(df)
-    if cb is not None:
-        res = f"{html_escape(cb)}({res})"
 
     headers = [("Content-type", "application/json")]
     start_response("200 OK", headers)
-    return [res.encode("ascii")]
+    return res.encode("ascii")

@@ -1,8 +1,20 @@
 """.. title:: Convective SIGMET GeoJSON
 
-Return to `JSON Services </json/>`_
+Return to `API Services </api/#json>`_
 
 This service provides a GeoJSON representation of current Convective SIGMETs.
+
+Changelog
+---------
+
+- 2024-08-14: Documentation Update
+
+Example Requests
+----------------
+
+Get the current Convective SIGMETs
+
+https://mesonet.agron.iastate.edu/geojson/convective_sigmet.geojson
 
 """
 

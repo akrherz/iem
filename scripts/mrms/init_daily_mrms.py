@@ -20,6 +20,7 @@ def init_year(ts, for_dep=False):
     """
 
     fn = iemre.get_daily_mrms_ncname(ts.year)
+    os.makedirs(os.path.dirname(fn), exist_ok=True)
     dom = iemre.DOMAINS[""]
     if for_dep:
         fn = fn.replace("daily", "dep")

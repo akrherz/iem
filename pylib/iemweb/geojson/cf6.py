@@ -1,4 +1,4 @@
-"""Produce geojson of CF6 data"""
+""".. title:: CF6 Data as GeoJSON"""
 
 import datetime
 

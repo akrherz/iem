@@ -95,13 +95,24 @@ not be implied as an endorsement. Of course, you can just search google for
   <ul>
     <li><a href="/json/climodat_stclimo.py?help">Climodat State Climatology</a></li>
     <li><a href="/json/current.py?help">Current Obs</a></li>
-    <li><a href="/json/dcp_vars.json?help">HADS/DCP Reporting SHEF Vars</a></li>
-    <li><a href="/json/products.json?help">Archive IEM Web Products</a></li>
+    <li><a href="/geojson/7am.py?help">COOP and other data valid @ 7 AM</a></li>
+    <li><a href="/json/dcp_vars.py?help">HADS/DCP Reporting SHEF Vars</a></li>
+    <li><a href="/json/products.py?help">Archive IEM Web Products</a></li>
     <li><a href="/geojson/network.py?help">Network GeoJSON</a></li>
     <li><a href="/geojson/networks.py?help">Network Identifiers</a></li>
-    <li><a href="/json/stations.json?help">Station Metadata Changes</a></li>
+    <li><a href="/geojson/recent_metar.py?help">Recent "Interesting" METAR Reports</a></li>
+    <li><a href="/json/stations.py?help">Station Metadata Changes</a></li>
     <li><a href="/json/tms.py?help">Tile Map Services metadata</a></li>
-    <li><a href="/json/webcams.json?help">Webcam metadata</a></li>
+    <li><a href="/json/webcams.py?help">Webcam archive metadata</a></li>
+  </ul>
+  </div>
+</div>
+
+<div class="panel panel-default">
+  <div class="panel-heading">Aviation Services</div>
+  <div class="panel-body">
+  <ul>
+    <li><a href="/geojson/convective_sigmet.py?help">SIGMETs</a></li>
   </ul>
   </div>
 </div>
@@ -114,8 +125,10 @@ not be implied as an endorsement. Of course, you can just search google for
   <div class="panel-heading">NWS Data</div>
   <div class="panel-body">
   <ul>
-      <li><a href="/geojson/cli.py?help">CLI Reporting Stations GeoJSON</a></li>
-      <li><a href="/json/cli.py?help">CLI Reporting Stations JSON</a>
+      <li>CF6 Data: <a href="/geojson/cf6.py?help">GeoJSON</a> or
+      <a href="/json/cf6.py?help">JSON</a></li>
+      <li>CLI Data: <a href="/geojson/cli.py?help">GeoJSON</a> or
+      <a href="/json/cli.py?help">JSON</a></li>
       <li><a href="/geojson/lsr.py?help">Local Storm Reports</a></li>
       <li><a href="/geojson/nexrad_attr.py?help">NEXRAD Storm Attributes</a></li>
       <li><a href="/json/ibw_tags.py?help">Impact Based Warning Tags</a></li>
@@ -128,8 +141,6 @@ not be implied as an endorsement. Of course, you can just search google for
       <li><a href="/json/raob.py?help">Sounding/RAOB Data</a></li>
       <li><a href="/geojson/sps.py?help">Special Weather Statements (SPS)</a></li>
       <li><a href="/json/sps_by_point.py?help">Special Weather Statements (SPS) by Point</a></li>
-      <li><a href="/geojson/sbw.geojson?help">Storm Based Warnings</a></li>
-      <li><a href="/json/sbw_by_point.py?help">Storm Based Warnings by Point</a></li>
       <li><a href="/json/nwstext.py?help">Text Data</a></li>
       <li><a href="/json/nwstext_search.py?help">Text Product Metadata Search</a></li>
   </ul>
@@ -143,6 +154,8 @@ not be implied as an endorsement. Of course, you can just search google for
 <div class="panel panel-default">
   <div class="panel-heading">NWS Watch, Warning, and Advisories</div>
   <div class="panel-body">
+      <li><a href="/geojson/sbw.py?help">Storm Based Warnings</a></li>
+      <li><a href="/json/sbw_by_point.py?help">Storm Based Warnings by Point</a></li>
       <li><a href="/geojson/vtec_event.py?help">VTEC Event Data</a></li>
       <li><a href="/json/vtec_events.py?help">VTEC Events</a></li>
       <li><a href="/json/vtec_events_bypoint.py?help">VTEC Events by Point</a></li>

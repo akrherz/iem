@@ -1,6 +1,7 @@
 # Paths are setup in setuppaths.sh
 python database/store_test_data.py $(which psql)
 python scripts/dbutil/sync_stations.py
+python scripts/mrms/init_daily_mrms.py --year=2024
 python scripts/prism/init_daily.py --year=2024
 python scripts/iemre/init_daily.py --year=2024 --domain=
 python scripts/iemre/init_daily.py --year=2024 --domain=europe

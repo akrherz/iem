@@ -1,12 +1,36 @@
 """.. title:: Available Archived Webcams at given time
 
-Return to `JSON Services </json/>`.
+Return to `API Services </api/#json>`.
 
 Documentation for /json/webcams.json
 -------------------------------------
 
 This service provides a listing of available archived webcam images for a
-given time.
+given time.  The first entry is to a crude overview map with the NEXRAD
+overlain at the given time.
+
+Changelog
+---------
+
+- 2024-08-14: Initial documentation update
+
+Example usage
+-------------
+
+Return webcam images value at approximately 2020-08-10 17:00 UTC for the KCRG
+network:
+
+https://mesonet.agron.iastate.edu/json/webcams.py\
+?network=KCRG&ts=2020-08-10T16:00:00Z
+
+The same request, but for the IDOT network:
+
+https://mesonet.agron.iastate.edu/json/webcams.py\
+?network=IDOT&ts=2020-08-10T16:00:00Z
+
+Get current imagery from the MCFC network:
+
+https://mesonet.agron.iastate.edu/json/webcams.py?network=MCFC
 
 """
 
