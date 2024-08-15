@@ -100,6 +100,7 @@ not be implied as an endorsement. Of course, you can just search google for
     <li><a href="/json/products.py?help">Archive IEM Web Products</a></li>
     <li><a href="/geojson/network.py?help">Network GeoJSON</a></li>
     <li><a href="/geojson/networks.py?help">Network Identifiers</a></li>
+    <li><a href="/json/reference.py?help">pyIEM reference data</a></li>
     <li><a href="/geojson/recent_metar.py?help">Recent "Interesting" METAR Reports</a></li>
     <li><a href="/json/stations.py?help">Station Metadata Changes</a></li>
     <li><a href="/json/tms.py?help">Tile Map Services metadata</a></li>
