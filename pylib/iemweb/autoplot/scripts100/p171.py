@@ -206,7 +206,7 @@ def plotter(fdict):
     elif opt == "ugc":
         name, wfo = get_ugc_name(ctx["ugc"])
         title = (
-            f"NWS [{wfo}] {ctx['_nt'].sts[station]['name']} Issued for "
+            f"NWS [{wfo}] {ctx['_nt'].sts[wfo]['name']} Issued for "
             f"[{ctx['ugc']}] {name}"
         )
     (fig, ax) = figure_axes(title=title, subtitle=subtitle, apctx=ctx)
