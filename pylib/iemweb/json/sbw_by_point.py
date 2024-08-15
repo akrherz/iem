@@ -1,6 +1,6 @@
 """.. title:: Storm Based Warnings by Latitude and Longitude Point
 
-Return to `JSON Services </json/>`_
+Return to `API Services </api/#json>`_
 
 Documentation for /json/sbw_by_point.py
 ---------------------------------------
@@ -27,6 +27,11 @@ during 2023 in Excel format.
 https::/mesonet.agron.iastate.edu/json/sbw_by_point.py?lat=41.99&lon=-92.0\
 &sdate=2023-01-01&edate=2024-01-01&fmt=xlsx
 
+Same request, but in CSV format.
+
+https::/mesonet.agron.iastate.edu/json/sbw_by_point.py?lat=41.99&lon=-92.0\
+&sdate=2023-01-01&edate=2024-01-01&fmt=csv
+
 """
 
 import datetime
@@ -51,8 +56,10 @@ class Schema(CGIModel):
 
     callback: str = Field(None, description="JSONP callback function name")
     fmt: str = Field("json", description="The format of the response")
-    lat: float = Field(41.99, description="Latitude of point")
-    lon: float = Field(-92.0, description="Longitude of point")
+    lat: float = Field(41.99, description="Latitude of point", ge=-90, le=90)
+    lon: float = Field(
+        -92.0, description="Longitude of point", ge=-180, le=180
+    )
     sdate: datetime.date = Field(
         default=datetime.date(2002, 1, 1), description="Start Date"
     )

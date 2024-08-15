@@ -1,6 +1,6 @@
 """.. title:: IEM Reference Data from pyIEM python library
 
-Return to `JSON Services </json/>`_
+Return to `API Services </api/#json>`_
 
 Documentation for /json/reference.py
 ------------------------------------
@@ -13,6 +13,13 @@ Changelog
 ---------
 
 - 2024-07-24: Initial documentation release
+
+Example Usage
+-------------
+
+Return all reference data in JSON format.
+
+https://mesonet.agron.iastate.edu/json/reference.py
 
 """
 

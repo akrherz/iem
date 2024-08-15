@@ -1,6 +1,6 @@
 """.. title:: Sounding/RAOB JSON Service
 
-Return to `JSON Services </json/>`_
+Return to `API Services </api/#json>`_
 
 Documentation for /json/raob.py
 -------------------------------

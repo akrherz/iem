@@ -8,9 +8,11 @@ import pandas as pd
 from metpy.calc import apparent_temperature
 from metpy.units import units
 from pyiem import reference
+from pyiem.database import get_sqlalchemy_conn
 from pyiem.exceptions import NoDataFound
 from pyiem.plot import MapPlot, get_cmap
-from pyiem.util import get_autoplot_context, get_sqlalchemy_conn, utc
+from pyiem.util import get_autoplot_context, utc
+from sqlalchemy import text
 
 PDICT = {"cwa": "Plot by NWS Forecast Office", "state": "Plot by State"}
 PDICT2 = {"vsby": "Visibility", "feel": "Feels Like Temperature"}
@@ -77,48 +79,41 @@ def get_description():
 
 def get_df(ctx, bnds, buf=2.25):
     """Figure out what data we need to fetch here"""
-    giswkt = "SRID=4326;POLYGON((%s %s, %s %s, %s %s, %s %s, %s %s))" % (
-        bnds[0] - buf,
-        bnds[1] - buf,
-        bnds[0] - buf,
-        bnds[3] + buf,
-        bnds[2] + buf,
-        bnds[3] + buf,
-        bnds[2] + buf,
-        bnds[1] - buf,
-        bnds[0] - buf,
-        bnds[1] - buf,
-    )
     if ctx.get("valid"):
         valid = ctx["valid"].replace(tzinfo=ZoneInfo("UTC"))
         with get_sqlalchemy_conn("asos") as conn:
             df = pd.read_sql(
-                """
+                text("""
             WITH mystation as (
                 select id, st_x(geom) as lon, st_y(geom) as lat,
                 state, wfo from stations
                 where network ~* 'ASOS' and
-                ST_contains(ST_GeomFromEWKT(%s), geom)
+                ST_contains(
+                    ST_MakeEnvelope(:west, :south, :east, :north, 4326),
+                    geom)
             )
             SELECT station, vsby, tmpf, dwpf, sknt, state, wfo, lat, lon, relh,
-            abs(extract(epoch from (%s - valid))) as tdiff from
+            abs(extract(epoch from (:valid - valid))) as tdiff from
             alldata a JOIN mystation m on (a.station = m.id)
-            WHERE a.valid between %s and %s ORDER by tdiff ASC
-            """,
+            WHERE a.valid between :sts and :ets ORDER by tdiff ASC
+            """),
                 conn,
-                params=(
-                    giswkt,
-                    valid,
-                    valid - datetime.timedelta(minutes=30),
-                    valid + datetime.timedelta(minutes=30),
-                ),
+                params={
+                    "west": bnds[0] - buf,
+                    "south": bnds[1] - buf,
+                    "east": bnds[2] + buf,
+                    "north": bnds[3] + buf,
+                    "valid": valid,
+                    "sts": valid - datetime.timedelta(minutes=30),
+                    "ets": valid + datetime.timedelta(minutes=30),
+                },
             )
         df = df.groupby("station").first()
     else:
-        valid = datetime.datetime.utcnow().replace(tzinfo=ZoneInfo("UTC"))
+        valid = utc()
         with get_sqlalchemy_conn("iem") as conn:
             df = pd.read_sql(
-                """
+                text("""
                 SELECT state, wfo, tmpf, dwpf, sknt, relh,
         id, network, vsby, ST_x(geom) as lon, ST_y(geom) as lat
         FROM
@@ -126,10 +121,16 @@ def get_df(ctx, bnds, buf=2.25):
         WHERE s.network ~* 'ASOS' and s.country = 'US' and
         valid + '80 minutes'::interval > now() and
         vsby >= 0 and vsby <= 10 and
-        ST_contains(ST_GeomFromEWKT(%s), geom)
-            """,
+        ST_contains(
+            ST_MakeEnvelope(:west, :south, :east, :north, 4326), geom)
+            """),
                 conn,
-                params=(giswkt,),
+                params={
+                    "west": bnds[0] - buf,
+                    "south": bnds[1] - buf,
+                    "east": bnds[2] + buf,
+                    "north": bnds[3] + buf,
+                },
             )
     return df, valid
 
