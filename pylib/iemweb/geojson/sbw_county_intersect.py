@@ -1,10 +1,25 @@
 """.. title:: Storm Based Warning County Intersection
 
-Return to `JSON Services </json/>`_
+Return to `API Services </api/#json>`_. This service drives some of the
+presentation of the `VTEC Browser </vtec/>`_.
 
 This service provides a GeoJSON for the intersection of the polygon border and
 any county/parish borders.  This is meant to describe the amount of the polygon
 border that was influenced by the county border.
+
+Changelog
+---------
+
+- 2024-08-16: Initial documentation update
+
+Example Usage
+-------------
+
+Show the intersection of the polygon border for Des Moines Tornado Warning 49
+from 2024 with county borders.
+
+https://mesonet.agron.iastate.edu/geojson/sbw_county_intersect.py\
+?wfo=KDMX&year=2024&phenomena=TO&significance=W&eventid=49
 
 """
 
@@ -25,7 +40,7 @@ class Schema(CGIModel):
     significance: str = Field(
         "W", description="VTEC Significance", max_length=1
     )
-    eventid: int = Field(1, description="VTEC Event ID")
+    eventid: int = Field(1, description="VTEC Event ID", ge=1, le=9999)
 
 
 def run(wfo, year, phenomena, significance, eventid):
@@ -64,7 +79,7 @@ def run(wfo, year, phenomena, significance, eventid):
     return borderdf.to_json()
 
 
-def get_mckey(environ):
+def get_mckey(environ: dict) -> str:
     """Return the key."""
     return (
         f"/geojson/sbw_county_intersect/{environ['wfo']}/{environ['year']}/"

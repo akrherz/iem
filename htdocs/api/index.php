@@ -159,6 +159,7 @@ not be implied as an endorsement. Of course, you can just search google for
   <div class="panel-body">
       <li><a href="/geojson/sbw.py?help">Storm Based Warnings</a></li>
       <li><a href="/json/sbw_by_point.py?help">Storm Based Warnings by Point</a></li>
+      <li><a href="/geojson/sbw_county_intersection.py?help">SBW Polygon County Intersection</a></li>
       <li><a href="/geojson/vtec_event.py?help">VTEC Event Data</a></li>
       <li><a href="/json/vtec_events.py?help">VTEC Events</a></li>
       <li><a href="/json/vtec_events_bypoint.py?help">VTEC Events by Point</a></li>

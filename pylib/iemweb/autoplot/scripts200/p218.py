@@ -302,18 +302,19 @@ def build_params(clsite, dt):
                 params=(clsite, f"{dt:%m%d}"),
                 index_col="year",
             )
-        if df.empty:
-            return hp, lp
-        hp.minval = df["high"].min()
-        hp.maxval = df["high"].max()
-        hp.avgval = df["high"].mean()
-        hp.stddev = df["high"].std()
-        hp.ptiles = df["high"].quantile(np.arange(0.1, 0.91, 0.1)).to_list()
-        lp.maxval = df["low"].max()
-        lp.minval = df["low"].min()
-        lp.avgval = df["low"].mean()
-        lp.stddev = df["low"].std()
-        lp.ptiles = df["low"].quantile(np.arange(0.1, 0.91, 0.1)).to_list()
+        if not df.empty:
+            hp.minval = df["high"].min()
+            hp.maxval = df["high"].max()
+            hp.avgval = df["high"].mean()
+            hp.stddev = df["high"].std()
+            hp.ptiles = (
+                df["high"].quantile(np.arange(0.1, 0.91, 0.1)).to_list()
+            )
+            lp.maxval = df["low"].max()
+            lp.minval = df["low"].min()
+            lp.avgval = df["low"].mean()
+            lp.stddev = df["low"].std()
+            lp.ptiles = df["low"].quantile(np.arange(0.1, 0.91, 0.1)).to_list()
 
     return hp, lp
 

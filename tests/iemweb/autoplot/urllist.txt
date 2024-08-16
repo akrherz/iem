@@ -80,6 +80,9 @@
 /plotting/auto/plot/199/opt:7::date:2024-07-24::_r:t::dpi:100.png
 /plotting/auto/plot/199/opt:8::date:2024-07-24::_r:t::dpi:100.png
 /plotting/auto/plot/199/opt:9::date:2024-07-24::_r:t::dpi:100.png
+/plotting/auto/plot/201/mode:heat::sdate:2024-07-01::edate:2024-08-16::outlook_type:C::day:1::w:all::network:WFO::wfo:STO::mystate:IA::ugc:IAZ048::g:yes::_r:t::dpi:100.png
+/plotting/auto/plot/201/mode:cal::sdate:2024-07-01::edate:2024-08-16::outlook_type:C::day:1::w:all::network:WFO::wfo:STO::mystate:IA::ugc:IAZ048::g:yes::_r:t::dpi:100.png
+/plotting/auto/plot/201/mode:cal::sdate:2024-01-01::edate:2024-08-16::outlook_type:C::day:1::w:wfo::network:WFO::wfo:STO::mystate:IA::ugc:IAZ048::g:yes::_r:t::dpi:100.png
 /plotting/auto/plot/203/typ:W::sort:W::date:2024-05-21::dpi:100.png
 /plotting/auto/plot/203/typ:W::sort:S::date:2024-05-21::dpi:100.png
 /plotting/auto/plot/211/ptype:precip::network:IA_ASOS::zstation:AMW::sts:2024-07-10%200000::ets:2024-07-12%202359::_r:t::dpi:100.png
