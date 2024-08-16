@@ -1,9 +1,9 @@
 """.. title:: Webcam Metadata GeoJSON
 
-Return to `JSON Services </json/>`_ listing.
+Return to `API Services </api/#json>`_ listing.
 
-Documentation for /geojson/webcam.geojson
---------------------------------------
+Documentation for /geojson/webcam.py
+------------------------------------
 
 This service emits a geojson with metadata for webcam information that is
 active at the given timestamp/now.

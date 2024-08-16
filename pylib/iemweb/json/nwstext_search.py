@@ -1,6 +1,6 @@
 """.. title:: Search for NWS Text Products over a time range
 
-Return to `JSON Services </json/>`_
+Return to `API Services </api/#json>`_
 
 Documentation for /json/nwstext_search.py
 -----------------------------------------

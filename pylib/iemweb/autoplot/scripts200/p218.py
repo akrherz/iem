@@ -302,6 +302,8 @@ def build_params(clsite, dt):
                 params=(clsite, f"{dt:%m%d}"),
                 index_col="year",
             )
+        if df.empty:
+            return hp, lp
         hp.minval = df["high"].min()
         hp.maxval = df["high"].max()
         hp.avgval = df["high"].mean()

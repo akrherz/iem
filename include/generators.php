@@ -62,7 +62,7 @@ function get_website_stats()
     $val = $memcache->get("iemperf.json");
     if (!$val) {
         // Fetch from nagios
-        $val = @file_get_contents("https://nagios.agron.iastate.edu/cgi-bin/get_iemstats.py");
+        $val = @file_get_contents("https://nagios.agron.iastate.edu/cgi-bin/get_iemstats.py");  // skipcq
         if ($val) $memcache->set("iemperf.json", $val, 90);
     }
     $bcolor = "success";

@@ -1,4 +1,20 @@
-""".. title:: CF6 Data as GeoJSON"""
+""".. title:: CF6 Data as GeoJSON
+
+Return to `API Services </api/#json>`_
+
+Changelog
+---------
+
+- 2024-08-15: Initial documentation release
+
+Example Usage
+-------------
+
+Request CF6 data for January 1st, 2024:
+
+https://mesonet.agron.iastate.edu/geojson/cf6.py?dt=2024-01-01
+
+"""
 
 import datetime
 

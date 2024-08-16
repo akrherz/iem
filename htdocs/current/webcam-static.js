@@ -1,4 +1,4 @@
-/* global Ext */
+/* global Ext, app, cfg */
 Ext.namespace('app');
 var imagestore;
 var disableStore;

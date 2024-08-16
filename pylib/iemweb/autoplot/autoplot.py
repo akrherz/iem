@@ -246,13 +246,11 @@ def workflow(mc, environ, fmt):
             plt.close()
             ram.seek(0)
             content = ram.read()
-            del ram
         elif isinstance(mixedobj, Image.Image):
             ram = BytesIO()
             mixedobj.save(ram, fmt)
             ram.seek(0)
             content = ram.read()
-            del ram
 
         elif mixedobj is None:
             return (
@@ -301,7 +299,6 @@ def workflow(mc, environ, fmt):
             with open(tmpfn, "rb") as fh:
                 content = fh.read()
             os.unlink(tmpfn)
-        del df
     else:
         sys.stderr.write(
             f"Undefined edge case: fmt: {fmt} "

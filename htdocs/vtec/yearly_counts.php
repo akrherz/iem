@@ -116,8 +116,8 @@ EOF;
             "<tr><td>%s</td><td>%s</td><td>%s</td><td>%s</td>",
             $phenomena,
             $significance,
-            @$vtec_phenomena[$phenomena],
-            @$vtec_significance[$significance]
+            $vtec_phenomena[$phenomena],
+            $vtec_significance[$significance]
         );
 
         foreach ($years as $i => $yr) {
