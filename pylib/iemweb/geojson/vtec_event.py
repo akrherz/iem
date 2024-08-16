@@ -27,6 +27,12 @@ Return Local Storm Reports associated with the above event
 https://mesonet.agron.iastate.edu/geojson/vtec_event.py\
 ?wfo=DMX&year=2024&phenomena=TO&significance=W&etn=49&lsrs=1
 
+Return Local Storm Reports associated with the above event, but confined to
+the Storm Based Warning polygon
+
+https://mesonet.agron.iastate.edu/geojson/vtec_event.py\
+?wfo=DMX&year=2024&phenomena=TO&significance=W&etn=49&lsrs=1&sbw=1
+
 Return Storm Based Warning polygons associated with the above event
 
 https://mesonet.agron.iastate.edu/geojson/vtec_event.py\
@@ -62,7 +68,10 @@ class Schema(CGIModel):
     )
     lsrs: bool = Field(
         default=False,
-        description="Confine result to include Local Storm Reports",
+        description=(
+            "Provide Local Storm Reports either for the county or "
+            "SBW when sbw=1 is set"
+        ),
     )
 
 
