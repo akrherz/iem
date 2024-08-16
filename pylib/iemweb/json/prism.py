@@ -1,6 +1,6 @@
 """.. title :: PRISM Data by Point
 
-Return to `JSON Services </json/>`_
+Return to `API Services </api/#json>`_
 
 Documentation for /json/prism.py
 --------------------------------
@@ -44,8 +44,10 @@ class Schema(CGIModel):
     """See how we are called."""
 
     callback: str = Field(None, description="JSONP callback function")
-    lat: float = Field(41.9, description="Latitude of point")
-    lon: float = Field(-92.0, description="Longitude of point")
+    lat: float = Field(41.9, description="Latitude of point", ge=-90, le=90)
+    lon: float = Field(
+        -92.0, description="Longitude of point", ge=-180, le=180
+    )
     valid: datetime.date = Field(
         default=None,
         description="Provide data valid for this date (~12 UTC)",

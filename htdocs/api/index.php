@@ -104,7 +104,9 @@ not be implied as an endorsement. Of course, you can just search google for
     <li><a href="/geojson/recent_metar.py?help">Recent "Interesting" METAR Reports</a></li>
     <li><a href="/json/stations.py?help">Station Metadata Changes</a></li>
     <li><a href="/json/tms.py?help">Tile Map Services metadata</a></li>
-    <li><a href="/json/webcams.py?help">Webcam archive metadata</a></li>
+    <li>Webcam Archive Metadata:
+        <a href="/geojson/webcam.py?help">GeoJSON</a> or
+        <a href="/json/webcams.py?help">JSON</a></li>
   </ul>
   </div>
 </div>

@@ -78,7 +78,8 @@ def try_era5land(ts: datetime.datetime, domain: str, dom: dict) -> bool:
     if domain != "":
         ncfn = iemre.get_daily_ncname(ts.year, domain)
         idx = iemre.daily_offset(ts.date())
-        with ncopen(ncfn, "a") as nc:
+        # vals may have some NaNs, so we need to avoid a warning
+        with ncopen(ncfn, "a") as nc, np.errstate(invalid="ignore"):
             nc.variables["rsds"][idx, :, :] = vals
         return True
     # Jitter the grid to fill out edges along the coasts

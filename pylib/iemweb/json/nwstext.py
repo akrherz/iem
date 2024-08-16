@@ -1,6 +1,6 @@
 """.. title:: Single Instance NWS Text Product JSON Service
 
-Return to `JSON Services </json/>`_
+Return to `API Services </api/#json>`_
 
 Documentation for /json/nwstext.py
 ----------------------------------

@@ -1,6 +1,6 @@
 """.. title:: Website Products for IEM Time Machine
 
-Return to `JSON Services </json/>`.
+Return to `API Services </api/#json>`_
 
 Documentation for /json/products.py
 -----------------------------------
