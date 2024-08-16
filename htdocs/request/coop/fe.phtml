@@ -160,12 +160,15 @@ This option is only relevant if you did not select "Excel File" from #5 above.
    <option value="yes">Yes
  </select>
 
-<p><h4>8. Supplement {$thisyear}'s data with scenario year</h4>
-<i>Optional!</i> For some purposes, you may wish to have a complete (Jan 1 -
-Dec 31) set of data for the current year.  Of course, this period is in the
-future and observations do not exist! This option allows you to fill
-out the current year with data from a previous year. If data for Feb 29 is
-needed and not available from past year, Feb 28 data is simply repeated.</i> 
+<p><h4>8. Fill out last year with scenario</h4>
+<i>Optional!</i> This is a bit tricky to explain.  The common usage case is to
+fill out the current calendar's year worth of data with some data from the
+past. For example, if today is 16 August 2024 and you select 2023 as the
+scenario year, the data for 16 August 2024 would instead be a copy of what
+was observed on 16 August 2023.  If you select a date period that was in the
+past and not ending on 31 December, you could still use this feature to fill
+out the year with the scenario year.  The scenario year could be from the
+future!  For example, what if 2020 ended like what was observed in 2023.
 <br />
 <input type="checkbox" name="scenario" value="yes" id="scen">
 <label for="scen">Yes, use this year for replacement:</label> {$sy_select}

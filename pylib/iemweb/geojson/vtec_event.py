@@ -1,6 +1,42 @@
 """.. title:: VTEC Event GeoJSON Service
 
-Return to `JSON Services </json/>`_
+Return to `API Services </api/#json>`_. This service drives some of the data
+shown on the `VTEC Browser </vtec/>`_.
+
+Documentation for /geojson/vtec_event.py
+----------------------------------------
+
+This service emits a GeoJSON for a single VTEC event.  The payload can include
+some additional requested meatadata.
+
+Changelog
+---------
+
+- 2024-08-16: Initial documentation update
+
+Example Usage
+-------------
+
+Return information about Des Moines Tornado Warning 49 from 2024
+
+https://mesonet.agron.iastate.edu/geojson/vtec_event.py\
+?wfo=DMX&year=2024&phenomena=TO&significance=W&etn=49
+
+Return Local Storm Reports associated with the above event
+
+https://mesonet.agron.iastate.edu/geojson/vtec_event.py\
+?wfo=DMX&year=2024&phenomena=TO&significance=W&etn=49&lsrs=1
+
+Return Local Storm Reports associated with the above event, but confined to
+the Storm Based Warning polygon
+
+https://mesonet.agron.iastate.edu/geojson/vtec_event.py\
+?wfo=DMX&year=2024&phenomena=TO&significance=W&etn=49&lsrs=1&sbw=1
+
+Return Storm Based Warning polygons associated with the above event
+
+https://mesonet.agron.iastate.edu/geojson/vtec_event.py\
+?wfo=DMX&year=2024&phenomena=TO&significance=W&etn=49&sbw=1
 
 """
 
@@ -23,9 +59,20 @@ class Schema(CGIModel):
     significance: str = Field(
         "W", description="VTEC Significance", max_length=1
     )
-    etn: int = Field(1, description="VTEC Event ID")
-    sbw: bool = Field(False, description="Include SBW polygons")
-    lsrs: bool = Field(False, description="Include LSRs in the VTEC Event")
+    etn: int = Field(1, description="VTEC Event ID", ge=1, le=9999)
+    sbw: bool = Field(
+        default=False,
+        description=(
+            "Confine result to include the Storm Based Warning polygon"
+        ),
+    )
+    lsrs: bool = Field(
+        default=False,
+        description=(
+            "Provide Local Storm Reports either for the county or "
+            "SBW when sbw=1 is set"
+        ),
+    )
 
 
 def run_lsrs(wfo, year, phenomena, significance, etn, sbw):
@@ -33,10 +80,10 @@ def run_lsrs(wfo, year, phenomena, significance, etn, sbw):
     pgconn, cursor = get_dbconnc("postgis")
 
     if sbw == 1:
-        sql = f"""
+        sql = """
             SELECT distinct l.*, valid at time zone 'UTC' as utc_valid,
             ST_asGeoJson(l.geom) as geojson
-            from lsrs l, sbw_{year} w WHERE
+            from lsrs l, sbw w WHERE w.vtec_year = %s and
             l.geom && w.geom and ST_contains(w.geom, l.geom)
             and l.wfo = %s and
             l.valid >= w.issue and l.valid <= w.expire and
@@ -44,13 +91,13 @@ def run_lsrs(wfo, year, phenomena, significance, etn, sbw):
             w.significance = %s and w.phenomena = %s
             ORDER by l.valid ASC
         """
-        args = (wfo, wfo, etn, significance, phenomena)
+        args = (year, wfo, wfo, etn, significance, phenomena)
     else:
-        sql = f"""
+        sql = """
             WITH countybased as (
                 SELECT min(issue) as issued, max(expire) as expired
-                from warnings_{year} w JOIN ugcs u on (u.gid = w.gid)
-                WHERE w.wfo = %s and w.eventid = %s and
+                from warnings w JOIN ugcs u on (u.gid = w.gid)
+                WHERE w.vtec_year = %s and w.wfo = %s and w.eventid = %s and
                 w.significance = %s
                 and w.phenomena = %s)
 
@@ -60,7 +107,7 @@ def run_lsrs(wfo, year, phenomena, significance, etn, sbw):
             l.valid >= c.issued and l.valid < c.expired and
             l.wfo = %s ORDER by l.valid ASC
         """
-        args = (wfo, etn, significance, phenomena, wfo)
+        args = (year, wfo, etn, significance, phenomena, wfo)
     cursor.execute(sql, args)
     res = {
         "type": "FeatureCollection",
@@ -92,18 +139,17 @@ def run_sbw(wfo, year, phenomena, significance, etn):
     """Do great things"""
     pgconn, cursor = get_dbconnc("postgis")
 
-    table = f"sbw_{year}"
     cursor.execute(
-        f"""
+        """
     SELECT
     ST_asGeoJson(geom) as geojson,
     issue at time zone 'UTC' as utc_issue,
     init_expire at time zone 'UTC' as utc_init_expire
-    from {table}
-    WHERE wfo = %s and eventid = %s and phenomena = %s and significance = %s
+    from sbw WHERE vtec_year = %s and wfo = %s
+    and eventid = %s and phenomena = %s and significance = %s
     and status = 'NEW'
     """,
-        (wfo, etn, phenomena, significance),
+        (year, wfo, etn, phenomena, significance),
     )
     res = {
         "type": "FeatureCollection",
@@ -130,17 +176,17 @@ def run(wfo, year, phenomena, significance, etn):
     pgconn, cursor = get_dbconnc("postgis")
 
     cursor.execute(
-        f"""
+        """
     SELECT
     w.ugc,
     ST_asGeoJson(u.geom) as geojson,
     issue at time zone 'UTC' as utc_issue,
     init_expire at time zone 'UTC' as utc_init_expire
-    from warnings_{year} w JOIN ugcs u on (w.gid = u.gid)
-    WHERE w.wfo = %s and eventid = %s and
+    from warnings w JOIN ugcs u on (w.gid = u.gid)
+    WHERE w.vtec_year = %s and w.wfo = %s and eventid = %s and
     phenomena = %s and significance = %s
     """,
-        (wfo, etn, phenomena, significance),
+        (year, wfo, etn, phenomena, significance),
     )
     res = {
         "type": "FeatureCollection",
@@ -163,7 +209,7 @@ def run(wfo, year, phenomena, significance, etn):
     return json.dumps(res)
 
 
-def get_mckey(environ):
+def get_mckey(environ: dict) -> str:
     """Return the key."""
     return (
         f"/geojson/vtec_event/{environ['wfo']}/{environ['year']}/"

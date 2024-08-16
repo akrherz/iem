@@ -2,8 +2,8 @@
 
 Return to `JSON Services </json/>`_ listing.
 
-Documentation for /geojson/sps.geojson
---------------------------------------
+Documentation for /geojson/sps.py
+---------------------------------
 
 This service emits a geojson for a given valid time of NWS Special Weather
 Statements (SPS) that contain polygons.
@@ -18,11 +18,11 @@ Example Usage
 
 Return up to the moment SPSs with polygons.
 
-https://mesonet.agron.iastate.edu/geojson/sps.geojson
+https://mesonet.agron.iastate.edu/geojson/sps.py
 
-Return SPSs valid at a specific time.
+Return SPSs valid at 20 UTC on 10 August 2024
 
-https://mesonet.agron.iastate.edu/geojson/sps.geojson?valid=2024-06-30T12:00:00Z
+https://mesonet.agron.iastate.edu/geojson/sps.py?valid=2024-08-10T20:00:00Z
 
 """
 
@@ -83,7 +83,7 @@ def run(valid):
     return json.dumps(data)
 
 
-def get_mckey(environ):
+def get_mckey(environ: dict) -> str:
     """Return a memcache key."""
     return f"/geojson/sps.geojson|{environ['valid']:%Y%m%d%H%M}"
 

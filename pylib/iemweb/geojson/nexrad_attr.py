@@ -1,7 +1,9 @@
 """.. title:: Service for NEXRAD Attributes GeoJSON
 
-Documentation for /geojson/nexrad_attr.geojson
-----------------------------------------------
+Return to `API Services </json/#json>`_.
+
+Documentation for /geojson/nexrad_attr.py
+-----------------------------------------
 
 This service emits GeoJSON of NEXRAD attributes.  If no `valid` parameter is
 provided, it provides the most recent storm attributes per NEXRAD that are
@@ -13,6 +15,23 @@ Changelog
 ---------
 
 - 2024-07-03: Initial documentation release.
+
+Example Usage
+-------------
+
+Return the most recent NEXRAD attributes in GeoJSON format:
+
+https://mesonet.agron.iastate.edu/geojson/nexrad_attr.py
+
+Return attributes around the time of 05:10UTC on 10 August 2024:
+
+https://mesonet.agron.iastate.edu/geojson/nexrad_attr.py?\
+valid=2024-08-10T05:10:00Z
+
+Same request, but return CSV
+
+https://mesonet.agron.iastate.edu/geojson/nexrad_attr.py?\
+valid=2024-08-10T05:10:00Z&fmt=csv
 
 """
 
@@ -178,10 +197,7 @@ def get_mckey(environ):
 def application(environ, start_response):
     """Do Something"""
     fmt = environ["fmt"]
-    if fmt == "geojson":
-        headers = [("Content-type", "application/vnd.geo+json")]
-    else:
-        headers = [("Content-type", "text/csv")]
+    headers = [("Content-type", get_ct(environ))]
 
     with get_sqlalchemy_conn("radar") as conn:
         res = run(conn, environ["valid"], fmt)
