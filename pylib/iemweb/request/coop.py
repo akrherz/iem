@@ -1,5 +1,8 @@
 """.. title:: IEM Climodat Data Export
 
+Return to `API Services </api/>`_.  This service is the backend for the
+`Climodat Download </request/coop/fe.phtml>`_ frontend.
+
 Documentation for /cgi-bin/request/coop.py
 ------------------------------------------
 
@@ -222,7 +225,7 @@ def do_apsim(cursor, ctx):
     if station not in nt.sts:
         raise IncompleteWebRequest("Unknown station provided")
 
-    thisyear = datetime.now().year
+    thisyear = ctx["ets"].year
     extra = {}
     if ctx["scenario"]:
         sts = datetime(int(ctx["scenario_year"]), 1, 1)
@@ -308,7 +311,9 @@ def do_apsim(cursor, ctx):
         """,
         (station, ctx["sts"], ctx["ets"]),
     )
+    lastday = ctx["sts"]
     for row in cursor:
+        lastday = row["day"]
         srad = -99 if row["srad"] is None else row["srad"]
         sio.write(
             ("%4s %10.0f %10.3f %10.1f %10.1f %10.2f\n")
@@ -323,8 +328,8 @@ def do_apsim(cursor, ctx):
         )
 
     if extra:
-        dec31 = date(thisyear, 12, 31)
-        now = row["day"]
+        dec31 = date(lastday.year, 12, 31)
+        now = lastday + timedelta(days=1)
         while now <= dec31:
             row = extra.get(now)
             if row is None:
@@ -465,7 +470,7 @@ def do_daycent(cursor, ctx):
         ).encode("ascii")
 
     extra = {}
-    thisyear = datetime.now().year
+    thisyear = ctx["ets"].year
     if ctx["scenario"]:
         sts = datetime(int(ctx["scenario_year"]), 1, 1)
         ets = datetime(int(ctx["scenario_year"]), 12, 31)
@@ -499,7 +504,9 @@ def do_daycent(cursor, ctx):
     )
     sio = StringIO()
     sio.write("Daily Weather Data File (use extra weather drivers = 0):\n\n")
+    lastday = ctx["sts"]
     for row in cursor:
+        lastday = row["day"]
         sio.write(
             ("%s %s %s %s %.2f %.2f %.2f\n")
             % (
@@ -513,8 +520,8 @@ def do_daycent(cursor, ctx):
             )
         )
     if extra:
-        dec31 = date(thisyear, 12, 31)
-        now = row["day"]
+        dec31 = date(lastday.year, 12, 31)
+        now = lastday + timedelta(days=1)
         while now <= dec31:
             row = extra[now]
             sio.write(
@@ -539,7 +546,7 @@ def do_simple(cursor, ctx):
     table = get_tablename(ctx["stations"])
 
     nt = get_stationtable(ctx["stations"])
-    thisyear = datetime.now().year
+    thisyear = ctx["ets"].year
 
     limitrowcount = "LIMIT 1048000" if ctx["what"] == "excel" else ""
     sql = f"""
