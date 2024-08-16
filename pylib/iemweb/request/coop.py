@@ -883,7 +883,7 @@ def application(environ, start_response):
     ctx["inclatlon"] = environ["gis"]
     ctx["scenario"] = environ["scenario"]
     ctx["scenario_year"] = 2099
-    if ctx["scenario"] == "yes":
+    if ctx["scenario"]:
         ctx["scenario_year"] = environ["scenario_year"]
     ctx["scenario_sts"], ctx["scenario_ets"] = get_scenario_period(ctx)
     ctx["with_header"] = environ["with_header"]
