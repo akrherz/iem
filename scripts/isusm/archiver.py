@@ -94,7 +94,7 @@ def upload_to_staging():
         "rsync -r --no-perms "
         "--remove-source-files --groupmap=*:iem-friends --rsync-path "
         f'"mkdir -p {rempath} && rsync" archived/* '
-        f"mesonet@metl60.agron.iastate.edu:{rempath}"
+        f"mesonet@akrherz-desktop.agron.iastate.edu:{rempath}"
     )
     LOG.debug(cmd)
     subprocess.call(cmd, shell=True)

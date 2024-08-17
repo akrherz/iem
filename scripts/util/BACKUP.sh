@@ -17,4 +17,4 @@ cd /mesonet/tmp
 tar -cf ${yyyymmdd}.tar ${dd}_backup/
 rm -Rf ${dd}_backup/
 
-rsync -a --remove-source-files --rsync-path "mkdir -p /stage/iemoffline/dailydata && rsync" ${yyyymmdd}.tar metl60:/stage/iemoffline/dailydata/
+rsync -a --remove-source-files --rsync-path "mkdir -p /stage/iemoffline/dailydata && rsync" ${yyyymmdd}.tar akrherz-desktop:/stage/iemoffline/dailydata/

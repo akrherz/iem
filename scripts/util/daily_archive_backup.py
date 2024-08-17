@@ -33,7 +33,8 @@ def run(date):
         "--rsync-path",
         f"mkdir -p /stage/IEMArchive/{date:%Y/%m} && rsync",
         tarfn,
-        f"mesonet@metl60.agron.iastate.edu:/stage/IEMArchive/{date:%Y/%m}",
+        f"mesonet@akrherz-desktop.agron.iastate.edu:"
+        f"/stage/IEMArchive/{date:%Y/%m}",
     ]
     LOG.info(" ".join(cmd))
     subprocess.call(cmd)

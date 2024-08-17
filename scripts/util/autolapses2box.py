@@ -37,7 +37,7 @@ def main():
         "--rsync-path",
         f"mkdir -p {remotepath} && rsync",
         *localfns,
-        f"mesonet@metl60.agron.iastate.edu:{remotepath}",
+        f"mesonet@akrherz-desktop.agron.iastate.edu:{remotepath}",
     ]
     LOG.info(" ".join(cmd))
     subprocess.call(cmd)
