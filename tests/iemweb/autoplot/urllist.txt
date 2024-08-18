@@ -1,5 +1,6 @@
 /plotting/auto/plot/1/network:IACLIMATE::station:IATAME::threshold:44::month1:6::num1:2::var1:hdd65::month2:6::num2:2::var2:gdd41::year:2007::_r:96::dpi:100.png
 /plotting/auto/plot/2/network:IACLIMATE::station:IATAME::month:2::year:2024::gddbase:50::gddceil:86::_r:t::dpi:100.png
+/plotting/auto/plot/11/network:IA_ASOS::zstation:AMW::year:2024::emphasis:-99::var:dwpf::opt:below::_r:43::dpi:100.png
 /plotting/auto/plot/17/network:IA_ASOS::station:AMW::month:7::year:2024::p:temps::_r:t::dpi:100.png
 /plotting/auto/plot/17/network:IA_ASOS::station:AMW::month:7::year:2024::p:precip::_r:t::dpi:100.png
 /plotting/auto/plot/17/network:IA_ASOS::station:BNW::month:7::year:2024::p:temps::_r:t::dpi:100.png
@@ -18,6 +19,7 @@
 /plotting/auto/plot/51/network:ISUSM::station:AEEI4::sdate:2024-05-01::edate:2024-07-27::base:50::ceil:86::which:precip::_r:t::dpi:100.png
 /plotting/auto/plot/51/network:ISUSM::station:AEEI4::sdate:2024-05-01::edate:2024-07-27::base:50::ceil:86::which:sdd::_r:t::dpi:100.png
 /plotting/auto/plot/56/how:week::start:jan::opt:wfo::state:IA::network:WFO::station:DMX::phenomena:TO::significance:W::_r:t::dpi:100.png
+/plotting/auto/plot/59/network:IA_ASOS::station:CSQ::units:mph::_r:t::dpi:100.png
 /plotting/auto/plot/61/var:high::sdate:2024-08-01::sector:conus::network:WFO::wfo:STO::state:IA::_r:t::dpi:100.png
 /plotting/auto/plot/72/network:WFO::station:DMX::phenomena:TO::significance:W::season:jul.png
 /plotting/auto/plot/72/network:WFO::station:DMX::phenomena:TO::significance:W::season:all.png
@@ -69,6 +71,7 @@
 /plotting/auto/plot/177/network:ISUSM::station:BOOI4::opt:2::sts:2024-07-18%201000::ets:2024-07-25%201000::_r:t::dpi:100.png
 /plotting/auto/plot/177/network:ISUSM::station:BOOI4::opt:sm::sts:2024-07-18%201000::ets:2024-07-25%201000::_r:t::dpi:100.png
 /plotting/auto/plot/177/network:ISUSM::station:BOOI4::opt:at::sts:2024-07-18%201000::ets:2024-07-25%201000::_r:t::dpi:100.png
+/plotting/auto/plot/180/v:precip::network1:IACLIMATE::station1:IATDSM::c1:1951::network2:IACLIMATE::station2:IA0000::c2:1951::s:0::sy1:1991::ey1:2020::sy2:1981::ey2:2010::_r:43::dpi:100.png
 /plotting/auto/plot/192/t:state::network:WFO::wfo:STO::state:IA::v:vsby::valid:2020-06-15%201400::cmap:gray::_r:t::dpi:100.png
 /plotting/auto/plot/194/csector:midwest::sdate:2020-05-01::edate:2024-07-17::d:0::w:percent::cmap:plasma::_r:t::dpi:100.png
 /plotting/auto/plot/199/opt:1::date:2024-07-24::_r:t::dpi:100.png
