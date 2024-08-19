@@ -8,3 +8,4 @@
 /json/prism.py?lat=-140&lon=35&valid=2024-01-01
 /json/prism.py?lat=-140&lon=35
 /json/raob.py?ts=1930-01-01T12:00:00Z
+/json/stage4.py?valid=2024-08-11&lon=-102.30&lat=45.10&tz=Boguis
