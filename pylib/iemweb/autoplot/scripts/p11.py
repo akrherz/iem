@@ -14,6 +14,7 @@ from pyiem.database import get_sqlalchemy_conn
 from pyiem.exceptions import NoDataFound
 from pyiem.plot import figure
 from pyiem.util import get_autoplot_context
+from sqlalchemy import text
 
 PDICT = {
     "below": "Daily Range Below Emphasis",
@@ -85,16 +86,16 @@ def plotter(fdict):
     varname = ctx["var"]
     with get_sqlalchemy_conn("iem") as conn:
         df = pd.read_sql(
-            f"""
+            text(f"""
             select day, max_{varname}, min_{varname}
             from summary_{year} s JOIN stations t on (s.iemid = t.iemid)
-            where t.id = %s and t.network = %s and
+            where t.id = :station and t.network = :network and
             max_{varname} is not null and
             min_{varname} is not null
             ORDER by day ASC
-        """,
+        """),
             conn,
-            params=(station, ctx["network"]),
+            params={"station": station, "network": ctx["network"]},
             index_col="day",
         )
     if df.empty:

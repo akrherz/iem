@@ -1,6 +1,6 @@
 """.. title:: Legacy Network Metadata Service
 
-Return to `JSON Services </json/>`.
+Return to `API Services </api/#json>`_
 
 Changelog
 ---------
