@@ -80,10 +80,9 @@ def process_grib(grb):
 def workflow(url):
     """Fetch the URL, see what we have."""
     try:
-        with httpx.stream("GET", url) as resp:
-            with open("data.bin", "wb") as fh:
-                for chunk in resp.iter_bytes():
-                    fh.write(chunk)
+        with httpx.stream("GET", url) as resp, open("data.bin", "wb") as fh:
+            for chunk in resp.iter_bytes():
+                fh.write(chunk)
     except Exception as exp:
         LOG.info("download_ndfd failed to fetch %s: %s", url, exp)
         return

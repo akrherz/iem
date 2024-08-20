@@ -1,6 +1,5 @@
 #!/bin/sh
 DD=$(date +%d)
-DOW=$(date +%u)
 
 cd isusm
 bash run_plots.sh
