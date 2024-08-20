@@ -4,6 +4,8 @@ python cache/cache_autoplots.py &
 
 python dl/download_rtma_ru.py &
 
+python dl/download_ndfd.py &
+
 cd gfs
 python gfs2iemre.py --valid=$(date -u --date '7 hours ago' +'%Y-%m-%dT%H'):00:00 &
 

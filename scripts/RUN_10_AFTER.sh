@@ -9,6 +9,8 @@ LHH=$(date +'%H')
 YEST=$(date --date '1 day ago' +'%Y %m %d')
 TODAY=$(date +'%Y %m %d')
 
+python dl/download_ndfd.py &
+
 cd mrms
 # MRMS hourly totals arrive shortly after the top of the hour
 if [ $LHH -eq "00" ]
