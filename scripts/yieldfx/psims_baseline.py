@@ -1,9 +1,13 @@
-"""Generate PSIMs Tiles for baseline."""
+"""Generate PSIMs Tiles for baseline.
+
+Run from RUN_2AM.sh for yesterday and eight days ago, so to pick up POWER.
+"""
 
 import datetime
 import os
 import sys
 
+import click
 import numpy as np
 from metpy.units import units
 from pyiem import iemre
@@ -166,14 +170,13 @@ def workflow(valid, ncfn, west, south, fullmode):
             qc(nc)
 
 
-def main(argv):
+@click.command()
+@click.option("--date", "dt", type=click.DateTime(), help="Date to process")
+@click.option("--full", is_flag=True, help="Full replacement mode")
+def main(dt, full):
     """Go Main Go"""
-    # Can be run in two modes, full replacement up until this time
-    valid = datetime.date(int(argv[1]), 12, 31)
-    fullmode = True
-    if len(argv) == 4:
-        valid = datetime.date(int(argv[1]), int(argv[2]), int(argv[3]))
-        fullmode = False
+    if dt is not None:
+        dt = dt.date()
     # Create tiles to cover 12 states
     progress = tqdm(np.arange(-104, -80, 2), disable=not sys.stdout.isatty())
     for west in progress:
@@ -186,8 +189,8 @@ def main(argv):
             yt = (90 - south) / 2
             xt = (180 - (0 - west)) / 2 + 1
             ncfn = f"clim_{yt:04.0f}_{xt:04.0f}.tile.nc4"
-            workflow(valid, ncfn, west, south, fullmode)
+            workflow(dt, ncfn, west, south, full)
 
 
 if __name__ == "__main__":
-    main(sys.argv)
+    main()

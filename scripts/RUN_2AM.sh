@@ -44,15 +44,11 @@ if [ $DD -eq "09" ]
     then
          python download_narr.py $(date --date '13 days ago' +'%Y %m') &
 fi
-# run every Monday
-if [ $DOW -eq "1" ]
-    then
-        python fetch_power.py --year=$(date --date '7 days ago' +'%Y') --domain=
-        python fetch_power.py --year=$(date --date '7 days ago' +'%Y') --domain=china
-        python fetch_power.py --year=$(date --date '7 days ago' +'%Y') --domain=europe
-        cd ../climodat
-        python power_extract.py &
-fi
+python fetch_power.py --year=$(date --date '7 days ago' +'%Y') --domain=
+python fetch_power.py --year=$(date --date '7 days ago' +'%Y') --domain=china
+python fetch_power.py --year=$(date --date '7 days ago' +'%Y') --domain=europe
+cd ../climodat
+python power_extract.py &
 
 cd ../cache
 python warn_cache.py &
@@ -75,7 +71,8 @@ cd ../../windrose
 python daily_drive_network.py &
 
 cd ../yieldfx
-python psims_baseline.py $(date --date '1 days ago' +'%Y %m %d')
+python psims_baseline.py --date=$(date --date '1 days ago' +'%Y-%m-%d')
+python psims_baseline.py --date=$(date --date '8 days ago' +'%Y-%m-%d')
 
 cd ../prism
 python ingest_prism.py --date=$(date --date '7 days ago' +'%Y-%m-%d')
