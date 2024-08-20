@@ -1,17 +1,20 @@
 """
 This plot produces a time series difference
-between daily high and low temperatures against climatology. For this
-context, the climatology is the simple daily average based on period of
-record data.
+between daily high and low temperatures against climatology. Climatology is
+based on the current official NCEI 1991-2020 dataset to compute the daily
+average high and low temperature.  The period of record data is used to compute
+the daily standard deviation departures.
 """
 
 import datetime
 
 import matplotlib.dates as mdates
 import pandas as pd
+from pyiem.database import get_sqlalchemy_conn
 from pyiem.exceptions import NoDataFound
 from pyiem.plot import figure
-from pyiem.util import get_autoplot_context, get_sqlalchemy_conn
+from pyiem.util import get_autoplot_context
+from sqlalchemy import text
 
 from iemweb.autoplot import ARG_STATION
 
@@ -46,44 +49,46 @@ def plotter(fdict):
     station = ctx["station"]
     delta = ctx["delta"]
     year = ctx["year"]
-
+    clstation = ctx["_nt"].sts[station]["ncei91"]
     with get_sqlalchemy_conn("coop") as conn:
         df = pd.read_sql(
-            """
+            text("""
             WITH days as (
-                select generate_series(%s, %s,
+                select generate_series(:sts, :ets,
                     '1 day'::interval)::date as day,
-                    to_char(generate_series(%s, %s,
+                    to_char(generate_series(:sts, :ets,
                     '1 day'::interval)::date, 'mmdd') as sday
             ),
+            official as (
+                select to_char(valid, 'mmdd') as sday, high as avg_high,
+                low as avg_low from
+                ncei_climate91 where station = :clstation
+            ),
             climo as (
-                SELECT sday, avg(high) as avg_high, stddev(high)
-                as stddev_high,
-                avg(low) as avg_low, stddev(low) as stddev_low from alldata
-                WHERE station = %s GROUP by sday
+                SELECT sday, stddev(high) as stddev_high,
+                stddev(low) as stddev_low from alldata
+                WHERE station = :station GROUP by sday
             ),
             thisyear as (
                 SELECT day, sday, high, low from alldata
-                WHERE station = %s and year = %s
+                WHERE station = :station and year = :year
             ),
             thisyear2 as (
                 SELECT d.day, d.sday, t.high, t.low from days d LEFT JOIN
                 thisyear t on (d.sday = t.sday)
             )
-            SELECT t.day, t.sday, t.high, t.low, c.avg_high, c.avg_low,
-            c.stddev_high, c.stddev_low from thisyear2 t JOIN climo c on
-            (t.sday = c.sday) ORDER by t.day ASC
-        """,
+            SELECT t.day, t.sday, t.high, t.low, o.avg_high, o.avg_low,
+            c.stddev_high, c.stddev_low from thisyear2 t, climo c, official o
+            WHERE c.sday = t.sday and t.sday = o.sday ORDER by t.day ASC
+        """),
             conn,
-            params=(
-                datetime.date(year, 1, 1),
-                datetime.date(year, 12, 31),
-                datetime.date(year, 1, 1),
-                datetime.date(year, 12, 31),
-                station,
-                station,
-                year,
-            ),
+            params={
+                "clstation": clstation,
+                "sts": datetime.date(year, 1, 1),
+                "ets": datetime.date(year, 12, 31),
+                "station": station,
+                "year": year,
+            },
             index_col="day",
         )
     if df.empty or df["stddev_high"].min() == 0:
@@ -93,7 +98,11 @@ def plotter(fdict):
     df["low_sigma"] = (df["low"] - df["avg_low"]) / df["stddev_low"]
 
     title = f"{ctx['_sname']} :: Climatology & {year} Observations"
-    fig = figure(apctx=ctx, title=title)
+    fig = figure(
+        apctx=ctx,
+        title=title,
+        subtitle=f"NCEI 1991-2020 Climatology Source: {clstation}",
+    )
     ax = fig.subplots(2, 1, sharex=True)
 
     ax[0].plot(

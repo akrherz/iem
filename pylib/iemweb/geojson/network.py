@@ -1,4 +1,34 @@
-"""GeoJSON of a given IEM network code"""
+""".. title:: GeoJSON of stations within a network
+
+Return to `API Services </api/#json>`_
+
+Documentation for /geojson/network.py
+-------------------------------------
+
+This service provides a GeoJSON representation of stations within a given
+network.
+
+Changelog
+---------
+
+- 2024-08-19: Initial documentation update
+
+Example Usage
+-------------
+
+Provide all sites with 1 minute ASOS data:
+
+https://mesonet.agron.iastate.edu/geojson/network.py?network=ASOS1MIN
+
+Provide all sites with TAF data:
+
+https://mesonet.agron.iastate.edu/geojson/network.py?network=TAF
+
+Provide sites that are online within ASOS class networks
+
+https://mesonet.agron.iastate.edu/geojson/network.py?network=AZOS&only_online=1
+
+"""
 
 import datetime
 import json
