@@ -140,6 +140,7 @@ def plotter(fdict):
     if obsdf.empty:
         raise NoDataFound("Did not find any observations for station.")
     obsdf = obsdf.reindex(pd.date_range(obsdf.index.min(), obsdf.index.max()))
+    day = None
     for day, row in obsdf.iterrows():
         if op(row[varname], threshold):
             if running == 0:

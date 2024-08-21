@@ -1,8 +1,20 @@
 """.. title:: IEM Networks GeoJSON
 
-Return to `JSON Services </json/>`_
+Return to `API Services </api/#json>`_
 
 This service provides a GeoJSON representation of the IEM Networks.
+
+Changelog
+---------
+
+- 2024-08-20: Initial documentation update
+
+Example Usage
+~~~~~~~~~~~~~
+
+Request the GeoJSON representation of the IEM Networks:
+
+https://mesonet.agron.iastate.edu/geojson/network.py
 
 """
 

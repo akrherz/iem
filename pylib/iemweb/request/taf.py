@@ -1,5 +1,7 @@
 """.. title:: Terminal Aerodrome Forecast (TAF) Data
 
+Return to `API Services </api/>`_ or `TAF Request </request/taf.php>`_.
+
 Documentation for /cgi-bin/request/taf.py
 -----------------------------------------
 
@@ -9,13 +11,20 @@ specified stations and time ranges.
 Example Usage
 ~~~~~~~~~~~~~
 
-Request all of Des Moines TAF for the month of January 2024 in CSV format:
+Request all of Des Moines TAF for the month of August 2024 in CSV format and
+then excel format:
 
-    https://mesonet.agron.iastate.edu/cgi-bin/request/taf.py?station=DSM&sts=2024-01-01T00:00Z&ets=2024-02-01T00:00Z&fmt=csv
+https://mesonet.agron.iastate.edu/cgi-bin/request/taf.py\
+?station=DSM&sts=2024-08-01T00:00Z&ets=2024-09-01T00:00Z&fmt=csv
+
+https://mesonet.agron.iastate.edu/cgi-bin/request/taf.py\
+?station=DSM&sts=2024-08-01T00:00Z&ets=2024-09-01T00:00Z&fmt=excel
 
 Request the past 240 hours of TAF data for Chicago O'Hare in Excel format:
 
-    https://mesonet.agron.iastate.edu/cgi-bin/request/taf.py?station=ORD&hours=240&fmt=excel
+https://mesonet.agron.iastate.edu/cgi-bin/request/taf.py\
+?station=ORD&hours=240&fmt=excel
+
 """
 
 from datetime import timedelta
