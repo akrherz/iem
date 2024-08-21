@@ -4,6 +4,8 @@
 /plotting/auto/plot/17/network:IA_ASOS::station:AMW::month:7::year:2024::p:temps::_r:t::dpi:100.png
 /plotting/auto/plot/17/network:IA_ASOS::station:AMW::month:7::year:2024::p:precip::_r:t::dpi:100.png
 /plotting/auto/plot/17/network:IA_ASOS::station:BNW::month:7::year:2024::p:temps::_r:t::dpi:100.png
+/plotting/auto/plot/24/which:cd::csector:IA::var:precip::w:rank::p:month::year:2024::month:1::sdate:2024-07-23::edate:2024-08-20::cmap:BrBG_r::_r:t::dpi:100.png
+/plotting/auto/plot/24/which:st::csector:midwest::var:precip::w:rank::p:month::year:2024::month:1::sdate:2024-07-23::edate:2024-08-20::cmap:BrBG_r::_r:t::dpi:100.png
 /plotting/auto/plot/28/network:IACLIMATE::station:IATAME::opt:rank::date:2024-07-26::_r:t::dpi:100::_cb:1.png
 /plotting/auto/plot/32/network:IACLIMATE::station:IATAME::year:2024::var:era5land_srad::gddbase:50::gddceil:86::how:sigma::cmap:jet::_r:t::dpi:100.png
 /plotting/auto/plot/32/network:IACLIMATE::station:IATAME::year:2024::var:era5land_srad::gddbase:50::gddceil:86::how:valrange::cmap:jet::_r:t::dpi:100.png

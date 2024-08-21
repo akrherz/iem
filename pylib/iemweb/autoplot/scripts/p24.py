@@ -26,12 +26,14 @@ from pyiem.database import get_sqlalchemy_conn
 from pyiem.exceptions import NoDataFound
 from pyiem.plot import MapPlot, centered_bins, get_cmap, pretty_bins
 from pyiem.util import get_autoplot_context
+from sqlalchemy import text
 
 PDICT = {
     "aridity": "Aridity Index",
     "avgt": "Average Temperature",
     "high": "Average High Temperature",
     "low": "Average Low Temperature",
+    "sdd86": "Stress Degree Days (Base 86)",
     "precip": "Total Precipitation",
 }
 
@@ -151,17 +153,23 @@ def get_daily_data(ctx, sdate, edate):
         raise NoDataFound(
             "Sorry, too long of period selected. < 1 year please"
         )
+    params = {
+        "year": edate.year,
+        "sdate": sdate.strftime("%m%d"),
+        "edate": edate.strftime("%m%d"),
+        "csector": ctx["csector"],
+    }
     yearcond = "false"
     if edate.year != sdate.year:
-        yearcond = f"sday >= '{sdate.strftime('%m%d')}'"
-        sday = f" sday >= '{sdate:%m%d}' or sday <= '{edate:%m%d}' "
+        yearcond = "sday >= :sdate"
+        sday = " sday >= :sdate or sday <= :edate "
     else:
-        sday = f" sday >= '{sdate:%m%d}' and sday <= '{edate:%m%d}' "
+        sday = " sday >= :sdate and sday <= :edate "
 
     statelimiter = ""
     table = "alldata"
     if len(ctx["csector"]) == 2:
-        statelimiter = f" and substr(station, 1, 2) = '{ctx['csector']}' "
+        statelimiter = " and substr(station, 1, 2) = :csector "
         table = f"alldata_{ctx['csector']}"
     stationlimiter = "substr(station, 3, 1) = 'C'"
     if ctx["which"] == "st":
@@ -169,11 +177,12 @@ def get_daily_data(ctx, sdate, edate):
 
     with get_sqlalchemy_conn("coop") as conn:
         ctx["df"] = pd.read_sql(
-            f"""
+            text(f"""
         with monthly as (
             SELECT
             case when {yearcond} then year + 1 else year end as myyear,
             station,
+            sum(sdd86(high, low)) as sdd86,
             sum(precip) as p,
             avg((high+low)/2.) as avgt,
             avg(low) as avglo,
@@ -185,6 +194,8 @@ def get_daily_data(ctx, sdate, edate):
         ranks as (
             SELECT station, myyear as year,
             max(max_date) OVER (PARTITION by station, myyear) as max_date,
+            avg(sdd86) OVER (PARTITION by station) as avg_sdd86,
+            sdd86 as sdd86,
             avg(p) OVER (PARTITION by station) as avg_precip,
             stddev(p) OVER (PARTITION by station) as std_precip,
             p as precip,
@@ -194,26 +205,28 @@ def get_daily_data(ctx, sdate, edate):
             avg(avgt) OVER (PARTITION by station) as avg_avgt,
             avgt,
             avg(avglo) OVER (PARTITION by station) as avg_low,
-            stddev(avglo) OVER (PARTITION by station) as std_low,
             avglo as low,
             rank() OVER (PARTITION by station ORDER by p DESC) as precip_rank,
             rank() OVER (PARTITION by station ORDER by avghi DESC)
                 as high_rank,
             rank() OVER (PARTITION by station ORDER by avglo DESC) as low_rank,
-            rank() OVER (PARTITION by station ORDER by avgt DESC) as avgt_rank
+            rank() OVER (PARTITION by station ORDER by avgt DESC) as avgt_rank,
+            rank() OVER (PARTITION by station ORDER by sdd86 DESC)
+                as sdd86_rank
             from monthly)
 
         SELECT station,
         high as high_val, low as low_val, precip as precip_val,
-        avgt as avgt_val,
+        avgt as avgt_val, sdd86 as sdd86_val,
         high - avg_high as high_dep, low - avg_low as low_dep,
         precip - avg_precip as precip_dep, avgt - avg_avgt as avgt_dep,
-        precip_rank, avgt_rank, high_rank, low_rank,
+        sdd86 - avg_sdd86 as sdd86_dep,
+        precip_rank, avgt_rank, high_rank, low_rank, sdd86_rank,
         ((high - avg_high) / std_high) - ((precip - avg_precip) / std_precip)
-        as aridity, max_date from ranks where year = %s
-        """,
+        as aridity, max_date from ranks where year = :year
+        """),
             conn,
-            params=(edate.year,),
+            params=params,
             index_col="station",
         )
     if ctx["df"].empty:
@@ -262,13 +275,13 @@ def plotter(fdict):
             raise NoDataFound("Aridity does not have departures")
     elif ctx["w"] == "dep":
         title = "Departure "
-        if ctx["var"] in ["high", "low", "avgt"]:
+        if ctx["var"] in ["high", "low", "avgt", "sdd86"]:
             units = "degrees F"
         elif ctx["var"] == "precip":
             units = "inch"
     elif ctx["w"] == "val":
         title = ""
-        if ctx["var"] in ["high", "low", "avgt"]:
+        if ctx["var"] in ["high", "low", "avgt", "sdd86"]:
             units = "degrees F"
         elif ctx["var"] == "precip":
             units = "inch"
@@ -294,6 +307,8 @@ def plotter(fdict):
     cmap = get_cmap(ctx["cmap"])
     pvar = f"{ctx['var']}_{ctx['w']}"
     fmt = "%.2f"
+    if ctx["var"] == "sdd86":
+        fmt = "%.1f"
     if ctx["var"] == "aridity":
         bins = np.arange(-4, 4.1, 1)
         pvar = ctx["var"]
