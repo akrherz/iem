@@ -25,6 +25,7 @@ import pandas as pd
 from pyiem.database import get_sqlalchemy_conn
 from pyiem.exceptions import NoDataFound
 from pyiem.plot import MapPlot, centered_bins, get_cmap, pretty_bins
+from pyiem.reference import state_names
 from pyiem.util import get_autoplot_context
 from sqlalchemy import text
 
@@ -162,18 +163,19 @@ def get_daily_data(ctx, sdate, edate):
     yearcond = "false"
     if edate.year != sdate.year:
         yearcond = "sday >= :sdate"
-        sday = " sday >= :sdate or sday <= :edate "
+        sday = " ( sday >= :sdate or sday <= :edate ) "
     else:
         sday = " sday >= :sdate and sday <= :edate "
 
-    statelimiter = ""
     table = "alldata"
     if len(ctx["csector"]) == 2:
-        statelimiter = " and substr(station, 1, 2) = :csector "
         table = f"alldata_{ctx['csector']}"
-    stationlimiter = "substr(station, 3, 1) = 'C'"
     if ctx["which"] == "st":
-        stationlimiter = "substr(station, 3, 4) = '0000'"
+        params["stations"] = [f"{st}0000" for st in state_names]
+    else:
+        params["stations"] = [
+            f"{st}C{x:03.0f}" for st in state_names for x in range(1, 11)
+        ]
 
     with get_sqlalchemy_conn("coop") as conn:
         ctx["df"] = pd.read_sql(
@@ -189,7 +191,7 @@ def get_daily_data(ctx, sdate, edate):
             avg(high) as avghi,
             max(day) as max_date
             from {table}
-            WHERE {stationlimiter} and ( {sday} ) {statelimiter}
+            WHERE station = ANY(:stations) and {sday}
             GROUP by myyear, station),
         ranks as (
             SELECT station, myyear as year,
