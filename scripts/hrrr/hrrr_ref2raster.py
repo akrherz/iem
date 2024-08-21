@@ -9,9 +9,12 @@ import tempfile
 
 import numpy as np
 import pygrib
+import pyproj
+from affine import Affine
 from PIL import Image
 from pyiem.reference import ISO8601
 from pyiem.util import logger, utc
+from rasterio.warp import reproject
 
 LOG = logger()
 with open("/mesonet/ldmdata/gis/images/4326/USCOMP/n0q_0.png", "rb") as fh:
@@ -27,31 +30,30 @@ def do_grb(grib, valid, routes):
     else:
         fxvalid = valid + datetime.timedelta(hours=fxdelta)
         fxminutes = int(fxdelta * 60.0)
-    newgribtemp = tempfile.NamedTemporaryFile(suffix=".grib2")
     pngtemp = tempfile.NamedTemporaryFile(suffix=".png")
-    with tempfile.NamedTemporaryFile(
-        suffix=".grib2", delete=False
-    ) as gribtemp:
-        gribtemp.write(grib.tostring())
-    # Regrid this to match N0Q
-    cmd = [
-        "wgrib2",
-        gribtemp.name,
-        "-set_grib_type",
-        "same",
-        "-new_grid_winds",
-        "earth",
-        "-new_grid",
-        "latlon",
-        "-126:3050:0.02",
-        "23.01:1340:0.02",
-        newgribtemp.name,
-    ]
-    subprocess.call(cmd, stdout=subprocess.PIPE)
-    # Rasterize
-    grbs = pygrib.open(newgribtemp.name)
-    g1 = grbs[1]
-    refd = np.flipud(g1.values)
+    projparams = grib.projparams
+    lat1 = grib["latitudeOfFirstGridPointInDegrees"]
+    lon1 = grib["longitudeOfFirstGridPointInDegrees"]
+    llx, lly = pyproj.Proj(projparams)(lon1, lat1)
+    hrrr_aff = Affine(
+        grib["DxInMetres"],
+        0.0,
+        llx,
+        0.0,
+        grib["DyInMetres"],
+        lly,
+    )
+    dest_aff = Affine(0.02, 0.0, -126.0, 0.0, -0.02, 50.0)
+    refd = np.zeros((1340, 3050))
+    reproject(
+        grib.values,
+        refd,
+        src_transform=hrrr_aff,
+        src_crs=projparams,
+        dst_transform=dest_aff,
+        dst_crs="EPSG:4326",
+        dst_nodata=-99,
+    )
     # anything -10 or lower is zero
     refd = np.where(refd < -9, -99, refd)
     # rasterize from index 1 as -32 by 0.5
@@ -112,7 +114,6 @@ def do_grb(grib, valid, routes):
     ]
     if routes == "ac":
         subprocess.call(cmd)
-    os.unlink(gribtemp.name)
     os.unlink(wldtmp.name)
     os.unlink(jsontmp.name)
 
