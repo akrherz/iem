@@ -12,7 +12,7 @@ LOOKUP = {
     "-asos": IPS[DB3],
     "-asos1min": IPS[DB1],
     "-awos": IPS[DB3],
-    "-coop": IPS[DB1],
+    "-coop": IPS[DB2],
     "-frost": IPS[DB1],
     "-hads": IPS[DB2],
     "-hml": IPS[DB3],
