@@ -4,6 +4,12 @@
 /plotting/auto/plot/17/network:IA_ASOS::station:AMW::month:7::year:2024::p:temps::_r:t::dpi:100.png
 /plotting/auto/plot/17/network:IA_ASOS::station:AMW::month:7::year:2024::p:precip::_r:t::dpi:100.png
 /plotting/auto/plot/17/network:IA_ASOS::station:BNW::month:7::year:2024::p:temps::_r:t::dpi:100.png
+/plotting/auto/plot/24/which:cd::csector:IA::var:precip::w:rank::p:month::year:2024::month:1::sdate:2024-07-23::edate:2024-08-20::cmap:BrBG_r::_r:t::dpi:100.png
+/plotting/auto/plot/24/which:st::csector:midwest::var:precip::w:rank::p:month::year:2024::month:1::sdate:2024-07-23::edate:2024-08-20::cmap:BrBG_r::_r:t::dpi:100.png
+/plotting/auto/plot/24/which:st::csector:midwest::var:sdd86::w:rank::p:day::year:2024::month:1::sdate:2023-02-01::edate:2023-02-08::cmap:BrBG_r::_r:43::dpi:100.png
+/plotting/auto/plot/24/which:st::csector:midwest::var:sdd86::w:rank::p:day::year:2024::month:1::sdate:2023-02-01::edate:2024-02-08::cmap:BrBG_r::_r:43::dpi:100.png
+/plotting/auto/plot/24/which:st::csector:midwest::var:avgt::w:val::p:day::year:2024::month:1::sdate:2022-12-15::edate:2023-01-15::cmap:BrBG_r::_r:43::dpi:100.png
+/plotting/auto/plot/24/which:st::csector:midwest::var:aridity::w:dep::p:day::year:2024::month:1::sdate:2022-12-15::edate:2023-01-15::cmap:BrBG_r::_r:43::dpi:100.png
 /plotting/auto/plot/28/network:IACLIMATE::station:IATAME::opt:rank::date:2024-07-26::_r:t::dpi:100::_cb:1.png
 /plotting/auto/plot/32/network:IACLIMATE::station:IATAME::year:2024::var:era5land_srad::gddbase:50::gddceil:86::how:sigma::cmap:jet::_r:t::dpi:100.png
 /plotting/auto/plot/32/network:IACLIMATE::station:IATAME::year:2024::var:era5land_srad::gddbase:50::gddceil:86::how:valrange::cmap:jet::_r:t::dpi:100.png
@@ -43,6 +49,7 @@
 /plotting/auto/plot/99/network:IACLIMATE::station:IATAME::year:2024::delta:sigma::_r:t::dpi:100::_cb:1.png
 /plotting/auto/plot/104/network:IACLIMATE::station:IATAME::date1:2024-05-07::date2:2024-08-05::days:14::days2:7::_r:t::dpi:100.png
 /plotting/auto/plot/109/by:state::sdate:2024-01-01%200000::edate:2024-07-17%202359::var:days::w:set::phenomenav1:TO::significancev1:W::e:all::cmap:jet::_r:t::dpi:100.png
+/plotting/auto/plot/109/by:state::sdate:2024-01-01%200000::edate:2024-08-20%202359::var:count_departure::w:set::phenomenav1:SV::significancev1:W::phenomenav2:TO::significancev2:W::e:all::cmap:jet::_r:t::dpi:100.png
 /plotting/auto/plot/111/_cb:1.txt
 /plotting/auto/plot/112/_cb:1.txt
 /plotting/auto/plot/114/_cb:1.txt
@@ -56,6 +63,8 @@
 /plotting/auto/plot/140/network:IA_ASOS::station:DSM::syear:1928::sday:0711::eday:0725::varname:avg_temp::w:none::thres:1::year:2024::_r:t::dpi:100.png
 /plotting/auto/plot/141/location:ames::ptype:rain::sdate:mar15::_r:t::dpi:100.png
 /plotting/auto/plot/141/location:ames::ptype:maxt::sdate:mar15::_r:t::dpi:100.png
+/plotting/auto/plot/163/csector:midwest::var:count::sdate:2024-01-01%200000::edate:2024-08-22%200000::filter:NONE::by:wfo::cmap:plasma::lbl:yes::_r:t::dpi:100.png
+/plotting/auto/plot/163/csector:SD::var:count::sdate:2024-01-01%200000::edate:2024-08-22%200000::filter:NONE::by:ugc::cmap:plasma::lbl:yes::_r:t::dpi:100.png
 /plotting/auto/plot/171/opt:ugc::network:WFO::station:MEG::state:IA::ugc:IAC169::c:single::phenomena:SV::significance:W::cmap:Greens::_r:43::dpi:100.png
 /plotting/auto/plot/177/network:ISUSM::station:BOOI4::opt:1::sts:2024-07-18%201000::ets:2024-07-25%201000::_r:t::dpi:100.png
 /plotting/auto/plot/177/network:ISUSM::station:BOOI4::opt:m::sts:2024-07-18%201000::ets:2024-07-25%201000::_r:t::dpi:100.png
