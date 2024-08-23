@@ -1,28 +1,26 @@
-"""What we need to do with HRRR"""
+"""HRRR Reflectivity Jobs.
 
-import datetime
+RUN from RUN_40_AFTER_2.sh for previous hour and six hours ago
+"""
+
 import subprocess
-import sys
-import time
+from datetime import datetime
+
+import click
 
 
-def main(argv):
+@click.command()
+@click.option("--valid", type=click.DateTime(), required=True)
+@click.option("--is-realtime", "rt", is_flag=True)
+def main(valid: datetime, rt: bool):
     """Stuff"""
-    valid = datetime.datetime(
-        int(argv[1]), int(argv[2]), int(argv[3]), int(argv[4])
-    )
-    tstring = valid.strftime("%Y %m %d %H")
-    extra = " --is-realtime" if argv[5] == "RT" else ""
-    cmds = [
-        f"python dl_hrrrref.py {tstring}",
-        f"python plot_ref.py --valid={valid:%Y-%m-%dT%H:%M:%S}{extra}",
-        f"python hrrr_ref2raster.py {tstring} {argv[5]}",
-    ]
-    for cmd in cmds:
-        subprocess.call(cmd.split())
-        # allow for some time for LDM to move data
-        time.sleep(120)
+    tstring = f"--valid={valid:%Y-%m-%dT%H:%M:%S}"
+    for py in ["dl_hrrrref.py", "plot_ref.py", "hrrr_ref2raster.py"]:
+        cmd = ["python", py, tstring]
+        if rt:
+            cmd.append("--is-realtime")
+        subprocess.call(cmd)
 
 
 if __name__ == "__main__":
-    main(sys.argv)
+    main()

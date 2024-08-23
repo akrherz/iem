@@ -1,19 +1,19 @@
 """Convert HRRR Grib Reflectivity to RASTERS matching ramp used with N0Q"""
 
-import datetime
 import json
 import os
 import subprocess
-import sys
 import tempfile
+from datetime import datetime, timedelta, timezone
 
+import click
 import numpy as np
 import pygrib
 import pyproj
 from affine import Affine
 from PIL import Image
 from pyiem.reference import ISO8601
-from pyiem.util import logger, utc
+from pyiem.util import archive_fetch, logger
 from rasterio.warp import reproject
 
 LOG = logger()
@@ -25,10 +25,10 @@ def do_grb(grib, valid, routes):
     """Process this grib object"""
     fxdelta = grib.forecastTime
     if grib.fcstimeunits == "mins":
-        fxvalid = valid + datetime.timedelta(minutes=fxdelta)
+        fxvalid = valid + timedelta(minutes=fxdelta)
         fxminutes = fxdelta
     else:
-        fxvalid = valid + datetime.timedelta(hours=fxdelta)
+        fxvalid = valid + timedelta(hours=fxdelta)
         fxminutes = int(fxdelta * 60.0)
     pngtemp = tempfile.NamedTemporaryFile(suffix=".png")
     projparams = grib.projparams
@@ -131,18 +131,20 @@ def workflow(valid, routes):
         do_grb(grbs[i + 1], valid, routes)
 
 
-def main(argv):
+@click.command()
+@click.option("--valid", type=click.DateTime(), required=True)
+@click.option("--is-realtime", "rt", is_flag=True)
+def main(valid: datetime, rt: bool):
     """So Something great"""
-    valid = utc(int(argv[1]), int(argv[2]), int(argv[3]), int(argv[4]))
-    routes = "ac" if argv[5] == "RT" else "a"
-    LOG.info("valid: %s routes: %s", valid, routes)
+    valid = valid.replace(tzinfo=timezone.utc)
+    LOG.info("valid: %s realtime: %s", valid, rt)
+    routes = "ac" if rt else "a"
     # See if we already have output
-    fn = valid.strftime(
-        "/mesonet/ARCHIVE/data/%Y/%m/%d/GIS/hrrr/%H/refd_0000.png"
-    )
-    if not os.path.isfile(fn):
-        workflow(valid, routes)
+    ppath = valid.strftime("%Y/%m/%d/GIS/hrrr/%H/refd_0000.png")
+    with archive_fetch(ppath) as fn:
+        if fn is None:
+            workflow(valid, routes)
 
 
 if __name__ == "__main__":
-    main(sys.argv)
+    main()
