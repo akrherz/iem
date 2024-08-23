@@ -126,9 +126,10 @@ def workflow(valid, routes):
     if not os.path.isfile(gribfn):
         LOG.warning("missing %s", gribfn)
         return
-    grbs = pygrib.open(gribfn)
-    for i in range(grbs.messages):
-        do_grb(grbs[i + 1], valid, routes)
+    with pygrib.open(gribfn) as grbs:
+        for grb in grbs:
+            if grb.shortName == "refd":
+                do_grb(grb, valid, routes)
 
 
 @click.command()

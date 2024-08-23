@@ -28,7 +28,12 @@ for _hr in range(0, 24, 6):
 
 def is_archive_complete(valid: datetime) -> bool:
     """Ensure we have the right file and is the right size."""
-    answer = 18 * 4 + (HOURS[valid.hour] - 18) + 1
+    # 15 minute data out 18 hours (ref + 4 ptype fields)
+    answer = 18 * 4 * 5
+    # Extended hours, when possible, have hourly data
+    answer += (HOURS[valid.hour] - 18) * 5
+    # The first timestamp
+    answer += 5
     ppath = valid.strftime("%Y/%m/%d/model/hrrr/%H/hrrr.t%Hz.refd.grib2")
     with archive_fetch(ppath) as gribfn:
         if gribfn is None:
@@ -55,11 +60,11 @@ def run(tmpfp: tempfile._TemporaryFileWrapper, valid: datetime):
         shr = f"{hr:02.0f}"
         if hr <= 18:
             uri = valid.strftime(
-                f"{AWS}hrrr.%Y%m%d/conus/" f"hrrr.t%Hz.wrfsubhf{shr}.grib2.idx"
+                f"{AWS}hrrr.%Y%m%d/conus/hrrr.t%Hz.wrfsubhf{shr}.grib2.idx"
             )
         else:
             uri = valid.strftime(
-                f"{AWS}hrrr.%Y%m%d/conus/" f"hrrr.t%Hz.wrfsfcf{shr}.grib2.idx"
+                f"{AWS}hrrr.%Y%m%d/conus/hrrr.t%Hz.wrfsfcf{shr}.grib2.idx"
             )
         LOG.info(uri)
         req = exponential_backoff(httpx.get, uri, timeout=30)
@@ -80,16 +85,21 @@ def run(tmpfp: tempfile._TemporaryFileWrapper, valid: datetime):
             if neednext:
                 offsets[-1].append(int(tokens[1]))
                 neednext = False
-            if tokens[3] == "REFD" and tokens[4] == "1000 m above ground":
-                offsets.append([int(tokens[1])])
-                neednext = True
+            if tokens[3] not in ["REFD", "CSNOW", "CICEP", "CFRZR", "CRAIN"]:
+                continue
+            if tokens[3] == "REFD" and tokens[4] != "1000 m above ground":
+                continue
+            offsets.append([int(tokens[1])])
+            neednext = True
 
-        if 0 < hr < 19 and len(offsets) != 4:
-            LOG.info(
-                "[%s] hr: %s offsets: %s",
+        answer = 20 if (0 < hr < 19) else 5
+        if len(offsets) != answer:
+            LOG.warning(
+                "[%s] hr: %s offsets: %s wanted: %s",
                 valid.strftime("%Y%m%d%H"),
                 hr,
                 offsets,
+                answer,
             )
         for pr in offsets:
             headers = {"Range": f"bytes={pr[0]}-{pr[1]}"}
