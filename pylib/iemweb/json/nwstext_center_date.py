@@ -1,6 +1,6 @@
 """.. title:: NWS Text Data by Center and Date
 
-Return to `JSON Services </json/>`_
+Return to `API Services </api/#json>`_
 
 Documentation for /json/nwstext_center_date.py
 ----------------------------------------------
@@ -32,9 +32,16 @@ import json
 from datetime import datetime, timedelta
 
 from pydantic import AwareDatetime, Field
+from pyiem.database import get_sqlalchemy_conn
 from pyiem.exceptions import IncompleteWebRequest
 from pyiem.util import utc
 from pyiem.webutil import CGIModel, iemapp
+from sqlalchemy import text
+
+OPTPILS = (
+    "AQA CFW DGT DSW FFA FFS FFW FLS FLW FWW HLS MWS MWW NPW NOW PNS PSH RER "
+    "RFW RWR RWS SMW SPS SRF SQW SVR SVS TCV TOR TSU WCN WSW"
+).split()
 
 
 class Schema(CGIModel):
@@ -55,7 +62,10 @@ class Schema(CGIModel):
         max_length=4,
     )
     opt: bool = Field(
-        False, description="Optional flag to limit to certain product types"
+        False,
+        description=(
+            f"Optional flag to limit to certain pil types {', '.join(OPTPILS)}"
+        ),
     )
     sts: AwareDatetime = Field(
         None,
@@ -67,7 +77,7 @@ class Schema(CGIModel):
     )
 
 
-@iemapp(help=__doc__, schema=Schema, default_tz="UTC", iemdb="afos")
+@iemapp(help=__doc__, schema=Schema, default_tz="UTC")
 def application(environ, start_response):
     """Answer request."""
     center = environ["center"]
@@ -83,23 +93,29 @@ def application(environ, start_response):
 
     root = {"products": []}
     pil_limiter = ""
+    params = {
+        "center": center,
+        "sts": environ["sts"],
+        "ets": environ["ets"],
+    }
     if environ["opt"]:
-        pil_limiter = """
-            and substr(pil, 1, 3) in ('AQA', 'CFW', 'DGT', 'DSW', 'FFA',
-            'FFS', 'FFW', 'FLS', 'FLW', 'FWW', 'HLS', 'MWS', 'MWW', 'NPW',
-            'NOW', 'PNS', 'PSH', 'RER', 'RFW', 'RWR', 'RWS', 'SMW', 'SPS',
-            'SRF', 'SQW', 'SVR', 'SVS', 'TCV', 'TOR', 'TSU', 'WCN', 'WSW')
-        """
-
-    environ["iemdb.afos.cursor"].execute(
-        "SELECT data, to_char(entered at time zone 'UTC', "
-        "'YYYY-MM-DDThh24:MI:00Z') as ee from products "
-        "where source = %s and entered >= %s and "
-        f"entered < %s {pil_limiter} ORDER by entered ASC",
-        (center, environ["sts"], environ["ets"]),
-    )
-    for row in environ["iemdb.afos.cursor"]:
-        root["products"].append({"data": row["data"], "entered": row["ee"]})
+        params["pils"] = OPTPILS
+        pil_limiter = "and substr(pil, 1, 3) = ANY(:pils) "
+    with get_sqlalchemy_conn("afos") as conn:
+        res = conn.execute(
+            text(
+                f"""
+                SELECT data, to_char(entered at time zone 'UTC',
+                'YYYY-MM-DDThh24:MI:00Z') as e from products
+                where source = :center and entered >= :sts and entered < :ets
+                {pil_limiter} ORDER by entered ASC
+            """
+            ),
+            params,
+        )
+        for row in res:
+            row = row._asdict()
+            root["products"].append({"data": row["data"], "entered": row["e"]})
 
     data = json.dumps(root)
 
