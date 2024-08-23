@@ -12,6 +12,7 @@ import sys
 import tempfile
 import time
 from datetime import datetime, timezone
+from typing import NoReturn, Optional, Union
 
 import click
 import httpx
@@ -26,7 +27,7 @@ for _hr in range(0, 24, 6):
     HOURS[_hr] = 48
 
 
-def is_archive_complete(valid: datetime) -> bool:
+def is_archive_complete(valid: datetime) -> Union[bool, NoReturn]:
     """Ensure we have the right file and is the right size."""
     # 15 minute data out 18 hours (ref + 4 ptype fields)
     answer = 18 * 4 * 5
@@ -51,6 +52,31 @@ def is_archive_complete(valid: datetime) -> bool:
         except Exception as exp:
             logging.debug(exp)
     LOG.warning("Archive file %s is corrupt? Aborting...", ppath)
+    sys.exit(1)
+
+
+def wait_for_upstream(valid: datetime) -> Union[Optional[None], NoReturn]:
+    """Wait for upstream availability."""
+    lasthour = HOURS[valid.hour]
+    if lasthour == 18:
+        uri = valid.strftime(
+            f"{AWS}hrrr.%Y%m%d/conus/hrrr.t%Hz.wrfsubhf{lasthour}.grib2.idx"
+        )
+    else:
+        uri = valid.strftime(
+            f"{AWS}hrrr.%Y%m%d/conus/hrrr.t%Hz.wrfsfcf{lasthour}.grib2.idx"
+        )
+    # Wait for at most 45 minutes for the upstream to be available
+    for _ in range(45):
+        try:
+            resp = httpx.get(uri, timeout=30)
+            resp.raise_for_status()
+            if resp.status_code == 200:
+                return
+        except Exception as exp:
+            LOG.info("Failed to fetch %s: %s, waiting 60s", uri, exp)
+        time.sleep(60)
+    LOG.warning("Failed to find upstream file %s, aborting", uri)
     sys.exit(1)
 
 
@@ -144,6 +170,7 @@ def main(valid: datetime, skiprecheck: bool):
     """Go Main Go"""
     if is_archive_complete(valid):
         return
+    wait_for_upstream(valid)
     with tempfile.NamedTemporaryFile("wb", delete=False) as tmpfp:
         run(tmpfp, valid.replace(tzinfo=timezone.utc))
     if skiprecheck:

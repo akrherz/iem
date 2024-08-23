@@ -9,7 +9,6 @@ please be patient!
 """
 
 import datetime
-import os
 from io import BytesIO
 
 import matplotlib.colors as mpcolors
@@ -17,7 +16,7 @@ import numpy as np
 import pygrib
 from PIL import Image
 from pyiem.plot import MapPlot, ramp2df
-from pyiem.util import get_autoplot_context, utc
+from pyiem.util import archive_fetch, get_autoplot_context, utc
 
 PDICT = {
     "sector": "Plot by State / Sector",
@@ -85,18 +84,18 @@ def mp_factory(ctx):
 def add_forecast(img, ctx, valid, fhour, x, y):
     """Overlay things."""
     ts = valid - datetime.timedelta(hours=fhour)
-    gribfn = ts.strftime(
-        "/mesonet/ARCHIVE/data/%Y/%m/%d/model/hrrr/%H/hrrr.t%Hz.refd.grib2"
-    )
-    if not os.path.isfile(gribfn):
-        return
-    grbs = pygrib.open(gribfn)
-    try:
-        gs = grbs.select(shortName="refd", level=1000, forecastTime=fhour * 60)
-    except ValueError:
-        grbs.close()
-        return
-    ref = gs[0]["values"]
+    ppath = ts.strftime("%Y/%m/%d/model/hrrr/%H/hrrr.t%Hz.refd.grib2")
+    with archive_fetch(ppath) as gribfn:
+        if gribfn is None:
+            return
+        with pygrib.open(gribfn) as grbs:
+            try:
+                gs = grbs.select(
+                    shortName="refd", level=1000, forecastTime=fhour * 60
+                )
+            except ValueError:
+                return
+            ref = gs[0]["values"]
     # HRRR anything below -9 is missing
     ref = np.where(ref < -9, -100, ref)
     if "lats" not in ctx:
