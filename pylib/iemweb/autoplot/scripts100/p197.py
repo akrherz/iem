@@ -66,10 +66,7 @@ PDICT2 = {
 def get_description():
     """Return a dict describing how to call this plotter"""
     desc = {"data": True, "cache": 3600, "description": __doc__}
-    # Compute a better default for corn planting.
-    today = datetime.date.today() - datetime.timedelta(days=7)
-    if today.month < 5 or today.month > 6:
-        today = datetime.date(today.year - 1, 5, 15)
+    today = datetime.date.today()
     desc["arguments"] = [
         dict(
             type="csector",
