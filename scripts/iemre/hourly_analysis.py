@@ -132,7 +132,7 @@ def use_rtma(ts, kind):
         try:
             grbs = pygrib.open(fn)
             for task in tasks[kind]:
-                grb = grbs.select(shortName=task)[0]
+                grb = grbs.select(shortName=task, typeOfGeneratingProcess=0)[0]
                 res.append(grb2iemre(grb))
             return res[0] if len(res) == 1 else res
         except Exception as exp:
