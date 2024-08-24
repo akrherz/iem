@@ -1,6 +1,6 @@
 """HRRR Reflectivity Jobs.
 
-RUN from RUN_40_AFTER_2.sh for previous hour and six hours ago
+RUN from RUN_HRRR_REF.sh for previous hour and six hours ago
 """
 
 import subprocess
