@@ -158,7 +158,9 @@ def run(tmpfp: tempfile._TemporaryFileWrapper, valid: datetime):
     os.unlink(tmpfp.name)
 
 
-@click.command()
+@click.command(
+    context_settings={"ignore_unknown_options": True, "allow_extra_args": True}
+)
 @click.option("--valid", type=click.DateTime(), required=True)
 @click.option(
     "--skip-recheck",

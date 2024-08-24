@@ -1,15 +1,29 @@
-"""Placefile for NEXRAD l3 storm attributes
+""".. title:: Generate IEM NEXRAD L3 Attributes Placefile
 
-TODO suggestions:
-> On another note, it might be nice to set thresholds for visibility when
-> things get cluttered, such as ~420 for overall visibility so you can
-> zoom out to max to drop the icons, and maybe a lower value (like 200)
-> for storms that don't have either MDA, Hail, or TVS on them. This
-> shouldn't take more than changing a few constants and maybe an
-> if/assignment statement or two.
+Changelog
+---------
 
-TODO:
-Add storm tracks.
+- 2024-08-24: Update to pydantic validation and documentation release.
+
+Example Requests
+----------------
+
+Get the current attributes for AMX
+
+https://mesonet.agron.iastate.edu/request/grx/l3attr.txt?nexrad=AMX
+
+Get the attributes for a radar at -80.413 longitude
+
+https://mesonet.agron.iastate.edu/request/grx/l3attr.txt?lon=-80.413
+
+Get the current attributes with a Possibility of Hail greater than 10%
+
+https://mesonet.agron.iastate.edu/request/grx/l3attr.txt?poh=10
+
+Same request, but version 3.0
+
+https://mesonet.agron.iastate.edu/request/grx/l3attr.txt?poh=10&version=3.0
+
 """
 
 # pylint: disable=unpacking-non-sequence
@@ -18,13 +32,52 @@ import math
 import numpy as np
 import pandas as pd
 import pyproj
-from pyiem.util import convert_value, get_sqlalchemy_conn
-from pyiem.webutil import iemapp
-from pymemcache.client import Client
+from pydantic import Field
+from pyiem.database import get_sqlalchemy_conn
+from pyiem.util import convert_value, utc
+from pyiem.webutil import CGIModel, iemapp
 from sqlalchemy import text
 
 # Do geo math in US National Atlas Equal Area
 P3857 = pyproj.Proj("EPSG:3857")
+
+
+class Schema(CGIModel):
+    """See how we are called"""
+
+    lon: str = Field(
+        default=None,
+        description="Longitude of radar site according to GR",
+    )
+    max_size: float = Field(
+        default=0,
+        description="Minimum hail size to include",
+    )
+    meso: float = Field(
+        default=-1,
+        description="Minimum MESO size to include",
+    )
+    nexrad: str = Field(
+        default=None,
+        description="Three character NEXRAD Site Identifier",
+        min_length=3,
+        max_length=3,
+    )
+    poh: int = Field(
+        default=0,
+        description="Probability of Hail threshold",
+        ge=0,
+        le=100,
+    )
+    tvs: bool = Field(
+        default=False,
+        description="Include TVS in output",
+    )
+    version: str = Field(
+        default="2",
+        description="Version of Placefile to generate",
+    )
+
 
 ICONFILE = "https://mesonet.agron.iastate.edu/request/grx/storm_attribute.png"
 SECONDS = np.array([15 * 60, 30 * 60, 45 * 60, 60 * 60])
@@ -314,7 +367,7 @@ def get_df(nexrad, meso, tvs, poh, max_size):
     }
     limiter = ""
     meso_limiter = ""
-    if nexrad != "":
+    if nexrad is not None:
         limiter = " and nexrad = :nexrad "
     if meso >= 0:
         meso_limiter = " and meso != 'NONE' "
@@ -372,7 +425,7 @@ def produce_content_v3(df, title, titleadd):
     """v3 stuff."""
     res = (
         "Placefile {\n"
-        f'Title = "{title}{titleadd}"\n'
+        f'Title = "{title}{titleadd} @{utc():%H%M}Z"\n'
         "Refresh = 180\n"
         "Define Iconsheet\n"
         "{\n"
@@ -423,7 +476,7 @@ def produce_content_v2(df, threshold, title, titleadd):
     res = (
         "Refresh: 3\n"
         f"Threshold: {threshold}\n"
-        f"Title: {title}{titleadd}\n"
+        f"Title: {title}{titleadd}  @{utc():%H%M}Z\n"
         f'IconFile: 1, 32, 32, 16, 16, "{ICONFILE}"\n'
         'Font: 1, 11, 1, "Courier New"\n'
     )
@@ -461,30 +514,44 @@ def produce_content_v2(df, threshold, title, titleadd):
     return res
 
 
-@iemapp()
-def application(environ, start_response):
-    """Go Main Go"""
-    nexrad = environ.get("nexrad", "").upper()[:3]
-    if nexrad == "":
-        lon = environ.get("lon")
+def get_mckey(environ: dict) -> str:
+    """Figure out the memcache key"""
+    nexrad = compute_nexrad(environ)
+    poh = environ["poh"]
+    meso = environ["meso"]
+    tvs = environ["tvs"]
+    max_size = environ["max_size"]
+    v3 = environ["version"].startswith("3.")
+    return f"/request/grx/i3attr|{nexrad}|{poh}|{meso}|{tvs}|{max_size}|{v3}"
+
+
+def compute_nexrad(environ: dict) -> str:
+    nexrad = environ["nexrad"]
+    if nexrad is None:
+        lon = environ["lon"]
         if lon is not None:
             for line in RADARS.split("\n"):
                 if line.find(lon) > 0:
                     nexrad = line[1:4].upper()
+    return nexrad
 
-    poh = int(environ.get("poh", 0))
-    meso = float(environ.get("meso", -1))
-    tvs = "tvs" in environ
-    max_size = float(environ.get("max_size", 0))
-    v3 = environ.get("version", "").startswith("3.")
-    mckey = f"/request/grx/i3attr|{nexrad}|{poh}|{meso}|{tvs}|{max_size}|{v3}"
-    mc = Client("iem-memcached:11211")
-    res = mc.get(mckey)
-    if not res:
-        res = produce_content(nexrad, poh, meso, tvs, max_size, v3)
-        mc.set(mckey, res, 60)
-    else:
-        res = res.decode("utf-8")
-    mc.close()
+
+@iemapp(
+    help=__doc__,
+    schema=Schema,
+    memcachekey=get_mckey,
+    memcacheexpire=60,
+    content_type="text/plain",
+)
+def application(environ, start_response):
+    """Go Main Go"""
+    nexrad = compute_nexrad(environ)
+
+    poh = environ["poh"]
+    meso = environ["meso"]
+    tvs = environ["tvs"]
+    max_size = environ["max_size"]
+    v3 = environ["version"].startswith("3.")
+    res = produce_content(nexrad, poh, meso, tvs, max_size, v3)
     start_response("200 OK", [("Content-type", "text/plain")])
-    return [res.encode("ascii")]
+    return res.encode("ascii")
