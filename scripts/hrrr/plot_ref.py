@@ -61,6 +61,7 @@ def run(tmpdir, valid, routes):
 
             try:
                 gs = grbs.select(
+                    shortName="refd",
                     indicatorOfUnitOfTimeRange=0 if is_minute else 1,
                     forecastTime=minute if is_minute else int(minute / 60),
                 )
