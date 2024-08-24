@@ -27,7 +27,7 @@ for _hr in range(0, 24, 6):
     HOURS[_hr] = 48
 
 
-def is_archive_complete(valid: datetime) -> Union[bool, NoReturn]:
+def is_archive_complete(valid: datetime) -> Union[Optional[bool], NoReturn]:
     """Ensure we have the right file and is the right size."""
     # 15 minute data out 18 hours (ref + 4 ptype fields)
     answer = 18 * 4 * 5
