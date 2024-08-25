@@ -113,8 +113,14 @@ $theform = <<<EOM
 <br /><i>Can be left blank</i>
 <br /><input placeholder="FXUS63" type="text" name="ttaaii" maxlength="6" size="6"></p>
 
-<p><label for="limit">Date Descending Entries</label>
+<p><label for="limit">Entries</label>
 <br /><input type="text" name="limit" maxlength="4" size="6" value="1"></p>
+
+<p><strong>Time Sort:</strong>
+<br /><input type="radio" name="order" value="desc" id="desc" checked>
+<label for="desc">Newest First</label>&nbsp;&nbsp;
+<input type="radio" name="order" value="asc" id="asc">
+<label for="asc">Oldest First</label></p>
 
 <p><label for="sdate">Start Date @ 00 UTC</label>
 <br /><input id="sdate" type="text" name="sdate" value="No Limit"></p>

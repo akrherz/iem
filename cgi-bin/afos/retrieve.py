@@ -1,5 +1,8 @@
 """.. title:: Retrieve NWS Text Products
 
+Return to `API Services </api/>`_ or
+`NWS Text Products Interface </wx/afos/>`_.
+
 Documentation for /cgi-bin/afos/retrieve.py
 -------------------------------------------
 
@@ -10,6 +13,8 @@ with minimal latency.
 Changelog
 ~~~~~~~~~
 
+- 2024-08-25: Add ``order`` parameter to allow for order of the returned
+  products.
 - 2024-03-29: Initial documentation release and migrate to a pydantic schema
   verification.
 
@@ -19,12 +24,12 @@ Examples
 Return all TORnado warnings issued between 20 and 21 UTC on 27 Apr 2011 as
 a zip file.
 
-  https://mesonet.agron.iastate.edu/cgi-bin/afos/retrieve.py?\
+https://mesonet.agron.iastate.edu/cgi-bin/afos/retrieve.py?\
 sdate=2011-04-27T20:00Z&edate=2011-04-27T21:00Z&pil=TOR&fmt=zip&limit=9999
 
 Return the last Area Forecast Discussion from NWS Des Moines as text
 
-  https://mesonet.agron.iastate.edu/cgi-bin/afos/retrieve.py?pil=AFDDMX
+https://mesonet.agron.iastate.edu/cgi-bin/afos/retrieve.py?pil=AFDDMX
 
 """
 
@@ -101,6 +106,13 @@ class MyModel(CGIModel):
             "value is inclusive."
         ),
     )
+    order: str = Field(
+        default="desc",
+        description=(
+            "The order of the returned products, either 'asc' or 'desc'"
+        ),
+        pattern="^(asc|desc)$",
+    )
     ttaaii: str = Field(
         "",
         description=(
@@ -144,13 +156,13 @@ def zip_handler(cursor):
     return [bio.getvalue()]
 
 
-def special_metar_logic(pils, limit, fmt, sio):
+def special_metar_logic(pils, limit, fmt, sio, order):
     access = get_dbconn("iem")
     cursor = access.cursor()
     sql = (
         "SELECT raw from current_log c JOIN stations t on "
         "(t.iemid = c.iemid) WHERE raw != '' and "
-        f"id = '{pils[0][3:].strip()}' ORDER by valid DESC LIMIT {limit}"
+        f"id = '{pils[0][3:].strip()}' ORDER by valid {order} LIMIT {limit}"
     )
     cursor.execute(sql)
     for row in cursor:
@@ -176,6 +188,7 @@ def special_metar_logic(pils, limit, fmt, sio):
 @iemapp(help=__doc__, schema=MyModel, parse_times=False)
 def application(environ, start_response):
     """Process the request"""
+    order = environ["order"]
     # Expand PILs
     pils = pil_logic(environ["pil"])
     # Establish our date range
@@ -206,7 +219,7 @@ def application(environ, start_response):
 
     sio = StringIO()
     if pils[0][:3] == "MTR":
-        return special_metar_logic(pils, environ["limit"], fmt, sio)
+        return special_metar_logic(pils, environ["limit"], fmt, sio, order)
 
     params = {
         "pils": pils,
@@ -229,12 +242,14 @@ def application(environ, start_response):
         "to_char(entered at time zone 'UTC', 'YYYYMMDDHH24MI') as ts "
         f"from products WHERE {plimit} "
         f"and entered >= :sdate and entered <= :edate {centerlimit} "
-        f"{ttlimit} ORDER by entered DESC LIMIT :limit"
+        f"{ttlimit} ORDER by entered {order} LIMIT :limit"
     )
     # Query optimization when sdate is very old and perhaps we could reach
     # the limit by looking at the last 31 days of data
     sdates = [environ["sdate"]]
-    if environ["sdate"] < (environ["edate"] - timedelta(days=365)):
+    if environ["sdate"] < (environ["edate"] - timedelta(days=365)) and (
+        order == "desc"
+    ):
         sdates = [utc() - timedelta(days=31), environ["sdate"]]
     with get_sqlalchemy_conn("afos") as conn:
         for sdate in sdates:
