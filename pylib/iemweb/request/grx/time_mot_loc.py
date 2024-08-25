@@ -1,4 +1,19 @@
-"""Serve Time Motion Location Vectors."""
+""".. title:: NWS TOR+SVR Warning Time-Mot-Loc
+
+Changelog
+---------
+
+- 2024-08-25: Initial documentation and pydantic validation
+
+Example Requests
+----------------
+
+Provide values for a time on 21 May 2024
+
+https://mesonet.agron.iastate.edu/request/grx/time_mot_loc.txt\
+?all&version=1.5&valid=2024-05-21T20:00:00Z
+
+"""
 
 import datetime
 import math
@@ -6,11 +21,30 @@ import re
 from io import StringIO
 from zoneinfo import ZoneInfo
 
-from pyiem.util import get_dbconnc, utc
-from pyiem.webutil import iemapp
+from pydantic import AwareDatetime, Field
+from pyiem.database import get_dbconnc
+from pyiem.util import utc
+from pyiem.webutil import CGIModel, iemapp
 
 LOLA = re.compile(r"(?P<lon>[0-9\.\-]+) (?P<lat>[0-9\.\-]+)")
 SQLISO = "YYYY-MM-DDThh24:MI:SSZ"
+
+
+class Schema(CGIModel):
+    """See how we are called."""
+
+    all: str = Field(
+        default=None,
+        description="Include all warnings, not just Tornado",
+    )
+    valid: AwareDatetime = Field(
+        default=None,
+        description="The valid time to generate the product for.",
+    )
+    version: float = Field(
+        default=1.0,
+        description="The version of the GR product to generate.",
+    )
 
 
 def extrapolate(lon, lat, distance, drct):
@@ -80,25 +114,22 @@ def gentext(sio, row, grversion):
     sio.write("Threshold: 999\n")
 
 
-@iemapp()
+@iemapp(help=__doc__, schema=Schema)
 def application(environ, start_response):
     """Our WSGI service."""
-    grversion = float(environ.get("version", 1.0))
-    is_all = "all" in environ
-    phenoms = ["TO", "SV"] if is_all else ["TO"]
+    grversion = environ["version"]
+    phenoms = ["TO", "SV"] if environ["all"] is not None else ["TO"]
     pgconn, cursor = get_dbconnc("postgis")
     valid = utc()
     refresh = 60
-    if "valid" in environ:
+    if environ["valid"]:
         # pylint: disable=no-value-for-parameter
-        valid = datetime.datetime.strptime(
-            environ.get("valid")[:16], "%Y-%m-%dT%H:%M"
-        ).replace(tzinfo=ZoneInfo("UTC"))
+        valid = environ["valid"]
         refresh = 86400
     t1 = valid
     t2 = valid
     tmlabel = valid.strftime("%H%Mz")
-    if grversion >= 1.5 or "valid" in environ:
+    if grversion >= 1.5 or environ["valid"]:
         # Pull larger window of data to support TimeRange
         t1 = valid - datetime.timedelta(hours=2)
         t2 = valid + datetime.timedelta(hours=2)
@@ -110,14 +141,14 @@ def application(environ, start_response):
         polygon_begin, polygon_end, eventid, wfo, phenomena,
         to_char(polygon_begin at time zone 'UTC', '{SQLISO}') as iso_begin,
         to_char(polygon_end at time zone 'UTC', '{SQLISO}') as iso_end
-        from sbw_{valid.year} WHERE polygon_end > %s and
+        from sbw WHERE vtec_year = %s and polygon_end > %s and
         polygon_begin < %s and phenomena = ANY(%s)
         and tml_direction is not null and status != 'CAN' and
         polygon_end > polygon_begin""",
-        (t1, t2, phenoms),
+        (valid.year, t1, t2, phenoms),
     )
     sio = StringIO()
-    label = "TOR+SVR" if is_all else "TOR"
+    label = "TOR+SVR" if environ["all"] is not None else "TOR"
     sio.write(
         f"RefreshSeconds: {refresh}\n"
         "Threshold: 999\n"

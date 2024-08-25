@@ -67,6 +67,13 @@
 /plotting/auto/plot/160/station:GTTI4::dt:2024-08-23%201620::var:primary::w:both::_r:t::dpi:100.png
 /plotting/auto/plot/163/csector:midwest::var:count::sdate:2024-01-01%200000::edate:2024-08-22%200000::filter:NONE::by:wfo::cmap:plasma::lbl:yes::_r:t::dpi:100.png
 /plotting/auto/plot/163/csector:SD::var:count::sdate:2024-01-01%200000::edate:2024-08-22%200000::filter:NONE::by:ugc::cmap:plasma::lbl:yes::_r:t::dpi:100.png
+/plotting/auto/plot/163/csector:midwest::var:days::sdate:2024-01-01%200000::edate:2024-08-26%200000::filter:NONE::by:wfo::cmap:plasma::lbl:yes::_r:t::dpi:100.png
+/plotting/auto/plot/163/csector:midwest::var:count_rank::sdate:2024-01-01%200000::edate:2024-08-26%200000::filter:NONE::by:wfo::cmap:plasma::lbl:yes::_r:t::dpi:100.png
+/plotting/auto/plot/163/csector:midwest::var:count_departure::sdate:2024-01-01%200000::edate:2024-08-26%200000::filter:NONE::by:wfo::cmap:plasma::lbl:yes::_r:t::dpi:100.png
+/plotting/auto/plot/163/csector:midwest::var:count_standard::sdate:2024-01-01%200000::edate:2024-08-26%200000::filter:NONE::by:wfo::cmap:plasma::lbl:yes::_r:t::dpi:100.png
+/plotting/auto/plot/165/w:air::sector:IA::var:spring_below::popt:contour::year:2020::threshold:32::cmap:BrBG::_r:t::dpi:100.png
+/plotting/auto/plot/165/w:air::sector:IA::var:spring_below::popt:contour::year:2020::threshold:32::p:50::cmap:BrBG::_r:t::dpi:100.png
+/plotting/auto/plot/165/w:air::sector:IA::var:high_above::popt:values::year:2020::threshold:32::p:50::sday:0824::syear:1893::eyear:2024::cmap:BrBG::_r:t::dpi:100.png
 /plotting/auto/plot/171/opt:ugc::network:WFO::station:MEG::state:IA::ugc:IAC169::c:single::phenomena:SV::significance:W::cmap:Greens::_r:43::dpi:100.png
 /plotting/auto/plot/177/network:ISUSM::station:BOOI4::opt:1::sts:2024-07-18%201000::ets:2024-07-25%201000::_r:t::dpi:100.png
 /plotting/auto/plot/177/network:ISUSM::station:BOOI4::opt:m::sts:2024-07-18%201000::ets:2024-07-25%201000::_r:t::dpi:100.png
