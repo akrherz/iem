@@ -1,10 +1,14 @@
-"""Legacy stuff."""
+""".. title:: SchoolNet Precipitation Rates
+
+Very much legacy stuff.
+
+"""
 
 import datetime
 from io import StringIO
 from zoneinfo import ZoneInfo
 
-from pyiem.util import get_dbconnc
+from pyiem.database import get_dbconnc
 from pyiem.webutil import iemapp
 
 
@@ -19,7 +23,7 @@ def diff(nowVal, pastVal, mulli):
     return "%5.2f," % (differ * mulli)
 
 
-@iemapp()
+@iemapp(help=__doc__)
 def application(environ, start_response):
     """Go Main."""
     sio = StringIO()
@@ -40,7 +44,7 @@ def application(environ, start_response):
     )
 
     if s.strftime("%Y%m%d") == datetime.datetime.now().strftime("%Y%m%d"):
-        IEM, cursor = get_dbconnc("iem")
+        _IEM, cursor = get_dbconnc("iem")
         cursor.execute(
             """SELECT s.id as station, valid, pday from current_log c JOIN
         stations s on (s.iemid = c.iemid) WHERE
@@ -48,12 +52,10 @@ def application(environ, start_response):
             (station, s, e),
         )
     else:
-        SNET, cursor = get_dbconnc("snet")
+        _SNET, cursor = get_dbconnc("snet")
 
         cursor.execute(
-            """SELECT station, valid, pday from t"""
-            + s.strftime("%Y_%m")
-            + """ WHERE
+            f"""SELECT station, valid, pday from t{s:%Y_%m} WHERE
             station = %s and valid >= %s and valid < %s ORDER by valid ASC""",
             (station, s, e),
         )

@@ -1,4 +1,14 @@
-"""Legacy."""
+""".. title:: Ancient IEM webpage that lingers
+
+Example Usage
+-------------
+
+Get the Ames weather on 11 September 2001
+
+https://mesonet.agron.iastate.edu/cgi-bin/onsite/birthday/getweather.py\
+?city=IATDSM&year=2011&month=9&day=11
+
+"""
 
 import datetime
 from io import StringIO
@@ -85,7 +95,6 @@ def get_values(city, dateStr):
 
 def get_day(sio, city, ts):
     """Yawn."""
-    str_month = ts.strftime("%B")
     year = str(ts.year)
     month = str(ts.month)
     day = str(ts.day)
@@ -102,13 +111,8 @@ def get_day(sio, city, ts):
 
     sio.write('<div class="col-md-2">')
     sio.write(
-        '<img src="/content/date.php?year='
-        + year
-        + "&month="
-        + str_month
-        + "&day="
-        + day
-        + '"><BR>'
+        f'<img src="/content/date.php?year={year}&month={month}'
+        f'&day={day}"><br />'
     )
     sio.write("<TABLE>")
     sio.write("<TR><TH>HIGH </TH><TD> " + str(high) + "</TD></TR>")
@@ -126,7 +130,6 @@ def get_day(sio, city, ts):
 
 def now_get_day(sio, city, ts):
     """Yawn."""
-    str_month = ts.strftime("%B")
     year = str(ts.year)
     month = str(ts.month)
     day = str(ts.day)
@@ -143,13 +146,8 @@ def now_get_day(sio, city, ts):
     sio.write('<div class="col-md-3">')
     sio.write('<font color="BLUE">HAPPY BIRTHDAY!!</font><BR><BR>')
     sio.write(
-        '<img src="/content/date.php?year='
-        + year
-        + "&month="
-        + str_month
-        + "&day="
-        + day
-        + '"><BR>'
+        f'<img src="/content/date.php?year={year}&month={month}'
+        f'&day={day}"><br />'
     )
     sio.write("<TABLE>")
     sio.write("<TR><TH>HIGH </TH><TD> " + str(high) + "</TD></TR>")

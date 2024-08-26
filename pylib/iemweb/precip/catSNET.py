@@ -1,12 +1,14 @@
-"""
-Generate web output for precip data
+""".. title:: SchoolNet Hourly Precipitation Grid
+
+Very much legacy stuff.
+
 """
 
 import datetime
 from io import StringIO
 
+from pyiem.database import get_dbconnc
 from pyiem.network import Table as NetworkTable
-from pyiem.util import get_dbconnc
 from pyiem.webutil import iemapp
 
 nt = NetworkTable(["KCCI", "KIMIT", "KELO"], only_online=False)
@@ -140,7 +142,7 @@ def loadstations():
         totp[station] = 0
 
 
-@iemapp()
+@iemapp(help=__doc__)
 def application(environ, start_response):
     """Go Main Go."""
     sio = StringIO()
