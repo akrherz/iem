@@ -1,2 +1,2 @@
 <?php
-Header("Location: /");
+Header("Location: /api");

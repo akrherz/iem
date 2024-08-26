@@ -1,6 +1,6 @@
 """.. title:: Generate GeoJSON of 7 AM reports
 
-Return to `API Services </json/#json>`_
+Return to `API Services </api/#json>`_
 
 Changelog
 ---------
@@ -13,6 +13,14 @@ Example Requests
 Get reports for 7 AM on 1 July 2024
 
 https://mesonet.agron.iastate.edu/geojson/7am.py?dt=2024-07-01
+
+Get reports for 7 AM on 1 July 2024 for COOP stations
+
+https://mesonet.agron.iastate.edu/geojson/7am.py?dt=2024-07-01&group=coop
+
+Get the morning reports on that date for ASOS stations
+
+https://mesonet.agron.iastate.edu/geojson/7am.py?dt=2024-07-01&group=azos
 
 """
 
@@ -31,15 +39,15 @@ class Schema(CGIModel):
     """See how we are called."""
 
     callback: str = Field(
-        None,
+        default=None,
         description="Optional JSONP callback function name",
     )
     group: str = Field(
-        "coop",
+        default="coop",
         description="The group of stations to generate data for",
     )
     dt: datetime.date = Field(
-        datetime.date.today(),
+        default=datetime.date.today(),
         description="Date to generate data for",
     )
 

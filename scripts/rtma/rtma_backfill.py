@@ -5,12 +5,13 @@ Called from RUN_2AM.sh for 3 days ago.
 
 import os
 import subprocess
-import sys
 import tempfile
+from datetime import datetime, timezone
 
+import click
+import httpx
 import pygrib
-import requests
-from pyiem.util import logger, utc
+from pyiem.util import archive_fetch, logger
 
 LOG = logger()
 WMO_XREF = {
@@ -29,46 +30,44 @@ GRIB_XREF = {
 }
 
 
-def main(argv):
+def workflow(now: datetime):
     """Run for a given date."""
-    now = utc(int(argv[1]), int(argv[2]), int(argv[3]))
-    for hr in range(24):
-        now = now.replace(hour=hr)
-        fn = now.strftime(
-            "/mesonet/ARCHIVE/data/%Y/%m/%d/"
-            "model/rtma/%H/rtma.t%Hz.awp2p5f000.grib2"
-        )
-        if not os.path.isfile(fn):
+    ppath = now.strftime("%Y/%m/%d/model/rtma/%H/rtma.t%Hz.awp2p5f000.grib2")
+    with archive_fetch(ppath) as fn:
+        if fn is None:
             jobs = list(WMO_XREF.keys())
         else:
             jobs = []
-            grbs = pygrib.open(fn)
-            for key, sn in GRIB_XREF.items():
-                try:
-                    _ = grbs.select(shortName=sn)[0].values
-                except Exception:
-                    jobs.append(key)
-            grbs.close()
-        if jobs:
-            LOG.warning("%s jobs %s", now, jobs)
-        for key in jobs:
-            url = (
-                "https://www.ncei.noaa.gov/data/national-digital-guidance-"
-                f"database/access/{'historical/' if now.year < 2020 else ''}"
-                f"{now:%Y%m}/{now:%Y%m%d}/"
-                f"{WMO_XREF[key]}_KWBR_{now:%Y%m%d%H%M}"
-            )
-            LOG.info("Downloading %s", url)
-            req = requests.get(url, timeout=60)
-            if req.status_code != 200:
-                LOG.info("Failed to get %s got %s", url, req.status_code)
-                continue
-            # We need to inspect this file as we do not want the forecast
-            # analysis error grib data, ie some of these files have 2 messages
-            with tempfile.NamedTemporaryFile(delete=False) as fh:
-                fh.write(req.content)
-            try:
-                grbs = pygrib.open(fh.name)
+            with pygrib.open(fn) as grbs:
+                for key, sn in GRIB_XREF.items():
+                    try:
+                        _ = grbs.select(
+                            shortName=sn, typeOfGeneratingProcess=0
+                        )[0].values
+                    except Exception:
+                        jobs.append(key)
+    if jobs:
+        LOG.warning("%s jobs %s", now, jobs)
+    for key in jobs:
+        url = (
+            "https://www.ncei.noaa.gov/data/national-digital-guidance-"
+            f"database/access/{'historical/' if now.year < 2020 else ''}"
+            f"{now:%Y%m}/{now:%Y%m%d}/"
+            f"{WMO_XREF[key]}_KWBR_{now:%Y%m%d%H%M}"
+        )
+        LOG.info("Downloading %s", url)
+        try:
+            resp = httpx.get(url, timeout=60)
+            resp.raise_for_status()
+        except Exception as exp:
+            LOG.info("Failed to get %s got %s", url, exp)
+            continue
+        # We need to inspect this file as we do not want the forecast
+        # analysis error grib data, ie some of these files have 2 messages
+        with tempfile.NamedTemporaryFile(delete=False) as fh:
+            fh.write(resp.content)
+        try:
+            with pygrib.open(fh.name) as grbs:
                 msgs = grbs.select(
                     shortName=GRIB_XREF[key],
                     typeOfGeneratingProcess=0,
@@ -90,13 +89,23 @@ def main(argv):
                     fh.name,
                 ]
                 subprocess.call(cmd)
-                grbs.close()
-            except Exception:
-                LOG.warning("%s not found in %s", key, fn)
-            os.unlink(fh.name)
+        except Exception:
+            LOG.warning("%s not found in %s", key, fn)
+        os.unlink(fh.name)
+
+
+@click.command()
+@click.option(
+    "--date", "dt", type=click.DateTime(), help="Specify UTC valid time"
+)
+def main(dt: datetime):
+    """Go Main Go."""
+    dt = dt.replace(tzinfo=timezone.utc)
+    with tempfile.TemporaryDirectory() as _tmpdir:
+        os.chdir(_tmpdir)
+        for hr in range(24):
+            workflow(dt.replace(hour=hr))
 
 
 if __name__ == "__main__":
-    with tempfile.TemporaryDirectory() as _tmpdir:
-        os.chdir(_tmpdir)
-        main(sys.argv)
+    main()
