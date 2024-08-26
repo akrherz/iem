@@ -1,6 +1,6 @@
 """.. title:: Local Storm Reports GeoJSON and More
 
-Return to `JSON Services </json/>`_
+Return to `API Services </api/#json>`_
 
 This service does a number of different things with Local Storm Reports.
 
@@ -18,6 +18,11 @@ UTC date period is specified that equates to the US Central date.
 
 https://mesonet.agron.iastate.edu/geojson/lsr.geojson?states=WI&\
 ets=2024-07-13T05:00Z&sts=2024-07-14T05:00Z
+
+Provide the LSRs associated with Des Moines Tornado Warning 47
+
+https://mesonet.agron.iastate.edu/geojson/lsr.geojson?phenomena=TO&\
+significance=W&eventid=47&year=2024&wfo=DMX
 
 """
 
