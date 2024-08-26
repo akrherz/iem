@@ -31,6 +31,24 @@ Return the last Area Forecast Discussion from NWS Des Moines as text
 
 https://mesonet.agron.iastate.edu/cgi-bin/afos/retrieve.py?pil=AFDDMX
 
+Retrieve recent METAR observations for KDSM, note that this only works for
+recent data, no archive support with this API.
+
+https://mesonet.agron.iastate.edu/cgi-bin/afos/retrieve.py?pil=MTRDSM
+
+Use the WAR pil shortcut to retrieve a number of Des Moines products
+
+https://mesonet.agron.iastate.edu/cgi-bin/afos/retrieve.py?pil=WARDSM
+
+Return the last AFDDMX product in text format
+
+https://mesonet.agron.iastate.edu/cgi-bin/afos/retrieve.py?pil=AFDDMX&fmt=text
+
+Return a zip file of AFDDMX products during 2024
+
+https://mesonet.agron.iastate.edu/cgi-bin/afos/retrieve.py?pil=AFDDMX&fmt=zip&\
+sdate=2024-01-01T00:00Z&edate=2024-12-31T23:59Z
+
 """
 
 import zipfile
@@ -96,7 +114,8 @@ class MyModel(CGIModel):
         ...,
         description=(
             "The 3 to 6 character AFOS ID / Product ID to query for. This is "
-            "typically the third line of a NWS Text Product"
+            "typically the third line of a NWS Text Product.  A special case "
+            f"of ``WAR`` will return {', '.join(WARPIL)} products."
         ),
     )
     sdate: Optional[Union[None, datetime]] = Field(

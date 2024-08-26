@@ -62,7 +62,7 @@ function loadTabContent(div, pil, center, ttaaii, limit, sdate, edate, order) {
     `&ttaaii=${ttaaii}&order=${order}`;
     $.ajax({
         method: 'GET',
-        url: url,
+        url,
         success: (txt) => {
             div.html(txt);
         },
