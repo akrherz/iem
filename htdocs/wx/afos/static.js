@@ -1,8 +1,4 @@
-/* global Cookies */
-/*
- * NWS Text Product Finder
- *  - uses cookies and hashlinks to save info
- */
+/* global Cookies, $ */
 const NO_DATE_SET = 'No Limit';
 
 function text(str){
@@ -20,7 +16,7 @@ function readAnchorTags() {
         if (tokens2.length === 1) {
             tokens2.push(1);
         }
-        addTab(text(tokens2[0]), "", "", text(tokens2[1]), NO_DATE_SET, NO_DATE_SET, false);
+        addTab(text(tokens2[0]), "", "", text(tokens2[1]), NO_DATE_SET, NO_DATE_SET, false, "desc");
     });
 }
 function readCookies() {
@@ -33,14 +29,18 @@ function readCookies() {
         if (tokens.length == 1) {
             tokens.push(1);
         }
-        addTab(tokens[0], "", "", tokens[1], NO_DATE_SET, NO_DATE_SET, false);
+        addTab(tokens[0], "", "", tokens[1], NO_DATE_SET, NO_DATE_SET, false, "desc");
     });
 }
 function saveCookies() {
     const afospils = [];
     $(".nav-tabs li[data-pil]").each((_idx, li) => {
         // these are currently temporary
-        if ($(li).data('sdate') != NO_DATE_SET) {
+        if ($(li).data('sdate') !== NO_DATE_SET) {
+            return;
+        }
+        // Unsupported
+        if ($(li).data('order') === "desc") {
             return;
         }
         afospils.push(`${$(li).data('pil')}-${$(li).data('limit')}`);
@@ -53,13 +53,16 @@ function saveCookies() {
     window.location.href = `#${afospils.join(",")}`;
 };
 
-function loadTabContent(div, pil, center, ttaaii, limit, sdate, edate) {
+function loadTabContent(div, pil, center, ttaaii, limit, sdate, edate, order) {
     div.html('<img src="/images/wait24trans.gif"> Searching the database ...');
     sdate = (sdate === NO_DATE_SET) ? "" : sdate;
     edate = (edate === NO_DATE_SET) ? "" : edate;
+    const url = `/cgi-bin/afos/retrieve.py?fmt=html&pil=${pil}`+
+    `&center=${center}&limit=${limit}&sdate=${sdate}&edate=${edate}`+
+    `&ttaaii=${ttaaii}&order=${order}`;
     $.ajax({
         method: 'GET',
-        url: `/cgi-bin/afos/retrieve.py?fmt=html&pil=${pil}&center=${center}&limit=${limit}&sdate=${sdate}&edate=${edate}&ttaaii=${ttaaii}`,
+        url,
         success: (txt) => {
             div.html(txt);
         },
@@ -77,15 +80,16 @@ function refreshActiveTab() {
     const ttaaii = $(".nav-tabs li.active").data('ttaaii');
     const sdate = $(".nav-tabs li.active").data('sdate');
     const edate = $(".nav-tabs li.active").data('edate');
+    const order = $(".nav-tabs li.active").data('order');
     if (pil === undefined) {
         return;
     }
     const tabid = $(".nav-tabs li.active a").attr('href');
     const tabdiv = $(tabid);
-    loadTabContent(tabdiv, pil, center, ttaaii, limit, sdate, edate);
+    loadTabContent(tabdiv, pil, center, ttaaii, limit, sdate, edate, order);
 }
 
-function addTab(pil, center, ttaaii, limit, sdate, edate, doCookieSave) {
+function addTab(pil, center, ttaaii, limit, sdate, edate, doCookieSave, order) {
     // Make sure the pil is something
     if (pil === null || pil === "") {
         return;
@@ -95,11 +99,16 @@ function addTab(pil, center, ttaaii, limit, sdate, edate, doCookieSave) {
         return;
     }
     const pos = $(".nav-tabs").children().length;
-    $("#thetabs .nav-tabs").append(`<li data-center="${text(center)}" data-sdate="${text(sdate)}" data-edate="${text(edate)}" data-ttaaii="${text(ttaaii)}" data-limit="${text(limit)}" data-pil="${text(pil)}"><a href="#tab${pos}" data-toggle="tab">${text(pil)}</a></li>`);
+    $("#thetabs .nav-tabs").append(
+        `<li data-center="${text(center)}" data-sdate="${text(sdate)}" ` +
+        `data-edate="${text(edate)}" data-ttaaii="${text(ttaaii)}" ` +
+        `data-limit="${text(limit)}" data-pil="${text(pil)}" ` +
+        `data-order="${text(order)}"><a href="#tab${pos}" ` +
+        `data-toggle="tab">${text(pil)}</a></li>`);
     $('.tab-content').append(`<div class="tab-pane" id="tab${pos}"></div>`);
     const newdiv = $(`#tab${pos}`);
     $(`.nav-tabs li:nth-child(${pos + 1}) a`).click();
-    loadTabContent(newdiv, pil, center, ttaaii, limit, sdate, edate);
+    loadTabContent(newdiv, pil, center, ttaaii, limit, sdate, edate, order);
     if (doCookieSave) {
         saveCookies();
     }
@@ -113,11 +122,14 @@ function dlbtn(btn, fmt) {
     const limit = $(".nav-tabs li.active").data('limit');
     const center = $(".nav-tabs li.active").data('center');
     const ttaaii = $(".nav-tabs li.active").data('ttaaii');
+    const order = $(".nav-tabs li.active").data('order');
     let sdate = $(".nav-tabs li.active").data('sdate');
     let edate = $(".nav-tabs li.active").data('edate');
     sdate = (sdate === NO_DATE_SET) ? "" : sdate;
     edate = (edate === NO_DATE_SET) ? "" : edate;
-    window.location = `/cgi-bin/afos/retrieve.py?dl=1&fmt=${fmt}&pil=${pil}&center=${center}&limit=${limit}&sdate=${sdate}&edate=${edate}&ttaaii=${ttaaii}`;
+    window.location = `/cgi-bin/afos/retrieve.py?dl=1&fmt=${fmt}&pil=${pil}` +
+    `&center=${center}&limit=${limit}&sdate=${sdate}&edate=${edate}` +
+    `&ttaaii=${ttaaii}&order=${order}`;
     $(btn).blur();
 }
 function buildUI() {
@@ -162,7 +174,8 @@ function buildUI() {
         const limit = parseInt($("#myform input[name='limit']").val(), 10);
         const sdate = $("#sdate").val();
         const edate = $("#edate").val();
-        addTab(pil, center, ttaaii, limit, sdate, edate, true);
+        const order = $("#myform input[name='order']:checked").val();
+        addTab(pil, center, ttaaii, limit, sdate, edate, true, order);
         $(this).blur();
     });
     $("#sdate").datepicker({
