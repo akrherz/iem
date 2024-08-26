@@ -21,7 +21,7 @@ python compute_climate.py --date=$(date --date '1 days ago' +'%Y-%m-%d')
 
 # Look for stuff we missed with noaaport ingest
 cd ../rtma
-python rtma_backfill.py $(date --date '3 days ago' +'%Y %m %d')
+python rtma_backfill.py --date=$(date --date '3 days ago' +'%Y-%m-%d')
 
 cd ../climodat
 bash run.sh &
