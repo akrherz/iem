@@ -3,34 +3,37 @@
 Run from RUN_40_AFTER.sh for a UTC timestamp 3 hours ago.
 """
 
-import datetime
 import os
 import subprocess
-import sys
 import tempfile
+from datetime import datetime, timedelta, timezone
 
+import click
+import httpx
 import pygrib
-import requests
-from pyiem.util import exponential_backoff, logger
+from pyiem.util import archive_fetch, exponential_backoff, logger
 
 LOG = logger()
 
 
-def need_to_run(valid, hr) -> bool:
+def need_to_run(valid: datetime, hr) -> bool:
     """Check to see if we already have the radiation data we need"""
-    gribfn = valid.strftime(
-        "/mesonet/ARCHIVE/data/%Y/%m/%d/model/nam/%H/"
-        f"nam.t%Hz.conusnest.hiresf0{hr}.tm00.grib2"
+    ppath = valid.strftime(
+        f"%Y/%m/%d/model/nam/%H/nam.t%Hz.conusnest.hiresf0{hr}.tm00.grib2"
     )
-    if not os.path.isfile(gribfn):
-        return True
-    try:
-        grbs = pygrib.open(gribfn)
-        if grbs.messages < 5:
-            LOG.info("gribfn %s only has %s messages", gribfn, grbs.messages)
+    with archive_fetch(ppath) as fn:
+        if fn is None:
             return True
-    except Exception:
-        return True
+        try:
+            with pygrib.open(fn) as grbs:
+                if grbs.messages < 5:
+                    LOG.info(
+                        "gribfn %s has %s/5 messages", ppath, grbs.messages
+                    )
+                    return True
+        except Exception as exp:
+            LOG.exception(exp)
+            return True
     return False
 
 
@@ -40,7 +43,7 @@ def fetch(valid, hr):
         "https://noaa-nam-pds.s3.amazonaws.com/"
         f"nam.%Y%m%d/nam.t%Hz.conusnest.hiresf0{hr}.tm00.grib2.idx"
     )
-    req = exponential_backoff(requests.get, uri, timeout=30)
+    req = exponential_backoff(httpx.get, uri, timeout=30)
     if req is None or req.status_code != 200:
         LOG.warning("failed to get idx: %s", uri)
         return
@@ -78,7 +81,7 @@ def fetch(valid, hr):
     for pr in offsets:
         headers = {"Range": f"bytes={pr[0]}-{pr[1]}"}
         req = exponential_backoff(
-            requests.get, uri[:-4], headers=headers, timeout=30
+            httpx.get, uri[:-4], headers=headers, timeout=30
         )
         if req is None:
             LOG.info("failure for uri: %s", uri)
@@ -90,18 +93,19 @@ def fetch(valid, hr):
         os.unlink(tmpfd.name)
 
 
-def main():
+@click.command()
+@click.option("--valid", required=True, type=click.DateTime(), help="UTC Time")
+def main(valid: datetime):
     """Go Main Go"""
-    ts = datetime.datetime(
-        int(sys.argv[1]), int(sys.argv[2]), int(sys.argv[3]), int(sys.argv[4])
-    )
+    ts = valid.replace(tzinfo=timezone.utc)
     # script is called every hour, just short circuit the un-needed hours
     if ts.hour % 6 != 0:
+        LOG.info("Aborting as time %s is not modulo 6", ts)
         return
     times = [
         ts,
-        ts - datetime.timedelta(hours=6),
-        ts - datetime.timedelta(hours=24),
+        ts - timedelta(hours=6),
+        ts - timedelta(hours=24),
     ]
     for ts in times:
         for hr in range(6):

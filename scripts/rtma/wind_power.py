@@ -11,16 +11,16 @@ RUN from RUN_40_AFTER.sh
 
 """
 
-import datetime
-import os
-import sys
 import time
+from datetime import datetime, timedelta, timezone
+from typing import Optional
 from zoneinfo import ZoneInfo
 
+import click
 import numpy as np
 import pygrib
 from pyiem.plot import MapPlot
-from pyiem.util import logger, utc
+from pyiem.util import archive_fetch, logger, utc
 
 LOG = logger()
 LEVELS = [
@@ -49,27 +49,27 @@ LEVELS = [
 
 def run(ts, routes):
     """Run for a given UTC timestamp"""
-    fn = ts.strftime(
-        "/mesonet/ARCHIVE/data/%Y/%m/%d/model/rtma/%H/"
-        "rtma.t%Hz.awp2p5f000.grib2"
-    )
-    if not os.path.isfile(fn):
-        LOG.info("File Not Found: %s", fn)
-        return
+    ppath = ts.strftime("%Y/%m/%d/model/rtma/%H/rtma.t%Hz.awp2p5f000.grib2")
+    with archive_fetch(ppath) as fn:
+        if fn is None:
+            LOG.info("File Not Found: %s", fn)
+            return
 
-    grb = pygrib.open(fn)
-    try:
-        u = grb.select(name="10 metre U wind component")[0]
-        v = grb.select(name="10 metre V wind component")[0]
-    except Exception as exp:
-        LOG.info("Missing u/v wind for wind_power.py\nFN: %s\n%s", fn, exp)
-        return
-    mag = np.hypot(u["values"], v["values"])
+        with pygrib.open(fn) as grbs:
+            try:
+                u = grbs.select(name="10 metre U wind component")[0]
+                v = grbs.select(name="10 metre V wind component")[0]
+            except Exception as exp:
+                LOG.info(
+                    "Missing u/v wind for wind_power.py\nFN: %s\n%s", fn, exp
+                )
+                return
+            mag = np.hypot(u["values"], v["values"])
 
-    mag = (mag * 1.35) ** 3 * 0.002641
-    # 0.002641
+            mag = (mag * 1.35) ** 3 * 0.002641
+            # 0.002641
 
-    lats, lons = u.latlons()
+            lats, lons = u.latlons()
     lts = ts.astimezone(ZoneInfo("America/Chicago"))
     pqstr = (
         f"plot {routes} {ts:%Y%m%d%H}00 midwest/rtma_wind_power.png "
@@ -91,13 +91,15 @@ def run(ts, routes):
     mp.close()
 
 
-def main(argv):
+@click.command()
+@click.option("--valid", type=click.DateTime(), help="Specify UTC valid time")
+def main(valid: Optional[datetime]):
     """Main()"""
-    if len(sys.argv) == 5:
-        now = utc(int(argv[1]), int(argv[2]), int(argv[3]), int(argv[4]))
+    if valid is not None:
+        now = valid.replace(tzinfo=timezone.utc)
         routes = "a"
     else:
-        now = utc() - datetime.timedelta(hours=1)
+        now = utc() - timedelta(hours=1)
         routes = "ac"
         # the 3z RTMA is always late, so we shall wait
         if now.hour == 3:
@@ -107,4 +109,4 @@ def main(argv):
 
 
 if __name__ == "__main__":
-    main(sys.argv)
+    main()
