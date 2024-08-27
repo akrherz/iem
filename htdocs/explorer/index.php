@@ -62,7 +62,7 @@ $t->content = <<<EOM
             data-target="https://mesonet.agron.iastate.edu">
 
             <br /><strong>Precipitation Departure</strong>
-            <img src="/plotting/auto/plot/84/sector:IA::src:mrms::opt:dep::usdm:yes::ptype:g::sdate:2023-08-01::edate:2023-10-10::cmap:BrBG::_r:43.png"
+            <img src="/plotting/auto/plot/84/sector:IA::src:mrms::opt:dep::usdm:yes::ptype:g::sdate:2024-08-01::edate:2024-10-10::cmap:BrBG::_r:43.png"
             role="button" title="Precip Departure Aug 1"
             data-target="https://mesonet.agron.iastate.edu">
 
@@ -82,9 +82,9 @@ $t->content = <<<EOM
             data-target="https://mesonet.agron.iastate.edu/plotting/auto/?_wait=no&q=127&state=IA&short_desc=CD&cmap=jet&_r=43&dpi=100&_fmt=png">
 
             <br /><strong>Climate District Ranks</strong>
-            <img src="/plotting/auto/plot/24/csector:midwest::var:precip::p:month::year:2022::month:summer::cmap:RdBu_r::_r:43.png" role="button"
+            <img src="/plotting/auto/plot/24/csector:midwest::var:precip::p:month::year:2024::month:summer::cmap:RdBu_r::_r:43.png" role="button"
             title="Climate District Precip Ranks"
-            data-target="https://mesonet.agron.iastate.edu/plotting/auto/?_wait=no&q=24&csector=midwest&var=precip&p=month&year=2022&month=summer&sdate=2022%2F04%2F05&edate=2022%2F05%2F03&cmap=RdBu&cmap_r=on&_r=t&dpi=100&_fmt=png">
+            data-target="https://mesonet.agron.iastate.edu/plotting/auto/?_wait=no&q=24&csector=midwest&var=precip&p=month&year=2024&month=summer&sdate=2024%2F04%2F05&edate=2024%2F05%2F03&cmap=RdBu&cmap_r=on&_r=t&dpi=100&_fmt=png">
 
         </div>
     </div>
@@ -95,13 +95,13 @@ $t->content = <<<EOM
             <a class="btn btn-default" target="_blank" href="/sites/site.php?station={station}&amp;network={network}"><i class="fa fa-sign-out"></i> Site Mainpage</a>
 
             <br /><button role="button" onClick="loaderClicked(this);" class="autoload"
-            data-url-template="/plotting/auto/plot/145/network:ISUSM::station:{station}::var:tsoil::year:2022::_r:86.png"><i class="fa fa-thermometer-quarter"></i> 4in Soil Temps</button>
+            data-url-template="/plotting/auto/plot/145/network:ISUSM::station:{station}::var:tsoil::year:2024::_r:86.png"><i class="fa fa-thermometer-quarter"></i> 4in Soil Temps</button>
             <button role="button" onClick="loaderClicked(this);"
-            data-url-template="/plotting/auto/plot/177/network:ISUSM::station:{station}::opt:sm::sts:2022-05-01%200000::_r:86.png"><i class="fa fa-tint"></i> Soil Moisture</button>
+            data-url-template="/plotting/auto/plot/177/network:ISUSM::station:{station}::opt:sm::sts:2024-05-01%200000::_r:86.png"><i class="fa fa-tint"></i> Soil Moisture</button>
             <button role="button" onClick="loaderClicked(this);"
-            data-url-template="/plotting/auto/plot/177/network:ISUSM::station:{station}::opt:7::sts:2022-05-01%200000::_r:86.png"><i class="fa fa-battery-half"></i> Available Soil Water</button>
+            data-url-template="/plotting/auto/plot/177/network:ISUSM::station:{station}::opt:7::sts:2024-05-01%200000::_r:86.png"><i class="fa fa-battery-half"></i> Available Soil Water</button>
            <button role="button" onClick="loaderClicked(this);"
-            data-url-template="/plotting/auto/plot/177/network:ISUSM::station:{station}::opt:4::sts:2022-05-01%200000::_r:43.png"><i class="fa fa-sun-o"></i> Daily Solar Radiation</i></button>
+            data-url-template="/plotting/auto/plot/177/network:ISUSM::station:{station}::opt:4::sts:2024-05-01%200000::_r:43.png"><i class="fa fa-sun-o"></i> Daily Solar Radiation</i></button>
 
        </div>
        <div class="col-md-8 data-display" style="overflow-y: auto;"></div>
@@ -113,20 +113,20 @@ $t->content = <<<EOM
             <a class="btn btn-default" target="_blank" href="/sites/site.php?station={station}&amp;network={network}"><i class="fa fa-sign-out"></i> Site Mainpage</a>
 
             <br /><button role="button" onClick="loaderClicked(this);" class="autoload"
-            data-url-template="/plotting/auto/plot/140/network:{network}::station:{station}::syear:1973::month:4::day:1::days:30::varname:avg_wind_speed::year:2022::_r:86.png">
+            data-url-template="/plotting/auto/plot/140/network:{network}::station:{station}::syear:1973::month:4::day:1::days:30::varname:avg_wind_speed::year:2024::_r:86.png">
             <i class="fa fa-leaf"></i> April Wind Speed</button>
             
             <button role="button" onClick="loaderClicked(this);"
-            data-url-template="/plotting/auto/plot/140/network:{network}::station:{station}::syear:1973::month:6::day:1::days:92::varname:avg_dewp::year:2022::_r:43.png">
+            data-url-template="/plotting/auto/plot/140/network:{network}::station:{station}::syear:1973::month:6::day:1::days:92::varname:avg_dewp::year:2024::_r:43.png">
             <i class="fa fa-fire"></i> Summer Dew Points</button>
             
             <button role="button" onClick="loaderClicked(this);"
-            data-url-template="/plotting/auto/plot/93/network:{network}::zstation:{station}::syear:1973::year:2022::var:heatindex::ytd:yes::inc:no::_r:43.png">
-            <i class="fa fa-table"></i> 2022 Heat Index Hrs</button>
+            data-url-template="/plotting/auto/plot/93/network:{network}::zstation:{station}::syear:1973::year:2024::var:heatindex::ytd:yes::inc:no::_r:43.png">
+            <i class="fa fa-table"></i> 2024 Heat Index Hrs</button>
 
             <button role="button" onClick="loaderClicked(this);"
             data-url-template="/plotting/auto/plot/82/network:{network}::station:{station}::var:high_departure::sdate:2024-05-01::edate:2024-08-31::_r:43.png">
-            <i class="fa fa-calendar"></i> 2022 Highs Calendar</button>
+            <i class="fa fa-calendar"></i> 2024 Highs Calendar</button>
 
             <button role="button" onClick="loaderClicked(this);"
             data-url-template="/plotting/auto/plot/51/network:{network}::station:{station}::sdate:2024-05-01::base:50::ceil:86::year2:2023::year3:2019::which:gdd::_r:43.png">
@@ -171,8 +171,8 @@ $t->content = <<<EOM
             ><i class="fa fa-thermometer-half"></i> Average Temperature</button>
 
             <br /><button role="button" onClick="loaderClicked(this)"
-            data-url-template="/plotting/auto/plot/32/network:{network}::station:{station}::year:2022::var:high::gddbase:50::gddceil:86::how:diff::cmap:jet::_r:43.png"
-            ><i class="fa fa-thermometer-quarter"></i> 2022 High Departures</button>
+            data-url-template="/plotting/auto/plot/32/network:{network}::station:{station}::year:2024::var:high::gddbase:50::gddceil:86::how:diff::cmap:jet::_r:43.png"
+            ><i class="fa fa-thermometer-quarter"></i> 2024 High Departures</button>
 
             <br /><button role="button" onClick="loaderClicked(this)"
             data-url-template="/plotting/auto/plot/3/network:{network}::station:{station}::month:year::type:max-precip::_e:{elem}.js"
