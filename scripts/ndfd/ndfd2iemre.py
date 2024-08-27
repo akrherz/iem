@@ -3,18 +3,19 @@
 Run from RUN_20_AFTER.sh
 """
 
-import os
 import shutil
+import warnings
 from datetime import date, timedelta
 
 import numpy as np
 import pygrib
 from pyiem import iemre
 from pyiem.reference import ISO8601
-from pyiem.util import logger, ncopen, utc
-from scipy.interpolate import NearestNDInterpolator
+from pyiem.util import archive_fetch, logger, ncopen, utc
 
 LOG = logger()
+# unavoidable casting
+warnings.simplefilter("ignore", RuntimeWarning)
 
 
 def create(ts):
@@ -79,52 +80,47 @@ def create(ts):
         low.coordinates = "lon lat"
 
 
-def do_target(nc, now, target, day, xi, yi, vname):
+def do_target(nc, now, target, day, vname):
     """Make magic."""
     hour = 0
     found = False
-    lons = None
-    lats = None
     ncvar = "high" if vname == "Maximum" else "low"
     while hour < 24 and not found:
         ts = now - timedelta(hours=hour)
         fhour = (target - ts).total_seconds() / 3600.0
-        testfn = ts.strftime(
-            "/mesonet/ARCHIVE/data/%Y/%m/%d/model/ndfd/"
-            f"%H/ndfd.t%Hz.awp2p5f{fhour:03.0f}.grib2"
+        ppath = ts.strftime(
+            f"%Y/%m/%d/model/ndfd/%H/ndfd.t%Hz.awp2p5f{fhour:03.0f}.grib2"
         )
-        if not os.path.isfile(testfn):
-            hour += 1
-            continue
-        grbs = pygrib.open(testfn)
-        for grb in grbs:
-            if lons is None:
-                lats, lons = [np.ravel(ar) for ar in grb.latlons()]
-            if (
-                grb.valid_key("parameterName")
-                and grb["parameterName"] == f"{vname} temperature"
-            ):
-                # This is 0z
-                LOG.info("%s_tmpk day: %s fn: %s", ncvar, day, testfn)
-                nn = NearestNDInterpolator((lons, lats), np.ravel(grb.values))
-                nc.variables[f"{ncvar}_tmpk"][day, :, :] = nn(xi, yi)
-                found = True
-        grbs.close()
+        with archive_fetch(ppath) as fn:
+            if fn is None:
+                hour += 1
+                continue
+            with pygrib.open(fn) as grbs:
+                for grb in grbs:
+                    if (
+                        grb.valid_key("parameterName")
+                        and grb["parameterName"] == f"{vname} temperature"
+                    ):
+                        # This is 0z
+                        LOG.info("%s_tmpk day: %s fn: %s", ncvar, day, ppath)
+                        nc.variables[f"{ncvar}_tmpk"][day] = iemre.grb2iemre(
+                            grb,
+                        )
+                        found = True
         hour += 1
 
 
 def merge_grib(nc, now):
     """Merge what grib data we can find into the netcdf file."""
 
-    xi, yi = np.meshgrid(iemre.XAXIS, iemre.YAXIS)
     for day in range(10):
         dt = now.date() + timedelta(days=day)
         # Look backward until we find a 0z forecast (utc + 1 day)
         target = utc(dt.year, dt.month, dt.day, 0, 0, 0) + timedelta(days=1)
-        do_target(nc, now, target, day, xi, yi, "Maximum")
+        do_target(nc, now, target, day, "Maximum")
         # Look backward until we find a 12z forecast
         target = utc(dt.year, dt.month, dt.day, 12, 0, 0)
-        do_target(nc, now, target, day, xi, yi, "Minimum")
+        do_target(nc, now, target, day, "Minimum")
 
 
 def main():

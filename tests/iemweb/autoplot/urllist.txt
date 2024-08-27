@@ -107,6 +107,8 @@
 /plotting/auto/plot/201/mode:cal::sdate:2024-01-01::edate:2024-08-16::outlook_type:C::day:1::w:wfo::network:WFO::wfo:STO::mystate:IA::ugc:IAZ048::g:yes::_r:t::dpi:100.png
 /plotting/auto/plot/203/typ:W::sort:W::date:2024-05-21::dpi:100.png
 /plotting/auto/plot/203/typ:W::sort:S::date:2024-05-21::dpi:100.png
+/plotting/auto/plot/208/network:WFO::wfo:DMX::year:2024::phenomenav:TO::significancev:W::etn:47::opt:single::n:auto::_r:43::dpi:100.png
+/plotting/auto/plot/208/valid:2024-08-27%201717::network:WFO::wfo:DMX::year:2024::phenomenav:TO::significancev:W::etn:47::opt:single::n:off::_r:43::dpi:100.png
 /plotting/auto/plot/211/ptype:precip::network:IA_ASOS::zstation:AMW::sts:2024-07-10%200000::ets:2024-07-12%202359::_r:t::dpi:100.png
 /plotting/auto/plot/211/ptype:meteo::network:IA_ASOS::zstation:AMW::sts:2024-07-10%200000::ets:2024-07-12%202359::_r:t::dpi:100.png
 /plotting/auto/plot/211/ptype:wind::network:IA_ASOS::zstation:AMW::sts:2024-07-10%200000::ets:2024-07-12%202359::_r:t::dpi:100.png
@@ -119,8 +121,12 @@
 /plotting/auto/plot/219/station:PASN::valid:2024-08-21%200413::_r:t::dpi:100.png
 /plotting/auto/plot/219/station:PAOM::valid:2024-08-21%200413::_r:t::dpi:100.png
 /plotting/auto/plot/219/station:KDSM::valid:2024-08-21%200413::_r:t::dpi:100.png
+/plotting/auto/plot/220/which:1C::cat:categorical::t:state::network:WFO::wfo:STO::csector:midwest::valid:2024-08-07%201706::_r:t::dpi:100.png
+/plotting/auto/plot/220/which:5C::cat:categorical::t:state::network:WFO::wfo:STO::csector:midwest::valid:2024-08-07%201706::_r:t::dpi:100.png
 /plotting/auto/plot/230/outlook_type:E::day:4::w:ugc::network:WFO::wfo:ABR::mystate:IA::ugc:NCC001::month:all::_r:t::dpi:100.png
 /plotting/auto/plot/236/ident:ZMP::sdate:2024-07-31::edate:2024-08-01::_r:43::dpi:100.png
 /plotting/auto/plot/241/sts:2000-08-06%200900::ets:2000-08-06%200900::w:min::csector:IA::mode:user::cmap:gnuplot2::_r:t::dpi:100.png
 /plotting/auto/plot/241/sts:2024-08-06%200900::ets:2024-08-06%200900::w:min::csector:IA::mode:user::cmap:gnuplot2::_r:t::dpi:100.png
+/plotting/auto/plot/242/pid:202405211331-KDMX-NWUS53-LSRDMX::_r:t::dpi:100.png
+/plotting/auto/plot/242/pid:201806210250-KDMX-NWUS53-LSRDMX::_r:t::dpi:100.png
 /plotting/auto/plot/253/datglobalid:%7B495DE596-B299-41FE-9C90-13C87E43FE0B%7D::dat:2024-05-21::cmap:gist_rainbow::_r:t::dpi:100.png

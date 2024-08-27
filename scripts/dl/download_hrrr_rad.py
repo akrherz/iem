@@ -6,35 +6,33 @@ Run at 40 AFTER for the previous hour
 
 """
 
-import datetime
 import os
 import subprocess
-import sys
 import tempfile
+from datetime import datetime, timedelta, timezone
+from typing import Optional
 
+import click
+import httpx
 import pygrib
-import requests
-from pyiem.util import exponential_backoff, logger, utc
+from pyiem.util import archive_fetch, exponential_backoff, logger, utc
 
 LOG = logger()
 
 
-def need_to_run(valid):
+def need_to_run(valid) -> bool:
     """Check to see if we already have the radiation data we need"""
-    gribfn = valid.strftime(
-        "/mesonet/ARCHIVE/data/%Y/%m/%d/model/hrrr/"
-        "%H/hrrr.t%Hz.3kmf01.grib2"
-    )
-    # If the file does not exist, we have no choice
-    if not os.path.isfile(gribfn):
-        return True
-    # Look for our grids please.
-    grbs = pygrib.open(gribfn)
-    hits = 0
-    for grb in grbs:
-        if grb.shortName in ["dswrf", "msdwswrf"]:
-            hits += 1
-    LOG.info("Found %s dswrf fields in %s", hits, gribfn)
+    ppath = valid.strftime("%Y/%m/%d/model/hrrr/%H/hrrr.t%Hz.3kmf01.grib2")
+    with archive_fetch(ppath) as fn:
+        if fn is None:
+            return True
+        # Look for our grids please.
+        with pygrib.open(fn) as grbs:
+            hits = 0
+            for grb in grbs:
+                if grb.shortName in ["dswrf", "msdwswrf"]:
+                    hits += 1
+    LOG.info("Found %s dswrf fields in %s", hits, ppath)
     return hits != 4
 
 
@@ -43,12 +41,12 @@ def fetch(valid):
     22:23684154:d=2023041000:DSWRF:surface:0-15 min ave fcst:
     """
     baseuri = "https://nomads.ncep.noaa.gov/pub/data/nccf/com/hrrr/prod"
-    if valid < utc() - datetime.timedelta(days=1):
+    if valid < utc() - timedelta(days=1):
         baseuri = "https://noaa-hrrr-bdp-pds.s3.amazonaws.com"
     uri = valid.strftime(
         f"{baseuri}/hrrr.%Y%m%d/conus/hrrr.t%Hz.wrfsubhf01.grib2.idx"
     )
-    req = exponential_backoff(requests.get, uri, timeout=30)
+    req = exponential_backoff(httpx.get, uri, timeout=30)
     if req is None or req.status_code != 200:
         LOG.warning("failed to get idx %s", uri)
         return
@@ -84,7 +82,7 @@ def fetch(valid):
         routes = "u"
         headers = {"Range": f"bytes={pr[0]}-{pr[1]}"}
         req = exponential_backoff(
-            requests.get, uri[:-4], headers=headers, timeout=30
+            httpx.get, uri[:-4], headers=headers, timeout=30
         )
         if req is None:
             LOG.info("failure for uri: %s", uri)
@@ -95,15 +93,17 @@ def fetch(valid):
         os.unlink(tmpfd.name)
 
 
-def main(argv):
+@click.command()
+@click.option("--valid", type=click.DateTime(), help="Specify UTC valid time")
+def main(valid: Optional[datetime]):
     """Go Main Go"""
     times = []
-    if len(argv) == 5:
-        times.append(utc(*[int(i) for i in argv[1:]]))
+    if valid is not None:
+        times.append(valid.replace(tzinfo=timezone.utc))
     else:
-        times.append(utc() - datetime.timedelta(hours=1))
-        times.append(utc() - datetime.timedelta(hours=6))
-        times.append(utc() - datetime.timedelta(hours=24))
+        times.append(utc() - timedelta(hours=1))
+        times.append(utc() - timedelta(hours=6))
+        times.append(utc() - timedelta(hours=24))
     for ts in times:
         if not need_to_run(ts):
             continue
@@ -112,4 +112,4 @@ def main(argv):
 
 
 if __name__ == "__main__":
-    main(sys.argv)
+    main()

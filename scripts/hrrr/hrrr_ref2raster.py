@@ -118,18 +118,17 @@ def do_grb(grib, valid, routes):
     os.unlink(jsontmp.name)
 
 
-def workflow(valid, routes):
+def workflow(valid: datetime, routes: str):
     """Process this time's data"""
-    gribfn = valid.strftime(
-        "/mesonet/ARCHIVE/data/%Y/%m/%d/model/hrrr/%H/hrrr.t%Hz.refd.grib2"
-    )
-    if not os.path.isfile(gribfn):
-        LOG.warning("missing %s", gribfn)
-        return
-    with pygrib.open(gribfn) as grbs:
-        for grb in grbs:
-            if grb.shortName == "refd":
-                do_grb(grb, valid, routes)
+    ppath = valid.strftime("%Y/%m/%d/model/hrrr/%H/hrrr.t%Hz.refd.grib2")
+    with archive_fetch(ppath) as fn:
+        if fn is None:
+            LOG.warning("missing %s", ppath)
+            return
+        with pygrib.open(fn) as grbs:
+            for grb in grbs:
+                if grb.shortName == "refd":
+                    do_grb(grb, valid, routes)
 
 
 @click.command()
