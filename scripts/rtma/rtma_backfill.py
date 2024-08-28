@@ -14,6 +14,7 @@ import pygrib
 from pyiem.util import archive_fetch, logger
 
 LOG = logger()
+ARCHIVE_SWITCH = datetime(2020, 5, 16, tzinfo=timezone.utc)
 WMO_XREF = {
     "PRES": "LPIA98",
     "DPT": "LRIA98",
@@ -51,7 +52,7 @@ def workflow(now: datetime):
     for key in jobs:
         url = (
             "https://www.ncei.noaa.gov/data/national-digital-guidance-"
-            f"database/access/{'historical/' if now.year < 2020 else ''}"
+            f"database/access/{'historical/' if now < ARCHIVE_SWITCH else ''}"
             f"{now:%Y%m}/{now:%Y%m%d}/"
             f"{WMO_XREF[key]}_KWBR_{now:%Y%m%d%H%M}"
         )
