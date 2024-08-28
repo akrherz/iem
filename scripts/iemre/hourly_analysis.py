@@ -302,6 +302,15 @@ def grid_hour(ts, domain):
     if res is None:
         # try ERA5Land
         res = use_era5land(ts, "dwpk", domain)
+        if res is not None and tmp_used_rtma:
+            LOG.info("Forcing ERA5Land temperature, since dewpoint used it")
+            tmpf = (
+                masked_array(
+                    use_era5land(ts, "tmpk", domain), data_units="degK"
+                )
+                .to("degF")
+                .m
+            )
     # Ensure we have RTMA temps available
     if not did_gridding and res is not None:
         dwpf = masked_array(res, data_units="degK").to("degF").m
