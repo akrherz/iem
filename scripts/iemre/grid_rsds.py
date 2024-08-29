@@ -9,9 +9,10 @@ Called from:
  - RUN_10_AFTER.sh at 11 PM for the current day
 """
 
-# pylint: disable=unpacking-non-sequence
-import datetime
 import subprocess
+from datetime import datetime, timedelta
+from pathlib import Path
+from typing import Optional
 from zoneinfo import ZoneInfo
 
 import click
@@ -28,21 +29,22 @@ P4326 = pyproj.Proj("EPSG:4326")
 SWITCH_DATE = utc(2014, 10, 10, 20)
 
 
-def try_era5land(ts: datetime.datetime, domain: str, dom: dict) -> bool:
+def try_era5land(ts: datetime, domain: str, dom: dict) -> Optional[np.ndarray]:
     """Attempt to use ERA5Land data."""
     dd = "" if domain == "" else f"_{domain}"
     # inbound `ts` represents noon local time, we want values from 1 AM
     # till midnight
     one_am = ts.replace(hour=1).astimezone(ZoneInfo("UTC"))
     midnight = (
-        (ts + datetime.timedelta(days=1))
-        .replace(hour=0)
-        .astimezone(ZoneInfo("UTC"))
+        (ts + timedelta(days=1)).replace(hour=0).astimezone(ZoneInfo("UTC"))
     )
     # If years are equal, we don't have to span files
     idx0 = iemre.hourly_offset(one_am)
     idx1 = iemre.hourly_offset(midnight) + 1
     ncfn = f"/mesonet/data/era5{dd}/{one_am.year}_era5land_hourly.nc"
+    if not Path(ncfn).is_file():
+        LOG.info("Missing %s", ncfn)
+        return None
     if one_am.year == midnight.year:
         with ncopen(ncfn) as nc:
             total = np.ma.sum(nc.variables["rsds"][idx0:idx1, :, :], axis=0)
@@ -55,7 +57,7 @@ def try_era5land(ts: datetime.datetime, domain: str, dom: dict) -> bool:
 
     # If total is all missing, then we have no data
     if total.mask.all():
-        return False
+        return None
     # We wanna store as W m-2, so we just average out the data by hour
     total = total / 24.0
 
@@ -63,41 +65,20 @@ def try_era5land(ts: datetime.datetime, domain: str, dom: dict) -> bool:
     vals = iemre.reproject2iemre(
         np.flipud(total), aff, P4326.crs, domain=domain
     )
-    # 4 was found to be not enough to appease DEP's needs
-    for shift in (-7, 7):
+
+    # ERA5Land is too tight to the coast, so we need to jitter the grid
+    # 7 and 4 was found to be enough to appease DEP's needs
+    # NOTE: HRRR and GFS do not need this
+    for shift in (-7, -4, 4, 7):
         for axis in (0, 1):
             vals_shifted = np.roll(vals, shift=shift, axis=axis)
             idx = ~vals_shifted.mask * vals.mask
             vals[idx] = vals_shifted[idx]
 
-    avgval = np.ma.mean(vals)
-    if avgval < 50:
-        LOG.info("ERA5Land average value is %.2f, skipping", avgval)
-        return False
-
-    if domain != "":
-        ncfn = iemre.get_daily_ncname(ts.year, domain)
-        idx = iemre.daily_offset(ts.date())
-        # vals may have some NaNs, so we need to avoid a warning
-        with ncopen(ncfn, "a") as nc, np.errstate(invalid="ignore"):
-            nc.variables["rsds"][idx, :, :] = vals
-        return True
-    # Jitter the grid to fill out edges along the coasts
-    ds = xr.Dataset(
-        {
-            "rsds": xr.DataArray(
-                vals,
-                dims=("y", "x"),
-            )
-        }
-    )
-    iemre.set_grids(ts.date(), ds)
-    subprocess.call(["python", "db_to_netcdf.py", f"--date={ts:%Y-%m-%d}"])
-
-    return True
+    return vals
 
 
-def do_gfs(ts: datetime.datetime, domain: str):
+def do_gfs(ts: datetime, domain: str) -> Optional[np.ndarray]:
     """Attempt to use the GFS."""
     # Major complications with GFS 6 hour data being averaged and which
     # time period to use to get a "daily" value.
@@ -109,7 +90,7 @@ def do_gfs(ts: datetime.datetime, domain: str):
     utcnow = ts.astimezone(ZoneInfo("UTC"))
     utcnow = utcnow.replace(
         hour=(utcnow.hour // 6) * 6, minute=0, second=0, microsecond=0
-    ) - datetime.timedelta(hours=12)
+    ) - timedelta(hours=12)
     attempt = 4
     while attempt > 0:
         ppath = (
@@ -118,21 +99,18 @@ def do_gfs(ts: datetime.datetime, domain: str):
         with archive_fetch(ppath) as fn:
             if fn is None:
                 attempt -= 1
-                utcnow -= datetime.timedelta(hours=6)
+                utcnow -= timedelta(hours=6)
                 continue
             tidx = (ts.date() - utcnow.date()).days
             LOG.info("Using GFS %s for day index:%s", utcnow, tidx)
             with ncopen(fn) as nc:
-                srad = nc.variables["srad"][tidx]
-        ncfn = iemre.get_daily_ncname(ts.year, domain)
-        idx = iemre.daily_offset(ts.date())
-        with ncopen(ncfn, "a") as nc:
-            # convert MJ/d to W/m^2
-            nc.variables["rsds"][idx, :, :] = srad * 1e6 / 86400.0
-        attempt = 0
+                # convert MJ/d to W/m^2
+                srad = nc.variables["srad"][tidx] * 1e6 / 86400.0
+            return srad
+    return None
 
 
-def do_hrrr(ts: datetime.datetime):
+def do_hrrr(ts: datetime) -> Optional[np.ndarray]:
     """Convert the hourly HRRR data to IEMRE grid"""
     LCC = pyproj.Proj(
         "+lon_0=-97.5 +y_0=0.0 +R=6367470. +proj=lcc +x_0=0.0 "
@@ -145,7 +123,7 @@ def do_hrrr(ts: datetime.datetime):
         utcnow = ts.replace(hour=hr).astimezone(ZoneInfo("UTC"))
         LOG.info("Considering timestamp %s", utcnow)
         # Try the newer f01 files, which have better data!
-        ppath = (utcnow - datetime.timedelta(hours=1)).strftime(
+        ppath = (utcnow - timedelta(hours=1)).strftime(
             "%Y/%m/%d/model/hrrr/%H/hrrr.t%Hz.3kmf01.grib2"
         )
         with archive_fetch(ppath) as fn:
@@ -216,22 +194,42 @@ def do_hrrr(ts: datetime.datetime):
 
     if total is None:
         LOG.info("found no HRRR data for %s", ts.strftime("%d %b %Y"))
-        return
+        return None
 
     # We wanna store as W m-2, so we just average out the data by hour
     total = total / 24.0
     affine_in = Affine(dx, 0.0, llcrnrx, 0.0, dy, llcrnry)
 
+    srad = iemre.reproject2iemre(total, affine_in, LCC.crs)
+    return srad
+
+
+def postprocess(srad: np.ndarray, ts: datetime, domain: str) -> bool:
+    """Do the necessary work."""
+    avgval = np.ma.mean(srad)
+    if avgval < 50:
+        LOG.info("Average value is %.2f and below 50, skipping", avgval)
+        return False
+
     ds = xr.Dataset(
         {
             "rsds": xr.DataArray(
-                iemre.reproject2iemre(total, affine_in, LCC.crs),
+                srad,
                 dims=("y", "x"),
             )
         }
     )
-    iemre.set_grids(ts.date(), ds)
-    subprocess.call(["python", "db_to_netcdf.py", f"--date={ts:%Y-%m-%d}"])
+    iemre.set_grids(ts.date(), ds, domain=domain)
+    subprocess.call(
+        [
+            "python",
+            "db_to_netcdf.py",
+            f"--date={ts:%Y-%m-%d}",
+            f"--domain={domain}",
+        ]
+    )
+
+    return True
 
 
 @click.command()
@@ -242,23 +240,29 @@ def main(dt, year, month):
     """Go Main Go"""
     queue = []
     if year is not None and month is not None:
-        now = datetime.datetime(year, month, 1, 12)
+        now = datetime(year, month, 1, 12)
         while now.month == month:
             queue.append(now)
-            now += datetime.timedelta(days=1)
+            now += timedelta(days=1)
     else:
         queue.append(dt.replace(hour=12))
     for sts in queue:
         for domain, dom in iemre.DOMAINS.items():
             sts = sts.replace(tzinfo=dom["tzinfo"])
-            if not try_era5land(sts, domain, dom):
-                LOG.info("try_era5land failed to find data")
-                if domain == "":
-                    LOG.info("trying hrrr")
-                    do_hrrr(sts)
-                else:
-                    LOG.info("trying GFS for domain %s", domain)
-                    do_gfs(sts, domain)
+            srad = try_era5land(sts, domain, dom)
+            if srad is not None and postprocess(srad, sts, domain):
+                continue
+            LOG.info("try_era5land failed to find data")
+            if domain == "":
+                srad = do_hrrr(sts)
+                if srad is not None and postprocess(srad, sts, domain):
+                    continue
+                LOG.info("do_hrrr failed to find data")
+            srad = do_gfs(sts, domain)
+            if srad is None:
+                LOG.info("do_gfs failed to find data")
+                continue
+            postprocess(srad, sts, domain)
 
 
 if __name__ == "__main__":
