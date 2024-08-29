@@ -1,6 +1,7 @@
 /plotting/auto/plot/1/network:IACLIMATE::station:IATAME::threshold:44::month1:6::num1:2::var1:hdd65::month2:6::num2:2::var2:gdd41::year:2007::_r:96::dpi:100.png
 /plotting/auto/plot/2/network:IACLIMATE::station:IATAME::month:2::year:2024::gddbase:50::gddceil:86::_r:t::dpi:100.png
 /plotting/auto/plot/11/network:IA_ASOS::zstation:AMW::year:2024::emphasis:-99::var:dwpf::opt:below::_r:43::dpi:100.png
+/plotting/auto/plot/14/network:IACLIMATE::station:IATAME::year:2024::_r:t::dpi:100.png
 /plotting/auto/plot/17/network:IA_ASOS::station:AMW::month:7::year:2024::p:temps::_r:t::dpi:100.png
 /plotting/auto/plot/17/network:IA_ASOS::station:AMW::month:7::year:2024::p:precip::_r:t::dpi:100.png
 /plotting/auto/plot/17/network:IA_ASOS::station:BNW::month:7::year:2024::p:temps::_r:t::dpi:100.png
@@ -48,6 +49,9 @@
 /plotting/auto/plot/90/t:state::v:total::ilabel:yes::geo:polygon::drawc:yes::year:2024::year2:2024::sdate:1999-01-01%200000::edate:2024-08-12%200000::network:WFO::station:DMX::state:IA::phenomena:TO::significance:W::cmap:jet::_r:t::dpi:100.png
 /plotting/auto/plot/99/network:IACLIMATE::station:IATAME::year:2024::delta:sigma::_r:t::dpi:100::_cb:1.png
 /plotting/auto/plot/104/network:IACLIMATE::station:IATAME::date1:2024-05-07::date2:2024-08-05::days:14::days2:7::_r:t::dpi:100.png
+/plotting/auto/plot/107/network:IACLIMATE::station:IATAME::sday:0814::eday:0828::varname:avg_temp::thres:-99::base:50::ceil:86::year:2024::_r:t::dpi:100.png
+/plotting/auto/plot/107/network:IACLIMATE::station:IATAME::sday:0814::eday:0828::varname:precip::thres:-99::base:50::ceil:86::year:2024::_r:t::dpi:100.png
+/plotting/auto/plot/107/network:IACLIMATE::station:IATAME::sday:0814::eday:0828::varname:avg_era5land_soilt4_avg::thres:-99::base:50::ceil:86::year:2022::_r:43::dpi:100.png
 /plotting/auto/plot/109/by:state::sdate:2024-01-01%200000::edate:2024-07-17%202359::var:days::w:set::phenomenav1:TO::significancev1:W::e:all::cmap:jet::_r:t::dpi:100.png
 /plotting/auto/plot/109/by:state::sdate:2024-01-01%200000::edate:2024-08-20%202359::var:count_departure::w:set::phenomenav1:SV::significancev1:W::phenomenav2:TO::significancev2:W::e:all::cmap:jet::_r:t::dpi:100.png
 /plotting/auto/plot/111/_cb:1.txt
