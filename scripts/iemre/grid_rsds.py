@@ -107,6 +107,7 @@ def do_gfs(ts: datetime, domain: str) -> Optional[np.ndarray]:
                 # convert MJ/d to W/m^2
                 srad = nc.variables["srad"][tidx] * 1e6 / 86400.0
             return srad
+    return None
 
 
 def do_hrrr(ts: datetime) -> Optional[np.ndarray]:
