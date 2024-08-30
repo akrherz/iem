@@ -8,7 +8,7 @@ Run from `RUN_MIDNIGHT.sh` for previous UTC date.
 see akrherz/iem#104
 """
 
-import datetime
+from datetime import datetime, timedelta
 
 import click
 import pandas as pd
@@ -35,10 +35,10 @@ def arbpick(asosdb, year, station, gdf):
 @click.option(
     "--date", "dt", type=click.DateTime(), required=True, help="UTC Date"
 )
-def main(dt: datetime.datetime):
+def main(dt: datetime):
     """Go."""
     sts = utc(dt.year, dt.month, dt.day)
-    ets = sts + datetime.timedelta(hours=24)
+    ets = sts + timedelta(hours=24)
     asosdb = get_dbconn("asos")
     with get_sqlalchemy_conn("asos") as conn:
         df = pd.read_sql(

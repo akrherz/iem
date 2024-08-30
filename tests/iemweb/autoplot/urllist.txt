@@ -31,6 +31,9 @@
 /plotting/auto/plot/72/network:WFO::station:DMX::phenomena:TO::significance:W::season:jul.png
 /plotting/auto/plot/72/network:WFO::station:DMX::phenomena:TO::significance:W::season:all.png
 /plotting/auto/plot/73/opt:ugc::network:WFO::station:PQR::state:WA::ugc:WAZ660::limit:no::sday:0101::eday:1231::phenomena:FW::significance:W::_r:t::dpi:100.png
+/plotting/auto/plot/73/opt:wfo::network:WFO::station:TSA::state:IA::ugc:IAC169::limit:udf::sday:0104::eday:0104::phenomena:SV::significance:W::_r:t::dpi:100.png
+/plotting/auto/plot/80/which:wfo::network:WFO::wfo:DMX::ugc:IAC153::phenomena:TO::significance:W::_r:t::dpi:100.png
+/plotting/auto/plot/80/which:ugc::network:WFO::wfo:DMX::ugc:IAC153::phenomena:TO::significance:W::_r:t::dpi:100.png
 /plotting/auto/plot/82/network:IA_ASOS::station:AMW::var:pday::sdate:2024-05-16::edate:2024-08-14::_r:t::dpi:100.png
 /plotting/auto/plot/82/network:IA_ASOS::station:AMW::var:max_rstage::sdate:2024-05-16::edate:2024-08-14::_r:t::dpi:100.png
 /plotting/auto/plot/82/network:IACLIMATE::station:IATAME::var:max_tmpf::sdate:2023-05-11::edate:2023-08-14::_r:t::dpi:100.png
@@ -47,6 +50,13 @@
 /plotting/auto/plot/90/t:cwa::v:periodavg::ilabel:yes::geo:ugc::drawc:yes::year:2024::year2:2024::sdate:2006-01-01%200000::edate:2024-07-29%200000::network:WFO::station:DMX::state:IA::phenomena:TO::significance:W::cmap:jet::_r:t::dpi:100.png
 /plotting/auto/plot/90/t:cwa::v:periodmax::ilabel:yes::geo:ugc::drawc:yes::year:2024::year2:2024::sdate:2006-01-01%200000::edate:2024-07-29%200000::network:WFO::station:DMX::state:IA::phenomena:TO::significance:W::cmap:jet::_r:t::dpi:100.png
 /plotting/auto/plot/90/t:state::v:total::ilabel:yes::geo:polygon::drawc:yes::year:2024::year2:2024::sdate:1999-01-01%200000::edate:2024-08-12%200000::network:WFO::station:DMX::state:IA::phenomena:TO::significance:W::cmap:jet::_r:t::dpi:100.png
+/plotting/auto/plot/90/t:cwa::v:hour::ilabel:yes::geo:polygon::drawc:yes::year:2024::year2:2024::sdate:2006-01-01%200000::edate:2024-09-02%200000::network:WFO::station:DMX::state:IA::phenomena:TO::significance:W::cmap:jet::_r:t::dpi:100.png
+/plotting/auto/plot/90/t:cwa::v:periodavg::ilabel:yes::geo:polygon::drawc:yes::year:2020::year2:2024::sdate:2006-01-01%200000::edate:2024-09-02%200000::network:WFO::station:DMX::state:IA::phenomena:TO::significance:W::cmap:jet::_r:t::dpi:100.png
+/plotting/auto/plot/90/t:cwa::v:periodmax::ilabel:yes::geo:polygon::drawc:yes::year:2020::year2:2024::sdate:2006-01-01%200000::edate:2024-09-02%200000::network:WFO::station:DMX::state:IA::phenomena:TO::significance:W::cmap:jet::_r:t::dpi:100.png
+/plotting/auto/plot/90/t:cwa::v:events::ilabel:yes::geo:polygon::drawc:yes::year:2020::year2:2024::sdate:2006-01-01%200000::edate:2024-09-02%200000::network:WFO::station:DMX::state:IA::phenomena:TO::significance:W::cmap:jet::_r:t::dpi:100.png
+/plotting/auto/plot/90/t:cwa::v:events::ilabel:yes::geo:ugc::drawc:yes::year:2020::year2:2024::sdate:2006-01-01%200000::edate:2024-09-02%200000::network:WFO::station:DMX::state:IA::phenomena:TO::significance:W::cmap:jet::_r:t::dpi:100.png
+/plotting/auto/plot/90/t:cwa::v:hour::ilabel:yes::geo:ugc::drawc:yes::year:2020::year2:2024::sdate:2006-01-01%200000::edate:2024-09-02%200000::network:WFO::station:DMX::state:IA::phenomena:TO::significance:W::cmap:jet::_r:t::dpi:100.png
+/plotting/auto/plot/90/t:cwa::v:total::ilabel:yes::geo:ugc::drawc:yes::year:2020::year2:2024::sdate:2006-01-01%200000::edate:2024-09-02%200000::network:WFO::station:DMX::state:IA::phenomena:TO::significance:W::cmap:jet::_r:t::dpi:100.png
 /plotting/auto/plot/99/network:IACLIMATE::station:IATAME::year:2024::delta:sigma::_r:t::dpi:100::_cb:1.png
 /plotting/auto/plot/104/network:IACLIMATE::station:IATAME::date1:2024-05-07::date2:2024-08-05::days:14::days2:7::_r:t::dpi:100.png
 /plotting/auto/plot/107/network:IACLIMATE::station:IATAME::sday:0814::eday:0828::varname:avg_temp::thres:-99::base:50::ceil:86::year:2024::_r:t::dpi:100.png
@@ -64,6 +74,9 @@
 /plotting/auto/plot/123/_cb:1.txt
 /plotting/auto/plot/124/_cb:1.txt
 /plotting/auto/plot/125/month:summer::sector:midwest::src:ncdc_climate81::state:WI::opt:both::var:avg_temp::cmap:jet::_r:t::dpi:100.png
+/plotting/auto/plot/134/network:OHCLIMATE::station:OHTCMH::var:warmest_hifeel::days:4::cmap:hot_r::_r:43::dpi:100.png
+/plotting/auto/plot/134/network:IA_ASOS::station:DSM::var:coldest_lofeel::days:7::cmap:jet::_r:t::dpi:100::_cb:1.png
+/plotting/auto/plot/134/network:IACLIMATE::station:IATAME::var:wettest::days:7::cmap:jet::_r:t::dpi:100.png
 /plotting/auto/plot/140/network:IA_ASOS::station:DSM::syear:1928::sday:0711::eday:0725::varname:avg_temp::w:none::thres:1::year:2024::_r:t::dpi:100.png
 /plotting/auto/plot/141/location:ames::ptype:rain::sdate:mar15::_r:t::dpi:100.png
 /plotting/auto/plot/141/location:ames::ptype:maxt::sdate:mar15::_r:t::dpi:100.png

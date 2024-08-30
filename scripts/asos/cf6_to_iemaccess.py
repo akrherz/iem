@@ -3,9 +3,10 @@
 Run from RUN_12Z.sh, RUN_0Z.sh for past 48 hours of data
 """
 
-import sys
 from datetime import date
+from typing import Optional
 
+import click
 import pandas as pd
 from metpy.units import units
 from pyiem.database import get_dbconn, get_sqlalchemy_conn
@@ -29,13 +30,13 @@ def comp(old, new):
     return True
 
 
-def get_data(argv):
+def get_data(dt: Optional[date]) -> pd.DataFrame:
     """Figure out what data we want."""
     params = {}
     lmt = "updated > (now() - '48 hours'::interval)"
-    if len(argv) == 4:
+    if dt is not None:
         lmt = "valid = :valid"
-        params["valid"] = date(int(argv[1]), int(argv[2]), int(argv[3]))
+        params["valid"] = dt
 
     with get_sqlalchemy_conn("iem") as conn:
         cf6 = pd.read_sql(
@@ -194,9 +195,11 @@ def build_xref():
     return df
 
 
-def main(argv):
+@click.command()
+@click.option("--date", "dt", type=click.DateTime(), help="Specific date")
+def main(dt: Optional[date]):
     """Go Main Go."""
-    cf6 = get_data(argv)
+    cf6 = get_data(dt)
     xref = build_xref()
 
     for valid, gdf in cf6.groupby("valid"):
@@ -205,4 +208,4 @@ def main(argv):
 
 
 if __name__ == "__main__":
-    main(sys.argv)
+    main()

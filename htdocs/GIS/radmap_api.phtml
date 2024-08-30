@@ -181,12 +181,13 @@ generate a folder of images that can then be converted into a movie.
 <pre style="border-top: 1px solid #ccc; background: #EEFFCC; border-bottom: 1px solid #ccc; padding-left: 5px;">
 #!/usr/bin/env python
 
-import datetime, os
+import os
+from datetime import datetime, timedelta
 
 # Generate series of images between 0z and 12z on the 3rd of August
-now = datetime.datetime(2008,8,3,0,0)
-ets = datetime.datetime(2008,8,3,12,0)
-interval = datetime.timedelta(minutes=5)
+now = datetime(2008, 8, 3, 0, 0)
+ets = datetime(2008, 8, 3, 12, 0)
+interval = timedelta(minutes=5)
 
 baseuri = "https://mesonet.agron.iastate.edu/GIS/radmap.php?"
 baseuri += "width=800&amp;height=600&amp;bbox=-95,42.5,-89,45.5"
