@@ -48,6 +48,10 @@ natively store and use within the various services.</p>
 <h4>Changes</h4>
 
 <ul>
+<li><strong>30 Aug 2024:</strong> It was discovered that the various Hawaii
+services were no longer updating.  Turns out that the input source was
+<a href="https://www.weather.gov/media/notification/pdf2/scn22-94_geo_spectral_coverage_goes-east-west_aab.pdf">discontinued by NOAA</a>.
+The GOES West services cover Hawaii now and should be used instead.</li>
 <li><strong>1 December 2019:</strong> GOES West products have stopped and everything
 has been migrated to new workflows based on GOES-R (GOES-16) and GOES-S (GOES-17).</li>
 
@@ -73,11 +77,7 @@ a color ramp <a href="legends/ir_ramp.png">here</a>.</li>
 <p><strong>GOES West Alaska infrared imagery</strong>
 <br /><code>https://mesonet.agron.iastate.edu/cgi-bin/wms/goes/alaska_ir.cgi?</code>
 
-<p><strong>GOES West Hawaii infrared imagery</strong>
-<br /><code>https://mesonet.agron.iastate.edu/cgi-bin/wms/goes/hawaii_ir.cgi?</code>
-
 <hr />
-
 
 <p><strong>GOES West visible imagery</strong>
 <br /><code>https://mesonet.agron.iastate.edu/cgi-bin/wms/goes/west_vis.cgi?</code>
@@ -85,20 +85,13 @@ a color ramp <a href="legends/ir_ramp.png">here</a>.</li>
 <p><strong>GOES West Alaska visible imagery</strong>
 <br /><code>https://mesonet.agron.iastate.edu/cgi-bin/wms/goes/alaska_vis.cgi?</code>
 
-<p><strong>GOES West Hawaii visible imagery</strong>
-<br /><code>https://mesonet.agron.iastate.edu/cgi-bin/wms/goes/hawaii_vis.cgi?</code>
-
 <hr>
-
 
 <p><strong>GOES West water vapor imagery</strong>
 <br /><code>https://mesonet.agron.iastate.edu/cgi-bin/wms/goes/west_wv.cgi?</code>
 
 <p><strong>GOES West Alaska water vapor imagery</strong>
 <br /><code>https://mesonet.agron.iastate.edu/cgi-bin/wms/goes/alaska_wv.cgi?</code>
-
-<p><strong>GOES West Hawaii water vapor imagery</strong>
-<br /><code>https://mesonet.agron.iastate.edu/cgi-bin/wms/goes/hawaii_wv.cgi?</code>
 
 <p><b>Note:</b>  To get the WMS capabilities, you need to add
 <br /><code>VER=1.1.1&amp;SERVICE=WMS&amp;REQUEST=GetCapabilities</code>
