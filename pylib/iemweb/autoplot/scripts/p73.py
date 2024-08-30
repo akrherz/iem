@@ -11,7 +11,7 @@ various phenomena, when this app encounters those years as the starting
 point of the plot, they are droppped from the display.
 """
 
-import datetime
+from datetime import date
 
 import pandas as pd
 from matplotlib.ticker import MaxNLocator
@@ -146,7 +146,7 @@ def plotter(fdict):
     doy_limiter = ""
     title = "Entire Year"
     if limit.lower() == "yes":
-        title = f"thru ~{datetime.date.today():%-d %b}"
+        title = f"thru ~{date.today():%-d %b}"
         doy_limiter = (
             " and extract(doy from issue at time zone :tzname) <= "
             "extract(doy from 'TODAY'::date) "
@@ -198,6 +198,8 @@ def plotter(fdict):
         df = df[df["yr"] > 2005]
     elif df["yr"].min() == 2008:
         df = df[df["yr"] > 2008]
+    if df.empty:
+        raise NoDataFound("No data found after filtering, adjust years")
     title = f"{title1} [{title}]"
     subtitle = (
         f"{vtec.get_ps_string(phenomena, significance)} "
@@ -218,10 +220,10 @@ def plotter(fdict):
         )
     ax.grid(True)
     ax.set_ylabel("Yearly Count")
-    xx = "" if limit == "yes" else datetime.date.today().year
+    xx = "" if limit == "yes" else date.today().year
     xlabel = ""
     if limit != "udf":
-        xlabel = f"{xx} thru approximately {datetime.date.today():%-d %b}."
+        xlabel = f"{xx} thru approximately {date.today():%-d %b}."
     ax.set_xlabel(f"{xlabel} Timezone: {tzname}")
     ax.yaxis.set_major_locator(MaxNLocator(integer=True))
     return fig, df

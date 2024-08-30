@@ -755,144 +755,144 @@ END
 LAYER
   NAME "hawaii_ch01"
   STATUS OFF
-  DATA "/mesonet/ldmdata/gis/images/GOES/hawaii/channel01/GOES-18_C01.png"
+  DATA "/mesonet/ldmdata/gis/images/GOES/conus/channel01/GOES-18_C01.png"
   TYPE RASTER
-  INCLUDE "/mesonet/ldmdata/gis/images/GOES/hawaii/channel01/GOES-18_C01.msinc"
+  INCLUDE "/mesonet/ldmdata/gis/images/GOES/conus/channel01/GOES-18_C01.msinc"
   PROCESSING "CLOSE_CONNECTION=NORMAL"
 END
 
 LAYER
   NAME "hawaii_ch02"
   STATUS OFF
-  DATA "/mesonet/ldmdata/gis/images/GOES/hawaii/channel02/GOES-18_C02.png"
+  DATA "/mesonet/ldmdata/gis/images/GOES/conus/channel02/GOES-18_C02.png"
   TYPE RASTER
-  INCLUDE "/mesonet/ldmdata/gis/images/GOES/hawaii/channel02/GOES-18_C02.msinc"
+  INCLUDE "/mesonet/ldmdata/gis/images/GOES/conus/channel02/GOES-18_C02.msinc"
   PROCESSING "CLOSE_CONNECTION=NORMAL"
 END
 
 LAYER
   NAME "hawaii_ch03"
   STATUS OFF
-  DATA "/mesonet/ldmdata/gis/images/GOES/hawaii/channel03/GOES-18_C03.png"
+  DATA "/mesonet/ldmdata/gis/images/GOES/conus/channel03/GOES-18_C03.png"
   TYPE RASTER
-  INCLUDE "/mesonet/ldmdata/gis/images/GOES/hawaii/channel03/GOES-18_C03.msinc"
+  INCLUDE "/mesonet/ldmdata/gis/images/GOES/conus/channel03/GOES-18_C03.msinc"
   PROCESSING "CLOSE_CONNECTION=NORMAL"
 END
 
 LAYER
   NAME "hawaii_ch04"
   STATUS OFF
-  DATA "/mesonet/ldmdata/gis/images/GOES/hawaii/channel04/GOES-18_C04.png"
+  DATA "/mesonet/ldmdata/gis/images/GOES/conus/channel04/GOES-18_C04.png"
   TYPE RASTER
-  INCLUDE "/mesonet/ldmdata/gis/images/GOES/hawaii/channel04/GOES-18_C04.msinc"
+  INCLUDE "/mesonet/ldmdata/gis/images/GOES/conus/channel04/GOES-18_C04.msinc"
   PROCESSING "CLOSE_CONNECTION=NORMAL"
 END
 
 LAYER
   NAME "hawaii_ch05"
   STATUS OFF
-  DATA "/mesonet/ldmdata/gis/images/GOES/hawaii/channel05/GOES-18_C05.png"
+  DATA "/mesonet/ldmdata/gis/images/GOES/conus/channel05/GOES-18_C05.png"
   TYPE RASTER
-  INCLUDE "/mesonet/ldmdata/gis/images/GOES/hawaii/channel05/GOES-18_C05.msinc"
+  INCLUDE "/mesonet/ldmdata/gis/images/GOES/conus/channel05/GOES-18_C05.msinc"
   PROCESSING "CLOSE_CONNECTION=NORMAL"
 END
 
 LAYER
   NAME "hawaii_ch06"
   STATUS OFF
-  DATA "/mesonet/ldmdata/gis/images/GOES/hawaii/channel06/GOES-18_C06.png"
+  DATA "/mesonet/ldmdata/gis/images/GOES/conus/channel06/GOES-18_C06.png"
   TYPE RASTER
-  INCLUDE "/mesonet/ldmdata/gis/images/GOES/hawaii/channel06/GOES-18_C06.msinc"
+  INCLUDE "/mesonet/ldmdata/gis/images/GOES/conus/channel06/GOES-18_C06.msinc"
   PROCESSING "CLOSE_CONNECTION=NORMAL"
 END
 
 LAYER
   NAME "hawaii_ch07"
   STATUS OFF
-  DATA "/mesonet/ldmdata/gis/images/GOES/hawaii/channel07/GOES-18_C07.png"
+  DATA "/mesonet/ldmdata/gis/images/GOES/conus/channel07/GOES-18_C07.png"
   TYPE RASTER
-  INCLUDE "/mesonet/ldmdata/gis/images/GOES/hawaii/channel07/GOES-18_C07.msinc"
+  INCLUDE "/mesonet/ldmdata/gis/images/GOES/conus/channel07/GOES-18_C07.msinc"
   PROCESSING "CLOSE_CONNECTION=NORMAL"
 END
 
 LAYER
   NAME "hawaii_ch08"
   STATUS OFF
-  DATA "/mesonet/ldmdata/gis/images/GOES/hawaii/channel08/GOES-18_C08.png"
+  DATA "/mesonet/ldmdata/gis/images/GOES/conus/channel08/GOES-18_C08.png"
   TYPE RASTER
-  INCLUDE "/mesonet/ldmdata/gis/images/GOES/hawaii/channel08/GOES-18_C08.msinc"
+  INCLUDE "/mesonet/ldmdata/gis/images/GOES/conus/channel08/GOES-18_C08.msinc"
   PROCESSING "CLOSE_CONNECTION=NORMAL"
 END
 
 LAYER
   NAME "hawaii_ch09"
   STATUS OFF
-  DATA "/mesonet/ldmdata/gis/images/GOES/hawaii/channel09/GOES-18_C09.png"
+  DATA "/mesonet/ldmdata/gis/images/GOES/conus/channel09/GOES-18_C09.png"
   TYPE RASTER
-  INCLUDE "/mesonet/ldmdata/gis/images/GOES/hawaii/channel09/GOES-18_C09.msinc"
+  INCLUDE "/mesonet/ldmdata/gis/images/GOES/conus/channel09/GOES-18_C09.msinc"
   PROCESSING "CLOSE_CONNECTION=NORMAL"
 END
 
 LAYER
   NAME "hawaii_ch10"
   STATUS OFF
-  DATA "/mesonet/ldmdata/gis/images/GOES/hawaii/channel10/GOES-18_C10.png"
+  DATA "/mesonet/ldmdata/gis/images/GOES/conus/channel10/GOES-18_C10.png"
   TYPE RASTER
-  INCLUDE "/mesonet/ldmdata/gis/images/GOES/hawaii/channel10/GOES-18_C10.msinc"
+  INCLUDE "/mesonet/ldmdata/gis/images/GOES/conus/channel10/GOES-18_C10.msinc"
   PROCESSING "CLOSE_CONNECTION=NORMAL"
 END
 
 LAYER
   NAME "hawaii_ch11"
   STATUS OFF
-  DATA "/mesonet/ldmdata/gis/images/GOES/hawaii/channel11/GOES-18_C11.png"
+  DATA "/mesonet/ldmdata/gis/images/GOES/conus/channel11/GOES-18_C11.png"
   TYPE RASTER
-  INCLUDE "/mesonet/ldmdata/gis/images/GOES/hawaii/channel11/GOES-18_C11.msinc"
+  INCLUDE "/mesonet/ldmdata/gis/images/GOES/conus/channel11/GOES-18_C11.msinc"
   PROCESSING "CLOSE_CONNECTION=NORMAL"
 END
 
 LAYER
   NAME "hawaii_ch12"
   STATUS OFF
-  DATA "/mesonet/ldmdata/gis/images/GOES/hawaii/channel12/GOES-18_C12.png"
+  DATA "/mesonet/ldmdata/gis/images/GOES/conus/channel12/GOES-18_C12.png"
   TYPE RASTER
-  INCLUDE "/mesonet/ldmdata/gis/images/GOES/hawaii/channel12/GOES-18_C12.msinc"
+  INCLUDE "/mesonet/ldmdata/gis/images/GOES/conus/channel12/GOES-18_C12.msinc"
   PROCESSING "CLOSE_CONNECTION=NORMAL"
 END
 
 LAYER
   NAME "hawaii_ch13"
   STATUS OFF
-  DATA "/mesonet/ldmdata/gis/images/GOES/hawaii/channel13/GOES-18_C13.png"
+  DATA "/mesonet/ldmdata/gis/images/GOES/conus/channel13/GOES-18_C13.png"
   TYPE RASTER
-  INCLUDE "/mesonet/ldmdata/gis/images/GOES/hawaii/channel13/GOES-18_C13.msinc"
+  INCLUDE "/mesonet/ldmdata/gis/images/GOES/conus/channel13/GOES-18_C13.msinc"
   PROCESSING "CLOSE_CONNECTION=NORMAL"
 END
 
 LAYER
   NAME "hawaii_ch14"
   STATUS OFF
-  DATA "/mesonet/ldmdata/gis/images/GOES/hawaii/channel14/GOES-18_C14.png"
+  DATA "/mesonet/ldmdata/gis/images/GOES/conus/channel14/GOES-18_C14.png"
   TYPE RASTER
-  INCLUDE "/mesonet/ldmdata/gis/images/GOES/hawaii/channel14/GOES-18_C14.msinc"
+  INCLUDE "/mesonet/ldmdata/gis/images/GOES/conus/channel14/GOES-18_C14.msinc"
   PROCESSING "CLOSE_CONNECTION=NORMAL"
 END
 
 LAYER
   NAME "hawaii_ch15"
   STATUS OFF
-  DATA "/mesonet/ldmdata/gis/images/GOES/hawaii/channel15/GOES-18_C15.png"
+  DATA "/mesonet/ldmdata/gis/images/GOES/conus/channel15/GOES-18_C15.png"
   TYPE RASTER
-  INCLUDE "/mesonet/ldmdata/gis/images/GOES/hawaii/channel15/GOES-18_C15.msinc"
+  INCLUDE "/mesonet/ldmdata/gis/images/GOES/conus/channel15/GOES-18_C15.msinc"
   PROCESSING "CLOSE_CONNECTION=NORMAL"
 END
 
 LAYER
   NAME "hawaii_ch16"
   STATUS OFF
-  DATA "/mesonet/ldmdata/gis/images/GOES/hawaii/channel16/GOES-18_C16.png"
+  DATA "/mesonet/ldmdata/gis/images/GOES/conus/channel16/GOES-18_C16.png"
   TYPE RASTER
-  INCLUDE "/mesonet/ldmdata/gis/images/GOES/hawaii/channel16/GOES-18_C16.msinc"
+  INCLUDE "/mesonet/ldmdata/gis/images/GOES/conus/channel16/GOES-18_C16.msinc"
   PROCESSING "CLOSE_CONNECTION=NORMAL"
 END
 

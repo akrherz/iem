@@ -10,7 +10,7 @@ date.
 """
 
 import calendar
-import datetime
+from datetime import date, datetime
 
 import pandas as pd
 from pyiem.database import get_sqlalchemy_conn
@@ -25,7 +25,7 @@ UNITCONV = {"mph": "mile / hour", "kt": "knot", "mps": "meter / second"}
 def get_description():
     """Return a dict describing how to call this plotter"""
     desc = {"description": __doc__, "data": True, "cache": 86400}
-    today = datetime.date.today()
+    today = date.today()
     desc["arguments"] = [
         dict(
             type="zstation",
@@ -126,7 +126,7 @@ def add_context(ctx):
         if ab is None:
             raise NoDataFound("Unknown station metadata.")
         y1 = ab.year
-        y2 = datetime.date.today().year
+        y2 = date.today().year
 
     with get_sqlalchemy_conn("asos") as conn:
         df = pd.read_sql(
@@ -168,12 +168,8 @@ def add_context(ctx):
             if p is None:
                 continue
             tokens = p.split("-")
-            sts = datetime.datetime.strptime(
-                "2000" + tokens[0].strip(), "%Y%m%d"
-            )
-            ets = datetime.datetime.strptime(
-                "2000" + tokens[1].strip(), "%Y%m%d"
-            )
+            sts = datetime.strptime(f"2000{tokens[0].strip()}", "%Y%m%d")
+            ets = datetime.strptime(f"2000{tokens[1].strip()}", "%Y%m%d")
             ldf = (
                 df[["hour", "avg_sknt"]]
                 .loc[sts.date() : ets.date()]

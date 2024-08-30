@@ -1,18 +1,22 @@
 """Compute daily summaries of ASOS/METAR data.
 
-Called from RUN_12Z.sh for the previous date
+Called from RUN_12Z.sh with no args and 2 days ago
+Called from RUN_MIDNIGHT.sh with no args
 """
 
-import datetime
-import sys
 import time
 import warnings
+from datetime import date, datetime, timedelta
+from typing import Optional
 
+import click
 import metpy.calc as mcalc
 import numpy as np
 import pandas as pd
 from metpy.units import units as munits
-from pyiem.util import get_dbconn, get_sqlalchemy_conn, logger
+from pyiem.database import get_dbconn, get_sqlalchemy_conn
+from pyiem.util import logger
+from sqlalchemy import text
 
 LOG = logger()
 # bad values into mcalc
@@ -62,22 +66,22 @@ def is_new(colname, newval, currentrow, newdata):
         newdata[colname] = newval
 
 
-def do(ts):
+def do(dt: date):
     """Process this date timestamp"""
     iemaccess = get_dbconn("iem")
     icursor = iemaccess.cursor()
-    table = f"summary_{ts.year}"
+    table = f"summary_{dt.year}"
     # Get what we currently know, just grab everything
     with get_sqlalchemy_conn("iem") as conn:
         current = pd.read_sql(
-            f"SELECT * from {table} WHERE day = %s",
+            text(f"SELECT * from {table} WHERE day = :dt"),
             conn,
-            params=(ts.strftime("%Y-%m-%d"),),
+            params={"dt": dt},
             index_col="iemid",
         )
     with get_sqlalchemy_conn("asos") as conn:
         df = pd.read_sql(
-            """
+            text("""
         select station, network, iemid, drct, sknt, gust,
         valid at time zone tzname as localvalid, valid,
         tmpf, dwpf, relh, feel,
@@ -85,20 +89,20 @@ def do(ts):
         peak_wind_time at time zone tzname as local_peak_wind_time from
         alldata d JOIN stations t on (t.id = d.station)
         where network ~* 'ASOS'
-        and valid between %s and %s and t.tzname is not null
-        and date(valid at time zone tzname) = %s
+        and valid between :sts and :ets and t.tzname is not null
+        and date(valid at time zone tzname) = :dt
         ORDER by valid ASC
-        """,
+        """),
             conn,
-            params=(
-                ts - datetime.timedelta(days=2),
-                ts + datetime.timedelta(days=2),
-                ts.strftime("%Y-%m-%d"),
-            ),
+            params={
+                "sts": dt - timedelta(days=2),
+                "ets": dt + timedelta(days=2),
+                "dt": dt,
+            },
             index_col=None,
         )
     if df.empty:
-        LOG.info("no ASOS database entries for %s", ts)
+        LOG.info("no ASOS database entries for %s", dt)
         return
     # derive some parameters
     df["u"], df["v"] = mcalc.wind_components(
@@ -124,11 +128,11 @@ def do(ts):
                 table,
                 gdf.iloc[0]["station"],
                 gdf.iloc[0]["network"],
-                ts,
+                dt,
             )
             icursor.execute(
                 f"INSERT into {table} (iemid, day) values (%s, %s)",
-                (iemid, ts),
+                (iemid, dt),
             )
             current.loc[iemid] = None
         newdata = {}
@@ -195,7 +199,7 @@ def do(ts):
         for key, val in newdata.items():
             cols.append(f"{key} = %s")
             args.append(val)
-        args.extend([iemid, ts])
+        args.extend([iemid, dt])
 
         sql = ", ".join(cols)
 
@@ -219,20 +223,25 @@ def do(ts):
     iemaccess.close()
 
 
-def main(argv):
+@click.command()
+@click.option(
+    "--date", "dt", type=click.DateTime(), required=False, help="Date"
+)
+def main(dt: Optional[datetime]):
     """Go Main Go"""
-    ts = datetime.date.today() - datetime.timedelta(days=1)
-    if len(argv) == 4:
-        ts = datetime.date(int(argv[1]), int(argv[2]), int(argv[3]))
+    if dt is None:
+        dt = date.today() - timedelta(days=1)
+    else:
+        dt = dt.date()
     try:
-        do(ts)
+        do(dt)
     except Exception as exp:
         LOG.info("first pass yield an exception")
         LOG.exception(exp)
         LOG.info("sleeping two minutes before trying once more")
         time.sleep(120)
-        do(ts)
+        do(dt)
 
 
 if __name__ == "__main__":
-    main(sys.argv)
+    main()

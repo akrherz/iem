@@ -4,24 +4,25 @@ each year with the extreme criterion meet. In the case of a tie, the
 first period of the season is used for the analysis.  For a season to
 count within the analysis, it must have had at least 200 days with data.
 
-<p>The dew point option only works for ASOS networks and does a simple
-arthimetic mean of dew point temperatures.
+<p>The dew point and feels like option only works for ASOS networks
+and does a simple arthimetic mean of dew point temperatures.</p>
 
 <p>Note that the coldest and warmest feels like temperature values are
 averages of the daily minimum or maximum values, not an average of an
 average feels like temperature.  This is why we can't have nice things.</p>
 """
 
-import datetime
+from datetime import datetime, timedelta
 
 import matplotlib.colors as mpcolors
 import numpy as np
 import pandas as pd
 from matplotlib.colorbar import ColorbarBase
 from matplotlib.ticker import MaxNLocator
+from pyiem.database import get_sqlalchemy_conn
 from pyiem.exceptions import NoDataFound
 from pyiem.plot import figure, get_cmap
-from pyiem.util import get_autoplot_context, get_sqlalchemy_conn
+from pyiem.util import get_autoplot_context
 from sqlalchemy import text
 
 PDICT = {
@@ -191,7 +192,7 @@ def plotter(fdict):
     days = ctx["days"]
     varname = ctx["var"]
     df = get_data(ctx)
-    if df.empty:
+    if df.empty or df[XREF[varname]].isnull().all():
         raise NoDataFound("Error, no results returned!")
 
     # Don't plot zeros for precip
@@ -230,7 +231,7 @@ def plotter(fdict):
     xticks = []
     xticklabels = []
     for i in np.arange(df["doy"].min() - 5, df["doy"].max() + 5, 1):
-        ts = datetime.datetime(2000, 1, 1) + datetime.timedelta(days=int(i))
+        ts = datetime(2000, 1, 1) + timedelta(days=int(i))
         if ts.day == 1:
             xticks.append(i)
             xticklabels.append(ts.strftime("%-d %b"))

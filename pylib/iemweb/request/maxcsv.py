@@ -101,7 +101,7 @@ class Schema(CGIModel):
     q: str = Field(..., description="Apache mod_rewrite query string.")
 
 
-def figurePhase(p1, p2):
+def figure_phase(p1: float, p2: float) -> str:
     """Return a string of the moon phase!"""
     if p2 < p1:  # Waning!
         if p1 < 0.1:
@@ -251,7 +251,7 @@ def do_moon(lon, lat):
     s2 = (
         obs.next_setting(moon).datetime().replace(tzinfo=datetime.timezone.utc)
     )
-    label = figurePhase(p1, p2)
+    label = figure_phase(p1, p2)
     # Figure out the timezone
     pgconn, cursor = get_dbconnc("mesosite")
     cursor.execute(

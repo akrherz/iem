@@ -11,7 +11,7 @@ wished to see added to this analysis, please
 """
 
 import calendar
-import datetime
+from datetime import date, timedelta
 
 import numpy as np
 import pandas as pd
@@ -73,8 +73,8 @@ UNITS = {
 def get_description():
     """Return a dict describing how to call this plotter"""
     desc = {"description": __doc__, "data": True}
-    today = datetime.date.today()
-    yesterday = today - datetime.timedelta(days=60)
+    today = date.today()
+    yesterday = today - timedelta(days=60)
     desc["arguments"] = [
         ARG_STATION,
         dict(
@@ -177,7 +177,7 @@ def combine(df, months, offsets) -> pd.DataFrame:
 
 def plotter(fdict):
     """Go"""
-    today = datetime.date.today() + datetime.timedelta(days=1)
+    today = date.today() + timedelta(days=1)
     ctx = get_autoplot_context(fdict, get_description())
     station = ctx["station"]
     threshold = ctx["threshold"]
