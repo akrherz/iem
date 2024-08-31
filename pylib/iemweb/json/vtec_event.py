@@ -1,6 +1,6 @@
 """.. title:: Metadata for a single VTEC event
 
-Return to `JSON Services </json/>`_
+Return to `API Services </api/#json>`_
 
 Documentation for /json/vtec_event.py
 -------------------------------------

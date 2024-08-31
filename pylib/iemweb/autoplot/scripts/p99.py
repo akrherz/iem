@@ -6,7 +6,7 @@ average high and low temperature.  The period of record data is used to compute
 the daily standard deviation departures.
 """
 
-import datetime
+from datetime import date, timedelta
 
 import matplotlib.dates as mdates
 import pandas as pd
@@ -29,7 +29,7 @@ def get_description():
         dict(
             type="year",
             name="year",
-            default=datetime.date.today().year,
+            default=date.today().year,
             label="Which Year:",
         ),
         dict(
@@ -84,8 +84,8 @@ def plotter(fdict):
             conn,
             params={
                 "clstation": clstation,
-                "sts": datetime.date(year, 1, 1),
-                "ets": datetime.date(year, 12, 31),
+                "sts": date(year, 1, 1),
+                "ets": date(year, 12, 31),
                 "station": station,
                 "year": year,
             },
@@ -165,8 +165,8 @@ def plotter(fdict):
     ax[0].xaxis.set_major_locator(mdates.MonthLocator(interval=1))
     ax[0].xaxis.set_major_formatter(mdates.DateFormatter("%-d\n%b"))
     ax[0].set_xlim(
-        df.index.min() - datetime.timedelta(days=3),
-        df.index.max() + datetime.timedelta(days=3),
+        df.index.min() - timedelta(days=3),
+        df.index.max() + timedelta(days=3),
     )
 
     return fig, df

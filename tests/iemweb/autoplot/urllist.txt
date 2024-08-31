@@ -81,6 +81,7 @@
 /plotting/auto/plot/140/network:IA_ASOS::station:DSM::syear:1928::sday:0711::eday:0725::varname:avg_temp::w:none::thres:1::year:2024::_r:t::dpi:100.png
 /plotting/auto/plot/141/location:ames::ptype:rain::sdate:mar15::_r:t::dpi:100.png
 /plotting/auto/plot/141/location:ames::ptype:maxt::sdate:mar15::_r:t::dpi:100.png
+/plotting/auto/plot/149/network:IACLIMATE::station:IATAME::days:91::days2:13::days3:0::year2:2015::year3:2023::sdate:2024-03-03::edate:2024-08-30::_r:43::dpi:100.png
 /plotting/auto/plot/160/station:GTTI4::dt:2024-08-23%201620::var:primary::w:both::_r:t::dpi:100.js
 /plotting/auto/plot/160/station:GTTI4::dt:2024-08-23%201620::var:primary::w:both::_r:t::dpi:100.png
 /plotting/auto/plot/163/csector:midwest::var:count::sdate:2024-01-01%200000::edate:2024-08-22%200000::filter:NONE::by:wfo::cmap:plasma::lbl:yes::_r:t::dpi:100.png
@@ -112,6 +113,7 @@
 /plotting/auto/plot/180/v:precip::network1:IACLIMATE::station1:IATDSM::c1:1951::network2:IACLIMATE::station2:IA0000::c2:1951::s:0::sy1:1991::ey1:2020::sy2:1981::ey2:2010::_r:43::dpi:100.png
 /plotting/auto/plot/192/t:state::network:WFO::wfo:STO::state:IA::v:vsby::valid:2020-06-15%201400::cmap:gray::_r:t::dpi:100.png
 /plotting/auto/plot/194/csector:midwest::sdate:2020-05-01::edate:2024-07-17::d:0::w:percent::cmap:plasma::_r:t::dpi:100.png
+/plotting/auto/plot/198/network:RAOB::station:_OAX::hour:12::month:all::agg:avg::var:tmpc::level:500::quorum:no::_r:t::dpi:100.png
 /plotting/auto/plot/199/opt:1::date:2024-07-24::_r:t::dpi:100.png
 /plotting/auto/plot/199/opt:2::date:2024-07-24::_r:t::dpi:100.png
 /plotting/auto/plot/199/opt:3::date:2024-07-24::_r:t::dpi:100.png

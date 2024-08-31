@@ -4,15 +4,17 @@ This is only run for the exceptions, when data is marked as missing for some
 reason.  The main data estimator is found at `daily_estimator.py`.
 
 This script utilizes the IEMRE web service to provide data.
+
+Called from RUN_CLIMODAT_STATE.sh
 """
 
-import sys
-
+import click
 import pandas as pd
 import requests
 from pyiem.database import get_dbconn, get_sqlalchemy_conn
 from pyiem.network import Table as NetworkTable
 from pyiem.util import logger
+from sqlalchemy import text
 
 LOG = logger()
 URI = (
@@ -100,9 +102,10 @@ def process(cursor, station, df, meta):
         cursor.execute(sql.replace("nan", "null"))
 
 
-def main(argv):
+@click.command()
+@click.option("--state", required=True, help="State to process")
+def main(state: str):
     """Go Main Go"""
-    state = argv[1]
     if state in NON_CONUS:
         LOG.error("Exiting for non-CONUS sites (%s).", state)
         return
@@ -110,12 +113,12 @@ def main(argv):
     pgconn = get_dbconn("coop")
     with get_sqlalchemy_conn("coop") as conn:
         df = pd.read_sql(
-            f"""
+            text(f"""
             SELECT station, year, day, high, low, precip, temp_estimated,
             precip_estimated from alldata_{state}
             WHERE (high is null or low is null or precip is null)
             and year >= 1893 and day < 'TODAY' ORDER by station, day
-            """,
+            """),
             conn,
             index_col=None,
         )
@@ -131,4 +134,4 @@ def main(argv):
 
 
 if __name__ == "__main__":
-    main(sys.argv)
+    main()

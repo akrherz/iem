@@ -365,9 +365,12 @@ def application(environ, start_response):
         output = handle_error(exp, fmt, environ.get("REQUEST_URI"))
     finally:
         mc.close()
+    # Special case for when we are returning a javascript alert
+    if fmt == "js" and status == HTTP400:
+        start_response(HTTP200, get_response_headers(status, fmt))
+        return [output.encode("utf-8")]
     # Figure out what our response headers should be
     start_response(status, get_response_headers(status, fmt))
-    # python3 mod-wsgi requires returning bytes, so we encode strings
-    if sys.version_info[0] > 2 and isinstance(output, str):
+    if isinstance(output, str):
         output = output.encode("UTF-8")
     return [output]
