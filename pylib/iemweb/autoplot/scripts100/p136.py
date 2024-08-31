@@ -245,7 +245,7 @@ def add_ctx(ctx):
         s = s.dropna().astype("timedelta64[s]")
         ctx["lines"]["season"] = {
             "x": s.index.values[::-1],
-            "y": s[ctx["season"]].values[::-1] / 24.0 / 3600.0,
+            "y": s[ctx["season"]].values[::-1].astype(int) / 24.0 / 3600.0,
             "c": "blue",
             "label": f"{ctx['season']}",
         }
@@ -258,7 +258,7 @@ def add_ctx(ctx):
         s = s.dropna().astype("timedelta64[s]")
         ctx["lines"][lbl] = {
             "x": s.index.values[::-1],
-            "y": s[lbl].values[::-1] / 24.0 / 3600.0,
+            "y": s[lbl].values[::-1].astype(int) / 24.0 / 3600.0,
             "label": lbl,
             "c": color,
         }
