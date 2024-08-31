@@ -15,7 +15,7 @@ plotted representing the best root mean squared error fit to the selected
 year's data.
 """
 
-import datetime
+from datetime import date, timedelta
 
 import matplotlib.dates as mdates
 import numpy as np
@@ -25,20 +25,16 @@ from pyiem.exceptions import IncompleteWebRequest, NoDataFound
 from pyiem.plot import figure_axes
 from pyiem.util import get_autoplot_context
 
+from iemweb.autoplot import ARG_STATION
+
 
 def get_description():
     """Return a dict describing how to call this plotter"""
     desc = {"description": __doc__, "data": True, "cache": 86400}
-    today = datetime.date.today()
-    sts = today - datetime.timedelta(days=180)
+    today = date.today()
+    sts = today - timedelta(days=180)
     desc["arguments"] = [
-        dict(
-            type="station",
-            name="station",
-            default="IATAME",
-            network="IACLIMATE",
-            label="Select Station:",
-        ),
+        ARG_STATION,
         dict(type="int", name="days", default=91, label="Number of Days #1"),
         dict(
             type="int",
@@ -216,7 +212,7 @@ def plotter(fdict):
                     xticks.append(i)
                     xticklabels.append(now.strftime("%b"))
                 i += 1
-                now += datetime.timedelta(days=1)
+                now += timedelta(days=1)
             ax.set_xticks(xticks)
             ax.set_xticklabels(xticklabels)
             df2 = df.loc[sts2:ets2]
@@ -245,7 +241,7 @@ def plotter(fdict):
         aridity = df.loc[sts:ets, "aridity"].values
         mae = 100
         useyear = None
-        for _year in range(1951, datetime.date.today().year + 1):
+        for _year in range(1951, date.today().year + 1):
             if _year == ets.year:
                 continue
             sts2 = sts.replace(year=_year - yrrange)

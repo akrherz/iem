@@ -11,6 +11,9 @@ from pyiem.database import get_sqlalchemy_conn
 from pyiem.exceptions import NoDataFound
 from pyiem.plot import figure_axes
 from pyiem.util import get_autoplot_context
+from sqlalchemy import text
+
+from iemweb.autoplot import ARG_STATION
 
 PDICT = {"high": "High temperature", "low": "Low Temperature"}
 
@@ -19,13 +22,7 @@ def get_description():
     """Return a dict describing how to call this plotter"""
     desc = {"description": __doc__, "data": True}
     desc["arguments"] = [
-        dict(
-            type="station",
-            name="station",
-            default="IATAME",
-            label="Select Station:",
-            network="IACLIMATE",
-        ),
+        ARG_STATION,
         dict(
             type="int",
             name="min",
@@ -52,28 +49,27 @@ def plotter(fdict):
     station = ctx["station"]
     with get_sqlalchemy_conn("coop") as conn:
         df = pd.read_sql(
-            """
+            text("""
         WITH climate as (
             SELECT to_char(valid, 'mmdd') as sday, high, low from
-            ncei_climate91 where station = %s
+            ncei_climate91 where station = :ncei
         )
         SELECT extract(doy from day) as doy, count(*),
-        SUM(case when a.high >= (c.high + %s) and a.high < (c.high + %s)
+        SUM(case when a.high >= (c.high + :minv) and a.high < (c.high + :maxv)
                 then 1 else 0 end) as high_count,
-        SUM(case when a.low >= (c.low + %s) and a.low < (c.low + %s)
+        SUM(case when a.low >= (c.low + :minv) and a.low < (c.low + :maxv)
                 then 1 else 0 end) as low_count
         FROM alldata a JOIN climate c on (a.sday = c.sday)
-        WHERE a.sday != '0229' and station = %s GROUP by doy ORDER by doy ASC
-        """,
+        WHERE a.sday != '0229' and station = :station
+        GROUP by doy ORDER by doy ASC
+        """),
             conn,
-            params=(
-                ctx["_nt"].sts[station]["ncei91"],
-                minv,
-                maxv,
-                minv,
-                maxv,
-                station,
-            ),
+            params={
+                "ncei": ctx["_nt"].sts[station]["ncei91"],
+                "minv": minv,
+                "maxv": maxv,
+                "station": station,
+            },
             index_col="doy",
         )
     if df.empty:

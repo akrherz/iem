@@ -91,9 +91,22 @@ def ingest(ncin, nc, valid, domain):
     nc.variables["p01m"][tidx] = np.ma.where(newval < 0, 0, newval)
 
 
-def run(valid, domain):
+def run(valid, domain, force):
     """Run for the given valid time."""
     dd = "" if domain == "" else f"_{domain}"
+    ncoutfn = f"/mesonet/data/era5{dd}/{valid.year}_era5land_hourly.nc"
+    tidx = iemre.hourly_offset(valid)
+    if not force:
+        with ncopen(ncoutfn) as nc:
+            sample = nc.variables["tmpk"][tidx, 150, 150]
+            if 200 < sample < 350:
+                LOG.info(
+                    "Skipping %s, tmpk %.1fK for domain `%s`",
+                    valid,
+                    sample,
+                    domain,
+                )
+                return
     dom = iemre.DOMAINS[domain]
     LOG.info("Running for %s[domain=%s]", valid, domain)
     ncfn = f"{domain}_{valid:%Y%m%d%H}.nc"
@@ -118,7 +131,6 @@ def run(valid, domain):
         },
         ncfn,
     )
-    ncoutfn = f"/mesonet/data/era5{dd}/{valid.year}_era5land_hourly.nc"
     with ncopen(ncfn) as ncin, ncopen(ncoutfn, "a") as nc:
         ingest(ncin, nc, valid, domain)
     os.unlink(ncfn)
@@ -127,7 +139,8 @@ def run(valid, domain):
 @click.command()
 @click.option("--date", "valid", required=True, type=click.DateTime())
 @click.option("--domain", default=None, help="IEMRE Domain to run for")
-def main(valid, domain):
+@click.option("--force", is_flag=True, help="Force re-download")
+def main(valid, domain, force: bool):
     """Go!"""
     valid = utc(valid.year, valid.month, valid.day)
     domains = iemre.DOMAINS.keys()
@@ -135,7 +148,7 @@ def main(valid, domain):
         domains = [domain]
     for offset in range(1, 25):
         for _domain in domains:
-            run(valid + timedelta(hours=offset), _domain)
+            run(valid + timedelta(hours=offset), _domain, force)
 
 
 if __name__ == "__main__":

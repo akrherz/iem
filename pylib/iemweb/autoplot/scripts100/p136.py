@@ -7,13 +7,14 @@ in this analysis with the wind chill temperature being the air temperature
 in those instances.
 """
 
-import datetime
+from datetime import date, datetime
 
 import pandas as pd
 from pyiem.database import get_sqlalchemy_conn
 from pyiem.exceptions import NoDataFound
 from pyiem.plot import figure_axes
 from pyiem.util import get_autoplot_context
+from sqlalchemy import text
 
 PDICT = {
     "0": "Include calm observations",
@@ -36,7 +37,7 @@ def get_description():
         dict(
             type="year",
             name="season",
-            default=datetime.datetime.now().year,
+            default=datetime.now().year,
             label="Select Season to Highlight",
         ),
         dict(
@@ -197,22 +198,22 @@ def add_ctx(ctx):
     """Get the data"""
     station = ctx["zstation"]
     sknt = ctx["wind"]
-    today = datetime.date.today()
+    today = date.today()
     with get_sqlalchemy_conn("asos") as conn:
         df = pd.read_sql(
-            """
+            text("""
         WITH data as (
             SELECT valid, lag(valid) OVER (ORDER by valid ASC),
             extract(year from valid + '5 months'::interval) as season,
             wcht(tmpf::numeric, (sknt * 1.15)::numeric) from alldata
-            WHERE station = %s and tmpf is not null and sknt is not null
-            and tmpf < 50 and sknt >= %s and report_type = 3 ORDER by valid)
+            WHERE station = :station and tmpf is not null and sknt is not null
+            and tmpf < 50 and sknt >= :sknt and report_type = 3 ORDER by valid)
         SELECT case when (valid - lag) < '3 hours'::interval then (valid - lag)
         else '3 hours'::interval end as timedelta, wcht,
         season, to_char(valid, 'mmdd') as sday from data
-        """,
+        """),
             conn,
-            params=(station, sknt),
+            params={"station": station, "sknt": sknt},
             index_col=None,
         )
     if df.empty:
@@ -236,7 +237,7 @@ def add_ctx(ctx):
     )
     ctx["subtitle"] = f"Hours below threshold by season (wind >= {sknt} kts)"
     ctx["dfdescribe"] = df2.iloc[:-1].describe()
-    ctx["season"] = int(ctx.get("season", datetime.datetime.now().year))
+    ctx["season"] = int(ctx.get("season", datetime.now().year))
     ctx["lines"] = {}
 
     if ctx["season"] in ctx["df"].index.values:
@@ -261,6 +262,8 @@ def add_ctx(ctx):
             "label": lbl,
             "c": color,
         }
+    if not ctx["lines"]:
+        raise NoDataFound("No data found for query.")
 
     return ctx
 

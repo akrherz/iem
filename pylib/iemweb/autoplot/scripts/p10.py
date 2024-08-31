@@ -6,7 +6,7 @@ simple linear trend line is placed on both dates.
 """
 
 import calendar
-import datetime
+from datetime import date, timedelta
 
 import numpy as np
 import pandas as pd
@@ -136,7 +136,7 @@ def plotter(fdict):
     if df.empty:
         raise NoDataFound("No data found for query.")
     df["season"] = df["fall"] - df["spring"]
-    today = datetime.date.today()
+    today = date.today()
     res = (
         "# IEM Climodat https://mesonet.agron.iastate.edu/climodat/\n"
         f"# Report Generated: {today:%d %b %Y}\n"
@@ -159,12 +159,8 @@ def plotter(fdict):
             f"{row['fall_date'].month:4.0f}{row['fall_date'].day:6.0f}"
             f"{row['fall']:4.0f}          {row['season']:.0f}\n"
         )
-    sts = datetime.date(2000, 1, 1) + datetime.timedelta(
-        days=df["spring"].mean()
-    )
-    ets = datetime.date(2000, 1, 1) + datetime.timedelta(
-        days=df["fall"].mean()
-    )
+    sts = date(2000, 1, 1) + timedelta(days=df["spring"].mean())
+    ets = date(2000, 1, 1) + timedelta(days=df["fall"].mean())
     res += (
         f"{'MEAN':7s}{sts.month:4.0f}{sts.day:6.0f}{df['spring'].mean():4.0f}"
         f"        {ets.month:4.0f}{ets.day:6.0f}{df['fall'].mean():4.0f}"
@@ -181,7 +177,7 @@ def plotter(fdict):
     ax.bar(years, fall - spring, bottom=spring, ec="tan", fc="tan", zorder=1)
     for _v in [fall, spring]:
         avgv = int(np.average(_v))
-        ts = datetime.date(2000, 1, 1) + datetime.timedelta(days=avgv - 1)
+        ts = date(2000, 1, 1) + timedelta(days=avgv - 1)
         ax.text(
             years[-1] + 3,
             avgv,

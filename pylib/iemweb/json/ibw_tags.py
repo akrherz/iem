@@ -1,6 +1,6 @@
 """.. title:: Impact Based Warning Tags by WFO and Year
 
-Return to `JSON Services </json/>`_
+Return to `API Services </api/#json>`_
 
 Documentation for /json/ibw_tags.py
 -----------------------------------
