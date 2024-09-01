@@ -104,6 +104,8 @@ def get_df(ctx):
             params=(ctx["station"], str(events.index.values[0])),
             index_col="valid",
         )
+    if obs.empty:
+        raise NoDataFound("No Data Found.")
     ctx["title"] = (
         f"{ctx['_sname']} ({str(events.index.values[0])[:10]} "
         f"to {str(obs.index.values[-1])[:10]})\n"
