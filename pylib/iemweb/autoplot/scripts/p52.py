@@ -13,7 +13,7 @@ there is no hallow area, these are events that went into effect immediately
 at issuance.  For example, Severe Thunderstorm Warnings are all this way.
 """
 
-import datetime
+from datetime import datetime, timedelta
 from zoneinfo import ZoneInfo
 
 import matplotlib.dates as mdates
@@ -155,10 +155,10 @@ def plotter(fdict):
     if station not in ctx["_nt"].sts:
         raise NoDataFound("Invalid station provided.")
     tz = ZoneInfo(ctx["_nt"].sts[station]["tzname"])
-    sts = datetime.datetime(sts.year, sts.month, sts.day, tzinfo=tz)
+    sts = datetime(sts.year, sts.month, sts.day, tzinfo=tz)
     days = ctx["days"]
 
-    ets = sts + datetime.timedelta(days=days)
+    ets = sts + timedelta(days=days)
     params = {
         "wfo": station if len(station) == 3 else station[1:],
         "sts": sts,
@@ -222,7 +222,7 @@ def plotter(fdict):
     title = (
         f"{title} Watch/Warning/Advisories\n"
         f"{sts:%-d %b %Y} through "
-        f"{(ets - datetime.timedelta(days=1)):%-d %b %Y}"
+        f"{(ets - timedelta(days=1)):%-d %b %Y}"
     )
     fig = figure(title=title, apctx=ctx)
     ax = fig.add_axes([0.07, 0.09, 0.71, 0.81])
@@ -263,10 +263,10 @@ def plotter(fdict):
         # place to the right if end of bar is less than 70% of the way
         if x1 < 0.7:
             align = "left"
-            xpos = row["endts"] + datetime.timedelta(minutes=90)
+            xpos = row["endts"] + timedelta(minutes=90)
         else:
             align = "right"
-            xpos = row["minproductissue"] - datetime.timedelta(minutes=90)
+            xpos = row["minproductissue"] - timedelta(minutes=90)
         textcolor = vtec.NWS_COLORS.get(phsig if phsig != "TO.A" else "X", "k")
         ax.text(
             xpos,

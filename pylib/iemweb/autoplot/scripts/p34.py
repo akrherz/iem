@@ -4,7 +4,7 @@ days above or below some threshold for high or low temperature.
 """
 
 import calendar
-import datetime
+from datetime import date, datetime, timedelta
 
 import numpy as np
 import pandas as pd
@@ -12,8 +12,9 @@ from pyiem.database import get_sqlalchemy_conn
 from pyiem.exceptions import NoDataFound
 from pyiem.plot import figure, fitbox
 from pyiem.util import get_autoplot_context
+from sqlalchemy import text
 
-from iemweb.autoplot import get_monofont
+from iemweb.autoplot import ARG_STATION, get_monofont
 
 PDICT = {
     "high_over": "High Temperature At or Above",
@@ -39,13 +40,7 @@ def get_description():
     """Return a dict describing how to call this plotter"""
     desc = {"description": __doc__, "data": True}
     desc["arguments"] = [
-        dict(
-            type="station",
-            name="station",
-            default="IATAME",
-            network="IACLIMATE",
-            label="Select Station:",
-        ),
+        ARG_STATION,
         dict(
             type="select",
             name="var",
@@ -109,20 +104,20 @@ def plotter(fdict):
         clstation = ctx["_nt"].sts[station]["ncei91"]
     with get_sqlalchemy_conn("coop") as conn:
         obs = pd.read_sql(
-            f"""
+            text(f"""
             WITH myclimo as (
                 select to_char(valid, 'mmdd') as sday, high, low,
                 (high + low) / 2. as avgt from
-                {cltable} WHERE station = %s
+                {cltable} WHERE station = :clstation
             )
             SELECT extract(doy from day)::int as d, o.high, o.low, o.day,
             (o.high + o.low) / 2. as avgt,
             c.high as climo_high, c.low as climo_low, c.avgt as climo_avgt
             from alldata o JOIN myclimo c on (o.sday = c.sday)
-            where o.station = %s and o.high is not null ORDER by day ASC
-            """,
+            where o.station = :st and o.high is not null ORDER by day ASC
+            """),
             conn,
-            params=(clstation, station),
+            params={"clstation": clstation, "st": station},
             index_col="day",
         )
     if obs.empty:
@@ -146,7 +141,7 @@ def plotter(fdict):
             running += 1
         else:
             if running > 0:
-                streaks.append([running, day - datetime.timedelta(days=1)])
+                streaks.append([running, day - timedelta(days=1)])
             running = 0
         if running > maxperiod[doy]:
             maxperiod[doy] = running
@@ -154,7 +149,7 @@ def plotter(fdict):
     if running > 0:
         streaks.append([running, day])
 
-    sts = datetime.datetime(2012, 1, 1)
+    sts = datetime(2012, 1, 1)
     xticks = []
     for i in range(1, 13):
         ts = sts.replace(month=i)
@@ -193,12 +188,12 @@ def plotter(fdict):
     fig.text(0.7, ypos, "Top 20 Distinct Periods\nDays - Inclusive Period")
     ypos -= 0.06
     monofont = get_monofont()
-    today = datetime.date.today()
+    today = date.today()
     for idx, row in (
         sdf.sort_values("period", ascending=False).head(20).iterrows()
     ):
         d2 = row["enddate"]
-        d1 = d2 - datetime.timedelta(days=row["period"] - 1)
+        d1 = d2 - timedelta(days=row["period"] - 1)
         df.at[idx, "startdate"] = d1
         fig.text(
             0.7,

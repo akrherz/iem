@@ -1,6 +1,6 @@
 """.. title:: Example JSON Service
 
-Return to `JSON Services </json/>`.
+Return to `API Services </api/#json>`.
 
 Example Requests
 ----------------

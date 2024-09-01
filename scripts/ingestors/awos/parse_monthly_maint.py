@@ -5,9 +5,9 @@ entire sensors replaced when outside of bounds.
 2. There is no flag that denotes if a calibration even happened :/
 """
 
-import datetime
 import re
 import sys
+from datetime import datetime
 
 import pandas as pd
 from pyiem.database import get_dbconn
@@ -46,7 +46,7 @@ def main(argv):
         if key in done:
             continue
         done.append(key)
-        date = datetime.datetime.strptime(row["Visit Date"], "%m-%d-%Y")
+        date = datetime.strptime(row["Visit Date"], "%m-%d-%Y")
         descr = (
             row["Description"]
             .lower()
@@ -76,12 +76,15 @@ def main(argv):
             + comment
         )
         tempadj = float(parts[0][1]) - float(parts[0][0])
+        p2 = parts[0][2]
+        if p2.endswith("."):
+            p2 = p2[:-1]
         args = (
             faa,
             date.strftime("%Y-%m-%d"),
             "tmpf",
             tempadj,
-            parts[0][2],
+            p2,
             comment,
         )
         if len(sys.argv) > 1:
@@ -94,7 +97,7 @@ def main(argv):
             )
             pcursor.execute(sql, args)
 
-        dewpadj = float(parts[0][3]) - float(parts[0][2])
+        dewpadj = float(parts[0][3]) - float(p2)
         args = (
             faa,
             date.strftime("%Y-%m-%d"),

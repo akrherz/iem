@@ -1,6 +1,7 @@
 """.. title:: Daily CLImate Reports
 
-Return to `JSON Services </json/>`_ | View `Map Frontend </nws/climap.php>`_
+Return to `API Services </api/#json>`_ |
+View `Map Frontend </nws/climap.php>`_
 or `Table Frontend </nws/clitable.php>`_
 
 Documentation for /geojson/cli.py
@@ -33,7 +34,7 @@ https://mesonet.agron.iastate.edu/geojson/cli.py?dt=2024-07-01&fmt=csv&dl=1
 
 """
 
-import datetime
+from datetime import date
 
 import simplejson as json
 from pydantic import Field
@@ -51,9 +52,7 @@ class Schema(CGIModel):
         default=None, description="JSONP callback function name."
     )
     dl: bool = Field(default=False, description="Force download of CSV file.")
-    dt: datetime.date = Field(
-        default=datetime.date.today(), description="Date of interest."
-    )
+    dt: date = Field(default=date.today(), description="Date of interest.")
     fmt: str = Field(
         default="geojson",
         description="The output format requested.",

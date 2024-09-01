@@ -6,11 +6,9 @@ pre-generate them and allow folks to download.
 This is a cron job from RUN_2AM.sh
 """
 
-import datetime
-import sys
-
-import requests
-from pyiem.util import logger
+import click
+import httpx
+from pyiem.util import logger, utc
 
 LOG = logger()
 FINAL = "/mesonet/share/pickup/wwa/"
@@ -19,7 +17,7 @@ URL = "http://iem.local/cgi-bin/request/gis/watchwarn.py"
 
 def get_uri(uri, localfn):
     """Fetch the remote resource to a local file"""
-    req = requests.get(uri, timeout=1200)
+    req = httpx.get(uri, timeout=1200)
     if req.status_code != 200:
         LOG.warning(
             "warn_cache[%s] failed with status: %s\n%s",
@@ -50,15 +48,12 @@ def get_files(year):
         get_uri(myuri, f"{FINAL}/{year}_tsmf_sbw.zip")
 
 
-def main(argv):
+@click.command()
+@click.option("--year", default=utc().year, type=int, help="Year to process")
+def main(year: int):
     """Do Stuff"""
-    # Lets go!
-    if len(argv) == 2:
-        get_files(int(argv[1]))
-    else:
-        yesterday = datetime.datetime.now() - datetime.timedelta(days=1)
-        get_files(yesterday.year)
+    get_files(year)
 
 
 if __name__ == "__main__":
-    main(sys.argv)
+    main()

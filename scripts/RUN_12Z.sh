@@ -29,7 +29,7 @@ python daily_archive_backup.py &
 # Run this twice as to account for some timezones west of Hawaii
 cd ../asos
 python compute_daily.py
-python compute_daily.py $(date -u --date '2 days ago' +'%Y %m %d')
+python compute_daily.py --date=$(date -u --date '2 days ago' +'%Y-%m-%d')
 
 cd ../dailyb
 python spammer.py

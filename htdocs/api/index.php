@@ -94,6 +94,7 @@ not be implied as an endorsement. Of course, you can just search google for
   <div class="panel-body">
   <ul>
     <li><a href="/json/climodat_stclimo.py?help">Climodat State Climatology</a></li>
+    <li><a href="/geojson/climodat_dayclimo.py?help">Climodat Day Climatology</a></li>
     <li><a href="/json/current.py?help">Current Obs</a></li>
     <li><a href="/geojson/7am.py?help">COOP and other data valid @ 7 AM</a></li>
     <li><a href="/json/dcp_vars.py?help">HADS/DCP Reporting SHEF Vars</a></li>
