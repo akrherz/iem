@@ -115,9 +115,9 @@ python mine_autoplot.py &
 python rwis2archive.py &
 
 cd ../current
-python q3_xhour.py --offset=6
-python q3_xhour.py --offset=3
-python q3_xhour.py --offset=1
+python q3_xhour.py --hours=6
+python q3_xhour.py --hours=3
+python q3_xhour.py --hours=1
 python q3_today_total.py 
 
 cd ../ua
