@@ -4,7 +4,7 @@ In most cases, you can access the raw data for these plots
 <a href="/climodat/" class="alert-link">here.</a>
 """
 
-import datetime
+from datetime import date
 
 import numpy as np
 import pandas as pd
@@ -12,6 +12,8 @@ from pyiem import util
 from pyiem.exceptions import NoDataFound
 from pyiem.plot import figure_axes
 from sqlalchemy import text
+
+from iemweb.autoplot import ARG_STATION
 
 PDICT = {
     "max-high": "Maximum High",
@@ -40,15 +42,9 @@ PDICT = {
 def get_description():
     """Return a dict describing how to call this plotter"""
     desc = {"description": __doc__, "data": True}
-    eyear = datetime.date.today().year
+    eyear = date.today().year
     desc["arguments"] = [
-        dict(
-            type="station",
-            name="station",
-            default="IATAME",
-            network="IACLIMATE",
-            label="Select Station",
-        ),
+        ARG_STATION,
         dict(
             type="select",
             name="type",

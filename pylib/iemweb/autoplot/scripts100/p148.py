@@ -11,10 +11,13 @@ import datetime
 
 import pandas as pd
 from dateutil.easter import easter as get_easter
+from pyiem.database import get_sqlalchemy_conn
 from pyiem.exceptions import NoDataFound
 from pyiem.plot import figure_axes
-from pyiem.util import get_autoplot_context, get_sqlalchemy_conn
+from pyiem.util import get_autoplot_context
 from sqlalchemy import text
+
+from iemweb.autoplot import ARG_STATION
 
 PDICT = {
     "easter": "Easter (Western Church Dates)",
@@ -37,13 +40,7 @@ def get_description():
     """Return a dict describing how to call this plotter"""
     desc = {"description": __doc__, "data": True, "cache": 86400}
     desc["arguments"] = [
-        dict(
-            type="station",
-            name="station",
-            default="IATAME",
-            network="IACLIMATE",
-            label="Select Station:",
-        ),
+        ARG_STATION,
         dict(
             type="select",
             name="date",

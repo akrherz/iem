@@ -212,6 +212,7 @@ daily_opts = [
         ),
     },
     {"id": 168, "label": "Latest Date of Year for High Temperature"},
+    {"id": 255, "label": "Leaky Bucket Model for Daily Precip + Evaporation"},
     {"id": 229, "label": "Lightning Stroke Density Maps"},
     {"id": 207, "label": "Local Storm Report + COOP Snowfall Analysis Maps"},
     {"id": 206, "label": "Map of Daily Automated Station Summaries"},

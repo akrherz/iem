@@ -7,29 +7,26 @@ precipitation for a period of your choice.
 """
 
 import calendar
-import datetime
+from datetime import date
 
 import numpy as np
 import pandas as pd
+from pyiem.database import get_sqlalchemy_conn
 from pyiem.exceptions import NoDataFound
 from pyiem.plot import figure_axes
-from pyiem.util import get_autoplot_context, get_sqlalchemy_conn
+from pyiem.util import get_autoplot_context
 from sqlalchemy import text
+
+from iemweb.autoplot import ARG_STATION
 
 
 def get_description():
     """Return a dict describing how to call this plotter"""
     desc = {"description": __doc__, "data": True}
-    y2 = datetime.date.today().year
+    y2 = date.today().year
     y1 = y2 - 20
     desc["arguments"] = [
-        dict(
-            type="station",
-            name="station",
-            default="IATAME",
-            label="Select Station:",
-            network="IACLIMATE",
-        ),
+        ARG_STATION,
         dict(type="year", name="syear", default=y1, label="Enter Start Year:"),
         dict(
             type="year",

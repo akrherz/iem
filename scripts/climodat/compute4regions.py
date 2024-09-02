@@ -3,9 +3,9 @@
 Run from RUN_NOON.sh
 """
 
-import datetime
-import sys
+from datetime import datetime
 
+import click
 import geopandas as gpd
 import numpy as np
 from pyiem import iemre
@@ -101,13 +101,21 @@ def do_day(cursor, valid):
         update_database(cursor, sid, valid, data)
 
 
-def main(argv):
+@click.command()
+@click.option(
+    "--date",
+    "dt",
+    required=True,
+    type=click.DateTime(),
+    help="Date to process",
+)
+def main(dt: datetime):
     """Go Main Go"""
     conn, cursor = get_dbconnc("coop")
-    do_day(cursor, datetime.date(int(argv[1]), int(argv[2]), int(argv[3])))
+    do_day(cursor, dt.date())
     cursor.close()
     conn.commit()
 
 
 if __name__ == "__main__":
-    main(sys.argv)
+    main()

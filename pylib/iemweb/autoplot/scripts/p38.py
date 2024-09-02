@@ -10,14 +10,17 @@ the MERRAv2/NARR lag by about a month, and the ERA5 Land lags by 8-9 days.
 """
 
 import calendar
-import datetime
 import itertools
+from datetime import date
 
 import numpy as np
 import pandas as pd
+from pyiem.database import get_sqlalchemy_conn
 from pyiem.exceptions import NoDataFound
 from pyiem.plot import figure
-from pyiem.util import get_autoplot_context, get_sqlalchemy_conn
+from pyiem.util import get_autoplot_context
+
+from iemweb.autoplot import ARG_STATION
 
 PDICT = {
     "best": "Use ERA5 Land, then HRRR",
@@ -38,13 +41,7 @@ def get_description():
     """Return a dict describing how to call this plotter"""
     desc = {"description": __doc__, "data": True}
     desc["arguments"] = [
-        dict(
-            type="station",
-            name="station",
-            default="IATAME",
-            label="Select Station:",
-            network="IACLIMATE",
-        ),
+        ARG_STATION,
         dict(
             type="select",
             options=PDICT,
@@ -62,7 +59,7 @@ def get_description():
         {
             "type": "year",
             "name": "year",
-            "default": datetime.date.today().year,
+            "default": date.today().year,
             "min": 1951,
             "label": "Select Year to Plot:",
         },

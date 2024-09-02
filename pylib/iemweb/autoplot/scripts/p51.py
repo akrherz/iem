@@ -6,7 +6,7 @@ range of accumulated values based on the climatology for the site. The
 climatology is based on the closest nearby long-term climate site.
 """
 
-import datetime
+from datetime import date, datetime, timedelta
 
 import numpy as np
 import pandas as pd
@@ -26,7 +26,7 @@ PDICT = {
 def get_description():
     """Return a dict describing how to call this plotter"""
     desc = {"description": __doc__, "data": True}
-    today = datetime.date.today()
+    today = date.today()
     if today.month < 5:
         today = today.replace(year=today.year - 1, month=10, day=1)
     sts = today.replace(month=5, day=1)
@@ -140,7 +140,7 @@ def plotter(fdict):
     if climo.empty:
         raise NoDataFound("Failed to find climatology")
     baseyear = int(climo.index.values[0].year)
-    years = (datetime.datetime.now().year - baseyear) + 1
+    years = (datetime.now().year - baseyear) + 1
     xlen = int((edate - sdate).days) + 1  # In case of leap day
     acc = np.zeros((years, xlen))
     acc[:] = np.nan
@@ -148,9 +148,9 @@ def plotter(fdict):
     pacc[:] = np.nan
     sacc = np.zeros((years, xlen))
     sacc[:] = np.nan
-    for year in range(baseyear, datetime.datetime.now().year + 1):
+    for year in range(baseyear, datetime.now().year + 1):
         sts = sdate.replace(year=year)
-        ets = sts + datetime.timedelta(days=xlen - 1)
+        ets = sts + timedelta(days=xlen - 1)
         x = climo.loc[sts:ets, glabel].cumsum()
         if x.empty:
             continue
@@ -163,8 +163,8 @@ def plotter(fdict):
     sday_climo = climo.groupby("sday").mean()
     rows = []
     for i in range(xlen):
-        date = sdate + datetime.timedelta(days=i)
-        sday = date.strftime("%m%d")
+        dt = sdate + timedelta(days=i)
+        sday = dt.strftime("%m%d")
         rows.append(
             {
                 "sday": sday,
@@ -244,7 +244,7 @@ def plotter(fdict):
         if year == 0:
             continue
         sts = sdate.replace(year=year)
-        ets = sts + datetime.timedelta(days=xlen - 1)
+        ets = sts + timedelta(days=xlen - 1)
         color = yearcolors[wantedyears.index(year)]
         yearlabel = sts.year
         x = df.loc[sts:ets]
@@ -357,7 +357,7 @@ def plotter(fdict):
             (
                 f"{sdate.month}/{sdate.day} - {edate.month}/{edate.day}\n"
                 f"Climatology {climosite} {baseyear:.0f}-"
-                f"{datetime.date.today().year:.0f}"
+                f"{date.today().year:.0f}"
             ),
             transform=ax1.transAxes,
             ha="center",
@@ -387,7 +387,7 @@ def plotter(fdict):
         if now.day in wanted:
             xticks.append(i)
             xticklabels.append(now.strftime("%-d %b"))
-        now += datetime.timedelta(days=1)
+        now += timedelta(days=1)
         i += 1
     if whichplots in ["all", "gdd"]:
         ax2.set_xticks(xticks)

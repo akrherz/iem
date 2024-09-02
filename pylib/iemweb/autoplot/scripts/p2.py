@@ -11,7 +11,7 @@ labelled with the year they represent.
 """
 
 import calendar
-import datetime
+from datetime import datetime
 
 import pandas as pd
 from matplotlib.patches import Circle
@@ -25,7 +25,7 @@ from scipy import stats
 def get_description():
     """Return a dict describing how to call this plotter"""
     desc = {"description": __doc__, "data": True}
-    today = datetime.datetime.now()
+    today = datetime.now()
     desc["arguments"] = [
         dict(
             type="station",

@@ -4,7 +4,7 @@ Degree Days for a location of your choice. Please note that
 Feb 29 is not considered for this analysis.
 """
 
-import datetime
+from datetime import date, datetime
 
 import matplotlib.dates as mdates
 import pandas as pd
@@ -13,6 +13,8 @@ from pyiem.exceptions import NoDataFound
 from pyiem.plot import figure_axes
 from pyiem.util import get_autoplot_context
 from sqlalchemy import text
+
+from iemweb.autoplot import ARG_STATION
 
 PDICT = {
     "cdd": "Cooling Degree Days",
@@ -29,15 +31,9 @@ PDICT2 = {
 def get_description():
     """Return a dict describing how to call this plotter"""
     desc = {"description": __doc__, "data": True}
-    thisyear = datetime.date.today().year
+    thisyear = date.today().year
     desc["arguments"] = [
-        dict(
-            type="station",
-            name="station",
-            default="IATAME",
-            label="Select Station:",
-            network="IACLIMATE",
-        ),
+        ARG_STATION,
         dict(
             type="year",
             name="year",
@@ -91,7 +87,7 @@ def plotter(fdict):
     """Go"""
     ctx = get_autoplot_context(fdict, get_description())
     station = ctx["station"]
-    thisyear = datetime.datetime.now().year
+    thisyear = datetime.now().year
     year = ctx["year"]
     base = ctx["base"]
     ceiling = ctx["ceiling"]

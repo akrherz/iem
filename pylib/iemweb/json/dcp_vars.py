@@ -1,6 +1,6 @@
 """.. title:: DCP Variables Metadata Service
 
-Return to `JSON Services </json/>`.
+Return to `API Services </api/#json>`.
 
 Documentation for /json/dcp_vars.json
 -------------------------------------

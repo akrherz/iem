@@ -8,7 +8,7 @@ IEM.
 """
 
 import calendar
-import datetime
+from datetime import date
 
 import pandas as pd
 from pyiem.database import get_sqlalchemy_conn
@@ -27,7 +27,7 @@ def get_description():
         dict(
             type="month",
             name="month",
-            default=datetime.date.today().month,
+            default=date.today().month,
             label="Select Month:",
         ),
         dict(
@@ -42,7 +42,7 @@ def get_description():
             min=1850,
             label="Maximum Inclusive Year (if data exists) for IEM Average",
             name="eyear",
-            default=datetime.date.today().year,
+            default=date.today().year,
         ),
     ]
     return desc

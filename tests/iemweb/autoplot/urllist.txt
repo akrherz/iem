@@ -73,6 +73,7 @@
 /plotting/auto/plot/109/by:state::sdate:2024-01-01%200000::edate:2024-08-20%202359::var:count_departure::w:set::phenomenav1:SV::significancev1:W::phenomenav2:TO::significancev2:W::e:all::cmap:jet::_r:t::dpi:100.png
 /plotting/auto/plot/111/_cb:1.txt
 /plotting/auto/plot/112/_cb:1.txt
+/plotting/auto/plot/113/network:IACLIMATE::station:IATAME::var:maxmin::year1:2023::sday:0101::eday:1231::_r:43::dpi:100.png
 /plotting/auto/plot/114/_cb:1.txt
 /plotting/auto/plot/117/_cb:1.txt
 /plotting/auto/plot/118/_cb:1.txt
@@ -87,7 +88,11 @@
 /plotting/auto/plot/140/network:IA_ASOS::station:DSM::syear:1928::sday:0711::eday:0725::varname:avg_temp::w:none::thres:1::year:2024::_r:t::dpi:100.png
 /plotting/auto/plot/141/location:ames::ptype:rain::sdate:mar15::_r:t::dpi:100.png
 /plotting/auto/plot/141/location:ames::ptype:maxt::sdate:mar15::_r:t::dpi:100.png
+/plotting/auto/plot/148/network:IACLIMATE::station:IATAME::date:mlk::thedate:0101::var:high::_r:t::dpi:100.png
+/plotting/auto/plot/148/network:IACLIMATE::station:IATAME::date:easter::thedate:0101::var:high::_r:t::dpi:100.png
+/plotting/auto/plot/148/network:IACLIMATE::station:IATAME::date:thanksgiving::thedate:0101::offset:1::var:high::_r:t::dpi:100.png
 /plotting/auto/plot/149/network:IACLIMATE::station:IATAME::days:91::days2:13::days3:0::year2:2015::year3:2023::sdate:2024-03-03::edate:2024-08-30::_r:43::dpi:100.png
+/plotting/auto/plot/151/month:all::sector:state::state:IA::opt:both::var:total_precip::r:english::threshold:-99::opt1:diff::p1syear:2000::p1eyear:2010::p2syear:2011::p2eyear:2021::cmap:seismic_r::_r:t::dpi:100.png
 /plotting/auto/plot/160/station:GTTI4::dt:2024-08-23%201620::var:primary::w:both::_r:t::dpi:100.js
 /plotting/auto/plot/160/station:GTTI4::dt:2024-08-23%201620::var:primary::w:both::_r:t::dpi:100.png
 /plotting/auto/plot/163/csector:midwest::var:count::sdate:2024-01-01%200000::edate:2024-08-22%200000::filter:NONE::by:wfo::cmap:plasma::lbl:yes::_r:t::dpi:100.png
@@ -120,6 +125,7 @@
 /plotting/auto/plot/192/t:state::network:WFO::wfo:STO::state:IA::v:vsby::valid:2020-06-15%201400::cmap:gray::_r:t::dpi:100.png
 /plotting/auto/plot/194/csector:midwest::sdate:2020-05-01::edate:2024-07-17::d:0::w:percent::cmap:plasma::_r:t::dpi:100.png
 /plotting/auto/plot/196/network:IA_ASOS::station:AMW::opt:no::var:chill::_r:43::dpi:100.png
+/plotting/auto/plot/197/csector:IA::var:corn_planting::w:avg::weeks:1::date:2021-05-09::cmap:BrBG::_r:43::dpi:100.png
 /plotting/auto/plot/198/network:RAOB::station:_OAX::hour:12::month:all::agg:avg::var:tmpc::level:500::quorum:no::_r:t::dpi:100.png
 /plotting/auto/plot/199/opt:1::date:2024-07-24::_r:t::dpi:100.png
 /plotting/auto/plot/199/opt:2::date:2024-07-24::_r:t::dpi:100.png
@@ -142,6 +148,7 @@
 /plotting/auto/plot/211/ptype:wind::network:IA_ASOS::zstation:AMW::sts:2024-07-10%200000::ets:2024-07-12%202359::_r:t::dpi:100.png
 /plotting/auto/plot/211/ptype:wind::network:IA_ASOS::zstation:AMW::sts:2024-07-10%200000::ets:2024-07-12%202359::_r:t::dpi:100::_cb:1.png
 /plotting/auto/plot/211/ptype:windkt::network:IA_ASOS::zstation:AMW::sts:2024-07-10%200000::ets:2024-07-12%202359::_r:t::dpi:100.png
+/plotting/auto/plot/212/network:RAOB::station:_OAX::year:2024::hour:both::var:height::level:500::_r:t::dpi:100.png
 /plotting/auto/plot/216/network:MA_ASOS::station:BOS::var:max_dwpf::dir:above::threshold:70::_r:43::dpi:100.png
 /plotting/auto/plot/216/network:IA_ASOS::station:AMW::var:high::dir:below::threshold:32::_r:t::dpi:100.png
 /plotting/auto/plot/218/w:set::network:NWSCLI::station:KDSM::date:2024-07-26::_r:t::dpi:100.png
@@ -159,3 +166,6 @@
 /plotting/auto/plot/242/pid:202405211331-KDMX-NWUS53-LSRDMX::_r:t::dpi:100.png
 /plotting/auto/plot/242/pid:201806210250-KDMX-NWUS53-LSRDMX::_r:t::dpi:100.png
 /plotting/auto/plot/253/datglobalid:%7B495DE596-B299-41FE-9C90-13C87E43FE0B%7D::dat:2024-05-21::cmap:gist_rainbow::_r:t::dpi:100.png
+/plotting/auto/plot/255/network:IACLIMATE::station:IATAME::sday:0901::eday:0301::depth:1::init:1.0::loss:0.15::year:2023::_r:43::dpi:100.png
+/plotting/auto/plot/255/network:IACLIMATE::station:IATAME::sday:0901::eday:0301::depth:1::init:1.0::loss:0.15::year:1803::_r:43::dpi:100.png
+/plotting/auto/plot/255/network:IACLIMATE::station:IA0157::sday:0901::eday:0301::depth:1::init:1.0::loss:0.15::year:2023::_r:43::dpi:100.png

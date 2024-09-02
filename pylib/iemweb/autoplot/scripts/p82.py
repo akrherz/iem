@@ -7,7 +7,7 @@ values are rounded to the nearest whole degree Fahrenheit and then compared
 against the observed value to compute a departure.
 """
 
-import datetime
+from datetime import date, timedelta
 
 import numpy as np
 import pandas as pd
@@ -17,6 +17,7 @@ from pyiem.exceptions import NoDataFound
 from pyiem.plot import calendar_plot
 from pyiem.reference import TRACE_VALUE
 from pyiem.util import convert_value, get_autoplot_context
+from sqlalchemy import text
 
 PDICT = {
     "max_tmpf": "High Temperature",
@@ -41,8 +42,8 @@ COLORS = "white #ffff72 #ffc672 #ff7272 #e28eff".split()
 def get_description():
     """Return a dict describing how to call this plotter"""
     desc = {"description": __doc__, "data": True, "cache": 600}
-    today = datetime.date.today()
-    m90 = today - datetime.timedelta(days=90)
+    today = date.today()
+    m90 = today - timedelta(days=90)
     desc["arguments"] = [
         dict(
             type="sid",
@@ -126,13 +127,15 @@ def plotter(fdict):
     # Get Climatology
     with get_sqlalchemy_conn("coop") as conn:
         cdf = pd.read_sql(
-            "SELECT to_char(valid, 'mmdd') as sday, "
-            "round(high::numeric, 0) as high, "
-            "round(low::numeric, 0) as low, "
-            "round(((high + low) / 2.)::numeric, 0) as avg, "
-            "precip from ncei_climate91 WHERE station = %s ORDER by sday ASC",
+            text("""SELECT to_char(valid, 'mmdd') as sday,
+            round(high::numeric, 0) as high,
+            round(low::numeric, 0) as low,
+            round(((high + low) / 2.)::numeric, 0) as avg,
+            precip from ncei_climate91 WHERE station = :ncei
+            ORDER by sday ASC
+            """),
             conn,
-            params=(ctx["_nt"].sts[station]["ncei91"],),
+            params={"ncei": ctx["_nt"].sts[station]["ncei91"]},
             index_col="sday",
         )
     if cdf.empty:
