@@ -143,6 +143,7 @@ def plotter(fdict):
             f"Bucket Depth: {depth:.2f} inches, "
             f"Loss/Leak: {loss:.2f} inches/day"
         ),
+        apctx=ctx,
     )
     # Plot the bucket depth for year of interest
     thisyear = df[df["year"] == ctx["year"]]
