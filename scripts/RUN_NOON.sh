@@ -29,8 +29,8 @@ python daily_estimator.py --date=$(date +'%Y-%m-%d')
 python daily_estimator.py --date=$(date --date '1 days ago'  +'%Y-%m-%d')
 # Perhaps some more QC happened, that we now need to pick up
 python daily_estimator.py --date=$(date --date '7 days ago'  +'%Y-%m-%d')
-python compute4regions.py $(date +'%Y %m %d')
-python compute4regions.py $(date --date '1 days ago'  +'%Y %m %d')
+python compute4regions.py --date=$(date +'%Y-%m-%d')
+python compute4regions.py --date=$(date --date '1 days ago'  +'%Y-%m-%d')
 python hrrr_solarrad.py --date=$(date --date '1 days ago'  +'%Y-%m-%d')
 # Sync any coop data that may have updated over the past 24 hours
 python sync_coop_updates.py
@@ -51,7 +51,7 @@ python daily_analysis.py --date=$(date --date '10 days ago' +'%Y-%m-%d') --domai
 
 # and now recompute climodat statewide/climate from two days ago
 cd ../climodat
-python compute4regions.py $(date --date '2 days ago' +'%Y %m %d')
+python compute4regions.py --date=$(date --date '2 days ago' +'%Y-%m-%d')
 
 # CFS workflow, first two are for yesterday and we actually run for two
 # days ago

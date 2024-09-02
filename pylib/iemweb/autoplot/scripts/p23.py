@@ -3,7 +3,7 @@ This plot presents the combination of monthly
 temperature or precipitation departures and El Nino index values.
 """
 
-import datetime
+from datetime import date, datetime, timedelta
 
 import pandas as pd
 from matplotlib.lines import Line2D
@@ -12,6 +12,8 @@ from pyiem.database import get_sqlalchemy_conn
 from pyiem.exceptions import NoDataFound
 from pyiem.plot import figure_axes
 from pyiem.util import get_autoplot_context
+
+from iemweb.autoplot import ARG_STATION
 
 PDICT = {
     "avg_high": "Average High Temperature [F]",
@@ -24,15 +26,9 @@ PDICT = {
 def get_description():
     """Return a dict describing how to call this plotter"""
     desc = {"description": __doc__, "data": True}
-    year = datetime.date.today().year - 7
+    year = date.today().year - 7
     desc["arguments"] = [
-        dict(
-            type="station",
-            name="station",
-            default="IATAME",
-            label="Select Station:",
-            network="IACLIMATE",
-        ),
+        ARG_STATION,
         dict(
             type="year",
             name="syear",
@@ -66,9 +62,9 @@ def plotter(fdict):
     years = ctx["years"]
     varname = ctx["var"]
 
-    sts = datetime.datetime(syear, 1, 1)
-    ets = datetime.datetime(syear + years, 1, 1)
-    archiveend = datetime.date.today() + datetime.timedelta(days=1)
+    sts = datetime(syear, 1, 1)
+    ets = datetime(syear + years, 1, 1)
+    archiveend = date.today() + timedelta(days=1)
     if archiveend.day < 20:
         archiveend = archiveend.replace(day=1)
 

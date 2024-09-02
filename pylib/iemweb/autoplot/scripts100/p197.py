@@ -7,7 +7,7 @@ season has started or ended. In this situation, hopefully the Right-Thing
 is done!
 """
 
-import datetime
+from datetime import date, timedelta
 
 import pandas as pd
 from pyiem.database import get_sqlalchemy_conn
@@ -66,7 +66,7 @@ PDICT2 = {
 def get_description():
     """Return a dict describing how to call this plotter"""
     desc = {"data": True, "cache": 3600, "description": __doc__}
-    today = datetime.date.today()
+    today = date.today()
     desc["arguments"] = [
         dict(
             type="csector",
@@ -112,7 +112,7 @@ def get_df(ctx):
     date = ctx["date"]
     # Rectify to Sunday
     if date.isoweekday() < 7:
-        date = date - datetime.timedelta(days=date.isoweekday())
+        date = date - timedelta(days=date.isoweekday())
     varname = ctx["var"]
     params2 = NASS_CROP_PROGRESS_LOOKUP[varname]
     params = {}
@@ -143,7 +143,7 @@ def get_df(ctx):
     # Average at least ten years
     syear = max([1981, date.year - 10])
     eyear = syear + 10
-    week_ending_start = date - datetime.timedelta(days=ctx["weeks"] * 7)
+    week_ending_start = date - timedelta(days=ctx["weeks"] * 7)
     for state, gdf in df.groupby("state_alpha"):
         sdf = gdf.copy().set_index("week_ending")
         # TOO DIFFICULT to know what to do in this case.

@@ -4,7 +4,7 @@ degree days were accumulated between the two thresholds provided by
 the user.  The colors represent the number of days for the period shown.
 """
 
-import datetime
+from datetime import date, datetime, timedelta
 
 import matplotlib.colors as mpcolors
 import matplotlib.dates as mdates
@@ -15,23 +15,19 @@ from pyiem.exceptions import NoDataFound
 from pyiem.plot import figure, get_cmap
 from pyiem.util import get_autoplot_context
 
+from iemweb.autoplot import ARG_STATION
+
 
 def get_description():
     """Return a dict describing how to call this plotter"""
     desc = {"description": __doc__, "data": True}
-    today = datetime.date.today()
+    today = date.today()
     year = today.year if today.month > 5 else today.year - 1
     desc["gallery"] = {
         "year": 2023,
     }
     desc["arguments"] = [
-        dict(
-            type="station",
-            name="station",
-            default="IATAME",
-            label="Select Station:",
-            network="IACLIMATE",
-        ),
+        ARG_STATION,
         dict(
             type="year",
             name="year",
@@ -91,16 +87,16 @@ def plotter(fdict):
     pgconn.close()
     yticks = []
     yticklabels = []
-    jan1 = datetime.datetime(year, 1, 1)
+    jan1 = datetime(year, 1, 1)
     for i in range(110, 330):
-        ts = jan1 + datetime.timedelta(days=i)
+        ts = jan1 + timedelta(days=i)
         if ts.day == 1 or ts.day % 12 == 1:
             yticks.append(i)
             yticklabels.append(ts.strftime("%-d %b"))
 
     gdds = np.array(gdds)
-    sts = datetime.datetime(year, 4, 1)
-    ets = datetime.datetime(year, 6, 10)
+    sts = datetime(year, 4, 1)
+    ets = datetime(year, 6, 10)
     now = sts
     sz = len(gdds)
 
@@ -132,7 +128,7 @@ def plotter(fdict):
                 success=success[-1],
             )
         )
-        now += datetime.timedelta(days=1)
+        now += timedelta(days=1)
 
     if not any(success):
         raise NoDataFound("No data, pick lower GDD values")

@@ -12,7 +12,7 @@ very similiar tool</a> that you may want to check out.</p>
 seperately at 00 and 12 UTC.  The chart gets more noisey when doing so.</p>
 """
 
-import datetime
+from datetime import date, timedelta
 
 import matplotlib.dates as mdates
 import numpy as np
@@ -75,7 +75,7 @@ def get_description():
         dict(
             type="year",
             min=1946,
-            default=datetime.date.today().year,
+            default=date.today().year,
             name="year",
             label="Year to Plot",
         ),
@@ -172,7 +172,7 @@ def get_data(ctx):
     dfin["sday"] = dfin.index.strftime("%m%d%H")
     # Drop leapday if this year does not have it.
     try:
-        datetime.date(ctx["year"], 2, 29)
+        date(ctx["year"], 2, 29)
     except ValueError:
         dfin = dfin[dfin["sday"].str.slice(0, 4) != "0229"]
     # create the climatology dataframe
@@ -374,11 +374,11 @@ def plotter(fdict):
         .agg(["max", "idxmax", "min", "idxmin"])
     )
     for month, row in minmax.iterrows():
-        sts = datetime.date(ctx["year"], int(month), 1)
-        ets = (sts + datetime.timedelta(days=35)).replace(day=1)
+        sts = date(ctx["year"], int(month), 1)
+        ets = (sts + timedelta(days=35)).replace(day=1)
         ax.plot([sts, ets], [row["max"], row["max"]], zorder=3, color="b")
         ax.text(
-            sts + datetime.timedelta(days=15),
+            sts + timedelta(days=15),
             row["max"] + dy,
             f"{row['idxmax'].year}\n"
             f"{row['idxmax']:%-m/%-d %H}z\n{row['max']:.2f}",
@@ -390,7 +390,7 @@ def plotter(fdict):
             continue
         ax.plot([sts, ets], [row["min"], row["min"]], zorder=3, color="b")
         ax.text(
-            sts + datetime.timedelta(days=15),
+            sts + timedelta(days=15),
             row["min"] - dy,
             f"{row['idxmin'].year}\n"
             f"{row['idxmin']:%-m/%-d %H}z\n{row['min']:.2f}",

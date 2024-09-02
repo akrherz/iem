@@ -4,28 +4,23 @@ being warmer than another month for that calendar year.
 """
 
 import calendar
-import datetime
+from datetime import date, datetime
 
 import matplotlib.patheffects as PathEffects
 import numpy as np
 import pandas as pd
+from pyiem.database import get_dbconn
 from pyiem.exceptions import NoDataFound
 from pyiem.plot import figure_axes
-from pyiem.util import get_autoplot_context, get_dbconn
+from pyiem.util import get_autoplot_context
+
+from iemweb.autoplot import ARG_STATION
 
 
 def get_description():
     """Return a dict describing how to call this plotter"""
     desc = {"description": __doc__, "data": True}
-    desc["arguments"] = [
-        dict(
-            type="station",
-            name="station",
-            default="IATAME",
-            label="Select Station:",
-            network="IACLIMATE",
-        )
-    ]
+    desc["arguments"] = [ARG_STATION]
     return desc
 
 
@@ -41,7 +36,7 @@ def plotter(fdict):
         SELECT year, month, avg((high+low)/2.) from alldata WHERE
         station = %s and day < %s GROUP by year, month ORDER by year ASC
         """,
-        (station, datetime.date.today().replace(day=1)),
+        (station, date.today().replace(day=1)),
     )
     if cursor.rowcount == 0:
         raise NoDataFound("No results found for query")
@@ -49,10 +44,7 @@ def plotter(fdict):
     for rownum, row in enumerate(cursor):
         if rownum == 0:
             baseyear = row[0]
-            avgs = (
-                np.ones((datetime.datetime.now().year - baseyear + 1, 12))
-                * -99.0
-            )
+            avgs = np.ones((datetime.now().year - baseyear + 1, 12)) * -99.0
         avgs[row[0] - baseyear, row[1] - 1] = row[2]
 
     matrix = np.zeros((12, 12))
@@ -70,7 +62,7 @@ def plotter(fdict):
                 0,
             )
             matrix[i, j] = np.sum(t)
-            lastyear[i, j] = datetime.datetime.now().year - np.argmax(t[::-1])
+            lastyear[i, j] = datetime.now().year - np.argmax(t[::-1])
             lyear = lastyear[i, j] if matrix[i, j] > 0 else None
             rows.append(
                 dict(

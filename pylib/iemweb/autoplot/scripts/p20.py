@@ -6,7 +6,7 @@ in hopes of making the long term climatology comparable.
 """
 
 import calendar
-import datetime
+from datetime import date
 
 import numpy as np
 import pandas as pd
@@ -14,12 +14,13 @@ from pyiem.database import get_sqlalchemy_conn
 from pyiem.exceptions import NoDataFound
 from pyiem.plot import figure_axes
 from pyiem.util import get_autoplot_context
+from sqlalchemy import text
 
 
 def get_description():
     """Return a dict describing how to call this plotter"""
     desc = {"description": __doc__, "data": True}
-    ts = datetime.date.today()
+    ts = date.today()
     desc["arguments"] = [
         dict(
             type="zstation",
@@ -43,17 +44,17 @@ def plotter(fdict):
     # Oh, the pain of floating point comparison here.
     with get_sqlalchemy_conn("asos") as conn:
         df = pd.read_sql(
-            """
+            text("""
         WITH obs as (
             SELECT distinct date_trunc('hour', valid) as t from alldata
-            WHERE station = %s and p01i > 0.009
+            WHERE station = :station and p01i > 0.009
         ), agg1 as (
             SELECT extract(year from t) as year, extract(month from t)
             as month, count(*) from obs GROUP by year, month
         ), averages as (
             SELECT month, avg(count), max(count) from agg1 GROUP by month
         ), myyear as (
-            SELECT month, count from agg1 where year = %s
+            SELECT month, count from agg1 where year = :year
         ), ranks as (
             SELECT month, year,
             rank() OVER (PARTITION by month ORDER by count DESC)
@@ -68,9 +69,9 @@ def plotter(fdict):
         SELECT a.month, m.count as count, a.avg, a.max, a.max_year from
         agg2 a LEFT JOIN myyear m
         on (m.month = a.month) ORDER by a.month ASC
-        """,
+        """),
             conn,
-            params=(station, year),
+            params={"station": station, "year": year},
             index_col=None,
         )
     if df.empty:
@@ -138,7 +139,7 @@ def plotter(fdict):
     if not np.isnan(maxval):
         ax.set_yticks(np.arange(0, maxval + 20, 12))
     ax.set_ylabel("Hours with 0.01+ inch precip")
-    today = datetime.date.today()
+    today = date.today()
     if today.year == year:
         ax.set_xlabel(f"For {year}, valid till {today:%-d %B}.")
     ax.grid(True)

@@ -18,19 +18,16 @@ from pyiem.database import get_sqlalchemy_conn
 from pyiem.exceptions import NoDataFound
 from pyiem.plot import figure
 from pyiem.util import get_autoplot_context
+from sqlalchemy import text
+
+from iemweb.autoplot import ARG_STATION
 
 
 def get_description():
     """Return a dict describing how to call this plotter"""
     desc = {"description": __doc__, "data": True}
     desc["arguments"] = [
-        dict(
-            type="station",
-            name="station",
-            default="IATAME",
-            label="Select Station:",
-            network="IACLIMATE",
-        ),
+        ARG_STATION,
         dict(
             type="year",
             name="year",
@@ -48,11 +45,11 @@ def plotter(fdict):
     year = ctx["year"]
     with get_sqlalchemy_conn("coop") as conn:
         df = pd.read_sql(
-            """
+            text("""
         with obs as (
         select day, (case when month < 7 then year - 1 else year end)
             as myyear,
-        low, month from alldata where station = %s
+        low, month from alldata where station = :station
         ), obs2 as (
             select day, myyear, low, month,
             low - min(low) OVER
@@ -65,9 +62,9 @@ def plotter(fdict):
         )
         select myyear as year, day, low, drop as largest_change
         from agg where rank = 1
-        """,
+        """),
             conn,
-            params=(station,),
+            params={"station": station},
             index_col="year",
             parse_dates="day",
         )

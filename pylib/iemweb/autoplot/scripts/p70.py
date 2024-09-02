@@ -18,7 +18,7 @@ over the years excluding the first and last year.</p>
 the second half of this period, ie 2020 is 1 Jul 2019 - 30 Jun 2020.</p>
 """
 
-import datetime
+from datetime import date, timedelta
 
 import matplotlib.colors as mpcolors
 import numpy as np
@@ -231,18 +231,18 @@ def plotter(fdict):
     avg_end = np.average(gdf["doy", "max"].values[1:-1])
     ax.axvline(avg_start, ls=":", lw=2, color="k")
     ax.axvline(avg_end, ls=":", lw=2, color="k")
-    x0 = datetime.date(2000, 1 if split == "jan1" else 7, 1)
-    _1 = (x0 + datetime.timedelta(days=int(avg_start))).strftime("%-d %b")
-    _2 = (x0 + datetime.timedelta(days=int(avg_end))).strftime("%-d %b")
+    x0 = date(2000, 1 if split == "jan1" else 7, 1)
+    _1 = (x0 + timedelta(days=int(avg_start))).strftime("%-d %b")
+    _2 = (x0 + timedelta(days=int(avg_end))).strftime("%-d %b")
     ax.set_xlabel(f"Average Start Date: {_1}, End Date: {_2}")
     ax.grid()
     xticks = []
     xticklabels = []
     for i in range(367):
-        date = x0 + datetime.timedelta(days=i)
-        if date.day == 1:
+        dt = x0 + timedelta(days=i)
+        if dt.day == 1:
             xticks.append(i)
-            xticklabels.append(date.strftime("%b"))
+            xticklabels.append(dt.strftime("%b"))
     ax.set_xticks(xticks)
     ax.set_xticklabels(xticklabels)
     ax.set_xlim(df["doy"].min() - 10, df["doy"].max() + 10)

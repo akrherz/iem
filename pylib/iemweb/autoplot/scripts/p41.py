@@ -31,7 +31,7 @@ from pyiem.plot.use_agg import plt
 from pyiem.util import get_autoplot_context
 from scipy import stats
 
-from iemweb.autoplot import get_monofont
+from iemweb.autoplot import ARG_STATION, get_monofont
 
 ODICT = {"max": "Maximum", "min": "Minimum", "avg": "Average"}
 PDICT = {
@@ -64,13 +64,7 @@ def get_description():
     """Return a dict describing how to call this plotter"""
     desc = {"data": True, "description": __doc__}
     desc["arguments"] = [
-        dict(
-            type="station",
-            name="station",
-            default="IATAME",
-            network="IACLIMATE",
-            label="Select Station:",
-        ),
+        ARG_STATION,
         dict(
             type="select",
             name="month1",
