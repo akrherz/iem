@@ -163,8 +163,8 @@ def plotter(fdict):
     sday_climo = climo.groupby("sday").mean()
     rows = []
     for i in range(xlen):
-        date = sdate + timedelta(days=i)
-        sday = date.strftime("%m%d")
+        dt = sdate + timedelta(days=i)
+        sday = dt.strftime("%m%d")
         rows.append(
             {
                 "sday": sday,
@@ -357,7 +357,7 @@ def plotter(fdict):
             (
                 f"{sdate.month}/{sdate.day} - {edate.month}/{edate.day}\n"
                 f"Climatology {climosite} {baseyear:.0f}-"
-                f"{datetime.date.today().year:.0f}"
+                f"{date.today().year:.0f}"
             ),
             transform=ax1.transAxes,
             ha="center",

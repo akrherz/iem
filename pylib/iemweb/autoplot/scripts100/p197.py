@@ -109,10 +109,10 @@ def get_description():
 
 def get_df(ctx):
     """Figure out what data we need to fetch here"""
-    date = ctx["date"]
+    dt = ctx["date"]
     # Rectify to Sunday
-    if date.isoweekday() < 7:
-        date = date - timedelta(days=date.isoweekday())
+    if dt.isoweekday() < 7:
+        dt = dt - timedelta(days=dt.isoweekday())
     varname = ctx["var"]
     params2 = NASS_CROP_PROGRESS_LOOKUP[varname]
     params = {}
@@ -141,15 +141,15 @@ def get_df(ctx):
         raise NoDataFound("No NASS Data was found for query, sorry.")
     data = {}
     # Average at least ten years
-    syear = max([1981, date.year - 10])
+    syear = max([1981, dt.year - 10])
     eyear = syear + 10
-    week_ending_start = date - timedelta(days=ctx["weeks"] * 7)
+    week_ending_start = dt - timedelta(days=ctx["weeks"] * 7)
     for state, gdf in df.groupby("state_alpha"):
         sdf = gdf.copy().set_index("week_ending")
         # TOO DIFFICULT to know what to do in this case.
-        if date.strftime("%Y-%m-%d") not in sdf.index:
+        if dt.strftime("%Y-%m-%d") not in sdf.index:
             continue
-        thisval = sdf.loc[date.strftime("%Y-%m-%d")]["value"]
+        thisval = sdf.loc[dt.strftime("%Y-%m-%d")]["value"]
         # linear interpolate data to get comparables
         newdf = (
             sdf[~sdf.index.duplicated(keep="first")][["year", "value"]]
@@ -164,8 +164,8 @@ def get_df(ctx):
             doyavgs = y10.groupby(y10.index.strftime("%m%d")).mean(
                 numeric_only=True
             )
-            if date.strftime("%m%d") in doyavgs.index:
-                avgval = doyavgs.at[date.strftime("%m%d"), "value"]
+            if dt.strftime("%m%d") in doyavgs.index:
+                avgval = doyavgs.at[dt.strftime("%m%d"), "value"]
             else:
                 avgval = None
         pval = None
@@ -183,15 +183,15 @@ def get_df(ctx):
     ctx["df"].index.name = "state"
     col = "avg" if ctx["w"] == "avg" else f'week{ctx["weeks"]}ago'
     ctx["df"]["departure"] = ctx["df"]["thisval"] - ctx["df"][col]
-    ctx["title"] = f"{date:%-d %b %Y} USDA NASS {NASS_CROP_PROGRESS[varname]}"
+    ctx["title"] = f"{dt:%-d %b %Y} USDA NASS {NASS_CROP_PROGRESS[varname]}"
     if ctx["w"] == "avg":
         ctx["subtitle"] = (
-            f"Top value is {date.year} percentage, bottom value is "
+            f"Top value is {dt.year} percentage, bottom value is "
             f"departure from {syear}-{eyear - 1} avg"
         )
     else:
         ctx["subtitle"] = (
-            f"Top value is {date.year} percentage, bottom value is "
+            f"Top value is {dt.year} percentage, bottom value is "
             f"precentage points change since {week_ending_start:%-d %b %Y}"
         )
 
