@@ -8,6 +8,21 @@ Changelog
 
 - 2024-09-02: Initial documentation update and pydantic validation
 
+Example Requests
+----------------
+
+Provide the hourly averaged data on 15 September 2016
+
+https://mesonet.agron.iastate.edu/cgi-bin/request/talltowers.py?\
+station=ETTI4,MCAI4&var=ws_s&var=ws_nw&z=10&z=2&agg=avg\
+&sts=2016-09-15T00:00Z&ets=2016-09-16T00:00Z&window=60&format=excel
+
+Same request, but return as a CSV file
+
+https://mesonet.agron.iastate.edu/cgi-bin/request/talltowers.py?\
+station=ETTI4,MCAI4&var=ws_s&var=ws_nw&z=10&z=2&agg=avg\
+&sts=2016-09-15T00:00Z&ets=2016-09-16T00:00Z&window=60&format=comma
+
 """
 
 from datetime import timedelta
