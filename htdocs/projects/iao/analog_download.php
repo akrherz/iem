@@ -10,8 +10,8 @@ $t = new MyView();
 
 $t->title = "Download TallTowers 1 minute aggregate data";
 
-$y1select = yearSelect2(2016, date("Y"), "year1");
-$y2select = yearSelect2(2016, date("Y"), "year2");
+$y1select = yearSelect2(2016, date("Y"), "year1", '', 2021);
+$y2select = yearSelect2(2016, date("Y"), "year2", '', 2021);
 
 $m1select = monthSelect2(1, "month1");
 $m2select = monthSelect2(date("m"), "month2");
@@ -37,7 +37,10 @@ $t->content = <<<EOF
 </ol>
 
 <p>This interface provides a download of one minute aggregates of available
-one second data from the "analog" sensors found on the Tall Towers.</p>
+one second data from the "analog" sensors found on the Tall Towers.
+<a href="/cgi-bin/request/talltowers.py?help" class="btn btn-default">
+<i class="fa fa-file"></i> Backend documentation</a> exists for those who
+wish to script against the backend service.</p>
 
 <h4>Citation</h4>
 
@@ -64,7 +67,7 @@ Science Foundation grant #1701278.</p>
 <h4>3) Specific Date Range:</h4>
 
 <p>Due to processing constraints, up to 31 days of data is only allowed per
-request.</p>
+request. Data exists between approximately 5 April 2016 and 21 Sept 2021.</p>
 
 <table class="table table-condensed">
 <tr><th>Start Date:</th><td>{$y1select} {$m1select} {$d1select} {$h1select}</td></tr>
