@@ -159,3 +159,6 @@
 /plotting/auto/plot/242/pid:202405211331-KDMX-NWUS53-LSRDMX::_r:t::dpi:100.png
 /plotting/auto/plot/242/pid:201806210250-KDMX-NWUS53-LSRDMX::_r:t::dpi:100.png
 /plotting/auto/plot/253/datglobalid:%7B495DE596-B299-41FE-9C90-13C87E43FE0B%7D::dat:2024-05-21::cmap:gist_rainbow::_r:t::dpi:100.png
+/plotting/auto/plot/255/network:IACLIMATE::station:IATAME::sday:0901::eday:0301::depth:1::init:1.0::loss:0.15::year:2023::_r:43::dpi:100.png
+/plotting/auto/plot/255/network:IACLIMATE::station:IATAME::sday:0901::eday:0301::depth:1::init:1.0::loss:0.15::year:1803::_r:43::dpi:100.png
+/plotting/auto/plot/255/network:IACLIMATE::station:IA0157::sday:0901::eday:0301::depth:1::init:1.0::loss:0.15::year:2023::_r:43::dpi:100.png
