@@ -1,12 +1,15 @@
-"""Create a plot of the X Hour interval precipitation"""
+"""Create a plot of the X Hour interval precipitation.
 
-import datetime
+Run from RUN_10_AFTER.sh for 1,3 and 6 hours ago
+"""
+
 import gzip
 import os
-import sys
 import tempfile
+from datetime import datetime, timedelta
 from zoneinfo import ZoneInfo
 
+import click
 import numpy as np
 import pygrib
 from pyiem import mrms
@@ -23,8 +26,8 @@ def doit(ts, hours):
     """
     # Start at 1 AM
     ts = ts.replace(minute=0, second=0, microsecond=0)
-    now = ts - datetime.timedelta(hours=hours - 1)
-    interval = datetime.timedelta(hours=1)
+    now = ts - timedelta(hours=hours - 1)
+    interval = timedelta(hours=1)
     ets = utc()
     total = None
     while now < ets:
@@ -96,21 +99,16 @@ def doit(ts, hours):
     mp.close()
 
 
-def main(argv):
+@click.command()
+@click.option("--hours", type=int, default=1, help="Number of hours to accum")
+@click.option("--valid", type=click.DateTime(), help="UTC Timestamp")
+def main(hours: int, valid: datetime):
     """Go main"""
-    if len(argv) == 7:
-        ts = utc(
-            int(argv[1]),
-            int(argv[2]),
-            int(argv[3]),
-            int(argv[4]),
-            int(argv[5]),
-        )
-        doit(ts, int(sys.argv[6]))
-    else:
-        ts = utc()
-        doit(ts, int(argv[1]))
+    valid = utc()
+    if valid is not None:
+        valid = valid.replace(tzinfo=ZoneInfo("UTC"))
+    doit(valid, hours)
 
 
 if __name__ == "__main__":
-    main(sys.argv)
+    main()

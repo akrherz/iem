@@ -11,7 +11,7 @@ forward.
 """
 
 import calendar
-import datetime
+from datetime import date, datetime
 
 import matplotlib.colors as mpcolors
 import numpy as np
@@ -99,7 +99,7 @@ def get_description():
             optional=True,
             type="date",
             name="edate",
-            default=datetime.date.today().strftime("%Y/%m/%d"),
+            default=date.today().strftime("%Y/%m/%d"),
             label="Exclusive End Local Date (optional):",
         ),
         dict(type="cmap", name="cmap", default="jet", label="Color Ramp:"),
@@ -279,10 +279,12 @@ def plotter(fdict):
 
     data = np.ones((24, 53), "f") * -1
     df = get_df(ctx)
+    if df[ctx["w"]].max() == 0:
+        raise NoDataFound("No data found for query")
     for _, row in df.iterrows():
         data[int(row["hour"]), int(row["week"])] = row[ctx["w"]]
     data = np.ma.masked_where(data <= 0, data)
-    sts = datetime.datetime(2012, 1, 1)
+    sts = datetime(2012, 1, 1)
     xticks = []
     for i in range(1, 13):
         ts = sts.replace(month=i)

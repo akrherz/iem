@@ -1,6 +1,6 @@
 """.. title:: US Drought Monitor GeoJSON
 
-Return to `JSON Services </json/>`_
+Return to `API Services </api/#json>`_
 
 Documentation for /geojson/usdm.py
 ----------------------------------
@@ -21,6 +21,10 @@ Example Usage
 Fetch the latest USDM:
 
 https://mesonet.agron.iastate.edu/geojson/usdm.py
+
+Fetch the USDM for closest date to 20 March 2024:
+
+https://mesonet.agron.iastate.edu/geojson/usdm.py?date=2024-03-20
 
 """
 

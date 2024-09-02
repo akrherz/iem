@@ -4,7 +4,7 @@ NWS Watch, Warning, and Advisory data.  The choice of NWS Headline type
 will limit which potential headlines events are overlaid on the chart.
 """
 
-import datetime
+from datetime import timedelta, timezone
 from zoneinfo import ZoneInfo
 
 # third party
@@ -12,13 +12,11 @@ import matplotlib.dates as mdates
 import numpy as np
 import pandas as pd
 from matplotlib.patches import Rectangle
+from pyiem.database import get_sqlalchemy_conn
 from pyiem.exceptions import NoDataFound
 from pyiem.nws.vtec import NWS_COLORS, get_ps_string
 from pyiem.plot import figure
-from pyiem.util import (
-    get_autoplot_context,
-    get_sqlalchemy_conn,
-)
+from pyiem.util import get_autoplot_context
 from sqlalchemy import text
 
 PDICT = {
@@ -109,7 +107,7 @@ def plot_bz(ax, obs):
         color = "#EEEEEE" if secs < (3 * 3600.0) else "lightblue"
         rect = Rectangle(
             (obs.at[hit, "utc_valid"], 0),
-            datetime.timedelta(seconds=secs),
+            timedelta(seconds=secs),
             60,
             fc=color,
             zorder=1,
@@ -122,7 +120,7 @@ def plot_bz(ax, obs):
         color = "#EEEEEE" if secs < (3 * 3600.0) else "lightblue"
         rect = Rectangle(
             (obs.at[hit, "utc_valid"], 0),
-            datetime.timedelta(seconds=secs),
+            timedelta(seconds=secs),
             60,
             fc=color,
             zorder=1,
@@ -134,10 +132,10 @@ def plot_bz(ax, obs):
 def plotter(fdict):
     """Go"""
     ctx = get_autoplot_context(fdict, get_description())
-    sts = ctx["valid"].replace(tzinfo=datetime.timezone.utc)
+    sts = ctx["valid"].replace(tzinfo=timezone.utc)
     station = ctx["station"]
     tzname = ctx["_nt"].sts[station]["tzname"]
-    ets = sts + datetime.timedelta(hours=ctx["hours"])
+    ets = sts + timedelta(hours=ctx["hours"])
 
     # Find WaWa
     with get_sqlalchemy_conn("postgis") as conn:
@@ -271,7 +269,7 @@ def plotter(fdict):
         f"{sts.astimezone(tzinfo):%-d %b %Y %-H:%M %p} to "
         f"{ets.astimezone(tzinfo):%-d %b %Y %-H:%M %p} [{tzname}]"
     )
-    ax.set_xlim(sts, ets + datetime.timedelta(minutes=5))
-    top_ax.set_xlim(sts, ets + datetime.timedelta(minutes=5))
+    ax.set_xlim(sts, ets + timedelta(minutes=5))
+    top_ax.set_xlim(sts, ets + timedelta(minutes=5))
 
     return fig, obs

@@ -1,15 +1,33 @@
-"""Dump daily computed climatology direct from the database"""
+""".. title:: Generate Climodat Day Climatology GeoJSON
+
+Return to `API Services </api/#json>`_ or
+`Climodat Frontend </COOP/extremes.php>`_.
+
+Documentation for /geojson/climodat_dayclimo.py
+-----------------------------------------------
+
+This service returns a GeoJSON representation of the daily climatology
+for a given day of the year.  The data is derived from the IEM's
+`climodat` database table.
+
+Usage Examples
+~~~~~~~~~~~~~~
+
+Provide Iowa's daily climatology for January 1st:
+
+https://mesonet.agron.iastate.edu/geojson/climodat_dayclimo.py\
+?network=IACLIMATE&month=1&day=1
+
+"""
 
 import datetime
 import json
 
 from pydantic import Field
-from pyiem.database import get_dbconn
-from pyiem.exceptions import IncompleteWebRequest
+from pyiem.database import get_sqlalchemy_conn
 from pyiem.network import Table as NetworkTable
-from pyiem.util import html_escape
 from pyiem.webutil import CGIModel, iemapp
-from pymemcache.client import Client
+from sqlalchemy import text
 
 
 class Schema(CGIModel):
@@ -29,16 +47,14 @@ class Schema(CGIModel):
     )
 
 
-def run(network, month, day, syear, eyear):
+def run(conn, network, month, day, syear, eyear):
     """Do something"""
-    pgconn = get_dbconn("coop")
-    cursor = pgconn.cursor()
 
     nt = NetworkTable(network)
     sday = f"{month:02.0f}{day:02.0f}"
     table = f"alldata_{network[:2]}"
-    cursor.execute(
-        f"""
+    res = conn.execute(
+        text(f"""
     WITH data as (
       SELECT station, year, precip,
       avg(precip) OVER (PARTITION by station) as avg_precip,
@@ -54,7 +70,7 @@ def run(network, month, day, syear, eyear):
         as min_low,
       rank() OVER (PARTITION by station ORDER by precip DESC nulls last)
         as max_precip
-      from {table} WHERE sday = %s and year >= %s and year < %s),
+      from {table} WHERE sday = :sday and year >= :syear and year < :eyear),
 
     max_highs as (
       SELECT station, high, array_agg(year) as years from data
@@ -78,9 +94,11 @@ def run(network, month, day, syear, eyear):
       SELECT station, count(*) as cnt, max(avg_precip) as p,
       max(avg_high) as h, max(avg_low) as l from data GROUP by station)
 
-    SELECT a.station, a.cnt, a.h, xh.high, xh.years,
-    nh.high, nh.years, a.l, xl.low, xl.years,
-    nl.low, nl.years, a.p, mp.precip, mp.years
+    SELECT a.station, a.cnt, a.h, xh.high as xh_high, xh.years as xh_years,
+    nh.high as nh_high, nh.years as nh_years, a.l, xl.low as xl_low,
+    xl.years as xl_years,
+    nl.low as nl_low, nl.years as nl_years, a.p, mp.precip,
+    mp.years as mp_years
     from avgs a, max_highs xh, min_highs nh, max_lows xl, min_lows nl,
     max_precip mp
     WHERE xh.station = a.station and xh.station = nh.station
@@ -88,8 +106,8 @@ def run(network, month, day, syear, eyear):
     xh.station = nl.station and xh.station = mp.station and
     xh.high is not null and a.l is not null ORDER by station ASC
 
-    """,
-        (sday, syear, eyear),
+    """),
+        {"sday": sday, "syear": syear, "eyear": eyear},
     )
     data = {
         "type": "FeatureCollection",
@@ -99,25 +117,26 @@ def run(network, month, day, syear, eyear):
         "features": [],
     }
 
-    for i, row in enumerate(cursor):
-        if row[0] not in nt.sts:
+    for i, row in enumerate(res):
+        row = row._asdict()
+        if row["station"] not in nt.sts:
             continue
         props = dict(
-            station=row[0],
-            years=row[1],
-            avg_high=float(row[2]),
-            max_high=row[3],
-            max_high_years=row[4],
-            min_high=row[5],
-            min_high_years=row[6],
-            avg_low=float(row[7]),
-            max_low=row[8],
-            max_low_years=row[9],
-            min_low=row[10],
-            min_low_years=row[11],
-            avg_precip=float(row[12]),
-            max_precip=row[13],
-            max_precip_years=row[14],
+            station=row["station"],
+            years=row["cnt"],
+            avg_high=float(row["h"]),
+            max_high=row["xh_high"],
+            max_high_years=row["xh_years"],
+            min_high=row["nh_high"],
+            min_high_years=row["nh_years"],
+            avg_low=float(row["l"]),
+            max_low=row["xl_low"],
+            max_low_years=row["xl_years"],
+            min_low=row["nl_low"],
+            min_low_years=row["nl_years"],
+            avg_precip=float(row["p"]),
+            max_precip=row["precip"],
+            max_precip_years=row["mp_years"],
         )
         data["features"].append(
             {
@@ -127,8 +146,8 @@ def run(network, month, day, syear, eyear):
                 "geometry": {
                     "type": "Point",
                     "coordinates": [
-                        nt.sts[row[0]]["lon"],
-                        nt.sts[row[0]]["lat"],
+                        nt.sts[row["station"]]["lon"],
+                        nt.sts[row["station"]]["lat"],
                     ],
                 },
             }
@@ -137,34 +156,28 @@ def run(network, month, day, syear, eyear):
     return json.dumps(data)
 
 
-@iemapp(help=__doc__, schema=Schema)
+def get_mckey(environ: dict) -> str:
+    """Get the memcache key"""
+    return (
+        f"/geojson/climodat_dayclimo/{environ['network']}/{environ['month']}/"
+        f"{environ['day']}/{environ['syear']}/{environ['eyear']}"
+    )
+
+
+@iemapp(
+    help=__doc__, memcacheexpire=7200, memcachekey=get_mckey, schema=Schema
+)
 def application(environ, start_response):
     """Main()"""
     headers = [("Content-type", "application/json")]
 
     network = environ["network"]
-    if network == "":
-        raise IncompleteWebRequest("No network specified")
     month = environ["month"]
     day = environ["day"]
     syear = environ["syear"]
     eyear = environ["eyear"]
-    cb = environ["callback"]
-
-    mckey = (
-        f"/geojson/climodat_dayclimo/{network}/{month}/{day}/{syear}/{eyear}"
-    )
-    mc = Client("iem-memcached:11211")
-    res = mc.get(mckey)
-    if not res:
-        res = run(network, month, day, syear, eyear)
-        mc.set(mckey, res, 86400)
-    else:
-        res = res.decode("utf-8")
-    mc.close()
-
-    if cb is not None:
-        res = f"{html_escape(cb)}({res})"
+    with get_sqlalchemy_conn("coop") as conn:
+        res = run(conn, network, month, day, syear, eyear)
 
     start_response("200 OK", headers)
-    return [res.encode("ascii")]
+    return res.encode("ascii")

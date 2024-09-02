@@ -12,7 +12,7 @@ of an hourly variable between two sites.</p>
 """
 
 import calendar
-import datetime
+from datetime import datetime
 
 import numpy as np
 import pandas as pd
@@ -20,6 +20,7 @@ from pyiem.database import get_sqlalchemy_conn
 from pyiem.exceptions import NoDataFound
 from pyiem.plot import figure, get_cmap
 from pyiem.util import get_autoplot_context
+from sqlalchemy import text
 
 PDICT = {
     "low": "Morning Low (midnight to 8 AM)",
@@ -71,17 +72,17 @@ def plotter(fdict):
         tlimit = "12 and 20"
     with get_sqlalchemy_conn("asos") as conn:
         df = pd.read_sql(
-            f"""
+            text(f"""
         WITH one as (
         SELECT date(valid), {aggfunc}(tmpf::int) as d, avg(sknt)
-        from alldata where station = %s
-        and extract(hour from valid at time zone %s) between {tlimit}
+        from alldata where station = :station1
+        and extract(hour from valid at time zone :tz1) between {tlimit}
         and tmpf between -70 and 140  GROUP by date),
 
         two as (
         SELECT date(valid), {aggfunc}(tmpf::int) as d, avg(sknt)
-        from alldata where station = %s
-        and extract(hour from valid at time zone %s) between {tlimit}
+        from alldata where station = :station2
+        and extract(hour from valid at time zone :tz2) between {tlimit}
         and tmpf between -70 and 140 GROUP by date)
 
         SELECT one.date as day,
@@ -91,19 +92,19 @@ def plotter(fdict):
         two.avg as sknt2
         from one JOIN two on (one.date = two.date) WHERE one.avg >= 0
         and one.d - two.d between -25 and 25
-        """,
+        """),
             conn,
-            params=(
-                station1,
-                ctx["_nt1"].sts[station1]["tzname"],
-                station2,
-                ctx["_nt2"].sts[station2]["tzname"],
-            ),
+            params={
+                "station1": station1,
+                "tz1": ctx["_nt1"].sts[station1]["tzname"],
+                "station2": station2,
+                "tz2": ctx["_nt2"].sts[station2]["tzname"],
+            },
             index_col=None,
         )
     if df.empty:
         raise NoDataFound("No Data Found.")
-    sts = datetime.datetime(2012, 1, 1)
+    sts = datetime(2012, 1, 1)
     xticks = []
     for i in range(1, 13):
         ts = sts.replace(month=i)
