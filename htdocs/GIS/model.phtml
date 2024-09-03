@@ -51,6 +51,16 @@ and forecast hour 18.  <strong>Again, this F**** value is in minutes, not hours!
 IEM will be picked.  For example:
 <code>https://mesonet.agron.iastate.edu/cache/tile.py/1.0.0/hrrr::REFD-F0000-0/6/15/24.png</code></p>
 
+<h3>Suggested TMS Usage for Realtime</h3>
+
+<p>To avoid any caching ugliness on the IEM's end, it is always best to use the explicit TMS URLs
+that specify the HRRR model initialization time.  A simple query you can do to figure out the
+latest run is to fetch the 18-hour (1080 minute) forecast JSON metadata file:
+
+<br /><a href="/data/gis/images/4326/hrrr/refd_1080.json">/data/gis/images/4326/hrrr/refd_1080.json</a>
+
+<p>The <code>model_init_utc</code> value in that file would be the latest run available.</p>
+
 <h3>Web Map Service (WMS)</h3>
 
 <p>There is also a standard WMS located at:
