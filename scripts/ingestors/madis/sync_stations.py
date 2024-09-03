@@ -3,8 +3,10 @@
 import sys
 import warnings
 
+import click
 from netCDF4 import chartostring
-from pyiem.util import get_dbconn, logger, ncopen
+from pyiem.database import get_dbconn
+from pyiem.util import logger, ncopen
 
 sys.path.insert(0, ".")
 from to_iemaccess import provider2network  # noqa
@@ -13,28 +15,25 @@ warnings.filterwarnings("ignore", category=DeprecationWarning)
 LOG = logger()
 
 
-def main(argv):
+@click.command()
+@click.option("--filename", help="Path to MADIS netcdf file", required=True)
+def main(filename: str):
     """Go Main Go"""
     pgconn = get_dbconn("mesosite")
     mcursor = pgconn.cursor()
 
-    fn = argv[1]
-    nc = ncopen(fn)
-
-    stations = chartostring(nc.variables["stationId"][:])
-    names = chartostring(nc.variables["stationName"][:])
-    providers = chartostring(nc.variables["dataProvider"][:])
-    latitudes = nc.variables["latitude"][:]
-    longitudes = nc.variables["longitude"][:]
-    nc.close()
+    with ncopen(filename) as nc:
+        stations = chartostring(nc.variables["stationId"][:])
+        names = chartostring(nc.variables["stationName"][:])
+        providers = chartostring(nc.variables["dataProvider"][:])
+        latitudes = nc.variables["latitude"][:]
+        longitudes = nc.variables["longitude"][:]
     for recnum, provider in enumerate(providers):
         name = names[recnum].replace(",", " ")
         network = provider2network(provider, name)
-        if network is None:
+        if network is None or network == "IA_RWIS":
             continue
         stid = stations[recnum]
-        if stid == "IA065":
-            continue
         mcursor.execute(
             "SELECT st_x(geom), st_y(geom) from stations "
             "where id = %s and network = %s",
@@ -79,4 +78,4 @@ def main(argv):
 
 
 if __name__ == "__main__":
-    main(sys.argv)
+    main()

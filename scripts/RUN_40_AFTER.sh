@@ -27,7 +27,7 @@ python /opt/iem/scripts/scan/scan_ingest.py &
 cd ../madis
 python extract_madis.py
 python extract_hfmetar.py 0 &
-python to_iemaccess.py 2 &
+python to_iemaccess.py --offset=2 &
 
 cd ../cocorahs
 python cocorahs_stations.py IA
