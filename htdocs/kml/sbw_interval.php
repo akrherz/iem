@@ -17,8 +17,7 @@ if (isset($_REQUEST['location_group'])){
     $location_group = (string) $_REQUEST['location_group'];
     if($location_group === 'states'){
         if(isset($_REQUEST[$location_group])){
-            $connect_meso = iemdb('mesosite');
-            $mywfos = pull_wfos_in_states($connect_meso, $_REQUEST[$location_group]);
+            $mywfos = pull_wfos_in_states($_REQUEST[$location_group]);
             if($mywfos === null){
                 $has_error = true;
                 $error_message = 'Error determine relevant list of WFO to use';
@@ -126,7 +125,8 @@ for ($i=0;$row=pg_fetch_array($result);$i++){
 echo "</Document>
 </kml>";
 
-function pull_wfos_in_states($db, $state_abbreviations){
+function pull_wfos_in_states($state_abbreviations){
+    $db = iemdb("mesosite");
     $status = true;
     $sql = 'SELECT distinct wfo FROM stations WHERE state IN (';
     // Loop over the states just to be safe
@@ -188,25 +188,61 @@ function pull_vtec_events_by_wfo_year(
     if (isset($form["addsvs"]) && ($form["addsvs"] == "yes")){
         $statuslimiter = " status != 'CAN' ";
     }
-    $rs = pg_prepare($db, "SELECT-INT", "SELECT 
-        issue, expire, phenomena, significance, eventid, wfo, status,
-           ST_askml(geom) as kml,
-           round(ST_area(ST_transform(geom,2163)) / 1000000.0) as psize,
-           polygon_begin, polygon_end, tornadotag, damagetag, windtag, hailtag
-           from sbw
-           WHERE $wfolimiter coalesce(issue, polygon_begin) >= $1
-           and coalesce(issue, polygon_begin) <= $2
-           and $statuslimiter and eventid > 0 $pslimiter");
-    $rs = pg_prepare($db, "SELECT", "SELECT
-        issue, expire, phenomena, significance, eventid, wfo, status,
-           ST_askml(geom) as kml,
-           round(ST_area(ST_transform(geom,2163)) / 1000000.0) as psize,
-           polygon_begin, polygon_end, tornadotag, damagetag, windtag, hailtag
-           from sbw
-           WHERE $wfolimiter coalesce(issue, polygon_begin) <= $1 and
-           expire > $2
-           and $statuslimiter and eventid > 0 $pslimiter");
-
+    if (isset($form["limit2"]) && ($form["limit2"] == "yes")) {
+        // This is tough as the sbw table has events come in and out of
+        // emergency status
+        $rs = pg_prepare($db, "SELECT-INT", <<<EOM
+with possible_events as (
+    select distinct wfo, vtec_year, eventid, phenomena, significance from sbw
+    where is_emergency and $wfolimiter coalesce(issue, polygon_begin) >= $1
+    and coalesce(issue, polygon_begin) <= $2 $pslimiter
+)
+    SELECT 
+    s.issue, s.expire, s.phenomena, s.significance, s.eventid, s.wfo, s.status,
+    ST_askml(s.geom) as kml,
+    round(ST_area(ST_transform(s.geom,2163)) / 1000000.0) as psize,
+    s.polygon_begin, s.polygon_end, s.tornadotag, s.damagetag, s.windtag,
+    s.hailtag from sbw s, possible_events pe
+    WHERE s.vtec_year = pe.vtec_year and s.wfo = pe.wfo and
+    s.eventid = pe.eventid and s.phenomena = pe.phenomena and $statuslimiter
+EOM
+    );
+    $rs = pg_prepare($db, "SELECT", <<<EOM
+with possible_events as (
+    select distinct wfo, vtec_year, eventid, phenomena, significance from sbw
+    where is_emergency and $wfolimiter coalesce(issue, polygon_begin) <= $1
+    and expire > $2 $pslimiter
+)
+    SELECT 
+    s.issue, s.expire, s.phenomena, s.significance, s.eventid, s.wfo, s.status,
+    ST_askml(s.geom) as kml,
+    round(ST_area(ST_transform(s.geom,2163)) / 1000000.0) as psize,
+    s.polygon_begin, s.polygon_end, s.tornadotag, s.damagetag, s.windtag,
+    s.hailtag from sbw s, possible_events pe
+    WHERE s.vtec_year = pe.vtec_year and s.wfo = pe.wfo and
+    s.eventid = pe.eventid and s.phenomena = pe.phenomena and $statuslimiter
+EOM
+        );
+        } else {
+        $rs = pg_prepare($db, "SELECT-INT", "SELECT 
+            issue, expire, phenomena, significance, eventid, wfo, status,
+            ST_askml(geom) as kml,
+            round(ST_area(ST_transform(geom,2163)) / 1000000.0) as psize,
+            polygon_begin, polygon_end, tornadotag, damagetag, windtag, hailtag
+            from sbw s
+            WHERE $wfolimiter coalesce(issue, polygon_begin) >= $1
+            and coalesce(issue, polygon_begin) <= $2
+            and $statuslimiter $pslimiter");
+        $rs = pg_prepare($db, "SELECT", "SELECT
+            issue, expire, phenomena, significance, eventid, wfo, status,
+            ST_askml(geom) as kml,
+            round(ST_area(ST_transform(geom,2163)) / 1000000.0) as psize,
+            polygon_begin, polygon_end, tornadotag, damagetag, windtag, hailtag
+            from sbw s
+            WHERE $wfolimiter coalesce(issue, polygon_begin) <= $1 and
+            expire > $2
+            and $statuslimiter $pslimiter");
+    }
     if ($tsSQL != $tsSQL2)
     {
         $result = pg_execute($db, "SELECT-INT",  Array($tsSQL, $tsSQL2) );

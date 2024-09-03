@@ -215,12 +215,11 @@ Flash Flood Warnings</label>
 <br /><input id="limit1" type="checkbox" name="limit1" value="yes">
 <label for="limit1">Limit output to only Storm Based Warnings</label>
 <br /><input id="limit2" type="checkbox" name="limit2" value="yes">
-<label for="limit2">Limit output to only Tornado/Flash Flood Emergencies</label>
+<label for="limit2">Limit output to only Emergencies [<sup>2</sup>]</label>
 <br /><input id="limitpds" type="checkbox" name="limitpds" value="yes">
 <label for="limitpds">Limit output to only Particularly Dangerous Sitations</label>
 
-<div class="row well">
-<input id="limitps" type="checkbox" name="limitps" value="yes">
+<br /><input id="limitps" type="checkbox" name="limitps" value="yes">
 <label for="limitps">Limit output to selected VTEC
 phenomena and significance below.</label>
 
@@ -228,9 +227,8 @@ phenomena and significance below.</label>
 <div class="col-md-6">{$pselect}</div>
 <div class="col-md-6">{$sselect}</div>
 </div><!-- ./row -->
-</div><!-- ./row -->
 
-<p><input id="addsvs" type="checkbox" name="addsvs" value="yes">
+<br /><input id="addsvs" type="checkbox" name="addsvs" value="yes">
 <label for="addsvs">Include polygons/metadata found with any followup (SVS/MWS/etc)
 statements. [<sup>1</sup>]</label></p>
 
@@ -253,6 +251,9 @@ function set_accept(f, val){
  <input type="reset" />
 <br />* Only Storm Based Warnings are available via KML.
 <br />[1] By default, only the issuance polygon is included.
+<br />[2] In the case of KML output and emergencies, this get very complex with
+the download. You likely want to enable "Include polygons/metadata" option to
+get a complete download.  Otherwise, you only get emergencies <strong>at issuance</strong>.
 </form>
 </div>
 
