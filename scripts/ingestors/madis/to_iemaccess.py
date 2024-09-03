@@ -12,6 +12,7 @@ import sys
 import warnings
 from zoneinfo import ZoneInfo
 
+import click
 import numpy as np
 from netCDF4 import chartostring
 from pyiem.database import get_dbconnc
@@ -83,10 +84,12 @@ def build_roadstate_xref(ncvar):
     return xref
 
 
-def main(argv):
+@click.command()
+@click.option("--offset", default=0, help="Offset in hours", type=int)
+def main(offset: int):
     """Do Something"""
     pgconn, icursor = get_dbconnc("iem")
-    fn = find_file(0 if len(argv) == 1 else int(argv[1]))
+    fn = find_file(offset)
     nc = ncopen(fn, timeout=300)
 
     stations = chartostring(nc.variables["stationId"][:])
@@ -170,9 +173,6 @@ def main(argv):
             db[this_station]["scond3"] = road_state_xref.get(rstate4[recnum])
 
     for sid, val in db.items():
-        # Sigh
-        if sid == "IA065":
-            continue
         iem = Observation(sid, val["network"], val["ts"])
         for colname in ["scond0", "scond1", "scond2", "scond3"]:
             iem.data[colname] = val.get(colname)
@@ -208,14 +208,14 @@ def main(argv):
             iem.data["rwis_subf"] = convert_value(val["subk"], "degK", "degF")
         if val["pday"] is not None:
             iem.data["pday"] = round(mm2inch(val["pday"]), 2)
-        if not iem.save(icursor):
+        if not iem.save(icursor) and val["network"] != "IA_RWIS":
             LOG.warning(
                 "MADIS Extract: %s found new station: %s network: %s" "",
                 fn.split("/")[-1],
                 sid,
                 val["network"],
             )
-            subprocess.call(["python", "sync_stations.py", fn])
+            subprocess.call(["python", "sync_stations.py", f"--filename={fn}"])
             os.chdir("../../dbutil")
             subprocess.call(["sh", "SYNC_STATIONS.sh"])
             os.chdir("../ingestors/madis")
@@ -227,4 +227,4 @@ def main(argv):
 
 
 if __name__ == "__main__":
-    main(sys.argv)
+    main()
