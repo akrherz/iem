@@ -1,4 +1,24 @@
-"""Answer search requests, oh boy."""
+""".. title:: IEM Search Service
+
+This service drives the search bar on the IEM website.
+
+Changelog
+---------
+
+- 2024-09-04: Initial documentation update
+
+Example Requests
+----------------
+
+Search for a given NWS AFOS Product Identifier
+
+https://mesonet.agron.iastate.edu/search.py?q=AAABBB
+
+Link to a given autoplot number
+
+https://mesonet.agron.iastate.edu/search.py?q=ap100
+
+"""
 
 # Local
 import re
@@ -8,8 +28,9 @@ import requests
 
 # Third Party
 from commonregex import CommonRegex
+from pyiem.database import get_sqlalchemy_conn
 from pyiem.templates.iem import TEMPLATE
-from pyiem.util import get_properties, get_sqlalchemy_conn
+from pyiem.util import get_properties
 from pyiem.webutil import iemapp
 
 AFOS_RE = re.compile(r"^[A-Z0-9]{6}$", re.I)
@@ -149,7 +170,7 @@ of supported search values.</p>
     return [TEMPLATE.render(ctx).encode("utf-8")]
 
 
-@iemapp()
+@iemapp(help=__doc__)
 def application(environ, start_response):
     """Here we are, answer with a redirect in most cases."""
     q = environ.get("q", "").strip()

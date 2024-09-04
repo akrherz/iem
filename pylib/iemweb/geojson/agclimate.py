@@ -1,6 +1,6 @@
 """.. title:: ISU Ag Climate GeoJSON Service
 
-Return to `JSON Services </json/>`_
+Return to `API Services </api/#json>`_
 
 This service provides access to the ISU Ag Climate Network data in a GeoJSON
 format.

@@ -2,9 +2,9 @@
 Create a plot of today's IFC estimated precip
 """
 
-import datetime
-import sys
+from datetime import datetime, timedelta
 
+import click
 import numpy as np
 from pyiem.iemre import daily_offset
 from pyiem.plot import MapPlot, nwsprecip
@@ -22,9 +22,9 @@ def doday(ts, realtime):
         xaxis = nc.variables["lon"][:]
         yaxis = nc.variables["lat"][:]
         total = nc.variables["p01d"][idx, :, :]
-    lastts = datetime.datetime(ts.year, ts.month, ts.day, 23, 59)
+    lastts = datetime(ts.year, ts.month, ts.day, 23, 59)
     if realtime:
-        now = datetime.datetime.now() - datetime.timedelta(minutes=60)
+        now = datetime.now() - timedelta(minutes=60)
         lastts = now.replace(minute=59)
     subtitle = f"Total between 12:00 AM and {lastts:%I:%M %p}"
     routes = "ac"
@@ -73,17 +73,19 @@ def doday(ts, realtime):
     mp.close()
 
 
-def main(argv):
+@click.command()
+@click.option(
+    "--date",
+    "dt",
+    type=click.DateTime(),
+    help="Date to process",
+    required=True,
+)
+@click.option("--realtime", is_flag=True, help="Operate in realtime mode")
+def main(dt: datetime, realtime: bool):
     """Go Main Go"""
-    if len(argv) == 4:
-        date = datetime.date(int(argv[1]), int(argv[2]), int(argv[3]))
-        realtime = False
-    else:
-        date = datetime.datetime.now() - datetime.timedelta(minutes=60)
-        date = date.date()
-        realtime = True
-    doday(date, realtime)
+    doday(dt.date(), realtime)
 
 
 if __name__ == "__main__":
-    main(sys.argv)
+    main()

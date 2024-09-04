@@ -4,13 +4,14 @@ Need something to generate a kitchen sink report of Climate Data
 Called from climodat/run.sh
 """
 
-import datetime
 import os
 import sys
+from datetime import datetime
 
+import click
 import numpy as np
+from pyiem.database import get_dbconn
 from pyiem.network import Table as NetworkTable
-from pyiem.util import get_dbconn
 from tqdm import tqdm
 
 nt = NetworkTable("IACLIMATE")
@@ -137,15 +138,15 @@ def main(yr):
             process(sid, fh, yr)
 
 
-def frontend(argv):
+@click.command()
+@click.option(
+    "--year", default=datetime.now().year, type=int, help="Year to process"
+)
+def frontend(year: int):
     """A frontend to main."""
-    if len(argv) == 2:
-        yr = int(argv[1])
-    else:
-        yr = datetime.datetime.now().year
-    main(yr)
-    main(yr - 1)
+    main(year)
+    main(year - 1)
 
 
 if __name__ == "__main__":
-    frontend(sys.argv)
+    frontend()

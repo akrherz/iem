@@ -3,6 +3,8 @@
 /cgi-bin/request/gis/cwas.py
 /cgi-bin/request/gis/nexrad_storm_attrs.py
 /cgi-bin/request/gis/sigmets.py
+/cgi-bin/request/hourlyprecip.py
+/cgi-bin/request/hourlyprecip.py?station=DSM
 /geojson/sbw.geojson?sts=200809130559&ets=000007231555&wfos=HGX
 /json/nwstext_center_date.py?center=KDMX
 /json/prism.py?lat=-140&lon=35&valid=2024-01-01

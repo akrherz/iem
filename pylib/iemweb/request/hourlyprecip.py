@@ -6,6 +6,21 @@ Documentation for /cgi-bin/request/hourlyprecip.py
 This service emits hourly precipitation data based on processed METAR
 observations by the IEM.
 
+Changelog
+---------
+
+- 2024-09-04: Initial update and examples
+
+Example Usage
+-------------
+
+Return the hourly precip for Ames, IA for the month of January 2024 with the
+station's state and lat/lon included:
+
+https://mesonet.agron.iastate.edu/cgi-bin/request/hourlyprecip.py?\
+station=AMW&network=IA_ASOS&sts=2024-01-01T00:00:00Z&ets=2024-02-01T00:00:00Z\
+&st=1&lalo=1
+
 """
 
 from zoneinfo import ZoneInfo

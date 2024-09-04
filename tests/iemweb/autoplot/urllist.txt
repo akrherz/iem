@@ -141,6 +141,9 @@
 /plotting/auto/plot/201/mode:cal::sdate:2024-01-01::edate:2024-08-16::outlook_type:C::day:1::w:wfo::network:WFO::wfo:STO::mystate:IA::ugc:IAZ048::g:yes::_r:t::dpi:100.png
 /plotting/auto/plot/203/typ:W::sort:W::date:2024-05-21::dpi:100.png
 /plotting/auto/plot/203/typ:W::sort:S::date:2024-05-21::dpi:100.png
+/plotting/auto/plot/205/network:IA_ASOS::station:DSM::max_tmpf_above:90::max_feel_above:90::_r:t::dpi:100.png
+/plotting/auto/plot/206/t:conus::network:WFO::wfo:DMX::state:IA::v:max_gust::p:both::day:2024-04-04::cmap:viridis::_r:t::dpi:100.png
+/plotting/auto/plot/206/t:state::network:WFO::wfo:DMX::state:IA::v:max_gust::p:both::day:2024-04-04::cmap:viridis::_r:t::dpi:100.png
 /plotting/auto/plot/208/network:WFO::wfo:DMX::year:2024::phenomenav:TO::significancev:W::etn:47::opt:single::n:auto::_r:43::dpi:100.png
 /plotting/auto/plot/208/valid:2024-08-27%201717::network:WFO::wfo:DMX::year:2024::phenomenav:TO::significancev:W::etn:47::opt:single::n:off::_r:43::dpi:100.png
 /plotting/auto/plot/211/ptype:precip::network:IA_ASOS::zstation:AMW::sts:2024-07-10%200000::ets:2024-07-12%202359::_r:t::dpi:100.png
@@ -159,6 +162,8 @@
 /plotting/auto/plot/220/which:1C::cat:categorical::t:state::network:WFO::wfo:STO::csector:midwest::valid:2024-08-07%201706::_r:t::dpi:100.png
 /plotting/auto/plot/220/which:5C::cat:categorical::t:state::network:WFO::wfo:STO::csector:midwest::valid:2024-08-07%201706::_r:t::dpi:100.png
 /plotting/auto/plot/230/outlook_type:E::day:4::w:ugc::network:WFO::wfo:ABR::mystate:IA::ugc:NCC001::month:all::_r:t::dpi:100.png
+/plotting/auto/plot/230/outlook_type:C::day:1::w:all::network:WFO::wfo:DMX::mystate:IA::ugc:IAZ048::month:all::_r:t::dpi:100.png
+/plotting/auto/plot/230/outlook_type:C::day:1::w:wfo::network:WFO::wfo:DMX::mystate:IA::ugc:IAZ048::month:all::_r:t::dpi:100::_cb:1.png
 /plotting/auto/plot/232/mode:WC::network:IA_ASOS::station:AMW::valid:2020-01-17%201200::hours:72::_r:t::dpi:100.png
 /plotting/auto/plot/236/ident:ZMP::sdate:2024-07-31::edate:2024-08-01::_r:43::dpi:100.png
 /plotting/auto/plot/241/sts:2000-08-06%200900::ets:2000-08-06%200900::w:min::csector:IA::mode:user::cmap:gnuplot2::_r:t::dpi:100.png

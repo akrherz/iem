@@ -3,20 +3,20 @@
 called from RUN_0Z.sh
 """
 
-import datetime
 import os
-import sys
+from datetime import datetime, timedelta, timezone
 
-from pyiem.util import archive_fetch, logger, utc
+import click
+from pyiem.util import archive_fetch, logger
 
 LOG = logger()
 
 
-def run(sts, ets):
+def run(sts: datetime, ets: datetime):
     """Loop over a start to end time and look for missing N0Q products."""
-
+    LOG.info("Checking N0Q availability from %s to %s", sts, ets)
     now = sts
-    interval = datetime.timedelta(minutes=5)
+    interval = timedelta(minutes=5)
     while now < ets:
         for comp in ["us", "ak", "hi", "pr", "gu"]:
             ppath = f"{now:%Y/%m/%d}/GIS/{comp}comp/n0q_{now:%Y%m%d%H%M}.png"
@@ -33,17 +33,14 @@ def run(sts, ets):
         now += interval
 
 
-def main(argv):
+@click.command()
+@click.option("--date", "dt", type=click.DateTime(), help="UTC Date")
+def main(dt: datetime):
     """Go Main Go"""
-    if len(argv) == 4:
-        sts = utc(int(argv[1]), int(argv[2]), int(argv[3]))
-    else:
-        utcnow = utc()
-        sts = utcnow - datetime.timedelta(hours=24)
-        sts = sts.replace(hour=0, minute=0, second=0, microsecond=0)
-    ets = sts + datetime.timedelta(hours=24)
+    sts = dt.replace(tzinfo=timezone.utc)
+    ets = sts + timedelta(hours=24)
     run(sts, ets)
 
 
 if __name__ == "__main__":
-    main(sys.argv)
+    main()

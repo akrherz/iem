@@ -6,13 +6,12 @@
 called from RUN_MIDNIGHT.sh
 """
 
-import datetime
-import sys
-from zoneinfo import ZoneInfo
+from datetime import datetime, timedelta, timezone
 
+import click
 from pyiem.database import get_dbconn
 from pyiem.network import Table as NetworkTable
-from pyiem.util import logger, utc
+from pyiem.util import logger
 
 LOG = logger()
 pgconn = get_dbconn("afos")
@@ -35,7 +34,7 @@ def check_vtec_dups(ts):
             group by entered, source, pil, bbb)
         select * from data where count > 1
         """,
-        (ts - datetime.timedelta(hours=2), ts + datetime.timedelta(hours=26)),
+        (ts - timedelta(hours=2), ts + timedelta(hours=26)),
     )
     if cursor.rowcount > 0:
         LOG.warning("Found %s VTEC relevant product_id dups", cursor.rowcount)
@@ -48,24 +47,24 @@ def sample(source, ts):
     cursor2.execute(
         "SELECT pil, entered, wmo from products where entered >= %s "
         "and entered < %s and source = %s",
-        (ts, ts + datetime.timedelta(hours=24), source),
+        (ts, ts + timedelta(hours=24), source),
     )
     pils = []
     for row in cursor2:
         if row[0] in pils:
             continue
         pils.append(row[0])
-        valid = row[1].astimezone(ZoneInfo("UTC"))
+        valid = row[1].astimezone(timezone.utc)
         print(f" {BASE}={valid:%Y%m%d%H%M}-{source}-{row[2]}-{row[0]}")
 
 
-def look4(ts):
+def look4(ts: datetime):
     """Let us investigate"""
     cursor.execute(
         "SELECT source, count(*) from products WHERE entered >= %s "
         "and entered < %s and substr(source, 1, 1) in ('K', 'P') "
         "GROUP by source ORDER by count DESC",
-        (ts, ts + datetime.timedelta(hours=24)),
+        (ts, ts + timedelta(hours=24)),
     )
     for row in cursor:
         source = row[0]
@@ -79,17 +78,16 @@ def look4(ts):
         sample(source, ts)
 
 
-def main(argv):
+@click.command()
+@click.option(
+    "--date", "dt", type=click.DateTime(), help="UTC Date", required=True
+)
+def main(dt: datetime):
     """Go Main Go"""
-    if len(argv) == 4:
-        ts = utc(int(argv[1]), int(argv[2]), int(argv[3]))
-    else:
-        ts = utc() - datetime.timedelta(days=1)
-        ts = ts.replace(hour=0, minute=0, second=0, microsecond=0)
-
-    LOG.info("running for %s", ts)
-    look4(ts)
+    dt = dt.replace(tzinfo=timezone.utc)
+    LOG.info("running for %s", dt)
+    look4(dt)
 
 
 if __name__ == "__main__":
-    main(sys.argv)
+    main()
