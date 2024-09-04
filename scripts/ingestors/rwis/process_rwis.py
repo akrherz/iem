@@ -1,17 +1,16 @@
 """Process the IDOT RWIS Data files"""
 
 # stdlib
-import datetime
 import json
 import os
 import subprocess
 import sys
-
-import numpy as np
-import pandas as pd
+from datetime import datetime, timedelta, timezone
 
 # third party
-import requests
+import httpx
+import numpy as np
+import pandas as pd
 from pyiem import util
 from pyiem.database import get_sqlalchemy_conn
 from pyiem.network import Table as NetworkTable
@@ -19,7 +18,8 @@ from pyiem.observation import Observation
 from pyiem.tracker import TrackerEngine
 
 LOG = util.logger()
-NT = NetworkTable("IA_RWIS")
+NT = NetworkTable("IA_RWIS", only_online=False)
+REMOTE2NWSLI = {str(NT.sts[sid]["remote_id"]): sid for sid in NT.sts}
 RWIS2METAR = {
     "00": "XADA",
     "01": "XALG",
@@ -92,7 +92,29 @@ RWIS2METAR = {
     "68": "XCMI",
     "69": "XRGI",
     "70": "XKYI",
+    "71": "XGAI",
     "72": "XCTI",
+    "73": "XEYI",
+    "74": "XSYI",
+    "75": "XTFI",
+    "76": "XLSI",
+    "77": "XVNI",
+    "78": "XVHI",
+    "79": "XAWI",
+    "80": "XARI",
+    "81": "XBMI",
+    "82": "XGII",
+    "83": "XLDI",
+    "84": "XWMI",
+    "85": "XMOI",
+    "86": "XPEI",
+    "87": "XRII",
+    "88": "XAII",
+    "89": "XOUI",
+    "90": "XPJI",
+    "91": "XPRI",
+    "92": "XCGI",
+    "93": "XHUI",
 }
 # STATUS 1 is online
 ATMOS_URI = (
@@ -100,13 +122,13 @@ ATMOS_URI = (
     "RWIS_Atmospheric_Data_View/FeatureServer/0/query?where=STATUS%3D1&"
     "f=json&outFields=DATA_LAST_UPDATED,AIR_TEMP,RELATIVE_HUMIDITY,DEW_POINT,"
     "VISIBILITY,AVG_WINDSPEED_KNOTS,MAX_WINDSPEED_KNOTS,WIND_DIRECTION_DEG,"
-    "PRECIPITATION_RATE,PRECIPITATION_ACCUMULATION,NWS_ID"
+    "PRECIPITATION_RATE,PRECIPITATION_ACCUMULATION,NWS_ID,RPUID"
 )
 SURFACE_URI = (
     "https://services.arcgis.com/8lRhdTsQyJpO52F1/arcgis/rest/services/"
     "RWIS_Surface_Data_View/FeatureServer/0/query?where=STATUS%3D1&f=json&"
     "outFields=NWS_ID,SURFACE_CONDITION,SURFACE_TEMP,ICE_PERCENTAGE,"
-    "FREEZE_TEMP,SENSOR_ID,FrictionIndex,DATA_LAST_UPDATED"
+    "FREEZE_TEMP,SENSOR_ID,FrictionIndex,DATA_LAST_UPDATED,RPUID"
 )
 
 
@@ -180,7 +202,7 @@ def merge(atmos, surface):
 
 def do_iemtracker(obs):
     """Iterate over the obs and do IEM Tracker related activities"""
-    threshold = util.utc() - datetime.timedelta(hours=3)
+    threshold = util.utc() - timedelta(hours=3)
     iem_pgconn, icursor = util.get_dbconnc("iem")
     portfolio_pgconn, pcursor = util.get_dbconnc("portfolio")
     tracker = TrackerEngine(icursor, pcursor)
@@ -232,7 +254,7 @@ def gen_metars(obs, filename, convids=False):
 
     """
     mtime = util.utc().strftime("%d%H%M")
-    thres = util.utc() - datetime.timedelta(hours=3)
+    thres = util.utc() - timedelta(hours=3)
     with open(filename, "w", encoding="utf-8") as fp:
         fp.write("\001\015\015\012001\n")
         fp.write(f"SAUS43 KDMX {mtime}\015\015\012METAR\015\015\012")
@@ -248,7 +270,7 @@ def gen_metars(obs, filename, convids=False):
                 LOG.info("nwsli: %s is unknown remote_id", sid)
                 continue
             if convids:
-                metarid = RWIS2METAR.get("%02i" % (remoteid,), "XXXX")
+                metarid = RWIS2METAR.get(f"{remoteid:02.0f}", "XXXX")
             temptxt = ""
             t_temptxt = ""
             windtxt = ""
@@ -297,7 +319,8 @@ def update_iemaccess(obs):
                 iemob.data[varname] = ob.get(varname)
             elif not np.isnan(thisval):
                 iemob.data[varname] = ob.get(varname)
-        iemob.save(icursor)
+        if not iemob.save(icursor):
+            LOG.info("Access update for %s failed", sid)
         icursor.close()
         pgconn.commit()
 
@@ -308,16 +331,16 @@ def process_features(features):
     for feat in features:
         props = feat["attributes"]
         props["valid"] = (
-            datetime.datetime(1970, 1, 1)
-            + datetime.timedelta(seconds=props["DATA_LAST_UPDATED"] / 1000.0)
-        ).replace(tzinfo=datetime.timezone.utc)
+            datetime(1970, 1, 1)
+            + timedelta(seconds=props["DATA_LAST_UPDATED"] / 1000.0)
+        ).replace(tzinfo=timezone.utc)
         rows.append(props)
     return pd.DataFrame(rows).replace({9999: np.nan})
 
 
 def fetch(uri):
     """Download the files we need"""
-    res = util.exponential_backoff(requests.get, uri, timeout=30)
+    res = util.exponential_backoff(httpx.get, uri, timeout=30)
     if res is None:
         LOG.info("failed to fetch %s", uri)
         sys.exit()
@@ -330,7 +353,22 @@ def fetch(uri):
             json.dumps(data, sort_keys=True, indent=4, separators=(",", ": ")),
         )
         sys.exit()
-    return process_features(data["features"])
+    df = process_features(data["features"])
+    # fillout / cross check NWS_ID
+    for idx, row in df.iterrows():
+        if row["NWS_ID"] is None:
+            if row["RPUID"] in REMOTE2NWSLI:
+                df.at[idx, "NWS_ID"] = REMOTE2NWSLI[row["RPUID"]]
+                continue
+            LOG.info("RPUID %s is unknown", row["RPUID"])
+            continue
+        if REMOTE2NWSLI.get(row["RPUID"], "") != row["NWS_ID"]:
+            LOG.info(
+                "NWS_ID mismatch remote: %s IEM: %s",
+                row["NWS_ID"],
+                REMOTE2NWSLI.get(row["RPUID"]),
+            )
+    return df
 
 
 def ldm_insert_metars(fn1, fn2):
