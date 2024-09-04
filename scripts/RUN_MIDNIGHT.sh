@@ -25,7 +25,7 @@ sleep 600
 cd ../qc
 python check_station_geom.py
 python check_vtec_eventids.py
-python check_afos.py
+python check_afos.py --date=$(date --date '1 day ago' +'%Y-%m-%d')
 
 cd ../iemre
 python grid_rsds.py --date=$(date --date '1 day ago' +'%Y-%m-%d')
@@ -49,7 +49,7 @@ then
     MM=$(date -u --date '1 month ago' +'%m')
     YYYY=$(date -u --date '1 month ago' +'%Y')
     cd ../climodat
-    python merra_solarrad.py $YYYY $MM
+    python merra_solarrad.py --year=$YYYY --month=$MM
 fi
 
 # Move content to offlining

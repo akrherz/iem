@@ -77,10 +77,10 @@ python process_traffic.py &
 
 cd ../../current
 python plot_hilo.py
-python ifc_today_total.py
+python ifc_today_total.py --date=$(date --date '60 minutes ago' +'%Y-%m-%d') --realtime
 if [ $LHH -eq "01" ]
 then
-    python ifc_today_total.py $YEST
+    python ifc_today_total.py --date=$(date --date '1 days ago' +'%Y-%m-%d')
 fi
 python today_min_windchill.py
 

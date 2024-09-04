@@ -9,10 +9,11 @@ So 1000 W m-2 x 3600 is 3,600,000 W s m-2 is 86 langleys
 RUN_MIDNIGHT.sh every 28th of the month.
 """
 
-import datetime
 import os
-import sys
+from datetime import datetime, timedelta
+from typing import Optional
 
+import click
 import geopandas as gpd
 import numpy as np
 import pandas as pd
@@ -91,7 +92,7 @@ def build_stations(dt) -> pd.DataFrame:
 def compute(df, sids, dt, do_regions=False):
     """Compute things."""
     sts = dt.replace(hour=6)  # 6z
-    ets = sts + datetime.timedelta(days=1)
+    ets = sts + timedelta(days=1)
     fn = sts.strftime("/mesonet/data/merra2/%Y/%Y%m%d.nc")
     fn2 = ets.strftime("/mesonet/data/merra2/%Y/%Y%m%d.nc")
     if not os.path.isfile(fn):
@@ -137,14 +138,14 @@ def compute(df, sids, dt, do_regions=False):
         compute_regions(total, df)
 
 
-def do(dt):
+def do(dt: datetime):
     """Process for a given date."""
     LOG.info("do(%s)", dt)
     df = build_stations(dt)
     # We currently do two options
     # 1. For morning sites 1-11 AM, they get yesterday's radiation
     sids = df[(df["temp_hour"] > 0) & (df["temp_hour"] < 12)].index.values
-    compute(df, sids, dt - datetime.timedelta(days=1), True)
+    compute(df, sids, dt - timedelta(days=1), True)
     # 2. All other sites get today
     sids = df[df[COL].isna()].index.values
     compute(df, sids, dt)
@@ -163,22 +164,29 @@ def do(dt):
     pgconn.close()
 
 
-def main(argv):
+@click.command()
+@click.option("--date", "dt", type=click.DateTime(), help="Date to process")
+@click.option("--year", type=int, help="Year to process")
+@click.option("--month", type=int, help="Month to process")
+def main(dt: Optional[datetime], year: Optional[int], month: Optional[int]):
     """Go Main Go"""
-    if len(argv) == 4:
-        do(datetime.datetime(int(argv[1]), int(argv[2]), int(argv[3])))
-    if len(argv) == 3:
+    queue = []
+    if dt is not None:
+        queue.append(dt)
+    else:
         # Run for a given month!
-        sts = datetime.datetime(int(argv[1]), int(argv[2]), 1)
+        sts = datetime(year, month, 1)
         # run for last date of previous month as well
-        sts = sts - datetime.timedelta(days=1)
-        ets = sts + datetime.timedelta(days=45)
+        sts = sts - timedelta(days=1)
+        ets = sts + timedelta(days=45)
         ets = ets.replace(day=1)
         now = sts
         while now < ets:
-            do(now)
-            now += datetime.timedelta(days=1)
+            queue.append(now)
+            now += timedelta(days=1)
+    for _dt in queue:
+        do(_dt)
 
 
 if __name__ == "__main__":
-    main(sys.argv)
+    main()

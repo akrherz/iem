@@ -6,7 +6,7 @@ date of a given SPC outlook threshold as per IEM unofficial archives.
 usage of levels with time.
 """
 
-import datetime
+from datetime import date, datetime
 
 import pandas as pd
 from matplotlib.patches import Rectangle
@@ -133,7 +133,7 @@ def get_description():
             name="date",
             label="Set retroactive date (exclude events on or after date):",
             optional=True,
-            default=f"{datetime.date.today():%Y/%m/%d}",
+            default=f"{date.today():%Y/%m/%d}",
         ),
     ]
     return desc
@@ -169,7 +169,7 @@ def plotter(fdict):
     elif month == "octmar":
         months = [10, 11, 12, 1, 2, 3]
     else:
-        ts = datetime.datetime.strptime(f"2000-{month}-01", "%Y-%b-%d")
+        ts = datetime.strptime(f"2000-{month}-01", "%Y-%b-%d")
         # make sure it is length two for the trick below in SQL
         months = [
             ts.month,
@@ -280,7 +280,7 @@ def plotter(fdict):
         df["max_expire"].dt.date - pd.Timedelta(days=1)
     )
 
-    df["days"] = (pd.Timestamp(datetime.date.today()) - df["date"]).dt.days
+    df["days"] = (pd.Timestamp(date.today()) - df["date"]).dt.days
     _ll = ""
     if ctx.get("date") is not None:
         _ll = f"Prior to {ctx['date']:%-d %b %Y}, "

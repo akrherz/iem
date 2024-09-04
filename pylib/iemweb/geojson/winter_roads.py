@@ -1,6 +1,6 @@
 """.. title:: Winter Road Conditions GeoJSON
 
-Return to `API Services </json/#json>`_
+Return to `API Services </api/#json>`_
 
 Example Requests
 ----------------

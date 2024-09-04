@@ -1,12 +1,19 @@
-"""
-IEM_APPID = 79
+""".. title:: Hourly precipitation Tables
+
+Example Usage
+-------------
+
+Show the table for 1 September 2024
+
+https://mesonet.agron.iastate.edu/cgi-bin/precip/catAZOS.py?date=2024-09-01
+
 """
 
 import datetime
 from io import StringIO
 
+from pyiem.database import get_dbconnc
 from pyiem.network import Table as NetworkTable
-from pyiem.util import get_dbconnc
 from pyiem.webutil import iemapp
 
 nt = NetworkTable("IA_ASOS")
@@ -129,7 +136,7 @@ def loadstations():
         totp[station] = 0
 
 
-@iemapp()
+@iemapp(help=__doc__)
 def application(environ, start_response):
     """Go Main Go"""
     sio = StringIO()
