@@ -22,6 +22,7 @@ import pyproj
 import xarray as xr
 from affine import Affine
 from pyiem import iemre
+from pyiem.grid.util import grid_smear
 from pyiem.util import archive_fetch, logger, ncopen, utc
 
 LOG = logger()
@@ -69,11 +70,8 @@ def try_era5land(ts: datetime, domain: str, dom: dict) -> Optional[np.ndarray]:
     # ERA5Land is too tight to the coast, so we need to jitter the grid
     # 7 and 4 was found to be enough to appease DEP's needs
     # NOTE: HRRR and GFS do not need this
-    for shift in (-7, -4, 4, 7):
-        for axis in (0, 1):
-            vals_shifted = np.roll(vals, shift=shift, axis=axis)
-            idx = ~vals_shifted.mask * vals.mask
-            vals[idx] = vals_shifted[idx]
+    vals = grid_smear(vals, shift=7)
+    vals = grid_smear(vals, shift=4)
 
     return vals
 
