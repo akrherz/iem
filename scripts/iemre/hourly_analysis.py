@@ -18,6 +18,7 @@ from metpy.interpolate import inverse_distance_to_grid
 from metpy.units import masked_array, units
 from pyiem import iemre
 from pyiem.database import get_sqlalchemy_conn
+from pyiem.grid.util import grid_smear
 from pyiem.iemre import grb2iemre, hourly_offset, reproject2iemre
 from pyiem.util import archive_fetch, logger, ncopen
 from sqlalchemy import text
@@ -62,11 +63,7 @@ def use_era5land(ts, kind, domain):
                 # OK, ERA5Land is tight to land and when we interpolate
                 # we end up with slivers of no data.  So we goose things
                 # to smear data to the borders.
-                for shift in (-4, 4):
-                    for axis in (0, 1):
-                        vals_shifted = np.roll(vals, shift=shift, axis=axis)
-                        idx = ~vals_shifted.mask * vals.mask
-                        vals[idx] = vals_shifted[idx]
+                vals = grid_smear(vals, shift=4)
                 res.append(
                     reproject2iemre(
                         vals.filled(np.nan), aff, "epsg:4326", domain=domain

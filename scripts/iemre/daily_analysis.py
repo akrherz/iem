@@ -19,6 +19,7 @@ from metpy.interpolate import inverse_distance_to_grid
 from metpy.units import units
 from pyiem import iemre
 from pyiem.database import get_sqlalchemy_conn
+from pyiem.grid.util import grid_smear
 from pyiem.util import convert_value, logger, ncopen, utc
 from scipy.stats import zscore
 from sqlalchemy import text
@@ -402,11 +403,7 @@ def workflow(ts: datetime.date, domain: str):
         # Some grids are too tight to the CONUS boundary, so we smear things
         # out some.
         vals = ds[vname].to_masked_array()
-        for shift in (-4, 4):
-            for axis in (0, 1):
-                vals_shifted = np.roll(vals, shift=shift, axis=axis)
-                idx = ~vals_shifted.mask * vals.mask
-                vals[idx] = vals_shifted[idx]
+        vals = grid_smear(vals, shift=4)
         ds[vname].values = vals
         msg = f"{vname:14s} {ds[vname].min():6.2f} {ds[vname].max():6.2f}"
         LOG.info(msg)
