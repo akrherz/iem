@@ -40,7 +40,7 @@ cd ../nldas
 python process_nldasv2_noah.py --date=$(date -u --date '5 days ago' +'%Y-%m-%d') &
 
 cd ../qc
-python check_n0q.py --valid=$(date -u --date '1 days ago' +'%Y-%m-%d')
+python check_n0q.py --date=$(date -u --date '1 days ago' +'%Y-%m-%d')
 
 cd ../climodat
 python nldas_extract.py --valid=$(date -u --date '6 days ago' +'%Y-%m-%d')
