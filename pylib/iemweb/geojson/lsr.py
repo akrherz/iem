@@ -17,7 +17,7 @@ Provide all Local Storm Reports for Wisconsin on 13 July 2024. Note that a
 UTC date period is specified that equates to the US Central date.
 
 https://mesonet.agron.iastate.edu/geojson/lsr.geojson?states=WI&\
-ets=2024-07-13T05:00Z&sts=2024-07-14T05:00Z
+sts=2024-07-13T05:00Z&ets=2024-07-14T05:00Z
 
 Provide the LSRs associated with Des Moines Tornado Warning 47
 
