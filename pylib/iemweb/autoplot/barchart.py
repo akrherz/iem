@@ -36,6 +36,7 @@ def barchar_with_top10(
             color (str or list-like): color of the bars
             labelformat (str): format string for the labels
             width (float): width of the bars, default 1.
+            table_col_title (str): Title for column or defaults to column
 
     Returns:
         ax: matplotlib axis object
@@ -71,7 +72,11 @@ def barchar_with_top10(
     top10_table = table(
         tableax,
         cellText=cell_text,
-        colLabels=["Rank", data.index.name, column],
+        colLabels=[
+            "Rank",
+            data.index.name,
+            kwargs.get("table_col_title", column),
+        ],
         bbox=[0, 0.5, 1, 0.45],
         edges="horizontal",
     )
@@ -88,7 +93,11 @@ def barchar_with_top10(
     bottom10_table = table(
         tableax,
         cellText=cell_text,
-        colLabels=["Rank", data.index.name, column],
+        colLabels=[
+            "Rank",
+            data.index.name,
+            kwargs.get("table_col_title", column),
+        ],
         bbox=[0, 0, 1, 0.45],
         edges="horizontal",
     )
