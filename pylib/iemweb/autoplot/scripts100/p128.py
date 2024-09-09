@@ -6,8 +6,10 @@ years with similiar observation counts are used in this data presentation.
 import pandas as pd
 from pyiem.database import get_sqlalchemy_conn
 from pyiem.exceptions import NoDataFound
-from pyiem.plot import figure_axes
+from pyiem.plot import figure
 from pyiem.util import get_autoplot_context
+
+from iemweb.autoplot.barchart import barchar_with_top10
 
 PDICT = {
     "avg_high": "Average High Temperature",
@@ -97,24 +99,26 @@ def plotter(fdict):
     for col in PDICT:
         df["diff_" + col] = df["one_" + col] - df["two_" + col]
 
-    title = "Yearly %s [%s] %s\nminus [%s] %s" % (
-        PDICT[varname],
-        station1,
-        ctx["_nt1"].sts[station1]["name"],
-        station2,
-        ctx["_nt2"].sts[station2]["name"],
+    title = f"Yearly {PDICT[varname]} Difference"
+    subtitle = (
+        f"[{station1}] {ctx['_nt1'].sts[station1]['name']} minus "
+        f"[{station2}] {ctx['_nt2'].sts[station2]['name']}"
     )
-    (fig, ax) = figure_axes(title=title, apctx=ctx)
+    fig = figure(title=title, subtitle=subtitle, apctx=ctx)
     color_above = "b" if varname in ["total_precip"] else "r"
     color_below = "r" if color_above == "b" else "b"
+    df["color"] = color_above
+    df.loc[df[f"diff_{varname}"] < 0, "color"] = color_below
 
-    bars = ax.bar(
-        df.index, df["diff_" + varname], fc=color_above, ec=color_above
+    ax = barchar_with_top10(
+        fig,
+        df,
+        f"diff_{varname}",
+        color=df["color"],
+        table_col_title="Diff",
+        labelformat="%.2f" if varname in ["total_precip"] else "%.1f",
     )
-    for mybar, val in zip(bars, df["diff_" + varname].values):
-        if val < 0:
-            mybar.set_facecolor(color_below)
-            mybar.set_edgecolor(color_below)
+
     units = "inch" if varname in ["total_precip"] else "F"
     lbl = "wetter" if units == "inch" else "warmer"
     wins = len(df[df["diff_" + varname] > 0].index)
