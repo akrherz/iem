@@ -102,10 +102,13 @@
 /plotting/auto/plot/163/csector:midwest::var:count_rank::sdate:2024-01-01%200000::edate:2024-08-26%200000::filter:NONE::by:wfo::cmap:plasma::lbl:yes::_r:t::dpi:100.png
 /plotting/auto/plot/163/csector:midwest::var:count_departure::sdate:2024-01-01%200000::edate:2024-08-26%200000::filter:NONE::by:wfo::cmap:plasma::lbl:yes::_r:t::dpi:100.png
 /plotting/auto/plot/163/csector:midwest::var:count_standard::sdate:2024-01-01%200000::edate:2024-08-26%200000::filter:NONE::by:wfo::cmap:plasma::lbl:yes::_r:t::dpi:100.png
+/plotting/auto/plot/164/sts:2024-05-01::ets:2024-09-09::var:precip::_r:t::dpi:100.png
+/plotting/auto/plot/164/sts:2024-05-01::ets:2024-09-09::var:high::_r:t::dpi:100.png
 /plotting/auto/plot/165/w:air::sector:IA::var:spring_below::popt:contour::year:2020::threshold:32::cmap:BrBG::_r:t::dpi:100.png
 /plotting/auto/plot/165/w:air::sector:IA::var:spring_below::popt:contour::year:2020::threshold:32::p:50::cmap:BrBG::_r:t::dpi:100.png
 /plotting/auto/plot/165/w:air::sector:IA::var:high_above::popt:values::year:2020::threshold:32::p:50::sday:0824::syear:1893::eyear:2024::cmap:BrBG::_r:t::dpi:100.png
 /plotting/auto/plot/171/opt:ugc::network:WFO::station:MEG::state:IA::ugc:IAC169::c:single::phenomena:SV::significance:W::cmap:Greens::_r:43::dpi:100.png
+/plotting/auto/plot/172/network:IACLIMATE::station:IATAME::var:snow::year1:2024::sdate:0101::edate:0102::m:3::_r:t::dpi:100::_cb:1.png
 /plotting/auto/plot/173/network:IA_ASOS::zstation:AMW::units:mph::p1:0501-0510::p2:0511-0520::_r:t::dpi:100.png
 /plotting/auto/plot/177/network:ISUSM::station:BOOI4::opt:1::sts:2024-07-18%201000::ets:2024-07-25%201000::_r:t::dpi:100.png
 /plotting/auto/plot/177/network:ISUSM::station:BOOI4::opt:m::sts:2024-07-18%201000::ets:2024-07-25%201000::_r:t::dpi:100.png
@@ -137,6 +140,8 @@
 /plotting/auto/plot/199/opt:7::date:2024-07-24::_r:t::dpi:100.png
 /plotting/auto/plot/199/opt:8::date:2024-07-24::_r:t::dpi:100.png
 /plotting/auto/plot/199/opt:9::date:2024-07-24::_r:t::dpi:100.png
+/plotting/auto/plot/200/month:jan::p:3.C.8::level:CATEGORICAL.SLGT::t:state::network:WFO::station:DMX::csector:southeast::drawc:no::w:avg::edate:2024-09-10::cmap:jet::_r:t::dpi:100.png
+/plotting/auto/plot/200/month:summer::p:3.C.8::level:CATEGORICAL.SLGT::t:state::network:WFO::station:DMX::csector:southeast::drawc:no::w:avg::edate:2024-09-10::cmap:jet::_r:t::dpi:100.png
 /plotting/auto/plot/201/mode:heat::sdate:2024-07-01::edate:2024-08-16::outlook_type:C::day:1::w:all::network:WFO::wfo:STO::mystate:IA::ugc:IAZ048::g:yes::_r:t::dpi:100.png
 /plotting/auto/plot/201/mode:cal::sdate:2024-07-01::edate:2024-08-16::outlook_type:C::day:1::w:all::network:WFO::wfo:STO::mystate:IA::ugc:IAZ048::g:yes::_r:t::dpi:100.png
 /plotting/auto/plot/201/mode:cal::sdate:2024-01-01::edate:2024-08-16::outlook_type:C::day:1::w:wfo::network:WFO::wfo:STO::mystate:IA::ugc:IAZ048::g:yes::_r:t::dpi:100.png

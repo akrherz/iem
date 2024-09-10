@@ -8,13 +8,14 @@
 - Upload the resulting file <site>_YYYYmmdd.met
 """
 
-import datetime
 import os
 import subprocess
-import sys
 import tempfile
+from datetime import date, datetime, timedelta
 from io import StringIO
+from typing import Optional
 
+import click
 import numpy as np
 import pandas as pd
 from metpy.units import units
@@ -55,7 +56,7 @@ def write_and_upload(df, location):
             sio.write(line.strip() + "\r\n")
     sio.write(
         ("! auto-generated at %sZ by daryl akrherz@iastate.edu\r\n")
-        % (datetime.datetime.utcnow().isoformat(),)
+        % (datetime.utcnow().isoformat(),)
     )
     fmt = (
         "%-10s%-10s%-10s%-10s%-10s%-10s"
@@ -154,16 +155,16 @@ def load_baseline(location):
             index_col="valid",
         )
     # we want data from 1980 to this year
-    today = datetime.date.today()
+    today = date.today()
     # So now, we need to move any data that exists for this year and overwrite
     # the previous years with that data.  This is QC'd prior to any new obs
     # are taken from ISUSM
     rcols = ["radn", "maxt", "mint", "rain"]
-    for date, row in df[df["year"] == today.year].iterrows():
+    for dt, row in df[df["year"] == today.year].iterrows():
         for year in range(1980, today.year):
-            if date.month == 2 and date.day == 29 and year % 4 != 0:
+            if dt.month == 2 and dt.day == 29 and year % 4 != 0:
                 continue
-            df.loc[date.replace(year=year), rcols] = (
+            df.loc[dt.replace(year=year), rcols] = (
                 row["radn"],
                 row["maxt"],
                 row["mint"],
@@ -171,7 +172,7 @@ def load_baseline(location):
             )
     # Fill out the time domain
     dec31 = today.replace(month=12, day=31)
-    df = df.reindex(index=pd.date_range(datetime.date(1980, 1, 1), dec31).date)
+    df = df.reindex(index=pd.date_range(date(1980, 1, 1), dec31).date)
     return df
 
 
@@ -179,8 +180,8 @@ def replace_forecast(df, location):
     """Replace dataframe data with forecast for this location"""
     pgconn = get_dbconn("coop")
     cursor = pgconn.cursor()
-    today = datetime.date.today()
-    nextjan1 = datetime.date(today.year + 1, 1, 1)
+    today = date.today()
+    nextjan1 = date(today.year + 1, 1, 1)
     coop = XREF[location]["climodat"]
     years = [
         int(y)
@@ -236,7 +237,7 @@ def replace_cfs(df, location):
     pgconn = get_dbconn("coop")
     cursor = pgconn.cursor()
     coop = XREF[location]["climodat"]
-    today = datetime.date.today() + datetime.timedelta(days=3)
+    today = date.today() + timedelta(days=3)
     dec31 = today.replace(day=31, month=12)
     cursor.execute(
         """
@@ -261,13 +262,13 @@ def replace_cfs(df, location):
 
     if row[0] == dec31:
         return
-    now = row[0] + datetime.timedelta(days=1)
+    now = row[0] + timedelta(days=1)
     # OK, if our last row does not equal dec31, we have some more work to do
     LOG.info("Replacing %s->%s with previous year's data", now, dec31)
     while now <= dec31:
         lastyear = now.replace(year=now.year - 1)
         df.loc[now, rcols] = df.loc[lastyear, rcols]
-        now += datetime.timedelta(days=1)
+        now += timedelta(days=1)
 
 
 def replace_obs_iem(df, location):
@@ -279,7 +280,7 @@ def replace_obs_iem(df, location):
     pgconn = get_dbconn("iem")
     cursor = pgconn.cursor()
     station = XREF[location]["station"]
-    today = datetime.date.today()
+    today = date.today()
     jan1 = today.replace(month=1, day=1)
     years = [
         int(y)
@@ -341,7 +342,7 @@ def replace_obs(df, location):
     pgconn = get_dbconn("isuag")
     cursor = pgconn.cursor()
     isusm = XREF[location]["isusm"]
-    today = datetime.date.today()
+    today = date.today()
     jan1 = today.replace(month=1, day=1)
     years = [
         int(y)
@@ -455,14 +456,16 @@ def do(location):
     write_and_upload(df, location)
 
 
-def main(argv):
+@click.command()
+@click.option("--location", help="Run for isolated location")
+def main(location: Optional[str]):
     """Do Something"""
-    if len(argv) == 2:
-        do(argv[1])
-        return
-    for location in XREF:
+    if location:
         do(location)
+        return
+    for _location in XREF:
+        do(_location)
 
 
 if __name__ == "__main__":
-    main(sys.argv)
+    main()

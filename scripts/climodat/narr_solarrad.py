@@ -26,10 +26,10 @@ Called from dl/download_narr.py
 """
 
 # pylint: disable=unpacking-non-sequence
-import datetime
-import os
-import sys
+from datetime import date, datetime, timedelta
+from typing import Optional
 
+import click
 import geopandas as gpd
 import numpy as np
 import pandas as pd
@@ -80,40 +80,40 @@ def compute_regions(affine, rsds, df):
         df.at[sid, COL] = data[i]
 
 
-def compute(df, sids, dt, do_regions=False):
+def compute(df, sids, dt: date, do_regions=False):
     """Process data for this timestamp"""
     LOG.info("called dt: %s len(sids): %s", dt, len(sids))
     # Life choice is to run 6z to 6z
     now = utc(dt.year, dt.month, dt.day, 6)
-    ets = now + datetime.timedelta(hours=24)
+    ets = now + timedelta(hours=24)
     total = None
     xaxis = None
     yaxis = None
     while now < ets:
         # See if we have Grib data first
-        with archive_fetch(
-            now.strftime("%Y/%m/%d/model/NARR/rad_%Y%m%d%H00.grib")
-        ) as fn:
-            if not os.path.isfile(fn):
+        ppath = now.strftime("%Y/%m/%d/model/NARR/rad_%Y%m%d%H00.grib")
+        now += timedelta(hours=3)
+        with archive_fetch(ppath) as fn:
+            if fn is None:
                 LOG.warning("Missing %s", fn)
-            else:
-                grb = pygrib.open(fn)[1]
-                if total is None:
-                    xaxis, yaxis = get_grid(grb)
-                    affine = Affine(
-                        grb["DxInMetres"],
-                        0,
-                        xaxis[0],
-                        0,
-                        0 - grb["DyInMetres"],
-                        yaxis[-1],
-                    )
+                continue
+            with pygrib.open(fn) as grbs:
+                grb = grbs[1]
+            if total is None:
+                xaxis, yaxis = get_grid(grb)
+                affine = Affine(
+                    grb["DxInMetres"],
+                    0,
+                    xaxis[0],
+                    0,
+                    0 - grb["DyInMetres"],
+                    yaxis[-1],
+                )
 
-                    # W/m2 over 3 hours J/m2 to MJ/m2
-                    total = grb["values"] * 10800.0 / 1_000_000.0
-                else:
-                    total += grb["values"] * 10800.0 / 1_000_000.0
-            now += datetime.timedelta(hours=3)
+                # W/m2 over 3 hours J/m2 to MJ/m2
+                total = grb["values"] * 10800.0 / 1_000_000.0
+            else:
+                total += grb["values"] * 10800.0 / 1_000_000.0
 
     df["i"] = np.digitize(df["projx"].values, xaxis)
     df["j"] = np.digitize(df["projy"].values, yaxis)
@@ -150,7 +150,7 @@ def build_stations(dt) -> pd.DataFrame:
     return df
 
 
-def do(dt):
+def do(dt: date):
     """Process for a given date
     6z file has 6z to 9z data
     """
@@ -158,7 +158,7 @@ def do(dt):
     # We currently do two options
     # 1. For morning sites 1-11 AM, they get yesterday's radiation
     sids = df[(df["temp_hour"] > 0) & (df["temp_hour"] < 12)].index.values
-    compute(df, sids, dt - datetime.timedelta(days=1), True)
+    compute(df, sids, dt - timedelta(days=1), True)
     # 2. All other sites get today
     sids = df[df[COL].isna()].index.values
     compute(df, sids, dt)
@@ -177,19 +177,25 @@ def do(dt):
     pgconn.close()
 
 
-def main(argv):
+@click.command()
+@click.option("--year", type=int, default=None, help="Year to process")
+@click.option("--month", type=int, default=None, help="Month to process")
+@click.option(
+    "--date", "dt", type=click.DateTime(), default=None, help="Date to process"
+)
+def main(year: Optional[int], month: Optional[int], dt: Optional[datetime]):
     """Go Main Go"""
-    if len(argv) == 4:
-        do(datetime.datetime(int(argv[1]), int(argv[2]), int(argv[3])))
-    if len(argv) == 3:
-        sts = datetime.datetime(int(argv[1]), int(argv[2]), 1)
-        ets = sts + datetime.timedelta(days=35)
-        ets = ets.replace(day=1)
-        now = sts
-        while now < ets:
-            do(now)
-            now += datetime.timedelta(days=1)
+    if dt is not None:
+        do(dt.date())
+        return
+    sts = datetime(year, month, 1)
+    ets = sts + timedelta(days=35)
+    ets = ets.replace(day=1)
+    now = sts
+    while now < ets:
+        do(now.date())
+        now += timedelta(days=1)
 
 
 if __name__ == "__main__":
-    main(sys.argv)
+    main()

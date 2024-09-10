@@ -99,7 +99,7 @@ def get_description():
     return desc
 
 
-def plotter(fdict):
+def plotter(fdict: dict):
     """Go"""
     ctx = get_autoplot_context(fdict, get_description())
     utcvalid = ctx.get("valid")
