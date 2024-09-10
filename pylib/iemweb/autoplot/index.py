@@ -188,6 +188,23 @@ def station_handler(value, arg, fdict, res, typ):
     return netselect + " " + select + map_select_widget(network, arg["name"])
 
 
+def fema_select(value, name):
+    """Generate a select list of FEMA regions."""
+    regions = {
+        "1": "Region 1 {ME,NH,VT,MA,CT,RI}",
+        "2": "Region 2 {NY,NJ,PR,VI}",
+        "3": "Region 3 {MD,PA,WV,DC,DE,VA}",
+        "4": "Region 4 {NC,SC,GA,FL,AL,MS,TN,KY}",
+        "5": "Region 5 {IL,IN,OH,MI,WI,MN}",
+        "6": "Region 6 {NM,TX,OK,LA,AR}",
+        "7": "Region 7 {NE,IA,KS,MO}",
+        "8": "Region 8 {MT,ND,SD,WY,UT,CO}",
+        "9": "Region 9 {NV,AZ,CA,FSM,GUAM,HI,RMI,CNMI,AS}",
+        "10": "Region 10 {AK,WA,OR,ID}",
+    }
+    return make_select(name, value, regions)
+
+
 def ugc_select(state, ugc):
     """Generate a select for a given state."""
     pgconn, cursor = get_dbconnc("postgis")
@@ -589,6 +606,8 @@ def generate_form(apid, fdict, headers, cookies):
             form = make_select(arg["name"], value, CSECTORS, showvalue=False)
         elif arg["type"] == "cmap":
             form = cmap_handler(fdict, value, arg, res)
+        elif arg["type"] == "fema":
+            form = fema_select(value, arg["name"])
         elif arg["type"] in ["text", "int", "float"]:
             form = (
                 f"<input type=\"text\" name=\"{arg['name']}\" size=\"60\" "

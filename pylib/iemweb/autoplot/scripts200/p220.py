@@ -20,7 +20,7 @@ from zoneinfo import ZoneInfo
 import pandas as pd
 from geopandas import read_postgis
 from matplotlib.patches import Rectangle
-from pyiem.database import get_dbconn, get_sqlalchemy_conn
+from pyiem.database import get_sqlalchemy_conn
 from pyiem.exceptions import NoDataFound
 from pyiem.plot import MapPlot
 from pyiem.reference import LATLON, Z_OVERLAY2_LABEL, Z_POLITICAL
@@ -31,6 +31,7 @@ CENTRALTZ = ZoneInfo("America/Chicago")
 PDICT = {
     "cwa": "Plot by NWS Forecast Office",
     "state": "Plot by State/Sector",
+    "fema": "Plot by FEMA Region",
 }
 PDICT2 = {
     "1C": "Day 1 Convective",
@@ -155,8 +156,14 @@ def get_description():
             name="wfo",
             network="WFO",
             default="DMX",
-            label="Select WFO: (ignored if plotting state)",
+            label="Select WFO: (when applicable)",
         ),
+        {
+            "type": "fema",
+            "default": "7",
+            "name": "fema",
+            "label": "Select FEMA Region (when applicable):",
+        },
         dict(
             type="csector",
             name="csector",
@@ -176,16 +183,24 @@ def get_description():
 
 def outlook_search(valid, days, outlook_type):
     """Find nearest outlook."""
-    cursor = get_dbconn("postgis").cursor()
-    cursor.execute(
-        "SELECT product_issue at time zone 'UTC' from spc_outlook "
-        "WHERE day = ANY(%s) and outlook_type = %s and product_issue > %s and "
-        "product_issue < %s ORDER by product_issue DESC",
-        (days, outlook_type, valid - datetime.timedelta(hours=24), valid),
-    )
-    if cursor.rowcount == 0:
-        return None
-    return cursor.fetchone()[0].replace(tzinfo=datetime.timezone.utc)
+    with get_sqlalchemy_conn("postgis") as conn:
+        res = conn.execute(
+            text("""
+                 SELECT product_issue at time zone 'UTC' from spc_outlook
+            WHERE day = ANY(:days) and outlook_type = :ot
+            and product_issue > :sts and
+            product_issue < :ets ORDER by product_issue DESC
+            """),
+            {
+                "days": days,
+                "ot": outlook_type,
+                "sts": valid - datetime.timedelta(hours=24),
+                "ets": valid,
+            },
+        )
+        if res.rowcount == 0:
+            return None
+        return res.fetchone()[0].replace(tzinfo=datetime.timezone.utc)
 
 
 def compute_datelabel(df):
@@ -272,6 +287,8 @@ def plotter(fdict):
     csector = ctx.pop("csector")
     if ctx["t"] == "cwa":
         sector = "cwa"
+    elif ctx["t"] == "fema":
+        sector = "fema_region"
     else:
         sector = "state" if len(csector) == 2 else csector
     daylabel = day if day > 0 else f"{days[0]}-{days[-1]}"
@@ -295,6 +312,7 @@ def plotter(fdict):
         sector=sector,
         state=csector,
         cwa=(ctx["wfo"] if len(ctx["wfo"]) == 3 else ctx["wfo"][1:]),
+        fema_region=ctx["fema"],
         nocaption=True,
         background="ne2",
     )
@@ -370,6 +388,8 @@ def plotter(fdict):
 
     if sector == "cwa":
         mp.draw_cwas(color="k", linewidth=2.5)
+    if sector == "fema_region":
+        mp.draw_fema_regions()
     if sector in ["cwa", "state"]:
         mp.drawcounties()
         mp.drawcities()

@@ -5,7 +5,7 @@ US, the daily high and low temperature climatology is presented as a
 filled bar for each day plotted when Air Temperature is selected.
 """
 
-import datetime
+from datetime import date, timedelta
 from zoneinfo import ZoneInfo
 
 import numpy as np
@@ -36,7 +36,7 @@ UNITS = {
 def get_description():
     """Return a dict describing how to call this plotter"""
     desc = {"description": __doc__, "data": True}
-    ts = datetime.date.today() - datetime.timedelta(days=365)
+    ts = date.today() - timedelta(days=365)
     desc["arguments"] = [
         dict(
             type="zstation",
@@ -69,7 +69,7 @@ def get_highcharts(ctx: dict) -> dict:
     add_ctx(ctx)
     ranges = []
     now = ctx["sdate"]
-    oneday = datetime.timedelta(days=1)
+    oneday = timedelta(days=1)
     while ctx["climo"] and (now - oneday) <= ctx["edate"]:
         ranges.append(
             [
@@ -144,8 +144,8 @@ def add_ctx(ctx):
     ctx["station"] = ctx["zstation"]
     sdate = ctx["sdate"]
     days = ctx["days"]
-    ctx["edate"] = sdate + datetime.timedelta(days=days)
-    today = datetime.date.today()
+    ctx["edate"] = sdate + timedelta(days=days)
+    today = date.today()
     if ctx["edate"] > today:
         ctx["edate"] = today
         ctx["days"] = (ctx["edate"] - sdate).days
@@ -174,7 +174,7 @@ def add_ctx(ctx):
             params=(
                 ctx["station"],
                 sdate,
-                sdate + datetime.timedelta(days=days),
+                sdate + timedelta(days=days),
             ),
             index_col="valid",
         )
@@ -200,7 +200,7 @@ def plotter(fdict):
     cdates = []
     chighs = []
     clows = []
-    oneday = datetime.timedelta(days=1)
+    oneday = timedelta(days=1)
     while ctx["climo"] is not None and (now - oneday) <= ctx["edate"]:
         cdates.append(now)
         chighs.append(ctx["climo"][now.strftime("%m%d")]["high"])

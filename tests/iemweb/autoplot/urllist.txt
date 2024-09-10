@@ -6,6 +6,7 @@
 /plotting/auto/plot/17/network:IA_ASOS::station:AMW::month:7::year:2024::p:precip::_r:t::dpi:100.png
 /plotting/auto/plot/17/network:IA_ASOS::station:BNW::month:7::year:2024::p:temps::_r:t::dpi:100.png
 /plotting/auto/plot/18/network:IA_ASOS::zstation:DSM::sdate:2023-09-01::days:365::var:alti::_r:43::dpi:100.png
+/plotting/auto/plot/18/network:IA_ASOS::zstation:AMW::sdate:2020-01-11::days:365::var:tmpf::_r:t::dpi:100.png
 /plotting/auto/plot/24/which:cd::csector:IA::var:precip::w:rank::p:month::year:2024::month:1::sdate:2024-07-23::edate:2024-08-20::cmap:BrBG_r::_r:t::dpi:100.png
 /plotting/auto/plot/24/which:st::csector:midwest::var:precip::w:rank::p:month::year:2024::month:1::sdate:2024-07-23::edate:2024-08-20::cmap:BrBG_r::_r:t::dpi:100.png
 /plotting/auto/plot/24/which:st::csector:midwest::var:sdd86::w:rank::p:day::year:2024::month:1::sdate:2023-02-01::edate:2023-02-08::cmap:BrBG_r::_r:43::dpi:100.png
@@ -71,6 +72,7 @@
 /plotting/auto/plot/107/network:IACLIMATE::station:IATAME::sday:0814::eday:0828::varname:avg_era5land_soilt4_avg::thres:-99::base:50::ceil:86::year:2022::_r:43::dpi:100.png
 /plotting/auto/plot/109/by:state::sdate:2024-01-01%200000::edate:2024-07-17%202359::var:days::w:set::phenomenav1:TO::significancev1:W::e:all::cmap:jet::_r:t::dpi:100.png
 /plotting/auto/plot/109/by:state::sdate:2024-01-01%200000::edate:2024-08-20%202359::var:count_departure::w:set::phenomenav1:SV::significancev1:W::phenomenav2:TO::significancev2:W::e:all::cmap:jet::_r:t::dpi:100.png
+/plotting/auto/plot/109/by:wfo::sdate:2024-01-01%200000::edate:2024-09-10%202359::var:count::w:set::phenomenav1:TO::significancev1:W::e:pds::cmap:jet::_r:t::dpi:100.png
 /plotting/auto/plot/111/_cb:1.txt
 /plotting/auto/plot/112/_cb:1.txt
 /plotting/auto/plot/113/network:IACLIMATE::station:IATAME::var:maxmin::year1:2023::sday:0101::eday:1231::_r:43::dpi:100.png
@@ -167,6 +169,7 @@
 /plotting/auto/plot/219/station:KDSM::valid:2024-08-21%200413::_r:t::dpi:100.png
 /plotting/auto/plot/220/which:1C::cat:categorical::t:state::network:WFO::wfo:STO::csector:midwest::valid:2024-08-07%201706::_r:t::dpi:100.png
 /plotting/auto/plot/220/which:5C::cat:categorical::t:state::network:WFO::wfo:STO::csector:midwest::valid:2024-08-07%201706::_r:t::dpi:100.png
+/plotting/auto/plot/220/which:7C::cat:categorical::t:fema::network:WFO::wfo:DMX::fema:4::csector:southeast::valid:2001-09-10%201943::_r:t::dpi:100.png
 /plotting/auto/plot/230/outlook_type:E::day:4::w:ugc::network:WFO::wfo:ABR::mystate:IA::ugc:NCC001::month:all::_r:t::dpi:100.png
 /plotting/auto/plot/230/outlook_type:C::day:1::w:all::network:WFO::wfo:DMX::mystate:IA::ugc:IAZ048::month:all::_r:t::dpi:100.png
 /plotting/auto/plot/230/outlook_type:C::day:1::w:wfo::network:WFO::wfo:DMX::mystate:IA::ugc:IAZ048::month:all::_r:t::dpi:100::_cb:1.png
