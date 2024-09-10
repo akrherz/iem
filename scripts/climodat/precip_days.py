@@ -4,18 +4,20 @@ Generate a map of Number of days with precip
 Called from climodat/run.sh
 """
 
-import datetime
-import sys
+from datetime import datetime
 
+import click
 from pyiem.database import get_dbconnc
 from pyiem.network import Table as NetworkTable
 from pyiem.plot import MapPlot
 
 
-def runYear(year):
+@click.command()
+@click.option("--year", type=int, required=True)
+def main(year: int):
     """Do as I say"""
     # Grab the data
-    now = datetime.datetime.now()
+    now = datetime.now()
     nt = NetworkTable("IACLIMATE")
     nt.sts["IA0200"]["lon"] = -93.4
     nt.sts["IA5992"]["lat"] = 41.65
@@ -67,4 +69,4 @@ def runYear(year):
 
 
 if __name__ == "__main__":
-    runYear(sys.argv[1])
+    main()

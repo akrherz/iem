@@ -5,14 +5,14 @@
 cd dl
 python download_gfs.py --valid=$(date -u --date '6 hours ago' +'%Y-%m-%dT%H'):00:00 &
 
-python download_imerg.py $(date -u --date '7 hours ago' +'%Y %m %d %H 00')
-python download_imerg.py $(date -u --date '7 hours ago' +'%Y %m %d %H 30') ac
-python download_imerg.py $(date -u --date '27 hours ago' +'%Y %m %d %H 00')
-python download_imerg.py $(date -u --date '27 hours ago' +'%Y %m %d %H 30')
-python download_imerg.py $(date -u --date '35 hours ago' +'%Y %m %d %H 00')
-python download_imerg.py $(date -u --date '35 hours ago' +'%Y %m %d %H 30')
-python download_imerg.py $(date -u --date '6 months ago' +'%Y %m %d %H 00')
-python download_imerg.py $(date -u --date '6 months ago' +'%Y %m %d %H 30')
+python download_imerg.py --valid=$(date -u --date '7 hours ago' +'%Y-%m-%dT%H:00:00')
+python download_imerg.py --valid=$(date -u --date '7 hours ago' +'%Y-%m-%dT%H:30:00') --realtime
+python download_imerg.py --valid=$(date -u --date '27 hours ago' +'%Y-%m-%dT%H:00:00')
+python download_imerg.py --valid=$(date -u --date '27 hours ago' +'%Y-%m-%dT%H:30:00')
+python download_imerg.py --valid=$(date -u --date '35 hours ago' +'%Y-%m-%dT%H:00:00')
+python download_imerg.py --valid=$(date -u --date '35 hours ago' +'%Y-%m-%dT%H:30:00')
+python download_imerg.py --valid=$(date -u --date '6 months ago' +'%Y-%m-%dT%H:00:00')
+python download_imerg.py --valid=$(date -u --date '6 months ago' +'%Y-%m-%dT%H:30:00')
 
 cd ../ingestors/madis
 python extract_hfmetar.py 0 &

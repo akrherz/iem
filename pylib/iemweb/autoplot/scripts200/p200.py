@@ -20,7 +20,7 @@ just the 13z issuance, for example.</p>
 chart of days per year by WFO, state.</p>
 """
 
-import datetime
+from datetime import datetime, timedelta
 
 import geopandas as gpd
 import numpy as np
@@ -256,7 +256,7 @@ def plotter(fdict):
     elif month == "summer":
         months = [6, 7, 8]
     else:
-        ts = datetime.datetime.strptime(f"2000-{month}-01", "%Y-%b-%d")
+        ts = datetime.strptime(f"2000-{month}-01", "%Y-%b-%d")
         # make sure it is length two for the trick below in SQL
         months = [ts.month, 999]
 
@@ -274,7 +274,7 @@ def plotter(fdict):
         "t": level.split(".", 1)[1],
         "cat": level.split(".")[0],
         "months": months,
-        "edate": ctx.get("edate", utc() + datetime.timedelta(days=2)),
+        "edate": ctx.get("edate", utc() + timedelta(days=2)),
     }
 
     hour = p.split(".")[2]

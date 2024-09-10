@@ -19,9 +19,11 @@ missing data for the year to be considered in the plot.</p>
 import datetime
 
 import pandas as pd
+from pyiem.database import get_sqlalchemy_conn
 from pyiem.exceptions import NoDataFound
 from pyiem.plot import figure_axes
-from pyiem.util import get_autoplot_context, get_sqlalchemy_conn
+from pyiem.util import get_autoplot_context
+from sqlalchemy import text
 
 from iemweb.autoplot import ARG_STATION
 
@@ -118,30 +120,30 @@ def plotter(fdict):
     assert ctx["var"] in PDICT
     with get_sqlalchemy_conn("coop") as conn:
         climo = pd.read_sql(
-            """
+            text("""
             SELECT to_char(valid, 'mmdd') as sday, precip as cprecip,
             snow as csnow
-            from ncei_climate91 where station = %s ORDER by sday
-            """,
+            from ncei_climate91 where station = :stid ORDER by sday
+            """),
             conn,
-            params=(ctx["_nt"].sts[station]["ncei91"],),
+            params={"stid": ctx["_nt"].sts[station]["ncei91"]},
             index_col="sday",
         )
         df = pd.read_sql(
-            f"""
+            text(f"""
             with obs as (
                 SELECT day, {ctx["var"]}, sday,
-                case when sday >= %s then year else year - 1 end as binyear
-                from alldata WHERE station = %s
+                case when sday >= :sday then year else year - 1 end as binyear
+                from alldata WHERE station = :stid
             )
             SELECT day, binyear::int, {ctx["var"]}, sday,
             row_number() OVER (PARTITION by binyear ORDER by day ASC) as row,
             sum({ctx["var"]}) OVER (PARTITION by binyear ORDER by day ASC)
                 as accum
             from obs ORDER by day ASC
-        """,
+        """),
             conn,
-            params=(sdate.strftime("%m%d"), station),
+            params={"sday": sdate.strftime("%m%d"), "stid": station},
             index_col="day",
         )
     if df.empty:
@@ -176,6 +178,8 @@ def plotter(fdict):
     (fig, ax) = figure_axes(title=title, subtitle=subtitle, apctx=ctx)
     # Average
     jday = df[["row", "accum"]].groupby("row").mean()
+    if jday.empty or len(jday.index) < 3:
+        raise NoDataFound("No data found for variable.")
     jday["accum"].values[-1] = jday["accum"].values[-2]
     if climo.empty:
         ax.plot(

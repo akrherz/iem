@@ -16,15 +16,15 @@ Drop L in the above.
 RUN from RUN_20AFTER.sh for 5 hours ago.
 """
 
-import datetime
 import json
 import os
 import subprocess
-import sys
 import tempfile
+from datetime import datetime, timedelta, timezone
 
+import click
+import httpx
 import numpy as np
-import requests
 from PIL import Image
 from pyiem import mrms
 from pyiem.reference import ISO8601
@@ -36,18 +36,21 @@ LOG = logger()
 def compute_source(valid):
     """Which source to use."""
     utcnow = utc()
-    if (utcnow - valid) < datetime.timedelta(hours=24):
+    if (utcnow - valid) < timedelta(hours=24):
         return "E"
-    if (utcnow - valid) < datetime.timedelta(days=120):
+    if (utcnow - valid) < timedelta(days=120):
         return "L"
     return ""
 
 
-def main(argv):
+@click.command()
+@click.option("--valid", type=click.DateTime(), help="UTC Valid Time")
+@click.option("--realtime", is_flag=True, default=False)
+def main(valid: datetime, realtime: bool):
     """Go Main Go."""
-    valid = utc(*[int(a) for a in argv[1:6]])
+    valid = valid.replace(tzinfo=timezone.utc)
     source = compute_source(valid)
-    routes = "ac" if len(argv) > 6 else "a"
+    routes = "ac" if realtime else "a"
     LOG.info("Using source: `%s` for valid: %s[%s]", source, valid, routes)
     url = valid.strftime(
         "https://gpm1.gesdisc.eosdis.nasa.gov/thredds/ncss/aggregation/"
@@ -55,7 +58,7 @@ def main(argv):
         ".06_Aggregation_%Y%03j.ncml.ncml?"
         "var=precipitationCal&time=%Y-%m-%dT%H%%3A%M%%3A00Z&accept=netcdf4"
     )
-    req = exponential_backoff(requests.get, url, timeout=120)
+    req = exponential_backoff(httpx.get, url, timeout=120)
     if req is None:
         LOG.warning("Unable to get %s", url)
         return
@@ -97,12 +100,8 @@ def main(argv):
     png.save(f"{tmp.name}.png")
 
     metadata = {
-        "start_valid": (valid - datetime.timedelta(minutes=15)).strftime(
-            ISO8601
-        ),
-        "end_valid": (valid + datetime.timedelta(minutes=15)).strftime(
-            ISO8601
-        ),
+        "start_valid": (valid - timedelta(minutes=15)).strftime(ISO8601),
+        "end_valid": (valid + timedelta(minutes=15)).strftime(ISO8601),
         "units": "mm",
         "source": "F" if source == "" else source,  # E, L, F
         "generation_time": utc().strftime(ISO8601),
@@ -146,4 +145,4 @@ def main(argv):
 
 
 if __name__ == "__main__":
-    main(sys.argv)
+    main()

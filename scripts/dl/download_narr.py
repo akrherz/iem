@@ -73,8 +73,8 @@ def fetch_rda(year, month):
         [
             "python",
             "/opt/iem/scripts/climodat/narr_solarrad.py",
-            f"{year}",
-            f"{month}",
+            f"--year={year}",
+            f"--month={month}",
         ]
     )
     subprocess.call(
