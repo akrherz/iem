@@ -502,10 +502,6 @@ def plotter(fdict):
             "Climatology is based on data from "
             f"19{ctx['ct'][-2:]}-{date.today().year - 1}"
         )
-        if ctx["ct"] == "ncei_climate91":
-            subtitle = (
-                "Climatology of NCEI 1991-2020 is used to compute departures"
-            )
     if ctx["d"] == "sector":
         state = sector
         sector = "state" if len(sector) == 2 else sector
