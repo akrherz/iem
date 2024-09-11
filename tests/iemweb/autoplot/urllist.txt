@@ -7,6 +7,9 @@
 /plotting/auto/plot/17/network:IA_ASOS::station:BNW::month:7::year:2024::p:temps::_r:t::dpi:100.png
 /plotting/auto/plot/18/network:IA_ASOS::zstation:DSM::sdate:2023-09-01::days:365::var:alti::_r:43::dpi:100.png
 /plotting/auto/plot/18/network:IA_ASOS::zstation:AMW::sdate:2020-01-11::days:365::var:tmpf::_r:t::dpi:100.png
+/plotting/auto/plot/18/network:IA_ASOS::zstation:AMW::sdate:2020-01-11::days:365::var:tmpf::_r:t::dpi:100.js
+/plotting/auto/plot/18/network:IA_ASOS::zstation:AMW::sdate:2043-09-11::days:365::var:tmpf::_r:t::dpi:100.png
+/plotting/auto/plot/18/network:IA_ASOS::zstation:AMW::sdate:2020-09-11::days:30::var:tmpf::_r:t::dpi:100.png
 /plotting/auto/plot/24/which:cd::csector:IA::var:precip::w:rank::p:month::year:2024::month:1::sdate:2024-07-23::edate:2024-08-20::cmap:BrBG_r::_r:t::dpi:100.png
 /plotting/auto/plot/24/which:st::csector:midwest::var:precip::w:rank::p:month::year:2024::month:1::sdate:2024-07-23::edate:2024-08-20::cmap:BrBG_r::_r:t::dpi:100.png
 /plotting/auto/plot/24/which:st::csector:midwest::var:sdd86::w:rank::p:day::year:2024::month:1::sdate:2023-02-01::edate:2023-02-08::cmap:BrBG_r::_r:43::dpi:100.png
@@ -35,6 +38,10 @@
 /plotting/auto/plot/59/network:IA_ASOS::station:CSQ::units:mph::_r:t::dpi:100.png
 /plotting/auto/plot/60/network:IA_ASOS::zstation:DSM::var:tmpf::w:freq::threshold:120::direction:above::cmap:jet::_r:t::dpi:100.png
 /plotting/auto/plot/61/var:high::sdate:2024-08-01::sector:conus::network:WFO::wfo:STO::state:IA::_r:t::dpi:100.png
+/plotting/auto/plot/70/opt:wfo::network:WFO::station:DMX::state:IA::phenomena:TO::significance:W::split:jan1::f:daily::cmap:jet::_r:t::dpi:100.png
+/plotting/auto/plot/70/opt:state::network:WFO::station:DMX::state:IA::phenomena:TO::significance:W::split:jul1::f:none::cmap:jet::_r:t::dpi:100.png
+/plotting/auto/plot/70/opt:state::network:WFO::station:DMX::state:IA::phenomena:TO::significance:W::split:jan1::f:accum::cmap:jet::_r:t::dpi:100.png
+/plotting/auto/plot/70/opt:state::network:WFO::station:DMX::state:IA::phenomena:TO::significance:W::split:jan1::f:daily::cmap:jet::_r:t::dpi:100.png
 /plotting/auto/plot/72/network:WFO::station:DMX::phenomena:TO::significance:W::season:jul.png
 /plotting/auto/plot/72/network:WFO::station:DMX::phenomena:TO::significance:W::season:all.png
 /plotting/auto/plot/73/opt:wfo::network:WFO::station:DMX::state:IA::ugc:IAC169::limit:yes::sday:0101::eday:1231::phenomena:TO::significance:W::_r:t::dpi:100.png
@@ -170,9 +177,12 @@
 /plotting/auto/plot/220/which:1C::cat:categorical::t:state::network:WFO::wfo:STO::csector:midwest::valid:2024-08-07%201706::_r:t::dpi:100.png
 /plotting/auto/plot/220/which:5C::cat:categorical::t:state::network:WFO::wfo:STO::csector:midwest::valid:2024-08-07%201706::_r:t::dpi:100.png
 /plotting/auto/plot/220/which:7C::cat:categorical::t:fema::network:WFO::wfo:DMX::fema:4::csector:southeast::valid:2001-09-10%201943::_r:t::dpi:100.png
+/plotting/auto/plot/220/which:2C::cat:categorical::t:fema::network:WFO::wfo:DMX::fema:4::csector:southeast::valid:2024-08-08%200352::_r:t::dpi:100.png
+/plotting/auto/plot/220/which:2C::cat:hail::t:cwa::network:WFO::wfo:GSP::fema:4::csector:southeast::valid:2024-08-08%200352::_r:t::dpi:100.png
 /plotting/auto/plot/230/outlook_type:E::day:4::w:ugc::network:WFO::wfo:ABR::mystate:IA::ugc:NCC001::month:all::_r:t::dpi:100.png
 /plotting/auto/plot/230/outlook_type:C::day:1::w:all::network:WFO::wfo:DMX::mystate:IA::ugc:IAZ048::month:all::_r:t::dpi:100.png
 /plotting/auto/plot/230/outlook_type:C::day:1::w:wfo::network:WFO::wfo:DMX::mystate:IA::ugc:IAZ048::month:all::_r:t::dpi:100::_cb:1.png
+/plotting/auto/plot/230/outlook_type:C::day:1::w:fema::network:WFO::wfo:DMX::mystate:IA::fema:7::ugc:IAZ048::month:all::_r:43::dpi:100.png
 /plotting/auto/plot/232/mode:WC::network:IA_ASOS::station:AMW::valid:2020-01-17%201200::hours:72::_r:t::dpi:100.png
 /plotting/auto/plot/236/ident:ZMP::sdate:2024-07-31::edate:2024-08-01::_r:43::dpi:100.png
 /plotting/auto/plot/241/sts:2000-08-06%200900::ets:2000-08-06%200900::w:min::csector:IA::mode:user::cmap:gnuplot2::_r:t::dpi:100.png
