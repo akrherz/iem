@@ -2,27 +2,18 @@
  Generate a first guess file for Harry Hillaker to use for the monthly COOP
  QC, will hopefully save him some time...
 
-sites = []
-for line in open('/tmp/SCIA1107.txt'):
-    tokens = line.split(",")
-    if tokens[0] in ["", "2011", "YR"]:
-        continue
-    site = "IA%04i" % (int(tokens[0]),)
-    if not site in sites:
-        sites.append( site )
-
-sys.exit()
+Called from RUN_2AM.sh on Monday
 """
 
-import datetime
 import os
 import smtplib
-import sys
+from datetime import datetime, timedelta
 from email import encoders
 from email.mime.base import MIMEBase
 from email.mime.multipart import MIMEMultipart
 
-from pyiem.util import get_dbconn, logger
+from pyiem.database import get_dbconn
+from pyiem.util import logger
 from xlwt import Workbook
 
 LOG = logger()
@@ -210,8 +201,8 @@ def get_site(year, month, iemre, nwsli):
     """
     # Create data dictionary to store our wares
     data = [0]
-    sts = datetime.datetime(year, month, 1)
-    ets = sts + datetime.timedelta(days=35)
+    sts = datetime(year, month, 1)
+    ets = sts + timedelta(days=35)
     ets = ets.replace(day=1)
     now = sts
     while now < ets:
@@ -236,7 +227,7 @@ def get_site(year, month, iemre, nwsli):
                 },
             }
         )
-        now += datetime.timedelta(days=1)
+        now += timedelta(days=1)
 
     table = f"raw{year}"
     hcursor.execute(
@@ -255,7 +246,7 @@ def get_site(year, month, iemre, nwsli):
         valid = row[0]
         # Move midnight data back one minute
         if valid.hour == 0 and valid.minute == 0:
-            valid = valid - datetime.timedelta(minutes=1)
+            valid = valid - timedelta(minutes=1)
         idx = int(valid.day)
         key = row[1]
         if key in ["TAIRGZ"]:
@@ -337,8 +328,8 @@ def print_data(year, month, iemre, nwsli, sheet, data):
     row.write(21, "H")
     row.write(22, "W")
 
-    sts = datetime.datetime(year, month, 1)
-    ets = sts + datetime.timedelta(days=35)
+    sts = datetime(year, month, 1)
+    ets = sts + timedelta(days=35)
     ets = ets.replace(day=1)
     while sts < ets:
         idx = int(sts.day)
@@ -359,7 +350,7 @@ def print_data(year, month, iemre, nwsli, sheet, data):
         row.write(15, data[idx]["iemre"]["sog"])
         row.write(16, data[idx]["coop"]["sog"])
         row.write(17, data[idx]["coop"]["v"])
-        sts += datetime.timedelta(days=1)
+        sts += timedelta(days=1)
 
 
 def runner(year, month):
@@ -395,30 +386,27 @@ def runner(year, month):
 
 def main():
     """Go Main Go"""
-    if len(sys.argv) == 1:
-        lastmonth = datetime.datetime.now() - datetime.timedelta(days=15)
-        fn = runner(lastmonth.year, lastmonth.month)
-        # Email this out!
-        msg = MIMEMultipart()
-        msg["Subject"] = f"IEM COOP Report for {lastmonth:%b %Y}"
-        msg["From"] = "akrherz@iastate.edu"
-        msg["To"] = "justin.glisan@iowaagriculture.gov"
-        msg.preamble = "COOP Report"
+    lastmonth = datetime.now() - timedelta(days=15)
+    fn = runner(lastmonth.year, lastmonth.month)
+    # Email this out!
+    msg = MIMEMultipart()
+    msg["Subject"] = f"IEM COOP Report for {lastmonth:%b %Y}"
+    msg["From"] = "akrherz@iastate.edu"
+    msg["To"] = "justin.glisan@iowaagriculture.gov"
+    msg.preamble = "COOP Report"
 
-        b = MIMEBase("Application", "VND.MS-EXCEL")
-        with open(fn, "rb") as fp:
-            b.set_payload(fp.read())
-        encoders.encode_base64(b)
-        b.add_header("Content-Disposition", f'attachment; filename="{fn}"')
-        msg.attach(b)
+    b = MIMEBase("Application", "VND.MS-EXCEL")
+    with open(fn, "rb") as fp:
+        b.set_payload(fp.read())
+    encoders.encode_base64(b)
+    b.add_header("Content-Disposition", f'attachment; filename="{fn}"')
+    msg.attach(b)
 
-        # Send the email via our own SMTP server.
-        s = smtplib.SMTP("localhost")
-        s.sendmail(msg["From"], msg["To"], msg.as_string())
-        s.quit()
-        os.unlink(fn)
-    else:
-        runner(int(sys.argv[1]), int(sys.argv[2]))
+    # Send the email via our own SMTP server.
+    s = smtplib.SMTP("localhost")
+    s.sendmail(msg["From"], msg["To"], msg.as_string())
+    s.quit()
+    os.unlink(fn)
 
 
 if __name__ == "__main__":

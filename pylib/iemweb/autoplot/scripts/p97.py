@@ -10,7 +10,7 @@ that the IEM currently does not estimate snowfall, like it does for high, low,
 and precipitation.
 """
 
-import datetime
+from datetime import date, datetime, timedelta
 
 import geopandas as gpd
 import numpy as np
@@ -109,7 +109,7 @@ GDD_KNOWN_BASES = [32, 41, 46, 48, 50, 51, 52]
 def get_description():
     """Return a dict describing how to call this plotter"""
     desc = {"description": __doc__, "data": True}
-    today = datetime.datetime.today() - datetime.timedelta(days=1)
+    today = datetime.today() - timedelta(days=1)
     desc["arguments"] = [
         dict(
             type="select",
@@ -165,7 +165,7 @@ def get_description():
         dict(
             type="date",
             name="date1",
-            default=(today - datetime.timedelta(days=30)).strftime("%Y/%m/%d"),
+            default=(today - timedelta(days=30)).strftime("%Y/%m/%d"),
             label="Start Date:",
             min="1893/01/01",
         ),
@@ -260,7 +260,7 @@ def replace_gdd_climo(ctx, df, table, date1, date2):
     daylimit = f"sday >= '{d1}' and sday <= '{d2}'"
     if d1 > d2:
         daylimit = f"sday >= '{d2}' or sday <= '{d1}'"
-    if (date2 - date1) > datetime.timedelta(days=365):
+    if (date2 - date1) > timedelta(days=365):
         daylimit = ""
     with get_sqlalchemy_conn("coop") as conn:
         climo = pd.read_sql(
@@ -306,7 +306,7 @@ def get_data(ctx):
     """Compute the data needed for this app."""
     cull = cull_to_list(ctx["cull"])
     date1 = ctx["date1"]
-    date2 = min([ctx["date2"], datetime.date.today()])
+    date2 = min([ctx["date2"], date.today()])
     sector = ctx["sector"]
     table = f"alldata_{sector}" if len(sector) == 2 else "alldata"
     tables = [table]
@@ -475,7 +475,7 @@ def plotter(fdict):
     df = get_data(ctx)
     sector = ctx["sector"]
     date1 = ctx["date1"]
-    date2 = min([ctx["date2"], datetime.date.today()])
+    date2 = min([ctx["date2"], date.today()])
     varname = ctx["var"]
 
     datefmt = "%-d %b %Y" if varname != "cgdd_sum" else "%-d %b"
@@ -489,7 +489,7 @@ def plotter(fdict):
     elif varname.find("depart") > -1:
         subtitle = (
             f"{date1.year} is compared with 19{ctx['ct'][-2:]}-"
-            f"{datetime.date.today().year - 1} Climatology to "
+            f"{date.today().year - 1} Climatology to "
             "compute departures"
         )
         if ctx["ct"] == "ncei_climate91":
@@ -500,7 +500,7 @@ def plotter(fdict):
     elif varname.startswith("c"):
         subtitle = (
             "Climatology is based on data from "
-            f"19{ctx['ct'][-2:]}-{datetime.date.today().year - 1}"
+            f"19{ctx['ct'][-2:]}-{date.today().year - 1}"
         )
         if ctx["ct"] == "ncei_climate91":
             subtitle = (

@@ -4,7 +4,7 @@ Gridcell sample the ERA5Land NetCDF files to save srad to climodat database.
 Run from RUN_0Z.sh for seven UTC days ago.
 """
 
-import datetime
+from datetime import timedelta
 
 import click
 import geopandas as gpd
@@ -71,7 +71,7 @@ def compute(df, sids, dt, do_regions=False):
     """Do the magic."""
     # Life choice is to run 6z to 6z
     sts = utc(dt.year, dt.month, dt.day, 6)
-    ets = sts + datetime.timedelta(hours=24)
+    ets = sts + timedelta(hours=24)
 
     ncfn = f"/mesonet/data/era5/{sts.year}_era5land_hourly.nc"
     idx0 = hourly_offset(sts)
@@ -136,7 +136,7 @@ def do(dt):
     # We currently do two options
     # 1. For morning sites 1-11 AM, they get yesterday's values
     sids = df[(df["temp_hour"] > 0) & (df["temp_hour"] < 12)].index.values
-    compute(df, sids, dt - datetime.timedelta(days=1), True)
+    compute(df, sids, dt - timedelta(days=1), True)
     # 2. All other sites get today
     sids = df[df["era5land_srad"].isna()].index.values
     compute(df, sids, dt)

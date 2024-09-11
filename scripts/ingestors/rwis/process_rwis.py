@@ -387,6 +387,8 @@ def main():
     """Go Main Go"""
     atmos = fetch(ATMOS_URI)
     surface = fetch(SURFACE_URI)
+    # Ensure SENSOR_ID is valid
+    surface = surface[surface["SENSOR_ID"].notna()]
     if atmos.empty or surface.empty:
         LOG.info(
             "FAIL, empty dataframe atmos sz:%s, surface sz:%s",

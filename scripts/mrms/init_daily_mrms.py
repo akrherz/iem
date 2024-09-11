@@ -1,7 +1,7 @@
 """Generate the storage netcdf file for 0.01deg MRMS data."""
 
-import datetime
 import os
+from datetime import datetime
 
 import click
 import numpy as np
@@ -11,12 +11,13 @@ from pyiem.util import logger, ncopen
 LOG = logger()
 
 
-def init_year(ts, for_dep=False):
+def init_year(ts, for_dep=False, ci=False):
     """Create the netcdf file for a given year.
 
     Args:
         ts (datetime): timestamp to use for year
         for_dep (bool): are we doing this for the Daily Erosion Project?
+        ci (bool): are we doing this for the CI scenario?
     """
 
     fn = iemre.get_daily_mrms_ncname(ts.year)
@@ -37,13 +38,15 @@ def init_year(ts, for_dep=False):
     nc.realization = 1
     nc.Conventions = "CF-1.0"
     nc.contact = "Daryl Herzmann, akrherz@iastate.edu, 515-294-5978"
-    nc.history = f"{datetime.datetime.now():%d %B %Y} Generated"
+    nc.history = f"{datetime.now():%d %B %Y} Generated"
     nc.comment = "No Comment at this time"
 
     # Setup Dimensions
-    nc.createDimension("lat", (dom["north"] - dom["south"]) * 100.0)
-    nc.createDimension("lon", (dom["east"] - dom["west"]) * 100.0)
-    days = ((ts.replace(year=ts.year + 1)) - ts).days
+    ny = int((dom["north"] - dom["south"]) * 100.0)
+    nx = int((dom["east"] - dom["west"]) * 100.0)
+    nc.createDimension("lat", ny)
+    nc.createDimension("lon", nx)
+    days = 2 if ci else ((ts.replace(year=ts.year + 1)) - ts).days
     day_axis = np.arange(0, int(days))
     if for_dep:
         # April 11 through June 15
@@ -98,15 +101,26 @@ def init_year(ts, for_dep=False):
     p01d.coordinates = "lon lat"
     p01d.description = "Precipitation accumulation for the day"
 
+    # Add some faked data
+    if ci:
+        p01d[0] = np.meshgrid(np.linspace(0, 25, nx), np.linspace(0, 25, ny))[
+            0
+        ]
+        p01d[1] = np.meshgrid(
+            np.linspace(0, 100, nx), np.linspace(0, 100, ny)
+        )[0]
+
     nc.close()
 
 
 @click.command()
 @click.option("--year", type=int, help="Year to initialize")
-def main(year):
+@click.option("--ci", is_flag=True, help="CI Scenario, faked data, 2 step")
+def main(year, ci: bool):
     """Go Main Go."""
-    init_year(datetime.datetime(year, 1, 1), False)
-    init_year(datetime.datetime(year, 1, 1), True)
+    init_year(datetime(year, 1, 1), False, ci)
+    if not ci:
+        init_year(datetime(year, 1, 1), True, ci)
 
 
 if __name__ == "__main__":
