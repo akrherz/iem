@@ -1,6 +1,6 @@
 """.. title:: IEM Climodat Data Export
 
-Return to `API Services </api/>`_.  This service is the backend for the
+Return to `API Services </api/#cgi>`_.  This service is the backend for the
 `Climodat Download </request/coop/fe.phtml>`_ frontend.
 
 Documentation for /cgi-bin/request/coop.py
@@ -28,6 +28,7 @@ from pydantic import Field
 from pyiem.database import get_dbconnc, get_sqlalchemy_conn
 from pyiem.exceptions import IncompleteWebRequest
 from pyiem.network import Table as NetworkTable
+from pyiem.reference import state_names
 from pyiem.util import utc
 from pyiem.webutil import CGIModel, ListOrCSVType, iemapp
 from sqlalchemy import text
@@ -185,7 +186,7 @@ def get_tablename(stations):
     """Figure out the table that has the data for these stations"""
     states = []
     for sid in stations:
-        if sid[:2] not in states:
+        if sid[:2] not in states and sid[:2].lower() in state_names:
             states.append(sid[:2])
     if len(states) == 1:
         return f"alldata_{states[0]}"

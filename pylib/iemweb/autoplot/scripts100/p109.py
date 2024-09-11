@@ -62,6 +62,7 @@ PDICT2 = {
     "set": "Use Requested VTEC Events From Form",
 }
 PDICT3 = {
+    "pds": "Only PDS",
     "yes": "Only Emergencies",
     "all": "All Events",
 }
@@ -146,7 +147,7 @@ def get_description():
             type="select",
             name="e",
             default="all",
-            label="Only plot Emergencies?",
+            label="Only plot Emergencies / PDS ?",
             options=PDICT3,
         ),
         dict(type="cmap", name="cmap", default="jet", label="Color Ramp:"),
@@ -160,6 +161,8 @@ def get_count_df(ctx, varname, pstr, sts, ets):
     emerg_extra = ""
     if ctx["e"] == "yes":
         emerg_extra = " and is_emergency "
+    elif ctx["e"] == "pds":
+        emerg_extra = " and is_pds "
     params = {}
     if varname.startswith("count_"):
         if (ets - sts).days > 366:
@@ -381,6 +384,9 @@ def plotter(fdict):
     if ctx["e"] == "yes":
         emerg_extra = " and is_emergency "
         title += " (Emergencies) "
+    elif ctx["e"] == "pds":
+        emerg_extra = " and is_pds "
+        title += " (Particularly Dangerous Situation) "
     subtitle_extra = ""
     if varname.startswith("count"):
         df = get_count_df(ctx, varname, pstr, sts, ets)

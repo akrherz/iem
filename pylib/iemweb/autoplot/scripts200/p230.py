@@ -51,6 +51,7 @@ PDICT2 = {
     "ugc": "Summarize by Selected County/Zone/Parish",
     "state": "Summarize by Selected State",
     "wfo": "Summarize by Selected WFO",
+    "fema": "Summarize by FEMA Region",
 }
 COLORS = {
     "TSTM": "#c0e8c0",
@@ -115,6 +116,12 @@ def get_description():
             default="IA",
             label="Select State (when appropriate):",
         ),
+        {
+            "type": "fema",
+            "name": "fema",
+            "default": "7",
+            "label": "Select FEMA Region (when appropriate):",
+        },
         dict(
             type="ugc",
             name="ugc",
@@ -228,6 +235,12 @@ def plotter(fdict):
             if wfo not in ctx["_nt"].sts:
                 raise NoDataFound("Unknown station metadata.")
             title2 = f"NWS {ctx['_nt'].sts[wfo]['name']} [{wfo}]"
+        elif ctx["w"] == "fema":
+            table = "fema_regions"
+            abbrcol = "region"
+            geomcol = "geom"
+            geoval = ctx["fema"]
+            title2 = f"FEMA Region {geoval}"
         elif ctx["w"] == "ugc":
             table = "ugcs"
             abbrcol = "ugc"
