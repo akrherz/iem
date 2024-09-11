@@ -1,19 +1,22 @@
-"""Dump out obs from the database for use by other apps"""
+"""Dump out obs from the database for use by other apps
 
-import datetime
+called from PREC.sh
+"""
+
 import os
 import subprocess
 import zipfile
+from datetime import datetime
 
 import shapefile
-from pyiem.util import get_dbconnc
+from pyiem.database import get_dbconnc
 
 
 def main():
     """Go main!"""
     pgconn, icursor = get_dbconnc("iem")
 
-    now = datetime.datetime.now()
+    now = datetime.now()
     ts = now.strftime("%Y%m%d")
     yyyy = now.strftime("%Y")
 

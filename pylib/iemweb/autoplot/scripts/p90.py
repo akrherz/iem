@@ -90,7 +90,7 @@ enforcement of these unofficial polygons to stay within CWA bounds.</p>
 away as sometimes it will take 3-5 minutes to generate a map :(
 """
 
-import datetime
+from datetime import date, datetime, timedelta
 from zoneinfo import ZoneInfo
 
 import geopandas as gpd
@@ -143,8 +143,8 @@ PDICT5 = {
 def get_description():
     """Return a dict describing how to call this plotter"""
     desc = {"description": __doc__, "data": True, "cache": 86400}
-    today = datetime.date.today()
-    tom = today + datetime.timedelta(days=3)
+    today = date.today()
+    tom = today + timedelta(days=3)
     desc["arguments"] = [
         dict(
             type="select",
@@ -662,12 +662,12 @@ def do_ugc(ctx):
         rows = []
         data = {}
         ctx["labels"] = {}
-        midnight = datetime.datetime(2000, 1, 1)
+        midnight = datetime(2000, 1, 1)
         for row in cursor:
             rows.append(dict(hour=int(row[1]), ugc=row[0]))
             data[row[0]] = row[1]
             ctx["labels"][row[0]] = (
-                midnight + datetime.timedelta(hours=int(row[1]))
+                midnight + timedelta(hours=int(row[1]))
             ).strftime("%-I %p")
         ctx["title"] = (
             f"Most Freq. Issue Hour: {sdate:%d %b %Y} and {edate:%d %b %Y}"
@@ -687,8 +687,8 @@ def do_ugc(ctx):
                     station if len(station) == 3 else station[1:],
                     phenomena,
                     significance,
-                    datetime.date(year, 1, 1),
-                    datetime.date(year2 + 1, 1, 1),
+                    date(year, 1, 1),
+                    date(year2 + 1, 1, 1),
                 ),
             )
         else:
@@ -704,14 +704,14 @@ def do_ugc(ctx):
                     state,
                     phenomena,
                     significance,
-                    datetime.date(year, 1, 1),
-                    datetime.date(year2 + 1, 1, 1),
+                    date(year, 1, 1),
+                    date(year2 + 1, 1, 1),
                 ),
             )
         rows = []
         data = {}
-        minv = datetime.datetime(2050, 1, 1)
-        maxv = datetime.datetime(1986, 1, 1)
+        minv = datetime(2050, 1, 1)
+        maxv = datetime(1986, 1, 1)
         for row in cursor:
             if row[2] < minv:
                 minv = row[2]
@@ -746,8 +746,8 @@ def do_ugc(ctx):
             "wfo": station if len(station) == 3 else station[1:],
             "phenomena": phenomena,
             "significance": significance,
-            "sts": datetime.date(year, 1, 1),
-            "ets": datetime.date(year2 + 1, 1, 1),
+            "sts": date(year, 1, 1),
+            "ets": date(year2 + 1, 1, 1),
             "sdate": sdate.strftime("%m%d"),
             "edate": edate.strftime("%m%d"),
             "state": state,

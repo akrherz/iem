@@ -4,14 +4,15 @@ Generate a map of Yearly Precipitation.
 Called from climodat/run.sh
 """
 
-import sys
-
+import click
 from pyiem.util import logger, web2ldm
 
 LOG = logger()
 
 
-def runYear(year):
+@click.command()
+@click.option("--year", type=int, required=True, help="Year to process")
+def main(year: int):
     """Do Work."""
     url = (
         "http://iem.local/plotting/auto/plot/97/d:sector::sector:IA::"
@@ -28,4 +29,4 @@ def runYear(year):
 
 
 if __name__ == "__main__":
-    runYear(sys.argv[1])
+    main()

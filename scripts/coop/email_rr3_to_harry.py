@@ -1,11 +1,11 @@
-"""
-Send Harry Hillaker a weekly email summarizing the past seven days worth of
-RR3 products.
+"""Send a week's worth of RR3's to the SC.
+
+called from crontab
 """
 
-import datetime
 import os
 import smtplib
+from datetime import datetime, timedelta
 from email import encoders
 from email.mime.base import MIMEBase
 from email.mime.multipart import MIMEMultipart
@@ -20,8 +20,8 @@ def main():
     pgconn = get_dbconn("afos")
     acursor = pgconn.cursor()
 
-    now = datetime.datetime.now()
-    sts = now + datetime.timedelta(days=-7)
+    now = datetime.now()
+    sts = now + timedelta(days=-7)
     sts = sts.replace(hour=0)
 
     acursor.execute(

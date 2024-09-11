@@ -7,4 +7,4 @@ python ks_monthly.py
 
 python avg_temp.py --year=$YYYY
 python precip_days.py --year=$YYYY
-python yearly_precip.py $YYYY
+python yearly_precip.py --year=$YYYY

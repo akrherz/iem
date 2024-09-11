@@ -16,11 +16,12 @@ SWGDNCLR    surface incoming shortwave flux assuming clear sky
 
 """
 
-import datetime
 import os
 import subprocess
-import sys
+from datetime import datetime, timedelta
+from typing import Optional
 
+import click
 import netCDF4
 from pyiem.util import get_properties, logger
 
@@ -42,10 +43,10 @@ def trans(now):
 def do_month(sts):
     """Run for a given month"""
 
-    ets = sts + datetime.timedelta(days=35)
+    ets = sts + timedelta(days=35)
     ets = ets.replace(day=1)
 
-    interval = datetime.timedelta(days=1)
+    interval = timedelta(days=1)
     now = sts
     while now < ets:
         # We only fetch the northern hemisphere, for better or worse
@@ -91,16 +92,19 @@ def do_month(sts):
         now += interval
 
 
-def main(argv):
+@click.command()
+@click.option("--year", type=int, help="Year to process")
+@click.option("--month", type=int, help="Month to process")
+def main(year: Optional[int], month: Optional[int]):
     """Run for last month month"""
-    now = datetime.datetime.now()
-    if len(argv) == 3:
-        now = datetime.datetime(int(argv[1]), int(argv[2]), 1)
+    now = datetime.now()
+    if year and month:
+        now = datetime(year, month, 1)
     else:
-        now = now - datetime.timedelta(days=35)
+        now = now - timedelta(days=35)
         now = now.replace(day=1)
     do_month(now)
 
 
 if __name__ == "__main__":
-    main(sys.argv)
+    main()

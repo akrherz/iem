@@ -6,11 +6,11 @@
   the database other than to ensure temp_estimated is set to True.
 """
 
-import sys
 import time
 from datetime import date, datetime
-from typing import Tuple
+from typing import Optional, Tuple
 
+import click
 import httpx
 import numpy as np
 import pandas as pd
@@ -264,39 +264,46 @@ def do(meta, station, acis_station) -> int:
     return max(uu)
 
 
-def main(argv):
+@click.command()
+@click.option("--state", help="Two character state identifier")
+@click.option("--station", help="IEM Station Identifier")
+@click.option("--acis_station", help="ACIS Station Identifier")
+def main(
+    state: Optional[str], station: Optional[str], acis_station: Optional[str]
+):
     """Do what is asked."""
-    arg = argv[1]
     # Only run cron job for online sites
-    nt = NetworkTable(f"{arg[:2]}CLIMATE", only_online=False)
+    nt = NetworkTable(
+        f"{state if state is not None else station[:2]}CLIMATE",
+        only_online=False,
+    )
 
     def _worker(sid, acis_station):
         """Do work."""
         do(nt.sts[sid], sid, acis_station)
 
-    if len(argv) == 2:
-        if len(arg) == 2:
-            for sid in nt.sts:
-                if sid[2] == "C" or sid[2:] == "0000":
-                    continue
-                acis_station = ncei_state_codes[arg] + sid[2:]
-                if sid[2] in ["K", "P"]:
-                    acis_station = sid[2:]
-                if sid[2] == "T":
-                    acis_station = f"{sid[3:]}thr"
-                _worker(sid, acis_station)
-        else:
-            station = arg
-            acis_station = ncei_state_codes[station[:2]] + station[2:]
-            if station[2] in ["K", "P"]:
-                acis_station = station[2:]
-            if station[2] == "T":
-                acis_station = f"{station[3:]}thr"
-            _worker(station, acis_station)
+    if state is not None:
+        for sid in nt.sts:
+            if sid[2] == "C" or sid[2:] == "0000":
+                continue
+            astation = ncei_state_codes[state] + sid[2:]
+            if sid[2] in ["K", "P"]:
+                astation = sid[2:]
+            if sid[2] == "T":
+                astation = f"{sid[3:]}thr"
+            LOG.info("Guessing ACIS station as: %s", astation)
+            _worker(sid, astation)
+    elif station is not None and acis_station is None:
+        astation = ncei_state_codes[station[:2]] + station[2:]
+        if station[2] in ["K", "P"]:
+            astation = station[2:]
+        if station[2] == "T":
+            astation = f"{station[3:]}thr"
+        LOG.info("Guessing ACIS station as: %s", astation)
+        _worker(station, astation)
     else:
-        (station, acis_station) = argv[1], argv[2]
         _worker(station, acis_station)
 
 
 if __name__ == "__main__":
-    main(sys.argv)
+    main()

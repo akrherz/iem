@@ -40,6 +40,8 @@ dependencies:
   - numpy
   # racoon
   - odfpy
+  # Complicated dep need for iemwebfarm mod_wsgi usage
+  - openldap
   # excel output
   - openpyxl
   # due to config settings

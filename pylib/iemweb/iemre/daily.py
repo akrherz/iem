@@ -1,4 +1,24 @@
-"""JSON service providing IEMRE data for a given point"""
+""".. title:: IEM Reanalysis Daily Data
+
+Return to `API Services </api/#cgi>`_
+
+This service provides access to the IEM Reanalysis daily data product. Some
+additional information comes along for the ride.
+
+Changelog
+---------
+
+- 2024-09-11: Initial documentation update
+
+Example Requests
+----------------
+
+Provide the daily data for a location in Iowa on 1 Jan 2024
+
+https://mesonet.agron.iastate.edu/iemre/daily.py\
+?date=2024-01-01&lat=41.99&lon=-95.1
+
+"""
 
 import datetime
 import json
@@ -18,7 +38,7 @@ def myrounder(val, precision):
     return round(val, precision)
 
 
-@iemapp()
+@iemapp(help=__doc__)
 def application(environ, start_response):
     """Do Something Fun!"""
     ts = datetime.datetime.strptime(

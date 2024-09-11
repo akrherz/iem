@@ -1,7 +1,10 @@
-"""Extraction as requested by IA Public Health"""
+"""Extraction as requested by IA Public Health.
+
+Run yearly once I get an email asking for it :)
+"""
 
 import click
-from pyiem.util import get_dbconn
+from pyiem.database import get_dbconn
 
 
 @click.command()

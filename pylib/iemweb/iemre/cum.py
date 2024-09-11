@@ -1,4 +1,26 @@
-"""Fun."""
+""".. title:: IEM Reanalysis Grid Service over a period of days
+
+Return to `API Services </api/#cgi>`_
+
+Changelog
+---------
+
+- 2024-09-11: Initial documentation update
+
+Example Requests
+----------------
+
+Provide the daily data between 1-2 Jan 2024
+
+https://mesonet.agron.iastate.edu/iemre/cum.py\
+?date0=2024-01-01&date1=2024-01-02&format=json&county=IA169
+
+Same request, but return a shapefile
+
+https://mesonet.agron.iastate.edu/iemre/cum.py\
+?date0=2024-01-01&date1=2024-01-02&format=shp&county=IA169
+
+"""
 
 import datetime
 import json
@@ -8,12 +30,13 @@ import zipfile
 import numpy as np
 import shapefile
 from pyiem import iemre
+from pyiem.database import get_dbconn
 from pyiem.exceptions import IncompleteWebRequest
-from pyiem.util import convert_value, get_dbconn, ncopen
+from pyiem.util import convert_value, ncopen
 from pyiem.webutil import iemapp
 
 
-@iemapp()
+@iemapp(help=__doc__)
 def application(environ, start_response):
     """Go main go"""
     if "date0" not in environ:
