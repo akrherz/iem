@@ -13,12 +13,12 @@ Example Requests
 Provide the daily data between 1-2 Jan 2024
 
 https://mesonet.agron.iastate.edu/iemre/cum.py\
-?date0=2024-01-01&date1=2024-01-02&format=json
+?date0=2024-01-01&date1=2024-01-02&format=json&county=IA013
 
 Same request, but return a shapefile
 
 https://mesonet.agron.iastate.edu/iemre/cum.py\
-?date0=2024-01-01&date1=2024-01-02&format=shp
+?date0=2024-01-01&date1=2024-01-02&format=shp&county=IA013
 
 """
 
