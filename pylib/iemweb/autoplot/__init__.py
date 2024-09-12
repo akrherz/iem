@@ -19,6 +19,7 @@ Not listed due to having no PNG output
 """
 
 import importlib
+from typing import Tuple
 
 ARG_IEMRE_DOMAIN = {
     "type": "select",
@@ -38,6 +39,30 @@ ARG_STATION = {
     "label": "Select Station (STC000? are climate district, ST0000 state avg)",
     "network": "IACLIMATE",
 }
+ARG_FEMA = {
+    "type": "fema",
+    "name": "fema",
+    "default": "7",
+    "label": "Select FEMA Region:",
+}
+FEMA_REGIONS = {
+    "1": "Region 1 {ME,NH,VT,MA,CT,RI}",
+    "2": "Region 2 {NY,NJ,PR,VI}",
+    "3": "Region 3 {MD,PA,WV,DC,DE,VA}",
+    "4": "Region 4 {NC,SC,GA,FL,AL,MS,TN,KY}",
+    "5": "Region 5 {IL,IN,OH,MI,WI,MN}",
+    "6": "Region 6 {NM,TX,OK,LA,AR}",
+    "7": "Region 7 {NE,IA,KS,MO}",
+    "8": "Region 8 {MT,ND,SD,WY,UT,CO}",
+    "9": "Region 9 {NV,AZ,CA,FSM,GUAM,HI,RMI,CNMI,AS}",
+    "10": "Region 10 {AK,WA,OR,ID}",
+}
+
+
+def fema_region2states(region: str) -> Tuple:
+    """Convert string region code to list of states."""
+    label = FEMA_REGIONS[region]
+    return label.split("{")[1][:-1].split(",")
 
 
 def get_monofont():

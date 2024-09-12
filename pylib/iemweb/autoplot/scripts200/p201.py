@@ -18,7 +18,7 @@ spatially/temporally overlap each other.</p>
 """
 
 import calendar
-import datetime
+from datetime import date, timedelta
 
 import matplotlib.colors as mpcolors
 import numpy as np
@@ -30,6 +30,9 @@ from pyiem.exceptions import NoDataFound
 from pyiem.plot import calendar_plot, figure
 from pyiem.reference import state_names
 from pyiem.util import get_autoplot_context
+from sqlalchemy import text
+
+from iemweb.autoplot import ARG_FEMA
 
 PDICT = {
     "C": "Convective (Categorical)",
@@ -44,6 +47,7 @@ PDICT2 = {
     "ugc": "Summarize by Selected County/Zone/Parish",
     "state": "Summarize by Selected State",
     "wfo": "Summarize by Selected WFO",
+    "fema": "Summarize by FEMA Region",
 }
 PDICT3 = {"yes": "Yes", "no": "No"}
 COLORS = {
@@ -83,7 +87,7 @@ MDICT = {
 def get_description():
     """Return a dict describing how to call this plotter"""
     desc = {"description": __doc__, "data": True}
-    today = datetime.date.today()
+    today = date.today()
     jan1 = today.replace(month=1, day=1)
     desc["arguments"] = [
         dict(
@@ -104,7 +108,7 @@ def get_description():
             type="date",
             name="edate",
             default=today.strftime("%Y/%m/%d"),
-            max=(today + datetime.timedelta(days=8)).strftime("%Y/%m/%d"),
+            max=(today + timedelta(days=8)).strftime("%Y/%m/%d"),
             label="End Date (inclusive):",
             min="1987/01/01",
         ),
@@ -148,6 +152,7 @@ def get_description():
             default="IAZ048",
             label="Select UGC Zone/County (when appropriate):",
         ),
+        ARG_FEMA,
         dict(
             type="select",
             options=PDICT3,
@@ -192,11 +197,12 @@ def plotter(fdict):
     if ctx["w"] == "all":
         with get_sqlalchemy_conn("postgis") as conn:
             df = pd.read_sql(
-                """
+                text("""
             with data as (
                 select outlook_date, threshold from spc_outlooks
-                WHERE category = %s and day = %s and outlook_type = %s and
-                outlook_date >= %s and outlook_date <= %s and
+                WHERE category = :category and day = :day and
+                outlook_type = :ot and
+                outlook_date >= :sts and outlook_date <= :ets and
                 threshold not in ('IDRT', 'SDRT')),
             hatched as (
                 select distinct outlook_date, threshold from data
@@ -212,15 +218,15 @@ def plotter(fdict):
             case when h.threshold = 'SIGN' then true else false end as sign
             from agg a LEFT JOIN hatched h on (a.outlook_date = h.outlook_date)
             where rank = 1 ORDER by a.outlook_date ASC
-            """,
+            """),
                 conn,
-                params=(
-                    category,
-                    day,
-                    outlook_type_code,
-                    sts,
-                    ets + datetime.timedelta(days=2),
-                ),
+                params={
+                    "category": category,
+                    "day": day,
+                    "ot": outlook_type_code,
+                    "sts": sts,
+                    "ets": ets + timedelta(days=2),
+                },
                 index_col="date",
                 parse_dates=[
                     "date",
@@ -252,6 +258,12 @@ def plotter(fdict):
             if cursor.rowcount == 1:
                 name = cursor.fetchone()[0]
             title2 = f"{'County' if ugc[2] == 'C' else 'Zone'} [{ugc}] {name}"
+        elif ctx["w"] == "fema":
+            table = "fema_regions"
+            abbrcol = "region"
+            geomcol = "geom"
+            geoval = ctx["fema"]
+            title2 = f"FEMA Region {ctx['fema']}"
         else:
             table = "states"
             geomcol = "the_geom"
@@ -261,14 +273,15 @@ def plotter(fdict):
 
         with get_sqlalchemy_conn("postgis") as conn:
             df = pd.read_sql(
-                f"""
+                text(f"""
             with data as (
                 select outlook_date, threshold from
                 spc_outlooks o, {table} t
-                WHERE t.{abbrcol} = %s and category = %s
+                WHERE t.{abbrcol} = :geoval and category = :category
                 and ST_Intersects(st_buffer(o.geom, 0), t.{geomcol})
-                and o.day = %s and o.outlook_type = %s and outlook_date >= %s
-                and outlook_date <= %s {sqllimiter}),
+                and o.day = :day and o.outlook_type = :ot and
+                outlook_date >= :sts
+                and outlook_date <= :ets {sqllimiter}),
             hatched as (
                 select distinct outlook_date, threshold from data
                 where threshold = 'SIGN'
@@ -283,27 +296,25 @@ def plotter(fdict):
             case when h.threshold = 'SIGN' then true else false end as sign
             from agg a LEFT JOIN hatched h on (a.outlook_date = h.outlook_date)
             where rank = 1 ORDER by a.outlook_date ASC
-            """,
+            """),
                 conn,
-                params=(
-                    geoval,
-                    category,
-                    day,
-                    outlook_type_code,
-                    sts,
-                    ets + datetime.timedelta(days=2),
-                ),
+                params={
+                    "geoval": geoval,
+                    "category": category,
+                    "day": day,
+                    "ot": outlook_type_code,
+                    "sts": sts,
+                    "ets": ets + timedelta(days=2),
+                },
                 index_col="date",
-                parse_dates=[
-                    "date",
-                ],
+                parse_dates="date",
             )
 
     data = {}
     now = sts
     while now <= ets:
         data[now] = {"val": " "}
-        now += datetime.timedelta(days=1)
+        now += timedelta(days=1)
     aggtxt = []
     if not df.empty:
         df2 = (
@@ -317,10 +328,10 @@ def plotter(fdict):
         for thres, row in df2.iterrows():
             if thres in COLORS:
                 aggtxt.append(f"{thres} {row['days']} Days")
-    for date, row in df.iterrows():
+    for dt, row in df.iterrows():
         if row["threshold"] == "TSTM" and ctx.get("g", "yes") == "no":
             continue
-        data[date.to_pydatetime().date()] = {
+        data[dt.to_pydatetime().date()] = {
             "val": row["threshold"] + ("H" if row["sign"] else ""),
             "cellcolor": COLORS.get(row["threshold"], "#EEEEEE"),
         }
@@ -348,14 +359,14 @@ def plotter(fdict):
         ax = fig.add_axes([0.05, 0.15, 0.9, 0.75])
         data = np.ones((ets.year - sts.year + 1, 366)) * -1
         thresholds = list(COLORS.keys())
-        for date, row in df.iterrows():
-            if date > pd.Timestamp(ets):
+        for dt, row in df.iterrows():
+            if dt > pd.Timestamp(ets):
                 continue
             if row["threshold"] == "TSTM" and ctx.get("g", "yes") == "no":
                 continue
             if row["threshold"] in thresholds:
-                y = date.year - sts.year
-                x = int(date.strftime("%j"))
+                y = dt.year - sts.year
+                x = int(dt.strftime("%j"))
                 data[y, x - 1] = thresholds.index(row["threshold"])
 
         cmap = mpcolors.ListedColormap(list(COLORS.values()))

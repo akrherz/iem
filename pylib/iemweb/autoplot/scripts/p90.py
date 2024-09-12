@@ -102,12 +102,23 @@ from pyiem.exceptions import NoDataFound
 from pyiem.nws import vtec
 from pyiem.plot import get_cmap
 from pyiem.plot.geoplot import MapPlot
-from pyiem.reference import state_bounds, state_names, wfo_bounds
+from pyiem.reference import (
+    fema_region_bounds,
+    state_bounds,
+    state_names,
+    wfo_bounds,
+)
 from pyiem.util import get_autoplot_context, utc
 from rasterstats import zonal_stats
 from sqlalchemy import text
 
-PDICT = {"cwa": "Plot by NWS Forecast Office", "state": "Plot by State"}
+from iemweb.autoplot import ARG_FEMA, fema_region2states
+
+PDICT = {
+    "cwa": "Plot by NWS Forecast Office",
+    "state": "Plot by State",
+    "fema": "Plot by FEMA Region",
+}
 PDICT2 = {
     "yearcount": "Count of Events for Given Year",
     "days": "Days Since Last Issuance",
@@ -215,14 +226,15 @@ def get_description():
             name="station",
             network="WFO",
             default="DMX",
-            label="Select WFO: (ignored if plotting state)",
+            label="Select WFO: (when appropriate)",
         ),
         dict(
             type="state",
             name="state",
             default="IA",
-            label="Select State: (ignored if plotting wfo)",
+            label="Select State: (when appropriate)",
         ),
+        ARG_FEMA,
         dict(
             type="phenomena",
             name="phenomena",
@@ -250,7 +262,7 @@ def get_description():
     return desc
 
 
-def do_polygon(ctx):
+def do_polygon(ctx: dict):
     """polygon workflow"""
     varname = ctx["v"]
     if varname == "events":
@@ -295,6 +307,8 @@ def do_polygon(ctx):
     # We need to figure out how to get the warnings either by state or by wfo
     if t == "cwa":
         (west, south, east, north) = wfo_bounds[station[-3:]]
+    elif t == "fema":
+        (west, south, east, north) = fema_region_bounds[int(ctx["fema"])]
     else:
         (west, south, east, north) = state_bounds[state]
     # buffer by 5 degrees so to hopefully get all polys
@@ -302,6 +316,8 @@ def do_polygon(ctx):
     (east, north) = [x + 2 for x in (east, north)]
     # create grids
     griddelta = 0.01
+    if (east - west) > 10:
+        griddelta = 0.02
     lons = np.arange(west, east, griddelta)
     lats = np.arange(south, north, griddelta)
     YSZ = len(lats)
@@ -365,7 +381,6 @@ def do_polygon(ctx):
         x1 = x0 + dx
         y0 = y1 - dy
         if x0 < 0 or x1 >= XSZ or y0 < 0 or y1 >= YSZ:
-            # print raster.mask.shape, west, x0, x1, XSZ, north, y0, y1, YSZ
             continue
         if varname == "lastyear":
             counts[y0:y1, x0:x1] = np.where(
@@ -458,7 +473,7 @@ def do_polygon(ctx):
     ctx["lons"] = lons
 
 
-def do_ugc(ctx):
+def do_ugc(ctx: dict):
     """Do UGC based logic."""
     pgconn = get_dbconn("postgis")
     cursor = pgconn.cursor()
@@ -473,6 +488,9 @@ def do_ugc(ctx):
     year = ctx["year"]
     year2 = ctx["year2"]
     df = None
+    states = [state]
+    if t == "fema":
+        states = fema_region2states(ctx["fema"])
     if varname in ["lastyear", "days"]:
         if t == "cwa":
             cursor.execute(
@@ -494,11 +512,11 @@ def do_ugc(ctx):
             cursor.execute(
                 """
             select ugc, max(issue at time zone 'UTC') from warnings
-            WHERE substr(ugc, 1, 2) = %s and phenomena = %s
+            WHERE substr(ugc, 1, 2) = ANY(%s) and phenomena = %s
             and significance = %s and issue >= %s and issue < %s
             GROUP by ugc
             """,
-                (state, phenomena, significance, sdate, edate),
+                (states, phenomena, significance, sdate, edate),
             )
         rows = []
         data = {}
@@ -536,10 +554,11 @@ def do_ugc(ctx):
             cursor.execute(
                 """
             select ugc, count(*) from warnings
-            WHERE vtec_year = %s and substr(ugc, 1, 2) = %s and phenomena = %s
+            WHERE vtec_year = %s and substr(ugc, 1, 2) = ANY(%s)
+            and phenomena = %s
             and significance = %s GROUP by ugc
             """,
-                (year, state, phenomena, significance),
+                (year, states, phenomena, significance),
             )
         rows = []
         data = {}
@@ -573,12 +592,12 @@ def do_ugc(ctx):
                 """
             with data as (
                 select distinct ugc, date(issue) from warnings
-                WHERE substr(ugc, 1, 2) = %s and phenomena = %s
+                WHERE substr(ugc, 1, 2) = ANY(%s) and phenomena = %s
                 and significance = %s
                 and issue >= %s and issue < %s)
             SELECT ugc, count(*) from data GROUP by ugc
             """,
-                (state, phenomena, significance, sdate, edate),
+                (states, phenomena, significance, sdate, edate),
             )
         rows = []
         data = {}
@@ -613,11 +632,11 @@ def do_ugc(ctx):
                 """
             select ugc, count(*), min(issue at time zone 'UTC'),
             max(issue at time zone 'UTC') from warnings
-            WHERE substr(ugc, 1, 2) = %s and phenomena = %s
+            WHERE substr(ugc, 1, 2) = ANY(%s) and phenomena = %s
             and significance = %s and issue >= %s and issue < %s
             GROUP by ugc
             """,
-                (state, phenomena, significance, sdate, edate),
+                (states, phenomena, significance, sdate, edate),
             )
         rows = []
         data = {}
@@ -696,12 +715,12 @@ def do_ugc(ctx):
                 """
             select ugc, count(*), min(issue at time zone 'UTC'),
             max(issue at time zone 'UTC') from warnings
-            WHERE substr(ugc, 1, 2) = %s and phenomena = %s
+            WHERE substr(ugc, 1, 2) = ANY(%s) and phenomena = %s
             and significance = %s and issue >= %s and issue < %s
             GROUP by ugc
             """,
                 (
-                    state,
+                    states,
                     phenomena,
                     significance,
                     date(year, 1, 1),
@@ -750,7 +769,7 @@ def do_ugc(ctx):
             "ets": date(year2 + 1, 1, 1),
             "sdate": sdate.strftime("%m%d"),
             "edate": edate.strftime("%m%d"),
-            "state": state,
+            "states": states,
         }
         if t == "cwa":
             with get_sqlalchemy_conn("postgis") as conn:
@@ -779,7 +798,8 @@ def do_ugc(ctx):
                 select ugc, extract(year from issue) as year,
                 count(*), min(issue at time zone 'UTC') as nv,
                 max(issue at time zone 'UTC') as mv from warnings
-                WHERE substr(ugc, 1, 2) = :state and phenomena = :phenomena
+                WHERE substr(ugc, 1, 2) = ANY(:states)
+                and phenomena = :phenomena
                 and significance = :significance and issue >= :sts and
                 issue < :ets {daylimiter} GROUP by ugc, year
                 )
@@ -892,8 +912,9 @@ def plotter(fdict):
     )
     mp = MapPlot(
         apctx=ctx,
-        sector=("state" if t == "state" else "cwa"),
+        sector=ctx["t"] if ctx["t"] != "fema" else "fema_region",
         state=state,
+        fema_region=int(ctx["fema"]),
         cwa=(station if len(station) == 3 else station[1:]),
         axisbg="white",
         title=title,

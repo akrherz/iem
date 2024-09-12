@@ -37,7 +37,7 @@ HTTP400 = "400 Bad Request"
 HTTP500 = "500 Internal Server Error"
 
 
-def format_geojson_response(gdf, defaultcol):
+def format_geojson_response(gdf: pd.DataFrame, defaultcol: str) -> str:
     """Convert geodataframe into GeoJson."""
     # Avert your eyes children
     jdict = json.loads(gdf.to_json(), parse_float=lambda x: round(float(x), 2))
@@ -47,7 +47,7 @@ def format_geojson_response(gdf, defaultcol):
     return json.dumps(jdict)
 
 
-def parser(cgistr):
+def parser(cgistr: str) -> dict:
     """Convert a CGI string into a dict that gets passed to the plotting
     routine"""
     # want predictable / stable URIs, generally.

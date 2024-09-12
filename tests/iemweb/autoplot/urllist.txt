@@ -78,6 +78,7 @@
 /plotting/auto/plot/90/t:state::v:yearavg::ilabel:yes::geo:ugc::drawc:yes::year:2024::year2:2024::sdate:2006-01-01%200000::edate:2024-09-14%200000::network:WFO::station:DMX::state:IA::phenomena:TO::significance:W::cmap:jet::_r:t::dpi:100.png
 /plotting/auto/plot/90/t:state::v:days::ilabel:yes::geo:polygon::drawc:yes::year:2024::year2:2024::sdate:2006-01-01%200000::edate:2024-09-14%200000::network:WFO::station:DMX::state:IA::phenomena:TO::significance:W::cmap:jet::_r:t::dpi:100.png
 /plotting/auto/plot/90/t:state::v:lastyear::ilabel:yes::geo:ugc::drawc:yes::year:2024::year2:2024::sdate:2006-01-01%200000::edate:2024-09-14%200000::network:WFO::station:DMX::state:IA::phenomena:TO::significance:W::cmap:jet::_r:t::dpi:100.png
+/plotting/auto/plot/90/t:fema::v:lastyear::ilabel:yes::geo:ugc::drawc:yes::year:2024::year2:2024::sdate:2006-01-01%200000::edate:2024-09-14%200000::network:WFO::station:DMX::state:IA::fema:7::phenomena:TO::significance:W::cmap:jet::_r:t::dpi:100::_cb:1.png
 /plotting/auto/plot/97/d:sector::sector:IA::network:WFO::wfo:DMX::var:cgdd_sum::gddbase:50::gddceil:86::date1:2024-01-01::usdm:no::date2:2024-09-10::p:contour::cmap:RdYlBu::c:yes::ct:climate51::_r:t::dpi:100.png
 /plotting/auto/plot/97/d:sector::sector:IA::network:WFO::wfo:DMX::var:cgdd_sum::gddbase:50::gddceil:86::date1:2023-10-01::usdm:no::date2:2024-04-10::p:contour::cmap:RdYlBu::c:yes::ct:climate51::_r:t::dpi:100.png
 /plotting/auto/plot/97/d:wfo::sector:IA::network:WFO::wfo:DMX::var:precip_sum::gddbase:50::gddceil:86::date1:2024-01-11::usdm:no::date2:2024-02-10::p:contour::cmap:RdYlBu::c:yes::ct:climate51::_r:t::dpi:100.png
@@ -165,6 +166,8 @@
 /plotting/auto/plot/201/mode:heat::sdate:2024-07-01::edate:2024-08-16::outlook_type:C::day:1::w:all::network:WFO::wfo:STO::mystate:IA::ugc:IAZ048::g:yes::_r:t::dpi:100.png
 /plotting/auto/plot/201/mode:cal::sdate:2024-07-01::edate:2024-08-16::outlook_type:C::day:1::w:all::network:WFO::wfo:STO::mystate:IA::ugc:IAZ048::g:yes::_r:t::dpi:100.png
 /plotting/auto/plot/201/mode:cal::sdate:2024-01-01::edate:2024-08-16::outlook_type:C::day:1::w:wfo::network:WFO::wfo:STO::mystate:IA::ugc:IAZ048::g:yes::_r:t::dpi:100.png
+/plotting/auto/plot/201/mode:cal::sdate:2024-08-01::edate:2024-09-11::outlook_type:C::day:1::w:fema::network:WFO::wfo:DMX::mystate:IA::ugc:IAZ048::fema:7::g:yes::_r:43::dpi:100.png
+/plotting/auto/plot/201/mode:cal::sdate:2024-08-01::edate:2024-09-11::outlook_type:C::day:1::w:wfo::network:WFO::wfo:DMX::mystate:IA::ugc:IAZ048::fema:7::g:yes::_r:43::dpi:100.png
 /plotting/auto/plot/203/typ:W::sort:W::date:2024-05-21::dpi:100.png
 /plotting/auto/plot/203/typ:W::sort:S::date:2024-05-21::dpi:100.png
 /plotting/auto/plot/205/network:IA_ASOS::station:DSM::max_tmpf_above:90::max_feel_above:90::_r:t::dpi:100.png
@@ -200,6 +203,12 @@
 /plotting/auto/plot/241/sts:2024-08-06%200900::ets:2024-08-06%200900::w:min::csector:IA::mode:user::cmap:gnuplot2::_r:t::dpi:100.png
 /plotting/auto/plot/242/pid:202405211331-KDMX-NWUS53-LSRDMX::_r:t::dpi:100.png
 /plotting/auto/plot/242/pid:201806210250-KDMX-NWUS53-LSRDMX::_r:t::dpi:100.png
+/plotting/auto/plot/247/valid:2024-05-24%202000::opt:within::csector:cornbelt::add:stats::sc:no::dpi:100.png
+/plotting/auto/plot/247/valid:2024-05-24%202000::opt:active::csector:nws::add:none::sc:yes::dpi:100.png
+/plotting/auto/plot/248/year:1986::outlook_type:C::threshold:CATEGORICAL.SLGT::day:1::opt:fema::network:WFO::wfo:DMX::fema:7::state:IA::ugc:IAZ048::overlap:0::_r:t::dpi:100.png
+/plotting/auto/plot/248/year:1986::outlook_type:C::threshold:CATEGORICAL.SLGT::day:1::opt:wfo::network:WFO::wfo:DMX::fema:7::state:IA::ugc:IAZ048::overlap:0::_r:t::dpi:100.png
+/plotting/auto/plot/248/year:1986::outlook_type:C::threshold:CATEGORICAL.SLGT::day:1::opt:state::network:WFO::wfo:DMX::fema:7::state:IA::ugc:IAZ048::overlap:0::_r:t::dpi:100.png
+/plotting/auto/plot/248/year:1986::outlook_type:C::threshold:CATEGORICAL.SLGT::day:1::opt:state::network:WFO::wfo:DMX::fema:7::state:IA::ugc:IAZ048::overlap:5::_r:t::dpi:100.png
 /plotting/auto/plot/253/datglobalid:%7B495DE596-B299-41FE-9C90-13C87E43FE0B%7D::dat:2024-05-21::cmap:gist_rainbow::_r:t::dpi:100.png
 /plotting/auto/plot/255/network:IACLIMATE::station:IATAME::sday:0901::eday:0301::depth:1::init:1.0::loss:0.15::year:2023::_r:43::dpi:100.png
 /plotting/auto/plot/255/network:IACLIMATE::station:IATAME::sday:0901::eday:0301::depth:1::init:1.0::loss:0.15::year:1803::_r:43::dpi:100.png

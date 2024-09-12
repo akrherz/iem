@@ -20,7 +20,7 @@ spatial heatmaps.</p>
 """
 
 import calendar
-import datetime
+from datetime import date, timedelta
 
 import numpy as np
 import pandas as pd
@@ -33,7 +33,7 @@ from pyiem.plot.use_agg import plt
 from pyiem.util import get_autoplot_context
 from sqlalchemy import text
 
-from iemweb.autoplot import get_monofont
+from iemweb.autoplot import ARG_FEMA, get_monofont
 
 PDICT = {
     "0": "At least touches",
@@ -46,6 +46,7 @@ PDICT2 = {
     "wfo": "View by Single NWS Forecast Office",
     "state": "View by State",
     "ugc": "View by Selected County/Zone",
+    "fema": "View by FEMA Region",
 }
 PDICT3 = {
     "C": "SPC Convective Outlook",
@@ -158,6 +159,7 @@ def get_description():
             default="DMX",
             label="Select WFO:",
         ),
+        ARG_FEMA,
         dict(type="state", default="IA", name="state", label="Select State:"),
         {
             "type": "ugc",
@@ -188,17 +190,19 @@ def plotter(fdict):
     overlap = ctx["overlap"]
     state = ctx["state"]
     ugc = ctx["ugc"]
+    fema = ctx["fema"]
     (category, threshold) = ctx["threshold"].split(".", 1)
 
     params = {
         "wfo": wfo,
         "state": state,
+        "fema": fema,
         "overlap": int(overlap) / 100.0,
         "threshold": threshold,
         "category": category,
         "day": ctx["day"],
         "ugc": ugc,
-        "sts": datetime.date(ctx["year"], 1, 1),
+        "sts": date(ctx["year"], 1, 1),
         "outlook_type": ctx["outlook_type"].upper(),
     }
     geomtable = "cwa"
@@ -208,6 +212,10 @@ def plotter(fdict):
     if opt == "state":
         geomtable = "states"
         limiter = "g.state_abbr = :state"
+    elif opt == "fema":
+        geomcol = "geom"
+        geomtable = "fema_regions"
+        limiter = "g.region = :fema"
     elif opt == "ugc":
         geomtable = "ugcs"
         limiter = "g.ugc = :ugc and end_ts is null"
@@ -283,6 +291,8 @@ def plotter(fdict):
         subtitle = f"{verb} County/Zone {ugcname} [{ugc}]"
     elif opt == "conus":
         subtitle = "Based on Unofficial IEM Archives, Contiguous US"
+    elif opt == "fema":
+        subtitle = f"{verb} FEMA Region {fema}"
     if ctx["overlap"] not in ["0", "99"]:
         subtitle += f" with >= {overlap}% overlap"
     fig = figure(apctx=ctx, title=title, subtitle=subtitle)
@@ -322,9 +332,9 @@ def plotter(fdict):
         avg_end = np.average(gdf["doy", "max"].values[1:-1])
         ax.axvline(avg_start, ls=":", lw=2, color="k")
         ax.axvline(avg_end, ls=":", lw=2, color="k")
-        x0 = datetime.date(2000, 1, 1)
-        _1 = (x0 + datetime.timedelta(days=int(avg_start))).strftime("%-d %b")
-        _2 = (x0 + datetime.timedelta(days=int(avg_end))).strftime("%-d %b")
+        x0 = date(2000, 1, 1)
+        _1 = (x0 + timedelta(days=int(avg_start))).strftime("%-d %b")
+        _2 = (x0 + timedelta(days=int(avg_end))).strftime("%-d %b")
         ax.set_xlabel(f"Average Start Date: {_1}, End Date: {_2}")
     ax.grid()
     xticks = [1, 32, 60, 91, 121, 152, 182, 213, 244, 274, 305, 335]

@@ -74,6 +74,7 @@ not be implied as an endorsement. Of course, you can just search google for
 <ul>
  <li><a href="https://developer.baronweather.com/">Baron Weather</a></li>
  <li><a href="https://openweathermap.org/api">OpenWeatherMap</a></li>
+ <li><a href="https://pirateweather.net">Pirate Weather</a></li>
  <li><a href="https://realearth.ssec.wisc.edu/doc/api.php">SSEC RealEarth API</a></li>
  <li><a href="https://www.tomorrow.io/weather-api/">Tomorrow.io</a></li>
  <li><a href="https://xweather.com/docs">Vaisala Xweather</a></li>

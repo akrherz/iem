@@ -13,7 +13,7 @@ version, this is controlled by clicking on the legend items which will
 hide and show the various lines.
 """
 
-import datetime
+from datetime import timedelta
 from zoneinfo import ZoneInfo
 
 import matplotlib.dates as mdates
@@ -22,7 +22,7 @@ import pandas as pd
 from pyiem.database import get_sqlalchemy_conn
 from pyiem.exceptions import NoDataFound
 from pyiem.plot import figure_axes
-from pyiem.util import get_autoplot_context
+from pyiem.util import get_autoplot_context, utc
 from sqlalchemy import text
 
 STAGES = "low action bankfull flood moderate major record".split()
@@ -44,7 +44,6 @@ UTC = ZoneInfo("UTC")
 def get_description():
     """Return a dict describing how to call this plotter"""
     desc = {"description": __doc__, "data": True, "cache": 3600}
-    utc = datetime.datetime.utcnow()
     desc["arguments"] = [
         dict(
             type="text",
@@ -55,7 +54,7 @@ def get_description():
         dict(
             type="datetime",
             name="dt",
-            default=utc.strftime("%Y/%m/%d %H%M"),
+            default=utc().strftime("%Y/%m/%d %H%M"),
             label="Time to center plot at (UTC Time Zone):",
             min="2013/01/01 0000",
         ),
@@ -118,8 +117,8 @@ def add_context(ctx):
             conn,
             params=(
                 station,
-                dt - datetime.timedelta(days=3),
-                dt + datetime.timedelta(days=1),
+                dt - timedelta(days=3),
+                dt + timedelta(days=1),
             ),
             index_col=None,
         )
@@ -136,8 +135,8 @@ def add_context(ctx):
         mints = ctx["fdf"]["valid"].min()
         maxts = ctx["fdf"]["valid"].max()
     else:
-        mints = dt - datetime.timedelta(days=3)
-        maxts = dt + datetime.timedelta(days=3)
+        mints = dt - timedelta(days=3)
+        maxts = dt + timedelta(days=3)
     with get_sqlalchemy_conn("hml") as conn:
         df = pd.read_sql(
             text("""
