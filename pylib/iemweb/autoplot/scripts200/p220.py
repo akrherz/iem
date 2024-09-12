@@ -27,6 +27,8 @@ from pyiem.reference import LATLON, Z_OVERLAY2_LABEL, Z_POLITICAL
 from pyiem.util import get_autoplot_context, utc
 from sqlalchemy import text
 
+from iemweb.autoplot import ARG_FEMA
+
 CENTRALTZ = ZoneInfo("America/Chicago")
 PDICT = {
     "cwa": "Plot by NWS Forecast Office",
@@ -158,12 +160,7 @@ def get_description():
             default="DMX",
             label="Select WFO: (when applicable)",
         ),
-        {
-            "type": "fema",
-            "default": "7",
-            "name": "fema",
-            "label": "Select FEMA Region (when applicable):",
-        },
+        ARG_FEMA,
         dict(
             type="csector",
             name="csector",

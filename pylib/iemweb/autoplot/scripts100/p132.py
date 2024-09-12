@@ -14,7 +14,7 @@ shown in the 'Which Metric to Summarize' option:
 """
 
 import calendar
-import datetime
+from datetime import datetime, timedelta
 
 import pandas as pd
 from pyiem.database import get_sqlalchemy_conn
@@ -108,7 +108,7 @@ def plotter(fdict):
     elif month == "octmar":
         months = [10, 11, 12, 1, 2, 3]
     else:
-        ts = datetime.datetime.strptime(f"2000-{month}-01", "%Y-%b-%d")
+        ts = datetime.strptime(f"2000-{month}-01", "%Y-%b-%d")
         # make sure it is length two for the trick below in SQL
         months = [ts.month, 999]
 
@@ -152,7 +152,7 @@ def plotter(fdict):
         # no strftime support for old days, so we hack at it
         lbl = fmt % (row[varname],)
         if days > 1:
-            sts = row["end_date"] - datetime.timedelta(days=days - 1)
+            sts = row["end_date"] - timedelta(days=days - 1)
             if sts.month == row["end_date"].month:
                 lbl += " -- %s %s-%s, %s" % (
                     calendar.month_abbr[sts.month],
@@ -184,7 +184,7 @@ def plotter(fdict):
         tt = f"Single Day {TRANSLATION[varname]}"
     title = (
         f"{ctx['_sname']}:: Top 10 Events\n"
-        f"{tt} ({MDICT[month]}) ({ab.year}-{datetime.datetime.now().year})"
+        f"{tt} ({MDICT[month]}) ({ab.year}-{datetime.now().year})"
     )
 
     fig = figure(apctx=ctx, title=title)

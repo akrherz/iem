@@ -26,8 +26,7 @@ that attempts to omit too low of reports.
 showing the bad image and <a href="/info/contacts.php">email it to us</a>!
 """
 
-# pylint: disable=unpacking-non-sequence
-import datetime
+from datetime import datetime, timedelta
 
 import numpy as np
 import pandas as pd
@@ -87,7 +86,7 @@ PDICT8 = {
 def get_description():
     """Return a dict describing how to call this plotter"""
     desc = {"description": __doc__, "data": True, "cache": 60}
-    now = datetime.datetime.now()
+    now = datetime.now()
     desc["gallery"] = {
         "endts": "2024-01-10 1300",
         "hours": 24,
@@ -229,7 +228,7 @@ def load_data(ctx, basets, endts):
     now = basets
     while now <= endts:
         days.append(now.date())
-        now += datetime.timedelta(hours=24)
+        now += timedelta(hours=24)
     with get_sqlalchemy_conn("iem") as conn:
         df2 = read_postgis(
             text(
@@ -397,7 +396,7 @@ def plotter(fdict):
     if ctx["hours"] > 300:
         ctx["hours"] = 300
     endts = ctx["endts"]
-    basets = endts - datetime.timedelta(hours=ctx["hours"])
+    basets = endts - timedelta(hours=ctx["hours"])
     # Retrieve available obs
     df = load_data(ctx, basets, endts)
 

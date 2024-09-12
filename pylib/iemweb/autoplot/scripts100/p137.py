@@ -18,6 +18,8 @@ from pyiem.plot import figure
 from pyiem.util import get_autoplot_context
 from scipy import stats
 
+from iemweb.autoplot import ARG_STATION
+
 PDICT = {"spring": "Spring Season", "fall": "Fall Season"}
 
 
@@ -25,13 +27,7 @@ def get_description():
     """Return a dict describing how to call this plotter"""
     desc = {"description": __doc__, "data": True, "cache": 86400}
     desc["arguments"] = [
-        dict(
-            type="station",
-            name="station",
-            default="IATAME",
-            network="IACLIMATE",
-            label="Select Station:",
-        ),
+        ARG_STATION,
         dict(
             type="select",
             name="season",

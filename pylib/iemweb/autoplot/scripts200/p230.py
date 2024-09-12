@@ -17,6 +17,8 @@ from pyiem.reference import state_names
 from pyiem.util import get_autoplot_context
 from sqlalchemy import text
 
+from iemweb.autoplot import ARG_FEMA
+
 MDICT = {
     "all": "Entire Year",
     "spring": "Spring (MAM)",
@@ -116,12 +118,7 @@ def get_description():
             default="IA",
             label="Select State (when appropriate):",
         ),
-        {
-            "type": "fema",
-            "name": "fema",
-            "default": "7",
-            "label": "Select FEMA Region (when appropriate):",
-        },
+        ARG_FEMA,
         dict(
             type="ugc",
             name="ugc",
