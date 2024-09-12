@@ -36,6 +36,7 @@ import httpx
 import pandas as pd
 from matplotlib.patches import Rectangle
 from pyiem.database import get_sqlalchemy_conn
+from pyiem.exceptions import NoDataFound
 from pyiem.nws.vtec import NWS_COLORS, get_ps_string
 from pyiem.plot import MapPlot
 from pyiem.reference import SECTORS_NAME, Z_OVERLAY2, state_names
@@ -298,7 +299,7 @@ def plotter(fdict):
             with httpx.Client() as client:
                 res = client.get(uri, timeout=60)
                 if res.status_code != 200:
-                    raise ValueError("Failed to fetch data")
+                    raise NoDataFound("Failed to fetch data")
                 sio = StringIO(res.text)
                 statsdf = pd.read_csv(sio).set_index("key")
         else:
