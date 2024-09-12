@@ -359,14 +359,14 @@ def plotter(fdict):
         ax = fig.add_axes([0.05, 0.15, 0.9, 0.75])
         data = np.ones((ets.year - sts.year + 1, 366)) * -1
         thresholds = list(COLORS.keys())
-        for date, row in df.iterrows():
-            if date > pd.Timestamp(ets):
+        for dt, row in df.iterrows():
+            if dt > pd.Timestamp(ets):
                 continue
             if row["threshold"] == "TSTM" and ctx.get("g", "yes") == "no":
                 continue
             if row["threshold"] in thresholds:
-                y = date.year - sts.year
-                x = int(date.strftime("%j"))
+                y = dt.year - sts.year
+                x = int(dt.strftime("%j"))
                 data[y, x - 1] = thresholds.index(row["threshold"])
 
         cmap = mpcolors.ListedColormap(list(COLORS.values()))
