@@ -211,6 +211,10 @@
 /plotting/auto/plot/242/pid:201806210250-KDMX-NWUS53-LSRDMX::_r:t::dpi:100.png
 /plotting/auto/plot/243/opt:fema::day:cal::month:all::network:WFO::station:DMX::state:IA::fema:7::c:single::phenomena:TO::significance:W::_r:43::dpi:100.png
 /plotting/auto/plot/243/opt:bystate::day:cal::month:all::network:WFO::station:DMX::state:IA::fema:7::c:single::phenomena:TO::significance:W::_r:43::dpi:100.png
+/plotting/auto/plot/243/opt:wfo::day:cal::month:oct::network:WFO::station:DMX::state:IA::fema:7::c:single::phenomena:TO::significance:W::_r:t::dpi:100.png
+/plotting/auto/plot/243/opt:wfo::day:cal::month:octmar::network:WFO::station:DMX::state:IA::fema:7::c:single::phenomena:TO::significance:W::_r:t::dpi:100.png
+/plotting/auto/plot/243/opt:wfo::day:cal::month:all::network:WFO::station:DMX::state:IA::fema:7::c:single::phenomena:TO::significance:W::_r:t::dpi:100.png
+/plotting/auto/plot/243/opt:state::day:cal::month:may::network:WFO::station:DMX::state:IA::fema:7::c:single::phenomena:TO::significance:W::_r:t::dpi:100.png
 /plotting/auto/plot/247/valid:2024-05-24%202000::opt:within::csector:cornbelt::add:stats::sc:no::dpi:100.png
 /plotting/auto/plot/247/valid:2024-05-24%202000::opt:active::csector:nws::add:none::sc:yes::dpi:100.png
 /plotting/auto/plot/248/year:1986::outlook_type:C::threshold:CATEGORICAL.SLGT::day:1::opt:fema::network:WFO::wfo:DMX::fema:7::state:IA::ugc:IAZ048::overlap:0::_r:t::dpi:100.png
