@@ -34,10 +34,13 @@ from pyiem.plot import figure_axes
 from pyiem.util import get_autoplot_context
 from sqlalchemy import text
 
+from iemweb.autoplot import ARG_FEMA, fema_region2states
+
 PDICT = {
     "wfo": "Select by NWS Forecast Office",
     "state": "Select by State",
     "ugc": "Select by NWS County/Forecast Zone",
+    "fema": "Select by FEMA Region",
 }
 PDICT2 = {
     "single": "Total for Single Selected Phenomena / Significance",
@@ -72,6 +75,7 @@ def get_description():
             default="IAC169",
             label="Select UGC Zone/County:",
         ),
+        ARG_FEMA,
         {
             "type": "select",
             "options": PDICT2,
@@ -133,6 +137,9 @@ def plotter(fdict):
     if opt == "state":
         wfo_limiter = " and substr(ugc, 1, 2) = :state "
         params["state"] = state
+    elif opt == "fema":
+        wfo_limiter = " and substr(ugc, 1, 2) = ANY(:states) "
+        params["states"] = fema_region2states(ctx["fema"])
     elif opt == "ugc":
         wfo_limiter = " and ugc = :ugc "
         params["ugc"] = ctx["ugc"]
@@ -160,7 +167,7 @@ def plotter(fdict):
             text(
                 f"""
                 SELECT
-                extract(year from issue at time zone :tzname)::int as yr,
+                vtec_year,
                 extract(month from issue at time zone :tzname)::int as mo,
                 min(date(issue at time zone :tzname)) as min_date,
                 wfo,
@@ -168,8 +175,8 @@ def plotter(fdict):
                 from warnings where phenomena = ANY(:ph)
                 and significance = :sig
                 {wfo_limiter}
-                GROUP by yr, mo, wfo, phenomena, significance, eventid
-                ORDER by yr asc, mo asc
+                GROUP by vtec_year, mo, wfo, phenomena, significance, eventid
+                ORDER by vtec_year asc, mo asc
         """
             ),
             conn,
@@ -185,15 +192,15 @@ def plotter(fdict):
             )
         raise NoDataFound("Sorry, no data found!")
     df = (
-        daily[["yr", "mo", "eventid"]]
-        .groupby(["yr", "mo"])
+        daily[["vtec_year", "mo", "eventid"]]
+        .groupby(["vtec_year", "mo"])
         .count()
         .reset_index()
         .rename(columns={"eventid": "count"})
     )
 
-    df2 = df.pivot(index="yr", columns="mo", values="count").reindex(
-        index=range(df["yr"].min(), df["yr"].max() + 1),
+    df2 = df.pivot(index="vtec_year", columns="mo", values="count").reindex(
+        index=range(df["vtec_year"].min(), df["vtec_year"].max() + 1),
         columns=range(1, 13),
     )
 
@@ -215,10 +222,14 @@ def plotter(fdict):
     fig.text(0.82, ypos, "Top 10 Dates")
     ypos -= 0.04
     fig.text(0.82, ypos, params["tzname"])
-    gdf = daily.groupby("min_date").count().sort_values("yr", ascending=False)
+    gdf = (
+        daily.groupby("min_date")
+        .count()
+        .sort_values("vtec_year", ascending=False)
+    )
     for dt, row in gdf.head(10).iterrows():
         ypos -= 0.04
-        fig.text(0.82, ypos, f"{dt} {row['yr']:3.0f}")
+        fig.text(0.82, ypos, f"{dt} {row['vtec_year']:3.0f}")
     ax.set_position([0.1, 0.1, 0.75, 0.8])
     sns.heatmap(
         df2,
@@ -235,7 +246,9 @@ def plotter(fdict):
     for year, count in sumdf.items():
         ax.text(12, year, f"{count:.0f}")
     # Add some horizontal lines
-    for i, year in enumerate(range(df["yr"].min(), df["yr"].max() + 1)):
+    for i, year in enumerate(
+        range(df["vtec_year"].min(), df["vtec_year"].max() + 1)
+    ):
         ax.text(
             12 + 0.7, i + 0.5, f"{sumdf[year]:4.0f}", ha="right", va="center"
         )

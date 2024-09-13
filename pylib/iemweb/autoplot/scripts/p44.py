@@ -24,8 +24,8 @@ plot, but allows for a user defined period to be selected.</p>
 """
 
 import calendar
-import datetime
 import math
+from datetime import date
 
 import numpy as np
 import pandas as pd
@@ -36,13 +36,19 @@ from pyiem.plot import figure
 from pyiem.util import get_autoplot_context, get_sqlalchemy_conn
 from sqlalchemy import text
 
+from iemweb.autoplot import ARG_FEMA, fema_region2states
+
 PDICT = {"yes": "Limit Plot to Year-to-Date", "no": "Plot Entire Year"}
 PDICT2 = {
     "single": "Plot Single VTEC Phenomena + Significance",
     "svrtor": "Plot Severe Thunderstorm + Tornado Warnings",
     "all": "Plot All VTEC Events",
 }
-PDICT3 = {"wfo": "Plot for Single/All WFO", "state": "Plot for a Single State"}
+PDICT3 = {
+    "wfo": "Plot for Single/All WFO",
+    "state": "Plot for a Single State",
+    "fema": "Plot for a FEMA Region",
+}
 PDICT4 = {"line": "Accumulated line plot", "bar": "Single bar plot per year"}
 PDICT5 = {"jan1": "January 1", "jul1": "July 1"}
 
@@ -79,6 +85,7 @@ def get_description():
             name="state",
             label="Select State (when appropriate):",
         ),
+        ARG_FEMA,
         dict(
             type="select",
             name="limit",
@@ -115,7 +122,7 @@ def get_description():
         dict(
             type="year",
             name="eyear",
-            default=datetime.date.today().year,
+            default=date.today().year,
             min=1986,
             label="Inclusive End Year (if data is available) for plot:",
         ),
@@ -184,7 +191,7 @@ def munge_df(ctx, df):
     if ctx["limit"] == "no":
         return df
 
-    today_sday = datetime.date.today().strftime("%m%d")
+    today_sday = date.today().strftime("%m%d")
     # If year starts on jan1, easy
     if ctx["s"] == "jan1":
         return df[df["sday"] <= today_sday]
@@ -220,8 +227,11 @@ def plotter(fdict):
     if opt == "state":
         wfolimiter = " and substr(ugc, 1, 2) = :state "
         params["state"] = state
-    if opt == "wfo" and station == "_ALL":
+    elif opt == "wfo" and station == "_ALL":
         wfolimiter = ""
+    elif opt == "fema":
+        wfolimiter = " and substr(ugc, 1, 2) = ANY(:states) "
+        params["states"] = fema_region2states(ctx["fema"])
     eventlimiter = ""
     if combo == "svrtor":
         eventlimiter = " or (phenomena = 'SV' and significance = 'W') "
@@ -243,14 +253,14 @@ def plotter(fdict):
             text(
                 f"""
         WITH data as (
-            SELECT extract(year from issue)::int as year,
+            SELECT vtec_year,
             issue, phenomena, significance, eventid, wfo from warnings WHERE
-            {limiter} extract(year from issue) >= :syear and
-            extract(year from issue) <= :eyear {wfolimiter}),
+            {limiter} vtec_year >= :syear and
+            vtec_year <= :eyear {wfolimiter}),
         agg1 as (
-            SELECT year, min(issue) as min_issue, eventid, wfo, phenomena,
+            SELECT vtec_year, min(issue) as min_issue, eventid, wfo, phenomena,
             significance from data
-            GROUP by year, eventid, wfo, phenomena, significance)
+            GROUP by vtec_year, eventid, wfo, phenomena, significance)
 
         SELECT date(min_issue) as date, count(*)
         from agg1 GROUP by date ORDER by date ASC
@@ -264,9 +274,7 @@ def plotter(fdict):
     if df.empty:
         raise NoDataFound("No Data Found.")
     # pylint: disable=no-member
-    df = df.reindex(
-        pd.date_range(df.index.values[0], datetime.date.today())
-    ).fillna(0)
+    df = df.reindex(pd.date_range(df.index.values[0], date.today())).fillna(0)
     df = munge_df(ctx, df)
     # Compute cumsum
     df["cumsum"] = df[["year", "count"]].groupby("year").cumsum()
@@ -282,10 +290,12 @@ def plotter(fdict):
     if opt == "state":
         _p = "Parishes" if state == "LA" else "Counties"
         ptitle = f"NWS Issued for {_p} in {reference.state_names[state]}"
+    if opt == "fema":
+        ptitle = f"NWS Issued for FEMA Region {ctx['fema']}"
     ctx["xlabel"] = "all days plotted"
     if ctx["limit"] == "yes":
         mm = "January 1" if ctx["s"] == "jan1" else "July 1"
-        ctx["xlabel"] = f"{mm} through {datetime.date.today():%B %-d}"
+        ctx["xlabel"] = f"{mm} through {date.today():%B %-d}"
         ptitle = f"{ptitle} [{ctx['xlabel']}]"
         if ctx["s"] == "jul1":
             ctx["xlabel"] += " (Year for July 1 shown)"

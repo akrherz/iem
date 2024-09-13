@@ -25,18 +25,22 @@ import numpy as np
 import pandas as pd
 from matplotlib.colorbar import ColorbarBase
 from matplotlib.ticker import MaxNLocator
-from pyiem import reference
 from pyiem.database import get_sqlalchemy_conn
 from pyiem.exceptions import NoDataFound
 from pyiem.nws import vtec
 from pyiem.plot import figure, get_cmap
 from pyiem.plot.use_agg import plt
+from pyiem.reference import state_names
 from pyiem.util import get_autoplot_context
+from sqlalchemy import text
+
+from iemweb.autoplot import ARG_FEMA, FEMA_REGIONS, fema_region2states
 
 PDICT = {"jan1": "January 1", "jul1": "July 1"}
 PDICT2 = {
     "wfo": "View by Single NWS Forecast Office",
     "state": "View by State",
+    "fema": "View by FEMA Region",
 }
 PDICT3 = {
     "daily": "Color bars with daily issuance totals",
@@ -64,6 +68,7 @@ def get_description():
             label="Select WFO:",
         ),
         dict(type="state", default="IA", name="state", label="Select State:"),
+        ARG_FEMA,
         dict(
             type="phenomena",
             name="phenomena",
@@ -105,21 +110,30 @@ def plotter(fdict):
     opt = ctx["opt"]
     state = ctx["state"]
 
-    wfolimiter = f" wfo = '{station}' "
+    params = {
+        "phenomena": phenomena,
+        "significance": significance,
+        "state": state,
+        "station": station,
+    }
+    wfolimiter = " wfo = :station "
     if opt == "state":
-        wfolimiter = f" substr(ugc, 1, 2) = '{state}' "
+        wfolimiter = " substr(ugc, 1, 2) = :state "
+    elif opt == "fema":
+        wfolimiter = " substr(ugc, 1, 2) = ANY(:states) "
+        params["states"] = fema_region2states(ctx["fema"])
     with get_sqlalchemy_conn("postgis") as conn:
         df = pd.read_sql(
-            f"""WITH data as (
-                SELECT eventid, wfo, extract(year from issue) as year,
+            text(f"""WITH data as (
+                SELECT eventid, wfo, vtec_year,
                 min(date(issue)) as date from warnings where {wfolimiter}
-                and phenomena = %s and significance = %s
-                GROUP by eventid, wfo, year)
-            SELECT year::int, date, count(*) from data GROUP by year, date
-            ORDER by year ASC, date ASC
-            """,
+                and phenomena = :phenomena and significance = :significance
+                GROUP by eventid, wfo, vtec_year)
+            SELECT vtec_year, date, count(*) from data GROUP by vtec_year, date
+            ORDER by vtec_year ASC, date ASC
+            """),
             conn,
-            params=(phenomena, significance),
+            params=params,
             index_col=None,
             parse_dates=[
                 "date",
@@ -130,28 +144,31 @@ def plotter(fdict):
 
     # Since many VTEC events start in 2005, we should not trust any
     # data that has its first year in 2005
-    if df["year"].min() == 2005:
-        df = df[df["year"] > 2005]
+    if df["vtec_year"].min() == 2005:
+        df = df[df["vtec_year"] > 2005]
     # Split the season at jul 1, if requested
     if split == "jul1":
-        df["year"] = df.apply(
-            lambda x: x["year"] + 1 if x["date"].month > 6 else x["year"],
+        df["vtec_year"] = df.apply(
+            lambda x: x["vtec_year"] + 1
+            if x["date"].month > 6
+            else x["vtec_year"],
             axis=1,
         )
         df["doy"] = df.apply(
-            lambda x: x["date"] - pd.Timestamp(x["year"] - 1, 7, 1), axis=1
+            lambda x: x["date"] - pd.Timestamp(x["vtec_year"] - 1, 7, 1),
+            axis=1,
         )
     else:
         df["doy"] = df.apply(
-            lambda x: x["date"] - pd.Timestamp(x["year"], 1, 1), axis=1
+            lambda x: x["date"] - pd.Timestamp(x["vtec_year"], 1, 1), axis=1
         )
     df["doy"] = df["doy"].dt.days
 
     title = f"[{station}] NWS {ctx['_nt'].sts[station]['name']}"
     if opt == "state":
-        title = (
-            f"NWS Issued Alerts for State of {reference.state_names[state]}"
-        )
+        title = f"NWS Issued Alerts for State of {state_names[state]}"
+    elif opt == "fema":
+        title = f"NWS Issued Alerts for FEMA {FEMA_REGIONS[ctx['fema']]}"
     title += (
         "\n"
         "Period between First and Last "
@@ -169,7 +186,14 @@ def plotter(fdict):
     bins = [1, 2, 3, 4, 5, 7, 10, 15, 20, 25, 50]
     if ctx["f"] == "accum":
         maxval = (
-            int(df[["year", "count"]].groupby("year").sum().max().iloc[0]) + 1
+            int(
+                df[["vtec_year", "count"]]
+                .groupby("vtec_year")
+                .sum()
+                .max()
+                .iloc[0]
+            )
+            + 1
         )
         if maxval < 11:
             bins = np.arange(1, 11)
@@ -191,7 +215,7 @@ def plotter(fdict):
             loc="bottom",
         )
 
-    for year, gdf in df.groupby("year"):
+    for year, gdf in df.groupby("vtec_year"):
         size = max(gdf["doy"].max() - gdf["doy"].min(), 1)
         ax.barh(
             year,
@@ -205,7 +229,7 @@ def plotter(fdict):
             continue
         if ctx["f"] == "daily":
             ax.barh(
-                gdf["year"].values,
+                gdf["vtec_year"].values,
                 [1] * len(gdf.index),
                 left=gdf["doy"].values,
                 align="center",
@@ -216,14 +240,14 @@ def plotter(fdict):
         # Do the fancy pants accum
         gdf["cumsum"] = gdf["count"].cumsum()
         ax.barh(
-            gdf["year"].values[::-1],
+            gdf["vtec_year"].values[::-1],
             gdf["doy"].values[::-1] - gdf["doy"].values[0] + 1,
             left=[gdf["doy"].values[0]] * len(gdf.index),
             zorder=3,
             align="center",
             color=cmap(norm([gdf["cumsum"].values[::-1]]))[0],
         )
-    gdf = df[["year", "doy"]].groupby("year").agg(["min", "max"])
+    gdf = df[["vtec_year", "doy"]].groupby("vtec_year").agg(["min", "max"])
     if len(gdf.index) < 3:
         raise NoDataFound("Not enough data to compute an average")
     # Exclude first and last year in the average
@@ -247,19 +271,19 @@ def plotter(fdict):
     ax.set_xticklabels(xticklabels)
     ax.set_xlim(df["doy"].min() - 10, df["doy"].max() + 10)
     ax.set_ylabel("Year")
-    ax.set_ylim(df["year"].min() - 0.5, df["year"].max() + 0.5)
+    ax.set_ylim(df["vtec_year"].min() - 0.5, df["vtec_year"].max() + 0.5)
     ax.yaxis.set_major_locator(MaxNLocator(integer=True))
 
     # ______________________________________________
     ax = fig.add_axes([0.75, 0.1, 0.1, 0.8])
-    gdf = df[["year", "count"]].groupby("year").sum()
+    gdf = df[["vtec_year", "count"]].groupby("vtec_year").sum()
     ax.barh(
         gdf.index.values,
         gdf["count"].values,
         color="blue" if ctx["f"] != "accum" else cmap(norm([gdf["count"]]))[0],
         align="center",
     )
-    ax.set_ylim(df["year"].min() - 0.5, df["year"].max() + 0.5)
+    ax.set_ylim(df["vtec_year"].min() - 0.5, df["vtec_year"].max() + 0.5)
     plt.setp(ax.get_yticklabels(), visible=False)
     ax.grid(True)
     ax.set_xlabel("# Events")
@@ -269,9 +293,9 @@ def plotter(fdict):
 
     # __________________________________________
     ax = fig.add_axes([0.88, 0.1, 0.1, 0.8])
-    gdf = df[["year", "count"]].groupby("year").count()
+    gdf = df[["vtec_year", "count"]].groupby("vtec_year").count()
     ax.barh(gdf.index.values, gdf["count"].values, fc="blue", align="center")
-    ax.set_ylim(df["year"].min() - 0.5, df["year"].max() + 0.5)
+    ax.set_ylim(df["vtec_year"].min() - 0.5, df["vtec_year"].max() + 0.5)
     plt.setp(ax.get_yticklabels(), visible=False)
     ax.grid(True)
     ax.set_xlabel("# Dates")

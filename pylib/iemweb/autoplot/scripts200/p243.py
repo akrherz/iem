@@ -11,7 +11,7 @@ is shown.</p>
 produces monthly heatmaps.
 """
 
-import datetime
+from datetime import datetime
 
 import pandas as pd
 import pyiem.nws.vtec as vtec
@@ -21,6 +21,8 @@ from pyiem.exceptions import NoDataFound
 from pyiem.plot import figure
 from pyiem.util import get_autoplot_context
 from sqlalchemy import text
+
+from iemweb.autoplot import ARG_FEMA, FEMA_REGIONS, fema_region2states
 
 MDICT = {
     "all": "Entire Year",
@@ -49,6 +51,7 @@ DDICT = {
 PDICT = {
     "wfo": "Select by NWS Forecast Office",
     "state": "Select by State",
+    "fema": "Select by FEMA Region",
     "all": "Show NWS Totals (all)",
     "bywfo": "Show per NWS Office Totals",
     "bystate": "Show per State Totals",
@@ -94,6 +97,7 @@ def get_description():
             all=True,
         ),
         dict(type="state", name="state", default="IA", label="Select State:"),
+        ARG_FEMA,
         {
             "type": "select",
             "options": PDICT2,
@@ -146,7 +150,7 @@ def plotter(fdict):
     elif month == "octmar":
         months = [10, 11, 12, 1, 2, 3]
     else:
-        ts = datetime.datetime.strptime(f"2000-{month}-01", "%Y-%b-%d")
+        ts = datetime.strptime(f"2000-{month}-01", "%Y-%b-%d")
         # make sure it is length two for the trick below in SQL
         months = [ts.month]
     params = {
@@ -170,6 +174,9 @@ def plotter(fdict):
     if opt == "state":
         wfo_limiter = " and substr(ugc, 1, 2) = :state "
         params["state"] = state
+    elif opt == "fema":
+        wfo_limiter = " and substr(ugc, 1, 2) = ANY(:states) "
+        params["states"] = fema_region2states(ctx["fema"])
     if opt in ["bystate", "bywfo"]:
         wfo_limiter = ""
 
@@ -188,7 +195,7 @@ def plotter(fdict):
 
     sql = f"""
         SELECT
-        extract(year from issue)::int as yr,
+        vtec_year as yr,
         extract(month from issue)::int as mo,
         min(date(issue at time zone :tzname {offset})) as min_date,
         wfo, phenomena, significance, eventid
@@ -201,7 +208,7 @@ def plotter(fdict):
         # Yes, double counting
         sql = f"""
             SELECT
-            extract(year from issue)::int as yr,
+            vtec_year as yr,
             extract(month from issue)::int as mo,
             min(date(issue at time zone :tzname {offset})) as min_date,
             substr(ugc, 1, 2) as state,
@@ -258,6 +265,8 @@ def plotter(fdict):
         title = "NWS Issued by State"
     elif opt == "bywfo":
         title = "NWS Issued by WFO"
+    elif opt == "fema":
+        title = f"NWS Issued by FEMA {FEMA_REGIONS[ctx['fema']]}"
     if month != "all":
         title += f" [{MDICT[month]}]"
     fig = figure(

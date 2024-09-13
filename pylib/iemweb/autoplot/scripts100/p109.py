@@ -37,7 +37,7 @@ product.</p>
 Most products go back to October 2005.</p>
 """
 
-import datetime
+from datetime import date, timedelta
 from zoneinfo import ZoneInfo
 
 import numpy as np
@@ -76,9 +76,9 @@ def get_description():
     """Return a dict describing how to call this plotter"""
     desc = {"description": __doc__}
     desc["data"] = True
-    today = datetime.date.today()
+    today = date.today()
     jan1 = today.replace(month=1, day=1)
-    tomorrow = today + datetime.timedelta(days=1)
+    tomorrow = today + timedelta(days=1)
     desc["arguments"] = [
         dict(
             type="select",
@@ -444,8 +444,8 @@ def plotter(fdict):
                 params={
                     "sts": sts,
                     "ets": ets,
-                    "sts2": sts - datetime.timedelta(days=90),
-                    "ets2": ets + datetime.timedelta(days=90),
+                    "sts2": sts - timedelta(days=90),
+                    "ets2": ets + timedelta(days=90),
                 },
                 index_col="datum",
             )
@@ -489,8 +489,8 @@ def plotter(fdict):
                 params={
                     "sts": sts,
                     "ets": ets,
-                    "sts2": sts - datetime.timedelta(days=90),
-                    "ets2": ets + datetime.timedelta(days=90),
+                    "sts2": sts - timedelta(days=90),
+                    "ets2": ets + timedelta(days=90),
                     "mins": int(total_minutes),
                 },
                 index_col="datum",
