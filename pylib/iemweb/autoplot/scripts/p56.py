@@ -26,9 +26,12 @@ from pyiem.plot import figure
 from pyiem.util import get_autoplot_context
 from sqlalchemy import text
 
+from iemweb.autoplot import ARG_FEMA, FEMA_REGIONS, fema_region2states
+
 OPT = {
     "state": "Summarize by State",
     "wfo": "Summarize by NWS Forecast Office",
+    "fema": "Summarize by FEMA Region",
 }
 PDICT = {
     "doy": "Day of the Year",
@@ -84,6 +87,7 @@ def get_description():
             default="DMX",
             label="Select WFO (if appropriate):",
         ),
+        ARG_FEMA,
         dict(
             type="phenomena",
             name="phenomena",
@@ -182,6 +186,10 @@ def plotter(fdict):
         title = f"State of {reference.state_names[state]}"
         limiter = " substr(ugc, 1, 2) = :state "
         params["state"] = state
+    elif opt == "fema":
+        title = f"FEMA {FEMA_REGIONS[ctx['fema']]}"
+        limiter = " substr(ugc, 1, 2) = ANY(:states) "
+        params["states"] = fema_region2states(ctx["fema"])
     agg = f"extract({ctx['how']} from issue)"
     if ctx["how"] == "week":
         agg = "(extract(doy from issue) / 7)::int"
@@ -190,7 +198,7 @@ def plotter(fdict):
             text(
                 f"""
         with obs as (
-            SELECT distinct extract(year from issue) as yr,
+            SELECT distinct vtec_year as yr,
             {agg} as datum, wfo, eventid
             from warnings WHERE
             {limiter} and phenomena = :ph and significance = :sig

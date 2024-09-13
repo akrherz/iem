@@ -54,7 +54,7 @@ FEMA_REGIONS = {
     "6": "Region 6 {NM,TX,OK,LA,AR}",
     "7": "Region 7 {NE,IA,KS,MO}",
     "8": "Region 8 {MT,ND,SD,WY,UT,CO}",
-    "9": "Region 9 {NV,AZ,CA,FSM,GUAM,HI,RMI,CNMI,AS}",
+    "9": "Region 9 {NV,AZ,CA,FSM,GU,HI,RMI,CNMI,AS}",
     "10": "Region 10 {AK,WA,OR,ID}",
 }
 

@@ -12,7 +12,7 @@ plotting a given state.
 doing so the time zone used to compute the calendar dates is US Central.
 """
 
-import datetime
+from datetime import date, timedelta
 
 import pandas as pd
 from pyiem.database import get_dbconn, get_sqlalchemy_conn
@@ -23,18 +23,21 @@ from pyiem.reference import state_names
 from pyiem.util import get_autoplot_context
 from sqlalchemy import text
 
+from iemweb.autoplot import ARG_FEMA, fema_region2states
+
 PDICT = {"yes": "Colorize Cells in Chart", "no": "Just plot values please"}
 PDICT2 = {
     "wfo": "Summarize by Selected WFO",
     "state": "Summarize by Selected State",
     "ugc": "Summaryize by NWS County/Forecast Zone",
+    "fema": "Summarize by FEMA Region",
 }
 
 
 def get_description():
     """Return a dict describing how to call this plotter"""
     desc = {"description": __doc__, "data": True}
-    today = datetime.date.today()
+    today = date.today()
     jan1 = today.replace(month=1, day=1)
     desc["arguments"] = [
         dict(
@@ -72,6 +75,7 @@ def get_description():
             default="IA",
             label="Select State (when appropriate):",
         ),
+        ARG_FEMA,
         dict(
             type="ugc",
             name="ugc",
@@ -152,8 +156,8 @@ def plotter(fdict):
     title = []
     params = {}
     params["tzname"] = ctx["_nt"].sts[wfo]["tzname"]
-    params["sts"] = sts - datetime.timedelta(days=2)
-    params["ets"] = ets + datetime.timedelta(days=2)
+    params["sts"] = sts - timedelta(days=2)
+    params["ets"] = ets + timedelta(days=2)
     for i, (p, s) in enumerate(zip(phenomena, significance)):
         pstr.append(f"(phenomena = :ph{i} and significance = :sig{i})")
         params[f"ph{i}"] = p
@@ -184,6 +188,10 @@ def plotter(fdict):
         params["ugc"] = ctx["ugc"]
         name, wfo = get_ugc_name(ctx["ugc"])
         title2 = f"[{ctx['ugc']}] {name}"
+    elif ctx["w"] == "fema":
+        wfo_limiter = " and substr(ugc, 1, 2) = ANY(:states) "
+        params["states"] = fema_region2states(ctx["fema"])
+        title2 = f"FEMA Region {ctx['fema']}"
     else:
         wfo_limiter = " and substr(ugc, 1, 2) = :state "
         params["state"] = ctx["state"]
@@ -193,12 +201,11 @@ def plotter(fdict):
             text(
                 f"""
     with events as (
-    select wfo, min(issue at time zone :tzname) as localissue,
-    extract(year from issue) as year,
+    select wfo, min(issue at time zone :tzname) as localissue, vtec_year,
     phenomena, significance, eventid from warnings
     where {pstr} {wfo_limiter} and
-    issue >= :sts and issue < :ets GROUP by wfo, year, phenomena, significance,
-    eventid
+    issue >= :sts and issue < :ets
+    GROUP by wfo, vtec_year, phenomena, significance, eventid
     )
 
     SELECT date(localissue), count(*) from events GROUP by date(localissue)
@@ -213,9 +220,9 @@ def plotter(fdict):
     now = sts
     while now <= ets:
         data[now] = {"val": 0}
-        now += datetime.timedelta(days=1)
-    for date, row in df.iterrows():
-        data[date] = {"val": row["count"]}
+        now += timedelta(days=1)
+    for dt, row in df.iterrows():
+        data[dt] = {"val": row["count"]}
     aa = "VTEC Events"
     if len(significance) == 1:
         aa = f"{vtec.get_ps_string(phenomena[0], significance[0])} Count"

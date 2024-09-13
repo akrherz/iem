@@ -2,7 +2,7 @@
 
 cd coop
 bash PREC.sh
-python plot_precip_12z.py
+python plot_precip_12z.py --date=$(date +%Y-%m-%d)
 python year_precip.py
 python month_precip.py
 python day_precip.py

@@ -6,6 +6,7 @@ import os
 import subprocess
 import sys
 from datetime import datetime, timedelta, timezone
+from typing import NoReturn
 
 # third party
 import httpx
@@ -338,15 +339,15 @@ def process_features(features):
     return pd.DataFrame(rows).replace({9999: np.nan})
 
 
-def fetch(uri):
+def fetch(uri: str) -> NoReturn | pd.DataFrame:
     """Download the files we need"""
     res = util.exponential_backoff(httpx.get, uri, timeout=30)
     if res is None:
         LOG.info("failed to fetch %s", uri)
         sys.exit()
     data = res.json()
-    if "features" not in data:
-        LOG.info(
+    if not data.get("features", []):
+        LOG.warning(
             "Got status_code: %s for %s, invalid result of: %s",
             res.status_code,
             uri,
