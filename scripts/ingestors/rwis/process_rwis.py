@@ -346,7 +346,7 @@ def fetch(uri: str) -> NoReturn | pd.DataFrame:
         LOG.info("failed to fetch %s", uri)
         sys.exit()
     data = res.json()
-    if not data.get("features", []):
+    if "features" not in data:
         LOG.warning(
             "Got status_code: %s for %s, invalid result of: %s",
             res.status_code,
@@ -388,8 +388,6 @@ def main():
     """Go Main Go"""
     atmos = fetch(ATMOS_URI)
     surface = fetch(SURFACE_URI)
-    # Ensure SENSOR_ID is valid
-    surface = surface[surface["SENSOR_ID"].notna()]
     if atmos.empty or surface.empty:
         LOG.info(
             "FAIL, empty dataframe atmos sz:%s, surface sz:%s",
@@ -397,6 +395,8 @@ def main():
             len(surface.index),
         )
         return
+    # Ensure SENSOR_ID is valid
+    surface = surface[surface["SENSOR_ID"].notna()]
     obs = merge(atmos, surface)
     do_iemtracker(obs)
     # Remove back out those stations that are offline
