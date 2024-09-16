@@ -126,6 +126,7 @@
 /plotting/auto/plot/163/csector:midwest::var:count_rank::sdate:2024-01-01%200000::edate:2024-08-26%200000::filter:NONE::by:wfo::cmap:plasma::lbl:yes::_r:t::dpi:100.png
 /plotting/auto/plot/163/csector:midwest::var:count_departure::sdate:2024-01-01%200000::edate:2024-08-26%200000::filter:NONE::by:wfo::cmap:plasma::lbl:yes::_r:t::dpi:100.png
 /plotting/auto/plot/163/csector:midwest::var:count_standard::sdate:2024-01-01%200000::edate:2024-08-26%200000::filter:NONE::by:wfo::cmap:plasma::lbl:yes::_r:t::dpi:100.png
+/plotting/auto/plot/163/csector:IA::var:count::sdate:2024-01-01%200000::edate:2024-09-17%200000::filter:TORNADO::by:wfo::cmap:plasma::lbl:yes::_r:t::dpi:100.png
 /plotting/auto/plot/164/sts:2024-05-01::ets:2024-09-09::var:precip::_r:t::dpi:100.png
 /plotting/auto/plot/164/sts:2024-05-01::ets:2024-09-09::var:high::_r:t::dpi:100.png
 /plotting/auto/plot/165/w:air::sector:IA::var:spring_below::popt:contour::year:2020::threshold:32::cmap:BrBG::_r:t::dpi:100.png
