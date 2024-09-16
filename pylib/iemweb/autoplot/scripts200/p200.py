@@ -35,6 +35,8 @@ from pyiem.reference import LATLON
 from pyiem.util import get_autoplot_context, utc
 from sqlalchemy import text
 
+from iemweb.autoplot import ARG_FEMA
+
 PDICT5 = {
     "yes": "YES: Draw Counties/Parishes",
     "no": "NO: Do Not Draw Counties/Parishes",
@@ -122,7 +124,11 @@ OUTLOOKS = {
     "WIND.0.60": "Wind 60% (Days 1+2)",
     "WIND.SIGN": "Wind Significant (Days 1+2)",
 }
-PDICT = {"cwa": "Plot by NWS Forecast Office", "state": "Plot by State/Sector"}
+PDICT = {
+    "cwa": "Plot by NWS Forecast Office",
+    "state": "Plot by State/Sector",
+    "fema": "Plot by FEMA Region",
+}
 PDICT2 = {
     "avg": "Average Number of Days per Year",
     "count": "Total Number of Days",
@@ -204,6 +210,7 @@ def get_description():
             default="conus",
             label="Select state/sector to plot",
         ),
+        ARG_FEMA,
         dict(
             type="select",
             name="drawc",
@@ -352,6 +359,9 @@ def plotter(fdict):
             f"Plotted for {ctx['_nt'].sts[station]['name']} ({station}). "
             f"{subtitle}"
         )
+    elif t == "fema":
+        sector = "fema_region"
+        subtitle = f"Plotted for FEMA Region {ctx['fema']}. {subtitle}"
     else:
         sector = "state" if len(csector) == 2 else csector
 
@@ -359,6 +369,7 @@ def plotter(fdict):
         apctx=ctx,
         sector=sector,
         state=csector,
+        fema_region=ctx["fema"],
         cwa=(station if len(station) == 3 else station[1:]),
         axisbg="white",
         title=(

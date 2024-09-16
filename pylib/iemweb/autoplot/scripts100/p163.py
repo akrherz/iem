@@ -15,7 +15,7 @@ to use some heuristics to associate those with an actual political
 boundary.  This fails about one percent of the time.
 """
 
-import datetime
+from datetime import timedelta
 from zoneinfo import ZoneInfo
 
 import numpy as np
@@ -24,6 +24,7 @@ from pyiem.database import get_sqlalchemy_conn
 from pyiem.exceptions import NoDataFound
 from pyiem.plot import MapPlot, get_cmap
 from pyiem.util import get_autoplot_context, utc
+from sqlalchemy import text
 
 MDICT = {
     "NONE": "All LSR Types",
@@ -99,7 +100,7 @@ PDICT3 = {
 def get_description():
     """Return a dict describing how to call this plotter"""
     desc = {"description": __doc__, "data": True}
-    today = utc() + datetime.timedelta(days=1)
+    today = utc() + timedelta(days=1)
     jan1 = today.replace(month=1, day=1)
     desc["arguments"] = [
         dict(
@@ -231,8 +232,10 @@ def get_count_bins(df, varname):
 def plotter(fdict):
     """Go"""
     ctx = get_autoplot_context(fdict, get_description())
-    sts = ctx["sdate"].replace(tzinfo=ZoneInfo("UTC"))
-    ets = ctx["edate"].replace(tzinfo=ZoneInfo("UTC"))
+    params = {
+        "sts": ctx["sdate"].replace(tzinfo=ZoneInfo("UTC")),
+        "ets": ctx["edate"].replace(tzinfo=ZoneInfo("UTC")),
+    }
     varname = ctx["var"]
     by = ctx["by"]
     myfilter = ctx["filter"]
@@ -254,10 +257,12 @@ def plotter(fdict):
             "'TSTM WND DMG') "
         )
     else:
-        tlimiter = f" and typetext = '{myfilter}' "
+        tlimiter = " and typetext = :myfilter "
+        params["myfilter"] = myfilter
     state_limiter = ""
     if len(ctx["csector"]) == 2:
-        state_limiter = f" and l.state = '{ctx['csector']}' "
+        state_limiter = " and l.state = :state "
+        params["state"] = ctx["csector"]
     cmap = get_cmap(ctx["cmap"])
     extend = "neither"
 
@@ -265,31 +270,31 @@ def plotter(fdict):
         with get_sqlalchemy_conn("postgis") as conn:
             if by != "ugc":
                 df = pd.read_sql(
-                    f"""
+                    text(f"""
                 WITH data as (
                     SELECT distinct wfo, state, date(valid)
-                    from lsrs l where valid >= %s and valid < %s {tlimiter}
+                    from lsrs l where valid >= :sts and valid < :ets {tlimiter}
                     {state_limiter}
                 )
                 SELECT {by}, count(*) from data GROUP by {by}
-                """,
+                """),
                     conn,
-                    params=(sts, ets),
+                    params=params,
                     index_col=by,
                 )
             else:
                 df = pd.read_sql(
-                    f"""
+                    text(f"""
                 WITH data as (
                     SELECT distinct ugc, date(valid)
                     from lsrs l JOIN ugcs u on (l.gid = u.gid)
-                    where valid >= %s and valid < %s {tlimiter}
+                    where valid >= :sts and valid < :ets {tlimiter}
                     {state_limiter}
                 )
                 SELECT ugc, count(*) from data GROUP by ugc
-                """,
+                """),
                     conn,
-                    params=(sts, ets),
+                    params=params,
                     index_col=by,
                 )
         df2 = df["count"]
@@ -305,34 +310,34 @@ def plotter(fdict):
         with get_sqlalchemy_conn("postgis") as conn:
             if by != "ugc":
                 df = pd.read_sql(
-                    f"""
+                    text(f"""
                 WITH data as (
                     SELECT distinct wfo, state, valid, type,
                     magnitude, geom from lsrs l
-                    where valid >= %s and valid < %s {tlimiter}
+                    where valid >= :sts and valid < :ets {tlimiter}
                     {state_limiter}
                 )
                 SELECT {by}, count(*) from data GROUP by {by}
-                """,
+                """),
                     conn,
                     index_col=by,
-                    params=(sts, ets),
+                    params=params,
                 )
             else:
                 df = pd.read_sql(
-                    f"""
+                    text(f"""
                 WITH data as (
                     SELECT distinct ugc, valid, type,
                     magnitude, l.geom from
                     lsrs l JOIN ugcs u on (l.gid = u.gid)
-                    where valid >= %s and valid < %s {tlimiter}
+                    where valid >= :sts and valid < :ets {tlimiter}
                     {state_limiter}
                 )
                 SELECT ugc, count(*) from data GROUP by ugc
-                """,
+                """),
                     conn,
                     index_col=by,
-                    params=(sts, ets),
+                    params=params,
                 )
         df2 = df["count"]
         if df2.max() < 10:
@@ -345,17 +350,17 @@ def plotter(fdict):
         cmap.set_over("#EEEEEE")
         extend = "max"
     else:
-        sday = sts.strftime("%m%d")
-        eday = ets.strftime("%m%d")
+        params["sday"] = params["sts"].strftime("%m%d")
+        params["eday"] = params["ets"].strftime("%m%d")
         slimiter = (
-            f" (to_char(valid, 'mmdd') >= '{sday}' and "
-            f"to_char(valid, 'mmdd') <= '{eday}' ) "
+            " (to_char(valid, 'mmdd') >= :sday and "
+            "to_char(valid, 'mmdd') <= :eday ) "
         )
         yearcol = "extract(year from valid)"
-        if eday <= sday:
+        if params["eday"] <= params["sday"]:
             slimiter = slimiter.replace(" and ", " or ")
             yearcol = (
-                f"case when to_char(valid, 'mmdd') <= '{eday}' then "
+                "case when to_char(valid, 'mmdd') <= :eday then "
                 "extract(year from valid)::int - 1 else "
                 "extract(year from valid) end"
             )
@@ -363,20 +368,21 @@ def plotter(fdict):
         with get_sqlalchemy_conn("postgis") as conn:
             if by != "ugc":
                 df = pd.read_sql(
-                    f"""
+                    text(f"""
                 WITH data as (
                     SELECT distinct wfo, {yearcol} as year, state, valid, type,
                     magnitude, geom from lsrs l
                     where {slimiter} {tlimiter} {state_limiter}
                 )
                 SELECT {by}, year, count(*) from data GROUP by {by}, year
-                """,
+                """),
                     conn,
+                    params=params,
                     index_col=None,
                 )
             else:
                 df = pd.read_sql(
-                    f"""
+                    text(f"""
                 WITH data as (
                     SELECT distinct ugc, {yearcol} as year, valid, type,
                     magnitude, l.geom
@@ -384,8 +390,9 @@ def plotter(fdict):
                     where {slimiter} {tlimiter} {state_limiter}
                 )
                 SELECT {by}, year, count(*) from data GROUP by {by}, year
-                """,
+                """),
                     conn,
+                    params=params,
                     index_col=None,
                 )
         # Fill out zeros
@@ -396,7 +403,9 @@ def plotter(fdict):
         df = df.set_index([by, "year"]).reindex(idx).fillna(0).reset_index()
         df["rank"] = df.groupby(by)["count"].rank(method="min", ascending=True)
         thisyear = (
-            df[df["year"] == sts.year].set_index(by).drop("year", axis=1)
+            df[df["year"] == params["sts"].year]
+            .set_index(by)
+            .drop("year", axis=1)
         )
         # Ready to construct final df.
         df = df[[by, "count"]].groupby(by).agg(["mean", "std"]).copy()
@@ -427,7 +436,8 @@ def plotter(fdict):
             f"{PDICT[by]}"
         ),
         subtitle=(
-            f"Valid {sts:%d %b %Y %H:%M} - {ets:%d %b %Y %H:%M} UTC, "
+            f"Valid {params['sts']:%d %b %Y %H:%M} - "
+            f"{params['ets']:%d %b %Y %H:%M} UTC, "
             f"type limiter: {MDICT.get(myfilter)}"
         ),
         nocaption=True,
