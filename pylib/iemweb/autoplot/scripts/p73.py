@@ -23,6 +23,8 @@ from pyiem.reference import state_names
 from pyiem.util import get_autoplot_context
 from sqlalchemy import text
 
+from iemweb.autoplot import ARG_FEMA, FEMA_REGIONS, fema_region2states
+
 PDICT = {
     "yes": "Limit Plot to Year-to-Date",
     "no": "Plot Entire Year",
@@ -32,6 +34,7 @@ PDICT2 = {
     "wfo": "View by Single NWS Forecast Office",
     "state": "View by State",
     "ugc": "NWS County/Forecast Zone",
+    "fema": "FEMA Zone",
 }
 
 
@@ -55,6 +58,7 @@ def get_description():
             all=True,
         ),
         dict(type="state", default="IA", name="state", label="Select State:"),
+        ARG_FEMA,
         dict(
             type="ugc",
             name="ugc",
@@ -139,6 +143,10 @@ def plotter(fdict):
             f"NWS {ctx['_nt'].sts[wfo]['name']} Issued for [{ctx['ugc']}] "
             f"{name}"
         )
+    elif opt == "fema":
+        wfo_limiter = " and substr(ugc, 1, 2) = ANY(:states) "
+        params["states"] = fema_region2states(ctx["fema"])
+        title1 = f"FEMA Region {ctx['fema']} {FEMA_REGIONS[ctx['fema']]}"
     else:
         wfo_limiter = " and substr(ugc, 1, 2) = :state "
         params["state"] = state
