@@ -6,7 +6,7 @@ cd ../12z
 python asos_low.py
 
 cd ../climate
-python today_hilo.py
+python today_hilo.py --date=$(date --date '1 day ago' +'%Y-%m-%d')
 python today_rec_hilo.py
 
 cd ../month

@@ -4,14 +4,14 @@ Sum up the hourly precipitation from NCEP stage IV and produce maps
 called from RUN_STAGE4.sh
 """
 
-import datetime
-import sys
+from datetime import datetime, timedelta
 from zoneinfo import ZoneInfo
 
+import click
 import pygrib
 from metpy.units import masked_array, units
 from pyiem.plot import MapPlot, nwsprecip
-from pyiem.util import archive_fetch, logger, utc
+from pyiem.util import archive_fetch, logger
 
 LOG = logger()
 
@@ -24,8 +24,8 @@ def doday(ts, realtime):
     """
     LOG.info("Running for %s realtime: %s", ts, realtime)
     sts = ts.replace(hour=1)
-    ets = sts + datetime.timedelta(hours=24)
-    interval = datetime.timedelta(hours=1)
+    ets = sts + timedelta(hours=24)
+    interval = timedelta(hours=1)
     now = sts
     total = None
     lts = None
@@ -48,18 +48,16 @@ def doday(ts, realtime):
         if ts.hour > 1:
             LOG.info("found no data for date: %s", ts)
         return
-    lts = lts - datetime.timedelta(minutes=1)
+    lts = lts - timedelta(minutes=1)
     subtitle = "Total between 12:00 AM and %s" % (lts.strftime("%I:%M %p %Z"),)
     routes = "ac"
     if not realtime:
         routes = "a"
     total = masked_array(total, units("mm")).to(units("inch")).m
     for sector in ["iowa", "midwest", "conus"]:
-        pqstr = ("plot %s %s00 %s_stage4_1d.png %s_stage4_1d.png png") % (
-            routes,
-            ts.strftime("%Y%m%d%H"),
-            sector,
-            sector,
+        pqstr = (
+            f"plot {routes} {ts:%Y%m%d%H}00 {sector}_stage4_1d.png "
+            f"{sector}_stage4_1d.png png"
         )
 
         mp = MapPlot(
@@ -77,24 +75,19 @@ def doday(ts, realtime):
         mp.close()
 
 
-def main(argv):
+@click.command()
+@click.option("--date", "dt", required=True, type=click.DateTime())
+@click.option("--realtime", is_flag=True, default=False)
+def main(dt: datetime, realtime: bool):
     """Go Main Go
 
     So the past hour's stage IV is available by about 50 after, so we should
     run for a day that is 90 minutes in the past by default
 
     """
-    if len(argv) == 4:
-        date = utc(int(argv[1]), int(argv[2]), int(argv[3]), 12)
-        realtime = False
-    else:
-        date = utc()
-        date = date - datetime.timedelta(minutes=90)
-        date = date.replace(hour=12, minute=0, second=0, microsecond=0)
-        realtime = True
-    date = date.astimezone(ZoneInfo("America/Chicago"))
-    doday(date, realtime)
+    dt = dt.replace(hour=12, tzinfo=ZoneInfo("America/Chicago"))
+    doday(dt, realtime)
 
 
 if __name__ == "__main__":
-    main(sys.argv)
+    main()

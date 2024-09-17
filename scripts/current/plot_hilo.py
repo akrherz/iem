@@ -1,54 +1,47 @@
-"""Plot the High + Low Temperatures"""
+"""Plot the High + Low Temperatures.
 
-import datetime
-import sys
+Called from RUN_10_AFTER.sh and RUN_SUMMARY.sh
+"""
 
+from datetime import datetime
+
+import click
+import pandas as pd
+from pyiem.database import get_sqlalchemy_conn
 from pyiem.plot import MapPlot
-from pyiem.util import get_dbconnc
+from sqlalchemy import text
 
 
-def main(argv):
+@click.command()
+@click.option("--date", "dt", type=click.DateTime(), required=True)
+def main(dt: datetime):
     """Go Main Go"""
-    now = datetime.date.today()
-    routes = "ac"
-    if len(argv) == 4:
-        routes = "a"
-        now = datetime.date(int(argv[1]), int(argv[2]), int(argv[3]))
-    pgconn, cursor = get_dbconnc("iem")
+    now = dt.today()
+    routes = "ac" if now == dt.today() else "a"
 
     # Compute normal from the climate database
-    data = []
-    cursor.execute(
-        f"""
+    with get_sqlalchemy_conn("iem") as conn:
+        obs = pd.read_sql(
+            text(f"""
     SELECT
-      s.id as station, max_tmpf, min_tmpf,
+      s.id, max_tmpf as tmpf, min_tmpf as dwpf,
       ST_x(s.geom) as lon, ST_y(s.geom) as lat
     FROM
       summary_{now.year} c JOIN stations s on (c.iemid = s.iemid)
     WHERE
-      s.network = 'IA_ASOS' and day = %s
+      s.network = 'IA_ASOS' and day = :dt
       and max_tmpf is not null and min_tmpf is not null
-    """,
-        (now,),
-    )
-    for row in cursor:
-        data.append(  # noqa
-            {
-                "lat": row["lat"],
-                "lon": row["lon"],
-                "tmpf": row["max_tmpf"],
-                "dwpf": row["min_tmpf"],
-                "id": row["station"],
-            }
+    """),
+            conn,
+            params={"dt": now},
         )
-    pgconn.close()
 
     mp = MapPlot(
         title="Iowa High & Low Air Temperature",
         axisbg="white",
         subtitle=now.strftime("%d %b %Y"),
     )
-    mp.plot_station(data)
+    mp.plot_station(obs.to_dict("records"))
     mp.drawcounties()
     pqstr = f"plot {routes} {now:%Y%m%d}0000 bogus hilow.gif png"
     mp.postprocess(view=False, pqstr=pqstr)
@@ -56,4 +49,4 @@ def main(argv):
 
 
 if __name__ == "__main__":
-    main(sys.argv)
+    main()

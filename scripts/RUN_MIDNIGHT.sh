@@ -35,7 +35,7 @@ python hads_delete_dups.py
 
 cd ../hads
 python dedup_hml_forecasts.py
-python raw2obs.py
+python raw2obs.py --date=$(date --date '1 day ago' +'%Y-%m-%d')
 
 cd ../mrms
 python copy_daily_24h.py $(date +'%Y %m %d')

@@ -69,7 +69,6 @@ Ext.onReady(function () {
                 listeners: {
                     change: (cb, isChecked) => {
                         var id = cb.getName();
-                        //console.log("cid: "+ id +" checked: "+ checked);
                         if (!imagestore.isLoaded) { return; }
 
                         var rec = imagestore.getAt(imagestore.find("cid", id));
@@ -106,7 +105,7 @@ Ext.onReady(function () {
     });
 
 
-    var tpl = new Ext.XTemplate(
+    const tpl = new Ext.XTemplate(
         '<tpl for=".">',
         '<tpl if="this.shouldShow(cid)">',
         '<div class="thumb-wrap" id="{cid}">',
@@ -116,13 +115,13 @@ Ext.onReady(function () {
         '</tpl>',
         '<div class="x-clear"></div>',
         {
-            shouldShow: function (cid) {
-                return (disableStore.find('cid', cid) == -1);
+            shouldShow: (cid) => {
+                return (disableStore.find('cid', cid) === -1);
             }
         }
     );
 
-    var helpWin = new Ext.Window({
+    const helpWin = new Ext.Window({
         contentEl: 'help',
         title: 'Information',
         closeAction: 'hide',
@@ -146,16 +145,16 @@ Ext.onReady(function () {
             tbar: [{
                 xtype: 'button',
                 text: 'All Off',
-                handler: function () {
-                    Ext.getCmp("camselector").items.each(function (i) {
+                handler: () => {
+                    Ext.getCmp("camselector").items.each((i) => {
                         i.setValue(false);
                     });
                 }
             }, {
                 xtype: 'button',
                 text: 'All On',
-                handler: function () {
-                    Ext.getCmp("camselector").items.each(function (i) {
+                handler: () => {
+                    Ext.getCmp("camselector").items.each((i) => {
                         i.setValue(true);
                     });
                 }
@@ -176,7 +175,7 @@ Ext.onReady(function () {
             tbar: [{
                 xtype: 'button',
                 text: 'Help',
-                handler: function () {
+                handler: () => {
                     helpWin.show();
                 }
             }, {
@@ -198,7 +197,7 @@ Ext.onReady(function () {
                     data: [['name', 'Name'], ['county', 'County'], ['cid', 'Camera ID']]
                 }),
                 listeners: {
-                    'select': function (sb) {
+                    'select': (sb) => {
                         imagestore.sort(sb.getValue(), "ASC");
                     }
                 }
@@ -341,7 +340,7 @@ Ext.onReady(function () {
     Ext.TaskManager.start(task);
 
     app.appSetTime = function (s) {
-        if (s.length == 17) {
+        if (s.length === 17) {
             var tokens2 = s.split("-");
             var network = tokens2[0];
             Ext.getCmp("networkSelect").setValue(network);
@@ -362,7 +361,7 @@ Ext.onReady(function () {
                 }
             });
             window.location.href = "#" + Ext.getCmp("networkSelect").getValue() + "-" + Ext.Date.format(dt, 'YmdHi');
-        } else if (s.length == 6) {
+        } else if (s.length === 6) {
             const tokens3 = s.split("-");
             Ext.getCmp("networkSelect").setValue(tokens3[0]);
             imagestore.load({
@@ -375,8 +374,8 @@ Ext.onReady(function () {
     };
 
     // Anchor bookmark support
-    var tokens = window.location.href.split('#');
-    if (tokens.length == 2) {
+    const tokens = window.location.href.split('#');
+    if (tokens.length === 2) {
         app.appSetTime(tokens[1]);
     } else {
         imagestore.load();

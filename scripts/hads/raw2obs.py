@@ -1,12 +1,16 @@
-"""Convert the raw table data into something faster for website to use"""
+"""Convert the raw table data into something faster for website to use.
 
-import datetime
-import sys
+called from RUN_MIDNIGHT.sh
+"""
+
+from datetime import date, datetime, timedelta
 from io import StringIO
 from zoneinfo import ZoneInfo
 
+import click
 import pandas as pd
-from pyiem.util import convert_value, get_dbconn, get_sqlalchemy_conn, logger
+from pyiem.database import get_dbconn, get_sqlalchemy_conn
+from pyiem.util import convert_value, logger
 
 LOG = logger()
 
@@ -18,14 +22,12 @@ def v(val):
     return val
 
 
-def do(ts):
+def do(ts: date):
     """Do a UTC date's worth of data"""
     pgconn = get_dbconn("hads")
     table = ts.strftime("raw%Y_%m")
-    sts = datetime.datetime(ts.year, ts.month, ts.day).replace(
-        tzinfo=ZoneInfo("UTC")
-    )
-    ets = sts + datetime.timedelta(hours=24)
+    sts = datetime(ts.year, ts.month, ts.day).replace(tzinfo=ZoneInfo("UTC"))
+    ets = sts + timedelta(hours=24)
     with get_sqlalchemy_conn("hads") as conn:
         df = pd.read_sql(
             f"""
@@ -77,13 +79,12 @@ def do(ts):
     pgconn.commit()
 
 
-def main(argv):
+@click.command()
+@click.option("--date", "dt", required=True, type=click.DateTime())
+def main(dt: datetime):
     """Go Main Go"""
-    ts = datetime.date.today() - datetime.timedelta(days=1)
-    if len(argv) == 4:
-        ts = datetime.date(int(argv[1]), int(argv[2]), int(argv[3]))
-    do(ts)
+    do(dt.date())
 
 
 if __name__ == "__main__":
-    main(sys.argv)
+    main()

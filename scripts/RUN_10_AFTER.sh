@@ -40,7 +40,7 @@ fi
 if [ $HH -eq "12" ]
 then
     cd ../current
-    python q3_today_total.py $YEST
+    python mrms_today_total.py --date=$(date --date '1 day ago' +'%Y-%m-%d')
 fi
 
 # We have troubles with IEMRE daily_analysis running timely at midnight, so
@@ -76,7 +76,7 @@ cd ../ingestors/rwis
 python process_traffic.py &
 
 cd ../../current
-python plot_hilo.py
+python plot_hilo.py --date=$(date +'%Y-%m-%d')
 python ifc_today_total.py --date=$(date --date '60 minutes ago' +'%Y-%m-%d') --realtime
 if [ $LHH -eq "01" ]
 then
@@ -118,7 +118,7 @@ cd ../current
 python q3_xhour.py --hours=6
 python q3_xhour.py --hours=3
 python q3_xhour.py --hours=1
-python q3_today_total.py 
+python mrms_today_total.py --date=$(date +'%Y-%m-%d') 
 
 cd ../ua
 if [ $HH -eq "04" ]
