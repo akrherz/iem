@@ -1,4 +1,5 @@
 /* global Cookies, $ */
+// Legacy anchors looked like PIL-LIMIT, now are PIL:(LIMIT * ORDER)
 const NO_DATE_SET = 'No Limit';
 
 function text(str){
@@ -6,17 +7,28 @@ function text(str){
     return $("<p>").text(str).html();
 }
 
+function deal_with_token(token) {
+    var tokens2 = token.split(":");
+    if (tokens2.length !== 2) {
+        // legacy
+        tokens2 = token.split("-");
+    }
+    if (tokens2.length === 1) {
+        tokens2.push(1);
+    }
+    // Last value indicates the order
+    const order = (parseInt(tokens2[1], 10) < 0) ? "asc" : "desc";
+    const limit = Math.abs(parseInt(tokens2[1], 10));
+    addTab(text(tokens2[0]), "", "", limit, NO_DATE_SET, NO_DATE_SET, false, order);
+}
+
 function readAnchorTags() {
     const tokens = window.location.href.split("#");
     if (tokens.length !== 2) {
         return;
     }
-    $(text(tokens[1]).split(",")).each((_idx, pil_limit) => {
-        const tokens2 = pil_limit.split("-");
-        if (tokens2.length === 1) {
-            tokens2.push(1);
-        }
-        addTab(text(tokens2[0]), "", "", text(tokens2[1]), NO_DATE_SET, NO_DATE_SET, false, "desc");
+    $(text(tokens[1]).split(",")).each((_idx, token) => {
+        deal_with_token(token);
     });
 }
 function readCookies() {
@@ -24,12 +36,8 @@ function readCookies() {
     if (afospils === undefined || afospils === '') {
         return;
     }
-    $(afospils.split(",")).each((_idx, pil_limit) => {
-        const tokens = pil_limit.split("-");
-        if (tokens.length == 1) {
-            tokens.push(1);
-        }
-        addTab(tokens[0], "", "", tokens[1], NO_DATE_SET, NO_DATE_SET, false, "desc");
+    $(afospils.split(",")).each((_idx, token) => {
+        deal_with_token(token);
     });
 }
 function saveCookies() {
@@ -39,18 +47,16 @@ function saveCookies() {
         if ($(li).data('sdate') !== NO_DATE_SET) {
             return;
         }
-        // Unsupported
-        if ($(li).data('order') === "desc") {
-            return;
-        }
-        afospils.push(`${$(li).data('pil')}-${$(li).data('limit')}`);
+        const multi = ($(li).data('order') === "desc") ? 1 : -1;
+        const val = parseInt($(li).data('limit'), 10) * multi;
+        afospils.push(`${$(li).data('pil')}:${val}`);
     });
 
     Cookies.set('afospils', afospils.join(","), {
         'path': '/wx/afos/',
         'expires': 3650
     });
-    window.location.href = `#${afospils.join(",")}`;
+    window.location.hash = afospils.join(",");
 };
 
 function loadTabContent(div, pil, center, ttaaii, limit, sdate, edate, order) {
