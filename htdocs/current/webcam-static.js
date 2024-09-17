@@ -4,7 +4,7 @@ var imagestore;
 var disableStore;
 const ISO8601 = 'Y-m-d\\TH:i:s\\Z';
 
-Ext.onReady(function () {
+Ext.onReady(() => {
 
     /* Hack needed for Ext 3.0-rc2 to keep timefield working */
     Ext.override(Ext.form.ComboBox, {
@@ -58,9 +58,9 @@ Ext.onReady(function () {
      * When the image store loads, we need to check our listing of disabled
      * webcams so that we don't show it again
      */
-    imagestore.on('load', function (store, records) {
+    imagestore.on('load', (store, records) => {
         var data = Array();
-        Ext.each(records, function (record) {
+        Ext.each(records, (record) => {
             var checked = (disableStore.find('cid', record.get("cid")) == -1);
             data.push({
                 boxLabel: Number(record.get("cid").substr(5, 3)) + " " + record.get("name"),
