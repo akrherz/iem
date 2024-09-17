@@ -1057,7 +1057,7 @@ def remove_all_cookies(headers, cookiestr):
         )
 
 
-@iemapp(parse_times=False)
+@iemapp(parse_times=False, allowed_as_list=["ltype"])
 def application(environ, start_response):
     """mod-wsgi handler."""
     cookies = get_cookie_dict(environ)
