@@ -8,7 +8,8 @@ values are based on unofficial archives maintained by the IEM.
 Flood Warnings that cover multiple months in time would only appear once for
 the month of issuance.</p>
 
-<p>If you select the state wide option, the totaling is a bit different. A
+<p>If you select the state wide or FEMA option,
+the totaling is a bit different. A
 single watch issued by multiple WFOs would potentially count as more than
 one event in this listing.  Sorry, tough issue to get around.  In the case
 of warnings and advisories, the totals should be good.</p>
@@ -216,6 +217,8 @@ def plotter(fdict):
             f"NWS [{wfo}] {ctx['_nt'].sts[wfo]['name']} Issued for "
             f"[{ctx['ugc']}] {name}"
         )
+    elif opt == "fema":
+        title = f"NWS Issued for FEMA Region {ctx['fema']}"
     (fig, ax) = figure_axes(title=title, subtitle=subtitle, apctx=ctx)
     # Print the top 10 days
     ypos = 0.9

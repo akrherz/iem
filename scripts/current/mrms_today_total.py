@@ -1,12 +1,14 @@
 """
-Create a plot of today's estimated precipitation based on the MRMS data
+Create a plot of today's estimated precipitation based on the MRMS data.
+
+Called from RUN_10_AFTER.sh
 """
 
-import datetime
 import os
-import sys
+from datetime import date, datetime, timedelta
 from zoneinfo import ZoneInfo
 
+import click
 import numpy as np
 import pyiem.iemre as iemre
 from pyiem.plot import MapPlot, nwsprecip
@@ -24,9 +26,7 @@ def doday(ts, realtime):
     # make assumptions about the last valid MRMS data
     if realtime:
         # Up until :59 after of the last hour
-        lts = (datetime.datetime.now() - datetime.timedelta(hours=1)).replace(
-            minute=59
-        )
+        lts = (datetime.now() - timedelta(hours=1)).replace(minute=59)
     else:
         lts = lts.replace(
             year=ts.year, month=ts.month, day=ts.day, hour=23, minute=59
@@ -41,7 +41,7 @@ def doday(ts, realtime):
         precip = nc.variables["p01d"][idx, :, :]
         lats = nc.variables["lat"][:]
         lons = nc.variables["lon"][:]
-    subtitle = "Total between 12:00 AM and %s" % (lts.strftime("%I:%M %p %Z"),)
+    subtitle = f"Total between 12:00 AM and {lts:%I:%M %p %Z}"
     routes = "ac"
     if not realtime:
         routes = "a"
@@ -66,15 +66,12 @@ def doday(ts, realtime):
 
     (xx, yy) = np.meshgrid(lons, lats)
     for sector in ["iowa", "midwest"]:
-        pqstr = ("plot %s %s00 %s_q2_1d.png %s_q2_1d.png png") % (
-            routes,
-            ts.strftime("%Y%m%d%H"),
-            sector,
-            sector,
+        pqstr = (
+            f"plot {routes} {ts:%Y%m%d%H}00 {sector}_q2_1d.png "
+            f"{sector}_q2_1d.png png"
         )
         mp = MapPlot(
-            title=("%s NCEP MRMS Today's Precipitation")
-            % (ts.strftime("%-d %b %Y"),),
+            title=f"{ts:%-d %b %Y} NCEP MRMS Today's Precipitation",
             subtitle=subtitle,
             sector=sector,
         )
@@ -88,17 +85,12 @@ def doday(ts, realtime):
         mp.close()
 
 
-def main():
+@click.command()
+@click.option("--date", "dt", required=True, type=click.DateTime())
+def main(dt: datetime):
     """Main Method"""
-    if len(sys.argv) == 4:
-        date = datetime.date(
-            int(sys.argv[1]), int(sys.argv[2]), int(sys.argv[3])
-        )
-        realtime = False
-    else:
-        date = datetime.date.today()
-        realtime = True
-    doday(date, realtime)
+    dt = dt.date()
+    doday(dt, dt == date.today())
 
 
 if __name__ == "__main__":

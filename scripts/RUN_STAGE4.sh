@@ -10,7 +10,7 @@ sleep 30
 
 cd ../current
 python stage4_hourly.py --valid=$TSTAMP
-python stage4_today_total.py
+python stage4_today_total.py --date=$(date --date '90 minutes ago' +'%Y-%m-%d') --realtime
 python stage4_xhour.py 24
 python stage4_xhour.py 48
 

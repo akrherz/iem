@@ -338,7 +338,7 @@ def workflow(mc, environ, fmt):
     return HTTP200, content
 
 
-@iemapp(parse_times=False)
+@iemapp(parse_times=False, allowed_as_list=["ltype"])
 def application(environ, start_response):
     """Our Application!"""
     if "p" not in environ:
