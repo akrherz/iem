@@ -8,7 +8,7 @@ function text(str){
 }
 
 function deal_with_token(token) {
-    var tokens2 = token.split(":");
+    let tokens2 = token.split(":");
     if (tokens2.length !== 2) {
         // legacy
         tokens2 = token.split("-");
