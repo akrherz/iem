@@ -5,12 +5,12 @@ Appears that data for the previous month is available by the 9th of current mon
 called from RUN_2AM.sh
 """
 
-import datetime
 import glob
 import os
 import subprocess
-import sys
+from datetime import date, datetime, timedelta
 
+import click
 import pygrib
 import requests
 from pyiem.util import exponential_backoff, logger
@@ -32,7 +32,7 @@ def process(tarfn):
 
         dt = radgrb["dataDate"]
         hr = int(radgrb["dataTime"]) / 100.0
-        ts = datetime.datetime.strptime(f"{dt} {hr:.0f}", "%Y%m%d %H")
+        ts = datetime.strptime(f"{dt} {hr:.0f}", "%Y%m%d %H")
         for prefix, grb in zip(["rad", "apcp"], [radgrb, pcpgrb]):
             fn = f"{prefix}_{ts:%Y%m%d%H%M}.grib"
             with open(fn, "wb") as fh:
@@ -50,9 +50,9 @@ def process(tarfn):
 def fetch_rda(year, month):
     """Get data please from RDA"""
     days = ["0109", "1019"]
-    lastday = (
-        datetime.date(year, month, 1) + datetime.timedelta(days=35)
-    ).replace(day=1) - datetime.timedelta(days=1)
+    lastday = (date(year, month, 1) + timedelta(days=35)).replace(
+        day=1
+    ) - timedelta(days=1)
     days.append(f"20{lastday.day}")
     for day in days:
         uri = (
@@ -87,12 +87,13 @@ def fetch_rda(year, month):
     )
 
 
-def main(argv):
+@click.command()
+@click.option("--year", type=int, required=True)
+@click.option("--month", type=int, required=True)
+def main(year: int, month: int):
     """Go Main Go"""
-    year = int(argv[1])
-    month = int(argv[2])
     fetch_rda(year, month)
 
 
 if __name__ == "__main__":
-    main(sys.argv)
+    main()

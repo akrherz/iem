@@ -6,11 +6,12 @@ query plan.  So we iterate over t<year> tables.
 called from daily_drive_network.py for {asos,rwis}
 """
 
-import datetime
-import sys
+from datetime import date, timedelta
 
+import click
+from pyiem.database import get_dbconnc
 from pyiem.network import Table as NetworkTable
-from pyiem.util import get_dbconnc, logger
+from pyiem.util import logger
 
 LOG = logger()
 ALLDATA = {}
@@ -21,7 +22,7 @@ START_YEAR = {
     "scan": 1987,
     "uscrn": 2001,
 }
-TODAY = datetime.date.today()
+TODAY = date.today()
 
 
 def get_minvalid(cursor, station, start_year):
@@ -50,10 +51,12 @@ def get_maxvalid(cursor, station, start_year):
     return None
 
 
-def main(argv):
+@click.command()
+@click.option("--dbname", required=True)
+@click.option("--network", required=True)
+def main(dbname: str, network: str) -> None:
     """Go Main"""
-    basets = datetime.date.today() - datetime.timedelta(days=365)
-    (dbname, network) = argv[1:]
+    basets = date.today() - timedelta(days=365)
 
     pgconn, rcursor = get_dbconnc(dbname)
     mesosite, mcursor = get_dbconnc("mesosite")
@@ -102,4 +105,4 @@ def main(argv):
 
 
 if __name__ == "__main__":
-    main(sys.argv)
+    main()

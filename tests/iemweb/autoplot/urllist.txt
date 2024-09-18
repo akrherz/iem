@@ -189,6 +189,7 @@
 /plotting/auto/plot/205/network:IA_ASOS::station:DSM::max_tmpf_above:90::max_feel_above:90::_r:t::dpi:100.png
 /plotting/auto/plot/206/t:conus::network:WFO::wfo:DMX::state:IA::v:max_gust::p:both::day:2024-04-04::cmap:viridis::_r:t::dpi:100.png
 /plotting/auto/plot/206/t:state::network:WFO::wfo:DMX::state:IA::v:max_gust::p:both::day:2024-04-04::cmap:viridis::_r:t::dpi:100.png
+/plotting/auto/plot/206/t:fema::network:WFO::wfo:DMX::state:IA::v:max_gust::p:both::day:2024-04-04::cmap:viridis::_r:t::dpi:100.png
 /plotting/auto/plot/208/network:WFO::wfo:DMX::year:2024::phenomenav:TO::significancev:W::etn:47::opt:single::n:auto::_r:43::dpi:100.png
 /plotting/auto/plot/208/valid:2024-08-27%201717::network:WFO::wfo:DMX::year:2024::phenomenav:TO::significancev:W::etn:47::opt:single::n:off::_r:43::dpi:100.png
 /plotting/auto/plot/211/ptype:precip::network:IA_ASOS::zstation:AMW::sts:2024-07-10%200000::ets:2024-07-12%202359::_r:t::dpi:100.png

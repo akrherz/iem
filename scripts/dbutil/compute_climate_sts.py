@@ -3,32 +3,30 @@
 Called from RUN_CLIMODAT_STATE.sh
 """
 
-import datetime
-import sys
+from datetime import date, timedelta
 
+import click
+from pyiem.database import get_dbconn
 from pyiem.network import Table as NetworkTable
-from pyiem.util import get_dbconn, logger
+from pyiem.util import logger
 
 LOG = logger()
 
 
-def main(argv):
+@click.command()
+@click.option("--network", required=True)
+def main(network: str):
     """Go Main Go"""
     asos = get_dbconn("coop")
     acursor = asos.cursor()
     mesosite = get_dbconn("mesosite")
     mcursor = mesosite.cursor()
-    floor = datetime.date.today() - datetime.timedelta(days=7)
+    floor = date.today() - timedelta(days=7)
 
-    net = argv[1]
-    if len(net) == 2:
-        LOG.info("Fixing invalid network name...")
-        net = f"{net}CLIMATE"
-
-    nt = NetworkTable(net, only_online=False)
+    nt = NetworkTable(network, only_online=False)
 
     acursor.execute(
-        f"SELECT station, min(day), max(day) from alldata_{net[:2]} "
+        f"SELECT station, min(day), max(day) from alldata_{network[:2]} "
         "GROUP by station ORDER by min ASC"
     )
     for row in acursor:
@@ -50,7 +48,7 @@ def main(argv):
             "%s%s [%s] sts:%s->%s ets:%s->%s OL:%s->%s",
             "  --> " if not noop else "",
             station,
-            net,
+            network,
             osts,
             sts,
             oets,
@@ -73,4 +71,4 @@ def main(argv):
 
 
 if __name__ == "__main__":
-    main(sys.argv)
+    main()

@@ -82,7 +82,7 @@ if [ $LHH -eq "01" ]
 then
     python ifc_today_total.py --date=$(date --date '1 days ago' +'%Y-%m-%d')
 fi
-python today_min_windchill.py
+python today_min_windchill.py --date=$(date +'%Y-%m-%d') --realtime
 
 cd ../summary
 python hourly_precip.py

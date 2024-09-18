@@ -1,84 +1,33 @@
 """
 Create a plot of minimum wind chill
+
+Run from RUN_10_AFTER.sh
 """
 
-import datetime
-import sys
+from datetime import datetime
 
-from pandas import read_sql
-from pyiem.network import Table as NetworkTable
-from pyiem.plot import MapPlot
-from pyiem.util import get_sqlalchemy_conn
+import click
+from pyiem.util import web2ldm
 
 
-def doday(ts, realtime):
-    """
-    Create a plot of precipitation stage4 estimates for some day
-    """
-    nt = NetworkTable("IA_ASOS")
-    with get_sqlalchemy_conn("iem") as conn:
-        df = read_sql(
-            """
-        SELECT id as station, min(feel) as wcht from
-        current_log c JOIN stations t
-        on (c.iemid = t.iemid) WHERE t.network = 'IA_ASOS'
-        and valid >= %s and valid < %s + '24 hours'::interval
-        and feel is not null and sknt > 0 GROUP by id
-        """,
-            conn,
-            params=(ts, ts),
-            index_col="station",
-        )
-    routes = "ac"
-    if not realtime:
-        routes = "a"
-    lons = []
-    lats = []
-    vals = []
-    labels = []
-    for station, row in df.iterrows():
-        lons.append(nt.sts[station]["lon"])
-        lats.append(nt.sts[station]["lat"])
-        vals.append(row["wcht"])
-        labels.append(station)
-
-    pqstr = (
-        "plot %s %s00 summary/iowa_min_windchill.png "
-        "summary/iowa_min_windchill.png png"
-    ) % (routes, ts.strftime("%Y%m%d%H"))
-    mp = MapPlot(
-        title=(r"%s Minimum Wind Chill Temperature $^\circ$F")
-        % (ts.strftime("%-d %b %Y"),),
-        subtitle="Calm conditions are excluded from analysis",
-        continentalcolor="white",
-    )
-
-    mp.plot_values(
-        lons,
-        lats,
-        vals,
-        "%.1f",
-        labels=labels,
-        textsize=12,
-        labelbuffer=5,
-        labeltextsize=10,
-    )
-    mp.drawcounties()
-    mp.postprocess(pqstr=pqstr, view=False)
-    mp.close()
-
-
-def main():
+@click.command()
+@click.option("--date", "dt", type=click.DateTime(), required=True)
+@click.option("--realtime", is_flag=True, default=False)
+def main(dt: datetime, realtime: bool):
     """Main Method"""
-    if len(sys.argv) == 4:
-        date = datetime.date(
-            int(sys.argv[1]), int(sys.argv[2]), int(sys.argv[3])
-        )
-        realtime = False
-    else:
-        date = datetime.date.today()
-        realtime = True
-    doday(date, realtime)
+    routes = "ac" if realtime else "a"
+    pqstr = (
+        f"plot {routes} {dt:%Y%m%d%H}00 summary/iowa_min_windchill.png "
+        "summary/iowa_min_windchill.png png"
+    )
+    web2ldm(
+        (
+            "https://mesonet.agron.iastate.edu/plotting/auto/plot/206/t:state"
+            f"::state:IA::v:min_feel::p:plot2::day:{dt:%Y-%m-%d}::_r:43::"
+            "_cb:1.png"
+        ),
+        pqstr,
+    )
 
 
 if __name__ == "__main__":
