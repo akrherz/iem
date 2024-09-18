@@ -118,6 +118,11 @@
 /plotting/auto/plot/148/network:IACLIMATE::station:IATAME::date:thanksgiving::thedate:0101::offset:1::var:high::_r:t::dpi:100.png
 /plotting/auto/plot/149/network:IACLIMATE::station:IATAME::days:91::days2:13::days3:0::year2:2015::year3:2023::sdate:2024-03-03::edate:2024-08-30::_r:43::dpi:100.png
 /plotting/auto/plot/151/month:all::sector:state::state:IA::opt:both::var:total_precip::r:english::threshold:-99::opt1:diff::p1syear:2000::p1eyear:2010::p2syear:2011::p2eyear:2021::cmap:seismic_r::_r:t::dpi:100.png
+/plotting/auto/plot/159/network:IA_ASOS::zstation:DSM::var:tmpf::dir:aoa::thres:70::month:custom::sdate:0901::edate:0917::year:2024::syear:1920::_r:43::dpi:100::_cb:1.png
+/plotting/auto/plot/159/network:IA_ASOS::zstation:DSM::var:gust::dir:aoa::thres:20::month:jul1::sdate:0901::edate:0917::year:2020::syear:1920::_r:43::dpi:100.png
+/plotting/auto/plot/159/network:IA_ASOS::zstation:DSM::var:gust::dir:aoa::thres:20::month:custom::sdate:1221::edate:0121::year:2020::syear:1920::_r:43::dpi:100.png
+/plotting/auto/plot/159/network:IA_ASOS::zstation:DSM::var:gust::dir:aoa::thres:20::month:jun::sdate:1221::edate:0121::year:2020::syear:1920::_r:43::dpi:100.png
+/plotting/auto/plot/159/network:IA_ASOS::zstation:DSM::var:gust::dir:aoa::thres:20::month:ytd::sdate:1221::edate:0121::year:2020::syear:1920::_r:43::dpi:100.png
 /plotting/auto/plot/160/station:GTTI4::dt:2024-08-23%201620::var:primary::w:both::_r:t::dpi:100.js
 /plotting/auto/plot/160/station:GTTI4::dt:2024-08-23%201620::var:primary::w:both::_r:t::dpi:100.png
 /plotting/auto/plot/163/csector:midwest::var:count::sdate:2024-01-01%200000::edate:2024-08-22%200000::filter:NONE::by:wfo::cmap:plasma::lbl:yes::_r:t::dpi:100.png

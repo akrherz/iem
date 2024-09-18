@@ -9,9 +9,12 @@ the year of the start date is used within the plot.</p>
 <p>The hourly averages are based on years with sufficient data coverage (
 &lt;20% missing). The blue bars indicate years with such amount of missing
 data.</p>
+
+<p>Please note that <strong>wind gusts</strong> were not recorded prior to
+the early 1970s for most stations</p>
 """
 
-import datetime
+from datetime import date, datetime
 
 import pandas as pd
 from matplotlib.ticker import MaxNLocator
@@ -21,10 +24,12 @@ from pyiem.plot import figure
 from pyiem.util import get_autoplot_context
 from sqlalchemy import text
 
+from iemweb.autoplot.barchart import barchar_with_top10
+
 MDICT = {
     "all": "No Month/Time Limit",
     "custom": "Custom/Pick Start + End Date",
-    "ytd": f"Jan 1 through {datetime.date.today():%b %-d}",
+    "ytd": f"Jan 1 through {date.today():%b %-d}",
     "jul1": "Jul 1 - Jun 30",
     "spring": "Spring (MAM)",
     "fall": "Fall (SON)",
@@ -48,8 +53,12 @@ METRICS = {
     "tmpf": "Air Temp (F)",
     "dwpf": "Dew Point Temp (F)",
     "feel": "Feels Like Temp (F)",
+    "mslp": "Mean Sea Level Pressure (mb)",
+    "alti": "Pressure Altimeter (inHg)",
     "relh": "Relative Humidity (%)",
     "sped": "Wind Speed (mph)",
+    "gust": "Wind Gust (mph)",
+    "vsby": "Visibility (miles)",
 }
 UNITS = {
     "tmpf": "F",
@@ -57,6 +66,10 @@ UNITS = {
     "feel": "F",
     "relh": "%",
     "sped": "mph",
+    "gust": "mph",
+    "vsby": "miles",
+    "mslp": "mb",
+    "alti": "inHg",
 }
 
 DIRS = {"aoa": "At or Above", "below": "Below"}
@@ -91,7 +104,7 @@ def get_description():
             type="int",
             name="thres",
             default=65,
-            label="Threshold (F or % or MPH):",
+            label="Threshold (F, %, mph, inHg, mb):",
         ),
         dict(
             type="select",
@@ -109,13 +122,13 @@ def get_description():
         dict(
             type="sday",
             name="edate",
-            default=f"{datetime.date.today():%m%d}",
+            default=f"{date.today():%m%d}",
             label="Inclusive End Day of Year (when Date Limiter is custom):",
         ),
         dict(
             type="year",
             min=1973,
-            default=datetime.date.today().year,
+            default=date.today().year,
             label="Year to Highlight",
             name="year",
         ),
@@ -154,7 +167,7 @@ def set_df(ctx):
             ctx["totaldays"] = (
                 ctx["edate"].replace(year=2001) - ctx["sdate"]
             ).days + 1
-            days = (ctx["edate"] - datetime.date(2000, 1, 1)).days + 1
+            days = (ctx["edate"] - date(2000, 1, 1)).days + 1
             offset = f"ts - '{days} days'::interval"
             doylimit = (
                 " and (to_char(ts, 'mmdd') >= :sdate or "
@@ -170,13 +183,17 @@ def set_df(ctx):
     elif ctx["month"] == "summer":
         months = [6, 7, 8]
     else:
-        ts = datetime.datetime.strptime(f"2000-{ctx['month']}-01", "%Y-%b-%d")
+        ts = datetime.strptime(f"2000-{ctx['month']}-01", "%Y-%b-%d")
         # make sure it is length two for the trick below in SQL
         months = [ts.month]
     ctx["months"] = months
     opp = ">=" if ctx["dir"] == "aoa" else "<"
 
-    dbvarname = "(sknt * 1.15)" if ctx["var"] == "sped" else ctx["var"]
+    dbvarname = ctx["var"]
+    if ctx["var"] == "sped":
+        dbvarname = "(sknt * 1.15)"
+    elif ctx["var"] == "gust":
+        dbvarname = "(gust * 1.15)"
     if ctx["month"] == "ytd":
         doylimit = " and to_char(ts, 'mmdd') <= :sday "
     with get_sqlalchemy_conn("asos") as conn:
@@ -202,7 +219,7 @@ def set_df(ctx):
                 "t": ctx["thres"],
                 "station": ctx["zstation"],
                 "months": months,
-                "sday": datetime.date.today().strftime("%m%d"),
+                "sday": date.today().strftime("%m%d"),
                 "sdate": ctx["sdate"].strftime("%m%d"),
                 "edate": ctx["edate"].strftime("%m%d"),
                 "start": f"{ctx['syear']}-01-01",
@@ -221,24 +238,37 @@ def set_fig(ctx):
         f"{ctx['thres']}{UNITS[ctx['var']]}\n"
         f"{ctx['_sname']}:: ({ydf.index.min():.0f}-{ydf.index.max():.0f})"
     )
-    ctx["fig"] = figure(apctx=ctx, title=title)
-    ax = ctx["fig"].subplots(2, 1)
-    ax[0].bar(
-        ydf.index.values, ydf["hits"], align="center", fc="green", ec="green"
-    )
     # Loop over plot years and background highlight any years with less than
     # 80% data coverage
     obscount = len(ctx["months"]) * 30 * 24 * 0.8
     if ctx["month"] == "ytd":
-        obscount = int(f"{datetime.date.today():%j}") * 24 * 0.8
+        obscount = int(f"{date.today():%j}") * 24 * 0.8
     elif ctx["month"] == "custom":
         obscount = ctx["totaldays"] * 24 * 0.8
+    ctx["fig"] = figure(apctx=ctx, title=title)
+    quorum = ydf[ydf["obs"] > obscount]
+    ax = barchar_with_top10(
+        ctx["fig"],
+        quorum,
+        "hits",
+        color="green",
+        table_col_title="Hours",
+    )
+    antiquorum = ydf[ydf["obs"] < obscount]
+    ax.bar(
+        antiquorum.index.values,
+        antiquorum["hits"],
+        width=1,
+        align="center",
+        color="green",
+    )
+    ax.set_position((0.07, 0.6, 0.68, 0.3))
     for _year in range(ydf.index.values[0], ydf.index.values[-1] + 1):
         if _year not in ydf.index or ydf.at[_year, "obs"] < obscount:
-            ax[0].axvspan(_year - 0.5, _year + 0.5, color="#cfebfd", zorder=-3)
+            ax.axvspan(_year - 0.5, _year + 0.5, color="#cfebfd", zorder=-3)
     if ctx["year"] in ydf.index.values:
         val = ydf.loc[ctx["year"]]
-        ax[0].bar(
+        ax.bar(
             ctx["year"],
             val["hits"],
             align="center",
@@ -246,20 +276,21 @@ def set_fig(ctx):
             ec="orange",
             zorder=5,
         )
-    ax[0].grid(True)
-    ax[0].set_ylabel("Hours")
-    ax[0].set_xlim(ydf.index.min() - 0.5, ydf.index.max() + 0.5)
-    ax[0].xaxis.set_major_locator(MaxNLocator(integer=True))
-    ax[0].set_xlabel("Years with blue shading have more than 20% missing data")
+    ax.grid(True)
+    ax.set_ylabel("Hours")
+    ax.set_xlim(ydf.index.min() - 0.5, ydf.index.max() + 0.5)
+    ax.xaxis.set_major_locator(MaxNLocator(integer=True))
+    ax.set_xlabel("Years with blue shading have more than 20% missing data")
     avgv = ydf["hits"].mean()
-    ax[0].axhline(avgv, color="k", zorder=10)
-    ax[0].text(ydf.index.max() + 0.7, avgv, f"Avg\n{avgv:.1f}", va="center")
+    ax.axhline(avgv, color="k", zorder=10)
+    ax.text(ydf.index.max() + 0.7, avgv, f"Avg\n{avgv:.1f}", va="center")
 
     df2 = ydf[ydf["obs"] > obscount]
     years = len(df2.index)
     df2 = ctx["df"][ctx["df"]["year"].isin(df2.index.values)]
     hdf = df2.groupby("hour").sum() / years
-    ax[1].bar(
+    ax1 = ctx["fig"].add_axes([0.07, 0.1, 0.68, 0.4])
+    ax1.bar(
         hdf.index.values,
         hdf["hits"],
         align="center",
@@ -269,7 +300,7 @@ def set_fig(ctx):
     )
     thisyear = ctx["df"][ctx["df"]["year"] == ctx["year"]]
     if not thisyear.empty:
-        ax[1].bar(
+        ax1.bar(
             thisyear["hour"].values,
             thisyear["hits"],
             align="center",
@@ -279,13 +310,13 @@ def set_fig(ctx):
             ec="orange",
             label=f"{ctx['year']}",
         )
-    ax[1].set_xlim(-0.5, 23.5)
-    ax[1].grid(True)
-    ax[1].legend(loc=(0.7, -0.22), ncol=2, fontsize=10)
-    ax[1].set_ylabel("Days Per Period")
-    ax[1].set_xticks(range(0, 24, 4))
-    ax[1].set_xticklabels(["Mid", "4 AM", "8 AM", "Noon", "4 PM", "8 PM"])
-    ax[1].set_xlabel(
+    ax1.set_xlim(-0.5, 23.5)
+    ax1.grid(True)
+    ax1.legend(loc=(0.7, -0.22), ncol=2, fontsize=10)
+    ax1.set_ylabel("Days Per Period")
+    ax1.set_xticks(range(0, 24, 4))
+    ax1.set_xticklabels(["Mid", "4 AM", "8 AM", "Noon", "4 PM", "8 PM"])
+    ax1.set_xlabel(
         f"Hour of Day ({ctx['_nt'].sts[ctx['zstation']]['tzname']})",
         ha="right",
     )
