@@ -4,10 +4,10 @@ import os
 import subprocess
 import tempfile
 
-import requests
+import httpx
+from pyiem.database import get_dbconn
 from pyiem.util import (
     exponential_backoff,
-    get_dbconn,
     get_properties,
     logger,
     set_property,
@@ -38,7 +38,7 @@ def website_enable_check():
 
 def do(url, fn):
     """Do the work."""
-    res = exponential_backoff(requests.get, url, timeout=60)
+    res = exponential_backoff(httpx.get, url, timeout=60)
     if res is None:
         LOG.info("%s failure", url)
         return
@@ -54,23 +54,15 @@ def do(url, fn):
 
 def main():
     """Go Main Go."""
-    url = (
-        "http://iem.local/plotting/auto/plot/207/t:state::csector:IA"
-        "::p:both::hours:12::sz:25.png"
-    )
+    ap207 = "http://mesonet.agron.iastate.edu/plotting/auto/plot/207"
+    url = f"{ap207}/t:state::csector:IA::p:both::hours:12::sz:25.png"
     do(url, "lsr_snowfall.png")
 
-    url = (
-        "http://iem.local/plotting/auto/plot/207/t:state::csector:IA"
-        "::p:contour::hours:12::sz:25.png"
-    )
+    url = f"{ap207}t:state::csector:IA::p:contour::hours:12::sz:25.png"
     do(url, "lsr_snowfall_nv.png")
 
     # -----------------
-    url = (
-        "http://iem.local/plotting/auto/plot/207/t:state::csector:midwest"
-        "::p:contour::hours:12::sz:25.png"
-    )
+    url = f"{ap207}/t:state::csector:midwest::p:contour::hours:12::sz:25.png"
     do(url, "mw_lsr_snowfall.png")
 
     website_enable_check()

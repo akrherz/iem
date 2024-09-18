@@ -3,30 +3,33 @@
 called from RUN_CLIMODAT_STATE.sh
 """
 
-import datetime
-import sys
+from datetime import date
 
+import click
+from psycopg import Connection
+from pyiem.database import get_dbconnc, get_sqlalchemy_conn
 from pyiem.network import Table as NetworkTable
-from pyiem.util import get_dbconnc, logger
+from pyiem.util import logger
+from sqlalchemy import text
 
 LOG = logger()
-TODAY = datetime.date.today()
+TODAY = date.today()
 
 
-def do_network(network):
+def do_network(conn: Connection, network: str):
     """Do network"""
     nt = NetworkTable(network, only_online=False)
-    iem, icursor = get_dbconnc("iem")
     for sid in nt.sts:
-        icursor.execute(
-            "select min(day), max(day) from summary WHERE "
-            "iemid = %s and (max_tmpf is not null or min_tmpf is not null "
-            "or pday is not null)",
-            (nt.sts[sid]["iemid"],),
+        res = conn.execute(
+            text("""
+        select min(day), max(day) from summary WHERE iemid = :iemid and
+        (max_tmpf is not null or min_tmpf is not null or pday is not null)
+            """),
+            {"iemid": nt.sts[sid]["iemid"]},
         )
-        row = icursor.fetchone()
-        sts = row["min"]
-        ets = row["max"]
+        row = res.fetchone()
+        sts = row[0]
+        ets = row[1]
         if sts is None:
             LOG.warning("sid: %s has no iemaccess data?", sid)
             continue
@@ -62,14 +65,16 @@ def do_network(network):
         )
         mcursor.close()
         mconn.commit()
-    iem.close()
+        mconn.close()
 
 
-def main(argv):
+@click.command()
+@click.option("--network", required=True)
+def main(network: str):
     """Go main Go"""
-    network = argv[1]
-    do_network(network)
+    with get_sqlalchemy_conn("iem") as conn:
+        do_network(conn, network)
 
 
 if __name__ == "__main__":
-    main(sys.argv)
+    main()

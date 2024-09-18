@@ -41,7 +41,7 @@ fi
 cd ../dl
 if [ $DD -eq "09" ]
     then
-         python download_narr.py $(date --date '13 days ago' +'%Y %m') &
+         python download_narr.py --year=$(date --date '13 days ago' +%Y) --month=$(date --date '13 days ago' +%m) &
 fi
 python fetch_power.py --year=$(date --date '7 days ago' +'%Y') --domain=
 python fetch_power.py --year=$(date --date '7 days ago' +'%Y') --domain=china

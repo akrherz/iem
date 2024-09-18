@@ -80,50 +80,6 @@ def plotter(fdict):
     station = ctx["station"]
     oldstation = XREF.get(station, "A130209")
     with get_sqlalchemy_conn("isuag") as conn:
-        df = pd.read_sql(
-            """
-        with obs as (
-            select valid, c300, lag(c300) OVER (ORDER by valid ASC) from hourly
-            where station = %s),
-        agg1 as (
-            select valid,
-            case when c300 > %s and lag < %s then 1
-                when c300 < %s and lag > %s then -1
-                else 0 end as t from obs),
-        agg2 as (
-            SELECT valid, t from agg1 where t != 0),
-        agg3 as (
-            select valid, lead(valid) OVER (ORDER by valid ASC),
-            t from agg2),
-        agg4 as (
-            select extract(year from valid) as yr, valid, lead,
-            rank() OVER (PARTITION by extract(year from valid)
-            ORDER by valid ASC)
-            from agg3 where t = 1
-            and (lead - valid) >= '%s hours'::interval),
-        agg5 as (
-            select extract(year from valid) as yr, valid, lead
-            from agg3 where t = -1)
-
-        select f.yr, f.valid as fup, f.lead as flead, d.valid as dup,
-        d.lead as dlead from agg4 f JOIN agg5 d ON (f.yr = d.yr)
-        where f.rank = 1 and d.valid > f.valid
-        ORDER by fup ASC
-        """,
-            conn,
-            params=(
-                oldstation,
-                threshold,
-                threshold,
-                threshold,
-                threshold,
-                hours1,
-            ),
-            index_col=None,
-        )
-    if df.empty:
-        raise NoDataFound("No Data Found")
-    with get_sqlalchemy_conn("isuag") as conn:
         df2 = pd.read_sql(
             text("""
         with obs as (
@@ -163,8 +119,48 @@ def plotter(fdict):
             },
             index_col=None,
         )
-    if df2.empty:
-        raise NoDataFound("No Data Found")
+        if df2.empty:
+            raise NoDataFound("No Data Found")
+        df = pd.read_sql(
+            text("""
+        with obs as (
+            select valid, c300, lag(c300) OVER (ORDER by valid ASC) from hourly
+            where station = :oldstation),
+        agg1 as (
+            select valid,
+            case when c300 > :thres and lag < :thres then 1
+                when c300 < :thres and lag > :thres then -1
+                else 0 end as t from obs),
+        agg2 as (
+            SELECT valid, t from agg1 where t != 0),
+        agg3 as (
+            select valid, lead(valid) OVER (ORDER by valid ASC),
+            t from agg2),
+        agg4 as (
+            select extract(year from valid) as yr, valid, lead,
+            rank() OVER (PARTITION by extract(year from valid)
+            ORDER by valid ASC)
+            from agg3 where t = 1
+            and (lead - valid) >= ':hours hours'::interval),
+        agg5 as (
+            select extract(year from valid) as yr, valid, lead
+            from agg3 where t = -1)
+
+        select f.yr, f.valid as fup, f.lead as flead, d.valid as dup,
+        d.lead as dlead from agg4 f JOIN agg5 d ON (f.yr = d.yr)
+        where f.rank = 1 and d.valid > f.valid
+        ORDER by fup ASC
+        """),
+            conn,
+            params={
+                "oldstation": oldstation,
+                "thres": threshold,
+                "hours": hours1,
+            },
+            index_col=None,
+        )
+    if df.empty:
+        raise NoDataFound("No Data Found for legacy station")
 
     nt = NetworkTable("ISUSM")
     nt2 = NetworkTable("ISUAG", only_online=False)

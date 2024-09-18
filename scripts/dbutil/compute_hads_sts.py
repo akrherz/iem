@@ -3,14 +3,16 @@
 called from windrose/daily_drive_network.py
 """
 
-import datetime
-import sys
+from datetime import date
+from typing import Optional
 
+import click
+from pyiem.database import get_dbconn
 from pyiem.network import Table as NetworkTable
-from pyiem.util import get_dbconn, logger
+from pyiem.util import logger
 
 LOG = logger()
-TODAY = datetime.date.today()
+TODAY = date.today()
 HADSDB = get_dbconn("hads")
 MESOSITEDB = get_dbconn("mesosite")
 
@@ -41,7 +43,7 @@ def get_maxvalid(sid):
     return None
 
 
-def do_network(network):
+def do_network(network: str):
     """Do network"""
     nt = NetworkTable(network, only_online=False)
     for sid in nt.sts:
@@ -81,9 +83,11 @@ def do_network(network):
         MESOSITEDB.commit()
 
 
-def main(argv):
+@click.command()
+@click.option("--network", required=False)
+def main(network: Optional[str]):
     """Go main Go"""
-    if len(argv) == 1:
+    if network is None:
         # If we run without args, we pick a "random" DCP network!
         # COOP networks can't reliably use this script's logic
         cursor = MESOSITEDB.cursor()
@@ -91,13 +95,11 @@ def main(argv):
             "SELECT id from networks where id ~* 'DCP' ORDER by id ASC"
         )
         networks = [row[0] for row in cursor]
-        jday = int(datetime.date.today().strftime("%j"))
+        jday = int(date.today().strftime("%j"))
         network = networks[jday % len(networks)]
         LOG.info("auto-picked %s", network)
-    else:
-        network = argv[1]
     do_network(network)
 
 
 if __name__ == "__main__":
-    main(sys.argv)
+    main()

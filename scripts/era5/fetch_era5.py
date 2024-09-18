@@ -4,6 +4,8 @@ Run from RUN_0Z_ERA5LAND.sh for 5 days ago.
 """
 
 import os
+import sys
+import warnings
 from datetime import timedelta
 
 import cdsapi
@@ -27,6 +29,8 @@ VERBATIM = {
     "d2m": "dwpk",
     "t2m": "tmpk",
 }
+# unavoidable
+warnings.simplefilter("ignore", RuntimeWarning)
 
 
 def ingest(ncin, nc, valid, domain):
@@ -111,7 +115,7 @@ def run(valid, domain, force):
     LOG.info("Running for %s[domain=%s]", valid, domain)
     ncfn = f"{domain}_{valid:%Y%m%d%H}.nc"
 
-    cds = cdsapi.Client(quiet=True)
+    cds = cdsapi.Client(quiet=True, progress=not sys.stdout.isatty())
 
     cds.retrieve(
         "reanalysis-era5-land",

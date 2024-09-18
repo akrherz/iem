@@ -17,11 +17,18 @@ def do_network(network):
     # stuff cached too
     if network.find("_ASOS") > 0:
         subprocess.call(
-            ["python", "../dbutil/compute_alldata_sts.py", "asos", network]
+            [
+                "python",
+                "../dbutil/compute_alldata_sts.py",
+                "--dbname=asos",
+                f"--network={network}",
+            ]
         )
     elif network.find("_DCP") > 0:
         # Special Logic to compute archive period.
-        subprocess.call(["python", "../dbutil/compute_hads_sts.py", network])
+        subprocess.call(
+            ["python", "../dbutil/compute_hads_sts.py", f"--network={network}"]
+        )
         # Update stage details.
         subprocess.call(
             [
@@ -32,7 +39,12 @@ def do_network(network):
         )
     elif network.find("_RWIS") > 0:
         subprocess.call(
-            ["python", "../dbutil/compute_alldata_sts.py", "rwis", network],
+            [
+                "python",
+                "../dbutil/compute_alldata_sts.py",
+                "--dbname=rwis",
+                f"--network={network}",
+            ],
         )
     subprocess.call(
         ["python", "drive_network_windrose.py", "--network", network]

@@ -1,6 +1,6 @@
 """Generates analysis maps of ASOS station data for a given date."""
 
-import datetime
+from datetime import datetime
 
 import geopandas as gpd
 import numpy as np
@@ -10,11 +10,15 @@ from pyiem.database import get_sqlalchemy_conn
 from pyiem.exceptions import NoDataFound
 from pyiem.plot import MapPlot, get_cmap
 from pyiem.util import get_autoplot_context
+from sqlalchemy import text
+
+from iemweb.autoplot import ARG_FEMA
 
 PDICT = {
     "cwa": "Plot by NWS Forecast Office",
     "state": "Plot by State",
     "conus": "Plot for contiguous US",
+    "fema": "Plot by FEMA Region",
 }
 PDICT2 = {
     "max_tmpf": "Max Air Temperature [F]",
@@ -40,13 +44,17 @@ VARUNITS = {
     "max_gust": "mph",
     "max_sknt": "mph",
 }
-PDICT3 = {"both": "Plot and Contour Values", "plot": "Only Plot Values"}
+PDICT3 = {
+    "both": "Plot and Contour Values",
+    "plot": "Only Plot Values",
+    "plot2": "Plot Values with station IDs",
+}
 
 
 def get_description():
     """Return a dict describing how to call this plotter"""
     desc = {"description": __doc__, "data": True, "cache": 600}
-    now = datetime.datetime.now()
+    now = datetime.now()
     desc["arguments"] = [
         dict(
             type="select",
@@ -68,6 +76,7 @@ def get_description():
             default="IA",
             label="Select State: (ignored if plotting wfo)",
         ),
+        ARG_FEMA,
         dict(
             type="select",
             name="v",
@@ -121,29 +130,28 @@ def get_df(ctx, buf=2.25):
             reference.CONUS_NORTH,
         ]
         ctx["title"] = "Contiguous US"
+    elif ctx["t"] == "fema":
+        bnds = reference.fema_region_bounds[int(ctx["fema"])]
+        ctx["title"] = f"FEMA Region {ctx['fema']}"
     else:
         bnds = reference.wfo_bounds[ctx["wfo"]]
         ctx["title"] = f"NWS CWA {ctx['_sname']}"
-    giswkt = "SRID=4326;POLYGON((%s %s, %s %s, %s %s, %s %s, %s %s))" % (
-        bnds[0] - buf,
-        bnds[1] - buf,
-        bnds[0] - buf,
-        bnds[3] + buf,
-        bnds[2] + buf,
-        bnds[3] + buf,
-        bnds[2] + buf,
-        bnds[1] - buf,
-        bnds[0] - buf,
-        bnds[1] - buf,
-    )
+    params = {
+        "dt": ctx["day"],
+        "west": bnds[0] - buf,
+        "south": bnds[1] - buf,
+        "east": bnds[2] + buf,
+        "north": bnds[3] + buf,
+    }
     with get_sqlalchemy_conn("iem") as conn:
         df = gpd.read_postgis(
-            """
+            text("""
             WITH mystation as (
                 select id, st_x(geom) as lon, st_y(geom) as lat,
                 state, wfo, iemid, country, geom from stations
                 where network ~* 'ASOS' and
-                ST_contains(ST_GeomFromEWKT(%s), geom)
+                ST_contains(
+                    ST_MakeEnvelope(:west, :south, :east, :north, 4326), geom)
             )
             SELECT s.day, s.max_tmpf, s.min_tmpf, s.max_dwpf, s.min_dwpf,
             s.min_rh, s.max_rh, s.min_feel, s.max_feel,
@@ -151,13 +159,10 @@ def get_df(ctx, buf=2.25):
             max_gust * 1.15 as max_gust, t.id as station, t.lat, t.lon,
             t.wfo, t.state, t.country, t.geom from
             summary s JOIN mystation t on (s.iemid = t.iemid)
-            WHERE s.day = %s
-        """,
+            WHERE s.day = :dt
+        """),
             conn,
-            params=(
-                giswkt,
-                ctx["day"],
-            ),
+            params=params,
             geom_col="geom",
         )
     if df.empty:
@@ -183,10 +188,13 @@ def plotter(fdict):
     sector = "state" if ctx["t"] == "state" else "cwa"
     if ctx["t"] == "conus":
         sector = "conus"
+    elif ctx["t"] == "fema":
+        sector = "fema_region"
     mp = MapPlot(
         apctx=ctx,
         sector=sector,
         state=ctx["state"],
+        fema=ctx["fema"],
         cwa=(ctx["wfo"] if len(ctx["wfo"]) == 3 else ctx["wfo"][1:]),
         axisbg="white",
         title=f"{PDICT2[ctx['v']]} for {ctx['title']} on {ctx['day']}",
@@ -229,8 +237,10 @@ def plotter(fdict):
         df2 = df[df["country"] == "US"]
     elif ctx["t"] == "state":
         df2 = df[df[ctx["t"]] == ctx[ctx["t"]]]
-    else:
+    elif ctx["t"] == "cwa":
         df2 = df[df["wfo"] == ctx["wfo"]]
+    else:  # FEMA
+        df2 = df
 
     mp.plot_values(
         df2["lon"].values,
@@ -238,8 +248,9 @@ def plotter(fdict):
         df2[varname].values,
         "%.1f" if varname in ["max_gust", "max_sknt"] else "%.0f",
         labelbuffer=3,
+        labels=df2["station"].values if ctx["p"] == "plot2" else None,
     )
-    if ctx["t"] != "conus":
+    if ctx["t"] not in ["conus", "fema"]:
         mp.drawcounties()
     if ctx["t"] == "cwa":
         mp.draw_cwas()
