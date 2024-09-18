@@ -11,13 +11,14 @@ minutes into the future to place the near to top of the hour obs on
 that hour.  For example, a 9:53 AM observation becomes the ob for 10 AM.
 """
 
-import datetime
+from datetime import date, datetime
 
 import pandas as pd
 from matplotlib.font_manager import FontProperties
+from pyiem.database import get_sqlalchemy_conn
 from pyiem.exceptions import NoDataFound
 from pyiem.plot import figure_axes
-from pyiem.util import get_autoplot_context, get_sqlalchemy_conn
+from pyiem.util import get_autoplot_context
 from sqlalchemy import text
 
 from iemweb.autoplot import get_monofont
@@ -27,6 +28,8 @@ PDICT = {
     "min_dwpf": "Lowest Dew Point Temperature",
     "max_tmpf": "Highest Air Temperature",
     "min_tmpf": "Lowest Air Temperature",
+    "max_relh": "Highest Relative Humidity",
+    "min_relh": "Lowest Relative Humidity",
     "max_feel": "Highest Feels Like Temperature",
     "min_feel": "Lowest Feels Like Temperature",
     "max_p01i": "Maximum Hourly Precipitation",
@@ -38,6 +41,8 @@ PDICT = {
 UNITS = {
     "max_dwpf": "F",
     "max_tmpf": "F",
+    "max_relh": "%",
+    "min_relh": "%",
     "min_dwpf": "F",
     "min_tmpf": "F",
     "min_feel": "F",
@@ -93,7 +98,7 @@ def get_description():
             optional=True,
             name="sday",
             label="Start Day of The Year (inclusive):",
-            default=f"{datetime.date.today():%m%d}",
+            default=f"{date.today():%m%d}",
         ),
         dict(
             type="sday",
@@ -148,7 +153,7 @@ def plotter(fdict):
     elif month == "gs":
         months = [5, 6, 7, 8, 9]
     else:
-        ts = datetime.datetime.strptime(f"2000-{month}-01", "%Y-%b-%d")
+        ts = datetime.strptime(f"2000-{month}-01", "%Y-%b-%d")
         # make sure it is length two for the trick below in SQL
         months = [ts.month]
     params = {
@@ -183,7 +188,7 @@ def plotter(fdict):
             SELECT (valid + '{delta} minutes'::interval)
                 at time zone :tzname as ts,
             tmpf::int as itmpf, dwpf::int as idwpf,
-            feel::int as ifeel, mslp, alti, p01i from alldata
+            feel::int as ifeel, mslp, alti, p01i, relh from alldata
             where station = :station {doylimiter} {monlimiter}
             ),
         agg1 as (
@@ -198,7 +203,9 @@ def plotter(fdict):
             min(alti) as min_alti,
             max(mslp) as max_mslp,
             min(mslp) as min_mslp,
-            max(p01i) as max_p01i
+            max(p01i) as max_p01i,
+            max(relh) as max_relh,
+            min(relh) as min_relh
             from obs GROUP by hr)
         SELECT o.ts, a.hr::int as hr,
             a.{varname} from agg1 a JOIN obs o on
@@ -220,7 +227,7 @@ def plotter(fdict):
     if ab is None:
         raise NoDataFound("Unknown station metadata")
     title = (
-        f"{ctx['_sname']} ({ab.year}-{datetime.date.today().year})\n"
+        f"{ctx['_sname']} ({ab.year}-{date.today().year})\n"
         f"{PDICT[varname]} [{over}]"
     )
     (fig, ax) = figure_axes(apctx=ctx, title=title)
