@@ -99,8 +99,7 @@ def run(wfo, damagetag, year):
             params,
         )
 
-        for row in cursor:
-            row = row._asdict()
+        for row in cursor.mappings():
             # TODO the wfo here is a bug without it being 4 char
             href = (
                 f"{IEM}/vtec/#{year}-O-{row['status']}-K{row['wfo']}-"

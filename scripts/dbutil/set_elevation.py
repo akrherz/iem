@@ -1,24 +1,29 @@
-"""Hit up ESRIs elevation REST service to compute a station elevation."""
+"""Hit up elevation REST service to compute a station elevation.
 
-import sys
+Called from SYNC_STATIONS.sh
+"""
+
 import time
+from typing import Optional
 
-import requests
-from pyiem.util import get_dbconn, logger
+import click
+import httpx
+from pyiem.database import get_dbconn
+from pyiem.util import logger
 
 LOG = logger()
 
 
-def get_elevation(lon, lat):
+def get_elevation(lon: float, lat: float) -> Optional[float]:
     """Use arcgisonline"""
-    req = requests.get(
+    resp = httpx.get(
         f"https://api.opentopodata.org/v1/mapzen?locations={lat},{lon}",
         timeout=30,
     )
-    if req.status_code != 200:
-        LOG.info("ERROR: %s", req.status_code)
+    if resp.status_code != 200:
+        LOG.info("ERROR: %s", resp.status_code)
         return None
-    return req.json()["results"][0]["elevation"]
+    return resp.json()["results"][0]["elevation"]
 
 
 def workflow():
@@ -54,13 +59,16 @@ def workflow():
     pgconn.commit()
 
 
-def main(argv):
+@click.command()
+@click.option("--lon", type=float, help="Longitude")
+@click.option("--lat", type=float, help="Latitude")
+def main(lon: Optional[float], lat: Optional[float]):
     """Go Main Go"""
-    if len(argv) == 1:
-        workflow()
-    else:
-        print(get_elevation(argv[1], argv[2]))
+    if lon is not None and lat is not None:
+        print(get_elevation(lon, lat))
+        return
+    workflow()
 
 
 if __name__ == "__main__":
-    main(sys.argv)
+    main()

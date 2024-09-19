@@ -67,8 +67,7 @@ def run(valid):
             "count": res.rowcount,
         }
 
-        for row in res:
-            row = row._asdict()
+        for row in res.mappings():
             sts = row["utc_issue"].strftime(ISO8601)
             ets = row["utc_expire"].strftime(ISO8601)
             href = f"/api/1/nwstext/{row['product_id']}"

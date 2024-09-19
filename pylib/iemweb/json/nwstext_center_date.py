@@ -114,8 +114,7 @@ def application(environ, start_response):
             params,
         )
         for row in res:
-            row = row._asdict()
-            root["products"].append({"data": row["data"], "entered": row["e"]})
+            root["products"].append({"data": row.data, "entered": row.e})
 
     data = json.dumps(root)
 

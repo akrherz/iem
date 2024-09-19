@@ -67,8 +67,7 @@ def application(environ, start_response):
                 "state": environ["state"],
             },
         )
-        for row in res:
-            row = row._asdict()
+        for row in res.mappings():
             data["ugcs"].append(
                 {
                     "ugc": row["ugc"],

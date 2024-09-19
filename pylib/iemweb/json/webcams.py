@@ -41,7 +41,7 @@ from zoneinfo import ZoneInfo
 from pydantic import AwareDatetime, Field
 from pyiem.database import get_sqlalchemy_conn
 from pyiem.webutil import CGIModel, iemapp
-from sqlalchemy import text
+from sqlalchemy import Connection, text
 
 US_CENTRAL = ZoneInfo("America/Chicago")
 
@@ -63,7 +63,7 @@ class Schema(CGIModel):
     )
 
 
-def query_db(conn, environ):
+def query_db(conn: Connection, environ):
     """Query the database."""
     network = environ["network"]
     ts = environ["ts"]
@@ -126,8 +126,7 @@ def application(environ, start_response):
     used = []
     with get_sqlalchemy_conn("mesosite") as conn:
         res = query_db(conn, environ)
-        for row in res:
-            row = row._asdict()
+        for row in res.mappings():
             if row["cam"] in used:
                 continue
             used.append(row["cam"])

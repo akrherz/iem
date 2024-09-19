@@ -59,7 +59,7 @@ def rectify_date(dt):
     if dt is None:
         with get_sqlalchemy_conn("postgis") as conn:
             # Go get the latest USDM stored in the database!
-            res = conn.execute(text("SELECT max(valid) from usdm"))
+            res = conn.exec_driver_sql("SELECT max(valid) from usdm")
             res = res.fetchone()[0]
         return res
 
@@ -94,8 +94,7 @@ def run(ts):
             "generation_time": utcnow.strftime(ISO8601),
             "count": res.rowcount,
         }
-        for row in res:
-            row = row._asdict()
+        for row in res.mappings():
             data["features"].append(
                 dict(
                     type="Feature",

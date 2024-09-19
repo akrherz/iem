@@ -122,14 +122,10 @@ def get_res(state, year, phenomena, significance):
     """),
             {"year": year, "st": state, "ph": phenomena, "sig": significance},
         )
-        for row in res:
-            row = row._asdict()
-            uri = "/vtec/#%s-O-NEW-K%s-%s-%s-%04i" % (
-                year,
-                row["wfo"],
-                row["phenomena"],
-                row["significance"],
-                row["eventid"],
+        for row in res.mappings():
+            uri = (
+                f"/vtec/#{year}-O-NEW-K{row['wfo']}-{row['phenomena']}-"
+                f"{row['significance']}-{row['eventid']:04.0f}"
             )
             data["events"].append(
                 dict(

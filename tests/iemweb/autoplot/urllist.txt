@@ -218,6 +218,8 @@
 /plotting/auto/plot/236/ident:ZMP::sdate:2024-07-31::edate:2024-08-01::_r:43::dpi:100.png
 /plotting/auto/plot/241/sts:2000-08-06%200900::ets:2000-08-06%200900::w:min::csector:IA::mode:user::cmap:gnuplot2::_r:t::dpi:100.png
 /plotting/auto/plot/241/sts:2024-08-06%200900::ets:2024-08-06%200900::w:min::csector:IA::mode:user::cmap:gnuplot2::_r:t::dpi:100.png
+/plotting/auto/plot/241/sts:2024-01-01%200000::ets:2024-01-01%200100::w:min::csector:IA::mode:user::cmap:gnuplot2::_r:t::dpi:100::_cb:1.png
+/plotting/auto/plot/241/sts:2024-01-01%200000::ets:2024-01-01%200100::w:min::csector:AK::mode:user::cmap:gnuplot2::_r:t::dpi:100.png
 /plotting/auto/plot/242/pid:202405211331-KDMX-NWUS53-LSRDMX::_r:t::dpi:100.png
 /plotting/auto/plot/242/pid:201806210250-KDMX-NWUS53-LSRDMX::_r:t::dpi:100.png
 /plotting/auto/plot/243/opt:fema::day:cal::month:all::network:WFO::station:DMX::state:IA::fema:7::c:single::phenomena:TO::significance:W::_r:43::dpi:100.png

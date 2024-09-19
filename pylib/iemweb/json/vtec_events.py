@@ -41,7 +41,7 @@ from pyiem.database import get_sqlalchemy_conn
 from pyiem.reference import ISO8601
 from pyiem.util import utc
 from pyiem.webutil import CGIModel, iemapp
-from sqlalchemy import text
+from sqlalchemy import Connection, text
 
 EXL = "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"
 
@@ -77,7 +77,7 @@ class Schema(CGIModel):
     )
 
 
-def get_res(conn, wfo, year, phenomena, significance, combo):
+def get_res(conn: Connection, wfo, year, phenomena, significance, combo):
     """Generate a report of VTEC ETNs used for a WFO and year
 
     Args:
@@ -142,8 +142,7 @@ def get_res(conn, wfo, year, phenomena, significance, combo):
         "year": year,
         "events": [],
     }
-    for row in res:
-        row = row._asdict()
+    for row in res.mappings():
         uri = (
             f"/vtec/#{year}-O-NEW-K{wfo}-{row['phenomena']}-"
             f"{row['significance']}-{row['eventid']:04.0f}"

@@ -29,7 +29,7 @@ from pyiem.database import get_sqlalchemy_conn
 from pyiem.reference import ISO8601
 from pyiem.util import utc
 from pyiem.webutil import CGIModel, iemapp
-from sqlalchemy import text
+from sqlalchemy import Connection, text
 
 
 class Schema(CGIModel):
@@ -50,7 +50,7 @@ class Schema(CGIModel):
     )
 
 
-def run(conn, network, station):
+def run(conn: Connection, network, station):
     """Get last ob!"""
     res = conn.execute(
         text("""
@@ -68,7 +68,7 @@ def run(conn, network, station):
     )
     if res.rowcount == 0:
         return "{}"
-    row = res.fetchone()._asdict()
+    row = res.mappings().fetchone()
     data = {}
     data["server_gentime"] = utc().strftime(ISO8601)
     data["id"] = station

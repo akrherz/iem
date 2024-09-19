@@ -27,7 +27,7 @@ import json
 from pydantic import Field
 from pyiem.database import get_sqlalchemy_conn
 from pyiem.webutil import CGIModel, iemapp
-from sqlalchemy import text
+from sqlalchemy import Connection
 
 
 class Schema(CGIModel):
@@ -36,16 +36,13 @@ class Schema(CGIModel):
     callback: str = Field(None, description="JSONP callback function name")
 
 
-def add_webcam(conn, data):
+def add_webcam(conn: Connection, data):
     """Append."""
-    res = conn.execute(
-        text(
-            "SELECT * from webcams WHERE network != 'IDOT' "
-            "and sts is not null ORDER by network, name"
-        )
+    res = conn.exec_driver_sql(
+        "SELECT * from webcams WHERE network != 'IDOT' "
+        "and sts is not null ORDER by network, name"
     )
-    for row in res:
-        row = row._asdict()
+    for row in res.mappings():
         tpl = (
             "https://mesonet.agron.iastate.edu/archive/data/%Y/%m/%d/"
             f"camera/{row['id']}/{row['id']}_%Y%m%d%H%i.jpg"
@@ -64,16 +61,13 @@ def add_webcam(conn, data):
         )
 
 
-def add_archive_products(conn, data):
+def add_archive_products(conn: Connection, data):
     """Append."""
-    res = conn.execute(
-        text(
-            "SELECT * from archive_products WHERE sts is not null "
-            "ORDER by groupname, name"
-        )
+    res = conn.exec_driver_sql(
+        "SELECT * from archive_products WHERE sts is not null "
+        "ORDER by groupname, name"
     )
-    for row in res:
-        row = row._asdict()
+    for row in res.mappings():
         data["products"].append(
             {
                 "id": row["id"],

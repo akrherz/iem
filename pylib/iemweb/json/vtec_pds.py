@@ -16,7 +16,6 @@ from pyiem.database import get_sqlalchemy_conn
 from pyiem.reference import ISO8601
 from pyiem.util import utc
 from pyiem.webutil import CGIModel, iemapp
-from sqlalchemy import text
 
 
 class Schema(CGIModel):
@@ -29,8 +28,8 @@ def run():
     """Generate data."""
     data = {"generated_at": utc().strftime(ISO8601), "events": []}
     with get_sqlalchemy_conn("postgis") as conn:
-        res = conn.execute(
-            text("""
+        res = conn.exec_driver_sql(
+            """
         SELECT extract(year from issue)::int as year, wfo, eventid,
         phenomena, significance,
         min(product_issue at time zone 'UTC') as utc_product_issue,
@@ -42,10 +41,9 @@ def run():
         WHERE is_pds
         GROUP by year, wfo, eventid, phenomena, significance
         ORDER by utc_issue ASC
-    """)
+    """
         )
-        for row in res:
-            row = row._asdict()
+        for row in res.mappings():
             uri = (
                 f"/vtec/#{row['year']}-O-NEW-K{row['wfo']}-{row['phenomena']}-"
                 f"{row['significance']}-{row['eventid']:04.0f}"

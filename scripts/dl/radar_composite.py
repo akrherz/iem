@@ -3,17 +3,19 @@
 run from RUN_5MIN.sh
 """
 
-import datetime
 import os
 import subprocess
-import sys
 import tempfile
+from datetime import datetime, timedelta, timezone
 
-import requests
-from pyiem.util import exponential_backoff, get_dbconnc, logger, utc
+import click
+import httpx
+from pyiem.database import get_dbconnc
+from pyiem.util import archive_fetch, exponential_backoff, logger, utc
 
 LOG = logger()
 N0QBASE = utc(2010, 11, 14)
+IEM = "http://mesonet.agron.iastate.edu"
 
 
 def save(sectorName, file_name, dir_name, ts, routes, bbox=None):
@@ -26,15 +28,10 @@ def save(sectorName, file_name, dir_name, ts, routes, bbox=None):
     )
     if sectorName == "conus":
         layers = f"layers[]={nexrad}&layers[]=watch_by_county"
-    uri = (
-        f"http://iem.local/GIS/radmap.php?sector={sectorName}&"
-        f"ts={tstamp}&{layers}"
-    )
+    uri = f"{IEM}/GIS/radmap.php?sector={sectorName}&ts={tstamp}&{layers}"
     if bbox is not None:
-        uri = (
-            f"http://iem.local/GIS/radmap.php?bbox={bbox}&ts={tstamp}&{layers}"
-        )
-    req = exponential_backoff(requests.get, uri, timeout=60)
+        uri = f"{IEM}/GIS/radmap.php?bbox={bbox}&ts={tstamp}&{layers}"
+    req = exponential_backoff(httpx.get, uri, timeout=60)
     if req is None or req.status_code != 200:
         LOG.warning("%s failure", uri)
         return
@@ -53,7 +50,7 @@ def save(sectorName, file_name, dir_name, ts, routes, bbox=None):
     os.unlink(tmpfd.name)
 
 
-def runtime(ts, routes):
+def runtime(ts: datetime, routes: str):
     """Actually run for a time"""
     pgconn, pcursor = get_dbconnc("postgis")
 
@@ -76,7 +73,7 @@ def runtime(ts, routes):
         select trim(sel) as ss, st_xmax, st_xmin, st_ymax, st_ymin from data
         where rank = 1
         """,
-        (ts, ts - datetime.timedelta(days=120)),
+        (ts, ts - timedelta(days=120)),
     )
     for row in pcursor:
         xmin = float(row["st_xmin"]) - 0.75
@@ -89,26 +86,28 @@ def runtime(ts, routes):
     pgconn.close()
 
 
-def main(argv):
+@click.command()
+@click.option("--valid", type=click.DateTime(), required=True)
+def main(valid: datetime):
     """Go Main Go"""
-    ts = utc(*[int(x) for x in argv[1:6]])
-    LOG.info("Running for %s", ts)
+    valid = valid.replace(tzinfo=timezone.utc)
+    LOG.info("Running for %s", valid)
     # If we are near real-time, also check various archive points
-    if (utc() - ts).total_seconds() > 1000:
-        runtime(ts, "a")
+    if (utc() - valid).total_seconds() > 1000:
+        runtime(valid, "a")
         return
-    runtime(ts, "ac")
+    runtime(valid, "ac")
     for hroff in [1, 3, 7, 12, 24]:
-        valid = ts - datetime.timedelta(hours=hroff)
-        uri = (
-            f"http://iem.local/archive/data/{valid:%Y}/{valid:%m}/{valid:%d}/"
+        valid = valid - timedelta(hours=hroff)
+        ppath = (
+            f"{valid:%Y}/{valid:%m}/{valid:%d}/"
             f"comprad/n0r_{valid:%Y%m%d}_{valid:%H%M}.png"
         )
-        req = requests.get(uri, timeout=15)
-        if req.status_code == 404:
-            LOG.warning("%s 404, rerunning %s", uri, valid)
-            runtime(valid, "a")
+        with archive_fetch(ppath) as fh:
+            if fh is None:
+                LOG.warning("Missing %s", ppath)
+                runtime(valid, "a")
 
 
 if __name__ == "__main__":
-    main(sys.argv)
+    main()

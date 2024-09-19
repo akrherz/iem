@@ -115,7 +115,7 @@ def run(valid, domain, force):
     LOG.info("Running for %s[domain=%s]", valid, domain)
     ncfn = f"{domain}_{valid:%Y%m%d%H}.nc"
 
-    cds = cdsapi.Client(quiet=True, progress=not sys.stdout.isatty())
+    cds = cdsapi.Client(quiet=True, progress=sys.stdout.isatty())
 
     cds.retrieve(
         "reanalysis-era5-land",

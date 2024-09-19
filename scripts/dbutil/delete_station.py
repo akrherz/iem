@@ -1,8 +1,7 @@
 """Delete a station and all references to it!"""
 
-import sys
-
-from pyiem.util import get_dbconn
+import click
+from pyiem.database import get_dbconn
 
 
 def delete_logic(icursor, mcursor, network, station):
@@ -29,13 +28,11 @@ def delete_logic(icursor, mcursor, network, station):
     print(f"Deleted {mcursor.rowcount} row(s) from mesosite stations table")
 
 
-def main(argv):
+@click.command()
+@click.option("--network", required=True, help="Network Identifier")
+@click.option("--station", required=True, help="Station Identifier")
+def main(network: str, station: str):
     """Go Main Go"""
-    if len(argv) != 3:
-        print("Usage: python remove_realtime.py NETWORK SID")
-        return
-    network = sys.argv[1]
-    station = sys.argv[2]
     iem_pgconn = get_dbconn("iem")
     icursor = iem_pgconn.cursor()
     mesosite_pgconn = get_dbconn("mesosite")
@@ -48,4 +45,4 @@ def main(argv):
 
 
 if __name__ == "__main__":
-    main(sys.argv)
+    main()

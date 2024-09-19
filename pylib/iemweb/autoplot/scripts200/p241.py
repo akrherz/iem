@@ -20,7 +20,13 @@ import pygrib
 from pyiem.exceptions import NoDataFound
 from pyiem.plot import MapPlot, pretty_bins
 from pyiem.reference import LATLON
-from pyiem.util import archive_fetch, convert_value, get_autoplot_context, utc
+from pyiem.util import (
+    LOG,
+    archive_fetch,
+    convert_value,
+    get_autoplot_context,
+    utc,
+)
 
 PDICT = {
     "max": "Maximum",
@@ -87,6 +93,8 @@ def get_description():
 
 def get_data(ctx):
     """Do the computation!"""
+    if ctx["csector"] in ["AK", "HI"]:
+        raise NoDataFound("Sector not available for this plot.")
     sts = ctx["sts"]
     ets = ctx["ets"]
     ppath = (
@@ -116,17 +124,17 @@ def get_data(ctx):
                 missing_count += 1
                 continue
             try:
-                grbs = pygrib.open(fn)
-                grb = grbs.select(shortName="2t")[0]
-                if lons is None:
-                    lats, lons = grb.latlons()
-                    vals = grb.values
-                vals = func(vals, grb.values)
-                grbs.close()
+                with pygrib.open(fn) as grbs:
+                    grb = grbs.select(shortName="2t")[0]
+                    if lons is None:
+                        lats, lons = grb.latlons()
+                        vals = grb.values
+                    vals = func(vals, grb.values)  # type: ignore
                 if mindt is None:
                     mindt = dt
                 maxdt = dt
-            except Exception:
+            except Exception as exp:
+                LOG.exception(exp)
                 continue
     if vals is None:
         raise NoDataFound("Failed to find any RTMA data, sorry.")

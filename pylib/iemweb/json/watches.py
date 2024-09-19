@@ -29,7 +29,7 @@ from pydantic import Field
 from pyiem.database import get_sqlalchemy_conn
 from pyiem.reference import ISO8601
 from pyiem.webutil import CGIModel, iemapp
-from sqlalchemy import text
+from sqlalchemy import Connection, text
 
 
 class Schema(CGIModel):
@@ -40,7 +40,7 @@ class Schema(CGIModel):
     year: int = Field(default=2022, description="Year to limit to")
 
 
-def run(conn, year, is_pds):
+def run(conn: Connection, year, is_pds):
     """Generate data."""
 
     if is_pds:
@@ -66,8 +66,7 @@ def run(conn, year, is_pds):
         {"year": year},
     )
     data = {"events": []}
-    for row in res:
-        row = row._asdict()
+    for row in res.mappings():
         data["events"].append(
             dict(
                 year=row["year"],
