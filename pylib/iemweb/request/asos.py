@@ -1,6 +1,7 @@
 """.. title:: ASOS/METAR Backend Service
 
-`IEM API Mainpage </api/>`_
+Return to `API Mainpage </api/#cgi>`_ or the
+`Download Portal </request/download.phtml>`_.
 
 Documentation on /cgi-bin/request/asos.py
 -----------------------------------------
@@ -24,12 +25,14 @@ Example Usage
 Get the past 24 hours of air temperature and dew point for Des Moines and
 Mason City, Iowa.
 
-    https://mesonet.agron.iastate.edu/cgi-bin/request/asos.py?data=tmpf&data=dwpf&station=DSM&station=MCW&hours=24
+https://mesonet.agron.iastate.edu/cgi-bin/request/asos.py\
+?data=tmpf&data=dwpf&station=DSM&station=MCW&hours=24
 
 """
 
-import datetime
+import re
 import sys
+from datetime import datetime, timedelta
 from io import StringIO
 from zoneinfo import ZoneInfo, ZoneInfoNotFoundError
 
@@ -39,6 +42,7 @@ from pyiem.network import Table as NetworkTable
 from pyiem.util import utc
 from pyiem.webutil import CGIModel, ListOrCSVType, iemapp
 
+STATION_RE = re.compile(r"^[A-Z0-9_]{3,4}$")
 NULLS = {"M": "M", "null": "null", "empty": ""}
 TRACE_OPTS = {"T": "T", "null": "null", "empty": "", "0.0001": "0.0001"}
 AVAILABLE = [
@@ -273,6 +277,15 @@ class MyModel(CGIModel):
             raise ValueError(f"Unknown timezone: {value}") from exp
         return value
 
+    @field_validator("station")
+    @classmethod
+    def station_validator(cls, value):
+        """Ensure the station is valid."""
+        for station in value:
+            if not STATION_RE.fullmatch(station):
+                raise ValueError(f"Invalid station identifier: {station}")
+        return value
+
 
 def fmt_time(val, missing, _trace, tzinfo):
     """Format timestamp."""
@@ -357,13 +370,13 @@ def get_time_bounds(form, tzinfo):
     """Figure out the exact time bounds desired"""
     if form["hours"] is not None:
         ets = utc()
-        sts = ets - datetime.timedelta(hours=int(form.get("hours")))
+        sts = ets - timedelta(hours=int(form.get("hours")))
         return sts, ets
     # Here lie dragons, so tricky to get a proper timestamp
     try:
 
         def _get(num):
-            return datetime.datetime(
+            return datetime(
                 form[f"year{num}"],
                 form[f"month{num}"],
                 form[f"day{num}"],
@@ -379,7 +392,7 @@ def get_time_bounds(form, tzinfo):
         return None, None
 
     if form["sts"] == form["ets"]:
-        form["ets"] += datetime.timedelta(days=1)
+        form["ets"] += timedelta(days=1)
     if form["sts"] > form["ets"]:
         form["sts"], form["ets"] = form["ets"], form["sts"]
     return form["sts"], form["ets"]
@@ -456,7 +469,7 @@ def application(environ, start_response):
     if not stations:
         # We are asking for all-data.  We limit the amount of data returned to
         # one day or less
-        if (ets - sts) > datetime.timedelta(hours=24):
+        if (ets - sts) > timedelta(hours=24):
             pgconn.close()
             start_response("400 Bad Request", [("Content-type", "text/plain")])
             yield b"When requesting all-stations, must be less than 24 hours."
