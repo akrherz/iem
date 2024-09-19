@@ -19,10 +19,16 @@ UTC date period is specified that equates to the US Central date.
 https://mesonet.agron.iastate.edu/geojson/lsr.geojson?states=WI&\
 sts=2024-07-13T05:00Z&ets=2024-07-14T05:00Z
 
-Provide the LSRs associated with Des Moines Tornado Warning 47
+Provide the LSRs associated with Des Moines Tornado Warning 47 and include
+any coincident warnings with each LSR report.
 
 https://mesonet.agron.iastate.edu/geojson/lsr.geojson?phenomena=TO&\
-significance=W&eventid=47&year=2024&wfo=DMX
+significance=W&eventid=47&year=2024&wfo=DMX&inc_ap=1
+
+Provide LSRs from NWS Des Moines and Davenport for 21 May 2024 UTC
+
+https://mesonet.agron.iastate.edu/geojson/lsr.geojson?wfos=DMX,DVN&\
+sts=2024-05-21T00:00Z&ets=2024-05-22T00:00Z
 
 """
 
@@ -88,8 +94,6 @@ class Schema(CGIModel):
     @classmethod
     def parse_valid(cls, value, _info):
         """Ensure we have a valid time."""
-        if value is None:
-            return None
         fmt = "%Y%m%d%H%M"
         if value.find("T") > 0 and len(value) >= 16:
             fmt = "%Y-%m-%dT%H:%M"
