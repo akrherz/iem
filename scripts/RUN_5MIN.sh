@@ -1,5 +1,4 @@
 # Run every 5 minutes...
-export STAMP=$(date -u +'%Y %m %d %H %M')
 VALID=$(date -u +'%Y-%m-%dT%H:%M'):00
 
 cd cache 
@@ -10,7 +9,7 @@ python agg_precip.py &
 python csv2ldm.py &
 
 cd ../roads
-python archive_roadsplot.py $STAMP &
+python archive_roadsplot.py --valid=$VALID &
 python ingest_roads_rest.py &
 
 cd ../ingestors/ifc
