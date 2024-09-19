@@ -1,5 +1,6 @@
 # Run every 5 minutes...
 export STAMP=$(date -u +'%Y %m %d %H %M')
+VALID=$(date -u +'%Y-%m-%dT%H:%M'):00
 
 cd cache 
 python nws_wawa_archive.py &
@@ -16,7 +17,7 @@ cd ../ingestors/ifc
 python ingest_ifc_precip.py &
 
 cd ../../dl
-python radar_composite.py $STAMP &
+python radar_composite.py --valid=$VALID &
 
 cd ../GIS
 python 24h_lsr.py 

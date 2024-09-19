@@ -58,8 +58,7 @@ def application(environ, start_response):
                 "network": environ["network"],
             },
         )
-        for row in res:
-            row = row._asdict()
+        for row in res.mappings():
             data["stations"].append(
                 {
                     "id": row["id"],

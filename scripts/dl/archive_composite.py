@@ -1,26 +1,36 @@
-"""Regenerate composites to fulfill various reasons."""
+"""Regenerate composites to fulfill various reasons.
 
-import datetime
+Not called from anywhere, but often manually run :/
+"""
+
 import subprocess
-import sys
+from datetime import datetime, timedelta, timezone
 
-from pyiem.util import logger, utc
+import click
+from pyiem.util import logger
 
 LOG = logger()
 
 
-def main(argv):
+@click.command()
+@click.option("--sts", required=True, help="Start Time", type=click.DateTime())
+@click.option("--ets", required=True, help="End Time", type=click.DateTime())
+def main(sts: datetime, ets: datetime):
     """Go Main Go"""
-    sts = utc(*[int(x) for x in argv[1:6]])
-    ets = utc(*[int(x) for x in argv[6:11]])
-    interval = datetime.timedelta(minutes=5)
+    sts = sts.replace(tzinfo=timezone.utc)
+    ets = ets.replace(tzinfo=timezone.utc)
+    interval = timedelta(minutes=5)
     now = sts
     while now < ets:
-        cmd = f"python radar_composite.py {now:%Y %m %d %H %M}"
-        LOG.info(cmd)
-        subprocess.call(cmd.split())
+        cmd = [
+            "python",
+            "radar_composite.py",
+            f"--valid={now:%Y-%m-%dT%H:%M}:00",
+        ]
+        LOG.info(" ".join(cmd))
+        subprocess.call(cmd)
         now += interval
 
 
 if __name__ == "__main__":
-    main(sys.argv)
+    main()

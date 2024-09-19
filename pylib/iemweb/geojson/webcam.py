@@ -91,8 +91,7 @@ def run(valid, network):
             "count": res.rowcount,
         }
 
-        for row in res:
-            row = row._asdict()
+        for row in res.mappings():
             cv = row["valid"].astimezone(timezone.utc)
             url = (
                 "https://mesonet.agron.iastate.edu/archive/data/"

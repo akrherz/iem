@@ -44,7 +44,7 @@ from pyiem.database import get_sqlalchemy_conn
 from pyiem.reference import ISO8601
 from pyiem.util import utc
 from pyiem.webutil import CGIModel, iemapp
-from sqlalchemy import text
+from sqlalchemy import Connection, text
 
 
 class Schema(CGIModel):
@@ -63,16 +63,16 @@ class Schema(CGIModel):
     )
 
 
-def run(conn, valid, fmt):
+def run(conn: Connection, valid, fmt):
     """Actually do the hard work of getting the geojson"""
 
     if valid is None:
-        res = conn.execute(
-            text("""
+        res = conn.exec_driver_sql(
+            """
             SELECT ST_x(geom) as lon, ST_y(geom) as lat, *,
             valid at time zone 'UTC' as utc_valid from
             nexrad_attributes WHERE valid > now() - '30 minutes'::interval
-            """)
+            """
         )
     else:
         valid = valid.replace(tzinfo=ZoneInfo("UTC"))
@@ -107,8 +107,7 @@ def run(conn, valid, fmt):
             "generation_time": utc().strftime(ISO8601),
             "count": res.rowcount,
         }
-        for i, row in enumerate(res):
-            row = row._asdict()
+        for i, row in enumerate(res.mappings()):
             data["features"].append(
                 {
                     "type": "Feature",
@@ -142,8 +141,7 @@ def run(conn, valid, fmt):
         "nexrad,storm_id,azimuth,range,tvs,meso,posh,poh,max_size,"
         "vil,max_dbz,max_dbz_height,top,drct,sknt,valid\n"
     )
-    for row in res:
-        row = row._asdict()
+    for row in res.mappings():
         data += ",".join(
             [
                 str(x)

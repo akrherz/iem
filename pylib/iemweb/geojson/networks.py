@@ -25,7 +25,6 @@ from pyiem.database import get_sqlalchemy_conn
 from pyiem.reference import ISO8601
 from pyiem.util import utc
 from pyiem.webutil import CGIModel, iemapp
-from sqlalchemy import text
 
 
 class Schema(CGIModel):
@@ -37,11 +36,9 @@ class Schema(CGIModel):
 def run():
     """Actually do the hard work of getting the current SBW in geojson"""
     with get_sqlalchemy_conn("mesosite") as conn:
-        res = conn.execute(
-            text(
-                "SELECT ST_asGeoJson(extent) as geojson, id, name "
-                "from networks WHERE extent is not null ORDER by id ASC"
-            )
+        res = conn.exec_driver_sql(
+            "SELECT ST_asGeoJson(extent) as geojson, id, name "
+            "from networks WHERE extent is not null ORDER by id ASC"
         )
 
         data = {
@@ -50,8 +47,7 @@ def run():
             "generation_time": utc().strftime(ISO8601),
             "count": res.rowcount,
         }
-        for row in res:
-            row = row._asdict()
+        for row in res.mappings():
             data["features"].append(
                 dict(
                     type="Feature",

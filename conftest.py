@@ -12,4 +12,5 @@ def dbcursor(database):
     """Yield a cursor for the given database."""
     dbconn, cursor = get_dbconnc(database)
     yield cursor
+    cursor.close()
     dbconn.close()

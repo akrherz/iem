@@ -27,7 +27,7 @@ from pydantic import Field
 from pyiem.database import get_sqlalchemy_conn
 from pyiem.network import Table as NetworkTable
 from pyiem.webutil import CGIModel, iemapp
-from sqlalchemy import text
+from sqlalchemy import Connection, text
 
 
 class Schema(CGIModel):
@@ -47,7 +47,7 @@ class Schema(CGIModel):
     )
 
 
-def run(conn, network, month, day, syear, eyear):
+def run(conn: Connection, network, month, day, syear, eyear):
     """Do something"""
 
     nt = NetworkTable(network)
@@ -117,8 +117,7 @@ def run(conn, network, month, day, syear, eyear):
         "features": [],
     }
 
-    for i, row in enumerate(res):
-        row = row._asdict()
+    for i, row in enumerate(res.mappings()):
         if row["station"] not in nt.sts:
             continue
         props = dict(

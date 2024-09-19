@@ -154,8 +154,7 @@ def run(environ):
         """),
             params,
         )
-        for _row in rs:
-            row = _row._asdict()
+        for row in rs.mappings():
             sid = (
                 f"{row['wfo']}.{row['phenomena']}.{row['significance']}."
                 f"{row['eventid']:04.0f}"
