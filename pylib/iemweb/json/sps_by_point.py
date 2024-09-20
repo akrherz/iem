@@ -1,6 +1,6 @@
 """.. title:: Special Weather Statements (SPS) by Point
 
-Return to `JSON Services </json/>`_
+Return to `API Services </api/#json>`_
 
 This service returns any Special Weather Statements (SPS) that included a
 polygon threat area.
@@ -9,7 +9,7 @@ Changelog
 ---------
 
 - 2024-07-06: The `sdate` and `edate` parameters were rectified to be in the
-format of `YYYY-mm-dd` instead of `YYYY/mm/dd`.
+  format of `YYYY-mm-dd` instead of `YYYY/mm/dd`.
 
 Example Requests
 ----------------

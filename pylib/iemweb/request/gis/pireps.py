@@ -11,7 +11,8 @@ Changelog
 
 - 2024-06-28: Initital documentation release
 - 2024-07-31: A `product_id` field was added to the output, but only non-null
-for PIREPs after about 18 UTC on 31 July 2024.  Someday, a backfill may happen.
+  for PIREPs after about 18 UTC on 31 July 2024.  Someday, a backfill may
+  happen.
 
 Example Requests
 ----------------

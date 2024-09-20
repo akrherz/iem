@@ -17,10 +17,10 @@ Changelog
 
 - 2024-07-03: Added a `accept=csv` option to allow for CSV output.
 - 2024-06-26: Added `limitpds` parameter to limit the request to only include
-products that have a PDS (Particularly Dangerous Situation) tag or phrasing.
+  products that have a PDS (Particularly Dangerous Situation) tag or phrasing.
 - 2024-05-14: To mitigate against large requests that overwhelm the server, a
-limit of one year's worth of data is now in place for requests that do not
-limit the request by either state, phenomena, nor wfo.
+  limit of one year's worth of data is now in place for requests that do not
+  limit the request by either state, phenomena, nor wfo.
 - 2024-05-09: Migrated to pydantic based CGI input validation.
 
 Example Usage
@@ -30,7 +30,7 @@ Return all Areal Flood, Flash Flood, Severe Thunderstorm, and Tornado Watch
 and Warnings for the state of Mississippi during 2024.  Note how the phenomena
 and significance parameters are repeated so that each combination is present.
 
-    https://mesonet.agron.iastate.edu/cgi-bin/request/gis/watchwarn.py?\
+https://mesonet.agron.iastate.edu/cgi-bin/request/gis/watchwarn.py?\
 accept=shapefile&sts=2024-01-01T00:00Z&ets=2025-01-01T00:00Z&\
 location_group=states&states=MS&limitps=yes&phenomena=FF,FA,SV,TO,FF,FA,SV,TO&\
 significance=W,W,W,W,A,A,A,A
@@ -38,7 +38,7 @@ significance=W,W,W,W,A,A,A,A
 Return all Tornado Warnings for the Des Moines WFO in shapefile format during
 2023.
 
-    https://mesonet.agron.iastate.edu/cgi-bin/request/gis/watchwarn.py\
+https://mesonet.agron.iastate.edu/cgi-bin/request/gis/watchwarn.py\
 ?accept=shapefile&sts=2023-01-01T00:00Z&ets=2024-01-01T00:00Z&wfo[]=DMX\
 &limitps=yes&phenomena=TO&significance=W
 

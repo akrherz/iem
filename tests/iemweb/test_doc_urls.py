@@ -4,6 +4,7 @@ import importlib
 import pkgutil
 
 import pytest
+from docutils.core import publish_string
 from werkzeug.test import Client
 
 
@@ -29,13 +30,25 @@ def get_mods_and_urls():
             ):
                 continue
             cgi = "" if line.find("?") == -1 else line.split("?")[1]
-            yield mod.application, f"?{cgi}"
+            yield mod, f"?{cgi}"
+
+
+@pytest.mark.parametrize("arg", get_mods_and_urls())
+def test_docutils_publish_string(arg):
+    """Test that docutils can render __doc__ without any warnings."""
+    res = publish_string(source=arg[0].__doc__, writer_name="html").decode(
+        "utf-8"
+    )
+    pos = res.find("System Message")
+    if pos > 0:
+        print(res[pos : pos + 100])
+    assert res.find("System Message") == -1
 
 
 @pytest.mark.parametrize("arg", get_mods_and_urls())
 def test_urls(arg):
     """Test what urls.txt tells us to."""
-    c = Client(arg[0])
+    c = Client(arg[0].application)
     res = c.get(arg[1])
     # Allow apps that redirect to check OK
     assert res.status_code in [200, 302]

@@ -12,7 +12,7 @@ Changelog
 ---------
 
 - 2024-06-30: Initial documentation release. Parameter `valid` added for
-consistency with other services.
+  consistency with other services.
 
 Example Usage
 -------------
