@@ -223,6 +223,7 @@ def application(environ, start_response):
         df["latitude"] = [get_lat(x) for x in df["station"]]
         df["longitude"] = [get_lon(x) for x in df["station"]]
 
+    output_columns = df.columns.intersection(myvars).tolist()
     sio = StringIO()
     if what in ["txt", "download"]:
         headers = [
@@ -230,11 +231,11 @@ def application(environ, start_response):
             ("Content-disposition", "attachment; filename=rwis.txt"),
         ]
         start_response("200 OK", headers)
-        df.to_csv(sio, index=False, sep=delimiter, columns=myvars)
+        df.to_csv(sio, index=False, sep=delimiter, columns=output_columns)
         return [sio.getvalue().encode("ascii")]
     if what == "html":
         start_response("200 OK", [("Content-type", "text/html")])
-        df.to_html(sio, columns=myvars)
+        df.to_html(sio, columns=output_columns)
         return [sio.getvalue().encode("ascii")]
     if what == "excel":
         if len(df.index) >= 1048576:
@@ -242,7 +243,9 @@ def application(environ, start_response):
             return [b"Dataset too large for excel format."]
         bio = BytesIO()
         with pd.ExcelWriter(bio) as writer:
-            df.to_excel(writer, sheet_name="Data", index=False, columns=myvars)
+            df.to_excel(
+                writer, sheet_name="Data", index=False, columns=output_columns
+            )
 
         headers = [
             ("Content-type", EXL),
@@ -254,6 +257,6 @@ def application(environ, start_response):
     df.to_csv(
         path_or_buf=sio,
         sep=delimiter,
-        columns=df.columns.intersection(myvars).tolist(),
+        columns=output_columns,
     )
     return [sio.getvalue().encode("ascii")]
