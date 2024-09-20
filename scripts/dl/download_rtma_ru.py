@@ -4,36 +4,37 @@ Download RTMA Rapid Updates grids
 Run from RUN_50_AFTER.sh for previous hour
 """
 
-import datetime
 import os
 import subprocess
-import sys
 import tempfile
+from datetime import datetime, timedelta, timezone
 
+import click
+import httpx
 import pygrib
-import requests
-from pyiem.util import exponential_backoff, logger, utc
+from pyiem.util import archive_fetch, exponential_backoff, logger, utc
 
 LOG = logger()
-ARCHIVE_THRES = utc() - datetime.timedelta(days=3)
+ARCHIVE_THRES = utc() - timedelta(days=3)
 
 
-def fetch_aws(dt):
+def fetch_aws(dt: datetime):
     """Get the data via AWS PDS."""
-    localfn = (
-        f"/mesonet/ARCHIVE/data/{dt:%Y/%m/%d}/model/rtma/{dt:%H}/"
+    ppath = (
+        f"{dt:%Y/%m/%d}/model/rtma/{dt:%H}/"
         f"rtma2p5_ru.t{dt:%H%M}z.2dvaranl_ndfd.grb2"
     )
-    if os.path.isfile(localfn):
-        LOG.info("Skipping as we have data %s", localfn)
-        return
+    with archive_fetch(ppath) as fn:
+        if fn is not None:
+            LOG.info("Skipping as we have data %s", ppath)
+            return
 
     b = "_" if dt > utc(2021, 9, 10) else "-"
     url = (
         f"https://s3.amazonaws.com/noaa-rtma-pds/rtma2p5{b}ru.{dt:%Y%m%d}/"
         f"rtma2p5_ru.t{dt:%H%M}z.2dvarges_ndfd.grb2"
     )
-    req = exponential_backoff(requests.get, url, timeout=30)
+    req = exponential_backoff(httpx.get, url, timeout=30)
     if req is None or req.status_code != 200:
         LOG.info("failed to get idx: %s", url)
         return
@@ -53,7 +54,7 @@ def fetch_aws(dt):
         "-p",
         (
             f"data a {dt:%Y%m%d%H%M} bogus model/rtma/"
-            f"{dt:%H}/{localfn.split('/')[-1]} grib2"
+            f"{dt:%H}/{ppath.split('/')[-1]} grib2"
         ),
         tmpfp2.name,
     ]
@@ -66,18 +67,19 @@ def fetch_aws(dt):
 
 def fetch(dt):
     """Fetch the data for this timestamp"""
-    localfn = (
-        f"/mesonet/ARCHIVE/data/{dt:%Y/%m/%d}/model/rtma/{dt:%H}/"
+    ppath = (
+        f"{dt:%Y/%m/%d}/model/rtma/{dt:%H}/"
         f"rtma2p5_ru.t{dt:%H%M}z.2dvaranl_ndfd.grb2"
     )
-    if os.path.isfile(localfn):
-        LOG.info("Skipping as we have data %s", localfn)
-        return
+    with archive_fetch(ppath) as fn:
+        if fn is not None:
+            LOG.info("Skipping as we have data %s", ppath)
+            return
     uri = (
         "https://nomads.ncep.noaa.gov/pub/data/nccf/com/rtma/prod/"
         f"rtma2p5_ru.{dt:%Y%m%d}/rtma2p5_ru.t{dt:%H%M}z.2dvaranl_ndfd.grb2.idx"
     )
-    req = exponential_backoff(requests.get, uri, timeout=30)
+    req = exponential_backoff(httpx.get, uri, timeout=30)
     if req is None or req.status_code != 200:
         LOG.info("failed to get idx: %s", uri)
         return
@@ -104,7 +106,7 @@ def fetch(dt):
         for pr in offsets:
             headers = {"Range": f"bytes={pr[0]}-{pr[1]}"}
             req = exponential_backoff(
-                requests.get, uri[:-4], headers=headers, timeout=30
+                httpx.get, uri[:-4], headers=headers, timeout=30
             )
             if req is None:
                 LOG.warning("failure for uri: %s", uri)
@@ -116,7 +118,7 @@ def fetch(dt):
         "-p",
         (
             f"data a {dt:%Y%m%d%H%M} bogus model/rtma/"
-            f"{dt:%H}/{localfn.split('/')[-1]} grib2"
+            f"{dt:%H}/{ppath.split('/')[-1]} grib2"
         ),
         tmpfp.name,
     ]
@@ -125,21 +127,18 @@ def fetch(dt):
     os.unlink(tmpfp.name)
 
 
-def main(argv):
+@click.command()
+@click.option("--valid", required=True, type=click.DateTime(), help="UTC")
+def main(valid: datetime):
     """Go Main Go"""
-    if len(argv) == 5:
-        ts = utc(*[int(s) for s in argv[1:5]])
-    else:
-        ts = utc() - datetime.timedelta(hours=1)
+    valid = valid.replace(tzinfo=timezone.utc)
 
     # Backfilling mode
     for hroffset in [0, 6, 12, 24]:
         for minute in [0, 15, 30, 45]:
-            valid = (ts - datetime.timedelta(hours=hroffset)).replace(
-                minute=minute
-            )
-            (fetch if valid > ARCHIVE_THRES else fetch_aws)(valid)
+            ts = (valid - timedelta(hours=hroffset)).replace(minute=minute)
+            (fetch if ts > ARCHIVE_THRES else fetch_aws)(ts)
 
 
 if __name__ == "__main__":
-    main(sys.argv)
+    main()

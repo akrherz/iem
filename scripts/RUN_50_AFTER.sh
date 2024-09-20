@@ -2,7 +2,7 @@
 
 python cache/cache_autoplots.py &
 
-python dl/download_rtma_ru.py &
+python dl/download_rtma_ru.py --valid=$(date -u --date '1 hour ago' +'%Y-%m-%dT%H'):00:00 &
 
 python dl/download_ndfd.py &
 

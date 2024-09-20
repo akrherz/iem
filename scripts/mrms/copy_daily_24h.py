@@ -3,54 +3,57 @@
 Run from RUN_MIDNIGHT.sh
 """
 
-import datetime
-import os
 import subprocess
-import sys
+from datetime import datetime, timedelta
 from zoneinfo import ZoneInfo
 
-from pyiem.util import logger
+import click
+from pyiem.util import archive_fetch, logger
 
 LOG = logger()
 
 
 def workflow(dt):
     """Copy things around."""
-    basefn = dt.strftime(
-        "/mesonet/ARCHIVE/data/%Y/%m/%d/GIS/mrms/p24h_%Y%m%d%H00"
-    )
-    yest = dt - datetime.timedelta(days=1)
+    basefn = dt.strftime("%Y/%m/%d/GIS/mrms/p24h_%Y%m%d%H00")
+    yest = dt - timedelta(days=1)
     for suffix in ["png", "wld"]:
-        target = f"{basefn}.{suffix}"
-        if not os.path.isfile(target):
-            LOG.warning("ERROR: %s not found", target)
-            return
-        cmd = [
-            "pqinsert",
-            "-i",
-            "-p",
-            f"gis a {yest:%Y%m%d%H%M} GIS/mrms_calday_{yest:%Y%m%d}.{suffix} "
-            f"GIS/mrms_calday_{yest:%Y%m%d}.{suffix} {suffix}",
-            target,
-        ]
-        subprocess.call(cmd)
-        LOG.info("%s -> %s", target, " ".join(cmd))
+        ppath = f"{basefn}.{suffix}"
+        with archive_fetch(ppath) as target:
+            if target is None:
+                LOG.warning("ERROR: %s not found", target)
+                return
+            cmd = [
+                "pqinsert",
+                "-i",
+                "-p",
+                f"gis a {yest:%Y%m%d%H%M} "
+                f"GIS/mrms_calday_{yest:%Y%m%d}.{suffix} "
+                f"GIS/mrms_calday_{yest:%Y%m%d}.{suffix} {suffix}",
+                target,
+            ]
+            subprocess.call(cmd)
+            LOG.info("%s -> %s", target, " ".join(cmd))
 
 
-def main(argv):
+@click.command()
+@click.option(
+    "--date",
+    "dt",
+    required=True,
+    help="Date to process",
+    type=click.DateTime(),
+)
+def main(dt: datetime):
     """Do Something"""
     # Compute midnight Central as UTC
-    dt = datetime.datetime(
-        int(argv[1]),
-        int(argv[2]),
-        int(argv[3]),
-        0,
-        tzinfo=ZoneInfo("America/Chicago"),
-    ).astimezone(ZoneInfo("UTC"))
+    dt = dt.replace(tzinfo=ZoneInfo("America/Chicago")).astimezone(
+        ZoneInfo("UTC")
+    )
     LOG.info("Computed midnight UTC of %s", dt)
     workflow(dt)
 
 
 if __name__ == "__main__":
     # Go Main Go
-    main(sys.argv)
+    main()

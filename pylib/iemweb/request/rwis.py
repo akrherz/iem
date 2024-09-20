@@ -1,5 +1,8 @@
 """.. title:: RWIS Download
 
+Return to `API Services </api/#cgi>`_ and
+`RWIS Download Portal </request/rwis/fe.phtml>`_
+
 Documentation for /cgi-bin/request/rwis.py
 ------------------------------------------
 
@@ -8,6 +11,7 @@ This service emits RWIS data.
 Changelog
 ---------
 
+- 2024-09-19: Fix bug with no variables returned when ``vars`` is not set
 - 2024-08-01: Initital documentation release and pydantic validation
 
 Example Requests
@@ -78,7 +82,10 @@ class Schema(CGIModel):
     )
     vars: ListOrCSVType = Field(
         default=[],
-        description="List of variables to include in output",
+        description=(
+            "List of variables to include in output, if none are set, "
+            "then all variables are returned for the given ``src``"
+        ),
     )
     what: str = Field(
         default="dl",
@@ -162,8 +169,6 @@ def application(environ, start_response):
         raise IncompleteWebRequest("Missing GET parameter sts or ets")
     include_latlon = environ["gis"]
     myvars = environ["vars"]
-    myvars.insert(0, "station")
-    myvars.insert(1, "obtime")
     delimiter = DELIMITERS[environ["delim"]]
     what = environ["what"]
     tzname = environ["tz"]
@@ -195,6 +200,14 @@ def application(environ, start_response):
     if df.empty:
         start_response("200 OK", [("Content-type", "text/plain")])
         return [b"Sorry, no results found for query!"]
+    # default is to include all variables
+    if not environ["vars"]:
+        myvars = list(df.columns)
+        myvars.remove("station")
+        myvars.remove("valid")
+        myvars.remove("obtime")
+    myvars.insert(0, "station")
+    myvars.insert(1, "obtime")
     if include_latlon:
         myvars.insert(2, "longitude")
         myvars.insert(3, "latitude")
@@ -238,5 +251,9 @@ def application(environ, start_response):
         start_response("200 OK", headers)
         return [bio.getvalue()]
     start_response("200 OK", [("Content-type", "text/plain")])
-    df.to_csv(sio, sep=delimiter, columns=df.columns.intersection(myvars))
+    df.to_csv(
+        path_or_buf=sio,
+        sep=delimiter,
+        columns=df.columns.intersection(myvars).tolist(),
+    )
     return [sio.getvalue().encode("ascii")]
