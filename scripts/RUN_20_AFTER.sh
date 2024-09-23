@@ -28,7 +28,7 @@ cd ../isusm
 python agg_1minute.py
 
 cd ../hads
-python compute_hads_pday.py
+python compute_hads_pday.py --date=$(date '+%Y-%m-%d')
 
 cd ../ingestors
 python uscrn_ingest.py
