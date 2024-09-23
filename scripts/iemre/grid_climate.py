@@ -1,8 +1,10 @@
 """Grid climate for netcdf usage"""
 
-import datetime
 import sys
+from datetime import datetime
+from typing import Optional
 
+import click
 import numpy as np
 import pandas as pd
 from pyiem import iemre
@@ -39,7 +41,7 @@ def grid_solar(nc, ts):
     """Special Solar Ops."""
     offset = iemre.daily_offset(ts)
     if ts.day == 29 and ts.month == 2:
-        ts = datetime.datetime(2000, 3, 1)
+        ts = datetime(2000, 3, 1)
 
     with get_sqlalchemy_conn("coop") as conn:
         # Look for stations with data back to 1979 for merra
@@ -71,7 +73,7 @@ def grid_day(nc, ts):
     """Grid things."""
     offset = iemre.daily_offset(ts)
     if ts.day == 29 and ts.month == 2:
-        ts = datetime.datetime(2000, 3, 1)
+        ts = datetime(2000, 3, 1)
 
     with get_sqlalchemy_conn("coop") as conn:
         df = pd.read_sql(
@@ -108,17 +110,16 @@ def workflow(ts):
         grid_day(nc, ts)
         grid_solar(nc, ts)
 
-    with ncopen(
-        iemre.get_dailyc_mrms_ncname(domain=""), "a", timeout=300
-    ) as nc:
+    with ncopen(iemre.get_dailyc_mrms_ncname(), "a", timeout=300) as nc:
         grid_day(nc, ts)
 
 
-def main(argv):
+@click.command()
+@click.option("--date", "dt", type=click.DateTime(), help="Specific date")
+def main(dt: Optional[datetime]):
     """Go Main!"""
-    if len(argv) == 4:
-        ts = datetime.datetime(int(argv[1]), int(argv[2]), int(argv[3]))
-        workflow(ts)
+    if dt:
+        workflow(dt)
     else:
         for ts in pd.date_range("2000/1/1", "2000/12/31"):
             LOG.info(ts)

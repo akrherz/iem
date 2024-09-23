@@ -2,10 +2,10 @@
 Generate a RTP product for the weather bureau.
 """
 
-import datetime
 import os
 import subprocess
 import tempfile
+from datetime import timedelta
 
 import pandas as pd
 from pyiem.database import get_sqlalchemy_conn
@@ -59,6 +59,50 @@ def fix_isusm(df, yesterday, today):
     df.loc[corrected.index, "sum"] = corrected["sum"]
 
 
+def pp(val, width, dec):
+    """Pretty Print."""
+    fmt = f"%{width}s"
+    if val is None or pd.isna(val):
+        return fmt % ("M",)
+    if 0 < val < 0.009:
+        return fmt % ("T",)
+    fmt = f"%{width}.{dec}f"
+    return fmt % (val,)
+
+
+def do_dvn_coop(fh):
+    """Special job for DVN."""
+    fh.write(
+        f".BR DVN {utc():%m%d} C DH07/TAIRZX/TAIRZN/PPDRZZ/SFDRZZ/SDIRZZ\n"
+        ": COOP Reports processed by IEM\n"
+    )
+    with get_sqlalchemy_conn("iem") as conn:
+        res = conn.execute(
+            text(
+                """
+                select id, name, max_tmpf, min_tmpf, pday, snow, snowd,
+                coop_valid from
+                summary s JOIN stations t on (s.iemid = t.iemid)
+                WHERE t.network ~* 'COOP' and day = :dt and
+                extract(hour from s.coop_valid) between 4 and 11 and
+                t.wfo = 'DVN' and (max_tmpf is not null or min_tmpf is not null
+                or pday is not null or snow is not null or snowd is not null)
+                ORDER by id asc
+                """
+            ),
+            {"dt": utc().date()},
+        )
+        for row in res.mappings():
+            fh.write(
+                f"{row['id']:5.5s} :{row['name']:24.24s}:"
+                f"DH{row['coop_valid'].strftime('%H%M')}/"
+                f"{pp(row['max_tmpf'], 4, 0)}/{pp(row['min_tmpf'], 4, 0)}/"
+                f"{pp(row['pday'], 5, 2)}/{pp(row['snow'], 5, 1)}/"
+                f"{pp(row['snowd'], 5, 0)}\n"
+            )
+        fh.write(".END\n\n")
+
+
 def main(job):
     """Go Main Go"""
     qdict = loadqc()
@@ -67,8 +111,8 @@ def main(job):
     job["now12z"] = utc().replace(hour=12, minute=0, second=0, microsecond=0)
     job["today6z"] = job["now12z"].replace(hour=6)
     job["today0z"] = job["now12z"].replace(hour=0)
-    job["yesterday6z"] = job["today6z"] - datetime.timedelta(days=1)
-    job["yesterday12z"] = job["now12z"] - datetime.timedelta(days=1)
+    job["yesterday6z"] = job["today6z"] - timedelta(days=1)
+    job["yesterday12z"] = job["now12z"] - timedelta(days=1)
 
     asosfmt = "%-6s:%-43s: %3s / %3s / %5s\n"
     fmt = "%-6s:%-43s: %3s / %3s\n"
@@ -197,7 +241,8 @@ def main(job):
                 fh.write(_fmt % tuple(args))
 
             fh.write(".END\n\n")
-
+        if job["wfo"] == "DVN":
+            do_dvn_coop(fh)
     pqstr = (
         f"plot ac {job['now12z']:%Y%m%d}0000 "
         f"{job['filename']} {job['filename']} shef"

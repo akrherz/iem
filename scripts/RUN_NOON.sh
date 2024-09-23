@@ -2,7 +2,7 @@
 # Run at noon local time
 #
 cd smos
-python plot.py --date=$(date +'%Y-%m-%d')T00:00:00 --realtime
+python plot.py --valid=$(date +'%Y-%m-%d')T00:00:00 --realtime
 
 cd ../iemre
 # We hopefully have a 12z 24h file by now

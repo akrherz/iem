@@ -18,7 +18,7 @@ cd ../asos
 python adjust_report_type.py --date=$(date -u --date '1 day ago' +'%Y-%m-%d')
 
 cd ../smos
-python plot.py --date=$(date --date '1 day ago' +'%Y-%m-%d')T12:00:00 --realtime
+python plot.py --valid=$(date --date '1 day ago' +'%Y-%m-%d')T12:00:00 --realtime
 
 # Wait a bit before doing this
 sleep 600
