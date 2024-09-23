@@ -1,15 +1,19 @@
-"""Create a plot of SMOS data for either 0 or 12z"""
+"""Create a plot of SMOS data for either 0 or 12z
 
-import datetime
+called from RUN_NOON.sh for 0z and RUN_MIDNIGHT.sh for 12z
+"""
+
 import sys
 import warnings
+from datetime import datetime, timedelta, timezone
 
+import click
 import numpy as np
 import pandas as pd
 from pyiem.database import get_sqlalchemy_conn
 from pyiem.plot import get_cmap
 from pyiem.plot.geoplot import MapPlot
-from pyiem.util import logger, utc
+from pyiem.util import logger
 
 # Surpress warning from matplotlib that I have no idea about
 warnings.simplefilter("ignore", RuntimeWarning)
@@ -35,16 +39,16 @@ def makeplot(ts, routes="ac"):
         """,
             conn,
             params=(
-                ts - datetime.timedelta(hours=6),
-                ts + datetime.timedelta(hours=6),
+                ts - timedelta(hours=6),
+                ts + timedelta(hours=6),
             ),
             index_col=None,
         )
     if df.empty:
         LOG.warning(
             "Did not find SMOS data for: %s-%s",
-            ts - datetime.timedelta(hours=6),
-            ts + datetime.timedelta(hours=6),
+            ts - timedelta(hours=6),
+            ts + timedelta(hours=6),
         )
         return
     for sector in ["midwest", "iowa"]:
@@ -102,23 +106,16 @@ def makeplot(ts, routes="ac"):
         mp.close()
 
 
-def main(argv):
+@click.command()
+@click.option("--valid", type=click.DateTime(), help="Specific UTC time")
+@click.option("--realtime", is_flag=True, help="Operate in realtime mode")
+def main(valid: datetime, realtime: bool):
     """Go Main Go"""
-    if len(argv) == 2:
-        hr = int(argv[1])
-        if hr == 12:  # Run for the previous UTC day
-            ts = utc() - datetime.timedelta(days=1)
-            ts = ts.replace(hour=12, minute=0, second=0, microsecond=0)
-        else:
-            ts = utc().replace(hour=0, minute=0, second=0, microsecond=0)
-        makeplot(ts)
-        # Run a day, a week ago ago as well
+    valid = valid.replace(tzinfo=timezone.utc)
+    makeplot(valid, "ac" if realtime else "a")
+    if realtime:
         for d in [1, 5]:
-            ts -= datetime.timedelta(days=d)
-            makeplot(ts, "a")
-    else:
-        ts = utc(int(argv[1]), int(argv[2]), int(argv[3]), int(argv[4]))
-        makeplot(ts, "a")
+            makeplot(valid - timedelta(days=d), "a")
 
 
 if __name__ == "__main__":

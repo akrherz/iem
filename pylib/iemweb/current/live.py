@@ -5,12 +5,13 @@ URIs look like so:
     /live/KCRG-006.jpg
 """
 
-import datetime
+from datetime import datetime
 from io import BytesIO
 
 import requests
 from PIL import Image, ImageDraw
-from pyiem.util import get_dbconn, get_properties
+from pyiem.database import get_dbconn
+from pyiem.util import get_properties
 from pyiem.webutil import iemapp
 from pymemcache.client import Client
 from requests.auth import HTTPBasicAuth, HTTPDigestAuth
@@ -66,7 +67,7 @@ def fetch(cid):
     # Draw black box
     draw = ImageDraw.Draw(image)
     draw.rectangle([0, height - 12, width, height], fill="#000000")
-    stamp = datetime.datetime.now().strftime("%d %b %Y %I:%M:%S %P")
+    stamp = datetime.now().strftime("%d %b %Y %I:%M:%S %P")
     title = f"{name} - {network} Webcam Live Image at {stamp}"
     draw.text((5, height - 12), title)
     buf = BytesIO()

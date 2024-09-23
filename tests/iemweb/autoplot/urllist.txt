@@ -139,6 +139,7 @@
 /plotting/auto/plot/165/w:air::sector:IA::var:high_above::popt:values::year:2020::threshold:32::p:50::sday:0824::syear:1893::eyear:2024::cmap:BrBG::_r:t::dpi:100.png
 /plotting/auto/plot/166/w:cwa::state:IA::network:WFO::cwa:DMX::fema:7::limit:ytd::_r:t::dpi:100::_cb:1.png
 /plotting/auto/plot/166/w:fema::state:IA::network:WFO::cwa:DMX::fema:7::limit:ytd::_r:t::dpi:100::_cb:1.png
+/plotting/auto/plot/167/network:IA_ASOS::zstation:DSM::month:9::year:2020::_r:t::dpi:100.png
 /plotting/auto/plot/171/opt:ugc::network:WFO::station:MEG::state:IA::ugc:IAC169::c:single::phenomena:SV::significance:W::cmap:Greens::_r:43::dpi:100.png
 /plotting/auto/plot/171/opt:fema::network:WFO::station:DMX::state:IA::ugc:IAC169::fema:7::c:single::phenomena:TO::significance:W::cmap:Greens::_r:t::dpi:100.png
 /plotting/auto/plot/172/network:IACLIMATE::station:IATAME::var:snow::year1:2024::sdate:0101::edate:0102::m:3::_r:t::dpi:100::_cb:1.png
@@ -200,6 +201,7 @@
 /plotting/auto/plot/212/network:RAOB::station:_OAX::year:2024::hour:both::var:height::level:500::_r:t::dpi:100.png
 /plotting/auto/plot/216/network:MA_ASOS::station:BOS::var:max_dwpf::dir:above::threshold:70::_r:43::dpi:100.png
 /plotting/auto/plot/216/network:IA_ASOS::station:AMW::var:high::dir:below::threshold:32::_r:t::dpi:100.png
+/plotting/auto/plot/217/pid:202408100731-KMHX-WWUS82-SPSMHX::segnum:0::_r:t::dpi:100::_cb:1.png
 /plotting/auto/plot/218/w:set::network:NWSCLI::station:KDSM::date:2024-07-26::_r:t::dpi:100.png
 /plotting/auto/plot/219/station:PAAA::valid:2024-08-21%200413::_r:t::dpi:100.png
 /plotting/auto/plot/219/station:PASN::valid:2024-08-21%200413::_r:t::dpi:100.png

@@ -5,7 +5,7 @@ that contain polygons issued per day.
 but as yearly and monthly totals.
 """
 
-import datetime
+from datetime import date, timedelta
 
 import pandas as pd
 from pyiem.database import get_sqlalchemy_conn
@@ -20,7 +20,7 @@ PDICT = {"yes": "Colorize Cells in Chart", "no": "Just plot values please"}
 def get_description():
     """Return a dict describing how to call this plotter"""
     desc = {"description": __doc__, "data": True}
-    today = datetime.date.today()
+    today = date.today()
     jan1 = today.replace(month=1, day=1)
     desc["arguments"] = [
         dict(
@@ -70,8 +70,8 @@ def plotter(fdict):
     wfo = ctx["wfo"]
     params = {}
     params["tzname"] = ctx["_nt"].sts[wfo]["tzname"]
-    params["sts"] = sts - datetime.timedelta(days=2)
-    params["ets"] = ets + datetime.timedelta(days=2)
+    params["sts"] = sts - timedelta(days=2)
+    params["ets"] = ets + timedelta(days=2)
 
     ctx["_nt"].sts["_ALL"] = {
         "name": "All Offices",
@@ -105,9 +105,9 @@ def plotter(fdict):
     now = sts
     while now <= ets:
         data[now] = {"val": 0}
-        now += datetime.timedelta(days=1)
-    for date, row in df.iterrows():
-        data[date] = {"val": row["count"]}
+        now += timedelta(days=1)
+    for dt, row in df.iterrows():
+        data[dt] = {"val": row["count"]}
     fig = calendar_plot(
         sts,
         ets,

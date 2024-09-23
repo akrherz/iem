@@ -18,7 +18,7 @@ cd ../asos
 python adjust_report_type.py --date=$(date -u --date '1 day ago' +'%Y-%m-%d')
 
 cd ../smos
-python plot.py 12
+python plot.py --date=$(date --date '1 day ago' +'%Y-%m-%d')T12:00:00 --realtime
 
 # Wait a bit before doing this
 sleep 600
@@ -35,7 +35,7 @@ python hads_delete_dups.py --date=$(date -u --date '1 day ago' +'%Y-%m-%d')
 python hads_delete_dups.py --date=$(date -u --date '35 day ago' +'%Y-%m-%d')
 
 cd ../hads
-python dedup_hml_forecasts.py
+python dedup_hml_forecasts.py --date=$(date --date '1 day ago' +'%Y-%m-%d')
 python raw2obs.py --date=$(date --date '1 day ago' +'%Y-%m-%d')
 
 cd ../mrms
