@@ -11,6 +11,18 @@ TODAY=$(date +'%Y %m %d')
 
 python dl/download_ndfd.py &
 
+# Run at 0, 1, and 2 UTC
+if [[ $HH -eq "00" || $HH -eq "01" || $HH -eq "02" ]]
+then
+    python 00z/generate_rtp.py
+fi
+
+# Run at 12, 13, and 14 UTC
+if [[ $HH -eq "12" || $HH -eq "13" || $HH -eq "14" ]]
+then
+    python 12z/generate_rtp.py
+fi
+
 cd mrms
 # MRMS hourly totals arrive shortly after the top of the hour
 if [ $LHH -eq "00" ]
@@ -124,12 +136,12 @@ cd ../ua
 if [ $HH -eq "04" ]
 then
     python ingest_from_rucsoundings.py --valid=${YYYY}-${MM}-${DD}T00:00:00
-    python compute_params.py $YYYY
+    python compute_params.py --year=$YYYY
 fi
 if [ $HH -eq "16" ]
 then
     python ingest_from_rucsoundings.py --valid=${YYYY}-${MM}-${DD}T12:00:00
-    python compute_params.py $YYYY
+    python compute_params.py --year=$YYYY
 fi
 
 cd ../mos

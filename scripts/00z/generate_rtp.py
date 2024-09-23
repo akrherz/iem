@@ -1,6 +1,6 @@
 """Generate a First Guess RTP that the bureau can use for their product.
 
-called from RUN_0Z.sh
+called from RUN_10_AFTER.sh for 0, 1, and 2 UTC
 """
 
 import os

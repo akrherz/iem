@@ -7,6 +7,7 @@ Run from RUN_10AFTER.sh
 import sys
 import warnings
 
+import click
 import numpy as np
 import pandas as pd
 from metpy.calc import (
@@ -26,7 +27,7 @@ from metpy.calc import (
 from metpy.units import units
 from pyiem.database import get_dbconn, get_sqlalchemy_conn
 from pyiem.network import Table as NetworkTable
-from pyiem.util import logger, utc
+from pyiem.util import logger
 from scipy.interpolate import interp1d
 from tqdm import tqdm
 
@@ -308,9 +309,10 @@ def do_profile(cursor, fid, gdf, nt):
     )
 
 
-def main(argv):
+@click.command()
+@click.argument("year", required=True, type=int)
+def main(year: int):
     """Go Main Go."""
-    year = utc().year if len(argv) == 1 else int(argv[1])
     dbconn = get_dbconn("raob")
     cursor = dbconn.cursor()
     nt = NetworkTable("RAOB")
@@ -361,4 +363,4 @@ def main(argv):
 
 
 if __name__ == "__main__":
-    main(sys.argv)
+    main()

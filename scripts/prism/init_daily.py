@@ -1,8 +1,8 @@
 """Generate the yearly PRISM file to hold our data"""
 
-import datetime
 import os
 import sys
+from datetime import datetime
 
 import click
 import numpy as np
@@ -12,7 +12,7 @@ from pyiem.util import logger, ncopen
 LOG = logger()
 
 
-def init_year(ts: datetime.datetime):
+def init_year(ts: datetime):
     """
     Create a new NetCDF file for a year of our specification!
     """
@@ -22,7 +22,7 @@ def init_year(ts: datetime.datetime):
         LOG.info("Cowardly refusing to overwrite file %s.", fn)
         sys.exit()
     nc = ncopen(fn, "w")
-    nc.title = "PRISM Daily Data for %s" % (ts.year,)
+    nc.title = f"PRISM Daily Data for {ts:%Y}"
     nc.platform = "Grided Observations"
     nc.description = "PRISM Data on a 0.04 degree grid"
     nc.institution = "Iowa State University, Ames, IA, USA"
@@ -31,9 +31,7 @@ def init_year(ts: datetime.datetime):
     nc.realization = 1
     nc.Conventions = "CF-1.0"
     nc.contact = "Daryl Herzmann, akrherz@iastate.edu, 515-294-5978"
-    nc.history = ("%s Generated") % (
-        datetime.datetime.now().strftime("%d %B %Y"),
-    )
+    nc.history = f"{datetime.now():%d %B %Y} Generated"
     nc.comment = "No Comment at this time"
 
     # Setup Dimensions
@@ -99,7 +97,7 @@ def init_year(ts: datetime.datetime):
 def main(year):
     """Run for the year."""
     os.makedirs("/mesonet/data/prism", exist_ok=True)
-    init_year(datetime.datetime(year, 1, 1))
+    init_year(datetime(year, 1, 1))
 
 
 if __name__ == "__main__":

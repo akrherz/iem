@@ -1,15 +1,15 @@
 """yearly precip"""
 
-import datetime
 import os
 import subprocess
 import tempfile
+from datetime import datetime, timedelta
 
+import httpx
 import numpy as np
-import requests
+from pyiem.database import get_dbconn
 from pyiem.network import Table as NetworkTable
 from pyiem.plot import MapPlot
-from pyiem.util import get_dbconn
 
 
 def main():
@@ -18,7 +18,7 @@ def main():
     pgconn = get_dbconn("coop")
     ccursor = pgconn.cursor()
 
-    ts = datetime.datetime.now() - datetime.timedelta(days=1)
+    ts = datetime.now() - timedelta(days=1)
 
     nrain = []
     lats = []
@@ -63,7 +63,7 @@ def main():
         "ct:ncei_climate91::_r:43::_cb:1.png"
     )
 
-    req = requests.get(service, timeout=120)
+    req = httpx.get(service, timeout=120)
     tmpfd = tempfile.NamedTemporaryFile(delete=False)
     tmpfd.write(req.content)
     tmpfd.close()

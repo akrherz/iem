@@ -3,8 +3,8 @@
 Called from RUN_10_AFTER.sh
 """
 
-import datetime
 import sys
+from datetime import date, timedelta
 
 import pandas as pd
 from pyiem.database import get_sqlalchemy_conn
@@ -22,12 +22,12 @@ def fmter(val):
 
 def main(days, argv):
     """Go!"""
-    today = datetime.date.today()
+    today = date.today()
     routes = "ac"
     if len(argv) == 4:
-        today = datetime.date(int(argv[1]), int(argv[2]), int(argv[3]))
+        today = date(int(argv[1]), int(argv[2]), int(argv[3]))
         routes = "a"
-    sixago = today - datetime.timedelta(days=days - 1)
+    sixago = today - timedelta(days=days - 1)
 
     # Compute normal from the climate database
     with get_sqlalchemy_conn("iem") as conn:
@@ -62,9 +62,9 @@ def main(days, argv):
     )
     mp.drawcounties()
     pqstr = (
-        "plot %s %s0000 summary/%sday/ia_precip.png "
-        "summary/%sday/ia_precip.png png"
-    ) % (routes, today.strftime("%Y%m%d"), days, days)
+        f"plot {routes} {today:%Y%m%d}0000 summary/{days}day/ia_precip.png "
+        f"summary/{days}day/ia_precip.png png"
+    )
     mp.postprocess(pqstr=pqstr)
     mp.close()
 
