@@ -1,10 +1,9 @@
 """
 Generate an animated GIF of HRRR forecasted 1km reflectivity
 
-Run from RUN_40AFTER.sh and for the previous hour's HRRR run
+Run from hrrr_jobs.py
 """
 
-import datetime
 import glob
 import subprocess
 import tempfile
@@ -13,26 +12,17 @@ from zoneinfo import ZoneInfo
 import click
 import matplotlib.colors as mpcolors
 import numpy as np
-import pygrib
-import pyiem.reference as ref
+import pandas as pd
+import xarray as xr
 from pyiem.plot import MapPlot, ramp2df
+from pyiem.plot.colormaps import radar_ptype
+from pyiem.reference import Z_FILL
 from pyiem.util import archive_fetch, logger
 
 LOG = logger()
 HOURS = [18] * 24
 for _hr in range(0, 24, 6):
     HOURS[_hr] = 48
-
-
-def compute_bounds(lons, lats):
-    """figure out a minimum box to extract data from, save CPU"""
-    dist = ((lats - ref.MW_NORTH) ** 2 + (lons - ref.MW_WEST) ** 2) ** 0.5
-    # pylint: disable=unbalanced-tuple-unpacking
-    x2, y1 = np.unravel_index(dist.argmin(), dist.shape)
-    dist = ((lats - ref.MW_SOUTH) ** 2 + (lons - ref.MW_EAST) ** 2) ** 0.5
-    # pylint: disable=unbalanced-tuple-unpacking
-    x1, y2 = np.unravel_index(dist.argmin(), dist.shape)
-    return x1 - 100, x2 + 100, y1 - 100, y2 + 100
 
 
 def run(tmpdir, valid, routes):
@@ -44,38 +34,21 @@ def run(tmpdir, valid, routes):
     cmap = mpcolors.ListedColormap(rampdf[["r", "g", "b"]].to_numpy() / 256)
     cmap.set_under("white")
 
-    fn = valid.strftime("%Y/%m/%d/model/hrrr/%H/hrrr.t%Hz.refd.grib2")
-    with archive_fetch(fn) as res:
-        if res is None:
+    colors = radar_ptype()
+    norm = mpcolors.BoundaryNorm(np.arange(0, 56, 2.5), len(colors["rain"]))
+    ppath = valid.strftime("%Y/%m/%d/model/hrrr/%H/hrrr.t%Hz.refd.grib2")
+    with archive_fetch(ppath) as fn:
+        if fn is None:
             LOG.warning("missing %s, aborting GIF generation", fn)
             return
-        grbs = pygrib.open(res)
+        ds = xr.open_dataset(fn)
 
-        for minute in range(0, HOURS[valid.hour] * 60 + 1, 15):
-            is_minute = minute <= (18 * 60)  # grib sucks
-            if not is_minute and minute % 60 != 0:
-                continue
-            now = valid + datetime.timedelta(minutes=minute)
+        for step, toffset in enumerate(ds.step.values):
+            now = pd.Timestamp(ds.time.values + toffset).to_pydatetime()
             now = now.astimezone(ZoneInfo("America/Chicago"))
-            grbs.seek(0)
-
-            try:
-                gs = grbs.select(
-                    shortName="refd",
-                    indicatorOfUnitOfTimeRange=0 if is_minute else 1,
-                    forecastTime=minute if is_minute else int(minute / 60),
-                )
-            except ValueError:
-                LOG.info("select failure: %s %s", valid, minute)
-                continue
             if lats is None:
-                lats, lons = gs[0].latlons()
-                x1, x2, y1, y2 = compute_bounds(lons, lats)
-                lats = lats[x1:x2, y1:y2]
-                lons = lons[x1:x2, y1:y2]
-
-            reflect = gs[0]["values"][x1:x2, y1:y2]
-            reflect = np.where(reflect < -9, -100, reflect)
+                lats = ds.latitude.values
+                lons = ds.longitude.values
             mp = MapPlot(
                 sector="midwest",
                 axisbg="tan",
@@ -85,19 +58,19 @@ def run(tmpdir, valid, routes):
                 ),
                 subtitle=f"valid: {now:%-d %b %Y %I:%M %p %Z}",
             )
-            levels = [-32, -30]
-            levels.extend(range(-10, 96, 5))
-            mp.pcolormesh(
-                lons,
-                lats,
-                reflect,
-                range(-30, 96, 4),
-                spacing="proportional",
-                cmap=cmap,
-                units="dBZ",
-                clip_on=False,
-                clevstride=5,
-            )
+            refd = np.ma.masked_where(ds.refd[step] < 5, ds.refd[step])
+            for typ in ["rain", "snow", "frzr", "icep"]:
+                cmap = mpcolors.ListedColormap(colors[typ])
+                ref = np.ma.masked_where(ds[f"c{typ}"][i] < 0.01, refd)
+                mp.panels[0].pcolormesh(
+                    lons,
+                    lats,
+                    ref[:-1, :-1],  # hack around pcolormesh grid size demands
+                    norm=norm,
+                    cmap=cmap,
+                    zorder=Z_FILL,
+                )
+            mp.draw_radar_ptype_legend()
             pngfn = f"{tmpdir}/hrrr_ref_{i:03.0f}.png"
             mp.postprocess(filename=pngfn)
             mp.close()
