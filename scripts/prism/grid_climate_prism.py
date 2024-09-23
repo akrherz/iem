@@ -1,8 +1,9 @@
 """Grid climate for netcdf usage"""
 
-import datetime
-import sys
+from datetime import datetime, timedelta
+from typing import Optional
 
+import click
 import numpy as np
 from pyiem import iemre
 from pyiem.database import get_dbconnc
@@ -57,7 +58,7 @@ def grid_day(nc, ts):
     COOP, cursor = get_dbconnc("coop")
     offset = iemre.daily_offset(ts)
     if ts.day == 29 and ts.month == 2:
-        ts = datetime.datetime(2000, 3, 1)
+        ts = datetime(2000, 3, 1)
 
     sql = """SELECT * from ncei_climate91 WHERE valid = '%s' and
              substr(station,3,4) != '0000' and substr(station,3,1) != 'C'
@@ -94,15 +95,16 @@ def workflow(ts):
     nc.close()
 
 
-def main(argv):
+@click.command()
+@click.option("--date", "dt", type=click.DateTime())
+def main(dt: Optional[datetime]):
     """Go Main!"""
-    if len(argv) == 4:
-        ts = datetime.datetime(int(argv[1]), int(argv[2]), int(argv[3]))
-        workflow(ts)
+    if dt is not None:
+        workflow(dt)
     else:
-        sts = datetime.datetime(2000, 1, 1)
-        ets = datetime.datetime(2001, 1, 1)
-        interval = datetime.timedelta(days=1)
+        sts = datetime(2000, 1, 1)
+        ets = datetime(2001, 1, 1)
+        interval = timedelta(days=1)
         now = sts
         while now < ets:
             print(now)
@@ -111,4 +113,4 @@ def main(argv):
 
 
 if __name__ == "__main__":
-    main(sys.argv)
+    main()

@@ -11,7 +11,6 @@ python make_archive_baseline.py
 cd ../00z
 # Wait a bit, so that more obs can come in
 sleep 600
-python generate_rtp.py
 python asos_high.py
 
 cd ../ncei

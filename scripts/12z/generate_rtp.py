@@ -1,5 +1,7 @@
 """
 Generate a RTP product for the weather bureau.
+
+Run from RUN_10_AFTER.sh for 12, 13 and 14 UTC
 """
 
 import os

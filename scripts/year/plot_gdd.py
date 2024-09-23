@@ -1,6 +1,6 @@
 """Generate a plot of GDD for the ASOS network"""
 
-import datetime
+from datetime import date, timedelta
 
 import click
 from pyiem.util import logger, web2ldm
@@ -12,7 +12,7 @@ LOG = logger()
 @click.option("--gddbase", default=50, type=int, help="GDD Base Temperature")
 def main(gddbase):
     """Go Main Go"""
-    now = datetime.date.today() - datetime.timedelta(days=1)
+    now = date.today() - timedelta(days=1)
     jan1 = now.replace(month=1, day=1)
 
     url = (

@@ -3,7 +3,7 @@
 Run from RUN_SUMMARY.sh
 """
 
-import datetime
+from datetime import datetime, timedelta
 
 import numpy as np
 from pyiem import iemre
@@ -13,8 +13,8 @@ from pyiem.util import ncopen
 
 def main():
     """Go Main Go"""
-    ets = datetime.datetime.now() - datetime.timedelta(days=1)
-    sts = datetime.datetime(ets.year, 1, 1)
+    ets = datetime.now() - timedelta(days=1)
+    sts = datetime(ets.year, 1, 1)
 
     # Get the normal accumm
     with ncopen(iemre.get_dailyc_ncname()) as cnc:

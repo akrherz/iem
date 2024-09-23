@@ -4,10 +4,10 @@ RUN_2AM.sh for 7,60,365 days ago
 RUN_NOON.sh for 1 day ago
 """
 
-import datetime
 import glob
 import os
 import subprocess
+from datetime import datetime
 
 import click
 import numpy as np
@@ -77,7 +77,7 @@ def do_cleanup(valid):
 def update_properties(valid):
     """Conditionally update the database flag for when PRISM ends."""
     props = get_properties()
-    current = datetime.datetime.strptime(
+    current = datetime.strptime(
         props.get(PROPNAME, "1980-01-01"),
         "%Y-%m-%d",
     ).date()
@@ -90,7 +90,7 @@ def update_properties(valid):
 @click.option(
     "--date", "dt", type=click.DateTime(), required=True, help="Date"
 )
-def main(dt: datetime.datetime):
+def main(dt: datetime):
     """Do Something"""
     os.chdir("/mesonet/tmp")
     dt = dt.date()

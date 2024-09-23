@@ -4,10 +4,10 @@ Called from `RUN_20_AFTER.sh` for current date.
 Called from `RUN_12Z.sh` for yesterday and a week ago.
 """
 
-import datetime
-import sys
+from datetime import datetime, timedelta, timezone
 from zoneinfo import ZoneInfo
 
+import click
 import pandas as pd
 from metpy.units import units
 from pyiem.database import get_dbconn, get_sqlalchemy_conn
@@ -29,7 +29,7 @@ def _do_update(icursor, valid, iemid, precip):
     return icursor.rowcount
 
 
-def run(valid):
+def run(valid: datetime):
     """Do Work."""
     nt = NetworkTable("USCRN")
     iem_pgconn = get_dbconn("iem")
@@ -41,20 +41,20 @@ def run(valid):
             "from alldata where valid > %s and valid < %s",
             conn,
             params=(
-                valid - datetime.timedelta(days=1),
-                valid + datetime.timedelta(days=2),
+                valid - timedelta(days=1),
+                valid + timedelta(days=2),
             ),
             index_col=None,
         )
     if df.empty:
         LOG.info("No data found for date: %s", valid.date())
         return
-    df["utc_valid"] = df["utc_valid"].dt.tz_localize(datetime.timezone.utc)
+    df["utc_valid"] = df["utc_valid"].dt.tz_localize(timezone.utc)
     for station in nt.sts:
         iemid = nt.sts[station]["iemid"]
         tz = ZoneInfo(nt.sts[station]["tzname"])
-        sts = datetime.datetime(valid.year, valid.month, valid.day, tzinfo=tz)
-        ets = sts + datetime.timedelta(days=1)
+        sts = datetime(valid.year, valid.month, valid.day, tzinfo=tz)
+        ets = sts + timedelta(days=1)
         df2 = df[
             (df["station"] == station)
             & (df["utc_valid"] > sts)
@@ -78,14 +78,12 @@ def run(valid):
         iem_pgconn.commit()
 
 
-def main(argv):
+@click.command()
+@click.option("--date", "dt", type=click.DateTime(), required=True)
+def main(dt: datetime):
     """Go Main Go."""
-    if len(argv) == 4:
-        valid = datetime.datetime(int(argv[1]), int(argv[2]), int(argv[3]))
-    else:
-        valid = datetime.datetime.now()
-    run(valid)
+    run(dt)
 
 
 if __name__ == "__main__":
-    main(sys.argv)
+    main()
