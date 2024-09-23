@@ -5,12 +5,13 @@ This plot is not meant for interactive use, but a backend for SPS plots.
 from zoneinfo import ZoneInfo
 
 # third party
+import httpx
 from geopandas import read_postgis
 from pyiem.exceptions import NoDataFound
 from pyiem.network import Table as NetworkTable
 from pyiem.plot.geoplot import MapPlot
 from pyiem.reference import LATLON, Z_OVERLAY2
-from pyiem.util import get_autoplot_context, get_sqlalchemy_conn
+from pyiem.util import LOG, get_autoplot_context, get_sqlalchemy_conn
 from sqlalchemy import text
 
 TFORMAT = "%b %-d %Y %-I:%M %p %Z"
@@ -63,7 +64,7 @@ def plotter(fdict):
                     ST_Contains(s.geom, g.geom) and segmentnum = :segnum
                 )
                 SELECT geom, ugcs, wfo, issue, expire, landspout, waterspout,
-                max_hail_size, max_wind_gust, product, segmentnum,
+                max_hail_size, max_wind_gust, segmentnum,
                 coalesce(pop, 0) as pop
                 from sps_{pid[:4]}, geopop where product_id = :pid
                 and segmentnum = :segnum
@@ -144,9 +145,19 @@ def plotter(fdict):
     mp.cwa = wfo
 
     # Plot text on the page, hehe
+    try:
+        with httpx.Client() as client:
+            resp = client.get(
+                f"http://mesonet.agron.iastate.edu/api/1/nwstext/{pid}",
+                timeout=10,
+            )
+        resp.raise_for_status()
+        report = resp.text
+    except Exception as exp:
+        LOG.exception(exp)
+        report = ""
     report = (
-        row["product"]
-        .split("$$")[segnum]
+        report.split("$$")[segnum]
         .replace("\r", "")
         .replace("\003", "")
         .replace("\001", "")
@@ -214,4 +225,4 @@ def plotter(fdict):
         )
     mp.drawcities()
     mp.drawcounties()
-    return mp.fig, df.drop(["geom", "product"], axis=1)
+    return mp.fig, df.drop(columns=["geom"])

@@ -1,6 +1,6 @@
 """.. title:: Special Weather Statement (SPS) GeoJSON
 
-Return to `JSON Services </json/>`_ listing.
+Return to `API Services </api/#json>`_ listing.
 
 Documentation for /geojson/sps.py
 ---------------------------------

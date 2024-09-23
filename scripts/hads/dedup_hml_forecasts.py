@@ -2,21 +2,24 @@
 
 Suspicion is that do to retrans, etc, there are lots of dups in the HML
 database.  So this attempts to de-dup them.
+
+Run from RUN_MIDNIGHT.sh for previous UTC date
 """
 
-import datetime
-import sys
+from datetime import datetime, timedelta, timezone
 
-from pyiem.util import get_dbconn, logger, utc
+import click
+from pyiem.database import get_dbconn
+from pyiem.util import logger
 
 LOG = logger()
 
 
-def workflow(ts):
+def workflow(ts: datetime):
     """Deduplicate this timestep"""
     pgconn = get_dbconn("hml")
     cursor = pgconn.cursor()
-    table = "hml_forecast_data_%s" % (ts.year,)
+    table = f"hml_forecast_data_{ts:%Y}"
     cursor.execute(
         f"""
     with data as (
@@ -27,7 +30,7 @@ def workflow(ts):
     DELETE from {table} where hml_forecast_id in
         (select id from data where rank > 1)
         """,
-        (ts, ts + datetime.timedelta(days=1)),
+        (ts, ts + timedelta(days=1)),
     )
     LOG.info(
         "removed %s rows on %s for %s",
@@ -45,7 +48,7 @@ def workflow(ts):
     DELETE from hml_forecast where id in
         (select id from data where rank > 1)
     """,
-        (ts, ts + datetime.timedelta(days=1)),
+        (ts, ts + timedelta(days=1)),
     )
     LOG.info(
         "dedup_hml_forecasts removed %s rows on %s for %s",
@@ -57,14 +60,13 @@ def workflow(ts):
     pgconn.commit()
 
 
-def main(argv):
+@click.command()
+@click.option("--date", "dt", type=click.DateTime())
+def main(dt: datetime):
     """Go Main Go"""
-    if len(argv) != 4:
-        ts = utc() - datetime.timedelta(days=1)
-    else:
-        ts = utc(int(argv[1]), int(argv[2]), int(argv[3]))
-    workflow(ts)
+    dt = dt.replace(tzinfo=timezone.utc)
+    workflow(dt)
 
 
 if __name__ == "__main__":
-    main(sys.argv)
+    main()
