@@ -1,7 +1,4 @@
 <?php
-/* Fails when no polygon warning was present with the warning
-   ex) CAR.SV.9.2007
-*/
 if (!isset($sts)) {
     header("Location: /cow/");
     die(); /* Avoid direct calls.... */
@@ -243,7 +240,8 @@ if ($fcster != '') {
 <div class="alert alert-warning">
     <strong>This display is filtered for product signature: "{$fcster}".
     This means that the 'Unwarned Events' are not accurate as they may have
-    verified by warnings signed by a different string.</strong></div>
+    verified by warnings signed by a different string. This also means that
+    the POD + CSI metrics are also unreliable.</strong></div>
 EOF;
 }
 
