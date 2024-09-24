@@ -12,13 +12,13 @@ TODAY=$(date +'%Y %m %d')
 python dl/download_ndfd.py &
 
 # Run at 0, 1, and 2 UTC
-if [[ $HH -eq "00" || $HH -eq "01" || $HH -eq "02" ]]
+if [[ "$HH" -eq "00" || "$HH" -eq "01" || "$HH" -eq "02" ]]
 then
     python 00z/generate_rtp.py
 fi
 
 # Run at 12, 13, and 14 UTC
-if [[ $HH -eq "12" || $HH -eq "13" || $HH -eq "14" ]]
+if [[ "$HH" -eq "12" || "$HH" -eq "13" || "$HH" -eq "14" ]]
 then
     python 12z/generate_rtp.py
 fi
