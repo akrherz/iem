@@ -44,8 +44,12 @@ def run(tmpdir, valid, routes):
         ds = xr.open_dataset(fn)
 
         for step, toffset in enumerate(ds.step.values):
-            now = pd.Timestamp(ds.time.values + toffset).to_pydatetime()
-            now = now.astimezone(ZoneInfo("America/Chicago"))
+            now = (
+                pd.Timestamp(ds.time.values + toffset)
+                .to_pydatetime()
+                .replace(tzinfo=ZoneInfo("UTC"))
+                .astimezone(ZoneInfo("America/Chicago"))
+            )
             if lats is None:
                 lats = ds.latitude.values
                 lons = ds.longitude.values
