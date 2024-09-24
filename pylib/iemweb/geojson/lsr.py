@@ -7,6 +7,8 @@ This service does a number of different things with Local Storm Reports.
 Changelog
 ---------
 
+- 2024-09-23: Added `qualifier` to output attributes, this represents the
+  Measured, Estimated, or Unknonw qualifier for the report.
 - 2024-07-14: This service was migrated from a PHP based script to python. An
   attempt was made to not break the attribute names and types.
 
@@ -112,7 +114,7 @@ def do_vtec(environ: dict) -> gpd.GeoDataFrame:
             l.state, l.remark, l.city, l.source, l.unit, l.geom,
             to_char(valid at time zone 'UTC', 'YYYY-MM-DDThh24:MI:SSZ')
                 as valid,
-            ST_x(l.geom) as lon, ST_y(l.geom) as lat
+            ST_x(l.geom) as lon, ST_y(l.geom) as lat, qualifier
             from sbw w, lsrs l
             WHERE w.vtec_year = :year and w.wfo = :wfo and
             w.phenomena = :phenomena and
@@ -145,7 +147,7 @@ def do_states(environ: dict) -> gpd.GeoDataFrame:
             l.state, l.remark, l.city, l.source, l.unit, l.geom,
             to_char(valid at time zone 'UTC', 'YYYY-MM-DDThh24:MI:SSZ')
                 as valid,
-            ST_x(l.geom) as lon, ST_y(l.geom) as lat
+            ST_x(l.geom) as lon, ST_y(l.geom) as lat, qualifier
             FROM lsrs l, states s WHERE
             valid BETWEEN :sts and :ets and state_abbr = ANY(:states)
             and ST_Intersects(l.geom, s.the_geom)
@@ -176,7 +178,7 @@ def do_default(environ: dict) -> gpd.GeoDataFrame:
             county, typetext, state, remark, city, source, unit,
             to_char(valid at time zone 'UTC', 'YYYY-MM-DDThh24:MI:SSZ')
                 as valid,
-            ST_x(geom) as lon, ST_y(geom) as lat, geom
+            ST_x(geom) as lon, ST_y(geom) as lat, qualifier, geom
             FROM lsrs WHERE
             valid BETWEEN :sts and :ets {wfo_limiter}
             LIMIT 10000

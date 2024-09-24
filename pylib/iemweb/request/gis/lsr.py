@@ -12,6 +12,8 @@ dataset is as live as when you query it as reports are ingested in realtime.
 Changelog
 ---------
 
+- 2024-09-23: Added `qualify` as the Estimated, Measured, or Unknown qualifier
+  of the magnitude value.  Perhaps fixed a problem with SHP output as well.
 - 2024-08-14: Correct bug with reports for Puerto Rico were not included.
 - 2024-07-18: Instead of returning a `No results found for query` when no
   database entries are found, we return an empty result.
@@ -154,7 +156,7 @@ def get_time_domain(form):
 def do_excel_kml(fmt, params, sql_filters):
     """Export as Excel or KML."""
     with get_sqlalchemy_conn("postgis") as conn:
-        df = gpd.read_postgis(
+        df: gpd.GeoDataFrame = gpd.read_postgis(
             text(
                 f"""
             WITH wfos as (
@@ -164,7 +166,7 @@ def do_excel_kml(fmt, params, sql_filters):
                 select distinct l.wfo, valid, county, city, l.state, typetext,
                 magnitude, l.source, ST_y(l.geom) as lat, ST_x(l.geom) as lon,
                 coalesce(remark, '') as remark, u.ugc, u.name as ugcname,
-                l.geom
+                l.geom, qualifier
                 from lsrs l LEFT JOIN ugcs u on (l.gid = u.gid) WHERE
                 valid >= :sts and valid < :ets {sql_filters}
             )
@@ -174,7 +176,7 @@ def do_excel_kml(fmt, params, sql_filters):
             to_char(valid at time zone 'UTC',
                 'YYYY/MM/DD HH24:MI') as utcvalid,
             county, city, state, typetext, magnitude, source, lat, lon,
-            remark, ugc, ugcname, geom
+            remark, ugc, ugcname, geom, qualifier
             from reports l JOIN wfos w on (l.wfo = w.cwa)
             ORDER by utcvalid ASC"""
             ),
@@ -195,6 +197,7 @@ def do_excel_kml(fmt, params, sql_filters):
             "source": "Source",
             "lat": "Lat",
             "lon": "Lon",
+            "qualifier": "Qualifier",
             "remark": "Remark",
         },
         axis=1,
@@ -265,7 +268,7 @@ def application(environ, start_response):
     csv = StringIO()
     csv.write(
         "VALID,VALID2,LAT,LON,MAG,WFO,TYPECODE,TYPETEXT,CITY,"
-        "COUNTY,STATE,SOURCE,REMARK,UGC,UGCNAME\n"
+        "COUNTY,STATE,SOURCE,REMARK,UGC,UGCNAME,QUALIFIER\n"
     )
 
     with get_sqlalchemy_conn("postgis") as conn:
@@ -277,9 +280,9 @@ def application(environ, start_response):
             magnitude, l.wfo, type, typetext,
             city, county, l.state, l.source,
             substr(coalesce(remark, ''),0,200) as tremark,
-            ST_y(l.geom), ST_x(l.geom),
+            ST_y(l.geom) as lat, ST_x(l.geom) as lon,
             to_char(valid at time zone 'UTC', 'YYYY/MM/DD HH24:MI') as dvalid2,
-            u.ugc, u.name as ugcname
+            u.ugc, u.name as ugcname, qualifier
             from lsrs l LEFT JOIN ugcs u on (l.gid = u.gid) WHERE
             valid >= :sts and valid < :ets {sql_filters}
             ORDER by dvalid ASC
@@ -307,32 +310,50 @@ def application(environ, start_response):
             shp.field("LON", "F", 9, 4)
             shp.field("UGC", "C", 6)
             shp.field("UGCNAME", "C", 128)
-            for row in res:
-                row = list(row)
-                shp.point(row[11], row[10])
-                if row[9] is not None:
-                    row[9] = (
-                        row[9]
+            shp.field("QUALIFY", "C", 1)
+            for row in res.mappings():
+                tremark = ""
+                if row["tremark"] is not None:
+                    tremark = (
+                        row["tremark"]
                         .encode("utf-8", "ignore")
                         .decode("ascii", "ignore")
                         .replace(",", "_")
                     )
-                if row[14] is not None:
-                    row[14] = (
-                        row[14]
-                        .encode("utf-8", "ignore")
-                        .decode("ascii", "ignore")
-                        .replace(",", "_")
-                    )
-                shp.record(*row[:-1])
-                row5 = (
-                    row[5].encode("utf-8", "ignore").decode("ascii", "ignore")
+                city = (
+                    row["city"]
+                    .encode("utf-8", "ignore")
+                    .decode("ascii", "ignore")
                 )
-                row9 = row[9] if row[9] is not None else ""
+                record = {
+                    "VALID": row["dvalid"],
+                    "MAG": row["magnitude"],
+                    "WFO": row["wfo"],
+                    "TYPECODE": row["type"],
+                    "TYPETEXT": row["typetext"],
+                    "CITY": row["city"],
+                    "COUNTY": row["county"],
+                    "STATE": row["state"],
+                    "SOURCE": row["source"],
+                    "REMARK": tremark,
+                    "LAT": row["lat"],
+                    "LON": row["lon"],
+                    "UGC": row["ugc"],
+                    "UGCNAME": row["ugcname"],
+                    "QUALIFY": row["qualifier"],
+                }
+                shp.point(row["lon"], row["lat"])
+                shp.record(**record)
+                qualify = (
+                    row["qualifier"] if row["qualifier"] is not None else ""
+                )
                 csv.write(
-                    f"{row[0]},{row[12]},{row[10]:.2f},{row[11]:.2f},{row[1]},"
-                    f"{row[2]},{row[3]},{row[4]},{row5},{row[6]},{row[7]},"
-                    f"{row[8]},{row9},{row[13]},{row[14]}\n"
+                    f"{row['dvalid']},{row['dvalid2']},{row['lat']:.2f},"
+                    f"{row['lon']:.2f},{row['magnitude']},"
+                    f"{row['wfo']},{row['type']},{row['typetext']},{city},"
+                    f"{row['county']},{row['state']},"
+                    f"{row['source']},{tremark},{row['ugc']},{row['ugcname']},"
+                    f"{qualify}\n"
                 )
 
     if environ["justcsv"] or environ["fmt"] == "csv":
