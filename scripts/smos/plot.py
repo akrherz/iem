@@ -3,7 +3,6 @@
 called from RUN_NOON.sh for 0z and RUN_MIDNIGHT.sh for 12z
 """
 
-import sys
 import warnings
 from datetime import datetime, timedelta, timezone
 
@@ -119,4 +118,4 @@ def main(valid: datetime, realtime: bool):
 
 
 if __name__ == "__main__":
-    main(sys.argv)
+    main()

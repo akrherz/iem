@@ -310,7 +310,7 @@ def do_profile(cursor, fid, gdf, nt):
 
 
 @click.command()
-@click.argument("year", required=True, type=int)
+@click.option("--year", required=True, type=int)
 def main(year: int):
     """Go Main Go."""
     dbconn = get_dbconn("raob")
