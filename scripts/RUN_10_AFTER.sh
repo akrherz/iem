@@ -5,6 +5,7 @@ YYYY=$(date -u +'%Y')
 MM=$(date -u +'%m')
 DD=$(date -u +'%d')
 HH=$(date -u +'%H')
+HH=${HH#0}
 LHH=$(date +'%H')
 YEST=$(date --date '1 day ago' +'%Y %m %d')
 TODAY=$(date +'%Y %m %d')
@@ -12,13 +13,13 @@ TODAY=$(date +'%Y %m %d')
 python dl/download_ndfd.py &
 
 # Run at 0, 1, and 2 UTC
-if [[ "$HH" -eq "00" || "$HH" -eq "01" || "$HH" -eq "02" ]]
+if [[ $HH -eq 0 || $HH -eq 1 || $HH -eq 2 ]]
 then
     python 00z/generate_rtp.py
 fi
 
 # Run at 12, 13, and 14 UTC
-if [[ "$HH" -eq "12" || "$HH" -eq "13" || "$HH" -eq "14" ]]
+if [[ $HH -eq 12 || $HH -eq 13 || $HH -eq 14 ]]
 then
     python 12z/generate_rtp.py
 fi
@@ -49,7 +50,7 @@ then
     python merge_ifc.py $YEST
 fi
 
-if [ $HH -eq "12" ]
+if [ $HH -eq 12 ]
 then
     cd ../current
     python mrms_today_total.py --date=$(date --date '1 day ago' +'%Y-%m-%d')
@@ -133,12 +134,12 @@ python q3_xhour.py --hours=1
 python mrms_today_total.py --date=$(date +'%Y-%m-%d') 
 
 cd ../ua
-if [ $HH -eq "04" ]
+if [ $HH -eq 4 ]
 then
     python ingest_from_rucsoundings.py --valid=${YYYY}-${MM}-${DD}T00:00:00
     python compute_params.py --year=$YYYY
 fi
-if [ $HH -eq "16" ]
+if [ $HH -eq 16 ]
 then
     python ingest_from_rucsoundings.py --valid=${YYYY}-${MM}-${DD}T12:00:00
     python compute_params.py --year=$YYYY
@@ -149,7 +150,7 @@ python current_bias.py NAM
 python current_bias.py GFS
 python current_bias.py NBS
 
-if [ $HH -eq "01" ]
+if [ $HH -eq 1 ]
 then
     cd ../coop
     python ndfd_extract.py &
