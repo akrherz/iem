@@ -15,7 +15,7 @@ from datetime import date, datetime, timedelta
 import geopandas as gpd
 import numpy as np
 import pandas as pd
-from pyiem.database import get_dbconn, get_sqlalchemy_conn
+from pyiem.database import get_sqlalchemy_conn
 from pyiem.exceptions import NoDataFound
 from pyiem.plot import MapPlot, centered_bins, get_cmap, pretty_bins
 from pyiem.reference import wfo_bounds
@@ -238,15 +238,14 @@ def compute_tables_wfo(wfo):
     ymin -= 0.5
     xmax += 0.5
     ymax += 0.5
-    pgconn = get_dbconn("mesosite")
-    cursor = pgconn.cursor()
-    cursor.execute(
-        "SELECT distinct substr(id, 1, 2) from stations where "
-        "network ~* 'CLIMATE' and ST_Contains("
-        "ST_MakeEnvelope(%s, %s, %s, %s, 4326), geom)",
-        (xmin, ymin, xmax, ymax),
-    )
-    tables = [f"alldata_{row[0].lower()}" for row in cursor]
+    with get_sqlalchemy_conn("mesosite") as conn:
+        res = conn.exec_driver_sql(
+            "SELECT distinct substr(id, 1, 2) from stations where "
+            "network ~* 'CLIMATE' and ST_Contains("
+            "ST_MakeEnvelope(%s, %s, %s, %s, 4326), geom)",
+            (xmin, ymin, xmax, ymax),
+        )
+        tables = [f"alldata_{row[0].lower()}" for row in res]
     return tables, [xmin, ymin, xmax, ymax]
 
 
@@ -255,23 +254,27 @@ def replace_gdd_climo(ctx, df, table, date1, date2):
     # Short circuit if we are not doing departures
     if ctx["var"] in ["gdd_sum", "sdd_sum"]:
         return df
-    d1 = date1.strftime("%m%d")
-    d2 = date2.strftime("%m%d")
-    daylimit = f"sday >= '{d1}' and sday <= '{d2}'"
-    if d1 > d2:
-        daylimit = f"sday >= '{d2}' or sday <= '{d1}'"
+    params = {
+        "d1": date1.strftime("%m%d"),
+        "d2": date2.strftime("%m%d"),
+        "gddbase": ctx["gddbase"],
+        "gddceil": ctx["gddceil"],
+    }
+    daylimit = "sday >= :d1 and sday <= :d2"
+    if params["d1"] > params["d2"]:
+        daylimit = "sday >= :d2 or sday <= :d1"
     if (date2 - date1) > timedelta(days=365):
         daylimit = ""
     with get_sqlalchemy_conn("coop") as conn:
         climo = pd.read_sql(
-            f"""WITH obs as (
+            text(f"""WITH obs as (
                 SELECT station, sday, avg(gddxx(%s, %s, high, low)) as datum
                 from {table} GROUP by station, sday)
             select station, sum(datum) as gdd from obs
             WHERE {daylimit} GROUP by station ORDER by station
-            """,
+            """),
             conn,
-            params=(ctx["gddbase"], ctx["gddceil"]),
+            params=params,
             index_col="station",
         )
     climo.loc[climo["gdd"] == 0, "gdd"] = 1
@@ -327,7 +330,9 @@ def get_data(ctx):
         )
     if "alldata" in tables or len(tables) > 9:
         if ctx["gddbase"] not in GDD_KNOWN_BASES:
-            raise NoDataFound(f"GDD Base must be {','.join(GDD_KNOWN_BASES)}")
+            raise NoDataFound(
+                f"GDD Base must be {','.join(str(s) for s in GDD_KNOWN_BASES)}"
+            )
         ctx["gddceil"] = 86
     params = {
         "gddbase": ctx["gddbase"],
@@ -445,10 +450,10 @@ def get_data(ctx):
                 geom_col="geom",
             )
             LOG.info("Finshing %s table query", table)
-        if ctx["gddbase"] not in GDD_KNOWN_BASES or ctx["gddceil"] != 86:
-            # We need to compute our own GDD Climatology, Le Sigh
-            df = replace_gdd_climo(ctx, df, table, date1, date2)
-        dfs.append(df)
+            if ctx["gddbase"] not in GDD_KNOWN_BASES or ctx["gddceil"] != 86:
+                # We need to compute our own GDD Climatology, Le Sigh
+                df = replace_gdd_climo(ctx, df, table, date1, date2)
+            dfs.append(df)
     df = pd.concat(dfs)
     if df.empty:
         raise NoDataFound("No Data Found.")
