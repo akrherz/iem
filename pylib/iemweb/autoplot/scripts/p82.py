@@ -1,7 +1,7 @@
 """
 This chart presents a series of daily summary data
 as a calendar.  The daily totals should be valid for the local day of the
-weather station.  The climatology is based on the nearest NCEI 1981-2010
+weather station.  The climatology is based on the nearest NCEI 1991-2020
 climate station, which in most cases is the same station.  Climatology
 values are rounded to the nearest whole degree Fahrenheit and then compared
 against the observed value to compute a departure.
