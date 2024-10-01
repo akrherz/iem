@@ -15,7 +15,7 @@ export dd=$(date --date '1 day ago' +'%d')
 export yyyymm=$(date --date '1 day ago' +'%Y%m')
 
 PREFIXES="iem iemssl iemapps datateam sustainablecorn weatherim depbackend"
-MACHINES="iemvs35-dc iemvs36-dc iemvs37-dc iemvs38-dc \
+MACHINES="anticyclone iemvs35-dc iemvs36-dc iemvs37-dc iemvs38-dc \
 iemvs39-dc iemvs40-dc iemvs41-dc iemvs42-dc iemvs43-dc iemvs44-dc"
 CONFBASE="/opt/iem/scripts/webalizer"
 
