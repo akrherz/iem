@@ -124,7 +124,7 @@ def plotter(fdict):
         f"{PDICT[varname]} between {t1} and {t2} (inclusive)"
     )
     fig = figure(title=title, subtitle=subtitle, apctx=ctx)
-    ax = fig.add_axes([0.1, 0.23, 0.8, 0.67])
+    ax = fig.add_axes((0.1, 0.23, 0.8, 0.67))
     ax.scatter(
         df.index.values,
         df["below_freq"],
