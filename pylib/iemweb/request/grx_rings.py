@@ -1,11 +1,101 @@
-"""Author: Zach Hiris"""
+""".. title:: Generate a Placefile with Range Rings
+
+Return to `Frontend </request/grx/>`_
+
+This application generates a placefile with range rings around a specified
+location. The user can specify the location by entering the latitude and
+longitude, the location name, and the filename to save the placefile as.
+
+Author: Zach Hiris
+
+Changelog
+---------
+
+- 2024-10-01: Initial documentation update and pydantic validation
+
+Example Requests
+----------------
+
+Return a placefile for Solider Field in Chicago with 10, 20, and 30 mile rings.
+
+https://mesonet.agron.iastate.edu/cgi-bin/request/grx_rings.py\
+?lat=41.8623&lon=-87.6167&loc=Soldier%20Field&m0=10&m1=20&m2=30
+
+"""
 
 import math
 from html import escape
 from io import StringIO
 
+from pydantic import Field
 from pyiem.util import html_escape
-from pyiem.webutil import iemapp
+from pyiem.webutil import CGIModel, iemapp
+
+
+class Schema(CGIModel):
+    """See how we are called."""
+
+    fn: str = Field(
+        default="placefile_rings.txt", description="Filename to save as"
+    )
+    lat: float = Field(
+        default=42.014004, description="Latitude of center point"
+    )
+    lon: float = Field(
+        default=-93.635773, description="Longitude of center point"
+    )
+    loc: str = Field(default="Jack Trice Stadium", description="Location name")
+
+    m0: float = Field(
+        default=100, description="Distance of first ring in miles", ge=0
+    )
+    r0: int = Field(
+        default=255, description="Red component of color for first ring"
+    )
+    g0: int = Field(
+        default=255, description="Green component of color for first ring"
+    )
+    b0: int = Field(
+        default=0, description="Blue component of color for first ring"
+    )
+    a0: int = Field(
+        default=255, description="Alpha component of color for first ring"
+    )
+    t0: str = Field(default="", description="Text to display for first ring")
+
+    m1: float = Field(
+        default=0, description="Distance of second ring in miles", ge=0
+    )
+    r1: int = Field(
+        default=255, description="Red component of color for second ring"
+    )
+    g1: int = Field(
+        default=255, description="Green component of color for second ring"
+    )
+    b1: int = Field(
+        default=0, description="Blue component of color for second ring"
+    )
+    a1: int = Field(
+        default=255, description="Alpha component of color for second ring"
+    )
+    t1: str = Field(default="", description="Text to display for second ring")
+
+    m2: float = Field(
+        default=0, description="Distance of third ring in miles", ge=0
+    )
+    r2: int = Field(
+        default=255, description="Red component of color for third ring"
+    )
+    g2: int = Field(
+        default=255, description="Green component of color for third ring"
+    )
+    b2: int = Field(
+        default=0, description="Blue component of color for third ring"
+    )
+    a2: int = Field(
+        default=255, description="Alpha component of color for third ring"
+    )
+    t2: str = Field(default="", description="Text to display for third ring")
 
 
 def createCircleAroundWithRadius(lat, lon, radiusMiles):
@@ -46,10 +136,10 @@ def getLocation(lat1, lon1, brng, distanceMiles):
     return lat2, lon2
 
 
-@iemapp()
+@iemapp(help=__doc__, schema=Schema)
 def application(environ, start_response):
     """Go Main Go."""
-    fn = escape(environ.get("fn", "placefile_rings.txt"))
+    fn = escape(environ["fn"])
     headers = [
         ("Content-type", "application/octet-stream"),
         ("Content-Disposition", f"attachment; filename={fn}"),
@@ -57,18 +147,9 @@ def application(environ, start_response):
     start_response("200 OK", headers)
 
     # Things for the user to theoretically input:
-    loc = html_escape(environ.get("loc", "Jack Trice Stadium"))
-    try:
-        lat = environ.get("lat", 42.014004)
-        lon = environ.get("lon", -93.635773)
-        if isinstance(lat, list):
-            lat = lat[0]
-        if isinstance(lon, list):
-            lon = lon[0]
-        pointLat = float(lat)
-        pointLon = float(lon)
-    except ValueError:
-        return [b"ERROR: Invalid lat or lon valid provided."]
+    loc = html_escape(environ["loc"])
+    lat = environ["lat"]
+    lon = environ["lon"]
     sio = StringIO()
     sio.write(
         f"; This is a placefile to draw a range ring x miles from: {loc}\n"
@@ -79,25 +160,17 @@ def application(environ, start_response):
     )
 
     for i in range(3):
-        try:
-            distanceInMiles = float(environ.get(f"m{i}", 100))
-        except ValueError:
-            return [f"ERROR: Invalid m{i} provided.".encode("ascii")]
+        distanceInMiles = environ[f"m{i}"]
         if distanceInMiles <= 0.00001:
             continue
-        try:
-            r = int(float(environ.get(f"r{i}", 255)))
-            g = int(float(environ.get(f"g{i}", 255)))
-            b = int(float(environ.get(f"b{i}", 0)))
-            a = int(float(environ.get(f"a{i}", 255)))
-        except ValueError:
-            return [b"ERROR: Invalid color provided."]
-        t = environ.get(f"t{i}", "").replace("\n", "\\n")
+        r = environ[f"r{i}"]
+        g = environ[f"g{i}"]
+        b = environ[f"b{i}"]
+        a = environ[f"a{i}"]
+        t = environ[f"t{i}"].replace("\n", "\\n")
 
         # Create the lon/lat pairs
-        X, Y = createCircleAroundWithRadius(
-            pointLat, pointLon, distanceInMiles
-        )
+        X, Y = createCircleAroundWithRadius(lat, lon, distanceInMiles)
         ll = "\\n" if t != "" else ""
         sio.write(
             f"Color: {r} {g} {b} {a}\n"

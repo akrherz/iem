@@ -6,7 +6,7 @@ includes leap day, there is likely some small ambiguity with the resulting
 plot labels.
 """
 
-import datetime
+from datetime import date, timedelta
 
 import numpy as np
 import pandas as pd
@@ -44,7 +44,7 @@ def get_description():
         dict(
             type="year",
             name="year",
-            default=datetime.date.today().year,
+            default=date.today().year,
             label="Year to Highlight in Chart",
         ),
     ]
@@ -59,16 +59,16 @@ def plotter(fdict):
     varname = ctx["var"]
     month = ctx["month"]
     day = ctx["day"]
-    dt = datetime.date(2000, month, day)
+    dt = date(2000, month, day)
     days = ctx["days"]
     year = ctx["year"]
     ctx["before_period"] = "%s-%s" % (
-        (dt - datetime.timedelta(days=days)).strftime("%-d %b"),
-        (dt - datetime.timedelta(days=1)).strftime("%-d %b"),
+        (dt - timedelta(days=days)).strftime("%-d %b"),
+        (dt - timedelta(days=1)).strftime("%-d %b"),
     )
     ctx["after_period"] = "%s-%s" % (
-        (dt + datetime.timedelta(days=1)).strftime("%-d %b"),
-        (dt + datetime.timedelta(days=days)).strftime("%-d %b"),
+        (dt + timedelta(days=1)).strftime("%-d %b"),
+        (dt + timedelta(days=days)).strftime("%-d %b"),
     )
 
     with get_sqlalchemy_conn("coop") as conn:
@@ -127,9 +127,13 @@ def plotter(fdict):
     if df.empty:
         raise NoDataFound("No Data Found.")
 
-    xvals = df[varname + "_before"].values
-    yvals = df[varname + "_after"].values
-    fig, ax = figure_axes(apctx=ctx)
+    xvals = df[f"{varname}_before"].values
+    yvals = df[f"{varname}_after"].values
+    fig, ax = figure_axes(
+        title=f"{ctx['_sname']} :: {PDICT.get(varname)} over",
+        subtitle=f"{days} days prior to and after {dt:%-d %B}",
+        apctx=ctx,
+    )
     ax.scatter(xvals, yvals, zorder=2)
     if year in df.index:
         row = df.loc[year]
@@ -142,26 +146,22 @@ def plotter(fdict):
         ax.text(
             row[varname + "_before"],
             row[varname + "_after"],
-            "%s" % (year,),
+            f"{year}",
             ha="right",
             va="bottom",
             color="r",
         )
-    msg = (
-        f"{ctx['_sname']} :: {PDICT.get(varname)} over {days} days "
-        f"prior to and after {dt:%-d %B}"
-    )
-    tokens = msg.split()
-    sz = int(len(tokens) / 2)
-    ax.set_title(" ".join(tokens[:sz]) + "\n" + " ".join(tokens[sz:]))
-
     minv = min([min(xvals), min(yvals)])
     maxv = max([max(xvals), max(yvals)])
-    ax.plot([minv - 5, maxv + 5], [minv - 5, maxv + 5], label="x=y", color="b")
-    yavg = np.average(yvals)
-    xavg = np.average(xvals)
-    ax.axhline(yavg, label="After Avg: %.2f" % (yavg,), color="r", lw=2)
-    ax.axvline(xavg, label="Before Avg: %.2f" % (xavg,), color="g", lw=2)
+    buffer = 0.1 * (maxv - minv)
+    minv = (minv - buffer) if varname != "precip" else 0 - buffer
+    ax.plot(
+        [minv, maxv + buffer], [minv, maxv + buffer], label="x=y", color="b"
+    )
+    yavg = np.average(np.array(yvals))
+    xavg = np.average(np.array(xvals))
+    ax.axhline(yavg, label=f"After Avg: {yavg:.2f}", color="r", lw=2)
+    ax.axvline(xavg, label=f"Before Avg: {xavg:.2f}", color="g", lw=2)
     df2 = df[np.logical_and(xvals >= xavg, yvals >= yavg)]
     ax.text(
         0.98,
@@ -216,8 +216,8 @@ def plotter(fdict):
         % (PDICT.get(varname), UNITS.get(varname), ctx["after_period"])
     )
     ax.grid(True)
-    ax.set_xlim(minv - 5, maxv + 5)
-    ax.set_ylim(minv - 5, maxv + 5)
+    ax.set_xlim(minv, maxv + buffer)
+    ax.set_ylim(minv, maxv + buffer)
 
     _, _, r_value, _, _ = stats.linregress(xvals, yvals)
     ax.text(

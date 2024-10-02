@@ -15,7 +15,7 @@ given time.
 for this dataset.</p>
 """
 
-import datetime
+from datetime import date, datetime, timedelta
 
 import matplotlib.dates as mdates
 import numpy as np
@@ -123,7 +123,7 @@ SQL_OB = """
 def get_description():
     """Return a dict describing how to call this plotter"""
     desc = {"description": __doc__, "data": True, "cache": 3600}
-    today = datetime.date.today()
+    today = date.today()
     desc["arguments"] = [
         dict(
             type="zstation",
@@ -169,13 +169,13 @@ def plot_others(varname, ax, mosdata, month1, month, obs):
     bottom = []
     _obs = []
     x = []
-    now = datetime.datetime(month1.year, month1.month, month1.day)
+    now = datetime(month1.year, month1.month, month1.day)
     while now.month == month:
         x.append(now)
         bottom.append(mosdata.get(now, [np.nan, np.nan])[0])
         top.append(mosdata.get(now, [np.nan, np.nan])[1])
         _obs.append(obs.get(now, np.nan))
-        now += datetime.timedelta(hours=6)
+        now += timedelta(hours=6)
     df = pd.DataFrame(
         {
             "valid": pd.to_datetime(x),
@@ -238,7 +238,7 @@ def plot_temps(ax, mosdata, month1, month, obs, model):
 
         hobs.append(obs.get(now, {}).get("max", np.nan))
         lobs.append(obs.get(now, {}).get("min", np.nan))
-        now += datetime.timedelta(days=1)
+        now += timedelta(days=1)
     df = pd.DataFrame(
         {
             "valid": pd.to_datetime(valid),
@@ -323,9 +323,9 @@ def plotter(fdict):
 
     # Extract the range of forecasts for each day for approximately
     # the given month
-    month1 = datetime.datetime(year, month, 1)
-    sts = month1 - datetime.timedelta(days=10)
-    ets = month1 + datetime.timedelta(days=32)
+    month1 = datetime(year, month, 1)
+    sts = month1 - timedelta(days=10)
+    ets = month1 + timedelta(days=32)
     station4 = f"K{station}" if len(station) == 3 else station
     is_temp = ctx["var"] == "t"
     mcursor.execute(
