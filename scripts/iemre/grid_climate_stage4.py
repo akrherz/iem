@@ -1,7 +1,6 @@
 """Grid climate for netcdf usage"""
 
 import datetime
-import sys
 
 import numpy as np
 import pandas as pd
@@ -77,21 +76,17 @@ def workflow(ts):
         grid_day(nc, ts)
 
 
-def main(argv):
+def main():
     """Go Main!"""
-    if len(argv) == 4:
-        ts = datetime.datetime(int(argv[1]), int(argv[2]), int(argv[3]))
-        workflow(ts)
-    else:
-        sts = datetime.datetime(2000, 1, 1)
-        ets = datetime.datetime(2001, 1, 1)
-        interval = datetime.timedelta(days=1)
-        now = sts
-        while now < ets:
-            print(now)
-            workflow(now)
-            now += interval
+    sts = datetime.datetime(2000, 1, 1)
+    ets = datetime.datetime(2001, 1, 1)
+    interval = datetime.timedelta(days=1)
+    now = sts
+    while now < ets:
+        print(now)
+        workflow(now)
+        now += interval
 
 
 if __name__ == "__main__":
-    main(sys.argv)
+    main()

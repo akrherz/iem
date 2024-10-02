@@ -268,7 +268,8 @@ def replace_gdd_climo(ctx, df, table, date1, date2):
     with get_sqlalchemy_conn("coop") as conn:
         climo = pd.read_sql(
             text(f"""WITH obs as (
-                SELECT station, sday, avg(gddxx(%s, %s, high, low)) as datum
+                SELECT station, sday,
+                avg(gddxx(:gddbase, :gddceil, high, low)) as datum
                 from {table} GROUP by station, sday)
             select station, sum(datum) as gdd from obs
             WHERE {daylimit} GROUP by station ORDER by station

@@ -1,9 +1,10 @@
 """Generate the storage of NARR 3 hourly products"""
 
-import datetime
 import os
 import sys
+from datetime import datetime
 
+import click
 import numpy as np
 import pygrib
 from pyiem.util import archive_fetch, logger, ncopen
@@ -14,10 +15,13 @@ BASEDIR = "/mesonet/data/iemre"
 LOG = logger()
 
 
-def init_year(ts):
+@click.command()
+@click.option("--year", type=int, required=True)
+def main(year: int):
     """
     Create a new NetCDF file for a year of our specification!
     """
+    ts = datetime(year, 1, 1)
     # Load up the example grib file to base our file on
     with archive_fetch(TEMPLATE_FN) as fn:
         grbs = pygrib.open(fn)
@@ -39,14 +43,14 @@ def init_year(ts):
     nc.realization = 1
     nc.Conventions = "CF-1.0"
     nc.contact = "Daryl Herzmann, akrherz@iastate.edu, 515-294-5978"
-    nc.history = f"{datetime.datetime.now():%d %B %Y} Generated"
+    nc.history = f"{datetime.now():%d %B %Y} Generated"
     nc.comment = "No Comment at this time"
 
     # Setup Dimensions
     nc.createDimension("x", lats.shape[1])
     nc.createDimension("y", lats.shape[0])
     nc.createDimension("bnds", 2)
-    ts2 = datetime.datetime(ts.year + 1, 1, 1)
+    ts2 = datetime(ts.year + 1, 1, 1)
     days = (ts2 - ts).days
     print(f"Year {ts.year} has {days} days")
     nc.createDimension("time", int(days) * 8)
@@ -95,4 +99,4 @@ def init_year(ts):
 
 
 if __name__ == "__main__":
-    init_year(datetime.datetime(int(sys.argv[1]), 1, 1))
+    main()

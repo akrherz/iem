@@ -1,6 +1,5 @@
 """Grid climate for netcdf usage"""
 
-import sys
 from datetime import datetime
 from typing import Optional
 
@@ -127,4 +126,4 @@ def main(dt: Optional[datetime]):
 
 
 if __name__ == "__main__":
-    main(sys.argv)
+    main()

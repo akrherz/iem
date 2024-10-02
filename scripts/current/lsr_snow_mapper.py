@@ -58,7 +58,7 @@ def main():
     url = f"{ap207}/t:state::csector:IA::p:both::hours:12::sz:25.png"
     do(url, "lsr_snowfall.png")
 
-    url = f"{ap207}t:state::csector:IA::p:contour::hours:12::sz:25.png"
+    url = f"{ap207}/t:state::csector:IA::p:contour::hours:12::sz:25.png"
     do(url, "lsr_snowfall_nv.png")
 
     # -----------------

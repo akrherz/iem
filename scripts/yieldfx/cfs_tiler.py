@@ -1,10 +1,10 @@
 """Generate PSIMs Tiles.
 
-Run from RUN_NOON.sh for the previous UTC date."""
+Seems to be unused at the moment.
+"""
 
 import datetime
 import os
-import sys
 
 import numpy as np
 from metpy.units import units
@@ -210,15 +210,12 @@ def workflow(valid, ncfn, west, south):
     nc.close()
 
 
-def main(argv):
+def main():
     """Go Main Go"""
     # Run for the 12z file **two days ago**, the issue is that for a year
     # without a leap day, previous year filling will ask for one too many
     # days that currently does not have data
-    if len(argv) == 4:
-        today = datetime.date(int(argv[1]), int(argv[2]), int(argv[3]))
-    else:
-        today = datetime.date.today() - datetime.timedelta(days=2)
+    today = datetime.date.today() - datetime.timedelta(days=2)
     for hour in [0, 6, 12, 18]:
         valid = utc(today.year, today.month, today.day, hour)
         # Create tiles to cover 12 state region
@@ -235,4 +232,4 @@ def main(argv):
 
 
 if __name__ == "__main__":
-    main(sys.argv)
+    main()

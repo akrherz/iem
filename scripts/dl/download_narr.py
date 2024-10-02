@@ -81,8 +81,8 @@ def fetch_rda(year, month):
         [
             "python",
             "/opt/iem/scripts/iemre/merge_narr.py",
-            f"{year}",
-            f"{month}",
+            f"--year={year}",
+            f"--month={month}",
         ]
     )
 
