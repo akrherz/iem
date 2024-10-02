@@ -5,9 +5,9 @@ Unsure if I have any code that uses these .nc files, alas.
 Called from dl/download_narr.py each month around the 9th.
 """
 
-import datetime
-import sys
+from datetime import datetime, timedelta
 
+import click
 import numpy as np
 import pygrib
 from pyiem import iemre
@@ -40,11 +40,14 @@ def to_netcdf(valid):
     return True
 
 
-def main(argv):
+@click.command()
+@click.option("--year", type=int, required=True)
+@click.option("--month", type=int, required=True)
+def main(year: int, month: int):
     """Go Main"""
-    sts = datetime.datetime(int(argv[1]), int(argv[2]), 1)
-    ets = (sts + datetime.timedelta(days=33)).replace(day=1)
-    interval = datetime.timedelta(hours=3)
+    sts = datetime(year, month, 1)
+    ets = (sts + timedelta(days=33)).replace(day=1)
+    interval = timedelta(hours=3)
     now = sts
     while now < ets:
         to_netcdf(now)
@@ -52,4 +55,4 @@ def main(argv):
 
 
 if __name__ == "__main__":
-    main(sys.argv)
+    main()

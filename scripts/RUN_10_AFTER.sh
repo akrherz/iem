@@ -7,8 +7,6 @@ DD=$(date -u +'%d')
 HH=$(date -u +'%H')
 HH=${HH#0}
 LHH=$(date +'%H')
-YEST=$(date --date '1 day ago' +'%Y %m %d')
-TODAY=$(date +'%Y %m %d')
 
 python dl/download_ndfd.py &
 
@@ -44,10 +42,10 @@ then
 fi
 
 cd ../iemre
-python merge_ifc.py $TODAY
+python merge_ifc.py --date=$(date +'%Y-%m-%d')
 if [ $LHH -eq "01" ]
 then
-    python merge_ifc.py $YEST
+    python merge_ifc.py --date=$(date --date '1 day ago' +'%Y-%m-%d')
 fi
 
 if [ $HH -eq 12 ]

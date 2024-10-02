@@ -3,10 +3,10 @@
 called from RUN_10_AFTER.sh
 """
 
-import datetime
-import sys
+from datetime import datetime, timedelta
 from zoneinfo import ZoneInfo
 
+import click
 import numpy as np
 from osgeo import gdal
 from pyiem import iemre
@@ -20,8 +20,8 @@ def run(ts):
     """Process this date's worth of data"""
     LOG.info("Running for %s", ts)
     now = ts.replace(hour=0, minute=0)
-    ets = now + datetime.timedelta(hours=24)
-    interval = datetime.timedelta(minutes=5)
+    ets = now + timedelta(hours=24)
+    interval = timedelta(minutes=5)
     currenttime = utc()
 
     total = None
@@ -52,17 +52,14 @@ def run(ts):
         nc.variables["p01d"][idx, :, :] = np.flipud(total)
 
 
-def main(argv):
+@click.command()
+@click.option("--date", "dt", type=click.DateTime(), required=True)
+def main(dt: datetime):
     """Go Main Go"""
     # We are always running for a Central Timezone Date
-    valid = datetime.datetime(
-        int(argv[1]),
-        int(argv[2]),
-        int(argv[3]),
-        tzinfo=ZoneInfo("America/Chicago"),
-    )
-    run(valid)
+    dt = dt.replace(tzinfo=ZoneInfo("America/Chicago"))
+    run(dt)
 
 
 if __name__ == "__main__":
-    main(sys.argv)
+    main()
