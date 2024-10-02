@@ -1,12 +1,16 @@
-"""Process the US Climate Reference Network"""
+"""Process the US Climate Reference Network.
 
-import datetime
+Called from RUN_20_AFTER.sh
+"""
+
 import glob
 import os
 import subprocess
-import sys
+from datetime import datetime
+from typing import Optional
 from zoneinfo import ZoneInfo
 
+import click
 import httpx
 import pandas as pd
 from metpy.units import units
@@ -126,7 +130,7 @@ def process_file(icursor, ocursor, year, filename, size, reprocess):
             df.iloc[0]["WBANNO"],
         )
     for _, row in df.iterrows():
-        valid = datetime.datetime.strptime(
+        valid = datetime.strptime(
             "%s %s" % (row["UTC_DATE"], row["UTC_TIME"]), "%Y%m%d %H%M"
         )
         valid = valid.replace(tzinfo=ZoneInfo("UTC"))
@@ -219,6 +223,9 @@ def download(year, reprocess=False):
         # No new data
         if req is None or req.status_code == 416:
             continue
+        # Helene Failure
+        if req.status_code == 200 and req.text.startswith("Access"):
+            continue
         if req.status_code in [404, 403]:
             LOG.info("uscrn_ingest %s is %s", filename, req.status_code)
             continue
@@ -234,17 +241,19 @@ def download(year, reprocess=False):
     return queue
 
 
-def main(argv):
+@click.command()
+@click.option("--year", type=int, required=False, help="Year to process")
+def main(year: Optional[int]):
     """Go Main Go"""
     iem_pgconn = get_dbconn("iem")
     pgconn = get_dbconn("uscrn")
-    year = datetime.datetime.utcnow().year
     reprocess = False
-    if len(argv) == 2:
+    if year is not None:
         # Process an entire year
-        year = int(argv[1])
         reprocess = True
-    for [fn, size] in download(year, len(argv) == 2):
+    else:
+        year = datetime.now().year
+    for [fn, size] in download(year, reprocess):
         icursor = iem_pgconn.cursor(row_factory=dict_row)
         ocursor = pgconn.cursor()
         try:
@@ -258,4 +267,4 @@ def main(argv):
 
 
 if __name__ == "__main__":
-    main(sys.argv)
+    main()
