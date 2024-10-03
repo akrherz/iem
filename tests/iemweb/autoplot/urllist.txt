@@ -220,6 +220,8 @@
 /plotting/auto/plot/230/outlook_type:C::day:1::w:wfo::network:WFO::wfo:DMX::mystate:IA::ugc:IAZ048::month:all::_r:t::dpi:100::_cb:1.png
 /plotting/auto/plot/230/outlook_type:C::day:1::w:fema::network:WFO::wfo:DMX::mystate:IA::fema:7::ugc:IAZ048::month:all::_r:43::dpi:100.png
 /plotting/auto/plot/232/mode:WC::network:IA_ASOS::station:AMW::valid:2020-01-17%201200::hours:72::_r:t::dpi:100.png
+/plotting/auto/plot/232/mode:FW::network:IA_ASOS::station:AMW::valid:2020-01-17%201200::hours:72::_r:t::dpi:100.png
+/plotting/auto/plot/232/mode:BZ::network:IA_ASOS::station:AMW::valid:2020-01-17%201200::hours:72::_r:t::dpi:100.png
 /plotting/auto/plot/236/ident:ZMP::sdate:2024-07-31::edate:2024-08-01::_r:43::dpi:100.png
 /plotting/auto/plot/241/sts:2000-08-06%200900::ets:2000-08-06%200900::w:min::csector:IA::mode:user::cmap:gnuplot2::_r:t::dpi:100.png
 /plotting/auto/plot/241/sts:2024-08-06%200900::ets:2024-08-06%200900::w:min::csector:IA::mode:user::cmap:gnuplot2::_r:t::dpi:100.png

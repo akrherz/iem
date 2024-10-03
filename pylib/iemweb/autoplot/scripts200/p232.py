@@ -21,13 +21,15 @@ from sqlalchemy import text
 
 PDICT = {
     "BZ": "Blizzard Warning",
-    "WC": "Wind Chill Advisory/Warning",
+    "FW": "Fire Weather Warning",
     "HT": "Heat Advisory / Extreme Heat Warning",
+    "WC": "Wind Chill Advisory/Warning",
 }
 DOMAIN = {
     "BZ": [
         "BZ.W",
     ],
+    "FW": ["FW.W"],
     "WC": ["WC.W", "WC.Y", "WW.Y", "WS.W", "BZ.W"],
     "HT": ["EH.W", "HT.Y"],
 }
@@ -129,6 +131,25 @@ def plot_bz(ax, obs):
         ax.add_patch(rect)
 
 
+def get_firewx_zone(lon: float, lat: float):
+    """Sigh."""
+    with get_sqlalchemy_conn("postgis") as conn:
+        res = conn.execute(
+            text(
+                """
+            SELECT ugc from ugcs where end_ts is null and
+            ST_Contains(geom, ST_Point(:lon, :lat, 4326))
+            and source = 'fz'
+            """
+            ),
+            {"lon": lon, "lat": lat},
+        )
+        row = res.first()
+        if row:
+            return row[0]
+    return "IAZ001"
+
+
 def plotter(fdict):
     """Go"""
     ctx = get_autoplot_context(fdict, get_description())
@@ -138,6 +159,11 @@ def plotter(fdict):
     ets = sts + timedelta(hours=ctx["hours"])
 
     # Find WaWa
+    zone = ctx["_nt"].sts[station]["ugc_zone"]
+    if ctx["mode"] == "FW":
+        zone = get_firewx_zone(
+            ctx["_nt"].sts[station]["lon"], ctx["_nt"].sts[station]["lat"]
+        )
     with get_sqlalchemy_conn("postgis") as conn:
         wwa = pd.read_sql(
             text(
@@ -151,7 +177,7 @@ def plotter(fdict):
             conn,
             params={
                 "ugcs": [
-                    ctx["_nt"].sts[station]["ugc_zone"],
+                    zone,
                     ctx["_nt"].sts[station]["ugc_county"],
                 ],
                 "sts": sts,
@@ -169,7 +195,7 @@ def plotter(fdict):
             text(
                 """
             SELECT valid at time zone 'UTC' as utc_valid, tmpf, sknt, gust,
-            greatest(sknt, gust) * 1.15 as max_wind, feel,
+            greatest(sknt, gust) * 1.15 as max_wind, feel, relh,
             vsby from alldata where station = :station and
             valid >= :sts and valid <= :ets and report_type in (3, 4)
             ORDER by valid ASC"""
@@ -188,11 +214,11 @@ def plotter(fdict):
     title = f"{ctx['_sname']} :: Observations during NWS Headlines"
     subtitle = f"Plot customized for {PDICT[ctx['mode']]}."
     fig = figure(title=title, subtitle=subtitle, apctx=ctx)
-    box1 = [0.1, 0.15, 0.82, 0.65]
-    box2 = [0.1, 0.8, 0.82, 0.1]
+    box1 = (0.1, 0.15, 0.82, 0.65)
+    box2 = (0.1, 0.8, 0.82, 0.1)
     if len(wwa.index) > 4:
-        box1 = [0.1, 0.15, 0.82, 0.55]
-        box2 = [0.1, 0.7, 0.82, 0.2]
+        box1 = (0.1, 0.15, 0.82, 0.55)
+        box2 = (0.1, 0.7, 0.82, 0.2)
     ax = fig.add_axes(box1)
     top_ax = fig.add_axes(box2, frame_on=False)
     if ctx["mode"] == "BZ":
@@ -210,6 +236,33 @@ def plotter(fdict):
     elif ctx["mode"] in ["WC", "HT"]:
         obs = obs[pd.notna(obs["feel"])]
         plot(ax, obs, "feel")
+    elif ctx["mode"] == "FW":
+        sknt = obs[pd.notna(obs["sknt"])]
+        ax.bar(
+            sknt["utc_valid"],
+            sknt["max_wind"],
+            width=1 / 24.0,
+            align="center",
+            color="g",
+        )
+        ax.bar(
+            sknt["utc_valid"],
+            sknt["sknt"],
+            width=1 / 24.0,
+            align="center",
+            color="b",
+        )
+        ax.set_ylabel("Sustained Winds + Gusts (Green) [MPH]", color="b")
+        ax2 = ax.twinx()
+        relh = obs[pd.notna(obs["relh"])]
+        ax2.scatter(
+            relh["utc_valid"],
+            relh["relh"],
+            marker="o",
+            s=40,
+            color="r",
+        )
+        ax2.set_ylabel("Relative Humidity [%]", color="r")
     for i, row in wwa.iterrows():
         color = NWS_COLORS[row["key"]]
         ax.axvspan(
