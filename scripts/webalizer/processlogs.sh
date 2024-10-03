@@ -14,7 +14,8 @@ export mm=$(date --date '1 day ago' +'%m')
 export dd=$(date --date '1 day ago' +'%d')
 export yyyymm=$(date --date '1 day ago' +'%Y%m')
 
-PREFIXES="iem iemssl iemapps datateam sustainablecorn weatherim depbackend"
+# IMPORTANT: iemapps needs to go first for wildcard matching life choices
+PREFIXES="iemapps iem datateam sustainablecorn weatherim depbackend"
 MACHINES="anticyclone iemvs35-dc iemvs36-dc iemvs37-dc iemvs38-dc \
 iemvs39-dc iemvs40-dc iemvs41-dc iemvs42-dc iemvs43-dc iemvs44-dc"
 CONFBASE="/opt/iem/scripts/webalizer"
@@ -31,24 +32,20 @@ do
     # rename the files so that they are unique
     for PREF in $PREFIXES
     do
-        if [ -e ${PREF}-${yyyymmdd} ]; then
-            mv ${PREF}-${yyyymmdd} ${PREF}-${MACH}.log
-        fi
+        for filename in $(ls ${PREF}*${yyyymmdd}); do
+            mv $filename ${filename}-${MACH}
+        done
     done
 done
 
+# Step 2: Merge the log files together
 for PREF in $PREFIXES
 do
     echo "============== $PREF ============="
-    wc -l ${PREF}-*.log
-    csh -c "(/usr/local/bin/mergelog ${PREF}-*.log > combined-${PREF}.log) >& /dev/null"
-    rm -f ${PREF}-*.log
+    wc -l ${PREF}*
+    /usr/share/awstats/tools/logresolvemerge.pl ${PREF}* > combined-${PREF}.log
+    rm -f ${PREF}*
 done
-
-# special step to merge the combined-iem.logs and combined-iemssl.log files
-csh -c "(/usr/local/bin/mergelog combined-iem.log combined-iemssl.log > combined.access_log) >& /dev/null"	
-rm -f combined-iem.log combined-iemssl.log
-mv combined.access_log combined-iem.log
 
 # Step 3, run webalizer against these log files
 /home/mesonet/bin/webalizer -c ${CONFBASE}/mesonet.conf -T combined-iem.log
