@@ -1,7 +1,9 @@
 <?php
 // Throttle the script kiddies.
+require_once __DIR__ . '/mlib.php';
 
-$key = "throttle_{$_SERVER['REMOTE_ADDR']}";
+$client_ip = getClientIp();
+$key = "throttle_{$client_ip}";
 
 $memcache = new Memcached();
 $memcache->setOption(Memcached::OPT_BINARY_PROTOCOL, true);

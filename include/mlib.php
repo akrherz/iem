@@ -1,5 +1,15 @@
 <?php
 
+function getClientIp() {
+    if (!empty($_SERVER['HTTP_X_FORWARDED_FOR'])) {
+        $ipArray = explode(',', $_SERVER['HTTP_X_FORWARDED_FOR']);
+        $ip = trim($ipArray[0]);
+    } else {
+        $ip = $_SERVER['REMOTE_ADDR'];
+    }
+    return $ip;
+}
+
 // Helper
 function printTags($tokens)
 {
@@ -39,7 +49,7 @@ function iemws_json($endpoint, $args)
         if ($res === FALSE) {
             openlog("iem", LOG_PID | LOG_PERROR, LOG_LOCAL1);
             syslog(LOG_WARNING, "iemws fail  from:" . $_SERVER["REQUEST_URI"] .
-                ' remote: ' . $_SERVER["REMOTE_ADDR"] .
+                ' remote: ' . getClientIp() .
                 ' to: ' . $uri);
             closelog();
             sleep(3);
@@ -54,7 +64,7 @@ function iemws_json($endpoint, $args)
             syslog(
                 LOG_WARNING,
                 "iemws jsonfail  from:" . $_SERVER["REQUEST_URI"] .
-                    ' remote: ' . $_SERVER["REMOTE_ADDR"] .
+                    ' remote: ' . getClientIp() .
                     ' msg: ' . $e .
                     ' to: ' . $uri
             );

@@ -24,6 +24,7 @@ if (
     floatval($_GET["lon"]) != 1 &&
     floatval($_GET["lon"]) != -1
 ) {
+    $client_ip = getClientIp();
     // Log the request so to effectively do some DOS protection.
     $pgconn = iemdb("mesosite");
     $rs = pg_prepare(
@@ -36,7 +37,7 @@ if (
         $pgconn,
         "INSERT",
         array(
-            $_SERVER["REMOTE_ADDR"],
+            $client_ip,
             "/sites/site.php?network={$network}&station={$station}",
             $_SERVER["HTTP_REFERER"],
             404
@@ -54,7 +55,7 @@ if (
     $msg = <<<EOF
 IEM Sites Move Request
 ======================
-> REMOTE_ADDR: {$_SERVER["REMOTE_ADDR"]}
+> REMOTE_ADDR: {$client_ip}
 > ID:          {$station}
 > NAME:        {$name} OLD: {$metadata["name"]}
 > NETWORK:     {$network}

@@ -32,7 +32,7 @@ do
     # rename the files so that they are unique
     for PREF in $PREFIXES
     do
-        for filename in $(ls ${PREF}*${yyyymmdd}); do
+        for filename in $(ls ${PREF}*${yyyymmdd} 2>/dev/null); do
             mv $filename ${filename}-${MACH}
         done
     done

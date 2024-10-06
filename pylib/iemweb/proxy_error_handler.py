@@ -14,7 +14,9 @@ def application(environ, start_response):
         TELEMETRY(
             0,
             status_code,
-            environ.get("REMOTE_ADDR"),
+            environ.get("X-Forwarded-For", environ.get("REMOTE_ADDR"))
+            .split(",")[0]
+            .strip(),
             environ.get("REDIRECT_SCRIPT_URL"),
             environ.get("REQUEST_URI"),
             environ.get("HTTP_HOST"),
