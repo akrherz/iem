@@ -445,7 +445,10 @@ def application(environ, start_response):
         return
     tzinfo = ZoneInfo(environ["tz"])
     pgconn = get_dbconn("asos")
-    cursor_name = f"mystream_{environ.get('REMOTE_ADDR')}"
+    ip = environ.get("HTTP_X_FORWARDED_FOR", environ.get("REMOTE_ADDR"))
+    if ip is not None:
+        ip = ip.split(",")[0].strip()
+    cursor_name = f"mystream_{ip}"
     if toobusy(pgconn, cursor_name):
         pgconn.close()
         start_response(

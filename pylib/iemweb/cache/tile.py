@@ -33,7 +33,11 @@ def application(environ, start_response):
                      (:addr, :uri, :ref, :status)
                 """),
                 {
-                    "addr": environ.get("REMOTE_ADDR"),
+                    "addr": environ.get(
+                        "X-Forwarded-For", environ.get("REMOTE_ADDR")
+                    )
+                    .split(",")[0]
+                    .strip(),
                     "uri": environ.get("PATH_INFO"),
                     "ref": environ.get("HTTP_REFERER"),
                     "status": 404,
