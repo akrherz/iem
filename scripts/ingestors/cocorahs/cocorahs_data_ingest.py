@@ -1,10 +1,13 @@
-"""Process CoCoRaHS Stations!"""
+"""Process CoCoRaHS Stations!
 
-import datetime
-import sys
+Called from RUN_40_AFTER.sh
+"""
+
+from datetime import datetime, timedelta
 from zoneinfo import ZoneInfo
 
-import requests
+import click
+import httpx
 from pyiem.database import get_dbconnc
 from pyiem.observation import Observation
 from pyiem.reference import TRACE_VALUE
@@ -23,15 +26,13 @@ def safeP(v):
     return float(v)
 
 
-def main(daysago):
+def main(daysago: int, state: str) -> None:
     """Go Main Go"""
     dbconn, cursor = get_dbconnc("iem")
 
-    now = datetime.datetime.now() - datetime.timedelta(days=daysago)
+    now = datetime.now() - timedelta(days=daysago)
 
     lts = utc().astimezone(ZoneInfo("America/Chicago"))
-
-    state = sys.argv[1]
 
     url = (
         "http://data.cocorahs.org/Cocorahs/export/exportreports.aspx"
@@ -39,9 +40,7 @@ def main(daysago):
         f"ReportDateType=date&Date={now:%m/%d/%Y}&TimesInGMT=False"
     )
     try:
-        data = (
-            requests.get(url, timeout=30).content.decode("ascii").split("\r\n")
-        )
+        data = httpx.get(url, timeout=30).content.decode("ascii").split("\r\n")
     except Exception as exp:
         LOG.exception(exp)
         return
@@ -64,7 +63,7 @@ def main(daysago):
             + " "
             + cols[header["ObservationTime"]].strip()
         )
-        ts = datetime.datetime.strptime(t, "%Y-%m-%d %I:%M %p")
+        ts = datetime.strptime(t, "%Y-%m-%d %I:%M %p")
         lts = lts.replace(
             year=ts.year,
             month=ts.month,
@@ -86,12 +85,14 @@ def main(daysago):
     dbconn.commit()
 
 
-def frontend():
+@click.command()
+@click.option("--state", help="State to process", required=True)
+def frontend(state: str):
     """Do Logic."""
-    main(0)
-    if datetime.datetime.now().hour == 1:
+    main(0, state)
+    if datetime.now().hour == 1:
         for offset in range(1, 15):
-            main(offset)
+            main(offset, state)
 
 
 if __name__ == "__main__":

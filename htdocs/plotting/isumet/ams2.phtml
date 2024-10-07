@@ -15,7 +15,7 @@ $day = isset($_GET["day"]) ? intval($_GET["day"]): date("d");
 $myTime = mktime(0,0,0,$month, $day, $year);
 
 $dirRef = date("Y/m/d", $myTime);
-$dataurl = "https://mesonet.agron.iastate.edu/archive/data/$dirRef/text/ot/ot0010.dat";
+$dataurl = "/archive/data/$dirRef/text/ot/ot0010.dat";
 
 $station = "isumet";
 

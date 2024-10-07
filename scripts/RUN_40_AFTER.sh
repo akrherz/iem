@@ -31,7 +31,7 @@ python to_iemaccess.py --offset=2 &
 
 cd ../cocorahs
 python cocorahs_stations.py IA
-python cocorahs_data_ingest.py IA
+python cocorahs_data_ingest.py --state=IA
 
 cd ../../plots
 ./RUN_PLOTS

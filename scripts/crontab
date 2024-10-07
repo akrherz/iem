@@ -38,7 +38,7 @@ S=/opt/iem/scripts
 14 14 * * 5 cd $S/coop; python email_rr3_to_harry.py
 
 # Process last month's asos 1 min
-4 4 9 * * cd $S/ingestors/asos_1minute; python parse_ncei_asos1minute.py $(date --date '11 days ago' +'\%Y \%m')
+4 4 9 * * cd $S/ingestors/asos_1minute; python parse_ncei_asos1minute.py --year=$(date --date '11 days ago' +'\%Y') --month=$(date --date '11 days ago' +'\%m')
 # Process RT asos 1 min
 6 15 * * * cd $S/ingestors/asos_1minute; python parse_ncei_asos1minute.py
 

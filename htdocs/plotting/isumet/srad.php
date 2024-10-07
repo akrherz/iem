@@ -38,7 +38,12 @@ if (is_null($station)) {
         $drct[] = intval($parts[9]);
     } // End of while
 } else {
-    $fcontents = file("/mesonet/ARCHIVE/data/$dirRef/text/ot/ot0010.dat");
+    $fn = "/mesonet/ARCHIVE/data/$dirRef/text/ot/ot0010.dat";
+    if (!file_exists($fn)){
+        die("File not found");
+    }
+    $fcontents = file($fn);
+
     /*
      * month, day, year, hour, minute, outside temp, hi outside temp, lo outside
        temp, outside humidity, wind speed, wind direction, wind gust speed, time

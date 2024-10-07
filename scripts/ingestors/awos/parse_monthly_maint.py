@@ -6,9 +6,9 @@ entire sensors replaced when outside of bounds.
 """
 
 import re
-import sys
 from datetime import datetime
 
+import click
 import pandas as pd
 from pyiem.database import get_dbconn
 
@@ -29,13 +29,16 @@ FAIL = "\033[91m"
 ENDC = "\033[0m"
 
 
-def main(argv):
+@click.command()
+@click.option("--filename", help="CSV file to parse", required=True)
+@click.option("--commit", is_flag=True, help="Actually commit to database")
+def main(filename: str, commit: bool) -> None:
     """Go Main"""
     # Use SSH proxy
     pgconn = get_dbconn("portfolio", user="mesonet")
     pcursor = pgconn.cursor()
 
-    df = pd.read_csv(argv[1], encoding="cp1252")
+    df = pd.read_csv(filename, encoding="cp1252")
     done = []
     for _, row in df.iterrows():
         faa = row["FAA Code"]
@@ -87,7 +90,7 @@ def main(argv):
             p2,
             comment,
         )
-        if len(sys.argv) > 1:
+        if commit:
             pcursor.execute(
                 """
                 delete from iem_calibration where station = %s and valid = %s
@@ -106,7 +109,7 @@ def main(argv):
             parts[0][3],
             comment,
         )
-        if len(sys.argv) > 1:
+        if commit:
             pcursor.execute(
                 """
                 delete from iem_calibration where station = %s and valid = %s
@@ -121,8 +124,8 @@ def main(argv):
             f"DWPF: {parts[0][3]} ({dewpadj}){comment}"
         )
 
-    if len(argv) == 2:
-        print("WARNING: Disabled, call with arbitrary argument to enable")
+    if not commit:
+        print("WARNING: Disabled, call with --commit to enable")
     else:
         pcursor.close()
         pgconn.commit()
@@ -130,4 +133,4 @@ def main(argv):
 
 
 if __name__ == "__main__":
-    main(sys.argv)
+    main()
