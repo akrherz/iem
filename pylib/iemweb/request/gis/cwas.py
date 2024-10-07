@@ -11,6 +11,7 @@ Shapefile format.
 Changelog
 ---------
 
+- 2024-10-07: Fix issue whereby `sts` or `ets` were not provided.
 - 2024-08-10: Initital documentation update and usage of pydantic validation.
 
 Example Requests
@@ -47,8 +48,8 @@ PRJFILE = "/opt/iem/data/gis/meta/4326.prj"
 class Schema(CGIModel):
     """See how we are called."""
 
-    sts: AwareDatetime = Field(description="Start Time")
-    ets: AwareDatetime = Field(description="End Time")
+    sts: AwareDatetime = Field(default=None, description="Start Time")
+    ets: AwareDatetime = Field(default=None, description="End Time")
     format: str = Field(
         default="shp", description="Output format, either kml or shp"
     )

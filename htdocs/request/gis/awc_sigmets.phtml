@@ -91,11 +91,14 @@ $content .= <<<EOM
 
 <h4>Shapefile DBF schema:</h4>
 <pre>
-Field 0: Type=C/String, Title=`NAME' Combination of label and type fields
-Field 1: Type=C/String, Title=`LABEL' SIGMET label
-Field 2: Type=C/String, Title=`TYPE', One Character SIGMET type
-Field 3: Type=C/String, Title=`ISSUE', Issuance UTC Time
-Field 4: Type=C/String, Title=`EXPIRE', Expiration UTC Time
+Field 0: Type=C/String, Title='NAME' Combination of label and type fields
+Field 1: Type=C/String, Title='LABEL' SIGMET label
+Field 2: Type=C/String, Title='TYPE', One Character SIGMET type, always `C` at
+         this time.
+Field 3: Type=C/String, Title='ISSUE', Issuance UTC Time
+Field 4: Type=C/String, Title='EXPIRE', Expiration UTC Time
+Field 5: Type=C/String, Title='PROD_ID', IEM NWS Text Product Identifier, which
+         can be used against the /api/1/nwstext/&lt;PROD_ID&gt; service.
 </pre>
 
 <h4>Archive / Usage Notes:</h4>
