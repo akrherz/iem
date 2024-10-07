@@ -1,16 +1,36 @@
 """.. title:: Temperature and Wind Aloft Data Service
 
+Return to `User Frontend </request/tempwind_aloft.php>`_ or
+`IEM API Services </api/#cgi>`_.
+
 Documentation for /cgi-bin/request/tempwind_aloft.py
 ----------------------------------------------------
 
 This service emits processed data from a temperature and winds aloft product.
+
+Changelog
+---------
+
+- 2024-10-07: While format=comma should have worked, it was not implemented.
+  The suggestion is to use format=csv instead.
 
 Example Usage
 ~~~~~~~~~~~~~
 
 Request all data for `KDSM` for 2023.
 
-https://mesonet.agron.iastate.edu/cgi-bin/request/tempwind_aloft.py?station=KDSM&sts=2023-01-01T00:00Z&ets=2024-01-01T00:00Z
+https://mesonet.agron.iastate.edu/cgi-bin/request/tempwind_aloft.py?\
+station=KDSM&sts=2023-01-01T00:00Z&ets=2024-01-01T00:00Z
+
+Request all data for `KDSM` for 2023 in JSON format.
+
+https://mesonet.agron.iastate.edu/cgi-bin/request/tempwind_aloft.py?\
+station=KDSM&sts=2023-01-01T00:00Z&ets=2024-01-01T00:00Z&format=json
+
+Request all data for `KDSM` for 2023 in Excel format.
+
+https://mesonet.agron.iastate.edu/cgi-bin/request/tempwind_aloft.py?\
+station=KDSM&sts=2023-01-01T00:00Z&ets=2024-01-01T00:00Z&format=excel
 
 """
 
@@ -35,7 +55,7 @@ class Schema(CGIModel):
     format: str = Field(
         "csv",
         description="The format of the output (csv json or excel)",
-        pattern="^(csv|json|excel)$",
+        pattern="^(comma|csv|json|excel)$",
     )
     na: str = Field(
         "M",

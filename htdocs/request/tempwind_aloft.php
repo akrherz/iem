@@ -122,7 +122,7 @@ and end date.</i>
 
 <h3>4. Data Format:</h3>
 <select name="format">
-    <option value="comma">Comma</option>
+    <option value="csv">Comma</option>
     <option value="excel">Excel</option>
 </select>
 

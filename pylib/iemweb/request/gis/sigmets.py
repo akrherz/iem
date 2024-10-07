@@ -1,6 +1,7 @@
 """.. title:: SIGMET Data Service
 
-Return to `User Frontend </request/gis/awc_sigmets.phtml>`_
+Return to `User Frontend </request/gis/awc_sigmets.phtml>`_ or
+`IEM API Services </api/#cgi>`_.
 
 Documentation for /cgi-bin/request/gis/sigmets.py
 -------------------------------------------------
