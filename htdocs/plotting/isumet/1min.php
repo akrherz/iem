@@ -45,7 +45,11 @@ if ($station == null){
         $relh[] = ($rh > 1 && $rh < 100)? $rh : "";
      } // End of while
 } else {
-    $fcontents = file("/mesonet/ARCHIVE/data/$dirRef/text/ot/ot0010.dat");
+    $fn = "/mesonet/ARCHIVE/data/$dirRef/text/ot/ot0010.dat";
+    if (!file_exists($fn)){
+        die("File not found");
+    }
+    $fcontents = file($fn);
     /*
      * month, day, year, hour, minute, outside temp, hi outside temp, lo outside
        temp, outside humidity, wind speed, wind direction, wind gust speed, time
@@ -100,7 +104,6 @@ $graph->yaxis->scale->ticks->Set(1,0.5);
 $graph->legend->SetLayout(LEGEND_HOR);
 $graph->legend->Pos(0.2,0.09);
 
-
 $graph->title->SetFont(FF_FONT1,FS_BOLD,14);
 $graph->yaxis->SetTitle("Temperature [F]");
 
@@ -130,22 +133,11 @@ $lineplot3->SetLegend("Rel Humid");
 $lineplot3->SetColor("black");
 $lineplot3->SetWeight(3.0);
 
-// Box for error notations
-//[DMF]$t1 = new Text("Dups: ".$dups ." Missing: ".$missing );
-//[DMF]$t1->SetPos(0.4,0.95);
-//[DMF]$t1->SetOrientation("h");
-//[DMF]$t1->SetFont(FF_FONT1,FS_BOLD);
-//$t1->SetBox("white","black",true);
-//[DMF]$t1->SetColor("black");
-//[DMF]$graph->AddText($t1);
-
 $graph->Add($lineplot);
 if (isset($_REQUEST["rh"])){
     $graph->AddY2($lineplot3);
 } else {
     $graph->Add($lineplot2);
 }
-    
-$graph->Stroke();
 
-?>
+$graph->Stroke();

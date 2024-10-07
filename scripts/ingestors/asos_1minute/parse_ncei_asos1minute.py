@@ -17,10 +17,12 @@ import subprocess
 import sys
 import tarfile
 from io import StringIO
+from typing import Optional
 
 # third party
+import click
+import httpx
 import pandas as pd
-import requests
 from pyiem.database import get_dbconn, get_sqlalchemy_conn
 from pyiem.util import exponential_backoff, logger, set_property, utc
 from sqlalchemy import text
@@ -204,7 +206,7 @@ def dl_archive(df, dt):
             fn = f"asos-1min-pg{page}-{station4}-{dt:%Y%m}.dat"
             if not os.path.isfile(f"{datadir}/{fn}"):
                 uri = f"{baseuri}{page}/access/{dt:%Y/%m}/{fn}"
-                req = exponential_backoff(requests.get, uri, timeout=60)
+                req = exponential_backoff(httpx.get, uri, timeout=60)
                 if req is None:
                     LOG.info("total failure %s", uri)
                     continue
@@ -298,7 +300,9 @@ def runner(pgconn, metadata, station):
     return count
 
 
-def init_dataframes(argv) -> list:
+def init_dataframes(
+    year: Optional[int], month: Optional[int], station: Optional[str]
+) -> list:
     """Build the processing dataframe."""
     # ASOS query limit keeps other sites out of result that may have 1min
     # Do a time zone trick to figure out UTC offset 1 is ahead
@@ -320,13 +324,11 @@ def init_dataframes(argv) -> list:
     df["fn5"] = ""
     df["fn6"] = ""
     dt = utc()
-    if len(argv) >= 3:
-        if len(argv) == 4:
-            LOG.info("Limiting work to station %s", argv[1])
-            df = df.loc[[argv[1]]]
-            dt = utc(int(argv[2]), int(argv[3]))
-        else:
-            dt = utc(int(argv[1]), int(argv[2]))
+    if year is not None and month is not None:
+        dt = utc(year, month)
+        if station is not None:
+            LOG.info("Limiting work to station %s", station)
+            df = df.loc[[station]]
         dl_archive(df, dt)
         return [df]
     res = []
@@ -368,15 +370,15 @@ def dl_realtime(df, dt, mdt, page):
     tmpfn = f"asos-1min-pg{page}_d{mdt:%Y%m}_c{dt:%Y%m%d}.tar.gz"
     if not os.path.isfile(f"{TMPDIR}/{tmpfn}"):
         uri = f"{HIDDENURL}/{tmpfn}"
-        res = requests.get(uri, timeout=60, stream=True)
-        if res.status_code != 200:
-            loglvl = LOG.info if dt.month != mdt.month else LOG.warning
-            loglvl("Got HTTP %s for %s", res.status_code, uri)
-            return
-        with open(f"{TMPDIR}/{tmpfn}", "wb") as fh:
-            for chunk in res.iter_content(chunk_size=4096):
-                if chunk:
-                    fh.write(chunk)
+        with httpx.stream("GET", uri, timeout=60) as resp:
+            if resp.status_code != 200:
+                loglvl = LOG.info if dt.month != mdt.month else LOG.warning
+                loglvl("Got HTTP %s for %s", resp.status_code, uri)
+                return
+            with open(f"{TMPDIR}/{tmpfn}", "wb") as fh:
+                for chunk in resp.iter_bytes():
+                    if chunk:
+                        fh.write(chunk)
     with tarfile.open(f"{TMPDIR}/{tmpfn}", "r:gz") as tar:
         for tarinfo in tar:
             if not tarinfo.isreg():
@@ -408,26 +410,29 @@ def cleanup(df):
     subprocess.call(["tmpwatch", "200", TMPDIR])
 
 
-def main(argv):
+@click.command()
+@click.option("--year", type=int, required=False, help="Year to process")
+@click.option("--month", type=int, required=False, help="Month to process")
+@click.option("--station", type=str, required=False, help="Station to process")
+def main(year: Optional[int], month: Optional[int], station: Optional[str]):
     """Go Main Go"""
     cronjob = not sys.stdout.isatty()
     # Build a dataframe to do work with
     total = 0
-    for df in init_dataframes(argv):
+    for df in init_dataframes(year, month, station):
         pgconn = get_dbconn("asos1min")
         progress = tqdm(df.index.values, disable=cronjob)
-        for station in progress:
-            row = df.loc[station]
-            progress.set_description(f"{station}")
-            total += runner(pgconn, row, station)
+        for _station in progress:
+            row = df.loc[_station]
+            progress.set_description(f"{_station}")
+            total += runner(pgconn, row, _station)
         pgconn.close()
         cleanup(df)
-    if not cronjob or total < 1e6:
-        LOG.info("Ingested %s observations", total)
+    LOG.info("Ingested %s observations", total)
 
 
 if __name__ == "__main__":
-    main(sys.argv)
+    main()
 
 
 def test_timestamp():

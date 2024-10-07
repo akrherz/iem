@@ -98,6 +98,8 @@
 /plotting/auto/plot/109/by:state::sdate:2024-01-01%200000::edate:2024-07-17%202359::var:days::w:set::phenomenav1:TO::significancev1:W::e:all::cmap:jet::_r:t::dpi:100.png
 /plotting/auto/plot/109/by:state::sdate:2024-01-01%200000::edate:2024-08-20%202359::var:count_departure::w:set::phenomenav1:SV::significancev1:W::phenomenav2:TO::significancev2:W::e:all::cmap:jet::_r:t::dpi:100.png
 /plotting/auto/plot/109/by:wfo::sdate:2024-01-01%200000::edate:2024-09-10%202359::var:count::w:set::phenomenav1:TO::significancev1:W::e:pds::cmap:jet::_r:t::dpi:100.png
+/plotting/auto/plot/109/by:wfo::sdate:2022-01-01%200000::edate:2024-10-07%202359::var:count_rank::w:set::phenomenav1:SV::significancev1:W::e:all::cmap:jet::_r:t::dpi:100.png
+/plotting/auto/plot/109/by:state::sdate:2022-01-01%200000::edate:2024-10-07%202359::var:tpercent::w:set::phenomenav1:SV::significancev1:W::e:all::cmap:jet::_r:t::dpi:100.png
 /plotting/auto/plot/111/_cb:1.txt
 /plotting/auto/plot/112/_cb:1.txt
 /plotting/auto/plot/113/network:IACLIMATE::station:IATAME::var:maxmin::year1:2023::sday:0101::eday:1231::_r:43::dpi:100.png
@@ -116,6 +118,7 @@
 /plotting/auto/plot/140/network:IA_ASOS::station:DSM::syear:1928::sday:0711::eday:0725::varname:avg_temp::w:none::thres:1::year:2024::_r:t::dpi:100.png
 /plotting/auto/plot/141/location:ames::ptype:rain::sdate:mar15::_r:t::dpi:100.png
 /plotting/auto/plot/141/location:ames::ptype:maxt::sdate:mar15::_r:t::dpi:100.png
+/plotting/auto/plot/144/network:ISUSM::station:AEEI4::threshold:50::hours1:48::hours2:24::_r:t::dpi:100.png
 /plotting/auto/plot/148/network:IACLIMATE::station:IATAME::date:mlk::thedate:0101::var:high::_r:t::dpi:100.png
 /plotting/auto/plot/148/network:IACLIMATE::station:IATAME::date:easter::thedate:0101::var:high::_r:t::dpi:100.png
 /plotting/auto/plot/148/network:IACLIMATE::station:IATAME::date:thanksgiving::thedate:0101::offset:1::var:high::_r:t::dpi:100.png

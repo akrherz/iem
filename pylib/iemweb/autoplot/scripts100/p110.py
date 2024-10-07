@@ -3,8 +3,8 @@ This plot presents the weekly percentage of
 precipitation events within a given rainfall bin.
 """
 
-import datetime
 from calendar import month_abbr
+from datetime import date
 
 import numpy as np
 import pandas as pd
@@ -137,7 +137,7 @@ def plotter(fdict):
         4: "1.01 - 2.00",
         5: "2.01 +",
     }
-    today = datetime.date.today()
+    today = date.today()
     res = (
         "# IEM Climodat https://mesonet.agron.iastate.edu/climodat/\n"
         f"# Report Generated: {today:%d %b %Y}\n"
@@ -157,7 +157,7 @@ def plotter(fdict):
     )
     title = f"{ctx['_sname']}:: Precipitation Bin [inch] Frequency Histogram"
     fig = figure(title=title, apctx=ctx)
-    ax = fig.add_axes([0.1, 0.15, 0.8, 0.75])
+    ax = fig.add_axes((0.1, 0.15, 0.8, 0.75))
     df["total"] = (
         df["cat1"] + df["cat2"] + df["cat3"] + df["cat4"] + df["cat5"]
     )
