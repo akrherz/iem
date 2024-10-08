@@ -134,12 +134,12 @@ python mrms_today_total.py --date=$(date +'%Y-%m-%d')
 cd ../ua
 if [ $HH -eq 4 ]
 then
-    python ingest_from_rucsoundings.py --valid=${YYYY}-${MM}-${DD}T00:00:00
+    python ingest_from_spc.py --valid=${YYYY}-${MM}-${DD}T00:00:00
     python compute_params.py --year=$YYYY
 fi
 if [ $HH -eq 16 ]
 then
-    python ingest_from_rucsoundings.py --valid=${YYYY}-${MM}-${DD}T12:00:00
+    python ingest_from_spc.py --valid=${YYYY}-${MM}-${DD}T12:00:00
     python compute_params.py --year=$YYYY
 fi
 
