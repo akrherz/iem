@@ -5,16 +5,19 @@ Run from RUN_40_AFTER.sh
 
 import sys
 
-import requests
+import click
+import httpx
+from pyiem.database import get_dbconn
 from pyiem.network import Table as NetworkTable
-from pyiem.util import get_dbconn, logger
+from pyiem.util import logger
 
 LOG = logger()
 
 
-def main(argv):
+@click.command()
+@click.option("--state", required=True, help="State Abbreviation")
+def main(state: str):
     """Go Main Go"""
-    state = argv[1]
     network = f"{state}COCORAHS"
     nt = NetworkTable(network, only_online=False)
     pgconn = get_dbconn("mesosite")
@@ -25,9 +28,7 @@ def main(argv):
         f"State={state}&Format=CSV&country=usa"
     )
     try:
-        data = (
-            requests.get(url, timeout=30).content.decode("ascii").split("\r\n")
-        )
+        data = httpx.get(url, timeout=30).content.decode("ascii").split("\r\n")
     except Exception as exp:
         LOG.exception(exp)
         sys.exit(1)
@@ -121,4 +122,4 @@ def main(argv):
 
 
 if __name__ == "__main__":
-    main(sys.argv)
+    main()

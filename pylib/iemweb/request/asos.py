@@ -273,7 +273,7 @@ class MyModel(CGIModel):
             return "UTC"
         try:
             ZoneInfo(value)
-        except ZoneInfoNotFoundError as exp:
+        except (ZoneInfoNotFoundError, IsADirectoryError) as exp:
             raise ValueError(f"Unknown timezone: {value}") from exp
         return value
 

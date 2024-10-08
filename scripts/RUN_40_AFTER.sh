@@ -30,7 +30,7 @@ python extract_hfmetar.py 0 &
 python to_iemaccess.py --offset=2 &
 
 cd ../cocorahs
-python cocorahs_stations.py IA
+python cocorahs_stations.py --state=IA
 python cocorahs_data_ingest.py --state=IA
 
 cd ../../plots

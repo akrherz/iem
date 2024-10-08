@@ -3,18 +3,20 @@
 Run from: RUN_MIDNIGHT.sh
 """
 
-import sys
-from datetime import timedelta
+from datetime import datetime, timedelta
 
-# third party
-from pyiem.util import get_dbconn, logger, utc
+import click
+from pyiem.database import get_dbconn
+from pyiem.util import logger, utc
 
 LOG = logger()
 
 
-def main(argv):
+@click.command()
+@click.option("--date", "dt", required=True, help="Date to process")
+def main(dt: datetime):
     """Run for the given args."""
-    sts = utc(int(argv[1]), int(argv[2]), int(argv[3]), 6)  # close enough
+    sts = utc(dt.year, dt.month, dt.day, 6)  # close enough
     ets = sts + timedelta(hours=24)
     # Find obs
     other = get_dbconn("other")
@@ -48,4 +50,4 @@ def main(argv):
 
 
 if __name__ == "__main__":
-    main(sys.argv)
+    main()

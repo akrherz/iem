@@ -76,7 +76,7 @@ def run(tmpdir, valid, routes):
                 )
             mp.draw_radar_ptype_legend()
             pngfn = f"{tmpdir}/hrrr_ref_{i:03.0f}.png"
-            mp.fig.savefig(pngfn)
+            mp.postprocess(filename=pngfn)
             mp.close()
             subprocess.call(["magick", pngfn, f"{pngfn[:-4]}.gif"])
 

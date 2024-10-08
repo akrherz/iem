@@ -1,15 +1,15 @@
 """Generate a map of today's record high and low temperature"""
 
-import datetime
+from datetime import date
 
+from pyiem.database import get_dbconn
 from pyiem.network import Table as NetworkTable
 from pyiem.plot import MapPlot
-from pyiem.util import get_dbconn
 
 
 def main():
     """Go Main Go"""
-    today = datetime.date.today()
+    today = date.today()
     now = today.replace(year=2000)
     nt = NetworkTable("IACLIMATE")
     nt.sts["IA0200"]["lon"] = -93.6
@@ -38,17 +38,17 @@ def main():
         )
 
     mp = MapPlot(
-        title=("Record High + Low Temperature [F] (1893-%s)") % (today.year,),
-        subtitle="For Date: %s" % (now.strftime("%d %b"),),
+        title=f"Record High + Low Temperature [F] (1893-{today:%Y})",
+        subtitle=f"For Date: {now:%d %b}",
         continentalcolor="white",
     )
     mp.drawcounties()
     mp.plot_station(obs)
     pqstr = (
-        "plot ac %s0000 climate/iowa_today_rec_hilo_pt.png "
+        f"plot ac {today:%Y%m%d}0000 climate/iowa_today_rec_hilo_pt.png "
         "coop_rec_temp.png png"
-    ) % (today.strftime("%Y%m%d"),)
-    mp.postprocess(view=False, pqstr=pqstr)
+    )
+    mp.postprocess(pqstr=pqstr)
     mp.close()
 
 
