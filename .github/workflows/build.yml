@@ -38,7 +38,7 @@ jobs:
 
     # setup conda-forge with micromamba
     - name: Setup Python
-      uses: mamba-org/setup-micromamba@v1
+      uses: mamba-org/setup-micromamba@v2
       with:
         environment-file: environment.yml
         condarc: |
