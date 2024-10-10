@@ -13,7 +13,13 @@ LOG = logger()
 
 
 @click.command()
-@click.option("--date", "dt", required=True, help="Date to process")
+@click.option(
+    "--date",
+    "dt",
+    type=click.DateTime(),
+    required=True,
+    help="Date to process",
+)
 def main(dt: datetime):
     """Run for the given args."""
     sts = utc(dt.year, dt.month, dt.day, 6)  # close enough

@@ -1,12 +1,16 @@
 """Download and process the scan dataset.
 
 The data is provided in a standard local timestamp, yikes.
+
+Called from RUN_40_AFTER.sh
 """
 
-import datetime
 import sys
+from datetime import datetime, timedelta
+from typing import Optional
 from zoneinfo import ZoneInfo
 
+import click
 import numpy as np
 import pandas as pd
 import requests
@@ -53,7 +57,7 @@ def save_row(sid, meta, valid, row, icursor, scursor):
         iem.data[val] = row[key] if not pd.isna(row[key]) else None
     iem.data["dwpf"] = row["dwpf"]
     # Old data should not go through this logic as we will have a daily update
-    if valid > (utc() - datetime.timedelta(hours=23)):
+    if valid > (utc() - timedelta(hours=23)):
         if not iem.save(icursor):
             LOG.info("iemaccess sid: %s ts: %s updated no rows", sid, valid)
 
@@ -107,18 +111,21 @@ def load_times(icursor):
     return data
 
 
-def main(argv):
+@click.command()
+@click.option("--reprocess", is_flag=True, help="Reprocess all data")
+@click.option("--date", "dt", type=click.DateTime(), help="Specific date")
+@click.option("--station", help="Specific station to process")
+def main(reprocess: bool, dt: Optional[datetime], station: Optional[str]):
     """Go Main Go"""
     nt = NetworkTable("SCAN", only_online=False)
     SCAN, scursor = get_dbconnc("scan")
     ACCESS, icursor = get_dbconnc("iem")
-    reprocessing = len(argv) == 4
     params = {}
-    sts = datetime.datetime.now() - datetime.timedelta(days=1)
-    if len(argv) == 4:
-        sts = datetime.datetime(int(argv[1]), int(argv[2]), int(argv[3]))
-    basets = sts.replace(tzinfo=ZoneInfo("UTC")) - datetime.timedelta(days=2)
-    ets = sts + datetime.timedelta(days=1)
+    sts = datetime.now() - timedelta(days=1)
+    if dt is not None:
+        sts = dt
+    basets = sts.replace(tzinfo=ZoneInfo("UTC")) - timedelta(days=2)
+    ets = sts + timedelta(days=1)
     params["beginDate"] = sts.strftime("%Y-%m-%d %H:%M")
     params["endDate"] = ets.strftime("%Y-%m-%d %H:%M")
     params["duration"] = "HOURLY"
@@ -132,8 +139,10 @@ def main(argv):
     maxts = load_times(icursor)
     progress = tqdm(nt.sts.items(), disable=not sys.stdout.isatty())
     for sid, meta in progress:
+        if station is not None and sid != station:
+            continue
         progress.set_description(sid)
-        offset = datetime.timedelta(
+        offset = timedelta(
             hours=(0 - int(meta["attributes"]["AWDB.DATA_TIME_ZONE"]))
         )
         remote_id = int(sid[1:])
@@ -158,12 +167,12 @@ def main(argv):
                     varname = f"{varname}{depth}"
                 for val in data["values"]:
                     valid = (
-                        datetime.datetime.strptime(
-                            val["date"][:16], "%Y-%m-%d %H:%M"
-                        )
+                        datetime.strptime(val["date"][:16], "%Y-%m-%d %H:%M")
                         + offset
                     ).replace(tzinfo=ZoneInfo("UTC"))
-                    if not reprocessing and valid < maxts.get(sid, basets):
+                    if not reprocess and valid < maxts.get(sid, basets):
+                        continue
+                    if val.get("value") is None:
                         continue
                     value = val["value"]
                     if varname == "RHUM" and not 1 <= value <= 100:
@@ -211,4 +220,4 @@ def main(argv):
 
 
 if __name__ == "__main__":
-    main(sys.argv)
+    main()

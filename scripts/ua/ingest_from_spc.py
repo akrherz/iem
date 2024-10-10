@@ -135,14 +135,20 @@ def parse(raw, sid):
     """Parse the raw data and yield RAOB objects"""
     rob = RAOB()
     meat = raw[raw.find("%RAW%") + 5 : raw.find("%END%")].strip()
+    # Sigh, duplicate entries
+    last_pressure = None
     for line in meat.split("\n"):
         tokens = line.strip().split(",")
         if len(tokens) != 6:
             continue
+        pressure = conv(tokens[0])
+        if pressure is None or pressure == last_pressure:
+            continue
+        last_pressure = pressure
         rob.profile.append(
             {
                 "levelcode": 4,  # sigh
-                "pressure": conv(tokens[0]),
+                "pressure": pressure,
                 "height": conv(tokens[1]),
                 "tmpc": conv(tokens[2]),
                 "dwpc": conv(tokens[3]),
