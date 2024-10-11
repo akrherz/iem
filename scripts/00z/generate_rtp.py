@@ -192,10 +192,10 @@ def main(job):
             networkname = netid.replace("ASOS", "AWOS")
             precip_on = netid in job["precip_works"]
             fh.write(
-                f".BR {job['wfo']} {job['ets']:%m%d} Z "
-                "DH00/TAIRVS/TAIRVI"
+                f".BR {job['wfo']} {job['ets']:%m%d} Z DH00/TAIRVS/TAIRVI"
                 f"{'/PPDRVZ' if precip_on else ''}\n"
-                f": {networkname} RTP FIRST GUESS PROCESSED BY THE IEM\n"
+                f": {networkname} RTP FIRST GUESS PROCESSED BY THE IEM "
+                f"AT {utc():%H%M}UTC\n"
                 ":   06Z TO 00Z HIGH TEMPERATURE FOR "
                 f"{job['sts12z']:%d %b %Y}\n"
                 ":   06Z TO 00Z LOW TEMPERATURE FOR "

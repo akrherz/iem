@@ -202,7 +202,7 @@ def main(job):
                 "DH06/TAIRVX/DH12/TAIRVP"
                 f"{'/PPDRVZ' if precip_on else ''}\n"
                 f": {networkname} RTP FIRST GUESS "
-                "PROCESSED BY THE IEM\n"
+                f"PROCESSED BY THE IEM AT {utc():%H%M}UTC\n"
                 f":   06Z to 06Z HIGH TEMPERATURE FOR {tt}\n"
                 ":   00Z TO 12Z TODAY LOW TEMPERATURE\n"
                 ":   12Z YESTERDAY TO 12Z TODAY RAINFALL\n"

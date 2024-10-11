@@ -16,6 +16,7 @@
 /plotting/auto/plot/24/which:st::csector:midwest::var:sdd86::w:rank::p:day::year:2024::month:1::sdate:2023-02-01::edate:2024-02-08::cmap:BrBG_r::_r:43::dpi:100.png
 /plotting/auto/plot/24/which:st::csector:midwest::var:avgt::w:val::p:day::year:2024::month:1::sdate:2022-12-15::edate:2023-01-15::cmap:BrBG_r::_r:43::dpi:100.png
 /plotting/auto/plot/24/which:st::csector:midwest::var:aridity::w:dep::p:day::year:2024::month:1::sdate:2022-12-15::edate:2023-01-15::cmap:BrBG_r::_r:43::dpi:100.png
+/plotting/auto/plot/27/network:IACLIMATE::station:IATAME::t1:-55::t2:-60::_r:43::dpi:100.png
 /plotting/auto/plot/28/network:IACLIMATE::station:IATAME::opt:rank::date:2024-07-26::_r:t::dpi:100::_cb:1.png
 /plotting/auto/plot/32/network:IACLIMATE::station:IATAME::year:2024::var:era5land_srad::gddbase:50::gddceil:86::how:sigma::cmap:jet::_r:t::dpi:100.png
 /plotting/auto/plot/32/network:IACLIMATE::station:IATAME::year:2024::var:era5land_srad::gddbase:50::gddceil:86::how:valrange::cmap:jet::_r:t::dpi:100.png
@@ -57,8 +58,10 @@
 /plotting/auto/plot/82/network:IA_ASOS::station:AMW::var:pday::sdate:2024-05-16::edate:2024-08-14::_r:t::dpi:100.png
 /plotting/auto/plot/82/network:IA_ASOS::station:AMW::var:max_rstage::sdate:2024-05-16::edate:2024-08-14::_r:t::dpi:100.png
 /plotting/auto/plot/82/network:IACLIMATE::station:IATAME::var:max_tmpf::sdate:2023-05-11::edate:2023-08-14::_r:t::dpi:100.png
+/plotting/auto/plot/84/sector:northeast::network:WFO::src:stage4::opt:acc::usdm:no::ptype:g::sdate:2024-01-01::edate:2024-01-01::cmap:YlGnBu::_r:t::dpi:100.png
 /plotting/auto/plot/84/sector:IA::network:WFO::src:mrms::opt:acc::usdm:no::ptype:g::sdate:2024-01-01::edate:2024-01-01::cmap:YlGnBu::_r:t::dpi:100.png
 /plotting/auto/plot/84/sector:IA::ugc:IAC153::network:WFO::src:ifc::opt:per::usdm:yesb::ptype:g::sdate:2024-08-06::edate:2024-08-13::cmap:YlGnBu::_r:t::dpi:100.png
+/plotting/auto/plot/84/sector:IA::ugc:IAC169::network:WFO::src:ifc::opt:per::usdm:yesb::ptype:g::sdate:2024-08-06::edate:2024-08-13::cmap:YlGnBu::_r:t::dpi:100.png
 /plotting/auto/plot/84/sector:IA::network:WFO::cwa:DMX::src:mrms::opt:dep::usdm:no::ptype:g::sdate:2024-08-06::edate:2024-08-13::cmap:YlGnBu::_r:t::dpi:100.png
 /plotting/auto/plot/84/sector:IA::network:WFO::src:prism::opt:acc::usdm:no::ptype:g::sdate:2024-08-13::edate:2024-08-13::cmap:YlGnBu::_r:t::dpi:100.png
 /plotting/auto/plot/84/sector:IA::network:WFO::src:iemre::opt:acc::usdm:no::ptype:g::sdate:2024-08-13::edate:2024-08-13::cmap:YlGnBu::_r:t::dpi:100.png
