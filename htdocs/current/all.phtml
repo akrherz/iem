@@ -129,9 +129,8 @@ foreach ($finalA as $key => $val) {
     }
     $table .= "</td>";
     $table .= "<td>" . $parts["drct"] . "</td><td>";
-    if (array_key_exists("peak", $parts)){
+    if (array_key_exists("peak", $parts) && array_key_exists("peak_ts", $parts)) {
         $table .= myround($parts["peak"], 0) . " @ " . date("h:i A", $parts["peak_ts"]);
-
     }
     $table .= "<td>{$parts['phour']}</td><td>{$parts['pday']}</td></tr>\n";
     if ($metar == "yes") {

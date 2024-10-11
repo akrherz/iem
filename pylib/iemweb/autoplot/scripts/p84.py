@@ -294,9 +294,9 @@ def set_gridinfo(ctx):
 def set_data(ctx):
     """Do the data work."""
     if 0 in ctx["p01d"].shape:
-        raise NoDataFound("Data Unavailable")
+        raise NoDataFound("No data found for this period")
     if np.ma.is_masked(np.max(ctx["p01d"])):
-        raise NoDataFound("Data Unavailable")
+        raise NoDataFound("Data was found, but all missing")
     p01d = ctx["p01d"].filled(np.nan)
     plot_units = "inches"
     cmap = get_cmap(ctx["cmap"])

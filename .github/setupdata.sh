@@ -7,8 +7,8 @@ python scripts/prism/init_daily.py --year=2024
 python scripts/iemre/init_daily.py --year=2024 --domain=
 python scripts/iemre/init_daily.py --year=2024 --domain=europe
 python scripts/iemre/init_dailyc.py
-python scripts/iemre/init_stage4_hourly.py --year=2024
-python scripts/iemre/init_stage4_daily.py --year=2024
+python scripts/iemre/init_stage4_hourly.py --year=2024 --ci
+python scripts/iemre/init_stage4_daily.py --year=2024 --ci
 
 curl -o /mesonet/ldmdata/gis/images/4326/USCOMP/n0q_0.json \
 https://mesonet.agron.iastate.edu/data/gis/images/4326/USCOMP/n0q_0.json

@@ -1,7 +1,8 @@
 """Generate the StageIV "daily" file at 12z."""
 
-import datetime
 import os
+from datetime import datetime
+from typing import Optional
 
 import click
 import numpy as np
@@ -11,7 +12,7 @@ LOG = logger()
 BASEDIR = "/mesonet/data/stage4"
 
 
-def init_year(ts: datetime.datetime):
+def init_year(ts: datetime, ci: bool) -> Optional[str]:
     """Create a new NetCDF file for a year of our specification!"""
     # Get existing stageIV netcdf file to copy its cordinates from
     tmplnc = ncopen(f"{BASEDIR}/{ts.year}_stage4_hourly.nc", "r")
@@ -19,7 +20,7 @@ def init_year(ts: datetime.datetime):
     fn = f"{BASEDIR}/{ts.year}_stage4_daily.nc"
     if os.path.isfile(fn):
         LOG.info("Cowardly refusing to overwrite %s", fn)
-        return
+        return None
     nc = ncopen(fn, "w")
     nc.title = f"StageIV 12z-12z Totals for {ts.year}"
     nc.platform = "Grided"
@@ -30,16 +31,14 @@ def init_year(ts: datetime.datetime):
     nc.realization = 1
     nc.Conventions = "CF-1.0"  # *cough*
     nc.contact = "Daryl Herzmann, akrherz@iastate.edu, 515-294-5978"
-    nc.history = "%s Generated" % (
-        datetime.datetime.now().strftime("%d %B %Y"),
-    )
+    nc.history = "%s Generated" % (datetime.now().strftime("%d %B %Y"),)
     nc.comment = "No Comment at this time"
 
     # Setup Dimensions
     nc.createDimension("x", tmplnc.dimensions["x"].size)
     nc.createDimension("y", tmplnc.dimensions["y"].size)
-    ts2 = datetime.datetime(ts.year + 1, 1, 1)
-    days = (ts2 - ts).days
+    ts2 = datetime(ts.year + 1, 1, 1)
+    days = 2 if ci else (ts2 - ts).days
     nc.createDimension("time", int(days))
 
     # Setup Coordinate Variables
@@ -59,7 +58,7 @@ def init_year(ts: datetime.datetime):
     lon[:] = tmplnc.variables["lon"][:]
 
     tm = nc.createVariable("time", float, ("time",))
-    tm.units = "Days since %s-01-01 12:00:0.0" % (ts.year,)
+    tm.units = f"Days since {ts:%Y}-01-01 12:00:0.0"
     tm.long_name = "Time"
     tm.standard_name = "time"
     tm.axis = "T"
@@ -77,13 +76,18 @@ def init_year(ts: datetime.datetime):
 
     nc.close()
     tmplnc.close()
+    return fn
 
 
 @click.command()
 @click.option("--year", type=int, required=True)
-def main(year: int):
+@click.option("--ci", is_flag=True, default=False)
+def main(year: int, ci: bool) -> None:
     """Go Main"""
-    init_year(datetime.datetime(year, 1, 1))
+    fn = init_year(datetime(year, 1, 1), ci)
+    if ci and fn is not None:
+        with ncopen(fn, "a") as nc:
+            nc.variables["p01d_12z"][:] = 0
 
 
 if __name__ == "__main__":

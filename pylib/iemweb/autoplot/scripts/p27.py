@@ -6,7 +6,7 @@ lines are used to translate the dots to the date of occurrence for the
 second threshold.
 """
 
-import datetime
+from datetime import datetime, timedelta
 
 import numpy as np
 import pandas as pd
@@ -57,18 +57,19 @@ def plotter(fdict):
             params=(t1, t2, station),
             index_col="year",
         )
+    if not df.empty:
+        df = df[df["t2_doy"] < 400]
     if df.empty:
-        raise NoDataFound("No Data Found.")
-    df = df[df["t2_doy"] < 400]
+        raise NoDataFound("No data was found after applying filter.")
 
     doy = np.array(df["t1_doy"], "i")
     doy2 = np.array(df["t2_doy"], "i")
 
-    sts = datetime.datetime(2000, 1, 1)
+    sts = datetime(2000, 1, 1)
     xticks = []
     xticklabels = []
     for i in range(min(doy), max(doy2) + 1):
-        ts = sts + datetime.timedelta(days=i)
+        ts = sts + timedelta(days=i)
         if ts.day in [1, 8, 15, 22]:
             xticks.append(i)
             fmt = "%b %-d" if ts.day == 1 else "%-d"

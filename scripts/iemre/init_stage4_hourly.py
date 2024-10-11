@@ -1,7 +1,8 @@
 """Generate the storage of stage IV hourly products"""
 
-import datetime
 import os
+from datetime import datetime
+from typing import Optional
 
 import click
 import numpy as np
@@ -12,7 +13,7 @@ BASEDIR = "/mesonet/data/stage4"
 LOG = logger()
 
 
-def init_year(ts):
+def init_year(ts: datetime, ci: bool) -> Optional[str]:
     """
     Create a new NetCDF file for a year of our specification!
     """
@@ -24,11 +25,11 @@ def init_year(ts):
     lats, lons = grb.latlons()
 
     os.makedirs(BASEDIR, exist_ok=True)
-    fp = f"{BASEDIR}/{ts:%Y}_stage4_hourly.nc"
-    if os.path.isfile(fp):
-        LOG.warning("Cowardly refusing to overwrite %s", fp)
-        return
-    nc = ncopen(fp, "w")
+    fn = f"{BASEDIR}/{ts:%Y}_stage4_hourly.nc"
+    if os.path.isfile(fn):
+        LOG.warning("Cowardly refusing to overwrite %s", fn)
+        return None
+    nc = ncopen(fn, "w")
     nc.title = f"IEM Packaged NOAA Stage IV for {ts:Y}"
     nc.platform = "Grided Estimates"
     nc.description = "NOAA Stage IV on HRAP Grid"
@@ -38,17 +39,15 @@ def init_year(ts):
     nc.realization = 1
     nc.Conventions = "CF-1.0"
     nc.contact = "Daryl Herzmann, akrherz@iastate.edu, 515-294-5978"
-    nc.history = ("%s Generated") % (
-        datetime.datetime.now().strftime("%d %B %Y"),
-    )
+    nc.history = ("%s Generated") % (datetime.now().strftime("%d %B %Y"),)
     nc.comment = "No Comment at this time"
 
     # Setup Dimensions
     nc.createDimension("x", lats.shape[1])
     nc.createDimension("y", lats.shape[0])
     nc.createDimension("bnds", 2)
-    ts2 = datetime.datetime(ts.year + 1, 1, 1)
-    days = (ts2 - ts).days
+    ts2 = datetime(ts.year + 1, 1, 1)
+    days = 2 if ci else (ts2 - ts).days
     LOG.info("Year %s has %s days", ts.year, days)
     nc.createDimension("time", int(days) * 24)
 
@@ -68,7 +67,7 @@ def init_year(ts):
     lon[:] = lons
 
     tm = nc.createVariable("time", float, ("time",))
-    tm.units = "Hours since %s-01-01 00:00:0.0" % (ts.year,)
+    tm.units = f"Hours since {ts:%Y}-01-01 00:00:0.0"
     tm.long_name = "Time"
     tm.standard_name = "time"
     tm.axis = "T"
@@ -101,13 +100,19 @@ def init_year(ts):
     status.description = "-1 unset, 1 grib data copied, 2 QC Run"
 
     nc.close()
+    return fn
 
 
 @click.command()
 @click.option("--year", type=int, required=True, help="year")
-def main(year: int):
+@click.option("--ci", is_flag=True, help="Run in CI mode")
+def main(year: int, ci: bool):
     """Go Main!"""
-    init_year(datetime.datetime(year, 1, 1))
+    fn = init_year(datetime(year, 1, 1), ci)
+    if ci and fn is not None:
+        with ncopen(fn, "a") as nc:
+            nc.variables["p01m"][:] = 0
+            nc.variables["p01m_status"][:] = 1
 
 
 if __name__ == "__main__":
