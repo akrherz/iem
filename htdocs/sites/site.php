@@ -30,8 +30,9 @@ if (
     $rs = pg_prepare(
         $pgconn,
         "INSERT",
-        "INSERT into weblog(client_addr, uri, referer, http_status) " .
-            "VALUES ($1, $2, $3, $4)"
+        "INSERT into weblog ".
+            "(client_addr, uri, referer, http_status, x_forwarded_for) " .
+            "VALUES ($1, $2, $3, $4, $5)"
     );
     pg_execute(
         $pgconn,
@@ -40,7 +41,8 @@ if (
             $client_ip,
             "/sites/site.php?network={$network}&station={$station}",
             $_SERVER["HTTP_REFERER"],
-            404
+            404,
+            $_SERVER["HTTP_X_FORWARDED_FOR"]
         )
     );
     pg_close($pgconn);
@@ -66,7 +68,7 @@ IEM Sites Move Request
 https://mesonet.agron.iastate.edu/sites/site.php?network={$network}&station={$station}
 EOF;
     if (($delta < 0.5) || (strpos($email, '@') > 0)) {
-        mail("akrherz@iastate.edu", "Please move {$station} {$network}", $msg);
+       mail("akrherz@iastate.edu", "Please move {$station} {$network}", $msg);
     }
     $alertmsg = <<<EOM
 <div class="alert alert-danger">Thanks! Your suggested move was submitted for

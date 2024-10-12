@@ -25,12 +25,13 @@ def application(environ, start_response):
             # 5x the 404 logging
             conn.execute(
                 text("""
-                insert into weblog(client_addr, uri, referer, http_status)
-                VALUES (:addr, :uri, :ref, :status),
-                     (:addr, :uri, :ref, :status),
-                     (:addr, :uri, :ref, :status),
-                     (:addr, :uri, :ref, :status),
-                     (:addr, :uri, :ref, :status)
+                insert into weblog(client_addr, uri, referer, http_status,
+                     x_forwarded_for)
+                VALUES (:addr, :uri, :ref, :status, :for),
+                     (:addr, :uri, :ref, :status, :for),
+                     (:addr, :uri, :ref, :status, :for),
+                     (:addr, :uri, :ref, :status, :for),
+                     (:addr, :uri, :ref, :status, :for)
                 """),
                 {
                     "addr": environ.get(
@@ -41,6 +42,7 @@ def application(environ, start_response):
                     "uri": environ.get("PATH_INFO"),
                     "ref": environ.get("HTTP_REFERER"),
                     "status": 404,
+                    "for": environ.get("X-Forwarded-For"),
                 },
             )
             conn.commit()
