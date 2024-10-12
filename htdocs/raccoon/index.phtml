@@ -21,6 +21,13 @@ $sts = gmmktime($hour1, 0, 0, $month1, $day1, $year);
 $ets = gmmktime($hour2, 0, 0, $month2, $day2, $year);
 $wtype = isset($_GET["wtype"]) ? $_GET["wtype"] : array('TO', 'SV');
 
+// Double check that each wtype is 2 char long
+foreach ($wtype as $key => $val) {
+    if (strlen($val) != 2) {
+        xssafe("</script>");  // will kill the script
+    }
+}
+
 if (isset($_REQUEST["wfo"])) {
     /* Check to make sure we have warnings first! */
     $postgis = iemdb("postgis");
