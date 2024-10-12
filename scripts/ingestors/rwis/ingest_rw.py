@@ -1,14 +1,16 @@
 """Ingest the RWIS rainwise data"""
 
-import datetime
+from datetime import datetime
 from io import StringIO
 from zoneinfo import ZoneInfo
 
+import httpx
 import pandas as pd
-import requests
 from pyiem.database import get_dbconnc
 from pyiem.observation import Observation
+from pyiem.util import logger
 
+LOG = logger()
 URI = (
     "http://www.rainwise.net/inview/api/stationdata-iowa.php?"
     "username=iowadot&sid=1f6075797434189912d55196d0be5bac&"
@@ -47,11 +49,13 @@ def process(today, icursor, nwsli, lastts):
         f"{URI}&sdate={today:%Y-%m-%d}&edate={today:%Y-%m-%d}"
         f"&mac={ASSOC[nwsli]}"
     )
-    # print nwsli, myuri
     try:
+        resp = httpx.get(myuri, timeout=15)
+        resp.raise_for_status()
         sio = StringIO()
-        sio.write(requests.get(myuri, timeout=15).text)
-    except Exception:
+        sio.write(resp.text)
+    except Exception as exp:
+        LOG.info(exp)
         return
     try:
         sio.seek(0)
@@ -93,7 +97,7 @@ def process(today, icursor, nwsli, lastts):
     for _, row in sdf.iterrows():
         if pd.isnull(row["utc"]):
             continue
-        utc = datetime.datetime.strptime(row["utc"], "%Y-%m-%d %H:%M:%S")
+        utc = datetime.strptime(row["utc"], "%Y-%m-%d %H:%M:%S")
         utc = utc.replace(tzinfo=ZoneInfo("UTC"))
 
         if lastts is not None and utc < lastts:
@@ -108,7 +112,7 @@ def process(today, icursor, nwsli, lastts):
 
 def main():
     """Go Main Go"""
-    today = datetime.datetime.now()
+    today = datetime.now()
 
     pgconn, icursor = get_dbconnc("iem")
     data = get_last_obs(icursor)

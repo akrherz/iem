@@ -47,7 +47,7 @@ def main():
         station_id = feature["id"]
         props = feature["properties"]
         # We want stations with data to today (archive_end is null)
-        if props["archive_end"] is None:
+        if props["archive_end"] is not None:
             continue
         # We want stations with data to at least 1943
         if props["archive_begin"] is None:
