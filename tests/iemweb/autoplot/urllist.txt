@@ -169,6 +169,7 @@
 /plotting/auto/plot/177/network:ISUSM::station:BOOI4::opt:sm::sts:2024-07-18%201000::ets:2024-07-25%201000::_r:t::dpi:100.png
 /plotting/auto/plot/177/network:ISUSM::station:BOOI4::opt:at::sts:2024-07-18%201000::ets:2024-07-25%201000::_r:t::dpi:100.png
 /plotting/auto/plot/180/v:precip::network1:IACLIMATE::station1:IATDSM::c1:1951::network2:IACLIMATE::station2:IA0000::c2:1951::s:0::sy1:1991::ey1:2020::sy2:1981::ey2:2010::_r:43::dpi:100.png
+/plotting/auto/plot/181/network:IACLIMATE::station:IATAME::date:2024-10-14::year:2023::var:high::r1:50-59::r2:60%2069::r3:70%2079::r4:80%2089::r5:90%2099::_r:t::dpi:100.png
 /plotting/auto/plot/182/sector:IA::date:2024-01-02::trailing:1::threshold:0.1::_r:t::dpi:100.png
 /plotting/auto/plot/185/sector:IA::date:2024-01-01::threshold:2.0::cmap:terrain::_r:t::dpi:100.png
 /plotting/auto/plot/191/sdate:2024-01-01::edate:2024-09-12::w:fema::network:WFO::wfo:DMX::state:IA::fema:7::ugc:IAC169::heatmap:yes::phenomenav1:TO::significancev1:W::_r:t::dpi:100.png
@@ -247,6 +248,9 @@
 /plotting/auto/plot/248/year:1986::outlook_type:C::threshold:CATEGORICAL.SLGT::day:1::opt:wfo::network:WFO::wfo:DMX::fema:7::state:IA::ugc:IAZ048::overlap:0::_r:t::dpi:100.png
 /plotting/auto/plot/248/year:1986::outlook_type:C::threshold:CATEGORICAL.SLGT::day:1::opt:state::network:WFO::wfo:DMX::fema:7::state:IA::ugc:IAZ048::overlap:0::_r:t::dpi:100.png
 /plotting/auto/plot/248/year:1986::outlook_type:C::threshold:CATEGORICAL.SLGT::day:1::opt:state::network:WFO::wfo:DMX::fema:7::state:IA::ugc:IAZ048::overlap:5::_r:t::dpi:100.png
+/plotting/auto/plot/250/network1:IA_ASOS::zstation1:AMW::network2:IA_ASOS::zstation2:DSM::varname:tmpf::sts:2020-01-14%200000::ets:2020-04-14%202300::cmap:Greens::diff:0::_r:t::dpi:100.png
+/plotting/auto/plot/250/network1:IA_ASOS::zstation1:BNW::network2:IA_ASOS::zstation2:DSM::varname:tmpf::sts:2020-01-14%200000::ets:2020-04-14%202300::cmap:Greens::diff:0::_r:t::dpi:100.png
+/plotting/auto/plot/253/datglobalid:%7B495DE596-B299-41FE-9C90-13C87E43FE0B%7D::dat:2024-05-21::cmap:gist_rainbow::_r:t::dpi:100.png
 /plotting/auto/plot/253/datglobalid:%7B495DE596-B299-41FE-9C90-13C87E43FE0B%7D::dat:2024-05-21::cmap:gist_rainbow::_r:t::dpi:100.png
 /plotting/auto/plot/255/network:IACLIMATE::station:IATAME::sday:0901::eday:0301::depth:1::init:1.0::loss:0.15::year:2023::_r:43::dpi:100.png
 /plotting/auto/plot/255/network:IACLIMATE::station:IATAME::sday:0901::eday:0301::depth:1::init:1.0::loss:0.15::year:1803::_r:43::dpi:100.png

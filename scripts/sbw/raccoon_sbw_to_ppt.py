@@ -7,12 +7,12 @@ sequentially each minute
 Called from RUN_1MIN.sh
 """
 
-import datetime
 import os
 import random
 import shutil
 import subprocess
 import sys
+from datetime import datetime, timedelta
 
 from odf.draw import Frame, Image, Page, TextBox
 from odf.opendocument import OpenDocumentPresentation
@@ -26,16 +26,17 @@ from odf.style import (
     TextProperties,
 )
 from odf.text import P
-from pyiem.database import get_dbconnc
+from pyiem.database import get_dbconnc, get_sqlalchemy_conn
 from pyiem.util import logger, utc
+from sqlalchemy import text
 
 os.putenv("DISPLAY", "localhost:1")
 
 LOG = logger()
-__REV__ = "06Jun2022"
+__REV__ = "12Oct2024"
 TMPDIR = "/mesonet/tmp"
-SUPER_RES = datetime.datetime(2010, 3, 1)
-N0B_SWITCH = datetime.datetime(2022, 5, 16)
+SUPER_RES = datetime(2010, 3, 1)
+N0B_SWITCH = datetime(2022, 5, 16)
 
 
 def test_job():
@@ -45,8 +46,8 @@ def test_job():
             "wfo": "FSD",
             "radar": "FSD",
             "wtype": "SV,TO",
-            "sts": datetime.datetime(2003, 6, 24, 2),
-            "ets": datetime.datetime(2003, 6, 24, 4),
+            "sts": datetime(2003, 6, 24, 2),
+            "ets": datetime(2003, 6, 24, 4),
             "jobid": random.randint(1, 1000000),
             "nexrad_product": "N0U",
         }
@@ -86,27 +87,31 @@ def check_for_work():
     return jobs
 
 
-def get_warnings(sts, ets, wfo, wtypes):
+def get_warnings(sts: datetime, ets: datetime, wfo, wtypes):
     """Retreive an array of warnings for this time period and WFO"""
-    tokens = wtypes.split(",")
-    tokens.append("ZZZ")
-    phenomenas = str(tuple(tokens))
-    pgconn, pcursor = get_dbconnc("postgis")
-    sql = f"""
+    params = {
+        "wtypes": wtypes.split(","),
+        "year": sts.year,
+        "sts": sts,
+        "ets": ets,
+        "wfo": wfo,
+    }
+
+    with get_sqlalchemy_conn("postgis") as conn:
+        res = conn.execute(
+            text("""
     WITH stormbased as (
         SELECT phenomena, eventid, issue, expire,
         ST_Area(ST_Transform(geom,9311))/1000000.0 as polyarea
-        from sbw_{sts:%Y} WHERE issue BETWEEN
-        '{sts:%Y-%m-%d %H:%M}+00' and '{ets:%Y-%m-%d %H:%M}+00' and
-        wfo = '{wfo}' and phenomena in {phenomenas} and significance = 'W'
+        from sbw WHERE vtec_year = :year and issue BETWEEN :sts and :ets and
+        wfo = :wfo and phenomena = ANY(:wtypes) and significance = 'W'
         and status = 'NEW'
     ), countybased as (
         SELECT phenomena, eventid,
         sum(ST_Area(ST_Transform(u.geom,9311))/1000000.0) as countyarea
-        from warnings_{sts:%Y} w JOIN ugcs u on (u.gid = w.gid) WHERE
-        issue BETWEEN '{sts:%Y-%m-%d %H:%M}+00' and
-        '{ets:%Y-%m-%d %H:%M}+00' and
-        w.wfo = '{wfo}' and phenomena in {phenomenas} and significance = 'W'
+        from warnings w JOIN ugcs u on (u.gid = w.gid) WHERE vtec_year = :year
+        and issue BETWEEN :sts and :ets and
+        w.wfo = :wfo and phenomena = ANY(:wtypes) and significance = 'W'
         GROUP by phenomena, eventid
     )
 
@@ -115,11 +120,11 @@ def get_warnings(sts, ets, wfo, wtypes):
     s.expire at time zone 'UTC' as expire, s.polyarea,
     c.countyarea from stormbased s JOIN countybased c
     on (c.eventid = s.eventid and c.phenomena = s.phenomena)
-    """
-    pcursor.execute(sql)
-    res = pcursor.fetchall()
-    pgconn.close()
-    return res
+    """),
+            params,
+        )
+        rows = res.mappings().fetchall()
+    return rows
 
 
 def do_job(job):
@@ -289,8 +294,8 @@ def do_job(job):
         now = warning["issue"]
         while now < warning["expire"]:
             times.append(now)
-            now += datetime.timedelta(minutes=15)
-        times.append(warning["expire"] - datetime.timedelta(minutes=1))
+            now += timedelta(minutes=15)
+        times.append(warning["expire"] - timedelta(minutes=1))
 
         for now in times:
             page = Page(stylename=dpstyle, masterpagename=masterpage)
@@ -328,7 +333,7 @@ def do_job(job):
                     n0qn0r = "N0Q"
                 else:
                     n0qn0r = "N0B"
-            zz = now + datetime.timedelta(minutes=15)
+            zz = now + timedelta(minutes=15)
             url = (
                 "http://iem.local/GIS/radmap.php?layers[]=ridge&"
                 f"ridge_product={n0qn0r}&ridge_radar={job['radar']}&"
