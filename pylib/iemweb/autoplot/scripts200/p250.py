@@ -11,7 +11,7 @@ distribution of differences.
 """
 
 import calendar
-import datetime
+from datetime import date, timedelta, timezone
 from zoneinfo import ZoneInfo
 
 import numpy as np
@@ -95,8 +95,8 @@ def get_description():
 def plotter(fdict):
     """Go"""
     ctx = get_autoplot_context(fdict, get_description())
-    sts = ctx["sts"].replace(tzinfo=datetime.timezone.utc)
-    ets = ctx["ets"].replace(tzinfo=datetime.timezone.utc)
+    sts = ctx["sts"].replace(tzinfo=timezone.utc)
+    ets = ctx["ets"].replace(tzinfo=timezone.utc)
     station1 = ctx["zstation1"]
     station2 = ctx["zstation2"]
     varname = ctx["varname"]
@@ -117,9 +117,9 @@ def plotter(fdict):
             params={"stids": [station1, station2]},
             index_col=None,
         )
-    if df.empty or station1 not in df.columns or station2 not in df.columns:
-        raise NoDataFound("No Data Found.")
-    df["utc_valid"] = df["utc_valid"].dt.tz_localize(datetime.timezone.utc)
+    if df.empty:
+        raise NoDataFound("No data found with initial query.")
+    df["utc_valid"] = df["utc_valid"].dt.tz_localize(timezone.utc)
     tz = ZoneInfo(ctx["_nt1"].sts[station1]["tzname"])
     df["local_valid"] = df["utc_valid"].dt.tz_convert(tz)
     df = df.pivot_table(
@@ -127,8 +127,8 @@ def plotter(fdict):
     )
     # drop any rows with NaN in either column
     df = df.dropna()
-    if df.empty:
-        raise NoDataFound("No Data Found.")
+    if df.empty or station1 not in df.columns or station2 not in df.columns:
+        raise NoDataFound("No data found after pivoting")
     df["diff"] = df[station1] - df[station2]
 
     fig = figure(
@@ -145,20 +145,20 @@ def plotter(fdict):
         apctx=ctx,
     )
     # Plot the specified data period
-    ax = fig.add_axes([0.08, 0.55, 0.5, 0.35])
+    ax = fig.add_axes((0.08, 0.55, 0.5, 0.35))
     df2 = df.loc[sts:ets]
     if not df2.empty:
         ax.plot(df2.index.values, df2["diff"], label="Difference", lw=2)
         ax.set_ylabel(f"{PDICT[varname]} Difference")
         ax.grid(True)
-        if ets - sts < datetime.timedelta(days=2):
+        if ets - sts < timedelta(days=2):
             fmt = "%-I %p\n%-d %b"
         else:
             fmt = "%-d %b\n%Y"
         ax.xaxis.set_major_formatter(DateFormatter(fmt, tz=tz))
 
     # Plot the yearly means and standard deviation
-    ax = fig.add_axes([0.08, 0.1, 0.5, 0.35])
+    ax = fig.add_axes((0.08, 0.1, 0.5, 0.35))
     yearly = df["diff"].groupby(df.index.year).agg(["mean", "std"])
     ax.fill_between(
         yearly.index.values,
@@ -174,7 +174,7 @@ def plotter(fdict):
     ax.legend(loc="best", ncol=2)
 
     # Plot the monthly distribution of differences as half violin plot
-    ax = fig.add_axes([0.65, 0.1, 0.32, 0.3])
+    ax = fig.add_axes((0.65, 0.1, 0.32, 0.3))
     monthly = df["diff"].groupby(df.index.month).apply(np.array)
     ax.violinplot(
         monthly.values, showextrema=False, showmeans=True, widths=0.7
@@ -194,7 +194,7 @@ def plotter(fdict):
     freq = df[["week", "hour", "hit"]].groupby(["week", "hour"]).mean()
     freq = freq.unstack(level="hour")
     H = freq.values
-    ax = fig.add_axes([0.65, 0.53, 0.32, 0.32])
+    ax = fig.add_axes((0.65, 0.53, 0.32, 0.32))
     res = ax.imshow(
         H * 100.0,
         aspect="auto",
@@ -215,9 +215,7 @@ def plotter(fdict):
     # Label the x-axis with an approximate month
     ax.set_xticklabels(
         [
-            (
-                datetime.date(2000, 1, 1) + datetime.timedelta(days=int(x * 7))
-            ).strftime("%-d\n%b")
+            (date(2000, 1, 1) + timedelta(days=int(x * 7))).strftime("%-d\n%b")
             for x in ax.get_xticks()
         ]
     )

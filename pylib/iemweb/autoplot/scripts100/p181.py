@@ -9,7 +9,7 @@ sets the year-to-date period used for each year.
 updated to be space delimited so to allow negative numbers to be used.
 """
 
-import datetime
+from datetime import date
 
 import numpy as np
 import pandas as pd
@@ -31,13 +31,15 @@ PDICT = {
 
 def parse_range(rng):
     """Convert this into bins"""
+    if rng.find(" ") == -1:
+        raise NoDataFound("Invalid Range Provided")
     return [float(f) for f in rng.split()]
 
 
 def get_description():
     """Return a dict describing how to call this plotter"""
     desc = {"description": __doc__, "data": True}
-    today = datetime.date.today()
+    today = date.today()
     desc["arguments"] = [
         ARG_STATION,
         dict(
