@@ -17,6 +17,7 @@ from pyiem.database import get_sqlalchemy_conn
 from pyiem.exceptions import NoDataFound
 from pyiem.plot import figure_axes
 from pyiem.util import get_autoplot_context
+from sqlalchemy import text
 
 from iemweb.autoplot import ARG_STATION
 
@@ -104,19 +105,19 @@ def plotter(fdict):
     r3 = parse_range(ctx["r3"])
     r4 = parse_range(ctx["r4"])
     r5 = parse_range(ctx["r5"])
-    date = ctx["date"]
+    dt = ctx["date"]
     year = ctx["year"]
     varname = ctx["var"]
 
     with get_sqlalchemy_conn("coop") as conn:
         df = pd.read_sql(
-            """
+            text("""
             SELECT year, day, high, low, precip, snow,
-            (high + low) / 2. as avgt from alldata WHERE station = %s and
-            extract(doy from day) <= extract(doy from %s::date)
-        """,
+            (high + low) / 2. as avgt from alldata WHERE station = :station and
+            extract(doy from day) <= extract(doy from :dt)
+        """),
             conn,
-            params=(station, date),
+            params={"station": station, "dt": dt},
             index_col=None,
         )
     if df.empty:
@@ -134,7 +135,7 @@ def plotter(fdict):
         .sum()
     )
 
-    title = f"{ctx['_sname']} :: Jan 1 - {date:%b %-d} {PDICT[varname]} Days"
+    title = f"{ctx['_sname']} :: Jan 1 - {dt:%b %-d} {PDICT[varname]} Days"
     (fig, ax) = figure_axes(title=title, apctx=ctx)
     bars = ax.bar(
         np.arange(1, 6) - 0.25, gdf.mean().values, width=-0.25, label="Average"
@@ -161,12 +162,12 @@ def plotter(fdict):
                 ha="center",
             )
 
-    if date.year in gdf.index:
+    if dt.year in gdf.index:
         bars = ax.bar(
             np.arange(1, 6) + 0.25,
-            gdf.loc[date.year].values,
+            gdf.loc[dt.year].values,
             width=0.25,
-            label=str(date.year),
+            label=str(dt.year),
         )
         for mybar in bars:
             ax.text(
