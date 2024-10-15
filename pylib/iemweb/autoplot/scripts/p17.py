@@ -4,8 +4,8 @@ along with the daily climatology for the nearest (sometimes same) location.
 The vertical highlighted stripes on the plot are just the weekend dates.
 """
 
-import datetime
 import warnings
+from datetime import date, timedelta
 
 import httpx
 import matplotlib.patheffects as PathEffects
@@ -24,7 +24,7 @@ PDICT = {"temps": "Plot High/Low Temperatures", "precip": "Plot Precipitation"}
 def get_description():
     """Return a dict describing how to call this plotter"""
     desc = {"description": __doc__, "data": True, "cache": 300}
-    today = datetime.date.today()
+    today = date.today()
     mo = today.month
     yr = today.year
     desc["arguments"] = [
@@ -41,7 +41,7 @@ def get_description():
             name="year",
             default=yr,
             label="Select Year",
-            min=1928,
+            min=1850,
         ),
         dict(
             type="select",
@@ -58,10 +58,12 @@ def common(ctx):
     """Do things common to both plots."""
     station = ctx["station"]
     year = ctx["year"]
+    if not ctx["network"].endswith("CLIMATE") and year < 1929:
+        raise NoDataFound("No data available for year before 1929.")
     month = ctx["month"]
 
-    sts = datetime.date(year, month, 1)
-    ets = sts + datetime.timedelta(days=35)
+    sts = date(year, month, 1)
+    ets = sts + timedelta(days=35)
     ets = ets.replace(day=1)
     days = int((ets - sts).days)
     weekends = []
@@ -69,7 +71,7 @@ def common(ctx):
     while now < ets:
         if now.weekday() in [5, 6]:
             weekends.append(now.day)
-        now += datetime.timedelta(days=1)
+        now += timedelta(days=1)
     try:
         resp = httpx.get(
             "http://mesonet.agron.iastate.edu/api/1/daily.json",

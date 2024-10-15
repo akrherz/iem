@@ -5,6 +5,7 @@
 /plotting/auto/plot/17/network:IA_ASOS::station:AMW::month:7::year:2024::p:temps::_r:t::dpi:100.png
 /plotting/auto/plot/17/network:IA_ASOS::station:AMW::month:7::year:2024::p:precip::_r:t::dpi:100.png
 /plotting/auto/plot/17/network:IA_ASOS::station:BNW::month:7::year:2024::p:temps::_r:t::dpi:100.png
+/plotting/auto/plot/17/month:9::year:1909::station:DSM::network:IA_ASOS.png
 /plotting/auto/plot/18/network:IA_ASOS::zstation:DSM::sdate:2023-09-01::days:365::var:alti::_r:43::dpi:100.png
 /plotting/auto/plot/18/network:IA_ASOS::zstation:AMW::sdate:2020-01-11::days:365::var:tmpf::_r:t::dpi:100.png
 /plotting/auto/plot/18/network:IA_ASOS::zstation:AMW::sdate:2020-01-11::days:365::var:tmpf::_r:t::dpi:100.js

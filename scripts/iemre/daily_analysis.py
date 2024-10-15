@@ -8,8 +8,8 @@ This is tricky as some variables we can compute sooner than others.
     RUN_10_AFTER.sh
 """
 
-import datetime
 import subprocess
+from datetime import date, datetime, timedelta
 
 import click
 import numpy as np
@@ -90,26 +90,26 @@ def copy_iemre_hourly(ts, ds, domain):
     elif domain == "europe":
         sts = utc(ts.year, ts.month, ts.day, 0)
     else:
-        sts = utc(ts.year, ts.month, ts.day, 18) - datetime.timedelta(days=1)
-    ets = sts + datetime.timedelta(hours=23)
+        sts = utc(ts.year, ts.month, ts.day, 18) - timedelta(days=1)
+    ets = sts + timedelta(hours=23)
     pairs = [(sts, ets)]
     if sts.year != ets.year:
         # 6z to 23z (inclusve)
         # 0z to 5z (inclusive)
         pairs = [
-            (sts, sts + datetime.timedelta(hours=17)),
-            (sts + datetime.timedelta(hours=18), ets),
+            (sts, sts + timedelta(hours=17)),
+            (sts + timedelta(hours=18), ets),
         ]
     ets = utc(ts.year, ts.month, ts.day, 12)
     # 13z yesterday
-    sts = ets - datetime.timedelta(hours=23)
+    sts = ets - timedelta(hours=23)
     pairs12z = [(sts, ets)]
     if sts.year != ets.year:
         # 13z to 23z (inclusve)
         # 0z to 12z (inclusive)
         pairs12z = [
-            (sts, sts + datetime.timedelta(hours=10)),
-            (sts + datetime.timedelta(hours=11), ets),
+            (sts, sts + timedelta(hours=10)),
+            (sts + timedelta(hours=11), ets),
         ]
 
     # One Off
@@ -222,10 +222,8 @@ def use_climodat_12z(ts, ds):
             precip_hour < 4 or precip_hour > 11) then null
             else precip end as precipdata,
         snow as snowdata, snowd as snowddata,
-        case when (temp_estimated or temp_hour is null or temp_hour < 4
-            or temp_hour > 11) then null else high end as highdata,
-        case when (temp_estimated or temp_hour is null or temp_hour < 4
-            or temp_hour > 11) then null else low end as lowdata
+        case when temp_estimated then null else high end as highdata_all,
+        case when temp_estimated then null else low end as lowdata_all
         from alldata a JOIN mystations m
         ON (a.station = m.id) WHERE a.day = :ts
         """),
@@ -240,18 +238,18 @@ def use_climodat_12z(ts, ds):
         )
     LOG.info("loaded %s rows from climodat database", len(df.index))
     if len(df.index) < 50:
-        if ts != datetime.date.today():
+        if ts != date.today():
             LOG.warning("Failed quorum")
         return
     if ts.year < 1951:
-        res = generic_gridder(df, "highdata", "")
+        res = generic_gridder(df, "highdata_all", "")
         ds["high_tmpk_12z"].values = convert_value(res, "degF", "degK")
 
-        res = generic_gridder(df, "lowdata", "")
+        res = generic_gridder(df, "lowdata_all", "")
         ds["low_tmpk_12z"].values = convert_value(res, "degF", "degK")
 
     res = generic_gridder(df, "snowdata", "")
-    if res is not None and ts < datetime.date(2008, 10, 1):  # NOHRSC covers
+    if res is not None and ts < date(2008, 10, 1):  # NOHRSC covers
         ds["snow_12z"].values = convert_value(res, "inch", "millimeter")
 
     res = generic_gridder(df, "snowddata", "")
@@ -320,7 +318,7 @@ def use_asos_daily(ts, ds, domain):
         ds["max_rh"].values = res
 
 
-def use_climodat_daily(ts: datetime.date, ds):
+def use_climodat_daily(ts: date, ds):
     """Do our gridding"""
     mybuf = 2.0
     dom = iemre.DOMAINS[""]
@@ -361,7 +359,7 @@ def use_climodat_daily(ts: datetime.date, ds):
             },
         )
     if len(df.index) < 4:
-        if ts != datetime.date.today():
+        if ts != date.today():
             LOG.warning("Failed quorum")
         return
     suffix = "_all" if ts.year < 1951 else ""
@@ -376,7 +374,7 @@ def use_climodat_daily(ts: datetime.date, ds):
         ds["p01d"].values = convert_value(res, "inch", "mm")
 
 
-def workflow(ts: datetime.date, domain: str):
+def workflow(ts: date, domain: str):
     """Do Work"""
     # load up our current data
     ds = iemre.get_grids(ts, domain=domain)
@@ -390,10 +388,11 @@ def workflow(ts: datetime.date, domain: str):
     if ts.year > 1949:
         copy_iemre_hourly(ts, ds, domain)
     else:
-        LOG.info("Using ASOS for daily summary variables")
-        use_asos_daily(ts, ds, domain)
+        if ts.year > 1928:
+            LOG.info("Using ASOS for daily summary variables")
+            use_asos_daily(ts, ds, domain)
         if domain == "":
-            use_climodat_daily(ts, inverse_distance_to_grid)
+            use_climodat_daily(ts, ds)
 
     if domain == "":
         # snow_12z snowd_12z
@@ -423,7 +422,7 @@ def workflow(ts: datetime.date, domain: str):
     "--date", "valid", type=click.DateTime(), help="Date", required=True
 )
 @click.option("--domain", default="", help="Domain to process", type=str)
-def main(valid: datetime.datetime, domain: str):
+def main(valid: datetime, domain: str):
     """Go Main Go"""
     dt = valid.date()
     LOG.info("Run %s for domain: '%s'", dt, domain)

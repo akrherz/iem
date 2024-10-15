@@ -132,12 +132,12 @@ python q3_xhour.py --hours=1
 python mrms_today_total.py --date=$(date +'%Y-%m-%d') 
 
 cd ../ua
-if [ $HH -eq 4 ]
+if [ $HH -eq 1 ]
 then
     python ingest_from_spc.py --valid=${YYYY}-${MM}-${DD}T00:00:00
     python compute_params.py --year=$YYYY
 fi
-if [ $HH -eq 16 ]
+if [ $HH -eq 13 ]
 then
     python ingest_from_spc.py --valid=${YYYY}-${MM}-${DD}T12:00:00
     python compute_params.py --year=$YYYY
