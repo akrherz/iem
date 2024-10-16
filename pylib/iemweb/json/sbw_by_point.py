@@ -10,6 +10,9 @@ Returns NWS Storm Based Warnings for a provided latitude and longitude point.
 Changelog
 ---------
 
+- 2024-10-16: Added ``buffer`` parameter to expand the search area around the
+  provided point.  The units are in decimal degrees with a range limited
+  between 0 and 1.
 - 2024-07-23: Initial documentation update and migration to pydantic.
 
 Examples
@@ -31,6 +34,12 @@ Same request, but in CSV format.
 
 https::/mesonet.agron.iastate.edu/json/sbw_by_point.py?lat=41.99&lon=-92.0\
 &sdate=2023-01-01&edate=2024-01-01&fmt=csv
+
+Provide all storm based warnings for a point in Iowa and buffer this point by
+0.5 degrees.
+
+https::/mesonet.agron.iastate.edu/json/sbw_by_point.py?lat=41.99&lon=-92.0\
+&buffer=0.5
 
 """
 
@@ -55,6 +64,12 @@ class Schema(CGIModel):
     """See how we are called."""
 
     callback: str = Field(None, description="JSONP callback function name")
+    buffer: float = Field(
+        0.0,
+        description="Buffer in decimal degrees around point",
+        ge=0,
+        le=1,
+    )
     fmt: str = Field("json", description="The format of the response")
     lat: float = Field(41.99, description="Latitude of point", ge=-90, le=90)
     lon: float = Field(
@@ -96,6 +111,7 @@ def get_events(environ):
         "sbws": [],
         "lon": environ["lon"],
         "lat": environ["lat"],
+        "buffer": environ["buffer"],
         "valid": None,
     }
     data["generation_time"] = utc().strftime(ISO8601)
@@ -103,6 +119,7 @@ def get_events(environ):
     params = {
         "lon": environ["lon"],
         "lat": environ["lat"],
+        "buffer": environ["buffer"],
         "sdate": environ["sdate"],
         "edate": environ["edate"],
         "valid": environ["valid"],
@@ -110,6 +127,10 @@ def get_events(environ):
     if environ["valid"] is not None:
         valid_limiter = " and issue <= :valid and expire > :valid "
         data["valid"] = environ["valid"].strftime(ISO8601)
+
+    ptsql = "ST_Point(:lon, :lat, 4326)"
+    if environ["buffer"] > 0:
+        ptsql = "ST_Buffer(ST_Point(:lon, :lat, 4326), :buffer)"
 
     with get_sqlalchemy_conn("postgis") as conn:
         df = pd.read_sql(
@@ -127,8 +148,7 @@ def get_events(environ):
         eventid,
     tml_direction, tml_sknt, hvtec_nwsli, windtag, hailtag, tornadotag,
     damagetag from sbw where status = 'NEW' and
-    ST_Contains(geom, ST_Point(:lon, :lat, 4326)) and
-    issue > :sdate and expire < :edate
+    ST_Intersects(geom, {ptsql}) and issue > :sdate and expire < :edate
     {valid_limiter} ORDER by issue ASC
         """
             ),

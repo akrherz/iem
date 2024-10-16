@@ -68,22 +68,30 @@ function text(str) {
 function updateMarkerPosition(lon, lat) {
     $("#lat").val(lat.toFixed(4));
     $("#lon").val(lon.toFixed(4));
-    window.location.href = `#bypoint/${lon.toFixed(4)}/${lat.toFixed(4)}`;
+    const buffer = parseFloat($('select[name="buffer"]').val());
+    window.location.href = `#bypoint/${lon.toFixed(4)}/${lat.toFixed(4)}/${buffer.toFixed(2)}`;
     updateTable();
 }
 function updateMarkerPosition2(lon, lat) {
     $("#lat2").val(lat.toFixed(4));
     $("#lon2").val(lon.toFixed(4));
-    window.location.href = `#eventsbypoint/${lon.toFixed(4)}/${lat.toFixed(4)}`;
+    const buffer = parseFloat($('select[name="buffer2"]').val());
+    window.location.href = `#eventsbypoint/${lon.toFixed(4)}/${lat.toFixed(4)}/${buffer.toFixed(2)}`;
     updateTable2ByPoint();
 }
 function updateTable(){
-    $("#table1title").text(`Storm Based Warnings for Point: ${$("#lon").val()}E ${$("#lat").val()}N`);
+    const buffer = parseFloat($('select[name="buffer"]').val());
+    let title = `Storm Based Warnings for Point: ${$("#lon").val()}E ${$("#lat").val()}N`;
+    if (buffer > 0){
+        title += ` with ${buffer} degree buffer`;
+    }
+    $("#table1title").text(title);
     // Do what we need to for table 1
     $.ajax({
         data: {
             lat: $("#lat").val(),
             lon: $("#lon").val(),
+            buffer,
             sdate: $.datepicker.formatDate(DATE_FMT, sdate1.datepicker("getDate")),
             edate: $.datepicker.formatDate(DATE_FMT, edate1.datepicker("getDate"))
         },
@@ -130,13 +138,19 @@ function updateTable2ByUGC(){
 }
 
 function updateTable2ByPoint(){
+    const buffer = parseFloat($('select[name="buffer2"]').val());
     table2IsByPoint = true;
-    $("#table2title").text(`Events for Point: ${$("#lon2").val()}E ${$("#lat2").val()}N`);
+    let title = `Events for Point: ${$("#lon2").val()}E ${$("#lat2").val()}N`;
+    if (buffer > 0){
+        title += ` with ${buffer} degree buffer`;
+    }
+    $("#table2title").text(title);
     // Do what we need to for table 2
     $.ajax({
         data: {
             lat: $("#lat2").val(),
             lon: $("#lon2").val(),
+            buffer,
             sdate: $.datepicker.formatDate(DATE_FMT, sdate.datepicker("getDate")),
             edate: $.datepicker.formatDate(DATE_FMT, edate.datepicker("getDate"))
         },
@@ -198,6 +212,7 @@ function buildUI(){
             fmt: (btn.data("opt") == "csv") ? "csv" : "xlsx",
             lat: $("#lat").val(),
             lon: $("#lon").val(),
+            buffer: $('select[name="buffer"]').val(),
             sdate: $.datepicker.formatDate(DATE_FMT, sdate1.datepicker("getDate")),
             edate: $.datepicker.formatDate(DATE_FMT, edate1.datepicker("getDate"))
         };
@@ -414,15 +429,31 @@ function process_hash(hash){
             });
         }
     }
-    if (tokens2.length == 3){
+    if (tokens2.length == 3 || tokens2.length == 4){
         if (tokens2[0] == 'bypoint'){
             default_lat = parseFloat(text(tokens2[2]));
             default_lon = parseFloat(text(tokens2[1]));
+            if (tokens2.length == 4){
+                try {
+                    const buffer = parseFloat(tokens2[3]);
+                    $('select[name="buffer"]').val(buffer);
+                } catch {
+                    // pass
+                }
+            }
             updateMarkerPosition(default_lon, default_lat);
         }
         if (tokens2[0] == 'eventsbypoint'){
             default_lat = parseFloat(text(tokens2[2]));
             default_lon = parseFloat(text(tokens2[1]));
+            if (tokens2.length == 4){
+                try {
+                    const buffer = parseFloat(tokens2[3]);
+                    $('select[name="buffer2"]').val(buffer);
+                } catch {
+                    // pass
+                }
+            }
             updateMarkerPosition2(default_lon, default_lat);
         }
     }
