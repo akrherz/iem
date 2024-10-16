@@ -1,15 +1,17 @@
 """Pull in what's available for HFMETAR MADIS data
 
-Run from RUN_10MIN.sh
-Run from RUN_40_AFTER.sh for two hours ago
+Run from RUN_20_AFTER.sh for current hour
+Run from RUN_40_AFTER.sh for current hour and 2 hours ago
+Run from RUN_59_AFTER.sh for current hour
 """
 
-import datetime
 import os
 import sys
 import warnings
+from datetime import datetime, timedelta
 from zoneinfo import ZoneInfo
 
+import click
 import numpy as np
 from metar import Metar
 from metpy.units import masked_array, units
@@ -17,7 +19,7 @@ from netCDF4 import chartostring
 from pyiem.database import get_dbconnc
 from pyiem.observation import Observation
 from pyiem.reference import TRACE_VALUE
-from pyiem.util import convert_value, logger, mm2inch, ncopen
+from pyiem.util import convert_value, logger, mm2inch, ncopen, utc
 from tqdm import tqdm
 
 warnings.filterwarnings("ignore", category=DeprecationWarning)
@@ -143,7 +145,7 @@ def process(ncfn):
         if len(sid) < 3:
             continue
         sid3 = sid[1:] if sid.startswith("K") else sid
-        ts = datetime.datetime(1970, 1, 1) + datetime.timedelta(
+        ts = datetime(1970, 1, 1) + timedelta(
             seconds=data["observationTime"][i]
         )
         ts = ts.replace(tzinfo=ZoneInfo("UTC"))
@@ -253,17 +255,11 @@ def process(ncfn):
         pgconn.close()
 
 
-def find_fn(argv):
+def find_fn(hours: int):
     """Figure out which file to run for"""
-    if len(argv) == 5:
-        utcnow = datetime.datetime(
-            int(argv[1]), int(argv[2]), int(argv[3]), int(argv[4])
-        )
-        return utcnow.strftime("/mesonet/data/madis/hfmetar/%Y%m%d_%H00.nc")
-    utcnow = datetime.datetime.utcnow()
-    start = 0 if len(argv) == 1 else int(argv[1])
-    for i in range(start, 5):
-        ts = utcnow - datetime.timedelta(hours=i)
+    utcnow = utc()
+    for i in range(hours, 5):
+        ts = utcnow - timedelta(hours=i)
         for j in range(300, -1, -1):
             fn = ts.strftime(f"/mesonet/data/madis/hfmetar/%Y%m%d_%H00_{j}.nc")
             if os.path.isfile(fn):
@@ -272,11 +268,13 @@ def find_fn(argv):
     sys.exit()
 
 
-def main(argv):
+@click.command()
+@click.option("--hours", type=int, required=True)
+def main(hours: int):
     """Do Something"""
-    fn = find_fn(argv)
+    fn = find_fn(hours)
     process(fn)
 
 
 if __name__ == "__main__":
-    main(sys.argv)
+    main()

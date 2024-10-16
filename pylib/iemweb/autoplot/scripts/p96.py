@@ -7,14 +7,15 @@ be patient.  This chart attempts to address the question of if computing
 are commmon when computing this metric for high or low temperature.
 """
 
-import datetime
+from datetime import date
 from zoneinfo import ZoneInfo
 
 import numpy as np
 import pandas as pd
+from pyiem.database import get_dbconn
 from pyiem.exceptions import NoDataFound
 from pyiem.plot import figure_axes
-from pyiem.util import get_autoplot_context, get_dbconn
+from pyiem.util import get_autoplot_context, utc
 
 
 def get_description():
@@ -39,35 +40,29 @@ def plotter(fdict):
     ctx = get_autoplot_context(fdict, get_description())
 
     station = ctx["zstation"]
-    jan1 = datetime.datetime.now().replace(
-        hour=0,
-        day=1,
-        month=1,
-        minute=0,
-        second=0,
-        microsecond=0,
-        tzinfo=ZoneInfo("UTC"),
-    )
-    ts1973 = datetime.datetime(1973, 1, 1)
-    today = datetime.datetime.now()
+    ts1973 = utc(1973, 1, 1)
+    utcnow = utc()
     cursor.execute(
         "SELECT valid at time zone 'UTC', phour from hourly WHERE "
         "iemid = %s and phour > 0.009 and "
-        "valid >= '1973-01-01 00:00+00' and valid < %s",
-        (ctx["_nt"].sts[station]["iemid"], jan1),
+        "valid >= %s and valid < %s ORDER by valid ASC",
+        (ctx["_nt"].sts[station]["iemid"], ts1973, utcnow),
     )
     if cursor.rowcount == 0:
         raise NoDataFound("No Data Found.")
 
-    days = (jan1.year - 1973) * 366
+    # Create storage for the data
+    days = (utcnow.year - 1973 + 1) * 366
     data = np.zeros((days * 24), "f")
-    minvalid = today
+    minvalid = None
+    # make ts1973 naive
+    ts1973 = ts1973.replace(tzinfo=None)
     for row in cursor:
-        if row[0] < minvalid:
+        if minvalid is None:
             minvalid = row[0]
         data[(row[0] - ts1973).days * 24 + row[0].hour] = row[1]
 
-    lts = jan1.astimezone(ZoneInfo(ctx["_nt"].sts[station]["tzname"]))
+    lts = utcnow.astimezone(ZoneInfo(ctx["_nt"].sts[station]["tzname"]))
     lts = lts.replace(month=7, hour=0)
     cnts = [0] * 24
     avgv = [0] * 24
@@ -90,12 +85,12 @@ def plotter(fdict):
 
     df = pd.DataFrame(rows)
     title = (
-        f"{ctx['_sname']} ({minvalid.year}-{datetime.date.today().year})\n"
+        f"{ctx['_sname']} ({minvalid.year}-{date.today().year})\n"
         "Bias of 24 Hour 'Day' Split for Precipitation"
     )
     (fig, ax) = figure_axes(apctx=ctx, title=title)
     acount = np.average(cnts)
-    years = today.year - minvalid.year
+    years = utcnow.year - minvalid.year + 1
     arc = (np.array(cnts) - acount) / float(years)
     maxv = max([0 - np.min(arc), np.max(arc)])
     line = ax.plot(range(24), arc, color="b", label="Days Bias")
