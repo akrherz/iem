@@ -13,7 +13,7 @@ Example Usage
 
 Get 1-2 January 2024 data for Ames, IA:
 
-https:://mesonet.agron.iastate.edu/iemre/multiday.py?date1=2024-01-01&\
+https://mesonet.agron.iastate.edu/iemre/multiday.py?date1=2024-01-01&\
 date2=2024-01-02&lat=42.0308&lon=-93.6319
 
 """

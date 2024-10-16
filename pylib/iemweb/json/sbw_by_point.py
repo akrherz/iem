@@ -21,24 +21,24 @@ Examples
 Return all storm based warnings that were active at a given time for a given
 latitude and longitude point.
 
-https::/mesonet.agron.iastate.edu/json/sbw_by_point.py?lat=41.99&lon=-92.0\
+https://mesonet.agron.iastate.edu/json/sbw_by_point.py?lat=41.99&lon=-92.0\
 &valid=2024-07-23T12:00:00Z
 
 Return all storm based warnings for a given latitude and longitude point valid
 during 2023 in Excel format.
 
-https::/mesonet.agron.iastate.edu/json/sbw_by_point.py?lat=41.99&lon=-92.0\
+https://mesonet.agron.iastate.edu/json/sbw_by_point.py?lat=41.99&lon=-92.0\
 &sdate=2023-01-01&edate=2024-01-01&fmt=xlsx
 
 Same request, but in CSV format.
 
-https::/mesonet.agron.iastate.edu/json/sbw_by_point.py?lat=41.99&lon=-92.0\
+https://mesonet.agron.iastate.edu/json/sbw_by_point.py?lat=41.99&lon=-92.0\
 &sdate=2023-01-01&edate=2024-01-01&fmt=csv
 
 Provide all storm based warnings for a point in Iowa and buffer this point by
 0.5 degrees.
 
-https::/mesonet.agron.iastate.edu/json/sbw_by_point.py?lat=41.99&lon=-92.0\
+https://mesonet.agron.iastate.edu/json/sbw_by_point.py?lat=41.99&lon=-92.0\
 &buffer=0.5
 
 """
