@@ -208,7 +208,7 @@ function buildUI(){
     $(".iemtool").click(function(){ // this
         const btn = $(this);
         let url = BACKEND_SBW_BYPOINT;
-        var params = {
+        let params = {
             fmt: (btn.data("opt") == "csv") ? "csv" : "xlsx",
             lat: $("#lat").val(),
             lon: $("#lon").val(),
@@ -413,8 +413,8 @@ function buildUI(){
 
 function process_hash(hash){
     const tokens2 = hash.split("/");
-    if (tokens2.length == 2){
-        if (tokens2[0] == 'byugc'){
+    if (tokens2.length === 2){
+        if (tokens2[0] === 'byugc'){
             const aTag = $("a[name='byugc']");
             $('html,body').animate({scrollTop: aTag.offset().top},'slow');
             hashlinkUGC = tokens2[1];
@@ -429,11 +429,11 @@ function process_hash(hash){
             });
         }
     }
-    if (tokens2.length == 3 || tokens2.length == 4){
-        if (tokens2[0] == 'bypoint'){
+    if (tokens2.length === 3 || tokens2.length === 4){
+        if (tokens2[0] === 'bypoint'){
             default_lat = parseFloat(text(tokens2[2]));
             default_lon = parseFloat(text(tokens2[1]));
-            if (tokens2.length == 4){
+            if (tokens2.length === 4){
                 try {
                     const buffer = parseFloat(tokens2[3]);
                     $('select[name="buffer"]').val(buffer);
@@ -443,10 +443,10 @@ function process_hash(hash){
             }
             updateMarkerPosition(default_lon, default_lat);
         }
-        if (tokens2[0] == 'eventsbypoint'){
+        if (tokens2[0] === 'eventsbypoint'){
             default_lat = parseFloat(text(tokens2[2]));
             default_lon = parseFloat(text(tokens2[1]));
-            if (tokens2.length == 4){
+            if (tokens2.length === 4){
                 try {
                     const buffer = parseFloat(tokens2[3]);
                     $('select[name="buffer2"]').val(buffer);
@@ -457,7 +457,7 @@ function process_hash(hash){
             updateMarkerPosition2(default_lon, default_lat);
         }
     }
-    if (tokens2.length == 6){
+    if (tokens2.length === 6){
         // list
         const aTag = $("a[name='list']");
         $('html,body').animate({scrollTop: aTag.offset().top},'slow');
