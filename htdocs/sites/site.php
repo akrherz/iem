@@ -70,6 +70,11 @@ EOF;
     if (($delta < 0.5) || (strpos($email, '@') > 0)) {
        mail("akrherz@iastate.edu", "Please move {$station} {$network}", $msg);
     }
+    // We are doing a GET request, so we don't want folks to bookmark this
+    header("Location: site.php?station={$station}&network={$network}&moved=1");
+    exit();
+}
+if (isset($_GET["moved"])) {
     $alertmsg = <<<EOM
 <div class="alert alert-danger">Thanks! Your suggested move was submitted for
 evaluation.</div>

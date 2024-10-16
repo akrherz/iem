@@ -7,7 +7,7 @@ require_once "../../include/myview.php";
 require_once "../../include/iemprop.php";
 $t = new MyView();
 $DT = "2.0.2";
-$OL = "9.2.4";
+$OL = "10.1.0";
 
 $t->jsextra = <<<EOF
 <script type="text/javascript" src="/js/mapping.js"></script>
@@ -17,7 +17,7 @@ $t->jsextra = <<<EOF
 <script type="text/javascript" src="wfos.js"></script>
 <script src='/vendor/openlayers/{$OL}/ol.js'></script>
 <script type="text/javascript" src="/js/olselect-lonlat.js"></script>
-<script type="text/javascript" src="search.js"></script>
+<script type="text/javascript" src="search.js?v=2"></script>
 EOF;
 $t->headextra = <<<EOF
 <link rel="stylesheet" href="/vendor/jquery-datatables/{$DT}/datatables.min.css" />
@@ -54,7 +54,13 @@ grid will update and provide a listing of storm based warnings found.
     <div class="col-md-4">
         <p><strong>Either enter coordinates manually:</strong><br />
         <i>Latitude (deg N):</i> <input size="8" id="lat" value="41.53"><br />
-        <i>Longitude (deg E):</i> <input size="8" id="lon" value="-93.653">
+        <i>Longitude (deg E):</i> <input size="8" id="lon" value="-93.653"></p>
+        <p><strong>Approximate Location Buffer Radius:</strong><br />
+        <select name="buffer">
+            <option value="0">0 (Exact point)</option>
+            <option value="0.01">~1 mile (0.01 deg)</option>
+            <option value="0.1">~10 miles (0.10 deg)</option>
+        </select></p>
         <br /><label for="sdate1">Start Date:
             <input name="sdate1" type="text" id="sdate1"></label>
             <br /><label for="edate1">End Date:
@@ -124,7 +130,13 @@ an office that did not exist at the time.
         <p><strong>You can otherwise search by lat/lon point. The start and
         end date set above are used with this option as well:</strong><br />
         <i>Latitude (deg N):</i> <input size="8" id="lat2" value="41.53"><br />
-        <i>Longitude (deg E):</i> <input size="8" id="lon2" value="-93.653">
+        <i>Longitude (deg E):</i> <input size="8" id="lon2" value="-93.653"></p>
+        <p><strong>Approximate Location Buffer Radius:</strong><br />
+        <select name="buffer2">
+            <option value="0">0 (Exact point)</option>
+            <option value="0.01">~1 mile (0.01 deg)</option>
+            <option value="0.1">~10 miles (0.10 deg)</option>
+        </select></p>
         <button type="button" class="btn btn-default" id="manualpt2">Update</button>
         </p>
         <p><strong>Or drag marker to select coordinate:</strong><br />

@@ -1,6 +1,6 @@
 """.. title:: VTEC Events by Point
 
-Return to `JSON Services </json/>`_
+Return to `API Services </api/#json>`_
 
 Documentation for /json/vtec_events_bypoint.py
 ----------------------------------------------
@@ -11,6 +11,9 @@ point.
 Changelog
 ---------
 
+- 2024-10-16: Added support for a ``buffer`` parameter.  The units are in
+  decimal degrees with a range limited between 0 and 1.  This buffer is used
+  to expand the search area around the provided point.
 - 2024-08-08: Initial documentation and use pydantic
 
 Example Usage
@@ -30,6 +33,11 @@ Same request, but in csv
 
 https://mesonet.agron.iastate.edu/json/vtec_events_bypoint.py?\
 lat=41.99&lon=-93.61&fmt=csv
+
+Provide VTEC events for a point in Iowa and buffer this point by 0.5 degrees
+
+https://mesonet.agron.iastate.edu/json/vtec_events_bypoint.py?\
+lat=41.99&lon=-93.61&buffer=0.5
 
 """
 
@@ -56,6 +64,12 @@ class Schema(CGIModel):
         description="The format to return the data in, either json or csv",
         pattern="^(json|csv|xlsx)$",
     )
+    buffer: float = Field(
+        0,
+        description="Buffer in decimal degrees around the provided point",
+        ge=0,
+        le=1,
+    )
     sdate: datetime.date = Field(
         datetime.date(1986, 1, 1), description="Start Date"
     )
@@ -74,19 +88,28 @@ def make_url(row):
     )
 
 
-def get_df(lon, lat, sdate, edate):
+def get_df(lon, lat, sdate, edate, buffer: float):
     """Generate a report of VTEC ETNs used for a WFO and year
 
     Args:
       wfo (str): 3 character WFO identifier
       year (int): year to run for
     """
+    params = {
+        "lon": lon,
+        "lat": lat,
+        "sdate": sdate,
+        "edate": edate,
+        "buffer": buffer,
+    }
+    ptsql = "ST_Point(:lon, :lat, 4326)"
+    if buffer > 0:
+        ptsql = "ST_Buffer(ST_Point(:lon, :lat, 4326), :buffer)"
     with get_sqlalchemy_conn("postgis") as conn:
         df = pd.read_sql(
-            text("""
+            text(f"""
         WITH myugcs as (
-            select gid from ugcs where
-            ST_Contains(geom, ST_Point(:lon, :lat, 4326))
+            select gid from ugcs where ST_Intersects(geom, {ptsql})
         )
         SELECT vtec_year,
         to_char(issue at time zone 'UTC', 'YYYY-MM-DDThh24:MI:SSZ')
@@ -100,7 +123,7 @@ def get_df(lon, lat, sdate, edate):
         issue > :sdate and issue < :edate ORDER by issue ASC
         """),
             conn,
-            params={"lon": lon, "lat": lat, "sdate": sdate, "edate": edate},
+            params=params,
         )
     if df.empty:
         return df
@@ -153,7 +176,8 @@ def get_mckey(environ: dict) -> str:
     return (
         f"/json/vtec_events_bypoint.py?lat={environ['lat']:.2f}&"
         f"lon={environ['lon']:.2f}&sdate={environ['sdate']:%Y-%m-%d}&"
-        f"edate={environ['edate']:%Y-%m-%d}&fmt={environ['fmt']}"
+        f"edate={environ['edate']:%Y-%m-%d}&fmt={environ['fmt']}&"
+        f"buffer={environ['buffer']:.2f}"
     )
 
 
@@ -166,7 +190,7 @@ def application(environ, start_response):
     edate = environ["edate"]
     fmt = environ["fmt"]
 
-    df = get_df(lon, lat, sdate, edate)
+    df = get_df(lon, lat, sdate, edate, environ["buffer"])
     if fmt == "xlsx":
         fn = (
             f"vtec_{(0 - lon):.4f}W_{lat:.4f}N_{sdate:%Y%m%d}_"
