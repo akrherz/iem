@@ -1,13 +1,9 @@
-"""Process a network's worth of ISD data, please
+"""Process a network's worth of ISD data, please."""
 
-python run_network_isd_ingest.py <network> <lastyr_exclusive>
-ftp://ftp.ncdc.noaa.gov/pub/data/noaa
-"""
-
-import datetime
 import subprocess
-import sys
+from datetime import datetime
 
+import click
 from pyiem.network import Table as NetworkTable
 from pyiem.util import logger
 
@@ -28,17 +24,18 @@ def build_xref():
                 continue
             if faa[0] == "K":
                 faa = faa[1:]
-            sts = datetime.datetime.strptime(line[82:90], "%Y%m%d")
-            ets = datetime.datetime.strptime(line[91:99], "%Y%m%d")
+            sts = datetime.strptime(line[82:90], "%Y%m%d")
+            ets = datetime.strptime(line[91:99], "%Y%m%d")
             ar = xref.setdefault(faa, [])
             ar.append([airforce, wban, sts, ets])
     return xref
 
 
-def main(argv):
+@click.command()
+@click.option("--network", help="Network Identifier", required=True)
+@click.option("--till_year", help="Year to stop at", required=True, type=int)
+def main(network: str, till_year: int):
     """Go Main Go"""
-    network = argv[1]
-    till_year = int(argv[2])
     xref = build_xref()
     nt = NetworkTable(network, only_online=False)
     for station in nt.sts:
@@ -76,4 +73,4 @@ def main(argv):
 
 
 if __name__ == "__main__":
-    main(sys.argv)
+    main()

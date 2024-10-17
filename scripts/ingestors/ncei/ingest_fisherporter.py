@@ -4,8 +4,7 @@ Run from RUN_2AM.sh for 3, 6, and 12 months in the past
 on the 15th each month
 """
 
-import datetime
-import sys
+from datetime import datetime
 
 import pandas as pd
 from pyiem.network import Table as NetworkTable
@@ -30,12 +29,10 @@ def ingest(df, sid, cursor):
         LOG.info("Removed %s rows from database", cursor.rowcount)
     LOG.info("Found %s rows to ingest", len(df.index))
     taxis = pd.date_range("2000/01/01 00:00", "2000/01/01 23:45", freq="15min")
-    for date, row in df.iterrows():
+    for dt, row in df.iterrows():
         # CST
         for ts in taxis:
-            valid = datetime.datetime(
-                date.year, date.month, date.day, ts.hour, ts.minute
-            )
+            valid = datetime(dt.year, dt.month, dt.day, ts.hour, ts.minute)
             val = row[f"{ts:%H%M}Val"]
             if val < 0:  # Missing
                 continue
@@ -62,7 +59,7 @@ def ingest(df, sid, cursor):
     pgconn.commit()
 
 
-def main(_argv):
+def main():
     """Go Main Go"""
     nt = NetworkTable("IA_HPD")
     pgconn = get_dbconn("other")
@@ -93,4 +90,4 @@ def main(_argv):
 
 
 if __name__ == "__main__":
-    main(sys.argv)
+    main()

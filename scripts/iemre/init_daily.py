@@ -15,7 +15,7 @@ from pyiem.util import logger, ncopen
 LOG = logger()
 
 
-def init_year(ts, domain):
+def init_year(ts, domain, ci: bool):
     """
     Create a new NetCDF file for a year of our specification!
     """
@@ -41,7 +41,7 @@ def init_year(ts, domain):
     # Setup Dimensions
     nc.createDimension("lat", iemre.DOMAINS[domain]["ny"])
     nc.createDimension("lon", iemre.DOMAINS[domain]["nx"])
-    days = ((ts.replace(year=ts.year + 1)) - ts).days
+    days = 2 if ci else ((ts.replace(year=ts.year + 1)) - ts).days
     nc.createDimension("time", int(days))
 
     # Setup Coordinate Variables
@@ -268,10 +268,15 @@ def compute_hasdata(year, domain):
 @click.command()
 @click.option("--year", type=int, required=True, help="Year to initialize")
 @click.option("--domain", default="", help="IEMRE Domain to run for")
-def main(year, domain):
+@click.option("--ci", is_flag=True, help="Run in CI mode")
+def main(year: int, domain: str, ci: bool):
     """Go Main Go"""
-    init_year(datetime.datetime(year, 1, 1), domain)
+    init_year(datetime.datetime(year, 1, 1), domain, ci)
     compute_hasdata(year, domain)
+    if ci:
+        with ncopen(iemre.get_daily_ncname(year, domain), "a") as nc:
+            nc.variables["p01d"][:] = 0
+            nc.variables["p01d_12z"][:] = 0
 
 
 if __name__ == "__main__":

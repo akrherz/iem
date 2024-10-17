@@ -7,8 +7,8 @@ between 6 UTC to 6 UTC, which is Central Standard Time all year round.</p>
 variant of this plot.
 """
 
-import datetime
 import os
+from datetime import datetime, timedelta
 
 import numpy as np
 from metpy.units import masked_array, units
@@ -46,7 +46,7 @@ PDICT2 = {"c": "Contour Plot", "g": "Grid Cell Mesh"}
 def get_description():
     """Return a dict describing how to call this plotter"""
     desc = {"description": __doc__}
-    today = datetime.datetime.today() - datetime.timedelta(days=1)
+    today = datetime.today() - timedelta(days=1)
     desc["arguments"] = [
         ARG_IEMRE_DOMAIN,
         dict(
@@ -165,8 +165,8 @@ def plotter(fdict):
         lons = nc.variables["lon"][islice]
         cmap = get_cmap(ctx["cmap"])
         data = unit_convert(nc, varname, idx0, jslice, islice)
-        if np.ma.is_masked(np.max(data)):
-            raise NoDataFound("Data Unavailable")
+        if np.ma.is_masked(data) and data.mask.all():
+            raise NoDataFound("All data is missing.")
         ptiles = np.nanpercentile(data.filled(np.nan), [5, 95, 99.9])
         if varname in ["rsds", "power_swdn"]:
             plot_units = "MJ d-1"

@@ -69,6 +69,9 @@
 /plotting/auto/plot/84/sector:IA::network:WFO::src:ifc::opt:acc::usdm:no::ptype:g::sdate:2024-08-13::edate:2024-08-13::cmap:YlGnBu::_r:t::dpi:100.png
 /plotting/auto/plot/86/csector:AK::var:wind_speed::ptype:c::date:2024-01-01::cmap:magma::_r:t::dpi:100.png
 /plotting/auto/plot/86/csector:IN::var:wind_speed::ptype:c::date:2024-01-01::cmap:magma::_r:t::dpi:100.png
+/plotting/auto/plot/86/domain:europe::csector:IN::var:rsds::ptype:c::date:2024-01-01::cmap:magma::_r:t::dpi:100.png
+/plotting/auto/plot/86/csector:midwest::var:p01d_12z::ptype:c::date:2024-01-01::cmap:magma::_r:43::dpi:100.png
+/plotting/auto/plot/86/csector:midwest::var:p01d_12z::ptype:g::date:2024-01-01::cmap:magma::_r:43::dpi:100.png
 /plotting/auto/plot/90/t:state::v:events::ilabel:yes::geo:ugc::drawc:yes::year:2024::year2:2024::sdate:1999-01-01%200000::edate:2024-08-12%200000::network:WFO::station:DMX::state:IA::phenomena:TO::significance:W::cmap:jet::_r:t::dpi:100.png
 /plotting/auto/plot/90/t:state::v:events::ilabel:yes::geo:polygon::drawc:yes::year:2024::year2:2024::sdate:1999-01-01%200000::edate:2024-08-12%200000::network:WFO::station:DMX::state:IA::phenomena:TO::significance:W::cmap:jet::_r:t::dpi:100.png
 /plotting/auto/plot/90/t:state::v:lastyear::ilabel:yes::geo:polygon::drawc:yes::year:2024::year2:2024::sdate:2006-01-01%200000::edate:2024-07-29%200000::network:WFO::station:DMX::state:IA::phenomena:TO::significance:W::cmap:jet::_r:t::dpi:100::_cb:1.png
