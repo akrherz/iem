@@ -161,6 +161,8 @@ def plotter(fdict):
     if not os.path.isfile(ncfn):
         raise NoDataFound("No Data Found.")
     with ncopen(ncfn) as nc:
+        if idx0 >= nc.dimensions["time"].size:
+            raise NoDataFound("Requested time index not found in file.")
         lats = nc.variables["lat"][jslice]
         lons = nc.variables["lon"][islice]
         cmap = get_cmap(ctx["cmap"])
