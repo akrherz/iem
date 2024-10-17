@@ -21,14 +21,14 @@ from pyiem.util import convert_value, logger, mm2inch, ncopen
 
 LOG = logger()
 MYDIR = "/mesonet/data/madis/mesonet1"
-MY_PROVIDERS = ["KYTC-RWIS", "NEDOR", "MesoWest"]
+MY_PROVIDERS = ["KYTC-RWIS", "NEDOR", "MesoWest", "ITD"]
 warnings.filterwarnings("ignore", category=DeprecationWarning)
 
 
 def find_file(offset0):
     """Find the most recent file"""
     fn = None
-    for i in range(offset0, 4):
+    for i in range(offset0, offset0 + 4):
         ts = datetime.datetime.utcnow() - datetime.timedelta(hours=i)
         for j in range(300, -1, -1):
             testfn = ts.strftime(f"{MYDIR}/%Y%m%d_%H00_{j}.nc")
@@ -62,12 +62,25 @@ def provider2network(provider, name):
         if not tokens:
             return None
         network = tokens[-1]
+        if network == "NEDOR":
+            return "NE_RWIS"
         if network == "VTWAC":
             return network
-        if network.endswith("DOT") and len(network) == 5:
-            return f"{network[:2]}_RWIS"
+        # Le Sigh
+        if network == "CDOT":
+            return "CO_RWIS"
+        if network == "ODOT":
+            return "OR_RWIS"
+        if network.endswith("DOT"):
+            if len(network) == 5:
+                return f"{network[:2]}_RWIS"
+            if tokens[-2] in ["UTAH", "WA", "NV", "MT"]:
+                return f"{tokens[-2][:2]}_RWIS"
+            LOG.warning("How to convert %s into a network?", repr(tokens))
+            return None
         return None
-
+    if provider == "ITD":
+        return "ID_RWIS"
     if len(provider) == 5 or provider in ["KYTC-RWIS", "NEDOR"]:
         if provider[:2] == "IA":
             return None

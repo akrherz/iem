@@ -10,7 +10,7 @@ cd gfs
 python gfs2iemre.py --valid=$(date -u --date '7 hours ago' +'%Y-%m-%dT%H'):00:00 &
 
 cd ../ingestors/madis
-python extract_hfmetar.py 2 &
+python extract_hfmetar.py --hours=2 &
 
 # Run HRRR radiation ingest at 10 PM, so that we have this available
 # for ISUSM et al
