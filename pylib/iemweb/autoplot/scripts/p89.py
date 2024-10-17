@@ -62,8 +62,6 @@ def do_date(ctx, now: datetime, precip, daythres, trailthres):
     """Do the local date and return a dict"""
     idx = iemre.daily_offset(now)
     ctx["days"].append(now)
-    if idx >= precip.shape[0]:
-        return None
     sevenday = np.sum(precip[(idx - ctx["period"]) : idx, :, :], 0)
     ptrail = np.where(ctx["iowa"] > 0, sevenday, -1)
     pday = np.where(ctx["iowa"] > 0, precip[idx, :, :], -1)
