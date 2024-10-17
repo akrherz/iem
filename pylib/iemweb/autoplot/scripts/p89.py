@@ -8,8 +8,8 @@ over X number of days.  This provides some insight into if the
 precipitation fell over locations that needed it.
 """
 
-import datetime
 import os
+from datetime import date, datetime, timedelta
 
 import geopandas as gpd
 import matplotlib.dates as mdates
@@ -27,7 +27,7 @@ from pyiem.util import get_autoplot_context, ncopen
 def get_description():
     """Return a dict describing how to call this plotter"""
     desc = {"description": __doc__, "data": True}
-    today = datetime.date.today()
+    today = date.today()
     desc["arguments"] = [
         dict(
             type="year",
@@ -58,9 +58,12 @@ def get_description():
     return desc
 
 
-def do_date(ctx, now, precip, daythres, trailthres):
+def do_date(ctx, now: datetime, precip, daythres, trailthres):
     """Do the local date and return a dict"""
     idx = iemre.daily_offset(now)
+    ctx["days"].append(now)
+    if idx >= precip.shape[0]:
+        return None
     sevenday = np.sum(precip[(idx - ctx["period"]) : idx, :, :], 0)
     ptrail = np.where(ctx["iowa"] > 0, sevenday, -1)
     pday = np.where(ctx["iowa"] > 0, precip[idx, :, :], -1)
@@ -71,7 +74,6 @@ def do_date(ctx, now, precip, daythres, trailthres):
     htot = np.sum(
         np.where(np.logical_and(ptrail < trailthres, pday >= daythres), 1, 0)
     )
-    ctx["days"].append(now)
     return dict(
         day=now.strftime("%Y-%m-%d"),
         coverage=(tots / ctx["iowapts"] * 100.0),
@@ -115,12 +117,12 @@ def get_data(ctx):
         ctx["iowa"] = np.flipud(hasdata)
         ctx["iowapts"] = float(np.sum(np.where(hasdata > 0, 1, 0)))
 
-        now = datetime.datetime(ctx["year"], 1, 1)
-        now += datetime.timedelta(days=ctx["period"] - 1)
-        ets = datetime.datetime(ctx["year"], 12, 31)
-        today = datetime.datetime.now()
+        now = datetime(ctx["year"], 1, 1)
+        now += timedelta(days=ctx["period"] - 1)
+        ets = datetime(ctx["year"], 12, 31)
+        today = datetime.now()
         if ets > today:
-            ets = today - datetime.timedelta(days=1)
+            ets = today - timedelta(days=1)
         ctx["days"] = []
         rows = []
         trailthres = (
@@ -128,8 +130,11 @@ def get_data(ctx):
         )
         daythres = (ctx["daythres"] * units("inch")).to(units("mm")).magnitude
         while now < ets:
-            rows.append(do_date(ctx, now, precip, daythres, trailthres))
-            now += datetime.timedelta(days=1)
+            row = do_date(ctx, now, precip, daythres, trailthres)
+            if row:
+                rows.append(row)
+            now += timedelta(days=1)
+
     return pd.DataFrame(rows)
 
 
