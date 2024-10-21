@@ -1,7 +1,6 @@
 """Compare what we have for stations and what NCEI has for GHCN"""
 
-import sys
-
+import click
 import pandas as pd
 from pyiem.network import Table as NetworkTable
 
@@ -21,10 +20,12 @@ def read_table(state):
     return pd.DataFrame(rows)
 
 
-def main(argv):
+@click.command()
+@click.argument("--state")
+def main(state):
     """Can we do it?"""
-    nt = NetworkTable(f"{argv[1]}CLIMATE")
-    ncei = read_table(argv[1])
+    nt = NetworkTable(f"{state}CLIMATE")
+    ncei = read_table(state)
     for sid in nt.sts:
         if sid[2] == "C" or sid[-4:] == "0000":
             continue
@@ -38,4 +39,4 @@ def main(argv):
 
 
 if __name__ == "__main__":
-    main(sys.argv)
+    main()
