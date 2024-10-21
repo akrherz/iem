@@ -5,11 +5,12 @@ Some of the variables don't get properly updated in the summary table.
 cronjob from RUN_2AM.sh
 """
 
-import sys
 from datetime import timedelta
 
+import click
 import pandas as pd
-from pyiem.util import get_dbconn, get_sqlalchemy_conn, logger, utc
+from pyiem.database import get_dbconn, get_sqlalchemy_conn
+from pyiem.util import logger, utc
 
 LOG = logger()
 
@@ -47,12 +48,13 @@ def process(pgconn, obs):
         pgconn.commit()
 
 
-def main(argv):
+@click.command()
+@click.option("--full", is_flag=True, default=False)
+def main(full: bool):
     """Go Main Go"""
-    fullreprocess = len(argv) > 1 and argv[1] == "full"
 
-    basets = utc(2000, 1, 1) if fullreprocess else (utc() - timedelta(days=8))
-    LOG.info("Running full reprocess: %s basets: %s", fullreprocess, basets)
+    basets = utc(2000, 1, 1) if full else (utc() - timedelta(days=8))
+    LOG.info("Running full reprocess: %s basets: %s", full, basets)
     with get_sqlalchemy_conn("isuag") as conn:
         obs = pd.read_sql(
             "select iemid, station, valid, rh_avg_qc from "
@@ -69,4 +71,4 @@ def main(argv):
 
 
 if __name__ == "__main__":
-    main(sys.argv)
+    main()

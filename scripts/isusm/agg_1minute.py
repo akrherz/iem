@@ -4,9 +4,10 @@ Need to do some custom 1 minute data aggregation to fill out hourly table.
 RUN_20_AFTER.sh
 """
 
-import datetime
-import sys
+from datetime import date, datetime, timedelta
+from typing import Optional
 
+import click
 import numpy as np
 import pandas as pd
 from pyiem.database import get_dbconn, get_sqlalchemy_conn
@@ -20,9 +21,7 @@ TIME_FORMAT = "%Y-%m-%d %H:%M-06"
 def hourly_process(cursor, station, hour, mdf, hdf):
     """Merge this row information into the database."""
     # The totals for this hour are stored for the next hour
-    row = pd.Series(
-        {"station": station, "valid": hour + datetime.timedelta(hours=1)}
-    )
+    row = pd.Series({"station": station, "valid": hour + timedelta(hours=1)})
     if row["valid"] not in hdf.index or mdf.empty:
         return
     lastob = mdf.iloc[-1]
@@ -64,12 +63,12 @@ def hourly_process(cursor, station, hour, mdf, hdf):
     )
 
 
-def daily_process(cursor, station, date, df, ddf):
+def daily_process(cursor, station, dt, df, ddf):
     """Process this date's dataframe."""
     mindf = df.min(numeric_only=True)
     maxdf = df.max(numeric_only=True)
     avgdf = df.mean(numeric_only=True)
-    row = pd.Series({"station": station, "date": date})
+    row = pd.Series({"station": station, "date": dt})
     row["obs_count"] = df["tair_c_avg_qc"].size
     row["tair_c_max"] = maxdf["tair_c_avg_qc"]
     row["tair_c_min"] = mindf["tair_c_avg_qc"]
@@ -85,9 +84,9 @@ def daily_process(cursor, station, date, df, ddf):
     for depth in [2, 4, 8, 12, 14, 16, 20, 24, 28, 30, 32, 36, 40, 42, 52]:
         for col in ["t", "vwc", "ec"]:
             row[f"sv_{col}{depth}"] = float(avgdf[f"sv_{col}{depth}_qc"])
-    current = ddf.loc[(station, date)]
+    current = ddf.loc[(station, dt)]
     if current["obs_count"] == row["obs_count"]:
-        LOG.info("%s %s obs_count %s matches", date, station, row["obs_count"])
+        LOG.info("%s %s obs_count %s matches", dt, station, row["obs_count"])
         return
     # Ensure database gets nulls and not nan
     row = row.replace({np.nan: None})
@@ -101,7 +100,7 @@ def daily_process(cursor, station, date, df, ddf):
             continue
         tokens.append(f"{colname} = coalesce({colname}, %({colname})s)")
         tokens.append(f"{colname}_qc = coalesce({colname}_qc, %({colname})s)")
-    LOG.info("updating sm_daily %s %s", station, date)
+    LOG.info("updating sm_daily %s %s", station, dt)
     cursor.execute(
         f"UPDATE sm_daily SET {','.join(tokens)} "
         "WHERE station = %(station)s and valid = %(date)s",
@@ -114,23 +113,27 @@ def do_date_ops(df):
     df["utc_valid"] = df["utc_valid"].dt.tz_localize("UTC")
     df = df.drop(columns="valid")
     # Compute a LST date via UTC-6
-    df["date"] = (df["utc_valid"] - datetime.timedelta(hours=6)).dt.date
+    df["date"] = (df["utc_valid"] - timedelta(hours=6)).dt.date
     return df
 
 
-def main(argv):
+@click.command()
+@click.option(
+    "--date", "dt", type=click.DateTime(), default=None, help="Date to process"
+)
+def main(dt: Optional[datetime]):
     """Do things."""
     pgconn = get_dbconn("isuag")
     # We need to collect up data for periods representing CST dates, this
     # is tricky business
     # TODO memory troubles with more than 7 days of data :/
-    if len(argv) == 4:
-        sts = datetime.date(*[int(i) for i in argv[1:]])
+    if dt is not None:
+        sts = dt.date()
     else:
-        sts = datetime.date.today() - datetime.timedelta(days=7)
+        sts = date.today() - timedelta(days=7)
     # 6z is the start of such a date
     sts = utc(sts.year, sts.month, sts.day, 6)
-    ets = sts + datetime.timedelta(days=8)
+    ets = sts + timedelta(days=8)
     with get_sqlalchemy_conn("isuag") as conn:
         # Get the minute data
         mdf = (
@@ -169,11 +172,11 @@ def main(argv):
 
     # Daily work
     cursor = pgconn.cursor()
-    for (station, date), gdf in mdf.groupby(["station", "date"]):
-        if (station, date) not in ddf.index:
-            LOG.info("%s %s not in daily, skipping", station, date)
+    for (station, _dt), gdf in mdf.groupby(["station", "date"]):
+        if (station, _dt) not in ddf.index:
+            LOG.info("%s %s not in daily, skipping", station, _dt)
             continue
-        daily_process(cursor, station, date, gdf, ddf)
+        daily_process(cursor, station, _dt, gdf, ddf)
     cursor.close()
     pgconn.commit()
 
@@ -205,4 +208,4 @@ def main(argv):
 
 
 if __name__ == "__main__":
-    main(sys.argv)
+    main()

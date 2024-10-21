@@ -3,10 +3,12 @@
 This will allow for downstream usage by PSIMS/Drydown. Run from RUN_NOON.sh
 """
 
-import datetime
 import os
 import sys
+from datetime import date, datetime, timedelta
+from typing import Optional
 
+import click
 import numpy as np
 import pygrib
 from pyiem import iemre
@@ -44,9 +46,9 @@ def merge(nc, valid, gribname, vname):
     for grib in tqdm(
         grbs, total=grbs.messages, desc=vname, disable=not sys.stdout.isatty()
     ):
-        ftime = valid + datetime.timedelta(hours=grib.forecastTime)
+        ftime = valid + timedelta(hours=grib.forecastTime)
         # move us safely back to get into the proper date
-        cst = ftime - datetime.timedelta(hours=7)
+        cst = ftime - timedelta(hours=7)
         if cst.year != valid.year:
             continue
         if lats is None:
@@ -81,9 +83,7 @@ def create_netcdf(valid):
     nc.realization = 1
     nc.Conventions = "CF-1.0"
     nc.contact = "Daryl Herzmann, akrherz@iastate.edu, 515-294-5978"
-    nc.history = ("%s Generated") % (
-        datetime.datetime.now().strftime("%d %B %Y"),
-    )
+    nc.history = f"{utc():%d %B %Y} Generated"
     nc.comment = "No comment at this time"
 
     # Setup Dimensions
@@ -169,13 +169,15 @@ def finalize(nc):
     os.rename(filename, newfilename)
 
 
-def main(argv):
+@click.command()
+@click.option("--date", "dt", type=click.DateTime(), help="Specific date")
+def main(dt: Optional[datetime]):
     """Go Main Go"""
-    if len(argv) == 4:
-        today = datetime.date(int(argv[1]), int(argv[2]), int(argv[3]))
+    if dt is not None:
+        today = dt.date()
     else:
         # Run for 12z two days ago
-        today = datetime.date.today() - datetime.timedelta(days=4)
+        today = date.today() - timedelta(days=4)
     LOG.info("running for today=%s", today)
     for hour in [0, 6, 12, 18]:
         valid = utc(today.year, today.month, today.day, hour)
@@ -192,4 +194,4 @@ def main(argv):
 
 
 if __name__ == "__main__":
-    main(sys.argv)
+    main()

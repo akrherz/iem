@@ -2,14 +2,15 @@
 
 Run from RUN_10_AFTER.sh at 3 PM each day."""
 
-import sys
 from datetime import datetime, timedelta
 from zoneinfo import ZoneInfo
 
+import click
 import numpy as np
 import pandas as pd
 import requests
-from pyiem.util import get_dbconnc, get_properties, logger
+from pyiem.database import get_dbconnc
+from pyiem.util import get_properties, logger
 
 LOG = logger()
 PROPS = get_properties()
@@ -161,10 +162,12 @@ def process(df):
     LOG.warning("Del %s, Inserted %s, Dups %s rows", deleted, inserted, dups)
 
 
-def main(argv):
+@click.command()
+@click.option("--all", "rerun_all", is_flag=True, help="Re-run all data")
+def main(rerun_all: bool):
     """Go Main Go"""
     # Figure out a load_time
-    if len(argv) == 2:
+    if rerun_all:
         LOG.info("Re-running all!")
         sts = None
         # Oh my cats
@@ -183,4 +186,4 @@ def main(argv):
 
 
 if __name__ == "__main__":
-    main(sys.argv)
+    main()

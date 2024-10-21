@@ -1,9 +1,10 @@
 """Some of our solar radiation data is not good!"""
 
-import datetime
 import json
-import sys
+from datetime import datetime
+from typing import Optional
 
+import click
 import requests
 from pyiem.database import get_dbconn
 from pyiem.network import Table as NetworkTable
@@ -12,7 +13,7 @@ from pyiem.util import logger
 LOG = logger()
 
 
-def check_date(date):
+def check_date(dt):
     """Look this date over and compare with IEMRE."""
     pgconn = get_dbconn("isuag")
     cursor = pgconn.cursor()
@@ -22,7 +23,7 @@ def check_date(date):
     cursor.execute(
         "SELECT station, slrkj_tot_qc from sm_daily where "
         "valid = %s ORDER by station ASC",
-        (date,),
+        (dt,),
     )
     for row in cursor:
         station = row[0]
@@ -32,14 +33,14 @@ def check_date(date):
         ob = row[1]
         # Go fetch me the IEMRE value!
         uri = (
-            f"http://iem.local/iemre/daily/{date:%Y-%m-%d}/"
+            f"http://iem.local/iemre/daily/{dt:%Y-%m-%d}/"
             f"{nt.sts[station]['lat']:.2f}/"
             f"{nt.sts[station]['lon']:.2f}/json"
         )
         res = requests.get(uri, timeout=60)
         j = json.loads(res.content)
         if j["data"][0]["srad_mj"] is None:
-            LOG.info("fix_solar %s %s estimate is missing", station, date)
+            LOG.info("fix_solar %s %s estimate is missing", station, dt)
             continue
         estimate = j["data"][0]["srad_mj"] * 1000.0
         # Never pull data down
@@ -48,11 +49,11 @@ def check_date(date):
         # If ob is greater than 5 or the difference is less than 7 <arb>
         if ob is not None and (ob > 5000 or (estimate - ob) < 7000):
             continue
-        LOG.info("%s %s Ob:%s Est:%.1f", station, date, ob, estimate)
+        LOG.info("%s %s Ob:%s Est:%.1f", station, dt, ob, estimate)
         cursor2.execute(
             "UPDATE sm_daily SET slrkj_tot_qc = %s, slrkj_tot_f = 'E' "
             "WHERE station = %s and valid = %s",
-            (estimate, station, date),
+            (estimate, station, dt),
         )
 
     cursor2.close()
@@ -75,7 +76,7 @@ def fix_nulls():
     )
     for row in cursor:
         station = row[0]
-        v1 = datetime.datetime(row[1].year, row[1].month, row[1].day)
+        v1 = datetime(row[1].year, row[1].month, row[1].day)
         v2 = v1.replace(hour=23, minute=59)
         cursor2.execute(
             """
@@ -137,15 +138,17 @@ def fix_nulls():
     pgconn.commit()
 
 
-def main(argv):
+@click.command()
+@click.option("--date", "dt", type=click.DateTime(), required=False)
+def main(dt: Optional[datetime]):
     """Go Main Go."""
     # if we are given an argument, run for that date
-    if len(argv) == 4:
-        check_date(datetime.date(int(argv[1]), int(argv[2]), int(argv[3])))
+    if dt is not None:
+        check_date(dt.date())
     else:
         # Correct any nulls in the database
         fix_nulls()
 
 
 if __name__ == "__main__":
-    main(sys.argv)
+    main()
