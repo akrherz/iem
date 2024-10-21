@@ -549,8 +549,6 @@ def generate_form(apid, fdict, headers, cookies):
     if fmt is None:
         if meta.get("highcharts", False):
             fmt = "js"
-        elif meta.get("maptable", False):
-            fmt = "maptable"
         else:
             fmt = "png"
     if meta.get("nass") is not None:

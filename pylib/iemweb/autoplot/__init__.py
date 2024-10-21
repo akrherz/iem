@@ -574,7 +574,7 @@ yearly_opts = [
     },
     {
         "id": 134,
-        "label": "Period each year that was warmest/coldest/wettest",
+        "label": "Period each year that was warmest/coldest/wettest/driest",
     },
     {"id": 75, "label": "Precip Totals by Season/Year"},
     {
