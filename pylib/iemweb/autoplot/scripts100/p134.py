@@ -21,7 +21,7 @@ from matplotlib.colorbar import ColorbarBase
 from matplotlib.ticker import MaxNLocator
 from pyiem.database import get_sqlalchemy_conn
 from pyiem.exceptions import NoDataFound
-from pyiem.plot import figure, get_cmap
+from pyiem.plot import figure, get_cmap, pretty_bins
 from pyiem.util import get_autoplot_context
 from sqlalchemy import text
 
@@ -37,6 +37,7 @@ PDICT = {
     "warmest_hifeel": "Warmest Average Daily High Feels Like Temperature",
     "warmest_hidwpf": "Warmest Average High Dew Point Temperature",
     "wettest": "Highest Precipitation",
+    "driest": "Lowest Precipitation",
 }
 # How to get plot variable from dataframe
 XREF = {
@@ -51,6 +52,7 @@ XREF = {
     "warmest_hifeel": "avg_hifeel",
     "warmest_hidwpf": "avg_hidwpf",
     "wettest": "sum_precip",
+    "driest": "sum_precip",
 }
 
 
@@ -84,6 +86,8 @@ def get_data(ctx):
     days = ctx["days"]
     varname = ctx["var"]
     offset = 6 if varname.startswith("coldest") else 0
+    if varname == "driest":
+        offset = 6
     station = ctx["station"]
     if ctx["network"].endswith("CLIMATE"):
         table = "alldata"
@@ -168,6 +172,9 @@ def get_data(ctx):
             row_number()
                 OVER (PARTITION by season ORDER by sum_precip DESC nulls last,
                 day ASC) as wettest_rank,
+            row_number()
+                OVER (PARTITION by season ORDER by sum_precip ASC nulls last,
+                day ASC) as driest_rank,
             count(*) OVER (PARTITION by season)
             from data)
         SELECT season, day,
@@ -181,7 +188,7 @@ def get_data(ctx):
             params={"days": days - 1, "offset": offset, "station": station},
             index_col="season",
         )
-    if varname.startswith("coldest"):
+    if varname.startswith("coldest") or varname == "driest":
         df.loc[df["doy"] < 183, "doy"] += 365.0
     return df
 
@@ -204,20 +211,23 @@ def plotter(fdict):
         subtitle = subtitle.replace("Average ", "")
     subtitle = f"{days} Day Period with {subtitle}"
     fig = figure(title=title, subtitle=subtitle, apctx=ctx)
-    ax = fig.add_axes([0.05, 0.3, 0.45, 0.54])
-    lax = fig.add_axes([0.05, 0.1, 0.45, 0.2])
-    cax = fig.add_axes([0.05, 0.875, 0.4, 0.02])
+    ax = fig.add_axes((0.05, 0.3, 0.45, 0.54))
+    lax = fig.add_axes((0.05, 0.1, 0.45, 0.2))
+    cax = fig.add_axes((0.05, 0.875, 0.4, 0.02))
     cmap = get_cmap(ctx["cmap"])
     minval = df[XREF[varname]].min() - 1.0
-    if varname == "wettest" and minval < 0:
-        minval = 0
     maxval = df[XREF[varname]].max() + 1.0
-    ramp = np.linspace(
-        minval, maxval, min([int(maxval - minval), 10]), dtype="i"
-    )
+    if varname in ["wettest", "driest"]:
+        if minval < 0:
+            minval = 0
+        ramp = pretty_bins(minval, maxval)
+    else:
+        ramp = np.linspace(
+            minval, maxval, min([int(maxval - minval), 10]), dtype="i"
+        )
     norm = mpcolors.BoundaryNorm(ramp, cmap.N)
     ColorbarBase(cax, norm=norm, cmap=cmap, orientation="horizontal")
-    units = "inch" if varname == "wettest" else r"$^\circ$F"
+    units = "inch" if varname in ["wettest", "driest"] else r"$^\circ$F"
     fig.text(0.47, 0.88, units)
     bboxprops = dict(color="tan", alpha=0.5, boxstyle="round")
     ax.barh(
@@ -254,9 +264,12 @@ def plotter(fdict):
 
     # Plot per year
     series = df[XREF[varname]]
-    ax = fig.add_axes([0.59, 0.5, 0.4, 0.4])
+    ax = fig.add_axes((0.59, 0.5, 0.4, 0.4))
     ax.bar(df.index.values, series.values, color="blue", width=1)
-    ax.set_ylim(bottom=series.min() - 5)
+    minval = series.min() - 5
+    if varname == "driest":
+        minval = 0
+    ax.set_ylim(bottom=minval)
     ax.text(
         0.03,
         1.01,
@@ -268,7 +281,7 @@ def plotter(fdict):
     ax.grid(True)
 
     # CDF
-    ax = fig.add_axes([0.59, 0.1, 0.4, 0.3])
+    ax = fig.add_axes((0.59, 0.1, 0.4, 0.3))
     X2 = np.sort(series.values)
     ptile = np.percentile(X2, [0, 5, 50, 95, 100])
     N = len(series.values)
