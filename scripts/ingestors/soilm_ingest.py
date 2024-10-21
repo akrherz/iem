@@ -5,14 +5,15 @@ Run from RUN_5MIN.sh
 """
 
 # stdlib
-import datetime
 import io
 import os
 import subprocess
-import sys
 import tempfile
+from datetime import date, datetime, timedelta
+from typing import Optional
 from zoneinfo import ZoneInfo
 
+import click
 import numpy as np
 import pandas as pd
 from metpy.calc import dewpoint_from_relative_humidity
@@ -158,7 +159,7 @@ def qcval2(df, colname, floor, ceiling):
 
 def make_time(string):
     """Convert a time in the file to a datetime"""
-    tstamp = datetime.datetime.strptime(string, "%Y-%m-%d %H:%M:%S")
+    tstamp = datetime.strptime(string, "%Y-%m-%d %H:%M:%S")
     tstamp = tstamp.replace(tzinfo=ZoneInfo("Etc/GMT+6"))
     return tstamp
 
@@ -334,7 +335,7 @@ def common_df_logic(filename, maxts, nwsli, tablename):
             )
 
         # Rework the valid column into the appropriate date
-        df["valid"] = df["valid"].dt.date - datetime.timedelta(days=1)
+        df["valid"] = df["valid"].dt.date - timedelta(days=1)
         # Convert radiation to standardized slrkj_tot
         df["slrkj_tot"] = df["slrmj_tot"] * 1000.0
         # drop things we do not need
@@ -516,7 +517,7 @@ def daily_process(nwsli, maxts):
     pgconn, acursor = get_dbconnc("iem")
     for _i, row in df.iterrows():
         # Need a timezone
-        valid = datetime.datetime(
+        valid = datetime(
             row["valid"].year, row["valid"].month, row["valid"].day, 12, 0
         )
         valid = valid.replace(tzinfo=ZoneInfo("America/Chicago"))
@@ -558,9 +559,9 @@ def get_max_timestamps(nwsli):
     """Fetch out our max values"""
     pgconn, icursor = get_dbconnc("isuag")
     data = {
-        "hourly": datetime.datetime(2012, 1, 1, tzinfo=ZoneInfo("Etc/GMT+6")),
-        "minute": datetime.datetime(2012, 1, 1, tzinfo=ZoneInfo("Etc/GMT+6")),
-        "daily": datetime.date(2012, 1, 1),
+        "hourly": datetime(2012, 1, 1, tzinfo=ZoneInfo("Etc/GMT+6")),
+        "minute": datetime(2012, 1, 1, tzinfo=ZoneInfo("Etc/GMT+6")),
+        "daily": date(2012, 1, 1),
     }
     icursor.execute(
         "SELECT max(valid) from sm_daily WHERE station = %s",
@@ -659,9 +660,11 @@ def dump_raw_to_ldm(nwsli, dyprocessed, hrprocessed):
     os.remove(tmpfn)
 
 
-def main(argv):
+@click.command()
+@click.option("--station", help="Specific station to process")
+def main(station: Optional[str]):
     """Go main Go"""
-    stations = STATIONS if len(argv) == 1 else [argv[1]]
+    stations = STATIONS if station is None else [station]
     for nwsli in stations:
         LOG.info("starting workflow for: %s", nwsli)
         maxobs = get_max_timestamps(nwsli)
@@ -692,18 +695,14 @@ def main(argv):
             [
                 "python",
                 "../isusm/fix_precip.py",
-                f"{day:%Y}",
-                f"{day:%m}",
-                f"{day:%d}",
+                f"--date={day:%Y-%m-%d}",
             ]
         )
         subprocess.call(
             [
                 "python",
                 "../isusm/fix_solar.py",
-                f"{day:%Y}",
-                f"{day:%m}",
-                f"{day:%d}",
+                f"--date={day:%Y-%m-%d}",
             ]
         )
 
@@ -715,4 +714,4 @@ def test_make_tstamp():
 
 
 if __name__ == "__main__":
-    main(sys.argv)
+    main()

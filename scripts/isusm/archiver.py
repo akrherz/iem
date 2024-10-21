@@ -3,12 +3,12 @@ LoggerNet delivers now single files per poll.  This script pieces them back
 together and then 1) dumps to LDM and 2) archives off to storage.
 """
 
-import datetime
 import glob
 import os
 import subprocess
 import tempfile
 import zipfile
+from datetime import timedelta
 from io import BytesIO
 
 from pyiem.util import logger, utc
@@ -16,7 +16,7 @@ from pyiem.util import logger, utc
 LOG = logger()
 PATH = "/mesonet/data/isusm"
 # run at 6z, so file for previous date
-NOW = utc() - datetime.timedelta(days=1)
+NOW = utc() - timedelta(days=1)
 
 
 def save_content(station, content):

@@ -2,9 +2,9 @@
 Check to see if there are webcams offline, generate emails and such
 """
 
-import datetime
 import os
 import stat
+from datetime import datetime, timedelta
 from zoneinfo import ZoneInfo
 
 from pyiem.database import get_dbconnc
@@ -22,7 +22,7 @@ def workflow(netname, pname):
     # Now lets check files
     mydir = "/mesonet/ldmdata/camera/stills"
 
-    threshold = utc() - datetime.timedelta(hours=2)
+    threshold = utc() - timedelta(hours=2)
     mcursor.execute(
         "SELECT id, network, name from webcams where network = %s and online "
         "ORDER by id ASC",
@@ -45,9 +45,7 @@ def workflow(netname, pname):
                 print(f"Missing webcam file: {fn}")
             continue
         ticks = os.stat(fn)[stat.ST_MTIME]
-        valid = datetime.datetime(1970, 1, 1) + datetime.timedelta(
-            seconds=ticks
-        )
+        valid = datetime(1970, 1, 1) + timedelta(seconds=ticks)
         valid = valid.replace(tzinfo=ZoneInfo("UTC"))
         obs[row["id"]] = {"valid": valid}
     # Abort out if no obs are found

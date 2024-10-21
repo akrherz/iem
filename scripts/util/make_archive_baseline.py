@@ -11,8 +11,10 @@ called from RUN_0Z.sh
 
 import os
 import subprocess
-import sys
+from datetime import datetime
+from typing import Optional
 
+import click
 from pyiem.network import Table as NetworkTable
 from pyiem.util import utc
 
@@ -26,12 +28,14 @@ PILS = (
 ).split("|")
 
 
-def main(argv):
+@click.command()
+@click.option("--date", "dt", type=click.DateTime())
+def main(dt: Optional[datetime]):
     """Go Main Go"""
-    if len(argv) == 1:
+    if dt is None:
         ts = utc()
     else:
-        ts = utc(int(argv[1]), int(argv[2]), int(argv[3]))
+        ts = utc(dt.year, dt.month, dt.day)
     nt = NetworkTable(["NEXRAD", "TWDR"])
     for sid in nt.sts:
         for prod in PRODS[nt.sts[sid]["network"]]:
@@ -56,4 +60,4 @@ def main(argv):
 
 
 if __name__ == "__main__":
-    main(sys.argv)
+    main()

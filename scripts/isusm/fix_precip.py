@@ -8,11 +8,10 @@ Implementation Thoughts:
 4. This uses the flag 'E' for estimated
 """
 
-# pylint: disable=unsubscriptable-object
-import datetime
-import sys
+from datetime import datetime, timedelta
 from zoneinfo import ZoneInfo
 
+import click
 import pandas as pd
 import requests
 from pyiem.database import get_dbconn, get_sqlalchemy_conn
@@ -38,13 +37,13 @@ def print_debugging(station):
         print(f"     {row[0]}   {row[1]:5.2f}  {row[2]:5.2f} {row[3]}")
 
 
-def get_hdf(nt, date):
+def get_hdf(nt, dt):
     """Fetch the hourly dataframe for this network"""
     # Get our stage IV hourly totals
     rows = []
     for station in nt.sts:
         # service provides UTC dates, so we need to request two days
-        for ldate in [date, date + datetime.timedelta(days=1)]:
+        for ldate in [dt, dt + timedelta(days=1)]:
             uri = (
                 "http://iem.local/json/stage4/"
                 f"{nt.sts[station]['lon']:.2f}/"
@@ -59,7 +58,7 @@ def get_hdf(nt, date):
                 rows.append(  # noqa
                     {
                         "station": station,
-                        "valid": datetime.datetime.strptime(
+                        "valid": datetime.strptime(
                             entry["end_valid"], ISO8601
                         ).replace(tzinfo=ZoneInfo("UTC")),
                         "precip_in": entry["precip_in"],
@@ -70,26 +69,26 @@ def get_hdf(nt, date):
     return df
 
 
-def set_iemacces(station, date, precip_inch):
+def set_iemacces(station, dt, precip_inch):
     """Set the precip value for IEMAccess."""
     # update iemaccess
     pgconn = get_dbconn("iem")
     cursor = pgconn.cursor()
-    LOG.info("Update iemaccess %s %s %.4f", station, date, precip_inch)
+    LOG.info("Update iemaccess %s %s %.4f", station, dt, precip_inch)
     cursor.execute(
         "UPDATE summary s SET pday = %s FROM stations t WHERE "
         "t.iemid = s.iemid and s.day = %s and t.id = %s and "
         "t.network = 'ISUSM'",
-        (precip_inch, date, station),
+        (precip_inch, dt, station),
     )
     cursor.close()
     pgconn.commit()
 
 
-def update_precip(date, station, hdf):
+def update_precip(dt, station, hdf):
     """Do the update work"""
-    sts = utc(date.year, date.month, date.day, 7)
-    ets = sts + datetime.timedelta(hours=24)
+    sts = utc(dt.year, dt.month, dt.day, 7)
+    ets = sts + timedelta(hours=24)
     ldf = hdf[
         (hdf["station"] == station)
         & (hdf["valid"] >= sts)
@@ -97,7 +96,7 @@ def update_precip(date, station, hdf):
     ]
 
     newpday = ldf["precip_in"].sum()
-    set_iemacces(station, date, newpday)
+    set_iemacces(station, dt, newpday)
     # update isusm
     pgconn = get_dbconn("isuag")
     cursor = pgconn.cursor()
@@ -105,7 +104,7 @@ def update_precip(date, station, hdf):
     cursor.execute(
         "UPDATE sm_daily SET rain_in_tot_qc = %s, rain_in_tot_f = 'E' "
         "WHERE valid = %s and station = %s",
-        (newpday, date, station),
+        (newpday, dt, station),
     )
     for _, row in ldf.iterrows():
         # hourly
@@ -124,7 +123,7 @@ def update_precip(date, station, hdf):
             (
                 station,
                 row["valid"],
-                row["valid"] + datetime.timedelta(minutes=60),
+                row["valid"] + timedelta(minutes=60),
             ),
         )
         if cursor.rowcount == 0:
@@ -146,7 +145,7 @@ def update_precip(date, station, hdf):
                 value,
                 multi,
                 row["valid"],
-                row["valid"] + datetime.timedelta(minutes=60),
+                row["valid"] + timedelta(minutes=60),
                 station,
             ),
         )
@@ -161,10 +160,18 @@ def update_precip(date, station, hdf):
     pgconn.commit()
 
 
-def main(argv):
+@click.command()
+@click.option(
+    "--date",
+    "dt",
+    type=click.DateTime(),
+    required=True,
+    help="Date to process",
+)
+def main(dt: datetime):
     """Go main go"""
-    date = datetime.date(int(argv[1]), int(argv[2]), int(argv[3]))
-    LOG.info("Processing date: %s", date)
+    dt = dt.date()
+    LOG.info("Processing date: %s", dt)
     nt = NetworkTable("ISUSM")
 
     # Get our obs
@@ -173,24 +180,24 @@ def main(argv):
             "SELECT station, rain_in_tot from sm_daily where "
             "valid = %s ORDER by station ASC",
             conn,
-            params=(date,),
+            params=(dt,),
             index_col="station",
         )
     if df.empty:
-        LOG.warning("no observations found for %s, aborting", date)
+        LOG.warning("no observations found for %s, aborting", dt)
         return
     df["obs"] = df["rain_in_tot"]
-    hdf = get_hdf(nt, date)
+    hdf = get_hdf(nt, dt)
     if hdf.empty:
-        LOG.warning("hdf is empty, abort for %s", date)
+        LOG.warning("hdf is empty, abort for %s", dt)
         return
 
     # lets try some QC
     for station in df.index.values:
         # the daily total is 12 CST to 12 CST, so that is always 6z
         # so we want the 7z total
-        sts = utc(date.year, date.month, date.day, 7)
-        ets = sts + datetime.timedelta(hours=24)
+        sts = utc(dt.year, dt.month, dt.day, 7)
+        ets = sts + timedelta(hours=24)
         # OK, get our data
         ldf = hdf[
             (hdf["station"] == station)
@@ -211,18 +218,18 @@ def main(argv):
         ):
             # print to keep email log more pretty
             print(
-                f"ISUSM fix_precip {date} {station} "
+                f"ISUSM fix_precip {dt} {station} "
                 f"stageIV: {row['stage4']:.2f} obs: {row['obs']:.2f}"
             )
             print_debugging(station)
             if station == "MCSI4":
                 LOG.warning("Not updating Marcus")
-                set_iemacces(station, date, row["obs"])
+                set_iemacces(station, dt, row["obs"])
                 continue
-            update_precip(date, station, hdf)
+            update_precip(dt, station, hdf)
         else:
-            set_iemacces(station, date, row["obs"])
+            set_iemacces(station, dt, row["obs"])
 
 
 if __name__ == "__main__":
-    main(sys.argv)
+    main()

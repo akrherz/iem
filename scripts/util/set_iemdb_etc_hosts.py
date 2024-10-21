@@ -1,8 +1,9 @@
 """A util script used on daryl's laptop to switch 'iemdb' /etc/hosts entry."""
 
 import os
-import sys
 import tempfile
+
+import click
 
 DB1, DB2, DB3 = range(3)
 IPS = "172.16.170.1 172.16.172.1 172.16.174.1".split()
@@ -50,11 +51,10 @@ LOOKUP = {
 }
 
 
-def main(argv):
+@click.command()
+@click.argument("host", required=True, type=click.Choice(["local", "proxy"]))
+def main(host):
     """Go Main Go"""
-    if len(argv) == 1:
-        print("Usage: python set_iemdb_etc_hosts.py <local|proxy>")
-        return
     with open("/etc/hosts", encoding="utf-8") as fh:
         data = fh.read()
     result = []
@@ -64,7 +64,7 @@ def main(argv):
             print("Found ---AUTOGEN---")
             break
     for dbname, lkp in LOOKUP.items():
-        ip = lkp if argv[1] == "proxy" else "127.0.0.1"
+        ip = lkp if host == "proxy" else "127.0.0.1"
         result.append(f"{ip} iemdb{dbname}.local")
     print(f"added {len(LOOKUP)} entries")
     (tmpfd, tmpfn) = tempfile.mkstemp()
@@ -76,4 +76,4 @@ def main(argv):
 
 
 if __name__ == "__main__":
-    main(sys.argv)
+    main()
