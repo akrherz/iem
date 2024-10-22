@@ -15,6 +15,8 @@ services found at
 Changelog
 ---------
 
+- 2024-10-22: Fix and better document the ``at`` parameter for when
+  ``timeopt=2``.
 - 2024-07-03: Added a `accept=csv` option to allow for CSV output.
 - 2024-06-26: Added `limitpds` parameter to limit the request to only include
   products that have a PDS (Particularly Dangerous Situation) tag or phrasing.
@@ -40,6 +42,18 @@ Return all Tornado Warnings for the Des Moines WFO in shapefile format during
 
 https://mesonet.agron.iastate.edu/cgi-bin/request/gis/watchwarn.py\
 ?accept=shapefile&sts=2023-01-01T00:00Z&ets=2024-01-01T00:00Z&wfo[]=DMX\
+&limitps=yes&phenomena=TO&significance=W
+
+Provide all Tornado Warnings valid at 2320 UTC on 21 May 2024
+
+https://mesonet.agron.iastate.edu/cgi-bin/request/gis/watchwarn.py\
+?accept=shapefile&at=2024-05-21T23:20Z&timeopt=2&limitps=yes&phenomena=TO\
+&significance=W
+
+Same request, but using the more verbose parameterization for the timestamp
+
+https://mesonet.agron.iastate.edu/cgi-bin/request/gis/watchwarn.py\
+?accept=shapefile&year3=2024&month3=5&day3=21&hour3=23&minute3=20&timeopt=2\
 &limitps=yes&phenomena=TO&significance=W
 
 """
@@ -69,6 +83,13 @@ class Schema(CGIModel):
         "shapefile",
         pattern="^(shapefile|excel|csv)$",
         description="The format to return, either shapefile or excel.",
+    )
+    at: AwareDatetime = Field(
+        None,
+        description=(
+            "The timestamp to use when ``timeopt=2``, which the service "
+            "provides events valid at the specified time."
+        ),
     )
     addsvs: str = Field(
         "no",
@@ -145,7 +166,7 @@ class Schema(CGIModel):
         1,
         description="The time option to use, either 1 or 2, default is 1, "
         "which uses the start and end timestamps to determine "
-        "which events to include. Option 2 uses the at timestamp "
+        "which events to include. Option 2 uses the ``at`` timestamp "
         "to determine which events to include.",
     )
     wfo: ListOrCSVType = Field(
@@ -166,9 +187,11 @@ class Schema(CGIModel):
     )
     year3: int = Field(
         None,
-        description="The at timestamp components in UTC.  When timeopt is 2, "
-        "this is used to find all events that were valid at this "
-        "time.",
+        description=(
+            "The ``at`` timestamp components in UTC.  When timeopt is 2, "
+            "this is used to find all events that were valid at this "
+            "time."
+        ),
     )
     month1: int = Field(
         None,
@@ -182,9 +205,11 @@ class Schema(CGIModel):
     )
     month3: int = Field(
         None,
-        description="The at timestamp components in UTC.  When timeopt is 2, "
-        "this is used to find all events that were valid at this "
-        "time.",
+        description=(
+            "The ``at`` timestamp components in UTC.  When timeopt is 2, "
+            "this is used to find all events that were valid at this "
+            "time."
+        ),
     )
     day1: int = Field(
         None,
@@ -198,9 +223,11 @@ class Schema(CGIModel):
     )
     day3: int = Field(
         None,
-        description="The at timestamp components in UTC.  When timeopt is 2, "
-        "this is used to find all events that were valid at this "
-        "time.",
+        description=(
+            "The ``at`` timestamp components in UTC.  When timeopt is 2, "
+            "this is used to find all events that were valid at this "
+            "time."
+        ),
     )
     hour1: int = Field(
         None,
@@ -214,9 +241,11 @@ class Schema(CGIModel):
     )
     hour3: int = Field(
         None,
-        description="The at timestamp components in UTC.  When timeopt is 2, "
-        "this is used to find all events that were valid at this "
-        "time.",
+        description=(
+            "The ``at`` timestamp components in UTC.  When timeopt is 2, "
+            "this is used to find all events that were valid at this "
+            "time."
+        ),
     )
     minute1: int = Field(
         None,
@@ -230,9 +259,11 @@ class Schema(CGIModel):
     )
     minute3: int = Field(
         None,
-        description="The at timestamp components in UTC.  When timeopt is 2, "
-        "this is used to find all events that were valid at this "
-        "time.",
+        description=(
+            "The ``at`` timestamp components in UTC.  When timeopt is 2, "
+            "this is used to find all events that were valid at this "
+            "time."
+        ),
     )
 
 
@@ -298,13 +329,18 @@ def build_sql(environ):
         # Change to postgis db once we have the wfo list
         fn = f"wwa_{sts:%Y%m%d%H%M}_{ets:%Y%m%d%H%M}"
     else:
-        year3 = int(environ.get("year3"))
-        month3 = int(environ.get("month3"))
-        day3 = int(environ.get("day3"))
-        hour3 = int(environ.get("hour3"))
-        minute3 = int(environ.get("minute3"))
-        sts = utc(year3, month3, day3, hour3, minute3)
+        if environ["at"] is None:
+            year3 = int(environ.get("year3"))
+            month3 = int(environ.get("month3"))
+            day3 = int(environ.get("day3"))
+            hour3 = int(environ.get("hour3"))
+            minute3 = int(environ.get("minute3"))
+            sts = utc(year3, month3, day3, hour3, minute3)
+        else:
+            sts = environ["at"]
         ets = sts
+        environ["sts"] = sts
+        environ["ets"] = ets
         fn = f"wwa_{sts:%Y%m%d%H%M}"
 
     limiter = ""
@@ -451,7 +487,7 @@ def do_excel(sql, fmt):
 @iemapp(default_tz="UTC", help=__doc__, schema=Schema)
 def application(environ, start_response):
     """Go Main Go"""
-    if environ["sts"] is None:
+    if environ["timeopt"] != 2 and environ["sts"] is None:
         raise IncompleteWebRequest("Missing start time parameters")
     try:
         sql, fn = build_sql(environ)
@@ -474,6 +510,8 @@ def application(environ, start_response):
         start_response("200 OK", headers)
         return [do_excel(sql, environ["accept"])]
     pgconn, cursor = get_dbconnc("postgis", cursor_name="streaming")
+    # Set a larger fetch size
+    cursor.itersize = 2000
 
     cursor.execute(sql)
 

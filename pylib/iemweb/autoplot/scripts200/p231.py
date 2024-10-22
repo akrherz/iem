@@ -8,7 +8,7 @@ are colorized as green for improvements and red for degradations.
 <p>Caution, this chart does take a number of seconds to generate.
 """
 
-import datetime
+from datetime import date, timedelta
 
 import pandas as pd
 from pyiem.database import get_sqlalchemy_conn
@@ -16,13 +16,14 @@ from pyiem.exceptions import NoDataFound
 from pyiem.plot import MapPlot
 from pyiem.reference import state_names
 from pyiem.util import get_autoplot_context
+from sqlalchemy import text
 
 
 def get_description():
     """Return a dict describing how to call this plotter"""
     desc = {"description": __doc__, "data": True}
-    today = datetime.date.today() - datetime.timedelta(days=1)
-    lastweek = today - datetime.timedelta(days=7)
+    today = date.today() - timedelta(days=1)
+    lastweek = today - timedelta(days=7)
     desc["arguments"] = [
         dict(
             type="date",
@@ -57,16 +58,16 @@ def compute(state, sdate, edate, days):
     # Do we need magic 1 Jan logic?
     with get_sqlalchemy_conn("coop") as conn:
         df = pd.read_sql(
-            f"""
+            text(f"""
             WITH obs as (
                 SELECT station, day, sday,
                 sum(precip) OVER (PARTITION by station ORDER by day ASC
-                ROWS between %s PRECEDING AND CURRENT ROW) from
+                ROWS between :days PRECEDING AND CURRENT ROW) from
                 alldata_{state} WHERE
                 substr(station, 3, 1) not in ('C', 'D', 'T')
-                and station != '{state}0000'
+                and station != :statewide
             ), datum as (
-                SELECT * from obs where sday = ANY(%s)
+                SELECT * from obs where sday = ANY(:sdays)
                 ORDER by station ASC, day ASC
             ), agg as (
                 select station, sday, avg(sum) as avg_precip,
@@ -75,19 +76,21 @@ def compute(state, sdate, edate, days):
             ), agg2 as (
                 SELECT d.station, d.day, d.sday, d.sum, a.avg_precip,
                 a.std_precip from datum d, agg a WHERE d.station = a.station
-                and d.sday = a.sday and a.count >= 30 and d.day = ANY(%s)
+                and d.sday = a.sday and a.count >= 25 and d.day = ANY(:dates)
                 ORDER by d.station ASC, d.day ASC
             )
             select a.*, st_x(t.geom) as lon, st_y(t.geom) as lat
             from agg2 a JOIN stations t on (a.station = t.id) WHERE
-            t.network = '{state}CLIMATE'
-            """,
+            t.network = :network
+            """),
             conn,
-            params=(
-                days - 1,
-                [f"{edate:%m%d}", f"{sdate:%m%d}"],
-                [sdate, edate],
-            ),
+            params={
+                "statewide": f"{state}0000",
+                "network": f"{state}CLIMATE",
+                "days": days - 1,
+                "sdays": [f"{edate:%m%d}", f"{sdate:%m%d}"],
+                "dates": [sdate, edate],
+            },
             parse_dates=["day"],
         )
     if df.empty:

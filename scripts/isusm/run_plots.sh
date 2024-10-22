@@ -40,6 +40,6 @@ wget -q http://${WEBHOST}/GIS/apps/agclimate/month.php\?dvar=dailyet -O ${fp}.pn
 $PQI -p "plot c 000000000000 agclimate/${fp}.png bogus png" ${fp}.png
 rm -f ${fp}.png
 
-python fancy_4inch.py 1
-python fancy_4inch.py 2
-python fancy_4inch.py 3
+python fancy_4inch.py --days=1
+python fancy_4inch.py --days=2
+python fancy_4inch.py --days=3

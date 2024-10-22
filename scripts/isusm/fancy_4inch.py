@@ -4,9 +4,9 @@ Called from run_plots.sh
 """
 
 # pylint: disable=unbalanced-tuple-unpacking
-import datetime
-import sys
+from datetime import date, datetime, timedelta
 
+import click
 import numpy as np
 import pandas as pd
 import pygrib
@@ -50,13 +50,13 @@ def get_grib(now, fhour):
 def do_nam(valid):
     """Compute county level estimates based on NAM data"""
     # run 6z to 6z, close enough
-    now = datetime.datetime(valid.year, valid.month, valid.day, 6)
+    now = datetime(valid.year, valid.month, valid.day, 6)
     lats = None
     lons = None
     count = 0
     grib = None
     for offset in [0, 6, 12, 18]:
-        runtime = now + datetime.timedelta(hours=offset)
+        runtime = now + timedelta(hours=offset)
         for fhour in range(6):
             grib = get_grib(runtime, fhour)
             if grib is None:
@@ -83,12 +83,13 @@ def sampler(xaxis, yaxis, vals, x, y):
     return vals[i, j]
 
 
-def main(argv):
+@click.command()
+@click.option("--days", type=int, required=True)
+def main(days: int):
     """Go Main Go"""
     nt = Table("ISUSM")
     qdict = loadqc()
-    day_ago = int(argv[1])
-    ts = datetime.date.today() - datetime.timedelta(days=day_ago)
+    ts = date.today() - timedelta(days=days)
     hlons, hlats, hvals = do_nam(ts)
     if hlons is None:
         return
@@ -112,7 +113,7 @@ def main(argv):
             where valid = %s and t4_c_avg_qc > -40 and r.count > 19
         """,
             conn,
-            params=(ts, ts + datetime.timedelta(days=1), ts),
+            params=(ts, ts + timedelta(days=1), ts),
             index_col="station",
         )
     if df.empty:
@@ -201,9 +202,9 @@ def main(argv):
         labelbuffer=5,
     )
     mp.drawcounties()
-    routes = "a" if day_ago >= 4 else "ac"
+    routes = "a" if days >= 4 else "ac"
     pqstr = (
-        f"plot {routes} {ts:%Y%m%d}0000 soilt_day{day_ago}.png "
+        f"plot {routes} {ts:%Y%m%d}0000 soilt_day{days}.png "
         "isuag_county_4inch_soil.png png"
     )
     mp.postprocess(pqstr=pqstr)
@@ -211,4 +212,4 @@ def main(argv):
 
 
 if __name__ == "__main__":
-    main(sys.argv)
+    main()
