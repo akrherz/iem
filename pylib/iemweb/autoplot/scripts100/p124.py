@@ -15,7 +15,12 @@ CATS = np.array([0.01, 0.5, 1.0, 2.0, 3.0, 4.0])
 
 def get_description():
     """Return a dict describing how to call this plotter"""
-    desc = {"description": __doc__, "data": True, "report": True}
+    desc = {
+        "description": __doc__,
+        "data": True,
+        "report": True,
+        "nopng": True,
+    }
     desc["arguments"] = [
         ARG_STATION,
     ]

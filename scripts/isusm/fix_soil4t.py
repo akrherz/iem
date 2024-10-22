@@ -1,12 +1,12 @@
 """Quality control our 4 inch soil temperature data.
 
-Called from XXX
+Called from nowhere at the moment
 """
 
-import datetime
 import json
-import sys
+from datetime import datetime
 
+import click
 import requests
 from pyiem.database import get_dbconn
 from pyiem.network import Table as NetworkTable
@@ -82,10 +82,12 @@ def check_date(date):
     pgconn.commit()
 
 
-def main(argv):
+@click.command()
+@click.option("--date", "dt", type=click.DateTime(), required=True)
+def main(dt: datetime):
     """Go Main Go."""
-    check_date(datetime.date(int(argv[1]), int(argv[2]), int(argv[3])))
+    check_date(dt.date())
 
 
 if __name__ == "__main__":
-    main(sys.argv)
+    main()
