@@ -44,7 +44,6 @@ from zoneinfo import ZoneInfo
 
 import pandas as pd
 from pyiem.database import get_sqlalchemy_conn
-from pyiem.plot import figure_axes
 from pyiem.util import get_autoplot_context, utc
 from sqlalchemy import text
 
@@ -75,43 +74,47 @@ MAPTZ2SHEFTZ = {
 
 def get_description():
     """Return a dict describing how to call this plotter"""
-    desc = {"description": __doc__, "data": True, "report": True}
-    desc["arguments"] = [
-        {
-            "type": "select",
-            "name": "by",
-            "default": "wfo",
-            "label": "Generate RTP for state or WFO:",
-            "options": PDICT,
-        },
-        {
-            "type": "state",
-            "name": "state",
-            "default": "IA",
-            "label": "Select State:",
-        },
-        {
-            "type": "networkselect",
-            "name": "wfo",
-            "default": "DMX",
-            "network": "WFO",
-            "label": "Select WFO (used to pick timezone for report):",
-        },
-        {
-            "type": "select",
-            "name": "report",
-            "default": "12z",
-            "label": "Select RTP Report Type:",
-            "options": PDICT2,
-        },
-        {
-            "type": "date",
-            "name": "date",
-            "default": date.today().strftime("%Y/%m/%d"),
-            "label": "Date of Interest:",
-        },
-    ]
-    return desc
+    return {
+        "description": __doc__,
+        "data": True,
+        "report": True,
+        "nopng": True,
+        "arguments": [
+            {
+                "type": "select",
+                "name": "by",
+                "default": "wfo",
+                "label": "Generate RTP for state or WFO:",
+                "options": PDICT,
+            },
+            {
+                "type": "state",
+                "name": "state",
+                "default": "IA",
+                "label": "Select State:",
+            },
+            {
+                "type": "networkselect",
+                "name": "wfo",
+                "default": "DMX",
+                "network": "WFO",
+                "label": "Select WFO (used to pick timezone for report):",
+            },
+            {
+                "type": "select",
+                "name": "report",
+                "default": "12z",
+                "label": "Select RTP Report Type:",
+                "options": PDICT2,
+            },
+            {
+                "type": "date",
+                "name": "date",
+                "default": date.today().strftime("%Y/%m/%d"),
+                "label": "Date of Interest:",
+            },
+        ],
+    }
 
 
 def get_obsdf(ctx: dict) -> pd.DataFrame:
@@ -184,9 +187,5 @@ def plotter(fdict):
             f"{pp(row['snowd'], 5, 1)}\n"
         )
     report += ".END\n\n$$\n"
-    (fig, ax) = figure_axes(title="Error")
-    ax.text(
-        0.5, 0.5, "Choose text report option above", ha="center", va="center"
-    )
 
-    return fig, obsdf, report
+    return None, obsdf, report

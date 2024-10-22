@@ -11,7 +11,12 @@ from iemweb.autoplot import ARG_STATION
 
 def get_description():
     """Return a dict describing how to call this plotter"""
-    desc = {"description": __doc__, "data": True, "report": True}
+    desc = {
+        "description": __doc__,
+        "data": True,
+        "report": True,
+        "nopng": True,
+    }
     desc["arguments"] = [
         ARG_STATION,
     ]

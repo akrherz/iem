@@ -549,6 +549,8 @@ def generate_form(apid, fdict, headers, cookies):
     if fmt is None:
         if meta.get("highcharts", False):
             fmt = "js"
+        elif meta.get("report", False) and meta.get("nopng", False):
+            fmt = "text"
         else:
             fmt = "png"
     if meta.get("nass") is not None:
@@ -795,6 +797,11 @@ function onNetworkChange(newnetwork){{
 </form>
     {res['nassmsg']}
     """
+    if meta.get("report"):
+        res["dataextra"] = f"""
+<a href="{res['imguri']}.txt" class="btn btn-primary">
+<i class="fa fa-table"></i> Direct/Stable Link to Text</a> &nbsp;
+        """
     if meta.get("data"):
         res["dataextra"] += f"""
 <a href="{res['imguri']}.csv" class="btn btn-primary">
