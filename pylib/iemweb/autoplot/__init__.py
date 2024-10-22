@@ -272,6 +272,12 @@ daily_opts = [
         "label": ("Number of Days to Accumulate an Amount of Precip (MRMS)"),
     },
     {
+        "id": 256,
+        "label": (
+            "NWS Regional Temperature and Precipitation (RTP) Reports by IEM",
+        ),
+    },
+    {
         "id": 164,
         "label": (
             "Percentage of NWS CLI Sites Reporting Daily Above/Below "

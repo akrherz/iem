@@ -205,12 +205,13 @@ events.</li>
   <li><a href="obs.php">Sortable Currents by WFO</a></li>
 </ul>
 
-<h4>Iowa RTP First Guess</h4>
-<p>The IEM attempts to get the temperature and precipitation logic correct
-to build the required SHEF fields for the RTP product.</p>
+<h4>Regional Temperature &amp; Precipitation (RTP)</h4>
+<p>The IEM attempts to generate RTP products as the NWS has discontinued
+them.</p>
 <ul>
- <li><a href="/data/awos_rtp_00z.shef">0Z SHEF</a></li>
- <li><a href="/data/awos_rtp.shef">12Z SHEF</a></li>
+ <li><a href="/plotting/auto/?q=256">IEM Autoplot 256</a> generator tool.</li>
+ <li><a href="/data/awos_rtp_00z.shef">0Z SHEF for Iowa</a></li>
+ <li><a href="/data/awos_rtp.shef">12Z SHEF for Iowa</a></li>
 </ul>
 
   </div>
