@@ -274,7 +274,7 @@ daily_opts = [
     {
         "id": 256,
         "label": (
-            "NWS Regional Temperature and Precipitation (RTP) Reports by IEM",
+            "NWS Regional Temperature and Precipitation (RTP) Reports by IEM"
         ),
     },
     {

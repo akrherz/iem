@@ -3,11 +3,11 @@
 Likely due to water being dumped into the tipping bucket to clean it :/
 """
 
-import datetime
-import sys
+from datetime import datetime, timedelta
 from zoneinfo import ZoneInfo
 
-from pyiem.util import get_dbconn
+import click
+from pyiem.database import get_dbconn
 
 
 def zero_hourly(station, sts, ets):
@@ -64,19 +64,27 @@ def zero_iem(station, date):
     pgconn.commit()
 
 
-def main(argv):
+@click.command()
+@click.option("--station", required=True, help="ISUSM Station ID")
+@click.option(
+    "--date",
+    "dt",
+    type=click.DateTime(),
+    required=True,
+    help="Date to zero out",
+)
+def main(station: str, dt: datetime):
     """Go Main"""
-    station = argv[1]
-    date = datetime.date(int(argv[2]), int(argv[3]), int(argv[4]))
+    dt = dt.date()
     # Our weather stations are in CST, so the 'daily' precip is for a 6z to 6z
     # period and not calendar day, the hourly values are in the rears
-    sts = datetime.datetime(date.year, date.month, date.day, 6)
+    sts = datetime(dt.year, dt.month, dt.day, 6)
     sts = sts.replace(tzinfo=ZoneInfo("UTC"))
-    ets = sts + datetime.timedelta(hours=24)
+    ets = sts + timedelta(hours=24)
     zero_hourly(station, sts, ets)
-    zero_daily(station, date)
-    zero_iem(station, date)
+    zero_daily(station, dt)
+    zero_iem(station, dt)
 
 
 if __name__ == "__main__":
-    main(sys.argv)
+    main()

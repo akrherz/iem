@@ -12,7 +12,7 @@ temperature change was an increase during the day or decrease.
 plot, but computes the change over arbitrary time windows.</p>
 """
 
-import datetime
+from datetime import date, datetime, timedelta
 from zoneinfo import ZoneInfo
 
 import pandas as pd
@@ -76,12 +76,12 @@ def get_description():
     return desc
 
 
-def plot_date(ax, i, date, station, tz) -> bool:
+def plot_date(ax, i, dt: date, station, tz) -> bool:
     """plot date."""
     # request 36 hours
-    sts = datetime.datetime(date.year, date.month, date.day, tzinfo=tz)
-    sts = sts - datetime.timedelta(hours=12)
-    ets = sts + datetime.timedelta(hours=48)
+    sts = datetime(dt.year, dt.month, dt.day, tzinfo=tz)
+    sts = sts - timedelta(hours=12)
+    ets = sts + timedelta(hours=48)
     with get_sqlalchemy_conn("asos") as conn:
         df = pd.read_sql(
             "SELECT valid at time zone 'UTC' as valid, tmpf from alldata "
@@ -95,11 +95,11 @@ def plot_date(ax, i, date, station, tz) -> bool:
         return False
     df["valid"] = df["valid"].dt.tz_localize(ZoneInfo("UTC"))
     # Ensure that we have at least one ob within six hours to start and end
-    h6 = datetime.timedelta(hours=6)
+    h6 = timedelta(hours=6)
     dv = df["valid"]
     if df[(dv >= sts) & (dv < (sts + h6))].empty:
         return False
-    h18 = datetime.timedelta(hours=18)
+    h18 = timedelta(hours=18)
     if df[(dv >= (sts + h18)) & (dv < (sts + h6 + h18))].empty:
         return False
     df["norm"] = (df["tmpf"] - df["tmpf"].min()) / (
@@ -113,7 +113,7 @@ def plot_date(ax, i, date, station, tz) -> bool:
     ax.text(
         df["xnorm"].values[-1],
         df["norm"].values[-1] + i,
-        date.strftime("%-d %b %Y"),
+        dt.strftime("%-d %b %Y"),
         va="bottom" if df["norm"].values[-1] < 0.5 else "top",
         color=lp[0].get_color(),
     )
@@ -139,7 +139,7 @@ def plotter(fdict):
     elif month == "summer":
         months = [6, 7, 8]
     else:
-        ts = datetime.datetime.strptime(f"2000-{month}-01", "%Y-%b-%d")
+        ts = datetime.strptime(f"2000-{month}-01", "%Y-%b-%d")
         # make sure it is length two for the trick below in SQL
         months = [ts.month, 999]
 
@@ -174,7 +174,7 @@ def plotter(fdict):
         raise NoDataFound("Unknown station metadata.")
     tz = ZoneInfo(ctx["_nt"].sts[station]["tzname"])
     title = (
-        f"{ctx['_sname']} ({ab.year}-{datetime.date.today().year})\n"
+        f"{ctx['_sname']} ({ab.year}-{date.today().year})\n"
         f"Top 10 {PDICT[ctx['v']]} Local Calendar Day "
         f"[{month.capitalize()}] Temperature Differences"
     )
@@ -183,7 +183,7 @@ def plotter(fdict):
         0.1, 0.81, " #  Date         Diff   Low High", fontproperties=font0
     )
     y = 0.74
-    ax = fig.add_axes([0.5, 0.1, 0.3, 0.69])
+    ax = fig.add_axes((0.5, 0.1, 0.3, 0.69))
     i = 10
     hits = 0
     rank = 0
