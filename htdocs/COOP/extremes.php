@@ -44,6 +44,9 @@ $connection = iemdb("coop");
 $td = date("Y-m-d", $valid);
 // Option 1, we want climo for one station!
 if ($station != null) {
+    if (! array_key_exists($station, $cities)){
+        xssafe("</script>");
+    }
     if ($sortcol == 'station') $sortcol = 'valid';
     $jdata = file_get_contents("http://iem.local/json/climodat_stclimo.py?station={$station}&syear={$syear}&eyear={$eyear}");
     $URI = sprintf("https://mesonet.agron.iastate.edu/json/climodat_stclimo.py?station={$station}&syear={$syear}&eyear={$eyear}");
