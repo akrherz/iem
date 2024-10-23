@@ -14,19 +14,19 @@ when even requesting a state report, it is good to set the CWA so to get
 a locally relevant timezone.</p>
 <pre>
 $ wget -O RTPIA.txt 'https://mesonet.agron.iastate.edu/plotting/auto/plot/256/fmt:text::date:2024-06-10&wfo=DMX&state=IA&by=state&report=12z'
-$ cat RTPIA.txt | ./my_fancy_shef_decoder
+$ cat RTPIA.txt | dcshef
 </pre>
 
 <p>Generate a RTPBOU report for the morning of 21 May 2024:</p>
 <pre>
 $ wget -O RTPBOU.txt 'https://mesonet.agron.iastate.edu/plotting/auto/plot/256/fmt:text::date:2024-05-21&wfo=BOU&by=wfo&report=12z'
-$ cat RTPBOU.txt | ./my_fancy_shef_decoder
+$ cat RTPBOU.txt | dcshef
 </pre>
 
 <p><strong>Report Types:</strong>
 <ul>
-    <li><strong>12z:</strong> Morning ~12 UTC reports made between 6 and 16 UTC
-    </li>
+    <li><strong>12z:</strong> Morning ~12 UTC reports made between 5 AM and
+    11 AM local time.</li>
 </ul></p>
 
 <p><strong>Implementation Notes:</strong>
@@ -142,10 +142,10 @@ def get_obsdf(ctx: dict) -> pd.DataFrame:
             ctx["_nt"].sts[ctx["wfo"]]["tzname"],
         )
         if ctx["report"] == "12z":
-            # Require obs to be between 6 and 16 UTC
+            # Require obs to be between 5 and 10 AM local time
             obs = obs[
-                (obs["coop_valid"].dt.hour >= 6)
-                & (obs["coop_valid"].dt.hour <= 16)
+                (obs["coop_valid"].dt.hour >= 5)
+                & (obs["coop_valid"].dt.hour <= 10)
             ]
     return obs
 
@@ -170,11 +170,11 @@ def plotter(fdict):
     pil = wfo if ctx["by"] == "wfo" else f"{ctx['state']} "
     report = (
         "000 \n"
-        "ASUS63 XIEM 010000\n"
+        f"ASUS63 XIEM {utc():%d%H%M}\n"
         f"RTP{pil}\n\n"
         "IEM Generated Regional Temperature and Precipitation Report\n"
         "Iowa State University Ames IA\n"
-        f"{lnow:%H%M %p %a %b %d %Y %Z}\n\n"
+        f"{lnow:%I%M %p %a %b %d %Y %Z}\n\n"
         "COOP Reports\n\n"
         f".BR {wfo} {dt:%Y%m%d} {zc} DH07/TAIRZX/TAIRZN/PPDRZZ/SFDRZZ/SDIRZZ\n"
     )
