@@ -7,6 +7,8 @@ This service does a number of different things with Local Storm Reports.
 Changelog
 ---------
 
+- 2024-10-24: Added crude spatial bounds based parameters of ``east``,
+  ``west``, ``north``, and ``south``.
 - 2024-09-23: Added `qualifier` to output attributes, this represents the
   Measured, Estimated, or Unknonw qualifier for the report.
 - 2024-07-14: This service was migrated from a PHP based script to python. An
@@ -32,12 +34,18 @@ Provide LSRs from NWS Des Moines and Davenport for 21 May 2024 UTC
 https://mesonet.agron.iastate.edu/geojson/lsr.geojson?wfos=DMX,DVN&\
 sts=2024-05-21T00:00Z&ets=2024-05-22T00:00Z
 
+Provide all 2024 LSRs for a bounding box approximately covering Iowa.
+
+https://mesonet.agron.iastate.edu/geojson/lsr.geojson?\
+west=-96.5&east=-90.5&north=43.5&south=40.5&\
+sts=2024-01-01T00:00Z&ets=2024-12-31T23:59Z
+
 """
 
 from datetime import datetime, timezone
 
 import geopandas as gpd
-from pydantic import Field, field_validator
+from pydantic import Field, field_validator, model_validator
 from pyiem.database import get_sqlalchemy_conn
 from pyiem.nws.vtec import get_ps_string
 from pyiem.webutil import CGIModel, ListOrCSVType, iemapp
@@ -91,6 +99,44 @@ class Schema(CGIModel):
         default=2006,
         description="If provided, use this year for the given VTEC event.",
     )
+    east: float = Field(
+        default=None,
+        description="Eastern extent of spatial bounds. (degrees East)",
+        ge=-180,
+        le=180,
+    )
+    west: float = Field(
+        default=None,
+        description="Western extent of spatial bounds. (degrees East)",
+        ge=-180,
+        le=180,
+    )
+    north: float = Field(
+        default=None,
+        description="Northern extent of spatial bounds. (degrees North)",
+        ge=-90,
+        le=90,
+    )
+    south: float = Field(
+        default=None,
+        description="Southern extent of spatial bounds. (degrees North)",
+        ge=-90,
+        le=90,
+    )
+
+    @model_validator(mode="after")
+    def validate_spatial_bounds(self):
+        """Ensure we have a valid spatial bounds."""
+        # Ensure that if we have one field set, we have them all
+        vals = [self.east, self.west, self.north, self.south]
+        if any(x is not None for x in vals):
+            if not all(x is not None for x in vals):
+                raise ValueError("Incomplete spatial bounds provided")
+            if self.east <= self.west:
+                raise ValueError("East is less than West")
+            if self.north <= self.south:
+                raise ValueError("North is less than South")
+        return self
 
     @field_validator("ets", "sts", mode="before")
     @classmethod
@@ -170,6 +216,11 @@ def do_default(environ: dict) -> gpd.GeoDataFrame:
     wfo_limiter = ""
     if environ["wfos"]:
         wfo_limiter = " and wfo = ANY(:wfos) "
+    if environ["west"] is not None:
+        wfo_limiter = (
+            " and ST_Contains(ST_MakeEnvelope(:west, :south, :east, :north, "
+            "4326), geom) "
+        )
     with get_sqlalchemy_conn("postgis") as conn:
         lsrdf = gpd.read_postgis(
             text(
@@ -185,11 +236,7 @@ def do_default(environ: dict) -> gpd.GeoDataFrame:
                 """
             ),
             conn,
-            params={
-                "wfos": environ["wfos"],
-                "ets": environ["ets"],
-                "sts": environ["sts"],
-            },
+            params=environ,
             geom_col="geom",
         )
     return lsrdf
