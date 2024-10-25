@@ -1,6 +1,6 @@
 """.. title:: Climodat Degree Days service with GFS/NDFD forecast
 
-Return to `JSON Services </json/>`_
+Return to `API Services </api/#json>`_
 
 Documentation for /json/climodat_dd.py
 --------------------------------------

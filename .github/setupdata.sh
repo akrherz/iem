@@ -19,6 +19,12 @@ https://mesonet.agron.iastate.edu/data/gis/images/4326/USCOMP/n0r_0.json
 curl -o /mesonet/share/pickup/yieldfx/ames.met \
 https://mesonet.agron.iastate.edu/pickup/yieldfx/ames.met
 
+curl -o /mesonet/data/iemre/ndfd_current.nc \
+https://mesonet.agron.iastate.edu/onsite/iemre/ndfd_current.nc
+
+curl -o /mesonet/data/iemre/gfs_current.nc \
+https://mesonet.agron.iastate.edu/onsite/iemre/gfs_current.nc
+
 # A corrupted RTMA file
 mkdir -p /mesonet/ARCHIVE/data/2024/01/01/model/rtma/00
 echo > /mesonet/ARCHIVE/data/2024/01/01/model/rtma/00/rtma2p5_ru.t0000z.2dvaranl_ndfd.grb2

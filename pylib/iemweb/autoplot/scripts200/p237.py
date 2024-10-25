@@ -3,11 +3,12 @@ This autoplot is a bit of a catch-all for mapping event counts at a WFO or
 CWSU map unit.  These are events that do not have VTEC.
 """
 
-import datetime
+from datetime import timezone
 
 import pandas as pd
+from pyiem.database import get_sqlalchemy_conn
 from pyiem.plot import MapPlot, pretty_bins
-from pyiem.util import get_autoplot_context, get_sqlalchemy_conn, utc
+from pyiem.util import get_autoplot_context, utc
 from sqlalchemy import text
 
 PDICT = {
@@ -52,8 +53,8 @@ def get_description():
 def plotter(fdict):
     """Go"""
     ctx = get_autoplot_context(fdict, get_description())
-    sts = ctx["sts"].replace(tzinfo=datetime.timezone.utc)
-    ets = ctx["ets"].replace(tzinfo=datetime.timezone.utc)
+    sts = ctx["sts"].replace(tzinfo=timezone.utc)
+    ets = ctx["ets"].replace(tzinfo=timezone.utc)
     params = {}
     params["sts"] = sts
     params["ets"] = ets

@@ -12,6 +12,8 @@ dataset is as live as when you query it as reports are ingested in realtime.
 Changelog
 ---------
 
+- 2024-10-24: Added bounding box parameters of ``north``, ``south``, ``east``,
+  and ``west`` to allow for spatial subsetting of the results.
 - 2024-09-23: Added `qualify` as the Estimated, Measured, or Unknown qualifier
   of the magnitude value.  Perhaps fixed a problem with SHP output as well.
 - 2024-08-14: Correct bug with reports for Puerto Rico were not included.
@@ -32,6 +34,13 @@ https://mesonet.agron.iastate.edu/cgi-bin/request/gis/lsr.py\
 https://mesonet.agron.iastate.edu/cgi-bin/request/gis/lsr.py\
 ?sts=2024-01-01T00:00Z&ets=2025-01-01T00:00Z&state=IA&fmt=shp
 
+Provide all LSRs for 2024 for a lat/lon bounding box approximating Iowa and
+return as a CSV file.
+
+https://mesonet.agron.iastate.edu/cgi-bin/request/gis/lsr.py\
+?sts=2024-01-01T00:00Z&ets=2025-01-01T00:00Z&north=43.5&south=40.0\
+&east=-90.0&west=-96.5&fmt=csv
+
 """
 
 import datetime
@@ -42,7 +51,7 @@ import fiona
 import geopandas as gpd
 import pandas as pd
 import shapefile
-from pydantic import AwareDatetime, Field
+from pydantic import AwareDatetime, Field, model_validator
 from pyiem.database import get_sqlalchemy_conn
 from pyiem.exceptions import IncompleteWebRequest
 from pyiem.util import utc
@@ -137,6 +146,44 @@ class Schema(CGIModel):
         0,
         description="If ets unset, the end minute value in UTC.",
     )
+    east: float = Field(
+        default=None,
+        description="Eastern extent of spatial bounds. (degrees East)",
+        ge=-180,
+        le=180,
+    )
+    west: float = Field(
+        default=None,
+        description="Western extent of spatial bounds. (degrees East)",
+        ge=-180,
+        le=180,
+    )
+    north: float = Field(
+        default=None,
+        description="Northern extent of spatial bounds. (degrees North)",
+        ge=-90,
+        le=90,
+    )
+    south: float = Field(
+        default=None,
+        description="Southern extent of spatial bounds. (degrees North)",
+        ge=-90,
+        le=90,
+    )
+
+    @model_validator(mode="after")
+    def validate_spatial_bounds(self):
+        """Ensure we have a valid spatial bounds."""
+        # Ensure that if we have one field set, we have them all
+        vals = [self.east, self.west, self.north, self.south]
+        if any(x is not None for x in vals):
+            if not all(x is not None for x in vals):
+                raise ValueError("Incomplete spatial bounds provided")
+            if self.east <= self.west:
+                raise ValueError("East is less than West")
+            if self.north <= self.south:
+                raise ValueError("North is less than South")
+        return self
 
 
 def get_time_domain(form):
@@ -247,6 +294,15 @@ def application(environ, start_response):
         sql_filters += " and l.wfo = ANY(:wfos) "
     if params["types"] and "ALL" not in params["types"]:
         sql_filters += " and l.typetext = ANY(:types) "
+    if environ["north"] is not None:
+        sql_filters += (
+            " and ST_Contains(ST_MakeEnvelope(:west, :south, :east, :north, "
+            "4326), l.geom) "
+        )
+        params["north"] = environ["north"]
+        params["south"] = environ["south"]
+        params["east"] = environ["east"]
+        params["west"] = environ["west"]
 
     fn = f"lsr_{params['sts']:%Y%m%d%H%M}_{params['ets']:%Y%m%d%H%M}"
     if environ["fmt"] == "excel":
