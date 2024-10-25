@@ -238,7 +238,12 @@
 /plotting/auto/plot/232/mode:WC::network:IA_ASOS::station:AMW::valid:2020-01-17%201200::hours:72::_r:t::dpi:100.png
 /plotting/auto/plot/232/mode:FW::network:IA_ASOS::station:AMW::valid:2020-01-17%201200::hours:72::_r:t::dpi:100.png
 /plotting/auto/plot/232/mode:BZ::network:IA_ASOS::station:AMW::valid:2020-01-17%201200::hours:72::_r:t::dpi:100.png
+/plotting/auto/plot/234/sdate:2024-05-01::edate:2024-06-30::filter:NONE::w:cwa::network:WFO::wfo:_ALL::state:IA::heatmap:yes::cmap:viridis::_r:43::dpi:100.png
+/plotting/auto/plot/234/sdate:2023-05-01::edate:2024-06-30::filter:NONE::w:state::network:WFO::wfo:DMQ::state:IA::heatmap:yes::cmap:viridis::_r:43::dpi:100.png
+/plotting/auto/plot/234/sdate:2023-05-01::edate:2024-06-30::filter:NONE::w:state::network:WFO::wfo:DMX::state:IA::heatmap:yes::cmap:viridis::_r:43::dpi:100.png
+/plotting/auto/plot/234/sdate:2024-05-01::edate:2024-06-30::filter:NONE::w:state::network:WFO::wfo:DMX::state:IA::heatmap:yes::cmap:viridis::_r:43::dpi:100.png
 /plotting/auto/plot/236/ident:ZMP::sdate:2024-07-31::edate:2024-08-01::_r:43::dpi:100.png
+/plotting/auto/plot/240/network:IACLIMATE::station:IATAME::sdate:2024-04-24::_r:t::dpi:100.png
 /plotting/auto/plot/241/sts:2000-08-06%200900::ets:2000-08-06%200900::w:min::csector:IA::mode:user::cmap:gnuplot2::_r:t::dpi:100.png
 /plotting/auto/plot/241/sts:2024-08-06%200900::ets:2024-08-06%200900::w:min::csector:IA::mode:user::cmap:gnuplot2::_r:t::dpi:100.png
 /plotting/auto/plot/241/sts:2024-01-01%200000::ets:2024-01-01%200100::w:min::csector:IA::mode:user::cmap:gnuplot2::_r:t::dpi:100::_cb:1.png

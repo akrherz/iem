@@ -79,9 +79,11 @@ def plotter(fdict):
             is_morning = True
     try:
         # Sub-optimal need to actually have data.
+        edate = ctx["sdate"] + timedelta(days=7)
         req = requests.get(
             "http://iem.local/json/climodat_dd.py?"
-            f"station={ctx['station']}&gddbase=50&gddceil=86&",
+            f"station={ctx['station']}&gddbase=50&gddceil=86&"
+            f"sdate={ctx['sdate']:%Y-%m-%d}&edate={edate:%Y-%m-%d}",
             timeout=60,
         )
         data = req.json()
@@ -133,7 +135,7 @@ def plotter(fdict):
             "NWS NDFD Forecast"
         ),
     )
-    ax = fig.add_axes([0.06, 0.1, 0.85, 0.75])
+    ax = fig.add_axes((0.06, 0.1, 0.85, 0.75))
     ax.bar(xaxis, df["gdd"].values, color="g", label="Observed")
     ax.bar(xaxis, df["gddndfd"].values, color="r", label="NWS NDFD", width=0.4)
     ax.bar(

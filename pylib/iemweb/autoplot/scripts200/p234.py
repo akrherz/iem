@@ -5,13 +5,14 @@ date is based on the local timezone of the WFO selected.  The calendar plot
 type only supports up to 12 months plotted at once.
 """
 
-import datetime
+from datetime import date, timedelta
 
 import pandas as pd
+from pyiem.database import get_sqlalchemy_conn
 from pyiem.exceptions import NoDataFound
 from pyiem.plot import calendar_plot
 from pyiem.reference import state_names
-from pyiem.util import get_autoplot_context, get_sqlalchemy_conn
+from pyiem.util import get_autoplot_context
 from sqlalchemy import text
 
 PDICT = {"yes": "Colorize Cells in Chart", "no": "Just plot values please"}
@@ -71,7 +72,7 @@ PDICT2 = {"cwa": "by NWS Forecast Office", "state": "by State"}
 def get_description():
     """Return a dict describing how to call this plotter"""
     desc = {"description": __doc__, "data": True}
-    today = datetime.date.today()
+    today = date.today()
     jan1 = today.replace(month=1, day=1)
     desc["arguments"] = [
         dict(
@@ -123,6 +124,12 @@ def get_description():
             default="yes",
             label="Colorize calendar cells based on values?",
         ),
+        {
+            "type": "cmap",
+            "name": "cmap",
+            "label": "Color Ramp:",
+            "default": "viridis",
+        },
     ]
     return desc
 
@@ -142,8 +149,8 @@ def plotter(fdict):
     state = ctx["state"]
     params = {}
     params["tzname"] = ctx["_nt"].sts[wfo]["tzname"]
-    params["sts"] = sts - datetime.timedelta(days=2)
-    params["ets"] = ets + datetime.timedelta(days=2)
+    params["sts"] = sts - timedelta(days=2)
+    params["ets"] = ets + timedelta(days=2)
 
     ctx["_nt"].sts["_ALL"] = {
         "name": "All Offices",
@@ -203,14 +210,15 @@ def plotter(fdict):
     now = sts
     while now <= ets:
         data[now] = {"val": 0}
-        now += datetime.timedelta(days=1)
-    for date, row in df.iterrows():
-        data[date] = {"val": row["count"]}
+        now += timedelta(days=1)
+    for dt, row in df.iterrows():
+        data[dt] = {"val": row["count"]}
     fig = calendar_plot(
         sts,
         ets,
         data,
         apctx=ctx,
+        cmap=ctx["cmap"],
         heatmap=(ctx["heatmap"] == "yes"),
         title=f"{title2} :: Preliminary/Unfiltered Local Storm Reports",
         subtitle=(
