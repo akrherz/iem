@@ -1,12 +1,14 @@
 <?php
 require_once "../../../config/settings.inc.php";
 require_once "../../../include/myview.php";
+require_once "../../../include/network.php";
+require_once "../../../include/forms.php";
+
 $t = new MyView();
+$t->iem_resource = "ISUSM";
 $t->title = "ISU Soil Moisture Minute/Hourly Data Request";
 
-require_once "../../../include/network.php";
 $nt = new NetworkTable("ISUSM");
-require_once "../../../include/forms.php";
 require_once "boxinc.phtml";
 
 $yselect = yearSelect2(2013, 2013, "year1");
@@ -240,9 +242,8 @@ hourly data.</p>
  <dt>soil12vwc</dt><dd>12 inch Depth Soil Volumetric Water Content [%]</dd>
  <dt>soil24vwc</dt><dd>24 inch Depth Soil Volumetric Water Content [%]</dd>
  <dt>soil50vwc</dt><dd>50 inch Depth Soil Volumetric Water Content [%]</dd>
- 
- </dl>
 
+</dl>
 
 EOF;
 $t->render("full.phtml");

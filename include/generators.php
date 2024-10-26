@@ -4,6 +4,32 @@
  */
 require_once dirname(__FILE__) . "/database.inc.php";
 
+function get_website_citations($label){
+    $conn = iemdb("mesosite", TRUE, TRUE);
+    $rs = pg_prepare(
+        $conn,
+        "CITSELECT",
+        "SELECT * from website_citations WHERE iem_resource = $1 ".
+        "ORDER by publication_date DESC");
+    $rs = pg_execute($conn, "CITSELECT", array($label));
+    $s = <<<EOM
+<h3>Publications Citing IEM Data</h3>
+<p>These are publications that have cited the usage of data from this page. This
+list is not exhaustive, so please <a href="/info/contacts.php">let us know</a>
+if you have a publication that should be added. Hopefully by early 2025, this
+listing can be more complete.</p>
+<ul>
+EOM;
+    for ($i=0; $row = pg_fetch_assoc($rs); $i++){
+        $s .= sprintf(
+            "<li>%s <a href=\"%s\">%s</a></li>",
+            $row["title"], $row["link"], $row["link"]);
+    }
+    $s .= "</ul>";
+    pg_close($conn);
+    return $s;
+}
+
 function get_news_by_tag($tag)
 {
     // Generate a listing of recent news items by a certain tag
