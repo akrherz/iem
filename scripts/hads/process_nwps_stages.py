@@ -4,7 +4,7 @@ Called from windrose/daily_drive_network.py
 """
 
 import click
-import requests
+import httpx
 from pyiem.database import get_dbconn
 from pyiem.network import Table as NetworkTable
 from pyiem.util import logger
@@ -18,7 +18,7 @@ def process_site(mcursor, nwsli, meta):
     url = f"https://api.water.noaa.gov/nwps/v1/gauges/{nwsli}"
 
     try:
-        res = requests.get(url, timeout=30)
+        res = httpx.get(url, timeout=30)
         if res.status_code != 200:
             LOG.info("Failed to fetch %s, got %s", url, res.status_code)
             return

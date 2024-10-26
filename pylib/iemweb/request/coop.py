@@ -50,6 +50,7 @@ class Schema(CGIModel):
             "The delimiter to use in the output file.  "
             "Options: comma, tab, space"
         ),
+        pattern="^(comma|tab|space)$",
     )
     gis: bool = Field(
         False,

@@ -5,16 +5,16 @@ state.  The plot presents the distribution and normalized frequency
 for a specific year and for all years combined for the given month.
 """
 
-# pylint: disable=no-member
 import calendar
-import datetime
+from datetime import date
 
 import numpy as np
 import pandas as pd
 from pyiem import reference
+from pyiem.database import get_sqlalchemy_conn
 from pyiem.exceptions import NoDataFound
 from pyiem.plot import figure_axes
-from pyiem.util import get_autoplot_context, get_sqlalchemy_conn
+from pyiem.util import get_autoplot_context
 from scipy.stats import norm
 
 PDICT = {
@@ -29,7 +29,7 @@ PDICT = {
 def get_description():
     """Return a dict describing how to call this plotter"""
     desc = {"description": __doc__, "data": True}
-    today = datetime.date.today()
+    today = date.today()
     desc["arguments"] = [
         dict(type="state", name="state", default="IA", label="Select State:"),
         dict(
