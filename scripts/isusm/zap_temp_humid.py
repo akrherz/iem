@@ -1,10 +1,11 @@
 """Properly zap a period of data from the database"""
 
-import datetime
 import subprocess
-import sys
+from datetime import datetime
 
-from pyiem.util import get_dbconn, logger
+import click
+from pyiem.database import get_dbconn
+from pyiem.util import logger
 
 LOG = logger()
 
@@ -75,24 +76,25 @@ def do_iem(nwsli, sts, ets):
     pgconn.close()
 
 
-def main(argv):
+@click.command()
+@click.option("--station", help="Station Identifier", required=True)
+@click.option(
+    "--sts", help="Start Timestamp", required=True, type=click.DateTime()
+)
+@click.option(
+    "--ets", help="End Timestamp", required=True, type=click.DateTime()
+)
+def main(station: str, sts: datetime, ets: datetime):
     """Go Main Go"""
-    nwsli = argv[1]
-    sts = datetime.datetime(
-        int(argv[2]), int(argv[3]), int(argv[4]), int(argv[5])
-    )
-    ets = datetime.datetime(
-        int(argv[6]), int(argv[7]), int(argv[8]), int(argv[9])
-    )
-    res = input(f"{nwsli} {sts}->{ets}, OK? y/[n] ")
+    res = input(f"{station} {sts}->{ets}, OK? y/[n] ")
     if str(res) != "y":
         print("ABORT")
         return
-    do_iem(nwsli, sts, ets)
-    do_isuag(nwsli, sts, ets)
+    do_iem(station, sts, ets)
+    do_isuag(station, sts, ets)
     print("Redoing estimates")
     subprocess.call(["python", "fix_temps.py"])
 
 
 if __name__ == "__main__":
-    main(sys.argv)
+    main()

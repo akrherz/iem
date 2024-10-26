@@ -1,8 +1,6 @@
-#Run at 40 minutes after the hour, there are some expensive scripts here
-YYYY6=$(date -u --date '6 hours ago' +'%Y')
-MM6=$(date -u --date '6 hours ago' +'%m')
-DD6=$(date -u --date '6 hours ago' +'%d')
-HH6=$(date -u --date '6 hours ago' +'%H')
+# Run at 40 minutes after the hour, there are some expensive scripts here
+
+DT6="$(date -u --date '6 hours ago' +'%Y-%m-%dT%H'):00:00"
 
 cd dl
 python download_ffg.py &
@@ -39,4 +37,5 @@ cd black
 ./surfaceContours.csh
 
 cd ../../model
-python motherlode_ingest.py $YYYY6 $MM6 $DD6 $HH6
+# set above incase this bleeds into the next hour
+python motherlode_ingest.py --valid=$DT6

@@ -2,13 +2,15 @@
 Mine grid point extracted values for our good and the good of the IEM
 Use Unidata's motherlode server :)
 
+Called from RUN_40_AFTER.sh
 """
 
-import datetime
 import sys
+from datetime import datetime, timedelta
 from io import StringIO
 from zoneinfo import ZoneInfo
 
+import click
 import pandas as pd
 import requests
 from pyiem.database import get_dbconn
@@ -69,7 +71,7 @@ def run(mcursor, model, station, lon, lat, ts):
     host = (
         BASE_URL
         if (
-            datetime.datetime.utcnow().replace(tzinfo=ZoneInfo("UTC")) - ts
+            datetime.utcnow().replace(tzinfo=ZoneInfo("UTC")) - ts
         ).total_seconds()
         < 86400
         else BASE_URL2
@@ -122,7 +124,7 @@ def run(mcursor, model, station, lon, lat, ts):
         sbcape = xref(row, "sbcape", model)
         sbcin = xref(row, "sbcin", model)
         pwater = xref(row, "pwater", model)
-        fts = datetime.datetime.strptime(row["time"], ISO8601)
+        fts = datetime.strptime(row["time"], ISO8601)
         fts = fts.replace(tzinfo=ZoneInfo("UTC"))
         sql = f"""INSERT into {table} (station, model, runtime,
               ftime, sbcape, sbcin, pwater)
@@ -173,28 +175,23 @@ def check_and_run(mcursor, model, runtime):
         run_model(mcursor, model, runtime)
 
 
-def main(argv):
+@click.command()
+@click.option("--valid", type=click.DateTime(), required=True)
+def main(valid: datetime):
     """Do Something"""
+    valid = valid.replace(tzinfo=ZoneInfo("UTC"))
     pgconn = get_dbconn("mos")
     mcursor = pgconn.cursor()
-    gts = datetime.datetime.utcnow()
-    if len(argv) == 5:
-        gts = datetime.datetime(
-            int(argv[1]), int(argv[2]), int(argv[3]), int(argv[4])
-        )
-    gts = gts.replace(
-        tzinfo=ZoneInfo("UTC"), minute=0, second=0, microsecond=0
-    )
 
-    if gts.hour % 6 == 0:
-        ts = gts - datetime.timedelta(hours=6)
+    if valid.hour % 6 == 0:
+        ts = valid - timedelta(hours=6)
         for model in ["GFS", "NAM"]:
             run_model(mcursor, model, ts)
-            check_and_run(mcursor, model, ts - datetime.timedelta(days=7))
+            check_and_run(mcursor, model, ts - timedelta(days=7))
 
-    ts = gts - datetime.timedelta(hours=2)
+    ts = valid - timedelta(hours=2)
     run_model(mcursor, "RAP", ts)
-    check_and_run(mcursor, "RAP", ts - datetime.timedelta(days=7))
+    check_and_run(mcursor, "RAP", ts - timedelta(days=7))
     mcursor.close()
     pgconn.commit()
     pgconn.close()
@@ -202,4 +199,4 @@ def main(argv):
 
 if __name__ == "__main__":
     # Go Go gadget
-    main(sys.argv)
+    main()

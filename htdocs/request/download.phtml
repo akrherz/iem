@@ -9,6 +9,7 @@ require_once "../../include/iemprop.php";
 
 $asos_archive_end = get_iemprop("asos2archive_last");
 $t = new MyView();
+$t->iem_resource = "ASOS";
 $t->iemss = True;
 
 $network = isset($_GET['network']) ? xssafe($_GET['network']): "IA_ASOS";

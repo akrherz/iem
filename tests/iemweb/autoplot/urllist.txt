@@ -1,5 +1,6 @@
 /plotting/auto/plot/1/network:IACLIMATE::station:IATAME::threshold:44::month1:6::num1:2::var1:hdd65::month2:6::num2:2::var2:gdd41::year:2007::_r:96::dpi:100.png
 /plotting/auto/plot/2/network:IACLIMATE::station:IATAME::month:2::year:2024::gddbase:50::gddceil:86::_r:t::dpi:100.png
+/plotting/auto/plot/6/state:IA::year:2024::month:3::type:sum-precip::_r:t::dpi:100.png
 /plotting/auto/plot/11/network:IA_ASOS::zstation:AMW::year:2024::emphasis:-99::var:dwpf::opt:below::_r:43::dpi:100.png
 /plotting/auto/plot/14/network:IACLIMATE::station:IATAME::year:2024::_r:t::dpi:100.png
 /plotting/auto/plot/17/network:IA_ASOS::station:AMW::month:7::year:2024::p:temps::_r:t::dpi:100.png
@@ -124,6 +125,8 @@
 /plotting/auto/plot/134/network:OHCLIMATE::station:OHTCMH::var:warmest_hifeel::days:4::cmap:hot_r::_r:43::dpi:100.png
 /plotting/auto/plot/134/network:IA_ASOS::station:DSM::var:coldest_lofeel::days:7::cmap:jet::_r:t::dpi:100::_cb:1.png
 /plotting/auto/plot/134/network:IACLIMATE::station:IATAME::var:wettest::days:7::cmap:jet::_r:t::dpi:100.png
+/plotting/auto/plot/139/network:IA_ASOS::zstation:AMW::v:smallest::month:winter::_r:t::dpi:100.png
+/plotting/auto/plot/139/network:IA_ASOS::zstation:AMW::v:largest::month:all::_r:t::dpi:100::_cb:1.png
 /plotting/auto/plot/140/network:IA_ASOS::station:DSM::syear:1928::sday:0711::eday:0725::varname:avg_temp::w:none::thres:1::year:2024::_r:t::dpi:100.png
 /plotting/auto/plot/141/location:ames::ptype:rain::sdate:mar15::_r:t::dpi:100.png
 /plotting/auto/plot/141/location:ames::ptype:maxt::sdate:mar15::_r:t::dpi:100.png
@@ -177,6 +180,7 @@
 /plotting/auto/plot/177/network:ISUSM::station:BOOI4::opt:2::sts:2024-07-18%201000::ets:2024-07-25%201000::_r:t::dpi:100.png
 /plotting/auto/plot/177/network:ISUSM::station:BOOI4::opt:sm::sts:2024-07-18%201000::ets:2024-07-25%201000::_r:t::dpi:100.png
 /plotting/auto/plot/177/network:ISUSM::station:BOOI4::opt:at::sts:2024-07-18%201000::ets:2024-07-25%201000::_r:t::dpi:100.png
+/plotting/auto/plot/177/network:ISUSM::station:BOOI4::opt:1::sts:2024-07-21%201600::ets:2024-07-22%201600::_r:t::dpi:100.png
 /plotting/auto/plot/180/v:precip::network1:IACLIMATE::station1:IATDSM::c1:1951::network2:IACLIMATE::station2:IA0000::c2:1951::s:0::sy1:1991::ey1:2020::sy2:1981::ey2:2010::_r:43::dpi:100.png
 /plotting/auto/plot/181/network:IACLIMATE::station:IATAME::date:2024-10-14::year:2023::var:high::r1:50-59::r2:60%2069::r3:70%2079::r4:80%2089::r5:90%2099::_r:t::dpi:100.png
 /plotting/auto/plot/182/sector:IA::date:2024-01-02::trailing:1::threshold:0.1::_r:t::dpi:100.png

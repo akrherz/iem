@@ -3,7 +3,7 @@ This application generates time series charts using data from the
 ISU Soil Moisture Network.
 """
 
-import datetime
+from datetime import datetime, timedelta
 from zoneinfo import ZoneInfo
 
 import matplotlib.colors as mpcolors
@@ -49,8 +49,8 @@ def get_description():
     """Return a dict describing how to call this plotter"""
     desc = {"description": __doc__, "data": True}
     desc["frontend"] = "/agclimate/smts.php"
-    ets = datetime.datetime.now().replace(minute=0)
-    sts = ets - datetime.timedelta(days=7)
+    ets = datetime.now().replace(minute=0)
+    sts = ets - timedelta(days=7)
     desc["arguments"] = [
         dict(
             type="networkselect",
@@ -150,7 +150,7 @@ def make_inversion_timing(ctx):
     ax.set_xlabel(f"{ctx['sts'].year} Local Time (US Central)")
 
     def custom(x, _pos=None):
-        dt = ctx["sts"] + datetime.timedelta(days=x)
+        dt = ctx["sts"] + timedelta(days=x)
         return dt.strftime("%-d %b")
 
     ax.yaxis.set_major_formatter(custom)
@@ -390,7 +390,7 @@ def make_daily_rainfall_soil_rh(ctx):
         interval = int(len(df.index) / 7.0 + 1)
         ax.xaxis.set_major_locator(mdates.DayLocator(interval=interval))
 
-    ax = fig.add_axes([0.1, 0.7, 0.8, 0.2])
+    ax = fig.add_axes((0.1, 0.7, 0.8, 0.2))
     ax.bar(
         df.index.values,
         df["rain_in_tot_qc"].values,
@@ -401,7 +401,7 @@ def make_daily_rainfall_soil_rh(ctx):
     ax.set_ylabel("Precipitation [inch]")
     common(ax)
 
-    ax = fig.add_axes([0.1, 0.4, 0.8, 0.2])
+    ax = fig.add_axes((0.1, 0.4, 0.8, 0.2))
     vals = c2f(df["t4_c_avg_qc"].values)
     ax.bar(
         df.index.values,
@@ -413,7 +413,7 @@ def make_daily_rainfall_soil_rh(ctx):
     ax.set_ylabel(r"4 Inch Soil Temp [$^\circ$F]")
     common(ax)
 
-    ax = fig.add_axes([0.1, 0.1, 0.8, 0.2])
+    ax = fig.add_axes((0.1, 0.1, 0.8, 0.2))
     if not pd.isna(df["rh_avg_qc"]).all():
         ax.bar(
             df.index.values,
@@ -626,7 +626,7 @@ def make_daily_water_change_plot(ctx):
     ax = fig.subplots(2, 1, sharex=True)
     if not df["depth"].isnull().all():
         ax[0].bar(df["valid"].values, df["depth"], color="b", width=1)
-    oneday = datetime.timedelta(days=1)
+    oneday = timedelta(days=1)
     ax[0].grid(True)
     ax[0].set_ylabel("Plant Available Soil Water [inch]")
     ax[0].set_ylim(bottom=0)
@@ -863,7 +863,7 @@ def plot_meteogram(ctx):
     """Do main plotting logic"""
     table = "sm_minute"
     barwidth = 1 / 1440.0
-    if (ctx["ets"] - ctx["sts"]) > datetime.timedelta(days=5):
+    if (ctx["ets"] - ctx["sts"]) > timedelta(days=5):
         table = "sm_hourly"
         barwidth = 1 / 24.0
     with get_sqlalchemy_conn("isuag") as conn:
