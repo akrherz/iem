@@ -144,10 +144,13 @@ def fill100(df: pd.DataFrame) -> pd.DataFrame:
         if maxrow["num_value"] > 99 or year == utc().year:
             continue
         lastrow = df[df["year"] == year].iloc[-1]
+        filldate = lastrow["week_ending"] + pd.Timedelta(days=7)
+        if filldate.year != year:
+            continue
         newrows.append(
             {
                 "year": year,
-                "week_ending": lastrow["week_ending"] + pd.Timedelta(days=7),
+                "week_ending": filldate,
                 "num_value": 100,
                 "day_of_year": lastrow["day_of_year"] + 7,
             }
@@ -170,6 +173,7 @@ def plotter(fdict):
             from nass_quickstats
             where short_desc = :sd and state_alpha = :sa and
             num_value is not null and week_ending is not null
+            and extract(year from week_ending) = year
             ORDER by week_ending ASC
         """),
             conn,
@@ -198,7 +202,7 @@ def plotter(fdict):
         "Daily Linear Interpolated Values Between Weekly Reports"
     )
     fig = figure(title=title, apctx=ctx)
-    ax = fig.add_axes([0.05, 0.1, 0.35, 0.8])
+    ax = fig.add_axes((0.05, 0.1, 0.35, 0.8))
 
     data = np.ma.ones((df["yeari"].max() + 1, 366), "f") * -1
     data.mask = np.where(data == -1, True, False)
@@ -241,7 +245,7 @@ def plotter(fdict):
         interpolation="none",
         cmap=cmap,
     )
-    cax = fig.add_axes([0.42, 0.1, 0.02, 0.8])
+    cax = fig.add_axes((0.42, 0.1, 0.02, 0.8))
     fig.colorbar(res, cax=cax)
     ax.set_xticks((1, 32, 60, 91, 121, 152, 182, 213, 244, 274, 305, 335))
     ax.set_xticklabels(calendar.month_abbr[1:])
