@@ -2,10 +2,12 @@
 /* Daily Data download for the ISUAG Network */
 require_once "../../../config/settings.inc.php";
 require_once "../../../include/forms.php";
+require_once "../../../include/myview.php";
 define("IEM_APPID", 13);
 require_once "boxinc.phtml";
-require_once "../../../include/myview.php";
+
 $t = new MyView();
+$t->iem_resource = "ISUSM";
 $t->title = "ISU AgClimate Legacy Hourly Data Request";
 
 $ys = yearSelect2(1986, date("Y"), "startYear", '', 2014);
@@ -120,7 +122,8 @@ data from this network, see <a href="dailyRequest.php">this page</a>.
     <input type="submit" value="Submit Query">
     <input type="reset">
 
-<BR><BR>
+<br /><br />
 </form>
+
 EOF;
 $t->render('single.phtml');

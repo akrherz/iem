@@ -119,6 +119,7 @@
 /plotting/auto/plot/123/_cb:1.txt
 /plotting/auto/plot/124/_cb:1.txt
 /plotting/auto/plot/125/month:summer::sector:midwest::src:ncdc_climate81::state:WI::opt:both::var:avg_temp::cmap:jet::_r:t::dpi:100.png
+/plotting/auto/plot/127/state:IA::short_desc:CH::w:last::threshold:50::cmap:jet::_r:t::dpi:100::_cb:1.png
 /plotting/auto/plot/128/var:total_precip::network1:IACLIMATE::station1:IATAME::network2:IACLIMATE::station2:IA0000::_r:43::dpi:100::_cb:1.png
 /plotting/auto/plot/134/network:OHCLIMATE::station:OHTCMH::var:warmest_hifeel::days:4::cmap:hot_r::_r:43::dpi:100.png
 /plotting/auto/plot/134/network:IA_ASOS::station:DSM::var:coldest_lofeel::days:7::cmap:jet::_r:t::dpi:100::_cb:1.png

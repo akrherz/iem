@@ -9,6 +9,7 @@ require_once "../../../include/forms.php";
 require_once "boxinc.phtml";
 
 $t = new MyView();
+$t->iem_resource = "ISUSM";
 $t->title = "ISU Soil Moisture Daily Data Request";
 
 $nt = new NetworkTable("ISUSM");
@@ -211,7 +212,7 @@ When selecting the time interval, make sure you that choose <B> * valid * </B> d
 <dl class="dl-horizontal">
  <dt>station</dt><dd>National Weather Service Location Identifier for the
  site.  This is a five character identifier.</dd>
-         
+
  <dt>valid</dt><dd>Date of the observation</dd>
 
  <dt>high</dt><dd>High Temperature [F]</dd>
@@ -240,10 +241,9 @@ When selecting the time interval, make sure you that choose <B> * valid * </B> d
  <dt>soil12vwc</dt><dd>Average 12 inch Depth Soil Volumetric Water Content [%]</dd>
  <dt>soil24vwc</dt><dd>Average 24 inch Depth Soil Volumetric Water Content [%]</dd>
  <dt>soil50vwc</dt><dd>Average 50 inch Depth Soil Volumetric Water Content [%]</dd>
-         
-         
 </dl>
 
 </div></div>
+
 EOF;
 $t->render("single.phtml");

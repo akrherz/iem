@@ -10,6 +10,7 @@ require_once "../../../include/network.php";
 require_once "../../../include/vtec.php";
 
 $t = new MyView();
+$t->iem_resource = "VTEC";
 $t->title = "NWS Watches Warnings Advisories Download";
 
 $nt = new NetworkTable("WFO");
@@ -327,6 +328,7 @@ when they were generated.</p>
  <td></td>
 </tr>
 </table>
+
 EOF;
 $t->content = $content;
 $t->render('full.phtml');

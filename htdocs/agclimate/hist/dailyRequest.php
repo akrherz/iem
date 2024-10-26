@@ -6,6 +6,7 @@ define("IEM_APPID", 12);
 require_once "../../../include/myview.php";
 include_once "boxinc.phtml";
 $t = new MyView();
+$t->iem_resource = "ISUSM";
 $t->title = "ISU AgClimate Legacy Daily Data Request";
 
 $ys = yearSelect2(1986, date("Y"), "startYear", '', 2014);
@@ -144,5 +145,6 @@ or something appropriate for delimited text.</div>
 </form>
 
 <br />
+
 EOF;
 $t->render('single.phtml');

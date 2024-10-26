@@ -27,11 +27,16 @@ class MyView {
     public ?string $twitter_video = null;
     public int $twitter_video_width = 0;
     public int $twitter_video_height = 0;
+    public ?string $iem_resource = null;
 
     public function __construct() {
             $this->template_dir =  dirname(__FILE__).'/templates/';
     }
     public function render($template_file) {
+        if ($this->iem_resource != null) {
+            require_once dirname(__FILE__) . "/generators.php";
+            $this->content .= get_website_citations($this->iem_resource);
+        }
         if (file_exists($this->template_dir.$template_file)) {
             include $this->template_dir.$template_file;
         } else {
