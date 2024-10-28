@@ -1,9 +1,26 @@
 """.. title:: WPC MPD Shapefile Download
 
+Return to `User Frontend </request/gis/wpc_mpd.phtml>`_ or
+`API Services </api/#cgi>`_.
+
 Documentation for /cgi-bin/request/gis/wpc_mpd.py
 -------------------------------------------------
 
-To be written.
+This service provides a download of the WPC MPD shapefile data for a given
+time period.
+
+Changelog
+---------
+
+- 2024-10-27: Documentation update
+
+Example Requests
+----------------
+
+Provide a shapefile of WPC MPDs for July 2024
+
+https://mesonet.agron.iastate.edu/cgi-bin/request/gis/wpc_mpd.py?\
+sts=2024-07-01T00:00Z&ets=2024-08-01T00:00Z
 
 """
 
@@ -14,17 +31,35 @@ from io import BytesIO
 
 # Third Party
 import geopandas as gpd
+from pydantic import AwareDatetime, Field
+from pyiem.database import get_sqlalchemy_conn
 from pyiem.exceptions import IncompleteWebRequest
-from pyiem.util import get_sqlalchemy_conn
-from pyiem.webutil import iemapp
+from pyiem.webutil import CGIModel, iemapp
 
 PRJFILE = "/opt/iem/data/gis/meta/4326.prj"
 
 
-@iemapp(default_tz="UTC", help=__doc__)
+class Schema(CGIModel):
+    """See how we are called."""
+
+    sts: AwareDatetime = Field(None, description="Start Time")
+    ets: AwareDatetime = Field(None, description="End Time")
+    year1: int = Field(None, description="Start Time Year")
+    year2: int = Field(None, description="End Time Year")
+    month1: int = Field(None, description="Start Time Month")
+    month2: int = Field(None, description="End Time Month")
+    day1: int = Field(None, description="Start Time Day")
+    day2: int = Field(None, description="End Time Day")
+    hour1: int = Field(0, description="Start Time Hour")
+    hour2: int = Field(0, description="End Time Hour")
+    minute1: int = Field(0, description="Start Time Minute")
+    minute2: int = Field(0, description="End Time Minute")
+
+
+@iemapp(default_tz="UTC", help=__doc__, schema=Schema)
 def application(environ, start_response):
     """Do something!"""
-    if "sts" not in environ:
+    if environ["sts"] is None or environ["ets"] is None:
         raise IncompleteWebRequest("Missing start time GET params")
     if environ["sts"] > environ["ets"]:
         environ["sts"], environ["ets"] = environ["ets"], environ["sts"]

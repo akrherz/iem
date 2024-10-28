@@ -144,8 +144,8 @@ def get_obsdf(ctx: dict) -> pd.DataFrame:
         if ctx["report"] == "12z":
             # Require obs to be between 5 and 10 AM local time
             obs = obs[
-                (obs["coop_valid"].dt.hour >= 5)
-                & (obs["coop_valid"].dt.hour <= 10)
+                (obs["coop_local_valid"].dt.hour >= 5)
+                & (obs["coop_local_valid"].dt.hour <= 10)
             ]
     return obs
 

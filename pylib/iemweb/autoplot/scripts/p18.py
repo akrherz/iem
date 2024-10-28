@@ -150,9 +150,8 @@ def add_ctx(ctx):
         ctx["edate"] = today
         ctx["days"] = (ctx["edate"] - sdate).days
 
-    ctx["climo"] = None
+    ctx["climo"] = {}
     if ctx["var"] == "tmpf":
-        ctx["climo"] = {}
         ccursor.execute(
             "SELECT valid, high, low from ncei_climate91 where station = %s",
             (ctx["_nt"].sts[ctx["station"]]["ncei91"],),
@@ -201,7 +200,7 @@ def plotter(fdict):
     chighs = []
     clows = []
     oneday = timedelta(days=1)
-    while ctx["climo"] is not None and (now - oneday) <= ctx["edate"]:
+    while ctx["climo"] and (now - oneday) <= ctx["edate"]:
         cdates.append(now)
         chighs.append(ctx["climo"][now.strftime("%m%d")]["high"])
         clows.append(ctx["climo"][now.strftime("%m%d")]["low"])

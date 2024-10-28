@@ -4,13 +4,14 @@ high and low temperatures between two automated ASOS sites of your
 choosing.
 """
 
-import datetime
+from datetime import date, timedelta
 
 import matplotlib.dates as mdates
 import pandas as pd
+from pyiem.database import get_sqlalchemy_conn
 from pyiem.exceptions import NoDataFound
 from pyiem.plot import figure
-from pyiem.util import get_autoplot_context, get_sqlalchemy_conn
+from pyiem.util import get_autoplot_context
 
 PDICT = {
     "temp": "High and Low Temperature",
@@ -21,8 +22,8 @@ PDICT = {
 def get_description():
     """Return a dict describing how to call this plotter"""
     desc = {"description": __doc__, "data": True, "cache": 86400}
-    edate = datetime.date.today()
-    sdate = edate - datetime.timedelta(days=90)
+    edate = date.today()
+    sdate = edate - timedelta(days=90)
     desc["arguments"] = [
         dict(
             type="zstation",

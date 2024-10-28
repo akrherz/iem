@@ -10,6 +10,7 @@ require_once "../../../include/imagemaps.php";
 $network = isset($_REQUEST["network"]) ? substr(xssafe($_REQUEST["network"]), 0, 10) : "IACLIMATE";
 
 $t = new MyView();
+$t->iem_resource = "CLIMODAT";
 $t->iemss = True;
 $t->title = "Climodat Dataset Daily Data Download";
 

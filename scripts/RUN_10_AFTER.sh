@@ -144,9 +144,9 @@ then
 fi
 
 cd ../mos
-python current_bias.py NAM
-python current_bias.py GFS
-python current_bias.py NBS
+python current_bias.py --model=NAM
+python current_bias.py --model=GFS
+python current_bias.py --model=NBS
 
 if [ $HH -eq 1 ]
 then

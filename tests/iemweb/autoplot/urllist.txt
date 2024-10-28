@@ -112,6 +112,10 @@
 /plotting/auto/plot/111/_cb:1.txt
 /plotting/auto/plot/112/_cb:1.txt
 /plotting/auto/plot/113/network:IACLIMATE::station:IATAME::var:maxmin::year1:2023::sday:0101::eday:1231::_r:43::dpi:100.png
+/plotting/auto/plot/113/network:IACLIMATE::station:IATAME::var:precip::sday:0101::eday:1231::_r:t::dpi:100.png
+/plotting/auto/plot/113/network:IACLIMATE::station:IATAME::var:precip::year1:2019::sday:1001::eday:0430::_r:t::dpi:100.png
+/plotting/auto/plot/113/network:IACLIMATE::station:IATAME::var:range::year1:2019::year2:2008::sday:1001::eday:0430::_r:t::dpi:100.png
+/plotting/auto/plot/113/network:IACLIMATE::station:IATAME::var:means::year1:2019::year2:2008::sday:1001::eday:0430::_r:t::dpi:100.png
 /plotting/auto/plot/114/_cb:1.txt
 /plotting/auto/plot/117/_cb:1.txt
 /plotting/auto/plot/118/_cb:1.txt
@@ -165,6 +169,7 @@
 /plotting/auto/plot/171/opt:fema::network:WFO::station:DMX::state:IA::ugc:IAC169::fema:7::c:single::phenomena:TO::significance:W::cmap:Greens::_r:t::dpi:100.png
 /plotting/auto/plot/172/network:IACLIMATE::station:IATAME::var:snow::year1:2024::sdate:0101::edate:0102::m:3::_r:t::dpi:100::_cb:1.png
 /plotting/auto/plot/173/network:IA_ASOS::zstation:AMW::units:mph::p1:0501-0510::p2:0511-0520::_r:t::dpi:100.png
+/plotting/auto/plot/174/network1:IA_ASOS::zstation1:DSM::network2:IA_ASOS::zstation2:AMW::var:temp::sdate:2024-01-01::edate:2024-05-08::_r:43::dpi:100.png
 /plotting/auto/plot/177/network:ISUSM::station:BOOI4::opt:1::sts:2024-07-18%201000::ets:2024-07-25%201000::_r:t::dpi:100.png
 /plotting/auto/plot/177/network:ISUSM::station:BOOI4::opt:m::sts:2024-07-18%201000::ets:2024-07-25%201000::_r:t::dpi:100.png
 /plotting/auto/plot/177/network:ISUSM::station:BOOI4::opt:8::sts:2024-07-18%201000::ets:2024-07-25%201000::_r:t::dpi:100.png
@@ -182,6 +187,7 @@
 /plotting/auto/plot/177/network:ISUSM::station:BOOI4::opt:at::sts:2024-07-18%201000::ets:2024-07-25%201000::_r:t::dpi:100.png
 /plotting/auto/plot/177/network:ISUSM::station:BOOI4::opt:1::sts:2024-07-21%201600::ets:2024-07-22%201600::_r:t::dpi:100.png
 /plotting/auto/plot/180/v:precip::network1:IACLIMATE::station1:IATDSM::c1:1951::network2:IACLIMATE::station2:IA0000::c2:1951::s:0::sy1:1991::ey1:2020::sy2:1981::ey2:2010::_r:43::dpi:100.png
+/plotting/auto/plot/180/v:snow::network1:IACLIMATE::station1:IATDSM::c1:custom::network2:IACLIMATE::c2:1951::s:14::sy1:1991::ey1:2020::sy2:1981::ey2:2010::_r:t::dpi:100.png
 /plotting/auto/plot/181/network:IACLIMATE::station:IATAME::date:2024-10-14::year:2023::var:high::r1:50-59::r2:60%2069::r3:70%2079::r4:80%2089::r5:90%2099::_r:t::dpi:100.png
 /plotting/auto/plot/182/sector:IA::date:2024-01-02::trailing:1::threshold:0.1::_r:t::dpi:100.png
 /plotting/auto/plot/185/sector:IA::date:2024-01-01::threshold:2.0::cmap:terrain::_r:t::dpi:100.png

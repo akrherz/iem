@@ -9,8 +9,8 @@ This service emits shapefiles (with additional csv included),
 or even Excel files.  This service is
 rather blunt force and perhaps you should review the mountain of adhoc JSON/API
 services found at
-`IEM Legacy JSON Services <https://mesonet.agron.iastate.edu/json/>`_ or at
-`IEM API Services <https://mesonet.agron.iastate.edu/api/1/docs/>`_ .
+`IEM Legacy JSON Services </json/>`_ or at
+`IEM API Services </api/1/docs/>`_ .
 
 Changelog
 ---------
@@ -58,9 +58,9 @@ https://mesonet.agron.iastate.edu/cgi-bin/request/gis/watchwarn.py\
 
 """
 
-import datetime
 import tempfile
 import zipfile
+from datetime import timedelta
 from io import BytesIO
 
 import fiona
@@ -324,7 +324,7 @@ def build_sql(environ):
         if sts is None or ets is None:
             raise IncompleteWebRequest("Missing start or end time parameters")
         # Keep size low
-        if wfo_limiter == "" and (ets - sts) > datetime.timedelta(days=366):
+        if wfo_limiter == "" and (ets - sts) > timedelta(days=366):
             raise IncompleteWebRequest("Please shorten request to <1 year.")
         # Change to postgis db once we have the wfo list
         fn = f"wwa_{sts:%Y%m%d%H%M}_{ets:%Y%m%d%H%M}"
@@ -387,7 +387,7 @@ def build_sql(environ):
     if environ["timeopt"] == 2:
         timelimit = (
             f"issue <= '{sts}' and "
-            f"issue > '{sts + datetime.timedelta(days=-30)}' and "
+            f"issue > '{sts + timedelta(days=-30)}' and "
             f"expire > '{sts}'"
         )
     else:
