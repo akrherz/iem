@@ -69,6 +69,7 @@ import fiona
 import pandas as pd
 from pydantic import AwareDatetime, Field
 from pyiem.database import get_sqlalchemy_conn
+from pyiem.exceptions import IncompleteWebRequest
 from pyiem.util import utc
 from pyiem.webutil import CGIModel, ListOrCSVType, iemapp
 from shapely.geometry import mapping
@@ -327,10 +328,10 @@ def build(environ: dict) -> Tuple[str, str, dict]:
 
     if environ["timeopt"] != 2:
         if sts is None or ets is None:
-            raise ValueError("Missing start or end time parameters")
+            raise IncompleteWebRequest("Missing start or end time parameters")
         # Keep size low
         if wfo_limiter == "" and (ets - sts) > timedelta(days=366):
-            raise ValueError("Please shorten request to <1 year.")
+            raise IncompleteWebRequest("Please shorten request to <1 year.")
         # Change to postgis db once we have the wfo list
         fn = f"wwa_{sts:%Y%m%d%H%M}_{ets:%Y%m%d%H%M}"
     else:
@@ -395,7 +396,9 @@ def build(environ: dict) -> Tuple[str, str, dict]:
         params["sts30"] = sts + timedelta(days=-30)
     else:
         if wfo_limiter == "" and limiter == "" and (ets - sts).days > 366:
-            raise ValueError("You must limit your request to a year or less.")
+            raise IncompleteWebRequest(
+                "You must limit your request to a year or less."
+            )
     sbwtimelimit = timelimit
     statuslimit = " status = 'NEW' "
     if environ["addsvs"] == "yes":
@@ -466,7 +469,7 @@ def do_excel(sql, fmt):
     with get_sqlalchemy_conn("postgis") as conn:
         df = pd.read_sql(sql, conn, index_col=None)
     if fmt == "excel" and len(df.index) >= 1048576:
-        raise ValueError("Result too large for Excel download")
+        raise IncompleteWebRequest("Result too large for Excel download")
     # Back-convert datetimes :/
     for col in (
         "utc_issue utc_expire utc_prodissue utc_updated utc_polygon_begin "
@@ -567,12 +570,15 @@ def local_files(names):
 @iemapp(default_tz="UTC", help=__doc__, schema=Schema)
 def application(environ, start_response):
     """Go Main Go"""
-    if environ["timeopt"] != 2 and environ["sts"] is None:
-        start_response("400 Bad Request", [("Content-type", "text/plain")])
-        yield str("Missing start time parameters").encode("ascii")
-        return
     try:
+        if environ["timeopt"] != 2 and environ["sts"] is None:
+            raise IncompleteWebRequest("Missing start time parameter")
         sql, fn, params = build(environ)
+    except IncompleteWebRequest as exp:
+        start_response(
+            "422 Unprocessable Content", [("Content-type", "text/plain")]
+        )
+        yield str(exp).encode("ascii")
     except ValueError as exp:
         start_response("400 Bad Request", [("Content-type", "text/plain")])
         yield str(exp).encode("ascii")
