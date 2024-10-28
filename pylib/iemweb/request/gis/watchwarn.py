@@ -15,6 +15,8 @@ services found at
 Changelog
 ---------
 
+- 2024-10-28: The service default for parameter ``simple`` was set back to
+  ``yes``.  It was mistakenly set to ``no`` when this was migrated to pydantic.
 - 2024-10-28: Optimize the zipfile response by streaming the result.
 - 2024-10-22: Fix and better document the ``at`` parameter for when
   ``timeopt=2``.
@@ -60,6 +62,7 @@ https://mesonet.agron.iastate.edu/cgi-bin/request/gis/watchwarn.py\
 """
 
 import tempfile
+import zlib
 from datetime import datetime, timedelta
 from io import BytesIO
 from stat import S_IFREG
@@ -147,7 +150,7 @@ class Schema(CGIModel):
         "with the ``significance`` parameter.",
     )
     simple: str = Field(
-        "no",
+        "yes",
         pattern="^(yes|no)$",
         description="If yes, use a simplified geometry for the UGC "
         "counties/zones.",
@@ -579,11 +582,11 @@ def application(environ, start_response):
             "422 Unprocessable Content", [("Content-type", "text/plain")]
         )
         yield str(exp).encode("ascii")
+        return
     except ValueError as exp:
         start_response("400 Bad Request", [("Content-type", "text/plain")])
         yield str(exp).encode("ascii")
         return
-
     if environ["accept"] == "excel":
         headers = [
             ("Content-type", EXL),
@@ -642,7 +645,7 @@ def application(environ, start_response):
             ) as output,
             open(f"{tmpdir}/{fn}.csv", "w", encoding="ascii") as csv,
             conn.execution_options(
-                stream_results=True, max_row_buffer=1000
+                stream_results=True, max_row_buffer=10000
             ).execute(text(sql), params) as cursor,
         ):
             output.writerecords(process_results_yield_records(cursor, csv))
@@ -662,7 +665,10 @@ def application(environ, start_response):
                     f"{tmpdir}/{fn}.cpg",
                     f"{tmpdir}/{fn}.csv",
                 )
-            )
+            ),
+            get_compressobj=lambda: zlib.compressobj(
+                wbits=-zlib.MAX_WBITS, level=1
+            ),
         )
         for chunk in zstream:
             yield chunk
