@@ -13,7 +13,7 @@ long term COOP data.
 to use a more user friendly start and end date.
 """
 
-import datetime
+from datetime import date, datetime, timedelta
 
 import numpy as np
 import pandas as pd
@@ -55,9 +55,9 @@ PDICT = {
     "min_low": "Minimum Low Temperature",
     "max_feel": "Maximum Feels Like Temperature",
     "min_feel": "Minimum Feels Like Temperature",
-    "max_rh": "Maximum Relative Humidity",
-    "avg_rh": "Average Relative Humidity",
-    "min_rh": "Minimum Relative Humidity",
+    "max_rh": "Maximum Daily Average Relative Humidity",
+    "avg_rh": "Average Daily Average Relative Humidity",
+    "min_rh": "Minimum Daily Average Relative Humidity",
     "precip": "Total Precipitation",
 }
 PDICT2 = {
@@ -70,8 +70,8 @@ PDICT2 = {
 def get_description():
     """Return a dict describing how to call this plotter"""
     desc = {"description": __doc__, "data": True}
-    today = datetime.datetime.today() - datetime.timedelta(days=1)
-    sts = today - datetime.timedelta(days=14)
+    today = datetime.today() - timedelta(days=1)
+    sts = today - timedelta(days=14)
     desc["arguments"] = [
         dict(
             type="zstation",
@@ -187,9 +187,9 @@ def plotter(fdict):
         max(min_tmpf) as max_low,
         max(max_tmpf) as max_high,
         min(max_tmpf) as min_high,
-        max(max_rh) as max_rh,
-        max(avg_rh) as avg_rh,
-        min(min_rh) as min_rh,
+        avg(max_rh) as max_rh,
+        avg(avg_rh) as avg_rh,
+        avg(min_rh) as min_rh,
         max(max_dwpf) as max_dwpf,
         avg((max_dwpf + min_dwpf)/2.) as avg_dewp,
         min(min_dwpf) as min_dwpf,
@@ -208,7 +208,7 @@ def plotter(fdict):
                 "station": station,
                 "sday": f"{ctx['sday']:%m%d}",
                 "eday": f"{ctx['eday']:%m%d}",
-                "start": datetime.date(ctx["syear"], 1, 1),
+                "start": date(ctx["syear"], 1, 1),
             },
             index_col="yr",
         )
@@ -248,8 +248,8 @@ def plotter(fdict):
         title = title.replace("Average ", "")
     fig = figure(apctx=ctx, title=title)
     ax = [
-        fig.add_axes([0.07, 0.53, 0.78, 0.36]),
-        fig.add_axes([0.07, 0.1, 0.78, 0.36]),
+        fig.add_axes((0.07, 0.53, 0.78, 0.36)),
+        fig.add_axes((0.07, 0.1, 0.78, 0.36)),
     ]
 
     fmter = intfmt if ctx["w"] != "none" else nice
