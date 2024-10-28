@@ -69,7 +69,6 @@ import fiona
 import pandas as pd
 from pydantic import AwareDatetime, Field
 from pyiem.database import get_sqlalchemy_conn
-from pyiem.exceptions import IncompleteWebRequest
 from pyiem.util import utc
 from pyiem.webutil import CGIModel, ListOrCSVType, iemapp
 from shapely.geometry import mapping
@@ -271,11 +270,11 @@ class Schema(CGIModel):
     )
 
 
-def dfmt(text):
+def dfmt(txt):
     """Produce a prettier format for CSV."""
-    if text is None or len(text) != 12:
+    if txt is None or len(txt) != 12:
         return ""
-    return f"{text[:4]}-{text[4:6]}-{text[6:8]} {text[8:10]}:{text[10:12]}"
+    return f"{txt[:4]}-{txt[4:6]}-{txt[6:8]} {txt[8:10]}:{txt[10:12]}"
 
 
 def char3(wfos):
@@ -328,10 +327,10 @@ def build(environ: dict) -> Tuple[str, str, dict]:
 
     if environ["timeopt"] != 2:
         if sts is None or ets is None:
-            raise IncompleteWebRequest("Missing start or end time parameters")
+            raise ValueError("Missing start or end time parameters")
         # Keep size low
         if wfo_limiter == "" and (ets - sts) > timedelta(days=366):
-            raise IncompleteWebRequest("Please shorten request to <1 year.")
+            raise ValueError("Please shorten request to <1 year.")
         # Change to postgis db once we have the wfo list
         fn = f"wwa_{sts:%Y%m%d%H%M}_{ets:%Y%m%d%H%M}"
     else:
@@ -396,9 +395,7 @@ def build(environ: dict) -> Tuple[str, str, dict]:
         params["sts30"] = sts + timedelta(days=-30)
     else:
         if wfo_limiter == "" and limiter == "" and (ets - sts).days > 366:
-            raise IncompleteWebRequest(
-                "You must limit your request to a year or less."
-            )
+            raise ValueError("You must limit your request to a year or less.")
     sbwtimelimit = timelimit
     statuslimit = " status = 'NEW' "
     if environ["addsvs"] == "yes":
@@ -469,7 +466,7 @@ def do_excel(sql, fmt):
     with get_sqlalchemy_conn("postgis") as conn:
         df = pd.read_sql(sql, conn, index_col=None)
     if fmt == "excel" and len(df.index) >= 1048576:
-        raise IncompleteWebRequest("Result too large for Excel download")
+        raise ValueError("Result too large for Excel download")
     # Back-convert datetimes :/
     for col in (
         "utc_issue utc_expire utc_prodissue utc_updated utc_polygon_begin "
@@ -571,12 +568,15 @@ def local_files(names):
 def application(environ, start_response):
     """Go Main Go"""
     if environ["timeopt"] != 2 and environ["sts"] is None:
-        raise IncompleteWebRequest("Missing start time parameters")
+        start_response("400 Bad Request", [("Content-type", "text/plain")])
+        yield str("Missing start time parameters").encode("ascii")
+        return
     try:
         sql, fn, params = build(environ)
     except ValueError as exp:
         start_response("400 Bad Request", [("Content-type", "text/plain")])
-        return [str(exp).encode("ascii")]
+        yield str(exp).encode("ascii")
+        return
 
     if environ["accept"] == "excel":
         headers = [
@@ -584,14 +584,16 @@ def application(environ, start_response):
             ("Content-disposition", f"attachment; Filename={fn}.xlsx"),
         ]
         start_response("200 OK", headers)
-        return [do_excel(sql, environ["accept"])]
+        yield do_excel(sql, environ["accept"])
+        return
     if environ["accept"] == "csv":
         headers = [
             ("Content-type", "text/csv"),
             ("Content-disposition", f"attachment; Filename={fn}.csv"),
         ]
         start_response("200 OK", headers)
-        return [do_excel(sql, environ["accept"])]
+        yield do_excel(sql, environ["accept"])
+        return
 
     with tempfile.TemporaryDirectory() as tmpdir:
         with (
