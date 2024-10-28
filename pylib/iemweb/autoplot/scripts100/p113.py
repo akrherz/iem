@@ -5,7 +5,7 @@ over 1 January.  In such a case, if you select certain years to plot, the year
 will be from the start of the two year period that crosses 1 January.
 """
 
-import datetime
+from datetime import date, datetime, timedelta
 
 import httpx
 import pandas as pd
@@ -42,14 +42,14 @@ def get_description():
             "type": "year",
             "optional": True,
             "name": "year1",
-            "default": datetime.date.today().year,
+            "default": date.today().year,
             "label": "Show observed values for year:",
         },
         {
             "type": "year",
             "optional": True,
             "name": "year2",
-            "default": datetime.date.today().year - 1,
+            "default": date.today().year - 1,
             "label": "Show observed values for year:",
         },
         {
@@ -73,10 +73,10 @@ def do_year_overlay(ctx, ax, pname, color, crosses_jan1):
     year = ctx.get(pname)
     if year is None:
         return
-    sts = datetime.date(year, ctx["sday"].month, ctx["sday"].day)
-    ets = datetime.date(year, ctx["eday"].month, ctx["eday"].day)
+    sts = date(year, ctx["sday"].month, ctx["sday"].day)
+    ets = date(year, ctx["eday"].month, ctx["eday"].day)
     if crosses_jan1:
-        ets = datetime.date(year + 1, ctx["eday"].month, ctx["eday"].day)
+        ets = date(year + 1, ctx["eday"].month, ctx["eday"].day)
 
     with get_sqlalchemy_conn("coop") as conn:
         obs = pd.read_sql(
@@ -121,10 +121,10 @@ def plotter(fdict):
         raise NoDataFound("No Metadata found.")
     be = ctx["_nt"].sts[station]["archive_end"]
     if be is None:
-        be = datetime.date.today()
+        be = date.today()
     res = (
         "# IEM Climodat https://mesonet.agron.iastate.edu/climodat/\n"
-        f"# Report Generated: {datetime.date.today():%d %b %Y}\n"
+        f"# Report Generated: {date.today():%d %b %Y}\n"
         f"# Climate Record: {bs} -> {be}\n"
         f"# Site Information: [{station}] {ctx['_nt'].sts[station]['name']}\n"
         "# Contact Information: "
@@ -144,7 +144,7 @@ def plotter(fdict):
         raise NoDataFound("Climatology was not found.")
     df["valid"] = pd.to_datetime(
         {"year": 2000, "month": df["month"], "day": df["day"]}
-    )
+    )  # type: ignore
     df = df.set_index("valid")
     for col in df.columns:
         if col.find("_years") == -1:
@@ -153,7 +153,7 @@ def plotter(fdict):
     if varname == "maxmin":
         res += (
             f"# DAILY RECORD HIGHS AND LOWS OCCURRING DURING {bs.year}-"
-            f"{datetime.date.today().year} FOR "
+            f"{date.today().year} FOR "
             f"STATION NUMBER  {station}\n"
             "     JAN     FEB     MAR     APR     MAY     JUN     JUL     "
             "AUG     SEP     OCT     NOV     DEC\n"
@@ -189,7 +189,7 @@ def plotter(fdict):
         res += f"{day:3.0f}"
         for mo in range(1, 13):
             try:
-                ts = datetime.datetime(2000, mo, day)
+                ts = datetime(2000, mo, day)
                 if ts not in df.index:
                     res += bad
                     continue
@@ -217,12 +217,12 @@ def plotter(fdict):
         if ctx.get("year2") is not None:
             subtitle += f" and {ctx['year2']}"
     fig = figure(title=title, subtitle=subtitle, apctx=ctx)
-    ax = fig.add_axes([0.08, 0.1, 0.9, 0.8])
+    ax = fig.add_axes((0.08, 0.1, 0.9, 0.8))
     # Wants to cross 1 Jan on x-axis
     crosses_jan1 = ctx["sday"] > ctx["eday"]
     if crosses_jan1:
         if ctx["eday"].month == 2 and ctx["eday"].day == 29:
-            ctx["eday"] = datetime.date(ctx["eday"].year, 2, 28)
+            ctx["eday"] = date(ctx["eday"].year, 2, 28)
         dfnew = df.loc[ctx["sday"] :].copy()
         dfnew.index = dfnew.index.map(lambda x: x.replace(year=1999))
         df = pd.concat([dfnew, df.loc[: ctx["sday"]]])
@@ -274,11 +274,11 @@ def plotter(fdict):
     ax.grid(True)
     ax.legend(ncol=5)
     ax.set_ylabel(r"Temperature $^\circ$F")
-    ax.set_xlim(ctx["sday"], ctx["eday"] + datetime.timedelta(days=1))
+    ax.set_xlim(ctx["sday"], ctx["eday"] + timedelta(days=1))
     days = 1
-    if ctx["eday"] - ctx["sday"] < datetime.timedelta(days=71):
+    if ctx["eday"] - ctx["sday"] < timedelta(days=71):
         days = [1, 8, 15, 22, 29]
-    elif ctx["eday"] - ctx["sday"] < datetime.timedelta(days=121):
+    elif ctx["eday"] - ctx["sday"] < timedelta(days=121):
         days = [1, 15]
     ax.xaxis.set_major_locator(DayLocator(bymonthday=days))
     ax.xaxis.set_major_formatter(DateFormatter("%b %-d"))

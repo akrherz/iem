@@ -1,10 +1,13 @@
 """Analysis of current MOS temperature bias."""
 
-import sys
+from datetime import datetime
+from typing import Optional
 from zoneinfo import ZoneInfo
 
+import click
+from pyiem.database import get_dbconn
 from pyiem.plot import MapPlot, get_cmap
-from pyiem.util import get_dbconn, logger, utc
+from pyiem.util import logger, utc
 
 LOG = logger()
 
@@ -91,16 +94,17 @@ def doit(now, model):
     mp.close()
 
 
-def main(argv):
+@click.command()
+@click.option("--model", required=True)
+@click.option("--valid", type=click.DateTime())
+def main(model: str, valid: Optional[datetime]):
     """Go main go"""
     ts = utc()
-    model = argv[1]
-    if len(argv) == 6:
-        ts = utc(int(argv[1]), int(argv[2]), int(argv[3]), int(argv[4]))
-        model = sys.argv[5]
+    if valid is not None:
+        ts = valid.replace(tzinfo=ZoneInfo("UTC"))
     ts = ts.replace(minute=0, second=0, microsecond=0)
     doit(ts, model)
 
 
 if __name__ == "__main__":
-    main(sys.argv)
+    main()
