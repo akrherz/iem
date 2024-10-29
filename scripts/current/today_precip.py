@@ -2,11 +2,11 @@
 Generate analysis of precipitation
 """
 
-import datetime
+from datetime import datetime
 
+from pyiem.database import get_dbconn
 from pyiem.plot import MapPlot
 from pyiem.reference import TRACE_VALUE
-from pyiem.util import get_dbconn
 
 
 def t(value):
@@ -18,7 +18,7 @@ def t(value):
 
 def main():
     """Go Main Go"""
-    now = datetime.datetime.now()
+    now = datetime.now()
     pgconn = get_dbconn("iem")
     icursor = pgconn.cursor()
 

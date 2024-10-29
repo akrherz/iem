@@ -72,26 +72,22 @@ def get_data(ctx: dict) -> dict:
         f"hrrr.t{valid:%H}z.3kmf01.grib2"
     )
     # Get solar radiation
-    with archive_fetch(ppath_f01) as testfn:
-        with pygrib.open(testfn) as grbs:
-            # Eh
-            srad = grb2iemre(
-                grbs.select(
-                    name="Mean surface downward short-wave radiation flux"
-                )[0]
-            )
+    with archive_fetch(ppath_f01) as testfn, pygrib.open(testfn) as grbs:
+        # Eh
+        srad = grb2iemre(
+            grbs.select(
+                name="Mean surface downward short-wave radiation flux"
+            )[0]
+        )
 
-    with archive_fetch(ppath_f00) as testfn:
-        with pygrib.open(testfn) as grbs:
-            u = grb2iemre(grbs.select(name="10 metre U wind component")[0])
-            v = grb2iemre(grbs.select(name="10 metre V wind component")[0])
-            tmpk = grb2iemre(grbs.select(name="2 metre temperature")[0])
-            dwpk = grb2iemre(
-                grbs.select(name="2 metre dewpoint temperature")[0]
-            )
-            rh = relative_humidity_from_dewpoint(
-                units.degK * tmpk, units.degK * dwpk
-            )
+    with archive_fetch(ppath_f00) as testfn, pygrib.open(testfn) as grbs:
+        u = grb2iemre(grbs.select(name="10 metre U wind component")[0])
+        v = grb2iemre(grbs.select(name="10 metre V wind component")[0])
+        tmpk = grb2iemre(grbs.select(name="2 metre temperature")[0])
+        dwpk = grb2iemre(grbs.select(name="2 metre dewpoint temperature")[0])
+        rh = relative_humidity_from_dewpoint(
+            units.degK * tmpk, units.degK * dwpk
+        )
 
     res["cci"] = comprehensive_climate_index(
         units.degK * tmpk,
