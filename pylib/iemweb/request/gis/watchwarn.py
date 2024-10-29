@@ -47,16 +47,28 @@ https://mesonet.agron.iastate.edu/cgi-bin/request/gis/watchwarn.py\
 ?accept=shapefile&sts=2023-01-01T00:00Z&ets=2024-01-01T00:00Z&wfo[]=DMX\
 &limitps=yes&phenomena=TO&significance=W
 
-Provide all Tornado Warnings valid at 2320 UTC on 21 May 2024
+Provide all Tornado Warnings valid at 2120 UTC on 21 May 2024
 
 https://mesonet.agron.iastate.edu/cgi-bin/request/gis/watchwarn.py\
-?accept=shapefile&at=2024-05-21T23:20Z&timeopt=2&limitps=yes&phenomena=TO\
+?accept=shapefile&at=2024-05-21T21:20Z&timeopt=2&limitps=yes&phenomena=TO\
+&significance=W
+
+Same request, but return an excel file
+
+https://mesonet.agron.iastate.edu/cgi-bin/request/gis/watchwarn.py\
+?accept=excel&at=2024-05-21T21:20Z&timeopt=2&limitps=yes&phenomena=TO\
+&significance=W
+
+Same request, but return csv
+
+https://mesonet.agron.iastate.edu/cgi-bin/request/gis/watchwarn.py\
+?accept=csv&at=2024-05-21T21:20Z&timeopt=2&limitps=yes&phenomena=TO\
 &significance=W
 
 Same request, but using the more verbose parameterization for the timestamp
 
 https://mesonet.agron.iastate.edu/cgi-bin/request/gis/watchwarn.py\
-?accept=shapefile&year3=2024&month3=5&day3=21&hour3=23&minute3=20&timeopt=2\
+?accept=shapefile&year3=2024&month3=5&day3=21&hour3=21&minute3=20&timeopt=2\
 &limitps=yes&phenomena=TO&significance=W
 
 """
@@ -324,7 +336,7 @@ def build(environ: dict) -> Tuple[str, str, dict]:
             wfo_limiter2 = " and substr(w.ugc, 1, 2) = ANY(:states) "
             table_extra = " , states s "
         else:
-            raise ValueError("No state specified")
+            raise IncompleteWebRequest("No state specified")
     else:  # wfo
         wfo_limiter = parse_wfo_location_group(environ, params)
         wfo_limiter2 = wfo_limiter
@@ -467,10 +479,10 @@ def build(environ: dict) -> Tuple[str, str, dict]:
     )
 
 
-def do_excel(sql, fmt):
+def do_excel(sql, fmt, params):
     """Generate an Excel format response."""
     with get_sqlalchemy_conn("postgis") as conn:
-        df = pd.read_sql(sql, conn, index_col=None)
+        df = pd.read_sql(text(sql), conn, params=params, index_col=None)
     if fmt == "excel" and len(df.index) >= 1048576:
         raise IncompleteWebRequest("Result too large for Excel download")
     # Back-convert datetimes :/
@@ -577,14 +589,10 @@ def application(environ, start_response):
         if environ["timeopt"] != 2 and environ["sts"] is None:
             raise IncompleteWebRequest("Missing start time parameter")
         sql, fn, params = build(environ)
-    except IncompleteWebRequest as exp:
+    except (IncompleteWebRequest, ValueError) as exp:
         start_response(
             "422 Unprocessable Content", [("Content-type", "text/plain")]
         )
-        yield str(exp).encode("ascii")
-        return
-    except ValueError as exp:
-        start_response("400 Bad Request", [("Content-type", "text/plain")])
         yield str(exp).encode("ascii")
         return
     if environ["accept"] == "excel":
@@ -593,7 +601,7 @@ def application(environ, start_response):
             ("Content-disposition", f"attachment; Filename={fn}.xlsx"),
         ]
         start_response("200 OK", headers)
-        yield do_excel(sql, environ["accept"])
+        yield do_excel(sql, environ["accept"], params)
         return
     if environ["accept"] == "csv":
         headers = [
@@ -601,7 +609,7 @@ def application(environ, start_response):
             ("Content-disposition", f"attachment; Filename={fn}.csv"),
         ]
         start_response("200 OK", headers)
-        yield do_excel(sql, environ["accept"])
+        yield do_excel(sql, environ["accept"], params)
         return
 
     with tempfile.TemporaryDirectory() as tmpdir:

@@ -4,6 +4,8 @@
 /cgi-bin/request/gis/cwas.py
 /cgi-bin/request/gis/nexrad_storm_attrs.py
 /cgi-bin/request/gis/sigmets.py
+/cgi-bin/request/gis/watchwarn.py?location_group=states&sts=2024-05-21T00:00:00Z&ets=2024-05-21T23:59:59Z
+/cgi-bin/request/gis/watchwarn.py?sts=2022-05-21T00:00:00Z&ets=2024-05-21T23:59:59Z
 /cgi-bin/request/hourlyprecip.py
 /cgi-bin/request/hourlyprecip.py?station=DSM
 /geojson/sbw.geojson?sts=200809130559&ets=000007231555&wfos=HGX
