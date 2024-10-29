@@ -55,6 +55,8 @@
 /plotting/auto/plot/73/opt:wfo::network:WFO::station:DMX::state:IA::ugc:IAC169::limit:yes::sday:0101::eday:1231::phenomena:TO::significance:W::_r:t::dpi:100.png
 /plotting/auto/plot/73/opt:ugc::network:WFO::station:PQR::state:WA::ugc:WAZ660::limit:no::sday:0101::eday:1231::phenomena:FW::significance:W::_r:t::dpi:100.png
 /plotting/auto/plot/73/opt:wfo::network:WFO::station:TSA::state:IA::ugc:IAC169::limit:udf::sday:0104::eday:0104::phenomena:SV::significance:W::_r:t::dpi:100.png
+/plotting/auto/plot/76/network:IA_ASOS::station:DSM::season:winter::varname:dwpf::agg:mean::year:1893::w:bar::_r:t::dpi:100.png
+/plotting/auto/plot/76/network:IA_ASOS::station:DSM::season:water_year::varname:vpd::agg:mean::year:1893::w:bar::_r:t::dpi:100.png
 /plotting/auto/plot/80/which:wfo::network:WFO::wfo:DMX::ugc:IAC153::phenomena:TO::significance:W::_r:t::dpi:100.png
 /plotting/auto/plot/80/which:ugc::network:WFO::wfo:DMX::ugc:IAC153::phenomena:TO::significance:W::_r:t::dpi:100.png
 /plotting/auto/plot/82/network:IA_ASOS::station:AMW::var:pday::sdate:2024-05-16::edate:2024-08-14::_r:t::dpi:100.png

@@ -113,7 +113,7 @@ python hourly_analysis.py --valid=$(date -u +'%Y-%m-%dT%H:00:00')
 python hourly_analysis.py --valid=$(date -u --date '2 hours ago' +'%Y-%m-%dT%H:00:00')
 
 cd ../mrms
-python make_mrms_rasters.py $YYYY $MM $DD $HH
+python make_mrms_rasters.py --valid=$(date -u +'%Y-%m-%dT%H:00:00')
 
 cd ../smos
 python ingest_smos.py
