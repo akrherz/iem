@@ -15,6 +15,9 @@ services found at
 Changelog
 ---------
 
+- 2024-10-28: The service default for parameter ``simple`` was set back to
+  ``yes``.  It was mistakenly set to ``no`` when this was migrated to pydantic.
+- 2024-10-28: Optimize the zipfile response by streaming the result.
 - 2024-10-22: Fix and better document the ``at`` parameter for when
   ``timeopt=2``.
 - 2024-07-03: Added a `accept=csv` option to allow for CSV output.
@@ -44,34 +47,50 @@ https://mesonet.agron.iastate.edu/cgi-bin/request/gis/watchwarn.py\
 ?accept=shapefile&sts=2023-01-01T00:00Z&ets=2024-01-01T00:00Z&wfo[]=DMX\
 &limitps=yes&phenomena=TO&significance=W
 
-Provide all Tornado Warnings valid at 2320 UTC on 21 May 2024
+Provide all Tornado Warnings valid at 2120 UTC on 21 May 2024
 
 https://mesonet.agron.iastate.edu/cgi-bin/request/gis/watchwarn.py\
-?accept=shapefile&at=2024-05-21T23:20Z&timeopt=2&limitps=yes&phenomena=TO\
+?accept=shapefile&at=2024-05-21T21:20Z&timeopt=2&limitps=yes&phenomena=TO\
+&significance=W
+
+Same request, but return an excel file
+
+https://mesonet.agron.iastate.edu/cgi-bin/request/gis/watchwarn.py\
+?accept=excel&at=2024-05-21T21:20Z&timeopt=2&limitps=yes&phenomena=TO\
+&significance=W
+
+Same request, but return csv
+
+https://mesonet.agron.iastate.edu/cgi-bin/request/gis/watchwarn.py\
+?accept=csv&at=2024-05-21T21:20Z&timeopt=2&limitps=yes&phenomena=TO\
 &significance=W
 
 Same request, but using the more verbose parameterization for the timestamp
 
 https://mesonet.agron.iastate.edu/cgi-bin/request/gis/watchwarn.py\
-?accept=shapefile&year3=2024&month3=5&day3=21&hour3=23&minute3=20&timeopt=2\
+?accept=shapefile&year3=2024&month3=5&day3=21&hour3=21&minute3=20&timeopt=2\
 &limitps=yes&phenomena=TO&significance=W
 
 """
 
 import tempfile
-import zipfile
-from datetime import timedelta
+import zlib
+from datetime import datetime, timedelta
 from io import BytesIO
+from stat import S_IFREG
+from typing import Tuple
 
 import fiona
 import pandas as pd
 from pydantic import AwareDatetime, Field
-from pyiem.database import get_dbconnc, get_sqlalchemy_conn
+from pyiem.database import get_sqlalchemy_conn
 from pyiem.exceptions import IncompleteWebRequest
 from pyiem.util import utc
 from pyiem.webutil import CGIModel, ListOrCSVType, iemapp
 from shapely.geometry import mapping
 from shapely.wkb import loads
+from sqlalchemy import text
+from stream_zip import ZIP_32, stream_zip
 
 EXL = "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"
 
@@ -143,7 +162,7 @@ class Schema(CGIModel):
         "with the ``significance`` parameter.",
     )
     simple: str = Field(
-        "no",
+        "yes",
         pattern="^(yes|no)$",
         description="If yes, use a simplified geometry for the UGC "
         "counties/zones.",
@@ -267,11 +286,11 @@ class Schema(CGIModel):
     )
 
 
-def dfmt(text):
+def dfmt(txt):
     """Produce a prettier format for CSV."""
-    if text is None or len(text) != 12:
+    if txt is None or len(txt) != 12:
         return ""
-    return f"{text[:4]}-{text[4:6]}-{text[6:8]} {text[8:10]}:{text[10:12]}"
+    return f"{txt[:4]}-{txt[4:6]}-{txt[6:8]} {txt[8:10]}:{txt[10:12]}"
 
 
 def char3(wfos):
@@ -282,7 +301,7 @@ def char3(wfos):
     return res
 
 
-def parse_wfo_location_group(environ):
+def parse_wfo_location_group(environ, params):
     """Parse wfoLimiter"""
     limiter = ""
     wfos = environ["wfo"]
@@ -292,32 +311,34 @@ def parse_wfo_location_group(environ):
         if len(wfos) == 1:
             wfo = wfos[0]
             wfo = wfo[1:] if len(wfo) == 4 else wfo
-            limiter = f" and w.wfo = '{wfo}' "
+            limiter = " and w.wfo = :wfo "
+            params["wfo"] = wfo
         else:
-            limiter = f" and w.wfo in {tuple(char3(wfos))} "
+            limiter = " and w.wfo = ANY(:wfos) "
+            params["wfos"] = char3(wfos)
 
     return limiter
 
 
-def build_sql(environ):
+def build(environ: dict) -> Tuple[str, str, dict]:
     """Build the SQL statement."""
+    params = {}
     sts = environ["sts"]
     ets = environ["ets"]
     table_extra = ""
     if environ["location_group"] == "states":
         if environ["states"]:
-            states = [x[:2].upper() for x in environ["states"]]
-            states.append("XX")  # Hack for 1 length
+            params["states"] = [x[:2].upper() for x in environ["states"]]
             wfo_limiter = (
                 " and ST_Intersects(s.the_geom, w.geom) "
-                f"and s.state_abbr in {tuple(states)} "
+                "and s.state_abbr = ANY(:states) "
             )
-            wfo_limiter2 = f" and substr(w.ugc, 1, 2) in {tuple(states)} "
+            wfo_limiter2 = " and substr(w.ugc, 1, 2) = ANY(:states) "
             table_extra = " , states s "
         else:
-            raise ValueError("No state specified")
+            raise IncompleteWebRequest("No state specified")
     else:  # wfo
-        wfo_limiter = parse_wfo_location_group(environ)
+        wfo_limiter = parse_wfo_location_group(environ, params)
         wfo_limiter2 = wfo_limiter
 
     if environ["timeopt"] != 2:
@@ -352,10 +373,10 @@ def build_sql(environ):
         phenom = environ["phenomena"]
         sig = environ["significance"]
         parts = []
-        for p, s in zip(phenom, sig):
-            parts.append(
-                f"(phenomena = '{p[:2]}' and significance = '{s[:1]}') "
-            )
+        for _i, (p, s) in enumerate(zip(phenom, sig)):
+            parts.append(f"(phenomena = :p{_i} and significance = :s{_i}) ")
+            params[f"p{_i}"] = p[:2]
+            params[f"s{_i}"] = s[:1]
         limiter = f" and ({' or '.join(parts)}) "
 
     sbwlimiter = " WHERE gtype = 'P' " if environ["limit1"] == "yes" else ""
@@ -385,11 +406,9 @@ def build_sql(environ):
 
     timelimit = f"issue >= '{sts}' and issue < '{ets}'"
     if environ["timeopt"] == 2:
-        timelimit = (
-            f"issue <= '{sts}' and "
-            f"issue > '{sts + timedelta(days=-30)}' and "
-            f"expire > '{sts}'"
-        )
+        timelimit = "issue <= :sts and issue > :sts30 and expire > :sts"
+        params["sts"] = sts
+        params["sts30"] = sts + timedelta(days=-30)
     else:
         if wfo_limiter == "" and limiter == "" and (ets - sts).days > 366:
             raise IncompleteWebRequest(
@@ -407,8 +426,8 @@ def build_sql(environ):
     return (
         f"""
     WITH stormbased as (
-     SELECT distinct w.geom as geo, 'P'::text as gtype, significance, wfo,
-     status, eventid, ''::text as ugc,
+     SELECT distinct ST_AsBinary(w.geom) as geo, 'P'::text as gtype,
+     significance, wfo, status, eventid, ''::text as ugc,
      phenomena,
      ST_area( ST_transform(w.geom,9311) ) / 1000000.0 as area2d,
      to_char(expire at time zone 'UTC', 'YYYYMMDDHH24MI') as utc_expire,
@@ -431,7 +450,7 @@ def build_sql(environ):
      {wfo_limiter} {limiter} {elimiter} {pdslimiter}
     ),
     countybased as (
-     SELECT u.{geomcol} as geo, 'C'::text as gtype,
+     SELECT ST_AsBinary(u.{geomcol}) as geo, 'C'::text as gtype,
      significance,
      w.wfo, status, eventid, u.ugc, phenomena,
      u.area2163 as area2d,
@@ -456,13 +475,14 @@ def build_sql(environ):
      SELECT {cols} from countybased {sbwlimiter}
     """,
         fn,
+        params,
     )
 
 
-def do_excel(sql, fmt):
+def do_excel(sql, fmt, params):
     """Generate an Excel format response."""
     with get_sqlalchemy_conn("postgis") as conn:
-        df = pd.read_sql(sql, conn, index_col=None)
+        df = pd.read_sql(text(sql), conn, params=params, index_col=None)
     if fmt == "excel" and len(df.index) >= 1048576:
         raise IncompleteWebRequest("Result too large for Excel download")
     # Back-convert datetimes :/
@@ -484,47 +504,118 @@ def do_excel(sql, fmt):
     return bio.getvalue()
 
 
+def process_results_yield_records(cursor, csv):
+    """Do something with the results."""
+    # Filenames are racy, so we need to have a temp folder
+    csv.write(
+        "WFO,ISSUED,EXPIRED,INIT_ISS,INIT_EXP,PHENOM,GTYPE,SIG,ETN,"
+        "STATUS,NWS_UGC,AREA_KM2,UPDATED,HVTEC_NWSLI,HVTEC_SEVERITY,"
+        "HVTEC_CAUSE,HVTEC_RECORD,IS_EMERGENCY,POLYBEGIN,POLYEND,"
+        "WINDTAG,HAILTAG,TORNADOTAG,DAMAGETAG,PRODUCT_ID\n"
+    )
+    for row in cursor.mappings():
+        if row["geo"] is None:  # Is this possible?
+            continue
+        mp = loads(row["geo"])
+        csv.write(
+            f"{row['wfo']},{dfmt(row['utc_issue'])},"
+            f"{dfmt(row['utc_expire'])},"
+            f"{dfmt(row['utc_prodissue'])},"
+            f"{dfmt(row['utc_init_expire'])},"
+            f"{row['phenomena']},{row['gtype']},"
+            f"{row['significance']},{row['eventid']},"
+            f"{row['status']},"
+            f"{row['ugc']},{row['area2d']:.2f},"
+            f"{dfmt(row['utc_updated'])},"
+            f"{row['hvtec_nwsli']},{row['hvtec_severity']},"
+            f"{row['hvtec_cause']},{row['hvtec_record']},"
+            f"{row['is_emergency']},"
+            f"{dfmt(row['utc_polygon_begin'])},"
+            f"{dfmt(row['utc_polygon_end'])},{row['windtag']},"
+            f"{row['hailtag']},{row['tornadotag']},"
+            f"{row['damagetag']},{row['product_id']}\n"
+        )
+        yield {
+            "properties": {
+                "WFO": row["wfo"],
+                "ISSUED": row["utc_issue"],
+                "EXPIRED": row["utc_expire"],
+                "INIT_ISS": row["utc_prodissue"],
+                "INIT_EXP": row["utc_init_expire"],
+                "PHENOM": row["phenomena"],
+                "GTYPE": row["gtype"],
+                "SIG": row["significance"],
+                "ETN": row["eventid"],
+                "STATUS": row["status"],
+                "NWS_UGC": row["ugc"],
+                "AREA_KM2": row["area2d"],
+                "UPDATED": row["utc_updated"],
+                "HV_NWSLI": row["hvtec_nwsli"],
+                "HV_SEV": row["hvtec_severity"],
+                "HV_CAUSE": row["hvtec_cause"],
+                "HV_REC": row["hvtec_record"],
+                "EMERGENC": row["is_emergency"],
+                "POLY_BEG": row["utc_polygon_begin"],
+                "POLY_END": row["utc_polygon_end"],
+                "WINDTAG": row["windtag"],
+                "HAILTAG": row["hailtag"],
+                "TORNTAG": row["tornadotag"],
+                "DAMAGTAG": row["damagetag"],
+                "PROD_ID": row["product_id"],
+            },
+            "geometry": mapping(mp),
+        }
+
+
+def local_files(names):
+    """Return a generator of local files."""
+    now = datetime.now()
+
+    def contents(name):
+        with open(name, "rb") as f:
+            while chunk := f.read(65536):
+                yield chunk
+
+    return (
+        (name.split("/")[-1], now, S_IFREG | 0o644, ZIP_32, contents(name))
+        for name in names
+    )
+
+
 @iemapp(default_tz="UTC", help=__doc__, schema=Schema)
 def application(environ, start_response):
     """Go Main Go"""
-    if environ["timeopt"] != 2 and environ["sts"] is None:
-        raise IncompleteWebRequest("Missing start time parameters")
     try:
-        sql, fn = build_sql(environ)
-    except ValueError as exp:
-        start_response("400 Bad Request", [("Content-type", "text/plain")])
-        return [str(exp).encode("ascii")]
-
+        if environ["timeopt"] != 2 and environ["sts"] is None:
+            raise IncompleteWebRequest("Missing start time parameter")
+        sql, fn, params = build(environ)
+    except (IncompleteWebRequest, ValueError) as exp:
+        start_response(
+            "422 Unprocessable Content", [("Content-type", "text/plain")]
+        )
+        yield str(exp).encode("ascii")
+        return
     if environ["accept"] == "excel":
         headers = [
             ("Content-type", EXL),
             ("Content-disposition", f"attachment; Filename={fn}.xlsx"),
         ]
         start_response("200 OK", headers)
-        return [do_excel(sql, environ["accept"])]
+        yield do_excel(sql, environ["accept"], params)
+        return
     if environ["accept"] == "csv":
         headers = [
             ("Content-type", "text/csv"),
             ("Content-disposition", f"attachment; Filename={fn}.csv"),
         ]
         start_response("200 OK", headers)
-        return [do_excel(sql, environ["accept"])]
-    pgconn, cursor = get_dbconnc("postgis", cursor_name="streaming")
-    # Set a larger fetch size
-    cursor.itersize = 2000
+        yield do_excel(sql, environ["accept"], params)
+        return
 
-    cursor.execute(sql)
-
-    # Filenames are racy, so we need to have a temp folder
     with tempfile.TemporaryDirectory() as tmpdir:
-        with open(f"{tmpdir}/{fn}.csv", "w", encoding="ascii") as csv:
-            csv.write(
-                "WFO,ISSUED,EXPIRED,INIT_ISS,INIT_EXP,PHENOM,GTYPE,SIG,ETN,"
-                "STATUS,NWS_UGC,AREA_KM2,UPDATED,HVTEC_NWSLI,HVTEC_SEVERITY,"
-                "HVTEC_CAUSE,HVTEC_RECORD,IS_EMERGENCY,POLYBEGIN,POLYEND,"
-                "WINDTAG,HAILTAG,TORNADOTAG,DAMAGETAG,PRODUCT_ID\n"
-            )
-            with fiona.open(
+        with (
+            get_sqlalchemy_conn("postgis") as conn,
+            fiona.open(
                 f"{tmpdir}/{fn}.shp",
                 "w",
                 crs="EPSG:4326",
@@ -559,75 +650,33 @@ def application(environ, start_response):
                         "PROD_ID": "str:36",
                     },
                 },
-            ) as output:
-                for row in cursor:
-                    if row["geo"] is None:
-                        continue
-                    mp = loads(row["geo"], hex=True)
-                    csv.write(
-                        f"{row['wfo']},{dfmt(row['utc_issue'])},"
-                        f"{dfmt(row['utc_expire'])},"
-                        f"{dfmt(row['utc_prodissue'])},"
-                        f"{dfmt(row['utc_init_expire'])},"
-                        f"{row['phenomena']},{row['gtype']},"
-                        f"{row['significance']},{row['eventid']},"
-                        f"{row['status']},"
-                        f"{row['ugc']},{row['area2d']:.2f},"
-                        f"{dfmt(row['utc_updated'])},"
-                        f"{row['hvtec_nwsli']},{row['hvtec_severity']},"
-                        f"{row['hvtec_cause']},{row['hvtec_record']},"
-                        f"{row['is_emergency']},"
-                        f"{dfmt(row['utc_polygon_begin'])},"
-                        f"{dfmt(row['utc_polygon_end'])},{row['windtag']},"
-                        f"{row['hailtag']},{row['tornadotag']},"
-                        f"{row['damagetag']},{row['product_id']}\n"
-                    )
-                    output.write(
-                        {
-                            "properties": {
-                                "WFO": row["wfo"],
-                                "ISSUED": row["utc_issue"],
-                                "EXPIRED": row["utc_expire"],
-                                "INIT_ISS": row["utc_prodissue"],
-                                "INIT_EXP": row["utc_init_expire"],
-                                "PHENOM": row["phenomena"],
-                                "GTYPE": row["gtype"],
-                                "SIG": row["significance"],
-                                "ETN": row["eventid"],
-                                "STATUS": row["status"],
-                                "NWS_UGC": row["ugc"],
-                                "AREA_KM2": row["area2d"],
-                                "UPDATED": row["utc_updated"],
-                                "HV_NWSLI": row["hvtec_nwsli"],
-                                "HV_SEV": row["hvtec_severity"],
-                                "HV_CAUSE": row["hvtec_cause"],
-                                "HV_REC": row["hvtec_record"],
-                                "EMERGENC": row["is_emergency"],
-                                "POLY_BEG": row["utc_polygon_begin"],
-                                "POLY_END": row["utc_polygon_end"],
-                                "WINDTAG": row["windtag"],
-                                "HAILTAG": row["hailtag"],
-                                "TORNTAG": row["tornadotag"],
-                                "DAMAGTAG": row["damagetag"],
-                                "PROD_ID": row["product_id"],
-                            },
-                            "geometry": mapping(mp),
-                        }
-                    )
+            ) as output,
+            open(f"{tmpdir}/{fn}.csv", "w", encoding="ascii") as csv,
+            conn.execution_options(
+                stream_results=True, max_row_buffer=10000
+            ).execute(text(sql), params) as cursor,
+        ):
+            output.writerecords(process_results_yield_records(cursor, csv))
 
-        with zipfile.ZipFile(
-            f"{tmpdir}/{fn}.zip", "w", zipfile.ZIP_DEFLATED
-        ) as zf:
-            for suffix in ["shp", "shx", "dbf", "cpg", "prj", "csv"]:
-                zf.write(f"{tmpdir}/{fn}.{suffix}", f"{fn}.{suffix}")
-        with open(f"{tmpdir}/{fn}.zip", "rb") as fh:
-            payload = fh.read()
-    cursor.close()
-    pgconn.close()
-    headers = [
-        ("Content-type", "application/octet-stream"),
-        ("Content-Disposition", f"attachment; filename={fn}.zip"),
-    ]
-    start_response("200 OK", headers)
-
-    return [payload]
+        headers = [
+            ("Content-type", "application/octet-stream"),
+            ("Content-Disposition", f"attachment; filename={fn}.zip"),
+        ]
+        start_response("200 OK", headers)
+        zstream = stream_zip(
+            local_files(
+                (
+                    f"{tmpdir}/{fn}.shp",
+                    f"{tmpdir}/{fn}.shx",
+                    f"{tmpdir}/{fn}.dbf",
+                    f"{tmpdir}/{fn}.prj",
+                    f"{tmpdir}/{fn}.cpg",
+                    f"{tmpdir}/{fn}.csv",
+                )
+            ),
+            get_compressobj=lambda: zlib.compressobj(
+                wbits=-zlib.MAX_WBITS, level=1
+            ),
+        )
+        for chunk in zstream:
+            yield chunk

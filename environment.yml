@@ -92,6 +92,8 @@ dependencies:
   # various dumpers
   - simplejson
   - sqlalchemy
+  # for streaming back zip files
+  - stream-zip
   # scripts
   - tqdm
   # AHPS scripts

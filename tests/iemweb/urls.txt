@@ -10,6 +10,7 @@
 /cgi-bin/request/gis/pireps.py?fmt=shp&degrees=3.0&lon=-91.99&lat=41.99&artcc=_ALL&year1=2024&month1=7&day1=31&hour1=0&minute1=0&year2=2024&month2=7&day2=31&hour2=23&minute2=59
 /cgi-bin/request/gis/pireps.py?fmt=csv&filter=1&degrees=10.0&lon=-91.99&lat=41.99&artcc=_ALL&year1=2024&month1=7&day1=31&hour1=0&minute1=0&year2=2024&month2=7&day2=31&hour2=23&minute2=59
 /cgi-bin/request/gis/spc_mcd.py?year1=2024&month1=1&day1=1&hour1=0&minute1=0&year2=2024&month2=7&day2=29&hour2=0&minute2=0
+/cgi-bin/request/gis/watchwarn.py?wfo=KDMX&wfo=KDVN&sts=2024-05-21T00:00:00Z&ets=2024-05-21T23:59:59Z
 /cgi-bin/request/isusm.py?mode=hourly&timeres=hourly&station=AMFI4&year1=2024&month1=7&day1=1&year2=2024&month2=7&day2=25&vars=tmpf&vars=relh&vars=sv&vars=sv2&todisk=yes&format=excel&missing=-99&tz=America%2FChicago
 /cgi-bin/request/isusm.py?mode=hourly&timeres=hourly&station=AMFI4&year1=2024&month1=7&day1=1&year2=2024&month2=7&day2=25&vars=tmpf&vars=relh&vars=sv&vars=sv2&todisk=yes&format=comma&missing=-99&tz=America%2FChicago
 /cgi-bin/request/isusm.py?mode=inversion&station=BOOI4&year1=2021&month1=1&day1=1&year2=2024&month2=7&day2=25&todisk=yes&format=comma&missing=-99&tz=America%2FChicago
