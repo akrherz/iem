@@ -246,6 +246,11 @@ def grid_hour(ts, domain):
             index_col="station",
         )
 
+    # RSDS
+    res = use_era5land(ts, "rsds", domain)
+    if res is not None:
+        write_grid(ts, "rsds", res, domain)
+
     # Soil Temperature, try ERA5Land
     res = use_era5land(ts, "soilt", domain)
     if res is None and domain == "":

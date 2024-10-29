@@ -4,8 +4,8 @@ of your choice. <a href="/plotting/auto/?q=86">Autoplot 86</a> is the daily
 variant of this plot.
 """
 
-import datetime
 import os
+from datetime import datetime, timedelta, timezone
 
 import numpy as np
 from metpy.units import masked_array, units
@@ -24,6 +24,7 @@ PDICT = {
     "wind_speed": "10m Wind Speed",
     "p01m": "1 Hour Precipitation",
     "soil4t": "~0-10cm Soil Temperature",
+    "rsds": "Hourly Solar Radiation",
 }
 PDICT2 = {"c": "Contour Plot", "g": "Grid Cell Mesh"}
 
@@ -31,7 +32,7 @@ PDICT2 = {"c": "Contour Plot", "g": "Grid Cell Mesh"}
 def get_description():
     """Return a dict describing how to call this plotter"""
     desc = {"description": __doc__}
-    today = datetime.datetime.today() - datetime.timedelta(days=1)
+    today = datetime.today() - timedelta(days=1)
     desc["arguments"] = [
         ARG_IEMRE_DOMAIN,
         dict(
@@ -101,7 +102,7 @@ def plotter(fdict):
     ctx = get_autoplot_context(fdict, get_description())
     domain = ctx["domain"]
     ptype = ctx["ptype"]
-    valid = ctx["valid"].replace(tzinfo=datetime.timezone.utc)
+    valid = ctx["valid"].replace(tzinfo=timezone.utc)
     varname = ctx["var"]
     title = valid.strftime("%-d %B %Y %H:%M UTC")
     mpargs = {
@@ -160,6 +161,9 @@ def plotter(fdict):
         ]:
             plot_units = "F"
             clevs = pretty_bins(ptiles[0], ptiles[1])
+        elif varname == "rsds":
+            plot_units = "W m**-2"
+            clevs = pretty_bins(0, ptiles[1])
 
     x, y = np.meshgrid(lons, lats)
     if ptype == "c":
