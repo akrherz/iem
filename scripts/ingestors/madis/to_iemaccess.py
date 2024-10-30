@@ -5,11 +5,11 @@ RUN_20_AFTER for previous hour
 RUN_40_AFTER for 2 hours ago.
 """
 
-import datetime
 import os
 import subprocess
 import sys
 import warnings
+from datetime import datetime, timedelta
 from zoneinfo import ZoneInfo
 
 import click
@@ -17,7 +17,7 @@ import numpy as np
 from netCDF4 import chartostring
 from pyiem.database import get_dbconnc
 from pyiem.observation import Observation
-from pyiem.util import convert_value, logger, mm2inch, ncopen
+from pyiem.util import convert_value, logger, mm2inch, ncopen, utc
 
 LOG = logger()
 MYDIR = "/mesonet/data/madis/mesonet1"
@@ -29,7 +29,7 @@ def find_file(offset0):
     """Find the most recent file"""
     fn = None
     for i in range(offset0, offset0 + 4):
-        ts = datetime.datetime.utcnow() - datetime.timedelta(hours=i)
+        ts = utc() - timedelta(hours=i)
         for j in range(300, -1, -1):
             testfn = ts.strftime(f"{MYDIR}/%Y%m%d_%H00_{j}.nc")
             if os.path.isfile(testfn):
@@ -159,7 +159,7 @@ def main(offset: int):
         this_station = stations[recnum]
         db[this_station] = {}
         ticks = obtime[recnum]
-        ts = datetime.datetime(1970, 1, 1) + datetime.timedelta(seconds=ticks)
+        ts = datetime(1970, 1, 1) + timedelta(seconds=ticks)
         db[this_station]["ts"] = ts.replace(tzinfo=ZoneInfo("UTC"))
         db[this_station]["network"] = network
         db[this_station]["pres"] = sanity_check(pressure[recnum], 0, 1000000)

@@ -4,7 +4,7 @@ Forecast (QPF) and most recent US Drought Monitor to the date choosen to
 plot the WPC forecast
 """
 
-import datetime
+from datetime import timedelta
 
 import numpy as np
 import pygrib
@@ -29,7 +29,7 @@ PDICT4 = {
 def get_description():
     """Return a dict describing how to call this plotter"""
     desc = {"data": False, "cache": 600, "description": __doc__}
-    utcnow = datetime.datetime.utcnow()
+    utcnow = utc()
     desc["arguments"] = [
         dict(
             type="csector",
@@ -105,7 +105,7 @@ def plotter(fdict):
     _t = "US Drought Monitor Overlaid, " if ctx["opt"] == "both" else ""
     subtitle = (
         f"{_t}WPC Forecast {valid:%d %b %Y %H} UTC to "
-        f"{(valid + datetime.timedelta(hours=int(period))):%d %b %Y %H} UTC"
+        f"{(valid + timedelta(hours=int(period))):%d %b %Y %H} UTC"
     )
     mp = MapPlot(
         apctx=ctx,
