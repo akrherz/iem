@@ -1,0 +1,118 @@
+<?php 
+require_once "../../../config/settings.inc.php";
+define("IEM_APPID", 163);
+require_once "../../../include/myview.php";
+require_once "../../../include/forms.php";
+require_once "../../../include/imagemaps.php";
+
+$t = new MyView();
+$t->title = "Download Misc NWS Polygons in Shapefile/KML";
+$content = <<<EOF
+<p>
+<ul class="breadcrumb">
+<li><a href="/nws/">NWS Mainpage</a></li>
+<li class="active">NWS Misc Polygons Download</li>
+</ul>
+</p>
+
+<p><strong>Related:</strong>
+<a class="btn btn-primary" href="watchwarn.phtml">NWS VTEC Watch Warning Advisory</a>
+&nbsp;
+<a class="btn btn-primary" href="spc_mcd.phtml">SPC Convective Discussions</a>
+&nbsp;
+<a class="btn btn-primary" href="outlooks.phtml">SPC/WPC Outlooks</a>
+&nbsp;
+<a class="btn btn-primary" href="spc_watch.phtml">SPC Watch Polygons</a>
+&nbsp;
+<a class="btn btn-primary" href="sps.phtml">SPS Polygons</a>
+&nbsp;
+<a class="btn btn-primary" href="wpc_mpd.phtml">WPC MPDs</a>
+</p>
+
+<p>This miscellaneous service provides polygons associated with NWS Products that
+were not SPS or VTEC enabled.  These include civil emergency messages, fire weather
+warnings, and others.</p>
+
+<p><a class="btn btn-primary" href="/cgi-bin/request/gis/misc.py?help"><i class="fa fa-file"></i> Backend documentation</a>
+for those wishing to script against this download portal.</p>
+
+<form method="GET" action="/cgi-bin/request/gis/misc.py">
+<table class="table">
+<thead><tr><th colspan="6">Time Interval for Issuance TIme (UTC)</th></tr></thead>
+<tr>
+    <td></td><th>Year</th><th>Month</th><th>Day</th>
+    <th>Hour</th><th>Minute</th>
+</tr>
+
+<tr>
+EOF;
+$content .= "<th>Start:</th>
+    <td>
+     ". yearSelect2(2022, date("Y"), "year1") ."
+    </td>
+    <td>
+     ". monthSelect2(0,"month1") ."
+    </td>
+    <td>
+     ". daySelect2(0, "day1") ."
+    </td>
+    <td>
+     ". gmtHourSelect(0, "hour1") ."
+    </td>
+    <td>
+     ". minuteSelect(0, "minute1") ."
+    </td>
+  </tr>
+
+  <tr>
+    <th>End:</th>
+    <td>
+     ". yearSelect2(2022, date("Y"), "year2") ."
+    </td>
+    <td>
+     ". monthSelect2(date("m"), "month2") ."
+    </td>
+    <td>
+     ". daySelect2(date("d"), "day2") ."
+    </td>
+    <td>
+     ". gmtHourSelect(0, "hour2") ."
+    </td>
+    <td>
+     ". minuteSelect(0, "minute2") ."
+    </td>
+  </tr>
+</table>";
+
+$content .= <<<EOM
+
+<p><strong>Format:</strong><br />
+<input type="radio" name="format" value="shp" checked="checked" id="shp" />
+<label for="shp">Shapefile</label>
+<input type="radio" name="format" value="kml" id="kml" />
+<label for="kml">KML</label>
+<input type="radio" name="format" value="csv" id="csv" />
+<label for="csv">CSV</label>
+<input type="radio" name="format" value="excel" id="excel" />
+<label for="excel">Excel</label>
+
+<p><input type="submit" value="Giveme data right now!"></p>
+</form>
+
+<h4>Shapefile DBF schema:</h4>
+<pre>
+Field 0: Type=C/String, Title='PIL' Six character AWIPS/AFOS ID
+Field 1: Type=C/String, Title='ISSUE', Issuance UTC Time
+Field 2: Type=C/String, Title='EXPIRE', Expiration UTC Time
+Field 3: Type=C/String, Title='PROD_ID', IEM NWS Text Product Identifier, which
+         can be used against the /api/1/nwstext/&lt;PROD_ID&gt; service.
+</pre>
+
+<h4>Archive / Usage Notes:</h4>
+<ol>
+</ol>
+</form>
+EOM;
+
+$t->content = $content;
+$t->render('single.phtml');
