@@ -1,20 +1,22 @@
-"""Generate MRMS MESH Contours."""
+"""Generate MRMS MESH Contours.
 
-import argparse
-import datetime
+dedicated crontab entry.
+"""
+
 import json
 import os
 import pathlib
 import subprocess
-import sys
 import tempfile
+from datetime import datetime, timedelta, timezone
 
+import click
 import numpy as np
 import pygrib
 import rasterio
 from pyiem.mrms import NORTH, WEST
 from pyiem.reference import ISO8601
-from pyiem.util import logger
+from pyiem.util import logger, utc
 from rasterio.transform import from_origin
 
 LOG = logger()
@@ -79,9 +81,9 @@ def make_raster(vals, tmpfn):
 
 def agg(sts, ets):
     """Aggregate up the value."""
-    interval = datetime.timedelta(minutes=2)
+    interval = timedelta(minutes=2)
     # in the rears
-    now = sts + datetime.timedelta(minutes=2)
+    now = sts + timedelta(minutes=2)
     maxval = None
     hits = 0
     misses = 0
@@ -100,49 +102,37 @@ def agg(sts, ets):
     return maxval, hits, misses
 
 
-def usage():
-    """Create the argparse instance."""
-    parser = argparse.ArgumentParser("MRMS MRSH Contours")
-    parser.add_argument("-i", "--interval", required=True, type=int)
-    parser.add_argument(
-        "-t",
-        "--datetime",
-        required=True,
-        type=lambda d: datetime.datetime.strptime(d[:16], "%Y-%m-%dT%H:%M"),
-    )
-    return parser
-
-
-def main(argv):
+@click.command()
+@click.option("--minutes", required=True, type=int)
+@click.option("--valid", required=True, type=click.DateTime())
+def main(minutes: int, valid: datetime):
     """Go Main Go."""
-    started = datetime.datetime.utcnow()
-    ctx = usage().parse_args(argv[1:])
-    ets = ctx.datetime
-    sts = ets - datetime.timedelta(minutes=ctx.interval)
+    started = utc()
+    valid = valid.replace(tzinfo=timezone.utc)
+    ets = valid
+    sts = ets - timedelta(minutes=minutes)
     with tempfile.NamedTemporaryFile() as tmp:
         maxval, hits, misses = agg(sts, ets)
         if maxval is None:
-            LOG.info("Aborting, no data! %s", ctx)
+            LOG.info("Aborting, no data! %s %s", minutes, valid)
             return
         make_raster(maxval, tmp.name)
         make_contours(tmp.name)
         os.unlink(f"{tmp.name}.tif")
         mydict = {
-            "generated_at": datetime.datetime.utcnow().strftime(ISO8601),
+            "generated_at": utc().strftime(ISO8601),
             "start_time_utc": sts.strftime(ISO8601),
             "end_time_utc": ets.strftime(ISO8601),
             "2min_files_used": hits,
             "2min_files_missed": misses,
             "script_version": VERSION,
-            "script_time_s": (
-                datetime.datetime.utcnow() - started
-            ).total_seconds(),
+            "script_time_s": (utc() - started).total_seconds(),
         }
         make_metadata(tmp.name, mydict)
-        pqinsert(tmp.name, ets, ctx.interval)
+        pqinsert(tmp.name, ets, minutes)
         os.unlink(f"{tmp.name}.geojson")
         os.unlink(f"{tmp.name}_meta.json")
 
 
 if __name__ == "__main__":
-    main(sys.argv)
+    main()

@@ -1,7 +1,7 @@
 """extract_madis.py Get the latest MADIS numbers from the data file!"""
 
-import datetime
 import os
+from datetime import datetime, timedelta, timezone
 from zoneinfo import ZoneInfo
 
 import numpy as np
@@ -42,10 +42,10 @@ def main():
     pgconn = get_dbconn("iem")
     icursor = pgconn.cursor()
 
-    utcnow = datetime.datetime.utcnow()
+    utcnow = datetime.now(timezone.utc)
     fn = None
     for i in range(10):
-        now = utcnow - datetime.timedelta(hours=i)
+        now = utcnow - timedelta(hours=i)
         for j in range(300, -1, -1):
             testfn = f"/mesonet/data/madis/mesonet1/{now:%Y%m%d_%H}00_{j}.nc"
             if os.path.isfile(testfn):
@@ -75,7 +75,7 @@ def main():
             continue
         sid = stations[p]
         ticks = int(times[p])
-        ts = datetime.datetime(1970, 1, 1) + datetime.timedelta(seconds=ticks)
+        ts = datetime(1970, 1, 1) + timedelta(seconds=ticks)
         ts = ts.replace(tzinfo=ZoneInfo("UTC"))
 
         (tmpf, tmpf_qc_av, tmpf_qc_sc) = (None, None, None)

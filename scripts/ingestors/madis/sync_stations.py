@@ -42,6 +42,10 @@ def main(filename: str):
         lon = float(longitudes[recnum])
         lat = float(latitudes[recnum])
         if mcursor.rowcount == 0:
+            # Remove extraneous stuff in the name
+            pos = name.find("   ")
+            if pos > 0:
+                name = name[:pos]
             LOG.warning("Add network: %s station: %s %s", network, stid, name)
             mcursor.execute(
                 "INSERT into stations(id, network, synop, country, plot_name, "

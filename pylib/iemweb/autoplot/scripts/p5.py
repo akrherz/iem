@@ -5,13 +5,14 @@ recent occurence is shown.
 """
 
 import calendar
-import datetime
 
 import numpy as np
 import pandas as pd
+from pyiem.database import get_sqlalchemy_conn
 from pyiem.exceptions import NoDataFound
-from pyiem.plot import figure_axes
-from pyiem.util import get_autoplot_context, get_sqlalchemy_conn
+from pyiem.plot import figure
+from pyiem.util import get_autoplot_context, utc
+from sqlalchemy import text
 
 from iemweb.autoplot import ARG_STATION
 
@@ -61,33 +62,32 @@ def plotter(fdict):
         orderer += " DESC"
     with get_sqlalchemy_conn("coop") as conn:
         df = pd.read_sql(
-            f"""
+            text(f"""
         WITH ranks as (
             SELECT month, day, high, low, precip, snow,
             rank() OVER (
                 PARTITION by month ORDER by {orderer} NULLS LAST)
-            from alldata WHERE station = %s)
+            from alldata WHERE station = :station)
 
-        select month, to_char(day, 'Mon dd, YYYY') as dd, high, low, precip,
-        snow, (high - low) as range from ranks
+        select month, day, to_char(day, 'Mon dd, YYYY') as dd, high, low,
+        precip, snow, (high - low) as range from ranks
         WHERE rank = 1 ORDER by month ASC, day DESC
-        """,
+        """),
             conn,
-            params=(station,),
-            index_col="month",
+            params={"station": station},
         )
     if df.empty:
         raise NoDataFound("No Data Found.")
     labels = []
     ranges = []
     months = []
-    for i, row in df.iterrows():
-        if i in months:
+    for _, row in df.iterrows():
+        if row["month"] in months:
             if labels[-1].endswith("*"):
                 continue
             labels[-1] += " *"
             continue
-        months.append(i)
+        months.append(row["month"])
         if tokens[1] == "range":
             labels.append(
                 f"{row[tokens[1]]} ({row['high']}/{row['low']}) - {row['dd']}"
@@ -99,11 +99,13 @@ def plotter(fdict):
     syear = "n/a"
     if ctx["_nt"].sts[station]["archive_begin"] is not None:
         syear = ctx["_nt"].sts[station]["archive_begin"].year
-    eyear = datetime.date.today().year
+    eyear = utc().year
     title = f"{ctx['_sname']} ({syear}-{eyear})\n" f"{PDICT[varname]} by Month"
 
-    (fig, ax) = figure_axes(title=title, apctx=ctx)
+    fig = figure(title=title, apctx=ctx)
 
+    # Subplot showing the data
+    ax = fig.add_axes((0.12, 0.1, 0.5, 0.8))
     ax.barh(np.arange(1, 13), ranges, align="center")
     ax.set_yticks(range(13))
     ax.set_yticklabels(calendar.month_name)
@@ -111,15 +113,37 @@ def plotter(fdict):
     ax.set_xlabel(
         "Date most recently set/tied shown, * indicates ties are present"
     )
-
-    box = ax.get_position()
-    ax.set_position([0.15, box.y0, box.width * 0.7, box.height])
     ax.grid(True)
+    for i, label in enumerate(labels, start=1):
+        ax.annotate(
+            label,
+            xy=(1.01, i),
+            xycoords=("axes fraction", "data"),
+            va="center",
+        )
 
-    ax2 = ax.twinx()
-    ax2.set_yticks(range(1, 13))
-    ax2.set_yticklabels(labels)
-    ax2.set_position([0.15, box.y0, box.width * 0.7, box.height])
-    ax2.set_ylim(0, 13)
+    # Create another axis for a cartoon for each month entry to denote the
+    # day of the month the record occurred with a carrot
+    ax = fig.add_axes((0.8, 0.1, 0.17, 0.8), frameon=False)
+    ax.set_xticks([])
+    ax.set_yticks([])
+    for i in range(1, 13):
+        for d in [8, 15, 22, 29]:
+            ax.plot([d, d], [i - 0.1, i + 0.1], lw=2, color="#EEE", zorder=2)
+            if i == 1:
+                ax.text(d, 1 - 0.1, f"{d}", color="tan", ha="center", va="top")
+        ax.plot([1, 31], [i, i], lw=2, color="tan", zorder=3)
+        for _, row in df[df["month"] == i].iterrows():
+            ax.scatter(
+                row["day"].day,
+                i + 0.06,
+                marker="v",
+                color="red",
+                s=20,
+                zorder=4,
+            )
+    ax.text(31, 12.5, "Day of Month\nRecord(s) Exist", ha="right", va="bottom")
+    ax.set_ylim(0, 13)
+    ax.set_xlim(-1, 33)  # give some space
 
     return fig, df

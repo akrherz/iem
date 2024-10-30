@@ -246,16 +246,29 @@ EOM;
             }
             pg_close($pconn);
         }
-        if (substr($pil, 0, 3) == "SPS") {
+        if (substr($pil, 0, 3) == "FRW" && strpos($row["data"], "LAT...LON") !== false) {
+            $t->twitter_image = "/plotting/auto/plot/227/pid:{$product_id}.png";
+            $img = <<<EOM
+<p><a class="btn btn-primary"
+ href="/plotting/auto/?q=227&pid={$product_id}"><i class="fa fa-icon"></i> Autoplot 227</a>
+generated the following image below.  You may find more customization options
+for this image by visiting that autoplot.</p>
+<p><img src="/plotting/auto/plot/227/pid:{$product_id}.png"
+ class="img img-responsive"></p>
+EOM;
+        } else if (substr($pil, 0, 3) == "SPS") {
             // Account for multi-segment SPS by counting $$ occurrences
             $segments = substr_count($row["data"], "$$");
             // Can only do one, so this is the best we can do
             $t->twitter_image = "/plotting/auto/plot/217/pid:{$product_id}.png";
-            $img = sprintf(
-                '<p><img src="/plotting/auto/plot/217/pid:%s::segnum:0.png" ' .
-                    'class="img img-responsive"></p>',
-                $product_id,
-            );
+            $img = <<<EOM
+<p><a class="btn btn-primary"
+ href="/plotting/auto/?q=217&pid={$product_id}"><i class="fa fa-icon"></i> Autoplot 217</a>
+generated the following image below.  You may find more customization options
+, like removal of RADAR, for this image by visiting that autoplot.</p>
+<p><img src="/plotting/auto/plot/217/pid:{$product_id}::segnum:0.png"
+ class="img img-responsive"></p>
+EOM;
             for ($segnum = 1; $segnum < $segments; $segnum++) {
                 $img .= sprintf(
                     '<p><img src="/plotting/auto/plot/217/pid:%s::segnum:%s.png" ' .
