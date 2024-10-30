@@ -284,3 +284,4 @@
 /plotting/auto/plot/255/network:IACLIMATE::station:IATAME::sday:0901::eday:0301::depth:1::init:1.0::loss:0.15::year:1803::_r:43::dpi:100.png
 /plotting/auto/plot/255/network:IACLIMATE::station:IA0157::sday:0901::eday:0301::depth:1::init:1.0::loss:0.15::year:2023::_r:43::dpi:100.png
 /plotting/auto/plot/256/fmt:text::date:2024-10-22::by:wfo::wfo:DMX.txt
+/plotting/auto/plot/257/valid:2024-10-29%200000::shade:no::csector:midwest::cmap:afmhot_r::_r:t::dpi:100.png

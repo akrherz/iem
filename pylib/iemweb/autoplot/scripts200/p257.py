@@ -104,7 +104,10 @@ def plotter(fdict):
     ctx = get_autoplot_context(fdict, get_description())
     ctx["valid"] = ctx["valid"].replace(tzinfo=ZoneInfo("UTC"))
     lvalid = ctx["valid"].astimezone(ZoneInfo("America/Chicago"))
-    data = get_data(ctx)
+    try:
+        data = get_data(ctx)
+    except Exception as exp:
+        raise NoDataFound("No HRRR Data Found.") from exp
 
     sse = "With Shade" if ctx["shade"] == "yes" else "No Shade"
     mp = MapPlot(
