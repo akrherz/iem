@@ -7,7 +7,7 @@ Documentation for /geojson/vtec_event.py
 ----------------------------------------
 
 This service emits a GeoJSON for a single VTEC event.  The payload can include
-some additional requested meatadata.
+some additional requested metadata.
 
 Changelog
 ---------
@@ -40,7 +40,7 @@ https://mesonet.agron.iastate.edu/geojson/vtec_event.py\
 
 """
 
-import datetime
+from datetime import datetime, timezone
 
 import simplejson as json
 from pydantic import Field
@@ -112,7 +112,7 @@ def run_lsrs(wfo, year, phenomena, significance, etn, sbw):
     res = {
         "type": "FeatureCollection",
         "features": [],
-        "generation_time": datetime.datetime.utcnow().strftime(ISO8601),
+        "generation_time": datetime.now(timezone.utc).strftime(ISO8601),
         "count": cursor.rowcount,
     }
     for row in cursor:
@@ -154,7 +154,7 @@ def run_sbw(wfo, year, phenomena, significance, etn):
     res = {
         "type": "FeatureCollection",
         "features": [],
-        "generation_time": datetime.datetime.utcnow().strftime(ISO8601),
+        "generation_time": datetime.now(timezone.utc).strftime(ISO8601),
         "count": cursor.rowcount,
     }
     for row in cursor:
@@ -191,7 +191,7 @@ def run(wfo, year, phenomena, significance, etn):
     res = {
         "type": "FeatureCollection",
         "features": [],
-        "generation_time": datetime.datetime.utcnow().strftime(ISO8601),
+        "generation_time": datetime.now(timezone.utc).strftime(ISO8601),
         "count": cursor.rowcount,
     }
     for row in cursor:

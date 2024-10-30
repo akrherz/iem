@@ -14,7 +14,7 @@ from pyiem.util import logger, ncopen, utc
 LOG = logger()
 
 
-def init_year(ts: datetime.datetime, domain: str) -> None:
+def init_year(ts: datetime.datetime, domain: str, ci: bool) -> None:
     """
     Create a new NetCDF file for a year of our specification!
     """
@@ -41,7 +41,7 @@ def init_year(ts: datetime.datetime, domain: str) -> None:
     nc.createDimension("lat", dom["ny"])
     nc.createDimension("lon", dom["nx"])
     ts2 = datetime.datetime(ts.year + 1, 1, 1)
-    days = (ts2 - ts).days
+    days = 1 if ci else (ts2 - ts).days
     LOG.info("Year %s has %s days", ts.year, days)
     nc.createDimension("time", int(days) * 24)
 
@@ -147,6 +147,16 @@ def init_year(ts: datetime.datetime, domain: str) -> None:
     v1.standard_name = "4inch Soil Temperature"
     v1.coordinates = "lon lat"
 
+    # Instantaneous solar radiation, so 0 to 1966 W/m^2
+    rsds = nc.createVariable(
+        "rsds", np.uint16, ("time", "lat", "lon"), fill_value=65535
+    )
+    rsds.units = "W m-2"
+    rsds.scale_factor = 0.03
+    rsds.long_name = "Downward Solar Radiation Flux"
+    rsds.standard_name = "Downward Solar Radiation Flux at Surface"
+    rsds.coordinates = "lon lat"
+
     nc.close()
 
 
@@ -177,12 +187,16 @@ def compute_hasdata(year):
 
 @click.command()
 @click.option("--year", type=int, required=True, help="Year to initialize")
-def main(year):
+@click.option("--ci", is_flag=True, help="Run in CI mode")
+def main(year: int, ci: bool) -> None:
     """Go Main Go"""
     for domain in iemre.DOMAINS:
-        init_year(datetime.datetime(year, 1, 1), domain)
-        if domain == "":
+        init_year(datetime.datetime(year, 1, 1), domain, ci)
+        if domain == "" and not ci:
             compute_hasdata(year)
+        if ci:
+            with ncopen(iemre.get_hourly_ncname(year, domain), "a") as nc:
+                nc.variables["rsds"][0] = 400
 
 
 if __name__ == "__main__":

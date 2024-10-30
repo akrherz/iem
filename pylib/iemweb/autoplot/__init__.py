@@ -942,6 +942,7 @@ uopts = [
 ]
 misc = [
     {"id": 226, "label": "Center Weather Advisory (CWA) Map"},
+    {"id": 257, "label": "HRRR Comprehensive Climate Index (CCI)"},
     {"id": 221, "label": "HRRR Time-Lagged Ensemble Reflectivity Plot"},
     {"id": 242, "label": "Local Storm Report (LSR) Simple Map"},
     {"id": 254, "label": "NEXRAD Level III Latency over NOAAPort"},

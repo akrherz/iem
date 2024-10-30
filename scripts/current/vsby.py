@@ -1,11 +1,12 @@
 """Generate current plot of visibility"""
 
-import datetime
 import warnings
+from datetime import datetime
 
 import numpy as np
+from pyiem.database import get_dbconn
 from pyiem.plot import MapPlot, get_cmap
-from pyiem.util import get_dbconn
+from pyiem.util import utc
 
 # Stop whining about missing data for contourf
 warnings.filterwarnings("ignore")
@@ -43,12 +44,12 @@ def main():
     if len(lats) < 5:
         return
 
-    now = datetime.datetime.now()
+    now = datetime.now()
 
     mp = MapPlot(
         sector="iowa",
         title="Iowa Visibility",
-        subtitle="Valid: %s" % (now.strftime("%d %b %Y %-I:%M %p"),),
+        subtitle=f"Valid: {now:%d %b %Y %-I:%M %p}",
     )
 
     mp.contourf(
@@ -63,9 +64,9 @@ def main():
     mp.plot_values(lons, lats, vals, "%.1f", valmask)
     mp.drawcounties()
 
-    pqstr = ("plot ac %s00 iowa_vsby.png vsby_contour_%s00.png png" "") % (
-        datetime.datetime.utcnow().strftime("%Y%m%d%H"),
-        datetime.datetime.utcnow().strftime("%H"),
+    pqstr = (
+        f"plot ac {utc():%Y%m%d%H}00 iowa_vsby.png "
+        f"vsby_contour_{utc():%H}00.png png"
     )
     mp.postprocess(pqstr=pqstr)
     mp.close()

@@ -55,6 +55,8 @@
 /plotting/auto/plot/73/opt:wfo::network:WFO::station:DMX::state:IA::ugc:IAC169::limit:yes::sday:0101::eday:1231::phenomena:TO::significance:W::_r:t::dpi:100.png
 /plotting/auto/plot/73/opt:ugc::network:WFO::station:PQR::state:WA::ugc:WAZ660::limit:no::sday:0101::eday:1231::phenomena:FW::significance:W::_r:t::dpi:100.png
 /plotting/auto/plot/73/opt:wfo::network:WFO::station:TSA::state:IA::ugc:IAC169::limit:udf::sday:0104::eday:0104::phenomena:SV::significance:W::_r:t::dpi:100.png
+/plotting/auto/plot/76/network:IA_ASOS::station:DSM::season:winter::varname:dwpf::agg:mean::year:1893::w:bar::_r:t::dpi:100.png
+/plotting/auto/plot/76/network:IA_ASOS::station:DSM::season:water_year::varname:vpd::agg:mean::year:1893::w:bar::_r:t::dpi:100.png
 /plotting/auto/plot/80/which:wfo::network:WFO::wfo:DMX::ugc:IAC153::phenomena:TO::significance:W::_r:t::dpi:100.png
 /plotting/auto/plot/80/which:ugc::network:WFO::wfo:DMX::ugc:IAC153::phenomena:TO::significance:W::_r:t::dpi:100.png
 /plotting/auto/plot/82/network:IA_ASOS::station:AMW::var:pday::sdate:2024-05-16::edate:2024-08-14::_r:t::dpi:100.png
@@ -273,6 +275,7 @@
 /plotting/auto/plot/248/year:1986::outlook_type:C::threshold:CATEGORICAL.SLGT::day:1::opt:wfo::network:WFO::wfo:DMX::fema:7::state:IA::ugc:IAZ048::overlap:0::_r:t::dpi:100.png
 /plotting/auto/plot/248/year:1986::outlook_type:C::threshold:CATEGORICAL.SLGT::day:1::opt:state::network:WFO::wfo:DMX::fema:7::state:IA::ugc:IAZ048::overlap:0::_r:t::dpi:100.png
 /plotting/auto/plot/248/year:1986::outlook_type:C::threshold:CATEGORICAL.SLGT::day:1::opt:state::network:WFO::wfo:DMX::fema:7::state:IA::ugc:IAZ048::overlap:5::_r:t::dpi:100.png
+/plotting/auto/plot/249/csector:midwest::var:rsds::ptype:c::valid:2023-01-01%200000::cmap:magma::_r:t::dpi:100.png
 /plotting/auto/plot/250/network1:IA_ASOS::zstation1:AMW::network2:IA_ASOS::zstation2:DSM::varname:tmpf::sts:2020-01-14%200000::ets:2020-04-14%202300::cmap:Greens::diff:0::_r:t::dpi:100.png
 /plotting/auto/plot/250/network1:IA_ASOS::zstation1:BNW::network2:IA_ASOS::zstation2:DSM::varname:tmpf::sts:2020-01-14%200000::ets:2020-04-14%202300::cmap:Greens::diff:0::_r:t::dpi:100.png
 /plotting/auto/plot/253/datglobalid:%7B495DE596-B299-41FE-9C90-13C87E43FE0B%7D::dat:2024-05-21::cmap:gist_rainbow::_r:t::dpi:100.png
@@ -281,3 +284,4 @@
 /plotting/auto/plot/255/network:IACLIMATE::station:IATAME::sday:0901::eday:0301::depth:1::init:1.0::loss:0.15::year:1803::_r:43::dpi:100.png
 /plotting/auto/plot/255/network:IACLIMATE::station:IA0157::sday:0901::eday:0301::depth:1::init:1.0::loss:0.15::year:2023::_r:43::dpi:100.png
 /plotting/auto/plot/256/fmt:text::date:2024-10-22::by:wfo::wfo:DMX.txt
+/plotting/auto/plot/257/valid:2024-10-29%200000::shade:no::csector:midwest::cmap:afmhot_r::_r:t::dpi:100.png

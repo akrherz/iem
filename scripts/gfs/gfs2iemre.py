@@ -159,7 +159,7 @@ def merge_grib(nc, now, domain: str, dom: dict):
                     tmaxgrid = np.where(
                         grb.values > tmaxgrid, grb.values, tmaxgrid
                     )
-            elif name == "dswrf":
+            elif name in ["dswrf", "sdswrf"]:
                 if srad is None:
                     # Average 6 hour flux in W/m^2 to MJ/day
                     srad = grb.values * 6.0 * 3600.0 / 1_000_000.0

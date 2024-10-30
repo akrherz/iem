@@ -5,6 +5,7 @@ python scripts/mrms/init_daily_mrms.py --year=2024
 python scripts/mrms/init_mrms_dailyc.py
 python scripts/prism/init_daily.py --year=2024
 python scripts/iemre/init_daily.py --year=2023 --ci
+python scripts/iemre/init_hourly.py --year=2023 --ci
 python scripts/iemre/init_daily.py --year=2024 --domain=
 python scripts/iemre/init_daily.py --year=2024 --domain=europe
 python scripts/iemre/init_dailyc.py

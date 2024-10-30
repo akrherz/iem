@@ -20,7 +20,7 @@ web service that provides the raw values.</p>
 of county/zone based FFG guidance found in the FFG text products.
 """
 
-import datetime
+from datetime import datetime, timedelta, timezone
 from zoneinfo import ZoneInfo
 
 import pandas as pd
@@ -53,7 +53,7 @@ PDICT3 = {
 def get_description():
     """Return a dict describing how to call this plotter"""
     desc = {"description": __doc__, "data": True}
-    now = datetime.datetime.utcnow()
+    now = datetime.now(timezone.utc)
     desc["arguments"] = [
         dict(
             type="select",
@@ -160,7 +160,7 @@ def plotter(fdict):
             SELECT *, substr(ugc, 3, 1) as ztype from data where rank = 1
             """,
                 conn,
-                params=(ts - datetime.timedelta(hours=24), ts),
+                params=(ts - timedelta(hours=24), ts),
                 index_col="ugc",
             )
         df2 = df[df["ztype"] == "C"]
@@ -182,11 +182,11 @@ def plotter(fdict):
         )
     else:
         # use grib data
-        ts -= datetime.timedelta(hours=ts.hour % 6)
+        ts -= timedelta(hours=ts.hour % 6)
         ts = ts.replace(minute=0)
         lats = None
         for offset in range(0, 24, 4):
-            ts2 = ts - datetime.timedelta(hours=offset)
+            ts2 = ts - timedelta(hours=offset)
             with archive_fetch(
                 ts2.strftime("%Y/%m/%d/model/ffg/5kmffg_%Y%m%d%H.grib2")
             ) as testfn:

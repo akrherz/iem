@@ -5,14 +5,14 @@ run from RUN_10_AFTER.sh
 
 """
 
-import datetime
 import gzip
 import json
 import os
 import subprocess
-import sys
 import tempfile
+from datetime import datetime, timedelta, timezone
 
+import click
 import numpy as np
 import pygrib
 from PIL import Image
@@ -74,7 +74,7 @@ def cleanup():
 
 def is_realtime(gts):
     """Is this timestamp a realtime product"""
-    utcnow = datetime.datetime.utcnow()
+    utcnow = datetime.utcnow()
     return utcnow.strftime("%Y%m%d%H") == gts.strftime("%Y%m%d%H")
 
 
@@ -88,7 +88,7 @@ def need_not_run(gts, hr) -> bool:
     return True
 
 
-def doit(gts, hr):
+def doit(gts: datetime, hr: int):
     """
     Actually generate a PNG file from the 8 NMQ tiles
     """
@@ -99,12 +99,12 @@ def doit(gts, hr):
             return
         LOG.warning("Reprocessing %s[%s] due to missing archive.", gts, hr)
     routes = "ac" if irealtime else "a"
-    sts = gts - datetime.timedelta(hours=hr)
+    sts = gts - timedelta(hours=hr)
     times = [gts]
     if hr > 24:
-        times.append(gts - datetime.timedelta(hours=24))
+        times.append(gts - timedelta(hours=24))
     if hr == 72:
-        times.append(gts - datetime.timedelta(hours=48))
+        times.append(gts - timedelta(hours=48))
     metadata = {
         "start_valid": sts.strftime(ISO8601),
         "end_valid": gts.strftime(ISO8601),
@@ -304,18 +304,18 @@ def doit(gts, hr):
     os.unlink(tmpfn)
 
 
-def main(argv):
+@click.command()
+@click.option("--valid", type=click.DateTime(), required=True)
+def main(valid: datetime):
     """We are always explicitly called"""
-    gts = datetime.datetime(
-        int(argv[1]), int(argv[2]), int(argv[3]), int(argv[4])
-    )
+    valid = valid.replace(tzinfo=timezone.utc)
     for hr in [1, 24, 48, 72]:
-        doit(gts, hr)
+        doit(valid, hr)
         # Also reprocess last hour and six hours ago
         for offset in [1, 6]:
-            doit(gts - datetime.timedelta(hours=offset), hr)
+            doit(valid - timedelta(hours=offset), hr)
     cleanup()
 
 
 if __name__ == "__main__":
-    main(sys.argv)
+    main()
