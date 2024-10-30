@@ -8,7 +8,7 @@ represents the start year of the winter season.  Rewording, the year 2016
 would represent the period of 1 July 2016 to 30 Jun 2017.
 """
 
-import datetime
+from datetime import date, datetime, timedelta
 
 import numpy as np
 import pandas as pd
@@ -38,7 +38,7 @@ PDICT2 = {
 def get_description():
     """Return a dict describing how to call this plotter"""
     desc = {"description": __doc__, "data": True}
-    thisyear = datetime.date.today().year
+    thisyear = date.today().year
     desc["arguments"] = [
         ARG_STATION,
         dict(
@@ -149,7 +149,7 @@ def plotter(fdict):
     df2 = df[df["count"] > 0]
     if df2.empty:
         raise NoDataFound("No data found.")
-    tl = PDICT["%s_%s_%s" % (extrenum, varname, direction)]
+    tl = PDICT[f"{extrenum}_{varname}_{direction}"]
     title = (
         f"{ctx['_sname']} :: {extrenum.capitalize()} Date and Days\n"
         f"{tl} {threshold}"
@@ -170,7 +170,7 @@ def plotter(fdict):
     xticks = []
     xticklabels = []
     for i in np.arange(df2[col].min() - 5, df2[col].max() + 5, 1):
-        ts = datetime.datetime(2000, 1, 1) + datetime.timedelta(days=i)
+        ts = datetime(2000, 1, 1) + timedelta(days=i)
         if ts.day == 1:
             xticks.append(i)
             xticklabels.append(ts.strftime("%-d %b"))
@@ -178,15 +178,13 @@ def plotter(fdict):
     ax.set_xticklabels(xticklabels)
 
     ax2 = ax.twinx()
-    sortvals = np.sort(df2[col].values)
+    sortvals = np.sort(np.array(df2[col].values))
     yvals = np.arange(len(sortvals)) / float(len(sortvals))
     ax2.plot(sortvals, yvals * 100.0, color="r")
     ax2.set_ylabel("Accumulated Frequency [%] (red line)", color="r")
     ax2.set_yticks([0, 25, 50, 75, 100])
 
-    avgd = datetime.datetime(2000, 1, 1) + datetime.timedelta(
-        days=int(df2[col].mean())
-    )
+    avgd = datetime(2000, 1, 1) + timedelta(days=int(df2[col].mean()))
     ax.text(
         0.01,
         0.99,
@@ -256,13 +254,12 @@ def plotter(fdict):
             va="top",
         )
     # print the earliest 10 dates
-    label = "Earliest First Dates"
-    for _, row in (
-        df.sort_values("nday_doy", ascending=True).head(10).iterrows()
-    ):
-        if row["nday"] is None:
+    label = f"Earliest {'Last' if extrenum == 'last' else 'First'} Dates"
+    lcol = col.split("_")[0]
+    for _, row in df.sort_values(col, ascending=True).head(10).iterrows():
+        if row[lcol] is None:
             continue
-        label += f"\n{row['nday']:%d %b %Y}"
+        label += f"\n{row[lcol]:%d %b %Y}"
     fig.text(
         0.85,
         0.9,
@@ -270,13 +267,11 @@ def plotter(fdict):
         ha="left",
         va="top",
     )
-    label = "Latest First Dates"
-    for _, row in (
-        df.sort_values("nday_doy", ascending=False).head(10).iterrows()
-    ):
-        if row["nday"] is None:
+    label = f"Latest {'Last' if extrenum == 'last' else 'First'} Dates"
+    for _, row in df.sort_values(col, ascending=False).head(10).iterrows():
+        if row[lcol] is None:
             continue
-        label += f"\n{row['nday']:%d %b %Y}"
+        label += f"\n{row[lcol]:%d %b %Y}"
     fig.text(
         0.85,
         0.5,
