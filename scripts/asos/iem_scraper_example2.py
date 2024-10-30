@@ -3,6 +3,10 @@ An example script to sequentially download data from a bunch of long term
 ASOS sites, for only a few specific variables, and save the result to
 individual CSV files.
 
+More help on CGI parameters is available at:
+
+    https://mesonet.agron.iastate.edu/cgi-bin/request/asos.py?help
+
 You are free to use this however you want.
 
 Author: daryl herzmann akrherz@iastate.edu

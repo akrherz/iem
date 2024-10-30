@@ -1,6 +1,10 @@
 """
 Example script that scrapes data from the IEM ASOS download service.
 
+More help on CGI parameters is available at:
+
+    https://mesonet.agron.iastate.edu/cgi-bin/request/asos.py?help
+
 Requires: Python 3
 """
 
