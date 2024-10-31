@@ -24,8 +24,8 @@ https://mesonet.agron.iastate.edu/geojson/7am.py?dt=2024-07-01&group=azos
 
 """
 
-import datetime
 import json
+from datetime import date, timedelta
 from zoneinfo import ZoneInfo
 
 from pydantic import Field
@@ -46,8 +46,8 @@ class Schema(CGIModel):
         default="coop",
         description="The group of stations to generate data for",
     )
-    dt: datetime.date = Field(
-        default=datetime.date.today(),
+    dt: date = Field(
+        default=date.today(),
         description="Date to generate data for",
     )
 
@@ -93,11 +93,10 @@ def run_azos(ts):
     """Get the data please"""
     pgconn, cursor = get_dbconnc("iem")
 
-    utcnow = datetime.datetime.utcnow()
     # Now we have the tricky work of finding what 7 AM is
     ts = ts.astimezone(ZoneInfo("America/Chicago"))
     ts1 = ts.replace(hour=7)
-    ts0 = ts1 - datetime.timedelta(hours=24)
+    ts0 = ts1 - timedelta(hours=24)
     cursor.execute(
         """
         select t.id, t.name, t.network, sum(phour), st_x(geom), st_y(geom)
@@ -112,7 +111,7 @@ def run_azos(ts):
     res = {
         "type": "FeatureCollection",
         "features": [],
-        "generation_time": utcnow.strftime(ISO8601),
+        "generation_time": utc().strftime(ISO8601),
         "count": cursor.rowcount,
     }
     for row in cursor:
@@ -140,8 +139,6 @@ def run(ts, networks):
     """Actually do the hard work of getting the current SPS in geojson"""
     pgconn, cursor = get_dbconnc("iem")
 
-    utcnow = datetime.datetime.utcnow()
-
     cursor.execute(
         """
         select id, ST_x(geom), ST_y(geom), coop_valid, pday, snow, snowd,
@@ -157,7 +154,7 @@ def run(ts, networks):
     res = {
         "type": "FeatureCollection",
         "features": [],
-        "generation_time": utcnow.strftime(ISO8601),
+        "generation_time": utc().strftime(ISO8601),
         "count": cursor.rowcount,
     }
     for row in cursor:

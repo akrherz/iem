@@ -30,12 +30,12 @@ https://mesonet.agron.iastate.edu/geojson/network.py?network=AZOS&only_online=1
 
 """
 
-import datetime
 import json
 
 from pydantic import Field
 from pyiem.database import get_dbconnc
 from pyiem.reference import ISO8601
+from pyiem.util import utc
 from pyiem.webutil import CGIModel, iemapp
 
 
@@ -88,7 +88,7 @@ def run(network, only_online):
     res = {
         "type": "FeatureCollection",
         "features": [],
-        "generation_time": datetime.datetime.utcnow().strftime(ISO8601),
+        "generation_time": utc().strftime(ISO8601),
         "count": cursor.rowcount,
     }
     for row in cursor:

@@ -25,8 +25,9 @@ $ cat RTPBOU.txt | dcshef
 
 <p><strong>Report Types:</strong>
 <ul>
-    <li><strong>12z:</strong> Morning ~12 UTC reports made between 5 AM and
-    11 AM local time.</li>
+    <li><strong>12z:</strong> COOP Morning ~12 UTC reports made between 5 AM
+    and 11 AM local time.  Computed ASOS summaries for previous day and for
+    12 UTC to 12 UTC period.</li>
 </ul></p>
 
 <p><strong>Implementation Notes:</strong>
@@ -79,6 +80,7 @@ def get_description():
         "data": True,
         "report": True,
         "nopng": True,
+        "cache": 120,
         "arguments": [
             {
                 "type": "select",
@@ -115,6 +117,98 @@ def get_description():
             },
         ],
     }
+
+
+def get_asos(ctx: dict) -> pd.DataFrame:
+    """Figure out the data."""
+    params = {
+        "date": ctx["date"],
+        "wfo": ctx["wfo"],
+        "state": ctx["state"],
+    }
+    limiter = " wfo = :wfo "
+    if ctx["by"] == "state":
+        limiter = " state = :state "
+    with get_sqlalchemy_conn("asos") as conn:
+        # Figure out which stations we care about
+        stations = pd.read_sql(
+            text(
+                "select id, name from stations where network ~* 'ASOS' and "
+                f"{limiter} ORDER by id ASC"
+            ),
+            conn,
+            index_col="id",
+            params=params,
+        )
+        # 6z to 6z high
+        ets = utc(ctx["date"].year, ctx["date"].month, ctx["date"].day, 6)
+        sts = ets - pd.Timedelta("24 hours")
+        highsdf = pd.read_sql(
+            text(
+                """
+    select station,
+    max(coalesce(max_tmpf_6hr, tmpf)) as calc_max_tmpf from alldata
+    where valid >= :sts and valid < :ets and station = ANY(:stations)
+    GROUP by station ORDER by station ASC
+"""
+            ),
+            conn,
+            params={
+                "stations": stations.index.to_list(),
+                "sts": sts,
+                "ets": ets,
+            },
+            index_col="station",
+        )
+        stations["high"] = highsdf["calc_max_tmpf"]
+        # 0z to 12z low
+        ets = utc(ctx["date"].year, ctx["date"].month, ctx["date"].day, 12)
+        sts = utc(ctx["date"].year, ctx["date"].month, ctx["date"].day, 0)
+        lowsdf = pd.read_sql(
+            text(
+                """
+    select station,
+    min(coalesce(min_tmpf_6hr, tmpf)) as calc_min_tmpf from alldata
+    where valid >= :sts and valid < :ets and station = ANY(:stations)
+    GROUP by station ORDER by station ASC
+"""
+            ),
+            conn,
+            index_col="station",
+            params={
+                "stations": stations.index.to_list(),
+                "sts": sts,
+                "ets": ets,
+            },
+        )
+        stations["low"] = lowsdf["calc_min_tmpf"]
+        # 12z to 12z precip
+        ets = utc(ctx["date"].year, ctx["date"].month, ctx["date"].day, 12)
+        sts = ets - pd.Timedelta("24 hours")
+        precipdf = pd.read_sql(
+            text(
+                """
+    with obs as (
+    select station, date_trunc('hour', valid) as ts,
+    max(p01i) as precip from alldata
+    where valid >= :sts and valid < :ets and station = ANY(:stations)
+    GROUP by station, ts)
+    select station, sum(precip) as precip from obs
+    GROUP by station ORDER by station ASC
+"""
+            ),
+            conn,
+            params={
+                "stations": stations.index.to_list(),
+                "sts": sts,
+                "ets": ets,
+            },
+            index_col="station",
+        )
+        stations["precip"] = precipdf["precip"]
+    # drop any rows with all missing data, except `name`
+    stations = stations.dropna(how="all", subset=["high", "low", "precip"])
+    return stations
 
 
 def get_obsdf(ctx: dict) -> pd.DataFrame:
@@ -162,6 +256,7 @@ def plotter(fdict):
     ctx = get_autoplot_context(fdict, get_description())
 
     obsdf = get_obsdf(ctx)
+    asosdf = get_asos(ctx)
     wfo = ctx["wfo"]
     dt = ctx["date"]
     tzname = ctx["_nt"].sts[wfo]["tzname"]
@@ -186,6 +281,21 @@ def plotter(fdict):
             f"{pp(row['pday'], 5, 2)} /{pp(row['snow'], 5, 1)} /"
             f"{pp(row['snowd'], 5, 1)}\n"
         )
-    report += ".END\n\n$$\n"
+    report += ".END\n\n"
 
-    return None, obsdf, report
+    report += (
+        "ASOS Reports\n\n"
+        f".BR {wfo} {dt:%Y%m%d} Z DH06/TAIRVX/DH12/TAIRVP/PPDRVZ\n"
+        ": 06Z (yesterday) to 06Z HIGH TEMPERATURE\n"
+        ": 00Z TO 12Z TODAY LOW TEMPERATURE\n"
+        ": 12Z YESTERDAY TO 12Z TODAY RAINFALL\n"
+    )
+    for sid, row in asosdf.iterrows():
+        report += (
+            f"{sid:6s}:{row['name']:25.25s}: "
+            f"{pp(row['high'], 4, 0)} /{pp(row['low'], 4, 0)} /"
+            f"{pp(row['precip'], 5, 2)}\n"
+        )
+    report += ".END\n\n"
+
+    return None, obsdf, report + "$$\n"
