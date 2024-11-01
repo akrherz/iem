@@ -1,15 +1,17 @@
 """
 Generate a composite of the MRMS Lowest Composite Reflectvity
+
+called from RUN_1MIN.sh
 """
 
-import datetime
 import gzip
 import json
 import os
 import subprocess
-import sys
 import tempfile
+from datetime import datetime, timedelta, timezone
 
+import click
 import numpy as np
 import pygrib
 import pyiem.mrms as mrms
@@ -166,25 +168,20 @@ def do(now, realtime=False):
     os.unlink(tmpfn)
 
 
-def main(argv):
+@click.command()
+@click.option("--valid", type=click.DateTime())
+def main(valid: datetime):
     """Go Main Go"""
     utcnow = utc()
-    if len(argv) == 6:
-        utcnow = utc(
-            int(argv[1]),
-            int(argv[2]),
-            int(argv[3]),
-            int(argv[4]),
-            int(argv[5]),
-        )
+    if valid is not None:
+        utcnow = valid.replace(tzinfo=timezone.utc)
         do(utcnow)
     else:
         # If our time is an odd time, run 3 minutes ago
         utcnow = utcnow.replace(second=0, microsecond=0)
         if utcnow.minute % 2 == 1:
-            do(utcnow - datetime.timedelta(minutes=5), True)
+            do(utcnow - timedelta(minutes=5), True)
 
 
 if __name__ == "__main__":
-    # Lets do something
-    main(sys.argv)
+    main()
