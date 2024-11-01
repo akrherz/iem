@@ -1,30 +1,55 @@
-"""
-Create ERDAS Imagine file from a MRMS Raster
+""".. title:: MRMS to ERDAS IMG
+
+This service converts MRMS grib data into a ERDAS IMG file for use in GIS.
+
+Changelog
+---------
+
+- 2024-11-01: Migration to pydantic validation.
+
+Example Usage
+-------------
+
+Convert the 1 hour MRMS data ending at 18 UTC on 13 April 2016:
+
+https://mesonet.agron.iastate.edu/rainfall/mrms2img.py?\
+year=2016&month=4&day=13&hour=18&minute=0&period=1
+
 """
 
-import datetime
-import os
 import tempfile
 import zipfile
 
 import numpy as np
 from imageio import imread
 from osgeo import gdal, osr
-from pyiem.exceptions import IncompleteWebRequest, NoDataFound
-from pyiem.webutil import iemapp
+from pydantic import Field
+from pyiem.exceptions import NoDataFound
+from pyiem.util import archive_fetch, utc
+from pyiem.webutil import CGIModel, iemapp
 
 # Workaround future
 gdal.UseExceptions()
 
 
+class Schema(CGIModel):
+    """See how we are called."""
+
+    year: int = Field(description="Year of the data", default=2016)
+    month: int = Field(description="Month of the data", default=4)
+    day: int = Field(description="Day of the data", default=13)
+    hour: int = Field(description="Hour of the data", default=18)
+    minute: int = Field(description="Minute of the data", default=0)
+    period: int = Field(description="Period of the data", default=1)
+
+
 def workflow(tmpdir, valid, period, start_response):
     """Actually do the work!"""
-    fn = valid.strftime(
-        f"/mesonet/ARCHIVE/data/%Y/%m/%d/GIS/mrms/p{period}h_%Y%m%d%H%M.png"
-    )
-    if not os.path.isfile(fn):
-        raise NoDataFound(f"File not found: {fn}")
-    img = imread(fn, pilmode="P")
+    ppath = valid.strftime(f"%Y/%m/%d/GIS/mrms/p{period}h_%Y%m%d%H%M.png")
+    with archive_fetch(ppath) as fn:
+        if fn is None:
+            raise NoDataFound(f"File not found: {ppath}")
+        img = imread(fn, pilmode="P")
     size = np.shape(img)
     # print 'A', np.max(img), np.min(img), img[0,0], img[-1,-1]
     data = np.ones(size, np.uint16) * 65535
@@ -91,20 +116,17 @@ def workflow(tmpdir, valid, period, start_response):
     return payload
 
 
-@iemapp()
+@iemapp(schema=Schema, help=__doc__)
 def application(environ, start_response):
     """Do Something"""
-    if "year" not in environ:
-        raise IncompleteWebRequest("GET parameter year= missing")
-    year = int(environ.get("year", 2016))
-    month = int(environ.get("month", 4))
-    day = int(environ.get("day", 13))
-    hour = int(environ.get("hour", 18))
-    minute = int(environ.get("minute", 0))
 
-    period = int(environ.get("period", 1))
-
-    valid = datetime.datetime(year, month, day, hour, minute)
+    valid = utc(
+        environ["year"],
+        environ["month"],
+        environ["day"],
+        environ["hour"],
+        environ["minute"],
+    )
 
     with tempfile.TemporaryDirectory() as tmpdir:
-        return [workflow(tmpdir, valid, period, start_response)]
+        return [workflow(tmpdir, valid, environ["period"], start_response)]
