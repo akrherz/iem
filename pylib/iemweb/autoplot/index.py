@@ -841,22 +841,25 @@ plot type.</p>
         if res["frontend"]:
             extra = " or strpos(appurl, :fe) = 1"
             params["fe"] = res["frontend"]
+        # careful here as we use US Central Time for dates
         df = pd.read_sql(
             text(
-                "select valid, title from feature "
+                "select date(valid at time zone 'America/Chicago') as dt, "
+                "title from feature "
                 "WHERE (substr(appurl, 1, 14) = '/plotting/auto' and "
                 f" appurl ~* :appurl) {extra} and valid < now() "
                 "ORDER by valid DESC"
             ),
             conn,
             params=params,
-            index_col="valid",
+            parse_dates="dt",
+            index_col="dt",
         )
-    for valid, row in df.iterrows():
+    for dt, row in df.iterrows():
         s += (
             f'<li><strong><a href="/onsite/features/cat.php?'
-            f'day={valid:%Y-%m-%d}">'
-            f"{valid:%d %b %Y}</a></strong>: {row['title']}</li>\n"
+            f'day={dt:%Y-%m-%d}">'
+            f"{dt:%d %b %Y}</a></strong>: {row['title']}</li>\n"
         )
     s += "</ul>"
     return s
