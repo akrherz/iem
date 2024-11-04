@@ -227,34 +227,6 @@ function stateSelect(
     return $s;
 }
 
-function vtecPhenoSelect($selected, $name = 'phenomena')
-{
-    global $vtec_phenomena;
-    reset($vtec_phenomena);
-    $s = "<select name=\"{$name}\" style=\"width: 195px;\">\n";
-    foreach ($vtec_phenomena as $key => $value) {
-        $s .= "<option value=\"$key\" ";
-        if ($selected == $key) $s .= "SELECTED";
-        $s .= ">[" . $key . "] " . $vtec_phenomena[$key] . "</option>";
-    }
-    $s .= "</select>\n";
-    return $s;
-}
-
-function vtecSigSelect($selected, $name = 'significance')
-{
-    global $vtec_significance;
-    reset($vtec_significance);
-    $s = "<select name=\"{$name}\" style=\"width: 195px;\">\n";
-    foreach ($vtec_significance as $key => $value) {
-        $s .= "<option value=\"$key\" ";
-        if ($selected == $key) $s .= "SELECTED";
-        $s .= ">[" . $key . "] " . $vtec_significance[$key] . "</option>";
-    }
-    $s .= "</select>\n";
-    return $s;
-}
-
 function wfoSelect($selected)
 {
     global $wfos;
@@ -263,7 +235,7 @@ function wfoSelect($selected)
     foreach ($wfos as $key => $value) {
         $s .= "<option value=\"$key\" ";
         if ($selected == $key) $s .= "SELECTED";
-        $s .= ">[" . $key . "] " . $wfos[$key]["city"] . "</option>";
+        $s .= ">[" . $key . "] " . $value["city"] . "</option>";
     }
     $s .= "</select>";
     return $s;
@@ -393,11 +365,11 @@ function daySelect2($selected, $name, $jsextra = '')
 {
     $s = "<select name='$name' {$jsextra}>\n";
     for ($k = 1; $k < 32; $k++) {
-        $s .= "<option value=\"" . $k . "\" ";
-        if ($k == (int)$selected) {
-            $s .= "SELECTED";
-        }
-        $s .= ">" . $k . "</option>";
+        $s .= sprintf('<option value="%s"%s>%s</option>',
+            $k,
+            ($k == intval($selected)) ? " SELECTED" : "",
+            $k,
+        );
     }
     $s .= "</select>\n";
     return $s;
