@@ -25,6 +25,8 @@
 /plotting/auto/plot/32/network:IACLIMATE::station:IATAME::year:2024::var:era5land_srad::gddbase:50::gddceil:86::how:ptile::cmap:jet::_r:t::dpi:100.png
 /plotting/auto/plot/32/network:IACLIMATE::station:IATAME::year:2024::var:era5land_soilm4_avg::gddbase:50::gddceil:86::how:diff::cmap:jet::_r:t::dpi:100.png
 /plotting/auto/plot/34/network:IACLIMATE::station:IATAME::var:high_over::which:average::climo:1951::threshold:32::_r:43::dpi:100.png
+/plotting/auto/plot/37/network:IA_ASOS::zstation:AMW::month:8::year:2024::model:NBE::var:wsp::_r:t::dpi:100::_cb:1.png
+/plotting/auto/plot/37/network:IA_ASOS::zstation:AMW::month:8::year:2024::model:GFS::var:t::_r:t::dpi:100.png
 /plotting/auto/plot/39/network:IACLIMATE::station:IATAME::compare:manual::year:2024::month:1::date:2024-01-03::_r:t::dpi:100.png
 /plotting/auto/plot/40/network:IA_ASOS::zstation:DSM::month:1::ptype:vsby::year:2020::_r:t::dpi:100.png
 /plotting/auto/plot/40/network:IA_ASOS::zstation:DSM::month:1::ptype:sky::year:2020::_r:t::dpi:100.png

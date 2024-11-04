@@ -1,9 +1,12 @@
-"""Copy NDFD grib data to netcdf."""
+"""Copy NDFD grib data to netcdf.
 
-import datetime
+Called from RUN_10_AFTER.sh
+"""
+
 import os
-import sys
+from datetime import datetime, timedelta
 
+import click
 import numpy as np
 import pygrib
 from pyiem.util import ncopen, utc
@@ -85,7 +88,7 @@ def merge_grib(ts, nc):
     """Merge what grib data we can find into the netcdf file."""
     # taking some liberties here given our hard coded 0z start below
     for fhour in range(6, 169, 6):
-        fts = ts + datetime.timedelta(hours=fhour)
+        fts = ts + timedelta(hours=fhour)
         fhourstr = "%03i" % (fhour,)
         gribfn = ts.strftime(
             "/mesonet/ARCHIVE/data/%Y/%m/%d/model/ndfd/"
@@ -132,12 +135,14 @@ def workflow(ts):
     nc.close()
 
 
-def main(argv):
+@click.command()
+@click.option("--date", "dt", required=True, help="UTC date to process")
+def main(dt: datetime):
     """Process a given UTC into netcdf."""
     # TODO: we presently only support the 0z NDFD
-    ts = utc(int(argv[1]), int(argv[2]), int(argv[3]))
+    ts = utc(dt.year, dt.month, dt.day)
     workflow(ts)
 
 
 if __name__ == "__main__":
-    main(sys.argv)
+    main()

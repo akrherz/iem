@@ -21,10 +21,11 @@ import matplotlib.dates as mdates
 import numpy as np
 import pandas as pd
 from matplotlib.ticker import AutoMinorLocator, MaxNLocator
-from pyiem.database import get_dbconn
+from pyiem.database import get_sqlalchemy_conn
 from pyiem.exceptions import NoDataFound
 from pyiem.plot import figure_axes
 from pyiem.util import get_autoplot_context
+from sqlalchemy import text
 
 PDICT = {
     "NAM": "NAM (9 Dec 2008 - current)",
@@ -52,23 +53,24 @@ T_SQL = """
     SELECT date(ftime),
     min(case when
         extract(hour from ftime at time zone 'UTC') = 12
-        then coalesce(n_x, txn) else null end) as min_morning,
+        then coalesce(n_x, txn) else null end) as morning_min,
     max(case when
         extract(hour from ftime at time zone 'UTC') = 12
-        then coalesce(n_x, txn) else null end) as max_morning,
+        then coalesce(n_x, txn) else null end) as morning_max,
     min(case when
         extract(hour from ftime at time zone 'UTC') = 0
-        then coalesce(n_x, txn) else null end) as min_afternoon,
+        then coalesce(n_x, txn) else null end) as afternoon_min,
     max(case when
         extract(hour from ftime at time zone 'UTC') = 0
-        then coalesce(n_x, txn) else null end) as max_afternoon
-    from alldata WHERE station = %s and runtime BETWEEN %s and %s
-    and model = %s and (txn is null or txn > -98) GROUP by date
+        then coalesce(n_x, txn) else null end) as afternoon_max
+    from alldata WHERE station = :station and runtime BETWEEN :sts and :ets
+    and model = :model and (txn is null or txn > -98) GROUP by date
     """
 SQL = """
-    SELECT ftime at time zone 'UTC', min(RPL), max(RPL)
-    from alldata WHERE station = %s and runtime BETWEEN %s and %s
-    and model = %s GROUP by ftime ORDER by ftime
+    SELECT ftime at time zone 'UTC' as date, min(RPL) as morning_min,
+    max(RPL) as afternoon_max
+    from alldata WHERE station = :station and runtime BETWEEN :sts and :ets
+    and model = :model GROUP by ftime ORDER by ftime
     """
 T_SQL_OB = """
     SELECT date(valid),
@@ -76,7 +78,7 @@ T_SQL_OB = """
         then tmpf else null end) as morning_min,
     max(case when extract(hour from valid at time zone 'UTC') between 12 and 24
         then tmpf else null end) as afternoon_max
-    from alldata WHERE station = %s and valid between %s and %s
+    from alldata WHERE station = :station and valid between :sts and :ets
     GROUP by date
     """
 # Tricky business here
@@ -89,9 +91,9 @@ NBM_TXN_OB_SQL = """
         SELECT
         date_trunc('hour',
             (valid + '10 minutes'::interval) at time zone 'UTC') as utc_valid,
-        tmpf, max_tmpf_6hr, min_tmpf_6hr from alldata WHERE station = %s
-        and valid between %s and %s and (extract(minute from valid) >= 50 or
-         extract(minute from valid) < 10) and report_type in (3, 4)
+        tmpf, max_tmpf_6hr, min_tmpf_6hr from alldata WHERE station = :station
+        and valid between :sts and :ets and (extract(minute from valid) >= 50
+        or extract(minute from valid) < 10) and report_type in (3, 4)
     ), highs as (
         select date(utc_valid - '7 hours'::interval),
         max(greatest(tmpf,
@@ -113,7 +115,7 @@ NBM_TXN_OB_SQL = """
 SQL_OB = """
     select date_trunc('hour',
     valid at time zone 'UTC' + '10 minutes'::interval) as datum,
-    RPL from alldata where station = %s and valid between %s and %s
+    RPL from alldata where station = :station and valid between :sts and :ets
     and (extract(minute from valid) >= 50 or
          extract(minute from valid) < 10) and RPL is not null
     and report_type in (3, 4)
@@ -310,10 +312,6 @@ def plot_temps(ax, mosdata, month1, month, obs, model):
 
 def plotter(fdict):
     """Go"""
-    asos_pgconn = get_dbconn("asos")
-    acursor = asos_pgconn.cursor()
-    mos_pgconn = get_dbconn("mos")
-    mcursor = mos_pgconn.cursor()
     ctx = get_autoplot_context(fdict, get_description())
 
     station = ctx["zstation"]
@@ -328,45 +326,61 @@ def plotter(fdict):
     ets = month1 + timedelta(days=32)
     station4 = f"K{station}" if len(station) == 3 else station
     is_temp = ctx["var"] == "t"
-    mcursor.execute(
-        T_SQL if is_temp else SQL.replace("RPL", ctx["var"]),
-        (station4, sts, ets, model),
-    )
-
+    params = {"station": station4, "sts": sts, "ets": ets, "model": model}
     mosdata = {}
-    for row in mcursor:
-        if is_temp:
-            mosdata[row[0]] = {
-                "morning": [
-                    row[1] if row[1] is not None else np.nan,
-                    row[2] if row[2] is not None else np.nan,
-                ],
-                "afternoon": [
-                    row[3] if row[3] is not None else np.nan,
-                    row[4] if row[4] is not None else np.nan,
-                ],
-            }
-        else:
-            mosdata[row[0]] = [row[1], row[2]]
-
-    # Go and figure out what the observations where for this month, tricky!
-    if model in ["NBE", "NBS"] and is_temp:
-        acursor.execute(NBM_TXN_OB_SQL, (station, sts, ets))
-    else:
-        acursor.execute(
-            T_SQL_OB if is_temp else SQL_OB.replace("RPL", LOOKUP[ctx["var"]]),
-            (station, sts, ets),
+    with get_sqlalchemy_conn("mos") as conn:
+        res = conn.execute(
+            text(T_SQL if is_temp else SQL.replace("RPL", ctx["var"])),
+            params,
         )
-
+        for row in res.mappings():
+            if is_temp:
+                mosdata[row["date"]] = {
+                    "morning": [
+                        row["morning_min"]
+                        if row["morning_min"] is not None
+                        else np.nan,
+                        row["morning_max"]
+                        if row["morning_max"] is not None
+                        else np.nan,
+                    ],
+                    "afternoon": [
+                        row["afternoon_min"]
+                        if row["afternoon_min"] is not None
+                        else np.nan,
+                        row["afternoon_max"]
+                        if row["afternoon_max"] is not None
+                        else np.nan,
+                    ],
+                }
+            else:
+                mosdata[row["date"]] = [
+                    row["morning_min"],
+                    row["afternoon_max"],
+                ]
+    # Go and figure out what the observations where for this month, tricky!
+    params["station"] = station
     obs = {}
-    for row in acursor:
-        if is_temp:
-            obs[row[0]] = {
-                "min": row[1] if row[1] is not None else np.nan,
-                "max": row[2] if row[2] is not None else np.nan,
-            }
+    with get_sqlalchemy_conn("asos") as conn:
+        if model in ["NBE", "NBS"] and is_temp:
+            res = conn.execute(text(NBM_TXN_OB_SQL), params)
         else:
-            obs[row[0]] = row[1]
+            res = conn.execute(
+                text(
+                    T_SQL_OB
+                    if is_temp
+                    else SQL_OB.replace("RPL", LOOKUP[ctx["var"]])
+                ),
+                params,
+            )
+        for row in res:
+            if is_temp:
+                obs[row[0]] = {
+                    "min": row[1] if row[1] is not None else np.nan,
+                    "max": row[2] if row[2] is not None else np.nan,
+                }
+            else:
+                obs[row[0]] = row[1]
 
     mlabel = PDICT[model][: PDICT[model].find(" (")]
     title = (

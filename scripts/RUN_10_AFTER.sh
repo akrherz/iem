@@ -154,7 +154,7 @@ then
     python ndfd_extract.py &
 
     cd ../ndfd
-    python ndfd2netcdf.py $(date -u +'%Y %m %d')
+    python ndfd2netcdf.py --date=$(date -u +'%Y-%m-%d')
     python plot_temps.py $(date -u +'%Y %m %d')
 fi
 

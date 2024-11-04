@@ -1,8 +1,12 @@
-"""Plot monthly MRMS"""
+"""Plot monthly MRMS.
 
-import datetime
-import sys
+Called from RUN_MIDNIGHT.sh
+"""
 
+from datetime import date, datetime, timedelta
+from typing import Optional
+
+import click
 import numpy as np
 from pyiem import iemre
 from pyiem.plot import MapPlot
@@ -12,11 +16,11 @@ from pyiem.util import mm2inch, ncopen
 def do_month(year, month, routes):
     """Generate a MRMS plot for the month!"""
 
-    sts = datetime.datetime(year, month, 1)
-    ets = sts + datetime.timedelta(days=35)
+    sts = datetime(year, month, 1)
+    ets = sts + timedelta(days=35)
     ets = ets.replace(day=1)
 
-    ets = min(datetime.datetime.now(), ets)
+    ets = min(datetime.now(), ets)
 
     idx0 = iemre.daily_offset(sts)
     idx1 = iemre.daily_offset(ets)
@@ -26,7 +30,7 @@ def do_month(year, month, routes):
         lons = nc.variables["lon"][:]
         p01d = mm2inch(np.sum(nc.variables["p01d"][idx0:idx1, :, :], 0))
 
-    dd = (ets - datetime.timedelta(days=1)).strftime("%-d %b %Y")
+    dd = (ets - timedelta(days=1)).strftime("%-d %b %Y")
     mp = MapPlot(
         sector="iowa",
         title=f"MRMS {sts:%-d %b} - {dd} Total Precipitation",
@@ -42,15 +46,18 @@ def do_month(year, month, routes):
     mp.postprocess(pqstr=pqstr)
 
 
-def main(argv):
+@click.command()
+@click.option("--year", type=int)
+@click.option("--month", type=int)
+def main(year: Optional[int], month: Optional[int]) -> None:
     """Go Main Go"""
-    if len(argv) == 3:
-        do_month(int(argv[1]), int(argv[2]), "m")
+    if year and month:
+        do_month(year, month, "m")
     else:
-        today = datetime.date.today()
-        yesterday = today - datetime.timedelta(days=1)
+        today = date.today()
+        yesterday = today - timedelta(days=1)
         do_month(yesterday.year, yesterday.month, "cm")
 
 
 if __name__ == "__main__":
-    main(sys.argv)
+    main()
