@@ -29,6 +29,11 @@ FAIL = "\033[91m"
 ENDC = "\033[0m"
 
 
+def clean(val: str) -> float:
+    """Clean a value"""
+    return float(val.rstrip("."))
+
+
 @click.command()
 @click.option("--filename", help="CSV file to parse", required=True)
 @click.option("--commit", is_flag=True, help="Actually commit to database")
@@ -78,7 +83,7 @@ def main(filename: str, commit: bool) -> None:
             .replace("\n", " ")
             + comment
         )
-        tempadj = float(parts[0][1]) - float(parts[0][0])
+        tempadj = float(parts[0][1]) - clean(parts[0][0])
         p2 = parts[0][2]
         if p2.endswith("."):
             p2 = p2[:-1]
