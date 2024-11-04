@@ -28,7 +28,7 @@ for MACH in $MACHINES
 do
     # limit file transfer to 750Mbit/s
     scp -l 750000 -q root@${MACH}:/mesonet/www/logs/*-${yyyymmdd} .
-    ssh root@$MACH "rm -f /mesonet/www/logs/*-${yyyymmdd}"
+    ssh root@$MACH "rm -f /mesonet/www/logs/*-${yyyymmdd}"  # skipcq
     # rename the files so that they are unique
     for PREF in $PREFIXES
     do
