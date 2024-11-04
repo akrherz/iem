@@ -127,7 +127,9 @@ hourly data.</p>
 
 <hr>
 <p>The Ames-AEA, Ames-Kitchen, Ames-Hinds, and Jefferson locations have the
-<a href="https://www.campbellsci.com/soilvue10">CS SoilVue 10</a> installed.<br />
+<a href="https://www.campbellsci.com/soilvue10">CS SoilVue 10</a> installed,
+but the depth of installation varies by site with the first depth at
+the Ames-AEA location being at 14 inches.<br />
 
 <input type="checkbox" name="vars" value="sv" id="sv">
 <label for="sv">All SoilVue Temperature + Moisture Data</label>

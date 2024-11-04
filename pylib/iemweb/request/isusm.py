@@ -242,6 +242,8 @@ def fetch_hourly(environ, cols):
                 depth = int(col[2:])
                 for c2 in ["t", "vwc"]:
                     cols.append(f"sv_{c2}{depth}")
+                # remove the proxy column
+                cols.remove(col)
     with get_sqlalchemy_conn("isuag") as conn:
         df = pd.read_sql(
             text(
@@ -312,14 +314,12 @@ def fetch_hourly(environ, cols):
         # Remove the original
         cols.remove("sv")
     else:
-        for col in list(cols):
+        for col in cols:
             if col.startswith("sv_t"):
                 df[col] = convert_value(df[f"{col}_qc"].values, "degC", "degF")
-                cols.remove(col)
             elif col.startswith("sv_vwc"):
                 # Copy
                 df[col] = df[f"{col}_qc"]
-                cols.remove(col)
 
     # Convert solar radiation to J/m2
     if "solar" in cols:
