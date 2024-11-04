@@ -13,6 +13,7 @@ you should instead use the `API <https://mesonet.agron.iastate.edu
 Changelog
 ---------
 
+- 2024-11-04: A number of additional metadata fields were added to the output
 - 2024-07-01: Initial documentation release
 
 Examples
@@ -149,7 +150,9 @@ def run(environ):
             polygon_begin at time zone 'UTC' as utc_polygon_begin, status,
             hvtec_nwsli, vtec_year, product_id,
             issue at time zone 'UTC' as utc_issue,
-            expire at time zone 'UTC' as utc_expire
+            expire at time zone 'UTC' as utc_expire, windtag, hailtag,
+            tornadotag, damagetag, waterspouttag, is_emergency, is_pds,
+            windthreat, hailthreat, product_signature
             from sbw WHERE {time_limiter} {wfo_limiter}
         """),
             params,
@@ -189,6 +192,16 @@ def run(environ):
                         expire_utc=df(row["utc_expire"]),
                         href=href,
                         link=link,
+                        windtag=row["windtag"],
+                        hailtag=row["hailtag"],
+                        tornadotag=row["tornadotag"],
+                        damagetag=row["damagetag"],
+                        waterspouttag=row["waterspouttag"],
+                        is_emergency=row["is_emergency"],
+                        is_pds=row["is_pds"],
+                        windthreat=row["windthreat"],
+                        hailthreat=row["hailthreat"],
+                        product_signature=row["product_signature"],
                     ),
                     geometry=json.loads(row["geojson"]),
                 )
