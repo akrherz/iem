@@ -5,7 +5,7 @@ points and not a true percentage.  For example, if the first value was 30% and
 the next value was 50%, the change in percentage points is 20.
 """
 
-import datetime
+from datetime import datetime, timedelta
 
 import matplotlib.colors as mpcolors
 import numpy as np
@@ -34,7 +34,7 @@ PDICT2 = {"CORN": "Corn", "SOYBEANS": "Soybean"}
 def get_description():
     """Return a dict describing how to call this plotter"""
     desc = {"description": __doc__, "cache": 3600, "nass": True, "data": True}
-    today = datetime.datetime.today()
+    today = datetime.today()
     desc["arguments"] = [
         dict(type="state", name="state", default="IA", label="Select State:"),
         dict(
@@ -151,14 +151,10 @@ def plotter(fdict):
                 fc=cmap(norm([row["delta"]]))[0],
             )
 
-    sts = datetime.datetime(2000, 1, 1) + datetime.timedelta(
-        days=int(df["doy"].min())
-    )
-    ets = datetime.datetime(2000, 1, 1) + datetime.timedelta(
-        days=int(df["doy"].max())
-    )
+    sts = datetime(2000, 1, 1) + timedelta(days=int(df["doy"].min()))
+    ets = datetime(2000, 1, 1) + timedelta(days=int(df["doy"].max()))
     now = sts
-    interval = datetime.timedelta(days=1)
+    interval = timedelta(days=1)
     jdays = []
     labels = []
     while now < ets:

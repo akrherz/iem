@@ -173,13 +173,12 @@ def get_count_df(ctx, varname, pstr, sts, ets):
             " (to_char(issue, 'mmdd') >= :sday and "
             "to_char(issue, 'mmdd') <= :eday ) "
         )
-        yearcol = "extract(year from issue)"
+        yearcol = "vtec_year"
         if ets <= sts:
             slimiter = slimiter.replace(" and ", " or ")
             yearcol = (
                 "case when to_char(issue, 'mmdd') <= :eday then "
-                "extract(year from issue)::int - 1 else "
-                "extract(year from issue) end"
+                "vtec_year - 1 else vtec_year end"
             )
 
         # compute all the things.
