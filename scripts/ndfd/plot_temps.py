@@ -1,8 +1,11 @@
-"""Generate some plots."""
+"""Generate some plots.
 
-import datetime
-import sys
+Called from RUN_10_AFTER.sh
+"""
 
+from datetime import datetime, timedelta
+
+import click
 import numpy as np
 from metpy.units import masked_array, units
 from pyiem.iemre import daily_offset
@@ -31,7 +34,7 @@ def plot_gdd(ts):
         "Based on National Digital Forecast Database (NDFD) "
         f"00 UTC Forecast made {ts:%-d %b %Y}"
     )
-    t2 = ts + datetime.timedelta(days=6)
+    t2 = ts + timedelta(days=6)
     mp = MapPlot(
         title=(
             f"NWS NDFD 7 Day ({ts:%-d %b} through {t2:%-d %b}) "
@@ -70,7 +73,7 @@ def plot_maxmin(ts, field):
         "Based on National Digital Forecast Database (NDFD) "
         f"00 UTC Forecast made {ts:%-d %b %Y}"
     )
-    t2 = ts + datetime.timedelta(days=6)
+    t2 = ts + timedelta(days=6)
     tt = "Maximum" if field == "high_tmpk" else "Minimum"
     mp = MapPlot(
         title=(
@@ -99,13 +102,15 @@ def plot_maxmin(ts, field):
     nc.close()
 
 
-def main(argv):
+@click.command()
+@click.option("--date", "dt", type=click.DateTime(), required=True)
+def main(dt: datetime):
     """Run for the given args."""
-    ts = utc(int(argv[1]), int(argv[2]), int(argv[3]))
+    ts = utc(dt.year, dt.month, dt.day)
     plot_gdd(ts)
     plot_maxmin(ts, "high_tmpk")
     plot_maxmin(ts, "low_tmpk")
 
 
 if __name__ == "__main__":
-    main(sys.argv)
+    main()

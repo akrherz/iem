@@ -30,7 +30,7 @@ class MyView {
     public ?string $iem_resource = null;
 
     public function __construct() {
-            $this->template_dir =  dirname(__FILE__).'/templates/';
+            $this->template_dir =  dirname(__FILE__).'/templates/';  // skipcq
     }
     public function render($template_file) {
         if ($this->iem_resource != null) {

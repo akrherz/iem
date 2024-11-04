@@ -209,14 +209,14 @@ function buildUI(){
         const btn = $(this);
         let url = BACKEND_SBW_BYPOINT;
         let params = {
-            fmt: (btn.data("opt") == "csv") ? "csv" : "xlsx",
+            fmt: (btn.data("opt") === "csv") ? "csv" : "xlsx",
             lat: $("#lat").val(),
             lon: $("#lon").val(),
             buffer: $('select[name="buffer"]').val(),
             sdate: $.datepicker.formatDate(DATE_FMT, sdate1.datepicker("getDate")),
             edate: $.datepicker.formatDate(DATE_FMT, edate1.datepicker("getDate"))
         };
-        if (btn.data("table") == "2"){
+        if (btn.data("table") === "2"){
             url = BACKEND_EVENTS_BYUGC;
             params.ugc = ugcSelect.val();
             params.sdate = $.datepicker.formatDate(DATE_FMT, sdate.datepicker("getDate"));
@@ -227,9 +227,9 @@ function buildUI(){
                 params.lat = $("#lat2").val();
             }
         }
-        if (btn.data("table") == "3"){
+        if (btn.data("table") === "3"){
             const by = $("input[name='by3']:checked").val();
-            url = (by == "state") ? BACKEND_EVENTS_BYSTATE: BACKEND_EVENTS;
+            url = (by === "state") ? BACKEND_EVENTS_BYSTATE: BACKEND_EVENTS;
             params = {
                 fmt: (btn.data("opt") == "csv") ? "csv" : "xlsx",
                 wfo: $("#wfo3").val(),
@@ -484,7 +484,7 @@ $(document).ready(() => {
 
     // Do the anchor tag linking, please
     const tokens = window.location.href.split("#");
-    if (tokens.length == 2){
+    if (tokens.length === 2){
         process_hash(tokens[1]);
     }
     let res1 = olSelectLonLat("map", default_lon, default_lat, updateMarkerPosition);

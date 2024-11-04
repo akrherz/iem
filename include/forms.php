@@ -377,13 +377,13 @@ function monthSelect2($selected, $name, $jsextra = '')
 
 function daySelect($selected)
 {
-    $s = "<select name='day'>\n";
+    $s = "<select name=\"day\">\n";
     for ($k = 1; $k < 32; $k++) {
-        $s .= "<option value=\"" . $k . "\" ";
-        if ($k == (int)$selected) {
-            $s .= "SELECTED";
-        }
-        $s .= ">" . $k . "</option>";
+        $s .= sprintf('<option value="%s"%s>%s</option>',
+            $k,
+            ($k == intval($selected)) ? " SELECTED" : "",
+            $k,
+        );
     }
     $s .= "</select>\n";
     return $s;

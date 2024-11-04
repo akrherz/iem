@@ -155,7 +155,7 @@ then
 
     cd ../ndfd
     python ndfd2netcdf.py --date=$(date -u +'%Y-%m-%d')
-    python plot_temps.py $(date -u +'%Y %m %d')
+    python plot_temps.py --date=$(date -u +'%Y-%m-%d')
 fi
 
 # Additional hourly_analysis for a number of days ago, to pick up new data

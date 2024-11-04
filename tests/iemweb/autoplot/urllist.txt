@@ -113,6 +113,9 @@
 /plotting/auto/plot/109/by:wfo::sdate:2024-01-01%200000::edate:2024-09-10%202359::var:count::w:set::phenomenav1:TO::significancev1:W::e:pds::cmap:jet::_r:t::dpi:100.png
 /plotting/auto/plot/109/by:wfo::sdate:2022-01-01%200000::edate:2024-10-07%202359::var:count_rank::w:set::phenomenav1:SV::significancev1:W::e:all::cmap:jet::_r:t::dpi:100.png
 /plotting/auto/plot/109/by:state::sdate:2022-01-01%200000::edate:2024-10-07%202359::var:tpercent::w:set::phenomenav1:SV::significancev1:W::e:all::cmap:jet::_r:t::dpi:100.png
+/plotting/auto/plot/109/by:wfo::sdate:2023-10-01%200000::edate:2024-07-04%202359::var:count::w:set::phenomenav1:TO::significancev1:W::e:yes::cmap:jet::_r:t::dpi:100.png
+/plotting/auto/plot/109/by:state::sdate:2023-10-01%200000::edate:2024-07-04%202359::var:days::w:set::phenomenav1:TO::significancev1:W::e:yes::cmap:jet::_r:t::dpi:100.png
+/plotting/auto/plot/109/by:state::sdate:2023-10-01%200000::edate:2024-07-04%202359::var:days::w:all::phenomenav1:TO::significancev1:W::e:yes::cmap:jet::_r:t::dpi:100.png
 /plotting/auto/plot/111/_cb:1.txt
 /plotting/auto/plot/112/_cb:1.txt
 /plotting/auto/plot/113/network:IACLIMATE::station:IATAME::var:maxmin::year1:2023::sday:0101::eday:1231::_r:43::dpi:100.png
