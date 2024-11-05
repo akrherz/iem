@@ -136,7 +136,13 @@ def workflow(ts):
 
 
 @click.command()
-@click.option("--date", "dt", required=True, help="UTC date to process")
+@click.option(
+    "--date",
+    "dt",
+    type=click.DateTime(),
+    required=True,
+    help="UTC date to process",
+)
 def main(dt: datetime):
     """Process a given UTC into netcdf."""
     # TODO: we presently only support the 0z NDFD

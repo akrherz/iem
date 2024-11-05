@@ -99,6 +99,9 @@
 /plotting/auto/plot/90/t:state::v:days::ilabel:yes::geo:polygon::drawc:yes::year:2024::year2:2024::sdate:2006-01-01%200000::edate:2024-09-14%200000::network:WFO::station:DMX::state:IA::phenomena:TO::significance:W::cmap:jet::_r:t::dpi:100.png
 /plotting/auto/plot/90/t:state::v:lastyear::ilabel:yes::geo:ugc::drawc:yes::year:2024::year2:2024::sdate:2006-01-01%200000::edate:2024-09-14%200000::network:WFO::station:DMX::state:IA::phenomena:TO::significance:W::cmap:jet::_r:t::dpi:100.png
 /plotting/auto/plot/90/t:fema::v:lastyear::ilabel:yes::geo:ugc::drawc:yes::year:2024::year2:2024::sdate:2006-01-01%200000::edate:2024-09-14%200000::network:WFO::station:DMX::state:IA::fema:7::phenomena:TO::significance:W::cmap:jet::_r:t::dpi:100::_cb:1.png
+/plotting/auto/plot/93/network:IA_ASOS::zstation:DSM::syear:1973::eyear:2024::year:2024::var:gust::ytd:yes::inc:no::_r:t::dpi:100.png
+/plotting/auto/plot/93/network:IA_ASOS::zstation:DSM::syear:1973::eyear:2024::year:2024::var:dwpf_cold::ytd:yes::inc:no::_r:t::dpi:100.png
+/plotting/auto/plot/93/network:IA_ASOS::zstation:DEH::syear:1973::eyear:1993::year:2024::var:dwpf_cold::ytd:yes::inc:no::_r:t::dpi:100.png
 /plotting/auto/plot/97/d:sector::sector:IA::network:WFO::wfo:DMX::var:cgdd_sum::gddbase:50::gddceil:86::date1:2024-01-01::usdm:no::date2:2024-09-10::p:contour::cmap:RdYlBu::c:yes::ct:climate51::_r:t::dpi:100.png
 /plotting/auto/plot/97/d:sector::sector:IA::network:WFO::wfo:DMX::var:cgdd_sum::gddbase:50::gddceil:86::date1:2023-10-01::usdm:no::date2:2024-04-10::p:contour::cmap:RdYlBu::c:yes::ct:climate51::_r:t::dpi:100.png
 /plotting/auto/plot/97/d:sector::sector:IA::network:WFO::wfo:DMX::var:avg_temp::bins:50%2055%2060%2065%2070%2075%2080%2085%2090%2095%20100::gddbase:55::gddceil:86::date1:2024-05-01::usdm:no::date2:2024-09-30::p:contour::cmap:RdYlBu_r::c:no::ct:ncei_climate91::_r:88::dpi:100.png
