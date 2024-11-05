@@ -142,6 +142,8 @@
 /plotting/auto/plot/141/location:ames::ptype:rain::sdate:mar15::_r:t::dpi:100.png
 /plotting/auto/plot/141/location:ames::ptype:maxt::sdate:mar15::_r:t::dpi:100.png
 /plotting/auto/plot/144/network:ISUSM::station:AEEI4::threshold:50::hours1:48::hours2:24::_r:t::dpi:100.png
+/plotting/auto/plot/145/network:ISUSM::station:BOOI4::var:tsoil::year:2024::_r:t::dpi:100.png
+/plotting/auto/plot/145/network:ISUSM::station:BOOI4::var:vwc12::year:2024::_r:t::dpi:100.png
 /plotting/auto/plot/148/network:IACLIMATE::station:IATAME::date:mlk::thedate:0101::var:high::_r:t::dpi:100.png
 /plotting/auto/plot/148/network:IACLIMATE::station:IATAME::date:easter::thedate:0101::var:high::_r:t::dpi:100.png
 /plotting/auto/plot/148/network:IACLIMATE::station:IATAME::date:thanksgiving::thedate:0101::offset:1::var:high::_r:t::dpi:100.png

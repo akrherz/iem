@@ -6,7 +6,7 @@ Soil Moisture Network.
 """
 
 import calendar
-import datetime
+from datetime import date
 
 import pandas as pd
 from pyiem.database import get_sqlalchemy_conn
@@ -46,7 +46,7 @@ XREF = {
 def get_description():
     """Return a dict describing how to call this plotter"""
     desc = {"description": __doc__, "data": True}
-    today = datetime.date.today()
+    today = date.today()
     desc["arguments"] = [
         dict(
             type="networkselect",
@@ -91,7 +91,8 @@ def plotter(fdict):
             and c30 > -20 and c30 < 40 ORDER by valid ASC
         ), present as (
             SELECT valid, t4_c_avg_qc * 9./5. + 32. as tsoil,
-            'C' as dtype, vwc12, vwc24, vwc50
+            'C' as dtype, vwc12_qc as vwc12, vwc24_qc as vwc24,
+            vwc50_qc as vwc50
             from sm_daily
             where station = :station and t4_c_avg_qc > -20 and t4_c_avg_qc < 40
             ORDER by valid ASC
@@ -105,6 +106,9 @@ def plotter(fdict):
         )
     if df.empty:
         raise NoDataFound("No Data Found.")
+    df = df[df[varname].notnull()]
+    if df.empty:
+        raise NoDataFound("No Valid Data Found.")
     df["valid"] = pd.to_datetime(df["valid"])
     df["doy"] = pd.to_numeric(df["valid"].dt.strftime("%j"))
     df["year"] = df["valid"].dt.year
@@ -167,7 +171,7 @@ def plotter(fdict):
     ax.set_xticklabels(calendar.month_abbr[1:])
     ax.set_xlim(0, 367)
     if varname != "tsoil":
-        ax.set_ylim(0, 1)
+        ax.set_ylim(0, 0.6)
     ax.axhline(32, lw=2, color="purple", zorder=4)
     ax.legend(loc="best")
 
