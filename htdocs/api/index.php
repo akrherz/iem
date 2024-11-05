@@ -208,6 +208,7 @@ help pages for these services:</p>
 <li><a href="/cgi-bin/request/gis/cwas.py?help">Center Weather Advisories (/cgi-bin/request/gis/cwas.py)</a></li>
 <li><a href="/cgi-bin/request/hads.py?help">HADS/DCP/SHEF Data (/cgi-bin/request/hads.py)</a></li>
 <li><a href="/cgi-bin/request/grx_rings.py?help">Gibson Ridge Range Ring Placefile (/cgi-bin/request/grx_rings.py)</a></li>
+<li><a href="/cgi-bin/request/hml.py?help">HML Processed Data (/cgi-bin/request/hml.py)</a></li>
 <li><a href="/cgi-bin/request/hourlyprecip.py?help">Hourly Precip (/cgi-bin/request/hourlyprecip.py)</a></li>
 <li><a href="/cgi-bin/request/nass_iowa.py?help">Iowa NASS (/cgi-bin/request/nass_iowa.py)</a></li>
 <li><a href="/cgi-bin/request/isusm.py?help">Iowa State Soil Moisture Network (/cgi-bin/request/isusm.py)</a></li>

@@ -10,7 +10,10 @@ you download the data, the timestamps are all in UTC.</p>
 <p>For the image format output options, you can optionally control if
 forecasts, observations, or both are plotted.  For the Interactive Chart
 version, this is controlled by clicking on the legend items which will
-hide and show the various lines.
+hide and show the various lines.</p>
+
+<p>A <a href="/request/hml.php">Download Portal</a> is available to more
+easily download the raw data in bulk.</p>
 """
 
 from datetime import timedelta
