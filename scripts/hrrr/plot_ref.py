@@ -29,7 +29,7 @@ def run(tmpdir, valid, routes):
     """Generate the plot for the given UTC time"""
     lats = None
     lons = None
-    i = 0
+    frame = 0
     rampdf = ramp2df("composite_n0q")
     cmap = mpcolors.ListedColormap(rampdf[["r", "g", "b"]].to_numpy() / 256)
     cmap.set_under("white")
@@ -63,9 +63,12 @@ def run(tmpdir, valid, routes):
                 subtitle=f"valid: {now:%-d %b %Y %I:%M %p %Z}",
             )
             refd = np.ma.masked_where(ds.refd[step] < 5, ds.refd[step])
+            LOG.info("Plotting %s with max: %s", now, np.ma.max(refd))
+            # ptype is all missing at step 0
+            pstep = max(step, 1)
             for typ in ["rain", "snow", "frzr", "icep"]:
                 cmap = mpcolors.ListedColormap(colors[typ])
-                ref = np.ma.masked_where(ds[f"c{typ}"][i] < 0.01, refd)
+                ref = np.ma.masked_where(ds[f"c{typ}"][pstep] < 0.01, refd)
                 mp.panels[0].pcolormesh(
                     lons,
                     lats,
@@ -75,12 +78,12 @@ def run(tmpdir, valid, routes):
                     zorder=Z_FILL,
                 )
             mp.draw_radar_ptype_legend()
-            pngfn = f"{tmpdir}/hrrr_ref_{i:03.0f}.png"
+            pngfn = f"{tmpdir}/hrrr_ref_{frame:03.0f}.png"
             mp.postprocess(filename=pngfn)
             mp.close()
             subprocess.call(["magick", pngfn, f"{pngfn[:-4]}.gif"])
 
-            i += 1
+            frame += 1
 
     # Generate anim GIF
     gifs = glob.glob(f"{tmpdir}/hrrr_ref_???.gif")
@@ -112,7 +115,8 @@ def run(tmpdir, valid, routes):
 @click.command()
 @click.option("--valid", required=True, type=click.DateTime())
 @click.option("--is-realtime", default=False, is_flag=True)
-def main(valid, is_realtime):
+@click.option("--force", default=False, is_flag=True)
+def main(valid, is_realtime, force: bool):
     """Go Main"""
     valid = valid.replace(tzinfo=ZoneInfo("UTC"))
     routes = "ac" if is_realtime else "a"
@@ -121,7 +125,7 @@ def main(valid, is_realtime):
     # See if we already have output
     fn = valid.strftime("%Y/%m/%d/model/hrrr/hrrr_1km_ref_%H.gif")
     with archive_fetch(fn) as res:
-        if res is None:
+        if res is None or force:
             LOG.info("archive GIF missing %s, running", fn)
             with tempfile.TemporaryDirectory() as tmpdir:
                 run(tmpdir, valid, routes)
