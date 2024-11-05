@@ -20,13 +20,13 @@ function get_dbconn_str($dbname)
 /*
  * Help function that yields database connections
  */
-function iemdb($dbname, $force_new = 0, $rw = FALSE)
+function iemdb($dbname, $flags = 0, $rw = FALSE)
 {
     $connstr = get_dbconn_str($dbname);
-    $db = pg_connect($connstr, $force_new);
+    $db = pg_connect($connstr, $flags);
     if (!$db) {
         // Try once more
-        $db = pg_connect($connstr, $force_new);
+        $db = pg_connect($connstr, $flags);
     }
     if (!$db) {
         database_failure($dbname);
