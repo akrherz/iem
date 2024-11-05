@@ -119,10 +119,17 @@ function formatter($i, $row)
     $ts = strtotime(substr($row["local_valid"], 0, 16));
     $relh = relh(f2c($row["tmpf"]), f2c($row["dwpf"]));
     $relh = (!is_null($relh)) ? intval($relh) : "";
+    $precip_extra = "";
+    if (array_key_exists("phour_flag", $row) && !is_null($row["phour_flag"])) {
+        $precip_extra = sprintf(
+            " (%s)",
+            ($row["phour_flag"] == "E") ? "Estimated" : $row["phour_flag"],
+        );
+    }
     return sprintf(
         "<tr style=\"background: %s;\">" .
             "<td>%s</td><td>%s</td><td>%s</td>
-    <td>%s</td><td>%s</td><td>%s</td><td>%s</td></tr>",
+    <td>%s</td><td>%s</td><td>%s</td><td>%s%s</td></tr>",
         ($i % 2 == 0) ? "#FFF" : "#EEE",
         date("g:i A", $ts),
         wind_formatter($row),
@@ -131,6 +138,7 @@ function formatter($i, $row)
         temp_formatter($row["feel"]),
         relh(f2c($row["tmpf"]), f2c($row["dwpf"])),
         precip_formatter($row["phour"]),
+        $precip_extra,
     );
 }
 function hads_formatter($i, $row, $shefcols)
