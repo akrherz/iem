@@ -92,6 +92,8 @@ hole with hundreds of plotting options for many datasets of NWS interest.</p>
   <li><a href="/plotting/auto/?q=160">HML based forecasts and observations</a>
     <br />An archive of HML processed products is used to drive an interactive
     plot of forecasts and observations.</li>
+  <li><a href="/request/hml.php">HML Processed Data Download</a>
+    <br />Download HML data for a site of your choice.</li>
   <li><a href="/cow/">IEM Cow Polygon Verification</a><br />
     Application does LSR based verification of Flash Flood Warnings.</li>
   <li><a href="/river/">River Forecast Point Monitor</a><br />
