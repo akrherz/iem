@@ -33,13 +33,13 @@ Provide all Guttenberg, IA GTTI4 forecast data for 2024 in CSV
 
 https://mesonet.agron.iastate.edu/cgi-bin/request/hml.py\
 ?station=GTTI4&sts=2024-01-01T00:00Z&ets=2025-01-01T00:00Z&fmt=csv\
-&kind=forecast
+&kind=forecasts
 
 And then Excel
 
 https://mesonet.agron.iastate.edu/cgi-bin/request/hml.py\
 ?station=GTTI4&sts=2024-01-01T00:00Z&ets=2025-01-01T00:00Z&fmt=excel\
-&kind=forecast
+&kind=forecasts
 
 """
 
