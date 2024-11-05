@@ -138,6 +138,7 @@ def plotter(fdict):
             params={"valid": valid},
             index_col="key",
         )
+    df = df[df[col].notna()]
     if df.empty:
         raise NoDataFound("No WaWA data found at the given timestamp!")
     df["label"] = df.index.to_series().apply(
