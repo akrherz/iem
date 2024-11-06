@@ -27,7 +27,7 @@ from zoneinfo import ZoneInfo
 from pydantic import AwareDatetime, Field, field_validator
 from pyiem.webutil import CGIModel, iemapp
 
-SIMULTANEOUS_REQUESTS = 10
+SIMULTANEOUS_REQUESTS = 30
 
 
 class Schema(CGIModel):
