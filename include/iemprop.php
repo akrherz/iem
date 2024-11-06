@@ -4,7 +4,7 @@ require_once dirname(__FILE__) . "/database.inc.php";
 
 function get_iemprop($propname)
 {
-    $dbconn = iemdb("mesosite", true);
+    $dbconn = iemdb("mesosite", PGSQL_CONNECT_FORCE_NEW);
     $rs = pg_prepare(
         $dbconn,
         "SELECT",

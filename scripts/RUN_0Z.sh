@@ -5,6 +5,8 @@ if [ "$HH" -ne "00" ]
         exit
 fi
 
+python hads/assign_has_hml.py
+
 cd util
 python make_archive_baseline.py
 

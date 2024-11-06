@@ -1,6 +1,6 @@
 """.. title:: HADS Data Request
 
-`IEM API Mainpage <https://mesonet.agron.iastate.edu/api/>`_
+`IEM API Mainpage </api/#cgi>`_
 
 Documentation on /cgi-bin/request/hads.py
 -----------------------------------------
@@ -135,10 +135,9 @@ def threshold_search(table, threshold, thresholdvar):
                 )
             )
             above = True
-        if val > threshold and above:
-            if val > maxrunning:
-                maxrunning = val
-                maxvalid = valid
+        if val > threshold and above and val > maxrunning:
+            maxrunning = val
+            maxvalid = valid
         if val < threshold and above:
             res.append(
                 dict(

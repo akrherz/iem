@@ -5,7 +5,7 @@ require_once "../../include/myview.php";
 $t = new MyView();
 require_once "../../include/database.inc.php";
 require_once "../../include/forms.php";
-$dbconn = iemdb("mesosite", TRUE, TRUE);
+$dbconn = iemdb("mesosite", PGSQL_CONNECT_FORCE_NEW, TRUE);
 
 $id = get_int404("id");
 $q = isset($_GET["q"]) ? pg_escape_string($dbconn, xssafe($_GET["q"])) : "";

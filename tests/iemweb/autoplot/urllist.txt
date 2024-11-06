@@ -179,6 +179,8 @@
 /plotting/auto/plot/166/w:cwa::state:IA::network:WFO::cwa:DMX::fema:7::limit:ytd::_r:t::dpi:100::_cb:1.png
 /plotting/auto/plot/166/w:fema::state:IA::network:WFO::cwa:DMX::fema:7::limit:ytd::_r:t::dpi:100::_cb:1.png
 /plotting/auto/plot/167/network:IA_ASOS::zstation:DSM::month:9::year:2020::_r:t::dpi:100.png
+/plotting/auto/plot/169/network:IA_ASOS::zstation:AMW::v:tmpf::hours:24::month:winter::dir:warm::how:over::_r:t::dpi:100.png
+/plotting/auto/plot/169/network:IA_ASOS::zstation:AMW::v:alti::hours:24::month:feb::dir:cool::how:over::_r:43::dpi:100.png
 /plotting/auto/plot/171/opt:ugc::network:WFO::station:MEG::state:IA::ugc:IAC169::c:single::phenomena:SV::significance:W::cmap:Greens::_r:43::dpi:100.png
 /plotting/auto/plot/171/opt:fema::network:WFO::station:DMX::state:IA::ugc:IAC169::fema:7::c:single::phenomena:TO::significance:W::cmap:Greens::_r:t::dpi:100.png
 /plotting/auto/plot/172/network:IACLIMATE::station:IATAME::var:snow::year1:2024::sdate:0101::edate:0102::m:3::_r:t::dpi:100::_cb:1.png

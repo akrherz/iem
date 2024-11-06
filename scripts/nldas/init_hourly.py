@@ -1,9 +1,9 @@
 """Generate the NLDASv2 hourly analysis file for a year"""
 
-import datetime
 import os
-import sys
+from datetime import datetime
 
+import click
 import numpy as np
 from pyiem.util import logger, ncopen
 
@@ -28,13 +28,13 @@ def init_year(ts):
     nc.realization = 1
     nc.Conventions = "CF-1.0"
     nc.contact = "Daryl Herzmann, akrherz@iastate.edu, 515-294-5978"
-    nc.history = f"{datetime.datetime.now():%d %B %Y} Generated"
+    nc.history = f"{datetime.now():%d %B %Y} Generated"
     nc.comment = "No Comment at this time"
 
     # Setup Dimensions
     nc.createDimension("lat", 224)
     nc.createDimension("lon", 464)
-    ts2 = datetime.datetime(ts.year + 1, 1, 1)
+    ts2 = datetime(ts.year + 1, 1, 1)
     days = (ts2 - ts).days
     LOG.info("Year %s has %s days", ts.year, days)
     nc.createDimension("time", int(days) * 24)
@@ -125,11 +125,12 @@ def init_year(ts):
     nc.close()
 
 
-def main(argv):
+@click.command()
+@click.option("--year", type=int, required=True)
+def main(year: int):
     """Go Main Go"""
-    year = int(argv[1])
-    init_year(datetime.datetime(year, 1, 1))
+    init_year(datetime(year, 1, 1))
 
 
 if __name__ == "__main__":
-    main(sys.argv)
+    main()

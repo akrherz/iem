@@ -5,7 +5,7 @@
 require_once dirname(__FILE__) . "/database.inc.php";
 
 function get_website_citations($label){
-    $conn = iemdb("mesosite", TRUE, TRUE);
+    $conn = iemdb("mesosite", PGSQL_CONNECT_FORCE_NEW, TRUE);
     $rs = pg_prepare(
         $conn,
         "CITSELECT",
@@ -33,7 +33,7 @@ EOM;
 function get_news_by_tag($tag)
 {
     // Generate a listing of recent news items by a certain tag
-    $pgconn = iemdb("mesosite", TRUE, TRUE);
+    $pgconn = iemdb("mesosite", PGSQL_CONNECT_FORCE_NEW, TRUE);
     $rs = pg_prepare(
         $pgconn,
         "NEWSTAGSELECT",
@@ -59,7 +59,7 @@ function get_news_by_tag($tag)
 function get_iemapps_tags($tagname)
 {
     // Get a html list for this tagname
-    $pgconn = iemdb("mesosite", TRUE, TRUE);
+    $pgconn = iemdb("mesosite", PGSQL_CONNECT_FORCE_NEW, TRUE);
     $rs = pg_prepare(
         $pgconn,
         "TAGSELECT",
@@ -169,7 +169,7 @@ function gen_feature($t)
 {
     $s = '';
 
-    $connection = iemdb("mesosite", TRUE, TRUE);
+    $connection = iemdb("mesosite", PGSQL_CONNECT_FORCE_NEW, TRUE);
     $query1 = "SELECT *, to_char(valid, 'YYYY/MM/YYMMDD') as imageref,
                 to_char(valid, 'DD Mon YYYY HH:MI AM') as webdate,
                 to_char(valid, 'YYYY-MM-DD') as permalink from feature
