@@ -135,10 +135,9 @@ def threshold_search(table, threshold, thresholdvar):
                 )
             )
             above = True
-        if val > threshold and above:
-            if val > maxrunning:
-                maxrunning = val
-                maxvalid = valid
+        if val > threshold and above and val > maxrunning:
+            maxrunning = val
+            maxvalid = valid
         if val < threshold and above:
             res.append(
                 dict(

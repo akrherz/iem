@@ -172,7 +172,7 @@ function updateTable2ByPoint(){
 function updateTable3(){
     // get currently selected by3 radio button
     const by = text($("input[name='by3']:checked").val());
-    const datum = (by == "state") ? text(stateSelect3.val()) : text($("#wfo3").val());
+    const datum = (by === "state") ? text(stateSelect3.val()) : text($("#wfo3").val());
     const year = text($("#year3").val());
     const ph = text($("#ph3").val());
     const sig = text($("#sig3").val());
@@ -187,7 +187,7 @@ function updateTable3(){
             phenomena: ph,
             significance: sig
         },
-        url: (by == "wfo") ? BACKEND_EVENTS: BACKEND_EVENTS_BYSTATE,
+        url: (by === "wfo") ? BACKEND_EVENTS: BACKEND_EVENTS_BYSTATE,
         dataType: "json",
         method: "GET",
         success: (data) => {
@@ -231,7 +231,7 @@ function buildUI(){
             const by = $("input[name='by3']:checked").val();
             url = (by === "state") ? BACKEND_EVENTS_BYSTATE: BACKEND_EVENTS;
             params = {
-                fmt: (btn.data("opt") == "csv") ? "csv" : "xlsx",
+                fmt: (btn.data("opt") === "csv") ? "csv" : "xlsx",
                 wfo: $("#wfo3").val(),
                 state: stateSelect3.val(),
                 year: $("#year3").val(),
@@ -470,7 +470,7 @@ function process_hash(hash){
         $("#year3").val(year);
         $("#ph3").val(ph);
         $("#sig3").val(sig);
-        if (by == "state"){
+        if (by === "state"){
             stateSelect3.val(datum).trigger("change");
         } else {
             $("#wfo3").val(datum).trigger("change");
