@@ -1,5 +1,7 @@
 """.. title:: Request Hour's worth of METARs
 
+Return to `IEM API Mainpage </api/#cgi>`_
+
 Documentation for /cgi-bin/request/metars.py
 --------------------------------------------
 
@@ -12,7 +14,7 @@ Example Usage:
 
 Retrieve all METARs for the hour starting at 00 UTC on 1 January 2016:
 
-    https://mesonet.agron.iastate.edu/cgi-bin/request/metars.py\
+https://mesonet.agron.iastate.edu/cgi-bin/request/metars.py\
 ?valid=2016010100
 
 """

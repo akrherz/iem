@@ -236,9 +236,9 @@ def plotter(fdict):
         f"[{MDICT2[month]}]"
     )
     fig = figure(title=title, apctx=ctx)
-    ax = fig.add_axes([0.35, 0.1, 0.25, 0.8])
+    ax = fig.add_axes((0.35, 0.1, 0.25, 0.8))
 
-    sparkax = fig.add_axes([0.65, 0.1, 0.22, 0.8])
+    sparkax = fig.add_axes((0.65, 0.1, 0.22, 0.8))
 
     labels = []
     used = []
