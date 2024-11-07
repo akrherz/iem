@@ -263,6 +263,10 @@
 /plotting/auto/plot/216/network:MA_ASOS::station:BOS::var:max_dwpf::dir:above::threshold:70::_r:43::dpi:100.png
 /plotting/auto/plot/216/network:IA_ASOS::station:AMW::var:high::dir:below::threshold:32::_r:t::dpi:100.png
 /plotting/auto/plot/217/pid:202408100731-KMHX-WWUS82-SPSMHX::segnum:0::_r:t::dpi:100::_cb:1.png
+/plotting/auto/plot/217/pid:202408011023-KCAR-WWUS81-SPSCAR::segnum:0::_r:t::dpi:100::_cb:1.png
+/plotting/auto/plot/217/pid:202408011023-KCASPSCAR::segnum:0::_r:t::dpi:100::_cb:1.png
+/plotting/auto/plot/217/pid:202408011023-KCAR-WWUS81-SPSCAR::segnum:10::_r:t::dpi:100::_cb:1.png
+/plotting/auto/plot/217/pid:202408011600-PAJK-WWAK87-SPSAJK::segnum:0::_r:t::dpi:100::_cb:1.png
 /plotting/auto/plot/218/w:set::network:NWSCLI::station:KDSM::date:2024-07-26::_r:t::dpi:100.png
 /plotting/auto/plot/219/station:PAAA::valid:2024-08-21%200413::_r:t::dpi:100.png
 /plotting/auto/plot/219/station:PASN::valid:2024-08-21%200413::_r:t::dpi:100.png

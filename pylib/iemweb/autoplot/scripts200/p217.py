@@ -1,17 +1,19 @@
 """
-This plot is not meant for interactive use, but a backend for SPS plots.
+This plot is not meant for interactive use, but a backend for SPS plots. A more
+approachable frontend is to visit the <a href="/wx/afos/list.phtml">NWS Text
+by WFO</a> page and click on the SPS product you are interested in.
 """
 
 from zoneinfo import ZoneInfo
 
-# third party
 import httpx
 from geopandas import read_postgis
+from pyiem.database import get_sqlalchemy_conn
 from pyiem.exceptions import NoDataFound
 from pyiem.network import Table as NetworkTable
 from pyiem.plot.geoplot import MapPlot
 from pyiem.reference import LATLON, Z_OVERLAY2
-from pyiem.util import LOG, get_autoplot_context, get_sqlalchemy_conn
+from pyiem.util import LOG, get_autoplot_context
 from sqlalchemy import text
 
 TFORMAT = "%b %-d %Y %-I:%M %p %Z"
@@ -20,6 +22,11 @@ UNITS = {
     "max_wind_gust": "MPH",
 }
 WFOCONV = {"JSJ": "SJU"}
+PDICT3 = {
+    "on": "Overlay NEXRAD Mosaic",
+    "auto": "Let autoplot decide when to include NEXRAD overlay",
+    "off": "No NEXRAD Mosaic Please",
+}
 
 
 def get_description():
@@ -39,6 +46,13 @@ def get_description():
             name="segnum",
             label="Product Segment Number (starts at 0):",
         ),
+        {
+            "type": "select",
+            "name": "n",
+            "default": "auto",
+            "label": "Should a NEXRAD Mosaic by overlain:",
+            "options": PDICT3,
+        },
     ]
     return desc
 
@@ -77,10 +91,7 @@ def plotter(fdict):
         )
     if df.empty:
         raise NoDataFound("SPS Event was not found, sorry.")
-    df2 = df[df["segmentnum"] == segnum]
-    if df2.empty:
-        raise NoDataFound("SPS Event Segment was not found, sorry.")
-    row = df2.iloc[0]
+    row = df.iloc[0]
     wfo = row["wfo"]
     tzname = nt.sts.get(wfo, {}).get("tzname")
     if tzname is None:
@@ -204,6 +215,9 @@ def plotter(fdict):
             zorder=Z_OVERLAY2,
         )
     else:
+        # disable RADAR if auto and since we have no polygon
+        if ctx["n"] == "auto":
+            ctx["n"] = "off"
         mp.fill_ugcs(
             ugcs,
             ec="r",
@@ -214,15 +228,18 @@ def plotter(fdict):
             zorder=Z_OVERLAY2 - 1,
             is_firewx=is_fwx,
         )
-    prod = "N0Q" if df["issue"][0].year > 2010 else "N0R"
-    radtime = mp.overlay_nexrad(df["issue"][0].to_pydatetime(), product=prod)
-    if radtime is not None:
-        mp.fig.text(
-            0.65,
-            0.02,
-            f"RADAR Valid: {radtime.astimezone(tz).strftime(TFORMAT)}",
-            ha="center",
+    if ctx["n"] != "off":
+        prod = "N0Q" if df["issue"][0].year > 2010 else "N0R"
+        radtime = mp.overlay_nexrad(
+            df["issue"][0].to_pydatetime(), product=prod
         )
+        if radtime is not None:
+            mp.fig.text(
+                0.65,
+                0.02,
+                f"RADAR Valid: {radtime.astimezone(tz).strftime(TFORMAT)}",
+                ha="center",
+            )
     mp.drawcities()
     mp.drawcounties()
     return mp.fig, df.drop(columns=["geom"])
