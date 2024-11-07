@@ -240,6 +240,5 @@ def plotter(fdict):
                 f"RADAR Valid: {radtime.astimezone(tz).strftime(TFORMAT)}",
                 ha="center",
             )
-    mp.drawcities()
     mp.drawcounties()
     return mp.fig, df.drop(columns=["geom"])
