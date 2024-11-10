@@ -34,6 +34,7 @@
 /plotting/auto/plot/43/network:IA_ASOS::station:AMW::sdate:2020-07-01::p:two::_r:88::dpi:100.png
 /plotting/auto/plot/44/plot:bar::opt:fema::network:WFO::station:DMX::state:IA::fema:7::limit:yes::c:single::phenomena:TO::significance:W::syear:1986::eyear:2024::s:jan1::_r:t::dpi:100.png
 /plotting/auto/plot/44/plot:line::opt:fema::network:WFO::station:DMX::state:IA::fema:7::limit:no::c:svrtor::phenomena:TO::significance:W::syear:1986::eyear:2024::s:jan1::_r:t::dpi:100.png
+/plotting/auto/plot/44/plot:bar::opt:state::network:WFO::station:_ALL::state:VA::fema:7::limit:no::c:single::phenomena:FW::significance:W::syear:1986::eyear:2024::s:jul1::_r:43::dpi:100.png
 /plotting/auto/plot/51/network:ISUSM::station:AEEI4::sdate:2024-05-01::edate:2024-07-27::base:50::ceil:86::which:all::_r:t::dpi:100.png
 /plotting/auto/plot/51/network:ISUSM::station:AEEI4::sdate:2024-05-01::edate:2024-07-27::base:50::ceil:86::which:gdd::_r:t::dpi:100.png
 /plotting/auto/plot/51/network:ISUSM::station:AEEI4::sdate:2024-05-01::edate:2024-07-27::base:50::ceil:86::which:precip::_r:t::dpi:100.png

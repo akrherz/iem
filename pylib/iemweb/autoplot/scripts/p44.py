@@ -30,10 +30,12 @@ from datetime import date
 import numpy as np
 import pandas as pd
 from pyiem import reference
+from pyiem.database import get_sqlalchemy_conn
 from pyiem.exceptions import NoDataFound
 from pyiem.nws import vtec
 from pyiem.plot import figure
-from pyiem.util import get_autoplot_context, get_sqlalchemy_conn
+from pyiem.plot.use_agg import plt
+from pyiem.util import get_autoplot_context
 from sqlalchemy import text
 
 from iemweb.autoplot import ARG_FEMA, fema_region2states
@@ -147,7 +149,7 @@ def plot_common(ctx, ax):
 def make_barplot(ctx, df):
     """Create a bar plot."""
     fig = figure(title=ctx["title"], apctx=ctx)
-    ax = fig.add_axes([0.1, 0.1, 0.8, 0.8])
+    ax = fig.add_axes((0.1, 0.1, 0.8, 0.8))
     df2 = (
         df.groupby("year")
         .sum(numeric_only=True)
@@ -166,6 +168,7 @@ def make_barplot(ctx, df):
             ha="center",
         )
     ax.set_xlim(ctx["syear"] - 0.5, ctx["eyear"] + 0.5)
+    ax.xaxis.set_major_locator(plt.MaxNLocator(integer=True))
     ax.set_ylim(top=top)
     plot_common(ctx, ax)
     return fig, df2
@@ -297,14 +300,14 @@ def plotter(fdict):
         mm = "January 1" if ctx["s"] == "jan1" else "July 1"
         ctx["xlabel"] = f"{mm} through {date.today():%B %-d}"
         ptitle = f"{ptitle} [{ctx['xlabel']}]"
-        if ctx["s"] == "jul1":
-            ctx["xlabel"] += " (Year for July 1 shown)"
+    if ctx["s"] == "jul1":
+        ctx["xlabel"] += " (Year for July 1 shown)"
     ctx["title"] = f"{ptitle}\n{title} Count"
 
     if ctx["plot"] == "bar":
         return make_barplot(ctx, df)
     fig = figure(title=ctx["title"], apctx=ctx)
-    ax = fig.add_axes([0.05, 0.1, 0.65, 0.8])
+    ax = fig.add_axes((0.05, 0.1, 0.65, 0.8))
     ann = []
     for yr in range(ctx["syear"], eyear + 1):
         df2 = df[df["year"] == yr]
