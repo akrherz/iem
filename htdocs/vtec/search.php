@@ -17,7 +17,7 @@ $t->jsextra = <<<EOF
 <script type="text/javascript" src="wfos.js"></script>
 <script src='/vendor/openlayers/{$OL}/ol.js'></script>
 <script type="text/javascript" src="/js/olselect-lonlat.js"></script>
-<script type="text/javascript" src="search.js?v=2"></script>
+<script type="text/javascript" src="search.js"></script>
 EOF;
 $t->headextra = <<<EOF
 <link rel="stylesheet" href="/vendor/jquery-datatables/{$DT}/datatables.min.css" />

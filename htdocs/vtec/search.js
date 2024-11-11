@@ -216,7 +216,7 @@ function buildUI(){
             sdate: $.datepicker.formatDate(DATE_FMT, sdate1.datepicker("getDate")),
             edate: $.datepicker.formatDate(DATE_FMT, edate1.datepicker("getDate"))
         };
-        if (btn.data("table") === "2"){
+        if (btn.data("table") === 2){
             url = BACKEND_EVENTS_BYUGC;
             params.ugc = ugcSelect.val();
             params.sdate = $.datepicker.formatDate(DATE_FMT, sdate.datepicker("getDate"));
@@ -227,7 +227,7 @@ function buildUI(){
                 params.lat = $("#lat2").val();
             }
         }
-        if (btn.data("table") === "3"){
+        if (btn.data("table") === 3){
             const by = $("input[name='by3']:checked").val();
             url = (by === "state") ? BACKEND_EVENTS_BYSTATE: BACKEND_EVENTS;
             params = {
