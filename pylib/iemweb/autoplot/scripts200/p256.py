@@ -131,17 +131,52 @@ def get_asos(ctx: dict) -> pd.DataFrame:
     limiter = " wfo = :wfo "
     if ctx["by"] == "state":
         limiter = " state = :state "
-    with get_sqlalchemy_conn("asos") as conn:
+    with get_sqlalchemy_conn("mesosite") as conn:
         # Figure out which stations we care about
         stations = pd.read_sql(
-            text(
-                "select id, name from stations where network ~* 'ASOS' and "
-                f"{limiter} ORDER by id ASC"
-            ),
+            text(f"""
+                select id, name, value as snow_src, null as snow,
+                null as snowd from stations s LEFT
+                JOIN station_attributes a on (s.iemid = a.iemid and
+                a.attr = 'SHEF_6HR_SRC')
+                where network ~* 'ASOS' and {limiter} ORDER by id ASC
+            """),
             conn,
             index_col="id",
             params=params,
         )
+    # If we have any snow_src values, we should go fishing for that data
+    if stations["snow_src"].notnull().any():
+        # 12z to 12z snow
+        ets = utc(ctx["date"].year, ctx["date"].month, ctx["date"].day, 12)
+        sts = ets - pd.Timedelta("24 hours")
+        with get_sqlalchemy_conn("hads") as conn:
+            snowdf = pd.read_sql(
+                text(f"""
+                select station, valid, substr(key, 1, 3) as shefvar, value
+                from raw{ets:%Y} WHERE
+                station = ANY(:stations) and
+                substr(key, 1, 3) in ('SFQ', 'SFD') and
+                valid > :sts and valid <= :ets and value is not null
+                ORDER by station asc, valid asc
+                """),
+                conn,
+                params={
+                    "stations": stations["snow_src"].dropna().to_list(),
+                    "sts": sts,
+                    "ets": ets,
+                },
+            )
+            for snowsrc, gdf in snowdf.groupby("station"):
+                asosid = stations[stations["snow_src"] == snowsrc].index[0]
+                stations.at[asosid, "cnt_6hr"] = len(gdf["valid"].unique())
+                snowfall = gdf[gdf["shefvar"] == "SFD"]["value"].sum()
+                qobs = gdf[gdf["shefvar"] == "SFQ"]
+                if not qobs.empty and qobs["valid"].values[-1] == ets:
+                    stations.at[asosid, "snowd"] = qobs["value"].values[-1]
+                stations.at[asosid, "snow"] = snowfall
+
+    with get_sqlalchemy_conn("asos") as conn:
         # 6z to 6z high
         ets = utc(ctx["date"].year, ctx["date"].month, ctx["date"].day, 6)
         sts = ets - pd.Timedelta("24 hours")
@@ -285,6 +320,30 @@ def plotter(fdict):
         )
     report += ".END\n\n"
 
+    if asosdf["snow_src"].notnull().any():
+        report += (
+            "ASOS Reports with 6 Hour Snowfall Supplemented\n\n"
+            f".BR {wfo} {dt:%Y%m%d} Z DH06/TAIRVX/DH12/TAIRVP/PPDRVZ/"
+            "SFDRZZ/SDIRZZ\n"
+            ": Station Name and Number of 6 Hour Reports\n"
+            ": 06Z (yesterday) to 06Z HIGH TEMPERATURE\n"
+            ": 00Z TO 12Z TODAY LOW TEMPERATURE\n"
+            ": 12Z YESTERDAY TO 12Z TODAY RAINFALL\n"
+            ": 12Z YESTERDAY TO 12Z TODAY SNOWFALL\n"
+            ": 12Z TODAY SNOW DEPTH\n"
+        )
+        for sid, row in asosdf[asosdf["snow_src"].notna()].iterrows():
+            cnt = 0 if pd.isna(row["cnt_6hr"]) else int(row["cnt_6hr"])
+            quorum = f"({cnt}/4)"
+            report += (
+                f"{sid:6s}:{row['name']:19.19s}{quorum}: "
+                f"{pp(row['high'], 4, 0)} /{pp(row['low'], 4, 0)} /"
+                f"{pp(row['precip'], 5, 2)} /"
+                f"{pp(row['snow'], 5, 1)} /"
+                f"{pp(row['snowd'], 5, 0)}\n"
+            )
+        report += ".END\n\n"
+
     report += (
         "ASOS Reports\n\n"
         f".BR {wfo} {dt:%Y%m%d} Z DH06/TAIRVX/DH12/TAIRVP/PPDRVZ\n"
@@ -292,7 +351,7 @@ def plotter(fdict):
         ": 00Z TO 12Z TODAY LOW TEMPERATURE\n"
         ": 12Z YESTERDAY TO 12Z TODAY RAINFALL\n"
     )
-    for sid, row in asosdf.iterrows():
+    for sid, row in asosdf[asosdf["snow_src"].isna()].iterrows():
         report += (
             f"{sid:6s}:{row['name']:25.25s}: "
             f"{pp(row['high'], 4, 0)} /{pp(row['low'], 4, 0)} /"
