@@ -5,6 +5,7 @@ if [ "$HH" -ne "00" ]
         exit
 fi
 
+python dbutil/xcheck_SFQ.py
 python hads/assign_has_hml.py
 
 cd util

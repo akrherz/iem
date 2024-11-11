@@ -47,6 +47,7 @@ from zoneinfo import ZoneInfo
 
 import pandas as pd
 from pyiem.database import get_sqlalchemy_conn
+from pyiem.reference import StationAttributes as SA
 from pyiem.util import get_autoplot_context, utc
 from sqlalchemy import text
 
@@ -127,6 +128,7 @@ def get_asos(ctx: dict) -> pd.DataFrame:
         "date": ctx["date"],
         "wfo": ctx["wfo"],
         "state": ctx["state"],
+        "attr": SA.SHEF_6HR_SRC,
     }
     limiter = " wfo = :wfo "
     if ctx["by"] == "state":
@@ -138,7 +140,7 @@ def get_asos(ctx: dict) -> pd.DataFrame:
                 select id, name, value as snow_src, null as snow,
                 null as snowd from stations s LEFT
                 JOIN station_attributes a on (s.iemid = a.iemid and
-                a.attr = 'SHEF_6HR_SRC')
+                a.attr = :attr)
                 where network ~* 'ASOS' and {limiter} ORDER by id ASC
             """),
             conn,
