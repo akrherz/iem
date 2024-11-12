@@ -134,6 +134,7 @@ def conv(raw: str):
 def parse(raw, sid):
     """Parse the raw data and yield RAOB objects"""
     rob = RAOB()
+    rob.wind_units = "kt"  # sigh
     meat = raw[raw.find("%RAW%") + 5 : raw.find("%END%")].strip()
     # Sigh, duplicate entries
     last_pressure = None
