@@ -6,11 +6,20 @@ Documentation for /json/vtec_events_bypoint.py
 ----------------------------------------------
 
 This service returns VTEC event metadata for a given latitude and longitude
-point.
+point.  You can optionally pass an `at` parameter to specify a specific time
+to query for VTEC events.  The default is to query for all VTEC events that
+have occurred at the provided point.
+
+**Important Note**: This service is providing events based on the UGCs
+associated with the event. In the case of storm based warnings, the UGCs
+are not the official warning.  Use the
+`SBW By Point Service <sbw_by_point.py?help>`_ for the official warnings.
 
 Changelog
 ---------
 
+- 2024-11-12: Added support for `at` parameter to query for VTEC events at a
+  specific time.
 - 2024-10-16: Added support for a ``buffer`` parameter.  The units are in
   decimal degrees with a range limited between 0 and 1.  This buffer is used
   to expand the search area around the provided point.
@@ -34,6 +43,11 @@ Same request, but in csv
 https://mesonet.agron.iastate.edu/json/vtec_events_bypoint.py?\
 lat=41.99&lon=-93.61&fmt=csv
 
+Provide VTEC events for the same point, but valid at 19 UTC on 26 Aug 2024
+
+https://mesonet.agron.iastate.edu/json/vtec_events_bypoint.py?\
+lat=41.99&lon=-93.61&at=2024-08-26T19:00:00Z
+
 Provide VTEC events for a point in Iowa and buffer this point by 0.5 degrees
 
 https://mesonet.agron.iastate.edu/json/vtec_events_bypoint.py?\
@@ -41,12 +55,13 @@ lat=41.99&lon=-93.61&buffer=0.5
 
 """
 
-import datetime
 import json
+from datetime import date, datetime
 from io import BytesIO, StringIO
+from typing import Optional
 
 import pandas as pd
-from pydantic import Field
+from pydantic import AwareDatetime, Field
 from pyiem.database import get_sqlalchemy_conn
 from pyiem.nws.vtec import VTEC_PHENOMENA, VTEC_SIGNIFICANCE, get_ps_string
 from pyiem.webutil import CGIModel, iemapp
@@ -59,6 +74,14 @@ class Schema(CGIModel):
     """See how we are called."""
 
     callback: str = Field(None, description="JSONP callback function name")
+    at: AwareDatetime = Field(
+        None,
+        description=(
+            "Specific time to query for VTEC events. In the case of long "
+            "fuse events, the at value is compared against the product "
+            "issuance time as well."
+        ),
+    )
     fmt: str = Field(
         default="json",
         description="The format to return the data in, either json or csv",
@@ -70,12 +93,8 @@ class Schema(CGIModel):
         ge=0,
         le=1,
     )
-    sdate: datetime.date = Field(
-        datetime.date(1986, 1, 1), description="Start Date"
-    )
-    edate: datetime.date = Field(
-        datetime.date(2099, 1, 1), description="End Date"
-    )
+    sdate: date = Field(date(1986, 1, 1), description="Start Date")
+    edate: date = Field(date(2099, 1, 1), description="End Date")
     lat: float = Field(42.5, description="Latitude", ge=-90, le=90)
     lon: float = Field(-95.5, description="Longitude", ge=-180, le=180)
 
@@ -88,7 +107,7 @@ def make_url(row):
     )
 
 
-def get_df(lon, lat, sdate, edate, buffer: float):
+def get_df(lon, lat, sdate, edate, buffer: float, at: Optional[datetime]):
     """Generate a report of VTEC ETNs used for a WFO and year
 
     Args:
@@ -101,10 +120,16 @@ def get_df(lon, lat, sdate, edate, buffer: float):
         "sdate": sdate,
         "edate": edate,
         "buffer": buffer,
+        "at": at,
     }
     ptsql = "ST_Point(:lon, :lat, 4326)"
     if buffer > 0:
         ptsql = "ST_Buffer(ST_Point(:lon, :lat, 4326), :buffer)"
+    time_limiter = ""
+    if at is not None:
+        time_limiter = (
+            "and (issue <= :at or product_issue <= :at) and expire >= :at"
+        )
     with get_sqlalchemy_conn("postgis") as conn:
         df = pd.read_sql(
             text(f"""
@@ -120,7 +145,7 @@ def get_df(lon, lat, sdate, edate, buffer: float):
         to_char(expire at time zone 'UTC', 'YYYY-MM-DD hh24:MI') as expired,
         eventid, phenomena, significance, wfo, hvtec_nwsli, w.ugc
         from warnings w JOIN myugcs u on (w.gid = u.gid) WHERE
-        issue > :sdate and issue < :edate ORDER by issue ASC
+        issue > :sdate and issue < :edate {time_limiter} ORDER by issue ASC
         """),
             conn,
             params=params,
@@ -168,16 +193,17 @@ def to_json(df):
 def parse_date(val):
     """convert string to date."""
     fmt = "%Y/%m/%d" if "/" in val else "%Y-%m-%d"
-    return datetime.datetime.strptime(val, fmt)
+    return datetime.strptime(val, fmt)
 
 
 def get_mckey(environ: dict) -> str:
     """Construct the key."""
+    at = "null" if environ["at"] is None else f"{environ['at']:%Y%m%d%H%M}"
     return (
         f"/json/vtec_events_bypoint.py?lat={environ['lat']:.2f}&"
         f"lon={environ['lon']:.2f}&sdate={environ['sdate']:%Y-%m-%d}&"
         f"edate={environ['edate']:%Y-%m-%d}&fmt={environ['fmt']}&"
-        f"buffer={environ['buffer']:.2f}"
+        f"buffer={environ['buffer']:.2f}&at={at}"
     )
 
 
@@ -190,7 +216,7 @@ def application(environ, start_response):
     edate = environ["edate"]
     fmt = environ["fmt"]
 
-    df = get_df(lon, lat, sdate, edate, environ["buffer"])
+    df = get_df(lon, lat, sdate, edate, environ["buffer"], environ["at"])
     if fmt == "xlsx":
         fn = (
             f"vtec_{(0 - lon):.4f}W_{lat:.4f}N_{sdate:%Y%m%d}_"
