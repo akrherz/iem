@@ -66,6 +66,7 @@
 /plotting/auto/plot/82/network:IA_ASOS::station:AMW::var:max_rstage::sdate:2024-05-16::edate:2024-08-14::_r:t::dpi:100.png
 /plotting/auto/plot/82/network:IACLIMATE::station:IATAME::var:max_tmpf::sdate:2023-05-11::edate:2023-08-14::_r:t::dpi:100.png
 /plotting/auto/plot/84/sector:northeast::network:WFO::src:stage4::opt:acc::usdm:no::ptype:g::sdate:2024-01-01::edate:2024-01-01::cmap:YlGnBu::_r:t::dpi:100.png
+/plotting/auto/plot/84/sector:sengland::network:WFO::cwa:ALY::src:mrms::opt:dep::usdm:no::ptype:g::sdate:2024-11-10::edate:2024-10-10::cmap:YlGnBu::_r:t::dpi:100.png
 /plotting/auto/plot/84/sector:IA::network:WFO::src:mrms::opt:acc::usdm:no::ptype:g::sdate:2024-01-01::edate:2024-01-01::cmap:YlGnBu::_r:t::dpi:100.png
 /plotting/auto/plot/84/sector:IA::ugc:IAC153::network:WFO::src:ifc::opt:per::usdm:yesb::ptype:g::sdate:2024-08-06::edate:2024-08-13::cmap:YlGnBu::_r:t::dpi:100.png
 /plotting/auto/plot/84/sector:IA::ugc:IAC169::network:WFO::src:ifc::opt:per::usdm:yesb::ptype:g::sdate:2024-08-06::edate:2024-08-13::cmap:YlGnBu::_r:t::dpi:100.png
