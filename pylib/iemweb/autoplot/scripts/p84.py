@@ -422,6 +422,8 @@ def finalize_map(ctx):
 def plotter(fdict):
     """Go"""
     ctx = util.get_autoplot_context(fdict, get_description())
+    if ctx["sdate"] > ctx["edate"]:
+        ctx["sdate"], ctx["edate"] = ctx["edate"], ctx["sdate"]
     if ctx["sdate"].year != ctx["edate"].year:
         raise NoDataFound("Sorry, do not support multi-year plots yet!")
 
