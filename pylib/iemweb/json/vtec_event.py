@@ -14,6 +14,8 @@ text within the resulting JSON response.  This can be disabled by setting the
 Changelog
 ---------
 
+- 2024-11-12: Added boolean attribute ``event_exists`` to the response to
+  indicate if the event was found in the database.
 - 2024-07-31: Initial documentation release and pydantic validation
 
 Example Requests
@@ -109,6 +111,7 @@ def run(environ):
 
     res = {
         "generation_time": utc().strftime(ISO8601),
+        "event_exists": not df.empty,
         "year": year,
         "phenomena": phenomena,
         "significance": significance,
@@ -190,7 +193,7 @@ def get_mckey(environ: dict) -> str:
     return (
         f"/json/vtec_event/{environ['wfo']}/{environ['year']}/"
         f"{environ['phenomena']}/{environ['significance']}/{environ['etn']}/"
-        f"{environ['include_text']}"
+        f"{environ['include_text']}/v2"
     )
 
 

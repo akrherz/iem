@@ -356,6 +356,7 @@ RewriteRule ^/search /search.py [QSA]
   </Directory>
 
   <Directory "/opt/iem/htdocs/vtec">
+    RewriteRule ^event/.* index.php [L]
     RewriteRule ([^\.]+)\.html index.php?vtec=$1 [L]
     RewriteRule f/(.*)$ f.py [QSA]
   </Directory>
