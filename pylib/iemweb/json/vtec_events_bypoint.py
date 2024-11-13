@@ -190,12 +190,6 @@ def to_json(df):
     return json.dumps(res)
 
 
-def parse_date(val):
-    """convert string to date."""
-    fmt = "%Y/%m/%d" if "/" in val else "%Y-%m-%d"
-    return datetime.strptime(val, fmt)
-
-
 def get_mckey(environ: dict) -> str:
     """Construct the key."""
     at = "null" if environ["at"] is None else f"{environ['at']:%Y%m%d%H%M}"
