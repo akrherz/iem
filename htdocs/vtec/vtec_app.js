@@ -176,7 +176,7 @@ function urlencode() {
 /**
  * https://stackoverflow.com/questions/2044616
  */
-function selectElementContents(elid) {
+function selectElementContents(elid) {  // skipcq
     const el = document.getElementById(elid);
     const body = document.body;
     let range = null;
@@ -263,7 +263,7 @@ function handleURLChange(url) {
         }
         else if (pathSegments[i] === "radar") {
             const radartokens = pathSegments[i+1].split("-");
-            if (radartokens.length == 3) {
+            if (radartokens.length === 3) {
                 CONFIG.radar = text(radartokens[0]);
                 CONFIG.radarProduct = text(radartokens[1]);
                 CONFIG.radarProductTime = moment.utc(text(radartokens[2]),
@@ -332,7 +332,7 @@ function consumeInitialURL() {
         return;
     }
     const subtokens = tokens[1].split("/");
-    var url = `/vtec/event/${subtokens[0]}`;
+    let url = `/vtec/event/${subtokens[0]}`;
     if (subtokens.length > 1) {
         url += `/radar/${subtokens[1]}`;
     }
@@ -359,7 +359,7 @@ function getRADARSource() {
             url: '/cache/tile.py/1.0.0/ridge::USCOMP-N0Q-0/{z}/{x}/{y}.png'
         });
     }
-    radarTMSLayer.set('title', '@ ' + dt.format());
+    radarTMSLayer.set("title", `@ ${dt.format()}`);
     const src = text($("#radarsource").val());
     const prod = text($("#radarproduct").val());
     const url = `/cache/tile.py/1.0.0/ridge::${src}-${prod}-${dt.utc().format('YMMDDHHmm')}/{z}/{x}/{y}.png`;
@@ -414,7 +414,7 @@ function buildMap() {
     lsrLayer = new ol.layer.Vector({
         title: 'Local Storm Reports',
         style: (feature) => {
-            if (feature.get('type') == 'S' || feature.get('type') == 'R') {
+            if (feature.get('type') === 'S' || feature.get('type') === 'R') {
                 textStyle.getText().setText(feature.get('magnitude').toString());
                 return textStyle;
             }
@@ -472,7 +472,7 @@ function buildMap() {
     // TODO support mobile
     olmap.on('click', (evt) => {
         const feature = olmap.forEachFeatureAtPixel(evt.pixel,
-            function (feature2) {
+            (feature2) => {
                 return feature2;
             });
         if (feature) {
@@ -876,7 +876,11 @@ function makeLSRTable(div) {
     return table;
 }
 
-function setUpdate(val){
+/**
+ * called from HTML tag
+ * @param {String} val
+ */
+function setUpdate(val){  // skipcq
     CONFIG.activeUpdate = val;
     updateURL();
 }
@@ -903,21 +907,21 @@ function buildUI() {
         html += `<option value="${arr[0]}">${arr[1]} (${arr[0]})</option>`;
     });
     $("#phenomena").append(html);
-    $(`#phenomena option[value='TO']`).prop('selected', true)
+    $("#phenomena option[value='TO']").prop('selected', true);
 
     html = "";
     $.each(iemdata.vtec_sig_dict, (_idx, arr) => {
         html += `<option value="${arr[0]}">${arr[1]} (${arr[0]})</option>`;
     });
     $("#significance").append(html);
-    $(`#significance option[value='W']`).prop('selected', true)
+    $("#significance option[value='W']").prop('selected', true);
 
     html = "";
     for (let year = 1986; year <= (new Date()).getFullYear(); year++) {
         html += `<option value="${year}">${year}</option>`;
     }
     $("#year").append(html);
-    $(`#year option[value=2024]`).prop('selected', true)
+    $("#year option[value=2024]").prop('selected', true);
 
     setETN(45);
     $("#etn-prev").click(function() { // this
@@ -943,7 +947,7 @@ function buildUI() {
     eventTable = $("#eventtable").DataTable();
     $('#eventtable tbody').on('click', 'tr', function () {  // this
         const data = eventTable.row(this).data();
-        if (data[0] == getETN()) return;
+        if (parseInt(data[0], 10) === getETN()) return;
         setETN(data[0]);
         // Switch to the details tab, which will trigger update
         $("#thetabs_tabs a[href='#info']").trigger('click');
@@ -951,7 +955,7 @@ function buildUI() {
 
     $('a[data-toggle="tab"]').on('shown.bs.tab', (e) => {
         const target = $(e.target).attr("href") // activated tab
-        if (target == "#themap") {
+        if (target === "#themap") {
             olmap.updateSize();
         }
     });
