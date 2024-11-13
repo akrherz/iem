@@ -94,7 +94,7 @@ def as_html(ctx):
 <!DOCTYPE html>
 <html lang="en">
 <head>
-<meta http-equiv="refresh" content="0; URL=/vtec/#%(v)s">
+<meta http-equiv="refresh" content="0; URL=/vtec/event/%(v)s">
 <title>%(ogtitle)s</title>
 <meta property="og:title" content="%(ogtitle)s">
 <meta property="og:description" content="%(desc)s">

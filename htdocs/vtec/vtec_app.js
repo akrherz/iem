@@ -1,5 +1,14 @@
-/* global CONFIG, iemdata, moment, ol */
-// previous hashlinking looks like 2017-O-NEW-KALY-WI-Y-0015
+/* global iemdata, moment, ol */
+
+const CONFIG = {
+    radar: null,
+    radarProduct: null,
+    radarProductTime: null,
+    issue: null,
+    expire: null,
+    activeTab: "info",
+    activeUpdate: null
+};
 
 let olmap = null;
 let productVectorCountyLayer = null;
@@ -13,6 +22,7 @@ let ugcTable = null;
 let lsrTable = null;
 let sbwLsrTable = null;
 let element = null;
+let loadedVTEC = "";
 
 const sbwLookup = {
     "TO": 'red',
@@ -111,19 +121,61 @@ const textStyle = new ol.style.Style({
     })
 });
 
+function getWFO() {
+    return text($("#wfo").val());
+}
+function setWFO(wfo) {
+    $("#wfo").val(text(wfo));
+}
+//----------------
+function getYear() {
+    return parseInt($("#year").val(), 10);
+}
+function setYear(year) {
+    $("#year").val(text(year));
+}
+//----------------
+function getPhenomena() {
+    return text($("#phenomena").val());
+}
+function setPhenomena(phenomena) {
+    $("#phenomena").val(text(phenomena));
+}
+//----------------
+function getSignificance() {
+    return text($("#significance").val());
+}
+function setSignificance(significance) {
+    $("#significance").val(text(significance));
+}
+//----------------
+function getETN() {
+    return parseInt($("#etn").val(), 10);
+}
+function setETN(etn) {
+    etn = parseInt(etn, 10);
+    if (etn > 0 && etn < 10000) {
+        $("#etn").val(etn);
+    }
+}
+
 function text(str) {
     // XSS
     return $("<p>").text(str).html();
 }
 
+/**
+ * Encode the current vtec into CGI parms
+ * @returns {string} The URL encoded string
+ */
 function urlencode() {
     // Make our CONFIG object a URI
-    const uri = `?year=${CONFIG.year}&phenomena=${CONFIG.phenomena}&significance=${CONFIG.significance}&eventid=${CONFIG.etn}&wfo=${CONFIG.wfo}`;
-    return uri;
+    return `?year=${getYear()}&phenomena=${getPhenomena()}&significance=${getSignificance()}&eventid=${getETN()}&wfo=${getWFO()}`;
 }
 
-// https://stackoverflow.com/questions/2044616
-
+/**
+ * https://stackoverflow.com/questions/2044616
+ */
 function selectElementContents(elid) {
     const el = document.getElementById(elid);
     const body = document.body;
@@ -149,32 +201,68 @@ function selectElementContents(elid) {
     }
 }
 
-function updateHash() {
-    // Set the hashlink as per our current CONFIG
-    let href = `#${CONFIG.year}-O-NEW-${CONFIG.wfo}-${CONFIG.phenomena}-${CONFIG.significance}-${String(CONFIG.etn).padStart(4, '0')}`;
-    if (CONFIG.radarProductTime !== null && CONFIG.radarProduct !== null &&
-        CONFIG.radar !== null) {
-        href += "/" + CONFIG.radar + "-" + CONFIG.radarProduct +
-            "-" + CONFIG.radarProductTime.utc().format('YMMDDHHmm');
-    }
-    window.location.href = href;
+/**
+ * Generate a commonly used VTEC string in the form of
+ * YYYY-O-NEW-WFO-PHENOMENA-SIGNIFICANCE-ETN
+ * @returns {string} The VTEC string
+ */
+function vtecString() {
+    return `${getYear()}-O-NEW-${getWFO()}-${getPhenomena()}-${getSignificance()}-${String(getETN()).padStart(4, '0')}`;
 }
 
-function parseHash() {
-    // See what we have for a hash and update the CONFIG if appropriate
-    const tokens = window.location.href.split('#');
-    if (tokens.length == 2) {
-        const subtokens = tokens[1].split("/");
-        const vtectokens = subtokens[0].split("-");
-        if (vtectokens.length == 7) {
-            CONFIG.year = parseInt(vtectokens[0], 10);
-            CONFIG.wfo = text(vtectokens[3]);
-            CONFIG.phenomena = text(vtectokens[4]);
-            CONFIG.significance = text(vtectokens[5]);
-            CONFIG.etn = parseInt(vtectokens[6], 10);
+/**
+ * Important gateway for updating the app
+ * fires off a navigateTo call, which may or may not reload the data
+ * depending on the VTEC string
+ * @returns {void}
+ */
+function updateURL(){
+    let url = `/vtec/event/${vtecString()}`;
+    if (CONFIG.radarProductTime !== null && CONFIG.radarProduct !== null &&
+        CONFIG.radar !== null) {
+        url += `/radar/${CONFIG.radar}-${CONFIG.radarProduct}-${CONFIG.radarProductTime.utc().format('YMMDDHHmm')}`;
+    }
+    url += `/tab/${CONFIG.activeTab}`;
+    if (CONFIG.activeUpdate !== null) {
+        url += `/update/${CONFIG.activeUpdate}`;
+    }
+    navigateTo(url);
+}
+
+/**
+ * Push the URL onto the HTML5 history stack
+ * and call handleURLChange, which may or may not reload the data
+ * @param {String} url 
+ */
+function navigateTo(url) {
+    history.pushState(null, null, url);
+    handleURLChange(url);
+}
+
+/**
+ * Process the URL and update the app state
+ * @param {String} url 
+ * @returns {void}
+ */
+function handleURLChange(url) {
+    const pathSegments = url.split('/').filter(segment => segment);
+    if (pathSegments.length < 3) {
+        return;
+    }
+    // We only need to reload if the event has changed
+    for (let i = 1; (i + 1) < pathSegments.length; i+=2) {
+        if (pathSegments[i] === "event") {
+            const vtectokens = pathSegments[i+1].split("-");
+            if (vtectokens.length === 7) {
+                setYear(vtectokens[0]);
+                setWFO(vtectokens[3]);
+                setPhenomena(vtectokens[4]);
+                setSignificance(vtectokens[5]);
+                setETN(vtectokens[6]);
+            }
         }
-        if (subtokens.length > 1) {
-            const radartokens = subtokens[1].split("-");
+        else if (pathSegments[i] === "radar") {
+            const radartokens = pathSegments[i+1].split("-");
             if (radartokens.length == 3) {
                 CONFIG.radar = text(radartokens[0]);
                 CONFIG.radarProduct = text(radartokens[1]);
@@ -182,18 +270,76 @@ function parseHash() {
                     'YYYYMMDDHHmm');
             }
         }
+        else if (pathSegments[i] === "tab") {
+            setActiveTab(pathSegments[i+1]);
+        }
+        else if (pathSegments[i] === "update") {
+            setUpdateTab(pathSegments[i+1]);
+        }
+    }
+    if (loadedVTEC !== vtecString()) {
+        loadTabs();
     }
 }
 
-function readHTMLForm() {
-    // See what the user has set
-    CONFIG.year = parseInt($("#year").val(), 10);
-    CONFIG.wfo = text($("#wfo").val());
-    CONFIG.phenomena = text($("#phenomena").val());
-    CONFIG.significance = text($("#significance").val());
-    CONFIG.etn = parseInt($("#etn").val(), 10);
+/**
+ * Listen for user hitting the back and forward buttons
+ */
+window.addEventListener('popstate', (_event) => {
+    handleURLChange(document.location.pathname);
+});
 
+/**
+ * Update the current active tab within the text tab
+ * @param {String} tab 
+ * @returns {void}
+ */
+function setUpdateTab(tab) {
+    if (tab === CONFIG.activeUpdate) {
+        return;
+    }
+    CONFIG.activeUpdate = text(tab);
+    $(`#text_tabs a[data-update='${tab}']`).click();
 }
+
+/**
+ * Update the active main tab
+ * @param {String} tab 
+ * @returns {void}
+ */
+function setActiveTab(tab) {
+    if (tab === CONFIG.activeTab){
+        return;
+    }
+    CONFIG.activeTab = text(tab);
+    $(`#thetabs_tabs a[href='#${tab}']`).click();
+}
+
+
+/**
+ * Initialization time check of URI and consume what it sets
+ * @returns {void}
+ */
+function consumeInitialURL() {
+    // Assume we start with /event, which is true via Apache rewrite
+    if (window.location.pathname.startsWith("/vtec/event")) {
+        handleURLChange(window.location.pathname);
+        return;
+    }
+    // Convert the hashlink to a URL
+    const tokens = window.location.href.split('#');
+    if (tokens.length === 1) {
+        return;
+    }
+    const subtokens = tokens[1].split("/");
+    var url = `/vtec/event/${subtokens[0]}`;
+    if (subtokens.length > 1) {
+        url += `/radar/${subtokens[1]}`;
+    }
+    url += "/tab/info";
+    navigateTo(url);
+}
+
 
 function make_iem_tms(title, layername, visible, type) {
     return new ol.layer.Tile({
@@ -361,8 +507,11 @@ function lsrFeatureHTML(feature) {
     return html.join('\n');
 }
 
+/**
+ * Query radar service for available RADARs and products
+ * and update the UI
+ */
 function updateRADARTimeSlider() {
-    // operation=list&product=N0Q&radar=USCOMP&start=2012-01-23T08%3A10Z&end=2012-01-23T08%3A45Z
     $.ajax({
         data: {
             radar: $("#radarsource").val(),
@@ -381,7 +530,7 @@ function updateRADARTimeSlider() {
                 radartimes.push(moment.utc(scan.ts));
             });
             if (CONFIG.radarProductTime === null && radartimes.length > 0) {
-                CONFIG.radarProducTime = radartimes[0];
+                CONFIG.radarProductTime = radartimes[0];
             }
             let idx = 0;
             $.each(radartimes, (i, rt) => {
@@ -395,6 +544,9 @@ function updateRADARTimeSlider() {
 
 }
 
+/**
+ * Query radar service for available RADAR products and update the UI
+ */
 function updateRADARProducts() {
     // operation=products&radar=USCOMP&start=2012-01-23T08%3A10Z
     $.ajax({
@@ -423,6 +575,9 @@ function updateRADARProducts() {
     });
 }
 
+/**
+ * Query radar service for available RADARs and update the UI
+ */
 function updateRADARSources() {
     // Use these x, y coordinates to drive our RADAR availablility work
     const center = ol.proj.transform(olmap.getView().getCenter(),
@@ -454,18 +609,27 @@ function updateRADARSources() {
     });
 }
 
+/**
+ * Build a common data object with the payload to send to web services
+ * @returns {Object} The data to be sent to the server
+ */
+function getData(){
+    return {
+        wfo: getWFO(),
+        phenomena: getPhenomena(),
+        significance: getSignificance(),
+        etn: getETN(),
+        year: getYear()
+    }
+}
+
 function getVTECGeometry() {
     // After the initial metadata is fetched, we get the geometry
+    const payload = getData();
+    payload.sbw = 0;
+    payload.lsrs = 0;
     $.ajax({
-        data: {
-            wfo: CONFIG.wfo,
-            phenomena: CONFIG.phenomena,
-            significance: CONFIG.significance,
-            etn: CONFIG.etn,
-            year: CONFIG.year,
-            sbw: 0,
-            lsrs: 0
-        },
+        data: payload,
         url: "/geojson/vtec_event.py",
         method: "GET",
         dataType: "json",
@@ -486,16 +650,11 @@ function getVTECGeometry() {
             updateRADARSources();
         }
     });
+    const payload2 = getData();
+    payload2.sbw = 1;
+    payload2.lsrs = 0;
     $.ajax({
-        data: {
-            wfo: CONFIG.wfo,
-            phenomena: CONFIG.phenomena,
-            significance: CONFIG.significance,
-            etn: CONFIG.etn,
-            year: CONFIG.year,
-            sbw: 1,
-            lsrs: 0
-        },
+        data: payload2,
         url: "/geojson/vtec_event.py",
         method: "GET",
         dataType: "json",
@@ -513,13 +672,7 @@ function getVTECGeometry() {
     });
     // Intersection
     $.ajax({
-        data: {
-            wfo: CONFIG.wfo,
-            phenomena: CONFIG.phenomena,
-            significance: CONFIG.significance,
-            eventid: CONFIG.etn,
-            year: CONFIG.year
-        },
+        data: getData(),
         url: "/geojson/sbw_county_intersect.geojson",
         method: "GET",
         dataType: "json",
@@ -537,16 +690,11 @@ function getVTECGeometry() {
     });
 
     // All LSRs
+    const payload3 = getData();
+    payload3.sbw = 0;
+    payload3.lsrs = 1;
     $.ajax({
-        data: {
-            wfo: CONFIG.wfo,
-            phenomena: CONFIG.phenomena,
-            significance: CONFIG.significance,
-            etn: CONFIG.etn,
-            year: CONFIG.year,
-            sbw: 0,
-            lsrs: 1
-        },
+        data: payload3,
         url: "/geojson/vtec_event.py",
         method: "GET",
         dataType: "json",
@@ -567,16 +715,11 @@ function getVTECGeometry() {
         }
     });
     // SBW LSRs
+    const payload4 = getData();
+    payload4.sbw = 1;
+    payload4.lsrs = 1;
     $.ajax({
-        data: {
-            wfo: CONFIG.wfo,
-            phenomena: CONFIG.phenomena,
-            significance: CONFIG.significance,
-            etn: CONFIG.etn,
-            year: CONFIG.year,
-            sbw: 1,
-            lsrs: 1
-        },
+        data: payload4,
         url: "/geojson/vtec_event.py",
         method: "GET",
         dataType: "json",
@@ -591,38 +734,43 @@ function getVTECGeometry() {
     });
 }
 
+/**
+ * Make web services calls to get VTEC data and load the tabs with information
+ */
 function loadTabs() {
-    // OK, lets load up the tab content
-    const vstring = `${CONFIG.year}.O.NEW.${CONFIG.wfo}.${CONFIG.phenomena}.${CONFIG.significance}.${String(CONFIG.etn).padStart(4, '0')}`;
-    const vstring2 = `${CONFIG.year}.${CONFIG.wfo}.${CONFIG.phenomena}.${CONFIG.significance}.${String(CONFIG.etn).padStart(4, '0')}`;
+    loadedVTEC = vtecString();
+    const vstring = vtecString();
+    const vstring2 = `${getYear()}.${getWFO()}.${getPhenomena()}.${getSignificance()}.${String(getETN()).padStart(4, '0')}`;
     $("#radarmap").html(`<img src="/GIS/radmap.php?layers[]=nexrad&layers[]=sbw&layers[]=sbwh&layers[]=uscounties&vtec=${vstring}" class="img img-responsive">`);
     $("#sbwhistory").html(`<img src="/GIS/sbw-history.php?vtec=${vstring2}" class="img img-responsive">`);
 
     $("#vtec_label").html(
-        `${CONFIG.year} ${text($("#wfo option:selected").text())}
+        `${getYear()} ${text($("#wfo option:selected").text())}
             ${text($("#phenomena option:selected").text())}
             ${text($("#significance option:selected").text())}
-            Number ${text($("#etn").val())}`
+            Number ${getETN()}`
     );
     $.ajax({
-        data: {
-            wfo: CONFIG.wfo,
-            phenomena: CONFIG.phenomena,
-            significance: CONFIG.significance,
-            etn: CONFIG.etn,
-            year: CONFIG.year
-        },
+        data: getData(),
         url: "/json/vtec_event.py",
         method: "GET",
         dataType: "json",
         success: (data) => {
+            if (!data.event_exists){
+                $("#info_event_found").hide();
+                $("#info_event_not_found").show();
+                return;
+            }
+            $("#info_event_found").show();
+            $("#info_event_not_found").hide();
             const tabs = $("#textdata ul");
             const tabcontent = $("#textdata div.tab-content");
             tabs.empty();
             tabcontent.empty();
             tabs.append('<li><a href="#tall" data-toggle="tab">All</a></li>');
             const stamp = moment.utc(data.report.valid).local().format("DD/h:mm A");
-            tabs.append(`<li class="active"><a href="#t0" data-toggle="tab">Issue ${stamp}</a></li>`);
+            const update = moment.utc(data.report.valid).format("YYYYMMDDHHmm");
+            tabs.append(`<li class="active"><a href="#t0" data-update="${update}" onclick="setUpdate('${update}');" data-toggle="tab">Issue ${stamp}</a></li>`);
             const plink = `<a href="/p.php?pid=${data.report.product_id}" target="_new">Permalink to ${data.report.product_id}</a><br />`;
             tabcontent.append(`<div class="tab-pane" id="tall"><pre>${data.report.text}</pre></div>`);
             tabcontent.append(`<div class="tab-pane active" id="t0">${plink}<pre>${data.report.text}</pre></div>`);
@@ -630,11 +778,15 @@ function loadTabs() {
             $.each(data.svs, (_idx, svs) => {
                 const splink = `<a href="/p.php?pid=${svs.product_id}" target="_new">Permalink to ${svs.product_id}</a><br />`;
                 const sstamp = moment.utc(svs.valid).local().format("DD/h:mm A");
-                tabs.append(`<li><a href="#t${tidx}" data-toggle="tab">U${tidx}: ${sstamp}</a></li>`);
+                const supdate = moment.utc(svs.valid).format("YYYYMMDDHHmm");
+                tabs.append(`<li><a href="#t${tidx}" data-update="${supdate}" onclick="setUpdate('${supdate}');" data-toggle="tab">U${tidx}: ${sstamp}</a></li>`);
                 tabcontent.append(`<div class="tab-pane" id="t${tidx}">${splink}<pre>${svs.text}</pre></div>`);
                 $("#tall").append(`<pre>${svs.text}</pre>`);
                 tidx += 1;
             });
+            if (CONFIG.activeUpdate !== null) {
+                $(`#textdata a[data-update="${CONFIG.activeUpdate}"]`).click();
+            }
             ugcTable.clear();
             $.each(data.ugcs, (_idx, ugc) => {
                 ugcTable.row.add([ugc.ugc, ugc.name, ugc.status,
@@ -649,12 +801,7 @@ function loadTabs() {
     });
 
     $.ajax({
-        data: {
-            wfo: CONFIG.wfo,
-            phenomena: CONFIG.phenomena,
-            significance: CONFIG.significance,
-            year: CONFIG.year
-        },
+        data: getData(),
         url: "/json/vtec_events.py",
         method: "GET",
         dataType: "json",
@@ -667,10 +814,9 @@ function loadTabs() {
             eventTable.draw();
         }
     });
-    updateHash();
     // Set the active tab to 'Event Info' if we are on the first tab
-    if ($("#thetabs .active > a").attr("href") == "#help") {
-        $("#event_tab").click();
+    if ($("#thetabs_tabs a").attr("href") === "#help") {
+        $("#thetabs_tabs a[href='#info']").click();
     }
 }
 function remarkformat(d) {
@@ -730,40 +876,64 @@ function makeLSRTable(div) {
     return table;
 }
 
+function setUpdate(val){
+    CONFIG.activeUpdate = val;
+    updateURL();
+}
+
 function buildUI() {
-    // build the UI components
+    // One time build up of UI and handlers
+
+    // When tabs are clicked
+    $("#thetabs_tabs a").click(function () { // this
+        CONFIG.activeTab = this.href.split('#')[1];
+        updateURL();
+    });
+
     let html = "";
     $.each(iemdata.wfos, (_idx, arr) => {
-        html += "<option value=\"" + arr[0] + "\">[" + arr[0] + "] " + arr[1] + "</option>";
+        html += `<option value="${arr[0]}">[${arr[0]}] ${arr[1]}</option>`;
     });
-    $("#wfo").append(html);
-    $(`#wfo option[value='${CONFIG.wfo}']`).prop('selected', true)
+    const $wfo = $("#wfo");
+    $wfo.append(html);
+    $wfo.val("KDMX");
 
     html = "";
     $.each(iemdata.vtec_phenomena_dict, (_idx, arr) => {
-        html += "<option value=\"" + arr[0] + "\">" + arr[1] + " (" + arr[0] + ")</option>";
+        html += `<option value="${arr[0]}">${arr[1]} (${arr[0]})</option>`;
     });
     $("#phenomena").append(html);
-    $(`#phenomena option[value='${CONFIG.phenomena}']`).prop('selected', true)
+    $(`#phenomena option[value='TO']`).prop('selected', true)
 
     html = "";
     $.each(iemdata.vtec_sig_dict, (_idx, arr) => {
-        html += "<option value=\"" + arr[0] + "\">" + arr[1] + " (" + arr[0] + ")</option>";
+        html += `<option value="${arr[0]}">${arr[1]} (${arr[0]})</option>`;
     });
     $("#significance").append(html);
-    $(`#significance option[value='${CONFIG.significance}']`).prop('selected', true)
+    $(`#significance option[value='W']`).prop('selected', true)
 
     html = "";
     for (let year = 1986; year <= (new Date()).getFullYear(); year++) {
-        html += "<option value=\"" + year + "\">" + year + "</option>";
+        html += `<option value="${year}">${year}</option>`;
     }
     $("#year").append(html);
-    $(`#year option[value='${CONFIG.year}']`).prop('selected', true)
+    $(`#year option[value=2024]`).prop('selected', true)
 
-    $("#etn").val(CONFIG.etn);
+    setETN(45);
+    $("#etn-prev").click(function() { // this
+        setETN(getETN() - 1);
+        updateURL();
+        // unselect the button
+        $(this).blur();
+    });
+    $("#etn-next").click(function() { // this
+        setETN(getETN() + 1);
+        updateURL();
+        $(this).blur();
+    });
+
     $("#myform-submit").click(function () { // this
-        readHTMLForm();
-        loadTabs();
+        updateURL();
         $(this).blur();
     });
     ugcTable = $("#ugctable").DataTable();
@@ -773,12 +943,10 @@ function buildUI() {
     eventTable = $("#eventtable").DataTable();
     $('#eventtable tbody').on('click', 'tr', function () {  // this
         const data = eventTable.row(this).data();
-        if (data[0] == CONFIG.etn) return;
-        CONFIG.etn = data[0];
-        $("#etn").val(CONFIG.etn);
-        loadTabs();
-        // Switch to the details tab after the click
-        $('#event_tab').trigger('click');
+        if (data[0] == getETN()) return;
+        setETN(data[0]);
+        // Switch to the details tab, which will trigger update
+        $("#thetabs_tabs a[href='#info']").trigger('click');
     });
 
     $('a[data-toggle="tab"]').on('shown.bs.tab', (e) => {
@@ -804,26 +972,27 @@ function buildUI() {
             }
             CONFIG.radarProductTime = radartimes[ui.value];
             radarTMSLayer.setSource(getRADARSource());
-            updateHash();
             const label = radartimes[ui.value].local().format("D MMM YYYY h:mm A");
             $("#radartime").html(label);
+            updateURL();
         },
         slide: (_event, ui) => {
             const label = radartimes[ui.value].local().format("D MMM YYYY h:mm A");
             $("#radartime").html(label);
+            updateURL();
         }
     });
     $("#radarsource").change(() => {
         CONFIG.radar = text($("#radarsource").val());
         updateRADARProducts();
-        updateHash();
+        updateURL();
     });
     $("#radarproduct").change(() => {
         // we can safely(??) assume that radartimes does not update when we
         // switch products
         CONFIG.radarProduct = text($("#radarproduct").val());
         radarTMSLayer.setSource(getRADARSource());
-        updateHash();
+        updateURL();
     });
     $("#lsr_kml_button").click(() => {
         window.location.href = `/kml/sbw_lsrs.php${urlencode()}`;
@@ -849,17 +1018,16 @@ function buildUI() {
         newWin.document.close();
         setTimeout(() => { newWin.close(); }, 10);
     });
-
 }
 
+/**
+ * Entry point
+ */
 $(() => {
-    //onReady
-    try {
-        parseHash();
-    } catch {
-        // Nothing?
-    };
+    // Step 1, activate UI components
     buildUI();
+    // Step 2, build the map
     buildMap();
-    loadTabs();
+    // Step 3, consume the URL to resolve the data to load
+    consumeInitialURL();
 });

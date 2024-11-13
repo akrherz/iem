@@ -2,30 +2,24 @@
 require_once "../../config/settings.inc.php";
 require_once "../../include/mlib.php";
 require_once "../../include/forms.php";
+// Maps app is not happy with non HTTPS
 force_https();
+// If CGI vtec parameter is set, we want to redirect to the new URL
+if (isset($_GET["vtec"])){
+  header("Location: /vtec/event/". xssafe($_GET["vtec"]));
+  die();
+}
 require_once "../../include/myview.php";
-$OL = "9.2.4";
+$OL = "10.1.0";
 $JQUERYUI = "1.13.2";
 $t = new MyView();
 $t->title = "Valid Time Event Code (VTEC) App";
-
-$v = isset($_GET["vtec"]) ? xssafe($_GET["vtec"]) : "2024-O-NEW-KDMX-TO-W-0045";
-$tokens = preg_split('/-/', $v);
-$year = $tokens[0];
-$operation = $tokens[1];
-$vstatus = $tokens[2];
-$wfo4 = $tokens[3];
-$wfo = substr($wfo4, 1, 3);
-$phenomena = $tokens[4];
-$significance = $tokens[5];
-$etn = intval($tokens[6]);
-
 $t->headextra = <<<EOM
 <link rel="stylesheet" href="/vendor/jquery-datatables/1.10.20/datatables.min.css" />
 <link rel="stylesheet" href="/vendor/jquery-ui/{$JQUERYUI}/jquery-ui.min.css" />
 <link rel='stylesheet' href="/vendor/openlayers/{$OL}/ol.css" type='text/css'>
 <link type="text/css" href="/vendor/openlayers/{$OL}/ol-layerswitcher.css" rel="stylesheet" />
-<link rel="stylesheet" href="vtec_static.css" />
+<link rel="stylesheet" href="/vtec/vtec_static.css" />
 EOM;
 $t->jsextra = <<<EOM
 <script src="/vendor/jquery-datatables/1.10.20/datatables.min.js"></script>
@@ -33,22 +27,8 @@ $t->jsextra = <<<EOM
 <script src="/vendor/moment/2.13.0/moment.min.js"></script>
 <script src='/vendor/openlayers/{$OL}/ol.js'></script>
 <script src='/vendor/openlayers/{$OL}/ol-layerswitcher.js'></script>
-<script type="text/javascript" src="vtec_static.js"></script>
-<script>
-var CONFIG = {
-  radar: null,
-  radarProduct: null,
-  radarProductTime: null,
-  issue: null,
-  expire: null,
-  year: {$year},
-  wfo: "{$wfo4}",
-  phenomena: "{$phenomena}",
-  significance: "{$significance}",
-  etn: {$etn}
-};
-</script>
-<script type="text/javascript" src="vtec_app.js"></script>
+<script type="text/javascript" src="/vtec/vtec_static.js?20241113"></script>
+<script type="text/javascript" src="/vtec/vtec_app.js?20241113"></script>
 EOM;
 
 $theform = <<<EOM
@@ -72,7 +52,11 @@ $theform = <<<EOM
 </div>
 
 <div class="form-group">
+<button type="button" id="etn-prev" class="btn btn-default">
+<i class="fa fa-arrow-left"></i></button>
 <label for="etn">Event Number</label>
+<button type="button" id="etn-next" class="btn btn-default">
+<i class="fa fa-arrow-right"></i></button>
 <input type="text" name="etn" id="etn" class="form-control" maxlength="4">
 </div>
 
@@ -81,8 +65,10 @@ $theform = <<<EOM
 <select name="year" id="year" class="form-control"></select>
 </div>
 
-
-<p><button type="button" id="myform-submit" class="btn btn-default"><i class="fa fa-search"></i> Load Product</button></p>
+<p>
+<button type="button" id="myform-submit" class="btn btn-default">
+<i class="fa fa-search"></i> Load Product</button>
+</p>
 
 </form>
 
@@ -90,12 +76,17 @@ EOM;
 
 $helpdiv = <<<EOM
 <div id="help">
- <h2>IEM VTEC Product Browser 4.0</h2>
+ <h2>IEM VTEC Product Browser</h2>
 
- <p>This application allows easy navigation of National Weather Service
+<p>This application allows easy navigation of National Weather Service
 issued products with Valid Time Event Coding (VTEC).</p>
 
-<p style="margin-top: 10px;"><b>Tab Functionality:</b>
+<p><strong>13 Nov 2024 Update:</strong> The tool was updated to use non-hash
+link style URLs.  A shim is in place to translate the old URLs to the new
+ones, so nothing should be broken (famous last words). This was done to
+allow the HTML5 History API to provide a better user experience.</p>
+
+<p><strong>Tab Functionality:</strong>
 <br /><i>Above this section, you will notice six selectable tabs. Click on 
 the tab to show the information.</i>
 <br /><ul>
@@ -106,6 +97,12 @@ the tab to show the information.</i>
  <li><b>Storm Reports:</b> Local Storm Reports.</li>
  <li><b>List Events:</b> List all events of the given phenomena, significance, year, and issuing office.</li>
 </ul>
+</p>
+
+<p><strong>Web Services Used:</strong>
+<br />This application is fully driven by IEM <a href="/api/">web services</a>.
+</p>
+
 </div>
 EOM;
 
@@ -113,6 +110,11 @@ $infodiv = <<<EOM
 
 <p><strong><span id="vtec_label"></span></strong></p>
 
+<div id="info_event_not_found" style="display: none;">
+<p>Yikes! The event you requested was not found.  Please try another search.</p>
+</div>
+
+<div id="info_event_found" style="display: block;">
 <button type="button" id="lsr_kml_button" class="btn btn-default"><i class="fa fa-search"></i> LSR KML Source</button>
 <button type="button" id="warn_kml_button" class="btn btn-default"><i class="fa fa-search"></i> Warning KML Source</button>
 <button type="button" id="ci_kml_button" class="btn btn-default"><i class="fa fa-search"></i> County Intersection KML Source</button>
@@ -128,7 +130,7 @@ $infodiv = <<<EOM
 </div>
 
 
-<table id="ugctable">
+<table id="ugctable" style="width: 100%">
 <thead>
 <tr>
  <th>UGC</th>
@@ -154,6 +156,8 @@ $infodiv = <<<EOM
 
 <div id="sbwhistory"></div>
 
+</div><!-- ./info_event_found -->
+
 EOM;
 
 $eventsdiv = <<<EOM
@@ -168,7 +172,7 @@ selected year.  Click on the row to select that event.</p>
     </button>
 </div>
 
-<table id="eventtable">
+<table id="eventtable" style="width:100%">
 <thead>
 <tr>
  <th>ID</th>
@@ -200,7 +204,7 @@ $lsrsdiv = <<<EOM
 </div>
 
 
-<table id="lsrtable">
+<table id="lsrtable" style="width: 100%">
 <thead>
 <tr>
  <th></th>
@@ -226,7 +230,7 @@ $lsrsdiv = <<<EOM
 </div>
 
 
-<table id="sbwlsrtable">
+<table id="sbwlsrtable" style="width: 100%">
 <thead>
 <tr>
  <th></th>
@@ -280,14 +284,15 @@ EOM;
 
 $textdiv = <<<EOM
 
-<button type="button" id="toolbar-print" class="btn btn-default"><i class="fa fa-print"></i> Send Text to Printer</button>
+<button type="button" id="toolbar-print" class="btn btn-default">
+<i class="fa fa-print"></i> Send Text to Printer</button>
 
-  <ul class="nav nav-tabs">
-     <li class="active"><a href="#t0" data-toggle="tab">Issuance</a></li>
-  </ul>
-  <div class="tab-content clearfix">
+<ul class="nav nav-tabs" id="text_tabs">
+    <li class="active"><a href="#t0" data-toggle="tab">Issuance</a></li>
+</ul>
+<div class="tab-content clearfix">
     <div class="tab-pane active" id="t0">Text Product Issuance</div>
-  </div>
+</div>
 EOM;
 
 $t->content = <<<EOF
@@ -302,9 +307,9 @@ $t->content = <<<EOF
 
 <div class="panel with-nav-tabs panel-default" id="thetabs">
     <div class="panel-heading">
-      <ul class="nav nav-tabs">
+      <ul class="nav nav-tabs" id="thetabs_tabs">
          <li class="active"><a href="#help" data-toggle="tab">Help</a></li>
-         <li><a id="event_tab" href="#info" data-toggle="tab">Event Info</a></li>
+         <li><a href="#info" data-toggle="tab">Event Info</a></li>
          <li><a href="#textdata" data-toggle="tab">Text Data</a></li>
          <li><a href="#themap" data-toggle="tab">Interactive Map</a></li>
          <li><a href="#stormreports" data-toggle="tab">Storm Reports</a></li>
