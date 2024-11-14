@@ -26,4 +26,5 @@ def test_all(service):
     c = Client(service.application)
     res = c.get("/")
     # 422 when a required parameter was not provided, which is fine
-    assert res.status_code in [200, 422]
+    # 301 when the app is upset about being approached via http
+    assert res.status_code in [200, 301, 422]
