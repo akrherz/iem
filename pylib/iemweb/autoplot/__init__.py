@@ -429,7 +429,7 @@ monthly_opts = [
         "id": 23,
         "label": "Monthly Station Departures + El Nino 3.4 Index Time Series",
     },
-    {"id": 36, "label": "Month warmer than other Month for Year"},
+    {"id": 36, "label": "Month warmer/wetter than other Month for Year"},
     {
         "id": 58,
         "label": (
