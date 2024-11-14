@@ -34,6 +34,7 @@ np.seterr(all="ignore")
 
 HTTP200 = "200 OK"
 HTTP400 = "400 Bad Request"
+HTTP422 = "422 Unprocessable Entity"
 HTTP500 = "500 Internal Server Error"
 
 
@@ -263,7 +264,7 @@ def workflow(mc, environ, fmt):
             )
     elif fmt == "txt" and report is not None:
         content = report
-    elif fmt in ["csv", "xlsx"] and df is not None:
+    elif fmt in ["csv", "txt", "xlsx"] and df is not None:
         # If the index is a datetime object, we need to convert it to a string
         if isdt(df.index):
             dtz = df.index.tz
@@ -289,7 +290,7 @@ def workflow(mc, environ, fmt):
                 else:
                     df[column] = df[column].dt.strftime("%Y-%m-%dT%H:%M:%S")
 
-        if fmt == "csv":
+        if fmt in ["csv", "txt"]:  # Meh on the txt here
             content = df.to_csv(index=(df.index.name is not None), header=True)
         elif fmt == "xlsx":
             # Can't write to ram buffer yet, unimplmented upstream
@@ -306,7 +307,7 @@ def workflow(mc, environ, fmt):
             f"Undefined edge case: fmt: {fmt} "
             f"uri: {environ.get('REQUEST_URI')}\n"
         )
-        raise Exception(f"Undefined autoplot action |{fmt}|")
+        return HTTP422, "Undefined edge case encountered"
 
     dur = int(meta.get("cache", 43200))
     try:

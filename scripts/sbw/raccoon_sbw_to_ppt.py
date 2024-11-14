@@ -11,9 +11,9 @@ import os
 import random
 import shutil
 import subprocess
-import sys
 from datetime import datetime, timedelta
 
+import click
 from odf.draw import Frame, Image, Page, TextBox
 from odf.opendocument import OpenDocumentPresentation
 from odf.style import (
@@ -66,7 +66,7 @@ def add_job(row):
     pgconn.commit()
 
 
-def check_for_work():
+def check_for_work() -> list:
     """See if we have any requests to process!"""
     pgconn, mcursor = get_dbconnc("mesosite")
     mcursor2 = pgconn.cursor()
@@ -372,17 +372,17 @@ def do_job(job):
         add_job(job)
 
 
-def main(argv):
+@click.command()
+@click.option("--test", is_flag=True, help="Run a test job")
+def main(test: bool):
     """Do main"""
-    if len(argv) == 2:
+    if test:
         jobs = test_job()
     else:
         jobs = check_for_work()
-    if not jobs:
-        sys.exit()
     for job in jobs:
         do_job(job)
 
 
 if __name__ == "__main__":
-    main(sys.argv)
+    main()

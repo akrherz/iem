@@ -2,12 +2,16 @@
 
 For better or worse, we have a manual accounting of precipitation totals within
 the database.  This updates those totals.
+
+Called from RUN_10_AFTER.sh
 """
 
-import datetime
-import sys
+from datetime import datetime, timedelta, timezone
+from typing import Optional
 
-from pyiem.util import get_dbconnc, utc
+import click
+from pyiem.database import get_dbconnc
+from pyiem.util import utc
 
 
 def update(icursor, iemid, valid, phour):
@@ -41,7 +45,7 @@ def archive(ts):
     SELECT max, iemid from data d JOIN stations s on
     (d.station = s.id) WHERE s.network ~* 'ASOS'
     """,
-        (ts, ts + datetime.timedelta(minutes=60)),
+        (ts, ts + timedelta(minutes=60)),
     )
 
     for row in acursor:
@@ -64,7 +68,7 @@ def realtime(ts):
         and phour >= 0 and c.iemid = t.iemid and t.network !~* 'DCP'
         GROUP by t.iemid
         """,
-        (ts, ts + datetime.timedelta(minutes=60)),
+        (ts, ts + timedelta(minutes=60)),
     )
     for row in acursor:
         update(icursor, row["iemid"], ts, row["p"])
@@ -73,18 +77,19 @@ def realtime(ts):
     pgconn.close()
 
 
-def main(argv):
+@click.command()
+@click.option("--valid", type=click.DateTime(), help="UTC Timestamp")
+def main(valid: Optional[datetime]):
     """Do things"""
-    if len(argv) == 5:
+    if valid:
         # Run for a custom hour
-        ts = utc(int(argv[1]), int(argv[2]), int(argv[3]), int(argv[4]))
-        archive(ts)
+        archive(valid.replace(tzinfo=timezone.utc))
     else:
         # We run for the last hour
-        ts = utc() - datetime.timedelta(hours=1)
+        ts = utc() - timedelta(hours=1)
         ts = ts.replace(minute=0, second=0, microsecond=0)
         realtime(ts)
 
 
 if __name__ == "__main__":
-    main(sys.argv)
+    main()
