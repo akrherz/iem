@@ -16,6 +16,7 @@ function ugcStateSelect($state, $selected)
         }
         $s .= ">[" . $row["ugc"] . "] " . $row["name"] . " ($z)</option>\n";
     }
+    $s .= "</select>\n";
     return $s;
 }
 
@@ -34,6 +35,7 @@ function selectAzosNetwork($network)
         }
         $s .= ">" . $row["name"] . "</option>\n";
     }
+    $s .= "</select>\n";
     return $s;
 }
 
@@ -53,6 +55,7 @@ function selectClimodatNetwork($selected, $label = "network")
         }
         $s .= ">" . $row["name"] . "</option>\n";
     }
+    $s .= "</select>\n";
     return $s;
 }
 
@@ -77,6 +80,7 @@ function selectNetwork($selected, $extra = array())
         }
         $s .= ">[{$row['id']}] {$row['name']}</option>\n";
     }
+    $s .= "</select>\n";
     return $s;
 }
 
