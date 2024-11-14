@@ -1,4 +1,7 @@
-"""Generate a web crawler friendly page."""
+""".. title:: VTEC Jump Page
+
+TBW.
+"""
 
 import re
 
@@ -155,7 +158,7 @@ def get_context(url):
     return ctx
 
 
-@iemapp()
+@iemapp(help=__doc__)
 def application(environ, start_response):
     """Answer the bell."""
     script_url = environ.get("SCRIPT_URI")

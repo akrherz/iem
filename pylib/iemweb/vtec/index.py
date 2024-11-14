@@ -1,6 +1,7 @@
-"""The frontend for VTEC Browser.
+"""..title:: VTEC Browser
 
-https://mesonet.agron.iastate.edu/vtec/
+TBW.
+
 """
 
 import re
@@ -153,7 +154,7 @@ def get_context(script_url: str) -> dict:
     return ctx
 
 
-@iemapp(schema=Schema)
+@iemapp(schema=Schema, help=__doc__)
 def application(environ, start_response):
     """Answer the bell."""
     # Force HTTPS as the openlayers map will be angry
