@@ -17,4 +17,4 @@
 /json/prism.py?lat=-140&lon=35
 /json/raob.py?ts=1930-01-01T12:00:00Z
 /json/stage4.py?valid=2024-08-11&lon=-102.30&lat=45.10&tz=Boguis
-/plotting/auto/autoplot.py?fmt=qqq&p=97&q=d:sector::sector:IA::var:gdd_sum::gddbase:39::gddceil:84::date1:2024-01-01::usdm:no::date2:2024-05-25::p:contour::cmap:RdYlBu_r::c:yes::_r:43
+/autoplot/autoplot.py?fmt=qqq&p=97&q=d:sector::sector:IA::var:gdd_sum::gddbase:39::gddceil:84::date1:2024-01-01::usdm:no::date2:2024-05-25::p:contour::cmap:RdYlBu_r::c:yes::_r:43
