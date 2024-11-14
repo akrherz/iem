@@ -8,7 +8,6 @@ import re
 
 from pydantic import Field
 from pyiem.database import get_dbconn
-from pyiem.exceptions import IncompleteWebRequest
 from pyiem.nws import vtec
 from pyiem.templates.iem import TEMPLATE
 from pyiem.util import html_escape, utc
@@ -52,8 +51,6 @@ def get_data(vtecinfo: dict):
             int(vtecinfo["eventid"]),
         ),
     )
-    if cursor.rowcount == 0:
-        raise IncompleteWebRequest("VTEC Event Not Found")
     row = cursor.fetchone()
     vtecinfo["report"] = (
         "" if row[0] is None else html_escape(row[0].replace("\001", ""))
@@ -168,8 +165,5 @@ def application(environ, start_response):
         start_response("301 Moved Permanently", [("Location", url)])
         return [b"Redirecting"]
     ctx = get_context(environ.get("SCRIPT_URI", ""))
-    if not ctx:
-        start_response("404 Not Found", [("Content-type", "text/plain")])
-        return [b"Resource Not Found"]
     start_response("200 OK", [("Content-type", "text/html")])
     return TEMPLATE.render(ctx).encode("utf-8")
