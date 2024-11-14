@@ -1,6 +1,6 @@
 """
 This plot summarizes the frequency of one month
-being warmer than another month for that calendar year.
+being warmer/wetter than another month for that calendar year.
 """
 
 import calendar
@@ -16,11 +16,44 @@ from pyiem.util import get_autoplot_context
 
 from iemweb.autoplot import ARG_STATION
 
+PDICT = {
+    "high": "High Temperature Warmer",
+    "low": "Low Temperature Warmer",
+    "avg": "Average Temperature Warmer",
+    "precip": "Total Precipitation Wetter",
+}
+COLSQL = {
+    "high": "avg(high)",
+    "low": "avg(low)",
+    "avg": "avg((high+low)/2.)",
+    "precip": "sum(precip)",
+}
+PDICT2 = {
+    "no": "Don't include current month",
+    "yes": "Include current month",
+}
+
 
 def get_description():
     """Return a dict describing how to call this plotter"""
     desc = {"description": __doc__, "data": True}
-    desc["arguments"] = [ARG_STATION]
+    desc["arguments"] = [
+        ARG_STATION,
+        {
+            "type": "select",
+            "name": "var",
+            "default": "avg",
+            "options": PDICT,
+            "label": "Which Variable to Compare",
+        },
+        {
+            "type": "select",
+            "name": "inc",
+            "default": "no",
+            "options": PDICT2,
+            "label": "Include Current Month?",
+        },
+    ]
     return desc
 
 
@@ -31,18 +64,24 @@ def plotter(fdict):
     ctx = get_autoplot_context(fdict, get_description())
     station = ctx["station"]
 
+    varname = ctx["var"]
+    last_date = date.today().replace(day=1)
+    if ctx["inc"] == "yes":
+        last_date = date.today()
+
     cursor.execute(
-        """
-        SELECT year, month, avg((high+low)/2.) from alldata WHERE
+        f"""
+        SELECT year, month, {COLSQL[varname]} from alldata WHERE
         station = %s and day < %s GROUP by year, month ORDER by year ASC
         """,
-        (station, date.today().replace(day=1)),
+        (station, last_date),
     )
     if cursor.rowcount == 0:
         raise NoDataFound("No results found for query")
 
-    for rownum, row in enumerate(cursor):
-        if rownum == 0:
+    baseyear = None
+    for row in cursor:
+        if baseyear is None:
             baseyear = row[0]
             avgs = np.ones((datetime.now().year - baseyear + 1, 12)) * -99.0
         avgs[row[0] - baseyear, row[1] - 1] = row[2]
@@ -74,8 +113,9 @@ def plotter(fdict):
             )
     df = pd.DataFrame(rows)
 
-    title = f"{ctx['_sname']}\n" "Years that Month was Warmer than other Month"
-    (fig, ax) = figure_axes(title=title, apctx=ctx)
+    subtitle = f"{ctx['_sname']} [{baseyear}-]"
+    title = f"Years that Month with {PDICT[varname]} than other Month"
+    (fig, ax) = figure_axes(title=title, subtitle=subtitle, apctx=ctx)
     x, y = np.meshgrid(np.arange(-0.5, 12.5, 1), np.arange(-0.5, 12.5, 1))
     res = ax.pcolormesh(x, y, np.transpose(matrix))
     for i in range(12):
@@ -112,7 +152,10 @@ def plotter(fdict):
     ax.set_xlim(-0.5, 11.5)
     ax.set_ylim(-0.5, 11.5)
     fig.colorbar(res)
-    ax.set_xlabel("This Month was Warmer than...")
+    ax.set_xlabel(
+        f"This Month was {'Warmer' if varname != 'precip' else 'Wetter'} "
+        "than..."
+    )
     ax.set_ylabel("...this month for same year")
 
     return fig, df
