@@ -158,7 +158,7 @@ def get_asos(ctx: dict) -> pd.DataFrame:
                 select station, valid, substr(key, 1, 3) as shefvar, value
                 from raw{ets:%Y} WHERE
                 station = ANY(:stations) and
-                substr(key, 1, 3) in ('SFQ', 'SFD') and
+                substr(key, 1, 3) in ('SFQ', 'SDI') and
                 valid > :sts and valid <= :ets and value is not null
                 ORDER by station asc, valid asc
                 """),
@@ -173,10 +173,13 @@ def get_asos(ctx: dict) -> pd.DataFrame:
                 asosid = stations[stations["snow_src"] == snowsrc].index[0]
                 stations.at[asosid, "cnt_6hr"] = len(gdf["valid"].unique())
                 snowfall = gdf[gdf["shefvar"] == "SFD"]["value"].sum()
-                qobs = gdf[gdf["shefvar"] == "SFQ"]
-                if not qobs.empty and qobs["valid"].values[-1] == ets:
-                    stations.at[asosid, "snowd"] = qobs["value"].values[-1]
                 stations.at[asosid, "snow"] = snowfall
+
+                qobs = gdf[gdf["shefvar"] == "SDI"]
+                if qobs.empty:
+                    continue
+                if qobs.iloc[-1]["valid"].to_pydatetime() == ets:
+                    stations.at[asosid, "snowd"] = qobs["value"].values[-1]
 
     with get_sqlalchemy_conn("asos") as conn:
         # 6z to 6z high
