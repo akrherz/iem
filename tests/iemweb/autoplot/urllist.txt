@@ -113,6 +113,7 @@
 /plotting/auto/plot/107/network:IACLIMATE::station:IATAME::sday:0814::eday:0828::varname:avg_temp::thres:-99::base:50::ceil:86::year:2024::_r:t::dpi:100.png
 /plotting/auto/plot/107/network:IACLIMATE::station:IATAME::sday:0814::eday:0828::varname:precip::thres:-99::base:50::ceil:86::year:2024::_r:t::dpi:100.png
 /plotting/auto/plot/107/network:IACLIMATE::station:IATAME::sday:0814::eday:0828::varname:avg_era5land_soilt4_avg::thres:-99::base:50::ceil:86::year:2022::_r:43::dpi:100.png
+/plotting/auto/plot/107/network:IACLIMATE::station:IATAME::sday:1225::eday:0104::stop:32::varname:min_merra_srad::thres:-99::base:50::ceil:86::year:2024::_r:43::dpi:100.png
 /plotting/auto/plot/109/by:state::sdate:2024-01-01%200000::edate:2024-07-17%202359::var:days::w:set::phenomenav1:TO::significancev1:W::e:all::cmap:jet::_r:t::dpi:100.png
 /plotting/auto/plot/109/by:state::sdate:2024-01-01%200000::edate:2024-08-20%202359::var:count_departure::w:set::phenomenav1:SV::significancev1:W::phenomenav2:TO::significancev2:W::e:all::cmap:jet::_r:t::dpi:100.png
 /plotting/auto/plot/109/by:wfo::sdate:2024-01-01%200000::edate:2024-09-10%202359::var:count::w:set::phenomenav1:TO::significancev1:W::e:pds::cmap:jet::_r:t::dpi:100.png
@@ -129,6 +130,8 @@
 /plotting/auto/plot/113/network:IACLIMATE::station:IATAME::var:range::year1:2019::year2:2008::sday:1001::eday:0430::_r:t::dpi:100.png
 /plotting/auto/plot/113/network:IACLIMATE::station:IATAME::var:means::year1:2019::year2:2008::sday:1001::eday:0430::_r:t::dpi:100.png
 /plotting/auto/plot/114/_cb:1.txt
+/plotting/auto/plot/115/_cb:1.xlsx
+/plotting/auto/plot/115/station:IA0133::network:IACLIMATE::_cb:1.xlsx
 /plotting/auto/plot/117/_cb:1.txt
 /plotting/auto/plot/118/_cb:1.txt
 /plotting/auto/plot/121/_cb:1.txt

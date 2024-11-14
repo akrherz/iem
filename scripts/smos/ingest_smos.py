@@ -1,14 +1,14 @@
 """Ingest SMOS data, please!"""
 
-import datetime
 import glob
 import os
 import re
 import warnings
+from datetime import datetime, timezone
 from io import StringIO
-from zoneinfo import ZoneInfo
 
-from pyiem.util import get_dbconn, logger, ncopen
+from pyiem.database import get_dbconn
+from pyiem.util import logger, ncopen
 
 LOG = logger()
 TSTAMP = re.compile("([0-9]{8}T[0-9]{6})")
@@ -67,8 +67,8 @@ def fn2datetime(fn):
     tokens = TSTAMP.findall(fn)
     if not tokens:
         return None
-    ts = datetime.datetime.strptime(tokens[0], "%Y%m%dT%H%M%S")
-    return ts.replace(tzinfo=ZoneInfo("UTC"))
+    ts = datetime.strptime(tokens[0], "%Y%m%dT%H%M%S")
+    return ts.replace(tzinfo=timezone.utc)
 
 
 def load_grid_ids(scursor, grid_ids):

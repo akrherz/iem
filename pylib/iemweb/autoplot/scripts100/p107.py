@@ -16,7 +16,7 @@ data in order to be included within the plot.
 to use a more user friendly start and end date.
 """
 
-import datetime
+from datetime import datetime, timedelta
 
 import numpy as np
 import pandas as pd
@@ -74,8 +74,8 @@ PDICT = {
 def get_description():
     """Return a dict describing how to call this plotter"""
     desc = {"description": __doc__, "data": True}
-    today = datetime.datetime.today() - datetime.timedelta(days=1)
-    sts = today - datetime.timedelta(days=14)
+    today = datetime.today() - timedelta(days=1)
+    sts = today - timedelta(days=14)
     desc["arguments"] = [
         ARG_STATION,
         {
