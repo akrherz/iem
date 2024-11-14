@@ -29,4 +29,5 @@ def test_app(app):
     """Test the app."""
     resp = httpx.get(f"http://iem.local{app}", timeout=30)
     # 422 IncompleteWebRequest when there's missing CGI params
-    assert resp.status_code in [422, 200]
+    # 301 The app could be upset about being approached via http
+    assert resp.status_code in [422, 301, 200]
