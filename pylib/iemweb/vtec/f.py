@@ -158,9 +158,9 @@ def get_context(url):
 @iemapp()
 def application(environ, start_response):
     """Answer the bell."""
-    script_url = environ.get("SCRIPT_URL")
+    script_url = environ.get("SCRIPT_URI")
     if script_url is None:
-        raise IncompleteWebRequest("SCRIPT_URL is required")
+        raise IncompleteWebRequest("SCRIPT_URI is required")
     ctx = get_context(script_url)
     if not ctx:
         start_response("404 Not Found", [("Content-type", "text/plain")])

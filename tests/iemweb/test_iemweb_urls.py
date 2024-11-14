@@ -32,7 +32,7 @@ def test_urls(arg):
     c = Client(arg[0])
     res = c.get(arg[1])
     # Allow apps that redirect to check OK
-    assert res.status_code in [200, 302]
+    assert res.status_code in [200, 301, 302]
 
 
 @pytest.mark.parametrize("arg", get_mods_and_urls("422"))

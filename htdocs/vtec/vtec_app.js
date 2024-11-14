@@ -226,6 +226,7 @@ function updateURL(){
     if (CONFIG.activeUpdate !== null) {
         url += `/update/${CONFIG.activeUpdate}`;
     }
+    document.title = `VTEC Event ${vtecString()}`;
     navigateTo(url);
 }
 
