@@ -142,9 +142,12 @@ def plotter(fdict):
     if df.empty:
         raise NoDataFound("No data found for query")
 
+    # We have an edge case of vtec_year != date.year, remove those rows
+    df = df[df["vtec_year"] == df["date"].dt.year]
+
     # Since many VTEC events start in 2005, we should not trust any
     # data that has its first year in 2005
-    if df["vtec_year"].min() == 2005:
+    if df["vtec_year"].min() == 2005 and split == "jan1":
         df = df[df["vtec_year"] > 2005]
     # Split the season at jul 1, if requested
     if split == "jul1":
@@ -177,7 +180,7 @@ def plotter(fdict):
     )
 
     fig = figure(apctx=ctx, title=title)
-    ax = fig.add_axes([0.12, 0.1, 0.61, 0.8])
+    ax = fig.add_axes((0.12, 0.1, 0.61, 0.8))
 
     # Create a color bar for the number of events per day
     cmap = get_cmap(ctx["cmap"])
@@ -275,7 +278,7 @@ def plotter(fdict):
     ax.yaxis.set_major_locator(MaxNLocator(integer=True))
 
     # ______________________________________________
-    ax = fig.add_axes([0.75, 0.1, 0.1, 0.8])
+    ax = fig.add_axes((0.75, 0.1, 0.1, 0.8))
     gdf = df[["vtec_year", "count"]].groupby("vtec_year").sum()
     ax.barh(
         gdf.index.values,
@@ -292,7 +295,7 @@ def plotter(fdict):
     ax.yaxis.set_major_locator(MaxNLocator(integer=True))
 
     # __________________________________________
-    ax = fig.add_axes([0.88, 0.1, 0.1, 0.8])
+    ax = fig.add_axes((0.88, 0.1, 0.1, 0.8))
     gdf = df[["vtec_year", "count"]].groupby("vtec_year").count()
     ax.barh(gdf.index.values, gdf["count"].values, fc="blue", align="center")
     ax.set_ylim(df["vtec_year"].min() - 0.5, df["vtec_year"].max() + 0.5)
