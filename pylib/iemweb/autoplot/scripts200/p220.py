@@ -13,7 +13,7 @@ as the code stands now, you get the next day's outlook.
 option exists for downloading these outlooks in-bulk.</p>
 """
 
-import datetime
+from datetime import timedelta, timezone
 from zoneinfo import ZoneInfo
 
 # third party
@@ -191,13 +191,13 @@ def outlook_search(valid, days, outlook_type):
             {
                 "days": days,
                 "ot": outlook_type,
-                "sts": valid - datetime.timedelta(hours=24),
+                "sts": valid - timedelta(hours=24),
                 "ets": valid,
             },
         )
         if res.rowcount == 0:
             return None
-        return res.fetchone()[0].replace(tzinfo=datetime.timezone.utc)
+        return res.fetchone()[0].replace(tzinfo=timezone.utc)
 
 
 def compute_datelabel(df):
@@ -218,7 +218,7 @@ def compute_datelabel(df):
     )
 
 
-def get_threshold_label(threshold, outlook_type):
+def get_threshold_label(threshold, outlook_type) -> str:
     """Make it pretty."""
     if threshold in THRESHOLD_LEVELS:
         if outlook_type == "E":
@@ -235,7 +235,7 @@ def get_threshold_label(threshold, outlook_type):
 def plotter(fdict):
     """Go"""
     ctx = get_autoplot_context(fdict, get_description())
-    valid = ctx["valid"].replace(tzinfo=datetime.timezone.utc)
+    valid = ctx["valid"].replace(tzinfo=timezone.utc)
     day, outlook_type = int(ctx["which"][0]), ctx["which"][1]
     category = ctx["cat"].upper()
     # Ensure we don't have an incompatable combo
@@ -280,7 +280,7 @@ def plotter(fdict):
             raise NoDataFound("SPC Outlook data was not found!")
         df = fetch(valid)
     for col in ["updated", "product_issue", "issue", "expire"]:
-        df[col] = df[col].dt.tz_localize(datetime.timezone.utc)
+        df[col] = df[col].dt.tz_localize(timezone.utc)
     csector = ctx.pop("csector")
     if ctx["t"] == "cwa":
         sector = "cwa"
@@ -349,6 +349,11 @@ def plotter(fdict):
             rect = Rectangle((0, 0), 1, 1, fc=fc, ec=ec)
         rects.append(rect)
         label = get_threshold_label(row["threshold"], outlook_type)
+        label = (
+            label.replace("Thunderstorms", "T'Storms")
+            if ctx["_r"] == "86"
+            else label
+        )
         if day == 0:
             label = f"D{row['day']} {label}"
         rectlabels.append(label)
