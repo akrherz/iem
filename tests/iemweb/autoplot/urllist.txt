@@ -1,5 +1,6 @@
 /plotting/auto/plot/1/network:IACLIMATE::station:IATAME::threshold:44::month1:6::num1:2::var1:hdd65::month2:6::num2:2::var2:gdd41::year:2007::_r:96::dpi:100.png
 /plotting/auto/plot/2/network:IACLIMATE::station:IATAME::month:2::year:2024::gddbase:50::gddceil:86::_r:t::dpi:100.png
+/plotting/auto/plot/3/network:IACLIMATE::station:IATAME::month:summer::type:sum-precip::threshold:-99::syear:1850::eyear:2024::decadal:yes::_r:43::dpi:100.png
 /plotting/auto/plot/6/state:IA::year:2024::month:3::type:sum-precip::_r:t::dpi:100.png
 /plotting/auto/plot/11/network:IA_ASOS::zstation:AMW::year:2024::emphasis:-99::var:dwpf::opt:below::_r:43::dpi:100.png
 /plotting/auto/plot/14/network:IACLIMATE::station:IATAME::year:2024::_r:t::dpi:100.png

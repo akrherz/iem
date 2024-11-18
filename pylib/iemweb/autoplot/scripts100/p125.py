@@ -11,7 +11,7 @@ example, a period between Dec 15 and Jan 15 will be computed.</p>
 """
 
 import calendar
-import datetime
+from datetime import datetime
 
 import pandas as pd
 from pyiem.database import get_sqlalchemy_conn
@@ -45,6 +45,7 @@ PDICT3 = {
     "total_hdd65": "Total Heating Degree Days (base=65)",
     "total_sdd86": "Total Stress Degree Days (base=86)",
     "total_precip": "Total Precipitation",
+    "total_snow": "Total Snowfall",
 }
 PDICT5 = {
     "climate": "Period of Record Climatology",
@@ -54,9 +55,10 @@ PDICT5 = {
     "ncdc_climate81": "NCEI 1981-2010 Climatology",
     "ncei_climate91": "NCEI 1991-2020 Climatology",
 }
-UNITS = {"total_precip": "inch"}
+UNITS = {"total_precip": "inch", "total_snow": "inch"}
 PRECISION = {
     "total_precip": 2,
+    "total_snow": 1,
     "total_gdd50": 0,
     "total_gdd32": 0,
     "total_gdd41": 0,
@@ -180,7 +182,7 @@ def plotter(fdict):
     elif month == "summer":
         months = [6, 7, 8]
     else:
-        ts = datetime.datetime.strptime(f"2000-{month}-01", "%Y-%b-%d")
+        ts = datetime.strptime(f"2000-{month}-01", "%Y-%b-%d")
         # make sure it is length two for the trick below in SQL
         months = [ts.month]
 
@@ -237,6 +239,7 @@ def plotter(fdict):
             SELECT station, max(state) as state,
             max(lon) as lon, min(lat) as lat,
             sum(precip) as total_precip,
+            sum(snow) as total_snow,
             avg(high) as avg_high,
             avg(low) as avg_low,
             avg((high+low)/2.) as avg_temp,
