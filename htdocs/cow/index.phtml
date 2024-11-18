@@ -6,6 +6,7 @@ require_once "../../include/database.inc.php";
 require_once "../../include/network.php";
 require_once "../../include/forms.php";
 $t = new MyView();
+$t->iem_resource = "COW";
 
 $wtype = isset($_GET["wtype"]) ? xssafe($_GET["wtype"]) : array();
 $ltype = isset($_GET["ltype"]) ? xssafe($_GET["ltype"]) : array();
