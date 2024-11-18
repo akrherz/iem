@@ -1,15 +1,19 @@
-"""IEM Processing of the USDM Shapefiles"""
+"""IEM Processing of the USDM Shapefiles.
 
-import datetime
+Called from dedicated crontab
+"""
+
 import glob
 import os
 import subprocess
-import sys
 import tempfile
 import zipfile
+from datetime import date, datetime, timedelta
+from typing import Optional
 
+import click
 import fiona
-import requests
+import httpx
 from pyiem.database import get_dbconnc
 from pyiem.util import exponential_backoff, logger
 from shapely.geometry import MultiPolygon, shape
@@ -18,10 +22,10 @@ LOG = logger()
 BASEURL = "https://droughtmonitor.unl.edu/data/shapefiles_m/"
 
 
-def database_save(date, shpfn):
+def database_save(dt: date, shpfn):
     """Save to our databasem please"""
     pgconn, cursor = get_dbconnc("postgis")
-    cursor.execute("DELETE from usdm where valid = %s", (date,))
+    cursor.execute("DELETE from usdm where valid = %s", (dt,))
     if cursor.rowcount > 0:
         LOG.info("    database delete removed %s rows", cursor.rowcount)
     with fiona.open(shpfn) as shps:
@@ -39,12 +43,12 @@ def database_save(date, shpfn):
     pgconn.close()
 
 
-def workflow(date, routes):
+def workflow(dt: date, routes):
     """Do work for this date"""
     # 1. get file from USDM website
-    url = f"{BASEURL}USDM_{date:%Y%m%d}_M.zip"
+    url = f"{BASEURL}USDM_{dt:%Y%m%d}_M.zip"
     LOG.info("Fetching %s", url)
-    req = exponential_backoff(requests.get, url, timeout=30)
+    req = exponential_backoff(httpx.get, url, timeout=30)
     if req is None:
         LOG.info("Download full fail: %s", url)
         return
@@ -62,15 +66,15 @@ def workflow(date, routes):
         if name[-3:] == "shp":
             shpfn = f"/tmp/{name}"
     # 2. Save it to the database
-    database_save(date, shpfn)
+    database_save(dt, shpfn)
     # 3. Send it to LDM for current and archive writing
-    for fn in glob.glob(f"/tmp/USDM_{date:%Y%m%d}*"):
+    for fn in glob.glob(f"/tmp/USDM_{dt:%Y%m%d}*"):
         suffix = fn.split("/")[-1].split(".", 1)[1]
         cmd = [
             "pqinsert",
             "-i",
             "-p",
-            f"data {routes} {date:%Y%m%d}0000 "
+            f"data {routes} {dt:%Y%m%d}0000 "
             f"gis/shape/4326/us/dm_current.{suffix} "
             f"GIS/usdm/{fn.split('/')[-1]} bogus",
             fn,
@@ -82,19 +86,21 @@ def workflow(date, routes):
     os.unlink(tmp.name)
 
 
-def main(argv):
+@click.command()
+@click.option("--date", "dt", type=click.DateTime(), help="Specific date")
+def main(dt: Optional[datetime]):
     """Go Main Go"""
-    if len(argv) == 1:
+    if dt is None:
         # Run for most recent Tuesday
-        today = datetime.date.today()
+        today = date.today()
         routes = "ac"
     else:
-        today = datetime.date(int(argv[1]), int(argv[2]), int(argv[3]))
+        today = dt.date()
         routes = "a"
     offset = (today.weekday() - 1) % 7
-    tuesday = today - datetime.timedelta(days=offset)
+    tuesday = today - timedelta(days=offset)
     workflow(tuesday, routes)
 
 
 if __name__ == "__main__":
-    main(sys.argv)
+    main()
