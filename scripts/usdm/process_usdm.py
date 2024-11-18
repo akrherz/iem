@@ -1,15 +1,19 @@
-"""IEM Processing of the USDM Shapefiles"""
+"""IEM Processing of the USDM Shapefiles.
 
-import datetime
+Called from dedicated crontab
+"""
+
 import glob
 import os
 import subprocess
-import sys
 import tempfile
 import zipfile
+from datetime import date, datetime, timedelta
+from typing import Optional
 
+import click
 import fiona
-import requests
+import httpx
 from pyiem.database import get_dbconnc
 from pyiem.util import exponential_backoff, logger
 from shapely.geometry import MultiPolygon, shape
@@ -44,7 +48,7 @@ def workflow(date, routes):
     # 1. get file from USDM website
     url = f"{BASEURL}USDM_{date:%Y%m%d}_M.zip"
     LOG.info("Fetching %s", url)
-    req = exponential_backoff(requests.get, url, timeout=30)
+    req = exponential_backoff(httpx.get, url, timeout=30)
     if req is None:
         LOG.info("Download full fail: %s", url)
         return
@@ -82,19 +86,21 @@ def workflow(date, routes):
     os.unlink(tmp.name)
 
 
-def main(argv):
+@click.command()
+@click.option("--date", "dt", type=click.DateTime(), help="Specific date")
+def main(dt: Optional[datetime]):
     """Go Main Go"""
-    if len(argv) == 1:
+    if dt is None:
         # Run for most recent Tuesday
-        today = datetime.date.today()
+        today = date.today()
         routes = "ac"
     else:
-        today = datetime.date(int(argv[1]), int(argv[2]), int(argv[3]))
+        today = dt.date()
         routes = "a"
     offset = (today.weekday() - 1) % 7
-    tuesday = today - datetime.timedelta(days=offset)
+    tuesday = today - timedelta(days=offset)
     workflow(tuesday, routes)
 
 
 if __name__ == "__main__":
-    main(sys.argv)
+    main()

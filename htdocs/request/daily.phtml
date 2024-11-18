@@ -100,6 +100,12 @@ download data from COOP networks with this interface, in which case the
 "daily" data are effectively the once-daily observations.  If you request
 all stations, you can only request up to 1 year of data at a time.</p>
 
+<p>The concept of a <strong>day</strong> here is unfortunately not straight
+forward. It is typically representing a calendar day for the timezone of the
+local observation station.  However, some sites have summary information that
+is valid for a local standard time day, which will overwrite any computed by
+the IEM daily totals.</p>
+
 <p><a href="/cgi-bin/request/daily.py?help" class="btn btn-info"><i class="fa fa-file"></i> Backend documentation</a>
 exists for those wishing to script against this service.</p>
 <p>Select network to download from:<br />

@@ -139,6 +139,7 @@
 /plotting/auto/plot/122/_cb:1.txt
 /plotting/auto/plot/123/_cb:1.txt
 /plotting/auto/plot/124/_cb:1.txt
+/plotting/auto/plot/125/month:all::sector:state::src:climate81::state:IA::opt:both::var:total_snow::cmap:YlGnBu::_r:t::dpi:100.png
 /plotting/auto/plot/125/month:summer::sector:midwest::src:ncdc_climate81::state:WI::opt:both::var:avg_temp::cmap:jet::_r:t::dpi:100.png
 /plotting/auto/plot/127/state:IA::short_desc:CH::w:last::threshold:50::cmap:jet::_r:t::dpi:100::_cb:1.png
 /plotting/auto/plot/128/var:total_precip::network1:IACLIMATE::station1:IATAME::network2:IACLIMATE::station2:IA0000::_r:43::dpi:100::_cb:1.png
@@ -283,6 +284,8 @@
 /plotting/auto/plot/220/which:7C::cat:categorical::t:fema::network:WFO::wfo:DMX::fema:4::csector:southeast::valid:2001-09-10%201943::_r:t::dpi:100.png
 /plotting/auto/plot/220/which:2C::cat:categorical::t:fema::network:WFO::wfo:DMX::fema:4::csector:southeast::valid:2024-08-08%200352::_r:t::dpi:100.png
 /plotting/auto/plot/220/which:2C::cat:hail::t:cwa::network:WFO::wfo:GSP::fema:4::csector:southeast::valid:2024-08-08%200352::_r:t::dpi:100.png
+/plotting/auto/plot/228/mode:normal::state:IA::date:2024-01-10::d1:30::d2:60::d3:90::_r:t::dpi:100::_cb:1.png
+/plotting/auto/plot/228/mode:iadrought::state:IA::date:2024-01-10::d1:30::d2:60::d3:90::_r:t::dpi:100.png
 /plotting/auto/plot/230/outlook_type:E::day:4::w:ugc::network:WFO::wfo:ABR::mystate:IA::ugc:NCC001::month:all::_r:t::dpi:100.png
 /plotting/auto/plot/230/outlook_type:C::day:1::w:all::network:WFO::wfo:DMX::mystate:IA::ugc:IAZ048::month:all::_r:t::dpi:100.png
 /plotting/auto/plot/230/outlook_type:C::day:1::w:wfo::network:WFO::wfo:DMX::mystate:IA::ugc:IAZ048::month:all::_r:t::dpi:100::_cb:1.png

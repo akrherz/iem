@@ -7,8 +7,8 @@ the first few days of January.  This application only works for contiguous
 states eventhough it presents states like AK and HI as an option, sorry.
 """
 
-import datetime
 import os
+from datetime import date, timedelta
 
 import geopandas as gpd
 import matplotlib.dates as mdates
@@ -26,7 +26,7 @@ from sqlalchemy import text
 def get_description():
     """Return a dict describing how to call this plotter"""
     desc = {"description": __doc__, "data": True}
-    today = datetime.date.today()
+    today = date.today()
     desc["arguments"] = [
         dict(
             type="year",
@@ -94,9 +94,9 @@ def plotter(fdict):
         if datapts == 0:
             raise NoDataFound("Application does not work for non-CONUS.")
 
-        now = datetime.date(year, 1, 1)
-        now += datetime.timedelta(days=period - 1)
-        ets = min(datetime.date.today(), datetime.date(year, 12, 31))
+        now = date(year, 1, 1)
+        now += timedelta(days=period - 1)
+        ets = min(date.today(), date(year, 12, 31))
         days = []
         coverage = []
         while now <= ets:
@@ -107,7 +107,7 @@ def plotter(fdict):
             days.append(now)
             coverage.append(tots / float(datapts) * 100.0)
 
-            now += datetime.timedelta(days=1)
+            now += timedelta(days=1)
     df = pd.DataFrame(
         {"day": pd.Series(days), "coverage": pd.Series(coverage)}
     )

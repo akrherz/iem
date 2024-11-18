@@ -48,12 +48,20 @@ PDICT3 = {
     "total_snow": "Total Snowfall",
 }
 PDICT5 = {
-    "climate": "Period of Record Climatology",
-    "climate51": "1951-Present Climatology",
-    "climate71": "1971-Present Climatology",
-    "climate81": "1981-Present Climatology",
+    "climate": "Period of Record Simple Climatology",
+    "climate51": "1951-Present Simple Climatology",
+    "climate71": "1971-Present Simple Climatology",
+    "climate81": "1981-Present Simple Climatology",
     "ncdc_climate81": "NCEI 1981-2010 Climatology",
     "ncei_climate91": "NCEI 1991-2020 Climatology",
+}
+QUORUM = {
+    "climate": 60,
+    "climate51": 60,
+    "climate71": 40,
+    "climate81": 30,
+    "ncdc_climate81": 30,
+    "ncei_climate91": 30,
 }
 UNITS = {"total_precip": "inch", "total_snow": "inch"}
 PRECISION = {
@@ -238,6 +246,7 @@ def plotter(fdict):
             )
             SELECT station, max(state) as state,
             max(lon) as lon, min(lat) as lat,
+            max(years) as max_years,
             sum(precip) as total_precip,
             sum(snow) as total_snow,
             avg(high) as avg_high,
@@ -264,9 +273,15 @@ def plotter(fdict):
         )
     if df.empty:
         raise NoDataFound("No data was found for query, sorry.")
-    df = df[pd.notna(df[varname])]
+    df = df[pd.notna(df[varname]) & (df["max_years"] >= QUORUM[ctx["src"]])]
     if df.empty:
         raise NoDataFound("No data was found for query, sorry.")
+    # Total hack for snow
+    if varname == "total_snow":
+        thres = 0.5 if df["total_snow"].mean() > 10 else 0.1
+        df = df[df["total_snow"] > (df["total_snow"].mean() * thres)]
+    if df.empty:
+        raise NoDataFound("No data was found after filters applied.")
     levels = pretty_bins(df[varname].min(), df[varname].max(), 10)
     if opt in ["both", "contour"]:
         mp.contourf(

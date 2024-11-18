@@ -3,7 +3,7 @@
 Run for a previous date from RUN_2AM.sh
 """
 
-import datetime
+from datetime import date, datetime
 
 import click
 from pyiem.database import get_dbconnc
@@ -13,23 +13,23 @@ from pyiem.util import logger
 
 LOG = logger()
 
-THISYEAR = datetime.date.today().year
+THISYEAR = date.today().year
 META = {
     "climate51": {
-        "sts": datetime.datetime(1951, 1, 1),
-        "ets": datetime.datetime(THISYEAR, 1, 1),
+        "sts": datetime(1951, 1, 1),
+        "ets": datetime(THISYEAR, 1, 1),
     },
     "climate71": {
-        "sts": datetime.datetime(1971, 1, 1),
-        "ets": datetime.datetime(2001, 1, 1),
+        "sts": datetime(1971, 1, 1),
+        "ets": datetime(2001, 1, 1),
     },
     "climate": {
-        "sts": datetime.datetime(1893, 1, 1),
-        "ets": datetime.datetime(THISYEAR, 1, 1),
+        "sts": datetime(1893, 1, 1),
+        "ets": datetime(THISYEAR, 1, 1),
     },
     "climate81": {
-        "sts": datetime.datetime(1981, 1, 1),
-        "ets": datetime.datetime(2011, 1, 1),
+        "sts": datetime(1981, 1, 1),
+        "ets": datetime(2011, 1, 1),
     },
 }
 
