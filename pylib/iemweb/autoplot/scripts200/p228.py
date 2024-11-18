@@ -112,13 +112,13 @@ def plotter(fdict):
     d1 = ctx["d1"]
     d2 = ctx["d2"]
     d3 = ctx["d3"]
-    date = ctx["date"]
+    dt = ctx["date"]
     params = {
         "d1": d1 - 1,
         "d2": d2 - 1,
         "d3": d3 - 1,
-        "date": date,
-        "sday": date.strftime("%m%d"),
+        "date": dt,
+        "sday": dt.strftime("%m%d"),
         "network": f"{state}CLIMATE",
     }
     dfs = []
@@ -199,12 +199,12 @@ def plotter(fdict):
         st = "Iowa Drought Monitoring Regions"
     mp = MapPlot(
         title="Trailing Day Standardized Precipitation Index",
-        subtitle=f"Ending {date:%B %-d %Y} computed for {st}",
+        subtitle=f"Ending {dt:%B %-d %Y} computed for {st}",
         sector="state",
         state=state,
         stateborderwidth=2,
     )
-    mp.draw_usdm(date, alpha=1)
+    mp.draw_usdm(dt, alpha=1)
     mp.drawcounties()
     levels = [-100, -2, -1.6, -1.3, -0.8, -0.5, 0.5, 0.8, 1.3, 1.6, 2, 100]
     cmap = mpcolors.ListedColormap(

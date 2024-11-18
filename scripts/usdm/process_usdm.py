@@ -22,10 +22,10 @@ LOG = logger()
 BASEURL = "https://droughtmonitor.unl.edu/data/shapefiles_m/"
 
 
-def database_save(date, shpfn):
+def database_save(dt: date, shpfn):
     """Save to our databasem please"""
     pgconn, cursor = get_dbconnc("postgis")
-    cursor.execute("DELETE from usdm where valid = %s", (date,))
+    cursor.execute("DELETE from usdm where valid = %s", (dt,))
     if cursor.rowcount > 0:
         LOG.info("    database delete removed %s rows", cursor.rowcount)
     with fiona.open(shpfn) as shps:
@@ -43,10 +43,10 @@ def database_save(date, shpfn):
     pgconn.close()
 
 
-def workflow(date, routes):
+def workflow(dt: date, routes):
     """Do work for this date"""
     # 1. get file from USDM website
-    url = f"{BASEURL}USDM_{date:%Y%m%d}_M.zip"
+    url = f"{BASEURL}USDM_{dt:%Y%m%d}_M.zip"
     LOG.info("Fetching %s", url)
     req = exponential_backoff(httpx.get, url, timeout=30)
     if req is None:
@@ -66,15 +66,15 @@ def workflow(date, routes):
         if name[-3:] == "shp":
             shpfn = f"/tmp/{name}"
     # 2. Save it to the database
-    database_save(date, shpfn)
+    database_save(dt, shpfn)
     # 3. Send it to LDM for current and archive writing
-    for fn in glob.glob(f"/tmp/USDM_{date:%Y%m%d}*"):
+    for fn in glob.glob(f"/tmp/USDM_{dt:%Y%m%d}*"):
         suffix = fn.split("/")[-1].split(".", 1)[1]
         cmd = [
             "pqinsert",
             "-i",
             "-p",
-            f"data {routes} {date:%Y%m%d}0000 "
+            f"data {routes} {dt:%Y%m%d}0000 "
             f"gis/shape/4326/us/dm_current.{suffix} "
             f"GIS/usdm/{fn.split('/')[-1]} bogus",
             fn,
