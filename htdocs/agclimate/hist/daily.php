@@ -1,7 +1,5 @@
 <?php
-/* 
-  * Download front end for daily data from the ISUSM network
-  */
+// Frontend for the ISUSM Daily Data Download
 require_once "../../../config/settings.inc.php";
 require_once "../../../include/myview.php";
 require_once "../../../include/network.php";
@@ -121,6 +119,10 @@ When selecting the time interval, make sure you that choose <B> * valid * </B> d
  <label for="high">High Temperature [F]</label>
 <br /><input type="checkbox" name="vars" value="low" id="low">
  <label for="low">Low Temperature [F]</label>
+<br /><input type="checkbox" name="vars" value="chillhours" id="chillhours">
+ <label for="chillhours">Daily Chill Hours,</label>
+ Base (&deg;F): <input type="text" size="3" value="32" name="chillbase">
+ Ceiling (&deg;F): <input type="text" size="3" value="45" name="chillceil">
 <br /><input type="checkbox" name="vars" value="rh_min" id="rh_min">
  <label for="rh_min">Minimum Relative Humidity [%]</label>
 <br /><input type="checkbox" name="vars" value="rh" id="rh">

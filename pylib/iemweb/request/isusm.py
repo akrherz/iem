@@ -83,6 +83,9 @@ def fetch_daily(environ, cols):
     --- Get the Daily Max/Min soil values
     WITH soils as (
       SELECT station, date(valid) as date,
+      sum(
+      case when (tair_c_avg_qc >= :chillbase and tair_c_avg_qc <= :chillceil)
+        then 1 else 0 end) as chillhours,
       min(rh_avg_qc) as rh_min,
       avg(rh_avg_qc) as rh,
       max(rh_avg_qc) as rh_max,
@@ -99,7 +102,7 @@ def fetch_daily(environ, cols):
         c2f( tair_c_min_qc ))::numeric,1) as gdd50 from sm_daily WHERE
       valid >= :sts and valid < :ets and station = ANY(:stations)
     )
-    SELECT d.*, s.rh_min, s.rh, s.rh_max,
+    SELECT d.*, s.rh_min, s.rh, s.rh_max, s.chillhours,
     s.soil12tn, s.soil12tx, s.soil24tn, s.soil24tx, s.soil50tn, s.soil50tx
     FROM soils s JOIN daily d on (d.station = s.station and s.date = d.valid)
     ORDER by d.valid ASC
@@ -110,6 +113,12 @@ def fetch_daily(environ, cols):
                 "sts": environ["sts"],
                 "ets": environ["ets"],
                 "stations": stations,
+                "chillbase": convert_value(
+                    float(environ.get("chillbase", 32)), "degF", "degC"
+                ),
+                "chillceil": convert_value(
+                    float(environ.get("chillceil", 45)), "degF", "degC"
+                ),
             },
             index_col=None,
         )
