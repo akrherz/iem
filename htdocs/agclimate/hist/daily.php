@@ -83,6 +83,10 @@ select the stations and weather variables desired below.</p>
 <P><B>Data Interval:</B>Currently you are selected to download daily data. 
 You may wish to change this to <a href="hourly.php">hourly data</a>. 
 
+<p><a href="/cgi-bin/request/isusm.py?help" class="btn btn-info">
+<i class="fa fa-file"></i> Backend documentation</a> exists for those
+wishing to script against this data service.</p>
+
 <form name="dl" method="GET" action="/cgi-bin/request/isusm.py">
 <input type="hidden" name="mode" value="daily" />
 

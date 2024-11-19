@@ -1,67 +1,125 @@
-"""Download interface for ISU-SM data."""
+""".. title:: ISU Soil Moisture Data Download Service
 
-import datetime
+This service emits data from the ISU Soil Moisture Network.
+
+Changelog
+---------
+
+- **2024-11-19** Initial update to use pydantic request validation.
+
+Example Requests
+----------------
+
+Provide an Excel file of the minute data for the Hinds Farm station on
+21 July 2024.
+
+https://mesonet.agron.iastate.edu/cgi-bin/request/isusm.py?station=AHDI4&\
+mode=hourly&sts=2024-07-21T05:00Z&ets=2024-07-22T05:00Z&format=excel&\
+timeres=minute
+
+Provide all of the daily data for the Hinds Farm station for the month of
+July 2024 in a tab delimited format.
+
+https://mesonet.agron.iastate.edu/cgi-bin/request/isusm.py?station=AHDI4&\
+mode=daily&sts=2024-07-01T00:00Z&ets=2024-08-01T00:00Z&format=tab
+
+Provide all of the hourly data for the Hinds Farm station for the month of
+July 2024 in a comma delimited format with timestampts in UTC.
+
+https://mesonet.agron.iastate.edu/cgi-bin/request/isusm.py?station=AHDI4&\
+mode=hourly&sts=2024-07-01T00:00Z&ets=2024-08-01T00:00Z&format=comma&tz=UTC
+
+"""
+
+import re
+from datetime import timedelta
 from io import BytesIO, StringIO
+from typing import List
 from zoneinfo import ZoneInfo
 
 import numpy as np
 import pandas as pd
+from pydantic import AwareDatetime, Field, field_validator
 from pyiem.database import get_sqlalchemy_conn
 from pyiem.exceptions import IncompleteWebRequest
 from pyiem.util import convert_value
-from pyiem.webutil import ensure_list, iemapp
+from pyiem.webutil import CGIModel, ListOrCSVType, iemapp
 from sqlalchemy import text
 
 EXL = "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"
+LEGACY_STS = re.compile("sts=[A-Z]")
 MISSING = {"", "M", "-99"}
 SV_DEPTHS = [2, 4, 8, 12, 14, 16, 20, 24, 28, 30, 32, 36, 40, 42, 52]
+DELIMITERS = {"comma": ",", "tab": "\t"}
 
 
-def get_stations(environ):
-    """Figure out which stations were requested"""
-    # Dragons, sts could now be a datetime, but legacy, it could be a list
-    # of stations as legacy frontend used it for a variable
-    sts = ensure_list(environ, "station")
-    if not sts and not isinstance(environ.get("sts", ""), datetime.datetime):
-        sts = ensure_list(environ, "sts")
-    return sts
+class Schema(CGIModel):
+    """See how we are called..."""
+
+    chillbase: float = Field(
+        32, description="Chill Hours Base Temperature [degF]"
+    )
+    chillceil: float = Field(
+        45, description="Chill Hours Ceiling Temperature [degF]"
+    )
+    delim: str = Field(
+        description="Delimiter", default="comma", pattern="comma|tab"
+    )
+    ets: AwareDatetime = Field(None, description="End Time")
+    format: str = Field(
+        "csv", description="Output Format", pattern="csv|comma|excel|tab"
+    )
+    missing: str = Field(
+        "-99", description="Missing Value Indicator", pattern="^-99|M|$"
+    )
+    sts: AwareDatetime = Field(None, description="Start Time")
+    mode: str = Field(
+        "hourly",
+        description="Data Mode",
+        pattern="hourly|daily|inversion",
+    )
+    station: ListOrCSVType = Field(description="Station Identifier(s)")
+    timeres: str = Field(
+        "hourly",
+        description="Time Resolution for hourly request",
+        pattern="hourly|minute",
+    )
+    todisk: str = Field("no", description="Download to Disk", pattern="yes|no")
+    tz: str = Field(
+        "America/Chicago",
+        description="Timezone for output",
+    )
+    vars: ListOrCSVType = Field(
+        default=None, description="Variables to include in output"
+    )
+    year1: int = Field(None, description="Start year if sts is not provided")
+    month1: int = Field(None, description="Start month if sts is not provided")
+    day1: int = Field(None, description="Start day if sts is not provided")
+    hour1: int = Field(0, description="Start hour if sts is not provided")
+    minute1: int = Field(0, description="Start minute if sts is not provided")
+    year2: int = Field(None, description="End year if ets is not provided")
+    month2: int = Field(None, description="End month if ets is not provided")
+    day2: int = Field(None, description="End day if ets is not provided")
+    hour2: int = Field(0, description="End hour if ets is not provided")
+    minute2: int = Field(0, description="End minute if ets is not provided")
+
+    @field_validator("tz", mode="after")
+    def check_tz(cls, value):
+        """Ensure the timezone is valid."""
+        ZoneInfo(value)
+        return value
 
 
-def get_delimiter(environ):
-    """Figure out what is the requested delimiter"""
-    d = environ.get("delim", "comma")
-    if d == "comma":
-        return ","
-    return "\t"
-
-
-def fetch_daily(environ, cols):
+def fetch_daily(environ: dict, cols: List):
     """Return a fetching of daily data"""
-    stations = get_stations(environ)
+    stations: list = environ["station"]
 
     if not cols:
-        cols = [
-            "station",
-            "valid",
-            "high",
-            "low",
-            "rh_min",
-            "rh",
-            "rh_max",
-            "gdd50",
-            "solar",
-            "precip",
-            "speed",
-            "gust",
-            "et",
-            "soil04t",
-            "soil12t",
-            "soil24t",
-            "soil50t",
-            "soil12vwc",
-            "soil24vwc",
-            "soil50vwc",
-        ]
+        cols = (
+            "station valid high low rh_min rh rh_max gdd50 solar precip "
+            "speed gust et soil04t soil12t soil24t soil50t soil12vwc "
+            "soil24vwc soil50vwc"
+        ).split()
     else:
         cols.insert(0, "valid")
         cols.insert(0, "station")
@@ -110,19 +168,18 @@ def fetch_daily(environ, cols):
             ),
             conn,
             params={
-                "sts": environ["sts"],
-                "ets": environ["ets"],
+                "sts": environ["sts"].date(),
+                "ets": environ["ets"].date(),
                 "stations": stations,
                 "chillbase": convert_value(
-                    float(environ.get("chillbase", 32)), "degF", "degC"
+                    environ["chillbase"], "degF", "degC"
                 ),
                 "chillceil": convert_value(
-                    float(environ.get("chillceil", 45)), "degF", "degC"
+                    environ["chillceil"], "degF", "degC"
                 ),
             },
             index_col=None,
         )
-
     if df.empty:
         return df, []
 
@@ -208,36 +265,22 @@ def fetch_daily(environ, cols):
     return df, cols
 
 
-def fetch_hourly(environ, cols):
+def fetch_hourly(environ: dict, cols: List):
     """Process the request for hourly/minute data."""
-    stations = get_stations(environ)
+    stations = environ["station"]
 
     if not cols:
-        cols = [
-            "station",
-            "valid",
-            "tmpf",
-            "relh",
-            "solar",
-            "precip",
-            "speed",
-            "drct",
-            "et",
-            "soil04t",
-            "soil12t",
-            "soil24t",
-            "soil50t",
-            "soil12vwc",
-            "soil24vwc",
-            "soil50vwc",
-        ]
+        cols = (
+            "station valid tmpf relh solar precip speed drct et soil04t "
+            "soil12t soil24t soil50t soil12vwc soil24vwc soil50vwc"
+        ).split()
     else:
         cols.insert(0, "valid")
         cols.insert(0, "station")
 
     table = "sm_hourly"
     sqlextra = ", null as bp_mb_qc "
-    if environ.get("timeres") == "minute":
+    if environ["timeres"] == "minute":
         table = "sm_minute"
         sqlextra = ", null as etalfalfa_qc"
     if "sv" in cols:
@@ -274,13 +317,13 @@ def fetch_hourly(environ, cols):
         return df, cols
 
     # Muck with the timestamp column
-    if environ.get("tz") == "utc":
+    if environ["tz"] == "UTC":
         df["valid"] = df["utc_valid"].dt.strftime("%Y-%m-%d %H:%M+00")
     else:
         df["valid"] = (
             df["utc_valid"]
             .dt.tz_localize("UTC")
-            .dt.tz_convert("US/Central")
+            .dt.tz_convert(environ["tz"])
             .dt.strftime("%Y-%m-%d %H:%M")
         )
 
@@ -352,35 +395,11 @@ def fetch_hourly(environ, cols):
     return df, cols
 
 
-def muck_timestamps(environ):
-    """Atone for previous sins with sts variable..."""
-    # No action necessary
-    if isinstance(environ["sts"], datetime.datetime):
-        return
-    environ["station"] = ensure_list(environ, "sts")
-    environ["sts"] = datetime.datetime(
-        int(environ["year1"]),
-        int(environ["month1"]),
-        int(environ["day1"]),
-        tzinfo=ZoneInfo("America/Chicago"),
-    )
-    if environ["sts"] == environ["ets"]:
-        environ["ets"] = environ["sts"] + datetime.timedelta(days=1)
-
-
-def fetch_inversion(environ, cols):
+def fetch_inversion(environ: dict, cols: List):
     """Process the request for inversion data."""
-    stations = get_stations(environ)
+    stations = environ["station"]
 
-    cols = [
-        "station",
-        "valid",
-        "tair_15",
-        "tair_5",
-        "tair_10",
-        "speed",
-        "gust",
-    ]
+    cols = "station valid tair_15 tair_5 tair_10 speed gust".split()
 
     with get_sqlalchemy_conn("isuag") as conn:
         df = pd.read_sql(
@@ -405,13 +424,13 @@ def fetch_inversion(environ, cols):
         return df, cols
 
     # Muck with the timestamp column
-    if environ.get("tz") == "utc":
+    if environ["tz"] == "UTC":
         df["valid"] = df["utc_valid"].dt.strftime("%Y-%m-%d %H:%M+00")
     else:
         df["valid"] = (
             df["utc_valid"]
             .dt.tz_localize("UTC")
-            .dt.tz_convert("US/Central")
+            .dt.tz_convert(environ["tz"])
             .dt.strftime("%Y-%m-%d %H:%M")
         )
 
@@ -433,27 +452,47 @@ def fetch_inversion(environ, cols):
     return df, cols
 
 
-@iemapp()
+def rewrite_cgi_params():
+    """Rewrite the CGI parameters to be more sane"""
+
+    def _decorator(func):
+        def _wrapped(environ, start_response):
+            """Rewrite the query string as necessary."""
+            qs = environ.get("QUERY_STRING", "")
+            # If sts=[A-Z] is present, we replace this with station
+            if LEGACY_STS.search(qs):
+                environ["QUERY_STRING"] = qs.replace("sts=", "station=")
+
+            return func(environ, start_response)
+
+        return _wrapped
+
+    return _decorator
+
+
+@rewrite_cgi_params()
+@iemapp(
+    help=__doc__, schema=Schema, default_tz="America/Chicago", parse_times=True
+)
 def application(environ, start_response):
     """Do things"""
-    if "sts" not in environ:
-        raise IncompleteWebRequest("Missing start time parameters")
-    try:
-        muck_timestamps(environ)
-    except Exception as exp:
-        raise IncompleteWebRequest("Invalid date/station provided") from exp
-    mode = environ.get("mode", "hourly")
-    cols = ensure_list(environ, "vars")
-    fmt = environ.get("format", "csv").lower()
-    todisk = environ.get("todisk", "no")
+    if environ["sts"] is None or environ["ets"] is None:
+        raise IncompleteWebRequest("Missing start/end time parameters")
+    if environ["sts"] >= environ["ets"]:
+        environ["ets"] = environ["sts"] + timedelta(days=1)
+    mode = environ["mode"]
+    cols = environ["vars"]
+    if cols is None:
+        cols = []
+    fmt = environ["format"]
+    todisk = environ["todisk"] == "yes"
     if mode == "hourly":
         df, cols = fetch_hourly(environ, cols)
     elif mode == "inversion":
         df, cols = fetch_inversion(environ, cols)
     else:
         df, cols = fetch_daily(environ, cols)
-    miss = environ.get("missing", "-99")
-    assert miss in MISSING
+    miss = environ["missing"]
     df = df.replace({np.nan: miss})
     # compute columns present in both cols and df.columns
     # pandas intersection is not order preserving, so we do this
@@ -478,7 +517,7 @@ def application(environ, start_response):
     # careful of precision here
     df.to_csv(sio, index=False, columns=cols, sep=delim, float_format="%.4f")
 
-    if todisk == "yes":
+    if todisk:
         headers = [
             ("Content-type", "application/octet-stream"),
             ("Content-Disposition", "attachment; filename=isusm.txt"),

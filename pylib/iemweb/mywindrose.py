@@ -11,17 +11,17 @@ Example Usage
 
 Plot a windrose for Ames, IA for the month of June 2021:
 
-https://mesonet.agron.iastate.edu/cgi-bin/mywindrose.py?station=AMW&network=IA_ASOS&year1=2021&month1=6&day1=1&year2=2021&month2=6&day2=30&hour2=23&fmt=png
+https://mesonet.agron.iastate.edu/cgi-bin/mywindrose.py?\
+station=AMW&network=IA_ASOS&year1=2021&month1=6&day1=1&\
+year2=2021&month2=6&day2=30&hour2=23&fmt=png
 
 Changelog
 ---------
 
-- `2024-03-25`
-    The backend was migrated to use a pydantic schema, which will
-    generate more structured error messages when the user provides invalid
-    input.
-- `2024-03-25`
-    The `sts` and `ets` parameters were formalized and are timezone aware.
+- **2024-03-25** The backend was migrated to use a pydantic schema, which will
+  generate more structured error messages when the user provides invalid input.
+- **2024-03-25** The `sts` and `ets` parameters were formalized and
+  are timezone aware.
 
 """
 

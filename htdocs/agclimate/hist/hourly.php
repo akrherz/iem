@@ -78,8 +78,12 @@ $t->content = <<<EOF
 
 <p>the present data collection interval from this network is every 15 minutes
 for the vineyard sites and every minute for the others.  the minute interval
-data only started in 2021 though.  the default download is to provide the
+data only started in 2021 though.  The default download is to provide the
 hourly data.</p>
+
+<p><a href="/cgi-bin/request/isusm.py?help" class="btn btn-info">
+<i class="fa fa-file"></i> Backend documentation</a> exists for those
+wishing to script against this data service.</p>
 
 <div class="row">
 <div class="col-md-7">

@@ -13,6 +13,8 @@ you should instead use the `API <https://mesonet.agron.iastate.edu
 Changelog
 ---------
 
+- 2024-11-19: Trimmed caching time from 60s to 15s. Added `ps` attribute that
+  holds the VTEC Phenomena and Significance string.
 - 2024-11-04: A number of additional metadata fields were added to the output
 - 2024-07-01: Initial documentation release
 
@@ -180,6 +182,7 @@ def run(environ):
                         status=row["status"],
                         phenomena=row["phenomena"],
                         significance=row["significance"],
+                        ps=label,
                         wfo=row["wfo"],
                         eventid=row["eventid"],
                         polygon_begin=sts,
@@ -231,7 +234,7 @@ def get_mckey(environ):
     schema=Schema,
     content_type="application/vnd.geo+json",
     memcachekey=get_mckey,
-    memcacheexpire=60,
+    memcacheexpire=15,
     parse_times=False,
 )
 def application(environ, start_response):
