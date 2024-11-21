@@ -18,7 +18,7 @@ value and not departures nor ranks.  Hopefully, this can be implemented in
 the near future.</p>
 """
 
-import datetime
+from datetime import date, timedelta
 
 import numpy as np
 import pandas as pd
@@ -75,8 +75,8 @@ MDICT = {
 def get_description():
     """Return a dict describing how to call this plotter"""
     desc = {"description": __doc__, "data": True, "cache": 86400}
-    today = datetime.date.today()
-    lmonth = today - datetime.timedelta(days=28)
+    today = date.today()
+    lmonth = today - timedelta(days=28)
     desc["arguments"] = [
         dict(
             type="select",
@@ -147,7 +147,7 @@ def get_description():
 
 def get_daily_data(ctx, sdate, edate):
     """Do the data work"""
-    edate = min([edate, datetime.date.today()])
+    edate = min([edate, date.today()])
     if edate <= sdate:
         raise NoDataFound("start date after end date, please correct")
     if (edate - sdate).days > 366:
@@ -168,7 +168,7 @@ def get_daily_data(ctx, sdate, edate):
         sday = " sday >= :sdate and sday <= :edate "
 
     table = "alldata"
-    if len(ctx["csector"]) == 2:
+    if len(ctx["csector"]) == 2 and ctx["which"] != "st":
         table = f"alldata_{ctx['csector']}"
     if ctx["which"] == "st":
         params["stations"] = [f"{st}0000" for st in state_names]
@@ -234,7 +234,7 @@ def get_daily_data(ctx, sdate, edate):
     if ctx["df"].empty:
         raise NoDataFound("No data found")
     edate = ctx["df"]["max_date"].max()
-    dl = (sdate - datetime.timedelta(days=1)).strftime("%-d %b %Y")
+    dl = (sdate - timedelta(days=1)).strftime("%-d %b %Y")
     ctx["label"] = f"{dl} ~7 AM till {edate:%-d %b %Y} ~7 AM"
 
 
@@ -244,27 +244,27 @@ def plotter(fdict):
     if ctx["p"] == "day":
         get_daily_data(ctx, ctx["sdate"], ctx["edate"])
     else:
-        oneday = datetime.timedelta(days=1)
+        oneday = timedelta(days=1)
         year = ctx["year"]
         month = ctx["month"]
         if month == "fall":
-            sts = datetime.date(year, 9, 1)
-            ets = datetime.date(year, 11, 30)
+            sts = date(year, 9, 1)
+            ets = date(year, 11, 30)
         elif month == "winter":
-            sts = datetime.date(year, 12, 1)
-            ets = datetime.date(year + 1, 3, 1) - oneday
+            sts = date(year, 12, 1)
+            ets = date(year + 1, 3, 1) - oneday
         elif month == "spring":
-            sts = datetime.date(year, 3, 1)
-            ets = datetime.date(year, 5, 31)
+            sts = date(year, 3, 1)
+            ets = date(year, 5, 31)
         elif month == "summer":
-            sts = datetime.date(year, 6, 1)
-            ets = datetime.date(year, 8, 31)
+            sts = date(year, 6, 1)
+            ets = date(year, 8, 31)
         else:
-            sts = datetime.date(year, int(month), 1)
-            ets = (sts + datetime.timedelta(days=34)).replace(day=1) - oneday
+            sts = date(year, int(month), 1)
+            ets = (sts + timedelta(days=34)).replace(day=1) - oneday
 
         get_daily_data(ctx, sts, ets)
-    ctx["lastyear"] = datetime.date.today().year
+    ctx["lastyear"] = date.today().year
     ctx["years"] = ctx["lastyear"] - 1893 + 1
 
     subtitle = "Based on IEM Estimates"
