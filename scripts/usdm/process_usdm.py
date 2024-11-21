@@ -36,7 +36,7 @@ def database_save(dt: date, shpfn):
             cursor.execute(
                 "INSERT into usdm(valid, dm, geom) VALUES "
                 "(%s, %s, st_setsrid(st_geomfromtext(%s), 4326))",
-                (date, shp["properties"]["DM"], geo.wkt),
+                (dt, shp["properties"]["DM"], geo.wkt),
             )
     cursor.close()
     pgconn.commit()
