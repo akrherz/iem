@@ -8,7 +8,7 @@ chart will indicate cloudiness up to the top, it may not have been like
 that in reality.
 """
 
-import datetime
+from datetime import date, timedelta
 
 import numpy as np
 import pandas as pd
@@ -24,7 +24,7 @@ PDICT = {"sky": "Sky Coverage + Visibility", "vsby": "Just Visibility"}
 def get_description():
     """Return a dict describing how to call this plotter"""
     desc = {"description": __doc__, "data": True, "cache": 3600}
-    today = datetime.date.today()
+    today = date.today()
     desc["arguments"] = [
         dict(
             type="zstation",
@@ -61,7 +61,7 @@ def plot_sky(days, vsby, data, ctx, sts):
     """Sky plot variant."""
     fig = figure(apctx=ctx)
     # vsby plot
-    ax = fig.add_axes([0.1, 0.08, 0.8, 0.03])
+    ax = fig.add_axes((0.1, 0.08, 0.8, 0.03))
     ax.set_xticks(np.arange(0, int(days * 24) - 1, 24))
     ax.set_xticklabels(np.arange(1, days + 1))
     ax.set_yticks([])
@@ -75,12 +75,12 @@ def plot_sky(days, vsby, data, ctx, sts):
         cmap=cmap,
         vmax=10,
     )
-    cax = fig.add_axes([0.915, 0.08, 0.035, 0.2])
+    cax = fig.add_axes((0.915, 0.08, 0.035, 0.2))
     fig.colorbar(res, cax=cax)
     fig.text(0.02, 0.09, "Visibility\n[miles]", va="center")
 
     # clouds
-    ax = fig.add_axes([0.1, 0.16, 0.8, 0.7])
+    ax = fig.add_axes((0.1, 0.16, 0.8, 0.7))
     ax.set_facecolor("skyblue")
     ax.set_xticks(np.arange(0, int(days * 24) - 1, 24))
     ax.set_xticklabels(np.arange(1, days + 1))
@@ -145,7 +145,7 @@ def plot_vsby(days, vsby, ctx, sts):
     data = np.ma.array(data, mask=np.where(data < -1, True, False))
 
     # clouds
-    ax = fig.add_axes([0.1, 0.1, 0.8, 0.8])
+    ax = fig.add_axes((0.1, 0.1, 0.8, 0.8))
     ax.set_facecolor("skyblue")
     ax.set_xticks(np.arange(1, days * 24 + 1, 24))
     ax.set_xticklabels(np.arange(1, days + 1))
@@ -170,7 +170,7 @@ def plot_vsby(days, vsby, ctx, sts):
         vmin=0,
         vmax=10,
     )
-    cax = fig.add_axes([0.915, 0.08, 0.035, 0.2])
+    cax = fig.add_axes((0.915, 0.08, 0.035, 0.2))
     fig.colorbar(res, cax=cax)
     ax.set_yticks(range(0, 101, 10))
     ax.set_yticklabels(range(0, 11, 1))
@@ -193,7 +193,7 @@ def plotter(fdict):
     # Extract the range of forecasts for each day for approximately
     # the given month
     sts = utc(year, month, 1, 0, 0)
-    ets = (sts + datetime.timedelta(days=35)).replace(day=1)
+    ets = (sts + timedelta(days=35)).replace(day=1)
     days = (ets - sts).days
     data = np.ones((250, days * 24)) * -1
     vsby = np.ones((1, days * 24)) * -1
