@@ -3,6 +3,7 @@
 /plotting/auto/plot/3/network:IACLIMATE::station:IATAME::month:summer::type:sum-precip::threshold:-99::syear:1850::eyear:2024::decadal:yes::_r:43::dpi:100.png
 /plotting/auto/plot/6/state:IA::year:2024::month:3::type:sum-precip::_r:t::dpi:100.png
 /plotting/auto/plot/11/network:IA_ASOS::zstation:AMW::year:2024::emphasis:-99::var:dwpf::opt:below::_r:43::dpi:100.png
+/plotting/auto/plot/11/network:IA_ASOS::zstation:AMW::year:2024::emphasis:20::var:feel::opt:touches::_r:43::dpi:100.png
 /plotting/auto/plot/14/network:IACLIMATE::station:IATAME::year:2024::_r:t::dpi:100.png
 /plotting/auto/plot/17/network:IA_ASOS::station:AMW::month:7::year:2024::p:temps::_r:t::dpi:100.png
 /plotting/auto/plot/17/network:IA_ASOS::station:AMW::month:7::year:2024::p:precip::_r:t::dpi:100.png

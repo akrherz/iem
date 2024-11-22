@@ -6,7 +6,7 @@ so they would be represent a true min and max of a continuously observed
 variable.
 """
 
-import datetime
+from datetime import datetime, timedelta
 
 import matplotlib.dates as mdates
 import pandas as pd
@@ -18,6 +18,7 @@ from sqlalchemy import text
 
 PDICT = {
     "below": "Daily Range Below Emphasis",
+    "atbelow": "Daily Range At or Below Emphasis",
     "touches": "Daily Range Touches Emphasis",
     "above": "Daily Range At or Above Emphasis",
 }
@@ -33,7 +34,7 @@ PDICT2 = {
 def get_description():
     """Return a dict describing how to call this plotter"""
     desc = {"description": __doc__, "data": True}
-    today = datetime.datetime.now()
+    today = datetime.now()
     desc["arguments"] = [
         dict(
             type="zstation",
@@ -102,13 +103,16 @@ def plotter(fdict):
         raise NoDataFound("No Data Found!")
     df["range"] = df[f"max_{varname}"] - df[f"min_{varname}"]
 
+    minval = df[f"min_{varname}"].min()
+    maxval = df[f"max_{varname}"].max()
     title = (
         f"{ctx['_sname']}:: {year} "
         f"Daily Min/Max {PDICT2[varname]}\n"
-        f"Period: {df.index.values[0]:%-d %b} to {df.index.values[-1]:%-d %b}"
+        f"Period: {df.index.values[0]:%-d %B} to {df.index.values[-1]:%-d %B}"
+        f" , Min: {minval:.0f} Max: {maxval:.0f}"
     )
     fig = figure(title=title, apctx=ctx)
-    ax = fig.add_axes([0.1, 0.15, 0.8, 0.75])
+    ax = fig.add_axes((0.1, 0.15, 0.8, 0.75))
     bars = ax.bar(
         df.index.values,
         df["range"].values,
@@ -121,18 +125,20 @@ def plotter(fdict):
     hits = []
     if emphasis > -99:
         for i, mybar in enumerate(bars):
-            y = mybar.get_y() + mybar.get_height()
+            minval = mybar.get_y()
+            maxval = mybar.get_y() + mybar.get_height()
             if (
-                (y >= emphasis and opt == "touches")
-                or (mybar.get_y() >= emphasis and opt == "above")
-                or (y < emphasis and opt == "below")
+                (maxval >= emphasis >= minval and opt == "touches")
+                or (minval >= emphasis and opt == "above")
+                or (maxval < emphasis and opt == "below")
+                or (minval <= emphasis and opt == "atbelow")
             ):
                 mybar.set_facecolor("r")
                 mybar.set_edgecolor("r")
                 hits.append(df.index.values[i])
         ax.axhline(emphasis, lw=2, color="k")
         ax.text(
-            df.index.values[-1] + datetime.timedelta(days=2),
+            df.index.values[-1] + timedelta(days=2),
             emphasis,
             f"{emphasis}",
             ha="left",
@@ -146,6 +152,6 @@ def plotter(fdict):
         f"first: {hits[0].strftime('%B %d') if hits else 'None'} "
         f"last: {hits[-1].strftime('%B %d') if hits else 'None'}"
     )
-    delta = datetime.timedelta(days=1)
+    delta = timedelta(days=1)
     ax.set_xlim(df.index.values[0] - delta, df.index.values[-1] + delta)
     return fig, df
