@@ -35,10 +35,11 @@ https://mesonet.agron.iastate.edu/geojson/network.py?network=AZOS&only_online=1
 import json
 
 from pydantic import Field
-from pyiem.database import get_dbconnc
+from pyiem.database import get_sqlalchemy_conn
 from pyiem.reference import ISO8601
 from pyiem.util import utc
 from pyiem.webutil import CGIModel, iemapp
+from sqlalchemy import text
 
 XREF = {
     "HAS_HML": "HAS_HML",
@@ -59,38 +60,40 @@ class Schema(CGIModel):
     )
 
 
-def run(network, only_online):
+def run(conn, network, only_online):
     """Generate a GeoJSON dump of the provided network"""
-    pgconn, cursor = get_dbconnc("mesosite")
+    params = {
+        "network": network,
+    }
 
     # One off special
     if network in XREF:
-        cursor.execute(
-            "SELECT ST_asGeoJson(geom, 4) as geojson, t.* "
-            "from stations t JOIN station_attributes a "
-            "ON (t.iemid = a.iemid) WHERE a.attr = %s ORDER by id ASC",
-            (XREF[network],),
-        )
+        subselect = "a.attr = :network"
     elif network == "FPS":
-        cursor.execute(
-            "SELECT ST_asGeoJson(geom, 4) as geojson, * "
-            "from stations WHERE (network ~* 'ASOS' or ("
-            "network ~* 'CLIMATE'and archive_begin < '1990-01-01') or "
-            "network = 'ISUSM') "
-            "and country = 'US' and online ORDER by id ASC",
-        )
+        subselect = """(network ~* 'ASOS' or (
+            network ~* 'CLIMATE'and archive_begin < '1990-01-01') or
+            network = 'ISUSM')
+        and country = 'US' and online"""
     elif network == "AZOS":
-        cursor.execute(
-            "SELECT ST_asGeoJson(geom, 4) as geojson, * "
-            "from stations WHERE network ~* 'ASOS' and online ORDER by id ASC",
-        )
+        subselect = "network ~* 'ASOS' and online"
     else:
-        online = "and online" if only_online else ""
-        cursor.execute(
-            "SELECT ST_asGeoJson(geom, 4) as geojson, * from stations "
-            f"WHERE network = %s {online} ORDER by name ASC",
-            (network,),
-        )
+        subselect = "network = :network "
+        subselect += "and online" if only_online else ""
+    cursor = conn.execute(
+        text(f"""
+    WITH attrs as (
+        SELECT t.iemid, string_agg(a.attr, '____') as attrs,
+        string_agg(a.value, '____') as attr_values
+        from stations t LEFT JOIN station_attributes a
+        on (t.iemid = a.iemid) WHERE {subselect}
+        GROUP by t.iemid)
+    SELECT t.*, ST_AsGeoJSON(t.geom, 4) as geojson,
+    coalesce(a.attrs, '') as attrs,
+    coalesce(a.attr_values, '') as attr_values from stations t JOIN attrs a on
+    (t.iemid = a.iemid) ORDER by t.id ASC
+            """),
+        params,
+    )
 
     res = {
         "type": "FeatureCollection",
@@ -98,7 +101,8 @@ def run(network, only_online):
         "generation_time": utc().strftime(ISO8601),
         "count": cursor.rowcount,
     }
-    for row in cursor:
+
+    for row in cursor.mappings():
         ab = row["archive_begin"]
         ae = row["archive_end"]
         time_domain = (
@@ -128,11 +132,17 @@ def run(network, only_online):
                     sid=row["id"],
                     network=row["network"],
                     online=row["online"],
+                    synop=row["synop"],
+                    attributes=dict(
+                        zip(
+                            row["attrs"].split("____"),
+                            row["attr_values"].split("____"),
+                        )
+                    ),
                 ),
                 geometry=json.loads(row["geojson"]),
             )
         )
-    pgconn.close()
     return json.dumps(res)
 
 
@@ -140,7 +150,7 @@ def get_mckey(environ) -> str:
     """Get the memcache key"""
     return (
         "/geojson/network/"
-        f"{environ['network']}.geojson|{environ['only_online']}"
+        f"{environ['network']}.geojson|{environ['only_online']}/v2"
     )
 
 
@@ -158,6 +168,7 @@ def application(environ, start_response):
     network = environ["network"]
     only_online = environ["only_online"]
 
-    res = run(network, only_online)
+    with get_sqlalchemy_conn("mesosite") as conn:
+        res = run(conn, network, only_online)
     start_response("200 OK", headers)
     return res
