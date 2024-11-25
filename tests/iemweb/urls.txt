@@ -21,6 +21,7 @@
 /cgi-bin/request/isusm.py?station=AHDI4&mode=daily&sts=2000-07-01T00:00Z&ets=2000-08-01T00:00Z&format=tab
 /cgi-bin/request/isusm.py?station=AHDI4&mode=hourly&sts=2020-07-01T00:00Z&ets=2020-08-01T00:00Z&format=comma&tz=UTC
 /cgi-bin/request/metars.py?valid=2020070100
+/geojson/network.py?network=FPS
 /geojson/usdm.py?date=2099-01-01
 /json/cf6.py?station=KDSM&year=2024&fmt=json
 /json/cf6.py?station=KDSM&year=2024&fmt=csv
