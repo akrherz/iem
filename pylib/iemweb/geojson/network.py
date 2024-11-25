@@ -11,6 +11,8 @@ network.
 Changelog
 ---------
 
+- 2024-11-25: Added `network` overload value of `HAS_HML` for sites with HML
+  data.
 - 2024-08-19: Initial documentation update
 
 Example Usage
@@ -38,6 +40,12 @@ from pyiem.reference import ISO8601
 from pyiem.util import utc
 from pyiem.webutil import CGIModel, iemapp
 
+XREF = {
+    "HAS_HML": "HAS_HML",
+    "ASOS1MIN": "HAS1MIN",
+    "TAF": "HASTAF",
+}
+
 
 class Schema(CGIModel):
     """See how we are called."""
@@ -56,13 +64,12 @@ def run(network, only_online):
     pgconn, cursor = get_dbconnc("mesosite")
 
     # One off special
-    if network in ["ASOS1MIN", "TAF"]:
+    if network in XREF:
         cursor.execute(
             "SELECT ST_asGeoJson(geom, 4) as geojson, t.* "
             "from stations t JOIN station_attributes a "
-            "ON (t.iemid = a.iemid) WHERE t.network ~* 'ASOS' and "
-            "a.attr = %s ORDER by id ASC",
-            ("HAS1MIN" if network == "ASOS1MIN" else "HASTAF",),
+            "ON (t.iemid = a.iemid) WHERE a.attr = %s ORDER by id ASC",
+            (XREF[network],),
         )
     elif network == "FPS":
         cursor.execute(

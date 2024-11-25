@@ -96,12 +96,16 @@ function sortListing(option) {
 }
 
 $().ready(() => {
+    // If this does not support all, remove the add all button
+    if ($("#iemss").data("supports-all") === 0) {
+        $("#stations_addall").hide();
+    };
 
     // Make sure clicking the submit button selects all of the selected 
     // stations, this avoids user confusion
     $("form[name='iemss'] :submit").click(function () {
         // Empty input implies that all are selected!
-        if ($("#iemss").data("supports-all") != "0") {
+        if ($("#iemss").data("supports-all") !== 0) {
             // If all entries are in the stations_out box
             if ($('#stations_out option').length >= geojsonSource.getFeatures().length) {
                 // Deselect anything selected so that it does not submit
@@ -114,7 +118,7 @@ $().ready(() => {
         }
         $('#stations_out option').prop('selected', true);
         // Stop us if we have no stations selected!
-        if ($('#stations_out option').length == 0) {
+        if ($('#stations_out option').length === 0) {
             alert("No stations listed in 'Selected Stations'!");
             return false;
         }
@@ -124,13 +128,13 @@ $().ready(() => {
     $("#iemss").append(htmlInterface.join(''));
 
     network = $("#iemss").data("network");
-    var only_online = ($("#iemss").data("only-online") == "1");
+    var only_online = ($("#iemss").data("only-online") === 1);
     var select_name = $("#iemss").attr("data-name");
     if (select_name) {
         $("#stations_out").attr("name", select_name);
     }
     $("#iemss-network").html(network);
-    $("#iemss-metadata-link").attr('href', '/sites/networks.php?network=' + network);
+    $("#iemss-metadata-link").attr('href', `/sites/networks.php?network=${network}`);
 
     $("#stations_in").dblclick(function () {
         return !$('#stations_in option:selected').remove().appendTo('#stations_out');
@@ -171,26 +175,14 @@ $().ready(() => {
         projection: ol.proj.get('EPSG:3857'),
         url: `/geojson/network/${network}.geojson?only_online=${only_online ? "1" : "0"}`
     });
-    geojson = new ol.layer.Vector({
+    geojson = new ol.layer.WebGLPoints({
         source: geojsonSource,
-        style: (feature, _resolution) => {
-            const color = feature.get("online") ? '#00ff00' : '#ffff00';
-            const zindex = feature.get("online") ? 100 : 99;
-            return [
-                new ol.style.Style({
-                    zIndex: zindex,
-                    image: new ol.style.Circle({
-                        fill: new ol.style.Fill({
-                            color
-                        }),
-                        stroke: new ol.style.Stroke({
-                            color: '#000000',
-                            width: 2.25
-                        }),
-                        radius: 7
-                    })
-                })
-            ];
+        style: {
+            symbol: {
+                symbolType: 'circle',
+                size: 14,
+                color: ['case', ['==', ['get', 'online'], 1], [0, 128, 0, 1], [255, 0, 0, 1]]
+            }
         }
     });
 
@@ -210,10 +202,10 @@ $().ready(() => {
 
     geojsonSource.on('change', function (e) {
         if (geojsonSource.getState() == 'ready') {
-            $.each(geojsonSource.getFeatures(), function (index, feat) {
-                var lbl = "[" + feat.get('sid') + "] " + feat.get('sname');
+            $.each(geojsonSource.getFeatures(), (_index, feat) => {
+                var lbl = `[${feat.get('sid')}] ${feat.get('sname')}`;
                 if (network != 'TAF') {
-                    lbl += " " + feat.get("time_domain");
+                    lbl += ` ${feat.get('time_domain')}`;
                 }
                 $('#stations_in').append($('<option/>', {
                     value: feat.get('sid'),
@@ -249,12 +241,12 @@ $().ready(() => {
     $(element).popover({
         'placement': 'top',
         'html': true,
-        content: function () { return $('#popover-content').html(); }
+        content: () => { return $('#popover-content').html(); }
     });
     // display popup on click
-    map.on('click', function (evt) {
+    map.on('click', (evt) => {
         var feature = map.forEachFeatureAtPixel(evt.pixel,
-            function (feat, _layer) {
+            (feat) => {
                 return feat;
             });
         if (feature) {
@@ -262,16 +254,16 @@ $().ready(() => {
             var coord = geometry.getCoordinates();
             var sid = feature.get('sid');
             popup.setPosition(coord);
-            var content = "<p><strong>SID: </strong>" + sid
-                + "<br /><strong>Name: </strong>" + feature.get('sname')
-                + "<br /><strong>Period:</strong> " + feature.get("time_domain") + "</p>";
+            var content = `<p><strong>SID: </strong>${sid}`
+                + `<br /><strong>Name:</strong> ${feature.get('sname')}`
+                + `<br /><strong>Period:</strong> ${feature.get("time_domain")}</p>`;
             $('#popover-content').html(content);
             $(element).popover('show');
-            $("#stations_in").find("option[value=\"" + sid + "\"]").attr("selected", "selected");
+            $("#stations_in").find(`option[value="${sid}"]`).attr("selected", "selected");
         } else {
             $(element).popover('hide');
         }
 
     });
 
-});  
+});
