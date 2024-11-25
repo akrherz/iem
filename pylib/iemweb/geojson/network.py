@@ -66,29 +66,61 @@ def run(network, only_online):
     # One off special
     if network in XREF:
         cursor.execute(
-            "SELECT ST_asGeoJson(geom, 4) as geojson, t.* "
-            "from stations t JOIN station_attributes a "
-            "ON (t.iemid = a.iemid) WHERE a.attr = %s ORDER by id ASC",
+            """
+    WITH attrs as (
+        SELECT t.iemid, string_agg(a.attr, '____') as attrs,
+        string_agg(a.value, '____') as attr_values
+        from stations t LEFT JOIN station_attributes a
+        on (t.iemid = a.iemid) WHERE a.attr = %s
+        GROUP by t.iemid)
+    SELECT t.*, ST_AsGeoJSON(t.geom, 4) as geojson,
+    a.attrs, a.attr_values from stations t JOIN attrs a on
+    (t.iemid = a.iemid) ORDER by t.id ASC
+            """,
             (XREF[network],),
         )
     elif network == "FPS":
-        cursor.execute(
-            "SELECT ST_asGeoJson(geom, 4) as geojson, * "
-            "from stations WHERE (network ~* 'ASOS' or ("
-            "network ~* 'CLIMATE'and archive_begin < '1990-01-01') or "
-            "network = 'ISUSM') "
-            "and country = 'US' and online ORDER by id ASC",
-        )
+        cursor.execute("""
+    WITH attrs as (
+        SELECT t.iemid, string_agg(a.attr, '____') as attrs,
+        string_agg(a.value, '____') as attr_values
+        from stations t LEFT JOIN station_attributes a
+        on (t.iemid = a.iemid) WHERE (network ~* 'ASOS' or (
+            network ~* 'CLIMATE'and archive_begin < '1990-01-01') or
+            network = 'ISUSM')
+        and country = 'US' and online
+        GROUP by t.iemid)
+    SELECT t.*, ST_AsGeoJSON(t.geom, 4) as geojson,
+    a.attrs, a.attr_values from stations t JOIN attrs a on
+    (t.iemid = a.iemid) ORDER by t.id ASC""")
     elif network == "AZOS":
         cursor.execute(
-            "SELECT ST_asGeoJson(geom, 4) as geojson, * "
-            "from stations WHERE network ~* 'ASOS' and online ORDER by id ASC",
+            """
+    WITH attrs as (
+        SELECT t.iemid, string_agg(a.attr, '____') as attrs,
+        string_agg(a.value, '____') as attr_values
+        from stations t LEFT JOIN station_attributes a
+        on (t.iemid = a.iemid) WHERE network ~* 'ASOS' and online
+        GROUP by t.iemid)
+    SELECT t.*, ST_AsGeoJSON(t.geom, 4) as geojson,
+    a.attrs, a.attr_values from stations t JOIN attrs a on
+    (t.iemid = a.iemid) ORDER by t.id ASC
+    """
         )
     else:
         online = "and online" if only_online else ""
         cursor.execute(
-            "SELECT ST_asGeoJson(geom, 4) as geojson, * from stations "
-            f"WHERE network = %s {online} ORDER by name ASC",
+            f"""
+    WITH attrs as (
+        SELECT t.iemid, string_agg(a.attr, '____') as attrs,
+        string_agg(a.value, '____') as attr_values
+        from stations t LEFT JOIN station_attributes a
+        on (t.iemid = a.iemid) WHERE network = %s {online}
+        GROUP by t.iemid)
+    SELECT t.*, ST_AsGeoJSON(t.geom, 4) as geojson,
+    coalesce(a.attrs, '') as attrs,
+    coalesce(a.attr_values, '') as attr_values from stations t JOIN attrs a on
+    (t.iemid = a.iemid) ORDER by t.id ASC""",
             (network,),
         )
 
@@ -128,6 +160,13 @@ def run(network, only_online):
                     sid=row["id"],
                     network=row["network"],
                     online=row["online"],
+                    synop=row["synop"],
+                    attributes=dict(
+                        zip(
+                            row["attrs"].split("____"),
+                            row["attr_values"].split("____"),
+                        )
+                    ),
                 ),
                 geometry=json.loads(row["geojson"]),
             )
@@ -140,7 +179,7 @@ def get_mckey(environ) -> str:
     """Get the memcache key"""
     return (
         "/geojson/network/"
-        f"{environ['network']}.geojson|{environ['only_online']}"
+        f"{environ['network']}.geojson|{environ['only_online']}/v2"
     )
 
 

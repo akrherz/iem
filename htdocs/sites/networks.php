@@ -12,6 +12,11 @@ $pgconn = iemdb("mesosite");
 
 $network = isset($_GET['network']) ? xssafe($_GET['network']) : 'IA_ASOS';
 
+$extra_networks = array(
+    "_ALL_" => "All Networks",
+    "HAS_HML" => "Stations with HML Data",
+);
+
 function attrs2str($arr)
 {
     $s = "";
@@ -71,8 +76,32 @@ if ($network == '_ALL_') {
         $cities[$row["id"]] = $row;
     }
 } else {
-    $nt = new NetworkTable($network);
-    $cities = $nt->table;
+    $resp = file_get_contents(
+        "http://iem.local/geojson/network/{$network}.geojson");
+    if ($resp === FALSE) {
+        $cities = array();
+    } else {
+        $jobj = json_decode($resp, $assoc = TRUE);
+        $cities = array();
+        foreach ($jobj["features"] as $k => $v) {
+            $props = $v["properties"];
+            $cities[$props["sid"]] = Array(
+                "id" => $props["sid"],
+                "name" => $props["sname"],
+                "elevation" => $props["elevation"],
+                "archive_begin" => $props["archive_begin"],
+                "archive_end" => $props["archive_end"],
+                "network" => $props["network"],
+                "lon" => $v["geometry"]["coordinates"][0],
+                "lat" => $v["geometry"]["coordinates"][1],
+                "attributes" => $props["attributes"],
+                "state" => $props["state"],
+                "synop" => $props["synop"],
+                "country" => $props["country"],
+                "attributes" => $props["attributes"],
+            );
+        }
+    }
 }
 
 $format = isset($_GET['format']) ? xssafe($_GET['format']) : 'html';
@@ -229,7 +258,7 @@ if (!$nohtml || $format == 'shapefile') {
         "madis" => "MADIS Station Table"
     );
     $fselect = make_select("format", $format, $ar);
-    $nselect = selectNetwork($network, array("_ALL_" => "All Networks"));
+    $nselect = selectNetwork($network, $extra_networks);
     $t->content = <<<EOF
 <h3>Network Location Tables</h3>
 
@@ -241,8 +270,9 @@ added stations.
 <ul>
  <li><a href="networks.php?special=allasos&format=gempak&nohtml">Global METAR in GEMPAK Format</a></li>
  <li><a href="networks.php?special=allasos&format=csv&nohtml">Global METAR in CSV Format</a></li>
-<li><a href="/geojson/network/AZOS.geojson">Global METAR/ASOS in GeoJSON</a></li>
-<li><a href="networks.php?special=alldcp&format=csv&nohtml">All DCPs in CSV Format</a></li>
+ <li><a href="/geojson/network/AZOS.geojson">Global METAR/ASOS in GeoJSON</a></li>
+ <li><a href="networks.php?special=alldcp&format=csv&nohtml">All DCPs in CSV Format</a></li>
+ <li><a href="networks.php?network=HAS_HML">Sites with HML Coverage</a></li>
 </ul>
 </div>
 
