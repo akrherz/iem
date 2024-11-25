@@ -38,11 +38,8 @@ exists for those wishing to script against this service. The HML archive dates b
 <div class="col-md-6">
 
 <p>
-<h3>1. Enter NWSLI Station Identifier:</h3>
-At this time, the IEM website does not have a map selection tool to pick from
-HML sites.  So you are stuck having to know the 5 character NWSLI identifier,
-sorry.
-<br /><input type="text" name="station" size="7" maxlength="5">
+<h3>1. Select Station(s):</h3>
+<div id="iemss" data-network="HAS_HML" data-name="station" data-supports-all="0"></div>
 </p>
 
 <p>
