@@ -24,6 +24,16 @@ let sbwLsrTable = null;
 let element = null;
 let loadedVTEC = "";
 
+// Fix WFO ids that come in wrong
+const wfoLookup = {
+    "KAFG": "PAFG",
+    "KAFC": "PAFC",
+    "KAJK": "PAJK",
+    "KGUM": "PGUM",
+    "KHFO": "PHFO",
+    "KJSJ": "TJSJ",
+};
+
 const sbwLookup = {
     "TO": 'red',
     "MA": 'purple',
@@ -256,7 +266,12 @@ function handleURLChange(url) {
             const vtectokens = pathSegments[i+1].split("-");
             if (vtectokens.length === 7) {
                 setYear(vtectokens[0]);
-                setWFO(vtectokens[3]);
+                // Fix bad WFOs
+                if (wfoLookup[vtectokens[3]] !== undefined) {
+                    setWFO(wfoLookup[vtectokens[3]]);
+                } else {
+                    setWFO(vtectokens[3]);
+                }
                 setPhenomena(vtectokens[4]);
                 setSignificance(vtectokens[5]);
                 setETN(vtectokens[6]);

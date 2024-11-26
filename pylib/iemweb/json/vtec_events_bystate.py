@@ -39,6 +39,8 @@ from pyiem.util import utc
 from pyiem.webutil import CGIModel, iemapp
 from sqlalchemy import text
 
+from iemweb.imagemaps import rectify_wfo
+
 EXL = "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"
 
 
@@ -124,7 +126,8 @@ def get_res(state, year, phenomena, significance):
         )
         for row in res.mappings():
             uri = (
-                f"/vtec/#{year}-O-NEW-K{row['wfo']}-{row['phenomena']}-"
+                f"/vtec/event/{year}-O-NEW-{rectify_wfo(row['wfo'])}-"
+                f"{row['phenomena']}-"
                 f"{row['significance']}-{row['eventid']:04.0f}"
             )
             data["events"].append(

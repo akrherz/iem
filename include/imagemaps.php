@@ -1,5 +1,42 @@
 <?php
 
+/**
+ * Convert a vague 3 character WFO identifier to a 4 character one
+ * @param wfo3 the 3 character WFO identifier
+ * @return the 4 character WFO identifier
+ */
+function rectify_wfo($wfo3){
+    $xref = Array(
+        "AFC" => "PAFC",
+        "AJK" => "PAJK",
+        "AFG" => "PAFG",
+        "HFO" => "PHFO",
+        "GUM" => "PGUM",
+        "SJU" => "TJSJ",
+        "JSJ" => "TJSJ",
+    );
+    if (array_key_exists($wfo3, $xref)){
+        return $xref[$wfo3];
+    };
+    return sprintf("K%s", $wfo3);
+}
+
+/**
+ * Figure out the vague 3 character ID :/
+ * @param wfo3 the 3 character WFO identifier
+ * @return the 4 character WFO identifier
+ */
+function unrectify_wfo($wfo){
+    if (strlen($wfo) == 4){
+        $wfo = substr($wfo, 1, 3);
+    }
+    if ($wfo == "SJU"){
+        return "JSJ";
+    }
+    return $wfo;
+}
+
+
 function ugcStateSelect($state, $selected)
 {
     $state = substr(strtoupper($state), 0, 2);

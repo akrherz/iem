@@ -57,6 +57,8 @@ from pyiem.util import utc
 from pyiem.webutil import CGIModel, iemapp
 from sqlalchemy import text
 
+from iemweb.imagemaps import rectify_wfo
+
 EXL = "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"
 
 
@@ -100,7 +102,7 @@ class Schema(CGIModel):
 def make_url(row):
     """Build URL."""
     return (
-        f"/vtec/#{row['vtec_year']}-O-NEW-K{row['wfo']}-"
+        f"/vtec/event/{row['vtec_year']}-O-NEW-{rectify_wfo(row['wfo'])}-"
         f"{row['phenomena']}-{row['significance']}-{row['eventid']:04.0f}"
     )
 

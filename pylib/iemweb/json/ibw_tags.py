@@ -20,6 +20,8 @@ from pyiem.util import utc
 from pyiem.webutil import CGIModel, iemapp
 from sqlalchemy import text
 
+from iemweb.imagemaps import rectify_wfo
+
 DAMAGE_TAGS = "CONSIDERABLE DESTRUCTIVE CATASTROPHIC".split()
 IEM = "https://mesonet.agron.iastate.edu"
 
@@ -102,7 +104,8 @@ def run(wfo, damagetag, year):
         for row in cursor.mappings():
             # TODO the wfo here is a bug without it being 4 char
             href = (
-                f"{IEM}/vtec/#{year}-O-{row['status']}-K{row['wfo']}-"
+                f"{IEM}/vtec/event/{year}-O-{row['status']}-"
+                f"{rectify_wfo(row['wfo'])}-"
                 f"{row['ph']}-W-{row['eventid']:04.0f}"
             )
             data = dict(

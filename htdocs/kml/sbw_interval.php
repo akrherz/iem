@@ -3,6 +3,7 @@
 require_once "../../config/settings.inc.php";
 require_once "../../include/database.inc.php";
 require_once "../../include/vtec.php";
+require_once "../../include/imagemaps.php";
 
 function nice_date($val){
     if (is_null($val)) return "not available";
@@ -95,9 +96,9 @@ echo "<?xml version=\"1.0\" encoding=\"UTF-8\"?>
     </Style>";
 for ($i=0;$row=pg_fetch_array($result);$i++){
     $uri = sprintf(
-        "<a href=\"%s/vtec/#%s-O-NEW-K%s-%s-%s-%04d\">%s</a>",
+        "<a href=\"%s/vtec/event/%s-O-NEW-%s-%s-%s-%04d\">%s</a>",
         "https://mesonet.agron.iastate.edu", date('Y', strtotime($row["polygon_begin"])),
-        $row["wfo"], $row["phenomena"],
+        rectify_wfo($row["wfo"]), $row["phenomena"],
         $row["significance"], $row["eventid"], $row["eventid"]
     );
   echo "<Placemark>

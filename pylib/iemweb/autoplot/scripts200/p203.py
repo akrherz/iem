@@ -20,6 +20,8 @@ from pyiem.plot.util import fitbox
 from pyiem.util import get_autoplot_context, utc
 from sqlalchemy import text
 
+from iemweb.imagemaps import rectify_wfo
+
 PDICT = {
     "W": "By Issuance Center",
     "S": "By Polygon Size",
@@ -300,9 +302,9 @@ def plotter(fdict):
         )
 
         # Image map
-        url = ("/vtec/#%s-O-NEW-K%s-%s-%s-%04i") % (
+        url = ("/vtec/event/%s-O-NEW-%s-%s-%s-%04i") % (
             sts.year,
-            row["wfo"],
+            rectify_wfo(row["wfo"]),
             row["phenomena"],
             "W",
             row["eventid"],

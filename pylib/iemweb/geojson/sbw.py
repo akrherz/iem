@@ -39,6 +39,8 @@ from pyiem.util import utc
 from pyiem.webutil import CGIModel, ListOrCSVType, iemapp
 from sqlalchemy import text
 
+from iemweb.imagemaps import rectify_wfo
+
 
 class Schema(CGIModel):
     """See how we are called."""
@@ -168,8 +170,9 @@ def run(environ):
             sts = row["utc_polygon_begin"].strftime(ISO8601)
             sid += "." + sts
             href = (
-                f"https://mesonet.agron.iastate.edu/vtec/#{row['vtec_year']}-"
-                f"0-{row['status']}-K{row['wfo']}-{row['phenomena']}-"
+                "https://mesonet.agron.iastate.edu/vtec/event/"
+                f"{row['vtec_year']}-0-{row['status']}-"
+                f"{rectify_wfo(row['wfo'])}-{row['phenomena']}-"
                 f"{row['significance']}-{row['eventid']:04.0f}"
             )
             label = get_ps_string(row["phenomena"], row["significance"])

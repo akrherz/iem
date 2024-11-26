@@ -41,7 +41,7 @@ def run(year, fmt):
     cursor.execute(
         f"""
     SELECT wfo, phenomena, significance, max(eventid),
-    '/vtec/#{year}-O-NEW-K'||
+    '/vtec/event/{year}-O-NEW-K'||
     wfo||'-'||phenomena||'-'||significance||'-'||
     LPAD(max(eventid)::text, 4, '0') as url
      from warnings_{year} WHERE wfo is not null and eventid is not null and
