@@ -316,6 +316,7 @@ def plotter(fdict):
         data[now] = {"val": " "}
         now += timedelta(days=1)
     aggtxt = []
+    sumtxt = []
     if not df.empty:
         df2 = (
             df.reset_index()
@@ -327,7 +328,9 @@ def plotter(fdict):
         )
         for thres, row in df2.iterrows():
             if thres in COLORS:
-                aggtxt.append(f"{thres} {row['days']} Days")
+                aggtxt.append(f"{thres} {row['days']}")
+                total = df[df["threshold"] == thres].shape[0]
+                sumtxt.append(f"{thres} {total}")
     for dt, row in df.iterrows():
         if row["threshold"] == "TSTM" and ctx.get("g", "yes") == "no":
             continue
@@ -341,7 +344,7 @@ def plotter(fdict):
     )
     subtitle = (
         f"Valid {sts:%d %b %Y} - {ets:%d %b %Y}. "
-        f"Days since by threshold: {', '.join(aggtxt)}"
+        f"Days since: {', '.join(aggtxt)}. Total Days: {', '.join(sumtxt)}"
     )
     if outlook_type in ["H", "W", "T"]:
         subtitle += ", H denotes SIGN"
@@ -356,7 +359,7 @@ def plotter(fdict):
         )
     else:
         fig = figure(apctx=ctx, title=title, subtitle=subtitle)
-        ax = fig.add_axes([0.05, 0.15, 0.9, 0.75])
+        ax = fig.add_axes((0.05, 0.15, 0.9, 0.75))
         data = np.ones((ets.year - sts.year + 1, 366)) * -1
         thresholds = list(COLORS.keys())
         for dt, row in df.iterrows():
