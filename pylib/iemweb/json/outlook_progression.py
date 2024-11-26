@@ -3,7 +3,7 @@
 Return to `API Services </api/#json>`_.
 
 Documentation for /json/outlook_progression.py
--------------------------------------
+----------------------------------------------
 
 This service requires a latitude and longitude point along with a date of
 interest. The service will return the coincident SPC or WPC outlooks valid
