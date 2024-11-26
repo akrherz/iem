@@ -3,14 +3,16 @@ The number of days for a given season that are
 either above or below some temperature threshold.
 """
 
+import numpy as np
 import pandas as pd
 from pyiem.database import get_sqlalchemy_conn
 from pyiem.exceptions import NoDataFound
-from pyiem.plot import figure_axes
+from pyiem.plot import figure
 from pyiem.util import get_autoplot_context
 from scipy import stats
 
 from iemweb.autoplot import ARG_STATION
+from iemweb.autoplot.barchart import barchar_with_top10
 
 PDICT = {"above": "At or Above Threshold", "below": "Below Threshold"}
 PDICT2 = {
@@ -81,7 +83,7 @@ def plotter(fdict):
     with get_sqlalchemy_conn("coop") as conn:
         df = pd.read_sql(
             f"""
-        SELECT extract(year from day + '%s month'::interval) as yr,
+        SELECT extract(year from day + '%s month'::interval)::int as yr,
         sum(case when month in (12, 1, 2) and {b}
         then 1 else 0 end) as winter,
         sum(case when month in (3, 4, 5) and {b}
@@ -100,7 +102,7 @@ def plotter(fdict):
         )
     if df.empty:
         raise NoDataFound("No data found for query")
-
+    df.index.name = "year"
     tt = r"$^\circ$F" if varname != "precip" else "inch"
     title = (
         f"{ctx['_sname']} {df.index.min():.0f}-{df.index.max():.0f} "
@@ -108,7 +110,7 @@ def plotter(fdict):
         f"[{PDICT2[season]}] with {PDICT3[varname]} {PDICT[direction]} "
         f"{threshold}{tt}"
     )
-    (fig, ax) = figure_axes(title=title, apctx=ctx)
+    fig = figure(title=title, apctx=ctx)
     avgv = df[season].mean()
 
     colorabove = "r"
@@ -116,17 +118,16 @@ def plotter(fdict):
     if direction == "below":
         colorabove = "b"
         colorbelow = "r"
-    bars = ax.bar(
-        df.index.values,
-        df[season],
-        fc=colorabove,
-        ec=colorabove,
-        align="center",
+    df["color"] = np.where(df[season] < avgv, colorbelow, colorabove)
+
+    ax = barchar_with_top10(
+        fig,
+        df,
+        season,
+        color=df["color"].to_list(),
+        labelformat="%.0f",
+        table_col_title="Days",
     )
-    for i, mybar in enumerate(bars):
-        if df[season].values[i] < avgv:
-            mybar.set_facecolor(colorbelow)
-            mybar.set_edgecolor(colorbelow)
     ax.axhline(avgv, lw=2, color="k", zorder=2, label="Average")
     h_slope, intercept, r_value, _, _ = stats.linregress(
         df.index.values, df[season]
