@@ -41,7 +41,7 @@ def run():
         array_to_string(array_agg(distinct substr(ugc, 1, 2)), ',') as states
         from warnings
         WHERE is_pds
-        GROUP by year, wfo, eventid, phenomena, significance
+        GROUP by vtec_year, wfo, eventid, phenomena, significance
         ORDER by utc_issue ASC
     """
         )
