@@ -17,6 +17,8 @@ from pyiem.reference import ISO8601
 from pyiem.util import utc
 from pyiem.webutil import CGIModel, iemapp
 
+from iemweb.imagemaps import rectify_wfo
+
 
 class Schema(CGIModel):
     """See how we are called."""
@@ -30,7 +32,7 @@ def run():
     with get_sqlalchemy_conn("postgis") as pgconn:
         res = pgconn.exec_driver_sql(
             """
-            SELECT extract(year from issue)::int as year, wfo, eventid,
+            SELECT vtec_year, wfo, eventid,
             phenomena, significance,
             min(product_issue at time zone 'UTC') as utc_product_issue,
             min(init_expire at time zone 'UTC') as utc_init_expire,
@@ -41,19 +43,19 @@ def run():
             from warnings
             WHERE phenomena in ('TO', 'FF') and significance = 'W'
             and is_emergency
-            GROUP by year, wfo, eventid, phenomena, significance
+            GROUP by vtec_year, wfo, eventid, phenomena, significance
             ORDER by utc_issue ASC
         """
         )
         for row in res.mappings():
             uri = (
-                f"/vtec/#{row['year']}-O-NEW-K{row['wfo']}-"
-                f"{row['phenomena']}-{row['significance']}-"
-                f"{row['eventid']:04.0f}"
+                f"/vtec/event/{row['vtec_year']}-O-NEW-"
+                f"{rectify_wfo(row['wfo'])}-{row['phenomena']}-"
+                f"{row['significance']}-{row['eventid']:04.0f}"
             )
             data["events"].append(
                 dict(
-                    year=row["year"],
+                    year=row["vtec_year"],
                     phenomena=row["phenomena"],
                     significance=row["significance"],
                     eventid=row["eventid"],

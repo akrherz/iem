@@ -50,10 +50,10 @@ foreach ($jobj["data"] as $bogus => $row) {
     $used[] = $row["nwsli"];
     $river = $row["river_name"];
     $uri = sprintf(
-        "/vtec/#%s-O-%s-K%s-%s-%s-%04d",
+        "/vtec/event/%s-O-%s-%s-%s-%s-%04d",
         date("Y"),
         "NEW",
-        $row["wfo"],
+        rectify_wfo($row["wfo"]),
         $row["phenomena"],
         "W",
         $row["eventid"]

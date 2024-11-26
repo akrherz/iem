@@ -51,6 +51,8 @@ from pyiem.nws.vtec import get_ps_string
 from pyiem.webutil import CGIModel, ListOrCSVType, iemapp
 from sqlalchemy import text
 
+from iemweb.imagemaps import rectify_wfo
+
 
 class Schema(CGIModel):
     """See how we are called."""
@@ -267,8 +269,9 @@ def add_warnings(lsrdf: gpd.GeoDataFrame) -> None:
             products = ""
             for row2 in res.mappings():
                 url = (
-                    f"/vtec/#{row2['vtec_year']}-O-NEW-K{row['wfo']}-"
-                    f"{row2['phenomena']}-{row2['significance']}-"
+                    f"/vtec/event/{row2['vtec_year']}-O-NEW-"
+                    f"{rectify_wfo(row['wfo'])}-{row2['phenomena']}-"
+                    f"{row2['significance']}-"
                     f"{row2['eventid']:04.0f}"
                 )
                 products += (
