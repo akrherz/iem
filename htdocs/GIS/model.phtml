@@ -17,9 +17,13 @@ $t->content = <<<EOF
 
 <div style="width: 310px; float: right; border: 1px solid #000; padding: 5px; margin: 5px;">
 <a href="/data/gis/images/4326/hrrr/refd_0060.png">
-<img width="300" src="https://mesonet.agron.iastate.edu/data/gis/images/4326/hrrr/refd_0060.png">
+<img width="300" src="/data/gis/images/4326/hrrr/refd_0060.png">
 </a>
-<br />Latest HRRR 1 Hour Forecast
+<br />Latest HRRR 1 Hour Forecast (<code>REFD</code>)
+<a href="/data/gis/images/4326/hrrr/refp_0060.png">
+<img width="300" src="/data/gis/images/4326/hrrr/refp_0060.png">
+</a>
+<br />Latest HRRR 1 Hour Forecast with Precipitation Type (<code>REFP</code>)
 </div>
 
 
@@ -36,11 +40,20 @@ is now possible.</p>
  <li><strong>Archived raw RASTERs:</strong> <a href="/archive/data/2017/07/14/GIS/hrrr/00/">here</a> based on UTC timestamps</li>
 </ul>
 
+<h3>Changelog</h3>
+<ul>
+<li><strong>25 Nov 2024:</strong> Initial support for HRRR Reflectivity with
+a precipitation type color ramp applied. The hope is to backfill the archive
+with this eventually.</li>
+</ul>
+
 <h3>Tile Map Service (TMS)</h3>
 
 <p>You can call the TMS with either model initialization time explicit set or latest run
 processed by the IEM.  For the explicit time set, the URL form looks like so:
 <code>https://mesonet.agron.iastate.edu/cache/tile.py/1.0.0/hrrr::REFD-F0000-201707140100/6/15/24.png</code>
+<br />
+<code>https://mesonet.agron.iastate.edu/cache/tile.py/1.0.0/hrrr::REFP-F0000-201707140100/6/15/24.png</code>
 <br />
 The important parts here are <i>hrrr::REFD-F0000-201707140100</i> which equates to HRRR model reflectivity
 for forecast <strong>minute</strong> 0000 (needs to be 4 characters) for model initialization on 14 July 2017
@@ -49,7 +62,8 @@ and forecast hour 18.  <strong>Again, this F**** value is in minutes, not hours!
 
 <p>You can also specify <i>0</i> as the model initialization time, of which the last run processed by the
 IEM will be picked.  For example:
-<code>https://mesonet.agron.iastate.edu/cache/tile.py/1.0.0/hrrr::REFD-F0000-0/6/15/24.png</code></p>
+<code>https://mesonet.agron.iastate.edu/cache/tile.py/1.0.0/hrrr::REFD-F0000-0/6/15/24.png</code>
+<br /><code>https://mesonet.agron.iastate.edu/cache/tile.py/1.0.0/hrrr::REFP-F0000-0/6/15/24.png</code></p>
 
 <h3>Suggested TMS Usage for Realtime</h3>
 
@@ -68,6 +82,13 @@ latest run is to fetch the 18-hour (1080 minute) forecast JSON metadata file:
 <br />The individual forecast hours have individual LAYERS defined like so
 <code>refd_0000</code> where 0000 is the forecast time in <strong>minutes</strong></p>
 
+<code>https://mesonet.agron.iastate.edu/cgi-bin/wms/hrrr/refp.cgi</code>
+<br />The individual forecast hours have individual LAYERS defined like so
+<code>refp_0000</code> where 0000 is the forecast time in <strong>minutes</strong></p>
+
+<p>Here's a legend for the <code>REFP</code> product:
+<br /><img src="legends/REFP.png" alt="HRRR Reflectivity with Precip Type"/></p>
+
 <h3>FAQ</h3>
 
 <ol>
@@ -76,12 +97,19 @@ latest run is to fetch the 18-hour (1080 minute) forecast JSON metadata file:
 the previous hour.  This processing takes about 10 minutes, so at for example 01:50 UTC, the 00 UTC
 run should be available.</li>
 
-<li>What color index to reflectivity value scale is used for the RASTERS?
-<br />These images should match the <a href="/GIS/rasters.php?rid=2">IEM N0Q Composites</a>.</li>
+<li>What color index to reflectivity value scale is used for the <code>REFD</code> RASTERS?
+<br />These images should match the
+<a href="/GIS/rasters.php?rid=2">IEM N0Q Composites</a>.</li>
+
+<li>What color index to reflectivity value scale is used for the <code>REFP</code> RASTERS?
+<br />These images use a 22-color per precipitation type scale. This RASTER
+is not intended to be used as data within a GIS.</li>
 
 <li>What exact dataset is being shown here?
-<br />This is the production NCEP HRRR "REFD" variable, "1000 m above ground" simulated RADAR
-reflectivity.</li> 
+<br />This is the production NCEP HRRR "REFD" variable, "1000 m above ground"
+simulated RADAR reflectivity.  The <code>REFP</code> applies a color ramp to
+the reflectivity to indicate if it is rain, snow, freezing rain, and finally
+ice.</li> 
 
 <li>Am I free to use this service for lucrative commercial interests?
 <br />You betcha, but don't sue us and also send us <a href="/info/contacts.php">feedback</a> on how
