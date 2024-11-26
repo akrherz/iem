@@ -139,6 +139,7 @@ not be implied as an endorsement. Of course, you can just search google for
       <li><a href="/json/ibw_tags.py?help">Impact Based Warning Tags</a></li>
       <li><a href="/json/radar.py?help">NEXRAD/TWDR Archive Metadata</a></li>
       <li><a href="/json/ridge_current.py?help">NEXRAD/TWDR Current Metadata</a></li>
+      <li><a href="/json/outlook_progression.py?help">SPC/WPC Outlook Progression by Point by Date</a></li>
       <li><a href="/json/spcmcd.py?help">SPC Mesoscale Discussions</a></li>
       <li><a href="/json/spcoutlook.py?help">SPC Outlooks</a></li>
       <li><a href="/json/spc_bysize.py?help">SPC Outlooks by Size</a></li>
