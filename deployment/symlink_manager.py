@@ -76,7 +76,11 @@ def main():
     # Quasi dynamic generation of /mesonet/ARCHIVE/data/YYYY links
     if not os.path.isdir("/mesonet/ARCHIVE/data"):
         os.makedirs("/mesonet/ARCHIVE/data")
-    for year in range(1893, 2023):
+    for year in range(1893, 2014):
+        link = f"/mesonet/ARCHIVE/data/{year}"
+        target = f"/mnt/archive32/ARCHIVE/data/{year}"
+        workflow(link, target)
+    for year in range(2013, 2023):
         link = f"/mesonet/ARCHIVE/data/{year}"
         target = f"/mnt/archive5/ARCHIVE/data/{year}"
         workflow(link, target)
