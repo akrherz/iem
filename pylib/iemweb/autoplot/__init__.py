@@ -869,6 +869,13 @@ nopts = [
         ),
     },
     {
+        "id": 258,
+        "label": (
+            "SPC Convective/Fire Wx or "
+            "WPC Excessive Rainfall Outlook Progression for Lat/Lon"
+        ),
+    },
+    {
         "id": 230,
         "label": (
             "SPC Convective/Fire Wx or "
