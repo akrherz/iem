@@ -113,12 +113,12 @@ def plotter(fdict):
     }
     ylabels = []
     ylocator = {}
-    slots = compute_slots(fdict["outlook_type"], ctx["valid"])
+    slots = compute_slots(ctx["outlook_type"], ctx["valid"])
     for (pissue, cat), df2 in outlooks.groupby(["product_issue", "category"]):
         row0 = df2[df2["threshold"] != "SIGN"].iloc[0]
         if row0["cycle"] != -1:
             # Consume up slots as necessary
-            slotkey = f"{row0['day']}.{fdict['outlook_type']}.{row0['cycle']}"
+            slotkey = f"{row0['day']}.{ctx['outlook_type']}.{row0['cycle']}"
             if slotkey in slots:
                 removeme = []
                 for index in range(slots.index(slotkey)):
