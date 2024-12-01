@@ -138,7 +138,7 @@ def get_asos(ctx: dict) -> pd.DataFrame:
         stations = pd.read_sql(
             text(f"""
                 select id, name, value as snow_src, null as snow,
-                null as snowd from stations s LEFT
+                null as snowd, null as cnt_6hr from stations s LEFT
                 JOIN station_attributes a on (s.iemid = a.iemid and
                 a.attr = :attr)
                 where network ~* 'ASOS' and {limiter} ORDER by id ASC
@@ -325,7 +325,7 @@ def plotter(fdict):
         )
     report += ".END\n\n"
 
-    if asosdf["snow_src"].notnull().any():
+    if asosdf["cnt_6hr"].notnull().any():
         report += (
             "ASOS Reports with 6 Hour Snowfall Supplemented\n\n"
             f".BR {wfo} {dt:%Y%m%d} Z DH06/TAIRVX/DH12/TAIRVP/PPDRVZ/"
@@ -337,7 +337,7 @@ def plotter(fdict):
             ": 12Z YESTERDAY TO 12Z TODAY SNOWFALL\n"
             ": 12Z TODAY SNOW DEPTH\n"
         )
-        for sid, row in asosdf[asosdf["snow_src"].notna()].iterrows():
+        for sid, row in asosdf[asosdf["cnt_6hr"].notna()].iterrows():
             cnt = 0 if pd.isna(row["cnt_6hr"]) else int(row["cnt_6hr"])
             quorum = f"({cnt}/4)"
             report += (
