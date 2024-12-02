@@ -69,6 +69,7 @@ def run(conn, network, only_online):
     # One off special
     if network in XREF:
         subselect = "a.attr = :network"
+        params["network"] = XREF[network]
     elif network == "FPS":
         subselect = """(network ~* 'ASOS' or (
             network ~* 'CLIMATE'and archive_begin < '1990-01-01') or
