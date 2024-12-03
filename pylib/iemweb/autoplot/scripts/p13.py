@@ -3,7 +3,7 @@ This chart presents the start or end date of the
 warmest 91 day period each year.
 """
 
-import datetime
+from datetime import date, datetime, timedelta
 
 import matplotlib.colors as mpcolors
 import numpy as np
@@ -72,7 +72,7 @@ def plotter(fdict):
         )
     if df.empty:
         raise NoDataFound("No Data Found.")
-    today = datetime.date.today()
+    today = date.today()
     df["departure"] = df["avg"] - df["avg"].mean()
     df["plot_doy"] = df["doy"] - (0 if which == "end_summer" else 91)
     if today.year in df.index and df.at[today.year, "doy"] < 270:
@@ -88,7 +88,9 @@ def plotter(fdict):
     cmap = get_cmap(ctx["cmap"])
     bins = centered_bins(df["departure"].abs().max())
     norm = mpcolors.BoundaryNorm(bins, cmap.N)
-    ax.scatter(df.index, df["plot_doy"], c=cmap(norm(df["departure"].values)))
+    ax.scatter(
+        df.index, df["plot_doy"], c=cmap(norm(df["departure"].to_numpy()))
+    )
     ax.grid(True)
     ax.set_ylabel(f"{t1} Date")
 
@@ -100,7 +102,7 @@ def plotter(fdict):
     yticks = []
     yticklabels = []
     for i in np.arange(df["plot_doy"].min() - 5, df["plot_doy"].max() + 5, 1):
-        ts = datetime.datetime(2000, 1, 1) + datetime.timedelta(days=int(i))
+        ts = datetime(2000, 1, 1) + timedelta(days=int(i))
         if ts.day in [1, 8, 15, 22, 29]:
             yticks.append(i)
             yticklabels.append(ts.strftime("%-d %b"))
@@ -114,9 +116,7 @@ def plotter(fdict):
         df.index.values, h_slope * df.index.values + intercept, lw=2, color="r"
     )
 
-    avgd = datetime.datetime(2000, 1, 1) + datetime.timedelta(
-        days=int(df["plot_doy"].mean())
-    )
+    avgd = datetime(2000, 1, 1) + timedelta(days=int(df["plot_doy"].mean()))
     ax.text(
         0.1,
         0.03,

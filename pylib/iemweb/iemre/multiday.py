@@ -18,9 +18,9 @@ date2=2024-01-02&lat=42.0308&lon=-93.6319
 
 """
 
-import datetime
 import json
 import warnings
+from datetime import date, datetime, timedelta
 
 import numpy as np
 import pyiem.prism as prismutil
@@ -38,10 +38,10 @@ class Schema(CGIModel):
     """See how we are called."""
 
     callback: str = Field(None, description="JSONP callback function name")
-    date1: datetime.date = Field(
+    date1: date = Field(
         ..., description="Start date for the data request, YYYY-MM-DD"
     )
-    date2: datetime.date = Field(
+    date2: date = Field(
         ..., description="End date for the data request, YYYY-MM-DD"
     )
     lat: float = Field(
@@ -84,9 +84,9 @@ def application(environ, start_response):
             send_error(start_response, "multi-year query not supported yet...")
         ]
     # Make sure we aren't in the future
-    tsend = datetime.date.today()
+    tsend = date.today()
     if ts2 > tsend:
-        ts2 = datetime.datetime.now() - datetime.timedelta(days=1)
+        ts2 = datetime.now() - timedelta(days=1)
 
     lon = environ["lon"]
     lat = environ["lat"]
@@ -100,6 +100,13 @@ def application(environ, start_response):
         ]
     dom = iemre.DOMAINS[domain]
     i, j = iemre.find_ij(lon, lat, domain=domain)
+    if i is None or j is None:
+        return [
+            send_error(
+                start_response,
+                "Point not within any domain",
+            )
+        ]
     offset1 = iemre.daily_offset(ts1)
     offset2 = iemre.daily_offset(ts2) + 1
     tslice = slice(offset1, offset2)
@@ -168,8 +175,8 @@ def application(environ, start_response):
 
     res = {"data": []}
 
-    for i in range(offset2 - offset1):
-        now = ts1 + datetime.timedelta(days=i)
+    for i in range(hightemp.shape[0]):
+        now = ts1 + timedelta(days=i)
         res["data"].append(
             {
                 "date": now.strftime("%Y-%m-%d"),

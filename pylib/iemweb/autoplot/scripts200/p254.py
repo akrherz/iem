@@ -28,8 +28,9 @@ to keep from overloading the server with refresh requests.</p>
 appear plotted on this map.
 """
 
-import datetime
+from datetime import timedelta
 
+import numpy as np
 import pandas as pd
 from matplotlib.colors import BoundaryNorm, ListedColormap
 from pyiem.database import get_sqlalchemy_conn
@@ -73,7 +74,7 @@ def get_description():
 def plotter(fdict):
     """Go"""
     ctx = get_autoplot_context(fdict, get_description())
-    ts = utc() - datetime.timedelta(minutes=ctx["offset"])
+    ts = utc() - timedelta(minutes=ctx["offset"])
     nt = NetworkTable("NEXRAD")
     with get_sqlalchemy_conn("id3b") as conn:
         latency = pd.read_sql(
@@ -98,8 +99,12 @@ def plotter(fdict):
     )
     latency["latency"] = latency["latency"].dt.total_seconds() / 60.0
     latency["realtime"] = latency["realtime"].dt.total_seconds() / 60.0
-    latency["lon"] = latency["nexrad"].apply(lambda x: nt.sts[x]["lon"])
-    latency["lat"] = latency["nexrad"].apply(lambda x: nt.sts[x]["lat"])
+
+    def _get(val, col):
+        return nt.sts.get(val, {"lon": np.nan, "lat": np.nan})[col]
+
+    latency["lon"] = latency["nexrad"].apply(lambda x: _get(x, "lon"))
+    latency["lat"] = latency["nexrad"].apply(lambda x: _get(x, "lat"))
     for col in ["latency", "realtime"]:
         latency.loc[latency[col] < 0][col] = 0
     mp = MapPlot(

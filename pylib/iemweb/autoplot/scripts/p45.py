@@ -7,7 +7,7 @@ OVC condition to be reported in the METAR observation.
 """
 
 import calendar
-import datetime
+from datetime import date, datetime
 
 import pandas as pd
 from pyiem.database import get_sqlalchemy_conn
@@ -19,7 +19,7 @@ from pyiem.util import get_autoplot_context
 def get_description():
     """Return a dict describing how to call this plotter"""
     desc = {"description": __doc__, "cache": 86400, "data": True}
-    today = datetime.date.today()
+    today = date.today()
     desc["arguments"] = [
         dict(
             type="zstation",
@@ -84,9 +84,9 @@ def plotter(fdict):
     climo["freq"] = climo["hits"] / climo["count"] * 100.0
 
     title = (
-        f"({df['year'].min():.0f}-{datetime.datetime.now().year}) "
+        f"({df['year'].min():.0f}-{datetime.now().year}) "
         f"{ctx['_sname']}\n"
-        f"Frequency of {datetime.datetime(2000, 1, 1, hour, 0):%I %p} "
+        f"Frequency of {datetime(2000, 1, 1, hour, 0):%I %p} "
         "Cloud Observation of Overcast"
     )
     fig = figure(apctx=ctx, title=title)
