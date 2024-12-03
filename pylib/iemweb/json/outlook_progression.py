@@ -25,11 +25,20 @@ Changelog
 Example Usage
 -------------
 
-Provide the progression of convective outlooks for a point in Iowa for
-21 May 2024.
+Provide the progression of convective outlooks for a point on 5 August 2024:
 
 https://mesonet.agron.iastate.edu/json/outlook_progression.py\
-?lat=42&lon=-95&valid=2024-05-21&outlook_type=C
+?lat=39.9&lon=-85.9&valid=2024-08-05&outlook_type=C
+
+Same request, but return an Excel file:
+
+https://mesonet.agron.iastate.edu/json/outlook_progression.py\
+?lat=39.9&lon=-85.9&valid=2024-08-05&outlook_type=C&fmt=excel
+
+Same request, but return a CSV file:
+
+https://mesonet.agron.iastate.edu/json/outlook_progression.py\
+?lat=39.9&lon=-85.9&valid=2024-08-05&outlook_type=C&fmt=csv
 
 """
 
@@ -120,7 +129,7 @@ def dowork(environ: dict) -> pd.DataFrame:
         return outlooks
     # Now we need to filter down to the ones that contain the point
     outlooks = outlooks[
-        outlooks["geom"].contains(Point((environ["lon"], environ["lat"])))
+        outlooks.geometry.contains(Point((environ["lon"], environ["lat"])))
     ]
     # Now we need to merge the domain into the outlooks
     rows = []
@@ -131,8 +140,10 @@ def dowork(environ: dict) -> pd.DataFrame:
         ].empty:
             rows.append(row)
     if rows:
-        outlooks = pd.concat([outlooks, pd.DataFrame(rows)], ignore_index=True)
-    outlooks = outlooks.sort_values("product_issue", ascending=True)
+        outlooks: pd.DataFrame = pd.concat(
+            [outlooks, pd.DataFrame(rows)], ignore_index=True
+        )
+    outlooks = outlooks.sort_values(by="product_issue", ascending=True)
     if not outlooks.empty:
         for col in ["issue", "expire", "product_issue"]:
             outlooks[col] = outlooks[col].dt.strftime("%Y-%m-%dT%H:%M:%SZ")
