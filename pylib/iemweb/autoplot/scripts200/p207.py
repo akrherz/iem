@@ -391,8 +391,7 @@ def prettyprint(val):
 def plotter(fdict):
     """Go"""
     ctx = get_autoplot_context(fdict, get_description())
-    if ctx["sz"] < 5:
-        ctx["sz"] = 5
+    ctx["sz"] = max(5, ctx["sz"])
     if ctx["hours"] > 300:
         ctx["hours"] = 300
     endts = ctx["endts"]
@@ -402,6 +401,8 @@ def plotter(fdict):
 
     # figure out our grid bounds
     csector = ctx.pop("csector")
+    if ctx["t"] == "state" and len(csector) > 2:
+        ctx["sz"] = max(50, ctx["sz"])
     ctx["bnds2163"] = compute_grid_bounds(ctx, csector)
     # add zeros and QC
     df = add_zeros(df, ctx)

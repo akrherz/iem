@@ -146,9 +146,6 @@ def get_data(ctx):
                 params=params,
                 index_col="utc_valid",
             )
-            if not dfin.empty:
-                # Drop duplicates :(
-                dfin = dfin.groupby("utc_valid").first()
     else:
         ctx["leveltitle"] = ""
         with get_sqlalchemy_conn("raob") as conn:
@@ -165,6 +162,9 @@ def get_data(ctx):
                 params=params,
                 index_col="utc_valid",
             )
+    if not dfin.empty:
+        # Drop duplicates :(
+        dfin = dfin.groupby("utc_valid").first()
     if dfin.empty:
         raise NoDataFound("No Data Found.")
     if varname_final == "pwater_in":
