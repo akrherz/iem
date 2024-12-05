@@ -6,7 +6,7 @@ date of a given SPC outlook threshold as per IEM unofficial archives.
 usage of levels with time.
 """
 
-from datetime import date, datetime
+from datetime import date
 
 import pandas as pd
 from matplotlib.patches import Rectangle
@@ -18,6 +18,7 @@ from pyiem.util import get_autoplot_context
 from sqlalchemy import text
 
 from iemweb.autoplot import ARG_FEMA
+from iemweb.util import month2months
 
 MDICT = {
     "all": "Entire Year",
@@ -160,24 +161,7 @@ def plotter(fdict):
         date_limiter = " and outlook_date < :date "
         params["date"] = ctx["date"]
     month = ctx["month"]
-    if month == "all":
-        months = range(1, 13)
-    elif month == "fall":
-        months = [9, 10, 11]
-    elif month == "winter":
-        months = [12, 1, 2]
-    elif month == "spring":
-        months = [3, 4, 5]
-    elif month == "summer":
-        months = [6, 7, 8]
-    elif month == "octmar":
-        months = [10, 11, 12, 1, 2, 3]
-    else:
-        ts = datetime.strptime(f"2000-{month}-01", "%Y-%b-%d")
-        # make sure it is length two for the trick below in SQL
-        months = [
-            ts.month,
-        ]
+    months = month2months(month)
     if month != "all":
         date_limiter = (
             f" and extract(month from issue) = ANY(:months) {date_limiter}"

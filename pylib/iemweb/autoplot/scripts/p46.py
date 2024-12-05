@@ -6,8 +6,6 @@ requires the feels like temperature to be additive, so heat index
 greater than air temperature and wind chill less than air temperature.
 """
 
-from datetime import datetime
-
 import numpy as np
 import pandas as pd
 from pyiem.database import get_sqlalchemy_conn
@@ -15,6 +13,8 @@ from pyiem.exceptions import NoDataFound
 from pyiem.plot import figure
 from pyiem.util import get_autoplot_context
 from sqlalchemy import text
+
+from iemweb.util import month2months
 
 PDICT = {
     "wcht": "Minimum Wind Chill",
@@ -74,23 +74,8 @@ def plotter(fdict):
     """Go"""
     ctx = get_autoplot_context(fdict, get_description())
     station = ctx["zstation"]
-    offset = 0
-    if ctx["month"] == "all":
-        months = list(range(1, 13))
-        offset = 3
-    elif ctx["month"] == "fall":
-        months = [9, 10, 11]
-    elif ctx["month"] == "winter":
-        months = [12, 1, 2]
-        offset = 3
-    elif ctx["month"] == "spring":
-        months = [3, 4, 5]
-    elif ctx["month"] == "summer":
-        months = [6, 7, 8]
-    else:
-        ts = datetime.strptime(f"2000-{ctx['month']}-01", "%Y-%b-%d")
-        # make sure it is length two for the trick below in SQL
-        months = [ts.month, 999]
+    offset = 3 if ctx["month"] in ["all", "winter"] else 0
+    months = month2months(ctx["month"])
 
     additive = "feel < tmpf" if ctx["var"] == "wcht" else "feel > tmpf"
     with get_sqlalchemy_conn("asos") as conn:

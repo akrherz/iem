@@ -11,14 +11,14 @@ locations, the place that the sounding is made has moved over the years..
 <strong>Some derived parameters are a work-in-progress.</strong>
 """
 
-from datetime import datetime
-
 import pandas as pd
 from pyiem.database import get_sqlalchemy_conn
 from pyiem.exceptions import NoDataFound
 from pyiem.plot import figure_axes
 from pyiem.util import get_autoplot_context
 from sqlalchemy import text
+
+from iemweb.util import month2months
 
 PDICT = {"00": "00 UTC", "12": "12 UTC", "ALL": "Any Hour"}
 MDICT = {
@@ -173,23 +173,7 @@ def plotter(fdict):
     level = ctx["level"]
     agg = ctx["agg"]
     offset = 0
-    if month == "all":
-        months = list(range(1, 13))
-    elif month == "fall":
-        months = [9, 10, 11]
-    elif month == "winter":
-        months = [12, 1, 2]
-        offset = 32
-    elif month == "spring":
-        months = [3, 4, 5]
-    elif month == "mjj":
-        months = [5, 6, 7]
-    elif month == "summer":
-        months = [6, 7, 8]
-    else:
-        ts = datetime.strptime(f"2000-{month}-01", "%Y-%b-%d")
-        # make sure it is length two for the trick below in SQL
-        months = [ts.month]
+    months = month2months(month)
 
     name = ctx["_nt"].sts[station]["name"]
     stations = [station]

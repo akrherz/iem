@@ -26,7 +26,7 @@ flakey.</p>
 plot, but only considers a calendar day.</p>
 """
 
-from datetime import date, datetime, timedelta
+from datetime import date, timedelta
 from zoneinfo import ZoneInfo
 
 import pandas as pd
@@ -35,6 +35,8 @@ from pyiem.exceptions import NoDataFound
 from pyiem.plot import figure
 from pyiem.util import get_autoplot_context
 from sqlalchemy import text
+
+from iemweb.util import month2months
 
 MDICT = {"warm": "Rise", "cool": "Drop"}
 MDICT2 = {
@@ -142,22 +144,7 @@ def plotter(fdict):
     if varname not in PDICT2:
         raise NoDataFound("Invalid varname")
 
-    if month == "all":
-        months = range(1, 13)
-    elif month == "fall":
-        months = [9, 10, 11]
-    elif month == "winter":
-        months = [12, 1, 2]
-    elif month == "spring":
-        months = [3, 4, 5]
-    elif month == "summer":
-        months = [6, 7, 8]
-    else:
-        ts = datetime.strptime(f"2000-{month}-01", "%Y-%b-%d")
-        # make sure it is length two for the trick below in SQL
-        months = [
-            ts.month,
-        ]
+    months = month2months(month)
 
     tzname = ctx["_nt"].sts[station]["tzname"]
     ab = ctx["_nt"].sts[station]["archive_begin"]

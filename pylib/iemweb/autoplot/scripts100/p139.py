@@ -23,6 +23,7 @@ from pyiem.util import get_autoplot_context
 from sqlalchemy import text
 
 from iemweb.autoplot import get_monofont
+from iemweb.util import month2months
 
 MDICT = {
     "all": "No Month/Time Limit",
@@ -127,21 +128,7 @@ def plotter(fdict):
     ctx = get_autoplot_context(fdict, get_description())
     station = ctx["zstation"]
     month = ctx["month"]
-
-    if month == "all":
-        months = list(range(1, 13))
-    elif month == "fall":
-        months = [9, 10, 11]
-    elif month == "winter":
-        months = [12, 1, 2]
-    elif month == "spring":
-        months = [3, 4, 5]
-    elif month == "summer":
-        months = [6, 7, 8]
-    else:
-        ts = datetime.strptime(f"2000-{month}-01", "%Y-%b-%d")
-        # make sure it is length two for the trick below in SQL
-        months = [ts.month, 999]
+    months = month2months(month)
 
     order = "DESC" if ctx["v"] == "largest" else "ASC"
     with get_sqlalchemy_conn("iem") as conn:

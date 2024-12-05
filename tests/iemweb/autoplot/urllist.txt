@@ -32,6 +32,9 @@
 /plotting/auto/plot/39/network:IACLIMATE::station:IATAME::compare:manual::year:2024::month:1::date:2024-01-03::_r:t::dpi:100.png
 /plotting/auto/plot/40/network:IA_ASOS::zstation:DSM::month:1::ptype:vsby::year:2020::_r:t::dpi:100.png
 /plotting/auto/plot/40/network:IA_ASOS::zstation:DSM::month:1::ptype:sky::year:2020::_r:t::dpi:100.png
+/plotting/auto/plot/41/network:IACLIMATE::station:IATAME::month1:winter::month2:7::var:high::highlight:55::days:1::opt:max::_r:t::dpi:100.png
+/plotting/auto/plot/41/network:IACLIMATE::station:IATAME::month1:winter::p1:1893-1950::month2:7::p2:1950-2017::var:high::highlight:55::days:7::opt:avg::_r:43::dpi:100.png
+/plotting/auto/plot/42/network:IA_ASOS::zstation:DSM::m:octmar::yrange:1928-2024::dir:below::var:mslp::threshold:1003::t2:1000::_r:43::dpi:100.png
 /plotting/auto/plot/43/network:IA_ASOS::station:AMW::sdate:2020-07-01::p:default::_r:88::dpi:100.png
 /plotting/auto/plot/43/network:IA_ASOS::station:AMW::sdate:2020-07-01::p:two::_r:88::dpi:100.png
 /plotting/auto/plot/44/plot:bar::opt:fema::network:WFO::station:DMX::state:IA::fema:7::limit:yes::c:single::phenomena:TO::significance:W::syear:1986::eyear:2024::s:jan1::_r:t::dpi:100.png
@@ -49,6 +52,7 @@
 /plotting/auto/plot/59/network:IA_ASOS::station:CSQ::units:mph::_r:t::dpi:100.png
 /plotting/auto/plot/60/network:IA_ASOS::zstation:DSM::var:tmpf::w:freq::threshold:120::direction:above::cmap:jet::_r:t::dpi:100.png
 /plotting/auto/plot/61/var:high::sdate:2024-08-01::sector:conus::network:WFO::wfo:STO::state:IA::_r:t::dpi:100.png
+/plotting/auto/plot/69/network:IACLIMATE::station:IA0000::var:high::which:above::unit:degrees::mag:0::month:winter::opt:percent::_r:t::dpi:100.png
 /plotting/auto/plot/70/opt:wfo::network:WFO::station:DMX::state:IA::phenomena:TO::significance:W::split:jan1::f:daily::cmap:jet::_r:t::dpi:100.png
 /plotting/auto/plot/70/opt:state::network:WFO::station:DMX::state:IA::phenomena:TO::significance:W::split:jul1::f:none::cmap:jet::_r:t::dpi:100.png
 /plotting/auto/plot/70/opt:state::network:WFO::station:DMX::state:IA::phenomena:TO::significance:W::split:jan1::f:accum::cmap:jet::_r:t::dpi:100.png
@@ -62,6 +66,7 @@
 /plotting/auto/plot/73/opt:wfo::network:WFO::station:TSA::state:IA::ugc:IAC169::limit:udf::sday:0104::eday:0104::phenomena:SV::significance:W::_r:t::dpi:100.png
 /plotting/auto/plot/76/network:IA_ASOS::station:DSM::season:winter::varname:dwpf::agg:mean::year:1893::w:bar::_r:t::dpi:100.png
 /plotting/auto/plot/76/network:IA_ASOS::station:DSM::season:water_year::varname:vpd::agg:mean::year:1893::w:bar::_r:t::dpi:100.png
+/plotting/auto/plot/78/network:IA_ASOS::zstation:DSM::month:winter::date:2024-08-01::_r:t::dpi:100.png
 /plotting/auto/plot/80/which:wfo::network:WFO::wfo:DMX::ugc:IAC153::phenomena:TO::significance:W::_r:t::dpi:100.png
 /plotting/auto/plot/80/which:ugc::network:WFO::wfo:DMX::ugc:IAC153::phenomena:TO::significance:W::_r:t::dpi:100.png
 /plotting/auto/plot/82/network:IA_ASOS::station:AMW::var:pday::sdate:2024-05-16::edate:2024-08-14::_r:t::dpi:100.png
