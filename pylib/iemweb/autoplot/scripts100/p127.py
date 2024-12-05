@@ -85,9 +85,12 @@ def plot_trendline(fig, ctx, data, year0, lastyear):
     years = []
     doys = []
     for year in range(year0, lastyear):
-        idx = np.digitize([threshold], data[year - year0, :], right=True)
-        years.append(year)
-        doys.append(idx[0])
+        try:
+            idx = np.digitize([threshold], data[year - year0, :], right=True)
+            years.append(year)
+            doys.append(idx[0])
+        except ValueError:
+            pass
 
     ax.scatter(years, doys, s=40)
     ax.set_xlim(year0 - 0.5, lastyear + 0.5)
@@ -234,8 +237,11 @@ def plotter(fdict):
     if ctx["w"] == "thres":
         dlast = ctx["threshold"]
     for year in range(year0, lastyear):
-        idx = np.digitize([dlast], data[year - year0, :], right=True)
-        ax.text(idx[0], year, "X", va="center", zorder=2, color="white")
+        try:
+            idx = np.digitize([dlast], data[year - year0, :], right=True)
+            ax.text(idx[0], year, "X", va="center", zorder=2, color="white")
+        except ValueError:
+            pass
 
     cmap = get_cmap(ctx["cmap"])
     res = ax.imshow(

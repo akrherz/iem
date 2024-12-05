@@ -8,7 +8,7 @@ event type in parenthesis are the raw LSR counts for that year. You need
 to graph at least two years worth of data to make this plot type work.
 """
 
-import datetime
+from datetime import date
 
 import numpy as np
 import pandas as pd
@@ -25,7 +25,7 @@ MARKERS = ["8", ">", "<", "v", "o", "h", "*"]
 def get_description():
     """Return a dict describing how to call this plotter"""
     desc = {"description": __doc__, "data": True, "cache": 3600}
-    today = datetime.date.today()
+    today = date.today()
     ltypes = list(lsr_events.keys())
     ltypes.sort()
     ev = dict(zip(ltypes, ltypes))

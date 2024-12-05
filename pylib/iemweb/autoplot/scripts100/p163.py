@@ -157,69 +157,12 @@ def get_description():
     return desc
 
 
-def get_count_bins(df, varname):
+def get_count_bins(df: pd.DataFrame, varname: str):
     """Figure out sensible bins."""
     minv = df[varname].min()
     maxv = df[varname].max()
     if varname == "count_rank":
         bins = np.arange(1, maxv + 2)
-    elif varname == "count":
-        bins = [0, 1, 2, 3, 5, 10, 15, 20, 25, 30, 40, 50, 75, 100, 200]
-        if maxv > 5000:
-            bins = [
-                0,
-                5,
-                10,
-                50,
-                100,
-                250,
-                500,
-                750,
-                1000,
-                1500,
-                2000,
-                3000,
-                5000,
-                7500,
-                10000,
-            ]
-        elif maxv > 1000:
-            bins = [
-                0,
-                1,
-                5,
-                10,
-                50,
-                100,
-                150,
-                200,
-                250,
-                500,
-                750,
-                1000,
-                1250,
-                1500,
-                2000,
-            ]
-        elif maxv > 200:
-            bins = [
-                0,
-                1,
-                3,
-                5,
-                10,
-                20,
-                35,
-                50,
-                75,
-                100,
-                150,
-                200,
-                250,
-                500,
-                750,
-                1000,
-            ]
     elif max([abs(minv), abs(maxv)]) > 100:
         bins = [-200, -150, -100, -50, -25, -10, 0, 10, 25, 50, 100, 150, 200]
     elif max([abs(minv), abs(maxv)]) > 10:

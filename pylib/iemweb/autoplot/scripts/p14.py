@@ -6,7 +6,7 @@ compared.  With this comparison, you can say that one's years worth of
 departures can be explained by these differences in precipitation bins.
 """
 
-import datetime
+from datetime import datetime
 
 import numpy as np
 import pandas as pd
@@ -26,7 +26,7 @@ def get_description():
         dict(
             type="year",
             name="year",
-            default=datetime.datetime.now().year,
+            default=datetime.now().year,
             label="Year to Highlight:",
         ),
     ]
@@ -38,13 +38,13 @@ def plotter(fdict):
     pgconn, cursor = get_dbconnc("coop")
     ctx = get_autoplot_context(fdict, get_description())
     station = ctx["station"]
-    today = datetime.datetime.now()
+    today = datetime.now()
     year = ctx["year"]
     jdaylimit = 367
     if year == today.year:
         jdaylimit = int(today.strftime("%j"))
 
-    endyear = int(datetime.datetime.now().year) + 1
+    endyear = int(datetime.now().year) + 1
 
     cursor.execute(
         """
