@@ -120,7 +120,7 @@ def get_context(script_url: str) -> dict:
 <script src="/vendor/moment/2.13.0/moment.min.js"></script>
 <script src='/vendor/openlayers/10.1.0/ol.js'></script>
 <script src='/vendor/openlayers/10.1.0/ol-layerswitcher.js'></script>
-<script type="text/javascript" src="/vtec/vtec_static.js?20241113"></script>
+<script type="text/javascript" src="/vtec/vtec_static.js?20241205"></script>
 <script type="text/javascript" src="/vtec/vtec_app.js?20241113"></script>
 """,
     }
