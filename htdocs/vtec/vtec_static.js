@@ -1,4 +1,4 @@
-var iemdata = {};
+const iemdata = {};
 
 iemdata.vtec_phenomena_dict = [
 ['SV','Severe Thunderstorm'],
@@ -12,6 +12,7 @@ iemdata.vtec_phenomena_dict = [
 ['BW','Brisk Wind'],
 ['BZ','Blizzard'],
 ['CF','Coastal Flood'],
+['CW','Cold Weather'],
 ['DU','Blowing Dust'],
 ['DS','Dust Storm'],
 ['EC','Extreme Cold'],
