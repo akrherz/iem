@@ -1,4 +1,4 @@
-var iemdata = {};
+const iemdata = {};
 
 iemdata.vtec_phenomena_dict = [
 ['SV','Severe Thunderstorm'],
