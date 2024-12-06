@@ -72,7 +72,8 @@ $table = <<<EOF
     <th>Avg Speed</th><th>Max Speed</th><th>Avg Drct</th>
     <th>Max Gust</th><th>Gust Drct</th>
     <th>Minutes Sunshine</th><th>Poss Sunshine</th>
-    <th>Cloud SS</th><th>Weather Codes</th>
+    <th>Cloud SS</th>
+    <th>Weather Codes [<a href="#wxcodes">1</a>]</th>
 </tr>
 </thead>
 <tbody>
@@ -191,6 +192,31 @@ directly access it here:
 <p><button id="makefancy">Make Table Interactive</button></p>
 
 {$table}
+
+<p><a name="wxcodes">1. Weather Codes</a>:
+
+<br />The numeric weather codes shown above are just concatenated values. For
+instance, a value of 12 implies a <code>1</code> and a <code>2</code> weather
+code.
+
+<br />
+<table class="table table-condensed table-striped table-bordered table-hover">
+<thead>
+<tr><th>Code</th><th>Meaning</th></tr>
+</thead>
+<tbody>
+<tr><td>1</td><td>Fog or Mist</td></tr>
+<tr><td>2</td><td>Fog or Vis 0.25 mile or less</td></tr>
+<tr><td>3</td><td>Thunder</td></tr>
+<tr><td>4</td><td>Ice pellets</td></tr>
+<tr><td>5</td><td>Hail</td></tr>
+<tr><td>6</td><td>Freezing Rain or Drizzle</td></tr>
+<tr><td>7</td><td>Duststorm or Sandstorm vis 0.25 mile or less</td></tr>
+<tr><td>8</td><td>Smoke or Haze</td></tr>
+<tr><td>9</td><td>Blowing Snow</td></tr>
+<tr><td>X</td><td>Tornado</td></tr>
+</tbody>
+</table></p>
 
 EOF;
 $t->headextra = <<<EOF

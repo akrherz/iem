@@ -29,6 +29,8 @@ from pyiem.util import get_autoplot_context, utc
 from scipy import stats
 from sqlalchemy import text
 
+from iemweb.util import month2months
+
 MDICT = {
     "all": "No Month/Time Limit",
     "water_year": "Water Year",
@@ -180,37 +182,27 @@ def get_data(ctx, startyear):
     today = datetime.datetime.now()
     lastyear = today.year
     deltadays = 0
-    if ctx["season"] == "all":
-        months = list(range(1, 13))
-    elif ctx["season"] == "water_year":
+    months = month2months(ctx["season"])
+    if ctx["season"] == "water_year":
         deltadays = 92
-        months = list(range(1, 13))
         lastyear += 1
     elif ctx["season"] == "spring":
-        months = [3, 4, 5]
         if today.month > 5:
             lastyear += 1
     elif ctx["season"] == "spring2":
-        months = [4, 5, 6]
         if today.month > 6:
             lastyear += 1
     elif ctx["season"] == "fall":
-        months = [9, 10, 11]
         if today.month > 11:
             lastyear += 1
     elif ctx["season"] == "summer":
-        months = [6, 7, 8]
         if today.month > 8:
             lastyear += 1
     elif ctx["season"] == "winter":
         deltadays = 33
-        months = [12, 1, 2]
         if today.month > 2:
             lastyear += 1
     else:
-        ts = datetime.datetime.strptime(f"2000-{ctx['season']}-01", "%Y-%b-%d")
-        # make sure it is length two for the trick below in SQL
-        months = [ts.month, 999]
         lastyear += 1
     if startyear >= lastyear:
         raise NoDataFound("Start year should be less than end year.")

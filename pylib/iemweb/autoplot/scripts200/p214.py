@@ -17,6 +17,8 @@ from pyiem.plot import figure_axes
 from pyiem.util import get_autoplot_context
 from sqlalchemy import text
 
+from iemweb.util import month2months
+
 VDICT = {
     "dwpf": "Air Dew Point Temp [F]",
     "tmpf": "Air Temperature [F]",
@@ -168,21 +170,7 @@ def add_data(ctx):
     assert x in VDICT
     assert y in VDICT
     assert agg in ADICT
-
-    if month == "all":
-        months = list(range(1, 13))
-    elif month == "fall":
-        months = [9, 10, 11]
-    elif month == "winter":
-        months = [12, 1, 2]
-    elif month == "spring":
-        months = [3, 4, 5]
-    elif month == "summer":
-        months = [6, 7, 8]
-    else:
-        ts = datetime.datetime.strptime(f"2000-{month}-01", "%Y-%b-%d")
-        # make sure it is length two for the trick below in SQL
-        months = [ts.month, 999]
+    months = month2months(month)
 
     cast = "int" if x in ["tmpf", "dwpf", "feel"] else "real"
     basets = datetime.date(ctx["syear"], 1, 1)

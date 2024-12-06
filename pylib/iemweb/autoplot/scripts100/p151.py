@@ -6,8 +6,6 @@ about changes in climate or just to produce a simple plot of yearly
 averages over some period of years.
 """
 
-import datetime
-
 import numpy as np
 import pandas as pd
 from pyiem.database import get_sqlalchemy_conn
@@ -16,6 +14,8 @@ from pyiem.plot import MapPlot, centered_bins, get_cmap
 from pyiem.reference import SECTORS_NAME
 from pyiem.util import get_autoplot_context
 from sqlalchemy import text
+
+from iemweb.util import month2months
 
 PDICT = {
     "state": "State Level Maps (select state)",
@@ -193,24 +193,8 @@ def get_data(ctx):
     p2eyear = ctx["p2eyear"]
     p2years = p2eyear - p2syear + 1
 
-    mlimiter = "and month = ANY(:months)"
-    if month == "all":
-        mlimiter = ""
-        months = list(range(1, 13))
-    elif month == "fall":
-        months = [9, 10, 11]
-    elif month == "winter":
-        months = [12, 1, 2]
-    elif month == "spring":
-        months = [3, 4, 5]
-    elif month == "summer":
-        months = [6, 7, 8]
-    elif month == "gs":
-        months = [5, 6, 7, 8, 9]
-    else:
-        ts = datetime.datetime.strptime(f"2000-{month}-01", "%Y-%b-%d")
-        # make sure it is length two for the trick below in SQL
-        months = [ts.month]
+    mlimiter = "and month = ANY(:months)" if month != "all" else ""
+    months = month2months(month)
     table = "alldata"
     if sector == "state":
         # optimization
@@ -356,7 +340,7 @@ def plotter(fdict):
     else:
         levels = [
             round(v, PRECISION.get(varname, 1))
-            for v in np.percentile(df2[column].values, range(0, 101, 10))
+            for v in np.percentile(df2[column].to_numpy(), range(0, 101, 10))
         ]
     if opt in ["both", "contour"]:
         mp.contourf(

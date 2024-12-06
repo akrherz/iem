@@ -5,18 +5,14 @@ with its "Climdiv" dataset.  This autoplot creates comparisons between the two.
 <p>Variances shown are problems with IEM's database/processing, not NCEI!
 """
 
-import datetime
-
 import pandas as pd
+from pyiem.database import get_dbconn, get_sqlalchemy_conn
 from pyiem.exceptions import NoDataFound
 from pyiem.plot import figure
-from pyiem.util import (
-    get_autoplot_context,
-    get_dbconn,
-    get_properties,
-    get_sqlalchemy_conn,
-)
+from pyiem.util import get_autoplot_context, get_properties
 from sqlalchemy import text
+
+from iemweb.util import month2months
 
 PDICT = {
     "sum_precip": "Total Precipitation",
@@ -129,23 +125,11 @@ def plotter(fdict):
         raise NoDataFound("Sorry, no data found!")
 
     month = ctx["m"]
-    if month == "all":
-        months = range(1, 13)
-    elif month == "fall":
-        months = [9, 10, 11]
-    elif month == "spring":
-        months = [3, 4, 5]
-    elif month == "summer":
-        months = [6, 7, 8]
-    elif month == "winter":
-        months = [12, 1, 2]
+    months = month2months(month)
+    if month == "winter":
         df = df.reset_index()
         df["year"] = df.loc[df["month"].isin([1, 2]), "year"] - 1
         df = df.set_index("year")
-    else:
-        ts = datetime.datetime.strptime(f"2000-{month}-01", "%Y-%b-%d")
-        # make sure it is length two for the trick below in SQL
-        months = [ts.month, 999]
 
     df = (
         df.loc[df["month"].isin(months)]
@@ -167,7 +151,7 @@ def plotter(fdict):
         subtitle=f"{PDICT[varname]}, NCEI processdate: {procdate}",
         apctx=ctx,
     )
-    ax = fig.add_axes([0.1, 0.1, 0.6, 0.8])
+    ax = fig.add_axes((0.1, 0.1, 0.6, 0.8))
     df["iem_bias"] = df[f"iem_{varname}"] - df[f"ncei_{varname}"]
     bias = df["iem_bias"].mean()
     ax.bar(

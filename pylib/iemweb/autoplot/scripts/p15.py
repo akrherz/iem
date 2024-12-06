@@ -4,7 +4,6 @@ day to day changes in high or low temperature summarized by month.
 """
 
 import calendar
-import datetime
 
 import matplotlib.patheffects as PathEffects
 import numpy as np
@@ -12,7 +11,8 @@ import pandas as pd
 from pyiem.database import get_sqlalchemy_conn
 from pyiem.exceptions import NoDataFound
 from pyiem.plot import figure_axes
-from pyiem.util import get_autoplot_context
+from pyiem.util import get_autoplot_context, utc
+from sqlalchemy import text
 
 from iemweb.autoplot import ARG_STATION
 
@@ -34,7 +34,7 @@ def get_description():
         dict(
             type="year",
             name="year",
-            default=datetime.date.today().year,
+            default=utc().year,
             label="Year to Highlight",
             min=1893,
         ),
@@ -51,11 +51,11 @@ def plotter(fdict):
 
     with get_sqlalchemy_conn("coop") as conn:
         df = pd.read_sql(
-            """
+            text("""
         with obs as
         (select month, year, high, lag(high) OVER (ORDER by day ASC) as lhigh,
         low, lag(low) OVER (ORDER by day ASC) as llow
-        from alldata where station = %s)
+        from alldata where station = :station)
 
         SELECT year, month,
         sum(case when high > lhigh then 1 else 0 end)::numeric as high_greater,
@@ -65,9 +65,9 @@ def plotter(fdict):
         sum(case when low = llow then 1 else 0 end)::numeric as low_unch,
         sum(case when low < llow then 1 else 0 end)::numeric as low_lower
         from obs GROUP by year, month ORDER by year, month
-        """,
+        """),
             conn,
-            params=(station,),
+            params={"station": station},
             index_col=None,
         )
     gdf = df.groupby("month").sum()

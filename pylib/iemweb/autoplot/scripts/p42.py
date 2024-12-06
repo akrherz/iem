@@ -25,6 +25,8 @@ from pyiem.exceptions import NoDataFound
 from pyiem.plot import figure
 from pyiem.util import get_autoplot_context
 
+from iemweb.util import month2months
+
 PDICT = {
     "above": "At or Above Threshold...",
     "below": "Below Threshold...",
@@ -221,21 +223,7 @@ def plotter(fdict):
             f" and valid >= '{int(y1)}-01-01' and "
             f"valid < '{int(y2) + 1}-01-01' "
         )
-    if month == "all":
-        months = list(range(1, 13))
-    elif month == "fall":
-        months = [9, 10, 11]
-    elif month == "winter":
-        months = [12, 1, 2]
-    elif month == "octmar":
-        months = [10, 11, 12, 1, 2, 3]
-    elif month == "spring":
-        months = [3, 4, 5]
-    elif month == "summer":
-        months = [6, 7, 8]
-    else:
-        ts = datetime.datetime.strptime(f"2000-{month}-01", "%Y-%b-%d")
-        months = [ts.month]
+    months = month2months(month)
 
     ab = ctx["_nt"].sts[station]["archive_begin"]
     if ab is None:
@@ -288,7 +276,7 @@ def plotter(fdict):
         f"{MDICT.get(month)} :: Streaks {PDICT2[varname]} {label} {units}"
     )
     fig = figure(title=title, subtitle=subtitle, apctx=ctx)
-    ax = fig.add_axes([0.07, 0.25, 0.6, 0.65])
+    ax = fig.add_axes((0.07, 0.25, 0.6, 0.65))
 
     threshold = datetime.timedelta(hours=3)
     reset_valid = datetime.datetime(1910, 1, 1, tzinfo=tzinfo)

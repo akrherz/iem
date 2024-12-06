@@ -18,6 +18,7 @@ from pyiem.util import get_autoplot_context
 from sqlalchemy import text
 
 from iemweb.autoplot import ARG_STATION, get_monofont
+from iemweb.util import month2months
 
 MDICT = {
     "all": "No Month/Time Limit",
@@ -91,20 +92,6 @@ def plotter(fdict):
     binsize = ctx["binsize"]
     month = ctx["month"]
     year = ctx.get("year")
-    if month == "all":
-        months = list(range(1, 13))
-    elif month == "fall":
-        months = [9, 10, 11]
-    elif month == "winter":
-        months = [12, 1, 2]
-    elif month == "spring":
-        months = [3, 4, 5]
-    elif month == "summer":
-        months = [6, 7, 8]
-    else:
-        ts = datetime.datetime.strptime(f"2000-{month}-01", "%Y-%b-%d")
-        # make sure it is length two for the trick below in SQL
-        months = [ts.month, 999]
     with get_sqlalchemy_conn("coop") as conn:
         ddf = pd.read_sql(
             text(
@@ -113,7 +100,7 @@ def plotter(fdict):
                 "and high >= low and month = ANY(:months) "
             ),
             conn,
-            params={"station": station, "months": months},
+            params={"station": station, "months": month2months(month)},
             index_col=None,
         )
     if ddf.empty:
@@ -146,7 +133,7 @@ def plotter(fdict):
         f"{ctx['_sname']} ({ddf['year'].min():.0f}-{ddf['year'].max():.0f})"
     )
     fig = figure(title=title, subtitle=subtitle, apctx=ctx)
-    kax = fig.add_axes([0.65, 0.5, 0.3, 0.36])
+    kax = fig.add_axes((0.65, 0.5, 0.3, 0.36))
     kax.grid(True)
     kax.text(
         0.02,
@@ -194,9 +181,9 @@ def plotter(fdict):
         label = f"{q * 100:-6g} {val:-6.0f}"
         fig.text(xpos, ypos, label, fontproperties=monofont)
 
-    ax = fig.add_axes([0.07, 0.17, 0.5, 0.73])
+    ax = fig.add_axes((0.07, 0.17, 0.5, 0.73))
     res = ax.pcolormesh(xedges, yedges, hist.T, cmap=get_cmap(ctx["cmap"]))
-    cax = fig.add_axes([0.07, 0.08, 0.5, 0.01])
+    cax = fig.add_axes((0.07, 0.08, 0.5, 0.01))
     fig.colorbar(res, label="Days per Year", orientation="horizontal", cax=cax)
     ax.grid(True)
     ax.set_ylabel(r"High Temperature $^{\circ}\mathrm{F}$")

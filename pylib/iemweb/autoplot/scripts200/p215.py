@@ -5,7 +5,7 @@ is using a guassian kernel density estimate.
 """
 
 import calendar
-from datetime import date, datetime
+from datetime import date
 
 import numpy as np
 import pandas as pd
@@ -19,6 +19,7 @@ from scipy.stats import gaussian_kde
 from sqlalchemy import text
 
 from iemweb.autoplot import ARG_STATION
+from iemweb.util import month2months
 
 PDICT = {
     "high": "High Temperature [F]",
@@ -101,21 +102,11 @@ def get_df(ctx, period):
     """Get our data."""
     month = ctx["month"]
     ctx["mlabel"] = f"{month.capitalize()} Season"
+    months = month2months(month)
     if month == "all":
-        months = list(range(1, 13))
         ctx["mlabel"] = "All Year"
-    elif month == "fall":
-        months = [9, 10, 11]
-    elif month == "winter":
-        months = [12, 1, 2]
-    elif month == "spring":
-        months = [3, 4, 5]
-    elif month == "summer":
-        months = [6, 7, 8]
-    else:
-        ts = datetime.strptime(f"2000-{month}-01", "%Y-%b-%d")
-        months = [ts.month]
-        ctx["mlabel"] = calendar.month_name[ts.month]
+    elif len(months) == 1:
+        ctx["mlabel"] = calendar.month_name[months[0]]
     with get_sqlalchemy_conn("coop") as conn:
         df = pd.read_sql(
             text(
@@ -171,7 +162,7 @@ def plotter(fdict):
     )
     fitbox(fig, title, 0.12, 0.9, 0.91, 0.99)
 
-    ax = fig.add_axes([0.12, 0.38, 0.75, 0.52])
+    ax = fig.add_axes((0.12, 0.38, 0.75, 0.52))
     C1 = "blue"
     C2 = "red"
     alpha = 0.4
@@ -202,7 +193,7 @@ def plotter(fdict):
     ax.xaxis.set_major_locator(MaxNLocator(20))
 
     # Sub ax
-    ax2 = fig.add_axes([0.12, 0.1, 0.75, 0.22])
+    ax2 = fig.add_axes((0.12, 0.1, 0.75, 0.22))
     delta = df[label2] - df[label1]
     ax2.plot(df.index.values, delta)
     dam = delta.abs().max() * 1.1

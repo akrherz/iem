@@ -20,10 +20,13 @@ unfiltered events for further usage as you see fit.</p>
 import datetime
 
 import pandas as pd
+from pyiem.database import get_sqlalchemy_conn
 from pyiem.exceptions import NoDataFound
 from pyiem.plot import figure
-from pyiem.util import get_autoplot_context, get_sqlalchemy_conn
+from pyiem.util import get_autoplot_context
 from sqlalchemy import text
+
+from iemweb.util import month2months
 
 MDICT = {
     "all": "Entire Year",
@@ -178,22 +181,7 @@ def plotter(fdict):
             )
             title2 = f"on {ctx['sdate']:%-d %b}"
     else:
-        if month == "all":
-            months = list(range(1, 13))
-        elif month == "fall":
-            months = [9, 10, 11]
-        elif month == "winter":
-            months = [12, 1, 2]
-        elif month == "spring":
-            months = [3, 4, 5]
-        elif month == "summer":
-            months = [6, 7, 8]
-        elif month == "octmar":
-            months = [10, 11, 12, 1, 2, 3]
-        else:
-            ts = datetime.datetime.strptime(f"2000-{month}-01", "%Y-%b-%d")
-            # make sure it is length two for the trick below in SQL
-            months = [ts.month, 999]
+        months = month2months(month)
         date_limiter = (
             " and extract(month from valid at time zone :tzname)"
             " = ANY(:months) "
@@ -313,7 +301,7 @@ def plotter(fdict):
         f"({ab.year}-{datetime.datetime.now().year})"
     )
     fig = figure(title=title, subtitle=subtitle, apctx=ctx)
-    ax = fig.add_axes([0.1, 0.1, 0.65, 0.8])
+    ax = fig.add_axes((0.1, 0.1, 0.65, 0.8))
     ax.barh(
         range(len(y), 0, -1),
         y,

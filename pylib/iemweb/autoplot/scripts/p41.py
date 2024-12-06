@@ -22,6 +22,8 @@ are:
 and duration of stretches of hot or cold weather.
 """
 
+from datetime import timedelta
+
 import numpy as np
 import pandas as pd
 from pyiem.database import get_sqlalchemy_conn
@@ -30,8 +32,10 @@ from pyiem.plot import figure
 from pyiem.plot.use_agg import plt
 from pyiem.util import get_autoplot_context
 from scipy import stats
+from sqlalchemy import text
 
 from iemweb.autoplot import ARG_STATION, get_monofont
+from iemweb.util import month2months
 
 ODICT = {"max": "Maximum", "min": "Minimum", "avg": "Average"}
 PDICT = {
@@ -125,40 +129,35 @@ def get_description():
 
 def get_data(station, month, period, varname, days, opt):
     """Get Data please"""
-    doffset = "0 days"
-    if len(month) < 3:
-        mlimiter = f" and month = {int(month)} "
-    elif month == "all":
-        mlimiter = ""
-    elif month == "fall":
-        mlimiter = " and month in (9, 10, 11) "
-    elif month == "winter":
-        mlimiter = " and month in (12, 1, 2) "
-        doffset = "31 days"
-    elif month == "spring":
-        mlimiter = " and month in (3, 4, 5) "
-    else:  # summer
-        mlimiter = " and month in (6, 7, 8) "
-
+    params = {
+        "station": station,
+        "months": month2months(month),
+        "doffset": timedelta(days=0),
+    }
+    mlimiter = "and month = ANY(:months)"
+    if month == "winter":
+        params["doffset"] = timedelta(days=31)
     ylimiter = ""
     if period is not None:
         (y1, y2) = [int(x) for x in period.split("-")]
-        ylimiter = f"WHERE myyear >= {y1} and myyear <= {y2}"
+        params["y1"] = y1
+        params["y2"] = y2
+        ylimiter = "WHERE myyear >= :y1 and myyear <= :y2"
     if days == 1:
         with get_sqlalchemy_conn("coop") as conn:
             df = pd.read_sql(
-                f"""
+                text(f"""
             WITH data as (
                 SELECT
-                extract(year from day + '{doffset}'::interval)::int
+                extract(year from day + :doffset)::int
                 as myyear,
                 high, low, (high+low)/2. as avg from alldata
-                WHERE station = %s and high is not null
+                WHERE station = :station and high is not null
                 and low is not null {mlimiter})
             SELECT * from data {ylimiter}
-            """,
+            """),
                 conn,
-                params=(station,),
+                params=params,
                 index_col=None,
             )
     else:
@@ -168,20 +167,21 @@ def get_data(station, month, period, varname, days, opt):
         )
         with get_sqlalchemy_conn("coop") as conn:
             df = pd.read_sql(
-                f"""
+                text(f"""
             WITH data as (
                 SELECT
-                extract(year from day + '{doffset}'::interval)::int
+                extract(year from day + :doffset)::int
                 as myyear,
                 high, low, (high+low)/2. as avg, day, month from alldata
-                WHERE station = %s and high is not null and low is not null),
+                WHERE station = :station
+                and high is not null and low is not null),
             agg1 as (
                 SELECT myyear, month, {res} as {varname}
                 from data WHERE 1 = 1 {mlimiter})
             SELECT * from agg1 {ylimiter}
-            """,
+            """),
                 conn,
-                params=(station,),
+                params=params,
                 index_col=None,
             )
     if df.empty:
@@ -221,7 +221,7 @@ def plotter(fdict):
     s_slp, s_int, s_r, _, _ = stats.linregress(pc1, pc2)
 
     fig = figure(apctx=ctx)
-    ax = fig.add_axes([0.1, 0.11, 0.4, 0.76])
+    ax = fig.add_axes((0.1, 0.11, 0.4, 0.76))
     ax.scatter(pc1[::5], pc2[::5], s=40, marker="s", color="b", zorder=3)
     ax.plot(
         pc1,
@@ -273,7 +273,7 @@ def plotter(fdict):
     ax.legend(loc=2)
 
     # Second
-    ax = fig.add_axes([0.56, 0.18, 0.26, 0.68])
+    ax = fig.add_axes((0.56, 0.18, 0.26, 0.68))
     ax.set_title("Distribution")
     v1 = ax.violinplot(m1data, positions=[0], showextrema=True, showmeans=True)
     b = v1["bodies"][0]
@@ -320,26 +320,8 @@ def plotter(fdict):
     col1 = f"{MDICT[month1]}_{varname}_{y1}_{y2}"
     col2 = f"{MDICT[month2]}_{varname}_{y3}_{y4}"
     fig.text(x, y + 0.04, "Percentile Data    Diff")
-    for percentile in [
-        100,
-        99,
-        98,
-        97,
-        96,
-        95,
-        92,
-        90,
-        75,
-        50,
-        25,
-        10,
-        8,
-        5,
-        4,
-        3,
-        2,
-        1,
-    ]:
+    pt = [100, 99, 98, 97, 96, 95, 92, 90, 75, 50, 25, 10, 8, 5, 4, 3, 2, 1]
+    for percentile in pt:
         row = df.loc[percentile]
         fig.text(x, y, f"{percentile:3.0f}", fontproperties=monofont)
         fig.text(

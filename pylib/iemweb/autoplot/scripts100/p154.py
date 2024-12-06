@@ -16,6 +16,8 @@ from pyiem.util import get_autoplot_context
 from scipy import stats
 from sqlalchemy import text
 
+from iemweb.util import month2months
+
 PDICT = {"avg_tmpf": "Average Temperature"}
 UNITS = {"avg_tmpf": "F"}
 MDICT = {
@@ -86,23 +88,7 @@ def plotter(fdict):
     month = ctx["month"]
     station = ctx["zstation"]
     hour = ctx["hour"]
-
-    if month == "all":
-        months = list(range(1, 13))
-    elif month == "fall":
-        months = [9, 10, 11]
-    elif month == "winter":
-        months = [12, 1, 2]
-    elif month == "spring":
-        months = [3, 4, 5]
-    elif month == "summer":
-        months = [6, 7, 8]
-    elif month == "gs":
-        months = [5, 6, 7, 8, 9]
-    else:
-        ts = datetime.datetime.strptime(f"2000-{month}-01", "%Y-%b-%d")
-        # make sure it is length two for the trick below in SQL
-        months = [ts.month]
+    months = month2months(month)
 
     with get_sqlalchemy_conn("asos") as conn:
         df = pd.read_sql(
