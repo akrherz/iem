@@ -18,7 +18,7 @@ def main():
         "cmap:gist_stern_r::_cb:1.png"
     )
     pqstr = (
-        "plot ac {now:%Y%m%d%H%M} summary/today_gust.png "
+        f"plot ac {now:%Y%m%d%H%M} summary/today_gust.png "
         "iowa_wind_gust.png png"
     )
     web2ldm(service, pqstr, md5_from_name=True)
