@@ -20,7 +20,7 @@ positive.</p>
 issuance counts for a single Weather Forecast Offices.</p>
 """
 
-import datetime
+from datetime import timedelta
 from zoneinfo import ZoneInfo
 
 import numpy as np
@@ -30,6 +30,7 @@ from pyiem.exceptions import NoDataFound
 from pyiem.plot.geoplot import MapPlot
 from pyiem.reference import prodDefinitions
 from pyiem.util import get_autoplot_context, utc
+from sqlalchemy import text
 
 PDICT = {
     "count": "Issuance Count",
@@ -55,7 +56,7 @@ def get_description():
     """Return a dict describing how to call this plotter"""
     fix()
     desc = {"description": __doc__, "cache": 300, "data": True}
-    now = utc() + datetime.timedelta(days=1)
+    now = utc() + timedelta(days=1)
     desc["arguments"] = [
         dict(
             type="select",
@@ -108,20 +109,23 @@ def plotter(fdict):
 
     with get_sqlalchemy_conn("afos") as conn:
         df = pd.read_sql(
-            "SELECT source, pil, min(entered at time zone 'UTC') as first, "
-            "max(entered at time zone 'UTC') as last, count(*) from products "
-            "WHERE substr(pil, 1, 3) = %s and entered >= %s and entered < %s "
-            "GROUP by source, pil ORDER by source, pil ASC",
+            text("""
+    SELECT source, pil, min(entered at time zone 'UTC') as first,
+    max(entered at time zone 'UTC') as last, count(*) from products
+    WHERE substr(pil, 1, 3) = :pil and entered >= :sts and entered < :ets
+    GROUP by source, pil ORDER by source, pil ASC"""),
             conn,
-            params=(pil, ctx["sts"], ctx["ets"]),
+            params={"pil": pil, "sts": ctx["sts"], "ets": ctx["ets"]},
             index_col=None,
         )
     if df.empty:
         raise NoDataFound("No text products found for query, sorry.")
 
     data = {}
+    subtitle = ""
     if ctx["var"] == "count":
         gdf = df.groupby("source").sum(numeric_only=True)  # dt makes no sense
+        subtitle = f"Total: {gdf['count'].sum():,.0f}"
     elif ctx["var"] == "last":
         gdf = df.groupby("source").max()
     else:  # first
@@ -150,7 +154,7 @@ def plotter(fdict):
         subtitle=(
             f"Plot valid between {ctx['sts']:%d %b %Y %H:%M} UTC "
             f"and {ctx['ets']:%d %b %Y %H:%M} UTC, "
-            "based on unofficial IEM Archives"
+            f"based on unofficial IEM Archives.{subtitle}"
         ),
         sector="nws",
         nocaption=True,
