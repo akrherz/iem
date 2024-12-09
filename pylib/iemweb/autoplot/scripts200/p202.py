@@ -13,7 +13,7 @@ the plotted lines covering the period of record data.
 """
 
 import calendar
-import datetime
+from datetime import date, datetime
 
 import matplotlib.colors as mpcolors
 import metpy.calc as mcalc
@@ -59,27 +59,27 @@ def get_description():
         dict(
             type="year",
             name="y1",
-            default=datetime.date.today().year,
+            default=date.today().year,
             label="Year to highlight in chart:",
         ),
         dict(
             type="year",
             name="y2",
-            default=datetime.date.today().year,
+            default=date.today().year,
             label="Additional Year to plot (optional):",
             optional=True,
         ),
         dict(
             type="year",
             name="y3",
-            default=datetime.date.today().year,
+            default=date.today().year,
             label="Additional Year to plot (optional)",
             optional=True,
         ),
         dict(
             type="year",
             name="y4",
-            default=datetime.date.today().year,
+            default=date.today().year,
             label="Additional Year to plot (optional)",
             optional=True,
         ),
@@ -180,8 +180,8 @@ def plotter(fdict):
     df["week"] = (df["doy"] / 7).astype(int)
     df["delta"] = df[h2] - df[h1]
 
-    sts = datetime.datetime(2000, 6, 1, h1)
-    ets = datetime.datetime(2000, 6, 1, h2)
+    sts = datetime(2000, 6, 1, h1)
+    ets = datetime(2000, 6, 1, h2)
     sd = "same day" if h2 > h1 else "previous day"
     subtitle = f"{ets:%-I %p} minus {sts:%-I %p} ({sd}) (timezone: {tzname})"
     title = (
@@ -202,8 +202,8 @@ def plotter(fdict):
         # Histogram
         dy = 0.25 if ctx["v"] == "q" else 1.0
         H, xedges, yedges = np.histogram2d(
-            df["doy"].values,
-            df["delta"].values,
+            df["doy"].to_numpy(),
+            df["delta"].to_numpy(),
             bins=(
                 np.arange(0, 366, 7),
                 np.arange(-ymax - 0.5, ymax + 0.5, dy),

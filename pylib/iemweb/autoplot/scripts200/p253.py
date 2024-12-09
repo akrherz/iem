@@ -20,7 +20,7 @@ tornado track with the lead time in minutes.</p>
 
 """
 
-import datetime
+from datetime import timedelta, timezone
 from zoneinfo import ZoneInfo
 
 import geopandas as gpd
@@ -205,7 +205,7 @@ def plotter(fdict):
         trackgdf[col] = pd.to_datetime(
             trackgdf[col] / 1000,
             unit="s",
-        ).dt.tz_localize(datetime.timezone.utc)
+        ).dt.tz_localize(timezone.utc)
     track_sts = trackgdf.iloc[0]["starttime"]
     track_ets = trackgdf.iloc[0]["endtime"]
     # Get the warning polygons
@@ -234,7 +234,7 @@ def plotter(fdict):
         )
     if not tow.empty:
         for col in ["utc_issue", "utc_expire"]:
-            tow[col] = tow[col].dt.tz_localize(datetime.timezone.utc)
+            tow[col] = tow[col].dt.tz_localize(timezone.utc)
 
     minutes = int((track_ets - track_sts).total_seconds() / 60.0)
     if minutes <= 0:
@@ -246,7 +246,7 @@ def plotter(fdict):
     rows = []
     for minute in range(minutes + 1):
         # Compute the time of the segment
-        valid = track_sts + datetime.timedelta(minutes=minute)
+        valid = track_sts + timedelta(minutes=minute)
         # Compute the distance of the segment
         pt = utm_track.interpolate(minute / minutes * utm_track.length)
         rows.append({"geom": pt, "valid": valid})
