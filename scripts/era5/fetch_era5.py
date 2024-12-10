@@ -56,7 +56,7 @@ def ingest(ncin, nc, valid, domain):
     p01m = nc.variables["p01m"]
     evap = nc.variables["evap"]
     if valid.hour == 0:
-        tidx0 = iemre.hourly_offset((valid - timedelta(hours=24)))
+        tidx0 = iemre.hourly_offset(valid - timedelta(hours=24))
         # Special 1 Jan consideration
         if valid.month == 1 and valid.day == 1 and valid.year > 1950:
             with ncopen(

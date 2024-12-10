@@ -40,12 +40,10 @@ def fetcher(station, sts, ets):
 
     sio = StringIO()
     sio.write(
-        (
-            "station,valid_CST_CDT,air_tmp_F,dew_point_F,"
-            "wind_dir_deg,wind_sped_kts,wind_gust_kts,relh_%,"
-            "alti_in,pcpncnt_in,precip_day_in,precip_month_in,"
-            "solar_rad_wms\n"
-        )
+        "station,valid_CST_CDT,air_tmp_F,dew_point_F,"
+        "wind_dir_deg,wind_sped_kts,wind_gust_kts,relh_%,"
+        "alti_in,pcpncnt_in,precip_day_in,precip_month_in,"
+        "solar_rad_wms\n"
     )
 
     for row in cursor:

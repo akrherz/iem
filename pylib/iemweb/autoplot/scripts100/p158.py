@@ -6,7 +6,7 @@ prevent web browser crashes.  If you select a time period greater than
 20 minutes, you will get strided results.
 """
 
-import datetime
+from datetime import timedelta
 from zoneinfo import ZoneInfo
 
 import matplotlib.dates as mdates
@@ -55,7 +55,7 @@ def add_context(ctx):
     # We can't deal with thousands of datapoints on the plot, so we stride
     # appropriately with hopes of limiting to 1000 x points
     size = minutes * 60.0
-    stride = 1 if size < 1000 else int(((size / 1000) + 1))
+    stride = 1 if size < 1000 else int((size / 1000) + 1)
 
     towerid = ctx["_nt"].sts[station]["remote_id"]
     ctx["title"] = f"Tall Tower {ctx['_nt'].sts[station]['name']}"
@@ -72,7 +72,7 @@ def add_context(ctx):
             params=(
                 towerid,
                 dt,
-                dt + datetime.timedelta(minutes=minutes),
+                dt + timedelta(minutes=minutes),
                 stride,
             ),
             index_col="valid",

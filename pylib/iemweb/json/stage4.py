@@ -93,7 +93,7 @@ def dowork(environ):
             (nc.variables["lon"][:] - environ["lon"]) ** 2
             + (nc.variables["lat"][:] - environ["lat"]) ** 2
         ) ** 0.5
-        (j, i) = np.unravel_index(dist.argmin(), dist.shape)  # noqa
+        (j, i) = np.unravel_index(dist.argmin(), dist.shape)  # skipcq
         res["gridi"] = int(i)
         res["gridj"] = int(j)
 

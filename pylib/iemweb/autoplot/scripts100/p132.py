@@ -192,11 +192,9 @@ def plotter(fdict):
     ax2.set_yticklabels(ylabels[::-1])
     ax.grid(True, zorder=11)
     ax.set_xlabel(
-        (
-            "Precipitation [inch]"
-            if varname in ["total_precip"]
-            else r"Temperature $^\circ$F"
-        )
+        "Precipitation [inch]"
+        if varname in ["total_precip"]
+        else r"Temperature $^\circ$F"
     )
 
     return fig, df

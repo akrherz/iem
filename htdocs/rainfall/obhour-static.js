@@ -68,9 +68,9 @@ function rpv(val){
     return val;
 }
 
-Ext.onReady(function () {
+Ext.onReady(() => {
 
-    var network_selector = new Ext.form.ComboBox({
+    const network_selector = new Ext.form.ComboBox({
         hiddenName: 'network',
         store: new Ext.data.SimpleStore({
             fields: ['abbr', 'name'],
@@ -90,7 +90,7 @@ Ext.onReady(function () {
     });
 
 
-    var dateselector = new Ext.form.DateField({
+    const dateselector = new Ext.form.DateField({
         id: "df",
         width: 150,
         hideLabel: true,
@@ -99,7 +99,7 @@ Ext.onReady(function () {
         value: new Date()
     });
 
-    var timeselector = new Ext.form.TimeField({
+    const timeselector = new Ext.form.TimeField({
         hideLabel: true,
         increment: 60,
         value: new Date(),
@@ -107,21 +107,21 @@ Ext.onReady(function () {
         id: "tm"
     });
 
-    var realtime = new Ext.form.Checkbox({
+    const realtime = new Ext.form.Checkbox({
         id: "realtime",
         boxLabel: "Auto Refresh",
         hideLabel: true
     });
 
-    var task = {
+    const task = {
         run: function () {
             if (!realtime.checked) return;
             var localDate = new Date();
             dateselector.setValue(localDate);
             timeselector.setValue(localDate);
-            var gmtDate = localDate.add(Date.SECOND, 0 - localDate.format('Z'));
-            var sff = Ext.getCmp('selectform').getForm();
-            var network = sff.findField('network').getValue();
+            const gmtDate = localDate.add(Date.SECOND, 0 - localDate.format('Z'));
+            const sff = Ext.getCmp('selectform').getForm();
+            const network = sff.findField('network').getValue();
             Ext.getCmp('precipgrid').setTitle("Precip Accumulation valid at " + localDate.format('d M Y h A')).getStore().load({
                 params: 'network=' + network + '&ts=' + gmtDate.format('YmdHi')
             });
@@ -134,7 +134,7 @@ Ext.onReady(function () {
     Ext.TaskMgr.start(task);
 
 
-    var selectform = new Ext.form.FormPanel({
+    const selectform = new Ext.form.FormPanel({
         frame: true,
         id: 'selectform',
         title: 'Data Chooser',
@@ -142,14 +142,14 @@ Ext.onReady(function () {
         buttons: [{
             text: 'Load Data',
             handler: function () {
-                var sff = Ext.getCmp('selectform').getForm();
-                var network = sff.findField('network').getValue();
+                const sff = Ext.getCmp('selectform').getForm();
+                const network = sff.findField('network').getValue();
                 updateURI(network);
-                var localDate = sff.findField('df').getValue();
-                var tm = sff.findField('tm').getValue();
-                var d = new Date.parseDate(tm, 'h A');
+                let localDate = sff.findField('df').getValue();
+                const tm = sff.findField('tm').getValue();
+                const d = new Date.parseDate(tm, 'h A');
                 localDate = localDate.add(Date.HOUR, d.format('H'));
-                var gmtDate = localDate.add(Date.SECOND, 0 - localDate.format('Z'));
+                const gmtDate = localDate.add(Date.SECOND, 0 - localDate.format('Z'));
                 Ext.getCmp('precipgrid').setTitle("Precip Accumulation valid at " + localDate.format('d M Y h A')).getStore().load({
                     params: 'network=' + network + '&ts=' + gmtDate.format('YmdHi')
                 });
@@ -161,13 +161,13 @@ Ext.onReady(function () {
     });
 
     // http://www.sencha.com/forum/showthread.php?43298-HttpProxy-timeout-always-30-secs
-    var conn = new Ext.data.Connection({
+    const conn = new Ext.data.Connection({
         timeout: 120000
         , url: 'obhour-json.php'
         , method: 'GET'
     });
 
-    var pstore = new Ext.data.Store({
+    const pstore = new Ext.data.Store({
         root: 'precip',
         autoLoad: false,
         proxy: new Ext.data.HttpProxy(conn),
@@ -198,9 +198,9 @@ Ext.onReady(function () {
     };
 
     function updateHeaders(ts) {
-        var cm = gpanel.getColumnModel();
-        var col;
-        var ts0;
+        const cm = gpanel.getColumnModel();
+        let col;
+        let ts0;
         for (var i = 2; i < cm.getColumnCount(); i++) {
             col = cm.getColumnById(cm.getColumnId(i));
             ts0 = ts.add(Date.SECOND, 0 - (col.toffset * 3600));
@@ -246,7 +246,7 @@ Ext.onReady(function () {
         autoScroll: true
     });
 
-    var tp = new Ext.Panel({
+    const tp = new Ext.Panel({
         contentEl: 'sidebarinfo'
     });
 

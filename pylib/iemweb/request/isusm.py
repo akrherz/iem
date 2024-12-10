@@ -34,7 +34,6 @@ mode=hourly&sts=2024-07-01T00:00Z&ets=2024-08-01T00:00Z&format=comma&tz=UTC
 import re
 from datetime import timedelta
 from io import BytesIO, StringIO
-from typing import List
 from zoneinfo import ZoneInfo
 
 import numpy as np
@@ -110,7 +109,7 @@ class Schema(CGIModel):
         return value
 
 
-def fetch_daily(environ: dict, cols: List):
+def fetch_daily(environ: dict, cols: list):
     """Return a fetching of daily data"""
     stations: list = environ["station"]
 
@@ -265,7 +264,7 @@ def fetch_daily(environ: dict, cols: List):
     return df, cols
 
 
-def fetch_hourly(environ: dict, cols: List):
+def fetch_hourly(environ: dict, cols: list):
     """Process the request for hourly/minute data."""
     stations = environ["station"]
 
@@ -395,7 +394,7 @@ def fetch_hourly(environ: dict, cols: List):
     return df, cols
 
 
-def fetch_inversion(environ: dict, cols: List):
+def fetch_inversion(environ: dict, cols: list):
     """Process the request for inversion data."""
     stations = environ["station"]
 

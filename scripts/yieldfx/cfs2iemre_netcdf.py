@@ -30,10 +30,8 @@ AGGFUNC = {
 def merge(nc, valid, gribname, vname):
     """Merge in the grib data"""
     fn = valid.strftime(
-        (
-            f"/mesonet/ARCHIVE/data/%Y/%m/%d/model/cfs/%H/{gribname}"
-            ".01.%Y%m%d%H.daily.grib2"
-        )
+        f"/mesonet/ARCHIVE/data/%Y/%m/%d/model/cfs/%H/{gribname}"
+        ".01.%Y%m%d%H.daily.grib2"
     )
     if not os.path.isfile(fn):
         LOG.info("Missing %s, aborting", fn)

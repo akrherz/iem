@@ -19,7 +19,6 @@ Not listed due to having no PNG output
 """
 
 import importlib
-from typing import Tuple
 
 ARG_IEMRE_DOMAIN = {
     "type": "select",
@@ -59,7 +58,7 @@ FEMA_REGIONS = {
 }
 
 
-def fema_region2states(region: str) -> Tuple:
+def fema_region2states(region: str) -> tuple:
     """Convert string region code to list of states."""
     label = FEMA_REGIONS[region]
     return label.split("{")[1][:-1].split(",")

@@ -8,7 +8,7 @@ assuming the four seasons are to be equal duration.  Of course, this is
 arbitrary, but interesting to look at!
 """
 
-import datetime
+from datetime import date, timedelta
 
 import matplotlib.dates as mdates
 import pandas as pd
@@ -38,7 +38,7 @@ def get_description():
         dict(
             type="year",
             name="year",
-            default=(datetime.date.today().year - 2),
+            default=(date.today().year - 2),
             label="Select Start Year (3 years plotted) for Top Panel:",
         ),
     ]
@@ -103,12 +103,12 @@ def plotter(fdict):
         df.at[df.index.min(), col] = None
 
     # Need to cull current year
-    if datetime.date.today().month < 8:
+    if date.today().month < 8:
         for col in ["summer", "summer_end_doy", "summer_end"]:
-            df.at[datetime.date.today().year, col] = None
-    if datetime.date.today().month < 2:
+            df.at[date.today().year, col] = None
+    if date.today().month < 2:
         for col in ["winter", "winter_end_doy", "winter_end"]:
-            df.at[datetime.date.today().year, col] = None
+            df.at[date.today().year, col] = None
     df["spring_length"] = df["summer_end_doy"] - 91 - df["winter_end_doy"]
     # fall is a bit tricker
     df["fall_length"] = None
@@ -138,24 +138,24 @@ def plotter(fdict):
     for yr in range(year, year + 3):
         if yr not in df.index:
             continue
-        date = df.at[yr, "winter_end"]
+        dt = df.at[yr, "winter_end"]
         val = df.at[yr, "winter"]
-        if date is not None:
+        if dt is not None:
             ax[0].text(
-                date,
+                dt,
                 val - 1,
-                r"%s %.1f$^\circ$F" % (date.strftime("%-d %b"), val),
+                r"%s %.1f$^\circ$F" % (dt.strftime("%-d %b"), val),
                 ha="center",
                 va="top",
                 bbox=dict(color="white", boxstyle="square,pad=0"),
             )
-        date = df.at[yr, "summer_end"]
+        dt = df.at[yr, "summer_end"]
         val = df.at[yr, "summer"]
-        if date is not None:
+        if dt is not None:
             ax[0].text(
-                date,
+                dt,
                 val + 1,
-                r"%s %.1f$^\circ$F" % (date.strftime("%-d %b"), val),
+                r"%s %.1f$^\circ$F" % (dt.strftime("%-d %b"), val),
                 ha="center",
                 va="bottom",
                 bbox=dict(color="white", boxstyle="square,pad=0"),
@@ -172,10 +172,10 @@ def plotter(fdict):
     yticks = []
     yticklabels = []
     for doy in range(int(df[p2col].min()), int(df[p2col].max())):
-        date = datetime.date(2000, 1, 1) + datetime.timedelta(days=doy - 1)
-        if date.day in [1, 15]:
+        dt = date(2000, 1, 1) + timedelta(days=doy - 1)
+        if dt.day in [1, 15]:
             yticks.append(doy)
-            yticklabels.append(date.strftime("%-d %b"))
+            yticklabels.append(dt.strftime("%-d %b"))
     ax[1].set_yticks(yticks)
     ax[1].set_yticklabels(yticklabels)
     lbl = (
@@ -188,9 +188,7 @@ def plotter(fdict):
     avgv = df[p2col].mean()
     ax[1].axhline(avgv, color="r")
     ax[1].plot(df.index.values, intercept + (df.index.values * slp))
-    d = (
-        datetime.date(2000, 1, 1) + datetime.timedelta(days=int(avgv))
-    ).strftime("%-d %b")
+    d = (date(2000, 1, 1) + timedelta(days=int(avgv))).strftime("%-d %b")
     ax[1].text(
         0.02,
         0.02,
