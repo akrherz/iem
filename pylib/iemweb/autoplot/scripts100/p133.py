@@ -102,7 +102,7 @@ def get_highcharts(ctx: dict) -> dict:
             dict(
                 x=round(row["before"], 2),
                 y=round(row["after"], 2),
-                name="%s-%s" % (yr, yr + 1),
+                name=f"{yr}-{yr + 1}",
             )
         )
     j["series"] = [
@@ -131,7 +131,7 @@ def plotter(fdict):
 
     title = (
         f"{ctx['_sname']}:: Snowfall Totals\n"
-        f"Prior to and after: {date:%-d %B}"
+        f"Prior to and after: {dt:%-d %B}"
     )
     (fig, ax) = figure_axes(title=title, apctx=ctx)
     ax.scatter(df["before"].values, df["after"].values)

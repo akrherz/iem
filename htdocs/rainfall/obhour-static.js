@@ -116,7 +116,7 @@ Ext.onReady(() => {
     const task = {
         run: function () {
             if (!realtime.checked) return;
-            var localDate = new Date();
+            const localDate = new Date();
             dateselector.setValue(localDate);
             timeselector.setValue(localDate);
             const gmtDate = localDate.add(Date.SECOND, 0 - localDate.format('Z'));
@@ -201,7 +201,7 @@ Ext.onReady(() => {
         const cm = gpanel.getColumnModel();
         let col;
         let ts0;
-        for (var i = 2; i < cm.getColumnCount(); i++) {
+        for (let i = 2; i < cm.getColumnCount(); i++) {
             col = cm.getColumnById(cm.getColumnId(i));
             ts0 = ts.add(Date.SECOND, 0 - (col.toffset * 3600));
             if (col.toffset == 0) {
