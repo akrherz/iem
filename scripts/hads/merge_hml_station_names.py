@@ -5,9 +5,9 @@ hacked into the database previously..."""
 
 import sys
 
+from pyiem.database import get_dbconn
 from pyiem.nws.products.hml import parser
 from pyiem.reference import nwsli2state
-from pyiem.util import get_dbconn
 
 sys.path.insert(0, "../dbutil")
 from delete_station import delete_logic  # noqa
@@ -84,11 +84,11 @@ def merge(xref):
     """Do some logic here to clean things up!"""
     pgconn = get_dbconn("mesosite", user="mesonet")
     ipgconn = get_dbconn("iem", user="mesonet")
-    for nwsli, name in xref.items():
+    for nwsli, name_in in xref.items():
         cursor = pgconn.cursor()
         rwcursor = pgconn.cursor()
         icursor = ipgconn.cursor()
-        name = name[:64]  # database name size limitation
+        name = name_in[:64]  # database name size limitation
         cursor.execute(
             "SELECT id, name, network, iemid from stations WHERE "
             "id = %s and (network ~* 'COOP' or network ~* 'DCP')",

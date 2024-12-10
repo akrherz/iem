@@ -40,8 +40,8 @@ def main():
         )
         LOG.info("Removed %s rows for station: %s", cursor.rowcount, location)
         with open(fn, encoding="ascii") as fh:
-            for line in fh:
-                line = line.strip()
+            for line_in in fh:
+                line = line_in.strip()
                 if not line.startswith("19") and not line.startswith("20"):
                     continue
                 tokens = line.split()

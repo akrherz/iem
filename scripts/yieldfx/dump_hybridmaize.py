@@ -23,8 +23,8 @@ def main():
         thisyear = {}
         # get values from latest yieldfx dump
         with open(f"{DIRPATH}/{site}.met", encoding="utf-8") as fh:
-            for line in fh:
-                line = line.strip()
+            for line_in in fh:
+                line = line_in.strip()
                 if not line.startswith("2016"):
                     continue
                 tokens = line.split()

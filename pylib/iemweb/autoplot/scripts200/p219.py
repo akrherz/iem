@@ -5,7 +5,7 @@ app will search backwards in time up to 24 hours to find the nearest
 issuance stored in the database.
 """
 
-import datetime
+from datetime import timedelta, timezone
 
 import matplotlib.patheffects as PathEffects
 import numpy as np
@@ -76,11 +76,11 @@ def taf_search(pgconn, station, valid):
         "SELECT valid at time zone 'UTC' from taf "
         "WHERE station = %s and valid > %s and "
         "valid < %s ORDER by valid DESC",
-        (station, valid - datetime.timedelta(hours=24), valid),
+        (station, valid - timedelta(hours=24), valid),
     )
     if cursor.rowcount == 0:
         return None
-    return cursor.fetchone()[0].replace(tzinfo=datetime.timezone.utc)
+    return cursor.fetchone()[0].replace(tzinfo=timezone.utc)
 
 
 def compute_flight_condition(row):
@@ -109,7 +109,7 @@ def compute_flight_condition(row):
 def plotter(fdict):
     """Go"""
     ctx = get_autoplot_context(fdict, get_description())
-    valid = ctx["valid"].replace(tzinfo=datetime.timezone.utc)
+    valid = ctx["valid"].replace(tzinfo=timezone.utc)
 
     def fetch(ts):
         """Getme data."""
@@ -155,7 +155,7 @@ def plotter(fdict):
     # one-two line TAFs cause the legend to go off-screen
     yndc = max([bbox.y1 / figbbox.y1, 0.13])
     # Create the main axes that will hold all our hackery
-    ax = fig.add_axes([0.08, yndc + 0.05, 0.9, 0.9 - yndc - 0.05])
+    ax = fig.add_axes((0.08, yndc + 0.05, 0.9, 0.9 - yndc - 0.05))
     fig.text(0.015, 0.3, "Cloud Coverage & Level", rotation=90)
 
     df["u"], df["v"] = [
@@ -194,7 +194,7 @@ def plotter(fdict):
         # At 0.9 present weather
         delta = row["next_valid"]
         rotation = 0
-        if not pd.isna(delta) and delta < datetime.timedelta(hours=2):
+        if not pd.isna(delta) and delta < timedelta(hours=2):
             rotation = 45
         ax.text(
             valid,
@@ -256,7 +256,7 @@ def plotter(fdict):
         color="r",
     )
 
-    padding = datetime.timedelta(minutes=60)
+    padding = timedelta(minutes=60)
     ax.set_xlim(df.index.min() - padding, df.index.max() + padding)
     ax.set_yticks([0.9, 1.5, 2, 2.5, 3, 3.25, 3.8])
     ax.set_yticklabels(
@@ -290,9 +290,8 @@ def plotter(fdict):
     xs[0] = xs[0] - padding
     xs.append(df.index.max() + padding)
     previous = "VFR"
-    for i, val in enumerate(df["fcond"].values):
-        if val is None:
-            val = previous
+    for i, val_in in enumerate(df["fcond"].values):
+        val = previous if val_in is None else val_in
         previous = val
         ax.axvspan(
             xs[i],

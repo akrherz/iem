@@ -6,7 +6,8 @@ Run from RUN_10_AFTER.sh
 import datetime
 import re
 
-from pyiem.util import get_dbconn, logger
+from pyiem.database import get_dbconn
+from pyiem.util import logger
 
 LOG = logger()
 LOGRE = re.compile(r"Autoplot\[\s*(\d+)\] Timing:\s*(\d+\.\d+)s Key: ([^\s]*)")
@@ -42,8 +43,8 @@ def find_and_save(cursor, dbendts):
     thisyear = now.year
     inserts = 0
     with open(LOGFN, "rb") as fh:
-        for line in fh:
-            line = line.decode("utf-8", "ignore")
+        for line_in in fh:
+            line = line_in.decode("utf-8", "ignore")
             tokens = LOGRE.findall(line)
             if len(tokens) != 1:
                 continue

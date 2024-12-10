@@ -1,6 +1,6 @@
 /* global moment, $ */
-var dt = moment(); // Current application time
-var irealtime = true; // Is our application in realtime mode or not
+let dt = moment(); // Current application time
+let irealtime = true; // Is our application in realtime mode or not
 
 function text(str) {
     // XSS

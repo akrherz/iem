@@ -126,7 +126,6 @@ def plotter(fdict):
         dyear = df[df["yr"] == year].sort_values(by=["rank"], ascending=True)
         if not dyear.empty:
             break
-        year += 1
     i = 1
     ylabels = []
     leftsrcs = []

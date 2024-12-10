@@ -1,9 +1,9 @@
 /* global $, ol */
-var controls;
-var vectors;
-var feature;
+let controls;
+let vectors;
+let feature;
 window.app = {};
-var app = window.app;
+const app = window.app;
 let theMap = null;
 /**
  * @constructor
@@ -44,7 +44,7 @@ app.Drag = function () {
 
 };
 // https://gis.stackexchange.com/questions/324606
-var ol_ext_inherits = function (child, parent) {
+const ol_ext_inherits = function (child, parent) {
     child.prototype = Object.create(parent.prototype);
     child.prototype.constructor = child;
 };
@@ -75,18 +75,17 @@ app.Drag.prototype.handleDownEvent = function (evt) {
  * @param {ol.MapBrowserEvent} evt Map browser event.
  */
 app.Drag.prototype.handleDragEvent = function (evt) {
-    var map = evt.map;
+    const map = evt.map;
 
     map.forEachFeatureAtPixel(evt.pixel,
         function (feat) {
             return feat;
         });
 
-    var deltaX = evt.coordinate[0] - this.coordinate_[0];
-    var deltaY = evt.coordinate[1] - this.coordinate_[1];
+    const deltaX = evt.coordinate[0] - this.coordinate_[0];
+    const deltaY = evt.coordinate[1] - this.coordinate_[1];
 
-    var geometry = /** @type {ol.geom.SimpleGeometry} */
-        (this.feature_.getGeometry());
+    const geometry = this.feature_.getGeometry();
     geometry.translate(deltaX, deltaY);
 
     this.coordinate_[0] = evt.coordinate[0];
@@ -99,12 +98,12 @@ app.Drag.prototype.handleDragEvent = function (evt) {
  */
 app.Drag.prototype.handleMoveEvent = function (evt) {
     if (this.cursor_) {
-        var map = evt.map;
+        const map = evt.map;
         const feature_ = map.forEachFeatureAtPixel(evt.pixel,
             function (feat) {
                 return feat;
             });
-        var element = evt.map.getTargetElement();
+        const element = evt.map.getTargetElement();
         if (feature_) {
             if (element.style.cursor != this.cursor_) {
                 this.previousCursor_ = element.style.cursor;
@@ -123,7 +122,7 @@ app.Drag.prototype.handleMoveEvent = function (evt) {
  * @return {boolean} `false` to stop the drag sequence.
  */
 app.Drag.prototype.handleUpEvent = function (evt) {
-    var ar = ol.proj.transform(this.coordinate_, 'EPSG:3857', 'EPSG:4326');
+    const ar = ol.proj.transform(this.coordinate_, 'EPSG:3857', 'EPSG:4326');
     $('#lon').val(ar[0].toFixed(4));
     $('#lat').val(ar[1].toFixed(4));
     this.coordinate_ = null;

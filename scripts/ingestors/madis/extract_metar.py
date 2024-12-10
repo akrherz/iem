@@ -116,8 +116,8 @@ def workflow(fn):
     dwpkqcd = ds["dewpointQCD"].values
     altiqcd = ds["altimeterQCD"].values
     metars = []
-    for idx, rawid in enumerate(ids):
-        rawid = rawid.decode("ascii")
+    for idx, rawid_in in enumerate(ids):
+        rawid = rawid_in.decode("ascii")
         if len(rawid) != 4:
             continue
 

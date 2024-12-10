@@ -91,8 +91,8 @@ def glean_labels(label) -> list:
     """Figure out what we have here."""
     res = []
     prefix = ""
-    for token in [x.strip().lower() for x in label.split("\n")]:
-        token = token.replace(".", "").strip()
+    for tokenin in [x.strip().lower() for x in label.split("\n")]:
+        token = tokenin.replace(".", "").strip()
         token = REMAPED.get(token, token)
         if token.find("moisture") > -1:
             prefix = f"{token} "
@@ -107,8 +107,8 @@ def process_lines_pdfminer(valid, lines) -> int:
     """Special magic here."""
     labels = ""
     numbers = []
-    for line in lines:
-        line = line.strip().lower()
+    for line_in in lines:
+        line = line_in.strip().lower()
         if line in [""]:
             continue
         if line in ["topsoil moisture", "subsoil moisture"]:
@@ -135,9 +135,9 @@ def process_lines(valid, lines) -> int:
     # Quacks like a duck here
     prefix = ""
     inserts = 0
-    for line in lines:
+    for line_in in lines:
         line = (
-            line.strip()
+            line_in.strip()
             .lower()
             .replace("a1", "11")
             .replace("ii", "11")

@@ -1,40 +1,49 @@
-<?php 
- require_once "../../config/settings.inc.php";
- require_once "../../include/myview.php";
- require_once "../../include/mlib.php"; 
- require_once "../../include/database.inc.php";
- require_once "../../include/forms.php";
- 
- $t = new MyView();
- $t->current_network = "Other";
- $sortcol = isset($_GET["sortcol"]) ? xssafe($_GET["sortcol"]): "station";
- $network = isset($_GET["network"]) ? xssafe($_GET["network"]): 'OT';
- 
- $mesosite = iemdb('mesosite');
- pg_prepare($mesosite, "FINDTZ", "SELECT tzname from networks where id = $1");
- $rs = pg_execute($mesosite, "FINDTZ", Array($network));
- if (pg_num_rows($rs) < 1){
-     $tzname = "America/Chicago";
- } else {
-     $row = pg_fetch_assoc($rs,0);
-     $tzname = $row["tzname"];
- }
-  
- $t->title = "Other Currents";
- $t->refresh = 600;
+<?php
+require_once "../../config/settings.inc.php";
+require_once "../../include/myview.php";
+require_once "../../include/mlib.php";
+require_once "../../include/database.inc.php";
+require_once "../../include/forms.php";
 
-$arr = Array(
+$t = new MyView();
+$t->current_network = "Other";
+$sortcol = isset($_GET["sortcol"]) ? xssafe($_GET["sortcol"]) : "station";
+$network = isset($_GET["network"]) ? xssafe($_GET["network"]) : 'OT';
+
+$mesosite = iemdb('mesosite');
+pg_prepare($mesosite, "FINDTZ", "SELECT tzname from networks where id = $1");
+$rs = pg_execute($mesosite, "FINDTZ", array($network));
+if (pg_num_rows($rs) < 1) {
+    $tzname = "America/Chicago";
+} else {
+    $row = pg_fetch_assoc($rs, 0);
+    $tzname = $row["tzname"];
+}
+
+$t->title = "Other Currents";
+$t->refresh = 600;
+
+$arr = array(
     "network" => $network,
 );
 $jobj = iemws_json("currents.json", $arr);
 
-$vals = Array("tmpf" => "Air Temperature [F]", "dwpf" => "Dew Point Temp [F]",
-  "sknt" => "Wind Speed [knots]", "wdir" => "Wind Direction [deg]",
-  "pday" => "Precip Accum [inches]", "max_sknt" => "Wind Gust [knots]",
-  "ts" => "Observation Time [local]", "feel" => "Feels Like",
-  "min_tmpf" => "Today's Low Temperature", "drct" => "Wind Direction",
-  "max_tmpf" => "Today's High Temperature", "gtim" => "Wind Gust Time",
-  "station" => "Station ID", "relh" => "Relative Humidity");
+$vals = array(
+    "tmpf" => "Air Temperature [F]",
+    "dwpf" => "Dew Point Temp [F]",
+    "sknt" => "Wind Speed [knots]",
+    "wdir" => "Wind Direction [deg]",
+    "pday" => "Precip Accum [inches]",
+    "max_sknt" => "Wind Gust [knots]",
+    "ts" => "Observation Time [local]",
+    "feel" => "Feels Like",
+    "min_tmpf" => "Today's Low Temperature",
+    "drct" => "Wind Direction",
+    "max_tmpf" => "Today's High Temperature",
+    "gtim" => "Wind Gust Time",
+    "station" => "Station ID",
+    "relh" => "Relative Humidity"
+);
 
 $t->breadcrumbs = <<<EOF
 <ol class="breadcrumb">
@@ -43,25 +52,26 @@ $t->breadcrumbs = <<<EOF
 </ol>
 EOF;
 
-$mydata = Array();
+$mydata = array();
 
-foreach($jobj["data"] as $bogus => $iemob){
+foreach ($jobj["data"] as $bogus => $iemob) {
     $key = $iemob["station"];
     $mydata[$key] = $iemob;
     $mydata[$key]["ts"] = strtotime($iemob["local_valid"]);
     $mydata[$key]["sped"] = $mydata[$key]["sknt"] * 1.15078;
-    $mydata[$key]["relh"] = relh(f2c($mydata[$key]["tmpf"]),
-       f2c($mydata[$key]["dwpf"]) );
-    
-    if ($mydata[$key]["max_gust"] > $mydata[$key]["max_sknt"]){
+    $mydata[$key]["relh"] = relh(
+        f2c($mydata[$key]["tmpf"]),
+        f2c($mydata[$key]["dwpf"])
+    );
+
+    if ($mydata[$key]["max_gust"] > $mydata[$key]["max_sknt"]) {
         $mydata[$key]["peak"] = $mydata[$key]["max_gust"];
         $mydata[$key]["peak_ts"] = strtotime($mydata[$key]["local_max_gust_ts"]);
     } else {
         $mydata[$key]["peak"] = $mydata[$key]["max_sknt"];
-        $val = is_null($mydata[$key]["local_max_sknt_ts"]) ? null: strtotime($mydata[$key]["local_max_sknt_ts"]);
+        $val = is_null($mydata[$key]["local_max_sknt_ts"]) ? null : strtotime($mydata[$key]["local_max_sknt_ts"]);
         $mydata[$key]["peak_ts"] = $val;
     }
-
 }
 
 $finalA = aSortBySecondIndex($mydata, $sortcol);
@@ -70,11 +80,11 @@ $now = time();
 
 $table = "";
 // Loop though all data
-foreach($finalA as $key => $parts){
+foreach ($finalA as $key => $parts) {
     $i++;
     $tdiff = $now - $parts["ts"];
     // Don't show stations over 5 days old
-    if ($tdiff > 86400*5){
+    if ($tdiff > 86400 * 5) {
         continue;
     }
     $table .= "<tr";
@@ -82,43 +92,52 @@ foreach($finalA as $key => $parts){
 
     $table .= ">";
     $table .= "<td><input type=\"checkbox\" name=\"st[]\"
-               value=\"".$key."\"></td>";
-    $table .= sprintf("<td><a href=\"/sites/site.php?station=%s&amp;network=%s\">%s</a></td>",
-        $key, $network, $parts["name"]); 
+               value=\"" . $key . "\"></td>";
+    $table .= sprintf(
+        "<td><a href=\"/sites/site.php?station=%s&amp;network=%s\">%s</a></td>",
+        $key,
+        $network,
+        $parts["name"]
+    );
     $table .= "<td ";
     $format = "h:i A";
-    if ($tdiff > 11900){
+    if ($tdiff > 11900) {
         $table .= 'bgcolor="red"';
         $format = "M-d-Y h:i A";
-    } else if ($tdiff > 7200){
+    } else if ($tdiff > 7200) {
         $table .= 'bgcolor="orange"';
-    } else if ($tdiff > 3600){
+    } else if ($tdiff > 3600) {
         $table .= 'bgcolor="green"';
     }
-    $table .= ">". date($format, $parts["ts"]) ."</td>
-  <td align='center'>". myround($parts["tmpf"],0) ."(<font color=\"#ff0000\">".
-  myround($parts["max_tmpf"],0) ."</font>/<font color=\"#0000ff\">".
-  myround($parts["min_tmpf"],0) ."</font>)</td>
- <td>". myround($parts["dwpf"],0) ."</td>
- <td>". myround($parts["feel"], 1) ."</td>
- <td>". $parts["relh"] ."</td>
- <td>". myround($parts["sknt"],0) ;
-    if (! is_null($parts["gust"]) && $parts["gust"] > 0){
-        $table .= "G". myround($parts["gust"],1);
+    $table .= ">" . date($format, $parts["ts"]) . "</td>
+  <td align='center'>" . myround($parts["tmpf"], 0) . "(<font color=\"#ff0000\">" .
+        myround($parts["max_tmpf"], 0) . "</font>/<font color=\"#0000ff\">" .
+        myround($parts["min_tmpf"], 0) . "</font>)</td>
+ <td>" . myround($parts["dwpf"], 0) . "</td>
+ <td>" . myround($parts["feel"], 1) . "</td>
+ <td>" . $parts["relh"] . "</td>
+ <td>" . myround($parts["sknt"], 0);
+    if (! is_null($parts["gust"]) && $parts["gust"] > 0) {
+        $table .= "G" . myround($parts["gust"], 1);
     }
     $table .= "</td>
-            <td>". myround($parts["drct"],0) ."</td>
-        <td>". myround($parts["peak"],0) ."@ ". date("h:i A", $parts["peak_ts"] ) ."</td>
+            <td>" . myround($parts["drct"], 0) . "</td>
+        <td>" . myround($parts["peak"], 0) . "@ " . date("h:i A", $parts["peak_ts"]) . "</td>
         </tr>\n";
 }
 
-$networks = Array(
-        "OT" => "IEM Misc Stations",
-        "VTWAC" => "Vermont Weather Analytics Center");
+$networks = array(
+    "OT" => "IEM Misc Stations",
+    "VTWAC" => "Vermont Weather Analytics Center"
+);
 $buttons = "";
-foreach($networks as $key => $val){
-    $buttons .= sprintf("<a class=\"btn btn-sm%s\" href=\"current.phtml?network=%s\">%s</a>",
-            ($key == $network) ? ' active': '', $key, $val);
+foreach ($networks as $key => $val) {
+    $buttons .= sprintf(
+        "<a class=\"btn btn-sm%s\" href=\"current.phtml?network=%s\">%s</a>",
+        ($key == $network) ? ' active' : '',
+        $key,
+        $val
+    );
 }
 
 $content = <<<EOF
