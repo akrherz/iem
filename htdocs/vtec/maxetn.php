@@ -22,7 +22,7 @@ EOM;
 
 $yselect = yearSelect2(2005, $year, 'year');
 
-$t->content = <<<EOF
+$t->content = <<<EOM
 <ol class="breadcrumb">
  <li><a href="/nws/">NWS Resources</a></li>
  <li class="active">Max VTEC EventID Listing</li>
@@ -46,13 +46,13 @@ see presented on this page<br />
 </form>
 
 <hr >
-    <h3>Max VTEC ETN listing for {$year}</h3>
+<h3>Max VTEC ETN listing for {$year}</h3>
 <div id="thetable">
 {$table}
 </div>
 
 
-EOF;
+EOM;
 $t->jsextra = <<<EOM
 <script src='/vendor/jquery-datatables/1.10.20/datatables.min.js'></script>
 <script>

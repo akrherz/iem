@@ -1,8 +1,8 @@
 """yieldfx plot"""
 
 import calendar
-import datetime
 import os
+from datetime import date, datetime, timedelta
 
 import pandas as pd
 from metpy.units import units
@@ -64,14 +64,14 @@ def load(dirname, location, sdate):
         raise NoDataFound("Data file was not found.")
     with open(fn, encoding="utf8") as fh:
         for line in fh:
-            line = line.strip()
+            line = line.strip()  # noqa
             if not line.startswith("19") and not line.startswith("20"):
                 continue
             tokens = line.split()
             if int(tokens[1]) < mindoy:
                 continue
             data.append(tokens)
-            ts = datetime.date(int(tokens[0]), 1, 1) + datetime.timedelta(
+            ts = date(int(tokens[0]), 1, 1) + timedelta(
                 days=int(tokens[1]) - 1
             )
             idx.append(ts)
@@ -115,11 +115,11 @@ def plotter(fdict):
 
     location = ctx["location"]
     ptype = ctx["ptype"]
-    sdate = datetime.datetime.strptime(ctx["sdate"], "%b%d")
+    sdate = datetime.strptime(ctx["sdate"], "%b%d")
     df = load("/mesonet/share/pickup/yieldfx", location, sdate)
     cdf = load("/opt/iem/scripts/yieldfx/baseline", location, sdate)
 
-    today = datetime.date.today()
+    today = date.today()
     thisyear = (
         df[df["year"] == today.year].copy().reset_index().set_index("doy")
     )
@@ -224,7 +224,7 @@ def plotter(fdict):
     ax.grid(True)
     ax.set_xlim(
         int(sdate.strftime("%j")),
-        int(datetime.date(today.year, 12, 1).strftime("%j")),
+        int(date(today.year, 12, 1).strftime("%j")),
     )
     pos = ax.get_position()
     ax.set_position([pos.x0, pos.y0 + 0.05, pos.width, pos.height * 0.95])

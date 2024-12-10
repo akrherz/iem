@@ -11,8 +11,8 @@ def get_test_urls():
     """yield a list of URLs to test."""
     listfn = os.path.join(os.path.dirname(__file__), "urllist_index.txt")
     with open(listfn) as fh:
-        for line in fh:
-            line = line.strip()
+        for line_in in fh:
+            line = line_in.strip()
             if line == "" or line.startswith("#"):
                 continue
             yield line

@@ -17,7 +17,7 @@ warnings.simplefilter("ignore", category=DeprecationWarning)
 
 def consume(scursor, fn, ts, grid_ids):
     """Actually process the filename at given timestamp"""
-    table = "data_%s" % (ts.strftime("%Y_%m"),)
+    table = f"data_{ts:%Y_%m}"
     LOG.info("Processing %s for table %s", fn, table)
     nc = ncopen(fn)
     gpids = nc.variables["Grid_Point_ID"][:]
@@ -33,12 +33,12 @@ def consume(scursor, fn, ts, grid_ids):
         # changed 1 Feb 2018 as per guidance from Victoria
         if chi2pd is not None and chi2pd < 0.05:
             bad += 1
-            od = None
-            sm = None
+            od = None  # noqa
+            sm = None  # noqa
         if sm is None or sm <= 0 or sm >= 0.7:
-            sm = None
+            sm = None  # noqa
         if od is None or od <= 0 or od > 1:
-            od = None
+            od = None  # noqa
         data.write(
             ("%s\t%s\t%s\t%s\n")
             % (

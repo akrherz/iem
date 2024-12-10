@@ -460,11 +460,11 @@ def process(order):
             )
         # Now we are getting closer, lets split by the delimter as we
         # may have multiple products in one file!
-        for bulletin in content.split("\001"):
-            if bulletin == "":
+        for bulletin_in in content.split("\001"):
+            if bulletin_in == "":
                 continue
             try:
-                bulletin = noaaport_text(bulletin)
+                bulletin = noaaport_text(bulletin_in)
                 prod = TextProduct(bulletin, utcnow=ts, parse_segments=False)
                 prod.source = XREF_SOURCE.get(prod.source, prod.source)
             except Exception:

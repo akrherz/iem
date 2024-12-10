@@ -20,7 +20,7 @@ select = [
     "PIE",  # flake8-pie
     "PERF",  # performance
     "PLE",  # pylint error
-    # "PLW",  # pylint warning
+    "PLW",  # pylint warning
     # "SIM",  # simplify
     "T20",  # print
     # "TRY",  # try-except-raise
