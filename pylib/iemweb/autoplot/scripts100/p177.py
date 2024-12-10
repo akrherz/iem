@@ -1123,10 +1123,8 @@ def plotter(fdict):
     ]:
         if col in df.columns:
             df[col] = df[col].apply(
-                (
-                    lambda x: x
-                    if isinstance(x, str) or pd.isnull(x)
-                    else x.strftime("%Y-%m-%d %H:%M")
-                )
+                lambda x: x
+                if isinstance(x, str) or pd.isnull(x)
+                else x.strftime("%Y-%m-%d %H:%M")
             )
     return fig, df

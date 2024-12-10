@@ -8,7 +8,7 @@
 
 import time
 from datetime import date, datetime
-from typing import Optional, Tuple
+from typing import Optional
 
 import click
 import httpx
@@ -25,7 +25,7 @@ SERVICE = "https://data.rcc-acis.org/StnData"
 METASERVICE = "https://data.rcc-acis.org/StnMeta"
 
 
-def compute_por(acis_station) -> Tuple[date, date]:
+def compute_por(acis_station) -> tuple[date, date]:
     """Need to ask ACIS what the POR is based on variables, not SIDs.
 
     Result payload looks like:

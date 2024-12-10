@@ -216,16 +216,16 @@ def plotter(fdict):
             lastrow = row
             continue
 
-        date = row["week_ending"]
+        dt = row["week_ending"]
         ldate = lastrow["week_ending"]
         val = int(row["num_value"])
         lval = int(lastrow["num_value"])
         d0 = int(ldate.strftime("%j"))
-        d1 = int(date.strftime("%j"))
-        if ldate.year == date.year:
+        d1 = int(dt.strftime("%j"))
+        if ldate.year == dt.year:
             delta = (val - lval) / float(d1 - d0)
             for i, jday in enumerate(range(d0, d1 + 1)):
-                data[date.year - year0, jday] = lval + i * delta
+                data[dt.year - year0, jday] = lval + i * delta
         else:
             data[ldate.year - year0, d0:] = np.max(data[ldate.year - year0, :])
 

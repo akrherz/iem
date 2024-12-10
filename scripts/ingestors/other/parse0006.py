@@ -5,8 +5,9 @@ import os
 import sys
 from zoneinfo import ZoneInfo
 
+from pyiem.database import get_dbconn
 from pyiem.observation import Observation
-from pyiem.util import convert_value, get_dbconn
+from pyiem.util import convert_value
 
 
 def main():
@@ -20,7 +21,7 @@ def main():
 
     if not os.path.isfile(fn):
         return
-    with open(fn, "r", encoding="ascii") as fh:
+    with open(fn, encoding="ascii") as fh:
         lines = fh.readlines()
     line = lines[-1]
 

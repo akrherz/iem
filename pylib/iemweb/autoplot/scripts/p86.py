@@ -131,9 +131,9 @@ def plotter(fdict):
     ctx = get_autoplot_context(fdict, get_description())
     domain = ctx["domain"]
     ptype = ctx["ptype"]
-    date = ctx["date"]
+    dt = ctx["date"]
     varname = ctx["var"]
-    title = date.strftime("%-d %B %Y")
+    title = dt.strftime("%-d %B %Y")
     mpargs = {
         "title": f"IEM Reanalysis of {PDICT.get(varname)} for {title}",
         "subtitle": "Data derived from various NOAA datasets",
@@ -156,8 +156,8 @@ def plotter(fdict):
     islice = slice(i0, i1)
 
     plot_units = ""
-    idx0 = iemre.daily_offset(date)
-    ncfn = iemre.get_daily_ncname(date.year, domain=domain)
+    idx0 = iemre.daily_offset(dt)
+    ncfn = iemre.get_daily_ncname(dt.year, domain=domain)
     if not os.path.isfile(ncfn):
         raise NoDataFound("No Data Found.")
     with ncopen(ncfn) as nc:

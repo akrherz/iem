@@ -36,9 +36,7 @@ def get_file(tmpdir, now, routes):
     for i in [7, 6, 5, 4]:
         if data is not None:
             break
-        fn = now.strftime(
-            ("H99999999_I000" + repr(i) + "_G_%d%b%Y" "_%H%M00")
-        ).upper()
+        fn = now.strftime(f"H99999999_I000{repr(i)}_G_%d%b%Y_%H%M00").upper()
         uri = f"{BASEURL}/{fn}.out"
         req = exponential_backoff(requests.get, uri, timeout=5)
         if req is None:

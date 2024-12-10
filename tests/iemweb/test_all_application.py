@@ -13,8 +13,7 @@ def get_services(package_name):
     for _, name, is_pkg in pkgutil.iter_modules(root.__path__):
         mod = importlib.import_module(f"{package_name}.{name}")
         if is_pkg:
-            for _sub in get_services(f"{package_name}.{name}"):
-                yield _sub
+            yield from get_services(f"{package_name}.{name}")
             continue
         if hasattr(mod, "application"):
             yield mod

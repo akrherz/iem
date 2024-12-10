@@ -38,7 +38,6 @@ https://mesonet.agron.iastate.edu/json/spcoutlook.py\
 import datetime
 import json
 from io import BytesIO
-from typing import Tuple
 from zoneinfo import ZoneInfo
 
 import pandas as pd
@@ -93,7 +92,7 @@ def process_df(watches: pd.DataFrame) -> pd.DataFrame:
     return watches
 
 
-def dotime(time, lon, lat, day, cat) -> Tuple[pd.DataFrame, datetime.datetime]:
+def dotime(time, lon, lat, day, cat) -> tuple[pd.DataFrame, datetime.datetime]:
     """Query for Outlook based on some timestamp"""
     if time in ["", "current", "now"]:
         ts = utc()

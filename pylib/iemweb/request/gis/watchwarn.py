@@ -78,7 +78,6 @@ import zlib
 from datetime import datetime, timedelta
 from io import BytesIO
 from stat import S_IFREG
-from typing import Tuple
 
 import fiona
 import pandas as pd
@@ -320,7 +319,7 @@ def parse_wfo_location_group(environ, params):
     return limiter
 
 
-def build(environ: dict) -> Tuple[str, str, dict]:
+def build(environ: dict) -> tuple[str, str, dict]:
     """Build the SQL statement."""
     params = {}
     sts = environ["sts"]
@@ -678,5 +677,4 @@ def application(environ, start_response):
                 wbits=-zlib.MAX_WBITS, level=1
             ),
         )
-        for chunk in zstream:
-            yield chunk
+        yield from zstream

@@ -7,7 +7,7 @@ is shown.  For example, 1 Jul 2019 to 30 Jun 2020 is 2019 for this plot.
 """
 
 import calendar
-import datetime
+from datetime import date, datetime, timedelta
 
 import numpy as np
 import pandas as pd
@@ -34,7 +34,7 @@ def get_description():
         dict(
             type="year",
             name="year",
-            default=datetime.datetime.now().year,
+            default=datetime.now().year,
             label="Year (of fall season) to highlight:",
         ),
         dict(
@@ -60,7 +60,7 @@ def add_ctx(ctx):
     """Get the raw infromations we need"""
     pgconn, cursor = get_dbconnc("coop")
 
-    today = datetime.date.today()
+    today = date.today()
     thisyear = today.year
     year = ctx["year"]
     station = ctx["station"]
@@ -81,7 +81,7 @@ def add_ctx(ctx):
             case when month > 6 then year else year - 1 end as yr, {varname}
             from alldata WHERE station = %s and low is not null and
             high is not null and day >= %s ORDER by day ASC""",
-            (station, datetime.date(startyear, 7, 1)),
+            (station, date(startyear, 7, 1)),
         )
     else:
         cursor.execute(
@@ -137,7 +137,7 @@ def add_ctx(ctx):
     )
     df = pd.DataFrame(d)
     addval = int(df["doy"].values[0] - 1)
-    sts = datetime.date(2000, 1, 1) + datetime.timedelta(days=addval)
+    sts = date(2000, 1, 1) + timedelta(days=addval)
     df["dates"] = pd.date_range(sts, periods=len(doys))
     df = df.set_index("doy")
     ctx["df"] = df

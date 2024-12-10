@@ -85,11 +85,12 @@ def plot_date(ax, i, dt: date, station, tz) -> bool:
     ets = sts + timedelta(hours=48)
     with get_sqlalchemy_conn("asos") as conn:
         df = pd.read_sql(
-            "SELECT valid at time zone 'UTC' as valid, tmpf from alldata "
-            "where station = %s and valid >= %s and valid <= %s and "
-            "tmpf is not null ORDER by valid ASC",
+            text("""
+        SELECT valid at time zone 'UTC' as valid, tmpf from alldata
+        where station = :station and valid >= :sts and valid <= :ets and
+        tmpf is not null ORDER by valid ASC"""),
             conn,
-            params=(station, sts, ets),
+            params={"station": station, "sts": sts, "ets": ets},
             index_col=None,
         )
     if df.empty:

@@ -704,10 +704,8 @@ def do_salus(cursor, ctx):
     )
     sio = StringIO()
     sio.write(
-        (
-            "StationID, Year, DOY, SRAD, Tmax, Tmin, Rain, DewP, "
-            "Wind, Par, dbnum\n"
-        )
+        "StationID, Year, DOY, SRAD, Tmax, Tmin, Rain, DewP, "
+        "Wind, Par, dbnum\n"
     )
     for i, row in enumerate(cursor):
         srad = -99 if row["srad"] is None else row["srad"]

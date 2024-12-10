@@ -14,7 +14,7 @@ percentile, the date plotted means that 50% of the previous years on
 record experienced that temperature threshold by the given date.
 """
 
-import datetime
+from datetime import date, datetime, timedelta
 
 import numpy as np
 import pandas as pd
@@ -51,13 +51,17 @@ YRGP = {
     "high_above": "year",
     "fall_below": "winter_year",
 }
-ORDER = {"spring_below": "max", "fall_below": "min", "high_above": "min"}
+ORDER = {
+    "spring_below": "max",
+    "fall_below": "min",
+    "high_above": "min",
+}
 
 
 def get_description():
     """Return a dict describing how to call this plotter"""
     desc = {"description": __doc__, "data": True}
-    today = datetime.datetime.today() - datetime.timedelta(days=1)
+    today = datetime.today() - timedelta(days=1)
     desc["arguments"] = [
         {
             "type": "select",
@@ -155,13 +159,13 @@ def plotter(fdict):
     sector = ctx["sector"]
     if len(sector) != 2:
         raise NoDataFound("Sorry, this app doesn't support multi-state plots.")
-    varname = ctx["var"]
+    varname: str = ctx["var"]
     year = ctx["year"]
     popt = ctx["popt"]
     threshold = ctx["threshold"]
     nt = NetworkTable(f"{sector}CLIMATE")
     syear = ctx.get("syear", 1893)
-    eyear = ctx.get("eyear", datetime.date.today().year)
+    eyear = ctx.get("eyear", date.today().year)
     sql = SQLOPT[varname]
     if ctx["w"] == "soil":
         sql = sql.replace("high", "soil").replace("low", "soil")
@@ -204,16 +208,14 @@ def plotter(fdict):
     df = df[df["event"].notna()]
     df["doy"] = (df["event"] - df["min_day"]).apply(lambda x: x.days)
 
-    basedate = datetime.date(2000, 7 if varname == "fall_below" else 1, 1)
+    basedate = date(2000, 7 if varname.startswith("fall") else 1, 1)
     if ctx.get("p") is not None:
         # Remove low count stations
         df2 = df[["doy"]].groupby("station").count()
         df = df[~df.index.isin(df2[df2["doy"] < 10].index.values)]
         df2 = df[["doy"]].groupby("station").quantile(ctx["p"] / 100.0).copy()
         df2["pdate"] = df2["doy"].apply(
-            lambda x: (basedate + datetime.timedelta(days=int(x))).strftime(
-                "%-m/%-d"
-            )
+            lambda x: (basedate + timedelta(days=int(x))).strftime("%-m/%-d")
         )
         title = (
             f"{ctx['p']:.0f}{th(str(ctx['p']))} Percentile Date of "
@@ -246,7 +248,11 @@ def plotter(fdict):
         df2 = df[df[YRGP[varname]] == year].copy()
         # Require sites have enough data
         df2 = df2[df2["count"] > (df2["count"].max() * 0.9)]
-        title = f"{year} {PDICT2[varname]} {threshold}" r"$^\circ$F"
+        title = (
+            f"{year} {PDICT[ctx['w']]} {PDICT2[varname]} "
+            f"{threshold}"
+            r"$^\circ$F"
+        )
         df2["pdate"] = df2["event"].apply(lambda x: x.strftime("%-m/%-d"))
         extra = ""
     if df2.empty:
@@ -301,9 +307,7 @@ def plotter(fdict):
         if popt == "contour" and (levs[-1] - levs[0]) > 5:
 
             def f(val):
-                return (basedate + datetime.timedelta(days=int(val))).strftime(
-                    "%b %-d"
-                )
+                return (basedate + timedelta(days=int(val))).strftime("%b %-d")
 
             levlables = list(map(f, levs))
             mp.contourf(

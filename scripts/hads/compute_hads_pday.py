@@ -61,7 +61,7 @@ def workflow(dt: date):
         LOG.info("%s found no data", dt)
         return
     obsdf["utc_valid"] = obsdf["utc_valid"].dt.tz_localize(ZoneInfo("UTC"))
-    precip = np.zeros((24 * 60))
+    precip = np.zeros(24 * 60)
     grouped = obsdf.groupby("station")
     for station in obsdf["station"].unique():
         if station not in df.index:

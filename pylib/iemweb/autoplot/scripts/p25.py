@@ -6,7 +6,7 @@ dataset is fit with a simple normal distribution based on the simple
 population statistics.
 """
 
-import datetime
+from datetime import datetime
 
 import numpy as np
 import pandas as pd
@@ -45,13 +45,13 @@ def get_description():
     return desc
 
 
-def plotter(fdict):
+def plotter(fdict: dict):
     """Go"""
     ctx = get_autoplot_context(fdict, get_description())
 
     month = ctx["month"]
     day = ctx["day"]
-    ts = datetime.datetime(2000, month, day)
+    ts = datetime(2000, month, day)
     if ctx["opt"] == "station":
         title = f"{ctx['_sname']} {ts:%d %B} Temperature Distribution"
         with get_sqlalchemy_conn("coop") as conn:
@@ -84,8 +84,8 @@ def plotter(fdict):
             )
     if df.empty:
         raise NoDataFound("No Data Found.")
-    highs = df["high"].values
-    lows = df["low"].values
+    highs = df["high"].to_numpy()
+    lows = df["low"].to_numpy()
 
     (fig, ax) = figure_axes(title=title, apctx=ctx)
 

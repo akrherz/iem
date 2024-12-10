@@ -11,11 +11,9 @@ from pyiem.util import get_dbconn
 from pyiem.webutil import iemapp
 
 PATTERN = re.compile(
-    (
-        "^/onsite/features/(?P<yyyy>[0-9]{4})/(?P<mm>[0-9]{2})/"
-        "(?P<yymmdd>[0-9]{6})(?P<extra>.*)."
-        "(?P<suffix>png|gif|jpg|xls|pdf|gnumeric|mp4)$"
-    )
+    "^/onsite/features/(?P<yyyy>[0-9]{4})/(?P<mm>[0-9]{2})/"
+    "(?P<yymmdd>[0-9]{6})(?P<extra>.*)."
+    "(?P<suffix>png|gif|jpg|xls|pdf|gnumeric|mp4)$"
 )
 
 

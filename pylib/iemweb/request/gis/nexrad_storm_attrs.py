@@ -125,10 +125,8 @@ def run(environ, start_response):
             ]
             start_response("200 OK", headers)
             sio.write(
-                (
-                    "VALID,STORM_ID,NEXRAD,AZIMUTH,RANGE,TVS,MESO,POSH,"
-                    "POH,MAX_SIZE,VIL,MAX_DBZ,MAZ_DBZ_H,TOP,DRCT,SKNT,LAT,LON\n"
-                )
+                "VALID,STORM_ID,NEXRAD,AZIMUTH,RANGE,TVS,MESO,POSH,"
+                "POH,MAX_SIZE,VIL,MAX_DBZ,MAZ_DBZ_H,TOP,DRCT,SKNT,LAT,LON\n"
             )
             for row in res:
                 sio.write(",".join([str(s) for s in row]) + "\n")

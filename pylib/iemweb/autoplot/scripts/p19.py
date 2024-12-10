@@ -7,7 +7,7 @@ Dec 2017 thru Feb 2018.  The plot details the temperature bin with the
 highest frequency.
 """
 
-import datetime
+from datetime import date, datetime
 
 import numpy as np
 import pandas as pd
@@ -76,7 +76,7 @@ def get_description():
         dict(
             type="year",
             optional=True,
-            default=datetime.date.today().year,
+            default=date.today().year,
             label="Optional: Overlay Observations for given year",
             name="year",
         ),
@@ -120,7 +120,7 @@ def plotter(fdict):
     ab = ctx["_nt"].sts[station]["archive_begin"]
     if ab is None:
         raise NoDataFound("Unknown station metadata.")
-    years = float(datetime.datetime.now().year - ab.year)
+    years = float(datetime.now().year - ab.year)
     hist = np.ma.array(hist / years)
     hist.mask = np.where(hist < (1.0 / years), True, False)
     ar = np.argwhere(hist.max() == hist)

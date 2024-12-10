@@ -44,10 +44,8 @@ def fetcher(station, sts, ets):
         (stations, sts, ets),
     )
     sio.write(
-        (
-            "station,validUTC,levelcode,pressure_mb,height_m,tmpc,"
-            "dwpc,drct,speed_kts,bearing,range_sm\n"
-        )
+        "station,validUTC,levelcode,pressure_mb,height_m,tmpc,"
+        "dwpc,drct,speed_kts,bearing,range_sm\n"
     )
     for row in cursor:
         sio.write(

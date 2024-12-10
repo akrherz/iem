@@ -5,8 +5,9 @@ import re
 import sys
 from zoneinfo import ZoneInfo
 
+from pyiem.database import get_dbconnc
 from pyiem.observation import Observation
-from pyiem.util import convert_value, get_dbconnc, utc
+from pyiem.util import convert_value, utc
 
 
 def main():
@@ -17,7 +18,7 @@ def main():
     if not os.path.isfile(fn):
         sys.exit()
 
-    with open(fn, "r", encoding="ascii") as fh:
+    with open(fn, encoding="ascii") as fh:
         lines = fh.readlines()
     lastline = lines[-1]
     tokens = re.split(r"[\s+]+", lastline)

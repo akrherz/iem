@@ -5,12 +5,13 @@ season.  When you select a date to split the winter season, the year
 shown in the date can be ignored.
 """
 
-import datetime
+from datetime import date
 
 import pandas as pd
+from pyiem.database import get_sqlalchemy_conn
 from pyiem.exceptions import NoDataFound
 from pyiem.plot import figure_axes
-from pyiem.util import get_autoplot_context, get_sqlalchemy_conn
+from pyiem.util import get_autoplot_context
 
 from iemweb.autoplot import ARG_STATION
 
@@ -34,9 +35,9 @@ def get_description():
 def get_data(ctx):
     """Get the data"""
     station = ctx["station"]
-    date = ctx["date"]
-    jul1 = datetime.date(date.year if date.month > 6 else date.year - 1, 7, 1)
-    offset = int((date - jul1).days)
+    dt = ctx["date"]
+    jul1 = date(dt.year if dt.month > 6 else dt.year - 1, 7, 1)
+    offset = int((dt - jul1).days)
     with get_sqlalchemy_conn("coop") as conn:
         df = pd.read_sql(
             """
@@ -64,19 +65,14 @@ def get_data(ctx):
 
 def get_highcharts(ctx: dict) -> dict:
     """Highcharts Output"""
-    date = ctx["date"]
+    dt = ctx["date"]
     df = get_data(ctx)
 
     j = {}
     j["title"] = {"text": f"{ctx['_sname']}:: Snowfall Totals"}
-    j["subtitle"] = {
-        "text": "Before and After %s" % (date.strftime("%-d %B"),)
-    }
+    j["subtitle"] = {"text": f"Before and After {dt:%-d %B}"}
     j["xAxis"] = {
-        "title": {
-            "text": "Snowfall Total [inch] before %s"
-            % (date.strftime("%-d %B"),)
-        },
+        "title": {"text": f"Snowfall Total [inch] before {dt:%-d %B}"},
         "plotLines": [
             {
                 "color": "red",
@@ -88,10 +84,7 @@ def get_highcharts(ctx: dict) -> dict:
         ],
     }
     j["yAxis"] = {
-        "title": {
-            "text": "Snowfall Total [inch] on or after %s"
-            % (date.strftime("%-d %B"),)
-        },
+        "title": {"text": f"Snowfall Total [inch] on or after {dt:%-d %B}"},
         "plotLines": [
             {
                 "color": "red",
@@ -109,7 +102,7 @@ def get_highcharts(ctx: dict) -> dict:
             dict(
                 x=round(row["before"], 2),
                 y=round(row["after"], 2),
-                name="%s-%s" % (yr, yr + 1),
+                name=f"{yr}-{yr + 1}",
             )
         )
     j["series"] = [
@@ -131,25 +124,21 @@ def get_highcharts(ctx: dict) -> dict:
 def plotter(fdict):
     """Go"""
     ctx = get_autoplot_context(fdict, get_description())
-    date = ctx["date"]
+    dt = ctx["date"]
     df = get_data(ctx)
     if df.empty:
         raise NoDataFound("Error, no results returned!")
 
     title = (
         f"{ctx['_sname']}:: Snowfall Totals\n"
-        f"Prior to and after: {date:%-d %B}"
+        f"Prior to and after: {dt:%-d %B}"
     )
     (fig, ax) = figure_axes(title=title, apctx=ctx)
     ax.scatter(df["before"].values, df["after"].values)
     ax.set_xlim(left=-0.1)
     ax.set_ylim(bottom=-0.1)
-    ax.set_xlabel(
-        "Snowfall Total [inch] Prior to %s" % (date.strftime("%-d %b"),)
-    )
-    ax.set_ylabel(
-        "Snowfall Total [inch] On and After %s" % (date.strftime("%-d %b"),)
-    )
+    ax.set_xlabel(f"Snowfall Total [inch] Prior to {dt:%-d %b}")
+    ax.set_ylabel(f"Snowfall Total [inch] On and After {dt:%-d %b}")
     ax.grid(True)
     ax.axvline(
         df["before"].mean(),

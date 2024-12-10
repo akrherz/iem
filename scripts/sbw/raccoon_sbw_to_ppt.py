@@ -1,4 +1,3 @@
-# -*- coding: utf-8 -*-
 """Generate a Powerpoint file for an event.
 
 This script looks for queued jobs within the database and runs them

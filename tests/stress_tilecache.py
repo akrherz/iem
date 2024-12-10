@@ -21,17 +21,14 @@ def main():
     while now < ets:
         for _ in range(1000):
             uri = now.strftime(
-                (
-                    "http://iem.local/"
-                    "c/tile.py/1.0.0/ridge::USCOMP-N0R-"
-                    "%Y%m%d%H%M/"
-                    + str(random.randint(0, 10))
-                    + "/"
-                    + str(random.randint(0, 10))
-                    + "/"
-                    + str(random.randint(0, 10))
-                    + ".png"
-                )
+                "http://iem.local/c/tile.py/1.0.0/ridge::USCOMP-N0R-"
+                "%Y%m%d%H%M/"
+                + str(random.randint(0, 10))
+                + "/"
+                + str(random.randint(0, 10))
+                + "/"
+                + str(random.randint(0, 10))
+                + ".png"
             )
             requests.get(uri, timeout=5)
             cnt += 1

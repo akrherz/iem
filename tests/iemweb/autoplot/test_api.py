@@ -10,8 +10,7 @@ from werkzeug.test import Client
 def genmod():
     """Generate modules to test against."""
     for plot in autoplot_data["plots"]:
-        for entry in plot["options"]:
-            yield entry
+        yield from plot["options"]
 
 
 @pytest.mark.parametrize("entry", genmod())

@@ -22,7 +22,7 @@ interactive chart version.
 </ul>
 """
 
-import datetime
+from datetime import date, datetime, timedelta
 
 import httpx
 import numpy as np
@@ -46,7 +46,7 @@ PDICT = {
 def get_description():
     """Return a dict describing how to call this plotter"""
     desc = {"description": __doc__, "data": True}
-    today = datetime.date.today()
+    today = date.today()
     desc["arguments"] = [
         ARG_STATION,
         dict(
@@ -71,11 +71,11 @@ def add_ctx(ctx):
     """Get the plotting context"""
     pgconn, cursor = get_dbconnc("coop")
     station = ctx["station"]
-    date = ctx["date"]
+    dt = ctx["date"]
     opt = ctx["opt"]
 
     cursor.execute(
-        "SELECT year,  extract(doy from day) as doy, precip from "
+        "SELECT year, extract(doy from day) as doy, precip from "
         "alldata where station = %s and precip is not null",
         (station,),
     )
@@ -87,12 +87,9 @@ def add_ctx(ctx):
     if ab is None:
         raise NoDataFound("Unknown station metadata.")
     baseyear = ab.year - 1
-    ctx["years"] = (datetime.datetime.now().year - baseyear) + 1
+    ctx["years"] = (datetime.now().year - baseyear) + 1
 
     data = np.zeros((ctx["years"], 367 * 2))
-    # 1892 1893
-    # 1893 1894
-    # 1894 1895
 
     for row in cursor:
         # left hand
@@ -102,13 +99,13 @@ def add_ctx(ctx):
             "precip"
         ]
     pgconn.close()
-    sts = date - datetime.timedelta(days=14)
+    sts = dt - timedelta(days=14)
     try:
         resp = httpx.get(
             "http://mesonet.agron.iastate.edu/api/1/usdm_bypoint.json",
             params={
                 "sdate": sts.strftime("%Y-%m-%d"),
-                "edate": date.strftime("%Y-%m-%d"),
+                "edate": dt.strftime("%Y-%m-%d"),
                 "lon": ctx["_nt"].sts[station]["lon"],
                 "lat": ctx["_nt"].sts[station]["lat"],
             },
@@ -123,15 +120,15 @@ def add_ctx(ctx):
         lastrow = jdata["data"][-1]
         cat = lastrow["category"]
         cat = "No Drought" if cat is None else f"D{cat}"
-        ts = datetime.datetime.strptime(lastrow["valid"], "%Y-%m-%d")
+        ts = datetime.strptime(lastrow["valid"], "%Y-%m-%d")
         dclass = f"{cat} on {ts:%-d %b %Y}"
 
-    _temp = date.replace(year=2000)
+    _temp = dt.replace(year=2000)
     _doy = int(_temp.strftime("%j"))
     xticks = []
     xticklabels = []
     for i in range(-360, 1, 60):
-        ts = date + datetime.timedelta(days=i)
+        ts = dt + timedelta(days=i)
         xticks.append(i)
         xticklabels.append(ts.strftime("%b %-d\n'%y"))
     ranks = []
@@ -142,7 +139,7 @@ def add_ctx(ctx):
     avgs = []
     spi = []
     ptile = []
-    myyear = date.year - baseyear - 1
+    myyear = dt.year - baseyear - 1
     for days in range(1, 366):
         idx0 = _doy + 366 - days
         idx1 = _doy + 366
@@ -163,16 +160,14 @@ def add_ctx(ctx):
         percentages.append(thisyear / avgs[-1] * 100)
         spi.append((thisyear - avgs[-1]) / np.nanstd(sums))
 
-    ctx["sdate"] = date - datetime.timedelta(days=360)
-    ctx["title"] = (
-        f"[{baseyear + 2}-{datetime.datetime.now().year}] {ctx['_sname']}"
-    )
+    ctx["sdate"] = dt - timedelta(days=360)
+    ctx["title"] = f"[{baseyear + 2}-{datetime.now().year}] {ctx['_sname']}"
     ctx["subtitle"] = (
-        f"{PDICT[opt]} from given x-axis date until {date:%-d %b %Y}, "
+        f"{PDICT[opt]} from given x-axis date until {dt:%-d %b %Y}, "
         f"US Drought Monitor: {dclass}"
     )
     ctx["subtitle2"] = (
-        f"From given x-axis date until {date:%-d %b %Y}, "
+        f"From given x-axis date until {dt:%-d %b %Y}, "
         f"US Drought Monitor: {dclass}"
     )
 
@@ -320,12 +315,12 @@ def plotter(fdict):
     y1 = y0 + height + 0.03
     x2 = x1 + width + 0.06
     axes = [
-        fig.add_axes([x0, y1, width, height]),
-        fig.add_axes([x0, y0, width, height]),
-        fig.add_axes([x1, y1, width, height]),
-        fig.add_axes([x1, y0, width, height]),
-        fig.add_axes([x2, y1, width, height]),
-        fig.add_axes([x2, y0, width, height]),
+        fig.add_axes((x0, y1, width, height)),
+        fig.add_axes((x0, y0, width, height)),
+        fig.add_axes((x1, y1, width, height)),
+        fig.add_axes((x1, y0, width, height)),
+        fig.add_axes((x2, y1, width, height)),
+        fig.add_axes((x2, y0, width, height)),
     ]
     for i, ax in enumerate(axes):
         ax.grid(True)

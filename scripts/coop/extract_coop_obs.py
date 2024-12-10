@@ -81,11 +81,9 @@ def main():
     pgconn.close()
     with open("coop.csv", "w", encoding="ascii") as csv:
         csv.write(
-            (
-                "nwsli,site_name,longitude,latitude,date,time,high_f,low_f,"
-                "prec_in,snow_in,snow_depth_in,prec_mon_in,snow_mon_in,"
-                "elevation_m\n"
-            )
+            "nwsli,site_name,longitude,latitude,date,time,high_f,low_f,"
+            "prec_in,snow_in,snow_depth_in,prec_mon_in,snow_mon_in,"
+            "elevation_m\n"
         )
 
         w = shapefile.Writer(f"coop_{ts}")
