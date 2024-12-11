@@ -1,10 +1,11 @@
 """
-This map produces an analysis yearly averages. You
-can either plot the difference between two period of years or simply the
-years between the first period.  This app is meant to address the question
-about changes in climate or just to produce a simple plot of yearly
-averages over some period of years.
+This autoplot can either produce a plot of averages for a given period or
+annual over a period of years; or a difference between a second set of years.
+<a href="/plotting/auto/?q=97">Autoplot 97</a> is a similar plot and perhaps
+more useful for some users than this one.
 """
+
+from datetime import date
 
 import numpy as np
 import pandas as pd
@@ -70,6 +71,7 @@ MUNITS = {
 PRECISION = {"total_precip": 2}
 MDICT = {
     "all": "Annual",
+    "custom": "Custom Period (select below)",
     "spring": "Spring (MAM)",
     "fall": "Fall (SON)",
     "winter": "Winter (DJF)",
@@ -100,8 +102,20 @@ def get_description():
             name="month",
             default="all",
             options=MDICT,
-            label="Show Monthly or Annual Averages",
+            label="Show Monthly, Annual or Custom Defined Period Averages",
         ),
+        {
+            "type": "sday",
+            "default": "0101",
+            "name": "sday",
+            "label": "Inclusive Start Day (select custom period above)",
+        },
+        {
+            "type": "sday",
+            "default": "1231",
+            "name": "eday",
+            "label": "Inclusive End Day (select custom period above)",
+        },
         dict(
             type="select",
             name="sector",
@@ -186,6 +200,8 @@ def get_data(ctx):
     sector = ctx["sector"]
     threshold = ctx["threshold"]
     month = ctx["month"]
+    sday: date = ctx["sday"]
+    eday: date = ctx["eday"]
     p1syear = ctx["p1syear"]
     p1eyear = ctx["p1eyear"]
     p1years = p1eyear - p1syear + 1
@@ -193,8 +209,14 @@ def get_data(ctx):
     p2eyear = ctx["p2eyear"]
     p2years = p2eyear - p2syear + 1
 
-    mlimiter = "and month = ANY(:months)" if month != "all" else ""
-    months = month2months(month)
+    if month != "custom":
+        mlimiter = "and month = ANY(:months)" if month != "all" else ""
+        months = month2months(month)
+    else:
+        mlimiter = "and sday >= :sday and sday <= :eday"
+        if sday > eday:
+            mlimiter = "and (sday >= :sday or sday <= :eday)"
+        months = None
     table = "alldata"
     if sector == "state":
         # optimization
@@ -270,6 +292,8 @@ def get_data(ctx):
                 "syear1": p1syear,
                 "eyear1": p1eyear,
                 "months": months,
+                "sday": f"{sday:%m%d}",
+                "eday": f"{eday:%m%d}",
                 "syear2": p2syear,
                 "eyear2": p2eyear,
                 "p1years": p1years,
@@ -306,7 +330,13 @@ def plotter(fdict):
     opt1 = ctx["opt1"]
 
     column = varname
-    title = f"{MDICT[month]} {PDICT3[varname]}"
+    if month == "custom":
+        title = (
+            f"({ctx['sday']:%-d %b} thru {ctx['eday']:%-d %b}) "
+            f"{PDICT3[varname]}"
+        )
+    else:
+        title = f"{MDICT[month]} {PDICT3[varname]}"
     title = title.replace("[Threshold]", f"{threshold:.1f}")
     if opt1 == "p1":
         column = f"p1_{varname}"
