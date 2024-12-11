@@ -1,6 +1,6 @@
 """.. title:: IEMRE Multi-Day Data
 
-Return to `JSON Services </json/>`_
+Return to `API Services </api/>`_
 
 Documentation for /iemre/multiday.py
 ------------------------------------

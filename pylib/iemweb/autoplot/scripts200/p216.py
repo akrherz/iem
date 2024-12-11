@@ -8,7 +8,7 @@ provides the raw values for the automated stations.  The download portal for
 the long term climate sites is <a href="/request/coop/fe.phtml">here</a>.
 """
 
-import datetime
+from datetime import timedelta
 
 import matplotlib.ticker as mticker
 import numpy as np
@@ -154,7 +154,7 @@ def plotter(fdict):
                 "days": running,
                 "season": day.year if mydir == "above" else row["season"],
                 "startdate": startdate,
-                "enddate": day - datetime.timedelta(days=1),
+                "enddate": day - timedelta(days=1),
             }
         )
         running = 0
@@ -180,7 +180,7 @@ def plotter(fdict):
     )
     subtitle = f"{PDICT2[varname]} {label} {threshold} {UNITS[varname]}"
     fig = figure(title=title, subtitle=subtitle, apctx=ctx)
-    ax = fig.add_axes([0.1, 0.1, 0.5, 0.8])
+    ax = fig.add_axes((0.1, 0.1, 0.5, 0.8))
     ax.set_ylabel(f"Max Streak by {label2} [days]")
     ax.grid(True)
     gdf = df.groupby("season").max()

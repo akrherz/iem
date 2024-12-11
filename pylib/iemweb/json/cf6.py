@@ -1,6 +1,6 @@
 """.. title:: NWS CF6 JSON Service
 
-Return to `API Services </json/#json>`_
+Return to `API Services </api/#json>`_
 
 Documentation for /json/cf6.py
 ------------------------------
@@ -21,7 +21,7 @@ https://mesonet.agron.iastate.edu/json/cf6.py?station=KDSM&year=2024
 
 """
 
-import datetime
+from datetime import date
 
 import simplejson as json
 from pydantic import Field
@@ -98,7 +98,7 @@ def get_data(cursor, station, year, fmt):
         and c.valid >= %s and c.valid <= %s
         ORDER by c.valid ASC
     """,
-        (station, datetime.date(year, 1, 1), datetime.date(year, 12, 31)),
+        (station, date(year, 1, 1), date(year, 12, 31)),
     )
     for row in cursor:
         data["results"].append(

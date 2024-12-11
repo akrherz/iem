@@ -68,7 +68,7 @@ def get_description():
             default="DMX",
             label="Select WFO:",
         ),
-        dict(type="year", min=1986, default=2019, name="year", label="Year"),
+        dict(type="year", min=1986, default=2024, name="year", label="Year"),
         dict(
             type="vtec_ps",
             name="v",
@@ -262,7 +262,7 @@ def plotter(fdict: dict):
     df["color"] = vtec.NWS_COLORS.get(f"{p1}.{s1}", "#FF0000") + "D0"
     if not sbwdf.empty:
         df["color"] = "#D2B48CD0"
-    if len(df["wfo"].unique()) == 1:
+    if len(df.wfo.unique()) == 1:
         bounds = df["simple_geom"].total_bounds
         if not sbwdf.empty:
             bounds = sbwdf["geom"].total_bounds
@@ -296,12 +296,14 @@ def plotter(fdict: dict):
         north=bounds[3] + buffer,
         nocaption=True,
     )
-    if len(df["wfo"].unique()) == 1 and wfo not in ["PHEB", "PAAQ"]:
+    if len(df.wfo.unique()) == 1 and wfo not in ["PHEB", "PAAQ"]:
         mp.sector = "cwa"
         mp.cwa = wfo[-3:]
     # CAN statements come here with time == expire :/
     if ctx["opt"] == "single":
-        df2 = df[(df["issue"] <= utcvalid) & (df["expire"] > utcvalid)]
+        df2: gpd.GeoDataFrame = df[
+            (df["issue"] <= utcvalid) & (df["expire"] > utcvalid)
+        ]
     else:
         df2 = df
     if df2.empty:
