@@ -209,6 +209,7 @@ def get_data(ctx):
     p2eyear = ctx["p2eyear"]
     p2years = p2eyear - p2syear + 1
 
+    datumsql = "year"
     if month != "custom":
         mlimiter = "and month = ANY(:months)" if month != "all" else ""
         months = month2months(month)
@@ -216,6 +217,7 @@ def get_data(ctx):
         mlimiter = "and sday >= :sday and sday <= :eday"
         if sday > eday:
             mlimiter = "and (sday >= :sday or sday <= :eday)"
+            datumsql = "case when sday >= :sday then year + 1 else year end"
         months = None
     table = "alldata"
     if sector == "state":
@@ -255,15 +257,15 @@ def get_data(ctx):
             text(
                 f"""
         WITH period1 as (
-            SELECT station, year,
+            SELECT station, {datumsql} as datum,
             {sqlopts[ctx['var']]} as {ctx['var']}
             from {table} WHERE year >= :syear1 and year <= :eyear1
-            {mlimiter} GROUP by station, year),
+            {mlimiter} GROUP by station, datum),
         period2 as (
-            SELECT station, year,
+            SELECT station, {datumsql} as datum,
             {sqlopts[ctx['var']]} as {ctx['var']}
             from {table} WHERE year >= :syear2 and year <= :eyear2
-            {mlimiter} GROUP by station, year),
+            {mlimiter} GROUP by station, datum),
         p1agg as (
             SELECT station,
             avg({ctx['var']}) as {ctx['var']}, count(*) as count
