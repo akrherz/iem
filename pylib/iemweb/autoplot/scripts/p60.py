@@ -205,7 +205,7 @@ def get_highcharts(ctx: dict) -> str:
     containername = ctx["_e"]
 
     return f"""
-    var units = {repr(ctx['units'])};
+    var units = "{ctx['units']:%s}";
     function getPointCategoryName(point, dimension) {{
         var series = point.series,
         isY = dimension === 'y',
@@ -226,11 +226,11 @@ def get_highcharts(ctx: dict) -> str:
             min: 0,
             max: 23,
             title: {{
-                text: {repr(ctx['ylabel'])}
+                text: "{ctx['ylabel']:%s}"
             }}
         }},
         title: {{
-            text: {repr(title)}
+            text: "{title:%s}"
         }},
         accessibility: {{
             point: {{

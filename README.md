@@ -10,36 +10,5 @@ Limited integration testing is done on Github Actions: [![Build Status](https://
 [![DeepSource](https://app.deepsource.com/gh/akrherz/iem.svg/?label=active+issues&show_trend=true&token=WvZunVBligt7HgkO2JGg5uMe)](https://app.deepsource.com/gh/akrherz/iem/)
 [![codecov](https://codecov.io/gh/akrherz/iem/graph/badge.svg?token=zKXnLZdxIk)](https://codecov.io/gh/akrherz/iem)
 
-Database schema is in [akrherz/iem-database](https://github.com/akrherz/iem-database).
-
-## Where are processes running
-
-The processing load for the IEM is spread over a number of virtual machines.
-This is an attempt to document what is running where.  The backup shown may not
-be automated, but another system that could be up and running the service in
-limited time.
-
-Process | Primary | Backup | Monitor
-------- | ------- | ------ | -------
-GOES R/S | iem8-dc | iem19 | None
-hrrr | iem8-dc | None | None
-iembot  | iem11-dc | None  | nagios
-iemdb1 | metvm33-dc | iemvm4 | nagios check
-iemdb2 | metvm4-dc | iemvm5 | nagios check
-iemdb3 | metvm2-dc | iemvm0 | nagios check
-iem-archive | metvm6-dc | iemvm6 | nagios
-iem-web-services | iem27-dc | iem11-dc | nagios check
-letsencrpyt | iem8-dc | None | nagios SSL check
-LDM | iem11 | None | None
-LoggerNet | iem8-dc | None | nagios check
-memcached | metvm0-dc | iem8-dc | nagios check
-NEXRAD Mosaics | iem8-dc | iem16 | nagios checks archive
-NWWS-OI Ingest | iem12 | None | None
-openfire | iem11-dc | None | None
-rabbitmq | iem9-dc | iem8-dc | nagios check
-samba | iem16 | None | cron scripts check data availability
-RIDGE | iem9-dc | None    | inbound file queue, check latency 7 radars
-webalizer | iem8-dc | None | None
-webcam haproxy | iem19 | iem12 | nagios
-Webcam Current | iem19 | None | cron script monitors for offline webcams
-Webcam Lapses | iem19 | None | None
+See [@akrherz Github Profile](https://github.com/akrherz) for an overview of
+repositories found here and how the fit together.

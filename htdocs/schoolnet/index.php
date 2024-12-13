@@ -9,9 +9,9 @@ $t->content = <<<EOF
 <h3>SchoolNet</h3>
 
 <p>Over the years, the IEM partnered with 
-<a href="http://www.kcci.com/">KCCI-TV</a> (Des Moines, IA),
-<a href="http://www.keloland.com">KELO-TV</a> (Sioux Falls, SD), 
-and <a href="http://www.kimt.com">KIMT-TV</a> (Mason City, IA) to collect data
+<a href="https://www.kcci.com/">KCCI-TV</a> (Des Moines, IA),
+<a href="https://www.keloland.com">KELO-TV</a> (Sioux Falls, SD), 
+and <a href="https://www.kimt.com">KIMT-TV</a> (Mason City, IA) to collect data
 from their respective school-based weather stations.  Sadly, the observation
 equipment fell into disrepair and the various networks were wound down or
 replaced with proprietary solutions.

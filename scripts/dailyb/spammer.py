@@ -13,17 +13,13 @@ from zoneinfo import ZoneInfo
 
 import requests
 import wwa  # @UnresolvedImport
+from pyiem.database import get_dbconnc
 from pyiem.reference import ISO8601
-from pyiem.util import (
-    exponential_backoff,
-    get_dbconnc,
-    logger,
-    utc,
-)
+from pyiem.util import exponential_backoff, logger, utc
 
 LOG = logger()
 IEM_BRANCHES = "https://api.github.com/repos/akrherz/iem/branches"
-URLS = re.compile(r"(https?://[\w\d:#@%/;$()~_?\+-=\\\.&]*)", re.M)
+URLS = re.compile(r"(https?://[\w\d:#@%/;$()~_?\+-=\\\.&]*)", re.MULTILINE)
 
 
 def mywrap(text):

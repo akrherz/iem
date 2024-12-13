@@ -74,7 +74,7 @@ class Schema(CGIModel):
         "UTC",
         description=(
             "The timezone to use for timestamps in request and response, it "
-            "should be something recognized by the pytz library."
+            "should be something recognized by the ZoneInfo library."
         ),
     )
     year1: int = Field(

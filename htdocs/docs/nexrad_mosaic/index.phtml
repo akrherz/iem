@@ -2,6 +2,7 @@
 require_once "../../../config/settings.inc.php";
 require_once "../../../include/myview.php";
 $t = new MyView();
+$t->iem_resource = "MOSAIC";
 $t->title = "About NEXRAD Mosaics";
 $d = date("Y/m/d");
 $t->content = <<<EOF

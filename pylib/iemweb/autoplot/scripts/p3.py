@@ -167,15 +167,15 @@ Highcharts.chart('{containername}', {{
         tooltip: {{
             valueDecimals: 2
         }},
-        data: {str(ctx["data"].tolist())},
+        data: {ctx["data"].tolist()},
         threshold: null
         }}, {{
         tooltip: {{valueDecimals: 2}},
         name: '30 Year Trailing Avg',
-    pointStart: {str(ctx["df"].index.min() + (3 if ctx["decadal"] else 30))},
+    pointStart: {ctx["df"].index.min() + (3 if ctx["decadal"] else 30)},
         pointInterval: {ptinterval},
             width: 2,
-        data: {str(ctx["tavg"][(3 if ctx["decadal"] else 30) :])}
+        data: {ctx["tavg"][(3 if ctx["decadal"] else 30) :]}
         }},{{
             tooltip: {{
                 valueDecimals: 2
@@ -183,9 +183,9 @@ Highcharts.chart('{containername}', {{
             name: 'Average',
             width: 2,
             pointPadding: 0.1,
-            pointStart: {str(ctx["df"].index.min())},
+            pointStart: {ctx["df"].index.min()},
             pointInterval: {ptinterval},
-            data: {str([ctx["avgv"]] * len(ctx["df"].index))}
+            data: {[ctx["avgv"]] * len(ctx["df"].index)}
         }}]
 }});
     """

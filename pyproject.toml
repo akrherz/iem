@@ -9,18 +9,22 @@ target-version = "py39"
 select = [
     "A",  # builtins
     "B",  # bugbear
+    # "DTZ",  # datetime
     "E",  # pycodestyle
     "ERA",  # eradicate
     "EXE",  # shebang
     "F",  # pyflakes
     "G",  # logging-format
     # "FIX",  # has fixme
+    "FURB",  # refurb
     "I",  # isort
+    "NPY",  # numpy
     # "PD",  # pandas-vet
     "PIE",  # flake8-pie
     "PERF",  # performance
     "PLE",  # pylint error
     "PLW",  # pylint warning
+    "RUF",  # ruff specific
     # "SIM",  # simplify
     "T20",  # print
     # "TRY",  # try-except-raise

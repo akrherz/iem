@@ -81,11 +81,11 @@ to request a point outside of the domain.  Data is available since
 </div><div class="col-md-6">
 <div id="map"></div>
 
-            </div></div>
+</div></div>
 
 <input type="submit" value="Get Data!" />
 
-    </form>
+</form>
 
 <p><h4>Recent Analysis Plots at 00 UTC</h4>
 <i>Click image for archived imagery</i>

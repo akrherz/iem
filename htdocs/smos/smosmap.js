@@ -1,6 +1,4 @@
 /* global $, ol */
-let controls;
-let vectors;
 let feature;
 window.app = {};
 const app = window.app;
@@ -121,7 +119,7 @@ app.Drag.prototype.handleMoveEvent = function (evt) {
  * @param {ol.MapBrowserEvent} evt Map browser event.
  * @return {boolean} `false` to stop the drag sequence.
  */
-app.Drag.prototype.handleUpEvent = function (evt) {
+app.Drag.prototype.handleUpEvent = function (_evt) {
     const ar = ol.proj.transform(this.coordinate_, 'EPSG:3857', 'EPSG:4326');
     $('#lon').val(ar[0].toFixed(4));
     $('#lat').val(ar[1].toFixed(4));
