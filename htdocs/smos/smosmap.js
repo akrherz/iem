@@ -1,7 +1,5 @@
 /* global $, ol */
-let controls;
-let vectors;
-let feature;
+let feature = null;
 window.app = {};
 const app = window.app;
 let theMap = null;
@@ -58,7 +56,7 @@ ol_ext_inherits(app.Drag, ol.interaction.Pointer);
 app.Drag.prototype.handleDownEvent = function (evt) {
 
     const feature_ = theMap.forEachFeatureAtPixel(evt.pixel,
-        function (feat) {
+        (feat) => {
             return feat;
         });
 
@@ -78,7 +76,7 @@ app.Drag.prototype.handleDragEvent = function (evt) {
     const map = evt.map;
 
     map.forEachFeatureAtPixel(evt.pixel,
-        function (feat) {
+        (feat) => {
             return feat;
         });
 
@@ -100,12 +98,12 @@ app.Drag.prototype.handleMoveEvent = function (evt) {
     if (this.cursor_) {
         const map = evt.map;
         const feature_ = map.forEachFeatureAtPixel(evt.pixel,
-            function (feat) {
+            (feat) => {
                 return feat;
             });
         const element = evt.map.getTargetElement();
         if (feature_) {
-            if (element.style.cursor != this.cursor_) {
+            if (element.style.cursor !== this.cursor_) {
                 this.previousCursor_ = element.style.cursor;
                 element.style.cursor = this.cursor_;
             }
@@ -121,7 +119,7 @@ app.Drag.prototype.handleMoveEvent = function (evt) {
  * @param {ol.MapBrowserEvent} evt Map browser event.
  * @return {boolean} `false` to stop the drag sequence.
  */
-app.Drag.prototype.handleUpEvent = function (evt) {
+app.Drag.prototype.handleUpEvent = function (_evt) {
     const ar = ol.proj.transform(this.coordinate_, 'EPSG:3857', 'EPSG:4326');
     $('#lon').val(ar[0].toFixed(4));
     $('#lat').val(ar[1].toFixed(4));

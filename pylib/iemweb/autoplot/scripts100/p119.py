@@ -247,7 +247,7 @@ def plotter(fdict):
             celltext[j][i] = row["dates"].strftime("%b %d")
             cellcolors[j][i] = colors[row["dates"].month - 1]
 
-    ax2 = fig.add_axes([0.75, 0.1, 0.2, 0.75])
+    ax2 = fig.add_axes((0.75, 0.1, 0.2, 0.75))
     # remove all the splines, but show the ylabel
     ax2.spines["top"].set_visible(False)
     ax2.spines["bottom"].set_visible(False)
@@ -259,7 +259,7 @@ def plotter(fdict):
         celltext,
         cellColours=cellcolors,
         colLabels=[f"{t}" + r"$^\circ$F" for t in thresholds],
-        rowLabels=["Min"] + list(range(10, 100, 10)) + ["Max"],
+        rowLabels=["Min", *list(range(10, 100, 10)), "Max"],
         loc="center",
     )
     # add some vertical padding to text in the table and keep the borders

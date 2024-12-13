@@ -33,10 +33,10 @@ from pyiem.templates.iem import TEMPLATE
 from pyiem.util import get_properties
 from pyiem.webutil import iemapp
 
-AFOS_RE = re.compile(r"^[A-Z0-9]{6}$", re.I)
-STATION_RE = re.compile(r"^[A-Z0-9\-]{3,32}$", re.I)
-AUTOPLOT_RE = re.compile(r"^(autoplot|ap)?\s?(?P<n>\d{1,3})$", re.I)
-PRODID_RE = re.compile(r"^[12]\d{11}-[A-Z]{4}-", re.I)
+AFOS_RE = re.compile(r"^[A-Z0-9]{6}$", re.IGNORECASE)
+STATION_RE = re.compile(r"^[A-Z0-9\-]{3,32}$", re.IGNORECASE)
+AUTOPLOT_RE = re.compile(r"^(autoplot|ap)?\s?(?P<n>\d{1,3})$", re.IGNORECASE)
+PRODID_RE = re.compile(r"^[12]\d{11}-[A-Z]{4}-", re.IGNORECASE)
 
 
 def station_df_handler(df):

@@ -142,7 +142,7 @@ def main(days: int):
     df["nam"] += bias
     df["diff"] = df["ob"] - df["nam"]
     # we are going to require data be within 1 SD of sampled or 5 deg
-    std = 5.0 if df["nam"].std() < 5.0 else df["nam"].std()
+    std = max(5.0, df["nam"].std())
     for station in df[df["diff"].abs() > std].index.values:
         LOG.info(
             "%s QC'd %s out std: %.2f, ob:%.1f nam:%.1f",

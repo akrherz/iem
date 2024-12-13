@@ -13,17 +13,13 @@ from zoneinfo import ZoneInfo
 
 import requests
 import wwa  # @UnresolvedImport
+from pyiem.database import get_dbconnc
 from pyiem.reference import ISO8601
-from pyiem.util import (
-    exponential_backoff,
-    get_dbconnc,
-    logger,
-    utc,
-)
+from pyiem.util import exponential_backoff, logger, utc
 
 LOG = logger()
 IEM_BRANCHES = "https://api.github.com/repos/akrherz/iem/branches"
-URLS = re.compile(r"(https?://[\w\d:#@%/;$()~_?\+-=\\\.&]*)", re.M)
+URLS = re.compile(r"(https?://[\w\d:#@%/;$()~_?\+-=\\\.&]*)", re.MULTILINE)
 
 
 def mywrap(text):
@@ -226,6 +222,7 @@ Bad: %(bad)s  Abstain: %(abstain)s
         txt += "\n    No feature posted\n\n"
         html += "<strong>No feature posted</strong>"
 
+    mesosite.close()
     return txt, html
 
 
@@ -271,6 +268,7 @@ def news():
         txt += "\n    No news is good news\n\n"
         html += "<strong>No news is good news</strong>"
 
+    mesosite.close()
     return txt, html
 
 

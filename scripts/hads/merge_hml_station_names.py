@@ -10,7 +10,7 @@ from pyiem.nws.products.hml import parser
 from pyiem.reference import nwsli2state
 
 sys.path.insert(0, "../dbutil")
-from delete_station import delete_logic  # noqa
+from delete_station import delete_logic  # type: ignore
 
 
 def build_stations():

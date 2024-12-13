@@ -6,8 +6,9 @@ import cryptocode
 import mastodon
 import requests
 from paste.request import get_cookie_dict
+from pyiem.database import get_dbconnc
 from pyiem.templates.iem import TEMPLATE
-from pyiem.util import get_dbconnc, get_properties
+from pyiem.util import get_properties
 from pyiem.webutil import iemapp
 
 PRIVKEY = get_properties().get("mod_wsgi.privkey", "")
@@ -124,7 +125,7 @@ def build_subui(mapp, fdict):
     """Show the subscriptions."""
     me = mapp.me()
     res = f"""
-    <p>Hi <a href="{me['url']}">@{str(me['username'])}</a>
+    <p>Hi <a href="{me['url']}">@{me['username']}</a>
     <img src="{me['avatar']}" style="width:20px;">!
     This page configures your IEMBot channel subscriptions.</p>
     """

@@ -84,7 +84,7 @@ def workflow(cid):
         return res
     try:
         res = fetch(cid)
-    except Exception:  # noqa
+    except Exception:
         return None
     if res is not None:
         # Set for 15 seconds

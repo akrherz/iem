@@ -170,6 +170,7 @@
 /plotting/auto/plot/150/network:RAOB::station:_OAX::date:2024-07-19::hour:12::which:none::h:same::var:tmpc::_r:t::dpi:100.png
 /plotting/auto/plot/151/month:all::sector:state::state:IA::opt:both::var:total_precip::r:english::threshold:-99::opt1:diff::p1syear:2000::p1eyear:2010::p2syear:2011::p2eyear:2021::cmap:seismic_r::_r:t::dpi:100.png
 /plotting/auto/plot/151/month:custom::sday:0814::eday:0901::sector:state::state:IA::opt:both::var:total_precip::r:english::threshold:-99::opt1:diff::p1syear:1951::p1eyear:1980::p2syear:1981::p2eyear:2010::cmap:seismic_r::_r:t::dpi:100::_cb:1.png
+/plotting/auto/plot/151/month:custom::sday:1226::eday:0103::sector:state::state:IA::opt:both::var:total_precip::r:english::threshold:-99::opt1:diff::p1syear:1951::p1eyear:1980::p2syear:1981::p2eyear:2010::cmap:seismic_r::_r:t::dpi:100.png
 /plotting/auto/plot/153/network:IA_ASOS::zstation:DSM::month:all::var:min_relh::_r:t::dpi:100.png
 /plotting/auto/plot/155/network:IA_ASOS::zstation:AMW::var:max_gust::w:all::threshold:100::month:nov::_r:t::dpi:100.png
 /plotting/auto/plot/155/network:IA_ASOS::zstation:AMW::var:above_dwpf::w:one::threshold:10::hour:12::month:nov::_r:t::dpi:100.png

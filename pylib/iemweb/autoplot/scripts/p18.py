@@ -89,7 +89,7 @@ def get_highcharts(ctx: dict) -> dict:
     j["tooltip"] = {
         "crosshairs": True,
         "shared": True,
-        "valueSuffix": " %s" % (UNITS[ctx["var"]],),
+        "valueSuffix": f" {UNITS[ctx['var']]}",
     }
     j["legend"] = {}
     j["time"] = {"useUTC": False}
@@ -103,6 +103,7 @@ def get_highcharts(ctx: dict) -> dict:
                 zip(
                     ctx["df"].ticks.values.tolist(),
                     ctx["df"].datum.values.tolist(),
+                    strict=True,
                 )
             ),
             "zIndex": 2,

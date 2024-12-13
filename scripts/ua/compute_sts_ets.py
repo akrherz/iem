@@ -33,7 +33,7 @@ def main():
         current_ets = nt.sts[station]["archive_end"]
         sts = row[0]
         ets = row[1]
-        if sts is not None and current_sts is None or current_sts != sts:
+        if (sts is not None and current_sts is None) or current_sts != sts:
             LOG.info("%s sts %s->%s", station, current_sts, sts)
             mcursor.execute(
                 "UPDATE stations SET archive_begin = %s where id = %s and "

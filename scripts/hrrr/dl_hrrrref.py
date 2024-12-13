@@ -12,7 +12,7 @@ import sys
 import tempfile
 import time
 from datetime import datetime, timezone
-from typing import NoReturn, Optional, Union
+from typing import Optional
 
 import click
 import httpx
@@ -27,7 +27,7 @@ for _hr in range(0, 24, 6):
     HOURS[_hr] = 48
 
 
-def is_archive_complete(valid: datetime) -> Union[Optional[bool], NoReturn]:
+def is_archive_complete(valid: datetime) -> Optional[bool]:
     """Ensure we have the right file and is the right size."""
     # 15 minute data out 18 hours (ref + 4 ptype fields)
     answer = 18 * 4 * 5
@@ -55,7 +55,7 @@ def is_archive_complete(valid: datetime) -> Union[Optional[bool], NoReturn]:
     sys.exit(1)
 
 
-def wait_for_upstream(valid: datetime) -> Union[Optional[None], NoReturn]:
+def wait_for_upstream(valid: datetime) -> Optional[None]:
     """Wait for upstream availability."""
     lasthour = HOURS[valid.hour]
     if lasthour == 18:

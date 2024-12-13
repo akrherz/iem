@@ -1,11 +1,19 @@
-"""
-Placefile for DOT trucks and webcam images
+""".. title:: Iowa DOT Trucks for GRLevelX
+
+This script generates a GRLevelX compatible text file for the Iowa DOT Trucks
+service.
+
+Example Requests:
+
+Get the current Iowa DOT Trucks data:
+
+https://mesonet.agron.iastate.edu/request/grx/iadot_trucks.txt
+
 """
 
-import datetime
-
-from pyiem.util import get_dbconn
-from pymemcache.client import Client
+from pyiem.database import get_dbconn
+from pyiem.util import utc
+from pyiem.webutil import iemapp
 
 URLBASE = "https://mesonet.agron.iastate.edu/data/camera/idot_trucks"
 ARROWS = "https://mesonet.agron.iastate.edu/request/grx/arrows.png"
@@ -14,17 +22,13 @@ ARROWS = "https://mesonet.agron.iastate.edu/request/grx/arrows.png"
 def produce_content():
     """Generate content"""
 
-    res = """Title: Iowa DOT Trucks @%sZ
+    res = f"""Title: Iowa DOT Trucks @{utc():%H%M}Z
 Refresh: 5
 Color: 200 200 255
-IconFile: 1, 15, 25, 8, 25, "%s"
+IconFile: 1, 15, 25, 8, 25, "{ARROWS}"
 Font: 1, 11, 1, "Courier New"
 
-""" % (
-        datetime.datetime.utcnow().strftime("%H%M"),
-        ARROWS,
-    )
-
+"""
     pgconn = get_dbconn("postgis")
     cursor = pgconn.cursor()
 
@@ -60,17 +64,13 @@ Font: 1, 11, 1, "Courier New"
     return res
 
 
+@iemapp(
+    help=__doc__,
+    content_type="text/plain",
+    memcacheexpire=300,
+    memcachekey="/request/grx/iadot_trucks.txt",
+)
 def application(_environ, start_response):
     """Go Main Go"""
     start_response("200 OK", [("Content-type", "text/plain")])
-
-    mckey = "/request/grx/iadot_trucks.txt"
-    mc = Client("iem-memcached:11211")
-    res = mc.get(mckey)
-    if not res:
-        res = produce_content()
-        mc.set(mckey, res, 300)
-    else:
-        res = res.decode("utf-8")
-    mc.close()
-    return [res.encode("ascii")]
+    return produce_content()

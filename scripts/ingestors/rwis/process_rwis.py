@@ -6,7 +6,6 @@ import os
 import subprocess
 import sys
 from datetime import datetime, timedelta, timezone
-from typing import NoReturn
 
 # third party
 import httpx
@@ -339,7 +338,7 @@ def process_features(features):
     return pd.DataFrame(rows).replace({9999: np.nan})
 
 
-def fetch(uri: str) -> NoReturn | pd.DataFrame:
+def fetch(uri: str) -> pd.DataFrame:
     """Download the files we need"""
     res = util.exponential_backoff(httpx.get, uri, timeout=30)
     if res is None:
