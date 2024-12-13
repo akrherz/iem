@@ -11,7 +11,7 @@ require_once "../../../../include/forms.php";
 $state = isset($_GET['state']) ? xssafe($_GET['state']) : '';
 $radar = isset($_GET['radar']) ? xssafe($_GET['radar']) : 1;
 $refresh = isset($_GET['refresh']) ? xssafe($_GET['refresh']) : 0;
-$imgsize = isset($_GET["imgsize"]) ? xssafe($_GET["imgsize"]) : "640x480";
+$imgsize = isset($_GET["imgsize"]) ? xssafe($_GET["imgsize"]) : "1280x1024";
 $tokens = explode("x", $imgsize);
 $imgwidth = intval($tokens[0]);
 $imgheight = intval($tokens[1]);
@@ -58,7 +58,7 @@ if (isset($sextent))
     $oextents = $sextent;
 else
     $oextents = isset($_GET['extents']) ? xssafe($_GET['extents']) : "-105,36,-86,50";
-$zoom     = isset($_GET['zoom']) ? intval($_GET['zoom']) : 0;
+$zoom = isset($_GET['zoom']) ? intval($_GET['zoom']) : 0;
 /**
  * Something simple to enable click interface on a PHP mapcript
  * application
@@ -112,7 +112,7 @@ $imgurl .= sprintf(
 if ($radar) {
     $imgurl .= "layers[]=nexrad&";
 }
-$imgurl .= "&title=IEM%20Freeze&";
+$imgurl .= "&title=IEM%20Freeze&layers[]=interstates";
 
 if ($refresh > 0) {
     $t->headextra = "<meta http-equiv=\"refresh\" content=\"" . $refresh . "; URL=" . $uri . "?imgsize=$imgsize&refresh=" . $refresh . "&extents=" . $extents . "&state=" . $state . "\">\n";
@@ -137,12 +137,25 @@ $reselect = make_select("refresh", $refresh, $ar);
 $sselect = "<select name=\"ba\" onChange=\"location=this.form.ba.options[this.form.ba.selectedIndex].value\">";
 $sselect .= "<option value=\"#\"> -- User Defined -- </option>";
 $ar = array(
-    "A" => "Midwest US", "AK" => "Alaska", "HI" => "Hawaii",
-    "IL" => "Illinois", "IA" => "Iowa", "IA_C" => "Iowa Central", "IA_NE" => "Iowa Northeast",
-    "IA_SE" => "Iowa Southeast", "IA_SW" => "Iowa Southwest", "IA_NW" => "Iowa Northwest",
-    "KS" => "Kansas", "NE" => "Nebraska", "MN_N" => "Minnesota North",
-    "MN_S" => "Minnsota South", "MO" => "Missouri", "ND" => "North Dakota",
-    "NW" => "Pacific Northwest", "SD" => "South Dakota", "WI" => "Wisconsin"
+    "A" => "Midwest US",
+    "AK" => "Alaska",
+    "HI" => "Hawaii",
+    "IL" => "Illinois",
+    "IA" => "Iowa",
+    "IA_C" => "Iowa Central",
+    "IA_NE" => "Iowa Northeast",
+    "IA_SE" => "Iowa Southeast",
+    "IA_SW" => "Iowa Southwest",
+    "IA_NW" => "Iowa Northwest",
+    "KS" => "Kansas",
+    "NE" => "Nebraska",
+    "MN_N" => "Minnesota North",
+    "MN_S" => "Minnsota South",
+    "MO" => "Missouri",
+    "ND" => "North Dakota",
+    "NW" => "Pacific Northwest",
+    "SD" => "South Dakota",
+    "WI" => "Wisconsin"
 );
 foreach ($ar as $key => $val) {
     $sselect .= sprintf(

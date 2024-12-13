@@ -2,7 +2,6 @@
 /* 
  * I am sort of inspired by the old mapblaster days.  Lets create a map of
  * all sorts of data with tons of CGI vars, yippeee
- * 
  */
 require_once "/usr/lib64/php/modules/mapscript.php";
 
@@ -787,7 +786,7 @@ if (in_array("airtemps", $layers)) {
 
 $tlayer = $map->getLayerByName("bar640t-title");
 $point = new pointobj();
-$point->setXY(80, 9);
+$point->setXY(80, 15);
 $tzformat = "d M Y h:i A T";
 $tzinfo = isset($_REQUEST["tz"]) ? xssafe($_REQUEST["tz"]) : "America/Chicago";
 // Translate to ZoneInfo compat
@@ -850,13 +849,16 @@ if (isset($_GET["title"])) {
     }
 }
 
+// Flush all the labels to the plot prior to doing headers and legends
+$map->drawLabelCache($img);
+
 $header_height = ($plotmeta["subtitle"] == "") ? 36 : 53;
 draw_header($map, $img, $width, $header_height);
 
 $point->draw($map, $tlayer, $img, 0, $title);
 
 $point = new pointobj();
-$point->setXY(80, 26);
+$point->setXY(80, 32);
 $point->draw($map, $tlayer, $img, 1, "$d");
 if ($plotmeta["subtitle"] != "") {
     $point = new pointobj();
@@ -864,7 +866,6 @@ if ($plotmeta["subtitle"] != "") {
     $point->draw($map, $tlayer, $img, 1, $plotmeta["subtitle"]);
 }
 
-$map->drawLabelCache($img);
 
 $layer = $map->getLayerByName("logo");
 $point = new pointobj();
@@ -887,8 +888,6 @@ if (in_array("n0q", $layers) || in_array("n0q_tc", $layers) || in_array("n0q_tc6
 if (in_array("legend", $layers)) {
     $map->embedLegend($img);
 }
-//$map->drawLabelCache($img);
-//$map->save("/tmp/test.map");
 
 header("Content-type: image/png");
 echo $img->getBytes();

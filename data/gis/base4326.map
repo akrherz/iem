@@ -813,43 +813,6 @@ LAYER
   END
 END
 
-
-
-
-# Credits
-LAYER
-  NAME "bar640t-title"
-  TYPE POINT
-  STATUS OFF
-  TRANSFORM FALSE
-  CLASS
-    NAME 's14y'
-    LABEL
-      COLOR 255 255 0
-      TYPE TRUETYPE
-      SIZE 14
-      FONT 'liberation'
-      POSITION CR
-      FORCE TRUE
-      PARTIALS TRUE
-      BUFFER 2
-    END
-  END
-  CLASS
-    NAME 's12w'
-    LABEL
-      COLOR 255 255 255
-      TYPE TRUETYPE
-      SIZE 12
-      FONT 'liberation'
-      POSITION CR
-      FORCE TRUE
-      PARTIALS TRUE
-      BUFFER 2
-    END
-  END
-END
-
 # Credits
 LAYER
   NAME credits
