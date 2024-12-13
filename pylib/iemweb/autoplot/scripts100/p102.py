@@ -116,7 +116,7 @@ def plotter(fdict):
         "Local Storm Report Sources Ranks"
     )
     if ltype:
-        label = f"For LSR Types: {ltype:%s}"
+        label = f"For LSR Types: {ltype}"
         if len(label) > 90:
             label = f"{label[:90]}..."
         title += f"\n{label}"
