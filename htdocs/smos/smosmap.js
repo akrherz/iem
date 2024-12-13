@@ -1,5 +1,5 @@
 /* global $, ol */
-let feature;
+let feature = null;
 window.app = {};
 const app = window.app;
 let theMap = null;
@@ -56,7 +56,7 @@ ol_ext_inherits(app.Drag, ol.interaction.Pointer);
 app.Drag.prototype.handleDownEvent = function (evt) {
 
     const feature_ = theMap.forEachFeatureAtPixel(evt.pixel,
-        function (feat) {
+        (feat) => {
             return feat;
         });
 
@@ -76,7 +76,7 @@ app.Drag.prototype.handleDragEvent = function (evt) {
     const map = evt.map;
 
     map.forEachFeatureAtPixel(evt.pixel,
-        function (feat) {
+        (feat) => {
             return feat;
         });
 
@@ -98,12 +98,12 @@ app.Drag.prototype.handleMoveEvent = function (evt) {
     if (this.cursor_) {
         const map = evt.map;
         const feature_ = map.forEachFeatureAtPixel(evt.pixel,
-            function (feat) {
+            (feat) => {
                 return feat;
             });
         const element = evt.map.getTargetElement();
         if (feature_) {
-            if (element.style.cursor != this.cursor_) {
+            if (element.style.cursor !== this.cursor_) {
                 this.previousCursor_ = element.style.cursor;
                 element.style.cursor = this.cursor_;
             }

@@ -222,6 +222,7 @@ Bad: %(bad)s  Abstain: %(abstain)s
         txt += "\n    No feature posted\n\n"
         html += "<strong>No feature posted</strong>"
 
+    mesosite.close()
     return txt, html
 
 
@@ -267,6 +268,7 @@ def news():
         txt += "\n    No news is good news\n\n"
         html += "<strong>No news is good news</strong>"
 
+    mesosite.close()
     return txt, html
 
 
