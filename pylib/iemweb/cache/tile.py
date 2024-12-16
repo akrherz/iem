@@ -35,14 +35,14 @@ def application(environ, start_response):
                 """),
                 {
                     "addr": environ.get(
-                        "X-Forwarded-For", environ.get("REMOTE_ADDR")
+                        "HTTP_X_FORWARDED_FOR", environ.get("REMOTE_ADDR")
                     )
                     .split(",")[0]
                     .strip(),
                     "uri": environ.get("PATH_INFO"),
                     "ref": environ.get("HTTP_REFERER"),
                     "status": 404,
-                    "for": environ.get("X-Forwarded-For"),
+                    "for": environ.get("HTTP_X_FORWARDED_FOR"),
                 },
             )
             conn.commit()
