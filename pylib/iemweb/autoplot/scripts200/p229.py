@@ -11,16 +11,17 @@ coverage should be good outside of the major gap on 10 August 2020 due
 to the derecho power outage.</p>
 """
 
-import datetime
+from datetime import timedelta
 from zoneinfo import ZoneInfo
 
 import geopandas as gpd
 import matplotlib.colors as mpcolors
 import numpy as np
+from pyiem.database import get_sqlalchemy_conn
 from pyiem.exceptions import NoDataFound
 from pyiem.plot import MapPlot, get_cmap, pretty_bins
 from pyiem.reference import EPSG, Z_CLIP2, state_bounds
-from pyiem.util import get_autoplot_context, get_sqlalchemy_conn, utc
+from pyiem.util import get_autoplot_context, utc
 
 LL = (
     "https://www.vaisala.com/en/products/"
@@ -30,7 +31,7 @@ LL = (
 
 def get_description():
     """Return a dict describing how to call this plotter"""
-    t24 = utc() - datetime.timedelta(hours=24)
+    t24 = utc() - timedelta(hours=24)
     return {
         "data": False,
         "description": __doc__.replace("{LL}", LL),
