@@ -124,13 +124,12 @@ def do_hrrr(ts: datetime) -> Optional[np.ndarray]:
         ppath = (utcnow - timedelta(hours=1)).strftime(
             "%Y/%m/%d/model/hrrr/%H/hrrr.t%Hz.3kmf01.grib2"
         )
+        grbname = "Time-mean surface downward short-wave radiation flux"
         with archive_fetch(ppath) as fn:
             if fn is not None:
                 try:
                     grbs = pygrib.open(fn)
-                    selgrbs = grbs.select(
-                        name="Mean surface downward short-wave radiation flux"
-                    )
+                    selgrbs = grbs.select(name=grbname)
                 except Exception:
                     LOG.warning("Read of %s failed", fn)
                     continue
