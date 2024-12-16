@@ -6,13 +6,14 @@ NWEM plots.
 from zoneinfo import ZoneInfo
 
 # third party
-import requests
+import httpx
 from geopandas import read_postgis
+from pyiem.database import get_sqlalchemy_conn
 from pyiem.exceptions import NoDataFound
 from pyiem.network import Table as NetworkTable
 from pyiem.plot.geoplot import MapPlot
 from pyiem.reference import LATLON, Z_OVERLAY2, prodDefinitions
-from pyiem.util import LOG, get_autoplot_context, get_sqlalchemy_conn
+from pyiem.util import LOG, get_autoplot_context
 from sqlalchemy import text
 
 TFORMAT = "%b %-d %Y %-I:%M %p %Z"
@@ -40,15 +41,15 @@ def get_description():
     return desc
 
 
-def get_text(product_id):
+def get_text(product_id: str) -> str:
     """get the raw text."""
     res = "Text Unavailable, Sorry."
     uri = f"https://mesonet.agron.iastate.edu/api/1/nwstext/{product_id}"
     try:
-        req = requests.get(uri, timeout=5)
-        if req.status_code == 200:
-            res = req.content.decode("ascii", "ignore").replace("\001", "")
-            res = "\n".join(text.replace("\r", "").split("\n")[5:])
+        resp = httpx.get(uri, timeout=5)
+        resp.raise_for_status()
+        res = resp.content.decode("ascii", "ignore").replace("\001", "")
+        res = "\n".join(text.replace("\r", "").split("\n")[5:])
     except Exception as exp:
         LOG.info(exp)
 

@@ -45,6 +45,7 @@ class Schema(CGIModel):
         default="KDSM",
         description="The station identifier to query for",
         max_length=4,
+        pattern="^[A-Z]{4}$",
     )
     year: int = Field(default=2019, description="The year to query for")
 

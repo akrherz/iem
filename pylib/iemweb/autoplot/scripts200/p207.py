@@ -32,6 +32,7 @@ import numpy as np
 import pandas as pd
 from geopandas import GeoDataFrame, read_postgis
 from pyiem.database import get_sqlalchemy_conn
+from pyiem.exceptions import NoDataFound
 from pyiem.plot import MapPlot, nwssnow
 from pyiem.reference import EPSG
 from pyiem.util import get_autoplot_context, logger
@@ -256,7 +257,7 @@ def load_data(ctx, basets, endts):
     df2[USEME] = True
     df2["plotme"] = True
     df2["source"] = "COOP"
-    return pd.concat([df, df2], ignore_index=True, sort=False)
+    return pd.concat((df, df2), ignore_index=True, sort=False)
 
 
 def compute_grid_bounds(ctx, csector):
@@ -328,7 +329,7 @@ def add_zeros(df, ctx):
     if newrows:
         if not df.empty:
             df = pd.concat(
-                [df, GeoDataFrame(newrows, geometry="geo", crs=EPSG[2163])],
+                (df, GeoDataFrame(newrows, geometry="geo", crs=EPSG[2163])),
                 ignore_index=True,
                 sort=False,
             )
@@ -350,7 +351,7 @@ def add_zeros(df, ctx):
     return df
 
 
-def do_analysis(df, ctx):
+def do_analysis(df: pd.DataFrame, ctx: dict):
     """Do the analysis finally."""
     # cull dups to prevent gridding badness
     df2 = (
@@ -359,13 +360,14 @@ def do_analysis(df, ctx):
         .first()
         .reset_index()
     )
+    if df2.empty:
+        raise NoDataFound("No Data Found.")
     sz = ctx["sz"] * 1000.0
     # Introduce some jitter
     xi = np.arange(ctx["bnds2163"][0], ctx["bnds2163"][2] + sz, sz / 1.9)
     yi = np.arange(ctx["bnds2163"][1], ctx["bnds2163"][3] + sz, sz / 1.9)
     xi, yi = np.meshgrid(xi, yi)
     lons, lats = T2163_4326.transform(xi, yi)
-
     gridder = Rbf(
         df2["level_0"].values,
         df2["level_1"].values,
