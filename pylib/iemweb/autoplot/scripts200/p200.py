@@ -261,12 +261,12 @@ def plotter(fdict):
     months = month2months(month)
 
     griddelta = 0.05
-    YSZ = (GRIDNORTH - GRIDSOUTH) / griddelta
-    XSZ = (GRIDEAST - GRIDWEST) / griddelta
+    YSZ = int((GRIDNORTH - GRIDSOUTH) / griddelta)
+    XSZ = int((GRIDEAST - GRIDWEST) / griddelta)
 
     raster = np.zeros((int(YSZ), int(XSZ)))
-    lons = np.arange(GRIDWEST, GRIDEAST, griddelta)
-    lats = np.arange(GRIDSOUTH, GRIDNORTH, griddelta)
+    lons = np.linspace(GRIDWEST, GRIDEAST, XSZ)
+    lats = np.linspace(GRIDSOUTH, GRIDNORTH, YSZ)
 
     params = {
         "ot": p.split(".")[1],
