@@ -5,11 +5,8 @@ import sys
 from datetime import datetime
 
 import click
-import geopandas as gpd
 import numpy as np
 from pyiem import iemre
-from pyiem.database import get_sqlalchemy_conn
-from pyiem.grid.zs import CachingZonalStats
 from pyiem.util import logger, ncopen
 
 LOG = logger()
@@ -252,31 +249,6 @@ def init_year(ts, domain, ci: bool):
     nc.close()
 
 
-def compute_hasdata(year, domain):
-    """Compute the has_data grid"""
-    nc = ncopen(iemre.get_daily_ncname(year, domain), "a", timeout=300)
-    czs = CachingZonalStats(iemre.DOMAINS[domain]["affine"])
-    with get_sqlalchemy_conn("postgis") as conn:
-        states = gpd.read_postgis(
-            "SELECT the_geom, state_abbr from states",
-            conn,
-            index_col="state_abbr",
-            geom_col="the_geom",
-        )
-    data = np.flipud(nc.variables["hasdata"][:, :])
-    czs.gen_stats(data, states["the_geom"])
-    for nav in czs.gridnav:
-        if nav is None:
-            continue
-        grid = np.ones((nav.ysz, nav.xsz))
-        grid[nav.mask] = 0.0
-        jslice = slice(nav.y0, nav.y0 + nav.ysz)
-        islice = slice(nav.x0, nav.x0 + nav.xsz)
-        data[jslice, islice] = np.where(grid > 0, 1, data[jslice, islice])
-    nc.variables["hasdata"][:, :] = np.flipud(data)
-    nc.close()
-
-
 @click.command()
 @click.option("--year", type=int, required=True, help="Year to initialize")
 @click.option("--domain", default="", help="IEMRE Domain to run for")
@@ -284,7 +256,6 @@ def compute_hasdata(year, domain):
 def main(year: int, domain: str, ci: bool):
     """Go Main Go"""
     init_year(datetime(year, 1, 1), domain, ci)
-    compute_hasdata(year, domain)
     if ci:
         with ncopen(iemre.get_daily_ncname(year, domain), "a") as nc:
             nc.variables["p01d"][:] = 0
