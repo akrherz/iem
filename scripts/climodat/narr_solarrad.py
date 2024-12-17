@@ -60,7 +60,7 @@ def get_grid(grb):
     return xaxis, yaxis
 
 
-def compute_regions(affine, rsds, df):
+def compute_regions(affine: Affine, rsds, df):
     """Do the spatial averaging work."""
     with get_sqlalchemy_conn("coop") as conn:
         gdf = gpd.read_postgis(
@@ -80,7 +80,7 @@ def compute_regions(affine, rsds, df):
         df.at[sid, COL] = data[i]
 
 
-def compute(df, sids, dt: date, do_regions=False):
+def compute(df: pd.DataFrame, sids, dt: date, do_regions=False):
     """Process data for this timestamp"""
     LOG.info("called dt: %s len(sids): %s", dt, len(sids))
     # Life choice is to run 6z to 6z
@@ -101,13 +101,14 @@ def compute(df, sids, dt: date, do_regions=False):
                 grb = grbs[1]
             if total is None:
                 xaxis, yaxis = get_grid(grb)
+                # This is the outer edge, not grid center
                 affine = Affine(
                     grb["DxInMetres"],
                     0,
-                    xaxis[0],
+                    xaxis[0] - grb["DxInMetres"] / 2.0,
                     0,
                     0 - grb["DyInMetres"],
-                    yaxis[-1],
+                    yaxis[-1] + grb["DyInMetres"] / 2.0,
                 )
 
                 # W/m2 over 3 hours J/m2 to MJ/m2
@@ -115,8 +116,8 @@ def compute(df, sids, dt: date, do_regions=False):
             else:
                 total += grb["values"] * 10800.0 / 1_000_000.0
 
-    df["i"] = np.digitize(df["projx"].values, xaxis)
-    df["j"] = np.digitize(df["projy"].values, yaxis)
+    df["i"] = np.digitize(df["projx"].to_numpy(), xaxis)
+    df["j"] = np.digitize(df["projy"].to_numpy(), yaxis)
     for sid, row in df.loc[sids].iterrows():
         df.at[sid, COL] = total[int(row["j"]), int(row["i"])]
 

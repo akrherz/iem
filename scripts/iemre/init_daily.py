@@ -1,15 +1,12 @@
 """Generate the IEMRE daily analysis file for a year"""
 
-import datetime
 import os
 import sys
+from datetime import datetime
 
 import click
-import geopandas as gpd
 import numpy as np
 from pyiem import iemre
-from pyiem.database import get_sqlalchemy_conn
-from pyiem.grid.zs import CachingZonalStats
 from pyiem.util import logger, ncopen
 
 LOG = logger()
@@ -35,12 +32,13 @@ def init_year(ts, domain, ci: bool):
     nc.realization = 1
     nc.Conventions = "CF-1.0"
     nc.contact = "Daryl Herzmann, akrherz@iastate.edu, 515-294-5978"
-    nc.history = f"{datetime.datetime.now():%d %B %Y} Generated"
+    nc.history = f"{datetime.now():%d %B %Y} Generated"
     nc.comment = "No Comment at this time"
 
     # Setup Dimensions
     nc.createDimension("lat", iemre.DOMAINS[domain]["ny"])
     nc.createDimension("lon", iemre.DOMAINS[domain]["nx"])
+    nc.createDimension("nv", 2)
     days = 2 if ci else ((ts.replace(year=ts.year + 1)) - ts).days
     nc.createDimension("time", int(days))
 
@@ -50,22 +48,33 @@ def init_year(ts, domain, ci: bool):
     lat.long_name = "Latitude"
     lat.standard_name = "latitude"
     lat.axis = "Y"
+    lat.bounds = "lat_bnds"
+    # These are the grid centers
     lat[:] = np.arange(
         iemre.DOMAINS[domain]["south"],
-        iemre.DOMAINS[domain]["north"],
+        iemre.DOMAINS[domain]["north"] + 0.001,
         iemre.DY,
     )
+    lat_bnds = nc.createVariable("lat_bnds", float, ("lat", "nv"))
+    lat_bnds[:, 0] = lat[:] - iemre.DY / 2.0
+    lat_bnds[:, 1] = lat[:] + iemre.DY / 2.0
 
     lon = nc.createVariable("lon", float, ("lon",))
     lon.units = "degrees_east"
     lon.long_name = "Longitude"
     lon.standard_name = "longitude"
     lon.axis = "X"
+    lon.bounds = "lon_bnds"
+    # These are the grid centers
     lon[:] = np.arange(
         iemre.DOMAINS[domain]["west"],
-        iemre.DOMAINS[domain]["east"],
+        iemre.DOMAINS[domain]["east"] + 0.001,
         iemre.DX,
     )
+
+    lon_bnds = nc.createVariable("lon_bnds", float, ("lon", "nv"))
+    lon_bnds[:, 0] = lon[:] - iemre.DX / 2.0
+    lon_bnds[:, 1] = lon[:] + iemre.DX / 2.0
 
     tm = nc.createVariable("time", float, ("time",))
     tm.units = f"Days since {ts.year}-01-01 00:00:0.0"
@@ -240,39 +249,13 @@ def init_year(ts, domain, ci: bool):
     nc.close()
 
 
-def compute_hasdata(year, domain):
-    """Compute the has_data grid"""
-    nc = ncopen(iemre.get_daily_ncname(year, domain), "a", timeout=300)
-    czs = CachingZonalStats(iemre.DOMAINS[domain]["affine"])
-    with get_sqlalchemy_conn("postgis") as conn:
-        states = gpd.read_postgis(
-            "SELECT the_geom, state_abbr from states",
-            conn,
-            index_col="state_abbr",
-            geom_col="the_geom",
-        )
-    data = np.flipud(nc.variables["hasdata"][:, :])
-    czs.gen_stats(data, states["the_geom"])
-    for nav in czs.gridnav:
-        if nav is None:
-            continue
-        grid = np.ones((nav.ysz, nav.xsz))
-        grid[nav.mask] = 0.0
-        jslice = slice(nav.y0, nav.y0 + nav.ysz)
-        islice = slice(nav.x0, nav.x0 + nav.xsz)
-        data[jslice, islice] = np.where(grid > 0, 1, data[jslice, islice])
-    nc.variables["hasdata"][:, :] = np.flipud(data)
-    nc.close()
-
-
 @click.command()
 @click.option("--year", type=int, required=True, help="Year to initialize")
 @click.option("--domain", default="", help="IEMRE Domain to run for")
 @click.option("--ci", is_flag=True, help="Run in CI mode")
 def main(year: int, domain: str, ci: bool):
     """Go Main Go"""
-    init_year(datetime.datetime(year, 1, 1), domain, ci)
-    compute_hasdata(year, domain)
+    init_year(datetime(year, 1, 1), domain, ci)
     if ci:
         with ncopen(iemre.get_daily_ncname(year, domain), "a") as nc:
             nc.variables["p01d"][:] = 0

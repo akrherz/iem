@@ -4,14 +4,18 @@
 2. Copies hourly stage IV netCDF to hourly IEMRE
 """
 
-import datetime
 import warnings
+from datetime import datetime, timedelta, timezone
+from typing import Optional
 
 import click
 import numpy as np
 import pygrib
 from affine import Affine
 from pyiem import iemre
+from pyiem.stage4 import AFFINE_NATIVE as STAGE4_AFFINE
+from pyiem.stage4 import AFFINE_NATIVE_OLD as STAGE4_AFFINE_OLD
+from pyiem.stage4 import ARCHIVE_FLIP as STAGE4_ARCHIVE_FLIP
 from pyiem.util import archive_fetch, logger, ncopen
 
 # silence warning when we squeeze data into netcdf
@@ -88,11 +92,9 @@ def copy_to_iemre(valid):
         "lat_0": 90.0,
         "lon_0": 255.0 - 360.0,
     }
-    # Lower left corner, so no flipping!
-    affine = Affine(4762.5, 0.0, -1902531, 0.0, 4762.5, -7617604)
-
     # Reproject to IEMRE
-    res = iemre.reproject2iemre(val, affine, projparams, domain="")
+    aff = STAGE4_AFFINE if valid >= STAGE4_ARCHIVE_FLIP else STAGE4_AFFINE_OLD
+    res = iemre.reproject2iemre(val, aff, projparams, domain="")
     LOG.info("iemre mean: %.2f max: %.2f", np.mean(res), np.max(res))
 
     # Lets clip bad data
@@ -147,18 +149,18 @@ def workflow(valid, force_copy):
 @click.command()
 @click.option("--valid", "ts", type=click.DateTime(), help="Specific UTC")
 @click.option("--valid12z", "ets", type=click.DateTime(), help="12z UTC")
-def main(ts, ets):
+def main(ts: Optional[datetime], ets: Optional[datetime]):
     """Go Main"""
     if ts is not None:
-        ts = ts.replace(tzinfo=datetime.timezone.utc)
+        ts = ts.replace(tzinfo=timezone.utc)
         workflow(ts, True)
         return
     # Otherwise we are running for an explicit 12z to 12z period, copy only
-    ets = ets.replace(tzinfo=datetime.timezone.utc)
-    now = ets - datetime.timedelta(hours=23)
+    ets = ets.replace(tzinfo=timezone.utc)
+    now = ets - timedelta(hours=23)
     while now <= ets:
         workflow(now, False)
-        now += datetime.timedelta(hours=1)
+        now += timedelta(hours=1)
 
 
 if __name__ == "__main__":

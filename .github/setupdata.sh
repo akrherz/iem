@@ -1,3 +1,5 @@
+# Ensure we error out
+set -x -e
 # Paths are setup in setuppaths.sh
 python database/store_test_data.py $(which psql)
 python scripts/dbutil/sync_stations.py

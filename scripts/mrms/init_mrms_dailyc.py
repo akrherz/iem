@@ -15,7 +15,16 @@ def init_year(ts):
     Create a new NetCDF file for a year of our specification!
     """
     fn = iemre.get_dailyc_mrms_ncname()
-    dom = iemre.DOMAINS[""]
+    # Centroid of the upper left pixel
+    ulx = -125.995
+    uly = 49.995
+    ny = 2700
+    nx = 6100
+    dx = 0.01
+    dy = 0.01
+    # Centroid of the lower right pixel
+    lry = 23.005
+    lrx = -65.005
     if os.path.isfile(fn):
         LOG.warning("Cowardly refusing to create fn: %s", fn)
         return
@@ -35,8 +44,8 @@ def init_year(ts):
     nc.comment = "No Comment at this time"
 
     # Setup Dimensions
-    nc.createDimension("lat", (dom["north"] - dom["south"]) * 100.0)
-    nc.createDimension("lon", (dom["east"] - dom["west"]) * 100.0)
+    nc.createDimension("lat", ny)
+    nc.createDimension("lon", nx)
     ts2 = datetime.datetime(ts.year + 1, 1, 1)
     days = (ts2 - ts).days
     nc.createDimension("time", int(days))
@@ -50,11 +59,11 @@ def init_year(ts):
     lat.bounds = "lat_bnds"
     lat.axis = "Y"
     # Grid centers
-    lat[:] = np.arange(dom["south"] + 0.005, dom["north"], 0.01)
+    lat[:] = np.arange(lry, uly + 0.0001, dy)
 
     lat_bnds = nc.createVariable("lat_bnds", float, ("lat", "nv"))
-    lat_bnds[:, 0] = np.arange(dom["south"], dom["north"], 0.01)
-    lat_bnds[:, 1] = np.arange(dom["south"] + 0.01, dom["north"] + 0.01, 0.01)
+    lat_bnds[:, 0] = lat[:] - dy / 2.0
+    lat_bnds[:, 1] = lat[:] + dy / 2.0
 
     lon = nc.createVariable("lon", float, ("lon",))
     lon.units = "degrees_east"
@@ -62,11 +71,11 @@ def init_year(ts):
     lon.standard_name = "longitude"
     lon.bounds = "lon_bnds"
     lon.axis = "X"
-    lon[:] = np.arange(dom["west"], dom["east"], 0.01)
+    lon[:] = np.arange(ulx, lrx + 0.0001, dx)
 
     lon_bnds = nc.createVariable("lon_bnds", float, ("lon", "nv"))
-    lon_bnds[:, 0] = np.arange(dom["west"], dom["east"], 0.01)
-    lon_bnds[:, 1] = np.arange(dom["west"] + 0.01, dom["east"] + 0.01, 0.01)
+    lon_bnds[:, 0] = lon[:] - dx / 2.0
+    lon_bnds[:, 1] = lon[:] + dx / 2.0
 
     tm = nc.createVariable("time", float, ("time",))
     tm.units = "Days since %s-01-01 00:00:0.0" % (ts.year,)

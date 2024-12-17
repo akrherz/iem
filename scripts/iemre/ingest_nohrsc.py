@@ -32,9 +32,10 @@ def main(valid):
         lats = nc.variables["lat"][:]
         lons = nc.variables["lon"][:]
         snow = nc.variables["Data"][:] * 1_000.0  # m to mm
-    aff_in = Affine(
-        lons[1] - lons[0], 0.0, lons[0], 0.0, lats[1] - lats[0], lats[0]
-    )
+    dx = lons[1] - lons[0]
+    dy = lats[1] - lats[0]
+    # This is the SW edge, not the center
+    aff_in = Affine(dx, 0.0, lons[0] - dx / 2.0, 0.0, dy, lats[0] - dy / 2.0)
     snow12z = reproject2iemre(snow, aff_in, "EPSG:4326")
     ds = get_grids(valid.date(), varnames=["snow_12z"])
     ds.variables["snow_12z"][:] = snow12z

@@ -14,6 +14,7 @@ import numpy as np
 from pyiem import iemre, util
 from pyiem.exceptions import NoDataFound
 from pyiem.grid.zs import CachingZonalStats
+from pyiem.iemre import MRMS4IEMRE_AFFINE
 from pyiem.plot import get_cmap
 from pyiem.plot.geoplot import MapPlot
 
@@ -65,7 +66,7 @@ def plotter(fdict):
             index_col=None,
             geom_col="the_geom",
         )
-    czs = CachingZonalStats(iemre.MRMS_AFFINE)
+    czs = CachingZonalStats(MRMS4IEMRE_AFFINE)
     steps = 0
     with util.ncopen(ncfn) as nc:
         czs.gen_stats(
@@ -131,7 +132,13 @@ def plotter(fdict):
         ),
         nocaption=True,
     )
-    x, y = np.meshgrid(lon, lat)
+    lon_edges = np.concatenate(
+        [lon - (lon[1] - lon[0]) / 2, [lon[-1] + (lon[1] - lon[0]) / 2]]
+    )
+    lat_edges = np.concatenate(
+        [lat - (lat[1] - lat[0]) / 2, [lat[-1] + (lat[1] - lat[0]) / 2]]
+    )
+    x, y = np.meshgrid(lon_edges, lat_edges)
     cmap = get_cmap(ctx["cmap"])
     cmap.set_over("k")
     cmap.set_under("white")

@@ -319,11 +319,23 @@ def do_polygon(ctx: dict):
     if (east - west) > 10:
         griddelta = 0.02
     lons = np.arange(west, east, griddelta)
+    lon_edges = np.append(lons - griddelta / 2.0, lons[-1] + griddelta / 2.0)
     lats = np.arange(south, north, griddelta)
+    lat_edges = np.append(lats - griddelta / 2.0, lats[-1] + griddelta / 2.0)
     YSZ = len(lats)
     XSZ = len(lons)
     lons, lats = np.meshgrid(lons, lats)
-    affine = Affine(griddelta, 0.0, west, 0.0, 0 - griddelta, north)
+    lon_edges, lat_edges = np.meshgrid(lon_edges, lat_edges)
+    # lons and lats are the center of the grid cells, so the affine needs
+    # to be adjusted to the upper left corner
+    affine = Affine(
+        griddelta,
+        0.0,
+        west - griddelta / 2.0,
+        0.0,
+        0 - griddelta,
+        north + griddelta / 2.0,
+    )
     ones = np.ones((int(YSZ), int(XSZ)))
     counts = np.zeros((int(YSZ), int(XSZ)))
     wfolimiter = ""
@@ -469,8 +481,8 @@ def do_polygon(ctx: dict):
             bins[0] = 0.01
     ctx["bins"] = bins
     ctx["data"] = counts
-    ctx["lats"] = lats
-    ctx["lons"] = lons
+    ctx["lats"] = lat_edges
+    ctx["lons"] = lon_edges
 
 
 def do_ugc(ctx: dict):

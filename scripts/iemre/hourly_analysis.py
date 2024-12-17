@@ -44,13 +44,16 @@ def use_era5land(ts, kind, domain):
         with ncopen(ncfn) as nc:
             lats = nc.variables["lat"][:]
             lons = nc.variables["lon"][:]
+            dx = lons[1] - lons[0]
+            dy = lats[1] - lats[0]
+            # This defines the SW edge of the grid
             aff = Affine(
-                lons[1] - lons[0],
+                dx,
                 0,
-                lons[0],
+                lons[0] - dx / 2.0,
                 0,
-                lats[1] - lats[0],
-                lats[0],
+                dy,
+                lats[0] - dy / 2.0,
             )
             res = []
             for task in tasks.get(kind, [kind]):
@@ -139,7 +142,7 @@ def use_rtma(ts, kind):
     return None
 
 
-def grid_wind(df, hasdata, domain):
+def grid_wind(df, domain):
     """
     Grid winds based on u and v components
     @return uwnd, vwnd
@@ -155,30 +158,27 @@ def grid_wind(df, hasdata, domain):
         v.append(_v.to("meter / second").m)
     df["u"] = u
     df["v"] = v
-    ugrid = generic_gridder(df, "u", hasdata, applymask=False, domain=domain)
-    vgrid = generic_gridder(df, "v", hasdata, applymask=False, domain=domain)
+    ugrid = generic_gridder(df, "u", domain=domain)
+    vgrid = generic_gridder(df, "v", domain=domain)
     return ugrid, vgrid
 
 
-def grid_skyc(df, hasdata, domain):
+def grid_skyc(df, domain):
     """Take the max sky coverage value."""
     cols = ["max_skyc1", "max_skyc2", "max_skyc3", "max_skyc4"]
     df["skyc"] = df[cols].max(axis="columns")
-    return generic_gridder(df, "skyc", hasdata, domain=domain)
+    return generic_gridder(df, "skyc", domain=domain)
 
 
-def generic_gridder(df, idx, hasdata, applymask=True, domain=""):
+def generic_gridder(df, idx, domain=""):
     """Generic gridding algorithm for easy variables"""
     dom = iemre.DOMAINS[domain]
     df2 = df[pd.notnull(df[idx])]
     xi, yi = np.meshgrid(
-        np.arange(dom["west"], dom["east"], iemre.DX),
-        np.arange(dom["south"], dom["north"], iemre.DY),
+        np.arange(dom["west"], dom["east"] + 0.01, iemre.DX),
+        np.arange(dom["south"], dom["north"] + 0.01, iemre.DY),
     )
     res = np.ones(xi.shape) * np.nan
-    # set a sentinel of where we won't be estimating
-    if applymask:
-        res = np.where(hasdata > 0, res, -9999)
     # do our gridding
     grid = inverse_distance_to_grid(
         df2["lon"].values, df2["lat"].values, df2[idx].values, xi, yi, 1.5
@@ -205,10 +205,6 @@ def grid_hour(ts, domain):
     @param ts Timestamp of the analysis, we'll consider a 20 minute window
     """
     LOG.info("Processing %s", ts)
-    with ncopen(
-        iemre.get_hourly_ncname(ts.year, domain=domain), "r", timeout=300
-    ) as nc:
-        hasdata = nc.variables["hasdata"][:, :]
     ts0 = ts - datetime.timedelta(minutes=10)
     ts1 = ts + datetime.timedelta(minutes=10)
 
@@ -272,7 +268,7 @@ def grid_hour(ts, domain):
         if df.empty:
             LOG.warning("%s has no entries, FAIL", ts)
             return
-        ures, vres = grid_wind(df, hasdata, domain)
+        ures, vres = grid_wind(df, domain)
     if ures is None:
         LOG.warning("Failure for uwnd at %s", ts)
     else:
@@ -295,7 +291,7 @@ def grid_hour(ts, domain):
             LOG.warning("%s has no entries, FAIL", ts)
             return
         did_gridding = True
-        tmpf = generic_gridder(df, "max_tmpf", hasdata, domain=domain)
+        tmpf = generic_gridder(df, "max_tmpf", domain=domain)
 
     # only use RTMA if tmp worked
     res = None
@@ -320,7 +316,7 @@ def grid_hour(ts, domain):
         if df.empty:
             LOG.warning("%s has no entries, FAIL", ts)
             return
-        dwpf = generic_gridder(df, "max_dwpf", hasdata, domain=domain)
+        dwpf = generic_gridder(df, "max_dwpf", domain=domain)
 
     # Only keep cases when tmpf >= dwpf and they are both not masked
     # Note some truncation issues here, so our comparison is not perfect
@@ -334,7 +330,7 @@ def grid_hour(ts, domain):
     write_grid(
         ts, "dwpk", masked_array(dwpf, data_units="degF").to("degK"), domain
     )
-    res = grid_skyc(df, hasdata, domain)
+    res = grid_skyc(df, domain)
     if res is None:
         LOG.warning("No obs for skyc at %s", ts)
     else:

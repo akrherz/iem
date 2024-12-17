@@ -62,6 +62,7 @@ def try_era5land(ts: datetime, domain: str, dom: dict) -> Optional[np.ndarray]:
     # We wanna store as W m-2, so we just average out the data by hour
     total = total / 24.0
 
+    # The affine defines the edges of the grid
     aff = Affine(0.1, 0, dom["west"], 0, -0.1, dom["north"])
     vals = iemre.reproject2iemre(
         np.flipud(total), aff, P4326.crs, domain=domain
@@ -195,7 +196,9 @@ def do_hrrr(ts: datetime) -> Optional[np.ndarray]:
 
     # We wanna store as W m-2, so we just average out the data by hour
     total = total / 24.0
-    affine_in = Affine(dx, 0.0, llcrnrx, 0.0, dy, llcrnry)
+    affine_in = Affine(
+        dx, 0.0, llcrnrx - dx / 2.0, 0.0, dy, llcrnry + dy / 2.0
+    )
 
     srad = iemre.reproject2iemre(total, affine_in, LCC.crs)
     return srad
