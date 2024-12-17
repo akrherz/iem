@@ -27,6 +27,10 @@ PDICT = {
     "rsds": "Hourly Solar Radiation",
 }
 PDICT2 = {"c": "Contour Plot", "g": "Grid Cell Mesh"}
+PDICT3 = {
+    "yes": "Yes, mask the plot when appropriate",
+    "no": "No, do not mask the plot",
+}
 
 
 def get_description():
@@ -59,9 +63,16 @@ def get_description():
             type="datetime",
             name="valid",
             default=today.strftime("%Y/%m/%d 0000"),
-            label="Date:",
+            label="UTC Timestamp:",
             min="1950/01/01 0000",
         ),
+        {
+            "type": "select",
+            "name": "clip",
+            "default": "yes",
+            "label": "Mask Plot Data?",
+            "options": PDICT3,
+        },
         dict(type="cmap", name="cmap", default="magma", label="Color Ramp:"),
     ]
     return desc
@@ -177,6 +188,7 @@ def plotter(fdict):
             ilabel=True,
             labelfmt="%.0f",
             cmap=cmap,
+            clip_on=ctx["clip"] == "yes",
         )
     else:
         x, y = np.meshgrid(lons, lats)
@@ -187,6 +199,7 @@ def plotter(fdict):
             clevs,
             cmap=cmap,
             units=plot_units,
+            clip_on=ctx["clip"] == "yes",
         )
 
     return mp.fig
