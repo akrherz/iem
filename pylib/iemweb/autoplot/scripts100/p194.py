@@ -25,6 +25,7 @@ from pyiem.plot import MapPlot
 from pyiem.plot.colormaps import stretch_cmap
 from pyiem.reference import LATLON
 from pyiem.util import get_autoplot_context
+from sqlalchemy import text
 
 PDICT = {
     "0": "D0: Abnormally Dry",
@@ -131,37 +132,36 @@ def plotter(fdict):
     lons = np.arange(raster.shape[1]) * griddelta + west
     lats = np.arange(0, 0 - raster.shape[0], -1) * griddelta + north
     lats = lats[::-1]
-    affine = Affine(griddelta, 0.0, west, 0.0, 0 - griddelta, north)
-    # get the geopandas data
-    giswkt = "SRID=4326;POLYGON((%s %s, %s %s, %s %s, %s %s, %s %s))" % (
-        west,
-        south,
-        west,
-        north,
-        east,
-        north,
-        east,
-        south,
-        west,
-        south,
+    # The affine is the grid edge, which is different than the grid center
+    affine = Affine(
+        griddelta,
+        0.0,
+        west - griddelta / 2.0,
+        0.0,
+        0 - griddelta,
+        north + griddelta / 2.0,
     )
     with get_sqlalchemy_conn("postgis") as conn:
         df = read_postgis(
-            """
+            text("""
         with d as (
             select valid, (ST_Dump(st_simplify(geom, 0.01))).geom from usdm
-            where valid >= %s and valid <= %s and dm >= %s and
-            ST_Intersects(geom, ST_GeomFromEWKT(%s))
+            where valid >= :sdate and valid <= :edate and dm >= :dlevel and
+            ST_Intersects(geom,
+                ST_MakeEnvelope(:west, :south, :east, :north, 4326))
         )
         select valid, st_collect(geom) as the_geom from d GROUP by valid
-        """,
+        """),
             conn,
-            params=(
-                sdate,
-                edate,
-                dlevel,
-                giswkt,
-            ),
+            params={
+                "sdate": sdate,
+                "edate": edate,
+                "dlevel": dlevel,
+                "west": west,
+                "south": south,
+                "east": east,
+                "north": north,
+            },
             geom_col="the_geom",
         )
     if df.empty:
@@ -191,7 +191,13 @@ def plotter(fdict):
     cmap = stretch_cmap(ctx["cmap"], ramp)
     cmap.set_under("white")
     cmap.set_bad("white")
-    xx, yy = np.meshgrid(lons, lats)
+    lon_edges = np.concatenate(
+        [lons - griddelta / 2.0, [lons[-1] + griddelta / 2.0]]
+    )
+    lat_edges = np.concatenate(
+        [lats - griddelta / 2.0, [lats[-1] + griddelta / 2.0]]
+    )
+    xx, yy = np.meshgrid(lon_edges, lat_edges)
     raster2 = np.flipud(raster)
     mp.pcolormesh(
         xx,

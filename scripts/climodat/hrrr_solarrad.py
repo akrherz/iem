@@ -31,7 +31,7 @@ SWITCH_DATE = utc(2014, 10, 10, 20)
 GRBNAME = "Mean surface downward short-wave radiation flux"
 
 
-def compute_regions(affine, rsds, df):
+def compute_regions(affine: Affine, rsds, df):
     """Do the spatial averaging work."""
     with get_sqlalchemy_conn("coop") as conn:
         gdf = gpd.read_postgis(
@@ -87,7 +87,7 @@ def get_grid(grb):
     return xaxis, yaxis
 
 
-def compute(df, sids, dt, do_regions=False):
+def compute(df: pd.DataFrame, sids, dt, do_regions=False):
     """Process data for this timestamp"""
     # Life choice is to run 6z to 6z
     sts = utc(dt.year, dt.month, dt.day, 6)
@@ -113,13 +113,14 @@ def compute(df, sids, dt, do_regions=False):
                     for g in selgrbs:
                         if total is None:
                             xaxis, yaxis = get_grid(g)
+                            # This is the outer edge, not center
                             affine = Affine(
                                 g["DxInMetres"],
                                 0,
-                                xaxis[0],
+                                xaxis[0] - g["DxInMetres"] / 2.0,
                                 0,
                                 0 - g["DyInMetres"],
-                                yaxis[-1],
+                                yaxis[-1] + g["DyInMetres"] / 2.0,
                             )
                             total = g.values * 900.0  # 15 min data
                         else:
@@ -142,13 +143,14 @@ def compute(df, sids, dt, do_regions=False):
             g = grb[0]
             if total is None:
                 xaxis, yaxis = get_grid(g)
+                # This is the outer edge, not center
                 affine = Affine(
                     g["DxInMetres"],
                     0,
-                    xaxis[0],
+                    xaxis[0] - g["DxInMetres"] / 2.0,
                     0,
                     0 - g["DyInMetres"],
-                    yaxis[-1],
+                    yaxis[-1] + g["DyInMetres"] / 2.0,
                 )
                 total = g.values * 3600.0
             else:
@@ -162,8 +164,8 @@ def compute(df, sids, dt, do_regions=False):
     # We want MJ day-1 m-2
     total = total / 1_000_000.0
 
-    df["i"] = np.digitize(df["projx"].values, xaxis)
-    df["j"] = np.digitize(df["projy"].values, yaxis)
+    df["i"] = np.digitize(df["projx"].to_numpy(), xaxis)
+    df["j"] = np.digitize(df["projy"].to_numpy(), yaxis)
     for sid, row in df.loc[sids].iterrows():
         df.at[sid, COL] = total[int(row["j"]), int(row["i"])]
 

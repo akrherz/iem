@@ -6,8 +6,8 @@ Called from:
   RUN_NOON.sh and RUN_0Z.sh for today.
 """
 
-import datetime
 import os
+from datetime import datetime, timedelta
 
 import click
 import numpy as np
@@ -52,11 +52,11 @@ def merge(ts):
     save12z(ts, val)
 
     # storage is in the arrears
-    sts = ts - datetime.timedelta(hours=23)
+    sts = ts - timedelta(hours=23)
     pairs = [(sts, ts)]
     if ts.month == 1 and ts.day == 1:
         pairs = [
-            (sts, sts + datetime.timedelta(hours=10)),  # 13z thr 23z
+            (sts, sts + timedelta(hours=10)),  # 13z thr 23z
             (ts.replace(hour=0), ts),
         ]
     hourly_total = None
@@ -105,7 +105,7 @@ def merge(ts):
 
 @click.command()
 @click.option("--date", "dt", type=click.DateTime(), required=True)
-def main(dt: datetime.datetime):
+def main(dt: datetime):
     """Go Main Go"""
     merge(utc(dt.year, dt.month, dt.day, 12))
 

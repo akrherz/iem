@@ -44,13 +44,16 @@ def use_era5land(ts, kind, domain):
         with ncopen(ncfn) as nc:
             lats = nc.variables["lat"][:]
             lons = nc.variables["lon"][:]
+            dx = lons[1] - lons[0]
+            dy = lats[1] - lats[0]
+            # This defines the SW edge of the grid
             aff = Affine(
-                lons[1] - lons[0],
+                dx,
                 0,
-                lons[0],
+                lons[0] - dx / 2.0,
                 0,
-                lats[1] - lats[0],
-                lats[0],
+                dy,
+                lats[0] - dy / 2.0,
             )
             res = []
             for task in tasks.get(kind, [kind]):

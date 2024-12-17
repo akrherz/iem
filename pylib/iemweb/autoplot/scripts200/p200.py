@@ -275,6 +275,10 @@ def plotter(fdict):
         "cat": level.split(".")[0],
         "months": months,
         "edate": ctx.get("edate", utc() + timedelta(days=2)),
+        "west": GRIDWEST,
+        "south": GRIDSOUTH,
+        "east": GRIDEAST,
+        "north": GRIDNORTH,
     }
 
     hour = p.split(".")[2]
@@ -282,19 +286,6 @@ def plotter(fdict):
     if hour != "A":
         params["hour"] = int(hour)
         hour_limiter = " and cycle = :hour "
-    giswkt = "SRID=4326;POLYGON((%s %s, %s %s, %s %s, %s %s, %s %s))" % (
-        GRIDWEST,
-        GRIDSOUTH,
-        GRIDWEST,
-        GRIDNORTH,
-        GRIDEAST,
-        GRIDNORTH,
-        GRIDEAST,
-        GRIDSOUTH,
-        GRIDWEST,
-        GRIDSOUTH,
-    )
-    params["giswkt"] = giswkt
     with get_sqlalchemy_conn("postgis") as conn:
         df = gpd.read_postgis(
             text(
@@ -304,7 +295,8 @@ def plotter(fdict):
             min(extract(year from issue at time zone 'UTC')) as year
             from spc_outlooks where outlook_type = :ot and day = :day
             {hour_limiter} and threshold = :t and category = :cat and
-            ST_Intersects(geom, ST_GeomFromEWKT(:giswkt))
+            ST_Intersects(geom,
+                ST_MakeEnvelope(:west, :south, :east, :north, 4326))
             and extract(month from issue) = ANY(:months)
             and product_issue > '2002-01-01' and
             product_issue < :edate
@@ -318,7 +310,15 @@ def plotter(fdict):
         )
     if df.empty:
         raise NoDataFound("No results found for query")
-    affine = Affine(griddelta, 0.0, GRIDWEST, 0.0, 0 - griddelta, GRIDNORTH)
+    # The affine is the edge and not the analysis centers
+    affine = Affine(
+        griddelta,
+        0.0,
+        GRIDWEST - griddelta / 2.0,
+        0.0,
+        0 - griddelta,
+        GRIDNORTH + griddelta / 2.0,
+    )
     czs = CachingZonalStats(affine)
     czs.compute_gridnav(df["geom"], raster)
     for i, nav in enumerate(czs.gridnav):
@@ -373,10 +373,15 @@ def plotter(fdict):
         subtitle=f"{PDICT2[ctx['w']]}, {subtitle}",
         nocaption=True,
     )
+    lon_edges = np.concatenate(
+        [lons - griddelta / 2.0, [lons[-1] + griddelta / 2.0]]
+    )
+    lat_edges = np.concatenate(
+        [lats - griddelta / 2.0, [lats[-1] + griddelta / 2.0]]
+    )
     # Get the main axes bounds
     if t == "state" and csector == "conus":
         domain = raster
-        lons, lats = np.meshgrid(lons, lats)
         df2 = pd.DataFrame()
     else:
         (west, east, south, north) = mp.panels[0].get_extent(LATLON)
@@ -387,7 +392,15 @@ def plotter(fdict):
         jslice = slice(j0, j1)
         islice = slice(i0, i1)
         domain = raster[jslice, islice]
-        lons, lats = np.meshgrid(lons[islice], lats[jslice])
+        lons = lons[islice]
+        lats = lats[jslice]
+        lon_edges = np.concatenate(
+            [lons - griddelta / 2.0, [lons[-1] + griddelta / 2.0]]
+        )
+        lat_edges = np.concatenate(
+            [lats - griddelta / 2.0, [lats[-1] + griddelta / 2.0]]
+        )
+        lons, lats = np.meshgrid(lons, lats)
         df2 = pd.DataFrame(
             {"lat": lats.ravel(), "lon": lons.ravel(), "freq": domain.ravel()}
         )
@@ -415,9 +428,10 @@ def plotter(fdict):
     cmap.set_bad("white")
     cmap.set_under("white")
     cmap.set_over("black")
+    x, y = np.meshgrid(lon_edges, lat_edges)
     res = mp.pcolormesh(
-        lons,
-        lats,
+        x,
+        y,
         domain,
         rng,
         cmap=cmap,

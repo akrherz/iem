@@ -40,6 +40,7 @@ def init_year(ts: datetime.datetime, domain: str, ci: bool) -> None:
     # Setup Dimensions
     nc.createDimension("lat", dom["ny"])
     nc.createDimension("lon", dom["nx"])
+    nc.createDimension("nv", 2)
     ts2 = datetime.datetime(ts.year + 1, 1, 1)
     days = 1 if ci else (ts2 - ts).days
     LOG.info("Year %s has %s days", ts.year, days)
@@ -51,14 +52,33 @@ def init_year(ts: datetime.datetime, domain: str, ci: bool) -> None:
     lat.long_name = "Latitude"
     lat.standard_name = "latitude"
     lat.axis = "Y"
-    lat[:] = np.arange(dom["south"], dom["north"], iemre.DY)
+    lat.bounds = "lat_bnds"
+    # These are the grid centers
+    lat[:] = np.arange(
+        iemre.DOMAINS[""]["south"],
+        iemre.DOMAINS[""]["north"],
+        iemre.DY,
+    )
+    lat_bnds = nc.createVariable("lat_bnds", float, ("lat", "nv"))
+    lat_bnds[:, 0] = lat[:] - iemre.DY / 2.0
+    lat_bnds[:, 1] = lat[:] + iemre.DY / 2.0
 
     lon = nc.createVariable("lon", float, ("lon",))
     lon.units = "degrees_east"
     lon.long_name = "Longitude"
     lon.standard_name = "longitude"
     lon.axis = "X"
-    lon[:] = np.arange(dom["west"], dom["east"], iemre.DX)
+    lon.bounds = "lon_bnds"
+    # These are the grid centers
+    lon[:] = np.arange(
+        iemre.DOMAINS[domain]["west"],
+        iemre.DOMAINS[domain]["east"],
+        iemre.DX,
+    )
+
+    lon_bnds = nc.createVariable("lon_bnds", float, ("lon", "nv"))
+    lon_bnds[:, 0] = lon[:] - iemre.DX / 2.0
+    lon_bnds[:, 1] = lon[:] + iemre.DX / 2.0
 
     tm = nc.createVariable("time", float, ("time",))
     tm.units = f"Hours since {ts.year}-01-01 00:00:0.0"

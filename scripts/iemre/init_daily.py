@@ -1,8 +1,8 @@
 """Generate the IEMRE daily analysis file for a year"""
 
-import datetime
 import os
 import sys
+from datetime import datetime
 
 import click
 import geopandas as gpd
@@ -35,12 +35,13 @@ def init_year(ts, domain, ci: bool):
     nc.realization = 1
     nc.Conventions = "CF-1.0"
     nc.contact = "Daryl Herzmann, akrherz@iastate.edu, 515-294-5978"
-    nc.history = f"{datetime.datetime.now():%d %B %Y} Generated"
+    nc.history = f"{datetime.now():%d %B %Y} Generated"
     nc.comment = "No Comment at this time"
 
     # Setup Dimensions
     nc.createDimension("lat", iemre.DOMAINS[domain]["ny"])
     nc.createDimension("lon", iemre.DOMAINS[domain]["nx"])
+    nc.createDimension("nv", 2)
     days = 2 if ci else ((ts.replace(year=ts.year + 1)) - ts).days
     nc.createDimension("time", int(days))
 
@@ -50,22 +51,33 @@ def init_year(ts, domain, ci: bool):
     lat.long_name = "Latitude"
     lat.standard_name = "latitude"
     lat.axis = "Y"
+    lat.bounds = "lat_bnds"
+    # These are the grid centers
     lat[:] = np.arange(
         iemre.DOMAINS[domain]["south"],
         iemre.DOMAINS[domain]["north"],
         iemre.DY,
     )
+    lat_bnds = nc.createVariable("lat_bnds", float, ("lat", "nv"))
+    lat_bnds[:, 0] = lat[:] - iemre.DY / 2.0
+    lat_bnds[:, 1] = lat[:] + iemre.DY / 2.0
 
     lon = nc.createVariable("lon", float, ("lon",))
     lon.units = "degrees_east"
     lon.long_name = "Longitude"
     lon.standard_name = "longitude"
     lon.axis = "X"
+    lon.bounds = "lon_bnds"
+    # These are the grid centers
     lon[:] = np.arange(
         iemre.DOMAINS[domain]["west"],
         iemre.DOMAINS[domain]["east"],
         iemre.DX,
     )
+
+    lon_bnds = nc.createVariable("lon_bnds", float, ("lon", "nv"))
+    lon_bnds[:, 0] = lon[:] - iemre.DX / 2.0
+    lon_bnds[:, 1] = lon[:] + iemre.DX / 2.0
 
     tm = nc.createVariable("time", float, ("time",))
     tm.units = f"Days since {ts.year}-01-01 00:00:0.0"
@@ -271,7 +283,7 @@ def compute_hasdata(year, domain):
 @click.option("--ci", is_flag=True, help="Run in CI mode")
 def main(year: int, domain: str, ci: bool):
     """Go Main Go"""
-    init_year(datetime.datetime(year, 1, 1), domain, ci)
+    init_year(datetime(year, 1, 1), domain, ci)
     compute_hasdata(year, domain)
     if ci:
         with ncopen(iemre.get_daily_ncname(year, domain), "a") as nc:

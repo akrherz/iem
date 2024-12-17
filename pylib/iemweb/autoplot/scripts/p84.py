@@ -344,7 +344,15 @@ def set_data(ctx):
         clevs[0] = 0.01
 
     if len(ctx["lons"].shape) == 1:
-        x2d, y2d = np.meshgrid(ctx["lons"], ctx["lats"])
+        dx = ctx["lons"][1] - ctx["lons"][0]
+        dy = ctx["lats"][1] - ctx["lats"][0]
+        lat_edges = np.concatenate(
+            [ctx["lats"] - dy / 2, [ctx["lats"][-1] + dy / 2]]
+        )
+        lon_edges = np.concatenate(
+            [ctx["lons"] - dx / 2, [ctx["lons"][-1] + dx / 2]]
+        )
+        x2d, y2d = np.meshgrid(lon_edges, lat_edges)
     else:
         x2d, y2d = ctx["lons"], ctx["lats"]
 

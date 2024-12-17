@@ -9,14 +9,15 @@ how much of the rain on a given day fell on an area that needed it!  The
 areal coverage percentages are relative to the given state.
 """
 
-import datetime
 import os
+from datetime import datetime, timedelta
 
 import geopandas as gpd
 import numpy as np
 from pyiem import iemre, util
 from pyiem.exceptions import NoDataFound
 from pyiem.grid.zs import CachingZonalStats
+from pyiem.iemre import MRMS4IEMRE_AFFINE
 from pyiem.plot import figure_axes
 from pyiem.reference import state_names
 
@@ -24,7 +25,7 @@ from pyiem.reference import state_names
 def get_description():
     """Return a dict describing how to call this plotter"""
     desc = {"description": __doc__}
-    today = datetime.datetime.today() - datetime.timedelta(days=1)
+    today = datetime.today() - timedelta(days=1)
     desc["arguments"] = [
         dict(
             type="csector", name="sector", default="IA", label="Select Sector:"
@@ -59,7 +60,7 @@ def plotter(fdict):
     sector = ctx["sector"]
     days = ctx["trailing"]
     threshold = ctx["threshold"]
-    window_sts = date - datetime.timedelta(days=days)
+    window_sts = date - timedelta(days=days)
     if window_sts.year != date.year:
         raise NoDataFound("Sorry, do not support multi-year plots yet!")
     if len(sector) != 2:
@@ -82,7 +83,7 @@ def plotter(fdict):
             index_col=None,
             geom_col="the_geom",
         )
-    czs = CachingZonalStats(iemre.MRMS_AFFINE)
+    czs = CachingZonalStats(MRMS4IEMRE_AFFINE)
     with util.ncopen(ncfn) as nc:
         czs.gen_stats(
             np.zeros((nc.variables["lat"].size, nc.variables["lon"].size)),

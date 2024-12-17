@@ -70,12 +70,13 @@ def do_step(
     hrrr_aff = Affine(
         ds.refd.GRIB_DxInMetres,
         0.0,
-        llx,
+        llx - ds.refd.GRIB_DxInMetres / 2.0,
         0.0,
         ds.refd.GRIB_DyInMetres,
-        lly,
+        lly + ds.refd.GRIB_DyInMetres / 2.0,
     )
-    dest_aff = Affine(0.02, 0.0, -126.0, 0.0, -0.02, 50.0)
+    # This defines the grid edge, so we need to adjust for the center
+    dest_aff = Affine(0.02, 0.0, -126.01, 0.0, -0.02, 50.01)
     if ptype:
         refidx = np.zeros(raw.shape)
         color_ramps = radar_ptype()
@@ -131,7 +132,7 @@ def do_step(
         pngtemp.name,
     ]
     subprocess.call(cmd)
-    # Do world file variant
+    # This defines the center of the upper left pixel, so it jives with above
     with tempfile.NamedTemporaryFile(delete=False, mode="w") as wldtmp:
         wldtmp.write(
             "\n".join(["0.02", "0.0", "0.0", "-0.02", "-126.0", "50.0"])
