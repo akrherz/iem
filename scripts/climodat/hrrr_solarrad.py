@@ -28,7 +28,7 @@ COL = "hrrr_srad"
 # NOTE: for unsure reasons, the old HRRR data prior to this timestamp gets
 # invalidly decoded by present day pygrib, so we just abort for now.
 SWITCH_DATE = utc(2014, 10, 10, 20)
-GRBNAME = "Mean surface downward short-wave radiation flux"
+GRBNAME = "Time-mean surface downward short-wave radiation flux"
 
 
 def compute_regions(affine: Affine, rsds, df):
