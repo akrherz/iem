@@ -53,6 +53,10 @@ PDICT4 = {
     "yesb": "Yes, overlay Drought Monitor (valid near begin date)",
     "no": "No, do not overlay Drought Monitor",
 }
+PDICT5 = {
+    "yes": "Mask the plot to the contiguous United States",
+    "no": "Do not mask the plot",
+}
 
 
 def get_description():
@@ -122,6 +126,13 @@ def get_description():
             min="1893/01/01",
             max=f"{datetime.today():%Y/%m/%d}",
         ),
+        {
+            "type": "select",
+            "name": "clip",
+            "default": "yes",
+            "label": "Clip Data to CONUS?",
+            "options": PDICT5,
+        },
         dict(type="cmap", name="cmap", default="YlGnBu", label="Color Ramp:"),
     ]
     return desc
@@ -241,7 +252,7 @@ def set_gridinfo(ctx):
     idx0 = iemre.daily_offset(ctx["sdate"])
     idx1 = iemre.daily_offset(ctx["edate"]) + 1
     if not os.path.isfile(ctx["ncfn"]):
-        raise NoDataFound("No data for that year, sorry.")
+        raise NoDataFound("No data found.")
     with util.ncopen(ctx["ncfn"]) as nc:
         x0, y0, x1, y1 = util.grid_bounds(
             nc.variables["lon"][:],
@@ -416,7 +427,8 @@ def finalize_map(ctx):
         )
     if ctx.get("cwa") is not None:
         ctx["mp"].draw_cwas()
-    ctx["mp"].draw_mask("conus")
+    if ctx["clip"] == "yes":
+        ctx["mp"].draw_mask("conus")
 
 
 def plotter(fdict):
