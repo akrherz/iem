@@ -52,11 +52,11 @@ def init_year(ts):
     lat.bounds = "lat_bnds"
     lat.axis = "Y"
     # Grid centers
-    lat[:] = prism.YAXIS
+    lat[:] = prism.SOUTH + np.arange(prism.NY) * prism.DY
 
-    lat_bnds = nc.createVariable("lat_bnds", float, ("lat", "nv"))
-    lat_bnds[:, 0] = prism.YAXIS
-    lat_bnds[:, 1] = prism.YAXIS + 0.04
+    lat_bnds = nc.createVariable("lat_bnds", float, ("lat", "bnds"))
+    lat_bnds[:, 0] = prism.SOUTH_EDGE + np.arange(prism.NY) * prism.DY
+    lat_bnds[:, 1] = prism.SOUTH_EDGE + np.arange(1, prism.NY + 1) * prism.DY
 
     lon = nc.createVariable("lon", float, ("lon",))
     lon.units = "degrees_east"
@@ -64,11 +64,11 @@ def init_year(ts):
     lon.standard_name = "longitude"
     lon.bounds = "lon_bnds"
     lon.axis = "X"
-    lon[:] = prism.XAXIS
+    lon[:] = prism.WEST + np.arange(prism.NX) * prism.DX
 
-    lon_bnds = nc.createVariable("lon_bnds", float, ("lon", "nv"))
-    lon_bnds[:, 0] = prism.XAXIS
-    lon_bnds[:, 1] = prism.XAXIS + 0.04
+    lon_bnds = nc.createVariable("lon_bnds", float, ("lon", "bnds"))
+    lon_bnds[:, 0] = prism.WEST_EDGE + np.arange(prism.NX) * prism.DX
+    lon_bnds[:, 1] = prism.WEST_EDGE + np.arange(1, prism.NX + 1) * prism.DX
 
     tm = nc.createVariable("time", float, ("time",))
     tm.units = f"Days since {ts.year}-01-01 00:00:0.0"

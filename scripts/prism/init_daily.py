@@ -39,6 +39,7 @@ def init_year(ts: datetime):
     nc.createDimension("lon", prism.NX)
     days = ((ts.replace(year=ts.year + 1)) - ts).days
     nc.createDimension("time", int(days))
+    nc.createDimension("bnds", 2)
 
     # Setup Coordinate Variables
     lat = nc.createVariable("lat", float, ("lat",))
@@ -46,14 +47,25 @@ def init_year(ts: datetime):
     lat.long_name = "Latitude"
     lat.standard_name = "latitude"
     lat.axis = "Y"
-    lat[:] = prism.YAXIS
+    lat.bounds = "lat_bnds"
+    # We want to store the center of the grid cell
+    lat[:] = prism.SOUTH + np.arange(prism.NY) * prism.DY
+
+    lat_bnds = nc.createVariable("lat_bnds", float, ("lat", "bnds"))
+    lat_bnds[:, 0] = prism.SOUTH_EDGE + np.arange(prism.NY) * prism.DY
+    lat_bnds[:, 1] = prism.SOUTH_EDGE + np.arange(1, prism.NY + 1) * prism.DY
 
     lon = nc.createVariable("lon", float, ("lon",))
     lon.units = "degrees_east"
     lon.long_name = "Longitude"
     lon.standard_name = "longitude"
     lon.axis = "X"
-    lon[:] = prism.XAXIS
+    lon.bounds = "lon_bnds"
+    lon[:] = prism.WEST + np.arange(prism.NX) * prism.DX
+
+    lon_bnds = nc.createVariable("lon_bnds", float, ("lon", "bnds"))
+    lon_bnds[:, 0] = prism.WEST_EDGE + np.arange(prism.NX) * prism.DX
+    lon_bnds[:, 1] = prism.WEST_EDGE + np.arange(1, prism.NX + 1) * prism.DX
 
     tm = nc.createVariable("time", float, ("time",))
     tm.units = "Days since %s-01-01 00:00:0.0" % (ts.year,)
