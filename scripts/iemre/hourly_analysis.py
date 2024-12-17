@@ -158,8 +158,8 @@ def grid_wind(df, domain):
         v.append(_v.to("meter / second").m)
     df["u"] = u
     df["v"] = v
-    ugrid = generic_gridder(df, "u", applymask=False, domain=domain)
-    vgrid = generic_gridder(df, "v", applymask=False, domain=domain)
+    ugrid = generic_gridder(df, "u", domain=domain)
+    vgrid = generic_gridder(df, "v", domain=domain)
     return ugrid, vgrid
 
 
