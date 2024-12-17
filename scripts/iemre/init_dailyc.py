@@ -52,7 +52,7 @@ def init_year(ts):
     # These are the grid centers
     lat[:] = np.arange(
         iemre.DOMAINS[""]["south"],
-        iemre.DOMAINS[""]["north"],
+        iemre.DOMAINS[""]["north"] + 0.001,
         iemre.DY,
     )
     lat_bnds = nc.createVariable("lat_bnds", float, ("lat", "nv"))
@@ -68,7 +68,7 @@ def init_year(ts):
     # These are the grid centers
     lon[:] = np.arange(
         iemre.DOMAINS[""]["west"],
-        iemre.DOMAINS[""]["east"],
+        iemre.DOMAINS[""]["east"] + 0.001,
         iemre.DX,
     )
 
