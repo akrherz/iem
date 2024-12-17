@@ -190,9 +190,9 @@ def main(dt):
     compute(df, sids, dt)
 
     pgconn, cursor = get_dbconnc("coop")
-    cursor.executemany(  # skipcq
-        f"UPDATE alldata set {COL} = %({COL})s where station = %(station)s "
-        "and day = %(day)s",
+    cursor.executemany(
+        f"UPDATE alldata set {COL} = %({COL})s "  # skipcq
+        "where station = %(station)s and day = %(day)s",  # skipcq
         df[df[COL].notna()].reset_index().to_dict("records"),
     )
     cursor.close()

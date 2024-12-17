@@ -55,8 +55,8 @@ def init_year(ts: datetime.datetime, domain: str, ci: bool) -> None:
     lat.bounds = "lat_bnds"
     # These are the grid centers
     lat[:] = np.arange(
-        iemre.DOMAINS[""]["south"],
-        iemre.DOMAINS[""]["north"] + 0.0001,
+        iemre.DOMAINS[domain]["south"],
+        iemre.DOMAINS[domain]["north"] + 0.0001,
         iemre.DY,
     )
     lat_bnds = nc.createVariable("lat_bnds", float, ("lat", "nv"))
