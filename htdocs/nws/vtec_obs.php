@@ -5,10 +5,12 @@ require_once "../../include/myview.php";
 require_once "../../include/forms.php";
 require_once "../../include/mlib.php";
 require_once "../../include/network.php";
+require_once "../../include/imagemaps.php";
 
 $nt = new NetworkTable("WFO");
 $t = new MyView();
 $wfo = isset($_REQUEST["wfo"]) ? xssafe($_REQUEST["wfo"]) : 'DMX';
+$wfo3 = unrectify_wfo($wfo);
 $year = get_int404("year", date("Y"));
 if ($year < 1986) xssafe("<script>");
 $sid = get_int404("sid", 1);
@@ -70,7 +72,7 @@ $station2ugc = array();
 $ugc2station = array();
 $rs = pg_prepare($postgis, "STATIONS", "SELECT id, ugc_zone from stations " .
     "where wfo = $1 and network ~* 'ASOS'");
-$rs = pg_execute($postgis, "STATIONS", array($wfo));
+$rs = pg_execute($postgis, "STATIONS", array($wfo3));
 for ($i = 0; $row = pg_fetch_assoc($rs); $i++) {
     if (!array_key_exists($row["ugc_zone"], $ugc2station)) {
         $ugc2station[$row["ugc_zone"]] = array();
@@ -165,7 +167,7 @@ function c6($hidx, $thres)
 $table = "";
 
 $rs = pg_execute($postgis, "FIND", array(
-    $wfo, $sid, $eid, $phenomena,
+    $wfo3, $sid, $eid, $phenomena,
     $significance
 ));
 if ($rs === FALSE) xssafe("</script>");
