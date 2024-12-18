@@ -356,7 +356,7 @@ def plotter(fdict):
         ": 00Z TO 12Z TODAY LOW TEMPERATURE\n"
         ": 12Z YESTERDAY TO 12Z TODAY RAINFALL\n"
     )
-    for sid, row in asosdf[asosdf["snow_src"].isna()].iterrows():
+    for sid, row in asosdf[asosdf["cnt_6hr"].isna()].iterrows():
         report += (
             f"{sid:6s}:{row['name']:25.25s}: "
             f"{pp(row['high'], 4, 0)} /{pp(row['low'], 4, 0)} /"
