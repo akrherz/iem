@@ -225,7 +225,7 @@ def plotter(fdict):
         f"{(ets - timedelta(days=1)):%-d %b %Y}"
     )
     fig = figure(title=title, apctx=ctx)
-    ax = fig.add_axes([0.07, 0.09, 0.71, 0.81])
+    ax = fig.add_axes((0.07, 0.09, 0.71, 0.81))
     fontsize = 8 if len(df.index) > 20 else 10
 
     used = []
