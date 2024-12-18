@@ -40,6 +40,7 @@ def create(ts: datetime, domain: str, dom: dict) -> str:
         nc.createDimension("lon", dom["nx"])
         # store 20 days worth, to be safe of future changes
         nc.createDimension("time", 20)
+        nc.createDimension("nv", 2)
 
         # Setup Coordinate Variables
         lat = nc.createVariable("lat", float, ("lat"))
@@ -48,7 +49,11 @@ def create(ts: datetime, domain: str, dom: dict) -> str:
         lat.standard_name = "latitude"
         lat.bounds = "lat_bnds"
         lat.axis = "Y"
-        lat[:] = np.arange(dom["south"], dom["north"], iemre.DY)
+        lat[:] = np.arange(dom["south"], dom["north"] + 0.001, iemre.DY)
+
+        lat_bnds = nc.createVariable("lat_bnds", float, ("lat", "nv"))
+        lat_bnds[:, 0] = lat[:] - iemre.DY / 2.0
+        lat_bnds[:, 1] = lat[:] + iemre.DY / 2.0
 
         lon = nc.createVariable("lon", float, ("lon"))
         lon.units = "degrees_east"
@@ -56,7 +61,11 @@ def create(ts: datetime, domain: str, dom: dict) -> str:
         lon.standard_name = "longitude"
         lon.bounds = "lon_bnds"
         lon.axis = "X"
-        lon[:] = np.arange(dom["west"], dom["east"], iemre.DX)
+        lon[:] = np.arange(dom["west"], dom["east"] + 0.001, iemre.DX)
+
+        lon_bnds = nc.createVariable("lon_bnds", float, ("lon", "nv"))
+        lon_bnds[:, 0] = lon[:] - iemre.DX / 2.0
+        lon_bnds[:, 1] = lon[:] + iemre.DX / 2.0
 
         tm = nc.createVariable("time", float, ("time",))
         tm.units = f"Days since {ts:%Y-%m-%d} 00:00:0.0"
@@ -150,7 +159,16 @@ def merge_grib(nc, now, domain: str, dom: dict):
         grbs = pygrib.open(grbfn)
         for grb in grbs:
             if affine is None:
-                affine = Affine(0.125, 0, -180, 0, -0.125, 89.9103)
+                dx = grb["iDirectionIncrementInDegrees"]
+                # the grib data is top down
+                affine = Affine(
+                    dx,
+                    0.0,
+                    -180,  # not right, but close enough?
+                    0.0,
+                    -dx,
+                    grb["latitudeOfFirstGridPointInDegrees"] + dx / 2.0,
+                )
             name = grb.shortName.lower()
             if name == "tmax":
                 if tmaxgrid is None:
