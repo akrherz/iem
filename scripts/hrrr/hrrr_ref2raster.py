@@ -67,6 +67,7 @@ def do_step(
     lat1 = ds.refd.GRIB_latitudeOfFirstGridPointInDegrees
     lon1 = ds.refd.GRIB_longitudeOfFirstGridPointInDegrees
     llx, lly = pyproj.Proj(projparams)(lon1, lat1)
+    # This is the edge and not the corner
     hrrr_aff = Affine(
         ds.refd.GRIB_DxInMetres,
         0.0,

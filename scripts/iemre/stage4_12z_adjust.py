@@ -45,10 +45,8 @@ def merge(ts):
         if fn is None:
             LOG.info("stage4_12z_adjust %s is missing", ppath)
             return
-        grbs = pygrib.open(fn)
-        grb = grbs[1]
-        val = grb.values
-        grbs.close()
+        with pygrib.open(fn) as grbs:
+            val = grbs[1].values
     save12z(ts, val)
 
     # storage is in the arrears
@@ -64,17 +62,18 @@ def merge(ts):
         ncfn = f"/mesonet/data/stage4/{pair[0].year}_stage4_hourly.nc"
         idx0 = iemre.hourly_offset(pair[0])
         idx1 = iemre.hourly_offset(pair[1])
+        tslice = slice(idx0, idx1 + 1)
         LOG.info("%s [%s thru %s]", ncfn, idx0, idx1)
         with ncopen(ncfn, timeout=60) as nc:
             # Check that the status value is (1,2), otherwise prism ran
             sentinel = np.nanmax(
-                nc.variables["p01m_status"][idx0 : (idx1 + 1)]
+                nc.variables["p01m_status"][tslice],
             )
             if sentinel == 3:
-                LOG.warning("Aborting as p01m_status[%s] == 3", sentinel)
+                LOG.warning("Aborting as p01m_status[%s] == 3", tslice)
                 return
             p01m = nc.variables["p01m"]
-            total = np.nansum(p01m[idx0 : (idx1 + 1)], axis=0)
+            total = np.nansum(p01m[tslice], axis=0)
             if hourly_total is None:
                 hourly_total = total
             else:
