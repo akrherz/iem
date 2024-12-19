@@ -53,7 +53,7 @@ def init_year(ts: datetime, ci: bool) -> Optional[str]:
     x.bounds = "x_bounds"
     x[:] = stage4.XAXIS
 
-    x_bounds = nc.createVariable("x_bounds", float, ("x", "bnds"))
+    x_bounds = nc.createVariable("x_bounds", float, ("x", "nv"))
     x_bounds[:, 0] = stage4.XAXIS - stage4.DX / 2.0
     x_bounds[:, 1] = stage4.XAXIS + stage4.DX / 2.0
 
@@ -65,7 +65,7 @@ def init_year(ts: datetime, ci: bool) -> Optional[str]:
     y.bounds = "y_bounds"
     y[:] = stage4.YAXIS
 
-    y_bounds = nc.createVariable("y_bounds", float, ("y", "bnds"))
+    y_bounds = nc.createVariable("y_bounds", float, ("y", "nv"))
     y_bounds[:, 0] = stage4.YAXIS - stage4.DY / 2.0
     y_bounds[:, 1] = stage4.YAXIS + stage4.DY / 2.0
 
