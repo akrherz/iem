@@ -30,7 +30,7 @@ P4326 = pyproj.Proj("EPSG:4326")
 SWITCH_DATE = utc(2014, 10, 10, 20)
 
 
-def try_era5land(ts: datetime, domain: str, dom: dict) -> Optional[np.ndarray]:
+def try_era5land(ts: datetime, domain: str) -> Optional[np.ndarray]:
     """Attempt to use ERA5Land data."""
     dd = "" if domain == "" else f"_{domain}"
     # inbound `ts` represents noon local time, we want values from 1 AM
@@ -248,7 +248,7 @@ def main(dt: Optional[datetime], year, month):
     for sts_in in queue:
         for domain, dom in iemre.DOMAINS.items():
             sts = sts_in.replace(tzinfo=dom["tzinfo"])
-            srad = try_era5land(sts, domain, dom)
+            srad = try_era5land(sts, domain)
             if srad is not None and postprocess(srad, sts, domain):
                 continue
             LOG.info("try_era5land failed to find data")

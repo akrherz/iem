@@ -155,8 +155,8 @@ def do(dt: datetime):
     cursor = pgconn.cursor()
     for sid, row in df[df[COL].notna()].iterrows():
         cursor.execute(
-            f"UPDATE alldata set {COL} = %s where station = %s and "
-            "day = %s",
+            f"UPDATE alldata set {COL} = %s where station = %s "  # skipcq
+            "and day = %s",
             (row[COL], sid, dt),
         )
 

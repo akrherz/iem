@@ -41,8 +41,8 @@ def init_year(ts: datetime, for_dep=False, ci=False):
     nc.comment = "No Comment at this time"
 
     # Setup Dimensions
-    nc.createDimension("lat", mrms.MRMS4IEMRE_NX)
-    nc.createDimension("lon", mrms.MRMS4IEMRE_NY)
+    nc.createDimension("lat", mrms.MRMS4IEMRE_NY)
+    nc.createDimension("lon", mrms.MRMS4IEMRE_NX)
     days = 2 if ci else ((ts.replace(year=ts.year + 1)) - ts).days
     day_axis = np.arange(0, int(days))
     if for_dep:
