@@ -7,6 +7,7 @@ from typing import Optional
 import click
 import numpy as np
 import pygrib
+from pyiem import stage4
 from pyiem.util import archive_fetch, logger, ncopen
 
 BASEDIR = "/mesonet/data/stage4"
@@ -41,7 +42,8 @@ def init_year(ts: datetime, ci: bool) -> Optional[str]:
     nc.contact = "Daryl Herzmann, akrherz@iastate.edu, 515-294-5978"
     nc.history = ("%s Generated") % (datetime.now().strftime("%d %B %Y"),)
     nc.comment = "No Comment at this time"
-
+    # Store projection information
+    nc.proj4 = stage4.PROJ.srs
     # Setup Dimensions
     nc.createDimension("x", lats.shape[1])
     nc.createDimension("y", lats.shape[0])
@@ -50,6 +52,30 @@ def init_year(ts: datetime, ci: bool) -> Optional[str]:
     days = 2 if ci else (ts2 - ts).days
     LOG.info("Year %s has %s days", ts.year, days)
     nc.createDimension("time", int(days) * 24)
+
+    x = nc.createVariable("x", float, ("x",))
+    x.units = "m"
+    x.long_name = "X coordinate of projection"
+    x.standard_name = "projection_x_coordinate"
+    x.axis = "X"
+    x.bounds = "x_bounds"
+    x[:] = stage4.XAXIS
+
+    x_bounds = nc.createVariable("x_bounds", float, ("x", "bnds"))
+    x_bounds[:, 0] = stage4.XAXIS - stage4.DX / 2.0
+    x_bounds[:, 1] = stage4.XAXIS + stage4.DX / 2.0
+
+    y = nc.createVariable("y", float, ("y",))
+    y.units = "m"
+    y.long_name = "Y coordinate of projection"
+    y.standard_name = "projection_y_coordinate"
+    y.axis = "Y"
+    y.bounds = "y_bounds"
+    y[:] = stage4.YAXIS
+
+    y_bounds = nc.createVariable("y_bounds", float, ("y", "bnds"))
+    y_bounds[:, 0] = stage4.YAXIS - stage4.DY / 2.0
+    y_bounds[:, 1] = stage4.YAXIS + stage4.DY / 2.0
 
     # Setup Coordinate Variables
     lat = nc.createVariable("lat", float, ("y", "x"))

@@ -10,10 +10,10 @@ import click
 import geopandas as gpd
 import numpy as np
 import pandas as pd
-from affine import Affine
 from pyiem.database import get_dbconn, get_sqlalchemy_conn
+from pyiem.era5land import DOMAINS, find_ij
 from pyiem.grid.zs import CachingZonalStats
-from pyiem.iemre import NORTH, WEST, hourly_offset
+from pyiem.iemre import hourly_offset
 from pyiem.util import convert_value, logger, ncopen, utc
 
 LOG = logger()
@@ -31,9 +31,8 @@ def compute_regions(data, varname, df):
             index_col="id",
             geom_col="geom",
         )
-    affine = Affine(0.1, 0, WEST, 0, -0.1, NORTH)
-    czs = CachingZonalStats(affine)
-    data = czs.gen_stats(np.flipud(data), gdf["geom"])
+    czs = CachingZonalStats(DOMAINS[""]["AFFINE_NC"])
+    data = czs.gen_stats(data, gdf["geom"])
     for i, sid in enumerate(gdf.index.values):
         df.at[sid, varname] = data[i]
 
@@ -61,8 +60,6 @@ def build_stations(dt) -> pd.DataFrame:
         "era5land_soilm1m_avg",
     ]:
         df[col] = np.nan
-    df["i"] = np.nan
-    df["j"] = np.nan
     LOG.info("Found %s database entries", len(df.index))
     return df
 
@@ -79,8 +76,6 @@ def compute(df, sids, dt, do_regions=False):
     # Wm-2 to MJ
     factor = 3600.0 / 1_000_000.0
     with ncopen(ncfn) as nc:
-        lons = nc.variables["lon"][:]
-        lats = nc.variables["lat"][:]
         if f"{dt:%m%d}" == "1231":
             rsds = np.sum(nc.variables["rsds"][idx0:], 0) * factor
             # Close enough
@@ -104,20 +99,17 @@ def compute(df, sids, dt, do_regions=False):
             ) / 100.0
             soilt = np.mean(nc.variables["soilt"][idx0:idx1, 0], 0)
 
-    df["i"] = np.digitize(df["lon"].values, lons)
-    df["j"] = np.digitize(df["lat"].values, lats)
     rsds = rsds.filled(np.nan)
     soilm = soilm.filled(np.nan)
     soilm1m = soilm1m.filled(np.nan)
     soilt = soilt.filled(np.nan)
 
     for sid, row in df.loc[sids].iterrows():
-        df.at[sid, "era5land_srad"] = rsds[int(row["j"]), int(row["i"])]
-        df.at[sid, "era5land_soilt4_avg"] = soilt[int(row["j"]), int(row["i"])]
-        df.at[sid, "era5land_soilm4_avg"] = soilm[int(row["j"]), int(row["i"])]
-        df.at[sid, "era5land_soilm1m_avg"] = soilm1m[
-            int(row["j"]), int(row["i"])
-        ]
+        i, j = find_ij(row["lon"], row["lat"])
+        df.at[sid, "era5land_srad"] = rsds[j, i]
+        df.at[sid, "era5land_soilt4_avg"] = soilt[j, i]
+        df.at[sid, "era5land_soilm4_avg"] = soilm[j, i]
+        df.at[sid, "era5land_soilm1m_avg"] = soilm1m[j, i]
 
     if do_regions:
         compute_regions(rsds, "era5land_srad", df)

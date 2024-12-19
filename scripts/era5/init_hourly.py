@@ -1,22 +1,22 @@
 """Generate the ERA5 hourly analysis file for a year"""
 
-import datetime
 import os
+from datetime import datetime
 
 import click
 import numpy as np
-from pyiem import iemre
+from pyiem import era5land
 from pyiem.util import logger, ncopen
 
 LOG = logger()
 
 
-def init_year(ts, domain):
+def init_year(ts: datetime, domain: str):
     """
     Create a new NetCDF file for a year of our specification!
     """
+    dom = era5land.DOMAINS[domain]
     dd = "" if domain == "" else f"_{domain}"
-    dom = iemre.DOMAINS[domain]
     ncfn = f"/mesonet/data/era5{dd}/{ts.year}_era5land_hourly.nc"
     if os.path.isfile(ncfn):
         LOG.info("Cowardly refusing to overwrite: %s", ncfn)
@@ -31,19 +31,13 @@ def init_year(ts, domain):
     nc.realization = 1
     nc.Conventions = "CF-1.0"
     nc.contact = "Daryl Herzmann, akrherz@iastate.edu, 515-294-5978"
-    nc.history = f"{datetime.datetime.now():%d %B %Y} Generated"
+    nc.history = f"{datetime.now():%d %B %Y} Generated"
     nc.comment = "No Comment at this time"
 
-    # Setup Dimensions
-    nc.createDimension(
-        "lat",
-        (dom["north"] - dom["south"]) * 10.0 + 1,
-    )
-    nc.createDimension(
-        "lon",
-        (dom["east"] - dom["west"]) * 10.0 + 1,
-    )
-    ts2 = datetime.datetime(ts.year + 1, 1, 1)
+    nc.createDimension("lat", dom["NY"])
+    nc.createDimension("lon", dom["NX"])
+    nc.createDimension("nv", 2)
+    ts2 = datetime(ts.year + 1, 1, 1)
     days = (ts2 - ts).days
     LOG.info("Year %s has %s days", ts.year, days)
     nc.createDimension("time", int(days) * 24)
@@ -60,14 +54,24 @@ def init_year(ts, domain):
     lat.long_name = "Latitude"
     lat.standard_name = "latitude"
     lat.axis = "Y"
-    lat[:] = np.arange(dom["south"], dom["north"] + 0.001, 0.1)
+    lat.bounds = "lat_bnds"
+    lat[:] = dom["YAXIS"]
+
+    lat_bnds = nc.createVariable("lat_bnds", float, ("lat", "nv"))
+    lat_bnds[:, 0] = dom["YAXIS"] - 0.05
+    lat_bnds[:, 1] = dom["YAXIS"] + 0.05
 
     lon = nc.createVariable("lon", float, ("lon",))
     lon.units = "degrees_east"
     lon.long_name = "Longitude"
     lon.standard_name = "longitude"
     lon.axis = "X"
-    lon[:] = np.arange(dom["west"], dom["east"] + 0.001, 0.1)
+    lon.bounds = "lon_bnds"
+    lon[:] = dom["XAXIS"]
+
+    lon_bnds = nc.createVariable("lon_bnds", float, ("lon", "nv"))
+    lon_bnds[:, 0] = dom["XAXIS"] - 0.05
+    lon_bnds[:, 1] = dom["XAXIS"] + 0.05
 
     tm = nc.createVariable("time", float, ("time",))
     tm.units = f"Hours since {ts.year}-01-01 00:00:0.0"
@@ -188,7 +192,7 @@ def init_year(ts, domain):
 @click.option("--domain", default="", help="IEMRE Domain")
 def main(year, domain):
     """Go Main Go"""
-    init_year(datetime.datetime(year, 1, 1), domain)
+    init_year(datetime(year, 1, 1), domain)
 
 
 if __name__ == "__main__":

@@ -83,7 +83,7 @@ def do_day(cursor, valid):
             index_col="id",
             geom_col="geom",
         )
-    czs = CachingZonalStats(iemre.AFFINE)
+    czs = CachingZonalStats(iemre.DOMAINS[""]["affine"])
     sthigh = czs.gen_stats(np.flipud(high), gdf["geom"])
     stlow = czs.gen_stats(np.flipud(low), gdf["geom"])
     stprecip = czs.gen_stats(np.flipud(precip), gdf["geom"])

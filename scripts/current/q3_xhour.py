@@ -22,7 +22,7 @@ TMP = "/mesonet/tmp"
 
 def doit(ts, hours):
     """
-    Create a plot of precipitation stage4 estimates for some day
+    Create a plot of precipitation MRMS estimates for some day
     """
     # Start at 1 AM
     ts = ts.replace(minute=0, second=0, microsecond=0)

@@ -99,7 +99,7 @@ def get_data(ctx):
         raise NoDataFound(f"Missing {ncfn}")
     with ncopen(ncfn) as nc:
         precip = nc.variables["p01d"]
-        czs = CachingZonalStats(iemre.AFFINE)
+        czs = CachingZonalStats(iemre.DOMAINS[""]["affine"])
         hasdata = np.zeros(
             (nc.dimensions["lat"].size, nc.dimensions["lon"].size)
         )

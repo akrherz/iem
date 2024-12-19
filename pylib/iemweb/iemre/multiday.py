@@ -25,7 +25,7 @@ from datetime import date, datetime, timedelta
 import numpy as np
 import pyiem.prism as prismutil
 from pydantic import Field
-from pyiem import iemre
+from pyiem import iemre, mrms
 from pyiem.util import convert_value, ncopen
 from pyiem.webutil import CGIModel, iemapp
 
@@ -98,7 +98,6 @@ def application(environ, start_response):
                 "Point not within any domain",
             )
         ]
-    dom = iemre.DOMAINS[domain]
     i, j = iemre.find_ij(lon, lat, domain=domain)
     if i is None or j is None:
         return [
@@ -166,8 +165,7 @@ def application(environ, start_response):
         prism_precip = [None] * (offset2 - offset1)
 
     if ts1.year > 2000 and domain == "":
-        j2 = int((lat - dom["south"]) * 100.0)
-        i2 = int((lon - dom["west"]) * 100.0)
+        i2, j2 = mrms.find_ij(lon, lat)
         with ncopen(iemre.get_daily_mrms_ncname(ts1.year)) as nc:
             mrms_precip = nc.variables["p01d"][tslice, j2, i2] / 25.4
     else:

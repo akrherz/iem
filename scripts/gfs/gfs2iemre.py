@@ -125,11 +125,6 @@ def create(ts: datetime, domain: str, dom: dict) -> str:
     return fn
 
 
-def shuffle(grid):
-    """Convert the 0-360 grid to -180 to 180."""
-    return np.concatenate((grid[:, 1536:], grid[:, :1536]), axis=1)
-
-
 def merge_grib(nc, now, domain: str, dom: dict):
     """Merge what grib data we can find into the netcdf file."""
     # Tricky here for how to compute a valid date
@@ -164,7 +159,7 @@ def merge_grib(nc, now, domain: str, dom: dict):
                 affine = Affine(
                     dx,
                     0.0,
-                    -180,  # not right, but close enough?
+                    0 - dx / 2.0,
                     0.0,
                     -dx,
                     grb["latitudeOfFirstGridPointInDegrees"] + dx / 2.0,
@@ -217,20 +212,20 @@ def merge_grib(nc, now, domain: str, dom: dict):
             days = (approxlocal.date() - now.date()).days
             if hits == 4:
                 nc.variables["high_tmpk"][days] = iemre.reproject2iemre(
-                    shuffle(tmaxgrid), affine, EPSG[4326], domain=domain
+                    tmaxgrid, affine, EPSG[4326], domain=domain
                 )
                 nc.variables["low_tmpk"][days] = iemre.reproject2iemre(
-                    shuffle(tmingrid), affine, EPSG[4326], domain=domain
+                    tmingrid, affine, EPSG[4326], domain=domain
                 )
                 nc.variables["p01d"][days] = iemre.reproject2iemre(
-                    shuffle(pgrid), affine, EPSG[4326], domain=domain
+                    pgrid, affine, EPSG[4326], domain=domain
                 )
                 pout = nc.variables["p01d"][days]
                 nc.variables["tsoil"][days] = iemre.reproject2iemre(
-                    shuffle(tsoilgrid / 4.0), affine, EPSG[4326], domain=domain
+                    tsoilgrid / 4.0, affine, EPSG[4326], domain=domain
                 )
                 nc.variables["srad"][days] = iemre.reproject2iemre(
-                    shuffle(srad), affine, EPSG[4326], domain=domain
+                    srad, affine, EPSG[4326], domain=domain
                 )
                 sout = nc.variables["srad"][days]
                 LOG.info(

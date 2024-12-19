@@ -13,7 +13,7 @@ from pyiem.util import mm2inch, ncopen
 
 def doday(ts, realtime):
     """
-    Create a plot of precipitation stage4 estimates for some day
+    Create a plot of precipitation IFC estimates for some day
     """
     idx = daily_offset(ts)
     with ncopen(

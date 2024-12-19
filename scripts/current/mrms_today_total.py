@@ -19,7 +19,7 @@ LOG = logger()
 
 def doday(ts, realtime):
     """
-    Create a plot of precipitation stage4 estimates for some day
+    Create a plot of precipitation MRMS estimates for some day
     """
     lts = utc(ts.year, ts.month, ts.day, 12)
     lts = lts.astimezone(ZoneInfo("America/Chicago"))

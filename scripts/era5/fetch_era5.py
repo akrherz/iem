@@ -11,7 +11,8 @@ from datetime import timedelta
 import cdsapi
 import click
 import numpy as np
-from pyiem import iemre
+from netCDF4 import Dataset
+from pyiem import era5land, iemre
 from pyiem.util import logger, ncopen, utc
 
 LOG = logger()
@@ -33,23 +34,45 @@ VERBATIM = {
 warnings.simplefilter("ignore", RuntimeWarning)
 
 
-def ingest(ncin, nc, valid, domain):
+def ingest(ncin: Dataset, nc: Dataset, valid, domain):
     """Consume this grib file."""
+    # Bad daryl had an off by one error here
+    ijs = slice(None, None)
+    if ncin.variables["longitude"].size != nc.variables["lon"].size:
+        LOG.info("Applying off by one logic")
+        ijs = slice(0, -1)
+
     tidx = iemre.hourly_offset(valid)
     dd = "" if domain == "" else f"_{domain}"
 
     for ekey, key in VERBATIM.items():
-        nc.variables[key][tidx] = np.flipud(ncin.variables[ekey][0])
+        nc.variables[key][tidx, ijs, ijs] = np.flipud(ncin.variables[ekey][0])
 
-    nc.variables["soilt"][tidx, 0] = np.flipud(ncin.variables["stl1"][0])
-    nc.variables["soilt"][tidx, 1] = np.flipud(ncin.variables["stl2"][0])
-    nc.variables["soilt"][tidx, 2] = np.flipud(ncin.variables["stl3"][0])
-    nc.variables["soilt"][tidx, 3] = np.flipud(ncin.variables["stl4"][0])
+    nc.variables["soilt"][tidx, 0, ijs, ijs] = np.flipud(
+        ncin.variables["stl1"][0]
+    )
+    nc.variables["soilt"][tidx, 1, ijs, ijs] = np.flipud(
+        ncin.variables["stl2"][0]
+    )
+    nc.variables["soilt"][tidx, 2, ijs, ijs] = np.flipud(
+        ncin.variables["stl3"][0]
+    )
+    nc.variables["soilt"][tidx, 3, ijs, ijs] = np.flipud(
+        ncin.variables["stl4"][0]
+    )
 
-    nc.variables["soilm"][tidx, 0] = np.flipud(ncin.variables["swvl1"][0])
-    nc.variables["soilm"][tidx, 1] = np.flipud(ncin.variables["swvl2"][0])
-    nc.variables["soilm"][tidx, 2] = np.flipud(ncin.variables["swvl3"][0])
-    nc.variables["soilm"][tidx, 3] = np.flipud(ncin.variables["swvl4"][0])
+    nc.variables["soilm"][tidx, 0, ijs, ijs] = np.flipud(
+        ncin.variables["swvl1"][0]
+    )
+    nc.variables["soilm"][tidx, 1, ijs, ijs] = np.flipud(
+        ncin.variables["swvl2"][0]
+    )
+    nc.variables["soilm"][tidx, 2, ijs, ijs] = np.flipud(
+        ncin.variables["swvl3"][0]
+    )
+    nc.variables["soilm"][tidx, 3, ijs, ijs] = np.flipud(
+        ncin.variables["swvl4"][0]
+    )
 
     # -- these vars are accumulated since 0z, so 0z is the 24hr sum
     rsds = nc.variables["rsds"]
@@ -63,39 +86,44 @@ def ingest(ncin, nc, valid, domain):
                 f"/mesonet/data/era5{dd}/{valid.year - 1}_era5land_hourly.nc"
             ) as nc2:
                 tsolar = (
-                    np.sum(nc2.variables["rsds"][(tidx0 + 1) :], 0) * 3600.0
+                    np.sum(nc2.variables["rsds"][(tidx0 + 1) :, ijs, ijs], 0)
+                    * 3600.0
                 )
-                tp01m = np.sum(nc2.variables["p01m"][(tidx0 + 1) :], 0)
-                tevap = np.sum(nc2.variables["evap"][(tidx0 + 1) :], 0)
+                tp01m = np.sum(
+                    nc2.variables["p01m"][(tidx0 + 1) :, ijs, ijs], 0
+                )
+                tevap = np.sum(
+                    nc2.variables["evap"][(tidx0 + 1) :, ijs, ijs], 0
+                )
         else:
-            tsolar = np.sum(rsds[(tidx0 + 1) : tidx], 0) * 3600.0
-            tp01m = np.sum(p01m[(tidx0 + 1) : tidx], 0)
-            tevap = np.sum(evap[(tidx0 + 1) : tidx], 0)
+            tsolar = np.sum(rsds[(tidx0 + 1) : tidx, ijs], 0) * 3600.0
+            tp01m = np.sum(p01m[(tidx0 + 1) : tidx, ijs], 0)
+            tevap = np.sum(evap[(tidx0 + 1) : tidx, ijs], 0)
     elif valid.hour > 1:
         tidx0 = iemre.hourly_offset(valid.replace(hour=1))
-        tsolar = np.sum(rsds[tidx0:tidx], 0) * 3600.0
-        tp01m = np.sum(p01m[tidx0:tidx], 0)
-        tevap = np.sum(evap[tidx0:tidx], 0)
+        tsolar = np.sum(rsds[tidx0:tidx, ijs], 0) * 3600.0
+        tp01m = np.sum(p01m[tidx0:tidx, ijs], 0)
+        tevap = np.sum(evap[tidx0:tidx, ijs], 0)
     else:
-        tsolar = np.zeros(rsds.shape[1:])
-        tp01m = np.zeros(rsds.shape[1:])
-        tevap = np.zeros(rsds.shape[1:])
+        tsolar = np.zeros(ncin.variables["t2m"][0].shape)
+        tp01m = np.zeros(ncin.variables["t2m"][0].shape)
+        tevap = np.zeros(ncin.variables["t2m"][0].shape)
     # J m-2 to W/m2
     val = np.flipud(ncin.variables["ssrd"][0])
     newval = (val - tsolar) / 3600.0
     # Le Sigh, sometimes things are negative, somehow?
-    nc.variables["rsds"][tidx] = np.ma.where(newval < 0, 0, newval)
+    rsds[tidx, ijs, ijs] = np.ma.where(newval < 0, 0, newval)
     # m to mm
     val = np.flipud(ncin.variables["e"][0])
     newval = (val * 1000.0) - tevap
-    nc.variables["evap"][tidx] = np.ma.where(newval < 0, 0, newval)
+    evap[tidx, ijs, ijs] = np.ma.where(newval < 0, 0, newval)
     # m to mm
     val = np.flipud(ncin.variables["tp"][0])
     newval = (val * 1000.0) - tp01m
-    nc.variables["p01m"][tidx] = np.ma.where(newval < 0, 0, newval)
+    p01m[tidx, ijs, ijs] = np.ma.where(newval < 0, 0, newval)
 
 
-def run(valid, domain, force):
+def run(valid, domain: str, force):
     """Run for the given valid time."""
     dd = "" if domain == "" else f"_{domain}"
     ncoutfn = f"/mesonet/data/era5{dd}/{valid.year}_era5land_hourly.nc"
@@ -111,7 +139,7 @@ def run(valid, domain, force):
                     domain,
                 )
                 return
-    dom = iemre.DOMAINS[domain]
+    dom = era5land.DOMAINS[domain]
     LOG.info("Running for %s[domain=%s]", valid, domain)
     ncfn = f"{domain}_{valid:%Y%m%d%H}.nc"
 
@@ -125,11 +153,13 @@ def run(valid, domain, force):
             "month": f"{valid.month}",
             "day": f"{valid.day}",
             "time": f"{valid:%H}:00",
+            # Unclear what is happening here, but the download seems to
+            # conform to the requested grid
             "area": [
-                dom["north_edge"],
-                dom["west_edge"],
-                dom["south_edge"],
-                dom["east_edge"],
+                dom["NORTH"],
+                dom["WEST"],
+                dom["SOUTH"],
+                dom["EAST"],
             ],
             "format": "netcdf",
         },

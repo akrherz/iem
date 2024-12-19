@@ -17,7 +17,7 @@ import numpy as np
 from pyiem import iemre, util
 from pyiem.exceptions import NoDataFound
 from pyiem.grid.zs import CachingZonalStats
-from pyiem.iemre import MRMS4IEMRE_AFFINE
+from pyiem.mrms import MRMS4IEMRE_AFFINE
 from pyiem.plot import figure_axes
 from pyiem.reference import state_names
 

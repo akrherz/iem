@@ -21,7 +21,7 @@ import pygrib
 import pyproj
 import xarray as xr
 from affine import Affine
-from pyiem import iemre
+from pyiem import era5land, iemre
 from pyiem.grid.util import grid_smear
 from pyiem.util import archive_fetch, logger, ncopen, utc
 
@@ -30,7 +30,7 @@ P4326 = pyproj.Proj("EPSG:4326")
 SWITCH_DATE = utc(2014, 10, 10, 20)
 
 
-def try_era5land(ts: datetime, domain: str, dom: dict) -> Optional[np.ndarray]:
+def try_era5land(ts: datetime, domain: str) -> Optional[np.ndarray]:
     """Attempt to use ERA5Land data."""
     dd = "" if domain == "" else f"_{domain}"
     # inbound `ts` represents noon local time, we want values from 1 AM
@@ -63,10 +63,8 @@ def try_era5land(ts: datetime, domain: str, dom: dict) -> Optional[np.ndarray]:
     total = total / 24.0
 
     # The affine defines the edges of the grid
-    aff = Affine(0.1, 0, dom["west"], 0, -0.1, dom["north"])
-    vals = iemre.reproject2iemre(
-        np.flipud(total), aff, P4326.crs, domain=domain
-    )
+    aff = era5land.DOMAINS[domain]["AFFINE_NC"]
+    vals = iemre.reproject2iemre(total, aff, P4326.crs, domain=domain)
 
     # ERA5Land is too tight to the coast, so we need to jitter the grid
     # 7 and 4 was found to be enough to appease DEP's needs
@@ -196,6 +194,7 @@ def do_hrrr(ts: datetime) -> Optional[np.ndarray]:
 
     # We wanna store as W m-2, so we just average out the data by hour
     total = total / 24.0
+    # This is the edge and not the center of the UL pixel
     affine_in = Affine(
         dx, 0.0, llcrnrx - dx / 2.0, 0.0, dy, llcrnry + dy / 2.0
     )
@@ -249,7 +248,7 @@ def main(dt: Optional[datetime], year, month):
     for sts_in in queue:
         for domain, dom in iemre.DOMAINS.items():
             sts = sts_in.replace(tzinfo=dom["tzinfo"])
-            srad = try_era5land(sts, domain, dom)
+            srad = try_era5land(sts, domain)
             if srad is not None and postprocess(srad, sts, domain):
                 continue
             LOG.info("try_era5land failed to find data")

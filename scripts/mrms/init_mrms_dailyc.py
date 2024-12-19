@@ -4,7 +4,7 @@ import datetime
 import os
 
 import numpy as np
-from pyiem import iemre
+from pyiem import iemre, mrms
 from pyiem.util import logger, ncopen
 
 LOG = logger()
@@ -15,21 +15,15 @@ def init_year(ts):
     Create a new NetCDF file for a year of our specification!
     """
     fn = iemre.get_dailyc_mrms_ncname()
-    # Centroid of the upper left pixel
-    ulx = -125.995
-    uly = 49.995
-    ny = 2700
-    nx = 6100
-    dx = 0.01
-    dy = 0.01
-    # Centroid of the lower right pixel
-    lry = 23.005
-    lrx = -65.005
+    ny = mrms.MRMS4IEMRE_NY
+    nx = mrms.MRMS4IEMRE_NX
+    dx = mrms.MRMS4IEMRE_DX
+    dy = mrms.MRMS4IEMRE_DY
     if os.path.isfile(fn):
         LOG.warning("Cowardly refusing to create fn: %s", fn)
         return
     nc = ncopen(fn, "w")
-    nc.title = "IEM Daily Reanalysis Climatology %s" % (ts.year,)
+    nc.title = f"IEM Daily Reanalysis Climatology {ts.year}"
     nc.platform = "Grided Climatology"
     nc.description = "IEM daily analysis on a 0.01 degree grid"
     nc.institution = "Iowa State University, Ames, IA, USA"
@@ -59,7 +53,7 @@ def init_year(ts):
     lat.bounds = "lat_bnds"
     lat.axis = "Y"
     # Grid centers
-    lat[:] = np.arange(lry, uly + 0.0001, dy)
+    lat[:] = mrms.MRMS4IEMRE_YAXIS
 
     lat_bnds = nc.createVariable("lat_bnds", float, ("lat", "nv"))
     lat_bnds[:, 0] = lat[:] - dy / 2.0
@@ -71,7 +65,7 @@ def init_year(ts):
     lon.standard_name = "longitude"
     lon.bounds = "lon_bnds"
     lon.axis = "X"
-    lon[:] = np.arange(ulx, lrx + 0.0001, dx)
+    lon[:] = mrms.MRMS4IEMRE_XAXIS
 
     lon_bnds = nc.createVariable("lon_bnds", float, ("lon", "nv"))
     lon_bnds[:, 0] = lon[:] - dx / 2.0

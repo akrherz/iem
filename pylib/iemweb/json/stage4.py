@@ -35,6 +35,7 @@ import numpy as np
 from pydantic import Field, field_validator
 from pyiem import iemre
 from pyiem.reference import ISO8601
+from pyiem.stage4 import find_ij
 from pyiem.util import mm2inch, ncopen, utc
 from pyiem.webutil import CGIModel, iemapp
 
@@ -43,8 +44,8 @@ class Schema(CGIModel):
     """See how we are called."""
 
     callback: str = Field(None, description="JSONP callback function name")
-    lat: float = Field(..., description="Latitude of point")
-    lon: float = Field(..., description="Longitude of point")
+    lat: float = Field(..., description="Latitude of point", ge=-90, le=90)
+    lon: float = Field(..., description="Longitude of point", ge=-180, le=180)
     valid: date = Field(..., description="Valid date of data")
     tz: str = Field("UTC", description="Timezone of valid date")
 
@@ -88,26 +89,23 @@ def dowork(environ):
     }
     if not os.path.isfile(ncfn):
         return json.dumps(res)
-    with ncopen(ncfn) as nc:
-        dist = (
-            (nc.variables["lon"][:] - environ["lon"]) ** 2
-            + (nc.variables["lat"][:] - environ["lat"]) ** 2
-        ) ** 0.5
-        (j, i) = np.unravel_index(dist.argmin(), dist.shape)  # skipcq
-        res["gridi"] = int(i)
-        res["gridj"] = int(j)
+    i, j = find_ij(environ["lon"], environ["lat"])
+    if i is not None:
+        with ncopen(ncfn) as nc:
+            res["gridi"] = i
+            res["gridj"] = j
 
-        ppt = nc.variables["p01m"][sidx:eidx, j, i]
+            ppt = nc.variables["p01m"][sidx:eidx, j, i]
 
-    for tx, pt in enumerate(ppt):
-        valid = sts + timedelta(hours=tx)
-        utcnow = valid.astimezone(ZoneInfo("UTC"))
-        res["data"].append(
-            {
-                "end_valid": utcnow.strftime("%Y-%m-%dT%H:00:00Z"),
-                "precip_in": myrounder(mm2inch(pt), 2),
-            }
-        )
+        for tx, pt in enumerate(ppt):
+            valid = sts + timedelta(hours=tx)
+            utcnow = valid.astimezone(ZoneInfo("UTC"))
+            res["data"].append(
+                {
+                    "end_valid": utcnow.strftime("%Y-%m-%dT%H:00:00Z"),
+                    "precip_in": myrounder(mm2inch(pt), 2),
+                }
+            )
 
     return json.dumps(res)
 
