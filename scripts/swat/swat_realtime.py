@@ -65,10 +65,8 @@ def workflow(page, huc12s):
     # default time domain, only run for one date if the files exist.
     ets = date.today() - timedelta(days=1)
     LOG.info("Running for time domain %s to %s", now, ets)
-    mrmsaffine = Affine(0.01, 0.0, mrms.WEST, 0.0, -0.01, mrms.NORTH)
-    mrms_czs = CachingZonalStats(
-        mrmsaffine,
-    )
+    # This is N to S
+    mrms_czs = CachingZonalStats(mrms.AFFINE)
     dom = iemre.DOMAINS[""]
     iemreaffine = Affine(
         iemre.DX, 0.0, dom["west"], 0.0, 0 - iemre.DY, dom["north"]

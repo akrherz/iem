@@ -81,7 +81,7 @@ def plotter(fdict):
     if not os.path.isfile(ncfn):
         raise NoDataFound(f"Data for year {sts.year} not found")
     with ncopen(ncfn) as nc:
-        czs = CachingZonalStats(iemre.AFFINE)
+        czs = CachingZonalStats(iemre.DOMAINS[""]["affine"])
         hasdata = np.zeros(
             (nc.dimensions["lat"].size, nc.dimensions["lon"].size)
         )

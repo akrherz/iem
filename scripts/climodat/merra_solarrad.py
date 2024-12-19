@@ -38,7 +38,8 @@ def compute_regions(rsds, df):
             index_col="id",
             geom_col="geom",
         )
-    affine = Affine(0.625, 0, -180.0, 0, -0.5, 90)
+    # This may not be exactly right, but alas
+    affine = Affine(0.625, 0, -180.3125, 0, -0.5, 90.5)
     czs = CachingZonalStats(affine)
     data = czs.gen_stats(np.flipud(rsds), gdf["geom"])
     for i, sid in enumerate(gdf.index.values):

@@ -12,11 +12,10 @@ import numpy as np
 import pandas as pd
 import pint
 import pygrib
-from affine import Affine
 from metpy.calc import wind_components
 from metpy.interpolate import inverse_distance_to_grid
 from metpy.units import masked_array, units
-from pyiem import iemre
+from pyiem import era5land, iemre
 from pyiem.database import get_sqlalchemy_conn
 from pyiem.grid.util import grid_smear
 from pyiem.iemre import grb2iemre, hourly_offset, reproject2iemre
@@ -40,21 +39,9 @@ def use_era5land(ts, kind, domain):
         LOG.warning("Failed to find %s", ncfn)
         return None
     tidx = hourly_offset(ts)
+    aff = era5land.DOMAINS[domain]["AFFINE_NC"]
     try:
         with ncopen(ncfn) as nc:
-            lats = nc.variables["lat"][:]
-            lons = nc.variables["lon"][:]
-            dx = lons[1] - lons[0]
-            dy = lats[1] - lats[0]
-            # This defines the SW edge of the grid
-            aff = Affine(
-                dx,
-                0,
-                lons[0] - dx / 2.0,
-                0,
-                dy,
-                lats[0] - dy / 2.0,
-            )
             res = []
             for task in tasks.get(kind, [kind]):
                 if task == "soilt":

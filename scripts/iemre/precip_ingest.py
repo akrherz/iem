@@ -11,8 +11,7 @@ from typing import Optional
 import click
 import numpy as np
 import pygrib
-from affine import Affine
-from pyiem import iemre
+from pyiem import era5land, iemre, stage4
 from pyiem.stage4 import AFFINE_NATIVE as STAGE4_AFFINE
 from pyiem.stage4 import AFFINE_NATIVE_OLD as STAGE4_AFFINE_OLD
 from pyiem.stage4 import ARCHIVE_FLIP as STAGE4_ARCHIVE_FLIP
@@ -66,7 +65,7 @@ def ingest_hourly_grib(valid):
         else:
             p01m[tidx, :, :] = val
         nc.variables["p01m_status"][tidx] = 1
-    LOG.debug(
+    LOG.info(
         "write p01m to stage4 netcdf min: %.2f avg: %.2f max: %.2f",
         np.min(val),
         np.mean(val),
@@ -83,18 +82,9 @@ def copy_to_iemre(valid):
         val = nc.variables["p01m"][tidx]
         LOG.info("stage4 mean: %.2f max: %.2f", np.mean(val), np.max(val))
 
-    # Define stage4 projection and affine
-    projparams = {
-        "a": 6371200.0,
-        "b": 6371200.0,
-        "proj": "stere",
-        "lat_ts": 60.0,
-        "lat_0": 90.0,
-        "lon_0": 255.0 - 360.0,
-    }
     # Reproject to IEMRE
     aff = STAGE4_AFFINE if valid >= STAGE4_ARCHIVE_FLIP else STAGE4_AFFINE_OLD
-    res = iemre.reproject2iemre(val, aff, projparams, domain="")
+    res = iemre.reproject2iemre(val, aff, stage4.PROJPARMS, domain="")
     LOG.info("iemre mean: %.2f max: %.2f", np.mean(res), np.max(res))
 
     # Lets clip bad data
@@ -123,9 +113,8 @@ def era5workflow(valid):
         p01m = nc.variables["p01m"][idx]
     # Convert trace/drizzle to 0, values < 0.01in or .254mm
     p01m[p01m < 0.254] = 0
-    dom = iemre.DOMAINS[""]
-    affine_in = Affine(0.1, 0, dom["west"], 0, -0.1, dom["north"])
-    val = iemre.reproject2iemre(np.flipud(p01m), affine_in, "EPSG:4326")
+    affine_in = era5land.DOMAINS[""]["AFFINE_NC"]
+    val = iemre.reproject2iemre(p01m, affine_in, "EPSG:4326")
     with ncopen(
         iemre.get_hourly_ncname(valid.year, domain=""), "a", timeout=300
     ) as nc:

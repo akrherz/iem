@@ -68,13 +68,13 @@ def run(dt: datetime.date, for_dep: bool):
             if utcdt < utcnow:
                 LOG.info("MISSING %s", utcdt)
             continue
-        grbs = pygrib.open(gribfn)
-        grb = grbs[1]
-        if lats is None:
-            lats, _ = grb.latlons()
+        with pygrib.open(gribfn) as grbs:
+            grb = grbs[1]
+            if lats is None:
+                lats, _ = grb.latlons()
+            val = grb["values"]
         os.unlink(gribfn)
 
-        val = grb["values"]
         # Anything less than zero, we set to zero
         val = np.where(val < 0, 0, val)
         if total is None:

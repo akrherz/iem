@@ -5,13 +5,13 @@ from datetime import datetime
 
 import click
 import numpy as np
-from pyiem import iemre
+from pyiem import iemre, mrms
 from pyiem.util import logger, ncopen
 
 LOG = logger()
 
 
-def init_year(ts, for_dep=False, ci=False):
+def init_year(ts: datetime, for_dep=False, ci=False):
     """Create the netcdf file for a given year.
 
     Args:
@@ -22,16 +22,6 @@ def init_year(ts, for_dep=False, ci=False):
 
     fn = iemre.get_daily_mrms_ncname(ts.year)
     os.makedirs(os.path.dirname(fn), exist_ok=True)
-    # Centroid of the upper left pixel
-    ulx = -125.995
-    uly = 49.995
-    ny = 2700
-    nx = 6100
-    dx = 0.01
-    dy = 0.01
-    # Centroid of the lower right pixel
-    lry = 23.005
-    lrx = -65.005
     if for_dep:
         fn = fn.replace("daily", "dep")
     if os.path.isfile(fn):
@@ -51,8 +41,8 @@ def init_year(ts, for_dep=False, ci=False):
     nc.comment = "No Comment at this time"
 
     # Setup Dimensions
-    nc.createDimension("lat", ny)
-    nc.createDimension("lon", nx)
+    nc.createDimension("lat", mrms.MRMS4IEMRE_NX)
+    nc.createDimension("lon", mrms.MRMS4IEMRE_NY)
     days = 2 if ci else ((ts.replace(year=ts.year + 1)) - ts).days
     day_axis = np.arange(0, int(days))
     if for_dep:
@@ -71,11 +61,11 @@ def init_year(ts, for_dep=False, ci=False):
     lat.bounds = "lat_bnds"
     lat.axis = "Y"
     # Grid centers
-    lat[:] = np.arange(lry, uly + 0.0001, dy)
+    lat[:] = mrms.MRMS4IEMRE_YAXIS
 
     lat_bnds = nc.createVariable("lat_bnds", float, ("lat", "nv"))
-    lat_bnds[:, 0] = lat[:] - dy / 2.0
-    lat_bnds[:, 1] = lat[:] + dy / 2.0
+    lat_bnds[:, 0] = lat[:] - mrms.MRMS4IEMRE_DY / 2.0
+    lat_bnds[:, 1] = lat[:] + mrms.MRMS4IEMRE_DY / 2.0
 
     lon = nc.createVariable("lon", float, ("lon",))
     lon.units = "degrees_east"
@@ -83,11 +73,11 @@ def init_year(ts, for_dep=False, ci=False):
     lon.standard_name = "longitude"
     lon.bounds = "lon_bnds"
     lon.axis = "X"
-    lon[:] = np.arange(ulx, lrx + 0.0001, dx)
+    lon[:] = mrms.MRMS4IEMRE_XAXIS
 
     lon_bnds = nc.createVariable("lon_bnds", float, ("lon", "nv"))
-    lon_bnds[:, 0] = lon[:] - dx / 2.0
-    lon_bnds[:, 1] = lon[:] + dx / 2.0
+    lon_bnds[:, 0] = lon[:] - mrms.MRMS4IEMRE_DX / 2.0
+    lon_bnds[:, 1] = lon[:] + mrms.MRMS4IEMRE_DX / 2.0
 
     tm = nc.createVariable("time", float, ("time",))
     tm.units = f"Days since {ts.year}-01-01 00:00:0.0"
@@ -110,11 +100,13 @@ def init_year(ts, for_dep=False, ci=False):
 
     # Add some faked data
     if ci:
-        p01d[0] = np.meshgrid(np.linspace(0, 25, nx), np.linspace(0, 25, ny))[
-            0
-        ]
+        p01d[0] = np.meshgrid(
+            np.linspace(0, 25, mrms.MRMS4IEMRE_NX),
+            np.linspace(0, 25, mrms.MRMS4IEMRE_NY),
+        )[0]
         p01d[1] = np.meshgrid(
-            np.linspace(0, 100, nx), np.linspace(0, 100, ny)
+            np.linspace(0, 100, mrms.MRMS4IEMRE_NX),
+            np.linspace(0, 100, mrms.MRMS4IEMRE_NY),
         )[0]
 
     nc.close()

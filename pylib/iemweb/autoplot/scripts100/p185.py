@@ -14,7 +14,7 @@ import numpy as np
 from pyiem import iemre, util
 from pyiem.exceptions import NoDataFound
 from pyiem.grid.zs import CachingZonalStats
-from pyiem.iemre import MRMS4IEMRE_AFFINE
+from pyiem.mrms import MRMS4IEMRE_AFFINE
 from pyiem.plot import get_cmap
 from pyiem.plot.geoplot import MapPlot
 

@@ -26,7 +26,7 @@ import os
 
 import numpy as np
 import pyiem.prism as prismutil
-from pyiem import iemre
+from pyiem import iemre, mrms
 from pyiem.util import convert_value, ncopen
 from pyiem.webutil import iemapp
 
@@ -85,8 +85,7 @@ def application(environ, start_response):
         if not os.path.isfile(ncfn):
             mrms_precip = None
         else:
-            j2 = int((lat - iemre.SOUTH) * 100.0)
-            i2 = int((lon - iemre.WEST) * 100.0)
+            i2, j2 = mrms.find_ij(lon, lat)
             with ncopen(ncfn) as nc:
                 mrms_precip = nc.variables["p01d"][offset, j2, i2] / 25.4
     else:
