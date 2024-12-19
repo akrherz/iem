@@ -551,7 +551,7 @@ yearly_opts = [
     },
     {
         "id": 53,
-        "label": ("Hourly Frequency of Temperature within Certain Ranges"),
+        "label": "Hourly Frequency of Variable within Certain Ranges",
     },
     {
         "id": 10,
