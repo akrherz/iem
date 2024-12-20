@@ -232,7 +232,7 @@ def application(environ, start_response):
             float(v) for v in environ["bins"].split(",") if v.strip() != ""
         ]
         # Ensure that the bins are in ascending order and unique
-        bins = sorted(list(set(bins)))
+        bins = sorted(set(bins))
     res = windrose(
         station,
         database=dbname,

@@ -34,14 +34,17 @@ def pqinsert(tmpfn, ets, interval):
         "bogus"
     )
     LOG.info(name)
-    cmd = f"pqinsert -i -p '{name}' {tmpfn}.geojson"
+    cmd = ["pqinsert", "-i", "-p", name, f"{tmpfn}.geojson"]
     if pathlib.Path(f"{tmpfn}.geojson").stat().st_size > 0:
-        subprocess.call(cmd, shell=True)
-    cmd = (
-        f"pqinsert -i -p '{name.replace('.geojson', '_meta.json')}' "
-        f"{tmpfn}_meta.json"
-    )
-    subprocess.call(cmd, shell=True)
+        subprocess.call(cmd)
+    cmd = [
+        "pqinsert",
+        "-i",
+        "-p",
+        name.replace(".geojson", "_meta.json"),
+        f"{tmpfn}_meta.json",
+    ]
+    subprocess.call(cmd)
 
 
 def make_metadata(tmpfn, mydict):

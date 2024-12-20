@@ -143,10 +143,16 @@ def export_shapefile(txn, valid):
             zfp.write(f"iaroad_cond.{suffix}")
 
     subprocess.call(
-        f"pqinsert -p 'zip ac {valid:%Y%m%d%H%M} "
-        "gis/shape/26915/ia/iaroad_cond.zip "
-        f"GIS/iaroad_cond_{valid:%Y%m%d%H%M}.zip zip' iaroad_cond.zip",
-        shell=True,
+        [
+            "pqinsert",
+            "-p",
+            (
+                f"zip ac {valid:%Y%m%d%H%M} "
+                "gis/shape/26915/ia/iaroad_cond.zip "
+                f"GIS/iaroad_cond_{valid:%Y%m%d%H%M}.zip zip"
+            ),
+            "iaroad_cond.zip",
+        ],
     )
 
     for suffix in ["shp", "shx", "dbf", "prj", "zip"]:

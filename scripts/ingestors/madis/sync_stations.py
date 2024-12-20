@@ -9,7 +9,7 @@ from pyiem.database import get_dbconn
 from pyiem.util import logger, ncopen
 
 sys.path.insert(0, ".")
-from to_iemaccess import provider2network
+from to_iemaccess import provider2network  # skipcq
 
 warnings.filterwarnings("ignore", category=DeprecationWarning)
 LOG = logger()
