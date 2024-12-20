@@ -424,9 +424,8 @@ def do_polygon(ctx: dict):
         )
     elif varname in "days":
         ctx["title"] = PDICT2[varname]
-        bins = np.linspace(
-            max([df["days"].min() - 7, 1]), df["days"].max() + 7, 12, dtype="i"
-        )
+        daymin = max(df["days"].min(), 1)
+        bins = np.linspace(daymin, df["days"].max() + 7, 12, dtype="i")
         counts = np.where(counts < 0.0001, -1, counts)
         ctx["subtitle"] = (
             f" between {sdate:%d %b %Y %H%M} and {edate:%d %b %Y %H%M} UTC"

@@ -4,7 +4,7 @@ observations.  Please note the colors and axes labels used to denote
 which variable is which in the combination plots.
 """
 
-import datetime
+from datetime import date, timedelta
 from zoneinfo import ZoneInfo
 
 import matplotlib.dates as mdates
@@ -31,7 +31,7 @@ def date_ticker(ax, mytz):
     xmin = mdates.num2date(xmin)
     xmax = mdates.num2date(xmax)
     xmin = xmin.replace(minute=0)
-    xmax = (xmax + datetime.timedelta(minutes=59)).replace(minute=0)
+    xmax = (xmax + timedelta(minutes=59)).replace(minute=0)
     now = xmin
     xticks = []
     xticklabels = []
@@ -43,7 +43,7 @@ def date_ticker(ax, mytz):
             xticklabels.append(lts.strftime(fmt))
         if len(xticks) > 100:
             break
-        now += datetime.timedelta(hours=1)
+        now += timedelta(hours=1)
 
     ax.set_xticks(xticks)
     ax.set_xticklabels(xticklabels)
@@ -53,7 +53,7 @@ def get_description():
     """Return a dict describing how to call this plotter"""
     desc = {"description": __doc__, "data": True, "cache": 360}
     desc["defaults"] = {"_r": "88"}
-    d3 = datetime.date.today() - datetime.timedelta(days=2)
+    d3 = date.today() - timedelta(days=2)
     desc["arguments"] = [
         dict(
             type="sid",
@@ -80,7 +80,7 @@ def get_description():
     return desc
 
 
-def get_data(network, station, tzname, sdate):
+def get_data(network: str, station, tzname, sdate) -> pd.DataFrame:
     """retrieve the data frame we want"""
     if sdate is None:
         with get_sqlalchemy_conn("iem") as conn:
@@ -104,7 +104,7 @@ def get_data(network, station, tzname, sdate):
     sts = sts.replace(
         year=sdate.year, month=sdate.month, day=sdate.day, hour=0, minute=0
     )
-    ets = sts + datetime.timedelta(hours=72)
+    ets = sts + timedelta(hours=72)
     if network.endswith("ASOS"):
         with get_sqlalchemy_conn("asos") as conn:
             df = pd.read_sql(
@@ -165,7 +165,7 @@ def plotter(fdict):
     fig = figure(apctx=ctx, title=title)
     xalign = 0.1
     xwidth = 0.8
-    ax = fig.add_axes([xalign, 0.7, xwidth, 0.2])
+    ax = fig.add_axes((xalign, 0.7, xwidth, 0.2))
 
     xmin = df.index.min()
     xmax = df.index.max()
@@ -205,7 +205,7 @@ def plotter(fdict):
     ax.legend(loc="best", ncol=2)
 
     # _____________PLOT 2____________________________
-    ax = fig.add_axes([xalign, 0.4, xwidth, 0.25])
+    ax = fig.add_axes((xalign, 0.4, xwidth, 0.25))
 
     ax2 = ax.twinx()
     df2 = df[df["gust"].notnull()]
@@ -247,7 +247,7 @@ def plotter(fdict):
     ax.grid(True)
 
     # _________ PLOT 3 ____
-    ax = fig.add_axes([xalign, 0.1, xwidth, 0.25])
+    ax = fig.add_axes((xalign, 0.1, xwidth, 0.25))
     if plot_type == "default":
         ax2 = ax.twinx()
         ax2.scatter(

@@ -15,7 +15,6 @@ from metpy.units import masked_array, units
 from pyiem import iemre
 from pyiem.exceptions import NoDataFound
 from pyiem.plot import MapPlot, get_cmap, pretty_bins
-from pyiem.reference import LATLON
 from pyiem.util import get_autoplot_context, ncopen
 
 from iemweb.autoplot import ARG_IEMRE_DOMAIN
@@ -41,6 +40,10 @@ PDICT = {
     "snowd_12z": "Experimental 24-Hour Snow Depth at 12 UTC",
 }
 PDICT2 = {"c": "Contour Plot", "g": "Grid Cell Mesh"}
+PDICT3 = {
+    "yes": "Mask Data Outside Plot Geography",
+    "no": "Do Not Mask Data Outside Plot Geography",
+}
 
 
 def get_description():
@@ -76,16 +79,23 @@ def get_description():
             label="Date:",
             min="1893/01/01",
         ),
+        {
+            "type": "select",
+            "name": "clip",
+            "default": "yes",
+            "label": "Clip Data Outside Plot Geography:",
+            "options": PDICT3,
+        },
         dict(type="cmap", name="cmap", default="magma", label="Color Ramp:"),
     ]
     return desc
 
 
-def unit_convert(nc, varname, idx0, jslice, islice):
+def unit_convert(nc, varname, idx0):
     """Convert units."""
     data = None
     if not varname.startswith("range"):
-        data = nc.variables[varname][idx0, jslice, islice]
+        data = nc.variables[varname][idx0]
     if varname in ["min_rh", "max_rh"]:
         pass
     elif varname in ["rsds", "power_swdn"]:
@@ -117,8 +127,8 @@ def unit_convert(nc, varname, idx0, jslice, islice):
     else:  # range_tmpk range_tmpk_12z
         vname2 = f"low_tmpk{'_12z' if varname == 'range_tmpk_12z' else ''}"
         vname1 = vname2.replace("low", "high")
-        d1 = nc.variables[vname1][idx0, jslice, islice]
-        d2 = nc.variables[vname2][idx0, jslice, islice]
+        d1 = nc.variables[vname1][idx0]
+        d2 = nc.variables[vname2][idx0]
         data = (
             masked_array(d1, units("degK")).to(units("degF")).m
             - masked_array(d2, units("degK")).to(units("degF")).m
@@ -133,9 +143,8 @@ def plotter(fdict):
     ptype = ctx["ptype"]
     dt = ctx["date"]
     varname = ctx["var"]
-    title = dt.strftime("%-d %B %Y")
     mpargs = {
-        "title": f"IEM Reanalysis of {PDICT.get(varname)} for {title}",
+        "title": f"IEM Reanalysis of {PDICT.get(varname)} for {dt:%-d %b %Y}",
         "subtitle": "Data derived from various NOAA datasets",
         "axisbg": "white",
         "nocaption": True,
@@ -149,11 +158,6 @@ def plotter(fdict):
         mpargs["north"] = iemre.DOMAINS[domain]["north"]
 
     mp = MapPlot(**mpargs)
-    (west, east, south, north) = mp.panels[0].get_extent(LATLON)
-    i0, j0 = iemre.find_ij(west, south, domain=domain)
-    i1, j1 = iemre.find_ij(east, north, domain=domain)
-    jslice = slice(j0, j1)
-    islice = slice(i0, i1)
 
     plot_units = ""
     idx0 = iemre.daily_offset(dt)
@@ -161,10 +165,10 @@ def plotter(fdict):
     if not os.path.isfile(ncfn):
         raise NoDataFound("No Data Found.")
     with ncopen(ncfn) as nc:
-        lats = nc.variables["lat"][jslice]
-        lons = nc.variables["lon"][islice]
+        lats = nc.variables["lat"][:]
+        lons = nc.variables["lon"][:]
         cmap = get_cmap(ctx["cmap"])
-        data = unit_convert(nc, varname, idx0, jslice, islice)
+        data = unit_convert(nc, varname, idx0)
         if np.ma.is_masked(data) and data.mask.all():
             raise NoDataFound("All data is missing.")
         ptiles = np.nanpercentile(data.filled(np.nan), [5, 95, 99.9])
@@ -202,28 +206,28 @@ def plotter(fdict):
             plot_units = "F"
             clevs = pretty_bins(ptiles[0], ptiles[1])
 
-    x, y = np.meshgrid(lons, lats)
     if ptype == "c":
-        # in the case of contour, use the centroids on the grids
+        x, y = np.meshgrid(lons, lats)
         mp.contourf(
-            x + 0.125,
-            y + 0.125,
+            x,
+            y,
             data,
             clevs,
             units=plot_units,
             ilabel=True,
             labelfmt="%.0f",
             cmap=cmap,
+            clip_on=ctx["clip"] == "yes",
         )
     else:
-        x, y = np.meshgrid(lons, lats)
-        mp.pcolormesh(
-            x,
-            y,
+        mp.imshow(
             data,
-            clevs,
+            iemre.DOMAINS[domain]["affine_native"],
+            "EPSG:4326",
+            clevs=clevs,
             cmap=cmap,
             units=plot_units,
+            clip_on=ctx["clip"] == "yes",
         )
 
     return mp.fig

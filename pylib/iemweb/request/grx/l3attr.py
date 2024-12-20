@@ -462,8 +462,10 @@ def produce_content_v3(df, title, titleadd):
             "Icon {\n"
             f"Index = {icon}\n"
             f"Pos = {{{row['lat']:.4f}, {row['lon']:.4f}}}\n"
-            "Sheet = \"1\"\n"
-            f"Hover = \"{txt}\"\n"
+            'Sheet = "1"'
+            "\n"
+            f'Hover = "{txt}"'
+            "\n"
             "}\n"
         )
         res += rabbit_tracks(row, True)

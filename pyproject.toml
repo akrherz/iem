@@ -8,30 +8,42 @@ target-version = "py39"
 [tool.ruff.lint]
 select = [
     "A",  # builtins
+    "ASYNC",  # async
     "B",  # bugbear
+    "C4",  # comprehensions
+    # "COM",  # commas
     # "DTZ",  # datetime
     "E",  # pycodestyle
+    # "EM",  # flake8-errmsg
     "ERA",  # eradicate
     "EXE",  # shebang
     "F",  # pyflakes
     "G",  # logging-format
+    # "FBT",  # flake8-boolean-trap
     # "FIX",  # has fixme
     "FURB",  # refurb
     "I",  # isort
+    "INT",  # flake8-gettext
     "NPY",  # numpy
     # "PD",  # pandas-vet
     "PIE",  # flake8-pie
     "PERF",  # performance
     "PLE",  # pylint error
     "PLW",  # pylint warning
+    # "PTH",  # pathlib
+    "Q",  # flake8-quotes
+    # "RET",  # flake8-return
     "RUF",  # ruff specific
+    # "S608",  # SQL injection
     # "SIM",  # simplify
     "T20",  # print
     # "TRY",  # try-except-raise
     "UP",  # pyupgrade
     "W",  # pycodestyle
+    "YTT",  # flake8-2020
 ]
 ignore = [
+    "C408",  # dict comprehension
     "PERF203",  # try,except within a loop
     "PLR2004",  # magic numbers
     "UP031",  # format specifiers
@@ -40,4 +52,7 @@ ignore = [
 [tool.ruff.lint.per-file-ignores]
 "{scripts,tests}/**/*.py" = [
     "T20",  # print
+]
+"tests/**/*.py" = [
+    "S101",  # assert
 ]
