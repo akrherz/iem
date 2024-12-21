@@ -11,10 +11,9 @@ from typing import Optional
 import click
 import numpy as np
 import pygrib
-from pyiem import era5land, iemre, stage4
-from pyiem.stage4 import AFFINE_NATIVE as STAGE4_AFFINE
-from pyiem.stage4 import AFFINE_NATIVE_OLD as STAGE4_AFFINE_OLD
-from pyiem.stage4 import ARCHIVE_FLIP as STAGE4_ARCHIVE_FLIP
+from pyiem.grid import nav
+from pyiem.iemre import get_hourly_ncname, hourly_offset, reproject2iemre
+from pyiem.stage4 import STAGE4_ARCHIVE_FLIP
 from pyiem.util import archive_fetch, logger, ncopen
 
 # silence warning when we squeeze data into netcdf
@@ -24,7 +23,7 @@ LOG = logger()
 
 def get_p01m_status(valid):
     """Figure out what our current status is of this hour."""
-    tidx = iemre.hourly_offset(valid)
+    tidx = hourly_offset(valid)
     with ncopen(
         f"/mesonet/data/stage4/{valid.year}_stage4_hourly.nc",
         timeout=300,
@@ -43,7 +42,7 @@ def ingest_hourly_grib(valid):
     Returns:
       int value of the new p01m_status
     """
-    tidx = iemre.hourly_offset(valid)
+    tidx = hourly_offset(valid)
     ppath = valid.strftime("%Y/%m/%d/stage4/ST4.%Y%m%d%H.01h.grib")
     with archive_fetch(ppath) as fn:
         if fn is None:
@@ -76,15 +75,19 @@ def ingest_hourly_grib(valid):
 
 def copy_to_iemre(valid):
     """verbatim copy over to IEMRE."""
-    tidx = iemre.hourly_offset(valid)
+    tidx = hourly_offset(valid)
     ncfn = f"/mesonet/data/stage4/{valid.year}_stage4_hourly.nc"
     with ncopen(ncfn, "a", timeout=300) as nc:
         val = nc.variables["p01m"][tidx]
         LOG.info("stage4 mean: %.2f max: %.2f", np.mean(val), np.max(val))
 
     # Reproject to IEMRE
-    aff = STAGE4_AFFINE if valid >= STAGE4_ARCHIVE_FLIP else STAGE4_AFFINE_OLD
-    res = iemre.reproject2iemre(val, aff, stage4.PROJPARMS, domain="")
+    aff = (
+        nav.STAGE4.affine
+        if valid >= STAGE4_ARCHIVE_FLIP
+        else nav.STAGE4_PRE2002.affine
+    )
+    res = reproject2iemre(val, aff, nav.STAGE4.crs, domain="")
     LOG.info("iemre mean: %.2f max: %.2f", np.mean(res), np.max(res))
 
     # Lets clip bad data
@@ -94,7 +97,7 @@ def copy_to_iemre(valid):
 
     # Open up our RE file
     with ncopen(
-        iemre.get_hourly_ncname(valid.year, domain=""), "a", timeout=300
+        get_hourly_ncname(valid.year, domain=""), "a", timeout=300
     ) as nc:
         nc.variables["p01m"][tidx] = res
     LOG.info(
@@ -108,15 +111,15 @@ def copy_to_iemre(valid):
 def era5workflow(valid):
     """Copy ERA5Land to IEMRE."""
     # NOTE, this may be off-by-one
-    idx = iemre.hourly_offset(valid)
+    idx = hourly_offset(valid)
     with ncopen(f"/mesonet/data/era5/{valid:%Y}_era5land_hourly.nc") as nc:
         p01m = nc.variables["p01m"][idx]
     # Convert trace/drizzle to 0, values < 0.01in or .254mm
     p01m[p01m < 0.254] = 0
-    affine_in = era5land.DOMAINS[""]["AFFINE_NC"]
-    val = iemre.reproject2iemre(p01m, affine_in, "EPSG:4326")
+    affine_in = nav.ERA5LAND.affine
+    val = reproject2iemre(p01m, affine_in, "EPSG:4326")
     with ncopen(
-        iemre.get_hourly_ncname(valid.year, domain=""), "a", timeout=300
+        get_hourly_ncname(valid.year, domain=""), "a", timeout=300
     ) as nc:
         nc.variables["p01m"][idx] = val
 

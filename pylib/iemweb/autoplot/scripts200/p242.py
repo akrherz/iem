@@ -85,7 +85,7 @@ def get_image(filename):
     return OffsetImage(plt.imread(fn, format=filename[-3:]), zoom=0.7)
 
 
-def overlay_info(fig, df):
+def overlay_info(fig, df: gpd.GeoDataFrame):
     """Add bling."""
     if len(df.index) > 1:
         msg = ""

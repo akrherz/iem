@@ -17,9 +17,10 @@ import pandas as pd
 from metpy.calc import relative_humidity_from_dewpoint
 from metpy.interpolate import inverse_distance_to_grid
 from metpy.units import units
-from pyiem import iemre
 from pyiem.database import get_sqlalchemy_conn
+from pyiem.grid.nav import get_nav
 from pyiem.grid.util import grid_smear
+from pyiem.iemre import get_grids, get_hourly_ncname, hourly_offset, set_grids
 from pyiem.util import convert_value, logger, ncopen, utc
 from scipy.stats import zscore
 from sqlalchemy import text
@@ -31,12 +32,12 @@ def generic_gridder(df, idx, domain: str):
     """
     Generic gridding algorithm for easy variables
     """
-    dom = iemre.DOMAINS[domain]
+    gridnav = get_nav("iemre", domain)
     if not idx.startswith("precip"):
         window = 2.0
         f1 = df[df[idx].notnull()]
-        for lat in np.arange(dom["south"], dom["north"], window):
-            for lon in np.arange(dom["west"], dom["east"], window):
+        for lat in np.arange(gridnav.bottom, gridnav.top, window):
+            for lon in np.arange(gridnav.left, gridnav.right, window):
                 (west, east, south, north) = (
                     lon,
                     lon + window,
@@ -61,7 +62,7 @@ def generic_gridder(df, idx, domain: str):
     if len(df2.index) < 4:
         LOG.info("Not enough data %s", idx)
         return None
-    xi, yi = np.meshgrid(iemre.XAXIS, iemre.YAXIS)
+    xi, yi = np.meshgrid(gridnav.x_points, gridnav.y_points)
     res = np.ones(xi.shape) * np.nan
     # do our gridding
     grid = inverse_distance_to_grid(
@@ -117,9 +118,9 @@ def copy_iemre_hourly(ts, ds, domain):
         aggfunc = np.ma.max if vname == "max_rh" else np.ma.min
         res = None
         for pair in pairs:
-            ncfn = iemre.get_hourly_ncname(pair[0].year, domain)
-            tidx1 = iemre.hourly_offset(pair[0])
-            tidx2 = iemre.hourly_offset(pair[1])
+            ncfn = get_hourly_ncname(pair[0].year, domain)
+            tidx1 = hourly_offset(pair[0])
+            tidx2 = hourly_offset(pair[1])
             with ncopen(ncfn, timeout=600) as nc:
                 tmpk = nc.variables["tmpk"]
                 dwpk = nc.variables["dwpk"]
@@ -141,9 +142,9 @@ def copy_iemre_hourly(ts, ds, domain):
     hours = 0
     runningsum = None
     for pair in pairs:
-        ncfn = iemre.get_hourly_ncname(pair[0].year, domain)
-        tidx1 = iemre.hourly_offset(pair[0])
-        tidx2 = iemre.hourly_offset(pair[1])
+        ncfn = get_hourly_ncname(pair[0].year, domain)
+        tidx1 = hourly_offset(pair[0])
+        tidx2 = hourly_offset(pair[1])
         with ncopen(ncfn, timeout=600) as nc:
             uwnd = nc.variables["uwnd"]
             vwnd = nc.variables["vwnd"]
@@ -180,9 +181,9 @@ def copy_iemre_hourly(ts, ds, domain):
         )
         ncvarname = "p01m" if ncvarname == "p01d" else ncvarname
         for pair in pairs12z if vname.endswith("12z") else pairs:
-            ncfn = iemre.get_hourly_ncname(pair[0].year, domain)
-            tidx1 = iemre.hourly_offset(pair[0])
-            tidx2 = iemre.hourly_offset(pair[1])
+            ncfn = get_hourly_ncname(pair[0].year, domain)
+            tidx1 = hourly_offset(pair[0])
+            tidx2 = hourly_offset(pair[1])
             tslice = slice(tidx1, tidx2 + 1)
             if vname.startswith("p01d"):
                 # Caution: precip is stored arrears, so we have ugliness
@@ -206,7 +207,7 @@ def copy_iemre_hourly(ts, ds, domain):
 def use_climodat_12z(ts, ds):
     """Look at what we have in climodat."""
     mybuf = 2
-    dom = iemre.DOMAINS[""]
+    gridnav = get_nav("iemre", "")
     with get_sqlalchemy_conn("coop") as conn:
         df = pd.read_sql(
             text("""
@@ -229,10 +230,10 @@ def use_climodat_12z(ts, ds):
         """),
             conn,
             params={
-                "west": dom["west"] - mybuf,
-                "south": dom["south"] - mybuf,
-                "east": dom["east"] + mybuf,
-                "north": dom["north"] + mybuf,
+                "west": gridnav.left - mybuf,
+                "south": gridnav.bottom - mybuf,
+                "east": gridnav.right + mybuf,
+                "north": gridnav.top + mybuf,
                 "ts": ts,
             },
         )
@@ -260,7 +261,7 @@ def use_climodat_12z(ts, ds):
 def use_asos_daily(ts, ds, domain):
     """Grid out available ASOS data."""
     mybuf = 2.0
-    dom = iemre.DOMAINS[domain]
+    gridnav = get_nav("iemre", domain)
     with get_sqlalchemy_conn("iem") as conn:
         df = pd.read_sql(
             text(f"""
@@ -286,10 +287,10 @@ def use_asos_daily(ts, ds, domain):
             """),
             conn,
             params={
-                "west": dom["west"] - mybuf,
-                "south": dom["south"] - mybuf,
-                "east": dom["east"] + mybuf,
-                "north": dom["north"] + mybuf,
+                "west": gridnav.left - mybuf,
+                "south": gridnav.bottom - mybuf,
+                "east": gridnav.right + mybuf,
+                "north": gridnav.top + mybuf,
                 "ts": ts,
             },
         )
@@ -321,7 +322,7 @@ def use_asos_daily(ts, ds, domain):
 def use_climodat_daily(ts: date, ds):
     """Do our gridding"""
     mybuf = 2.0
-    dom = iemre.DOMAINS[""]
+    gridnav = get_nav("iemre", "")
     with get_sqlalchemy_conn("coop") as conn:
         df = pd.read_sql(
             text("""
@@ -351,10 +352,10 @@ def use_climodat_daily(ts: date, ds):
         """),
             conn,
             params={
-                "west": dom["west"] - mybuf,
-                "south": dom["south"] - mybuf,
-                "east": dom["east"] + mybuf,
-                "north": dom["north"] + mybuf,
+                "west": gridnav.left - mybuf,
+                "south": gridnav.bottom - mybuf,
+                "east": gridnav.right + mybuf,
+                "north": gridnav.top + mybuf,
                 "ts": ts,
             },
         )
@@ -377,7 +378,7 @@ def use_climodat_daily(ts: date, ds):
 def workflow(ts: date, domain: str):
     """Do Work"""
     # load up our current data
-    ds = iemre.get_grids(ts, domain=domain)
+    ds = get_grids(ts, domain=domain)
     LOG.info("loaded %s variables from IEMRE database", len(ds))
 
     # rsds -> grid_rsds.py
@@ -406,7 +407,7 @@ def workflow(ts: date, domain: str):
         ds[vname].values = vals
         msg = f"{vname:14s} {ds[vname].min():6.2f} {ds[vname].max():6.2f}"
         LOG.info(msg)
-    iemre.set_grids(ts, ds, domain=domain)
+    set_grids(ts, ds, domain=domain)
     subprocess.call(
         [
             "python",

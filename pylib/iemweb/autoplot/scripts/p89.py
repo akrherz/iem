@@ -16,10 +16,12 @@ import matplotlib.dates as mdates
 import numpy as np
 import pandas as pd
 from metpy.units import units
-from pyiem import iemre, reference
+from pyiem import reference
 from pyiem.database import get_sqlalchemy_conn
 from pyiem.exceptions import NoDataFound
+from pyiem.grid import nav
 from pyiem.grid.zs import CachingZonalStats
+from pyiem.iemre import daily_offset, get_daily_ncname
 from pyiem.plot import figure
 from pyiem.util import get_autoplot_context, ncopen
 
@@ -60,7 +62,7 @@ def get_description():
 
 def do_date(ctx, now: datetime, precip, daythres, trailthres):
     """Do the local date and return a dict"""
-    idx = iemre.daily_offset(now)
+    idx = daily_offset(now)
     ctx["days"].append(now)
     sevenday = np.sum(precip[(idx - ctx["period"]) : idx, :, :], 0)
     ptrail = np.where(ctx["iowa"] > 0, sevenday, -1)
@@ -94,21 +96,21 @@ def get_data(ctx):
     if states.empty:
         raise NoDataFound("No data was found.")
 
-    ncfn = iemre.get_daily_ncname(ctx["year"])
+    ncfn = get_daily_ncname(ctx["year"])
     if not os.path.isfile(ncfn):
         raise NoDataFound(f"Missing {ncfn}")
     with ncopen(ncfn) as nc:
         precip = nc.variables["p01d"]
-        czs = CachingZonalStats(iemre.DOMAINS[""]["affine"])
+        czs = CachingZonalStats(nav.IEMRE.affine_image)
         hasdata = np.zeros(
             (nc.dimensions["lat"].size, nc.dimensions["lon"].size)
         )
         czs.gen_stats(hasdata, states["the_geom"])
-        for nav in czs.gridnav:
-            grid = np.ones((nav.ysz, nav.xsz))
-            grid[nav.mask] = 0.0
-            jslice = slice(nav.y0, nav.y0 + nav.ysz)
-            islice = slice(nav.x0, nav.x0 + nav.xsz)
+        for gnav in czs.gridnav:
+            grid = np.ones((gnav.ysz, gnav.xsz))
+            grid[gnav.mask] = 0.0
+            jslice = slice(gnav.y0, gnav.y0 + gnav.ysz)
+            islice = slice(gnav.x0, gnav.x0 + gnav.xsz)
             hasdata[jslice, islice] = np.where(
                 grid > 0, 1, hasdata[jslice, islice]
             )

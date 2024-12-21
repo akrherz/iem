@@ -14,10 +14,12 @@ import geopandas as gpd
 import matplotlib.dates as mdates
 import numpy as np
 import pandas as pd
-from pyiem import iemre, reference
+from pyiem import reference
 from pyiem.database import get_sqlalchemy_conn
 from pyiem.exceptions import NoDataFound
+from pyiem.grid import nav
 from pyiem.grid.zs import CachingZonalStats
+from pyiem.iemre import daily_offset, get_daily_ncname
 from pyiem.plot import figure_axes
 from pyiem.util import get_autoplot_context, ncopen
 from sqlalchemy import text
@@ -69,23 +71,23 @@ def plotter(fdict):
             geom_col="the_geom",
         )
 
-    ncfn = iemre.get_daily_ncname(year)
+    ncfn = get_daily_ncname(year)
     if not os.path.isfile(ncfn):
         raise NoDataFound("Data not available for year")
     with ncopen(ncfn) as nc:
         precip = nc.variables["p01d"]
-        czs = CachingZonalStats(iemre.DOMAINS[""]["affine"])
+        czs = CachingZonalStats(nav.IEMRE.affine_image)
         hasdata = np.zeros(
             (nc.dimensions["lat"].size, nc.dimensions["lon"].size)
         )
         czs.gen_stats(hasdata, states["the_geom"])
-        for nav in czs.gridnav:
-            if nav is None:
+        for gnav in czs.gridnav:
+            if gnav is None:
                 continue
-            grid = np.ones((nav.ysz, nav.xsz))
-            grid[nav.mask] = 0.0
-            jslice = slice(nav.y0, nav.y0 + nav.ysz)
-            islice = slice(nav.x0, nav.x0 + nav.xsz)
+            grid = np.ones((gnav.ysz, gnav.xsz))
+            grid[gnav.mask] = 0.0
+            jslice = slice(gnav.y0, gnav.y0 + gnav.ysz)
+            islice = slice(gnav.x0, gnav.x0 + gnav.xsz)
             hasdata[jslice, islice] = np.where(
                 grid > 0, 1, hasdata[jslice, islice]
             )
@@ -100,7 +102,7 @@ def plotter(fdict):
         days = []
         coverage = []
         while now <= ets:
-            idx = iemre.daily_offset(now)
+            idx = daily_offset(now)
             sevenday = np.sum(precip[(idx - period) : idx, :, :], 0)
             pday = np.where(hasdata > 0, sevenday[:, :], -1)
             tots = np.sum(np.where(pday >= (threshold * 25.4), 1, 0))

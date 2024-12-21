@@ -4,11 +4,9 @@ import datetime
 import os
 
 import click
-import geopandas as gpd
 import numpy as np
-from pyiem import iemre
-from pyiem.database import get_sqlalchemy_conn
-from pyiem.grid.zs import CachingZonalStats
+from pyiem.grid.nav import get_nav
+from pyiem.iemre import get_hourly_ncname
 from pyiem.util import logger, ncopen, utc
 
 LOG = logger()
@@ -18,8 +16,8 @@ def init_year(ts: datetime.datetime, domain: str, ci: bool) -> None:
     """
     Create a new NetCDF file for a year of our specification!
     """
-    dom = iemre.DOMAINS[domain]
-    fn = iemre.get_hourly_ncname(ts.year, domain)
+    gridnav = get_nav("iemre", domain)
+    fn = get_hourly_ncname(ts.year, domain)
     os.makedirs(os.path.dirname(fn), exist_ok=True)
     if os.path.isfile(fn):
         LOG.info("Cowardly refusing to overwrite: %s", fn)
@@ -38,8 +36,8 @@ def init_year(ts: datetime.datetime, domain: str, ci: bool) -> None:
     nc.comment = "No Comment at this time"
 
     # Setup Dimensions
-    nc.createDimension("lat", dom["ny"])
-    nc.createDimension("lon", dom["nx"])
+    nc.createDimension("lat", gridnav.ny)
+    nc.createDimension("lon", gridnav.nx)
     nc.createDimension("nv", 2)
     ts2 = datetime.datetime(ts.year + 1, 1, 1)
     days = 1 if ci else (ts2 - ts).days
@@ -54,14 +52,11 @@ def init_year(ts: datetime.datetime, domain: str, ci: bool) -> None:
     lat.axis = "Y"
     lat.bounds = "lat_bnds"
     # These are the grid centers
-    lat[:] = np.arange(
-        iemre.DOMAINS[domain]["south"],
-        iemre.DOMAINS[domain]["north"] + 0.0001,
-        iemre.DY,
-    )
+    lat[:] = gridnav.y_points
+
     lat_bnds = nc.createVariable("lat_bnds", float, ("lat", "nv"))
-    lat_bnds[:, 0] = lat[:] - iemre.DY / 2.0
-    lat_bnds[:, 1] = lat[:] + iemre.DY / 2.0
+    lat_bnds[:, 0] = gridnav.y_edges[:-1]
+    lat_bnds[:, 1] = gridnav.y_edges[1:]
 
     lon = nc.createVariable("lon", float, ("lon",))
     lon.units = "degrees_east"
@@ -70,15 +65,11 @@ def init_year(ts: datetime.datetime, domain: str, ci: bool) -> None:
     lon.axis = "X"
     lon.bounds = "lon_bnds"
     # These are the grid centers
-    lon[:] = np.arange(
-        iemre.DOMAINS[domain]["west"],
-        iemre.DOMAINS[domain]["east"] + 0.0001,
-        iemre.DX,
-    )
+    lon[:] = gridnav.x_points
 
     lon_bnds = nc.createVariable("lon_bnds", float, ("lon", "nv"))
-    lon_bnds[:, 0] = lon[:] - iemre.DX / 2.0
-    lon_bnds[:, 1] = lon[:] + iemre.DX / 2.0
+    lon_bnds[:, 0] = gridnav.x_edges[:-1]
+    lon_bnds[:, 1] = gridnav.x_edges[1:]
 
     tm = nc.createVariable("time", float, ("time",))
     tm.units = f"Hours since {ts.year}-01-01 00:00:0.0"
@@ -180,42 +171,15 @@ def init_year(ts: datetime.datetime, domain: str, ci: bool) -> None:
     nc.close()
 
 
-def compute_hasdata(year):
-    """Compute the has_data grid"""
-    nc = ncopen(iemre.get_hourly_ncname(year, domain=""), "a", timeout=300)
-    czs = CachingZonalStats(iemre.AFFINE)
-    with get_sqlalchemy_conn("postgis") as conn:
-        states = gpd.GeoDataFrame.from_postgis(
-            "SELECT the_geom, state_abbr from states",
-            conn,
-            index_col="state_abbr",
-            geom_col="the_geom",
-        )
-    data = np.flipud(nc.variables["hasdata"][:, :])
-    czs.gen_stats(data, states["the_geom"])
-    for nav in czs.gridnav:
-        if nav is None:
-            continue
-        grid = np.ones((nav.ysz, nav.xsz))
-        grid[nav.mask] = 0.0
-        jslice = slice(nav.y0, nav.y0 + nav.ysz)
-        islice = slice(nav.x0, nav.x0 + nav.xsz)
-        data[jslice, islice] = np.where(grid > 0, 1, data[jslice, islice])
-    nc.variables["hasdata"][:, :] = np.flipud(data)
-    nc.close()
-
-
 @click.command()
 @click.option("--year", type=int, required=True, help="Year to initialize")
 @click.option("--ci", is_flag=True, help="Run in CI mode")
 def main(year: int, ci: bool) -> None:
     """Go Main Go"""
-    for domain in iemre.DOMAINS:
+    for domain in ["", "china", "europe"]:
         init_year(datetime.datetime(year, 1, 1), domain, ci)
-        if domain == "" and not ci:
-            compute_hasdata(year)
         if ci:
-            with ncopen(iemre.get_hourly_ncname(year, domain), "a") as nc:
+            with ncopen(get_hourly_ncname(year, domain), "a") as nc:
                 nc.variables["rsds"][0] = 400
 
 

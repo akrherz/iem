@@ -12,10 +12,12 @@ import geopandas as gpd
 import matplotlib.dates as mdates
 import numpy as np
 import pandas as pd
-from pyiem import iemre, reference
+from pyiem import reference
 from pyiem.database import get_sqlalchemy_conn
 from pyiem.exceptions import NoDataFound
+from pyiem.grid import nav
 from pyiem.grid.zs import CachingZonalStats
+from pyiem.iemre import daily_offset, get_daily_ncname
 from pyiem.plot import figure_axes
 from pyiem.util import convert_value, get_autoplot_context, ncopen
 
@@ -76,21 +78,21 @@ def plotter(fdict):
             geom_col="the_geom",
         )
 
-    sidx = iemre.daily_offset(sts)
-    ncfn = iemre.get_daily_ncname(sts.year)
+    sidx = daily_offset(sts)
+    ncfn = get_daily_ncname(sts.year)
     if not os.path.isfile(ncfn):
         raise NoDataFound(f"Data for year {sts.year} not found")
     with ncopen(ncfn) as nc:
-        czs = CachingZonalStats(iemre.DOMAINS[""]["affine"])
+        czs = CachingZonalStats(nav.IEMRE.affine_image)
         hasdata = np.zeros(
             (nc.dimensions["lat"].size, nc.dimensions["lon"].size)
         )
         czs.gen_stats(hasdata, states["the_geom"])
-        for nav in czs.gridnav:
-            grid = np.ones((nav.ysz, nav.xsz))
-            grid[nav.mask] = 0.0
-            jslice = slice(nav.y0, nav.y0 + nav.ysz)
-            islice = slice(nav.x0, nav.x0 + nav.xsz)
+        for gnav in czs.gridnav:
+            grid = np.ones((gnav.ysz, gnav.xsz))
+            grid[gnav.mask] = 0.0
+            jslice = slice(gnav.y0, gnav.y0 + gnav.ysz)
+            islice = slice(gnav.x0, gnav.x0 + gnav.xsz)
             hasdata[jslice, islice] = np.where(
                 grid > 0, 1, hasdata[jslice, islice]
             )
@@ -106,8 +108,8 @@ def plotter(fdict):
             }
         )
 
-    eidx = iemre.daily_offset(ets)
-    ncfn = iemre.get_daily_ncname(ets.year)
+    eidx = daily_offset(ets)
+    ncfn = get_daily_ncname(ets.year)
     if not os.path.isfile(ncfn):
         raise NoDataFound(f"Data for year {ets.year} not found")
     with ncopen(ncfn) as nc:

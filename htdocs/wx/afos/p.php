@@ -312,7 +312,7 @@ EOM;
 <div class="row">
 <div class="col-sm-7 col-md-7">
 <p>Displaying AFOS PIL: <strong>$pil</strong> 
-Received: <strong>{$dstamp} UTC</strong>
+Product Timestamp: <strong>{$dstamp} UTC</strong>
 
 <p><a class="btn btn-primary" 
  href="p.php?dir=prev&pil=$pil&e=$newe"><i class="fa fa-arrow-left"></i> 

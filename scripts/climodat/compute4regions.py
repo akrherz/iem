@@ -8,9 +8,10 @@ from datetime import datetime
 import click
 import geopandas as gpd
 import numpy as np
-from pyiem import iemre
 from pyiem.database import get_dbconnc, get_sqlalchemy_conn
+from pyiem.grid import nav
 from pyiem.grid.zs import CachingZonalStats
+from pyiem.iemre import daily_offset, get_daily_ncname
 from pyiem.util import convert_value, logger, mm2inch, ncopen
 
 LOG = logger()
@@ -60,8 +61,8 @@ def update_database(cursor, stid, valid, row):
 
 def do_day(cursor, valid):
     """Process a day please"""
-    idx = iemre.daily_offset(valid)
-    with ncopen(iemre.get_daily_ncname(valid.year), "r", timeout=300) as nc:
+    idx = daily_offset(valid)
+    with ncopen(get_daily_ncname(valid.year), "r", timeout=300) as nc:
         high = convert_value(
             nc.variables["high_tmpk_12z"][idx, :, :], "degK", "degF"
         )
@@ -83,7 +84,7 @@ def do_day(cursor, valid):
             index_col="id",
             geom_col="geom",
         )
-    czs = CachingZonalStats(iemre.DOMAINS[""]["affine"])
+    czs = CachingZonalStats(nav.IEMRE.affine_image)
     sthigh = czs.gen_stats(np.flipud(high), gdf["geom"])
     stlow = czs.gen_stats(np.flipud(low), gdf["geom"])
     stprecip = czs.gen_stats(np.flipud(precip), gdf["geom"])

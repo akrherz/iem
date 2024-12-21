@@ -9,10 +9,10 @@ from datetime import datetime, timedelta, timezone
 
 import numpy as np
 from metpy.units import masked_array, units
-from pyiem import iemre
 from pyiem.exceptions import NoDataFound
+from pyiem.grid.nav import get_nav
+from pyiem.iemre import get_hourly_ncname, hourly_offset
 from pyiem.plot import MapPlot, get_cmap, pretty_bins
-from pyiem.reference import LATLON
 from pyiem.util import get_autoplot_context, ncopen
 
 from iemweb.autoplot import ARG_IEMRE_DOMAIN
@@ -78,12 +78,11 @@ def get_description():
     return desc
 
 
-def unit_convert(nc, varname, idx0, jslice, islice):
+def unit_convert(nc, varname, idx0):
     """Convert units."""
     if varname == "wind_speed":
         data = (
-            nc.variables["uwnd"][idx0, jslice, islice] ** 2
-            + nc.variables["vwnd"][idx0, jslice, islice] ** 2
+            nc.variables["uwnd"][idx0] ** 2 + nc.variables["vwnd"][idx0] ** 2
         ) ** 0.5
         data = (
             masked_array(
@@ -94,7 +93,7 @@ def unit_convert(nc, varname, idx0, jslice, islice):
             .m
         )
     else:
-        data = nc.variables[varname][idx0, jslice, islice]
+        data = nc.variables[varname][idx0]
     if varname in [
         "p01m",
     ]:
@@ -112,6 +111,7 @@ def plotter(fdict):
     """Go"""
     ctx = get_autoplot_context(fdict, get_description())
     domain = ctx["domain"]
+    gridnav = get_nav("iemre", domain)
     ptype = ctx["ptype"]
     valid = ctx["valid"].replace(tzinfo=timezone.utc)
     varname = ctx["var"]
@@ -125,28 +125,21 @@ def plotter(fdict):
     }
     if domain != "":
         ctx["csector"] = "custom"
-        mpargs["east"] = iemre.DOMAINS[domain]["east"]
-        mpargs["west"] = iemre.DOMAINS[domain]["west"]
-        mpargs["south"] = iemre.DOMAINS[domain]["south"]
-        mpargs["north"] = iemre.DOMAINS[domain]["north"]
+        mpargs["east"] = gridnav.right_edge
+        mpargs["west"] = gridnav.left_edge
+        mpargs["south"] = gridnav.bottom_edge
+        mpargs["north"] = gridnav.top_edge
 
     mp = MapPlot(**mpargs)
-    (west, east, south, north) = mp.panels[0].get_extent(LATLON)
-    i0, j0 = iemre.find_ij(west, south, domain=domain)
-    i1, j1 = iemre.find_ij(east, north, domain=domain)
-    jslice = slice(j0, j1)
-    islice = slice(i0, i1)
 
     plot_units = ""
-    idx0 = iemre.hourly_offset(valid)
-    ncfn = iemre.get_hourly_ncname(valid.year, domain=domain)
+    idx0 = hourly_offset(valid)
+    ncfn = get_hourly_ncname(valid.year, domain=domain)
     if not os.path.isfile(ncfn):
         raise NoDataFound("No Data Found.")
     with ncopen(ncfn) as nc:
-        lats = nc.variables["lat"][jslice]
-        lons = nc.variables["lon"][islice]
         cmap = get_cmap(ctx["cmap"])
-        data = unit_convert(nc, varname, idx0, jslice, islice)
+        data = unit_convert(nc, varname, idx0)
         if np.ma.is_masked(np.max(data)):
             raise NoDataFound("Data Unavailable")
         ptiles = np.nanpercentile(data.filled(np.nan), [5, 95, 99.9])
@@ -176,12 +169,12 @@ def plotter(fdict):
             plot_units = "W m**-2"
             clevs = pretty_bins(0, ptiles[1])
 
-    x, y = np.meshgrid(lons, lats)
     if ptype == "c":
+        x, y = np.meshgrid(gridnav.x_points, gridnav.y_points)
         # in the case of contour, use the centroids on the grids
         mp.contourf(
-            x + 0.125,
-            y + 0.125,
+            x,
+            y,
             data,
             clevs,
             units=plot_units,
@@ -191,12 +184,11 @@ def plotter(fdict):
             clip_on=ctx["clip"] == "yes",
         )
     else:
-        x, y = np.meshgrid(lons, lats)
-        mp.pcolormesh(
-            x,
-            y,
+        mp.imshow(
             data,
-            clevs,
+            gridnav.affine,
+            gridnav.crs,
+            clevs=clevs,
             cmap=cmap,
             units=plot_units,
             clip_on=ctx["clip"] == "yes",
