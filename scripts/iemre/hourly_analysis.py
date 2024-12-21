@@ -15,10 +15,15 @@ import pygrib
 from metpy.calc import wind_components
 from metpy.interpolate import inverse_distance_to_grid
 from metpy.units import masked_array, units
-from pyiem import era5land, iemre
 from pyiem.database import get_sqlalchemy_conn
+from pyiem.grid.nav import get_nav
 from pyiem.grid.util import grid_smear
-from pyiem.iemre import grb2iemre, hourly_offset, reproject2iemre
+from pyiem.iemre import (
+    get_hourly_ncname,
+    grb2iemre,
+    hourly_offset,
+    reproject2iemre,
+)
 from pyiem.util import archive_fetch, logger, ncopen
 from sqlalchemy import text
 
@@ -39,7 +44,7 @@ def use_era5land(ts, kind, domain):
         LOG.warning("Failed to find %s", ncfn)
         return None
     tidx = hourly_offset(ts)
-    aff = era5land.DOMAINS[domain]["AFFINE_NC"]
+    aff = get_nav("era5land", domain).affine
     try:
         with ncopen(ncfn) as nc:
             res = []
@@ -159,12 +164,9 @@ def grid_skyc(df, domain):
 
 def generic_gridder(df, idx, domain=""):
     """Generic gridding algorithm for easy variables"""
-    dom = iemre.DOMAINS[domain]
+    gridnav = get_nav("iemre", domain)
     df2 = df[pd.notnull(df[idx])]
-    xi, yi = np.meshgrid(
-        np.arange(dom["west"], dom["east"] + 0.01, iemre.DX),
-        np.arange(dom["south"], dom["north"] + 0.01, iemre.DY),
-    )
+    xi, yi = np.meshgrid(gridnav.x_points, gridnav.y_points)
     res = np.ones(xi.shape) * np.nan
     # do our gridding
     grid = inverse_distance_to_grid(
@@ -196,7 +198,7 @@ def grid_hour(ts, domain):
     ts1 = ts + datetime.timedelta(minutes=10)
 
     mybuf = 2.0
-    dom = iemre.DOMAINS[domain]
+    gridnav = get_nav("iemre", domain)
     with get_sqlalchemy_conn("asos") as conn:
         df = pd.read_sql(
             text("""SELECT station, ST_x(geom) as lon, st_y(geom) as lat,
@@ -219,10 +221,10 @@ def grid_hour(ts, domain):
     GROUP by station, lon, lat"""),
             conn,
             params={
-                "west": dom["west"] - mybuf,
-                "south": dom["south"] - mybuf,
-                "east": dom["east"] + mybuf,
-                "north": dom["north"] + mybuf,
+                "west": gridnav.left - mybuf,
+                "south": gridnav.bottom - mybuf,
+                "east": gridnav.right + mybuf,
+                "north": gridnav.top + mybuf,
                 "ts0": ts0,
                 "ts1": ts1,
             },
@@ -332,10 +334,8 @@ def write_grid(valid, vname, grid, domain):
     """
     if isinstance(grid, pint.Quantity):
         grid = grid.m
-    offset = iemre.hourly_offset(valid)
-    with ncopen(
-        iemre.get_hourly_ncname(valid.year, domain), "a", timeout=300
-    ) as nc:
+    offset = hourly_offset(valid)
+    with ncopen(get_hourly_ncname(valid.year, domain), "a", timeout=300) as nc:
         LOG.info(
             "offset: %s writing %s with min: %s max: %s Ames: %s",
             offset,

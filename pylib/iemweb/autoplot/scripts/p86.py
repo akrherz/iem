@@ -12,8 +12,9 @@ from datetime import datetime, timedelta
 
 import numpy as np
 from metpy.units import masked_array, units
-from pyiem import iemre
 from pyiem.exceptions import NoDataFound
+from pyiem.grid.nav import get_nav
+from pyiem.iemre import daily_offset, get_daily_ncname
 from pyiem.plot import MapPlot, get_cmap, pretty_bins
 from pyiem.util import get_autoplot_context, ncopen
 
@@ -140,6 +141,7 @@ def plotter(fdict):
     """Go"""
     ctx = get_autoplot_context(fdict, get_description())
     domain = ctx["domain"]
+    gridnav = get_nav("iemre", domain)
     ptype = ctx["ptype"]
     dt = ctx["date"]
     varname = ctx["var"]
@@ -152,21 +154,19 @@ def plotter(fdict):
     }
     if domain != "":
         ctx["csector"] = "custom"
-        mpargs["west"] = iemre.DOMAINS[domain]["west"]
-        mpargs["east"] = iemre.DOMAINS[domain]["east"]
-        mpargs["south"] = iemre.DOMAINS[domain]["south"]
-        mpargs["north"] = iemre.DOMAINS[domain]["north"]
+        mpargs["west"] = gridnav.left_edge
+        mpargs["east"] = gridnav.right_edge
+        mpargs["south"] = gridnav.bottom_edge
+        mpargs["north"] = gridnav.top_edge
 
     mp = MapPlot(**mpargs)
 
     plot_units = ""
-    idx0 = iemre.daily_offset(dt)
-    ncfn = iemre.get_daily_ncname(dt.year, domain=domain)
+    idx0 = daily_offset(dt)
+    ncfn = get_daily_ncname(dt.year, domain=domain)
     if not os.path.isfile(ncfn):
         raise NoDataFound("No Data Found.")
     with ncopen(ncfn) as nc:
-        lats = nc.variables["lat"][:]
-        lons = nc.variables["lon"][:]
         cmap = get_cmap(ctx["cmap"])
         data = unit_convert(nc, varname, idx0)
         if np.ma.is_masked(data) and data.mask.all():
@@ -207,7 +207,7 @@ def plotter(fdict):
             clevs = pretty_bins(ptiles[0], ptiles[1])
 
     if ptype == "c":
-        x, y = np.meshgrid(lons, lats)
+        x, y = np.meshgrid(gridnav.x_points, gridnav.y_points)
         mp.contourf(
             x,
             y,
@@ -222,8 +222,8 @@ def plotter(fdict):
     else:
         mp.imshow(
             data,
-            iemre.DOMAINS[domain]["affine_native"],
-            "EPSG:4326",
+            gridnav.affine,
+            gridnav.crs,
             clevs=clevs,
             cmap=cmap,
             units=plot_units,

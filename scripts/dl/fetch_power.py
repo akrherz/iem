@@ -11,7 +11,8 @@ import time
 import click
 import httpx
 import numpy as np
-from pyiem import iemre
+from pyiem.grid.nav import get_nav
+from pyiem.iemre import get_grids, set_grids
 from pyiem.util import exponential_backoff, logger, ncopen
 from tqdm import tqdm
 
@@ -23,13 +24,13 @@ LOG = logger()
 @click.option("--domain", default="", type=str, help="IEMRE Domain")
 def main(year: int, domain: str):
     """Go Main Go."""
-    dom = iemre.DOMAINS[domain]
+    gridnav = get_nav("iemre", domain)
     sts = datetime.date(year, 1, 1)
     ets = min([datetime.date(year, 12, 31), datetime.date.today()])
     current = {}
     now = ets
     while now >= sts:
-        ds = iemre.get_grids(now, varnames="power_swdn", domain=domain)
+        ds = get_grids(now, varnames="power_swdn", domain=domain)
         maxval = ds["power_swdn"].values.max()
         if np.isnan(maxval) or maxval < 0:
             LOG.info("adding %s as currently empty", now)
@@ -44,8 +45,8 @@ def main(year: int, domain: str):
 
     queue = []
     # 10x10 degree chunk is the max request size...
-    for x0 in np.arange(dom["west"], dom["east"], 10.0):
-        for y0 in np.arange(dom["south"], dom["north"], 10.0):
+    for x0 in np.arange(gridnav.left, gridnav.right, 10.0):
+        for y0 in np.arange(gridnav.bottom, gridnav.top, 10.0):
             queue.append([x0, y0])  # noqa
     for x0, y0 in tqdm(queue, disable=not sys.stdout.isatty()):
         url = (
@@ -84,13 +85,13 @@ def main(year: int, domain: str):
                 # Sometimes there are missing values?
                 if np.ma.is_masked(data):
                     data[data.mask] = np.mean(data)
-                i, j = iemre.find_ij(x0, y0, domain=domain)
+                i, j = gridnav.find_ij(x0, y0)
                 # resample data is 0.5, iemre is 0.125
                 data = np.repeat(np.repeat(data, 4, axis=0), 4, axis=1)
                 data = np.where(data < 0, np.nan, data)
                 shp = np.shape(data)
-                jslice = slice(j, min([j + shp[0], dom["ny"]]))
-                islice = slice(i, min([i + shp[1], dom["nx"]]))
+                jslice = slice(j, min([j + shp[0], gridnav.ny]))
+                islice = slice(i, min([i + shp[1], gridnav.nx]))
                 # align grids
                 data = data[
                     slice(0, jslice.stop - jslice.start),
@@ -110,7 +111,7 @@ def main(year: int, domain: str):
         if not item["dirty"]:
             continue
         LOG.info("saving %s", date)
-        iemre.set_grids(date, item["data"], domain=domain)
+        set_grids(date, item["data"], domain=domain)
         subprocess.call(
             [
                 "python",

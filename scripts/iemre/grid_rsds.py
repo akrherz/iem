@@ -21,8 +21,10 @@ import pygrib
 import pyproj
 import xarray as xr
 from affine import Affine
-from pyiem import era5land, iemre
+from pyiem.grid.nav import get_nav
 from pyiem.grid.util import grid_smear
+from pyiem.iemre import DOMAINS as IEMRE_DOMAINS
+from pyiem.iemre import hourly_offset, reproject2iemre, set_grids
 from pyiem.util import archive_fetch, logger, ncopen, utc
 
 LOG = logger()
@@ -40,8 +42,8 @@ def try_era5land(ts: datetime, domain: str) -> Optional[np.ndarray]:
         (ts + timedelta(days=1)).replace(hour=0).astimezone(ZoneInfo("UTC"))
     )
     # If years are equal, we don't have to span files
-    idx0 = iemre.hourly_offset(one_am)
-    idx1 = iemre.hourly_offset(midnight) + 1
+    idx0 = hourly_offset(one_am)
+    idx1 = hourly_offset(midnight) + 1
     ncfn = f"/mesonet/data/era5{dd}/{one_am.year}_era5land_hourly.nc"
     if not Path(ncfn).is_file():
         LOG.info("Missing %s", ncfn)
@@ -63,8 +65,8 @@ def try_era5land(ts: datetime, domain: str) -> Optional[np.ndarray]:
     total = total / 24.0
 
     # The affine defines the edges of the grid
-    aff = era5land.DOMAINS[domain]["AFFINE_NC"]
-    vals = iemre.reproject2iemre(total, aff, P4326.crs, domain=domain)
+    aff = get_nav("era5land", domain).affine
+    vals = reproject2iemre(total, aff, P4326.crs, domain=domain)
 
     # ERA5Land is too tight to the coast, so we need to jitter the grid
     # 7 and 4 was found to be enough to appease DEP's needs
@@ -199,7 +201,7 @@ def do_hrrr(ts: datetime) -> Optional[np.ndarray]:
         dx, 0.0, llcrnrx - dx / 2.0, 0.0, dy, llcrnry + dy / 2.0
     )
 
-    srad = iemre.reproject2iemre(total, affine_in, LCC.crs)
+    srad = reproject2iemre(total, affine_in, LCC.crs)
     return srad
 
 
@@ -218,7 +220,7 @@ def postprocess(srad: np.ndarray, ts: datetime, domain: str) -> bool:
             )
         }
     )
-    iemre.set_grids(ts.date(), ds, domain=domain)
+    set_grids(ts.date(), ds, domain=domain)
     subprocess.call(
         [
             "python",
@@ -246,7 +248,7 @@ def main(dt: Optional[datetime], year, month):
     else:
         queue.append(dt.replace(hour=12))
     for sts_in in queue:
-        for domain, dom in iemre.DOMAINS.items():
+        for domain, dom in IEMRE_DOMAINS.items():
             sts = sts_in.replace(tzinfo=dom["tzinfo"])
             srad = try_era5land(sts, domain)
             if srad is not None and postprocess(srad, sts, domain):

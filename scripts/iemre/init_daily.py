@@ -6,7 +6,8 @@ from datetime import datetime
 
 import click
 import numpy as np
-from pyiem import iemre
+from pyiem.grid.nav import get_nav
+from pyiem.iemre import get_daily_ncname
 from pyiem.util import logger, ncopen
 
 LOG = logger()
@@ -16,8 +17,8 @@ def init_year(ts, domain, ci: bool):
     """
     Create a new NetCDF file for a year of our specification!
     """
-
-    fn = iemre.get_daily_ncname(ts.year, domain)
+    gridnav = get_nav("iemre", domain)
+    fn = get_daily_ncname(ts.year, domain)
     os.makedirs(os.path.dirname(fn), exist_ok=True)
     if os.path.isfile(fn):
         LOG.info("cowardly refusing to overwrite: %s", fn)
@@ -25,7 +26,7 @@ def init_year(ts, domain, ci: bool):
     nc = ncopen(fn, "w")
     nc.title = f"IEM Daily Reanalysis {ts.year}"
     nc.platform = "Grided Observations"
-    nc.description = f"IEM daily analysis on a {iemre.DX} degree grid"
+    nc.description = f"IEM daily analysis on a {gridnav.dx} degree grid"
     nc.institution = "Iowa State University, Ames, IA, USA"
     nc.source = "Iowa Environmental Mesonet"
     nc.project_id = "IEM"
@@ -36,8 +37,8 @@ def init_year(ts, domain, ci: bool):
     nc.comment = "No Comment at this time"
 
     # Setup Dimensions
-    nc.createDimension("lat", iemre.DOMAINS[domain]["ny"])
-    nc.createDimension("lon", iemre.DOMAINS[domain]["nx"])
+    nc.createDimension("lat", gridnav.ny)
+    nc.createDimension("lon", gridnav.nx)
     nc.createDimension("nv", 2)
     days = 2 if ci else ((ts.replace(year=ts.year + 1)) - ts).days
     nc.createDimension("time", int(days))
@@ -50,14 +51,10 @@ def init_year(ts, domain, ci: bool):
     lat.axis = "Y"
     lat.bounds = "lat_bnds"
     # These are the grid centers
-    lat[:] = np.arange(
-        iemre.DOMAINS[domain]["south"],
-        iemre.DOMAINS[domain]["north"] + 0.001,
-        iemre.DY,
-    )
+    lat[:] = gridnav.y_points
     lat_bnds = nc.createVariable("lat_bnds", float, ("lat", "nv"))
-    lat_bnds[:, 0] = lat[:] - iemre.DY / 2.0
-    lat_bnds[:, 1] = lat[:] + iemre.DY / 2.0
+    lat_bnds[:, 0] = gridnav.y_edges[:-1]
+    lat_bnds[:, 1] = gridnav.y_edges[1:]
 
     lon = nc.createVariable("lon", float, ("lon",))
     lon.units = "degrees_east"
@@ -66,15 +63,11 @@ def init_year(ts, domain, ci: bool):
     lon.axis = "X"
     lon.bounds = "lon_bnds"
     # These are the grid centers
-    lon[:] = np.arange(
-        iemre.DOMAINS[domain]["west"],
-        iemre.DOMAINS[domain]["east"] + 0.001,
-        iemre.DX,
-    )
+    lon[:] = gridnav.x_points
 
     lon_bnds = nc.createVariable("lon_bnds", float, ("lon", "nv"))
-    lon_bnds[:, 0] = lon[:] - iemre.DX / 2.0
-    lon_bnds[:, 1] = lon[:] + iemre.DX / 2.0
+    lon_bnds[:, 0] = gridnav.x_edges[:-1]
+    lon_bnds[:, 1] = gridnav.x_edges[1:]
 
     tm = nc.createVariable("time", float, ("time",))
     tm.units = f"Days since {ts.year}-01-01 00:00:0.0"
@@ -257,7 +250,7 @@ def main(year: int, domain: str, ci: bool):
     """Go Main Go"""
     init_year(datetime(year, 1, 1), domain, ci)
     if ci:
-        with ncopen(iemre.get_daily_ncname(year, domain), "a") as nc:
+        with ncopen(get_daily_ncname(year, domain), "a") as nc:
             nc.variables["p01d"][:] = 0
             nc.variables["p01d_12z"][:] = 0
 

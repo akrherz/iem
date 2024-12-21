@@ -3,6 +3,7 @@ require_once "../../config/settings.inc.php";
 require_once "../../include/myview.php";
 $t = new MyView();
 $t->title = "Reanalysis Data";
+$t->iem_resource = "IEMRE";
 
 $s4link = sprintf("/archive/data/%s/stage4/", date("Y/m/d"));
 

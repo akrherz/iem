@@ -5,7 +5,7 @@ from datetime import datetime
 
 import click
 import numpy as np
-from pyiem import era5land
+from pyiem.grid.nav import get_nav
 from pyiem.util import logger, ncopen
 
 LOG = logger()
@@ -15,7 +15,7 @@ def init_year(ts: datetime, domain: str):
     """
     Create a new NetCDF file for a year of our specification!
     """
-    dom = era5land.DOMAINS[domain]
+    gridnav = get_nav("era5land", domain)
     dd = "" if domain == "" else f"_{domain}"
     ncfn = f"/mesonet/data/era5{dd}/{ts.year}_era5land_hourly.nc"
     if os.path.isfile(ncfn):
@@ -34,8 +34,8 @@ def init_year(ts: datetime, domain: str):
     nc.history = f"{datetime.now():%d %B %Y} Generated"
     nc.comment = "No Comment at this time"
 
-    nc.createDimension("lat", dom["NY"])
-    nc.createDimension("lon", dom["NX"])
+    nc.createDimension("lat", gridnav.ny)
+    nc.createDimension("lon", gridnav.nx)
     nc.createDimension("nv", 2)
     ts2 = datetime(ts.year + 1, 1, 1)
     days = (ts2 - ts).days
@@ -55,11 +55,11 @@ def init_year(ts: datetime, domain: str):
     lat.standard_name = "latitude"
     lat.axis = "Y"
     lat.bounds = "lat_bnds"
-    lat[:] = dom["YAXIS"]
+    lat[:] = gridnav.y_points
 
     lat_bnds = nc.createVariable("lat_bnds", float, ("lat", "nv"))
-    lat_bnds[:, 0] = dom["YAXIS"] - 0.05
-    lat_bnds[:, 1] = dom["YAXIS"] + 0.05
+    lat_bnds[:, 0] = gridnav.y_edges[:-1]
+    lat_bnds[:, 1] = gridnav.y_edges[1:]
 
     lon = nc.createVariable("lon", float, ("lon",))
     lon.units = "degrees_east"
@@ -67,11 +67,11 @@ def init_year(ts: datetime, domain: str):
     lon.standard_name = "longitude"
     lon.axis = "X"
     lon.bounds = "lon_bnds"
-    lon[:] = dom["XAXIS"]
+    lon[:] = gridnav.x_points
 
     lon_bnds = nc.createVariable("lon_bnds", float, ("lon", "nv"))
-    lon_bnds[:, 0] = dom["XAXIS"] - 0.05
-    lon_bnds[:, 1] = dom["XAXIS"] + 0.05
+    lon_bnds[:, 0] = gridnav.x_edges[:-1]
+    lon_bnds[:, 1] = gridnav.x_edges[1:]
 
     tm = nc.createVariable("time", float, ("time",))
     tm.units = f"Hours since {ts.year}-01-01 00:00:0.0"

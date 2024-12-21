@@ -12,7 +12,9 @@ import click
 import numpy as np
 import pygrib
 from affine import Affine
-from pyiem import iemre
+from pyiem.grid.nav import get_nav
+from pyiem.iemre import DOMAINS as IEMRE_DOMAINS
+from pyiem.iemre import reproject2iemre
 from pyiem.reference import EPSG, ISO8601
 from pyiem.util import logger, ncopen, utc
 
@@ -25,6 +27,7 @@ def create(ts: datetime, domain: str, dom: dict) -> str:
     Create a new NetCDF file for a year of our specification!
     """
     dd = "" if domain == "" else f"_{domain}"
+    gridnav = get_nav("iemre", domain)
     fn = f"/mesonet/data/iemre{dd}/gfs_current{dd}_new.nc"
     with ncopen(fn, "w") as nc:
         nc.title = (
@@ -49,11 +52,11 @@ def create(ts: datetime, domain: str, dom: dict) -> str:
         lat.standard_name = "latitude"
         lat.bounds = "lat_bnds"
         lat.axis = "Y"
-        lat[:] = np.arange(dom["south"], dom["north"] + 0.001, iemre.DY)
+        lat[:] = gridnav.y_points
 
         lat_bnds = nc.createVariable("lat_bnds", float, ("lat", "nv"))
-        lat_bnds[:, 0] = lat[:] - iemre.DY / 2.0
-        lat_bnds[:, 1] = lat[:] + iemre.DY / 2.0
+        lat_bnds[:, 0] = gridnav.y_edges[:-1]
+        lat_bnds[:, 1] = gridnav.y_edges[1:]
 
         lon = nc.createVariable("lon", float, ("lon"))
         lon.units = "degrees_east"
@@ -61,11 +64,11 @@ def create(ts: datetime, domain: str, dom: dict) -> str:
         lon.standard_name = "longitude"
         lon.bounds = "lon_bnds"
         lon.axis = "X"
-        lon[:] = np.arange(dom["west"], dom["east"] + 0.001, iemre.DX)
+        lon[:] = gridnav.x_points
 
         lon_bnds = nc.createVariable("lon_bnds", float, ("lon", "nv"))
-        lon_bnds[:, 0] = lon[:] - iemre.DX / 2.0
-        lon_bnds[:, 1] = lon[:] + iemre.DX / 2.0
+        lon_bnds[:, 0] = gridnav.x_edges[:-1]
+        lon_bnds[:, 1] = gridnav.x_edges[1:]
 
         tm = nc.createVariable("time", float, ("time",))
         tm.units = f"Days since {ts:%Y-%m-%d} 00:00:0.0"
@@ -211,20 +214,20 @@ def merge_grib(nc, now, domain: str, dom: dict):
             )
             days = (approxlocal.date() - now.date()).days
             if hits == 4:
-                nc.variables["high_tmpk"][days] = iemre.reproject2iemre(
+                nc.variables["high_tmpk"][days] = reproject2iemre(
                     tmaxgrid, affine, EPSG[4326], domain=domain
                 )
-                nc.variables["low_tmpk"][days] = iemre.reproject2iemre(
+                nc.variables["low_tmpk"][days] = reproject2iemre(
                     tmingrid, affine, EPSG[4326], domain=domain
                 )
-                nc.variables["p01d"][days] = iemre.reproject2iemre(
+                nc.variables["p01d"][days] = reproject2iemre(
                     pgrid, affine, EPSG[4326], domain=domain
                 )
                 pout = nc.variables["p01d"][days]
-                nc.variables["tsoil"][days] = iemre.reproject2iemre(
+                nc.variables["tsoil"][days] = reproject2iemre(
                     tsoilgrid / 4.0, affine, EPSG[4326], domain=domain
                 )
-                nc.variables["srad"][days] = iemre.reproject2iemre(
+                nc.variables["srad"][days] = reproject2iemre(
                     srad, affine, EPSG[4326], domain=domain
                 )
                 sout = nc.variables["srad"][days]
@@ -255,7 +258,7 @@ def main(valid):
     # Run every hour, filter those we don't run
     if valid.hour % 6 != 0:
         return
-    for domain, dom in iemre.DOMAINS.items():
+    for domain, dom in IEMRE_DOMAINS.items():
         ncfn = create(valid, domain, dom)
         with ncopen(ncfn, "a") as nc:
             merge_grib(nc, valid, domain, dom)

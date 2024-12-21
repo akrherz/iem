@@ -21,11 +21,12 @@ import numpy as np
 import pandas as pd
 
 # third party
-from affine import Affine
 from geopandas import read_postgis
-from pyiem import iemre, mrms
+from pyiem.database import get_sqlalchemy_conn
+from pyiem.grid import nav
 from pyiem.grid.zs import CachingZonalStats
-from pyiem.util import convert_value, get_sqlalchemy_conn, logger, ncopen
+from pyiem.iemre import daily_offset, get_daily_mrms_ncname, get_daily_ncname
+from pyiem.util import convert_value, logger, ncopen
 from tqdm import tqdm
 
 LOG = logger()
@@ -66,14 +67,8 @@ def workflow(page, huc12s):
     ets = date.today() - timedelta(days=1)
     LOG.info("Running for time domain %s to %s", now, ets)
     # This is N to S
-    mrms_czs = CachingZonalStats(mrms.AFFINE)
-    dom = iemre.DOMAINS[""]
-    iemreaffine = Affine(
-        iemre.DX, 0.0, dom["west"], 0.0, 0 - iemre.DY, dom["north"]
-    )
-    iemre_czs = CachingZonalStats(
-        iemreaffine,
-    )
+    mrms_czs = CachingZonalStats(nav.MRMS_IEMRE.affine_image)
+    iemre_czs = CachingZonalStats(nav.IEMRE.affine_image)
 
     mrms_nchandles = {}
     iemre_nchandles = {}
@@ -88,16 +83,16 @@ def workflow(page, huc12s):
     ):
         for now in progress:
             progress.set_description(f"{now:%Y%m%d}")
-            offset = iemre.daily_offset(now)
+            offset = daily_offset(now)
             # get mrms netcdf handle
             if now.year not in mrms_nchandles:
                 mrms_nchandles[now.year] = ncopen(
-                    iemre.get_daily_mrms_ncname(now.year), "r"
+                    get_daily_mrms_ncname(now.year), "r"
                 )
             # get iemre netcdf handle
             if now.year not in iemre_nchandles:
                 iemre_nchandles[now.year] = ncopen(
-                    iemre.get_daily_ncname(now.year), "r"
+                    get_daily_ncname(now.year), "r"
                 )
             # mrms precip
             precip = np.flipud(mrms_nchandles[now.year]["p01d"][offset])

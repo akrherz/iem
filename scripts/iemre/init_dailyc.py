@@ -3,11 +3,9 @@
 import os
 from datetime import datetime
 
-import geopandas as gpd
 import numpy as np
-from pyiem import iemre
-from pyiem.database import get_dbconn
-from pyiem.grid.zs import CachingZonalStats
+from pyiem.grid.nav import get_nav
+from pyiem.iemre import get_dailyc_ncname
 from pyiem.util import logger, ncopen
 
 LOG = logger()
@@ -17,7 +15,8 @@ def init_year(ts):
     """
     Create a new NetCDF file for a year of our specification!
     """
-    fn = iemre.get_dailyc_ncname()
+    gridnav = get_nav("iemre", "")
+    fn = get_dailyc_ncname()
     if os.path.isfile(fn):
         LOG.warning("Cowardly refusing to create file: %s", fn)
         return
@@ -35,8 +34,8 @@ def init_year(ts):
     nc.comment = "No Comment at this time"
 
     # Setup Dimensions
-    nc.createDimension("lat", iemre.NY)
-    nc.createDimension("lon", iemre.NX)
+    nc.createDimension("lat", gridnav.ny)
+    nc.createDimension("lon", gridnav.nx)
     nc.createDimension("nv", 2)
     ts2 = datetime(ts.year + 1, 1, 1)
     days = (ts2 - ts).days
@@ -50,14 +49,10 @@ def init_year(ts):
     lat.axis = "Y"
     lat.bounds = "lat_bnds"
     # These are the grid centers
-    lat[:] = np.arange(
-        iemre.DOMAINS[""]["south"],
-        iemre.DOMAINS[""]["north"] + 0.001,
-        iemre.DY,
-    )
+    lat[:] = gridnav.y_points
     lat_bnds = nc.createVariable("lat_bnds", float, ("lat", "nv"))
-    lat_bnds[:, 0] = lat[:] - iemre.DY / 2.0
-    lat_bnds[:, 1] = lat[:] + iemre.DY / 2.0
+    lat_bnds[:, 0] = gridnav.y_edges[:-1]
+    lat_bnds[:, 1] = gridnav.y_edges[1:]
 
     lon = nc.createVariable("lon", float, ("lon",))
     lon.units = "degrees_east"
@@ -66,15 +61,11 @@ def init_year(ts):
     lon.axis = "X"
     lon.bounds = "lon_bnds"
     # These are the grid centers
-    lon[:] = np.arange(
-        iemre.DOMAINS[""]["west"],
-        iemre.DOMAINS[""]["east"] + 0.001,
-        iemre.DX,
-    )
+    lon[:] = gridnav.x_points
 
     lon_bnds = nc.createVariable("lon_bnds", float, ("lon", "nv"))
-    lon_bnds[:, 0] = lon[:] - iemre.DX / 2.0
-    lon_bnds[:, 1] = lon[:] + iemre.DX / 2.0
+    lon_bnds[:, 0] = gridnav.x_edges[:-1]
+    lon_bnds[:, 1] = gridnav.x_edges[1:]
 
     tm = nc.createVariable("time", float, ("time",))
     tm.units = "Days since %s-01-01 00:00:0.0" % (ts.year,)
@@ -119,34 +110,9 @@ def init_year(ts):
     nc.close()
 
 
-def compute_hasdata(nc):
-    """Compute the has_data grid"""
-    czs = CachingZonalStats(iemre.AFFINE)
-    pgconn = get_dbconn("postgis")
-    states = gpd.GeoDataFrame.from_postgis(
-        "SELECT the_geom, state_abbr from states",
-        pgconn,
-        index_col="state_abbr",
-        geom_col="the_geom",
-    )
-    data = np.flipud(nc.variables["hasdata"][:, :])
-    czs.gen_stats(data, states["the_geom"])
-    for nav in czs.gridnav:
-        if nav is None:
-            continue
-        grid = np.ones((nav.ysz, nav.xsz))
-        grid[nav.mask] = 0.0
-        yslice = slice(nav.y0, nav.y0 + nav.ysz)
-        xslice = slice(nav.x0, nav.x0 + nav.xsz)
-        data[yslice, xslice] = np.where(grid > 0, 1, data[yslice, xslice])
-    nc.variables["hasdata"][:, :] = np.flipud(data)
-
-
 def main():
     """Go Main"""
     init_year(datetime(2000, 1, 1))
-    with ncopen(iemre.get_dailyc_ncname(domain=""), "a", timeout=300) as nc:
-        compute_hasdata(nc)
 
 
 if __name__ == "__main__":

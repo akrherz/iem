@@ -11,7 +11,7 @@ import geopandas as gpd
 import numpy as np
 import pandas as pd
 from pyiem.database import get_dbconn, get_sqlalchemy_conn
-from pyiem.era5land import DOMAINS, find_ij
+from pyiem.grid import nav
 from pyiem.grid.zs import CachingZonalStats
 from pyiem.iemre import hourly_offset
 from pyiem.util import convert_value, logger, ncopen, utc
@@ -31,8 +31,8 @@ def compute_regions(data, varname, df):
             index_col="id",
             geom_col="geom",
         )
-    czs = CachingZonalStats(DOMAINS[""]["AFFINE_NC"])
-    data = czs.gen_stats(data, gdf["geom"])
+    czs = CachingZonalStats(nav.ERA5LAND.affine_image)
+    data = czs.gen_stats(np.flipud(data), gdf["geom"])
     for i, sid in enumerate(gdf.index.values):
         df.at[sid, varname] = data[i]
 
@@ -105,7 +105,7 @@ def compute(df, sids, dt, do_regions=False):
     soilt = soilt.filled(np.nan)
 
     for sid, row in df.loc[sids].iterrows():
-        i, j = find_ij(row["lon"], row["lat"])
+        i, j = nav.ERA5LAND.find_ij(row["lon"], row["lat"])
         df.at[sid, "era5land_srad"] = rsds[j, i]
         df.at[sid, "era5land_soilt4_avg"] = soilt[j, i]
         df.at[sid, "era5land_soilm4_avg"] = soilm[j, i]
