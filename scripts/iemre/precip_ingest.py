@@ -13,7 +13,7 @@ import numpy as np
 import pygrib
 from pyiem.grid import nav
 from pyiem.iemre import get_hourly_ncname, hourly_offset, reproject2iemre
-from pyiem.stage4 import STAGE4_ARCHIVE_FLIP
+from pyiem.stage4 import ARCHIVE_FLIP
 from pyiem.util import archive_fetch, logger, ncopen
 
 # silence warning when we squeeze data into netcdf
@@ -84,7 +84,7 @@ def copy_to_iemre(valid):
     # Reproject to IEMRE
     aff = (
         nav.STAGE4.affine
-        if valid >= STAGE4_ARCHIVE_FLIP
+        if valid >= ARCHIVE_FLIP
         else nav.STAGE4_PRE2002.affine
     )
     res = reproject2iemre(val, aff, nav.STAGE4.crs, domain="")

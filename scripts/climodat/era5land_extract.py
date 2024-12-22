@@ -106,6 +106,8 @@ def compute(df, sids, dt, do_regions=False):
 
     for sid, row in df.loc[sids].iterrows():
         i, j = nav.ERA5LAND.find_ij(row["lon"], row["lat"])
+        if i is None:
+            continue
         df.at[sid, "era5land_srad"] = rsds[j, i]
         df.at[sid, "era5land_soilt4_avg"] = soilt[j, i]
         df.at[sid, "era5land_soilm4_avg"] = soilm[j, i]
