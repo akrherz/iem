@@ -11,8 +11,8 @@
 # cellsize [dec deg]: 0.004167
 # no data value: -99.0
 
-http://s-iihr57.iihr.uiowa.edu/feeds/IFC7ADV/latest.dat
-http://s-iihr57.iihr.uiowa.edu/feeds/IFC7ADV/H99999999_I0007_G_15MAR2013_154500.out
+http://s-iihr77.iihr.uiowa.edu/feeds/IFC7ADV/latest.dat
+http://s-iihr77.iihr.uiowa.edu/feeds/IFC7ADV/H99999999_I0007_G_15MAR2013_154500.out
 """
 
 import datetime
@@ -27,7 +27,7 @@ from PIL import Image, PngImagePlugin
 from pyiem.util import exponential_backoff, logger
 
 LOG = logger()
-BASEURL = "http://s-iihr77.iihr.uiowa.edu//Products/IFC7ADV"
+BASEURL = "http://s-iihr77.iihr.uiowa.edu/Products/IFC7ADV"
 
 
 def get_file(tmpdir, now, routes):
@@ -84,8 +84,8 @@ def to_raster(tmpfn, now):
             "0.00\n"
             "0.00\n"
             "-0.004167\n"
-            "44.53785\n"
-            "-89.89942"
+            "-97.154167\n"
+            "44.53785"
         )
 
 

@@ -52,6 +52,10 @@ def init_year(ts):
     # Grid centers
     lat[:] = 40.133331 + np.arange(1057) * 0.004167
 
+    lat_bnds = nc.createVariable("lat_bnds", float, ("lat", "nv"))
+    lat_bnds[:, 0] = lat[:] - 0.0020835
+    lat_bnds[:, 1] = lat[:] + 0.0020835
+
     lon = nc.createVariable("lon", float, ("lon",))
     lon.units = "degrees_east"
     lon.long_name = "Longitude"
@@ -59,6 +63,10 @@ def init_year(ts):
     lon.bounds = "lon_bnds"
     lon.axis = "X"
     lon[:] = -97.154167 + np.arange(1741) * 0.004167
+
+    lon_bnds = nc.createVariable("lon_bnds", float, ("lon", "nv"))
+    lon_bnds[:, 0] = lon[:] - 0.0020835
+    lon_bnds[:, 1] = lon[:] + 0.0020835
 
     tm = nc.createVariable("time", float, ("time",))
     tm.units = "Days since %s-01-01 00:00:0.0" % (ts.year,)
