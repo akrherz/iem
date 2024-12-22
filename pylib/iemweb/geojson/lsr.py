@@ -7,6 +7,8 @@ This service does a number of different things with Local Storm Reports.
 Changelog
 ---------
 
+- 2024-12-22: Added `hours` parameter to allow for a set time window prior
+  to the `ets` parameter, which defaults to now.
 - 2024-10-24: Added crude spatial bounds based parameters of ``east``,
   ``west``, ``north``, and ``south``.
 - 2024-09-23: Added `qualifier` to output attributes, this represents the
@@ -16,6 +18,10 @@ Changelog
 
 Example Requests
 ----------------
+
+Provide all Local Storm Reports valid within the past 72 hours for Illinois.
+
+https://mesonet.agron.iastate.edu/geojson/lsr.geojson?states=IL&hours=72
 
 Provide all Local Storm Reports for Wisconsin on 13 July 2024. Note that a
 UTC date period is specified that equates to the US Central date.
@@ -42,12 +48,13 @@ sts=2024-01-01T00:00Z&ets=2024-12-31T23:59Z
 
 """
 
-from datetime import datetime, timezone
+from datetime import datetime, timedelta, timezone
 
 import geopandas as gpd
 from pydantic import Field, field_validator, model_validator
 from pyiem.database import get_sqlalchemy_conn
 from pyiem.nws.vtec import get_ps_string
+from pyiem.util import utc
 from pyiem.webutil import CGIModel, ListOrCSVType, iemapp
 from sqlalchemy import text
 
@@ -82,11 +89,18 @@ class Schema(CGIModel):
     )
     ets: datetime = Field(
         default=None,
-        description="Legacy and poorly constructed parameter YYYYmmddHHMI.",
+        description="End timestamp.",
     )
     sts: datetime = Field(
         default=None,
-        description="Legacy and poorly constructed parameter YYYYmmddHHMI.",
+        description="Start Timestamp.",
+    )
+    hours: int = Field(
+        default=None,
+        description=(
+            "If provided, number of hours prior to `ets` "
+            "(default now) to provide LSRs for."
+        ),
     )
     wfo: str = Field(
         default=None,
@@ -295,6 +309,10 @@ def application(environ, start_response):
     # Quirk unhandled properly yet
     environ["wfos"] = list(filter(lambda x: len(x) == 3, environ["wfos"]))
     environ["states"] = list(filter(lambda x: len(x) == 2, environ["states"]))
+    if environ["hours"] is not None:
+        if environ["ets"] is None:
+            environ["ets"] = utc()
+        environ["sts"] = environ["ets"] - timedelta(hours=environ["hours"])
     # Go Main Go
     headers = [("Content-type", "application/vnd.geo+json")]
     if environ["phenomena"] is not None:
