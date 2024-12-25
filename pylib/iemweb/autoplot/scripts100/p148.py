@@ -7,10 +7,11 @@ prior to the holiday's inception.
 """
 
 import calendar
-import datetime
+from datetime import date, datetime, timedelta
 
 import pandas as pd
 from dateutil.easter import easter as get_easter
+from matplotlib.ticker import MaxNLocator
 from pyiem.database import get_sqlalchemy_conn
 from pyiem.exceptions import NoDataFound
 from pyiem.plot import figure_axes
@@ -33,6 +34,7 @@ PDICT2 = {
     "low": "Low Temperature [F]",
     "precip": "Precipitation [inch]",
     "snow": "Snowfall [inch]",
+    "snowd": "Snow Depth [inch]",
 }
 
 
@@ -75,16 +77,16 @@ def get_description():
 def mlk():
     """MLK Day"""
     days = []
-    for year in range(1986, datetime.date.today().year + 1):
-        jan1 = datetime.date(year, 1, 1)
+    for year in range(1986, date.today().year + 1):
+        jan1 = date(year, 1, 1)
         if jan1.weekday() == 0:  # If Jan 1 is a Monday
             first_monday = jan1
         else:
             # Calculate the number of days until the next Monday
             days_until_monday = 7 - jan1.weekday()
-            first_monday = jan1 + datetime.timedelta(days=days_until_monday)
+            first_monday = jan1 + timedelta(days=days_until_monday)
         # Add 14 days to the first Monday to get the third Monday
-        third_monday = first_monday + datetime.timedelta(days=14)
+        third_monday = first_monday + timedelta(days=14)
         days.append(third_monday)
     return days
 
@@ -92,18 +94,15 @@ def mlk():
 def mothers_day():
     """Mother's Day"""
     days = []
-    for year in range(1914, datetime.date.today().year + 1):
-        may1 = datetime.date(year, 5, 1)
-        days.append(datetime.date(year, 5, (14 - may1.weekday())))
+    for year in range(1914, date.today().year + 1):
+        may1 = date(year, 5, 1)
+        days.append(date(year, 5, (14 - may1.weekday())))
     return days
 
 
 def easter():
     """Compute easter"""
-    return [
-        get_easter(year)
-        for year in range(1893, datetime.date.today().year + 1)
-    ]
+    return [get_easter(year) for year in range(1893, date.today().year + 1)]
 
 
 def thanksgiving():
@@ -111,17 +110,17 @@ def thanksgiving():
     days = []
     # monday is 0
     offsets = [3, 2, 1, 0, 6, 5, 4]
-    for year in range(1893, datetime.date.today().year + 1):
-        nov1 = datetime.datetime(year, 11, 1)
-        r1 = nov1 + datetime.timedelta(days=offsets[nov1.weekday()])
-        days.append(r1 + datetime.timedelta(days=21))
+    for year in range(1893, date.today().year + 1):
+        nov1 = datetime(year, 11, 1)
+        r1 = nov1 + timedelta(days=offsets[nov1.weekday()])
+        days.append(r1 + timedelta(days=21))
     return days
 
 
 def labor_days():
     """Labor Day Please"""
     days = []
-    for year in range(1893, datetime.date.today().year + 1):
+    for year in range(1893, date.today().year + 1):
         mycal = calendar.Calendar(0)
         cal = mycal.monthdatescalendar(year, 9)
         if cal[0][0].month == 9:
@@ -134,7 +133,7 @@ def labor_days():
 def memorial_days():
     """Memorial Day Please"""
     days = []
-    for year in range(1971, datetime.date.today().year + 1):
+    for year in range(1971, date.today().year + 1):
         mycal = calendar.Calendar(0)
         cal = mycal.monthdatescalendar(year, 5)
         if cal[-1][0].month == 5:
@@ -149,50 +148,49 @@ def add_context(ctx):
     station = ctx["station"]
     ctx["varname"] = ctx["var"]
     thedate = ctx["thedate"]
-    date = ctx["date"]
+    dt = ctx["date"]
     offset = ctx.get("offset")
     dtoff = None
     if offset is not None and -367 < offset < 367:
-        dtoff = datetime.timedelta(days=offset)
+        dtoff = timedelta(days=offset)
         thedate = thedate + dtoff
 
-    if date == "exact":
+    if dt == "exact":
         with get_sqlalchemy_conn("coop") as conn:
             ctx["df"] = pd.read_sql(
-                "SELECT year, high, low, day, precip, snow from alldata "
-                "WHERE station = %s and sday = %s ORDER by year ASC",
+                "SELECT year, high, low, day, precip, snow, snowd from "
+                "alldata WHERE station = %s and sday = %s ORDER by year ASC",
                 conn,
                 params=(station, thedate.strftime("%m%d")),
                 index_col="year",
             )
         ctx["subtitle"] = thedate.strftime("%B %-d")
     else:
-        if date == "memorial":
+        if dt == "memorial":
             days = memorial_days()
-        elif date == "thanksgiving":
+        elif dt == "thanksgiving":
             days = thanksgiving()
-        elif date == "easter":
+        elif dt == "easter":
             days = easter()
-        elif date == "mother":
+        elif dt == "mother":
             days = mothers_day()
-        elif date == "mlk":
+        elif dt == "mlk":
             days = mlk()
         else:
             days = labor_days()
-        ctx["subtitle"] = PDICT[date]
+        ctx["subtitle"] = PDICT[dt]
         if dtoff:
             ctx["subtitle"] = (
                 f"{abs(offset)} Days {'before' if offset < 0 else 'after'} "
-                f"{PDICT[date]}"
+                f"{PDICT[dt]}"
             )
             days = [day + dtoff for day in days]
         with get_sqlalchemy_conn("coop") as conn:
             ctx["df"] = pd.read_sql(
-                text(
-                    "SELECT year, high, day, low, precip, snow from alldata "
-                    "WHERE station = :station and day = ANY(:days) "
-                    "ORDER by year ASC"
-                ),
+                text("""
+    SELECT year, high, day, low, precip, snow, snowd from alldata
+    WHERE station = :station and day = ANY(:days) ORDER by year ASC
+                """),
                 conn,
                 params={
                     "station": station,
@@ -273,7 +271,9 @@ def plotter(fdict):
     ctx = get_autoplot_context(fdict, get_description())
     add_context(ctx)
 
-    (fig, ax) = figure_axes(apctx=ctx)
+    (fig, ax) = figure_axes(
+        title=ctx["title"], subtitle=f"on {ctx['subtitle']}", apctx=ctx
+    )
 
     ax.bar(
         ctx["df"].index.values,
@@ -284,7 +284,6 @@ def plotter(fdict):
     )
     mean = ctx["df"][ctx["varname"]].mean()
     ax.axhline(mean)
-    ax.set_title(f"{ctx['title']}\non {ctx['subtitle']}")
     ax.text(
         ctx["df"].index.values[-1] + 1,
         mean,
@@ -297,9 +296,28 @@ def plotter(fdict):
         ctx["df"].index.values.min() - 1, ctx["df"].index.values.max() + 1
     )
     ax.set_ylabel(PDICT2[ctx["varname"]])
-    if ctx["varname"] not in ["precip", "snow"]:
+    if ctx["varname"] not in ["precip", "snow", "snowd"]:
         ax.set_ylim(
             ctx["df"][ctx["varname"]].min() - 5,
             ctx["df"][ctx["varname"]].max() + 5,
+        )
+    if ctx["varname"] == "snowd":
+        ax.yaxis.set_major_locator(MaxNLocator(integer=True))
+        nonnull = ctx["df"][ctx["df"][ctx["varname"]].notnull()]
+        if nonnull.empty:
+            raise NoDataFound("No Snowdepth data for location.")
+        oneinch = len(nonnull[nonnull["snowd"] > 1])
+        percent = oneinch / len(nonnull) * 100.0
+        ax.text(
+            0.03,
+            0.98,
+            (
+                f"{oneinch}/{len(nonnull)} ({percent:.1f}%) years "
+                "with snow depth >= 1 inch"
+            ),
+            transform=ax.transAxes,
+            va="top",
+            ha="left",
+            bbox=dict(facecolor="white", edgecolor="white"),
         )
     return fig, ctx["df"]
