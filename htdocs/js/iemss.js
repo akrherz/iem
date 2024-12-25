@@ -52,7 +52,7 @@ var htmlInterface = ['<div class="panel panel-default">',
     '</div><!-- End of panel-body -->',
     '</div><!-- End of panel -->'];
 
-var map, selectedFeature, selectControl, geojson, geojsonSource, network;
+var map, selectedFeature, geojson, geojsonSource, network;
 
 //http://www.lessanvaezi.com/filter-select-list-options/
 jQuery.fn.filterByText = function (textbox, selectSingleMatch) {
@@ -146,26 +146,26 @@ $().ready(() => {
     $('#stations_add').click(function () {
         return !$('#stations_in option:selected').remove().appendTo('#stations_out');
     });
-    $('#stations_addall').click(function () {
+    $('#stations_addall').click(() => {
         var ret = !$('#stations_in option').remove().appendTo('#stations_out');
         $('#stations_out option').prop('selected', true);
         return ret;
     });
-    $('#stations_delall').click(function () {
+    $('#stations_delall').click(() => {
         return !$('#stations_out option').remove().appendTo('#stations_in');
     });
     $('#stations_del').click(function () {
         $('#stations_out option:selected').remove().appendTo('#stations_in');
-        $('#stations_out option').each(function (i) {
+        $('#stations_out option').each(function () { // this
             $(this).attr("selected", "selected");
         });
         return false;
     });
 
-    $('#iemss-sortbyid').click(function () {
+    $('#iemss-sortbyid').click(() => {
         sortListing("id");
     });
-    $('#iemss-sortbyname').click(function () {
+    $('#iemss-sortbyname').click(() => {
         sortListing("name");
     });
 
@@ -200,7 +200,7 @@ $().ready(() => {
         })
     });
 
-    geojsonSource.on('change', function (e) {
+    geojsonSource.on('change', () => {
         if (geojsonSource.getState() == 'ready') {
             $.each(geojsonSource.getFeatures(), (_index, feat) => {
                 var lbl = `[${feat.get('sid')}] ${feat.get('sname')}`;

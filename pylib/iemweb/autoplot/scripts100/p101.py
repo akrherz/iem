@@ -7,7 +7,7 @@ count as two events in this summary. The values plotted are relative to the
 most frequent product.
 """
 
-import datetime
+from datetime import date
 
 import numpy as np
 import pandas as pd
@@ -41,7 +41,7 @@ def get_description():
         dict(
             type="year",
             name="eyear",
-            default=datetime.date.today().year,
+            default=date.today().year,
             label="End Year (inclusive):",
             min=2009,
         ),
@@ -56,8 +56,8 @@ def plotter(fdict):
     syear = ctx["syear"]
     eyear = ctx["eyear"] + 1
     station = ctx["station"][:4]
-    sts = datetime.date(syear, 1, 1)
-    ets = datetime.date(eyear, 1, 1)
+    sts = date(syear, 1, 1)
+    ets = date(eyear, 1, 1)
     params = {
         "sts": sts,
         "ets": ets,

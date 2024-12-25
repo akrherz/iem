@@ -11,9 +11,10 @@ import calendar
 
 import pandas as pd
 import seaborn as sns
+from pyiem.database import get_sqlalchemy_conn
 from pyiem.exceptions import NoDataFound
 from pyiem.plot import figure
-from pyiem.util import get_autoplot_context, get_sqlalchemy_conn
+from pyiem.util import get_autoplot_context, utc
 
 from iemweb.autoplot import ARG_STATION
 
@@ -33,7 +34,7 @@ def get_description():
         dict(
             type="year",
             name="year",
-            default="2014",
+            default=utc().year,
             label="Select Year to Highlight:",
         ),
     ]
@@ -70,8 +71,8 @@ def plotter(fdict):
         f"{calendar.month_name[month]} Snowfall vs Precipitation Totals"
     )
     figure(title=title, apctx=ctx, fig=g.figure)
-    g.fig.tight_layout()
-    g.fig.subplots_adjust(top=0.91)
+    g.figure.tight_layout()
+    g.figure.subplots_adjust(top=0.91)
     if year in df.index:
         row = df.loc[year]
         g.ax_joint.scatter(
@@ -112,4 +113,4 @@ def plotter(fdict):
     g.ax_joint.set_ylabel("Snowfall Total [inch]")
     g.ax_joint.set_xlabel("Precipitation Total (liquid + melted) [inch]")
     g.ax_joint.legend(loc=1, scatterpoints=1)
-    return g.fig, df
+    return g.figure, df
