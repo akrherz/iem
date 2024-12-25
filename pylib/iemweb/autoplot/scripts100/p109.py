@@ -155,7 +155,7 @@ def get_description():
     return desc
 
 
-def get_count_df(ctx, varname, pstr, sts, ets):
+def get_count_df(ctx, varname: str, pstr, sts, ets):
     """Oh boy, do complex things."""
 
     emerg_extra = ""

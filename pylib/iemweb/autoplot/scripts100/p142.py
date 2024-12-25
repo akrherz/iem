@@ -11,8 +11,8 @@ station, you get the US Drought Monitor valid for the district centroid.
 If you plot a statewide average, you get no USDM included.
 """
 
-import datetime
 import sys
+from datetime import date, datetime, timedelta
 
 import matplotlib.dates as mdates
 import pandas as pd
@@ -38,8 +38,8 @@ COLORS = ["#ffff00", "#fcd37f", "#ffaa00", "#e60000", "#730000"]
 def get_description():
     """Return a dict describing how to call this plotter"""
     desc = {"description": __doc__, "data": True, "cache": 86400}
-    today = datetime.date.today()
-    sts = today - datetime.timedelta(days=720)
+    today = date.today()
+    sts = today - timedelta(days=720)
     desc["arguments"] = [
         dict(
             type="station",
@@ -85,7 +85,7 @@ def get_description():
 
 def underlay_usdm(axis, sts, ets, lon, lat):
     """Underlay the USDM as pretty bars, somehow"""
-    if ets < datetime.date(2000, 1, 1):
+    if ets < date(2000, 1, 1):
         axis.text(
             0.0,
             1.03,
@@ -115,11 +115,11 @@ def underlay_usdm(axis, sts, ets, lon, lat):
     for row in data["data"]:
         if row["category"] is None:
             continue
-        ts = datetime.datetime.strptime(row["valid"], "%Y-%m-%d")
-        date = datetime.date(ts.year, ts.month, ts.day)
+        ts = datetime.strptime(row["valid"], "%Y-%m-%d")
+        dt = date(ts.year, ts.month, ts.day)
         axis.axvspan(
-            date,
-            date + datetime.timedelta(days=7),
+            dt,
+            dt + timedelta(days=7),
             color=COLORS[row["category"]],
             zorder=-3,
         )
@@ -241,9 +241,9 @@ def plotter(fdict):
 
     (l1,) = ax.plot(
         df.index.values,
-        df["p1_" + pvar + "_" + how],
+        df[f"p1_{pvar}_{how}"],
         lw=2,
-        label="%s Day" % (p1,),
+        label=f"{p1} Day",
         zorder=5,
     )
     (l2,) = ax.plot(
@@ -301,7 +301,7 @@ def plotter(fdict):
             )
         except Exception as exp:
             sys.stderr.write(str(exp))
-    offset = datetime.timedelta(days=2)
+    offset = timedelta(days=2)
     ax.set_xlim(df.index.min() - offset, df.index.max() + offset)
 
     return fig, df

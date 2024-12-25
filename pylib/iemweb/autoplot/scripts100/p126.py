@@ -10,7 +10,7 @@ Tetens formula (Buck, 1981).
 """
 
 import calendar
-import datetime
+from datetime import date
 
 import metpy.calc as mcalc
 import pandas as pd
@@ -19,6 +19,7 @@ from pyiem.database import get_sqlalchemy_conn
 from pyiem.exceptions import NoDataFound
 from pyiem.plot import figure
 from pyiem.util import get_autoplot_context
+from sqlalchemy import text
 
 PDICT = {
     "mixing_ratio": "Mixing Ratio [g/kg]",
@@ -34,7 +35,7 @@ PDICT2 = {
 def get_description():
     """Return a dict describing how to call this plotter"""
     desc = {"description": __doc__, "data": True}
-    today = datetime.date.today()
+    today = date.today()
     desc["arguments"] = [
         dict(
             type="zstation",
@@ -75,16 +76,16 @@ def plotter(fdict):
     varname = ctx["var"]
     with get_sqlalchemy_conn("asos") as conn:
         df = pd.read_sql(
-            """
+            text("""
             SELECT extract(year from valid) as year,
             coalesce(mslp, alti * 33.8639, 1013.25) as slp,
             extract(doy from valid) as doy, tmpf, dwpf, relh from alldata
-            where station = %s and dwpf > -50 and dwpf < 90 and
+            where station = :station and dwpf > -50 and dwpf < 90 and
             tmpf > -50 and tmpf < 120 and valid > '1950-01-01'
             and report_type = 3
-        """,
+        """),
             conn,
-            params=(station,),
+            params={"station": station},
             index_col=None,
         )
     if df.empty:

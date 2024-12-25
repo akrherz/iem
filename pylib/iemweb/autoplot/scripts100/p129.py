@@ -7,7 +7,7 @@ for precipitation are computed with dry days omitted.
 """
 
 import calendar
-import datetime
+from datetime import date
 
 import pandas as pd
 from pyiem.database import get_sqlalchemy_conn
@@ -79,7 +79,7 @@ def add_ctx(ctx):
         GROUP by year, month ORDER by year desc, month ASC
         """,
             conn,
-            params=(level, station, datetime.date.today().replace(day=1)),
+            params=(level, station, date.today().replace(day=1)),
             index_col=None,
         )
     if monthly.empty:
@@ -116,7 +116,7 @@ def add_ctx(ctx):
         station,
         ctx["_nt"].sts[station]["name"],
         bs.year,
-        datetime.date.today().year,
+        date.today().year,
     )
     return ctx
 
@@ -229,7 +229,7 @@ def plotter(fdict):
         ax.text(
             idx,
             row["rank"],
-            "%.1f" % (row["rank"],),
+            f"{row['rank']:.1f}",
             ha="left",
             color="k",
             zorder=5,
