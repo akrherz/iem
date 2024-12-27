@@ -8,9 +8,10 @@ the computation of the average nor minimum value.
 import datetime
 
 import pandas as pd
+from pyiem.database import get_sqlalchemy_conn
 from pyiem.exceptions import NoDataFound
 from pyiem.plot import figure_axes
-from pyiem.util import get_autoplot_context, get_sqlalchemy_conn
+from pyiem.util import get_autoplot_context
 from sqlalchemy import text
 
 from iemweb.autoplot import ARG_STATION
@@ -56,7 +57,7 @@ def plotter(fdict):
     params = {"station": station}
     if limit == "ytd":
         limittitle = f"(Jan 1 - {today:%b %-d})"
-        params["doy"] = int(today.strftime("%j"))
+        params["doy"] = today.timetuple().tm_yday
         limitsql = " and extract(doy from day) <= :doy "
 
     ab = ctx["_nt"].sts[station]["archive_begin"]

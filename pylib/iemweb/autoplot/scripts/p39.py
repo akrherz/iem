@@ -8,7 +8,7 @@ possible for the remainder of the month.
 """
 
 import calendar
-import datetime
+from datetime import date, timedelta
 
 import numpy as np
 from pyiem.database import get_dbconnc
@@ -28,8 +28,8 @@ PDICT = {
 def get_description():
     """Return a dict describing how to call this plotter"""
     desc = {"description": __doc__}
-    today = datetime.date.today()
-    lastmonth = (today.replace(day=1)) - datetime.timedelta(days=25)
+    today = date.today()
+    lastmonth = (today.replace(day=1)) - timedelta(days=25)
     desc["arguments"] = [
         ARG_STATION,
         {
@@ -93,9 +93,9 @@ def plotter(fdict):
     effective_date = ctx["date"]
     year, month = compute_compare_month(ctx, cursor)
 
-    oldmonth = datetime.date(year, month, 1)
-    sts = datetime.date(effective_date.year, effective_date.month, 1)
-    ets = (sts + datetime.timedelta(days=35)).replace(day=1)
+    oldmonth = date(year, month, 1)
+    sts = date(effective_date.year, effective_date.month, 1)
+    ets = (sts + timedelta(days=35)).replace(day=1)
     days = int((ets - sts).days)
 
     # beat month
@@ -185,7 +185,7 @@ def plotter(fdict):
         % (calendar.month_abbr[effective_date.month], effective_date.year, lv),
     )
     # For historical, we can additionally plot the month values
-    today = datetime.date.today().replace(day=1)
+    today = date.today().replace(day=1)
     if effective_date < today:
         ax.plot(
             np.arange(1, days + 1),

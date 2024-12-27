@@ -153,7 +153,7 @@ def plotter(fdict):
     xticks = []
     for i in range(1, 13):
         ts = sts.replace(month=i)
-        xticks.append(int(ts.strftime("%j")))
+        xticks.append(ts.timetuple().tm_yday)
 
     sdf = pd.DataFrame(streaks, columns=["period", "enddate"])
     df = pd.DataFrame(
@@ -166,7 +166,7 @@ def plotter(fdict):
     )
     df["startdate"] = df["enddate"]
     fig = figure(apctx=ctx)
-    ax = fig.add_axes([0.1, 0.1, 0.55, 0.8])
+    ax = fig.add_axes((0.1, 0.1, 0.55, 0.8))
     ax.bar(np.arange(1, 367), maxperiod[1:], fc="b", ec="b")
     ax.grid(True)
     ax.set_ylabel("Consecutive Days")

@@ -1,10 +1,11 @@
 """Plot of current RWIS surface temperatures"""
 
-import datetime
+from zoneinfo import ZoneInfo
 
 import numpy as np
 from pyiem.database import get_dbconn
 from pyiem.plot import MapPlot
+from pyiem.util import utc
 
 IEM = get_dbconn("iem")
 
@@ -24,7 +25,7 @@ def main():
     cursor.execute(
         """SELECT ST_x(geom), ST_y(geom), tsf0, tsf1, tsf2, tsf3,
     id, rwis_subf from current c JOIN stations t on (t.iemid = c.iemid)
-    WHERE c.valid > now() - '1 hour'::interval"""
+    WHERE c.valid > now() - '1 hour'::interval and t.network ~* 'RWIS'"""
     )
     for row in cursor:
         val = cln(row[2:6])
@@ -35,18 +36,18 @@ def main():
             d["dwpf"] = row[7]
         data.append(d)
 
-    now = datetime.datetime.now()
+    now = utc().astimezone(ZoneInfo("America/Chicago"))
     mp = MapPlot(
         axisbg="white",
-        title="Iowa RWIS Average Pavement + Sub-Surface Temperature",
-        subtitle=("Valid: %s (pavement in red, sub-surface in blue)" "")
-        % (now.strftime("%-d %b %Y %-I:%M %p"),),
+        title="RWIS Average Pavement + Sub-Surface Temperature",
+        subtitle=(
+            f"Valid: {now:%-d %b %Y %-I:%M %p} "
+            "(pavement in red, sub-surface in blue)"
+        ),
     )
     mp.plot_station(data)
     mp.drawcounties()
-    pqstr = ("plot c %s rwis_sf.png rwis_sf.png png" "") % (
-        datetime.datetime.utcnow().strftime("%Y%m%d%H%M"),
-    )
+    pqstr = f"plot c {utc():%Y%m%d%H%M} rwis_sf.png rwis_sf.png png"
     mp.postprocess(view=False, pqstr=pqstr)
 
 

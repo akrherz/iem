@@ -76,6 +76,7 @@ not be implied as an endorsement. Of course, you can just search google for
  <li><a href="https://openweathermap.org/api">OpenWeatherMap</a></li>
  <li><a href="https://pirateweather.net">Pirate Weather</a></li>
  <li><a href="https://realearth.ssec.wisc.edu/doc/api.php">SSEC RealEarth API</a></li>
+ <li><a href="https://synopticdata.com/">Synoptic Data PBC</a></li>
  <li><a href="https://www.tomorrow.io/weather-api/">Tomorrow.io</a></li>
  <li><a href="https://xweather.com/docs">Vaisala Xweather</a></li>
  <li><a href="https://www.visualcrossing.com/weather-api">Visual Crossing Weather</a></li>

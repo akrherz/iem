@@ -106,7 +106,7 @@ def get_data(ctx):
     if df.empty:
         raise NoDataFound("No results found for query!")
     df["week_ending"] = pd.to_datetime(df["week_ending"])
-    df["doy"] = pd.to_numeric(df["week_ending"].dt.strftime("%j"))
+    df["doy"] = df["week_ending"].dt.dayofyear
     df = df.set_index("week_ending")
     df["delta"] = df.groupby("year")["num_value"].diff().fillna(0)
     return df

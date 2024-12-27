@@ -71,7 +71,7 @@ def add_ctx(ctx):
     """Get the plotting context"""
     pgconn, cursor = get_dbconnc("coop")
     station = ctx["station"]
-    dt = ctx["date"]
+    dt: date = ctx["date"]
     opt = ctx["opt"]
 
     cursor.execute(
@@ -123,8 +123,7 @@ def add_ctx(ctx):
         ts = datetime.strptime(lastrow["valid"], "%Y-%m-%d")
         dclass = f"{cat} on {ts:%-d %b %Y}"
 
-    _temp = dt.replace(year=2000)
-    _doy = int(_temp.strftime("%j"))
+    _doy = dt.replace(year=2000).timetuple().tm_yday
     xticks = []
     xticklabels = []
     for i in range(-360, 1, 60):

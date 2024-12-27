@@ -26,6 +26,11 @@ Changelog
 Example Requests
 ----------------
 
+Provide an Excel file of recent LSRs within the past 30 minutes.
+
+https://mesonet.agron.iastate.edu/cgi-bin/request/gis/lsr.py\
+?recent=1800&fmt=excel
+
 Provide all Iowa LSRs for 2024 in KML format and then shapefile format.
 
 https://mesonet.agron.iastate.edu/cgi-bin/request/gis/lsr.py\

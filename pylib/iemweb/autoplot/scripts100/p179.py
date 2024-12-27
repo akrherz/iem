@@ -11,7 +11,7 @@ provide current frequencies / probabilities of what could potentially
 happen this year.
 """
 
-import datetime
+from datetime import date, datetime
 
 import matplotlib.colors as mpcolors
 import numpy as np
@@ -27,7 +27,7 @@ from iemweb.autoplot import ARG_STATION
 def get_description():
     """Return a dict describing how to call this plotter"""
     desc = {"description": __doc__, "data": True}
-    today = datetime.date.today()
+    today = date.today()
     desc["arguments"] = [
         ARG_STATION,
         dict(
@@ -67,7 +67,7 @@ def plotter(fdict):
     gddbase = ctx["gddbase"]
     base = ctx["base"]
     ceil = ctx["ceil"]
-    today = ctx["date"]
+    today: date = ctx["date"]
     bs = ctx["_nt"].sts[station]["archive_begin"]
     if bs is None:
         raise NoDataFound("Unknown station metadata.")
@@ -96,11 +96,11 @@ def plotter(fdict):
     for i, freeze in enumerate(freezes):
         gdd[i, int(freeze) :] = 0.0
 
-    idx = int(today.strftime("%j")) - 1
-    apr1 = int(datetime.datetime(2000, 4, 1).strftime("%j")) - 1
-    jun30 = int(datetime.datetime(2000, 6, 30).strftime("%j")) - 1
-    sep1 = int(datetime.datetime(2000, 9, 1).strftime("%j")) - 1
-    oct31 = int(datetime.datetime(2000, 10, 31).strftime("%j")) - 1
+    idx = today.timetuple().tm_yday - 1
+    apr1 = datetime(2000, 4, 1).timetuple().tm_yday - 1
+    jun30 = datetime(2000, 6, 30).timetuple().tm_yday - 1
+    sep1 = datetime(2000, 9, 1).timetuple().tm_yday - 1
+    oct31 = datetime(2000, 10, 31).timetuple().tm_yday - 1
 
     # Replace all years with the last year's data
     scenario_gdd = gdd * 1
@@ -177,7 +177,7 @@ def plotter(fdict):
     ax[1].set_xlabel("Growing Season Begin Date")
 
     fig.subplots_adjust(bottom=0.20, top=0.85)
-    cbar_ax = fig.add_axes([0.05, 0.06, 0.85, 0.05])
+    cbar_ax = fig.add_axes((0.05, 0.06, 0.85, 0.05))
     fig.colorbar(res, cax=cbar_ax, orientation="horizontal")
 
     return fig, df

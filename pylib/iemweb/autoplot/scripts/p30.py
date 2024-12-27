@@ -6,7 +6,7 @@ The black lines represent the simple averages of the data.
 """
 
 import calendar
-import datetime
+from datetime import date
 
 import numpy as np
 import pandas as pd
@@ -24,7 +24,7 @@ def get_description():
     """Return a dict describing how to call this plotter"""
     desc = {"description": __doc__, "data": True}
     desc["defaults"] = {"_r": "96"}
-    today = datetime.date.today()
+    today = date.today()
     desc["arguments"] = [
         ARG_STATION,
         dict(

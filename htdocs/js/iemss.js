@@ -1,5 +1,5 @@
 /* global $, ol */
-var htmlInterface = ['<div class="panel panel-default">',
+const htmlInterface = ['<div class="panel panel-default">',
     '<div class="panel-heading">',
     '<a class="btn btn-default pull-right" href="/" id="iemss-metadata-link" target="_new">',
     '<i class="fa fa-info"></i> Station Metadata</a>',
@@ -52,24 +52,28 @@ var htmlInterface = ['<div class="panel panel-default">',
     '</div><!-- End of panel-body -->',
     '</div><!-- End of panel -->'];
 
-var map, selectedFeature, geojson, geojsonSource, network;
+let map = null;
+let selectedFeature = null;
+let geojson = null;
+let geojsonSource = null;
+let network = null;
 
 //http://www.lessanvaezi.com/filter-select-list-options/
 jQuery.fn.filterByText = function (textbox, selectSingleMatch) {
     return this.each(function () {
-        var select = this;
-        var options = [];
+        const select = this;
+        const options = [];
         $(select).find('option').each(function () {
             options.push({ value: $(this).val(), text: $(this).text() });
         });
         $(select).data('options', options);
         $(textbox).bind('change keyup', function () {
             const opts = $(select).empty().scrollTop(0).data('options');
-            var search = $.trim($(this).val());
-            var regex = new RegExp(search, 'gi');
+            const search = $.trim($(this).val());
+            const regex = new RegExp(search, 'gi');
 
             $.each(opts, (i) => {
-                var option = options[i];
+                const option = options[i];
                 if (option.text.match(regex) !== null) {
                     $(select).append(
                         $('<option>').text(option.text).val(option.value)
@@ -86,7 +90,7 @@ jQuery.fn.filterByText = function (textbox, selectSingleMatch) {
 
 function sortListing(option) {
     $("#stations_in").append($("#stations_in option").remove().sort(function (a, b) {
-        var at = $(a).text(), bt = $(b).text();
+        let at = $(a).text(), bt = $(b).text();
         if (option == 'name') {
             at = at.slice(at.indexOf(' ') + 1);
             bt = bt.slice(bt.indexOf(' ') + 1);
@@ -128,8 +132,8 @@ $().ready(() => {
     $("#iemss").append(htmlInterface.join(''));
 
     network = $("#iemss").data("network");
-    var only_online = ($("#iemss").data("only-online") === 1);
-    var select_name = $("#iemss").attr("data-name");
+    const only_online = ($("#iemss").data("only-online") === 1);
+    const select_name = $("#iemss").attr("data-name");
     if (select_name) {
         $("#stations_out").attr("name", select_name);
     }
@@ -147,7 +151,7 @@ $().ready(() => {
         return !$('#stations_in option:selected').remove().appendTo('#stations_out');
     });
     $('#stations_addall').click(() => {
-        var ret = !$('#stations_in option').remove().appendTo('#stations_out');
+        const ret = !$('#stations_in option').remove().appendTo('#stations_out');
         $('#stations_out option').prop('selected', true);
         return ret;
     });
@@ -203,7 +207,7 @@ $().ready(() => {
     geojsonSource.on('change', () => {
         if (geojsonSource.getState() == 'ready') {
             $.each(geojsonSource.getFeatures(), (_index, feat) => {
-                var lbl = `[${feat.get('sid')}] ${feat.get('sname')}`;
+                let lbl = `[${feat.get('sid')}] ${feat.get('sname')}`;
                 if (network != 'TAF') {
                     lbl += ` ${feat.get('time_domain')}`;
                 }
@@ -224,14 +228,14 @@ $().ready(() => {
         }
     });
 
-    var $newdiv = $("<div>", { id: "popup", style: "width: 250px;" });
+    const $newdiv = $("<div>", { id: "popup", style: "width: 250px;" });
     $("#map").append($newdiv);
-    var $newdiv2 = $("<div>", { id: "popover-content", style: "display: none;" });
+    const $newdiv2 = $("<div>", { id: "popover-content", style: "display: none;" });
     $("#map").append($newdiv2);
 
-    var element = document.getElementById('popup');
+    const element = document.getElementById('popup');
 
-    var popup = new ol.Overlay({
+    const popup = new ol.Overlay({
         element: element,
         positioning: 'bottom-center',
         stopEvent: false
@@ -245,16 +249,16 @@ $().ready(() => {
     });
     // display popup on click
     map.on('click', (evt) => {
-        var feature = map.forEachFeatureAtPixel(evt.pixel,
+        const feature = map.forEachFeatureAtPixel(evt.pixel,
             (feat) => {
                 return feat;
             });
         if (feature) {
-            var geometry = feature.getGeometry();
-            var coord = geometry.getCoordinates();
-            var sid = feature.get('sid');
+            const geometry = feature.getGeometry();
+            const coord = geometry.getCoordinates();
+            const sid = feature.get('sid');
             popup.setPosition(coord);
-            var content = `<p><strong>SID: </strong>${sid}`
+            const content = `<p><strong>SID: </strong>${sid}`
                 + `<br /><strong>Name:</strong> ${feature.get('sname')}`
                 + `<br /><strong>Period:</strong> ${feature.get("time_domain")}</p>`;
             $('#popover-content').html(content);

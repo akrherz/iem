@@ -16,6 +16,21 @@ Changelog
 - 2024-04-09: Migrated to pydantic based CGI field validation.
 - 2024-03-15: Initial documentation added
 
+Example Requests
+----------------
+
+Provide all DNKI4 data for the month of November 2023
+
+https://mesonet.agron.iastate.edu/cgi-bin/request/hads.py?\
+stations=DNKI4&sts=2023-11-01T00:00Z&ets=2023-12-01T00:00Z&what=txt
+
+Same request, but do a threshold search for when the SHEF var RG is greater
+than 0.5
+
+https://mesonet.agron.iastate.edu/cgi-bin/request/hads.py?\
+stations=DNKI4&sts=2023-11-01T00:00Z&ets=2023-12-01T00:00Z&what=txt&\
+threshold=0.5&thresholdvar=RG
+
 """
 
 # pylint: disable=abstract-class-instantiated
@@ -112,12 +127,15 @@ class Schema(CGIModel):
         return None if value == "" else value
 
 
-def threshold_search(table, threshold, thresholdvar):
+def threshold_search(table: pd.DataFrame, threshold, thresholdvar):
     """Do the threshold searching magic"""
     cols = list(table.columns.values)
     searchfor = f"HGI{thresholdvar.upper()}"
     cols5 = [s[:5] for s in cols]
-    mycol = cols[cols5.index(searchfor)]
+    try:
+        mycol = cols[cols5.index(searchfor)]
+    except ValueError:
+        return pd.DataFrame()
     above = False
     maxrunning = -99
     maxvalid = None

@@ -173,7 +173,14 @@ def plotter(fdict):
     s_slp, s_int, s_r, _, _ = stats.linregress(years, spring)
     f_slp, f_int, f_r, _, _ = stats.linregress(years, fall)
 
-    (fig, ax) = figure_axes(apctx=ctx)
+    title = PDICT.get(direction, "").replace(
+        "Temperature", PDICT2.get(varname)
+    )
+    units = r"$^\circ$F" if not varname.startswith("snow") else "inch"
+    (fig, ax) = figure_axes(
+        title=ctx["_sname"], subtitle=f"{title} {threshold}{units}", apctx=ctx
+    )
+    ax.set_position([0.1, 0.1, 0.8, 0.7])
     ax.bar(years, fall - spring, bottom=spring, ec="tan", fc="tan", zorder=1)
     for _v in [fall, spring]:
         avgv = int(np.average(_v))
@@ -232,12 +239,7 @@ def plotter(fdict):
     )
 
     ax.grid(True)
-    title = PDICT.get(direction, "").replace(
-        "Temperature", PDICT2.get(varname)
-    )
-    units = r"$^\circ$F" if not varname.startswith("snow") else "inch"
-    ax.set_title(f"{ctx['_sname']}\n{title} {threshold}{units}")
-    ax.legend(ncol=4, fontsize=14, labelspacing=2)
+    ax.legend(ncol=4, fontsize=14, labelspacing=2, loc=(0.1, 0.91))
     ax.set_yticks((1, 32, 60, 91, 121, 152, 182, 213, 244, 274, 305, 335))
     ax.set_yticklabels(calendar.month_abbr[1:])
     ax.set_ylim(min(spring) - 5, max(fall) + 30)

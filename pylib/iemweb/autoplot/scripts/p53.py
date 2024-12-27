@@ -154,7 +154,7 @@ def plotter(fdict):
     xticks = []
     for i in range(1, 13):
         ts = sts.replace(month=i)
-        xticks.append(float(ts.strftime("%j")) / 7.0)
+        xticks.append(ts.timetuple().tm_yday / 7.0)
 
     title = f"Hourly {PDICT[v]} {UNITS[v]} Frequencies "
     subtitle = (

@@ -158,7 +158,9 @@ def plotter(fdict):
         resdf[_ptype + "_min[F]"] = c2f(df.groupby("doy")[_ptype].min().values)
         resdf[_ptype + "_max[F]"] = c2f(df.groupby("doy")[_ptype].max().values)
 
-    (fig, ax) = figure_axes(apctx=ctx)
+    (fig, ax) = figure_axes(
+        apctx=ctx, title=f"{STATIONS[location]} {PLOTS[ptype]}"
+    )
     if ptype in ["gdd", "rain"]:
         ax.plot(
             thisyear.index.values,
@@ -216,15 +218,14 @@ def plotter(fdict):
             zorder=2,
         )
 
-    ax.set_title(f"{STATIONS[location]} {PLOTS[ptype]}")
     ax.set_ylabel(PLOTS[ptype])
     ax.legend(loc=(0.03, -0.16), ncol=3, fontsize=12)
     ax.set_xticks((1, 32, 60, 91, 121, 152, 182, 213, 244, 274, 305, 335))
     ax.set_xticklabels(calendar.month_abbr[1:])
     ax.grid(True)
     ax.set_xlim(
-        int(sdate.strftime("%j")),
-        int(date(today.year, 12, 1).strftime("%j")),
+        sdate.timetuple().tm_yday,
+        date(today.year, 12, 31).timetuple().tm_yday,
     )
     pos = ax.get_position()
     ax.set_position([pos.x0, pos.y0 + 0.05, pos.width, pos.height * 0.95])
