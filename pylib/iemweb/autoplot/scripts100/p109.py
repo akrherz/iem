@@ -469,7 +469,8 @@ def plotter(fdict):
                 least(expire, :ets), '1 minute'::interval) as ts from warnings
                 WHERE issue > :sts2 and expire < :ets2 and {pstr} {emerg_extra}
             )
-            select state as datum, count(*) / :mins * 100. as tpercent
+            select state as datum,
+            count(*) / cast(:mins as real) * 100. as tpercent
             from data GROUP by datum ORDER by tpercent DESC
             """
             else:
@@ -479,8 +480,9 @@ def plotter(fdict):
                 least(expire, :ets), '1 minute'::interval) as ts from warnings
                 WHERE issue > :sts2 and expire < :ets2 and {pstr} {emerg_extra}
             )
-            select wfo as datum, count(*) / :mins * 100. as tpercent from data
-            GROUP by datum ORDER by tpercent DESC
+            select wfo as datum,
+            count(*) / cast(:mins as real) * 100. as tpercent
+            from data GROUP by datum ORDER by tpercent DESC
             """
             df = pd.read_sql(
                 text(sql),
@@ -490,7 +492,7 @@ def plotter(fdict):
                     "ets": ets,
                     "sts2": sts - timedelta(days=90),
                     "ets2": ets + timedelta(days=90),
-                    "mins": int(total_minutes),
+                    "mins": total_minutes,
                 },
                 index_col="datum",
             )
