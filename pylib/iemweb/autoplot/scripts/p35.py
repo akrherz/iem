@@ -8,7 +8,7 @@ is then normalized by the number of years of data available.
 """
 
 import calendar
-import datetime
+from datetime import datetime, timedelta
 
 import numpy as np
 import pandas as pd
@@ -86,25 +86,25 @@ def plotter(fdict):
             conn,
             params={
                 "station": station,
-                "hours": datetime.timedelta(hours=hours),
+                "hours": timedelta(hours=hours),
             },
             parse_dates="valid",
         )
     if obs.empty:
         raise NoDataFound("No non-null data found")
 
-    sts = datetime.datetime(2012, 1, 1)
+    sts = datetime(2012, 1, 1)
     xticks = []
     for i in range(1, 13):
         ts = sts.replace(month=i)
-        xticks.append(int(ts.strftime("%j")))
+        xticks.append(ts.timetuple().tm_yday)
 
     # We want bins centered on zero
     p99 = obs["delta"].abs().quantile(0.999)
     bins = np.arange(0 - p99, p99, interval)
 
     hist, xedges, yedges = np.histogram2d(
-        obs["week"].values, obs["delta"].values, [range(54), bins]
+        obs["week"].to_numpy(), obs["delta"].to_numpy(), [range(54), bins]
     )
     # create a dataframe from this 2d histogram
     x, y = np.meshgrid(xedges[:-1], yedges[:-1])

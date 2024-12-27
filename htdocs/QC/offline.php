@@ -52,7 +52,6 @@ $t->content = <<< EOF
 to a wide range of factors.  Here is a listing of sites currently offline.
 </p>
 
-
 <table class="table table-striped">
 <thead>
 <tr>

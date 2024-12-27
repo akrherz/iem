@@ -9,7 +9,7 @@ def main():
     """Go."""
     states = list(state_names.keys())
     states.sort()
-    doy = int(datetime.date.today().strftime("%j"))
+    doy = datetime.date.today().timetuple().tm_yday
     print(states[doy % len(states)])
 
 

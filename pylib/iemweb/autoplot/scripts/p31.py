@@ -19,7 +19,7 @@ this example evaluates to a jump of 20 degrees.
 """
 
 import calendar
-import datetime
+from datetime import date, datetime
 
 import pandas as pd
 from pyiem.database import get_sqlalchemy_conn
@@ -79,7 +79,7 @@ def get_description():
         dict(
             type="year",
             min=1893,
-            default=datetime.date.today().year,
+            default=date.today().year,
             label="End Year for Plot:",
             name="eyear",
         ),
@@ -272,7 +272,7 @@ def plotter(fdict):
     multiplier = 1
     if agg == "week":
         multiplier = 7
-        sts = datetime.datetime(2012, 1, 1)
+        sts = datetime(2012, 1, 1)
         xticks = []
         for i in range(1, 13):
             ts = sts.replace(month=i)

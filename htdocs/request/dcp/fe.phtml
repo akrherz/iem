@@ -9,6 +9,7 @@ $network = isset($_GET['network']) ? xssafe($_GET["network"]) : 'IA_DCP';
 
 $t = new MyView();
 $t->iemss = True;
+$t->iem_resource = "HADS";
 define("IEM_APPID", 44);
 $mesosite = iemdb('mesosite');
 

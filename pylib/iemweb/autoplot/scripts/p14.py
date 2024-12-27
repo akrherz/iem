@@ -42,7 +42,7 @@ def plotter(fdict):
     year = ctx["year"]
     jdaylimit = 367
     if year == today.year:
-        jdaylimit = int(today.strftime("%j"))
+        jdaylimit = today.timetuple().tm_yday
 
     endyear = int(datetime.now().year) + 1
 

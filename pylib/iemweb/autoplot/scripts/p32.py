@@ -8,7 +8,7 @@ on the period of record observations for the site.
 variable you selected for plotting.
 """
 
-import datetime
+from datetime import date
 
 import matplotlib.colors as mpcolors
 import matplotlib.dates as mdates
@@ -50,7 +50,7 @@ def get_description():
         dict(
             type="year",
             name="year",
-            default=datetime.date.today().year,
+            default=date.today().year,
             label="Year to Plot:",
         ),
         dict(

@@ -106,7 +106,7 @@ def plotter(fdict):
     success = []
     rows = []
     while now < ets:
-        idx = int(now.strftime("%j")) - 1
+        idx = now.timetuple().tm_yday - 1
         running = 0
         while idx < sz and running < gdd1:
             running += gdds[idx]
@@ -149,7 +149,7 @@ def plotter(fdict):
         f"Period between GDD {gdd1} and {gdd2}, gray bars incomplete"
     )
     fig = figure(apctx=ctx, title=title)
-    ax = fig.add_axes([0.125, 0.125, 0.75, 0.75])
+    ax = fig.add_axes((0.125, 0.125, 0.75, 0.75))
     bars = ax.bar(days2, heights, bottom=starts, fc="#EEEEEE")
     for i, mybar in enumerate(bars):
         if success[i]:

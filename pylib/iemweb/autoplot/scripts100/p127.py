@@ -220,8 +220,8 @@ def plotter(fdict):
         ldate = lastrow["week_ending"]
         val = int(row["num_value"])
         lval = int(lastrow["num_value"])
-        d0 = int(ldate.strftime("%j"))
-        d1 = int(dt.strftime("%j"))
+        d0 = ldate.timetuple().tm_yday
+        d1 = dt.timetuple().tm_yday
         if ldate.year == dt.year:
             delta = (val - lval) / float(d1 - d0)
             for i, jday in enumerate(range(d0, d1 + 1)):
