@@ -74,12 +74,12 @@ def plotter(fdict):
     gyear = df[df["year"] == year].groupby("month").sum()
     if gyear.empty or gdf.empty:
         raise NoDataFound("No data found.")
-    increase = gdf[varname + "_greater"]
-    nochange = gdf[varname + "_unch"]
-    decrease = gdf[varname + "_lower"]
-    increase2 = gyear[varname + "_greater"]
-    nochange2 = gyear[varname + "_unch"]
-    decrease2 = gyear[varname + "_lower"]
+    increase = gdf[f"{varname}_greater"]
+    nochange = gdf[f"{varname}_unch"]
+    decrease = gdf[f"{varname}_lower"]
+    increase2 = gyear[f"{varname}_greater"]
+    nochange2 = gyear[f"{varname}_unch"]
+    decrease2 = gyear[f"{varname}_lower"]
 
     title = f"{ctx['_sname']}\nDay to Day {varname.title()} Temperature Change"
     (fig, ax) = figure_axes(title=title, apctx=ctx)
@@ -100,7 +100,7 @@ def plotter(fdict):
         decrease2 / total2 * 100.0,
         fc="lightblue",
         width=0.4,
-        label=f"{year} ''",
+        label=f"{year} Decrease",
         align="center",
     )
     ax.bar(
@@ -118,7 +118,7 @@ def plotter(fdict):
         bottom=(decrease2 / total2 * 100.0).values,
         fc="lightgreen",
         width=0.4,
-        label=f"{year} ''",
+        label=f"{year} No Change",
         align="center",
     )
     ax.bar(
@@ -136,15 +136,15 @@ def plotter(fdict):
         bottom=((decrease2 + nochange2) / total2).values * 100.0,
         fc="pink",
         width=0.4,
-        label=f"{year} ''",
+        label=f"{year} Increase",
         align="center",
     )
 
     offset = -0.2
     for _df in [gdf, gyear]:
-        increase = _df[varname + "_greater"]
-        nochange = _df[varname + "_unch"]
-        decrease = _df[varname + "_lower"]
+        increase = _df[f"{varname}_greater"]
+        nochange = _df[f"{varname}_unch"]
+        decrease = _df[f"{varname}_lower"]
         total = decrease + nochange + increase
         for i, _ in _df.iterrows():
             txt = ax.text(

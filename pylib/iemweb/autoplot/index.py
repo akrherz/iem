@@ -90,6 +90,9 @@ CMAPS = {
         "coolwarm",
         "bwr",
         "seismic",
+        "berlin",
+        "managua",
+        "vanimo",
     ],
     "Cyclic": [
         "twilight",
