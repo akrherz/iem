@@ -13,6 +13,9 @@ you should instead use the `API <https://mesonet.agron.iastate.edu
 Changelog
 ---------
 
+- 2024-12-30: Parameters `sts` and `ets` can now be provided as ISO8601
+  formatted strings.  The legacy format of %Y%m%d%H%M is still supported, but
+  discouraged.
 - 2024-11-19: Trimmed caching time from 60s to 15s. Added `ps` attribute that
   holds the VTEC Phenomena and Significance string.
 - 2024-11-04: A number of additional metadata fields were added to the output
@@ -25,14 +28,18 @@ Provide all SBW polygons active at a given timestamp:
 
 https://mesonet.agron.iastate.edu/geojson/sbw.geojson?ts=2024-05-26T20:00:00Z
 
+Provide all SBW polygons on 26 May 2024 CDT.
+
+https://mesonet.agron.iastate.edu/geojson/sbw.geojson\
+?sts=2024-05-26T05:00:00Z&ets=2024-05-27T05:00:00Z
+
 """
 
 import json
 from datetime import datetime, timedelta, timezone
 
-from pydantic import AwareDatetime, Field
+from pydantic import AwareDatetime, Field, field_validator
 from pyiem.database import get_sqlalchemy_conn
-from pyiem.exceptions import IncompleteWebRequest
 from pyiem.nws.vtec import get_ps_string
 from pyiem.reference import ISO8601
 from pyiem.util import utc
@@ -49,23 +56,17 @@ class Schema(CGIModel):
         default=None,
         description="Optional JSONP callback function name",
     )
-    ets: str = Field(
+    ets: AwareDatetime = Field(
         default=None,
         description=(
             "Legacy UTC end timestamp parameter in the form of YYYYmmddHHMM"
         ),
-        max_length=12,
-        min_length=12,
-        pattern=r"^\d{12}$",
     )
-    sts: str = Field(
+    sts: AwareDatetime = Field(
         default=None,
         description=(
             "Legacy UTC start timestamp parameter in the form of YYYYmmddHHMM"
         ),
-        max_length=12,
-        min_length=12,
-        pattern=r"^\d{12}$",
     )
     ts: AwareDatetime = Field(
         default=None,
@@ -85,6 +86,15 @@ class Schema(CGIModel):
         description="Optional list of WFOs to limit the results to",
     )
 
+    @field_validator("sts", "ets", mode="before")
+    def legacy_timestamps(cls, value, _info):
+        """Allow the junky old way to work."""
+        fmt = "%Y%m%d%H%M"
+        if value.find("T") > 0 and len(value) >= 16:
+            fmt = "%Y-%m-%dT%H:%M"
+            value = value[:16]
+        return datetime.strptime(value, fmt).replace(tzinfo=timezone.utc)
+
 
 def df(val):
     """Format a datetime object"""
@@ -93,7 +103,7 @@ def df(val):
     return val.strftime(ISO8601)
 
 
-def run(environ):
+def run(environ: dict):
     """Actually do the hard work of getting the current SBW in geojson"""
     wfos = environ["wfos"]
     if wfos is not None and wfos[0] == "":
@@ -106,16 +116,6 @@ def run(environ):
         and environ["ets"] is None
     ):
         environ["ts"] = utc()
-    for col in ["sts", "ets"]:
-        if environ[col] is not None:
-            try:
-                environ[col] = datetime.strptime(
-                    environ[col], "%Y%m%d%H%M"
-                ).replace(tzinfo=timezone.utc)
-            except ValueError as exp:
-                raise IncompleteWebRequest(
-                    f"Provided timestamp {col}={environ[col]} is invalid"
-                ) from exp
 
     params = {
         "wfos": wfos,
@@ -225,7 +225,7 @@ def get_mckey(environ):
         wfos = []
     ts = environ["ts"]
     if ts is None:
-        ts = f"{environ['sts']}_to_{environ['ets']}"
+        ts = f"{environ['sts']:%Y%m%d%H%M}_to_{environ['ets']:%Y%m%d%H%M}"
     else:
         ts = ts.strftime(ISO8601)
 

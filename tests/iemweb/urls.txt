@@ -23,6 +23,7 @@
 /cgi-bin/request/metars.py?valid=2020070100
 /geojson/network.py?network=FPS
 /geojson/usdm.py?date=2099-01-01
+/geojson/sbw.geojson?sts=202405260500&ets=202405270500
 /json/cf6.py?station=KDSM&year=2024&fmt=json
 /json/cf6.py?station=KDSM&year=2024&fmt=csv
 /json/cli.json?station=KDSM&year=2024&fmt=csv
