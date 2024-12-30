@@ -21,32 +21,33 @@ $rs = pg_prepare(
     $connect,
     "SELECT",
     "SELECT array_to_json(product_ids) as ja ".
-    "from warnings_$year WHERE wfo = $1 and ". 
-    "phenomena = $2 and eventid = $3 and significance = $4 ".
+    "from warnings WHERE vtec_year = $1 and wfo = $2 and ". 
+    "phenomena = $3 and eventid = $4 and significance = $5 ".
     "ORDER by cardinality(product_ids) DESC LIMIT 1"
 );
-$rs = pg_execute($connect, "SELECT", Array($wfo, $phenomena, $eventid, $significance));
+$rs = pg_execute($connect, "SELECT", Array($year, $wfo, $phenomena, $eventid, $significance));
 
 $ar = array("data" => array());
-$row = pg_fetch_assoc($rs, 0);
-$product_ids = json_decode($row["ja"]);
+if (pg_num_rows($rs) > 0) {
+    $row = pg_fetch_assoc($rs, 0);
+    $product_ids = json_decode($row["ja"]);
 
-$z = array();
-$z["id"] = 1;
-$report = file_get_contents("http://iem.local/api/1/nwstext/". $product_ids[0]);
-$z["report"] = preg_replace("/\001/", "",
-    preg_replace("/\r\r\n/", "\n", $report));
-$z["svs"] = array();
-$lsvs = "";
-for ($i=1; $i < sizeof($product_ids); $i++) {
-    $report = file_get_contents("http://iem.local/api/1/nwstext/". $product_ids[$i]);
-    $lsvs = preg_replace("/\001/", "", htmlspecialchars($report));
-    $z["svs"][] = preg_replace("/\r\r\n/", "\n", $lsvs);
+    $z = array();
+    $z["id"] = 1;
+    $report = file_get_contents("http://iem.local/api/1/nwstext/". $product_ids[0]);
+    $z["report"] = preg_replace("/\001/", "",
+        preg_replace("/\r\r\n/", "\n", $report));
+    $z["svs"] = array();
+    $lsvs = "";
+    for ($i=1; $i < sizeof($product_ids); $i++) {
+        $report = file_get_contents("http://iem.local/api/1/nwstext/". $product_ids[$i]);
+        $lsvs = preg_replace("/\001/", "", htmlspecialchars($report));
+        $z["svs"][] = preg_replace("/\r\r\n/", "\n", $lsvs);
+    }
+    if ($lastsvs == "y") {
+        $z["svs"] = preg_replace("/\r\r\n/", "\n", $lsvs);
+    }
+    $ar["data"][] = $z;
 }
-if ($lastsvs == "y") {
-    $z["svs"] = preg_replace("/\r\r\n/", "\n", $lsvs);
-}
-$ar["data"][] = $z;
-
 header("Content-type: application/json");
 echo json_encode($ar);
