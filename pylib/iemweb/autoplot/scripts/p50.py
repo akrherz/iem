@@ -4,10 +4,11 @@ wind and hail tags used in NWS Severe Thunderstorm Warnings. You have the
 choice to only plot the issuance or use a computed max value over the
 warning's lifecycle (including SVSs).  The maximum wind and hail tags
 are computed independently over the lifecycle of the Severe Thunderstorm
-Warning.
+Warning.  In the download, a value of 0 indicates that the tag was not
+available.
 """
 
-import datetime
+from datetime import date, datetime, timedelta
 
 import pandas as pd
 from pyiem.database import get_sqlalchemy_conn
@@ -29,7 +30,7 @@ FONTSIZE = 12
 def get_description():
     """Return a dict describing how to call this plotter"""
     desc = {"description": __doc__, "data": True, "cache": 300}
-    today = datetime.datetime.today() + datetime.timedelta(days=1)
+    today = datetime.today() + timedelta(days=1)
 
     desc["arguments"] = [
         dict(
@@ -90,10 +91,8 @@ def plotter(fdict):
     opt = ctx["opt"]
     station = ctx["station"]
     state = ctx["state"]
-    date1 = ctx.get("date1", datetime.date(2010, 4, 1))
-    date2 = ctx.get(
-        "date2", datetime.date.today() + datetime.timedelta(days=1)
-    )
+    date1 = ctx.get("date1", date(2010, 4, 1))
+    date2 = ctx.get("date2", date.today() + timedelta(days=1))
     wfo_limiter = (
         f"and wfo = '{station if len(station) == 3 else station[1:]}' "
     )
@@ -104,13 +103,14 @@ def plotter(fdict):
         status_limiter = ""
     sql = f"""
     WITH data as (
-        SELECT wfo, eventid, extract(year from polygon_begin) as year,
+        SELECT wfo, eventid, vtec_year,
         min(polygon_begin) as min_issue,
         max(windtag) as max_windtag, max(hailtag) as max_hailtag
         from sbw WHERE polygon_begin >= %s and
         polygon_begin <= %s {wfo_limiter}
         and (windtag > 0 or hailtag > 0) and phenomena = 'SV' and
-        significance = 'W' {status_limiter} GROUP by wfo, eventid, year
+        significance = 'W' {status_limiter}
+        GROUP by wfo, eventid, vtec_year
     )
     select max_windtag as windtag, max_hailtag as hailtag,
     min(min_issue at time zone 'UTC') as min_issue,
@@ -132,14 +132,15 @@ def plotter(fdict):
 
         sql = f"""
         WITH data as (
-            SELECT wfo, eventid, extract(year from polygon_begin) as year,
+            SELECT wfo, eventid, vtec_year,
             min(polygon_begin) as min_issue,
             max(windtag) as max_windtag, max(hailtag) as max_hailtag
             from sbw w, states s
             WHERE polygon_begin >= %s and polygon_begin <= %s and
             s.state_abbr = %s and ST_Intersects(s.the_geom, w.geom)
             and (windtag > 0 or hailtag > 0) and phenomena = 'SV' and
-            significance = 'W' {status_limiter} GROUP by wfo, eventid, year
+            significance = 'W' {status_limiter}
+            GROUP by wfo, eventid, vtec_year
         )
         select max_windtag as windtag, max_hailtag as hailtag,
         min(min_issue at time zone 'UTC') as min_issue,
@@ -213,7 +214,14 @@ def plotter(fdict):
     ax.set_yticks(range(-1, len(uniquehail)))
     ax.set_xlim(-0.5, len(uniquewind) + 0.5)
     ax.set_ylim(-1.5, len(uniquehail) - 0.5)
-    ax.set_xticklabels([*uniquewind, "Total"], fontsize=14)
+
+    def zeros(arr):
+        for idx in [0, -1]:
+            if arr[idx] < 0.1:
+                arr[idx] = "n/a"
+        return arr
+
+    ax.set_xticklabels([*zeros(uniquewind), "Total"], fontsize=14)
     ax.set_yticklabels(["Total", *uniquehail], fontsize=14)
     ax.xaxis.tick_top()
     ax.set_xlabel("Wind Speed [mph]", fontsize=14)
