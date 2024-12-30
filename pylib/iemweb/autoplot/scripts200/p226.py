@@ -97,7 +97,7 @@ def plotter(fdict):
     )
     mp.drawcounties()
     radtime = mp.overlay_nexrad(
-        df["issue"][0].to_pydatetime(),
+        df["issue"].iloc[0].to_pydatetime(),
         product="N0Q",
         caxpos=[-0.6, 0.05, 0.35, 0.04],  # TODO make this appear nicer
     )

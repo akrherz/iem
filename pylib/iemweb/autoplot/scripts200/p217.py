@@ -229,9 +229,9 @@ def plotter(fdict):
             is_firewx=is_fwx,
         )
     if ctx["n"] != "off":
-        prod = "N0Q" if df["issue"][0].year > 2010 else "N0R"
+        prod = "N0Q" if df["issue"].iloc[0].year > 2010 else "N0R"
         radtime = mp.overlay_nexrad(
-            df["issue"][0].to_pydatetime(), product=prod
+            df["issue"].iloc[0].to_pydatetime(), product=prod
         )
         if radtime is not None:
             mp.fig.text(
