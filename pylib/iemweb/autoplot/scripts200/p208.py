@@ -358,7 +358,7 @@ def plotter(fdict: dict):
     if ctx["n"] != "off" and (
         (p1 in ["SV", "TO", "FF", "MA"] and s1 == "W") or ctx["n"] == "on"
     ):
-        prod = "N0Q" if df["issue"][0].year > 2010 else "N0R"
+        prod = "N0Q" if df["issue"].iloc[0].year > 2010 else "N0R"
         radval = mp.overlay_nexrad(
             utcvalid.to_pydatetime().replace(tzinfo=timezone.utc),
             product=prod,
