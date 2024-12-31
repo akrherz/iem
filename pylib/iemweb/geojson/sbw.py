@@ -264,10 +264,14 @@ def get_mckey(environ):
     if wfos is None:
         wfos = []
     ts = environ["ts"]
-    if ts is None:
+    if (
+        ts is None
+        and environ["sts"] is not None
+        and environ["ets"] is not None
+    ):
         ts = f"{environ['sts']:%Y%m%d%H%M}_to_{environ['ets']:%Y%m%d%H%M}"
-    else:
-        ts = ts.strftime(ISO8601)
+    elif ts is None:
+        ts = utc().strftime(ISO8601)
 
     return f"/geojson/sbw.geojson|{ts}|{','.join(wfos)[:100]}"
 
