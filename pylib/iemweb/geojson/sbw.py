@@ -42,7 +42,7 @@ import json
 from datetime import datetime, timedelta, timezone
 from typing import Optional
 
-from pydantic import AwareDatetime, Field, field_validator
+from pydantic import AwareDatetime, Field, field_validator, model_validator
 from pyiem.database import get_sqlalchemy_conn
 from pyiem.nws.vtec import get_ps_string
 from pyiem.reference import ISO8601
@@ -99,6 +99,17 @@ class Schema(CGIModel):
             value = value[:16]
         return datetime.strptime(value, fmt).replace(tzinfo=timezone.utc)
 
+    @model_validator(mode="after")
+    def ensure_some_timestamp(self):
+        """Ensure that we have some timestamp set."""
+        if self.ts is None and self.sts is None and self.ets is None:
+            self.ts = utc()
+        if (self.sts is not None and self.ets is None) or (
+            self.sts is None and self.ets is not None
+        ):
+            raise ValueError("Both sts and ets must be provided")
+        return self
+
 
 def df(val: Optional[datetime]):
     """Format a datetime object"""
@@ -112,12 +123,6 @@ def run(environ: dict):
         wfos = None
     if wfos is None and environ["wfo"] is not None:
         wfos = [environ["wfo"]]
-    if (
-        environ["ts"] is None
-        and environ["sts"] is None
-        and environ["ets"] is None
-    ):
-        environ["ts"] = utc()
 
     params = {
         "wfos": wfos,
@@ -251,9 +256,7 @@ def run(environ: dict):
 
 def get_mcexpire(environ: dict) -> int:
     """Compute the cache expiration time."""
-    if environ["ts"] is not None:
-        return 15
-    return 600
+    return 15 if environ["ts"] is None else 600
 
 
 def get_mckey(environ):
@@ -264,14 +267,10 @@ def get_mckey(environ):
     if wfos is None:
         wfos = []
     ts = environ["ts"]
-    if (
-        ts is None
-        and environ["sts"] is not None
-        and environ["ets"] is not None
-    ):
+    if environ["sts"] is not None:
         ts = f"{environ['sts']:%Y%m%d%H%M}_to_{environ['ets']:%Y%m%d%H%M}"
-    elif ts is None:
-        ts = utc().strftime(ISO8601)
+    else:
+        ts = ts.strftime(ISO8601)
 
     return f"/geojson/sbw.geojson|{ts}|{','.join(wfos)[:100]}"
 
