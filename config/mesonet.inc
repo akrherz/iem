@@ -323,15 +323,8 @@ RewriteRule ^/search /search.py [QSA]
 
   <Directory "/opt/iem/htdocs/plotting/auto">
     RewriteRule qrcode/([0-9]{1,12})/(.*).png$ gen_qrcode.py?p=$1&q=$2&fmt=png [B]
-    RewriteRule plot/([0-9]{1,12})/(.*).png$ autoplot.py?p=$1&q=$2&fmt=png [B]
-    RewriteRule plot/([0-9]{1,12})/(.*).csv$ autoplot.py?p=$1&q=$2&fmt=csv [B]
-    RewriteRule plot/([0-9]{1,12})/(.*).txt$ autoplot.py?p=$1&q=$2&fmt=txt [B]
-    RewriteRule plot/([0-9]{1,12})/(.*).xlsx$ autoplot.py?p=$1&q=$2&fmt=xlsx [B]
-    RewriteRule plot/([0-9]{1,12})/(.*).js$ autoplot.py?p=$1&q=$2&fmt=js [B]
-    RewriteRule plot/([0-9]{1,12})/(.*).geojson$ autoplot.py?p=$1&q=$2&fmt=geojson [B]
-    RewriteRule plot/([0-9]{1,12})/(.*).pdf$ autoplot.py?p=$1&q=$2&fmt=pdf [B]
-    RewriteRule plot/([0-9]{1,12})/(.*).svg$ autoplot.py?p=$1&q=$2&fmt=svg [B]
-    RewriteRule meta/([0-9]{1,12}).(json|html) meta.py?p=$1&_fmt=$2 [QSA,B]
+    RewriteRule plot/([0-9]{1,12})/(.*).(png|csv|txt|xlsx|js|geojson|pdf|svg|geotiff)$ autoplot.py?p=$1&q=$2&fmt=$3 [B]
+    RewriteRule meta/([0-9]{1,12}).json meta.py?p=$1 [QSA,B]
   </Directory>
 
   <Directory "/opt/iem/htdocs/request">

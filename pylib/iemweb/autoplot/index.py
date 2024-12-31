@@ -812,11 +812,16 @@ function onNetworkChange(newnetwork){{
 <a href="{res['imguri']}.xlsx" class="btn btn-primary">
 <i class="fa fa-table"></i> Download as Excel</a> &nbsp;
         """
-        if meta["maptable"]:
-            res["dataextra"] += f"""
+    if meta["maptable"]:
+        res["dataextra"] += f"""
 <a href="{res['imguri']}.geojson" class="btn btn-primary">
 <i class="fa fa-map"></i> Download as GeoJSON</a> &nbsp;
-            """
+        """
+    if meta.get("raster"):
+        res["dataextra"] += f"""
+<a href="{res['imguri']}.geotiff" class="btn btn-primary">
+<i class="fa fa-map"></i> Download as GeoTIFF</a> &nbsp;
+        """
     res["issues"] = """
     <div><span class="fa fa-info"></span>
     If you notice plotting issues with the image above, please

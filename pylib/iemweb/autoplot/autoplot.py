@@ -12,6 +12,7 @@ from zoneinfo import ZoneInfo
 
 import numpy as np
 import pandas as pd
+import rasterio
 from pandas.api.types import is_datetime64_any_dtype as isdt
 from PIL import Image
 from pyiem.exceptions import (
@@ -82,6 +83,11 @@ def get_response_headers(status, fmt):
         ctype = "application/pdf"
     elif fmt in ["csv", "txt"]:
         ctype = "text/plain"
+    elif fmt == "geotiff":
+        ctype = "image/tiff"
+        extra = [
+            ("Content-Disposition", "attachment;Filename=autoplot.geotiff")
+        ]
     else:
         if status != HTTP200:
             ctype = "text/plain"
@@ -144,16 +150,31 @@ def get_res_by_fmt(p, fmt, fdict):
         # Need to pass the container name
         ctx["_e"] = fdict.get("_e", "ap_container")
         res = mod.get_highcharts(ctx)
+    elif fmt == "geotiff":
+        (img, imgaff, crs) = mod.get_raster(ctx)
+        ram = BytesIO()
+        with rasterio.open(
+            ram,
+            "w",
+            driver="GTiff",
+            width=img.shape[1],
+            height=img.shape[0],
+            count=1,
+            dtype=img.dtype,
+            crs=crs,
+            transform=imgaff,
+        ) as dst:
+            dst.write(img, 1)
+        res = [ram.getvalue(), None, None]
     elif fmt == "geojson":
         res = format_geojson_response(*mod.geojson(ctx))
     else:
         res = mod.plotter(ctx)
     # res should be either a 2 or 3 length tuple, rectify this otherwise
-    if not isinstance(res, tuple):
+    if not isinstance(res, (list, tuple)):
         res = [res, None, None]
     if len(res) == 2:
         res = [res[0], res[1], None]
-
     return res, meta
 
 
@@ -237,7 +258,7 @@ def workflow(mc, environ, fmt):
     content = ""
     if fmt == "js" and isinstance(mixedobj, dict):
         content = f'Highcharts.chart("ap_container", {json.dumps(mixedobj)});'
-    elif fmt in ["js", "geojson"]:
+    elif fmt in ["js", "geojson", "geotiff"]:
         content = mixedobj
     elif fmt in ["svg", "png", "pdf"]:
         if isinstance(mixedobj, plt.Figure):

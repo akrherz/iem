@@ -37,9 +37,8 @@ def get_timing(pidx: int) -> float:
     return timing if timing is not None else -1
 
 
-def do_json(pidx):
+def do_json(pidx: int):
     """Do what needs to be done for JSON requests."""
-    status = "200 OK"
     if pidx == 0:
         data = autoplot_data
     else:
@@ -52,6 +51,7 @@ def do_json(pidx):
         defaults = data.pop("defaults", {"_r": "t", "dpi": "100"})
         data["maptable"] = hasattr(mod, "geojson")
         data["highcharts"] = hasattr(mod, "get_highcharts")
+        data["raster"] = hasattr(mod, "get_raster")
         data["timing[secs]"] = timing
 
         # Setting to None disables
@@ -73,10 +73,7 @@ def do_json(pidx):
                 label="Image Resolution (DPI) (50 to 500)",
             )
         )
-    output = json.dumps(data)
-
-    response_headers = [("Content-type", "application/json")]
-    return output, status, response_headers
+    return json.dumps(data)
 
 
 @iemapp(
@@ -88,8 +85,7 @@ def do_json(pidx):
 def application(environ, start_response):
     """Our Application!"""
     pidx = environ["p"]
-    output, status, response_headers = do_json(pidx)
+    output = do_json(pidx)
 
-    start_response(status, response_headers)
-    # json.dumps returns str, we need bytes here
-    return output.encode()
+    start_response("200 OK", [("Content-type", "application/json")])
+    return output
