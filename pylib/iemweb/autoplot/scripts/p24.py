@@ -26,7 +26,6 @@ from pyiem.database import get_sqlalchemy_conn
 from pyiem.exceptions import NoDataFound
 from pyiem.plot import MapPlot, centered_bins, get_cmap, pretty_bins
 from pyiem.reference import state_names
-from pyiem.util import get_autoplot_context
 from sqlalchemy import text
 
 PDICT = {
@@ -238,9 +237,8 @@ def get_daily_data(ctx, sdate, edate):
     ctx["label"] = f"{dl} ~7 AM till {edate:%-d %b %Y} ~7 AM"
 
 
-def plotter(fdict):
+def plotter(ctx: dict):
     """Go"""
-    ctx = get_autoplot_context(fdict, get_description())
     if ctx["p"] == "day":
         get_daily_data(ctx, ctx["sdate"], ctx["edate"])
     else:

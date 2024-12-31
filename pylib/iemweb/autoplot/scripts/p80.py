@@ -23,7 +23,6 @@ import pyiem.nws.vtec as vtec
 from pyiem.database import get_sqlalchemy_conn
 from pyiem.exceptions import NoDataFound
 from pyiem.plot import figure_axes
-from pyiem.util import get_autoplot_context
 from sqlalchemy import text
 
 from iemweb.autoplot import get_monofont
@@ -113,9 +112,8 @@ def print_top(fig, events: pd.DataFrame):
         y -= 0.05
 
 
-def plotter(fdict):
+def plotter(ctx: dict):
     """Go"""
-    ctx = get_autoplot_context(fdict, get_description())
     ugc = ctx["ugc"]
     phenomena = ctx["phenomena"]
     significance = ctx["significance"]

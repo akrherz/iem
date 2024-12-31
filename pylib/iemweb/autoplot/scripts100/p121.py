@@ -7,8 +7,8 @@ round trip from below some threshold to above the second threshold.
 import datetime
 
 import pandas as pd
+from pyiem.database import get_dbconn
 from pyiem.exceptions import NoDataFound
-from pyiem.util import get_autoplot_context, get_dbconn
 
 from iemweb.autoplot import ARG_STATION
 
@@ -56,11 +56,10 @@ def make(val):
     return [int(a) for a in val.split("-")]
 
 
-def plotter(fdict):
+def plotter(ctx: dict):
     """Go"""
     pgconn = get_dbconn("coop")
     cursor = pgconn.cursor()
-    ctx = get_autoplot_context(fdict, get_description())
     station = ctx["station"]
     thres1 = ctx["thres1"]
     thres2 = ctx["thres2"]

@@ -8,8 +8,8 @@ import calendar
 import datetime
 
 import pandas as pd
+from pyiem.database import get_sqlalchemy_conn
 from pyiem.plot import figure
-from pyiem.util import get_autoplot_context, get_sqlalchemy_conn
 
 from iemweb.autoplot import ARG_STATION
 
@@ -39,9 +39,8 @@ def get_description():
     return desc
 
 
-def plotter(fdict):
+def plotter(ctx: dict):
     """Go"""
-    ctx = get_autoplot_context(fdict, get_description())
     station = ctx["station"]
     month = ctx["month"]
     mydir = ctx["dir"]

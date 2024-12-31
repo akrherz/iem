@@ -8,7 +8,6 @@ import pandas as pd
 from pyiem.database import get_dbconnc
 from pyiem.exceptions import NoDataFound
 from pyiem.plot import figure_axes
-from pyiem.util import get_autoplot_context
 
 from iemweb.autoplot import ARG_STATION
 
@@ -177,9 +176,8 @@ Highcharts.chart('"""
     )
 
 
-def plotter(fdict):
+def plotter(ctx: dict):
     """Go"""
-    ctx = get_autoplot_context(fdict, get_description())
     add_context(ctx)
 
     (fig, ax) = figure_axes(

@@ -18,7 +18,6 @@ from pyiem.database import get_dbconn
 from pyiem.exceptions import NoDataFound
 from pyiem.plot import figure
 from pyiem.reference import TRACE_VALUE
-from pyiem.util import get_autoplot_context
 
 from iemweb.autoplot import ARG_STATION
 
@@ -169,9 +168,8 @@ def plot_yearly_trend(fig, df):
     ax.legend(loc=(0.0, -0.15), ncol=2)
 
 
-def plotter(fdict):
+def plotter(ctx: dict):
     """Go"""
-    ctx = get_autoplot_context(fdict, get_description())
     df = get_data(ctx)
     t1 = "Last" if ctx["dir"] == "last" else "First"
     t2 = (

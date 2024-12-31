@@ -21,7 +21,7 @@ from pyiem.grid import nav
 from pyiem.grid.zs import CachingZonalStats
 from pyiem.iemre import daily_offset, get_daily_ncname
 from pyiem.plot import figure_axes
-from pyiem.util import get_autoplot_context, ncopen
+from pyiem.util import ncopen
 from sqlalchemy import text
 
 
@@ -51,9 +51,8 @@ def get_description():
     return desc
 
 
-def plotter(fdict):
+def plotter(ctx: dict):
     """Go"""
-    ctx = get_autoplot_context(fdict, get_description())
     year = ctx["year"]
     threshold = ctx["threshold"]
     period = ctx["period"]

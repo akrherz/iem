@@ -7,7 +7,7 @@ import pandas as pd
 from pyiem.database import get_sqlalchemy_conn
 from pyiem.exceptions import NoDataFound
 from pyiem.plot import MapPlot, centered_bins, pretty_bins
-from pyiem.util import get_autoplot_context, utc
+from pyiem.util import utc
 from sqlalchemy import text
 
 PDICT = {
@@ -64,9 +64,8 @@ def get_description():
     return desc
 
 
-def plotter(fdict):
+def plotter(ctx: dict):
     """Go"""
-    ctx = get_autoplot_context(fdict, get_description())
     year1 = max(ctx["year"] - 10, 1981)
     params = {"y1": year1, "year": ctx["year"], "crop": ctx["crop"].upper()}
     params["util"] = "GRAIN"

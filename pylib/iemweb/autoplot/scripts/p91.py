@@ -13,7 +13,6 @@ import numpy as np
 import pandas as pd
 from pyiem.database import get_dbconn
 from pyiem.plot import figure_axes
-from pyiem.util import get_autoplot_context
 
 from iemweb.autoplot import ARG_STATION
 
@@ -50,11 +49,10 @@ def get_description():
     return desc
 
 
-def plotter(fdict):
+def plotter(ctx: dict):
     """Go"""
     pgconn = get_dbconn("coop")
     ccursor = pgconn.cursor()
-    ctx = get_autoplot_context(fdict, get_description())
     station = ctx["station"]
     varname = ctx["var"]
 

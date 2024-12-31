@@ -13,7 +13,6 @@ import pandas as pd
 from pyiem.database import get_sqlalchemy_conn
 from pyiem.exceptions import NoDataFound
 from pyiem.plot import figure_axes, get_cmap
-from pyiem.util import get_autoplot_context
 
 
 def get_description():
@@ -32,10 +31,8 @@ def get_description():
     return desc
 
 
-def plotter(fdict):
+def plotter(ctx: dict):
     """Go"""
-    ctx = get_autoplot_context(fdict, get_description())
-
     station = ctx["zstation"]
     with get_sqlalchemy_conn("asos") as conn:
         df = pd.read_sql(

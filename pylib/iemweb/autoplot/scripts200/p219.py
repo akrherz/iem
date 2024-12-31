@@ -19,7 +19,7 @@ from metpy.units import units
 from pyiem.database import get_dbconn, get_sqlalchemy_conn
 from pyiem.exceptions import NoDataFound
 from pyiem.plot import figure
-from pyiem.util import LOG, get_autoplot_context, utc
+from pyiem.util import LOG, utc
 
 VIS = "visibility"
 TEXTARGS = {
@@ -106,9 +106,8 @@ def compute_flight_condition(row):
     return "UNK"
 
 
-def plotter(fdict):
+def plotter(ctx: dict):
     """Go"""
-    ctx = get_autoplot_context(fdict, get_description())
     valid = ctx["valid"].replace(tzinfo=timezone.utc)
 
     def fetch(ts):

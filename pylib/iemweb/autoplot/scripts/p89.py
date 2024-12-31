@@ -23,7 +23,7 @@ from pyiem.grid import nav
 from pyiem.grid.zs import CachingZonalStats
 from pyiem.iemre import daily_offset, get_daily_ncname
 from pyiem.plot import figure
-from pyiem.util import get_autoplot_context, ncopen
+from pyiem.util import ncopen
 
 
 def get_description():
@@ -138,9 +138,8 @@ def get_data(ctx):
     return pd.DataFrame(rows)
 
 
-def plotter(fdict):
+def plotter(ctx: dict):
     """Go"""
-    ctx = get_autoplot_context(fdict, get_description())
     daythres = ctx["daythres"]
     trailthres = ctx["trailthres"]
     period = ctx["period"]

@@ -37,7 +37,6 @@ from pyiem.exceptions import NoDataFound
 from pyiem.network import Table as NetworkTable
 from pyiem.plot import get_cmap
 from pyiem.plot.geoplot import MAIN_AX_BOUNDS, MapPlot
-from pyiem.util import get_autoplot_context
 from sqlalchemy import text
 
 
@@ -176,11 +175,10 @@ def plot_timeseries(mp, pts, tzinfo):
     )
 
 
-def plotter(fdict):
+def plotter(ctx: dict):
     """Go"""
-    ctx = get_autoplot_context(fdict, get_description())
     # Eh
-    datglobalid = fdict.get("datglobalid")
+    datglobalid = ctx.get("datglobalid")
     if datglobalid is None or datglobalid == "":
         raise NoDataFound("No DAT globalid provided...")
 

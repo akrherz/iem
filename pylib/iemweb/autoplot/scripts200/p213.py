@@ -24,7 +24,6 @@ from pyiem.database import get_sqlalchemy_conn
 from pyiem.exceptions import NoDataFound
 from pyiem.plot import figure, get_cmap
 from pyiem.plot.util import fitbox
-from pyiem.util import get_autoplot_context
 
 from iemweb.autoplot import get_monofont
 
@@ -107,9 +106,8 @@ def print_table(fig, df, varname):
         fig.text(xpos, ypos, label, fontproperties=monofont)
 
 
-def plotter(fdict):
+def plotter(ctx: dict):
     """Go"""
-    ctx = get_autoplot_context(fdict, get_description())
     station = ctx["zstation"]
     date = ctx["date"]
     opt = ctx["opt"]

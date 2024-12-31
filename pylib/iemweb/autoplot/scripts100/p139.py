@@ -19,7 +19,6 @@ import pandas as pd
 from pyiem.database import get_sqlalchemy_conn
 from pyiem.exceptions import NoDataFound
 from pyiem.plot import figure
-from pyiem.util import get_autoplot_context
 from sqlalchemy import text
 
 from iemweb.autoplot import get_monofont
@@ -122,11 +121,10 @@ def plot_date(ax, i, dt: date, station, tz) -> bool:
     return True
 
 
-def plotter(fdict):
+def plotter(ctx: dict):
     """Go"""
     font0 = get_monofont()
     font0.set_size(16)
-    ctx = get_autoplot_context(fdict, get_description())
     station = ctx["zstation"]
     month = ctx["month"]
     months = month2months(month)

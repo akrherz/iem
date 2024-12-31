@@ -33,7 +33,6 @@ import pandas as pd
 from pyiem.database import get_sqlalchemy_conn
 from pyiem.exceptions import NoDataFound
 from pyiem.plot import figure
-from pyiem.util import get_autoplot_context
 from sqlalchemy import text
 
 from iemweb.util import month2months
@@ -133,9 +132,8 @@ def plot_event(ax, i, df, varname):
     )
 
 
-def plotter(fdict):
+def plotter(ctx: dict):
     """Go"""
-    ctx = get_autoplot_context(fdict, get_description())
     station = ctx["zstation"]
     hours = ctx["hours"]
     mydir = ctx["dir"]

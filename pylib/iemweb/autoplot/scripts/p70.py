@@ -31,7 +31,6 @@ from pyiem.nws import vtec
 from pyiem.plot import figure, get_cmap
 from pyiem.plot.use_agg import plt
 from pyiem.reference import state_names
-from pyiem.util import get_autoplot_context
 from sqlalchemy import text
 
 from iemweb.autoplot import ARG_FEMA, FEMA_REGIONS, fema_region2states
@@ -100,9 +99,8 @@ def get_description():
     return desc
 
 
-def plotter(fdict):
+def plotter(ctx: dict):
     """Go"""
-    ctx = get_autoplot_context(fdict, get_description())
     station = ctx["station"][:4]
     phenomena = ctx["phenomena"]
     significance = ctx["significance"]

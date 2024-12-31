@@ -15,7 +15,7 @@ from pyiem.database import get_sqlalchemy_conn
 from pyiem.exceptions import NoDataFound
 from pyiem.plot import figure
 from pyiem.plot.use_agg import plt
-from pyiem.util import get_autoplot_context, utc
+from pyiem.util import utc
 
 PDICT = {
     "default": "Temperatures | Winds | Clouds + Vis",
@@ -123,9 +123,8 @@ def get_data(network: str, station, tzname, sdate) -> pd.DataFrame:
     raise NoDataFound("No data was found for this site.")
 
 
-def plotter(fdict):
+def plotter(ctx: dict):
     """Go"""
-    ctx = get_autoplot_context(fdict, get_description())
     station = ctx["station"]
     sdate = ctx.get("sdate")
     plot_type = ctx["p"]

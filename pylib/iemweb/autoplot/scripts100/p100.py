@@ -74,9 +74,8 @@ def get_description():
     return desc
 
 
-def plotter(fdict):
+def plotter(ctx: dict):
     """Go"""
-    ctx = util.get_autoplot_context(fdict, get_description())
     station = ctx["station"]
     threshold = ctx["threshold"]
     ptype = ctx["type"]

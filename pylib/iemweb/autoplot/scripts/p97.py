@@ -19,7 +19,7 @@ from pyiem.database import get_sqlalchemy_conn
 from pyiem.exceptions import NoDataFound
 from pyiem.plot import MapPlot, centered_bins, get_cmap, pretty_bins
 from pyiem.reference import wfo_bounds
-from pyiem.util import get_autoplot_context, logger
+from pyiem.util import logger
 from sqlalchemy import text
 
 LOG = logger()
@@ -467,15 +467,13 @@ def get_data(ctx):
     return df.reindex(df[ctx["var"]].abs().sort_values(ascending=False).index)
 
 
-def geojson(fdict):
+def geojson(ctx: dict):
     """Generate a GeoDataFrame ready for geojson."""
-    ctx = get_autoplot_context(fdict, get_description())
     return (get_data(ctx).drop(["lat", "lon"], axis=1)), ctx["var"]
 
 
-def plotter(fdict):
+def plotter(ctx: dict):
     """Go"""
-    ctx = get_autoplot_context(fdict, get_description(), rectify_dates=True)
     if ctx["var"] in NCEI_BAD and ctx["ct"].startswith("ncei"):
         raise NoDataFound("Combo of NCEI Climatology + GDDs does not work!")
     df = get_data(ctx)

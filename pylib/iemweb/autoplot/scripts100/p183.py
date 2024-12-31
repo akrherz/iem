@@ -13,7 +13,6 @@ import requests
 from pyiem.exceptions import NoDataFound
 from pyiem.plot import figure_axes
 from pyiem.reference import state_fips, state_names
-from pyiem.util import get_autoplot_context
 
 SERVICE = (
     "https://droughtmonitor.unl.edu"
@@ -55,9 +54,8 @@ def get_description():
     return desc
 
 
-def plotter(fdict):
+def plotter(ctx: dict):
     """Go"""
-    ctx = get_autoplot_context(fdict, get_description())
     sdate = ctx["sdate"]
     edate = ctx["edate"]
     state = ctx["state"].upper()

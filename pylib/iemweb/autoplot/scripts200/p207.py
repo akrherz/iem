@@ -35,7 +35,7 @@ from pyiem.database import get_sqlalchemy_conn
 from pyiem.exceptions import NoDataFound
 from pyiem.plot import MapPlot, nwssnow
 from pyiem.reference import EPSG
-from pyiem.util import get_autoplot_context, logger
+from pyiem.util import logger
 from pyproj import Transformer
 from scipy.interpolate import Rbf
 from shapely.geometry import Point, Polygon
@@ -390,9 +390,8 @@ def prettyprint(val):
     return f"{val:.1f}"
 
 
-def plotter(fdict):
+def plotter(ctx: dict):
     """Go"""
-    ctx = get_autoplot_context(fdict, get_description())
     ctx["sz"] = max(5, ctx["sz"])
     if ctx["hours"] > 300:
         ctx["hours"] = 300

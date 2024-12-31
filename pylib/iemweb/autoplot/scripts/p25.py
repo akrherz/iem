@@ -14,7 +14,6 @@ from pyiem import reference
 from pyiem.database import get_sqlalchemy_conn
 from pyiem.exceptions import NoDataFound
 from pyiem.plot import figure_axes
-from pyiem.util import get_autoplot_context
 from scipy.stats import norm
 from sqlalchemy import text
 
@@ -45,10 +44,8 @@ def get_description():
     return desc
 
 
-def plotter(fdict: dict):
+def plotter(ctx: dict):
     """Go"""
-    ctx = get_autoplot_context(fdict, get_description())
-
     month = ctx["month"]
     day = ctx["day"]
     ts = datetime(2000, month, day)

@@ -16,7 +16,7 @@ from matplotlib.patches import Rectangle
 from pyiem.database import get_sqlalchemy_conn
 from pyiem.exceptions import NoDataFound
 from pyiem.plot import figure, get_cmap
-from pyiem.util import get_autoplot_context, utc
+from pyiem.util import utc
 
 PDICT = {"sky": "Sky Coverage + Visibility", "vsby": "Just Visibility"}
 
@@ -182,9 +182,8 @@ def plot_vsby(days, vsby, ctx, sts):
     return fig
 
 
-def plotter(fdict):
+def plotter(ctx: dict):
     """Go"""
-    ctx = get_autoplot_context(fdict, get_description())
     station = ctx["zstation"]
     year = ctx["year"]
     month = ctx["month"]

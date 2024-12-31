@@ -16,7 +16,7 @@ import numpy as np
 import pygrib
 from PIL import Image
 from pyiem.plot import MapPlot, ramp2df
-from pyiem.util import archive_fetch, get_autoplot_context, utc
+from pyiem.util import archive_fetch, utc
 
 PDICT = {
     "sector": "Plot by State / Sector",
@@ -149,9 +149,8 @@ def add_obs(img, ctx, valid):
     mp.close()
 
 
-def plotter(fdict):
+def plotter(ctx: dict):
     """Go"""
-    ctx = get_autoplot_context(fdict, get_description())
     valid = ctx["valid"].replace(tzinfo=datetime.timezone.utc)
     ramp = ramp2df("composite_n0q")
     ctx["cmap"] = mpcolors.ListedColormap(

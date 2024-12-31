@@ -7,7 +7,6 @@ import pandas as pd
 from pyiem.database import get_sqlalchemy_conn
 from pyiem.exceptions import NoDataFound
 from pyiem.plot import figure
-from pyiem.util import get_autoplot_context
 
 from iemweb.autoplot.barchart import barchar_with_top10
 
@@ -52,9 +51,8 @@ def get_description():
     return desc
 
 
-def plotter(fdict):
+def plotter(ctx: dict):
     """Go"""
-    ctx = get_autoplot_context(fdict, get_description())
     station1 = ctx["station1"].upper()
     station2 = ctx["station2"].upper()
     varname = ctx["var"]

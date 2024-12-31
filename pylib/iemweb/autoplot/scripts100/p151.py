@@ -13,7 +13,6 @@ from pyiem.database import get_sqlalchemy_conn
 from pyiem.exceptions import NoDataFound
 from pyiem.plot import MapPlot, centered_bins, get_cmap
 from pyiem.reference import SECTORS_NAME
-from pyiem.util import get_autoplot_context
 from sqlalchemy import text
 
 from iemweb.util import month2months
@@ -309,15 +308,13 @@ def get_data(ctx):
     return df
 
 
-def geojson(fdict):
+def geojson(ctx: dict):
     """Handle GeoJSON output."""
-    ctx = get_autoplot_context(fdict, get_description())
     return (get_data(ctx).drop(["lat", "lon"], axis=1)), ctx["var"]
 
 
-def plotter(fdict):
+def plotter(ctx: dict):
     """Go"""
-    ctx = get_autoplot_context(fdict, get_description())
     df = get_data(ctx)
     state = ctx["state"]
     varname = ctx["var"]

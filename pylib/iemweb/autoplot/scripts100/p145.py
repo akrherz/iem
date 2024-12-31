@@ -13,7 +13,6 @@ from pyiem.database import get_sqlalchemy_conn
 from pyiem.exceptions import NoDataFound
 from pyiem.network import Table as NetworkTable  # This is needed.
 from pyiem.plot import figure_axes
-from pyiem.util import get_autoplot_context
 from sqlalchemy import text
 
 VARS = {
@@ -73,11 +72,10 @@ def get_description():
     return desc
 
 
-def plotter(fdict):
+def plotter(ctx: dict):
     """Go"""
     nt = NetworkTable("ISUSM", only_online=False)
     oldnt = NetworkTable("ISUAG", only_online=False)
-    ctx = get_autoplot_context(fdict, get_description())
     station = ctx["station"]
     highlightyear = ctx["year"]
     varname = ctx["var"]

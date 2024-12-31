@@ -9,7 +9,6 @@ temperature.
 from pyiem.database import get_dbconn
 from pyiem.exceptions import NoDataFound
 from pyiem.plot import figure_axes
-from pyiem.util import get_autoplot_context
 
 from iemweb.util import month2months
 
@@ -74,11 +73,10 @@ def get_description():
     return desc
 
 
-def plotter(fdict):
+def plotter(ctx: dict):
     """Go"""
     pgconn = get_dbconn("asos")
     cursor = pgconn.cursor()
-    ctx = get_autoplot_context(fdict, get_description())
     station = ctx["zstation"]
     threshold = ctx["threshold"]
     opt = ctx["opt"]

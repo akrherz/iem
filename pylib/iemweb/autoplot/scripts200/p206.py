@@ -9,7 +9,6 @@ from pyiem import reference
 from pyiem.database import get_sqlalchemy_conn
 from pyiem.exceptions import NoDataFound
 from pyiem.plot import MapPlot, get_cmap
-from pyiem.util import get_autoplot_context
 from sqlalchemy import text
 
 from iemweb.autoplot import ARG_FEMA
@@ -171,15 +170,13 @@ def get_df(ctx, buf=2.25):
     return df[pd.notnull(df[ctx["v"]])]
 
 
-def geojson(fdict):
+def geojson(ctx: dict):
     """GeoJSON Content."""
-    ctx = get_autoplot_context(fdict, get_description())
     return (get_df(ctx).drop(columns=["lat", "lon", "day"])), ctx["v"]
 
 
-def plotter(fdict):
+def plotter(ctx: dict):
     """Go"""
-    ctx = get_autoplot_context(fdict, get_description())
     varname = ctx["v"]
 
     df = get_df(ctx)

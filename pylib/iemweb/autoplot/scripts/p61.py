@@ -15,7 +15,6 @@ from pyiem.exceptions import NoDataFound
 from pyiem.network import Table as NetworkTable
 from pyiem.plot.geoplot import MapPlot
 from pyiem.reference import SECTORS_NAME
-from pyiem.util import get_autoplot_context
 
 PDICT = {
     "precip": "Last Measurable Precipitation",
@@ -161,9 +160,8 @@ def get_data(ctx):
     )
 
 
-def plotter(fdict):
+def plotter(ctx: dict):
     """Go"""
-    ctx = get_autoplot_context(fdict, get_description())
     get_data(ctx)
 
     title = (

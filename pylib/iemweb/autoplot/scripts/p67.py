@@ -9,9 +9,9 @@ import datetime
 
 import matplotlib.patheffects as PathEffects
 import pandas as pd
+from pyiem.database import get_dbconn
 from pyiem.exceptions import NoDataFound
 from pyiem.plot import figure_axes
-from pyiem.util import get_autoplot_context, get_dbconn
 
 
 def get_description():
@@ -36,11 +36,10 @@ def get_description():
     return desc
 
 
-def plotter(fdict):
+def plotter(ctx: dict):
     """Go"""
     pgconn = get_dbconn("asos")
     cursor = pgconn.cursor()
-    ctx = get_autoplot_context(fdict, get_description())
     station = ctx["zstation"]
     threshold = ctx["threshold"]
     month = ctx["month"]

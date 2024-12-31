@@ -37,7 +37,7 @@ from pyiem.database import get_sqlalchemy_conn
 from pyiem.exceptions import NoDataFound
 from pyiem.network import Table as NetworkTable
 from pyiem.plot.geoplot import MapPlot
-from pyiem.util import get_autoplot_context, utc
+from pyiem.util import utc
 from sqlalchemy import text
 
 PDICT = {"realtime": "Realtime-ness", "latency": "Latency"}
@@ -71,9 +71,8 @@ def get_description():
     }
 
 
-def plotter(fdict):
+def plotter(ctx: dict):
     """Go"""
-    ctx = get_autoplot_context(fdict, get_description())
     ts = utc() - timedelta(minutes=ctx["offset"])
     nt = NetworkTable("NEXRAD")
     with get_sqlalchemy_conn("id3b") as conn:

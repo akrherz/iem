@@ -12,7 +12,7 @@ from pyiem.exceptions import NoDataFound
 from pyiem.network import Table as NetworkTable  # This is needed.
 from pyiem.plot.geoplot import MapPlot
 from pyiem.tracker import loadqc
-from pyiem.util import get_autoplot_context, mm2inch
+from pyiem.util import mm2inch
 
 PLOTTYPES = {
     "1": "Max/Min 4 Inch Soil Temps",
@@ -340,9 +340,8 @@ def plot9(ctx):
     return data, df
 
 
-def plotter(fdict):
+def plotter(ctx: dict):
     """Go"""
-    ctx = get_autoplot_context(fdict, get_description())
     ctx["qc"] = loadqc(date=ctx["date"])
     ctx["nt"] = NetworkTable("ISUSM")
     if not ctx["nt"].sts:

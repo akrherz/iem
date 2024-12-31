@@ -20,7 +20,6 @@ from pyiem.database import get_sqlalchemy_conn
 from pyiem.exceptions import NoDataFound
 from pyiem.nws.vtec import NWS_COLORS, get_ps_string
 from pyiem.plot import figure_axes
-from pyiem.util import get_autoplot_context
 from sqlalchemy import text
 
 PDICT = {
@@ -137,10 +136,8 @@ def get_df(ctx):
         ctx["df"][f"{vtec}%"] = ctx["df"][vtec] / ctx["df"]["Total"] * 100.0
 
 
-def plotter(fdict):
+def plotter(ctx: dict):
     """Go"""
-    ctx = get_autoplot_context(fdict, get_description())
-
     get_df(ctx)
     (fig, ax) = figure_axes(apctx=ctx)
 

@@ -40,7 +40,7 @@ from pyiem.exceptions import NoDataFound
 from pyiem.nws.vtec import NWS_COLORS, get_ps_string
 from pyiem.plot import MapPlot
 from pyiem.reference import SECTORS_NAME, Z_OVERLAY2, state_names
-from pyiem.util import get_autoplot_context, utc
+from pyiem.util import utc
 from sqlalchemy import text
 
 # shared with 224
@@ -233,9 +233,8 @@ def plotdf(mp, df):
             )
 
 
-def plotter(fdict):
+def plotter(ctx: dict):
     """Go"""
-    ctx = get_autoplot_context(fdict, get_description())
     valid = ctx["valid"].replace(tzinfo=timezone.utc)
     isscol = "issue" if ctx["opt"] == "within" else "product_issue"
     with get_sqlalchemy_conn("postgis") as conn:

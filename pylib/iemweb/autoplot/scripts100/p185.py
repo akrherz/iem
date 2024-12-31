@@ -43,9 +43,8 @@ def get_description():
     return desc
 
 
-def plotter(fdict):
+def plotter(ctx: dict):
     """Go"""
-    ctx = util.get_autoplot_context(fdict, get_description())
     date = ctx["date"]
     sector = ctx["sector"]
     threshold = ctx["threshold"]

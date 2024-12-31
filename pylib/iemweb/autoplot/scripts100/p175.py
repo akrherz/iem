@@ -19,7 +19,7 @@ from pyiem.grid import nav
 from pyiem.grid.zs import CachingZonalStats
 from pyiem.iemre import daily_offset, get_daily_ncname
 from pyiem.plot import figure_axes
-from pyiem.util import convert_value, get_autoplot_context, ncopen
+from pyiem.util import convert_value, ncopen
 
 
 def get_description():
@@ -57,9 +57,8 @@ def f(st, snowd, metric, stpts):
     return np.nan if v is np.ma.masked else v
 
 
-def plotter(fdict):
+def plotter(ctx: dict):
     """Go"""
-    ctx = get_autoplot_context(fdict, get_description())
     year = ctx["year"]
     thres = ctx["thres"]
     metric = convert_value(thres, "inch", "millimeter")

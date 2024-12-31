@@ -11,7 +11,7 @@ from pyiem import reference
 from pyiem.database import get_sqlalchemy_conn
 from pyiem.exceptions import NoDataFound
 from pyiem.plot import MapPlot, get_cmap
-from pyiem.util import get_autoplot_context, utc
+from pyiem.util import utc
 from sqlalchemy import text
 
 PDICT = {"cwa": "Plot by NWS Forecast Office", "state": "Plot by State"}
@@ -135,9 +135,8 @@ def get_df(ctx, bnds, buf=2.25):
     return df, valid
 
 
-def plotter(fdict):
+def plotter(ctx: dict):
     """Go"""
-    ctx = get_autoplot_context(fdict, get_description())
     varname = ctx["v"]
 
     if ctx["t"] == "state":

@@ -32,7 +32,7 @@ from pyiem.grid.zs import CachingZonalStats
 from pyiem.plot import get_cmap
 from pyiem.plot.geoplot import MapPlot
 from pyiem.reference import LATLON
-from pyiem.util import get_autoplot_context, utc
+from pyiem.util import utc
 from sqlalchemy import text
 
 from iemweb.autoplot import ARG_FEMA
@@ -249,9 +249,8 @@ def get_description():
     return desc
 
 
-def plotter(fdict):
+def plotter(ctx: dict):
     """Go"""
-    ctx = get_autoplot_context(fdict, get_description())
     level = ctx["level"]
     station = ctx["station"][:4]
     t = ctx["t"]

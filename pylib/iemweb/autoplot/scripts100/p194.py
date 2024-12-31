@@ -24,7 +24,6 @@ from pyiem.grid.zs import CachingZonalStats
 from pyiem.plot import MapPlot
 from pyiem.plot.colormaps import stretch_cmap
 from pyiem.reference import LATLON
-from pyiem.util import get_autoplot_context
 from sqlalchemy import text
 
 PDICT = {
@@ -97,9 +96,8 @@ def make_tuesday(date):
     return tuesday
 
 
-def plotter(fdict):
+def plotter(ctx: dict):
     """Go"""
-    ctx = get_autoplot_context(fdict, get_description())
     csector = ctx["csector"]
     sdate = make_tuesday(ctx["sdate"])
     edate = make_tuesday(ctx["edate"])

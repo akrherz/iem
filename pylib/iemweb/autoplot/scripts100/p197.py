@@ -14,7 +14,6 @@ from pyiem.database import get_sqlalchemy_conn
 from pyiem.exceptions import NoDataFound
 from pyiem.plot import get_cmap
 from pyiem.plot.geoplot import MapPlot
-from pyiem.util import get_autoplot_context
 from sqlalchemy import text
 
 NASS_CROP_PROGRESS = {
@@ -196,10 +195,8 @@ def get_df(ctx):
         )
 
 
-def plotter(fdict):
+def plotter(ctx: dict):
     """Go"""
-    ctx = get_autoplot_context(fdict, get_description())
-
     get_df(ctx)
     labels = {}
     data = {}

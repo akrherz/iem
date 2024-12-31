@@ -17,7 +17,6 @@ from pyiem.database import get_dbconn
 from pyiem.exceptions import NoDataFound
 from pyiem.plot import figure, get_cmap
 from pyiem.plot.use_agg import plt
-from pyiem.util import get_autoplot_context
 from scipy import stats
 
 PDICT = {"none": "Show all values", "hide": 'Show "strong" events'}
@@ -75,11 +74,10 @@ def title(wanted):
     )
 
 
-def plotter(fdict):
+def plotter(ctx: dict):
     """Go"""
     pgconn = get_dbconn("coop")
     ccursor = pgconn.cursor()
-    ctx = get_autoplot_context(fdict, get_description())
     station = ctx["station"]
     lagmonths = ctx["lag"]
     months = ctx["months"]

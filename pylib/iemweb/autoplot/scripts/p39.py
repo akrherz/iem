@@ -14,7 +14,6 @@ import numpy as np
 from pyiem.database import get_dbconnc
 from pyiem.exceptions import NoDataFound
 from pyiem.plot import figure_axes
-from pyiem.util import get_autoplot_context
 
 from iemweb.autoplot import ARG_STATION
 
@@ -85,9 +84,8 @@ def compute_compare_month(ctx, cursor):
     return cursor.fetchone()["year"], effective_date.month
 
 
-def plotter(fdict):
+def plotter(ctx: dict):
     """Go"""
-    ctx = get_autoplot_context(fdict, get_description())
     pgconn, cursor = get_dbconnc("coop")
     station = ctx["station"]
     effective_date = ctx["date"]

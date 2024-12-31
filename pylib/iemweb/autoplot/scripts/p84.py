@@ -26,10 +26,12 @@ import os
 from datetime import datetime, timedelta
 
 import numpy as np
+from affine import Affine
 from metpy.units import masked_array, units
 from pyiem import iemre, util
 from pyiem.database import get_dbconnc
 from pyiem.exceptions import NoDataFound
+from pyiem.grid.nav import IEMRE, IFC, MRMS_IEMRE, PRISM, STAGE4
 from pyiem.plot import get_cmap, pretty_bins
 from pyiem.plot.geoplot import MapPlot
 from pyiem.reference import LATLON
@@ -42,6 +44,13 @@ SRCDICT = {
     "mrms": "NOAA MRMS (since 1 Jan 2001)",
     "prism": "OSU PRISM (since 1 Jan 1981)",
     "stage4": "Stage IV (since 1 Apr 1998)",
+}
+NAV_XREF = {
+    "iemre": IEMRE,
+    "ifc": IFC,
+    "mrms": MRMS_IEMRE,
+    "prism": PRISM,
+    "stage4": STAGE4,
 }
 PDICT3 = {
     "acc": "Accumulation",
@@ -195,6 +204,11 @@ def get_ugc_bounds(ctx, sector):
 
 def set_ncinfo(ctx):
     """Define the netcdf stuff we need."""
+    if ctx["sdate"] > ctx["edate"]:
+        ctx["sdate"], ctx["edate"] = ctx["edate"], ctx["sdate"]
+    if ctx["sdate"].year != ctx["edate"].year:
+        raise NoDataFound("Sorry, do not support multi-year plots yet!")
+
     clncvar = "p01d"
     if ctx["src"] == "mrms":
         ncfn = iemre.get_daily_mrms_ncname(ctx["sdate"].year)
@@ -253,6 +267,7 @@ def set_gridinfo(ctx):
     idx1 = iemre.daily_offset(ctx["edate"]) + 1
     if not os.path.isfile(ctx["ncfn"]):
         raise NoDataFound("No data found.")
+    affin = NAV_XREF[ctx["src"]].affine
     with util.ncopen(ctx["ncfn"]) as nc:
         x0, y0, x1, y1 = util.grid_bounds(
             nc.variables["lon"][:],
@@ -261,12 +276,15 @@ def set_gridinfo(ctx):
         )
         if ctx["sector"] == "conus":
             x0, y0, x1, y1 = 0, 0, -1, -1
-        if ctx["src"] == "stage4":
-            lats = nc.variables["lat"][y0:y1, x0:x1]
-            lons = nc.variables["lon"][y0:y1, x0:x1]
-        else:
-            lats = nc.variables["lat"][y0:y1]
-            lons = nc.variables["lon"][x0:x1]
+        # Figure out what the new affine is
+        ctx["affine"] = Affine(
+            affin.a,
+            affin.b,
+            affin.c + x0 * affin.a,
+            affin.d,
+            affin.e,
+            affin.f + y0 * affin.e,
+        )
         if ctx["sdate"] == ctx["edate"]:
             p01d = mm2inch(nc.variables[ctx["ncvar"]][idx0, y0:y1, x0:x1])
         elif (idx1 - idx0) < 32:
@@ -291,8 +309,6 @@ def set_gridinfo(ctx):
                             nc.variables[ctx["ncvar"]][i:i2, y0:y1, x0:x1], 0
                         )
                     )
-    ctx["lats"] = lats
-    ctx["lons"] = lons
     ctx["p01d"] = p01d
     ctx["idx0"] = idx0
     ctx["idx1"] = idx1
@@ -343,25 +359,10 @@ def set_data(ctx):
             clevs = pretty_bins(0, maxval)
         clevs[0] = 0.01
 
-    if len(ctx["lons"].shape) == 1:
-        dx = ctx["lons"][1] - ctx["lons"][0]
-        dy = ctx["lats"][1] - ctx["lats"][0]
-        lat_edges = np.concatenate(
-            [ctx["lats"] - dy / 2, [ctx["lats"][-1] + dy / 2]]
-        )
-        lon_edges = np.concatenate(
-            [ctx["lons"] - dx / 2, [ctx["lons"][-1] + dx / 2]]
-        )
-        x2d, y2d = np.meshgrid(lon_edges, lat_edges)
-    else:
-        x2d, y2d = ctx["lons"], ctx["lats"]
-
     ctx["clevs"] = clevs
     ctx["p01d"] = p01d
     ctx["plot_units"] = plot_units
     ctx["cmap"] = cmap
-    ctx["x2d"] = x2d
-    ctx["y2d"] = y2d
 
 
 def set_mapplot(ctx):
@@ -402,10 +403,21 @@ def set_mapplot(ctx):
 
 def finalize_map(ctx):
     """Finish it."""
+    affine = ctx["affine"]
     if ctx["ptype"] == "c":
+        shp = ctx["p01d"].shape
+        xpts = np.arange(shp[1]) * affine.a + (affine.c + affine.a / 2.0)
+        ypts = np.arange(shp[0]) * affine.e + (affine.f + affine.e / 2.0)
+        # Compute the lat/lon grid
+        if ctx["src"] == "stage4":
+            xi, yi = np.meshgrid(xpts, ypts)
+            lons, lats = STAGE4.crs(xi, yi)
+        else:
+            lons, lats = np.meshgrid(xpts, ypts)
+
         ctx["mp"].contourf(
-            ctx["x2d"],
-            ctx["y2d"],
+            lons,
+            lats,
             ctx["p01d"],
             ctx["clevs"],
             cmap=ctx["cmap"],
@@ -414,16 +426,15 @@ def finalize_map(ctx):
             clip_on=False,
         )
     else:
-        res = ctx["mp"].pcolormesh(
-            ctx["x2d"],
-            ctx["y2d"],
+        ctx["mp"].imshow(
             ctx["p01d"],
-            ctx["clevs"],
+            affine,
+            NAV_XREF[ctx["src"]].crs,
+            clevs=ctx["clevs"],
             cmap=ctx["cmap"],
             units=ctx["plot_units"],
             clip_on=False,
         )
-        res.set_rasterized(True)
     if (ctx["east"] - ctx["west"]) < 10:
         ctx["mp"].drawcounties()
         ctx["mp"].drawcities(minpop=500 if ctx["sector"] == "custom" else 5000)
@@ -439,14 +450,17 @@ def finalize_map(ctx):
         ctx["mp"].draw_mask("conus")
 
 
-def plotter(fdict):
-    """Go"""
-    ctx = util.get_autoplot_context(fdict, get_description())
-    if ctx["sdate"] > ctx["edate"]:
-        ctx["sdate"], ctx["edate"] = ctx["edate"], ctx["sdate"]
-    if ctx["sdate"].year != ctx["edate"].year:
-        raise NoDataFound("Sorry, do not support multi-year plots yet!")
+def get_raster(ctx: dict):
+    """Return the grid for delivery as GeoTIFF, etc."""
+    set_ncinfo(ctx)
+    set_mapplot(ctx)  # need this for the affine
+    set_gridinfo(ctx)
+    set_data(ctx)
+    return ctx["p01d"], ctx["affine"], NAV_XREF[ctx["src"]].crs
 
+
+def plotter(ctx: dict):
+    """Go"""
     set_ncinfo(ctx)
     set_mapplot(ctx)
     set_gridinfo(ctx)

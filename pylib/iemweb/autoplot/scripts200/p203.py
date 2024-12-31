@@ -17,7 +17,7 @@ from pyiem.database import get_sqlalchemy_conn
 from pyiem.nws.vtec import VTEC_PHENOMENA
 from pyiem.plot import figure
 from pyiem.plot.util import fitbox
-from pyiem.util import get_autoplot_context, utc
+from pyiem.util import utc
 from sqlalchemy import text
 
 from iemweb.imagemaps import rectify_wfo
@@ -74,9 +74,8 @@ def get_description():
     return desc
 
 
-def plotter(fdict):
+def plotter(ctx: dict):
     """Go"""
-    ctx = get_autoplot_context(fdict, get_description())
     typ = ctx["typ"]
     sort = ctx["sort"]
     date = ctx["date"]

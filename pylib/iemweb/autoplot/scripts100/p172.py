@@ -22,7 +22,6 @@ import pandas as pd
 from pyiem.database import get_sqlalchemy_conn
 from pyiem.exceptions import NoDataFound
 from pyiem.plot import figure_axes
-from pyiem.util import get_autoplot_context
 from sqlalchemy import text
 
 from iemweb.autoplot import ARG_STATION
@@ -105,9 +104,8 @@ def cull_missing(df, colname, missingdays):
     return resdf, list(filter(lambda x: x > minyear, years))
 
 
-def plotter(fdict):
+def plotter(ctx: dict):
     """Go"""
-    ctx = get_autoplot_context(fdict, get_description())
     station = ctx["station"]
     ab = ctx["_nt"].sts[station]["archive_begin"]
     if ab is None:

@@ -16,7 +16,6 @@ from metpy.units import units
 from pyiem.database import get_sqlalchemy_conn
 from pyiem.exceptions import NoDataFound
 from pyiem.plot import figure
-from pyiem.util import get_autoplot_context
 from sqlalchemy import text
 
 PDICT = {
@@ -112,9 +111,8 @@ def add_plot(ctx):
     ax.set_xlim(0, 366)
 
 
-def plotter(fdict):
+def plotter(ctx: dict):
     """Go"""
-    ctx = get_autoplot_context(fdict, get_description())
     ctx["ab"] = ctx["_nt"].sts[ctx["station"]]["archive_begin"]
     with get_sqlalchemy_conn("asos") as conn:
         df = pd.read_sql(

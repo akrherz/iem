@@ -10,9 +10,9 @@ import calendar
 import numpy as np
 import pandas as pd
 import seaborn as sns
+from pyiem.database import get_sqlalchemy_conn
 from pyiem.exceptions import NoDataFound
 from pyiem.plot import figure_axes
-from pyiem.util import get_autoplot_context, get_sqlalchemy_conn
 from sqlalchemy import text
 
 PDICT = {
@@ -44,9 +44,8 @@ def get_description():
     return desc
 
 
-def plotter(fdict):
+def plotter(ctx: dict):
     """Go"""
-    ctx = get_autoplot_context(fdict, get_description())
     station = ctx["station"]
     ctx["_nt"].sts["_ALL"] = {"name": "All Offices"}
 

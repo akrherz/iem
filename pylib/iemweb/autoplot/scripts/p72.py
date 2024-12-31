@@ -21,7 +21,6 @@ from pyiem.database import get_sqlalchemy_conn
 from pyiem.exceptions import NoDataFound
 from pyiem.nws import vtec
 from pyiem.plot import figure_axes
-from pyiem.util import get_autoplot_context
 from sqlalchemy import text
 
 MDICT = {
@@ -125,10 +124,8 @@ def get_data(conn, params):
     return df
 
 
-def plotter(fdict):
+def plotter(ctx: dict):
     """Go"""
-    ctx = get_autoplot_context(fdict, get_description())
-
     wfo = ctx["station"]
     phenomena = ctx["phenomena"]
     significance = ctx["significance"]

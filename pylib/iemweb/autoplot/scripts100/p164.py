@@ -10,10 +10,10 @@ temperature for that date are omitted.
 import datetime
 
 import pandas as pd
+from pyiem.database import get_sqlalchemy_conn
 from pyiem.exceptions import NoDataFound
 from pyiem.plot import figure_axes
 from pyiem.plot.use_agg import plt
-from pyiem.util import get_autoplot_context, get_sqlalchemy_conn
 
 MDICT = {
     "high": "High Temperature",
@@ -54,10 +54,8 @@ def get_description():
     return desc
 
 
-def plotter(fdict):
+def plotter(ctx: dict):
     """Go"""
-    ctx = get_autoplot_context(fdict, get_description())
-
     sts = ctx["sts"]
     ets = ctx["ets"]
     varname = ctx["var"]

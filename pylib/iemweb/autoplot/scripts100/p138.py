@@ -11,7 +11,7 @@ from metpy.units import units as munits
 from pyiem.database import get_sqlalchemy_conn
 from pyiem.exceptions import NoDataFound
 from pyiem.plot import figure_axes
-from pyiem.util import convert_value, drct2text, get_autoplot_context
+from pyiem.util import convert_value, drct2text
 
 UNITS = {"mph": "miles per hour", "kt": "knots", "mps": "meters per second"}
 UNITCONV = {"mph": "miles / hour", "kt": "knot", "mps": "meter / second"}
@@ -39,10 +39,8 @@ def get_description():
     return desc
 
 
-def plotter(fdict):
+def plotter(ctx: dict):
     """Go"""
-    ctx = get_autoplot_context(fdict, get_description())
-
     station = ctx["zstation"]
     units = ctx["units"]
     with get_sqlalchemy_conn("asos") as conn:

@@ -13,7 +13,7 @@ import pandas as pd
 from pyiem.database import get_sqlalchemy_conn
 from pyiem.exceptions import NoDataFound
 from pyiem.plot import figure_axes
-from pyiem.util import get_autoplot_context, utc
+from pyiem.util import utc
 from sqlalchemy import text
 
 PDICT = {
@@ -101,9 +101,8 @@ def get_data(ctx, meta):
     return obsdf, df
 
 
-def plotter(fdict):
+def plotter(ctx: dict):
     """Go"""
-    ctx = get_autoplot_context(fdict, get_description())
     meta = ctx["_nt"].sts[ctx["zstation"]]
     if "HAS1MIN" not in meta["attributes"]:
         raise NoDataFound("Sorry, the IEM has no one-minute data for station.")

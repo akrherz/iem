@@ -13,7 +13,7 @@ from pyiem.exceptions import NoDataFound
 from pyiem.grid.nav import get_nav
 from pyiem.iemre import get_hourly_ncname, hourly_offset
 from pyiem.plot import MapPlot, get_cmap, pretty_bins
-from pyiem.util import get_autoplot_context, ncopen
+from pyiem.util import ncopen
 
 from iemweb.autoplot import ARG_IEMRE_DOMAIN
 
@@ -107,9 +107,8 @@ def unit_convert(nc, varname, idx0):
     return data
 
 
-def plotter(fdict):
+def plotter(ctx: dict):
     """Go"""
-    ctx = get_autoplot_context(fdict, get_description())
     domain = ctx["domain"]
     gridnav = get_nav("iemre", domain)
     ptype = ctx["ptype"]

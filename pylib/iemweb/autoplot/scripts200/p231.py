@@ -15,7 +15,6 @@ from pyiem.database import get_sqlalchemy_conn
 from pyiem.exceptions import NoDataFound
 from pyiem.plot import MapPlot
 from pyiem.reference import state_names
-from pyiem.util import get_autoplot_context
 from sqlalchemy import text
 
 
@@ -100,9 +99,8 @@ def compute(state, sdate, edate, days):
     return df
 
 
-def plotter(fdict):
+def plotter(ctx: dict):
     """Go"""
-    ctx = get_autoplot_context(fdict, get_description())
     df = compute(ctx["state"], ctx["from"], ctx["on"], ctx["days"])
     startdf = df[df["sday"] == f"{ctx['from']:%m%d}"].set_index("station")
     enddf = df[df["sday"] == f"{ctx['on']:%m%d}"].set_index("station")

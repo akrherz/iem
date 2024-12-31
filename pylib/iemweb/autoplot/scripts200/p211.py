@@ -16,7 +16,7 @@ from metpy.units import masked_array, units
 from pyiem.database import get_sqlalchemy_conn
 from pyiem.exceptions import NoDataFound
 from pyiem.plot import figure, figure_axes
-from pyiem.util import get_autoplot_context, utc
+from pyiem.util import utc
 
 PDICT = {
     "meteo": "Meteogram Style (Temp/Wind/Pressure)",
@@ -348,9 +348,8 @@ def make_meteo_plot(ctx):
     return fig
 
 
-def plotter(fdict):
+def plotter(ctx: dict):
     """Go"""
-    ctx = get_autoplot_context(fdict, get_description())
     if "HAS1MIN" not in ctx["_nt"].sts[ctx["zstation"]]["attributes"]:
         raise NoDataFound("Sorry, the IEM has no one-minute data for station.")
     # Make timestamps tzaware

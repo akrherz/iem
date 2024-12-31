@@ -24,7 +24,7 @@ from pyiem.database import get_sqlalchemy_conn
 from pyiem.exceptions import NoDataFound
 from pyiem.plot import MapPlot
 from pyiem.reference import LATLON, Z_OVERLAY2_LABEL, Z_POLITICAL
-from pyiem.util import get_autoplot_context, utc
+from pyiem.util import utc
 from sqlalchemy import text
 
 from iemweb.autoplot import ARG_FEMA
@@ -232,9 +232,8 @@ def get_threshold_label(threshold, outlook_type) -> str:
     return threshold
 
 
-def plotter(fdict):
+def plotter(ctx: dict):
     """Go"""
-    ctx = get_autoplot_context(fdict, get_description())
     valid = ctx["valid"].replace(tzinfo=timezone.utc)
     day, outlook_type = int(ctx["which"][0]), ctx["which"][1]
     category = ctx["cat"].upper()

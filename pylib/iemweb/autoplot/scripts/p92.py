@@ -11,7 +11,7 @@ import pandas as pd
 from pyiem.exceptions import NoDataFound
 from pyiem.nws import vtec
 from pyiem.plot.geoplot import MapPlot
-from pyiem.util import get_autoplot_context, get_dbconn, utc
+from pyiem.util import get_dbconn, utc
 
 PDICT = {
     "yes": "Only Emergencies",
@@ -53,12 +53,11 @@ def get_description():
     return desc
 
 
-def plotter(fdict):
+def plotter(ctx: dict):
     """Go"""
     bins = [0, 1, 14, 31, 91, 182, 273, 365, 730, 1460, 2920, 3800]
     pgconn = get_dbconn("postgis")
     cursor = pgconn.cursor()
-    ctx = get_autoplot_context(fdict, get_description())
     phenomena = ctx["phenomena"]
     significance = ctx["significance"]
     edate = ctx.get("edate")

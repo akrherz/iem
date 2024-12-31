@@ -13,7 +13,7 @@ import matplotlib.dates as mdates
 import pandas as pd
 from pyiem.exceptions import NoDataFound
 from pyiem.plot import figure
-from pyiem.util import get_autoplot_context, get_sqlalchemy_conn, utc
+from pyiem.util import get_sqlalchemy_conn, utc
 from sqlalchemy import text
 
 # select distinct '"'||ident||'": "['||ident||'] '||name||'",' from airspaces
@@ -101,9 +101,8 @@ def get_description():
     return desc
 
 
-def plotter(fdict):
+def plotter(ctx: dict):
     """Go"""
-    ctx = get_autoplot_context(fdict, get_description())
     sdate = ctx["sdate"]
     edate = ctx["edate"]
     limiter = (

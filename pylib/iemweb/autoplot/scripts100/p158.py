@@ -15,7 +15,6 @@ import pandas as pd
 from pyiem.database import get_sqlalchemy_conn
 from pyiem.exceptions import NoDataFound
 from pyiem.plot import figure
-from pyiem.util import get_autoplot_context
 
 
 def get_description():
@@ -424,9 +423,8 @@ $('<div class="chart">')
     )
 
 
-def plotter(fdict):
+def plotter(ctx: dict):
     """Go"""
-    ctx = get_autoplot_context(fdict, get_description())
     add_context(ctx)
 
     fig = figure(apctx=ctx)

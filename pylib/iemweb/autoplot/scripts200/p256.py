@@ -48,7 +48,7 @@ from zoneinfo import ZoneInfo
 import pandas as pd
 from pyiem.database import get_sqlalchemy_conn
 from pyiem.reference import StationAttributes as SA
-from pyiem.util import get_autoplot_context, utc
+from pyiem.util import utc
 from sqlalchemy import text
 
 PDICT = {
@@ -293,10 +293,8 @@ def pp(val, width, dec):
     return f"{val:.{dec}f}".rjust(width)
 
 
-def plotter(fdict):
+def plotter(ctx: dict):
     """Go"""
-    ctx = get_autoplot_context(fdict, get_description())
-
     obsdf = get_obsdf(ctx)
     asosdf = get_asos(ctx)
     wfo = ctx["wfo"]

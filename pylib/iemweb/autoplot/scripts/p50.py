@@ -16,7 +16,6 @@ from pyiem.exceptions import NoDataFound
 from pyiem.plot import figure_axes
 from pyiem.plot.use_agg import plt
 from pyiem.reference import state_names
-from pyiem.util import get_autoplot_context
 
 PDICT = {"state": "Aggregate by State", "wfo": "Aggregate by WFO"}
 PDICT2 = {"percent": "Frequency [%]", "count": "Count"}
@@ -83,9 +82,8 @@ def get_description():
     return desc
 
 
-def plotter(fdict):
+def plotter(ctx: dict):
     """Go"""
-    ctx = get_autoplot_context(fdict, get_description())
     ctx["_nt"].sts["_ALL"] = {"name": "All Offices"}
 
     opt = ctx["opt"]

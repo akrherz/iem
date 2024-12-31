@@ -30,7 +30,6 @@ import pandas as pd
 from pyiem.database import get_dbconnc
 from pyiem.exceptions import NoDataFound
 from pyiem.plot import figure
-from pyiem.util import get_autoplot_context
 
 from iemweb.autoplot import ARG_STATION
 
@@ -300,9 +299,8 @@ Highcharts.chart('"""
     )
 
 
-def plotter(fdict):
+def plotter(ctx: dict):
     """Go"""
-    ctx = get_autoplot_context(fdict, get_description())
     add_ctx(ctx)
 
     fig = figure(title=ctx["title"], subtitle=ctx["subtitle2"], apctx=ctx)

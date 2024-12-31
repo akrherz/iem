@@ -5,10 +5,10 @@ import datetime
 
 import pandas as pd
 from matplotlib.font_manager import FontProperties
+from pyiem.database import get_sqlalchemy_conn
 from pyiem.exceptions import NoDataFound
 from pyiem.plot import figure
 from pyiem.reference import state_names
-from pyiem.util import get_autoplot_context, get_sqlalchemy_conn
 from sqlalchemy import text
 
 NASS_CROP_PROGRESS = {
@@ -127,9 +127,8 @@ def get_description():
     return desc
 
 
-def plotter(fdict):
+def plotter(ctx: dict):
     """Go"""
-    ctx = get_autoplot_context(fdict, get_description())
     st1 = ctx["st1"][:2]
     st2 = ctx["st2"][:2]
     st3 = ctx["st3"][:2]

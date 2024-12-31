@@ -12,7 +12,6 @@ from matplotlib.font_manager import FontProperties
 from pyiem.database import get_sqlalchemy_conn
 from pyiem.exceptions import NoDataFound
 from pyiem.plot import figure_axes
-from pyiem.util import get_autoplot_context
 from scipy import stats
 from sqlalchemy import text
 
@@ -77,13 +76,12 @@ def get_description():
     return desc
 
 
-def plotter(fdict):
+def plotter(ctx: dict):
     """Go"""
     font0 = FontProperties()
     font0.set_family("monospace")
     font0.set_size(16)
 
-    ctx = get_autoplot_context(fdict, get_description())
     varname = ctx["var"]
     month = ctx["month"]
     station = ctx["zstation"]

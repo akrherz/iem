@@ -13,7 +13,6 @@ import pandas as pd
 from pyiem.database import get_sqlalchemy_conn
 from pyiem.exceptions import NoDataFound
 from pyiem.plot import figure_axes
-from pyiem.util import get_autoplot_context
 
 from iemweb.autoplot import ARG_STATION
 
@@ -176,9 +175,8 @@ s += '<br /><b>Avg Days per Month:</b> '+ this.points[1].y.toFixed(2);
     """
 
 
-def plotter(fdict):
+def plotter(ctx: dict):
     """Go"""
-    ctx = get_autoplot_context(fdict, get_description())
     add_ctx(ctx)
     (fig, ax) = figure_axes(
         title=ctx["title"], subtitle=ctx["subtitle"], apctx=ctx

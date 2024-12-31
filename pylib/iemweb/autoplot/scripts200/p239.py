@@ -17,7 +17,6 @@ from pyiem.database import get_dbconn, get_sqlalchemy_conn
 from pyiem.exceptions import NoDataFound
 from pyiem.plot import figure, get_cmap, pretty_bins
 from pyiem.reference import state_names
-from pyiem.util import get_autoplot_context
 from sklearn.linear_model import LinearRegression
 from sqlalchemy import text
 
@@ -171,9 +170,8 @@ def get_nass(ctx):
     return df
 
 
-def plotter(fdict):
+def plotter(ctx: dict):
     """Go"""
-    ctx = get_autoplot_context(fdict, get_description())
     county = ctx["_nt"].sts[ctx["station"]]["ugc_county"]
     countyname = get_countyname(county)
     if ctx["station"].endswith("0000"):
