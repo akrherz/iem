@@ -83,7 +83,7 @@
 /plotting/auto/plot/84/sector:IA::network:WFO::cwa:DMX::src:mrms::opt:dep::usdm:no::ptype:g::sdate:2024-08-06::edate:2024-08-13::cmap:YlGnBu::_r:t::dpi:100.png
 /plotting/auto/plot/84/sector:IA::network:WFO::src:prism::opt:acc::usdm:no::ptype:g::sdate:2024-08-13::edate:2024-08-13::cmap:YlGnBu::_r:t::dpi:100.png
 /plotting/auto/plot/84/sector:IA::network:WFO::src:iemre::opt:acc::usdm:no::ptype:g::sdate:2024-08-13::edate:2024-08-13::cmap:YlGnBu::_r:t::dpi:100.png
-/plotting/auto/plot/84/sector:IA::network:WFO::src:ifc::opt:acc::usdm:no::ptype:g::sdate:2024-08-13::edate:2024-08-13::cmap:YlGnBu::_r:t::dpi:100.png
+/plotting/auto/plot/84/sector:IA::network:WFO::src:ifc::opt:acc::usdm:no::ptype:g::sdate:2024-01-01::edate:2024-01-02::cmap:YlGnBu::_r:t::dpi:100.png
 /plotting/auto/plot/86/csector:AK::var:wind_speed::ptype:c::date:2024-01-01::cmap:magma::_r:t::dpi:100.png
 /plotting/auto/plot/86/csector:IN::var:wind_speed::ptype:c::date:2024-01-01::cmap:magma::_r:t::dpi:100.png
 /plotting/auto/plot/86/domain:europe::csector:IN::var:rsds::ptype:c::date:2024-01-01::cmap:magma::_r:t::dpi:100.png
@@ -266,9 +266,12 @@
 /plotting/auto/plot/199/opt:7::date:2024-07-24::_r:t::dpi:100.png
 /plotting/auto/plot/199/opt:8::date:2024-07-24::_r:t::dpi:100.png
 /plotting/auto/plot/199/opt:9::date:2024-07-24::_r:t::dpi:100.png
+/plotting/auto/plot/200/month:all::p:2.C.7::level:CATEGORICAL.SLGT::t:state::network:WFO::station:ABR::csector:conus::fema:7::drawc:no::w:lastyear::cmap:jet::_r:t::dpi:100.png
 /plotting/auto/plot/200/month:all::p:2.C.7::level:CATEGORICAL.SLGT::t:fema::network:WFO::station:DMX::csector:IA::fema:7::drawc:no::w:avg::cmap:jet::_r:t::dpi:100.png
 /plotting/auto/plot/200/month:jan::p:3.C.8::level:CATEGORICAL.SLGT::t:state::network:WFO::station:DMX::csector:southeast::drawc:no::w:avg::edate:2024-09-10::cmap:jet::_r:t::dpi:100.png
 /plotting/auto/plot/200/month:summer::p:3.C.8::level:CATEGORICAL.SLGT::t:state::network:WFO::station:DMX::csector:southeast::drawc:no::w:avg::edate:2024-09-10::cmap:jet::_r:t::dpi:100.png
+/plotting/auto/plot/200/month:all::p:2.C.7::level:CATEGORICAL.SLGT::t:state::network:WFO::station:ABR::csector:conus::fema:7::drawc:no::w:avg::cmap:jet::_r:t::dpi:100::_cb:1.png
+/plotting/auto/plot/200/month:all::p:2.C.7::level:CATEGORICAL.SLGT::t:state::network:WFO::station:ABR::csector:conus::fema:7::drawc:no::w:count::cmap:jet::_r:t::dpi:100.png
 /plotting/auto/plot/201/mode:heat::sdate:2024-07-01::edate:2024-08-16::outlook_type:C::day:1::w:all::network:WFO::wfo:STO::mystate:IA::ugc:IAZ048::g:yes::_r:t::dpi:100.png
 /plotting/auto/plot/201/mode:cal::sdate:2024-07-01::edate:2024-08-16::outlook_type:C::day:1::w:all::network:WFO::wfo:STO::mystate:IA::ugc:IAZ048::g:yes::_r:t::dpi:100.png
 /plotting/auto/plot/201/mode:cal::sdate:2024-01-01::edate:2024-08-16::outlook_type:C::day:1::w:wfo::network:WFO::wfo:STO::mystate:IA::ugc:IAZ048::g:yes::_r:t::dpi:100.png
@@ -306,6 +309,7 @@
 /plotting/auto/plot/220/which:7C::cat:categorical::t:fema::network:WFO::wfo:DMX::fema:4::csector:southeast::valid:2001-09-10%201943::_r:t::dpi:100.png
 /plotting/auto/plot/220/which:2C::cat:categorical::t:fema::network:WFO::wfo:DMX::fema:4::csector:southeast::valid:2024-08-08%200352::_r:t::dpi:100.png
 /plotting/auto/plot/220/which:2C::cat:hail::t:cwa::network:WFO::wfo:GSP::fema:4::csector:southeast::valid:2024-08-08%200352::_r:t::dpi:100.png
+/plotting/auto/plot/224/which:pop::valid:2024-05-21%202100::opt:active::_r:t::dpi:100.png
 /plotting/auto/plot/227/pid:202410012036-KDTX-FZUS73-MWSDTX::segnum:0::_r:t::dpi:100.png
 /plotting/auto/plot/228/mode:normal::state:IA::date:2024-01-10::d1:30::d2:60::d3:90::_r:t::dpi:100::_cb:1.png
 /plotting/auto/plot/228/mode:iadrought::state:IA::date:2024-01-10::d1:30::d2:60::d3:90::_r:t::dpi:100.png

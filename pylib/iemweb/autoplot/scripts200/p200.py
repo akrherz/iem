@@ -11,10 +11,9 @@ slight risk total.</p>
 outlooks since 2002.  This app is also horribly slow for reasons I have
 yet to fully debug :(</p>
 
-<p><strong>Updated 28 Apr 2022</strong>: A generalized outlook category
-was added to lump all of the issuance times together.  So you can do
-generic requests now like for any Day 1 Outlook, instead of limiting to
-just the 13z issuance, for example.</p>
+<p><strong>Updated 31 Dec 2024</strong>: This autoplot will no longer emit
+a hacky CSV/Excel file.  Instead, it will return a GeoTIFF with the analysis
+grid.  If this causes you heartburn, please let me know.</p>
 
 <p>Autoplot <a href="/plotting/auto/?q=248">248</a> is similar, but generates
 chart of days per year by WFO, state.</p>
@@ -31,7 +30,6 @@ from pyiem.exceptions import NoDataFound
 from pyiem.grid.zs import CachingZonalStats
 from pyiem.plot import get_cmap
 from pyiem.plot.geoplot import MapPlot
-from pyiem.reference import LATLON
 from pyiem.util import utc
 from sqlalchemy import text
 
@@ -173,7 +171,7 @@ GRIDSOUTH = 19.47
 
 def get_description():
     """Return a dict describing how to call this plotter"""
-    desc = {"description": __doc__, "data": True, "cache": 86400}
+    desc = {"description": __doc__, "cache": 86400}
     desc["arguments"] = [
         dict(
             type="select",
@@ -249,11 +247,9 @@ def get_description():
     return desc
 
 
-def plotter(ctx: dict):
-    """Go"""
+def get_raster(ctx: dict):
+    """Compute the raster."""
     level = ctx["level"]
-    station = ctx["station"][:4]
-    t = ctx["t"]
     p = ctx["p"]
     month = ctx["month"]
 
@@ -264,8 +260,6 @@ def plotter(ctx: dict):
     XSZ = int((GRIDEAST - GRIDWEST) / griddelta)
 
     raster = np.zeros((int(YSZ), int(XSZ)))
-    lons = np.linspace(GRIDWEST, GRIDEAST, XSZ)
-    lats = np.linspace(GRIDSOUTH, GRIDNORTH, YSZ)
 
     params = {
         "ot": p.split(".")[1],
@@ -286,7 +280,7 @@ def plotter(ctx: dict):
         params["hour"] = int(hour)
         hour_limiter = " and cycle = :hour "
     with get_sqlalchemy_conn("postgis") as conn:
-        df = gpd.read_postgis(
+        df = gpd.read_postgis(  # skipcq
             text(
                 f"""
             select expire, min(issue) as min_issue,
@@ -313,10 +307,10 @@ def plotter(ctx: dict):
     affine = Affine(
         griddelta,
         0.0,
-        GRIDWEST - griddelta / 2.0,
+        GRIDWEST,
         0.0,
         0 - griddelta,
-        GRIDNORTH + griddelta / 2.0,
+        GRIDNORTH,
     )
     czs = CachingZonalStats(affine)
     czs.compute_gridnav(df["geom"], raster)
@@ -335,10 +329,24 @@ def plotter(ctx: dict):
         else:
             raster[jslice, islice] += grid
 
-    raster = np.flipud(raster)
     years = (utc() - df["min_issue"].min()).total_seconds() / 365.25 / 86400.0
     if ctx["w"] == "avg":
         raster = raster / years
+
+    ctx["df"] = df
+
+    return raster, affine, 4326
+
+
+def plotter(ctx: dict):
+    """Go"""
+    raster, affine, _crs = get_raster(ctx)
+    df: pd.DataFrame = ctx["df"]
+    station = ctx["station"][:4]
+    level = ctx["level"]
+    t = ctx["t"]
+    p = ctx["p"]
+    month = ctx["month"]
     subtitle = (
         f"Found {len(df.index)} events for CONUS "
         f"between {df['min_issue'].min():%d %b %Y} and "
@@ -372,54 +380,23 @@ def plotter(ctx: dict):
         subtitle=f"{PDICT2[ctx['w']]}, {subtitle}",
         nocaption=True,
     )
-    lon_edges = np.concatenate(
-        [lons - griddelta / 2.0, [lons[-1] + griddelta / 2.0]]
-    )
-    lat_edges = np.concatenate(
-        [lats - griddelta / 2.0, [lats[-1] + griddelta / 2.0]]
-    )
-    # Get the main axes bounds
-    if t == "state" and csector == "conus":
-        domain = raster
-        df2 = pd.DataFrame()
-    else:
-        (west, east, south, north) = mp.panels[0].get_extent(LATLON)
-        i0 = int((west - GRIDWEST) / griddelta)
-        j0 = int((south - GRIDSOUTH) / griddelta)
-        i1 = int((east - GRIDWEST) / griddelta)
-        j1 = int((north - GRIDSOUTH) / griddelta)
-        jslice = slice(j0, j1)
-        islice = slice(i0, i1)
-        domain = raster[jslice, islice]
-        lons = lons[islice]
-        lats = lats[jslice]
-        lon_edges = np.concatenate(
-            [lons - griddelta / 2.0, [lons[-1] + griddelta / 2.0]]
-        )
-        lat_edges = np.concatenate(
-            [lats - griddelta / 2.0, [lats[-1] + griddelta / 2.0]]
-        )
-        lons, lats = np.meshgrid(lons, lats)
-        df2 = pd.DataFrame(
-            {"lat": lats.ravel(), "lon": lons.ravel(), "freq": domain.ravel()}
-        )
-    if np.nanmax(domain) == 0:
+    if np.nanmax(raster) == 0:
         raise NoDataFound("No Data Found")
     if ctx["w"] == "lastyear":
-        if np.ma.max(domain) < 1:
-            domain = np.where(domain < 1, np.nan, domain)
+        if np.ma.max(raster) < 1:
+            raster = np.where(raster < 1, np.nan, raster)
             rng = range(2022, 2024)
         else:
-            domain = np.where(domain < 1, np.nan, domain)
-            rng = range(int(np.nanmin(domain)), int(np.nanmax(domain)) + 2)
+            raster = np.where(raster < 1, np.nan, raster)
+            rng = range(int(np.nanmin(raster)), int(np.nanmax(raster)) + 2)
     elif ctx["w"] == "count":
-        domain = np.where(domain < 1, np.nan, domain)
-        rng = np.unique(np.linspace(1, np.nanmax(domain) + 1, 10, dtype=int))
+        raster = np.where(raster < 1, np.nan, raster)
+        rng = np.unique(np.linspace(1, np.nanmax(raster) + 1, 10, dtype=int))
     else:
         rng = [
             round(x, 2)
             for x in np.linspace(
-                max([0.01, np.min(domain) - 0.5]), np.max(domain) + 0.1, 10
+                max([0.01, np.min(raster) - 0.5]), np.max(raster) + 0.1, 10
             )
         ]
 
@@ -427,20 +404,17 @@ def plotter(ctx: dict):
     cmap.set_bad("white")
     cmap.set_under("white")
     cmap.set_over("black")
-    x, y = np.meshgrid(lon_edges, lat_edges)
-    res = mp.pcolormesh(
-        x,
-        y,
-        domain,
-        rng,
+    mp.imshow(
+        raster,
+        affine,
+        "EPSG:4326",
+        clevs=rng,
         cmap=cmap,
         clip_on=False,
         units=UNITS[ctx["w"]],
         extend="both" if ctx["w"] != "lastyear" else "neither",  # dragons
     )
-    # Cut down on SVG et al size
-    res.set_rasterized(True)
     if ctx["drawc"] == "yes":
         mp.drawcounties()
 
-    return mp.fig, df2
+    return mp.fig

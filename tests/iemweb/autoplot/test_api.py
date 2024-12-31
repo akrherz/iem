@@ -23,6 +23,8 @@ def test_autoplot_calls_via_frontend(entry: dict):
         fmts.append("js")
     if meta.get("data"):
         fmts.append("csv")
+    if meta.get("raster"):
+        fmts.append("geotiff")
     for fmt in fmts:
         c = Client(autoplot_app)
         res = c.get(f"?p={entry['id']}&fmt={fmt}")
