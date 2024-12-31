@@ -178,7 +178,7 @@ def plot_timeseries(mp, pts, tzinfo):
 def plotter(ctx: dict):
     """Go"""
     # Eh
-    datglobalid = ctx.get("datglobalid")
+    datglobalid = ctx["datglobalid"]
     if datglobalid is None or datglobalid == "":
         raise NoDataFound("No DAT globalid provided...")
 

@@ -160,7 +160,7 @@ def plotter(ctx: dict):
 
     fig = figure(title=title, subtitle=subtitle, apctx=ctx)
     # add axes without any markups
-    ax = fig.add_axes([0.0, 0.0, 1, 1], frame_on=False)
+    ax = fig.add_axes((0.0, 0.0, 1, 1), frame_on=False)
     ypos = 0.8
     xbarstart = 0.26
     xbarend = 0.85
@@ -174,7 +174,7 @@ def plotter(ctx: dict):
         rect = Rectangle((0.02, ypos - 0.001), 0.94, 0.08, ec="k", fc="w")
         ax.add_patch(rect)
         # Draw a rectange for each of the top 5
-        color = NWS_COLORS.get(key, "#EEEEEE")
+        color = NWS_COLORS.get(str(key), "#EEEEEE")
         # A simple abbrevation to start
         fig.text(0.03, ypos + 0.01, key, color=color, fontsize="xx-large")
         # A lablel above the top
