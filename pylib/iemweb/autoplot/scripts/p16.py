@@ -10,7 +10,7 @@ from metpy.units import units
 from pyiem.database import get_sqlalchemy_conn
 from pyiem.exceptions import NoDataFound
 from pyiem.plot.windrose import WindrosePlot, histogram
-from pyiem.util import drct2text, get_autoplot_context
+from pyiem.util import drct2text
 from sqlalchemy import text
 
 from iemweb.util import month2months
@@ -277,9 +277,8 @@ def add_ctx(ctx):
     return ctx
 
 
-def plotter(fdict):
+def plotter(ctx: dict):
     """Go"""
-    ctx = get_autoplot_context(fdict, get_description())
     add_ctx(ctx)
 
     wr = WindrosePlot(

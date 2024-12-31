@@ -14,7 +14,7 @@ from pyiem.database import get_sqlalchemy_conn
 from pyiem.exceptions import NoDataFound
 from pyiem.plot import figure, get_cmap
 from pyiem.reference import state_names
-from pyiem.util import get_autoplot_context, utc
+from pyiem.util import utc
 from sqlalchemy import text
 
 PDICT = {
@@ -163,9 +163,8 @@ def fill100(df: pd.DataFrame) -> pd.DataFrame:
     return df.sort_values("week_ending", ascending=True)
 
 
-def plotter(fdict):
+def plotter(ctx: dict):
     """Go"""
-    ctx = get_autoplot_context(fdict, get_description())
     state = ctx["state"][:2]
     short_desc = PDICT[ctx["short_desc"].upper()]
     with get_sqlalchemy_conn("coop") as conn:

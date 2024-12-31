@@ -14,7 +14,7 @@ from pyiem.exceptions import NoDataFound
 from pyiem.iemre import XAXIS, YAXIS, grb2iemre
 from pyiem.meteorology import comprehensive_climate_index
 from pyiem.plot import MapPlot, get_cmap
-from pyiem.util import archive_fetch, get_autoplot_context, utc
+from pyiem.util import archive_fetch, utc
 
 PDICT = {
     "no": "No Shade Effect",
@@ -99,9 +99,8 @@ def get_data(ctx: dict) -> dict:
     return res
 
 
-def plotter(fdict):
+def plotter(ctx: dict):
     """Go"""
-    ctx = get_autoplot_context(fdict, get_description())
     ctx["valid"] = ctx["valid"].replace(tzinfo=ZoneInfo("UTC"))
     lvalid = ctx["valid"].astimezone(ZoneInfo("America/Chicago"))
     try:

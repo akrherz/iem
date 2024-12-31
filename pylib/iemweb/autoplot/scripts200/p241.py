@@ -24,7 +24,6 @@ from pyiem.util import (
     LOG,
     archive_fetch,
     convert_value,
-    get_autoplot_context,
     utc,
 )
 
@@ -150,9 +149,8 @@ def get_data(ctx):
     }
 
 
-def plotter(fdict):
+def plotter(ctx: dict):
     """Go"""
-    ctx = get_autoplot_context(fdict, get_description())
     if (ctx["ets"] - ctx["sts"]) > timedelta(days=4):
         ctx["ets"] = ctx["sts"] + timedelta(days=4)
     res = get_data(ctx)

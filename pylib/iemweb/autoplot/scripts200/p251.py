@@ -13,7 +13,7 @@ from pyiem.database import get_sqlalchemy_conn
 from pyiem.exceptions import IncompleteWebRequest
 from pyiem.nws.vtec import NWS_COLORS
 from pyiem.plot import figure_axes
-from pyiem.util import get_autoplot_context, utc
+from pyiem.util import utc
 from sqlalchemy import text
 
 
@@ -91,9 +91,8 @@ def getp(conn, phenomena, wfo, sts, ets):
     return times, counts
 
 
-def plotter(fdict):
+def plotter(ctx: dict):
     """Go"""
-    ctx = get_autoplot_context(fdict, get_description())
     wfo = ctx["wfo"]
     sts = ctx["sts"].replace(tzinfo=timezone.utc)
     ets = ctx["ets"].replace(tzinfo=timezone.utc)

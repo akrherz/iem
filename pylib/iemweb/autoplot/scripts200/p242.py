@@ -18,7 +18,6 @@ from pyiem.plot import MapPlot
 from pyiem.plot.geoplot import MAIN_AX_BOUNDS
 from pyiem.plot.use_agg import plt
 from pyiem.reference import Z_OVERLAY2
-from pyiem.util import get_autoplot_context
 from sqlalchemy import text
 
 ICONS = {
@@ -172,9 +171,8 @@ def get_df(table, product_id):
     return df
 
 
-def plotter(fdict):
+def plotter(ctx: dict):
     """Go"""
-    ctx = get_autoplot_context(fdict, get_description())
     product_id = ctx["pid"]
     # Can we find data?
     df = get_df(f"lsrs_{product_id[:4]}", product_id)

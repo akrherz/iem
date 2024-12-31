@@ -15,7 +15,6 @@ from matplotlib.patches import Rectangle
 from pyiem.database import get_sqlalchemy_conn
 from pyiem.exceptions import NoDataFound
 from pyiem.plot import figure_axes
-from pyiem.util import get_autoplot_context
 
 warnings.simplefilter("ignore", UserWarning)
 PDICT = {"temps": "Plot High/Low Temperatures", "precip": "Plot Precipitation"}
@@ -287,9 +286,8 @@ def do_temperature_plot(ctx) -> bool:
     return hasdata
 
 
-def plotter(fdict):
+def plotter(ctx: dict):
     """Go"""
-    ctx = get_autoplot_context(fdict, get_description())
     common(ctx)
     if ctx["p"] == "precip":
         hasdata = do_precip_plot(ctx)

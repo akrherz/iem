@@ -29,7 +29,7 @@ from pyiem.database import get_sqlalchemy_conn
 from pyiem.exceptions import NoDataFound
 from pyiem.plot.geoplot import MapPlot
 from pyiem.reference import prodDefinitions
-from pyiem.util import get_autoplot_context, utc
+from pyiem.util import utc
 from sqlalchemy import text
 
 PDICT = {
@@ -99,10 +99,9 @@ def get_description():
     return desc
 
 
-def plotter(fdict):
+def plotter(ctx: dict):
     """Go"""
     fix()
-    ctx = get_autoplot_context(fdict, get_description())
     pil = ctx["pil"][:3]
     if ctx["ets"].astimezone(ZoneInfo("UTC")) > utc():
         ctx["ets"] = utc()

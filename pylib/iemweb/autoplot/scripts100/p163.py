@@ -23,7 +23,7 @@ import pandas as pd
 from pyiem.database import get_sqlalchemy_conn
 from pyiem.exceptions import NoDataFound
 from pyiem.plot import MapPlot, get_cmap
-from pyiem.util import get_autoplot_context, utc
+from pyiem.util import utc
 from sqlalchemy import text
 
 MDICT = {
@@ -172,9 +172,8 @@ def get_count_bins(df: pd.DataFrame, varname: str):
     return bins
 
 
-def plotter(fdict):
+def plotter(ctx: dict):
     """Go"""
-    ctx = get_autoplot_context(fdict, get_description())
     params = {
         "sts": ctx["sdate"].replace(tzinfo=ZoneInfo("UTC")),
         "ets": ctx["edate"].replace(tzinfo=ZoneInfo("UTC")),

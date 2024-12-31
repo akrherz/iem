@@ -21,7 +21,6 @@ import requests
 from pyiem.exceptions import NoDataFound
 from pyiem.plot import figure
 from pyiem.reference import state_fips, state_names
-from pyiem.util import get_autoplot_context
 from scipy.interpolate import interp1d
 
 SERVICE = (
@@ -66,9 +65,8 @@ def get_description():
     return desc
 
 
-def plotter(fdict):
+def plotter(ctx: dict):
     """Go"""
-    ctx = get_autoplot_context(fdict, get_description())
     state = ctx["state"]
     syear = ctx["syear"]
     eyear = ctx["eyear"]

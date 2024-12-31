@@ -16,7 +16,6 @@ from pyiem.database import get_sqlalchemy_conn
 from pyiem.exceptions import NoDataFound
 from pyiem.plot import figure
 from pyiem.plot.use_agg import plt
-from pyiem.util import get_autoplot_context
 
 PDICT = {
     "BLSN": "Blowing Snow (BLSN)",
@@ -72,10 +71,8 @@ def get_description():
     return desc
 
 
-def plotter(fdict):
+def plotter(ctx: dict):
     """Go"""
-    ctx = get_autoplot_context(fdict, get_description())
-
     station = ctx["zstation"]
     syear = ctx["syear"]
     eyear = ctx["eyear"]

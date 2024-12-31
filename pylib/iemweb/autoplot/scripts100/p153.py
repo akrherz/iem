@@ -18,7 +18,6 @@ from matplotlib.font_manager import FontProperties
 from pyiem.database import get_sqlalchemy_conn
 from pyiem.exceptions import NoDataFound
 from pyiem.plot import figure_axes
-from pyiem.util import get_autoplot_context
 from sqlalchemy import text
 
 from iemweb.autoplot import get_monofont
@@ -126,14 +125,13 @@ def rounder(row, varname):
     return f"{row[varname]:3.0f}"
 
 
-def plotter(fdict):
+def plotter(ctx: dict):
     """Go"""
     font0 = get_monofont()
     font0.set_size(16)
     font1 = FontProperties()
     font1.set_size(16)
 
-    ctx = get_autoplot_context(fdict, get_description())
     varname = ctx["var"]
     varname2 = varname.split("_")[1]
     if varname2 in ["dwpf", "tmpf", "feel"]:

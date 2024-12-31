@@ -10,7 +10,7 @@ import numpy as np
 import pygrib
 from pyiem.exceptions import NoDataFound
 from pyiem.plot import MapPlot, get_cmap, pretty_bins
-from pyiem.util import archive_fetch, get_autoplot_context, mm2inch, utc
+from pyiem.util import archive_fetch, mm2inch, utc
 
 PDICT = {"120": "Five Day", "168": "Seven Day"}
 PDICT2 = {"0": "0z (7 PM CDT)", "12": "12z (7 AM CDT)"}
@@ -80,9 +80,8 @@ def get_description():
     return desc
 
 
-def plotter(fdict):
+def plotter(ctx: dict):
     """Go"""
-    ctx = get_autoplot_context(fdict, get_description())
     date = ctx["date"]
     z = ctx["z"]
     period = ctx["f"]

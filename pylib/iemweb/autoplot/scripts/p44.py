@@ -35,7 +35,6 @@ from pyiem.exceptions import NoDataFound
 from pyiem.nws import vtec
 from pyiem.plot import figure
 from pyiem.plot.use_agg import plt
-from pyiem.util import get_autoplot_context
 from sqlalchemy import text
 
 from iemweb.autoplot import ARG_FEMA, fema_region2states
@@ -205,9 +204,8 @@ def munge_df(ctx, df):
     return df[(df["sday"] <= today_sday) | (df["sday"] >= "0701")]
 
 
-def plotter(fdict):
+def plotter(ctx: dict):
     """Go"""
-    ctx = get_autoplot_context(fdict, get_description())
     station = ctx["station"]
     combo = ctx["c"]
     phenomena = ctx["phenomena"][:2]

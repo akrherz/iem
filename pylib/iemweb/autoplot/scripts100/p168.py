@@ -30,9 +30,8 @@ def get_description():
     return desc
 
 
-def plotter(fdict):
+def plotter(ctx: dict):
     """Go"""
-    ctx = util.get_autoplot_context(fdict, get_description())
     station = ctx["station"]
     ab = ctx["_nt"].sts[station]["archive_begin"]
     if ab is None:

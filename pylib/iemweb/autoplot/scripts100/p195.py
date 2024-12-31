@@ -14,7 +14,7 @@ import pandas as pd
 import seaborn as sns
 from pyiem.exceptions import NoDataFound
 from pyiem.plot import figure
-from pyiem.util import convert_value, get_autoplot_context, get_sqlalchemy_conn
+from pyiem.util import convert_value, get_sqlalchemy_conn
 from sqlalchemy import text
 
 PDICT = {
@@ -200,9 +200,8 @@ Highcharts.chart('"""
     )
 
 
-def plotter(fdict):
+def plotter(ctx: dict):
     """Go"""
-    ctx = get_autoplot_context(fdict, get_description())
     date = ctx.get("date")
     df = get_data(ctx)
     plotdf = df

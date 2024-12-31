@@ -24,7 +24,6 @@ from pyiem.exceptions import NoDataFound
 from pyiem.network import Table as NetworkTable
 from pyiem.plot import MapPlot
 from pyiem.reference import Z_OVERLAY2, state_bounds
-from pyiem.util import get_autoplot_context
 from sqlalchemy import text
 from tqdm import tqdm
 
@@ -105,9 +104,8 @@ def overlay_drought_regions(mp):
     )
 
 
-def plotter(fdict):
+def plotter(ctx: dict):
     """Go"""
-    ctx = get_autoplot_context(fdict, get_description())
     state = ctx["state"]
     d1 = ctx["d1"]
     d2 = ctx["d2"]

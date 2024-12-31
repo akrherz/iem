@@ -108,7 +108,7 @@ from pyiem.reference import (
     state_names,
     wfo_bounds,
 )
-from pyiem.util import get_autoplot_context, utc
+from pyiem.util import utc
 from rasterstats import zonal_stats
 from sqlalchemy import text
 
@@ -891,9 +891,8 @@ def do_ugc(ctx: dict):
     pgconn.close()
 
 
-def plotter(fdict):
+def plotter(ctx: dict):
     """Go"""
-    ctx = get_autoplot_context(fdict, get_description())
     # Covert datetime to UTC
     ctx["sdate"] = ctx["sdate"].replace(tzinfo=ZoneInfo("UTC"))
     ctx["edate"] = ctx["edate"].replace(tzinfo=ZoneInfo("UTC"))

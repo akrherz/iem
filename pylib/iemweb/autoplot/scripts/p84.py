@@ -439,9 +439,8 @@ def finalize_map(ctx):
         ctx["mp"].draw_mask("conus")
 
 
-def plotter(fdict):
+def plotter(ctx: dict):
     """Go"""
-    ctx = util.get_autoplot_context(fdict, get_description())
     if ctx["sdate"] > ctx["edate"]:
         ctx["sdate"], ctx["edate"] = ctx["edate"], ctx["sdate"]
     if ctx["sdate"].year != ctx["edate"].year:

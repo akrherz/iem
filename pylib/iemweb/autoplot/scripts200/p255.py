@@ -20,7 +20,6 @@ import pandas as pd
 from pyiem.database import get_sqlalchemy_conn
 from pyiem.exceptions import NoDataFound
 from pyiem.plot import figure
-from pyiem.util import get_autoplot_context
 from sqlalchemy import text
 
 from iemweb.autoplot import ARG_STATION
@@ -114,10 +113,8 @@ def get_obsdf(ctx):
     return df
 
 
-def plotter(fdict):
+def plotter(ctx: dict):
     """Go"""
-    ctx = get_autoplot_context(fdict, get_description())
-
     df = get_obsdf(ctx)
 
     depth = max(0, min(999, ctx["depth"]))

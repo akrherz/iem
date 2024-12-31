@@ -12,7 +12,6 @@ import pandas as pd
 from pyiem.database import get_sqlalchemy_conn
 from pyiem.exceptions import NoDataFound
 from pyiem.plot import figure, fitbox
-from pyiem.util import get_autoplot_context
 from sqlalchemy import text
 
 PDICT = {
@@ -138,9 +137,8 @@ def pick_climate(ctx, idx):
     return cltable, clstation
 
 
-def plotter(fdict):
+def plotter(ctx: dict):
     """Go"""
-    ctx = get_autoplot_context(fdict, get_description())
     varname = ctx["v"]
     station1 = ctx["station1"]
     station2 = ctx.get("station2")

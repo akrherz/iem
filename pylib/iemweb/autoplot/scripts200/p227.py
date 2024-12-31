@@ -13,7 +13,7 @@ from pyiem.exceptions import NoDataFound
 from pyiem.network import Table as NetworkTable
 from pyiem.plot.geoplot import MapPlot
 from pyiem.reference import LATLON, Z_OVERLAY2, prodDefinitions
-from pyiem.util import LOG, get_autoplot_context
+from pyiem.util import LOG
 from sqlalchemy import text
 
 TFORMAT = "%b %-d %Y %-I:%M %p %Z"
@@ -56,9 +56,8 @@ def get_text(product_id: str) -> str:
     return res
 
 
-def plotter(fdict):
+def plotter(ctx: dict):
     """Go"""
-    ctx = get_autoplot_context(fdict, get_description())
     pid = ctx["pid"][:35]
     segnum = ctx["segnum"]
     nt = NetworkTable("WFO")

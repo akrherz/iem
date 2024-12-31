@@ -46,7 +46,6 @@ from pyiem.database import get_sqlalchemy_conn
 from pyiem.exceptions import NoDataFound
 from pyiem.nws import vtec
 from pyiem.plot import MapPlot, get_cmap
-from pyiem.util import get_autoplot_context
 from sqlalchemy import text
 
 PDICT = {
@@ -344,9 +343,8 @@ def get_count_bins(df, varname):
     return bins
 
 
-def plotter(fdict):
+def plotter(ctx: dict):
     """Go"""
-    ctx = get_autoplot_context(fdict, get_description())
     sts = ctx["sdate"].replace(tzinfo=ZoneInfo("UTC"))
     ets = ctx["edate"].replace(tzinfo=ZoneInfo("UTC"))
     p1 = ctx["phenomenav1"]

@@ -24,7 +24,6 @@ from matplotlib.ticker import AutoMinorLocator, MaxNLocator
 from pyiem.database import get_sqlalchemy_conn
 from pyiem.exceptions import NoDataFound
 from pyiem.plot import figure_axes
-from pyiem.util import get_autoplot_context
 from sqlalchemy import text
 
 PDICT = {
@@ -310,10 +309,8 @@ def plot_temps(ax, mosdata, month1, month, obs, model):
     return df
 
 
-def plotter(fdict):
+def plotter(ctx: dict):
     """Go"""
-    ctx = get_autoplot_context(fdict, get_description())
-
     station = ctx["zstation"]
     year = ctx["year"]
     month = ctx["month"]

@@ -20,7 +20,6 @@ from pyiem.exceptions import NoDataFound
 from pyiem.nws import vtec
 from pyiem.plot import calendar_plot
 from pyiem.reference import state_names
-from pyiem.util import get_autoplot_context
 from sqlalchemy import text
 
 from iemweb.autoplot import ARG_FEMA, fema_region2states
@@ -129,9 +128,8 @@ def get_ugc_name(ugc):
     return cursor.fetchone()
 
 
-def plotter(fdict):
+def plotter(ctx: dict):
     """Go"""
-    ctx = get_autoplot_context(fdict, get_description())
     ctx["_nt"].sts["_ALL"] = {
         "name": "All Offices",
         "tzname": "America/Chicago",

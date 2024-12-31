@@ -12,7 +12,7 @@ import pandas as pd
 from matplotlib.patches import Rectangle
 from pyiem.exceptions import NoDataFound
 from pyiem.plot import figure
-from pyiem.util import get_autoplot_context, utc
+from pyiem.util import utc
 
 from iemweb.autoplot.scripts200.p200 import ISSUANCE
 from iemweb.autoplot.scripts200.p220 import COLORS
@@ -77,9 +77,8 @@ def compute_slots(outlook_type: str, valid: date) -> list:
     return slots
 
 
-def plotter(fdict):
+def plotter(ctx: dict):
     """Go"""
-    ctx = get_autoplot_context(fdict, get_description())
     jdata = httpx.get(
         "http://iem.local/json/outlook_progression.py",
         params={

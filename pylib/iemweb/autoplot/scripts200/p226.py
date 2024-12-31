@@ -11,7 +11,6 @@ from pyiem.database import get_sqlalchemy_conn
 from pyiem.exceptions import NoDataFound
 from pyiem.plot.geoplot import MapPlot
 from pyiem.reference import Z_OVERLAY2
-from pyiem.util import get_autoplot_context
 
 
 def get_description():
@@ -46,9 +45,8 @@ def get_description():
     return desc
 
 
-def plotter(fdict):
+def plotter(ctx: dict):
     """Go"""
-    ctx = get_autoplot_context(fdict, get_description())
     num = ctx["num"]
 
     with get_sqlalchemy_conn("postgis") as conn:

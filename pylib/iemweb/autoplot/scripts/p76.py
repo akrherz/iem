@@ -25,7 +25,7 @@ from metpy.units import units
 from pyiem.database import get_sqlalchemy_conn
 from pyiem.exceptions import NoDataFound
 from pyiem.plot import figure_axes
-from pyiem.util import get_autoplot_context, utc
+from pyiem.util import utc
 from scipy import stats
 from sqlalchemy import text
 
@@ -351,9 +351,8 @@ def make_plot(df, ctx):
     return fig, means
 
 
-def plotter(fdict):
+def plotter(ctx: dict):
     """Go"""
-    ctx = get_autoplot_context(fdict, get_description())
     startyear = ctx["year"]
 
     df = get_data(ctx, startyear)

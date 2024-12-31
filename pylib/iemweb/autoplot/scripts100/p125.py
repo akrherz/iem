@@ -17,7 +17,6 @@ from pyiem.database import get_sqlalchemy_conn
 from pyiem.exceptions import NoDataFound
 from pyiem.plot import MapPlot, get_cmap, pretty_bins
 from pyiem.reference import LATLON, SECTORS_NAME, Z_OVERLAY2
-from pyiem.util import get_autoplot_context
 from sqlalchemy import text
 
 from iemweb.util import month2months
@@ -168,9 +167,8 @@ def get_description():
     return desc
 
 
-def plotter(fdict):
+def plotter(ctx: dict):
     """Go"""
-    ctx = get_autoplot_context(fdict, get_description())
     state = ctx["state"][:2]
     varname = ctx["var"]
     sector = ctx["sector"]

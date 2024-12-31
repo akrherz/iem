@@ -23,7 +23,6 @@ import pandas as pd
 from pyiem.database import get_dbconnc
 from pyiem.exceptions import NoDataFound
 from pyiem.plot import figure
-from pyiem.util import get_autoplot_context
 
 from iemweb.util import month2months
 
@@ -79,6 +78,7 @@ def get_description():
             default="all",
             label="Month Limiter",
             options=MDICT,
+            oldname="month",
         ),
         dict(
             type="text",
@@ -204,16 +204,14 @@ def compute_xlabels(ax, xbase):
     ax.set_xticklabels(xticklabels)
 
 
-def plotter(fdict):
+def plotter(ctx: dict):
     """Go"""
     pgconn, cursor = get_dbconnc("asos")
-
-    ctx = get_autoplot_context(fdict, get_description())
     station = ctx["zstation"]
     threshold = ctx["threshold"]
     mydir = ctx["dir"]
     varname = ctx["var"]
-    month = ctx["m"] if fdict.get("month") is None else fdict.get("month")
+    month = ctx["m"]
 
     year_limiter = ""
     y1, y2 = None, None

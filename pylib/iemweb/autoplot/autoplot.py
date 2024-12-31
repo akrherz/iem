@@ -139,15 +139,15 @@ def get_res_by_fmt(p, fmt, fdict):
     if fdict.get("_gallery") is not None and meta.get("gallery") is not None:
         fdict.update(meta["gallery"])
     # Allow returning of javascript as a string
+    ctx = get_autoplot_context(fdict, mod.get_description())
     if fmt == "js":
         # Need to pass the container name
-        ctx = get_autoplot_context(fdict, mod.get_description())
         ctx["_e"] = fdict.get("_e", "ap_container")
         res = mod.get_highcharts(ctx)
     elif fmt == "geojson":
-        res = format_geojson_response(*mod.geojson(fdict))
+        res = format_geojson_response(*mod.geojson(ctx))
     else:
-        res = mod.plotter(fdict)
+        res = mod.plotter(ctx)
     # res should be either a 2 or 3 length tuple, rectify this otherwise
     if not isinstance(res, tuple):
         res = [res, None, None]

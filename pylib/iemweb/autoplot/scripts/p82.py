@@ -16,7 +16,7 @@ from pyiem.database import get_dbconnc, get_sqlalchemy_conn
 from pyiem.exceptions import NoDataFound
 from pyiem.plot import calendar_plot
 from pyiem.reference import TRACE_VALUE
-from pyiem.util import convert_value, get_autoplot_context
+from pyiem.util import convert_value
 from sqlalchemy import text
 
 PDICT = {
@@ -116,9 +116,8 @@ def add_stages_legend(fig, stagevals):
         fig.legend(handles, labels, ncol=4, loc=(0.4, 0.915))
 
 
-def plotter(fdict):
+def plotter(ctx: dict):
     """Go"""
-    ctx = get_autoplot_context(fdict, get_description())
     station = ctx["station"]
     varname = ctx["var"]
     sdate = ctx["sdate"]

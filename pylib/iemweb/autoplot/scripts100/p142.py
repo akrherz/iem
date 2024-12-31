@@ -22,7 +22,6 @@ from pyiem.database import get_sqlalchemy_conn
 from pyiem.exceptions import NoDataFound
 from pyiem.plot import figure_axes
 from pyiem.plot.use_agg import plt
-from pyiem.util import get_autoplot_context
 
 UNITS = {"precip": "inch", "avgt": "F", "high": "F", "low": "F"}
 PDICT = {
@@ -125,9 +124,8 @@ def underlay_usdm(axis, sts, ets, lon, lat):
         )
 
 
-def plotter(fdict):
+def plotter(ctx: dict):
     """Go"""
-    ctx = get_autoplot_context(fdict, get_description())
     station = ctx["station"]
     p1 = ctx["p1"]
     p2 = ctx["p2"]

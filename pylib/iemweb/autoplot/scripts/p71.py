@@ -14,13 +14,9 @@ import datetime
 import matplotlib.patheffects as PathEffects
 import numpy as np
 import pandas as pd
+from pyiem.database import get_sqlalchemy_conn
 from pyiem.plot import figure_axes
-from pyiem.util import (
-    convert_value,
-    drct2text,
-    get_autoplot_context,
-    get_sqlalchemy_conn,
-)
+from pyiem.util import convert_value, drct2text
 
 PDICT = {
     "KT": "knots",
@@ -86,9 +82,8 @@ def arrow(ax, x, y, angle):
     )
 
 
-def plotter(fdict):
+def plotter(ctx: dict):
     """Go"""
-    ctx = get_autoplot_context(fdict, get_description())
     station = ctx["zstation"]
     plot_units = ctx["units"]
     year = ctx["year"]

@@ -15,7 +15,6 @@ from pyiem.database import get_sqlalchemy_conn
 from pyiem.exceptions import NoDataFound
 from pyiem.plot import figure_axes, get_cmap
 from pyiem.reference import state_names
-from pyiem.util import get_autoplot_context
 from sqlalchemy import text
 
 PDICT = {
@@ -112,9 +111,8 @@ def get_data(ctx):
     return df
 
 
-def plotter(fdict):
+def plotter(ctx: dict):
     """Go"""
-    ctx = get_autoplot_context(fdict, get_description())
     df = get_data(ctx)
 
     cmap = get_cmap(ctx["cmap"])

@@ -9,7 +9,7 @@ from metpy.units import units
 from pyiem.exceptions import NoDataFound
 from pyiem.meteorology import gdd
 from pyiem.plot import figure_axes
-from pyiem.util import c2f, get_autoplot_context, mm2inch
+from pyiem.util import c2f, mm2inch
 
 STATIONS = {
     "ames": "Central (Ames)",
@@ -109,10 +109,8 @@ def load(dirname, location, sdate):
     return df
 
 
-def plotter(fdict):
+def plotter(ctx: dict):
     """Go"""
-    ctx = get_autoplot_context(fdict, get_description())
-
     location = ctx["location"]
     ptype = ctx["ptype"]
     sdate = datetime.strptime(ctx["sdate"], "%b%d")

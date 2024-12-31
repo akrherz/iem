@@ -31,7 +31,7 @@ from pyiem.exceptions import NoDataFound
 from pyiem.nws import vtec
 from pyiem.plot.geoplot import MapPlot
 from pyiem.reference import LATLON, Z_FILL, Z_OVERLAY2, Z_OVERLAY2_LABEL
-from pyiem.util import get_autoplot_context, utc
+from pyiem.util import utc
 from sqlalchemy import text
 
 TFORMAT = "%b %-d %Y %-I:%M %p %Z"
@@ -99,9 +99,8 @@ def get_description():
     return desc
 
 
-def plotter(fdict: dict):
+def plotter(ctx: dict):
     """Go"""
-    ctx = get_autoplot_context(fdict, get_description())
     utcvalid = ctx.get("valid")
     wfo = ctx["wfo"]
     if wfo == "_ALL":

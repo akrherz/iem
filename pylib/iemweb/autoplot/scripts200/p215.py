@@ -14,7 +14,6 @@ from pyiem.database import get_sqlalchemy_conn
 from pyiem.exceptions import NoDataFound
 from pyiem.plot import figure
 from pyiem.plot.util import fitbox
-from pyiem.util import get_autoplot_context
 from scipy.stats import gaussian_kde
 from sqlalchemy import text
 
@@ -133,9 +132,8 @@ def f2s(value):
     return (f"{value:.5f}").rstrip("0").rstrip(".")
 
 
-def plotter(fdict):
+def plotter(ctx: dict):
     """Go"""
-    ctx = get_autoplot_context(fdict, get_description())
     df1 = get_df(ctx, "1")
     df2 = get_df(ctx, "2")
     if df1.empty or df2.empty:

@@ -12,7 +12,7 @@ from pyiem.exceptions import NoDataFound
 from pyiem.network import Table as NetworkTable  # This is needed.
 from pyiem.plot import figure_axes
 from pyiem.plot.use_agg import plt
-from pyiem.util import convert_value, get_autoplot_context, utc
+from pyiem.util import convert_value, utc
 from sqlalchemy import text
 
 XREF = {
@@ -70,9 +70,8 @@ def get_description():
     return desc
 
 
-def plotter(fdict):
+def plotter(ctx: dict):
     """Go"""
-    ctx = get_autoplot_context(fdict, get_description())
     threshold = ctx["threshold"]
     threshold_c = convert_value(threshold, "degF", "degC")
     hours1 = ctx["hours1"]

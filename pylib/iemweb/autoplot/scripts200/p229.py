@@ -21,7 +21,7 @@ from pyiem.database import get_sqlalchemy_conn
 from pyiem.exceptions import NoDataFound
 from pyiem.plot import MapPlot, get_cmap, pretty_bins
 from pyiem.reference import EPSG, Z_CLIP2, state_bounds
-from pyiem.util import get_autoplot_context, utc
+from pyiem.util import utc
 
 LL = (
     "https://www.vaisala.com/en/products/"
@@ -70,9 +70,8 @@ def get_description():
     }
 
 
-def plotter(fdict):
+def plotter(ctx: dict):
     """Go"""
-    ctx = get_autoplot_context(fdict, get_description())
     state = ctx["state"]
     sts = ctx["sts"].replace(tzinfo=ZoneInfo("UTC"))
     ets = ctx["ets"].replace(tzinfo=ZoneInfo("UTC"))

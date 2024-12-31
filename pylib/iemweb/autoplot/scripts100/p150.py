@@ -20,7 +20,7 @@ import calendar
 import pandas as pd
 from pyiem.exceptions import NoDataFound
 from pyiem.plot import figure
-from pyiem.util import get_autoplot_context, get_sqlalchemy_conn, utc
+from pyiem.util import get_sqlalchemy_conn, utc
 from sqlalchemy import text
 
 PDICT = {"00": "00 UTC", "12": "12 UTC"}
@@ -92,9 +92,8 @@ def get_description():
     return desc
 
 
-def plotter(fdict):
+def plotter(ctx: dict):
     """Go"""
-    ctx = get_autoplot_context(fdict, get_description())
     station = ctx["station"]
     if station not in ctx["_nt"].sts:  # This is needed.
         raise NoDataFound("Unknown station metadata.")

@@ -21,7 +21,6 @@ from pyiem.plot import figure, figure_axes, get_cmap
 from pyiem.util import (
     c2f,
     convert_value,
-    get_autoplot_context,
 )
 from sqlalchemy import text
 
@@ -1074,10 +1073,8 @@ def xaxis_magic(ctx, ax):
         )
 
 
-def plotter(fdict):
+def plotter(ctx: dict):
     """Go"""
-    ctx = get_autoplot_context(fdict, get_description())
-
     if ctx["opt"] == "1":
         fig, df = plot1(ctx)
     elif ctx["opt"] == "m":

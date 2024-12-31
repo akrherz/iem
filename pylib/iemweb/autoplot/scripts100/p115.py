@@ -14,7 +14,6 @@ import seaborn as sns
 from pyiem.database import get_sqlalchemy_conn
 from pyiem.exceptions import NoDataFound
 from pyiem.plot import figure_axes
-from pyiem.util import get_autoplot_context
 
 from iemweb.autoplot import ARG_STATION
 
@@ -86,10 +85,8 @@ def p(df, year, month, varname, precision):
     return fmt % val
 
 
-def plotter(fdict):
+def plotter(ctx: dict):
     """Go"""
-    ctx = get_autoplot_context(fdict, get_description())
-
     station = ctx["station"]
     varname = ctx["var"]
 
@@ -201,7 +198,7 @@ def plotter(fdict):
         wyrmean if varname not in ["precip", "snow"] else wyrsum
     )
     resdf.at["MEAN", "WATER YEAR"] = resdf["WATER YEAR"].mean()
-    y1 = int(fdict.get("syear", 1990))
+    y1 = int(ctx.get("syear", 1990))
 
     fig, ax = figure_axes(
         title=f"{ctx['_sname']} {LABELS[varname]}",

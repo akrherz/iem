@@ -13,7 +13,6 @@ import pandas as pd
 from pyiem.database import get_dbconnc
 from pyiem.exceptions import NoDataFound
 from pyiem.plot import figure, get_cmap
-from pyiem.util import get_autoplot_context
 
 from iemweb.autoplot import ARG_STATION
 
@@ -64,11 +63,9 @@ def get_description():
     return desc
 
 
-def plotter(fdict):
+def plotter(ctx: dict):
     """Go"""
     pgconn, cursor = get_dbconnc("coop")
-
-    ctx = get_autoplot_context(fdict, get_description())
     station = ctx["station"]
     year = ctx["year"]
     gdd1 = ctx["gdd1"]

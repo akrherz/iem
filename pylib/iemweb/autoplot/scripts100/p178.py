@@ -30,7 +30,7 @@ from pyiem.database import get_sqlalchemy_conn
 from pyiem.exceptions import NoDataFound
 from pyiem.plot import MapPlot, get_cmap
 from pyiem.reference import SECTORS_NAME
-from pyiem.util import archive_fetch, get_autoplot_context
+from pyiem.util import archive_fetch
 
 HOURS = {
     "1": "One Hour",
@@ -106,9 +106,8 @@ def get_description():
     return desc
 
 
-def plotter(fdict):
+def plotter(ctx: dict):
     """Go"""
-    ctx = get_autoplot_context(fdict, get_description())
     ts = ctx["ts"].replace(tzinfo=ZoneInfo("UTC"))
     hour = int(ctx["hour"])
     ilabel = ctx["ilabel"] == "yes"

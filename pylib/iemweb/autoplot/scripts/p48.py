@@ -11,10 +11,10 @@ plots for a single WFO at a time.
 
 import numpy as np
 import pandas as pd
+from pyiem.database import get_dbconn
 from pyiem.exceptions import NoDataFound
 from pyiem.nws import vtec
 from pyiem.plot import figure_axes
-from pyiem.util import get_autoplot_context, get_dbconn
 
 
 def get_description():
@@ -43,11 +43,10 @@ def get_description():
     return desc
 
 
-def plotter(fdict):
+def plotter(ctx: dict):
     """Go"""
     pgconn = get_dbconn("postgis")
     cursor = pgconn.cursor()
-    ctx = get_autoplot_context(fdict, get_description())
 
     ugc = ctx["ugc"]
     phenomena = ctx["phenomena"]

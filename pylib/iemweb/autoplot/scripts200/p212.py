@@ -20,7 +20,7 @@ import pandas as pd
 from pyiem.database import get_sqlalchemy_conn
 from pyiem.exceptions import NoDataFound
 from pyiem.plot import figure_axes
-from pyiem.util import get_autoplot_context, mm2inch
+from pyiem.util import mm2inch
 from sqlalchemy import text
 
 PDICT = {"00": "00 UTC", "12": "12 UTC", "both": "00 + 12 UTC"}
@@ -334,9 +334,8 @@ Highcharts.chart("{containername}", {{
     return res.replace("None", "null")
 
 
-def plotter(fdict):
+def plotter(ctx: dict):
     """Go"""
-    ctx = get_autoplot_context(fdict, get_description())
     get_data(ctx)
     df = ctx["df"]
     fig, ax = figure_axes(apctx=ctx, title=ctx["title"])

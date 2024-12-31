@@ -18,7 +18,6 @@ import pandas as pd
 from pyiem.database import get_sqlalchemy_conn
 from pyiem.exceptions import NoDataFound
 from pyiem.plot import figure_axes
-from pyiem.util import get_autoplot_context
 from scipy import stats
 
 from iemweb.autoplot import ARG_STATION
@@ -175,10 +174,9 @@ def combine(df, months, offsets) -> pd.DataFrame:
     return xdf
 
 
-def plotter(fdict):
+def plotter(ctx: dict):
     """Go"""
     today = date.today() + timedelta(days=1)
-    ctx = get_autoplot_context(fdict, get_description())
     station = ctx["station"]
     threshold = ctx["threshold"]
     month1 = ctx["month1"]
