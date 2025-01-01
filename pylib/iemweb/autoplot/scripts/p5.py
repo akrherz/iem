@@ -131,7 +131,11 @@ def plotter(ctx: dict):
             if i == 1:
                 ax.text(d, 1 - 0.1, f"{d}", color="tan", ha="center", va="top")
         ax.plot([1, 31], [i, i], lw=2, color="tan", zorder=3)
-        for _, row in df[df["month"] == i].iterrows():
+        records = df[df["month"] == i]
+        # likely zeros
+        if len(records) > 30:
+            continue
+        for _, row in records.iterrows():
             ax.scatter(
                 row["day"].day,
                 i + 0.06,
