@@ -91,7 +91,7 @@ def plotter(ctx: dict):
     valid = ctx["valid"].replace(tzinfo=timezone.utc)
 
     isscol = "issue" if ctx["opt"] == "within" else "product_issue"
-    popyear = int(valid.year - (valid.year % 5))
+    popyear = min(int(valid.year - (valid.year % 5)), 2020)
     col = "final_pop" if ctx["which"] == "pop" else "final_area_sqkm"
     with get_sqlalchemy_conn("postgis") as conn:
         df = pd.read_sql(

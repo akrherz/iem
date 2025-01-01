@@ -63,7 +63,7 @@ def plotter(ctx: dict):
     nt = NetworkTable("WFO")
 
     # Compute a population estimate
-    popyear = max([int(pid[:4]) - int(pid[:4]) % 5, 2000])
+    popyear = min(max([int(pid[:4]) - int(pid[:4]) % 5, 2000]), 2020)
     with get_sqlalchemy_conn("postgis") as conn:
         df = read_postgis(
             text(
