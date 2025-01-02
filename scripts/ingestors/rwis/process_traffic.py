@@ -5,8 +5,8 @@ called from RUN_10_AFTER.sh
 
 import datetime
 
+import httpx
 import pandas as pd
-import requests
 from pyiem.network import Table as NetworkTable
 from pyiem.reference import ISO8601
 from pyiem.util import get_dbconnc, get_properties, logger, utc
@@ -101,13 +101,13 @@ def main():
             f"&endDate={edate}&units=us&precision=0"
         )
 
-        req = requests.get(URI, timeout=60, headers=headers)
-        if req.status_code != 200:
+        resp = httpx.get(URI, timeout=60, headers=headers)
+        if resp.status_code != 200:
             # HACK
             if idot_id < 73:
-                LOG.info("Fetch %s got status_code %s", URI, req.status_code)
+                LOG.info("Fetch %s got status_code %s", URI, resp.status_code)
             continue
-        res = req.json()
+        res = resp.json()
         if not res:
             continue
         try:

@@ -7,12 +7,10 @@ issuance stored in the database.
 
 from datetime import timedelta, timezone
 
+import httpx
 import matplotlib.patheffects as PathEffects
 import numpy as np
 import pandas as pd
-
-# third party
-import requests
 from matplotlib.patches import Rectangle
 from metpy.calc import wind_components
 from metpy.units import units
@@ -59,10 +57,10 @@ def get_text(product_id):
     text = "Text Unavailable, Sorry."
     uri = f"https://mesonet.agron.iastate.edu/api/1/nwstext/{product_id}"
     try:
-        req = requests.get(uri, timeout=5)
-        if req.status_code == 200:
-            text = req.content.decode("ascii", "ignore").replace("\001", "")
-            text = "\n".join(text.replace("\r", "").split("\n")[5:])
+        resp = httpx.get(uri, timeout=5)
+        resp.raise_for_status()
+        text = resp.content.decode("ascii", "ignore").replace("\001", "")
+        text = "\n".join(text.replace("\r", "").split("\n")[5:])
     except Exception as exp:
         LOG.warning(exp)
 

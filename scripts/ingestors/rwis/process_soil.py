@@ -6,9 +6,10 @@ import json
 import sys
 from zoneinfo import ZoneInfo
 
+import httpx
+
 # third party
 import pandas as pd
-import requests
 from pyiem.util import (
     exponential_backoff,
     get_dbconn,
@@ -67,15 +68,15 @@ def process_features(features):
 
 def main():
     """Go Main Go."""
-    res = exponential_backoff(requests.get, URI, timeout=30)
-    if res is None:
+    resp = exponential_backoff(httpx.get, URI, timeout=30)
+    if resp is None:
         LOG.info("failed to fetch %s", URI)
         return
-    data = res.json()
+    data = resp.json()
     if "features" not in data:
         LOG.info(
             "Got status_code: %s, invalid result of: %s",
-            res.status_code,
+            resp.status_code,
             json.dumps(data, sort_keys=True, indent=4, separators=(",", ": ")),
         )
         return

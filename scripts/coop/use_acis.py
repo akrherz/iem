@@ -5,8 +5,8 @@ import sys
 from zoneinfo import ZoneInfo
 
 import click
+import httpx
 import pandas as pd
-import requests
 from pyiem.database import get_dbconnc, get_sqlalchemy_conn
 from pyiem.network import Table as NetworkTable
 from pyiem.observation import Observation
@@ -93,8 +93,9 @@ def main(state, station):
             ],
         }
         try:
-            req = requests.post(SERVICE, json=payload, timeout=30)
-            j = req.json()
+            resp = httpx.post(SERVICE, json=payload, timeout=30)
+            resp.raise_for_status()
+            j = resp.json()
         except Exception as exp:
             LOG.warning("download and processing failed for %s", nwsli)
             LOG.exception(exp)

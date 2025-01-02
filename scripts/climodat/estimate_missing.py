@@ -9,8 +9,8 @@ Called from RUN_CLIMODAT_STATE.sh
 """
 
 import click
+import httpx
 import pandas as pd
-import requests
 from pyiem.database import get_dbconn, get_sqlalchemy_conn
 from pyiem.network import Table as NetworkTable
 from pyiem.util import logger
@@ -36,15 +36,13 @@ def process(cursor, station, df, meta):
         "lon": meta["lon"],
         "lat": meta["lat"],
     }
-    req = requests.get(wsuri, timeout=60)
-    if req.status_code != 200:
-        LOG.warning("%s got status %s", wsuri, req.status_code)
-        return
     try:
-        estimated = pd.DataFrame(req.json()["data"])
+        resp = httpx.get(wsuri, timeout=60)
+        resp.raise_for_status()
+        estimated = pd.DataFrame(resp.json()["data"])
     except Exception as exp:
         LOG.warning(
-            "\n%s Failure:%s\n%s\nExp: %s", station, req.content, wsuri, exp
+            "\n%s Failure:%s\n%s\nExp: %s", station, resp.content, wsuri, exp
         )
         return
     estimated["date"] = pd.to_datetime(estimated["date"]).dt.date

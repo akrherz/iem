@@ -3,8 +3,8 @@ Configure iembot for mastodon, gasp.
 """
 
 import cryptocode
+import httpx
 import mastodon
-import requests
 from paste.request import get_cookie_dict
 from pyiem.database import get_dbconnc
 from pyiem.templates.iem import TEMPLATE
@@ -261,7 +261,7 @@ def save_code(mapp, server, code, headers):
 
 def reload_bot():
     """Tell iembot to refresh."""
-    requests.get("http://iembot:9003/reload", timeout=5)
+    httpx.get("http://iembot:9003/reload", timeout=5)
 
 
 @iemapp()

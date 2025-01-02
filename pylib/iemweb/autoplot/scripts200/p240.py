@@ -17,9 +17,9 @@ GDD Climatology.
 
 from datetime import date, timedelta
 
+import httpx
 import matplotlib.dates as mdates
 import pandas as pd
-import requests
 from pyiem.database import get_sqlalchemy_conn
 from pyiem.exceptions import NoDataFound
 from pyiem.plot import figure
@@ -77,13 +77,14 @@ def plotter(ctx: dict):
     try:
         # Sub-optimal need to actually have data.
         edate = ctx["sdate"] + timedelta(days=7)
-        req = requests.get(
+        resp = httpx.get(
             "http://iem.local/json/climodat_dd.py?"
             f"station={ctx['station']}&gddbase=50&gddceil=86&"
             f"sdate={ctx['sdate']:%Y-%m-%d}&edate={edate:%Y-%m-%d}",
             timeout=60,
         )
-        data = req.json()
+        resp.raise_for_status()
+        data = resp.json()
     except Exception as exp:
         raise NoDataFound("Backend API failure, no data.") from exp
     if "gfs" not in data or "ndfd" not in data:

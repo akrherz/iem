@@ -15,7 +15,7 @@ Author: daryl herzmann akrherz@iastate.edu
 import os
 from datetime import date, datetime, timedelta
 
-import requests
+import httpx
 
 
 def fetch(station_id):
@@ -33,20 +33,20 @@ def fetch(station_id):
         "tz=Etc%2FUTC&format=onlycomma&latlon=no&elev=no&missing=M&trace=T&"
         "direct=yes&report_type=3"
     )
-    res = requests.get(uri, timeout=300)
+    resp = httpx.get(uri, timeout=300)
     with open(localfn, "w", encoding="utf-8") as fh:
-        fh.write(res.text)
+        fh.write(resp.text)
 
 
 def main():
     """Main loop."""
     # Step 1: Fetch global METAR geojson metadata
     # https://mesonet.agron.iastate.edu/sites/networks.php
-    req = requests.get(
+    resp = httpx.get(
         "http://mesonet.agron.iastate.edu/geojson/network/AZOS.geojson",
         timeout=60,
     )
-    geojson = req.json()
+    geojson = resp.json()
     for feature in geojson["features"]:
         station_id = feature["id"]
         props = feature["properties"]

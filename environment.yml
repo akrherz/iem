@@ -71,6 +71,7 @@ dependencies:
   # for testing
   - pytest
   - pytest-cov
+  - pytest-httpx
   - pytest-mpl
   - pytest-runner
   - pytest-xdist
@@ -79,8 +80,6 @@ dependencies:
   - rasterio
   # various places
   - rasterstats
-  # yo
-  - requests
   # important
   - scipy
   # autoplots

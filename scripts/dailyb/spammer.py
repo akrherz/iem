@@ -11,8 +11,8 @@ from email.mime.multipart import MIMEMultipart
 from email.mime.text import MIMEText
 from zoneinfo import ZoneInfo
 
-import requests
-import wwa  # @UnresolvedImport
+import httpx
+import wwa
 from pyiem.database import get_dbconnc
 from pyiem.reference import ISO8601
 from pyiem.util import exponential_backoff, logger, utc
@@ -52,7 +52,7 @@ def get_github_commits():
 
     # get branches, main is first!
     branches = ["main"]
-    req = exponential_backoff(requests.get, IEM_BRANCHES, timeout=30)
+    req = exponential_backoff(httpx.get, IEM_BRANCHES, timeout=30)
     for branch in req.json():
         if branch["name"] == "main":
             continue
@@ -65,7 +65,7 @@ def get_github_commits():
             f"https://api.github.com/repos/akrherz/iem/commits?since={iso}&"
             f"sha={branch}"
         )
-        req2 = exponential_backoff(requests.get, uri, timeout=30)
+        req2 = exponential_backoff(httpx.get, uri, timeout=30)
         # commits are in reverse order
         for commit in req2.json()[::-1]:
             if commit["sha"] in hashes:
@@ -122,7 +122,7 @@ def cowreport():
         f"http://iem.local/api/1/cow.json?begints={begints}&endts={endts}&"
         "phenomena=SV&phenomena=TO&lsrtype=SV&lsrtype=TO"
     )
-    data = requests.get(api, timeout=60).json()
+    data = httpx.get(api, timeout=60).json()
     st = data["stats"]
     if st["events_total"] == 0:
         text = "No SVR+TOR Warnings Issued."

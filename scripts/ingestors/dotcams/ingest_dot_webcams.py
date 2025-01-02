@@ -7,15 +7,13 @@ OPENSSL_CONF=openssl.conf python ingest_dot_webcams.py
 RUN from RUN_10MIN.sh
 """
 
-# stdlib
 import json
 import os
 import subprocess
 import tempfile
 from datetime import datetime, timedelta, timezone
 
-# third party
-import requests
+import httpx
 from pyiem.database import get_dbconn
 from pyiem.util import exponential_backoff, logger, utc
 
@@ -82,21 +80,20 @@ def process_feature(cursor, domain, feat):
             LOG.debug("skipping %s %s %s", cam, valid, url)
             continue
         try:
-            req = requests.get(url, timeout=30)
-        except requests.exceptions.Timeout:
+            resp = httpx.get(url, timeout=30)
+        except httpx.TimeoutException:
             # Try again
-            req = requests.get(url, timeout=60)
-        if req.status_code == 404:
+            resp = httpx.get(url, timeout=60)
+        if resp.status_code == 404:
             LOG.debug("cloud 404 %s", url)
             with open(CLOUD404, "a", encoding="utf8") as fh:
                 fh.write(f"{url}\n")
                 continue
-        if req.status_code != 200:
-            LOG.info("Fetching %s resulted in status %s", url, req.status_code)
+        if resp.status_code != 200:
+            LOG.info("Fetching %s result in status %s", url, resp.status_code)
             continue
-        tmpfd = tempfile.NamedTemporaryFile(mode="wb", delete=False)
-        tmpfd.write(req.content)
-        tmpfd.close()
+        with tempfile.NamedTemporaryFile(mode="wb", delete=False) as tmpfd:
+            tmpfd.write(resp.content)
         # Get current entry
         cursor.execute(
             "SELECT valid from camera_current where cam = %s", (cam,)
@@ -154,15 +151,15 @@ def main():
     cursor.close()
 
     # Fetch the REST service
-    req = exponential_backoff(requests.get, URI, timeout=30)
-    if req is None:
+    resp = exponential_backoff(httpx.get, URI, timeout=30)
+    if resp is None:
         LOG.info("Failed to fetch REST service, aborting.")
         return
-    jobj = req.json()
+    jobj = resp.json()
     if "features" not in jobj:
         LOG.info(
             "Got status_code: %s, invalid result of: %s",
-            req.status_code,
+            resp.status_code,
             json.dumps(jobj, sort_keys=True, indent=4, separators=(",", ": ")),
         )
         return

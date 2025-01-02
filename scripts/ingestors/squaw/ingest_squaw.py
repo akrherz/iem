@@ -2,7 +2,7 @@
 
 import re
 
-import requests
+import httpx
 from pyiem.util import exponential_backoff, get_dbconn, logger
 
 LOG = logger()
@@ -18,7 +18,7 @@ def main():
         "period=2&site_no=05470500"
     )
 
-    req = exponential_backoff(requests.get, uri, timeout=30)
+    req = exponential_backoff(httpx.get, uri, timeout=30)
     if req is None or req.status_code != 200:
         LOG.info("failed to fetch %s", uri)
         return

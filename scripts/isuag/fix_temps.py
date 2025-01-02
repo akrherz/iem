@@ -2,7 +2,7 @@
 
 import json
 
-import requests
+import httpx
 from pyiem.network import Table as NetworkTable
 from pyiem.util import convert_value, get_dbconn, logger
 
@@ -31,7 +31,7 @@ def main():
             f"{date:%Y-%m-%d}/{nt.sts[station]['lat']:.2f}/"
             f"{nt.sts[station]['lon']:.2f}/json"
         )
-        res = requests.get(uri, timeout=60)
+        res = httpx.get(uri, timeout=60)
         j = json.loads(res.content)
         if not j["data"]:
             LOG.info(" %s %s IEMRE Failure", station, date)

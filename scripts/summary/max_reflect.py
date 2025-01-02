@@ -9,8 +9,8 @@ import tempfile
 import time
 
 import click
+import httpx
 import numpy as np
-import requests
 from osgeo import gdal, gdalconst
 from pyiem.database import get_dbconn
 from pyiem.util import archive_fetch, logger, utc
@@ -142,12 +142,12 @@ def run(tmpdir, prod, sts):
     layer = "nexrad_tc" if prod == "n0r" else "n0q_tc"
     if sts.hour == 6:
         layer = f"{layer}6"
-    png = requests.get(
+    resp = httpx.get(
         f"{URLBASE}layers[]=uscounties&layers[]={layer}&ts={sts:%Y%m%d%H%M}",
         timeout=120,
     )
     with open(f"{tmpdir}/{sts:%Y%m%d%H}.png", "wb") as fh:
-        fh.write(png.content)
+        fh.write(resp.content)
     cmd = [
         "pqinsert",
         "-p",
@@ -163,12 +163,12 @@ def run(tmpdir, prod, sts):
 
     # US
     url = f"{URLBASE}sector=conus&layers[]={layer}&ts={sts:%Y%m%d%H%M}"
-    png = requests.get(url, timeout=120)
-    if png.status_code != 200:
-        LOG.warning("Got status_code %s for %s", png.status_code, url)
+    resp = httpx.get(url, timeout=120)
+    if resp.status_code != 200:
+        LOG.warning("Got status_code %s for %s", resp.status_code, url)
     else:
         with open(f"{tmpdir}/{sts:%Y%m%d%H}.png", "wb") as fh:
-            fh.write(png.content)
+            fh.write(resp.content)
         cmd = [
             "pqinsert",
             "-p",

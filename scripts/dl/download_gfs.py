@@ -10,7 +10,7 @@ import datetime
 import os
 
 import click
-import requests
+import httpx
 from pyiem.util import exponential_backoff, logger
 
 LOG = logger()
@@ -42,7 +42,7 @@ def fetch(valid, hr):
     uri = valid.strftime(
         f"{baseurl}gfs.%Y%m%d/%H/atmos/gfs.t%Hz.sfluxgrbf{hr:03.0f}.grib2.idx"
     )
-    req = exponential_backoff(requests.get, uri, timeout=30)
+    req = exponential_backoff(httpx.get, uri, timeout=30)
     if req is None or req.status_code != 200:
         LOG.info("failed to get idx: %s", uri)
         return
@@ -84,7 +84,7 @@ def fetch(valid, hr):
     for pr in offsets:
         headers = {"Range": f"bytes={pr[0]}-{pr[1]}"}
         req = exponential_backoff(
-            requests.get, uri[:-4], headers=headers, timeout=30
+            httpx.get, uri[:-4], headers=headers, timeout=30
         )
         if req is None:
             LOG.warning("failure for uri: %s", uri)

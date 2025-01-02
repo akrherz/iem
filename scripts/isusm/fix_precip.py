@@ -12,8 +12,8 @@ from datetime import datetime, timedelta
 from zoneinfo import ZoneInfo
 
 import click
+import httpx
 import pandas as pd
-import requests
 from pyiem.database import get_dbconn, get_sqlalchemy_conn
 from pyiem.network import Table as NetworkTable
 from pyiem.reference import ISO8601
@@ -50,11 +50,13 @@ def get_hdf(nt, dt):
                 f"{nt.sts[station]['lat']:.2f}/{ldate:%Y-%m-%d}"
             )
             try:
-                j = requests.get(uri, timeout=30).json()
+                resp = httpx.get(uri, timeout=30)
+                resp.raise_for_status()
+                jdata = resp.json()
             except Exception as exp:
                 LOG.warning("JSON stage4 service failed\n%s\n%s", uri, exp)
                 continue
-            for entry in j["data"]:
+            for entry in jdata["data"]:
                 rows.append(  # noqa
                     {
                         "station": station,

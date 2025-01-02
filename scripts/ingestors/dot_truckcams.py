@@ -4,7 +4,6 @@ Iowa DOT Truck dash camera imagery.  Save this to the IEM archives
 /YYYY/mm/dd/camera/idot_trucks/keyhash/keyhash_timestamp.jpg
 """
 
-# pylint: disable=unsubscriptable-object
 import datetime
 import json
 import os
@@ -12,8 +11,8 @@ import subprocess
 import tempfile
 from zoneinfo import ZoneInfo
 
+import httpx
 import pyproj
-import requests
 from pyiem.database import get_dbconn
 from pyiem.util import exponential_backoff, logger
 
@@ -50,7 +49,7 @@ def fetch_features(offset):
     """Fetch Features with the defined offset."""
     LOG.debug("fetch_features for offset: %s", offset)
     url = URI + f"&resultOffset={offset}"
-    req = exponential_backoff(requests.get, url, timeout=30)
+    req = exponential_backoff(httpx.get, url, timeout=30)
     if req is None or req.status_code != 200:
         return False, []
     data = req.json()
@@ -105,7 +104,7 @@ def process_features(features):
         photourl = feat["attributes"]["PHOTO_URL"]
         # Go get the URL for saving!
         LOG.debug("Fetch %s", photourl)
-        req = exponential_backoff(requests.get, photourl, timeout=15)
+        req = exponential_backoff(httpx.get, photourl, timeout=15)
         if req is None or req.status_code != 200:
             LOG.info(
                 "dot_truckcams.py dl fail |%s| %s",

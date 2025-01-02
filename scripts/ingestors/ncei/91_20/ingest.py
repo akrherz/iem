@@ -5,8 +5,8 @@ https://www.ncei.noaa.gov/data/normals-daily/1991-2020/access/
 import datetime
 from io import StringIO
 
+import httpx
 import pandas as pd
-import requests
 from pyiem.network import Table as NetworkTable
 from pyiem.util import get_dbconn, logger
 from tqdm import tqdm
@@ -45,12 +45,12 @@ def ingest(pgconn, sid):
     )
     if cursor.fetchone()[0] == 366:
         return
-    req = requests.get(f"{BASEURL}/{sid}.csv", timeout=30)
-    if req.status_code != 200:
+    resp = httpx.get(f"{BASEURL}/{sid}.csv", timeout=30)
+    if resp.status_code != 200:
         LOG.info("failed to get %s", sid)
         return
     sio = StringIO()
-    sio.write(req.text)
+    sio.write(resp.text)
     sio.seek(0)
     df = pd.read_csv(sio)
     if (

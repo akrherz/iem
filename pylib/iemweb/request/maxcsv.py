@@ -85,9 +85,9 @@ from zoneinfo import ZoneInfo
 
 # third party
 import ephem
+import httpx
 import numpy as np
 import pandas as pd
-import requests
 from pydantic import Field
 from pyiem.database import get_dbconnc, get_sqlalchemy_conn
 from pyiem.util import utc
@@ -769,9 +769,9 @@ def do_uvi():
         "https://www.cpc.ncep.noaa.gov/"
         "products/stratosphere/uv_index/bulletin.txt"
     )
-    req = requests.get(URL, timeout=20)
+    resp = httpx.get(URL, timeout=20)
     rows = []
-    for line in req.content.decode("ascii").split("\n"):
+    for line in resp.content.decode("ascii").split("\n"):
         m = PATTERN.match(line)
         if not m:
             continue

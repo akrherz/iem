@@ -13,8 +13,8 @@ import subprocess
 import tempfile
 
 import click
+import httpx
 import pygrib
-import requests
 from pyiem.util import archive_fetch, exponential_backoff, logger, utc
 
 LOG = logger()
@@ -47,7 +47,7 @@ def dl(now, varname, scenario):
         f".{now:%Y%m%d%H}.daily.grb2"
     )
     LOG.info("fetching %s", uri)
-    response = exponential_backoff(requests.get, uri, timeout=60)
+    response = exponential_backoff(httpx.get, uri, timeout=60)
     if response is None or response.status_code != 200:
         LOG.warning("dl %s failed", uri)
         return

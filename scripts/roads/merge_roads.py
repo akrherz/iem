@@ -2,7 +2,7 @@
 
 import datetime
 
-import requests
+import httpx
 from ingest_roads_rest import LOG, URI
 from pandas import read_sql
 from pyiem.database import get_dbconn, get_sqlalchemy_conn
@@ -22,8 +22,8 @@ def main():
             index_col="idot_id",
         )
     LOG.info("found %s rows from roads_base", len(df.index))
-    req = requests.get(URI, timeout=30)
-    jobj = req.json()
+    resp = httpx.get(URI, timeout=30)
+    jobj = resp.json()
     archive_begin = utc()
     for feat in jobj["features"]:
         props = feat["attributes"]
