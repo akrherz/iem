@@ -16,8 +16,8 @@ import geopandas as gpd
 import numpy as np
 from pyiem import iemre, util
 from pyiem.exceptions import NoDataFound
+from pyiem.grid.nav import MRMS_IEMRE
 from pyiem.grid.zs import CachingZonalStats
-from pyiem.mrms import MRMS4IEMRE_AFFINE
 from pyiem.plot import figure_axes
 from pyiem.reference import state_names
 
@@ -82,26 +82,26 @@ def plotter(ctx: dict):
             index_col=None,
             geom_col="the_geom",
         )
-    czs = CachingZonalStats(MRMS4IEMRE_AFFINE)
-    with util.ncopen(ncfn) as nc:
-        czs.gen_stats(
-            np.zeros((nc.variables["lat"].size, nc.variables["lon"].size)),
-            df["the_geom"],
+    czs = CachingZonalStats(MRMS_IEMRE.affine_image)
+    czs.gen_stats(
+        np.zeros((MRMS_IEMRE.ny, MRMS_IEMRE.nx)),
+        df["the_geom"],
+    )
+    hasdata = None
+    jslice = None
+    islice = None
+    for nav in czs.gridnav:
+        hasdata = np.ones((nav.ysz, nav.xsz))
+        hasdata[nav.mask] = 0.0
+        # careful here as y is flipped in this context
+        jslice = slice(
+            MRMS_IEMRE.ny - (nav.y0 + nav.ysz),
+            MRMS_IEMRE.ny - nav.y0,
         )
-        hasdata = None
-        jslice = None
-        islice = None
-        for nav in czs.gridnav:
-            hasdata = np.ones((nav.ysz, nav.xsz))
-            hasdata[nav.mask] = 0.0
-            # careful here as y is flipped in this context
-            jslice = slice(
-                nc.variables["lat"].size - (nav.y0 + nav.ysz),
-                nc.variables["lat"].size - nav.y0,
-            )
-            islice = slice(nav.x0, nav.x0 + nav.xsz)
+        islice = slice(nav.x0, nav.x0 + nav.xsz)
+    if hasdata is not None:
         hasdata = np.flipud(hasdata)
-
+    with util.ncopen(ncfn) as nc:
         today = util.mm2inch(nc.variables[ncvar][idx1, jslice, islice])
         if (idx1 - idx0) < 32:
             p01d = util.mm2inch(
@@ -143,7 +143,7 @@ def plotter(ctx: dict):
                     )
 
     # we actually don't care about weights at this fine of scale
-    cells = np.sum(np.where(hasdata > 0, 1, 0))
+    cells = np.sum(hasdata > 0)
     departure = p01d - c_p01d
     # Update departure and today to values unconsidered below when out of state
     departure = np.where(hasdata > 0, departure, -9999)

@@ -5,14 +5,15 @@ plot uses a JSON data service provided by the
 <a href="https://droughtmonitor.unl.edu">Drought Monitor</a> website.
 """
 
-import datetime
+from datetime import datetime, timedelta
 
+import httpx
 import matplotlib.dates as mdates
 import pandas as pd
-import requests
 from pyiem.exceptions import NoDataFound
 from pyiem.plot import figure_axes
 from pyiem.reference import state_fips, state_names
+from pyiem.util import LOG
 
 SERVICE = (
     "https://droughtmonitor.unl.edu"
@@ -25,8 +26,8 @@ PDICT = {"state": "Plot Individual State", "national": "Plot CONUS"}
 def get_description():
     """Return a dict describing how to call this plotter"""
     desc = {"description": __doc__, "data": True}
-    today = datetime.datetime.today()
-    sts = today - datetime.timedelta(days=720)
+    today = datetime.today()
+    sts = today - timedelta(days=720)
     desc["arguments"] = [
         dict(
             type="select",
@@ -73,10 +74,15 @@ def plotter(ctx: dict):
     headers = {}
     headers["Accept"] = "application/json, text/javascript, */*; q=0.01"
     headers["Content-Type"] = "application/json; charset=UTF-8"
-    req = requests.get(SERVICE + suffix, payload, headers=headers, timeout=30)
-    if req.status_code != 200:
-        raise NoDataFound("API request to droughtmonitor website failed...")
-    jdata = req.json()
+    try:
+        resp = httpx.get(
+            SERVICE + suffix, params=payload, headers=headers, timeout=30
+        )
+        resp.raise_for_status()
+        jdata = resp.json()
+    except Exception as exp:
+        LOG.info("droughtmonitor failed: %s", exp)
+        raise NoDataFound("API request to droughtmonitor failed...") from exp
     if "d" not in jdata:
         raise NoDataFound("No data Found.")
     df = pd.DataFrame(jdata["d"])
@@ -90,7 +96,7 @@ def plotter(ctx: dict):
     if df.empty:
         raise NoDataFound("No data Found.")
     df = df.sort_values("Date", ascending=True)
-    df["x"] = df["Date"] + datetime.timedelta(hours=3.5 * 24)
+    df["x"] = df["Date"] + timedelta(hours=3.5 * 24)
     df = df.set_index("Date")
     df.index.name = "Date"
 
@@ -158,9 +164,7 @@ def plotter(ctx: dict):
     ax.set_yticks([0, 10, 30, 50, 70, 90, 100])
     ax.set_ylabel("Percentage of Area [%]")
     ax.grid(True)
-    ax.set_xlim(
-        df["Date"].min(), df["Date"].max() + datetime.timedelta(days=7)
-    )
+    ax.set_xlim(df["Date"].min(), df["Date"].max() + timedelta(days=7))
     ax.legend(bbox_to_anchor=(0, -0.13, 1, 0), loc="center", ncol=5)
     ax.set_position([0.1, 0.15, 0.8, 0.75])
     ax.xaxis.set_major_formatter(mdates.DateFormatter("%b\n%Y"))

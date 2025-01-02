@@ -254,6 +254,8 @@
 /plotting/auto/plot/180/v:temps::network1:IACLIMATE::station1:IATDSM::c1:1951::network2:IACLIMATE::station2:IATDSM::c2:custom::s:0::sy1:1991::ey1:2020::sy2:1981::ey2:2010::_r:43::dpi:100.png
 /plotting/auto/plot/181/network:IACLIMATE::station:IATAME::date:2024-10-14::year:2023::var:high::r1:50-59::r2:60%2069::r3:70%2079::r4:80%2089::r5:90%2099::_r:t::dpi:100.png
 /plotting/auto/plot/182/sector:IA::date:2024-01-02::trailing:1::threshold:0.1::_r:t::dpi:100.png
+/plotting/auto/plot/183/s:national::state:IA::sdate:2023-01-12::edate:2025-01-01::_r:t::dpi:100::_cb:1.png
+/plotting/auto/plot/184/network:IACLIMATE::station:IATAME::year:2024::limit:ytd::_r:t::dpi:100.png
 /plotting/auto/plot/185/sector:IA::date:2024-01-01::threshold:2.0::cmap:terrain::_r:t::dpi:100.png
 /plotting/auto/plot/191/sdate:2024-01-01::edate:2024-09-12::w:fema::network:WFO::wfo:DMX::state:IA::fema:7::ugc:IAC169::heatmap:yes::phenomenav1:TO::significancev1:W::_r:t::dpi:100.png
 /plotting/auto/plot/192/t:state::network:WFO::wfo:STO::state:IA::v:vsby::valid:2020-06-15%201400::cmap:gray::_r:t::dpi:100.png
