@@ -5,7 +5,7 @@ Generate some sequential load to watch what happens to IEM's backend processing
 import datetime
 import random
 
-import requests
+import httpx
 
 
 def main():
@@ -30,7 +30,7 @@ def main():
                 + str(random.randint(0, 10))
                 + ".png"
             )
-            requests.get(uri, timeout=5)
+            httpx.get(uri, timeout=5)
             cnt += 1
             if cnt % 100 == 0:
                 delta = datetime.datetime.now() - start

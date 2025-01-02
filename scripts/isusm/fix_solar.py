@@ -5,7 +5,7 @@ from datetime import datetime
 from typing import Optional
 
 import click
-import requests
+import httpx
 from pyiem.database import get_dbconn
 from pyiem.network import Table as NetworkTable
 from pyiem.util import logger
@@ -37,7 +37,7 @@ def check_date(dt):
             f"{nt.sts[station]['lat']:.2f}/"
             f"{nt.sts[station]['lon']:.2f}/json"
         )
-        res = requests.get(uri, timeout=60)
+        res = httpx.get(uri, timeout=60)
         j = json.loads(res.content)
         if j["data"][0]["srad_mj"] is None:
             LOG.info("fix_solar %s %s estimate is missing", station, dt)
@@ -102,7 +102,7 @@ def fix_nulls():
                 f"{nt.sts[station]['lat']:.2f}/"
                 f"{nt.sts[station]['lon']:.2f}/json"
             )
-            res = requests.get(uri, timeout=60)
+            res = httpx.get(uri, timeout=60)
             if res.status_code != 200:
                 LOG.warning("Fix solar got %s from %s", res.status_code, uri)
                 continue

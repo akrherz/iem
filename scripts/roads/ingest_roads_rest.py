@@ -37,8 +37,8 @@ import subprocess
 import sys
 import zipfile
 
+import httpx
 import pandas as pd
-import requests
 import shapefile
 from pyiem.database import get_dbconnc, get_sqlalchemy_conn
 from pyiem.util import exponential_backoff, logger, utc
@@ -174,7 +174,7 @@ def main():
             index_col="idot_id",
         )
 
-    req = exponential_backoff(requests.get, URI, timeout=30)
+    req = exponential_backoff(httpx.get, URI, timeout=30)
     if req is None:
         sys.exit()
     jobj = req.json()

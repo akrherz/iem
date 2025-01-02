@@ -11,8 +11,8 @@ import subprocess
 from datetime import date, datetime, timedelta
 
 import click
+import httpx
 import pygrib
-import requests
 from pyiem.util import exponential_backoff, logger
 
 LOG = logger()
@@ -59,7 +59,7 @@ def fetch_rda(year, month):
             "https://data.rda.ucar.edu/ds608.0/3HRLY/"
             f"{year}/NARRsfc_{year}{month:02.0f}_{day}.tar"
         )
-        req = exponential_backoff(requests.get, uri, timeout=30, stream=True)
+        req = exponential_backoff(httpx.get, uri, timeout=30, stream=True)
         tmpfn = f"{TMP}/narr.tar"
         with open(tmpfn, "wb") as fh:
             for chunk in req.iter_content(chunk_size=1024):

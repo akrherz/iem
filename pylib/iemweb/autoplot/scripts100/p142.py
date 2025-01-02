@@ -14,14 +14,15 @@ If you plot a statewide average, you get no USDM included.
 import sys
 from datetime import date, datetime, timedelta
 
+import httpx
 import matplotlib.dates as mdates
 import pandas as pd
-import requests
 from matplotlib.patches import Rectangle
 from pyiem.database import get_sqlalchemy_conn
 from pyiem.exceptions import NoDataFound
 from pyiem.plot import figure_axes
 from pyiem.plot.use_agg import plt
+from pyiem.util import LOG
 
 UNITS = {"precip": "inch", "avgt": "F", "high": "F", "low": "F"}
 PDICT = {
@@ -106,10 +107,15 @@ def underlay_usdm(axis, sts, ets, lon, lat):
     axis.add_artist(legend)
     uri = (
         "http://mesonet.agron.iastate.edu/"
-        "api/1/usdm_bypoint.json?sdate=%s&edate=%s&lon=%s&lat=%s"
-    ) % (sts.strftime("%Y-%m-%d"), ets.strftime("%Y-%m-%d"), lon, lat)
-    data = requests.get(uri, timeout=30).json()
-    if not data["data"]:
+        f"api/1/usdm_bypoint.json?sdate={sts:%Y-%m-%d}&edate={ets:%Y-%m-%d}"
+        f"&lon={lon}&lat={lat}"
+    )
+    try:
+        resp = httpx.get(uri, timeout=30)
+        resp.raise_for_status()
+        data = resp.json()
+    except Exception as exp:
+        LOG.info("usdm fetch failed: %s", exp)
         return
     for row in data["data"]:
         if row["category"] is None:

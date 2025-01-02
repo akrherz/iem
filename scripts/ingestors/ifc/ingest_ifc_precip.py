@@ -19,8 +19,8 @@ import datetime
 import subprocess
 import tempfile
 
+import httpx
 import numpy as np
-import requests
 from PIL import Image, PngImagePlugin
 from pyiem.mrms import make_colorramp
 from pyiem.util import archive_fetch, exponential_backoff, logger, utc
@@ -37,15 +37,15 @@ def get_file(tmpdir, now, routes):
             break
         fn = now.strftime(f"H99999999_I000{i}_G_%d%b%Y_%H%M00").upper()
         uri = f"{BASEURL}/{fn}.out"
-        req = exponential_backoff(requests.get, uri, timeout=5)
-        if req is None:
+        resp = exponential_backoff(httpx.get, uri, timeout=5)
+        if resp is None:
             continue
-        if req.status_code == 404:
+        if resp.status_code == 404:
             continue
-        if req.status_code != 200:
-            LOG.info("uri %s failed with status %s", uri, req.status_code)
+        if resp.status_code != 200:
+            LOG.info("uri %s failed with status %s", uri, resp.status_code)
             continue
-        data = req.text
+        data = resp.text
 
     if data is None:
         # only generate an annoy-o-gram if we are in archive mode

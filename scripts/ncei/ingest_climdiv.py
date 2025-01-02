@@ -3,8 +3,8 @@
 Run from RUN_0Z.sh
 """
 
+import httpx
 import pandas as pd
-import requests
 from pyiem.reference import ncei_state_codes
 from pyiem.util import get_dbconn, get_properties, logger, set_property
 
@@ -111,7 +111,7 @@ def dbsave(df):
 
 def main():
     """Go Main Go."""
-    procdate = requests.get(
+    procdate = httpx.get(
         "https://www.ncei.noaa.gov/pub/data/cirs/climdiv/procdate.txt",
         timeout=30,
     ).text.strip()

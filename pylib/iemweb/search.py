@@ -23,8 +23,8 @@ https://mesonet.agron.iastate.edu/search.py?q=ap100
 # Local
 import re
 
+import httpx
 import pandas as pd
-import requests
 
 # Third Party
 from commonregex import CommonRegex
@@ -55,12 +55,12 @@ def station_df_handler(df):
 def geocoder(q):
     """Attempt geocoding."""
     props = get_properties()
-    req = requests.get(
+    resp = httpx.get(
         "https://maps.googleapis.com/maps/api/geocode/json",
         params=dict(address=q, key=props["google.maps.key2"], sensor="true"),
         timeout=30,
     )
-    data = req.json()
+    data = resp.json()
     if not data["results"]:
         return "/sites/locate.php"
     lat = data["results"][0]["geometry"]["location"]["lat"]

@@ -20,6 +20,7 @@ dependencies:
   - fiona
   # various places
   - gdal
+  - libgdal-pg
   # important
   - geopandas
   # Get stuff
@@ -71,6 +72,7 @@ dependencies:
   # for testing
   - pytest
   - pytest-cov
+  - pytest-httpx
   - pytest-mpl
   - pytest-runner
   - pytest-xdist
@@ -79,8 +81,6 @@ dependencies:
   - rasterio
   # various places
   - rasterstats
-  # yo
-  - requests
   # important
   - scipy
   # autoplots

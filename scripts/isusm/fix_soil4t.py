@@ -7,7 +7,7 @@ import json
 from datetime import datetime
 
 import click
-import requests
+import httpx
 from pyiem.database import get_dbconn
 from pyiem.network import Table as NetworkTable
 from pyiem.util import convert_value, logger
@@ -49,7 +49,7 @@ def check_date(date):
             f"{nt.sts[station]['lat']:.2f}/"
             f"{nt.sts[station]['lon']:.2f}/json"
         )
-        res = requests.get(uri, timeout=60)
+        res = httpx.get(uri, timeout=60)
         j = json.loads(res.content)
         iemre = j["data"][0]
         iemre_low = convert_value(iemre["soil4t_low_f"], "degF", "degC")

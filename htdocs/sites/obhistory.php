@@ -78,7 +78,7 @@ function asos_formatter($i, $row)
     $ts = strtotime(substr($row["local_valid"], 0, 16));
     $relh = relh(f2c($row["tmpf"]), f2c($row["dwpf"]));
     $relh = (!is_null($relh)) ? intval($relh) : "";
-    $ismadis = (strpos($row["raw"], "MADISHF") > 0);
+    $ismadis = is_null($row["raw"]) ? FALSE: (strpos($row["raw"], "MADISHF") > 0);
     return sprintf(
         "<tr style=\"background: %s;\" class=\"%sob\" data-madis=\"%s\">" .
             "</div><td>%s</td><td>%s</td><td>%s</td>

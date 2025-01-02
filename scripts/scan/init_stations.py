@@ -1,6 +1,6 @@
 """Pull in what NRCS has for stations."""
 
-import requests
+import httpx
 from pyiem.database import get_dbconnc
 from pyiem.network import Table as NetworkTable
 from pyiem.util import convert_value, logger
@@ -13,7 +13,7 @@ def main():
     """Go Main Go."""
     mesosite, mcursor = get_dbconnc("mesosite")
     nt = NetworkTable("SCAN", only_online=False)
-    entries = requests.get(
+    entries = httpx.get(
         "https://wcc.sc.egov.usda.gov/awdbRestApi/services/v1/stations?"
         "activeOnly=true&returnForecastPointMetadata=false&"
         "returnReservoirMetadata=false&returnStationElements=false",

@@ -11,8 +11,8 @@ from io import StringIO
 from zoneinfo import ZoneInfo
 
 import click
+import httpx
 import pandas as pd
-import requests
 from pyiem.database import get_dbconn
 from pyiem.network import Table as NetworkTable
 from pyiem.reference import ISO8601
@@ -82,7 +82,7 @@ def run(mcursor, model, station, lon, lat, ts):
         "&accept=csv&point=true"
     )
     try:
-        fp = requests.get(url, timeout=120)
+        fp = httpx.get(url, timeout=120)
         if fp.status_code == 404:
             LOG.info(url)
             LOG.warning("Grid %s %s missing", model, ts)

@@ -15,12 +15,13 @@ at the state scale when normalized by area.
 import calendar
 import datetime
 
+import httpx
 import numpy as np
 import pandas as pd
-import requests
 from pyiem.exceptions import NoDataFound
 from pyiem.plot import figure
 from pyiem.reference import state_fips, state_names
+from pyiem.util import LOG
 from scipy.interpolate import interp1d
 
 SERVICE = (
@@ -85,10 +86,13 @@ def plotter(ctx: dict):
     headers["Accept"] = "application/json, text/javascript, */*; q=0.01"
     headers["Content-Type"] = "application/json; charset=UTF-8"
     headers["user-agent"] = "requests"
-    req = requests.get(url, payload, headers=headers, timeout=30)
-    if req is None or req.status_code != 200:
-        raise NoDataFound("Drought Web Service failed to deliver data.")
-    jdata = req.json()
+    try:
+        resp = httpx.get(url, params=payload, headers=headers, timeout=30)
+        resp.raise_for_status()
+        jdata = resp.json()
+    except Exception as exp:
+        LOG.info(exp)
+        raise NoDataFound("Drought Web Service failed.") from exp
     if not jdata.get("d"):
         raise NoDataFound("Data Not Found.")
     df = pd.DataFrame(jdata["d"])

@@ -6,9 +6,9 @@ from datetime import datetime, timedelta
 from zoneinfo import ZoneInfo
 
 import click
+import httpx
 import numpy as np
 import pandas as pd
-import requests
 from pyiem.database import get_dbconnc
 from pyiem.util import get_properties, logger
 
@@ -40,14 +40,14 @@ def get_df(year, sts, topic):
     if sts is not None:
         params["load_time__GE"] = sts.strftime("%Y-%m-%d %H:%M:%S")
     params.update(topic)
-    req = requests.get(SERVICE, params, timeout=300)
-    if req.status_code != 200:
-        if req.status_code == 400:
-            LOG.debug("Got status_code=400 (no data) %s", req.url)
+    resp = httpx.get(SERVICE, params=params, timeout=300)
+    if resp.status_code != 200:
+        if resp.status_code == 400:
+            LOG.debug("Got status_code=400 (no data) %s", resp.url)
         else:
-            LOG.warning("Got status_code %s %s", req.status_code, req.url)
+            LOG.warning("Got status_code %s %s", resp.status_code, resp.url)
         return None
-    data = req.json()
+    data = resp.json()
     return pd.DataFrame(data["data"])
 
 

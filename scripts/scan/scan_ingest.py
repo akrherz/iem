@@ -11,9 +11,9 @@ from typing import Optional
 from zoneinfo import ZoneInfo
 
 import click
+import httpx
 import numpy as np
 import pandas as pd
-import requests
 from metpy.calc import dewpoint_from_relative_humidity
 from metpy.units import units
 from pyiem.network import Table as NetworkTable
@@ -148,16 +148,14 @@ def main(reprocess: bool, dt: Optional[datetime], station: Optional[str]):
         remote_id = int(sid[1:])
         params["stationTriplets"] = f"{remote_id}:{meta['state']}:SCAN"
         try:
-            req = requests.get(SERVICE, params=params, timeout=30)
-            if req.status_code != 200:
-                LOG.info("Got %s for url %s", req.status_code, req.url)
-                continue
-            response = req.json()
+            resp = httpx.get(SERVICE, params=params, timeout=30)
+            resp.raise_for_status()
+            jdata = resp.json()
         except Exception as exp:
             LOG.info("Failed to download: %s %s", sid, exp)
             continue
         rows = []
-        for entry in response:
+        for entry in jdata:
             for data in entry["data"]:
                 if data["stationElement"]["ordinal"] != 1:
                     continue
