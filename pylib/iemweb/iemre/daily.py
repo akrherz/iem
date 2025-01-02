@@ -8,6 +8,7 @@ additional information comes along for the ride.
 Changelog
 ---------
 
+- 2025-01-01: Implementation updated to use pydantic validation.
 - 2024-09-11: Initial documentation update
 
 Example Requests
@@ -25,10 +26,47 @@ import json
 import os
 
 import numpy as np
-import pyiem.prism as prismutil
-from pyiem import iemre, mrms
+from pydantic import Field
+from pyiem.grid.nav import MRMS_IEMRE, PRISM, get_nav
+from pyiem.iemre import (
+    daily_offset,
+    get_daily_mrms_ncname,
+    get_daily_ncname,
+    get_dailyc_ncname,
+    get_domain,
+)
 from pyiem.util import convert_value, ncopen
-from pyiem.webutil import iemapp
+from pyiem.webutil import CGIModel, iemapp
+
+
+class Schema(CGIModel):
+    """See how we are called."""
+
+    date: datetime.date = Field(
+        datetime.date(2019, 3, 1),
+        title="Date",
+        description="Date of interest",
+    )
+    lat: float = Field(
+        41.99,
+        title="Latitude",
+        description="Latitude of interest",
+        ge=-90,
+        le=90,
+    )
+    lon: float = Field(
+        -95.1,
+        title="Longitude",
+        description="Longitude of interest",
+        ge=-180,
+        le=180,
+    )
+    format: str = Field(
+        "json",
+        title="Format",
+        description="Format of the output",
+        pattern="json",
+    )
 
 
 def myrounder(val, precision):
@@ -38,26 +76,21 @@ def myrounder(val, precision):
     return round(val, precision)
 
 
-@iemapp(help=__doc__)
+@iemapp(help=__doc__, schema=Schema)
 def application(environ, start_response):
     """Do Something Fun!"""
-    ts = datetime.datetime.strptime(
-        environ.get("date", "2019-03-01"), "%Y-%m-%d"
-    )
-    lat = float(environ.get("lat", 41.99))
-    lon = float(environ.get("lon", -95.1))
-    fmt = environ.get("format", "json")
-    if fmt != "json":
-        headers = [("Content-type", "text/plain")]
-        start_response("200 OK", headers)
-        return [b"ERROR: Service only emits json at this time"]
+    dt: datetime.date = environ["date"]
+    lat = environ["lat"]
+    lon = environ["lon"]
+    domain = get_domain(lon, lat)
+    nav = get_nav("iemre", domain)
 
-    i, j = iemre.find_ij(lon, lat)
-    offset = iemre.daily_offset(ts)
+    i, j = nav.find_ij(lon, lat)
+    offset = daily_offset(dt)
 
     res = {"data": []}
 
-    fn = iemre.get_daily_ncname(ts.year)
+    fn = get_daily_ncname(dt.year, domain=domain)
 
     headers = [("Content-type", "application/json")]
     start_response("200 OK", headers)
@@ -69,32 +102,32 @@ def application(environ, start_response):
         data = {"error": "Coordinates outside of domain"}
         return [json.dumps(data).encode("ascii")]
 
-    if ts.year > 1980:
-        ncfn = f"/mesonet/data/prism/{ts.year}_daily.nc"
+    if dt.year > 1980:
+        ncfn = f"/mesonet/data/prism/{dt.year}_daily.nc"
         if not os.path.isfile(ncfn):
             prism_precip = None
         else:
-            i2, j2 = prismutil.find_ij(lon, lat)
+            i2, j2 = PRISM.find_ij(lon, lat)  # type: ignore
             with ncopen(ncfn) as nc:
                 prism_precip = nc.variables["ppt"][offset, j2, i2] / 25.4
     else:
         prism_precip = None
 
-    if ts.year > 2000:
-        ncfn = iemre.get_daily_mrms_ncname(ts.year)
+    if dt.year > 2000:
+        ncfn = get_daily_mrms_ncname(dt.year)
         if not os.path.isfile(ncfn):
             mrms_precip = None
         else:
-            i2, j2 = mrms.find_ij(lon, lat)
+            i2, j2 = MRMS_IEMRE.find_ij(lon, lat)  # type: ignore
             with ncopen(ncfn) as nc:
                 mrms_precip = nc.variables["p01d"][offset, j2, i2] / 25.4
     else:
         mrms_precip = None
 
-    c2000 = ts.replace(year=2000)
-    coffset = iemre.daily_offset(c2000)
+    c2000 = dt.replace(year=2000)
+    coffset = daily_offset(c2000)
 
-    with ncopen(fn) as nc, ncopen(iemre.get_dailyc_ncname()) as cnc:
+    with ncopen(fn) as nc, ncopen(get_dailyc_ncname()) as cnc:
         res["data"].append(
             {
                 "prism_precip_in": myrounder(prism_precip, 2),

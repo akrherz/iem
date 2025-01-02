@@ -27,15 +27,16 @@ valid=2024-01-10
 
 """
 
-import datetime
 import json
 import os
+from datetime import date
 
 import numpy as np
 import pandas as pd
 from pydantic import Field
-from pyiem import prism
 from pyiem.exceptions import IncompleteWebRequest
+from pyiem.grid.nav import PRISM
+from pyiem.iemre import daily_offset
 from pyiem.util import c2f, mm2inch, ncopen
 from pyiem.webutil import CGIModel, iemapp
 
@@ -48,15 +49,15 @@ class Schema(CGIModel):
     lon: float = Field(
         -92.0, description="Longitude of point", ge=-180, le=180
     )
-    valid: datetime.date = Field(
+    valid: date = Field(
         default=None,
         description="Provide data valid for this date (~12 UTC)",
     )
-    sdate: datetime.date = Field(
+    sdate: date = Field(
         default=None,
         description="Inclusive start date for data request",
     )
-    edate: datetime.date = Field(
+    edate: date = Field(
         default=None,
         description="Inclusive end date for data request",
     )
@@ -79,7 +80,7 @@ def dowork(environ: dict):
     else:
         raise IncompleteWebRequest("Need valid or sdate/edate")
 
-    i, j = prism.find_ij(environ["lon"], environ["lat"])
+    i, j = PRISM.find_ij(environ["lon"], environ["lat"])
     if i is None or j is None:
         raise IncompleteWebRequest("Coordinates outside of domain")
 
@@ -93,8 +94,8 @@ def dowork(environ: dict):
         ),
     }
 
-    sidx = prism.daily_offset(dates[0])
-    eidx = prism.daily_offset(dates[-1]) + 1
+    sidx = daily_offset(dates[0])
+    eidx = daily_offset(dates[-1]) + 1
 
     ncfn = f"/mesonet/data/prism/{dates[0]:%Y}_daily.nc"
     if os.path.isfile(ncfn):

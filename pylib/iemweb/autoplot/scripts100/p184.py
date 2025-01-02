@@ -5,7 +5,7 @@ this plot for the year to date period.  The present year is not used for
 the computation of the average nor minimum value.
 """
 
-import datetime
+from datetime import date, timedelta
 
 import pandas as pd
 from pyiem.database import get_sqlalchemy_conn
@@ -24,7 +24,7 @@ PDICT = {
 def get_description():
     """Return a dict describing how to call this plotter"""
     desc = {"description": __doc__, "data": True}
-    today = datetime.date.today()
+    today = date.today()
     desc["arguments"] = [
         ARG_STATION,
         dict(
@@ -51,7 +51,7 @@ def plotter(ctx: dict):
     limit = ctx["limit"]
     limitsql = ""
     limittitle = ""
-    today = datetime.date.today() - datetime.timedelta(days=1)
+    today = date.today() - timedelta(days=1)
     params = {"station": station}
     if limit == "ytd":
         limittitle = f"(Jan 1 - {today:%b %-d})"
@@ -149,7 +149,7 @@ def plotter(ctx: dict):
     ax.set_xlim(0, df["max"].max() * 1.2)
     ax.set_ylim(maxval2 - 31, maxval2 + 2)
     ax.set_ylabel(r"High Temperature $^\circ$F")
-    if year == datetime.date.today().year:
+    if year == date.today().year:
         ax.set_xlabel(f"Days, {year} data till {today}")
     else:
         ax.set_xlabel("Days")

@@ -7,7 +7,7 @@ import os
 from datetime import datetime
 
 import numpy as np
-from pyiem import prism
+from pyiem.grid.nav import PRISM
 from pyiem.util import logger, ncopen
 
 LOG = logger()
@@ -37,8 +37,8 @@ def init_year(ts):
     nc.comment = "No Comment at this time"
 
     # Setup Dimensions
-    nc.createDimension("lat", prism.NY)
-    nc.createDimension("lon", prism.NX)
+    nc.createDimension("lat", PRISM.ny)
+    nc.createDimension("lon", PRISM.nx)
     ts2 = datetime(ts.year + 1, 1, 1)
     days = (ts2 - ts).days
     nc.createDimension("time", int(days))
@@ -52,11 +52,11 @@ def init_year(ts):
     lat.bounds = "lat_bnds"
     lat.axis = "Y"
     # Grid centers
-    lat[:] = prism.SOUTH + np.arange(prism.NY) * prism.DY
+    lat[:] = PRISM.y_points
 
     lat_bnds = nc.createVariable("lat_bnds", float, ("lat", "bnds"))
-    lat_bnds[:, 0] = prism.SOUTH_EDGE + np.arange(prism.NY) * prism.DY
-    lat_bnds[:, 1] = prism.SOUTH_EDGE + np.arange(1, prism.NY + 1) * prism.DY
+    lat_bnds[:, 0] = PRISM.y_edges[:-1]
+    lat_bnds[:, 1] = PRISM.y_edges[1:]
 
     lon = nc.createVariable("lon", float, ("lon",))
     lon.units = "degrees_east"
@@ -64,11 +64,11 @@ def init_year(ts):
     lon.standard_name = "longitude"
     lon.bounds = "lon_bnds"
     lon.axis = "X"
-    lon[:] = prism.WEST + np.arange(prism.NX) * prism.DX
+    lon[:] = PRISM.x_points
 
     lon_bnds = nc.createVariable("lon_bnds", float, ("lon", "bnds"))
-    lon_bnds[:, 0] = prism.WEST_EDGE + np.arange(prism.NX) * prism.DX
-    lon_bnds[:, 1] = prism.WEST_EDGE + np.arange(1, prism.NX + 1) * prism.DX
+    lon_bnds[:, 0] = PRISM.x_edges[:-1]
+    lon_bnds[:, 1] = PRISM.x_edges[1:]
 
     tm = nc.createVariable("time", float, ("time",))
     tm.units = f"Days since {ts.year}-01-01 00:00:0.0"

@@ -72,6 +72,10 @@ def plotter(ctx: dict):
             bins.append(row["precip"])
             base += onefifth
 
+    if len(bins) != 6:
+        pgconn.close()
+        raise NoDataFound("Not enough data found.")
+
     normal = total / float(endyear - minyear - 1)
     # A rounding edge case
     if row["precip"] != bins[-1]:

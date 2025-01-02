@@ -8,6 +8,11 @@ Documentation for /iemre/multiday.py
 This application provides a JSON service for multi-day data from the IEM
 Reanalysis project.
 
+Changelog
+---------
+
+- 2025-01-02: Service cleanups
+
 Example Usage
 -------------
 
@@ -23,9 +28,15 @@ import warnings
 from datetime import date, datetime, timedelta
 
 import numpy as np
-import pyiem.prism as prismutil
 from pydantic import Field
-from pyiem import iemre, mrms
+from pyiem.grid.nav import MRMS_IEMRE, PRISM, get_nav
+from pyiem.iemre import (
+    daily_offset,
+    get_daily_mrms_ncname,
+    get_daily_ncname,
+    get_dailyc_ncname,
+    get_domain,
+)
 from pyiem.util import convert_value, ncopen
 from pyiem.webutil import CGIModel, iemapp
 
@@ -90,7 +101,7 @@ def application(environ, start_response):
 
     lon = environ["lon"]
     lat = environ["lat"]
-    domain = iemre.get_domain(lon, lat)
+    domain = get_domain(lon, lat)
     if domain is None:
         return [
             send_error(
@@ -98,7 +109,8 @@ def application(environ, start_response):
                 "Point not within any domain",
             )
         ]
-    i, j = iemre.find_ij(lon, lat, domain=domain)
+    nav = get_nav("iemre", domain)
+    i, j = nav.find_ij(lon, lat)
     if i is None or j is None:
         return [
             send_error(
@@ -106,12 +118,12 @@ def application(environ, start_response):
                 "Point not within any domain",
             )
         ]
-    offset1 = iemre.daily_offset(ts1)
-    offset2 = iemre.daily_offset(ts2) + 1
+    offset1 = daily_offset(ts1)
+    offset2 = daily_offset(ts2) + 1
     tslice = slice(offset1, offset2)
 
     # Get our netCDF vars
-    with ncopen(iemre.get_daily_ncname(ts1.year, domain=domain)) as nc:
+    with ncopen(get_daily_ncname(ts1.year, domain=domain)) as nc:
         hightemp = convert_value(
             nc.variables["high_tmpk"][tslice, j, i], "degK", "degF"
         )
@@ -142,10 +154,10 @@ def application(environ, start_response):
 
     # Get our climatology vars
     c2000 = ts1.replace(year=2000)
-    coffset1 = iemre.daily_offset(c2000)
+    coffset1 = daily_offset(c2000)
     c2000 = ts2.replace(year=2000)
-    coffset2 = iemre.daily_offset(c2000) + 1
-    with ncopen(iemre.get_dailyc_ncname(domain=domain)) as cnc:
+    coffset2 = daily_offset(c2000) + 1
+    with ncopen(get_dailyc_ncname(domain=domain)) as cnc:
         chigh = convert_value(
             cnc.variables["high_tmpk"][coffset1:coffset2, j, i], "degK", "degF"
         )
@@ -155,7 +167,7 @@ def application(environ, start_response):
         cprecip = cnc.variables["p01d"][coffset1:coffset2, j, i] / 25.4
 
     if ts1.year > 1980 and domain == "":
-        i2, j2 = prismutil.find_ij(lon, lat)
+        i2, j2 = PRISM.find_ij(lon, lat)
         if i2 is None or j2 is None:
             prism_precip = [None] * (offset2 - offset1)
         else:
@@ -165,8 +177,8 @@ def application(environ, start_response):
         prism_precip = [None] * (offset2 - offset1)
 
     if ts1.year > 2000 and domain == "":
-        i2, j2 = mrms.find_ij(lon, lat)
-        with ncopen(iemre.get_daily_mrms_ncname(ts1.year)) as nc:
+        i2, j2 = MRMS_IEMRE.find_ij(lon, lat)
+        with ncopen(get_daily_mrms_ncname(ts1.year)) as nc:
             mrms_precip = nc.variables["p01d"][tslice, j2, i2] / 25.4
     else:
         mrms_precip = [None] * (offset2 - offset1)

@@ -16,15 +16,14 @@ http://s-iihr77.iihr.uiowa.edu/feeds/IFC7ADV/H99999999_I0007_G_15MAR2013_154500.
 """
 
 import datetime
-import os
 import subprocess
 import tempfile
 
 import numpy as np
-import pyiem.mrms as mrms
 import requests
 from PIL import Image, PngImagePlugin
-from pyiem.util import exponential_backoff, logger
+from pyiem.mrms import make_colorramp
+from pyiem.util import archive_fetch, exponential_backoff, logger, utc
 
 LOG = logger()
 BASEURL = "http://s-iihr77.iihr.uiowa.edu/Products/IFC7ADV"
@@ -72,7 +71,7 @@ def to_raster(tmpfn, now):
     imgdata = data * 10.0 / 12.0
     imgdata = np.where(imgdata < 0, 255, imgdata)
     png = Image.fromarray(np.uint8(imgdata))
-    png.putpalette(mrms.make_colorramp())
+    png.putpalette(make_colorramp())
     meta = PngImagePlugin.PngInfo()
     meta.add_text("title", now.strftime("%Y%m%d%H%M"), 0)
     png.save(f"{tmpfn}.png", pnginfo=meta)
@@ -119,8 +118,7 @@ def do_time(tmpdir, now, routes="ac"):
 
 def main():
     """main method"""
-    now = datetime.datetime.utcnow()
-    now = now.replace(second=0, microsecond=0)
+    now = utc().replace(second=0, microsecond=0)
     # Round back to the nearest 5 minute, plus 10
     delta = now.minute % 5 + 15
     now = now - datetime.timedelta(minutes=delta)
@@ -129,12 +127,12 @@ def main():
         do_time(tmpdir, now)
     # Do we need to rerun a previous hour
     now = now - datetime.timedelta(minutes=60)
-    fn = now.strftime(
-        "/mesonet/ARCHIVE/data/%Y/%m/%d/GIS/ifc/p05m_%Y%m%d%H%M.png"
-    )
-    if not os.path.isfile(fn):
-        with tempfile.TemporaryDirectory() as tmpdir:
-            do_time(tmpdir, now, routes="a")
+    fn = now.strftime("%Y/%m/%d/GIS/ifc/p05m_%Y%m%d%H%M.png")
+    with archive_fetch(fn) as fp:
+        if fp is not None:
+            return
+    with tempfile.TemporaryDirectory() as tmpdir:
+        do_time(tmpdir, now, routes="a")
 
 
 if __name__ == "__main__":
