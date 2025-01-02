@@ -90,14 +90,18 @@ def zip_and_delete(station, files):
 def upload_to_staging():
     """Move to staging for google drive upload."""
     rempath = "/stage/iemoffline/isusm/"
-    cmd = (
-        "rsync -r --no-perms "
-        "--remove-source-files --groupmap=*:iem-friends --rsync-path "
-        f'"mkdir -p {rempath} && rsync" archived/* '
-        f"mesonet@akrherz-desktop.agron.iastate.edu:{rempath}"
-    )
-    LOG.debug(cmd)
-    subprocess.call(cmd, shell=True)
+    cmd = [
+        "rsync",
+        "-r",
+        "--no-perms",
+        "--remove-source-files",
+        "--groupmap=*:iem-friends",
+        "--rsync-path",
+        f"mkdir -p {rempath} && rsync",
+        *glob.glob("archived/*"),
+        f"mesonet@akrherz-desktop.agron.iastate.edu:{rempath}",
+    ]
+    subprocess.call(cmd)
 
 
 def main():

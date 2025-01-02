@@ -1,10 +1,14 @@
-"""Create a hybrid maize dump file"""
+"""Create a hybrid maize dump file.
 
-import datetime
+Called from RUN_12Z.sh
+"""
+
 import subprocess
+from datetime import date, timedelta
 
+from pyiem.database import get_dbconn
 from pyiem.network import Table as NetworkTable
-from pyiem.util import convert_value, get_dbconn, logger
+from pyiem.util import convert_value, logger
 
 LOG = logger()
 SITES = ["ames", "nashua", "sutherland", "crawfordsville", "lewis"]
@@ -17,7 +21,7 @@ def main():
     nt = NetworkTable("ISUSM")
     ipgconn = get_dbconn("iem")
     icursor = ipgconn.cursor()
-    today = datetime.date.today()
+    today = date.today()
     for i, site in enumerate(SITES):
         # Need to figure out this year's data
         thisyear = {}
@@ -28,9 +32,9 @@ def main():
                 if not line.startswith("2016"):
                     continue
                 tokens = line.split()
-                valid = datetime.date(
-                    int(tokens[0]), 1, 1
-                ) + datetime.timedelta(days=int(tokens[1]) - 1)
+                valid = date(int(tokens[0]), 1, 1) + timedelta(
+                    days=int(tokens[1]) - 1
+                )
                 if valid >= today:
                     break
                 thisyear[valid.strftime("%m%d")] = {
@@ -74,32 +78,27 @@ year    day     Solar   T-High  T-Low   RelHum  Precip  WndSpd\r
             )
 
             # Get the baseline obs
-            sts = datetime.date(2021, 9, 1)
+            sts = date(2021, 9, 1)
             ets = today
             now = sts
             while now < ets:
                 idx = now.strftime("%m%d")
-                row = [now, None, None, None, None, None, None]
-                for j, key in enumerate(
-                    ["radn", "maxt", "mint", "rh", "rain", "windspeed"]
-                ):
-                    row[j + 1] = thisyear[idx][key]
-                fh.write(
-                    ("%s\t%4s\t%.3f\t%.1f\t%.1f\t%.0f\t%.1f\t%.1f\r\n")
-                    % (
-                        row[0].year,
-                        int(row[0].strftime("%j")),
-                        row[1],
-                        row[2],
-                        row[3],
-                        row[4],
-                        row[5],
-                        convert_value(
-                            row[6], "meter / second", "kilometer / hour"
-                        ),
-                    )
+                ws = convert_value(
+                    thisyear[idx]["windspeed"],
+                    "meter / second",
+                    "kilometer / hour",
                 )
-                now += datetime.timedelta(days=1)
+                fh.write(
+                    f"{now:%Y}\t"
+                    f"{now.timetuple().tm_yday:4.0f}\t"
+                    f"{thisyear[idx]['radn']:.3f}\t"
+                    f"{thisyear[idx]['maxt']:.1f}\t"
+                    f"{thisyear[idx]['mint']:.1f}\t"
+                    f"{thisyear[idx]['rh']:.0f}\t"
+                    f"{thisyear[idx]['rain']:.1f}\t"
+                    f"{ws:.1f}\r\n"
+                )
+                now += timedelta(days=1)
         try:
             subprocess.call(
                 ["mv", fn, f"/mesonet/share/pickup/yieldfx/{site}.wth"],

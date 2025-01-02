@@ -55,13 +55,29 @@ def make_metadata(tmpfn, mydict):
 
 def make_contours(tmpfn):
     """Make a GeoJSON."""
-    cmd = (
-        "timeout 120 gdal_contour "
-        "-fl 0 5 10 15 20 25 30 35 40 45 50 55 60 65 70 75 80 85 "
-        "90 95 100 150 200 -amin ssize_mm -amax esize_mm "
-        f"-snodata -1 -p -q {tmpfn}.tif {tmpfn}.geojson"
-    )
-    subprocess.call(cmd, shell=True)
+    cmd = [
+        "timeout",
+        "120",
+        "gdal_contour",
+        "-fl",
+        " ".join(str(x) for x in range(0, 101, 5)) + " 150 200",
+        "-amin",
+        "ssize_mm",
+        "-amax",
+        "esize_mm",
+        "-snodata",
+        "-1",
+        "-p",
+        "-q",
+        f"{tmpfn}.tif",
+        f"{tmpfn}.geojson",
+    ]
+    with subprocess.Popen(
+        cmd, stdout=subprocess.PIPE, stderr=subprocess.PIPE
+    ) as proc:
+        (stdout, stderr) = proc.communicate()
+    if stdout != b"" or stderr != b"":
+        LOG.info("stdout: %s stderr: %s", stdout, stderr)
 
 
 def make_raster(vals, tmpfn):

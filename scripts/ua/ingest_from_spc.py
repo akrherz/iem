@@ -4,8 +4,8 @@ Stop gap ingest from SPC since rucsoundings is down
 called from RUN_10_AFTER.sh for 00z and 12z
 """
 
-import datetime
 import sys
+from datetime import datetime, timedelta
 from typing import Optional
 from zoneinfo import ZoneInfo
 
@@ -39,7 +39,7 @@ class RAOB:
         if raw == "99999":
             return None
         if int(raw) < 100:
-            return self.valid.replace(hour=0, minute=0) + datetime.timedelta(
+            return self.valid.replace(hour=0, minute=0) + timedelta(
                 minutes=int(raw)
             )
         minute = int(raw[-2:])
@@ -49,7 +49,7 @@ class RAOB:
             hour += 1
         ts = self.valid.replace(hour=hour, minute=minute)
         if ts.hour > 20 and self.valid.hour < 2:
-            ts -= datetime.timedelta(days=1)
+            ts -= timedelta(days=1)
         return ts
 
     def conv_speed(self, raw):
@@ -131,7 +131,7 @@ def conv(raw: str):
     return float(raw)
 
 
-def parse(raw, sid):
+def parse(raw):
     """Parse the raw data and yield RAOB objects"""
     rob = RAOB()
     rob.wind_units = "kt"  # sigh
@@ -213,7 +213,7 @@ def main(valid, station):
             continue
         cursor = dbconn.cursor()
         try:
-            rob = parse(resp.text, sid)
+            rob = parse(resp.text)
             if rob is None:
                 continue
             rob.station = sid
