@@ -150,6 +150,8 @@ def run(environ: dict):
         )
         status_limiter = ""
         params["pastts"] = environ["ts"] - timedelta(days=14)  # arb
+        params["sts"] = environ["ts"]
+        params["ets"] = environ["ts"]
         res["valid_at"] = environ["ts"].strftime(ISO8601)
 
     # NOTE: we dropped checking for products valid in the future (FL.W)
