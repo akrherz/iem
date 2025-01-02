@@ -20,6 +20,7 @@ dependencies:
   - fiona
   # various places
   - gdal
+  - libgdal-pg
   # important
   - geopandas
   # Get stuff
