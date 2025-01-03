@@ -7,7 +7,8 @@ import os
 
 import numpy as np
 from metpy.units import units
-from pyiem import iemre
+from pyiem.grid.nav import IEMRE
+from pyiem.iemre import daily_offset, get_daily_ncname
 from pyiem.meteorology import gdd
 from pyiem.util import convert_value, ncopen
 
@@ -80,7 +81,7 @@ def replace_cfs(nc, valid, islice, jslice):
         datetime.date(valid.year, 12, 31) - datetime.date(valid.year, 1, 1)
     ).days
     cfsnc = ncopen(valid.strftime("/mesonet/data/iemre/cfs_%Y%m%d%H.nc"))
-    tidx = iemre.daily_offset(valid + datetime.timedelta(days=1))
+    tidx = daily_offset(valid + datetime.timedelta(days=1))
     tslice = slice(tidx0 + 1, tidx1 + 1)
     # CFS is W m-2, we want MJ
     nc.variables["srad"][tslice, :, :] = (
@@ -105,7 +106,7 @@ def replace_cfs(nc, valid, islice, jslice):
 
 def copy_iemre(nc, fromyear, ncdate0, ncdate1, islice, jslice):
     """Copy IEMRE data from a given year to **inclusive** dates."""
-    rencfn = iemre.get_daily_ncname(fromyear)
+    rencfn = get_daily_ncname(fromyear)
     if not os.path.isfile(rencfn):
         print("reanalysis fn %s missing" % (rencfn,))
         return
@@ -158,7 +159,7 @@ def copy_iemre(nc, fromyear, ncdate0, ncdate1, islice, jslice):
 def tile_extraction(nc, valid, west, south):
     """Do our tile extraction"""
     # update model metadata
-    i, j = iemre.find_ij(west, south)
+    i, j = IEMRE.find_ij(west, south)
     islice = slice(i, i + 16)
     jslice = slice(j, j + 16)
     # Current year IEMRE should be substituted for this year's data

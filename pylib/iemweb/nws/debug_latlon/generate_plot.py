@@ -1,4 +1,22 @@
-"""Generate a pretty plot, please."""
+"""..title:: Tool to debug NWS LAT...LON polygons
+
+Simple tool to help debug NWS LAT...LON polygons.
+
+Changelog
+---------
+
+- 2025-01-03: Updated to use pydantic for input validation
+
+Example Requests
+----------------
+
+The urlencoding here is a bit ugly, but alas.
+
+https://mesonet.agron.iastate.edu/nws/debug_latlon/generate_plot.py?\
+text=LAT...LON%203920%208402%203920%208400%203918%208400%203918%208402%20%0A\
+&title=Test
+
+"""
 
 # stdlib
 import json
@@ -7,19 +25,28 @@ import tempfile
 
 import geopandas as gpd
 import matplotlib.patheffects as PathEffects
-from pyiem.exceptions import IncompleteWebRequest
+from matplotlib.figure import Figure
+from pydantic import Field
 from pyiem.nws.product import str2polygon
 from pyiem.plot import fitbox
 from pyiem.plot.use_agg import plt
 from pyiem.reference import ISO8601, TWITTER_RESOLUTION_INCH
 from pyiem.util import utc
-from pyiem.webutil import iemapp
+from pyiem.webutil import CGIModel, iemapp
 
 
-def plot_poly(fig, poly, environ):
+class Schema(CGIModel):
+    """See how we are called."""
+
+    text: str = Field(..., description="The text to parse", min_length=1)
+    title: str = Field(None, description="Optional title for the plot")
+
+
+def plot_poly(fig: Figure, poly, environ):
     """Add to axes."""
-    ax = fig.add_axes([0.15, 0.15, 0.7, 0.7])
-    title = environ.get("title", "")[:120]
+    ax = fig.add_axes((0.15, 0.15, 0.7, 0.7))
+    title = environ["title"] if environ["title"] else "No Title Provided"
+    title = title[:120]
     title += (
         f"\npolygon.is_valid: {poly.is_valid} "
         f"linearring.is_valid: {poly.exterior.is_valid}"
@@ -62,8 +89,6 @@ def plot_poly(fig, poly, environ):
 def process(environ):
     """Make something pretty."""
     text = environ.get("text")
-    if text is None:
-        raise IncompleteWebRequest("GET text= parameter is missing")
     text = text.replace("LAT...LON", "").replace("\n", " ")
     # Add extra whitespace to account for upstream issues
     poly = str2polygon(text + " \n")
@@ -84,10 +109,10 @@ def process(environ):
     return res
 
 
-@iemapp()
+@iemapp(help=__doc__, schema=Schema)
 def application(environ, start_response):
     """The App."""
     res = process(environ)
     headers = [("Content-type", "application/json")]
     start_response("200 OK", headers)
-    return [json.dumps(res).encode("ascii")]
+    return json.dumps(res)

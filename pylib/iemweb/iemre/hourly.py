@@ -1,18 +1,60 @@
-"""JSON service providing IEMRE data for a given point"""
+""".. title:: IEMRE Hourly Data Service
 
-import datetime
+This service emits point values from the IEMRE analysis grid.  You can only
+request 24 hours of data at a time.
+
+Changelog
+---------
+
+- 2025-01-03: Initial implementation with pydantic validation.
+
+"""
+
 import json
-import os
-from zoneinfo import ZoneInfo
+from datetime import date as datetype
+from datetime import datetime, timedelta, timezone
 
 import numpy as np
-from pyiem import iemre
-from pyiem.exceptions import BadWebRequest
+from pydantic import Field, PrivateAttr, model_validator
+from pyiem.grid.nav import get_nav
+from pyiem.iemre import DOMAINS, get_domain, get_hourly_ncname, hourly_offset
 from pyiem.util import convert_value, ncopen, utc
-from pyiem.webutil import iemapp
-from pymemcache.client import Client
+from pyiem.webutil import CGIModel, iemapp
 
 ISO = "%Y-%m-%dT%H:%MZ"
+
+
+class Schema(CGIModel):
+    """See how we are called."""
+
+    _domain: str = PrivateAttr(None)
+    _i: int = PrivateAttr(None)
+    _j: int = PrivateAttr(None)
+
+    date: datetype = Field(..., description="Date to query data for")
+    lat: float = Field(
+        ...,
+        le=90,
+        ge=-90,
+        description="Latitude (degrees Norht) of point to query",
+    )
+    lon: float = Field(
+        ...,
+        le=180,
+        ge=-180,
+        description="Longitude (degrees East) of point to query",
+    )
+
+    @model_validator(mode="after")
+    def ensure_domain(self):
+        """Ensure the point is within a domain."""
+        domain = get_domain(self.lon, self.lat)
+        if domain is None:
+            raise ValueError("Point is outside all IEMRE domains")
+        self._domain = domain  # skipcq
+        self._i, self._j = get_nav("iemre", domain).find_ij(
+            self.lon, self.lat
+        )  # skipcq
 
 
 def myrounder(val, precision):
@@ -22,99 +64,90 @@ def myrounder(val, precision):
     return round(float(val), precision)
 
 
-def get_timerange(form):
+def get_timerange(dt: datetype, domain: str) -> tuple[datetime, datetime]:
     """Figure out what period to get data for."""
-    ts = datetime.datetime.strptime(form.get("date", "2019-03-01"), "%Y-%m-%d")
-    # Construct a CDT/CST Midnight to 11 PM period
-    # This logic does not properly handle spring/fall time changes as it always
-    # returns a 24 hour period.
-    ts = utc(ts.year, ts.month, ts.day, 12).astimezone(
-        ZoneInfo("America/Chicago")
-    )
-    return ts.replace(hour=0), ts.replace(hour=23)
+    tzinfo = DOMAINS[domain]["tzinfo"]
+    # Construct a local midnight to 11 PM period
+    ts = datetime(dt.year, dt.month, dt.day, 0, tzinfo=tzinfo)
+    return ts, ts.replace(hour=23)
 
 
-def workflow(sts, ets, i, j, domain):
+def workflow(
+    sts: datetime, ets: datetime, i: int, j: int, domain: str
+) -> dict:
     """Return a dict of our data."""
-    res = {"data": [], "generated_at": utc().strftime(ISO)}
+    res = {
+        "data": [],
+        "grid_i": i,
+        "grid_j": j,
+        "generated_at": utc().strftime(ISO),
+    }
 
-    # BUG here for Dec 31.
-    fn = iemre.get_hourly_ncname(sts.year, domain=domain)
+    tidx0 = hourly_offset(sts)
+    tidx1 = hourly_offset(ets)
+    fns = [get_hourly_ncname(sts.astimezone(timezone.utc).year, domain)]
+    tslices = [slice(tidx0, tidx1 + 1)]
+    if tidx1 < tidx0:
+        # We are spanning years
+        fns.append(
+            get_hourly_ncname(ets.astimezone(timezone.utc).year, domain)
+        )
+        tslices.append(slice(0, tidx1 + 1))
+        tslices[0] = slice(tidx0, None)
 
-    if not os.path.isfile(fn):
-        return res
-
-    if i is None or j is None:
-        return {"error": "Coordinates outside of domain"}
-
-    res["grid_i"] = int(i)
-    res["grid_j"] = int(j)
-    with ncopen(fn) as nc:
-        now = sts
-        while now <= ets:
-            offset = iemre.hourly_offset(now)
-            res["data"].append(
-                {
-                    "valid_utc": now.astimezone(ZoneInfo("UTC")).strftime(ISO),
-                    "valid_local": now.strftime(ISO[:-1]),
-                    "skyc_%": myrounder(nc.variables["skyc"][offset, j, i], 1),
-                    "air_temp_f": myrounder(
-                        convert_value(
-                            nc.variables["tmpk"][offset, j, i], "degK", "degF"
-                        ),
-                        1,
-                    ),
-                    "dew_point_f": myrounder(
-                        convert_value(
-                            nc.variables["dwpk"][offset, j, i], "degK", "degF"
-                        ),
-                        1,
-                    ),
-                    "soil4t_f": myrounder(
-                        convert_value(
-                            nc.variables["soil4t"][offset, j, i],
-                            "degK",
-                            "degF",
-                        ),
-                        1,
-                    ),
-                    "uwnd_mps": myrounder(
-                        nc.variables["uwnd"][offset, j, i], 2
-                    ),
-                    "vwnd_mps": myrounder(
-                        nc.variables["vwnd"][offset, j, i], 2
-                    ),
-                    "hourly_precip_in": myrounder(
-                        nc.variables["p01m"][offset, j, i] / 25.4, 2
-                    ),
-                }
+    now = sts
+    for fn, tslice in zip(fns, tslices):
+        with ncopen(fn) as nc:
+            skyc = nc.variables["skyc"][tslice, j, i]
+            dwpf = convert_value(
+                nc.variables["dwpk"][tslice, j, i], "degK", "degF"
             )
-            now += datetime.timedelta(hours=1)
+            tmpf = convert_value(
+                nc.variables["tmpk"][tslice, j, i], "degK", "degF"
+            )
+            soil4t = convert_value(
+                nc.variables["soil4t"][tslice, j, i], "degK", "degF"
+            )
+            uwnd = nc.variables["uwnd"][tslice, j, i]
+            vwnd = nc.variables["vwnd"][tslice, j, i]
+            precip = nc.variables["p01m"][tslice, j, i] / 25.4
+            for idx, _skyc in enumerate(skyc):
+                utcnow = now.astimezone(timezone.utc)
+                res["data"].append(
+                    {
+                        "valid_utc": utcnow.strftime(ISO),
+                        "valid_local": now.strftime(ISO[:-1]),
+                        "skyc_%": myrounder(_skyc, 1),
+                        "air_temp_f": myrounder(tmpf[idx], 1),
+                        "dew_point_f": myrounder(dwpf[idx], 1),
+                        "soil4t_f": myrounder(soil4t[idx], 1),
+                        "uwnd_mps": myrounder(uwnd[idx], 2),
+                        "vwnd_mps": myrounder(vwnd[idx], 2),
+                        "hourly_precip_in": myrounder(precip[idx], 2),
+                    }
+                )
+                now += timedelta(hours=1)
     return res
 
 
-@iemapp()
+def get_mckey(environ: dict):
+    """Figure out the memcache key."""
+    model: Schema = environ["_cgimodel_schema"]
+    return (
+        f"iemre/hourly/{model._domain}/{environ['date']:%Y%m%d}"  # skipcq
+        f"/{model._i}/{model._j}"  # skipcq
+    )
+
+
+@iemapp(
+    help=__doc__, schema=Schema, memcachekey=get_mckey, memcacheexpire=3600
+)
 def application(environ, start_response):
     """Do Something Fun!"""
-    try:
-        sts, ets = get_timerange(environ)
-    except ValueError as exp:
-        raise BadWebRequest("Invalid date provided") from exp
-    lat = float(environ.get("lat", 41.99))
-    lon = float(environ.get("lon", -95.1))
-    domain = iemre.get_domain(lon, lat)
+    model: Schema = environ["_cgimodel_schema"]
+    sts, ets = get_timerange(environ["date"], model._domain)  # skipcq
 
     headers = [("Content-type", "application/json")]
     start_response("200 OK", headers)
-
-    i, j = iemre.find_ij(lon, lat, domain=domain)
-    mckey = f"iemre/hourly/{domain}/{sts:%Y%m%d}/{i}/{j}"
-
-    mc = Client("iem-memcached:11211")
-    res = mc.get(mckey)
-    if res is None:
-        res = workflow(sts, ets, i, j, domain)
-        res = json.dumps(res).encode("ascii")
-        mc.set(mckey, res, 3600)
-    mc.close()
-    return [res]
+    res = workflow(sts, ets, model._i, model._j, model._domain)  # skipcq
+    return json.dumps(res)
