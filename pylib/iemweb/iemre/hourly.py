@@ -51,8 +51,10 @@ class Schema(CGIModel):
         domain = get_domain(self.lon, self.lat)
         if domain is None:
             raise ValueError("Point is outside all IEMRE domains")
-        self._domain = domain
-        self._i, self._j = get_nav("iemre", domain).find_ij(self.lon, self.lat)
+        self._domain = domain  # skipcq
+        self._i, self._j = get_nav("iemre", domain).find_ij(
+            self.lon, self.lat
+        )  # skipcq
 
 
 def myrounder(val, precision):
@@ -109,13 +111,13 @@ def workflow(
             uwnd = nc.variables["uwnd"][tslice, j, i]
             vwnd = nc.variables["vwnd"][tslice, j, i]
             precip = nc.variables["p01m"][tslice, j, i] / 25.4
-            for idx in range(len(skyc)):
+            for idx, _skyc in enumerate(skyc):
                 utcnow = now.astimezone(timezone.utc)
                 res["data"].append(
                     {
                         "valid_utc": utcnow.strftime(ISO),
                         "valid_local": now.strftime(ISO[:-1]),
-                        "skyc_%": myrounder(skyc[idx], 1),
+                        "skyc_%": myrounder(_skyc, 1),
                         "air_temp_f": myrounder(tmpf[idx], 1),
                         "dew_point_f": myrounder(dwpf[idx], 1),
                         "soil4t_f": myrounder(soil4t[idx], 1),
@@ -132,8 +134,8 @@ def get_mckey(environ: dict):
     """Figure out the memcache key."""
     model: Schema = environ["_cgimodel_schema"]
     return (
-        f"iemre/hourly/{model._domain}/{environ['date']:%Y%m%d}"
-        f"/{model._i}/{model._j}"
+        f"iemre/hourly/{model._domain}/{environ['date']:%Y%m%d}"  # skipcq
+        f"/{model._i}/{model._j}"  # skipcq
     )
 
 
@@ -143,9 +145,9 @@ def get_mckey(environ: dict):
 def application(environ, start_response):
     """Do Something Fun!"""
     model: Schema = environ["_cgimodel_schema"]
-    sts, ets = get_timerange(environ["date"], model._domain)
+    sts, ets = get_timerange(environ["date"], model._domain)  # skipcq
 
     headers = [("Content-type", "application/json")]
     start_response("200 OK", headers)
-    res = workflow(sts, ets, model._i, model._j, model._domain)
+    res = workflow(sts, ets, model._i, model._j, model._domain)  # skipcq
     return json.dumps(res)
