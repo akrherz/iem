@@ -46,11 +46,13 @@ def plotter(ctx: dict):
 
     cursor.execute(
         """
+    with pop as (
         select precip, sum(precip) OVER (ORDER by precip ASC) as rsum,
         sum(precip) OVER () as tsum,
         min(year) OVER () as minyear from alldata where
         station = %s and precip > 0.009 and extract(doy from day) < %s and
-        year < extract(year from now()) ORDER by precip ASC
+        year < extract(year from now()) ORDER by precip ASC)
+    select distinct precip, rsum, tsum, minyear from pop order by precip ASC
     """,
         (station, jdaylimit),
     )
@@ -62,24 +64,26 @@ def plotter(ctx: dict):
     bins = [0.01]
     minyear = None
     row = None
+    last_precip = None
     for i, row in enumerate(cursor):
         if i == 0:
             minyear = row["minyear"]
             total = row["tsum"]
             onefifth = total / 5.0
             base = onefifth
+        last_precip = row["precip"]
         if row["rsum"] > base:
             bins.append(row["precip"])
             base += onefifth
 
-    if len(bins) != 6:
+    if len(bins) != 5:
         pgconn.close()
         raise NoDataFound("Not enough data found.")
 
     normal = total / float(endyear - minyear - 1)
     # A rounding edge case
-    if row["precip"] != bins[-1]:
-        bins.append(row["precip"])
+    if last_precip != bins[-1]:
+        bins.append(last_precip)
 
     df = pd.DataFrame(
         {"bin": range(1, 6), "lower": bins[0:-1], "upper": bins[1:]},

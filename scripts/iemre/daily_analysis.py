@@ -95,11 +95,10 @@ def copy_iemre_hourly(ts, ds, domain):
     ets = sts + timedelta(hours=23)
     pairs = [(sts, ets)]
     if sts.year != ets.year:
-        # 6z to 23z (inclusve)
-        # 0z to 5z (inclusive)
+        # These are inclusive
         pairs = [
-            (sts, sts + timedelta(hours=17)),
-            (sts + timedelta(hours=18), ets),
+            (sts, sts.replace(hour=23)),
+            (ets.replace(hour=0), ets),
         ]
     ets = utc(ts.year, ts.month, ts.day, 12)
     # 13z yesterday
