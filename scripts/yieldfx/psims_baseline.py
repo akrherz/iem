@@ -10,7 +10,8 @@ import sys
 import click
 import numpy as np
 from metpy.units import units
-from pyiem import iemre
+from pyiem.grid.nav import IEMRE
+from pyiem.iemre import get_daily_ncname
 from pyiem.meteorology import gdd
 from pyiem.util import convert_value, logger, ncopen
 from tqdm import tqdm
@@ -77,7 +78,7 @@ def make_netcdf(ncfn, valid, west, south):
 
 def copy_iemre(nc, ncdate0, ncdate1, islice, jslice):
     """Copy IEMRE data from a given year to **inclusive** dates."""
-    rencfn = iemre.get_daily_ncname(ncdate0.year)
+    rencfn = get_daily_ncname(ncdate0.year)
     if not os.path.isfile(rencfn):
         LOG.info("reanalysis fn %s missing", rencfn)
         return
@@ -129,7 +130,7 @@ def copy_iemre(nc, ncdate0, ncdate1, islice, jslice):
 def tile_extraction(nc, valid, west, south, fullmode):
     """Do our tile extraction"""
     # update model metadata
-    i, j = iemre.find_ij(west, south)
+    i, j = IEMRE.find_ij(west, south)
     islice = slice(i, i + 16)
     jslice = slice(j, j + 16)
     if fullmode:

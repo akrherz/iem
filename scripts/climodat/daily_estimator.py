@@ -21,8 +21,9 @@ import numpy as np
 import pandas as pd
 import xarray as xr
 from metpy.units import units
-from pyiem import iemre
 from pyiem.database import get_dbconn, get_sqlalchemy_conn
+from pyiem.grid.nav import IEMRE
+from pyiem.iemre import get_grids
 from pyiem.network import Table as NetworkTable
 from pyiem.reference import TRACE_VALUE, state_names
 from pyiem.util import logger, mm2inch
@@ -58,7 +59,7 @@ def init_df(state, date):
             continue
         if entry["threading"]:
             threaded[sid] = nt.get_threading_id(sid, date)
-        i, j = iemre.find_ij(entry["lon"], entry["lat"])
+        i, j = IEMRE.find_ij(entry["lon"], entry["lat"])
         rows.append(
             {
                 "day": date,
@@ -320,7 +321,7 @@ def merge_threaded(df, threaded):
 def main(date, st):
     """Go Main Go."""
     date = date.date()
-    ds = iemre.get_grids(
+    ds = get_grids(
         date,
         varnames=[
             "high_tmpk",

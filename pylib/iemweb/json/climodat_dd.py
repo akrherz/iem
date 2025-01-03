@@ -34,7 +34,7 @@ from metpy.units import units
 from pydantic import Field
 from pyiem.database import get_sqlalchemy_conn
 from pyiem.exceptions import IncompleteWebRequest
-from pyiem.iemre import find_ij
+from pyiem.grid.nav import IEMRE
 from pyiem.meteorology import gdd as calc_gdd
 from pyiem.util import c2f, ncopen
 from pyiem.webutil import CGIModel, iemapp
@@ -127,7 +127,7 @@ def run(station, sdate, edate, gddbase, gddceil):
         "gddceil": gddceil,
         "accum": accum,
     }
-    idx, jdx = find_ij(lon, lat)
+    idx, jdx = IEMRE.find_ij(lon, lat)
     if idx is not None:
         for model in ["gfs", "ndfd"]:
             ncfn = f"/mesonet/data/iemre/{model}_current.nc"

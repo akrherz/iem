@@ -15,6 +15,7 @@
 /geojson/lsr.geojson?east=-80&west=-70&north=42&south=40
 /geojson/lsr.geojson?east=-70&west=-80&north=40&south=50
 /geojson/lsr.geojson?east=-70&west=-80&north=40
+/iemre/hourly.py?lat=0&lon=0&date=2024-01-01
 /json/nwstext_center_date.py?center=KDMX
 /json/prism.py?lat=-140&lon=35&valid=2024-01-01
 /json/prism.py?lat=-140&lon=35

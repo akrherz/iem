@@ -33,9 +33,9 @@ from zoneinfo import ZoneInfo, ZoneInfoNotFoundError
 
 import numpy as np
 from pydantic import Field, field_validator
-from pyiem import iemre
+from pyiem.grid.nav import STAGE4
+from pyiem.iemre import hourly_offset
 from pyiem.reference import ISO8601
-from pyiem.stage4 import find_ij
 from pyiem.util import mm2inch, ncopen, utc
 from pyiem.webutil import CGIModel, iemapp
 
@@ -49,8 +49,7 @@ class Schema(CGIModel):
     valid: date = Field(..., description="Valid date of data")
     tz: str = Field("UTC", description="Timezone of valid date")
 
-    @field_validator("tz")
-    @classmethod
+    @field_validator("tz", mode="before")
     def validate_tz(cls, value):
         """Ensure the timezone is valid."""
         try:
@@ -76,8 +75,8 @@ def dowork(environ):
         valid.year, valid.month, valid.day, 1, tzinfo=ZoneInfo(environ["tz"])
     )
     ets = sts + timedelta(hours=24)
-    sidx = iemre.hourly_offset(sts)
-    eidx = iemre.hourly_offset(ets)
+    sidx = hourly_offset(sts)
+    eidx = hourly_offset(ets)
 
     ncfn = f"/mesonet/data/stage4/{valid:%Y}_stage4_hourly.nc"
     res = {
@@ -89,7 +88,7 @@ def dowork(environ):
     }
     if not os.path.isfile(ncfn):
         return json.dumps(res)
-    i, j = find_ij(environ["lon"], environ["lat"])
+    i, j = STAGE4.find_ij(environ["lon"], environ["lat"])
     if i is not None:
         with ncopen(ncfn) as nc:
             res["gridi"] = i
