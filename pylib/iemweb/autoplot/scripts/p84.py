@@ -36,6 +36,7 @@ from pyiem.plot import get_cmap, pretty_bins
 from pyiem.plot.geoplot import MapPlot
 from pyiem.reference import LATLON
 from pyiem.util import get_properties
+from pyproj import Proj
 
 PDICT2 = {"c": "Contour Plot", "g": "Grid Cell Mesh"}
 SRCDICT = {
@@ -411,7 +412,7 @@ def finalize_map(ctx):
         # Compute the lat/lon grid
         if ctx["src"] == "stage4":
             xi, yi = np.meshgrid(xpts, ypts)
-            lons, lats = STAGE4.crs(xi, yi)
+            lons, lats = Proj(STAGE4.crs)(xi, yi)
         else:
             lons, lats = np.meshgrid(xpts, ypts)
 
