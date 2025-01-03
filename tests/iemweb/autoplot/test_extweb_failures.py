@@ -9,5 +9,5 @@ def test_ap17(httpx_mock: HTTPXMock):
     """Test a failure found in prod."""
     httpx_mock.add_response(status_code=404)
     c = Client(application)
-    res = c.get("?p=17")
+    res = c.get("?p=17&_cb=1")
     assert res.status_code == 400
