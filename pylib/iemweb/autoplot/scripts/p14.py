@@ -84,6 +84,9 @@ def plotter(ctx: dict):
     # A rounding edge case
     if last_precip != bins[-1]:
         bins.append(last_precip)
+    if len(bins) != 6:
+        pgconn.close()
+        raise NoDataFound("Not enough data found.")
 
     df = pd.DataFrame(
         {"bin": range(1, len(bins)), "lower": bins[0:-1], "upper": bins[1:]},
