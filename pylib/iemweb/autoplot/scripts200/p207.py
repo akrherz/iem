@@ -33,7 +33,8 @@ import pandas as pd
 from geopandas import GeoDataFrame, read_postgis
 from pyiem.database import get_sqlalchemy_conn
 from pyiem.exceptions import NoDataFound
-from pyiem.plot import MapPlot, nwssnow
+from pyiem.plot import MapPlot
+from pyiem.plot.colormaps import nwsice, nwssnow
 from pyiem.reference import EPSG
 from pyiem.util import logger
 from pyproj import Transformer
@@ -413,9 +414,10 @@ def plotter(ctx: dict):
     lons, lats, vals = do_analysis(df2, ctx)
 
     rng = [0.01, 1, 2, 3, 4, 6, 8, 12, 18, 24, 30, 36]
-    if ctx["v"] == "ice":
-        rng = [0.01, 0.02, 0.05, 0.07, 0.1, 0.2, 0.3, 0.4, 0.5, 0.75, 1]
     cmap = nwssnow()
+    if ctx["v"] == "ice":
+        rng = [0.01, 0.1, 0.25, 0.5, 0.75, 1, 2]
+        cmap = nwsice()
     if ctx["t"] == "cwa":
         sector = "cwa"
     else:
@@ -449,6 +451,7 @@ def plotter(ctx: dict):
             cmap=cmap,
             clip_on=(ctx["c"] == "yes"),
             linewidths=ctx["lw"],
+            spacing="proportional",
         )
         # Allow analysis to bleed outside the CWA per request.
         if ctx["t"] == "cwa":
