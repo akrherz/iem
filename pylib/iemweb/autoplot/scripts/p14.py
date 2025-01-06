@@ -86,8 +86,8 @@ def plotter(ctx: dict):
         bins.append(last_precip)
 
     df = pd.DataFrame(
-        {"bin": range(1, 6), "lower": bins[0:-1], "upper": bins[1:]},
-        index=range(1, 6),
+        {"bin": range(1, len(bins)), "lower": bins[0:-1], "upper": bins[1:]},
+        index=range(1, len(bins)),
     )
 
     yearlybins = np.zeros((endyear - minyear, 5), "f")
