@@ -382,13 +382,18 @@ def do_analysis(df: pd.DataFrame, ctx: dict):
     return lons, lats, vals
 
 
-def prettyprint(val):
+def prettyprint(val, decimals=1):
     """Make trace pretty."""
     if val == 0:
         return "0"
     if 0 < val < 0.1:
         return "T"
-    return f"{val:.1f}"
+    return f"{val:.1f}" if decimals == 1 else f"{val:.2f}"
+
+
+def prettyprint2(val):
+    """Lazy."""
+    return prettyprint(val, 2)
 
 
 def plotter(ctx: dict):
@@ -408,7 +413,9 @@ def plotter(ctx: dict):
     ctx["bnds2163"] = compute_grid_bounds(ctx, csector)
     # add zeros and QC
     df = add_zeros(df, ctx)
-    df["label"] = df["val"].apply(prettyprint)
+    df["label"] = df["val"].apply(
+        prettyprint2 if ctx["v"] == "ice" else prettyprint
+    )
     # do gridding
     df2 = df[df[USEME]]
     lons, lats, vals = do_analysis(df2, ctx)
