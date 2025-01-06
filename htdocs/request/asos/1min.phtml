@@ -9,6 +9,7 @@ require_once "../../../include/database.inc.php";
 define("IEM_APPID", 73);
 $t = new MyView();
 $t->iemss = True;
+$t->iem_resource = "ASOS1MIN";
 $t->title = "ASOS One Minute Data Download";
 
 $aend = get_iemprop("asos.1min.end");

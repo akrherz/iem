@@ -53,7 +53,12 @@ class Schema(CGIModel):
     """See how we are called."""
 
     callback: str = Field(None, description="JSONP callback function name")
-    wfo: str = Field("MPX", description="3 or 4 character WFO Identifier")
+    wfo: str = Field(
+        "MPX",
+        description="3 or 4 character WFO Identifier",
+        min_length=3,
+        max_length=4,
+    )
     year: int = Field(2015, description="Year of interest")
     phenomena: str = Field("SV", description="VTEC Phenomena", max_length=2)
     significance: str = Field(
