@@ -6,15 +6,15 @@ data.
 from datetime import datetime, timedelta
 from zoneinfo import ZoneInfo
 
-import numpy as np
 import pygrib
 from metpy.calc import relative_humidity_from_dewpoint, wind_speed
 from metpy.units import units
 from pyiem.exceptions import NoDataFound
-from pyiem.iemre import XAXIS, YAXIS, grb2iemre
+from pyiem.grid.nav import IEMRE
+from pyiem.iemre import grb2iemre
 from pyiem.meteorology import comprehensive_climate_index
 from pyiem.plot import MapPlot, get_cmap
-from pyiem.util import archive_fetch, utc
+from pyiem.util import LOG, archive_fetch, utc
 
 PDICT = {
     "no": "No Shade Effect",
@@ -57,11 +57,10 @@ def get_description():
     return desc
 
 
-def get_data(ctx: dict) -> dict:
+def get_raster(ctx: dict):
     """Do the computation!"""
     if ctx["csector"] in ["AK", "HI"]:
         raise NoDataFound("Sector not available for this plot.")
-    res = {}
     valid: datetime = ctx["valid"]
     ppath_f00 = (
         f"{valid:%Y/%m/%d}/model/hrrr/{valid:%H}/"
@@ -76,7 +75,7 @@ def get_data(ctx: dict) -> dict:
         # Eh
         srad = grb2iemre(
             grbs.select(
-                name="Mean surface downward short-wave radiation flux"
+                name="Time-mean surface downward short-wave radiation flux"
             )[0]
         )
 
@@ -89,14 +88,14 @@ def get_data(ctx: dict) -> dict:
             units.degK * tmpk, units.degK * dwpk
         )
 
-    res["cci"] = comprehensive_climate_index(
+    cci = comprehensive_climate_index(
         units.degK * tmpk,
         units.percent * rh,
         wind_speed(units("m/s") * u, units("m/s") * v),
         units("W/m^2") * srad,
         shade_effect=ctx["shade"] == "yes",
     )
-    return res
+    return cci, IEMRE.affine, IEMRE.crs
 
 
 def plotter(ctx: dict):
@@ -104,8 +103,9 @@ def plotter(ctx: dict):
     ctx["valid"] = ctx["valid"].replace(tzinfo=ZoneInfo("UTC"))
     lvalid = ctx["valid"].astimezone(ZoneInfo("America/Chicago"))
     try:
-        data = get_data(ctx)
+        cci, aff, crs = get_raster(ctx)
     except Exception as exp:
+        LOG.exception(exp)
         raise NoDataFound("No HRRR Data Found.") from exp
 
     sse = "With Shade" if ctx["shade"] == "yes" else "No Shade"
@@ -125,11 +125,10 @@ def plotter(ctx: dict):
         "Extr",
         "Extr\nDng",
     ]
-    x2d, y2d = np.meshgrid(XAXIS, YAXIS)
-    mp.pcolormesh(
-        x2d,
-        y2d,
-        data["cci"],
+    mp.imshow(
+        cci,
+        aff,
+        crs,
         levels,
         cmap=cmap,
         clip_on=False,

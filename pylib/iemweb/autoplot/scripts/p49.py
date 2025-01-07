@@ -9,7 +9,7 @@ threshold to happen.  Please be sure to review the aggregate function that
 you want used over this period of days.
 """
 
-import datetime
+from datetime import date, timedelta
 
 import matplotlib.dates as mdates
 import pandas as pd
@@ -56,7 +56,7 @@ def get_description():
         dict(
             type="year",
             name="eyear",
-            default=datetime.date.today().year,
+            default=date.today().year,
             min=1893,
             label="End year (inclusive) for plot",
         ),
@@ -168,8 +168,8 @@ def plotter(ctx: dict):
     (fig, ax) = figure_axes(title=title, subtitle=subtitle, apctx=ctx)
     ax.bar(df.index.values, df["freq"], ec="b", fc="b")
     ax.set_xlim(
-        df.index.min() - datetime.timedelta(days=1),
-        df.index.max() + datetime.timedelta(days=1),
+        df.index.min() - timedelta(days=1),
+        df.index.max() + timedelta(days=1),
     )
     ax.xaxis.set_major_locator(mdates.MonthLocator())
     ax.xaxis.set_major_formatter(mdates.DateFormatter("%b"))
