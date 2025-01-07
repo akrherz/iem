@@ -52,7 +52,9 @@ LOOKUP = {
 
 
 @click.command()
-@click.argument("host", required=True, type=click.Choice(["local", "proxy"]))
+@click.argument(
+    "host", required=True, type=click.Choice(["local", "proxy", "test"])
+)
 def main(host):
     """Go Main Go"""
     with open("/etc/hosts", encoding="utf-8") as fh:
@@ -65,6 +67,8 @@ def main(host):
             break
     for dbname, lkp in LOOKUP.items():
         ip = lkp if host == "proxy" else "127.0.0.1"
+        if host == "test":
+            ip = "172.16.171.1"  # docker iem_database container
         result.append(f"{ip} iemdb{dbname}.local")
     print(f"added {len(LOOKUP)} entries")
     (tmpfd, tmpfn) = tempfile.mkstemp()
@@ -73,6 +77,12 @@ def main(host):
     os.close(tmpfd)
     os.rename(tmpfn, "/etc/hosts")
     os.chmod("/etc/hosts", 0o644)
+
+    if host == "test":
+        print(
+            "docker run -d -p 172.16.171.1:5432:5432 "
+            "ghcr.io/akrherz/iem_database:test_data"
+        )
 
 
 if __name__ == "__main__":
