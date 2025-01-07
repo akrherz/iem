@@ -36,6 +36,18 @@ jobs:
       run: |
         cat .github/workflows/etchosts.txt | sudo tee -a /etc/hosts
 
+    - name: Run IEM Database Container
+      run: |
+        IMAGE_TAG=$([[ ${{ matrix.WITH_IEM_DATA }} == 'YES' ]] && echo "test_data" || echo "no_test_data")
+        docker run -d --name iem_database -p 5432:5432 ghcr.io/akrherz/iem_database:$IMAGE_TAG
+        until docker exec iem_database pg_isready -h localhost; do
+          sleep 6
+        done
+
+    - name: Run Memcached container
+      run: |
+        docker run -d --name iem_memcached -p 11211:11211 memcached:1.6.9
+
     # setup conda-forge with micromamba
     - name: Setup Python
       uses: mamba-org/setup-micromamba@v2
@@ -50,16 +62,9 @@ jobs:
         environment-name: prod
         cache-environment: true
 
-    # Get postgresql running and setup the database
-    - name: Setup Postgres
+    - name: Clone ci_tooling
       run: |
-        git clone --depth 1 https://github.com/akrherz/iem-database.git database
         git clone --depth 1 https://github.com/akrherz/ci_tooling.git .ci_tooling
-        cd .ci_tooling
-        . postgres.sh
-        cd ..
-        cd database; sh bootstrap.sh
-        python schema_manager.py
 
     # Copy repo's default settings into the real position
     - name: Copy PHP Setting Defaults
@@ -77,12 +82,6 @@ jobs:
     - name: Setup IEM Data
       if: ${{ matrix.WITH_IEM_DATA == 'YES' }}
       run: sh .github/setupdata.sh
-
-    # Get memcached running
-    - name: Setup Memcached
-      run: |
-        cd .ci_tooling
-        . memcached.sh
 
     # Get apache running, which is needed to build mod_wsgi
     - name: Configure IEM Webfarm Server
