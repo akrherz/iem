@@ -28,9 +28,9 @@ showing the bad image and <a href="/info/contacts.php">email it to us</a>!
 
 from datetime import datetime, timedelta
 
+import geopandas as gpd
 import numpy as np
 import pandas as pd
-from geopandas import GeoDataFrame, read_postgis
 from pyiem.database import get_sqlalchemy_conn
 from pyiem.exceptions import NoDataFound
 from pyiem.plot import MapPlot
@@ -199,7 +199,7 @@ def get_description():
 def load_data(ctx, basets, endts):
     """Generate a dataframe with the data we want to analyze."""
     with get_sqlalchemy_conn("postgis") as conn:
-        df = read_postgis(
+        df: gpd.GeoDataFrame = gpd.read_postgis(
             text(
                 """SELECT state, wfo,
             max(magnitude::real) as val, ST_x(geom) as lon, ST_y(geom) as lat,
@@ -232,7 +232,7 @@ def load_data(ctx, basets, endts):
         days.append(now.date())
         now += timedelta(hours=24)
     with get_sqlalchemy_conn("iem") as conn:
-        df2 = read_postgis(
+        df2: gpd.GeoDataFrame = gpd.read_postgis(
             text(
                 """SELECT state, wfo, id as nwsli,
             sum(snow) as val, ST_x(geom) as lon, ST_y(geom) as lat,
@@ -258,7 +258,7 @@ def load_data(ctx, basets, endts):
     df2[USEME] = True
     df2["plotme"] = True
     df2["source"] = "COOP"
-    return pd.concat((df, df2), ignore_index=True, sort=False)
+    return pd.concat([df, df2], ignore_index=True, sort=False)
 
 
 def compute_grid_bounds(ctx, csector):
@@ -330,14 +330,17 @@ def add_zeros(df, ctx):
     if newrows:
         if not df.empty:
             df = pd.concat(
-                (df, GeoDataFrame(newrows, geometry="geo", crs=EPSG[2163])),
+                (
+                    df,
+                    gpd.GeoDataFrame(newrows, geometry="geo", crs=EPSG[2163]),  # type: ignore
+                ),
                 ignore_index=True,
                 sort=False,
             )
         else:
-            df = GeoDataFrame(newrows, geometry="geo", crs=EPSG[2163])
+            df = gpd.GeoDataFrame(newrows, geometry="geo", crs=EPSG[2163])  # type: ignore
         # Ensure we end up with val being float
-        df["val"] = pd.to_numeric(df["val"])
+        df["val"] = pd.to_numeric(df["val"])  # type: ignore
     # compute a cell index for each row
     df["xcell"] = ((df["geo"].x - ctx["bnds2163"][0]) / cellsize).astype(int)
     df["ycell"] = ((df["geo"].y - ctx["bnds2163"][1]) / cellsize).astype(int)
