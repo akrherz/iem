@@ -114,3 +114,24 @@ The pyIEM parsers send emails to the IEM developer when issues are found.  The p
 1. How do polygon warnings exist in the IEM archive prior to being official?
 
     The NWS offices started experimenting with polygons beginning in 2002.  These polygons were included with the warnings, but sometimes were not geographically valid and/or leaked well outside of a local office's CWA bounds.  On 1 October 2007, these polygons became the official warning for some VTEC types.  In general, the IEM's data ingestor attempts to save these polygons whenever found.
+
+1. What is the source of Alaska Marine VTEC events?
+
+    For various convoluted reasons, Alaska WFOs do not issue full blown VTEC
+    enabled products for their Marine Zones.  Instead, somewhat cryptic headlines
+    are generated within their `CWF` and `OFF` products that create faked VTEC
+    events for their marine zones.  On 4 January 2025, the IEM created a workflow
+    that attempts to process these into somewhat spatial/temporally coherent
+    VTEC events.  At the time, an evaluation was done on a similar fake VTEC
+    generation that was being done by the NWS within its CAP messages.  This was
+    found to be lacking due to very crude event identifier generation.
+
+    So the IEM processing runs in real-time and these events were backfilled into
+    years dating back to 2005. Further back processing was not straight forward
+    due to complexities with the raw text.
+
+    Some processing quirks include VTEC events are not permitted to cross year
+    boundaries and there is no "in the future" logic that attempts to glean from
+    the text if the given event is not yet active.  Rewording, if the `CWF` or
+    `OFF` text says "Gale Warning", the assumption is that the "Gale Warning" is
+    now in effect.

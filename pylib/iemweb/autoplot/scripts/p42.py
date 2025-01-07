@@ -15,8 +15,8 @@ number of hours was removed.  This option did not add much value as folks
 generally wish to see the top 10 longest streaks.</p>
 """
 
-import datetime
 import operator
+from datetime import date, datetime, timedelta, timezone
 from zoneinfo import ZoneInfo
 
 import pandas as pd
@@ -63,7 +63,7 @@ MDICT = {
 def get_description():
     """Return a dict describing how to call this plotter"""
     desc = {"description": __doc__, "cache": 86400, "data": True}
-    year_range = f"1928-{datetime.date.today().year}"
+    year_range = f"1928-{date.today().year}"
     desc["arguments"] = [
         dict(
             type="zstation",
@@ -125,7 +125,7 @@ def plot(ax, xbase, valid, tmpf, lines: list) -> bool:
     """Our plotting function"""
     if len(valid) < 2:
         return True
-    interval = datetime.timedelta(hours=1)
+    interval = timedelta(hours=1)
     # lines are sorted from shortest to longest, so the first one is the
     # minimum length when we are full
     if len(lines) == 10:
@@ -182,10 +182,10 @@ def compute_xlabels(ax, xbase):
     """Figure out how to make pretty xaxis labels"""
     # values are in seconds
     xlim = ax.get_xlim()
-    x0 = xbase + datetime.timedelta(seconds=xlim[0])
+    x0 = xbase + timedelta(seconds=xlim[0])
     x0 = x0.replace(hour=0, minute=0)
-    x1 = xbase + datetime.timedelta(seconds=xlim[1])
-    x1 = x1.replace(hour=0, minute=0) + datetime.timedelta(days=1)
+    x1 = xbase + timedelta(seconds=xlim[1])
+    x1 = x1.replace(hour=0, minute=0) + timedelta(days=1)
     xticks = []
     xticklabels = []
     # Pick a number of days so that we end up with 8 labels
@@ -198,7 +198,7 @@ def compute_xlabels(ax, xbase):
         86400 * delta,
     ):
         xticks.append(x)
-        ts = xbase + datetime.timedelta(seconds=x)
+        ts = xbase + timedelta(seconds=x)
         xticklabels.append(ts.strftime("%-d\n%b"))
     ax.set_xticks(xticks)
     ax.set_xticklabels(xticklabels)
@@ -247,7 +247,7 @@ def plotter(ctx: dict):
         units = "mile"
     title = (
         f"{y1 if y1 is not None else ab.year}-"
-        f"{y2 if y2 is not None else datetime.datetime.now().year} "
+        f"{y2 if y2 is not None else datetime.now().year} "
         f"{ctx['_sname']}"
     )
 
@@ -276,28 +276,23 @@ def plotter(ctx: dict):
     fig = figure(title=title, subtitle=subtitle, apctx=ctx)
     ax = fig.add_axes((0.07, 0.25, 0.6, 0.65))
 
-    threshold = datetime.timedelta(hours=3)
-    reset_valid = datetime.datetime(1910, 1, 1, tzinfo=tzinfo)
+    threshold = timedelta(hours=3)
+    reset_valid = datetime(1910, 1, 1, tzinfo=tzinfo)
     xbase = reset_valid
 
     op2 = operator.lt if mydir == "below" else operator.le
     for row in cursor:
-        valid = row["utc_valid"].replace(tzinfo=datetime.timezone.utc)
+        valid = row["utc_valid"].replace(tzinfo=timezone.utc)
         ireset = False
         # This is tricky, we need to resolve when time resets.
         if valid > reset_valid:
             _tmp = (
-                datetime.datetime(valid.year, months[-1], 1)
-                + datetime.timedelta(days=32)
+                datetime(valid.year, months[-1], 1) + timedelta(days=32)
             ).replace(day=1)
             if month in ["winter", "octmar"]:
                 _tmp = _tmp.replace(year=valid.year + 1)
-            reset_valid = datetime.datetime(
-                _tmp.year, _tmp.month, 1, tzinfo=tzinfo
-            )
-            xbase = datetime.datetime(
-                _tmp.year - 1, _tmp.month, 1, tzinfo=tzinfo
-            )
+            reset_valid = datetime(_tmp.year, _tmp.month, 1, tzinfo=tzinfo)
+            xbase = datetime(_tmp.year - 1, _tmp.month, 1, tzinfo=tzinfo)
             ireset = True
         if ireset or (valids and ((valid - valids[-1]) > threshold)):
             if not plot(ax, xbase, valids, tmpf, lines):
