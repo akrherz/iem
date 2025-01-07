@@ -170,6 +170,7 @@ def main():
             process_feature(mcursor, domain, feat)
         except Exception as exp:
             LOG.exception(exp)
+            LOG.warning(feat)
         mcursor.close()
         pgconn.commit()
 
