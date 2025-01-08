@@ -16,8 +16,7 @@ function get_website_citations($label){
 <h3>Publications Citing IEM Data</h3>
 <p>These are publications that have cited the usage of data from this page. This
 list is not exhaustive, so please <a href="/info/contacts.php">let us know</a>
-if you have a publication that should be added. Hopefully by early 2025, this
-listing can be more complete.</p>
+if you have a publication that should be added.</p>
 <ul>
 EOM;
     for ($i=0; $row = pg_fetch_assoc($rs); $i++){

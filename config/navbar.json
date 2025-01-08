@@ -98,6 +98,10 @@
                     "url": "/request/daily.phtml"
                 },
                 {
+                    "title": "Dataset Documentation",
+                    "url": "/info/datasets/"
+                },
+                {
                     "title": "IEM Reanalysis",
                     "url": "/iemre/"
                 },

@@ -323,7 +323,8 @@ def add_ctx(ctx):
     xlabel = f"Year, Max: {df[ptype].max():.2f} {df2.index.values[0]}{xx}"
     df2 = df[df[ptype] == df[ptype].min()]
     xx = "+" if len(df2.index) > 1 else ""
-    xlabel += f", Min: {df[ptype].min():.2f} {df2.index.values[0]}{xx}"
+    if not df2.empty:
+        xlabel += f", Min: {df[ptype].min():.2f} {df2.index.values[0]}{xx}"
     ctx["xlabel"] = xlabel
     data = df[ptype].values
     ctx["data"] = data
