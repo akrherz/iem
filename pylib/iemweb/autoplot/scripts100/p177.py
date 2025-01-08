@@ -169,6 +169,10 @@ def make_inversion_plot(ctx):
     if df.empty:
         raise NoDataFound("No inversion data found for station!")
 
+    # stride the result to <=1000 rows
+    stride = max(1, int(len(df.index) / 1000.0))
+    df = df.iloc[::stride]
+
     axwidth = 0.88
     axheight = 0.25
     fig = figure(apctx=ctx)
@@ -211,7 +215,7 @@ def make_inversion_plot(ctx):
         ),
         zorder=2,
         color="red",
-        width=1 / 1440.0,
+        width=stride / 1440.0,
         label="5 Second Gust",
     )
     ax.bar(
@@ -222,7 +226,7 @@ def make_inversion_plot(ctx):
         zorder=3,
         color="lightblue",
         label="1 Minute Speed",
-        width=1 / 1440.0,
+        width=stride / 1440.0,
     )
     ax.set_title("10 Foot Wind Speed")
     ax.grid(True)
