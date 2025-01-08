@@ -10,11 +10,12 @@ function get_website_citations($label){
         $conn,
         "CITSELECT",
         "SELECT * from website_citations WHERE iem_resource = $1 ".
-        "ORDER by publication_date DESC");
+        "ORDER by publication_date DESC LIMIT 10");
     $rs = pg_execute($conn, "CITSELECT", array($label));
     $s = <<<EOM
-<h3>Publications Citing IEM Data</h3>
-<p>These are publications that have cited the usage of data from this page. This
+<h3>Publications Citing IEM Data (<a href="/info/refs.php">View All</a>)</h3>
+<p>These are the most recent 10 publications that have cited the usage of data
+from this page. This
 list is not exhaustive, so please <a href="/info/contacts.php">let us know</a>
 if you have a publication that should be added.</p>
 <ul>
