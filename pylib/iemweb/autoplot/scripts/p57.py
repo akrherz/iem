@@ -5,13 +5,14 @@ considered for the analysis, except for total precipitation.
 """
 
 import calendar
-import datetime
+from datetime import date, timedelta
 
 import numpy as np
 import pandas as pd
 from pyiem.database import get_sqlalchemy_conn
 from pyiem.exceptions import NoDataFound
 from pyiem.plot import figure_axes
+from sqlalchemy import text
 
 from iemweb.autoplot import ARG_STATION
 
@@ -54,22 +55,22 @@ def plotter(ctx: dict):
     varname = ctx["varname"]
     agg = ctx["agg"]
 
-    lastday = datetime.date.today()
+    lastday = date.today()
     if varname == "total_precip" and agg == "max":
-        lastday += datetime.timedelta(days=1)
+        lastday += timedelta(days=1)
     else:
         lastday = lastday.replace(day=1)
     with get_sqlalchemy_conn("coop") as conn:
         df = pd.read_sql(
-            """SELECT year, month, avg((high+low)/2.) as avg_temp,
+            text("""SELECT year, month, avg((high+low)/2.) as avg_temp,
         avg(high) as avg_high_temp, avg(low) as avg_low_temp,
         sum(precip) as total_precip,
         sum(case when precip > 0.005 then 1 else 0 end) as rain_days
-        from alldata where station = %s and day < %s
+        from alldata where station = :station and day < :lastday
         GROUP by year, month
-        """,
+        """),
             conn,
-            params=(station, lastday),
+            params={"station": station, "lastday": lastday},
         )
     if df.empty:
         raise NoDataFound("No Data Found.")

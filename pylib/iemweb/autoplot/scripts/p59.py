@@ -7,7 +7,6 @@ download the raw data, it will not contain this smoothing.
 """
 
 import calendar
-import datetime
 
 import numpy as np
 import pandas as pd
@@ -16,6 +15,7 @@ from metpy.units import units
 from pyiem.database import get_sqlalchemy_conn
 from pyiem.exceptions import NoDataFound
 from pyiem.plot import figure
+from pyiem.util import utc
 from sqlalchemy import text
 
 PDICT = {
@@ -63,7 +63,7 @@ def add_plot(ctx):
     """Do plotting."""
     title = (
         f"{ctx['_sname']} :: Daily Average Component Wind Speed\n"
-        f"[{ctx['ab'].year}-{datetime.datetime.now().year}] 7 day smooth "
+        f"[{ctx['ab'].year}-{utc().year}] 7 day smooth "
         f"filter applied, {len(ctx['df'].index):.0f} obs found"
     )
     ctx["fig"] = figure(apctx=ctx, title=title)

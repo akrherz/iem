@@ -6,7 +6,7 @@ event (trace events are counted as dry).
 This plot is based off of NWS CLI sites.
 """
 
-import datetime
+from datetime import date, timedelta
 
 import geopandas as gpd
 import pandas as pd
@@ -44,7 +44,7 @@ def get_description():
         dict(
             type="date",
             name="sdate",
-            default=datetime.date.today().strftime("%Y/%m/%d"),
+            default=date.today().strftime("%Y/%m/%d"),
             label="Start Date:",
             min="2010/01/01",
         ),
@@ -78,8 +78,8 @@ def get_data(ctx):
     varname = ctx["var"]
 
     today = ctx["sdate"]
-    yesterday = today - datetime.timedelta(days=1)
-    d180 = today - datetime.timedelta(days=180)
+    yesterday = today - timedelta(days=1)
+    d180 = today - timedelta(days=180)
     with get_sqlalchemy_conn("iem") as conn:
         df = pd.read_sql(
             """
@@ -153,7 +153,7 @@ def get_data(ctx):
     df = df[pd.notnull(df["lon"])]
     ctx["df"] = gpd.GeoDataFrame(
         df, geometry=gpd.points_from_xy(df["lon"], df["lat"])
-    )
+    )  # type: ignore
     ctx["subtitle"] = (
         "based on NWS CLI Sites, map approximately "
         f"valid for {today:%-d %b %Y}"
