@@ -13,6 +13,7 @@ with minimal latency.
 Changelog
 ~~~~~~~~~
 
+- 2025-01-08: Added some caching due to incessant requests for the same data.
 - 2024-08-25: Add ``order`` parameter to allow for order of the returned
   products.
 - 2024-03-29: Initial documentation release and migrate to a pydantic schema
@@ -20,6 +21,12 @@ Changelog
 
 Examples
 ~~~~~~~~
+
+Return all of the Daily Summary Messages for Des Moines from 1 Jan 2025 to 9
+Jan 2025 in text format.
+
+https://mesonet.agron.iastate.edu/cgi-bin/afos/retrieve.py?\
+limit=9999&pil=DSMDSM&fmt=text&sdate=2025-01-01&edate=2025-01-09
 
 Return all TORnado warnings issued between 20 and 21 UTC on 27 Apr 2011 as
 a zip file.
@@ -204,7 +211,40 @@ def special_metar_logic(pils, limit, fmt, sio, order):
     return [sio.getvalue().encode("ascii", "ignore")]
 
 
-@iemapp(help=__doc__, schema=MyModel, parse_times=False)
+def get_mckey(environ: dict) -> Optional[str]:
+    """Cache a specific request."""
+    # limit=9999&pil=DSMDEN&fmt=text&sdate=2025-01-07&edate=2025-01-09
+    if (
+        environ["pil"][0].startswith("DSM")
+        and environ["fmt"] == "text"
+        and environ["sdate"] is not None
+        and environ["edate"] is not None
+    ):
+        return (
+            f"afos_retrieve.py_{environ['pil'][0]}_{environ['sdate']:%Y%m%d}_"
+            f"{environ['edate']:%Y%m%d}_{environ['limit']}"
+        )
+    return None
+
+
+def get_ct(environ: dict) -> str:
+    """Figure out the content type."""
+    fmt = environ["fmt"]
+    if fmt == "zip" or environ["dl"]:
+        return "application/octet-stream"
+    if fmt == "html":
+        return "text/html"
+    return "text/plain"
+
+
+@iemapp(
+    help=__doc__,
+    schema=MyModel,
+    memcacheexpire=600,
+    memcachekey=get_mckey,
+    content_type=get_ct,
+    parse_times=False,
+)
 def application(environ, start_response):
     """Process the request"""
     order = environ["order"]
@@ -223,17 +263,12 @@ def application(environ, start_response):
         environ["sdate"], environ["edate"] = environ["edate"], environ["sdate"]
     fmt = environ["fmt"]
     headers = [("X-Content-Type-Options", "nosniff")]
+    headers.append(("Content-type", get_ct(environ)))
     if environ["dl"] or fmt == "zip":
         suffix = "zip" if fmt == "zip" else "txt"
-        headers.append(("Content-type", "application/octet-stream"))
         headers.append(
             ("Content-disposition", f"attachment; filename=afos.{suffix}")
         )
-    else:
-        if fmt == "text":
-            headers.append(("Content-type", "text/plain"))
-        elif fmt == "html":
-            headers.append(("Content-type", "text/html"))
     start_response("200 OK", headers)
 
     sio = StringIO()
@@ -312,4 +347,4 @@ def application(environ, start_response):
 
         if cursor.rowcount == 0:
             sio.write(f"ERROR: Could not Find: {','.join(pils)}")
-    return [sio.getvalue().encode("ascii", "ignore")]
+    return sio.getvalue()
