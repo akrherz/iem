@@ -229,6 +229,13 @@ def get_description():
             options=PDICT2,
             label="Which metric to plot?",
         ),
+        {
+            "type": "date",
+            "name": "sdate",
+            "label": "Limit plot to start date (2002 is start):",
+            "min": "2002/01/01",
+            "default": "2002/01/01",
+        },
         dict(
             optional=True,
             type="date",
@@ -267,6 +274,7 @@ def get_raster(ctx: dict):
         "t": level.split(".", 1)[1],
         "cat": level.split(".")[0],
         "months": months,
+        "sdate": ctx["sdate"],
         "edate": ctx.get("edate", utc() + timedelta(days=2)),
         "west": GRIDWEST,
         "south": GRIDSOUTH,
@@ -291,7 +299,7 @@ def get_raster(ctx: dict):
             ST_Intersects(geom,
                 ST_MakeEnvelope(:west, :south, :east, :north, 4326))
             and extract(month from issue) = ANY(:months)
-            and product_issue > '2002-01-01' and
+            and product_issue > :sdate and
             product_issue < :edate
             GROUP by expire ORDER by min_issue ASC
         """
