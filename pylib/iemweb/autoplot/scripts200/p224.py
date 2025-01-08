@@ -111,8 +111,9 @@ def plotter(ctx: dict):
                 WHERE polygon_begin <= :valid and polygon_end >= :valid
                 GROUP by key
             ), sbwagg as (
-                select p.key, p.pop, e.count as events, e.area
-                from sbwpop p JOIN sbwevents e on (p.key = e.key)
+                select e.key, coalesce(p.pop, 0) as pop,
+                e.count as events, e.area
+                from sbwevents e LEFT JOIN sbwpop p on (e.key = p.key)
             ), cbwpop as (
                 select phenomena ||'.'|| significance as key,
                 array_agg(distinct substr(w.ugc, 1, 2)) as states,
@@ -164,7 +165,7 @@ def plotter(ctx: dict):
     ypos = 0.8
     xbarstart = 0.26
     xbarend = 0.85
-    maxval = df[col].max()
+    maxval = max(df[col].max(), 1)
 
     fig.text(xbarend + 0.03, ypos + 0.09, "Cnty/Zone\nEvents", ha="center")
     fig.text(xbarend + 0.07, ypos + 0.09, "Polygons")
