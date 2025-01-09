@@ -78,14 +78,7 @@ def to_raster(tmpfn, now):
     del png
     # Make worldfile
     with open(f"{tmpfn}.wld", "w") as fh:
-        fh.write(
-            "0.004167\n"
-            "0.00\n"
-            "0.00\n"
-            "-0.004167\n"
-            "-97.154167\n"
-            "44.53785"
-        )
+        fh.write("0.004167\n0.00\n0.00\n-0.004167\n-97.154167\n44.53785")
 
 
 def ldm(tmpfn, now, routes):

@@ -231,7 +231,7 @@ def yearly_plot(ctx):
         ax.text(
             ctx["first_year"],
             maxy,
-            f"$R^2$={(r_value ** 2):.2f}",
+            f"$R^2$={(r_value**2):.2f}",
             color="#CC6633",
             bbox=dict(facecolor="white"),
         )

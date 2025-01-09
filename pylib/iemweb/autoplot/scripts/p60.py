@@ -204,7 +204,7 @@ def get_highcharts(ctx: dict) -> str:
     containername = ctx["_e"]
 
     return f"""
-    var units = "{ctx['units']}";
+    var units = "{ctx["units"]}";
     function getPointCategoryName(point, dimension) {{
         var series = point.series,
         isY = dimension === 'y',
@@ -225,7 +225,7 @@ def get_highcharts(ctx: dict) -> str:
             min: 0,
             max: 23,
             title: {{
-                text: "{ctx['ylabel']}"
+                text: "{ctx["ylabel"]}"
             }}
         }},
         title: {{
@@ -244,7 +244,7 @@ def get_highcharts(ctx: dict) -> str:
         }},
         colorAxis: {{
             min: 0,
-            max: {df[ctx['w']].max() + 1},
+            max: {df[ctx["w"]].max() + 1},
             minColor: '#FFFFFF',
             maxColor: Highcharts.getOptions().colors[0]
         }},

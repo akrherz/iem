@@ -118,7 +118,7 @@ def plotter(ctx: dict):
     ax.text(
         0.01,
         0.99,
-        f"Avg: {avgv:.2f}, slope: {(h_slope * 100.):.2f} inch/century, "
+        f"Avg: {avgv:.2f}, slope: {(h_slope * 100.0):.2f} inch/century, "
         f"R$^2$={(r_value**2):.2f}",
         transform=ax.transAxes,
         va="top",

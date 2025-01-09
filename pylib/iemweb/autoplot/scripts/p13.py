@@ -120,7 +120,7 @@ def plotter(ctx: dict):
         0.03,
         (
             f"Avg Date: {avgd:%-d %b}, "
-            f"slope: {h_slope * 100.:.2f} days/century, "
+            f"slope: {h_slope * 100.0:.2f} days/century, "
             f"R$^2$={r_value**2:.2f}"
         ),
         transform=ax.transAxes,

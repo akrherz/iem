@@ -117,7 +117,7 @@ def plotter(ctx: dict):
     df["rng"] = df["max_high"] - df["min_low"]
 
     tt = calendar.month_name[month] if ctx["opt"] == "monthly" else "Yearly"
-    title = f"{ctx['_sname']}\n" f"{tt} Temperature Range (Max High - Min Low)"
+    title = f"{ctx['_sname']}\n{tt} Temperature Range (Max High - Min Low)"
     fig = figure(title=title, apctx=ctx)
     ax = fig.subplots(3, 1, sharex=True)
     ax[0].scatter(df.index.values, df["max_high"].values)

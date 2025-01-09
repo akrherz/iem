@@ -138,8 +138,7 @@ def get_description():
             default="ncei_climate91",
             options=PDICT5,
             label=(
-                "Select Climatology Source to Use "
-                "(limits available variables)"
+                "Select Climatology Source to Use (limits available variables)"
             ),
         ),
         dict(

@@ -49,10 +49,7 @@ def logic(
         if pcursor.rowcount == 1:
             (ugc, ugcname, dist) = pcursor.fetchone()
             print(
-                (
-                    "OK set_county[%s] ID: %s Net: %s: St: %s "
-                    "UGC: %s Dist: %.2f"
-                )
+                ("OK set_county[%s] ID: %s Net: %s: St: %s UGC: %s Dist: %.2f")
                 % (ugccode, station, network, state, ugc, dist)
             )
             if ugccode == "C":

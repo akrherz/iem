@@ -328,12 +328,12 @@ def rabbit_tracks(row, v3):
             "Line {\n"
             f"Points = {{ {{ {lat0:.4f}, {lon0:.4f} }}, "
             f"{{ {lats[-1]:.4f}, {lons[-1]:.4f} }} }}\n"
-            f"Hover = \"Cell [{row['storm_id']}]\"\n"
+            f'Hover = "Cell [{row["storm_id"]}]"\n'
             "}\n"
         )
     else:
         res += (
-            f"Line: 1, 0, \"Cell [{row['storm_id']}]\"\n"
+            f'Line: 1, 0, "Cell [{row["storm_id"]}]"\n'
             f"{lat0:.4f}, {lon0:.4f}\n"
             f"{lats[-1]:.4f}, {lons[-1]:.4f}\n"
             "END:\n"
@@ -485,7 +485,7 @@ def produce_content_v2(df, threshold, title, titleadd):
     for _, row in df.iterrows():
         txt = (
             f"K{row['nexrad']} [{row['storm_id']}] {row['utc_valid']:%H:%M} "
-            f"Z\\n\" \"Drct: {row['drct']} Speed: {row['sknt']} kts\\n"
+            f'Z\\n" "Drct: {row["drct"]} Speed: {row["sknt"]} kts\\n'
         )
         icon = 9
         if row["tvs"] != "NONE" or row["meso"] != "NONE":

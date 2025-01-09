@@ -173,14 +173,14 @@ def get_df(ctx):
         data[state] = {
             "avg": avgval,
             "thisval": thisval,
-            f'week{ctx["weeks"]}ago': pval,
+            f"week{ctx['weeks']}ago": pval,
         }
     ctx["df"] = pd.DataFrame.from_dict(data, orient="index")
     if ctx["df"].empty:
         raise NoDataFound("No Data Found.")
     ctx["df"] = ctx["df"].dropna(how="all")
     ctx["df"].index.name = "state"
-    col = "avg" if ctx["w"] == "avg" else f'week{ctx["weeks"]}ago'
+    col = "avg" if ctx["w"] == "avg" else f"week{ctx['weeks']}ago"
     ctx["df"]["departure"] = ctx["df"]["thisval"] - ctx["df"][col]
     ctx["title"] = f"{dt:%-d %b %Y} USDA NASS {NASS_CROP_PROGRESS[varname]}"
     if ctx["w"] == "avg":

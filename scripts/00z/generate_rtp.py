@@ -129,7 +129,7 @@ def main(job):
             greatest(max_tmpf_6hr, tmpf))::numeric,0) as max_tmpf,
         count(tmpf) as obs FROM current_log c, stations t
         WHERE t.iemid = c.iemid and t.network = ANY(:networks) and
-        valid >= :sts6z and valid < :ets and {job['limiter']}
+        valid >= :sts6z and valid < :ets and {job["limiter"]}
         and tmpf > -99 and not id = ANY(:badtemps) GROUP by id
                  """
             ),
@@ -147,7 +147,7 @@ def main(job):
         current_log c JOIN stations t on (t.iemid = c.iemid)
         WHERE t.network = ANY(:networks) and valid >= :sts6z
         and valid < :ets and tmpf > -99 and not
-        id = ANY(:badtemps) and {job['limiter']} GROUP by id
+        id = ANY(:badtemps) and {job["limiter"]} GROUP by id
                 """
             ),
             conn,
@@ -165,7 +165,7 @@ def main(job):
         max(phour) as precip from current_log c, stations t
         WHERE t.network = ANY(:networks) and t.iemid = c.iemid
         and valid >= :sts24h and valid < :ets
-        and not id = ANY(:badprecip) and {job['limiter']}
+        and not id = ANY(:badprecip) and {job["limiter"]}
         GROUP by id, hour) as foo
         GROUP by id
     """

@@ -103,7 +103,7 @@ def do_date(ccursor2, table, row, col, agg_col):
     """Process date"""
     ccursor2.execute(
         f"""
-        SELECT year from alldata_{row['station'][:2]} where station = %s and
+        SELECT year from alldata_{row["station"][:2]} where station = %s and
         abs({col} - {row[agg_col]}) < 0.001 and
         sday = %s and day >= %s and day < %s ORDER by year ASC
     """,

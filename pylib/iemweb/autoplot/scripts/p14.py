@@ -220,7 +220,7 @@ def plotter(ctx: dict):
         0.5,
         -0.05,
         "Precipitation Bins [inch], split into equal 20%"
-        f" by rain volume ({(normal / 5.):.2f}in) over period of record",
+        f" by rain volume ({(normal / 5.0):.2f}in) over period of record",
         transform=ax.transAxes,
         va="top",
         ha="center",

@@ -110,7 +110,7 @@ daily_opts = [
     {
         "id": 11,
         "label": (
-            "ASOS Daily Min/Max Dew Point/Temp/Feels Like/RH " "for a Year"
+            "ASOS Daily Min/Max Dew Point/Temp/Feels Like/RH for a Year"
         ),
     },
     {"id": 94, "label": "Bias of 24 Hour High+Low Computation by Hour"},
@@ -407,7 +407,7 @@ monthly_opts = [
     {
         "id": 95,
         "label": (
-            "Monthly Precip/Temperature with " "El Nino SOI Index Relationship"
+            "Monthly Precip/Temperature with El Nino SOI Index Relationship"
         ),
     },
     {
@@ -431,7 +431,7 @@ monthly_opts = [
     {
         "id": 58,
         "label": (
-            "One Day's Precip Greater than X percentage " "of Monthly Total"
+            "One Day's Precip Greater than X percentage of Monthly Total"
         ),
     },
     {
@@ -495,15 +495,13 @@ yearly_opts = [
     {
         "id": 12,
         "label": (
-            "Days per year and first/latest date "
-            "above/below given threshold"
+            "Days per year and first/latest date above/below given threshold"
         ),
     },
     {
         "id": 184,
         "label": (
-            "Days per year with High Temperature "
-            "above temperature thresholds"
+            "Days per year with High Temperature above temperature thresholds"
         ),
     },
     {
@@ -862,8 +860,7 @@ nopts = [
     {
         "id": 201,
         "label": (
-            "SPC Convective/Fire Wx or "
-            "WPC Excessive Rainfall Outlook Calendar"
+            "SPC Convective/Fire Wx or WPC Excessive Rainfall Outlook Calendar"
         ),
     },
     {
@@ -884,15 +881,13 @@ nopts = [
     {
         "id": 143,
         "label": (
-            "Special Weather Statements (SPS) "
-            "Polygon Count by Year by Month"
+            "Special Weather Statements (SPS) Polygon Count by Year by Month"
         ),
     },
     {
         "id": 233,
         "label": (
-            "Special Weather Statements (SPS) "
-            "Polygon Calendar of Daily Counts"
+            "Special Weather Statements (SPS) Polygon Calendar of Daily Counts"
         ),
     },
     {

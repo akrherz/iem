@@ -88,7 +88,7 @@ def workflow(dt: date):
         if icursor.rowcount == 0:
             LOG.info("Adding record %s[%s] for day %s", station, iemid, dt)
             icursor.execute(
-                f"INSERT into summary_{dt:%Y} " "(iemid, day) VALUES (%s, %s)",
+                f"INSERT into summary_{dt:%Y} (iemid, day) VALUES (%s, %s)",
                 (iemid, dt),
             )
             icursor.execute(

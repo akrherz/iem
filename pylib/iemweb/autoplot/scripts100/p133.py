@@ -128,8 +128,7 @@ def plotter(ctx: dict):
         raise NoDataFound("Error, no results returned!")
 
     title = (
-        f"{ctx['_sname']}:: Snowfall Totals\n"
-        f"Prior to and after: {dt:%-d %B}"
+        f"{ctx['_sname']}:: Snowfall Totals\nPrior to and after: {dt:%-d %B}"
     )
     (fig, ax) = figure_axes(title=title, apctx=ctx)
     ax.scatter(df["before"].values, df["after"].values)

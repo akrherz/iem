@@ -9,6 +9,7 @@ request 120 days or less of data at one time if you do not filter the request.
 Changelog
 ---------
 
+- 2025-01-09: Added `FL` field (Flight Level) to the output, units are `ft`.
 - 2024-06-28: Initital documentation release
 - 2024-07-31: A `product_id` field was added to the output, but only non-null
   for PIREPs after about 18 UTC on 31 July 2024.  Someday, a backfill may
@@ -17,10 +18,15 @@ Changelog
 Example Requests
 ----------------
 
-Provide all PIREPs for the month of June 2024 over Chicago ARTCC in CSV:
+Provide all PIREPs for 31 July 2024 UTC over Minneapolis ARTCC:
 
 https://mesonet.agron.iastate.edu/cgi-bin/request/gis/pireps.py?\
-sts=2024-06-01T00:00:00Z&ets=2024-07-01T00:00:00Z&artcc=ZAU&fmt=csv
+sts=2024-07-31T00:00:00Z&ets=2024-08-01T00:00:00Z&artcc=ZMP&fmt=csv
+
+Same request, but return a shapefile:
+
+https://mesonet.agron.iastate.edu/cgi-bin/request/gis/pireps.py?\
+sts=2024-07-31T00:00:00Z&ets=2024-08-01T00:00:00Z&artcc=ZMP&fmt=shp
 
 """
 
@@ -144,7 +150,7 @@ def run(environ, start_response):
             '/IC([^/]*)/?')), 0, 255) as icing,
         substr(trim(substring(replace(report, ',', ' '),
             '/TB([^/]*)/?')), 0, 255) as turb,
-        artcc, product_id,
+        artcc, product_id, flight_level,
         ST_y(geom::geometry) as lat, ST_x(geom::geometry) as lon
         from pireps WHERE {spatialsql} {artcc_sql}
         valid >= :sts and valid < :ets ORDER by valid ASC
@@ -165,8 +171,8 @@ def run(environ, start_response):
             ]
             start_response("200 OK", headers)
             sio.write(
-                "VALID,URGENT,AIRCRAFT,REPORT,ICING,TURBULENCE,ATRCC,LAT,LON,"
-                "PRODUCT_ID\n"
+                "VALID,URGENT,AIRCRAFT,REPORT,ICING,TURBULENCE,ATRCC,"
+                "PRODUCT_ID,FL,LAT,LON\n"
             )
             for row in res:
                 sio.write(",".join([str(s) for s in row]) + "\n")
@@ -185,6 +191,7 @@ def run(environ, start_response):
             shp.field("TURB", "C", 255)  # Max field size is 255
             shp.field("ARTCC", "C", 3)
             shp.field("PROD_ID", "C", 36)
+            shp.field("FL", "N", 6, 0)
             shp.field("LAT", "F", 7, 4)
             shp.field("LON", "F", 9, 4)
             for row in res:

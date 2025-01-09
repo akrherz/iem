@@ -349,7 +349,7 @@ def plotter(ctx: dict):
         label += (
             f" {sts.strftime('%m/%d/%y %I:%M %p')} "
             f"{ets.strftime('%m/%d/%y %I:%M %p')} "
-            f"{line.interval.total_seconds() / 3600.:4.0f}\n"
+            f"{line.interval.total_seconds() / 3600.0:4.0f}\n"
         )
     label += tzname
     fig.text(0.99, 0.9, label, ha="right", va="top", fontsize=10)

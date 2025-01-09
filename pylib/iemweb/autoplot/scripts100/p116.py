@@ -123,9 +123,7 @@ def plotter(ctx: dict):
 
     y1 = int(ctx.get("syear", 1990))
 
-    title = (
-        f"[{station}] {ctx['_nt'].sts[station]['name']} " f"({y1}-{y1 + 20})"
-    )
+    title = f"[{station}] {ctx['_nt'].sts[station]['name']} ({y1}-{y1 + 20})"
     fig, ax = figure_axes(
         title=title,
         subtitle=f"{PDICT[varname]} base=60" r"$^\circ$F",

@@ -148,7 +148,7 @@ def add_ctx(ctx):
         title = "Year to Date Maximum Daily %s Temperature"
     title = title % (varname.capitalize(),)
     ctx["ylabel"] = title
-    ctx["title"] = f"{startyear}-{thisyear - 1} {ctx['_sname']}\n" f"{title}"
+    ctx["title"] = f"{startyear}-{thisyear - 1} {ctx['_sname']}\n{title}"
     return ctx
 
 

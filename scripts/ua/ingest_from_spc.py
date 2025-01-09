@@ -200,7 +200,7 @@ def main(valid, station):
             if obs.at[sid, "nullcnt"] < 10 < obs.at[sid, "count"]:
                 continue
         progress.set_description(sid)
-        sid3 = sid[1:] if sid.startswith("K") else sid
+        sid3 = sid.removeprefix("K")
         uri = (
             "https://www.spc.noaa.gov/exper/soundings/"
             f"{valid:%y%m%d%H}_OBS/{sid3}.txt"

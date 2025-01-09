@@ -110,7 +110,7 @@ def get_description():
             name="inc",
             default="no",
             label=(
-                "Include cases where windchill or heatindex " "is not additive"
+                "Include cases where windchill or heatindex is not additive"
             ),
         ),
     ]

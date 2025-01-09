@@ -257,26 +257,26 @@ def get_data(ctx):
                 f"""
         WITH period1 as (
             SELECT station, {datumsql} as datum,
-            {sqlopts[ctx['var']]} as {ctx['var']}
+            {sqlopts[ctx["var"]]} as {ctx["var"]}
             from {table} WHERE year >= :syear1 and year <= :eyear1
             {mlimiter} GROUP by station, datum),
         period2 as (
             SELECT station, {datumsql} as datum,
-            {sqlopts[ctx['var']]} as {ctx['var']}
+            {sqlopts[ctx["var"]]} as {ctx["var"]}
             from {table} WHERE year >= :syear2 and year <= :eyear2
             {mlimiter} GROUP by station, datum),
         p1agg as (
             SELECT station,
-            avg({ctx['var']}) as {ctx['var']}, count(*) as count
+            avg({ctx["var"]}) as {ctx["var"]}, count(*) as count
             from period1 GROUP by station),
         p2agg as (
             SELECT station,
-            avg({ctx['var']}) as {ctx['var']}, count(*) as count
+            avg({ctx["var"]}) as {ctx["var"]}, count(*) as count
             from period2 GROUP by station),
         agg as (
             SELECT p2.station,
-            p2.{ctx['var']} as p2_{ctx['var']},
-            p1.{ctx['var']} as p1_{ctx['var']}
+            p2.{ctx["var"]} as p2_{ctx["var"]},
+            p1.{ctx["var"]} as p1_{ctx["var"]}
             from p1agg p1 JOIN p2agg p2 on
             (p1.station = p2.station)
             WHERE p1.count >= :p1years and p2.count >= :p2years)

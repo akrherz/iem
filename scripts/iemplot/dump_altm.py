@@ -24,7 +24,7 @@ def main():
     df["altm"] = (df["alti"].values * units("inHg")).to(units("hPa")).m
 
     with open("/mesonet/data/iemplot/altm.txt", "w") as fh:
-        fh.write(" PARM = ALTM\n\n" "    STN    YYMMDD/HHMM      ALTM\n")
+        fh.write(" PARM = ALTM\n\n    STN    YYMMDD/HHMM      ALTM\n")
 
         for sid, row in df.iterrows():
             fh.write("   %4s    %s  %8.2f\n" % (sid, ts, row["altm"]))

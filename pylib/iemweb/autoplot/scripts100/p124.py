@@ -77,8 +77,7 @@ def plotter(ctx: dict):
     for i, cat in enumerate(CATS):
         col = f"cat{i + 1}"
         res += (
-            "YEAR %4.2f JAN FEB MAR APR MAY JUN "
-            "JUL AUG SEP OCT NOV DEC ANN\n"
+            "YEAR %4.2f JAN FEB MAR APR MAY JUN JUL AUG SEP OCT NOV DEC ANN\n"
         ) % (cat,)
         for yr in range(startyear, datetime.date.today().year + 1):
             res += "%s %4.2f " % (yr, cat)

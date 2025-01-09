@@ -155,7 +155,7 @@ def plotter(ctx: dict):
             WHERE f.station = ANY(:stations) {hrlimit} {vlimit}
             and p.pressure in (925, 850, 700, 500, 400, 300, 250, 200,
             150, 100, 70, 50, 10)  and
-            {varname if varname != 'hght' else 'height'} is not null)
+            {varname if varname != "hght" else "height"} is not null)
 
         select * from data where valid = :ts ORDER by pressure DESC
         """

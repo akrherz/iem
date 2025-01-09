@@ -102,7 +102,7 @@ def plotter(ctx: dict):
     ax.plot(
         [-4, 4],
         [y1, y2],
-        label=f"Slope={h_slope:.2f} R$^2$={(r_value ** 2):.2f}",
+        label=f"Slope={h_slope:.2f} R$^2$={(r_value**2):.2f}",
     )
     xmax = df.gdd_sigma.abs().max() + 0.25
     ymax = df.precip_sigma.abs().max() + 0.25

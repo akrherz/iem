@@ -29,7 +29,7 @@ def main():
             continue
         if table.sts[station]["archive_begin"] != row[1]:
             LOG.warning(
-                "Updated %s STS WAS: %s NOW: %s" "",
+                "Updated %s STS WAS: %s NOW: %s",
                 station,
                 table.sts[station]["archive_begin"],
                 row[1],

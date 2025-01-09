@@ -190,7 +190,7 @@ def plotter(ctx: dict):
             )
         )
         res += (
-            "%3i %5s %10s %10s %5s %10s %10s  " "%5s %10s %10s %5s %10s %10s\n"
+            "%3i %5s %10s %10s %5s %10s %10s  %5s %10s %10s %5s %10s %10s\n"
         ) % (
             thres,
             wrap(max_bl),

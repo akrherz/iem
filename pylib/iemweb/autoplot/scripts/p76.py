@@ -283,7 +283,7 @@ def make_plot(df, ctx):
         f"{ctx['_sname']} ({means.index.min():.0f}-{means.index.max():.0f})\n"
         f"{PDICT3[ctx['agg']]} Daily {PDICT[varname]} {tt} [{MDICT[season]}] "
         f"{ctx.get('hour_limiter', '')} Avg: {avgv:.1f}, "
-        f"slope: {(h_slope * 100.):.2f} {UNITS[varname]}/century, "
+        f"slope: {(h_slope * 100.0):.2f} {UNITS[varname]}/century, "
         f"R$^2$={(r_value**2):.2f}"
     )
 

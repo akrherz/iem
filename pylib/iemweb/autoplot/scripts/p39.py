@@ -77,7 +77,7 @@ def compute_compare_month(ctx, cursor):
         where station = %s and month = %s and year != %s
         and high is not null and low is not null
         GROUP by year
-        ORDER by avg {'desc' if compare == 'high' else 'asc'} LIMIT 1
+        ORDER by avg {"desc" if compare == "high" else "asc"} LIMIT 1
         """,
         (station, effective_date.month, effective_date.year),
     )

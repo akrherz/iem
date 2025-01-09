@@ -62,7 +62,7 @@ def process_sky(data, skycs, skyls):
         data[f"skyc{i}"] = skyc
         if skyc != "CLR":
             data[f"skyl{i}"] = int(np.round(skyl, 0))  # GH287
-            mtr += f"{skyc}{(skyl / 100.):03.0f} "
+            mtr += f"{skyc}{(skyl / 100.0):03.0f} "
         else:
             mtr += "CLR "
     return mtr
@@ -144,7 +144,7 @@ def process(ncfn):
     ):
         if len(sid) < 3:
             continue
-        sid3 = sid[1:] if sid.startswith("K") else sid
+        sid3 = sid.removeprefix("K")
         ts = datetime(1970, 1, 1) + timedelta(
             seconds=data["observationTime"][i]
         )
@@ -198,7 +198,7 @@ def process(ncfn):
             tf = "M" if tmpc < 0 else ""
             t = f"{tf}{tc:02.0f}/"
             tf = "1" if tmpc < 0 else "0"
-            tgroup += f"{tf}{(tc * 10.):03.0f}"
+            tgroup += f"{tf}{(tc * 10.0):03.0f}"
         val = decision(i, "dewpoint", 10)
         if t != "" and val is not None:
             tmpc = float(data["dewpointC"][i])
@@ -206,7 +206,7 @@ def process(ncfn):
             tf = "M" if tmpc < 0 else ""
             t = f"{t}{tf}{tc:02.0f} "
             tf = "1" if tmpc < 0 else "0"
-            tgroup += f"{tf}{(tc * 10.):03.0f}"
+            tgroup += f"{tf}{(tc * 10.0):03.0f}"
         if len(t) > 4:
             mtr += t
         val = decision(i, "altimeter", 20)

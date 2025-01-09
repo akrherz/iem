@@ -245,7 +245,7 @@ def cmap_handler(fdict, value, arg, res):
     )
     checked = ' checked="checked"' if reverse_on else ""
     s += (
-        f"&nbsp; <input type=\"checkbox\" name=\"{arg['name']}_r\" "
+        f'&nbsp; <input type="checkbox" name="{arg["name"]}_r" '
         f'value="on"{checked}> Reverse Colormap?'
     )
     res["pltvars"].append(f"{arg['name']}:{value}{'_r' if reverse_on else ''}")
@@ -351,8 +351,7 @@ $("#{dpname}").datepicker(
 );
     """
     return (
-        f"<input type=\"text\" name=\"{arg['name']}\" id=\"{dpname}\" "
-        "> (YYYY/mm/dd)"
+        f'<input type="text" name="{arg["name"]}" id="{dpname}" > (YYYY/mm/dd)'
     )
 
 
@@ -368,10 +367,10 @@ $( "#{dpname}" ).flatpickr({{
     allowInput: true,
     defaultDate: moment('{value}', 'YYYY/MM/DD HHmm').toDate(),
     maxDate: moment('{vmax}', 'YYYY/MM/DD HHmm').toDate(),
-    minDate: moment('{arg['min']}', 'YYYY/MM/DD HHmm').toDate()}});
+    minDate: moment('{arg["min"]}', 'YYYY/MM/DD HHmm').toDate()}});
     """
     return (
-        f"<input type=\"text\" name=\"{arg['name']}\" id=\"{dpname}\" "
+        f'<input type="text" name="{arg["name"]}" id="{dpname}" '
         "> (YYYY/mm/dd HH24MI)"
     )
 
@@ -488,7 +487,7 @@ def dat_handler(fdict, res):
             _globalid = feat["attributes"]["globalid"]
             ss += (
                 f'<option value="{_globalid}" '
-                f'{"selected=" if _globalid == gid else ""}>'
+                f"{'selected=' if _globalid == gid else ''}>"
                 f"{compute_dat_label(feat['attributes'])} </option>\n"
             )
     ss += "</select>"
@@ -507,9 +506,7 @@ $("#dat").datepicker(
     'setDate', new Date('{dt}')
 );
     """
-    return (
-        '<input type="text" name="dat" id="dat"> (YYYY/mm/dd) &nbsp; ' f"{ss}"
-    )
+    return f'<input type="text" name="dat" id="dat"> (YYYY/mm/dd) &nbsp; {ss}'
 
 
 def generate_form(apid, fdict, headers, cookies):
@@ -597,7 +594,7 @@ def generate_form(apid, fdict, headers, cookies):
             form = make_select(arg["name"], value, FEMA_REGIONS)
         elif arg["type"] in ["text", "int", "float"]:
             form = (
-                f"<input type=\"text\" name=\"{arg['name']}\" size=\"60\" "
+                f'<input type="text" name="{arg["name"]}" size="60" '
                 f'value="{value}">'
             )
         elif arg["type"] in ["month", "zhour", "hour", "day", "year"]:
@@ -663,7 +660,7 @@ def generate_form(apid, fdict, headers, cookies):
 </script>
 <script src="/vendor/highcharts/{HIGHCHARTS}/modules/exporting.js"></script>
 <script src="/vendor/highcharts/{HIGHCHARTS}/modules/heatmap.js"></script>
-<script src="{res['imguri']}.js"></script>
+<script src="{res["imguri"]}.js"></script>
             """
         elif fmt == "maptable":
             res["image"] = (
@@ -702,7 +699,7 @@ $(document).ready(function(){{
         </div>
 </div>
 <br clear="all" />
-        <img src="{res['imguri']}.{fmt}" class="img img-responsive"
+        <img src="{res["imguri"]}.{fmt}" class="img img-responsive"
          id="theimage" />
             """
             res["jsextra"] += f"""
@@ -719,9 +716,9 @@ var progressBar = setInterval(function (){{
             """
         elif fmt == "pdf":
             res["image"] = f"""
-<object id="windrose-plot" src="{res['imguri']}.{fmt}" width="700px"
+<object id="windrose-plot" src="{res["imguri"]}.{fmt}" width="700px"
  height="700px">
-    <embed src="{res['imguri']}.{fmt}" width="700px" height="700px">
+    <embed src="{res["imguri"]}.{fmt}" width="700px" height="700px">
     </embed>
 </object>
             """
@@ -798,28 +795,28 @@ function onNetworkChange(newnetwork){{
         <button type="submit" name="_cb" value="1">
         Force Updated Plot (no caching)</button>
 </form>
-    {res['nassmsg']}
+    {res["nassmsg"]}
     """
     if meta.get("report"):
         res["dataextra"] = f"""
-<a href="{res['imguri']}.txt" class="btn btn-primary">
+<a href="{res["imguri"]}.txt" class="btn btn-primary">
 <i class="fa fa-table"></i> Direct/Stable Link to Text</a> &nbsp;
         """
     if meta.get("data"):
         res["dataextra"] += f"""
-<a href="{res['imguri']}.csv" class="btn btn-primary">
+<a href="{res["imguri"]}.csv" class="btn btn-primary">
 <i class="fa fa-table"></i> View Data (as csv)</a> &nbsp;
-<a href="{res['imguri']}.xlsx" class="btn btn-primary">
+<a href="{res["imguri"]}.xlsx" class="btn btn-primary">
 <i class="fa fa-table"></i> Download as Excel</a> &nbsp;
         """
     if meta["maptable"]:
         res["dataextra"] += f"""
-<a href="{res['imguri']}.geojson" class="btn btn-primary">
+<a href="{res["imguri"]}.geojson" class="btn btn-primary">
 <i class="fa fa-map"></i> Download as GeoJSON</a> &nbsp;
         """
     if meta.get("raster"):
         res["dataextra"] += f"""
-<a href="{res['imguri']}.geotiff" class="btn btn-primary">
+<a href="{res["imguri"]}.geotiff" class="btn btn-primary">
 <i class="fa fa-map"></i> Download as GeoTIFF</a> &nbsp;
         """
     res["issues"] = """
@@ -877,11 +874,11 @@ def generate_autoplot_list(apid):
     """The select list of available autoplots."""
     s = '<select name="q" class="iemselect2" data-width="100%">\n'
     for entry in autoplot_data["plots"]:
-        s += f"<optgroup label=\"{entry['label']}\">\n"
+        s += f'<optgroup label="{entry["label"]}">\n'
         for opt in entry["options"]:
             selected = ' selected="selected"' if opt["id"] == apid else ""
             s += (
-                f"<option value=\"{opt['id']}\"{selected}>{opt['label']} "
+                f'<option value="{opt["id"]}"{selected}>{opt["label"]} '
                 f"(#{opt['id']})</option>\n"
             )
         s += "</optgroup>\n"
@@ -909,7 +906,7 @@ def generate_trending():
                         label = opt["label"]
                         break
             res += (
-                f"<tr><td><a href=\"/plotting/auto/?q={entry['appid']}\">"
+                f'<tr><td><a href="/plotting/auto/?q={entry["appid"]}">'
                 f"#{entry['appid']}. {label}</a></td><td>{entry['count']:,}"
                 "</td></tr>\n"
             )
@@ -978,7 +975,7 @@ to some of these autoplots.</p>
 
 {res["formhtml"]}
 
-{res['description']}
+{res["description"]}
 
 <hr>
 
@@ -1004,7 +1001,7 @@ to some of these autoplots.</p>
 <script src="/vendor/openlayers/{OPENLAYERS}/ol.js" type="text/javascript">
 </script>
 <script src='/vendor/openlayers/{OPENLAYERS}/ol-layerswitcher.js'></script>
-{res['extrascripts']}
+{res["extrascripts"]}
 <script src="js/mapselect.js?v=2"></script>
 <script>
 function hideImageLoad(){{
@@ -1012,7 +1009,7 @@ function hideImageLoad(){{
         $('#willload').css('display', 'none');
 }}
 $(document).ready(function(){{
-    {res['jsextra']}
+    {res["jsextra"]}
     $('.optcontrol').change(function(){{
         if (this.checked){{
                 $("#"+ this.name).css('display', 'block');
@@ -1056,7 +1053,7 @@ $(document).ready(function(){{
 .cmapselect{{
     width: 400px; }}
 </style>
- {res['headextra']}
+ {res["headextra"]}
         """,
     }
 

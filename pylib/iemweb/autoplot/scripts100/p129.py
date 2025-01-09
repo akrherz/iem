@@ -127,8 +127,8 @@ def get_highcharts(ctx: dict) -> str:
 
     return f"""
 Highcharts.chart('{containername}', {{
-    title: {{text: '{ctx['title']}'}},
-    subtitle: {{text: '{ctx['subtitle']}'}},
+    title: {{text: '{ctx["title"]}'}},
+    subtitle: {{text: '{ctx["subtitle"]}'}},
     yAxis: [{{
             min: 0, max: 100,
             title: {{
@@ -159,12 +159,12 @@ s += '<br /><b>Avg Days per Month:</b> '+ this.points[1].y.toFixed(2);
     }},
     series : [{{
         name: 'Percentile',
-        data: {ctx['df']['rank'].values.tolist()},
+        data: {ctx["df"]["rank"].values.tolist()},
         pointPadding: 0.2,
         pointPlacement: -0.2
     }},{{
         name: 'Avg Days per Month',
-        data: {ctx['df']['avg_days'].values.tolist()},
+        data: {ctx["df"]["avg_days"].values.tolist()},
         yAxis: 1,
         pointPadding: 0.4,
         pointPlacement: -0.2

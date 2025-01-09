@@ -249,7 +249,7 @@ Highcharts.chart("{containername}", {{
         }},
         yAxis: {{
             title: {{
-                text: "{PDICT3[ctx['var']]}"
+                text: "{PDICT3[ctx["var"]]}"
             }}
         }},
         tooltip: {{
@@ -260,13 +260,10 @@ Highcharts.chart("{containername}", {{
         }},
         series: [
             {{
-                name: "{' '.join(PDICT3[ctx["var"]].split()[:-1])}",
+                name: "{" ".join(PDICT3[ctx["var"]].split()[:-1])}",
                 data: {
-                    df[["ticks", myyearcol]]
-                    .replace({np.nan: None})
-                    .values
-                    .tolist()
-                },
+        df[["ticks", myyearcol]].replace({np.nan: None}).values.tolist()
+    },
                 zIndex: 3,
                 color: "#FF0000",
                 lineWidth: 2,
@@ -277,11 +274,8 @@ Highcharts.chart("{containername}", {{
             }}, {{
                 name: "Average",
                 data: {
-                    df[[tc, (ctx["var"], "mean")]]
-                    .replace({np.nan: None})
-                    .values
-                    .tolist()
-                },
+        df[[tc, (ctx["var"], "mean")]].replace({np.nan: None}).values.tolist()
+    },
                 zIndex: 2,
                 color: "#000000",
                 lineWidth: 2,
@@ -292,11 +286,10 @@ Highcharts.chart("{containername}", {{
             }}, {{
                 name: "Range",
                 data: {
-                    df[[tc, (ctx["var"], "min"), (ctx["var"], "max")]]
-                    .replace({np.nan: None})
-                    .values
-                    .tolist()
-                },
+        df[[tc, (ctx["var"], "min"), (ctx["var"], "max")]]
+        .replace({np.nan: None})
+        .values.tolist()
+    },
                 type: "arearange",
                 lineWidth: 0,
                 linkedTo: ":previous",
@@ -316,11 +309,10 @@ Highcharts.chart("{containername}", {{
             }}, {{
                 name: "25-75 %tile",
                 data: {
-                    df[[tc, (ctx["var"], "25%"), (ctx["var"], "75%")]]
-                    .replace({np.nan: None})
-                    .values
-                    .tolist()
-                },
+        df[[tc, (ctx["var"], "25%"), (ctx["var"], "75%")]]
+        .replace({np.nan: None})
+        .values.tolist()
+    },
                 type: "arearange",
                 lineWidth: 0,
                 linkedTo: ":previous",

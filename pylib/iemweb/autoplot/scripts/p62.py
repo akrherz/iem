@@ -83,9 +83,7 @@ def plotter(ctx: dict):
 
     obs.mask = np.where(obs < 0, True, False)
 
-    title = (
-        f"{ctx['_sname']}\n" f"Daily Snow Depth ({minyear}-{eyear}) [inches]"
-    )
+    title = f"{ctx['_sname']}\nDaily Snow Depth ({minyear}-{eyear}) [inches]"
     fig = figure(apctx=ctx, title=title)
     ax = fig.add_axes((0.1, 0.1, 0.93, 0.8))
     ax.set_xticks((0, 29, 60, 91, 120, 151, 181))

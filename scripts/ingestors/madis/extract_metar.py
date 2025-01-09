@@ -121,7 +121,7 @@ def workflow(fn):
         if len(rawid) != 4:
             continue
 
-        sid = rawid[1:] if rawid.startswith("K") else rawid
+        sid = rawid.removeprefix("K")
         ts = valid[idx]
         if sid not in currentdf.index or ts > currentdf.at[sid, "valid"]:
             # MADIS has newer data than noaaport METAR ingest :/

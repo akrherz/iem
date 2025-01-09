@@ -104,8 +104,7 @@ def plotter(ctx: dict):
             parse_dates=["day"],
         )
     title = (
-        f"{ctx['_sname']}\n"
-        f"{sts:%b %Y} Daily Average Wind Speed and Direction"
+        f"{ctx['_sname']}\n{sts:%b %Y} Daily Average Wind Speed and Direction"
     )
     (fig, ax) = figure_axes(title=title, apctx=ctx)
 

@@ -49,7 +49,7 @@ def process(df, ncfn, south, west):
             nc2019_srad = nc2019.variables["srad"][:, j, i]
 
             with open(
-                ("/mesonet/share/pickup/yieldfx/county/" "%s_%s_%.4f_%.4f.csv")
+                ("/mesonet/share/pickup/yieldfx/county/%s_%s_%.4f_%.4f.csv")
                 % (
                     row["State"].replace(" ", "_"),
                     row["County"].replace(" ", "_"),

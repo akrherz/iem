@@ -160,8 +160,7 @@ def plotter(ctx: dict):
     doff = "extract(year from day)"
     if ctx["eday"] < ctx["sday"]:
         dtlimiter = (
-            "(to_char(day, 'mmdd') >= :sday or "
-            "to_char(day, 'mmdd') <= :eday)"
+            "(to_char(day, 'mmdd') >= :sday or to_char(day, 'mmdd') <= :eday)"
         )
         doff = (
             "case when to_char(day, 'mmdd') <= :eday then "
