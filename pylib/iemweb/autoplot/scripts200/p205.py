@@ -160,7 +160,7 @@ def plotter(ctx: dict):
 
     ab = ctx["_nt"].sts[station]["archive_begin"]
     ab = "N/A" if ab is None else ab
-    title = f"{ctx['_sname']} ({ab.year}-)\n" "Daily Observed Frequency"
+    title = f"{ctx['_sname']} ({ab.year}-)\nDaily Observed Frequency"
     (fig, ax) = figure_axes(title=title, apctx=ctx)
     colors = itertools.cycle(["r", "g", "b", "c", "m", "y"])
     for col in df.columns:

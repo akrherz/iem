@@ -102,7 +102,7 @@ def plotter(ctx: dict):
     label = prodDefinitions.get(pil, "")
     mp = MapPlot(
         apctx=ctx,
-        title=(f"{wfo} {label} ({pil}) " f"till {expire.strftime(TFORMAT)}"),
+        title=(f"{wfo} {label} ({pil}) till {expire.strftime(TFORMAT)}"),
         subtitle=(f"Estimated {popyear} Population{stextra}: {population:,}"),
         sector="spherical_mercator",
         west=bounds[0] - 0.02,

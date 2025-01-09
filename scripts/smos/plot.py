@@ -84,8 +84,7 @@ def makeplot(ts, routes="ac"):
             sector=sector,
             axisbg="white",
             title=(
-                "SMOS Satellite: Land Cover Optical Depth "
-                "(microwave L-band)"
+                "SMOS Satellite: Land Cover Optical Depth (microwave L-band)"
             ),
             subtitle=f"Satelite passes around {ts:%d %B %Y %H} UTC",
         )

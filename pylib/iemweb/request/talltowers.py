@@ -143,7 +143,7 @@ def application(environ, start_response):
     (date_trunc('hour', valid) +
     (((date_part('minute', valid)::integer / {tw}::integer) * {tw}::integer)
      || ' minutes')::interval) at time zone :tz as ts,
-    {','.join(tokens)} from
+    {",".join(tokens)} from
     data_analog where tower = ANY(:sids) and valid >= :sts and valid < :ets
     GROUP by tower, ts ORDER by tower, ts
     """

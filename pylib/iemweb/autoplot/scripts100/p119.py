@@ -109,7 +109,7 @@ def plotter(ctx: dict):
                 f"""
                 select
                 case when month > 7 then year + 1 else year end as winter,
-                {'min' if opt == 'first_below' else 'max'}(
+                {"min" if opt == "first_below" else "max"}(
                 case when {ctx["var"]} {comp}
                 %s then day else '{sent}'::date end) as date,
                 count(*) from alldata

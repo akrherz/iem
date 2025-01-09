@@ -133,10 +133,10 @@ def get_context(script_url: str) -> dict:
         as_html(vtecinfo)
         ctx["title"] = vtecinfo["ogtitle"]
         ctx["headextra"] += f"""
-<meta property="og:title" content="{vtecinfo['ogtitle']}">
-<meta property="og:description" content="{vtecinfo['desc']}">
-<meta property="og:image" content="{vtecinfo['ogimg']}.png">
-<meta property="og:url" content="{vtecinfo['ogurl']}">
+<meta property="og:title" content="{vtecinfo["ogtitle"]}">
+<meta property="og:description" content="{vtecinfo["desc"]}">
+<meta property="og:image" content="{vtecinfo["ogimg"]}.png">
+<meta property="og:url" content="{vtecinfo["ogurl"]}">
 <meta name="twitter:card" content="summary_large_image">
 <meta name="twitter:site" content="@akrherz">
 <meta name="og:image:width" content="1200">

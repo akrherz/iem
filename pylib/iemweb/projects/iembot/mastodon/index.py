@@ -125,8 +125,8 @@ def build_subui(mapp, fdict):
     """Show the subscriptions."""
     me = mapp.me()
     res = f"""
-    <p>Hi <a href="{me['url']}">@{me['username']}</a>
-    <img src="{me['avatar']}" style="width:20px;">!
+    <p>Hi <a href="{me["url"]}">@{me["username"]}</a>
+    <img src="{me["avatar"]}" style="width:20px;">!
     This page configures your IEMBot channel subscriptions.</p>
     """
     conn, cursor = get_dbconnc("mesosite")
@@ -135,7 +135,7 @@ def build_subui(mapp, fdict):
         try:
             _res = mapp.status_post(status=TEST_MESSAGE)
             log.append(
-                f"Test post to Mastodon is <a href=\"{_res['uri']}\">here</a>"
+                f'Test post to Mastodon is <a href="{_res["uri"]}">here</a>'
             )
         except Exception as exp:
             log.append(f"Posting test message resulted in error: {exp}")
@@ -185,7 +185,7 @@ def build_subui(mapp, fdict):
     for row in cursor:
         du = f"/projects/iembot/mastodon/?del={row['channel']}"
         res += (
-            f'<p><strong>{row["channel"]}</strong> '
+            f"<p><strong>{row['channel']}</strong> "
             f'<a href="{du}">Delete</a></p>'
         )
     cursor.close()

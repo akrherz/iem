@@ -57,8 +57,7 @@ def run(tmpdir, valid, routes):
                 sector="midwest",
                 axisbg="tan",
                 title=(
-                    f"{valid:%-d %b %Y %H} UTC "
-                    "NCEP HRRR 1 km AGL Reflectivity"
+                    f"{valid:%-d %b %Y %H} UTC NCEP HRRR 1 km AGL Reflectivity"
                 ),
                 subtitle=f"valid: {now:%-d %b %Y %I:%M %p %Z}",
             )

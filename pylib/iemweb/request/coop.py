@@ -217,8 +217,7 @@ def do_apsim(cursor, ctx):
     """
     if len(ctx["stations"]) > 1:
         return (
-            "ERROR: APSIM output is only "
-            "permitted for one station at a time."
+            "ERROR: APSIM output is only permitted for one station at a time."
         ).encode("ascii")
 
     station = ctx["stations"][0]
@@ -662,8 +661,7 @@ def do_salus(cursor, ctx):
     """
     if len(ctx["stations"]) > 1:
         return (
-            "ERROR: SALUS output is only "
-            "permitted for one station at a time."
+            "ERROR: SALUS output is only permitted for one station at a time."
         ).encode("ascii")
 
     scenario_year = 2030

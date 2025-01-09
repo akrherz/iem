@@ -300,7 +300,7 @@ def build_climate_sql(ctx, table):
     sql = f"""
     SELECT t.id as station, to_char(valid, 'mmdd') as sday, precip, high,
     low, {gddclimocol} as gdd, cdd65, hdd65, snow, sdd86
-    from {ctx['ct']} c, stations t WHERE c.station = t.{stjoin} and
+    from {ctx["ct"]} c, stations t WHERE c.station = t.{stjoin} and
     {netlimiter} """
 
     return sql

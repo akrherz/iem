@@ -24,7 +24,7 @@ def application(environ, start_response):
         )
     )
 
-    status = f'{status_code} {HTTP_RESPONSES.get(status_code, "Unknown")}'
+    status = f"{status_code} {HTTP_RESPONSES.get(status_code, 'Unknown')}"
     headers = [("Content-type", "text/plain")]
     start_response(status, headers)
     return [b"An error occurred, please try again later."]

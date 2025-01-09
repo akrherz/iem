@@ -91,8 +91,7 @@ FILTERS = {
         "'NON-TSTM WND GST', 'TSTM WND GST') and magnitude >= 100 "
     ),
     "CON": (
-        " and typetext in ('TORNADO', 'HAIL', 'TSTM WND GST', "
-        "'TSTM WND DMG') "
+        " and typetext in ('TORNADO', 'HAIL', 'TSTM WND GST', 'TSTM WND DMG') "
     ),
     "CMG": (
         " and typetext in ('TORNADO', 'HAIL', 'TSTM WND GST', "

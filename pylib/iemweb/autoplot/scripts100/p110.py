@@ -185,7 +185,7 @@ def plotter(ctx: dict):
         ax.bar(
             np.arange(0, len(cs.index)) * 7,
             cs[f"cat{i}"].values,
-            bottom=cs[f"cat{i-1}f"].values,
+            bottom=cs[f"cat{i - 1}f"].values,
             label=bins[i],
             width=7.0,
         )

@@ -89,13 +89,13 @@ def process(cursor, station, df, meta):
             newvals["precip_estimated"],
         )
         sql = f"""
-            UPDATE alldata SET temp_estimated = {newvals['temp_estimated']},
-            precip_estimated = {newvals['precip_estimated']},
-            high = {newvals['high']:.0f}, low = {newvals['low']:.0f},
-            precip = {newvals['precip']:.2f},
+            UPDATE alldata SET temp_estimated = {newvals["temp_estimated"]},
+            precip_estimated = {newvals["precip_estimated"]},
+            high = {newvals["high"]:.0f}, low = {newvals["low"]:.0f},
+            precip = {newvals["precip"]:.2f},
             temp_hour = coalesce(temp_hour, {hour}),
             precip_hour = coalesce(precip_hour, {hour})
-            WHERE station = '{station}' and day = '{row['day']}'
+            WHERE station = '{station}' and day = '{row["day"]}'
             """
         cursor.execute(sql.replace("nan", "null"))
 

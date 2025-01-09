@@ -76,9 +76,9 @@ def gentext(sio, row, grversion):
         lon2, lat2 = extrapolate(row["lon"], row["lat"], distance, drct)
         sio.write(
             f"Color: 255 255 0\n{time_range}"
-            f"Line: 2,0,\"NWS Warning Track ({row['wfo']}-{row['phenomena']}"
+            f'Line: 2,0,"NWS Warning Track ({row["wfo"]}-{row["phenomena"]}'
             f"-{row['eventid']})\\n"
-            f"{drct:.0f}/{row['tml_sknt']:.0f}\"\n"
+            f'{drct:.0f}/{row["tml_sknt"]:.0f}"\n'
             f"{row['lat']:.4f},{row['lon']:.4f}\n"
             f"{lat2:.4f},{lon2:.4f}\n"
             "End:\n"
@@ -96,7 +96,7 @@ def gentext(sio, row, grversion):
                 f'Line: 2,0,"NWS Warning Track @{ts}'
                 f"({row['wfo']}-{row['phenomena']}"
                 f"-{row['eventid']})\\n"
-                f"{drct:.0f}/{row['tml_sknt']:.0f}\"\n"
+                f'{drct:.0f}/{row["tml_sknt"]:.0f}"\n'
             )
             for lon, lat in zip(lons, lats):
                 lon2, lat2 = extrapolate(lon, lat, seconds * smps, drct)

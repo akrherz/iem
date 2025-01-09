@@ -606,9 +606,7 @@ def do_ahps_fx(nwsli):
     odf = df[df["type"] == "F"]
     col = "Stage[ft]" if "Stage[ft]" in odf.columns else "Tailwater[ft]"
     for _, row in odf.iterrows():
-        res += (
-            f"{row['Time']},{row[col]:.2f}ft," f"{row['Flow[kcfs]']:.1f}kcfs\n"
-        )
+        res += f"{row['Time']},{row[col]:.2f}ft,{row['Flow[kcfs]']:.1f}kcfs\n"
     return res
 
 

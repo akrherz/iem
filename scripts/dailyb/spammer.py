@@ -101,7 +101,7 @@ def get_github_commits():
     if len(txt) == 1:
         txt = txt[0] + "    No code commits found in previous 24 Hours"
         html = html[0] + (
-            "<strong>No code commits found " "in previous 24 Hours</strong>"
+            "<strong>No code commits found in previous 24 Hours</strong>"
         )
     else:
         txt = "\n".join(txt) + "\n\n" + "\n".join(links)

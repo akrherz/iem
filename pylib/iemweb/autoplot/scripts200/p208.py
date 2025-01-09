@@ -273,7 +273,7 @@ def plotter(ctx: dict):
     lbl = vtec.get_ps_string(p1, s1)
     if df["is_emergency"].any():
         lbl = f"{vtec.VTEC_PHENOMENA.get(p1, p1)} Emergency"
-    title = f"{year} {wfo} {_pds} {lbl} " f"({p1}.{s1}) #{etn}"
+    title = f"{year} {wfo} {_pds} {lbl} ({p1}.{s1}) #{etn}"
     if ctx["opt"] in ["expand", "etn"]:
         title = (
             f"{year} NWS {vtec.VTEC_PHENOMENA.get(p1, p1)} "

@@ -175,10 +175,7 @@ def plotter(ctx: dict):
         title = "Stress Degree Days (base=86)"
 
     ax1.set_title(
-        (
-            f"Accumulated {title}\n"
-            f"{station} {ctx['_nt'].sts[station]['name']}"
-        ),
+        (f"Accumulated {title}\n{station} {ctx['_nt'].sts[station]['name']}"),
         fontsize=18 if whichplots == "all" else 14,
     )
 

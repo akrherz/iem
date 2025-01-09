@@ -98,7 +98,7 @@ def plotter(ctx: dict):
     if ctx["_nt"].sts[station]["archive_begin"] is not None:
         syear = ctx["_nt"].sts[station]["archive_begin"].year
     eyear = utc().year
-    title = f"{ctx['_sname']} ({syear}-{eyear})\n" f"{PDICT[varname]} by Month"
+    title = f"{ctx['_sname']} ({syear}-{eyear})\n{PDICT[varname]} by Month"
 
     fig = figure(title=title, apctx=ctx)
 

@@ -85,8 +85,7 @@ def main(filename: str, commit: bool) -> None:
         )
         tempadj = float(parts[0][1]) - clean(parts[0][0])
         p2 = parts[0][2]
-        if p2.endswith("."):
-            p2 = p2[:-1]
+        p2 = p2.removesuffix(".")
         args = (
             faa,
             date.strftime("%Y-%m-%d"),

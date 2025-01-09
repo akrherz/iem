@@ -290,8 +290,8 @@ def add_warnings(lsrdf: gpd.GeoDataFrame) -> None:
                 )
                 products += (
                     f'<a href="{url}">'
-                    f'{get_ps_string(row2["phenomena"], row2["significance"])}'
-                    f' {row2["eventid"]}</a><br />'
+                    f"{get_ps_string(row2['phenomena'], row2['significance'])}"
+                    f" {row2['eventid']}</a><br />"
                 )
             if products == "":
                 products = "No Warnings Found"

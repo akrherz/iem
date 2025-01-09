@@ -45,7 +45,7 @@ def main():
     mp = MapPlot(
         axisbg="white",
         title="Iowa %s Average Temperature" % (now.strftime("%Y %B"),),
-        subtitle=("Average of the High + Low ending: %s" "")
+        subtitle=("Average of the High + Low ending: %s")
         % (now.strftime("%d %B"),),
     )
     minval = int(min(vals))

@@ -80,8 +80,7 @@ def dowork(lon, lat) -> pd.DataFrame:
         mcds["utc_issue"] = mcds["i"].dt.strftime(ISO8601)
         mcds["utc_expire"] = mcds["e"].dt.strftime(ISO8601)
         mcds["product_href"] = (
-            "https://mesonet.agron.iastate.edu/"
-            "p.php?pid=" + mcds["product_id"]
+            "https://mesonet.agron.iastate.edu/p.php?pid=" + mcds["product_id"]
         )
     return mcds.drop(columns=["i", "e"])
 

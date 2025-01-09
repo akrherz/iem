@@ -223,7 +223,7 @@ def main(offset: int):
             iem.data["pday"] = round(mm2inch(val["pday"]), 2)
         if not iem.save(icursor) and val["network"] != "IA_RWIS":
             LOG.warning(
-                "MADIS Extract: %s found new station: %s network: %s" "",
+                "MADIS Extract: %s found new station: %s network: %s",
                 fn.split("/")[-1],
                 sid,
                 val["network"],

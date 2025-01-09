@@ -127,7 +127,7 @@ def plotter(ctx: dict):
     df["range-hilo"] = df["max-high"] - df["min-low"]
 
     years = df.index.values
-    title = f"{ctx['_sname']} :: {min(years)}-{max(years)}\n" f"{PDICT[ptype]}"
+    title = f"{ctx['_sname']} :: {min(years)}-{max(years)}\n{PDICT[ptype]}"
     if ptype.find("days") == 0:
         title += f" ({threshold})"
     (fig, ax) = figure_axes(title=title, apctx=ctx)

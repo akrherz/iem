@@ -186,10 +186,7 @@ def plotter(ctx: dict):
     ax.text(
         0.01,
         0.99,
-        (
-            "%s year(s) failed threshold %s\nAvg Date: %s\n"
-            "Avg Count: %.1f days"
-        )
+        ("%s year(s) failed threshold %s\nAvg Date: %s\nAvg Count: %.1f days")
         % (
             len(zeros),
             ("[" + ",".join([str(z) for z in zeros]) + "]")

@@ -121,8 +121,7 @@ def process_soil(first_updated, last_updated):
         )
         inserts += 1
     icursor.execute(
-        "delete from rwis_soil_data_log where "
-        "updated >= %s and updated < %s",
+        "delete from rwis_soil_data_log where updated >= %s and updated < %s",
         (first_updated, last_updated),
     )
     rcursor.close()

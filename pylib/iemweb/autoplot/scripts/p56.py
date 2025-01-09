@@ -152,7 +152,7 @@ def compute_plot_climo(ax, df):
             left + (weeks * 7) / 2.0,
             ymax * 1.1,
             f"{weeks} Weeks\n"
-            f"{rolsum.max() / df['count'].sum() * 100.:.0f}% Events",
+            f"{rolsum.max() / df['count'].sum() * 100.0:.0f}% Events",
             ha="center",
             va="center",
         )

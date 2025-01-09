@@ -254,7 +254,7 @@ def precip(fig, row, col):
     ax.text(
         0.2,
         1,
-        f"Record: {miss(row[col + '_record'])}\"\n"
+        f'Record: {miss(row[col + "_record"])}"\n'
         f"{', '.join([str(s) for s in row[col + '_record_years']])}",
         va="center",
         ha="left",
@@ -263,7 +263,7 @@ def precip(fig, row, col):
         ax.text(
             1.2,
             row[col + "_month_normal"] / c2,
-            f"Avg: {miss(row[col + '_month_normal'])}\"",
+            f'Avg: {miss(row[col + "_month_normal"])}"',
             va="center",
             ha="left",
         )
@@ -271,7 +271,7 @@ def precip(fig, row, col):
         ax.text(
             2.2,
             row[col + "_" + jan1 + "_normal"] / c3,
-            f"Avg: {miss(row[col + '_' + jan1 + '_normal'])}\"",
+            f'Avg: {miss(row[col + "_" + jan1 + "_normal"])}"',
             va="center",
             ha="left",
             bbox=dict(color="white"),
@@ -280,8 +280,8 @@ def precip(fig, row, col):
     ax.set_xticklabels(
         [
             f'Day:\n{miss(row[col])}"',
-            f"Month:\n{miss(row[col + '_month'])}\"",
-            f"Since {jan1.capitalize()}:\n{miss(row[col + '_' + jan1])}\"",
+            f'Month:\n{miss(row[col + "_month"])}"',
+            f'Since {jan1.capitalize()}:\n{miss(row[col + "_" + jan1])}"',
         ],
         fontsize=14,
     )
