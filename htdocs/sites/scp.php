@@ -36,13 +36,15 @@ if (!is_null($metadata["archive_begin"])) {
 
 $exturi = sprintf(
     "https://mesonet.agron.iastate.edu/" .
-        "api/1/scp.json?station=%s&amp;date=%s",
+        "api/1/scp.json?station=%s&amp;date=%s&amp;tz=%s",
     $station,
-    date("Y-m-d", $date)
+    date("Y-m-d", $date),
+    $metadata["tzname"],
 );
 $arr = array(
     "station" => $station,
     "date" => date("Y-m-d", $date),
+    "tz" => $metadata["tzname"],
 );
 $json = iemws_json("scp.json", $arr);
 if ($json === FALSE) {
@@ -88,8 +90,11 @@ function skyc($row, $i)
 
 $table = <<<EOM
 <table>
-<thead>
-<tr><th rowspan="2" class="rl">SCP Valid UTC</th>$header<th colspan="2">ASOS METAR Report</th></tr>
+<thead class="sticky">
+<tr>
+<th rowspan="2" class="rl">SCP Valid UTC</th>
+<th rowspan="2" class="rl">METAR Valid Local</th>
+$header<th colspan="2">ASOS METAR Report</th></tr>
 <tr>$header2<th>Levels ft</th><th>METAR</th></tr> 
 </thead>
 <tbody>
@@ -103,8 +108,9 @@ foreach ($data as $key => $row) {
         continue;
     }
     $table .= sprintf(
-        "<tr><td class=\"rl\">%sZ</td>",
-        gmdate("Hi", strtotime($row["utc_scp_valid"]))
+        "<tr><td class=\"rl\">%sZ</td><td class=\"rl\">%s</td>",
+        gmdate("Hi", strtotime($row["utc_scp_valid"])),
+        date("g:i A", strtotime($row["local_valid"]))
     );
     foreach ($birds as $b) {
         $table .= sprintf(
