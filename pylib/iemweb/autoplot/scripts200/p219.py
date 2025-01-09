@@ -204,7 +204,7 @@ def plotter(ctx: dict):
         if pd.notna(row["ws_sknt"]):
             ax.text(
                 valid,
-                3.8 + (0.5 if row["v"] > 0 else 0.5),
+                3.8 + 0.5,
                 f"WS{row['ws_sknt']:.0f}",
                 ha="center",
                 fontsize=TEXTARGS["fontsize"],
@@ -217,7 +217,7 @@ def plotter(ctx: dict):
         if not pd.isna(row["sknt"]):
             ax.text(
                 valid,
-                3.8 + (0.35 if row["v"] > 0 else 0.35),
+                3.8 + 0.35,
                 f"{text}KT",
                 ha="center",
                 fontsize=TEXTARGS["fontsize"],
