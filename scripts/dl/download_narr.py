@@ -13,7 +13,7 @@ from datetime import date, datetime, timedelta
 import click
 import httpx
 import pygrib
-from pyiem.util import exponential_backoff, logger
+from pyiem.util import logger
 
 LOG = logger()
 TMP = "/mesonet/tmp"
@@ -59,10 +59,12 @@ def fetch_rda(year, month):
             "https://data.rda.ucar.edu/ds608.0/3HRLY/"
             f"{year}/NARRsfc_{year}{month:02.0f}_{day}.tar"
         )
-        req = exponential_backoff(httpx.get, uri, timeout=30, stream=True)
         tmpfn = f"{TMP}/narr.tar"
-        with open(tmpfn, "wb") as fh:
-            for chunk in req.iter_content(chunk_size=1024):
+        with (
+            httpx.stream("GET", uri, timeout=30) as resp,
+            open(tmpfn, "wb") as fh,
+        ):
+            for chunk in resp.iter_bytes(chunk_size=1024):
                 if chunk:
                     fh.write(chunk)
         process(tmpfn)
