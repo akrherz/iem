@@ -172,21 +172,25 @@ function updateTable2ByPoint(){
 function updateTable3(){
     // get currently selected by3 radio button
     const by = text($("input[name='by3']:checked").val());
+    const single = text($("input[name='single3']:checked").val());
     const datum = (by === "state") ? text(stateSelect3.val()) : text($("#wfo3").val());
     const year = text($("#year3").val());
-    const ph = text($("#ph3").val());
-    const sig = text($("#sig3").val());
-    window.location.href = `#list/${by}/${datum}/${year}/${ph}/${sig}`;
+    const params = {
+        wfo: $("#wfo3").val(),
+        state: stateSelect3.val(),
+        year: year,
+    };
+    let href = `#list/${by}/${datum}/${year}`;
+    if (single === "single"){
+        params.phenomena = text($("#ph3").val());
+        params.significance = text($("#sig3").val());
+        href += `/${params.phenomena}/${params.significance}`;
+    }
+    window.location.href = href;
     $("#table3title").text(`Events for ${by} ${datum} in ${year}`);
     // Do what we need to for table 3
     $.ajax({
-        data: {
-            wfo: $("#wfo3").val(),
-            state: stateSelect3.val(),
-            year: year,
-            phenomena: ph,
-            significance: sig
-        },
+        data: params,
         url: (by === "wfo") ? BACKEND_EVENTS: BACKEND_EVENTS_BYSTATE,
         dataType: "json",
         method: "GET",
@@ -455,6 +459,22 @@ function process_hash(hash){
                 }
             }
             updateMarkerPosition2(default_lon, default_lat);
+        }
+        if (tokens2[0] === 'list'){
+            const aTag = $("a[name='list']");
+            $('html,body').animate({scrollTop: aTag.offset().top},'slow');
+            const by = text(tokens2[1]);
+            const datum = text(tokens2[2]);
+            const year = text(tokens2[3]);
+            $("input[name='by3'][value='"+by+"']").prop("checked", true);
+            $("input[name='single3'][value='all']").prop("checked", true);
+            $("#year3").val(year);
+            if (by === "state"){
+                stateSelect3.val(datum).trigger("change");
+            } else {
+                $("#wfo3").val(datum).trigger("change");
+            }
+            updateTable3();
         }
     }
     if (tokens2.length === 6){

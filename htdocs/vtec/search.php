@@ -17,7 +17,7 @@ $t->jsextra = <<<EOF
 <script type="text/javascript" src="wfos.js"></script>
 <script src='/vendor/openlayers/{$OL}/ol.js'></script>
 <script type="text/javascript" src="/js/olselect-lonlat.js"></script>
-<script type="text/javascript" src="search.js"></script>
+<script type="text/javascript" src="search.js?v=2"></script>
 EOF;
 $t->headextra = <<<EOF
 <link rel="stylesheet" href="/vendor/jquery-datatables/{$DT}/datatables.min.css" />
@@ -174,7 +174,12 @@ by state and year.</p>
         <label for="bywfo">Select By WFO</label>
         <br /><select name="wfo" style="width: 100%" id="wfo3"></select></p>
 
-        <p><label for="ph3">Select VTEC Phenomena:</label>
+        <p><input type="radio" name="single3" value="single" id="single3"
+            checked="checked"/>
+        <label for="single3">Single VTEC Event</label> or
+        <input type="radio" name="single3" value="all" id="all3">
+        <label for="all3">All VTEC Events</label>
+        <br /><label for="ph3">Select VTEC Phenomena:</label>
         <select name="ph" style="width: 100%" id="ph3"></select></p>
 
         <p><label for="sig3">Select VTEC Significance:</label>
