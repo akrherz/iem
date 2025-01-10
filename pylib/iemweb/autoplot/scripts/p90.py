@@ -904,6 +904,9 @@ def plotter(ctx: dict):
     t = ctx["t"]
     ilabel = ctx["ilabel"] == "yes"
     geo = ctx["geo"]
+    grid = None
+    aff = None
+    crs = None
     if geo == "ugc":
         do_ugc(ctx)
     elif geo == "polygon":

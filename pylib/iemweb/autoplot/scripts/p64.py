@@ -112,7 +112,7 @@ def get_data(ctx):
             color = "b"
         else:
             color = "r"
-        dt = date(year, 1, 1) + timedelta(days=(int(idx) + 183 - 1))
+        dt = date(year, 1, 1) + timedelta(days=int(idx) + 183 - 1)
         rows.append(
             dict(
                 year=year,
