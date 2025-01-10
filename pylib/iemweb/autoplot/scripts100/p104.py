@@ -96,9 +96,9 @@ def plotter(ctx: dict):
 
     now = date1
     while now <= date2:
-        sdays = []
-        for i in range(0, 0 - days, -1):
-            sdays.append((now + datetime.timedelta(days=i)).strftime("%m%d"))  # noqa
+        sdays = [
+            f"{(now - timedelta(days=i)):%m%d}" for i in range(0, 0 - days, -1)
+        ]
         cursor.execute(
             """
         SELECT avg(p), stddev(p), avg(t), stddev(t),
