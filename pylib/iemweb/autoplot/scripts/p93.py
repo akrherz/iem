@@ -24,7 +24,7 @@ updated to use greater than or equal to the given threshold.  In the case
 of wind chill, it is less than or equal to.</p>
 """
 
-import datetime
+from datetime import date
 
 import numpy as np
 import pandas as pd
@@ -79,14 +79,14 @@ def get_description():
         dict(
             type="year",
             min=1973,
-            default=datetime.date.today().year,
+            default=date.today().year,
             name="eyear",
             label="End year (inclusive, if data available) for plot:",
         ),
         dict(
             type="year",
             min=1973,
-            default=datetime.date.today().year,
+            default=date.today().year,
             name="year",
             label="Year to Highlight:",
         ),
@@ -123,7 +123,7 @@ def get_doylimit(ytd, varname):
         return ""
     if varname not in ["windchill", "tmpf_cold", "dwpf_cold"]:
         return "and extract(doy from valid) < extract(doy from 'TODAY'::date)"
-    if datetime.date.today().month > 7:
+    if date.today().month > 7:
         res = "and extract(doy from valid) < extract(doy from 'TODAY'::date) "
         if varname in ["windchill", "tmpf_cold", "dwpf_cold"]:
             res += "and extract(month from valid) > 6"
@@ -139,8 +139,8 @@ def plotter(ctx: dict):
     """Go"""
     station = ctx["zstation"]
     highlightyear = ctx["year"]
-    sdate = datetime.date(ctx["syear"], 1, 1)
-    edate = datetime.date(ctx["eyear"] + 1, 1, 1)
+    sdate = date(ctx["syear"], 1, 1)
+    edate = date(ctx["eyear"] + 1, 1, 1)
     ytd = ctx["ytd"]
     varname = ctx["var"]
     inc = ctx["inc"]
@@ -213,7 +213,7 @@ def plotter(ctx: dict):
     title = ""
     if varname in ["windchill", "tmpf_cold", "dwpf_cold"]:
         title = "1 Jul "
-    title = f"{title}till {datetime.date.today():%-d %b}"
+    title = f"{title}till {date.today():%-d %b}"
     title = "Entire Year" if ytd == "no" else title
     title = (
         f"{ctx['_sname']} ({minyear}-{maxyear})\n"

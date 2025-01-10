@@ -9,7 +9,7 @@ that comparing climate data for a station that changed hour of day
 observation over the years is problematic.
 """
 
-import datetime
+from datetime import date
 
 import numpy as np
 import pandas as pd
@@ -72,7 +72,7 @@ def plotter(ctx: dict):
     ab = ctx["_nt"].sts[station]["archive_begin"]
     if ab is None:
         raise NoDataFound("Unknown station metadata.")
-    title = f"{ctx['_sname']} ({ab.year}-{datetime.date.today().year})"
+    title = f"{ctx['_sname']} ({ab.year}-{date.today().year})"
     subtitle = "Bias of 24 Hour 'Day' Split for Average High + Low Temp"
     (fig, ax) = figure_axes(title=title, subtitle=subtitle, apctx=ctx)
     ax.plot(

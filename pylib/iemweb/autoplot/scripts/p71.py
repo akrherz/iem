@@ -9,7 +9,7 @@ The average wind direction
 is computed by vector averaging of the wind speed and direction reports.
 """
 
-import datetime
+from datetime import date, datetime
 
 import matplotlib.patheffects as PathEffects
 import numpy as np
@@ -46,13 +46,13 @@ def get_description():
         dict(
             type="year",
             name="year",
-            default=datetime.datetime.now().year,
+            default=datetime.now().year,
             label="Select Year:",
         ),
         dict(
             type="month",
             name="month",
-            default=datetime.datetime.now().month,
+            default=datetime.now().month,
             label="Select Month:",
         ),
         dict(
@@ -88,7 +88,7 @@ def plotter(ctx: dict):
     plot_units = ctx["units"]
     year = ctx["year"]
     month = ctx["month"]
-    sts = datetime.date(year, month, 1)
+    sts = date(year, month, 1)
     with get_sqlalchemy_conn("iem") as conn:
         df = pd.read_sql(
             """

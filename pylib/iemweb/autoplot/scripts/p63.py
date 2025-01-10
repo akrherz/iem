@@ -8,7 +8,7 @@ records to be set each year would be 365 / (number of years).  So you would
 expect to set 365 records the first year, 183 the second, and so on...
 """
 
-import datetime
+from datetime import datetime
 
 import pandas as pd
 from pyiem.database import get_dbconnc
@@ -37,7 +37,7 @@ def plotter(ctx: dict):
     pgconn, cursor = get_dbconnc("coop")
     syear = sts.year if sts.month == 1 and sts.day == 1 else (sts.year + 1)
     syear = max(syear, 1893)
-    eyear = datetime.datetime.now().year
+    eyear = datetime.now().year
 
     cursor.execute(
         """

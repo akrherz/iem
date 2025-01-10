@@ -90,8 +90,7 @@ enforcement of these unofficial polygons to stay within CWA bounds.</p>
 away as sometimes it will take 3-5 minutes to generate a map :(
 """
 
-from datetime import date, datetime, timedelta
-from zoneinfo import ZoneInfo
+from datetime import date, datetime, timedelta, timezone
 
 import geopandas as gpd
 import numpy as np
@@ -262,8 +261,12 @@ def get_description():
     return desc
 
 
-def do_polygon(ctx: dict):
+def get_raster(ctx: dict):
     """polygon workflow"""
+    if ctx["geo"] == "ugc":
+        raise NoDataFound("Sorry, GeoTIFF only works for polygon summaries.")
+    ctx["sdate"] = ctx["sdate"].replace(tzinfo=timezone.utc)
+    ctx["edate"] = ctx["edate"].replace(tzinfo=timezone.utc)
     varname = ctx["v"]
     if varname == "events":
         raise NoDataFound("Sorry, not implemented for polygon summaries.")
@@ -311,7 +314,7 @@ def do_polygon(ctx: dict):
         (west, south, east, north) = fema_region_bounds[int(ctx["fema"])]
     else:
         (west, south, east, north) = state_bounds[state]
-    # buffer by 5 degrees so to hopefully get all polys
+    # buffer by 2 degrees so to hopefully get all polys
     (west, south) = [x - 2 for x in (west, south)]
     (east, north) = [x + 2 for x in (east, north)]
     # create grids
@@ -319,13 +322,10 @@ def do_polygon(ctx: dict):
     if (east - west) > 10:
         griddelta = 0.02
     lons = np.arange(west, east, griddelta)
-    lon_edges = np.append(lons - griddelta / 2.0, lons[-1] + griddelta / 2.0)
     lats = np.arange(south, north, griddelta)
-    lat_edges = np.append(lats - griddelta / 2.0, lats[-1] + griddelta / 2.0)
     YSZ = len(lats)
     XSZ = len(lons)
     lons, lats = np.meshgrid(lons, lats)
-    lon_edges, lat_edges = np.meshgrid(lon_edges, lat_edges)
     # lons and lats are the center of the grid cells, so the affine needs
     # to be adjusted to the upper left corner
     affine = Affine(
@@ -336,8 +336,8 @@ def do_polygon(ctx: dict):
         0 - griddelta,
         north + griddelta / 2.0,
     )
-    ones = np.ones((int(YSZ), int(XSZ)))
-    counts = np.zeros((int(YSZ), int(XSZ)))
+    ones = np.ones((YSZ, XSZ))
+    counts = np.zeros((YSZ, XSZ))
     wfolimiter = ""
     if ctx["t"] == "cwa":
         wfolimiter = " wfo = :wfo and "
@@ -386,13 +386,14 @@ def do_polygon(ctx: dict):
         aff = z["mini_raster_affine"]
         mywest = aff.c
         mynorth = aff.f
-        raster = np.flipud(z["mini_raster_array"])
+        raster = z["mini_raster_array"]
         x0 = int((mywest - west) / griddelta)
-        y1 = int((mynorth - south) / griddelta)
-        dy, dx = np.shape(raster)
-        x1 = x0 + dx
-        y0 = y1 - dy
+        y0 = int((north - mynorth) / griddelta)
+        ny, nx = np.shape(raster)
+        x1 = x0 + nx
+        y1 = y0 + ny
         if x0 < 0 or x1 >= XSZ or y0 < 0 or y1 >= YSZ:
+            # Hmmmmm
             continue
         if varname == "lastyear":
             counts[y0:y1, x0:x1] = np.where(
@@ -408,7 +409,11 @@ def do_polygon(ctx: dict):
         raise NoDataFound("Sorry, no data found for query!")
     # construct the df
     ctx["df"] = pd.DataFrame(
-        {"lat": lats.ravel(), "lon": lons.ravel(), "val": counts.ravel()}
+        {
+            "lat": lats.ravel(),
+            "lon": lons.ravel(),
+            "val": np.flipud(counts).ravel(),
+        }
     )
     minv = df["issue"].min()
     maxv = df["issue"].max()
@@ -479,9 +484,7 @@ def do_polygon(ctx: dict):
                     break
             bins[0] = 0.01
     ctx["bins"] = bins
-    ctx["data"] = counts
-    ctx["lats"] = lat_edges
-    ctx["lons"] = lon_edges
+    return counts, affine, "EPSG:4326"
 
 
 def do_ugc(ctx: dict):
@@ -533,9 +536,7 @@ def do_ugc(ctx: dict):
         data = {}
         for row in cursor:
             days = int(
-                (
-                    edate - row[1].replace(tzinfo=ZoneInfo("UTC"))
-                ).total_seconds()
+                (edate - row[1].replace(tzinfo=timezone.utc)).total_seconds()
                 / 86400.0
             )
             rows.append(
@@ -894,8 +895,8 @@ def do_ugc(ctx: dict):
 def plotter(ctx: dict):
     """Go"""
     # Covert datetime to UTC
-    ctx["sdate"] = ctx["sdate"].replace(tzinfo=ZoneInfo("UTC"))
-    ctx["edate"] = ctx["edate"].replace(tzinfo=ZoneInfo("UTC"))
+    ctx["sdate"] = ctx["sdate"].replace(tzinfo=timezone.utc)
+    ctx["edate"] = ctx["edate"].replace(tzinfo=timezone.utc)
     state = ctx["state"]
     phenomena = ctx["phenomena"]
     significance = ctx["significance"]
@@ -903,10 +904,13 @@ def plotter(ctx: dict):
     t = ctx["t"]
     ilabel = ctx["ilabel"] == "yes"
     geo = ctx["geo"]
+    grid = None
+    aff = None
+    crs = None
     if geo == "ugc":
         do_ugc(ctx)
     elif geo == "polygon":
-        do_polygon(ctx)
+        grid, aff, crs = get_raster(ctx)
 
     subtitle = f"based on IEM Archives {ctx.get('subtitle', '')}"
     if t == "cwa":
@@ -988,17 +992,15 @@ def plotter(ctx: dict):
                 is_firewx=(phenomena == "FW"),
             )
     else:
-        res = mp.pcolormesh(
-            ctx["lons"],
-            ctx["lats"],
-            ctx["data"],
-            ctx["bins"],
+        mp.imshow(
+            grid,
+            aff,
+            crs,
+            clevs=ctx["bins"],
             cmap=cmap,
             units=ctx["units"],
             extend=ctx.get("extend", "both"),
         )
-        # Cut down on SVG et al size
-        res.set_rasterized(True)
         if ctx["drawc"] == "yes":
             mp.drawcounties()
 

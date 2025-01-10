@@ -8,7 +8,7 @@ the SOI value.  The thought is that there is some lag time for the impacts
 of a given SOI to be felt in the midwestern US.
 """
 
-import datetime
+from datetime import date
 
 import matplotlib.colors as mpcolors
 import numpy as np
@@ -55,7 +55,7 @@ def get_description():
         ),
         dict(
             type="text",
-            default=str(datetime.date.today().year),
+            default=str(date.today().year),
             name="year",
             label="Year(s) to Highlight in Chart (comma delimited)",
         ),
@@ -66,8 +66,8 @@ def get_description():
 
 def title(wanted):
     """Make a title"""
-    t1 = datetime.date(2000, wanted[0], 1)
-    t2 = datetime.date(2000, wanted[-1], 1)
+    t1 = date(2000, wanted[0], 1)
+    t2 = date(2000, wanted[-1], 1)
     return "Avg Precip + Temp for %s%s" % (
         t1.strftime("%B"),
         " thru %s" % (t2.strftime("%B"),) if wanted[0] != wanted[-1] else "",
@@ -133,10 +133,10 @@ def plotter(ctx: dict):
 
     title2 = f"{ctx['_sname']} :: {title(wanted)}"
     subtitle = "%s SOI (3 month average)" % (
-        datetime.date(2000, wantmonth, 1).strftime("%B"),
+        date(2000, wantmonth, 1).strftime("%B"),
     )
     fig = figure(title=title2, subtitle=subtitle, apctx=ctx)
-    ax = fig.add_axes([0.07, 0.12, 0.53, 0.75])
+    ax = fig.add_axes((0.07, 0.12, 0.53, 0.75))
 
     cmap = get_cmap(ctx["cmap"])
     zdata = np.arange(-2.0, 2.1, 0.5)
@@ -186,7 +186,7 @@ def plotter(ctx: dict):
     ax.set_ylabel(
         (r"Average Temperature $^\circ$F, " "Avg: %.1f") % (np.average(ys),)
     )
-    ax2 = fig.add_axes([0.67, 0.55, 0.28, 0.35])
+    ax2 = fig.add_axes((0.67, 0.55, 0.28, 0.35))
     ax2.scatter(df["soi3m"].values, df["tmpf"].values)
     ax2.set_xlabel("<-- El Nino :: SOI :: La Nina -->")
     ax2.set_ylabel(r"Avg Temp $^\circ$F")
@@ -206,12 +206,12 @@ def plotter(ctx: dict):
     )
     ax2.grid(True)
 
-    ax3 = fig.add_axes([0.67, 0.1, 0.28, 0.35])
+    ax3 = fig.add_axes((0.67, 0.1, 0.28, 0.35))
     ax3.scatter(df["soi3m"].values, df["precip"].values)
     ax3.set_xlabel("<-- El Nino :: SOI :: La Nina -->")
     ax3.set_ylabel("Total Precip [inch]")
     slp, intercept, r_value, _, _ = stats.linregress(
-        df["soi3m"].values, df["precip"].values
+        df["soi3m"].to_numpy(), df["precip"].to_numpy()
     )
     y1 = -2.0 * slp + intercept
     y2 = 2.0 * slp + intercept

@@ -5,7 +5,7 @@ set the plot to a retroactive date, which computes the number of number
 of days prior to that date.
 """
 
-import datetime
+from datetime import date
 
 import pandas as pd
 from pyiem.exceptions import NoDataFound
@@ -44,7 +44,7 @@ def get_description():
         ),
         dict(
             type="date",
-            default=datetime.date.today().strftime("%Y/%m/%d"),
+            default=date.today().strftime("%Y/%m/%d"),
             optional=True,
             label="Retroactive Date of Plot:",
             name="edate",
