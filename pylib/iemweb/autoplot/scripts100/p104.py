@@ -9,7 +9,7 @@ physical processes, the plot tends to cycle.  In economics, a classic
 comparable plot to this one is of suply vs demand.
 """
 
-import datetime
+from datetime import datetime, timedelta
 
 import numpy as np
 import pandas as pd
@@ -23,13 +23,13 @@ from iemweb.autoplot import ARG_STATION
 def get_description():
     """Return a dict describing how to call this plotter"""
     desc = {"description": __doc__, "data": True}
-    today = datetime.datetime.today() - datetime.timedelta(days=1)
+    today = datetime.today() - timedelta(days=1)
     desc["arguments"] = [
         ARG_STATION,
         dict(
             type="date",
             name="date1",
-            default=(today - datetime.timedelta(days=90)).strftime("%Y/%m/%d"),
+            default=(today - timedelta(days=90)).strftime("%Y/%m/%d"),
             label="Start Date:",
             min="1893/01/01",
         ),
@@ -85,7 +85,7 @@ def plotter(ctx: dict):
 
     (fig, ax) = figure_axes(title=title, apctx=ctx)
 
-    interval = datetime.timedelta(days=days2)
+    interval = timedelta(days=days2)
 
     lbls = []
     lbls2 = []

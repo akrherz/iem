@@ -7,7 +7,7 @@ range of accumulated values based on the observation history at the
 site.
 """
 
-import datetime
+from datetime import date, datetime, timedelta
 
 import numpy as np
 import pandas as pd
@@ -28,7 +28,7 @@ PDICT = {
 def get_description():
     """Return a dict describing how to call this plotter"""
     desc = {"description": __doc__, "data": True}
-    today = datetime.date.today()
+    today = date.today()
     if today.month < 5:
         today = today.replace(year=today.year - 1, month=10, day=1)
     sts = today.replace(month=5, day=1)
@@ -137,7 +137,7 @@ def plotter(ctx: dict):
     df[glabel + "_diff"] = df["o" + glabel] - df["c" + glabel]
 
     xlen = int((edate - sdate).days) + 1  # In case of leap day
-    years = (datetime.datetime.now().year - ab.year) + 1
+    years = (datetime.now().year - ab.year) + 1
     acc = np.zeros((years, xlen))
     acc[:] = np.nan
     pacc = np.zeros((years, xlen))
@@ -146,7 +146,7 @@ def plotter(ctx: dict):
     sacc[:] = np.nan
     if whichplots == "all":
         fig = figure(figsize=(9, 12), apctx=ctx)
-        ax1 = fig.add_axes([0.1, 0.7, 0.8, 0.2])
+        ax1 = fig.add_axes((0.1, 0.7, 0.8, 0.2))
         ax2 = fig.add_axes(
             [0.1, 0.6, 0.8, 0.1], sharex=ax1, facecolor="#EEEEEE"
         )
@@ -158,33 +158,33 @@ def plotter(ctx: dict):
         )
     elif whichplots == "gdd":
         fig = figure(apctx=ctx)
-        ax1 = fig.add_axes([0.14, 0.31, 0.8, 0.57])
+        ax1 = fig.add_axes((0.14, 0.31, 0.8, 0.57))
         ax2 = fig.add_axes(
             [0.14, 0.11, 0.8, 0.2], sharex=ax1, facecolor="#EEEEEE"
         )
         title = f"GDD(base={gddbase:.0f},ceil={gddceil:.0f})"
     elif whichplots == "precip":
         fig = figure(apctx=ctx)
-        ax3 = fig.add_axes([0.1, 0.11, 0.8, 0.75])
+        ax3 = fig.add_axes((0.1, 0.11, 0.8, 0.75))
         ax1 = ax3
         title = "Precipitation"
     else:  # sdd
         fig = figure(apctx=ctx)
-        ax4 = fig.add_axes([0.1, 0.1, 0.8, 0.8])
+        ax4 = fig.add_axes((0.1, 0.1, 0.8, 0.8))
         ax1 = ax4
         title = "Stress Degree Days (base=86)"
 
     ax1.set_title(
-        (f"Accumulated {title}\n{station} {ctx['_nt'].sts[station]['name']}"),
+        f"Accumulated {title}\n{station} {ctx['_nt'].sts[station]['name']}",
         fontsize=18 if whichplots == "all" else 14,
     )
 
     ab = ctx["_nt"].sts[station]["archive_begin"]
     if ab is None:
         raise NoDataFound("Unknown station metadata.")
-    for year in range(ab.year, datetime.datetime.now().year + 1):
+    for year in range(ab.year, datetime.now().year + 1):
         sts = sdate.replace(year=year)
-        ets = sts + datetime.timedelta(days=xlen - 1)
+        ets = sts + timedelta(days=xlen - 1)
         x = df.loc[sts:ets, f"o{glabel}"].cumsum()
         if x.empty:
             continue
@@ -329,7 +329,7 @@ def plotter(ctx: dict):
         if now.day in wanted:
             xticks.append(i)
             xticklabels.append(now.strftime("%-d\n%b"))
-        now += datetime.timedelta(days=1)
+        now += timedelta(days=1)
         i += 1
     if whichplots in ["all", "gdd"]:
         ax2.set_xticks(xticks)

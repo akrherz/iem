@@ -2,7 +2,7 @@
 Simple plot of seasonal/yearly precipitation totals.
 """
 
-import datetime
+from datetime import datetime
 
 import numpy as np
 import pandas as pd
@@ -76,7 +76,7 @@ def plotter(ctx: dict):
         pgconn.close()
         raise NoDataFound("No Data Found.")
 
-    today = datetime.datetime.now()
+    today = datetime.now()
     thisyear = today.year
     if season == "spring" and today.month > 5:
         thisyear += 1

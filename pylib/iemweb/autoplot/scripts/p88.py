@@ -7,7 +7,7 @@ chart is limited to post 1973 as cloud cover data since then is more
 reliable/comparable.
 """
 
-import datetime
+from datetime import date
 
 import numpy as np
 import pandas as pd
@@ -92,7 +92,7 @@ def plotter(ctx: dict):
         raise NoDataFound("Unknown station metadata.")
     title = (
         f"{ctx['_sname']} "
-        f"({max([ab.year, 1973])}-{datetime.date.today().year})\n"
+        f"({max([ab.year, 1973])}-{date.today().year})\n"
         f"Hourly Temp Departure (skies were {PDICT[ctx['which']]} vs all)"
     )
     (fig, ax) = figure_axes(title=title, apctx=ctx)

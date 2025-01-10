@@ -3,7 +3,7 @@ This application totals growing degree days by
 month and year.
 """
 
-import datetime
+from datetime import date
 
 import numpy as np
 import pandas as pd
@@ -54,9 +54,9 @@ def modMonth(
     if ab is None:
         raise NoDataFound("Unknown station metadata.")
     s = ab.year
-    e = datetime.date(datetime.date.today().year + 1, 1, 1)
+    e = date(date.today().year + 1, 1, 1)
     for year in range(s, e.year):
-        now = datetime.date(year, 1, 1)
+        now = date(year, 1, 1)
         m1 = now.replace(month=mo1)
         m2 = now.replace(month=mo2)
         if m1 >= e or m1 not in db:
@@ -139,9 +139,9 @@ def plotter(ctx: dict):
 # Site Information: [%s] %s
 # Contact Information: Daryl Herzmann akrherz@iastate.edu 515.294.5978
 """ % (
-        datetime.date.today().strftime("%d %b %Y"),
+        date.today().strftime("%d %b %Y"),
         bs,
-        datetime.date.today(),
+        date.today(),
         station,
         ctx["_nt"].sts[station]["name"],
     )
@@ -149,13 +149,11 @@ def plotter(ctx: dict):
         station,
     )
 
-    monthly = [0] * 13
-    for i in range(13):
-        monthly[i] = {"40": [], "48": [], "50": [], "XX": []}
+    monthly = [{"40": [], "48": [], "50": [], "XX": []}] * 13
 
     db = {}
     for _, row in df.iterrows():
-        ts = datetime.date(int(row["year"]), int(row["month"]), 1)
+        ts = date(int(row["year"]), int(row["month"]), 1)
         db[ts] = {
             "40": float(row["gdd40"]),
             "48": float(row["gdd48"]),

@@ -6,7 +6,7 @@ the dew point temperature.  With that averaged dew point temperature a
 relative humidity value is computed.
 """
 
-import datetime
+from datetime import datetime
 
 import matplotlib.ticker as mticker
 import metpy.calc as mcalc
@@ -170,7 +170,7 @@ def plotter(ctx: dict):
     titles = [
         f"{ctx['_sname']}:: ",
         f"Average Dew Point by Wind Direction (month={month.upper()}) "
-        f"({max([1973, ab.year])}-{datetime.datetime.now().year})",
+        f"({max([1973, ab.year])}-{datetime.now().year})",
         "(must have 3+ hourly obs >= 3 knots at given direction)",
     ]
     ax.set_title("\n".join(titles), size=10)

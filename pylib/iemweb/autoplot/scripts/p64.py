@@ -9,7 +9,7 @@ to be below 40F. This is to help filter out hail events.</p>
 """
 
 import calendar
-import datetime
+from datetime import date, datetime, timedelta
 
 import numpy as np
 import pandas as pd
@@ -63,7 +63,7 @@ def get_data(ctx):
     if ab is None:
         raise NoDataFound("No Data Found.")
     syear = max(1893, ab.year)
-    eyear = datetime.datetime.now().year
+    eyear = datetime.now().year
 
     snow = np.zeros((eyear - syear + 1, 366))
     snowd = np.zeros((eyear - syear + 1, 366))
@@ -112,9 +112,7 @@ def get_data(ctx):
             color = "b"
         else:
             color = "r"
-        dt = datetime.date(year, 1, 1) + datetime.timedelta(
-            days=(int(idx) + 183 - 1)
-        )
+        dt = date(year, 1, 1) + timedelta(days=(int(idx) + 183 - 1))
         rows.append(
             dict(
                 year=year,
@@ -184,7 +182,7 @@ def plotter(ctx: dict):
     )
     fig = figure(title=title, apctx=ctx)
     plot_yearly_trend(fig, df)
-    ax = fig.add_axes([0.08, 0.11, 0.36, 0.79])
+    ax = fig.add_axes((0.08, 0.11, 0.36, 0.79))
 
     ax.scatter(
         df["snow_doy"],
@@ -212,7 +210,7 @@ def plotter(ctx: dict):
     ax.grid(True)
     ax.set_ylim(bottom=0)
     ax2 = ax.twinx()
-    ptile = np.percentile(df["snow_doy"].values, np.arange(100))
+    ptile = np.percentile(df["snow_doy"].to_numpy(), np.arange(100))
     ax2.plot(ptile, np.arange(100), lw=2, color="k")
     ax2.set_ylabel(
         ("Frequency of %s Date (CDF) [%%] (black line)")

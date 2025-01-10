@@ -14,7 +14,7 @@ like Flood Warnings are prime examples of this.
 plots for a single county/zone/parish at a time.
 """
 
-import datetime
+from datetime import datetime
 
 import pandas as pd
 from pyiem.database import get_sqlalchemy_conn
@@ -142,7 +142,7 @@ def plotter(ctx: dict):
     elif ctx["season"] == "winter":
         months = [12, 1, 2]
     else:
-        ts = datetime.datetime.strptime(f"2000-{ctx['season']}-01", "%Y-%b-%d")
+        ts = datetime.strptime(f"2000-{ctx['season']}-01", "%Y-%b-%d")
         months = [ts.month]
 
     tzname = ctx["_nt"].sts[wfo]["tzname"]

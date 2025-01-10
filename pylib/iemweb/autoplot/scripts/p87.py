@@ -8,7 +8,7 @@ it would only count as one in this analysis.
 """
 
 import calendar
-import datetime
+from datetime import date
 
 import numpy as np
 import pandas as pd
@@ -64,7 +64,7 @@ def get_description():
         dict(
             type="year",
             name="eyear",
-            default=datetime.date.today().year,
+            default=date.today().year,
             label="End Year of Analysis (inclusive):",
         ),
     ]
@@ -77,8 +77,8 @@ def plotter(ctx: dict):
     syear = ctx["syear"]
     eyear = ctx["eyear"]
     groupby = ctx["groupby"]
-    sts = datetime.date(syear, 1, 1)
-    ets = datetime.date(eyear + 1, 1, 1)
+    sts = date(syear, 1, 1)
+    ets = date(eyear + 1, 1, 1)
     code = ctx["code"]
     if code == "PSN":
         code = "+SN"
@@ -148,8 +148,8 @@ def plotter(ctx: dict):
         f"{PDICT2[groupby].replace('group ', '')}"
     )
     fig = figure(apctx=ctx, title=title)
-    ax = fig.add_axes([0.11, 0.25, 0.7, 0.65])
-    cax = fig.add_axes([0.82, 0.04, 0.02, 0.15])
+    ax = fig.add_axes((0.11, 0.25, 0.7, 0.65))
+    cax = fig.add_axes((0.82, 0.04, 0.02, 0.15))
 
     res = ax.imshow(
         data, aspect="auto", rasterized=True, interpolation="nearest"
@@ -163,7 +163,7 @@ def plotter(ctx: dict):
     ax.set_ylabel(f"Local Time, {ctx['_nt'].sts[station]['tzname']}")
     ax.set_yticklabels(("Mid", "4 AM", "8 AM", "Noon", "4 PM", "8 PM"))
     ax.grid(True)
-    lax = fig.add_axes([0.11, 0.1, 0.7, 0.15])
+    lax = fig.add_axes((0.11, 0.1, 0.7, 0.15))
     if groupby == "week":
         ax.set_xticks(np.arange(0, 55, 7))
         lax.bar(np.arange(0, 52), np.ma.sum(data, 0), facecolor="tan")
@@ -198,7 +198,7 @@ def plotter(ctx: dict):
     lax.yaxis.get_major_ticks()[-1].label1.set_visible(False)
 
     # Right grid
-    rax = fig.add_axes([0.81, 0.25, 0.15, 0.65])
+    rax = fig.add_axes((0.81, 0.25, 0.15, 0.65))
     rax.barh(np.arange(0, 24) - 0.4, np.ma.sum(data, 1), facecolor="tan")
     rax.set_ylim(-0.5, 23.5)
     rax.set_yticks([])

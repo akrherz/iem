@@ -5,7 +5,7 @@ a year.
 """
 
 import calendar
-import datetime
+from datetime import date, datetime, timedelta
 
 import pandas as pd
 from pyiem.database import get_sqlalchemy_conn
@@ -19,7 +19,7 @@ PDICT = {"cold": "Coldest Temperature", "hot": "Hottest Temperature"}
 def get_description():
     """Return a dict describing how to call this plotter"""
     desc = {"description": __doc__, "data": True}
-    today = datetime.date.today()
+    today = date.today()
     desc["arguments"] = [
         ARG_STATION,
         dict(
@@ -44,8 +44,8 @@ def plotter(ctx: dict):
     station = ctx["station"]
     month = ctx["month"]
     mydir = ctx["dir"]
-    ts = datetime.datetime(2000, month, 1)
-    ets = ts + datetime.timedelta(days=35)
+    ts = datetime(2000, month, 1)
+    ets = ts + timedelta(days=35)
     ets = ets.replace(day=1)
     days = int((ets - ts).days)
 

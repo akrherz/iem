@@ -5,7 +5,7 @@ and by month.
 """
 
 import calendar
-import datetime
+from datetime import datetime
 
 import matplotlib.patheffects as PathEffects
 import pandas as pd
@@ -88,7 +88,7 @@ def plotter(ctx: dict):
         f"{ctx['_sname']}\n"
         f"Frequency of {threshold}+ knot Wind Speeds by Temperature "
         f"for {calendar.month_name[month]} "
-        f"({ab.year}-{datetime.datetime.now().year})\n"
+        f"({ab.year}-{datetime.now().year})\n"
         "(must have 3+ hourly observations at the given temperature)"
     )
     (fig, ax) = figure_axes(title=title, apctx=ctx)
