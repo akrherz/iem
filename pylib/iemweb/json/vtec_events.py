@@ -10,10 +10,15 @@ This provides metadata on VTEC events for a given WFO and year.
 Changelog
 ---------
 
+- 2025-01-10: Support providing all events for a given year and wfo.
 - 2024-08-08: Migration to pydantic validation
 
 Example Usage
 -------------
+
+Provide all NWS Des Moines VTEC events for 2024.
+
+https://mesonet.agron.iastate.edu/json/vtec_events.py?wfo=DMX&year=2024
 
 Provide all NWS Des Moines Tornado Warnings for 2024:
 
