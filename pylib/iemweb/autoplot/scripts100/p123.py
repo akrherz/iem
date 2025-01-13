@@ -1,6 +1,6 @@
 """Climodat consec days"""
 
-import datetime
+from datetime import date, timedelta
 
 import numpy as np
 import pandas as pd
@@ -77,9 +77,9 @@ def plotter(ctx: dict):
         "# First occurance of record consecutive number of days\n"
         "# above or below a temperature threshold\n"
     ) % (
-        datetime.date.today().strftime("%d %b %Y"),
+        date.today().strftime("%d %b %Y"),
         bs,
-        datetime.date.today(),
+        date.today(),
         station,
         ctx["_nt"].sts[station]["name"],
     )
@@ -121,54 +121,46 @@ def plotter(ctx: dict):
     for thres in range(-20, 101, 2):
         condition = lows < thres
         max_bl = 0
-        max_bl_ts = datetime.date.today()
+        max_bl_ts = date.today()
         for start, stop in contiguous_regions(condition):
             if (stop - start) > max_bl:
                 max_bl = int(stop - start)
-                max_bl_ts = datetime.date(
-                    startyear, 1, 1
-                ) + datetime.timedelta(days=int(stop))
+                max_bl_ts = date(startyear, 1, 1) + timedelta(days=int(stop))
         condition = lows >= thres
         max_al = 0
-        max_al_ts = datetime.date.today()
+        max_al_ts = date.today()
         for start, stop in contiguous_regions(condition):
             if (stop - start) > max_al:
                 max_al = int(stop - start)
-                max_al_ts = datetime.date(
-                    startyear, 1, 1
-                ) + datetime.timedelta(days=int(stop))
+                max_al_ts = date(startyear, 1, 1) + timedelta(days=int(stop))
         condition = highs < thres
         max_bh = 0
-        max_bh_ts = datetime.date.today()
+        max_bh_ts = date.today()
         for start, stop in contiguous_regions(condition):
             if (stop - start) > max_bh:
                 max_bh = int(stop - start)
-                max_bh_ts = datetime.date(
-                    startyear, 1, 1
-                ) + datetime.timedelta(days=int(stop))
+                max_bh_ts = date(startyear, 1, 1) + timedelta(days=int(stop))
         condition = highs >= thres
         max_ah = 0
-        max_ah_ts = datetime.date.today()
+        max_ah_ts = date.today()
         for start, stop in contiguous_regions(condition):
             if (stop - start) > max_ah:
                 max_ah = int(stop - start)
-                max_ah_ts = datetime.date(
-                    startyear, 1, 1
-                ) + datetime.timedelta(days=int(stop))
+                max_ah_ts = date(startyear, 1, 1) + timedelta(days=int(stop))
 
-        max_bl_sdate = (max_bl_ts - datetime.timedelta(days=max_bl)).strftime(
+        max_bl_sdate = (max_bl_ts - timedelta(days=max_bl)).strftime(
             "%m/%d/%Y"
         )
         max_bl_edate = max_bl_ts.strftime("%m/%d/%Y")
-        max_bh_sdate = (max_bh_ts - datetime.timedelta(days=max_bh)).strftime(
+        max_bh_sdate = (max_bh_ts - timedelta(days=max_bh)).strftime(
             "%m/%d/%Y"
         )
         max_bh_edate = max_bh_ts.strftime("%m/%d/%Y")
-        max_al_sdate = (max_al_ts - datetime.timedelta(days=max_al)).strftime(
+        max_al_sdate = (max_al_ts - timedelta(days=max_al)).strftime(
             "%m/%d/%Y"
         )
         max_al_edate = max_al_ts.strftime("%m/%d/%Y")
-        max_ah_sdate = (max_ah_ts - datetime.timedelta(days=max_ah)).strftime(
+        max_ah_sdate = (max_ah_ts - timedelta(days=max_ah)).strftime(
             "%m/%d/%Y"
         )
         max_ah_edate = max_ah_ts.strftime("%m/%d/%Y")

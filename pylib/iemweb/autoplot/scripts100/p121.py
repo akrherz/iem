@@ -4,7 +4,7 @@ two temperature thresholds of your choice.  A cycle representing one
 round trip from below some threshold to above the second threshold.
 """
 
-import datetime
+from datetime import date
 
 import pandas as pd
 from pyiem.database import get_dbconn
@@ -70,7 +70,7 @@ def plotter(ctx: dict):
     prs = [make(thres1), make(thres2), make(thres3), make(thres4)]
 
     s = ctx["_nt"].sts[station]["archive_begin"]
-    e = datetime.date.today()
+    e = date.today()
 
     if s is None:
         raise NoDataFound("Unknown metadata.")
@@ -88,9 +88,9 @@ THRES  %2.0f-%2.0f   %2.0f-%2.0f   %2.0f-%2.0f   %2.0f-%2.0f   \
 %2.0f-%2.0f   %2.0f-%2.0f   %2.0f-%2.0f   %2.0f-%2.0f
 YEAR   SPRING  FALL    SPRING  FALL    SPRING  FALL    SPRING  FALL
 """ % (
-        datetime.date.today().strftime("%d %b %Y"),
+        e.strftime("%d %b %Y"),
         s,
-        datetime.date.today(),
+        e,
         station,
         ctx["_nt"].sts[station]["name"],
         prs[0][0],
