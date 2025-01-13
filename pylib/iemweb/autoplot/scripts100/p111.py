@@ -1,6 +1,6 @@
 """Top 30 24-Hour Precipitation Events."""
 
-import datetime
+from datetime import date
 
 import pandas as pd
 from pyiem.database import get_sqlalchemy_conn
@@ -41,9 +41,9 @@ def plotter(ctx: dict):
 
     res = (
         "# IEM Climodat https://mesonet.agron.iastate.edu/climodat/\n"
-        f"# Report Generated: {datetime.date.today():%d %b %Y}\n"
+        f"# Report Generated: {date.today():%d %b %Y}\n"
         f"# Climate Record: {ctx['_nt'].sts[station]['archive_begin']} "
-        f"-> {datetime.date.today()}\n"
+        f"-> {date.today()}\n"
         f"# Site Information: {ctx['_sname']}\n"
         "# Contact Information: Daryl Herzmann "
         "akrherz@iastate.edu 515.294.5978\n"

@@ -18,7 +18,7 @@ season. Caveat emptor.</p>
 autoplot and presents the spring season values.</p>
 """
 
-import datetime
+from datetime import date, datetime, timedelta
 
 import matplotlib.dates as mdates
 import numpy as np
@@ -130,7 +130,7 @@ def plotter(ctx: dict):
             for idx, row in df2.iterrows():
                 if row["date"].year in [2099, 1800]:
                     continue
-                jan1 = datetime.date(row["winter"] - 1, 1, 1)
+                jan1 = date(row["winter"] - 1, 1, 1)
                 doy = (row["date"] - jan1).days
                 df2.at[idx, "doy"] = doy
                 df.loc[doy:sz, f"{base}cnts"] += 1
@@ -155,8 +155,8 @@ def plotter(ctx: dict):
         )
     res = (
         "# IEM Climodat https://mesonet.agron.iastate.edu/climodat/\n"
-        f"# Report Generated: {datetime.date.today():%d %b %Y}\n"
-        f"# Climate Record: {bs} -> {datetime.date.today()}\n"
+        f"# Report Generated: {date.today():%d %b %Y}\n"
+        f"# Climate Record: {bs} -> {date.today()}\n"
         f"# Site Information: {ctx['_sname']}\n"
         "# Contact: Daryl Herzmann akrherz@iastate.edu 515.294.5978\n"
         f"# {PDICT[ctx['var']]} exceedence probabilities\n"
@@ -172,10 +172,10 @@ def plotter(ctx: dict):
             continue
         if row[fcols[3]] >= 100:
             if maxdate is None:
-                maxdate = row["dates"] + datetime.timedelta(days=5)
+                maxdate = row["dates"] + timedelta(days=5)
             continue
         if row[fcols[0]] > 0 and mindate is None:
-            mindate = row["dates"] - datetime.timedelta(days=5)
+            mindate = row["dates"] - timedelta(days=5)
         res += (" %3s %s  %3i  %3i  %3i  %3i\n") % (
             row["dates"].strftime("%-j"),
             row["dates"].strftime("%b %d"),
@@ -187,7 +187,7 @@ def plotter(ctx: dict):
     if mindate is None:
         raise NoDataFound("Error found, try different thresholds.")
     if maxdate is None:
-        maxdate = datetime.datetime(2001, 6, 1)
+        maxdate = datetime(2001, 6, 1)
 
     byear = bs.year
     if ctx["var"] == "era5land_soilt4_avg":
@@ -197,7 +197,7 @@ def plotter(ctx: dict):
         station,
         ctx["_nt"].sts[station]["name"],
         byear,
-        datetime.date.today().year,
+        date.today().year,
     )
     (fig, ax) = figure_axes(title=title, apctx=ctx)
     # shrink the plot to make room for the table

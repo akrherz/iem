@@ -15,7 +15,7 @@ inclusive.  If you want to plot one hour, just set the start and end hour
 to the same value.</p>
 """
 
-import datetime
+from datetime import datetime
 
 import metpy.calc as mcalc
 import numpy as np
@@ -179,7 +179,7 @@ def run_calcs(df, ctx):
 
 def get_data(ctx, startyear):
     """Get data"""
-    today = datetime.datetime.now()
+    today = datetime.now()
     lastyear = today.year
     deltadays = 0
     months = month2months(ctx["season"])

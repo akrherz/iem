@@ -63,7 +63,9 @@ COLORS = {
     "0.05": "#8b4726",
     "0.10": "#ffc800",
     "0.15": "#ff0000",
+    "0.25": "#ff00aa",
     "0.30": "#ff00ff",
+    "0.35": "#ff78ff",
     "0.45": "#912cee",
     "0.60": "#104e8b",
 }
@@ -223,7 +225,7 @@ def plotter(ctx: dict):
                     "day": day,
                     "ot": outlook_type_code,
                     "sts": sts,
-                    "ets": ets + timedelta(days=2),
+                    "ets": ets,
                 },
                 index_col="date",
                 parse_dates=[
@@ -302,7 +304,7 @@ def plotter(ctx: dict):
                     "day": day,
                     "ot": outlook_type_code,
                     "sts": sts,
-                    "ets": ets + timedelta(days=2),
+                    "ets": ets,
                 },
                 index_col="date",
                 parse_dates="date",
@@ -327,8 +329,7 @@ def plotter(ctx: dict):
         for thres, row in df2.iterrows():
             if thres in COLORS:
                 aggtxt.append(f"{thres} {row['days']}")
-                total = df[df["threshold"] == thres].shape[0]
-                sumtxt.append(f"{thres} {total}")
+                sumtxt.append(f"{thres} {len(df[df['threshold'] == thres])}")
     for dt, row in df.iterrows():
         if row["threshold"] == "TSTM" and ctx.get("g", "yes") == "no":
             continue

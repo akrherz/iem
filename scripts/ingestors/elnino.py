@@ -1,6 +1,6 @@
 """Ingest the El Nino"""
 
-import datetime
+from datetime import date
 
 import httpx
 import pandas as pd
@@ -27,24 +27,25 @@ def main():
         if len(tokens) < 3:
             continue
         anom34 = float(tokens[-1])
-        date = datetime.date(int(tokens[0]), int(tokens[1]), 1)
-        if date in current.index:
-            if current.loc[date]["anom_34"] != anom34:
+        dt = date(int(tokens[0]), int(tokens[1]), 1)
+        if dt in current.index:
+            if current.loc[dt]["anom_34"] != anom34:
                 print(
-                    f"anom_34 update {date.year}-{date.month}-01: "
-                    f"{current.loc[date]['anom_34']} -> {anom34}"
+                    f"anom_34 update {dt.year}-{dt.month}-01: "
+                    f"{current.loc[dt]['anom_34']} -> {anom34}"
                 )
                 mcursor.execute(
                     "UPDATE elnino SET anom_34 = %s WHERE monthdate = %s",
-                    (anom34, date),
+                    (anom34, dt),
                 )
             continue
-        print(f"Found ElNino3.4! {date} {anom34}")
+        print(f"Found ElNino3.4! {dt} {anom34}")
         # Add entry to current dataframe
-        current.loc[date] = [anom34, None]
+        current.at[dt, "anom_34"] = anom34
+        current.at[dt, "soi_3m"] = None
         mcursor.execute(
             "INSERT into elnino(monthdate, anom_34) values (%s, %s)",
-            (date, anom34),
+            (dt, anom34),
         )
 
     url = "https://www.cpc.ncep.noaa.gov/data/indices/soi.3m.txt"
@@ -58,23 +59,23 @@ def main():
         for month in range(1, 13):
             soi = float(line[pos : pos + 6])
             pos += 6
-            date = datetime.date(year, month, 1)
+            dt = date(year, month, 1)
             if soi < -999:
                 continue
-            if date in current.index:
-                if current.loc[date]["soi_3m"] != soi:
+            if dt in current.index:
+                if current.loc[dt]["soi_3m"] != soi:
                     print(
-                        f"soi_3m update {date.year}-{date.month}-01: "
-                        f"{current.loc[date]['soi_3m']} -> {soi}"
+                        f"soi_3m update {dt.year}-{dt.month}-01: "
+                        f"{current.loc[dt]['soi_3m']} -> {soi}"
                     )
                     mcursor.execute(
                         "UPDATE elnino SET soi_3m = %s WHERE monthdate = %s",
-                        (soi, date),
+                        (soi, dt),
                     )
                 continue
             mcursor.execute(
                 "INSERT into elnino(monthdate, soi_3m) values (%s, %s)",
-                (date, soi),
+                (dt, soi),
             )
 
     mesosite.commit()
