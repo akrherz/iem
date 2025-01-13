@@ -16,7 +16,7 @@ you do it!  The app has a tight requirement of no less than 3 days of
 missing data for the year to be considered in the plot.</p>
 """
 
-import datetime
+from datetime import date, timedelta
 
 import pandas as pd
 from pyiem.database import get_sqlalchemy_conn
@@ -35,7 +35,7 @@ PDICT = {
 def get_description():
     """Return a dict describing how to call this plotter"""
     desc = {"description": __doc__, "data": True}
-    today = datetime.date.today()
+    today = date.today()
     thisyear = today.year
     desc["arguments"] = [
         ARG_STATION,
@@ -148,7 +148,7 @@ def plotter(ctx: dict):
         raise NoDataFound("No data found!")
     # Truncate plot
     doy_trunc = 365
-    today = ctx.get("edate", datetime.date.today())
+    today = ctx.get("edate", date.today())
     if ctx.get("edate") is not None:
         today_doy = int(today.strftime("%j"))
         sdate_doy = int(sdate.strftime("%j"))
@@ -164,9 +164,7 @@ def plotter(ctx: dict):
 
     extra = "" if doy_trunc == 365 else f" through {today.strftime('%-d %B')}"
     title = f"Accumulated {PDICT[ctx['var']]}{extra} after {sdate:%-d %B}"
-    subtitle = (
-        f"{ctx['_sname']} ({df['binyear'].min()}-{datetime.date.today().year})"
-    )
+    subtitle = f"{ctx['_sname']} ({df['binyear'].min()}-{date.today().year})"
     if cullyears:
         subtitle += (
             f", {len(cullyears)} years excluded due to "
@@ -254,11 +252,11 @@ def plotter(ctx: dict):
     xticks = []
     xticklabels = []
     for i in range(doy_trunc + 1):
-        date = sdate + datetime.timedelta(days=i)
-        if date.day != 1:
+        dt = sdate + timedelta(days=i)
+        if dt.day != 1:
             continue
         xticks.append(i)
-        xticklabels.append(date.strftime("%b"))
+        xticklabels.append(dt.strftime("%b"))
     ax.set_xlim(0, doy_trunc + 1)
     ax.set_ylim(bottom=-0.1)
     ax.set_xticks(xticks)

@@ -7,7 +7,7 @@ example, the 2009 <i>WYEAR</i> value represents the period between
 """
 
 import calendar
-import datetime
+from datetime import date
 
 import pandas as pd
 import seaborn as sns
@@ -44,7 +44,7 @@ LABELS = {
 def get_description():
     """Return a dict describing how to call this plotter"""
     desc = {"description": __doc__, "data": True, "report": True}
-    y20 = datetime.date.today().year - 19
+    y20 = date.today().year - 19
     desc["arguments"] = [
         ARG_STATION,
         dict(
@@ -113,7 +113,7 @@ def plotter(ctx: dict):
 
     res = (
         "# IEM Climodat https://mesonet.agron.iastate.edu/climodat/\n"
-        f"# Report Generated: {datetime.date.today():%d %b %Y}\n"
+        f"# Report Generated: {date.today():%d %b %Y}\n"
         f"# Climate Record: {ctx['_nt'].sts[station]['archive_begin']} "
         f"-> {df['max_day'].max()}, "
         "WYEAR column is Water Year Oct 1 - Sep 30\n"

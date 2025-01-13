@@ -7,7 +7,7 @@ the dew point temperature.  With that averaged dew point temperature a
 relative humidity value is computed.
 """
 
-import datetime
+from datetime import date, datetime
 
 import metpy.calc as mcalc
 import pandas as pd
@@ -63,7 +63,7 @@ def get_description():
             name="date",
             optional=True,
             label="Plot Obs for A Single Calendar Date (optional)",
-            default=datetime.date.today().strftime("%Y/%m/%d"),
+            default=date.today().strftime("%Y/%m/%d"),
         ),
     ]
     return desc
@@ -149,7 +149,7 @@ def plotter(ctx: dict):
         raise NoDataFound("Unknown station metadata.")
     title = (
         f"{ctx['_sname']}:: Dew Point Distribution by Air Temp "
-        f"(month={month.upper()}) ({ab.year}-{datetime.datetime.now().year}), "
+        f"(month={month.upper()}) ({ab.year}-{datetime.now().year}), "
         f"n={len(df.index):.0f}"
     )
     subtitle = "(must have 6+ hourly observations at the given temperature)"

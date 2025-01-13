@@ -1,6 +1,6 @@
 """precip days per month"""
 
-import datetime
+from datetime import date
 
 import pandas as pd
 from pyiem.database import get_sqlalchemy_conn
@@ -63,9 +63,9 @@ def plotter(ctx: dict):
 # Days with a trace accumulation are not included
 YEAR   JAN FEB MAR APR MAY JUN JUL AUG SEP OCT NOV DEC ANN
 """ % (
-        datetime.date.today().strftime("%d %b %Y"),
+        date.today().strftime("%d %b %Y"),
         ctx["_nt"].sts[station]["archive_begin"],
-        datetime.date.today(),
+        date.today(),
         station,
         ctx["_nt"].sts[station]["name"],
         "PRECIPITATION" if varname == "precip_days" else "SNOW FALL",

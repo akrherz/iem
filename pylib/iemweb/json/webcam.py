@@ -9,8 +9,8 @@ Changelog
 
 """
 
-import datetime
 import json
+from datetime import datetime, timedelta
 from zoneinfo import ZoneInfo
 
 from pydantic import Field
@@ -65,17 +65,17 @@ def application(environ, start_response):
     cid = environ["cid"]
     start_ts = environ["start_ts"]
     end_ts = environ["end_ts"]
-    date = environ["date"]
-    if date is not None:
-        start_ts = datetime.datetime.strptime(date, "%Y%m%d")
+    dt = environ["date"]
+    if dt is not None:
+        start_ts = datetime.strptime(dt, "%Y%m%d")
         start_ts = start_ts.replace(tzinfo=ZoneInfo("America/Chicago"))
-        end_ts = start_ts + datetime.timedelta(days=1)
+        end_ts = start_ts + timedelta(days=1)
     else:
         if start_ts is None:
             raise IncompleteWebRequest("GET start_ts= parameter missing")
-        start_ts = datetime.datetime.strptime(start_ts, "%Y%m%d%H%M")
+        start_ts = datetime.strptime(start_ts, "%Y%m%d%H%M")
         start_ts = start_ts.replace(tzinfo=ZoneInfo("UTC"))
-        end_ts = datetime.datetime.strptime(end_ts, "%Y%m%d%H%M")
+        end_ts = datetime.strptime(end_ts, "%Y%m%d%H%M")
         end_ts = end_ts.replace(tzinfo=ZoneInfo("UTC"))
 
     headers = [("Content-type", "application/json")]

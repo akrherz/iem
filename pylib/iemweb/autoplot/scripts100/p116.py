@@ -5,7 +5,7 @@ limit is for plot usability only, the data download has all available
 years contained.
 """
 
-import datetime
+from datetime import date
 
 import pandas as pd
 import seaborn as sns
@@ -21,7 +21,7 @@ PDICT = {"cdd": "Cooling Degree Days", "hdd": "Heating Degree Days"}
 def get_description():
     """Return a dict describing how to call this plotter"""
     desc = {"description": __doc__, "data": True, "report": True}
-    y20 = datetime.date.today().year - 19
+    y20 = date.today().year - 19
     desc["arguments"] = [
         ARG_STATION,
         dict(
@@ -66,15 +66,15 @@ def plotter(ctx: dict):
     if df.empty:
         raise NoDataFound("No Data Found.")
     df["monthdate"] = df[["year", "month"]].apply(
-        lambda x: datetime.date(x.iloc[0], x.iloc[1], 1), axis=1
+        lambda x: date(x.iloc[0], x.iloc[1], 1), axis=1
     )
     df = df.set_index("monthdate")
 
     res = (
         "# IEM Climodat https://mesonet.agron.iastate.edu/climodat/\n"
-        f"# Report Generated: {datetime.date.today():%d %b %Y}\n"
+        f"# Report Generated: {date.today():%d %b %Y}\n"
         f"# Climate Record: {ctx['_nt'].sts[station]['archive_begin']} "
-        f"-> {datetime.date.today()}\n"
+        f"-> {date.today()}\n"
         f"# Site Information: {ctx['_sname']}\n"
         "# Contact Information: Daryl Herzmann "
         "akrherz@iastate.edu 515.294.5978\n"
@@ -96,7 +96,7 @@ def plotter(ctx: dict):
         res += f"{yr:4.0f}"
         second += f"{yr:4.0f}"
         for mo in range(1, 13):
-            ts = datetime.date(yr, mo, 1)
+            ts = date(yr, mo, 1)
             if ts not in df.index:
                 res += f"{'M':>7s}"
                 second += f"{'M':>7s}"

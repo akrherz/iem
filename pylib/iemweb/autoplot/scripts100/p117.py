@@ -1,6 +1,6 @@
-"""To be written."""
+"""Stress Degree Days."""
 
-import datetime
+from datetime import date
 
 import numpy as np
 import pandas as pd
@@ -39,9 +39,9 @@ def plotter(ctx: dict):
         "# Contact Information: Daryl Herzmann "
         "akrherz@iastate.edu 515.294.5978\n"
     ) % (
-        datetime.date.today().strftime("%d %b %Y"),
+        date.today().strftime("%d %b %Y"),
         bs,
-        datetime.date.today(),
+        date.today(),
         station,
         ctx["_nt"].sts[station]["name"],
     )

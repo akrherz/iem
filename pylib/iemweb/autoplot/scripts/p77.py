@@ -6,13 +6,14 @@ days represented by the period.
 """
 
 import calendar
-import datetime
+from datetime import datetime
 
 import numpy as np
 import pandas as pd
 from pyiem.database import get_sqlalchemy_conn
 from pyiem.exceptions import NoDataFound
 from pyiem.plot import figure
+from sqlalchemy import text
 
 from iemweb.autoplot import ARG_STATION
 
@@ -28,24 +29,24 @@ def plotter(ctx: dict):
     """Go"""
     station = ctx["station"]
 
-    today = datetime.datetime.now()
+    today = datetime.now()
     thisyear = today.year
 
     with get_sqlalchemy_conn("coop") as conn:
         df = pd.read_sql(
-            """
+            text("""
         with data as (
             select year, month, extract(doy from day) as doy,
             generate_series(32, high) as t from alldata
-            where station = %s and year < %s),
+            where station = :station and year < :thisyear),
         agger as (
             SELECT year, t, min(doy), max(doy) from data GROUP by year, t)
 
         SELECT t as tmpf, avg(min) as min_jday,
         avg(max) as max_jday from agger GROUP by t ORDER by t ASC
-        """,
+        """),
             conn,
-            params=(station, thisyear),
+            params={"station": station, "thisyear": thisyear},
             index_col="tmpf",
         )
     if df.empty:
@@ -55,8 +56,8 @@ def plotter(ctx: dict):
         "Average Last and First High Temperature of Year"
     )
     fig = figure(title=title, apctx=ctx)
-    ax = fig.add_axes([0.1, 0.1, 0.7, 0.8])
-    ax2 = fig.add_axes([0.81, 0.1, 0.15, 0.8])
+    ax = fig.add_axes((0.1, 0.1, 0.7, 0.8))
+    ax2 = fig.add_axes((0.81, 0.1, 0.15, 0.8))
     height = df["min_jday"][:] + 365.0 - df["max_jday"]
     ax2.plot(height, df.index.values)
     ax2.set_xticks([30, 90, 180, 365])

@@ -1,6 +1,6 @@
 """Days per year"""
 
-import datetime
+from datetime import date
 
 import pandas as pd
 from pyiem.database import get_sqlalchemy_conn
@@ -33,7 +33,7 @@ def plotter(ctx: dict):
             "WHERE station = %s and low >= 32 and year < %s "
             "GROUP by year ORDER by year ASC",
             conn,
-            params=(station, datetime.date.today().year),
+            params=(station, date.today().year),
             index_col=None,
         )
     if df.empty:
@@ -47,9 +47,9 @@ def plotter(ctx: dict):
 # Contact Information: Daryl Herzmann akrherz@iastate.edu 515.294.5978
 # OF DAYS EACH YEAR WHERE MIN >=32 F
 """ % (
-        datetime.date.today().strftime("%d %b %Y"),
+        date.today().strftime("%d %b %Y"),
         ctx["_nt"].sts[station]["archive_begin"],
-        datetime.date.today(),
+        date.today(),
         station,
         ctx["_nt"].sts[station]["name"],
     )
