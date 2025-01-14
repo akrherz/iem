@@ -68,10 +68,10 @@ Ext.onReady(() => {
                 checked: checked,
                 listeners: {
                     change: (cb, isChecked) => {
-                        var id = cb.getName();
+                        const id = cb.getName();
                         if (!imagestore.isLoaded) { return; }
 
-                        var rec = imagestore.getAt(imagestore.find("cid", id));
+                        let rec = imagestore.getAt(imagestore.find("cid", id));
                         rec.set('show', isChecked, { silent: true });
                         if (isChecked) {
                             rec = disableStore.getAt(disableStore.find('cid', id));
@@ -223,9 +223,9 @@ Ext.onReady(() => {
                 listeners: {
                     'select': function (sb) {
                         imagestore.isLoaded = false;
-                        var ts = Ext.Date.format(Ext.getCmp("datepicker").getValue(), 'm/d/Y')
+                        let ts = Ext.Date.format(Ext.getCmp("datepicker").getValue(), 'm/d/Y')
                             + " " + Ext.getCmp("timepicker").getRawValue();
-                        var dt = new Date(ts);
+                        const dt = new Date(ts);
                         if (Ext.getCmp("timemode").realtime) { ts = 0; }
                         else { ts = Ext.Date.format(dt.toUTC(), ISO8601); }
                         imagestore.reload({
@@ -246,7 +246,7 @@ Ext.onReady(() => {
                 id: 'timemode',
                 text: 'Real Time Mode',
                 realtime: true,
-                handler: function () {
+                handler: function () { // this
                     if (this.realtime) {
                         Ext.getCmp("datepicker").enable();
                         Ext.getCmp("timepicker").enable();
@@ -276,11 +276,11 @@ Ext.onReady(() => {
                 width: 100,
                 disabled: true,
                 listeners: {
-                    select: function (field, value) {
+                    select: () => {
                         imagestore.isLoaded = false;
-                        var ts = Ext.Date.format(Ext.getCmp("datepicker").getValue(), 'm/d/Y')
+                        const ts = Ext.Date.format(Ext.getCmp("datepicker").getValue(), 'm/d/Y')
                             + " " + Ext.getCmp("timepicker").getRawValue();
-                        var dt = new Date(ts);
+                        const dt = new Date(ts);
                         imagestore.reload({
                             add: false,
                             params: {
@@ -301,12 +301,12 @@ Ext.onReady(() => {
                 value: new Date(),
                 disabled: true,
                 listeners: {
-                    select: function (field, value) {
+                    select: () => {
                         imagestore.isLoaded = false;
-                        var ts = Ext.Date.format(Ext.getCmp("datepicker").getValue(),
+                        const ts = Ext.Date.format(Ext.getCmp("datepicker").getValue(),
                             'm/d/Y')
                             + " " + Ext.getCmp("timepicker").getRawValue();
-                        var dt = new Date(ts);
+                        const dt = new Date(ts);
                         imagestore.reload({
                             add: false,
                             params: {

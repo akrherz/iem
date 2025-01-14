@@ -53,7 +53,6 @@ const htmlInterface = ['<div class="panel panel-default">',
     '</div><!-- End of panel -->'];
 
 let map = null;
-let selectedFeature = null;
 let geojson = null;
 let geojsonSource = null;
 let network = null;

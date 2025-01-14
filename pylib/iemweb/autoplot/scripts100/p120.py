@@ -6,7 +6,7 @@ having the last spring temperature at or below a given threshold.
 autoplot and presents the fall season values.</p>
 """
 
-import datetime
+from datetime import date, timedelta
 
 import matplotlib.dates as mdates
 import pandas as pd
@@ -38,7 +38,7 @@ def get_description():
             name="eyear",
             min=1880,
             label="Potential (if data exists) exclusive maximum year",
-            default=datetime.date.today().year,
+            default=date.today().year,
         ),
     ]
     return desc
@@ -98,9 +98,9 @@ def plotter(ctx: dict):
 # threshold would be observed again that spring season)
  DOY Date    <%s  <%s  <%s  <%s
 """ % (
-        datetime.date.today().strftime("%d %b %Y"),
-        max([bs, datetime.date(ctx["syear"], 1, 1)]),
-        min([datetime.date.today(), datetime.date(ctx["eyear"] - 1, 12, 31)]),
+        date.today().strftime("%d %b %Y"),
+        max([bs, date(ctx["syear"], 1, 1)]),
+        min([date.today(), date(ctx["eyear"] - 1, 12, 31)]),
         station,
         ctx["_nt"].sts[station]["name"],
         thresholds[0] + 1,
@@ -114,7 +114,7 @@ def plotter(ctx: dict):
         if doy % 2 != 0:
             continue
         if row[fcols[3]] < 100 and mindate is None:
-            mindate = row["dates"] - datetime.timedelta(days=5)
+            mindate = row["dates"] - timedelta(days=5)
         res += (" %3s %s  %3i  %3i  %3i  %3i\n") % (
             row["dates"].strftime("%-j"),
             row["dates"].strftime("%b %d"),
@@ -128,8 +128,8 @@ def plotter(ctx: dict):
     subtitle = "%s %s (%s-%s)" % (
         station,
         ctx["_nt"].sts[station]["name"],
-        max([bs, datetime.date(ctx["syear"], 1, 1)]),
-        min([datetime.date.today(), datetime.date(ctx["eyear"] - 1, 12, 31)]),
+        max([bs, date(ctx["syear"], 1, 1)]),
+        min([date.today(), date(ctx["eyear"] - 1, 12, 31)]),
     )
     (fig, ax) = figure_axes(title=title, subtitle=subtitle, apctx=ctx)
     for base in thresholds:

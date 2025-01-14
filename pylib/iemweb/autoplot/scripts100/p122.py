@@ -3,7 +3,7 @@ A simple accounting of the number of days with a low temperature below the
 given threshold or above the given threshold by year.
 """
 
-import datetime
+from datetime import date
 
 import pandas as pd
 from pyiem.database import get_sqlalchemy_conn
@@ -45,9 +45,9 @@ def plotter(ctx: dict):
         "# 50, 70, 80, 93, 100 are days with high temperature at or "
         "above value\n"
     ) % (
-        datetime.date.today().strftime("%d %b %Y"),
+        date.today().strftime("%d %b %Y"),
         bs,
-        datetime.date.today(),
+        date.today(),
         station,
         ctx["_nt"].sts[station]["name"],
     )
