@@ -41,7 +41,8 @@ def run(tmpdir, valid, routes):
         if fn is None:
             LOG.warning("missing %s, aborting GIF generation", fn)
             return
-        ds = xr.open_dataset(fn)
+        # prevent idx file creation
+        ds = xr.open_dataset(fn, backend_kwargs={"indexpath": ""})
 
         for step, toffset in enumerate(ds.step.values):
             now = (

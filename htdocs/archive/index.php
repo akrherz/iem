@@ -5,6 +5,7 @@ require_once "../../include/generators.php";
 
 define("IEM_APPID", 19);
 $t = new MyView();
+$t->iem_resource = "ARCHIVE";
 $t->title = "Archived Data Resources";
 
 $dllist = get_iemapps_tags("download");
@@ -89,20 +90,9 @@ then, only base reflectivity was saved.</li>
 </ul>
 
 <h3>NWS Text Products</h3>
-<p>See this <a href="/onsite/news.phtml?id=1408">news item</a> for more details
-on this archive and how it is made available.</p>
-<ul>
- <li><a href="/wx/afos/">AFOS Product Finder</a>
-  <br />If you know what you are looking for, this app works great!</li>
- <li><a href="/archive/data/{$d}/text/noaaport/">Simple directory listing</a>
-  <br />Certain warning type products can be found in the main IEM data archive
-  directory structure.</li>
- <li><a href="/wx/afos/list.phtml">List Products by WFO by Date</a>
-  <br />View quick listings of issued products by forecast office and by date.</li>
-  <li><a href="/archive/rer/">NWS Record Event Reports</a>
-  <br />Daily reports of record temperatures and precipitation for
-   Iowa since November 2001</li>
-</ul>
+
+<p>Please visit this <a href="/nws/text.php">dedicated page</a> for information
+about the IEM's text product archives.</p>
 
 </div><div class="col-md-6 col-sm-6">
 
