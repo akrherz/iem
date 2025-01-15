@@ -90,6 +90,7 @@ if (isset($_GET["xlsx"])) {
 
 $coop_archive_end = strtotime(get_iemprop("iaclimate.end"));
 $t = new MyView();
+$t->iem_resource = "CLIMODAT";
 $t->title = "Climodat Reports";
 
 if ($station == "" || !is_file("/mesonet/share/climodat/reports/{$station}_$report.txt")) {

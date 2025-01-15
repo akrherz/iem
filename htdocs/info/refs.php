@@ -20,8 +20,9 @@ $XREF = Array(
     "HADS" => "/request/dcp/fe.phtml",
     "IEMRE" => "/iemre",
     "ISUSM" => "/agclimate/",
+    "LSR" => "/request/gis/lsrs.phtml",
     "MOSAIC" => "/docs/nexrad_mosaic",
-    "NWSTEXT" => "/nws/",
+    "NWSTEXT" => "/nws/text.php",
     "VTEC" => "/request/gis/watchwarn.phtml",
     "WINDROSE" => "/archive/",
 );
