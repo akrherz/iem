@@ -182,7 +182,8 @@ def workflow(valid: datetime, routes: str):
         if fn is None:
             LOG.warning("missing %s", ppath)
             return
-        ds = xr.open_dataset(fn)
+        # prevent idx file creation
+        ds = xr.open_dataset(fn, backend_kwargs={"indexpath": ""})
         for step, toffset in enumerate(ds.step.values):
             do_step(ds, step, toffset, routes, False)
             do_step(ds, step, toffset, routes, True)
