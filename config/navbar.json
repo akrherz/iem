@@ -269,6 +269,10 @@
                     "url": "/GIS/apps/rview/watch.phtml"
                 },
                 {
+                    "title": "Text Archives Mainpage",
+                    "url": "/nws/text.php"
+                },
+                {
                     "title": "Text Listing by WFO/Center/Product",
                     "url": "/wx/afos/list.phtml"
                 },
