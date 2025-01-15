@@ -4,7 +4,7 @@ conditions reported by the automated sensor.  Please note that the yaxis
 uses an irregular spacing.
 """
 
-import datetime
+from datetime import date
 
 import matplotlib.colors as mpcolors
 import numpy as np
@@ -60,7 +60,7 @@ def plotter(ctx: dict):
     )
 
     H, xedges, yedges = np.histogram2d(
-        df["sky"].values, df["doy"].values, bins=(z, w)
+        df["sky"].to_numpy(), df["doy"].to_numpy(), bins=(z, w)
     )
     rows = []
     for i, x in enumerate(xedges[:-1]):
@@ -77,7 +77,7 @@ def plotter(ctx: dict):
     syear = max([1973, ab.year])
 
     title = (
-        f"({syear}-{datetime.date.today().year}) {ctx['_sname']}:: "
+        f"({syear}-{date.today().year}) {ctx['_sname']}:: "
         "Ceilings Frequency\n"
         "Level at which Overcast Conditions Reported"
     )
@@ -93,7 +93,7 @@ def plotter(ctx: dict):
         bounds = np.linspace(0, 2, cmap.N)
     norm = mpcolors.BoundaryNorm(bounds, cmap.N)
 
-    years = (datetime.date.today().year - syear) + 1.0
+    years = date.today().year - syear + 1.0
     c = ax.imshow(
         H / years, aspect="auto", interpolation="nearest", norm=norm, cmap=cmap
     )

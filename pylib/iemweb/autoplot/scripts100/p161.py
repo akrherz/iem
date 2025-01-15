@@ -4,7 +4,7 @@ given month or period of months that a given variable was above or below
 some threshold.
 """
 
-import datetime
+from datetime import date
 
 import pandas as pd
 from pyiem.database import get_sqlalchemy_conn
@@ -90,7 +90,7 @@ def get_description():
         dict(
             type="year",
             min=1928,
-            default=datetime.date.today().year,
+            default=date.today().year,
             label="Year to Highlight",
             name="year",
         ),

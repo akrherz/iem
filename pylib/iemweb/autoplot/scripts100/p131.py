@@ -5,7 +5,7 @@ looks for the report of 'OVC' within the METAR sky conditions.  Many
 caveats apply with the reporting changes of this over the years.
 """
 
-import datetime
+from datetime import datetime
 
 import pandas as pd
 from pyiem.database import get_sqlalchemy_conn
@@ -143,13 +143,13 @@ def plotter(ctx: dict):
         raise NoDataFound("Unknown station metadata.")
     hrlabel = "ALL"
     if hour is not None:
-        ts = datetime.datetime(2000, 1, 1, hour)
+        ts = datetime(2000, 1, 1, hour)
         hrlabel = ts.strftime("%-I %p")
     tt = "Overcast Clouds" if varname == "OVC" else "Clear Skies"
     title = (
         f"{ctx['_sname']}\n"
         f"Frequency of {tt} by Air Temp (month={month.upper()},hour={hrlabel})"
-        f" ({ab.year}-{datetime.datetime.now().year})\n"
+        f" ({ab.year}-{datetime.now().year})\n"
         "(must have 3+ hourly observations at the given temperature)"
     )
     (fig, ax) = figure_axes(title=title, apctx=ctx)

@@ -17,7 +17,7 @@ extremes for that date.</p>
 unfiltered events for further usage as you see fit.</p>
 """
 
-import datetime
+from datetime import datetime
 
 import pandas as pd
 from pyiem.database import get_sqlalchemy_conn
@@ -191,7 +191,7 @@ def plotter(ctx: dict):
             "+ '10 minutes'::interval) = :hour "
         )
         params["hour"] = ctx["hour"]
-        dt = datetime.datetime(2000, 1, 1, ctx["hour"])
+        dt = datetime(2000, 1, 1, ctx["hour"])
         title2 += f" @{dt:%-I %p}"
     (agg, dbvar) = varname.split("_")
     # Special accounting for the peak_wind_gust column
@@ -294,8 +294,7 @@ def plotter(ctx: dict):
         title += " (Only 1 Ob per Day Shown)"
     st = ctx.get("threshold") if agg in ["above", "below"] else ""
     subtitle = (
-        f"{METRICS[varname]} {st} ({title2}) "
-        f"({ab.year}-{datetime.datetime.now().year})"
+        f"{METRICS[varname]} {st} ({title2}) ({ab.year}-{datetime.now().year})"
     )
     fig = figure(title=title, subtitle=subtitle, apctx=ctx)
     ax = fig.add_axes((0.1, 0.1, 0.65, 0.8))

@@ -1,7 +1,7 @@
 """This chart presents crop condition reports from USDA/NASS."""
 
 import calendar
-import datetime
+from datetime import date
 
 import pandas as pd
 from matplotlib.font_manager import FontProperties
@@ -89,7 +89,7 @@ def get_description():
             type="year",
             min=1981,
             name="y1",
-            default=datetime.date.today().year,
+            default=date.today().year,
             label="Select Year #1",
         ),
         dict(
@@ -187,20 +187,20 @@ def plotter(ctx: dict):
     y1 = 0.51
     if ctx["w"] == "one":
         axes = [
-            [fig.add_axes([x0, 0.12, 0.9, 0.75]), None, None],
+            [fig.add_axes((x0, 0.12, 0.9, 0.75)), None, None],
             [None, None, None],
         ]
     else:
         axes = [
             [
-                fig.add_axes([x0, y1, width, height]),
-                fig.add_axes([x0 + width + xpad, y1, width, height]),
-                fig.add_axes([x0 + 2 * width + 2 * xpad, y1, width, height]),
+                fig.add_axes((x0, y1, width, height)),
+                fig.add_axes((x0 + width + xpad, y1, width, height)),
+                fig.add_axes((x0 + 2 * width + 2 * xpad, y1, width, height)),
             ],
             [
-                fig.add_axes([x0, y0, width, height]),
-                fig.add_axes([x0 + width + xpad, y0, width, height]),
-                fig.add_axes([x0 + 2 * width + 2 * xpad, y0, width, height]),
+                fig.add_axes((x0, y0, width, height)),
+                fig.add_axes((x0 + width + xpad, y0, width, height)),
+                fig.add_axes((x0 + 2 * width + 2 * xpad, y0, width, height)),
             ],
         ]
 

@@ -1,6 +1,6 @@
 """text report of number of days with precip above threshold"""
 
-import datetime
+from datetime import date
 
 import numpy as np
 import pandas as pd
@@ -63,8 +63,8 @@ def plotter(ctx: dict):
 
     res = (
         "# IEM Climodat https://mesonet.agron.iastate.edu/climodat/\n"
-        f"# Report Generated: {datetime.date.today():%d %b %Y}\n"
-        f"# Climate Record: {bs} -> {datetime.date.today()}\n"
+        f"# Report Generated: {date.today():%d %b %Y}\n"
+        f"# Climate Record: {bs} -> {date.today()}\n"
         f"# Site Information: {ctx['_sname']}\n"
         "# Contact Information: Daryl Herzmann akrherz@iastate.edu "
         "515.294.5978\n"
@@ -79,7 +79,7 @@ def plotter(ctx: dict):
         res += (
             "YEAR %4.2f JAN FEB MAR APR MAY JUN JUL AUG SEP OCT NOV DEC ANN\n"
         ) % (cat,)
-        for yr in range(startyear, datetime.date.today().year + 1):
+        for yr in range(startyear, date.today().year + 1):
             res += "%s %4.2f " % (yr, cat)
             for mo in range(1, 13):
                 if (yr, mo) in df.index:

@@ -11,7 +11,7 @@ observations.
 """
 
 import calendar
-import datetime
+from datetime import datetime, timedelta
 
 import pandas as pd
 from pyiem.database import get_sqlalchemy_conn
@@ -35,7 +35,7 @@ PDICT2 = {
 def get_description():
     """Return a dict describing how to call this plotter"""
     desc = {"description": __doc__, "data": True}
-    today = datetime.datetime.today() - datetime.timedelta(days=1)
+    today = datetime.today() - timedelta(days=1)
     desc["arguments"] = [
         dict(
             type="zstation",
@@ -129,7 +129,7 @@ def plotter(ctx: dict):
         f"{PDICT2[varname]} Climatology {ttitle}"
     )
     fig = figure(apctx=ctx, title=title)
-    ax = fig.add_axes([0.1, 0.55, 0.8, 0.35])
+    ax = fig.add_axes((0.1, 0.55, 0.8, 0.35))
     ax.fill_between(
         bydoy.index.values,
         bydoy["min"],
@@ -161,7 +161,7 @@ def plotter(ctx: dict):
     ax.set_ylabel(f"{PDICT2[varname]} [{units}]")
 
     # Frequency
-    ax2 = fig.add_axes([0.1, 0.1, 0.8, 0.35])
+    ax2 = fig.add_axes((0.1, 0.1, 0.8, 0.35))
     probs = (
         obsdf[["doy", "threshold_exceed"]]
         .groupby("doy")
