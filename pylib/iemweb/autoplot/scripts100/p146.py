@@ -7,7 +7,7 @@ have been.
 """
 
 import calendar
-import datetime
+from datetime import date, datetime
 
 import numpy as np
 import pandas as pd
@@ -49,7 +49,7 @@ def plotter(ctx: dict):
     if df.empty:
         raise NoDataFound("No data found.")
 
-    sts = datetime.datetime(2012, 1, 1)
+    sts = datetime(2012, 1, 1)
     xticks = []
     for i in range(1, 13):
         ts = sts.replace(month=i)
@@ -60,14 +60,14 @@ def plotter(ctx: dict):
         raise NoDataFound("Unknown station metadata.")
     title = (
         f"{ctx['_sname']} "
-        f"({ab.year}-{datetime.date.today().year})\n"
+        f"({ab.year}-{date.today().year})\n"
         "Temperature Frequency During Precipitation by Week"
     )
     (fig, ax) = figure_axes(title=title, apctx=ctx)
 
     bins = np.arange(df["tmpf"].min() - 5, df["tmpf"].max() + 5, 2)
     H, xedges, yedges = np.histogram2d(
-        df["week"].values, df["tmpf"].values, [range(54), bins]
+        df["week"].to_numpy(), df["tmpf"].to_numpy(), [range(54), bins]
     )
     rows = []
     for i, x in enumerate(xedges[:-1]):
@@ -75,7 +75,7 @@ def plotter(ctx: dict):
             rows.append(dict(tmpf=y, week=x, count=H[i, j]))
     resdf = pd.DataFrame(rows)
 
-    years = datetime.date.today().year - ab.year
+    years = date.today().year - ab.year
     H = np.ma.array(H) / float(years)
     H.mask = np.ma.where(H < 0.1, True, False)
     res = ax.pcolormesh(

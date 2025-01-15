@@ -7,7 +7,7 @@ somewhat sloppy day-of-year logic that does not necessarily align leap years.
 year. ie 1 July 2023 - 30 Jun 2024 plots as 2023.</p>
 """
 
-import datetime
+from datetime import date, timedelta
 
 import pandas as pd
 from pyiem.database import get_sqlalchemy_conn
@@ -49,7 +49,7 @@ def get_description():
         dict(
             type="year",
             name="year",
-            default=datetime.date.today().year,
+            default=date.today().year,
             label="Year to Highlight in Chart",
         ),
     ]
@@ -93,8 +93,8 @@ def get_highcharts(ctx: dict) -> dict:
     ranges = []
     thisyear = []
     for doy, row in df.iterrows():
-        ts = datetime.date(2000, 1, 1) + datetime.timedelta(days=doy - 1)
-        ticks = (ts - datetime.date(1970, 1, 1)).total_seconds() * 1000.0
+        ts = date(2000, 1, 1) + timedelta(days=doy - 1)
+        ticks = (ts - date(1970, 1, 1)).total_seconds() * 1000.0
         avgs.append([ticks, row["avg"]])
         ranges.append([ticks, row["min"], row["max"]])
         if row["thisyear"] is not None:
@@ -156,7 +156,7 @@ def get_data(ctx):
     if sts is None:
         raise NoDataFound("Unknown station metadata.")
     if sts.month > 1:
-        sts = sts + datetime.timedelta(days=365)
+        sts = sts + timedelta(days=365)
         sts = sts.replace(month=1, day=1)
     doylogic = "extract(doy from day)"
     seasonlogic = "extract(year from day)"
@@ -201,9 +201,7 @@ def get_data(ctx):
     df = obs[["doy", "hits"]].groupby("doy").agg(["mean", "max", "min"]).copy()
     df.columns = ["avg", "max", "min"]
     df["datestr"] = df.index.map(
-        lambda x: (
-            datetime.date(2001, 1, 1) + datetime.timedelta(days=x)
-        ).strftime("%-d %b")
+        lambda x: (date(2001, 1, 1) + timedelta(days=x)).strftime("%-d %b")
     )
     df["thisyear"] = obs[obs["season"] == year].set_index("doy")["hits"]
     ctx["df"] = df
@@ -282,9 +280,9 @@ def plotter(ctx: dict):
     xticks = []
     xticklabels = []
     for x in range(int(df.index.min()) - 1, int(df.index.max())):
-        ts = datetime.date(
-            2000, 7 if ctx["split"] == "jul1" else 1, 1
-        ) + datetime.timedelta(days=x)
+        ts = date(2000, 7 if ctx["split"] == "jul1" else 1, 1) + timedelta(
+            days=x
+        )
         if ts.day == 1:
             xticks.append(x)
             xticklabels.append(ts.strftime("%b"))

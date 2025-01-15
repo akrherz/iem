@@ -5,7 +5,7 @@ for the site.  For the year to plot, at least 80% data availability needs
 to be obtained.
 """
 
-import datetime
+from datetime import datetime
 
 import pandas as pd
 from matplotlib.font_manager import FontProperties
@@ -121,7 +121,7 @@ def plotter(ctx: dict):
         raise NoDataFound("No data was found.")
     minfreq = len(months) * 30 * 0.8
     df2 = df[df["cnt"] > minfreq]
-    lts = datetime.datetime(2000, 1, 1, int(hour), 0)
+    lts = datetime(2000, 1, 1, int(hour), 0)
     title = (
         f"{ctx['_sname']}:: {lts:%-I %p} Local "
         f"({df2.index.min()}-{df2.index.max()})"

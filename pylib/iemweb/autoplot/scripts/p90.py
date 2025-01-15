@@ -918,6 +918,8 @@ def plotter(ctx: dict):
             f"Plotted for {ctx['_nt'].sts[station]['name']} ({station}), "
             f"{subtitle}"
         )
+    elif t == "fema":
+        subtitle = f"Plotted for FEMA Region {ctx['fema']}, {subtitle}"
     else:
         subtitle = f"Plotted for {state_names[state]}, {subtitle}"
     title = (
@@ -929,7 +931,7 @@ def plotter(ctx: dict):
         sector=ctx["t"] if ctx["t"] != "fema" else "fema_region",
         state=state,
         fema_region=int(ctx["fema"]),
-        cwa=(station if len(station) == 3 else station[1:]),
+        cwa=station if len(station) == 3 else station[1:],
         axisbg="white",
         title=title,
         subtitle=subtitle,
