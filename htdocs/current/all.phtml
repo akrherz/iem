@@ -8,7 +8,7 @@ $t = new MyView();
 $sortcol = isset($_GET["sortcol"]) ? xssafe($_GET["sortcol"]) : "peak";
 $metar = isset($_GET["metar"]) ? xssafe($_GET['metar']) : "no";
 $sorder = isset($_GET["sorder"]) ? xssafe($_GET["sorder"]) : "desc";
-$state = isset($_REQUEST["state"]) ? xssafe($_REQUEST["state"]) : "IA";
+$state = get_str404("state", "IA", 2);
 
 $t->refresh = 60;
 $t->title = "$state Current Conditions";
@@ -27,6 +27,9 @@ $vals = array(
     "max_tmpf" => "Today's High Temperature",
     "pday" => "Today Rainfall [inch]"
 );
+if (! array_key_exists($sortcol, $vals)) {
+    xssafe("<script>");
+}
 
 $t->current_network = 'By State';
 

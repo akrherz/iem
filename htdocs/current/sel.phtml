@@ -11,25 +11,25 @@ $sel = get_int404("sel", -1);
 $t->refresh = 300;
 $t->title = "SPC Watches Overview";
 
-$metdata = array();
+$metadata = array();
 $rs = pg_query(
     $conn,
     <<<EOM
 with data as (
     select sel, rank() OVER (PARTITION by sel ORDER by issued DESC),
-    issued, expired
+    issued, expired, num
     from watches where issued > now() - '120 days'::interval)
 select * from data where rank = 1
 EOM
     );
-for ($i = 0; $row = pg_fetch_assoc($rs); $i++) {
+for ($i = 0; $row = pg_fetch_array($rs); $i++) {
     $metadata[$row["sel"]] = $row;
     $metadata[$row["sel"]]["sts"] = strtotime(substr($row["issued"], 0, 16));
     $metadata[$row["sel"]]["ets"] = strtotime(substr($row["expired"], 0, 16));
 }
 
 if ($sel > -1) {
-    $row = $metadata["SEL" . $sel];
+    $row = $metadata["SEL{$sel}"];
 
     $t->content = <<<EOF
 <a href="sel.phtml">View All Watches</a>
@@ -41,7 +41,7 @@ EOF;
 } else {
     $content = "";
     for ($i = 0; $i < 10; $i++) {
-        $row = $metadata["SEL" . $i];
+        $row = $metadata["SEL{$i}"];
         $content .= "<div class=\"col-md-4 well\">
         <strong>SEL{$i}:</strong> Issued: " . date("j M Y g:i A", $row["sts"])
             . "<br />Expired: " . date("j M Y g:i A", $row["ets"]) . ",

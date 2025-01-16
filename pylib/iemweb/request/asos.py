@@ -286,6 +286,12 @@ class MyModel(CGIModel):
                 raise ValueError(f"Invalid station identifier: {station}")
         return value
 
+    @field_validator("report_type", mode="after")
+    def ensure_ints(cls, value: list):
+        """Ensure that each value is a valid integer."""
+        [int(v) for v in value]
+        return value
+
 
 def fmt_time(val, missing, _trace, tzinfo):
     """Format timestamp."""

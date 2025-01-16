@@ -25,7 +25,7 @@ $old2new = array(
 );
 
 // Legacy
-if (isset($_GET["src"])) {
+if (isset($_GET["src"]) && array_key_exists(xssafe($_GET["src"]), $old2new)) {
     $prod = $old2new[$_GET["src"]];
 }
 
