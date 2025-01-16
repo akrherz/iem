@@ -45,27 +45,20 @@ $h2 = hourSelect($hour2, "hour2");
 // Retreive the autoplot description JSON
 $content = file_get_contents("http://iem.local/plotting/auto/meta/177.json");
 $meta = json_decode($content, $assoc=TRUE);
-
+$dd = "This plot is a time series graph of
+observations from a time period and ISU Soil Moisture station of your choice.";
+$desc = array();
 foreach ($meta["arguments"] as $arg) {
     if ($arg["name"] == "opt") {
         $ar = $arg["options"];
+        $keys = array_keys($ar);
+        foreach ($keys as $key) {
+            $desc[$key] = $dd;
+        }
         break;
     }
 }
 
-$dd = "This plot is a time series graph of
-observations from a time period and ISU Soil Moisture station of your choice.";
-$desc = array(
-    "1" => $dd,
-    "2" => $dd,
-    "sm" => $dd,
-    "3" => $dd,
-    "4" => $dd,
-    "5" => $dd,
-    "6" => $dd,
-    "7" => $dd,
-    "8" => $dd
-);
 $desc["m"] = <<<EOM
 This plot presents a Meteogram, which is just a time series of common weather
 variables including temperature, dew point, wind speed, and wind direction. If

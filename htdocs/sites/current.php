@@ -80,7 +80,7 @@ function make_shef_table($data, $iscurrent){
             $row["type"],
             $row["source"],
             $row["extremum"] == 'Z' ? '-' : $row['extremum'],
-            $extremumcodes[$row["extremum"]],
+            array_key_exists($row["extremum"], $extremumcodes) ? $extremumcodes[$row["extremum"]] : "Invalid",
             $valid->format("M j, Y h:i A"),
             $row["value"],
             $plink

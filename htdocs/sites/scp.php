@@ -107,10 +107,14 @@ foreach ($data as $key => $row) {
     if (!array_key_exists("utc_scp_valid", $row)) {
         continue;
     }
+    $lvalid = "No Ob";
+    if (array_key_exists("local_valid", $row)) {
+        $lvalid = date("g:i A", strtotime($row["local_valid"]));
+    }
     $table .= sprintf(
         "<tr><td class=\"rl\">%sZ</td><td class=\"rl\">%s</td>",
-        gmdate("Hi", strtotime($row["utc_scp_valid"])),
-        date("g:i A", strtotime($row["local_valid"]))
+        date("Hi", strtotime($row["utc_scp_valid"])),
+        $lvalid,
     );
     foreach ($birds as $b) {
         $table .= sprintf(
