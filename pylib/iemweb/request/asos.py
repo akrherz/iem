@@ -289,7 +289,7 @@ class MyModel(CGIModel):
     @field_validator("report_type", mode="after")
     def ensure_ints(cls, value: list):
         """Ensure that each value is a valid integer."""
-        [int(v) for v in value]
+        _ = [int(v) for v in value]  # skipcq
         return value
 
 
@@ -465,7 +465,7 @@ def application(environ, start_response):
     acursor = pgconn.cursor(cursor_name, scrollable=False)
     acursor.itersize = 2000
 
-    report_types = [int(i) for i in environ["report_type"]]
+    report_types = [int(x) for x in environ["report_type"]]
     sts, ets = get_time_bounds(environ, tzinfo)
     if sts is None:
         pgconn.close()
