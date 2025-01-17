@@ -98,6 +98,7 @@ PDICT3 = {
 }
 PDICT5 = {"yes": "Label Station Values", "no": "Do Not Label Station Values"}
 PDICT6 = {
+    "climate": "IEM Climatology 1893-present",
     "climate51": "IEM Climatology 1951-present",
     "climate71": "IEM Climatology 1971-present",
     "climate81": "IEM Climatology 1981-present",
@@ -492,9 +493,8 @@ def plotter(ctx: dict):
         subtitle = "Period of Record Climatology is used for custom GDD"
     elif varname.find("depart") > -1:
         subtitle = (
-            f"{date1.year} is compared with 19{ctx['ct'][-2:]}-"
-            f"{date.today().year - 1} Climatology to "
-            "compute departures"
+            f"{date1.year} is compared with {PDICT6[ctx['ct']]}"
+            " to compute departures"
         )
         if ctx["ct"] == "ncei_climate91":
             subtitle = (
