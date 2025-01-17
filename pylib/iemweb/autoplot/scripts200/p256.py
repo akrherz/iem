@@ -35,6 +35,10 @@ $ cat RTPBOU.txt | dcshef
 <p><strong>Implementation Notes:</strong>
 <ol>
     <li>The choice of a WFO governs the timezone used for the report.</li>
+    <li>The IEM has made a likely futile attempt to delineate ASOS from AWOS
+    stations. The two are separated in the report as the AWOS data quality,
+    particularly for precipitation is often suspect.  Also, the terms
+    ASOS and AWOS are vague, so alas.</li>
 </ol>
 </p>
 
@@ -137,11 +141,21 @@ def get_asos(ctx: dict) -> pd.DataFrame:
         # Figure out which stations we care about
         stations = pd.read_sql(
             text(f"""
+            with pop as (
                 select id, name, value as snow_src, null as snow,
                 null as snowd, null as cnt_6hr from stations s LEFT
                 JOIN station_attributes a on (s.iemid = a.iemid and
                 a.attr = :attr)
                 where network ~* 'ASOS' and {limiter} ORDER by id ASC
+            ), is_awos as (
+                select id, value::bool
+                from stations s JOIN station_attributes a on
+                (s.iemid = a.iemid) where network ~* 'ASOS' and {limiter}
+                and a.attr = 'IS_AWOS' and a.value = '1' ORDER by id ASC
+            )
+            select p.*, coalesce(i.value, false) as is_awos
+            from pop p LEFT JOIN
+            is_awos i on (p.id = i.id) ORDER by p.id ASC
             """),
             conn,
             index_col="id",
@@ -160,6 +174,8 @@ def get_asos(ctx: dict) -> pd.DataFrame:
                 station = ANY(:stations) and
                 substr(key, 1, 3) in ('SFQ', 'SDI') and
                 valid > :sts and valid <= :ets and value is not null
+                and extract(hour from valid at time zone 'UTC')
+                in (0, 6, 12, 18)
                 ORDER by station asc, valid asc
                 """),
                 conn,
@@ -347,19 +363,21 @@ def plotter(ctx: dict):
             )
         report += ".END\n\n"
 
-    report += (
-        "ASOS Reports\n\n"
-        f".BR {wfo} {dt:%Y%m%d} Z DH06/TAIRVX/DH12/TAIRVP/PPDRVZ\n"
-        ": 06Z (yesterday) to 06Z HIGH TEMPERATURE\n"
-        ": 00Z TO 12Z TODAY LOW TEMPERATURE\n"
-        ": 12Z YESTERDAY TO 12Z TODAY RAINFALL\n"
-    )
-    for sid, row in asosdf[asosdf["cnt_6hr"].isna()].iterrows():
+    for is_awos in [False, True]:
         report += (
-            f"{sid:6s}:{row['name']:25.25s}: "
-            f"{pp(row['high'], 4, 0)} /{pp(row['low'], 4, 0)} /"
-            f"{pp(row['precip'], 5, 2)}\n"
+            f"{'AWOS' if is_awos else 'ASOS'} Reports\n\n"
+            f".BR {wfo} {dt:%Y%m%d} Z DH06/TAIRVX/DH12/TAIRVP/PPDRVZ\n"
+            ": 06Z (yesterday) to 06Z HIGH TEMPERATURE\n"
+            ": 00Z TO 12Z TODAY LOW TEMPERATURE\n"
+            ": 12Z YESTERDAY TO 12Z TODAY RAINFALL\n"
         )
-    report += ".END\n\n"
+        filtered = asosdf[asosdf["is_awos"] == is_awos]
+        for sid, row in filtered[filtered["cnt_6hr"].isna()].iterrows():
+            report += (
+                f"{sid:6s}:{row['name']:25.25s}: "
+                f"{pp(row['high'], 4, 0)} /{pp(row['low'], 4, 0)} /"
+                f"{pp(row['precip'], 5, 2)}\n"
+            )
+        report += ".END\n\n"
 
     return None, obsdf, report + "$$\n"
