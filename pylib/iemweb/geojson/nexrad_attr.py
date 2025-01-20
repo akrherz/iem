@@ -1,6 +1,6 @@
 """.. title:: Service for NEXRAD Attributes GeoJSON
 
-Return to `API Services </json/#json>`_.
+Return to `API Services </api/#json>`_.
 
 Documentation for /geojson/nexrad_attr.py
 -----------------------------------------
@@ -35,8 +35,8 @@ valid=2024-08-10T05:10:00Z&fmt=csv
 
 """
 
-import datetime
 import json
+from datetime import datetime, timedelta
 from zoneinfo import ZoneInfo
 
 from pydantic import Field
@@ -58,7 +58,7 @@ class Schema(CGIModel):
         description="The format of the output, geojson or csv",
         pattern="^(geojson|csv)$",
     )
-    valid: datetime.datetime = Field(
+    valid: datetime = Field(
         default=None, description="The timestamp to request data for, in UTC."
     )
 
@@ -94,8 +94,8 @@ def run(conn: Connection, valid, fmt):
     ORDER by n.nexrad ASC
     """),
             {
-                "sts": valid - datetime.timedelta(minutes=10),
-                "ets": valid + datetime.timedelta(minutes=10),
+                "sts": valid - timedelta(minutes=10),
+                "ets": valid + timedelta(minutes=10),
                 "valid": valid,
             },
         )

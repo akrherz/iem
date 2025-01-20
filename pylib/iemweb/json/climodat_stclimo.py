@@ -1,6 +1,6 @@
 """.. title:: Climodat Station Climatology
 
-Return to `JSON Services </json/>`_
+Return to `API Services </api/#json>`_
 
 Documentation for /json/climodat_stclimo.py
 -------------------------------------------
@@ -21,8 +21,8 @@ https://mesonet.agron.iastate.edu/json/climodat_stclimo.py?station=IATAME
 
 """
 
-import datetime
 import json
+from datetime import datetime
 
 from pydantic import Field
 from pyiem.webutil import CGIModel, iemapp
@@ -32,9 +32,7 @@ class Schema(CGIModel):
     """See how we are called."""
 
     callback: str = Field(None, description="JSONP Callback")
-    eyear: int = Field(
-        datetime.datetime.now().year + 1, description="End Year"
-    )
+    eyear: int = Field(datetime.now().year + 1, description="End Year")
     station: str = Field(
         "IA0200", description="Station Identifier", max_length=6
     )

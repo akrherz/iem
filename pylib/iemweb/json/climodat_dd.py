@@ -25,9 +25,9 @@ https://mesonet.agron.iastate.edu/json/climodat_dd.py\
 
 """
 
-import datetime
 import json
 import os
+from datetime import date, datetime, timedelta
 
 import numpy as np
 from metpy.units import units
@@ -48,7 +48,7 @@ class Schema(CGIModel):
         default=None,
         description="Optional JSONP callback function name.",
     )
-    edate: datetime.date = Field(
+    edate: date = Field(
         ...,
         description="The end date for the period of interest.",
     )
@@ -60,7 +60,7 @@ class Schema(CGIModel):
         86,
         description="The ceiling temperature for GDD computation.",
     )
-    sdate: datetime.date = Field(
+    sdate: date = Field(
         ...,
         description="The start date for the period of interest.",
     )
@@ -74,10 +74,8 @@ class Schema(CGIModel):
 
 def compute_taxis(ncvar):
     """Figure out our dates."""
-    basets = datetime.datetime.strptime(
-        ncvar.units[:21], "Days since %Y-%m-%d"
-    ).date()
-    return [basets + datetime.timedelta(days=val) for val in ncvar[:]]
+    basets = datetime.strptime(ncvar.units[:21], "Days since %Y-%m-%d").date()
+    return [basets + timedelta(days=val) for val in ncvar[:]]
 
 
 def compute(taxis, highs, lows, gddbase, gddceil):
@@ -127,7 +125,7 @@ def run(station, sdate, edate, gddbase, gddceil):
         "gddceil": gddceil,
         "accum": accum,
     }
-    idx, jdx = IEMRE.find_ij(lon, lat)
+    idx, jdx = IEMRE.find_ij(lon, lat)  # type: ignore
     if idx is not None:
         for model in ["gfs", "ndfd"]:
             ncfn = f"/mesonet/data/iemre/{model}_current.nc"

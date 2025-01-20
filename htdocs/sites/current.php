@@ -76,7 +76,7 @@ function make_shef_table($data, $iscurrent){
             array_key_exists($row["physical_code"], $shefcodes) ? $shefcodes[$row["physical_code"]] : "((unknown code))",
             $depth,
             $row["duration"],
-            $durationcodes[$row["duration"]],
+            array_key_exists($row["duration"], $durationcodes) ? $durationcodes[$row["duration"]] : "Invalid",
             $row["type"],
             $row["source"],
             $row["extremum"] == 'Z' ? '-' : $row['extremum'],

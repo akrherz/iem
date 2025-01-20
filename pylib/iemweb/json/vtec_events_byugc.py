@@ -10,10 +10,17 @@ This metadata service returns VTEC events for the given UGC.
 Changelog
 ---------
 
+- 2025-01-20: Added explicit `sts` and `ets` parameters for a more explicit
+    datetime range.
 - 2024-07-18: Initial documentation release and migration to pydantic.
 
 Example Requests
 ----------------
+
+Get all events for IAC169 during May 2024 UTC
+
+https://mesonet.agron.iastate.edu/json/vtec_events_byugc.py\
+?ugc=IAC169&sts=2024-05-01T00:00:00Z&ets=2024-06-01T00:00:00Z
 
 Get all events during 2024 for Story County, Iowa IAC169
 
@@ -32,12 +39,12 @@ https://mesonet.agron.iastate.edu/json/vtec_events_byugc.py\
 
 """
 
-import datetime
 import json
+from datetime import datetime
 from io import BytesIO, StringIO
 
 import pandas as pd
-from pydantic import Field
+from pydantic import AwareDatetime, Field
 from pyiem.exceptions import IncompleteWebRequest
 from pyiem.nws.vtec import VTEC_PHENOMENA, VTEC_SIGNIFICANCE, get_ps_string
 from pyiem.util import get_sqlalchemy_conn, utc
@@ -59,11 +66,21 @@ class Schema(CGIModel):
     )
     edate: str = Field(
         default=f"{utc().year}-12-31",
-        description="End Date (@00Z) to end query for issuance",
+        description="End Date (midnight US Central) to end query for issuance",
     )
     sdate: str = Field(
         default="1986-01-01",
-        description="Start Date (@00Z) to start query for issuance",
+        description=(
+            "Start Date (midnight US Central) to start query for issuance"
+        ),
+    )
+    sts: AwareDatetime = Field(
+        default=None,
+        description="Start timestamp (overrides sdate) for event issuance",
+    )
+    ets: AwareDatetime = Field(
+        default=None,
+        description="End timestamp (overrides edate) for event issuance",
     )
     ugc: str = Field(
         default="IAC001",
@@ -82,7 +99,7 @@ def make_url(row):
     )
 
 
-def get_df(ugc, sdate, edate):
+def get_df(ugc, sts: datetime, ets: datetime):
     """Answer the request!"""
     with get_sqlalchemy_conn("postgis") as conn:
         df = pd.read_sql(
@@ -98,11 +115,11 @@ def get_df(ugc, sdate, edate):
                 'YYYY-MM-DD hh24:MI') as expired,
             eventid, phenomena, significance, hvtec_nwsli, wfo, ugc,
             product_ids[1] as product_id
-            from warnings WHERE ugc = %s and issue > %s
+            from warnings WHERE ugc = %s and issue >= %s
             and issue < %s ORDER by issue ASC
             """,
             conn,
-            params=(ugc, sdate, edate),
+            params=(ugc, sts, ets),
         )
     if df.empty:
         return df
@@ -148,7 +165,7 @@ def as_json(df):
 def parse_date(val):
     """convert string to date."""
     fmt = "%Y/%m/%d" if "/" in val else "%Y-%m-%d"
-    return datetime.datetime.strptime(val, fmt)
+    return datetime.strptime(val, fmt)
 
 
 def get_mckey(environ):
@@ -166,15 +183,19 @@ def application(environ, start_response):
     """Answer request."""
     ugc = environ["ugc"]
     try:
-        sdate = parse_date(environ["sdate"])
-        edate = parse_date(environ["edate"])
+        sts = parse_date(environ["sdate"])
+        ets = parse_date(environ["edate"])
     except Exception as exp:
         raise IncompleteWebRequest(str(exp)) from exp
+    if environ["sts"]:
+        sts = environ["sts"]
+    if environ["ets"]:
+        ets = environ["ets"]
     fmt = environ["fmt"]
 
-    df = get_df(ugc, sdate, edate)
+    df = get_df(ugc, sts, ets)
     if fmt in ["xlsx", "excel"]:
-        fn = f"vtec_{ugc}_{sdate:%Y%m%d}_{edate:%Y%m%d}.xlsx"
+        fn = f"vtec_{ugc}_{sts:%Y%m%d}_{ets:%Y%m%d}.xlsx"
         headers = [
             ("Content-type", EXL),
             ("Content-disposition", f"attachment; Filename={fn}"),
@@ -184,7 +205,7 @@ def application(environ, start_response):
         df.to_excel(bio, index=False)
         return [bio.getvalue()]
     if fmt == "csv":
-        fn = f"vtec_{ugc}_{sdate:%Y%m%d}_{edate:%Y%m%d}.csv"
+        fn = f"vtec_{ugc}_{sts:%Y%m%d}_{ets:%Y%m%d}.csv"
         headers = [
             ("Content-type", "application/octet-stream"),
             ("Content-disposition", f"attachment; Filename={fn}"),

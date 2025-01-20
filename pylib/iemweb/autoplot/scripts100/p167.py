@@ -22,7 +22,7 @@ Ceiling &gt; 3000' AGL and visibility &gt; 5 statutes miles (green)</td></tr>
 </table>
 """
 
-import datetime
+from datetime import date, timedelta
 from zoneinfo import ZoneInfo
 
 import matplotlib.colors as mpcolors
@@ -38,7 +38,7 @@ from pyiem.util import utc
 def get_description():
     """Return a dict describing how to call this plotter"""
     desc = {"description": __doc__, "data": True, "cache": 86400}
-    today = datetime.date.today()
+    today = date.today()
     desc["arguments"] = [
         dict(
             type="zstation",
@@ -76,7 +76,7 @@ def plotter(ctx: dict):
     # Figure out the 1rst and last of this month in the local time zone
     sts = utc(year, month, 3)
     sts = sts.astimezone(tzinfo).replace(day=1, hour=0, minute=0)
-    ets = (sts + datetime.timedelta(days=35)).replace(day=1)
+    ets = (sts + timedelta(days=35)).replace(day=1)
     days = (ets - sts).days
     data = np.zeros((24, days))
     with get_sqlalchemy_conn("asos") as conn:

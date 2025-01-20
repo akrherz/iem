@@ -7,7 +7,7 @@ coverage of some condition.  For temperature, sites with an average
 temperature for that date are omitted.
 """
 
-import datetime
+from datetime import date, timedelta
 
 import pandas as pd
 from pyiem.database import get_sqlalchemy_conn
@@ -26,8 +26,8 @@ MDICT = {
 def get_description():
     """Return a dict describing how to call this plotter"""
     desc = {"description": __doc__, "data": True, "cache": 86400}
-    sts = datetime.date.today() - datetime.timedelta(days=45)
-    ets = datetime.date.today() - datetime.timedelta(days=1)
+    sts = date.today() - timedelta(days=45)
+    ets = date.today() - timedelta(days=1)
     desc["arguments"] = [
         dict(
             type="date",

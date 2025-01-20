@@ -1,6 +1,6 @@
 """.. title:: SPC MCD Service
 
-Return to `JSON Services </json/>`_
+Return to `API Services </api/#json>`_
 
 Changelog
 ---------

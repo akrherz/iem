@@ -31,13 +31,12 @@ for ($i = 0; $row = pg_fetch_array($rs); $i++) {
 if ($sel > -1) {
     $row = $metadata["SEL{$sel}"];
 
-    $t->content = <<<EOF
+    $t->content = <<<EOM
 <a href="sel.phtml">View All Watches</a>
 
 <p><img src="/data/sel{$sel}comp.png" />
 
-<br /><pre>{$row["report"]}</pre>
-EOF;
+EOM;
 } else {
     $content = "";
     for ($i = 0; $i < 10; $i++) {
