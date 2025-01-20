@@ -24,7 +24,8 @@ and can provide you web links to the resources you are looking for!
 <br>Ames, IA 50011
 <br><i>Email:</i> <a href="mailto:akrherz@iastate.edu">akrherz@iastate.edu</a>
 <br><i>Phone:</i> 515.451.9249 (Please email before calling, please!)
-<br /><i>Twitter/X</i> <a href="https://x.com/akrherz">@akrherz</a> 
+<br /><i>Blue Sky</i>
+<a href="https://bsky.app/profile/akrherz.bsky.social">akrherz.bsky.social</a> 
 
 EOM;
 $t->render('single.phtml');
