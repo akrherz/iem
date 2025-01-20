@@ -33,6 +33,9 @@ $cols = array(
     'VBIZ' => 'Battery Voltage',
     'TWIZ' => 'Water Temperature',
 );
+if (!array_key_exists($sortcol, $cols)) {
+    xssafe("</script>");
+}
 
 $rs = pg_prepare(
     $pgconn,

@@ -1,6 +1,6 @@
 """.. title:  IEM Tile Map Service metadata
 
-Return to `JSON Services </json/>`_
+Return to `API Services </api/#json>`_
 
 Documentation for /json/tms.json
 --------------------------------
@@ -22,9 +22,9 @@ https://mesonet.agron.iastate.edu/json/tms.json
 
 """
 
-import datetime
 import json
 import os
+from datetime import datetime
 
 from pydantic import Field
 from pyiem.reference import ISO8601
@@ -49,7 +49,7 @@ def run():
         return "ERROR"
     with open(fn, encoding="utf-8") as fh:
         j = json.load(fh)
-    vt = datetime.datetime.strptime(j["meta"]["valid"], ISO8601)
+    vt = datetime.strptime(j["meta"]["valid"], ISO8601)
     res["services"].append(
         {
             "id": "ridge_uscomp_n0q",
@@ -60,7 +60,7 @@ def run():
     fn = "/mesonet/ldmdata/gis/images/4326/USCOMP/n0r_0.json"
     with open(fn, encoding="utf-8") as fh:
         j = json.load(fh)
-    vt = datetime.datetime.strptime(j["meta"]["valid"], ISO8601)
+    vt = datetime.strptime(j["meta"]["valid"], ISO8601)
     res["services"].append(
         {
             "id": "ridge_uscomp_n0r",

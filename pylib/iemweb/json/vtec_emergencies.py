@@ -1,6 +1,6 @@
 """.. title:: NWS Warnings with Emergency Significance
 
-Return to `JSON Services </json/>`_
+Return to `API Services </api/#json>`_
 
 Changelog
 ---------

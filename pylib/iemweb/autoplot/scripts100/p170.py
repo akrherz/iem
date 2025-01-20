@@ -22,7 +22,7 @@ hopefully allow more accurate statistics.
 """
 
 import calendar
-import datetime
+from datetime import date
 
 import pandas as pd
 from pyiem.database import get_sqlalchemy_conn
@@ -66,7 +66,7 @@ def get_description():
             type="year",
             name="year",
             label="Year to Highlight:",
-            default=datetime.date.today().year,
+            default=date.today().year,
             min=1973,
         ),
         dict(
@@ -136,7 +136,7 @@ def plotter(ctx: dict):
     title = (
         f"{ctx['_sname']}:: {PDICT[pweather]} "
         "Events\n"
-        f"({syear}-{datetime.date.today().year}) Distinct {t1} with "
+        f"({syear}-{date.today().year}) Distinct {t1} with "
         f"'{t2}' Reported{t3}"
     )
     (fig, ax) = figure_axes(title=title, apctx=ctx)
@@ -153,7 +153,7 @@ def plotter(ctx: dict):
         for x, y in zip(df2["month"].values, df2["count"].values):
             ax.text(x - 0.2, y + 0.2, f"{y:.0f}", ha="center")
     df2 = df.groupby("month").sum()
-    years = (datetime.date.today().year - syear) + 1
+    years = (date.today().year - syear) + 1
     yvals = df2["count"] / years
     ax.bar(
         df2.index.values + 0.2, yvals, width=0.4, fc="b", ec="b", label="Avg"

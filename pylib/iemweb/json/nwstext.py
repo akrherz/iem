@@ -31,9 +31,8 @@ product_id=202407160452-KDMX-FXUS63-AFDDMX
 
 """
 
-# stdlib
-import datetime
 import json
+from datetime import datetime, timezone
 
 from pydantic import Field
 from pyiem.database import get_sqlalchemy_conn
@@ -68,8 +67,8 @@ def application(environ, start_response):
 
     pid = environ["product_id"]
     tokens = pid.split("-")
-    utc = datetime.datetime.strptime(tokens[0], "%Y%m%d%H%M")
-    utc = utc.replace(tzinfo=datetime.timezone.utc)
+    utc = datetime.strptime(tokens[0], "%Y%m%d%H%M")
+    utc = utc.replace(tzinfo=timezone.utc)
     root = {"products": []}
 
     with get_sqlalchemy_conn("afos") as conn:

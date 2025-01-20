@@ -1,6 +1,6 @@
 """.. title:: IEM Archived RADAR Metadata Service
 
-Return to `JSON Services </json/>`_
+Return to `API Services </api/#json>`_
 
 Documentation for /json/radar.py
 --------------------------------
@@ -38,10 +38,10 @@ start=2024-06-30T15:20:00Z&operation=available
 
 """
 
-import datetime
 import glob
 import json
 import os.path
+from datetime import timedelta
 
 from pydantic import AwareDatetime, Field
 from pyiem.database import get_sqlalchemy_conn
@@ -187,7 +187,7 @@ def find_scans(root, radar, product, sts, ets):
     times = []
     if radar in ["USCOMP"]:
         # These are every 5 minutes, so 288 per day
-        now -= datetime.timedelta(minutes=now.minute % 5)
+        now -= timedelta(minutes=now.minute % 5)
         while now < ets:
             if os.path.isfile(
                 now.strftime(
@@ -196,7 +196,7 @@ def find_scans(root, radar, product, sts, ets):
                 )
             ):
                 times.append({"ts": now.strftime("%Y-%m-%dT%H:%MZ")})
-            now += datetime.timedelta(minutes=5)
+            now += timedelta(minutes=5)
     else:
         while now < ets:
             if os.path.isfile(
@@ -207,7 +207,7 @@ def find_scans(root, radar, product, sts, ets):
                 )
             ):
                 times.append({"ts": now.strftime("%Y-%m-%dT%H:%MZ")})
-            now += datetime.timedelta(minutes=1)
+            now += timedelta(minutes=1)
     if len(times) > 500:
         # Do some filtering
         interval = int((len(times) / 500.0) + 1)
@@ -236,14 +236,14 @@ def list_files(environ):
         start_gts = utc()
     end_gts = environ["end"]
     if end_gts is None:
-        end_gts = start_gts + datetime.timedelta(minutes=1)
+        end_gts = start_gts + timedelta(minutes=1)
     # practical limit here of 10 days
-    if (start_gts + datetime.timedelta(days=10)) < end_gts:
-        end_gts = start_gts + datetime.timedelta(days=10)
+    if (start_gts + timedelta(days=10)) < end_gts:
+        end_gts = start_gts + timedelta(days=10)
     root = {"scans": []}
     find_scans(root, radar, product, start_gts, end_gts)
     if not root["scans"] and is_realtime(start_gts):
-        now = start_gts - datetime.timedelta(minutes=10)
+        now = start_gts - timedelta(minutes=10)
         find_scans(root, radar, product, now, end_gts)
 
     return root

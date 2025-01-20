@@ -1,6 +1,6 @@
 """.. title:: Single station currents
 
-Return to `JSON Services </json/>`_
+Return to `API Services </api/#json>`_
 
 Documentation for /json/current.py
 ----------------------------------

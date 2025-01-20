@@ -5,8 +5,8 @@ degree analysis of NWS COOP observations.  The date shown would represent
 snow depth reported approximately at 7 AM.
 """
 
-import datetime
 import os
+from datetime import date, datetime, timedelta
 
 import geopandas as gpd
 import matplotlib.dates as mdates
@@ -25,7 +25,7 @@ from pyiem.util import convert_value, ncopen
 def get_description():
     """Return a dict describing how to call this plotter"""
     desc = {"description": __doc__, "data": True, "cache": 86400}
-    today = datetime.date.today()
+    today = date.today()
     year = today.year if today.month > 9 else today.year - 1
     desc["arguments"] = [
         dict(
@@ -64,8 +64,8 @@ def plotter(ctx: dict):
     metric = convert_value(thres, "inch", "millimeter")
     state = ctx["state"][:2]
 
-    sts = datetime.datetime(year, 10, 1, 12)
-    ets = datetime.datetime(year + 1, 5, 1, 12)
+    sts = datetime(year, 10, 1, 12)
+    ets = datetime(year + 1, 5, 1, 12)
     rows = []
 
     with get_sqlalchemy_conn("postgis") as conn:
@@ -102,7 +102,7 @@ def plotter(ctx: dict):
     for i in range(snowd.shape[0]):
         rows.append(  # noqa
             {
-                "valid": sts + datetime.timedelta(days=i),
+                "valid": sts + timedelta(days=i),
                 "coverage": f(st, snowd[i], metric, stpts),
             }
         )
@@ -116,8 +116,7 @@ def plotter(ctx: dict):
     for i in range(snowd.shape[0]):
         rows.append(  # noqa
             {
-                "valid": datetime.datetime(ets.year, 1, 1, 12)
-                + datetime.timedelta(days=i),
+                "valid": datetime(ets.year, 1, 1, 12) + timedelta(days=i),
                 "coverage": f(st, snowd[i], metric, stpts),
             }
         )
@@ -142,7 +141,7 @@ def plotter(ctx: dict):
     ax.set_ylabel("Areal Coverage [%]")
     ax.xaxis.set_major_locator(mdates.DayLocator([1, 15]))
     ax.xaxis.set_major_formatter(mdates.DateFormatter("%-d %b\n%Y"))
-    one = datetime.timedelta(days=1)
+    one = timedelta(days=1)
     ax.set_xlim(df["valid"].min() - one, df["valid"].max() + one)
     ax.set_yticks(range(0, 101, 25))
     ax.grid(True)

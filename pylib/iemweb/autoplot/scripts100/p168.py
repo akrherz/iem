@@ -10,7 +10,7 @@ provides the latest date at a given temperature.
 """
 
 import calendar
-import datetime
+from datetime import date
 
 import numpy as np
 import pandas as pd
@@ -55,12 +55,12 @@ def plotter(ctx: dict):
 
     title = (
         "Most Recent & Latest Date of High Temperature\n"
-        f"{ctx['_sname']} ({ab.year}-{datetime.date.today().year})"
+        f"{ctx['_sname']} ({ab.year}-{date.today().year})"
     )
     (fig, ax) = figure_axes(apctx=ctx, title=title)
     current = {
-        "d2000": datetime.date(2000, 1, 1),
-        "date": datetime.date(2000, 1, 1),
+        "d2000": date(2000, 1, 1),
+        "date": date(2000, 1, 1),
         "ties": False,
     }
     x = []
