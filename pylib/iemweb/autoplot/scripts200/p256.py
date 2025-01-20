@@ -14,14 +14,14 @@ when even requesting a state report, it is good to set the CWA so to get
 a locally relevant timezone.</p>
 <pre>
 $ wget -O RTPIA.txt 'https://mesonet.agron.iastate.edu/plotting/auto/plot/\
-256/fmt:text::date:2024-06-10&wfo=DMX&state=IA&by=state&report=12z'
+256/date:2024-06-10::wfo:DMX::state:IA::by:state::report:12z.txt'
 $ cat RTPIA.txt | dcshef
 </pre>
 
 <p>Generate a RTPBOU report for the morning of 21 May 2024:</p>
 <pre>
 $ wget -O RTPBOU.txt 'https://mesonet.agron.iastate.edu/plotting/auto/plot/\
-256/fmt:text::date:2024-05-21&wfo=BOU&by=wfo&report=12z'
+256/date:2024-05-21::wfo:BOU::by:wfo::report:12z.txt'
 $ cat RTPBOU.txt | dcshef
 </pre>
 
