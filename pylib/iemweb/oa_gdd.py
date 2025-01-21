@@ -2,7 +2,7 @@
 Produce a OA GDD Plot, dynamically!
 """
 
-import datetime
+from datetime import date, timedelta
 from io import BytesIO
 
 from pydantic import Field
@@ -18,8 +18,8 @@ class Schema(CGIModel):
 
     base: int = Field(default=50, description="Base Temperature")
     max: int = Field(default=86, description="Max Temperature")
-    sts: datetime.date = Field(None, description="Start Date")
-    ets: datetime.date = Field(None, description="End Date")
+    sts: date = Field(None, description="Start Date")
+    ets: date = Field(None, description="End Date")
     year1: int = Field(None, description="Year 1")
     year2: int = Field(None, description="Year 2")
     month1: int = Field(None, description="Month 1")
@@ -73,7 +73,7 @@ def application(environ, start_response):
         gdd50.append(float(row[1]))
         valmask.append(True)
 
-    tt = (ets - datetime.timedelta(days=1)).strftime("%d %b")
+    tt = (ets - timedelta(days=1)).strftime("%d %b")
     mp = MapPlot(
         title=(
             f"Iowa {environ['sts']:%Y: %d %b} thru {tt} "

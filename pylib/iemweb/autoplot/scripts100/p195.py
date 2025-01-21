@@ -6,15 +6,15 @@ estimate (KDE) overlay.  You can optionally pick a date to highlight on the
 chart.  This date is a central time zone date.
 """
 
-# pylint: disable=consider-using-f-string
-import datetime
 import json
+from datetime import date
 
 import pandas as pd
 import seaborn as sns
+from pyiem.database import get_sqlalchemy_conn
 from pyiem.exceptions import NoDataFound
 from pyiem.plot import figure
-from pyiem.util import convert_value, get_sqlalchemy_conn
+from pyiem.util import convert_value
 from sqlalchemy import text
 
 PDICT = {
@@ -36,7 +36,7 @@ PDICT2 = {
 def get_description():
     """Return a dict describing how to call this plotter"""
     desc = {"description": __doc__, "data": True, "cache": 600}
-    today = datetime.date.today()
+    today = date.today()
     desc["arguments"] = [
         dict(
             type="date",
@@ -117,10 +117,10 @@ def get_highcharts(ctx: dict) -> str:
     """Do the highcharts scatter plot of the data."""
     df = get_data(ctx)
     df["datetxt"] = df["issue"].dt.strftime("%b %-d, %Y")
-    date = ctx.get("date")
+    dt = ctx.get("date")
     plotdf = df
-    if date:
-        plotdf = df[df["issue"].dt.date != date]
+    if dt:
+        plotdf = df[df["issue"].dt.date != dt]
     cols = (
         "tml_direction tml_mph datetxt tml_sknt utc_issue ph s eventid"
     ).split()
@@ -134,12 +134,12 @@ def get_highcharts(ctx: dict) -> str:
             ),
         )
     ]
-    if date:
+    if dt:
         series.append(
             dict(
-                name=date.strftime("%b %-d, %Y"),
+                name=dt.strftime("%b %-d, %Y"),
                 data=(
-                    df[df["issue"].dt.date == date][cols]
+                    df[df["issue"].dt.date == dt][cols]
                     .rename(columns={"tml_direction": "x", "tml_mph": "y"})
                     .to_dict(orient="records")
                 ),
@@ -202,11 +202,11 @@ Highcharts.chart('"""
 
 def plotter(ctx: dict):
     """Go"""
-    date = ctx.get("date")
+    dt = ctx.get("date")
     df = get_data(ctx)
     plotdf = df
-    if date is not None:
-        plotdf = df[df["issue"].dt.date != date]
+    if dt is not None:
+        plotdf = df[df["issue"].dt.date != dt]
 
     g = sns.jointplot(
         x=plotdf["tml_direction"].values,
@@ -221,15 +221,15 @@ def plotter(ctx: dict):
     g.ax_joint.set_ylabel("Storm Speed [MPH]")
     g.ax_joint.set_xticks(range(0, 361, 45))
     g.ax_joint.set_xticklabels("N NE E SE S SW W NW N".split())
-    if date:
-        df2 = df[df["issue"].dt.date == date]
+    if dt:
+        df2 = df[df["issue"].dt.date == dt]
         g.ax_joint.scatter(
             df2["tml_direction"],
             df2["tml_mph"],
             marker="+",
             color="r",
             s=50,
-            label=date.strftime("%b %-d, %Y"),
+            label=dt.strftime("%b %-d, %Y"),
             zorder=2,
         )
         g.ax_joint.legend(loc="best")

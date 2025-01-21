@@ -221,7 +221,7 @@ Ext.onReady(() => {
                     ['MCFC', 'McLaughlin Family of Companies']]
                 }),
                 listeners: {
-                    'select': function (sb) {
+                    'select': () => {
                         imagestore.isLoaded = false;
                         let ts = Ext.Date.format(Ext.getCmp("datepicker").getValue(), 'm/d/Y')
                             + " " + Ext.getCmp("timepicker").getRawValue();

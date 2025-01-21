@@ -12,7 +12,7 @@ available metrics.
 December within the three year period.
 """
 
-import datetime
+from datetime import date
 
 import pandas as pd
 from pyiem.database import get_sqlalchemy_conn
@@ -245,7 +245,7 @@ def get_description():
     pdict = {}
     for varname, item in META.items():
         pdict[varname] = item["title"]
-    today = datetime.date.today()
+    today = date.today()
     desc["arguments"] = [
         dict(
             type="station",

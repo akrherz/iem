@@ -3,16 +3,13 @@
 Called from gfs2iemre.py for just the 6z run.
 """
 
-# pylint: disable=unbalanced-tuple-unpacking
-# stdlib
 import datetime
 
 import numpy as np
-
-# thirdparty
 import pandas as pd
+from pyiem.database import get_sqlalchemy_conn
 from pyiem.plot import MapPlot, get_cmap
-from pyiem.util import convert_value, get_sqlalchemy_conn, logger, ncopen
+from pyiem.util import convert_value, logger, ncopen
 
 LOG = logger()
 

@@ -274,7 +274,6 @@ def plotter(ctx: dict):
         )
     if df.empty:
         raise NoDataFound("No Data Found.")
-    # pylint: disable=no-member
     df = df.reindex(pd.date_range(df.index.values[0], date.today())).fillna(0)
     df = munge_df(ctx, df)
     # Compute cumsum

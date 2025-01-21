@@ -4,8 +4,8 @@ require_once "../../config/settings.inc.php";
 require_once "../../include/myview.php";
 $t = new MyView();
 $t->title = "Model Output Statistics (MOS)";
-
-$t->content = <<<EOF
+$t->iem_resource = "MOS";
+$t->content = <<<EOM
 
 <h3>Archived Model Output Statistics (MOS)</h3>
 
@@ -13,7 +13,7 @@ $t->content = <<<EOF
 weather prediction models.  These models produce a gridded forecast that is
 then processed thru a series of equations (Model Output Statistics) to 
 produce a site specific forecast. You can find out more about
-<a href="http://www.weather.gov/mdl/synop/products.php">MOS</a> on the
+<a href="https://vlab.noaa.gov/web/mdl">MOS</a> on the
 NWS's website.  The IEM maintains an interactive MOS archive to support
 local research and makes it available for others to use as well.</p>
 
@@ -95,5 +95,5 @@ multiplied by 10 for its true value.
 </div>
 
 </div>
-EOF;
+EOM;
 $t->render('single.phtml');

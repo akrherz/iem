@@ -3,14 +3,11 @@
 IEM_APPID 92
 """
 
-# pylint: disable=wrong-import-position
-# stdlib
 import calendar
 import os
 from datetime import date, datetime, timedelta
 from zoneinfo import ZoneInfo
 
-# Third Party
 import httpx
 import pandas as pd
 from paste.request import get_cookie_dict

@@ -21,6 +21,7 @@ $XREF = Array(
     "IEMRE" => "/iemre",
     "ISUSM" => "/agclimate/",
     "LSR" => "/request/gis/lsrs.phtml",
+    "MOS" => "/mos/",
     "MOSAIC" => "/docs/nexrad_mosaic",
     "NWSTEXT" => "/nws/text.php",
     "VTEC" => "/request/gis/watchwarn.phtml",

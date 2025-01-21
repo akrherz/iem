@@ -28,8 +28,9 @@ https://mesonet.agron.iastate.edu/geojson/usdm.py?date=2024-03-20
 
 """
 
-import datetime
 import json
+from datetime import date as dateobj
+from datetime import timedelta
 
 from pydantic import Field
 from pyiem.database import get_sqlalchemy_conn
@@ -44,12 +45,10 @@ class Schema(CGIModel):
     """See how we are called."""
 
     callback: str = Field(None, description="JSONP callback function name")
-    date: datetime.date = Field(
-        None, description="Date to query for, YYYY-MM-DD"
-    )
+    date: dateobj = Field(None, description="Date to query for, YYYY-MM-DD")
 
 
-def rectify_date(dt):
+def rectify_date(dt: dateobj):
     """Convert this tstamp into something we can actually use
 
     if '', use max valid from database
@@ -64,7 +63,7 @@ def rectify_date(dt):
         return res
 
     offset = (dt.weekday() - 1) % 7
-    return dt - datetime.timedelta(days=offset)
+    return dt - timedelta(days=offset)
 
 
 def run(ts):
@@ -85,7 +84,7 @@ def run(ts):
                     "SELECT ST_asGeoJson(geom) as geojson, dm, valid "
                     "from usdm WHERE valid = :ts ORDER by dm ASC"
                 ),
-                {"ts": ts - datetime.timedelta(days=7)},
+                {"ts": ts - timedelta(days=7)},
             )
 
         data = {
