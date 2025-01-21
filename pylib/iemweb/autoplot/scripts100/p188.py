@@ -10,7 +10,7 @@ high reached 60+ degrees until the end of each year.
 """
 
 import calendar
-import datetime
+from datetime import date
 
 import pandas as pd
 from pyiem.database import get_sqlalchemy_conn
@@ -26,7 +26,7 @@ PDICT = {
 def get_description():
     """Return a dict describing how to call this plotter"""
     desc = {"data": True, "description": __doc__}
-    today = datetime.date.today()
+    today = date.today()
     desc["arguments"] = [
         dict(
             type="station",

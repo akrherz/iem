@@ -1,6 +1,6 @@
 """Generates analysis maps of ASOS station data."""
 
-import datetime
+from datetime import timedelta
 from zoneinfo import ZoneInfo
 
 import numpy as np
@@ -104,8 +104,8 @@ def get_df(ctx, bnds, buf=2.25):
                     "east": bnds[2] + buf,
                     "north": bnds[3] + buf,
                     "valid": valid,
-                    "sts": valid - datetime.timedelta(minutes=30),
-                    "ets": valid + datetime.timedelta(minutes=30),
+                    "sts": valid - timedelta(minutes=30),
+                    "ets": valid + timedelta(minutes=30),
                 },
             )
         df = df.groupby("station").first()

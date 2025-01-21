@@ -12,7 +12,7 @@ how the grid analysis is done, the exact pixel location is nebulous.
 Having said that, it should be close!
 """
 
-import datetime
+from datetime import date, timedelta
 
 import numpy as np
 import pandas as pd
@@ -39,7 +39,7 @@ PDICT2 = {"weeks": "Number of Weeks", "percent": "Percentage of Weeks"}
 def get_description():
     """Return a dict describing how to call this plotter"""
     desc = {"description": __doc__, "data": True, "cache": 600}
-    today = datetime.date.today()
+    today = date.today()
     desc["arguments"] = [
         dict(
             type="csector",
@@ -82,10 +82,10 @@ def get_description():
     return desc
 
 
-def make_tuesday(date):
+def make_tuesday(dt: date):
     """Make sure we back up to a tuesday"""
-    offset = (date.weekday() - 1) % 7
-    tuesday = date - datetime.timedelta(days=offset)
+    offset = (dt.weekday() - 1) % 7
+    tuesday = dt - timedelta(days=offset)
     # Ensure that the database has this date
     with get_dbconn("postgis") as conn:
         cursor = conn.cursor()

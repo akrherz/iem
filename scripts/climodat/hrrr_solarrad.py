@@ -4,8 +4,7 @@ Run once at 10 PM to snag calendar day stations. (RUN_50_AFTER.sh)
 Run again with RUN_NOON.sh when the regular estimator runs
 """
 
-# pylint: disable=unpacking-non-sequence
-import datetime
+from datetime import datetime, timedelta
 
 import click
 import geopandas as gpd
@@ -87,7 +86,7 @@ def get_grid(grb):
     return xaxis, yaxis
 
 
-def compute(df: pd.DataFrame, sids, dt, do_regions=False):
+def compute(df: pd.DataFrame, sids, dt: datetime, do_regions=False):
     """Process data for this timestamp"""
     # Life choice is to run 6z to 6z
     sts = utc(dt.year, dt.month, dt.day, 6)
@@ -98,9 +97,7 @@ def compute(df: pd.DataFrame, sids, dt, do_regions=False):
     xaxis = None
     yaxis = None
     # date_range is inclusive
-    for now in pd.date_range(
-        sts, sts + datetime.timedelta(hours=23), freq="1h"
-    ):
+    for now in pd.date_range(sts, sts + timedelta(hours=23), freq="1h"):
         # Try the newer f01 files, which have better data!
         with archive_fetch(
             now.strftime("%Y/%m/%d/model/hrrr/%H/hrrr.t%Hz.3kmf01.grib2")
@@ -164,8 +161,9 @@ def compute(df: pd.DataFrame, sids, dt, do_regions=False):
     # We want MJ day-1 m-2
     total = total / 1_000_000.0
 
-    df["i"] = np.digitize(df["projx"].to_numpy(), xaxis)
-    df["j"] = np.digitize(df["projy"].to_numpy(), yaxis)
+    if xaxis is not None and yaxis is not None:
+        df["i"] = np.digitize(df["projx"].to_numpy(), xaxis)
+        df["j"] = np.digitize(df["projy"].to_numpy(), yaxis)
     for sid, row in df.loc[sids].iterrows():
         df.at[sid, COL] = total[int(row["j"]), int(row["i"])]
 
@@ -177,14 +175,14 @@ def compute(df: pd.DataFrame, sids, dt, do_regions=False):
 
 @click.command()
 @click.option("--date", "dt", type=click.DateTime(), help="UTC Valid Time")
-def main(dt):
+def main(dt: datetime):
     """Do Something"""
     dt = dt.date()
     df = build_stations(dt)
     # We currently do two options
     # 1. For morning sites 1-11 AM, they get yesterday's radiation
     sids = df[(df["temp_hour"] > 0) & (df["temp_hour"] < 12)].index.values
-    compute(df, sids, dt - datetime.timedelta(days=1), True)
+    compute(df, sids, dt - timedelta(days=1), True)
     # 2. All other sites get today
     sids = df[df[COL].isna()].index.values
     compute(df, sids, dt)

@@ -1,5 +1,4 @@
 """Invoked at mod-wsgi startup to get certain libraries loaded!"""
-# pylint: disable=unused-import,wrong-import-position
 
 import os
 import sys

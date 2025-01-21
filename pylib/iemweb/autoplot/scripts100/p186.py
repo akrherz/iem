@@ -13,7 +13,7 @@ at the state scale when normalized by area.
 """
 
 import calendar
-import datetime
+from datetime import date, timedelta
 
 import httpx
 import numpy as np
@@ -38,7 +38,7 @@ PDICT = {
 def get_description():
     """Return a dict describing how to call this plotter"""
     desc = {"description": __doc__, "data": True}
-    thisyear = datetime.date.today().year
+    thisyear = date.today().year
     desc["arguments"] = [
         {
             "type": "select",
@@ -100,7 +100,7 @@ def plotter(ctx: dict):
         df[f"D{c}"] = pd.to_numeric(df[f"D{c}"])
     df["Date"] = pd.to_datetime(df["Date"], format="%Y-%m-%d")
     df = df.sort_values("Date", ascending=True)
-    df["x"] = df["Date"] + datetime.timedelta(hours=3.5 * 24)
+    df["x"] = df["Date"] + timedelta(hours=3.5 * 24)
     # accounting
     df["score"] = (
         df["D4"] * 5 + df["D3"] * 4 + df["D2"] * 3 + df["D1"] * 2 + df["D0"]
@@ -111,7 +111,7 @@ def plotter(ctx: dict):
     df.iat[0, df.columns.get_loc("delta")] = 0
 
     fig = figure(apctx=ctx)
-    ax = fig.add_axes([0.1, 0.1, 0.87, 0.84])
+    ax = fig.add_axes((0.1, 0.1, 0.87, 0.84))
     for year, gdf in df.groupby(df.Date.dt.year):
         if year < syear or year > eyear:
             continue
