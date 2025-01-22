@@ -13,6 +13,8 @@ with minimal latency.
 Changelog
 ~~~~~~~~~
 
+- 2025-01-22: Added `aviation_afd` flag for the specific case of retrieving
+  the "Aviation" section of an Area Forecast Discussion.
 - 2025-01-08: Added some caching due to incessant requests for the same data.
 - 2024-08-25: Add ``order`` parameter to allow for order of the returned
   products.
@@ -58,6 +60,7 @@ sdate=2024-01-01T00:00Z&edate=2024-12-31T23:59Z
 
 """
 
+import re
 import zipfile
 from datetime import datetime, timedelta, timezone
 from io import BytesIO, StringIO
@@ -70,11 +73,20 @@ from pyiem.webutil import CGIModel, ListOrCSVType, iemapp
 from sqlalchemy import text
 
 WARPIL = "FLS FFS AWW TOR SVR FFW SVS LSR SPS WSW FFA WCN NPW".split()
+AVIATION_AFD = re.compile(r"^\.AVIATION[\s\.]", re.IGNORECASE | re.MULTILINE)
 
 
 class MyModel(CGIModel):
     """See how we are called."""
 
+    aviation_afd: bool = Field(
+        False,
+        description=(
+            "If set to 1, the returned data will be the 'Aviation' section "
+            "of an Area Forecast Discussion. This requires the PIL to be "
+            "an AFD product and a limit of 1 set."
+        ),
+    )
     center: str = Field(
         "",
         description=(
@@ -324,19 +336,31 @@ def application(environ, start_response):
                 sio.write("<br /><pre>\n")
             else:
                 sio.write("\001\n")
+            payload = row[0]
+            if (
+                len(pils) == 1
+                and pils[0].startswith("AFD")
+                and environ["aviation_afd"]
+            ):
+                # Special case for AFD products, we only want the Aviation
+                # section
+                parts = payload.split("&&")
+                for part in parts:
+                    if AVIATION_AFD.search(part):
+                        payload = part
+                        break
             # Remove control characters from the product as we are including
             # them manually here...
             if fmt == "html":
                 sio.write(
-                    html_escape(row[0])
+                    html_escape(payload)
                     .replace("\003", "")
                     .replace("\001\r\r\n", "")
                     .replace("\r\r\n", "\n")
                 )
             else:
                 sio.write(
-                    (row[0])
-                    .replace("\003", "")
+                    payload.replace("\003", "")
                     .replace("\001\r\r\n", "")
                     .replace("\r\r\n", "\n")
                 )

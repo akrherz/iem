@@ -13,39 +13,40 @@ $station4 = (strlen($station) == 3) ? sprintf("K%s", $station) : $station;
 $station3 = substr($station4, 1, 3);
 
 $t = new MyView();
+$t->refresh = 300;
 $t->title = "Terminal Aerodome Forecasts";
 $t->sites_current = "taf";
 $t->jsextra = <<<EOM
-<script>
-$(document).ready(function(){
-    $.ajax({
-        url: "/cgi-bin/afos/retrieve.py?pil=TAF{$station3}&fmt=html",
-        success: function(data){
-            $("#rawtext").html(data);
-        }
-    });
-
-});
-</script>
+<script src="taf.js" type="text/javascript"></script>
 EOM;
 
-$t->content = <<<EOF
+$t->content = <<<EOM
 <h3>Terminal Aerodome Forecasts</h3>
 
 <p>The IEM processes the feed of Terminal Aerodome Forecasts from the NWS.  This
 page presents some of the options available for this dataset. A
 <a href="/request/taf.php">download option</a> exists as well.</p>
 
-<h4>Raw Text</h4>
+<h4>Recent METARs</h4>
 
-<div id="rawtext"></div>
+<div id="metars" data-station4="{$station4}"></div>
 
-<h4>IEM Visualization</h4>
+<h4>Raw TAF Text</h4>
+
+<div id="rawtext" data-station3="{$station3}"></div>
+
+<h4>Current NWS Aviation AFD</h4>
+
+<div id="afd" data-wfo="{$metadata['wfo']}"></div>
+
+
+<h4>IEM TAF Visualization</h4>
 
 <p>IEM <a href="/plotting/auto/?q=219&station={$station4}">Autoplot 219</a> produced
 this visualization:</p>
 
 <p><img src="/plotting/auto/plot/219/station:{$station4}.png" class="img img-responsive"></p>
 
-EOF;
+
+EOM;
 $t->render('sites.phtml');
