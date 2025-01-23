@@ -3,11 +3,12 @@ Check the status of our ISUSM sites being offline or online
 run from RUN_40_AFTER.sh
 """
 
-import datetime
+from datetime import timedelta
 
+from pyiem.database import get_dbconnc
 from pyiem.network import Table as NetworkTable
 from pyiem.tracker import TrackerEngine
-from pyiem.util import get_dbconnc, utc
+from pyiem.util import utc
 
 
 def main():
@@ -16,7 +17,7 @@ def main():
     IEM, icursor = get_dbconnc("iem")
     PORTFOLIO, pcursor = get_dbconnc("portfolio")
 
-    threshold = utc() - datetime.timedelta(hours=12)
+    threshold = utc() - timedelta(hours=12)
 
     icursor.execute(
         "SELECT id, valid from current c JOIN stations t ON "

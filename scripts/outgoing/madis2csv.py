@@ -2,13 +2,12 @@
 Dump a CSV file of the MADIS data, kind of sad that I do this, but alas
 """
 
-import datetime
 import os
 import subprocess
 import time
 import warnings
+from datetime import datetime, timedelta, timezone
 from tempfile import NamedTemporaryFile
-from zoneinfo import ZoneInfo
 
 import numpy.ma
 from netCDF4 import chartostring
@@ -99,8 +98,8 @@ def main():
         ot = times[recnum]
         if numpy.ma.is_masked(ot) or ot > 2141347600:
             continue
-        ts = datetime.datetime(1970, 1, 1) + datetime.timedelta(seconds=ot)
-        ts = ts.replace(tzinfo=ZoneInfo("UTC"))
+        ts = datetime(1970, 1, 1) + timedelta(seconds=ot)
+        ts = ts.replace(tzinfo=timezone.utc)
         db[station] = {
             "STN": station,
             "PROVIDER": providers[recnum],

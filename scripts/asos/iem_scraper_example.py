@@ -8,11 +8,11 @@ More help on CGI parameters is available at:
 Requires: Python 3
 """
 
-import datetime
 import json
 import os
 import sys
 import time
+from datetime import datetime, timedelta
 from urllib.request import urlopen
 
 # Number of attempts to download data
@@ -90,9 +90,9 @@ def download_alldata():
 
     Service supports up to 24 hours worth of data at a time."""
     # timestamps in UTC to request data for
-    startts = datetime.datetime(2012, 8, 1)
-    endts = datetime.datetime(2012, 9, 1)
-    interval = datetime.timedelta(hours=24)
+    startts = datetime(2012, 8, 1)
+    endts = datetime(2012, 9, 1)
+    interval = timedelta(hours=24)
 
     service = SERVICE + "data=all&tz=Etc/UTC&format=comma&latlon=yes&"
 
@@ -112,8 +112,8 @@ def download_alldata():
 def main():
     """Our main method"""
     # timestamps in UTC to request data for
-    startts = datetime.datetime(2012, 8, 1)
-    endts = datetime.datetime(2012, 9, 1)
+    startts = datetime(2012, 8, 1)
+    endts = datetime(2012, 9, 1)
 
     service = SERVICE + "data=all&tz=Etc/UTC&format=comma&latlon=yes&"
 

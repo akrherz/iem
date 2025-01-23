@@ -339,7 +339,6 @@ RewriteRule ^/search /search.py [QSA]
     # .php was legacy stuff, lets not break old paths
     RewriteRule grx/l3attr.(php|txt) grx/l3attr.py [QSA]
 
-    RewriteRule wxc/idot_trucks.txt wxc/idot_trucks.py
   </Directory>
 
   <Directory "/opt/iem/htdocs/roads">

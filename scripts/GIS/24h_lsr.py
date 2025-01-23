@@ -3,11 +3,11 @@
 Called from RUN_5MIN.sh
 """
 
-import datetime
 import os
 import subprocess
 import tempfile
 import zipfile
+from datetime import timedelta
 
 import geopandas as gpd
 from pyiem.database import get_sqlalchemy_conn
@@ -37,7 +37,7 @@ def main():
     """Go Main Go"""
     # We set one minute into the future, so to get expiring warnings
     # out of the shapefile
-    ets = utc() + datetime.timedelta(minutes=+1)
+    ets = utc() + timedelta(minutes=+1)
     with get_sqlalchemy_conn("postgis") as conn:
         df = gpd.read_postgis(
             """

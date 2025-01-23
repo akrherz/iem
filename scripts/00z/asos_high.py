@@ -3,11 +3,12 @@
 run from RUN_0Z.sh
 """
 
-import datetime
+from datetime import timedelta
 
 import pandas as pd
+from pyiem.database import get_sqlalchemy_conn
 from pyiem.plot import MapPlot
-from pyiem.util import get_sqlalchemy_conn, logger, utc
+from pyiem.util import logger, utc
 from sqlalchemy import text
 
 LOG = logger()
@@ -16,7 +17,7 @@ LOG = logger()
 def main():
     """Go Main Go"""
     now = utc().replace(hour=0, minute=0, second=0, microsecond=0)
-    sts = now - datetime.timedelta(hours=12)
+    sts = now - timedelta(hours=12)
     with get_sqlalchemy_conn("iem") as conn:
         df = pd.read_sql(
             text(

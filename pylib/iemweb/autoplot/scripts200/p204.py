@@ -5,7 +5,7 @@ a trailing number of days to evaluate the metric for.
 """
 
 import calendar
-import datetime
+from datetime import date
 
 import matplotlib.colors as mpcolors
 import numpy as np
@@ -27,7 +27,7 @@ PDICT = {
 def get_description():
     """Return a dict describing how to call this plotter"""
     desc = {"description": __doc__, "data": True, "cache": 86400}
-    today = datetime.date.today()
+    today = date.today()
     desc["arguments"] = [
         dict(
             type="select",

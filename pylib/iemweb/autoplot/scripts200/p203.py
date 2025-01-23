@@ -6,8 +6,8 @@ UTC date.
 plot's resolution.
 """
 
-import datetime
 import os
+from datetime import date, timedelta
 from io import StringIO
 
 import geopandas as gpd
@@ -48,7 +48,7 @@ def get_description():
             "date": "2024-05-05",  # pick a date with not too many
         },
     }
-    today = datetime.date.today()
+    today = date.today()
     desc["arguments"] = [
         dict(
             type="select",
@@ -78,10 +78,10 @@ def plotter(ctx: dict):
     """Go"""
     typ = ctx["typ"]
     sort = ctx["sort"]
-    date = ctx["date"]
+    dt = ctx["date"]
 
-    sts = utc(date.year, date.month, date.day)
-    ets = sts + datetime.timedelta(hours=24)
+    sts = utc(dt.year, dt.month, dt.day)
+    ets = sts + timedelta(hours=24)
 
     opts = {
         "W": {

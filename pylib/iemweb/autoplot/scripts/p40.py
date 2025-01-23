@@ -218,7 +218,7 @@ def plotter(ctx: dict):
     for _, row in df.iterrows():
         delta = int(row["hours"] - 1)
         data[:, delta] = 0
-        if not np.isnan(row["vsby"]):
+        if pd.notna(row["vsby"]):
             vsby[0, delta] = row["vsby"]
         for i in range(1, 5):
             a = lookup.get(row[f"skyc{i}"], -1)
@@ -233,6 +233,8 @@ def plotter(ctx: dict):
 
     data = np.ma.array(data, mask=np.where(data < 0, True, False))
     vsby = np.ma.array(vsby, mask=np.where(vsby < 0, True, False))
+    if vsby.mask.all():
+        raise NoDataFound("No Visibility Data Found for station, sorry!")
 
     if ptype == "vsby":
         fig = plot_vsby(days, vsby, ctx, sts)

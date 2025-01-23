@@ -13,7 +13,7 @@ results are found with shorter time windows of time to compute the
 percentiles.
 """
 
-import datetime
+from datetime import date
 from zoneinfo import ZoneInfo
 
 import matplotlib.dates as mdates
@@ -55,7 +55,7 @@ def get_description():
         dict(
             type="date",
             name="date",
-            default=datetime.date.today().strftime("%Y/%m/%d"),
+            default=date.today().strftime("%Y/%m/%d"),
             label="Date of Interest (used to select week, month, year):",
         ),
         dict(
@@ -109,7 +109,7 @@ def print_table(fig, df, varname):
 def plotter(ctx: dict):
     """Go"""
     station = ctx["zstation"]
-    date = ctx["date"]
+    dt = ctx["date"]
     opt = ctx["opt"]
     varname = ctx["v"]
 
@@ -120,29 +120,29 @@ def plotter(ctx: dict):
     if opt == "day":
         limiter = (
             f" and to_char(valid at time zone '{tzname}', 'mmdd') = "
-            f"'{date.strftime('%m%d')}' "
+            f"'{dt.strftime('%m%d')}' "
         )
         subtitle = (
-            f"For Date of {date.strftime('%-d %b')}, "
-            f"{date.strftime('%-d %b %Y')} plotted in bottom panel"
+            f"For Date of {dt.strftime('%-d %b')}, "
+            f"{dt.strftime('%-d %b %Y')} plotted in bottom panel"
         )
         datefmt = "%I %p"
     elif opt == "week":
-        limiter = f" and extract(week from valid) = {date.strftime('%V')} "
+        limiter = f" and extract(week from valid) = {dt.strftime('%V')} "
         subtitle = (
-            f"For ISO Week of {date.strftime('%V')}, "
-            f"week of {date.strftime('%-d %b %Y')} plotted in bottom panel"
+            f"For ISO Week of {dt.strftime('%V')}, "
+            f"week of {dt.strftime('%-d %b %Y')} plotted in bottom panel"
         )
         datefmt = "%-d %b"
     elif opt == "month":
-        limiter = f" and extract(month from valid) = {date.strftime('%m')} "
+        limiter = f" and extract(month from valid) = {dt.strftime('%m')} "
         subtitle = (
-            f"For Month of {date.strftime('%B')}, "
-            f"{date.strftime('%b %Y')} plotted in bottom panel"
+            f"For Month of {dt.strftime('%B')}, "
+            f"{dt.strftime('%b %Y')} plotted in bottom panel"
         )
         datefmt = "%-d %b\n%-I %p"
     else:
-        subtitle = f"All Year, {date.year} plotted in bottom panel"
+        subtitle = f"All Year, {dt.year} plotted in bottom panel"
         datefmt = "%-d %b"
 
     # Load up all the values, since we need pandas to do some heavy lifting
@@ -179,9 +179,9 @@ def plotter(ctx: dict):
         f"{subtitle}"
     )
     fig = figure(apctx=ctx, title=title)
-    tp = fig.add_axes([0.1, 0.57, 0.5, 0.33])
-    bp = fig.add_axes([0.1, 0.13, 0.5, 0.35])
-    sidep = fig.add_axes([0.61, 0.13, 0.1, 0.35])
+    tp = fig.add_axes((0.1, 0.57, 0.5, 0.33))
+    bp = fig.add_axes((0.1, 0.13, 0.5, 0.35))
+    sidep = fig.add_axes((0.61, 0.13, 0.1, 0.35))
     # Plot total percentiles on the figure
     print_table(fig, obsdf, varname)
     cmap = get_cmap(ctx["cmap"])
@@ -189,7 +189,7 @@ def plotter(ctx: dict):
         tp.plot(
             gdf["quantile"].values * 100.0,
             gdf[varname].values,
-            color=cmap(hr / 23.0),
+            color=cmap(hr / 23.0),  # type: ignore
             label=str(hr),
         )
     tp.set_xlim(0, 100)
@@ -205,7 +205,7 @@ def plotter(ctx: dict):
     cb.set_ticklabels(["Mid", "4 AM", "8 AM", "Noon", "4 PM", "8 PM"])
     cb.set_label("Local Hour")
 
-    thisyear = obsdf[obsdf["year"] == date.year]
+    thisyear = obsdf[obsdf["year"] == dt.year]
     if not thisyear.empty:
         bp.plot(
             thisyear["utc_valid"].values, thisyear["quantile"].values * 100.0

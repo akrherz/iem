@@ -3,7 +3,7 @@ This application generates maps of daily ISU
 Soil Moisture Network Data.
 """
 
-import datetime
+from datetime import datetime, timedelta
 
 import pandas as pd
 from metpy.units import units
@@ -30,8 +30,8 @@ PLOTTYPES = {
 def get_description():
     """Return a dict describing how to call this plotter"""
     desc = {"description": __doc__, "data": True}
-    ets = datetime.datetime.now().replace(minute=0)
-    sts = ets - datetime.timedelta(days=1)
+    ets = datetime.now().replace(minute=0)
+    sts = ets - timedelta(days=1)
     desc["arguments"] = [
         dict(
             type="select",
@@ -53,9 +53,7 @@ def get_description():
 
 def plot1(ctx):
     """Daily four inch depth high/low temp."""
-    dt = datetime.datetime(
-        ctx["date"].year, ctx["date"].month, ctx["date"].day
-    )
+    dt = datetime(ctx["date"].year, ctx["date"].month, ctx["date"].day)
     with get_sqlalchemy_conn("isuag") as conn:
         df = pd.read_sql(
             """
@@ -65,7 +63,7 @@ def plot1(ctx):
             GROUP by station
         """,
             conn,
-            params=(dt, dt + datetime.timedelta(hours=24)),
+            params=(dt, dt + timedelta(hours=24)),
             index_col="station",
         )
     if df.empty:

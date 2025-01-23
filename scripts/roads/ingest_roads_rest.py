@@ -30,12 +30,12 @@ Run every five minutes from RUN_5MIN.sh
 
 """
 
-import datetime
 import json
 import os
 import subprocess
 import sys
 import zipfile
+from datetime import datetime, timedelta
 
 import httpx
 import pandas as pd
@@ -214,7 +214,7 @@ def main():
             continue
         # Timestamps appear to be UTC now
         if props["CARS_MSG_UPDATE_DATE"] is not None:
-            valid = utc(1970, 1, 1) + datetime.timedelta(
+            valid = utc(1970, 1, 1) + timedelta(
                 seconds=props["CARS_MSG_UPDATE_DATE"] / 1000.0
             )
         else:
@@ -239,14 +239,11 @@ def main():
         )
 
     # Force a run each morning at about 3 AM
-    if (
-        datetime.datetime.now().hour == 3
-        and datetime.datetime.now().minute < 10
-    ):
+    if datetime.now().hour == 3 and datetime.now().minute < 10:
         dirty = True
 
     if dirty:
-        export_shapefile(cursor, datetime.datetime.utcnow())
+        export_shapefile(cursor, utc())
 
     cursor.close()
     pgconn.commit()

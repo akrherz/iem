@@ -1,25 +1,25 @@
 """Plot the average temperature for the month"""
 
-import datetime
+from datetime import date, datetime, timedelta
 
 import numpy as np
+from pyiem.database import get_dbconnc
 from pyiem.plot import MapPlot
-from pyiem.util import get_dbconnc
 
 
 def main():
     """Go Main Go"""
-    now = datetime.datetime.now()
+    now = datetime.now()
     pgconn, icursor = get_dbconnc("iem")
 
-    day1 = datetime.date.today().replace(day=1)
-    day2 = (day1 + datetime.timedelta(days=35)).replace(day=1)
+    day1 = date.today().replace(day=1)
+    day2 = (day1 + timedelta(days=35)).replace(day=1)
 
     lats = []
     lons = []
     vals = []
     valmask = []
-    table = "summary_%s" % (day1.year,)
+    table = f"summary_{day1:%Y}"
     icursor.execute(
         f"""
         SELECT id, s.network, ST_x(s.geom) as lon, ST_y(s.geom) as lat,
@@ -38,7 +38,7 @@ def main():
         lons.append(row["lon"])
         vals.append(row["avgt"])
         valmask.append(row["network"] == "IA_ASOS")
-
+    pgconn.close()
     if len(vals) < 3:
         return
 

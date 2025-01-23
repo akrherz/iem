@@ -28,8 +28,8 @@ sts=2024-07-10T00:00Z&ets=2024-07-11T00:00Z
 
 """
 
-import datetime
 import json
+from datetime import datetime
 
 from pydantic import Field
 from pyiem.database import get_sqlalchemy_conn
@@ -47,10 +47,10 @@ class Schema(CGIModel):
         max_length=6,
         min_length=3,
     )
-    sts: datetime.datetime = Field(
+    sts: datetime = Field(
         ..., description="Start of the time period (UTC) to search for"
     )
-    ets: datetime.datetime = Field(
+    ets: datetime = Field(
         ..., description="End of the time period (UTC) to search for"
     )
 

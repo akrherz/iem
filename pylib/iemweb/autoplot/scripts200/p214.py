@@ -8,7 +8,7 @@ what the reality may have been.  Additionally, for the case of mean
 values, the presented timestamp is not of much use.
 """
 
-import datetime
+from datetime import date, datetime
 
 import pandas as pd
 from pyiem.database import get_sqlalchemy_conn
@@ -172,7 +172,7 @@ def add_data(ctx):
     months = month2months(month)
 
     cast = "int" if x in ["tmpf", "dwpf", "feel"] else "real"
-    basets = datetime.date(ctx["syear"], 1, 1)
+    basets = date(ctx["syear"], 1, 1)
     direction = "DESC" if agg == "max" else "ASC"
     with get_sqlalchemy_conn("asos") as conn:
         ctx["df"] = pd.read_sql(
@@ -215,7 +215,7 @@ def add_data(ctx):
         VDICT[x],
         month.upper(),
         minyear,
-        datetime.datetime.now().year,
+        datetime.now().year,
     )
 
 
