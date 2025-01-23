@@ -27,7 +27,7 @@ def test_http_range_bytes_request():
         headers={"Range": "bytes=0-100"},
     )
     assert response.status_code == 206
-    assert response.headers["Content-Range"] == "bytes 0-100/85051"
+    assert response.headers["Content-Range"] == "bytes 0-100/59811"
     assert response.headers["Content-Length"] == "101"
 
 

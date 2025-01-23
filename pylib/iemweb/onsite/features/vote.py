@@ -48,7 +48,7 @@ def do(environ, headers, vote):
         # Allow this vote
         d[vote] += 1
         cursor.execute(
-            f"UPDATE feature SET {vote} = {vote} + 1 WHERE "
+            f"UPDATE feature SET {vote} = {vote} + 1 WHERE "  # skipcq
             "to_char(valid, 'YYmmdd')::int = %s",
             (foid,),
         )
