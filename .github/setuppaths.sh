@@ -5,6 +5,7 @@ mkdir _mesonet
 sudo ln -s `pwd`/_mesonet /mesonet
 mkdir -p /mesonet/ldmdata/gis/images/4326/USCOMP
 mkdir -p /mesonet/share/pickup/yieldfx
+mkdir -p /mesonet/share/features/2022/03
 
 mkdir _webtmp
 sudo ln -s `pwd`/_webtmp /var/webtmp

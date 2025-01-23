@@ -184,8 +184,8 @@ def plotter(ctx: dict):
             index_col=None,
         )
     if not wwa.empty:
-        wwa["utc_issue"] = wwa["utc_issue"].dt.tz_localize(ZoneInfo("UTC"))
-        wwa["utc_expire"] = wwa["utc_expire"].dt.tz_localize(ZoneInfo("UTC"))
+        wwa["utc_issue"] = wwa["utc_issue"].dt.tz_localize(timezone.utc)
+        wwa["utc_expire"] = wwa["utc_expire"].dt.tz_localize(timezone.utc)
         wwa = wwa[wwa["key"].isin(DOMAIN[ctx["mode"]])].reset_index()
     # Find Obs
     with get_sqlalchemy_conn("asos") as conn:

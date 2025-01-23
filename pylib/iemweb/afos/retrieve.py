@@ -58,6 +58,11 @@ Return a zip file of AFDDMX products during 2024
 https://mesonet.agron.iastate.edu/cgi-bin/afos/retrieve.py?pil=AFDDMX&fmt=zip&\
 sdate=2024-01-01T00:00Z&edate=2024-12-31T23:59Z
 
+Return the aviation section of the latest AFD from NWS Des Moines
+
+https://mesonet.agron.iastate.edu/cgi-bin/afos/retrieve.py?pil=AFDDMX&\
+aviation_afd=1
+
 """
 
 import re
@@ -197,10 +202,12 @@ def zip_handler(cursor):
 def special_metar_logic(pils, limit, fmt, sio, order):
     access = get_dbconn("iem")
     cursor = access.cursor()
+    # skipcq
     sql = (
         "SELECT raw from current_log c JOIN stations t on "
         "(t.iemid = c.iemid) WHERE raw != '' and "
-        f"id = '{pils[0][3:].strip()}' ORDER by valid {order} LIMIT {limit}"
+        f"id = '{pils[0][3:].strip()}' "
+        f"ORDER by valid {order} LIMIT {limit}"
     )
     cursor.execute(sql)
     for row in cursor:
@@ -274,8 +281,10 @@ def application(environ, start_response):
     if environ["edate"] < environ["sdate"]:
         environ["sdate"], environ["edate"] = environ["edate"], environ["sdate"]
     fmt = environ["fmt"]
-    headers = [("X-Content-Type-Options", "nosniff")]
-    headers.append(("Content-type", get_ct(environ)))
+    headers = [
+        ("X-Content-Type-Options", "nosniff"),
+        ("Content-type", get_ct(environ)),
+    ]
     if environ["dl"] or fmt == "zip":
         suffix = "zip" if fmt == "zip" else "txt"
         headers.append(
@@ -303,6 +312,7 @@ def application(environ, start_response):
         if len(pils[0].strip()) == 3:
             # There's a database index on this
             plimit = " substr(pil, 1, 3) = :pil "
+    # skipcq
     sql = (
         "SELECT data, pil, "
         "to_char(entered at time zone 'UTC', 'YYYYMMDDHH24MI') as ts "

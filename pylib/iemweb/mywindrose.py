@@ -25,7 +25,7 @@ Changelog
 
 """
 
-import datetime
+from datetime import timedelta
 from io import BytesIO
 from zoneinfo import ZoneInfo
 
@@ -216,7 +216,7 @@ def application(environ, start_response):
             hours.extend(range(environ["ets"].hour))
         else:
             if environ["sts"].hour == environ["ets"].hour:
-                environ["ets"] += datetime.timedelta(hours=1)
+                environ["ets"] += timedelta(hours=1)
             hours = list(range(environ["sts"].hour, environ["ets"].hour))
     else:
         hours = list(range(24))
