@@ -16,7 +16,7 @@ https://mesonet.agron.iastate.edu/geojson/cf6.py?dt=2024-01-01
 
 """
 
-import datetime
+from datetime import date
 
 import simplejson as json
 from pydantic import Field
@@ -30,9 +30,7 @@ encoder.FLOAT_REPR = lambda o: format(o, ".2f")
 class Schema(CGIModel):
     """See how we are called."""
 
-    dt: datetime.date = Field(
-        default=datetime.date.today(), description="Date to query for"
-    )
+    dt: date = Field(default=date.today(), description="Date to query for")
     callback: str = Field(None, description="JSONP callback function name")
     fmt: str = Field(description="Format of output", default="geojson")
 

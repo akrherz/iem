@@ -1,7 +1,7 @@
 """Generate the IEMRE climatology file, hmmm"""
 
-import datetime
 import os
+from datetime import datetime
 
 import numpy as np
 from pyiem import iemre, mrms
@@ -32,15 +32,13 @@ def init_year(ts):
     nc.realization = 1
     nc.Conventions = "CF-1.0"  # *cough*
     nc.contact = "Daryl Herzmann, akrherz@iastate.edu, 515-294-5978"
-    nc.history = "%s Generated" % (
-        datetime.datetime.now().strftime("%d %B %Y"),
-    )
+    nc.history = "%s Generated" % (datetime.now().strftime("%d %B %Y"),)
     nc.comment = "No Comment at this time"
 
     # Setup Dimensions
     nc.createDimension("lat", ny)
     nc.createDimension("lon", nx)
-    ts2 = datetime.datetime(ts.year + 1, 1, 1)
+    ts2 = datetime(ts.year + 1, 1, 1)
     days = (ts2 - ts).days
     nc.createDimension("time", int(days))
     nc.createDimension("nv", 2)
@@ -94,7 +92,7 @@ def init_year(ts):
 
 def main():
     """Go Main"""
-    init_year(datetime.datetime(2000, 1, 1))
+    init_year(datetime(2000, 1, 1))
 
 
 if __name__ == "__main__":

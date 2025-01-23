@@ -6,7 +6,7 @@ the given month and season.
 """
 
 import calendar
-import datetime
+from datetime import date
 
 import pandas as pd
 from pyiem.database import get_sqlalchemy_conn
@@ -65,7 +65,7 @@ def get_description():
         dict(
             type="year",
             name="eyear",
-            default=datetime.date.today().year,
+            default=date.today().year,
             label="Inclusive Ending Year:",
         ),
         dict(

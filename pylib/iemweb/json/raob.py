@@ -29,8 +29,8 @@ ts=2024-03-24T12:00:00Z&pressure=500
 
 """
 
-import datetime
 import json
+from datetime import datetime, timezone
 
 import numpy as np
 import pandas as pd
@@ -56,7 +56,7 @@ class Schema(CGIModel):
         min_length=3,
         max_length=4,
     )
-    ts: datetime.datetime = Field(
+    ts: datetime = Field(
         ...,
         description="Timestamp of Interest, ISO-8601 preferred",
     )
@@ -67,15 +67,15 @@ class Schema(CGIModel):
         """Ensure we have a valid timestamp."""
         if value.find("T") > 0:
             # Assume ISO
-            dt = datetime.datetime.strptime(value[:16], "%Y-%m-%dT%H:%M")
+            dt = datetime.strptime(value[:16], "%Y-%m-%dT%H:%M")
         else:
-            dt = datetime.datetime.strptime(value[:12], "%Y%m%d%H%M")
+            dt = datetime.strptime(value[:12], "%Y%m%d%H%M")
 
         # Matches the archive range
         if dt.year < 1946 or dt.year > utc().year:
             raise ValueError("Timestamp out of archive bounds.")
 
-        return dt.replace(tzinfo=datetime.timezone.utc)
+        return dt.replace(tzinfo=timezone.utc)
 
     @field_validator("station", mode="before")
     @classmethod

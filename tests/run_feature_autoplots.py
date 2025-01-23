@@ -1,7 +1,7 @@
 """Attempt to rerun all feature plots to see what I broke."""
 
-import datetime
 import sys
+from datetime import datetime
 from multiprocessing import Pool
 
 import httpx
@@ -46,11 +46,11 @@ def run_plot(uri):
 
 def workflow(entry):
     """Run our queued entry of id and format"""
-    sts = datetime.datetime.now()
+    sts = datetime.now()
     res = run_plot(entry[1])
     if res is False:
         return [entry[0], entry[1], False]
-    ets = datetime.datetime.now()
+    ets = datetime.now()
     return [entry[0], entry[1], (ets - sts).total_seconds()]
 
 

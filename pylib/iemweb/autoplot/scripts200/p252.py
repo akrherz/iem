@@ -6,7 +6,7 @@ at-or-above or below a given threshold between an inclusive period of days.
 is to search the period including 1 January.
 """
 
-import datetime
+from datetime import date
 
 import numpy as np
 import pandas as pd
@@ -88,7 +88,7 @@ def get_description():
         ),
         dict(
             type="year",
-            default=datetime.date.today().year,
+            default=date.today().year,
             optional=True,
             name="eyear",
             label="Limit search to years before (inclusive):",
@@ -109,7 +109,7 @@ def plotter(ctx: dict):
         threshold = int(threshold)
     nt = NetworkTable(f"{sector}CLIMATE", only_online=False)
     syear = ctx.get("syear", 1893)
-    eyear = ctx.get("eyear", datetime.date.today().year)
+    eyear = ctx.get("eyear", date.today().year)
     comp = ">=" if ctx["w"] == "aoa" else "<"
     sday_limiter = "sday >= :sday and sday <= :eday"
     if ctx["sday"] > ctx["eday"]:

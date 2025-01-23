@@ -32,9 +32,8 @@ https://mesonet.agron.iastate.edu/json/spcwatch.py?ts=202408010000&fmt=excel
 
 """
 
-import datetime
+from datetime import datetime, timezone
 from io import BytesIO
-from zoneinfo import ZoneInfo
 
 import geopandas as gpd
 from pydantic import Field
@@ -136,8 +135,8 @@ def application(environ, start_response):
     if environ["ts"] is None:
         ts = utc()
     else:
-        ts = datetime.datetime.strptime(environ["ts"], "%Y%m%d%H%M")
-    ts = ts.replace(tzinfo=ZoneInfo("UTC"))
+        ts = datetime.strptime(environ["ts"], "%Y%m%d%H%M")
+    ts = ts.replace(tzinfo=timezone.utc)
     fmt = environ["fmt"]
     if environ["lon"] is not None and environ["lat"] is not None:
         watches = pointquery(environ["lon"], environ["lat"])

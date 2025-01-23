@@ -2,21 +2,21 @@
 Generate some sequential load to watch what happens to IEM's backend processing
 """
 
-import datetime
 import random
+from datetime import datetime, timedelta
 
 import httpx
 
 
 def main():
     """Do stressfull things"""
-    sts = datetime.datetime(2012, 1, 23)
-    ets = datetime.datetime(2012, 1, 24)
-    interval = datetime.timedelta(minutes=5)
+    sts = datetime(2012, 1, 23)
+    ets = datetime(2012, 1, 24)
+    interval = timedelta(minutes=5)
     now = sts
 
     cnt = 0
-    start = datetime.datetime.now()
+    start = datetime.now()
     istart = start
     while now < ets:
         for _ in range(1000):
@@ -33,8 +33,8 @@ def main():
             httpx.get(uri, timeout=5)
             cnt += 1
             if cnt % 100 == 0:
-                delta = datetime.datetime.now() - start
-                delta2 = datetime.datetime.now() - istart
+                delta = datetime.now() - start
+                delta2 = datetime.now() - istart
                 print(
                     ("%6i %9.5f req/s %9.5f req/s")
                     % (
@@ -43,7 +43,7 @@ def main():
                         (float(cnt) / delta.total_seconds()),
                     )
                 )
-                istart = datetime.datetime.now()
+                istart = datetime.now()
 
         now += interval
 

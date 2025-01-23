@@ -8,7 +8,7 @@ NEXRAD base reflectivity.
 please be patient!
 """
 
-import datetime
+from datetime import timedelta, timezone
 from io import BytesIO
 
 import matplotlib.colors as mpcolors
@@ -28,7 +28,7 @@ FONTSIZE = 32
 def get_description():
     """Return a dict describing how to call this plotter"""
     desc = {"data": False, "description": __doc__}
-    sts = utc() - datetime.timedelta(hours=5)
+    sts = utc() - timedelta(hours=5)
     desc["arguments"] = [
         dict(
             type="select",
@@ -83,7 +83,7 @@ def mp_factory(ctx):
 
 def add_forecast(img, ctx, valid, fhour, x, y):
     """Overlay things."""
-    ts = valid - datetime.timedelta(hours=fhour)
+    ts = valid - timedelta(hours=fhour)
     ppath = ts.strftime("%Y/%m/%d/model/hrrr/%H/hrrr.t%Hz.refd.grib2")
     with archive_fetch(ppath) as gribfn:
         if gribfn is None:
@@ -151,7 +151,7 @@ def add_obs(img, ctx, valid):
 
 def plotter(ctx: dict):
     """Go"""
-    valid = ctx["valid"].replace(tzinfo=datetime.timezone.utc)
+    valid = ctx["valid"].replace(tzinfo=timezone.utc)
     ramp = ramp2df("composite_n0q")
     ctx["cmap"] = mpcolors.ListedColormap(
         ramp[["r", "g", "b"]].to_numpy() / 256,

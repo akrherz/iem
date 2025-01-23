@@ -3,11 +3,12 @@ Check the status of our AWOS sites being offline or online
 run from RUN_10_AFTER.sh
 """
 
-import datetime
+from datetime import timedelta
 
+from pyiem.database import get_dbconnc
 from pyiem.network import Table as NetworkTable
 from pyiem.tracker import TrackerEngine
-from pyiem.util import get_dbconnc, logger, utc
+from pyiem.util import logger, utc
 
 LOG = logger()
 
@@ -18,7 +19,7 @@ def main():
     iem, icursor = get_dbconnc("iem")
     portfolio, pcursor = get_dbconnc("portfolio")
 
-    threshold = utc() - datetime.timedelta(hours=1)
+    threshold = utc() - timedelta(hours=1)
 
     icursor.execute(
         "SELECT id, valid from current c JOIN stations t ON "
