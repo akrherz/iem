@@ -14,6 +14,9 @@ python scripts/iemre/init_stage4_hourly.py --year=2024 --ci
 python scripts/iemre/init_stage4_daily.py --year=2024 --ci
 python scripts/iemre/init_daily_ifc.py --year=2024 --ci
 
+curl -o /mesonet/share/features/2022/03/220325.png \
+https://mesonet.agron.iastate.edu/onsite/features/2022/03/220325.png
+
 curl -o /mesonet/ldmdata/gis/images/4326/USCOMP/n0q_0.json \
 https://mesonet.agron.iastate.edu/data/gis/images/4326/USCOMP/n0q_0.json
 curl -o /mesonet/ldmdata/gis/images/4326/USCOMP/n0r_0.json \

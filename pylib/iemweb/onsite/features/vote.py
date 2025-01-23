@@ -1,11 +1,22 @@
 """Feature Voting"""
 
-import datetime
 import json
+from datetime import datetime, timedelta
 from http.cookies import SimpleCookie
 
-from pyiem.util import get_dbconnc
-from pyiem.webutil import iemapp
+from pydantic import Field
+from pyiem.database import get_dbconnc
+from pyiem.webutil import CGIModel, iemapp
+
+
+class Schema(CGIModel):
+    """See how we are called."""
+
+    vote: str = Field(
+        default=None,
+        description="The vote to cast",
+        pattern="^(good|bad|abstain)$",
+    )
 
 
 def do(environ, headers, vote):
@@ -42,7 +53,7 @@ def do(environ, headers, vote):
             (foid,),
         )
         # Now we set a cookie
-        expiration = datetime.datetime.now() + datetime.timedelta(days=4)
+        expiration = datetime.now() + timedelta(days=4)
         cookie = SimpleCookie()
         cookie["foid"] = foid
         cookie["foid"]["path"] = "/onsite/features/"
@@ -57,7 +68,7 @@ def do(environ, headers, vote):
     return d
 
 
-@iemapp()
+@iemapp(schema=Schema)
 def application(environ, start_response):
     """Process this request.
 
@@ -65,7 +76,7 @@ def application(environ, start_response):
     or like "/onsite/features/vote/abstain.json".
     """
     headers = [("Content-type", "application/json")]
-    vote = environ.get("vote", "missing")
+    vote = environ["vote"]
     j = do(environ, headers, vote)
     start_response("200 OK", headers)
-    return [json.dumps(j).encode("ascii")]
+    return json.dumps(j)

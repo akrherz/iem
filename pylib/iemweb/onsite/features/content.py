@@ -1,9 +1,9 @@
 """Frontend for Feature Content, such that we can make some magic happen"""
 
-import datetime
 import os
 import re
 import sys
+from datetime import date
 from io import BytesIO
 
 from pyiem.exceptions import IncompleteWebRequest
@@ -17,18 +17,19 @@ PATTERN = re.compile(
 )
 
 
-def dblog(yymmdd):
+def dblog(yymmdd: str):
     """Log this request"""
     try:
         with get_dbconn("mesosite") as pgconn:
             cursor = pgconn.cursor()
-            dt = datetime.date(
+            dt = date(
                 2000 + int(yymmdd[:2]), int(yymmdd[2:4]), int(yymmdd[4:6])
             )
             cursor.execute(
                 "UPDATE feature SET views = views + 1 WHERE date(valid) = %s",
                 (dt,),
             )
+            cursor.close()
             pgconn.commit()
     except Exception as exp:
         sys.stderr.write(str(exp))
@@ -117,7 +118,7 @@ def application(environ, start_response):
         headers.append(
             (
                 "Content-Range",
-                "bytes %s-%s/%s" % (stripe.start, secondval, totalsize),
+                f"bytes {stripe.start}-{secondval}/{totalsize}",
             )
         )
     dblog(data["yymmdd"])

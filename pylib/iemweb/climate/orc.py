@@ -14,7 +14,7 @@ https://mesonet.agron.iastate.edu/cgi-bin/climate/orc.py
 
 """
 
-import datetime
+from datetime import datetime, timedelta
 from io import StringIO
 
 from pyiem.database import get_dbconn
@@ -73,9 +73,9 @@ def application(_environ, start_response):
     acursor = ASOS.cursor()
 
     ADJUSTMENT = 0
-    now = datetime.datetime.now()
+    now = datetime.now()
     e = now.replace(day=17)
-    s = (e - datetime.timedelta(days=31)).replace(day=18)
+    s = (e - timedelta(days=31)).replace(day=18)
     db = {}
     now = s
     while now <= e:
@@ -85,7 +85,7 @@ def application(_environ, start_response):
             "avg_high": -99,
             "avg_low": -99,
         }
-        now += datetime.timedelta(days=1)
+        now += timedelta(days=1)
 
     # Get Sioux City data
     icursor.execute(
@@ -141,7 +141,7 @@ def application(_environ, start_response):
                 db[now.strftime("%m%d")]["avg_low"],
             )
         )
-        now += datetime.timedelta(days=1)
+        now += timedelta(days=1)
 
     h, low = averageTemp(db)
     ch, cl = averageTemp(db, "avg_high", "avg_low")

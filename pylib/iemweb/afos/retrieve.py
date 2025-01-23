@@ -58,6 +58,11 @@ Return a zip file of AFDDMX products during 2024
 https://mesonet.agron.iastate.edu/cgi-bin/afos/retrieve.py?pil=AFDDMX&fmt=zip&\
 sdate=2024-01-01T00:00Z&edate=2024-12-31T23:59Z
 
+Return the aviation section of the latest AFD from NWS Des Moines
+
+https://mesonet.agron.iastate.edu/cgi-bin/afos/retrieve.py?pil=AFDDMX&\
+aviation_afd=1
+
 """
 
 import re

@@ -19,8 +19,8 @@ https://mesonet.agron.iastate.edu/json/stations.py
 
 """
 
-import datetime
 import json
+from datetime import date as dateobj
 
 import pandas as pd
 from pydantic import Field
@@ -35,8 +35,8 @@ class Schema(CGIModel):
     """See how we are called."""
 
     callback: str = Field(None, description="JSONP callback function name")
-    date: datetime.date = Field(
-        default=datetime.date.today(),
+    date: dateobj = Field(
+        default=dateobj.today(),
         description="Query metadata changes since this date.",
     )
 

@@ -129,7 +129,7 @@ def plotter(ctx: dict):
     g = sns.JointGrid(data=df, x="doy", y=varname, height=6)
     figure(fig=g.figure, apctx=ctx, title=title)
     # Create an inset legend for the histogram colorbar
-    cax = g.figure.add_axes([0.8, 0.65, 0.02, 0.2])
+    cax = g.figure.add_axes((0.8, 0.65, 0.02, 0.2))
 
     # Add the joint and marginal histogram plots
     g.plot_joint(
