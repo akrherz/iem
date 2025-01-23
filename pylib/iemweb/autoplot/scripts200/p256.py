@@ -306,6 +306,8 @@ def pp(val, width, dec):
     """Format a value."""
     if pd.isna(val):
         return " " * (width - 1) + "M"
+    if 0 < val < 0.01:
+        return " " * (width - 1) + "T"
     return f"{val:.{dec}f}".rjust(width)
 
 
