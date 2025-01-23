@@ -40,7 +40,7 @@ S=/opt/iem/scripts
 # Process last month's asos 1 min
 4 4 9 * * cd $S/ingestors/asos_1minute; python parse_ncei_asos1minute.py --year=$(date --date '11 days ago' +'\%Y') --month=$(date --date '11 days ago' +'\%m')
 # Process RT asos 1 min
-6 15 * * * cd $S/ingestors/asos_1minute; python parse_ncei_asos1minute.py
+6 15 * * * cd $S/ingestors/asos_1minute; python parse_ncei_asos1minute.py --date=$(date +'\%Y-\%m-\%d')
 
 03,13,24 * * * * cd $S/plots; ./HOURLY_PLOTS
 

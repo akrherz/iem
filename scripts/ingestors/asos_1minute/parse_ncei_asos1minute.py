@@ -8,18 +8,16 @@ https://www.ncei.noaa.gov/pub/download/hidden/onemin/
 NCEI generates these at about 1530EDT, so we run a bit after that via crontab
 """
 
-# stdlib
 import codecs
-import datetime
 import os
 import re
 import subprocess
 import sys
 import tarfile
+from datetime import datetime, timedelta
 from io import StringIO
 from typing import Optional
 
-# third party
 import click
 import httpx
 import pandas as pd
@@ -57,9 +55,9 @@ def tstamp2dt(s, metadata):
     utc_is_ahead = metadata["utc_direction"] == 1
     # PAIN
     if utc_is_ahead and utc_hr < local_hr:
-        ts += datetime.timedelta(hours=24)
+        ts += timedelta(hours=24)
     elif not utc_is_ahead and utc_hr > local_hr:
-        ts -= datetime.timedelta(hours=24)
+        ts -= timedelta(hours=24)
 
     return ts.replace(hour=utc_hr, minute=int(s[14:16]))
 
@@ -234,7 +232,11 @@ def runner(pgconn, metadata, station):
     data = {}
     # We have two files to worry about
     for ln in liner(metadata["fn5"]):
-        d = p1_parser(ln, metadata)
+        try:
+            d = p1_parser(ln, metadata)
+        except Exception as exp:
+            LOG.info("p1_parser failed: %s", exp)
+            continue
         if d is None or d["valid"] <= metadata["archive_end"]:
             continue
         data[d["valid"]] = d
@@ -256,7 +258,7 @@ def runner(pgconn, metadata, station):
 
     mints = min(data)
     maxts = max(data)
-    if (maxts - mints) > datetime.timedelta(days=40):
+    if (maxts - mints) > timedelta(days=40):
         LOG.warning(
             "refusing to update %s due to %s-%s > 40 days",
             station,
@@ -301,7 +303,10 @@ def runner(pgconn, metadata, station):
 
 
 def init_dataframes(
-    year: Optional[int], month: Optional[int], station: Optional[str]
+    year: Optional[int],
+    month: Optional[int],
+    station: Optional[str],
+    dt: Optional[datetime],
 ) -> list:
     """Build the processing dataframe."""
     # ASOS query limit keeps other sites out of result that may have 1min
@@ -323,7 +328,6 @@ def init_dataframes(
     df["archive_end"] = DT1980
     df["fn5"] = ""
     df["fn6"] = ""
-    dt = utc()
     if year is not None and month is not None:
         dt = utc(year, month)
         if station is not None:
@@ -334,7 +338,7 @@ def init_dataframes(
     res = []
     months = [dt]
     if dt.day < 7:
-        months.insert(0, dt - datetime.timedelta(days=9))
+        months.insert(0, dt - timedelta(days=9))
     for mdt in months:
         df["archive_end"] = DT1980
         df["fn5"] = ""
@@ -414,12 +418,24 @@ def cleanup(df):
 @click.option("--year", type=int, required=False, help="Year to process")
 @click.option("--month", type=int, required=False, help="Month to process")
 @click.option("--station", type=str, required=False, help="Station to process")
-def main(year: Optional[int], month: Optional[int], station: Optional[str]):
+@click.option(
+    "--date",
+    "dt",
+    type=click.DateTime(),
+    required=False,
+    help="NCEI hidden file date",
+)
+def main(
+    year: Optional[int],
+    month: Optional[int],
+    station: Optional[str],
+    dt: Optional[datetime],
+):
     """Go Main Go"""
     cronjob = not sys.stdout.isatty()
     # Build a dataframe to do work with
     total = 0
-    for df in init_dataframes(year, month, station):
+    for df in init_dataframes(year, month, station, dt):
         pgconn = get_dbconn("asos1min")
         progress = tqdm(df.index.values, disable=cronjob)
         for _station in progress:
