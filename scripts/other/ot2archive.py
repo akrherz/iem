@@ -76,7 +76,9 @@ def dowork(sts, ets):
 
     LOG.info("%s->%s deletes: %s inserts: %s", sts, ets, deletes, inserts)
     ocursor.close()
+    IEM.close()
     OTHER.commit()
+    OTHER.close()
 
 
 def get_first_updated():

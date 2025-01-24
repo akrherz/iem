@@ -82,11 +82,11 @@ def get_description():
 
 def plotter(ctx: dict):
     """Go"""
-    date = ctx["date"]
+    dt = ctx["date"]
     z = ctx["z"]
     period = ctx["f"]
     scale = ctx["scale"]
-    valid = utc(date.year, date.month, date.day, int(z))
+    valid = utc(dt.year, dt.month, dt.day, int(z))
     with archive_fetch(
         valid.strftime(f"%Y/%m/%d/model/wpc/p{period}m_%Y%m%d%Hf{period}.grb")
     ) as gribfn:

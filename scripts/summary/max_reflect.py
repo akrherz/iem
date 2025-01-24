@@ -92,7 +92,7 @@ def run(tmpdir, prod, sts):
     # Set output color table to match input
     outdataset.GetRasterBand(1).SetRasterColorTable(n0rct)
     outdataset.GetRasterBand(1).WriteArray(maxn0r)
-    del outdataset
+    del outdataset  # skipcq
 
     subprocess.call(
         [
@@ -146,7 +146,7 @@ def run(tmpdir, prod, sts):
         f"{URLBASE}layers[]=uscounties&layers[]={layer}&ts={sts:%Y%m%d%H%M}",
         timeout=120,
     )
-    with open(f"{tmpdir}/{sts:%Y%m%d%H}.png", "wb") as fh:
+    with open(f"{tmpdir}/{sts:%Y%m%d%H}.png", "wb") as fh:  # skipcq
         fh.write(resp.content)
     cmd = [
         "pqinsert",

@@ -14,7 +14,7 @@ RUN_0Z.sh - processes the current date and gets the prelim calday sites data.
 RUN_2AM.sh - processes yesterday, which should run all sites
 """
 
-import datetime
+from datetime import date, datetime
 
 import click
 import numpy as np
@@ -34,38 +34,36 @@ LOG = logger()
 NON_CONUS = ["AK", "HI", "PR", "VI", "GU", "AS"]
 
 
-def init_df(state, date):
+def init_df(state, dt: date):
     """Build up a dataframe for further processing."""
     # NB: we need to load all stations and then later cull those that are
     # not relevent for this given date
     nt = NetworkTable(f"{state}CLIMATE", only_online=False)
     rows = []
     # Logic to determine if we can generate data for today's date or not
-    skip_calday_sites = (
-        date == datetime.date.today() and datetime.datetime.now().hour < 18
-    )
+    skip_calday_sites = dt == date.today() and datetime.now().hour < 18
     threaded = {}
     for sid, entry in nt.sts.items():
         # handled by compute4regions
         if sid[2:] == "0000" or sid[2] in ["C", "D"]:
             continue
         # clicken/egg status
-        ab = date if entry["archive_begin"] is None else entry["archive_begin"]
-        ae = date if entry["archive_end"] is None else entry["archive_end"]
+        ab = dt if entry["archive_begin"] is None else entry["archive_begin"]
+        ae = dt if entry["archive_end"] is None else entry["archive_end"]
         # out of bounds
-        if date < ab or date > ae:
+        if dt < ab or dt > ae:
             continue
         if skip_calday_sites and entry["temp24_hour"] not in range(3, 12):
             continue
         if entry["threading"]:
-            threaded[sid] = nt.get_threading_id(sid, date)
+            threaded[sid] = nt.get_threading_id(sid, dt)
         i, j = IEMRE.find_ij(entry["lon"], entry["lat"])
         rows.append(
             {
-                "day": date,
-                "sday": f"{date:%m%d}",
-                "year": date.year,
-                "month": date.month,
+                "day": dt,
+                "sday": f"{dt:%m%d}",
+                "year": dt.year,
+                "month": dt.month,
                 "station": sid,
                 "gridi": i,
                 "gridj": j,
@@ -91,7 +89,7 @@ def init_df(state, date):
     return pd.DataFrame(rows).set_index("station"), threaded
 
 
-def load_current(df: pd.DataFrame, state: str, date):
+def load_current(df: pd.DataFrame, state: str, dt: date):
     """load what our database currently has."""
     # Load up any available observations
     with get_sqlalchemy_conn("coop") as conn:
@@ -105,7 +103,7 @@ def load_current(df: pd.DataFrame, state: str, date):
                 """
             ),
             conn,
-            params={"date": date, "stations": df.index.values.tolist()},
+            params={"date": dt, "stations": df.index.values.tolist()},
             index_col="station",
         )
     # combine this back into the main table
@@ -316,13 +314,13 @@ def merge_threaded(df, threaded):
 
 
 @click.command()
-@click.option("--date", required=True, type=click.DateTime())
+@click.option("--date", "dt", required=True, type=click.DateTime())
 @click.option("--state", "st", default=None, help="Single state to process")
-def main(date, st):
+def main(dt: datetime, st):
     """Go Main Go."""
-    date = date.date()
+    dt = dt.date()
     ds = get_grids(
-        date,
+        dt,
         varnames=[
             "high_tmpk",
             "low_tmpk",
@@ -336,13 +334,13 @@ def main(date, st):
     states = state_names.keys() if st is None else [st]
     for state in states:
         # initialize our dataframe based on station table metadata
-        df, threaded = init_df(state, date)
+        df, threaded = init_df(state, dt)
         if df is None:
             LOG.info("skipping state %s as load_table empty", state)
             continue
         # Load what our database has for current obs
-        df = load_current(df, state, date)
-        df = merge_obs(df, state, date)
+        df = load_current(df, state, dt)
+        df = merge_obs(df, state, dt)
         # IEMRE does not exist for these states, so we skip this
         if state not in NON_CONUS:
             df = estimate_hilo(df, ds)
@@ -353,7 +351,7 @@ def main(date, st):
                 LOG.info(
                     "state: %s date: %s missing: %s, skipping...",
                     state,
-                    date.strftime("%Y-%m-%d"),
+                    dt.strftime("%Y-%m-%d"),
                     missing,
                 )
                 continue

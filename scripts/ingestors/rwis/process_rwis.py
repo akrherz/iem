@@ -255,7 +255,7 @@ def gen_metars(obs, filename, convids=False):
     """
     mtime = utc().strftime("%d%H%M")
     thres = utc() - timedelta(hours=3)
-    with open(filename, "w", encoding="utf-8") as fp:
+    with open(filename, "w", encoding="utf-8") as fp:  # skipcq
         fp.write("\001\015\015\012001\n")
         fp.write(f"SAUS43 KDMX {mtime}\015\015\012METAR\015\015\012")
         for sid in obs:
