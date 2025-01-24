@@ -43,8 +43,8 @@ https://mesonet.agron.iastate.edu/json/sbw_by_point.py?lat=41.99&lon=-92.0\
 
 """
 
-import datetime
 import json
+from datetime import date, datetime
 from io import BytesIO, StringIO
 
 import numpy as np
@@ -77,12 +77,8 @@ class Schema(CGIModel):
     lon: float = Field(
         -92.0, description="Longitude of point", ge=-180, le=180
     )
-    sdate: datetime.date = Field(
-        default=datetime.date(2002, 1, 1), description="Start Date"
-    )
-    edate: datetime.date = Field(
-        default=datetime.date(2099, 1, 1), description="End Date"
-    )
+    sdate: date = Field(default=date(2002, 1, 1), description="Start Date")
+    edate: date = Field(default=date(2099, 1, 1), description="End Date")
     valid: AwareDatetime = Field(
         default=None,
         description="If provided, only provide results valid at this time.",
@@ -94,9 +90,7 @@ class Schema(CGIModel):
         """Forgive some things."""
         if value is None:
             return None
-        return datetime.datetime.strptime(
-            value.replace("/", "-"), "%Y-%m-%d"
-        ).date()
+        return datetime.strptime(value.replace("/", "-"), "%Y-%m-%d").date()
 
 
 def make_url(row):

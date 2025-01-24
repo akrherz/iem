@@ -3,13 +3,14 @@
 called from RUN_10_AFTER.sh
 """
 
-import datetime
+from datetime import timedelta
 
 import httpx
 import pandas as pd
+from pyiem.database import get_dbconnc
 from pyiem.network import Table as NetworkTable
 from pyiem.reference import ISO8601
-from pyiem.util import get_dbconnc, get_properties, logger, utc
+from pyiem.util import get_properties, logger, utc
 
 LOG = logger()
 NT = NetworkTable("IA_RWIS")
@@ -25,6 +26,8 @@ def load_metadata():
     for row in icursor:
         key = f"{row['location_id']}_{row['lane_id']}"
         meta[key] = row["sensor_id"]
+    icursor.close()
+    conn.close()
     return meta
 
 
@@ -83,8 +86,8 @@ def process(cursor, df, meta):
 def main():
     """Go Main Go."""
     # prevent a clock drift issue
-    ets = utc() - datetime.timedelta(minutes=1)
-    sts = ets - datetime.timedelta(hours=4)
+    ets = utc() - timedelta(minutes=1)
+    sts = ets - timedelta(hours=4)
     edate = ets.strftime(ISO8601)
     sdate = sts.strftime(ISO8601)
     meta = load_metadata()

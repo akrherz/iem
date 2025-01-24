@@ -1,6 +1,6 @@
 """.. title:: SPC Outlook Service
 
-Return to `JSON Services </json/>`_.
+Return to `API Services </api/>`_.
 
 Documentation for /json/spcoutlook.py
 -------------------------------------
@@ -35,10 +35,9 @@ https://mesonet.agron.iastate.edu/json/spcoutlook.py\
 
 """
 
-import datetime
 import json
+from datetime import datetime, timedelta, timezone
 from io import BytesIO
-from zoneinfo import ZoneInfo
 
 import pandas as pd
 from pydantic import Field
@@ -92,16 +91,16 @@ def process_df(watches: pd.DataFrame) -> pd.DataFrame:
     return watches
 
 
-def dotime(time, lon, lat, day, cat) -> tuple[pd.DataFrame, datetime.datetime]:
+def dotime(time, lon, lat, day, cat) -> tuple[pd.DataFrame, datetime]:
     """Query for Outlook based on some timestamp"""
     if time in ["", "current", "now"]:
         ts = utc()
         if day > 1:
-            ts += datetime.timedelta(days=day - 1)
+            ts += timedelta(days=day - 1)
     else:
         # ISO formatting
-        ts = datetime.datetime.strptime(time, "%Y-%m-%dT%H:%MZ")
-        ts = ts.replace(tzinfo=ZoneInfo("UTC"))
+        ts = datetime.strptime(time, "%Y-%m-%dT%H:%MZ")
+        ts = ts.replace(tzinfo=timezone.utc)
     with get_sqlalchemy_conn("postgis") as conn:
         outlooks = pd.read_sql(
             text("""

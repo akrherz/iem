@@ -11,13 +11,13 @@ from datetime import datetime, timedelta, timezone
 import httpx
 import numpy as np
 import pandas as pd
-from pyiem import util
-from pyiem.database import get_sqlalchemy_conn
+from pyiem.database import get_dbconnc, get_sqlalchemy_conn
 from pyiem.network import Table as NetworkTable
 from pyiem.observation import Observation
 from pyiem.tracker import TrackerEngine
+from pyiem.util import convert_value, exponential_backoff, logger, utc
 
-LOG = util.logger()
+LOG = logger()
 NT = NetworkTable("IA_RWIS", only_online=False)
 REMOTE2NWSLI = {str(NT.sts[sid]["remote_id"]): sid for sid in NT.sts}
 RWIS2METAR = {
@@ -202,9 +202,9 @@ def merge(atmos, surface):
 
 def do_iemtracker(obs):
     """Iterate over the obs and do IEM Tracker related activities"""
-    threshold = util.utc() - timedelta(hours=3)
-    iem_pgconn, icursor = util.get_dbconnc("iem")
-    portfolio_pgconn, pcursor = util.get_dbconnc("portfolio")
+    threshold = utc() - timedelta(hours=3)
+    iem_pgconn, icursor = get_dbconnc("iem")
+    portfolio_pgconn, pcursor = get_dbconnc("portfolio")
     tracker = TrackerEngine(icursor, pcursor)
     tracker.process_network(obs, "iarwis", NT, threshold)
     tracker.send_emails()
@@ -253,8 +253,8 @@ def gen_metars(obs, filename, convids=False):
       convids (bool): should we use special logic for ID conversion
 
     """
-    mtime = util.utc().strftime("%d%H%M")
-    thres = util.utc() - timedelta(hours=3)
+    mtime = utc().strftime("%d%H%M")
+    thres = utc() - timedelta(hours=3)
     with open(filename, "w", encoding="utf-8") as fp:
         fp.write("\001\015\015\012001\n")
         fp.write(f"SAUS43 KDMX {mtime}\015\015\012METAR\015\015\012")
@@ -278,10 +278,10 @@ def gen_metars(obs, filename, convids=False):
                 windtxt = METARwind(ob["sknt"], ob["drct"], ob.get("gust"))
             if obs.get("tmpf") is not None and obs.get("dwpf") is not None:
                 m_tmpc, t_tmpc = METARtemp(
-                    util.convert_value(ob["tmpf"], "degF", "degC")
+                    convert_value(ob["tmpf"], "degF", "degC")
                 )
                 m_dwpc, t_dwpc = METARtemp(
-                    util.convert_value(ob["dwpf"], "degF", "degC")
+                    convert_value(ob["dwpf"], "degF", "degC")
                 )
                 temptxt = "%s/%s" % (m_tmpc, m_dwpc)
                 t_temptxt = "T%s%s " % (t_tmpc, t_dwpc)
@@ -304,7 +304,7 @@ def update_iemaccess(obs):
     """Update the IEMAccess database"""
     for sid in obs:
         # FIXME
-        pgconn, icursor = util.get_dbconnc("iem")
+        pgconn, icursor = get_dbconnc("iem")
         ob = obs[sid]
         iemob = Observation(sid, "IA_RWIS", ob["valid"])
         for varname in ob:
@@ -340,7 +340,7 @@ def process_features(features):
 
 def fetch(uri: str) -> pd.DataFrame:
     """Download the files we need"""
-    res = util.exponential_backoff(httpx.get, uri, timeout=30)
+    res = exponential_backoff(httpx.get, uri, timeout=30)
     if res is None:
         LOG.info("failed to fetch %s", uri)
         sys.exit()
@@ -401,7 +401,7 @@ def main():
     # Remove back out those stations that are offline
     obs = {k: v for k, v in obs.items() if v["online"]}
 
-    ts = util.utc().strftime("%d%H%M")
+    ts = utc().strftime("%d%H%M")
     fn1 = f"/tmp/IArwis{ts}.sao"
     fn2 = f"/tmp/IA.rwis{ts}.sao"
     gen_metars(obs, fn1, False)

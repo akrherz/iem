@@ -19,8 +19,8 @@ https://mesonet.agron.iastate.edu/geojson/agclimate.py\
 
 """
 
-import datetime
 import json
+from datetime import datetime, timedelta, timezone
 
 from metpy.units import units
 from pydantic import Field
@@ -155,7 +155,7 @@ def get_data(cursor, ts):
     data = {"type": "FeatureCollection", "features": []}
     midnight = ts.replace(hour=0, minute=0)
     tophour = ts.replace(minute=0)
-    h24 = ts - datetime.timedelta(hours=24)
+    h24 = ts - timedelta(hours=24)
     mon_ts0 = min([h24, ts.replace(day=1, hour=1)])
     cursor.execute(
         """
@@ -328,8 +328,7 @@ def application(environ, start_response):
         ts = utc().replace(minute=0, second=0, microsecond=0)
     else:
         fmt = "%Y-%m-%dT%H:%M:%S.000Z" if len(dt) == 24 else "%Y-%m-%dT%H:%MZ"
-        ts = datetime.datetime.strptime(dt, fmt)
-        ts = ts.replace(tzinfo=datetime.timezone.utc)
+        ts = datetime.strptime(dt, fmt).replace(tzinfo=timezone.utc)
     func = get_data if environ["inversion"] is None else get_inversion_data
     data = func(environ["iemdb.isuag.cursor"], ts)
 

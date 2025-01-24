@@ -5,10 +5,11 @@ import httpx
 import numpy as np
 import pandas as pd
 from metpy.units import masked_array, units
+from pyiem.database import get_dbconn
 from pyiem.network import Table as NetworkTable
 from pyiem.observation import Observation
 from pyiem.reference import ISO8601
-from pyiem.util import get_dbconn, get_properties, logger, utc
+from pyiem.util import get_properties, logger, utc
 
 LOG = logger()
 DBCONN = get_dbconn("iem")

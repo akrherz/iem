@@ -39,8 +39,10 @@ def save(sectorName, file_name, dir_name, ts, routes, bbox=None):
     with tempfile.NamedTemporaryFile(delete=False) as tmpfd:
         tmpfd.write(req.content)
 
+    extra = [] if ts.year == utc().year else ["-i"]
     cmd = [
         "pqinsert",
+        *extra,  # avoid duplicated sectors causing md5 collisions
         "-p",
         f"plot {routes} {tstamp} {file_name} "
         f"{dir_name}/n0r_{tstamp[:8]}_{tstamp[8:]}.png png",

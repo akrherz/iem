@@ -3,10 +3,10 @@
 For now, we just run each Monday for the current year RUN_2AM.sh
 """
 
-import datetime
 import subprocess
 import sys
 import time
+from datetime import date, timedelta
 
 import click
 import httpx
@@ -25,8 +25,8 @@ LOG = logger()
 def main(year: int, domain: str):
     """Go Main Go."""
     gridnav = get_nav("iemre", domain)
-    sts = datetime.date(year, 1, 1)
-    ets = min([datetime.date(year, 12, 31), datetime.date.today()])
+    sts = date(year, 1, 1)
+    ets = min([date(year, 12, 31), date.today()])
     current = {}
     now = ets
     while now >= sts:
@@ -35,7 +35,7 @@ def main(year: int, domain: str):
         if np.isnan(maxval) or maxval < 0:
             LOG.info("adding %s as currently empty", now)
             current[now] = {"data": ds, "dirty": False}
-        now -= datetime.timedelta(days=1)
+        now -= timedelta(days=1)
     if not current:
         LOG.info("Nothing to be done...")
         return
@@ -77,7 +77,7 @@ def main(year: int, domain: str):
                     fh.write(chunk)
         with ncopen(ncfn) as nc:
             for day, _ in enumerate(nc.variables["time"][:]):
-                date = sts + datetime.timedelta(days=day)
+                date = sts + timedelta(days=day)
                 if date not in current:
                     continue
                 # W/m2 to MJ/d 86400 / 1e6

@@ -1,21 +1,13 @@
 """Process Soil Data"""
 
-# stdlib
-import datetime
 import json
 import sys
-from zoneinfo import ZoneInfo
+from datetime import datetime, timedelta, timezone
 
 import httpx
-
-# third party
 import pandas as pd
-from pyiem.util import (
-    exponential_backoff,
-    get_dbconn,
-    get_sqlalchemy_conn,
-    logger,
-)
+from pyiem.database import get_dbconn, get_sqlalchemy_conn
+from pyiem.util import exponential_backoff, logger
 
 LOG = logger()
 URI = (
@@ -49,9 +41,9 @@ def process_features(features):
     for feat in features:
         props = feat["attributes"]
         valid = (
-            datetime.datetime(1970, 1, 1)
-            + datetime.timedelta(seconds=props["DATA_LAST_UPDATED"] / 1000.0)
-        ).replace(tzinfo=ZoneInfo("UTC"))
+            datetime(1970, 1, 1)
+            + timedelta(seconds=props["DATA_LAST_UPDATED"] / 1000.0)
+        ).replace(tzinfo=timezone.utc)
         rows.append(
             {
                 "nwsli": props["NWS_ID"],

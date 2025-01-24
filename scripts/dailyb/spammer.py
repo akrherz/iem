@@ -2,11 +2,11 @@
 Generate the dailyb spam, run from RUN_12Z.sh
 """
 
-import datetime
 import os
 import re
 import smtplib
 import subprocess
+from datetime import datetime, timedelta, timezone
 from email.mime.multipart import MIMEMultipart
 from email.mime.text import MIMEText
 from zoneinfo import ZoneInfo
@@ -42,8 +42,8 @@ def get_github_commits():
       txt (str): text variant result
       html (str): html variant result
     """
-    utcnow = datetime.datetime.utcnow()
-    yesterday = utcnow - datetime.timedelta(hours=24)
+    utcnow = utc()
+    yesterday = utcnow - timedelta(hours=24)
     yesterday = yesterday.replace(hour=12, minute=0, second=0)
     iso = yesterday.strftime(ISO8601)
 
@@ -72,8 +72,8 @@ def get_github_commits():
                 continue
             hashes.append(commit["sha"])
             timestring = commit["commit"]["author"]["date"]
-            utcvalid = datetime.datetime.strptime(timestring, ISO8601)
-            valid = utcvalid.replace(tzinfo=ZoneInfo("UTC")).astimezone(
+            utcvalid = datetime.strptime(timestring, ISO8601)
+            valid = utcvalid.replace(tzinfo=timezone.utc).astimezone(
                 ZoneInfo("America/Chicago")
             )
             data = {
@@ -113,11 +113,11 @@ def get_github_commits():
 def cowreport():
     """Generate something from the Cow, moooo!"""
     central = ZoneInfo("America/Chicago")
-    yesterday = (utc() - datetime.timedelta(days=1)).astimezone(central)
+    yesterday = (utc() - timedelta(days=1)).astimezone(central)
     midnight = yesterday.replace(hour=0, minute=0)
     midutc = midnight.astimezone(ZoneInfo("UTC"))
     begints = midutc.strftime("%Y-%m-%dT%H:%M")
-    endts = (midutc + datetime.timedelta(hours=24)).strftime("%Y-%m-%dT%H:%M")
+    endts = (midutc + timedelta(hours=24)).strftime("%Y-%m-%dT%H:%M")
     api = (
         f"http://iem.local/api/1/cow.json?begints={begints}&endts={endts}&"
         "phenomena=SV&phenomena=TO&lsrtype=SV&lsrtype=TO"
@@ -156,7 +156,7 @@ def cowreport():
 def feature():
     """Print the feature for yesterday"""
     mesosite, mcursor = get_dbconnc("mesosite")
-    lastts = datetime.datetime.now() + datetime.timedelta(days=-1)
+    lastts = datetime.now() + timedelta(days=-1)
     # Query
     mcursor.execute(
         "SELECT *, to_char(valid, 'DD Mon HH:MI AM') as nicedate "
@@ -230,7 +230,7 @@ def news():
     """Print the news that is fit to print"""
     mesosite, mcursor = get_dbconnc("mesosite")
     # Last dailyb delivery
-    lastts = datetime.datetime.now() + datetime.timedelta(days=-1)
+    lastts = datetime.now() + timedelta(days=-1)
     mcursor.execute(
         "SELECT *, to_char(entered, 'DD Mon HH:MI AM') as nicedate "
         "from news WHERE entered > %s ORDER by entered DESC",
@@ -282,7 +282,7 @@ def send_email(msg):
 def main():
     """Go Main!"""
     msg = MIMEMultipart("alternative")
-    now = datetime.datetime.now()
+    now = datetime.now()
     msg["Subject"] = f"IEM Daily Bulletin for {now:%b %-d %Y}"
     msg["From"] = "daryl herzmann <akrherz@iastate.edu>"
     if os.environ["USER"] == "akrherz2":

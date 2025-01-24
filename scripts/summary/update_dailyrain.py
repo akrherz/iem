@@ -5,10 +5,10 @@ there are actual measurable precip.  Eventually, the DSM or other summary
 messages come and overwrite the trouble. Run from RUN_10MIN.sh
 """
 
-import datetime
+from datetime import datetime
 
+from pyiem.database import get_dbconnc
 from pyiem.reference import TRACE_VALUE
-from pyiem.util import get_dbconnc
 
 
 def main():
@@ -16,7 +16,7 @@ def main():
     pgconn, icursor = get_dbconnc("iem")
     icursor2 = pgconn.cursor()
 
-    now = datetime.datetime.now()
+    now = datetime.now()
     yyyy = now.year
 
     # Run for the previous hour, so that we don't skip totaling up 11 PM
