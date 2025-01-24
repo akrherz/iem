@@ -125,6 +125,8 @@
 /plotting/auto/plot/97/d:sector::sector:IA::network:WFO::wfo:DMX::var:avg_temp::bins:50%2055%2060%2065%2070%2075%2080%2085%2090%2095%20100::gddbase:55::gddceil:86::date1:2024-05-01::usdm:no::date2:2024-09-30::p:contour::cmap:RdYlBu_r::c:no::ct:ncei_climate91::_r:88::dpi:100.png
 /plotting/auto/plot/97/d:wfo::sector:IA::network:WFO::wfo:DMX::var:precip_sum::gddbase:50::gddceil:86::date1:2024-01-11::usdm:no::date2:2024-02-10::p:contour::cmap:RdYlBu::c:yes::ct:climate51::_r:t::dpi:100.png
 /plotting/auto/plot/99/network:IACLIMATE::station:IATAME::year:2024::delta:sigma::_r:t::dpi:100::_cb:1.png
+/plotting/auto/plot/102/network:WFO::station:DMX::year:2006::eyear:2025::_r:t::dpi:100.png
+/plotting/auto/plot/102/network:WFO::station:DMX::ltype:TORNADO::year:2006::eyear:2025::_r:t::dpi:100.png
 /plotting/auto/plot/104/network:IACLIMATE::station:IATAME::date1:2024-05-07::date2:2024-08-05::days:14::days2:7::_r:t::dpi:100.png
 /plotting/auto/plot/107/network:IACLIMATE::station:IATAME::sday:0814::eday:0828::varname:avg_temp::thres:-99::base:50::ceil:86::year:2024::_r:t::dpi:100.png
 /plotting/auto/plot/107/network:IACLIMATE::station:IATAME::sday:0814::eday:0828::varname:precip::thres:-99::base:50::ceil:86::year:2024::_r:t::dpi:100.png

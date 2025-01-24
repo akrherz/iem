@@ -1,10 +1,11 @@
 """Ingest the ISU FEEL Farm data."""
 
-import datetime
 import os
+from datetime import date, datetime
 
 import pandas as pd
-from pyiem.util import get_dbconn, logger
+from pyiem.database import get_dbconn
+from pyiem.util import logger
 
 LOG = logger()
 BASE = "/mesonet/home/mesonet/ot/ot0005/incoming/Pierson"
@@ -30,15 +31,15 @@ def ingest(cursor):
 
     dstart, hstart = get_starttimes(cursor)
     if dstart is None:
-        dstart = datetime.date(1980, 1, 1)
+        dstart = date(1980, 1, 1)
     if hstart is None:
-        hstart = datetime.datetime(1980, 1, 1)
-    fn = "%s/%s/ISU_Feel_Daily.dat" % (BASE, datetime.date.today().year)
+        hstart = datetime(1980, 1, 1)
+    fn = "%s/%s/ISU_Feel_Daily.dat" % (BASE, date.today().year)
     # If this file does not exist, try the previous year's file
     if not os.path.isfile(fn):
         fn = "%s/%s/ISU_Feel_Daily.dat" % (
             BASE,
-            datetime.date.today().year - 1,
+            date.today().year - 1,
         )
         if not os.path.isfile(fn):
             LOG.info("Double failure to find %s", fn)
@@ -49,7 +50,7 @@ def ingest(cursor):
     )
 
     for _, row in df.iterrows():
-        ts = datetime.datetime.strptime(row["TIMESTAMP"][:10], "%Y-%m-%d")
+        ts = datetime.strptime(row["TIMESTAMP"][:10], "%Y-%m-%d")
         if ts.date() <= dstart:
             continue
         cursor.execute(
@@ -69,12 +70,12 @@ def ingest(cursor):
             ),
         )
 
-    fn = "%s/%s/ISU_Feel_Hourly.dat" % (BASE, datetime.date.today().year)
+    fn = "%s/%s/ISU_Feel_Hourly.dat" % (BASE, date.today().year)
     # If this file does not exist, try the previous year's file
     if not os.path.isfile(fn):
         fn = "%s/%s/ISU_Feel_Hourly.dat" % (
             BASE,
-            datetime.date.today().year - 1,
+            date.today().year - 1,
         )
         if not os.path.isfile(fn):
             LOG.info("Double failure to find %s", fn)
@@ -84,7 +85,7 @@ def ingest(cursor):
     )
 
     for _, row in df.iterrows():
-        ts = datetime.datetime.strptime(row["TIMESTAMP"][:13], "%Y-%m-%d %H")
+        ts = datetime.strptime(row["TIMESTAMP"][:13], "%Y-%m-%d %H")
         if ts <= hstart:
             continue
         cursor.execute(

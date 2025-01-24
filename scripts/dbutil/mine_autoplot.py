@@ -3,8 +3,8 @@
 Run from RUN_10_AFTER.sh
 """
 
-import datetime
 import re
+from datetime import datetime, timedelta
 
 from pyiem.database import get_dbconn
 from pyiem.util import logger
@@ -31,7 +31,7 @@ def get_dbendts(cursor):
     cursor.execute("SELECT max(valid) from autoplot_timing")
     ts = cursor.fetchone()[0]
     if ts is None:
-        ts = datetime.datetime.now() - datetime.timedelta(days=1)
+        ts = datetime.now() - timedelta(days=1)
     else:
         ts = ts.replace(tzinfo=None)
     return ts
@@ -39,7 +39,7 @@ def get_dbendts(cursor):
 
 def find_and_save(cursor, dbendts):
     """Do work please"""
-    now = datetime.datetime.now()
+    now = datetime.now()
     thisyear = now.year
     inserts = 0
     with open(LOGFN, "rb") as fh:
@@ -50,7 +50,7 @@ def find_and_save(cursor, dbendts):
                 continue
             (appid, timing, uri) = tokens[0]
             try:
-                valid = datetime.datetime.strptime(
+                valid = datetime.strptime(
                     f"{thisyear} {line[:15]}", "%Y %b %d %H:%M:%S"
                 )
             except ValueError as exp:

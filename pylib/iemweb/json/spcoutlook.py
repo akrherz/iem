@@ -1,6 +1,6 @@
 """.. title:: SPC Outlook Service
 
-Return to `JSON Services </json/>`_.
+Return to `API Services </api/>`_.
 
 Documentation for /json/spcoutlook.py
 -------------------------------------
@@ -18,7 +18,7 @@ Changelog
 Example Usage
 -------------
 
-Get all the day 1 outlooks for Piere, South Dakota.  First in JSON, then
+Get all the day 1 outlooks for Pierre, South Dakota.  First in JSON, then
 CSV, and finally Excel.
 
 https://mesonet.agron.iastate.edu/json/spcoutlook.py\
@@ -28,6 +28,11 @@ https://mesonet.agron.iastate.edu/json/spcoutlook.py\
 https://mesonet.agron.iastate.edu/json/spcoutlook.py\
 ?lat=44.368&lon=-100.336&day=1&fmt=excel
 
+Provide the day 1 outlook for Pierre, SD valid at 8 UTC on 3 Aug 2024
+
+https://mesonet.agron.iastate.edu/json/spcoutlook.py\
+?lat=44.368&lon=-100.336&day=1&time=2024-08-03T08:00Z
+
 Get only the last day 2 outlook for Washington, DC
 
 https://mesonet.agron.iastate.edu/json/spcoutlook.py\
@@ -35,10 +40,9 @@ https://mesonet.agron.iastate.edu/json/spcoutlook.py\
 
 """
 
-import datetime
 import json
+from datetime import datetime, timedelta, timezone
 from io import BytesIO
-from zoneinfo import ZoneInfo
 
 import pandas as pd
 from pydantic import Field
@@ -84,24 +88,24 @@ def get_order(threshold):
     return THRESHOLD_ORDER.index(threshold)
 
 
-def process_df(watches: pd.DataFrame) -> pd.DataFrame:
+def process_df(outlooks: pd.DataFrame) -> pd.DataFrame:
     """Condition the dataframe."""
-    if watches.empty:
-        return watches
-    watches["threshold_rank"] = watches["threshold"].apply(get_order)
-    return watches
+    if outlooks.empty:
+        return outlooks
+    outlooks["threshold_rank"] = outlooks["threshold"].apply(get_order)
+    return outlooks
 
 
-def dotime(time, lon, lat, day, cat) -> tuple[pd.DataFrame, datetime.datetime]:
+def dotime(time, lon, lat, day, cat) -> tuple[pd.DataFrame, datetime]:
     """Query for Outlook based on some timestamp"""
     if time in ["", "current", "now"]:
         ts = utc()
         if day > 1:
-            ts += datetime.timedelta(days=day - 1)
+            ts += timedelta(days=day - 1)
     else:
         # ISO formatting
-        ts = datetime.datetime.strptime(time, "%Y-%m-%dT%H:%MZ")
-        ts = ts.replace(tzinfo=ZoneInfo("UTC"))
+        ts = datetime.strptime(time, "%Y-%m-%dT%H:%MZ")
+        ts = ts.replace(tzinfo=timezone.utc)
     with get_sqlalchemy_conn("postgis") as conn:
         outlooks = pd.read_sql(
             text("""
@@ -163,21 +167,7 @@ def dowork(lon, lat, day, cat) -> pd.DataFrame:
     return outlooks
 
 
-def get_ct(environ) -> str:
-    """Figure out the content type."""
-    fmt = environ["fmt"]
-    if fmt == "json":
-        return "application/json"
-    if fmt == "excel":
-        return "application/vnd.ms-excel"
-    return "text/csv"
-
-
-@iemapp(
-    help=__doc__,
-    schema=Schema,
-    content_type=get_ct,
-)
+@iemapp(help=__doc__, schema=Schema)
 def application(environ, start_response):
     """Answer request."""
     time = environ.get("time")

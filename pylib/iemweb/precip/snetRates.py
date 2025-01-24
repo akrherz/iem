@@ -4,7 +4,7 @@ Very much legacy stuff.
 
 """
 
-import datetime
+from datetime import datetime, timedelta
 from io import StringIO
 from zoneinfo import ZoneInfo
 
@@ -32,18 +32,19 @@ def application(environ, start_response):
     month = environ.get("month", 6)
     day = environ.get("day", 7)
     station = environ.get("station", "SAMI4")[:5]
-    s = datetime.datetime(int(year), int(month), int(day))
-    s = s.replace(tzinfo=ZoneInfo("America/Chicago"))
-    e = s + datetime.timedelta(days=1)
+    s = datetime(
+        int(year), int(month), int(day), tzinfo=ZoneInfo("America/Chicago")
+    )
+    e = s + timedelta(days=1)
     e = e.replace(tzinfo=ZoneInfo("America/Chicago"))
-    interval = datetime.timedelta(seconds=60)
+    interval = timedelta(seconds=60)
 
     sio.write(
         "SID  ,  DATE    ,TIME ,PCOUNT,P1MIN ,60min ,30min ,20min "
         ",15min ,10min , 5min , 1min ,"
     )
 
-    if s.strftime("%Y%m%d") == datetime.datetime.now().strftime("%Y%m%d"):
+    if s.strftime("%Y%m%d") == datetime.now().strftime("%Y%m%d"):
         _IEM, cursor = get_dbconnc("iem")
         cursor.execute(
             """SELECT s.id as station, valid, pday from current_log c JOIN
@@ -55,7 +56,7 @@ def application(environ, start_response):
         _SNET, cursor = get_dbconnc("snet")
 
         cursor.execute(
-            f"""SELECT station, valid, pday from t{s:%Y_%m} WHERE
+            """SELECT station, valid, pday from alldata WHERE
             station = %s and valid >= %s and valid < %s ORDER by valid ASC""",
             (station, s, e),
         )

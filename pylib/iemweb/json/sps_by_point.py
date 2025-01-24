@@ -31,8 +31,8 @@ https://mesonet.agron.iastate.edu/json/sps_by_point.py\
 
 """
 
-import datetime
 import json
+from datetime import date
 from io import BytesIO, StringIO
 
 import numpy as np
@@ -62,12 +62,12 @@ class Schema(CGIModel):
     lon: float = Field(
         default=-92.0, description="Longitude of point", ge=-180, le=180
     )
-    sdate: datetime.date = Field(
-        default=datetime.date(2002, 1, 1),
+    sdate: date = Field(
+        default=date(2002, 1, 1),
         description="Start date of search",
     )
-    edate: datetime.date = Field(
-        default=datetime.date(2099, 1, 1),
+    edate: date = Field(
+        default=date(2099, 1, 1),
         description="End date of search",
     )
     valid: AwareDatetime = Field(

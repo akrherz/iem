@@ -1,11 +1,10 @@
 """Ingest the files kindly sent to me by poker"""
 
-import datetime
 import glob
 import os
 import re
 import subprocess
-from zoneinfo import ZoneInfo
+from datetime import datetime, timedelta, timezone
 
 from pyiem.database import get_dbconn
 from pyiem.nws.product import TextProduct
@@ -443,11 +442,9 @@ XREF_SOURCE = {
 def process(order):
     """Process this timestamp"""
     cursor = PGCONN.cursor()
-    ts = datetime.datetime.strptime(order[:6], "%y%m%d").replace(
-        tzinfo=ZoneInfo("UTC")
-    )
-    base = ts - datetime.timedelta(days=2)
-    ceiling = ts + datetime.timedelta(days=2)
+    ts = datetime.strptime(order[:6], "%y%m%d").replace(tzinfo=timezone.utc)
+    base = ts - timedelta(days=2)
+    ceiling = ts + timedelta(days=2)
     subprocess.call(["tar", "-xzf", order])
     inserts = 0
     deletes = 0

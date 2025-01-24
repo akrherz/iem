@@ -3,10 +3,10 @@
 For now, we just run each Monday for the current year RUN_2AM.sh
 """
 
-import datetime
 import subprocess
 import sys
 import time
+from datetime import date, timedelta
 
 import click
 import httpx
@@ -25,8 +25,8 @@ LOG = logger()
 def main(year: int, domain: str):
     """Go Main Go."""
     gridnav = get_nav("iemre", domain)
-    sts = datetime.date(year, 1, 1)
-    ets = min([datetime.date(year, 12, 31), datetime.date.today()])
+    sts = date(year, 1, 1)
+    ets = min([date(year, 12, 31), date.today()])
     current = {}
     now = ets
     while now >= sts:
@@ -35,7 +35,7 @@ def main(year: int, domain: str):
         if np.isnan(maxval) or maxval < 0:
             LOG.info("adding %s as currently empty", now)
             current[now] = {"data": ds, "dirty": False}
-        now -= datetime.timedelta(days=1)
+        now -= timedelta(days=1)
     if not current:
         LOG.info("Nothing to be done...")
         return
@@ -77,8 +77,8 @@ def main(year: int, domain: str):
                     fh.write(chunk)
         with ncopen(ncfn) as nc:
             for day, _ in enumerate(nc.variables["time"][:]):
-                date = sts + datetime.timedelta(days=day)
-                if date not in current:
+                dt = sts + timedelta(days=day)
+                if dt not in current:
                     continue
                 # W/m2 to MJ/d 86400 / 1e6
                 data = nc.variables["ALLSKY_SFC_SW_DWN"][day, :, :] * 0.0864
@@ -98,25 +98,23 @@ def main(year: int, domain: str):
                     slice(0, islice.stop - islice.start),
                 ]
                 # get currentdata
-                present = current[date]["data"]["power_swdn"].values[
+                present = current[dt]["data"]["power_swdn"].values[
                     jslice, islice
                 ]
                 if present.mean() == data.mean():
                     continue
-                current[date]["data"]["power_swdn"].values[jslice, islice] = (
-                    data
-                )
-                current[date]["dirty"] = True
-    for date, item in current.items():
+                current[dt]["data"]["power_swdn"].values[jslice, islice] = data
+                current[dt]["dirty"] = True
+    for dt, item in current.items():
         if not item["dirty"]:
             continue
-        LOG.info("saving %s", date)
-        set_grids(date, item["data"], domain=domain)
+        LOG.info("saving %s", dt)
+        set_grids(dt, item["data"], domain=domain)
         subprocess.call(
             [
                 "python",
                 "../iemre/db_to_netcdf.py",
-                f"--date={date:%Y-%m-%d}",
+                f"--date={dt:%Y-%m-%d}",
                 f"--domain={domain}",
             ]
         )

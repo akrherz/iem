@@ -6,6 +6,7 @@ require_once "../../../include/imagemaps.php";
 define("IEM_APPID", 111);
 
 $t = new MyView();
+$t->iem_resource = "PIREPS";
 $t->title = "Download PIREPs";
 $artcc = Array(
     "ZAB"=> "[ZAB] ALBUQUERQUE",

@@ -1,14 +1,15 @@
 """.. title:: RAOB Data Service
 
+Return to `API Services </api/#cgi>`_
+
 Documentation for /cgi-bin/request/raob.py
 ------------------------------------------
 
 To be written.
 """
 
-import datetime
+from datetime import datetime, timezone
 from io import StringIO
-from zoneinfo import ZoneInfo
 
 from pyiem.database import get_dbconn
 from pyiem.exceptions import IncompleteWebRequest
@@ -73,10 +74,10 @@ def friendly_date(form, key):
     try:
         val = val.strip()
         if len(val.split()) == 1:
-            dt = datetime.datetime.strptime(val, "%m/%d/%Y")
+            dt = datetime.strptime(val, "%m/%d/%Y")
         else:
-            dt = datetime.datetime.strptime(val, "%m/%d/%Y %H:%M")
-        dt = dt.replace(tzinfo=ZoneInfo("UTC"))
+            dt = datetime.strptime(val, "%m/%d/%Y %H:%M")
+        dt = dt.replace(tzinfo=timezone.utc)
     except Exception:
         return (
             f"Invalid {key} date provided, should be '%m/%d/%Y %H:%M'"
@@ -93,7 +94,7 @@ def application(environ, start_response):
     sts = friendly_date(environ, "sts")
     ets = friendly_date(environ, "ets")
     for val in [sts, ets]:
-        if not isinstance(val, datetime.datetime):
+        if not isinstance(val, datetime):
             headers = [("Content-type", "text/plain")]
             start_response("500 Internal Server Error", headers)
             return [val.encode("ascii")]

@@ -9,7 +9,7 @@ https://mesonet.agron.iastate.edu/cgi-bin/precip/catAZOS.py?date=2024-09-01
 
 """
 
-import datetime
+from datetime import datetime, timedelta
 from io import StringIO
 
 from pyiem.database import get_dbconnc
@@ -42,17 +42,17 @@ Hourly Precipitation [IA_ASOS]
     sio.write('<h3 align="center">Hourly Precip [inches] Grid</h3>')
     try:
         postDate = environ.get("date")
-        myTime = datetime.datetime.strptime(postDate, "%Y-%m-%d")
+        myTime = datetime.strptime(postDate, "%Y-%m-%d")
     except Exception:
-        myTime = datetime.datetime.now()
+        myTime = datetime.now()
 
     sio.write("<table border=1><tr>")
     sio.write(
         '<td>Back: <a href="catAZOS.py?date='
-        + (myTime - datetime.timedelta(days=1)).strftime("%Y-%m-%d")
+        + (myTime - timedelta(days=1)).strftime("%Y-%m-%d")
         + '"> \
     '
-        + (myTime - datetime.timedelta(days=1)).strftime("%Y-%m-%d")
+        + (myTime - timedelta(days=1)).strftime("%Y-%m-%d")
         + "</a></td>"
     )
 
@@ -60,10 +60,10 @@ Hourly Precipitation [IA_ASOS]
 
     sio.write(
         '<td>Forward: <a href="catAZOS.py?date='
-        + (myTime + datetime.timedelta(days=1)).strftime("%Y-%m-%d")
+        + (myTime + timedelta(days=1)).strftime("%Y-%m-%d")
         + '"> \
     '
-        + (myTime + datetime.timedelta(days=1)).strftime("%Y-%m-%d")
+        + (myTime + timedelta(days=1)).strftime("%Y-%m-%d")
         + "</a></td>"
     )
 
@@ -144,12 +144,13 @@ def application(environ, start_response):
     loadstations()
     setupTable(sio)
     conn, icursor = get_dbconnc("iem")
+    # skipcq
     icursor.execute(
         "SELECT extract('hour' from valid) as vhour, t.id as station, "
         f"valid, phour from hourly_{ts.year} h JOIN stations t on "
         "(h.iemid = t.iemid) WHERE "
         "valid >= %s and valid < %s and t.network = 'IA_ASOS'",
-        (ts, ts + datetime.timedelta(hours=24)),
+        (ts, ts + timedelta(hours=24)),
     )
     for row in icursor:
         p01i = float(row["phour"])
@@ -166,16 +167,6 @@ def application(environ, start_response):
             except KeyError:
                 continue
     conn.close()
-    if ts < datetime.datetime(2006, 6, 1):
-        stData["MXO"] = ["M"] * 24
-    if ts < datetime.datetime(2007, 6, 1):
-        stData["IIB"] = ["M"] * 24
-        stData["VTI"] = ["M"] * 24
-        stData["MPZ"] = ["M"] * 24
-        stData["PEA"] = ["M"] * 24
-        stData["IFA"] = ["M"] * 24
-        stData["TVK"] = ["M"] * 24
-
     j = 0
     ids = list(nt.sts.keys())
     ids.sort()

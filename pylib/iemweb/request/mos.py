@@ -1,5 +1,7 @@
 """.. title:: Model Output Statistics (MOS) Data
 
+Return to `API Services </api/#cgi>`_
+
 Documentation for /cgi-bin/request/mos.py
 -----------------------------------------
 
@@ -11,8 +13,18 @@ Example Usage
 
 Return all the NBS MOS data for KDSM for MOS runs made on 14 Dec 2023
 
-  https://mesonet.agron.iastate.edu/cgi-bin/request/mos.py?\
+https://mesonet.agron.iastate.edu/cgi-bin/request/mos.py?\
 station=KDSM&model=NBS&sts=2023-12-14T00:00Z&ets=2023-12-15T00:00Z&format=csv
+
+and in Excel format this time
+
+https://mesonet.agron.iastate.edu/cgi-bin/request/mos.py?\
+station=KDSM&model=NBS&sts=2023-12-14T00:00Z&ets=2023-12-15T00:00Z&format=excel
+
+and in JSON format this time
+
+https://mesonet.agron.iastate.edu/cgi-bin/request/mos.py?\
+station=KDSM&model=NBS&sts=2023-12-14T00:00Z&ets=2023-12-15T00:00Z&format=json
 
 """
 
@@ -88,11 +100,8 @@ class MyModel(CGIModel):
 
 def get_data(sts, ets, station, model, fmt):
     """Go fetch data please"""
-    model2 = model
-    if model == "NAM":
-        model2 = "ETA"
-    if model == "GFS":
-        model2 = "AVN"
+    xref = {"NAM": "ETA", "GFS": "AVN"}
+    model2 = xref.get(model, model)
     with get_sqlalchemy_conn("mos") as conn:
         df = pd.read_sql(
             text(
@@ -102,16 +111,14 @@ def get_data(sts, ets, station, model, fmt):
             ftime at time zone 'UTC' as utc_ftime,
             *, t06_1 ||'/'||t06_2 as t06,
             t12_1 ||'/'|| t12_2 as t12  from alldata WHERE station = :station
-            and runtime >= :sts and runtime <= :ets and
-            (model = :model1 or model = :model2)
+            and runtime >= :sts and runtime <= :ets and model = ANY(:models)
             ORDER by runtime,ftime ASC"""
             ),
             conn,
             params={
                 "sts": sts,
                 "ets": ets,
-                "model1": model,
-                "model2": model2,
+                "models": [model, model2],
                 "station": station,
             },
         )

@@ -5,10 +5,11 @@
 run from RUN_STAGE4.sh
 """
 
-import datetime
 import os
 import subprocess
 import tempfile
+import time
+from datetime import datetime, timedelta
 
 import httpx
 from pyiem.util import logger, utc
@@ -16,7 +17,7 @@ from pyiem.util import logger, utc
 LOG = logger()
 
 
-def download(now, offset):
+def download(now: datetime, offset: int):
     """
     Download a given timestamp from NCEP and inject into LDM
     Example:  pub/data/nccf/com/hourly/prod/
@@ -44,6 +45,10 @@ def download(now, offset):
             except httpx.HTTPError as exp:
                 lvl = LOG.info if offset < 24 else LOG.warning
                 lvl("dl %s failed: %s", url, exp)
+                if offset == 0:
+                    # Wait a bit and try again
+                    lvl("waiting 120 seconds and trying again")
+                    time.sleep(120)
         if response is None or response.status_code != 200:
             LOG.warning("Full fail for %s", url)
             continue
@@ -67,13 +72,12 @@ def download(now, offset):
 def main():
     """Do something"""
     # We want this hour UTC
-    utcnow = utc()
-    utcnow = utcnow.replace(minute=0, second=0, microsecond=0)
+    utcnow = utc().replace(minute=0, second=0, microsecond=0)
     # Website review seems to show updates ~8 days later :/
     for offset in [0, 240, 8 * 24, 9, 3]:
         with tempfile.TemporaryDirectory() as tempdir:
             os.chdir(tempdir)
-            download(utcnow - datetime.timedelta(hours=offset), offset)
+            download(utcnow - timedelta(hours=offset), offset)
 
 
 if __name__ == "__main__":

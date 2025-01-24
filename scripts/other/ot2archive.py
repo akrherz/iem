@@ -4,12 +4,12 @@ Migrate IEM Access data to the archive database.
 Called from RUN_20MIN.sh
 """
 
-import datetime
 import sys
+from datetime import datetime, timezone
 
-# third party
+from pyiem.database import get_dbconnc
 from pyiem.reference import ISO8601
-from pyiem.util import get_dbconnc, get_properties, logger, set_property, utc
+from pyiem.util import get_properties, logger, set_property, utc
 
 LOG = logger()
 PROPERTY_NAME = "ot2archive_last"
@@ -76,7 +76,9 @@ def dowork(sts, ets):
 
     LOG.info("%s->%s deletes: %s inserts: %s", sts, ets, deletes, inserts)
     ocursor.close()
+    IEM.close()
     OTHER.commit()
+    OTHER.close()
 
 
 def get_first_updated():
@@ -87,8 +89,8 @@ def get_first_updated():
         LOG.warning("iem property %s is not set, abort!", PROPERTY_NAME)
         sys.exit()
 
-    dt = datetime.datetime.strptime(propvalue, ISO8601)
-    return dt.replace(tzinfo=datetime.timezone.utc)
+    dt = datetime.strptime(propvalue, ISO8601)
+    return dt.replace(tzinfo=timezone.utc)
 
 
 def main():

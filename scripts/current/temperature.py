@@ -1,10 +1,11 @@
 """Generate current plot of Temperature"""
 
-import datetime
+from datetime import datetime
 
 import pandas as pd
+from pyiem.database import get_sqlalchemy_conn
 from pyiem.plot import MapPlot
-from pyiem.util import get_sqlalchemy_conn, utc
+from pyiem.util import utc
 
 
 def get_df():
@@ -29,7 +30,7 @@ def get_df():
 
 def main():
     """GO!"""
-    now = datetime.datetime.now()
+    now = datetime.now()
 
     df = get_df()
     rng = range(-30, 120, 2)

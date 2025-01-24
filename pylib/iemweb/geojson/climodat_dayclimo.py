@@ -20,8 +20,8 @@ https://mesonet.agron.iastate.edu/geojson/climodat_dayclimo.py\
 
 """
 
-import datetime
 import json
+from datetime import datetime
 
 from pydantic import Field
 from pyiem.database import get_sqlalchemy_conn
@@ -37,9 +37,7 @@ class Schema(CGIModel):
     day: int = Field(default=1, ge=1, le=31)
     month: int = Field(default=1, ge=1, le=12)
     syear: int = Field(default=1800, ge=1800, le=2050)
-    eyear: int = Field(
-        default=datetime.datetime.now().year + 1, ge=1800, le=2050
-    )
+    eyear: int = Field(default=datetime.now().year + 1, ge=1800, le=2050)
     network: str = Field(
         default="IACLIMATE",
         title="Network Identifier",

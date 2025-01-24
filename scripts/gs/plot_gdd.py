@@ -3,7 +3,7 @@
 Called from RUN_SUMMARY.sh
 """
 
-import datetime
+from datetime import datetime
 
 from pyiem.util import logger, web2ldm
 
@@ -29,7 +29,7 @@ def run(gddbase, now, fn):
 
 def main():
     """Main()"""
-    today = datetime.datetime.now()
+    today = datetime.now()
     if today.month < 5:
         today = today.replace(year=(today.year - 1), month=11, day=1)
     run(50, today, "gdd_may1")

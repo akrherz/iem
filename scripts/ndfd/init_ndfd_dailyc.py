@@ -1,7 +1,7 @@
 """Generate the NDFD climatology file, hmmm"""
 
-import datetime
 import os
+from datetime import datetime
 
 import numpy as np
 import pygrib
@@ -19,9 +19,7 @@ def init_year(ts):
     nc = ncopen(ncfn, "w")
     nc.title = "NDFD"
     nc.contact = "Daryl Herzmann, akrherz@iastate.edu, 515-294-5978"
-    nc.history = "%s Generated" % (
-        datetime.datetime.now().strftime("%d %B %Y"),
-    )
+    nc.history = "%s Generated" % (datetime.now().strftime("%d %B %Y"),)
 
     grbs = pygrib.open(
         "/mesonet/ARCHIVE/data/2019/05/06/model/ndfd/"
@@ -34,7 +32,7 @@ def init_year(ts):
     # Setup Dimensions
     nc.createDimension("lat", shape[0])
     nc.createDimension("lon", shape[1])
-    ts2 = datetime.datetime(ts.year + 1, 1, 1)
+    ts2 = datetime(ts.year + 1, 1, 1)
     days = (ts2 - ts).days
     nc.createDimension("time", int(days))
 
@@ -105,7 +103,7 @@ def init_year(ts):
 
 def main():
     """Go Main"""
-    init_year(datetime.datetime(2000, 1, 1))
+    init_year(datetime(2000, 1, 1))
 
 
 if __name__ == "__main__":

@@ -3,10 +3,10 @@
 Run from RUN_0Z.sh, RUN_10_AFTER.sh (6z)
 """
 
-import datetime
 import subprocess
 import tempfile
 import time
+from datetime import timedelta, timezone
 
 import click
 import httpx
@@ -51,12 +51,12 @@ def run(tmpdir, prod, sts):
       prod (str): Product to run for, either n0r or n0q
       sts (datetime): date to run for
     """
-    yest = utc() - datetime.timedelta(days=1)
+    yest = utc() - timedelta(days=1)
     routes = "ac" if sts.date() == yest.date() else "a"
     label = f"{sts.hour}z{sts.hour}z"
     LOG.info("Running for %s with routes=%s, label=%s", sts, routes, label)
-    ets = sts + datetime.timedelta(days=1)
-    interval = datetime.timedelta(minutes=5)
+    ets = sts + timedelta(days=1)
+    interval = timedelta(minutes=5)
 
     n0rct = get_colortable(prod)
 
@@ -92,7 +92,7 @@ def run(tmpdir, prod, sts):
     # Set output color table to match input
     outdataset.GetRasterBand(1).SetRasterColorTable(n0rct)
     outdataset.GetRasterBand(1).WriteArray(maxn0r)
-    del outdataset
+    del outdataset  # skipcq
 
     subprocess.call(
         [
@@ -146,7 +146,7 @@ def run(tmpdir, prod, sts):
         f"{URLBASE}layers[]=uscounties&layers[]={layer}&ts={sts:%Y%m%d%H%M}",
         timeout=120,
     )
-    with open(f"{tmpdir}/{sts:%Y%m%d%H}.png", "wb") as fh:
+    with open(f"{tmpdir}/{sts:%Y%m%d%H}.png", "wb") as fh:  # skipcq
         fh.write(resp.content)
     cmd = [
         "pqinsert",
@@ -189,7 +189,7 @@ def run(tmpdir, prod, sts):
 )
 def main(valid):
     """Run main()"""
-    valid = valid.replace(tzinfo=datetime.timezone.utc)
+    valid = valid.replace(tzinfo=timezone.utc)
     for prod in ["n0r", "n0q"]:
         if valid < utc(2010, 11, 13) and prod == "n0q":
             continue

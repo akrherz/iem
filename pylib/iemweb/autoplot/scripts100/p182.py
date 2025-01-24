@@ -55,12 +55,12 @@ def get_description():
 
 def plotter(ctx: dict):
     """Go"""
-    date = ctx["date"]
+    dt = ctx["date"]
     sector = ctx["sector"]
     days = ctx["trailing"]
     threshold = ctx["threshold"]
-    window_sts = date - timedelta(days=days)
-    if window_sts.year != date.year:
+    window_sts = dt - timedelta(days=days)
+    if window_sts.year != dt.year:
         raise NoDataFound("Sorry, do not support multi-year plots yet!")
     if len(sector) != 2:
         raise NoDataFound(
@@ -68,8 +68,8 @@ def plotter(ctx: dict):
         )
 
     idx0 = iemre.daily_offset(window_sts)
-    idx1 = iemre.daily_offset(date)
-    ncfn = iemre.get_daily_mrms_ncname(date.year)
+    idx1 = iemre.daily_offset(dt)
+    ncfn = iemre.get_daily_mrms_ncname(dt.year)
     ncvar = "p01d"
     if not os.path.isfile(ncfn):
         raise NoDataFound("No data for that year, sorry.")
@@ -170,7 +170,7 @@ def plotter(ctx: dict):
         x2.append(np.sum(np.where(hits2, 1, 0)) / float(cells) * 100.0)
 
     title = (
-        f"{state_names[sector]} NOAA MRMS {date:%-d %b %Y} "
+        f"{state_names[sector]} NOAA MRMS {dt:%-d %b %Y} "
         f"{threshold:.2f} inch Precip Coverage"
     )
     (fig, ax) = figure_axes(apctx=ctx, title=title)
@@ -186,7 +186,7 @@ def plotter(ctx: dict):
         x2,
         align="center",
         width=0.4,
-        label=f"{date:%-d %b %Y} Coverage ({sum(x2):.1f}% Tot)",
+        label=f"{dt:%-d %b %Y} Coverage ({sum(x2):.1f}% Tot)",
     )
     for i, (_x1, _x2) in enumerate(zip(x, x2)):
         ax.text(i - 0.2, _x1 + 1, f"{_x1:.1f}", ha="center")

@@ -21,9 +21,9 @@ https://mesonet.agron.iastate.edu/iemre/daily.py\
 
 """
 
-import datetime
 import json
 import os
+from datetime import date as dateobj
 
 import numpy as np
 from pydantic import Field
@@ -42,8 +42,8 @@ from pyiem.webutil import CGIModel, iemapp
 class Schema(CGIModel):
     """See how we are called."""
 
-    date: datetime.date = Field(
-        datetime.date(2019, 3, 1),
+    date: dateobj = Field(
+        dateobj(2019, 3, 1),
         title="Date",
         description="Date of interest",
     )
@@ -79,7 +79,7 @@ def myrounder(val, precision):
 @iemapp(help=__doc__, schema=Schema)
 def application(environ, start_response):
     """Do Something Fun!"""
-    dt: datetime.date = environ["date"]
+    dt: dateobj = environ["date"]
     lat = environ["lat"]
     lon = environ["lon"]
     domain = get_domain(lon, lat)

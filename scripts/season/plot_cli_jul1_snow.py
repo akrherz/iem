@@ -1,16 +1,16 @@
 """Plot CLI snow"""
 
-import datetime
+from datetime import datetime, timedelta
 
-from pandas import read_sql
+import pandas as pd
+from pyiem.database import get_sqlalchemy_conn
 from pyiem.plot import MapPlot
-from pyiem.util import get_sqlalchemy_conn
 
 
 def main():
     """Go Main Go"""
     with get_sqlalchemy_conn("iem") as conn:
-        df = read_sql(
+        df = pd.read_sql(
             """
         select station, st_x(geom), st_y(geom), snow_jul1, snow_jul1_normal
         from cli_data c JOIN stations t on (t.id = c.station)
@@ -26,7 +26,7 @@ def main():
         lambda x: "#ff0000" if x < 0 else "#0000ff"
     )
 
-    yesterday = datetime.datetime.today() - datetime.timedelta(days=1)
+    yesterday = datetime.today() - timedelta(days=1)
     year = yesterday.year if yesterday.month > 6 else yesterday.year - 1
 
     mp = MapPlot(
@@ -35,7 +35,7 @@ def main():
         title="NWS Total Snowfall (inches) thru %s"
         % (yesterday.strftime("%-d %B %Y"),),
         subtitle=("1 July %s - %s")
-        % (year, datetime.datetime.today().strftime("%-d %B %Y")),
+        % (year, datetime.today().strftime("%-d %B %Y")),
     )
     mp.plot_values(
         df["st_x"].values,
@@ -47,7 +47,7 @@ def main():
     pqstr = (
         "data ac %s0000 summary/mw_season_snowfall.png "
         "mw_season_snowfall.png png"
-    ) % (datetime.datetime.today().strftime("%Y%m%d"),)
+    ) % (datetime.today().strftime("%Y%m%d"),)
     mp.postprocess(view=False, pqstr=pqstr)
     mp.close()
 
@@ -58,7 +58,7 @@ def main():
         title="NWS Total Snowfall Departure (inches) thru %s"
         % (yesterday.strftime("%-d %B %Y"),),
         subtitle=("1 July %s - %s")
-        % (year, datetime.datetime.today().strftime("%-d %B %Y")),
+        % (year, datetime.today().strftime("%-d %B %Y")),
     )
     mp.plot_values(
         df["st_x"].values,
@@ -71,7 +71,7 @@ def main():
     pqstr = (
         "data ac %s0000 summary/mw_season_snowfall_departure.png "
         "mw_season_snowfall_departure.png png"
-    ) % (datetime.datetime.today().strftime("%Y%m%d"),)
+    ) % (datetime.today().strftime("%Y%m%d"),)
     mp.postprocess(view=False, pqstr=pqstr)
     mp.close()
 

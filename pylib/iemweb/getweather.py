@@ -3,14 +3,14 @@
 Example Usage
 -------------
 
-Get the Ames weather on 11 September 2001
+Get the Des Moines weather on 11 September 2001
 
 https://mesonet.agron.iastate.edu/cgi-bin/onsite/birthday/getweather.py\
 ?city=IATDSM&year=2011&month=9&day=11
 
 """
 
-import datetime
+from datetime import datetime, timedelta
 from io import StringIO
 
 from pydantic import Field
@@ -176,15 +176,13 @@ def application(environ, start_response):
         raise NoDataFound("Unknown City")
 
     cityName = nt.sts[city]["name"]
-    now = datetime.datetime(environ["year"], environ["month"], environ["day"])
-    nowM2 = now + datetime.timedelta(days=-2)
-    nowM1 = now + datetime.timedelta(days=-1)
-    nowP1 = now + datetime.timedelta(days=1)
-    nowP2 = now + datetime.timedelta(days=2)
+    now = datetime(environ["year"], environ["month"], environ["day"])
+    nowM2 = now + timedelta(days=-2)
+    nowM1 = now + timedelta(days=-1)
+    nowP1 = now + timedelta(days=1)
+    nowP2 = now + timedelta(days=2)
 
-    sio.write(
-        "<BR><h4>Data valid for station: " + cityName + ", Iowa</h4><BR>"
-    )
+    sio.write(f"<BR><h4>Data valid for station: {cityName}, Iowa</h4><BR>")
 
     sio.write('<div class="row">')
 
