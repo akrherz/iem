@@ -144,6 +144,7 @@ def application(environ, start_response):
     loadstations()
     setupTable(sio)
     conn, icursor = get_dbconnc("iem")
+    # skipcq
     icursor.execute(
         "SELECT extract('hour' from valid) as vhour, t.id as station, "
         f"valid, phour from hourly_{ts.year} h JOIN stations t on "

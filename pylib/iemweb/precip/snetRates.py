@@ -56,7 +56,7 @@ def application(environ, start_response):
         _SNET, cursor = get_dbconnc("snet")
 
         cursor.execute(
-            f"""SELECT station, valid, pday from t{s:%Y_%m} WHERE
+            """SELECT station, valid, pday from alldata WHERE
             station = %s and valid >= %s and valid < %s ORDER by valid ASC""",
             (station, s, e),
         )

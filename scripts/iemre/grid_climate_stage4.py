@@ -1,6 +1,6 @@
 """Grid climate for netcdf usage"""
 
-import datetime
+from datetime import datetime, timedelta
 
 import numpy as np
 import pandas as pd
@@ -44,7 +44,7 @@ def grid_day(nc, ts):
     """
     offset = iemre.daily_offset(ts)
     if ts.day == 29 and ts.month == 2:
-        ts = datetime.datetime(2000, 3, 1)
+        ts = datetime(2000, 3, 1)
     with get_sqlalchemy_conn("coop") as conn:
         df = pd.read_sql(
             "select station, st_x(geom) as lon, st_y(geom) as lat, precip "
@@ -78,9 +78,9 @@ def workflow(ts):
 
 def main():
     """Go Main!"""
-    sts = datetime.datetime(2000, 1, 1)
-    ets = datetime.datetime(2001, 1, 1)
-    interval = datetime.timedelta(days=1)
+    sts = datetime(2000, 1, 1)
+    ets = datetime(2001, 1, 1)
+    interval = timedelta(days=1)
     now = sts
     while now < ets:
         print(now)

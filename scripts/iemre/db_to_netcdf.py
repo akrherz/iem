@@ -7,8 +7,8 @@ If hour and minute are omitted, this is a daily copy, otherwise hourly.
 see: akrherz/iem#199
 """
 
-import datetime
 import warnings
+from datetime import datetime
 
 import click
 import numpy as np
@@ -21,9 +21,15 @@ LOG = logger()
 
 
 @click.command()
-@click.option("--date", "dt", type=click.DateTime(), help="Valid timestamp")
+@click.option(
+    "--date",
+    "dt",
+    required=True,
+    type=click.DateTime(),
+    help="Valid timestamp",
+)
 @click.option("--domain", default="", help="Domain to process")
-def main(dt: datetime.datetime, domain: str):
+def main(dt: datetime, domain: str):
     """Go Main Go."""
     dt = dt.date()
     ncfn = iemre.get_daily_ncname(dt.year, domain=domain)

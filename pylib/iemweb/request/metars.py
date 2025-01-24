@@ -19,10 +19,9 @@ https://mesonet.agron.iastate.edu/cgi-bin/request/metars.py\
 
 """
 
-import datetime
 import sys
+from datetime import datetime, timedelta, timezone
 from io import StringIO
-from zoneinfo import ZoneInfo
 
 from pydantic import AwareDatetime, Field, field_validator
 from pyiem.webutil import CGIModel, iemapp
@@ -44,8 +43,8 @@ class Schema(CGIModel):
     @field_validator("valid", mode="before")
     def parse_valid(cls, value):
         """Ensure valid is a valid datetime"""
-        return datetime.datetime.strptime(value, "%Y%m%d%H").replace(
-            tzinfo=ZoneInfo("UTC")
+        return datetime.strptime(value, "%Y%m%d%H").replace(
+            tzinfo=timezone.utc
         )
 
 
@@ -80,7 +79,7 @@ def application(environ, start_response):
         WHERE valid >= %s and valid < %s and metar is not null
         ORDER by valid ASC
     """,
-        (valid, valid + datetime.timedelta(hours=1)),
+        (valid, valid + timedelta(hours=1)),
     )
     sio = StringIO()
     for row in cursor:
