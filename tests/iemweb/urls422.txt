@@ -10,6 +10,7 @@
 /cgi-bin/request/gis/lsr.py?west=-100&east=-120&south=40&north=30
 /cgi-bin/request/hourlyprecip.py
 /cgi-bin/request/hourlyprecip.py?station=DSM
+/cgi-bin/request/hourlyprecip.py?tz=Etc
 /geojson/sbw.geojson?sts=200809130559&ets=000007231555&wfos=HGX
 /geojson/sbw.geojson?sts=200809130559&wfos=HGX
 /geojson/lsr.geojson?east=-80&west=-70&north=42&south=40

@@ -11,7 +11,7 @@ from tempfile import NamedTemporaryFile
 
 import numpy.ma
 from netCDF4 import chartostring
-from pyiem.util import convert_value, logger, ncopen
+from pyiem.util import convert_value, logger, ncopen, utc
 
 LOG = logger()
 # GIGO
@@ -36,17 +36,17 @@ def main():
     )
     format_tokens = fmt.split(",")
 
-    utc = datetime.datetime.utcnow()
+    utcnow = utc()
     fn = None
     for i in range(300, -1, -1):
-        testfn = f"/mesonet/data/madis/mesonet1/{utc:%Y%m%d_%H}00_{i}.nc"
+        testfn = f"/mesonet/data/madis/mesonet1/{utcnow:%Y%m%d_%H}00_{i}.nc"
         if not os.path.isfile(testfn):
             continue
         fn = testfn
         LOG.info("Found %s", fn)
         break
     if fn is None:
-        if utc.minute > 30:
+        if utcnow.minute > 30:
             LOG.warning("No netcdf files found...")
         return
     # Let file settle
@@ -134,7 +134,7 @@ def main():
                 fh.write(",")
             fh.write("\n")
 
-    pqstr = f"data c {utc:%Y%m%d%H%M} fn/madis.csv bogus csv"
+    pqstr = f"data c {utcnow:%Y%m%d%H%M} fn/madis.csv bogus csv"
     subprocess.call(["pqinsert", "-i", "-p", pqstr, fh.name])
     os.remove(fh.name)
 
@@ -149,7 +149,7 @@ def main():
                 fh.write(",")
             fh.write("\n")
 
-    pqstr = f"data c {utc:%Y%m%d%H%M} fn/madis_iamn.csv bogus csv"
+    pqstr = f"data c {utcnow:%Y%m%d%H%M} fn/madis_iamn.csv bogus csv"
     subprocess.call(["pqinsert", "-i", "-p", pqstr, fh.name])
     os.remove(fh.name)
 
