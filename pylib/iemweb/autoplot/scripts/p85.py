@@ -5,15 +5,21 @@ above or below a temperature thresold.
 """
 
 import calendar
+from datetime import datetime
 
 import pandas as pd
 from pyiem.database import get_sqlalchemy_conn
 from pyiem.exceptions import NoDataFound
-from pyiem.plot import figure_axes
+from pyiem.plot import figure
+from sqlalchemy import text
 
 PDICT = {
     "above": "At or Above Temperature",
     "below": "Below Temperature",
+}
+PDICT2 = {
+    "100": "Scale x-axis to 100%",
+    "data": "Scale x-axis to Data",
 }
 
 
@@ -42,6 +48,13 @@ def get_description():
             label="Threshold Option:",
             options=PDICT,
         ),
+        {
+            "type": "select",
+            "name": "scale",
+            "default": "100",
+            "label": "Scale X-Axis:",
+            "options": PDICT2,
+        },
     ]
     return desc
 
@@ -56,21 +69,32 @@ def plotter(ctx: dict):
     tzname = ctx["_nt"].sts[station]["tzname"]
     with get_sqlalchemy_conn("asos") as conn:
         df = pd.read_sql(
-            """
+            text("""
         WITH data as (
-            SELECT valid at time zone %s  + '10 minutes'::interval as v, tmpf
-            from alldata where station = %s and tmpf > -90 and tmpf < 150
-            and extract(month from valid) = %s and report_type = 3)
+            SELECT valid at time zone :tzname  + '10 minutes'::interval as v,
+            tmpf
+            from alldata where station = :station and tmpf > -90 and tmpf < 150
+            and extract(month from valid) = :month and report_type = 3)
 
         SELECT extract(hour from v) as hour,
-        min(v) as min_valid, max(v) as max_valid,
-        sum(case when tmpf::int < %s THEN 1 ELSE 0 END) as below,
-        sum(case when tmpf::int >= %s THEN 1 ELSE 0 END) as above,
+        min(v) as min_valid,
+        max(v) as max_valid,
+        max(case when tmpf::int < :thres THEN v ELSE null END)
+            as last_below_valid,
+        max(case when tmpf::int >= :thres THEN v ELSE null END)
+            as last_above_valid,
+        sum(case when tmpf::int < :thres THEN 1 ELSE 0 END) as below,
+        sum(case when tmpf::int >= :thres THEN 1 ELSE 0 END) as above,
         count(*) from data
         GROUP by hour ORDER by hour ASC
-        """,
+        """),
             conn,
-            params=(tzname, station, month, thres, thres),
+            params={
+                "station": station,
+                "month": month,
+                "thres": thres,
+                "tzname": tzname,
+            },
             index_col="hour",
         )
     if df.empty:
@@ -88,25 +112,36 @@ def plotter(ctx: dict):
         f"{thres}"
         r"$^\circ$F"
     )
-    (fig, ax) = figure_axes(apctx=ctx, title=title)
-    bars = ax.bar(hours, freq, fc="blue", align="center")
-    for i, mybar in enumerate(bars):
-        ax.text(
-            i,
-            mybar.get_height() + 3,
-            f"{mybar.get_height():.0f}",
-            ha="center",
-            fontsize=10,
-        )
-    ax.set_xticks(range(0, 25, 3))
-    ax.set_xticklabels(
-        ["Mid", "3 AM", "6 AM", "9 AM", "Noon", "3 PM", "6 PM", "9 PM", "Mid"]
+    fig = figure(apctx=ctx, title=title)
+    ax = fig.add_axes((0.45, 0.08, 0.5, 0.75))
+    # Add a table of stats
+    ax.text(
+        0,
+        1.02,
+        f"Hour | Last {mydir:5s} | Count | Total | Freq",
+        ha="right",
+        va="bottom",
+        transform=ax.transAxes,
     )
+    labels = []
+    for i, row in df.iterrows():
+        dt = row[f"last_{mydir}_valid"]
+        dt = "N/A" if pd.isna(dt) else dt.strftime("%d %b %Y")
+        hr = datetime(2000, 1, 1, int(i)).strftime("%-I %p")
+        labels.append(
+            f"{hr:5s} | {dt} | {row[mydir]:,} | "
+            f"{row['count']:,} | "
+            f"{row[mydir + '_freq']:.1f}%\n"
+        )
+
+    ax.barh(hours, freq, fc="blue", align="center")
+    ax.set_yticks(range(24))
+    ax.set_yticklabels(labels)
     ax.grid(True)
-    ax.set_ylim(0, 100)
-    ax.set_yticks([0, 25, 50, 75, 100])
-    ax.set_ylabel("Frequency [%]")
-    ax.set_xlabel(f"Hour Timezone: {tzname}")
-    ax.set_xlim(-0.5, 23.5)
+    if ctx["scale"] == "100":
+        ax.set_xlim(0, 100)
+        ax.set_xticks([0, 5, 25, 50, 75, 95, 100])
+    ax.set_xlabel(f"Frequence [%s] (Hour Timezone: {tzname})")
+    ax.set_ylim(-0.5, 23.5)
 
     return fig, df

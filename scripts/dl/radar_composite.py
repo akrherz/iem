@@ -69,11 +69,11 @@ def runtime(ts: datetime, routes: str):
         with data as (
             select sel, rank() OVER (PARTITION by sel ORDER by issued DESC),
             ST_xmax(geom), ST_xmin(geom), ST_ymax(geom), ST_ymin(geom)
-            from watches where issued < %s and issued > %s)
-        select trim(sel) as ss, st_xmax, st_xmin, st_ymax, st_ymin from data
+            from watches where issued <= %s and sel is not null)
+        select sel as ss, st_xmax, st_xmin, st_ymax, st_ymin from data
         where rank = 1
         """,
-        (ts, ts - timedelta(days=120)),
+        (ts,),
     )
     for row in pcursor:
         xmin = float(row["st_xmin"]) - 0.75

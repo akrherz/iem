@@ -1,5 +1,7 @@
 """.. title:: Hourly Precipitation Data Service
 
+Return to `API Services </api/>`_
+
 Documentation for /cgi-bin/request/hourlyprecip.py
 --------------------------------------------------
 
@@ -25,7 +27,7 @@ station=AMW&network=IA_ASOS&sts=2024-01-01T00:00:00Z&ets=2024-02-01T00:00:00Z\
 
 from zoneinfo import ZoneInfo
 
-from pydantic import AwareDatetime, Field
+from pydantic import AwareDatetime, Field, field_validator
 from pyiem.database import get_dbconn
 from pyiem.exceptions import IncompleteWebRequest
 from pyiem.webutil import CGIModel, ListOrCSVType, iemapp
@@ -64,6 +66,15 @@ class Schema(CGIModel):
     year2: int = Field(None, description="The end year, when ets is unset.")
     month2: int = Field(None, description="The end month, when ets is unset.")
     day2: int = Field(None, description="The end day, when ets is unset.")
+
+    @field_validator("tz", mode="after")
+    def validate_tz(cls, value):
+        """Ensure the timezone is valid."""
+        try:
+            ZoneInfo(value)
+        except Exception as exp:
+            raise ValueError("Invalid timezone") from exp
+        return value
 
 
 def get_data(network, environ, tzinfo):
