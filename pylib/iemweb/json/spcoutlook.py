@@ -18,7 +18,7 @@ Changelog
 Example Usage
 -------------
 
-Get all the day 1 outlooks for Piere, South Dakota.  First in JSON, then
+Get all the day 1 outlooks for Pierre, South Dakota.  First in JSON, then
 CSV, and finally Excel.
 
 https://mesonet.agron.iastate.edu/json/spcoutlook.py\
@@ -27,6 +27,11 @@ https://mesonet.agron.iastate.edu/json/spcoutlook.py\
 ?lat=44.368&lon=-100.336&day=1&fmt=csv
 https://mesonet.agron.iastate.edu/json/spcoutlook.py\
 ?lat=44.368&lon=-100.336&day=1&fmt=excel
+
+Provide the day 1 outlook for Pierre, SD valid at 8 UTC on 3 Aug 2024
+
+https://mesonet.agron.iastate.edu/json/spcoutlook.py\
+?lat=44.368&lon=-100.336&day=1&time=2024-08-03T08:00Z
 
 Get only the last day 2 outlook for Washington, DC
 
@@ -83,12 +88,12 @@ def get_order(threshold):
     return THRESHOLD_ORDER.index(threshold)
 
 
-def process_df(watches: pd.DataFrame) -> pd.DataFrame:
+def process_df(outlooks: pd.DataFrame) -> pd.DataFrame:
     """Condition the dataframe."""
-    if watches.empty:
-        return watches
-    watches["threshold_rank"] = watches["threshold"].apply(get_order)
-    return watches
+    if outlooks.empty:
+        return outlooks
+    outlooks["threshold_rank"] = outlooks["threshold"].apply(get_order)
+    return outlooks
 
 
 def dotime(time, lon, lat, day, cat) -> tuple[pd.DataFrame, datetime]:
@@ -162,21 +167,7 @@ def dowork(lon, lat, day, cat) -> pd.DataFrame:
     return outlooks
 
 
-def get_ct(environ) -> str:
-    """Figure out the content type."""
-    fmt = environ["fmt"]
-    if fmt == "json":
-        return "application/json"
-    if fmt == "excel":
-        return "application/vnd.ms-excel"
-    return "text/csv"
-
-
-@iemapp(
-    help=__doc__,
-    schema=Schema,
-    content_type=get_ct,
-)
+@iemapp(help=__doc__, schema=Schema)
 def application(environ, start_response):
     """Answer request."""
     time = environ.get("time")
