@@ -1,6 +1,6 @@
 """Plot of Precip reports"""
 
-import datetime
+from datetime import datetime, timedelta
 
 from pyiem.database import get_dbconn
 from pyiem.plot import MapPlot
@@ -175,7 +175,7 @@ def plot_snow_month(valid):
     cursor = pgconn.cursor()
 
     d1 = valid.replace(day=1)
-    d2 = d1 + datetime.timedelta(days=35)
+    d2 = d1 + timedelta(days=35)
     d2 = d2.replace(day=1)
 
     cursor.execute(
@@ -229,7 +229,7 @@ def plot_precip_month(valid):
     cursor = pgconn.cursor()
 
     d1 = valid.replace(day=1)
-    d2 = d1 + datetime.timedelta(days=35)
+    d2 = d1 + timedelta(days=35)
     d2 = d2.replace(day=1)
 
     cursor.execute(
@@ -322,10 +322,15 @@ def plot_precip(valid):
     pgconn.close()
 
 
+def main():
+    """Go Main."""
+    plot_precip(datetime.now())
+    plot_snow(datetime.now())
+    plot_snowdepth(datetime.now())
+    plot_hilo(datetime.now())
+    plot_precip_month(datetime.now())
+    plot_snow_month(datetime.now())
+
+
 if __name__ == "__main__":
-    plot_precip(datetime.datetime.now())
-    plot_snow(datetime.datetime.now())
-    plot_snowdepth(datetime.datetime.now())
-    plot_hilo(datetime.datetime.now())
-    plot_precip_month(datetime.datetime.now())
-    plot_snow_month(datetime.datetime.now())
+    main()

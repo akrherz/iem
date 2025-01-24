@@ -8,7 +8,7 @@ Since POWER data is courser than the IEMRE grid, we can just sample IEMRE.
 Run from RUN_2AM.sh looking for missing data to estimate.
 """
 
-import datetime
+from datetime import date, datetime, timedelta
 from typing import Optional
 
 import click
@@ -65,7 +65,7 @@ def build_stations(dt) -> pd.DataFrame:
     return df
 
 
-def compute(df, sids, dt: datetime.date, do_regions=False):
+def compute(df, sids, dt: date, do_regions=False):
     """Do the magic."""
     ncfn = get_daily_ncname(dt.year, domain="")
     tidx = daily_offset(dt)
@@ -86,7 +86,7 @@ def compute(df, sids, dt: datetime.date, do_regions=False):
     LOG.info("IA0200 %s", df.loc["IA0200"])
 
 
-def do(dt: datetime.date):
+def do(dt: date):
     """Process for a given date."""
     LOG.info("do(%s)", dt)
     df = build_stations(dt)
@@ -94,7 +94,7 @@ def do(dt: datetime.date):
     # We currently do two options
     # 1. For morning sites 1-11 AM, they get yesterday's values
     sids = df[(df["temp_hour"] > 0) & (df["temp_hour"] < 12)].index.values
-    compute(df, sids, dt - datetime.timedelta(days=1), True)
+    compute(df, sids, dt - timedelta(days=1), True)
     # 2. All other sites get today
     sids = df[df["power_srad"].isna()].index.values
     compute(df, sids, dt)
@@ -117,7 +117,7 @@ def do(dt: datetime.date):
 
 @click.command()
 @click.option("--date", "valid", type=click.DateTime())
-def main(valid: Optional[datetime.datetime]):
+def main(valid: Optional[datetime]):
     """Go Main Go"""
     if valid is not None:
         do(valid.date())

@@ -4,7 +4,7 @@ Very much legacy stuff.
 
 """
 
-import datetime
+from datetime import datetime, timedelta
 from io import StringIO
 
 from pyiem.database import get_dbconnc
@@ -40,17 +40,17 @@ KELO sites. SchoolNet data stops on 3 May 2019.
     sio.write('<h3 align="center">Hourly Precip Grid</h3>')
     try:
         postDate = environ.get("date")
-        myTime = datetime.datetime.strptime(postDate, "%Y-%m-%d")
+        myTime = datetime.strptime(postDate, "%Y-%m-%d")
     except Exception:
-        myTime = datetime.datetime(2019, 5, 3)
+        myTime = datetime(2019, 5, 3)
 
     sio.write("<table border=1><tr>")
     sio.write(
         '<td>Back: <a href="catSNET.py?date='
-        + (myTime - datetime.timedelta(days=1)).strftime("%Y-%m-%d")
+        + (myTime - timedelta(days=1)).strftime("%Y-%m-%d")
         + '"> \
         '
-        + (myTime - datetime.timedelta(days=1)).strftime("%Y-%m-%d")
+        + (myTime - timedelta(days=1)).strftime("%Y-%m-%d")
         + "</a></td>"
     )
 
@@ -58,10 +58,10 @@ KELO sites. SchoolNet data stops on 3 May 2019.
 
     sio.write(
         '<td>Forward: <a href="catSNET.py?date='
-        + (myTime + datetime.timedelta(days=1)).strftime("%Y-%m-%d")
+        + (myTime + timedelta(days=1)).strftime("%Y-%m-%d")
         + '"> \
         '
-        + (myTime + datetime.timedelta(days=1)).strftime("%Y-%m-%d")
+        + (myTime + timedelta(days=1)).strftime("%Y-%m-%d")
         + "</a></td>"
     )
 
@@ -151,7 +151,7 @@ def application(environ, start_response):
     setupTable(sio)
 
     td = ts.strftime("%Y-%m-%d")
-    tm = (ts + datetime.timedelta(days=1)).strftime("%Y-%m-%d")
+    tm = (ts + timedelta(days=1)).strftime("%Y-%m-%d")
 
     sqlStr = """
         SELECT extract('hour' from valid) as vhour,
