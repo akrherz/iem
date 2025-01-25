@@ -5,6 +5,7 @@ Run from RUN_0Z_ERA5LAND.sh for 5 days ago.
 
 import os
 import sys
+import tempfile
 import warnings
 from datetime import timedelta
 
@@ -113,7 +114,7 @@ def run(valid, domain: str, force):
                 return
     gridnav = get_nav("era5land", domain)
     LOG.info("Running for %s[domain=%s]", valid, domain)
-    ncfn = f"{domain}_{valid:%Y%m%d%H}.nc"
+    zipfn = f"{domain}_{valid:%Y%m%d%H}.zip"
 
     cds = cdsapi.Client(quiet=True, progress=sys.stdout.isatty())
 
@@ -122,9 +123,9 @@ def run(valid, domain: str, force):
         {
             "variable": CDSVARS,
             "year": f"{valid.year}",
-            "month": f"{valid.month}",
-            "day": f"{valid.day}",
-            "time": f"{valid:%H}:00",
+            "month": f"{valid:%m}",
+            "day": [f"{valid:%d}"],
+            "time": [f"{valid:%H}:00"],
             # Unclear what is happening here, but the download seems to
             # conform to the requested grid
             "area": [
@@ -133,13 +134,17 @@ def run(valid, domain: str, force):
                 gridnav.bottom,
                 gridnav.right,
             ],
-            "format": "netcdf",
+            "data_format": "netcdf",
+            "download_format": "zip",
         },
-        ncfn,
+        zipfn,
     )
-    with ncopen(ncfn) as ncin, ncopen(ncoutfn, "a") as nc:
+    # unzip
+    os.system(f"unzip {zipfn}")
+    os.unlink(zipfn)
+    with ncopen("data_0.nc") as ncin, ncopen(ncoutfn, "a") as nc:
         ingest(ncin, nc, valid, domain)
-    os.unlink(ncfn)
+    os.unlink("data_0.nc")
 
 
 @click.command()
@@ -152,9 +157,11 @@ def main(valid, domain, force: bool):
     domains = ["", "china", "europe"]
     if domain is not None:
         domains = [domain]
-    for offset in range(1, 25):
-        for _domain in domains:
-            run(valid + timedelta(hours=offset), _domain, force)
+    with tempfile.TemporaryDirectory() as tmpdir:
+        os.chdir(tmpdir)
+        for offset in range(1, 25):
+            for _domain in domains:
+                run(valid + timedelta(hours=offset), _domain, force)
 
 
 if __name__ == "__main__":
