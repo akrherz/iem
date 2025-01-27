@@ -1,7 +1,8 @@
 """
 Based on IEM archives of METAR reports, this
 application produces the hourly frequency of a temperature at or
-above or below a temperature thresold.
+above or below a temperature thresold.  This application tries to only
+consider the top of the hour reports.
 """
 
 import calendar
@@ -14,12 +15,41 @@ from pyiem.plot import figure
 from sqlalchemy import text
 
 PDICT = {
-    "above": "At or Above Temperature",
-    "below": "Below Temperature",
+    "above": "At or Above",
+    "below": "Below",
 }
 PDICT2 = {
     "100": "Scale x-axis to 100%",
     "data": "Scale x-axis to Data",
+}
+PDICT3 = {
+    "alti": "Altimeter",
+    "dwpf": "Dew Point",
+    "feel": "Feels Like",
+    "p01i": "Precipitation",
+    "mslp": "Pressure",
+    "relh": "Relative Humidity",
+    "tmpf": "Temperature",
+    "vsby": "Visibility",
+    "sknt": "Wind Speed",
+    "gust": "Wind Gust",
+}
+UNITS = {
+    "alti": "inches",
+    "dwpf": "F",
+    "feel": "F",
+    "p01i": "inches",
+    "mslp": "mb",
+    "relh": "%",
+    "tmpf": "F",
+    "vsby": "miles",
+    "sknt": "knots",
+    "gust": "knots",
+}
+CASTS = {
+    "tmpf": "int",
+    "dwpf": "int",
+    "feel": "int",
 }
 
 
@@ -35,11 +65,18 @@ def get_description():
             label="Select Station:",
         ),
         dict(type="month", name="month", default=7, label="Month:"),
+        {
+            "type": "select",
+            "name": "varname",
+            "default": "tmpf",
+            "label": "Variable to Plot:",
+            "options": PDICT3,
+        },
         dict(
             type="int",
             name="t",
             default=80,
-            label="Temperature Threshold (F):",
+            label="Threshold (units of variable):",
         ),
         dict(
             type="select",
@@ -65,26 +102,27 @@ def plotter(ctx: dict):
     month = int(ctx["month"])
     thres = ctx["t"]
     mydir = ctx["dir"]
+    varname = ctx["varname"]
 
     tzname = ctx["_nt"].sts[station]["tzname"]
     with get_sqlalchemy_conn("asos") as conn:
         df = pd.read_sql(
-            text("""
+            text(f"""
         WITH data as (
             SELECT valid at time zone :tzname  + '10 minutes'::interval as v,
-            tmpf
-            from alldata where station = :station and tmpf > -90 and tmpf < 150
+            {varname}::{CASTS.get(varname, "numeric")} as datum
+            from alldata where station = :station and {varname} is not null
             and extract(month from valid) = :month and report_type = 3)
 
         SELECT extract(hour from v) as hour,
         min(v) as min_valid,
         max(v) as max_valid,
-        max(case when tmpf::int < :thres THEN v ELSE null END)
+        max(case when datum < :thres THEN v ELSE null END)
             as last_below_valid,
-        max(case when tmpf::int >= :thres THEN v ELSE null END)
+        max(case when datum >= :thres THEN v ELSE null END)
             as last_above_valid,
-        sum(case when tmpf::int < :thres THEN 1 ELSE 0 END) as below,
-        sum(case when tmpf::int >= :thres THEN 1 ELSE 0 END) as above,
+        sum(case when datum < :thres THEN 1 ELSE 0 END) as below,
+        sum(case when datum >= :thres THEN 1 ELSE 0 END) as above,
         count(*) from data
         GROUP by hour ORDER by hour ASC
         """),
@@ -108,9 +146,9 @@ def plotter(ctx: dict):
     title = (
         f"({df['min_valid'].min().year} - {df['max_valid'].max().year}) "
         f"{ctx['_sname']}\n"
-        f"Frequency of {calendar.month_name[month]} Hour, {PDICT[mydir]}: "
-        f"{thres}"
-        r"$^\circ$F"
+        f"Frequency of {calendar.month_name[month]} Hour, "
+        f"{PDICT3[varname]} {PDICT[mydir]}: "
+        f"{thres} {UNITS[varname]}"
     )
     fig = figure(apctx=ctx, title=title)
     ax = fig.add_axes((0.45, 0.08, 0.5, 0.75))
@@ -141,7 +179,7 @@ def plotter(ctx: dict):
     if ctx["scale"] == "100":
         ax.set_xlim(0, 100)
         ax.set_xticks([0, 5, 25, 50, 75, 95, 100])
-    ax.set_xlabel(f"Frequence [%s] (Hour Timezone: {tzname})")
+    ax.set_xlabel(f"Frequency [%s] (Hour Timezone: {tzname})")
     ax.set_ylim(-0.5, 23.5)
 
     return fig, df
