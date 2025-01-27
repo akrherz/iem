@@ -1,6 +1,6 @@
 """Generate a plot of GDD"""
 
-import datetime
+from datetime import date
 
 from pyiem.util import logger, web2ldm
 
@@ -9,7 +9,7 @@ LOG = logger()
 
 def main():
     """Go Main Go"""
-    today = datetime.date.today()
+    today = date.today()
     first = today.replace(day=1)
     url = (
         "http://iem.local/plotting/auto/plot/97/d:sector::sector:IA::"

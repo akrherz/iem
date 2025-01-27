@@ -4,7 +4,7 @@ Gridcell sample the NLDAS NetCDF files to save srad to climodat database.
 Run from RUN_0Z.sh for six UTC days ago.
 """
 
-import datetime
+from datetime import timedelta
 
 import click
 import geopandas as gpd
@@ -14,12 +14,7 @@ from affine import Affine
 from pyiem.database import get_dbconnc, get_sqlalchemy_conn
 from pyiem.grid.zs import CachingZonalStats
 from pyiem.iemre import hourly_offset
-from pyiem.util import (
-    convert_value,
-    logger,
-    ncopen,
-    utc,
-)
+from pyiem.util import convert_value, logger, ncopen, utc
 
 LOG = logger()
 
@@ -71,7 +66,7 @@ def compute(df, sids, dt, do_regions=False):
     """Do the magic."""
     # Life choice is to run 6z to 6z
     sts = utc(dt.year, dt.month, dt.day, 6)
-    ets = sts + datetime.timedelta(hours=24)
+    ets = sts + timedelta(hours=24)
 
     ncfn = f"/mesonet/data/nldas/{sts.year}_hourly.nc"
     idx0 = hourly_offset(sts)
@@ -118,7 +113,7 @@ def do(dt):
     # We currently do two options
     # 1. For morning sites 1-11 AM, they get yesterday's values
     sids = df[(df["temp_hour"] > 0) & (df["temp_hour"] < 12)].index.values
-    compute(df, sids, dt - datetime.timedelta(days=1), True)
+    compute(df, sids, dt - timedelta(days=1), True)
     # 2. All other sites get today
     sids = df[df["nldas_soilt4_avg"].isna()].index.values
     compute(df, sids, dt)

@@ -8,12 +8,13 @@ Run on the 7th from `RUN_2AM.sh`
 
 """
 
-import datetime
 import smtplib
+from datetime import date, datetime, timedelta
 from email.mime.text import MIMEText
 
 import pandas as pd
-from pyiem.util import get_properties, get_sqlalchemy_conn
+from pyiem.database import get_sqlalchemy_conn
+from pyiem.util import get_properties
 
 
 def generate_report(start_date, end_date):
@@ -25,7 +26,7 @@ def generate_report(start_date, end_date):
             "SELECT station, count(*) from sm_hourly WHERE valid >= %s "
             "and valid < %s GROUP by station ORDER by station",
             pgconn,
-            params=(start_date, end_date + datetime.timedelta(days=1)),
+            params=(start_date, end_date + timedelta(days=1)),
             index_col="station",
         )
     performance = min([100, df["count"].sum() / float(totalobs) * 100.0])
@@ -53,7 +54,7 @@ Additional Details
         totalobs,
         days,
         df["count"].sum(),
-        datetime.datetime.now().strftime("%d %B %Y %H:%M %p"),
+        datetime.now().strftime("%d %B %Y %H:%M %p"),
     )
 
 
@@ -61,8 +62,8 @@ def main():
     """Go Main Go"""
     emails = get_properties()["nmp_monthly_email_list"].split(",")
 
-    end_date = datetime.date.today().replace(day=6)
-    start_date = (end_date - datetime.timedelta(days=40)).replace(day=7)
+    end_date = date.today().replace(day=6)
+    start_date = (end_date - timedelta(days=40)).replace(day=7)
     report = generate_report(start_date, end_date)
 
     msg = MIMEText(report)

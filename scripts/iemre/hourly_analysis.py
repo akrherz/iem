@@ -3,9 +3,9 @@
 Run from RUN_10_AFTER.sh
 """
 
-import datetime
 import os
 import warnings
+from datetime import datetime, timedelta, timezone
 
 import click
 import numpy as np
@@ -30,7 +30,7 @@ from sqlalchemy import text
 # Prevent invalid value encountered in cast
 warnings.simplefilter("ignore", RuntimeWarning)
 LOG = logger()
-MEMORY = {"ts": datetime.datetime.now()}
+MEMORY = {"ts": datetime.now()}
 
 
 def use_era5land(ts, kind, domain):
@@ -79,7 +79,7 @@ def use_hrrr_soilt(ts):
     # We may be running close to real-time, so it makes some sense to take
     # files from the recent past.
     for offset in range(5):
-        fn = (ts - datetime.timedelta(hours=offset)).strftime(
+        fn = (ts - timedelta(hours=offset)).strftime(
             "%Y/%m/%d/model/hrrr/%H/hrrr.t%Hz.3kmf00.grib2"
         )
         with archive_fetch(fn) as fn:
@@ -194,8 +194,8 @@ def grid_hour(ts, domain):
     @param ts Timestamp of the analysis, we'll consider a 20 minute window
     """
     LOG.info("Processing %s", ts)
-    ts0 = ts - datetime.timedelta(minutes=10)
-    ts1 = ts + datetime.timedelta(minutes=10)
+    ts0 = ts - timedelta(minutes=10)
+    ts1 = ts + timedelta(minutes=10)
 
     mybuf = 2.0
     gridnav = get_nav("iemre", domain)
@@ -350,9 +350,9 @@ def write_grid(valid, vname, grid, domain):
 @click.command()
 @click.option("--valid", required=True, type=click.DateTime(), help="UTC")
 @click.option("--domain", default="", help="Domain to process")
-def main(valid, domain):
+def main(valid: datetime, domain):
     """Go Main"""
-    grid_hour(valid.replace(tzinfo=datetime.timezone.utc), domain)
+    grid_hour(valid.replace(tzinfo=timezone.utc), domain)
 
 
 if __name__ == "__main__":

@@ -4,9 +4,8 @@
 Rewritten by apache to text2png?e=201612141916&pil=ADMNFD
 """
 
-import datetime
+from datetime import datetime, timezone
 from io import BytesIO
-from zoneinfo import ZoneInfo
 
 import PIL.ImageDraw
 import PIL.ImageFont
@@ -14,11 +13,6 @@ import PIL.ImageOps
 from pyiem.database import get_dbconn
 from pyiem.webutil import iemapp
 from pymemcache.client import Client
-
-
-def pt2px(pt):
-    """Crude point to pixel work"""
-    return int(round(pt * 96.0 / 72))
 
 
 def text_image(content):
@@ -73,8 +67,7 @@ def make_image(e, pil):
     """Do as I say"""
     pgconn = get_dbconn("afos")
     cursor = pgconn.cursor()
-    valid = datetime.datetime.strptime(e, "%Y%m%d%H%M")
-    valid = valid.replace(tzinfo=ZoneInfo("UTC"))
+    valid = datetime.strptime(e, "%Y%m%d%H%M").replace(tzinfo=timezone.utc)
 
     cursor.execute(
         "SELECT data from products WHERE pil = %s and entered = %s",

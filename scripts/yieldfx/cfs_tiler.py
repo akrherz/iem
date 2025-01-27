@@ -3,8 +3,8 @@
 Seems to be unused at the moment.
 """
 
-import datetime
 import os
+from datetime import date, timedelta
 
 import numpy as np
 from metpy.units import units
@@ -80,12 +80,10 @@ def make_netcdf(fullpath, valid, west, south):
 
 def replace_cfs(nc, valid, islice, jslice):
     """Copy CFS data into the given year."""
-    tidx0 = (valid - datetime.date(1980, 1, 1)).days
-    tidx1 = (
-        datetime.date(valid.year, 12, 31) - datetime.date(1980, 1, 1)
-    ).days
+    tidx0 = (valid - date(1980, 1, 1)).days
+    tidx1 = (date(valid.year, 12, 31) - date(1980, 1, 1)).days
     cfsnc = ncopen(valid.strftime("/mesonet/data/iemre/cfs_%Y%m%d%H.nc"))
-    tidx = daily_offset(valid + datetime.timedelta(days=1))
+    tidx = daily_offset(valid + timedelta(days=1))
     tslice = slice(tidx0 + 1, tidx1 + 1)
     # CFS is W m-2, we want MJ
     nc.variables["srad"][tslice, :, :] = (
@@ -115,8 +113,8 @@ def copy_iemre(nc, fromyear, ncdate0, ncdate1, islice, jslice):
         LOG.warning("reanalysis fn %s missing", rencfn)
         return
     renc = ncopen(rencfn)
-    tidx0 = (ncdate0 - datetime.date(1980, 1, 1)).days
-    tidx1 = (ncdate1 - datetime.date(1980, 1, 1)).days
+    tidx0 = (ncdate0 - date(1980, 1, 1)).days
+    tidx1 = (ncdate1 - date(1980, 1, 1)).days
     tslice = slice(tidx0, tidx1 + 1)
     # time steps to fill
     tsteps = (tidx1 - tidx0) + 1
@@ -170,10 +168,8 @@ def tile_extraction(nc, valid, west, south):
     jslice = slice(j, j + 16)
     for year in range(1980, valid.year + 1):
         # Current year IEMRE should be substituted for this year's data
-        today = datetime.date(year, valid.month, valid.day)
-        copy_iemre(
-            nc, valid.year, datetime.date(year, 1, 1), today, islice, jslice
-        )
+        today = date(year, valid.month, valid.day)
+        copy_iemre(nc, valid.year, date(year, 1, 1), today, islice, jslice)
 
         # replace CFS!
         if year == valid.year:
@@ -183,8 +179,8 @@ def tile_extraction(nc, valid, west, south):
             copy_iemre(
                 nc,
                 year,
-                today + datetime.timedelta(days=1),
-                datetime.date(year, 12, 31),
+                today + timedelta(days=1),
+                date(year, 12, 31),
                 islice,
                 jslice,
             )
@@ -193,7 +189,7 @@ def tile_extraction(nc, valid, west, south):
 def qc(nc):
     """Quick QC of the file."""
     for i, time in enumerate(nc.variables["time"][:]):
-        ts = datetime.date(1980, 1, 1) + datetime.timedelta(days=int(time))
+        ts = date(1980, 1, 1) + timedelta(days=int(time))
         avgv = np.mean(nc.variables["srad"][i, :, :])
         if avgv > 0:
             continue
@@ -216,7 +212,7 @@ def main():
     # Run for the 12z file **two days ago**, the issue is that for a year
     # without a leap day, previous year filling will ask for one too many
     # days that currently does not have data
-    today = datetime.date.today() - datetime.timedelta(days=2)
+    today = date.today() - timedelta(days=2)
     for hour in [0, 6, 12, 18]:
         valid = utc(today.year, today.month, today.day, hour)
         # Create tiles to cover 12 state region

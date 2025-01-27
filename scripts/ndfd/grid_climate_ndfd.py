@@ -1,12 +1,13 @@
 """Grid climate for netcdf usage"""
 
-import datetime
+from datetime import datetime, timedelta
 
 import numpy as np
-from pyiem import iemre
+from pyiem.database import get_dbconnc
+from pyiem.iemre import daily_offset
 from pyiem.network import Table as NetworkTable
 from pyiem.reference import state_names
-from pyiem.util import convert_value, get_dbconnc, ncopen
+from pyiem.util import convert_value, ncopen
 from scipy.interpolate import NearestNDInterpolator
 
 NT = NetworkTable([f"{abbr}CLIMATE" for abbr in state_names])
@@ -48,9 +49,9 @@ def grid_day(nc, ts):
     @param ts Timestamp of the analysis, we'll consider a 20 minute window
     """
     pgconn, cursor = get_dbconnc("coop")
-    offset = iemre.daily_offset(ts)
+    offset = daily_offset(ts)
     if ts.day == 29 and ts.month == 2:
-        ts = datetime.datetime(2000, 3, 1)
+        ts = datetime(2000, 3, 1)
 
     sql = """SELECT * from climate51 WHERE valid = '%s' and
              substr(station,3,4) != '0000' and substr(station,3,1) != 'C'
@@ -83,9 +84,9 @@ def workflow(ts):
 
 def main():
     """Go Main!"""
-    sts = datetime.datetime(2000, 1, 1)
-    ets = datetime.datetime(2001, 1, 1)
-    interval = datetime.timedelta(days=1)
+    sts = datetime(2000, 1, 1)
+    ets = datetime(2001, 1, 1)
+    interval = timedelta(days=1)
     now = sts
     while now < ets:
         print(now)

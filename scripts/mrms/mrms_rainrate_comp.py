@@ -7,12 +7,12 @@ of 0.02 mm per index.
 Run from RUN_1MIN.sh
 """
 
-import datetime
 import gzip
 import json
 import os
 import subprocess
 import tempfile
+from datetime import datetime, timedelta, timezone
 
 import click
 import numpy as np
@@ -32,7 +32,7 @@ def workflow(now, realtime):
     szy = 3500
     # Create the image data
     imgdata = np.zeros((szy, szx), "u1")
-    sts = now - datetime.timedelta(minutes=2)
+    sts = now - timedelta(minutes=2)
     prefix = f"a{minutes}m"
     metadata = {
         "start_valid": sts.strftime(ISO8601),
@@ -154,12 +154,14 @@ def workflow(now, realtime):
 
 
 @click.command()
-@click.option("--valid", type=click.DateTime(), help="UTC Timestamp")
-def main(valid):
+@click.option(
+    "--valid", required=True, type=click.DateTime(), help="UTC Timestamp"
+)
+def main(valid: datetime):
     """Go Main Go"""
-    valid = valid.replace(tzinfo=datetime.timezone.utc)
+    valid = valid.replace(tzinfo=timezone.utc)
     realtime = False
-    if utc() - valid < datetime.timedelta(minutes=10):
+    if (utc() - valid) < timedelta(minutes=10):
         realtime = True
     # Present reality
     if realtime and valid.minute % 2 != 0:
@@ -168,7 +170,7 @@ def main(valid):
     workflow(valid, True)
     # Also check old dates
     for delta in [30, 90, 600, 1440, 2880]:
-        ts = valid - datetime.timedelta(minutes=delta)
+        ts = valid - timedelta(minutes=delta)
         ppath = ts.strftime("%Y/%m/%d/GIS/mrms/a2m_%Y%m%d%H%M.png")
         with archive_fetch(ppath) as fn:
             if fn is None:

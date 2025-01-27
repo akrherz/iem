@@ -1,8 +1,8 @@
 """Hacky parsers"""
 
-import datetime
 import os
 import sys
+from datetime import datetime
 from zoneinfo import ZoneInfo
 
 from pyiem.database import get_dbconn
@@ -15,7 +15,7 @@ def main():
     pgconn = get_dbconn("iem")
     icursor = pgconn.cursor()
 
-    now = datetime.datetime.now().replace(tzinfo=ZoneInfo("America/Chicago"))
+    now = datetime.now().replace(tzinfo=ZoneInfo("America/Chicago"))
 
     fn = f"/mesonet/ARCHIVE/data/{now:%Y/%m/%d}/text/ot/ot0006.dat"
 
@@ -31,7 +31,7 @@ def main():
     if len(tokens) != 19:
         sys.exit(0)
 
-    ts = datetime.datetime.strptime(" ".join(tokens[:5]), "%B %d, %Y %I:%M %p")
+    ts = datetime.strptime(" ".join(tokens[:5]), "%B %d, %Y %I:%M %p")
 
     ts = now.replace(
         year=ts.year,

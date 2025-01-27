@@ -2,14 +2,15 @@
 Ingest files provided by NLAE containing flux information
 """
 
-import datetime
 import os
+from datetime import date, datetime
 from io import StringIO
 from zoneinfo import ZoneInfo
 
 import pandas as pd
+from pyiem.database import get_dbconnc
 from pyiem.observation import Observation
-from pyiem.util import c2f, convert_value, get_dbconnc, logger, utc
+from pyiem.util import c2f, convert_value, logger, utc
 
 LOG = logger()
 BASEDIR = "/mesonet/home/mesonet/ot/ot0005/incoming/Fluxdata"
@@ -142,11 +143,11 @@ def c(v):
     return v
 
 
-def make_time(string):
+def make_time(string) -> datetime:
     """Convert a time in the file to a datetime"""
-    tstamp = datetime.datetime.strptime(string, "%Y-%m-%d %H:%M:%S")
-    tstamp = tstamp.replace(tzinfo=ZoneInfo("Etc/GMT+6"))
-    return tstamp
+    return datetime.strptime(string, "%Y-%m-%d %H:%M:%S").replace(
+        tzinfo=ZoneInfo("Etc/GMT+6")
+    )
 
 
 def main():
@@ -169,7 +170,7 @@ def main():
             maxts[station] = utc(1980, 1, 1)
         dfs = []
         for fn in fns:
-            myfn = os.path.join(BASEDIR, str(datetime.date.today().year), fn)
+            myfn = os.path.join(BASEDIR, str(date.today().year), fn)
             if not os.path.isfile(myfn):
                 LOG.info("missing file: %s", myfn)
                 continue

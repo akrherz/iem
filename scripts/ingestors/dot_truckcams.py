@@ -4,12 +4,11 @@ Iowa DOT Truck dash camera imagery.  Save this to the IEM archives
 /YYYY/mm/dd/camera/idot_trucks/keyhash/keyhash_timestamp.jpg
 """
 
-import datetime
 import json
 import os
 import subprocess
 import tempfile
-from zoneinfo import ZoneInfo
+from datetime import datetime, timezone
 
 import httpx
 import pyproj
@@ -89,8 +88,8 @@ def process_features(features):
         logdt = feat["attributes"]["PHOTO_FILEDATE"]
         if logdt is None:
             continue
-        ts = datetime.datetime.utcfromtimestamp(logdt / 1000.0)
-        valid = ts.replace(tzinfo=ZoneInfo("UTC"))
+        ts = datetime.utcfromtimestamp(logdt / 1000.0)
+        valid = ts.replace(tzinfo=timezone.utc)
         label = feat["attributes"]["PHOTO_ANUMBER"]
         idnum = feat["attributes"]["PHOTO_UID"]
         LOG.debug(

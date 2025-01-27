@@ -26,7 +26,6 @@ $ISUAGcities = $nt->table;
 $year = get_int404("year", date("Y", time() - 86400 - (7 * 3600)));
 $month = get_int404("month", date("m", time() - 86400 - (7 * 3600)));
 $day = get_int404("day", date("d", time() - 86400 - (7 * 3600)));
-$date = isset($_GET["date"]) ? xssafe($_GET["date"]) : $year . "-" . $month . "-" . $day;
 
 $sts = mktime(0, 0, 0, $month, 1, $year);
 
@@ -101,10 +100,12 @@ for ($i = 0; $row = pg_fetch_assoc($rs); $i++) {
         $pt->draw($map, $snet, $img, 1, $ISUAGcities[$key]['plot_name']);
     }
 }
-$minvalid = strtotime($minvalid);
-$maxvalid = strtotime($maxvalid);
-iemmap_title($map, $img, $title[$dvar] . " [ " .
-    date("d M", $minvalid) . " thru " . date("d M Y", $maxvalid) . " ]");
+if (!is_null($minvalid)) {
+    $minvalid = date("Y-m-d", $minvalid);
+    $maxvalid = date("Y-m-d", $maxvalid);
+    iemmap_title($map, $img, $title[$dvar] . " [ " .
+        date("d M", $minvalid) . " thru " . date("d M Y", $maxvalid) . " ]");
+}
 $map->drawLabelCache($img);
 
 header("Content-type: image/png");

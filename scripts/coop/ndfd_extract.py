@@ -10,7 +10,7 @@ files.
 Run from RUN_10_AFTER.sh at 1z
 """
 
-import datetime
+from datetime import timedelta, timezone
 
 import click
 import numpy as np
@@ -43,7 +43,7 @@ def do_precip(gribs, ftime, data):
         dy = sel[0]["DyInMetres"]
         data["x"] = llcrnrx + dx * np.arange(nx)
         data["y"] = llcrnry + dy * np.arange(ny)
-    cst = ftime - datetime.timedelta(hours=6)
+    cst = ftime - timedelta(hours=6)
     key = cst.strftime("%Y-%m-%d")
     d = data["fx"].setdefault(key, dict(precip=None, high=None, low=None))
     LOG.info("Writting precip %s from ftime: %s", key, ftime)
@@ -59,7 +59,7 @@ def do_temp(name, dkey, gribs, ftime, data):
         sel = gribs.select(parameterName=name)
     except Exception:
         return
-    cst = ftime - datetime.timedelta(hours=6)
+    cst = ftime - timedelta(hours=6)
     key = cst.strftime("%Y-%m-%d")
     d = data["fx"].setdefault(key, dict(precip=None, high=None, low=None))
     LOG.info("Writting %s %s from ftime: %s", name, key, ftime)
@@ -76,7 +76,7 @@ def process(ts):
             continue
         if fhour > 72 and fhour % 6 != 0:
             continue
-        ftime = ts + datetime.timedelta(hours=fhour)
+        ftime = ts + timedelta(hours=fhour)
         ppath = (
             f"{ts:%Y/%m/%d}/model/ndfd/{ts:%H}/"
             f"ndfd.t{ts:%H}z.awp2p5f{fhour:03.0f}.grib2"
@@ -167,7 +167,7 @@ def main(ts):
     """Go!"""
     # Extract 00 UTC Data
     if ts is not None:
-        ts = ts.replace(tzinfo=datetime.timezone.utc)
+        ts = ts.replace(tzinfo=timezone.utc)
     else:
         ts = utc().replace(hour=0, minute=0, second=0, microsecond=0)
     data = process(ts)

@@ -1,9 +1,9 @@
 """Onewire ingest."""
 
-import datetime
 import os
 import subprocess
 import time
+from datetime import datetime
 
 os.environ["TZ"] = "CST6CDT"
 
@@ -24,7 +24,7 @@ def main():
             except Exception:
                 print(ll)
         if len(data) > 3:
-            now = datetime.datetime.now()
+            now = datetime.now()
             fp = "ot0003_%s.dat" % (now.strftime("%Y%m%d%H%M"),)
             with open(fp, "w") as fh:
                 fh.write(

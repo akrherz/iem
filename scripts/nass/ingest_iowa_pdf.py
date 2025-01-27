@@ -3,10 +3,10 @@
 Run from RUN_12Z.sh on Tuesdays
 """
 
-import datetime
 import os
 import tempfile
 import warnings
+from datetime import datetime, timedelta
 
 import click
 import httpx
@@ -229,11 +229,11 @@ def get_url(valid):
     )
     if valid.year <= 2017:
         uri = uri.replace("-", "_")
-    if datetime.datetime(2013, 6, 1) < valid < datetime.datetime(2014, 1, 1):
+    if datetime(2013, 6, 1) < valid < datetime(2014, 1, 1):
         uri = uri.replace("_Crop_Progress_", "")
     elif valid.year <= 2016:
         uri = uri.replace("_Crop_Progress", "")
-    if datetime.datetime(2014, 5, 20) < valid < datetime.datetime(2014, 6, 29):
+    if datetime(2014, 5, 20) < valid < datetime(2014, 6, 29):
         uri = uri.replace("_14", "__14")
     return uri
 
@@ -246,7 +246,7 @@ def workflow(sunday, engine, remotefn):
         req = httpx.get(f"{BASEURL}/{sunday:%Y}/{remotefn}")
     else:
         for day in [1, 2, 3, 0]:
-            valid = sunday + datetime.timedelta(days=day)
+            valid = sunday + timedelta(days=day)
             uri = get_url(valid)
             LOG.info("Attempting %s", uri)
             req = httpx.get(uri)
@@ -282,7 +282,7 @@ def main(sunday, weeks, engine, remotefn):
     """Go Main Go."""
     for _ in range(weeks):
         workflow(sunday, engine, remotefn)
-        sunday += datetime.timedelta(days=7)
+        sunday += timedelta(days=7)
 
 
 if __name__ == "__main__":

@@ -2,21 +2,17 @@
 Sync ACIS content to IEM Access for the ASOS sites.
 """
 
-import datetime
 import sys
 import time
+from datetime import date, timedelta
 
 import click
 import httpx
 import pandas as pd
+from pyiem.database import get_dbconn, get_sqlalchemy_conn
 from pyiem.network import Table as NetworkTable
 from pyiem.reference import TRACE_VALUE
-from pyiem.util import (
-    exponential_backoff,
-    get_dbconn,
-    get_sqlalchemy_conn,
-    logger,
-)
+from pyiem.util import exponential_backoff, logger
 
 LOG = logger()
 SERVICE = "http://data.rcc-acis.org/StnData"
@@ -53,7 +49,7 @@ def compare(row, colname):
 
 def do(meta, acis_station, interactive):
     """Do the query and work"""
-    today = datetime.date.today()
+    today = date.today()
     fmt = "%Y-%m-%d"
     payload = {
         "sid": acis_station,
@@ -68,7 +64,7 @@ def do(meta, acis_station, interactive):
         ],
     }
     if not interactive:
-        payload["sdate"] = (today - datetime.timedelta(days=365)).strftime(fmt)
+        payload["sdate"] = (today - timedelta(days=365)).strftime(fmt)
     LOG.info(
         "Call ACIS for: %s[%s %s]",
         acis_station,

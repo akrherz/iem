@@ -1,7 +1,7 @@
 """Generate the IEMRE hourly analysis file for a year"""
 
-import datetime
 import os
+from datetime import datetime
 
 import click
 import numpy as np
@@ -12,7 +12,7 @@ from pyiem.util import logger, ncopen, utc
 LOG = logger()
 
 
-def init_year(ts: datetime.datetime, domain: str, ci: bool) -> None:
+def init_year(ts: datetime, domain: str, ci: bool) -> None:
     """
     Create a new NetCDF file for a year of our specification!
     """
@@ -39,7 +39,7 @@ def init_year(ts: datetime.datetime, domain: str, ci: bool) -> None:
     nc.createDimension("lat", gridnav.ny)
     nc.createDimension("lon", gridnav.nx)
     nc.createDimension("nv", 2)
-    ts2 = datetime.datetime(ts.year + 1, 1, 1)
+    ts2 = datetime(ts.year + 1, 1, 1)
     days = 1 if ci else (ts2 - ts).days
     LOG.info("Year %s has %s days", ts.year, days)
     nc.createDimension("time", int(days) * 24)
@@ -177,7 +177,7 @@ def init_year(ts: datetime.datetime, domain: str, ci: bool) -> None:
 def main(year: int, ci: bool) -> None:
     """Go Main Go"""
     for domain in ["", "china", "europe"]:
-        init_year(datetime.datetime(year, 1, 1), domain, ci)
+        init_year(datetime(year, 1, 1), domain, ci)
         if ci:
             with ncopen(get_hourly_ncname(year, domain), "a") as nc:
                 nc.variables["rsds"][0] = 400

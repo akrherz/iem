@@ -1,15 +1,15 @@
 """Generate a map of today's average high and low temperature"""
 
-import datetime
+from datetime import date
 
+from pyiem.database import get_dbconnc
 from pyiem.network import Table as NetworkTable
 from pyiem.plot import MapPlot
-from pyiem.util import get_dbconnc
 
 
 def main():
     """Go Main Go"""
-    today = datetime.date.today()
+    today = date.today()
     now = today.replace(year=2000)
     nt = NetworkTable("IACLIMATE")
     nt.sts["IA0200"]["lon"] = -93.6
