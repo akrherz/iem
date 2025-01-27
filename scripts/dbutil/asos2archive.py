@@ -226,6 +226,8 @@ def main():
                 first_updated.strftime("%Y-%m-%dT%H:%M"),
                 last_updated.strftime("%Y-%m-%dT%H:%M"),
             )
+    icursor.close()
+    iempgconn.close()
     set_property(PROPERTY_NAME, last_updated)
 
 

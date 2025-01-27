@@ -335,7 +335,7 @@ def do_webcams(network):
     return df
 
 
-def do_iowa_azos(date, itoday=False):
+def do_iowa_azos(dt: date, itoday=False):
     """Dump high and lows for Iowa ASOS"""
     with get_sqlalchemy_conn("iem") as conn:
         df = pd.read_sql(
@@ -345,12 +345,12 @@ def do_iowa_azos(date, itoday=False):
         st_y(geom) as latitude,
         st_x(geom) as longitude, s.day, s.max_tmpf::int as high,
         s.min_tmpf::int as low, coalesce(pday, 0) as precip
-        from stations n JOIN summary_{date.year} s on (n.iemid = s.iemid)
+        from stations n JOIN summary_{dt.year} s on (n.iemid = s.iemid)
         WHERE n.network = 'IA_ASOS' and s.day = :dt
         """
             ),
             conn,
-            params={"dt": date},
+            params={"dt": dt},
             index_col="locationid",
         )
         if itoday:
