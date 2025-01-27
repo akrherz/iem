@@ -5,6 +5,8 @@ This service emits data from the ISU Soil Moisture Network.
 Changelog
 ---------
 
+- 2025-01-27: Added support for `qcflags` for the inclusion of the flag
+  values.
 - **2024-11-19** Initial update to use pydantic request validation.
 
 Example Requests
@@ -24,10 +26,18 @@ https://mesonet.agron.iastate.edu/cgi-bin/request/isusm.py?station=AHDI4&\
 mode=daily&sts=2024-07-01T00:00Z&ets=2024-08-01T00:00Z&format=tab
 
 Provide all of the hourly data for the Hinds Farm station for the month of
-July 2024 in a comma delimited format with timestampts in UTC.
+July 2024 in a comma delimited format with timestampts in UTC and include
+any QC flags.  Also include the SoilVue 10 data.
 
 https://mesonet.agron.iastate.edu/cgi-bin/request/isusm.py?station=AHDI4&\
-mode=hourly&sts=2024-07-01T00:00Z&ets=2024-08-01T00:00Z&format=comma&tz=UTC
+mode=hourly&sts=2024-07-01T00:00Z&ets=2024-08-01T00:00Z&format=comma&tz=UTC\
+&qcflags=1&vars=sv
+
+Same as the last, but for daily data this time and solar radiation in MJ/m2
+
+https://mesonet.agron.iastate.edu/cgi-bin/request/isusm.py?station=AHDI4&\
+mode=daily&sts=2024-07-01T00:00Z&ets=2024-08-01T00:00Z&format=comma&tz=UTC\
+&qcflags=1&vars=sv,solar_mj
 
 """
 
@@ -70,6 +80,10 @@ class Schema(CGIModel):
     )
     missing: str = Field(
         "-99", description="Missing Value Indicator", pattern="^-99|M|$"
+    )
+    qcflags: bool = Field(
+        default=False,
+        description="Include QC Flag Values",
     )
     sts: AwareDatetime = Field(None, description="Start Time")
     mode: str = Field(
@@ -122,17 +136,28 @@ def fetch_daily(environ: dict, cols: list):
     else:
         cols.insert(0, "valid")
         cols.insert(0, "station")
+    if environ["qcflags"]:
+        newcols = cols[:2]
+        for col in cols[2:]:
+            newcols.extend([col, f"{col}_f"])
+        cols = newcols
+
     if "sv" in cols:
         # SoilVue 10 data
         for depth in SV_DEPTHS:
             for c2 in ["t", "vwc"]:
                 cols.append(f"sv_{c2}{depth}")
+                if environ["qcflags"]:
+                    cols.append(f"{col}_f")
     else:
         for col in list(cols):
             if col.startswith("sv") and len(col) > 2:
                 depth = int(col[2:])
                 for c2 in ["t", "vwc"]:
                     cols.append(f"sv_{c2}{depth}")
+                    if environ["qcflags"]:
+                        cols.append(f"sv_{c2}{depth}_f")
+
     with get_sqlalchemy_conn("isuag") as conn:
         df = pd.read_sql(
             text(
@@ -143,24 +168,45 @@ def fetch_daily(environ: dict, cols: list):
       sum(
       case when (tair_c_avg_qc >= :chillbase and tair_c_avg_qc <= :chillceil)
         then 1 else 0 end) as chillhours,
+      max(tair_c_max_f) as chillhours_f,
       min(rh_avg_qc) as rh_min,
+      max(rh_avg_f) as rh_min_f,
       avg(rh_avg_qc) as rh,
+      max(rh_avg_f) as rh_f,
       max(rh_avg_qc) as rh_max,
-      min(t12_c_avg_qc) as soil12tn, max(t12_c_avg_qc) as soil12tx,
-      min(t24_c_avg_qc) as soil24tn, max(t24_c_avg_qc) as soil24tx,
-      min(t50_c_avg_qc) as soil50tn, max(t50_c_avg_qc) as soil50tx
+      max(rh_avg_f) as rh_max_f,
+      min(t12_c_avg_qc) as soil12tn,
+      max(t12_c_avg_f) as soil12tn_f,
+      max(t12_c_avg_qc) as soil12tx,
+      max(t12_c_avg_qc) as soil12tx_f,
+      min(t24_c_avg_qc) as soil24tn,
+      max(t24_c_avg_f) as soil24tn_f,
+      max(t24_c_avg_qc) as soil24tx,
+      max(t24_c_avg_f) as soil24tx_f,
+      min(t50_c_avg_qc) as soil50tn,
+      max(t50_c_avg_f) as soil50tn_f,
+      max(t50_c_avg_qc) as soil50tx,
+      max(t50_c_avg_f) as soil50tx_f
       from sm_hourly where
       valid >= :sts and valid < :ets and station = ANY(:stations)
       GROUP by station, date
     ), daily as (
       SELECT *,
-      t4_c_min_qc as soil04tn, t4_c_max_qc as soil04tx,
+      t4_c_min_qc as soil04tn,
+      t4_c_min_f as soil04tn_f,
+      t4_c_max_qc as soil04tx,
+      t4_c_max_f as soil04tx_f,
       round(gddxx(50, 86, c2f( tair_c_max_qc ),
-        c2f( tair_c_min_qc ))::numeric,1) as gdd50 from sm_daily WHERE
+        c2f( tair_c_min_qc ))::numeric,1) as gdd50,
+     tair_c_min_f as gdd50_f
+     from sm_daily WHERE
       valid >= :sts and valid < :ets and station = ANY(:stations)
     )
-    SELECT d.*, s.rh_min, s.rh, s.rh_max, s.chillhours,
-    s.soil12tn, s.soil12tx, s.soil24tn, s.soil24tx, s.soil50tn, s.soil50tx
+    SELECT d.*, s.rh_min, s.rh_min_f, s.rh, s.rh_f, s.rh_max, s.rh_max_f,
+    s.chillhours, s.chillhours_f,
+    s.soil12tn, s.soil12tn_f, s.soil12tx, s.soil12tx_f, s.soil24tn,
+    s.soil24tn_f, s.soil24tx, s.soil24tx_f, s.soil50tn, s.soil50tn_f,
+    s.soil50tx, s.soil50tx_f
     FROM soils s JOIN daily d on (d.station = s.station and s.date = d.valid)
     ORDER by d.valid ASC
     """
@@ -187,12 +233,19 @@ def fetch_daily(environ: dict, cols: list):
     # Direct copy / rename
     xref = {
         "rh_avg_qc": "relh",
+        "rh_avg_f": "relh_f",
         "rain_in_tot_qc": "precip",
+        "rain_in_tot_f": "precip_f",
         "winddir_d1_wvt_qc": "drct",
+        "winddir_d1_wvt_f": "drct_f",
         "vwc12_qc": "soil12vwc",
+        "vwc12_f": "soil12vwc_f",
         "vwc24_qc": "soil24vwc",
+        "vwc24_f": "soil24vwc_f",
         "vwc50_qc": "soil50vwc",
+        "vwc50_f": "soil50vwc_f",
         "dailyet_qc": "et",
+        "dailyet_f": "et_f",
     }
     df = df.rename(columns=xref, errors="ignore")
     # Mul by 100 for %
@@ -220,11 +273,14 @@ def fetch_daily(environ: dict, cols: list):
             continue
         # Do the work
         df[key] = convert_value(df[col].values, "degC", "degF")
+        df[f"{key}_f"] = df[f"{col.replace('_qc', '')}_f"]
 
     if "speed" in cols:
-        df = df.rename(columns={"ws_mph_qc": "speed"})
+        df = df.rename(columns={"ws_mph_qc": "speed", "ws_mph_f": "speed_f"})
     if "gust" in cols:
-        df = df.rename(columns={"ws_mph_max_qc": "gust"})
+        df = df.rename(
+            columns={"ws_mph_max_qc": "gust", "ws_mph_max_f": "gust_f"}
+        )
     if "sv" in cols:
         # SoilVue 10 data
         for depth in SV_DEPTHS:
@@ -247,8 +303,10 @@ def fetch_daily(environ: dict, cols: list):
     # Convert solar radiation to J/m2
     if "solar" in cols:
         df["solar"] = df["slrkj_tot_qc"] * 1000.0
+        df["solar_f"] = df["slrkj_tot_f"]
     if "solar_mj" in cols:
         df["solar_mj"] = df["slrkj_tot_qc"] / 1000.0
+        df["solar_mj_f"] = df["slrkj_tot_f"]
     if "et" in cols:
         df["et"] = convert_value(df["et"], "mm", "inch")
 
@@ -276,23 +334,32 @@ def fetch_hourly(environ: dict, cols: list):
     else:
         cols.insert(0, "valid")
         cols.insert(0, "station")
+    if environ["qcflags"]:
+        newcols = cols[:2]
+        for col in cols[2:]:
+            newcols.extend([col, f"{col}_f"])
+        cols = newcols
 
     table = "sm_hourly"
-    sqlextra = ", null as bp_mb_qc "
+    sqlextra = ", null as bp_mb_qc, '' as bp_mb_f "
     if environ["timeres"] == "minute":
         table = "sm_minute"
-        sqlextra = ", null as etalfalfa_qc"
+        sqlextra = ", null as etalfalfa_qc, '' as etalfalfa_f "
     if "sv" in cols:
         # SoilVue 10 data
         for depth in SV_DEPTHS:
             for c2 in ["t", "vwc"]:
                 cols.append(f"sv_{c2}{depth}")
+                if environ["qcflags"]:
+                    cols.append(f"sv_{c2}{depth}_f")
     else:
         for col in list(cols):
             if col.startswith("sv") and len(col) > 2:
                 depth = int(col[2:])
                 for c2 in ["t", "vwc"]:
                     cols.append(f"sv_{c2}{depth}")
+                    if environ["qcflags"]:
+                        cols.append(f"sv_{c2}{depth}_f")
                 # remove the proxy column
                 cols.remove(col)
     with get_sqlalchemy_conn("isuag") as conn:
@@ -330,11 +397,17 @@ def fetch_hourly(environ: dict, cols: list):
     # Direct copy / rename
     xref = {
         "rh_avg_qc": "relh",
+        "rh_avg_f": "relh_f",
         "rain_in_tot_qc": "precip",
+        "rain_in_tot_f": "precip_f",
         "winddir_d1_wvt_qc": "drct",
+        "winddir_d1_wvt_f": "drct_f",
         "vwc12_qc": "soil12vwc",
+        "vwc12_f": "soil12vwc_f",
         "vwc24_qc": "soil24vwc",
+        "soil24_f": "soil24vwc_f",
         "vwc50_qc": "soil50vwc",
+        "soil50_f": "soil50vwc_f",
     }
     df = df.rename(columns=xref, errors="ignore")
     # Mul by 100 for %
@@ -353,6 +426,7 @@ def fetch_hourly(environ: dict, cols: list):
             continue
         # Do the work
         df[key] = convert_value(df[col].values, "degC", "degF")
+        df[f"{key}_f"] = df[f"{col.replace('_qc', '')}_f"]
 
     if "sv" in cols:
         # SoilVue 10 data
@@ -405,8 +479,16 @@ def fetch_inversion(environ: dict, cols: list):
             text(
                 """
                 SELECT station, valid at time zone 'UTC' as utc_valid,
-                tair_15_c_avg_qc, tair_5_c_avg_qc, tair_10_c_avg_qc,
-                ws_ms_avg_qc, ws_ms_max_qc
+                tair_15_c_avg_qc,
+                tair_15_c_avg_f,
+                tair_5_c_avg_qc,
+                tair_5_c_avg_f,
+                tair_10_c_avg_qc,
+                tair_10_c_avg_f,
+                ws_ms_avg_qc,
+                ws_ms_avg_f,
+                ws_ms_max_qc,
+                ws_ms_max_f
                 from sm_inversion WHERE valid >= :sts and valid < :ets and
                 station = ANY(:stations) ORDER by valid ASC
                 """
@@ -444,9 +526,12 @@ def fetch_inversion(environ: dict, cols: list):
     for key, col in tc.items():
         # Do the work
         df[key] = convert_value(df[col].values, "degC", "degF")
+        df[f"{key}_f"] = df[f"{col.replace('_qc', '')}_f"]
 
     df["speed"] = convert_value(df["ws_ms_avg_qc"].values, "mps", "mph")
+    df["speed_f"] = df["ws_ms_avg_f"]
     df["gust"] = convert_value(df["ws_ms_max_qc"].values, "mps", "mph")
+    df["gust_f"] = df["ws_ms_max_f"]
 
     return df, cols
 
