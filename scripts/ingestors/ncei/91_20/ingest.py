@@ -2,13 +2,14 @@
 https://www.ncei.noaa.gov/data/normals-daily/1991-2020/access/
 """
 
-import datetime
+from datetime import datetime
 from io import StringIO
 
 import httpx
 import pandas as pd
+from pyiem.database import get_dbconn
 from pyiem.network import Table as NetworkTable
-from pyiem.util import get_dbconn, logger
+from pyiem.util import logger
 from tqdm import tqdm
 
 LOG = logger()
@@ -76,7 +77,7 @@ def ingest(pgconn, sid):
     df.at[0, "precip"] = df.at[0, "pcum"]
     df.at[59, "precip"] = df.at[58, "precip"]
     for _, row in df.iterrows():
-        now = datetime.datetime(2000, row["month"], row["day"])
+        now = datetime(2000, row["month"], row["day"])
         cursor.execute(
             "INSERT into ncei_climate91 (station, valid, high, low, precip, "
             "snow) VALUES (%s, %s, %s, %s, %s, %s)",

@@ -1,8 +1,8 @@
 """Here we are, dumping CSV."""
 
-import datetime
 import os
 import subprocess
+from datetime import date, timedelta
 
 import numpy as np
 import pandas as pd
@@ -62,9 +62,9 @@ def process(df, ncfn, south, west):
                     "year,yday,prcp (mm/day),srad (W/m^2),tmax (deg c),"
                     "tmin (deg c)\n"
                 )
-                base = datetime.date(1980, 1, 1)
+                base = date(1980, 1, 1)
                 for tstep, days in enumerate(nc.variables["time"]):
-                    ts = base + datetime.timedelta(days=int(days))
+                    ts = base + timedelta(days=int(days))
                     fp.write(
                         "%s,%s,%.3f,%.3f,%.3f,%.3f\n"
                         % (
@@ -76,9 +76,9 @@ def process(df, ncfn, south, west):
                             nc_tmin[tstep],
                         )
                     )
-                base = datetime.date(2019, 1, 1)
+                base = date(2019, 1, 1)
                 for tstep, days in enumerate(nc2019.variables["time"]):
-                    ts = base + datetime.timedelta(days=int(days))
+                    ts = base + timedelta(days=int(days))
                     fp.write(
                         "%s,%s,%.3f,%.3f,%.3f,%.3f\n"
                         % (

@@ -10,11 +10,12 @@ tracked in the properties table.
 Run from RUN_10MIN.sh
 """
 
-import datetime
 import sys
+from datetime import datetime, timedelta, timezone
 
+from pyiem.database import get_dbconnc
 from pyiem.reference import ISO8601
-from pyiem.util import get_dbconnc, get_properties, logger, set_property, utc
+from pyiem.util import get_properties, logger, set_property, utc
 
 LOG = logger()
 PROPERTY_NAME = "asos2archive_last"
@@ -43,8 +44,8 @@ def get_first_updated():
         LOG.warning("iem property %s is not set, abort!", PROPERTY_NAME)
         sys.exit()
 
-    dt = datetime.datetime.strptime(propvalue, ISO8601)
-    return dt.replace(tzinfo=datetime.timezone.utc)
+    dt = datetime.strptime(propvalue, ISO8601)
+    return dt.replace(tzinfo=timezone.utc)
 
 
 def compute_time(argv):
@@ -53,14 +54,14 @@ def compute_time(argv):
     utcnow = utcnow.replace(minute=0, second=0, microsecond=0)
 
     if len(argv) == 1:  # noargs
-        yesterday = utcnow - datetime.timedelta(hours=24)
+        yesterday = utcnow - timedelta(hours=24)
         sts = yesterday.replace(hour=0)
         ets = sts.replace(hour=23, minute=59)
     elif len(argv) == 4:
         sts = utc(int(argv[1]), int(argv[2]), int(argv[3]))
         ets = sts.replace(hour=23, minute=59)
     else:
-        lasthour = utcnow - datetime.timedelta(minutes=60)
+        lasthour = utcnow - timedelta(minutes=60)
         sts = lasthour.replace(minute=0)
         ets = lasthour.replace(minute=59)
     return sts, ets
@@ -225,6 +226,8 @@ def main():
                 first_updated.strftime("%Y-%m-%dT%H:%M"),
                 last_updated.strftime("%Y-%m-%dT%H:%M"),
             )
+    icursor.close()
+    iempgconn.close()
     set_property(PROPERTY_NAME, last_updated)
 
 

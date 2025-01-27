@@ -7,7 +7,7 @@ Minimum temperature
 Run at 5 AM local from RUN_10_AFTER.sh
 """
 
-import datetime
+from datetime import timedelta
 
 import numpy as np
 import pygrib
@@ -34,8 +34,8 @@ def do_agg(dkey, fname, ts, data):
                 lat, lon = grib.latlons()
                 data["y"] = lat[:, 0]
                 data["x"] = lon[0, :]
-            ftime = ts + datetime.timedelta(hours=grib.forecastTime)
-            cst = ftime - datetime.timedelta(hours=7)
+            ftime = ts + timedelta(hours=grib.forecastTime)
+            cst = ftime - timedelta(hours=7)
             key = cst.strftime("%Y-%m-%d")
             d = data["fx"].setdefault(
                 key, dict(precip=None, high=None, low=None, srad=None)
@@ -58,8 +58,8 @@ def do_temp(dkey, fname, func, ts, data):
             return
         gribs = pygrib.open(fn)
         for grib in gribs:
-            ftime = ts + datetime.timedelta(hours=grib.forecastTime)
-            cst = ftime - datetime.timedelta(hours=7)
+            ftime = ts + timedelta(hours=grib.forecastTime)
+            cst = ftime - timedelta(hours=7)
             key = cst.strftime("%Y-%m-%d")
             if key not in data["fx"]:
                 continue
@@ -164,7 +164,7 @@ def dbsave(ts, data):
 def main():
     """Go!"""
     # Extract 12 UTC Data
-    ts = utc() - datetime.timedelta(days=4)
+    ts = utc() - timedelta(days=4)
     ts = ts.replace(hour=12, minute=0, second=0, microsecond=0)
     data = process(ts)
     dbsave(ts, data)

@@ -79,8 +79,8 @@ https://mesonet.agron.iastate.edu/request/maxcsv/ahpsobs_DEWI4.txt
 
 """
 
-import datetime
 import re
+from datetime import date, timedelta, timezone
 from zoneinfo import ZoneInfo
 
 # third party
@@ -127,8 +127,8 @@ def figure_phase(p1: float, p2: float) -> str:
 
 def do_monthly_summary(station, year, month):
     """Compute some requested monthly summary stats."""
-    sts = datetime.date(year, month, 1)
-    ets = (sts + datetime.timedelta(days=35)).replace(day=1)
+    sts = date(year, month, 1)
+    ets = (sts + timedelta(days=35)).replace(day=1)
     with get_sqlalchemy_conn("iem") as conn:
         df = pd.read_sql(
             text(
@@ -182,16 +182,16 @@ def do_moonphase(lon, lat):
         {
             "new_moon": ephem.next_new_moon(utc())
             .datetime()
-            .replace(tzinfo=datetime.timezone.utc),
+            .replace(tzinfo=timezone.utc),
             "full_moon": ephem.next_full_moon(utc())
             .datetime()
-            .replace(tzinfo=datetime.timezone.utc),
+            .replace(tzinfo=timezone.utc),
             "first_quarter": ephem.next_first_quarter_moon(utc())
             .datetime()
-            .replace(tzinfo=datetime.timezone.utc),
+            .replace(tzinfo=timezone.utc),
             "last_quarter": ephem.next_last_quarter_moon(utc())
             .datetime()
-            .replace(tzinfo=datetime.timezone.utc),
+            .replace(tzinfo=timezone.utc),
         }
     ).sort_values(ascending=True)
     # Figure out the timezone
@@ -237,20 +237,16 @@ def do_moon(lon, lat):
     obs.lat = str(lat)
     obs.long = str(lon)
     obs.date = utc().strftime("%Y/%m/%d %H:%M")
-    r1 = obs.next_rising(moon).datetime().replace(tzinfo=datetime.timezone.utc)
+    r1 = obs.next_rising(moon).datetime().replace(tzinfo=timezone.utc)
     p1 = moon.moon_phase
     obs.date = r1.strftime("%Y/%m/%d %H:%M")
-    s1 = (
-        obs.next_setting(moon).datetime().replace(tzinfo=datetime.timezone.utc)
-    )
+    s1 = obs.next_setting(moon).datetime().replace(tzinfo=timezone.utc)
     # Figure out the next rise time
     obs.date = s1.strftime("%Y/%m/%d %H:%M")
-    r2 = obs.next_rising(moon).datetime().replace(tzinfo=datetime.timezone.utc)
+    r2 = obs.next_rising(moon).datetime().replace(tzinfo=timezone.utc)
     p2 = moon.moon_phase
     obs.date = r2.strftime("%Y/%m/%d %H:%M")
-    s2 = (
-        obs.next_setting(moon).datetime().replace(tzinfo=datetime.timezone.utc)
-    )
+    s2 = obs.next_setting(moon).datetime().replace(tzinfo=timezone.utc)
     label = figure_phase(p1, p2)
     # Figure out the timezone
     pgconn, cursor = get_dbconnc("mesosite")
@@ -339,7 +335,7 @@ def do_webcams(network):
     return df
 
 
-def do_iowa_azos(date, itoday=False):
+def do_iowa_azos(dt: date, itoday=False):
     """Dump high and lows for Iowa ASOS"""
     with get_sqlalchemy_conn("iem") as conn:
         df = pd.read_sql(
@@ -349,12 +345,12 @@ def do_iowa_azos(date, itoday=False):
         st_y(geom) as latitude,
         st_x(geom) as longitude, s.day, s.max_tmpf::int as high,
         s.min_tmpf::int as low, coalesce(pday, 0) as precip
-        from stations n JOIN summary_{date.year} s on (n.iemid = s.iemid)
+        from stations n JOIN summary_{dt.year} s on (n.iemid = s.iemid)
         WHERE n.network = 'IA_ASOS' and s.day = :dt
         """
             ),
             conn,
-            params={"dt": date},
+            params={"dt": dt},
             index_col="locationid",
         )
         if itoday:
@@ -798,9 +794,9 @@ def router(appname):
     elif appname == "iarwis":
         df = do_iarwis()
     elif appname == "iowayesterday":
-        df = do_iowa_azos(datetime.date.today() - datetime.timedelta(days=1))
+        df = do_iowa_azos(date.today() - timedelta(days=1))
     elif appname == "iowatoday":
-        df = do_iowa_azos(datetime.date.today(), True)
+        df = do_iowa_azos(date.today(), True)
     elif appname == "kcrgcitycam":
         df = do_webcams("KCRG")
     elif appname == "uvi":

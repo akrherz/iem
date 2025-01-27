@@ -27,7 +27,7 @@ def main():
         fh.write(" PARM = ALTM\n\n    STN    YYMMDD/HHMM      ALTM\n")
 
         for sid, row in df.iterrows():
-            fh.write("   %4s    %s  %8.2f\n" % (sid, ts, row["altm"]))
+            fh.write(f"   {sid:4s}    {ts}  {row['altm']:8.2f}\n")
 
 
 if __name__ == "__main__":

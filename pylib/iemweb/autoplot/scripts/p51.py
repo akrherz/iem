@@ -13,6 +13,7 @@ import pandas as pd
 from pyiem.database import get_sqlalchemy_conn
 from pyiem.exceptions import NoDataFound
 from pyiem.plot import figure
+from sqlalchemy import text
 
 PDICT = {
     "all": "Show All Three Plots",
@@ -124,14 +125,18 @@ def plotter(ctx: dict):
     climosite = ctx["_nt"].sts[station]["climate_site"]
     with get_sqlalchemy_conn("coop") as conn:
         climo = pd.read_sql(
-            f"""
-            SELECT day, sday, gddxx(%s, %s, high, low) as {glabel},
+            text(f"""
+            SELECT day, sday, gddxx(:gddbase, :gddceil, high, low) as {glabel},
             sdd86(high, low) as sdd86, precip
-            from alldata WHERE station = %s and
+            from alldata WHERE station = :station and
             year >= 1951 ORDER by day ASC
-            """,
+            """),
             conn,
-            params=(gddbase, gddceil, ctx["_nt"].sts[station]["climate_site"]),
+            params={
+                "gddbase": gddbase,
+                "gddceil": gddceil,
+                "station": ctx["_nt"].sts[station]["climate_site"],
+            },
             index_col="day",
         )
     if climo.empty:
@@ -182,17 +187,23 @@ def plotter(ctx: dict):
     climo = pd.DataFrame(rows)
 
     # build the obs
-    with get_sqlalchemy_conn("iem") as conn:
+    with get_sqlalchemy_conn("isuag") as conn:
         df = pd.read_sql(
-            f"""SELECT day, to_char(day, 'mmdd') as sday,
-            gddxx(%s, %s, max_tmpf, min_tmpf) as o{glabel},
-            coalesce(pday, 0) as oprecip,
-            sdd86(max_tmpf, min_tmpf) as osdd86 from summary s JOIN stations t
-            ON (s.iemid = t.iemid)
-            WHERE t.id = %s and t.network = %s and
-            to_char(day, 'mmdd') != '0229' ORDER by day ASC""",
+            text(f"""
+            SELECT valid as day, to_char(valid, 'mmdd') as sday,
+            gddxx(:gddbase, :gddceil, c2f(tair_c_max_qc), c2f(tair_c_min_qc))
+                as o{glabel},
+            coalesce(rain_in_tot_qc, 0) as oprecip,
+            sdd86( c2f(tair_c_max_qc), c2f(tair_c_min_qc)) as osdd86
+            from sm_daily
+            WHERE station = :station and to_char(valid, 'mmdd') != '0229'
+            ORDER by day ASC"""),
             conn,
-            params=(gddbase, gddceil, station, ctx["network"]),
+            params={
+                "gddbase": gddbase,
+                "gddceil": gddceil,
+                "station": station,
+            },
             index_col=None,
         )
     # Now we need to join the frames
@@ -200,14 +211,14 @@ def plotter(ctx: dict):
     df = df.sort_values("day", ascending=True)
     df = df.set_index("day")
     df["precip_diff"] = df["oprecip"] - df["cprecip"]
-    df[glabel + "_diff"] = df["o" + glabel] - df["c" + glabel]
+    df[f"{glabel}_diff"] = df[f"o{glabel}"] - df[f"c{glabel}"]
 
     ab = ctx["_nt"].sts[station]["archive_begin"]
     if ab is None:
         raise NoDataFound("Unknown station metadata.")
     fig = figure(apctx=ctx)
     if whichplots == "all":
-        ax1 = fig.add_axes([0.1, 0.7, 0.8, 0.2])
+        ax1 = fig.add_axes((0.1, 0.7, 0.8, 0.2))
         ax2 = fig.add_axes(
             [0.1, 0.6, 0.8, 0.1], sharex=ax1, facecolor="#EEEEEE"
         )
@@ -218,17 +229,17 @@ def plotter(ctx: dict):
             "SDD(base=86)"
         )
     elif whichplots == "gdd":
-        ax1 = fig.add_axes([0.14, 0.31, 0.8, 0.57])
+        ax1 = fig.add_axes((0.14, 0.31, 0.8, 0.57))
         ax2 = fig.add_axes(
             [0.14, 0.11, 0.8, 0.2], sharex=ax1, facecolor="#EEEEEE"
         )
         title = f"GDD(base={gddbase:.0f},ceil={gddceil:.0f})"
     elif whichplots == "precip":
-        ax3 = fig.add_axes([0.1, 0.11, 0.8, 0.75])
+        ax3 = fig.add_axes((0.1, 0.11, 0.8, 0.75))
         ax1 = ax3
         title = "Precipitation"
     else:  # sdd
-        ax4 = fig.add_axes([0.1, 0.1, 0.8, 0.8])
+        ax4 = fig.add_axes((0.1, 0.1, 0.8, 0.8))
         ax1 = ax4
         title = "Stress Degree Days (base=86)"
 

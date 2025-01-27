@@ -1,18 +1,19 @@
 """Generate a plot of SDD"""
 
-import datetime
 import sys
+from datetime import datetime
 
+from pyiem.database import get_dbconn
 from pyiem.network import Table as NetworkTable
 from pyiem.plot import MapPlot
-from pyiem.util import get_dbconn, logger
+from pyiem.util import logger
 
 LOG = logger()
 
 
 def main():
     """Go Main Go"""
-    now = datetime.datetime.now()
+    now = datetime.now()
 
     pgconn = get_dbconn("coop")
     ccursor = pgconn.cursor()

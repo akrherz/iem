@@ -1,7 +1,7 @@
 """Use data provided by ACIS to replace IEM COOP data."""
 
-import datetime
 import sys
+from datetime import date, datetime, timedelta
 from zoneinfo import ZoneInfo
 
 import click
@@ -58,8 +58,8 @@ def main(state, station):
     # We are only asking for the last 720 days of data, so might as well only
     # do stations that are currently known to be `online`
     nt = NetworkTable(network, only_online=station is None)
-    ets = datetime.date.today() - datetime.timedelta(days=1)
-    sts = ets - datetime.timedelta(days=720)
+    ets = date.today() - timedelta(days=1)
+    sts = ets - timedelta(days=720)
     pgconn, cursor = get_dbconnc("iem")
     # Lame for now
     cursor.close()
@@ -106,10 +106,10 @@ def main(state, station):
             continue
         updates = 0
         for row in j["data"]:
-            date = datetime.datetime.strptime(row[0], "%Y-%m-%d")
+            dt = datetime.strptime(row[0], "%Y-%m-%d")
             data = {}
             hour = None
-            current = obsdf.loc[date]
+            current = obsdf.loc[dt]
             for i, col in enumerate("obst maxt mint pcpn snow snwd".split()):
                 val = safe(row[i + 1][0])
                 if not is_new(val, current[col]):
@@ -119,10 +119,10 @@ def main(state, station):
                     hour = row[i + 1][1]
             if not data or hour < 0:
                 continue
-            valid = datetime.datetime(
-                date.year,
-                date.month,
-                date.day,
+            valid = datetime(
+                dt.year,
+                dt.month,
+                dt.day,
                 hour if hour < 24 else 23,
                 0 if hour < 24 else 59,
                 tzinfo=tz,

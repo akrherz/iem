@@ -3,7 +3,7 @@
 Called from gfs2iemre.py for just the 6z run.
 """
 
-import datetime
+from datetime import datetime, timedelta
 
 import numpy as np
 import pandas as pd
@@ -86,12 +86,12 @@ def main():
         lats = nc.variables["lat"][:]
         lons, lats = np.meshgrid(lons, lats)
         fx = nc.gfs_forecast
-        basedt = datetime.datetime.strptime(
+        basedt = datetime.strptime(
             nc.variables["time"].units.split()[2],
             "%Y-%m-%d",
         )
         for day in range(20):
-            dt = basedt + datetime.timedelta(days=day)
+            dt = basedt + timedelta(days=day)
             soilk = nc.variables["tsoil"][day, :, :]
             if np.ma.is_masked(np.ma.max(soilk)):
                 continue

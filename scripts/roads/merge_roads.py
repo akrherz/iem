@@ -1,6 +1,6 @@
 """Compare the REST service with our current database."""
 
-import datetime
+from datetime import timedelta
 
 import httpx
 from ingest_roads_rest import LOG, URI
@@ -65,7 +65,7 @@ def main():
                 longname,
                 idot_id,
                 archive_begin,
-                archive_begin + datetime.timedelta(days=365),
+                archive_begin + timedelta(days=365),
             ),
         )
         segid = cursor.fetchone()[0]

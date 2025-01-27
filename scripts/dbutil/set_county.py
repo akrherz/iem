@@ -1,6 +1,6 @@
 """Need to set station metadata for county name for a given site."""
 
-from pyiem.util import get_dbconn
+from pyiem.database import get_dbconn
 
 
 def set_county(mcursor2, iemid, ugc, ugcname):

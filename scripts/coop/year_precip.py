@@ -1,11 +1,11 @@
 """Yearly precip something"""
 
-import datetime
 import os
 import subprocess
+from datetime import datetime
 
+from pyiem.database import get_dbconn
 from pyiem.network import Table as NetworkTable
-from pyiem.util import get_dbconn
 
 
 def main():
@@ -22,7 +22,7 @@ def main():
         fp.write("   NWS COOP STATION YEAR PRECIPITATION TOTALS\n")
         fp.write("   AS CALCULATED ON THE IEM SERVER\n")
 
-        now = datetime.datetime.now()
+        now = datetime.now()
         jdays = now.strftime("%j")
 
         mrain = {}

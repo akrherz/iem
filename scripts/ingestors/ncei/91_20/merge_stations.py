@@ -1,6 +1,6 @@
 """Create NCEI91 station entries."""
 
-from pyiem.util import get_dbconn
+from pyiem.database import get_dbconn
 
 
 def compute_stations(cursor):

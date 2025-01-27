@@ -1,17 +1,17 @@
 """Generate a map of this month's observed precip"""
 
-import datetime
+from datetime import datetime
 
-import pyiem.tracker
+from pyiem import tracker
+from pyiem.database import get_dbconnc
 from pyiem.plot import MapPlot
-from pyiem.util import get_dbconnc
 
 
 def main():
     """Go Main Go"""
-    now = datetime.datetime.now()
+    now = datetime.now()
 
-    qdict = pyiem.tracker.loadqc()
+    qdict = tracker.loadqc()
 
     pgconn, icursor = get_dbconnc("iem")
 

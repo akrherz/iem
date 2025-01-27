@@ -2,7 +2,7 @@
 Need something to set the time zone of networks
 """
 
-from pyiem.util import get_dbconn
+from pyiem.database import get_dbconn
 
 
 def main():

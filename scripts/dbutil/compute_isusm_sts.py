@@ -1,7 +1,8 @@
 """Figure out when the ISUSM data started..."""
 
+from pyiem.database import get_dbconn
 from pyiem.network import Table as NetworkTable
-from pyiem.util import get_dbconn, logger
+from pyiem.util import logger
 
 LOG = logger()
 

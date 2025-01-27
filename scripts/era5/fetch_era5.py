@@ -4,6 +4,7 @@ Run from RUN_0Z_ERA5LAND.sh for 5 days ago.
 """
 
 import os
+import subprocess
 import sys
 import tempfile
 import warnings
@@ -140,7 +141,7 @@ def run(valid, domain: str, force):
         zipfn,
     )
     # unzip
-    os.system(f"unzip {zipfn}")
+    subprocess.call(["unzip", "-q", zipfn])
     os.unlink(zipfn)
     with ncopen("data_0.nc") as ncin, ncopen(ncoutfn, "a") as nc:
         ingest(ncin, nc, valid, domain)

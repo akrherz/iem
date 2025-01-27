@@ -48,8 +48,8 @@ https://mesonet.agron.iastate.edu/cgi-bin/request/gis/lsr.py\
 
 """
 
-import datetime
 import zipfile
+from datetime import timedelta
 from io import BytesIO, StringIO
 
 import fiona
@@ -196,7 +196,7 @@ def get_time_domain(form):
     if form["recent"] is not None:
         # Allow for specifying a recent number of seconds
         ets = utc()
-        sts = ets - datetime.timedelta(seconds=form["recent"])
+        sts = ets - timedelta(seconds=form["recent"])
         return sts, ets
     if form["sts"] is None:
         raise IncompleteWebRequest("GET start time parameters missing")
