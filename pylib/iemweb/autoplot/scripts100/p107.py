@@ -11,9 +11,6 @@ automated stations.
 
 <p>A quorum of at least 90% of the days within the choosen period must have
 data in order to be included within the plot.
-
-<p><strong>Updated 12 Oct 2023:</strong> The API for this autoplot was changed
-to use a more user friendly start and end date.
 """
 
 from datetime import datetime, timedelta
@@ -349,7 +346,18 @@ def plotter(ctx: dict):
             mybar.set_facecolor("g")
             mybar.set_edgecolor("g")
             thisvalue = y
-    ax[0].set_xlabel(f"Year, {yrfmter(year)} = {fmter(thisvalue)}")
+    # Meh
+    for yr in range(df.index[0], df.index[-1] + 1):
+        if yr not in df.index:
+            ax[0].axvspan(
+                yr - 0.5,
+                yr + 0.5,
+                facecolor="skyblue",
+            )
+    ax[0].set_xlabel(
+        f"Year, {yrfmter(year)} = {fmter(thisvalue)}, "
+        "years shaded blue are missing"
+    )
     ax[0].axhline(
         df[varname].mean(), lw=2, label=f"Avg: {df[varname].mean():.2f}"
     )
