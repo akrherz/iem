@@ -1,18 +1,18 @@
 """Generate a map of this month's observed precip"""
 
-import datetime
+from datetime import date, timedelta
 
+from pyiem.database import get_dbconnc
 from pyiem.plot import MapPlot
-from pyiem.util import get_dbconnc
 
 
 def main():
     """Go Main Go"""
-    now = datetime.date.today()
+    now = date.today()
     pgconn, icursor = get_dbconnc("iem")
 
     day1 = now.replace(day=1)
-    day2 = (now + datetime.timedelta(days=35)).replace(day=1)
+    day2 = (now + timedelta(days=35)).replace(day=1)
 
     # Compute normal from the climate database
     sql = """SELECT id,

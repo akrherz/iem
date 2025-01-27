@@ -1,5 +1,7 @@
 """.. title:: NWS TOR+SVR Warning Time-Mot-Loc
 
+Return to `API Services </api/#cgi>`_
+
 Changelog
 ---------
 
@@ -15,9 +17,9 @@ https://mesonet.agron.iastate.edu/request/grx/time_mot_loc.txt\
 
 """
 
-import datetime
 import math
 import re
+from datetime import timedelta
 from io import StringIO
 from zoneinfo import ZoneInfo
 
@@ -89,7 +91,7 @@ def gentext(sio, row, grversion):
             lons.append(float(token[0]))
             lats.append(float(token[1]))
         for seconds in [0, duration / 2.0, duration]:
-            valid = tml_valid + datetime.timedelta(seconds=seconds)
+            valid = tml_valid + timedelta(seconds=seconds)
             ts = valid.strftime("%H%Mz")
             sio.write(
                 f"Color: 255 255 0\n{time_range}"
@@ -107,7 +109,7 @@ def gentext(sio, row, grversion):
     sio.write("Color: 255 255 255\nThreshold:10\n\n")
     for lon, lat in zip(lons, lats):
         for minute in range(int(duration / 60.0) + 1):
-            valid = tml_valid + datetime.timedelta(minutes=minute)
+            valid = tml_valid + timedelta(minutes=minute)
             ts = valid.strftime("%H%Mz")
             lon2, lat2 = extrapolate(lon, lat, smps * minute * 60, drct)
             sio.write(f"Place: {lat2:.4f},{lon2:.4f},{ts}\n")
@@ -131,8 +133,8 @@ def application(environ, start_response):
     tmlabel = valid.strftime("%H%Mz")
     if grversion >= 1.5 or environ["valid"]:
         # Pull larger window of data to support TimeRange
-        t1 = valid - datetime.timedelta(hours=2)
-        t2 = valid + datetime.timedelta(hours=2)
+        t1 = valid - timedelta(hours=2)
+        t2 = valid + timedelta(hours=2)
         tmlabel = valid.strftime("%b %d %Y %H%Mz")
     cursor.execute(
         f"""SELECT ST_x(tml_geom) as lon, ST_y(tml_geom) as lat,

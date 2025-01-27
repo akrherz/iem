@@ -33,8 +33,8 @@ fmt=shp&sts=2024-08-10T00:00:00Z&ets=2024-08-11T00:00:00Z&radar=TLH
 
 """
 
-import datetime
 import zipfile
+from datetime import timedelta
 from io import BytesIO, StringIO
 
 import shapefile
@@ -94,7 +94,7 @@ def run(environ, start_response):
         len(environ["radar"]) > 2
         and (environ["ets"] - environ["sts"]).days > 6
     ):
-        environ["ets"] = environ["sts"] + datetime.timedelta(days=7)
+        environ["ets"] = environ["sts"] + timedelta(days=7)
     fn = f"stormattr_{environ['sts']:%Y%m%d%H%M}_{environ['ets']:%Y%m%d%H%M}"
 
     with get_sqlalchemy_conn("radar") as conn:

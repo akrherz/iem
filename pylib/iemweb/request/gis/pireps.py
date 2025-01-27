@@ -1,5 +1,7 @@
 """.. title:: Pilot Weather Report (PIREP) Data Service
 
+Return to `API Services </api/#cgi>`_
+
 Documentation for /cgi-bin/request/gis/pireps.py
 ------------------------------------------------
 
@@ -30,8 +32,8 @@ sts=2024-07-31T00:00:00Z&ets=2024-08-01T00:00:00Z&artcc=ZMP&fmt=shp
 
 """
 
-import datetime
 import zipfile
+from datetime import timedelta
 from io import BytesIO, StringIO
 
 import shapefile
@@ -140,7 +142,7 @@ def run(environ, start_response):
         )
     else:
         if (environ["ets"] - environ["sts"]).days > 120:
-            environ["ets"] = environ["sts"] + datetime.timedelta(days=120)
+            environ["ets"] = environ["sts"] + timedelta(days=120)
     sql = f"""
         SELECT to_char(valid at time zone 'UTC', 'YYYYMMDDHH24MI') as utctime,
         case when is_urgent then 'T' else 'F' end,

@@ -4,7 +4,8 @@ Set time zones of stations using the shapefile found here:
 http://efele.net/maps/tz/world/
 """
 
-from pyiem.util import get_dbconnc, logger
+from pyiem.database import get_dbconnc
+from pyiem.util import logger
 
 LOG = logger()
 

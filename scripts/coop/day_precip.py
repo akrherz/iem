@@ -2,10 +2,10 @@
 Daily precip something
 """
 
-import datetime
 import os
 import subprocess
 import tempfile
+from datetime import datetime
 
 from pyiem.database import get_dbconn
 from pyiem.network import Table as NetworkTable
@@ -25,7 +25,7 @@ def main():
     tmpfd.write("   NWS COOP STATION DAY PRECIPITATION TOTALS\n")
     tmpfd.write("   AS CALCULATED ON THE IEM SERVER\n")
 
-    now = datetime.datetime.now()
+    now = datetime.now()
 
     # Now we load climatology
     mrain = {}

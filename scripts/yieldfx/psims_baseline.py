@@ -3,9 +3,9 @@
 Run from RUN_2AM.sh for yesterday and eight days ago, so to pick up POWER.
 """
 
-import datetime
 import os
 import sys
+from datetime import date, datetime, timedelta
 
 import click
 import numpy as np
@@ -76,7 +76,7 @@ def make_netcdf(ncfn, valid, west, south):
         srad.long_name = "daylight average incident shortwave radiation"
 
 
-def copy_iemre(nc, ncdate0, ncdate1, islice, jslice):
+def copy_iemre(nc, ncdate0: date, ncdate1: date, islice, jslice):
     """Copy IEMRE data from a given year to **inclusive** dates."""
     rencfn = get_daily_ncname(ncdate0.year)
     if not os.path.isfile(rencfn):
@@ -84,12 +84,12 @@ def copy_iemre(nc, ncdate0, ncdate1, islice, jslice):
         return
     with ncopen(rencfn) as renc:
         # Compute offsets for yieldfx file
-        tidx0 = (ncdate0 - datetime.date(1980, 1, 1)).days
-        tidx1 = (ncdate1 - datetime.date(1980, 1, 1)).days
+        tidx0 = (ncdate0 - date(1980, 1, 1)).days
+        tidx1 = (ncdate1 - date(1980, 1, 1)).days
         yfx_slice = slice(tidx0, tidx1 + 1)
         # Compute offsets for the reanalysis file
-        tidx0 = (ncdate0 - datetime.date(ncdate0.year, 1, 1)).days
-        tidx1 = (ncdate1 - datetime.date(ncdate0.year, 1, 1)).days
+        tidx0 = (ncdate0 - date(ncdate0.year, 1, 1)).days
+        tidx1 = (ncdate1 - date(ncdate0.year, 1, 1)).days
         re_slice = slice(tidx0, tidx1 + 1)
 
         highc = convert_value(
@@ -137,8 +137,8 @@ def tile_extraction(nc, valid, west, south, fullmode):
         for year in range(1980, valid.year + 1):
             copy_iemre(
                 nc,
-                datetime.date(year, 1, 1),
-                datetime.date(year, 12, 31),
+                date(year, 1, 1),
+                date(year, 12, 31),
                 islice,
                 jslice,
             )
@@ -149,7 +149,7 @@ def tile_extraction(nc, valid, west, south, fullmode):
 def qc(nc):
     """Quick QC of the file."""
     for i, time in enumerate(nc.variables["time"][:]):
-        ts = datetime.date(1980, 1, 1) + datetime.timedelta(days=int(time))
+        ts = date(1980, 1, 1) + timedelta(days=int(time))
         avgv = np.mean(nc.variables["srad"][i, :, :])
         if avgv > 0:
             continue
@@ -174,7 +174,7 @@ def workflow(valid, ncfn, west, south, fullmode):
 @click.command()
 @click.option("--date", "dt", type=click.DateTime(), help="Date to process")
 @click.option("--full", is_flag=True, help="Full replacement mode")
-def main(dt, full):
+def main(dt: datetime, full):
     """Go Main Go"""
     if dt is not None:
         dt = dt.date()

@@ -1,5 +1,7 @@
 """.. title:: IEM Computed Daily Summaries
 
+Return to `API Services </api/#cgi>`_
+
 Documentation for /cgi-bin/request/daily.py
 -------------------------------------------
 
@@ -14,13 +16,17 @@ Example Usage
 Request all high temperature data for Ames, IA (AMW) for the month of January
 2019:
 
-    https://mesonet.agron.iastate.edu/cgi-bin/request/daily.py?sts=2019-01-01&ets=2019-01-31&network=IA_ASOS&stations=AMW&var=max_temp_f&format=csv
+https://mesonet.agron.iastate.edu/cgi-bin/request/daily.py?\
+sts=2019-01-01&ets=2019-01-31&network=IA_ASOS&stations=AMW&\
+var=max_temp_f&format=csv
 
 
 Request daily precipitation and the climatology for all stations in Washington
 state on 23 June 2023 in Excel format:
 
-    https://mesonet.agron.iastate.edu/cgi-bin/request/daily.py?sts=2023-06-23&ets=2023-06-23&network=WA_ASOS&stations=_ALL&var=precip_in,climo_precip_in&format=excel
+https://mesonet.agron.iastate.edu/cgi-bin/request/daily.py?\
+sts=2023-06-23&ets=2023-06-23&network=WA_ASOS&stations=_ALL&\
+var=precip_in,climo_precip_in&format=excel
 
 """
 

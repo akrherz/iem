@@ -1,8 +1,8 @@
 """See if MADIS knows any station metadata."""
 
-import datetime
 import os
 import warnings
+from datetime import timedelta
 
 from netCDF4 import chartostring
 from pandas import read_sql
@@ -28,7 +28,7 @@ def main():
     now = utc()
     i = 0
     while i < 10:
-        now -= datetime.timedelta(hours=1)
+        now -= timedelta(hours=1)
         testfn = now.strftime("/mesonet/data/madis/mesonet1/%Y%m%d_%H00_10.nc")
         if os.path.isfile(testfn):
             break

@@ -1,8 +1,8 @@
 """Copy the provided baseline data to the database"""
 
-import datetime
 import glob
 import os
+from datetime import date, timedelta
 
 from pyiem.database import get_dbconn
 from pyiem.util import convert_value, logger
@@ -25,7 +25,7 @@ def main():
     )
     for row in icursor:
         if row[1] is None or row[2] is None:
-            dsm[row[0]] = dsm[row[0] - datetime.timedelta(days=1)]
+            dsm[row[0]] = dsm[row[0] - timedelta(days=1)]
         else:
             dsm[row[0]] = {
                 "wind_speed": convert_value(row[1], "knot", "meter / second"),
@@ -45,9 +45,9 @@ def main():
                 if not line.startswith("19") and not line.startswith("20"):
                     continue
                 tokens = line.split()
-                valid = datetime.date(
-                    int(tokens[0]), 1, 1
-                ) + datetime.timedelta(days=int(tokens[1]) - 1)
+                valid = date(int(tokens[0]), 1, 1) + timedelta(
+                    days=int(tokens[1]) - 1
+                )
                 cursor.execute(
                     """
                 INSERT into yieldfx_baseline (station, valid,

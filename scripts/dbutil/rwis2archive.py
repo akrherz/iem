@@ -4,11 +4,12 @@ Copy RWIS data from iem database to its final resting home in 'rwis'
 called from RUN_10_AFTER.sh
 """
 
-import datetime
 import sys
+from datetime import datetime, timezone
 
+from pyiem.database import get_dbconnc
 from pyiem.reference import ISO8601
-from pyiem.util import get_dbconnc, get_properties, logger, set_property, utc
+from pyiem.util import get_properties, logger, set_property, utc
 
 LOG = logger()
 PROPERTY_NAME = "rwis2archive_last"
@@ -22,8 +23,8 @@ def get_first_updated():
         LOG.warning("iem property %s is not set, abort!", PROPERTY_NAME)
         sys.exit()
 
-    dt = datetime.datetime.strptime(propvalue, ISO8601)
-    return dt.replace(tzinfo=datetime.timezone.utc)
+    dt = datetime.strptime(propvalue, ISO8601)
+    return dt.replace(tzinfo=timezone.utc)
 
 
 def process_traffic(first_updated, last_updated):

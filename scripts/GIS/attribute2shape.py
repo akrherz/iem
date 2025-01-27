@@ -3,13 +3,14 @@
 Run every minute from RUN_1MIN.sh
 """
 
-import datetime
 import os
 import subprocess
 import zipfile
+from datetime import timedelta
 
 import shapefile
-from pyiem.util import get_dbconnc, logger, utc
+from pyiem.database import get_dbconnc
+from pyiem.util import logger, utc
 
 LOG = logger()
 INFORMATION = """
@@ -100,7 +101,7 @@ def main():
 
     # Delete anything older than 20 minutes
     now = utc()
-    ets = now - datetime.timedelta(minutes=20)
+    ets = now - timedelta(minutes=20)
 
     shp = shpschema()
 

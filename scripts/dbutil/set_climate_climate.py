@@ -3,7 +3,7 @@ We have a somewhat hack whereby we assign the proper sector to the climate
 site.  So a climate site like Ames gets assigned to the IAC005 (central Iowa)
 """
 
-from pyiem.util import get_dbconn
+from pyiem.database import get_dbconn
 
 
 def main():

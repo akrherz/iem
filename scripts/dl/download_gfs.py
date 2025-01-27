@@ -6,8 +6,8 @@ days worth of data into /mesonet/tmp/gfs/
 RUN from RUN_20_AFTER.sh
 """
 
-import datetime
 import os
+from datetime import datetime, timedelta, timezone
 
 import click
 import httpx
@@ -94,21 +94,23 @@ def fetch(valid, hr):
 
 
 @click.command()
-@click.option("--valid", type=click.DateTime(), help="Valid UTC Timestamp")
-def main(valid):
+@click.option(
+    "--valid", type=click.DateTime(), help="Valid UTC Timestamp", required=True
+)
+def main(valid: datetime):
     """Go Main Go"""
-    valid = valid.replace(tzinfo=datetime.timezone.utc)
+    valid = valid.replace(tzinfo=timezone.utc)
     # script is called every hour, just short circuit the un-needed hours
     if valid.hour % 6 != 0:
         return
-    times = [valid, valid - datetime.timedelta(hours=6)]
+    times = [valid, valid - timedelta(hours=6)]
     for ts in times:
         for hr in range(0, 385, 6):
             if need_to_run(ts, hr):
                 fetch(ts, hr)
     # now cull old content
     for hr in range(72, 97, 6):
-        cull(valid - datetime.timedelta(hours=hr))
+        cull(valid - timedelta(hours=hr))
 
 
 if __name__ == "__main__":

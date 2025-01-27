@@ -3,7 +3,7 @@ Main script that adds a site into the appropriate tables
 called from SYNC_STATIONS.sh
 """
 
-import datetime
+from datetime import datetime, timedelta
 
 from pyiem.database import get_dbconnc
 from pyiem.util import logger
@@ -38,7 +38,7 @@ def main():
         "not s.metasite"
     )
 
-    now = datetime.datetime.now()
+    now = datetime.now()
 
     for row in icursor:
         LOG.info(
@@ -47,7 +47,7 @@ def main():
             row["network"],
         )
 
-        for valid in [now, now - datetime.timedelta(days=1)]:
+        for valid in [now, now - timedelta(days=1)]:
             add_summary(icursor2, valid.date(), row["iemid"])
         icursor2.execute(
             "INSERT into current (valid, iemid) VALUES ('1980-01-01', %s)",

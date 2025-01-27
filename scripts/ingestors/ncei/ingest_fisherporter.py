@@ -7,8 +7,9 @@ on the 15th each month
 from datetime import datetime
 
 import pandas as pd
+from pyiem.database import get_dbconn
 from pyiem.network import Table as NetworkTable
-from pyiem.util import get_dbconn, logger
+from pyiem.util import logger
 
 LOG = logger()
 

@@ -1,6 +1,6 @@
 """Iowa RWIS station plot!"""
 
-import datetime
+from datetime import datetime
 
 from pyiem.database import get_dbconnc
 from pyiem.plot import MapPlot
@@ -8,7 +8,7 @@ from pyiem.plot import MapPlot
 
 def main():
     """Go Main Go"""
-    now = datetime.datetime.now()
+    now = datetime.now()
     pgconn, icursor = get_dbconnc("iem")
 
     # Compute normal from the climate database
@@ -30,7 +30,7 @@ def main():
     mp = MapPlot(
         axisbg="white",
         title="Iowa DOT RWIS Mesoplot",
-        subtitle="plot valid %s" % (now.strftime("%-d %b %Y %H:%M %P"),),
+        subtitle=f"plot valid {now:%-d %b %Y %H:%M %P}",
     )
     mp.plot_station(data)
     mp.drawcounties(color="#EEEEEE")
