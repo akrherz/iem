@@ -16,7 +16,7 @@ $dselect = daySelect("day");
 
 $sselect = selectClimodatNetwork($network, "network");
 
-$t->content = <<<EOF
+$t->content = <<<EOM
 
 <p>With this interface, you can download daily climate normals for NWS COOP
 sites.  Please fill out the form below:</p>
@@ -27,13 +27,14 @@ sites.  Please fill out the form below:</p>
 <input type="submit" value="Select State">
 </form>
 
-<form method="GET" action="normals_wkr.php" name="dl">
+<form method="GET" action="/cgi-bin/request/normals.py" name="dl">
 <input type="hidden" name="network" value="{$network}">
 <h3>1. Climatology Source:</h3>
-<blockquote>
-(<i>Based on daily observations, the IEM has computed standard climatological values. The
-official data is the 30 year record from NCDC.</i>)
-</blockquote>
+
+<p>The IEM maintains a set of station idenitifers that does not exactly match
+what NCEI uses.  When you select the NCEI climatology and an IEM station identifier,
+you are getting the cross reference between the two idenitifer sets.  Hopefully, this
+is generally one to one, but it could be "nearest station"</p>
 
 <strong>Select Data Source</strong><br />
  <select name="source">
@@ -54,13 +55,13 @@ official data is the 30 year record from NCDC.</i>)
     <input type="radio" name="mode" value="station" checked="CHECKED">Single Station, All Days</input>
 
     <br>{$nselect}
-  
+
   </div>
   <div class="col-md-6">
     <p><b>2b. Select Month & Date:</b><br>
 
     <input type="radio" name="mode" value="day">All Stations, One Day</input>
-    
+
     <br />Select Month: {$mselect}
     <br />Select Day: {$dselect}
  </div>
@@ -84,5 +85,5 @@ open the comma delimited file.
 </form><p>
 
 <p><img src="/images/gisready.png"> Data includes Lat/Lon information.
-EOF;
+EOM;
 $t->render('single.phtml');
