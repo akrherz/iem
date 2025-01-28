@@ -194,7 +194,7 @@ def plotter(ctx: dict):
             gddxx(:gddbase, :gddceil, c2f(tair_c_max_qc), c2f(tair_c_min_qc))
                 as o{glabel},
             coalesce(rain_in_tot_qc, 0) as oprecip,
-            sdd86( c2f(tair_c_max_qc), c2f(tair_c_min_qc)) as osdd86
+            sdd86(c2f(tair_c_max_qc), c2f(tair_c_min_qc)) as osdd86
             from sm_daily
             WHERE station = :station and to_char(valid, 'mmdd') != '0229'
             ORDER by day ASC"""),

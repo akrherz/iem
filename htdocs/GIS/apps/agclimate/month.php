@@ -68,12 +68,14 @@ $maxvalid = null;
 for ($i = 0; $row = pg_fetch_assoc($rs); $i++) {
     $key = $row["station"];
     if ($key == "AMFI4" or $key == "AHTI4") continue;
+    $minv = strtotime($row["min_valid"]);
+    $maxv = strtotime($row["max_valid"]);
 
-    if (is_null($minvalid) || $row["min_valid"] < $minvalid) {
-        $minvalid = $row["min_valid"];
+    if (is_null($minvalid) || $minv < $minvalid) {
+        $minvalid = $minv;
     }
-    if (is_null($maxvalid) || $row["max_valid"] > $maxvalid) {
-        $maxvalid = $row["max_valid"];
+    if (is_null($maxvalid) || $maxv > $maxvalid) {
+        $maxvalid = $maxv;
     }
     if ($dvar == "rain_in_tot") {
         $val = round($row["s"], 2);
@@ -104,7 +106,7 @@ if (!is_null($minvalid)) {
     $minvalid = date("Y-m-d", $minvalid);
     $maxvalid = date("Y-m-d", $maxvalid);
     iemmap_title($map, $img, $title[$dvar] . " [ " .
-        date("d M", $minvalid) . " thru " . date("d M Y", $maxvalid) . " ]");
+        $minvalid . " thru " . $maxvalid . " ]");
 }
 $map->drawLabelCache($img);
 

@@ -1,7 +1,4 @@
 <?php
-/*
- * List out COOP extremes table
- */
 require_once "../../config/settings.inc.php";
 require_once "../../include/myview.php";
 $t = new MyView();
@@ -174,15 +171,16 @@ if ($station != null) {
 }
 
 
-$t->content = <<<EOF
+$t->content = <<<EOM
 
 {$h3}
 
 <p>This table gives a listing of <b>unofficial</b> daily records for NWS
-COOP stations.  Some records may have occured on multiple years, only one
-is listed here.  You may click on a column to sort it.  You can click on the station
+COOP stations. You may click on a column to sort it.  You can click on the station
 name to get all daily records for that station or click on the date to get all records
 for that date.</p>
+
+<p><a href="/COOP/dl/normals.phtml" class="btn btn-default">Download Daily Climatology</a>.</p>
 
 <p>The data found in this table was derived from the following
 <a href="/json/">JSON webservice</a>:<br />
@@ -247,5 +245,5 @@ for that date.</p>
 {$table}
 </tbody>
 </table>
-EOF;
+EOM;
 $t->render('single.phtml');

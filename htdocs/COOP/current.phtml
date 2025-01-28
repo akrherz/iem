@@ -154,6 +154,9 @@ $cols = array(
     "snowd" => "Snowfall Depth", "pday" => "24 hour rainfall",
     "phour" => "Rainfall One Hour", "snoww" => "Snow Water Equivalent"
 );
+if (!array_key_exists($sortcol, $cols)) {
+    xssafe("</script>");
+}
 $t->current_network = "COOP";
 
 $nselect = '<select name="network">';

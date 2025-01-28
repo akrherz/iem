@@ -97,7 +97,7 @@ EOF;
  
 $news = get_news_by_tag("coop");
  
-$t->content = <<<EOF
+$t->content = <<<EOM
 
 <h3>National Weather Service Cooperative Observer Program (COOP)</h3>
 
@@ -216,5 +216,5 @@ div.tease a {
 </div><!-- ./row -->
 
 <br clear="all" />
-EOF;
+EOM;
 $t->render('full.phtml');

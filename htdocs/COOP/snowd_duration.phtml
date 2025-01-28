@@ -12,7 +12,7 @@ $station = isset($_GET["station"]) ? xssafe($_GET["station"]) : 'IA0200';
 $month = get_int404("month", 12);
 $day = get_int404("day", 25);
 
-$ts = strtotime("2000-${month}-${day}");
+$ts = strtotime("2000-{$month}-{$day}");
 $sday = date('md', $ts);
 
 $rs = pg_prepare($coopdb, "FIND", "SELECT * from alldata_ia
@@ -21,11 +21,11 @@ $rs = pg_prepare($coopdb, "FIND", "SELECT * from alldata_ia
 $rs = pg_prepare($coopdb, "FIND2", "SELECT min(day) as m from alldata_ia
       WHERE day > $1 and station = $2 and snowd = 0");
 
-$table = <<<EOF
+$table = <<<EOM
 <table  class="table table-striped table-bordered">
 <tr><th>Start Day</th><th>Depth [inch]</th><th>End Date</th>
  <th>Duration [days]</th></tr>
-EOF;
+EOM;
 
 /* Find all snow days for this date! */
 $rs = pg_execute($coopdb, "FIND", array(strtoupper($station), $sday));
@@ -54,7 +54,7 @@ $t->title = "COOP Snow Depth Duration";
 $nselect = networkSelect("IACLIMATE", $station);
 $mselect = monthSelect($month);
 $dselect = daySelect($day);
-$t->content = <<<EOF
+$t->content = <<<EOM
 <ol class="breadcrumb">
  <li><a href="/COOP/">NWS COOP Network</a></li>
  <li class="active">Snow Depth Duration</li>
@@ -82,5 +82,5 @@ ground for Christmas in Ames, how long does it stick around for?"</p>
 </form>
 
 {$table}
-EOF;
+EOM;
 $t->render('single.phtml');

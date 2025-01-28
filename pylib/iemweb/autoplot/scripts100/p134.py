@@ -216,9 +216,7 @@ def plotter(ctx: dict):
     minval = df[XREF[varname]].min() - 1.0
     maxval = df[XREF[varname]].max() + 1.0
     if varname in ["wettest", "driest"]:
-        if minval < 0:
-            minval = 0
-        ramp = pretty_bins(minval, maxval)
+        ramp = pretty_bins(max(0, minval), maxval)
     else:
         ramp = np.linspace(
             minval, maxval, min([int(maxval - minval), 10]), dtype="i"
@@ -232,7 +230,7 @@ def plotter(ctx: dict):
         df.index.values,
         [days] * len(df.index),
         left=df["doy"].values,
-        color=cmap(norm(df[XREF[varname]].values)),
+        color=cmap(norm(df[XREF[varname]].to_numpy())),
     )
     ax.grid(True)
     lax.grid(True)
@@ -280,7 +278,7 @@ def plotter(ctx: dict):
 
     # CDF
     ax = fig.add_axes((0.59, 0.1, 0.4, 0.3))
-    X2 = np.sort(series.values)
+    X2 = np.sort(series.to_numpy())
     ptile = np.percentile(X2, [0, 5, 50, 95, 100])
     N = len(series.values)
     F2 = np.array(range(N)) / float(N) * 100.0
