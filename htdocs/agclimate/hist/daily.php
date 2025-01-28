@@ -185,9 +185,7 @@ When selecting the time interval, make sure you that choose <B> * valid * </B> d
 <label for="sv">SoilVue Temperature + Moisture Data</label>
 </p>
 
-{$qcbox}
-
-<p><strong>View on web browser or</strong> &nbsp; 
+<p>View on web browser or &nbsp; 
  <br /><input type="checkbox" name="todisk" value="yes" id="todisk">
   <label for="todisk">Download directly to disk</label>
 
@@ -205,6 +203,8 @@ When selecting the time interval, make sure you that choose <B> * valid * </B> d
     <option value="M">M</option>
       <option value="">(blank, empty space)</option>
 </select>
+
+{$qcbox}
 
 <p><h4>Submit your request:</h4>
     <input type="submit" value="Get Data">

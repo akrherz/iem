@@ -3,14 +3,14 @@
 Called from climodat/run.sh
 """
 
-import datetime
+from datetime import date
 
 from pyiem.database import get_dbconnc
 from pyiem.network import Table as NetworkTable
 
 pgconn, cursor = get_dbconnc("coop")
 
-ENDYEAR = datetime.date.today().year
+ENDYEAR = date.today().year
 
 
 def metadata(nt, sid, csv):

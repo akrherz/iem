@@ -2,7 +2,7 @@
 Plot the hourly stage IV precip data
 """
 
-import datetime
+from datetime import timedelta, timezone
 from zoneinfo import ZoneInfo
 
 import click
@@ -84,13 +84,13 @@ def doit(ts):
 def main(ts):
     """Go main Go"""
     if ts is not None:
-        ts = ts.replace(tzinfo=ZoneInfo("UTC"))
+        ts = ts.replace(tzinfo=timezone.utc)
         doit(ts)
     else:
         ts = utc()
         doit(ts)
-        doit(ts - datetime.timedelta(hours=24))
-        doit(ts - datetime.timedelta(hours=48))
+        doit(ts - timedelta(hours=24))
+        doit(ts - timedelta(hours=48))
 
 
 if __name__ == "__main__":

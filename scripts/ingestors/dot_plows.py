@@ -1,7 +1,7 @@
 """Consume a REST service of DOT Snowplow locations and data."""
 
-import datetime
 import json
+from datetime import datetime, timedelta
 
 import httpx
 from pyiem.database import get_dbconn
@@ -24,7 +24,7 @@ URI = (
     "returnExceededLimitFeatures=true&quantizationParameters=&"
     "sqlFormat=none&f=pjson&token="
 )
-CEILING = utc() + datetime.timedelta(hours=3)
+CEILING = utc() + timedelta(hours=3)
 
 
 def workflow():
@@ -54,7 +54,7 @@ def workflow():
         if logdt is None:
             continue
         # Unsure why I do it this way, but alas
-        ts = datetime.datetime.utcfromtimestamp(logdt / 1000.0)
+        ts = datetime.utcfromtimestamp(logdt / 1000.0)
         valid = utc(ts.year, ts.month, ts.day, ts.hour, ts.minute, ts.second)
         if valid > CEILING:
             continue
@@ -64,7 +64,7 @@ def workflow():
 
         if current.get(label) is None:
             # allows subsequent data insert to work
-            current[label] = valid - datetime.timedelta(minutes=1)
+            current[label] = valid - timedelta(minutes=1)
             cursor.execute(
                 "INSERT into idot_snowplow_current (label, valid) "
                 "VALUES (%s, %s)",

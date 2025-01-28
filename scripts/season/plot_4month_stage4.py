@@ -7,7 +7,7 @@ Generate a number of plots showing:
  We care about 4 months as it is used in drought analysis
 """
 
-import datetime
+from datetime import datetime, timedelta
 
 import numpy as np
 from pyiem import iemre
@@ -18,8 +18,8 @@ from pyiem.util import ncopen
 def main():
     """Go Main Go"""
     # Run for a period of 121 days
-    ets = datetime.datetime.now() - datetime.timedelta(days=1)
-    sts = ets - datetime.timedelta(days=121)
+    ets = datetime.now() - timedelta(days=1)
+    sts = ets - timedelta(days=121)
 
     # Get the normal accumm
     with ncopen(iemre.get_dailyc_ncname(), "r") as cnc:

@@ -388,7 +388,7 @@ monthly_opts = [
         "label": "Consecutive Hours / Streaks Above/Below Threshold",
     },
     {"id": 154, "label": "Hourly Temperature Averages by Month"},
-    {"id": 85, "label": "Hourly Temperature Frequencies by Month"},
+    {"id": 85, "label": "Hourly Frequencies / Last Occurence by Month"},
     {"id": 20, "label": "Hours of Precip by Month"},
     {"id": 177, "label": "ISU Soil Moisture Network Timeseries Plots"},
     {"id": 115, "label": "Monthly Heatmap of Summary Totals"},

@@ -2,12 +2,13 @@
 Monthly precip something
 """
 
-import datetime
 import os
 import subprocess
+from datetime import datetime
 
+from pyiem.database import get_dbconn
 from pyiem.network import Table as NetworkTable
-from pyiem.util import get_dbconn, logger
+from pyiem.util import logger
 
 LOG = logger()
 
@@ -15,7 +16,7 @@ LOG = logger()
 def write_data(fp, ccursor, icursor):
     """Write data to fp."""
     nt = NetworkTable("IA_COOP")
-    now = datetime.datetime.now()
+    now = datetime.now()
     fp.write("IEMNWSMPR\n")
     fp.write("IOWA ENVIRONMENTAL MESONET\n")
     fp.write("   NWS COOP STATION MONTH PRECIPITATION TOTALS\n")
@@ -66,7 +67,7 @@ def main():
     icursor = iem_pgconn.cursor()
     coop_pgconn = get_dbconn("coop")
     ccursor = coop_pgconn.cursor()
-    now = datetime.datetime.now()
+    now = datetime.now()
     ccursor.execute(
         """
         select station, sum(precip) as rain from climate WHERE

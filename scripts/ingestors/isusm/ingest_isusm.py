@@ -1,9 +1,9 @@
 """ISUSM ingest."""
 
-import datetime
 import os
 import subprocess
 import traceback
+from datetime import datetime
 from zoneinfo import ZoneInfo
 
 import inotify.adapters
@@ -11,8 +11,9 @@ import numpy as np
 import pandas as pd
 from metpy.calc import dewpoint_from_relative_humidity
 from metpy.units import units
+from pyiem.database import get_dbconnc
 from pyiem.observation import Observation
-from pyiem.util import c2f, convert_value, get_dbconnc, logger, mm2inch
+from pyiem.util import c2f, convert_value, logger, mm2inch
 
 LOG = logger()
 DIRPATH = "/var/opt/CampbellSci/LoggerNet"
@@ -147,9 +148,9 @@ INVERSION = {
 
 def make_time(string):
     """Convert a CST timestamp in the file to a datetime"""
-    tstamp = datetime.datetime.strptime(string, "%Y-%m-%d %H:%M:%S")
-    tstamp = tstamp.replace(tzinfo=ZoneInfo("Etc/GMT+6"))
-    return tstamp
+    return datetime.strptime(string, "%Y-%m-%d %H:%M:%S").replace(
+        tzinfo=ZoneInfo("Etc/GMT+6")
+    )
 
 
 def qcval(df, colname, floor, ceiling):

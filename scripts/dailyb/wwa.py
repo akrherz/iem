@@ -1,9 +1,10 @@
 """Some simple summary stats for the IEM Daily Bulletin..."""
 
-import datetime
+from datetime import timedelta
 from zoneinfo import ZoneInfo
 
-from pyiem.util import get_dbconn, utc
+from pyiem.database import get_dbconn
+from pyiem.util import utc
 
 POSTGIS = get_dbconn("postgis")
 cursor = POSTGIS.cursor()
@@ -64,11 +65,11 @@ def run(sts=None, ets=None):
     """Generate listing of warning counts"""
     # default for CST yesterday
     if sts is None or ets is None:
-        yest = utc() - datetime.timedelta(hours=24)
+        yest = utc() - timedelta(hours=24)
         yest = yest.replace(second=0, microsecond=0, minute=0)
         ts = yest.astimezone(ZoneInfo("America/Chicago"))
         sts = ts.replace(hour=0)
-        ets = sts + datetime.timedelta(hours=24)
+        ets = sts + timedelta(hours=24)
 
     d = {}
 
@@ -145,7 +146,7 @@ def main():
     sts = utc(2015, 5, 4, 0)
     sts = sts.astimezone(ZoneInfo("America/Chicago"))
     sts = sts.replace(hour=0)
-    ets = sts + datetime.timedelta(hours=24)
+    ets = sts + timedelta(hours=24)
     txt, html = run(sts, ets)
     print(txt)
     print(html)

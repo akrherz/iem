@@ -2,8 +2,8 @@
 
 Run from RUN_NOON.sh for the previous UTC date."""
 
-import datetime
 import os
+from datetime import date, timedelta
 
 import numpy as np
 from metpy.units import units
@@ -76,12 +76,10 @@ def make_netcdf(fullpath, valid, west, south):
 
 def replace_cfs(nc, valid, islice, jslice):
     """Copy CFS data into the given year."""
-    tidx0 = (valid - datetime.date(valid.year, 1, 1)).days
-    tidx1 = (
-        datetime.date(valid.year, 12, 31) - datetime.date(valid.year, 1, 1)
-    ).days
+    tidx0 = (valid - date(valid.year, 1, 1)).days
+    tidx1 = (date(valid.year, 12, 31) - date(valid.year, 1, 1)).days
     cfsnc = ncopen(valid.strftime("/mesonet/data/iemre/cfs_%Y%m%d%H.nc"))
-    tidx = daily_offset(valid + datetime.timedelta(days=1))
+    tidx = daily_offset(valid + timedelta(days=1))
     tslice = slice(tidx0 + 1, tidx1 + 1)
     # CFS is W m-2, we want MJ
     nc.variables["srad"][tslice, :, :] = (
@@ -111,8 +109,8 @@ def copy_iemre(nc, fromyear, ncdate0, ncdate1, islice, jslice):
         print("reanalysis fn %s missing" % (rencfn,))
         return
     renc = ncopen(rencfn)
-    tidx0 = (ncdate0 - datetime.date(fromyear, 1, 1)).days
-    tidx1 = (ncdate1 - datetime.date(fromyear, 1, 1)).days
+    tidx0 = (ncdate0 - date(fromyear, 1, 1)).days
+    tidx1 = (ncdate1 - date(fromyear, 1, 1)).days
     tslice = slice(tidx0, tidx1 + 1)
     # time steps to fill
     tsteps = (tidx1 - tidx0) + 1
@@ -163,16 +161,14 @@ def tile_extraction(nc, valid, west, south):
     islice = slice(i, i + 16)
     jslice = slice(j, j + 16)
     # Current year IEMRE should be substituted for this year's data
-    copy_iemre(
-        nc, valid.year, datetime.date(valid.year, 1, 1), valid, islice, jslice
-    )
+    copy_iemre(nc, valid.year, date(valid.year, 1, 1), valid, islice, jslice)
     replace_cfs(nc, valid, islice, jslice)
 
 
 def qc(nc):
     """Quick QC of the file."""
     for i, time in enumerate(nc.variables["time"][:]):
-        ts = datetime.date(2019, 1, 1) + datetime.timedelta(days=int(time))
+        ts = date(2019, 1, 1) + timedelta(days=int(time))
         avgv = np.mean(nc.variables["srad"][i, :, :])
         if avgv > 0:
             continue
@@ -191,7 +187,7 @@ def workflow(valid, ncfn, west, south):
 
 def main():
     """Go Main Go"""
-    today = datetime.date.today() - datetime.timedelta(days=2)
+    today = date.today() - timedelta(days=2)
     # Create tiles to cover IA, IL, IN
     for west in np.arange(-104, -80, 2):
         for south in np.arange(36, 50, 2):

@@ -3,21 +3,16 @@
 called from RUN_20MIN.sh
 """
 
-import datetime
 import os
 import warnings
+from datetime import timedelta, timezone
 from subprocess import PIPE, Popen
 
 import numpy as np
 import pandas as pd
 import xarray as xr
-from pyiem.util import (
-    convert_value,
-    get_dbconn,
-    get_sqlalchemy_conn,
-    logger,
-    utc,
-)
+from pyiem.database import get_dbconn, get_sqlalchemy_conn
+from pyiem.util import convert_value, logger, utc
 from xarray.coding.variables import SerializationWarning
 
 # File has missing_value and fillValue set :/
@@ -76,7 +71,7 @@ def main():
     # Find most recent two files
     fns = []
     for offset in range(5):
-        now = utc() - datetime.timedelta(hours=offset)
+        now = utc() - timedelta(hours=offset)
         for j in range(300, -1, -1):
             fn = f"/mesonet/data/madis/metar/{now:%Y%m%d_%H}00_{j}.nc"
             if os.path.isfile(fn):
@@ -107,7 +102,7 @@ def workflow(fn):
         LOG.info("Found %s current ASOS entries", len(currentdf.index))
 
     ds = xr.open_dataset(fn)
-    valid = pd.to_datetime(ds["timeObs"]).tz_localize(datetime.timezone.utc)
+    valid = pd.to_datetime(ds["timeObs"]).tz_localize(timezone.utc)
     ids = ds["stationName"].values
     nc_tmpk = ds["temperature"].values
     nc_dwpk = ds["dewpoint"].values

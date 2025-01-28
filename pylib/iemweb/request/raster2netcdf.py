@@ -6,11 +6,10 @@ Documentation for /cgi-bin/request/raster2netcdf.py
 To be written.
 """
 
-import datetime
 import os
 import tempfile
+from datetime import datetime, timezone
 from io import BytesIO
-from zoneinfo import ZoneInfo
 
 import netCDF4
 import numpy as np
@@ -137,8 +136,8 @@ def application(environ, start_response):
     if prod == "":
         raise IncompleteWebRequest("prod is required")
     try:
-        valid = datetime.datetime.strptime(dstr, "%Y%m%d%H%M").replace(
-            tzinfo=ZoneInfo("UTC")
+        valid = datetime.strptime(dstr, "%Y%m%d%H%M").replace(
+            tzinfo=timezone.utc
         )
     except Exception as exp:
         raise IncompleteWebRequest("dstr not in form %Y%m%d%H%M") from exp
