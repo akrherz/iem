@@ -74,7 +74,7 @@ $emonthselect = monthSelect($emonth, "emonth");
 $edayselect = daySelect2($eday, "eday");
 $nselect = networkSelect($network, $station);
 $sselect = selectClimodatNetwork($network, "network");
-$t->content = <<<EOF
+$t->content = <<<EOM
 <ol class="breadcrumb">
     <li><a href="/COOP/">NWS COOP</a></li>
     <li class="active">Yearly time period averages</li>
@@ -111,5 +111,5 @@ like.
 
 <p>Errors exist in this dataset and you should evaluate the observations
 before using...
-EOF;
+EOM;
 $t->render('single.phtml');

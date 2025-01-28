@@ -213,6 +213,7 @@ help pages for these services:</p>
 <li><a href="/cgi-bin/request/hml.py?help">HML Processed Data (/cgi-bin/request/hml.py)</a></li>
 <li><a href="/cgi-bin/request/hourlyprecip.py?help">Hourly Precip (/cgi-bin/request/hourlyprecip.py)</a></li>
 <li><a href="/cgi-bin/request/nass_iowa.py?help">Iowa NASS (/cgi-bin/request/nass_iowa.py)</a></li>
+<li><a href="/cgi-bin/request/normals.py?help">NCEI/IEM Climate Normals (/cgi-bin/request/normals.py)</a></li>
 <li><a href="/cgi-bin/request/isusm.py?help">Iowa State Soil Moisture Network (/cgi-bin/request/isusm.py)</a></li>
 <li><a href="/cgi-bin/request/coop.py?help">IEM Climodat stations (/cgi-bin/request/coop.py)</a></li>
 <li><a href="/cgi-bin/request/daily.py?help">IEM Computed Daily Summaries (/cgi-bin/request/daily.py)</a></li>

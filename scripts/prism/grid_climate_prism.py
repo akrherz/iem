@@ -55,7 +55,7 @@ def grid_day(nc, ts):
     I proctor the gridding of data on an hourly basis
     @param ts Timestamp of the analysis, we'll consider a 20 minute window
     """
-    COOP, cursor = get_dbconnc("coop")
+    pgconn, cursor = get_dbconnc("coop")
     offset = iemre.daily_offset(ts)
     if ts.day == 29 and ts.month == 2:
         ts = datetime(2000, 3, 1)
@@ -83,6 +83,8 @@ def grid_day(nc, ts):
             ("%s has %02i entries, FAIL")
             % (ts.strftime("%Y-%m-%d"), cursor.rowcount)
         )
+    cursor.close()
+    pgconn.close()
 
 
 def workflow(ts):
@@ -90,9 +92,8 @@ def workflow(ts):
     # Load up a station table we are interested in
 
     # Load up our netcdf file!
-    nc = ncopen("/mesonet/data/prism/prism_dailyc.nc", "a")
-    grid_day(nc, ts)
-    nc.close()
+    with ncopen("/mesonet/data/prism/prism_dailyc.nc", "a") as nc:
+        grid_day(nc, ts)
 
 
 @click.command()

@@ -16,6 +16,7 @@ from pyiem.exceptions import NoDataFound
 from pyiem.plot import figure_axes
 from pyiem.plot.use_agg import plt
 from pyiem.reference import state_names
+from sqlalchemy import text
 
 PDICT = {"state": "Aggregate by State", "wfo": "Aggregate by WFO"}
 PDICT2 = {"percent": "Frequency [%]", "count": "Count"}
@@ -91,9 +92,12 @@ def plotter(ctx: dict):
     state = ctx["state"]
     date1 = ctx.get("date1", date(2010, 4, 1))
     date2 = ctx.get("date2", date.today() + timedelta(days=1))
-    wfo_limiter = (
-        f"and wfo = '{station if len(station) == 3 else station[1:]}' "
-    )
+    params = {
+        "sts": date1,
+        "ets": date2,
+        "wfo": station if len(station) == 3 else station[1:],
+    }
+    wfo_limiter = "and wfo = :wfo "
     if station == "_ALL":
         wfo_limiter = ""
     status_limiter = "and status = 'NEW'"
@@ -104,8 +108,8 @@ def plotter(ctx: dict):
         SELECT wfo, eventid, vtec_year,
         min(polygon_begin) as min_issue,
         max(windtag) as max_windtag, max(hailtag) as max_hailtag
-        from sbw WHERE polygon_begin >= %s and
-        polygon_begin <= %s {wfo_limiter}
+        from sbw WHERE polygon_begin >= :sts and
+        polygon_begin <= :ets {wfo_limiter}
         and (windtag > 0 or hailtag > 0) and phenomena = 'SV' and
         significance = 'W' {status_limiter}
         GROUP by wfo, eventid, vtec_year
@@ -115,7 +119,6 @@ def plotter(ctx: dict):
     max(min_issue at time zone 'UTC') as max_issue, count(*)
     from data GROUP by windtag, hailtag
     """
-    args = (date1, date2)
     supextra = ""
     if opt == "wfo" and station != "_ALL":
         supextra = (
@@ -134,8 +137,8 @@ def plotter(ctx: dict):
             min(polygon_begin) as min_issue,
             max(windtag) as max_windtag, max(hailtag) as max_hailtag
             from sbw w, states s
-            WHERE polygon_begin >= %s and polygon_begin <= %s and
-            s.state_abbr = %s and ST_Intersects(s.the_geom, w.geom)
+            WHERE polygon_begin >= :sts and polygon_begin <= :ets and
+            s.state_abbr = :state and ST_Intersects(s.the_geom, w.geom)
             and (windtag > 0 or hailtag > 0) and phenomena = 'SV' and
             significance = 'W' {status_limiter}
             GROUP by wfo, eventid, vtec_year
@@ -145,9 +148,9 @@ def plotter(ctx: dict):
         max(min_issue at time zone 'UTC') as max_issue, count(*)
         from data GROUP by windtag, hailtag
         """
-        args = (date1, date2, state)
+        params["state"] = state
     with get_sqlalchemy_conn("postgis") as conn:
-        df = pd.read_sql(sql, conn, params=args, index_col=None)
+        df = pd.read_sql(text(sql), conn, params=params, index_col=None)
     if df.empty:
         raise NoDataFound("No data was found.")
     minvalid = df["min_issue"].min()

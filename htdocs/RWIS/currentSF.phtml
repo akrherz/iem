@@ -29,6 +29,9 @@ $vals = array(
     "ts" => "Observation Time",
     "name" => "Site Name",
 );
+if (!array_key_exists($sortcol, $vals)) {
+    xssafe("</script>");
+}
 
 $t->breadcrumbs = <<<EOF
 <ol class="breadcrumb">

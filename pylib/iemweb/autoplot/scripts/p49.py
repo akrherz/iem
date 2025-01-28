@@ -131,9 +131,8 @@ def plotter(ctx: dict):
     func = "avg" if days == 1 else ctx["f"]
     with get_sqlalchemy_conn("coop") as conn:
         df = pd.read_sql(
-            (
-                text(
-                    f"""
+            text(
+                f"""
                 WITH data as (
                 SELECT sday, {func}({varname})
                 OVER (ORDER by day ASC ROWS between
@@ -145,7 +144,6 @@ def plotter(ctx: dict):
                 min(day) as min_date, max(day) as max_date from data
                 WHERE sday != '0229' GROUP by sday ORDER by sday ASC
             """
-                )
             ),
             conn,
             params=params,
