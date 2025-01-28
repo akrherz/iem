@@ -100,7 +100,7 @@ def application(environ, start_response):
     }
     if environ["mode"] == "station":
         limiter = "station = :station"
-    elif environ["mode"] == "day":
+    else:  # day
         limiter = "valid = :day and station = ANY(:stations)"
     if source.startswith("ncei"):
         col = "ncdc81" if source == "ncei_climate81" else "ncei91"
