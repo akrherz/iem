@@ -71,6 +71,8 @@ def grid_day(nc, ts):
     cursor.scroll(0, mode="absolute")
     res = generic_gridder(nc, cursor, "gdd50")
     nc.variables["gdd50"][offset] = res
+    cursor.close()
+    pgconn.close()
 
 
 def workflow(ts):

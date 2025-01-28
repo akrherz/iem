@@ -148,7 +148,7 @@ def fetch_daily(environ: dict, cols: list):
             for c2 in ["t", "vwc"]:
                 cols.append(f"sv_{c2}{depth}")
                 if environ["qcflags"]:
-                    cols.append(f"{col}_f")
+                    cols.append(f"sv_{c2}{depth}_f")
     else:
         for col in list(cols):
             if col.startswith("sv") and len(col) > 2:
