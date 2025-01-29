@@ -160,9 +160,9 @@ else if ($mode == "monthly") {
         } else {
             $str .= "<br>Precip: " . sprintf("%.2f", $row["precip"]);
         }
-        if ($row["precip_est"]) $str .= "(E)";
+        if (array_key_exists("precip_est", $row) && $row["precip_est"]) $str .= "(E)";
 
-        if (!is_null($row["max_rstage"]) && $row["max_rstage"] >= 0) {
+        if (array_key_exists("max_rstage", $row) && !is_null($row["max_rstage"]) && $row["max_rstage"] >= 0) {
             $str .= "<br>Max Stage[ft]: " . sprintf("%.2f", $row["max_rstage"]);
         }
 
