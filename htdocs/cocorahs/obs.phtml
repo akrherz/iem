@@ -2,7 +2,7 @@
 require_once "../../config/settings.inc.php";
 define("IEM_APPID", 57);
 require_once "../../include/database.inc.php";
-$access = iemdb("iem");
+$access = iemdb("coop");
 require_once "../../include/myview.php";
 require_once "../../include/forms.php";
 require_once "../../include/network.php";
@@ -11,13 +11,13 @@ $t = new MyView();
 $t->title = "CoCoRaHS Observations";
 
 $station = isset($_GET["station"]) ? xssafe($_GET["station"]) : "";
-$network = isset($_GET["network"]) ? xssafe($_GET["network"]) : "IACOCORAHS";
+$network = isset($_GET["network"]) ? xssafe($_GET["network"]) : "IA_COCORAHS";
 $date = isset($_GET["date"]) ? substr(xssafe($_GET["date"]), 0, 10) : date("Y-m-d");
-$sortvar = isset($_GET["sortvar"]) ? substr(xssafe($_GET["sortvar"]), 0, 10) : "pday";
+$sortvar = isset($_GET["sortvar"]) ? substr(xssafe($_GET["sortvar"]), 0, 10) : "precip";
 $year = isset($_GET["year"]) ? substr(xssafe($_GET["year"]), 0, 4) : date("Y");
 $sortdir = "ASC";
 if (
-    $sortvar == "pday" || $sortvar == "snow" ||
+    $sortvar == "precip" || $sortvar == "snow" ||
     $sortvar == "snowd" || $sortvar == "max_tmpf"
 ) {
     $sortdir = "DESC";
@@ -28,14 +28,17 @@ $nt = new NetworkTable($network);
 $ys =  yearSelect(2007, $year, "year");
 
 if (strlen($station) > 0) {
-    $rs = pg_prepare($access, "SELECTOR", "SELECT s.*, t.id as station 
-            from summary_$year s JOIN stations t
-            ON (t.iemid = s.iemid) WHERE t.id = $1
-            ORDER by $sortvar $sortdir");
+    $rs = pg_prepare(
+        $access, "SELECTOR",
+        "SELECT s.*, t.id as station from cocorahs_$year s JOIN stations t
+        ON (t.iemid = s.iemid) WHERE t.id = $1
+        ORDER by $sortvar $sortdir");
     $rs = pg_execute($access, "SELECTOR", array($station));
 } else {
-    $rs = pg_prepare($access, "SELECTOR", "SELECT s.*, t.id as station 
-        from summary_$year s JOIN stations t
+    $rs = pg_prepare($access, "SELECTOR",
+    
+        "SELECT s.*, t.id as station 
+        from cocorahs_$year s JOIN stations t
         ON (t.iemid = s.iemid) WHERE day = $1 and
         network = $2 ORDER by $sortvar $sortdir");
     $rs = pg_execute($access, "SELECTOR", array($date, $network));
@@ -45,7 +48,7 @@ $table = "";
 for ($i = 0; $row = pg_fetch_assoc($rs); $i++) {
     $nwsli = $row["station"];
 
-    $rain = $row["pday"];
+    $rain = $row["precip"];
     if ($rain == 0.0001) $rain = "T";
     if ($rain == -99 || $rain == "") $rain = "M";
     if ($rain > 10 || $rain < 0) $rain = "M";
@@ -116,14 +119,14 @@ if (strlen($date) > 0) {
 EOF;
 }
 
-$content .= <<<EOF
+$content .= <<<EOM
 <p><table class="table table-striped table-bordered">
 <tr>
   <th><a href="{$link}station">ID #:</a></th>
   <th>Site Name:</th>
   <th>County:</th>
   <th><a href="{$link}day">Date:</a></th>
-  <th><a href="{$link}pday">Precip</a></th>
+  <th><a href="{$link}precip">Precip</a></th>
   <th><a href="{$link}snow">Snowfall</a></th>
   <th><a href="{$link}snowd">Snow Depth</a></th></tr>
 
@@ -137,6 +140,6 @@ like.
 
 <p>Errors exist in this dataset and you should evaluate the observations
 before using...</div>
-EOF;
+EOM;
 $t->content = $content;
 $t->render('single.phtml');

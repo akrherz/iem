@@ -28,8 +28,7 @@ python extract_hfmetar.py --hours=0 &
 python to_iemaccess.py --offset=2 &
 
 cd ../cocorahs
-python cocorahs_stations.py --state=IA
-python cocorahs_data_ingest.py --state=IA
+python cocorahs_stations.py --newerthan=$(date --date '7 days ago' +'%Y-%m-%d')T00:00:00
 
 cd ../../plots
 ./RUN_PLOTS

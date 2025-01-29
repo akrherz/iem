@@ -3,122 +3,113 @@
 Run from RUN_40_AFTER.sh
 """
 
-import sys
+from datetime import datetime
+from io import StringIO
 
 import click
 import httpx
-from pyiem.database import get_dbconn
-from pyiem.network import Table as NetworkTable
-from pyiem.util import logger
+import pandas as pd
+from pyiem.database import get_dbconn, get_sqlalchemy_conn
+from pyiem.util import convert_value, logger
+from sqlalchemy import text
 
 LOG = logger()
 
 
 @click.command()
-@click.option("--state", required=True, help="State Abbreviation")
-def main(state: str):
+@click.option("--newerthan", type=click.DateTime(), required=True)
+def main(newerthan: datetime):
     """Go Main Go"""
-    network = f"{state}COCORAHS"
-    nt = NetworkTable(network, only_online=False)
+    with get_sqlalchemy_conn("mesosite") as conn:
+        current = pd.read_sql(
+            text("""
+    select id, name, st_x(geom) as lon, st_y(geom) as lat, elevation, iemid
+    from stations where network ~* '_COCORAHS' order by id
+            """),
+            conn,
+            index_col="id",
+        )
+    LOG.info("Found %s current COCORAHS stations", len(current.index))
     pgconn = get_dbconn("mesosite")
     mcursor = pgconn.cursor()
 
     url = (
         "http://data.cocorahs.org/cocorahs/export/exportstations.aspx?"
-        f"State={state}&Format=CSV&country=usa"
+        "Format=CSV"
     )
-    try:
-        data = httpx.get(url, timeout=30).content.decode("ascii").split("\r\n")
-    except Exception as exp:
-        LOG.exception(exp)
-        sys.exit(1)
+    with StringIO() as sio:
+        try:
+            resp = httpx.get(url, timeout=30)
+            resp.raise_for_status()
+            sio.write(resp.text.replace(", ", ","))  # remove space after comma
+        except Exception as exp:
+            LOG.exception(exp)
+            return
+        sio.seek(0)
+        upstream = pd.read_csv(sio).set_index("StationNumber")
+    upstream["updated"] = pd.to_datetime(
+        upstream["DateTimeStamp"], format="%Y-%m-%d %I:%M %p"
+    )
+    upstream = upstream[upstream["updated"] > newerthan]
+    LOG.info("Found %s upstream COCORAHS stations", len(upstream.index))
+    # We only want CoCoRaHS types
+    upstream = upstream[upstream["StationType"] == "CoCoRaHS"]
+    upstream["Latitude"] = pd.to_numeric(upstream["Latitude"], errors="coerce")
+    upstream["Longitude"] = pd.to_numeric(
+        upstream["Longitude"], errors="coerce"
+    )
 
-    # Process Header
-    h = data[0].split(",")
-    header = {_h: i for i, _h in enumerate(h)}
-
-    if "StationNumber" not in header:
-        sys.exit(0)
-
-    for row in data[1:]:
-        cols = row.split(", ")
-        if len(cols) < 4:
+    for sid, row in upstream.iterrows():
+        if row["Latitude"] == 0 or row["Longitude"] == 0:
             continue
-        if cols[header["StationStatus"]].strip() == "Closed":
-            continue
-        sid = cols[header["StationNumber"]]
-        name = cols[header["StationName"]].strip().replace("'", " ").strip()
-        if name == "":
-            name = sid
-        cnty = cols[header["County"]].strip().replace("'", " ")
-        lat = float(cols[header["Latitude"]].strip())
-        lon = float(cols[header["Longitude"]].strip())
-        # Always puzzled by this
-        if abs(lon - 0) < 0.1 or abs(lat - 0) < 0.1:
-            continue
-        if sid in nt.sts:
-            olat = nt.sts[sid]["lat"]
-            olon = nt.sts[sid]["lon"]
-            dist = ((olat - lat) ** 2 + (olon - lon) ** 2) ** 0.5
-            if dist < 0.01:
-                continue
-            LOG.info(
-                "%s is %.3f distance: %s->%s %s->%s",
-                sid,
-                dist,
-                olon,
-                lon,
-                olat,
-                lat,
-            )
+        network = f"{row['State']}_COCORAHS"
+        sname = row["StationName"].strip().replace("'", " ")
+        elevation = convert_value(row["Elevation"], "foot", "meter")
+        dirty = False
+        if sid not in current.index:
             mcursor.execute(
-                "UPDATE stations SET geom = ST_Point(%s, %s, 4326), "
-                "elevation = -999, ugc_county = null, ugc_zone = null, "
-                "ncdc81 = null, climate_site = null, ncei91 = null WHERE "
-                "id = %s and network = %s",
-                (lon, lat, sid, network),
+                "insert into stations(id, network, online, metasite) values "
+                "(%s, %s, 't', 't') returning iemid",
+                (sid, network),
             )
-            if name != nt.sts[sid]["name"]:
-                LOG.warning(
-                    "Updating %s name '%s' -> '%s'",
-                    sid,
-                    nt.sts[sid]["name"],
-                    name,
-                )
-                mcursor.execute(
-                    "UPDATE stations SET name = %s, plot_name = %s where "
-                    "id = %s and network = %s",
-                    (name, name, sid, network),
-                )
+            iemid = mcursor.fetchone()[0]
+            dirty = True
+        else:
+            iemid = current.at[sid, "iemid"]
+            if abs(current.at[sid, "elevation"] - elevation) > 3:
+                print("elev")
+                dirty = True
+            if abs(current.at[sid, "lat"] - row["Latitude"]) > 0.01:
+                print("lat")
+                dirty = True
+            if abs(current.at[sid, "lon"] - row["Longitude"]) > 0.01:
+                print("lon")
+                dirty = True
+            if current.at[sid, "name"] != sname:
+                print(f"name '{current.at[sid, 'name']}' '{sname}'")
+                dirty = True
+        if not dirty:
             continue
-
-        LOG.warning(
-            "ADD COCORAHS SID:%s Name:%s County:%s %.3f %.3f",
-            sid,
-            name,
-            cnty,
-            lat,
-            lon,
-        )
-
+        LOG.info("Updating %s", row)
         mcursor.execute(
-            "INSERT into stations(id, synop, name, state, country, network, "
-            "online, geom, county, plot_name , metasite) "
-            "VALUES (%s, 99999, %s, %s, 'US', %s, 't', "
-            "ST_POINT(%s, %s, 4326), %s, %s, 'f')",
+            "UPDATE stations SET geom = ST_Point(%s, %s, 4326), wfo = null, "
+            "elevation = %s, ugc_county = null, ugc_zone = null, "
+            "ncdc81 = null, climate_site = null, ncei91 = null, name = %s, "
+            "plot_name = %s WHERE iemid = %s",
             (
-                sid,
-                name,
-                state,
-                network,
-                lon,
-                lat,
-                cnty,
-                name,
+                row["Longitude"],
+                row["Latitude"],
+                elevation,
+                sname,
+                sname,
+                iemid,
             ),
         )
+        break
+
     mcursor.close()
     pgconn.commit()
+    pgconn.close()
 
 
 if __name__ == "__main__":

@@ -239,8 +239,7 @@ def load_data(ctx, basets, endts):
             ST_Transform(geom, 2163) as geo
             from summary s JOIN stations t on (s.iemid = t.iemid)
             WHERE s.day = ANY(:days)
-            and (t.network ~* 'COOP' or t.network = 'IACOCORAHS')
-            and snow >= 0 and
+            and t.network ~* 'COOP' and snow >= 0 and
             coop_valid >= :basets and coop_valid <= :endts
             GROUP by state, wfo, nwsli, lon, lat, geo
             ORDER by val DESC
@@ -258,7 +257,33 @@ def load_data(ctx, basets, endts):
     df2[USEME] = True
     df2["plotme"] = True
     df2["source"] = "COOP"
-    return pd.concat([df, df2], ignore_index=True, sort=False)
+    with get_sqlalchemy_conn("coop") as conn:
+        df3: gpd.GeoDataFrame = gpd.read_postgis(
+            text(
+                """SELECT state, wfo, id as nwsli,
+            sum(snow) as val, ST_x(geom) as lon, ST_y(geom) as lat,
+            ST_Transform(geom, 2163) as geo
+            from alldata_cocorahs s JOIN stations t on (s.iemid = t.iemid)
+            WHERE s.day = ANY(:days)
+            and t.network ~* '_COCORAHS' and snow >= 0 and
+            obvalid >= :basets and obvalid <= :endts
+            GROUP by state, wfo, nwsli, lon, lat, geo
+            ORDER by val DESC
+            """
+            ),
+            conn,
+            params={
+                "days": days,
+                "basets": basets,
+                "endts": endts,
+            },
+            index_col=None,
+            geom_col="geo",
+        )
+    df3[USEME] = True
+    df3["plotme"] = True
+    df3["source"] = "COCORAHS"
+    return pd.concat([df, df2, df3], ignore_index=True, sort=False)
 
 
 def compute_grid_bounds(ctx, csector):
