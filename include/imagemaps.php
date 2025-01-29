@@ -58,21 +58,32 @@ function ugcStateSelect($state, $selected)
 }
 
 
-function selectAzosNetwork($network)
+/**
+ * Select a network type
+ * @param nettype the network type
+ * @param selected the selected network id
+ * @return the select box
+ */
+function selectNetworkType($nettype, $selected)
 {
-    $network = strtoupper($network);
-    include_once dirname(__FILE__) . "/database.inc.php";
+    $selected = strtoupper($selected);
+    require_once dirname(__FILE__) . "/database.inc.php";
     $dbconn = iemdb('mesosite');
-    $rs = pg_exec($dbconn, "SELECT * from networks WHERE id ~* 'ASOS' ORDER by name ASC");
+    $rs = pg_prepare(
+        $dbconn,
+        "SELECT_NETWORK_BY_TYPE",
+        "SELECT * from networks WHERE id ~* $1 ORDER by name ASC");
+    $rs = pg_execute($dbconn, "SELECT_NETWORK_BY_TYPE", array($nettype));
     $s = "<select name=\"network\">\n";
     for ($i = 0; $row = pg_fetch_array($rs); $i++) {
         $s .= "<option value=\"" . $row["id"] . "\" ";
-        if ($row["id"] == $network) {
+        if ($row["id"] == $selected) {
             $s .= "SELECTED";
         }
         $s .= ">" . $row["name"] . "</option>\n";
     }
     $s .= "</select>\n";
+    pg_close($dbconn);
     return $s;
 }
 

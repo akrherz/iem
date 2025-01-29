@@ -60,7 +60,12 @@ def main(newerthan: datetime):
     )
 
     for sid, row in upstream.iterrows():
-        if row["Latitude"] == 0 or row["Longitude"] == 0:
+        if (
+            row["Latitude"] == 0
+            or row["Longitude"] == 0
+            or row["Elevation"] < -900
+            or pd.isna(row["StationName"])
+        ):
             continue
         network = f"{row['State']}_COCORAHS"
         sname = row["StationName"].strip().replace("'", " ")

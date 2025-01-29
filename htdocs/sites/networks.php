@@ -41,11 +41,13 @@ function pretty_date($val, $fmt = "M d, Y")
 }
 
 if ($network == '_ALL_') {
+    // Too much memory at the moment
     $rs = pg_query(
         $pgconn,
         "SELECT id, name, elevation, archive_begin, archive_end, network, " .
             "ST_x(geom) as lon, ST_y(geom) as lat, null as attributes, state, " .
-            "synop, country from stations WHERE online = 'y' ORDER by name"
+            "synop, country from stations WHERE online = 't' and ".
+            "network !~* '_COCORAHS' ORDER by name"
     );
     $cities = array();
     for ($i = 0; $row = pg_fetch_array($rs); $i++) {

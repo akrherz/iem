@@ -16,7 +16,7 @@ $network = isset($_GET['network']) ? xssafe($_GET['network']): "IA_ASOS";
 $station = "";
 $t->title = "Download ASOS/AWOS/METAR Data";
 
-$netselect = selectAzosNetwork($network);
+$netselect = selectNetworkType("ASOS", $network);
 
 $y1select = yearSelect2(1928, date("Y"), "year1"); 
 $y2select = yearSelect2(1928, date("Y"), "year2"); 

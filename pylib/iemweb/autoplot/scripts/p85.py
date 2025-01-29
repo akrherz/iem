@@ -179,7 +179,7 @@ def plotter(ctx: dict):
     if ctx["scale"] == "100":
         ax.set_xlim(0, 100)
         ax.set_xticks([0, 5, 25, 50, 75, 95, 100])
-    ax.set_xlabel(f"Frequency [%s] (Hour Timezone: {tzname})")
+    ax.set_xlabel(f"Frequency [%] (Hour Timezone: {tzname})")
     ax.set_ylim(-0.5, 23.5)
 
     return fig, df
