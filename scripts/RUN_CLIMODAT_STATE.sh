@@ -4,6 +4,7 @@ STATE=$(python util/pick_state.py)
 python climodat/check_database.py --state=$STATE
 # 2. Recompute sts, ets
 python dbutil/compute_climate_sts.py --network=${STATE}CLIMATE
+python dbutil/compute_cocorahs_sts.py --network=${STATE}_COCORAHS
 python dbutil/compute_coop_sts.py --network=${STATE}_COOP
 # 3. Use ACIS
 python climodat/use_acis.py --state=$STATE

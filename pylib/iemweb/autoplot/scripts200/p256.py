@@ -50,10 +50,9 @@ from datetime import date
 from zoneinfo import ZoneInfo
 
 import pandas as pd
-from pyiem.database import get_sqlalchemy_conn
+from pyiem.database import get_sqlalchemy_conn, sql_helper
 from pyiem.reference import StationAttributes as SA
 from pyiem.util import utc
-from sqlalchemy import text
 
 PDICT = {
     "state": "By State",
@@ -140,7 +139,8 @@ def get_asos(ctx: dict) -> pd.DataFrame:
     with get_sqlalchemy_conn("mesosite") as conn:
         # Figure out which stations we care about
         stations = pd.read_sql(
-            text(f"""
+            sql_helper(
+                """
             with pop as (
                 select id, name, value as snow_src, null as snow,
                 null as snowd, null as cnt_6hr from stations s LEFT
@@ -156,7 +156,9 @@ def get_asos(ctx: dict) -> pd.DataFrame:
             select p.*, coalesce(i.value, false) as is_awos
             from pop p LEFT JOIN
             is_awos i on (p.id = i.id) ORDER by p.id ASC
-            """),
+            """,
+                limiter=limiter,
+            ),
             conn,
             index_col="id",
             params=params,
@@ -168,16 +170,19 @@ def get_asos(ctx: dict) -> pd.DataFrame:
         sts = ets - pd.Timedelta("24 hours")
         with get_sqlalchemy_conn("hads") as conn:
             snowdf = pd.read_sql(
-                text(f"""
+                sql_helper(
+                    """
                 select station, valid, substr(key, 1, 3) as shefvar, value
-                from raw{ets:%Y} WHERE
+                from {table} WHERE
                 station = ANY(:stations) and
                 substr(key, 1, 3) in ('SFQ', 'SDI') and
                 valid > :sts and valid <= :ets and value is not null
                 and extract(hour from valid at time zone 'UTC')
                 in (0, 6, 12, 18)
                 ORDER by station asc, valid asc
-                """),
+                """,
+                    table=f"raw{ets:%Y}",
+                ),
                 conn,
                 params={
                     "stations": stations["snow_src"].dropna().to_list(),
@@ -202,7 +207,7 @@ def get_asos(ctx: dict) -> pd.DataFrame:
         ets = utc(ctx["date"].year, ctx["date"].month, ctx["date"].day, 6)
         sts = ets - pd.Timedelta("24 hours")
         highsdf = pd.read_sql(
-            text(
+            sql_helper(
                 """
     select station,
     max(coalesce(max_tmpf_6hr, tmpf)) as calc_max_tmpf from alldata
@@ -223,7 +228,7 @@ def get_asos(ctx: dict) -> pd.DataFrame:
         ets = utc(ctx["date"].year, ctx["date"].month, ctx["date"].day, 12)
         sts = utc(ctx["date"].year, ctx["date"].month, ctx["date"].day, 0)
         lowsdf = pd.read_sql(
-            text(
+            sql_helper(
                 """
     select station,
     min(coalesce(min_tmpf_6hr, tmpf)) as calc_min_tmpf from alldata
@@ -244,7 +249,7 @@ def get_asos(ctx: dict) -> pd.DataFrame:
         ets = utc(ctx["date"].year, ctx["date"].month, ctx["date"].day, 12)
         sts = ets - pd.Timedelta("24 hours")
         precipdf = pd.read_sql(
-            text(
+            sql_helper(
                 """
     with obs as (
     select station, date_trunc('hour', valid) as ts,
@@ -279,16 +284,19 @@ def get_obsdf(ctx: dict) -> pd.DataFrame:
     limiter = " and t.wfo = :wfo "
     if ctx["by"] == "state":
         limiter = " and t.state = :state "
-    sql = f"""
+    sql = sql_helper(
+        """
         select t.id, t.name, s.snow, s.snowd, s.pday, s.max_tmpf, s.min_tmpf,
         s.coop_valid
         from summary s JOIN stations t on (s.iemid = t.iemid)
         WHERE s.day = :date {limiter} and t.network ~* 'COOP' and
         coop_valid is not null
         ORDER by t.id ASC
-    """
+    """,
+        limiter=limiter,
+    )
     with get_sqlalchemy_conn("iem") as conn:
-        obs = pd.read_sql(text(sql), conn, params=params)
+        obs = pd.read_sql(sql, conn, params=params)
     if not obs.empty:
         obs["coop_local_valid"] = obs["coop_valid"].dt.tz_convert(
             ctx["_nt"].sts[ctx["wfo"]]["tzname"],
@@ -298,6 +306,49 @@ def get_obsdf(ctx: dict) -> pd.DataFrame:
             obs = obs[
                 (obs["coop_local_valid"].dt.hour >= 5)
                 & (obs["coop_local_valid"].dt.hour <= 10)
+            ]
+    return obs
+
+
+def munge_cocorahs_id(sid: str) -> str:
+    """CoCoRaHS IDs are poison to SHEF, so we have to munge them"""
+    tokens = sid.split("-")
+    return f"{tokens[0]}{tokens[1]}{int(tokens[2]):03.0f}"
+
+
+def get_cocorahsdf(ctx: dict) -> pd.DataFrame:
+    """Figure out the data."""
+    params = {
+        "date": ctx["date"],
+        "wfo": ctx["wfo"],
+        "state": ctx["state"],
+    }
+    limiter = " and t.wfo = :wfo "
+    if ctx["by"] == "state":
+        limiter = " and t.state = :state "
+    sql = sql_helper(
+        """
+        select t.id, t.name, s.snow, s.snowd, s.precip, s.obvalid, t.county,
+        t.state
+        from alldata_cocorahs s JOIN stations t on (s.iemid = t.iemid)
+        WHERE s.day = :date {limiter} and t.network ~* 'COCORAHS'
+        ORDER by t.id ASC
+    """,
+        limiter=limiter,
+    )
+    with get_sqlalchemy_conn("coop") as conn:
+        obs = pd.read_sql(sql, conn, params=params)
+    if not obs.empty:
+        # CoCoRaHS IDs are poison to SHEF, so we have to munge them
+        obs["id"] = obs["id"].apply(munge_cocorahs_id)
+        obs["cocorahs_local_valid"] = obs["obvalid"].dt.tz_convert(
+            ctx["_nt"].sts[ctx["wfo"]]["tzname"],
+        )
+        if ctx["report"] == "12z":
+            # Require obs to be between 5 and 10 AM local time
+            obs = obs[
+                (obs["cocorahs_local_valid"].dt.hour >= 5)
+                & (obs["cocorahs_local_valid"].dt.hour <= 10)
             ]
     return obs
 
@@ -315,6 +366,7 @@ def plotter(ctx: dict):
     """Go"""
     obsdf = get_obsdf(ctx)
     asosdf = get_asos(ctx)
+    cocorahsdf = get_cocorahsdf(ctx)
     wfo = ctx["wfo"]
     dt = ctx["date"]
     tzname = ctx["_nt"].sts[wfo]["tzname"]
@@ -364,6 +416,22 @@ def plotter(ctx: dict):
                 f"{pp(row['snowd'], 5, 0)}\n"
             )
         report += ".END\n\n"
+
+    report += (
+        "CoCoRaHS Reports\n\n"
+        f".BR {wfo} {dt:%Y%m%d} {zc} DH07/PPDRZZ/SFDRZZ/SDIRZZ\n"
+    )
+    for (county, state), gdf in cocorahsdf.groupby(["county", "state"]):
+        cc = "Parish" if state == "LA" else "County"
+        report += f": {county} ({cc}), {state}\n"
+        for _, row in gdf.iterrows():
+            report += (
+                f"{row['id']:10s}:{row['name']:25.25s}: "
+                f"DH{row['cocorahs_local_valid'].strftime('%H%M')}/ "
+                f"{pp(row['precip'], 5, 2)} /{pp(row['snow'], 5, 1)} /"
+                f"{pp(row['snowd'], 5, 1)}\n"
+            )
+    report += ".END\n\n"
 
     for is_awos in [False, True]:
         report += (
