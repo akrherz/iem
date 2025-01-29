@@ -5,7 +5,6 @@ require_once "../../include/database.inc.php";
 $access = iemdb("coop");
 require_once "../../include/myview.php";
 require_once "../../include/forms.php";
-require_once "../../include/network.php";
 
 $t = new MyView();
 $t->title = "CoCoRaHS Observations";
@@ -23,21 +22,19 @@ if (
     $sortdir = "DESC";
 }
 
-$nt = new NetworkTable($network);
-
 $ys =  yearSelect(2007, $year, "year");
 
 if (strlen($station) > 0) {
     $rs = pg_prepare(
         $access, "SELECTOR",
-        "SELECT s.*, t.id as station from cocorahs_$year s JOIN stations t
+        "SELECT s.*, t.id as station, t.name, t.county from cocorahs_$year s JOIN stations t
         ON (t.iemid = s.iemid) WHERE t.id = $1
         ORDER by $sortvar $sortdir");
     $rs = pg_execute($access, "SELECTOR", array($station));
 } else {
     $rs = pg_prepare($access, "SELECTOR",
     
-        "SELECT s.*, t.id as station 
+        "SELECT s.*, t.id as station, t.name, t.county
         from cocorahs_$year s JOIN stations t
         ON (t.iemid = s.iemid) WHERE day = $1 and
         network = $2 ORDER by $sortvar $sortdir");
@@ -70,16 +67,12 @@ for ($i = 0; $row = pg_fetch_assoc($rs); $i++) {
     if (strlen($station) > 0) {
         $table .= $nwsli;
     } else {
-        $table .= "<a href=\"obs.phtml?station=" . $nwsli . "&network=" . $network . "\">" . $nwsli . "</a>";
+        $table .= "<a href=\"obs.phtml?station={$nwsli}&network={$network}\">{$nwsli}</a>";
     }
 
-    $table .= "</td><td>" . $nt->table[$nwsli]["name"] . "</td><td>" . $nt->table[$nwsli]["county"] . "</td><td>";
+    $table .= "</td><td>" . $row["name"] . "</td><td>" . $row["county"] . "</td><td>";
 
-    if (strlen($date) > 0) {
-        $table .= $row["day"];
-    } else {
-        $table .= "<a href=\"obs.phtml?date=" . $row["day"] . "&network=" . $network . "\">" . $row["day"] . "</a>";
-    }
+    $table .= "<a href=\"obs.phtml?date=" . $row["day"] . "&network=" . $network . "\">" . $row["day"] . "</a>";
 
     $table .= "</td><td>" . $rain . "</td><td>" . $snow . "</td><td>" . $snowd . "</td></tr>\n";
 }

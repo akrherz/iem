@@ -46,9 +46,6 @@ def main(dt: Optional[date]) -> None:
     LOG.info("Found %s station defined", len(stations.index))
     dbconn, cursor = get_dbconnc("coop")
 
-    # https://data.cocorahs.org/export/exportreports.aspx?ReportType=Daily&
-    # dtf=1&Format=CSV&ReportDateType=timestamp&Date=1/29/2025%2012:00%20AM
-    # &TimesInGMT=True
     if dt is not None:
         # Export for a given date
         url = (
@@ -62,7 +59,7 @@ def main(dt: Optional[date]) -> None:
         url = (
             "https://data.cocorahs.org/export/exportreports.aspx"
             "?ReportType=Daily&dtf=1&Format=CSV&ReportDateType=timestamp"
-            f"&Date={since:%-m/%d/%Y}%20{since:%I:%m}%20{since:%p}&"
+            f"&Date={since:%-m/%d/%Y%%20%I:%m%%20%p}&"
             "TimesInGMT=True"
         )
     with StringIO() as sio:

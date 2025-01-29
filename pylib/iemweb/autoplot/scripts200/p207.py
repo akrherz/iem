@@ -1,6 +1,6 @@
 """
 Generates an analysis map of snowfall or freezing rain data
-based on NWS Local Storm Reports and NWS COOP Data.  This autoplot
+based on NWS Local Storm Reports, NWS COOP Data, and CoCoRaHS.  This autoplot
 presents a number of tunables including:
 <ul>
     <li>The window of hours to look before the specified valid time to
@@ -71,8 +71,8 @@ PDICT4 = {
     "plot": "Inject zeros and show on plot as red 'Z'",
 }
 PDICT5 = {
-    "yes": "Include any NWS COOP Reports, if possible.",
-    "no": "Do not include any COOP reports.",
+    "yes": "Include any reports, if possible.",
+    "no": "Do not include any reports.",
 }
 PDICT6 = {"snow": "Snowfall", "ice": "Freezing Rain / Ice Storm (LSRs Only)"}
 PDICT7 = {
@@ -170,6 +170,13 @@ def get_description():
             default="no",
             name="coop",
         ),
+        {
+            "type": "select",
+            "options": PDICT5,
+            "label": "Include CoCoRaHS reports too?",
+            "default": "yes",
+            "name": "cocorahs",
+        },
         dict(
             type="select",
             options=PDICT7,
@@ -196,7 +203,7 @@ def get_description():
     return desc
 
 
-def load_data(ctx, basets, endts):
+def load_data(ctx: dict, basets: datetime, endts: datetime):
     """Generate a dataframe with the data we want to analyze."""
     with get_sqlalchemy_conn("postgis") as conn:
         df: gpd.GeoDataFrame = gpd.read_postgis(
@@ -223,67 +230,69 @@ def load_data(ctx, basets, endts):
     df["nwsli"] = df.index.values
     df["plotme"] = True
     df["source"] = "LSR"
-    if ctx["coop"] == "no" or ctx["v"] == "ice":
-        return df
     # More work to do
     days = []
     now = basets
     while now <= endts:
         days.append(now.date())
         now += timedelta(hours=24)
-    with get_sqlalchemy_conn("iem") as conn:
-        df2: gpd.GeoDataFrame = gpd.read_postgis(
-            text(
-                """SELECT state, wfo, id as nwsli,
-            sum(snow) as val, ST_x(geom) as lon, ST_y(geom) as lat,
-            ST_Transform(geom, 2163) as geo
-            from summary s JOIN stations t on (s.iemid = t.iemid)
-            WHERE s.day = ANY(:days)
-            and t.network ~* 'COOP' and snow >= 0 and
-            coop_valid >= :basets and coop_valid <= :endts
-            GROUP by state, wfo, nwsli, lon, lat, geo
-            ORDER by val DESC
-            """
-            ),
-            conn,
-            params={
-                "days": days,
-                "basets": basets,
-                "endts": endts,
-            },
-            index_col=None,
-            geom_col="geo",
-        )
-    df2[USEME] = True
-    df2["plotme"] = True
-    df2["source"] = "COOP"
-    with get_sqlalchemy_conn("coop") as conn:
-        df3: gpd.GeoDataFrame = gpd.read_postgis(
-            text(
-                """SELECT state, wfo, id as nwsli,
-            sum(snow) as val, ST_x(geom) as lon, ST_y(geom) as lat,
-            ST_Transform(geom, 2163) as geo
-            from alldata_cocorahs s JOIN stations t on (s.iemid = t.iemid)
-            WHERE s.day = ANY(:days)
-            and t.network ~* '_COCORAHS' and snow >= 0 and
-            obvalid >= :basets and obvalid <= :endts
-            GROUP by state, wfo, nwsli, lon, lat, geo
-            ORDER by val DESC
-            """
-            ),
-            conn,
-            params={
-                "days": days,
-                "basets": basets,
-                "endts": endts,
-            },
-            index_col=None,
-            geom_col="geo",
-        )
-    df3[USEME] = True
-    df3["plotme"] = True
-    df3["source"] = "COCORAHS"
-    return pd.concat([df, df2, df3], ignore_index=True, sort=False)
+    if ctx["coop"] == "yes" or ctx["v"] == "ice":
+        with get_sqlalchemy_conn("iem") as conn:
+            df2: gpd.GeoDataFrame = gpd.read_postgis(
+                text(
+                    """SELECT state, wfo, id as nwsli,
+                sum(snow) as val, ST_x(geom) as lon, ST_y(geom) as lat,
+                ST_Transform(geom, 2163) as geo
+                from summary s JOIN stations t on (s.iemid = t.iemid)
+                WHERE s.day = ANY(:days)
+                and t.network ~* 'COOP' and snow >= 0 and
+                coop_valid >= :basets and coop_valid <= :endts
+                GROUP by state, wfo, nwsli, lon, lat, geo
+                ORDER by val DESC
+                """
+                ),
+                conn,
+                params={
+                    "days": days,
+                    "basets": basets,
+                    "endts": endts,
+                },
+                index_col=None,
+                geom_col="geo",
+            )
+        df2[USEME] = True
+        df2["plotme"] = True
+        df2["source"] = "COOP"
+        df = pd.concat([df, df2], ignore_index=True, sort=False)
+    if ctx["cocorahs"] == "yes":
+        with get_sqlalchemy_conn("coop") as conn:
+            df3: gpd.GeoDataFrame = gpd.read_postgis(
+                text(
+                    """SELECT state, wfo, id as nwsli,
+                sum(snow) as val, ST_x(geom) as lon, ST_y(geom) as lat,
+                ST_Transform(geom, 2163) as geo
+                from alldata_cocorahs s JOIN stations t on (s.iemid = t.iemid)
+                WHERE s.day = ANY(:days)
+                and t.network ~* '_COCORAHS' and snow >= 0 and
+                obvalid >= :basets and obvalid <= :endts
+                GROUP by state, wfo, nwsli, lon, lat, geo
+                ORDER by val DESC
+                """
+                ),
+                conn,
+                params={
+                    "days": days,
+                    "basets": basets,
+                    "endts": endts,
+                },
+                index_col=None,
+                geom_col="geo",
+            )
+        df3[USEME] = True
+        df3["plotme"] = True
+        df3["source"] = "COCORAHS"
+        df = pd.concat([df, df3], ignore_index=True, sort=False)
+    return df
 
 
 def compute_grid_bounds(ctx, csector):
@@ -459,6 +468,7 @@ def plotter(ctx: dict):
         sector = "state" if len(csector) == 2 else csector
 
     _t = " & COOP" if ctx["coop"] == "yes" else ""
+    _t += " & CoCoRaHS" if ctx["cocorahs"] == "yes" else ""
     title = f"NWS Local Storm Report{_t} Snowfall Total Analysis"
     if ctx["v"] == "ice":
         title = "NWS Local Storm Reports of Freezing Rain + Ice"
