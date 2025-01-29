@@ -72,10 +72,18 @@ def main(newerthan: datetime):
         elevation = convert_value(row["Elevation"], "foot", "meter")
         dirty = False
         if sid not in current.index:
+            state = None if sid[2] != "-" else sid[:2]
+            country = {
+                "BHS": "BH",
+                "CAN": "CA",
+            }.get(sid.split("-")[0], "US")
             mcursor.execute(
-                "insert into stations(id, network, online, metasite) values "
-                "(%s, %s, 't', 't') returning iemid",
-                (sid, network),
+                """
+                insert into stations(id, network, online, metasite, state,
+                country) values
+                (%s, %s, 't', 't', %s, %s) returning iemid
+                """,
+                (sid, network, state, country),
             )
             iemid = mcursor.fetchone()[0]
             dirty = True

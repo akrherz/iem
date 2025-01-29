@@ -282,7 +282,7 @@ EOF;
         $htmlout .= "<tr><td>" . $row['station'] . "</td>
           <td><a href=\"hist.phtml?network=$network&year=$year&month=$month&mode=monthly&station=" . $row["station"] . "\">{$label}</a></td>";
 
-        $te = $row["tmpf_est"] ? "(E)" : "";
+        $te = (array_key_exists("tmpf_est", $row) && $row["tmpf_est"] )? "(E)" : "";
         $htmlout .= "<td>" . $row["max_tmpf"] . " {$te}</td>";
 
         $htmlout .= "<td>" . $row["min_tmpf"] . " {$te}</td>";
@@ -292,10 +292,10 @@ EOF;
         $htmlout .= "<td>" . $row["min_dwpf"] . "</td>";
         $htmlout .= "<td>" . $row["max_dwpf"] . "</td>";
 
-        $pe = $row["precip_est"] ? "(E)" : "";
+        $pe = (array_key_exists("precip_est", $row) && $row["precip_est"] ) ? "(E)" : "";
         $htmlout .= "<td>" . snowprint($row["precip"]) . " {$pe}</td>";
 
-        if (!is_null($row["max_gust"]) && $row["max_gust_localts"] != "") {
+        if (array_key_exists("max_gust", $row) && !is_null($row["max_gust"]) && $row["max_gust_localts"] != "") {
             $gtim = strtotime(substr($row["max_gust_localts"], 0, 16));
             $gs = date("g:i A", $gtim);
             $g = round($row["max_gust"] * 1.15, 0);
