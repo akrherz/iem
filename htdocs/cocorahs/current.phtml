@@ -8,8 +8,27 @@ require_once "../../include/mlib.php";
 $t = new MyView();
 
 define("IEM_APPID", 56);
-$network = isset($_GET['network']) ? xssafe($_GET['network']): 'IACOCORAHS'; 
+$network = isset($_GET['network']) ? xssafe($_GET['network']): 'IA_COCORAHS'; 
 $sortcol = isset($_GET['sortcol']) ? xssafe($_GET['sortcol']): 'ts';
+
+$nselect = '<select name="network">';
+$mesosite = iemdb("mesosite");
+$rs = pg_query(
+    $mesosite,
+    "SELECT id, name from networks where id ~* '_COCORAHS' ORDER by name ASC");
+for ($i = 0; $row = pg_fetch_assoc($rs); $i++) {
+    $sel = '';
+    if ($network == $row["id"]) {
+        $sel = " selected='SELECTED'";
+    }
+    $nselect .= sprintf(
+        "<option value='%s'%s>%s</option>\n",
+        $row["id"],
+        $sel,
+        $row["name"]
+    );
+}
+$nselect .= "</select>";
 
 $t->title = "CoCoRaHS Last Observation";
 $t->headextra = <<<EOF
@@ -23,54 +42,50 @@ $t->headextra = <<<EOF
 EOF;
 $t->current_network = "CoCoRaHS";
 
- $nt = new NetworkTable($network);
+$nt = new NetworkTable($network);
 
- /* Compute monthly rainfall totals! */
- $dbconn = iemdb("iem");
- $year = date("Y");
- $first_of_month = date("Y-m");
- $sql = "SELECT id, 
-   sum(case WHEN pday < 0 THEN 0 ELSE pday END) as pmonth, 
-   sum(case WHEN pday < 0 THEN 1 ELSE 0 END) as missing from 
-   summary_$year s, stations t WHERE t.network = '$network' and t.iemid = s.iemid
-   and day >= '{$first_of_month}-01' GROUP by id";
- $rs = pg_exec($dbconn, $sql);
+$dbconn = iemdb("coop");
+$year = date("Y");
+$sql = <<<EOM
+with today as (
+    select t.id, c.*, t.tzname
+    from cocorahs_$year c JOIN stations t on (c.iemid = t.iemid)
+    WHERE day = 'TODAY' and t.network = $1),
+month as (
+    SELECT iemid,
+    sum(precip) as pmonth, count(*) as count from 
+    cocorahs_$year s WHERE day >= $2 GROUP by iemid)
+
+select t.*, m.pmonth, m.count,
+obvalid at time zone t.tzname as local_valid
+from today t JOIN month m on (t.iemid = m.iemid)
+ORDER by t.id asc
+EOM;
+$day1 = new DateTime();
+;
+$rs = pg_prepare($dbconn, "CS", $sql);
+ $rs = pg_execute($dbconn, "CS", array($network, $day1->format("Y-m") .'-01'));
  $monthDict = Array();
- for( $i=0; $row = pg_fetch_array($rs); $i++){
-    $val = is_null($row["pmonth"]) ? 0: $row["pmonth"];
-   $monthDict[ $row["id"] ] = Array("accum" => round($val, 2), "missing" => $row["missing"] );
- }
-
-$arr = Array("network" => $network);
-$jobj = iemws_json("currents.json", $arr);
-
  $db = Array();
- foreach($jobj["data"] as $bogus => $iemob){
-     $site = $iemob["station"];
-  $db[$site] = Array('snow'=> "", 'snowd'=>"", 'ratio'=>"", 'pday'=>"", 'pmonth'=>"", 'pmiss' => "");
-  $db[$site]['ts'] = strtotime($iemob["local_valid"]);
+ for( $i=0; $row = pg_fetch_array($rs); $i++){
+  $site = $row["id"];
+  $db[$site] = Array(
+    'pmonth' => $row["pmonth"],
+    'count' => $row["count"],
+    'snow'=> "", 'snowd'=>"", 'ratio'=>"", 'pday'=>"", 'pmonth'=>"", 'pmiss' => "");
+  $db[$site]['ts'] = strtotime($row["local_valid"]);
   $db[$site]['sid'] = $site;
-  $db[$site]['name'] = $iemob["name"];
+  $db[$site]['name'] = $nt->table[$site]["name"];
   $db[$site]['county'] = $nt->table[$site]["county"];
-  if ( date("Ym") == date("Ym", strtotime($iemob["local_valid"])) ){
-    $db[$site]['pmonth'] = @$monthDict[$site]["accum"];
-    $db[$site]['pmiss'] = @$monthDict[$site]["missing"];
-  }
-  if ( date("Ymd") != date("Ymd", strtotime($iemob["local_valid"])) ){
-    continue;
-  }
-
-
-  $db[$site]['pday'] = $iemob["ob_pday"];
-  $db[$site]['snow'] = ($iemob["snow"] >= 0) ? $iemob["snow"] : " ";
-  $db[$site]['snowd'] = ($iemob["snowd"] >= 0) ? $iemob["snowd"] : " ";
+  $db[$site]['pday'] = $row["precip"];
+  $db[$site]['snow'] = ($row["snow"] >= 0) ? $row["snow"] : " ";
+  $db[$site]['snowd'] = ($row["snowd"] >= 0) ? $row["snowd"] : " ";
   $db[$site]["ratio"] = -1;
   if ($db[$site]["snow"] > 0.0001 && $db[$site]["pday"] > 0.0001)
    {
      $db[$site]["ratio"] = intval( $db[$site]["snow"] / $db[$site]["pday"] );
    }
- }
-
+}
 $db = aSortBySecondIndex($db, $sortcol, "desc");
 
 $cols = Array("ts" => "Valid", "county" => "County",
@@ -81,9 +96,17 @@ $cols = Array("ts" => "Valid", "county" => "County",
   "pmonth" => "Precipitation for Month");
 
 $baseurl2 = "current.phtml?sortcol=";
-$content = <<<EOF
+$content = <<<EOM
 <p>Sorted by: {$cols[$sortcol]}. 
 The number of observations missing for this month is shown in parenthesis.
+
+<form method="GET" action="current.phtml" name="stctrl">
+<input type="hidden" name="sortcol" value="{$sortcol}">
+Option 1: <strong>View by State:</strong> {$nselect}
+<input type="submit" value="Go!">
+</form>
+
+
 <form name="st" action="/my/current.phtml" method="GET">
 <table class="table table-striped table-condensed table-bordered">
 <thead>
@@ -103,7 +126,7 @@ The number of observations missing for this month is shown in parenthesis.
   <th><a href="{$baseurl2}snowd">Snow Depth</a></th>
 </tr></thead>
 <tbody>
-EOF;
+EOM;
  $oddrow = true;
  $now = time();
  foreach($db as $site => $value){
@@ -113,12 +136,12 @@ EOF;
 
    $content .= "<tr ";
    if ($oddrow) $content .= "bgcolor=\"#EEEEEE\"";
-   $content .= <<<EOF
+   $content .= <<<EOM
 ><th><input type="checkbox" name="st[]"
    value="{$site}"></th><td><a href="/sites/site.php?station={$site}&network={$network}">$site</a></td>
     <td>{$value["name"]}</td>
     <td>{$value["county"]}</td>
-EOF;
+EOM;
    $content .= "<td ";
    if ($tdiff > (24*3600) || date("Ymd") != date("Ymd", $value["ts"]) ){
      $content .= 'bgcolor="red">'. date("d M Y h:i A", $value["ts"]) .'</td>';
@@ -143,11 +166,11 @@ EOF;
     $content .= "<td>". $value["snowd"] ."</td>";
    $content .= "</tr>";
  }
-$content .= <<<EOF
+$content .= <<<EOM
 </tbody>
 </table>
 <input type="submit" value="Add to Favorites">
          </form>
-EOF;
+EOM;
 $t->content = $content;
 $t->render('sortables.phtml');

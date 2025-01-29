@@ -347,9 +347,9 @@ def plotter(ctx: dict):
             f".BR {wfo} {dt:%Y%m%d} Z DH06/TAIRVX/DH12/TAIRVP/PPDRVZ/"
             "SFDRZZ/SDIRZZ\n"
             ": Station Name and Number of 6 Hour Reports\n"
-            ": 06Z (yesterday) to 06Z HIGH TEMPERATURE\n"
+            ": 06Z YESTERDAY to 06Z HIGH TEMPERATURE\n"
             ": 00Z TO 12Z TODAY LOW TEMPERATURE\n"
-            ": 12Z YESTERDAY TO 12Z TODAY RAINFALL\n"
+            ": 12Z YESTERDAY TO 12Z TODAY PRECIPITATION\n"
             ": 12Z YESTERDAY TO 12Z TODAY SNOWFALL\n"
             ": 12Z TODAY SNOW DEPTH\n"
         )
@@ -369,9 +369,9 @@ def plotter(ctx: dict):
         report += (
             f"{'AWOS' if is_awos else 'ASOS'} Reports\n\n"
             f".BR {wfo} {dt:%Y%m%d} Z DH06/TAIRVX/DH12/TAIRVP/PPDRVZ\n"
-            ": 06Z (yesterday) to 06Z HIGH TEMPERATURE\n"
+            ": 06Z YESTERDAY to 06Z HIGH TEMPERATURE\n"
             ": 00Z TO 12Z TODAY LOW TEMPERATURE\n"
-            ": 12Z YESTERDAY TO 12Z TODAY RAINFALL\n"
+            ": 12Z YESTERDAY TO 12Z TODAY PRECIPITATION\n"
         )
         filtered = asosdf[asosdf["is_awos"] == is_awos]
         for sid, row in filtered[filtered["cnt_6hr"].isna()].iterrows():

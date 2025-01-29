@@ -142,20 +142,23 @@ else if ($mode == "monthly") {
     $db = array();
     foreach ($jobj["data"] as $bogus => $row) {
         $dvalid = date("Ymd", strtotime($row["date"] . " 12:00"));
-        if (is_null($row["max_tmpf"])) $row["max_tmpf"] = "M";
-        $str = "High: " . $row["max_tmpf"];
-        if ($row["tmpf_est"]) $str .= "(E)";
+        $str = "";
+        if (! is_null($row["max_tmpf"])){
+            $str .= "High: " . $row["max_tmpf"];
+            if ($row["tmpf_est"]) $str .= "(E)";
+        }
 
-        if (is_null($row["min_tmpf"])) $row["min_tmpf"] = "M";
-        $str .= "<br>Low: " . $row["min_tmpf"];
-        if ($row["tmpf_est"]) $str .= "(E)";
+        if (! is_null($row["min_tmpf"])) {
+            $str .= "<br>Low: " . $row["min_tmpf"];
+            if ($row["tmpf_est"]) $str .= "(E)";
+        }
 
         if ($row["precip"] < 0.01 && $row["precip"] > 0) {
-            $str .= "<br>Rain: Trace ";
+            $str .= "<br>Precip: Trace ";
         } elseif (is_null($row["precip"])) {
-            $str .= "<br />Rain: ";
+            $str .= "<br />Precip: M";
         } else {
-            $str .= "<br>Rain: " . sprintf("%.2f", $row["precip"]);
+            $str .= "<br>Precip: " . sprintf("%.2f", $row["precip"]);
         }
         if ($row["precip_est"]) $str .= "(E)";
 

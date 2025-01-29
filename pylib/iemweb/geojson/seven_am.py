@@ -25,7 +25,7 @@ https://mesonet.agron.iastate.edu/geojson/7am.py?dt=2024-07-01&group=azos
 """
 
 import json
-from datetime import date, timedelta
+from datetime import date, datetime, timedelta
 from zoneinfo import ZoneInfo
 
 from pydantic import Field
@@ -85,7 +85,7 @@ def router(group, ts):
     if group == "azos":
         return run_azos(ts)
     if group == "cocorahs":
-        return run(ts, ["IACOCORAHS"])
+        return run_cocorahs(ts)
     return None
 
 
@@ -149,6 +149,54 @@ def run(ts, networks):
         and extract(hour from coop_valid) between 5 and 10
     """,
         (ts.date(), networks),
+    )
+
+    res = {
+        "type": "FeatureCollection",
+        "features": [],
+        "generation_time": utc().strftime(ISO8601),
+        "count": cursor.rowcount,
+    }
+    for row in cursor:
+        res["features"].append(
+            dict(
+                type="Feature",
+                id=row["id"],
+                properties=dict(
+                    pday=p(row["pday"]),
+                    snow=p(row["snow"], 1),
+                    snowd=p(row["snowd"], 1),
+                    name=row["name"],
+                    hour=row["hour"],
+                    high=row["high"],
+                    low=row["low"],
+                    coop_tmpf=row["coop_tmpf"],
+                    network=row["network"],
+                ),
+                geometry=dict(
+                    type="Point", coordinates=[row["st_x"], row["st_y"]]
+                ),
+            )
+        )
+    pgconn.close()
+    return json.dumps(res)
+
+
+def run_cocorahs(ts: datetime):
+    """Actually do the hard work of getting the current SPS in geojson"""
+    pgconn, cursor = get_dbconnc("coop")
+
+    cursor.execute(
+        """
+        select id, ST_x(geom), ST_y(geom), obvalid, precip as pday,
+        snow, snowd,
+        extract(hour from obvalid)::int as hour, null as high,
+        null as low, null as coop_tmpf, name, network
+        from alldata_cocorahs s JOIN stations t ON (t.iemid = s.iemid)
+        WHERE s.day = %s and t.network ~* '_COCORAHS' and precip >= 0
+        and extract(hour from obvalid) between 5 and 10
+    """,
+        (ts.date(),),
     )
 
     res = {

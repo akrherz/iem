@@ -119,6 +119,10 @@ function get_sites_context()
         header("Location: /sites/locate.php");
         die();
     }
+    // 28 Jan 2025 temp
+    if ($network == "IACOCORAHS"){
+        $network = "IA_COCORAHS";
+    }
 
     $st = new StationData($station, $network);
     $cities = $st->table;
