@@ -84,10 +84,14 @@ def get_response_headers(status, fmt):
     elif fmt in ["csv", "txt"]:
         ctype = "text/plain"
     elif fmt == "geotiff":
-        ctype = "image/tiff"
-        extra = [
-            ("Content-Disposition", "attachment;Filename=autoplot.geotiff")
-        ]
+        # Can't handle writting error into this type
+        if status != HTTP200:
+            ctype = "text/plain"
+        else:
+            ctype = "image/tiff"
+            extra = [
+                ("Content-Disposition", "attachment;Filename=autoplot.geotiff")
+            ]
     else:
         if status != HTTP200:
             ctype = "text/plain"

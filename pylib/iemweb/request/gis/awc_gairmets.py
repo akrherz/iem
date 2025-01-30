@@ -107,7 +107,7 @@ def run(ctx, start_response):
     fn = f"airmets_{ctx['sts']:%Y%m%d%H%M}_{ctx['ets']:%Y%m%d%H%M}"
     if ctx["format"] == "kml":
         fp = BytesIO()
-        with fiona.drivers():
+        with fiona.Env():
             df.to_file(fp, driver="KML", NameField="NAME", engine="fiona")
         headers = [
             ("Content-type", "application/octet-stream"),
