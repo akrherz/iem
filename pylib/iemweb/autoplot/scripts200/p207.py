@@ -229,12 +229,13 @@ def load_data(ctx: dict, basets: datetime, endts: datetime):
     df["nwsli"] = df.index.values
     df["plotme"] = True
     df["source"] = "LSR"
-    # More work to do
-    days = []
-    now = basets
-    while now <= endts:
-        days.append(now.date())
-        now += timedelta(hours=24)
+    # Figure out which days we need to look for COOP/CoCoRaHS data, we make
+    # some life choices here wanting a morning timestamp within the period
+    days = [
+        dt
+        for dt in pd.date_range(basets.date(), endts.date())
+        if basets < datetime(dt.year, dt.month, dt.day, 7) < endts
+    ]
     if ctx["coop"] == "yes" or ctx["v"] == "ice":
         with get_sqlalchemy_conn("iem") as conn:
             df2: gpd.GeoDataFrame = gpd.read_postgis(
@@ -265,7 +266,7 @@ def load_data(ctx: dict, basets: datetime, endts: datetime):
         df = pd.concat([df, df2], ignore_index=True, sort=False)
     if ctx["cocorahs"] == "yes":
         with get_sqlalchemy_conn("coop") as conn:
-            df3: gpd.GeoDataFrame = gpd.read_postgis(
+            cocodf: gpd.GeoDataFrame = gpd.read_postgis(
                 sql_helper(
                     """SELECT state, wfo, id as nwsli,
                 sum(snow) as val, ST_x(geom) as lon, ST_y(geom) as lat,
@@ -295,10 +296,11 @@ def load_data(ctx: dict, basets: datetime, endts: datetime):
                 index_col=None,
                 geom_col="geo",
             )
-        df3[USEME] = True
-        df3["plotme"] = True
-        df3["source"] = "COCORAHS"
-        df = pd.concat([df, df3], ignore_index=True, sort=False)
+        if not cocodf.empty:
+            cocodf[USEME] = True
+            cocodf["plotme"] = True
+            cocodf["source"] = "COCORAHS"
+            df = pd.concat([df, cocodf], ignore_index=True, sort=False)
     return df
 
 
