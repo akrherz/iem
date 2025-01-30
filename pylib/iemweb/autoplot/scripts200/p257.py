@@ -57,10 +57,8 @@ def get_description():
     return desc
 
 
-def get_raster(ctx: dict):
-    """Do the computation!"""
-    if ctx["csector"] in ["AK", "HI"]:
-        raise NoDataFound("Sector not available for this plot.")
+def do_processing(ctx: dict):
+    """So to check for errors"""
     valid: datetime = ctx["valid"]
     ppath_f00 = (
         f"{valid:%Y/%m/%d}/model/hrrr/{valid:%H}/"
@@ -88,13 +86,24 @@ def get_raster(ctx: dict):
             units.degK * tmpk, units.degK * dwpk
         )
 
-    cci = comprehensive_climate_index(
+    return comprehensive_climate_index(
         units.degK * tmpk,
         units.percent * rh,
         wind_speed(units("m/s") * u, units("m/s") * v),
         units("W/m^2") * srad,
         shade_effect=ctx["shade"] == "yes",
     )
+
+
+def get_raster(ctx: dict):
+    """Do the computation!"""
+    if ctx["csector"] in ["AK", "HI"]:
+        raise NoDataFound("Sector not available for this plot.")
+    try:
+        cci = do_processing(ctx)
+    except Exception as exp:
+        LOG.exception(exp)
+        raise NoDataFound("No HRRR Data Found.") from exp
     return cci, IEMRE.affine, IEMRE.crs
 
 
