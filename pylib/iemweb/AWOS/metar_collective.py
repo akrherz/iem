@@ -6,17 +6,16 @@
 from io import StringIO
 
 import pandas as pd
-from pyiem.database import get_sqlalchemy_conn
+from pyiem.database import get_sqlalchemy_conn, sql_helper
 from pyiem.util import utc
 from pyiem.webutil import iemapp
-from sqlalchemy import text
 
 
 def add_output(sio):
     """Do as I say"""
     with get_sqlalchemy_conn("iem") as conn:
         df = pd.read_sql(
-            text("""
+            sql_helper("""
             select raw from current c JOIn stations t on (t.iemid = c.iemid)
             WHERE t.network = 'IA_ASOS' and
             valid > now() - '2 hours'::interval

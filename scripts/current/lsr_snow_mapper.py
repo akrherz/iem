@@ -7,7 +7,6 @@ import tempfile
 import httpx
 from pyiem.database import get_dbconn
 from pyiem.util import (
-    exponential_backoff,
     get_properties,
     logger,
     set_property,
@@ -29,6 +28,7 @@ def website_enable_check():
         "and state = 'IA' and type = 'S'"
     )
     has_lsrs = cursor.rowcount > 0
+    cursor.close()
     postgis.close()
     if status == has_lsrs:
         return
@@ -38,15 +38,14 @@ def website_enable_check():
 
 def do(url, fn):
     """Do the work."""
-    res = exponential_backoff(httpx.get, url, timeout=60)
-    if res is None:
-        LOG.info("%s failure", url)
-        return
-    if res.status_code != 200:
-        LOG.info("%s resulted in %s", url, res.status_code)
+    try:
+        resp = httpx.get(url, timeout=30)
+        resp.raise_for_status()
+    except Exception as exp:
+        LOG.info("failure %s for %s", exp, url)
         return
     with tempfile.NamedTemporaryFile(delete=False) as tmpfd:
-        tmpfd.write(res.content)
+        tmpfd.write(resp.content)
     pqstr = f"plot c {utc():%Y%m%d%H%M} {fn} bogus{utc().second} png"
     subprocess.call(["pqinsert", "-i", "-p", pqstr, tmpfd.name])
     os.unlink(tmpfd.name)
@@ -54,7 +53,7 @@ def do(url, fn):
 
 def main():
     """Go Main Go."""
-    ap207 = "http://mesonet.agron.iastate.edu/plotting/auto/plot/207"
+    ap207 = "http://iem.local/plotting/auto/plot/207"
     url = f"{ap207}/t:state::csector:IA::p:both::hours:12::sz:25.png"
     do(url, "lsr_snowfall.png")
 

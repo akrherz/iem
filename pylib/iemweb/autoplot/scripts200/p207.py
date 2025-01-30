@@ -31,7 +31,7 @@ from datetime import datetime, timedelta
 import geopandas as gpd
 import numpy as np
 import pandas as pd
-from pyiem.database import get_sqlalchemy_conn
+from pyiem.database import get_sqlalchemy_conn, sql_helper
 from pyiem.exceptions import NoDataFound
 from pyiem.plot import MapPlot
 from pyiem.plot.colormaps import nwsice, nwssnow
@@ -40,7 +40,6 @@ from pyiem.util import logger
 from pyproj import Transformer
 from scipy.interpolate import Rbf
 from shapely.geometry import Point, Polygon
-from sqlalchemy import text
 
 LOG = logger()
 T4326_2163 = Transformer.from_proj(4326, 2163, always_xy=True)
@@ -207,7 +206,7 @@ def load_data(ctx: dict, basets: datetime, endts: datetime):
     """Generate a dataframe with the data we want to analyze."""
     with get_sqlalchemy_conn("postgis") as conn:
         df: gpd.GeoDataFrame = gpd.read_postgis(
-            text(
+            sql_helper(
                 """SELECT state, wfo,
             max(magnitude::real) as val, ST_x(geom) as lon, ST_y(geom) as lat,
             ST_Transform(geom, 2163) as geo
@@ -239,7 +238,7 @@ def load_data(ctx: dict, basets: datetime, endts: datetime):
     if ctx["coop"] == "yes" or ctx["v"] == "ice":
         with get_sqlalchemy_conn("iem") as conn:
             df2: gpd.GeoDataFrame = gpd.read_postgis(
-                text(
+                sql_helper(
                     """SELECT state, wfo, id as nwsli,
                 sum(snow) as val, ST_x(geom) as lon, ST_y(geom) as lat,
                 ST_Transform(geom, 2163) as geo
@@ -267,14 +266,18 @@ def load_data(ctx: dict, basets: datetime, endts: datetime):
     if ctx["cocorahs"] == "yes":
         with get_sqlalchemy_conn("coop") as conn:
             df3: gpd.GeoDataFrame = gpd.read_postgis(
-                text(
+                sql_helper(
                     """SELECT state, wfo, id as nwsli,
                 sum(snow) as val, ST_x(geom) as lon, ST_y(geom) as lat,
                 ST_Transform(geom, 2163) as geo
                 from alldata_cocorahs s JOIN stations t on (s.iemid = t.iemid)
                 WHERE s.day = ANY(:days)
                 and t.network ~* '_COCORAHS' and snow >= 0 and
-                obvalid >= :basets and obvalid <= :endts
+                obvalid >= :basets and obvalid <= :endts and
+                ST_Contains(
+                    ST_MakeEnvelope(:minx, :miny, :maxx, :maxy, 2163),
+                    ST_transform(geom, 2163)
+                )
                 GROUP by state, wfo, nwsli, lon, lat, geo
                 ORDER by val DESC
                 """
@@ -284,6 +287,10 @@ def load_data(ctx: dict, basets: datetime, endts: datetime):
                     "days": days,
                     "basets": basets,
                     "endts": endts,
+                    "minx": ctx["bnds2163"][0],
+                    "miny": ctx["bnds2163"][1],
+                    "maxx": ctx["bnds2163"][2],
+                    "maxy": ctx["bnds2163"][3],
                 },
                 index_col=None,
                 geom_col="geo",
@@ -440,14 +447,13 @@ def plotter(ctx: dict):
         ctx["hours"] = 300
     endts = ctx["endts"]
     basets = endts - timedelta(hours=ctx["hours"])
-    # Retrieve available obs
-    df = load_data(ctx, basets, endts)
-
     # figure out our grid bounds
     csector = ctx.pop("csector")
     if ctx["t"] == "state" and len(csector) > 2:
         ctx["sz"] = max(50, ctx["sz"])
     ctx["bnds2163"] = compute_grid_bounds(ctx, csector)
+    # Retrieve available obs
+    df = load_data(ctx, basets, endts)
     # add zeros and QC
     df = add_zeros(df, ctx)
     df["label"] = df["val"].apply(
@@ -502,7 +508,9 @@ def plotter(ctx: dict):
         if ctx["t"] == "cwa":
             mp.draw_mask(sector="conus")
             mp.draw_cwas(linewidth=2)
-    if sector not in ["conus", "midwest"]:
+    if sector not in ["conus", "midwest"] and not (
+        ctx["t"] == "state" and len(csector) > 2
+    ):
         mp.drawcounties()
     if ctx["ct"] == "yes":
         mp.drawcities(isolated=True, textoutlinewidth=0)
