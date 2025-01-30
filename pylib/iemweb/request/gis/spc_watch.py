@@ -165,7 +165,7 @@ def run(environ, start_response):
             + df["NUM"].apply(str)
         )
         fp = BytesIO()
-        with fiona.drivers():
+        with fiona.Env():
             df.to_file(fp, driver="KML", NameField="NAME", engine="fiona")
         return fp.getvalue()
 

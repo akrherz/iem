@@ -274,7 +274,7 @@ def do_excel_kml(fmt, params, sql_filters):
     # KML
     df["name"] = df["Location"] + ": " + df["Event Type"]
     fp = BytesIO()
-    with fiona.drivers():
+    with fiona.Env():
         df.to_file(fp, driver="KML", NameField="name", engine="fiona")
     return fp.getvalue()
 
