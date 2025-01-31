@@ -11,17 +11,17 @@ from pyiem.util import logger, ncopen
 LOG = logger()
 
 
-def init_year(ts):
+def init_year(domain: str, ts: datetime):
     """
     Create a new NetCDF file for a year of our specification!
     """
-    gridnav = get_nav("iemre", "")
-    fn = get_dailyc_ncname()
+    gridnav = get_nav("iemre", domain)
+    fn = get_dailyc_ncname(domain)
     if os.path.isfile(fn):
         LOG.warning("Cowardly refusing to create file: %s", fn)
         return
     nc = ncopen(fn, "w")
-    nc.title = "IEM Daily Reanalysis Climatology %s" % (ts.year,)
+    nc.title = f"IEM Daily Reanalysis Climatology {ts:%Y}"
     nc.platform = "Grided Climatology"
     nc.description = "IEM daily analysis on a 0.125 degree grid"
     nc.institution = "Iowa State University, Ames, IA, USA"
@@ -68,7 +68,7 @@ def init_year(ts):
     lon_bnds[:, 1] = gridnav.x_edges[1:]
 
     tm = nc.createVariable("time", float, ("time",))
-    tm.units = "Days since %s-01-01 00:00:0.0" % (ts.year,)
+    tm.units = f"Days since {ts:%Y}-01-01 00:00:0.0"
     tm.long_name = "Time"
     tm.standard_name = "time"
     tm.axis = "T"
@@ -112,7 +112,8 @@ def init_year(ts):
 
 def main():
     """Go Main"""
-    init_year(datetime(2000, 1, 1))
+    for domain in ["", "china", "europe"]:
+        init_year(domain, datetime(2000, 1, 1))
 
 
 if __name__ == "__main__":

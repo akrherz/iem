@@ -3,12 +3,14 @@
 ignore_user_abort(true);
 
 require_once "../../../include/throttle.php";
+require_once "../../../include/forms.php";
 
 date_default_timezone_set('UTC');
 putenv("TZ=GMT");
 /* This bad boy converts a PNG to a geo-tiff */
 
-$dstr = isset($_GET["dstr"]) ? $_GET["dstr"] : die("No dstr set");
+$dstr = isset($_GET["dstr"]) ? xssafe($_GET["dstr"]) : die("No dstr set");
+$sector = isset($_GET["sector"]) ? substr(xssafe($_GET["sector"]), 1, 2) : "us";
 $year = intval(substr($dstr, 0, 4));
 $month = intval(substr($dstr, 4, 2));
 $day = intval(substr($dstr, 6, 2));
@@ -34,10 +36,11 @@ if (is_file($zipFile)) {
     die();
 }
 
+$S = strtoupper($sector);
 if ($ts > ($now - 360.0)) {
-    $inFile = "/mesonet/ldmdata/gis/images/4326/USCOMP/n0r_0.tif";
+    $inFile = "/mesonet/ldmdata/gis/images/4326/{$S}COMP/n0r_0.tif";
 } else {
-    $inFile = sprintf("/mesonet/ARCHIVE/data/%s/GIS/uscomp/n0r_%s.png", date("Y/m/d", $ts), date("YmdHi", $ts));
+    $inFile = sprintf("/mesonet/ARCHIVE/data/%s/GIS/{$sector}comp/n0r_%s.png", date("Y/m/d", $ts), date("YmdHi", $ts));
 }
 
 if (!is_file($inFile)) die("No GIS composite found for this time!");

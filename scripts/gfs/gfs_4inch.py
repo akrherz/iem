@@ -7,14 +7,14 @@ from datetime import datetime, timedelta
 
 import numpy as np
 import pandas as pd
-from pyiem.database import get_sqlalchemy_conn
+from pyiem.database import get_sqlalchemy_conn, sql_helper
 from pyiem.plot import MapPlot, get_cmap
 from pyiem.util import convert_value, logger, ncopen
 
 LOG = logger()
 
 
-def get_idx(lons, lats, lon, lat):
+def get_idx(lons, lats, lon, lat) -> tuple[int, int]:
     """Return the grid points closest to this point"""
     dist = ((lons - lon) ** 2 + (lats - lat) ** 2) ** 0.5
     return np.unravel_index(dist.argmin(), dist.shape)
@@ -74,10 +74,10 @@ def main():
     """Go Main Go"""
     with get_sqlalchemy_conn("postgis") as conn:
         cdf = pd.read_sql(
-            """SELECT ST_x(ST_centroid(the_geom)) as lon,
+            sql_helper("""SELECT ST_x(ST_centroid(the_geom)) as lon,
             ST_y(ST_centroid(the_geom)) as lat
             from uscounties WHERE state_name = 'Iowa'
-        """,
+        """),
             conn,
             index_col=None,
         )

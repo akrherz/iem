@@ -42,6 +42,9 @@ $tzdict = array(
     "CST" => 21600, "MDT" => 21600, "MST" => 25200, "PDT" => 25200,
     "PST" => 28800
 );
+if (!array_key_exists($tz, $tzdict)) {
+    xssafe("<script>");
+}
 
 $tzoff = $tzdict[$tz];
 $filter = get_int404("filter", 0);
