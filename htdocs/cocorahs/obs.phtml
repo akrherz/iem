@@ -13,6 +13,9 @@ $station = isset($_GET["station"]) ? xssafe($_GET["station"]) : "";
 $network = isset($_GET["network"]) ? xssafe($_GET["network"]) : "IA_COCORAHS";
 $date = isset($_GET["date"]) ? substr(xssafe($_GET["date"]), 0, 10) : date("Y-m-d");
 $sortvar = isset($_GET["sortvar"]) ? substr(xssafe($_GET["sortvar"]), 0, 10) : "precip";
+if ($sortvar == "pday") $sortvar = "precip";
+$opts = Array("precip", "snow", "snowd", "station");
+if (!in_array($sortvar, $opts)) $sortvar = "precip";
 $year = isset($_GET["year"]) ? substr(xssafe($_GET["year"]), 0, 4) : date("Y");
 $sortdir = "ASC";
 if (

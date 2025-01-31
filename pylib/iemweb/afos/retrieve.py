@@ -72,10 +72,9 @@ from io import BytesIO, StringIO
 from typing import Optional, Union
 
 from pydantic import Field, field_validator
-from pyiem.database import get_dbconn, get_sqlalchemy_conn
+from pyiem.database import get_sqlalchemy_conn, sql_helper
 from pyiem.util import html_escape, utc
 from pyiem.webutil import CGIModel, ListOrCSVType, iemapp
-from sqlalchemy import text
 
 WARPIL = "FLS FFS AWW TOR SVR FFW SVS LSR SPS WSW FFA WCN NPW".split()
 AVIATION_AFD = re.compile(r"^\.AVIATION[\s\.]", re.IGNORECASE | re.MULTILINE)
@@ -199,18 +198,17 @@ def zip_handler(cursor):
     return [bio.getvalue()]
 
 
-def special_metar_logic(pils, limit, fmt, sio, order):
-    access = get_dbconn("iem")
-    cursor = access.cursor()
-    # skipcq
-    sql = (
+def special_metar_logic(conn, pils, limit, fmt, sio, order):
+    """Special METAR logic."""
+    params = {"pil": pils[0][3:].strip(), "limit": limit}
+    sql = sql_helper(
         "SELECT raw from current_log c JOIN stations t on "
-        "(t.iemid = c.iemid) WHERE raw != '' and "
-        f"id = '{pils[0][3:].strip()}' "
-        f"ORDER by valid {order} LIMIT {limit}"
+        "(t.iemid = c.iemid) WHERE raw != '' and id = :pil "
+        "ORDER by valid {order} LIMIT :limit",
+        order=order,
     )
-    cursor.execute(sql)
-    for row in cursor:
+    res = conn.execute(sql, params)
+    for row in res:
         if fmt == "html":
             sio.write("<pre>\n")
         else:
@@ -223,10 +221,8 @@ def special_metar_logic(pils, limit, fmt, sio, order):
             sio.write("</pre>\n")
         else:
             sio.write("\003\n")
-    if cursor.rowcount == 0:
+    if res.rowcount == 0:
         sio.write(f"ERROR: METAR lookup for {pils[0][3:].strip()} failed")
-    cursor.close()
-    access.close()
     return [sio.getvalue().encode("ascii", "ignore")]
 
 
@@ -294,7 +290,10 @@ def application(environ, start_response):
 
     sio = StringIO()
     if pils[0][:3] == "MTR":
-        return special_metar_logic(pils, environ["limit"], fmt, sio, order)
+        with get_sqlalchemy_conn("iem") as conn:
+            return special_metar_logic(
+                conn, pils, environ["limit"], fmt, sio, order
+            )
 
     params = {
         "pils": pils,
@@ -313,12 +312,16 @@ def application(environ, start_response):
             # There's a database index on this
             plimit = " substr(pil, 1, 3) = :pil "
     # skipcq
-    sql = (
+    sql = sql_helper(
         "SELECT data, pil, "
         "to_char(entered at time zone 'UTC', 'YYYYMMDDHH24MI') as ts "
-        f"from products WHERE {plimit} "
-        f"and entered >= :sdate and entered <= :edate {centerlimit} "
-        f"{ttlimit} ORDER by entered {order} LIMIT :limit"
+        "from products WHERE {plimit} "
+        "and entered >= :sdate and entered <= :edate {centerlimit} "
+        "{ttlimit} ORDER by entered {order} LIMIT :limit",
+        plimit=plimit,
+        centerlimit=centerlimit,
+        ttlimit=ttlimit,
+        order=order,
     )
     # Query optimization when sdate is very old and perhaps we could reach
     # the limit by looking at the last 31 days of data
@@ -330,7 +333,7 @@ def application(environ, start_response):
     with get_sqlalchemy_conn("afos") as conn:
         for sdate in sdates:
             params["sdate"] = sdate
-            cursor = conn.execute(text(sql), params)
+            cursor = conn.execute(sql, params)
             if cursor.rowcount == environ["limit"]:
                 break
 
