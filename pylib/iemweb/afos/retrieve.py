@@ -72,7 +72,7 @@ from io import BytesIO, StringIO
 from typing import Optional, Union
 
 from pydantic import Field, field_validator
-from pyiem.database import get_dbconn, get_sqlalchemy_conn, sql_helper
+from pyiem.database import get_sqlalchemy_conn, sql_helper
 from pyiem.util import html_escape, utc
 from pyiem.webutil import CGIModel, ListOrCSVType, iemapp
 
@@ -198,18 +198,17 @@ def zip_handler(cursor):
     return [bio.getvalue()]
 
 
-def special_metar_logic(pils, limit, fmt, sio, order):
-    access = get_dbconn("iem")
-    cursor = access.cursor()
-    # skipcq
-    sql = (
+def special_metar_logic(conn, pils, limit, fmt, sio, order):
+    """Special METAR logic."""
+    params = {"pil": pils[0][3:].strip(), "limit": limit}
+    sql = sql_helper(
         "SELECT raw from current_log c JOIN stations t on "
-        "(t.iemid = c.iemid) WHERE raw != '' and "
-        f"id = '{pils[0][3:].strip()}' "
-        f"ORDER by valid {order} LIMIT {limit}"
+        "(t.iemid = c.iemid) WHERE raw != '' and id = :pil "
+        "ORDER by valid {order} LIMIT :limit",
+        order=order,
     )
-    cursor.execute(sql)
-    for row in cursor:
+    res = conn.execute(sql, params)
+    for row in res:
         if fmt == "html":
             sio.write("<pre>\n")
         else:
@@ -222,10 +221,8 @@ def special_metar_logic(pils, limit, fmt, sio, order):
             sio.write("</pre>\n")
         else:
             sio.write("\003\n")
-    if cursor.rowcount == 0:
+    if res.rowcount == 0:
         sio.write(f"ERROR: METAR lookup for {pils[0][3:].strip()} failed")
-    cursor.close()
-    access.close()
     return [sio.getvalue().encode("ascii", "ignore")]
 
 
@@ -293,7 +290,10 @@ def application(environ, start_response):
 
     sio = StringIO()
     if pils[0][:3] == "MTR":
-        return special_metar_logic(pils, environ["limit"], fmt, sio, order)
+        with get_sqlalchemy_conn("iem") as conn:
+            return special_metar_logic(
+                conn, pils, environ["limit"], fmt, sio, order
+            )
 
     params = {
         "pils": pils,
