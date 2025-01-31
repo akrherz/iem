@@ -17,10 +17,9 @@ import calendar
 from datetime import datetime, timedelta
 
 import pandas as pd
-from pyiem.database import get_sqlalchemy_conn
+from pyiem.database import get_sqlalchemy_conn, sql_helper
 from pyiem.exceptions import NoDataFound
 from pyiem.plot import figure
-from sqlalchemy import text
 
 from iemweb.autoplot import ARG_STATION
 from iemweb.util import month2months
@@ -99,8 +98,8 @@ def plotter(ctx: dict):
     sorder = "ASC" if varname in ["min_greatest_low"] else "DESC"
     with get_sqlalchemy_conn("coop") as conn:
         df = pd.read_sql(
-            text(
-                f"""WITH data as (
+            sql_helper(
+                """WITH data as (
             SELECT month, day, day - ':days days'::interval as start_date,
             count(*) OVER (ORDER by day ASC ROWS BETWEEN :days preceding and
             current row) as count,
@@ -117,7 +116,9 @@ def plotter(ctx: dict):
             extract(month from start_date) = ANY(:months) and count = :d2 and
             {varname} is not null
             ORDER by {varname} {sorder} LIMIT 10
-            """
+            """,
+                varname=varname,
+                sorder=sorder,
             ),
             conn,
             params={

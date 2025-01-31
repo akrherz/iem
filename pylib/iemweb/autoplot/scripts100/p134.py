@@ -19,10 +19,9 @@ import numpy as np
 import pandas as pd
 from matplotlib.colorbar import ColorbarBase
 from matplotlib.ticker import MaxNLocator
-from pyiem.database import get_sqlalchemy_conn
+from pyiem.database import get_sqlalchemy_conn, sql_helper
 from pyiem.exceptions import NoDataFound
 from pyiem.plot import figure, get_cmap, pretty_bins
-from sqlalchemy import text
 
 PDICT = {
     "coldest_temp": "Coldest Average Temperature",
@@ -113,8 +112,8 @@ def get_data(ctx):
         stationcol = "iemid"
     with get_sqlalchemy_conn(dbname) as conn:
         df = pd.read_sql(
-            text(
-                f"""
+            sql_helper(
+                """
         WITH data as (
         SELECT day,
         extract(year from day + ':offset months'::interval) as season,
@@ -181,7 +180,17 @@ def get_data(ctx):
         avg_temp, avg_hitemp, avg_lotemp, avg_hidwpf, avg_lodwpf,
         avg_lofeel, avg_hifeel,
         sum_precip from agg1 where {varname}_rank = 1 and count > 200
-        """
+        """,
+                highcol=highcol,
+                lowcol=lowcol,
+                highdwpf=highdwpf,
+                lowdwpf=lowdwpf,
+                highfeel=highfeel,
+                lowfeel=lowfeel,
+                precipcol=precipcol,
+                table=table,
+                stationcol=stationcol,
+                varname=varname,
             ),
             conn,
             params={"days": days - 1, "offset": offset, "station": station},
@@ -215,6 +224,8 @@ def plotter(ctx: dict):
     cmap = get_cmap(ctx["cmap"])
     minval = df[XREF[varname]].min() - 1.0
     maxval = df[XREF[varname]].max() + 1.0
+    if pd.isnull(minval) or pd.isnull(maxval):
+        raise NoDataFound("No data found for this station!")
     if varname in ["wettest", "driest"]:
         ramp = pretty_bins(max(0, minval), maxval)
     else:
