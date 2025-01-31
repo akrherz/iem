@@ -238,7 +238,7 @@ def load_data(ctx: dict, basets: datetime, endts: datetime):
     ]
     if ctx["coop"] == "yes" or ctx["v"] == "ice":
         with get_sqlalchemy_conn("iem") as conn:
-            df2: gpd.GeoDataFrame = gpd.read_postgis(
+            coopdf: gpd.GeoDataFrame = gpd.read_postgis(
                 sql_helper(
                     """SELECT state, wfo, id as nwsli,
                 sum(snow) as val, ST_x(geom) as lon, ST_y(geom) as lat,
@@ -260,10 +260,11 @@ def load_data(ctx: dict, basets: datetime, endts: datetime):
                 index_col=None,
                 geom_col="geo",
             )
-        df2[USEME] = True
-        df2["plotme"] = True
-        df2["source"] = "COOP"
-        df = pd.concat([df, df2], ignore_index=True, sort=False)
+        if not coopdf.empty:
+            coopdf[USEME] = True
+            coopdf["plotme"] = True
+            coopdf["source"] = "COOP"
+            df = pd.concat([df, coopdf], ignore_index=True, sort=False)
     if ctx["cocorahs"] == "yes":
         with get_sqlalchemy_conn("coop") as conn:
             cocodf: gpd.GeoDataFrame = gpd.read_postgis(

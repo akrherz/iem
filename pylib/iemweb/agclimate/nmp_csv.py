@@ -9,7 +9,7 @@ from io import StringIO
 import numpy as np
 import pandas as pd
 from metpy.units import units
-from pyiem.database import get_sqlalchemy_conn
+from pyiem.database import get_sqlalchemy_conn, sql_helper
 from pyiem.network import Table as NetworkTable
 from pyiem.reference import ISO8601
 from pyiem.util import convert_value
@@ -119,7 +119,8 @@ def use_table(sio):
     table = f"sm_minute_{datetime.now().year}"
     with get_sqlalchemy_conn("isuag") as conn:
         obsdf = pd.read_sql(
-            f"""
+            sql_helper(
+                """
             WITH latest as (
                 SELECT station, valid,
                 row_number() OVER (PARTITION by station ORDER by valid DESC)
@@ -133,6 +134,8 @@ def use_table(sio):
             from {table} s, agg a WHERE s.station = a.station
             and s.valid > (a.valid - '1 hour'::interval) and s.valid <= a.valid
             """,
+                table=table,
+            ),
             conn,
             index_col=None,
         )

@@ -72,10 +72,9 @@ from io import BytesIO, StringIO
 from typing import Optional, Union
 
 from pydantic import Field, field_validator
-from pyiem.database import get_dbconn, get_sqlalchemy_conn
+from pyiem.database import get_dbconn, get_sqlalchemy_conn, sql_helper
 from pyiem.util import html_escape, utc
 from pyiem.webutil import CGIModel, ListOrCSVType, iemapp
-from sqlalchemy import text
 
 WARPIL = "FLS FFS AWW TOR SVR FFW SVS LSR SPS WSW FFA WCN NPW".split()
 AVIATION_AFD = re.compile(r"^\.AVIATION[\s\.]", re.IGNORECASE | re.MULTILINE)
@@ -313,12 +312,16 @@ def application(environ, start_response):
             # There's a database index on this
             plimit = " substr(pil, 1, 3) = :pil "
     # skipcq
-    sql = (
+    sql = sql_helper(
         "SELECT data, pil, "
         "to_char(entered at time zone 'UTC', 'YYYYMMDDHH24MI') as ts "
-        f"from products WHERE {plimit} "
-        f"and entered >= :sdate and entered <= :edate {centerlimit} "
-        f"{ttlimit} ORDER by entered {order} LIMIT :limit"
+        "from products WHERE {plimit} "
+        "and entered >= :sdate and entered <= :edate {centerlimit} "
+        "{ttlimit} ORDER by entered {order} LIMIT :limit",
+        plimit=plimit,
+        centerlimit=centerlimit,
+        ttlimit=ttlimit,
+        order=order,
     )
     # Query optimization when sdate is very old and perhaps we could reach
     # the limit by looking at the last 31 days of data
@@ -330,7 +333,7 @@ def application(environ, start_response):
     with get_sqlalchemy_conn("afos") as conn:
         for sdate in sdates:
             params["sdate"] = sdate
-            cursor = conn.execute(text(sql), params)
+            cursor = conn.execute(sql, params)
             if cursor.rowcount == environ["limit"]:
                 break
 
