@@ -11,7 +11,7 @@ from zoneinfo import ZoneInfo
 import httpx
 import pandas as pd
 from paste.request import get_cookie_dict
-from pyiem.database import get_dbconnc, get_sqlalchemy_conn
+from pyiem.database import get_dbconnc, get_sqlalchemy_conn, sql_helper
 from pyiem.exceptions import BadWebRequest
 from pyiem.htmlgen import make_select, station_select
 from pyiem.nws.vtec import VTEC_PHENOMENA, VTEC_SIGNIFICANCE
@@ -19,7 +19,6 @@ from pyiem.reference import SECTORS_NAME, state_names
 from pyiem.templates.iem import TEMPLATE
 from pyiem.util import LOG, html_escape, utc
 from pyiem.webutil import ensure_list, iemapp
-from sqlalchemy import text
 
 from iemweb.autoplot import FEMA_REGIONS
 from iemweb.autoplot import data as autoplot_data
@@ -845,12 +844,13 @@ plot type.</p>
             params["fe"] = res["frontend"]
         # careful here as we use US Central Time for dates
         df = pd.read_sql(
-            text(
+            sql_helper(
                 "select date(valid at time zone 'America/Chicago') as dt, "
                 "title from feature "
                 "WHERE (substr(appurl, 1, 14) = '/plotting/auto' and "
-                f" appurl ~* :appurl) {extra} and valid < now() "
-                "ORDER by valid DESC"
+                " appurl ~* :appurl) {extra} and valid < now() "
+                "ORDER by valid DESC",
+                extra=extra,
             ),
             conn,
             params=params,

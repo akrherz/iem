@@ -8,10 +8,9 @@ greater than air temperature and wind chill less than air temperature.
 
 import numpy as np
 import pandas as pd
-from pyiem.database import get_sqlalchemy_conn
+from pyiem.database import get_sqlalchemy_conn, sql_helper
 from pyiem.exceptions import NoDataFound
 from pyiem.plot import figure
-from sqlalchemy import text
 
 from iemweb.util import month2months
 
@@ -78,15 +77,16 @@ def plotter(ctx: dict):
     additive = "feel < tmpf" if ctx["var"] == "wcht" else "feel > tmpf"
     with get_sqlalchemy_conn("asos") as conn:
         df = pd.read_sql(
-            text(
-                f"""
+            sql_helper(
+                """
             SELECT extract(year from valid + ':offset months'::interval)
                 as year,
             min(feel) as min_feel, max(feel) as max_feel
             from alldata WHERE station = :station and {additive}
             and extract(month from valid) = ANY(:months)
             GROUP by year ORDER by year ASC
-        """
+        """,
+                additive=additive,
             ),
             conn,
             params={

@@ -11,11 +11,10 @@ are colorized as green for improvements and red for degradations.
 from datetime import date, timedelta
 
 import pandas as pd
-from pyiem.database import get_sqlalchemy_conn
+from pyiem.database import get_sqlalchemy_conn, sql_helper
 from pyiem.exceptions import NoDataFound
 from pyiem.plot import MapPlot
 from pyiem.reference import state_names
-from sqlalchemy import text
 
 
 def get_description():
@@ -55,14 +54,16 @@ def get_description():
 def compute(state, sdate, edate, days):
     """Compute the statistic."""
     # Do we need magic 1 Jan logic?
+    table = f"alldata_{state.lower()}"
     with get_sqlalchemy_conn("coop") as conn:
         df = pd.read_sql(
-            text(f"""
+            sql_helper(
+                """
             WITH obs as (
                 SELECT station, day, sday,
                 sum(precip) OVER (PARTITION by station ORDER by day ASC
                 ROWS between :days PRECEDING AND CURRENT ROW) from
-                alldata_{state} WHERE
+                {table} WHERE
                 substr(station, 3, 1) not in ('C', 'D', 'T')
                 and station != :statewide
             ), datum as (
@@ -81,7 +82,9 @@ def compute(state, sdate, edate, days):
             select a.*, st_x(t.geom) as lon, st_y(t.geom) as lat
             from agg2 a JOIN stations t on (a.station = t.id) WHERE
             t.network = :network
-            """),
+            """,
+                table=table,
+            ),
             conn,
             params={
                 "statewide": f"{state}0000",

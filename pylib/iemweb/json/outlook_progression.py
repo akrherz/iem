@@ -49,12 +49,10 @@ from io import BytesIO
 import geopandas as gpd
 import pandas as pd
 from pydantic import Field
-from pyiem.database import get_sqlalchemy_conn
+from pyiem.database import get_sqlalchemy_conn, sql_helper
 from pyiem.reference import ISO8601
 from pyiem.util import utc
 from pyiem.webutil import CGIModel, iemapp
-from shapely.geometry import Point
-from sqlalchemy import text
 
 
 class Schema(CGIModel):
@@ -94,11 +92,13 @@ def dowork(environ: dict) -> pd.DataFrame:
         "outlook_type": environ["outlook_type"],
         "sts": environ["valid"],
         "ets": environ["valid"] + timedelta(days=1),
+        "lon": environ["lon"],
+        "lat": environ["lat"],
     }
     with get_sqlalchemy_conn("postgis") as conn:
         # Figure out the outlooks for this date
         domain = pd.read_sql(
-            text("""
+            sql_helper("""
         select day, cycle, issue, expire, product_issue from spc_outlook
         where issue > :sts and issue < :ets and outlook_type = :outlook_type
         order by product_issue asc
@@ -111,14 +111,20 @@ def dowork(environ: dict) -> pd.DataFrame:
             if environ["outlook_type"] != "F"
             else "FIRE WEATHER CATEGORICAL"
         )
-        # At the moment, something is messed up with postgis st_contains perf
+        # For reasons I can not figure out, postgresql would not pick the
+        # date index first, which would is orders of magnitude faster, so
+        # instead we do a CTE and OFFSET 0 to disable inlining.
         outlooks = gpd.read_postgis(
-            text("""
-        select o.day, o.geom, o.cycle, o.category, o.issue, o.expire,
-        o.product_issue, o.threshold
-        from spc_outlooks o
-        where outlook_type = :outlook_type
-        and issue > :sts and issue < :ets
+            sql_helper("""
+        with data as (
+            select o.day, o.geom, o.cycle, o.category, o.issue, o.expire,
+            o.product_issue, o.threshold
+            from spc_outlooks o
+            where outlook_type = :outlook_type
+            and issue > :sts and issue < :ets
+            OFFSET 0
+        )
+        select * from data where st_contains(geom, ST_Point(:lon, :lat, 4326))
         order by product_issue asc, category asc
         """),
             conn,
@@ -127,10 +133,6 @@ def dowork(environ: dict) -> pd.DataFrame:
         )
     if domain.empty:
         return outlooks
-    # Now we need to filter down to the ones that contain the point
-    outlooks = outlooks[
-        outlooks.geometry.contains(Point((environ["lon"], environ["lat"])))
-    ]
     # Now we need to merge the domain into the outlooks
     rows = []
     for _, row in domain.iterrows():
