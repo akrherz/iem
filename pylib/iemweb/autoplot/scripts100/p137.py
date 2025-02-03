@@ -12,7 +12,7 @@ from datetime import date, timedelta
 
 import matplotlib.dates as mdates
 import pandas as pd
-from pyiem.database import get_sqlalchemy_conn
+from pyiem.database import get_sqlalchemy_conn, sql_helper
 from pyiem.exceptions import NoDataFound
 from pyiem.plot import figure
 from scipy import stats
@@ -53,28 +53,28 @@ def plotter(ctx: dict):
     with get_sqlalchemy_conn("coop") as conn:
         # Have to do a redundant query to get the running values
         obs = pd.read_sql(
-            """
+            sql_helper("""
         WITH trail as (
             SELECT day, year,
             avg((high+low)/2.) OVER (ORDER by day ASC ROWS 91 PRECEDING)
-            as avgt from alldata WHERE station = %s)
+            as avgt from alldata WHERE station = :station)
 
-        SELECT day, avgt from trail WHERE year between %s and %s
+        SELECT day, avgt from trail WHERE year between :y1 and :y2
         ORDER by day ASC
-        """,
+        """),
             conn,
-            params=(station, year, year + 2),
+            params={"station": station, "y1": year, "y2": year + 2},
             index_col="day",
         )
     if obs.empty:
         raise NoDataFound("No Data Found.")
     with get_sqlalchemy_conn("coop") as conn:
         df = pd.read_sql(
-            """
+            sql_helper("""
         WITH trail as (
             SELECT day, year,
             avg((high+low)/2.) OVER (ORDER by day ASC ROWS 91 PRECEDING)
-            as avgt from alldata WHERE station = %s),
+            as avgt from alldata WHERE station = :station),
         extremes as (
             SELECT day, year, avgt,
             rank() OVER (PARTITION by year ORDER by avgt ASC) as minrank,
@@ -91,9 +91,9 @@ def plotter(ctx: dict):
         extract(doy from winter_end)::int as winter_end_doy,
         extract(doy from summer_end)::int as summer_end_doy
         from yearmax x JOIN yearmin n on (x.year = n.year) ORDER by x.year ASC
-        """,
+        """),
             conn,
-            params=(station,),
+            params={"station": station},
             index_col="year",
         )
     # Throw out spring of the first year
@@ -138,22 +138,22 @@ def plotter(ctx: dict):
             continue
         dt = df.at[yr, "winter_end"]
         val = df.at[yr, "winter"]
-        if dt is not None:
+        if pd.notna(dt):
             ax[0].text(
                 dt,
                 val - 1,
-                r"%s %.1f$^\circ$F" % (dt.strftime("%-d %b"), val),
+                f"{dt:%-d %b} {val:.1f}" r"$^\circ$F",
                 ha="center",
                 va="top",
                 bbox=dict(color="white", boxstyle="square,pad=0"),
             )
         dt = df.at[yr, "summer_end"]
         val = df.at[yr, "summer"]
-        if dt is not None:
+        if pd.notna(dt):
             ax[0].text(
                 dt,
                 val + 1,
-                r"%s %.1f$^\circ$F" % (dt.strftime("%-d %b"), val),
+                f"{dt:%-d %b} {val:.1f}" r"$^\circ$F",
                 ha="center",
                 va="bottom",
                 bbox=dict(color="white", boxstyle="square,pad=0"),
