@@ -63,6 +63,9 @@ $interval = get_int404("interval", 5);
 $frames = get_int404("frames", 10);
 $warngeo = isset($_GET["warngeo"]) ? xssafe($_GET["warngeo"]) : "both";
 $ar = explode("x", $imgsize);
+if (count($ar) != 2) {
+    xssafe("<script>");
+}
 $width = $ar[0];
 $height = $ar[1];
 

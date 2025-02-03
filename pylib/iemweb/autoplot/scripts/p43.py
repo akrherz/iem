@@ -11,7 +11,7 @@ import matplotlib.dates as mdates
 import pandas as pd
 from matplotlib import ticker
 from metpy.units import units
-from pyiem.database import get_sqlalchemy_conn
+from pyiem.database import get_sqlalchemy_conn, sql_helper
 from pyiem.exceptions import NoDataFound
 from pyiem.plot import figure
 from pyiem.plot.use_agg import plt
@@ -85,16 +85,16 @@ def get_data(network: str, station, tzname, sdate) -> pd.DataFrame:
     if sdate is None:
         with get_sqlalchemy_conn("iem") as conn:
             df = pd.read_sql(
-                """
+                sql_helper("""
                 SELECT tmpf, dwpf, sknt, gust, drct, skyc1, skyc2, skyc3,
                 skyc4, skyl1, skyl2, skyl3, skyl4, vsby, alti,
                 valid at time zone 'UTC' as utc_valid
                 from current_log c JOIN stations t ON (t.iemid = c.iemid)
-                WHERE t.network = %s and t.id = %s and
+                WHERE t.network = :network and t.id = :station and
                 valid > now() - '4 days'::interval ORDER by valid ASC
-            """,
+            """),
                 conn,
-                params=(network, station),
+                params={"network": network, "station": station},
                 index_col="utc_valid",
             )
         return df
@@ -108,15 +108,16 @@ def get_data(network: str, station, tzname, sdate) -> pd.DataFrame:
     if network.endswith("ASOS"):
         with get_sqlalchemy_conn("asos") as conn:
             df = pd.read_sql(
-                """
+                sql_helper("""
                 SELECT tmpf, dwpf, sknt, gust, drct, skyc1, skyc2, skyc3,
                 skyc4, skyl1, skyl2, skyl3, skyl4, vsby, alti,
                 valid at time zone 'UTC' as utc_valid
-                from alldata WHERE station = %s and valid >= %s and valid < %s
+                from alldata WHERE station = :station and
+                valid >= :sts and valid < :ets
                 ORDER by valid ASC
-            """,
+            """),
                 conn,
-                params=(station, sts, ets),
+                params={"station": station, "sts": sts, "ets": ets},
                 index_col="utc_valid",
             )
         return df
@@ -152,6 +153,8 @@ def plotter(ctx: dict):
             return None
         pos = c.index("OVC")
         larr = [row["skyl1"], row["skyl2"], row["skyl3"], row["skyl4"]]
+        if pd.isnull(larr[pos]):
+            return None
         return larr[pos] / 1000.0
 
     df["ceiling"] = df.apply(ceilingfunc, axis=1)

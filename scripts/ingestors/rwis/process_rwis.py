@@ -396,6 +396,8 @@ def main():
         return
     # Ensure SENSOR_ID is valid
     surface = surface[surface["SENSOR_ID"].notna()]
+    # Dedup
+    surface = surface.groupby(["NWS_ID", "SENSOR_ID"]).first().reset_index()
     obs = merge(atmos, surface)
     do_iemtracker(obs)
     # Remove back out those stations that are offline
