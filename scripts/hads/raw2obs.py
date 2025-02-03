@@ -3,13 +3,12 @@
 called from RUN_MIDNIGHT.sh
 """
 
-from datetime import date, datetime, timedelta
+from datetime import date, datetime, timedelta, timezone
 from io import StringIO
-from zoneinfo import ZoneInfo
 
 import click
 import pandas as pd
-from pyiem.database import get_dbconn, get_sqlalchemy_conn
+from pyiem.database import get_dbconn, get_sqlalchemy_conn, sql_helper
 from pyiem.util import convert_value, logger
 
 LOG = logger()
@@ -26,18 +25,21 @@ def do(ts: date):
     """Do a UTC date's worth of data"""
     pgconn = get_dbconn("hads")
     table = ts.strftime("raw%Y_%m")
-    sts = datetime(ts.year, ts.month, ts.day).replace(tzinfo=ZoneInfo("UTC"))
+    sts = datetime(ts.year, ts.month, ts.day, tzinfo=timezone.utc)
     ets = sts + timedelta(hours=24)
     with get_sqlalchemy_conn("hads") as conn:
         df = pd.read_sql(
-            f"""
+            sql_helper(
+                f"""
             SELECT station, valid, substr(key, 1, 3) as vname, value
-            from {table} WHERE valid >= %s and valid < %s and
+            from {table} WHERE valid >= :sts and valid < :ets and
             substr(key, 1, 3) in ('USI', 'UDI', 'TAI', 'TDI')
             and value > -999
         """,
+                table=table,
+            ),
             conn,
-            params=(sts, ets),
+            params={"sts": sts, "ets": ets},
             index_col=None,
         )
     if df.empty:
@@ -66,7 +68,9 @@ def do(ts: date):
         )
     cursor = pgconn.cursor()
     cursor.execute(
-        f"DELETE from {table} WHERE valid between %s and %s", (sts, ets)
+        f"DELETE from {table} WHERE "  # skipcq
+        "valid between %s and %s",
+        (sts, ets),
     )
     data.seek(0)
     sql = (

@@ -18,16 +18,16 @@ set DEVICE="GIF|temps.gif"
 
 
 $GEMEXE/sfmap << EOF > /tmp/TEMPS_plot_sfmap.out
-	AREA    = 40.25;-97;43.75;-90
-	GAREA    = 40.25;-97;43.75;-90
- 	SATFIL   =  
-	RADFIL   =  
-	SFPARM   =  tmpf<120
-	COLORS   =  2
- 	DATTIM   =  ${date}/${hh}
- 	SFFILE   =  /mesonet/data/gempak/sao/${date}_sao.gem
-	MAP      =  25//2 + 25
- 	LATLON   =  0
+    AREA    = 40.25;-97;43.75;-90
+    GAREA    = 40.25;-97;43.75;-90
+     SATFIL   =  
+    RADFIL   =  
+    SFPARM   =  tmpf<120
+    COLORS   =  2
+     DATTIM   =  ${date}/${hh}
+     SFFILE   =  /mesonet/data/gempak/sao/${date}_sao.gem
+    MAP      =  25//2 + 25
+     LATLON   =  0
         TITLE    =  32/-1/~ Temp Comparison  [ASOS red]  [RWIS blue]
         CLEAR    =  no
         PANEL    =  0
@@ -37,29 +37,29 @@ $GEMEXE/sfmap << EOF > /tmp/TEMPS_plot_sfmap.out
         TEXT     =  1/1//hw
         LUTFIL   =
         STNPLT   =
-	\$mapfil = HIPOWO.CIA + HICNUS.NWS
-	list
-	run
+    \$mapfil = HIPOWO.CIA + HICNUS.NWS
+    list
+    run
 
-	exit
+    exit
 EOF
 
 $GEMEXE/sfmap << EOF > /tmp/TEMPS_plot_sfmap2.out
-	COLORS  =  4
-	SFFILE	= /mesonet/data/gempak/rwis/${date}_rwis.gem
-	TITLE	= 0
-	MAP	= 0
-	CLEAR	= no
+    COLORS  =  4
+    SFFILE	= /mesonet/data/gempak/rwis/${date}_rwis.gem
+    TITLE	= 0
+    MAP	= 0
+    CLEAR	= no
         DEVICE   = ${DEVICE}
-	list	
-	run
+    list	
+    run
 
-	exit
+    exit
 EOF
 
 $GEMEXE/gpend
 
 if (-e temps.gif) then
- pqinsert -p "plot c 000000000000 temps.gif bogus gif" temps.gif >& /dev/null
-	rm -f temps.gif
+    pqinsert -p "plot c 000000000000 temps.gif bogus gif" temps.gif >& /dev/null
+    rm -f temps.gif
 endif

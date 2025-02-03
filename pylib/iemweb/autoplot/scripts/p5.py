@@ -8,11 +8,10 @@ import calendar
 
 import numpy as np
 import pandas as pd
-from pyiem.database import get_sqlalchemy_conn
+from pyiem.database import get_sqlalchemy_conn, sql_helper
 from pyiem.exceptions import NoDataFound
 from pyiem.plot import figure
 from pyiem.util import utc
-from sqlalchemy import text
 
 from iemweb.autoplot import ARG_STATION
 
@@ -60,7 +59,8 @@ def plotter(ctx: dict):
         orderer += " DESC"
     with get_sqlalchemy_conn("coop") as conn:
         df = pd.read_sql(
-            text(f"""
+            sql_helper(
+                """
         WITH ranks as (
             SELECT month, day, high, low, precip, snow,
             rank() OVER (
@@ -70,7 +70,9 @@ def plotter(ctx: dict):
         select month, day, to_char(day, 'Mon dd, YYYY') as dd, high, low,
         precip, snow, (high - low) as range from ranks
         WHERE rank = 1 ORDER by month ASC, day DESC
-        """),
+        """,
+                orderer=orderer,
+            ),
             conn,
             params={"station": station},
         )

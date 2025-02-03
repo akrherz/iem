@@ -7,10 +7,9 @@ climatology for the location.
 import calendar
 
 import pandas as pd
-from pyiem.database import get_sqlalchemy_conn
+from pyiem.database import get_sqlalchemy_conn, sql_helper
 from pyiem.exceptions import NoDataFound
 from pyiem.plot import figure_axes
-from sqlalchemy import text
 
 from iemweb.autoplot import ARG_STATION
 
@@ -47,7 +46,7 @@ def plotter(ctx: dict):
     station = ctx["station"]
     with get_sqlalchemy_conn("coop") as conn:
         df = pd.read_sql(
-            text("""
+            sql_helper("""
         WITH climate as (
             SELECT to_char(valid, 'mmdd') as sday, high, low from
             ncei_climate91 where station = :ncei

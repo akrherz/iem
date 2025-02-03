@@ -10,10 +10,9 @@ from datetime import date
 
 import numpy as np
 import pandas as pd
-from pyiem.database import get_sqlalchemy_conn
+from pyiem.database import get_sqlalchemy_conn, sql_helper
 from pyiem.exceptions import NoDataFound
 from pyiem.plot import figure_axes
-from sqlalchemy import text
 
 
 def get_description():
@@ -41,7 +40,7 @@ def plotter(ctx: dict):
     # Oh, the pain of floating point comparison here.
     with get_sqlalchemy_conn("asos") as conn:
         df = pd.read_sql(
-            text("""
+            sql_helper("""
         WITH obs as (
             SELECT distinct date_trunc('hour', valid) as t from alldata
             WHERE station = :station and p01i > 0.009

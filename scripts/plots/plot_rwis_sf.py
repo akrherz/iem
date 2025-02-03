@@ -3,11 +3,9 @@
 from zoneinfo import ZoneInfo
 
 import numpy as np
-from pyiem.database import get_dbconn
+from pyiem.database import get_sqlalchemy_conn, sql_helper
 from pyiem.plot import MapPlot
 from pyiem.util import utc
-
-IEM = get_dbconn("iem")
 
 
 def cln(vals):
@@ -20,21 +18,24 @@ def cln(vals):
 
 def main():
     """Do Something"""
-    cursor = IEM.cursor()
     data = []
-    cursor.execute(
-        """SELECT ST_x(geom), ST_y(geom), tsf0, tsf1, tsf2, tsf3,
-    id, rwis_subf from current c JOIN stations t on (t.iemid = c.iemid)
-    WHERE c.valid > now() - '1 hour'::interval and t.network ~* 'RWIS'"""
-    )
-    for row in cursor:
-        val = cln(row[2:6])
-        if val is None:
-            continue
-        d = dict(lat=row[1], lon=row[0], tmpf=val, id=row[6])
-        if row[7] is not None and not np.isnan(row[7]):
-            d["dwpf"] = row[7]
-        data.append(d)
+    with get_sqlalchemy_conn("iem") as conn:
+        res = conn.execute(
+            sql_helper(
+                """SELECT ST_x(geom), ST_y(geom), tsf0, tsf1, tsf2, tsf3,
+        id, rwis_subf from current c JOIN stations t on (t.iemid = c.iemid)
+        WHERE c.valid > now() - '1 hour'::interval and t.network ~* 'RWIS'
+        """
+            )
+        )
+        for row in res:
+            val = cln(row[2:6])
+            if val is None:
+                continue
+            d = dict(lat=row[1], lon=row[0], tmpf=val, id=row[6])
+            if row[7] is not None and not np.isnan(row[7]):
+                d["dwpf"] = row[7]
+            data.append(d)
 
     now = utc().astimezone(ZoneInfo("America/Chicago"))
     mp = MapPlot(
@@ -49,6 +50,7 @@ def main():
     mp.drawcounties()
     pqstr = f"plot c {utc():%Y%m%d%H%M} rwis_sf.png rwis_sf.png png"
     mp.postprocess(view=False, pqstr=pqstr)
+    mp.close()
 
 
 if __name__ == "__main__":

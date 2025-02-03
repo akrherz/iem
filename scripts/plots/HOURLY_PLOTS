@@ -1,5 +1,4 @@
 #!/bin/csh -f
-# Run once hourly, I believe, all of this needs to go at some point.
 
 set ftime="`date -u +'%Y%m%d%H'`00"
 

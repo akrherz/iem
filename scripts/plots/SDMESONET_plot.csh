@@ -19,15 +19,15 @@ set AREA="42.6;-104.5;46;-96"
 
 # Now we plot
 sfmap << EOF > /tmp/SDMESONET_sfmap.out
-	AREA    = ${AREA}
-	GAREA    = ${AREA}
- 	SATFIL   =  
-	RADFIL   =  
-	SFPARM   =  skyc:.6;tmpf<120;wsym:1.2:2;alti;;dwpf<120;;;;brbk:1:1:231
-	COLORS   =  32;2;32;0;4;32
- 	DATTIM   =  ${date}/${hh}
- 	SFFILE   =  /mesonet/data/gempak/meso/${date}_meso.gem
- 	LATLON   =  0
+    AREA    = ${AREA}
+    GAREA    = ${AREA}
+     SATFIL   =  
+    RADFIL   =  
+    SFPARM   =  skyc:.6;tmpf<120;wsym:1.2:2;alti;;dwpf<120;;;;brbk:1:1:231
+    COLORS   =  32;2;32;0;4;32
+     DATTIM   =  ${date}/${hh}
+     SFFILE   =  /mesonet/data/gempak/meso/${date}_meso.gem
+     LATLON   =  0
         TITLE    =  32/-1/GMT: ~ South Dakota Mesonet Data
         CLEAR    =  yes
         PANEL    =  0
@@ -37,12 +37,12 @@ sfmap << EOF > /tmp/SDMESONET_sfmap.out
         TEXT     =  1/1//hw
         LUTFIL   =
         STNPLT   =
-	MAP	= 25 + 25//2
-	\$MAPFIL = HICNUS.NWS + hipowo.cia
-	list
-	run
+    MAP	= 25 + 25//2
+    \$MAPFIL = HICNUS.NWS + hipowo.cia
+    list
+    run
 
-	exit
+    exit
 EOF
 
 set gdfile="/mesonet/data/gempak/model/rap/${yyyymmddhh_1h}_rap252.gem"
@@ -51,46 +51,46 @@ set gdfile="/mesonet/data/gempak/model/rap/${yyyymmddhh_1h}_rap130.gem"
 endif
 
 gdcntr << EOF > /tmp/SDMESONET_gdcntr.out
-	GAREA    = ${AREA}
-	GDATTIM  = F001
-	GLEVEL   = 0
-	GVCORD   = NONE
-	GFUNC    = SM9S(MUL(0.01,MSLMA))
+    GAREA    = ${AREA}
+    GDATTIM  = F001
+    GLEVEL   = 0
+    GVCORD   = NONE
+    GFUNC    = SM9S(MUL(0.01,MSLMA))
 GDFILE   = $gdfile
-	CINT     = 1
-	LINE     = 4
-	MAP      = 0
-	TEXT     = 1
-	DEVICE   = ${DEVICE}
-	SATFIL   =  
-	RADFIL   =  
-	PROJ     = LCC
-	CLEAR    = no
-	PANEL	= 0
-	TITLE	= 32/-2/~ RUC2 MMSL
-	SCALE    = 0
-	LATLON   = 0
-	HILO     =  
-	HLSYM    =  
-	CLRBAR   = 1
-	CONTUR   = 3/3
-	SKIP     = 0
-	FINT     = 0
-	FLINE    = 10-20
-	CTYPE    = C
-	LUTFIL   =  
-	STNPLT   =  
-	list
-	run
+    CINT     = 1
+    LINE     = 4
+    MAP      = 0
+    TEXT     = 1
+    DEVICE   = ${DEVICE}
+    SATFIL   =  
+    RADFIL   =  
+    PROJ     = LCC
+    CLEAR    = no
+    PANEL	= 0
+    TITLE	= 32/-2/~ RUC2 MMSL
+    SCALE    = 0
+    LATLON   = 0
+    HILO     =  
+    HLSYM    =  
+    CLRBAR   = 1
+    CONTUR   = 3/3
+    SKIP     = 0
+    FINT     = 0
+    FLINE    = 10-20
+    CTYPE    = C
+    LUTFIL   =  
+    STNPLT   =  
+    list
+    run
 
-	exit
+    exit
 EOF
 
 
 ${GEMEXE}/gpend
 
 if (-e mesonet.gif) then
-  pqinsert -p "plot c 000000000000 SD/mesonet.gif bogus gif" mesonet.gif >& /dev/null
-  rm -f mesonet.gif
+    pqinsert -p "plot c 000000000000 SD/mesonet.gif bogus gif" mesonet.gif >& /dev/null
+    rm -f mesonet.gif
 endif
 

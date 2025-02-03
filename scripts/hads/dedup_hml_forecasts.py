@@ -61,7 +61,7 @@ def workflow(ts: datetime):
 
 
 @click.command()
-@click.option("--date", "dt", type=click.DateTime())
+@click.option("--date", "dt", type=click.DateTime(), required=True)
 def main(dt: datetime):
     """Go Main Go"""
     dt = dt.replace(tzinfo=timezone.utc)

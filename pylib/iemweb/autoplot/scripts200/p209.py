@@ -11,11 +11,10 @@ import matplotlib.colors as mpcolors
 import numpy as np
 import pandas as pd
 from matplotlib.colorbar import ColorbarBase
-from pyiem.database import get_sqlalchemy_conn
+from pyiem.database import get_sqlalchemy_conn, sql_helper
 from pyiem.exceptions import NoDataFound
 from pyiem.plot import figure_axes, get_cmap
 from pyiem.reference import state_names
-from sqlalchemy import text
 
 PDICT = {
     "PCT PLANTED": "Planting",
@@ -89,7 +88,7 @@ def get_data(ctx):
     }
     with get_sqlalchemy_conn("coop") as conn:
         df = pd.read_sql(
-            text("""
+            sql_helper("""
             select year, week_ending, num_value, state_alpha
             from nass_quickstats
             where commodity_desc = :cd and statisticcat_desc = 'PROGRESS'

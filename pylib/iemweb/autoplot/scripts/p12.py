@@ -12,7 +12,7 @@ from datetime import date, datetime, timedelta
 
 import numpy as np
 import pandas as pd
-from pyiem.database import get_sqlalchemy_conn
+from pyiem.database import get_sqlalchemy_conn, sql_helper
 from pyiem.exceptions import NoDataFound
 from pyiem.plot import figure_axes
 
@@ -103,36 +103,41 @@ def plotter(ctx: dict):
     (extrenum, varname, direction) = ctx["which"].split("_")
     year = ctx["year"]
 
-    op = "%s %s" % (varname, ">=" if direction == "above" else "<")
+    op = ">=" if direction == "above" else "<"
     with get_sqlalchemy_conn("coop") as conn:
         df = pd.read_sql(
-            f"""
+            sql_helper(
+                """
             with data as (
-                SELECT extract(year from day + '%s months'::interval)
+                SELECT extract(year from day + ':months months'::interval)
                     as season,
-                high, low, day from alldata WHERE station = %s
+                high, low, day from alldata WHERE station = :station
                 and day >= '1893-01-01'),
             agg1 as (
-                SELECT season - %s as season,
+                SELECT season - :soff as season,
                 count(*) as obs,
-                min(case when {op} %s then day else null end) as nday,
-                max(case when {op} %s then day else null end) as xday,
-                sum(case when {op} %s then 1 else 0 end) as count
+                min(case when {varname} {op} :thresh then day else null end)
+                    as nday,
+                max(case when {varname} {op} :thresh then day else null end)
+                    as xday,
+                sum(case when {varname} {op} :thresh then 1 else 0 end)
+                    as count
                 from data GROUP by season)
         SELECT season::int, count, obs, nday,
         extract(doy from nday) as nday_doy,
         xday, extract(doy from xday) as xday_doy from agg1
         ORDER by season ASC
         """,
-            conn,
-            params=(
-                6 if season == "winter" else 0,
-                station,
-                1 if season == "winter" else 0,
-                threshold,
-                threshold,
-                threshold,
+                op=op,
+                varname=varname,
             ),
+            conn,
+            params={
+                "months": 6 if season == "winter" else 0,
+                "station": station,
+                "soff": 1 if season == "winter" else 0,
+                "thresh": threshold,
+            },
             index_col="season",
         )
     # We need to do some magic to julian dates straight

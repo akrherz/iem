@@ -1,5 +1,7 @@
 """.. title:: Satellite Cloud Product (SCP) Request
 
+Return to `API Services </api/#cgi>`_
+
 Documentation for /cgi-bin/request/scp.py
 --------------------------------------------
 
@@ -11,17 +13,17 @@ Examples:
 
 Download all 2023 data for KBUR
 
-  https://mesonet.agron.iastate.edu/cgi-bin/request/scp.py?station=KBUR&sts=2023-01-01T00:00Z&ets=2024-01-01T00:00Z
+https://mesonet.agron.iastate.edu/cgi-bin/request/scp.py?\
+station=KBUR&sts=2023-01-01T00:00Z&ets=2024-01-01T00:00Z
 
 """
 
 from io import StringIO
 
 from pydantic import AwareDatetime, Field
-from pyiem.database import get_sqlalchemy_conn
+from pyiem.database import get_sqlalchemy_conn, sql_helper
 from pyiem.exceptions import IncompleteWebRequest
 from pyiem.webutil import CGIModel, ListOrCSVType, iemapp
-from sqlalchemy import text
 
 
 class Schema(CGIModel):
@@ -93,24 +95,25 @@ def application(environ, start_response):
     if environ["sts"] is None or environ["ets"] is None:
         raise IncompleteWebRequest("Both start and end time must be provided!")
     start_response("200 OK", [("Content-type", "text/plain")])
-    slimiter = ""
     params = {
         "sts": environ["sts"],
         "ets": environ["ets"],
         "station": environ["station"],
     }
-    if environ["station"]:
-        slimiter = "station = ANY(:station)"
+    slimiter = "station = ANY(:station)" if environ["station"] else ""
     sio = StringIO()
     sio.write("station,utc_valid,mid,high,cldtop1,cldtop2,eca,source\n")
     with get_sqlalchemy_conn("asos") as conn:
         res = conn.execute(
-            text(f"""
+            sql_helper(
+                """
             SELECT station, valid at time zone 'UTC' as utc_valid, mid, high,
             cldtop1, cldtop2, eca, source from scp_alldata
             WHERE valid >= :sts and valid < :ets and {slimiter}
             ORDER by valid ASC
-        """),
+        """,
+                slimiter=slimiter,
+            ),
             params,
         )
         for row in res:

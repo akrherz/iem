@@ -7,11 +7,10 @@ wind speed and direction.
 import numpy as np
 import pandas as pd
 from metpy.units import units
-from pyiem.database import get_sqlalchemy_conn
+from pyiem.database import get_sqlalchemy_conn, sql_helper
 from pyiem.exceptions import NoDataFound
 from pyiem.plot.windrose import WindrosePlot, histogram
 from pyiem.util import drct2text
-from sqlalchemy import text
 
 from iemweb.util import month2months
 
@@ -244,14 +243,15 @@ def add_ctx(ctx):
         title = f"Relative Humidity below {ctx['threshold']}%"
     with get_sqlalchemy_conn("asos") as conn:
         ctx["df"] = pd.read_sql(
-            text(
-                f"""
+            sql_helper(
+                """
             SELECT valid at time zone 'UTC' as valid,
             drct, sknt * 1.15 as smph from alldata
             where station = :station and {limiter} and sknt > 0
             and drct >= 0 and
             drct <= 360 and extract(month from valid) = ANY(:months)
-            """
+            """,
+                limiter=limiter,
             ),
             conn,
             params=params,

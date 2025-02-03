@@ -8,10 +8,11 @@ of days prior to that date.
 from datetime import date
 
 import pandas as pd
+from pyiem.database import get_sqlalchemy_conn, sql_helper
 from pyiem.exceptions import NoDataFound
 from pyiem.nws import vtec
 from pyiem.plot.geoplot import MapPlot
-from pyiem.util import get_dbconn, utc
+from pyiem.util import utc
 
 PDICT = {
     "yes": "Only Emergencies",
@@ -56,49 +57,56 @@ def get_description():
 def plotter(ctx: dict):
     """Go"""
     bins = [0, 1, 14, 31, 91, 182, 273, 365, 730, 1460, 2920, 3800]
-    pgconn = get_dbconn("postgis")
-    cursor = pgconn.cursor()
     phenomena = ctx["phenomena"]
     significance = ctx["significance"]
     edate = ctx.get("edate")
-    emerg_extra = ""
-    if ctx["e"] == "yes":
-        emerg_extra = " and is_emergency "
-    if edate is not None:
-        edate = utc(edate.year, edate.month, edate.day, 0, 0)
-        cursor.execute(
-            f"""
-         select wfo,  extract(days from (%s::date - max(issue))) as m,
-         max(date(issue))
-         from warnings where significance = %s and phenomena = %s
-         and issue < %s {emerg_extra}
-         GROUP by wfo ORDER by m ASC
-        """,
-            (edate, significance, phenomena, edate),
-        )
-    else:
-        cursor.execute(
-            f"""
-         select wfo,  extract(days from ('TODAY'::date - max(issue))) as m,
-         max(date(issue))
-         from warnings where significance = %s and phenomena = %s {emerg_extra}
-         GROUP by wfo ORDER by m ASC
-        """,
-            (significance, phenomena),
-        )
-        edate = utc()
+    emerg_extra = " and is_emergency " if ctx["e"] == "yes" else ""
+    with get_sqlalchemy_conn("postgis") as conn:
+        if edate is not None:
+            edate = utc(edate.year, edate.month, edate.day, 0, 0)
+            res = conn.execute(
+                sql_helper(
+                    """
+            select wfo,  extract(days from (date(:edate) - max(issue))) as m,
+            max(date(issue))
+            from warnings where significance = :sig and phenomena = :phenom
+            and issue < :edate {emerg_extra}
+            GROUP by wfo ORDER by m ASC
+            """,
+                    emerg_extra=emerg_extra,
+                ),
+                {
+                    "sig": significance,
+                    "phenom": phenomena,
+                    "edate": edate,
+                },
+            )
+        else:
+            res = conn.execute(
+                sql_helper(
+                    """
+            select wfo,  extract(days from ('TODAY'::date - max(issue))) as m,
+            max(date(issue))
+            from warnings where significance = :sig and phenomena = :phenom
+            {emerg_extra} GROUP by wfo ORDER by m ASC
+            """,
+                    emerg_extra=emerg_extra,
+                ),
+                {"sig": significance, "phenom": phenomena},
+            )
+            edate = utc()
 
-    if cursor.rowcount == 0:
-        raise NoDataFound(
-            "No Events Found for "
-            f"{vtec.get_ps_string(phenomena, significance)} "
-            f"({phenomena}.{significance})"
-        )
-    data = {}
-    rows = []
-    for row in cursor:
-        rows.append(dict(wfo=row[0], days=row[1], date_central=row[2]))
-        data[row[0]] = max([row[1], 0])
+        if res.rowcount == 0:
+            raise NoDataFound(
+                "No Events Found for "
+                f"{vtec.get_ps_string(phenomena, significance)} "
+                f"({phenomena}.{significance})"
+            )
+        data = {}
+        rows = []
+        for row in res:
+            rows.append(dict(wfo=row[0], days=row[1], date_central=row[2]))
+            data[row[0]] = max([row[1], 0])
     df = pd.DataFrame(rows)
     df = df.set_index("wfo")
 

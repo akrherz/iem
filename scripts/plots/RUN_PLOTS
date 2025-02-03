@@ -1,5 +1,3 @@
 #!/bin/csh -f
-#	RUN_PLOTS
-# These plots are run every 20 minutes
 
 python plot_rwis_sf.py

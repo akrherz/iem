@@ -10,9 +10,8 @@ from zoneinfo import ZoneInfo
 import click
 import numpy as np
 import pandas as pd
-from pyiem.database import get_dbconn, get_sqlalchemy_conn
+from pyiem.database import get_dbconn, get_sqlalchemy_conn, sql_helper
 from pyiem.util import logger, utc
-from sqlalchemy import text
 
 LOG = logger()
 
@@ -24,16 +23,18 @@ def workflow(dt: date):
     # load up the current obs
     with get_sqlalchemy_conn("iem") as conn:
         df = pd.read_sql(
-            text(f"""
+            sql_helper(
+                """
         WITH dcp as (
             SELECT id, iemid, tzname from stations where network ~* 'DCP'
             and tzname is not null
         ), obs as (
-            SELECT iemid, pday from summary_{dt:%Y}
-            WHERE day = :dt)
+            SELECT iemid, pday from {table} WHERE day = :dt)
         SELECT d.id, d.iemid, d.tzname, coalesce(o.pday, 0) as pday from
         dcp d LEFT JOIN obs o on (d.iemid = o.iemid)
-        """),
+        """,
+                table=f"summary_{dt:%Y}",
+            ),
             conn,
             params={"dt": dt},
             index_col="id",
@@ -48,11 +49,14 @@ def workflow(dt: date):
     ets = sts + timedelta(hours=48)
     with get_sqlalchemy_conn("hads") as conn:
         obsdf = pd.read_sql(
-            text(f"""
+            sql_helper(
+                """
         SELECT distinct station, valid at time zone 'UTC' as utc_valid, value
         from raw{dt:%Y} WHERE valid between :sts and :ets and
         substr(key, 1, 3) = 'PPH' and value >= 0
-        """),
+        """,
+                table=f"raw{dt:%Y}",
+            ),
             conn,
             params={"sts": sts, "ets": ets},
             index_col=None,
@@ -102,7 +106,7 @@ def workflow(dt: date):
 
 
 @click.command()
-@click.option("--date", "dt", type=click.DateTime())
+@click.option("--date", "dt", type=click.DateTime(), required=True)
 def main(dt: datetime):
     """Do Something"""
     workflow(dt.date())

@@ -6,10 +6,9 @@ Return to `API Services </api/#cgi>`_
 
 import pandas as pd
 from pydantic import Field
-from pyiem.database import get_sqlalchemy_conn
+from pyiem.database import get_sqlalchemy_conn, sql_helper
 from pyiem.util import utc
 from pyiem.webutil import CGIModel, ListOrCSVType, iemapp
-from sqlalchemy import text
 
 
 class Schema(CGIModel):
@@ -36,7 +35,7 @@ def application(environ, start_response):
     stations = environ["station"]
     with get_sqlalchemy_conn("other") as conn:
         df = pd.read_sql(
-            text(
+            sql_helper(
                 """
             select *, valid at time zone 'UTC' as utc_valid
             from flux_data where valid >= :sts and valid < :ets
