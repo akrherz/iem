@@ -42,7 +42,9 @@ def run(tmpdir, valid, routes):
             LOG.warning("missing %s, aborting GIF generation", fn)
             return
         # prevent idx file creation
-        ds = xr.open_dataset(fn, backend_kwargs={"indexpath": ""})
+        ds = xr.open_dataset(
+            fn, decode_timedelta=True, backend_kwargs={"indexpath": ""}
+        )
 
         for step, toffset in enumerate(ds.step.values):
             now = (

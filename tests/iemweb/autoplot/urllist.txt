@@ -121,6 +121,7 @@
 /plotting/auto/plot/90/t:state::v:days::ilabel:yes::geo:polygon::drawc:yes::year:2024::year2:2024::sdate:2006-01-01%200000::edate:2024-09-14%200000::network:WFO::station:DMX::state:IA::phenomena:TO::significance:W::cmap:jet::_r:t::dpi:100.png
 /plotting/auto/plot/90/t:state::v:lastyear::ilabel:yes::geo:ugc::drawc:yes::year:2024::year2:2024::sdate:2006-01-01%200000::edate:2024-09-14%200000::network:WFO::station:DMX::state:IA::phenomena:TO::significance:W::cmap:jet::_r:t::dpi:100.png
 /plotting/auto/plot/90/t:fema::v:lastyear::ilabel:yes::geo:ugc::drawc:yes::year:2024::year2:2024::sdate:2006-01-01%200000::edate:2024-09-14%200000::network:WFO::station:DMX::state:IA::fema:7::phenomena:TO::significance:W::cmap:jet::_r:t::dpi:100::_cb:1.png
+/plotting/auto/plot/92/phenomena:TO::significance:W::e:all::edate:2025-02-03::_r:t::dpi:100::_cb:1.png
 /plotting/auto/plot/93/network:IA_ASOS::zstation:DSM::syear:1973::eyear:2024::year:2024::var:gust::ytd:yes::inc:no::_r:t::dpi:100.png
 /plotting/auto/plot/93/network:IA_ASOS::zstation:DSM::syear:1973::eyear:2024::year:2024::var:dwpf_cold::ytd:yes::inc:no::_r:t::dpi:100.png
 /plotting/auto/plot/93/network:IA_ASOS::zstation:DEH::syear:1973::eyear:1993::year:2024::var:dwpf_cold::ytd:yes::inc:no::_r:t::dpi:100.png

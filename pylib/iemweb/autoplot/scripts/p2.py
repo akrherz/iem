@@ -15,7 +15,7 @@ from datetime import datetime
 
 import pandas as pd
 from matplotlib.patches import Circle
-from pyiem.database import get_sqlalchemy_conn
+from pyiem.database import get_sqlalchemy_conn, sql_helper
 from pyiem.exceptions import NoDataFound
 from pyiem.plot import figure_axes
 from scipy import stats
@@ -64,27 +64,34 @@ def plotter(ctx: dict):
 
     with get_sqlalchemy_conn("coop") as conn:
         df = pd.read_sql(
-            "SELECT year, sum(precip) as total_precip, "
-            "sum(gddxx(%s, %s, high::numeric,low::numeric)) as gdd "
-            "from alldata WHERE station = %s and month = %s GROUP by year",
+            sql_helper("""
+    SELECT year, sum(precip) as total_precip,
+    sum(gddxx(:gddbase, :gddceil, high::numeric,low::numeric)) as gdd
+    from alldata WHERE station = :station and month = :month GROUP by year
+            """),
             conn,
-            params=(ctx["gddbase"], ctx["gddceil"], station, month),
+            params={
+                "gddbase": ctx["gddbase"],
+                "gddceil": ctx["gddceil"],
+                "station": station,
+                "month": month,
+            },
             index_col="year",
         )
     if len(df.index) < 3:
         raise NoDataFound("ERROR: No Data Found")
 
-    gstats = df.gdd.describe()
-    pstats = df.total_precip.describe()
+    gstats = df["gdd"].describe()
+    pstats = df["total_precip"].describe()
     if "mean" not in pstats:
         raise NoDataFound("ERROR: No Data Found")
 
-    df["precip_sigma"] = (df.total_precip - pstats["mean"]) / pstats["std"]
-    df["gdd_sigma"] = (df.gdd - gstats["mean"]) / gstats["std"]
-    df["distance"] = (df.precip_sigma**2 + df.gdd_sigma**2) ** 0.5
+    df["precip_sigma"] = (df["total_precip"] - pstats["mean"]) / pstats["std"]
+    df["gdd_sigma"] = (df["gdd"] - gstats["mean"]) / gstats["std"]
+    df["distance"] = (df["precip_sigma"] ** 2 + df["gdd_sigma"] ** 2) ** 0.5
 
     h_slope, intercept, r_value, _, _ = stats.linregress(
-        df["gdd_sigma"], df["precip_sigma"]
+        df["gdd_sigma"].to_numpy(), df["precip_sigma"].to_numpy()
     )
 
     y1 = -4.0 * h_slope + intercept

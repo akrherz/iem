@@ -1,5 +1,4 @@
 #!/bin/csh
-# 		RELH_plot.csh
 
 source /mesonet/nawips/Gemenviron
 
@@ -16,17 +15,17 @@ set DEVICE="GIF|relh.gif"
 setenv DISPLAY localhost:1
 
 $GEMEXE/sfmap_gf << EOF > /tmp/RELH_plot_sfmap.out
-	AREA	= 40.25;-97;43.75;-90
-	GAREA	= 40.25;-97;43.75;-90
- 	SATFIL   =  
-	RADFIL   =  
+    AREA	= 40.25;-97;43.75;-90
+    GAREA	= 40.25;-97;43.75;-90
+     SATFIL   =  
+    RADFIL   =  
   CLRBAR = 
-	SFPARM   =  STID;RELH
-	COLORS   =  25;(60;80;100/32;23;2;2/RELH/L)
- 	DATTIM   =  ${date}/${hh}
- 	SFFILE   =  /mesonet/data/gempak/meso/${date}_meso.gem
-	MAP	=  25//2 + 25
- 	LATLON	=  0
+    SFPARM   =  STID;RELH
+    COLORS   =  25;(60;80;100/32;23;2;2/RELH/L)
+     DATTIM   =  ${date}/${hh}
+     SFFILE   =  /mesonet/data/gempak/meso/${date}_meso.gem
+    MAP	=  25//2 + 25
+     LATLON	=  0
         TITLE	=  32/-1/~ Relative Humidity
         CLEAR	=  no
         PANEL	=  0
@@ -36,13 +35,13 @@ $GEMEXE/sfmap_gf << EOF > /tmp/RELH_plot_sfmap.out
         TEXT	=  1
         LUTFIL	=
         STNPLT	=
-	\$mapfil = HIPOWO.CIA + HICNUS.NWS
-	list
-	run
+    \$mapfil = HIPOWO.CIA + HICNUS.NWS
+    list
+    run
 
 EOF
 
 if (-e relh.gif) then
-pqinsert -p "plot c 000000000000 relh.gif bogus gif" relh.gif >& /dev/null
-rm relh.gif
+    pqinsert -p "plot c 000000000000 relh.gif bogus gif" relh.gif >& /dev/null
+    rm relh.gif
 endif

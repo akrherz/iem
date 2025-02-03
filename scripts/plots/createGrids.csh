@@ -11,7 +11,7 @@ set hh=`date -u +%H`
 
 # First we need to delete anything out of the current Surface grid
 gddelt << EOF > /tmp/createGrids_gddelt.out
-	GDFILE	= /mesonet/data/gempak/surface50x50.grd
+    GDFILE	= /mesonet/data/gempak/surface50x50.grd
         GDATTIM = ALL
         GDNUM   = ALL
         GFUNC   = ALL
@@ -23,7 +23,7 @@ gddelt << EOF > /tmp/createGrids_gddelt.out
 
 
 
-	exit
+    exit
 EOF
 
 
@@ -49,7 +49,7 @@ oabsfc << EOF > /tmp/createGrids_oabsfc.out
         run
 
 
-	exit
+    exit
 EOF
 
 gpend

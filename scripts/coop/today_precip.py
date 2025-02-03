@@ -6,10 +6,9 @@ called from PREC.sh
 from datetime import datetime
 
 import pandas as pd
-from pyiem.database import get_sqlalchemy_conn
+from pyiem.database import get_sqlalchemy_conn, sql_helper
 from pyiem.plot import MapPlot
 from pyiem.reference import TRACE_VALUE
-from sqlalchemy import text
 
 
 def n(val):
@@ -25,7 +24,7 @@ def main():
     """Go Main Go"""
     with get_sqlalchemy_conn("iem") as conn:
         obs = pd.read_sql(
-            text("""
+            sql_helper("""
         select id, ST_x(s.geom) as lon, ST_y(s.geom) as lat, pday
         from summary c, stations s
         WHERE day = 'TODAY' and pday >= 0 and pday < 20

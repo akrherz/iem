@@ -8,10 +8,9 @@ interface.
 import json
 
 from pydantic import Field
-from pyiem.database import get_sqlalchemy_conn
+from pyiem.database import get_sqlalchemy_conn, sql_helper
 from pyiem.reference import FIGSIZES_NAMES
 from pyiem.webutil import CGIModel, iemapp
-from sqlalchemy import text
 
 from iemweb.autoplot import data as autoplot_data
 from iemweb.autoplot import import_script
@@ -27,7 +26,7 @@ def get_timing(pidx: int) -> float:
     """Return an average plot generation time for this app"""
     with get_sqlalchemy_conn("mesosite") as conn:
         res = conn.execute(
-            text(
+            sql_helper(
                 "SELECT avg(timing) from autoplot_timing where appid = :id "
                 "and valid > (now() - '7 days'::interval)"
             ),

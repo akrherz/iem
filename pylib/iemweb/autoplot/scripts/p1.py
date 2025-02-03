@@ -257,8 +257,8 @@ def plotter(ctx: dict):
         label=f"Slope={h_slope:.2f} R$^2$={r_value**2:.2f}",
     )
     ax.legend(fontsize=10)
-    xmonths = ", ".join([calendar.month_abbr[x] for x in months1])
-    ymonths = ", ".join([calendar.month_abbr[x] for x in months2])
+    xmonths = ", ".join(str(calendar.month_abbr[x]) for x in months1)
+    ymonths = ", ".join(str(calendar.month_abbr[x]) for x in months2)
     t1 = "" if varname1 not in ["days_high_aoa"] else f" {threshold:.0f}"
     t2 = "" if varname2 not in ["days_high_aoa"] else f" {threshold:.0f}"
     x = xdata.mean()

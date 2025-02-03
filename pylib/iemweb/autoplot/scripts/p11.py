@@ -10,10 +10,9 @@ from datetime import datetime, timedelta
 
 import matplotlib.dates as mdates
 import pandas as pd
-from pyiem.database import get_sqlalchemy_conn
+from pyiem.database import get_sqlalchemy_conn, sql_helper
 from pyiem.exceptions import NoDataFound
 from pyiem.plot import figure
-from sqlalchemy import text
 
 PDICT = {
     "below": "Daily Range Below Emphasis",
@@ -84,14 +83,18 @@ def plotter(ctx: dict):
     varname = ctx["var"]
     with get_sqlalchemy_conn("iem") as conn:
         df = pd.read_sql(
-            text(f"""
+            sql_helper(
+                """
             select day, max_{varname}, min_{varname}
-            from summary_{year} s JOIN stations t on (s.iemid = t.iemid)
+            from {table} s JOIN stations t on (s.iemid = t.iemid)
             where t.id = :station and t.network = :network and
             max_{varname} is not null and
             min_{varname} is not null
             ORDER by day ASC
-        """),
+        """,
+                varname=varname,
+                table=f"summary_{year}",
+            ),
             conn,
             params={"station": station, "network": ctx["network"]},
             index_col="day",

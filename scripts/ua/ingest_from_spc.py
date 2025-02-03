@@ -5,14 +5,13 @@ called from RUN_10_AFTER.sh for 00z and 12z
 """
 
 import sys
-from datetime import datetime, timedelta
+from datetime import datetime, timedelta, timezone
 from typing import Optional
-from zoneinfo import ZoneInfo
 
 import click
 import httpx
 import pandas as pd
-from pyiem.database import get_dbconn, get_sqlalchemy_conn
+from pyiem.database import get_dbconn, get_sqlalchemy_conn, sql_helper
 from pyiem.network import Table as NetworkTable
 from pyiem.util import logger
 from tqdm import tqdm
@@ -171,14 +170,17 @@ def main(valid, station):
     # check what we have
     with get_sqlalchemy_conn("raob") as conn:
         obs = pd.read_sql(
-            f"""SELECT station, locked, count(*),
+            sql_helper(
+                """SELECT station, locked, count(*),
             sum(case when smps is null then 1 else 0 end) as nullcnt from
-            raob_flights f JOIN raob_profile_{valid.year} p
-            ON (f.fid = p.fid) where valid = %s GROUP by station, locked
+            raob_flights f JOIN {table} p
+            ON (f.fid = p.fid) where valid = :valid GROUP by station, locked
             ORDER by station ASC
             """,
+                table=f"raob_profile_{valid:%Y}",
+            ),
             conn,
-            params=(valid,),
+            params={"valid": valid},
             index_col="station",
         )
     obs["added"] = 0
@@ -239,7 +241,7 @@ def main(valid, station):
 @click.option("--station", type=str, default=None)
 def frontend(valid: datetime, station: Optional[str]):
     """Figure out what we need to do here!"""
-    valid = valid.replace(tzinfo=ZoneInfo("UTC"))
+    valid = valid.replace(tzinfo=timezone.utc)
     main(valid, station)
 
 

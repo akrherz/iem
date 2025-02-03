@@ -45,8 +45,8 @@ https://mesonet.agron.iastate.edu/geojson/recent_metar.py?q=pno
 import json
 
 from pydantic import Field
+from pyiem.database import get_dbconnc
 from pyiem.reference import ISO8601, TRACE_VALUE
-from pyiem.util import get_dbconnc
 from pyiem.webutil import CGIModel, iemapp
 
 json.encoder.FLOAT_REPR = lambda o: format(o, ".2f")

@@ -159,10 +159,9 @@ def networkselect_handler(value, arg, res):
     ) + map_select_widget(arg["network"], arg["name"])
 
 
-def station_handler(value, arg, fdict, res, typ):
+def station_handler(value, arg: dict, fdict, res, typ: str):
     """Generate HTML."""
     networks = {}
-    pgconn, cursor = get_dbconnc("mesosite")
     netlim = ""
     if typ == "zstation":
         netlim = "WHERE id ~* 'ASOS'"
@@ -170,10 +169,15 @@ def station_handler(value, arg, fdict, res, typ):
         netlim = "WHERE id ~* 'CLIMATE'"
     elif typ == "sid" and not arg.get("include_climodat", False):
         netlim = "WHERE id !~* 'CLIMATE'"
-    cursor.execute(f"SELECT id, name from networks {netlim} ORDER by name ASC")
-    for row in cursor:
-        networks[row["id"]] = row["name"]
-    pgconn.close()
+    with get_sqlalchemy_conn("mesosite") as conn:
+        dbres = conn.execute(
+            sql_helper(
+                "SELECT id, name from networks {netlim} ORDER by name ASC",
+                netlim=netlim,
+            )
+        )
+        for row in dbres:
+            networks[row[0]] = row[1]
     # We could have two plus zstations
     networkcgi = "network"
     if arg["name"][-1].isdigit():
@@ -201,6 +205,7 @@ def ugc_select(state, ugc):
         ar[row["ugc"]] = (
             f"{row['name']} {'(Zone)' if row['ugc'][2] == 'Z' else ''}"
         )
+    cursor.close()
     pgconn.close()
     return make_select("ugc", ugc, ar, cssclass="iemselect2")
 

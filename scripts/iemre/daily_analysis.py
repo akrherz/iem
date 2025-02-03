@@ -17,13 +17,12 @@ import pandas as pd
 from metpy.calc import relative_humidity_from_dewpoint
 from metpy.interpolate import inverse_distance_to_grid
 from metpy.units import units
-from pyiem.database import get_sqlalchemy_conn
+from pyiem.database import get_sqlalchemy_conn, sql_helper
 from pyiem.grid.nav import get_nav
 from pyiem.grid.util import grid_smear
 from pyiem.iemre import get_grids, get_hourly_ncname, hourly_offset, set_grids
 from pyiem.util import convert_value, logger, ncopen, utc
 from scipy.stats import zscore
-from sqlalchemy import text
 
 LOG = logger()
 
@@ -209,7 +208,7 @@ def use_climodat_12z(ts, ds):
     gridnav = get_nav("iemre", "")
     with get_sqlalchemy_conn("coop") as conn:
         df = pd.read_sql(
-            text("""
+            sql_helper("""
         WITH mystations as (
             SELECT id, ST_X(geom) as lon, ST_Y(geom) as lat, state, name
             from stations where ST_Contains(
@@ -263,7 +262,8 @@ def use_asos_daily(ts, ds, domain):
     gridnav = get_nav("iemre", domain)
     with get_sqlalchemy_conn("iem") as conn:
         df = pd.read_sql(
-            text(f"""
+            sql_helper(
+                """
            SELECT ST_x(s.geom) as lon, ST_y(s.geom) as lat, s.state,
            s.name, s.id as station,
            (CASE WHEN pday >= 0 then pday else null end) as precipdata,
@@ -279,11 +279,13 @@ def use_asos_daily(ts, ds, domain):
              then min_rh else null end) as minrh,
             (CASE WHEN max_rh > 0 and max_rh < 101
              then max_rh else null end) as maxrh
-           from summary_{ts.year} c, stations s WHERE day = :ts and
+           from {table} c, stations s WHERE day = :ts and
            ST_Contains(ST_MakeEnvelope(:west, :south, :east, :north, 4326),
            geom) and s.network ~* 'ASOS'
            and c.iemid = s.iemid
-            """),
+            """,
+                table=f"summary_{ts:%Y}",
+            ),
             conn,
             params={
                 "west": gridnav.left - mybuf,
@@ -324,7 +326,7 @@ def use_climodat_daily(ts: date, ds):
     gridnav = get_nav("iemre", "")
     with get_sqlalchemy_conn("coop") as conn:
         df = pd.read_sql(
-            text("""
+            sql_helper("""
         WITH mystations as (
             SELECT id, ST_X(geom) as lon, ST_Y(geom) as lat, state, name
             from stations where ST_Contains(

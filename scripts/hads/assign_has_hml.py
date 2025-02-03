@@ -5,9 +5,8 @@ Run from RUN_0Z.sh
 
 import httpx
 import pandas as pd
-from pyiem.database import get_sqlalchemy_conn
+from pyiem.database import get_sqlalchemy_conn, sql_helper
 from pyiem.util import logger
-from sqlalchemy import text
 
 LOG = logger()
 
@@ -18,7 +17,7 @@ def deal_with_unknown(station: str):
     # 1. Is this site a COOP?
     with get_sqlalchemy_conn("mesosite") as conn:
         res = conn.execute(
-            text("""
+            sql_helper("""
             SELECT iemid, network from stations where id = :station
             and network ~* 'COOP'
         """),
@@ -40,7 +39,7 @@ def deal_with_unknown(station: str):
     with get_sqlalchemy_conn("mesosite") as conn:
         state = meta["state"]["abbreviation"]
         res = conn.execute(
-            text("""
+            sql_helper("""
             insert into stations
             (id, name, state, country, network, online, metasite,
             plot_name, geom)
@@ -59,7 +58,7 @@ def deal_with_unknown(station: str):
         iemid = res.first()[0]
         LOG.warning("Adding mesosite entry %s for %s", iemid, station)
         conn.execute(
-            text("""
+            sql_helper("""
             INSERT into station_attributes(iemid, attr, value)
             VALUES (:iemid, 'HAS_HML', '1')
             """),
@@ -72,7 +71,7 @@ def load_sites() -> pd.DataFrame:
     """Figure out what we have."""
     with get_sqlalchemy_conn("mesosite") as conn:
         df = pd.read_sql(
-            text("""
+            sql_helper("""
     SELECT id, network from stations s JOIN station_attributes a ON
     (s.iemid = a.iemid) WHERE a.attr = 'HAS_HML'
             """),
@@ -86,7 +85,7 @@ def load_obs() -> pd.DataFrame:
     """Figure out who has HML data."""
     with get_sqlalchemy_conn("hml") as conn:
         df = pd.read_sql(
-            text("""
+            sql_helper("""
     select distinct station from hml_observed_data where
     valid > now() - '7 days'::interval
                  """),
@@ -110,7 +109,7 @@ def main():
     with get_sqlalchemy_conn("mesosite") as conn:
         for station in addsites:
             res = conn.execute(
-                text(
+                sql_helper(
                     """
             INSERT into station_attributes(iemid, attr, value)
             SELECT iemid, 'HAS_HML', '1' from stations where id = :station

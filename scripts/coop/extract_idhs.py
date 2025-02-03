@@ -8,7 +8,7 @@ from pyiem.database import get_dbconn
 
 
 @click.command()
-@click.option("--year", type=int)
+@click.option("--year", type=int, required=True)
 def main(year):
     """Do Something"""
     pgconn = get_dbconn("postgis")

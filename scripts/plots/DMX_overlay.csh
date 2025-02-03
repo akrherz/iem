@@ -27,7 +27,7 @@ setenv DATA_DIR /mesonet/data/nexrad/NIDS/DMX/N0R
 set grid=${DATA_DIR}/N0R_${dateY}_${hh}00
 
 if (! -e ${grid} ) then
-	set grid=${DATA_DIR}/N0R_${dateY}_${hh}01
+    set grid=${DATA_DIR}/N0R_${dateY}_${hh}01
 endif
 
 if (! -e ${grid} ) then
@@ -76,43 +76,43 @@ endif
 
 
 $GEMEXE/sfmap << EOF > /tmp/DMX_overlay_sfmap.out
-	GAREA	= 40.25;-97;43.75;-90
-	AREA	= 40.25;-97;43.75;-90
-	DATTIM  = ${date}/${hh}00
-	GLEVEL	= 0
-	GVCORD   = NONE
-	SFPARM   = skyc:.6;tmpf<120;wsym:1.2:2;alti;;dwpf<120;;;;brbk:1:1:231
-	COLORS   = 32;2;32;0;4;32
-	SFFILE   = /mesonet/data/gempak/meso/${date}_meso.gem
-	LINE     = 4/1/1
-	TEXT     = 1/1
-	DEVICE   = ${DEVICE1}
-	SATFIL   = 
-	RADFIL   = ${grid}
-	PROJ     = RAD
-	CLEAR    = yes
-	PANEL	= 0
-	TITLE	= 32/-1/~ Mesonet with Des Moines NEXRAD
-	SCALE	= 0
-	GVECT   =
-	WIND    = 
-	LATLON	= 0
-	HILO     =  
-	HLSYM    =  
-	CLRBAR   = 32
-	CONTUR   = 3/3
-	SKIP     = 0
-	CINT	= 
-	FINT	=  
-	FLINE    = 24-12--1 
-	LUTFIL   = radar.tbl
-	STNPLT   =  
-	MAP     = 25//1 + 25//2
-        \$mapfil =HICNUS.NWS + hipowo.cia
-	list
-	run
+    GAREA	= 40.25;-97;43.75;-90
+    AREA	= 40.25;-97;43.75;-90
+    DATTIM  = ${date}/${hh}00
+    GLEVEL	= 0
+    GVCORD   = NONE
+    SFPARM   = skyc:.6;tmpf<120;wsym:1.2:2;alti;;dwpf<120;;;;brbk:1:1:231
+    COLORS   = 32;2;32;0;4;32
+    SFFILE   = /mesonet/data/gempak/meso/${date}_meso.gem
+    LINE     = 4/1/1
+    TEXT     = 1/1
+    DEVICE   = ${DEVICE1}
+    SATFIL   = 
+    RADFIL   = ${grid}
+    PROJ     = RAD
+    CLEAR    = yes
+    PANEL	= 0
+    TITLE	= 32/-1/~ Mesonet with Des Moines NEXRAD
+    SCALE	= 0
+    GVECT   =
+    WIND    = 
+    LATLON	= 0
+    HILO     =  
+    HLSYM    =  
+    CLRBAR   = 32
+    CONTUR   = 3/3
+    SKIP     = 0
+    CINT	= 
+    FINT	=  
+    FLINE    = 24-12--1 
+    LUTFIL   = radar.tbl
+    STNPLT   =  
+    MAP     = 25//1 + 25//2
+    \$mapfil =HICNUS.NWS + hipowo.cia
+    list
+    run
 
-	exit
+    exit
 EOF
 
 gpend

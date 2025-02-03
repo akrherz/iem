@@ -12,11 +12,10 @@ from zoneinfo import ZoneInfo
 
 import numpy as np
 import pandas as pd
-from pyiem.database import get_sqlalchemy_conn
+from pyiem.database import get_sqlalchemy_conn, sql_helper
 from pyiem.exceptions import NoDataFound
 from pyiem.plot import figure
 from pyiem.util import utc
-from sqlalchemy import text
 
 PDICT = {
     "tmpf": "Air Temperature [F]",
@@ -84,11 +83,11 @@ def plotter(ctx: dict):
     }
     with get_sqlalchemy_conn("asos") as conn:
         df = pd.read_sql(
-            text(
-                f"""
+            sql_helper(
+                """
         WITH obs as (
             SELECT (valid + '10 minutes'::interval) at time zone 'UTC' as vld,
-            {varsql.get(varname, varname)} as tmp from alldata
+            {vname} as tmp from alldata
             WHERE station = :station and report_type = 3 and
             extract(hour from
                 (valid + '10 minutes'::interval) at time zone 'UTC') = :hour
@@ -101,7 +100,8 @@ def plotter(ctx: dict):
         sum(case when tmp < :t1 then 1 else 0 end) as below,
         count(*), max(vld) as max_utcvalid, min(vld) as min_utcvalid
         from obs GROUP by month ORDER by month ASC
-        """
+        """,
+                vname=varsql.get(varname, varname),
             ),
             conn,
             params=params,

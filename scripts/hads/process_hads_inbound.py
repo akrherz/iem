@@ -6,9 +6,10 @@ which can jam things up badly when we are doing upgrades, etc.
 called from RUN_10_AFTER.sh
 """
 
-from zoneinfo import ZoneInfo
+from datetime import timezone
 
-from pyiem.util import get_dbconnc, logger, utc
+from pyiem.database import get_dbconnc
+from pyiem.util import logger, utc
 
 LOG = logger()
 
@@ -38,7 +39,7 @@ def main():
     )
     for row in cursor:
         table = f"raw{row['v']:%Y_%m}"
-        ts = row["v"].replace(tzinfo=ZoneInfo("UTC"))
+        ts = row["v"].replace(tzinfo=timezone.utc)
         cursor2.execute(
             f"INSERT into {table} "
             "(station, valid, key, value, depth, unit_convention, "

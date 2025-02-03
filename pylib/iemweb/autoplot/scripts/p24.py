@@ -22,11 +22,10 @@ from datetime import date, timedelta
 
 import numpy as np
 import pandas as pd
-from pyiem.database import get_sqlalchemy_conn
+from pyiem.database import get_sqlalchemy_conn, sql_helper
 from pyiem.exceptions import NoDataFound
 from pyiem.plot import MapPlot, centered_bins, get_cmap, pretty_bins
 from pyiem.reference import state_names
-from sqlalchemy import text
 
 PDICT = {
     "aridity": "Aridity Index",
@@ -168,7 +167,7 @@ def get_daily_data(ctx, sdate, edate):
 
     table = "alldata"
     if len(ctx["csector"]) == 2 and ctx["which"] != "st":
-        table = f"alldata_{ctx['csector']}"
+        table = f"alldata_{ctx['csector'].lower()}"
     if ctx["which"] == "st":
         params["stations"] = [f"{st}0000" for st in state_names]
     else:
@@ -178,7 +177,8 @@ def get_daily_data(ctx, sdate, edate):
 
     with get_sqlalchemy_conn("coop") as conn:
         ctx["df"] = pd.read_sql(
-            text(f"""
+            sql_helper(
+                """
         with monthly as (
             SELECT
             case when {yearcond} then year + 1 else year end as myyear,
@@ -225,7 +225,11 @@ def get_daily_data(ctx, sdate, edate):
         precip_rank, avgt_rank, high_rank, low_rank, sdd86_rank,
         ((high - avg_high) / std_high) - ((precip - avg_precip) / std_precip)
         as aridity, max_date from ranks where year = :year
-        """),
+        """,
+                table=table,
+                yearcond=yearcond,
+                sday=sday,
+            ),
             conn,
             params=params,
             index_col="station",

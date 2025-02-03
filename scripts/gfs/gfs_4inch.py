@@ -97,7 +97,7 @@ def main():
                 continue
             soilt = convert_value(soilk, "degK", "degF")
             for i, row in cdf.iterrows():
-                x, y = get_idx(lons, lats, row["lon"], row["lat"])
+                x, y = get_idx(lons, lats, row["lon"], row["lat"])  # skipcq
                 cdf.at[i, "gfs"] = soilt[x, y]
 
             gen_plot(cdf, dt, day, soilt, lons, lats, fx)

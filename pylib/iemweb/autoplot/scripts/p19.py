@@ -11,10 +11,9 @@ from datetime import date, datetime
 
 import numpy as np
 import pandas as pd
-from pyiem.database import get_sqlalchemy_conn
+from pyiem.database import get_sqlalchemy_conn, sql_helper
 from pyiem.exceptions import NoDataFound
 from pyiem.plot import figure, get_cmap
-from sqlalchemy import text
 
 from iemweb.autoplot import ARG_STATION, get_monofont
 from iemweb.util import month2months
@@ -92,7 +91,7 @@ def plotter(ctx: dict):
     year = ctx.get("year")
     with get_sqlalchemy_conn("coop") as conn:
         ddf = pd.read_sql(
-            text(
+            sql_helper(
                 "SELECT high, low, year, month from alldata "
                 "WHERE station = :station "
                 "and high >= low and month = ANY(:months) "

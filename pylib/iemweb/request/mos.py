@@ -32,10 +32,9 @@ from io import BytesIO, StringIO
 
 import pandas as pd
 from pydantic import AwareDatetime, Field
-from pyiem.database import get_sqlalchemy_conn
+from pyiem.database import get_sqlalchemy_conn, sql_helper
 from pyiem.exceptions import IncompleteWebRequest
 from pyiem.webutil import CGIModel, iemapp
-from sqlalchemy import text
 
 EXL = "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"
 
@@ -104,7 +103,7 @@ def get_data(sts, ets, station, model, fmt):
     model2 = xref.get(model, model)
     with get_sqlalchemy_conn("mos") as conn:
         df = pd.read_sql(
-            text(
+            sql_helper(
                 """
             select
             runtime at time zone 'UTC' as utc_runtime,

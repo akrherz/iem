@@ -25,9 +25,8 @@ from odf.style import (
     TextProperties,
 )
 from odf.text import P
-from pyiem.database import get_dbconnc, get_sqlalchemy_conn
+from pyiem.database import get_dbconnc, get_sqlalchemy_conn, sql_helper
 from pyiem.util import logger, utc
-from sqlalchemy import text
 
 os.putenv("DISPLAY", "localhost:1")
 
@@ -98,7 +97,7 @@ def get_warnings(sts: datetime, ets: datetime, wfo, wtypes):
 
     with get_sqlalchemy_conn("postgis") as conn:
         res = conn.execute(
-            text("""
+            sql_helper("""
     WITH stormbased as (
         SELECT phenomena, eventid, issue, expire,
         ST_Area(ST_Transform(geom,9311))/1000000.0 as polyarea

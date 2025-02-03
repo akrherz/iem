@@ -8,11 +8,10 @@ import calendar
 import matplotlib.patheffects as PathEffects
 import numpy as np
 import pandas as pd
-from pyiem.database import get_sqlalchemy_conn
+from pyiem.database import get_sqlalchemy_conn, sql_helper
 from pyiem.exceptions import NoDataFound
 from pyiem.plot import figure_axes
 from pyiem.util import utc
-from sqlalchemy import text
 
 from iemweb.autoplot import ARG_STATION
 
@@ -50,7 +49,7 @@ def plotter(ctx: dict):
 
     with get_sqlalchemy_conn("coop") as conn:
         df = pd.read_sql(
-            text("""
+            sql_helper("""
         with obs as
         (select month, year, high, lag(high) OVER (ORDER by day ASC) as lhigh,
         low, lag(low) OVER (ORDER by day ASC) as llow

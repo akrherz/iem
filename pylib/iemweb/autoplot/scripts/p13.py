@@ -9,11 +9,10 @@ import matplotlib.colors as mpcolors
 import numpy as np
 import pandas as pd
 from matplotlib import cm
-from pyiem.database import get_sqlalchemy_conn
+from pyiem.database import get_sqlalchemy_conn, sql_helper
 from pyiem.exceptions import NoDataFound
 from pyiem.plot import centered_bins, figure_axes, get_cmap
 from scipy import stats
-from sqlalchemy import text
 
 from iemweb.autoplot import ARG_STATION
 
@@ -49,7 +48,7 @@ def plotter(ctx: dict):
 
     with get_sqlalchemy_conn("coop") as conn:
         df = pd.read_sql(
-            text(
+            sql_helper(
                 """
             with obs as (
                 select day, year, avg((high+low)/2.) OVER

@@ -25,12 +25,11 @@ from zoneinfo import ZoneInfo
 
 import numpy as np
 import pandas as pd
-from pyiem.database import get_sqlalchemy_conn
+from pyiem.database import get_sqlalchemy_conn, sql_helper
 from pyiem.exceptions import NoDataFound
 from pyiem.plot.geoplot import MapPlot
 from pyiem.reference import prodDefinitions
 from pyiem.util import utc
-from sqlalchemy import text
 
 PDICT = {
     "count": "Issuance Count",
@@ -108,7 +107,7 @@ def plotter(ctx: dict):
 
     with get_sqlalchemy_conn("afos") as conn:
         df = pd.read_sql(
-            text("""
+            sql_helper("""
     SELECT source, pil, min(entered at time zone 'UTC') as first,
     max(entered at time zone 'UTC') as last, count(*) from products
     WHERE substr(pil, 1, 3) = :pil and entered >= :sts and entered < :ets

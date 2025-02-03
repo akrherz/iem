@@ -41,10 +41,9 @@ from io import BytesIO
 
 import pandas as pd
 from pydantic import Field
-from pyiem.database import get_sqlalchemy_conn
+from pyiem.database import get_sqlalchemy_conn, sql_helper
 from pyiem.network import Table as NetworkTable
 from pyiem.webutil import CGIModel, iemapp
-from sqlalchemy import text
 
 EXL = "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"
 
@@ -108,9 +107,10 @@ def application(environ, start_response):
         if environ["mode"] == "station":
             with get_sqlalchemy_conn("mesosite") as conn:
                 res = conn.execute(
-                    text(
-                        f"select {col} as station from stations "
-                        "where id = :station and network ~* 'CLIMATE'"
+                    sql_helper(
+                        "select {col} as station from stations "
+                        "where id = :station and network ~* 'CLIMATE'",
+                        col=col,
                     ),
                     {"station": environ["station"]},
                 )
@@ -123,11 +123,15 @@ def application(environ, start_response):
 
     with get_sqlalchemy_conn("coop") as pgconn:
         climodf = pd.read_sql(
-            text(f"""
+            sql_helper(
+                """
         select c.*, st_x(geom) as lon, st_y(geom) as lat, name
-        from {source} c, stations t WHERE c.station = t.id
+        from {table} c, stations t WHERE c.station = t.id
         and t.network = :network and {limiter}
-        """),
+        """,
+                table=source,
+                limiter=limiter,
+            ),
             pgconn,
             params=params,
         )
