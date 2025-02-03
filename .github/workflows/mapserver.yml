@@ -9,6 +9,10 @@ on:
 jobs:
   build-linux:
     name: Test Mapserver Files
+    defaults:
+      run:
+        # Ensures environment gets sourced right
+        shell: bash -l -e {0}
     runs-on: ubuntu-latest
     steps:
     - uses: actions/checkout@v4
@@ -16,6 +20,20 @@ jobs:
     - name: Add /etc/hosts entries
       run: |
         cat .github/workflows/etchosts.txt | sudo tee -a /etc/hosts
+
+    # setup conda-forge with micromamba
+    - name: Setup Python
+      uses: mamba-org/setup-micromamba@v2
+      with:
+        environment-file: .github/ms_environment.yml
+        condarc: |
+          channels:
+            - conda-forge
+            - defaults
+        create-args: >-
+          python=3.13
+        environment-name: prod
+        cache-environment: true
 
     - name: Run IEM Database container
       run: |
@@ -28,7 +46,6 @@ jobs:
       run: |
         set -e
         sudo ln -s `pwd` /opt/iem
-        sudo apt-get install mapserver-bin
         sudo mkdir -p /mesonet/ldmdata/
         wget -q http://mesonet.agron.iastate.edu/pickup/ci_msinc.tgz
         sudo tar -C / -xzf ci_msinc.tgz
