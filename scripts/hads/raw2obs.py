@@ -68,7 +68,9 @@ def do(ts: date):
         )
     cursor = pgconn.cursor()
     cursor.execute(
-        f"DELETE from {table} WHERE valid between %s and %s", (sts, ets)
+        f"DELETE from {table} WHERE "  # skipcq
+        "valid between %s and %s",
+        (sts, ets),
     )
     data.seek(0)
     sql = (

@@ -354,7 +354,6 @@ def do_job(job):
             i += 1
 
     doc.save(outputfile)
-    del doc
     subprocess.call(["unoconv", "-f", "ppt", outputfile])
     pptfn = f"{basefn}.ppt"
     LOG.warning("Generated %s with %s slides", pptfn, i)
