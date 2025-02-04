@@ -284,8 +284,8 @@ def add_ctx(ctx):
         and b.myyear * {decagg} <= :eyear
         ORDER by b.myyear ASC
         """,
-                lag=lag,
-                decagg=decagg,
+                lag=str(lag),  # ugly
+                decagg=str(decagg),
             ),
             conn,
             params={
