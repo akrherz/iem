@@ -32,10 +32,9 @@ from datetime import date
 
 import numpy as np
 import pandas as pd
-from pyiem.database import get_sqlalchemy_conn
+from pyiem.database import get_sqlalchemy_conn, sql_helper
 from pyiem.exceptions import NoDataFound
 from pyiem.plot import figure_axes
-from sqlalchemy import text
 
 from iemweb.autoplot import ARG_STATION
 
@@ -225,8 +224,8 @@ def add_ctx(ctx):
     decagg = 10 if ctx["decadal"] else 1
     with get_sqlalchemy_conn("coop") as conn:
         df = pd.read_sql(
-            text(
-                f"""
+            sql_helper(
+                """
         WITH climo as (
             SELECT to_char(valid, 'mmdd') as sday,
             high, low from ncei_climate91 WHERE station = :ncei),
@@ -284,7 +283,9 @@ def add_ctx(ctx):
         on (a.myyear = b.myyear) WHERE b.myyear * {decagg} >= :syear
         and b.myyear * {decagg} <= :eyear
         ORDER by b.myyear ASC
-        """
+        """,
+                lag=lag,
+                decagg=decagg,
             ),
             conn,
             params={

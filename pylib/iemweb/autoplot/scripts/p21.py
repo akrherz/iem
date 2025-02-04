@@ -7,11 +7,10 @@ climatology is based on the 1991-2020 period from NCEI.
 from datetime import date, timedelta
 
 import pandas as pd
-from pyiem.database import get_sqlalchemy_conn
+from pyiem.database import get_sqlalchemy_conn, sql_helper
 from pyiem.exceptions import NoDataFound
 from pyiem.plot import centered_bins, get_cmap
 from pyiem.plot.geoplot import MapPlot
-from sqlalchemy import text
 
 PDICT = {
     "high": "High temperature",
@@ -74,7 +73,7 @@ def plotter(ctx: dict):
     varname = ctx["varname"]
     with get_sqlalchemy_conn("coop") as conn:
         df = pd.read_sql(
-            text("""
+            sql_helper("""
         WITH t2 as (
             SELECT station, high, low, precip from ncei_climate91 WHERE
             valid = :date2

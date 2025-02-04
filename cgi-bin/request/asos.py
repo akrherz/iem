@@ -1,3 +1,6 @@
 """implemented in /pylib/iemweb/request/asos.py"""
 
-from iemweb.request.asos import application  # noqa: F401
+from iemweb.request.asos import application
+
+# Appease the linter
+_ = application

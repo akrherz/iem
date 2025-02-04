@@ -20,8 +20,7 @@ positive.</p>
 issuance counts for a single Weather Forecast Offices.</p>
 """
 
-from datetime import timedelta
-from zoneinfo import ZoneInfo
+from datetime import timedelta, timezone
 
 import numpy as np
 import pandas as pd
@@ -100,10 +99,11 @@ def get_description():
 
 def plotter(ctx: dict):
     """Go"""
+    ctx["sts"] = ctx["sts"].replace(tzinfo=timezone.utc)
+    ctx["ets"] = ctx["ets"].replace(tzinfo=timezone.utc)
     fix()
     pil = ctx["pil"][:3]
-    if ctx["ets"].astimezone(ZoneInfo("UTC")) > utc():
-        ctx["ets"] = utc()
+    ctx["ets"] = min(ctx["ets"], utc())
 
     with get_sqlalchemy_conn("afos") as conn:
         df = pd.read_sql(

@@ -52,7 +52,7 @@ def workflow(dt: date):
             sql_helper(
                 """
         SELECT distinct station, valid at time zone 'UTC' as utc_valid, value
-        from raw{dt:%Y} WHERE valid between :sts and :ets and
+        from {table} WHERE valid between :sts and :ets and
         substr(key, 1, 3) = 'PPH' and value >= 0
         """,
                 table=f"raw{dt:%Y}",

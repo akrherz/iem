@@ -1,3 +1,6 @@
 """Implementation at /pylib/iemweb/autoplot/meta.py"""
 
-from iemweb.autoplot.meta import application  # noqa: F401
+from iemweb.autoplot.meta import application
+
+# Appease linter
+_ = application
