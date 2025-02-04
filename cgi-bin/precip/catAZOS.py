@@ -1,3 +1,6 @@
 """Implementation at pylib/iemweb/precip/catAZOS.py"""
 
-from iemweb.precip.catAZOS import application  # noqa: F401
+from iemweb.precip.catAZOS import application
+
+# Appease linter
+_ = application

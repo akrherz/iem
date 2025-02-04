@@ -1,3 +1,6 @@
 """Implementation at pylib/iemweb/precip/snetRates.py"""
 
-from iemweb.precip.snetRates import application  # noqa: F401
+from iemweb.precip.snetRates import application
+
+# Appease linter
+_ = application

@@ -40,7 +40,7 @@ PDICT2 = {
 def get_description():
     """Return a dict describing how to call this plotter"""
     desc = {"description": __doc__}
-    sts = utc() - timedelta(hours=26)
+    sts = utc() - timedelta(hours=6)  # Save some CI time
     ets = utc() - timedelta(hours=2)
     desc["arguments"] = [
         {

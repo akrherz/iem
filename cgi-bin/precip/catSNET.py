@@ -1,3 +1,6 @@
 """Implementation at pylib/iemweb/precip/catSNET.py"""
 
-from iemweb.precip.catSNET import application  # noqa: F401
+from iemweb.precip.catSNET import application
+
+# Appease linter
+_ = application

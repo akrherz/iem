@@ -11,11 +11,10 @@ from datetime import datetime
 import numpy as np
 import pandas as pd
 from pyiem import reference
-from pyiem.database import get_sqlalchemy_conn
+from pyiem.database import get_sqlalchemy_conn, sql_helper
 from pyiem.exceptions import NoDataFound
 from pyiem.plot import figure_axes
 from scipy.stats import norm
-from sqlalchemy import text
 
 from iemweb.autoplot import ARG_STATION
 
@@ -53,7 +52,7 @@ def plotter(ctx: dict):
         title = f"{ctx['_sname']} {ts:%d %B} Temperature Distribution"
         with get_sqlalchemy_conn("coop") as conn:
             df = pd.read_sql(
-                text("""SELECT high, low from alldata
+                sql_helper("""SELECT high, low from alldata
                 where station = :station and sday = :sday and high is not null
                 and low is not null
                 """),
@@ -71,11 +70,14 @@ def plotter(ctx: dict):
         )
         with get_sqlalchemy_conn("coop") as conn:
             df = pd.read_sql(
-                text(f"""SELECT high, low from alldata_{state}
+                sql_helper(
+                    """SELECT high, low from {table}
                 where sday = :sday and high is not null and low is not null and
                 substr(station, 3, 1) != 'T' and
                 substr(station, 3, 4) != '0000'
-                """),
+                """,
+                    table=f"alldata_{state.lower()}",
+                ),
                 conn,
                 params={"sday": f"{month:02.0f}{day:02.0f}"},
             )

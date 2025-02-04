@@ -22,11 +22,10 @@ import calendar
 from datetime import date, datetime
 
 import pandas as pd
-from pyiem.database import get_sqlalchemy_conn
+from pyiem.database import get_sqlalchemy_conn, sql_helper
 from pyiem.exceptions import NoDataFound
 from pyiem.plot import figure_axes
 from scipy import stats
-from sqlalchemy import text
 
 from iemweb.autoplot import ARG_STATION
 
@@ -192,20 +191,24 @@ def plotter(ctx: dict):
         months = [int(month)]
     with get_sqlalchemy_conn("coop") as conn:
         obs = pd.read_sql(
-            text(
-                f"""WITH data as (
+            sql_helper(
+                """WITH data as (
         select day, extract(week from day) - 1 as week, year, month, sday,
-        {ctx["fstat"]}({ctx["var"]}) OVER
+        {fstat}({varname}) OVER
             (ORDER by day ASC rows between :f1 FOLLOWING and :f2 FOLLOWING)
-            as forward_stat, {ctx["mstat"]}({ctx["var"]}) OVER
+            as forward_stat, {mstat}({varname}) OVER
             (ORDER by day ASC rows between CURRENT ROW and :f3 FOLLOWING)
-            as middle_stat, {ctx["stat"]}({ctx["var"]}) OVER
+            as middle_stat, {stat}({varname}) OVER
             (ORDER by day ASC rows between :days PRECEDING and 1 PRECEDING)
             as trailing_stat
         from alldata where station = :station)
         SELECT * from data WHERE month = ANY(:months) and year >= :syear
             and year <= :eyear ORDER by day ASC
-        """
+        """,
+                fstat=ctx["fstat"],
+                mstat=ctx["mstat"],
+                stat=ctx["stat"],
+                varname=ctx["var"],
             ),
             conn,
             params={
