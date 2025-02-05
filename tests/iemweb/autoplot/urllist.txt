@@ -377,3 +377,4 @@
 /plotting/auto/plot/257/valid:2024-10-29%200000::shade:no::csector:midwest::cmap:afmhot_r::_r:t::dpi:100.png
 /plotting/auto/plot/257/valid:2024-08-16%201700::shade:yes::csector:southeast::cmap:afmhot_r::_r:t::dpi:100.png
 /plotting/auto/plot/258/valid:2024-08-02::outlook_type:C::lat:42.0::lon:-95.0::_r:t::dpi:100::_cb:1.png
+/plotting/auto/plot/259/ugc:CAZ509::fire:yes::_r:t::dpi:100::_cb:1.png

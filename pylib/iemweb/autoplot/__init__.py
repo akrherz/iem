@@ -905,6 +905,7 @@ nopts = [
     },
     {"id": 243, "label": "Top 10 VTEC Event Dates by Year/Month"},
     {"id": 101, "label": "Top 25 Most Frequent VTEC Products by Office/NWS"},
+    {"id": 259, "label": "UGC Geometry Change Diagnostic"},
     {
         "id": 56,
         "label": "Weekly/Daily/Monthly Frequency of a Watch/Warning/Advisory",
