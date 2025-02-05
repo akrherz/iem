@@ -84,6 +84,9 @@ def main(dt: Optional[date]) -> None:
             "%Y-%m-%d %I:%M %p",
         ).replace(tzinfo=timezone.utc)
         local_valid = valid.astimezone(tzinfo)
+        if local_valid.year < 2000:
+            LOG.info("Skipping %s %s as <2000", sid, local_valid)
+            continue
         updated = datetime.strptime(
             row["DateTimeStamp"], "%Y-%m-%d %I:%M %p"
         ).replace(tzinfo=timezone.utc)
