@@ -30,12 +30,11 @@ from datetime import date
 import numpy as np
 import pandas as pd
 from pyiem import reference
-from pyiem.database import get_sqlalchemy_conn
+from pyiem.database import get_sqlalchemy_conn, sql_helper
 from pyiem.exceptions import NoDataFound
 from pyiem.nws import vtec
 from pyiem.plot import figure
 from pyiem.plot.use_agg import plt
-from sqlalchemy import text
 
 from iemweb.autoplot import ARG_FEMA, fema_region2states
 
@@ -173,12 +172,12 @@ def make_barplot(ctx, df):
     return fig, df2
 
 
-def munge_df(ctx, df):
+def munge_df(ctx, df: pd.DataFrame):
     """Rectify an x-axis."""
     # Create sday
-    df["sday"] = df.index.strftime("%m%d")
-    df["year"] = df.index.year
-    df["month"] = df.index.month
+    df["sday"] = df["date"].dt.strftime("%m%d")
+    df["year"] = df["date"].dt.year
+    df["month"] = df["date"].dt.month
 
     # Rectify the year, if we are starting on jul1
     if ctx["s"] == "jul1":
@@ -186,8 +185,14 @@ def munge_df(ctx, df):
 
     # Create a baseline for a common xaxis
     month = 7 if ctx["s"] == "jul1" else 1
-    baseline = pd.to_datetime({"year": df["year"], "month": month, "day": 1})
-    df["xaxis"] = (df.index - baseline).astype(int) // 86400 // 1e9
+    baseline = pd.to_datetime(
+        {
+            "year": df["year"].to_numpy(),
+            "month": [month] * len(df.index),
+            "day": [1] * len(df.index),
+        }
+    )
+    df["xaxis"] = (df["date"] - baseline).dt.days
 
     # If not limiting, we are done
     if ctx["limit"] == "no":
@@ -251,8 +256,8 @@ def plotter(ctx: dict):
     # Load up all data by default and then filter it later.
     with get_sqlalchemy_conn("postgis") as conn:
         df = pd.read_sql(
-            text(
-                f"""
+            sql_helper(
+                """
         WITH data as (
             SELECT vtec_year,
             issue, phenomena, significance, eventid, wfo from warnings WHERE
@@ -265,7 +270,9 @@ def plotter(ctx: dict):
 
         SELECT date(min_issue) as date, count(*)
         from agg1 GROUP by date ORDER by date ASC
-        """
+        """,
+                limiter=limiter,
+                wfolimiter=wfolimiter,
             ),
             conn,
             params=params,
@@ -274,7 +281,13 @@ def plotter(ctx: dict):
         )
     if df.empty:
         raise NoDataFound("No Data Found.")
-    df = df.reindex(pd.date_range(df.index.values[0], date.today())).fillna(0)
+    df = (
+        df.reindex(
+            pd.date_range(df.index.values[0], date.today(), name="date")
+        )
+        .reset_index()
+        .fillna(0)
+    )
     df = munge_df(ctx, df)
     # Compute cumsum
     df["cumsum"] = df[["year", "count"]].groupby("year").cumsum()

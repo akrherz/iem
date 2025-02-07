@@ -13,10 +13,9 @@ from datetime import date, timedelta
 
 import matplotlib.dates as mdates
 import pandas as pd
-from pyiem.database import get_sqlalchemy_conn
+from pyiem.database import get_sqlalchemy_conn, sql_helper
 from pyiem.exceptions import NoDataFound
 from pyiem.plot import figure_axes
-from sqlalchemy import text
 
 from iemweb.autoplot import ARG_STATION
 
@@ -131,19 +130,23 @@ def plotter(ctx: dict):
     func = "avg" if days == 1 else ctx["f"]
     with get_sqlalchemy_conn("coop") as conn:
         df = pd.read_sql(
-            text(
-                f"""
+            sql_helper(
+                """
                 WITH data as (
                 SELECT sday, {func}({varname})
                 OVER (ORDER by day ASC ROWS between
-                CURRENT ROW and {days - 1} FOLLOWING) as val, day from alldata
+                CURRENT ROW and {days} FOLLOWING) as val, day from alldata
                 WHERE station = :station and {varname} is not null and
                 year >= :syear and year <= :eyear)
-                SELECT sday, sum(case when {sql} then 1 else 0
+                SELECT sday, sum(case when {sql2} then 1 else 0
                 end) as hits, count(*) as total,
                 min(day) as min_date, max(day) as max_date from data
                 WHERE sday != '0229' GROUP by sday ORDER by sday ASC
-            """
+            """,
+                varname=varname,
+                func=func,
+                days=str(days - 1),
+                sql2=sql,
             ),
             conn,
             params=params,

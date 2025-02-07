@@ -13,10 +13,9 @@ from datetime import date
 import matplotlib.colors as mpcolors
 import matplotlib.dates as mdates
 import pandas as pd
-from pyiem.database import get_sqlalchemy_conn
+from pyiem.database import get_sqlalchemy_conn, sql_helper
 from pyiem.exceptions import NoDataFound
 from pyiem.plot import figure_axes, get_cmap
-from sqlalchemy import text
 
 from iemweb.autoplot import ARG_STATION
 from iemweb.autoplot.barchart import barchar_with_top10
@@ -107,14 +106,15 @@ def plotter(ctx: dict):
         sqlvarname = "era5land_soilm1m_avg"
     with get_sqlalchemy_conn("coop") as conn:
         df = pd.read_sql(
-            text(
-                f"""
+            sql_helper(
+                """
             select day, year, sday,
             (high+low)/2. as avg,
             gddxx(:gddbase, :gddceil, high, low) as gdd, {sqlvarname}
             from alldata where station = :station and
             {sqlvarname} is not null ORDER by day ASC
-        """
+        """,
+                sqlvarname=sqlvarname,
             ),
             conn,
             params=params,

@@ -14,10 +14,9 @@ from calendar import month_abbr
 from datetime import date
 
 import pandas as pd
-from pyiem.database import get_sqlalchemy_conn
+from pyiem.database import get_sqlalchemy_conn, sql_helper
 from pyiem.exceptions import NoDataFound
 from pyiem.plot import figure
-from sqlalchemy import text
 
 from iemweb.autoplot import ARG_STATION
 
@@ -43,7 +42,7 @@ def plotter(ctx: dict):
     year = ctx["year"]
     with get_sqlalchemy_conn("coop") as conn:
         df = pd.read_sql(
-            text("""
+            sql_helper("""
         with obs as (
         select day, (case when month < 7 then year - 1 else year end)
             as myyear,
@@ -76,7 +75,7 @@ def plotter(ctx: dict):
     )
 
     fig = figure(title=title, apctx=ctx)
-    ax = fig.add_axes([0.1, 0.1, 0.4, 0.75])
+    ax = fig.add_axes((0.1, 0.1, 0.4, 0.75))
     df2 = df.groupby("year").max()
     ax.bar(
         df2.index.values,
@@ -100,7 +99,7 @@ def plotter(ctx: dict):
     ax.set_ylabel(r"Largest Low Temp Drop $^\circ$F, " f"Avg: {mv:.1f}")
     ax.set_xlim(df.index.values.min() - 1, df.index.values.max() + 1)
 
-    ax = fig.add_axes([0.58, 0.12, 0.4, 0.32])
+    ax = fig.add_axes((0.58, 0.12, 0.4, 0.32))
     ax.scatter(
         [int(x) for x in df["day"].dt.strftime("%j").values],
         df["largest_change"].values,
@@ -111,7 +110,7 @@ def plotter(ctx: dict):
     ax.set_xlabel("On Date")
     ax.grid(True)
 
-    ax = fig.add_axes([0.58, 0.56, 0.4, 0.32])
+    ax = fig.add_axes((0.58, 0.56, 0.4, 0.32))
     ax.scatter(
         df["low"].values,
         df["largest_change"].values,

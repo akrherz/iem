@@ -13,7 +13,7 @@ from zoneinfo import ZoneInfo
 import click
 import httpx
 import pandas as pd
-from pyiem.database import get_dbconnc, get_sqlalchemy_conn
+from pyiem.database import get_sqlalchemy_conn, sql_helper
 from pyiem.reference import TRACE_VALUE
 from pyiem.util import logger, utc
 from sqlalchemy import text
@@ -31,20 +31,18 @@ def safeP(v):
     return float(v)
 
 
-def main(dt: Optional[date]) -> None:
+def main(conn, dt: Optional[date]) -> None:
     """Go Main Go"""
-    with get_sqlalchemy_conn("coop") as conn:
-        stations = pd.read_sql(
-            text(
-                """
-    select iemid, id, tzname from stations where network ~* '_COCORAHS'
-                """
-            ),
-            conn,
-            index_col="id",
-        )
+    stations = pd.read_sql(
+        text(
+            """
+select iemid, id, tzname from stations where network ~* '_COCORAHS'
+            """
+        ),
+        conn,
+        index_col="id",
+    )
     LOG.info("Found %s station defined", len(stations.index))
-    dbconn, cursor = get_dbconnc("coop")
 
     if dt is not None:
         # Export for a given date
@@ -84,6 +82,9 @@ def main(dt: Optional[date]) -> None:
             "%Y-%m-%d %I:%M %p",
         ).replace(tzinfo=timezone.utc)
         local_valid = valid.astimezone(tzinfo)
+        if local_valid.year < 2000:
+            LOG.info("Skipping %s %s as <2000", sid, local_valid)
+            continue
         updated = datetime.strptime(
             row["DateTimeStamp"], "%Y-%m-%d %I:%M %p"
         ).replace(tzinfo=timezone.utc)
@@ -94,37 +95,44 @@ def main(dt: Optional[date]) -> None:
         snowd_swe = safeP(row["TotalSnowSWE"])
         iemid = stations.at[sid, "iemid"]
         table = f"cocorahs_{local_valid:%Y}"
-        cursor.execute(
-            f"select iemid from {table} where iemid = %s and day = %s",
-            (iemid, local_valid.date()),
-        )
-        if cursor.rowcount == 0:
-            cursor.execute(
-                f"INSERT into {table}(iemid, day) VALUES (%s, %s)",
-                (iemid, local_valid.date()),
-            )
-        cursor.execute(
-            f"""
-            UPDATE {table} SET obvalid = %s,
-            precip = %s, snow = %s, snow_swe = %s,
-            snowd = %s, snowd_swe = %s, updated = %s
-            WHERE iemid = %s and day = %s
-        """,
-            (
-                valid,
-                pday,
-                snow,
-                snow_swe,
-                snowd,
-                snowd_swe,
-                updated,
-                iemid,
-                local_valid.date(),
+        params = {
+            "iemid": iemid,
+            "d": local_valid.date(),
+            "valid": valid,
+            "pday": pday,
+            "snow": snow,
+            "snow_swe": snow_swe,
+            "snowd": snowd,
+            "snowd_swe": snowd_swe,
+            "updated": updated,
+        }
+        res = conn.execute(
+            sql_helper(
+                "select iemid from {table} where iemid = :iemid and day = :d",
+                table=table,
             ),
+            params,
         )
-
-    cursor.close()
-    dbconn.commit()
+        if res.rowcount == 0:
+            conn.execute(
+                sql_helper(
+                    "INSERT into {table}(iemid, day) VALUES (:iemid, :d)",
+                    table=table,
+                ),
+                params,
+            )
+        conn.execute(
+            sql_helper(
+                """
+            UPDATE {table} SET obvalid = :valid,
+            precip = :pday, snow = :snow, snow_swe = :snow_swe,
+            snowd = :snowd, snowd_swe = :snowd_swe, updated = :updated
+            WHERE iemid = :iemid and day = :d
+        """,
+                table=table,
+            ),
+            params,
+        )
 
 
 @click.command()
@@ -133,7 +141,9 @@ def frontend(dt: Optional[datetime]):
     """Do Logic."""
     if dt is not None:
         dt = dt.date()
-    main(dt)
+    with get_sqlalchemy_conn("iem") as conn:
+        main(conn, dt)
+        conn.commit()
 
 
 if __name__ == "__main__":

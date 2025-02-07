@@ -8,10 +8,9 @@ from datetime import date, datetime, timedelta
 
 import numpy as np
 import pandas as pd
-from pyiem.database import get_sqlalchemy_conn
+from pyiem.database import get_sqlalchemy_conn, sql_helper
 from pyiem.exceptions import NoDataFound
 from pyiem.plot import figure, fitbox
-from sqlalchemy import text
 
 from iemweb.autoplot import ARG_STATION, get_monofont
 
@@ -102,18 +101,21 @@ def plotter(ctx: dict):
         clstation = ctx["_nt"].sts[station]["ncei91"]
     with get_sqlalchemy_conn("coop") as conn:
         obs = pd.read_sql(
-            text(f"""
+            sql_helper(
+                """
             WITH myclimo as (
                 select to_char(valid, 'mmdd') as sday, high, low,
                 (high + low) / 2. as avgt from
-                {cltable} WHERE station = :clstation
+                {table} WHERE station = :clstation
             )
             SELECT extract(doy from day)::int as d, o.high, o.low, o.day,
             (o.high + o.low) / 2. as avgt,
             c.high as climo_high, c.low as climo_low, c.avgt as climo_avgt
             from alldata o JOIN myclimo c on (o.sday = c.sday)
             where o.station = :st and o.high is not null ORDER by day ASC
-            """),
+            """,
+                table=cltable,
+            ),
             conn,
             params={"clstation": clstation, "st": station},
             index_col="day",
@@ -143,7 +145,7 @@ def plotter(ctx: dict):
             running = 0
         if running > maxperiod[doy]:
             maxperiod[doy] = running
-            enddate[doy] = day
+            enddate[doy] = str(day)
     if running > 0:
         streaks.append([running, day])
 
