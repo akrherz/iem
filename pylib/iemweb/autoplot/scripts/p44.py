@@ -175,9 +175,9 @@ def make_barplot(ctx, df):
 def munge_df(ctx, df: pd.DataFrame):
     """Rectify an x-axis."""
     # Create sday
-    df["sday"] = df.index.strftime("%m%d")
-    df["year"] = df.index.year
-    df["month"] = df.index.month
+    df["sday"] = df["date"].dt.strftime("%m%d")
+    df["year"] = df["date"].dt.year
+    df["month"] = df["date"].dt.month
 
     # Rectify the year, if we are starting on jul1
     if ctx["s"] == "jul1":
@@ -192,7 +192,7 @@ def munge_df(ctx, df: pd.DataFrame):
             "day": [1] * len(df.index),
         }
     )
-    df["xaxis"] = (df.index - baseline).astype(int) // 86400 // 1e9
+    df["xaxis"] = (df["date"] - baseline).dt.days
 
     # If not limiting, we are done
     if ctx["limit"] == "no":
@@ -281,7 +281,13 @@ def plotter(ctx: dict):
         )
     if df.empty:
         raise NoDataFound("No Data Found.")
-    df = df.reindex(pd.date_range(df.index.values[0], date.today())).fillna(0)
+    df = (
+        df.reindex(
+            pd.date_range(df.index.values[0], date.today(), name="date")
+        )
+        .reset_index()
+        .fillna(0)
+    )
     df = munge_df(ctx, df)
     # Compute cumsum
     df["cumsum"] = df[["year", "count"]].groupby("year").cumsum()
