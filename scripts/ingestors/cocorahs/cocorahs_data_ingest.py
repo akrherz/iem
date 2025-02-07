@@ -141,7 +141,7 @@ def frontend(dt: Optional[datetime]):
     """Do Logic."""
     if dt is not None:
         dt = dt.date()
-    with get_sqlalchemy_conn("iem") as conn:
+    with get_sqlalchemy_conn("coop") as conn:
         main(conn, dt)
         conn.commit()
 
