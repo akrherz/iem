@@ -11,12 +11,11 @@ available.
 from datetime import date, datetime, timedelta
 
 import pandas as pd
-from pyiem.database import get_sqlalchemy_conn
+from pyiem.database import get_sqlalchemy_conn, sql_helper
 from pyiem.exceptions import NoDataFound
 from pyiem.plot import figure_axes
 from pyiem.plot.use_agg import plt
 from pyiem.reference import state_names
-from sqlalchemy import text
 
 PDICT = {"state": "Aggregate by State", "wfo": "Aggregate by WFO"}
 PDICT2 = {"percent": "Frequency [%]", "count": "Count"}
@@ -150,7 +149,7 @@ def plotter(ctx: dict):
         """
         params["state"] = state
     with get_sqlalchemy_conn("postgis") as conn:
-        df = pd.read_sql(text(sql), conn, params=params, index_col=None)
+        df = pd.read_sql(sql_helper(sql), conn, params=params, index_col=None)
     if df.empty:
         raise NoDataFound("No data was found.")
     minvalid = df["min_issue"].min()

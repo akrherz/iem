@@ -16,10 +16,9 @@ from datetime import datetime
 
 import numpy as np
 import pandas as pd
-from pyiem.database import get_sqlalchemy_conn
+from pyiem.database import get_sqlalchemy_conn, sql_helper
 from pyiem.exceptions import NoDataFound
 from pyiem.plot import figure, get_cmap
-from sqlalchemy import text
 
 PDICT = {
     "low": "Morning Low (midnight to 8 AM)",
@@ -70,7 +69,8 @@ def plotter(ctx: dict):
         tlimit = "12 and 20"
     with get_sqlalchemy_conn("asos") as conn:
         df = pd.read_sql(
-            text(f"""
+            sql_helper(
+                """
         WITH one as (
         SELECT date(valid), {aggfunc}(tmpf::int) as d, avg(sknt)
         from alldata where station = :station1
@@ -90,7 +90,10 @@ def plotter(ctx: dict):
         two.avg as sknt2
         from one JOIN two on (one.date = two.date) WHERE one.avg >= 0
         and one.d - two.d between -25 and 25
-        """),
+        """,
+                aggfunc=aggfunc,
+                tlimit=tlimit,
+            ),
             conn,
             params={
                 "station1": station1,
@@ -120,7 +123,9 @@ def plotter(ctx: dict):
 
     bins = np.arange(-20.5, 20.5, 1)
     H, xedges, yedges = np.histogram2d(
-        df["week"].values, df["delta"].values, [range(54), bins]
+        df["week"].to_numpy(),
+        df["delta"].to_numpy(),
+        [list(range(54)), list(bins)],
     )
     H = np.ma.array(H)
     H.mask = np.ma.where(H < 1, True, False)
@@ -164,7 +169,9 @@ def plotter(ctx: dict):
     )
 
     H, xedges, yedges = np.histogram2d(
-        df["sknt"].values, df["delta"].values, [range(31), bins]
+        df["sknt"].to_numpy(),
+        df["delta"].to_numpy(),
+        [list(range(31)), list(bins)],
     )
     H = np.ma.array(H)
     H.mask = np.where(H < 1, True, False)

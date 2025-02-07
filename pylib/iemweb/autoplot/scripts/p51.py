@@ -10,10 +10,9 @@ from datetime import date, datetime, timedelta
 
 import numpy as np
 import pandas as pd
-from pyiem.database import get_sqlalchemy_conn
+from pyiem.database import get_sqlalchemy_conn, sql_helper
 from pyiem.exceptions import NoDataFound
 from pyiem.plot import figure
-from sqlalchemy import text
 
 PDICT = {
     "all": "Show All Three Plots",
@@ -125,12 +124,15 @@ def plotter(ctx: dict):
     climosite = ctx["_nt"].sts[station]["climate_site"]
     with get_sqlalchemy_conn("coop") as conn:
         climo = pd.read_sql(
-            text(f"""
+            sql_helper(
+                """
             SELECT day, sday, gddxx(:gddbase, :gddceil, high, low) as {glabel},
             sdd86(high, low) as sdd86, precip
             from alldata WHERE station = :station and
             year >= 1951 ORDER by day ASC
-            """),
+            """,
+                glabel=glabel,
+            ),
             conn,
             params={
                 "gddbase": gddbase,
@@ -189,7 +191,8 @@ def plotter(ctx: dict):
     # build the obs
     with get_sqlalchemy_conn("isuag") as conn:
         df = pd.read_sql(
-            text(f"""
+            sql_helper(
+                """
             SELECT valid as day, to_char(valid, 'mmdd') as sday,
             gddxx(:gddbase, :gddceil, c2f(tair_c_max_qc), c2f(tair_c_min_qc))
                 as o{glabel},
@@ -197,7 +200,9 @@ def plotter(ctx: dict):
             sdd86(c2f(tair_c_max_qc), c2f(tair_c_min_qc)) as osdd86
             from sm_daily
             WHERE station = :station and to_char(valid, 'mmdd') != '0229'
-            ORDER by day ASC"""),
+            ORDER by day ASC""",
+                glabel=glabel,
+            ),
             conn,
             params={
                 "gddbase": gddbase,
@@ -220,10 +225,10 @@ def plotter(ctx: dict):
     if whichplots == "all":
         ax1 = fig.add_axes((0.1, 0.7, 0.8, 0.2))
         ax2 = fig.add_axes(
-            [0.1, 0.6, 0.8, 0.1], sharex=ax1, facecolor="#EEEEEE"
+            (0.1, 0.6, 0.8, 0.1), sharex=ax1, facecolor="#EEEEEE"
         )
-        ax3 = fig.add_axes([0.1, 0.35, 0.8, 0.2], sharex=ax1)
-        ax4 = fig.add_axes([0.1, 0.1, 0.8, 0.2], sharex=ax1)
+        ax3 = fig.add_axes((0.1, 0.35, 0.8, 0.2), sharex=ax1)
+        ax4 = fig.add_axes((0.1, 0.1, 0.8, 0.2), sharex=ax1)
         title = (
             f"GDD(base={gddbase:.0f},ceil={gddceil:.0f}), Precip, & "
             "SDD(base=86)"

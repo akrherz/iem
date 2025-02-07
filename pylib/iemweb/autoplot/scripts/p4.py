@@ -15,14 +15,13 @@ import matplotlib.dates as mdates
 import numpy as np
 import pandas as pd
 from pyiem import reference
-from pyiem.database import get_sqlalchemy_conn
+from pyiem.database import get_sqlalchemy_conn, sql_helper
 from pyiem.exceptions import NoDataFound
 from pyiem.grid import nav
 from pyiem.grid.zs import CachingZonalStats
 from pyiem.iemre import daily_offset, get_daily_ncname
 from pyiem.plot import figure_axes
 from pyiem.util import ncopen
-from sqlalchemy import text
 
 
 def get_description():
@@ -60,7 +59,7 @@ def plotter(ctx: dict):
 
     with get_sqlalchemy_conn("postgis") as conn:
         states = gpd.read_postgis(
-            text(
+            sql_helper(
                 "SELECT the_geom, state_abbr from states "
                 "where state_abbr = :abbr"
             ),

@@ -26,12 +26,11 @@ from datetime import timedelta
 
 import numpy as np
 import pandas as pd
-from pyiem.database import get_sqlalchemy_conn
+from pyiem.database import get_sqlalchemy_conn, sql_helper
 from pyiem.exceptions import NoDataFound
 from pyiem.plot import figure
 from pyiem.plot.use_agg import plt
 from scipy import stats
-from sqlalchemy import text
 
 from iemweb.autoplot import ARG_STATION, get_monofont
 from iemweb.util import month2months
@@ -145,7 +144,8 @@ def get_data(station, month, period, varname, days, opt):
     if days == 1:
         with get_sqlalchemy_conn("coop") as conn:
             df = pd.read_sql(
-                text(f"""
+                sql_helper(
+                    """
             WITH data as (
                 SELECT
                 extract(year from day + :doffset)::int
@@ -154,7 +154,10 @@ def get_data(station, month, period, varname, days, opt):
                 WHERE station = :station and high is not null
                 and low is not null {mlimiter})
             SELECT * from data {ylimiter}
-            """),
+            """,
+                    mlimiter=mlimiter,
+                    ylimiter=ylimiter,
+                ),
                 conn,
                 params=params,
                 index_col=None,
@@ -166,7 +169,8 @@ def get_data(station, month, period, varname, days, opt):
         )
         with get_sqlalchemy_conn("coop") as conn:
             df = pd.read_sql(
-                text(f"""
+                sql_helper(
+                    """
             WITH data as (
                 SELECT
                 extract(year from day + :doffset)::int
@@ -178,7 +182,12 @@ def get_data(station, month, period, varname, days, opt):
                 SELECT myyear, month, {res} as {varname}
                 from data WHERE 1 = 1 {mlimiter})
             SELECT * from agg1 {ylimiter}
-            """),
+            """,
+                    mlimiter=mlimiter,
+                    ylimiter=ylimiter,
+                    res=res,
+                    varname=varname,
+                ),
                 conn,
                 params=params,
                 index_col=None,

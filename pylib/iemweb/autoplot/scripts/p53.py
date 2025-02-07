@@ -13,10 +13,9 @@ import calendar
 from datetime import datetime
 
 import pandas as pd
-from pyiem.database import get_sqlalchemy_conn
+from pyiem.database import get_sqlalchemy_conn, sql_helper
 from pyiem.exceptions import NoDataFound
 from pyiem.plot import figure_axes
-from sqlalchemy import text
 
 PDICT = {
     "tmpf": "Air Temperature",
@@ -121,7 +120,8 @@ def plotter(ctx: dict):
     mlim = f"and {v} is not null" if ctx["missing"] == "no" else ""
     with get_sqlalchemy_conn("asos") as conn:
         df = pd.read_sql(
-            text(f"""
+            sql_helper(
+                """
     SELECT extract(week from valid) as week,
     min(valid) as min_valid, max(valid) as max_valid,
     sum(case when {v}::{cst} < :t1 then 1 else 0 end) as d1,
@@ -138,7 +138,11 @@ def plotter(ctx: dict):
     count(*)
     from alldata where station = :station and report_type = 3 {mlim}
     GROUP by week ORDER by week ASC
-        """),
+        """,
+                v=v,
+                cst=cst,
+                mlim=mlim,
+            ),
             conn,
             params=params,
             index_col="week",
