@@ -145,11 +145,14 @@ if (isset($_GET["lat0"]) && isset($_GET["lon0"]) && $osite == $site) {
 
 $t->title = "RADAR &amp; NWS Warnings";
 $jsextra = <<<EOM
-<script type="text/javascript" src="warnings.js?v=2"></script>
+<script type="module" src="warnings.js"></script>
 <script src="/vendor/jquery-ui/{$JQUERYUI}/jquery-ui.min.js"></script>
 <script language="javascript" type="text/javascript" src="/vendor/jsani/2.84/jquery.jsani.min.js"></script>
 <script src="/vendor/select2/4.0.3/select2.min.js"></script>
 <script language="JavaScript1.2" type="text/javascript">
+$(document).ready(() => {
+    $(".iemselect2").select2();
+});
 EOM;
 $headextra = <<<EOF
 <link rel="stylesheet" href="/vendor/jquery-ui/{$JQUERYUI}/jquery-ui.min.css">
@@ -327,12 +330,16 @@ $miselect = minuteSelect($m, "minute", 5);
 
 $achecked = ($isarchive) ? " CHECKED='CHECKED'" : "";
 $dwwidth = $width + 250;
-$content .= <<<EOF
+$content .= <<<EOM
 <div id="datawindow" style="background: #eee; width: {$dwwidth}px; z-index: 2;">
-<input type="submit" value="Layers" style="background: #73FA4D;" onClick="javascript: showControl('layers-control'); return false;">
-<input type="submit" value="Locations" style="background: #F2FE5A;" onClick="javascript: showControl('locations-control'); return false;">
-<input type="submit" value="Time" style="background: #FF5EC4;" onClick="javascript: showControl('time-control'); return false;">
-<input type="submit" value="Options" style="background: #2EA7F2;" onClick="javascript: showControl('options-control'); return false;">
+<button type="button" data-control="layers" style="background: #73FA4D;">
+Layers</button>
+<button type="button" data-control="locations" style="background: #F2FE5A;">
+Locations</button>
+<button type="button" data-control="time" style="background: #FF5EC4;">
+Time</button>
+<button type="button" data-control="options" style="background: #2EA7F2;">
+Options</button>
 <input type="submit" value="Update Map">
 <br />
 <div id="layers-control" style="width: 450px; background: #73FA4D; display: none; z-index: 3; position: absolute; padding: 5px; margin: 2px; border: 2px solid #000;">
@@ -343,7 +350,9 @@ $content .= <<<EOF
 {$lselect}
 <input type="hidden" name="layers[]" value="blank">
 
-<div style="float: right;"><input type="submit" onClick="javascript: setLayerDisplay('layers-control', 'none'); return false;" value="Save Settings"><input type="submit" value="Save + Update Map"> </div>
+<div style="float: right;">
+<button type="button" data-control="layers">Save Settings</button>
+<input type="submit" value="Save + Update Map"> </div>
 </div>
 <div id="locations-control" style="width: 450px; background: #F2FE5A; display: none; z-index: 3; position: absolute;  padding: 5px; margin: 2px; border: 2px solid #000;">
 <strong>NWS CWSU/WFO/RFC Office:</strong><br />
@@ -351,7 +360,8 @@ $content .= <<<EOF
 
 <br />Selecting a different office will move the display to that office.
 <div style="float: right;">
-<input type="submit" onClick="javascript: setLayerDisplay('locations-control', 'none'); return false;" value="Save Settings"><input type="submit" value="Save + Update Map"> </div>
+<button type="button" data-control="locations">Save Settings</button>
+<input type="submit" value="Save + Update Map"> </div>
 </div>
 <div id="time-control" style="width: 450px; background: #FF5EC4; display: none; z-index: 3; position: absolute;  padding: 5px; margin: 2px; border: 2px solid #000;">
 <p><strong>Select Time Zone</strong><br />
@@ -368,7 +378,9 @@ the loop.</p>
 <tr><th>Time:</th><td>{$hselect}:{$miselect}</td></tr>
 </table>
 
-<p><div style="float: right;"><input type="submit" onClick="javascript: setLayerDisplay('time-control', 'none'); return false;" value="Save Settings"><input type="submit" value="Save + Update Map"> </div>
+<p><div style="float: right;">
+<button type="button" data-control="time">Save Settings</button>
+<input type="submit" value="Save + Update Map"> </div>
 </div>
 <div id="options-control" style="width: 450px; background: #2EA7F2; display: none; z-index: 3; position: absolute;  padding: 5px; margin: 2px; border: 2px solid #000;">
 <strong>Warning geography:</strong>
@@ -406,9 +418,11 @@ geography associated with them.  You can pick which or both to display:
 <br />Time window around plot valid time to plot LSRs.
 <br />{$lrselect}
 {$lwselect}
-<div style="float: right;"><input type="submit" onClick="javascript: setLayerDisplay('options-control', 'none'); return false;" value="Save Settings"><input type="submit" value="Save + Update Map"> </div>
+<div style="float: right;">
+<button type="button" data-control="options">Save Settings</button>
+<input type="submit" value="Save + Update Map"> </div>
 </div>
-EOF;
+EOM;
 
 $heightadd = 0;
 $maptitle = "IEM NEXRAD Mosaic Base Reflectivity";
@@ -425,7 +439,7 @@ if ($loop === 1 || $loop === 2) {
     $memcache = new Memcached();
     $memcache->addServer('iem-memcached', 11211);
     // UNIX time is not unique enough, so we multiply by a random int
-    $fts = time() * rand(1, 100);
+    $fts = time() * random_int(1, 100);
     $memcache->set("/GIS/apps/rview/warnings.phtml?fts={$fts}", $urls, 86400);
 
     $content .= "</form>";
