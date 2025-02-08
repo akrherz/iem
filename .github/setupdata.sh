@@ -1,6 +1,7 @@
 # Ensure we error out
 set -x -e
 # Paths are setup in setuppaths.sh
+python .github/ci_db_testdata.py
 python scripts/dbutil/sync_stations.py
 python scripts/mrms/init_daily_mrms.py --year=2024
 python scripts/mrms/init_mrms_dailyc.py

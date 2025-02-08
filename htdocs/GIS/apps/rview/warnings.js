@@ -1,9 +1,7 @@
-function addTime() {
-    const d = new Date();
-    document.form.tzoff.value = (d.getTimezoneOffset() * 60);
-}
 
-function showControl(layerName) {
+import $ from '/js/jquery.module.js';
+
+export function showControl(layerName) {
     const oldval = document.getElementById(layerName).style.display;
     setLayerDisplay("layers-control", 'none');
     setLayerDisplay("locations-control", 'none');
@@ -13,23 +11,15 @@ function showControl(layerName) {
         setLayerDisplay(layerName, 'block');
     }
 }
-function setLayerDisplay(layerName, d) {
-    if (document.getElementById) {
-        const w = document.getElementById(layerName);
-        w.style.display = d;
-    }
-}
-function flipLayerDisplay(layerName) {
-    if (document.getElementById) {
-        const w = document.getElementById(layerName);
-        if (w.style.display === "none") {
-            w.style.display = "block";
-        } else {
-            w.style.display = "none";
-        }
-    }
+
+export function setLayerDisplay(layerName, dd) {
+    const ww = document.getElementById(layerName);
+    ww.style.display = dd;
 }
 
 $(document).ready(() => {
-    $(".iemselect2").select2();
+    $("#datawindow button").click((event) => {
+        const layer = $(event.target).data("control");
+        showControl(`${layer}-control`);
+    });
 });
