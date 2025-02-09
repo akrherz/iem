@@ -128,7 +128,9 @@ def main(days: int):
     df["ticket"] = False
     for stid in df.index:
         df.at[stid, "ticket"] = qdict.get(stid, {}).get("soil4", False)
-        x, y = get_idx(hlons, hlats, nt.sts[stid]["lon"], nt.sts[stid]["lat"])
+        x, y = get_idx(  # skipcq
+            hlons, hlats, nt.sts[stid]["lon"], nt.sts[stid]["lat"]
+        )
         df.at[stid, "nam"] = nam[x, y]
         df.at[stid, "lat"] = nt.sts[stid]["lat"]
         df.at[stid, "lon"] = nt.sts[stid]["lon"]
@@ -164,7 +166,7 @@ def main(days: int):
             index_col=None,
         )
     for i, row in cdf.iterrows():
-        x, y = get_idx(hlons, hlats, row["lon"], row["lat"])
+        x, y = get_idx(hlons, hlats, row["lon"], row["lat"])  # skipcq
         cdf.at[i, "nam"] = nam[x, y]
 
     mp = MapPlot(

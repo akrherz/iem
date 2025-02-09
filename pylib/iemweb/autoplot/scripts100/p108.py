@@ -129,7 +129,7 @@ def plotter(ctx: dict):
         c{glabel}, o.precip as oprecip, cprecip,
         sdd86(o.high, o.low) as osdd86, csdd86 from alldata o
         JOIN avgs a on (o.sday = a.sday)
-        WHERE station = %s and o.sday != '0229' ORDER by day ASC
+        WHERE station = :station and o.sday != '0229' ORDER by day ASC
         """,
                 glabel=glabel,
             ),

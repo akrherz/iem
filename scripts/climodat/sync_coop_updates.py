@@ -88,7 +88,7 @@ def compare_and_update(ccursor, currentob, newob):
 def _fetch(ccursor, climostation, row, table):
     ccursor.execute(
         "SELECT high, low, precip, snow, snowd, station, day from "
-        f"{table} WHERE station = %s and day = %s",
+        f"{table} WHERE station = %s and day = %s",  # skipcq
         (climostation, row["date"]),
     )
     return ccursor.fetchone()
@@ -150,6 +150,7 @@ def main():
     logl("synced %s rows, %s unused, %s dups", updates, unused, dups)
     ccursor.close()
     coopdb.commit()
+    accessdb.close()
 
 
 if __name__ == "__main__":
