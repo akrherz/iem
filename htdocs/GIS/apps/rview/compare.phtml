@@ -73,7 +73,7 @@ $ftime = filemtime('/mesonet/ldmdata/gis/images/4326/ridge/DMX/N0B_0.png');
 $radTS = date("m/d h:i a", $ftime);
 $s = drawStateNEXRAD($extents);
 
-$t->content = <<<EOF
+$t->content = <<<EOM
 <ol class="breadcrumb">
 <li><a href="/current/radar.phtml">Current RADAR Products</a></li>
 <li class="active">RADAR comparison</li>
@@ -127,5 +127,5 @@ $t->content = <<<EOF
 </tr>
 
 </table>
-EOF;
+EOM;
 $t->render('single.phtml');

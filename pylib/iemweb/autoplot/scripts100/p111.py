@@ -3,7 +3,7 @@
 from datetime import date
 
 import pandas as pd
-from pyiem.database import get_sqlalchemy_conn
+from pyiem.database import get_sqlalchemy_conn, sql_helper
 from pyiem.exceptions import NoDataFound
 
 from iemweb.autoplot import ARG_STATION
@@ -29,11 +29,13 @@ def plotter(ctx: dict):
 
     with get_sqlalchemy_conn("coop") as conn:
         df = pd.read_sql(
-            "SELECT day, precip from alldata WHERE "
-            "station = %s and precip is not null "
-            "ORDER by precip DESC LIMIT 30",
+            sql_helper(
+                "SELECT day, precip from alldata WHERE "
+                "station = :station and precip is not null "
+                "ORDER by precip DESC LIMIT 30"
+            ),
             conn,
-            params=(station,),
+            params={"station": station},
             index_col=None,
         )
     if df.empty:

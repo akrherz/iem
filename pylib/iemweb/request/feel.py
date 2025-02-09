@@ -1,13 +1,11 @@
 """FEEL data download"""
 
-# pylint: disable=abstract-class-instantiated
 from io import BytesIO
 
 import pandas as pd
-from pyiem.database import get_sqlalchemy_conn
+from pyiem.database import get_sqlalchemy_conn, sql_helper
 from pyiem.exceptions import IncompleteWebRequest
 from pyiem.webutil import iemapp
-from sqlalchemy import text
 
 EXL = "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"
 
@@ -20,13 +18,13 @@ def run(sts, ets, start_response):
             "SELECT * from feel_data_daily where "
             "valid >= :sts and valid < :ets ORDER by valid ASC"
         )
-        df = pd.read_sql(text(sql), dbconn, params=params)
+        df = pd.read_sql(sql_helper(sql), dbconn, params=params)
 
         sql = (
             "SELECT * from feel_data_hourly where "
             "valid >= :sts and valid < :ets ORDER by valid ASC"
         )
-        df2 = pd.read_sql(text(sql), dbconn, params=params)
+        df2 = pd.read_sql(sql_helper(sql), dbconn, params=params)
 
     def fmt(val):
         """Lovely hack."""

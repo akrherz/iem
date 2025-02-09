@@ -12,10 +12,9 @@ from io import BytesIO, StringIO
 
 import pandas as pd
 from pydantic import AwareDatetime, Field
-from pyiem.database import get_sqlalchemy_conn
+from pyiem.database import get_sqlalchemy_conn, sql_helper
 from pyiem.exceptions import IncompleteWebRequest
 from pyiem.webutil import CGIModel, ListOrCSVType, iemapp
-from sqlalchemy import text
 
 EXL = "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"
 
@@ -77,7 +76,7 @@ def get_data(sts, ets, stations, fmt):
     """Go fetch data please"""
     with get_sqlalchemy_conn("other") as conn:
         df = pd.read_sql(
-            text(
+            sql_helper(
                 """
             select
             valid at time zone 'UTC' as utc_valid, * from alldata
@@ -97,7 +96,6 @@ def get_data(sts, ets, stations, fmt):
         return df.to_json(orient="records")
     if fmt == "excel":
         bio = BytesIO()
-        # pylint: disable=abstract-class-instantiated
         with pd.ExcelWriter(bio, engine="xlsxwriter") as writer:
             df.to_excel(writer, sheet_name="Data", index=False)
         return bio.getvalue()

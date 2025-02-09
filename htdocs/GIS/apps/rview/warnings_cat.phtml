@@ -11,7 +11,7 @@ $phenomena = isset($_GET["phenomena"]) ? substr(xssafe($_GET["phenomena"]),0,2) 
 $significance = isset($_GET["significance"]) ? substr(xssafe($_GET["significance"]),0,1) : "W";
 
 /* Generate URL for forwarding */
-$uri = sprintf("/vtec/%s-O-NEW-K%s-%s-%s-%04d.html",  
+$uri = sprintf("/vtec/event/%s-O-NEW-K%s-%s-%s-%04d",  
   $year, $wfo, $phenomena, $significance, $eventid);
 
 header("Location: $uri");

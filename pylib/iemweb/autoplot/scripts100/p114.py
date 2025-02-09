@@ -3,7 +3,7 @@
 from datetime import date
 
 import pandas as pd
-from pyiem.database import get_sqlalchemy_conn
+from pyiem.database import get_sqlalchemy_conn, sql_helper
 from pyiem.exceptions import NoDataFound
 
 from iemweb.autoplot import ARG_STATION
@@ -29,11 +29,13 @@ def plotter(ctx: dict):
 
     with get_sqlalchemy_conn("coop") as conn:
         df = pd.read_sql(
-            "SELECT year, count(low) from alldata "
-            "WHERE station = %s and low >= 32 and year < %s "
-            "GROUP by year ORDER by year ASC",
+            sql_helper(
+                "SELECT year, count(low) from alldata "
+                "WHERE station = :station and low >= 32 and year < :year "
+                "GROUP by year ORDER by year ASC"
+            ),
             conn,
-            params=(station, date.today().year),
+            params={"station": station, "year": date.today().year},
             index_col=None,
         )
     if df.empty:

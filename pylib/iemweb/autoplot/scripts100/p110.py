@@ -8,7 +8,7 @@ from datetime import date
 
 import numpy as np
 import pandas as pd
-from pyiem.database import get_sqlalchemy_conn
+from pyiem.database import get_sqlalchemy_conn, sql_helper
 from pyiem.exceptions import NoDataFound
 from pyiem.plot import figure
 
@@ -84,12 +84,14 @@ def plotter(ctx: dict):
     """Go"""
     station = ctx["station"]
 
+    table = f"alldata_{station[:2].lower()}"
     with get_sqlalchemy_conn("coop") as conn:
         df = pd.read_sql(
-            f"""
+            sql_helper(
+                """
         with events as (
-            SELECT c.climoweek, a.precip, a.year from alldata_{station[:2]} a
-            JOIN climoweek c on (c.sday = a.sday) WHERE a.station = %s
+            SELECT c.climoweek, a.precip, a.year from {table} a
+            JOIN climoweek c on (c.sday = a.sday) WHERE a.station = :station
             and precip > 0.009),
         ranks as (
             SELECT climoweek, year,
@@ -121,8 +123,10 @@ def plotter(ctx: dict):
         stats e JOIN ranks r on (r.climoweek = e.climoweek) WHERE r.rank = 1
         ORDER by e.climoweek ASC
         """,
+                table=table,
+            ),
             conn,
-            params=(station,),
+            params={"station": station},
             index_col="climoweek",
         )
     if df.empty:

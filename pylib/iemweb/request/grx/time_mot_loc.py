@@ -125,7 +125,6 @@ def application(environ, start_response):
     valid = utc()
     refresh = 60
     if environ["valid"]:
-        # pylint: disable=no-value-for-parameter
         valid = environ["valid"]
         refresh = 86400
     t1 = valid

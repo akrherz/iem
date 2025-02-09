@@ -497,7 +497,6 @@ def do_excel(sql, fmt, params):
     if fmt == "csv":
         return df.to_csv(index=False).encode("ascii")
     bio = BytesIO()
-    # pylint: disable=abstract-class-instantiated
     with pd.ExcelWriter(bio, engine="xlsxwriter") as writer:
         df.to_excel(writer, sheet_name="VTEC WaWA", index=False)
     return bio.getvalue()

@@ -3,7 +3,6 @@
 Run from RUN_10AFTER.sh
 """
 
-# pylint: disable=no-member
 import sys
 import warnings
 
@@ -25,7 +24,7 @@ from metpy.calc import (
     wind_speed,
 )
 from metpy.units import units
-from pyiem.database import get_dbconn, get_sqlalchemy_conn
+from pyiem.database import get_dbconn, get_sqlalchemy_conn, sql_helper
 from pyiem.network import Table as NetworkTable
 from pyiem.util import logger
 from scipy.interpolate import interp1d
@@ -316,15 +315,19 @@ def main(year: int):
     dbconn = get_dbconn("raob")
     cursor = dbconn.cursor()
     nt = NetworkTable("RAOB")
+    table = f"raob_profile_{year}"
     with get_sqlalchemy_conn("raob") as conn:
         df = pd.read_sql(
-            f"""
+            sql_helper(
+                """
             select f.fid, f.station, pressure, dwpc, tmpc, drct, smps, height,
-            levelcode from raob_profile_{year} p JOIN raob_flights f
+            levelcode from {table} p JOIN raob_flights f
             on (p.fid = f.fid) WHERE (not computed or computed is null)
             and height is not null and pressure is not null and not locked
             ORDER by pressure DESC
         """,
+                table=table,
+            ),
             conn,
         )
     if df.empty or pd.isnull(df["smps"].max()):

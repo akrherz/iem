@@ -2,7 +2,7 @@
 
 function printHTML($urls, $width, $height){
     $urls = implode("::", $urls);
-return <<<EOF
+return <<<EOM
 <form name="jsani" id="jsani" action="#" style="width: {$width}px; height: {$height}px;">
     <input type="hidden" name="filenames" value="{$urls}">
     <input type="hidden" name="controls"
@@ -15,5 +15,5 @@ return <<<EOF
     <input type="hidden" name="first_frame_pause" value="2"> 
     <input type="hidden" name="frame_pause" value="2:4,3:5"> 
 </form>
-EOF;
+EOM;
 }

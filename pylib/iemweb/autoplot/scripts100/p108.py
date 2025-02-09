@@ -11,7 +11,7 @@ from datetime import date, datetime, timedelta
 
 import numpy as np
 import pandas as pd
-from pyiem.database import get_sqlalchemy_conn
+from pyiem.database import get_sqlalchemy_conn, sql_helper
 from pyiem.exceptions import NoDataFound
 from pyiem.plot import figure
 
@@ -117,20 +117,28 @@ def plotter(ctx: dict):
 
     with get_sqlalchemy_conn("coop") as conn:
         df = pd.read_sql(
-            f"""
+            sql_helper(
+                """
         WITH avgs as (
-            SELECT sday, avg(gddxx(%s, %s, high, low)) as c{glabel},
+            SELECT sday, avg(gddxx(:gddbase, :gddceil, high, low))
+                as c{glabel},
             avg(sdd86(high, low)) as csdd86, avg(precip) as cprecip
-            from alldata WHERE station = %s GROUP by sday
+            from alldata WHERE station = :station GROUP by sday
         )
-        SELECT day, gddxx(%s, %s, high, low) as o{glabel}, c{glabel},
-        o.precip as oprecip, cprecip,
+        SELECT day, gddxx(:gddbase, :gddceil, high, low) as o{glabel},
+        c{glabel}, o.precip as oprecip, cprecip,
         sdd86(o.high, o.low) as osdd86, csdd86 from alldata o
         JOIN avgs a on (o.sday = a.sday)
         WHERE station = %s and o.sday != '0229' ORDER by day ASC
         """,
+                glabel=glabel,
+            ),
             conn,
-            params=(gddbase, gddceil, station, gddbase, gddceil, station),
+            params={
+                "station": station,
+                "gddbase": gddbase,
+                "gddceil": gddceil,
+            },
             index_col="day",
         )
     df["precip_diff"] = df["oprecip"] - df["cprecip"]

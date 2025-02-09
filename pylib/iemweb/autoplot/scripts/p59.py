@@ -12,11 +12,10 @@ import numpy as np
 import pandas as pd
 from metpy.calc import wind_components
 from metpy.units import units
-from pyiem.database import get_sqlalchemy_conn
+from pyiem.database import get_sqlalchemy_conn, sql_helper
 from pyiem.exceptions import NoDataFound
 from pyiem.plot import figure
 from pyiem.util import utc
-from sqlalchemy import text
 
 PDICT = {
     "mps": "Meters per Second",
@@ -116,7 +115,7 @@ def plotter(ctx: dict):
     ctx["ab"] = ctx["_nt"].sts[ctx["station"]]["archive_begin"]
     with get_sqlalchemy_conn("asos") as conn:
         df = pd.read_sql(
-            text("""
+            sql_helper("""
             SELECT extract(doy from valid) as doy, sknt, drct from alldata
             where station = :station and sknt >= 0 and drct >= 0
             and report_type = 3"""),

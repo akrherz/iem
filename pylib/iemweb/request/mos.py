@@ -130,7 +130,6 @@ def get_data(sts, ets, station, model, fmt):
         return df.to_json(orient="records")
     if fmt == "excel":
         bio = BytesIO()
-        # pylint: disable=abstract-class-instantiated
         with pd.ExcelWriter(bio, engine="xlsxwriter") as writer:
             df.to_excel(writer, sheet_name="Data", index=False)
         return bio.getvalue()

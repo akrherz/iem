@@ -6,8 +6,9 @@ import sys
 from datetime import date
 from io import BytesIO
 
+from pyiem.database import get_dbconn
 from pyiem.exceptions import IncompleteWebRequest
-from pyiem.util import get_dbconn
+from pyiem.plot.use_agg import plt
 from pyiem.webutil import iemapp
 
 PATTERN = re.compile(
@@ -73,10 +74,6 @@ def application(environ, start_response):
     ) % data
     # Option 3, we have no file.
     if not os.path.isfile(fn):
-        # lazy import to save the expense of firing this up when this loads
-        # pylint: disable=import-outside-toplevel
-        from pyiem.plot.use_agg import plt
-
         headers.append(get_content_type("png"))
         (_, ax) = plt.subplots(1, 1)
         ax.text(

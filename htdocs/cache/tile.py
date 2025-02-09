@@ -1,3 +1,5 @@
 """implemented in pylib/iemweb/cache/tile.py"""
 
-from iemweb.cache.tile import application  # noqa: F401
+from iemweb.cache.tile import application
+
+_ = application

@@ -365,7 +365,6 @@ def plotter(ctx: dict):
 
             s = np.s_[x0 : x1 + 1, y0 : y1 + 1]
             if np.any(mask[s]):
-                # pylint: disable=protected-access
                 a.set_position([a._x - int(lastdoy / 14), a._y])
             else:
                 mask[s] = True

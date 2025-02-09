@@ -19,11 +19,10 @@ import calendar
 
 import pandas as pd
 from pyiem import reference
-from pyiem.database import get_sqlalchemy_conn
+from pyiem.database import get_sqlalchemy_conn, sql_helper
 from pyiem.exceptions import NoDataFound
 from pyiem.nws import vtec
 from pyiem.plot import figure
-from sqlalchemy import text
 
 from iemweb.autoplot import ARG_FEMA, FEMA_REGIONS, fema_region2states
 
@@ -192,8 +191,8 @@ def plotter(ctx: dict):
         agg = "(extract(doy from issue) / 7)::int"
     with get_sqlalchemy_conn("postgis") as conn:
         df = pd.read_sql(
-            text(
-                f"""
+            sql_helper(
+                """
         with obs as (
             SELECT distinct vtec_year as yr,
             {agg} as datum, wfo, eventid
@@ -202,7 +201,9 @@ def plotter(ctx: dict):
         )
         SELECT yr::int, datum, count(*) from obs GROUP by yr, datum
         ORDER by yr ASC
-        """
+        """,
+                limiter=limiter,
+                agg=agg,
             ),
             conn,
             params=params,

@@ -20,11 +20,10 @@ import matplotlib.dates as mdates
 import pandas as pd
 from matplotlib import ticker
 from matplotlib.patches import Rectangle
-from pyiem.database import get_sqlalchemy_conn
+from pyiem.database import get_sqlalchemy_conn, sql_helper
 from pyiem.exceptions import NoDataFound
 from pyiem.nws import vtec
 from pyiem.plot import figure
-from sqlalchemy import text
 
 PDICT = {
     "wfo": "NWS Forecast Office",
@@ -124,7 +123,7 @@ def compute_ugcs(ugc, valid):
     name = ""
     with get_sqlalchemy_conn("postgis") as conn:
         res = conn.execute(
-            text(
+            sql_helper(
                 """
             with useme as (
             SELECT geom, st_area(geom) from ugcs
@@ -174,8 +173,8 @@ def plotter(ctx: dict):
     date_cols = ["minproductissue", "minissue", "maxexpire", "maxinitexpire"]
     with get_sqlalchemy_conn("postgis") as conn:
         df = pd.read_sql(
-            text(
-                f"""
+            sql_helper(
+                """
             SELECT wfo, phenomena, significance, eventid,
             min(product_issue at time zone 'UTC') as minproductissue,
             min(issue at time zone 'UTC') as minissue,
@@ -187,7 +186,8 @@ def plotter(ctx: dict):
             WHERE {limiter} and issue > :sts and issue < :ets
             GROUP by wfo, phenomena, significance, eventid, year
             ORDER by minproductissue ASC
-        """
+        """,
+                limiter=limiter,
             ),
             conn,
             params=params,

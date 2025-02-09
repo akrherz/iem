@@ -3,14 +3,13 @@
 Called from run_plots.sh
 """
 
-# pylint: disable=unbalanced-tuple-unpacking
 from datetime import date, datetime, timedelta
 
 import click
 import numpy as np
 import pandas as pd
 import pygrib
-from pyiem.database import get_sqlalchemy_conn
+from pyiem.database import get_sqlalchemy_conn, sql_helper
 from pyiem.network import Table
 from pyiem.plot import MapPlot, get_cmap
 from pyiem.tracker import loadqc
@@ -100,20 +99,20 @@ def main(days: int):
     # Query out the data
     with get_sqlalchemy_conn("isuag") as conn:
         df = pd.read_sql(
-            """
+            sql_helper("""
             WITH ranges as (
                 select station, count(*), min(t4_c_avg_qc),
                 max(t4_c_avg_qc) from sm_hourly WHERE
-                valid >= %s and valid < %s and t4_c_avg_qc > -40
+                valid >= :sts and valid < :ets and t4_c_avg_qc > -40
                 and t4_c_avg_qc < 50 GROUP by station
             )
             SELECT d.station, d.t4_c_avg_qc,
             r.max as hourly_max_c, r.min as hourly_min_c, r.count
             from sm_daily d JOIN ranges r on (d.station = r.station)
-            where valid = %s and t4_c_avg_qc > -40 and r.count > 19
-        """,
+            where valid = :sts and t4_c_avg_qc > -40 and r.count > 19
+        """),
             conn,
-            params=(ts, ts + timedelta(days=1), ts),
+            params={"sts": ts, "ets": ts + timedelta(days=1)},
             index_col="station",
         )
     if df.empty:
