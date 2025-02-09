@@ -236,7 +236,7 @@ def load_data(ctx: dict, basets: datetime, endts: datetime):
         for dt in pd.date_range(basets.date(), endts.date())
         if basets < datetime(dt.year, dt.month, dt.day, 7) < endts
     ]
-    if ctx["coop"] == "yes" or ctx["v"] == "ice":
+    if ctx["coop"] == "yes" and ctx["v"] != "ice":
         with get_sqlalchemy_conn("iem") as conn:
             coopdf: gpd.GeoDataFrame = gpd.read_postgis(
                 sql_helper(
@@ -265,7 +265,7 @@ def load_data(ctx: dict, basets: datetime, endts: datetime):
             coopdf["plotme"] = True
             coopdf["source"] = "COOP"
             df = pd.concat([df, coopdf], ignore_index=True, sort=False)
-    if ctx["cocorahs"] == "yes":
+    if ctx["cocorahs"] == "yes" and ctx["v"] != "ice":
         with get_sqlalchemy_conn("coop") as conn:
             cocodf: gpd.GeoDataFrame = gpd.read_postgis(
                 sql_helper(
