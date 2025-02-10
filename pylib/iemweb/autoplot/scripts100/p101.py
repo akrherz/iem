@@ -11,11 +11,10 @@ from datetime import date
 
 import numpy as np
 import pandas as pd
-from pyiem.database import get_sqlalchemy_conn
+from pyiem.database import get_sqlalchemy_conn, sql_helper
 from pyiem.exceptions import NoDataFound
 from pyiem.nws import vtec
 from pyiem.plot import figure_axes
-from sqlalchemy import text
 
 
 def get_description():
@@ -71,12 +70,15 @@ def plotter(ctx: dict):
     rows = []
     with get_sqlalchemy_conn("postgis") as conn:
         res = conn.execute(
-            text(f"""
+            sql_helper(
+                """
             select phenomena, significance, min(issue), count(*) from warnings
             where ugc is not null and issue > :sts
             and issue < :ets {wfo_limiter}
             GROUP by phenomena, significance ORDER by count DESC
-        """),
+        """,
+                wfo_limiter=wfo_limiter,
+            ),
             params,
         )
         if res.rowcount == 0:

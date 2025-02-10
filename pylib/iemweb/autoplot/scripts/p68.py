@@ -13,10 +13,9 @@ image size at this time.
 
 import pandas as pd
 from matplotlib.ticker import MaxNLocator
-from pyiem.database import get_sqlalchemy_conn
+from pyiem.database import get_sqlalchemy_conn, sql_helper
 from pyiem.exceptions import NoDataFound
 from pyiem.plot import figure, fitbox
-from sqlalchemy import text
 
 
 def get_description():
@@ -45,13 +44,14 @@ def plotter(ctx: dict):
     sqllim = "wfo = :wfo and " if station != "_ALL" else ""
     with get_sqlalchemy_conn("postgis") as conn:
         df = pd.read_sql(
-            text(
-                f"""
+            sql_helper(
+                """
             SELECT distinct extract(year from issue) as year,
             phenomena, significance from warnings WHERE
             {sqllim} phenomena is not null and significance is not null
             and issue > '2005-01-01'
-            """
+            """,
+                sqllim=sqllim,
             ),
             conn,
             params=params,
@@ -71,9 +71,10 @@ def plotter(ctx: dict):
     fig = figure(figsize=(10, 14 if station != "_ALL" else 21), apctx=ctx)
     fitbox(fig, title, 0.1, 0.97, 0.97, 0.99)
     fitbox(fig, subtitle, 0.1, 0.97, 0.95, 0.97)
-    ax = [None, None]
-    ax[0] = fig.add_axes([0.05, 0.75, 0.93, 0.2])
-    ax[1] = fig.add_axes([0.05, 0.03, 0.93, 0.68])
+    ax = [
+        fig.add_axes((0.05, 0.75, 0.93, 0.2)),
+        fig.add_axes((0.05, 0.03, 0.93, 0.68)),
+    ]
 
     ax[0].bar(
         gdf.index.values, gdf["wfo"], width=0.8, fc="b", ec="b", align="center"

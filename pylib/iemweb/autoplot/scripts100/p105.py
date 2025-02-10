@@ -10,10 +10,9 @@ import calendar
 
 import numpy as np
 import pandas as pd
-from pyiem.database import get_sqlalchemy_conn
+from pyiem.database import get_sqlalchemy_conn, sql_helper
 from pyiem.exceptions import NoDataFound
 from pyiem.plot import figure
-from sqlalchemy import text
 
 from iemweb.autoplot import ARG_STATION
 
@@ -60,7 +59,7 @@ def plotter(ctx: dict):
     use_trace = ctx["trace"] == "yes"
     with get_sqlalchemy_conn("coop") as conn:
         df = pd.read_sql(
-            text("""
+            sql_helper("""
         with data as (
         select sday, day, precip from alldata
         where station = :station),

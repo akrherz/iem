@@ -21,9 +21,8 @@ from typing import Optional
 import click
 import httpx
 import pandas as pd
-from pyiem.database import get_dbconn, get_sqlalchemy_conn
+from pyiem.database import get_dbconn, get_sqlalchemy_conn, sql_helper
 from pyiem.util import exponential_backoff, logger, set_property, utc
-from sqlalchemy import text
 from tqdm import tqdm
 
 LOG = logger()
@@ -354,11 +353,12 @@ def init_dataframes(
 
 def merge_archive_end(df, dt):
     """Figure out our archive end times."""
+    table = f"t{dt:%Y%m}_1minute"
     with get_sqlalchemy_conn("asos1min") as conn:
         df2 = pd.read_sql(
-            text(
-                f"SELECT station, max(valid) from t{dt:%Y%m}_1minute "
-                "GROUP by station"
+            sql_helper(
+                "SELECT station, max(valid) from {table} GROUP by station",
+                table=table,
             ),
             conn,
             index_col="station",

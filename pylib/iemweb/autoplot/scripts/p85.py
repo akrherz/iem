@@ -9,10 +9,9 @@ import calendar
 from datetime import datetime
 
 import pandas as pd
-from pyiem.database import get_sqlalchemy_conn
+from pyiem.database import get_sqlalchemy_conn, sql_helper
 from pyiem.exceptions import NoDataFound
 from pyiem.plot import figure
-from sqlalchemy import text
 
 PDICT = {
     "above": "At or Above",
@@ -107,10 +106,11 @@ def plotter(ctx: dict):
     tzname = ctx["_nt"].sts[station]["tzname"]
     with get_sqlalchemy_conn("asos") as conn:
         df = pd.read_sql(
-            text(f"""
+            sql_helper(
+                """
         WITH data as (
             SELECT valid at time zone :tzname  + '10 minutes'::interval as v,
-            {varname}::{CASTS.get(varname, "numeric")} as datum
+            {varname}::{cst} as datum
             from alldata where station = :station and {varname} is not null
             and extract(month from valid) = :month and report_type = 3)
 
@@ -125,7 +125,10 @@ def plotter(ctx: dict):
         sum(case when datum >= :thres THEN 1 ELSE 0 END) as above,
         count(*) from data
         GROUP by hour ORDER by hour ASC
-        """),
+        """,
+                varname=varname,
+                cst=CASTS.get(varname, "numeric"),
+            ),
             conn,
             params={
                 "station": station,
