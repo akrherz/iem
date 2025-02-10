@@ -233,7 +233,6 @@ def main(offset: int):
             subprocess.call(["sh", "SYNC_STATIONS.sh"])
             os.chdir("../ingestors/madis")
             LOG.info("...done with sync.")
-        del iem
     icursor.close()
     pgconn.commit()
     pgconn.close()
