@@ -29,6 +29,7 @@ from datetime import date
 
 import numpy as np
 import pandas as pd
+from matplotlib.text import Text
 from pyiem import reference
 from pyiem.database import get_sqlalchemy_conn, sql_helper
 from pyiem.exceptions import NoDataFound
@@ -318,7 +319,7 @@ def plotter(ctx: dict):
         return make_barplot(ctx, df)
     fig = figure(title=ctx["title"], apctx=ctx)
     ax = fig.add_axes((0.05, 0.1, 0.65, 0.8))
-    ann = []
+    ann: list[Text] = []
     for yr in range(ctx["syear"], eyear + 1):
         df2 = df[df["year"] == yr]
         if len(df2.index) < 2:
@@ -365,8 +366,8 @@ def plotter(ctx: dict):
 
             s = np.s_[x0 : x1 + 1, y0 : y1 + 1]
             if np.any(mask[s]):
-                # pylint: disable=protected-access
-                a.set_position([a._x - int(lastdoy / 14), a._y])
+                x, y = a.get_position()
+                a.set_position([x - int(lastdoy / 14), y])
             else:
                 mask[s] = True
                 removals.append(a)

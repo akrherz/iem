@@ -168,7 +168,6 @@ def application(environ, start_response):
 
     # Excel
     bio = BytesIO()
-    # pylint: disable=abstract-class-instantiated
     with pd.ExcelWriter(bio, engine="xlsxwriter") as writer:
         df.to_excel(writer, sheet_name="Data", index=False)
     headers = [

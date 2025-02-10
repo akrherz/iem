@@ -17,7 +17,6 @@ IMAGETYPE PNG
 
 #
 PROJECTION
-#  "init=epsg:4326"
   "init=epsg:26915"
 END
 
@@ -32,7 +31,6 @@ WEB
    "wms_onlineresource" "https://mesonet.agron.iastate.edu/cgi-bin/mapserv/mapserv.wms?map=/opt/iem/htdocs/GIS/apps/rview/amosiac.map&amp;"
    "wms_srs" "EPSG:4269"
    "wms_abstract" "Ba Ba Ba"
-#   "wms_fees" "None"
    "wms_keywords" "Ba"
    "wms_accessconstraints" "None"
    "wms_contactperson" "Daryl Herzmann"

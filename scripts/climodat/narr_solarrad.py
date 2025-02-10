@@ -25,7 +25,6 @@ Review the following pdf file for details.
 Called from dl/download_narr.py
 """
 
-# pylint: disable=unpacking-non-sequence
 from datetime import date, datetime, timedelta
 from typing import Optional
 
@@ -36,7 +35,7 @@ import pandas as pd
 import pygrib
 import pyproj
 from affine import Affine
-from pyiem.database import get_dbconn, get_sqlalchemy_conn
+from pyiem.database import get_dbconn, get_sqlalchemy_conn, sql_helper
 from pyiem.grid.zs import CachingZonalStats
 from pyiem.util import archive_fetch, logger, utc
 
@@ -64,14 +63,14 @@ def compute_regions(affine: Affine, rsds, df):
     """Do the spatial averaging work."""
     with get_sqlalchemy_conn("coop") as conn:
         gdf = gpd.read_postgis(
-            """
-            SELECT t.id, ST_Transform(c.geom, %s) as geo
+            sql_helper("""
+            SELECT t.id, ST_Transform(c.geom, :lcc) as geo
             from stations t JOIN climodat_regions c on
             (t.iemid = c.iemid) ORDER by t.id ASC
-            """,
+            """),
             conn,
             index_col="id",
-            params=(LCC,),
+            params={"lcc": LCC},
             geom_col="geo",
         )
     czs = CachingZonalStats(affine)
@@ -116,8 +115,9 @@ def compute(df: pd.DataFrame, sids, dt: date, do_regions=False):
             else:
                 total += grb["values"] * 10800.0 / 1_000_000.0
 
-    df["i"] = np.digitize(df["projx"].to_numpy(), xaxis)
-    df["j"] = np.digitize(df["projy"].to_numpy(), yaxis)
+    if xaxis is not None and yaxis is not None:
+        df["i"] = np.digitize(df["projx"].to_numpy(), xaxis)
+        df["j"] = np.digitize(df["projy"].to_numpy(), yaxis)
     for sid, row in df.loc[sids].iterrows():
         df.at[sid, COL] = total[int(row["j"]), int(row["i"])]
 
@@ -131,16 +131,16 @@ def build_stations(dt) -> pd.DataFrame:
     """Figure out what we need data for."""
     with get_sqlalchemy_conn("coop") as conn:
         df = pd.read_sql(
-            """
-            SELECT station, st_x(ST_Transform(geom, %s)) as projx,
-            st_y(st_transform(geom, %s)) as projy, temp_hour
+            sql_helper("""
+            SELECT station, st_x(ST_Transform(geom, :lcc)) as projx,
+            st_y(st_transform(geom, :lcc)) as projy, temp_hour
             from alldata a JOIN stations t on (a.station = t.id) WHERE
-            t.network ~* 'CLIMATE' and a.day = %s and
+            t.network ~* 'CLIMATE' and a.day = :dt and
             state not in ('PR', 'HI', 'GU')
             ORDER by station ASC
-            """,
+            """),
             conn,
-            params=(LCC, LCC, dt),
+            params={"lcc": LCC, "dt": dt},
             index_col="station",
         )
     df[COL] = np.nan

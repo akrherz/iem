@@ -33,18 +33,16 @@ threshold=0.5&thresholdvar=RG
 
 """
 
-# pylint: disable=abstract-class-instantiated
 from datetime import timedelta
 from io import BytesIO, StringIO
 from typing import Optional
 
 import pandas as pd
 from pydantic import AwareDatetime, Field, field_validator
-from pyiem.database import get_sqlalchemy_conn
+from pyiem.database import get_sqlalchemy_conn, sql_helper
 from pyiem.exceptions import IncompleteWebRequest
 from pyiem.network import Table as NetworkTable
 from pyiem.webutil import CGIModel, ListOrCSVType, iemapp
-from sqlalchemy import text
 
 DELIMITERS = {"comma": ",", "space": " ", "tab": "\t"}
 EXL = "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"
@@ -201,7 +199,7 @@ def application(environ, start_response):
         )
     if not stations:
         raise IncompleteWebRequest("Error, no stations specified!")
-    sql = text(
+    sql = sql_helper(
         """
         SELECT station, valid at time zone 'UTC' as utc_valid, key, value
         from raw WHERE station = ANY(:ids) and

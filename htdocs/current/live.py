@@ -1,3 +1,6 @@
 """implemented in pylib/iemweb/current/live.py"""
 
-from iemweb.current.live import application  # noqa: F401
+from iemweb.current.live import application
+
+# appease the linter
+_ = application

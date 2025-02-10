@@ -26,17 +26,15 @@ https://mesonet.agron.iastate.edu/request/grx/l3attr.txt?poh=10&version=3.0
 
 """
 
-# pylint: disable=unpacking-non-sequence
 import math
 
 import numpy as np
 import pandas as pd
 import pyproj
 from pydantic import Field
-from pyiem.database import get_sqlalchemy_conn
+from pyiem.database import get_sqlalchemy_conn, sql_helper
 from pyiem.util import convert_value, utc
 from pyiem.webutil import CGIModel, iemapp
-from sqlalchemy import text
 
 # Do geo math in US National Atlas Equal Area
 P3857 = pyproj.Proj("EPSG:3857")
@@ -379,15 +377,18 @@ def get_df(nexrad, meso, tvs, poh, max_size):
 
     with get_sqlalchemy_conn("radar") as conn:
         df = pd.read_sql(
-            text(
-                f"""
+            sql_helper(
+                """
                 SELECT *, ST_x(geom) as lon, ST_y(geom) as lat,
                 valid at time zone 'UTC' as utc_valid
                 from nexrad_attributes WHERE
                 valid > now() - '15 minutes'::interval
                 {limiter} and poh >= :poh {meso_limiter} {tvs_limiter} and
                 max_size >= :max_size
-                 """
+                 """,
+                limiter=limiter,
+                meso_limiter=meso_limiter,
+                tvs_limiter=tvs_limiter,
             ),
             conn,
             params=params,

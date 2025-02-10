@@ -14,7 +14,7 @@ import click
 import httpx
 import numpy as np
 import pandas as pd
-from pyiem.database import get_dbconn, get_sqlalchemy_conn
+from pyiem.database import get_dbconn, get_sqlalchemy_conn, sql_helper
 from pyiem.network import Table as NetworkTable
 from pyiem.reference import TRACE_VALUE, ncei_state_codes
 from pyiem.util import logger
@@ -145,13 +145,13 @@ def do(meta, station, acis_station) -> int:
     pgconn = get_dbconn("coop")
     with get_sqlalchemy_conn("coop") as conn:
         obs = pd.read_sql(
-            """
+            sql_helper("""
             SELECT day, high, low, precip, snow, snowd, temp_hour, precip_hour,
             temp_estimated, precip_estimated, true as dbhas
-            from alldata WHERE station = %s ORDER by day ASC
-            """,
+            from alldata WHERE station = :station ORDER by day ASC
+            """),
             conn,
-            params=(station,),
+            params={"station": station},
             index_col="day",
         )
     LOG.info("Loaded %s rows from IEM", len(obs.index))

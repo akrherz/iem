@@ -21,10 +21,9 @@ import matplotlib.dates as mdates
 import numpy as np
 import pandas as pd
 from matplotlib.ticker import AutoMinorLocator, MaxNLocator
-from pyiem.database import get_sqlalchemy_conn
+from pyiem.database import get_sqlalchemy_conn, sql_helper
 from pyiem.exceptions import NoDataFound
 from pyiem.plot import figure_axes
-from sqlalchemy import text
 
 PDICT = {
     "NAM": "NAM (9 Dec 2008 - current)",
@@ -327,7 +326,7 @@ def plotter(ctx: dict):
     mosdata = {}
     with get_sqlalchemy_conn("mos") as conn:
         res = conn.execute(
-            text(T_SQL if is_temp else SQL.replace("RPL", ctx["var"])),
+            sql_helper(T_SQL if is_temp else SQL.replace("RPL", ctx["var"])),
             params,
         )
         for row in res.mappings():
@@ -360,10 +359,10 @@ def plotter(ctx: dict):
     obs = {}
     with get_sqlalchemy_conn("asos") as conn:
         if model in ["NBE", "NBS"] and is_temp:
-            res = conn.execute(text(NBM_TXN_OB_SQL), params)
+            res = conn.execute(sql_helper(NBM_TXN_OB_SQL), params)
         else:
             res = conn.execute(
-                text(
+                sql_helper(
                     T_SQL_OB
                     if is_temp
                     else SQL_OB.replace("RPL", LOOKUP[ctx["var"]])

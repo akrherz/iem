@@ -49,11 +49,10 @@ from zoneinfo import ZoneInfo
 import numpy as np
 import pandas as pd
 from pydantic import AwareDatetime, Field, field_validator
-from pyiem.database import get_sqlalchemy_conn
+from pyiem.database import get_sqlalchemy_conn, sql_helper
 from pyiem.exceptions import IncompleteWebRequest
 from pyiem.util import convert_value
 from pyiem.webutil import CGIModel, ListOrCSVType, iemapp
-from sqlalchemy import text
 
 EXL = "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"
 LEGACY_STS = re.compile("sts=[A-Z]")
@@ -160,7 +159,7 @@ def fetch_daily(environ: dict, cols: list):
 
     with get_sqlalchemy_conn("isuag") as conn:
         df = pd.read_sql(
-            text(
+            sql_helper(
                 """
     --- Get the Daily Max/Min soil values
     WITH soils as (
@@ -364,12 +363,14 @@ def fetch_hourly(environ: dict, cols: list):
                 cols.remove(col)
     with get_sqlalchemy_conn("isuag") as conn:
         df = pd.read_sql(
-            text(
-                f"""
+            sql_helper(
+                """
                 SELECT *, valid at time zone 'UTC' as utc_valid {sqlextra}
                 from {table} WHERE valid >= :sts and valid < :ets and
                 station = ANY(:stations) ORDER by valid ASC
-                """
+                """,
+                table=table,
+                sqlextra=sqlextra,
             ),
             conn,
             params={
@@ -476,7 +477,7 @@ def fetch_inversion(environ: dict, cols: list):
 
     with get_sqlalchemy_conn("isuag") as conn:
         df = pd.read_sql(
-            text(
+            sql_helper(
                 """
                 SELECT station, valid at time zone 'UTC' as utc_valid,
                 tair_15_c_avg_qc,
@@ -583,7 +584,6 @@ def application(environ, start_response):
     cols = [c for c in cols if c in df.columns]
     if fmt == "excel":
         bio = BytesIO()
-        # pylint: disable=abstract-class-instantiated
         if cols:
             with pd.ExcelWriter(bio, engine="xlsxwriter") as writer:
                 df.to_excel(

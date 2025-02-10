@@ -10,10 +10,9 @@ from datetime import date, datetime, timedelta
 import httpx
 import pandas as pd
 from matplotlib.dates import DateFormatter, DayLocator
-from pyiem.database import get_sqlalchemy_conn
+from pyiem.database import get_sqlalchemy_conn, sql_helper
 from pyiem.exceptions import NoDataFound
 from pyiem.plot import figure
-from sqlalchemy import text
 
 from iemweb.autoplot import ARG_STATION
 
@@ -79,7 +78,7 @@ def do_year_overlay(ctx, ax, pname, color, crosses_jan1):
 
     with get_sqlalchemy_conn("coop") as conn:
         obs = pd.read_sql(
-            text(
+            sql_helper(
                 """select day, year, high, low from alldata
             WHERE station = :station and day >= :sts and day <= :ets
             order by day ASC"""

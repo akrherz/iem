@@ -259,7 +259,6 @@ def do_excel_kml(fmt, params, sql_filters):
             raise IncompleteWebRequest("Too many results for Excel export.")
         df = df.drop(columns="geom")
         bio = BytesIO()
-        # pylint: disable=abstract-class-instantiated
         writer = pd.ExcelWriter(bio, engine="xlsxwriter")
         df.to_excel(writer, sheet_name="Local Storm Reports", index=False)
         worksheet = writer.sheets["Local Storm Reports"]

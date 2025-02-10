@@ -16,10 +16,9 @@ from datetime import date, datetime
 import matplotlib.colors as mpcolors
 import numpy as np
 import pandas as pd
-from pyiem.database import get_sqlalchemy_conn
+from pyiem.database import get_sqlalchemy_conn, sql_helper
 from pyiem.exceptions import NoDataFound
 from pyiem.plot import figure_axes, get_cmap, pretty_bins
-from sqlalchemy import text
 
 PDICT = {"above": "At or Above Threshold", "below": "Below Threshold"}
 PDICT2 = {
@@ -125,8 +124,8 @@ def get_df(ctx):
         timelimiter += f" and valid at time zone '{tzname}' < '{ctx['edate']}'"
     with get_sqlalchemy_conn("asos") as conn:
         df = pd.read_sql(
-            text(
-                f"""
+            sql_helper(
+                """
             WITH data as (
                 SELECT date(valid at time zone :tzname),
                 date_trunc('hour', (valid + '10 minutes'::interval)
@@ -143,7 +142,10 @@ def get_df(ctx):
             min(local_valid)::date as min_valid,
             max(local_valid)::date as max_valid
             from data GROUP by week, hour
-            """
+            """,
+                mydir=mydir,
+                varname=varname,
+                timelimiter=timelimiter,
             ),
             conn,
             params={"tzname": tzname, "station": station, "thres": threshold},

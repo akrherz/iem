@@ -9,10 +9,9 @@ from datetime import date, timedelta
 
 import numpy as np
 import pandas as pd
-from pyiem.database import get_sqlalchemy_conn
+from pyiem.database import get_sqlalchemy_conn, sql_helper
 from pyiem.exceptions import NoDataFound
 from pyiem.plot import figure_axes
-from sqlalchemy import text
 
 from iemweb.autoplot import ARG_STATION
 
@@ -62,7 +61,7 @@ def plotter(ctx: dict):
         lastday = lastday.replace(day=1)
     with get_sqlalchemy_conn("coop") as conn:
         df = pd.read_sql(
-            text("""SELECT year, month, avg((high+low)/2.) as avg_temp,
+            sql_helper("""SELECT year, month, avg((high+low)/2.) as avg_temp,
         avg(high) as avg_high_temp, avg(low) as avg_low_temp,
         sum(precip) as total_precip,
         sum(case when precip > 0.005 then 1 else 0 end) as rain_days

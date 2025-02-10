@@ -316,7 +316,7 @@ function switchToArchiveMode()
 </script>
 EOF;
 if ($autopilot == "yes") {
-    $headextra .= <<<EOF
+    $headextra .= <<<EOM
 <style>
 body{
   background: #fff;
@@ -328,7 +328,7 @@ body{
  display: none;
 }
 </style>
-EOF;
+EOM;
 }
 $t->headextra = $headextra;
 if ($mode == "realtime") {

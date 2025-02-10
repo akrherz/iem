@@ -42,11 +42,10 @@ from zoneinfo import ZoneInfo
 
 import numpy as np
 import pandas as pd
-from pyiem.database import get_sqlalchemy_conn
+from pyiem.database import get_sqlalchemy_conn, sql_helper
 from pyiem.exceptions import NoDataFound
 from pyiem.nws import vtec
 from pyiem.plot import MapPlot, get_cmap
-from sqlalchemy import text
 
 PDICT = {
     "count": "Event Count",
@@ -186,7 +185,7 @@ def get_count_df(ctx, varname: str, pstr, sts, ets):
             params["sdate"] = "2005-10-01"
         with get_sqlalchemy_conn("postgis") as conn:
             if ctx["by"] == "state":
-                sql = f"""
+                sql = """
                 with events as (
                     select distinct wfo, substr(ugc, 1, 2) as state,
                     {yearcol} as year,
@@ -196,7 +195,7 @@ def get_count_df(ctx, varname: str, pstr, sts, ets):
                 group by datum, year
                 """
             else:
-                sql = f"""
+                sql = """
                 with events as (
                     select distinct wfo, {yearcol} as year,
                     phenomena, eventid from warnings where {pstr} and
@@ -204,7 +203,18 @@ def get_count_df(ctx, varname: str, pstr, sts, ets):
                 select wfo as datum, year::int as year, count(*) from events
                 group by datum, year
                 """
-            df = pd.read_sql(text(sql), conn, params=params, index_col=None)
+            df = pd.read_sql(
+                sql_helper(
+                    sql,
+                    yearcol=yearcol,
+                    slimiter=slimiter,
+                    pstr=pstr,
+                    emerg_extra=emerg_extra,
+                ),
+                conn,
+                params=params,
+                index_col=None,
+            )
         # enlarge by wfo and year cartesian product
         ctx["_subtitle"] = (
             ", Period of Record: "
@@ -237,7 +247,7 @@ def get_count_df(ctx, varname: str, pstr, sts, ets):
     else:
         with get_sqlalchemy_conn("postgis") as conn:
             if ctx["by"] == "state":
-                sql = f"""
+                sql = """
                 with total as (
                 select distinct wfo, substr(ugc, 1, 2) as state,
                 extract(year from issue at time zone 'UTC') as year,
@@ -249,7 +259,7 @@ def get_count_df(ctx, varname: str, pstr, sts, ets):
                 GROUP by datum
                 """
             else:
-                sql = f"""
+                sql = """
                 with total as (
                 select distinct wfo,
                 extract(year from issue at time zone 'UTC') as year,
@@ -261,7 +271,7 @@ def get_count_df(ctx, varname: str, pstr, sts, ets):
                 GROUP by datum
                 """
             df = pd.read_sql(
-                text(sql),
+                sql_helper(sql, pstr=pstr, emerg_extra=emerg_extra),
                 conn,
                 params={"sts": sts, "ets": ets},
                 index_col="datum",
@@ -411,7 +421,7 @@ def plotter(ctx: dict):
     elif varname == "days":
         with get_sqlalchemy_conn("postgis") as conn:
             if ctx["by"] == "state":
-                sql = f"""
+                sql = """
             WITH data as (
                 SELECT distinct substr(ugc, 1, 2) as state,
                 generate_series(greatest(issue, :sts),
@@ -424,7 +434,7 @@ def plotter(ctx: dict):
             GROUP by datum ORDER by days DESC
             """
             else:
-                sql = f"""
+                sql = """
             WITH data as (
                 SELECT distinct wfo, generate_series(greatest(issue, :sts),
                 least(expire, :ets), '1 minute'::interval) as ts from warnings
@@ -436,7 +446,7 @@ def plotter(ctx: dict):
             GROUP by datum ORDER by days DESC
             """
             df = pd.read_sql(
-                text(sql),
+                sql_helper(sql, pstr=pstr, emerg_extra=emerg_extra),
                 conn,
                 params={
                     "sts": sts,
@@ -460,7 +470,7 @@ def plotter(ctx: dict):
         total_minutes = (ets - sts).total_seconds() / 60.0
         with get_sqlalchemy_conn("postgis") as conn:
             if ctx["by"] == "state":
-                sql = f"""
+                sql = """
             WITH data as (
                 SELECT distinct substr(ugc, 1, 2) as state,
                 generate_series(greatest(issue, :sts),
@@ -472,7 +482,7 @@ def plotter(ctx: dict):
             from data GROUP by datum ORDER by tpercent DESC
             """
             else:
-                sql = f"""
+                sql = """
             WITH data as (
                 SELECT distinct wfo, generate_series(greatest(issue, :sts),
                 least(expire, :ets), '1 minute'::interval) as ts from warnings
@@ -483,7 +493,7 @@ def plotter(ctx: dict):
             from data GROUP by datum ORDER by tpercent DESC
             """
             df = pd.read_sql(
-                text(sql),
+                sql_helper(sql, pstr=pstr, emerg_extra=emerg_extra),
                 conn,
                 params={
                     "sts": sts,

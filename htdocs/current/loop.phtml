@@ -56,7 +56,7 @@ $prodselect .= "</select>";
 
 $control =  $hrefs;
 
-$t->content = <<<EOF
+$t->content = <<<EOM
 <h3>IEM Product Looper</h3>
 
 <div style="padding: 10px; border: 2px solid #000;">
@@ -79,5 +79,5 @@ $t->content = <<<EOF
 {$control}
 
 </div>
-EOF;
+EOM;
 $t->render('single.phtml');

@@ -1,3 +1,6 @@
 """implemented in pylib/iemweb/agclimate/isusm.py"""
 
-from iemweb.agclimate.isusm import application  # noqa: F401
+from iemweb.agclimate.isusm import application
+
+# appease the linter
+_ = application

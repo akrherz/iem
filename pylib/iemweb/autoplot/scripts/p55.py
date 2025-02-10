@@ -104,9 +104,9 @@ def plotter(ctx: dict):
     fig = figure(apctx=ctx, title=title)
     height = 0.21
     ax = [
-        fig.add_axes([0.1, 0.08 + height * 2 + 0.18, 0.85, height]),
-        fig.add_axes([0.1, 0.08 + height + 0.09, 0.85, height]),
-        fig.add_axes([0.1, 0.08, 0.85, height]),
+        fig.add_axes((0.1, 0.08 + height * 2 + 0.18, 0.85, height)),
+        fig.add_axes((0.1, 0.08 + height + 0.09, 0.85, height)),
+        fig.add_axes((0.1, 0.08, 0.85, height)),
     ]
     x = list(range(1, len(df.index) + 1))
     for i, c in enumerate(["avgh", "avgl", "avgt"]):

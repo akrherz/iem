@@ -28,12 +28,12 @@ import pandas as pd
 
 # Third Party
 from commonregex import CommonRegex
-from pyiem.database import get_sqlalchemy_conn
+from pyiem.database import get_sqlalchemy_conn, sql_helper
 from pyiem.templates.iem import TEMPLATE
 from pyiem.util import get_properties
 from pyiem.webutil import iemapp
 
-AFOS_RE = re.compile(r"^[A-Z0-9]{6}$", re.IGNORECASE)
+AFOS_RE = re.compile(r"^[A-Z0-9]{4,6}$", re.IGNORECASE)
 STATION_RE = re.compile(r"^[A-Z0-9\-]{3,32}$", re.IGNORECASE)
 AUTOPLOT_RE = re.compile(r"^(autoplot|ap)?\s?(?P<n>\d{1,3})$", re.IGNORECASE)
 PRODID_RE = re.compile(r"^[12]\d{11}-[A-Z]{4}-", re.IGNORECASE)
@@ -67,13 +67,13 @@ def geocoder(q):
     lon = data["results"][0]["geometry"]["location"]["lng"]
     with get_sqlalchemy_conn("mesosite") as conn:
         df = pd.read_sql(
-            """SELECT id, network,
-            ST_Distance(geom, ST_Point(%s, %s, 4326)) as dist
-            from stations where ST_PointInsideCircle(geom, %s, %s, 1)
+            sql_helper("""SELECT id, network,
+            ST_Distance(geom, ST_Point(:lon, :lat, 4326)) as dist
+            from stations where ST_PointInsideCircle(geom, :lon, :lat, 1)
             ORDER by dist ASC LIMIT 50
-            """,
+            """),
             conn,
-            params=(lon, lat, lon, lat),
+            params={"lat": lat, "lon": lon},
         )
     return station_df_handler(df)
 
@@ -114,9 +114,9 @@ def has_station(sid):
         sid = sid[1:]
     with get_sqlalchemy_conn("mesosite") as conn:
         df = pd.read_sql(
-            "SELECT id, network from stations where id = %s",
+            sql_helper("SELECT id, network from stations where id = :sid"),
             conn,
-            params=(sid,),
+            params={"sid": sid},
         )
     return not df.empty
 
@@ -142,7 +142,6 @@ def find_handler(q):
         return afos_handler, q.upper()
     # Likely want to always do this one last, as it will catch things
     c = CommonRegex(q)
-    # pylint: disable=no-member
     if c.street_addresses:
         return geocoder, q
     return None, None

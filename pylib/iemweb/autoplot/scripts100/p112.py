@@ -7,7 +7,7 @@ from datetime import date
 
 import numpy as np
 import pandas as pd
-from pyiem.database import get_sqlalchemy_conn
+from pyiem.database import get_sqlalchemy_conn, sql_helper
 from pyiem.exceptions import NoDataFound
 
 from iemweb.autoplot import ARG_STATION
@@ -108,7 +108,8 @@ def plotter(ctx: dict):
 
     with get_sqlalchemy_conn("coop") as conn:
         df = pd.read_sql(
-            f"""
+            sql_helper(
+                """
         SELECT year, month, sum(precip) as sum_precip,
         avg(high) as avg_high,
         avg(low) as avg_low,
@@ -121,11 +122,17 @@ def plotter(ctx: dict):
         sum(gddxx(40,86,high,low)) as gdd40,
         sum(gddxx(48,86,high,low)) as gdd48,
         sum(gddxx(50,86,high,low)) as gdd50,
-        sum(gddxx(%s, %s, high, low)) as {varname}
-        from alldata WHERE station = %s GROUP by year, month
+        sum(gddxx(:gddbase, :gddceil, high, low)) as {varname}
+        from alldata WHERE station = :station GROUP by year, month
         """,
+                varname=varname,
+            ),
             conn,
-            params=(gddbase, gddceil, station),
+            params={
+                "station": station,
+                "gddbase": gddbase,
+                "gddceil": gddceil,
+            },
             index_col=None,
         )
 

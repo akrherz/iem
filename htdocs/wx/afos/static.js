@@ -1,4 +1,5 @@
 /* global Cookies, $ */
+
 // Legacy anchors looked like PIL-LIMIT, now are PIL:(LIMIT * ORDER)
 const NO_DATE_SET = 'No Limit';
 
@@ -139,6 +140,12 @@ function dlbtn(btn, fmt) {
     $(btn).blur();
 }
 function buildUI() {
+    $("#toolbar-download").click((event) => {
+        dlbtn(event.target, "text");
+    });
+    $("#toolbar-zip").click((event) => {
+        dlbtn(event.target, "zip");
+    });
     // listen for refresh clicks
     $("#toolbar-refresh").click(function () { // this
         refreshActiveTab();

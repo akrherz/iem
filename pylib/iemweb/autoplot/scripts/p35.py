@@ -12,10 +12,9 @@ from datetime import datetime, timedelta
 
 import numpy as np
 import pandas as pd
-from pyiem.database import get_sqlalchemy_conn
+from pyiem.database import get_sqlalchemy_conn, sql_helper
 from pyiem.exceptions import NoDataFound
 from pyiem.plot import figure_axes
-from sqlalchemy import text
 
 PDICT = {
     "tmpf": "Air Temp (F)",
@@ -69,7 +68,8 @@ def plotter(ctx: dict):
 
     with get_sqlalchemy_conn("asos") as conn:
         obs = pd.read_sql(
-            text(f"""
+            sql_helper(
+                """
         WITH one as (
             select valid, {varname} as t from alldata where
             station = :station and {varname} is not null and report_type = 3
@@ -80,7 +80,9 @@ def plotter(ctx: dict):
         SELECT extract(week from one.valid) as week, two.t - one.t as delta,
         valid
         from one JOIN two on (one.valid = two.v)
-        """),
+        """,
+                varname=varname,
+            ),
             conn,
             params={
                 "station": station,
@@ -102,7 +104,9 @@ def plotter(ctx: dict):
     bins = np.arange(0 - p99, p99, interval)
 
     hist, xedges, yedges = np.histogram2d(
-        obs["week"].to_numpy(), obs["delta"].to_numpy(), [range(54), bins]
+        obs["week"].to_numpy(),
+        obs["delta"].to_numpy(),
+        [list(range(54)), list(bins)],
     )
     # create a dataframe from this 2d histogram
     x, y = np.meshgrid(xedges[:-1], yedges[:-1])

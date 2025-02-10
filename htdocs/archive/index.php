@@ -10,7 +10,7 @@ $t->title = "Archived Data Resources";
 
 $dllist = get_iemapps_tags("download");
 $d = date("Y/m/d");
-$t->content = <<<EOF
+$t->content = <<<EOM
 <h3>Archived Data & Plots</h3>
 
 <p>This page contains a listing of archive resources.  A brief
@@ -194,5 +194,5 @@ surface plots and other plots.</li>
 
 <p style="clear: both;">Are we forgetting something?  Please let us know of other
 archives that are available for Iowa data.</p>
-EOF;
+EOM;
 $t->render('single.phtml');

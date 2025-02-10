@@ -497,7 +497,6 @@ def do_excel(sql, fmt, params):
     if fmt == "csv":
         return df.to_csv(index=False).encode("ascii")
     bio = BytesIO()
-    # pylint: disable=abstract-class-instantiated
     with pd.ExcelWriter(bio, engine="xlsxwriter") as writer:
         df.to_excel(writer, sheet_name="VTEC WaWA", index=False)
     return bio.getvalue()
@@ -570,8 +569,9 @@ def local_files(names):
     """Return a generator of local files."""
     now = datetime.now()
 
-    def contents(name):
-        with open(name, "rb") as f:
+    def contents(name: str):
+        """Return a generator of file contents."""
+        with open(name, "rb") as f:  # skipcq
             while chunk := f.read(65536):
                 yield chunk
 

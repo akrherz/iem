@@ -8,7 +8,7 @@ precipitation within one 24 hour period.
 import calendar
 
 import pandas as pd
-from pyiem.database import get_sqlalchemy_conn
+from pyiem.database import get_sqlalchemy_conn, sql_helper
 from pyiem.exceptions import NoDataFound
 from pyiem.plot import figure_axes
 
@@ -36,20 +36,21 @@ def plotter(ctx: dict):
     threshold = float(ctx["threshold"])
     with get_sqlalchemy_conn("coop") as conn:
         df = pd.read_sql(
-            """
+            sql_helper("""
             WITH monthly as (
             SELECT year, month, max(precip), sum(precip)
             from alldata
-            WHERE station = %s and precip is not null GROUP by year, month)
+            WHERE station = :station
+                       and precip is not null GROUP by year, month)
 
             SELECT month,
-            sum(case when max > (sum * %s) then 1 else 0 end) as hits,
-            max(case when max > (sum * %s) then year else null end)
+            sum(case when max > (sum * :thres) then 1 else 0 end) as hits,
+            max(case when max > (sum * :thres) then year else null end)
                 as last_year,
             count(*) as years from monthly GROUP by month ORDER by month ASC
-            """,
+            """),
             conn,
-            params=(station, threshold / 100.0, threshold / 100.0),
+            params={"station": station, "thres": threshold / 100.0},
             index_col="month",
         )
     if df.empty:
@@ -64,7 +65,7 @@ def plotter(ctx: dict):
     (fig, ax) = figure_axes(apctx=ctx, title=title)
 
     ax.bar(df.index, df["freq"], align="center")
-    for i, row in df.iterrows():  # pylint: disable=no-member
+    for i, row in df.iterrows():
         label = f"{row['freq']:.1f}%\n{row['last_year']:.0f}"
         if pd.isna(row["last_year"]):
             label = "None"
