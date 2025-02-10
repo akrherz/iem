@@ -12,11 +12,10 @@ from datetime import date
 
 import numpy as np
 import pandas as pd
-from pyiem.database import get_sqlalchemy_conn
+from pyiem.database import get_sqlalchemy_conn, sql_helper
 from pyiem.exceptions import NoDataFound
 from pyiem.plot import figure_axes
 from pyiem.reference import lsr_events
-from sqlalchemy import text
 
 MARKERS = ["8", ">", "<", "v", "o", "h", "*"]
 
@@ -86,16 +85,20 @@ def plotter(ctx: dict):
         else:
             typetext_limiter = " and typetext = ANY(:tt)"
             params["tt"] = ltype
+    params["sts"] = date(syear, 1, 1)
+    params["ets"] = date(eyear + 1, 1, 1)
     with get_sqlalchemy_conn("postgis") as conn:
         df = pd.read_sql(
-            text(
-                f"""
+            sql_helper(
+                """
             select extract(year from valid)::int as yr, upper(source) as src,
             count(*) from lsrs
-            where valid > '{syear}-01-01' and
-            valid < '{eyear + 1}-01-01' {wfo_limiter} {typetext_limiter}
+            where valid > :sts and
+            valid < :ets {wfo_limiter} {typetext_limiter}
             GROUP by yr, src
-        """
+        """,
+                wfo_limiter=wfo_limiter,
+                typetext_limiter=typetext_limiter,
             ),
             conn,
             params=params,

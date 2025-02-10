@@ -11,11 +11,10 @@ from datetime import date, datetime
 import matplotlib.colors as mpcolors
 import numpy as np
 import pandas as pd
-from pyiem.database import get_sqlalchemy_conn
+from pyiem.database import get_sqlalchemy_conn, sql_helper
 from pyiem.exceptions import NoDataFound
 from pyiem.plot import figure
 from pyiem.plot.colormaps import nwssnow
-from sqlalchemy import text
 
 from iemweb.autoplot import ARG_STATION
 
@@ -62,7 +61,7 @@ def plotter(ctx: dict):
     obs = np.ma.ones((eyear - syear + 1, 183), "f") * -1
     with get_sqlalchemy_conn("coop") as conn:
         df = pd.read_sql(
-            text("""
+            sql_helper("""
             SELECT year, extract(doy from day) as doy, snowd, day,
             case when month < 6 then year - 1 else year end as winter_year
             from alldata WHERE station = :station and

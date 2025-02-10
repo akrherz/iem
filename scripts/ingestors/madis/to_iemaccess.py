@@ -74,7 +74,7 @@ def provider2network(provider, name):
         if network.endswith("DOT"):
             if len(network) == 5:
                 return f"{network[:2]}_RWIS"
-            if tokens[-2] in ["UTAH", "WA", "NV", "MT"]:
+            if tokens[-2] == "UTAH" or len(tokens[-2]) == 2:
                 return f"{tokens[-2][:2]}_RWIS"
             LOG.warning("How to convert %s into a network?", repr(tokens))
             return None
@@ -233,7 +233,6 @@ def main(offset: int):
             subprocess.call(["sh", "SYNC_STATIONS.sh"])
             os.chdir("../ingestors/madis")
             LOG.info("...done with sync.")
-        del iem
     icursor.close()
     pgconn.commit()
     pgconn.close()

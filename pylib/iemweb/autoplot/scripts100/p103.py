@@ -9,10 +9,9 @@ import calendar
 
 import numpy as np
 import pandas as pd
-from pyiem.database import get_sqlalchemy_conn
+from pyiem.database import get_sqlalchemy_conn, sql_helper
 from pyiem.exceptions import NoDataFound
 from pyiem.plot import figure
-from sqlalchemy import text
 
 from iemweb.autoplot import ARG_STATION
 
@@ -47,7 +46,8 @@ def plotter(ctx: dict):
     )
     with get_sqlalchemy_conn("coop") as conn:
         df = pd.read_sql(
-            text(f"""
+            sql_helper(
+                """
         WITH obs as (
             SELECT day, month, high, low, {year} as season
             from alldata WHERE station = :station),
@@ -69,7 +69,9 @@ def plotter(ctx: dict):
         level, 'fall' as typ from lows WHERE rank = 1) UNION
         (SELECT season as year, day, extract(doy from day) as doy,
         level, 'spring' as typ from highs WHERE rank = 1)
-        """),
+        """,
+                year=year,
+            ),
             conn,
             params={"station": station},
         )
@@ -82,9 +84,9 @@ def plotter(ctx: dict):
     fig = figure(title=title, apctx=ctx)
     x = 0.1
     ax = [
-        fig.add_axes([x, 0.7, 0.88, 0.2]),
-        fig.add_axes([x, 0.4, 0.88, 0.2]),
-        fig.add_axes([x, 0.1, 0.88, 0.2]),
+        fig.add_axes((x, 0.7, 0.88, 0.2)),
+        fig.add_axes((x, 0.4, 0.88, 0.2)),
+        fig.add_axes((x, 0.1, 0.88, 0.2)),
     ]
     dyear = df2.groupby(["year"]).count()
     ax[0].bar(

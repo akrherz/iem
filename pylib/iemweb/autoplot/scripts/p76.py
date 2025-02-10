@@ -22,12 +22,11 @@ import numpy as np
 import pandas as pd
 from matplotlib.ticker import MaxNLocator
 from metpy.units import units
-from pyiem.database import get_sqlalchemy_conn
+from pyiem.database import get_sqlalchemy_conn, sql_helper
 from pyiem.exceptions import NoDataFound
 from pyiem.plot import figure_axes
 from pyiem.util import utc
 from scipy import stats
-from sqlalchemy import text
 
 from iemweb.util import month2months
 
@@ -219,7 +218,7 @@ def get_data(ctx, startyear):
         )
     with get_sqlalchemy_conn("asos") as conn:
         df = pd.read_sql(
-            text(
+            sql_helper(
                 """
             WITH obs as (
                 SELECT valid at time zone :tzname as valid, tmpf, dwpf, relh,

@@ -8,10 +8,9 @@ from datetime import date, datetime
 
 import matplotlib.dates as mdates
 import pandas as pd
-from pyiem.database import get_sqlalchemy_conn
+from pyiem.database import get_sqlalchemy_conn, sql_helper
 from pyiem.exceptions import NoDataFound
 from pyiem.plot import figure_axes
-from sqlalchemy import text
 
 from iemweb.autoplot import ARG_STATION
 
@@ -107,11 +106,13 @@ def plotter(ctx: dict):
         title = f"base={ceiling}"
     with get_sqlalchemy_conn("coop") as conn:
         df = pd.read_sql(
-            text(
-                f"""SELECT year, sday, {gfunc} as {glabel} from alldata WHERE
+            sql_helper(
+                """SELECT year, sday, {gfunc} as {glabel} from alldata WHERE
             station = :sid and year > 1892 and sday != '0229'
             and sday >= :sday and sday <= :eday ORDER by day ASC
-            """
+            """,
+                gfunc=gfunc,
+                glabel=glabel,
             ),
             conn,
             params={
