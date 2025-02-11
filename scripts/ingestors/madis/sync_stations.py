@@ -6,13 +6,12 @@ import warnings
 import click
 from netCDF4 import chartostring
 from pyiem.database import get_dbconn
-from pyiem.util import logger, ncopen
+from pyiem.util import ncopen
 
 sys.path.insert(0, ".")
-from to_iemaccess import provider2network  # skipcq
+from to_iemaccess import LOG, provider2network  # skipcq
 
 warnings.filterwarnings("ignore", category=DeprecationWarning)
-LOG = logger()
 
 
 @click.command()
@@ -24,18 +23,29 @@ def main(filename: str):
 
     with ncopen(filename) as nc:
         stations = chartostring(nc.variables["stationId"][:])
-        names = chartostring(nc.variables["stationName"][:])
+        try:
+            names = chartostring(nc.variables["stationName"][:])
+        except UnicodeDecodeError:
+            LOG.info("Falling back to bytes and manual name decode")
+            names = chartostring(
+                nc.variables["stationName"][:], "bytes"
+            ).tolist()
+            for i, name in enumerate(names):
+                try:
+                    names[i] = str(name.decode("utf-8"))
+                except UnicodeDecodeError:
+                    names[i] = ""
         providers = chartostring(nc.variables["dataProvider"][:])
         latitudes = nc.variables["latitude"][:]
         longitudes = nc.variables["longitude"][:]
     for recnum, provider in enumerate(providers):
         name = names[recnum].replace(",", " ")
         network = provider2network(provider, name)
-        if network is None or network == "IA_RWIS":
+        if network is None or network in ["IA_RWIS", "US_RWIS"]:
             continue
         stid = stations[recnum]
         mcursor.execute(
-            "SELECT st_x(geom), st_y(geom) from stations "
+            "SELECT st_x(geom), st_y(geom), name from stations "
             "where id = %s and network = %s",
             (stid, network),
         )
@@ -56,7 +66,13 @@ def main(filename: str):
             )
             continue
         # Compare location
-        (olon, olat) = mcursor.fetchone()
+        (olon, olat, oname) = mcursor.fetchone()
+        if oname == "":
+            LOG.info("Updating name[%s] for %s %s", name, stid, network)
+            mcursor.execute(
+                "UPDATE stations SET name = %s WHERE id = %s and network = %s",
+                (name, stid, network),
+            )
         distance = ((olon - lon) ** 2 + (olat - lat) ** 2) ** 0.5
         if distance < 0.001:
             continue

@@ -1,7 +1,6 @@
 
 /* global $, ol, olSelectLonLat */
 let marker = null;
-let map = null;
 
 function text(str) {
     // XSS
@@ -149,7 +148,6 @@ function doWatch(lon, lat) {
 $(document).ready(() => {
     buildUI();
     let res = olSelectLonLat("map", -93.653, 41.53, updateMarkerPosition);
-    map = res.map;
     marker = res.marker;
 
     // Do the anchor tag linking, please

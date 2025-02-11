@@ -12,7 +12,7 @@ var lsrtypefilter;
 var sbwtypefilter;
 var dateFormat1 = "YYYYMMDDHHmm";
 var realtime = false;
-var TABLE_FILTERED_EVENT = "tfe";
+const TABLE_FILTERED_EVENT = "tfe";
 let nexradBaseTime = moment().utc().subtract(moment().minutes() % 5, "minutes");
 
 // Use momentjs for formatting
@@ -915,3 +915,9 @@ function getShapefileLink(base) {
     uri += "&minute2=" + ets.utc().format('m');
     return uri;
 }
+
+$().ready(() => {
+    initUI(); // static.js
+    parse_href();
+    window.setInterval(cronMinute, 60000);
+});

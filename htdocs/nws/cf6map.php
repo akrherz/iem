@@ -7,7 +7,7 @@ require_once "../../include/mlib.php";
 force_https();
 $t = new MyView();
 $t->title = "Map of Daily NWS CF6 reports";
-$OL = '10.3.0';
+$OL = '10.4.0';
 $t->headextra = <<<EOF
 <link rel="stylesheet" href="/vendor/openlayers/{$OL}/ol.css" type="text/css">
 <link rel="stylesheet" href="/vendor/jquery-ui/1.12.1/jquery-ui.min.css" />
@@ -52,7 +52,7 @@ $t->content = <<<EOF
 </div>
 
         <form name='bah'><p><strong>Select Variable to Plot:</strong> 
-<select onChange="javascript: updateMap();" id="renderattr">
+<select id="renderattr">
     <option value="high">High Temperature</option>
     <option value="low">Low Temperature</option>
     <option value="avg_temp">Average Temperature</option>
