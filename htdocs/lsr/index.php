@@ -3,12 +3,12 @@ require_once "../../config/settings.inc.php";
 require_once "../../include/mlib.php";
 force_https();
 require_once "../../include/myview.php";
-$OL = "8.2.0";
+$OL = "10.4.0";
 $DT = "1.11.1";
 $S2 = "4.1.0rc0";
 
 $t = new MyView();
-$t->jsextra = <<<EOF
+$t->jsextra = <<<EOM
 <!-- need to load before datatables -->
 <script src="/vendor/moment/2.13.0/moment.min.js"></script>
 <script src="/vendor/jquery-datatables/{$DT}/datatables.min.js"></script>
@@ -21,15 +21,8 @@ $t->jsextra = <<<EOF
 <script src='/vendor/openlayers/{$OL}/ol-layerswitcher.js'></script>
 
 <script type="text/javascript" src="wfos.js"></script>
-<script type="text/javascript" src="static.js?v=3"></script>
-<script>
-$(document).ready(function(){
-    initUI(); // static.js
-    parse_href();
-    window.setInterval(cronMinute, 60000);
-});
-</script>
-EOF;
+<script type="text/javascript" src="static.js"></script>
+EOM;
 $t->headextra = <<<EOM
 <link rel="stylesheet" href="/vendor/jquery-datatables/{$DT}/datatables.min.css" />
 <link rel="stylesheet" href="/vendor/jquery-ui/1.11.4/jquery-ui.min.css" />

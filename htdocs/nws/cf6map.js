@@ -210,4 +210,8 @@ $(document).ready(() => {
         vectorLayer.setStyle(vectorStyleFunction);
     });
 
+    $('#renderattr').change(() => {
+        updateMap();
+    });
+
 });

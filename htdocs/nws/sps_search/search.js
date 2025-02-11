@@ -100,6 +100,9 @@ $(document).ready(() => {
     let default_lon = -93.653;
     let default_lat = 41.53;
 
+    let res = olSelectLonLat("map", default_lon, default_lat, updateMarkerPosition);
+    marker = res.marker;
+
     // Do the anchor tag linking, please
     const tokens = window.location.href.split("#");
     if (tokens.length == 2){
@@ -108,12 +111,9 @@ $(document).ready(() => {
             if (tokens2[0] == 'bypoint'){
                 default_lat = tokens2[2];
                 default_lon = tokens2[1];
-                updateMarkerPosition(default_lon, default_lat);
+                updateMarkerPosition(parseFloat(default_lon), parseFloat(default_lat));
             }
         }
     }
-    let res = olSelectLonLat("map", default_lon, default_lat, updateMarkerPosition);
-    mapwidget1 = res.map;
-    marker = res.marker;
 
 });

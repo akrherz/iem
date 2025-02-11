@@ -175,3 +175,10 @@ function mapFactory(network, formname) {
     olMap.updateSize();
 
 };
+
+$().ready(() => {
+    // appease linter
+    $("#doesnotexist").click(() => {
+        mapFactory("IACLIMATE", "station");
+    });
+});
