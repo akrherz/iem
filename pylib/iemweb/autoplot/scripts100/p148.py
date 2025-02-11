@@ -12,10 +12,9 @@ from datetime import date, datetime, timedelta
 import pandas as pd
 from dateutil.easter import easter as get_easter
 from matplotlib.ticker import MaxNLocator
-from pyiem.database import get_sqlalchemy_conn
+from pyiem.database import get_sqlalchemy_conn, sql_helper
 from pyiem.exceptions import NoDataFound
 from pyiem.plot import figure_axes
-from sqlalchemy import text
 
 from iemweb.autoplot import ARG_STATION
 
@@ -186,7 +185,7 @@ def add_context(ctx):
             days = [day + dtoff for day in days]
         with get_sqlalchemy_conn("coop") as conn:
             ctx["df"] = pd.read_sql(
-                text("""
+                sql_helper("""
     SELECT year, high, day, low, precip, snow, snowd from alldata
     WHERE station = :station and day = ANY(:days) ORDER by year ASC
                 """),

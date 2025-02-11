@@ -7,10 +7,9 @@ other years with a full year's worth of data.
 
 import matplotlib.patheffects as PathEffects
 import pandas as pd
-from pyiem.database import get_sqlalchemy_conn
+from pyiem.database import get_sqlalchemy_conn, sql_helper
 from pyiem.exceptions import NoDataFound
 from pyiem.plot import figure_axes
-from sqlalchemy import text
 
 from iemweb.util import month2months
 
@@ -129,8 +128,8 @@ def plotter(ctx: dict):
     which = "above" if ctx["which"] == "above" else "below"
     with get_sqlalchemy_conn("coop") as conn:
         df = pd.read_sql(
-            text(
-                f"""
+            sql_helper(
+                """
         WITH avgs as (
             SELECT sday,
             avg(high) as avg_high,
@@ -155,7 +154,13 @@ def plotter(ctx: dict):
         count(*) as days from alldata o, avgs a WHERE o.station = :station
         and o.sday = a.sday and month = ANY(:months)
         GROUP by yr ORDER by yr ASC
-        """
+        """,
+                yr=yr,
+                comp=comp,
+                op=op,
+                smul=str(smul),  # lame
+                offset=str(offset),  # lame
+                which=which,
             ),
             conn,
             params={

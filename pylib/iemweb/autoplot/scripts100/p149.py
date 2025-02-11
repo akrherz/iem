@@ -20,7 +20,7 @@ from datetime import date, timedelta
 import matplotlib.dates as mdates
 import numpy as np
 import pandas as pd
-from pyiem.database import get_sqlalchemy_conn
+from pyiem.database import get_sqlalchemy_conn, sql_helper
 from pyiem.exceptions import IncompleteWebRequest, NoDataFound
 from pyiem.plot import figure_axes
 
@@ -98,19 +98,19 @@ def plotter(ctx: dict):
     year3 = ctx.get("year3")  # could be null!
     with get_sqlalchemy_conn("coop") as conn:
         df = pd.read_sql(
-            """
+            sql_helper("""
         WITH agg as (
             SELECT o.day, o.sday,
-            avg(high) OVER (ORDER by day ASC ROWS %s PRECEDING) as avgt,
-            sum(precip) OVER (ORDER by day ASC ROWS %s PRECEDING) as sump,
-            count(*) OVER (ORDER by day ASC ROWS %s PRECEDING) as cnt,
-            avg(high) OVER (ORDER by day ASC ROWS %s PRECEDING) as avgt2,
-            sum(precip) OVER (ORDER by day ASC ROWS %s PRECEDING) as sump2,
-            count(*) OVER (ORDER by day ASC ROWS %s PRECEDING) as cnt2,
-            avg(high) OVER (ORDER by day ASC ROWS %s PRECEDING) as avgt3,
-            sum(precip) OVER (ORDER by day ASC ROWS %s PRECEDING) as sump3,
-            count(*) OVER (ORDER by day ASC ROWS %s PRECEDING) as cnt3
-            from alldata o WHERE station = %s),
+            avg(high) OVER (ORDER by day ASC ROWS :d1 PRECEDING) as avgt,
+            sum(precip) OVER (ORDER by day ASC ROWS :d1 PRECEDING) as sump,
+            count(*) OVER (ORDER by day ASC ROWS :d1 PRECEDING) as cnt,
+            avg(high) OVER (ORDER by day ASC ROWS :d2 PRECEDING) as avgt2,
+            sum(precip) OVER (ORDER by day ASC ROWS :d2 PRECEDING) as sump2,
+            count(*) OVER (ORDER by day ASC ROWS :d2 PRECEDING) as cnt2,
+            avg(high) OVER (ORDER by day ASC ROWS :d3 PRECEDING) as avgt3,
+            sum(precip) OVER (ORDER by day ASC ROWS :d3 PRECEDING) as sump3,
+            count(*) OVER (ORDER by day ASC ROWS :d3 PRECEDING) as cnt3
+            from alldata o WHERE station = :station),
         agg2 as (
             SELECT sday,
             avg(avgt) as avg_avgt, stddev(avgt) as std_avgt,
@@ -119,7 +119,7 @@ def plotter(ctx: dict):
             avg(sump2) as avg_sump2, stddev(sump2) as std_sump2,
             avg(avgt3) as avg_avgt3, stddev(avgt3) as std_avgt3,
             avg(sump3) as avg_sump3, stddev(sump3) as std_sump3
-            from agg WHERE cnt = %s GROUP by sday)
+            from agg WHERE cnt = :cnt GROUP by sday)
 
         SELECT day,
         (a.avgt - b.avg_avgt) / b.std_avgt as t,
@@ -130,21 +130,15 @@ def plotter(ctx: dict):
         (a.sump3 - b.avg_sump3) / greatest(b.std_sump3, 0.01) as p3
         from agg a JOIN agg2 b on (a.sday = b.sday)
         ORDER by day ASC
-        """,
+        """),
             conn,
-            params=(
-                days - 1,
-                days - 1,
-                days - 1,
-                _days2 - 1,
-                _days2 - 1,
-                _days2 - 1,
-                _days3 - 1,
-                _days3 - 1,
-                _days3 - 1,
-                station,
-                days,
-            ),
+            params={
+                "d1": days - 1,
+                "d2": _days2 - 1,
+                "d3": _days3 - 1,
+                "station": station,
+                "cnt": days,
+            },
             index_col="day",
         )
     if df.empty:

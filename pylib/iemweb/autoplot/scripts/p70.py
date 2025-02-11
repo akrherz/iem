@@ -25,13 +25,12 @@ import numpy as np
 import pandas as pd
 from matplotlib.colorbar import ColorbarBase
 from matplotlib.ticker import MaxNLocator
-from pyiem.database import get_sqlalchemy_conn
+from pyiem.database import get_sqlalchemy_conn, sql_helper
 from pyiem.exceptions import NoDataFound
 from pyiem.nws import vtec
 from pyiem.plot import figure, get_cmap
 from pyiem.plot.use_agg import plt
 from pyiem.reference import state_names
-from sqlalchemy import text
 
 from iemweb.autoplot import ARG_FEMA, FEMA_REGIONS, fema_region2states
 
@@ -122,14 +121,17 @@ def plotter(ctx: dict):
         params["states"] = fema_region2states(ctx["fema"])
     with get_sqlalchemy_conn("postgis") as conn:
         df = pd.read_sql(
-            text(f"""WITH data as (
+            sql_helper(
+                """WITH data as (
                 SELECT eventid, wfo, vtec_year,
                 min(date(issue)) as date from warnings where {wfolimiter}
                 and phenomena = :phenomena and significance = :significance
                 GROUP by eventid, wfo, vtec_year)
             SELECT vtec_year, date, count(*) from data GROUP by vtec_year, date
             ORDER by vtec_year ASC, date ASC
-            """),
+            """,
+                wfolimiter=wfolimiter,
+            ),
             conn,
             params=params,
             index_col=None,

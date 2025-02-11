@@ -15,12 +15,11 @@ from datetime import date
 
 import pandas as pd
 from matplotlib.ticker import MaxNLocator
-from pyiem.database import get_dbconn, get_sqlalchemy_conn
+from pyiem.database import get_dbconn, get_sqlalchemy_conn, sql_helper
 from pyiem.exceptions import NoDataFound
 from pyiem.nws import vtec
 from pyiem.plot import figure_axes
 from pyiem.reference import state_names
-from sqlalchemy import text
 
 from iemweb.autoplot import ARG_FEMA, FEMA_REGIONS, fema_region2states
 
@@ -176,8 +175,8 @@ def plotter(ctx: dict):
     params["tzname"] = tzname
     with get_sqlalchemy_conn("postgis") as conn:
         df = pd.read_sql(
-            text(
-                f"""
+            sql_helper(
+                """
             with data as (
                 SELECT distinct
                 extract(year from issue at time zone :tzname)::int as yr,
@@ -186,7 +185,10 @@ def plotter(ctx: dict):
                 {wfo_limiter} {doy_limiter})
 
             SELECT yr, count(*) from data GROUP by yr ORDER by yr ASC
-        """
+        """,
+                desc=desc,
+                wfo_limiter=wfo_limiter,
+                doy_limiter=doy_limiter,
             ),
             conn,
             params=params,

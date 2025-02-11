@@ -37,7 +37,7 @@ product.</p>
 Most products go back to October 2005.</p>
 """
 
-from datetime import date, timedelta
+from datetime import date, datetime, timedelta
 from zoneinfo import ZoneInfo
 
 import numpy as np
@@ -153,9 +153,8 @@ def get_description():
     return desc
 
 
-def get_count_df(ctx, varname: str, pstr, sts, ets):
+def get_count_df(ctx, varname: str, pstr: str, sts: datetime, ets: datetime):
     """Oh boy, do complex things."""
-
     emerg_extra = ""
     if ctx["e"] == "yes":
         emerg_extra = " and is_emergency "
@@ -172,7 +171,7 @@ def get_count_df(ctx, varname: str, pstr, sts, ets):
             "to_char(issue, 'mmdd') <= :eday ) "
         )
         yearcol = "vtec_year"
-        if ets <= sts:
+        if params["eday"] <= params["sday"]:
             slimiter = slimiter.replace(" and ", " or ")
             yearcol = (
                 "case when to_char(issue, 'mmdd') <= :eday then "
@@ -181,7 +180,7 @@ def get_count_df(ctx, varname: str, pstr, sts, ets):
 
         # compute all the things.
         params["sdate"] = "2002-01-01"
-        if pstr.find("1=1") > -1:
+        if pstr == " 1=1 ":
             params["sdate"] = "2005-10-01"
         with get_sqlalchemy_conn("postgis") as conn:
             if ctx["by"] == "state":

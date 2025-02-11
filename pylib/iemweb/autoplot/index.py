@@ -569,6 +569,10 @@ def generate_form(apid, fdict, headers, cookies):
             value = ensure_list(fdict, arg["name"])
         if isinstance(value, str):
             value = html_escape(value)
+            # Avoid situation of the Cookie having _ALL set and this form
+            # entry not supporting _ALL
+            if value == "_ALL" and not arg.get("all", False):
+                value = None
         if value is None:
             value = str(arg["default"])
         if arg["type"] in ["zstation", "sid", "station"]:

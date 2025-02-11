@@ -1,6 +1,12 @@
 <?php
 require_once "../include/forms.php";
 $pid = isset($_GET['pid']) ? substr(xssafe($_GET['pid']), 0, 35) : "";
+if ($pid != ""){
+    // Ensure it is in the proper format
+    if (!preg_match("/^[0-9]{12}-[A-Z0-9]{4}-[A-Z0-9]{6}-[A-Z\-0-9]{4,10}$/", $pid)){
+        xssafe("</script>");
+    }
+}
 
 // 201212100547-KTOP-FXUS63-AFDTOP
 $tokens = explode("-", $pid);
