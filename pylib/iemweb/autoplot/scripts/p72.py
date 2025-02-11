@@ -17,11 +17,10 @@ plots for a single county/zone/parish at a time.
 from datetime import datetime
 
 import pandas as pd
-from pyiem.database import get_sqlalchemy_conn
+from pyiem.database import get_sqlalchemy_conn, sql_helper
 from pyiem.exceptions import NoDataFound
 from pyiem.nws import vtec
 from pyiem.plot import figure_axes
-from sqlalchemy import text
 
 MDICT = {
     "all": "No Month/Time Limit",
@@ -85,8 +84,8 @@ def get_data(conn, params):
     if params["months"] is None:
         monthlimiter = ""
     df = pd.read_sql(
-        text(
-            f"""
+        sql_helper(
+            """
     WITH data as (
         SELECT extract(year from issue) as yr, eventid,
         min(issue at time zone :tzname) as minissue,
@@ -110,7 +109,8 @@ def get_data(conn, params):
         GROUP by minute ORDER by minute ASC)
     select d.minute, d.count, e.count as total, min_issue, max_issue
     from data2 d, events e
-    """
+    """,
+            monthlimiter=monthlimiter,
         ),
         conn,
         params=params,
