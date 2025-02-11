@@ -49,6 +49,10 @@ ignore = [
     "UP031",  # format specifiers
 ]
 
+# complains about iemweb.json
+[tool.ruff.lint.flake8-builtins]
+builtins-strict-checking = false
+
 [tool.ruff.lint.per-file-ignores]
 "{scripts,tests}/**/*.py" = [
     "T20",  # print
