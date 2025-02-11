@@ -24,3 +24,11 @@ def test_urls(url):
     c = Client(application)
     res = c.get(url)
     assert res.status_code == 200
+
+
+def test_cookie_set_to_all():
+    """Test handling of when cookie is set to _ALL."""
+    cl = Client(application)
+    cl.set_cookie("station_WFO", "_ALL")
+    res = cl.get("?q=72")
+    assert res.status_code == 200
