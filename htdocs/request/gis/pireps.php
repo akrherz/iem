@@ -113,7 +113,7 @@ EOF;
 $content .= "
     <th>Start:</th>
     <td>
-     ". yearSelect2(2003, date("Y"), "year1") ."
+     ". yearSelect2(2000, date("Y"), "year1") ."
     </td>
     <td>
      ". monthSelect2(1, "month1") ."
@@ -132,7 +132,7 @@ $content .= "
   <tr>
     <th>End:</th>
     <td>
-     ". yearSelect2(2003, date("Y"), "year2") ."
+     ". yearSelect2(2000, date("Y"), "year2") ."
     </td>
     <td>
      ". monthSelect2(date("m"), "month2") ."
@@ -169,26 +169,30 @@ Field 9: Type=C/String, Title='PROD_ID', The IEM NWS text product identifier.
 
 <h4>Archive notes:</h4>
 <ul>
- <li>Archive starts March 2003</li>
- <li><strong>8 January 2020</strong>: Previously, the ingest process would not
- consider PIPEPs with unknown / bad location details.  These are now included
- in the CSV option with a "None" column for the latitude and longitude.  On a
- typical day, less than five PIREPs have unknown location details.</li>
- <li><strong>21 April 2021</strong>: It was kindly pointed out that location
- offsets are in nautical miles and not miles.  The archive was reprocessed
- to properly use nautical miles.</li>
+ <li>Archive starts December 2000</li>
+ <li><strong>11 Feb 2025:</strong> An issue was found with the location of
+ the navaid <code>FLM</code>.  This resulted in PIREPs referencing that navaid
+ being placed in Florida.  This has been corrected and the archive was
+ reprocessed to fix this issue.</li>
+ <li><strong>31 July 2024:</strong> Going forward, a IEM product identifier
+ field has been added to allow the retrieval of the raw NWS text product that
+ the report was extracted from.  Hope to backfill this, at some point.</li> 
+ <li><strong>30 January 2023:</strong> Added extraction of icing and turbulence
+ portions of the PIREP. Added the associated, when applicable, ARTCC
+ identifier for the location of the PIREP.</li>
  <li><strong>23 September 2022</strong>: The archive was backfilled for as long
  as raw data was available from NCEI.  This backfilling covered a period between
  early March 2003 and 20 January 2015.  Confidence is not great that this backfilling
  is complete and PIREPs from Canada are mostly missing.  Again, due to reasons
  above and the poor format of this data, this archive is not the greatest, but
  is certainly unique!</li>
- <li><strong>30 January 2023:</strong> Added extraction of icing and turbulence
- portions of the PIREP. Added the associated, when applicable, ARTCC
- identifier for the location of the PIREP.</li>
- <li><strong>31 July 2024:</strong> Going forward, a IEM product identifier
- field has been added to allow the retrieval of the raw NWS text product that
- the report was extracted from.  Hope to backfill this, at some point.</li> 
+ <li><strong>21 April 2021</strong>: It was kindly pointed out that location
+ offsets are in nautical miles and not miles.  The archive was reprocessed
+ to properly use nautical miles.</li>
+ <li><strong>8 January 2020</strong>: Previously, the ingest process would not
+ consider PIPEPs with unknown / bad location details.  These are now included
+ in the CSV option with a "None" column for the latitude and longitude.  On a
+ typical day, less than five PIREPs have unknown location details.</li>
  </ul>
 EOF;
 $t->content = $content;
