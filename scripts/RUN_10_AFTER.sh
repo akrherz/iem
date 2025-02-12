@@ -68,9 +68,6 @@ then
     python cfs_extract.py &
 fi
 
-cd ../hads
-python process_hads_inbound.py &
-
 cd ../plots
 ./RUN_PLOTS
 

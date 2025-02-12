@@ -3,7 +3,7 @@
 Note, we do not want to do TRUNCATE here to do ugly locking that happens and
 which can jam things up badly when we are doing upgrades, etc.
 
-called from RUN_10_AFTER.sh
+called from RUN_10MIN.sh
 """
 
 from datetime import timezone

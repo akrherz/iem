@@ -8,6 +8,9 @@ python temperature.py
 python today_high.py
 python rwis_station.py
 
+cd ../hads
+python process_hads_inbound.py &
+
 cd ../dbutil
 timeout -v 540 python asos2archive.py &
 
