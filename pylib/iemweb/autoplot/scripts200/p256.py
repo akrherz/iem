@@ -193,7 +193,7 @@ def get_asos(ctx: dict) -> pd.DataFrame:
             for snowsrc, gdf in snowdf.groupby("station"):
                 asosid = stations[stations["snow_src"] == snowsrc].index[0]
                 stations.at[asosid, "cnt_6hr"] = len(gdf["valid"].unique())
-                snowfall = gdf[gdf["shefvar"] == "SFD"]["value"].sum()
+                snowfall = gdf[gdf["shefvar"] == "SFQ"]["value"].sum()
                 stations.at[asosid, "snow"] = snowfall
 
                 qobs = gdf[gdf["shefvar"] == "SDI"]
