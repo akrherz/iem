@@ -12,12 +12,11 @@ from datetime import date, timedelta
 import numpy as np
 import pandas as pd
 from matplotlib.patches import Rectangle
-from pyiem.database import get_dbconnc, get_sqlalchemy_conn
+from pyiem.database import get_dbconnc, get_sqlalchemy_conn, sql_helper
 from pyiem.exceptions import NoDataFound
 from pyiem.plot import calendar_plot
 from pyiem.reference import TRACE_VALUE
 from pyiem.util import convert_value
-from sqlalchemy import text
 
 PDICT = {
     "max_tmpf": "High Temperature",
@@ -126,7 +125,7 @@ def plotter(ctx: dict):
     # Get Climatology
     with get_sqlalchemy_conn("coop") as conn:
         cdf = pd.read_sql(
-            text("""SELECT to_char(valid, 'mmdd') as sday,
+            sql_helper("""SELECT to_char(valid, 'mmdd') as sday,
             round(high::numeric, 0) as high,
             round(low::numeric, 0) as low,
             round(((high + low) / 2.)::numeric, 0) as avg,

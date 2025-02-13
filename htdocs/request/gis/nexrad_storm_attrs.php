@@ -21,7 +21,7 @@ if (tokens.length == 2 && tokens[1].length == 3){
 </script>
 EOF;
 $t->title = "Download NEXRAD Storm Attributes Shapefile";
-$content = <<<EOF
+$content = <<<EOM
 <h3>Archived NEXRAD Storm Attributes Shapefiles</h3>
 
 <p>The IEM attempts to process and archive the Storm Attribute Table that is
@@ -37,9 +37,10 @@ $content = <<<EOF
         <a href="https://www.ncdc.noaa.gov/swdiws/">web services</a>.</div>
         
 <p>The archive behind this application is large, so please be patient after clicking
- the Givme button below.  If you request all RADARs, you can only request up to 
- seven days worth of data.  If you can request a single RADAR, there is no 
- date restriction, but the download will be slow! <a href="/cgi-bin/request/gis/nexrad_storm_attrs.py?help"
+ the Givme button below.  Requests are limited to a "score" of 1500, which is a
+ combination of selected RADARs and day interval.  If you select ALL RADARs,
+ that counts as 150 toward that score.
+ <a href="/cgi-bin/request/gis/nexrad_storm_attrs.py?help"
  class="btn btn-info"><i class="fa fa-file"></i> Backend documentation</a> exists
  for those wishing to script against this service.</p>
 
@@ -65,7 +66,7 @@ $content = <<<EOF
 
 <tr>
   <td rowspan='2'>
-EOF;
+EOM;
 $content .= networkMultiSelect(Array("NEXRAD", "TWDR"), 'ALL', 
           Array("ALL"=>"ALL"), "radar") ."</td>
     <th>Start:</th>
@@ -106,7 +107,7 @@ $content .= networkMultiSelect(Array("NEXRAD", "TWDR"), 'ALL',
   </tr>
 </table>";
 
-$content .= <<<EOF
+$content .= <<<EOM
 <p><input type="submit" value="Giveme data right now!">
 </form>
 
@@ -147,7 +148,7 @@ A direction of "west" would represent a storm moving from west to east.
 <form id='dyno' name='dyno'>
 
 <p><strong>Select RADAR:</strong> 
-EOF;
+EOM;
 $content .= networkSelect(Array("NEXRAD", "TWDR"), 
         'DMX') ."
 <br />

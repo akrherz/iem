@@ -20,10 +20,9 @@ In this case, both lines are presented as equal.
 import numpy as np
 import pandas as pd
 import pyiem.nws.vtec as vtec
-from pyiem.database import get_sqlalchemy_conn
+from pyiem.database import get_sqlalchemy_conn, sql_helper
 from pyiem.exceptions import NoDataFound
 from pyiem.plot import figure_axes
-from sqlalchemy import text
 
 from iemweb.autoplot import get_monofont
 
@@ -130,7 +129,7 @@ def plotter(ctx: dict):
     if ctx["which"] == "ugc":
         with get_sqlalchemy_conn("postgis") as conn:
             res = conn.execute(
-                text("""
+                sql_helper("""
                     SELECT s.wfo, s.tzname, u.name from ugcs u JOIN stations s
                     on (u.wfo = s.id) where ugc = :ugc and end_ts is null and
                     s.network = 'WFO' LIMIT 1
@@ -158,14 +157,20 @@ def plotter(ctx: dict):
 
     with get_sqlalchemy_conn("postgis") as conn:
         events = pd.read_sql(
-            text(f"""
+            sql_helper(
+                """
                 SELECT {expirecol} - {issuecol} as final,
                 {expirecol2} - {issuecol} as initial,
                 issue at time zone :tzname as issue, ugc, eventid,
                 vtec_year as year
                 from warnings WHERE {ugclimiter} phenomena = :phenomena
                 and significance = :significance and wfo = :wfo
-                 """),
+                 """,
+                expirecol=expirecol,
+                issuecol=issuecol,
+                expirecol2=expirecol2,
+                ugclimiter=ugclimiter,
+            ),
             conn,
             params=params,
         )

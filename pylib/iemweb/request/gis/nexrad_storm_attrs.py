@@ -1,6 +1,7 @@
 """.. title:: NEXRAD Storm Attributes Data Service
 
-Return to `request form </request/gis/nexrad_storm_attrs.php>`_.
+Return to `request form </request/gis/nexrad_storm_attrs.php>`_ or the
+`API mainpage </api/#cgi>`_.
 
 Documentation for /cgi-bin/request/gis/nexrad_storm_attrs.py
 ------------------------------------------------------------
@@ -12,6 +13,8 @@ request more than two radar sites, the time span is limited to 7 days.
 Changelog
 ---------
 
+- 2025-02-13: Requests are limited to 1000 (RADARs * days), which is
+    effectively all RADARs for about a week.
 - 2024-06-11: Initial documentation release
 
 Example Usage
@@ -34,15 +37,13 @@ fmt=shp&sts=2024-08-10T00:00:00Z&ets=2024-08-11T00:00:00Z&radar=TLH
 """
 
 import zipfile
-from datetime import timedelta
 from io import BytesIO, StringIO
 
 import shapefile
 from pydantic import AwareDatetime, Field
-from pyiem.database import get_sqlalchemy_conn
+from pyiem.database import get_sqlalchemy_conn, sql_helper
 from pyiem.exceptions import IncompleteWebRequest
 from pyiem.webutil import CGIModel, ListOrCSVType, iemapp
-from sqlalchemy import text
 
 
 class Schema(CGIModel):
@@ -90,16 +91,18 @@ def run(environ, start_response):
     radarlimit = ""
     if environ["radar"] and "ALL" not in environ["radar"]:
         radarlimit = " and nexrad = ANY(:radar) "
-    if (
-        len(environ["radar"]) > 2
-        and (environ["ets"] - environ["sts"]).days > 6
-    ):
-        environ["ets"] = environ["sts"] + timedelta(days=7)
+    score = len(environ["radar"]) if "ALL" not in environ["radar"] else 150
+    score *= (environ["ets"] - environ["sts"]).days
+    if score > 1_500:
+        raise IncompleteWebRequest(
+            "Request is too large, please limit to (radars * days) < 1500"
+        )
     fn = f"stormattr_{environ['sts']:%Y%m%d%H%M}_{environ['ets']:%Y%m%d%H%M}"
 
     with get_sqlalchemy_conn("radar") as conn:
         res = conn.execute(
-            text(f"""
+            sql_helper(
+                """
             SELECT to_char(valid at time zone 'UTC', 'YYYYMMDDHH24MI')
                 as utctime,
             storm_id, nexrad, azimuth, range, tvs, meso, posh, poh, max_size,
@@ -107,7 +110,9 @@ def run(environ, start_response):
             ST_y(geom) as lat, ST_x(geom) as lon
             from nexrad_attributes_log WHERE
             valid >= :sts and valid < :ets {radarlimit} ORDER by valid ASC
-            """),
+            """,
+                radarlimit=radarlimit,
+            ),
             {
                 "sts": environ["sts"],
                 "ets": environ["ets"],

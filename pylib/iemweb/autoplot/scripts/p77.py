@@ -10,10 +10,9 @@ from datetime import datetime
 
 import numpy as np
 import pandas as pd
-from pyiem.database import get_sqlalchemy_conn
+from pyiem.database import get_sqlalchemy_conn, sql_helper
 from pyiem.exceptions import NoDataFound
 from pyiem.plot import figure
-from sqlalchemy import text
 
 from iemweb.autoplot import ARG_STATION
 
@@ -34,7 +33,7 @@ def plotter(ctx: dict):
 
     with get_sqlalchemy_conn("coop") as conn:
         df = pd.read_sql(
-            text("""
+            sql_helper("""
         with data as (
             select year, month, extract(doy from day) as doy,
             generate_series(32, high) as t from alldata
