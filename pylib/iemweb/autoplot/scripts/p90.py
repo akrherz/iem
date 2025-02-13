@@ -96,7 +96,7 @@ import geopandas as gpd
 import numpy as np
 import pandas as pd
 from affine import Affine
-from pyiem.database import get_dbconn, get_sqlalchemy_conn
+from pyiem.database import get_dbconn, get_sqlalchemy_conn, sql_helper
 from pyiem.exceptions import NoDataFound
 from pyiem.nws import vtec
 from pyiem.plot import get_cmap
@@ -109,7 +109,6 @@ from pyiem.reference import (
 )
 from pyiem.util import utc
 from rasterstats import zonal_stats
-from sqlalchemy import text
 
 from iemweb.autoplot import ARG_FEMA, fema_region2states
 
@@ -355,8 +354,10 @@ def get_raster(ctx: dict):
         "ets": ets,
     }
     with get_sqlalchemy_conn("postgis") as conn:
-        df = gpd.read_postgis(
-            text(f"""
+        # Until geopandas gets typed
+        df: pd.DataFrame = gpd.read_postgis(
+            sql_helper(
+                """
         SELECT ST_Forcerhr(ST_Buffer(geom, 0.0005)) as geom, issue, expire,
         extract(epoch from :ets - issue) / 86400. as days
         from sbw where {wfolimiter} {daylimiter}
@@ -366,7 +367,10 @@ def get_raster(ctx: dict):
             ST_MakeEnvelope(:west, :south, :east, :north, 4326))
         and ST_IsValid(geom)
         and issue >= :sts and issue <= :ets ORDER by issue ASC
-        """),
+        """,
+                wfolimiter=wfolimiter,
+                daylimiter=daylimiter,
+            ),
             conn,
             params=params,
             geom_col="geom",
@@ -786,8 +790,9 @@ def do_ugc(ctx: dict):
         if t == "cwa":
             with get_sqlalchemy_conn("postgis") as conn:
                 df = pd.read_sql(
-                    text(f"""WITH data as (
-                select ugc, extract(year from issue) as year,
+                    sql_helper(
+                        """WITH data as (
+                select ugc, vtec_year as year,
                 count(*), min(issue at time zone 'UTC') as nv,
                 max(issue at time zone 'UTC') as mv from warnings
                 WHERE wfo = :wfo and phenomena = :phenomena and
@@ -798,7 +803,10 @@ def do_ugc(ctx: dict):
                 SELECT ugc, sum(count) as total, {aggstat}(count) as datum,
                 min(nv) as minvalid, max(mv) as maxvalid,
                 count(*)::int as years from data GROUP by ugc
-                """),
+                """,
+                        daylimiter=daylimiter,
+                        aggstat=aggstat,
+                    ),
                     conn,
                     params=params,
                     index_col="ugc",
@@ -806,8 +814,9 @@ def do_ugc(ctx: dict):
         else:
             with get_sqlalchemy_conn("postgis") as conn:
                 df = pd.read_sql(
-                    text(f"""WITH data as (
-                select ugc, extract(year from issue) as year,
+                    sql_helper(
+                        """WITH data as (
+                select ugc, vtec_year as year,
                 count(*), min(issue at time zone 'UTC') as nv,
                 max(issue at time zone 'UTC') as mv from warnings
                 WHERE substr(ugc, 1, 2) = ANY(:states)
@@ -818,7 +827,10 @@ def do_ugc(ctx: dict):
                 SELECT ugc, sum(count) as total, {aggstat}(count) as datum,
                 min(nv) as minvalid, max(mv) as maxvalid,
                 count(*)::int as years from data GROUP by ugc
-                """),
+                """,
+                        daylimiter=daylimiter,
+                        aggstat=aggstat,
+                    ),
                     conn,
                     params=params,
                     index_col="ugc",

@@ -15,12 +15,11 @@ from datetime import date, datetime, timedelta
 import geopandas as gpd
 import numpy as np
 import pandas as pd
-from pyiem.database import get_sqlalchemy_conn
+from pyiem.database import get_sqlalchemy_conn, sql_helper
 from pyiem.exceptions import NoDataFound
 from pyiem.plot import MapPlot, centered_bins, get_cmap, pretty_bins
 from pyiem.reference import wfo_bounds
 from pyiem.util import logger
-from sqlalchemy import text
 
 LOG = logger()
 PDICT = {
@@ -268,13 +267,17 @@ def replace_gdd_climo(ctx, df, table, date1, date2):
         daylimit = ""
     with get_sqlalchemy_conn("coop") as conn:
         climo = pd.read_sql(
-            text(f"""WITH obs as (
+            sql_helper(
+                """WITH obs as (
                 SELECT station, sday,
                 avg(gddxx(:gddbase, :gddceil, high, low)) as datum
                 from {table} GROUP by station, sday)
             select station, sum(datum) as gdd from obs
             WHERE {daylimit} GROUP by station ORDER by station
-            """),
+            """,
+                table=table,
+                daylimit=daylimit,
+            ),
             conn,
             params=params,
             index_col="station",
@@ -313,7 +316,7 @@ def get_data(ctx):
     date1 = ctx["date1"]
     date2 = min([ctx["date2"], date.today()])
     sector = ctx["sector"]
-    table = f"alldata_{sector}" if len(sector) == 2 else "alldata"
+    table = f"alldata_{sector.lower()}" if len(sector) == 2 else "alldata"
     tables = [table]
     dfs = []
     wfo_limiter = ""
@@ -347,8 +350,8 @@ def get_data(ctx):
         for table in tables:
             LOG.info("Starting %s table query", table)
             df = gpd.read_postgis(
-                text(
-                    f"""
+                sql_helper(
+                    """
                 WITH obs as (
                     SELECT station,
                     gddxx(:gddbase, :gddceil, high, low) as gdd,
@@ -361,7 +364,7 @@ def get_data(ctx):
                     substr(station, 3, 1) not in ('C', 'K', 'D') and
                     substr(station, 3, 4) != '0000'
                     and not (station = ANY(:cull))),
-                climo as ({build_climate_sql(ctx, table)}),
+                climo as ({climatesql}),
                 combo as (
                     SELECT o.station, o.precip - c.precip as precip_diff,
                     o.precip as precip, c.precip as cprecip,
@@ -444,7 +447,10 @@ def get_data(ctx):
                 t.geom, obs, snow_quorum
                 from agg d JOIN stations t on (d.station = t.id)
                 WHERE t.network ~* 'CLIMATE' and t.online {wfo_limiter}
-                """
+                """,
+                    table=table,
+                    wfo_limiter=wfo_limiter,
+                    climatesql=build_climate_sql(ctx, table),
                 ),
                 conn,
                 params=params,
