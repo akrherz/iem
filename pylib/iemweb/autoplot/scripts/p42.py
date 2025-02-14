@@ -86,6 +86,7 @@ def get_description():
             default=year_range,
             optional=True,
             label="Inclusive Range of Years to Include (optional)",
+            pattern=r"^\d{4}\s*-\s*\d{4}$",
         ),
         dict(
             type="select",

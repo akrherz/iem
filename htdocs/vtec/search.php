@@ -9,7 +9,7 @@ $t = new MyView();
 $DT = "2.0.2";
 $OL = "10.1.0";
 
-$t->jsextra = <<<EOF
+$t->jsextra = <<<EOM
 <script type="text/javascript" src="/js/mapping.js"></script>
 <script src="/vendor/jquery-datatables/{$DT}/datatables.min.js"></script>
 <script src="/vendor/jquery-ui/1.11.4/jquery-ui.js"></script>
@@ -18,8 +18,8 @@ $t->jsextra = <<<EOF
 <script src='/vendor/openlayers/{$OL}/ol.js'></script>
 <script type="text/javascript" src="/js/olselect-lonlat.js"></script>
 <script type="text/javascript" src="search.js?v=2"></script>
-EOF;
-$t->headextra = <<<EOF
+EOM;
+$t->headextra = <<<EOM
 <link rel="stylesheet" href="/vendor/jquery-datatables/{$DT}/datatables.min.css" />
 <link rel="stylesheet" href="/vendor/jquery-ui/1.11.4/jquery-ui.min.css" />
 <link rel='stylesheet' href="/vendor/openlayers/{$OL}/ol.css" type='text/css'>
@@ -31,10 +31,10 @@ $t->headextra = <<<EOF
     float: left;
   }
 </style>
-EOF;
+EOM;
 $t->title = "NWS Warning Search by Point or County/Zone";
 
-$t->content = <<<EOF
+$t->content = <<<EOM
 <p>This application allows you to search for National Weather Service Watch,
 Warning, and Advisories.  There are currently three options:
 <ul>
@@ -118,16 +118,24 @@ an office that did not exist at the time.
 <form id="form2">
 <div class="row">
     <div class="col-md-4">
-        <label for="state">Select State:
-        <select name="state" style="width: 100%" id="state"></select></label>
-        <br /><label for="ugc">Select County/Zone:
-        <select name="ugc" style="width: 100%"></select></label>
+        These dates (at 00 UTC) define the issuance of the event, please do not
+        be too tight with these dates.
         <br /><label for="sdate">Start Date:
         <input name="sdate" type="text"></label>
         <br /><label for="edate">End Date:
         <input name="edate" type="text"></label>
-        
-        <p><strong>You can otherwise search by lat/lon point. The start and
+
+        <div class="well"><strong>2a.</strong> Manual Selection.
+        <br /><label for="state">Select State:
+        <select name="state" style="width: 100%" id="state"></select></label>
+        <br /><label for="ugc">Select County/Zone:
+        <select name="ugc" style="width: 100%"></select></label>
+        <br /><button type="button" class="btn btn-default"
+         id="manualugc">Update</button>
+        </div>
+
+        <div class="well"><strong>2b.</strong> Manual Point Selection.
+        <br />You can otherwise search by lat/lon point. The start and
         end date set above are used with this option as well:</strong><br />
         <i>Latitude (deg N):</i> <input size="8" id="lat2" value="41.53"><br />
         <i>Longitude (deg E):</i> <input size="8" id="lon2" value="-93.653"></p>
@@ -138,9 +146,14 @@ an office that did not exist at the time.
             <option value="0.1">~10 miles (0.10 deg)</option>
         </select></p>
         <button type="button" class="btn btn-default" id="manualpt2">Update</button>
-        </p>
-        <p><strong>Or drag marker to select coordinate:</strong><br />
+        </div>
+
+        <div class="well">
+        <strong>2c.</strong> or drag marker to select coordinate:
+        <br />
         <div id="map2" class="map"></div>
+        <br clear="all" />
+        </div>
     </div>
     <div class="col-md-8">
     <h4 id="table2title"></h4>
@@ -203,5 +216,5 @@ by state and year.</p>
     </div>
 </div><!-- ./row -->
 </form><!-- ./form3 -->
-EOF;
+EOM;
 $t->render('full.phtml');

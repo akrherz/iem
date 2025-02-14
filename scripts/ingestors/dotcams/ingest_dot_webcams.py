@@ -76,7 +76,7 @@ def process_feature(cursor, domain, feat):
         if cursor.rowcount > 0:
             continue
         url = props[f"IMAGE_URL{suffix}"]
-        if url.find("Not_Available") > -1:
+        if url is None or url.find("Not_Available") > -1:
             LOG.debug("skipping %s %s %s", cam, valid, url)
             continue
         try:

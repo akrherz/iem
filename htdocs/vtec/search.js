@@ -364,6 +364,14 @@ function buildUI(){
         marker1.setGeometry(new ol.geom.Point(ol.proj.fromLonLat([lo, la])));
         updateMarkerPosition(lo, la);
     });
+    $("#manualugc").click(() => {
+        const ugc = ugcSelect.val();
+        if (ugc === null){
+            return;
+        }
+        window.location.href = `#byugc/${encodeURIComponent(ugc)}`;
+        updateTable2ByUGC();
+    });
     $("#manualpt2").click(() => {
         const la = parseFloat($("#lat2").val());
         const lo = parseFloat($("#lon2").val());
