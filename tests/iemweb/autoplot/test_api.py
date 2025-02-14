@@ -3,6 +3,7 @@
 import pytest
 from iemweb.autoplot import data as autoplot_data
 from iemweb.autoplot.autoplot import application as autoplot_app
+from iemweb.autoplot.autoplot import parser
 from iemweb.autoplot.meta import application as meta_app
 from werkzeug.test import Client
 
@@ -11,6 +12,20 @@ def genmod():
     """Generate modules to test against."""
     for plot in autoplot_data["plots"]:
         yield from plot["options"]
+
+
+def test_fourcolons():
+    """Test that this raises."""
+    with pytest.raises(ValueError):
+        parser("wfo:bah::::")
+
+
+def test_threecolons():
+    """Test that this raises."""
+    res = parser("network:WFO::wfo:::year:2025")
+    assert res["network"] == "WFO"
+    assert res["wfo"] == ""
+    assert res["year"] == "2025"
 
 
 @pytest.mark.parametrize("entry", genmod())

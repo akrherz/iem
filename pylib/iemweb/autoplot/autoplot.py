@@ -54,17 +54,21 @@ def parser(cgistr: str) -> dict:
     routine"""
     # want predictable / stable URIs, generally.
     data = {}
-    for token in cgistr.split("::"):
+    # GIGO
+    if cgistr.find("::::") > -1:
+        raise ValueError("Too many semicolons")
+    for token in cgistr.replace(":::", ": ::").split("::"):
         token2 = token.split(":")
         if len(token2) != 2:
             continue
+        if token2[1] == " ":  # Undo hack above
+            token2[1] = ""
         if token2[0] in data:
             if isinstance(data[token2[0]], string_types):
                 data[token2[0]] = [data[token2[0]]]
             data[token2[0]].append(token2[1])
         else:
             data[token2[0]] = token2[1]
-
     return data
 
 
