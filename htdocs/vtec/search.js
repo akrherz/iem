@@ -369,7 +369,7 @@ function buildUI(){
         if (ugc === null){
             return;
         }
-        window.location.href = `#byugc/${ugc}`;
+        window.location.href = `#byugc/${encodeURIComponent(ugc)}`;
         updateTable2ByUGC();
     });
     $("#manualpt2").click(() => {
