@@ -27,6 +27,7 @@ from datetime import date
 
 import simplejson as json
 from pydantic import Field
+from pyiem.database import get_sqlalchemy_conn, sql_helper
 from pyiem.reference import TRACE_VALUE
 from pyiem.webutil import CGIModel, iemapp
 from simplejson import encoder
@@ -85,12 +86,12 @@ def f2_sanitize(val):
     return round(val, 2)
 
 
-def get_data(cursor, station, year, fmt):
+def get_data(conn, station, year, fmt):
     """Get the data for this timestamp"""
     data = {"results": []}
     # Fetch the daily values
-    cursor.execute(
-        """
+    res = conn.execute(
+        sql_helper("""
         select station, name, product, state, wfo, valid,
         round(st_x(geom)::numeric, 4)::float as st_x,
         round(st_y(geom)::numeric, 4)::float as st_y,
@@ -110,13 +111,17 @@ def get_data(cursor, station, year, fmt):
         highest_gust_speed, highest_gust_direction,
         average_wind_speed, snowdepth
         from cli_data c JOIN stations s on (c.station = s.id)
-        WHERE s.network = 'NWSCLI' and c.station = %s
-        and c.valid >= %s and c.valid <= %s
+        WHERE s.network = 'NWSCLI' and c.station = :station
+        and c.valid >= :sts and c.valid <= :ets
         ORDER by c.valid ASC
-    """,
-        (station, date(year, 1, 1), date(year, 12, 31)),
+    """),
+        {
+            "station": station,
+            "sts": date(year, 1, 1),
+            "ets": date(year, 12, 31),
+        },
     )
-    for row in cursor:
+    for row in res.mappings():
         data["results"].append(
             {
                 "station": row["station"],
@@ -224,7 +229,6 @@ def get_ct(environ: dict) -> str:
     content_type=get_ct,
     memcachekey=get_mckey,
     memcacheexpire=300,
-    iemdb="iem",
 )
 def application(environ, start_response):
     """Answer request."""
@@ -232,6 +236,7 @@ def application(environ, start_response):
     year = environ["year"]
     fmt = environ["fmt"]
 
-    data = get_data(environ["iemdb.iem.cursor"], station, year, fmt)
+    with get_sqlalchemy_conn("iem") as conn:
+        data = get_data(conn, station, year, fmt)
     start_response("200 OK", [("Content-type", get_ct(environ))])
     return data.encode("ascii")

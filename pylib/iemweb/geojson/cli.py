@@ -38,6 +38,7 @@ from datetime import date
 
 import simplejson as json
 from pydantic import Field
+from pyiem.database import get_sqlalchemy_conn, sql_helper
 from pyiem.reference import TRACE_VALUE
 from pyiem.webutil import CGIModel, iemapp
 from simplejson import encoder
@@ -94,12 +95,12 @@ def f2_sanitize(val):
     return round(val, 2)
 
 
-def get_data(cursor, ts, fmt):
+def get_data(conn, ts, fmt):
     """Get the data for this timestamp"""
     data = {"type": "FeatureCollection", "features": []}
     # Fetch the daily values
-    cursor.execute(
-        """
+    res = conn.execute(
+        sql_helper("""
     select station, name, product, state, wfo, valid,
     round(st_x(geom)::numeric, 4)::float as lon,
     round(st_y(geom)::numeric, 4)::float as lat,
@@ -122,11 +123,11 @@ def get_data(cursor, ts, fmt):
     highest_gust_speed, highest_gust_direction,
     average_wind_speed, snowdepth
     from cli_data c JOIN stations s on (c.station = s.id)
-    WHERE s.network = 'NWSCLI' and c.valid = %s
-    """,
-        (ts,),
+    WHERE s.network = 'NWSCLI' and c.valid = :ts
+    """),
+        {"ts": ts},
     )
-    for i, row in enumerate(cursor):
+    for i, row in enumerate(res.mappings()):
         data["features"].append(
             {
                 "type": "Feature",
@@ -267,8 +268,6 @@ def get_mckey(environ):
     content_type=get_ct,
     memcachekey=get_mckey,
     memcacheexpire=300,
-    iemdb="iem",
-    iemdb_cursorname="cursor",
 )
 def application(environ, start_response):
     """see how we are called"""
@@ -290,6 +289,7 @@ def application(environ, start_response):
     else:
         headers.append(("Content-type", "text/plain"))
 
-    data = get_data(environ["iemdb.iem.cursor"], environ["dt"], fmt)
+    with get_sqlalchemy_conn("iem") as conn:
+        data = get_data(conn, environ["dt"], fmt)
     start_response("200 OK", headers)
     return data.encode("ascii")

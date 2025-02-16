@@ -13,11 +13,10 @@ example, a period between Dec 15 and Jan 15 will be computed.</p>
 import calendar
 
 import pandas as pd
-from pyiem.database import get_sqlalchemy_conn
+from pyiem.database import get_sqlalchemy_conn, sql_helper
 from pyiem.exceptions import NoDataFound
 from pyiem.plot import MapPlot, get_cmap, pretty_bins
 from pyiem.reference import LATLON, SECTORS_NAME, Z_OVERLAY2
-from sqlalchemy import text
 
 from iemweb.util import month2months
 
@@ -216,8 +215,8 @@ def plotter(ctx: dict):
         joincol = "ncei91"
     with get_sqlalchemy_conn("coop") as conn:
         df = pd.read_sql(
-            text(
-                f"""
+            sql_helper(
+                """
             WITH mystations as (
                 select {joincol} as myid, max(state) as state,
                 max(ST_x(geom)) as lon, max(ST_y(geom)) as lat from stations
@@ -246,7 +245,9 @@ def plotter(ctx: dict):
             JOIN mystations t on (c.station = t.myid)
             WHERE {dtlimiter}
             GROUP by station
-            """
+            """,
+                joincol=joincol,
+                dtlimiter=dtlimiter,
             ),
             conn,
             params=params,

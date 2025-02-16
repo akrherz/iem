@@ -25,6 +25,7 @@ import json
 from datetime import datetime
 
 from pydantic import Field
+from pyiem.database import get_sqlalchemy_conn, sql_helper
 from pyiem.webutil import CGIModel, iemapp
 
 
@@ -39,10 +40,10 @@ class Schema(CGIModel):
     syear: int = Field(1800, description="Start Year")
 
 
-def run(cursor, station, syear, eyear):
+def run(conn, station, syear, eyear):
     """Do something"""
-    cursor.execute(
-        """
+    res = conn.execute(
+        sql_helper("""
     WITH data as (
       SELECT sday, year, precip,
       avg(precip) OVER (PARTITION by sday) as avg_precip,
@@ -60,7 +61,8 @@ def run(cursor, station, syear, eyear):
         as max_precip,
       max(high - low) OVER (PARTITION by sday) as max_range,
       min(high - low) OVER (PARTITION by sday) as min_range
-      from alldata WHERE station = %s and year >= %s and year < %s),
+      from alldata
+    WHERE station = :station and year >= :syear and year < :eyear),
 
     max_highs as (
       SELECT sday, high, array_agg(year) as years from data
@@ -95,17 +97,17 @@ def run(cursor, station, syear, eyear):
     max_precip mp
     WHERE xh.sday = a.sday and xh.sday = nh.sday and xh.sday = xl.sday and
     xh.sday = nl.sday and xh.sday = mp.sday ORDER by sday ASC
-    """,
-        (station, syear, eyear),
+    """),
+        {"station": station, "syear": syear, "eyear": eyear},
     )
-    res = {
+    data = {
         "station": station,
         "start_year": syear,
         "end_year": eyear,
         "climatology": [],
     }
-    for row in cursor:
-        res["climatology"].append(
+    for row in res.mappings():
+        data["climatology"].append(
             dict(
                 month=int(row["sday"][:2]),
                 day=int(row["sday"][2:]),
@@ -127,7 +129,7 @@ def run(cursor, station, syear, eyear):
                 min_range=row["min_range"],
             )
         )
-    return json.dumps(res)
+    return json.dumps(data)
 
 
 def get_key(environ):
@@ -139,8 +141,6 @@ def get_key(environ):
 
 
 @iemapp(
-    iemdb="coop",
-    iemdb_cursorname="cursor",
     help=__doc__,
     schema=Schema,
     memcachekey=get_key,
@@ -151,7 +151,8 @@ def application(environ, start_response):
     syear = environ["syear"]
     eyear = environ["eyear"]
 
-    res = run(environ["iemdb.coop.cursor"], station, syear, eyear)
+    with get_sqlalchemy_conn("coop") as conn:
+        res = run(conn, station, syear, eyear)
     headers = [("Content-type", "application/json")]
     start_response("200 OK", headers)
     return res
