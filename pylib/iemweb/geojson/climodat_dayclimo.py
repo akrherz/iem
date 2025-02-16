@@ -50,7 +50,7 @@ def run(conn: Connection, network, month, day, syear, eyear):
 
     nt = NetworkTable(network)
     sday = f"{month:02.0f}{day:02.0f}"
-    table = f"alldata_{network[:2]}"
+    table = f"alldata_{network[:2].lower()}"
     res = conn.execute(
         sql_helper(
             """
