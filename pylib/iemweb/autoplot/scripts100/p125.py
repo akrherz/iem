@@ -241,13 +241,14 @@ def plotter(ctx: dict):
             sum(gdd48) as total_gdd48,
             sum(gdd50) as total_gdd50,
             sum(gdd51) as total_gdd51,
-            sum(gdd52) as total_gdd52 from {ctx["src"]} c
+            sum(gdd52) as total_gdd52 from {table} c
             JOIN mystations t on (c.station = t.myid)
             WHERE {dtlimiter}
             GROUP by station
             """,
                 joincol=joincol,
                 dtlimiter=dtlimiter,
+                table=ctx["src"],
             ),
             conn,
             params=params,
