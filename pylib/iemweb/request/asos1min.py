@@ -90,7 +90,7 @@ class Schema(CGIModel):
         return value
 
 
-def get_station_metadata(environ, stations) -> dict:
+def get_station_metadata(stations) -> dict:
     """build a dictionary."""
     with get_sqlalchemy_conn("mesosite") as conn:
         res = conn.execute(
@@ -114,7 +114,7 @@ def get_station_metadata(environ, stations) -> dict:
 
 def compute_prefixes(sio, environ, delim, stations, tz) -> dict:
     """"""
-    station_meta = get_station_metadata(environ, stations)
+    station_meta = get_station_metadata(stations)
     prefixes = {}
     if environ["gis"]:
         sio.write(
