@@ -23,6 +23,7 @@ from io import StringIO
 from zoneinfo import ZoneInfo, ZoneInfoNotFoundError
 
 from pydantic import AwareDatetime, Field, field_validator
+from pyiem.database import get_sqlalchemy_conn, sql_helper
 from pyiem.exceptions import IncompleteWebRequest
 from pyiem.webutil import CGIModel, ListOrCSVType, iemapp
 
@@ -89,29 +90,31 @@ class Schema(CGIModel):
         return value
 
 
-def get_station_metadata(environ, stations) -> dict:
+def get_station_metadata(stations) -> dict:
     """build a dictionary."""
-    cursor = environ["iemdb.mesosite.cursor"]
-    cursor.execute(
-        """
-        SELECT id, name, round(ST_x(geom)::numeric, 4) as lon,
-        round(ST_y(geom)::numeric, 4) as lat from stations
-        where id = ANY(%s) and network ~* 'ASOS'
-    """,
-        (stations,),
-    )
-    res = {}
-    for row in cursor:
-        res[row["id"]] = dict(name=row["name"], lon=row["lon"], lat=row["lat"])
+    with get_sqlalchemy_conn("mesosite") as conn:
+        res = conn.execute(
+            sql_helper("""
+            SELECT id, name, round(ST_x(geom)::numeric, 4) as lon,
+            round(ST_y(geom)::numeric, 4) as lat from stations
+            where id = ANY(:stations) and network ~* 'ASOS'
+        """),
+            {"stations": stations},
+        )
+        data = {}
+        for row in res.mappings():
+            data[row["id"]] = dict(
+                name=row["name"], lon=row["lon"], lat=row["lat"]
+            )
     for station in stations:
-        if station not in res:
+        if station not in data:
             raise IncompleteWebRequest(f"Unknown station provided: {station}")
-    return res
+    return data
 
 
 def compute_prefixes(sio, environ, delim, stations, tz) -> dict:
     """"""
-    station_meta = get_station_metadata(environ, stations)
+    station_meta = get_station_metadata(stations)
     prefixes = {}
     if environ["gis"]:
         sio.write(
@@ -147,8 +150,6 @@ def compute_prefixes(sio, environ, delim, stations, tz) -> dict:
 
 
 @iemapp(
-    iemdb=["asos1min", "mesosite"],
-    iemdb_cursor="blah",
     help=__doc__,
     schema=Schema,
 )
@@ -166,48 +167,56 @@ def application(environ, start_response):
     varnames = environ["vars"]
     if not varnames:
         raise IncompleteWebRequest("No vars= was specified in request.")
-    cursor = environ["iemdb.asos1min.cursor"]
-    # get a list of columns we have in the alldata_1minute table
-    cursor.execute(
-        "select column_name from information_schema.columns where "
-        "table_name = 'alldata_1minute' ORDER by column_name"
-    )
-    columns = [row["column_name"] for row in cursor]
-    # cross check varnames now
-    for varname in varnames:
-        if varname not in columns:
-            raise IncompleteWebRequest(
-                f"Unknown variable {varname} specified in request."
+    with get_sqlalchemy_conn("asos1min") as conn:
+        # get a list of columns we have in the alldata_1minute table
+        res = conn.execute(
+            sql_helper(
+                "select column_name from information_schema.columns where "
+                "table_name = 'alldata_1minute' ORDER by column_name"
             )
-    cursor.execute(
-        """
-        select *,
-        to_char(valid at time zone %s, 'YYYY-MM-DD hh24:MI') as local_valid
-        from alldata_1minute
-        where station = ANY(%s) and valid >= %s and valid < %s and
-        extract(minute from valid) %% %s = 0 ORDER by station, valid
-        """,
-        (tz, stations, environ["sts"], environ["ets"], sample),
-    )
-    headers = []
-    if environ["what"] == "download":
-        headers.append(("Content-type", "application/octet-stream"))
-        headers.append(
-            ("Content-Disposition", "attachment; filename=changeme.txt")
         )
-    else:
-        headers.append(("Content-type", "text/plain"))
+        columns = [row["column_name"] for row in res.mappings()]
+        # cross check varnames now
+        for varname in varnames:
+            if varname not in columns:
+                raise IncompleteWebRequest(
+                    f"Unknown variable {varname} specified in request."
+                )
+        res = conn.execution_options(stream_results=True).execute(
+            sql_helper("""
+    select *,
+    to_char(valid at time zone :tz, 'YYYY-MM-DD hh24:MI') as local_valid
+    from alldata_1minute
+    where station = ANY(:stations) and valid >= :sts and valid < :ets and
+    extract(minute from valid) % :sample = 0 ORDER by station, valid
+            """),
+            {
+                "tz": tz,
+                "stations": stations,
+                "sts": environ["sts"],
+                "ets": environ["ets"],
+                "sample": sample,
+            },
+        )
+        headers = []
+        if environ["what"] == "download":
+            headers.append(("Content-type", "application/octet-stream"))
+            headers.append(
+                ("Content-Disposition", "attachment; filename=changeme.txt")
+            )
+        else:
+            headers.append(("Content-type", "text/plain"))
 
-    sio = StringIO()
-    prefixes = compute_prefixes(sio, environ, delim, stations, tz)
+        sio = StringIO()
+        prefixes = compute_prefixes(sio, environ, delim, stations, tz)
 
-    sio.write(delim.join(varnames) + "\n")
-    rowfmt = delim.join([f"%({var})s" for var in varnames])
-    for row in cursor:
-        sio.write(prefixes[row["station"]])
-        sio.write(f"{row['local_valid']}{delim}")
-        sio.write((rowfmt % row).replace("None", "M"))
-        sio.write("\n")
+        sio.write(delim.join(varnames) + "\n")
+        rowfmt = delim.join([f"%({var})s" for var in varnames])
+        for row in res.mappings():
+            sio.write(prefixes[row["station"]])
+            sio.write(f"{row['local_valid']}{delim}")
+            sio.write((rowfmt % row).replace("None", "M"))
+            sio.write("\n")
 
     start_response("200 OK", headers)
     return [sio.getvalue().encode("ascii")]

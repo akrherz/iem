@@ -20,6 +20,7 @@ from datetime import date
 
 import simplejson as json
 from pydantic import Field
+from pyiem.database import get_sqlalchemy_conn, sql_helper
 from pyiem.reference import TRACE_VALUE
 from pyiem.webutil import CGIModel, iemapp
 from simplejson import encoder
@@ -69,12 +70,12 @@ def f2_sanitize(val):
     return round(val, 2)
 
 
-def get_data(cursor, ts, fmt):
+def get_data(conn, ts, fmt):
     """Get the data for this timestamp"""
     data = {"type": "FeatureCollection", "features": []}
     # Fetch the daily values
-    cursor.execute(
-        """
+    res = conn.execute(
+        sql_helper("""
     select station, name, product, state, wfo, valid,
     round(st_x(geom)::numeric, 4)::float as st_x,
     round(st_y(geom)::numeric, 4)::float as st_y,
@@ -82,11 +83,11 @@ def get_data(cursor, ts, fmt):
     avg_smph, max_smph, avg_drct, minutes_sunshine, possible_sunshine,
     cloud_ss, wxcodes, gust_smph, gust_drct
     from cf6_data c JOIN stations s on (c.station = s.id)
-    WHERE s.network = 'NWSCLI' and c.valid = %s
-    """,
-        (ts,),
+    WHERE s.network = 'NWSCLI' and c.valid = :ts
+    """),
+        {"ts": ts},
     )
-    for i, row in enumerate(cursor):
+    for i, row in enumerate(res.mappings()):
         data["features"].append(
             {
                 "type": "Feature",
@@ -159,8 +160,6 @@ def get_ct(environ: dict) -> str:
 
 
 @iemapp(
-    iemdb="iem",
-    iemdb_cursorname="cursor",
     help=__doc__,
     schema=Schema,
     memcachekey=get_mckey,
@@ -172,6 +171,7 @@ def application(environ, start_response):
     dt = environ["dt"]
     fmt = environ["fmt"]
     headers = [("Content-type", get_ct(environ))]
-    res = get_data(environ["iemdb.iem.cursor"], dt, fmt)
+    with get_sqlalchemy_conn("iem") as conn:
+        res = get_data(conn, dt, fmt)
     start_response("200 OK", headers)
     return res

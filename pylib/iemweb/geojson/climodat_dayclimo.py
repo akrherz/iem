@@ -24,10 +24,10 @@ import json
 from datetime import datetime
 
 from pydantic import Field
-from pyiem.database import get_sqlalchemy_conn
+from pyiem.database import get_sqlalchemy_conn, sql_helper
 from pyiem.network import Table as NetworkTable
 from pyiem.webutil import CGIModel, iemapp
-from sqlalchemy import Connection, text
+from sqlalchemy import Connection
 
 
 class Schema(CGIModel):
@@ -50,9 +50,10 @@ def run(conn: Connection, network, month, day, syear, eyear):
 
     nt = NetworkTable(network)
     sday = f"{month:02.0f}{day:02.0f}"
-    table = f"alldata_{network[:2]}"
+    table = f"alldata_{network[:2].lower()}"
     res = conn.execute(
-        text(f"""
+        sql_helper(
+            """
     WITH data as (
       SELECT station, year, precip,
       avg(precip) OVER (PARTITION by station) as avg_precip,
@@ -103,8 +104,9 @@ def run(conn: Connection, network, month, day, syear, eyear):
     and xh.station = xl.station and
     xh.station = nl.station and xh.station = mp.station and
     xh.high is not null and a.l is not null ORDER by station ASC
-
-    """),
+    """,
+            table=table,
+        ),
         {"sday": sday, "syear": syear, "eyear": eyear},
     )
     data = {

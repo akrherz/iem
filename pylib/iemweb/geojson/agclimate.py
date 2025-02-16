@@ -24,6 +24,7 @@ from datetime import datetime, timedelta, timezone
 
 from metpy.units import units
 from pydantic import Field
+from pyiem.database import get_sqlalchemy_conn, sql_helper
 from pyiem.meteorology import (
     comprehensive_climate_index,
     temperature_humidity_index,
@@ -115,16 +116,18 @@ def compute_plant_water(row):
     return safe(val, 2)
 
 
-def get_inversion_data(cursor, ts):
+def get_inversion_data(conn, ts):
     """Retrieve inversion data."""
     nt = NetworkTable("ISUSM", only_online=False)
     data = {"type": "FeatureCollection", "features": []}
-    cursor.execute(
-        "select *, case when tair_10_c_avg > tair_15_c_avg then true else "
-        "false end as is_inversion from sm_inversion where valid = %s",
-        (ts,),
+    res = conn.execute(
+        sql_helper(
+            "select *, case when tair_10_c_avg > tair_15_c_avg then true else "
+            "false end as is_inversion from sm_inversion where valid = :ts"
+        ),
+        {"ts": ts},
     )
-    for row in cursor:
+    for row in res.mappings():
         sid = row["station"]
         if sid not in nt.sts:
             continue
@@ -148,7 +151,7 @@ def get_inversion_data(cursor, ts):
     return json.dumps(data)
 
 
-def get_data(cursor, ts):
+def get_data(conn, ts):
     """Get the data for this timestamp"""
     qcdict = loadqc()
     nt = NetworkTable("ISUSM", only_online=False)
@@ -157,8 +160,8 @@ def get_data(cursor, ts):
     tophour = ts.replace(minute=0)
     h24 = ts - timedelta(hours=24)
     mon_ts0 = min([h24, ts.replace(day=1, hour=1)])
-    cursor.execute(
-        """
+    res = conn.execute(
+        sql_helper("""
         with calendar_day as (
             select
             h.station,
@@ -167,16 +170,16 @@ def get_data(cursor, ts):
             sum(coalesce(etalfalfa_qc, 0)) as dailyet,
             sum(h.rain_in_tot_qc) as pday from
             sm_minute m LEFT JOIN sm_hourly h on (m.station = h.station and
-            m.valid = h.valid) WHERE m.valid > %s and m.valid <= %s
+            m.valid = h.valid) WHERE m.valid > :midnight and m.valid <= :ts
             GROUP by h.station
         ),
         twentyfour_hour as (
             select
             station,
-            sum(case when valid > %s then rain_in_tot else 0 end) as p24m,
+            sum(case when valid > :h24 then rain_in_tot else 0 end) as p24m,
             sum(rain_in_tot) as pmonth
             from
-            sm_hourly WHERE valid > %s and valid <= %s
+            sm_hourly WHERE valid > :monts0 and valid <= :ts
             GROUP by station
         ),
         agg as (
@@ -207,16 +210,22 @@ def get_data(cursor, ts):
             from sm_hourly h LEFT JOIN sm_minute m on (
                 h.station = m.station and
                 h.valid = date_trunc('hour', m.valid))
-            where h.valid = %s and m.valid = %s
+            where h.valid = :tophour and m.valid = :ts
         )
         SELECT a.*, c.max_tmpc, c.min_tmpc, c.pday, h.p24m, h.pmonth,
         c.dailyet
         from agg a LEFT JOIN calendar_day c on (a.station = c.station)
         LEFT JOIN twentyfour_hour h on (a.station = h.station)
-    """,
-        (midnight, ts, h24, mon_ts0, ts, tophour, ts),
+    """),
+        {
+            "midnight": midnight,
+            "ts": ts,
+            "h24": h24,
+            "monts0": mon_ts0,
+            "tophour": tophour,
+        },
     )
-    for row in cursor:
+    for row in res.mappings():
         sid = row["station"]
         if sid not in nt.sts:
             continue
@@ -313,7 +322,6 @@ def get_data(cursor, ts):
 
 
 @iemapp(
-    iemdb="isuag",
     help=__doc__,
     schema=Schema,
     content_type="application/vnd.geo+json",
@@ -330,7 +338,8 @@ def application(environ, start_response):
         fmt = "%Y-%m-%dT%H:%M:%S.000Z" if len(dt) == 24 else "%Y-%m-%dT%H:%MZ"
         ts = datetime.strptime(dt, fmt).replace(tzinfo=timezone.utc)
     func = get_data if environ["inversion"] is None else get_inversion_data
-    data = func(environ["iemdb.isuag.cursor"], ts)
+    with get_sqlalchemy_conn("isuag") as conn:
+        data = func(conn, ts)
 
     start_response("200 OK", headers)
     return data

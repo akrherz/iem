@@ -24,6 +24,7 @@ from datetime import datetime, timedelta, timezone
 from io import StringIO
 
 from pydantic import AwareDatetime, Field, field_validator
+from pyiem.database import get_sqlalchemy_conn, sql_helper
 from pyiem.webutil import CGIModel, iemapp
 
 SIMULTANEOUS_REQUESTS = 30
@@ -48,40 +49,42 @@ class Schema(CGIModel):
         )
 
 
-def check_load(cursor):
+def check_load(conn):
     """A crude check that aborts this script if there is too much
     demand at the moment"""
-    cursor.execute(
-        "select pid from pg_stat_activity where query ~* 'FETCH' "
-        "and datname = 'asos'"
+    res = conn.execute(
+        sql_helper(
+            "select pid from pg_stat_activity where query ~* 'FETCH' "
+            "and datname = 'asos'"
+        )
     )
-    load = len(cursor.fetchall())
+    load = len(res.fetchall())
     if load > SIMULTANEOUS_REQUESTS:
         sys.stderr.write(f"/cgi-bin/request/metars.py over capacity: {load}\n")
         return False
     return True
 
 
-@iemapp(iemdb="asos", iemdb_cursorname="streamer", schema=Schema, help=__doc__)
+@iemapp(schema=Schema, help=__doc__)
 def application(environ, start_response):
     """Do Something"""
-    cursor = environ["iemdb.asos.cursor"]
-    if not check_load(cursor):
-        start_response(
-            "503 Service Unavailable", [("Content-type", "text/plain")]
+    with get_sqlalchemy_conn("asos") as conn:
+        if not check_load(conn):
+            start_response(
+                "503 Service Unavailable", [("Content-type", "text/plain")]
+            )
+            return [b"ERROR: server over capacity, please try later"]
+        start_response("200 OK", [("Content-type", "text/plain")])
+        valid = environ["valid"]
+        res = conn.execute(
+            sql_helper("""
+            SELECT metar from alldata
+            WHERE valid >= :sts and valid < :ets and metar is not null
+            ORDER by valid ASC
+        """),
+            {"sts": valid, "ets": valid + timedelta(hours=1)},
         )
-        return [b"ERROR: server over capacity, please try later"]
-    start_response("200 OK", [("Content-type", "text/plain")])
-    valid = environ["valid"]
-    cursor.execute(
-        """
-        SELECT metar from alldata
-        WHERE valid >= %s and valid < %s and metar is not null
-        ORDER by valid ASC
-    """,
-        (valid, valid + timedelta(hours=1)),
-    )
-    sio = StringIO()
-    for row in cursor:
-        sio.write("%s\n" % (row["metar"].replace("\n", " "),))
+        sio = StringIO()
+        for row in res:
+            sio.write("%s\n" % (row[0].replace("\n", " "),))
     return [sio.getvalue().encode("ascii", "ignore")]

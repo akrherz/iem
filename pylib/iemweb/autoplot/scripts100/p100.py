@@ -8,10 +8,9 @@ from datetime import date
 
 import numpy as np
 import pandas as pd
-from pyiem import util
+from pyiem.database import get_sqlalchemy_conn, sql_helper
 from pyiem.exceptions import NoDataFound
 from pyiem.plot import figure_axes
-from sqlalchemy import text
 
 from iemweb.autoplot import ARG_STATION
 
@@ -82,12 +81,9 @@ def plotter(ctx: dict):
     syear = ctx["syear"]
     eyear = ctx["eyear"]
 
-    if station not in ctx["_nt"].sts:
-        raise NoDataFound("Unknown station metadata.")
-
-    with util.get_sqlalchemy_conn("coop") as conn:
+    with get_sqlalchemy_conn("coop") as conn:
         df = pd.read_sql(
-            text("""
+            sql_helper("""
         SELECT year,
         max(high) as "max-high",
         min(high) as "min-high",
