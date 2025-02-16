@@ -92,22 +92,24 @@ class Schema(CGIModel):
 
 def get_station_metadata(environ, stations) -> dict:
     """build a dictionary."""
-    cursor = environ["iemdb.mesosite.cursor"]
-    cursor.execute(
-        """
-        SELECT id, name, round(ST_x(geom)::numeric, 4) as lon,
-        round(ST_y(geom)::numeric, 4) as lat from stations
-        where id = ANY(%s) and network ~* 'ASOS'
-    """,
-        (stations,),
-    )
-    res = {}
-    for row in cursor:
-        res[row["id"]] = dict(name=row["name"], lon=row["lon"], lat=row["lat"])
+    with get_sqlalchemy_conn("mesosite") as conn:
+        res = conn.execute(
+            sql_helper("""
+            SELECT id, name, round(ST_x(geom)::numeric, 4) as lon,
+            round(ST_y(geom)::numeric, 4) as lat from stations
+            where id = ANY(:stations) and network ~* 'ASOS'
+        """),
+            {"stations": stations},
+        )
+        data = {}
+        for row in res.mappings():
+            data[row["id"]] = dict(
+                name=row["name"], lon=row["lon"], lat=row["lat"]
+            )
     for station in stations:
-        if station not in res:
+        if station not in data:
             raise IncompleteWebRequest(f"Unknown station provided: {station}")
-    return res
+    return data
 
 
 def compute_prefixes(sio, environ, delim, stations, tz) -> dict:
