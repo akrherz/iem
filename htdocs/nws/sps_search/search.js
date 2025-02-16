@@ -1,5 +1,4 @@
 /* global $, ol, olSelectLonLat */
-let mapwidget1 = null;
 let marker = null;
 let table1 = null;
 let edate = null;
@@ -84,7 +83,7 @@ function buildUI(){
     });
     edate.datepicker("setDate", +1);
     // Manual Point Entry
-    $("#manualpt").click(function(){
+    $("#manualpt").click(() => {
         const la = parseFloat($("#lat").val());
         const lo = parseFloat($("#lon").val());
         if (isNaN(la) || isNaN(lo)){

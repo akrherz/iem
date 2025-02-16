@@ -18,10 +18,9 @@ from datetime import datetime, timedelta
 import numpy as np
 import pandas as pd
 from matplotlib.ticker import MaxNLocator
-from pyiem.database import get_sqlalchemy_conn
+from pyiem.database import get_sqlalchemy_conn, sql_helper
 from pyiem.exceptions import NoDataFound
 from pyiem.plot import figure
-from sqlalchemy import text
 
 from iemweb.autoplot import ARG_STATION
 
@@ -193,8 +192,8 @@ def plotter(ctx: dict):
 
     with get_sqlalchemy_conn("coop") as conn:
         df = pd.read_sql(
-            text(
-                f"""
+            sql_helper(
+                """
         SELECT {doff} as yr,
         day, high, low, precip, snow, (high + low) / 2. as avg_temp,
         high - low as range,
@@ -203,7 +202,10 @@ def plotter(ctx: dict):
         merra_srad, narr_srad
         from alldata WHERE station = :station and {dtlimiter}
         {culler} ORDER by day ASC
-        """
+        """,
+                doff=doff,
+                dtlimiter=dtlimiter,
+                culler=culler,
             ),
             conn,
             params=params,
