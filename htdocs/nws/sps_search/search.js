@@ -46,7 +46,7 @@ function buildUI(){
         const btn = $(this);
         const url = BACKEND_SPS_BYPOINT;
         const params = {
-            fmt: (btn.data("opt") == "csv") ? "csv" : "xlsx",
+            fmt: (btn.data("opt") === "csv") ? "csv" : "xlsx",
             lat: $("#lat").val(),
             lon: $("#lon").val(),
             sdate: $.datepicker.formatDate("yy-mm-dd", sdate.datepicker("getDate")),
@@ -99,15 +99,15 @@ $(document).ready(() => {
     let default_lon = -93.653;
     let default_lat = 41.53;
 
-    let res = olSelectLonLat("map", default_lon, default_lat, updateMarkerPosition);
+    const res = olSelectLonLat("map", default_lon, default_lat, updateMarkerPosition);
     marker = res.marker;
 
     // Do the anchor tag linking, please
     const tokens = window.location.href.split("#");
-    if (tokens.length == 2){
+    if (tokens.length === 2){
         const tokens2 = tokens[1].split("/");
-        if (tokens2.length == 3){
-            if (tokens2[0] == 'bypoint'){
+        if (tokens2.length === 3){
+            if (tokens2[0] === 'bypoint'){
                 default_lat = tokens2[2];
                 default_lon = tokens2[1];
                 updateMarkerPosition(parseFloat(default_lon), parseFloat(default_lat));
