@@ -5,15 +5,16 @@ force_https();
 require_once "../../include/forms.php";
 require_once "../../include/myview.php";
 // custom code in smosmap.js that will need replaced...
-$OL = "6.2.1";
+$OL = "10.4.0";
 $t = new MyView();
 $t->title = "SMOS Data";
 $t->headextra = <<<EOF
 <link rel='stylesheet' href="/vendor/openlayers/{$OL}/ol.css" type='text/css'>
 EOF;
-$t->jsextra = <<<EOF
+$t->jsextra = <<<EOM
 <script src='/vendor/openlayers/{$OL}/ol.js'></script>
-<script src="smosmap.js"></script>
+<script type="text/javascript" src="/js/olselect-lonlat.js"></script>
+<script src="smosmap.js?v=2"></script>
 <style type='text/css'>
         #map {
             width: 100%;
@@ -21,7 +22,7 @@ $t->jsextra = <<<EOF
             border: 2px solid black;
         }
 </style>
-EOF;
+EOM;
 
 $y1select = yearSelect2(2010, 2010, "year1");
 $m1select = monthSelect2(1, "month1");
@@ -49,7 +50,7 @@ the latitude and longitude pair you provide.  Data is only available here from
 the Midwestern United States.  The form will provide an error if you attempt
 to request a point outside of the domain.  Data is available since 
 <strong>31 May 2010</strong>.<br />
-<form method="GET" action="dl.php" name="dl">
+<form method="GET" action="/cgi-bin/request/smos.py" name="dl">
 <div class="row"><div class="col-md-6">
 <i>Enter Latitude/Longitude manually or drag marker on map to the right.</i>
 <table>
