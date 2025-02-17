@@ -12,7 +12,7 @@ class StationData
     public function __construct($a, $n = "")
     {
         $this->table = array();
-        $this->dbconn = iemdb("mesosite");
+        $dbconn = iemdb("mesosite");
         $sql_template = <<<EOM
     WITH attrs as (
         SELECT t.iemid, array_to_json(array_agg(a.attr)) as attrs,
@@ -26,31 +26,31 @@ class StationData
 EOM;
 
         $rs = pg_prepare(
-            $this->dbconn,
+            $dbconn,
             "SELECT  ST1",
             sprintf($sql_template, "id = $1 and network = $2")
         );
         $rs = pg_prepare(
-            $this->dbconn,
+            $dbconn,
             "SELECT  ST2",
             sprintf($sql_template, "id = $1")
         );
 
         if (is_string($a)) {
-            $this->loadStation($a, $n);
+            $this->loadStation($dbconn, $a, $n);
         } else if (is_array($a)) {
             foreach ($a as $id) {
-                $this->loadStation($id, $n);
+                $this->loadStation($dbconn, $id, $n);
             }
         }
     }
 
-    public function loadStation($id, $n = "")
+    public function loadStation($dbconn, $id, $n = "")
     {
         if ($n != "") {
-            $rs = pg_execute($this->dbconn, "SELECT  ST1", array($id, $n));
+            $rs = pg_execute($dbconn, "SELECT  ST1", array($id, $n));
         } else {
-            $rs = pg_execute($this->dbconn, "SELECT  ST2", array($id));
+            $rs = pg_execute($dbconn, "SELECT  ST2", array($id));
         }
         for ($i = 0; $row = pg_fetch_array($rs); $i++) {
             $this->table[$row["id"]] = $row;
