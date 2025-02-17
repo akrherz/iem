@@ -29,7 +29,7 @@ $today = time();
 
 $st = new StationData($station, $network);
 $climate_site = $st->table[$station]['climate_site'];
-$st->loadStation($climate_site);
+$st->loadStation(iemdb("mesosite"), $climate_site);
 $cities = $st->table;
 $coopdb = iemdb("coop");
 $iem = iemdb("iem");

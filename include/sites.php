@@ -6,6 +6,8 @@ require_once dirname(__FILE__) . "/station.php";
 require_once dirname(__FILE__) . "/forms.php";
 require_once dirname(__FILE__) . "/myview.php";
 
+$memcache = new Memcached();
+$memcache->addServer('iem-memcached', 11211);
 
 class SitesContext
 {
@@ -111,6 +113,7 @@ function station_helper($station)
 
 function get_sites_context()
 {
+    global $memcache;
     // Return a SitesContext
     $station = get_str404("station", "", 20);
     $network = get_str404("network", "", 14);  // could be 10?
@@ -124,7 +127,14 @@ function get_sites_context()
         $network = "IA_COCORAHS";
     }
 
-    $st = new StationData($station, $network);
+    $mckey = sprintf("/sites/%s/%s", $network, $station);
+
+    $st = $memcache->get($mckey);
+    if ($st === FALSE){
+        $st = new StationData($station, $network);
+        $memcache->set($mckey, $st, 3600);
+    }
+
     $cities = $st->table;
     if (!array_key_exists($station, $cities)) {
         station_helper($station);
