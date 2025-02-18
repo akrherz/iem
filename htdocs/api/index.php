@@ -231,7 +231,7 @@ help pages for these services:</p>
 <li><a href="/cgi-bin/request/rwis.py?help">Roadway Weather Information (RWIS) (/cgi-bin/request/rwis.py)</a></li>
 <li><a href="/cgi-bin/request/scan.py?help">Soil Climate Analysis Network (/cgi-bin/request/scan.py)</a></li>
 <li><a href="/cgi-bin/request/gis/sigmets.py?help">SIGMETs (/cgi-bin/request/gis/sigmets.py)</a></li>
-<li><a href="/cgi-bin/request/gis/smos.py?help">SMOS (/cgi-bin/request/smos.py)</a></li>
+<li><a href="/cgi-bin/request/smos.py?help">SMOS (/cgi-bin/request/smos.py)</a></li>
 <li><a href="/cgi-bin/request/gis/spc_mcd.py?help">SPC MCD (/cgi-bin/request/gis/spc_mcd.py)</a></li>
 <li><a href="/cgi-bin/request/gis/spc_outlooks.py?help">SPC/WPC Outlooks (/cgi-bin/request/gis/spc_outlooks.py)</a></li>
 <li><a href="/cgi-bin/request/gis/spc_watch.py?help">SPC Convective Watches (/cgi-bin/request/gis/spc_watch.py)</a></li>
