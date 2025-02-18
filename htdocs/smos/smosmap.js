@@ -1,8 +1,4 @@
-/* global $, ol */
-let feature = null;
-window.app = {};
-const app = window.app;
-let theMap = null;
+/* global $, ol, olSelectLonLat */
 
 function updateMarkerPosition(lon, lat) {
     $("#lat").val(lat.toFixed(4));
@@ -10,8 +6,8 @@ function updateMarkerPosition(lon, lat) {
 }
 
 $(document).ready(() => {
-    let default_lon = -93.653;
-    let default_lat = 41.53;
+    const default_lon = -93.653;
+    const default_lat = 41.53;
 
     olSelectLonLat("map", default_lon, default_lat, updateMarkerPosition);
 
