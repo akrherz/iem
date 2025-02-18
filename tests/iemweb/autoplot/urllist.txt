@@ -182,6 +182,7 @@
 /plotting/auto/plot/139/network:IA_ASOS::zstation:AMW::v:smallest::month:winter::_r:t::dpi:100.png
 /plotting/auto/plot/139/network:IA_ASOS::zstation:AMW::v:largest::month:all::_r:t::dpi:100::_cb:1.png
 /plotting/auto/plot/140/network:IA_ASOS::station:DSM::syear:1928::sday:0711::eday:0725::varname:avg_temp::w:none::thres:1::year:2024::_r:t::dpi:100.png
+/plotting/auto/plot/140/network:IA_ASOS::station:DSM::syear:1928::sday:1101::eday:0217::varname:max_wind_gust::w:aoa::thres:15::year:2025::_r:t::dpi:100.png
 /plotting/auto/plot/141/location:ames::ptype:rain::sdate:mar15::_r:t::dpi:100.png
 /plotting/auto/plot/141/location:ames::ptype:maxt::sdate:mar15::_r:t::dpi:100.png
 /plotting/auto/plot/144/network:ISUSM::station:AEEI4::threshold:50::hours1:48::hours2:24::_r:t::dpi:100.png
