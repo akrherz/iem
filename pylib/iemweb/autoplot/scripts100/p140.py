@@ -17,10 +17,9 @@ from datetime import date, datetime, timedelta
 
 import numpy as np
 import pandas as pd
-from pyiem.database import get_sqlalchemy_conn
+from pyiem.database import get_sqlalchemy_conn, sql_helper
 from pyiem.exceptions import NoDataFound
 from pyiem.plot import figure
-from sqlalchemy import text
 
 LOOKUP = {
     "avg_high_temp": "max_tmpf",
@@ -31,6 +30,7 @@ LOOKUP = {
     "avg_dewp": "(max_dwpf + min_dwpf)/2.",
     "avg_wind_speed": "avg_sknt * 1.15",
     "avg_wind_gust": "coalesce(max_gust, max_sknt) * 1.15",
+    "max_wind_gust": "coalesce(max_gust, max_sknt) * 1.15",
     "max_high": "max_tmpf",
     "min_high": "max_tmpf",
     "max_low": "min_tmpf",
@@ -48,6 +48,7 @@ PDICT = {
     "min_dwpf": "Minimum Dew Point Temp",
     "avg_wind_speed": "Average Wind Speed",
     "avg_wind_gust": "Average Wind Gust",
+    "max_wind_gust": "Maximum Wind Gust",
     "max_high": "Maximum High Temperature",
     "min_high": "Minimum High Temperature",
     "max_low": "Maximum Low Temperature",
@@ -172,14 +173,15 @@ def plotter(ctx: dict):
     dfcol = ctx["varname"] if ctx["w"] == "none" else "count_days"
     with get_sqlalchemy_conn("iem") as conn:
         df = pd.read_sql(
-            text(
-                f"""
+            sql_helper(
+                """
         SELECT {doff} as yr,
         avg((max_tmpf+min_tmpf)/2.) as avg_temp,
         avg(max_tmpf) as avg_high_temp,
         avg(min_tmpf) as avg_low_temp,
         sum(pday) as precip, avg(avg_sknt) * 1.15 as avg_wind_speed,
         avg(coalesce(max_gust, max_sknt)) * 1.15 as avg_wind_gust,
+        max(coalesce(max_gust, max_sknt)) * 1.15 as max_wind_gust,
         min(min_tmpf) as min_low,
         max(min_tmpf) as max_low,
         max(max_tmpf) as max_high,
@@ -191,13 +193,17 @@ def plotter(ctx: dict):
         avg((max_dwpf + min_dwpf)/2.) as avg_dewp,
         min(min_dwpf) as min_dwpf,
         max(max_feel) as max_feel, min(min_feel) as min_feel,
-        sum(case when {aggcol} {mydir} {threshold} then 1 else 0 end) as
+        sum(case when {aggcol} {mydir} :threshold then 1 else 0 end) as
             count_days
         from summary s JOIN stations t on (s.iemid = t.iemid)
         WHERE t.network = :network and t.id = :station
         and {dtlimiter} and day >= :start
         GROUP by yr ORDER by yr ASC
-        """
+        """,
+                doff=doff,
+                aggcol=aggcol,
+                mydir=mydir,
+                dtlimiter=dtlimiter,
             ),
             conn,
             params={
@@ -206,6 +212,7 @@ def plotter(ctx: dict):
                 "sday": f"{ctx['sday']:%m%d}",
                 "eday": f"{ctx['eday']:%m%d}",
                 "start": date(ctx["syear"], 1, 1),
+                "threshold": threshold,
             },
             index_col="yr",
         )
@@ -223,6 +230,8 @@ def plotter(ctx: dict):
         units = "[inch]"
     elif varname.find("wind") > -1:
         ylabel = "Wind Speed [MPH]"
+        if varname.find("gust") > -1:
+            ylabel = "Wind Gust [MPH]"
         units = "[MPH]"
     elif varname.find("rh") > -1:
         ylabel = "Relative Humidity [%]"
