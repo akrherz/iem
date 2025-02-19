@@ -10,11 +10,10 @@ is done!
 from datetime import date, timedelta
 
 import pandas as pd
-from pyiem.database import get_sqlalchemy_conn
+from pyiem.database import get_sqlalchemy_conn, sql_helper
 from pyiem.exceptions import NoDataFound
 from pyiem.plot import get_cmap
 from pyiem.plot.geoplot import MapPlot
-from sqlalchemy import text
 
 NASS_CROP_PROGRESS = {
     "corn_poor_verypoor": "Percentage Corn Poor + Very Poor Condition",
@@ -124,12 +123,13 @@ def get_df(ctx):
     # NB aggregate here needed for the multiple parameter short_desc above
     with get_sqlalchemy_conn("coop") as conn:
         df = pd.read_sql(
-            text(
+            sql_helper(
                 "select year, week_ending, sum(num_value) as value, "
-                f"state_alpha from nass_quickstats where {dlimit} and "
+                "state_alpha from nass_quickstats where {dlimit} and "
                 "num_value is not null "
                 "GROUP by year, week_ending, state_alpha "
-                "ORDER by state_alpha, week_ending"
+                "ORDER by state_alpha, week_ending",
+                dlimit=dlimit,
             ),
             conn,
             index_col=None,

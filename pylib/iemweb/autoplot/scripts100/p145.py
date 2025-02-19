@@ -9,11 +9,10 @@ import calendar
 from datetime import date
 
 import pandas as pd
-from pyiem.database import get_sqlalchemy_conn
+from pyiem.database import get_sqlalchemy_conn, sql_helper
 from pyiem.exceptions import NoDataFound
 from pyiem.network import Table as NetworkTable  # This is needed.
 from pyiem.plot import figure_axes
-from sqlalchemy import text
 
 VARS = {
     "tsoil": "4 inch Soil Temperature",
@@ -82,7 +81,7 @@ def plotter(ctx: dict):
     oldstation = XREF.get(station, "A130209")
     with get_sqlalchemy_conn("isuag") as conn:
         df = pd.read_sql(
-            text("""
+            sql_helper("""
         WITH legacy as (
             SELECT valid, c30 as tsoil, 'L' as dtype
             from daily where station = :oldstation

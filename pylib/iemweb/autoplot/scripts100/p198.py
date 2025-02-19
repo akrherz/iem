@@ -12,10 +12,9 @@ locations, the place that the sounding is made has moved over the years..
 """
 
 import pandas as pd
-from pyiem.database import get_sqlalchemy_conn
+from pyiem.database import get_sqlalchemy_conn, sql_helper
 from pyiem.exceptions import NoDataFound
 from pyiem.plot import figure_axes
-from sqlalchemy import text
 
 from iemweb.util import month2months
 
@@ -189,15 +188,18 @@ def plotter(ctx: dict):
         leveltitle = f" @ {level} hPa"
         with get_sqlalchemy_conn("raob") as conn:
             dfin = pd.read_sql(
-                text(
-                    f"""
+                sql_helper(
+                    """
                 select {yrcol} as year, {varname},
                 valid at time zone 'UTC' as utc_valid
                 from raob_profile p JOIN raob_flights f on (p.fid = f.fid)
                 WHERE f.station = ANY(:stations) and p.pressure = :level
                 and {hrlimiter} extract(month from f.valid) = ANY(:months)
                 and {varname} is not null
-            """
+            """,
+                    yrcol=yrcol,
+                    varname=varname,
+                    hrlimiter=hrlimiter,
                 ),
                 conn,
                 params={
@@ -210,14 +212,17 @@ def plotter(ctx: dict):
         leveltitle = ""
         with get_sqlalchemy_conn("raob") as conn:
             dfin = pd.read_sql(
-                text(
-                    f"""
+                sql_helper(
+                    """
                 select {yrcol} as year, {varname}, valid at time zone 'UTC'
                 as utc_valid from raob_flights f WHERE
                 f.station = ANY(:stations)
                 and {hrlimiter} extract(month from f.valid) = ANY(:months) and
                 {varname} is not null
-            """
+            """,
+                    yrcol=yrcol,
+                    varname=varname,
+                    hrlimiter=hrlimiter,
                 ),
                 conn,
                 params={
@@ -258,7 +263,7 @@ def plotter(ctx: dict):
     ax.axhline(avgv, color="k")
     ax.text(df.index.values[-1] + 2, avgv, f"Avg:\n{avgv:.1f}")
     ax.set_xlabel("Year")
-    ax.set_ylabel("%s %s%s" % (PDICT4[agg], PDICT3[varname], leveltitle))
+    ax.set_ylabel(f"{PDICT4[agg]} {PDICT3[varname]}{leveltitle}")
     ax.grid(True)
 
     return fig, df

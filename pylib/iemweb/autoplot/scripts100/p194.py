@@ -14,17 +14,16 @@ Having said that, it should be close!
 
 from datetime import date, timedelta
 
+import geopandas as gpd
 import numpy as np
 import pandas as pd
 from affine import Affine
-from geopandas import read_postgis
-from pyiem.database import get_dbconn, get_sqlalchemy_conn
+from pyiem.database import get_dbconn, get_sqlalchemy_conn, sql_helper
 from pyiem.exceptions import NoDataFound
 from pyiem.grid.zs import CachingZonalStats
 from pyiem.plot import MapPlot
 from pyiem.plot.colormaps import stretch_cmap
 from pyiem.reference import LATLON
-from sqlalchemy import text
 
 PDICT = {
     "0": "D0: Abnormally Dry",
@@ -140,8 +139,8 @@ def plotter(ctx: dict):
         north + griddelta / 2.0,
     )
     with get_sqlalchemy_conn("postgis") as conn:
-        df = read_postgis(
-            text("""
+        df = gpd.read_postgis(
+            sql_helper("""
         with d as (
             select valid, (ST_Dump(st_simplify(geom, 0.01))).geom from usdm
             where valid >= :sdate and valid <= :edate and dm >= :dlevel and

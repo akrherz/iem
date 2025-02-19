@@ -10,10 +10,9 @@ import calendar
 import numpy as np
 import pandas as pd
 import seaborn as sns
-from pyiem.database import get_sqlalchemy_conn
+from pyiem.database import get_sqlalchemy_conn, sql_helper
 from pyiem.exceptions import NoDataFound
 from pyiem.plot import figure_axes
-from sqlalchemy import text
 
 PDICT = {
     "wfo": "Select by NWS Forecast Office",
@@ -58,14 +57,15 @@ def plotter(ctx: dict):
 
     with get_sqlalchemy_conn("postgis") as conn:
         df = pd.read_sql(
-            text(
-                f"""
+            sql_helper(
+                """
                 SELECT
                 extract(year from issue)::int as yr,
                 extract(month from issue)::int as mo, count(*)
                 from sps WHERE not ST_IsEmpty(geom) {wfo_limiter}
                 GROUP by yr, mo ORDER by yr, mo ASC
-        """
+        """,
+                wfo_limiter=wfo_limiter,
             ),
             conn,
             params=params,

@@ -7,13 +7,12 @@ subsequent periods below 50 degrees for that year.
 """
 
 import pandas as pd
-from pyiem.database import get_sqlalchemy_conn
+from pyiem.database import get_sqlalchemy_conn, sql_helper
 from pyiem.exceptions import NoDataFound
 from pyiem.network import Table as NetworkTable  # This is needed.
 from pyiem.plot import figure_axes
 from pyiem.plot.use_agg import plt
 from pyiem.util import convert_value, utc
-from sqlalchemy import text
 
 XREF = {
     "AEEI4": "A130209",
@@ -80,7 +79,7 @@ def plotter(ctx: dict):
     oldstation = XREF.get(station, "A130209")
     with get_sqlalchemy_conn("isuag") as conn:
         df2 = pd.read_sql(
-            text("""
+            sql_helper("""
         with obs as (
             select valid, t4_c_avg_qc,
             lag(t4_c_avg_qc) OVER (ORDER by valid ASC) from sm_hourly
@@ -121,7 +120,7 @@ def plotter(ctx: dict):
         if df2.empty:
             raise NoDataFound("No Data Found")
         df = pd.read_sql(
-            text("""
+            sql_helper("""
         with obs as (
             select valid, c300, lag(c300) OVER (ORDER by valid ASC) from hourly
             where station = :oldstation),
