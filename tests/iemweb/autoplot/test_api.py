@@ -5,6 +5,7 @@ from iemweb.autoplot import data as autoplot_data
 from iemweb.autoplot.autoplot import application as autoplot_app
 from iemweb.autoplot.autoplot import parser
 from iemweb.autoplot.meta import application as meta_app
+from pyiem.exceptions import IncompleteWebRequest
 from werkzeug.test import Client
 
 
@@ -16,7 +17,7 @@ def genmod():
 
 def test_fourcolons():
     """Test that this raises."""
-    with pytest.raises(ValueError):
+    with pytest.raises(IncompleteWebRequest):
         parser("wfo:bah::::")
 
 

@@ -56,7 +56,7 @@ def parser(cgistr: str) -> dict:
     data = {}
     # GIGO
     if cgistr.find("::::") > -1:
-        raise ValueError("Too many semicolons")
+        raise IncompleteWebRequest("Too many semicolons")
     for token in cgistr.replace(":::", ": ::").split("::"):
         token2 = token.split(":")
         if len(token2) != 2:
