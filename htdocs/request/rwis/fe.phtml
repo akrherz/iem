@@ -9,6 +9,7 @@ $network = isset($_REQUEST["network"]) ? xssafe($_REQUEST["network"]) : "IA_RWIS
 
 define("IEM_APPID", 63);
 $t = new MyView();
+$t->iem_resource = "RWIS";
 $t->iemss = True;
 $t->title = "RWIS Data Download";
 
@@ -51,10 +52,9 @@ $t->content = <<<EOF
 
 <p>The IEM archives RWIS information for the network in Iowa based on a direct
 feed from the DOT.  We also archive other states based on an archive provided
-by the <a href="http://madis.noaa.gov/">MADIS project</a>. Data for Iowa dates
-back to 1995, whereas we only have data for other states back to 2009. 
-The archive has some holes in it around the year 2000 and 2001, 
-but it mostly in tack outside of those dates.</p>
+by the <a href="https://madis.ncep.noaa.gov/">MADIS project</a>. Data for Iowa dates
+back to 1995, whereas archive availability for other states varies based on
+their participation within MADIS.</p>
 
 <p><a href="/cgi-bin/request/rwis.py?help" class="btn btn-primary"><i class="fa fa-file"></i>
 Backend documentation</a> exists for those wishing to script against this service.</p>
