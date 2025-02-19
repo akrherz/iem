@@ -28,7 +28,7 @@ foreach ($cameras as $id => $cam) {
 $selectform .= "</select>\n";
 
 $t = new MyView();
-$t->title = "Iowa DOT RWIS Data";
+$t->title = "Roadway Weather Information System (RWIS) Data";
 
 $camimgs = "";
 for ($i = 0; $i < $cdict[$camid]; $i++) {
@@ -40,25 +40,20 @@ for ($i = 0; $i < $cdict[$camid]; $i++) {
     );
 }
 
-$t->content = <<<EOF
+$t->content = <<<EOM
 <h3>Roadway Weather Information System</h3><p>
 
 <div class="row">
 <div class="col-md-8">
 
-The Iowa Department of Transportation maintains a set 
-of observing stations located along major roads in the state.  These stations
-measure pavement temperatures as well as atmospherics.  The DOT has a good
-website called <a href="http://weatherview.iowadot.gov">WeatherView</a>, which contains recent obs and a 
-wealth of other information.  The products on this page are intended to 
-supplement their site.
+The IEM curates an archive of RWIS information.  The Iowa data has been
+provided by the Iowa DOT through a long standing partnership since the founding
+of the IEM.  Data for other states is provided via the
+<a href="https://madis.ncep.noaa.gov/">NOAA MADIS</a> system.
 </div>
 
 <div class="col-md-4">
-<b>RWIS Network</b>
-<br>About 6 obs per hour
-<br>Stations: 62
-<br><a href="/sites/locate.php?network=IA_RWIS">Locations</a>
+<br><a href="/sites/locate.php?network=IA_RWIS">Iowa RWIS Locations</a>
 </div>
 
 </div><!-- ./row -->
@@ -94,7 +89,7 @@ Available sites: {$selectform}
    <li><a href="/plotting/rwis/sf_fe.php">Recent Air/Pavement Temps</a></li>
 </ul>
 
-  <h3 class="subtitle">Plots with RWIS data</h3>
+<h3>Plots with RWIS data</h3>
 <ul>
    <li><a href="/data/mesonet.gif">Combined Mesonet</a></li>
    <li><a href="/data/iowa_rwis.png">RWIS Mesonet</a></li>
@@ -143,6 +138,6 @@ Available sites: {$selectform}
 </div>
 </div><!-- ./row -->
 
-EOF;
+EOM;
 
 $t->render("single.phtml");

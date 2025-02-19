@@ -23,7 +23,7 @@ from pyiem.webutil import ensure_list, iemapp
 from iemweb.autoplot import FEMA_REGIONS
 from iemweb.autoplot import data as autoplot_data
 
-HIGHCHARTS = "11.3.0"
+HIGHCHARTS = "12.1.2"
 OPENLAYERS = "7.5.1"
 CSECTORS = state_names.copy()
 CSECTORS.update(SECTORS_NAME)
@@ -657,6 +657,7 @@ def generate_form(apid, fdict, headers, cookies):
             res["image"] = (
                 '<div id="ap_container" style="width:100%s;height:400px;">'
                 "</div>"
+                '<div id="ap_container_controls"></div>'
             )
             res["extrascripts"] += f"""
 <script src="/vendor/highcharts/{HIGHCHARTS}/highcharts.js"></script>
