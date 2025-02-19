@@ -870,10 +870,19 @@ def plot_meteogram(ctx):
         barwidth = 1 / 24.0
     with get_sqlalchemy_conn("isuag") as conn:
         df = pd.read_sql(
-            f"SELECT * from {table} WHERE "
-            "station = %s and valid BETWEEN %s and %s ORDER by valid ASC",
+            sql_helper(
+                """
+            SELECT * from {table} WHERE
+            station = :station and valid BETWEEN :sts and :ets
+            ORDER by valid ASC""",
+                table=table,
+            ),
             conn,
-            params=(ctx["station"], ctx["sts"], ctx["ets"]),
+            params={
+                "station": ctx["station"],
+                "sts": ctx["sts"],
+                "ets": ctx["ets"],
+            },
             index_col="valid",
         )
     if df.empty:
