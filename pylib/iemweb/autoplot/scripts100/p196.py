@@ -11,6 +11,10 @@ is higher than the air temperature.  In the case of wind chill, a calm
 wind can lead to a nebulous wind chill.  Similiarly, a low humidity to
 what the computed heat index is.</p>
 
+<p>For the winter season of 2024-2025, the National Weather Service changed
+to issue Extreme Cold Warning and Cold Weather Advisory instead of
+Wind Chill Advisories/Warnings.</p>
+
 <p>The plot shows the NWS headline frequency for the forecast zone that
 the automated weather station resides in.
 """
@@ -25,7 +29,11 @@ PDICT = {
     "no": "Consider all Heat Index / Wind Chill Values",
     "yes": "Only consider additive cases, with index worse than temperature",
 }
-PDICT2 = {"heat": "Heat Index", "chill": "Wind Chill"}
+PDICT2 = {
+    "heat": "Heat Index",
+    "chill": "Wind Chill (pre 2024/2025)",
+    "chill25": "Wind Chill (2024/2025 +)",
+}
 
 
 def get_description():
@@ -62,24 +70,33 @@ def get_df(ctx):
     ctx["ugc"] = ctx["_nt"].sts[ctx["station"]]["ugc_zone"]
     ctx["s1"] = "Y"
     ctx["s2"] = "W"
+    tlimit = ""
     if ctx["var"] == "heat":
         ctx["p1"] = "HT"
         ctx["p2"] = "EH"
-    else:
+    elif ctx["var"] == "chill":
         ctx["p1"] = "WC"
         ctx["p2"] = "WC"
+        tlimit = " and issue < '2024-09-01' "
+    else:
+        ctx["p1"] = "CW"
+        ctx["p2"] = "EC"
+        tlimit = " and issue > '2024-09-01' "
     # Thankfully, all the above are zone based
     with get_sqlalchemy_conn("postgis") as conn:
         events = pd.read_sql(
-            sql_helper("""
+            sql_helper(
+                """
             SELECT generate_series(issue, expire, '1 minute'::interval)
             as valid,
             (phenomena ||'.'|| significance) as vtec
             from warnings WHERE ugc = :ugc and (
                 (phenomena = :p1 and significance = :s1) or
-                (phenomena = :p2 and significance = :s2)
+                (phenomena = :p2 and significance = :s2) {tlimit}
             ) ORDER by issue ASC
-        """),
+        """,
+                tlimit=tlimit,
+            ),
             conn,
             params={
                 "ugc": ctx["ugc"],
@@ -95,11 +112,20 @@ def get_df(ctx):
     thres = "tmpf > 70" if ctx["var"] == "heat" else "tmpf < 40"
     with get_sqlalchemy_conn("asos") as conn:
         obs = pd.read_sql(
-            "SELECT valid, tmpf::int as tmpf, feel from alldata where "
-            f"station = %s and valid > %s and {thres} and feel is not null "
-            "ORDER by valid ASC",
+            sql_helper(
+                """
+    SELECT valid, tmpf::int as tmpf, feel from alldata where
+    station = :station and valid > :sts and {thres} and feel is not null
+    {tlimit}
+    ORDER by valid ASC""",
+                thres=thres,
+                tlimit=tlimit.replace("issue", "valid"),
+            ),
             conn,
-            params=(ctx["station"], str(events.index.values[0])),
+            params={
+                "station": ctx["station"],
+                "sts": str(events.index.values[0]),
+            },
             index_col="valid",
         )
     if obs.empty:
@@ -176,7 +202,7 @@ def plotter(ctx: dict):
     ax.set_title(ctx["title"])
 
     # Clip the plot in the case of wind chill
-    if ctx["var"] == "chill":
+    if ctx["var"].startswith("chill"):
         vals = non[non < 100]
         if len(vals.index) > 0:
             ax.set_xlim(right=vals.index.values[-1] + 2)
