@@ -16,11 +16,10 @@ the automated weather station resides in.
 """
 
 import pandas as pd
-from pyiem.database import get_sqlalchemy_conn
+from pyiem.database import get_sqlalchemy_conn, sql_helper
 from pyiem.exceptions import NoDataFound
 from pyiem.nws.vtec import NWS_COLORS, get_ps_string
 from pyiem.plot import figure_axes
-from sqlalchemy import text
 
 PDICT = {
     "no": "Consider all Heat Index / Wind Chill Values",
@@ -72,7 +71,7 @@ def get_df(ctx):
     # Thankfully, all the above are zone based
     with get_sqlalchemy_conn("postgis") as conn:
         events = pd.read_sql(
-            text("""
+            sql_helper("""
             SELECT generate_series(issue, expire, '1 minute'::interval)
             as valid,
             (phenomena ||'.'|| significance) as vtec

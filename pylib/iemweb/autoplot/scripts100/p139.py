@@ -16,10 +16,9 @@ from datetime import date, datetime, timedelta
 from zoneinfo import ZoneInfo
 
 import pandas as pd
-from pyiem.database import get_sqlalchemy_conn
+from pyiem.database import get_sqlalchemy_conn, sql_helper
 from pyiem.exceptions import NoDataFound
 from pyiem.plot import figure
-from sqlalchemy import text
 
 from iemweb.autoplot import get_monofont
 from iemweb.util import month2months
@@ -84,7 +83,7 @@ def plot_date(ax, i, dt: date, station, tz) -> bool:
     ets = sts + timedelta(hours=48)
     with get_sqlalchemy_conn("asos") as conn:
         df = pd.read_sql(
-            text("""
+            sql_helper("""
         SELECT valid at time zone 'UTC' as valid, tmpf from alldata
         where station = :station and valid >= :sts and valid <= :ets and
         tmpf is not null ORDER by valid ASC"""),
@@ -133,8 +132,8 @@ def plotter(ctx: dict):
     with get_sqlalchemy_conn("iem") as conn:
         # Over-sample as we may get some DQ's due to lack of data
         df = pd.read_sql(
-            text(
-                f"""
+            sql_helper(
+                """
             SELECT day as date, max_tmpf as max, min_tmpf as min,
             max_tmpf::int - min_tmpf::int as difference
             from summary s JOIN stations t on (s.iemid = t.iemid)
@@ -142,7 +141,8 @@ def plotter(ctx: dict):
             and extract(month from day) = ANY(:months)
             and max_tmpf is not null and min_tmpf is not null
             ORDER by difference {order}, date DESC LIMIT 50
-        """
+        """,
+                order=order,
             ),
             conn,
             params={

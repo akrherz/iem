@@ -18,10 +18,10 @@ day's sounding if running this application prior to those ingest times.
 import calendar
 
 import pandas as pd
+from pyiem.database import get_sqlalchemy_conn, sql_helper
 from pyiem.exceptions import NoDataFound
 from pyiem.plot import figure
-from pyiem.util import get_sqlalchemy_conn, utc
-from sqlalchemy import text
+from pyiem.util import utc
 
 PDICT = {"00": "00 UTC", "12": "12 UTC"}
 PDICT2 = {
@@ -124,8 +124,8 @@ def plotter(ctx: dict):
         hrlimit = ""
     with get_sqlalchemy_conn("raob") as conn:
         df = pd.read_sql(
-            text(
-                f"""
+            sql_helper(
+                """
         with data as (
             select f.valid,
             p.pressure, count(*) OVER (PARTITION by p.pressure),
@@ -155,10 +155,13 @@ def plotter(ctx: dict):
             WHERE f.station = ANY(:stations) {hrlimit} {vlimit}
             and p.pressure in (925, 850, 700, 500, 400, 300, 250, 200,
             150, 100, 70, 50, 10)  and
-            {varname if varname != "hght" else "height"} is not null)
+            {vname} is not null)
 
         select * from data where valid = :ts ORDER by pressure DESC
-        """
+        """,
+                hrlimit=hrlimit,
+                vlimit=vlimit,
+                vname=varname if varname != "hght" else "height",
             ),
             conn,
             params=params,
@@ -182,7 +185,7 @@ def plotter(ctx: dict):
         f"({tt}) for {PDICT3[varname]} at {uu}"
     )
     fig = figure(title=title, subtitle=subtitle, apctx=ctx)
-    ax = fig.add_axes([0.1, 0.1, 0.75, 0.78])
+    ax = fig.add_axes((0.1, 0.1, 0.75, 0.78))
     bars = ax.barh(
         range(len(df.index)), df[varname + "_percentile"], align="center"
     )

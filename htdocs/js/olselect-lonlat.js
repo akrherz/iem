@@ -3,7 +3,7 @@
 // that is dragable, which then callbacks a given function with the lat/lon
 // values of the marker.
 
-function olSelectLonLat(div, initialLon, initialLat, callback) {
+function olSelectLonLat(div, initialLon, initialLat, callback) { // skipcq
 
     let marker = new ol.Feature({
         geometry: new ol.geom.Point(ol.proj.fromLonLat([initialLon, initialLat]))

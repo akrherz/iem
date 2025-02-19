@@ -11,11 +11,10 @@ from datetime import date
 
 import pandas as pd
 import seaborn as sns
-from pyiem.database import get_sqlalchemy_conn
+from pyiem.database import get_sqlalchemy_conn, sql_helper
 from pyiem.exceptions import NoDataFound
 from pyiem.plot import figure
 from pyiem.util import convert_value
-from sqlalchemy import text
 
 PDICT = {
     "TO": "Tornado Warning",
@@ -86,8 +85,8 @@ def get_data(ctx):
         ps = ["TO", "SV"]
     with get_sqlalchemy_conn("postgis") as conn:
         df = pd.read_sql(
-            text(
-                f"""
+            sql_helper(
+                """
                 SELECT polygon_begin at time zone 'America/Chicago'
                 as issue, to_char(polygon_begin at time zone 'UTC',
                 'YYYY-MM-DD HH24:MI') as utc_issue, eventid,
@@ -95,7 +94,8 @@ def get_data(ctx):
                 from sbw WHERE phenomena = ANY(:phenomena) and wfo = :wfo and
                 {statuslimit} and tml_direction is not null and
                 tml_sknt is not null ORDER by issue
-                """
+                """,
+                statuslimit=statuslimit,
             ),
             conn,
             params={"phenomena": ps, "wfo": wfo},
