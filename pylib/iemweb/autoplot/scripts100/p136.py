@@ -10,10 +10,9 @@ in those instances.
 from datetime import date, datetime
 
 import pandas as pd
-from pyiem.database import get_sqlalchemy_conn
+from pyiem.database import get_sqlalchemy_conn, sql_helper
 from pyiem.exceptions import NoDataFound
 from pyiem.plot import figure_axes
-from sqlalchemy import text
 
 PDICT = {
     "0": "Include calm observations",
@@ -200,7 +199,7 @@ def add_ctx(ctx):
     today = date.today()
     with get_sqlalchemy_conn("asos") as conn:
         df = pd.read_sql(
-            text("""
+            sql_helper("""
         WITH data as (
             SELECT valid, lag(valid) OVER (ORDER by valid ASC),
             extract(year from valid + '5 months'::interval) as season,

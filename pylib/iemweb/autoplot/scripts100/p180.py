@@ -9,10 +9,9 @@ import calendar
 
 import matplotlib.dates as mdates
 import pandas as pd
-from pyiem.database import get_sqlalchemy_conn
+from pyiem.database import get_sqlalchemy_conn, sql_helper
 from pyiem.exceptions import NoDataFound
 from pyiem.plot import figure, fitbox
-from sqlalchemy import text
 
 PDICT = {
     "por": "Period of Record (por) Climatology",
@@ -150,7 +149,7 @@ def plotter(ctx: dict):
     if c1 == "custom":
         with get_sqlalchemy_conn("coop") as conn:
             df = pd.read_sql(
-                text("""
+                sql_helper("""
                      SELECT sday, station, avg(high) as high, avg(low) as low,
                 avg(precip) as precip, avg(snow) as snow
                 from alldata WHERE
@@ -171,9 +170,12 @@ def plotter(ctx: dict):
     else:
         with get_sqlalchemy_conn("coop") as conn:
             df = pd.read_sql(
-                text(f"""SELECT valid, station, high, low, precip, snow from
-                {cltable1} WHERE station = :station and valid != '2000-02-29'
-                ORDER by valid ASC"""),
+                sql_helper(
+                    """SELECT valid, station, high, low, precip, snow from
+                {table} WHERE station = :station and valid != '2000-02-29'
+                ORDER by valid ASC""",
+                    table=cltable1,
+                ),
                 conn,
                 params={"station": clstation1},
                 parse_dates="valid",
@@ -186,7 +188,7 @@ def plotter(ctx: dict):
         if c2 == "custom":
             with get_sqlalchemy_conn("coop") as conn:
                 df2 = pd.read_sql(
-                    text("""
+                    sql_helper("""
                          SELECT sday, station, avg(high) as high,
                     avg(low) as low, avg(precip) as precip,
                     avg(snow) as snow from alldata WHERE
@@ -210,12 +212,15 @@ def plotter(ctx: dict):
         else:
             with get_sqlalchemy_conn("coop") as conn:
                 df2 = pd.read_sql(
-                    text(f"""
+                    sql_helper(
+                        """
                          SELECT valid, station, high, low, precip, snow from
-                    {cltable2} WHERE station = :station
+                    {table} WHERE station = :station
                     and valid != '2000-02-29'
                     ORDER by valid ASC
-                    """),
+                    """,
+                        table=cltable2,
+                    ),
                     conn,
                     params={"station": clstation2},
                     parse_dates="valid",

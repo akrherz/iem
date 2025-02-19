@@ -10,12 +10,11 @@ import calendar
 import numpy as np
 import pandas as pd
 from matplotlib import ticker
-from pyiem.database import get_sqlalchemy_conn
+from pyiem.database import get_sqlalchemy_conn, sql_helper
 from pyiem.exceptions import NoDataFound
 from pyiem.plot import figure, get_cmap
 from pyiem.reference import state_names
 from pyiem.util import utc
-from sqlalchemy import text
 
 PDICT = {
     "CPR": "CORN - PROGRESS, MEASURED IN PCT SEEDBED PREPARED",
@@ -169,7 +168,7 @@ def plotter(ctx: dict):
     short_desc = PDICT[ctx["short_desc"].upper()]
     with get_sqlalchemy_conn("coop") as conn:
         df = pd.read_sql(
-            text("""
+            sql_helper("""
             select distinct year, week_ending, num_value,
             extract(doy from week_ending)::int as day_of_year
             from nass_quickstats

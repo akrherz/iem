@@ -5,11 +5,10 @@ from datetime import date
 
 import pandas as pd
 from matplotlib.font_manager import FontProperties
-from pyiem.database import get_sqlalchemy_conn
+from pyiem.database import get_sqlalchemy_conn, sql_helper
 from pyiem.exceptions import NoDataFound
 from pyiem.plot import figure
 from pyiem.reference import state_names
-from sqlalchemy import text
 
 NASS_CROP_PROGRESS = {
     "corn_poor_verypoor": "Percentage Corn Poor + Very Poor Condition",
@@ -149,13 +148,14 @@ def plotter(ctx: dict):
         ]
     with get_sqlalchemy_conn("coop") as conn:
         df = pd.read_sql(
-            text(
-                "select extract(year from week_ending) as year, week_ending, "
-                "sum(num_value) as value, state_alpha "
-                "from nass_quickstats where short_desc = ANY(:desc) and "
-                "num_value is not null and state_alpha = ANY(:states) "
-                "GROUP by year, week_ending, state_alpha "
-                "ORDER by state_alpha, week_ending"
+            sql_helper(
+                """
+                select extract(year from week_ending) as year, week_ending,
+                sum(num_value) as value, state_alpha
+                from nass_quickstats where short_desc = ANY(:desc) and
+                num_value is not null and state_alpha = ANY(:states)
+                GROUP by year, week_ending, state_alpha
+                ORDER by state_alpha, week_ending"""
             ),
             conn,
             params={

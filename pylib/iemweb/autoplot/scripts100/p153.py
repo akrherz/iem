@@ -15,10 +15,9 @@ from datetime import date
 
 import pandas as pd
 from matplotlib.font_manager import FontProperties
-from pyiem.database import get_sqlalchemy_conn
+from pyiem.database import get_sqlalchemy_conn, sql_helper
 from pyiem.exceptions import NoDataFound
 from pyiem.plot import figure_axes
-from sqlalchemy import text
 
 from iemweb.autoplot import get_monofont
 from iemweb.util import month2months
@@ -165,8 +164,8 @@ def plotter(ctx: dict):
     delta = 10 if varname != "max_p01i" else -1
     with get_sqlalchemy_conn("asos") as conn:
         df = pd.read_sql(
-            text(
-                f"""
+            sql_helper(
+                """
         WITH obs as (
             SELECT (valid + '{delta} minutes'::interval)
                 at time zone :tzname as ts,
@@ -195,7 +194,12 @@ def plotter(ctx: dict):
             (a.hr = extract(hour from o.ts)
             and a.{varname} = o.{varname2})
             ORDER by a.hr ASC, o.ts DESC
-        """
+        """,
+                delta=str(delta),
+                doylimiter=doylimiter,
+                monlimiter=monlimiter,
+                varname=varname,
+                varname2=varname2,
             ),
             conn,
             params=params,

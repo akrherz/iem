@@ -8,10 +8,9 @@ caveats apply with the reporting changes of this over the years.
 from datetime import datetime
 
 import pandas as pd
-from pyiem.database import get_sqlalchemy_conn
+from pyiem.database import get_sqlalchemy_conn, sql_helper
 from pyiem.exceptions import NoDataFound
 from pyiem.plot import figure_axes
-from sqlalchemy import text
 
 from iemweb.util import month2months
 
@@ -84,7 +83,7 @@ def plotter(ctx: dict):
     if hour is None:
         with get_sqlalchemy_conn("asos") as conn:
             df = pd.read_sql(
-                text(
+                sql_helper(
                     """
                 SELECT tmpf::int as t,
                 SUM(case when (skyc1 = :v or skyc2 = :v or skyc3 = :v
@@ -107,7 +106,7 @@ def plotter(ctx: dict):
     else:
         with get_sqlalchemy_conn("asos") as conn:
             df = pd.read_sql(
-                text(
+                sql_helper(
                     """
                 SELECT tmpf::int as t,
                 SUM(case when (skyc1 = :v or skyc2 = :v or skyc3 = :v

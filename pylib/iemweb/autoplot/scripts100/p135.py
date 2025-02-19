@@ -10,10 +10,9 @@ year. ie 1 July 2023 - 30 Jun 2024 plots as 2023.</p>
 from datetime import date, timedelta
 
 import pandas as pd
-from pyiem.database import get_sqlalchemy_conn
+from pyiem.database import get_sqlalchemy_conn, sql_helper
 from pyiem.exceptions import NoDataFound
 from pyiem.plot import figure_axes
-from sqlalchemy import text
 
 from iemweb.autoplot import ARG_STATION
 
@@ -166,8 +165,8 @@ def get_data(ctx):
         seasonlogic = "case when month < 7 then year - 1 else year end"
     with get_sqlalchemy_conn("coop") as conn:
         obs = pd.read_sql(
-            text(
-                f"""
+            sql_helper(
+                """
         with data as (
             select {seasonlogic} as season,
             {doylogic} as doy,
@@ -176,7 +175,11 @@ def get_data(ctx):
         SELECT season, doy,
         sum(hit) OVER (PARTITION by season ORDER by doy ASC) as hits from data
         ORDER by season ASC, doy ASC
-        """
+        """,
+                seasonlogic=seasonlogic,
+                doylogic=doylogic,
+                opp=opp,
+                col=col,
             ),
             conn,
             params={

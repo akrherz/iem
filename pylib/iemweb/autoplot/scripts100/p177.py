@@ -15,14 +15,13 @@ from matplotlib.patches import Patch
 from metpy.calc import dewpoint_from_relative_humidity
 from metpy.units import units
 from pyiem import meteorology
-from pyiem.database import get_sqlalchemy_conn
+from pyiem.database import get_sqlalchemy_conn, sql_helper
 from pyiem.exceptions import NoDataFound
 from pyiem.plot import figure, figure_axes, get_cmap
 from pyiem.util import (
     c2f,
     convert_value,
 )
-from sqlalchemy import text
 
 CENTRAL = ZoneInfo("America/Chicago")
 PLOTTYPES = {
@@ -240,7 +239,7 @@ def make_daily_pet_plot(ctx):
     """Generate a daily PET plot"""
     with get_sqlalchemy_conn("isuag") as conn:
         res = conn.execute(
-            text("""WITH climo as (
+            sql_helper("""WITH climo as (
             select to_char(valid, 'mmdd') as mmdd, avg(c70) as  et
             from daily where station = 'A130209' GROUP by mmdd
         ), obs as (
@@ -364,7 +363,7 @@ def make_daily_rainfall_soil_rh(ctx):
     """Give them what they want."""
     with get_sqlalchemy_conn("isuag") as conn:
         df = pd.read_sql(
-            text("""
+            sql_helper("""
             SELECT valid, rain_in_tot_qc, t4_c_avg_qc, rh_avg_qc
             from sm_daily where station = :station and valid >= :sts
             and valid <= :ets and t4_c_avg_qc is not null
@@ -565,7 +564,7 @@ def make_daily_water_change_plot(ctx):
     # Get daily precip
     with get_sqlalchemy_conn("isuag") as conn:
         pdf = pd.read_sql(
-            text("""
+            sql_helper("""
                 SELECT valid, rain_in_tot_qc from sm_daily
                 where station = :station
                 and valid >= :sts and valid <= :ets ORDER by valid ASC
@@ -581,7 +580,7 @@ def make_daily_water_change_plot(ctx):
         )
 
         df = pd.read_sql(
-            text("""
+            sql_helper("""
         WITH obs as (
             SELECT valid,
             CASE WHEN t12_c_avg_qc > 1 then vwc12_qc else null end
