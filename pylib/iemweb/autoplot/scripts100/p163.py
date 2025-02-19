@@ -20,11 +20,10 @@ from zoneinfo import ZoneInfo
 
 import numpy as np
 import pandas as pd
-from pyiem.database import get_sqlalchemy_conn
+from pyiem.database import get_sqlalchemy_conn, sql_helper
 from pyiem.exceptions import NoDataFound
 from pyiem.plot import MapPlot, get_cmap
 from pyiem.util import utc
-from sqlalchemy import text
 
 MDICT = {
     "NONE": "All LSR Types",
@@ -212,21 +211,27 @@ def plotter(ctx: dict):
         with get_sqlalchemy_conn("postgis") as conn:
             if by != "ugc":
                 df = pd.read_sql(
-                    text(f"""
+                    sql_helper(
+                        """
                 WITH data as (
                     SELECT distinct wfo, state, date(valid)
                     from lsrs l where valid >= :sts and valid < :ets {tlimiter}
                     {state_limiter}
                 )
                 SELECT {by}, count(*) from data GROUP by {by}
-                """),
+                """,
+                        by=by,
+                        state_limiter=state_limiter,
+                        tlimiter=tlimiter,
+                    ),
                     conn,
                     params=params,
                     index_col=by,
                 )
             else:
                 df = pd.read_sql(
-                    text(f"""
+                    sql_helper(
+                        """
                 WITH data as (
                     SELECT distinct ugc, date(valid)
                     from lsrs l JOIN ugcs u on (l.gid = u.gid)
@@ -234,7 +239,10 @@ def plotter(ctx: dict):
                     {state_limiter}
                 )
                 SELECT ugc, count(*) from data GROUP by ugc
-                """),
+                """,
+                        state_limiter=state_limiter,
+                        tlimiter=tlimiter,
+                    ),
                     conn,
                     params=params,
                     index_col=by,
@@ -252,7 +260,8 @@ def plotter(ctx: dict):
         with get_sqlalchemy_conn("postgis") as conn:
             if by != "ugc":
                 df = pd.read_sql(
-                    text(f"""
+                    sql_helper(
+                        """
                 WITH data as (
                     SELECT distinct wfo, state, valid, type,
                     magnitude, geom from lsrs l
@@ -260,14 +269,19 @@ def plotter(ctx: dict):
                     {state_limiter}
                 )
                 SELECT {by}, count(*) from data GROUP by {by}
-                """),
+                """,
+                        by=by,
+                        state_limiter=state_limiter,
+                        tlimiter=tlimiter,
+                    ),
                     conn,
                     index_col=by,
                     params=params,
                 )
             else:
                 df = pd.read_sql(
-                    text(f"""
+                    sql_helper(
+                        """
                 WITH data as (
                     SELECT distinct ugc, valid, type,
                     magnitude, l.geom from
@@ -276,7 +290,10 @@ def plotter(ctx: dict):
                     {state_limiter}
                 )
                 SELECT ugc, count(*) from data GROUP by ugc
-                """),
+                """,
+                        state_limiter=state_limiter,
+                        tlimiter=tlimiter,
+                    ),
                     conn,
                     index_col=by,
                     params=params,
@@ -310,21 +327,29 @@ def plotter(ctx: dict):
         with get_sqlalchemy_conn("postgis") as conn:
             if by != "ugc":
                 df = pd.read_sql(
-                    text(f"""
+                    sql_helper(
+                        """
                 WITH data as (
                     SELECT distinct wfo, {yearcol} as year, state, valid, type,
                     magnitude, geom from lsrs l
                     where {slimiter} {tlimiter} {state_limiter}
                 )
                 SELECT {by}, year, count(*) from data GROUP by {by}, year
-                """),
+                """,
+                        yearcol=yearcol,
+                        slimiter=slimiter,
+                        by=by,
+                        tlimiter=tlimiter,
+                        state_limiter=state_limiter,
+                    ),
                     conn,
                     params=params,
                     index_col=None,
                 )
             else:
                 df = pd.read_sql(
-                    text(f"""
+                    sql_helper(
+                        """
                 WITH data as (
                     SELECT distinct ugc, {yearcol} as year, valid, type,
                     magnitude, l.geom
@@ -332,7 +357,13 @@ def plotter(ctx: dict):
                     where {slimiter} {tlimiter} {state_limiter}
                 )
                 SELECT {by}, year, count(*) from data GROUP by {by}, year
-                """),
+                """,
+                        by=by,
+                        yearcol=yearcol,
+                        slimiter=slimiter,
+                        tlimiter=tlimiter,
+                        state_limiter=state_limiter,
+                    ),
                     conn,
                     params=params,
                     index_col=None,

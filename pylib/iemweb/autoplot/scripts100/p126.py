@@ -15,10 +15,9 @@ from datetime import date
 import metpy.calc as mcalc
 import pandas as pd
 from metpy.units import units
-from pyiem.database import get_sqlalchemy_conn
+from pyiem.database import get_sqlalchemy_conn, sql_helper
 from pyiem.exceptions import NoDataFound
 from pyiem.plot import figure
-from sqlalchemy import text
 
 PDICT = {
     "mixing_ratio": "Mixing Ratio [g/kg]",
@@ -74,7 +73,7 @@ def plotter(ctx: dict):
     varname = ctx["var"]
     with get_sqlalchemy_conn("asos") as conn:
         df = pd.read_sql(
-            text("""
+            sql_helper("""
             SELECT extract(year from valid) as year,
             coalesce(mslp, alti * 33.8639, 1013.25) as slp,
             extract(doy from valid) as doy, tmpf, dwpf, relh from alldata

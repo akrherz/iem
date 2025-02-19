@@ -6,17 +6,16 @@ force_https();
 require_once "../../../include/myview.php";
 require_once "../../../include/iemprop.php";
 $t = new MyView();
-$OL = "9.2.4";
+$OL = "10.4.0";
 
-$t->jsextra = <<<EOF
-<script type="text/javascript" src="/js/mapping.js"></script>
+$t->jsextra = <<<EOM
 <script src="/vendor/jquery-datatables/1.10.20/datatables.min.js"></script>
 <script src="/vendor/jquery-ui/1.11.4/jquery-ui.js"></script>
 <script src="/vendor/select2/4.1.0rc0/select2.min.js"></script>
 <script src='/vendor/openlayers/{$OL}/ol.js'></script>
 <script type="text/javascript" src="/js/olselect-lonlat.js"></script>
 <script type="text/javascript" src="search.js?v=2"></script>
-EOF;
+EOM;
 
 $t->headextra = <<<EOF
 <link rel='stylesheet' href="/vendor/openlayers/{$OL}/ol.css" type='text/css'>
