@@ -22,13 +22,13 @@ from zoneinfo import ZoneInfo
 import matplotlib.dates as mdates
 import numpy as np
 import pandas as pd
-from pyiem.database import get_sqlalchemy_conn
+from pyiem.database import get_sqlalchemy_conn, sql_helper
 from pyiem.exceptions import NoDataFound
 from pyiem.plot import figure_axes
 from pyiem.util import utc
-from sqlalchemy import text
 
-STAGES = "low action bankfull flood moderate major record".split()
+# Requested removal of bankfull
+STAGES = "low action flood moderate major record".split()
 COLORS = {
     "action": "#ffff72",
     "flood": "#ffc672",
@@ -89,9 +89,12 @@ def add_context(ctx):
     # Attempt to get station information
     with get_sqlalchemy_conn("hml") as conn:
         df = pd.read_sql(
-            "SELECT * from stations where id = %s and network ~* 'DCP'",
+            sql_helper(
+                "SELECT * from stations where id = :station "
+                "and network ~* 'DCP'"
+            ),
             conn,
-            params=(station,),
+            params={"station": station},
             index_col=None,
         )
     if df.empty:
@@ -104,25 +107,28 @@ def add_context(ctx):
 
     with get_sqlalchemy_conn("hml") as conn:
         ctx["fdf"] = pd.read_sql(
-            f"""with fx as (
+            sql_helper(
+                """with fx as (
             select id, issued, primaryname, primaryunits, secondaryname,
-            secondaryunits from hml_forecast where station = %s
-            and generationtime between %s and %s)
+            secondaryunits from hml_forecast where station = :station
+            and generationtime between :sts and :ets)
         SELECT f.id,
         f.issued at time zone 'UTC' as issued,
         d.valid at time zone 'UTC' as valid,
         d.primary_value, f.primaryname,
         f.primaryunits, d.secondary_value, f.secondaryname,
         f.secondaryunits from
-        hml_forecast_data_{dt.year} d JOIN fx f
+        {table} d JOIN fx f
         on (d.hml_forecast_id = f.id) ORDER by f.id ASC, d.valid ASC
         """,
-            conn,
-            params=(
-                station,
-                dt - timedelta(days=3),
-                dt + timedelta(days=1),
+                table=f"hml_forecast_data_{dt.year}",
             ),
+            conn,
+            params={
+                "station": station,
+                "sts": dt - timedelta(days=3),
+                "ets": dt + timedelta(days=1),
+            },
             index_col=None,
         )
     if not ctx["fdf"].empty:
@@ -142,7 +148,7 @@ def add_context(ctx):
         maxts = dt + timedelta(days=3)
     with get_sqlalchemy_conn("hml") as conn:
         df = pd.read_sql(
-            text("""
+            sql_helper("""
             SELECT valid at time zone 'UTC' as valid,
             h.label, value from hml_observed_data d
             JOIN hml_observed_keys h on (d.key = h.id)
@@ -200,38 +206,33 @@ def get_highcharts(ctx: dict) -> str:
                 .tz_convert(ZoneInfo(ctx["tzname"]))
                 .strftime("%-m/%-d %-I%p %Z")
             )
-            v = df2[["ticks", ctx["var"] + "_value"]].to_json(orient="values")
+            v = df2[["ticks", f"{ctx['var']}_value"]].to_json(orient="values")
             lines.append(
-                """{
-                name: '"""
-                + issued
-                + """',
+                f"""{{
+                name: '{issued}',
                 type: 'line',
-                tooltip: {valueDecimal: 1},
-                data: """
-                + v
-                + """
-                }
+                tooltip: {{valueDecimal: 1}},
+                data: {v}
+                }}
             """
             )
     ctx["odf"]["ticks"] = ctx["odf"].index.values.view(np.int64) // 10**6
     if ctx["var"] in ctx:
         v = ctx["odf"][["ticks", ctx[ctx["var"]]]].to_json(orient="values")
         lines.append(
-            """{
+            f"""{{
                 name: 'Obs',
                 type: 'line',
                 color: 'black',
                 lineWidth: 3,
-                tooltip: {valueDecimal: 1},
-                data: """
-            + v
-            + """
-                }
+                tooltip: {{valueDecimal: 1}},
+                data: {v}
+                }}
         """
         )
     series = ",".join(lines)
     lines = []
+    scatter = []
     for stage in STAGES:
         val = ctx[f"sigstage_{stage}"]
         if val is None:
@@ -239,53 +240,66 @@ def get_highcharts(ctx: dict) -> str:
         lines.append(
             f"{{value: {val}, color: '{COLORS.get(stage, 'black')}', "
             "dashStyle: 'shortdash', "
-            f"width: 2, label: {{text: '{stage}'}}}}"
+            f"width: 2, label: {{text: '{stage} {val}'}}}}"
         )
-
+        # Workaround for plotLines not appearing when out of range
+        scatter.append(
+            f"""
+{{
+      type: 'scatter',
+      data: [[{df["ticks"].values[0]}, {val}]],
+      showInLegend: false,
+      type: 'scatter',
+      marker: {{
+        enabled: false
+      }},
+      enableMouseTracking: false,
+    }}
+            """
+        )
+    scatterentries = ",".join(scatter)
+    if scatter:
+        scatterentries = f",{scatterentries}"
     plotlines = ",".join(lines)
     containername = ctx["_e"]
-    return (
-        """
-Highcharts.chart('"""
-        + containername
-        + """', {
-    time: {
+    return f"""
+Highcharts.chart('{containername}', {{
+    time: {{
         useUTC: false,
-        timezone: '"""
-        + ctx["tzname"]
-        + """'
-    },
-    title: {text: '"""
-        + ctx["title"]
-        + """'},
-    subtitle: {text: '"""
-        + ctx["subtitle"]
-        + """'},
-    chart: {zoomType: 'xy'},
-    tooltip: {
+        timezone: '{ctx["tzname"]}'
+    }},
+    title: {{text: '{ctx["title"]}'}},
+    subtitle: {{text: '{ctx["subtitle"]}'}},
+    chart: {{zoomType: 'xy'}},
+    tooltip: {{
         shared: true,
         crosshairs: true,
         xDateFormat: '%d %b %Y %I:%M %p'
-    },
-    xAxis: {
-        title: {text: '"""
-        + ctx["tzname"]
-        + """ Timezone'},
-        type: 'datetime'},
-    yAxis: {
-        title: {text: '"""
-        + ctx.get(ctx["var"], "primary")
-        + """'},
-        plotLines: ["""
-        + plotlines
-        + """]
-    },
-    series: ["""
-        + series
-        + """]
-});
+    }},
+    xAxis: {{
+        title: {{text: '{ctx["tzname"]} Timezone'}},
+        type: 'datetime'
+    }},
+    yAxis: {{
+        title: {{text: '{ctx.get(ctx["var"], "primary")}'}},
+        plotLines: [{plotlines}]
+    }},
+    series: [{series}{scatterentries}]
+}});
+// Add a checkbox after the chart that scales the y-axis to the series range
+$('<input type="checkbox" id="scaleY" checked="checked"> '+
+ '<label for="scaleY">Scale to Flood Categories</label>')
+    .appendTo($('#{containername}_controls'))
+    .change(function() {{ // this
+        const chart = $('#{containername}').highcharts();
+        if (this.checked) {{
+            chart.yAxis[0].setExtremes(null, null);
+        }} else {{
+            chart.yAxis[0].setExtremes(
+                chart.series[0].dataMin, chart.series[0].dataMax, true, false);
+        }}
+    }});
     """
-    )
 
 
 def plotter(ctx: dict):
