@@ -7,10 +7,9 @@ require_once "../../include/myview.php";
 require_once "../../include/iemprop.php";
 $t = new MyView();
 $DT = "2.0.2";
-$OL = "10.1.0";
+$OL = "10.4.0";
 
 $t->jsextra = <<<EOM
-<script type="text/javascript" src="/js/mapping.js"></script>
 <script src="/vendor/jquery-datatables/{$DT}/datatables.min.js"></script>
 <script src="/vendor/jquery-ui/1.11.4/jquery-ui.js"></script>
 <script src="/vendor/select2/4.1.0rc0/select2.min.js"></script>
