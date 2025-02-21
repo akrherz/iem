@@ -16,14 +16,19 @@ LOG = logger()
 def main():
     """Go Main Go."""
     uri = "http://iem.local/agclimate/isusm.csv"
-    req = httpx.get(uri, timeout=30)
-    content = req.content
+    try:
+        resp = httpx.get(uri, timeout=30)
+        resp.raise_for_status()
+        content = resp.content
+    except Exception as exp:
+        LOG.warning("Failed to fetch %s: %s", uri, exp)
+        return
     # Ensure we get back a decent response
     if content.find(b".EOO") < 0:
-        LOG.info("%s failed to produce valid CSV", uri)
+        LOG.warning("%s failed to produce valid CSV", uri)
         return
     with tempfile.NamedTemporaryFile(delete=False) as tmpfd:
-        tmpfd.write(req.content)
+        tmpfd.write(content)
     subprocess.call(["pqinsert", "-p", "isusm.csv", tmpfd.name])
     os.unlink(tmpfd.name)
 

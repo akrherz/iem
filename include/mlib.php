@@ -3,7 +3,8 @@
 function getClientIp() {
     if (!empty($_SERVER['HTTP_X_FORWARDED_FOR'])) {
         $ipArray = explode(',', $_SERVER['HTTP_X_FORWARDED_FOR']);
-        $ip = trim($ipArray[0]);
+        // Likely want the last IP in the list
+        $ip = trim(end($ipArray));
     } else {
         $ip = $_SERVER['REMOTE_ADDR'];
     }
