@@ -192,21 +192,26 @@ def station_handler(value, arg: dict, fdict, res, typ: str):
     return netselect + " " + select + map_select_widget(network, arg["name"])
 
 
-def ugc_select(state, ugc):
+def ugc_select(state: str, ugc: str) -> str:
     """Generate a select for a given state."""
-    pgconn, cursor = get_dbconnc("postgis")
-    cursor.execute(
-        "SELECT ugc, name from ugcs WHERE substr(ugc, 1, 2) = %s and "
-        "end_ts is null ORDER by name ASC",
-        (state,),
-    )
+    sql = """
+    with data as (
+        select ugc, case when end_ts is not null then
+        to_char(begin_ts, 'YYYY-mm-dd') || '-' || to_char(end_ts, 'YYYY-mm-dd')
+        else null end as rng, name,
+        row_number() OVER (PARTITION by ugc ORDER by end_ts nulls first)
+        from ugcs where substr(ugc, 1, 2) = :state)
+    select ugc, name, rng from data where row_number = 1
+    order by name asc, ugc asc
+    """
     ar = {}
-    for row in cursor:
-        ar[row["ugc"]] = (
-            f"{row['name']} {'(Zone)' if row['ugc'][2] == 'Z' else ''}"
-        )
-    cursor.close()
-    pgconn.close()
+    with get_sqlalchemy_conn("postgis") as conn:
+        res = conn.execute(sql_helper(sql), {"state": state})
+        for row in res:
+            name = f"{row[1]} {'(Zone)' if row[0][2] == 'Z' else ''}"
+            if row[2] is not None:
+                name += f" {row[2]}"
+            ar[row[0]] = name
     return make_select("ugc", ugc, ar, cssclass="iemselect2")
 
 
