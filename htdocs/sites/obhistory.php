@@ -332,8 +332,39 @@ $mbutton = (preg_match("/ASOS/", $network)) ?
     "<a onclick=\"javascript:toggleMETAR();\" class=\"btn btn-success\" id=\"metar_toggle\"><i class=\"fa fa-plus\"></i> Show METARs</a>" .
     " &nbsp; <a onclick=\"javascript:toggleMADIS();\" class=\"btn btn-success\" id=\"madis_toggle\"><i class=\"fa fa-plus\"></i> Show High Frequency MADIS</a>"
     : "";
-
-$content = <<<EOF
+    $buttons = sprintf(
+        "<a id=\"prevbutton\" " .
+            "data-year=\"%s\" data-month=\"%s\" data-day=\"%s\" " .
+            "href=\"obhistory.php?network=%s&station=%s&year=%s&month=%s&day=%s\" " .
+            "class=\"btn btn-default\"><i class=\"fa fa-arrow-left\"></i> ".
+            "Previous Day</a>",
+        date("Y", $yesterday),
+        date("m", $yesterday),
+        date("d", $yesterday),
+        $network,
+        $station,
+        date("Y", $yesterday),
+        date("m", $yesterday),
+        date("d", $yesterday)
+    );
+    
+    if ($tomorrow) {
+        $buttons .= sprintf(
+            "<a id=\"nextbutton\" " .
+                "data-year=\"%s\" data-month=\"%s\" data-day=\"%s\" " .
+                "href=\"obhistory.php?network=%s&station=%s&year=%s&month=%s&day=%s\" " .
+                "class=\"btn btn-default\">Next Day <i class=\"fa fa-arrow-right\"></i></a>",
+            date("Y", $tomorrow),
+            date("m", $tomorrow),
+            date("d", $tomorrow),
+            $network,
+            $station,
+            date("Y", $tomorrow),
+            date("m", $tomorrow),
+            date("d", $tomorrow)
+        );
+    
+$content = <<<EOM
 <style>
 .high {
   color: #F00;
@@ -366,37 +397,7 @@ Time Order:{$sortform}
 <input type="submit" value="Change Date" />
 </form>
 <p>{$mbutton}</p>
-EOF;
-$content .= sprintf(
-    "<a id=\"prevbutton\" " .
-        "data-year=\"%s\" data-month=\"%s\" data-day=\"%s\" " .
-        "href=\"obhistory.php?network=%s&station=%s&year=%s&month=%s&day=%s\" " .
-        "class=\"btn btn-default\">Previous Day</a>",
-    date("Y", $yesterday),
-    date("m", $yesterday),
-    date("d", $yesterday),
-    $network,
-    $station,
-    date("Y", $yesterday),
-    date("m", $yesterday),
-    date("d", $yesterday)
-);
-
-if ($tomorrow) {
-    $content .= sprintf(
-        "<a id=\"nextbutton\" " .
-            "data-year=\"%s\" data-month=\"%s\" data-day=\"%s\" " .
-            "href=\"obhistory.php?network=%s&station=%s&year=%s&month=%s&day=%s\" " .
-            "class=\"btn btn-default\">Next Day</a>",
-        date("Y", $tomorrow),
-        date("m", $tomorrow),
-        date("d", $tomorrow),
-        $network,
-        $station,
-        date("Y", $tomorrow),
-        date("m", $tomorrow),
-        date("d", $tomorrow)
-    );
+EOM;
 }
 $notes = '';
 if ($network == "ISUSM") {
@@ -557,9 +558,11 @@ if ($errmsg != "") {
 EOM;
 }
 
-$content .= <<<EOF
+$content .= <<<EOM
 
 {$errdiv}
+
+{$buttons}
 
 <table class="table table-striped table-bordered" id="datatable">
 <thead>
@@ -570,6 +573,8 @@ $content .= <<<EOF
 </tbody>
 </table>
 
+{$buttons}
+
 <p>The <a href="{$wsuri}">IEM API webservice</a> that provided data to this
 page.  For more details, see <a href="/api/1/docs#/default/service_obhistory__fmt__get">documentation</a>.</p>
 
@@ -577,6 +582,6 @@ page.  For more details, see <a href="/api/1/docs#/default/service_obhistory__fm
 <ul>
 {$notes}
 </ul>
-EOF;
+EOM;
 $t->content = $content;
 $t->render('sites.phtml');
