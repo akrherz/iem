@@ -1,6 +1,8 @@
 <?php
 // Provides a context for PHP pages within the /sites/ IEM website
 require_once dirname(__FILE__) . "/../config/settings.inc.php";
+// Throttle
+require_once dirname(__FILE__) . "/throttle.php";
 require_once dirname(__FILE__) . "/database.inc.php";
 require_once dirname(__FILE__) . "/station.php";
 require_once dirname(__FILE__) . "/forms.php";
