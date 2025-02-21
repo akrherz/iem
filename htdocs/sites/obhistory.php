@@ -78,7 +78,7 @@ function asos_formatter($i, $row)
     $ts = strtotime(substr($row["local_valid"], 0, 16));
     $relh = relh(f2c($row["tmpf"]), f2c($row["dwpf"]));
     $relh = (!is_null($relh)) ? intval($relh) : "";
-    $ismadis = is_null($row["raw"]) ? FALSE: (strpos($row["raw"], "MADISHF") > 0);
+    $ismadis = is_null($row["raw"]) ? FALSE : (strpos($row["raw"], "MADISHF") > 0);
     return sprintf(
         "<tr style=\"background: %s;\" class=\"%sob\" data-madis=\"%s\">" .
             "</div><td>%s</td><td>%s</td><td>%s</td>
@@ -165,14 +165,15 @@ function hads_formatter($i, $row, $shefcols)
         $html
     );
 }
-function scan_formatter($i, $row){
+function scan_formatter($i, $row)
+{
     $ts = strtotime(substr($row["local_valid"], 0, 16));
     return sprintf(
         "<tr style=\"background: %s;\">" .
-            "<td>%s</td><td>%s</td><td>%s</td>".
-    "<td>%s</td><td>%s</td><td>%s</td><td>%s</td><td>%s</td><td>%s</td>".
-    "<td>%s</td><td>%s</td><td>%s</td><td>%s</td><td>%s</td><td>%s</td>".
-    "<td>%s</td><td>%s</td></tr>",
+            "<td>%s</td><td>%s</td><td>%s</td>" .
+            "<td>%s</td><td>%s</td><td>%s</td><td>%s</td><td>%s</td><td>%s</td>" .
+            "<td>%s</td><td>%s</td><td>%s</td><td>%s</td><td>%s</td><td>%s</td>" .
+            "<td>%s</td><td>%s</td></tr>",
         ($i % 2 == 0) ? "#FFF" : "#EEE",
         date("g:i A", $ts),
         wind_formatter($row),
@@ -192,7 +193,6 @@ function scan_formatter($i, $row){
         $row["soilt40"],
         $row["soilm40"],
     );
-
 }
 $year = get_int404("year", date("Y"));
 $month = get_int404("month", date("m"));
@@ -226,7 +226,8 @@ $t->sites_current = 'obhistory';
 
 $savevars = array(
     "year" => date("Y", $date),
-    "month" => date("m", $date), "day" => date("d", $date)
+    "month" => date("m", $date),
+    "day" => date("d", $date)
 );
 $t->jsextra = '<script type="module" src="obhistory.js"></script>';
 $dstr = date("d F Y", $date);
@@ -237,43 +238,43 @@ $ms = monthSelect(date("m", $date));
 $ds = daySelect(date("d", $date));
 
 $mbutton = (preg_match("/ASOS/", $network)) ?
-    '<button type="button" class="btn btn-success" id="metar_toggle">'.
-    '<i class="fa fa-plus"></i> Show METARs</button>'.
-    ' &nbsp; <button type="button" class="btn btn-success" id="madis_toggle">'.
+    '<button type="button" class="btn btn-success" id="metar_toggle">' .
+    '<i class="fa fa-plus"></i> Show METARs</button>' .
+    ' &nbsp; <button type="button" class="btn btn-success" id="madis_toggle">' .
     '<i class="fa fa-plus"></i> Show High Frequency MADIS</button>'
     : "";
-    $buttons = sprintf(
-        "<a id=\"prevbutton\" " .
+$buttons = sprintf(
+    "<a id=\"prevbutton\" " .
+        "data-year=\"%s\" data-month=\"%s\" data-day=\"%s\" " .
+        "href=\"obhistory.php?network=%s&station=%s&year=%s&month=%s&day=%s\" " .
+        "class=\"btn btn-default\"><i class=\"fa fa-arrow-left\"></i> " .
+        "Previous Day</a>",
+    date("Y", $yesterday),
+    date("m", $yesterday),
+    date("d", $yesterday),
+    $network,
+    $station,
+    date("Y", $yesterday),
+    date("m", $yesterday),
+    date("d", $yesterday)
+);
+
+if ($tomorrow) {
+    $buttons .= sprintf(
+        "<a id=\"nextbutton\" " .
             "data-year=\"%s\" data-month=\"%s\" data-day=\"%s\" " .
             "href=\"obhistory.php?network=%s&station=%s&year=%s&month=%s&day=%s\" " .
-            "class=\"btn btn-default\"><i class=\"fa fa-arrow-left\"></i> ".
-            "Previous Day</a>",
-        date("Y", $yesterday),
-        date("m", $yesterday),
-        date("d", $yesterday),
+            "class=\"btn btn-default\">Next Day <i class=\"fa fa-arrow-right\"></i></a>",
+        date("Y", $tomorrow),
+        date("m", $tomorrow),
+        date("d", $tomorrow),
         $network,
         $station,
-        date("Y", $yesterday),
-        date("m", $yesterday),
-        date("d", $yesterday)
+        date("Y", $tomorrow),
+        date("m", $tomorrow),
+        date("d", $tomorrow)
     );
-    
-    if ($tomorrow) {
-        $buttons .= sprintf(
-            "<a id=\"nextbutton\" " .
-                "data-year=\"%s\" data-month=\"%s\" data-day=\"%s\" " .
-                "href=\"obhistory.php?network=%s&station=%s&year=%s&month=%s&day=%s\" " .
-                "class=\"btn btn-default\">Next Day <i class=\"fa fa-arrow-right\"></i></a>",
-            date("Y", $tomorrow),
-            date("m", $tomorrow),
-            date("d", $tomorrow),
-            $network,
-            $station,
-            date("Y", $tomorrow),
-            date("m", $tomorrow),
-            date("d", $tomorrow)
-        );
-    
+}
 $content = <<<EOM
 <style>
 .high {
@@ -309,7 +310,7 @@ Time Order:{$sortform}
 </form>
 <p>{$mbutton}</p>
 EOM;
-}
+
 $notes = '';
 if ($network == "ISUSM") {
     $notes .= "<li>Wind direction and wind speed are 10 minute averages at 10 feet above the ground.</li>";
