@@ -7,7 +7,6 @@ RUN_40_AFTER for 2 hours ago.
 
 import os
 import subprocess
-import sys
 import warnings
 from datetime import datetime, timedelta
 from zoneinfo import ZoneInfo
@@ -20,18 +19,18 @@ from pyiem.observation import Observation
 from pyiem.util import convert_value, logger, mm2inch, ncopen, utc
 
 LOG = logger()
-MYDIR = "/mesonet/data/madis/mesonet1"
+MYDIR = "/mesonet/data/madis"
 MY_PROVIDERS = ["KYTC-RWIS", "NEDOR", "MesoWest", "ITD"]
 warnings.filterwarnings("ignore", category=DeprecationWarning)
 
 
-def find_file(offset0):
+def find_file(variant, offset0):
     """Find the most recent file"""
     fn = None
     for i in range(offset0, offset0 + 4):
         ts = utc() - timedelta(hours=i)
         for j in range(300, -1, -1):
-            testfn = ts.strftime(f"{MYDIR}/%Y%m%d_%H00_{j}.nc")
+            testfn = ts.strftime(f"{MYDIR}/{variant}/%Y%m%d_%H00_{j}.nc")
             if os.path.isfile(testfn):
                 LOG.info("processing %s", testfn)
                 fn = testfn
@@ -40,8 +39,8 @@ def find_file(offset0):
             break
 
     if fn is None:
-        LOG.warning("Found no available files to process")
-        sys.exit()
+        msg = f"Found no {variant} files to process within {offset0} hours"
+        LOG.warning(msg)
     return fn
 
 
@@ -97,12 +96,12 @@ def build_roadstate_xref(ncvar):
     return xref
 
 
-@click.command()
-@click.option("--offset", default=0, help="Offset in hours", type=int)
-def main(offset: int):
-    """Do Something"""
+def process(offset: int, variant: str):
+    """Process the MADIS file"""
     pgconn, icursor = get_dbconnc("iem")
-    fn = find_file(offset)
+    fn = find_file(variant, offset)
+    if fn is None:
+        return
     nc = ncopen(fn, timeout=300)
 
     stations = chartostring(nc.variables["stationId"][:])
@@ -185,6 +184,7 @@ def main(offset: int):
         if rstate4[recnum] is not np.ma.masked:
             db[this_station]["scond3"] = road_state_xref.get(rstate4[recnum])
 
+    updates = 0
     for sid, val in db.items():
         iem = Observation(sid, val["network"], val["ts"])
         for colname in ["scond0", "scond1", "scond2", "scond3"]:
@@ -221,6 +221,7 @@ def main(offset: int):
             iem.data["rwis_subf"] = convert_value(val["subk"], "degK", "degF")
         if val["pday"] is not None:
             iem.data["pday"] = round(mm2inch(val["pday"]), 2)
+        updates += 1
         if not iem.save(icursor) and val["network"] != "IA_RWIS":
             LOG.warning(
                 "MADIS Extract: %s found new station: %s network: %s",
@@ -232,10 +233,18 @@ def main(offset: int):
             os.chdir("../../dbutil")
             subprocess.call(["sh", "SYNC_STATIONS.sh"])
             os.chdir("../ingestors/madis")
-            LOG.info("...done with sync.")
+    LOG.info("Found %s/%s updates in %s", updates, len(providers), fn)
     icursor.close()
     pgconn.commit()
     pgconn.close()
+
+
+@click.command()
+@click.option("--offset", default=0, help="Offset in hours", type=int)
+def main(offset: int):
+    """Do Something"""
+    for variant in ["rwis1", "mesonet1"]:
+        process(offset, variant)
 
 
 if __name__ == "__main__":
