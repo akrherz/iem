@@ -155,21 +155,36 @@ function relh($tmpc, $dwpc)
 function drct2txt($dir)
 {
     $dir = intval($dir);
-    if ($dir >= 350 || $dir < 13)  return "N";
-    if ($dir >= 13 && $dir < 35) return "NNE";
-    if ($dir >= 35 && $dir < 57) return "NE";
-    if ($dir >= 57 && $dir < 80) return "ENE";
-    if ($dir >= 80 && $dir < 102) return "E";
-    if ($dir >= 102 && $dir < 127) return "ESE";
-    if ($dir >= 127 && $dir < 143) return "SE";
-    if ($dir >= 143 && $dir < 166) return "SSE";
-    if ($dir >= 166 && $dir < 190) return "S";
-    if ($dir >= 190 && $dir < 215) return "SSW";
-    if ($dir >= 215 && $dir < 237) return "SW";
-    if ($dir >= 237 && $dir < 260) return "WSW";
-    if ($dir >= 260 && $dir < 281) return "W";
-    if ($dir >= 281 && $dir < 304) return "WNW";
-    if ($dir >= 304 && $dir < 324) return "NW";
-    if ($dir >= 324 && $dir < 350) return "NNW";
+    $directions = [
+        "N" => [350, 360, 0, 13],
+        "NNE" => [13, 35],
+        "NE" => [35, 57],
+        "ENE" => [57, 80],
+        "E" => [80, 102],
+        "ESE" => [102, 127],
+        "SE" => [127, 143],
+        "SSE" => [143, 166],
+        "S" => [166, 190],
+        "SSW" => [190, 215],
+        "SW" => [215, 237],
+        "WSW" => [237, 260],
+        "W" => [260, 281],
+        "WNW" => [281, 304],
+        "NW" => [304, 324],
+        "NNW" => [324, 350]
+    ];
+
+    foreach ($directions as $text => $ranges) {
+        if (count($ranges) == 4) {
+            if (($dir >= $ranges[0] && $dir <= $ranges[1]) || ($dir >= $ranges[2] && $dir < $ranges[3])) {
+                return $text;
+            }
+        } else {
+            if ($dir >= $ranges[0] && $dir < $ranges[1]) {
+                return $text;
+            }
+        }
+    }
+
     return "";
 }
