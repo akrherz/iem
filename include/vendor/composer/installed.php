@@ -1,9 +1,9 @@
 <?php return array(
     'root' => array(
         'name' => '__root__',
-        'pretty_version' => '230122.x-dev',
-        'version' => '230122.9999999.9999999.9999999-dev',
-        'reference' => '4466ff1d7476ea5eb08ddc01aa3c0a24ca5e6515',
+        'pretty_version' => '250221.x-dev',
+        'version' => '250221.9999999.9999999.9999999-dev',
+        'reference' => '45006462ea70e151fcf628e1828024c8b5536e74',
         'type' => 'library',
         'install_path' => __DIR__ . '/../../',
         'aliases' => array(),
@@ -11,9 +11,9 @@
     ),
     'versions' => array(
         '__root__' => array(
-            'pretty_version' => '230122.x-dev',
-            'version' => '230122.9999999.9999999.9999999-dev',
-            'reference' => '4466ff1d7476ea5eb08ddc01aa3c0a24ca5e6515',
+            'pretty_version' => '250221.x-dev',
+            'version' => '250221.9999999.9999999.9999999-dev',
+            'reference' => '45006462ea70e151fcf628e1828024c8b5536e74',
             'type' => 'library',
             'install_path' => __DIR__ . '/../../',
             'aliases' => array(),
@@ -29,9 +29,9 @@
             'dev_requirement' => false,
         ),
         'composer/ca-bundle' => array(
-            'pretty_version' => '1.3.1',
-            'version' => '1.3.1.0',
-            'reference' => '4c679186f2aca4ab6a0f1b0b9cf9252decb44d0b',
+            'pretty_version' => '1.5.5',
+            'version' => '1.5.5.0',
+            'reference' => '08c50d5ec4c6ced7d0271d2862dec8c1033283e6',
             'type' => 'library',
             'install_path' => __DIR__ . '/./ca-bundle',
             'aliases' => array(),

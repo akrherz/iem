@@ -28,9 +28,6 @@ if ($opt === "bystation") {
         $station,
         $year
     );
-    $data = file_get_contents($uri);
-    $json = json_decode($data, $assoc = TRUE);
-    $arr = $json['results'];
 } else {
     $col1label = "Station";
     $byday = true;
@@ -40,10 +37,11 @@ if ($opt === "bystation") {
         "http://iem.local/geojson/cf6.py?dt=%s",
         date("Y-m-d", $day)
     );
-    $data = file_get_contents($uri);
-    $json = json_decode($data, $assoc = TRUE);
-    $arr = $json['features'];
 }
+$data = file_get_contents($uri);
+$json = json_decode($data, $assoc = TRUE);
+$arr = $json['features'];
+$generated_at = $json['generated_at'];
 $prettyurl = str_replace("http://iem.local", "https://mesonet.agron.iastate.edu", $uri);
 
 $table = <<<EOF
@@ -53,7 +51,7 @@ $table = <<<EOF
     border: 0px !important;
     padding: 2px !important;
     background: tan !important;
-}	
+}
 </style>
 <h3>{$title}</h3>
 <table id="thetable" class="table table-condensed table-striped table-bordered table-hover">
@@ -78,12 +76,6 @@ $table = <<<EOF
 </thead>
 <tbody>
 EOF;
-function trace($val)
-{
-    if ($val == 0.0001) return 'T';
-    if ($val > 0) return sprintf("%.2f", $val);
-    return $val;
-}
 foreach ($arr as $entry) {
     $row = ($opt === "bystation") ? $entry : $entry["properties"];
     $ts = strtotime($row["valid"]);
@@ -126,7 +118,7 @@ foreach ($arr as $entry) {
         $row["dep_temp"],
         $row["hdd"],
         $row["cdd"],
-        trace($row["precip"]),
+        $row["precip"],
         $row["snow"],
         $row["snowd_12z"],
         $row["avg_smph"],
@@ -180,13 +172,11 @@ $t->content = <<<EOF
     {$ys} {$ms} {$ds}
     <br /><input type="submit" value="Generate Table" />
 </form>
-
-
     </div>
 </div>
 
-<p>There is a <a href="/json/">JSON(P) webservice</a> that backends this table presentation, you can
-directly access it here:
+<p>This table's data was generated at: <code>{$generated_at}</code> by a
+<a href="/json/">JSON(P) webservice</a>, you can directly access it here:
 <br /><code>{$prettyurl}</code></p>
 
 <p><button id="makefancy">Make Table Interactive</button></p>
