@@ -1,18 +1,17 @@
 <?php
 require_once "../../../config/settings.inc.php";
 require_once "../../../include/myview.php";
-require_once "../../../include/database.inc.php";
 require_once "../../../include/imagemaps.php";
 require_once "../../../include/forms.php";
 
-$mesosite = iemdb('mesosite');
 $network = isset($_REQUEST['network']) ? xssafe($_REQUEST["network"]) : 'IA_COOP';
 
 define("IEM_APPID", 45);
 $t = new MyView();
+$t->iemss = True;
 $t->title = "NWS COOP Raw Observations Download";
 
-$content = <<<EOF
+$content = <<<EOM
 <ol class="breadcrumb">
 <li><a href="/COOP/">NWS COOP Network</a></li>
 <li class="active">Raw Data Download</li>
@@ -23,41 +22,9 @@ $content = <<<EOF
         was made!</strong> The observations represent a 24 hour period prior
         to the timestamp on the observation.  These observations are typically
         made around 7 AM localtime.</p>
-EOF;
+EOM;
 
-$west = <<<EOF
-<form method="GET" name="chstate">
-<p>Select from State: <select name="network">
-EOF;
-
-$rs = pg_query($mesosite, "SELECT id, name from networks where id ~* 'COOP' 
-        ORDER by name ASC");
-for ($i = 0; $row = pg_fetch_assoc($rs); $i++) {
-    $sel = '';
-    if ($network == $row["id"]) {
-        $sel = " selected='SELECTED'";
-    }
-    $west .= sprintf(
-        "<option value='%s'%s>%s</option>\n",
-        $row["id"],
-        $sel,
-        $row["name"]
-    );
-}
-
-$west .= <<<EOF
-</select>
-<input type="submit" value="Change Network" />
-</form>
-
-
-<form method="GET" action="obs-dl.php" name='dl'>
-<input type='hidden' name='network' value="{$network}" />
-
-<p><h3>1. Select Station(s):</h3><br>
-EOF;
-$west .= networkMultiSelect($network, "", array(), "station[]");
-
+$nselect = selectNetworkType("COOP", $network);
 $y1 = yearSelect2(2010, date("Y"), "year1");
 $m1 = monthSelect("", "month1");
 $d1 = daySelect2("", "day1");
@@ -65,7 +32,21 @@ $y2 = yearSelect2(2010, date("Y"), "year2");
 $m2 = monthSelect("", "month2");
 $d2 = daySelect2("", "day2");
 
-$west .= <<<EOF
+$west = <<<EOM
+<form method="GET" name="chstate">
+<p>Select from State:
+{$nselect}
+<input type="submit" value="Change Network" />
+</form>
+
+<p><a href="/cgi-bin/request/coopobs.py?help" class="btn btn-info">Backend documentation</a>
+exists for those wishing to script against this service.</p>
+
+<form method="GET" action="/cgi-bin/request/coopobs.py" name='dl'>
+<input type='hidden' name='network' value="{$network}" />
+
+<div id="iemss" data-network="{$network}"></div>
+
 <p><h3>2. Select Start/End Date:</h3>
 <p>These dates are the date of the observation and do not always represent
 a local calendar day!.</p>
@@ -86,20 +67,20 @@ a local calendar day!.</p>
   </tr>
 </table>
 
-EOF;
+EOM;
 $east = <<<EOF
 <p><h3>3. How to view?</h3><br>
 <select name="what">
-  <option value="download">Download to Disk
-  <option value="view">View on-line
+  <option value="download">Download to Disk</option>
+  <option value="view">View on-line</option>
 </select>
 
-<p><h3 class="subtitle">4. Data Delimitation:</h3><br>
+<p><h3>4. Data Delimitation:</h3><br>
 How shall the output values be seperated?
 <br><select name="delim">
-    <option value="comma">Comma
-    <option value="space">Space
-    <option value="tab">Tab
+    <option value="comma">Comma</option>
+    <option value="space">Space</option>
+    <option value="tab">Tab</option>
    </select>
 
 <p><h3 class="subtitle">Submit Form:</h3><br>
