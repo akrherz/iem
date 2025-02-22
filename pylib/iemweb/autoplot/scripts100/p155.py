@@ -258,7 +258,7 @@ def plotter(ctx: dict):
                     "ORDER by valid DESC LIMIT 100",
                     dbvar=dbvar,
                     op=op,
-                    threshold=threshold,
+                    threshold=str(threshold),
                     date_limiter=date_limiter,
                 ),
                 conn,
