@@ -1,11 +1,11 @@
 /* global Highcharts, $ */
-var dockPosition = 0;
+let dockPosition = 0;
 
 // https://stackoverflow.com/questions/48712560
 function addButtons(dlg) {
     // Define Buttons
-    var $close = dlg.find(".ui-dialog-titlebar-close");
-    var $min = $("<button>", {
+    const $close = dlg.find(".ui-dialog-titlebar-close");
+    const $min = $("<button>", {
         class: "ui-button ui-corner-all ui-widget ui-button-icon-only ui-window-minimize",
         type: "button",
         title: "Minimize"
@@ -17,7 +17,7 @@ function addButtons(dlg) {
     $("<span>", {
         class: "ui-button-icon-space"
     }).html(" ").appendTo($min);
-    var $max = $("<button>", {
+    const $max = $("<button>", {
         class: "ui-button ui-corner-all ui-widget ui-button-icon-only ui-window-maximize",
         type: "button",
         title: "Maximize"
@@ -56,7 +56,7 @@ function addButtons(dlg) {
             dockPosition -= 50;
         }
     });
-    $max.click(function (e) {
+    $max.click((e) => {
         if ($max.data("isMax") === false) {
             $max.data("original-pos", dlg.position());
             $max.data("original-size", {
@@ -80,23 +80,23 @@ function addButtons(dlg) {
             }, 200);
         }
         // Wait for parent to resize!
-        window.setTimeout(function() { resizeCharts(dlg); }, 500);
+        window.setTimeout(() => { resizeCharts(dlg); }, 500);
     });
 }
-function resizeCharts(dlg){
+function resizeCharts(dlg) {
     // console.log("resizeCharts with dlg.height=" + dlg.height());
     // Fixes responsive troubles with boostrap?
     $(dlg).find(".ui-dialog-content").height(dlg.height() - 40);
     // Causes charts to fit their container
-    $(Highcharts.charts).each(function(i,chart){
-        var height = chart.renderTo.clientHeight; 
-        var width = chart.renderTo.clientWidth; 
+    $(Highcharts.charts).each((_i, chart) => {
+        const height = chart.renderTo.clientHeight;
+        const width = chart.renderTo.clientWidth;
         chart.setSize(width, height);
     });
 }
 
-function windowFactory(initdiv, classID){
-    var dlg = $(initdiv).dialog({
+function windowFactory(initdiv, classID) {
+    const dlg = $(initdiv).dialog({
         draggable: true,
         autoOpen: true,
         dialogClass: classID,
@@ -108,15 +108,15 @@ function windowFactory(initdiv, classID){
         responsive: true,
         width: 800,
         height: 500,
-        close: function() {
+        close: function () { // this
             $(this).dialog('destroy').remove();
         },
-        resizeStop: function() {
+        resizeStop: () => {
             resizeCharts(dlg);
         }
     });
-    
-    addButtons($("."+classID));    
+
+    addButtons($(`.${classID}`));
     $(dlg).dialog("open");
     // Find the first button with autoload class and click it
     $(initdiv).find(".autoload").click();

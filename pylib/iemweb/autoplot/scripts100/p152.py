@@ -7,11 +7,10 @@ longer periods of time for each period will help some.
 """
 
 import pandas as pd
-from pyiem.database import get_sqlalchemy_conn
+from pyiem.database import get_sqlalchemy_conn, sql_helper
 from pyiem.exceptions import NoDataFound
 from pyiem.plot import MapPlot, centered_bins, get_cmap
 from pyiem.reference import SECTORS_NAME
-from sqlalchemy import text
 
 PDICT = {"state": "State Level Maps (select state)"}
 PDICT.update(SECTORS_NAME)
@@ -100,11 +99,11 @@ def plotter(ctx: dict):
 
     table = "alldata"
     if sector == "state":
-        table = f"alldata_{state}"
+        table = f"alldata_{state.lower()}"
     with get_sqlalchemy_conn("coop") as conn:
         df = pd.read_sql(
-            text(
-                f"""
+            sql_helper(
+                """
         WITH season1 as (
             SELECT station, year,
             min(case when month > 7 and low < 32 then
@@ -142,7 +141,8 @@ def plotter(ctx: dict):
         WHERE t.network ~* 'CLIMATE'
         and substr(station, 3, 1) not in ('C', 'D')
         and substr(station, 3, 4) != '0000'
-        """
+        """,
+                table=table,
             ),
             conn,
             params={

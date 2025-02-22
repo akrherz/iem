@@ -9,11 +9,10 @@ from datetime import datetime
 
 import pandas as pd
 from matplotlib.font_manager import FontProperties
-from pyiem.database import get_sqlalchemy_conn
+from pyiem.database import get_sqlalchemy_conn, sql_helper
 from pyiem.exceptions import NoDataFound
 from pyiem.plot import figure_axes
 from scipy import stats
-from sqlalchemy import text
 
 from iemweb.util import month2months
 
@@ -90,7 +89,7 @@ def plotter(ctx: dict):
 
     with get_sqlalchemy_conn("asos") as conn:
         df = pd.read_sql(
-            text(
+            sql_helper(
                 """
         WITH obs as (
             SELECT (valid + '10 minutes'::interval) at time zone :tzname as ts,

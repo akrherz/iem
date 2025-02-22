@@ -18,11 +18,10 @@ from datetime import date, datetime, timedelta
 
 import numpy as np
 import pandas as pd
-from pyiem.database import get_sqlalchemy_conn
+from pyiem.database import get_sqlalchemy_conn, sql_helper
 from pyiem.exceptions import NoDataFound
 from pyiem.network import Table as NetworkTable
 from pyiem.plot.geoplot import MapPlot
-from sqlalchemy import text
 
 PDICT3 = {"contour": "Contour + Plot Values", "values": "Plot Values Only"}
 PDICT2 = {
@@ -169,28 +168,32 @@ def plotter(ctx: dict):
         sql = sql.replace("high", "soil").replace("low", "soil")
     with get_sqlalchemy_conn("coop") as conn:
         df = pd.read_sql(
-            text(
-                f"""
+            sql_helper(
+                """
             -- create virtual table with winter_year included
             WITH events as (
                 SELECT station, day, year, high, low,
                 era5land_soilt4_avg as soil,
                 case when month < 7 then year - 1 else year end as winter_year,
                 extract(doy from day) as doy
-                from alldata_{sector} WHERE month = ANY(:months) and
+                from {table} WHERE month = ANY(:months) and
                 substr(station, 3, 4) != '0000'
                 and substr(station, 3, 1) not in ('C', 'D', 'T')
             )
-            SELECT station, {YRGP[varname]},
-            {ORDER[varname]}(
-                case when {sql} then day else null end) as event,
+            SELECT station, {ygrp},
+            {order}(
+                case when {ssql} then day else null end) as event,
             count(*),
             min(day) as min_day,
             max(day) as max_day
             from events
-            WHERE {YRGP[varname]} >= :syear and {YRGP[varname]} <= :eyear
-            GROUP by station, {YRGP[varname]}
-            """
+            WHERE {ygrp} >= :syear and {ygrp} <= :eyear
+            GROUP by station, {ygrp}
+            """,
+                table=f"alldata_{sector.lower()}",
+                order=ORDER[varname],
+                ssql=sql,
+                ygrp=YRGP[varname],
             ),
             conn,
             params={
