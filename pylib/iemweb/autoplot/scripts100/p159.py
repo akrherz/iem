@@ -18,10 +18,9 @@ from datetime import date, datetime
 
 import pandas as pd
 from matplotlib.ticker import MaxNLocator
-from pyiem.database import get_sqlalchemy_conn
+from pyiem.database import get_sqlalchemy_conn, sql_helper
 from pyiem.exceptions import NoDataFound
 from pyiem.plot import figure
-from sqlalchemy import text
 
 from iemweb.autoplot.barchart import barchar_with_top10
 
@@ -197,8 +196,8 @@ def set_df(ctx):
         doylimit = " and to_char(ts, 'mmdd') <= :sday "
     with get_sqlalchemy_conn("asos") as conn:
         ctx["df"] = pd.read_sql(
-            text(
-                f"""WITH hourly as (
+            sql_helper(
+                """WITH hourly as (
             SELECT date_trunc('hour', valid + '10 minutes'::interval)
             at time zone :tzname as ts,
             case when {dbvarname}::int {opp} :t then 1 else 0 end as hit
@@ -210,7 +209,11 @@ def set_df(ctx):
             sum(hit) as hits, count(*) as obs from hourly
             WHERE extract(month from ts) = ANY(:months) {doylimit}
             GROUP by year, hour
-            """
+            """,
+                dbvarname=dbvarname,
+                opp=opp,
+                offset=offset,
+                doylimit=doylimit,
             ),
             conn,
             params={

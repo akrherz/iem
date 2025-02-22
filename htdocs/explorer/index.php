@@ -21,8 +21,7 @@ $t->jsextra = <<<EOM
 <script src="/vendor/highcharts/10.1.0/modules/accessibility.js"></script>
 <script src="/vendor/highcharts/10.1.0/modules/exporting.js"></script>
 <script src="/vendor/highcharts/10.1.0/modules/heatmap.js"></script>
-<script src="app.js"></script>
-<script src="dialog.js"></script>
+<script src="app.js?v=2"></script>
 EOM;
 
 $t->content = <<<EOM

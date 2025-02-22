@@ -20,10 +20,9 @@ unfiltered events for further usage as you see fit.</p>
 from datetime import datetime
 
 import pandas as pd
-from pyiem.database import get_sqlalchemy_conn
+from pyiem.database import get_sqlalchemy_conn, sql_helper
 from pyiem.exceptions import NoDataFound
 from pyiem.plot import figure
-from sqlalchemy import text
 
 from iemweb.util import month2months
 
@@ -199,8 +198,8 @@ def plotter(ctx: dict):
         titlelabel = "Top"
         with get_sqlalchemy_conn("asos") as conn:
             df = pd.read_sql(
-                text(
-                    f"""
+                sql_helper(
+                    """
                 WITH data as (
                     SELECT
                     case when
@@ -215,7 +214,8 @@ def plotter(ctx: dict):
                 SELECT distinct v at time zone :tzname as valid, speed as gust
                 from data WHERE speed is not null
                 ORDER by gust DESC, valid DESC LIMIT 100
-            """
+            """,
+                    date_limiter=date_limiter,
                 ),
                 conn,
                 params=params,
@@ -227,15 +227,18 @@ def plotter(ctx: dict):
         sorder = "DESC" if agg == "max" else "ASC"
         with get_sqlalchemy_conn("asos") as conn:
             df = pd.read_sql(
-                text(
-                    f"""
+                sql_helper(
+                    """
                 WITH data as (
                     SELECT valid at time zone :tzname as v, {dbvar}
                     from alldata WHERE station = :station {date_limiter})
 
                 SELECT v as valid, {dbvar} from data
                 ORDER by {dbvar} {sorder} NULLS LAST LIMIT 100
-            """
+            """,
+                    dbvar=dbvar,
+                    sorder=sorder,
+                    date_limiter=date_limiter,
                 ),
                 conn,
                 params=params,
@@ -247,12 +250,16 @@ def plotter(ctx: dict):
         threshold = float(ctx.get("threshold", 100))
         with get_sqlalchemy_conn("asos") as conn:
             df = pd.read_sql(
-                text(
-                    f"SELECT valid at time zone :tzname as valid, "
-                    f"{dbvar} from "
-                    f"alldata WHERE station = :station {date_limiter} and "
-                    f"{dbvar} {op} {threshold} "
-                    "ORDER by valid DESC LIMIT 100"
+                sql_helper(
+                    "SELECT valid at time zone :tzname as valid, "
+                    "{dbvar} from "
+                    "alldata WHERE station = :station {date_limiter} and "
+                    "{dbvar} {op} {threshold} "
+                    "ORDER by valid DESC LIMIT 100",
+                    dbvar=dbvar,
+                    op=op,
+                    threshold=str(threshold),
+                    date_limiter=date_limiter,
                 ),
                 conn,
                 params=params,

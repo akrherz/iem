@@ -14,10 +14,9 @@ import calendar
 from datetime import datetime, timedelta
 
 import pandas as pd
-from pyiem.database import get_sqlalchemy_conn
+from pyiem.database import get_sqlalchemy_conn, sql_helper
 from pyiem.exceptions import NoDataFound
 from pyiem.plot import figure
-from sqlalchemy import text
 
 PDICT = {"above": "Above Threshold", "below": "Below Threshold"}
 PDICT2 = {
@@ -94,12 +93,16 @@ def plotter(ctx: dict):
     op = ">=" if mydir == "above" else "<"
     with get_sqlalchemy_conn("iem") as conn:
         obsdf = pd.read_sql(
-            text(f"""
+            sql_helper(
+                """
             SELECT day, extract(doy from day) as doy, {varname},
             case when {varname} {op} :threshold then 1 else 0 end
             as threshold_exceed from summary s WHERE iemid = :iemid
             and {varname} is not null ORDER by day ASC
-        """),
+        """,
+                varname=varname,
+                op=op,
+            ),
             conn,
             params={
                 "threshold": threshold,

@@ -311,9 +311,15 @@ def get_obsdf(ctx: dict) -> pd.DataFrame:
 
 
 def munge_cocorahs_id(sid: str) -> str:
-    """CoCoRaHS IDs are poison to SHEF, so we have to munge them"""
+    """CoCoRaHS IDs are poison to SHEF, so we have to munge them."""
     tokens = sid.split("-")
-    return f"{tokens[0]}{tokens[1]}{int(tokens[2]):03.0f}"
+    try:
+        # Le Sigh MO-FSA-131B
+        # Ensure they don't look like NWSLI
+        munged = f"{tokens[0]}{tokens[1]}{int(tokens[2]):03.0f}"
+    except ValueError:
+        munged = sid.replace("-", "")
+    return munged
 
 
 def get_cocorahsdf(ctx: dict) -> pd.DataFrame:

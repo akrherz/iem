@@ -9,11 +9,10 @@ from datetime import date
 
 import matplotlib.ticker as ticker
 import pandas as pd
-from pyiem.database import get_sqlalchemy_conn
+from pyiem.database import get_sqlalchemy_conn, sql_helper
 from pyiem.exceptions import NoDataFound
 from pyiem.plot import figure
 from pyiem.reference import state_names
-from sqlalchemy import text
 
 from iemweb.autoplot import ARG_FEMA
 
@@ -74,11 +73,14 @@ def plotter(ctx: dict):
     # Get total issued
     with get_sqlalchemy_conn("postgis") as conn:
         df = pd.read_sql(
-            text(f"""
+            sql_helper(
+                """
             Select extract(year from issued)::int as year,
             count(*) as national_count from watches
             where {sqllimit} num < 3000 GROUP by year ORDER by year ASC
-        """),
+        """,
+                sqllimit=sqllimit,
+            ),
             conn,
             index_col="year",
         )
@@ -108,13 +110,19 @@ def plotter(ctx: dict):
     # Get total issued
     with get_sqlalchemy_conn("postgis") as conn:
         odf = pd.read_sql(
-            text(f"""
+            sql_helper(
+                """
             select extract(year from issued)::int as year,
             count(*) as datum_count
             from watches w, {table} s where w.geom && s.{geomcol} and
             ST_Intersects(w.geom, s.{geomcol}) and {sqllimit} {abbrsql}
             GROUP by year ORDER by year ASC
-        """),
+        """,
+                table=table,
+                geomcol=geomcol,
+                sqllimit=sqllimit,
+                abbrsql=abbrsql,
+            ),
             conn,
             params=params,
             index_col="year",

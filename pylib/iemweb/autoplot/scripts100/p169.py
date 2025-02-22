@@ -30,10 +30,9 @@ from datetime import date, timedelta
 from zoneinfo import ZoneInfo
 
 import pandas as pd
-from pyiem.database import get_sqlalchemy_conn
+from pyiem.database import get_sqlalchemy_conn, sql_helper
 from pyiem.exceptions import NoDataFound
 from pyiem.plot import figure
-from sqlalchemy import text
 
 from iemweb.util import month2months
 
@@ -151,13 +150,14 @@ def plotter(ctx: dict):
 
     with get_sqlalchemy_conn("asos") as conn:
         df = pd.read_sql(
-            text(
-                f"""
+            sql_helper(
+                """
             SELECT valid at time zone 'UTC' as utc_valid, {varname}
             from alldata where station = :station
             and {varname} is not null
             ORDER by valid desc
-        """
+        """,
+                varname=varname,
             ),
             conn,
             params={

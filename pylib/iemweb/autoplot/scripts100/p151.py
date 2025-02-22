@@ -9,11 +9,10 @@ from datetime import date
 
 import numpy as np
 import pandas as pd
-from pyiem.database import get_sqlalchemy_conn
+from pyiem.database import get_sqlalchemy_conn, sql_helper
 from pyiem.exceptions import NoDataFound
 from pyiem.plot import MapPlot, centered_bins, get_cmap
 from pyiem.reference import SECTORS_NAME
-from sqlalchemy import text
 
 from iemweb.util import month2months
 
@@ -221,7 +220,7 @@ def get_data(ctx):
     table = "alldata"
     if sector == "state":
         # optimization
-        table = f"alldata_{state}"
+        table = f"alldata_{state.lower()}"
     hcol = "high"
     lcol = "low"
     pcol = "precip"
@@ -253,30 +252,30 @@ def get_data(ctx):
 
     with get_sqlalchemy_conn("coop") as conn:
         df = pd.read_sql(
-            text(
-                f"""
+            sql_helper(
+                """
         WITH period1 as (
             SELECT station, {datumsql} as datum,
-            {sqlopts[ctx["var"]]} as {ctx["var"]}
+            {sqlvar} as {varname}
             from {table} WHERE year >= :syear1 and year <= :eyear1
             {mlimiter} GROUP by station, datum),
         period2 as (
             SELECT station, {datumsql} as datum,
-            {sqlopts[ctx["var"]]} as {ctx["var"]}
+            {sqlvar} as {varname}
             from {table} WHERE year >= :syear2 and year <= :eyear2
             {mlimiter} GROUP by station, datum),
         p1agg as (
             SELECT station,
-            avg({ctx["var"]}) as {ctx["var"]}, count(*) as count
+            avg({varname}) as {varname}, count(*) as count
             from period1 GROUP by station),
         p2agg as (
             SELECT station,
-            avg({ctx["var"]}) as {ctx["var"]}, count(*) as count
+            avg({varname}) as {varname}, count(*) as count
             from period2 GROUP by station),
         agg as (
             SELECT p2.station,
-            p2.{ctx["var"]} as p2_{ctx["var"]},
-            p1.{ctx["var"]} as p1_{ctx["var"]}
+            p2.{varname} as p2_{varname},
+            p1.{varname} as p1_{varname}
             from p1agg p1 JOIN p2agg p2 on
             (p1.station = p2.station)
             WHERE p1.count >= :p1years and p2.count >= :p2years)
@@ -285,7 +284,12 @@ def get_data(ctx):
         d.* from agg d JOIN stations t ON (d.station = t.id)
         WHERE t.network ~* 'CLIMATE'
         and substr(station, 3, 1) != 'C' and substr(station, 3, 4) != '0000'
-        """
+        """,
+                datumsql=datumsql,
+                varname=ctx["var"],
+                sqlvar=sqlopts[ctx["var"]],
+                table=table,
+                mlimiter=mlimiter,
             ),
             conn,
             params={
