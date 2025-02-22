@@ -28,7 +28,7 @@ from datetime import date
 import simplejson as json
 from pydantic import Field
 from pyiem.database import get_sqlalchemy_conn, sql_helper
-from pyiem.reference import TRACE_VALUE
+from pyiem.util import utc
 from pyiem.webutil import CGIModel, iemapp
 from simplejson import encoder
 
@@ -63,8 +63,6 @@ def int_sanitize(val):
     """convert to Ms"""
     if val is None:
         return "M"
-    if val == TRACE_VALUE:
-        return "T"
     return int(val)
 
 
@@ -72,7 +70,7 @@ def f1_sanitize(val):
     """convert to Ms"""
     if val is None:
         return "M"
-    if val == TRACE_VALUE:
+    if 0 < val < 0.005:
         return "T"
     return round(val, 1)
 
@@ -81,14 +79,17 @@ def f2_sanitize(val):
     """convert to Ms"""
     if val is None:
         return "M"
-    if val == TRACE_VALUE:
+    if 0 < val < 0.005:
         return "T"
     return round(val, 2)
 
 
 def get_data(conn, station, year, fmt):
     """Get the data for this timestamp"""
-    data = {"results": []}
+    data = {
+        "results": [],
+        "generated_at": utc().strftime("%Y-%m-%dT%H:%M:%SZ"),
+    }
     # Fetch the daily values
     res = conn.execute(
         sql_helper("""
