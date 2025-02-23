@@ -35,9 +35,9 @@ for ($i = 0; $row = pg_fetch_array($rs); $i++) {
         $tokens = preg_split("/\),\(/", $token3);
         foreach ($tokens as $token) {
             if ($row["phenomena"] == "TO") {
-                $c = ", 255, 255, 0, ${alpha}";
+                $c = ", 255, 255, 0, {$alpha}";
             } else {
-                $c = ", 219, 112, 147, ${alpha}";
+                $c = ", 219, 112, 147, {$alpha}";
             }
             echo "\n;" . $row["phenomena"] . " Watch Number " . $row["eventid"] . "\n";
             echo "Polygon:\n";

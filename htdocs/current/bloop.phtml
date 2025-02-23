@@ -96,9 +96,7 @@ if ($java == "script") {
         $mis[] = sprintf("'%s'", $val);
     }
     $jsurls = implode(",", $mis);
-    $control = <<<EOM
-<div id="myanimation"></div>
-EOM;
+    $control = '<div id="myanimation"></div>';
     $headextra .= <<<EOM
 <link rel="stylesheet" href="/vendor/jquery-ui/{$JQUERYUI}/jquery-ui.min.css">
 <link rel="stylesheet" href="/vendor/jquery-ui/{$JQUERYUI}/jquery-ui.theme.min.css">
@@ -163,7 +161,8 @@ This page gives you a tool to build animations from this archive of images.</p>
 
 <table>
 <tr>
-<th>Frames:</th><td><input type="text" maxsize="2" size="3" name="frames" value="{$frames}"></td>
+<th>Frames:</th>
+<td><input type="text" maxsize="2" size="3" name="frames" value="{$frames}"></td>
 <th>Loop Tool:</th>
 <td>{$loopselect}</td>
 <th>Frame Interval:</th><td>

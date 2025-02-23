@@ -17,16 +17,16 @@ $minute = get_int404("minute", 0);
 $ts = gmmktime($hour, $minute, 0, $month, $day, $year);
 $wfo = isset($_GET["wfo"]) ? substr(xssafe($_GET["wfo"]), 0, 3) : "MPX";
 
-$rs = pg_prepare($connect, "SELECT", "SELECT *, ST_AsText(geom) as g, 
-           round(ST_area(ST_transform(geom,9311)) / 1000000.0) as psize
-           from sbw_$year 
-           WHERE wfo = $1 and issue <= $2 and expire > $2
-           and status = 'NEW'");
+$rs = pg_prepare($connect, "SELECT", "SELECT *, ST_AsText(geom) as g, ".
+           "round(ST_area(ST_transform(geom,9311)) / 1000000.0) as psize ".
+           "from sbw WHERE vtec_year = $3 and ".
+           "wfo = $1 and issue <= $2 and expire > $2 ".
+           "and status = 'NEW'");
 
 $result = pg_execute(
     $connect,
     "SELECT",
-    array($wfo, gmdate("Y-m-d H:i", $ts))
+    array($wfo, gmdate("Y-m-d H:i", $ts), $year)
 );
 
 $fp = sprintf("%s-%s.txt", $wfo, gmdate("YmdHi", $ts));

@@ -33,17 +33,9 @@ $ar = array(
 );
 $tzselect = make_select("tz", "Etc/UTC", $ar);
 
-$ar = array();
-$rs = pg_exec(
-    iemdb("mesosite"),
-    "SELECT id, name from networks where id ~* 'RWIS' ORDER by name ASC"
-);
-while ($row = pg_fetch_assoc($rs)) {
-    $ar[$row["id"]] = $row["name"];
-}
-$sselect = make_select("network", $network, $ar);
+$sselect = selectNetworkType("RWIS", $network);
 
-$t->content = <<<EOF
+$t->content = <<<EOM
 <ol class="breadcrumb">
  <li><a href="/RWIS/">RWIS Homepage</a></li>
  <li class="active">Download</li>
@@ -152,7 +144,7 @@ How shall the output values be seperated?
    <option value="no">No
    <option value="yes">Yes
  </select>
-   		
+
 <p><h4>8. Submit Form:</h4>
 <input type="submit" value="Process Data Request">
 <input type="reset">
@@ -263,5 +255,5 @@ This status will only be reported by NTCIP sites.</td></tr>
 
 
 </form>
-EOF;
+EOM;
 $t->render('single.phtml');

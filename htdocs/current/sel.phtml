@@ -49,7 +49,7 @@ EOM;
         <img src=\"/data/sel{$i}comp.png\" class=\"img img-responsive\"></a>
         </div>";
     }
-    $t->content = <<<EOF
+    $t->content = <<<EOM
 
 <p>Click on an image to get an enlarged view as well as the text for the watch. 
 These images are for the last 10 areas in which watches have been valid for.  
@@ -58,6 +58,6 @@ presented are in US Central time.
 
 $content
 
-EOF;
+EOM;
 }
 $t->render('full.phtml');

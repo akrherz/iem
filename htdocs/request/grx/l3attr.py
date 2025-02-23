@@ -1,3 +1,6 @@
 """implemented in pylib/iemweb/request/grx/l3attr.py"""
 
-from iemweb.request.grx.l3attr import application  # noqa: F401
+from iemweb.request.grx.l3attr import application
+
+# Appease linter
+_ = application

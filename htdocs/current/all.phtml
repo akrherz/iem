@@ -146,7 +146,7 @@ foreach ($finalA as $key => $val) {
     }
 }
 $sselect = stateSelect($state);
-$t->content = <<<EOF
+$t->content = <<<EOM
 <p>
 <form method="GET" action="all.phtml" name="work">
 <input type="hidden" value="{$sortcol}" name="sortcol">
@@ -167,7 +167,7 @@ of RWIS, ASOS, & AWOS sites in the state.
 <form method="GET" action="/my/current.phtml">
 
 <table style="width: 100%; font-size: 10pt;" cellspacing=0 cellpadding=1 border=1>
-<thead>
+<thead class="sticky">
 <tr>
   <th rowspan="2">ADD:</th>
   <th rowspan="2">Station:</th>
@@ -203,5 +203,5 @@ of RWIS, ASOS, & AWOS sites in the state.
 <input type="reset" value="Reset">
 
 </form></div>
-EOF;
+EOM;
 $t->render('sortables.phtml');

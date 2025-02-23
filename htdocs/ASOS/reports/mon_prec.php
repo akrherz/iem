@@ -4,29 +4,33 @@ require_once "../../../include/myview.php";
 require_once "../../../include/database.inc.php";
 require_once "../../../include/network.php";
 require_once "../../../include/forms.php";
+require_once "../../../include/imagemaps.php";
 
+$network = isset($_GET["network"]) ? xssafe($_GET["network"]) : "IA_ASOS";
 $year = get_int404("year", date("Y"));
 
+$netselect = selectNetworkType("ASOS", $network);
 $yselect = yearSelect2(2004, $year, "year");
 
 define("IEM_APPID", 29);
 $t = new MyView();
-$t->title = "Iowa ASOS Monthly Precipitation";
+$t->title = "{$year} {$network} Monthly Precipitation";
 
 $pgconn = iemdb("iem");
-$nt = new NetworkTable("IA_ASOS");
+$nt = new NetworkTable($network);
 $cities = $nt->table;
 
 
-$rs = pg_query($pgconn, "SELECT 
+$rs = pg_prepare($pgconn, "NSS", "SELECT 
  id,
  sum(pday) as precip,
  extract(month from day) as month
-FROM summary_${year} s JOIN stations t ON (t.iemid = s.iemid)
+FROM summary_{$year} s JOIN stations t ON (t.iemid = s.iemid)
 WHERE
- network = 'IA_ASOS'
+ network = $1
  and pday >= 0
 GROUP by id, month");
+$rs = pg_execute($pgconn, "NSS", array($network));
 $data = array();
 for ($i = 0; $row = pg_fetch_assoc($rs); $i++) {
     if (!array_key_exists($row['id'], $data)) {
@@ -37,29 +41,13 @@ for ($i = 0; $row = pg_fetch_assoc($rs); $i++) {
     }
     $data[$row["id"]][intval($row["month"]) - 1] = $row["precip"];
 }
-$t->headextra = '
+$t->headextra = <<<EOM
 <link rel="stylesheet" type="text/css" href="/vendor/ext/3.4.1/resources/css/ext-all.css"/>
 <script type="text/javascript" src="/vendor/ext/3.4.1/adapter/ext/ext-base.js"></script>
 <script type="text/javascript" src="/vendor/ext/3.4.1/ext-all.js"></script>
 <script type="text/javascript" src="/vendor/ext/ux/TableGrid.js"></script>
-<script>
-Ext.onReady(function(){
-    var btn = Ext.get("create-grid");
-    btn.on("click", function(){
-        btn.dom.disabled = true;
-        
-        // create the grid
-        var grid = new Ext.ux.grid.TableGrid("datagrid", {
-            stripeRows: true // stripe alternate rows
-        });
-        grid.render();
-    }, false, {
-        single: true
-    }); // run once
-
-});
-</script>
-';
+<script type="text/javascript" src="mon_prec.js"></script>
+EOM;
 
 reset($data);
 function friendly($val)
@@ -70,13 +58,15 @@ function friendly($val)
 $table = "";
 foreach ($data as $key => $val) {
     $table .= sprintf(
-        "<tr><td>%s</td><td>%s</td>
+        "<tr><td><a href=\"/sites/site.phtml?station=%s&network=%s\">%s</a></td><td>%s</td>
   <td>%s</td><td>%s</td><td>%s</td>
   <td>%s</td><td>%s</td><td>%s</td>
   <td>%s</td><td>%s</td><td>%s</td>
   <td>%s</td><td>%s</td><td>%s</td>
   <td>%.2f</td><td>%.2f</td>
   </tr>",
+        $key,
+        $network,
         $key,
         $cities[$key]["name"],
         friendly($val[0]),
@@ -97,10 +87,10 @@ foreach ($data as $key => $val) {
 }
 
 $d = date("d M Y h a");
-$t->content = <<<EOF
+$t->content = <<<EOM
 <ol class="breadcrumb">
     <li><a href="/ASOS/">ASOS Mainpage</a></li>
-    <li>{$year} Iowa ASOS Precipitation Report</li>
+    <li>{$year} {$network} Precipitation Report</li>
 </ol>
 
 <p>This table was generated at {$d} and is based
@@ -108,6 +98,7 @@ on available ASOS data.
 <strong>No attempt was made to estimate missing data.</strong></p>
 
 <form name="change">
+<p>{$netselect}
 <p>{$yselect}
 <input type="submit" value="Change Year" />
 </form>
@@ -115,7 +106,7 @@ on available ASOS data.
 <p><button id="create-grid" type="button">Interactive Grid</button>
 
 <TABLE border="1" cellpadding="2" cellspacing="0" width="100%" id="datagrid">
-<thead>
+<thead class="sticky">
 <TR>
 <th>ID</th>
 <th>Name</th>
@@ -139,5 +130,5 @@ on available ASOS data.
 {$table}
 </tbody>
 </table>
-EOF;
+EOM;
 $t->render('single.phtml');

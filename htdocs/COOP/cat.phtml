@@ -2,6 +2,9 @@
 require_once "../../config/settings.inc.php";
 define("IEM_APPID", 4);
 require_once "../../include/forms.php";
+require_once "../../include/myview.php";
+require_once "../../include/imagemaps.php";
+require_once "../../include/network.php";
 
 $station = get_str404("station", "", 5);
 $network = get_str404("network", "IA_COOP", 7);
@@ -10,9 +13,6 @@ $sortvar = get_str404("sortvar", "", 10);
 $year = get_int404("year", date("Y"));
 
 if ($date == "" && $station == "") $station = "AMSI4";
-require_once "../../include/myview.php";
-require_once "../../include/imagemaps.php";
-require_once "../../include/network.php";
 $t = new MyView();
 $t->title = "NWS COOP Observations by Date by Site";
 
@@ -64,30 +64,13 @@ if (strlen($date) > 0) {
 EOF;
 }
 
-$content .= "<select name=\"network\">";
-$mesosite = iemdb("mesosite");
-$rs = pg_query(
-    $mesosite,
-    "SELECT id, name from networks where id ~* 'COOP' ORDER by name ASC",
-);
-for ($i = 0; $row = pg_fetch_assoc($rs); $i++) {
-    $sel = '';
-    if ($network == $row["id"]) {
-        $sel = " selected='SELECTED'";
-    }
-    $content .= sprintf(
-        "<option value='%s'%s>%s</option>\n",
-        $row["id"],
-        $sel,
-        $row["name"]
-    );
-}
-$content .= <<<EOF
-</select>
+$netselect = selectNetworkType("COOP", $network);
+
+$content .= <<<EOM
+{$netselect}
 <input type="submit" value="View Data">
 
-<input id="rowshower" type="button" onclick="javascript:hiderows();" 
-  value="Hide rows without data">
+<input id="rowshower" type="button" value="Hide rows without data">
 </form>
 
 <p><table class="table table-striped table-bordered table-condensed">
@@ -101,8 +84,9 @@ $content .= <<<EOF
   <th><a href="{$link}pday">Precip</a></th>
   <th><a href="{$link}snow">Snowfall</a></th>
   <th><a href="{$link}snowd">Snow Depth</a></th>
-  <th><a href="{$link}snoww">Snow Water Equiv</a></th></tr></thead>
-EOF;
+  <th><a href="{$link}snoww">Snow Water Equiv</a></th>
+</tr></thead>
+EOM;
 
 $nt = new NetworkTable($network);
 $cities = $nt->table;
@@ -211,19 +195,5 @@ $content .= <<<EOF
 before using...
 EOF;
 $t->content = $content;
-$t->jsextra = <<<EOF
-<script>
-var currentmode = true;
-function hiderows(){
-    if (currentmode){
-        $('tr.nodata').hide();
-        $("#rowshower").attr('value','Show rows without data');
-    } else {
-        $('tr.nodata').show();
-        $("#rowshower").attr('value','Hide rows without data');
-    }
-    currentmode = !currentmode;
-}
-</script>
-EOF;
+$t->jsextra = '<script type="module" src="cat.js"></script>';
 $t->render('full.phtml');

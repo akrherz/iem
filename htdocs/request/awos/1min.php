@@ -37,7 +37,7 @@ foreach ($nt->table as $sid => $meta){
 
 $sselect = make_select('station[]', "", $ar, '', '', TRUE, TRUE);
 
-$t->content = <<<EOF
+$t->content = <<<EOM
 <ol class="breadcrumb">
  <li><a href="/AWOS/">AWOS Network</a></li>
  <li class="active">Download One Minute Data</li>
@@ -156,5 +156,5 @@ How shall the output values be seperated?
 <input type="submit" value="Process Data Request">
 <input type="reset">
 </form>
-EOF;
+EOM;
 $t->render('single.phtml');

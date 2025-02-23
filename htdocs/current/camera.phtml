@@ -57,23 +57,15 @@ foreach ($cameras as $id => $val) {
 reset($cameras);
 
 $t->title = "Web Cameras";
-$t->jsextra = <<<EOF
-<script language="JavaScript1.2" type="text/javascript">
-//<!--
-function switchToArchiveMode()
-{
-  $('#isarchived').prop('checked', true);
-}
-
--->
-</script>
-EOF;
+$t->jsextra = '<script type="module" src="camera.js"></script>';
 
 if (!$isarchive)
     $t->refresh = $camera_refresh;
 
 $selback = array(
-    "KELO" => "#fff", "KCCI" => "#fff", "KCRG" => "#fff",
+    "KELO" => "#fff",
+    "KCCI" => "#fff",
+    "KCRG" => "#fff",
     "MCFC" => "#fff"
 );
 $selback[$network] = "#ffcc99";
@@ -125,7 +117,10 @@ in the future.  Please use the <a href="/current/webcam.php">newer version</a>.<
 <thead><tr><th>&nbsp;</th><th>Year:</th><th>Month:</th><th>Day:</th><th>Hour:</th><th>Minute</th><td></td></tr></thead>
 <tbody>
 <tr>
-<td><input type="checkbox" value="yes" id="isarchived" name="archive" {$isarchived}>Archived Images</td>
+<td>
+<input type="checkbox" value="yes" id="isarchived" name="archive" {$isarchived}>
+<label for="isarchived">Archived Images</label>
+</td>
 <td>{$ys}</td>
 <td>{$month_select}</td>
 <td>{$ds}</td>
