@@ -158,11 +158,13 @@ def application(environ, start_response):
     environ["stations"] = get_cgi_stations(environ)
     if not environ["stations"]:
         raise IncompleteWebRequest("No stations were specified.")
-    if len(environ["stations"]) > 10:
-        if (environ["ets"] - environ["sts"]).days > 366:
-            raise IncompleteWebRequest(
-                "Limited to less than 1 year when requesting 10+ stations."
-            )
+    if (
+        len(environ["stations"]) > 10
+        and (environ["ets"] - environ["sts"]).days > 366
+    ):
+        raise IncompleteWebRequest(
+            "Limited to less than 1 year when requesting 10+ stations."
+        )
 
     headers = [("Content-type", "text/plain")]
     if environ["what"] == "download":

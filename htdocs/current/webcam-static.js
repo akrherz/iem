@@ -68,10 +68,10 @@ Ext.onReady(() => {
      * When the image store loads, we need to check our listing of disabled
      * webcams so that we don't show it again
      */
-    imagestore.on('load', (store, records) => {
-        var data = Array();
+    imagestore.on('load', (_store, records) => {
+        const data = Array();
         Ext.each(records, (record) => {
-            var checked = (disableStore.find('cid', record.get("cid")) == -1);
+            const checked = (disableStore.find('cid', record.get("cid")) == -1);
             data.push({
                 boxLabel: Number(record.get("cid").substr(5, 3)) + " " + record.get("name"),
                 name: record.get("cid"),
@@ -333,7 +333,7 @@ Ext.onReady(() => {
     });
 
 
-    var task = {
+    const task = {
         run: function () {
             if (imagestore.data.length > 0 && Ext.getCmp("timemode") &&
                 Ext.getCmp("timemode").realtime) {
@@ -349,13 +349,13 @@ Ext.onReady(() => {
     };
     Ext.TaskManager.start(task);
 
-    app.appSetTime = function (s) {
+    app.appSetTime = (s) => {
         if (s.length === 17) {
-            var tokens2 = s.split("-");
-            var network = tokens2[0];
+            const tokens2 = s.split("-");
+            const network = tokens2[0];
             Ext.getCmp("networkSelect").setValue(network);
-            var tstamp = tokens2[1];
-            var dt = Ext.Date.parseDate(tstamp, 'YmdHi');
+            const tstamp = tokens2[1];
+            const dt = Ext.Date.parseDate(tstamp, 'YmdHi');
             Ext.getCmp("datepicker").setValue(dt.fromUTC());
             Ext.getCmp("timepicker").setValue(dt.fromUTC());
             Ext.getCmp("datepicker").enable();
