@@ -30,6 +30,12 @@ https://mesonet.agron.iastate.edu/cgi-bin/request/coopobs.py?\
 network=IA_COOP&stations=_ALL&sts=2024-10-22\
 &ets=2024-10-22&what=view&delim=comma
 
+Download the COOP observations for Ames, IA on 22 October 2024 in CSV format:
+
+https://mesonet.agron.iastate.edu/cgi-bin/request/coopobs.py?\
+network=IA_COOP&stations=AESI4&sts=2024-10-22&ets=2024-10-22&what=download\
+&delim=comma
+
 """
 
 from datetime import date
@@ -156,8 +162,6 @@ def do_simple(ctx, conn=None):
 def application(environ, start_response):
     """go main go"""
     environ["stations"] = get_cgi_stations(environ)
-    if not environ["stations"]:
-        raise IncompleteWebRequest("No stations were specified.")
     if (
         len(environ["stations"]) > 10
         and (environ["ets"] - environ["sts"]).days > 366
