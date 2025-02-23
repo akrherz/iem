@@ -7,7 +7,7 @@ require_once "../../../include/imagemaps.php";
 
 $t = new MyView();
 $t->title = "Download Misc NWS Polygons in Shapefile/KML";
-$content = <<<EOF
+$content = <<<EOM
 <p>
 <ul class="breadcrumb">
 <li><a href="/nws/">NWS Mainpage</a></li>
@@ -45,7 +45,7 @@ for those wishing to script against this download portal.</p>
 </tr>
 
 <tr>
-EOF;
+EOM;
 $content .= "<th>Start:</th>
     <td>
      ". yearSelect2(2022, date("Y"), "year1") ."

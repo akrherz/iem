@@ -336,13 +336,11 @@ if ($mode == "realtime") {
 }
 $t->title = "Current & Historical IEM NEXRAD Mosaic Loop";
 
-$t->content = <<<EOF
+$t->content = <<<EOM
 <ol class="breadcrumb">
  <li><a href="/current/">Current Data</a></li>
  <li class="active"><b>IEM NEXRAD Mosaic</b> <a href="{$uri}">Reset Application for a Current Loop</a></li>
  </ol>
-
-
 
 <div class="row">
 <div class="col-sm-9">
@@ -408,6 +406,6 @@ on these mosaics.</p>
 <ul>
 {$radlinks}
 </ul>
-EOF;
+EOM;
 $t->jsextra = $jsextra;
 $t->render('single.phtml');

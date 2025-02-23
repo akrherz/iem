@@ -82,7 +82,7 @@ $types = Array(
 );
 $typeselect = make_select("type", "ALL", $types, "", "", TRUE, TRUE, FALSE);
 
-$t->content = <<<EOF
+$t->content = <<<EOM
 <ol class="breadcrumb">
 <li><a href="/GIS/">GIS Mainpage</a></li>
 <li class="active">Archived Local Storm Reports Shapefiles</li>
@@ -200,5 +200,5 @@ QUALIFY  1 char describing if the MAG is Estimated, Measured, or Unknown
   reference NWS UGC County/Zones database to the referenced county/state found
   in the LSR text.  This all is sub-optimal, but works in 99% of cases.</li>
 </ul>
-EOF;
+EOM;
 $t->render('single.phtml');

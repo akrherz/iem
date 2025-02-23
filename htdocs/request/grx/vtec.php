@@ -18,29 +18,29 @@ $eventid = isset($_GET["eventid"]) ? intval($_GET["eventid"]) : 103;
 $phenomena = isset($_GET["phenomena"]) ? substr($_GET["phenomena"], 0, 2) : "SV";
 $significance = isset($_GET["significance"]) ? substr($_GET["significance"], 0, 1) : "W";
 
-$rs = pg_prepare($connect, "SELECT", "SELECT eventid, phenomena, 
-        significance, ST_AsText(geom) as g
-        from sbw_$year 
-        WHERE wfo = $1 and phenomena = $2 and 
-        eventid = $3 and significance = $4
-        and status = 'NEW'");
+$rs = pg_prepare($connect, "SELECT", "SELECT eventid, phenomena, ".
+        "significance, ST_AsText(geom) as g ".
+        "from sbw ".
+        "WHERE vtec_year = $5 and wfo = $1 and phenomena = $2 and ". 
+        "eventid = $3 and significance = $4 ".
+        "and status = 'NEW'");
 
 $result = pg_execute(
     $connect,
     "SELECT",
-    array($wfo, $phenomena, $eventid, $significance)
+    array($wfo, $phenomena, $eventid, $significance, $year)
 );
 if (pg_num_rows($result) <= 0) {
-    $rs = pg_prepare($connect, "SELECT2", "SELECT eventid, phenomena,
-        significance, ST_astext(u.geom) as g 
-        from warnings_$year w JOIN ugcs u on (u.gid = w.gid)
-        WHERE w.wfo = $1 and phenomena = $2 and 
-        eventid = $3 and significance = $4 ");
+    $rs = pg_prepare($connect, "SELECT2", "SELECT eventid, phenomena, ".
+        "significance, ST_astext(u.geom) as g ". 
+        "from warnings w JOIN ugcs u on (u.gid = w.gid) ".
+        "WHERE w.vtec_year = $5 and w.wfo = $1 and phenomena = $2 and ".
+        "eventid = $3 and significance = $4 ");
 
     $result = pg_execute(
         $connect,
         "SELECT2",
-        array($wfo, $phenomena, $eventid, $significance)
+        array($wfo, $phenomena, $eventid, $significance, $year)
     );
 }
 $fp = sprintf("%s-%s-%s-%s.txt", $wfo, $phenomena, $significance, $eventid);
@@ -50,7 +50,7 @@ header("Content-Disposition: attachment; filename=$fp");
 
 echo "Refresh: 99999\n";
 echo "Threshold: 999\n";
-echo "Title: VTEC $wfo ${phenomena}.${significance} $eventid\n";
+echo "Title: VTEC $wfo {$phenomena}.{$significance} $eventid\n";
 
 for ($i = 0; $row = pg_fetch_assoc($result); $i++) {
     $geom = $row["g"];

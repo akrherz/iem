@@ -1,7 +1,6 @@
 <?php
-/* 
- * Generate a RADAR image with webcams overlain for some *UTC* timestamp!
- */
+//Generate a RADAR image with webcams overlain for some *UTC* timestamp!
+
 require_once "/usr/lib64/php/modules/mapscript.php";
 require_once "../../config/settings.inc.php";
 require_once "../../include/database.inc.php";

@@ -1,10 +1,20 @@
-/* global Ext, app, cfg */
+/* global $, Ext, app, cfg */
 Ext.namespace('app');
-var imagestore;
-var disableStore;
+Ext.namespace('cfg');
+cfg.refreshint = 60000;
+cfg.header = 'iem-header';
+cfg.headerHeight = 60;
+cfg.jsonSource = '/json/webcams.json';
+let imagestore = null;
+let disableStore = null;
 const ISO8601 = 'Y-m-d\\TH:i:s\\Z';
 
 Ext.onReady(() => {
+
+    $(".ccool").click((event) => {
+        const target = $(event.target);
+        app.appSetTime(target.data("opt"));
+    });
 
     /* Hack needed for Ext 3.0-rc2 to keep timefield working */
     Ext.override(Ext.form.ComboBox, {

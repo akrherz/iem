@@ -607,7 +607,7 @@ if ($maincontent == "") {
 EOM;
 }
 
-$t->content = <<<EOF
+$t->content = <<<EOM
 
 <div class="row">
  <div class="col-md-3{$menuhidden}">
@@ -628,5 +628,5 @@ $t->content = <<<EOF
  </div><!-- ./col-md-9 -->
 </div><!-- ./row -->
 
-EOF;
+EOM;
 $t->render('full.phtml');

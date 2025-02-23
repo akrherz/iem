@@ -7,7 +7,7 @@ require_once "../../../include/imagemaps.php";
 
 $t = new MyView();
 $t->title = "Download Aviation Weather Center SIGMETs Shapefile/KML";
-$content = <<<EOF
+$content = <<<EOM
 <p>
 <ul class="breadcrumb">
 <li><a href="/nws/">NWS Mainpage</a></li>
@@ -35,7 +35,7 @@ for those wishing to script against this download portal.</p>
 </tr>
 
 <tr>
-EOF;
+EOM;
 $content .= "<th>Start:</th>
     <td>
      ". yearSelect2(2015, date("Y"), "year1") ."

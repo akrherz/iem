@@ -7,7 +7,7 @@ require_once "../../../include/imagemaps.php";
 
 $t = new MyView();
 $t->title = "Download Aviation Weather Center G-AIRMETs Shapefile/KML";
-$content = <<<EOF
+$content = <<<EOM
 <p>
 <ul class="breadcrumb">
 <li><a href="/nws/">NWS Mainpage</a></li>
@@ -45,7 +45,7 @@ service.</p>
 </tr>
 
 <tr>
-EOF;
+EOM;
 $content .= "<th>Start:</th>
     <td>
      " . yearSelect2(2021, date("Y"), "year1") . "

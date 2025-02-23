@@ -3,7 +3,7 @@ require_once "../../../config/settings.inc.php";
 require_once "../../../include/myview.php";
 $t = new MyView();
 $t->title = "Gibson Ridge Placefiles";
-$t->content = <<<EOF
+$t->content = <<<EOM
 
 <h3>IEM Data in Gibson Ridge Placefile format</h3>
 
@@ -199,7 +199,6 @@ may be useful when looking at level2 data.  You can optionally pass a nexrad
   in!</td>
 </tr>
 
-
 </table>
-EOF;
+EOM;
 $t->render('single.phtml');

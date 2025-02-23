@@ -5,7 +5,7 @@ $t = new MyView();
 $t->title = "RADAR + Satellite Data";
 
 $tm1 = gmdate("Ymd", time() - 86400);
-$t->content = <<<EOF
+$t->content = <<<EOM
 <h3>RADAR + Satellite Data</h3>
 
 <div class="row"><div class="col-md-6">
@@ -60,5 +60,5 @@ information without much of the processing "Level III" products have.
 
 </div></div>
 
-EOF;
+EOM;
 $t->render('single.phtml');

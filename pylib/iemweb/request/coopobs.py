@@ -6,7 +6,9 @@ Return to `API Services </api/#cgi>`_.  This service is the backend for the
 Documentation for /cgi-bin/request/coopobs.py
 ---------------------------------------------
 
-This service emits the raw COOP observations without much IEM processing.
+This service emits the raw COOP observations without much IEM processing. If
+you request `_ALL` stations for a state or more than 10 stations, you are
+limited to one calendar year of data.
 
 Changelog
 ---------
@@ -16,15 +18,21 @@ Changelog
 Example Usage
 -------------
 
-Fetch the COOP observations for Iowa on 1 January 2022:
+Fetch the COOP observations for Iowa on 22 October 2024 in CSV format:
 
 https://mesonet.agron.iastate.edu/cgi-bin/request/coopobs.py?\
-network=IA_COOP&stations=_ALL&sts=2025-01-01\
-&ets=2025-01-01&what=download&delim=comma
+network=IA_COOP&stations=_ALL&sts=2024-10-22\
+&ets=2024-10-22&what=download&delim=comma
+
+Same request, but view the data instead of downloading it:
+
+https://mesonet.agron.iastate.edu/cgi-bin/request/coopobs.py?\
+network=IA_COOP&stations=_ALL&sts=2024-10-22\
+&ets=2024-10-22&what=view&delim=comma
 
 """
 
-from datetime import date, timedelta
+from datetime import date
 from io import StringIO
 
 from pydantic import Field
@@ -46,10 +54,10 @@ class Schema(CGIModel):
         pattern="^(comma|tab|space)$",
     )
     network: str = Field(
-        "IA_COOP", description="The network to use for station lookups."
+        ..., description="The network to use for station lookups."
     )
     stations: ListOrCSVType = Field(
-        [],
+        ...,
         description=(
             "List of stations to include in the output. Legacy variable name."
         ),
@@ -89,30 +97,6 @@ class Schema(CGIModel):
     )
 
 
-def sane_date(year, month, day):
-    """Attempt to account for usage of days outside of the bounds for
-    a given month"""
-    # Calculate the last date of the given month
-    nextmonth = date(year, month, 1) + timedelta(days=35)
-    lastday = nextmonth.replace(day=1) - timedelta(days=1)
-    return date(year, month, min(day, lastday.day))
-
-
-def get_cgi_dates(environ):
-    """Figure out which dates are requested via the form, we shall attempt
-    to account for invalid dates provided!"""
-
-    ets = min(
-        sane_date(environ["year2"], environ["month2"], environ["day2"]),
-        date.today() - timedelta(days=1),
-    )
-
-    return [
-        sane_date(environ["year1"], environ["month1"], environ["day1"]),
-        ets,
-    ]
-
-
 def get_cgi_stations(environ):
     """Figure out which stations the user wants, return a list of them"""
     reqlist = environ["stations"]
@@ -126,7 +110,6 @@ def get_cgi_stations(environ):
 @with_sqlalchemy_conn("iem")
 def do_simple(ctx, conn=None):
     """Generate Simple output"""
-    limitrowcount = "LIMIT 1048000" if ctx["what"] == "excel" else ""
     res = conn.execute(
         sql_helper(
             """
@@ -134,9 +117,7 @@ def do_simple(ctx, conn=None):
  coalesce(to_char(coop_valid at time zone t.tzname, 'HH PM'), '') as cv
  from summary s JOIN stations t on (t.iemid = s.iemid)
  WHERE day >= :sts and day <= :ets
- and id = ANY(:stations) and network = :network ORDER by s.day ASC
-    {limitrowcount}""",
-            limitrowcount=limitrowcount,
+ and id = ANY(:stations) and network = :network ORDER by s.day ASC"""
         ),
         {
             "stations": ctx["stations"],
@@ -177,7 +158,11 @@ def application(environ, start_response):
     environ["stations"] = get_cgi_stations(environ)
     if not environ["stations"]:
         raise IncompleteWebRequest("No stations were specified.")
-    environ["sts"], environ["ets"] = get_cgi_dates(environ)
+    if len(environ["stations"]) > 10:
+        if (environ["ets"] - environ["sts"]).days > 366:
+            raise IncompleteWebRequest(
+                "Limited to less than 1 year when requesting 10+ stations."
+            )
 
     headers = [("Content-type", "text/plain")]
     if environ["what"] == "download":

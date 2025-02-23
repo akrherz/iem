@@ -6,8 +6,8 @@ $t = new MyView();
 require_once "../../include/database.inc.php";
 require_once "../../include/forms.php";
 require_once "../../include/mlib.php";
+require_once "../../include/imagemaps.php";
 $pgconn = iemdb('iem');
-$mesosite = iemdb('mesosite');
 
 $sortcol = isset($_GET['sortcol']) ? xssafe($_GET['sortcol']) : "valid";
 $network = get_str404("network", 'IA_DCP', 9);
@@ -61,21 +61,7 @@ for ($i = 0; $row = pg_fetch_assoc($rs); $i++) {
 }
 $final = aSortBySecondIndex($obs, $sortcol, "desc");
 
-$nselect = "<select name=\"network\">";
-$rs = pg_query($mesosite, "SELECT id, name from networks where id ~* 'DCP' ORDER by name ASC");
-for ($i = 0; $row = pg_fetch_assoc($rs); $i++) {
-    $sel = '';
-    if ($network == $row["id"]) {
-        $sel = " selected='SELECTED'";
-    }
-    $nselect .= sprintf(
-        "<option value='%s'%s>%s</option>\n",
-        $row["id"],
-        $sel,
-        $row["name"]
-    );
-}
-$nselect .= "</select>";
+$nselect = selectNetworkType("DCP", $network);
 
 $ar = array("no" => "No", "yes" => "Yes");
 $sselect = make_select("shef", $shef, $ar);
