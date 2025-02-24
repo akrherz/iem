@@ -42,14 +42,22 @@ function iemws_json($endpoint, $args)
 {
     // Everything is method get at the moment
     $cgi = http_build_query($args);
-    $uri = "https://iem-web-services.agron.iastate.edu/{$endpoint}?{$cgi}";
+    // Nginx lives here
+    $uri = "http://iem-web-services.agron.iastate.edu:8080/{$endpoint}?{$cgi}";
     // Try twice to get the content
     $jobj = FALSE;
     for ($i = 0; $i < 2; $i++) {
-        $res = file_get_contents($uri);
-        if ($res === FALSE) {
+        // Use curl to get the data with a 15 second timeout
+        $ch = curl_init($uri);
+        curl_setopt($ch, CURLOPT_RETURNTRANSFER, TRUE);
+        curl_setopt($ch, CURLOPT_TIMEOUT, 15);
+        $res = curl_exec($ch);
+        $http_status = curl_getinfo($ch, CURLINFO_HTTP_CODE);
+        curl_close($ch);
+        if ($res === FALSE || $http_status != 200) {
             openlog("iem", LOG_PID | LOG_PERROR, LOG_LOCAL1);
-            syslog(LOG_WARNING, "iemws fail  from:" . $_SERVER["REQUEST_URI"] .
+            syslog(LOG_WARNING, "iemws fail[$i] $http_status ".
+                "from:" . $_SERVER["REQUEST_URI"] .
                 ' remote: ' . getClientIp() .
                 ' to: ' . $uri);
             closelog();
@@ -71,6 +79,11 @@ function iemws_json($endpoint, $args)
             );
             closelog();
         }
+    }
+    if ($jobj === FALSE) {
+        header("Content-type: text/plain");
+        http_response_code(500);
+        die("Backend web service failure, please try again later.");
     }
     return $jobj;
 }
