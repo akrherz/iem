@@ -89,10 +89,9 @@ import httpx
 import numpy as np
 import pandas as pd
 from pydantic import Field
-from pyiem.database import get_dbconnc, get_sqlalchemy_conn
+from pyiem.database import get_dbconnc, get_sqlalchemy_conn, sql_helper
 from pyiem.util import utc
 from pyiem.webutil import CGIModel, iemapp
-from sqlalchemy import text
 
 
 class Schema(CGIModel):
@@ -131,7 +130,7 @@ def do_monthly_summary(station, year, month):
     ets = (sts + timedelta(days=35)).replace(day=1)
     with get_sqlalchemy_conn("iem") as conn:
         df = pd.read_sql(
-            text(
+            sql_helper(
                 """
                 select station as location_id, valid, high, low,
                 high - high_normal as high_dep,
@@ -320,7 +319,7 @@ def do_webcams(network):
     """direction arrows"""
     with get_sqlalchemy_conn("mesosite") as conn:
         df = pd.read_sql(
-            text(
+            sql_helper(
                 """
         select cam as locationid, w.name as locationname,
         st_y(geom) as latitude,
@@ -339,15 +338,16 @@ def do_iowa_azos(dt: date, itoday=False):
     """Dump high and lows for Iowa ASOS"""
     with get_sqlalchemy_conn("iem") as conn:
         df = pd.read_sql(
-            text(
-                f"""
+            sql_helper(
+                """
         select id as locationid, n.name as locationname,
         st_y(geom) as latitude,
         st_x(geom) as longitude, s.day, s.max_tmpf::int as high,
         s.min_tmpf::int as low, coalesce(pday, 0) as precip
-        from stations n JOIN summary_{dt.year} s on (n.iemid = s.iemid)
+        from stations n JOIN {table} s on (n.iemid = s.iemid)
         WHERE n.network = 'IA_ASOS' and s.day = :dt
-        """
+        """,
+                table=f"summary_{dt:%Y}",
             ),
             conn,
             params={"dt": dt},
@@ -356,7 +356,7 @@ def do_iowa_azos(dt: date, itoday=False):
         if itoday:
             # Additionally, piggy back rainfall totals
             df2 = pd.read_sql(
-                text(
+                sql_helper(
                     """
             SELECT id as station,
             sum(phour) as precip720,
@@ -396,8 +396,8 @@ def do_lsrsnowfall(state):
     statelimiter = "" if state is None else " and state = :state "
     with get_sqlalchemy_conn("postgis") as conn:
         df = pd.read_sql(
-            text(
-                f"""
+            sql_helper(
+                """
         select max(product_id) as locationid, city as locationname,
         st_y(geom) as latitude,
         st_x(geom) as longitude, magnitude as snowfall
@@ -405,7 +405,8 @@ def do_lsrsnowfall(state):
         {statelimiter}
         GROUP by locationname, st_y(geom), st_x(geom), magnitude
         ORDER by locationid asc
-        """
+        """,
+                statelimiter=statelimiter,
             ),
             conn,
             params={"state": state},
@@ -417,7 +418,7 @@ def do_iarwis():
     """Dump RWIS data"""
     with get_sqlalchemy_conn("iem") as conn:
         df = pd.read_sql(
-            text(
+            sql_helper(
                 """
         select id as locationid, n.name as locationname,
         st_y(geom) as latitude,
@@ -480,7 +481,7 @@ def do_ahps_obs(nwsli):
     pgconn.close()
     with get_sqlalchemy_conn("hml") as conn:
         df = pd.read_sql(
-            text(
+            sql_helper(
                 """
         WITH primaryv as (
         SELECT valid, value from hml_observed_data WHERE station = :nwsli
@@ -539,6 +540,8 @@ def do_ahps_fx(nwsli):
         "where id = %s and network ~* 'DCP'",
         (nwsli,),
     )
+    if cursor.rowcount == 0:
+        return "NO DATA"
     row = cursor.fetchone()
     latitude = row["st_y"]
     longitude = row["st_x"]
@@ -568,13 +571,14 @@ def do_ahps_fx(nwsli):
     # Get the latest forecast
     with get_sqlalchemy_conn("hml") as conn:
         df = pd.read_sql(
-            text(
-                f"""
+            sql_helper(
+                """
         SELECT valid at time zone 'UTC' as valid,
         primary_value, secondary_value, 'F' as type from
-        hml_forecast_data_{generationtime.year} WHERE hml_forecast_id = :sid
+        {table} WHERE hml_forecast_id = :sid
         ORDER by valid ASC
-        """
+        """,
+                table=f"hml_forecast_data_{generationtime:%Y}",
             ),
             conn,
             params={"sid": row["id"]},
@@ -667,7 +671,7 @@ def do_ahps(nwsli):
     # get observations
     with get_sqlalchemy_conn("hml") as conn:
         odf = pd.read_sql(
-            text(
+            sql_helper(
                 """
         SELECT valid at time zone 'UTC' as valid, null as obtime,
         value from hml_observed_data WHERE station = :nwsli
@@ -692,13 +696,14 @@ def do_ahps(nwsli):
     # Get the latest forecast
     with get_sqlalchemy_conn("hml") as conn:
         df = pd.read_sql(
-            text(
-                f"""
+            sql_helper(
+                """
             SELECT valid at time zone 'UTC' as valid,
             primary_value, secondary_value, 'F' as type from
-            hml_forecast_data_{y} WHERE hml_forecast_id = :fid
+            {table} WHERE hml_forecast_id = :fid
             ORDER by valid ASC
-        """
+        """,
+                table=f"hml_forecast_data_{y}",
             ),
             conn,
             params={"fid": row["id"]},
@@ -711,7 +716,7 @@ def do_ahps(nwsli):
     # see akrherz/iem#187
     df["forecasttime"] = (
         df["valid"]
-        .dt.tz_localize(ZoneInfo("UTC"))
+        .dt.tz_localize(timezone.utc)
         .dt.tz_convert(tzinfo)
         .dt.strftime("%a. %-I %p")
     )

@@ -40,5 +40,4 @@ def test_urls422(arg):
     """Test what urls422.txt tells us to."""
     c = Client(arg[0])
     res = c.get(arg[1])
-    # Allow apps that redirect to check OK
     assert res.status_code == 422
