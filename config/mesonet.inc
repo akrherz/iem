@@ -212,7 +212,7 @@ RewriteRule ^/search /search.py [QSA]
 
   <LocationMatch "/api/1">
     # As a reminder, we are going via this route to take advantage of caching
-    # running with the apache on this vhost
+    # port 8080 is nginx, which proxies to fastapi on 8000
     # Always immediately retry a connection
     # We wait up to 5 seconds to connect to the remote server
     # We wait up to 60 seconds for the remote server to respond
