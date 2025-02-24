@@ -25,6 +25,7 @@ stations=_ALL&sts=2024-01-01&ets=2025-01-01&&what=dl&delim=comma
 
 """
 
+from datetime import datetime
 from io import StringIO
 
 import pandas as pd
@@ -44,10 +45,10 @@ class Schema(CGIModel):
         ..., description="List of SCAN station identifiers."
     )
     vars: ListOrCSVType = Field(
-        ..., description="List of variables to include in the output."
+        [], description="List of variables to include in the output."
     )
-    sts: str = Field(None, description="Start of the period of interest.")
-    ets: str = Field(None, description="End of the period of interest.")
+    sts: datetime = Field(None, description="Start of the period of interest.")
+    ets: datetime = Field(None, description="End of the period of interest.")
     delim: str = Field(
         "comma",
         description="Delimiter to use in the output file.",
