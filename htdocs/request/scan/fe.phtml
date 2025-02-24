@@ -6,22 +6,25 @@ $t = new MyView();
 $t->iemss = True;
 $t->title = "SCAN Data Download";
 
-$ys = yearSelect(1983, date("Y"), "year");
+$ys = yearSelect2(1983, date("Y"), "year1");
 $ms = monthSelect(1, "month1");
 $ds = daySelect2(1, "day1");
 $hs = gmtHourSelect(0, "hour1");
+$ys2 = yearSelect2(1983, date("Y"), "year2");
 $ms2 = monthSelect(12, "month2");
 $ds2 = daySelect2(31, "day2");
 $hs2 = gmtHourSelect(0, "hour2");
 
-$t->content = <<<EOF
+$t->content = <<<EOM
 <ol class="breadcrumb">
     <li><a href="/scan/">SCAN</a></li>
     <li class="active">Download Data</li>
  </ol>
 
 <p>Filling out this form will provide you with whatever archive data the
-IEM has from the SCAN network.  The archive has some holes in it....
+IEM has from the SCAN network.  The archive has some holes in it.
+<a href="/cgi-bin/request/scan.py?help" class="btn btn-default">Backend documentation</a>
+exists for those that wish to script against this service.</p>
 
 <form method="GET" action="/cgi-bin/request/scan.py">
 
@@ -32,7 +35,7 @@ IEM has from the SCAN network.  The archive has some holes in it....
 
 </div><div class="col-md-5">
 
-<p><h3 class="subtitle">2. Select Start/End Time:</h3><br>
+<p><h3>2. Select Start/End Time:</h3><br>
 <i>Times are in UTC.</i>
 <table>
   <tr>
@@ -42,7 +45,7 @@ IEM has from the SCAN network.  The archive has some holes in it....
 
   <tr>
     <th>Start:</th>
-    <td rowspan="2">{$ys}</td>
+    <td>{$ys}</td>
     <td>{$ms}</td>
     <td>{$ds}</td>
     <td>{$hs}
@@ -51,6 +54,7 @@ IEM has from the SCAN network.  The archive has some holes in it....
 
   <tr>
     <th>End:</th>
+    <td>{$ys2}</td>
     <td>
      {$ms2}
     </td>
@@ -63,7 +67,7 @@ IEM has from the SCAN network.  The archive has some holes in it....
   </tr>
 </table>
 
-<p><h3 class="subtitle">3. Select Variables:</h3><br>
+<p><h3>3. Select Variables:</h3><br>
 <select size=5 name="vars" MULTIPLE>
   <option value="tmpf">Air Temperature
   <option value="dwpf">Dew Point Temperature
@@ -84,7 +88,7 @@ IEM has from the SCAN network.  The archive has some holes in it....
   <option value="c5smv">40 inch Volumetric Soil Moisture
 </select>
 
-<p><h3 class="subtitle">4. How to view?</h3><br>
+<p><h3>4. How to view?</h3><br>
 <select name="what">
   <option value="download">Download to Disk
   <option value="view">View on-line
@@ -93,9 +97,9 @@ IEM has from the SCAN network.  The archive has some holes in it....
 <p><h3>5. Data Delimitation:</h3><br>
 How shall the output values be seperated?
 <br><select name="delim">
-    <option value="comma">Comma
-    <option value="space">Space
-    <option value="tab">Tab
+    <option value="comma">Comma</option>
+    <option value="space">Space</option>
+    <option value="tab">Tab</option>
 </select>
 
 <p><h3>Submit Form:</h3><br>
@@ -105,5 +109,5 @@ How shall the output values be seperated?
 </div></div>
 
 </form>
-EOF;
+EOM;
 $t->render('single.phtml');

@@ -40,6 +40,7 @@ import simplejson as json
 from pydantic import Field
 from pyiem.database import get_sqlalchemy_conn, sql_helper
 from pyiem.reference import TRACE_VALUE
+from pyiem.util import utc
 from pyiem.webutil import CGIModel, iemapp
 from simplejson import encoder
 
@@ -97,7 +98,11 @@ def f2_sanitize(val):
 
 def get_data(conn, ts, fmt):
     """Get the data for this timestamp"""
-    data = {"type": "FeatureCollection", "features": []}
+    data = {
+        "type": "FeatureCollection",
+        "generated_at": utc().strftime("%Y-%m-%dT%H:%M:%SZ"),
+        "features": [],
+    }
     # Fetch the daily values
     res = conn.execute(
         sql_helper("""

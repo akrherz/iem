@@ -28,6 +28,9 @@ if ($opt === "bystation") {
         $station,
         $year
     );
+    $data = file_get_contents($uri);
+    $json = json_decode($data, $assoc = TRUE);
+    $arr = $json['results'];
 } else {
     $col1label = "Station";
     $byday = true;
@@ -37,10 +40,10 @@ if ($opt === "bystation") {
         "http://iem.local/geojson/cf6.py?dt=%s",
         date("Y-m-d", $day)
     );
+    $data = file_get_contents($uri);
+    $json = json_decode($data, $assoc = TRUE);
+    $arr = $json['features'];
 }
-$data = file_get_contents($uri);
-$json = json_decode($data, $assoc = TRUE);
-$arr = $json['features'];
 $generated_at = $json['generated_at'];
 $prettyurl = str_replace("http://iem.local", "https://mesonet.agron.iastate.edu", $uri);
 
