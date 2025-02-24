@@ -1,4 +1,4 @@
-/* global windowFactory, HighCharts, ol, $ */
+/* global windowFactory, Highcharts, ol, $ */
 let epoch = 0;
 let olMap = null;
 let overviewMap = null;
@@ -446,7 +446,7 @@ function windowFactory(initdiv, classID) {
         }
     });
 
-    addButtons($(`.${classI}`));
+    addButtons($(`.${classID}`));
     $(dlg).dialog("open");
     // Find the first button with autoload class and click it
     $(initdiv).find(".autoload").click();

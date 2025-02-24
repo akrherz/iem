@@ -6,7 +6,7 @@ Ext.override(Ext.form.ComboBox, {
         if (q === undefined || q === null) {
             q = '';
         }
-        var qe = {
+        const qe = {
             query: q,
             forceAll: forceAll,
             combo: this,
@@ -20,7 +20,7 @@ Ext.override(Ext.form.ComboBox, {
         if (forceAll === true || (q.length >= this.minChars)) {
             if (this.lastQuery !== q) {
                 this.lastQuery = q;
-                if (this.mode == 'local') {
+                if (this.mode === 'local') {
                     this.selectedIndex = -1;
                     if (forceAll) {
                         this.store.clearFilter();
@@ -99,7 +99,7 @@ Ext.onReady(function () {
         ["WY", "Wyoming"]
     ];
 
-    var varStore = new Ext.data.Store({
+    const varStore = new Ext.data.Store({
         autoLoad: false,
         proxy: new Ext.data.HttpProxy({
             url: '/json/dcp_vars.json'
@@ -111,8 +111,8 @@ Ext.onReady(function () {
             { name: 'id', mapping: 'id' }
         ]),
         listeners: {
-            load: function (st, records) {
-                if (records.length == 0) {
+            load: function (_st, records) {
+                if (records.length === 0) {
                     Ext.get('msg').update('Sorry, did not find any variables for this site!');
                 } else {
                     Ext.get('msg').update('');
@@ -121,7 +121,7 @@ Ext.onReady(function () {
         }
     });
 
-    var varCB = new Ext.form.ComboBox({
+    const varCB = new Ext.form.ComboBox({
         store: varStore,
         displayField: 'id',
         valueField: 'id',
@@ -138,7 +138,7 @@ Ext.onReady(function () {
         itemSelector: 'div.search-item',
         hideTrigger: false
     });
-    var stationStore = new Ext.data.Store({
+    const stationStore = new Ext.data.Store({
         autoLoad: false,
         proxy: new Ext.data.HttpProxy({
             url: '/json/network.json'
@@ -154,7 +154,7 @@ Ext.onReady(function () {
         ])
     });
 
-    var stateCB = new Ext.form.ComboBox({
+    const stateCB = new Ext.form.ComboBox({
         hiddenName: 'state',
         store: new Ext.data.SimpleStore({
             fields: ['abbr', 'name'],
@@ -181,7 +181,7 @@ Ext.onReady(function () {
     });
 
 
-    var stationCB = new Ext.form.ComboBox({
+    const stationCB = new Ext.form.ComboBox({
         store: stationStore,
         displayField: 'combo',
         valueField: 'id',
@@ -199,20 +199,20 @@ Ext.onReady(function () {
         itemSelector: 'div.search-item',
         hideTrigger: false,
         listeners: {
-            select: function (cb, record, idx) {
+            select: function (_cb, record, _idx) {
                 varStore.load({ add: false, params: { station: record.id } });
                 return false;
             }
         }
     });
-    var datepicker = new Ext.form.DateField({
+    const datepicker = new Ext.form.DateField({
         minValue: new Date('1/1/2002'),
         maxValue: new Date(),
         fieldLabel: 'Start Date',
         emptyText: "Select Date",
         allowBlank: false
     });
-    var dayInterval = new Ext.form.NumberField({
+    const dayInterval = new Ext.form.NumberField({
         minValue: 1,
         maxValue: 31,
         value: 5,
@@ -221,14 +221,14 @@ Ext.onReady(function () {
     });
 
     function updateImage() {
-        var ds = datepicker.getValue();
-        var ds2 = ds.add(Date.DAY, dayInterval.getValue());
-        var url = String.format('plot.php?station={0}&sday={1}&eday={2}&var={3}',
+        const ds = datepicker.getValue();
+        const ds2 = ds.add(Date.DAY, dayInterval.getValue());
+        const url = String.format('plot.php?station={0}&sday={1}&eday={2}&var={3}',
             stationCB.getValue(), ds.format('Y-m-d'),
             ds2.format('Y-m-d'), varCB.getValue());
         Ext.get("imagedisplay").dom.src = url;
         /* Now adjust the URL */
-        var uri = String.format('#{0}.{1}.{2}.{3}.{4}', stateCB.getValue(), stationCB.getValue(),
+        const uri = String.format('#{0}.{1}.{2}.{3}.{4}', stateCB.getValue(), stationCB.getValue(),
             varCB.getValue(), ds.format('Y-m-d'),
             dayInterval.getValue());
         window.location.href = uri;
