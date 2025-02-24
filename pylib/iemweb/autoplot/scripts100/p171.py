@@ -29,10 +29,9 @@ import pandas as pd
 import pyiem.nws.vtec as vtec
 import seaborn as sns
 from pyiem import reference
-from pyiem.database import get_dbconn, get_sqlalchemy_conn
+from pyiem.database import get_dbconn, get_sqlalchemy_conn, sql_helper
 from pyiem.exceptions import NoDataFound
 from pyiem.plot import figure_axes
-from sqlalchemy import text
 
 from iemweb.autoplot import ARG_FEMA, fema_region2states
 
@@ -163,8 +162,8 @@ def plotter(ctx: dict):
         # NB quasi hack here as we have some redundant ETNs for a given year
         # so the groupby helps some.
         daily = pd.read_sql(
-            text(
-                f"""
+            sql_helper(
+                """
                 SELECT
                 vtec_year,
                 extract(month from issue at time zone :tzname)::int as mo,
@@ -176,7 +175,8 @@ def plotter(ctx: dict):
                 {wfo_limiter}
                 GROUP by vtec_year, mo, wfo, phenomena, significance, eventid
                 ORDER by vtec_year asc, mo asc
-        """
+        """,
+                wfo_limiter=wfo_limiter,
             ),
             conn,
             params=params,

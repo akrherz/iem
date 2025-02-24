@@ -8,10 +8,9 @@ the computation of the average nor minimum value.
 from datetime import date, timedelta
 
 import pandas as pd
-from pyiem.database import get_sqlalchemy_conn
+from pyiem.database import get_sqlalchemy_conn, sql_helper
 from pyiem.exceptions import NoDataFound
 from pyiem.plot import figure_axes
-from sqlalchemy import text
 
 from iemweb.autoplot import ARG_STATION
 
@@ -67,10 +66,11 @@ def plotter(ctx: dict):
         params["sts"] = f"{ab.year + 1}-01-01"
     with get_sqlalchemy_conn("coop") as conn:
         df = pd.read_sql(
-            text(
+            sql_helper(
                 "SELECT year, day, high from alldata WHERE "
                 "station = :station and day >= :sts and "
-                f"high is not null {limitsql} ORDER by day ASC"
+                "high is not null {limitsql} ORDER by day ASC",
+                limitsql=limitsql,
             ),
             conn,
             params=params,

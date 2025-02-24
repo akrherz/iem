@@ -13,12 +13,11 @@ from io import StringIO
 import geopandas as gpd
 import matplotlib.image as mpimage
 import pandas as pd
-from pyiem.database import get_sqlalchemy_conn
+from pyiem.database import get_sqlalchemy_conn, sql_helper
 from pyiem.nws.vtec import VTEC_PHENOMENA
 from pyiem.plot import figure
 from pyiem.plot.util import fitbox
 from pyiem.util import utc
-from sqlalchemy import text
 
 from iemweb.imagemaps import rectify_wfo
 
@@ -108,9 +107,9 @@ def plotter(ctx: dict):
 
     # Find largest polygon either in height or width
     with get_sqlalchemy_conn("postgis") as conn:
-        gdf = gpd.read_postgis(
-            text(
-                f"""
+        gdf: pd.DataFrame = gpd.read_postgis(
+            sql_helper(
+                """
             SELECT wfo, phenomena, eventid, issue,
             ST_area2d(ST_transform(geom,9311)) as size,
             (ST_xmax(ST_transform(geom,9311)) +
@@ -126,8 +125,9 @@ def plotter(ctx: dict):
             WHERE vtec_year = :year and
             status = 'NEW' and issue >= :sts and issue < :ets and
             phenomena = ANY(:phenomena) and eventid is not null
-            ORDER by {opts[sort]["sortby"]}
-        """
+            ORDER by {sortby}
+        """,
+                sortby=opts[sort]["sortby"],
             ),
             conn,
             params=params,
@@ -137,7 +137,7 @@ def plotter(ctx: dict):
 
         # For size reduction work
         df = pd.read_sql(
-            text(
+            sql_helper(
                 """
             SELECT w.wfo, phenomena, eventid,
             sum(ST_area2d(ST_transform(u.geom,9311))) as county_size

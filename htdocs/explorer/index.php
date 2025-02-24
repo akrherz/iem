@@ -93,13 +93,13 @@ $t->content = <<<EOM
        <div class="col-md-4" style="overflow-y: scroll; height: 100%;">
             <a class="btn btn-default" target="_blank" href="/sites/site.php?station={station}&amp;network={network}"><i class="fa fa-sign-out"></i> Site Mainpage</a>
 
-            <br /><button role="button" onClick="loaderClicked(this);" class="autoload"
+            <br /><button role="button" class="autoload"
             data-url-template="/plotting/auto/plot/145/network:ISUSM::station:{station}::var:tsoil::year:2024::_r:86.png"><i class="fa fa-thermometer-quarter"></i> 4in Soil Temps</button>
-            <button role="button" onClick="loaderClicked(this);"
+            <button role="button" class="autoload"
             data-url-template="/plotting/auto/plot/177/network:ISUSM::station:{station}::opt:sm::sts:2024-05-01%200000::_r:86.png"><i class="fa fa-tint"></i> Soil Moisture</button>
-            <button role="button" onClick="loaderClicked(this);"
+            <button role="button" class="autoload"
             data-url-template="/plotting/auto/plot/177/network:ISUSM::station:{station}::opt:7::sts:2024-05-01%200000::_r:86.png"><i class="fa fa-battery-half"></i> Available Soil Water</button>
-           <button role="button" onClick="loaderClicked(this);"
+           <button role="button" class="autoload"
             data-url-template="/plotting/auto/plot/177/network:ISUSM::station:{station}::opt:4::sts:2024-05-01%200000::_r:43.png"><i class="fa fa-sun-o"></i> Daily Solar Radiation</i></button>
 
        </div>
@@ -111,27 +111,27 @@ $t->content = <<<EOM
         <div class="col-md-4" style="overflow-y: scroll; height: 100%;">
             <a class="btn btn-default" target="_blank" href="/sites/site.php?station={station}&amp;network={network}"><i class="fa fa-sign-out"></i> Site Mainpage</a>
 
-            <br /><button role="button" onClick="loaderClicked(this);" class="autoload"
+            <br /><button role="button" class="autoload"
             data-url-template="/plotting/auto/plot/140/network:{network}::station:{station}::syear:1973::month:4::day:1::days:30::varname:avg_wind_speed::year:2024::_r:86.png">
             <i class="fa fa-leaf"></i> April Wind Speed</button>
             
-            <button role="button" onClick="loaderClicked(this);"
+            <button role="button" class="autoload"
             data-url-template="/plotting/auto/plot/140/network:{network}::station:{station}::syear:1973::month:6::day:1::days:92::varname:avg_dewp::year:2024::_r:43.png">
             <i class="fa fa-fire"></i> Summer Dew Points</button>
             
-            <button role="button" onClick="loaderClicked(this);"
+            <button role="button" class="autoload"
             data-url-template="/plotting/auto/plot/93/network:{network}::zstation:{station}::syear:1973::year:2024::var:heatindex::ytd:yes::inc:no::_r:43.png">
             <i class="fa fa-table"></i> 2024 Heat Index Hrs</button>
 
-            <button role="button" onClick="loaderClicked(this);"
+            <button role="button" class="autoload"
             data-url-template="/plotting/auto/plot/82/network:{network}::station:{station}::var:high_departure::sdate:2024-05-01::edate:2024-08-31::_r:43.png">
             <i class="fa fa-calendar"></i> 2024 Highs Calendar</button>
 
-            <button role="button" onClick="loaderClicked(this);"
+            <button role="button" class="autoload"
             data-url-template="/plotting/auto/plot/51/network:{network}::station:{station}::sdate:2024-05-01::base:50::ceil:86::year2:2023::year3:2019::which:gdd::_r:43.png">
             <i class="fa fa-fire"></i> 2024 GS Accum GDD</button>
 
-            <button role="button" onClick="loaderClicked(this);"
+            <button role="button" class="autoload"
             data-url-template="/plotting/auto/plot/51/network:{network}::station:{station}::sdate:2024-05-01::base:50::ceil:86::year2:2023::year3:2019::which:precip::_r:43.png">
             <i class="fa fa-tint"></i> 2024 GS Accum Precip</button>
 
@@ -152,7 +152,7 @@ $t->content = <<<EOM
                 <option value="nov">November</option>
                 <option value="dec">December</option>
             </select>
-            <button role="button" onClick="loaderClicked(this);"
+            <button role="button" class="autoload"
             data-url-template="/onsite/windrose/{network}/{station}/{station}_{month}.png">
             <i class="fa fa-pie-chart"></i> View Windrose</button>
 
@@ -165,39 +165,39 @@ $t->content = <<<EOM
         <div class="col-md-4" style="overflow-y: scroll; height: 100%;">
             <a class="btn btn-default" target="_blank" href="/sites/site.php?station={station}&amp;network={network}"><i class="fa fa-sign-out"></i> Site Mainpage</a>
 
-            <br /><button role="button" onClick="loaderClicked(this)" class="autoload"
+            <br /><button role="button" class="autoload"
             data-url-template="/plotting/auto/plot/3/network:{network}::station:{station}::month:year::type:avg-temp::_e:{elem}.js"
             ><i class="fa fa-thermometer-half"></i> Average Temperature</button>
 
-            <br /><button role="button" onClick="loaderClicked(this)"
+            <br /><button role="button" class="autoload"
             data-url-template="/plotting/auto/plot/32/network:{network}::station:{station}::year:2024::var:high::gddbase:50::gddceil:86::how:diff::cmap:jet::_r:43.png"
             ><i class="fa fa-thermometer-quarter"></i> 2024 High Departures</button>
 
-            <br /><button role="button" onClick="loaderClicked(this)"
+            <br /><button role="button" class="autoload"
             data-url-template="/plotting/auto/plot/3/network:{network}::station:{station}::month:year::type:max-precip::_e:{elem}.js"
             ><i class="fa fa-tint"></i> Daily Max Precip</button>
 
-            <br /><button role="button" onClick="loaderClicked(this)"
+            <br /><button role="button" class="autoload"
             data-url-template="/plotting/auto/plot/3/network:{network}::station:{station}::month:spring::type:sum-precip::_e:{elem}.js"
             ><i class="fa fa-tint"></i> Spring Season Precip</button>
 
-            <br /><button role="button" onClick="loaderClicked(this)"
+            <br /><button role="button" class="autoload"
             data-url-template="/plotting/auto/plot/10/network:{network}::station:{station}::direction:below::varname:low::threshold:32::year:1893::_r:86::dpi:100.png"
             ><i class="fa fa-tree"></i> Growing Season Days</button>
 
-            <br /><button role="button" onClick="loaderClicked(this)"
+            <br /><button role="button" class="autoload"
             data-url-template="/plotting/auto/plot/142/network:{network}::station:{station}::p1:31::p2:91::p3:365::pvar:precip::how:diff::_r:86.png"
             ><i class="fa fa-star-half-o"></i> Drought Monitoring</button>
 
-            <br /><button role="button" onClick="loaderClicked(this)"
+            <br /><button role="button" class="autoload"
             data-url-template="/plotting/auto/plot/215/network:{network}::station:{station}::v:high::month:all::sy1:1930::ey1:1939::sy2:2012::ey2:2021::_r:43.png"
             ><i class="fa fa-arrows-h"></i> 1930s vs 2010s</button>
 
-            <br /><button role="button" onClick="loaderClicked(this)"
+            <br /><button role="button" class="autoload"
             data-url-template="/plotting/auto/plot/28/network:{network}::station:{station}::opt:rank::_r:43.png"
             ><i class="fa fa-refresh"></i> Precip Status</button>
 
-            <br /><button role="button" onClick="loaderClicked(this)"
+            <br /><button role="button" class="autoload"
             data-url-template="/plotting/auto/plot/176/network:{network}::station:{station}::opt:0::w:daily::_e:{elem}.js"
             ><i class="fa fa-plus-circle"></i> Records Set by Year</button>
 
@@ -236,7 +236,7 @@ $t->content = <<<EOM
                 <option value="12">December</option>
             </select>
 
-            <button role="button" onClick="loaderClicked(this);"
+            <button role="button" class="autoload"
              data-url-template="/plotting/auto/plot/3/network:{network}::station:{station}::month:{month}::type:{type}::_e:{elem}.js"><i class="fa fa-line-chart"></i> Create Chart</button>
 
         </div>

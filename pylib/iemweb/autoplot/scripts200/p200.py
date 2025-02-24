@@ -25,13 +25,12 @@ import geopandas as gpd
 import numpy as np
 import pandas as pd
 from affine import Affine
-from pyiem.database import get_sqlalchemy_conn
+from pyiem.database import get_sqlalchemy_conn, sql_helper
 from pyiem.exceptions import NoDataFound
 from pyiem.grid.zs import CachingZonalStats
 from pyiem.plot import get_cmap
 from pyiem.plot.geoplot import MapPlot
 from pyiem.util import utc
-from sqlalchemy import text
 
 from iemweb.autoplot import ARG_FEMA
 from iemweb.util import month2months
@@ -288,9 +287,9 @@ def get_raster(ctx: dict):
         params["hour"] = int(hour)
         hour_limiter = " and cycle = :hour "
     with get_sqlalchemy_conn("postgis") as conn:
-        df = gpd.read_postgis(  # skipcq
-            text(
-                f"""
+        df: pd.DataFrame = gpd.read_postgis(
+            sql_helper(
+                """
             select expire, min(issue) as min_issue,
             st_union(geom_layers) as geom,
             min(extract(year from issue at time zone 'UTC')) as year
@@ -302,7 +301,8 @@ def get_raster(ctx: dict):
             and product_issue > :sdate and
             product_issue < :edate
             GROUP by expire ORDER by min_issue ASC
-        """
+        """,
+                hour_limiter=hour_limiter,
             ),
             conn,
             params=params,

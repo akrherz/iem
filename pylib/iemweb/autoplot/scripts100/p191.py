@@ -15,12 +15,11 @@ doing so the time zone used to compute the calendar dates is US Central.
 from datetime import date, timedelta
 
 import pandas as pd
-from pyiem.database import get_dbconn, get_sqlalchemy_conn
+from pyiem.database import get_dbconn, get_sqlalchemy_conn, sql_helper
 from pyiem.exceptions import NoDataFound
 from pyiem.nws import vtec
 from pyiem.plot import calendar_plot
 from pyiem.reference import state_names
-from sqlalchemy import text
 
 from iemweb.autoplot import ARG_FEMA, fema_region2states
 
@@ -196,8 +195,8 @@ def plotter(ctx: dict):
         title2 = state_names[ctx["state"]]
     with get_sqlalchemy_conn("postgis") as conn:
         df = pd.read_sql(
-            text(
-                f"""
+            sql_helper(
+                """
     with events as (
     select wfo, min(issue at time zone :tzname) as localissue, vtec_year,
     phenomena, significance, eventid from warnings
@@ -207,7 +206,9 @@ def plotter(ctx: dict):
     )
 
     SELECT date(localissue), count(*) from events GROUP by date(localissue)
-        """
+        """,
+                pstr=pstr,
+                wfo_limiter=wfo_limiter,
             ),
             conn,
             params=params,

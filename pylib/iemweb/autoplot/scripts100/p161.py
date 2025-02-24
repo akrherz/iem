@@ -7,10 +7,9 @@ some threshold.
 from datetime import date
 
 import pandas as pd
-from pyiem.database import get_sqlalchemy_conn
+from pyiem.database import get_sqlalchemy_conn, sql_helper
 from pyiem.exceptions import NoDataFound
 from pyiem.plot import figure_axes
-from sqlalchemy import text
 
 from iemweb.util import month2months
 
@@ -107,22 +106,23 @@ def add_context(ctx):
     mydir = ctx["dir"]
     threshold = ctx["thres"]
 
-    offset = "day"
     months = month2months(month)
 
     opp = ">=" if mydir == "aoa" else "<"
     with get_sqlalchemy_conn("iem") as conn:
         ctx["df"] = pd.read_sql(
-            text(
-                f"""
-            SELECT extract(year from {offset})::int as year,
+            sql_helper(
+                """
+            SELECT extract(year from day)::int as year,
             sum(case when {varname}::int {opp} :t then 1 else 0 end) as count
             from summary s JOIN stations t on (s.iemid = t.iemid)
             WHERE t.id = :station and t.network = :network
             and extract(month from day) = ANY(:months)
             and {varname} is not null
             GROUP by year ORDER by year ASC
-            """
+            """,
+                varname=varname,
+                opp=opp,
             ),
             conn,
             params={
@@ -149,30 +149,20 @@ def get_highcharts(ctx: dict) -> str:
     data = ctx["df"][["year", "count"]].to_json(orient="values")
     containername = ctx["_e"]
 
-    return (
-        """
-Highcharts.chart('"""
-        + containername
-        + """', {
-        chart: {
+    return f"""
+Highcharts.chart('{containername}', {{
+        chart: {{
             type: 'column'
-        },
-        yAxis: {title: {text: 'Days'}},
-        title: {text: '"""
-        + ctx["title"]
-        + """'},
-        subtitle: {text: '"""
-        + ctx["subtitle"]
-        + """'},
-        series: [{
+        }},
+        yAxis: {{title: {{text: 'Days'}}}},
+        title: {{text: '{ctx["title"]}'}},
+        subtitle: {{text: '{ctx["subtitle"]}'}},
+        series: [{{
             name: 'Days',
-            data: """
-        + data
-        + """
-        }]
-    });
+            data: {data}
+        }}]
+    }});
     """
-    )
 
 
 def plotter(ctx: dict):

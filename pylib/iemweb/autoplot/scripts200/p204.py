@@ -10,11 +10,10 @@ from datetime import date
 import matplotlib.colors as mpcolors
 import numpy as np
 import pandas as pd
-from pyiem.database import get_sqlalchemy_conn
+from pyiem.database import get_sqlalchemy_conn, sql_helper
 from pyiem.exceptions import NoDataFound
 from pyiem.plot import figure_axes, get_cmap
 from seaborn import heatmap
-from sqlalchemy import text
 
 from iemweb.autoplot import ARG_STATION
 
@@ -64,7 +63,7 @@ def plotter(ctx: dict):
     """Go"""
     with get_sqlalchemy_conn("coop") as conn:
         df = pd.read_sql(
-            text("""
+            sql_helper("""
             select day, sday, precip, high,
             extract(doy from day)::int as doy,
             year from alldata WHERE station = :station ORDER by day ASC

@@ -19,10 +19,9 @@ missing data for the year to be considered in the plot.</p>
 from datetime import date, timedelta
 
 import pandas as pd
-from pyiem.database import get_sqlalchemy_conn
+from pyiem.database import get_sqlalchemy_conn, sql_helper
 from pyiem.exceptions import NoDataFound
 from pyiem.plot import figure_axes
-from sqlalchemy import text
 
 from iemweb.autoplot import ARG_STATION
 
@@ -118,7 +117,7 @@ def plotter(ctx: dict):
     assert ctx["var"] in PDICT
     with get_sqlalchemy_conn("coop") as conn:
         climo = pd.read_sql(
-            text("""
+            sql_helper("""
             SELECT to_char(valid, 'mmdd') as sday, precip as cprecip,
             snow as csnow
             from ncei_climate91 where station = :stid ORDER by sday
@@ -128,18 +127,21 @@ def plotter(ctx: dict):
             index_col="sday",
         )
         df = pd.read_sql(
-            text(f"""
+            sql_helper(
+                """
             with obs as (
-                SELECT day, {ctx["var"]}, sday,
+                SELECT day, {varname}, sday,
                 case when sday >= :sday then year else year - 1 end as binyear
                 from alldata WHERE station = :stid
             )
-            SELECT day, binyear::int, {ctx["var"]}, sday,
+            SELECT day, binyear::int, {varname}, sday,
             row_number() OVER (PARTITION by binyear ORDER by day ASC) as row,
-            sum({ctx["var"]}) OVER (PARTITION by binyear ORDER by day ASC)
+            sum({varname}) OVER (PARTITION by binyear ORDER by day ASC)
                 as accum
             from obs ORDER by day ASC
-        """),
+        """,
+                varname=ctx["var"],
+            ),
             conn,
             params={"sday": sdate.strftime("%m%d"), "stid": station},
             index_col="day",
