@@ -1,5 +1,4 @@
 <?php
-/* hist.phtml */
 require_once "../../config/settings.inc.php";
 require_once "../../include/sites.php";
 require_once "../../include/imagemaps.php";
@@ -60,13 +59,13 @@ function printMonth($year, $month, $db, $thisApp, $dailyApp)
     $first_dow = intval(date("w", $sts));
 
     $title = date("M Y", $sts);
-    $s = <<<EOF
+    $s = <<<EOM
 <table class="table table-bordered">
 <tr><td><a href="{$lurl}">{$lstr}</a></td><th colspan="5">{$title}</th>
     <td><a href="{$nurl}">{$nstr}</a></td></tr>
 <tr><th>Sunday</th><th>Monday</th><th>Tuesday</th><th>Wednesday</th>
     <th>Thursday</th><th>Friday</th><th>Saturday</th></tr>
-EOF;
+EOM;
 
     // Handle the first week
     $now = $sts;
@@ -322,12 +321,12 @@ $htmlout .= <<< EOM
   exists as well.</p> 
 EOM;
 
-$content = <<<EOF
+$content = <<<EOM
 <div class="hidden-print">
 <form method="GET" name="changer" class="form-inline" role="form">
 <input type="hidden" name="station" value="{$station}">
 <input type="hidden" name="network" value="{$network}">
-EOF;
+EOM;
 $startyear = 2002;
 if (!is_null($metadata["archive_begin"])) {
     $startyear = $metadata["archive_begin"]->format("Y");
@@ -365,11 +364,6 @@ $t->headextra = <<<EOM
 EOM;
 $t->jsextra = <<<EOM
 <script src="/vendor/jquery-datatables/{$DT}/datatables.min.js"></script>
-<script>
-$(document).ready(function(){
-    $("#thetable").DataTable();
-});
-</script>
-
+<script src="hist.js" type="text/javascript"></script>
 EOM;
 $t->render('sites.phtml');
