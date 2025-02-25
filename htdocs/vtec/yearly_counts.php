@@ -7,6 +7,7 @@ require_once "../../include/vtec.php";
 require_once "../../include/network.php";
 require_once "../../include/forms.php";
 require_once "../../include/imagemaps.php";
+require_once "../../include/memcache.php";
 $nt = new NetworkTable("WFO");
 
 $clobber = isset($_REQUEST["clobber"]);
@@ -87,8 +88,7 @@ function get_data2()
 }
 
 /* see if memcache has our data */
-$memcache = new Memcached();
-$memcache->addServer('iem-memcached', 11211);
+$memcache = MemcacheSingleton::getInstance();
 if (is_null($phenomena) || is_null($significance)) {
     $data = $memcache->get("vtec_counts_data_$wfo");
     $pcodes = $memcache->get("vtec_counts_pcodes_$wfo");

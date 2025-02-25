@@ -3,6 +3,7 @@
  * functions that generate stuff
  */
 require_once dirname(__FILE__) . "/database.inc.php";
+require_once dirname(__FILE__) . "/memcache.php";
 
 function get_website_citations($label){
     $conn = iemdb("mesosite", PGSQL_CONNECT_FORCE_NEW, TRUE);
@@ -83,8 +84,7 @@ function get_iemapps_tags($tagname)
 
 function get_website_stats()
 {
-    $memcache = new Memcached();
-    $memcache->addServer('iem-memcached', 11211);
+    $memcache = MemcacheSingleton::getInstance();
     $val = $memcache->get("iemperf.json");
     if (!$val) {
         // Fetch from nagios

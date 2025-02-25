@@ -2,9 +2,7 @@
 // Build Network station tables on demand!
 
 require_once dirname(__FILE__) . "/database.inc.php";
-
-$memcache = new Memcached();
-$memcache->addServer("iem-memcached", 11211);
+require_once dirname(__FILE__) . "/memcache.php";
 
 class NetworkTable
 {
@@ -16,7 +14,7 @@ class NetworkTable
         // Cache the simple cache
         if (is_string($a)){
             $mckey = sprintf("networkTable_%s_%s", $a, $only_online);
-            global $memcache;
+            $memcache = MemcacheSingleton::getInstance();
             $result = $memcache->get($mckey);
             if ($result !== FALSE) {
                 $this->table = $result;

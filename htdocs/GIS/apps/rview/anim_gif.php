@@ -1,13 +1,13 @@
 <?php
 // Create animated GIF! and then send it to them...
+require_once "../../../../include/memcache.php";
 
 // Prevent client abort from leaving temp files around
 ignore_user_abort(true);
 
 $fts = isset($_GET["fts"]) ? intval($_GET["fts"]) : exit();
 
-$memcache = new Memcached();
-$memcache->addServer('iem-memcached', 11211);
+$memcache = MemcacheSingleton::getInstance();
 $urls = $memcache->get("/GIS/apps/rview/warnings.phtml?fts={$fts}");
 if (!$urls) {
     die("fts not found, ERROR");

@@ -1,7 +1,7 @@
 <?php
+require_once dirname(__FILE__) . "/memcache.php";
 
-$memcache = new Memcached();
-$memcache->addServer('iem-memcached', 11211);
+$memcache = MemcacheSingleton::getInstance();
 $cameras = $memcache->get("php/cameras.inc.php");
 if ($cameras) {
     return;

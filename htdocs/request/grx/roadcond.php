@@ -5,10 +5,10 @@ header("Content-type: text/plain");
  * Iowa DOT provided state road conditions
  */
 require_once "../../../config/settings.inc.php";
+require_once "../../../include/memcache.php";
 
 // Try to get it from memcached
-$memcache = new Memcached();
-$memcache->addServer('iem-memcached', 11211);
+$memcache = MemcacheSingleton::getInstance();
 $val = $memcache->get("/request/grx/roadcond.php");
 if ($val) {
     die($val);
