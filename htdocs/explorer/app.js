@@ -326,8 +326,8 @@ function loaderClicked(elem){
     loadAutoplot(container, uri, divid);
 }
 function initUI(){
-    $(".maprow img").click(function(){
-        loadImage(this);
+    $(".maprow img").click((event) => {
+        loadImage(event.target);
     });
 }
 
@@ -448,11 +448,16 @@ function windowFactory(initdiv, classID) {
 
     addButtons($(`.${classID}`));
     $(dlg).dialog("open");
-    // Find the first button with autoload class and click it
-    $(initdiv).find(".autoload").click();
+    // Need to reattach the click handler as JqueryUI mucks things up
+    const $divs = $(initdiv).find(".autoload");
+    $divs.click((event) => {
+        loaderClicked(event.target);
+    });
+    $divs.first().click();
+
 }
 
-$(document).ready(function() {
+$(document).ready(() => {
     initMap();
     initUI();
 });

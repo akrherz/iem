@@ -8,11 +8,10 @@ import pandas as pd
 from metpy.calc import apparent_temperature
 from metpy.units import units
 from pyiem import reference
-from pyiem.database import get_sqlalchemy_conn
+from pyiem.database import get_sqlalchemy_conn, sql_helper
 from pyiem.exceptions import NoDataFound
 from pyiem.plot import MapPlot, get_cmap
 from pyiem.util import utc
-from sqlalchemy import text
 
 PDICT = {"cwa": "Plot by NWS Forecast Office", "state": "Plot by State"}
 PDICT2 = {"vsby": "Visibility", "feel": "Feels Like Temperature"}
@@ -83,7 +82,7 @@ def get_df(ctx, bnds, buf=2.25):
         valid = ctx["valid"].replace(tzinfo=ZoneInfo("UTC"))
         with get_sqlalchemy_conn("asos") as conn:
             df = pd.read_sql(
-                text("""
+                sql_helper("""
             WITH mystation as (
                 select id, st_x(geom) as lon, st_y(geom) as lat,
                 state, wfo from stations
@@ -113,7 +112,7 @@ def get_df(ctx, bnds, buf=2.25):
         valid = utc()
         with get_sqlalchemy_conn("iem") as conn:
             df = pd.read_sql(
-                text("""
+                sql_helper("""
                 SELECT state, wfo, tmpf, dwpf, sknt, relh,
         id, network, vsby, ST_x(geom) as lon, ST_y(geom) as lat
         FROM

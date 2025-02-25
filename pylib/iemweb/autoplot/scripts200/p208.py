@@ -26,13 +26,12 @@ from zoneinfo import ZoneInfo
 
 import geopandas as gpd
 import pandas as pd
-from pyiem.database import get_sqlalchemy_conn
+from pyiem.database import get_sqlalchemy_conn, sql_helper
 from pyiem.exceptions import NoDataFound
 from pyiem.nws import vtec
 from pyiem.plot.geoplot import MapPlot
 from pyiem.reference import LATLON, Z_FILL, Z_OVERLAY2, Z_OVERLAY2_LABEL
 from pyiem.util import utc
-from sqlalchemy import text
 
 TFORMAT = "%b %-d %Y %-I:%M %p %Z"
 PDICT = {
@@ -122,8 +121,8 @@ def plotter(ctx: dict):
     with get_sqlalchemy_conn("postgis") as conn:
         wfolim = "w.wfo = :wfo and" if wfo != "NHC" else ""
         df = gpd.read_postgis(
-            text(
-                f"""
+            sql_helper(
+                """
             SELECT w.ugc, simple_geom, u.name,
             issue at time zone 'UTC' as issue,
             expire at time zone 'UTC' as expire,
@@ -133,7 +132,8 @@ def plotter(ctx: dict):
             from warnings w JOIN ugcs u on (w.gid = u.gid)
             WHERE {wfolim} vtec_year = :year and eventid = :etn and
             significance = :s1 and phenomena = :p1 ORDER by issue ASC
-        """
+        """,
+                wfolim=wfolim,
             ),
             conn,
             params=params,
@@ -145,8 +145,8 @@ def plotter(ctx: dict):
     if ctx["opt"] == "expand":
         # Get all phenomena coincident with the above alert
         with get_sqlalchemy_conn("postgis") as conn:
-            df = gpd.read_postgis(
-                text("""
+            df: pd.DataFrame = gpd.read_postgis(
+                sql_helper("""
                 SELECT w.ugc, simple_geom, u.name,
                 issue at time zone 'UTC' as issue,
                 expire at time zone 'UTC' as expire,
@@ -171,8 +171,8 @@ def plotter(ctx: dict):
     elif ctx["opt"] == "etn":
         # Get all phenomena coincident with the above alert
         with get_sqlalchemy_conn("postgis") as conn:
-            df = gpd.read_postgis(
-                text("""
+            df: pd.DataFrame = gpd.read_postgis(
+                sql_helper("""
                 SELECT w.ugc, simple_geom, u.name,
                 issue at time zone 'UTC' as issue,
                 expire at time zone 'UTC' as expire,
@@ -192,7 +192,7 @@ def plotter(ctx: dict):
         raise NoDataFound("VTEC Event was not found, sorry.")
     with get_sqlalchemy_conn("postgis") as conn:
         sbwdf = gpd.read_postgis(
-            text("""
+            sql_helper("""
             SELECT status, geom, wfo,
             polygon_begin at time zone 'UTC' as polygon_begin,
             polygon_end at time zone 'UTC' as polygon_end from sbw
@@ -208,7 +208,7 @@ def plotter(ctx: dict):
         # Get all phenomena coincident with the above alert
         with get_sqlalchemy_conn("postgis") as conn:
             sbwdf = gpd.read_postgis(
-                text("""
+                sql_helper("""
                 SELECT status, geom, wfo,
                 polygon_begin at time zone 'UTC' as polygon_begin,
                 polygon_end at time zone 'UTC' as polygon_end from sbw
@@ -231,7 +231,7 @@ def plotter(ctx: dict):
         # Get all phenomena coincident with the above alert
         with get_sqlalchemy_conn("postgis") as conn:
             sbwdf = gpd.read_postgis(
-                text("""
+                sql_helper("""
                 SELECT status, geom, wfo,
                 polygon_begin at time zone 'UTC' as polygon_begin,
                 polygon_end at time zone 'UTC' as polygon_end from sbw

@@ -6,10 +6,9 @@ import geopandas as gpd
 import numpy as np
 import pandas as pd
 from pyiem import reference
-from pyiem.database import get_sqlalchemy_conn
+from pyiem.database import get_sqlalchemy_conn, sql_helper
 from pyiem.exceptions import NoDataFound
 from pyiem.plot import MapPlot, get_cmap
-from sqlalchemy import text
 
 from iemweb.autoplot import ARG_FEMA
 
@@ -143,8 +142,8 @@ def get_df(ctx, buf=2.25):
         "north": bnds[3] + buf,
     }
     with get_sqlalchemy_conn("iem") as conn:
-        df = gpd.read_postgis(
-            text("""
+        df: pd.DataFrame = gpd.read_postgis(
+            sql_helper("""
             WITH mystation as (
                 select id, st_x(geom) as lon, st_y(geom) as lat,
                 state, wfo, iemid, country, geom from stations

@@ -25,11 +25,10 @@ import numpy as np
 import pandas as pd
 from matplotlib.patches import Rectangle
 from matplotlib.ticker import MaxNLocator
-from pyiem.database import get_dbconn, get_sqlalchemy_conn
+from pyiem.database import get_dbconn, get_sqlalchemy_conn, sql_helper
 from pyiem.exceptions import NoDataFound
 from pyiem.plot import calendar_plot, figure
 from pyiem.reference import state_names
-from sqlalchemy import text
 
 from iemweb.autoplot import ARG_FEMA
 
@@ -197,7 +196,7 @@ def plotter(ctx: dict):
     if ctx["w"] == "all":
         with get_sqlalchemy_conn("postgis") as conn:
             df = pd.read_sql(
-                text("""
+                sql_helper("""
             with data as (
                 select outlook_date, threshold from spc_outlooks
                 WHERE category = :category and day = :day and
@@ -273,7 +272,8 @@ def plotter(ctx: dict):
 
         with get_sqlalchemy_conn("postgis") as conn:
             df = pd.read_sql(
-                text(f"""
+                sql_helper(
+                    """
             with data as (
                 select outlook_date, threshold from
                 spc_outlooks o, {table} t
@@ -296,7 +296,12 @@ def plotter(ctx: dict):
             case when h.threshold = 'SIGN' then true else false end as sign
             from agg a LEFT JOIN hatched h on (a.outlook_date = h.outlook_date)
             where rank = 1 ORDER by a.outlook_date ASC
-            """),
+            """,
+                    table=table,
+                    sqllimiter=sqllimiter,
+                    geomcol=geomcol,
+                    abbrcol=abbrcol,
+                ),
                 conn,
                 params={
                     "geoval": geoval,
