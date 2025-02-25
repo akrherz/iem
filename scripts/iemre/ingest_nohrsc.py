@@ -21,13 +21,14 @@ def main(valid):
         "https://www.nohrsc.noaa.gov/snowfall/data/%Y%m/"
         "sfav2_CONUS_24h_%Y%m%d12.nc"
     )
-    with httpx.Client() as client:
-        req = client.get(url)
-        if req.status_code != 200:
-            LOG.warning("%s got status code %s", url, req.status_code)
-            return
+    try:
+        resp = httpx.get(url, timeout=60)
+        resp.raise_for_status()
         with tempfile.NamedTemporaryFile(delete=False) as tmp:
-            tmp.write(req.content)
+            tmp.write(resp.content)
+    except Exception as exp:
+        LOG.warning("download failed: %s %s", url, exp)
+        return
     with ncopen(tmp.name) as nc:
         lats = nc.variables["lat"][:]
         lons = nc.variables["lon"][:]

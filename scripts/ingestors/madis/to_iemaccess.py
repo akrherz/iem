@@ -167,7 +167,8 @@ def process(fn: str):
         name = names[recnum]
         network = provider2network(provider, name)
         sid = stations[recnum]
-        if network is None:
+        # IA_RWIS is processed via a dedicated workflow
+        if network is None or network == "IA_RWIS":
             continue
         ticks = obtime[recnum]
         ts = datetime(1970, 1, 1) + timedelta(seconds=ticks)
