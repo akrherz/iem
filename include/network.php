@@ -3,6 +3,9 @@
 
 require_once dirname(__FILE__) . "/database.inc.php";
 
+$memcache = new Memcached();
+$memcache->addServer("iem-memcached", 11211);
+
 class NetworkTable
 {
     public array $table;
@@ -10,6 +13,17 @@ class NetworkTable
 
     public function __construct($a, $force3char = FALSE, $only_online = FALSE)
     {
+        // Cache the simple cache
+        if (is_string($a)){
+            $mckey = sprintf("networkTable_%s_%s", $a, $only_online);
+            global $memcache;
+            $result = $memcache->get($mckey);
+            if ($result !== FALSE) {
+                $this->table = $result;
+                return;
+            }
+        }
+
         $this->table = array();
         $ol = ($only_online) ? " and online = 't' " : "";
         $sql_template = <<<EOM
@@ -37,6 +51,7 @@ EOM;
         );
         if (is_string($a)) {
             $this->loadNetwork($a, $force3char);
+            $memcache->set($mckey, $this->table, 3600);
         } else if (is_array($a)) {
             foreach ($a as $network) {
                 $this->loadNetwork($network, $force3char);
