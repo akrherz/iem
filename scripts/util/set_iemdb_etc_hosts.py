@@ -26,7 +26,7 @@ LOOKUP = {
     "-isuag": IPS[DB1],
     "-kcci": IPS[DB1],
     "-mesonet": IPS[DB1],
-    "-mesosite": IPS[DB1],
+    "-mesosite": IPS[DB2],  # needs 10g
     "-mos": IPS[DB1],
     "-nc1018": IPS[DB1],
     "-nldn": IPS[DB2],
