@@ -22,7 +22,7 @@ $t->sites_current = "porclimo";
 $arr = array(
     "station" => $station,
 );
-$json = iemws_json("/climodat/por_daily_climo.json", $arr);
+$json = iemws_json("climodat/por_daily_climo.json", $arr);
 if ($json === FALSE) {
     $json = array("data" => array());
 }
