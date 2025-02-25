@@ -8,6 +8,8 @@ class MemcacheSingleton
     private function __construct()
     {
         $this->memcache = new Memcached();
+        // Belief is that this is safe for all intended usage
+        $this->memcache->setOption(Memcached::OPT_BINARY_PROTOCOL, true);
         $this->memcache->addServer('iem-memcached', 11211);
     }
 
