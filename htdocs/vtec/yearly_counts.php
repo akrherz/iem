@@ -6,21 +6,23 @@ require_once "../../include/myview.php";
 require_once "../../include/vtec.php";
 require_once "../../include/network.php";
 require_once "../../include/forms.php";
+require_once "../../include/imagemaps.php";
 $nt = new NetworkTable("WFO");
 
 $clobber = isset($_REQUEST["clobber"]);
-$wfo = isset($_REQUEST["wfo"]) ? strtoupper(substr(xssafe($_REQUEST["wfo"]), 0, 3)) : null;
+$wfo = isset($_REQUEST["wfo"]) ? strtoupper(substr(xssafe($_REQUEST["wfo"]), 0, 4)) : "_ALL";
+$wfo3 = unrectify_wfo($wfo);
 $phenomena = isset($_REQUEST["phenomena"]) ? strtoupper(substr(xssafe($_REQUEST["phenomena"]), 0, 2)) : null;
 $significance = isset($_REQUEST["significance"]) ? strtoupper(substr(xssafe($_REQUEST["significance"]), 0, 1)) : null;
 $wfoLimiter = "";
 $wfoMsg = "Data for all WFOs shown";
-if ($wfo) {
-    $wfoLimiter = " and wfo = '{$wfo}' ";
+if ($wfo != "_ALL") {
+    $wfoLimiter = " and wfo = '{$wfo3}' ";
     $wfoMsg = "Data for only $wfo shown";
 }
 
-$p1 = make_select("phenomena", $phenomena, $vtec_phenomena);
-$s1 = make_select("significance", $significance, $vtec_significance);
+$p1 = make_select("phenomena", $phenomena, $vtec_phenomena, $showvalue = TRUE);
+$s1 = make_select("significance", $significance, $vtec_significance, $showvalue = TRUE);
 
 $t = new MyView();
 $t->title = "VTEC Yearly Event Counts";
@@ -34,12 +36,13 @@ function get_data()
         $dbconn,
         "
             SELECT yr, phenomena, significance, count(*) from
-            (SELECT distinct extract(year from issue) as yr, wfo,
+            (SELECT distinct vtec_year as yr, wfo,
             phenomena, significance, eventid from warnings WHERE
             significance is not null and phenomena is not null and
             issue > '1980-01-01' $wfoLimiter) as foo
             GROUP by yr, phenomena, significance
-    ");
+    "
+    );
 
     $data = array();
     $pcodes = array();
@@ -64,12 +67,13 @@ function get_data2()
         $dbconn,
         "
         WITH data as (
-            SELECT distinct wfo, eventid, extract(year from issue) as yr
+            SELECT distinct wfo, eventid, vtec_year as yr
             from warnings where phenomena = '$phenomena' and
             significance = '$significance'
         )
         SELECT wfo, yr, count(*) from data GROUP by wfo, yr
-    ");
+    "
+    );
 
     $data = array();
     for ($i = 0; $row = pg_fetch_assoc($rs); $i++) {
@@ -99,7 +103,7 @@ if (is_null($phenomena) || is_null($significance)) {
 
     $table = <<<EOF
     <table class="table table-striped">
-    <thead><tr><th>P</th><th>S</th><th>Phenomena</th><th>Significance</th>
+    <thead class="sticky"><tr><th>P</th><th>S</th><th>Phenomena</th><th>Significance</th>
 EOF;
     $years = array_keys($data);
     asort($years);
@@ -144,7 +148,7 @@ EOF;
 
     $table = <<<EOF
     <table class="table table-striped">
-    <thead><tr><th>WFO</th><th>WFO Name</th>
+    <thead class="sticky"><tr><th>WFO</th><th>WFO Name</th>
 EOF;
     $years = array_keys($data);
     asort($years);
@@ -154,14 +158,15 @@ EOF;
     $table .= "</tr></thead>\n";
 
     foreach ($nt->table as $key => $val) {
+        $wfo3 = unrectify_wfo($key);
         $table .= sprintf(
             "<tr><td>%s</td><td>%s</td>",
             $key,
             $val["name"]
         );
         foreach ($years as $i => $yr) {
-            if (array_key_exists($key, $data[$yr])) {
-                $table .= sprintf("<td>%s</td>", $data[$yr][$key]);
+            if (array_key_exists($wfo3, $data[$yr])) {
+                $table .= sprintf("<td>%s</td>", $data[$yr][$wfo3]);
             } else {
                 $table .= "<td>0</td>";
             }
@@ -197,18 +202,18 @@ WFOs would count as four in this summary, when summarizing all WFOs!</p>
 your favorite spreadsheet program for further analysis...</div>
         
 $cachedwarning
-        
+
 <p><h4>Option 1: All VTEC Events by Year</h4>
 <form method="GET" name="wfo">
 Limit Numbers by WFO: 
 EOF;
-$content .= "<select name=\"wfo\">
- <option value=\"ALL\" SELECTED>All Available</option>";
-foreach ($nt->table as $key => $value) {
-    $content .= "<option value='$key'>[$key] " . $value["name"] . "</option>\n";
-}
+$allWFO = array("_ALL" => array(
+    "id" => "_ALL",
+    "name" => "All Available",
+    "archive_end" => null,
+    "archive_begin" => new DateTime("1980-01-01")));
+$content .= networkSelect("WFO", $wfo, $extra = $allWFO, $selectName = "wfo");
 $content .= <<<EOF
-</select>
     <input type="submit" value="Generate Table">
 </form>
 
