@@ -16,7 +16,7 @@ python download_imerg.py --valid=$(date -u --date '6 months ago' +'%Y-%m-%dT%H:3
 
 cd ../ingestors/madis
 python extract_hfmetar.py --hours=0 &
-python to_iemaccess.py --offset=1 &
+python to_iemaccess.py --valid=$(date -u --date '1 hour ago' '%Y-%m-%dT%H:%M:00') &
 
 cd ../../plots
 ./RUN_PLOTS

@@ -1,7 +1,7 @@
 # Run every 20 minutes please
 
 cd ingestors/madis
-python to_iemaccess.py
+python to_iemaccess.py --valid=$(date -u '%Y-%m-%dT%H:%M:00')
 python extract_metar.py
 
 cd ../cocorahs
