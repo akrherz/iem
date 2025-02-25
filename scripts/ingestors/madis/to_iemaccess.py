@@ -222,7 +222,11 @@ def process(offset: int, variant: str):
         if val["pday"] is not None:
             iem.data["pday"] = round(mm2inch(val["pday"]), 2)
         updates += 1
-        if not iem.save(icursor) and val["network"] != "IA_RWIS":
+        # Could be processing previous hour or out-of-order data
+        if (
+            not iem.save(icursor, force_current_log=True)
+            and val["network"] != "IA_RWIS"
+        ):
             LOG.warning(
                 "MADIS Extract: %s found new station: %s network: %s",
                 fn.split("/")[-1],
