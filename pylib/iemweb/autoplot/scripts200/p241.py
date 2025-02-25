@@ -11,7 +11,8 @@ low temperature.  When the 15 minute data is available, it should certainly
 do a better job than the hourly.
 """
 
-from datetime import timedelta
+from datetime import timedelta, timezone
+from zoneinfo import ZoneInfo
 
 import matplotlib.colors as mpcolors
 import numpy as np
@@ -30,6 +31,7 @@ from pyiem.util import (
 PDICT = {
     "max": "Maximum",
     "min": "Minimum",
+    "delta": "Change",
 }
 PDICT2 = {
     "user": "User Defined",
@@ -110,6 +112,44 @@ def get_data(ctx):
     total = 0
     mindt = None
     maxdt = None
+    if ctx["w"] == "delta":
+        mydir = f"{sts:%Y/%m/%d}/model/rtma/{sts:%H}/"
+        ppath = mydir + (
+            f"rtma2p5_ru.t{sts:%H%M}z.2dvaranl_ndfd.grb2"
+            if use_ru
+            else f"rtma.t{sts:%H}z.awp2p5f000.grib2"
+        )
+        with archive_fetch(ppath) as fn:
+            if fn is None:
+                raise NoDataFound("Failed to find RTMA for start time.")
+            with pygrib.open(fn) as grbs:
+                grb = grbs.select(shortName="2t")[0]
+                lats, lons = grb.latlons()
+                first = grb.values
+        mydir = f"{ets:%Y/%m/%d}/model/rtma/{ets:%H}/"
+        ppath = mydir + (
+            f"rtma2p5_ru.t{ets:%H%M}z.2dvaranl_ndfd.grb2"
+            if use_ru
+            else f"rtma.t{ets:%H}z.awp2p5f000.grib2"
+        )
+        with archive_fetch(ppath) as fn:
+            if fn is None:
+                raise NoDataFound("Failed to find RTMA for start time.")
+            with pygrib.open(fn) as grbs:
+                grb = grbs.select(shortName="2t")[0]
+                second = grb.values
+        return {
+            "mindt": sts,
+            "maxdt": ets,
+            "missing_count": 0,
+            "total": 2,
+            "use_ru": use_ru,
+            "lons": lons,
+            "lats": lats,
+            "vals": convert_value(second, "degK", "degF")
+            - convert_value(first, "degK", "degF"),
+        }
+
     for dt in pd.date_range(sts, ets, freq="900s" if use_ru else "1h"):
         total += 1
         mydir = f"{dt:%Y/%m/%d}/model/rtma/{dt:%H}/"
@@ -151,24 +191,34 @@ def get_data(ctx):
 
 def plotter(ctx: dict):
     """Go"""
+    ctx["sts"] = ctx["sts"].replace(tzinfo=timezone.utc)
+    ctx["ets"] = ctx["ets"].replace(tzinfo=timezone.utc)
     if (ctx["ets"] - ctx["sts"]) > timedelta(days=4):
         ctx["ets"] = ctx["sts"] + timedelta(days=4)
     res = get_data(ctx)
+    localmindt = res["mindt"].astimezone(ZoneInfo("America/Chicago"))
+    localmaxdt = res["maxdt"].astimezone(ZoneInfo("America/Chicago"))
+    subtitle = (
+        f"{res['total'] - res['missing_count']}/{res['total']} grids "
+        f"found between {localmindt:%Y-%m-%d %-I:%M %p} and "
+        f"{localmaxdt:%Y-%m-%d %-I:%M %p}"
+    )
+    if ctx["w"] == "delta":
+        subtitle = (
+            f"Change in Temperature from {localmindt:%Y-%m-%d %-I:%M %p} to "
+            f"{localmaxdt:%Y-%m-%d %-I:%M %p}"
+        )
     mp = MapPlot(
         apctx=ctx,
         title=(
             f"NCEP RTMA{'-RU' if res['use_ru'] else ''} {PDICT[ctx['w']]} "
             "2m Air Temperature"
         ),
-        subtitle=(
-            f"{res['total'] - res['missing_count']}/{res['total']} grids "
-            f"found between {res['mindt']:%Y-%m-%dT%H:%MZ} and "
-            f"{res['maxdt']:%Y-%m-%dT%H:%MZ}"
-        ),
+        subtitle=subtitle,
         stateborderwidth=3,
         nocaption=True,
     )
-    if ctx["mode"] == "fz":
+    if ctx["mode"] == "fz" and ctx["w"] != "delta":
         # https://colorbrewer2.org/#type=diverging&scheme=RdYlBu&n=8
         # <26, 26-28, 28-30, 30-32, 32-34, 34-36, >36
         colors = (
