@@ -1,10 +1,10 @@
 <?php
 require_once "../config/settings.inc.php";
+require_once "../include/memcache.php";
 define("IEM_APPID", 62);
 header("Content-type: text/xml; charset=UTF-8");
 
-$memcache = new Memcached();
-$memcache->addServer('iem-memcached', 11211);
+$memcache = MemcacheSingleton::getInstance();
 $val = $memcache->get("/feature_rss.php");
 if ($val) {
     die($val);

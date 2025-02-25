@@ -5,13 +5,14 @@ require_once __DIR__ . '/mlib.php';
 $client_ip = getClientIp();
 $key = "throttle_{$client_ip}";
 
-$memcache = new Memcached();
-$memcache->setOption(Memcached::OPT_BINARY_PROTOCOL, true);
-$memcache->addServer('iem-memcached', 11211);
-register_shutdown_function(function () use ($memcache, $key) {
-    $memcache->decrement($key);
+// Need to do a custom memcache with BinaryProtocol
+$lmemcache = new Memcached();
+$lmemcache->setOption(Memcached::OPT_BINARY_PROTOCOL, true);
+$lmemcache->addServer('iem-memcached', 11211);
+register_shutdown_function(function () use ($lmemcache, $key) {
+    $lmemcache->decrement($key);
 });
-if ($memcache->increment($key, 1, 0, 300) > 5) {
+if ($lmemcache->increment($key, 1, 0, 300) > 5) {
     http_response_code(429);
     die('429: Too Many Requests');
 }

@@ -7,9 +7,8 @@ require_once dirname(__FILE__) . "/database.inc.php";
 require_once dirname(__FILE__) . "/station.php";
 require_once dirname(__FILE__) . "/forms.php";
 require_once dirname(__FILE__) . "/myview.php";
+require_once dirname(__FILE__) . "/memcache.php";
 
-$memcache = new Memcached();
-$memcache->addServer('iem-memcached', 11211);
 
 class SitesContext
 {
@@ -115,7 +114,6 @@ function station_helper($station)
 
 function get_sites_context()
 {
-    global $memcache;
     // Return a SitesContext
     $station = get_str404("station", "", 20);
     $network = get_str404("network", "", 14);  // could be 10?
@@ -131,6 +129,7 @@ function get_sites_context()
 
     $mckey = sprintf("/sites/%s/%s", $network, $station);
 
+    $memcache = MemcacheSingleton::getInstance();
     $st = $memcache->get($mckey);
     if ($st === FALSE){
         $st = new StationData($station, $network);

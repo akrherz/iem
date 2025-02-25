@@ -1,9 +1,9 @@
 <?php
 require_once "../config/settings.inc.php";
+require_once "../include/memcache.php";
 header("Content-type: text/xml; charset=UTF-8");
 
-$memcache = new Memcached();
-$memcache->addServer('iem-memcached', 11211);
+$memcache = MemcacheSingleton::getInstance();
 $val = $memcache->get("/rss.php");
 if ($val) {
     die($val);
