@@ -1,22 +1,21 @@
-"""Compute daily summaries of ASOS/METAR data.
+"""Compute daily summaries of observed data.
+
+NOTE: We don't want to compute things provided by ASOS DSM/CF6/CLI data.
 
 Called from RUN_12Z.sh with no args and 2 days ago
 Called from RUN_MIDNIGHT.sh with no args
 """
 
-import time
 import warnings
 from datetime import date, datetime, timedelta
-from typing import Optional
 
 import click
 import metpy.calc as mcalc
 import numpy as np
 import pandas as pd
 from metpy.units import units as munits
-from pyiem.database import get_dbconn, get_sqlalchemy_conn
+from pyiem.database import get_dbconn, get_sqlalchemy_conn, sql_helper
 from pyiem.util import logger
-from sqlalchemy import text
 
 LOG = logger()
 # bad values into mcalc
@@ -32,7 +31,7 @@ def clean(val, floor, ceiling):
     return float(val)
 
 
-def compute_wind_gusts(gdf, currentrow, newdata):
+def compute_wind_gusts_asos(gdf, currentrow, newdata):
     """Do wind gust logic."""
     dfmax = max([gdf["gust"].max(), gdf["peak_wind_gust"].max()])
     if pd.isnull(dfmax) or (
@@ -66,25 +65,37 @@ def is_new(colname, newval, currentrow, newdata):
         newdata[colname] = newval
 
 
-def do(dt: date):
-    """Process this date timestamp"""
-    iemaccess = get_dbconn("iem")
-    icursor = iemaccess.cursor()
-    table = f"summary_{dt.year}"
-    # Get what we currently know, just grab everything
-    with get_sqlalchemy_conn("iem") as conn:
-        current = pd.read_sql(
-            text(f"SELECT * from {table} WHERE day = :dt"),
-            conn,
-            params={"dt": dt},
-            index_col="iemid",
-        )
-    with get_sqlalchemy_conn("asos") as conn:
-        df = pd.read_sql(
-            text("""
+def get_rwis_obs(dt: date) -> pd.DataFrame:
+    """Get RWIS observations for a given date."""
+    with get_sqlalchemy_conn("rwis") as conn:
+        obsdf = pd.read_sql(
+            sql_helper("""
         select station, network, iemid, drct, sknt, gust,
-        valid at time zone tzname as localvalid, valid,
-        tmpf, dwpf, relh, feel,
+        valid at time zone tzname as localvalid, valid, relh, feel from
+        alldata d JOIN stations t on (t.id = d.station)
+        where network ~* 'RWIS'
+        and valid between :sts and :ets and t.tzname is not null
+        and date(valid at time zone tzname) = :dt
+        ORDER by valid ASC
+        """),
+            conn,
+            params={
+                "sts": dt - timedelta(days=2),
+                "ets": dt + timedelta(days=2),
+                "dt": dt,
+            },
+            index_col=None,
+        )
+    return obsdf
+
+
+def get_asos_obs(dt: date) -> pd.DataFrame:
+    """Get ASOS observations for a given date."""
+    with get_sqlalchemy_conn("asos") as conn:
+        obsdf = pd.read_sql(
+            sql_helper("""
+        select station, network, iemid, drct, sknt, gust,
+        valid at time zone tzname as localvalid, valid, relh, feel,
         peak_wind_gust, peak_wind_drct, peak_wind_time,
         peak_wind_time at time zone tzname as local_peak_wind_time from
         alldata d JOIN stations t on (t.id = d.station)
@@ -101,9 +112,10 @@ def do(dt: date):
             },
             index_col=None,
         )
-    if df.empty:
-        LOG.info("no ASOS database entries for %s", dt)
-        return
+    return obsdf
+
+
+def compute_things(df):
     # derive some parameters
     df["u"], df["v"] = mcalc.wind_components(
         df["sknt"].values * munits.knots, df["drct"].values * munits.deg
@@ -118,8 +130,35 @@ def do(dt: date):
     )
     df["timedelta"] = df["timedelta"] / np.timedelta64(1, "s")
 
+
+def do(dt: date, netclass: str, meta: dict):
+    """Process this date timestamp"""
+    iemaccess = get_dbconn("iem")
+    icursor = iemaccess.cursor()
+    table = f"summary_{dt.year}"
+    # Get what we currently know, just grab everything
+    with get_sqlalchemy_conn("iem") as conn:
+        current = pd.read_sql(
+            sql_helper(
+                """
+    SELECT s.* from {table} s JOIN stations t on (s.iemid = t.iemid)
+    WHERE day = :dt and network ~* :netclass
+            """,
+                table=table,
+            ),
+            conn,
+            params={"dt": dt, "netclass": netclass},
+            index_col="iemid",
+        )
+    LOG.info("Found %s summary entries for %s", len(current.index), netclass)
+    obsdf = meta["getobs"](dt)
+    if obsdf.empty:
+        LOG.info("no %s database entries for %s", netclass, dt)
+        return
+    compute_things(obsdf)
+
     updates = 0
-    for iemid, gdf in df.groupby("iemid"):
+    for iemid, gdf in obsdf.groupby("iemid"):
         if len(gdf.index) < 6:
             continue
         if iemid not in current.index:
@@ -137,7 +176,8 @@ def do(dt: date):
             current.loc[iemid] = None
         newdata = {}
         currentrow = current.loc[iemid]
-        compute_wind_gusts(gdf, currentrow, newdata)
+        if netclass == "ASOS":
+            compute_wind_gusts_asos(gdf, currentrow, newdata)
         # take the nearest value
         ldf = gdf.copy().bfill().ffill()
         totsecs = ldf["timedelta"].sum()
@@ -218,6 +258,7 @@ def do(dt: date):
             iemaccess.commit()
             icursor = iemaccess.cursor()
 
+    LOG.info("Updated %s/%s summary rows", updates, len(current.index))
     icursor.close()
     iemaccess.commit()
     iemaccess.close()
@@ -225,22 +266,17 @@ def do(dt: date):
 
 @click.command()
 @click.option(
-    "--date", "dt", type=click.DateTime(), required=False, help="Date"
+    "--date", "dt", type=click.DateTime(), required=True, help="Date"
 )
-def main(dt: Optional[datetime]):
+def main(dt: datetime):
     """Go Main Go"""
-    if dt is None:
-        dt = date.today() - timedelta(days=1)
-    else:
-        dt = dt.date()
-    try:
-        do(dt)
-    except Exception as exp:
-        LOG.info("first pass yield an exception")
-        LOG.exception(exp)
-        LOG.info("sleeping two minutes before trying once more")
-        time.sleep(120)
-        do(dt)
+    dt = dt.date()
+    settings = {
+        "ASOS": {"database": "asos", "getobs": get_asos_obs},
+        "RWIS": {"database": "rwis", "getobs": get_rwis_obs},
+    }
+    for netclass, meta in settings.items():
+        do(dt, netclass, meta)
 
 
 if __name__ == "__main__":
