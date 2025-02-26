@@ -1,7 +1,6 @@
 /* global $ */
 let station = '_OAX';
 let year = new Date().getFullYear();
-let j2 = null;
 let dt = null;
 
 function zero(val){

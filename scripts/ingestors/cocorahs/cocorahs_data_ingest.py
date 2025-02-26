@@ -16,7 +16,6 @@ import pandas as pd
 from pyiem.database import get_sqlalchemy_conn, sql_helper
 from pyiem.reference import TRACE_VALUE
 from pyiem.util import logger, utc
-from sqlalchemy import text
 
 LOG = logger()
 
@@ -34,10 +33,9 @@ def safeP(v):
 def main(conn, dt: Optional[date]) -> None:
     """Go Main Go"""
     stations = pd.read_sql(
-        text(
-            """
-select iemid, id, tzname from stations where network ~* '_COCORAHS'
-            """
+        sql_helper(
+            "select iemid, id, tzname from stations where "
+            "network ~* '_COCORAHS'"
         ),
         conn,
         index_col="id",
@@ -73,8 +71,6 @@ select iemid, id, tzname from stations where network ~* '_COCORAHS'
     LOG.info("Found %s obs to process", len(obs.index))
     for sid, row in obs.iterrows():
         if sid not in stations.index:
-            if sid.startswith("IA-"):
-                print(sid)
             continue
         tzinfo = ZoneInfo(stations.at[sid, "tzname"])
         valid = datetime.strptime(
