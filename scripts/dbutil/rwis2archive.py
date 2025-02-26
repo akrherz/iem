@@ -7,7 +7,7 @@ called from RUN_10_AFTER.sh
 import sys
 from datetime import datetime, timezone
 
-from pyiem.database import get_dbconnc
+from pyiem.database import get_dbconnc, get_sqlalchemy_conn, sql_helper
 from pyiem.reference import ISO8601
 from pyiem.util import get_properties, logger, set_property, utc
 
@@ -134,42 +134,59 @@ def process_soil(first_updated, last_updated):
     LOG.info("access: %s rows, rwis: %s dels", inserts, deleted)
 
 
-def process_obs(first_updated, last_updated):
-    """Take obs."""
-    ipgconn, icursor = get_dbconnc("iem")
-    rpgconn, rcursor = get_dbconnc("rwis")
-
-    icursor.execute(
-        """
-        SELECT c.*, t.id as station from current_log c, stations t
-        WHERE updated >= %s and updated < %s
+def do_ob_work(iconn, rconn, first_updated, last_updated):
+    """Do the obs work."""
+    res = iconn.execute(
+        sql_helper("""
+        SELECT c.*, t.id as station, valid at time zone 'UTC' as utc_valid
+        from current_log c, stations t
+        WHERE updated >= :sts and updated < :ets
           and t.network ~* 'RWIS' and t.iemid = c.iemid
-                    """,
-        (first_updated, last_updated),
+                    """),
+        {"sts": first_updated, "ets": last_updated},
     )
     deleted = 0
-    for row in icursor:
-        rcursor.execute(
-            "delete from alldata where station = %s and valid = %s",
-            (row["station"], row["valid"]),
+    for i, row in enumerate(res.mappings()):
+        # While updating alldata works, it is very slow, so we do this
+        table = f"t{row['utc_valid'].year}"
+        res2 = rconn.execute(
+            sql_helper(
+                "delete from {table} "
+                "where station =:station and valid = :valid",
+                table=table,
+            ),
+            {"station": row["station"], "valid": row["utc_valid"]},
         )
-        deleted += rcursor.rowcount
-        rcursor.execute(
-            """INSERT into alldata (station, valid, tmpf,
+        deleted += res2.rowcount
+        rconn.execute(
+            sql_helper(
+                """INSERT into {table} (station, valid, tmpf,
             dwpf, drct, sknt, tfs0, tfs1, tfs2, tfs3, subf, gust, tfs0_text,
             tfs1_text, tfs2_text, tfs3_text, pcpn, vsby, feel, relh)
-            VALUES (%(station)s,
-            %(valid)s,%(tmpf)s,%(dwpf)s,round(%(drct)s::numeric, 0),%(sknt)s,
-            %(tsf0)s,%(tsf1)s,%(tsf2)s,%(tsf3)s,%(rwis_subf)s,%(gust)s,
-            %(scond0)s,%(scond1)s,%(scond2)s,%(scond3)s,
-            %(pday)s,%(vsby)s,%(feel)s,%(relh)s)""",
+            VALUES (:station,
+            :utc_valid,:tmpf,:dwpf,round(:drct, 0),
+            :sknt,
+            :tsf0,:tsf1,:tsf2,:tsf3,:rwis_subf,:gust,
+            :scond0,:scond1,:scond2,:scond3,
+            :pday,:vsby,:feel,:relh)""",
+                table=table,
+            ),
             row,
         )
-    rcursor.close()
-    rpgconn.commit()
-    rpgconn.close()
-    ipgconn.close()
-    LOG.info("access: %s rows, rwis: %s dels", icursor.rowcount, deleted)
+        if i > 0 and i % 1000 == 0:
+            LOG.info("Processed %s rows", i)
+            rconn.commit()
+    rconn.commit()
+    LOG.info("Processed %s rows, deleted %s", res.rowcount, deleted)
+
+
+def process_obs(first_updated, last_updated):
+    """Take obs."""
+    with (
+        get_sqlalchemy_conn("iem") as iconn,
+        get_sqlalchemy_conn("rwis") as rconn,
+    ):
+        do_ob_work(iconn, rconn, first_updated, last_updated)
 
 
 def main():
