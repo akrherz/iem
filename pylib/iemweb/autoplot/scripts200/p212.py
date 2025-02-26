@@ -17,11 +17,10 @@ from datetime import date, timedelta
 import matplotlib.dates as mdates
 import numpy as np
 import pandas as pd
-from pyiem.database import get_sqlalchemy_conn
+from pyiem.database import get_sqlalchemy_conn, sql_helper
 from pyiem.exceptions import NoDataFound
 from pyiem.plot import figure_axes
 from pyiem.util import mm2inch
-from sqlalchemy import text
 
 PDICT = {"00": "00 UTC", "12": "12 UTC", "both": "00 + 12 UTC"}
 PDICT3 = {
@@ -133,14 +132,16 @@ def get_data(ctx):
         ctx["leveltitle"] = f" @ {level} hPa"
         with get_sqlalchemy_conn("raob") as conn:
             dfin = pd.read_sql(
-                text(
+                sql_helper(
                     "select "
                     "extract(year from f.valid at time zone 'UTC')::int "
                     "as year, f.valid at time zone 'UTC' as utc_valid, "
-                    f"{varname} from raob_profile p JOIN raob_flights f on "
+                    "{varname} from raob_profile p JOIN raob_flights f on "
                     "(p.fid = f.fid) WHERE f.station = ANY(:stations) "
-                    f"{hrlimiter} and p.pressure = :level  "
-                    f"and {varname} is not null ORDER by valid ASC"
+                    "{hrlimiter} and p.pressure = :level  "
+                    "and {varname} is not null ORDER by valid ASC",
+                    varname=varname,
+                    hrlimiter=hrlimiter,
                 ),
                 conn,
                 params=params,
@@ -150,13 +151,15 @@ def get_data(ctx):
         ctx["leveltitle"] = ""
         with get_sqlalchemy_conn("raob") as conn:
             dfin = pd.read_sql(
-                text(
+                sql_helper(
                     "select "
                     "extract(year from valid at time zone 'UTC')::int "
                     "as year, valid at time zone 'UTC' as utc_valid, "
-                    f"{varname} from raob_flights f WHERE "
+                    "{varname} from raob_flights f WHERE "
                     "station = ANY(:stations) "
-                    f"{hrlimiter} and {varname} is not null ORDER by valid ASC"
+                    "{hrlimiter} and {varname} is not null ORDER by valid ASC",
+                    varname=varname,
+                    hrlimiter=hrlimiter,
                 ),
                 conn,
                 params=params,

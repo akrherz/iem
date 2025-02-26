@@ -13,10 +13,9 @@ from datetime import timedelta
 import matplotlib.ticker as mticker
 import numpy as np
 import pandas as pd
-from pyiem.database import get_sqlalchemy_conn
+from pyiem.database import get_sqlalchemy_conn, sql_helper
 from pyiem.exceptions import IncompleteWebRequest, NoDataFound
 from pyiem.plot import figure
-from sqlalchemy import text
 
 from iemweb.autoplot import get_monofont
 
@@ -91,12 +90,15 @@ def get_data(ctx):
             raise IncompleteWebRequest("Invalid variable for Climate network.")
         with get_sqlalchemy_conn("coop") as conn:
             obsdf = pd.read_sql(
-                text(f"""
+                sql_helper(
+                    """
                 select day, {varname},
                 case when month > 6 then year + 1 else year end as season
                 from alldata where station = :station and {varname} is not null
                 ORDER by day ASC
-            """),
+            """,
+                    varname=varname,
+                ),
                 conn,
                 params={"station": station},
                 parse_dates="day",
@@ -107,14 +109,18 @@ def get_data(ctx):
         varname = {"high": "max_tmpf", "low": "min_tmpf"}.get(varname, varname)
         with get_sqlalchemy_conn("iem") as conn:
             obsdf = pd.read_sql(
-                text(f"""
+                sql_helper(
+                    """
                 select day, {varname} as {vin},
                 case when extract(month from day) > 6 then
                     extract(year from day) + 1 else extract(year from day)
                     end as season
                 from summary where iemid = :iemid and {varname} is not null
                 ORDER by day ASC
-            """),
+            """,
+                    varname=varname,
+                    vin=vin,
+                ),
                 conn,
                 params={"iemid": ctx["_nt"].sts[station]["iemid"]},
                 parse_dates="day",

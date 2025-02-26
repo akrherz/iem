@@ -3,7 +3,7 @@
 from io import StringIO
 
 import pandas as pd
-from pyiem.database import get_sqlalchemy_conn
+from pyiem.database import get_sqlalchemy_conn, sql_helper
 from pyiem.webutil import iemapp
 
 
@@ -12,20 +12,20 @@ def application(_environ, start_response):
     """Go Main Go"""
     with get_sqlalchemy_conn("iem") as conn:
         amsi4 = pd.read_sql(
-            """
+            sql_helper("""
         SELECT to_char(day + '16 hours'::interval,
             'YYYY-MM-DD HH24:MI') as valid,
         pday as coop, day
         from summary s JOIN stations t on (s.iemid = t.iemid)
         where t.id = 'AMSI4' and day > '2017-07-25' and pday >= 0
         ORDER by day ASC
-        """,
+        """),
             conn,
             index_col="valid",
         )
     with get_sqlalchemy_conn("isuag") as conn:
         df = pd.read_sql(
-            """
+            sql_helper("""
         SELECT to_char(valid, 'YYYY-MM-DD HH24:MI') as valid,
         case when extract(hour from valid) > 16 then
             date(valid + '8 hours'::interval) else date(valid) end
@@ -35,7 +35,7 @@ def application(_environ, start_response):
         from sm_hourly where station = 'BOOI4'
         and valid > '2017-07-25' and (rain_in_tot > 0 or rain_in_2_tot > 0)
         ORDER by valid ASC
-        """,
+        """),
             conn,
             index_col="valid",
         )
@@ -65,7 +65,7 @@ def application(_environ, start_response):
             ],
             classes="table table-striped tableFixHead",
             na_rep="-",
-            float_format="%.2f",
+            float_format="{:.2f}".format,
             index=False,
         )
     sio.seek(0)

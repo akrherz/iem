@@ -21,7 +21,7 @@ $t->jsextra = <<<EOM
 <script src="/vendor/highcharts/10.1.0/modules/accessibility.js"></script>
 <script src="/vendor/highcharts/10.1.0/modules/exporting.js"></script>
 <script src="/vendor/highcharts/10.1.0/modules/heatmap.js"></script>
-<script src="app.js?v=2"></script>
+<script src="app.js?v=3"></script>
 EOM;
 
 $t->content = <<<EOM
@@ -34,15 +34,15 @@ $t->content = <<<EOM
     <div class="row">
         <div class="col-md-2" style="padding-left: 30px; height: 700px;">
             <strong>Symbol Legend:</strong>
-            <br /><input type="checkbox" id="isusm" checked="checked" onclick="changeStations(this);">
+            <br /><input type="checkbox" class="cs" id="isusm" checked="checked">
               <label for="isusm"><img src="img/isu.svg" style="height: 30px;"> ISU Soil Moisture</label>
-            <br /><input type="checkbox" id="asos" checked="checked" onclick="changeStations(this);">
+            <br /><input type="checkbox" class="cs" id="asos" checked="checked">
               <label for="asos"><img src="img/airport.svg" style="height: 30px;"> Airports</label>
-            <br /><input type="checkbox" id="coop" checked="checked" onclick="changeStations(this);">
+            <br /><input type="checkbox" class="cs" id="coop" checked="checked">
               <label for="coop"><img src="img/green_dot.svg" style="height: 30px;"> Climate Stations</label>
-            <br /><input type="checkbox" id="cd" checked="checked" onclick="changeStations(this);">
+            <br /><input type="checkbox" class="cs" id="cd" checked="checked">
               <label for="cd"><img src="img/blue_square.svg" style="height: 30px;"> Climate Districts </label>
-            <br /><input type="checkbox" id="state" checked="checked" onclick="changeStations(this);">
+            <br /><input type="checkbox" class="cs" id="state" checked="checked">
               <label for="state"><img src="img/red_square.svg" style="height: 30px;"> State Averages</label>
 
             <br /><div id="overviewmap"></div>

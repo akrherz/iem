@@ -10,12 +10,11 @@ from datetime import date
 import numpy as np
 import pandas as pd
 from matplotlib.ticker import MaxNLocator
-from pyiem.database import get_sqlalchemy_conn
+from pyiem.database import get_sqlalchemy_conn, sql_helper
 from pyiem.exceptions import NoDataFound
 from pyiem.plot import figure
 from pyiem.plot.util import fitbox
 from scipy.stats import gaussian_kde
-from sqlalchemy import text
 
 from iemweb.autoplot import ARG_STATION
 from iemweb.util import month2months
@@ -108,7 +107,7 @@ def get_df(ctx, period):
         ctx["mlabel"] = calendar.month_name[months[0]]
     with get_sqlalchemy_conn("coop") as conn:
         df = pd.read_sql(
-            text(
+            sql_helper(
                 """
                 SELECT high, low, (high+low)/2. as avgt from alldata WHERE
                 day >= :d1 and day <= :d2 and station = :station
