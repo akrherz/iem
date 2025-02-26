@@ -60,11 +60,10 @@ from io import BytesIO, StringIO
 
 import pandas as pd
 from pydantic import Field
-from pyiem.database import get_sqlalchemy_conn
+from pyiem.database import get_sqlalchemy_conn, sql_helper
 from pyiem.exceptions import IncompleteWebRequest
 from pyiem.network import Table as NetworkTable
 from pyiem.webutil import CGIModel, ListOrCSVType, iemapp
-from sqlalchemy import text
 
 DELIMITERS = {"comma": ",", "space": " ", "tab": "\t"}
 EXL = "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"
@@ -179,9 +178,9 @@ def application(environ, start_response):
     if not stations:
         raise IncompleteWebRequest("Missing GET parameter stations=")
 
-    tbl = "alldata"
+    table = "alldata"
     if src in ["soil", "traffic"]:
-        tbl = f"alldata_{src}"
+        table = f"alldata_{src}"
     network = environ["network"]
     nt = NetworkTable(network, only_online=False)
     if "_ALL" in stations:
@@ -192,10 +191,11 @@ def application(environ, start_response):
         "sts": environ["sts"],
         "ets": environ["ets"],
     }
-    sql = text(
-        f"SELECT *, valid at time zone :tzname as obtime from {tbl} "
+    sql = sql_helper(
+        "SELECT *, valid at time zone :tzname as obtime from {table} "
         "WHERE station = ANY(:ids) and valid BETWEEN :sts and :ets "
-        "ORDER by valid ASC"
+        "ORDER by valid ASC",
+        table=table,
     )
     with get_sqlalchemy_conn("rwis") as conn:
         df = pd.read_sql(sql, conn, params=params)
