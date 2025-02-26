@@ -216,16 +216,9 @@ $t->headextra = <<<EOF
 <link rel="stylesheet" type="text/css" href="/vendor/select2/4.0.3/select2.min.css"/ >
 <link type="text/css" href="/vendor/jquery-datatables/1.10.20/datatables.min.css" rel="stylesheet" />
 EOF;
-$t->jsextra = <<<EOF
+$t->jsextra = <<<EOM
 <script src="/vendor/select2/4.0.3/select2.min.js"></script>
 <script src='/vendor/jquery-datatables/1.10.20/datatables.min.js'></script>
-<script>
-$(document).ready(function(){
-    $(".iemselect2").select2();
-});
-$('#makefancy').click(function(){
-    $("#thetable").DataTable();
-});
-</script>
-EOF;
+<script src="cf6table.js"></script>
+EOM;
 $t->render('full.phtml');
