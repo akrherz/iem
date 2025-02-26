@@ -177,7 +177,7 @@ def do_ob_work(iconn, rconn, first_updated, last_updated):
             LOG.info("Processed %s rows", i)
             rconn.commit()
     rconn.commit()
-    LOG.info("Processed %s rows, deleted %s", i, deleted)
+    LOG.info("Processed %s rows, deleted %s", res.rowcount, deleted)
 
 
 def process_obs(first_updated, last_updated):
