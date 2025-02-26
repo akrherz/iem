@@ -94,6 +94,7 @@ class MyModel(CGIModel):
     minute2: int = Field(0, description="The end minute, if not using ets")
 
     @field_validator("tz", mode="before")
+    @classmethod
     def check_tz(cls, value):
         """Ensure the timezone is valid."""
         try:
