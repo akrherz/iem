@@ -329,6 +329,9 @@ function initUI(){
     $(".maprow img").click((event) => {
         loadImage(event.target);
     });
+    $(".cs").click((event) => {
+        changeStations(event.target);
+    });
 }
 
 // https://stackoverflow.com/questions/48712560

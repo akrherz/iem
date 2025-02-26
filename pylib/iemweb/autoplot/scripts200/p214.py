@@ -11,10 +11,9 @@ values, the presented timestamp is not of much use.
 from datetime import date, datetime
 
 import pandas as pd
-from pyiem.database import get_sqlalchemy_conn
+from pyiem.database import get_sqlalchemy_conn, sql_helper
 from pyiem.exceptions import NoDataFound
 from pyiem.plot import figure_axes
-from sqlalchemy import text
 
 from iemweb.util import month2months
 
@@ -176,8 +175,8 @@ def add_data(ctx):
     direction = "DESC" if agg == "max" else "ASC"
     with get_sqlalchemy_conn("asos") as conn:
         ctx["df"] = pd.read_sql(
-            text(
-                f"""
+            sql_helper(
+                """
             WITH data as (
                 SELECT {x}::{cast} as x, ({y}) as yv,
                 first_value(valid at time zone 'UTC') OVER (
@@ -190,7 +189,12 @@ def add_data(ctx):
                 ORDER by x ASC)
             SELECT x, {agg}(yv) as y, max(timestamp) as utc_valid from data
             GROUP by x ORDER by x ASC
-        """
+        """,
+                x=x,
+                cast=cast,
+                y=y,
+                agg=agg,
+                direction=direction,
             ),
             conn,
             params={
