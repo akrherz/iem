@@ -157,11 +157,12 @@ def process_obs(first_updated, last_updated):
         rcursor.execute(
             """INSERT into alldata (station, valid, tmpf,
             dwpf, drct, sknt, tfs0, tfs1, tfs2, tfs3, subf, gust, tfs0_text,
-            tfs1_text, tfs2_text, tfs3_text, pcpn, vsby) VALUES (%(station)s,
+            tfs1_text, tfs2_text, tfs3_text, pcpn, vsby, feel, relh)
+            VALUES (%(station)s,
             %(valid)s,%(tmpf)s,%(dwpf)s,round(%(drct)s::numeric, 0),%(sknt)s,
             %(tsf0)s,%(tsf1)s,%(tsf2)s,%(tsf3)s,%(rwis_subf)s,%(gust)s,
-            %(scond0)s,
-            %(scond1)s,%(scond2)s,%(scond3)s,%(pday)s,%(vsby)s)""",
+            %(scond0)s,%(scond1)s,%(scond2)s,%(scond3)s,
+            %(pday)s,%(vsby)s,%(feel)s,%(relh)s)""",
             row,
         )
     rcursor.close()

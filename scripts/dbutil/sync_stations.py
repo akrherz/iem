@@ -96,7 +96,7 @@ def sync(df, dbname):
 def main():
     """Go Main Go"""
     subscribers = (
-        "iem isuag coop hads hml asos asos1min postgis raob"
+        "iem isuag coop hads hml asos asos1min postgis raob rwis other"
     ).split()
 
     with get_sqlalchemy_conn("mesosite") as conn:

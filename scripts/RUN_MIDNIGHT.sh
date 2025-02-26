@@ -4,8 +4,8 @@ MM=$(date -u +'%m')
 YYYY=$(date -u +'%Y')
 
 # Need this done so that certain variables are there for DEP
-cd asos
-python compute_daily.py
+cd summary
+python compute_daily.py --date=$(date --date '1 day ago' +'%Y-%m-%d')
 
 cd ../other
 python update_daily_srad.py --date=$(date --date '1 day ago' +'%Y-%m-%d')
