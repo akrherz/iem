@@ -11,6 +11,8 @@ This service emits RWIS data.
 Changelog
 ---------
 
+- 2025-02-26: Added variable support for `relh` and `feel`, but these
+  variables are not fully available yet over the archive.
 - 2024-09-19: Fix bug with no variables returned when ``vars`` is not set
 - 2024-08-01: Initital documentation release and pydantic validation
 
