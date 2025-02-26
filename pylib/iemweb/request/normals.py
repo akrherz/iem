@@ -76,7 +76,7 @@ class Schema(CGIModel):
     source: str = Field(
         default="ncei_climate91",
         description="The source of the data, defaults to ncei_climate91",
-        pattern=r"^(climate\d?\d?|ncdc_climate\d?\d?|ncei_climate\d?\d?)$",
+        pattern=r"^(climate(51|71|81)?|ncdc_climate[78]1|ncei_climate91)$",
     )
     station: str = Field(
         default="IA0000",

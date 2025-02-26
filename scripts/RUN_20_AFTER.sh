@@ -14,11 +14,7 @@ python download_imerg.py --valid=$(date -u --date '35 hours ago' +'%Y-%m-%dT%H:3
 python download_imerg.py --valid=$(date -u --date '6 months ago' +'%Y-%m-%dT%H:00:00')
 python download_imerg.py --valid=$(date -u --date '6 months ago' +'%Y-%m-%dT%H:30:00')
 
-cd ../ingestors/madis
-python extract_hfmetar.py --hours=0 &
-python to_iemaccess.py --valid=$(date -u --date '1 hour ago' +'%Y-%m-%dT%H:%M:00') &
-
-cd ../../plots
+cd ../plots
 ./RUN_PLOTS
 
 cd ../ndfd
@@ -35,3 +31,8 @@ python uscrn_ingest.py
 
 cd ../uscrn
 python compute_uscrn_pday.py --date=$(date '+%Y-%m-%d')
+
+# Run later to keep from conflicting with RUN_20MIN.sh to_iemaccess.py
+cd ../ingestors/madis
+python extract_hfmetar.py --hours=0 &
+python to_iemaccess.py --valid=$(date -u --date '1 hour ago' +'%Y-%m-%dT%H:%M:00')

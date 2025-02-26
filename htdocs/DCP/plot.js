@@ -173,8 +173,8 @@ Ext.onReady(function () {
         lazyRender: true,
         id: 'stateselector',
         listeners: {
-            select: function (cb, record, idx) {
-                stationStore.load({ add: false, params: { network: record.data.abbr + "_DCP" } });
+            select: (_cb, record, _idx) => {
+                stationStore.load({ add: false, params: { network: `${record.data.abbr}_DCP` } });
                 return false;
             }
         }
