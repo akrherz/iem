@@ -115,9 +115,22 @@ def build_roadstate_xref(ncvar):
     return xref
 
 
-def process(fn: str):
+def process(fn: str, valid: datetime):
     """Process the MADIS file"""
     pgconn, icursor = get_dbconnc("iem")
+    res = icursor.execute(
+        """
+    select id ||'_'|| network || '_'||
+    to_char(valid at time zone 'UTC', 'YYYYMMDDHH24MI') as key
+    from current_log c JOIN
+    stations t on (c.iemid = t.iemid) WHERE
+    (t.network ~* 'RWIS' or t.network = 'VTWAC') and valid >= %s
+    and valid < %s
+    """,
+        (valid, valid + timedelta(hours=1)),
+    )
+    LOG.info("Found %s current_log entries to dedup", res.rowcount)
+    dbhaskeys = [x["key"] for x in res]
     with ncopen(fn, timeout=300) as nc:
         stations = chartostring(nc.variables["stationId"][:])
         providers = chartostring(nc.variables["dataProvider"][:])
@@ -162,6 +175,7 @@ def process(fn: str):
         vsby = convert_value(nc.variables["visibility"][:], "meter", "mile")
 
     updates = 0
+    dupes = 0
     dirty = False
     for recnum, provider in enumerate(providers):
         name = names[recnum]
@@ -173,6 +187,9 @@ def process(fn: str):
         ticks = obtime[recnum]
         ts = datetime(1970, 1, 1) + timedelta(seconds=ticks)
         ts = ts.replace(tzinfo=ZoneInfo("UTC"))
+        if f"{sid}_{network}_{ts:%Y%m%d%H%M}" in dbhaskeys:
+            dupes += 1
+            continue
         iem = Observation(sid, network, ts)
 
         if rstate1[recnum] is not np.ma.masked:
@@ -253,7 +270,13 @@ def process(fn: str):
         os.chdir("../../dbutil")
         subprocess.call(["sh", "SYNC_STATIONS.sh"])
 
-    LOG.info("Found %s/%s updates in %s", updates, len(providers), fn)
+    LOG.info(
+        "%s had %s rows, with %s updates and %s dupes",
+        fn,
+        len(providers),
+        updates,
+        dupes,
+    )
     icursor.close()
     pgconn.commit()
     pgconn.close()
@@ -270,7 +293,7 @@ def main(valid: datetime):
         fn = find_file(variant, valid)
         if fn is None:
             continue
-        process(fn)
+        process(fn, valid)
         if fn.startswith("/tmp/"):
             os.unlink(fn)
 
