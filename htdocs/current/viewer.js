@@ -113,7 +113,7 @@ function findFeatureByCid(cid) {
     return feature;
 }
 
-function handleRWISClick(img) {
+function handleRWISClick(img) {  // skipcq
     $("#rwismain").attr('src', $(img).attr("src"));
 }
 
@@ -259,18 +259,6 @@ function refreshJSON() {
     }));
 }
 
-// Set the current camera by cid
-
-function setCamera(cid) {
-    const feature = findFeatureByCid(cid);
-    if (feature) {
-        currentCameraFeature = feature;
-    }
-    $(`#c${cid}`).prop('checked', true);
-    updateHashLink();
-    updateCamera();
-}
-
 function parseURI() {
     const tokens = window.location.href.split('#');
     if (tokens.length == 2) {
@@ -286,6 +274,10 @@ function parseURI() {
 }
 
 function buildUI() {
+
+    $("#liveshot").click(() => {
+        liveShot();
+    });
 
     // Time increment and decrement buttons
     $("button.timecontrol").click((evt) => {
