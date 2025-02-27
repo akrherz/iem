@@ -15,10 +15,14 @@ $bogus = 0;
 $y1select = yearSelect2(1996, date("Y"), "year1");
 $m1select = monthSelect(1, "month1");
 $d1select = daySelect2(1, "day1");
+$min1select = minuteSelect(0, "minute1");
+$hour1select = hourSelect(0, "hour1");
 
 $y2select = yearSelect2(1996, date("Y"), "year2");
 $m2select = monthSelect(date("m"), "month2");
 $d2select = daySelect2(date("d"), "day2");
+$min2select = minuteSelect(0, "minute2");
+$hour2select = hourSelect(0, "hour2");
 
 $t->headextra = <<<EOM
 <style type="text/css">
@@ -75,23 +79,26 @@ timezone you specify.</i>
 </SELECT>
 
 <h3>3. Select Start/End Time:</h3><br>
-<i>The end date is not inclusive.</i>
+<i>This defines the time domain to look for TAFs <strong>issued</strong>
+within.</i>
 <table class="table table-condensed">
 <thead>
   <tr>
     <td></td>
-    <th>Year</th><th>Month</th><th>Day</th>
+    <th>Year</th><th>Month</th><th>Day</th><th>Hour</th><th>Minute</th>
   </tr>
 </thead>
 <tbody>
   <tr>
     <th>Start:</th>
     <td>{$y1select}</td><td>{$m1select}</td><td>{$d1select}</td>
+    <td>{$hour1select}</td><td>{$min1select}</td>
   </tr>
 
   <tr>
     <th>End:</th>
     <td>{$y2select}</td><td>{$m2select}</td><td>{$d2select}</td>
+    <td>{$hour2select}</td><td>{$min2select}</td>
   </tr>
 </tbody>
 </table>
@@ -101,6 +108,10 @@ timezone you specify.</i>
     <option value="comma">Comma</option>
     <option value="excel">Excel</option>
 </select>
+
+<h3>5. Filter to last TAF per station:</h3>
+<input type="checkbox" name="last" value="1" id="last">
+<label for="last">Only include the last TAF for each station</label>
 
 <h3>Submit Form:</h3><br>
 <input type="submit" value="Process Data Request">

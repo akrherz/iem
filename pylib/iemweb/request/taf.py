@@ -1,12 +1,13 @@
 """.. title:: Terminal Aerodrome Forecast (TAF) Data
 
-Return to `API Services </api/>`_ or `TAF Request </request/taf.php>`_.
+Return to `API Services </api/#cgi>`_ or `TAF Request </request/taf.php>`_.
 
 Documentation for /cgi-bin/request/taf.py
 -----------------------------------------
 
 This service provides access to Terminal Aerodrome Forecast (TAF) data for
-specified stations and time ranges.
+specified stations and time ranges. The time range limits the TAF issuance
+timestamps, not the forecast valid times.
 
 Example Usage
 ~~~~~~~~~~~~~
@@ -25,6 +26,12 @@ Request the past 240 hours of TAF data for Chicago O'Hare in Excel format:
 https://mesonet.agron.iastate.edu/cgi-bin/request/taf.py\
 ?station=ORD&hours=240&fmt=excel
 
+Request the last TAF issuance for Des Moines valid prior to 00 UTC on 21 August
+2024 in CSV format:
+
+https://mesonet.agron.iastate.edu/cgi-bin/request/taf.py\
+?station=DSM&ets=2024-08-21T00:00Z&sts=2024-08-19T00:00Z&fmt=csv&last=1
+
 """
 
 from datetime import timedelta
@@ -33,10 +40,9 @@ from zoneinfo import ZoneInfo
 
 import pandas as pd
 from pydantic import AwareDatetime, Field
-from pyiem.database import get_sqlalchemy_conn
+from pyiem.database import get_sqlalchemy_conn, sql_helper
 from pyiem.util import utc
 from pyiem.webutil import CGIModel, ListOrCSVType, iemapp
-from sqlalchemy import text
 
 EXL = "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"
 
@@ -56,6 +62,14 @@ class MyModel(CGIModel):
     fmt: str = Field(
         "csv",
         description="The format of the output file, either 'csv' or 'excel'",
+    )
+    last: bool = Field(
+        default=False,
+        description=(
+            "If True, the last TAF issuance for the station(s) is returned, "
+            "which is defined as last issuance prior to or equal to the end "
+            "timestamp."
+        ),
     )
     tz: str = Field("UTC", description="The timezone to use for timestamps")
     sts: AwareDatetime = Field(
@@ -87,16 +101,17 @@ def run(start_response, environ):
     """Get data!"""
     with get_sqlalchemy_conn("asos") as dbconn:
         df = pd.read_sql(
-            text(
+            sql_helper(
                 """
             select t.station, t.valid at time zone 'UTC' as valid,
             f.valid at time zone 'UTC' as fx_valid, raw, is_tempo,
             end_valid at time zone 'UTC' as fx_valid_end,
             sknt, drct, gust, visibility,
-            presentwx, skyc, skyl, ws_level, ws_drct, ws_sknt, product_id
+            presentwx, skyc, skyl, ws_level, ws_drct, ws_sknt, product_id,
+            rank() OVER (PARTITION by t.station ORDER by t.valid DESC)
             from taf t JOIN taf_forecast f on (t.id = f.taf_id)
-            WHERE t.station = ANY(:stations) and f.valid >= :sts
-            and f.valid < :ets order by t.valid
+            WHERE t.station = ANY(:stations) and t.valid >= :sts
+            and t.valid < :ets order by t.valid asc, f.valid asc
             """
             ),
             dbconn,
@@ -114,6 +129,9 @@ def run(start_response, environ):
             df[col] = (
                 df[col].dt.tz_localize(tzinfo).dt.strftime("%Y-%m-%d %H:%M")
             )
+    if environ["last"]:
+        df = df[df["rank"] == 1]
+    df = df.drop(columns=["rank"])
 
     bio = BytesIO()
     if environ["fmt"] == "excel":
@@ -135,10 +153,7 @@ def run(start_response, environ):
 
 def rect(station):
     """Cleanup."""
-    station = station.upper()
-    if len(station) == 3:
-        return f"K{station}"
-    return station
+    return station if len(station) == 4 else f"K{station}"
 
 
 @iemapp(help=__doc__, schema=MyModel)
@@ -147,5 +162,5 @@ def application(environ, start_response):
     if environ["hours"] is not None:
         environ["ets"] = utc()
         environ["sts"] = environ["ets"] - timedelta(hours=environ["hours"])
-    environ["station"] = [rect(x) for x in environ["station"]]
+    environ["station"] = [rect(x.upper()) for x in environ["station"]]
     return [run(start_response, environ)]
