@@ -15,7 +15,7 @@ $year = get_int404("year", date("Y"));
 $smonth = get_int404("smonth", 5);
 $emonth = get_int404("emonth", 10);
 $sday = get_int404("sday", 1);
-$eday = get_int404("eday", 31);
+$eday = get_int404("eday", 1);
 $sts = mktime(0, 0, 0,  $smonth, $sday, $year);
 $ets = mktime(0, 0, 0, $emonth, $eday, $year);
 if ($ets > time()) {

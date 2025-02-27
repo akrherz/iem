@@ -79,6 +79,21 @@ $table = <<<EOF
 </thead>
 <tbody>
 EOF;
+
+$wxlookup = Array(
+    "1" => "FG",
+    "2" => "DNSEFG",
+    "3" => "TS",
+    "4" => "IP",
+    "5" => "GR",
+    "6" => "FZRA",
+    "7" => "DSTSTM",
+    "8" => "HZ",
+    "9" => "BLSN",
+    "X" => "TOR",
+);
+
+
 foreach ($arr as $entry) {
     $row = ($opt === "bystation") ? $entry : $entry["properties"];
     $ts = strtotime($row["valid"]);
@@ -102,6 +117,12 @@ foreach ($arr as $entry) {
             date("d", $ts)
         );
         $col1 = sprintf("<a href=\"%s\">%s</a>", $link, date("Md,y", $ts));
+    }
+    $wxcodes = "";
+    if (!is_null($row["wxcodes"])){
+        foreach (str_split($row["wxcodes"]) as $code) {
+            $wxcodes .= sprintf("%s ", $wxlookup[$code]);
+        }
     }
     $table .= sprintf(
         "
@@ -132,7 +153,7 @@ foreach ($arr as $entry) {
         $row["minutes_sunshine"],
         $row["possible_sunshine"],
         $row["cloud_ss"],
-        is_null($row["wxcodes"]) ? "": implode(" ", str_split($row["wxcodes"])),
+        trim($wxcodes),
     );
 }
 $table .= "</tbody></table>";
@@ -188,28 +209,31 @@ $t->content = <<<EOF
 
 <p><a name="wxcodes">1. Weather Codes</a>:
 
-<br />Here is a lookup table for what those weather codes mean.
+<br />The original CF6 text files use a symbol code to identify weather
+conditions.  The table presented on this page converts these codes into
+perhaps a slightly more human readable format.  The codes are as follows:
 
 <br />
 <table class="table table-condensed table-striped table-bordered table-hover">
 <thead>
-<tr><th>Code</th><th>Meaning</th></tr>
+<tr><th>CF6 Code</th><th>Abbrev</th><th>Meaning</th></tr>
 </thead>
 <tbody>
-<tr><td>1</td><td>Fog or Mist</td></tr>
-<tr><td>2</td><td>Fog or Vis 0.25 mile or less</td></tr>
-<tr><td>3</td><td>Thunder</td></tr>
-<tr><td>4</td><td>Ice pellets</td></tr>
-<tr><td>5</td><td>Hail</td></tr>
-<tr><td>6</td><td>Freezing Rain or Drizzle</td></tr>
-<tr><td>7</td><td>Duststorm or Sandstorm vis 0.25 mile or less</td></tr>
-<tr><td>8</td><td>Smoke or Haze</td></tr>
-<tr><td>9</td><td>Blowing Snow</td></tr>
-<tr><td>X</td><td>Tornado</td></tr>
+<tr><td>1</td><td>FG</td><td>Fog or Mist</td></tr>
+<tr><td>2</td><td>DNSEFG</td><td>Fog or Vis 0.25 mile or less</td></tr>
+<tr><td>3</td><td>TS</td><td>Thunder</td></tr>
+<tr><td>4</td><td>IP</td><td>Ice pellets</td></tr>
+<tr><td>5</td><td>GR</td><td>Hail</td></tr>
+<tr><td>6</td><td>FZRA</td><td>Freezing Rain or Drizzle</td></tr>
+<tr><td>7</td><td>DSTSTM</td><td>Duststorm or Sandstorm vis 0.25 mile or less</td></tr>
+<tr><td>8</td><td>HZ</td><td>Smoke or Haze</td></tr>
+<tr><td>9</td><td>BLSN</td><td>Blowing Snow</td></tr>
+<tr><td>X</td><td>TOR</td><td>Tornado</td></tr>
 </tbody>
 </table></p>
 
 EOF;
+
 $t->headextra = <<<EOF
 <link rel="stylesheet" type="text/css" href="/vendor/select2/4.0.3/select2.min.css"/ >
 <link type="text/css" href="/vendor/jquery-datatables/1.10.20/datatables.min.css" rel="stylesheet" />
