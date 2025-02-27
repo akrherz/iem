@@ -2,19 +2,20 @@
 require_once "../../../config/settings.inc.php";
 require_once "../../../include/database.inc.php";
 require_once "../../../include/station.php";
+require_once "../../../include/forms.php";
 require_once "../../../include/jpgraph/jpgraph.php";
 require_once "../../../include/jpgraph/jpgraph_line.php";
 require_once "../../../include/jpgraph/jpgraph_plotline.php";
 require_once "../../../include/jpgraph/jpgraph_date.php";
 require_once "../../../include/jpgraph/jpgraph_bar.php";
 
-$station = isset($_GET['station']) ? $_GET['station'] : "DSM";
-$network = isset($_GET['network']) ? $_GET['network'] : 'IA_ASOS';
-$year = isset($_GET['year']) ? $_GET['year'] : date("Y");
-$smonth = isset($_GET['smonth']) ? $_GET['smonth'] : 5;
-$emonth = isset($_GET['emonth']) ? $_GET['emonth'] : 10;
-$sday = isset($_GET['sday']) ? $_GET['sday'] : 1;
-$eday = isset($_GET['eday']) ? $_GET['eday'] : 1;
+$station = isset($_GET['station']) ? xssafe($_GET['station']) : "DSM";
+$network = isset($_GET['network']) ? xssafe($_GET['network']) : 'IA_ASOS';
+$year = get_int404("year", date("Y"));
+$smonth = get_int404("smonth", 5);
+$emonth = get_int404("emonth", 10);
+$sday = get_int404("sday", 1);
+$eday = get_int404("eday", 31);
 $sts = mktime(0, 0, 0,  $smonth, $sday, $year);
 $ets = mktime(0, 0, 0, $emonth, $eday, $year);
 if ($ets > time()) {
@@ -81,8 +82,11 @@ for ($i = 0; $row = pg_fetch_array($rs); $i++) {
     $p = $row["precip"];
     $climate[$i] = $p;
     $atot += $p;
-    if (@$aobs[$i] > 0) $cdiff[$i] = $aobs[$i] - $atot;
-    else $cdiff[$i] = "";
+    if (array_key_exists($i, $aobs) && $aobs[$i] > 0) {
+        $cdiff[$i] = $aobs[$i] - $atot;
+    } else {
+        $cdiff[$i] = "";
+    }
     $aclimate[$i] = $atot;
     $xlabels[$i] = "";
     $times[$i] = strtotime($row["valid"]);
