@@ -50,6 +50,7 @@ class Schema(CGIModel):
     tz: str = Field("UTC", description="Timezone of valid date")
 
     @field_validator("tz", mode="before")
+    @classmethod
     def validate_tz(cls, value):
         """Ensure the timezone is valid."""
         try:

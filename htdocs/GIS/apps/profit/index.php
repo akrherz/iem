@@ -16,46 +16,7 @@ $t->jsextra = <<<EOF
 <script src="/vendor/openlayers/{$OL}/ol.js" type="text/javascript"></script>
 <script src="/vendor/jquery-ui/1.11.4/jquery-ui.js"></script>
 <script src='/vendor/openlayers/{$OL}/ol-layerswitcher.js'></script>
-<script>
-var map;
-var player;
-$(document).ready(function(){
-    player = new ol.layer.Tile({
-                        title: 'Profitability',
-                        visible: true,
-                        source: new ol.source.XYZ({
-                                url : '/c/tile.py/1.0.0/profit2010/{z}/{x}/{y}.png'
-                        })
-                });
-        
-        map = new ol.Map({
-                target: 'map',
-                layers: [new ol.layer.Tile({
-            title: 'OpenStreetMap',
-            visible: true,
-            source: new ol.source.OSM()
-                }), player],
-        view: new ol.View({
-                        projection: 'EPSG:3857',
-                    center: ol.proj.transform([-93.5, 42.1], 'EPSG:4326', 'EPSG:3857'),
-            zoom: 7
-        
-                })
-        });
-    var layerSwitcher = new ol.control.LayerSwitcher();
-    map.addControl(layerSwitcher);
-
-    $("#yearselect").buttonset();
-    $( '#yearselect input[type=radio]').change(function(){
-        player.setSource(new ol.source.XYZ({
-            url : '/c/tile.py/1.0.0/profit'+this.value+'/{z}/{x}/{y}.png'
-        }));
-    });
-    $("#disclaimer_btn").click(function(){
-        $('#disclaimer').dialog({width: '50%', height: 400});
-    });
-});
-</script>
+<script src="index.js"></script>
 EOF;
 
 $t->content = <<<EOF
@@ -136,7 +97,7 @@ surveys</a> (ISU extension, 2010-2013, 2015), adjusted to corn
 suitability rating (CSR). Crop production costs were taken from the
 <a href="http://www.extension.iastate.edu/agdm/crops/html/a1-20.html">ISU
 Ag Decision Maker cost estimates</a>.</p>
-        
+
 </div><!-- ./disclaimer -->
 </div>
 

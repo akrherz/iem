@@ -91,6 +91,7 @@ class Schema(CGIModel):
     )
 
     @field_validator("sts", "ets", mode="before")
+    @classmethod
     def legacy_timestamps(cls, value, _info):
         """Allow the junky old way to work."""
         fmt = "%Y%m%d%H%M"

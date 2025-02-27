@@ -120,6 +120,7 @@ class Schema(CGIModel):
     )
 
     @field_validator("threshold", mode="before")
+    @classmethod
     def check_threshold(cls, value):
         """Allow empty string."""
         return None if value == "" else value

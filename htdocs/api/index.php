@@ -241,6 +241,7 @@ help pages for these services:</p>
 <li><a href="/cgi-bin/request/gis/watch_by_county.py?help">SPC Watch by County (/cgi-bin/request/gis/watch_by_county.py)</a></li>
 <li><a href="/cgi-bin/request/tempwind_aloft.py?help">Temp Winds Aloft (/cgi-bin/request/tempwind_aloft.py)</a></li>
 <li><a href="/cgi-bin/request/taf.py?help">Terminal Aerodome Forecast TAF (/cgi-bin/request/taf.py)</a></li>
+<li><a href="/cgi-bin/request/uscrn.py?help">US Climate Reference Network (/cgi-bin/request/uscrn.py)</a></li>
 <li><a href="/cgi-bin/request/gis/wpc_mpd.py?help">WPC Mesoscale Precip Discussions (/cgi-bin/request/gis/wpc_mpd.py)</a></li>
 <li><a href="/cgi-bin/mywindrose.py?help">Windrose Generator (/cgi-bin/mywindrose.py)</a></li>
 
@@ -251,7 +252,6 @@ help pages for these services:</p>
 <p>In general, we do not try to break things but bugs happen.  As always,
 please <a href="/info/contacts.php">email us</a> with any concerns you have.  We
 are extremely responsive to email :)
-
 
 EOM;
 

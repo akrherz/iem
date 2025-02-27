@@ -287,6 +287,7 @@ class MyModel(CGIModel):
         return value
 
     @field_validator("report_type", mode="after")
+    @classmethod
     def ensure_ints(cls, value: list):
         """Ensure that each value is a valid integer."""
         _ = [int(v) for v in value]  # skipcq

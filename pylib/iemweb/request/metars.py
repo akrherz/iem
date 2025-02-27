@@ -42,6 +42,7 @@ class Schema(CGIModel):
     )
 
     @field_validator("valid", mode="before")
+    @classmethod
     def parse_valid(cls, value):
         """Ensure valid is a valid datetime"""
         return datetime.strptime(value, "%Y%m%d%H").replace(

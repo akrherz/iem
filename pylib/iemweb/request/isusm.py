@@ -116,6 +116,7 @@ class Schema(CGIModel):
     minute2: int = Field(0, description="End minute if ets is not provided")
 
     @field_validator("tz", mode="after")
+    @classmethod
     def check_tz(cls, value):
         """Ensure the timezone is valid."""
         ZoneInfo(value)

@@ -68,6 +68,7 @@ class Schema(CGIModel):
     day2: int = Field(None, description="The end day, when ets is unset.")
 
     @field_validator("tz", mode="after")
+    @classmethod
     def validate_tz(cls, value):
         """Ensure the timezone is valid."""
         try:
