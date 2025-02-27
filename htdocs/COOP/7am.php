@@ -1,5 +1,5 @@
 <?php
-$OL = "8.1.0";
+$OL = "10.4.0";
 require_once "../../config/settings.inc.php";
 define("IEM_APPID", 86);
 require_once "../../include/mlib.php";
@@ -23,14 +23,14 @@ $t->headextra = <<<EOF
 </style>
 EOF;
 
-$t->jsextra = <<<EOF
+$t->jsextra = <<<EOM
 <script src="/vendor/openlayers/{$OL}/ol.js" type="text/javascript"></script>
 <script src="/vendor/jquery-ui/1.11.4/jquery-ui.js"></script>
 <script src='/vendor/openlayers/{$OL}/ol-layerswitcher.js'></script>
-<script src='7am-app.js?v=9'></script>
-EOF;
+<script src='7am-app.js?v=10'></script>
+EOM;
 
-$t->content = <<<EOF
+$t->content = <<<EOM
 <ol class="breadcrumb">
     <li><a href="/COOP/">NWS COOP</a></li>
     <li class="active">7 AM - 24 Hour Precipitation Analysis</li>
@@ -43,7 +43,7 @@ $t->content = <<<EOF
 <div class="row">
 <div class="col-md-6">
         <strong>Parameter to Plot:</strong>
-    <select onChange="javascript: updateMap();" id="renderattr">
+    <select id="renderattr">
         <option value='pday'>Precipitation</option>
         <option value='snow'>Snowfall</option>
         <option value='snowd'>Snow Depth [inch]</option>
@@ -69,5 +69,5 @@ $t->content = <<<EOF
   <p>This is the popover content</p>
 </div>
 
-EOF;
+EOM;
 $t->render("full.phtml");

@@ -1,5 +1,5 @@
 /* global $, ol */
-var renderattr = "pday";
+let renderattr = "pday";
 let map = null;
 let coopLayer = null;
 let azosLayer = null;
@@ -99,6 +99,9 @@ function get_tms_url() {
 }
 
 function buildUI() {
+    $("#renderattr").change(() => {
+        updateMap();
+    });
     //build up interface
     $("#datepicker").datepicker({
         dateFormat: "DD, d MM, yy",
