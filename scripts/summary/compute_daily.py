@@ -276,7 +276,11 @@ def main(dt: datetime):
         "RWIS": {"database": "rwis", "getobs": get_rwis_obs},
     }
     for netclass, meta in settings.items():
-        do(dt, netclass, meta)
+        try:
+            do(dt, netclass, meta)
+        except Exception as exp:
+            LOG.warning("compute_daily %s %s failed", netclass, dt)
+            LOG.exception(exp)
 
 
 if __name__ == "__main__":

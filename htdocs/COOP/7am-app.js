@@ -1,5 +1,5 @@
 /* global $, ol */
-var renderattr = "pday";
+let renderattr = "pday";
 let map = null;
 let coopLayer = null;
 let azosLayer = null;
@@ -74,8 +74,8 @@ function makeVectorLayer(dt, title, group) {
             projection: ol.proj.get('EPSG:3857'),
             url: `/geojson/7am.py?group=${group}&dt=${dt}`
         }),
-        style: function (feature) {
-            let txt = (feature.get(renderattr) == 0.0001) ? "T" : feature.get(renderattr);
+        style(feature) {
+            let txt = (feature.get(renderattr) === 0.0001) ? "T" : feature.get(renderattr);
             txt = (txt === null || txt === undefined) ? '.' : txt;
             return [new ol.style.Style({
                 text: new ol.style.Text({
@@ -99,6 +99,9 @@ function get_tms_url() {
 }
 
 function buildUI() {
+    $("#renderattr").change(() => {
+        updateMap();
+    });
     //build up interface
     $("#datepicker").datepicker({
         dateFormat: "DD, d MM, yy",
