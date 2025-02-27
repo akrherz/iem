@@ -132,7 +132,7 @@ foreach ($arr as $entry) {
         $row["minutes_sunshine"],
         $row["possible_sunshine"],
         $row["cloud_ss"],
-        $row["wxcodes"],
+        is_null($row["wxcodes"]) ? "": implode(" ", str_split($row["wxcodes"])),
     );
 }
 $table .= "</tbody></table>";
@@ -188,9 +188,7 @@ $t->content = <<<EOF
 
 <p><a name="wxcodes">1. Weather Codes</a>:
 
-<br />The numeric weather codes shown above are just concatenated values. For
-instance, a value of 12 implies a <code>1</code> and a <code>2</code> weather
-code.
+<br />Here is a lookup table for what those weather codes mean.
 
 <br />
 <table class="table table-condensed table-striped table-bordered table-hover">
