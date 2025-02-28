@@ -3,7 +3,7 @@ require_once "../../../config/settings.inc.php";
 require_once "../../../include/myview.php";
 $t = new MyView();
 
-$t->content = <<<EOF
+$t->content = <<<EOM
 
 <h3>Accessing "for public" chat rooms</h3>
 
@@ -31,5 +31,5 @@ configuration page for accessing the chatrooms.
     You will need to setup another jabber account to use with this service.</li>
 </ul>
 
-EOF;
+EOM;
 $t->render('single.phtml');

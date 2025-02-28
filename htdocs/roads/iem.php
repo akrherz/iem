@@ -136,7 +136,7 @@ if ($thumbnail) {
 }
 
 $logokey = new layerObj($map);
-$logokey->__set("type", MS_SHP_POINTZ);
+$logokey->__set("type", MS_SHAPE_POINT);
 $logokey->__set("transform", MS_FALSE);
 $logokey->__set("status", MS_ON);
 $logokey->__set("labelcache", MS_ON);

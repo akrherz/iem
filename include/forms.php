@@ -25,7 +25,7 @@ function get_str404($name, $default = null, $maxlength = null)
         return $default;
     }
     $val = xssafe($_REQUEST[$name]);
-    if ($maxlength !== null && strlen($val) > $maxlength){
+    if ($maxlength !== null && strlen($val) > $maxlength) {
         http_response_code(404);
         die();
     }
@@ -351,7 +351,8 @@ function daySelect($selected)
 {
     $s = "<select name=\"day\">\n";
     for ($k = 1; $k < 32; $k++) {
-        $s .= sprintf('<option value="%s"%s>%s</option>',
+        $s .= sprintf(
+            '<option value="%s"%s>%s</option>',
             $k,
             ($k == intval($selected)) ? " SELECTED" : "",
             $k,
@@ -365,7 +366,8 @@ function daySelect2($selected, $name, $jsextra = '')
 {
     $s = "<select name='$name' {$jsextra}>\n";
     for ($k = 1; $k < 32; $k++) {
-        $s .= sprintf('<option value="%s"%s>%s</option>',
+        $s .= sprintf(
+            '<option value="%s"%s>%s</option>',
             $k,
             ($k == intval($selected)) ? " SELECTED" : "",
             $k,

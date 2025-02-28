@@ -94,7 +94,7 @@ foreach ($finalA as $key => $val) {
     $i = !$i;
 }
 
-$t->content = <<<EOF
+$t->content = <<<EOM
 <h3>MADIS QC Values</h3>
 <p>Here are the MADIS QC values for some of the networks
 in the IEM.  <font color="#ff0000">Red numbers</font> indicate that the 
@@ -104,7 +104,7 @@ average of all of the QC routines MADIS runs.  The 'Spatial' column is a
 result of the <i>Spatial Consistency Check</i>.</p>
 
 <form method="GET" name="switchNetwork">
- 
+
 {$sselect}
 
 <input type="submit" value="Switch Network">
@@ -143,5 +143,5 @@ result of the <i>Spatial Consistency Check</i>.</p>
 
 {$table}
 </table>
-EOF;
+EOM;
 $t->render('single.phtml');

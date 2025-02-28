@@ -1,14 +1,3 @@
 <?php
- require_once "../../config/settings.inc.php";
- require_once "../../include/myview.php";
- $t = new MyView();
- $t->title = "Projects";
-
- $t->content = <<<EOF
-<h3>Orphaned page, daryl should update at some point!</h3>
-
-<ul>
- <li><a href="iembot/">IEMBOT</a></li>
-</ul>
-EOF;
- $t->render('single.phtml');
+// Meh, just redirect to the archive page
+header("Location: /archive/");

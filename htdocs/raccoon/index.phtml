@@ -98,7 +98,7 @@ $h1select = gmtHourSelect($hour1, "hour1");
 $m2select = monthSelect2($month2, "month2");
 $d2select = daySelect2($day2, "day2");
 $h2select = gmtHourSelect($hour2, "hour2");
-$t->content = <<<EOF
+$t->content = <<<EOM
 {$e}
 <h3>IEM Raccoon</h3>
 
@@ -170,5 +170,5 @@ probably back fill imagery for the event.
 </table>
 <p><input type="submit" value="Make my powerpoint!" />
 </form>
-EOF;
+EOM;
 $t->render('single.phtml');

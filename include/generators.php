@@ -60,15 +60,16 @@ function get_news_by_tag($tag)
 function get_iemapps_tags($tagname)
 {
     // Get a html list for this tagname
-    $pgconn = iemdb("mesosite", PGSQL_CONNECT_FORCE_NEW, TRUE);
+    $pgconn = iemdb("mesosite");
+    $stname = uniqid("TAGSELECT");
     $rs = pg_prepare(
         $pgconn,
-        "TAGSELECT",
+        $stname,
         "SELECT name, description, url from iemapps WHERE "
             . "appid in (SELECT appid from iemapps_tags WHERE tag = $1) "
             . "ORDER by name ASC"
     );
-    $rs = pg_execute($pgconn, "TAGSELECT", array($tagname));
+    $rs = pg_execute($pgconn, $stname, array($tagname));
     $s = "<ul>";
     for ($i = 0; $row = pg_fetch_assoc($rs); $i++) {
         $s .= sprintf(
@@ -88,7 +89,7 @@ function get_website_stats()
     $val = $memcache->get("iemperf.json");
     if (!$val) {
         // Fetch from nagios
-        $val = @file_get_contents("https://nagios.agron.iastate.edu/cgi-bin/get_iemstats.py");  // skipcq
+        $val = file_get_contents("https://nagios.agron.iastate.edu/cgi-bin/get_iemstats.py");  // skipcq
         if ($val) $memcache->set("iemperf.json", $val, 90);
     }
     $bcolor = "success";

@@ -2,19 +2,20 @@
 require_once "../../../config/settings.inc.php";
 // Does the work of processing the download request...
 require_once "../../../include/database.inc.php";
+require_once "../../../include/forms.php";
 
-$year1 = isset($_GET["year1"]) ? $_GET["year1"] : die("No year1");
-$year2 = isset($_GET["year2"]) ? $_GET["year2"] : die("No year2");
-$hour1 = isset($_GET["hour1"]) ? $_GET["hour1"] : die("No hour1");
-$hour2 = isset($_GET["hour2"]) ? $_GET["hour2"] : die("No hour2");
-$day1 = isset($_GET["day1"]) ? $_GET["day1"] : die("No day1");
-$day2 = isset($_GET["day2"]) ? $_GET["day2"] : die("No day2");
-$month1 = isset($_GET["month1"]) ? $_GET["month1"] : die("No month1");
-$month2 = isset($_GET["month2"]) ? $_GET["month2"] : die("No month2");
+$year1 = isset($_GET["year1"]) ? xssafe($_GET["year1"]) : die("No year1");
+$year2 = isset($_GET["year2"]) ? xssafe($_GET["year2"]) : die("No year2");
+$hour1 = isset($_GET["hour1"]) ? xssafe($_GET["hour1"]) : die("No hour1");
+$hour2 = isset($_GET["hour2"]) ? xssafe($_GET["hour2"]) : die("No hour2");
+$day1 = isset($_GET["day1"]) ? xssafe($_GET["day1"]) : die("No day1");
+$day2 = isset($_GET["day2"]) ? xssafe($_GET["day2"]) : die("No day2");
+$month1 = isset($_GET["month1"]) ? xssafe($_GET["month1"]) : die("No month1");
+$month2 = isset($_GET["month2"]) ? xssafe($_GET["month2"]) : die("No month2");
 $vars = isset($_GET["vars"]) ? $_GET["vars"] : die("No vars");
-$sample = isset($_GET["sample"]) ? $_GET["sample"] : die("No Sample");
-$dl_option = isset($_GET["dl_option"]) ? $_GET["dl_option"] : die("No dl_option");
-$delim = isset($_GET["delim"]) ? $_GET["delim"] : die("No delim");
+$sample = isset($_GET["sample"]) ? xssafe($_GET["sample"]) : die("No Sample");
+$dl_option = isset($_GET["dl_option"]) ? xssafe($_GET["dl_option"]) : die("No dl_option");
+$delim = isset($_GET["delim"]) ? xssafe($_GET["delim"]) : die("No delim");
 
 $ts1 = mktime($hour1, 0, 0, $month1, $day1, $year1) or
     die("Invalid Date Format");
@@ -56,7 +57,7 @@ $d = array(
 $stations = $_GET["station"];
 $stationString = "(";
 foreach ($stations as $key => $value) {
-    $stationString .= " '" . $value . "',";
+    $stationString .= " '" . substr($value, 0, 5) . "',";
 }
 $stationString = substr($stationString, 0, -1);
 $stationString .= ")";
