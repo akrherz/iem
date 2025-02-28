@@ -1,5 +1,4 @@
-
-var iemdata = {};
+const iemdata = {};
 
 iemdata.nws_products = [
     ['AFD', 'Area Forecast Discussion'],

@@ -22,3 +22,35 @@ class MemcacheSingleton
         return self::$instance->memcache;
     }
 }
+
+function cacheable($cacheKeyPrefix, $cacheDuration = 3600) {
+    return function ($func) use ($cacheKeyPrefix, $cacheDuration) {
+        return function (...$args) use ($func, $cacheKeyPrefix, $cacheDuration) {
+            try {
+                $memcache = MemcacheSingleton::getInstance();
+                $mckey = $cacheKeyPrefix . implode('_', $args);
+                $val = $memcache->get($mckey);
+            } catch (Exception $e) {
+                // log error
+                openlog("IEM", LOG_PID | LOG_PERROR, LOG_LOCAL0);
+                syslog(LOG_ERR, "memcache error: " . $e->getMessage());
+                closelog();
+                $val = null;
+            }
+            if ($val) {
+                return $val;
+            }
+            $result = $func(...$args);
+            try{
+                $memcache->set($mckey, $result, $cacheDuration);
+            } catch (Exception $e) {
+                // log error
+                openlog("IEM", LOG_PID | LOG_PERROR, LOG_LOCAL0);
+                syslog(LOG_ERR, "memcache error: " . $e->getMessage());
+                closelog();
+                // ignore
+            }
+            return $result;
+        };
+    };
+}
