@@ -53,11 +53,11 @@ $tbl = sprintf("raw%s", date("Y_m", $ts));
 $dstr = date("Y-m-d H:i", $ts);
 $ldate = date("d M Y h:i A", $ts);
 
-$rs = pg_prepare($pgconn, "SELECT", "SELECT t.* from $tbl t, stations s WHERE " .
+$stname = uniqid("select");
+$rs = pg_prepare($pgconn, $stname, "SELECT t.* from $tbl t, stations s WHERE " .
     "valid = $1 and s.id = t.station and s.network = $2");
 
-$rs = pg_execute($pgconn, "SELECT", array($dstr, $network));
-pg_close($pgconn);
+$rs = pg_execute($pgconn, $stname, array($dstr, $network));
 
 /* Load up the data into a big fat array */
 $data = array();

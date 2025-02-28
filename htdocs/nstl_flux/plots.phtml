@@ -50,7 +50,7 @@ $u2 = sprintf("plot.php?pvar=%s&year=%s&month=%s&day=%s", $pvar2, $year, $month,
 $u3 = sprintf("plot.php?pvar=%s&year=%s&month=%s&day=%s", $pvar3, $year, $month, $day);
 $u4 = sprintf("plot.php?pvar=%s&year=%s&month=%s&day=%s", $pvar4, $year, $month, $day);
 
-$t->content = <<<EOF
+$t->content = <<<EOM
 <ol class="breadcrumb">
 <li><a href="/nstl_flux/">NLAE Flux Stations</a></li>
 <li class="active">Time Series Plots</li>
@@ -87,5 +87,5 @@ you wish to plot and then click on the 'Generate Plots' button.
 <br /><img src="{$u2}" class="img img-responsive">
 <br /><img src="{$u3}" class="img img-responsive">
 <br /><img src="{$u4}" class="img img-responsive">
-EOF;
+EOM;
 $t->render('single.phtml');

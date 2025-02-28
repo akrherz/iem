@@ -156,7 +156,7 @@ $ar = array(
 );
 
 $vselect = make_select("report", $report, $ar);
-$sselect = selectClimodatNetwork($network, "network");
+$sselect = selectNetworkType("CLIMATE", $network);
 
 $content = <<<EOF
 <h3>IEM "Climodat" Reports</h3>

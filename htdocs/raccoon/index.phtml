@@ -31,14 +31,14 @@ foreach ($wtype as $key => $val) {
 if (isset($_REQUEST["wfo"])) {
     /* Check to make sure we have warnings first! */
     $postgis = iemdb("postgis");
-    $rs = pg_prepare($postgis, "SELECT", "SELECT issue from sbw_{$year} " .
+    $stname = uniqid("select");
+    $rs = pg_prepare($postgis, $stname, "SELECT issue from sbw_{$year} " .
         "WHERE wfo = $1 and phenomena in ('SV','TO','FF', 'MA', 'SQ', 'DS') " .
         "and significance = 'W' and issue BETWEEN $2 and $3");
-    $rs = pg_execute($postgis, "SELECT", array(
+    $rs = pg_execute($postgis, $stname, array(
         $wfo,
         gmdate("Y-m-d H:i", $sts) . "+00", gmdate("Y-m-d H:i", $ets) . "+00"
     ));
-    pg_close($postgis);
     if (pg_num_rows($rs) < 1) {
         $err = "Sorry, did not find any warnings for your selected WFO and
         time period, please try again!";

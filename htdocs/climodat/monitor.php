@@ -167,7 +167,7 @@ $(document).ready(function(){
 </script>
 EOF;
 
-$sselect = selectClimodatNetwork($network, 'network');
+$sselect = selectNetworkType("CLIMATE", $network);
 
 $snice = date("d M Y", $sdate);
 $today = ($edate > time()) ? time() : $edate;

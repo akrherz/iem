@@ -1,5 +1,5 @@
 /* global $ */
-var pestData = {};
+const pestData = {};
 pestData.seedcorn_maggot = { 'gddbase': 39, 'gddceil': 84 };
 pestData.alfalfa_weevil = { 'gddbase': 48, 'gddceil': 90 };
 pestData.soybean_aphid = { 'gddbase': 50, 'gddceil': 90 };
@@ -43,7 +43,7 @@ function updateStationForecast() {
     const edate = text($("#edate").val());
     const url = `/json/climodat_dd.py?station=${station}&gddbase=${opts.gddbase}&gddceil=${opts.gddceil}&sdate=${sdate}&edate=${edate}`;
     $.get(url, function (data) {
-        $("#station_date").html(data.sdate + " to " + data.edate);
+        $("#station_date").html(`${data.sdate} to ${data.edate}`);
         $("#station_accum").html(data.accum.toFixed(1));
 
         $("#station_gfs_date").html(data.gfs_sdate + " to " + data.gfs_edate);

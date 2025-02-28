@@ -38,7 +38,7 @@ for ($i = 0; $row = pg_fetch_assoc($rs); $i++) {
 
 $sselect = networkMultiSelect("NSTLFLUX", '', array(), 'station[]');
 
-$t->content = <<<EOF
+$t->content = <<<EOM
 
 <h3>USDA-ARS-National Laboratory for Agriculture and the Environment Flux Sites</h3>
 
@@ -101,5 +101,5 @@ align="left">First Observation</th><th align="left">Last Observation</th></tr></
 </tbody>
 </table><p>
 
-EOF;
+EOM;
 $t->render('single.phtml');

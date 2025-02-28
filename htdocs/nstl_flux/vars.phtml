@@ -15,7 +15,7 @@ for ($i = 0; $row = pg_fetch_assoc($rs); $i++) {
     $rows .= sprintf("<tr><th>%s</th><td>%s</td><td>%s</td></tr>", $row["name"], $row["units"], $row["details"]);
 }
 
-$t->content = <<<EOF
+$t->content = <<<EOM
 <ol class="breadcrumb">
  <li><a href="/nstl_flux/">NLAE Flux Sites</a></li>
  <li class="active">Data Variables and Units</li>
@@ -35,5 +35,5 @@ Each variable is not collected at every site.
 </tbody>
 </table>
 
-EOF;
+EOM;
 $t->render('single.phtml');

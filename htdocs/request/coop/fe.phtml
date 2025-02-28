@@ -26,7 +26,7 @@ $d1 = daySelect2(1, "day1");
 $y2 = yearSelect2(1870, date("Y"), "year2");
 $m2 = monthSelect2(date("m"), "month2");
 $d2 = daySelect2(date("d"), "day2");
-$sselect = selectClimodatNetwork($network, "network");
+$sselect = selectNetworkType("CLIMATE", $network);
 
 $t->content = <<<EOF
 <ol class="breadcrumb">

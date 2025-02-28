@@ -505,8 +505,6 @@ $query = "SELECT w.phenomena, u.name as cname, w.expire as expire,
 pg_exec($connection, "set time zone 'GMT'");
 $result = pg_exec($connection, $query);
 
-pg_close($connection);
-
 $afos = array(
     "SV" => "Svr Tstorm",
     "TO" => "Tornado",

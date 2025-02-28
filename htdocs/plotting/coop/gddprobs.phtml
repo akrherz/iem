@@ -17,7 +17,7 @@ $imgurl = sprintf("/plotting/auto/plot/179/network:%s::station:%s" .
 
 $t->title = "Growing Degree Day Scenarios / Probabilities";
 $nselect = networkSelect($network, $station);
-$sselect = selectClimodatNetwork($network, "network");
+$sselect = selectNetworkType("CLIMATE", $network);
 $t->content = <<<EOF
 <ol class="breadcrumb">
  <li><a href="/COOP/">NWS COOP Network</a></li>
@@ -42,7 +42,7 @@ on record got to {$gddbase} by 1 October prior to a freeze.
 
 <p>Data is available from the following states:
 <form method="GET" name="ssss">
-${sselect}
+{$sselect}
 <input type="submit" value="Select State">
 </form>
 

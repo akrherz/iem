@@ -1,7 +1,5 @@
 <?php
-/*
- * Database connection function that most every script uses :)
- */
+// Avoid circular includes here!
 
 // Helper to get a dbconn string
 function get_dbconn_str($dbname)

@@ -1,4 +1,6 @@
 <?php
+require_once "./database.inc.php";
+require_once "./network.php";
 
 /**
  * Convert a vague 3 character WFO identifier to a 4 character one
@@ -40,10 +42,11 @@ function unrectify_wfo($wfo){
 function ugcStateSelect($state, $selected)
 {
     $state = substr(strtoupper($state), 0, 2);
-    include_once dirname(__FILE__) . "/database.inc.php";
     $dbconn = iemdb('postgis');
-    $rs = pg_exec($dbconn, "SELECT ugc, name from ugcs WHERE end_ts is null "
-        . " and substr(ugc,1,2) = '$state' ORDER by name ASC");
+    $stname = uniqid("select");
+    pg_prepare($dbconn, $stname, "SELECT ugc, name from ugcs WHERE end_ts is null "
+        . " and substr(ugc,1,2) = $1 ORDER by name ASC");
+    $rs = pg_execute($dbconn, $stname, array($state));
     $s = "<select name=\"ugc\">\n";
     for ($i = 0; $row = pg_fetch_array($rs); $i++) {
         $z = (substr($row["ugc"], 2, 1) == "Z") ? "Zone" : "County";
@@ -67,14 +70,14 @@ function ugcStateSelect($state, $selected)
 function selectNetworkType($nettype, $selected)
 {
     $selected = strtoupper($selected);
-    require_once dirname(__FILE__) . "/database.inc.php";
     $dbconn = iemdb('mesosite');
+    $stname = uniqid("select");
     $rs = pg_prepare(
         $dbconn,
-        "SELECT_NETWORK_BY_TYPE",
+        $stname,
         "SELECT * from networks WHERE id ~* $1 ORDER by name ASC");
-    $rs = pg_execute($dbconn, "SELECT_NETWORK_BY_TYPE", array($nettype));
-    $s = "<select name=\"network\">\n";
+    $rs = pg_execute($dbconn, $stname, array($nettype));
+    $s = "<select class=\"iemselect2\" name=\"network\">\n";
     for ($i = 0; $row = pg_fetch_array($rs); $i++) {
         $s .= "<option value=\"" . $row["id"] . "\" ";
         if ($row["id"] == $selected) {
@@ -83,34 +86,13 @@ function selectNetworkType($nettype, $selected)
         $s .= ">" . $row["name"] . "</option>\n";
     }
     $s .= "</select>\n";
-    pg_close($dbconn);
     return $s;
 }
 
-// Our climodat tracked networks
-function selectClimodatNetwork($selected, $label = "network")
-{
-    $selected = strtoupper($selected);
-    include_once dirname(__FILE__) . "/database.inc.php";
-    $dbconn = iemdb('mesosite');
-    $rs = pg_exec($dbconn, "SELECT * from networks " .
-        "WHERE id ~* 'CLIMATE' ORDER by name ASC");
-    $s = "<select class=\"iemselect2\" name=\"$label\">\n";
-    for ($i = 0; $row = pg_fetch_array($rs); $i++) {
-        $s .= "<option value=\"" . $row["id"] . "\" ";
-        if ($row["id"] == $selected) {
-            $s .= "SELECTED";
-        }
-        $s .= ">" . $row["name"] . "</option>\n";
-    }
-    $s .= "</select>\n";
-    return $s;
-}
 
 function selectNetwork($selected, $extra = array())
 {
     $selected = strtoupper($selected);
-    include_once dirname(__FILE__) . "/database.inc.php";
     $dbconn = iemdb('mesosite');
     $rs = pg_exec($dbconn, "SELECT * from networks ORDER by name ASC");
     $s = "<select class=\"iemselect2\" name=\"network\">\n";
@@ -143,7 +125,6 @@ function networkMultiSelect(
     $label = "station"
 ) {
     $s = "";
-    include_once dirname(__FILE__) . "/network.php";
     $nt = new NetworkTable($network);
     $cities = $nt->table;
     $s .= "<select name=\"{$label}\" size=\"5\" MULTIPLE >\n";
@@ -189,7 +170,6 @@ function networkSelect(
     $only_online = FALSE
 ) {
     $s = "";
-    include_once dirname(__FILE__) . "/network.php";
     $nt = new NetworkTable($network, FALSE, $only_online);
     $cities = $nt->table;
     $s .= "<select class=\"iemselect2\" name=\"$selectName\">\n";
@@ -225,7 +205,6 @@ function networkSelectAuto($network, $selected, $extra = array())
 {
     $network = strtoupper($network);
     $s = "";
-    include_once dirname(__FILE__) . "/network.php";
     $nt = new NetworkTable($network);
     $cities = $nt->table;
     $s .= "<select class=\"iemselect2\" name=\"station\" onChange=\"this.form.submit()\">\n";

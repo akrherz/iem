@@ -8,6 +8,8 @@ class StationData
 {
     public $table;
     public $dbconn;
+    public string $stname1;
+    public string $stname2;
 
     public function __construct($a, $n = "")
     {
@@ -25,14 +27,16 @@ class StationData
     (t.iemid = a.iemid)
 EOM;
 
-        $rs = pg_prepare(
+        $this->stname1 = uniqid("s1");
+        pg_prepare(
             $dbconn,
-            "SELECT  ST1",
+            $this->stname1,
             sprintf($sql_template, "id = $1 and network = $2")
         );
-        $rs = pg_prepare(
+        $this->stname2 = uniqid("s2");
+        pg_prepare(
             $dbconn,
-            "SELECT  ST2",
+            $this->stname2,
             sprintf($sql_template, "id = $1")
         );
 
@@ -48,9 +52,9 @@ EOM;
     public function loadStation($dbconn, $id, $n = "")
     {
         if ($n != "") {
-            $rs = pg_execute($dbconn, "SELECT  ST1", array($id, $n));
+            $rs = pg_execute($dbconn, $this->stname1, array($id, $n));
         } else {
-            $rs = pg_execute($dbconn, "SELECT  ST2", array($id));
+            $rs = pg_execute($dbconn, $this->stname2, array($id));
         }
         for ($i = 0; $row = pg_fetch_array($rs); $i++) {
             $this->table[$row["id"]] = $row;
