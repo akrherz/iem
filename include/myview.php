@@ -1,4 +1,6 @@
 <?php
+require_once dirname(__FILE__) . "/generators.php";
+
 /* Here lies the dead simple templating engine the IEM uses
  * 
  * For example
@@ -34,7 +36,6 @@ class MyView {
     }
     public function render($template_file) {
         if (!is_null($this->iem_resource)) {
-            require_once dirname(__FILE__) . "/generators.php";
             global $get_website_citations;
             $this->content .= $get_website_citations($this->iem_resource);
         }
