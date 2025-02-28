@@ -3,11 +3,6 @@
  * Database connection function that most every script uses :)
  */
 
-function database_failure($DBKEY)
-{
-    echo sprintf("<div class='warning'>Unable to contact database: %s</div>", $DBKEY);
-}
-
 // Helper to get a dbconn string
 function get_dbconn_str($dbname)
 {
@@ -20,16 +15,18 @@ function get_dbconn_str($dbname)
 /*
  * Help function that yields database connections
  */
-function iemdb($dbname, $flags = 0, $rw = FALSE)
+function iemdb($dbname)
 {
     $connstr = get_dbconn_str($dbname);
-    $db = pg_connect($connstr, $flags);
+    $db = pg_connect($connstr);
     if (!$db) {
         // Try once more
-        $db = pg_connect($connstr, $flags);
+        $db = pg_connect($connstr);
     }
     if (!$db) {
-        database_failure($dbname);
+        // Send a HTTP try again later
+        header("HTTP/1.1 503 Service Unavailable");
+        die("Could not connect to database: $dbname");
     }
     return $db;
 }

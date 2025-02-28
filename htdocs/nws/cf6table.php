@@ -91,6 +91,7 @@ $wxlookup = Array(
     "8" => "HZ",
     "9" => "BLSN",
     "X" => "TOR",
+    "M" => "M",
 );
 
 
@@ -229,6 +230,7 @@ perhaps a slightly more human readable format.  The codes are as follows:
 <tr><td>8</td><td>HZ</td><td>Smoke or Haze</td></tr>
 <tr><td>9</td><td>BLSN</td><td>Blowing Snow</td></tr>
 <tr><td>X</td><td>TOR</td><td>Tornado</td></tr>
+<tr><td>M</td><td>M</td><td>Missing Data</td></tr>
 </tbody>
 </table></p>
 
