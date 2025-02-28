@@ -25,7 +25,6 @@ python /opt/iem/scripts/scan/scan_ingest.py &
 cd ../madis
 python extract_madis.py
 python extract_hfmetar.py --hours=0 &
-python to_iemaccess.py --valid=$(date -u --date '2 hours ago' +'%Y-%m-%dT%H:%M:00') &
 
 cd ../cocorahs
 python cocorahs_stations.py --newerthan=$(date --date '7 days ago' +'%Y-%m-%d')T00:00:00

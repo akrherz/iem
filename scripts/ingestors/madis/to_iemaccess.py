@@ -1,8 +1,7 @@
 """Suck in MADIS data into the iemdb.
 
 Run from RUN_20MIN.sh
-RUN_20_AFTER for previous hour
-RUN_40_AFTER for 2 hours ago.
+RUN_50_AFTER for previous hour and three hours ago.
 """
 
 import os
@@ -265,6 +264,11 @@ def process(fn: str, valid: datetime):
                 network,
             )
             dirty = True
+        if updates % 500 == 0:
+            LOG.info("Processed %s rows", updates)
+            icursor.close()
+            pgconn.commit()
+            icursor = pgconn.cursor()
     if dirty:
         subprocess.call(["python", "sync_stations.py", f"--filename={fn}"])
         os.chdir("../../dbutil")

@@ -34,5 +34,4 @@ python compute_uscrn_pday.py --date=$(date '+%Y-%m-%d')
 
 # Run later to keep from conflicting with RUN_20MIN.sh to_iemaccess.py
 cd ../ingestors/madis
-python extract_hfmetar.py --hours=0 &
-python to_iemaccess.py --valid=$(date -u --date '1 hour ago' +'%Y-%m-%dT%H:%M:00')
+python extract_hfmetar.py --hours=0

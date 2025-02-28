@@ -43,17 +43,17 @@ if (isset($_REQUEST["wfo"])) {
         $err = "Sorry, did not find any warnings for your selected WFO and
         time period, please try again!";
     } else {
-        $mesosite = iemdb("mesosite", PGSQL_CONNECT_FORCE_NEW, TRUE);
-        pg_prepare($mesosite, "INSERT", "INSERT into racoon_jobs(wfo, sts, ets,
+        $mesosite = iemdb("mesosite");
+        $stname = uniqid("insert");
+        pg_prepare($mesosite, $stname, "INSERT into racoon_jobs(wfo, sts, ets,
                 radar, nexrad_product, wtype) values ($1,$2,$3,$4,$5,$6) 
                 returning jobid");
-        $rs = pg_execute($mesosite, "INSERT", array(
+        $rs = pg_execute($mesosite, $stname, array(
             $wfo,
             date("Y-m-d H:i", $sts), date("Y-m-d H:i", $ets), $radar,
             $radar_product, implode(",", $wtype)
         ));
         $row = pg_fetch_assoc($rs, 0);
-        pg_close($mesosite);
         $jobid = $row["jobid"];
         Header("Location: wait.phtml?jobid=$jobid");
         die();

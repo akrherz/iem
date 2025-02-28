@@ -5,7 +5,7 @@ require_once "../../include/myview.php";
 $t = new MyView();
 require_once "../../include/database.inc.php";
 require_once "../../include/forms.php";
-$dbconn = iemdb("mesosite", PGSQL_CONNECT_FORCE_NEW, TRUE);
+$dbconn = iemdb("mesosite");
 
 $id = get_int404("id");
 $q = isset($_GET["q"]) ? pg_escape_string($dbconn, xssafe($_GET["q"])) : "";
@@ -17,25 +17,29 @@ $content = <<< EOF
 EOF;
 
 if ($id > 0) {
-    $rs = pg_prepare($dbconn, "READS", "UPDATE news SET views = views + 1 
+    $stname = uniqid("reads");
+    $rs = pg_prepare($dbconn, $stname, "UPDATE news SET views = views + 1 
       WHERE id = $1");
-    pg_execute($dbconn, "READS", array($id));
-    $rs = pg_prepare($dbconn, "SELECTONE", "SELECT *, 
+    pg_execute($dbconn, $stname, array($id));
+    $stname = uniqid("SELECTONE");
+    $rs = pg_prepare($dbconn, $stname, "SELECT *, 
       to_char(entered, 'YYYY-MM-DD HH:MI AM') as webdate 
       from news WHERE id = $1");
-    $result = pg_execute($dbconn, "SELECTONE", array($id));
+    $result = pg_execute($dbconn, $stname, array($id));
 } else if ($q != "") {
-    $rs = pg_prepare($dbconn, "SEARCH", "SELECT *, 
+    $stname = uniqid("SEARCH");
+    $rs = pg_prepare($dbconn, $stname, "SELECT *, 
       to_char(entered, 'YYYY-MM-DD HH:MI AM') as webdate 
       from news WHERE (title ~* $1 or body ~* $1) 
       ORDER by entered DESC");
-    $result = pg_execute($dbconn, "SEARCH", array($q));
+    $result = pg_execute($dbconn, $stname, array($q));
 } else if (!is_null($tag)) {
-    $rs = pg_prepare($dbconn, "SEARCH", "SELECT *,
+    $stname = uniqid("SEARCH");
+    $rs = pg_prepare($dbconn, $stname, "SELECT *,
       to_char(entered, 'YYYY-MM-DD HH:MI AM') as webdate
       from news WHERE tags @> Array[$1]::varchar[]
       ORDER by entered DESC");
-    $result = pg_execute($dbconn, "SEARCH", array($tag));
+    $result = pg_execute($dbconn, $stname, array($tag));
 } else {
     $q = "SELECT *, to_char(entered, 'YYYY-MM-DD HH:MI AM') as webdate 
            from news ORDER by entered DESC LIMIT 1";

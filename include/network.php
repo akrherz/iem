@@ -7,6 +7,8 @@ require_once dirname(__FILE__) . "/memcache.php";
 class NetworkTable
 {
     public array $table;
+    public string $stname1;
+    public string $stname2;
     public $dbconn;
 
     public function __construct($a, $force3char = FALSE, $only_online = FALSE)
@@ -36,15 +38,17 @@ class NetworkTable
     (t.iemid = a.iemid) ORDER by t.name ASC
 EOM;
         // We force new here to prevent reused prepared statement names, hack
-        $this->dbconn = iemdb("mesosite", PGSQL_CONNECT_FORCE_NEW);
+        $this->dbconn = iemdb("mesosite");
+        $this->stname1 = uniqid("SELECT");
+        $this->stname2 = uniqid("SELECTST");
         $rs = pg_prepare(
             $this->dbconn,
-            "SELECT",
+            $this->stname1,
             sprintf($sql_template, "network = $1")
         );
         $rs = pg_prepare(
             $this->dbconn,
-            "SELECTST",
+            $this->stname2,
             sprintf($sql_template, "id = $1")
         );
         if (is_string($a)) {
@@ -59,7 +63,7 @@ EOM;
 
     public function loadNetwork($network, $force3char = FALSE)
     {
-        $rs = pg_execute($this->dbconn, "SELECT", array($network));
+        $rs = pg_execute($this->dbconn, $this->stname1, array($network));
         for ($i = 0; $row = pg_fetch_array($rs); $i++) {
             $keyid = $row["id"];
             if ($force3char && strlen($keyid) == 4) {
@@ -72,7 +76,7 @@ EOM;
 
     public function loadStation($id)
     {
-        $rs = pg_execute($this->dbconn, "SELECTST", array($id));
+        $rs = pg_execute($this->dbconn, $this->stname2, array($id));
         for ($i = 0; $row = pg_fetch_array($rs); $i++) {
             $this->table[$row["id"]] = $row;
             $this->doConversions($row["id"]);

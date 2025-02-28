@@ -171,11 +171,18 @@ EOF;
     return $s;
 });
 
-function gen_feature($t)
+/**
+ * Generate the HTML for the most recent feature
+ * With 2 minutes of caching
+ * param object $t Template object
+ * return string HTML
+ */
+$gen_feature = cacheable("gen_feature", 120)(function()
 {
+    global $t;
     $s = '';
 
-    $connection = iemdb("mesosite", PGSQL_CONNECT_FORCE_NEW, TRUE);
+    $connection = iemdb("mesosite");
     $query1 = "SELECT *, to_char(valid, 'YYYY/MM/YYMMDD') as imageref,
                 to_char(valid, 'DD Mon YYYY HH:MI AM') as webdate,
                 to_char(valid, 'YYYY-MM-DD') as permalink from feature
@@ -374,4 +381,24 @@ EOF;
     $s .= "</div><!-- end of panel -->";
 
     return $s;
-}
+});
+
+/**
+ * Get recent news items
+ */
+$get_recent_news = cacheable("recentnews", 120)(function(){
+    $pgconn = iemdb("mesosite");
+    $rs = pg_query($pgconn, "SELECT * from news ORDER by entered DESC LIMIT 5");
+    
+    $today = new DateTime();
+    
+    $news = "";
+    for ($i=0; $row = pg_fetch_array($rs); $i++){
+        $ts = new DateTime(substr($row["entered"],0,16));
+        if ($ts > $today) $sts = $ts->format("g:i A");
+        $sts = $ts->format("j M g:i A");
+        $news .= sprintf("<p><a href=\"/onsite/news.phtml?id=%s\">%s</a>".
+            "<br /><i>Posted:</i> %s</li>\n", $row["id"], $row["title"], $sts);
+    }
+    return $news;
+});
