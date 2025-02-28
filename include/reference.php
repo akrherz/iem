@@ -1,6 +1,6 @@
 <?php
 /* Proxy for pyiem reference data */
-require_once './memcache.php';
+require_once dirname(__FILE__) . '/memcache.php';
 
 $cached_reference = cacheable('include_reference')(function() {
     $ch = curl_init("http://iem.local/json/reference.json");

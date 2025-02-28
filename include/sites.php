@@ -2,12 +2,12 @@
 // Provides a context for PHP pages within the /sites/ IEM website
 require_once dirname(__FILE__) . "/../config/settings.inc.php";
 // Throttle
-require_once "./throttle.php";
-require_once "./database.inc.php";
-require_once "./station.php";
-require_once "./forms.php";
-require_once "./myview.php";
-require_once "./memcache.php";
+require_once dirname(__FILE__) . "throttle.php";
+require_once dirname(__FILE__) . "database.inc.php";
+require_once dirname(__FILE__) . "station.php";
+require_once dirname(__FILE__) . "forms.php";
+require_once dirname(__FILE__) . "myview.php";
+require_once dirname(__FILE__) . "memcache.php";
 
 
 class SitesContext
