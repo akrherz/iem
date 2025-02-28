@@ -15,6 +15,9 @@ what the computed heat index is.</p>
 to issue Extreme Cold Warning and Cold Weather Advisory instead of
 Wind Chill Advisories/Warnings.</p>
 
+<p>For the 2025 summer season, the National Weather Service changed
+to issue Extreme Heat Warning instead of an Excessive Heat Warning.</p>
+
 <p>The plot shows the NWS headline frequency for the forecast zone that
 the automated weather station resides in.
 """
@@ -30,7 +33,8 @@ PDICT = {
     "yes": "Only consider additive cases, with index worse than temperature",
 }
 PDICT2 = {
-    "heat": "Heat Index",
+    "heat": "Heat Index (pre 2025)",
+    "heat25": "Heat Index (2025 +)",
     "chill": "Wind Chill (pre 2024/2025)",
     "chill25": "Wind Chill (2024/2025 +)",
 }
@@ -70,10 +74,14 @@ def get_df(ctx):
     ctx["ugc"] = ctx["_nt"].sts[ctx["station"]]["ugc_zone"]
     ctx["s1"] = "Y"
     ctx["s2"] = "W"
-    tlimit = ""
     if ctx["var"] == "heat":
         ctx["p1"] = "HT"
         ctx["p2"] = "EH"
+        tlimit = " and issue < '2025-01-01' "
+    elif ctx["var"] == "heat25":
+        ctx["p1"] = "HT"
+        ctx["p2"] = "XH"
+        tlimit = " and issue > '2025-01-01' "
     elif ctx["var"] == "chill":
         ctx["p1"] = "WC"
         ctx["p2"] = "WC"
@@ -109,7 +117,7 @@ def get_df(ctx):
         )
     if events.empty:
         raise NoDataFound(f"No Alerts were found for UGC: {ctx['ugc']}")
-    thres = "tmpf > 70" if ctx["var"] == "heat" else "tmpf < 40"
+    thres = "tmpf > 70" if ctx["var"].startswith("heat") else "tmpf < 40"
     with get_sqlalchemy_conn("asos") as conn:
         obs = pd.read_sql(
             sql_helper(
