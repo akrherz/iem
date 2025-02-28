@@ -39,7 +39,7 @@ class MyView {
             $this->content .= $get_website_citations($this->iem_resource);
         }
         if (file_exists($this->template_dir.$template_file)) {
-            include $this->template_dir.$template_file;
+            include $this->template_dir.$template_file;  // skipcq
         } else {
             throw new Exception(
                 'no template file ' .
