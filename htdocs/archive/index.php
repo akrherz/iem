@@ -8,7 +8,7 @@ $t = new MyView();
 $t->iem_resource = "ARCHIVE";
 $t->title = "Archived Data Resources";
 
-$dllist = get_iemapps_tags("download");
+$dllist = $get_iemapps_tags("download");
 $d = date("Y/m/d");
 $t->content = <<<EOM
 <h3>Archived Data & Plots</h3>

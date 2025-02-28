@@ -35,7 +35,7 @@ foreach ($ars as $key => $val) {
         $ars[$key] = "<tr><td colspan=\"6\">No Open/Active Tickets Found</td></tr>";
 }
 
-$t->content = <<<EOF
+$t->content = <<<EOM
 <ol class="breadcrumb">
  <li><a href="/QC/">Quality Control</a></li>
  <li class="active">Active Trouble Tickets</li>
@@ -76,7 +76,5 @@ please feel free to <a href="/info/contacts.php">Contact Us</a>.
 </thead>
 {$ars["iarwis"]}
 </table><br><br>
-
-
-EOF;
+EOM;
 $t->render('single.phtml');

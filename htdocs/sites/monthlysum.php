@@ -22,7 +22,7 @@ $pgconn = iemdb("iem");
 $rs = pg_prepare($pgconn, "SELECT", "SELECT extract(year from day) as year," .
     "extract(month from day) as month, sum(pday) as precip, " .
     "avg(avg_rh) as avg_rh, avg(max_tmpf) as avg_high, " .
-    "avg(avg_sknt) * 1.15 as avg_wind_mph, ".
+    "avg(avg_sknt) * 1.15 as avg_wind_mph, " .
     "avg(min_tmpf) as avg_low, avg((max_tmpf + min_tmpf) / 2.) as avg_temp " .
     "from summary s " .
     "JOIN stations t on (s.iemid = t.iemid) WHERE t.id = $1 and t.network = $2 " .
@@ -62,8 +62,9 @@ function f($data, $key1, $key2, $fmt)
     if ($val === NULL) return "M";
     return sprintf($fmt, $val);
 }
-function f2($data, $key, $fmt){
-    if (!array_key_exists($key, $data)){
+function f2($data, $key, $fmt)
+{
+    if (!array_key_exists($key, $data)) {
         return "M";
     }
     $val = $data[$key];
@@ -74,13 +75,13 @@ function f2($data, $key, $fmt){
 function make_table($data, $key, $minyear, $maxyear, $fmt, $climo)
 {
     $table = '<table class="table table-ruled table-condensed table-bordered">' .
-        '<thead class="sticky">'.
+        '<thead class="sticky">' .
         '<tr><th>Year</th><th>Jan</th><th>Feb</th><th>Mar</th>' .
         '<th>Apr</th><th>May</th><th>Jun</th><th>Jul</th><th>Aug</th>' .
         '<th>Sep</th><th>Oct</th><th>Nov</th><th>Dec</th></tr></thead>' .
         '<tbody>';
     for ($year = $minyear; $year <= $maxyear; $year++) {
-        $table .= @sprintf(
+        $table .= sprintf(
             "<tr><td>%s</td><td>%s</td><td>%s</td>" .
                 "<td>%s</td><td>%s</td><td>%s</td><td>%s</td>" .
                 "<td>%s</td><td>%s</td><td>%s</td><td>%s</td>" .
@@ -101,7 +102,7 @@ function make_table($data, $key, $minyear, $maxyear, $fmt, $climo)
         );
     }
     if (sizeof($climo) > 0) {
-        $table .= @sprintf(
+        $table .= sprintf(
             "<tr><td>%s</td><td>%s</td><td>%s</td>" .
                 "<td>%s</td><td>%s</td><td>%s</td><td>%s</td>" .
                 "<td>%s</td><td>%s</td><td>%s</td><td>%s</td>" .
@@ -216,21 +217,8 @@ $plot2 = sprintf(
     $network
 );
 
-$jsextracaller = isset($_GET["year"]) ? "go();" : "";
-$t->jsextra = <<<EOM
-<script>
-function go(){
-      document.getElementById("mycharts").scrollIntoView();
-}
-$(document).ready(function(){
-      $("#gogogo").click(function(){
-            go();
-      });
-      {$jsextracaller}
-});
-</script>
-EOM;
-$t->content = <<<EOF
+$t->jsextra = '<script src="monthlysum.js"></script>';
+$t->content = <<<EOM
 
 <p><button id="gogogo" role="button" class="btn btn-primary"><i class="fa fa-arrow-down"></i> View Monthly Charts</button></p>
 
@@ -279,8 +267,8 @@ by the duration between observations.</p>
  <div class="row">
  <div class="col-sm-3">
  <a href="{$llink}" class="btn btn-default">{$ltext} <i class="fa fa-arrow-left"></i></a>
-	</div>
-	<div class="col-sm-6">
+    </div>
+    <div class="col-sm-6">
   {$ms} {$ys}
  <input type="submit" value="Generate Plot">
  </div>
@@ -302,5 +290,5 @@ by the duration between observations.</p>
 </div>
 </div>
 
-EOF;
+EOM;
 $t->render('sites.phtml');

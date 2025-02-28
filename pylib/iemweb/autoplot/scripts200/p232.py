@@ -30,7 +30,7 @@ DOMAIN = {
     ],
     "FW": ["FW.W"],
     "WC": ["WC.W", "WC.Y", "WW.Y", "WS.W", "BZ.W", "EC.Y", "EC.W"],
-    "HT": ["EH.W", "HT.Y"],
+    "HT": ["EH.W", "HT.Y", "XH.W"],
 }
 
 

@@ -1,11 +1,11 @@
-<?php 
+<?php
 require_once "../../config/settings.inc.php";
 require_once "../../include/myview.php";
 $t = new MyView();
 $t->title = "Soil Climate Analysis Network";
 
 $baseuri = "https://wcc.sc.egov.usda.gov/nwcc/site";
-$t->content = <<<EOF
+$t->content = <<<EOM
 <h3>SCAN Network</h3>
 
 <p>This page contains data for the Ames SCAN site
@@ -29,11 +29,9 @@ information from five depths.</p>
  <li><a href="/request/scan/fe.phtml">Download Hourly data</a></li>
 </ul>
 
-
-
 <p><h3>Station Locations</h3><br>
 <table class="table table-striped">
-		<thead>
+        <thead>
 <tr>
   <th>Station</th>
   <th>Site #</th>
@@ -41,7 +39,7 @@ information from five depths.</p>
   <th>Longitude</th>
   <th>Elevation</th>
 </tr>
-		</thead>
+        </thead>
 
 <tr>
   <th><a href="{$baseuri}?sitenum=2031&state=ia">Ames, IA</a></th>
@@ -86,5 +84,5 @@ information from five depths.</p>
 
 
 </table></div>
-EOF;
+EOM;
 $t->render('single.phtml');

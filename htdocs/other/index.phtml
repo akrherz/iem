@@ -23,7 +23,7 @@ $y13select = yearSelect2(2013, 2013, "year1");
 $y23select = yearSelect2(2013, date("Y"), "year2");
 $nselect = networkSelect("OT", "");
 
-$t->content = <<<EOF
+$t->content = <<<EOM
 <h3>Other Data Networks</h3>
 
 <p>This page contains links to miscellaneous IEM networks and standalone
@@ -187,5 +187,5 @@ you can <a href="/request/wmo_bufr_srf.php">download data</a> and view a large
 <a href="/sites/locate.php?network=WMO_BUFR_SRF">station map</a> to see
 what is available.</p>
 
-EOF;
+EOM;
 $t->render('single.phtml');

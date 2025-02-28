@@ -65,7 +65,6 @@ $(document).ready(() => {
     });
 
     // Create a LayerSwitcher instance and add it to the map
-    const layerSwitcher = new ol.control.LayerSwitcher();
-    map.addControl(layerSwitcher);
+    map.addControl(new ol.control.LayerSwitcher());
 
 }); // End of onready

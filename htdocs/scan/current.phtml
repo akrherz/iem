@@ -103,7 +103,7 @@ $vals = array(
 );
 
 $t->current_network = 'SCAN';
-$t->content = <<<EOF
+$t->content = <<<EOM
 <h3>Current SCAN Conditions</h3>
 
 Sorted by: <b>({$vals[$sortcol]})</b>  &nbsp; &nbsp; Click on
@@ -175,5 +175,5 @@ a column to sort it. Timestamps are in the local station's timezone.<br>
 </tr>
 </tfoot>
 </table>
-EOF;
+EOM;
 $t->render("sortables.phtml");

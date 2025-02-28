@@ -74,8 +74,7 @@ foreach ($finalA as $key => $val) {
     $table .= "<td>" . $parts["raw"] . "</td>";
 }
 
-
-$t->content = <<<EOF
+$t->content = <<<EOM
 <ol class="breadcrumb">
   <li><a href="/roads/">Roads</a></li>
   <li class="active">Sortable Conditions</li>
@@ -88,7 +87,7 @@ $t->content = <<<EOF
 
 
 <table class="table table-striped">
-<thead>
+<thead class="sticky">
 <tr>
   <th><a href="{$uri}type">Road Class</a></th>
   <th><a href="{$uri}number">Route #</a></th>
@@ -98,5 +97,5 @@ $t->content = <<<EOF
 <tbody>
 {$table}
 </table>
-EOF;
+EOM;
 $t->render('single.phtml');

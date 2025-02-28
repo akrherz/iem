@@ -5,14 +5,23 @@
 require_once dirname(__FILE__) . "/database.inc.php";
 require_once dirname(__FILE__) . "/memcache.php";
 
-function get_website_citations($label){
-    $conn = iemdb("mesosite", PGSQL_CONNECT_FORCE_NEW, TRUE);
+/**
+ * Generate a listing of recent citations for a given IEM resource
+ * 
+ * Result is cached for 1 hour
+ * 
+ * @param string $label The IEM resource label
+ * @return string HTML
+ */
+$get_website_citations = cacheable('citations')(function ($label){
+    $conn = iemdb("mesosite");
+    $stname = uniqid("CITSELECT");
     $rs = pg_prepare(
         $conn,
-        "CITSELECT",
+        $stname,
         "SELECT * from website_citations WHERE iem_resource = $1 ".
         "ORDER by publication_date DESC LIMIT 10");
-    $rs = pg_execute($conn, "CITSELECT", array($label));
+    $rs = pg_execute($conn, $stname, array($label));
     $s = <<<EOM
 <h3>Publications Citing IEM Data (<a href="/info/refs.php">View All</a>)</h3>
 <p>These are the most recent 10 publications that have cited the usage of data
@@ -27,21 +36,22 @@ EOM;
             $row["title"], $row["link"], $row["link"]);
     }
     $s .= "</ul>";
-    pg_close($conn);
     return $s;
-}
+});
 
-function get_news_by_tag($tag)
+
+$get_news_by_tag = cacheable("newsbytag")(function($tag)
 {
     // Generate a listing of recent news items by a certain tag
-    $pgconn = iemdb("mesosite", PGSQL_CONNECT_FORCE_NEW, TRUE);
+    $pgconn = iemdb("mesosite");
+    $stname = uniqid("NEWSTAGSELECT");
     $rs = pg_prepare(
         $pgconn,
-        "NEWSTAGSELECT",
+        $stname,
         "SELECT id, entered, title from news WHERE "
             . "tags @> ARRAY[$1]::varchar[] ORDER by entered DESC LIMIT 5"
     );
-    $rs = pg_execute($pgconn, "NEWSTAGSELECT", array($tag));
+    $rs = pg_execute($pgconn, $stname, array($tag));
     $s = "<h3>Recent News Items</h3><p>Most recent news items tagged: "
         . "{$tag}</p><ul>";
     for ($i = 0; $row = pg_fetch_assoc($rs); $i++) {
@@ -55,20 +65,21 @@ function get_news_by_tag($tag)
     }
     $s .= "</ul>";
     return $s;
-}
+});
 
-function get_iemapps_tags($tagname)
+$get_iemapps_tags = cacheable("iemappstags")(function($tagname)
 {
     // Get a html list for this tagname
-    $pgconn = iemdb("mesosite", PGSQL_CONNECT_FORCE_NEW, TRUE);
+    $pgconn = iemdb("mesosite");
+    $stname = uniqid("TAGSELECT");
     $rs = pg_prepare(
         $pgconn,
-        "TAGSELECT",
+        $stname,
         "SELECT name, description, url from iemapps WHERE "
             . "appid in (SELECT appid from iemapps_tags WHERE tag = $1) "
             . "ORDER by name ASC"
     );
-    $rs = pg_execute($pgconn, "TAGSELECT", array($tagname));
+    $rs = pg_execute($pgconn, $stname, array($tagname));
     $s = "<ul>";
     for ($i = 0; $row = pg_fetch_assoc($rs); $i++) {
         $s .= sprintf(
@@ -80,17 +91,12 @@ function get_iemapps_tags($tagname)
     }
     $s .= "</ul>";
     return $s;
-}
+});
 
-function get_website_stats()
+$get_website_stats = cacheable("websitestats", 120)(function ()
 {
-    $memcache = MemcacheSingleton::getInstance();
-    $val = $memcache->get("iemperf.json");
-    if (!$val) {
-        // Fetch from nagios
-        $val = @file_get_contents("https://nagios.agron.iastate.edu/cgi-bin/get_iemstats.py");  // skipcq
-        if ($val) $memcache->set("iemperf.json", $val, 90);
-    }
+    // Fetch from nagios
+    $val = file_get_contents("https://nagios.agron.iastate.edu/cgi-bin/get_iemstats.py");  // skipcq
     $bcolor = "success";
     $rcolor = "success";
     $ocolor = "success";
@@ -163,7 +169,7 @@ function get_website_stats()
 </div>
 EOF;
     return $s;
-}
+});
 
 function gen_feature($t)
 {

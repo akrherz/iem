@@ -62,6 +62,7 @@ iemdata.vtec_phenomena = [
 ['WI','Wind'],
 ['WS','Winter Storm'],
 ['WW','Winter Weather'],
+['XH', 'Extreme Heat'],
 ['ZF','Freezing Fog'],
 ['ZR','Freezing Rain']
 ];

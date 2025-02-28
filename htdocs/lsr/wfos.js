@@ -1,5 +1,4 @@
-
-var iemdata = {};
+const iemdata = {};
 
 iemdata.nws_products = [
     ['AFD', 'Area Forecast Discussion'],
@@ -69,6 +68,7 @@ iemdata.vtec_phenomena = {
     'WI': 'Wind',
     'WS': 'Winter Storm',
     'WW': 'Winter Weather',
+    'XH': 'Extreme Heat',
     'ZF': 'Freezing Fog',
     'ZR': 'Freezing Rain'
 };

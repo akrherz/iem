@@ -140,10 +140,10 @@ foreach ($networks as $key => $val) {
     );
 }
 
-$content = <<<EOF
+$t->content = <<<EOM
 
 <p><b>Other Networks:</b> {$buttons}
- 
+
 <br /><strong>Times shown are for timezone: {$tzname}.</strong> The local day summary
 is based on that timezone.
 <br />Sorted by: <b>({$vals[$sortcol]})</b>  &nbsp; &nbsp; Click on
@@ -186,6 +186,5 @@ a column to sort it.<br>
 </form>
 
 <br><br>
-EOF;
-$t->content = $content;
+EOM;
 $t->render("sortables.phtml");

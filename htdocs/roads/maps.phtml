@@ -7,7 +7,7 @@ require_once "../../include/database.inc.php";
 require_once "../../include/myview.php";
 $t = new MyView();
 
-$OL = '9.2.4';
+$OL = '10.4.0';
 $con = iemdb("postgis");
 $sql = "SELECT max(valid) as valid from roads_current";
 $rs = pg_query($con, $sql);

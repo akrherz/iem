@@ -1,20 +1,20 @@
 <?php
- require_once "../../config/settings.inc.php";
- require_once "../../include/forms.php";
- header("Content-type: application/vnd.ogc.gml");
- $d = isset($_GET["date"]) ? xssafe($_GET["date"]) : date("Y-m-d");
- $d = isset($_GET["DATE"]) ? xssafe($_GET["DATE"]) : $d;
- $year = isset($_GET["year"]) ? xssafe($_GET["year"]): date("Y");
- $year = isset($_GET["YEAR"]) ? xssafe($_GET["YEAR"]): $year;
- $year = substr($year, 0, 4);
- $sts = "$d%2000:00";
- $ets = "$d%2023:59";
- $uri = "https://mesonet.agron.iastate.edu/cgi-bin/mapserv/mapserv.fcgi?map=/opt/iem/data/wfs/ww.map&amp;YEAR=$year&amp;STARTTS=$sts&amp;ENDTS=$ets&amp;";
- if (isset($_GET['time'])){
- 	$year = substr($d,0,4);
- 	 $ts = "$d%20".$_GET['time'];
- 	 $uri = "https://mesonet.agron.iastate.edu/cgi-bin/mapserv/mapserv.fcgi?map=/opt/iem/data/wfs/wwt.map&amp;YEAR=$year&TS=$ts&amp;";
- }
+require_once "../../config/settings.inc.php";
+require_once "../../include/forms.php";
+header("Content-type: application/vnd.ogc.gml");
+$d = isset($_GET["date"]) ? xssafe($_GET["date"]) : date("Y-m-d");
+$d = isset($_GET["DATE"]) ? xssafe($_GET["DATE"]) : $d;
+$year = isset($_GET["year"]) ? xssafe($_GET["year"]) : date("Y");
+$year = isset($_GET["YEAR"]) ? xssafe($_GET["YEAR"]) : $year;
+$year = substr($year, 0, 4);
+$sts = "$d%2000:00";
+$ets = "$d%2023:59";
+$uri = "https://mesonet.agron.iastate.edu/cgi-bin/mapserv/mapserv.fcgi?map=/opt/iem/data/wfs/ww.map&amp;YEAR=$year&amp;STARTTS=$sts&amp;ENDTS=$ets&amp;";
+if (isset($_GET['time'])) {
+    $year = substr($d, 0, 4);
+    $ts = "$d%20" . $_GET['time'];
+    $uri = "https://mesonet.agron.iastate.edu/cgi-bin/mapserv/mapserv.fcgi?map=/opt/iem/data/wfs/wwt.map&amp;YEAR=$year&TS=$ts&amp;";
+}
 echo <<<EOF
 <wfs:WFS_Capabilities xmlns:gml="http://www.opengis.net/gml" xmlns:wfs="http://www.opengis.net/wfs" xmlns:ows="http://www.opengis.net/ows" xmlns:xlink="http://www.w3.org/1999/xlink" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:ogc="http://www.opengis.net/ogc" xmlns="http://www.opengis.net/wfs" version="1.1.0" xsi:schemaLocation="http://www.opengis.net/wfs http://schemas.opengis.net/wfs/1.1.0/wfs.xsd">
 <ows:ServiceIdentification>

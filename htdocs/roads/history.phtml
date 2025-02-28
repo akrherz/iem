@@ -34,14 +34,11 @@ $t->title = "Historical Iowa Winter Road Conditions";
 $t->headextra = <<<EOM
 <link rel="stylesheet" type="text/css" href="/vendor/select2/4.0.3/select2.min.css"/ >
 EOM;
-$t->jsextra = <<<EOF
+$t->jsextra = <<<EOM
 <script src="/vendor/select2/4.0.3/select2.min.js"></script>
 <script src="/vendor/jquery-filtertable/1.5.7/jquery.filtertable.min.js"></script>
-        <script>
-        $("#table1").filterTable({label: "Filter Table By: "});
-        $(".iemselect2").select2()
-        </script>
-EOF;
+<script src="history.js"></script>
+EOM;
 
 $segselect = segmentSelect($dbconn, $year, $month, $segid);
 $ys = yearSelect2(2006, $year, "year");

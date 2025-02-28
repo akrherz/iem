@@ -11,7 +11,6 @@ if ($val) {
 // Need to buffer the output so that we can save it to memcached later
 ob_start();
 
-
 define("IEM_APPID", 60);
 require_once "../include/database.inc.php";
 
