@@ -30,7 +30,6 @@ $rs = pg_exec(
     "SELECT *, to_char(valid, 'YYYY/MM/YYMMDD') as imageref from feature " .
         "WHERE valid < now() ORDER by valid DESC LIMIT 20"
 );
-pg_close($conn);
 for ($i = 0; $row = pg_fetch_assoc($rs); $i++) {
     $appurl = "";
     if ($row["appurl"] != "") {

@@ -2,7 +2,10 @@
 /* Sucks to render a KML */
 require_once "../../config/settings.inc.php";
 require_once "../../include/database.inc.php";
-require_once "../../include/vtec.php";
+require_once "../../include/reference.php";
+$vtec_action = $reference["vtec_action"];
+$vtec_phenomena = $reference["vtec_phenomena"];
+$vtec_significance = $reference["vtec_significance"];
 $connect = iemdb("postgis");
 
 $year = isset($_GET["year"]) ? intval($_GET["year"]) : 2006;
@@ -59,7 +62,7 @@ echo "<?xml version=\"1.0\" encoding=\"UTF-8\"?>
     <description>
         <![CDATA[
   <p><font color=\"red\"><i>Polygon Size:</i></font> ". $row["psize"] ." sq km
-  <br /><font color=\"red\"><i>Status:</i></font> ". $vtec_status[$row["status"]] ."
+  <br /><font color=\"red\"><i>Status:</i></font> ". $vtec_action[$row["status"]] ."
    </p>
         ]]>
     </description>

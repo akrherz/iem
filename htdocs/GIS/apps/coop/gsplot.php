@@ -1,7 +1,4 @@
 <?php
-/* Generate a plot based on a request from gsplot.phtml, no more tmp 
- * files please
- */
 require_once "/usr/lib64/php/modules/mapscript.php";
 
 require_once "../../../../config/settings.inc.php";
@@ -23,7 +20,6 @@ if (strlen($network) > 9){
 
 $nt = new NetworkTable($network);
 $cities = $nt->table;
-
 
 $sts = new DateTime("{$year}-{$smonth}-{$sday}");
 $ets = new DateTime("{$year}-{$emonth}-{$eday}");
@@ -138,7 +134,8 @@ $bar640t->draw($map, $img);
 $dy = ($map->extent->maxy - $map->extent->miny) / 25;
 $dx = ($map->extent->maxx - $map->extent->minx) / 25;
 
-$rs = pg_prepare($coopdb, "SELECT", <<<EOM
+$stname = uniqid("select");
+$rs = pg_prepare($coopdb, $stname, <<<EOM
     SELECT station, 
     sum(precip) as s_prec,
     sum(gddxx(32, 86, high, low)) as s_gdd32,
@@ -158,7 +155,7 @@ $rs = pg_prepare($coopdb, "SELECT", <<<EOM
     ORDER by station ASC
 EOM
 );
-$rs = pg_execute($coopdb, "SELECT", array(
+$rs = pg_execute($coopdb, $stname, array(
     $sts->format("Y-m-d"),
     $ets->format("Y-m-d")
 ));

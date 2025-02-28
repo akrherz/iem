@@ -7,10 +7,12 @@ require_once "../../include/forms.php";
 require_once "../../include/database.inc.php";
 require_once "../../include/network.php";
 require_once "../../include/imagemaps.php";
+require_once "../../include/reference.php";
 
 $nt = new NetworkTable("WFO");
 $nt->table["ALL"] = array("name" => " --- All ---- ", "id" => "ALL", "archive_begin" => null);
-require_once "../../include/vtec.php";
+$vtec_phenomena = $reference["vtec_phenomena"];
+$vtec_significance = $reference["vtec_significance"];
 $postgis = iemdb('postgis');
 
 $wfo = get_str404("wfo", 'ALL', 4);

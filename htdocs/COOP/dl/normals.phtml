@@ -14,7 +14,7 @@ $nselect = networkSelect($network, "");
 $mselect = monthSelect("month");
 $dselect = daySelect("day");
 
-$sselect = selectClimodatNetwork($network, "network");
+$sselect = selectNetworkType("CLIMATE", $network);
 
 $t->content = <<<EOM
 

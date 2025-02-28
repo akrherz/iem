@@ -2,10 +2,6 @@
 require_once "/usr/lib64/php/modules/mapscript.php";
 
 require_once "../../../../config/settings.inc.php";
-// -----------------------------------------------------------------
-// request.php
-//   Give the user the climate data in the format they want...
-// -----------------------------------------------------------------
 
 // Prevent client abort from leaving temp files around
 ignore_user_abort(true);
@@ -28,15 +24,13 @@ $rs = pg_exec(
     "ON (c.station = s.id) WHERE c.valid = '{$sqlDate}' and ".
     "s.network ~* 'CLIMATE'");
 
-pg_close($pgcon);
-
 if (! is_dir("/tmp/cli2shp")){
     mkdir("/tmp/cli2shp", 0755);
 }
 chdir("/tmp/cli2shp");
 
 $shpFname =  $filePre;
-$shpFile = new shapeFileObj($shpFname, MS_SHAPEFILE_POINT);
+$shpFile = new shapeFileObj($shpFname, MS_SHAPE_POINT);
 $dbfFile = dbase_create($shpFname . ".dbf", array(
     array("SITE", "C", 6),
     array("CRECORD", "N", 5, 0),

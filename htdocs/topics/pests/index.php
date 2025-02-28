@@ -28,7 +28,7 @@ if ((! isset($_GET["edate"])) && isset($_GET["sdate"])) {
     $sdate = sprintf("%s-%s", $year, substr($sdate, 5, 5));
 }
 
-$sselect = selectClimodatNetwork($network, "network");
+$sselect = selectNetworkType("CLIMATE", $network);
 
 $t = new MyView();
 $t->title = "Pest Forecasting Maps";

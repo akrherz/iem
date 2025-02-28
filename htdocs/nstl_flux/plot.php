@@ -21,13 +21,15 @@ for ($i = 0; $row = pg_fetch_array($rows); $i++) {
     $vars[$row["name"]] = array("units" => $row["units"], "details" => $row["details"]);
 }
 
-$rs = pg_prepare($pgconn, "SELECT", "SELECT * from flux_data WHERE " .
+$stname = uniqid("select");
+$rs = pg_prepare($pgconn, $stname, "SELECT * from flux_data WHERE " .
     "valid >= $1 and valid < ($1 + '1 day'::interval) " .
     "and $pvar IS NOT NULL ORDER by valid ASC");
-$rs = pg_prepare($pgconn, "METADATA", "SELECT * from flux_meta WHERE " .
+$stname2 = uniqid("metadata");
+$rs = pg_prepare($pgconn, $stname2, "SELECT * from flux_meta WHERE " .
     "sts < $1 and ets > $1");
 
-$rs = pg_execute($pgconn, "SELECT", array(date('Y-m-d', $sts)));
+$rs = pg_execute($pgconn, $stname, array(date('Y-m-d', $sts)));
 
 $data = array(
     "NSTL11" => array(),
@@ -58,15 +60,13 @@ $labels = array(
     "NSTLNSPR" => "NSTLNSPR", "NSTL11" => "NSTL11",
     "NSTL10" => "NSTL10", "NSTL30FT" => "NSTL30FT", "NSTL110" => "NSTL110"
 );
-$rs = pg_execute($pgconn, "METADATA", array(date('Y-m-d', $sts)));
+$rs = pg_execute($pgconn, $stname2, array(date('Y-m-d', $sts)));
 for ($i = 0; $row = pg_fetch_array($rs); $i++) {
     $st = $row["station"];
     $labels[$st] =  $row["surface"];
 }
 
 $ts_lbl = date("d M Y", $sts);
-
-pg_close($pgconn);
 
 // Create the graph. These two calls are always required
 $graph = new Graph(640, 350);

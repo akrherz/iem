@@ -149,7 +149,7 @@ if ($station != null) {
     $h3 = "<h3>NWS COOP Climatology for " . date("d F", $valid) . "</h3>";
 }
 
-$netselect = selectClimodatNetwork($network, "network");
+$netselect = selectNetworkType("CLIMATE", $network);
 $mselect = monthSelect($month, "month");
 $dselect = daySelect($day, "day");
 

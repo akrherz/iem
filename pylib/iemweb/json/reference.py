@@ -12,6 +12,7 @@ from the `pyiem.reference` namespace are exposed at the moment.
 Changelog
 ---------
 
+- 2025-02-28: Added VTEC Action, Phenomena, Significance reference data
 - 2024-07-24: Initial documentation release
 
 Example Usage
@@ -27,6 +28,7 @@ import json
 
 from pydantic import Field
 from pyiem import reference
+from pyiem.nws.vtec import VTEC_ACTION, VTEC_PHENOMENA, VTEC_SIGNIFICANCE
 from pyiem.webutil import CGIModel, iemapp
 
 
@@ -37,13 +39,20 @@ class Schema(CGIModel):
 
 
 @iemapp(
-    memcachekey="/json/reference/v2",
+    memcachekey="/json/reference/v3",
     help=__doc__,
     schema=Schema,
-    memcacheexpire=0,
+    memcacheexpire=86_400,
 )
 def application(_environ, start_response):
     """Answer request."""
     headers = [("Content-type", "application/json")]
     start_response("200 OK", headers)
-    return json.dumps({"prodDefinitions": reference.prodDefinitions})
+    return json.dumps(
+        {
+            "prodDefinitions": reference.prodDefinitions,
+            "vtec_action": VTEC_ACTION,  # should have been status, sigh
+            "vtec_phenomena": VTEC_PHENOMENA,
+            "vtec_significance": VTEC_SIGNIFICANCE,
+        }
+    )

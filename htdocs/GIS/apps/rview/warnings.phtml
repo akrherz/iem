@@ -3,7 +3,7 @@ require_once "../../../../config/settings.inc.php";
 define("IEM_APPID", 96);
 $JQUERYUI = "1.12.1";
 require_once "../../../../include/database.inc.php";
-require_once "../../../../include/vtec.php";
+require_once "../../../../include/reference.php";
 require_once "../../../../include/network.php";
 require_once "../../../../include/forms.php";
 require_once "../../../../include/myview.php";
@@ -13,7 +13,6 @@ require_once 'lib.php';
 $baseuri = "warnings.phtml";
 putenv("TZ=UTC");
 date_default_timezone_set('UTC');
-
 
 if (isset($_GET["img_x"]) && isset($_GET["img_y"])) {
     $arExtents = explode(",", $_GET["extents"]);
@@ -505,8 +504,6 @@ $query = "SELECT w.phenomena, u.name as cname, w.expire as expire,
 pg_exec($connection, "set time zone 'GMT'");
 $result = pg_exec($connection, $query);
 
-pg_close($connection);
-
 $afos = array(
     "SV" => "Svr Tstorm",
     "TO" => "Tornado",
@@ -585,10 +582,10 @@ foreach ($wA as $key => $val) {
     $updated = strtotime($uA[$key]) - $tzoff;
     $resetApp = "$uri_nowfo&tz=$tz&cu=$cu&year=$year&month=$month&day=$day&hour=$hour&minute=$m&archive=$archive&tzoff=$tzoff&site=$wfo";
 
-    $pp = (array_key_exists($phenomena, $vtec_phenomena)) ? $vtec_phenomena[$phenomena]: "(($phenomena))";
+    $pp = (array_key_exists($phenomena, $reference["vtec_phenomena"])) ? $reference["vtec_phenomena"][$phenomena]: "(($phenomena))";
     $content .= "<div class=\"wwa-state\">$sname</div>" .
         "<div class=\"wwa$significance\"><span style=\"font-size: 14pt;\">" .
-        $pp . " " . $vtec_significance[$significance] .
+        $pp . " " . $reference["vtec_significance"][$significance] .
         "</span> (<a href=\"$warningscat\">View Text</a>) expires " .
         date($dformat, $expire) . " by <a href=\"$resetApp\">$wfo</a> (" .
         $fA[$key] . ")<br />" . $wA[$key] .

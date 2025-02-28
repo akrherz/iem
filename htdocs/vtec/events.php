@@ -2,10 +2,11 @@
 require_once "../../config/settings.inc.php";
 define("IEM_APPID", 85);
 require_once "../../include/myview.php";
-require_once "../../include/vtec.php";
+require_once "../../include/reference.php";
 require_once "../../include/forms.php";
 require_once "../../include/imagemaps.php";
-
+$vtec_phenomena = $referenceData["vtec_phenomena"];
+$vtec_significance = $referenceData["vtec_significance"];
 $wfo = isset($_GET["wfo"]) ? substr(xssafe($_GET["wfo"]), 0, 4) : 'DMX';
 $year = get_int404("year", intval(date("Y")));
 $state = isset($_GET['state']) ? substr(xssafe($_GET["state"]), 0, 2) : 'IA';

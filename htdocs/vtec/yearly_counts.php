@@ -3,12 +3,14 @@ require_once "../../config/settings.inc.php";
 define("IEM_APPID", 151);
 require_once "../../include/database.inc.php";
 require_once "../../include/myview.php";
-require_once "../../include/vtec.php";
+require_once "../../include/reference.php";
 require_once "../../include/network.php";
 require_once "../../include/forms.php";
 require_once "../../include/imagemaps.php";
 require_once "../../include/memcache.php";
 $nt = new NetworkTable("WFO");
+$vtec_phenomena = $reference["vtec_phenomena"];
+$vtec_significance = $reference["vtec_significance"];
 
 $clobber = isset($_REQUEST["clobber"]);
 $wfo = isset($_REQUEST["wfo"]) ? strtoupper(substr(xssafe($_REQUEST["wfo"]), 0, 4)) : "_ALL";

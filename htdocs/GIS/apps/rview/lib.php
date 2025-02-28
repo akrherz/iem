@@ -12,24 +12,6 @@ function determine_time_base($t)
     return mktime($hour, $m, 0, $month, $day, $year);
 }
 
-function tv_logo($map, $imgObj, $titlet)
-{
-    $layer = $map->getLayerByName("credits");
-
-    // point feature with text for location
-    $point = new pointobj();
-    $point->setXY(80, 400);
-
-    $point->draw($map, $layer, $imgObj, 1, $titlet);
-    $map->drawLabelCache($imgObj);
-
-    $layer = $map->getLayerByName("logo");
-
-    $point = new pointobj();
-    $point->setXY(80, 400);
-
-    $point->draw($map, $layer, $imgObj, 0, "");
-}
 
 function mktitle($map, $imgObj, $titlet, $subtitle = "", $width = 640)
 {
@@ -139,35 +121,6 @@ function drawCountyNEXRAD($site, $extents)
     $radarL = $map->getLayerByName("DMX");
     $radarL->__set("status", MS_ON);
     $radarL->__set("data", "/mesonet/ldmdata/gis/images/4326/ridge/{$site}/N0B_0.png");
-
-    $img = $map->prepareImage();
-    $namerica->draw($map, $img);
-    $radarL->draw($map, $img);
-    $counties->draw($map, $img);
-
-    return saveWebImage($img);
-}
-
-function drawKCCI($extents)
-{
-    $width = "150";
-    $height = "150";
-
-    /** ----------------------- */
-    $map = new mapObj("mosaic.map");
-    $map->__set("width", $width);
-    $map->__set("height", $height);
-
-    $map->setextent($extents[0], $extents[1], $extents[2], $extents[3]);
-    $map->setProjection("init=epsg:4326");
-
-    $namerica = $map->getLayerByName("namerica");
-    $namerica->__set("status", MS_ON);
-    $counties = $map->getLayerByName("counties_unproj");
-    $counties->__set("status", MS_ON);
-
-    $radarL = $map->getLayerByName("KCCI");
-    $radarL->__set("status", MS_ON);
 
     $img = $map->prepareImage();
     $namerica->draw($map, $img);

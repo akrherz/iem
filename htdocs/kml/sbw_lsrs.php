@@ -2,7 +2,6 @@
 /* Sucks to render a KML */
 require_once "../../config/settings.inc.php";
 require_once "../../include/database.inc.php";
-require_once "../../include/vtec.php";
 require_once "../../include/forms.php";
 $connect = iemdb("postgis");
 

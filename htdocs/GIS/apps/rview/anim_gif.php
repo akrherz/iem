@@ -25,13 +25,13 @@ foreach ($urls as $k => $v) {
     $f = fopen($fn, 'wb');
     fwrite($f, $res);
     fclose($f);
-    if (exec(escapeshellcmd("magick $fn $gfn")) === FALSE) {
+    if (exec(escapeshellcmd("magick $fn $gfn")) === FALSE) {  // skipcq
         die("magick failed");
     };
     $cmdstr .= " {$gfn} ";
 }
 
-if (exec(escapeshellcmd($cmdstr)) === FALSE){
+if (exec(escapeshellcmd($cmdstr)) === FALSE){  // skipcq
     die("gifsicle failed");
 };
 

@@ -9,7 +9,6 @@ $t->title = "Quality Control, Active Trouble Tickets";
 $conn = iemdb("portfolio");
 $rs = pg_exec($conn, "SELECT *, getSiteName(s_mid) as s_name from tt_base " .
     "WHERE status != 'CLOSED' ORDER by id ASC");
-pg_close($conn);
 
 $ars = array("isusm" => "", "iaawos" => "", "iarwis" => "");
 
@@ -27,7 +26,11 @@ for ($i = 0; $row = pg_fetch_array($rs); $i++) {
         <td>[" . $row["s_mid"] . "] " . $row["s_name"] . "</td>
         <td>" . $row["subject"] . "</td>
      </tr>";
-    @$ars[$row["portfolio"]] .= $s;
+    if (array_key_exists($row["portfolio"], $ars)) {
+        $ars[$row["portfolio"]] .= $s;
+    } else {
+        $ars[$row["portfolio"]] = $s;
+    }
 }
 
 foreach ($ars as $key => $val) {

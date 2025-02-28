@@ -7,7 +7,7 @@ define("IEM_APPID", 18);
 require_once "../../../include/forms.php";
 require_once "../../../include/myview.php";
 require_once "../../../include/network.php";
-require_once "../../../include/vtec.php";
+require_once "../../../include/reference.php";
 
 $t = new MyView();
 $t->iem_resource = "VTEC";
@@ -171,8 +171,8 @@ for($group_idx=0;$group_idx<$location_select_group_count;$group_idx++){
     $content .= $location_select_html[$group_key];
     $content .= '</div>';
 }
-$pselect = make_select("phenomena", "TO", $vtec_phenomena, "", "", FALSE, TRUE);
-$sselect = make_select("significance", "W", $vtec_significance, "", "", FALSE, TRUE);
+$pselect = make_select("phenomena", "TO", $reference["vtec_phenomena"], "", "", FALSE, TRUE);
+$sselect = make_select("significance", "W", $reference["vtec_significance"], "", "", FALSE, TRUE);
 $content .= <<<EOF
 
 <h4>Select time interval</h4>

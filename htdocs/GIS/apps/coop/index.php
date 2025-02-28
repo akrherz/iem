@@ -43,7 +43,7 @@ $ex = array(
     "sw" => array($lx,           $ly,           $ux - ($dx / 2), $uy - ($dy / 2)),
     "nw" => array($lx,           $ly + ($dy / 2), $ux - ($dx / 2), $uy)
 );
-if (!array_key_exists($area, $ex)){
+if (!array_key_exists($area, $ex)) {
     xssafe("<script>");
 }
 
@@ -100,7 +100,7 @@ $var = array(
     "min_high" => "Record Min High Temp [F]",
     "high" => "Average High Temp [F]"
 );
-if (!array_key_exists($plot, $var)){
+if (!array_key_exists($plot, $var)) {
     xssafe("<script>");
 }
 
@@ -181,7 +181,7 @@ $pselect = make_select("plot", $plot, $ar);
 $mselect = monthSelect($month, "month");
 $dselect = daySelect($day);
 
-$t->content = <<<EOF
+$t->content = <<<EOM
 <h3>COOP Climate Data</h3>
 
  Using the COOP data archive, daily averages and extremes
@@ -269,5 +269,5 @@ $t->content = <<<EOF
 
 </div></div>
 
-EOF;
+EOM;
 $t->render('single.phtml');

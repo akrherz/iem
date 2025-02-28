@@ -32,7 +32,7 @@ $y2select = yearSelect2(date("Y"), 2010, "year2");
 $m2select = monthSelect2(1, "month2");
 $d2select = daySelect2(1, "day2");
 
-$t->content = <<<EOF
+$t->content = <<<EOM
 <h3>Soil Moisture &amp; Ocean Salinity (SMOS) Satellite Data</h3>
 
 <p>The <a href="http://www.esa.int/SPECIALS/smos/">SMOS</a> satellite is a polar
@@ -131,5 +131,5 @@ to request a point outside of the domain.  Data is available since
 
 
 <br />
-EOF;
+EOM;
 $t->render('single.phtml');

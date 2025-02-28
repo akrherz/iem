@@ -2,8 +2,11 @@
 /* Sucks to render a KML */
 require_once "../../config/settings.inc.php";
 require_once "../../include/database.inc.php";
-require_once "../../include/vtec.php";
+require_once "../../include/reference.php";
 require_once "../../include/imagemaps.php";
+$vtec_action = $reference["vtec_action"];
+$vtec_phenomena = $reference["vtec_phenomena"];
+$vtec_significance = $reference["vtec_significance"];
 
 function nice_date($val){
     if (is_null($val)) return "not available";
@@ -110,7 +113,7 @@ for ($i=0;$row=pg_fetch_array($result);$i++){
   <br /><font color=\"red\"><i>Expires:</i></font> ". nice_date($row["expire"]) ."
   <br /><font color=\"red\"><i>Polygon Begin:</i></font> ". nice_date($row["polygon_begin"]) ."
   <br /><font color=\"red\"><i>Polygon End:</i></font> ". nice_date($row["polygon_end"]) ."
-  <br /><font color=\"red\"><i>Status:</i></font> ". $vtec_status[$row["status"]] ."
+  <br /><font color=\"red\"><i>Status:</i></font> ". $vtec_action[$row["status"]] ."
   <br /><font color=\"red\"><i>Hail Tag:</i></font> {$row["hailtag"]} IN
   <br /><font color=\"red\"><i>Wind Tag:</i></font> {$row["windtag"]} MPH
   <br /><font color=\"red\"><i>Tornado Tag:</i></font> {$row["tornadotag"]}

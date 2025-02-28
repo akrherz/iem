@@ -5,7 +5,6 @@ define("IEM_APPID", 115);
 $year = get_int404("year", intval(date("Y")));
 
 require_once "../../include/myview.php";
-require_once "../../include/vtec.php";
 require_once "../../include/imagemaps.php";
 
 $uri = sprintf("http://iem.local/json/vtec_max_etn.py?year=%s&format=html", 

@@ -2,12 +2,12 @@
 // Provides a context for PHP pages within the /sites/ IEM website
 require_once dirname(__FILE__) . "/../config/settings.inc.php";
 // Throttle
-require_once dirname(__FILE__) . "/throttle.php";
-require_once dirname(__FILE__) . "/database.inc.php";
-require_once dirname(__FILE__) . "/station.php";
-require_once dirname(__FILE__) . "/forms.php";
-require_once dirname(__FILE__) . "/myview.php";
-require_once dirname(__FILE__) . "/memcache.php";
+require_once dirname(__FILE__) . "throttle.php";
+require_once dirname(__FILE__) . "database.inc.php";
+require_once dirname(__FILE__) . "station.php";
+require_once dirname(__FILE__) . "forms.php";
+require_once dirname(__FILE__) . "myview.php";
+require_once dirname(__FILE__) . "memcache.php";
 
 
 class SitesContext
@@ -19,12 +19,13 @@ class SitesContext
     public function neighbors()
     {
         $con = iemdb("mesosite");
-        $rs = pg_prepare($con, "_SELECT", "SELECT *,
+        $stname = uniqid("select");
+        pg_prepare($con, $stname, "SELECT *,
          ST_distance(ST_transform(geom,3857), 
                      ST_transform(ST_Point({$this->metadata['lon']}, {$this->metadata['lat']}, 4326), 3857)) /1000.0 as dist from stations 
          WHERE ST_PointInsideCircle(geom, {$this->metadata['lon']}, {$this->metadata['lat']}, 0.25) 
          and id != $1 ORDER by dist ASC");
-        $result = pg_execute($con, "_SELECT", array($this->station));
+        $result = pg_execute($con, $stname, array($this->station));
 
         $s = <<<EOM
 <table class="table table-striped">
@@ -77,14 +78,15 @@ function station_helper($station)
 {
     // Attempt to help the user find this station
     $iemdb = iemdb("mesosite");
-    $rs = pg_prepare($iemdb, "FIND", "SELECT id, name, network from stations " .
+    $stname = uniqid("find");
+    pg_prepare($iemdb, $stname, "SELECT id, name, network from stations " .
         "WHERE id = $1");
-    $rs = pg_execute($iemdb, 'FIND', array($station));
+    $rs = pg_execute($iemdb, $stname, array($station));
     if (pg_num_rows($rs) == 0) {
         header("Location: locate.php");
         die();
     }
-    $table = <<<EOF
+    $table = <<<EOM
     <p>Sorry, the requested station identifier and network could not be found
         within the IEM database.  Here are other network matches for your 
         identifier provided.</p>
@@ -92,7 +94,7 @@ function station_helper($station)
     <table class="table table-ruled table-bordered">
     <thead><tr><th>ID</th><th>Name</th><th>Network</th></tr></thead>
     <tbody>
-    EOF;
+    EOM;
     while ($row = pg_fetch_assoc($rs)) {
         $table .= sprintf(
             "<tr><td>%s</td><td><a href=\"site.php?network=%s" .
