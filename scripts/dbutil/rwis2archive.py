@@ -5,8 +5,10 @@ called from RUN_10_AFTER.sh
 """
 
 import sys
-from datetime import datetime, timezone
+from datetime import datetime, timedelta, timezone
+from typing import Optional
 
+import click
 from pyiem.database import get_dbconnc, get_sqlalchemy_conn, sql_helper
 from pyiem.reference import ISO8601
 from pyiem.util import get_properties, logger, set_property, utc
@@ -138,33 +140,60 @@ def do_ob_work(iconn, rconn, first_updated, last_updated):
     """Do the obs work."""
     res = iconn.execute(
         sql_helper("""
-        SELECT c.*, t.id as station, valid at time zone 'UTC' as utc_valid
+        SELECT c.*, t.id as station, valid at time zone 'UTC' as utc_valid,
+        id || '_' || to_char(valid at time zone 'UTC', 'YYYYMMDDHH24MI')
+        as chunk_key
         from current_log c, stations t
         WHERE updated >= :sts and updated < :ets
           and t.network ~* 'RWIS' and t.iemid = c.iemid
+        ORDER by valid ASC
                     """),
         {"sts": first_updated, "ets": last_updated},
     )
-    deleted = 0
+    LOG.info(
+        "Processing %s IEMAccess rows, updated %s to %s",
+        res.rowcount,
+        first_updated,
+        last_updated,
+    )
+    # This is expensive, so we are going to try to be cute and do some
+    # hour based chunking.
+    chunk_valid = None
+    dbhas = []
+    dupes = 0
+    inserts = 0
     for i, row in enumerate(res.mappings()):
+        utc_valid = row["utc_valid"].replace(tzinfo=timezone.utc)
+        if chunk_valid is None or utc_valid >= chunk_valid:
+            res2 = rconn.execute(
+                sql_helper("""
+    select station || '_' ||
+    to_char(valid at time zone 'UTC', 'YYYYMMDDHH24MI')
+    as chunk_key from alldata where valid >= :valid and
+    valid < (:valid + '1 hour'::interval) ORDER by valid ASC
+                           """),
+                {"valid": utc_valid},
+            )
+            chunk_valid = utc_valid + timedelta(hours=1)
+            LOG.info(
+                "Found %s existing rows for chunk %s to %s",
+                res2.rowcount,
+                utc_valid,
+                chunk_valid,
+            )
+            dbhas = [row2[0] for row2 in res2]
+        if row["chunk_key"] in dbhas:
+            dupes += 1
+            continue
         # While updating alldata works, it is very slow, so we do this
-        table = f"t{row['utc_valid'].year}"
-        res2 = rconn.execute(
-            sql_helper(
-                "delete from {table} "
-                "where station =:station and valid = :valid",
-                table=table,
-            ),
-            {"station": row["station"], "valid": row["utc_valid"]},
-        )
-        deleted += res2.rowcount
+        table = f"t{utc_valid.year}"
         rconn.execute(
             sql_helper(
                 """INSERT into {table} (station, valid, tmpf,
             dwpf, drct, sknt, tfs0, tfs1, tfs2, tfs3, subf, gust, tfs0_text,
             tfs1_text, tfs2_text, tfs3_text, pcpn, vsby, feel, relh)
             VALUES (:station,
-            :utc_valid,:tmpf,:dwpf,round(:drct, 0),
+            :valid,:tmpf,:dwpf,round(:drct, 0),
             :sknt,
             :tsf0,:tsf1,:tsf2,:tsf3,:rwis_subf,:gust,
             :scond0,:scond1,:scond2,:scond3,
@@ -173,11 +202,17 @@ def do_ob_work(iconn, rconn, first_updated, last_updated):
             ),
             row,
         )
+        inserts += 1
         if i > 0 and i % 1000 == 0:
             LOG.info("Processed %s rows", i)
             rconn.commit()
     rconn.commit()
-    LOG.info("Processed %s rows, deleted %s", res.rowcount, deleted)
+    LOG.info(
+        "Processed %s rows with inserts %s dupes %s",
+        res.rowcount,
+        inserts,
+        dupes,
+    )
 
 
 def process_obs(first_updated, last_updated):
@@ -189,10 +224,15 @@ def process_obs(first_updated, last_updated):
         do_ob_work(iconn, rconn, first_updated, last_updated)
 
 
-def main():
+@click.command()
+@click.option("--minutes", type=int, help="Specify the size of the window")
+def main(minutes: Optional[int]):
     """Go main"""
-    last_updated = utc()
     first_updated = get_first_updated()
+    if minutes is not None:
+        last_updated = min(first_updated + timedelta(minutes=minutes), utc())
+    else:
+        last_updated = utc()
 
     process_traffic(first_updated, last_updated)
     process_soil(first_updated, last_updated)
