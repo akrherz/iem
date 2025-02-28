@@ -2,9 +2,12 @@
 /* Sucks to render a KML */
 require_once "../../config/settings.inc.php";
 require_once "../../include/database.inc.php";
-require_once "../../include/vtec.php";
+require_once "../../include/reference.php";
 require_once "../../include/forms.php";
 $connect = iemdb("postgis");
+$vtec_action = $reference["vtec_action"];
+$vtec_phenomena = $reference["vtec_phenomena"];
+$vtec_significance = $reference["vtec_significance"];
 
 $year = get_int404("year", 2006);
 $wfo = isset($_GET["wfo"]) ? substr(xssafe($_GET["wfo"]), 0, 4) : "MPX";
@@ -85,7 +88,7 @@ for ($i = 0; $row = pg_fetch_assoc($result); $i++) {
     <description>
         <![CDATA[
   <p><font color=\"red\"><i>Polygon Size:</i></font> " . $row["psize"] . " sq km
-  <br /><font color=\"red\"><i>Status:</i></font> " . $vtec_status[$row["status"]] . "
+  <br /><font color=\"red\"><i>Status:</i></font> " . $vtec_action[$row["status"]] . "
    </p>
         ]]>
     </description>

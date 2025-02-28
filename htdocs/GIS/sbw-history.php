@@ -4,7 +4,7 @@ require_once "/usr/lib64/php/modules/mapscript.php";
 /* Generate an ultra fancy plot of a storm based warning history! */
 require_once "../../config/settings.inc.php";
 require_once "../../include/database.inc.php";
-require_once "../../include/vtec.php";
+require_once "../../include/reference.php";
 require_once "../../include/forms.php";
 require_once "../../include/mlib.php";
 
@@ -109,7 +109,7 @@ for ($i = 0; $row = pg_fetch_array($rs); $i++) {
         $point = new pointObj();
         $point->setXY(80, 25);
         $d = date("d M Y h:i A T",  strtotime($row["init_expire"]));
-        $point->draw($map2, $tlayer, $img2, 1, "$wfo " . $vtec_phenomena[$phenomena] . " " . $vtec_significance[$significance] . " #$eventid till  $d");
+        $point->draw($map2, $tlayer, $img2, 1, "$wfo " . $reference["vtec_phenomena"][$phenomena] . " " . $reference["vtec_significance"][$significance] . " #$eventid till  $d");
 
         $layer = $map2->getLayerByName("logo");
         $point = new pointObj();
@@ -226,7 +226,7 @@ for ($i = 0; $row = pg_fetch_array($rs); $i++) {
     $tlayer = $map->getLayerByName("bar640t-title");
     $point = new pointObj();
     $point->setXY(2, 8);
-    $point->draw($map, $tlayer, $img, 0, $vtec_status[$row["status"]]);
+    $point->draw($map, $tlayer, $img, 0, $reference["vtec_action"][$row["status"]]);
 
     $point = new pointObj();
     $point->setXY(2, 25);

@@ -4,7 +4,7 @@
  */
 require_once "../../../config/settings.inc.php";
 require_once "../../../include/database.inc.php";
-require_once "../../../include/vtec.php";
+require_once "../../../include/reference.php";
 require_once "../../../include/forms.php";
 $connect = iemdb("postgis");
 pg_query($connect, "SET TIME ZONE 'UTC'");
@@ -45,7 +45,7 @@ for ($i = 0; $row = pg_fetch_array($result); $i++) {
     $significance = $row['significance'];
     $issue = strtotime($row["issue"]);
     $expire = strtotime($row["expire"]);
-    $lbl = $vtec_phenomena[$phenomena] . " " . $vtec_significance[$significance] . " " .
+    $lbl = $reference["vtec_phenomena"][$phenomena] . " " . $reference["vtec_significance"][$significance] . " " .
         $row["eventid"] . "\\nIssue: " . gmdate("Hi", $issue) . "Z Expire: " .
         gmdate("Hi", $expire) . "Z";
     echo "\n;";

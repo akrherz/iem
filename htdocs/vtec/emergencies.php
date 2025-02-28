@@ -5,7 +5,6 @@ $OL = "7.2.2";
 $JQUERYUI = "1.13.2";
 
 require_once "../../include/myview.php";
-require_once "../../include/vtec.php";
 require_once "../../include/forms.php";
 require_once "../../include/imagemaps.php";
 

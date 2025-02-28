@@ -4,7 +4,7 @@
  */
 require_once "../../../config/settings.inc.php";
 require_once "../../../include/database.inc.php";
-require_once "../../../include/vtec.php";
+require_once "../../../include/reference.php";
 $connect = iemdb("postgis");
 
 $year = isset($_GET["year"]) ? intval($_GET["year"]) : 2006;
@@ -59,7 +59,7 @@ for ($i = 0; $row = pg_fetch_assoc($result); $i++) {
     $tokens = preg_split("/,/", $geom);
     $phenomena = $row['phenomena'];
     $significance = $row['significance'];
-    echo "\n;" . $vtec_phenomena[$phenomena] . " " . $vtec_significance[$significance] . " " . $row["eventid"] . "\n";
+    echo "\n;" . $reference["vtec_phenomena"][$phenomena] . " " . $reference["vtec_significance"][$significance] . " " . $row["eventid"] . "\n";
 
     if ($row["phenomena"] == "SV") {
         $c = "255 255 0 255";

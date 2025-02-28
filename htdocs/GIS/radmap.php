@@ -7,8 +7,10 @@ require_once "/usr/lib64/php/modules/mapscript.php";
 
 require_once "../../config/settings.inc.php";
 require_once "../../include/database.inc.php";
-require_once "../../include/vtec.php";
+require_once "../../include/reference.php";
 require_once "../../include/forms.php";
+$vtec_phenomena = $reference["vtec_phenomena"];
+$vtec_significance = $reference["vtec_significance"];
 $postgis = iemdb("postgis");
 
 $plotmeta = array(
