@@ -266,7 +266,7 @@ def make_meteo_plot(ctx):
 
     axheight = 0.22
     # -----------------------------
-    ax = fig.add_axes([0.1, 0.69, 0.85, axheight])
+    ax = fig.add_axes((0.1, 0.69, 0.85, axheight))
     ax.plot(
         df["local_valid"].values,
         df["tmpf"].values,
@@ -295,7 +295,7 @@ def make_meteo_plot(ctx):
         .m
     )
 
-    ax = fig.add_axes([0.1, 0.37, 0.85, axheight])
+    ax = fig.add_axes((0.1, 0.37, 0.85, axheight))
     df2 = df[df["gust"].notna()]
     ax.bar(
         df2["local_valid"].values,
@@ -335,7 +335,7 @@ def make_meteo_plot(ctx):
     do_xaxis(ctx, ax, False)
 
     # -----------------------------
-    ax = fig.add_axes([0.1, 0.09, 0.85, axheight])
+    ax = fig.add_axes((0.1, 0.09, 0.85, axheight))
     ax.plot(
         df["local_valid"].values,
         df["pres1"].values,

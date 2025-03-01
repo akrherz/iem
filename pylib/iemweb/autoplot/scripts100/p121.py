@@ -113,14 +113,14 @@ YEAR   SPRING  FALL    SPRING  FALL    SPRING  FALL    SPRING  FALL
 
     df = pd.DataFrame(
         {
-            thres1 + "s": 0,
-            thres1 + "f": 0,
-            thres2 + "s": 0,
-            thres2 + "f": 0,
-            thres3 + "s": 0,
-            thres3 + "f": 0,
-            thres4 + "s": 0,
-            thres4 + "f": 0,
+            thres1 + "s": 0.0,
+            thres1 + "f": 0.0,
+            thres2 + "s": 0.0,
+            thres2 + "f": 0.0,
+            thres3 + "s": 0.0,
+            thres3 + "f": 0.0,
+            thres4 + "s": 0.0,
+            thres4 + "f": 0.0,
         },
         index=pd.Series(range(s.year, e.year + 1), name="year"),
     )
@@ -142,27 +142,26 @@ YEAR   SPRING  FALL    SPRING  FALL    SPRING  FALL    SPRING  FALL
 
             # cycles lower
             if cycle_pos[i] == 1 and low < lower:
-                # print 'Cycled lower', low, ts
                 cycle_pos[i] = -1
                 df.loc[ts.year, ckey] += 0.5
 
             # cycled higher
             if cycle_pos[i] == -1 and high > upper:
-                # print 'Cycled higher', high, ts
                 cycle_pos[i] = 1
                 df.loc[ts.year, ckey] += 0.5
-
+    cursor.close()
+    pgconn.close()
     for yr, row in df.iterrows():
         res += ("%s   %-8i%-8i%-8i%-8i%-8i%-8i%-8i%-8i\n") % (
             yr,
-            row[thres1 + "s"],
-            row[thres1 + "f"],
-            row[thres2 + "s"],
-            row[thres2 + "f"],
-            row[thres3 + "s"],
-            row[thres3 + "f"],
-            row[thres4 + "s"],
-            row[thres4 + "f"],
+            row[f"{thres1}s"],
+            row[f"{thres1}f"],
+            row[f"{thres2}s"],
+            row[f"{thres2}f"],
+            row[f"{thres3}s"],
+            row[f"{thres3}f"],
+            row[f"{thres4}s"],
+            row[f"{thres4}f"],
         )
 
     res += ("AVG    %-8.1f%-8.1f%-8.1f%-8.1f%-8.1f%-8.1f%-8.1f%-8.1f\n") % (

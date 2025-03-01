@@ -1,17 +1,17 @@
 /* global $, moment, ol, iemdata */
-var dragPan;
-var olmap; // Openlayers map
-var lsrtable; // LSR DataTable
-var sbwtable; // SBW DataTable
-var n0q = {}; // RADAR Layer
-let countiesLayer = {};
-let statesLayer = {};
-var wfoSelect;
-var stateSelect;
-var lsrtypefilter;
-var sbwtypefilter;
-var dateFormat1 = "YYYYMMDDHHmm";
-var realtime = false;
+let dragPan = null;
+let olmap = null; // Openlayers map
+let lsrtable = null; // LSR DataTable
+let sbwtable = null; // SBW DataTable
+let n0q = null; // RADAR Layer
+let countiesLayer = null;
+let statesLayer = null;
+let wfoSelect = null;
+let stateSelect = null;
+let lsrtypefilter = null;
+let sbwtypefilter = null;
+const dateFormat1 = "YYYYMMDDHHmm";
+let realtime = false;
 const TABLE_FILTERED_EVENT = "tfe";
 let nexradBaseTime = moment().utc().subtract(moment().minutes() % 5, "minutes");
 

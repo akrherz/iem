@@ -3,7 +3,7 @@
 import os
 import subprocess
 import traceback
-from datetime import datetime
+from datetime import datetime, timedelta
 from zoneinfo import ZoneInfo
 
 import inotify.adapters
@@ -313,7 +313,7 @@ def process(fullfn):
 
     if tabletype == "DailySI":
         # This is kludgy, during CDT, timestamp is 1 AM, CST, midnight
-        df["valid"] = df["valid"].dt.date - datetime.timedelta(days=1)
+        df["valid"] = df["valid"].dt.date - timedelta(days=1)
         df["slrkj_tot"] = df["slrw_avg"] * 86400.0 / 1000.0
         # Remove un-needed data
         df = df.drop(

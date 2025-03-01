@@ -57,9 +57,8 @@ def save_row(sid, meta, valid, row, icursor, scursor):
         iem.data[val] = row[key] if not pd.isna(row[key]) else None
     iem.data["dwpf"] = row["dwpf"]
     # Old data should not go through this logic as we will have a daily update
-    if valid > (utc() - timedelta(hours=23)):
-        if not iem.save(icursor):
-            LOG.info("iemaccess sid: %s ts: %s updated no rows", sid, valid)
+    if valid > (utc() - timedelta(hours=23)) and not iem.save(icursor):
+        LOG.info("iemaccess sid: %s ts: %s updated no rows", sid, valid)
 
     scursor.execute(
         "DELETE from alldata WHERE station = %s and valid = %s",
