@@ -8,13 +8,12 @@ from zoneinfo import ZoneInfo
 
 import httpx
 from geopandas import read_postgis
-from pyiem.database import get_sqlalchemy_conn
+from pyiem.database import get_sqlalchemy_conn, sql_helper
 from pyiem.exceptions import NoDataFound
 from pyiem.network import Table as NetworkTable
 from pyiem.plot.geoplot import MapPlot
 from pyiem.reference import LATLON, Z_OVERLAY2
 from pyiem.util import LOG
-from sqlalchemy import text
 
 TFORMAT = "%b %-d %Y %-I:%M %p %Z"
 UNITS = {
@@ -69,19 +68,21 @@ def plotter(ctx: dict):
     popyear = min(max([int(pid[:4]) - int(pid[:4]) % 5, 2000]), 2020)
     with get_sqlalchemy_conn("postgis") as conn:
         df = read_postgis(
-            text(
-                f"""
+            sql_helper(
+                """
                 with geopop as (
-                    select sum(population) as pop from sps_{pid[:4]} s,
-                    gpw{popyear} g WHERE s.product_id = :pid and
+                    select sum(population) as pop from {spstable} s,
+                    {gpwtable} g WHERE s.product_id = :pid and
                     ST_Contains(s.geom, g.geom) and segmentnum = :segnum
                 )
                 SELECT geom, ugcs, wfo, issue, expire, landspout, waterspout,
                 max_hail_size, max_wind_gust, segmentnum,
                 coalesce(pop, 0) as pop
-                from sps_{pid[:4]}, geopop where product_id = :pid
+                from {spstable}, geopop where product_id = :pid
                 and segmentnum = :segnum
-                """
+                """,
+                gpwtable=f"gpw{popyear}",
+                spstable=f"sps_{pid[:4]}",
             ),
             conn,
             params={"pid": pid, "segnum": segnum},
@@ -106,13 +107,14 @@ def plotter(ctx: dict):
         with get_sqlalchemy_conn("postgis") as conn:
             for source in ["z", "fz", "mz"]:
                 ugcdf = read_postgis(
-                    text(
-                        f"""
-                        SELECT simple_geom, ugc, gpw_population_{popyear}
+                    sql_helper(
+                        """
+                        SELECT simple_geom, ugc, {gpwcol}
                         as pop from ugcs where wfo = :wfo and ugc = ANY(:ugcs)
                         and (end_ts is null or end_ts > :expire) and
                         source = :source
-                        """
+                        """,
+                        gpwcol=f"gpw_population_{popyear}",
                     ),
                     conn,
                     params={
