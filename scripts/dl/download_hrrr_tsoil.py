@@ -61,16 +61,15 @@ def fetch(valid):
             offsets[-1].append(int(tokens[1]))
             neednext = False
         # Save soil temp and water at surface, 10cm and 40cm
-        if tokens[3] in ["TSOIL", "SOILW"]:
-            if tokens[4] in [
-                "0-0 m below ground",
-                "0.1-0.1 m below ground",
-                "0.3-0.3 m below ground",
-                "0.6-0.6 m below ground",
-                "1-1 m below ground",
-            ]:
-                offsets.append([int(tokens[1])])
-                neednext = True
+        if tokens[3] in ["TSOIL", "SOILW"] and tokens[4] in [
+            "0-0 m below ground",
+            "0.1-0.1 m below ground",
+            "0.3-0.3 m below ground",
+            "0.6-0.6 m below ground",
+            "1-1 m below ground",
+        ]:
+            offsets.append([int(tokens[1])])
+            neednext = True
 
     pqstr = valid.strftime(
         "data u %Y%m%d%H00 bogus model/hrrr/%H/hrrr.t%Hz.3kmf00.grib2 grib2"

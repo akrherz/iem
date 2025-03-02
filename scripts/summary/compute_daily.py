@@ -173,6 +173,11 @@ def do(dt: date, netclass: str, meta: dict):
                 f"INSERT into {table} (iemid, day) values (%s, %s)",
                 (iemid, dt),
             )
+            # Commit this immediately attempting to avoid a deadlock that
+            # has been difficult to track down
+            icursor.close()
+            iemaccess.commit()
+            icursor = iemaccess.cursor()
             current.loc[iemid] = None
         newdata = {}
         currentrow = current.loc[iemid]
