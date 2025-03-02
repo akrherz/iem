@@ -1,4 +1,4 @@
 /* global $ */
-$(document).ready(function(){
+$(document).ready(() => {
     $(".iemselect2").select2();	
 });

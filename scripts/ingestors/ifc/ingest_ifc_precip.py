@@ -77,7 +77,7 @@ def to_raster(tmpfn, now):
     png.save(f"{tmpfn}.png", pnginfo=meta)
     png.close()
     # Make worldfile
-    with open(f"{tmpfn}.wld", "w") as fh:
+    with open(f"{tmpfn}.wld", "w") as fh:  # skipcq
         fh.write("0.004167\n0.00\n0.00\n-0.004167\n-97.154167\n44.53785")
 
 
