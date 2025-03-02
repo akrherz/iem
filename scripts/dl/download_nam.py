@@ -57,19 +57,21 @@ def fetch(valid, hr):
         if neednext:
             offsets[-1].append(int(tokens[1]))
             neednext = False
-        if tokens[3] in ["ULWRF", "DSWRF"]:
-            if tokens[4] == "surface" and tokens[5].find("ave fcst") > 0:
-                offsets.append([int(tokens[1])])
-                neednext = True
+        if (
+            tokens[3] in ["ULWRF", "DSWRF"]
+            and tokens[4] == "surface"
+            and tokens[5].find("ave fcst") > 0
+        ):
+            offsets.append([int(tokens[1])])
+            neednext = True
         # Save soil temp and water at surface, 10cm and 40cm
-        if tokens[3] in ["TSOIL", "SOILW"]:
-            if tokens[4] in [
-                "0-0.1 m below ground",
-                "0.1-0.4 m below ground",
-                "0.4-1 m below ground",
-            ]:
-                offsets.append([int(tokens[1])])
-                neednext = True
+        if tokens[3] in ["TSOIL", "SOILW"] and tokens[4] in [
+            "0-0.1 m below ground",
+            "0.1-0.4 m below ground",
+            "0.4-1 m below ground",
+        ]:
+            offsets.append([int(tokens[1])])
+            neednext = True
 
     pqstr = valid.strftime(
         "data u %Y%m%d%H00 bogus model/nam/"
@@ -86,9 +88,8 @@ def fetch(valid, hr):
         if req is None:
             LOG.info("failure for uri: %s", uri)
             continue
-        tmpfd = tempfile.NamedTemporaryFile(delete=False)
-        tmpfd.write(req.content)
-        tmpfd.close()
+        with tempfile.NamedTemporaryFile(delete=False) as tmpfd:
+            tmpfd.write(req.content)
         subprocess.call(["pqinsert", "-p", pqstr, tmpfd.name])
         os.unlink(tmpfd.name)
 
