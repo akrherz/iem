@@ -75,7 +75,7 @@ def to_raster(tmpfn, now):
     meta = PngImagePlugin.PngInfo()
     meta.add_text("title", now.strftime("%Y%m%d%H%M"), 0)
     png.save(f"{tmpfn}.png", pnginfo=meta)
-    del png
+    png.close()
     # Make worldfile
     with open(f"{tmpfn}.wld", "w") as fh:
         fh.write("0.004167\n0.00\n0.00\n-0.004167\n-97.154167\n44.53785")

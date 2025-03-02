@@ -1,6 +1,6 @@
 <?php
-require_once dirname(__FILE__) . "database.inc.php";
-require_once dirname(__FILE__) . "network.php";
+require_once dirname(__FILE__) . "/database.inc.php";
+require_once dirname(__FILE__) . "/network.php";
 
 /**
  * Convert a vague 3 character WFO identifier to a 4 character one

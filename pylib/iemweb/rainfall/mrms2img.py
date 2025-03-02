@@ -98,7 +98,7 @@ def workflow(tmpdir, valid, period, start_response):
     # top left y, rotation, n-s pixel resolution
     ds.SetGeoTransform([-130.0, 0.01, 0, 55.0, 0, -0.01])
     ds.FlushCache()
-    del ds
+    ds.close()
 
     zipfn = f"{tmpdir}/{basefn}.zip"
     with zipfile.ZipFile(zipfn, "w", zipfile.ZIP_DEFLATED) as zfp:

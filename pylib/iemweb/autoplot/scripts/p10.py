@@ -10,7 +10,7 @@ from datetime import date, timedelta
 
 import numpy as np
 import pandas as pd
-from pyiem.database import get_dbconnc
+from pyiem.database import sql_helper, with_sqlalchemy_conn
 from pyiem.exceptions import NoDataFound
 from pyiem.plot import figure_axes
 from scipy import stats
@@ -62,9 +62,9 @@ def get_description():
     return desc
 
 
-def plotter(ctx: dict):
+@with_sqlalchemy_conn("coop")
+def plotter(ctx: dict, conn=None):
     """Go"""
-    pgconn, ccursor = get_dbconnc("coop")
     station = ctx["station"]
     threshold = ctx["threshold"]
     direction = ctx["direction"]
@@ -72,48 +72,50 @@ def plotter(ctx: dict):
     startyear = ctx["year"]
 
     if direction == "below":
-        sql = f"""select year,
-        max(case when {varname}::numeric < %s and month < 7
+        sql = """select year,
+        max(case when {varname}::numeric < :thres and month < 7
             then extract(doy from day) else 0 end) as spring,
-        max(case when {varname}::numeric < %s and month < 7
+        max(case when {varname}::numeric < :thres and month < 7
             then day else null end) as spring_date,
-        min(case when {varname}::numeric < %s and month > 6
+        min(case when {varname}::numeric < :thres and month > 6
             then extract(doy from day) else 388 end) as fall,
-        min(case when {varname}::numeric < %s and month > 6
+        min(case when {varname}::numeric < :thres and month > 6
             then day else null end) as fall_date
-        from alldata where station = %s
+        from alldata where station = :station
         GROUP by year ORDER by year ASC"""
     elif direction == "above":
-        sql = f"""select year,
-             min(case when {varname}::numeric >= %s and month < 7
+        sql = """select year,
+             min(case when {varname}::numeric >= :thres and month < 7
                  then extract(doy from day) else 183 end) as spring,
-             min(case when {varname}::numeric >= %s and month < 7
+             min(case when {varname}::numeric >= :thres and month < 7
                  then day else null end) as spring_date,
-             max(case when {varname}::numeric >= %s and month > 6
+             max(case when {varname}::numeric >= :thres and month > 6
                  then extract(doy from day) else 183 end) as fall,
-             max(case when {varname}::numeric >= %s and month > 6
+             max(case when {varname}::numeric >= :thres and month > 6
                  then day else null end) as fall_date
-            from alldata where station = %s
+            from alldata where station = :station
             GROUP by year ORDER by year ASC"""
     else:  # above2
-        sql = f"""select year,
-             max(case when {varname}::numeric >= %s and month < 7
+        sql = """select year,
+             max(case when {varname}::numeric >= :thres and month < 7
                  then extract(doy from day) else 0 end) as spring,
-             max(case when {varname}::numeric >= %s and month < 7
+             max(case when {varname}::numeric >= :thres and month < 7
                  then day else null end) as spring_date,
-             min(case when {varname}::numeric >= %s and month > 6
+             min(case when {varname}::numeric >= :thres and month > 6
                  then extract(doy from day) else 388 end) as fall,
-             min(case when {varname}::numeric >= %s and month > 6
+             min(case when {varname}::numeric >= :thres and month > 6
                  then day else null end) as fall_date
-            from alldata where station = %s
+            from alldata where station = :station
             GROUP by year ORDER by year ASC"""
 
-    ccursor.execute(sql, (threshold, threshold, threshold, threshold, station))
-    if ccursor.rowcount == 0:
-        pgconn.close()
+    res = conn.execute(
+        sql_helper(sql, varname=varname),
+        {"thres": threshold, "station": station},
+    )
+    if res.rowcount == 0:
         raise NoDataFound("No Data Found.")
     rows = []
-    for row in ccursor:
+    for row in res.mappings():
         if row["year"] < startyear:
             continue
         if row["fall"] > 366:
@@ -129,7 +131,6 @@ def plotter(ctx: dict):
                 fall_date=row["fall_date"],
             )
         )
-    pgconn.close()
     df = pd.DataFrame(rows)
     if df.empty:
         raise NoDataFound("No data found for query.")

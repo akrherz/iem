@@ -10,7 +10,7 @@ from datetime import datetime
 
 import numpy as np
 import pandas as pd
-from pyiem.database import get_dbconnc
+from pyiem.database import sql_helper, with_sqlalchemy_conn
 from pyiem.exceptions import NoDataFound
 from pyiem.plot import figure_axes
 
@@ -32,9 +32,9 @@ def get_description():
     return desc
 
 
-def plotter(ctx: dict):
+@with_sqlalchemy_conn("coop")
+def plotter(ctx: dict, conn=None):
     """Go"""
-    pgconn, cursor = get_dbconnc("coop")
     station = ctx["station"]
     today = datetime.now()
     year = ctx["year"]
@@ -44,20 +44,20 @@ def plotter(ctx: dict):
 
     endyear = int(datetime.now().year) + 1
 
-    cursor.execute(
-        """
+    res = conn.execute(
+        sql_helper("""
     with pop as (
         select precip, sum(precip) OVER (ORDER by precip ASC) as rsum,
         sum(precip) OVER () as tsum,
         min(year) OVER () as minyear from alldata where
-        station = %s and precip > 0.009 and extract(doy from day) < %s and
+        station = :station and precip > 0.009
+        and extract(doy from day) < :doy and
         year < extract(year from now()) ORDER by precip ASC)
     select distinct precip, rsum, tsum, minyear from pop order by precip ASC
-    """,
-        (station, jdaylimit),
+    """),
+        {"station": station, "doy": jdaylimit},
     )
-    if cursor.rowcount == 0:
-        pgconn.close()
+    if res.rowcount == 0:
         raise NoDataFound("No Data Found.")
     total = None
     base = None
@@ -65,7 +65,7 @@ def plotter(ctx: dict):
     minyear = None
     row = None
     last_precip = None
-    for i, row in enumerate(cursor):
+    for i, row in enumerate(res.mappings()):
         if i == 0:
             minyear = row["minyear"]
             total = row["tsum"]
@@ -77,7 +77,6 @@ def plotter(ctx: dict):
             base += onefifth
 
     if len(bins) != 5:
-        pgconn.close()
         raise NoDataFound("Not enough data found.")
 
     normal = total / float(endyear - minyear - 1)
@@ -85,7 +84,6 @@ def plotter(ctx: dict):
     if last_precip != bins[-1]:
         bins.append(last_precip)
     if len(bins) != 6:
-        pgconn.close()
         raise NoDataFound("Not enough data found.")
 
     df = pd.DataFrame(
@@ -96,52 +94,42 @@ def plotter(ctx: dict):
     yearlybins = np.zeros((endyear - minyear, 5), "f")
     yearlytotals = np.zeros((endyear - minyear, 5), "f")
 
-    cursor.execute(
-        """
+    res = conn.execute(
+        sql_helper("""
     SELECT year,
-    sum(case when precip >= %s and precip < %s then 1 else 0 end) as bin0,
-    sum(case when precip >= %s and precip < %s then 1 else 0 end) as bin1,
-    sum(case when precip >= %s and precip < %s then 1 else 0 end) as bin2,
-    sum(case when precip >= %s and precip < %s then 1 else 0 end) as bin3,
-    sum(case when precip >= %s and precip < %s then 1 else 0 end) as bin4,
-    sum(case when precip >= %s and precip < %s then precip else 0 end) as tot0,
-    sum(case when precip >= %s and precip < %s then precip else 0 end) as tot1,
-    sum(case when precip >= %s and precip < %s then precip else 0 end) as tot2,
-    sum(case when precip >= %s and precip < %s then precip else 0 end) as tot3,
-    sum(case when precip >= %s and precip < %s then precip else 0 end) as tot4
-    from alldata where extract(doy from day) < %s and
-    station = %s and precip > 0 and year > 1879 GROUP by year
-    """,
-        (
-            bins[0],
-            bins[1],
-            bins[1],
-            bins[2],
-            bins[2],
-            bins[3],
-            bins[3],
-            bins[4],
-            bins[4],
-            bins[5],
-            bins[0],
-            bins[1],
-            bins[1],
-            bins[2],
-            bins[2],
-            bins[3],
-            bins[3],
-            bins[4],
-            bins[4],
-            bins[5],
-            jdaylimit,
-            station,
-        ),
+    sum(case when precip >= :b0 and precip < :b1 then 1 else 0 end) as bin0,
+    sum(case when precip >= :b1 and precip < :b2 then 1 else 0 end) as bin1,
+    sum(case when precip >= :b2 and precip < :b3 then 1 else 0 end) as bin2,
+    sum(case when precip >= :b3 and precip < :b4 then 1 else 0 end) as bin3,
+    sum(case when precip >= :b4 and precip < :b5 then 1 else 0 end) as bin4,
+    sum(case when precip >= :b0 and precip < :b1 then precip else 0 end)
+                   as tot0,
+    sum(case when precip >= :b1 and precip < :b2 then precip else 0 end)
+                   as tot1,
+    sum(case when precip >= :b2 and precip < :b3 then precip else 0 end)
+                   as tot2,
+    sum(case when precip >= :b3 and precip < :b4 then precip else 0 end)
+                   as tot3,
+    sum(case when precip >= :b4 and precip < :b5 then precip else 0 end)
+                   as tot4
+    from alldata where extract(doy from day) < :doy and
+    station = :station and precip > 0 and year > 1879 GROUP by year
+    """),
+        {
+            "b0": bins[0],
+            "b1": bins[1],
+            "b2": bins[2],
+            "b3": bins[3],
+            "b4": bins[4],
+            "b5": bins[5],
+            "doy": jdaylimit,
+            "station": station,
+        },
     )
-    for row in cursor:
+    for row in res.mappings():
         for i in range(5):
             yearlybins[int(row["year"]) - minyear, i] = row[f"bin{i}"]
             yearlytotals[int(row["year"]) - minyear, i] = row[f"tot{i}"]
-    pgconn.close()
     avgs = np.average(yearlybins, 0)
     df["avg_days"] = avgs
     dlast = yearlybins[year - minyear, :]
@@ -220,7 +208,8 @@ def plotter(ctx: dict):
         0.5,
         -0.05,
         "Precipitation Bins [inch], split into equal 20%"
-        f" by rain volume ({(normal / 5.0):.2f}in) over period of record",
+        f" by precipitation volume ({(normal / 5.0):.2f}in) "
+        "over period of record",
         transform=ax.transAxes,
         va="top",
         ha="center",

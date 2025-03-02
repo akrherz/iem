@@ -62,7 +62,7 @@ def main(state):
         )
         with cursor.copy(sql) as copy:
             copy.write(sio.read())
-        del sio
+        sio.close()
         cursor.close()
         pgconn.commit()
 
