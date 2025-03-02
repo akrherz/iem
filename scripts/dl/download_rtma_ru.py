@@ -40,7 +40,6 @@ def fetch_aws(dt: datetime):
         return
     with tempfile.NamedTemporaryFile("wb", delete=False) as tmpfp:
         tmpfp.write(req.content)
-        del req
     grbs = pygrib.open(tmpfp.name)
     with tempfile.NamedTemporaryFile("wb", delete=False) as tmpfp2:
         tmpfp2.write(grbs.select(name="2 metre temperature")[0].tostring())

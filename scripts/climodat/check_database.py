@@ -8,7 +8,7 @@ from io import StringIO
 
 import click
 import pandas as pd
-from pyiem.database import get_dbconn, get_sqlalchemy_conn
+from pyiem.database import get_dbconn, get_sqlalchemy_conn, sql_helper
 from pyiem.network import Table as NetworkTable
 from pyiem.util import logger
 
@@ -23,8 +23,10 @@ def main(state):
     pgconn = get_dbconn("coop")
     with get_sqlalchemy_conn("coop") as conn:
         df = pd.read_sql(
-            f"SELECT station, year, day from alldata_{state} "
-            "ORDER by station, day",
+            sql_helper(
+                "SELECT station, year, day from {table} ORDER by station, day",
+                table=f"alldata_{state.lower()}",
+            ),
             conn,
             index_col=None,
         )
@@ -62,7 +64,7 @@ def main(state):
         )
         with cursor.copy(sql) as copy:
             copy.write(sio.read())
-        del sio
+        sio.close()
         cursor.close()
         pgconn.commit()
 
