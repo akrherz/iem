@@ -90,7 +90,7 @@ function findFeatureByCid(cid) {
     // Find the feature for the given camera id
     let feature = null;
     webcamGeoJsonLayer.getSource().forEachFeature((feat) => {
-        if (feat.get('cid') == cid) {
+        if (feat.get('cid') === cid) {
             feature = feat;
         }
     });
@@ -98,7 +98,7 @@ function findFeatureByCid(cid) {
         return feature;
     }
     idotdashcamGeoJsonLayer.getSource().forEachFeature((feat) => {
-        if (feat.get('cid') == cid) {
+        if (feat.get('cid') === cid) {
             feature = feat;
         }
     });
@@ -106,7 +106,7 @@ function findFeatureByCid(cid) {
         return feature;
     }
     idotRWISLayer.getSource().forEachFeature((feat) => {
-        if (feat.get('cid') == cid) {
+        if (feat.get('cid') === cid) {
             feature = feat;
         }
     });
@@ -261,9 +261,9 @@ function refreshJSON() {
 
 function parseURI() {
     const tokens = window.location.href.split('#');
-    if (tokens.length == 2) {
+    if (tokens.length === 2) {
         const tokens2 = tokens[1].split("/");
-        if (tokens2.length == 1) {
+        if (tokens2.length === 1) {
             cameraID = text(tokens[1]);
         } else {
             cameraID = text(tokens2[0]);
@@ -342,7 +342,7 @@ $().ready(() => {
         title: 'Iowa DOT Truck Dashcams (2014-)',
         style: (feature) => {
             if (currentCameraFeature &&
-                currentCameraFeature.get("cid") == feature.get("cid")) {
+                currentCameraFeature.get("cid") === feature.get("cid")) {
                 currentCameraFeature = feature;
                 return [trackaplowStyle2];
             }
@@ -351,9 +351,9 @@ $().ready(() => {
     });
     idotRWISLayer = new ol.layer.Vector({
         title: 'Iowa DOT RWIS Webcams (2010-)',
-        style: function (feature) {
+        style(feature) {
             if (currentCameraFeature &&
-                currentCameraFeature.get("cid") == feature.get("cid")) {
+                currentCameraFeature.get("cid") === feature.get("cid")) {
                 currentCameraFeature = feature;
                 return [rwisStyle];
             }
@@ -364,7 +364,7 @@ $().ready(() => {
         title: 'Webcams (2003-)',
         style: (feature) => {
             if (currentCameraFeature &&
-                currentCameraFeature.get("cid") == feature.get("cid")) {
+                currentCameraFeature.get("cid") === feature.get("cid")) {
                 currentCameraFeature = feature;
                 // OL rotation is in radians!
                 cameraStyle2.getImage().setRotation(

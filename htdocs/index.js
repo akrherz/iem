@@ -9,7 +9,6 @@ function onFeatureData(data) {
     }
 }
 $("button.feature_btn").click((event) => {
-    console.log("Clicked");
     const btn = $(event.target);
     $.get(`/onsite/features/vote/${btn.data('voting')}.json`, onFeatureData);
 });
