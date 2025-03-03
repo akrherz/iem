@@ -177,9 +177,8 @@ EOF;
  * param object $t Template object
  * return string HTML
  */
-$gen_feature = cacheable("gen_feature", 120)(function()
+function gen_feature($t)
 {
-    global $t;
     $s = '';
 
     $connection = iemdb("mesosite");
@@ -355,7 +354,7 @@ EOF;
     $s .= "</div><!-- end of panel -->";
 
     return $s;
-});
+};
 
 /**
  * Get recent news items
