@@ -47,7 +47,7 @@ Ext.override(Ext.form.ComboBox, {
 
 Ext.onReady(function () {
 
-    var states = [
+    const states = [
         ["AL", "Alabama"],
         ["AK", "Alaska"],
         ["AZ", "Arizona"],
