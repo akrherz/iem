@@ -9,7 +9,6 @@ import subprocess
 import tempfile
 import warnings
 from datetime import datetime, timedelta, timezone
-from zoneinfo import ZoneInfo
 
 import click
 import httpx
@@ -185,7 +184,7 @@ def process(fn: str, valid: datetime):
             continue
         ticks = obtime[recnum]
         ts = datetime(1970, 1, 1) + timedelta(seconds=ticks)
-        ts = ts.replace(tzinfo=ZoneInfo("UTC"))
+        ts = ts.replace(tzinfo=timezone.utc)
         if f"{sid}_{network}_{ts:%Y%m%d%H%M}" in dbhaskeys:
             dupes += 1
             continue
@@ -292,6 +291,12 @@ def process(fn: str, valid: datetime):
 )
 def main(valid: datetime):
     """Do Something"""
+    # The IEM has too much going on at midnight it seems, so we will punt on
+    # this script when run within a 12:00 AM to 12:20 AM window
+    if f"{datetime.now():%H%M}" < "0020":
+        LOG.info("Exiting due to midnight exclusion period.")
+        return
+
     valid = valid.replace(tzinfo=timezone.utc)
     for variant in ["rwis1", "mesonet1"]:
         fn = find_file(variant, valid)
