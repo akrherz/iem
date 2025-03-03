@@ -10,7 +10,7 @@ require_once "../../include/network.php";
 require_once "../../include/mlib.php";
 $pgconn = iemdb("iem");
 $stname = uniqid("select");
-$rs = pg_prepare(
+pg_prepare(
     $pgconn,
     $stname,
     "SELECT *, to_char(valid, 'Mon DD YYYY HH:MI AM') as v from offline ".

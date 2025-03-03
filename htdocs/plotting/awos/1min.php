@@ -26,7 +26,7 @@ $sqlDate = date("Y-m-d", $myTime);
 /** Time to get data from database **/
 $connection = iemdb("awos");
 $stname = uniqid("select");
-$rs = pg_prepare($connection, $stname, "SELECT " .
+pg_prepare($connection, $stname, "SELECT " .
     "to_char(valid, 'HH24:MI') as tvalid, tmpf, dwpf from " .
     "alldata WHERE station = $1 and " .
     " valid >= $2 and valid < $3 ORDER by tvalid");

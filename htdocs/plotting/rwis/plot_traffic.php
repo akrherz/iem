@@ -48,11 +48,12 @@ for ($i = 0; $row = pg_fetch_array($rs); $i++) {
 
 $dbconn = iemdb('rwis');
 $stname = uniqid("SELECT");
-$rs = pg_prepare($dbconn, $stname, "SELECT * from alldata_traffic
-  WHERE station = $1 and valid > $2 and valid < $3 ORDER by valid ASC");
+pg_prepare($dbconn, $stname, "SELECT * from alldata_traffic " .
+    "WHERE station = $1 and valid > $2 and valid < $3 ORDER by valid ASC");
 $rs = pg_execute($dbconn, $stname, array(
     $station,
-    date("Y-m-d H:i", $sts), date("Y-m-d H:i", $ets)
+    date("Y-m-d H:i", $sts),
+    date("Y-m-d H:i", $ets)
 ));
 
 for ($i = 0; $row = pg_fetch_array($rs); $i++) {
@@ -93,8 +94,14 @@ $graph->legend->Pos(0.01, 0.01);
 $graph->legend->SetLayout(LEGEND_VERT);
 
 $colors = array(
-    0 => "green", 1 => "black", 2 => "blue", 3 => "red",
-    4 => "purple", 5 => "tan", 6 => "pink", 7 => "lavendar"
+    0 => "green",
+    1 => "black",
+    2 => "blue",
+    3 => "red",
+    4 => "purple",
+    5 => "tan",
+    6 => "pink",
+    7 => "lavendar"
 );
 foreach ($times as $k => $v) {
     if (sizeof($times[$k]) < 2) {
