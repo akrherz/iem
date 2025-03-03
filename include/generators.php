@@ -237,12 +237,12 @@ EOM;
 </div>
 EOF;
         $HC = "8.2.0";
-        $jsextra = <<<EOF
+        $jsextra = <<<EOM
 <script src="/vendor/highcharts/{$HC}/highcharts.js"></script>
 <script src="/vendor/highcharts/{$HC}/highcharts-more.js"></script>
 <script src="/vendor/highcharts/{$HC}/modules/exporting.js"></script>
 <script src="{$row["javascripturl"]}"></script>
-EOF;
+EOM;
     }
 
     $s .= <<<EOF
@@ -287,7 +287,7 @@ EOF;
         $fbtext = "";
         $vtext = "";
     } else {
-        $vtext = <<<EOF
+        $vtext = <<<EOM
         <div style="clear:both;">
         <div class="row">
         <div class="col-xs-12 col-sm-3"><strong><span id="feature_msg">Rate Feature</span></strong></div>
@@ -302,36 +302,10 @@ EOF;
         </div>
         </div>
     </div>
-EOF;
+EOM;
 
         $t->jsextra = <<<EOF
-        <div id="fb-root"></div>
-<script type="text/javascript">
-(function(d, s, id) {
-  var js, fjs = d.getElementsByTagName(s)[0];
-  if (d.getElementById(id)) return;
-  js = d.createElement(s); js.id = id;
-  js.src = "//connect.facebook.net/en_US/all.js#xfbml=1&appId=196492870363354";
-  fjs.parentNode.insertBefore(js, fjs);
-}(document, 'script', 'facebook-jssdk'));
-
-function onFeatureData(data){
-      $("#feature_good_votes").html(data.good);
-      $("#feature_bad_votes").html(data.bad);
-      $("#feature_abstain_votes").html(data.abstain);
-      if (! data.can_vote){
-          $("#feature_msg").html("<i class=\"fa fa-ok\"></i> Thanks for voting!");
-          $("button.feature_btn").prop("disabled",true);
-      }
-}
-$("button.feature_btn").click(function(){
-  $.get("/onsite/features/vote/"+ $(this).data('voting') +".json", onFeatureData);
-});
-$(document).ready(function(){
-  $.get("/onsite/features/vote.json", onFeatureData);
-});
-
-</script>
+<script src="index.js"></script>
 {$jsextra}
 EOF;
         $huri = "https://mesonet.agron.iastate.edu/onsite/features/cat.php?day=" . $row["permalink"];

@@ -10,7 +10,7 @@ from zoneinfo import ZoneInfo
 
 import numpy as np
 import pandas as pd
-from pyiem.database import get_dbconnc, get_sqlalchemy_conn
+from pyiem.database import get_sqlalchemy_conn, sql_helper
 from pyiem.exceptions import NoDataFound
 from pyiem.plot import figure_axes
 
@@ -140,7 +140,6 @@ def get_highcharts(ctx: dict) -> dict:
 
 def add_ctx(ctx):
     """Get data common to both methods"""
-    coop_pgconn, ccursor = get_dbconnc("coop")
     ctx["station"] = ctx["zstation"]
     sdate = ctx["sdate"]
     days = ctx["days"]
@@ -152,32 +151,39 @@ def add_ctx(ctx):
 
     ctx["climo"] = {}
     if ctx["var"] == "tmpf":
-        ccursor.execute(
-            "SELECT valid, high, low from ncei_climate91 where station = %s",
-            (ctx["_nt"].sts[ctx["station"]]["ncei91"],),
-        )
-        for row in ccursor:
-            ctx["climo"][row["valid"].strftime("%m%d")] = dict(
-                high=row["high"], low=row["low"]
+        with get_sqlalchemy_conn("coop") as conn:
+            res = conn.execute(
+                sql_helper("""
+    SELECT valid, high, low from ncei_climate91 where station = :station
+                           """),
+                {"station": ctx["_nt"].sts[ctx["station"]]["ncei91"]},
             )
+            for row in res.mappings():
+                ctx["climo"][row["valid"].strftime("%m%d")] = dict(
+                    high=row["high"], low=row["low"]
+                )
     col = "tmpf::int" if ctx["var"] == "tmpf" else ctx["var"]
     col = "dwpf::int" if ctx["var"] == "dwpf" else col
     with get_sqlalchemy_conn("asos") as conn:
         ctx["df"] = pd.read_sql(
-            "SELECT valid at time zone 'UTC' as valid, "
-            f"extract(epoch from valid) * 1000 as ticks, {col} as datum "
-            "from alldata WHERE station = %s and valid > %s and valid < %s "
-            f"and {ctx['var']} is not null and report_type != 1 "
-            "ORDER by valid ASC",
-            conn,
-            params=(
-                ctx["station"],
-                sdate,
-                sdate + timedelta(days=days),
+            sql_helper(
+                """
+    SELECT valid at time zone 'UTC' as valid,
+    extract(epoch from valid) * 1000 as ticks, {col} as datum
+    from alldata WHERE station = :station and valid > :sts and valid < :ets
+    and {varname} is not null and report_type != 1
+    ORDER by valid ASC""",
+                col=col,
+                varname=ctx["var"],
             ),
+            conn,
+            params={
+                "station": ctx["station"],
+                "sts": sdate,
+                "ets": sdate + timedelta(days=days),
+            },
             index_col="valid",
         )
-    coop_pgconn.close()
     if ctx["df"].empty:
         raise NoDataFound("No data found.")
 

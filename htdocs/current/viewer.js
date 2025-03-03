@@ -333,7 +333,7 @@ $().ready(() => {
         }),
         style: (feature) => {
             const color = sbwLookup[feature.get('phenomena')];
-            if (color === undefined) return;
+            if (color === undefined) return sbwStyle;
             sbwStyle[1].getStroke().setColor(color);
             return sbwStyle;
         }
