@@ -27,7 +27,7 @@ from datetime import date, datetime, timedelta
 import httpx
 import numpy as np
 import pandas as pd
-from pyiem.database import get_dbconnc
+from pyiem.database import sql_helper, with_sqlalchemy_conn
 from pyiem.exceptions import NoDataFound
 from pyiem.plot import figure
 
@@ -66,20 +66,20 @@ def get_description():
     return desc
 
 
-def add_ctx(ctx):
+@with_sqlalchemy_conn("coop")
+def add_ctx(ctx, conn=None):
     """Get the plotting context"""
-    pgconn, cursor = get_dbconnc("coop")
     station = ctx["station"]
     dt: date = ctx["date"]
     opt = ctx["opt"]
 
-    cursor.execute(
-        "SELECT year, extract(doy from day) as doy, precip from "
-        "alldata where station = %s and precip is not null",
-        (station,),
+    res = conn.execute(
+        sql_helper("""
+    SELECT year, extract(doy from day) as doy, precip from
+    alldata where station = :station and precip is not null"""),
+        {"station": station},
     )
-    if cursor.rowcount == 0:
-        pgconn.close()
+    if res.rowcount == 0:
         raise NoDataFound("No Data Found")
 
     ab = ctx["_nt"].sts[station]["archive_begin"]
@@ -90,14 +90,13 @@ def add_ctx(ctx):
 
     data = np.zeros((ctx["years"], 367 * 2))
 
-    for row in cursor:
+    for row in res.mappings():
         # left hand
         data[int(row["year"] - baseyear), int(row["doy"])] = row["precip"]
         # right hand
         data[int(row["year"] - baseyear - 1), int(row["doy"]) + 366] = row[
             "precip"
         ]
-    pgconn.close()
     sts = dt - timedelta(days=14)
     try:
         resp = httpx.get(

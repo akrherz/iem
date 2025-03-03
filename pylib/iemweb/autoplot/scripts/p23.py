@@ -8,7 +8,7 @@ from datetime import date, datetime, timedelta
 import pandas as pd
 from matplotlib.lines import Line2D
 from matplotlib.patches import Rectangle
-from pyiem.database import get_sqlalchemy_conn
+from pyiem.database import get_sqlalchemy_conn, sql_helper
 from pyiem.exceptions import NoDataFound
 from pyiem.plot import figure_axes
 
@@ -67,19 +67,20 @@ def plotter(ctx: dict):
 
     with get_sqlalchemy_conn("coop") as conn:
         ndf = pd.read_sql(
-            "SELECT anom_34, monthdate from elnino where monthdate >= %s and "
-            "monthdate < %s ORDER by monthdate ASC",
+            sql_helper("""
+    SELECT anom_34, monthdate from elnino where monthdate >= :sts and
+    monthdate < :ets ORDER by monthdate ASC"""),
             conn,
-            params=(sts, ets),
+            params={"sts": sts, "ets": ets},
             index_col="monthdate",
         )
         df = pd.read_sql(
-            """
+            sql_helper("""
         WITH climo2 as (
             SELECT year, month, avg((high+low)/2.), sum(precip),
             avg(high) as avg_high, avg(low) as avg_low
-            from alldata where station = %s
-            and day < %s GROUP by year, month),
+            from alldata where station = :station
+            and day < :archiveend GROUP by year, month),
         climo as (
             select month, avg(avg) as t, avg(sum) as p,
             avg(avg_high) as high, avg(avg_low) as low from climo2
@@ -87,8 +88,9 @@ def plotter(ctx: dict):
         obs as (
             SELECT year, month, avg((high+low)/2.), avg(high) as avg_high,
             avg(low) as avg_low,
-            sum(precip) from alldata where station = %s
-            and day < %s and year >= %s and year < %s GROUP by year, month)
+            sum(precip) from alldata where station = :station
+            and day < :archiveend and year >= :syear and year < :eyear
+            GROUP by year, month)
 
         SELECT obs.year, obs.month, obs.avg - climo.t as avg_temp,
         obs.avg_high - climo.high as avg_high,
@@ -96,22 +98,20 @@ def plotter(ctx: dict):
         obs.sum - climo.p as precip from
         obs JOIN climo on (climo.month = obs.month)
         ORDER by obs.year ASC, obs.month ASC
-        """,
+        """),
             conn,
-            params=(
-                station,
-                archiveend,
-                station,
-                archiveend,
-                sts.year,
-                ets.year,
-            ),
+            params={
+                "station": station,
+                "archiveend": archiveend,
+                "syear": sts.year,
+                "eyear": ets.year,
+            },
             index_col=None,
         )
     if df.empty:
         raise NoDataFound("No Data Found.")
     df["date"] = pd.to_datetime(
-        {"year": df["year"], "month": df["month"], "day": 1}
+        {"year": df["year"], "month": df["month"], "day": [1] * len(df.index)}
     )
     df = df.set_index("date")
     df["nino34"] = ndf["anom_34"]
