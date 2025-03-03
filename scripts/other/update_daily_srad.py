@@ -47,7 +47,7 @@ def main(dt: datetime):
                 t.id = :sid and t.network = 'OT' and s.iemid = t.iemid and
                 s.day = :day
                 """,
-                    table=f"summary_{sts:Y}",
+                    table=f"summary_{sts:%Y}",
                 ),
                 {"rad": row[1], "sid": row[0], "day": sts.date()},
             )

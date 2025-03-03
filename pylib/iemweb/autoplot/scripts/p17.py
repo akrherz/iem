@@ -12,7 +12,7 @@ import matplotlib.patheffects as PathEffects
 import numpy as np
 import pandas as pd
 from matplotlib.patches import Rectangle
-from pyiem.database import get_sqlalchemy_conn
+from pyiem.database import get_sqlalchemy_conn, sql_helper
 from pyiem.exceptions import NoDataFound
 from pyiem.plot import figure_axes
 
@@ -111,12 +111,16 @@ def common(ctx):
     # Get the normals
     with get_sqlalchemy_conn("coop") as conn:
         cdf = pd.read_sql(
-            "SELECT high as climo_high, low as climo_low, "
-            "extract(day from valid)::int as day_of_month, "
-            f"precip as climo_precip from {table} where station = %s and "
-            "extract(month from valid) = %s ORDER by valid ASC",
+            sql_helper(
+                """
+    SELECT high as climo_high, low as climo_low,
+    extract(day from valid)::int as day_of_month,
+    precip as climo_precip from {table} where station = :station and
+    extract(month from valid) = :month ORDER by valid ASC""",
+                table=table,
+            ),
             conn,
-            params=(ctx["_nt"].sts[station][clcol], month),
+            params={"station": ctx["_nt"].sts[station][clcol], "month": month},
             index_col="day_of_month",
         )
     df = cdf.join(df, how="outer")
