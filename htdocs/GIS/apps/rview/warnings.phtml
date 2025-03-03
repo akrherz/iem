@@ -431,7 +431,7 @@ if ($loop === 1 || $loop === 2) {
     $urls = array();
     for ($i = 0; $i < $frames; $i++) {
         $imgi = $frames - 1 - $i;
-        include "warnings_plot.php";
+        include "../../../../include/warnings_plot.php";
         $urls[] = "'$url'";
     }
     $jsurls = implode(", ", $urls);
@@ -462,7 +462,7 @@ if ($loop === 1 || $loop === 2) {
 EOM;
 } else {
     $imgi = 0;
-    require "warnings_plot.php";
+    require "../../../../include/warnings_plot.php";
     $content .= "<input type=\"hidden\" name=\"extents\" value=\"{$x0},{$y0},{$x1},{$y1}\">\n";
     $content .= "<input type=\"image\" name=\"img\" src=\"" . $url . "\" border=\"1\">\n";
     $content .= "</form>";

@@ -1,7 +1,9 @@
-/* global Ext, Date, iemdata, defaultnetwork */
+/* global Ext, Date, iemdata */
 Ext.namespace('iemdata');
 
-let gpanel;
+let defaultnetwork = null;
+let gpanel = null;
+
 iemdata.networks = [
     ['IA_ASOS', 'Iowa ASOS/AWOS'],
     ['AL_ASOS', 'Alabama ASOS/AWOS'],
@@ -63,12 +65,14 @@ function updateURI(network) {
     url.searchParams.set('network', network);
     window.history.pushState({}, '', url);
 }
-function rpv(val){
+function rpv(val) {
     if ((val > 0) && (val < 0.009)) return "T";
     return val;
 }
 
 Ext.onReady(() => {
+
+    defaultnetwork = new URL(window.location).searchParams.get('network') || 'IA_ASOS';
 
     const network_selector = new Ext.form.ComboBox({
         hiddenName: 'network',
@@ -141,7 +145,7 @@ Ext.onReady(() => {
         labelWidth: 0,
         buttons: [{
             text: 'Load Data',
-            handler: function () {
+            handler: () => {
                 const sff = Ext.getCmp('selectform').getForm();
                 const network = sff.findField('network').getValue();
                 updateURI(network);
@@ -150,9 +154,12 @@ Ext.onReady(() => {
                 const d = new Date.parseDate(tm, 'h A');
                 localDate = localDate.add(Date.HOUR, d.format('H'));
                 const gmtDate = localDate.add(Date.SECOND, 0 - localDate.format('Z'));
-                Ext.getCmp('precipgrid').setTitle("Precip Accumulation valid at " + localDate.format('d M Y h A')).getStore().load({
-                    params: 'network=' + network + '&ts=' + gmtDate.format('YmdHi')
-                });
+                Ext.getCmp('precipgrid')
+                    .setTitle(`Precip Accumulation valid at ${localDate.format('d M Y h A')}`)
+                    .getStore()
+                    .load({
+                        params: `network=${network}&ts=${gmtDate.format('YmdHi')}`
+                    });
                 Ext.getCmp('statusField').setText("Grid Loaded at " + new Date());
                 updateHeaders(localDate);
             } // End of handler
@@ -199,12 +206,12 @@ Ext.onReady(() => {
 
     function updateHeaders(ts) {
         const cm = gpanel.getColumnModel();
-        let col;
-        let ts0;
+        let col = null;
+        let ts0 = null;
         for (let i = 2; i < cm.getColumnCount(); i++) {
             col = cm.getColumnById(cm.getColumnId(i));
             ts0 = ts.add(Date.SECOND, 0 - (col.toffset * 3600));
-            if (col.toffset == 0) {
+            if (col.toffset === 0) {
                 ts0 = ts.add(Date.HOUR, 0 - (ts.format('H')));
                 cm.setColumnHeader(i, "Midnight<br />" + ts0.format('m/d hA') + "<br />" + ts.format('m/d hA'));
             } else {
@@ -226,7 +233,7 @@ Ext.onReady(() => {
         loadMask: { msg: 'Loading Data... This may take a minute...' },
         viewConfig: { forceFit: false },
         cm: new Ext.grid.ColumnModel([
-            { header: "ID", width: 40, sortable: true, dataIndex: 'id'},
+            { header: "ID", width: 40, sortable: true, dataIndex: 'id' },
             { header: "Name", id: "sitename", width: 150, sortable: true, dataIndex: 'name' },
             { header: "Midnight Central", toffset: 0, width: 80, sortable: true, dataIndex: 'pmidnight', renderer: rpv },
             { header: "1 Hour", toffset: 1, width: 80, sortable: true, dataIndex: 'p1', renderer: rpv },

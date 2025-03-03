@@ -9,10 +9,11 @@ require_once "../../include/myview.php";
 $wepp = iemdb("wepp");
 $iem = iemdb("iem");
 
-$rs = pg_prepare($iem, "SELECTSUM", "SELECT day, pday from 
+$stname = uniqid("selectsum");
+$rs = pg_prepare($iem, $stname, "SELECT day, pday from 
       summary s JOIN stations t ON (t.iemid = s.iemid) WHERE
       t.id = $1 and day >= $2 and day < $3");
-$rs = pg_prepare($wepp, "SELECTRAIN", "select rainfall / 25.4 as inch, 
+$rs = pg_prepare($wepp, $stname, "select rainfall / 25.4 as inch, 
     valid from daily_rainfall
     WHERE hrap_i = $1 and valid >= $2 and valid < $3 ORDER by valid ASC");
 
@@ -59,7 +60,7 @@ if ($method == "geocode") {
     $longitude = round($cities[$id]["lon"], 4);
     $data .= "# Request Method: Specified NWSLI $id \n";
 
-    $rs = pg_execute($iem, "SELECTSUM", array(
+    $rs = pg_execute($iem, $stname, array(
         $id, date('Y-m-d', $sts),
         date('Y-m-d', $ets)
     ));
@@ -92,10 +93,11 @@ if ($latitude < 38 || $latitude > 44) {
     die("Longitude outside of Iowa");
 }
 
-$sql = "select hrap_i, ST_distance( the_geom, 
-    ST_transform(ST_Point($longitude, $latitude, 4326), 26915) ) 
-    from hrap_utm ORDER by st_distance ASC LIMIT 1";
-$rs = pg_exec($wepp, $sql);
+$stname2 = uniqid("selecthrap");
+$rs = pg_prepare($wepp, $stname2, "select hrap_i, ST_distance( the_geom, 
+    ST_transform(ST_Point($1, $2, 4326), 26915) ) 
+    from hrap_utm ORDER by st_distance ASC LIMIT 1");
+$rs = pg_execute($wepp, $stname2, array($longitude, $latitude));
 $row = pg_fetch_array($rs);
 if ($row[1] > 25000) {
     echo sprintf(
@@ -114,8 +116,7 @@ if ($method == 'id') {
     $data .= "\n";
 }
 
-
-$rs = pg_execute($wepp, "SELECTRAIN", array(
+$rs = pg_execute($wepp, $stname, array(
     $hrap_i, date('Y-m-d', $sts),
     date('Y-m-d', $ets)
 ));

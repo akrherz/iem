@@ -1,14 +1,15 @@
 <?php 
 require_once "../../../config/settings.inc.php";
 require_once "../../../include/myview.php";
+require_once "../../../include/database.inc.php";
+
 $t = new MyView();
 $t->title = "List of Daily Feature Titles";
-require_once "../../../include/database.inc.php";
 
 $connection = iemdb("mesosite");
 $query1 = "SELECT title, good, bad, abstain,
       to_char(valid, 'YYYY-MM-DD') as href
-      from feature  ORDER by title ASC";
+      from feature ORDER by title ASC";
 $result = pg_exec($connection, $query1);
 $table = "";
 $count = pg_num_rows($result);
@@ -16,16 +17,15 @@ for($i = 0; $row = pg_fetch_assoc($result); $i ++) {
     if ($i % 4 == 0) {
         $table .= "<tr>\n";
     }
-    $table .= sprintf("<td><a href=\"cat.php?day=%s\">%s</a> 
-            <i class=\"green\">%s</i>/<i class=\"red\">%s</i>/%s</td>",
+    $table .= sprintf('<td><a href="cat.php?day=%s">%s</a>'. 
+            '<i class="green">%s</i>/<i class="red">%s</i>/%s</td>',
     $row["href"], $row["title"], $row["good"], $row["bad"], $row["abstain"]);
     if (($i+1) % 4 == 0) {
         $table .= "</tr>\n";
     }
 }
 
-
-$t->content = <<<EOF
+$t->content = <<<EOM
 <style>
 .green {
  color: #0f0;
@@ -45,5 +45,5 @@ are good votes, bad votes, and abstains.
 {$table}
 </tr></table>
 
-EOF;
+EOM;
 $t->render('single.phtml');

@@ -2,21 +2,18 @@
 require_once '../../config/settings.inc.php';
 require_once "../../include/database.inc.php";
 
-$connect = iemdb("iem");
+$iem = iemdb("iem");
 $mesosite = iemdb("mesosite");
 
 $network = isset($_GET["network"]) ? substr($_GET["network"], 0, 20) : "IA_ASOS";
 $tstr = isset($_GET["ts"]) ? $_GET["ts"] : gmdate("YmdHi");
 $ts = DateTime::createFromFormat("YmdHi", $tstr, new DateTimeZone(("UTC")));
 
-$networks = "'$network'";
-if ($network == "IOWA") {
-    $networks = "'IA_ASOS'";
-}
-
 $data = array();
-$sql = "SELECT id, name from stations WHERE network IN ($networks)";
-$rs = pg_exec($mesosite, $sql);
+$stname = uniqid("select");
+$res = pg_prepare($mesosite, $stname, 
+    "SELECT id, name from stations WHERE network = $1");
+$rs = pg_execute($mesosite, $stname, array($network));
 for ($i = 0; $z = pg_fetch_array($rs); $i++) {
     $data[$z["id"]] = array(
         "name" => $z["name"],
@@ -50,26 +47,27 @@ foreach ($intervals as $key => $interval) {
     }
     $tstamps[$interval] = $ts0->format("Y-m-d H:i") . "+00";
 }
-$sql = <<<EOM
+$stname = uniqid("select");
+$rs = pg_prepare($iem, $stname, <<<EOM
     select id as station,
-    sum(case when valid >= '%s' then phour else 0 end) as p1,
-    sum(case when valid >= '%s' then phour else 0 end) as p3,
-    sum(case when valid >= '%s' then phour else 0 end) as p6,
-    sum(case when valid >= '%s' then phour else 0 end) as p12,
-    sum(case when valid >= '%s' then phour else 0 end) as p24,
-    sum(case when valid >= '%s' then phour else 0 end) as p48,
-    sum(case when valid >= '%s' then phour else 0 end) as p72,
-    sum(case when valid >= '%s' then phour else 0 end) as p168,
-    sum(case when valid >= '%s' then phour else 0 end) as p720,
-    sum(case when valid >= '%s' then phour else 0 end) as p2160,
-    sum(case when valid >= '%s' then phour else 0 end) as p8760,
-    sum(case when valid >= '%s' then phour else 0 end) as pmidnight
+    sum(case when valid >= $1 then phour else 0 end) as p1,
+    sum(case when valid >= $2 then phour else 0 end) as p3,
+    sum(case when valid >= $3 then phour else 0 end) as p6,
+    sum(case when valid >= $4 then phour else 0 end) as p12,
+    sum(case when valid >= $5 then phour else 0 end) as p24,
+    sum(case when valid >= $6 then phour else 0 end) as p48,
+    sum(case when valid >= $7 then phour else 0 end) as p72,
+    sum(case when valid >= $8 then phour else 0 end) as p168,
+    sum(case when valid >= $9 then phour else 0 end) as p720,
+    sum(case when valid >= $10 then phour else 0 end) as p2160,
+    sum(case when valid >= $11 then phour else 0 end) as p8760,
+    sum(case when valid >= $12 then phour else 0 end) as pmidnight
     from hourly h
     JOIN stations t on (h.iemid = t.iemid) WHERE
-    valid >= '%s' and valid < '%s' and t.network IN (%s)
+    valid >= $13 and valid < $14 and t.network = $15
     GROUP by t.id
-EOM;
-$sql = sprintf($sql,
+EOM);
+$rs = pg_execute($iem, $stname, array(
     $tstamps[1],
     $tstamps[3],
     $tstamps[6],
@@ -84,9 +82,8 @@ $sql = sprintf($sql,
     $tstamps["midnight"],
     $tstamps[8760],
     $ts->format("Y-m-d H:i") ."+00",
-    $networks
+    $network)
 );
-$rs = pg_exec($connect, $sql);
 for ($i = 0; $z = pg_fetch_array($rs); $i++) {
     foreach ($intervals as $key => $interval) {
         // hackery to account for trace values
@@ -107,4 +104,5 @@ foreach ($data as $station => $d) {
     $ar["precip"][] = $d;
 }
 
+header('Content-type: application/json');
 echo json_encode($ar);

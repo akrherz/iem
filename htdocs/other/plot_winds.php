@@ -17,18 +17,21 @@ $dirRef = date("Y_m/d", $myTime);
 $titleDate = date("M d, Y", $myTime);
 
 $db = iemdb("other");
-$sql = sprintf(
-    "SELECT * from t%s WHERE station = '%s' and date(valid) = '%s' ORDER by valid ASC",
-    $year,
-    $station,
-    date("Y-m-d", $myTime)
+$stname = uniqid("select");
+$rs = pg_prepare(
+    $db,
+    $stname,
+    "SELECT * from alldata WHERE station = $1 and valid >= $2 and valid < $3 ORDER by valid ASC",
+);
+$rs = pg_execute(
+    $db,
+    $stname,
+    array($station, date("Y-m-d", $myTime), date("Y-m-d", $myTime + 86400))
 );
 
 $drct = array();
 $sknt = array();
 $times = array();
-
-$rs = pg_exec($db, $sql);
 
 for ($i = 0; $row = pg_fetch_array($rs); $i++) {
     $sknt[] = $row["sknt"];
@@ -66,7 +69,7 @@ $graph->yaxis->SetTitleMargin(40);
 $graph->xaxis->SetPos("min");
 
 // Create the linear plot
-if (max($drct) > 0) {
+if (sizeof($drct) > 0 && max($drct) > 0) {
     $lineplot = new LinePlot($drct, $times);
     $lineplot->SetLegend("Direction");
     $lineplot->SetColor("blue");
@@ -74,7 +77,7 @@ if (max($drct) > 0) {
 }
 
 // Create the linear plot
-if (max($sknt) > 0) {
+if (sizeof($sknt) > 0 && max($sknt) > 0) {
     $lineplot2 = new LinePlot($sknt, $times);
     $lineplot2->SetLegend("Speed [kts]");
     $lineplot2->SetColor("red");

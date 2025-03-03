@@ -30,7 +30,7 @@ if (! is_dir("/tmp/cli2shp")){
 chdir("/tmp/cli2shp");
 
 $shpFname =  $filePre;
-$shpFile = new shapeFileObj($shpFname, MS_SHAPE_POINT);
+$shpFile = new shapeFileObj($shpFname, MS_SHAPEFILE_POINT);
 $dbfFile = dbase_create($shpFname . ".dbf", array(
     array("SITE", "C", 6),
     array("CRECORD", "N", 5, 0),

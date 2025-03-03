@@ -2,7 +2,7 @@
 Ext.BLANK_IMAGE_URL = '/vendor/ext/3.4.1/resources/images/default/s.gif';
 
 Ext.override(Ext.form.ComboBox, {
-    doQuery: function (q, forceAll) {
+    doQuery: function(q, forceAll) {  // this
         if (q === undefined || q === null) {
             q = '';
         }
@@ -40,6 +40,7 @@ Ext.override(Ext.form.ComboBox, {
                 this.onLoad();
             }
         }
+        return true;
     }
 });
 
