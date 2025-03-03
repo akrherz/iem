@@ -1,9 +1,10 @@
 <?php
-require_once "/usr/lib64/php/modules/mapscript.php";
 /*
  * Draw a map of the CONUS with a simple box showing the area of interest
  */
 require_once "../../config/settings.inc.php";
+require_once "../../include/vendor/mapscript.php";
+
 $extents = isset($_GET["BBOX"]) ? explode(",", $_GET["BBOX"]) :
     array(-105, 40, -97, 47);
 

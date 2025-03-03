@@ -1,7 +1,7 @@
 <?php
-require_once "/usr/lib64/php/modules/mapscript.php";
-
 require_once "../../../../config/settings.inc.php";
+require_once "../../../../include/vendor/mapscript.php";
+
 
 $map = new mapObj("robins.map");
 

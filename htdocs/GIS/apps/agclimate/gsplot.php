@@ -1,9 +1,9 @@
 <?php
-require_once "/usr/lib64/php/modules/mapscript.php";
 
 require_once "../../../../config/settings.inc.php";
 require_once "../../../../include/iemmap.php";
 require_once "../../../../include/forms.php";
+require_once "../../../../include/vendor/mapscript.php";
 
 $var = isset($_GET["var"]) ? $_GET["var"] : "gdd50";
 $year = get_int404("year", date("Y"));

@@ -12,10 +12,12 @@ $station = isset($_GET["station"]) ? xssafe($_GET['station']) : "A130209";
 $tstr = isset($_GET["tstr"]) ? xssafe($_GET['tstr']) : "50,45,40,35,32,28,23";
 
 $conn = iemdb("isuag");
-$rs = pg_prepare($conn, "spring", "SELECT extract(year from valid) as yr,
+$stname1 = uniqid("spring");
+$stname2 = uniqid("fall");
+$rs = pg_prepare($conn, $stname1, "SELECT extract(year from valid) as yr,
       max(extract(doy from valid)) as v from daily WHERE station = $1 and c30 < $2 and 
       extract(month from valid) < 7 and c30_f != 'e' GROUP by yr");
-$rs = pg_prepare($conn, "fall", "SELECT extract(year from valid) as yr,
+$rs = pg_prepare($conn, $stname2, "SELECT extract(year from valid) as yr,
       min(extract(doy from valid)) as v from daily WHERE station = $1 and c30 < $2 and
       extract(month from valid) > 6 and c30_f != 'e' GROUP by yr");
 
@@ -28,7 +30,7 @@ foreach ($thresholds as $k => $thres) {
         xssafe("<script>");
     }
     $row1 .= "<th>$thres</th>";
-    $rs = pg_execute($conn, "spring", array($station, $thres));
+    $rs = pg_execute($conn, $stname1, array($station, $thres));
     $cnts = array();
     $yrs = pg_num_rows($rs);
     for ($i = 0; $row = pg_fetch_array($rs); $i++) {
@@ -52,7 +54,11 @@ foreach ($thresholds as $k => $thres) {
         if (!array_key_exists($i, $tblrows)) {
             $tblrows[$i] = "";
         }
-        $tblrows[$i] .= sprintf("<td>%.0f</td>", $val / $yrs * 100);
+        if ($yrs == 0) {
+            $tblrows[$i] .= "<td>0</td>";
+        } else {
+            $tblrows[$i] .= sprintf("<td>%.0f</td>", $val / $yrs * 100);
+        }
     }
 }
 $spring = "<table class=\"table table-condensed table-striped table-bordered\">$row1</tr>";
@@ -66,7 +72,7 @@ $spring .= "</table>";
 /* ________________________FALL ______________ */
 $tblrows = array();
 foreach ($thresholds as $k => $thres) {
-    $rs = pg_execute($conn, "fall", array($station, $thres));
+    $rs = pg_execute($conn, $stname2, array($station, $thres));
     $cnts = array();
     $yrs = pg_num_rows($rs);
     for ($i = 0; $row = pg_fetch_array($rs); $i++) {
@@ -90,7 +96,11 @@ foreach ($thresholds as $k => $thres) {
         if (!array_key_exists($i, $tblrows)) {
             $tblrows[$i] = "";
         }
-        $tblrows[$i] .= sprintf("<td>%.0f</td>", $val / $yrs * 100);
+        if ($yrs == 0) {
+            $tblrows[$i] .= "<td>0</td>";
+        } else {
+            $tblrows[$i] .= sprintf("<td>%.0f</td>", $val / $yrs * 100);
+        }
     }
 }
 $fall = "<table class=\"table table-condensed table-striped table-bordered\">$row1</tr>";
@@ -104,7 +114,7 @@ $fall .= "</table>";
 $sselect = networkSelect("ISUAG", $station);
 
 $t->title = "ISUSM - Soil Temperature Probabilities";
-$t->content = <<<EOF
+$t->content = <<<EOM
 <ol class="breadcrumb">
         <li><a href="/agclimate/">ISU Soil Moisture Network</a></li>
         <li class="active">Soil Temperature Probabilities</li>
@@ -145,5 +155,5 @@ is not considered.</div>
 {$fall}
 
 </div></div>
-EOF;
+EOM;
 $t->render('single.phtml');

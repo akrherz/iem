@@ -1,10 +1,11 @@
 <?php
-require_once "/usr/lib64/php/modules/mapscript.php";
 require_once "../../../../config/settings.inc.php";
 require_once "../../../../include/iemmap.php";
 require_once "../../../../include/database.inc.php";
 require_once "../../../../include/network.php";
 require_once "../../../../include/forms.php";
+require_once "../../../../include/vendor/mapscript.php";
+
 $dbconn = iemdb("isuag");
 $dvar = isset($_GET["dvar"]) ? xssafe($_GET["dvar"]) : "rain_in_tot";
 
