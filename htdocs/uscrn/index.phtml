@@ -1,0 +1,22 @@
+<?php 
+require_once "../../config/settings.inc.php";
+require_once "../../include/myview.php";
+$t = new MyView();
+
+$t->title = "US Climate Reference Network (USCRN)";
+
+$t->content = <<<EOM
+
+<h3>United States Climate Reference Network (USCRN)</h3>
+
+<p>The IEM does a bit of processing of data from this network.  The upstream
+<a href="https://www.ncei.noaa.gov/access/crn/">NCEI website</a> is the
+primary source of data and information about the network.</p>
+
+<h4>Available Tools</h4>
+<ul>
+    <li><a href="/current/uscrn.phtml">Sortable Currents</a></li>
+    <li><a href="/request/uscrn.php">Download</a></li>
+</ul>
+EOM;
+$t->render('single.phtml');

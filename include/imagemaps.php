@@ -169,14 +169,13 @@ function networkSelect(
     $selectName = "station",
     $only_online = FALSE
 ) {
-    $s = "";
     $nt = new NetworkTable($network, FALSE, $only_online);
     $cities = $nt->table;
-    $s .= "<select class=\"iemselect2\" name=\"$selectName\">\n";
+    $s = "<select class=\"iemselect2\" name=\"$selectName\">\n";
     foreach ($cities as $sid => $tbl) {
         $s .= "<option value=\"$sid\" ";
         $sname = make_sname($tbl);
-        if ($selected == $sid) {
+        if ($selected === $sid) {
             $s .= "SELECTED";
         }
         $s .= ">{$sname}</option>\n";
@@ -191,7 +190,7 @@ function networkSelect(
         }
         $sname = make_sname($tbl);
         $s .= "<option value=\"$sid\" ";
-        if ($selected == $sid) {
+        if ($selected === $sid) {
             $s .= "SELECTED";
         }
         $s .= ">{$sname}</option>\n";

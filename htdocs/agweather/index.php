@@ -6,7 +6,7 @@ $t = new MyView();
 $t->title = "Agricultural Weather/Climate Information";
 
 $y = date("Y");
-$t->content = <<<EOF
+$t->content = <<<EOM
 <ol class="breadcrumb">
   <li><a href="/">IEM Homepage</a></li>
   <li class="active">IEM Ag Weather/Climate Information</li>
@@ -287,5 +287,5 @@ from Spring thresholds (mainly because of plant size/height).</blockquote>
  <li><a href="http://planthardiness.ars.usda.gov/PHZMWeb/">USDA Plant Hardiness Map</a> (enter
  your zipcode or click on the map)</li>
 </ul>
-EOF;
+EOM;
 $t->render('single.phtml');

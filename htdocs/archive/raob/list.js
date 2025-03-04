@@ -25,7 +25,7 @@ function fetch(){
                 '</tr>'];
             $('#datatable tbody').append(row.join(''));
         }
-        if (j.data.length == 0){
+        if (j.data.length === 0){
             $('#datatable tbody').append('<tr><th colspan="5">No results were found, sorry!</th></tr>');
         }
         if (dt){
