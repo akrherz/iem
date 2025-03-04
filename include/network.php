@@ -37,7 +37,6 @@ class NetworkTable
     a.attrs, a.attr_values from stations t JOIN attrs a on
     (t.iemid = a.iemid) ORDER by t.name ASC
 EOM;
-        // We force new here to prevent reused prepared statement names, hack
         $this->dbconn = iemdb("mesosite");
         $this->stname1 = uniqid("SELECT");
         $this->stname2 = uniqid("SELECTST");
@@ -66,7 +65,7 @@ EOM;
         $rs = pg_execute($this->dbconn, $this->stname1, array($network));
         for ($i = 0; $row = pg_fetch_array($rs); $i++) {
             $keyid = $row["id"];
-            if ($force3char && strlen($keyid) == 4) {
+            if ($force3char && strlen($keyid) === 4) {
                 $keyid = substr($keyid, 1, 3);
             }
             $this->table[$keyid] = $row;

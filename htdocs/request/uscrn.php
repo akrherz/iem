@@ -22,7 +22,7 @@ $hs2 = gmtHourSelect("0", "hour2");
 
 $t->content = <<<EOM
 <ol class="breadcrumb">
- <li><a href="/other/">Other Mainpage</a></li>
+ <li><a href="/uscrn/">USCRN Mainpage</a></li>
  <li class="active">USCRN Download</li>
 </ol>
 <h3>USCRN Data Download</h3>

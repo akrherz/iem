@@ -19,54 +19,54 @@ rm DVN_radar.gif* >& /dev/null
 set DEVICE1="GIF|DVN_radar.gif|800;600"
 
 
-setenv DATA_DIR /mesonet/data/nexrad/NIDS/DVN/N0R
+setenv DATA_DIR /mesonet/data/nexrad/NIDS/DVN/N0B
 setenv CHECK_DIR /mesonet/data/nexrad/NIDS/DVN/N0V
 
-set grid=${DATA_DIR}/N0R_${dateY}_${hh}00
+set grid=${DATA_DIR}/N0B_${dateY}_${hh}00
 set USE_TIME=${dateY}_${hh}00
 
 if (! -e ${grid} ) then
-    set grid=${DATA_DIR}/N0R_${dateY}_${hh}01
+    set grid=${DATA_DIR}/N0B_${dateY}_${hh}01
     set USE_TIME=${dateY}_${hh}01
 endif
 
 if (! -e ${grid} ) then
-        set grid=${DATA_DIR}/N0R_${dateY}_${hh}02
+        set grid=${DATA_DIR}/N0B_${dateY}_${hh}02
     set USE_TIME=${dateY}_${hh}02
 endif
 
 if (! -e ${grid} ) then
-        set grid=${DATA_DIR}/N0R_${dateY}_${hh}03
+        set grid=${DATA_DIR}/N0B_${dateY}_${hh}03
     set USE_TIME=${dateY}_${hh}03
 endif
 
 if (! -e ${grid} ) then
-        set grid=${DATA_DIR}/N0R_${dateY}_${hh}04
+        set grid=${DATA_DIR}/N0B_${dateY}_${hh}04
     set USE_TIME=${dateY}_${hh}04
 endif
 
 if (! -e ${grid} ) then
-        set grid=${DATA_DIR}/N0R_${dateY}_${hh}05
+        set grid=${DATA_DIR}/N0B_${dateY}_${hh}05
     set USE_TIME=${dateY}_${hh}05
 endif
 
 if (! -e ${grid} ) then
-        set grid=${DATA_DIR}/N0R_${dateY}_${hh}06
+        set grid=${DATA_DIR}/N0B_${dateY}_${hh}06
     set USE_TIME=${dateY}_${hh}06
 endif
 
 if (! -e ${grid} ) then
-        set grid=${DATA_DIR}/N0R_${h_date}59
+        set grid=${DATA_DIR}/N0B_${h_date}59
     set USE_TIME=${h_date}59
 endif
 
 if (! -e ${grid} ) then
-        set grid=${DATA_DIR}/N0R_${h_date}58
+        set grid=${DATA_DIR}/N0B_${h_date}58
     set USE_TIME=${h_date}58
 endif
 
 if (! -e ${grid} ) then
-        set grid=${DATA_DIR}/N0R_${h_date}57
+        set grid=${DATA_DIR}/N0B_${h_date}57
     set USE_TIME=${h_date}59
 endif
 

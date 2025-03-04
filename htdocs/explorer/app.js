@@ -99,9 +99,9 @@ function mapClickHandler(event){
     div.setAttribute("data-network", network);
     div.setAttribute("title", station + " " + feature.get("sname"));
     let prefix = (network.endsWith("ASOS") ? "asos": "coop");
-    prefix = (network == "ISUSM") ? "isusm": prefix;
+    prefix = (network === "ISUSM") ? "isusm": prefix;
     const $newdiv = $(`.${prefix}-data-template`).clone().css("display", "block").appendTo($(div));
-    $newdiv.find("a").each(function(i, a){
+    $newdiv.find("a").each((_i, a) => {
         a.href = a.href.replaceAll("{station}", station).replaceAll("{network}", network);
     });
     $newdiv.removeClass(`${prefix}-data-template`);
@@ -119,7 +119,7 @@ function stationLayerStyleFunc(feature){
         return isusmStyle.enabled ? isusmStyle: null;
     }
     const sid = feature.get("sid");
-    if (sid.substr(2, 1) == "C"){
+    if (sid.substr(2, 1) === "C"){
         climodistrictStyle.getText().setText(sid.substr(0, 2) + parseInt(sid.substr(3, 3)));
         return climodistrictStyle.enabled ? climodistrictStyle: null;
     }
@@ -246,15 +246,15 @@ function compute_href(uri){
     // Some magic here :/
     const tokens = uri.split("/");
     let res = "";
-    if (tokens[1] == "plotting"){
+    if (tokens[1] === "plotting"){
         res = `/plotting/auto/?q=${text(tokens[4])}&`;
         const tokens2 = text(tokens[5]).split("::");
-        tokens2.forEach(function (a){
+        tokens2.forEach((a) => {
             if (a.startsWith("_")){
                 return;
             }
             const tokens3 = a.split(":");
-            res += tokens3[0] + "=" + tokens3[1] + "&";
+            res += `${tokens3[0]}=${tokens3[1]}&`;
         });
     }
     return res;

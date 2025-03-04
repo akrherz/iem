@@ -18,43 +18,43 @@ rm OAX_radar.gif* >& /dev/null
 
 set DEVICE1="GIF|OAX_radar.gif|800;600"
 
-setenv DATA_DIR /mesonet/data/nexrad/NIDS/OAX/N0R
-set grid=${DATA_DIR}/N0R_${dateY}_${hh}00
+setenv DATA_DIR /mesonet/data/nexrad/NIDS/OAX/N0B
+set grid=${DATA_DIR}/N0B_${dateY}_${hh}00
 
 if (! -e ${grid} ) then
-    set grid=${DATA_DIR}/N0R_${dateY}_${hh}01
+    set grid=${DATA_DIR}/N0B_${dateY}_${hh}01
 endif
 
 if (! -e ${grid} ) then
-        set grid=${DATA_DIR}/N0R_${dateY}_${hh}02
+        set grid=${DATA_DIR}/N0B_${dateY}_${hh}02
 endif
 
 if (! -e ${grid} ) then
-        set grid=${DATA_DIR}/N0R_${dateY}_${hh}03
+        set grid=${DATA_DIR}/N0B_${dateY}_${hh}03
 endif
 
 if (! -e ${grid} ) then
-        set grid=${DATA_DIR}/N0R_${dateY}_${hh}04
+        set grid=${DATA_DIR}/N0B_${dateY}_${hh}04
 endif
 
 if (! -e ${grid} ) then
-        set grid=${DATA_DIR}/N0R_${dateY}_${hh}05
+        set grid=${DATA_DIR}/N0B_${dateY}_${hh}05
 endif
 
 if (! -e ${grid} ) then
-        set grid=${DATA_DIR}/N0R_${dateY}_${hh}06
+        set grid=${DATA_DIR}/N0B_${dateY}_${hh}06
 endif
 
 if (! -e ${grid} ) then
-        set grid=${DATA_DIR}/N0R_${h_date}59
+        set grid=${DATA_DIR}/N0B_${h_date}59
 endif
 
 if (! -e ${grid} ) then
-        set grid=${DATA_DIR}/N0R_${h_date}58
+        set grid=${DATA_DIR}/N0B_${h_date}58
 endif
 
 if (! -e ${grid} ) then
-        set grid=${DATA_DIR}/N0R_${h_date}57
+        set grid=${DATA_DIR}/N0B_${h_date}57
 endif
 
 set PROJ=RAD

@@ -11,6 +11,7 @@ $conn = iemdb("mesosite");
 $network = isset($_GET["network"])
     ? substr($_GET["network"], 0, 4) : die("No \$network Set");
 $ts = null;
+
 if ($network == "KCRG") {
     $cameras["KCCI-017"]["network"] = "KCRG";
 }
