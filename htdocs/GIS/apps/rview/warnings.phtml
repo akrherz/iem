@@ -113,7 +113,8 @@ $nt->table["NHC"] = array(
     "name" => "National Hurricane Center"
 );
 if (!array_key_exists($site, $nt->table)){
-    xssafe("<script>");
+    http_response_code(422);
+    die("Invalid Site Identifier");
 }
 
 $uri = "$baseuri?frames=$frames&amp;interval=$interval&amp;site=$site&amp;" .

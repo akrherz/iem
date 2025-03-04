@@ -7,6 +7,8 @@ require_once "../../../include/jpgraph/jpgraph.php";
 require_once "../../../include/jpgraph/jpgraph_line.php";
 require_once "../../../include/jpgraph/jpgraph_date.php";
 $nt = new NetworkTable("SCAN");
+print_r($nt->table);
+die();
 
 $connection = iemdb("scan");
 
@@ -50,10 +52,6 @@ for( $i=0; $row = pg_fetch_array($result); $i++)
   $ydataSR[] = ($row["srad"] >= 0) ? $row["srad"]: "";
   $times[] = strtotime($row["valid"]);
 }
-
-pg_close($connection);
-
-
 
 // Create the graph. These two calls are always required
 $graph = new Graph(640,480,"example1");
