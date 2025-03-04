@@ -17,24 +17,21 @@ $format = isset($_REQUEST["format"]) ? xssafe($_REQUEST['format']) : 'html';
 $t = new MyView();
 $t->title = "{$network} Current Conditions";
 $t->refresh = 1200;
-$t->headextra = <<<EOF
+$t->headextra = <<<EOM
 <link rel="stylesheet" type="text/css" href="/vendor/select2/4.0.3/select2.min.css"/ >
-EOF;
-$t->jsextra = <<<EOF
+EOM;
+$t->jsextra = <<<EOM
 <script src="/vendor/select2/4.0.3/select2.min.js"></script>
-<script language="JavaScript" type="text/javascript">
-$(document).ready(function(){
-    $(".iemselect2").select2();
-});
-</script>
-EOF;
+<script src="current.js"></script>
+EOM;
 $t->current_network = "ASOS";
 
 $nt = new NetworkTable($network, FALSE, TRUE);
 $cities = $nt->table;
 $mesosite = iemdb('mesosite');
-pg_prepare($mesosite, "FINDTZ", "SELECT tzname from networks where id = $1");
-$rs = pg_execute($mesosite, "FINDTZ", array($network));
+$stname = uniqid("findtz");
+pg_prepare($mesosite, $stname, "SELECT tzname from networks where id = $1");
+$rs = pg_execute($mesosite, $stname, array($network));
 if (pg_num_rows($rs) < 1) {
     $tzname = "America/Chicago";
 } else {
@@ -154,7 +151,7 @@ $month = date("m");
 $day = date("d");
 $tkeys = array_keys($cities);
 $station = $tkeys[0];
-$table = <<<EOF
+$table = <<<EOM
 <table class="table table-bordered table-condensed">
 <tr>
   <td>
@@ -210,7 +207,7 @@ on this network.
   <th><a href="{$uri}skyl4">Level 4</a></th>
 </tr></thead>
 <tbody>
-EOF;
+EOM;
 
 $finalA = aSortBySecondIndex($mydata, $sortcol, $sorder);
 $now = time();
@@ -310,7 +307,7 @@ foreach ($offline as $sid) {
 
 $table .= $old;
 $table .= $offline_entries;
-$table .= <<<EOF
+$table .= <<<EOM
 </tbody>
 
 </table>
@@ -319,6 +316,6 @@ $table .= <<<EOF
 <input type="reset" value="Reset">
 
 </form>
-EOF;
+EOM;
 $t->content = $table;
 $t->render('sortables.phtml');

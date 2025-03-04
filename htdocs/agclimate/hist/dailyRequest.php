@@ -16,7 +16,7 @@ $ys2 = yearSelect2(1986, date("Y"), "endYear", '', 2014);
 $ms2 = monthSelect(date("m"), "endMonth");
 $ds2 = daySelect2(date("d"), "endDay");
 
-$t->content = <<<EOF
+$t->content = <<<EOM
  <ol class="breadcrumb">
   <li><a href="/agclimate">ISU AgClimate</a></li>
   <li class="active">Legacy Network Daily Download</li>
@@ -146,5 +146,5 @@ or something appropriate for delimited text.</div>
 
 <br />
 
-EOF;
+EOM;
 $t->render('single.phtml');

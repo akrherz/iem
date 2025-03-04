@@ -5,7 +5,7 @@ require_once "../../include/myview.php";
 $t = new MyView();
 $t->title = "Recent Interesting METAR Reports";
 
-$t->content = <<<EOF
+$t->content = <<<EOM
  <ol class="breadcrumb">
      <li><a href="/ASOS/">ASOS Mainpage</a></li>
     <li class="active">Recent Interesting METAR Reports</li>
@@ -38,7 +38,7 @@ $t->content = <<<EOF
  </tbody>
  </table></p>
 
-EOF;
+EOM;
 $t->jsextra = <<<EOF
 <script src="recent.js"></script>
 EOF;
