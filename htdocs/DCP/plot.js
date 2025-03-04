@@ -2,7 +2,7 @@
 Ext.BLANK_IMAGE_URL = '/vendor/ext/3.4.1/resources/images/default/s.gif';
 
 Ext.override(Ext.form.ComboBox, {
-    doQuery: function (q, forceAll) {
+    doQuery: function(q, forceAll) {  // this
         if (q === undefined || q === null) {
             q = '';
         }
@@ -40,13 +40,14 @@ Ext.override(Ext.form.ComboBox, {
                 this.onLoad();
             }
         }
+        return true;
     }
 });
 
 
-Ext.onReady(function () {
+Ext.onReady(() => {
 
-    var states = [
+    const states = [
         ["AL", "Alabama"],
         ["AK", "Alaska"],
         ["AZ", "Arizona"],
@@ -199,7 +200,7 @@ Ext.onReady(function () {
         itemSelector: 'div.search-item',
         hideTrigger: false,
         listeners: {
-            select: function (_cb, record, _idx) {
+            select(_cb, record, _idx) {
                 varStore.load({ add: false, params: { station: record.id } });
                 return false;
             }
@@ -244,7 +245,7 @@ Ext.onReady(function () {
         items: [stateCB, stationCB, varCB, datepicker, dayInterval],
         buttons: [{
             text: 'Create Graph',
-            handler: function () {
+            handler() {
                 updateImage();
 
             }
@@ -252,10 +253,10 @@ Ext.onReady(function () {
 
     });
     /* Check to see if we had something specified on the URL! */
-    var tokens = window.location.href.split('#');
-    if (tokens.length == 2) {
-        var tokens2 = tokens[1].split('.');
-        if (tokens2.length == 5) {
+    const tokens = window.location.href.split('#');
+    if (tokens.length === 2) {
+        const tokens2 = tokens[1].split('.');
+        if (tokens2.length === 5) {
             stateCB.setValue(tokens2[0]);
             stationCB.setValue(tokens2[1]);
             varCB.setValue(tokens2[2]);

@@ -33,8 +33,8 @@ $vardict = array(
     "c600" => "Wind Direction"
 );
 
-$st   = $_GET['sts'];
-$vars = $_GET['vars'];
+$st   = isset($_GET['sts']) ? $_GET['sts'] : array();
+$vars = isset($_GET['vars']) ? $_GET['vars'] : array();
 $s_yr = get_int404('startYear');
 $e_yr = get_int404('endYear');
 $s_mo = get_int404('startMonth');

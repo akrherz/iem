@@ -24,7 +24,7 @@ $pselect = make_select("period", 1, $ar);
 
 $archivedir = '/archive/data/' . date("Y") . '/' . date('m') . '/' . date('d') . '/GIS/mrms';
 
-$t->content = <<<EOF
+$t->content = <<<EOM
 <h3>IEM Rainfall</h3>
 
 <p>IEM rainfall is a high resolution depiction of rainfall estimates over
@@ -239,7 +239,7 @@ the script converts the 8bit PNG mentioned above to uint16 IMG file on the fly!<
             <input type="submit" value="Request ERDAS Imagine File" />
         </form>
 
-<br />		
+<br />
 
-EOF;
+EOM;
 $t->render('single.phtml');

@@ -1,3 +1,6 @@
 """implemented in /pylib/iemweb/request/other.py"""
 
-from iemweb.request.other import application  # noqa: F401
+from iemweb.request.other import application
+
+# appease the linter
+_ = application

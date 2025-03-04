@@ -3,12 +3,12 @@
  * I am sort of inspired by the old mapblaster days.  Lets create a map of
  * all sorts of data with tons of CGI vars, yippeee
  */
-require_once "/usr/lib64/php/modules/mapscript.php";
-
 require_once "../../config/settings.inc.php";
 require_once "../../include/database.inc.php";
 require_once "../../include/reference.php";
 require_once "../../include/forms.php";
+require_once "../../include/vendor/mapscript.php";
+
 $vtec_phenomena = $reference["vtec_phenomena"];
 $vtec_significance = $reference["vtec_significance"];
 $postgis = iemdb("postgis");

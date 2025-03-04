@@ -22,25 +22,28 @@ if (is_null($day)) {
 }
 
 $dbconn = iemdb("mesosite");
-$rs = pg_prepare($dbconn, "yesterday", "SELECT *, date(valid) as d,
+$stname1 = uniqid("yesterday");
+$stname2 = uniqid("today");
+$stname3 = uniqid("tomorrow");
+$rs = pg_prepare($dbconn, $stname1, "SELECT *, date(valid) as d,
               to_char(valid, 'YYYY/MM/YYMMDD') as imageref, 
               to_char(valid, 'DD Mon YYYY HH:MI AM') as webdate from feature
               WHERE valid < $1 ORDER by valid DESC limit 1");
-$rs = pg_prepare($dbconn, "today", "SELECT *, date(valid) as d,
+$rs = pg_prepare($dbconn, $stname2, "SELECT *, date(valid) as d,
               to_char(valid, 'YYYY/MM/YYMMDD') as imageref, 
               to_char(valid, 'DD Mon YYYY HH:MI AM') as webdate from feature
               WHERE date(valid) = $1");
-$rs = pg_prepare($dbconn, "tomorrow", "SELECT *, date(valid) as d,
+$rs = pg_prepare($dbconn, $stname3, "SELECT *, date(valid) as d,
               to_char(valid, 'YYYY/MM/YYMMDD') as imageref, 
               to_char(valid, 'DD Mon YYYY HH:MI AM') as webdate from feature
               WHERE valid > ($1::date + '1 day'::interval) 
               ORDER by valid ASC limit 1");
 
-$q = "today";
+$q = $stname2;
 if ($offset == "-1") {
-    $q = "yesterday";
+    $q = $stname1;
 } else if ($offset == "+1") {
-    $q = "tomorrow";
+    $q = $stname3;
 }
 $result = pg_execute($dbconn, $q, array($day->format("Y-m-d")));
 
@@ -84,7 +87,7 @@ EOM;
 EOM;
 }
 
-$content = <<<EOF
+$content = <<<EOM
 
 <div class="row well">
     <div class="col-md-4">
@@ -117,7 +120,7 @@ $content = <<<EOF
 {$linktext}
 </div>
 <div class='col-md-6 well'>{$row["story"]}
-EOF;
+EOM;
 if ($row["voting"] == 't' && (intval($row["good"]) > 0 || intval($row["bad"]) > 0)) {
     $content .= "<br /><br /><b>Voting:</b>
             <br />Good = " . $row["good"]
@@ -131,15 +134,11 @@ $content .= "<br />" . printTags(is_null($row["tags"]) ? Array(): explode(",", $
 $fbhttpref = "https";
 if ($valid < strtotime("2016-08-09")) $fbhttpref = "http";
 
-$content .= <<<EOF
+$content .= <<<EOM
 </div>
          </div><!-- ./row -->
          <div class="clearfix">&nbsp;</div>
 <div class="clearfix">&nbsp;</div>
-         <div id="fb-root"></div><script src="https://connect.facebook.net/en_US/all.js#appId=196492870363354&amp;xfbml=1"></script>
-<fb:comments send_notification_uid="16922938" title="{$row["title"]}" 
- href="{$fbhttpref}://mesonet.agron.iastate.edu/onsite/features/cat.php?day={$day}" 
- xid="{$row["fbid"]}" numposts="6" width="600"></fb:comments>
-EOF;
+EOM;
 $t->content = $content;
 $t->render('single.phtml');

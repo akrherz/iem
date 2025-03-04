@@ -42,6 +42,9 @@ function imagettftextalign($image, $size, $angle, $x, $y, $color, $font, $text, 
 $width = 130;
 $height = 122;
 $font = "/usr/share/fonts/liberation-serif/LiberationSerif-Bold.ttf";
+if (!file_exists($font)) {
+    die("Missing font");
+}
 
 $png = ImageCreate($width, $height);
 

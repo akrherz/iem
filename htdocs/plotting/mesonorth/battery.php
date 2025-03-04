@@ -14,7 +14,12 @@ $myTime = mktime(0,0,0,$month,$day,$year);
 $titleDate = date("M d, Y", $myTime);
 $dirRef = date("Y/m/d", $myTime);
 
-$fcontents = file("/mesonet/ARCHIVE/data/$dirRef/text/ot/ot0003.dat");
+$filename = "/mesonet/ARCHIVE/data/$dirRef/text/ot/ot0003.dat";
+if (!file_exists($filename))
+{
+    die("File Not Found");
+}
+$fcontents = file($filename);
 
 $oldformat = 1;
 if ($myTime >= mktime(0,0,0,8,12,2005))

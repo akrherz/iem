@@ -51,10 +51,6 @@ for( $i=0; $row = pg_fetch_array($result); $i++)
   $times[] = strtotime($row["valid"]);
 }
 
-pg_close($connection);
-
-
-
 // Create the graph. These two calls are always required
 $graph = new Graph(640,480,"example1");
 $graph->SetScale("datlin");

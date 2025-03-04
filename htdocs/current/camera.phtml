@@ -59,7 +59,7 @@ reset($cameras);
 $t->title = "Web Cameras";
 $t->jsextra = '<script type="module" src="camera.js"></script>';
 
-if (!$isarchive)
+if (!$isarchive && isset($camera_refresh))
     $t->refresh = $camera_refresh;
 
 $selback = array(

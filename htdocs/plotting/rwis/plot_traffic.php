@@ -7,14 +7,15 @@ require_once "../../../include/jpgraph/jpgraph_bar.php";
 require_once "../../../include/jpgraph/jpgraph_date.php";
 require_once "../../../include/jpgraph/jpgraph_led.php";
 require_once "../../../include/network.php";
+require_once "../../../include/forms.php";
 
 /** We need these vars to make this work */
-$syear = isset($_GET["syear"]) ? $_GET["syear"] : date("Y");
-$smonth = isset($_GET["smonth"]) ? $_GET["smonth"] : date("m");
-$sday = isset($_GET["sday"]) ? $_GET["sday"] : date("d");
-$days = isset($_GET["days"]) ? $_GET["days"] : 2;
-$station = isset($_GET['station']) ? $_GET["station"] : "";
-$network = isset($_GET["network"]) ? $_GET["network"] : "IA_RWIS";
+$syear = get_int404("syear", date("Y"));
+$smonth = get_int404("smonth", date("m"));
+$sday = get_int404("sday", date("d"));
+$days = get_int404("days", 2);
+$station = isset($_GET['station']) ? xssafe($_GET["station"]) : "";
+$network = isset($_GET["network"]) ? xssafe($_GET["network"]) : "IA_RWIS";
 $nt = new NetworkTable($network);
 
 $sts = time() - (3. * 86400.);
@@ -25,9 +26,10 @@ $sts = mktime(0, 0, 0, $smonth, $sday, $syear);
 $ets = $sts + ($days * 86400.0);
 
 $iemdb = iemdb('iem');
-$rs = pg_prepare($iemdb, "SELECTMETA", "SELECT * from 
+$stname = uniqid("select");
+$rs = pg_prepare($iemdb, $stname, "SELECT * from 
       rwis_traffic_meta WHERE nwsli = $1");
-$rs = pg_execute($iemdb, "SELECTMETA", array($station));
+$rs = pg_execute($iemdb, $stname, array($station));
 $avg_speed = array();
 
 $normal_vol = array();
@@ -45,11 +47,13 @@ for ($i = 0; $row = pg_fetch_array($rs); $i++) {
 }
 
 $dbconn = iemdb('rwis');
-$rs = pg_prepare($dbconn, "SELECT", "SELECT * from alldata_traffic
-  WHERE station = $1 and valid > $2 and valid < $3 ORDER by valid ASC");
-$rs = pg_execute($dbconn, "SELECT", array(
+$stname = uniqid("SELECT");
+pg_prepare($dbconn, $stname, "SELECT * from alldata_traffic " .
+    "WHERE station = $1 and valid > $2 and valid < $3 ORDER by valid ASC");
+$rs = pg_execute($dbconn, $stname, array(
     $station,
-    date("Y-m-d H:i", $sts), date("Y-m-d H:i", $ets)
+    date("Y-m-d H:i", $sts),
+    date("Y-m-d H:i", $ets)
 ));
 
 for ($i = 0; $row = pg_fetch_array($rs); $i++) {
@@ -59,8 +63,6 @@ for ($i = 0; $row = pg_fetch_array($rs); $i++) {
     $long_vol[$row["lane_id"]][] = $row["avg_headway"];
     $occupancy[$row["lane_id"]][] = $row["avg_headway"];
 }
-pg_close($dbconn);
-pg_close($iemdb);
 
 
 if (pg_num_rows($rs) == 0) {
@@ -92,8 +94,14 @@ $graph->legend->Pos(0.01, 0.01);
 $graph->legend->SetLayout(LEGEND_VERT);
 
 $colors = array(
-    0 => "green", 1 => "black", 2 => "blue", 3 => "red",
-    4 => "purple", 5 => "tan", 6 => "pink", 7 => "lavendar"
+    0 => "green",
+    1 => "black",
+    2 => "blue",
+    3 => "red",
+    4 => "purple",
+    5 => "tan",
+    6 => "pink",
+    7 => "lavendar"
 );
 foreach ($times as $k => $v) {
     if (sizeof($times[$k]) < 2) {

@@ -178,7 +178,7 @@ over time here:
 <tr><td>Soil Moisture</td>
 <td colspan="2">The <a href="/agclimate/">ISU Soil Moisture</a> network collects five minute and hourly
 soil moisture data.</td>
-<td>The <a href="http://wepp.mesonet.agron.iastate.edu/GIS/sm.phtml?pvar=vsm">Iowa Daily Erosion Project</a>
+<td>The <a href="https://dailyerosion.org">Daily Erosion Project</a>
 produces soil moisture analyses based on a model called WEPP.</td>
 <td colspan="3">Summarized data for this timescale does not exist on the IEM 
 at this time.</td>

@@ -18,7 +18,8 @@ $t->refresh = 60;
 $t->title = "Obs by NWS Forecast Office";
 $nt = new NetworkTable("WFO");
 if (!key_exists($wfo, $nt->table)){
-    xssafe("<script>");
+    http_response_code(422);
+    die("Invalid WFO provided");
 }
 $tzname = $nt->table[$wfo]["tzname"];
 $tzinfo = new DateTimeZone($tzname);

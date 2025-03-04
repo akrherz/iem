@@ -25,14 +25,13 @@ $sqlDate = date("Y-m-d", $myTime);
 
 /** Time to get data from database **/
 $connection = iemdb("awos");
-$rs = pg_prepare($connection, "SELECT", "SELECT " .
+$stname = uniqid("select");
+pg_prepare($connection, $stname, "SELECT " .
     "to_char(valid, 'HH24:MI') as tvalid, tmpf, dwpf from " .
-    "" . $tableName . " WHERE station = $1 and " .
-    "  date(valid) = $2 ORDER by tvalid");
+    "alldata WHERE station = $1 and " .
+    " valid >= $2 and valid < $3 ORDER by tvalid");
 
-$result = pg_execute($connection, "SELECT", array($station, $sqlDate));
-
-pg_close($connection);
+$result = pg_execute($connection, $stname, array($station, $sqlDate, $sqlDate . " 23:59:59"));
 
 if (pg_num_rows($result) == 0) {
     $led = new DigitalLED74();

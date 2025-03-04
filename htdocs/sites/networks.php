@@ -1,5 +1,4 @@
 <?php
-require_once "/usr/lib64/php/modules/mapscript.php";
 require_once "../../config/settings.inc.php";
 define("IEM_APPID", 6);
 require_once "../../include/database.inc.php";

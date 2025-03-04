@@ -9,21 +9,21 @@ require_once "../../include/database.inc.php";
 require_once "../../include/network.php";
 require_once "../../include/mlib.php";
 $pgconn = iemdb("iem");
-$rs = pg_prepare(
+$stname = uniqid("select");
+pg_prepare(
     $pgconn,
-    "SELECT",
+    $stname,
     "SELECT *, to_char(valid, 'Mon DD YYYY HH:MI AM') as v from offline ".
     "WHERE network = $1 ORDER by valid ASC",
 );
 
-$nt = new NetworkTable("IA_ASOS");
 function networkOffline($network)
 {
-    global $pgconn, $nt;
-    $nt->loadNetwork($network);
+    global $pgconn, $stname;
+    $nt = new NetworkTable($network);
     $cities = $nt->table;
     $s = "";
-    $rs = pg_execute($pgconn, "SELECT", Array($network) );
+    $rs = pg_execute($pgconn, $stname, Array($network) );
 
     $q = 0;
     for( $i=0; $row = pg_fetch_array($rs); $i++)

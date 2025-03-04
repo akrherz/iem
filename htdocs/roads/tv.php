@@ -1,8 +1,8 @@
 <?php
-require_once "/usr/lib64/php/modules/mapscript.php";
-
 require_once "../../config/settings.inc.php";
 require_once "../../include/database.inc.php";
+require_once "../../include/vendor/mapscript.php";
+
 $con = iemdb("postgis");
 
 // kvillewxguy@hotmail.com

@@ -86,23 +86,10 @@ for ($i = 0; $i < pg_num_rows($result) && $row = pg_fetch_assoc($result, $i); $i
 } // End of for
 
 if (pg_num_rows($result) == 1) {
-    $t->jsextra = <<<EOF
-        <div id="fb-root"></div>
-<script type="text/javascript">
-(function(d, s, id) {
-  var js, fjs = d.getElementsByTagName(s)[0];
-  if (d.getElementById(id)) return;
-  js = d.createElement(s); js.id = id;
-  js.src = "//connect.facebook.net/en_US/all.js#xfbml=1&appId=196492870363354";
-  fjs.parentNode.insertBefore(js, fjs);
-}(document, 'script', 'facebook-jssdk'));
-
-</script>
-EOF;
     $huri = "https://mesonet.agron.iastate.edu/onsite/news.phtml?id=" . $id;
-    $content .= <<<EOF
+    $content .= <<<EOM
 <div class="fb-comments" data-href="{$huri}" data-numposts="5" data-colorscheme="light"></div>
-EOF;
+EOM;
     $content .= "</div>";
     $t->title = $row["title"];
 } else {

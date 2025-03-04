@@ -1,3 +1,6 @@
 """implemented in /pylib/iemweb/request/grx_rings.py"""
 
-from iemweb.request.grx_rings import application  # noqa: F401
+from iemweb.request.grx_rings import application
+
+# appease linter
+_ = application

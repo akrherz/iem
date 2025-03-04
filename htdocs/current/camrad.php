@@ -1,10 +1,10 @@
 <?php
 //Generate a RADAR image with webcams overlain for some *UTC* timestamp!
-
-require_once "/usr/lib64/php/modules/mapscript.php";
 require_once "../../config/settings.inc.php";
 require_once "../../include/database.inc.php";
 require_once "../../include/cameras.inc.php";
+require_once "../../include/vendor/mapscript.php";
+
 $conn = iemdb("mesosite");
 
 /* First, we need some GET vars */

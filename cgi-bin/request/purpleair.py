@@ -1,3 +1,6 @@
 """implemented in /pylib/iemweb/request/purpleair.py"""
 
-from iemweb.request.purpleair import application  # noqa: F401
+from iemweb.request.purpleair import application
+
+# appease the linter
+_ = application

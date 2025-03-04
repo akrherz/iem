@@ -82,7 +82,7 @@ function iemws_json($endpoint, $args)
     }
     if ($jobj === FALSE) {
         header("Content-type: text/plain");
-        http_response_code(500);
+        http_response_code(503);
         die("Backend web service failure, please try again later.");
     }
     return $jobj;

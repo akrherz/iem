@@ -1,6 +1,4 @@
 <?php
-require_once "/usr/lib64/php/modules/mapscript.php";
-
 require_once "../../../../config/settings.inc.php";
 define("IEM_APPID", 52);
 require_once "../../../../include/myview.php";
@@ -13,6 +11,7 @@ require_once "../../../../include/network.php";
 require_once "../../../../include/mlib.php";
 require_once "../../../../include/forms.php";
 require_once "../rview/lib.php";
+require_once "../../../../include/vendor/mapscript.php";
 
 $coopdb = iemdb("coop");
 $nt = new NetworkTable("IACLIMATE");
