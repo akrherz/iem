@@ -7,8 +7,6 @@ require_once "../../../include/jpgraph/jpgraph.php";
 require_once "../../../include/jpgraph/jpgraph_line.php";
 require_once "../../../include/jpgraph/jpgraph_date.php";
 $nt = new NetworkTable("SCAN");
-print_r($nt->table);
-die();
 
 $connection = iemdb("scan");
 
