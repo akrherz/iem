@@ -71,7 +71,7 @@ Ext.onReady(() => {
     imagestore.on('load', (_store, records) => {
         const data = Array();
         Ext.each(records, (record) => {
-            const checked = (disableStore.find('cid', record.get("cid")) == -1);
+            const checked = (disableStore.find('cid', record.get("cid")) === -1);
             data.push({
                 boxLabel: Number(record.get("cid").substr(5, 3)) + " " + record.get("name"),
                 name: record.get("cid"),
