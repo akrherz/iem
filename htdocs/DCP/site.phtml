@@ -26,38 +26,40 @@ if (!is_null($station)) {
     /* Make sure this site is not both a DCP and COOP site, this would cause
      * the app to do a yearlong query, which is expensive.
      */
-    $rs = pg_prepare($mesosite, "DUPSTATIONS", "SELECT network from stations
+    $stname = uniqid();
+    pg_prepare($mesosite, $stname, "SELECT network from stations
             WHERE id = $1 and (network ~* '_DCP' or network ~* '_COOP')");
-    $rs = pg_execute($mesosite, "DUPSTATIONS", array($station));
+    $rs = pg_execute($mesosite, $stname, array($station));
     $alone = (pg_num_rows($rs) == 1) ? TRUE : FALSE;
 
+    $stname = uniqid();
     if (preg_match('/_COOP/', $network) && $alone) {
         $table = sprintf("raw%s", date("Y", $ts));
         if (is_null($shefvar)) {
-            $rs = pg_prepare($hads, "QUERY", "SELECT * from $table WHERE
+            pg_prepare($hads, $stname, "SELECT * from $table WHERE
             station = $1 ORDER by valid ASC");
-            $rs = pg_execute($hads, "QUERY", array($station));
+            $rs = pg_execute($hads, $stname, array($station));
         } else {
-            $rs = pg_prepare($hads, "QUERY", "SELECT * from $table WHERE
+            pg_prepare($hads, $stname, "SELECT * from $table WHERE
             station = $1 and key = $2 ORDER by valid ASC");
-            $rs = pg_execute($hads, "QUERY", array($station, $shefvar));
+            $rs = pg_execute($hads, $stname, array($station, $shefvar));
         }
     } else {
         $table = sprintf("raw%s_%s", date("Y", $ts), date("m", $ts));
         if (is_null($shefvar)) {
-            $rs = pg_prepare($hads, "QUERY", "SELECT * from $table WHERE
+            pg_prepare($hads, $stname, "SELECT * from $table WHERE
                 station = $1 and valid BETWEEN $2 and $3 ORDER by valid ASC");
             $rs = pg_execute(
                 $hads,
-                "QUERY",
+                $stname,
                 array($station, date("Y-m-d", $ts), date("Y-m-d", $ts + 86400))
             );
         } else {
-            $rs = pg_prepare($hads, "QUERY", "SELECT * from $table WHERE
+            pg_prepare($hads, $stname, "SELECT * from $table WHERE
                 station = $1 and key = $2 and valid BETWEEN $3 and $4 ORDER by valid ASC");
             $rs = pg_execute(
                 $hads,
-                "QUERY",
+                $stname,
                 array($station, $shefvar, date("Y-m-d", $ts), date("Y-m-d", $ts + 86400))
             );
         }
@@ -65,7 +67,7 @@ if (!is_null($station)) {
 
     $data = array();
     $cols = array();
-    for ($i = 0; $row = pg_fetch_array($rs); $i++) {
+    for ($i = 0; $row = pg_fetch_assoc($rs); $i++) {
         $cols[$row["key"]] = 1;
         $data[strtotime(substr($row["valid"], 0, 16))][$row["key"]] = $row["value"];
     }
@@ -117,7 +119,7 @@ $ds = daySelect($day);
 
 $extra = "";
 if (is_null($station)) {
-    $extra = <<<EOF
+    $extra = <<<EOM
 <style type="text/css">
 #map {
     width: 100%;
@@ -127,14 +129,14 @@ if (is_null($station)) {
 </style>
 <i>Click on the dot to select your site:</i><br />
 <div id="map" data-network="{$network}"></div>
-EOF;
+EOM;
 } else {
     if (!$alone) {
-        $extra = <<<EOF
+        $extra = <<<EOM
 <div class="warning">This site is listed within the IEM database as both a 
     "COOP" and "DCP" site. This printout below will only include a days 
     worth of data.</div>
-EOF;
+EOM;
     }
     $extra .= "<br /><br />
     <table class=\"table table-striped table-bordered\" style=\"width: auto;\">";

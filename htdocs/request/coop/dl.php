@@ -7,6 +7,7 @@ require_once "../../../config/settings.inc.php";
 require_once "../../../include/database.inc.php";
 require_once "../../../include/mlib.php";
 require_once "../../../include/network.php";
+require_once "../../../include/forms.php";
 
 $connection = iemdb("coop");
 $network = isset($_REQUEST["network"]) ? substr($_REQUEST["network"], 0, 10) : "IACLIMATE";
@@ -34,6 +35,9 @@ $i = 0;
 foreach ($stations as $key => $value) {
     if ($value == "_ALL") {
         $selectAll = 1;
+    }
+    if (!array_key_exists($value, $cities)) {
+        xssafe("<tag>");
     }
     $stationString .= " '" . $value . "',";
     $i++;
@@ -105,10 +109,11 @@ if (in_array('daycent', $vars)) {
      */
     if (sizeof($stations) > 1) die("Sorry, only one station request at a time for daycent option");
     if ($selectAll) die("Sorry, only one station request at a time for daycent option");
-    pg_prepare($connection, "DAYCENT", "SELECT extract(doy from day) as doy, high, low, precip,
+    $stname = uniqid();
+    pg_prepare($connection, $stname, "SELECT extract(doy from day) as doy, high, low, precip,
         month, year, extract(day from day) as lday 
         from $table WHERE station IN " . $stationString . " and day >= '" . $sqlTS1 . "' and day <= '" . $sqlTS2 . "' ORDER by day ASC");
-    $rs = pg_execute($connection, 'DAYCENT', array());
+    $rs = pg_execute($connection, $stname, array());
     echo "Daily Weather Data File (use extra weather drivers = 0):\n";
     echo "\n";
     for ($i = 0; $row = pg_fetch_assoc($rs); $i++) {
@@ -141,11 +146,12 @@ tmax  1981  30.84  28.71  27.02  16.84  12.88   6.82   8.21   7.70  11.90  20.02
         die("Sorry, only one station request at a time for century option");
     }
     $table = sprintf("alldata_%s", substr($stations[0], 0, 2));
-    pg_prepare($connection, "TBD", "SELECT year, month, avg(high) as avgh, " .
+    $stname = uniqid();
+    pg_prepare($connection, $stname, "SELECT year, month, avg(high) as avgh, " .
         " avg(low) as avgl, sum(precip) as p" .
         " from $table WHERE station IN " . $stationString . " and " .
         " year >= $1 and year <= $2 GROUP by year, month");
-    $rs = pg_execute($connection, 'TBD', array($year1, $year2));
+    $rs = pg_execute($connection, $stname, array($year1, $year2));
     $monthly = array();
     for ($i = 0; $row = pg_fetch_assoc($rs); $i++) {
         $key = sprintf("%s%02d", $row["year"], $row["month"]);
@@ -327,7 +333,6 @@ CTRL, 1981, 2, 3.1898, 1.59032, -6.83361, 1.38607, NaN, NaN, NaN, 3
 
     $rs =  pg_exec($connection, $sqlStr);
 
-    pg_close($connection);
     if ($gis == "yes") {
         echo "station" . $d[$delim] . "station_name" . $d[$delim] . "lat" . $d[$delim] . "lon" . $d[$delim] . "day" . $d[$delim] . "julianday" . $d[$delim];
     } else {

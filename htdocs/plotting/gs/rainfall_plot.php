@@ -37,18 +37,18 @@ $iem = iemdb("iem");
 
 $climate_site = $cities[$station]["climate_site"];
 
+$stname = uniqid("rainfall_plot");
 if (strrpos($network, "CLIMATE") > 0) {
-    $rs = pg_prepare($coopdb, "SELECT", "SELECT precip as pday, day from 
-    alldata_" . substr($climate_site, 0, 2) . "
-        WHERE station = $1 and day between $2 and $3 " .
+    pg_prepare($coopdb, $stname, "SELECT precip as pday, day from 
+    alldata WHERE station = $1 and day between $2 and $3 " .
         " ORDER by day ASC");
-    $rs = pg_execute($coopdb, "SELECT", array($station, $sdate, $edate));
+    $rs = pg_execute($coopdb, $stname, array($station, $sdate, $edate));
 } else {
-    $rs = pg_prepare($iem, "SELECT", "SELECT pday, day from summary_$year s JOIN stations t
+    pg_prepare($iem, $stname, "SELECT pday, day from summary_$year s JOIN stations t
     ON (t.iemid = s.iemid)
         WHERE id = $1 and day between $2 and $3 " .
         "and network = $4 ORDER by day ASC");
-    $rs = pg_execute($iem, "SELECT", array($station, $sdate, $edate, $network));
+    $rs = pg_execute($iem, $stname, array($station, $sdate, $edate, $network));
 }
 
 $obs = array();
@@ -67,11 +67,14 @@ for ($i = 0; $row = pg_fetch_array($rs); $i++) {
 }
 
 /* Now we need the climate data */
-$q = "SELECT precip, valid from climate
-        WHERE station = '" . $climate_site . "' and valid between '$s2date' and
-        '$e2date'
-        ORDER by valid ASC";
-$rs = pg_exec($coopdb, $q);
+$stname = uniqid("select");
+pg_prepare(
+    $coopdb,
+    $stname,
+    "SELECT precip, valid from climate WHERE station = $1 ".
+    "and valid between $2 and $3 ORDER by valid ASC"
+);
+$rs = pg_execute($coopdb, $stname, array($climate_site, $s2date, $e2date));
 $climate = array();
 $cdiff = array();
 $aclimate = array();
@@ -91,8 +94,6 @@ for ($i = 0; $row = pg_fetch_array($rs); $i++) {
     $xlabels[$i] = "";
     $times[$i] = strtotime($row["valid"]);
 }
-
-pg_close($coopdb);
 
 // Create the graph. These two calls are always required
 $graph = new Graph(640, 480, "example1");

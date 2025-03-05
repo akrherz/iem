@@ -47,7 +47,7 @@ if ($opt === "bystation") {
 $generated_at = $json['generated_at'];
 $prettyurl = str_replace("http://iem.local", "https://mesonet.agron.iastate.edu", $uri);
 
-$table = <<<EOF
+$table = <<<EOM
 <style>
 .empty{
     width: 0px !important;
@@ -78,7 +78,7 @@ $table = <<<EOF
 </tr>
 </thead>
 <tbody>
-EOF;
+EOM;
 
 $wxlookup = Array(
     "1" => "FG",
@@ -92,6 +92,7 @@ $wxlookup = Array(
     "9" => "BLSN",
     "X" => "TOR",
     "M" => "M",
+    " " => "",  # GIGO
 );
 
 

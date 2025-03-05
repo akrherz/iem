@@ -31,7 +31,12 @@ $selectAll = false;
 foreach ($stations as $key => $value) {
     if ($value == "_ALL") {
         $selectAll = true;
+        continue;
     }
+    if (!array_key_exists($value, $cities)) {
+        xssafe("<tag>");
+    }
+
     $stationString .= " '" . $value . "',";
 }
 
@@ -95,12 +100,11 @@ if ($what == "download") {
 
 $connection = iemdb("rwis");
 
-$query1 = "SET TIME ZONE 'GMT'";
+$query1 = "SET TIME ZONE 'UTC'";
 
 $result = pg_exec($connection, $query1);
 $rs =  pg_exec($connection, $sqlStr);
 
-pg_close($connection);
 if ($gis == "yes") {
     echo "station,station_name,lat,lon,valid(GMT),";
 } else {

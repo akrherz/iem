@@ -12,7 +12,7 @@ $rs = pg_exec($conn, "SELECT *, getSiteName(s_mid) as s_name from tt_base " .
 
 $ars = array("isusm" => "", "iaawos" => "", "iarwis" => "");
 
-for ($i = 0; $row = pg_fetch_array($rs); $i++) {
+for ($i = 0; $row = pg_fetch_assoc($rs); $i++) {
     if (!array_key_exists($row["portfolio"], $ars)) {
         continue;
     }

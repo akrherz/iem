@@ -40,7 +40,7 @@ foreach ($u as $key => $val) {
     );
 }
 $pselect .= "</select>";
-$t->content = <<<EOF
+$t->content = <<<EOM
 <ol class="breadcrumb">
 <li><a href="/scan/">SCAN</a></li>
 <li class="active">Current/Historical Data Traces</li>
@@ -52,11 +52,11 @@ $t->content = <<<EOF
 <table class="table table-striped">
 <thead>
 <tr>
-  <th class="subtitle">SCAN Site:</th>
-  <th class="subtitle">Plot Type:</th>
-  <th class="subtitle">Year:</th>
-  <th class="subtitle">Month:</th>
-  <th class="subtitle">Day:</th></tr>
+  <th>SCAN Site:</th>
+  <th>Plot Type:</th>
+  <th>Year:</th>
+  <th>Month:</th>
+  <th>Day:</th></tr>
 </thead>
 <tbody>
 <tr>
@@ -71,5 +71,5 @@ $t->content = <<<EOF
 </table></form>
 
 <img src="{$ploturl}">
-EOF;
+EOM;
 $t->render("single.phtml");

@@ -174,30 +174,31 @@ if (isset($_GET["vtec"])) {
     }
     $wfo = substr($wfo, 1, 3);
     // Try to find this warning as a polygon first, then look at warnings table
-    $sql = <<<EOF
+    $sql = <<<EOM
       with one as (
           SELECT max(issue at time zone 'UTC') as v,
           max(expire at time zone 'UTC') as e, ST_extent(geom),
           max('P')::text as gtype
-          from sbw_{$year}
+          from sbw
           WHERE wfo = $1 and phenomena = $2 and eventid = $3 and
-          significance = $4 and status = 'NEW'),
+          significance = $4 and status = 'NEW' and vtec_year = $5),
       two as (
           SELECT max(issue at time zone 'UTC') as v,
           max(expire at time zone 'UTC') as e, ST_extent(u.geom),
-          'C'::text as gtype from warnings_{$year} w JOIN ugcs u on (w.gid = u.gid)
+          'C'::text as gtype from warnings w JOIN ugcs u on (w.gid = u.gid)
           WHERE w.wfo = $1 and phenomena = $2 and eventid = $3 and
-          significance = $4),
+          significance = $4 and vtec_year = $5),
       agg as (SELECT * from one UNION ALL select * from two)
 
       SELECT v, e, ST_xmax(st_extent) as x1, st_xmin(st_extent) as x0,
       ST_ymax(st_extent) as y1, st_ymin(st_extent) as y0, gtype from agg
       WHERE gtype is not null and v is not null LIMIT 1
-EOF;
-    $rs = pg_prepare($postgis, "OOR", $sql);
-    $rs = pg_execute($postgis, "OOR", array(
+EOM;
+    $stname = uniqid();
+    pg_prepare($postgis, $stname, $sql);
+    $rs = pg_execute($postgis, $stname, array(
         $wfo, $phenomena, $eventid,
-        $significance
+        $significance, $year,
     ));
     if ($rs === FALSE || pg_num_rows($rs) != 1) exit("ERROR: Unable to find warning!");
     $row = pg_fetch_assoc($rs, 0);
@@ -243,15 +244,16 @@ if (isset($_REQUEST['pid'])) {
         new DateTimeZone("UTC"),
     );
     /* First, we query for a bounding box please */
-    $rs = pg_prepare(
+    $stname = uniqid();
+    pg_prepare(
         $postgis,
-        "SELECTPID",
+        $stname,
         "SELECT ST_xmax(ST_extent(geom)) as x1, ST_xmin(ST_extent(geom)) as x0, "
             . "ST_ymin(ST_extent(geom)) as y0, ST_ymax(ST_extent(geom)) as y1 "
             . "from sps WHERE product_id = $1"
     );
-    $result = pg_execute($postgis, "SELECTPID", array($pid));
-    $row = pg_fetch_array($result, 0);
+    $result = pg_execute($postgis, $stname, array($pid));
+    $row = pg_fetch_assoc($result, 0);
     $lpad = 0.5;
     $y1 = $row["y1"] + $lpad;
     $y0 = $row["y0"] - $lpad;
@@ -276,11 +278,12 @@ if (isset($_GET["bbox"])) {
 if ($sector == "wfo") {
     $sector_wfo = isset($_REQUEST["sector_wfo"]) ? strtoupper($_REQUEST["sector_wfo"]) : "DMX";
     /* Fetch the bounds */
-    pg_prepare($postgis, "WFOBOUNDS", "SELECT ST_xmax(geom) as xmax, ST_ymax(geom) as ymax, "
+    $stname = uniqid();
+    pg_prepare($postgis, $stname, "SELECT ST_xmax(geom) as xmax, ST_ymax(geom) as ymax, "
         . " ST_xmin(geom) as xmin, ST_ymin(geom) as ymin from "
         . " (SELECT ST_Extent(geom) as geom from ugcs WHERE "
         . " wfo = $1 and end_ts is null) as foo");
-    $rs = pg_execute($postgis, "WFOBOUNDS", array($sector_wfo));
+    $rs = pg_execute($postgis, $stname, array($sector_wfo));
     if (pg_num_rows($rs) > 0) {
         $row = pg_fetch_assoc($rs, 0);
         $buffer = 0.25;
@@ -601,8 +604,8 @@ if (isset($_REQUEST["vtec"]) && in_array("cbw", $layers)) {
     $wc->connection = get_dbconn_str("postgis");
     $wc->status = MS_ON;
     $sql = sprintf("geom from (select eventid, w.wfo, significance, "
-        . "phenomena, u.geom, random() as oid from warnings_$year w JOIN ugcs u "
-        . "on (u.gid = w.gid) WHERE w.wfo = '$wfo' "
+        . "phenomena, u.geom, random() as oid from warnings w JOIN ugcs u "
+        . "on (u.gid = w.gid) WHERE w.vtec_year = $year and w.wfo = '$wfo' "
         . "and phenomena = '$phenomena' and significance = '$significance' "
         . "and eventid = $eventid ORDER by phenomena ASC) as foo "
         . "using unique oid using SRID=4326");

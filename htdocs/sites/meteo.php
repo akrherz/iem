@@ -17,10 +17,10 @@ $uri = sprintf(
     $station,
     $network
 );
-$t->content = <<<EOF
+$t->content = <<<EOM
 
 <p>This page creates a simple plot of recent observations from this site.</p>
 
 <br /><img src="{$uri}" class="img img-responsive">
-EOF;
+EOM;
 $t->render('sites.phtml');

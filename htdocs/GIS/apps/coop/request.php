@@ -46,7 +46,7 @@ $dbfFile = dbase_create($shpFname . ".dbf", array(
 ));
 
 
-for ($i = 0; $row = pg_fetch_array($rs); $i++) {
+for ($i = 0; $row = pg_fetch_assoc($rs); $i++) {
     // Create the shape
     $pt = new pointObj();
     $pt->setXY($row["lon"], $row["lat"], 0);

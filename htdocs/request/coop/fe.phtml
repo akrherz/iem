@@ -28,7 +28,7 @@ $m2 = monthSelect2(date("m"), "month2");
 $d2 = daySelect2(date("d"), "day2");
 $sselect = selectNetworkType("CLIMATE", $network);
 
-$t->content = <<<EOF
+$t->content = <<<EOM
 <ol class="breadcrumb">
 <li><a href="/COOP/">NWS COOP Network</a></li>
 <li class="active">Download IEM Climodat Daily Data</li>
@@ -183,5 +183,5 @@ seconds to get a response.</i><br />
 </div></div>
 
 </form>
-EOF;
+EOM;
 $t->render('full.phtml');

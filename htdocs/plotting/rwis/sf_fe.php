@@ -28,43 +28,27 @@ if (!$subc && !$dwpf && !$tmpf && !$s0 && !$s1 && !$s2 && !$s3) {
     $_GET["tmpf"] = "on";
 }
 
-$t->headextra = <<<EOF
+$t->headextra = <<<EOM
 <link rel="stylesheet" href="/vendor/openlayers/{$OL}/ol.css" type="text/css">
 <link type="text/css" href="/vendor/openlayers/{$OL}/ol-layerswitcher.css" rel="stylesheet" />
 <link rel="stylesheet" type="text/css" href="/vendor/select2/4.0.3/select2.min.css"/ >
-EOF;
-$t->jsextra = <<<EOF
+EOM;
+$t->jsextra = <<<EOM
 <script src="/vendor/openlayers/{$OL}/ol.js" type="text/javascript"></script>
 <script src='/vendor/openlayers/{$OL}/ol-layerswitcher.js'></script>
 <script src="/js/olselect.js"></script>
 <script src="/vendor/select2/4.0.3/select2.min.js"></script>
 <script type="text/javascript">
 $(document).ready(function(){
-    $(".iemselect2").select2();	
+    $(".iemselect2").select2();
 });
 </script>
-EOF;
+EOM;
 $t->title = "RWIS Timeseries Plots";
 
-$mesosite = iemdb('mesosite');
-$nselect = "<select name=\"network\">";
-$rs = pg_query($mesosite, "SELECT id, name from networks where id ~* 'RWIS' ORDER by name ASC");
-for ($i = 0; $row = pg_fetch_assoc($rs); $i++) {
-    $sel = '';
-    if ($network == $row["id"]) {
-        $sel = " selected='SELECTED'";
-    }
-    $nselect .= sprintf(
-        "<option value='%s'%s>%s</option>\n",
-        $row["id"],
-        $sel,
-        $row["name"]
-    );
-}
-$nselect .= "</select>";
+$nselect = selectNetworkType("RWIS", $network);
 
-
-$content = <<<EOF
+$content = <<<EOM
 <style type="text/css">
         #map {
             width: 450px;
@@ -89,7 +73,7 @@ for which time period in the archive.</p>
 
 <form method="GET" action="sf_fe.php" name="olselect">
 <input type="hidden" name="network" value="{$network}">
-EOF;
+EOM;
 if (strlen($station) > 0) {
     $ys = yearSelect2(1995, $syear, "syear");
     $ms =  monthSelect2($smonth, "smonth");
@@ -111,7 +95,6 @@ if (strlen($station) > 0) {
         $ns2 = $row['sensor2'];
         $ns3 = $row['sensor3'];
     }
-    pg_close($c0);
     $cgiStr = "&sday=$sday&smonth=$smonth&syear=$syear&days=$days&";
 
     $table = "<table class=\"table table-bordered\">

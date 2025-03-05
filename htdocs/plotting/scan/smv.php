@@ -18,13 +18,14 @@ $y2label = "Volumetric Soil Moisture [%]";
 
 $date = "$year-$month-$day";
 
-$rs = pg_prepare($connection, "SELECT", "SELECT c1smv, c2smv, c3smv, c4smv, c5smv, srad, 
+$stname = uniqid();
+pg_prepare($connection, $stname, "SELECT c1smv, c2smv, c3smv, c4smv, c5smv, srad, 
         to_char(valid, 'mmdd/HH24') as tvalid 
         from alldata WHERE 
         station = $1 and date(valid) >= $2  
         ORDER by tvalid ASC LIMIT 96");
 
-$result = pg_execute($connection, "SELECT", Array($station, $date));
+$result = pg_execute($connection, $stname, Array($station, $date));
 
 $ydata1 = array();
 $ydata2 = array();
@@ -35,7 +36,7 @@ $ydataSR = array();
 
 $xlabel= array();
 
-for( $i=0; $row = pg_fetch_array($result); $i++) 
+for( $i=0; $row = pg_fetch_assoc($result); $i++) 
 { 
   if ($row["c1smv"] > 0)   $ydata1[$i]  = $row["c1smv"];
   if ($row["c2smv"] > 0)   $ydata2[$i]  = $row["c2smv"];
@@ -46,8 +47,6 @@ for( $i=0; $row = pg_fetch_array($result); $i++)
   $ydataSR[$i] = $row["srad"];
   $xlabel[$i] = $row["tvalid"];
 }
-
-pg_close($connection);
 
 // Create the graph. These two calls are always required
 $graph = new Graph(660,450,"example1");

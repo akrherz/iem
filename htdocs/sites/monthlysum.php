@@ -19,7 +19,8 @@ $t->title = "Monthly Summaries";
 $t->sites_current = "monthsum";
 
 $pgconn = iemdb("iem");
-$rs = pg_prepare($pgconn, "SELECT", "SELECT extract(year from day) as year," .
+$stname = uniqid("station");
+pg_prepare($pgconn, $stname, "SELECT extract(year from day) as year," .
     "extract(month from day) as month, sum(pday) as precip, " .
     "avg(avg_rh) as avg_rh, avg(max_tmpf) as avg_high, " .
     "avg(avg_sknt) * 1.15 as avg_wind_mph, " .
@@ -27,7 +28,7 @@ $rs = pg_prepare($pgconn, "SELECT", "SELECT extract(year from day) as year," .
     "from summary s " .
     "JOIN stations t on (s.iemid = t.iemid) WHERE t.id = $1 and t.network = $2 " .
     "GROUP by year, month ORDER by year, month");
-$rs = pg_execute($pgconn, "SELECT", array($station, $network));
+$rs = pg_execute($pgconn, $stname, array($station, $network));
 $data = array();
 $minyear = 3000;
 $maxyear = 1000;
@@ -39,12 +40,13 @@ for ($i = 0; $row = pg_fetch_assoc($rs); $i++) {
 }
 $climo = array();
 $pgconn = iemdb("coop");
-$rs = pg_prepare($pgconn, "SELECT", "SELECT " .
+$stname = uniqid("station");
+pg_prepare($pgconn, $stname, "SELECT " .
     "extract(month from valid) as month, avg(high) as avg_high, " .
     "avg(low) as avg_low, avg((high+low)/2.) as avg_temp, " .
     "sum(precip) as precip from ncei_climate91 WHERE station = $1" .
     " GROUP by month ORDER by month ASC");
-$rs = pg_execute($pgconn, "SELECT", array($metadata["ncei91"]));
+$rs = pg_execute($pgconn, $stname, array($metadata["ncei91"]));
 for ($i = 0; $row = pg_fetch_assoc($rs); $i++) {
     $climo[$row["month"]] = $row;
     $climo[$row["month"]]["avg_wind_mph"] = null;

@@ -18,14 +18,15 @@ $y2label = "Temperature [C]";
 
 $date = "$year-$month-$day";
 
-$rs = pg_prepare($connection, "SELECT", "SELECT c1tmpf, c2tmpf, c3tmpf, 
+$stname = uniqid();
+pg_prepare($connection, $stname, "SELECT c1tmpf, c2tmpf, c3tmpf, 
         c4tmpf, c5tmpf, srad , tmpf,
         to_char(valid, 'mmdd/HH24') as tvalid 
         from alldata WHERE 
         station = $1 and date(valid) >= $2  
         ORDER by tvalid ASC LIMIT 96");
 
-$result = pg_execute($connection, "SELECT", Array($station, $date));
+$result = pg_execute($connection, $stname, Array($station, $date));
 
 $ydata1 = array();
 $ydata2 = array();
@@ -37,7 +38,7 @@ $ydataSR = array();
 
 $xlabel= array();
 
-for( $i=0; $row = pg_fetch_array($result); $i++) 
+for( $i=0; $row = pg_fetch_assoc($result); $i++) 
 { 
   $ydata1[$i]  = $row["c1tmpf"];
   $ydata2[$i]  = $row["c2tmpf"];
@@ -48,9 +49,6 @@ for( $i=0; $row = pg_fetch_array($result); $i++)
   $ydataA[$i] = $row["tmpf"];
   $xlabel[$i] = $row["tvalid"];
 }
-
-pg_close($connection);
-
 
 // Create the graph. These two calls are always required
 $graph = new Graph(660,450,"example1");

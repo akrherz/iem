@@ -3,6 +3,11 @@ require_once "../../../config/settings.inc.php";
 require_once "../../../include/database.inc.php";
 require_once "../../../include/forms.php";
 require_once "../../../include/network.php";
+require_once "../../../include/jpgraph/jpgraph.php";
+require_once "../../../include/jpgraph/jpgraph_line.php";
+require_once "../../../include/jpgraph/jpgraph_bar.php";
+require_once "../../../include/jpgraph/jpgraph_date.php";
+require_once "../../../include/jpgraph/jpgraph_led.php";
 
 /** We need these vars to make this work */
 $syear = get_int404("syear", date("Y"));
@@ -27,26 +32,21 @@ $sts = mktime(0, 0, 0, $smonth, $sday, $syear);
 $ets = $sts + ($days * 86400.0);
 
 $dbconn = iemdb('rwis');
-$rs = pg_prepare($dbconn, "SELECT", "SELECT * from alldata_soil
+$stname = uniqid("plot");
+$rs = pg_prepare($dbconn, $stname, "SELECT * from alldata_soil
 WHERE station = $1 and valid > $2 and valid < $3 ORDER by valid ASC");
-$rs = pg_execute($dbconn, "SELECT", array(
+$rs = pg_execute($dbconn, $stname, array(
     $station,
     date("Y-m-d H:i", $sts), date("Y-m-d H:i", $ets)
 ));
 
-for ($i = 0; $row = pg_fetch_array($rs); $i++) {
+for ($i = 0; $row = pg_fetch_assoc($rs); $i++) {
     $times[] = strtotime(substr($row["valid"], 0, 16));
     foreach ($depths as $j) {
         $data["s{$j}temp"][] = $row["tmpf_{$j}in"];
     }
 }
-pg_close($dbconn);
 
-require_once "../../../include/jpgraph/jpgraph.php";
-require_once "../../../include/jpgraph/jpgraph_line.php";
-require_once "../../../include/jpgraph/jpgraph_bar.php";
-require_once "../../../include/jpgraph/jpgraph_date.php";
-require_once "../../../include/jpgraph/jpgraph_led.php";
 
 if (pg_num_rows($rs) == 0) {
     $led = new DigitalLED74();

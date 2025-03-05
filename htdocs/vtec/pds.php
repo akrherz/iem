@@ -46,7 +46,7 @@ $('#makefancy').click(function(){
 EOM;
 
 
-$t->content = <<<EOF
+$t->content = <<<EOM
 <ol class="breadcrumb">
  <li><a href="/nws/">NWS Resources</a></li>
  <li class="active">PDS List</li>
@@ -85,5 +85,5 @@ regenerated hourly. <button id="makefancy">Make Table Interactive</button></p>
 </table>
 </div>
 
-EOF;
+EOM;
 $t->render("full.phtml");

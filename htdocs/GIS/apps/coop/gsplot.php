@@ -15,7 +15,7 @@ $emonth = get_int404("emonth", date("m"));
 $eday = get_int404("eday", date("d"));
 $network = isset($_REQUEST["network"]) ? xssafe($_REQUEST["network"]) : "IACLIMATE";
 if (strlen($network) > 9){
-    xssafe("<script>");
+    xssafe("<tag>");
 }
 
 $nt = new NetworkTable($network);
@@ -96,11 +96,14 @@ $map->setSize(1024, 768);
 
 $state = substr($network, 0, 2);
 $dbconn = iemdb("postgis");
-$rs = pg_query($dbconn, "SELECT ST_xmin(g), ST_xmax(g), ST_ymin(g), ST_ymax(g) from (
+$stname = uniqid();
+pg_prepare($dbconn, $stname,
+    "SELECT ST_xmin(g), ST_xmax(g), ST_ymin(g), ST_ymax(g) from (
         select ST_Extent(the_geom) as g from states 
-        where state_abbr = '{$state}'
+        where state_abbr = $1
         ) as foo");
-$row = pg_fetch_array($rs, 0);
+$rs = pg_execute($dbconn, $stname, Array($state));
+$row = pg_fetch_assoc($rs, 0);
 $buf = 0.2; // 35km
 $xsz = $row[1] - $row[0];
 $ysz = $row[3] - $row[2];
@@ -135,7 +138,7 @@ $dy = ($map->extent->maxy - $map->extent->miny) / 25;
 $dx = ($map->extent->maxx - $map->extent->minx) / 25;
 
 $stname = uniqid("select");
-$rs = pg_prepare($coopdb, $stname, <<<EOM
+pg_prepare($coopdb, $stname, <<<EOM
     SELECT station, 
     sum(precip) as s_prec,
     sum(gddxx(32, 86, high, low)) as s_gdd32,
@@ -162,7 +165,7 @@ $rs = pg_execute($coopdb, $stname, array(
 
 $used = Array();
 
-for ($i = 0; $row = pg_fetch_array($rs); $i++) {
+for ($i = 0; $row = pg_fetch_assoc($rs); $i++) {
 
     $ukey = $row["station"];
     if (!isset($cities[$ukey])) continue;

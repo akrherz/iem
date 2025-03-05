@@ -28,7 +28,7 @@ $ndate = $ts->format("Y-m-d");
 
 $t = new MyView();
 $t->title = "NWS COOP Daily Plotter";
-$t->headextra = <<<EOF
+$t->headextra = <<<EOM
 <script language="JavaScript" type="text/javascript">
 <!--//BEGIN Script
 function new_window(url) {
@@ -36,7 +36,7 @@ function new_window(url) {
 } 
 //END Script-->
 </script>
-EOF;
+EOM;
 
 $ar = array(
     "0" => "All Available",
@@ -92,11 +92,14 @@ $map->imagecolor->setRGB(255, 255, 255);
 $map->selectOutputFormat("PNG24");
 $map->setSize($width, $height);
 $dbconn = iemdb("postgis");
-$rs = pg_query(
+$stname = uniqid();
+pg_prepare(
     $dbconn,
+    $stname,
     "SELECT ST_xmin(the_geom), ST_xmax(the_geom), ST_ymin(the_geom), ST_ymax(the_geom) ".
-    "from states where state_abbr = '{$state}'");
-$row = pg_fetch_array($rs, 0);
+    "from states where state_abbr = $1");
+$rs = pg_execute($dbconn, $stname, Array($state));
+$row = pg_fetch_assoc($rs, 0);
 $buf = 0.5;
 $map->setextent(
     $row[0] - $buf,
@@ -176,7 +179,7 @@ if ($source == "qc") {
 
 $rs =  pg_exec($c, $sql);
 $vals = array();
-for ($i = 0; $row = pg_fetch_array($rs); $i++) {
+for ($i = 0; $row = pg_fetch_assoc($rs); $i++) {
     $stid = $row['station'];
     if ($var == "ratio") {
         if ($row["snow"] > 0 && $row["precip"] > 0) {

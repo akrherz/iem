@@ -515,9 +515,9 @@ $(document).ready(() => {
     if (tokens.length === 2){
         process_hash(tokens[1]);
     }
-    let res1 = olSelectLonLat("map", default_lon, default_lat, updateMarkerPosition);
+    const res1 = olSelectLonLat("map", default_lon, default_lat, updateMarkerPosition);
     marker1 = res1.marker;
-    let res2 = olSelectLonLat("map2", default_lon, default_lat, updateMarkerPosition2);
+    const res2 = olSelectLonLat("map2", default_lon, default_lat, updateMarkerPosition2);
     marker2 = res2.marker;
 
 });

@@ -45,6 +45,10 @@ $selectAll = false;
 foreach ($stations as $key => $value) {
     if ($value == "_ALL") {
         $selectAll = true;
+        continue;
+    }
+    if (!array_key_exists($value, $nt->table)) {
+        xssafe("<tag>");
     }
     $stationString .= " '" . $value . "',";
 }
@@ -124,7 +128,6 @@ if ($tz == "UTC") {
 
 $rs =  pg_exec($connection, $sqlStr);
 
-pg_close($connection);
 if ($gis == "yes") {
     echo "station,station_name,lat,lon,valid($tzn),";
 } else {
@@ -138,7 +141,7 @@ for ($j = 0; $j < $num_vars; $j++) {
 }
 echo "\n";
 
-for ($i = 0; $row = pg_fetch_array($rs); $i++) {
+for ($i = 0; $row = pg_fetch_assoc($rs); $i++) {
     $sid = $row["station"];
     echo $sid . $d[$delim] . $nt->table[$sid]["name"];
     if ($gis == "yes") {

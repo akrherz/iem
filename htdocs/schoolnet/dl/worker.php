@@ -33,7 +33,7 @@ $connection = iemdb("snet");
 
 $sqlStr = "SELECT station, ";
 for ($i = 0; $i < $num_vars; $i++) {
-    $sqlStr .= $vars[$i] . " as var" . $i . ", ";
+    $sqlStr .= xssafe($vars[$i]) . " as var{$i}, ";
 }
 
 $sqlTS1 = date("Y-m-d H:i", $ts1);
@@ -68,7 +68,6 @@ $sqlStr .= " and station IN " . $stationString . " and ";
 $sqlStr .= " extract(minute from valid)::int % " . $sampleStr[$sample] . " = 0 ";
 $sqlStr .= " ORDER by valid ASC";
 
-pg_exec($connection, "set enable_seqscan=off");
 $rs =  pg_exec($connection, $sqlStr);
 
 if (pg_num_rows($rs) == 0) {
@@ -80,8 +79,6 @@ if (pg_num_rows($rs) == 0) {
     header("Content-type: text/plain");
 }
 
-pg_close($connection);
-
 printf("%s%s%s", "STID", $d[$delim], "DATETIME");
 for ($j = 0; $j < $num_vars; $j++) {
     printf("%s%6s", $d[$delim], $vars[$j]);
@@ -89,7 +86,7 @@ for ($j = 0; $j < $num_vars; $j++) {
 echo "\n";
 if ($dl_option == "download") {
 
-    for ($i = 0; $row = pg_fetch_array($rs); $i++) {
+    for ($i = 0; $row = pg_fetch_assoc($rs); $i++) {
         printf("%s%s%s", $row["station"], $d[$delim],  $row["dvalid"]);
         for ($j = 0; $j < $num_vars; $j++) {
             printf("%s%6s", $d[$delim], $row["var" . $j]);

@@ -22,14 +22,15 @@ $queryData = "";
 
 $date = "$year-$month-$day";
 
-$rs = pg_prepare($connection, "SELECT", "SELECT c1tmpf, c2tmpf, c3tmpf, 
+$stname = uniqid();
+pg_prepare($connection, $stname, "SELECT c1tmpf, c2tmpf, c3tmpf, 
         c4tmpf, c5tmpf, srad, tmpf, valid, 
         to_char(valid, 'mmdd/HH24') as tvalid 
         from alldata WHERE 
         station = $1 and date(valid) >= $2  
         ORDER by tvalid ASC LIMIT 96");
 
-$result = pg_execute($connection, "SELECT", Array($station, $date));
+$result = pg_execute($connection, $stname, Array($station, $date));
 
 $ydata1 = array();
 $ydata2 = array();
@@ -40,7 +41,7 @@ $ydataSR = array();
 
 $times= array();
 
-for( $i=0; $row = pg_fetch_array($result); $i++) 
+for( $i=0; $row = pg_fetch_assoc($result); $i++) 
 {
   $ydata1[] = ($row["c1tmpf"] > -90) ? $row["c1tmpf"] : "";
   $ydata2[] = ($row["c2tmpf"] > -90) ? $row["c2tmpf"] : "";
