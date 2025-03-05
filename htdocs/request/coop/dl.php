@@ -7,6 +7,7 @@ require_once "../../../config/settings.inc.php";
 require_once "../../../include/database.inc.php";
 require_once "../../../include/mlib.php";
 require_once "../../../include/network.php";
+require_once "../../../include/forms.php";
 
 $connection = iemdb("coop");
 $network = isset($_REQUEST["network"]) ? substr($_REQUEST["network"], 0, 10) : "IACLIMATE";
@@ -26,29 +27,21 @@ $what = isset($_GET["what"]) ? $_GET["what"] : 'dl';
 $nt = new NetworkTable($network);
 $cities = $nt->table;
 
-$station = $_GET["station"];
 $stations = $_GET["station"];
-$stationString = "(";
-$selectAll = 0;
-$i = 0;
+$selectAll = false;
 foreach ($stations as $key => $value) {
     if ($value == "_ALL") {
-        $selectAll = 1;
+        $selectAll = true;
     }
-    $stationString .= " '" . $value . "',";
-    $i++;
+    if (!array_key_exists($value, $cities)) {
+        xssafe("<tag>");
+    }
 }
-
 
 if ($selectAll) {
-    $stationString = "(";
-    foreach ($cities as $key => $value) {
-        $stationString .= " '" . $key . "',";
-    }
+    $stations = array_keys($cities);
 }
-
-$stationString = substr($stationString, 0, -1);
-$stationString .= ")";
+$stationSQL = "{". implode(",", $stations) . "}";
 
 if (isset($_GET["day"]))
     die("Incorrect CGI param, use day1, day2");
@@ -75,7 +68,7 @@ $sqlStr = "SELECT station, *, to_char(day, 'YYYY/mm/dd') as dvalid,
  round((5.0/9.0 * (low - 32.0))::numeric,1) as lowc, 
  round((precip * 25.4)::numeric,1) as precipmm
  from $table WHERE day >= '" . $sqlTS1 . "' and day <= '" . $sqlTS2 . "' 
- and station IN " . $stationString . " ORDER by day ASC";
+ and station = ANY($1) ORDER by day ASC";
 
 /**
  * Must handle different ideas for what to do...
@@ -105,10 +98,11 @@ if (in_array('daycent', $vars)) {
      */
     if (sizeof($stations) > 1) die("Sorry, only one station request at a time for daycent option");
     if ($selectAll) die("Sorry, only one station request at a time for daycent option");
-    pg_prepare($connection, "DAYCENT", "SELECT extract(doy from day) as doy, high, low, precip,
+    $stname = uniqid();
+    pg_prepare($connection, $stname, "SELECT extract(doy from day) as doy, high, low, precip,
         month, year, extract(day from day) as lday 
-        from $table WHERE station IN " . $stationString . " and day >= '" . $sqlTS1 . "' and day <= '" . $sqlTS2 . "' ORDER by day ASC");
-    $rs = pg_execute($connection, 'DAYCENT', array());
+        from $table WHERE station = ANY($1) and day >= '" . $sqlTS1 . "' and day <= '" . $sqlTS2 . "' ORDER by day ASC");
+    $rs = pg_execute($connection, $stname, array($stationSQL));
     echo "Daily Weather Data File (use extra weather drivers = 0):\n";
     echo "\n";
     for ($i = 0; $row = pg_fetch_assoc($rs); $i++) {
@@ -141,11 +135,12 @@ tmax  1981  30.84  28.71  27.02  16.84  12.88   6.82   8.21   7.70  11.90  20.02
         die("Sorry, only one station request at a time for century option");
     }
     $table = sprintf("alldata_%s", substr($stations[0], 0, 2));
-    pg_prepare($connection, "TBD", "SELECT year, month, avg(high) as avgh, " .
+    $stname = uniqid();
+    pg_prepare($connection, $stname, "SELECT year, month, avg(high) as avgh, " .
         " avg(low) as avgl, sum(precip) as p" .
-        " from $table WHERE station IN " . $stationString . " and " .
+        " from $table WHERE station = ANY($3) and " .
         " year >= $1 and year <= $2 GROUP by year, month");
-    $rs = pg_execute($connection, 'TBD', array($year1, $year2));
+    $rs = pg_execute($connection, $stname, array($year1, $year2, $stationSQL));
     $monthly = array();
     for ($i = 0; $row = pg_fetch_assoc($rs); $i++) {
         $key = sprintf("%s%02d", $row["year"], $row["month"]);
@@ -204,22 +199,21 @@ year          day           radn          maxt          mint          rain
         $cities[$stations[0]]["lat"]
     );
 
-    $sql = "SELECT avg((high+low)/2)" .
-        " from climate51 " .
-        " WHERE station IN " . $stationString . " ";
+    $sql = "SELECT avg((high+low)/2) from climate51 " .
+        " WHERE station = ANY($1) ";
     pg_prepare($connection, "TBD", $sql);
-    $rs = pg_execute($connection, 'TBD', array());
+    $rs = pg_execute($connection, 'TBD', array($stationSQL));
     $row = pg_fetch_assoc($rs, 0);
     $response .= sprintf(
         "tav = %.3f (oC) ! annual average ambient temperature\n",
         f2c($row['avg'])
     );
-
-    pg_prepare($connection, "TBD2", "select max(avg) as h, min(avg) as l from
+    $stname = uniqid();
+    pg_prepare($connection, $stname, "select max(avg) as h, min(avg) as l from
             (SELECT extract(month from valid) as month, avg((high+low)/2.)
              from climate51 
-             WHERE station IN " . $stationString . " GROUP by month) as foo ");
-    $rs = pg_execute($connection, 'TBD2', array());
+             WHERE station = ANY($1) GROUP by month) as foo ");
+    $rs = pg_execute($connection, $stname, array($stationSQL));
     $row = pg_fetch_assoc($rs, 0);
     $response .= sprintf(
         "amp = %.3f (oC) ! annual amplitude in mean monthly temperature\n",
@@ -229,13 +223,14 @@ year          day           radn          maxt          mint          rain
     $response .= "year          day           radn          maxt          mint          rain
 ()            ()            (MJ/m^2)      (oC)          (oC)          (mm)\n";
 
-    pg_prepare($connection, "TBD4", "SELECT extract(doy from day) as doy, high," .
+    $stname = uniqid();
+    pg_prepare($connection, $stname, "SELECT extract(doy from day) as doy, high," .
         " low, precip, month, year, extract(day from day) as lday, station, year," .
         " coalesce(narr_srad, merra_srad, hrrr_srad) as srad" .
         " from $table " .
-        " WHERE station IN " . $stationString . " and " .
+        " WHERE station = ANY($1) and " .
         " day >= '" . $sqlTS1 . "' and day <= '" . $sqlTS2 . "' ORDER by day ASC");
-    $rs = pg_execute($connection, 'TBD4', array());
+    $rs = pg_execute($connection, $stname, array($stationSQL));
     for ($i = 0; $row = pg_fetch_assoc($rs); $i++) {
         $response .= sprintf(
             " %s         %s        %.4f         %.4f      %.4f     %.2f\n",
@@ -257,16 +252,13 @@ year          day           radn          maxt          mint          rain
      * One file per year! named StationName / StationName_YYYY.txt
      * julian day, tmax C , tmin C, precip cm seperated by space
      */
-    $network = sprintf("%sCLIMATE", substr($stations[0], 0, 2));
-    $nt = new NetworkTable($network);
-    $cities = $nt->table;
-
-    pg_prepare($connection, "TBD", "SELECT extract(doy from day) as doy, high," .
+    $stname = uniqid();
+    pg_prepare($connection, $stname, "SELECT extract(doy from day) as doy, high," .
         " low, precip, month, year, extract(day from day) as lday, station, year " .
         " from $table " .
-        " WHERE station IN " . $stationString . " and " .
+        " WHERE station = ANY($1) and " .
         " day >= '" . $sqlTS1 . "' and day <= '" . $sqlTS2 . "' ORDER by day ASC");
-    $rs = pg_execute($connection, 'TBD', array());
+    $rs = pg_execute($connection, $stname, array($stationSQL));
     $zipfiles = array();
     for ($i = 0; $row = pg_fetch_assoc($rs); $i++) {
         $sname = str_replace(" ", "_", $cities[$row["station"]]["name"]);
@@ -303,12 +295,13 @@ CTRL, 1981, 2, 3.1898, 1.59032, -6.83361, 1.38607, NaN, NaN, NaN, 3
     */
     if (sizeof($stations) > 1) die("Sorry, only one station request at a time for daycent option");
     if ($selectAll) die("Sorry, only one station request at a time for daycent option");
-    pg_prepare($connection, "TBD", "SELECT extract(doy from day) as doy, high," .
+    $stname = uniqid();
+    pg_prepare($connection, $stname, "SELECT extract(doy from day) as doy, high," .
         " low, precip, month, year, extract(day from day) as lday, station, year," .
         " coalesce(narr_srad, merra_srad, hrrr_srad) as srad" .
-        " from $table WHERE station IN " . $stationString . " and " .
+        " from $table WHERE station = ANY($1) and " .
         " day >= '" . $sqlTS1 . "' and day <= '" . $sqlTS2 . "' ORDER by day ASC");
-    $rs = pg_execute($connection, 'TBD', array());
+    $rs = pg_execute($connection, $stname, array($stationSQL));
     echo "StationID, Year, DOY, SRAD, Tmax, Tmin, Rain, DewP, Wind, Par, dbnum\n";
     for ($i = 0; $row = pg_fetch_assoc($rs); $i++) {
         echo sprintf(
@@ -327,7 +320,6 @@ CTRL, 1981, 2, 3.1898, 1.59032, -6.83361, 1.38607, NaN, NaN, NaN, 3
 
     $rs =  pg_exec($connection, $sqlStr);
 
-    pg_close($connection);
     if ($gis == "yes") {
         echo "station" . $d[$delim] . "station_name" . $d[$delim] . "lat" . $d[$delim] . "lon" . $d[$delim] . "day" . $d[$delim] . "julianday" . $d[$delim];
     } else {

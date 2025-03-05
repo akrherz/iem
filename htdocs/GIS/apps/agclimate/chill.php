@@ -3,14 +3,15 @@ require_once "../../../../config/settings.inc.php";
 require_once "../../../../include/iemmap.php";
 require_once "../../../../include/database.inc.php";
 require_once "../../../../include/network.php";
+require_once "../../../../include/forms.php";
 require_once "../../../../include/vendor/mapscript.php";
 $nt = new NetworkTable("ISUSM");
 $ISUAGcities = $nt->table;
 
-$year = isset($_GET["year"]) ? $_GET["year"] : date("Y", time() - 86400 - (7 * 3600));
-$month = isset($_GET["month"]) ? $_GET["month"] : date("m", time() - 86400 - (7 * 3600));
-$day = isset($_GET["day"]) ? $_GET["day"] : date("d", time() - 86400 - (7 * 3600));
-$date = isset($_GET["date"]) ? $_GET["date"] : $year . "-" . $month . "-" . $day;
+$year = get_int404("year", date("Y", time() - 86400 - (7 * 3600)));
+$month = get_int404("month", date("m", time() - 86400 - (7 * 3600)));
+$day = get_int404("day", date("d", time() - 86400 - (7 * 3600)));
+$date = isset($_GET["date"]) ? xssafe($_GET["date"]) : $year . "-" . $month . "-" . $day;
 
 $direct = isset($_GET["direct"]) ? $_GET['direct'] : "";
 
@@ -67,7 +68,7 @@ $sql = "select station, min(valid) as v from sm_hourly "
     . "WHERE valid > '{$sdate}' and tair_c_avg < f2c(29.0) and "
     . "valid < '{$edate}' GROUP by station";
 $rs =  pg_exec($c, $sql);
-for ($i = 0; $row = pg_fetch_array($rs); $i++) {
+for ($i = 0; $row = pg_fetch_assoc($rs); $i++) {
     $bdate = $sdate;
     $key = $row["station"];
 
@@ -81,7 +82,7 @@ for ($i = 0; $row = pg_fetch_array($rs); $i++) {
 
     $rs2 = pg_exec($c, $sql);
     if (pg_num_rows($rs2) == 0) continue;
-    $r = pg_fetch_array($rs2, 0);
+    $r = pg_fetch_assoc($rs2, 0);
     $val = $r["c"];
 
     $data[$key]['var'] = $val;
@@ -99,7 +100,7 @@ for ($i = 0; $row = pg_fetch_array($rs); $i++) {
     //echo $sql ."<br />";
     $rs2 = pg_exec($c, $sql);
     if (pg_num_rows($rs2) == 0) continue;
-    $r = pg_fetch_array($rs2, 0);
+    $r = pg_fetch_assoc($rs2, 0);
     if ((intval(date("Y")) - $syear - 1) == 0) continue;
     $avg = ($r["c"]) / (intval(date("Y")) - $syear - 1);
 

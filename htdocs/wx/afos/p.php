@@ -21,14 +21,16 @@ if (is_null($pil) || trim($pil) == "") {
 }
 
 $conn = iemdb("afos");
-$rs = pg_prepare(
+$st_nobbb = uniqid();
+$st_bbb = uniqid();
+pg_prepare(
     $conn,
-    "_LSELECT",
+    $st_nobbb,
     "SELECT data, bbb, entered at time zone 'UTC' as mytime, source, wmo ".
     "from products WHERE pil = $1 and entered = $2");
-$rs = pg_prepare(
+pg_prepare(
     $conn,
-    "_LSELECT_BBB",
+    $st_bbb,
     "SELECT data, bbb, entered at time zone 'UTC' as mytime, source, wmo ".
     "from products WHERE pil = $1 and entered = $2 and bbb = $3");
     
@@ -51,21 +53,23 @@ function locate_product($conn, $e, $pil, $dir)
         (intval(date("m", $ts)) > 6) ? "0712" : "0106"
     );
     // first attempt shortcut
-    $rs = pg_prepare($conn, "_LSELECT22", "SELECT " .
+    $stname = uniqid();
+    pg_prepare($conn, $stname, "SELECT " .
         "entered at time zone 'UTC' as mytime from $table " .
         "WHERE pil = $1 and entered $sign $2 " .
         "ORDER by entered $sortdir LIMIT 1");
-    $rs = pg_execute($conn, "_LSELECT22", array(
+    $rs = pg_execute($conn, $stname, array(
         $pil,
         date("Y-m-d H:i", $ts)
     ));
     if (pg_num_rows($rs) == 0) {
         // widen the net
-        $rs = pg_prepare($conn, "_LSELECT2", "SELECT " .
+        $stname = uniqid();
+        pg_prepare($conn, $stname, "SELECT " .
             "entered at time zone 'UTC' as mytime from products " .
             "WHERE pil = $1 and entered $sign $2 " .
             "ORDER by entered $sortdir LIMIT 1");
-        $rs = pg_execute($conn, "_LSELECT2", array(
+        $rs = pg_execute($conn, $stname, array(
             $pil,
             date("Y-m-d H:i", $ts)
         ));
@@ -85,11 +89,12 @@ function locate_product($conn, $e, $pil, $dir)
 function last_product($conn, $pil)
 {
     // Get the latest
-    $rs = pg_prepare($conn, "_LSELECT3", "SELECT data, bbb, "
+    $stname = uniqid();
+    $rs = pg_prepare($conn, $stname, "SELECT data, bbb, "
         . " entered at time zone 'UTC' as mytime, source from products"
         . " WHERE pil = $1"
         . " ORDER by entered DESC LIMIT 1");
-    $rs = pg_execute($conn, "_LSELECT3", array($pil));
+    $rs = pg_execute($conn, $stname, array($pil));
     if (pg_num_rows($rs) == 1) {
         $row = pg_fetch_assoc($rs, 0);
         $uri = sprintf(
@@ -113,12 +118,14 @@ function exact_product($conn, $e, $pil, $bbb){
         intval(substr($e, 0, 4))
     );
     if (is_null($bbb)) {
-        $rs = pg_execute($conn, "_LSELECT", array(
+        global $st_nobbb;
+        $rs = pg_execute($conn, $st_nobbb, array(
             $pil,
             gmdate("Y-m-d H:i+00", $ts),
         ));
     } else {
-        $rs = pg_execute($conn, "_LSELECT_BBB", array(
+        global $st_bbb;
+        $rs = pg_execute($conn, $st_bbb, array(
             $pil,
             gmdate("Y-m-d H:i+00", $ts),
             $bbb,
@@ -218,12 +225,13 @@ EOM;
         );
         if (substr($pil, 0, 3) == "CWA") {
             $pconn = iemdb("postgis");
-            $rs2 = pg_prepare(
+            $stname = uniqid();
+            pg_prepare(
                 $pconn,
-                "_SELECT", "SELECT num, issue, center from cwas WHERE ".
+                $stname, "SELECT num, issue, center from cwas WHERE ".
                 "issue > $1 and issue < $2 and product_id = $3");
             $rs2 = pg_execute(
-                $pconn, "_SELECT", array(
+                $pconn, $stname, array(
                     date("Y-m-d H:i+00", $basets - 3600),
                     date("Y-m-d H:i+00", $basets + 3600),
                     $product_id,
@@ -244,7 +252,6 @@ EOM;
                     $t->twitter_image,
                 );
             }
-            pg_close($pconn);
         }
         if (substr($pil, 0, 3) == "FRW" && strpos($row["data"], "LAT...LON") !== false) {
             $t->twitter_image = "/plotting/auto/plot/227/pid:{$product_id}.png";

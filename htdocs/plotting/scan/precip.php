@@ -18,13 +18,14 @@ $date = "$year-$month-$day";
 $var = "phour";
 $accum = 1;
 
-$rs = pg_prepare($connection, "SELECT", "SELECT sknt, drct, phour,
+$stname = uniqid();
+$rs = pg_prepare($connection, $stname, "SELECT sknt, drct, phour,
         to_char(valid, 'mmdd/HH24') as tvalid 
         from alldata WHERE 
         station = $1 and date(valid) >= $2  and phour >= 0
         ORDER by tvalid ASC LIMIT 96");
 
-$result = pg_execute($connection, "SELECT", array($station, $date));
+$result = pg_execute($connection, $stname, array($station, $date));
 
 $ydata1 = array();
 
@@ -32,13 +33,10 @@ $xlabel = array();
 
 $thisP = 0;
 
-for ($i = 0; $row = pg_fetch_array($result); $i++) {
+for ($i = 0; $row = pg_fetch_assoc($result); $i++) {
     $ydata1[$i]  = $row["phour"];
     $xlabel[$i] = $row["tvalid"];
 }
-
-pg_close($connection);
-
 
 // Create the graph. These two calls are always required
 $graph = new Graph(660, 450, "example1");

@@ -3,17 +3,14 @@ require_once "../../config/settings.inc.php";
 require_once "../../include/myview.php";
 $t = new MyView();
 $t->title = "Quality Control";
-$t->content = <<<EOF
+$t->content = <<<EOM
 
-<div class="row">
-        <div class="col-md-6">
 <h3>Quality Control Products</h3>
 
 <p>This page contains links to Quality Control (QC) products generated
     on the IEM server.</p>
 
 <ul>
- <li>FSL's MADIS <a href="http://www-sdd.fsl.noaa.gov/MSAS/qcms_data/qc20/qchour.txt">QC Messages</a> for this hour.</li>
  <li><a href="/QC/madis/network.phtml">MADIS Raw QC</a></li>
  <li><a href="/plotting/compare/">Generate Interactive Comparisons</a> between two sites of your choice.</li>
 </ul>
@@ -23,11 +20,6 @@ $t->content = <<<EOF
    <li>Sites currently <a href="offline.php">offline</a></li>
    <li><a href="tickets.phtml">Active Trouble Tickets</a></li>
 </ul>
-</div>
-<div class="col-md-6">
 
-</div>
-</div>
-
-EOF;
+EOM;
 $t->render('single.phtml');

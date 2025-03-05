@@ -35,7 +35,7 @@ foreach ($nt->table as $key => $val) {
     );
 }
 
-$t->content = <<<EOF
+$t->content = <<<EOM
  <ol class="breadcrumb">
   <li><a href="/agclimate">ISU Soil Moisture Network</a></li>
   <li class="active">Inversion Download</li>
@@ -127,5 +127,5 @@ site.  this is a five character identifier.</dd>
 <dt>gust</dt><dd>Wind Gust (mph) at 10ft above the ground</dd>
 </dl>
 
-EOF;
+EOM;
 $t->render("full.phtml");

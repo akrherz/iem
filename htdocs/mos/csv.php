@@ -13,7 +13,9 @@ if ($year < 2007) {
     exit();
 }
 
-$rs = pg_prepare($mos, "SELECTOR", "select *, t06_1 ||'/'||t06_2 as t06, 
+$stname = uniqid();
+$stname2 = uniqid();
+pg_prepare($mos, $stname, "select *, t06_1 ||'/'||t06_2 as t06, 
                  t12_1 ||'/'|| t12_2 as t12  from t{$year} WHERE station = $1
                  and ftime >= $2 and ftime <= ($2 + '10 days'::interval) ORDER by ftime ASC");
 
@@ -23,15 +25,15 @@ if (isset($_GET["runtime"]) && isset($_GET["model"])) {
     if ($year < 2007) {
         die("Bad runtime '" . $_GET["runtime"] . "'");
     }
-    $rs = pg_prepare($mos, "SELECTOR2", "select *, t06_1 ||'/'||t06_2 as t06, 
+    pg_prepare($mos, $stname2, "select *, t06_1 ||'/'||t06_2 as t06, 
                  t12_1 ||'/'|| t12_2 as t12  from t{$year} WHERE station = $1
                  and runtime = $2 and model = $3 ORDER by ftime ASC");
-    $rs = pg_execute($mos, "SELECTOR2", array(
+    $rs = pg_execute($mos, $stname2, array(
         $station, date("Y-m-d H:i", $ts),
         $_GET["model"]
     ));
 } else {
-    $rs = pg_execute($mos, "SELECTOR", array($station, date("Y-m-d H:i", $ts)));
+    $rs = pg_execute($mos, $stname, array($station, date("Y-m-d H:i", $ts)));
 }
 
 header("Content-type: text/plain");
@@ -44,7 +46,7 @@ $ar = array(
 );
 
 echo implode(",", $ar) . "\n";
-for ($i = 0; $row = pg_fetch_array($rs); $i++) {
+for ($i = 0; $row = pg_fetch_assoc($rs); $i++) {
     foreach ($ar as $k => $v) {
         echo sprintf("%s,", $row[$v]);
     }

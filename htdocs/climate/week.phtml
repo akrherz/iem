@@ -4,7 +4,7 @@ require_once "../../include/myview.php";
 $t = new MyView();
 $t->title = "Climatology Plots for Past 7 Days";
 
-$t->content = <<<EOF
+$t->content = <<<EOM
 <h4>Temperature</h4>
 <ul>
 <li><a href="/data/summary/7day/iaavg_max_tmpf.png">Average High</a></li>
@@ -16,5 +16,5 @@ $t->content = <<<EOF
 <li><a href="/rainfall/obhour.phtml">Hourly Precip Accumulator</a></li>
 <li><a href="/data/summary/7day/ia_precip.png">Precip Accumulation</a> [ASOS+AWOS]</li>
 </ul>
-EOF;
+EOM;
 $t->render('single.phtml');

@@ -15,24 +15,26 @@ $day = get_int404("day", 25);
 $ts = strtotime("2000-{$month}-{$day}");
 $sday = date('md', $ts);
 
-$rs = pg_prepare($coopdb, "FIND", "SELECT * from alldata_ia
+$stname1 = uniqid();
+pg_prepare($coopdb, $stname1, "SELECT * from alldata_ia
       WHERE station = $1 and sday = $2 and snowd > 0 ORDER
       by year ASC");
-$rs = pg_prepare($coopdb, "FIND2", "SELECT min(day) as m from alldata_ia
+$stname2 = uniqid();
+pg_prepare($coopdb, $stname2, "SELECT min(day) as m from alldata_ia
       WHERE day > $1 and station = $2 and snowd = 0");
 
 $table = <<<EOM
-<table  class="table table-striped table-bordered">
+<table class="table table-striped table-bordered">
 <tr><th>Start Day</th><th>Depth [inch]</th><th>End Date</th>
  <th>Duration [days]</th></tr>
 EOM;
 
 /* Find all snow days for this date! */
-$rs = pg_execute($coopdb, "FIND", array(strtoupper($station), $sday));
+$rs = pg_execute($coopdb, $stname1, array(strtoupper($station), $sday));
 $data = array();
-for ($i = 0; $row = pg_fetch_array($rs); $i++) {
-    $rs2 = pg_execute($coopdb, "FIND2", array($row["day"], $station));
-    $row2 = pg_fetch_array($rs2, 0);
+for ($i = 0; $row = pg_fetch_assoc($rs); $i++) {
+    $rs2 = pg_execute($coopdb, $stname2, array($row["day"], $station));
+    $row2 = pg_fetch_assoc($rs2, 0);
     $sts = strtotime($row["day"]);
     $endts = strtotime($row2["m"]);
     $days = ($endts - $sts) / 86400;

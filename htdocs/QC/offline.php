@@ -26,7 +26,7 @@ function networkOffline($network)
     $rs = pg_execute($pgconn, $stname, Array($network) );
 
     $q = 0;
-    for( $i=0; $row = pg_fetch_array($rs); $i++)
+    for( $i=0; $row = pg_fetch_assoc($rs); $i++)
     {
         $valid = $row["v"];
         $station = $row["station"];
@@ -42,7 +42,7 @@ function networkOffline($network)
 $rwis = networkOffline("IA_RWIS");
 $awos = networkOffline("IA_ASOS");
 $isusm = networkOffline("ISUSM");
-$t->content = <<< EOF
+$t->content = <<<EOM
 <ol class="breadcrumb">
  <li><a href="/QC/">Quality Control</a></li>
  <li class="active">Sites Offline</li>
@@ -80,5 +80,5 @@ to a wide range of factors.  Here is a listing of sites currently offline.
 <p>
 
 <p></div>
-EOF;
+EOM;
 $t->render('single.phtml');

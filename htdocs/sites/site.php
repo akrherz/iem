@@ -27,16 +27,17 @@ if (
     $client_ip = getClientIp();
     // Log the request so to effectively do some DOS protection.
     $pgconn = iemdb("mesosite");
-    $rs = pg_prepare(
+    $stname = uniqid("site");
+    pg_prepare(
         $pgconn,
-        "INSERT",
+        $stname,
         "INSERT into weblog ".
             "(client_addr, uri, referer, http_status, x_forwarded_for) " .
             "VALUES ($1, $2, $3, $4, $5)"
     );
     pg_execute(
         $pgconn,
-        "INSERT",
+        $stname,
         array(
             $client_ip,
             "/sites/site.php?network={$network}&station={$station}",
@@ -45,7 +46,6 @@ if (
             $_SERVER["HTTP_X_FORWARDED_FOR"]
         )
     );
-    pg_close($pgconn);
 
     $newlat = floatval($_GET["lat"]);
     $newlon = floatval($_GET["lon"]);
@@ -89,7 +89,7 @@ $t->title = sprintf("Site Info: %s %s", $station, $metadata["name"]);
 $t->headextra = <<<EOM
 <link rel='stylesheet' href="/vendor/openlayers/{$OL}/ol.css" type='text/css'>
 EOM;
-$t->jsextra = <<<EOF
+$t->jsextra = <<<EOM
 <script>
 var CONFIG = {
     lat: {$lat},
@@ -99,7 +99,7 @@ var CONFIG = {
 <script src='/vendor/openlayers/{$OL}/ol.js'></script>
 <script type="text/javascript" src="/js/olselect-lonlat.js"></script>\
 <script src="site.js" type="text/javascript"></script>
-EOF;
+EOM;
 $t->sites_current = "base";
 
 
@@ -146,15 +146,16 @@ EOM;
 $threading = "";
 if ((strpos($network, "CLIMATE") > 0) && (substr($station, 2, 1) == "T")) {
     $pgconn = iemdb("mesosite");
+    $stname = uniqid("site");
     pg_prepare(
         $pgconn,
-        "SELECT",
+        $stname,
         "SELECT t.id, t.network, t.name, s.begin_date, s.end_date " .
             "from station_threading s " .
             "JOIN stations t on (s.source_iemid = t.iemid) WHERE s.iemid = $1 " .
             "ORDER by s.begin_date ASC"
     );
-    $result = pg_execute($pgconn, "SELECT", array($metadata["iemid"]));
+    $result = pg_execute($pgconn, $stname, array($metadata["iemid"]));
     if (pg_num_rows($result) > 0) {
         $threading = <<<EOM
 <h3>Station Threading:</h3>
@@ -179,7 +180,6 @@ EOM;
     if (pg_num_rows($result) > 0) {
         $threading .= "</tbody></table>";
     }
-    pg_close($pgconn);
 }
 
 function df($val){
@@ -201,7 +201,7 @@ if (! is_null($metadata["wigos"])){
         $metadata["wigos"]);
 }
 
-$t->content = <<<EOF
+$t->content = <<<EOM
 
 {$alertmsg}
 
@@ -256,5 +256,5 @@ $t->content = <<<EOF
 </div>
 </div>
 
-EOF;
+EOM;
 $t->render('sites.phtml');

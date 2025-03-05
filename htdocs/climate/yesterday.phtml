@@ -13,7 +13,7 @@ $u2 = sprintf(
     date("Y/m/d/", date("U") - 86400)
 );
 
-$t->content = <<<EOF
+$t->content = <<<EOM
 <h4>Temperature</h4>
 <ul>
 <li><a href="/data/coopHighLow.gif">High Temps</a>[COOP]</li>
@@ -39,5 +39,5 @@ $t->content = <<<EOF
 <li><a href="/agclimate/daily_pics/soil-hilo-out.png">Yesterday's 4-inch</a></li>
 <li><a href="/data/soilt_day1.png">County estimate 4-inch</a></li>
 </ul>
-EOF;
+EOM;
 $t->render('single.phtml');

@@ -17,16 +17,16 @@ $pgconn = iemdb("other");
 
 $sql = "SELECT * from flux_vars ORDER by details ASC";
 $rows = pg_exec($pgconn, $sql);
-for ($i = 0; $row = pg_fetch_array($rows); $i++) {
+for ($i = 0; $row = pg_fetch_assoc($rows); $i++) {
     $vars[$row["name"]] = array("units" => $row["units"], "details" => $row["details"]);
 }
 
 $stname = uniqid("select");
-$rs = pg_prepare($pgconn, $stname, "SELECT * from flux_data WHERE " .
+pg_prepare($pgconn, $stname, "SELECT * from flux_data WHERE " .
     "valid >= $1 and valid < ($1 + '1 day'::interval) " .
     "and $pvar IS NOT NULL ORDER by valid ASC");
 $stname2 = uniqid("metadata");
-$rs = pg_prepare($pgconn, $stname2, "SELECT * from flux_meta WHERE " .
+pg_prepare($pgconn, $stname2, "SELECT * from flux_meta WHERE " .
     "sts < $1 and ets > $1");
 
 $rs = pg_execute($pgconn, $stname, array(date('Y-m-d', $sts)));
@@ -46,7 +46,7 @@ $times = array(
     "NSTLNSPR" => array()
 );
 
-for ($i = 0; $row = pg_fetch_array($rs); $i++) {
+for ($i = 0; $row = pg_fetch_assoc($rs); $i++) {
     $ts = strtotime(substr($row["valid"], 0, 16));
     $stid = $row["station"];
     $val = floatval($row[$pvar]);
@@ -61,7 +61,7 @@ $labels = array(
     "NSTL10" => "NSTL10", "NSTL30FT" => "NSTL30FT", "NSTL110" => "NSTL110"
 );
 $rs = pg_execute($pgconn, $stname2, array(date('Y-m-d', $sts)));
-for ($i = 0; $row = pg_fetch_array($rs); $i++) {
+for ($i = 0; $row = pg_fetch_assoc($rs); $i++) {
     $st = $row["station"];
     $labels[$st] =  $row["surface"];
 }

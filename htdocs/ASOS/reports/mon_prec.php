@@ -20,8 +20,9 @@ $pgconn = iemdb("iem");
 $nt = new NetworkTable($network);
 $cities = $nt->table;
 
-
-$rs = pg_prepare($pgconn, "NSS", "SELECT 
+$stname = uniqid();
+pg_prepare($pgconn, $stname, <<<EOM
+SELECT 
  id,
  sum(pday) as precip,
  extract(month from day) as month
@@ -29,8 +30,10 @@ FROM summary_{$year} s JOIN stations t ON (t.iemid = s.iemid)
 WHERE
  network = $1
  and pday >= 0
-GROUP by id, month");
-$rs = pg_execute($pgconn, "NSS", array($network));
+GROUP by id, month
+EOM
+);
+$rs = pg_execute($pgconn, $stname, array($network));
 $data = array();
 for ($i = 0; $row = pg_fetch_assoc($rs); $i++) {
     if (!array_key_exists($row['id'], $data)) {

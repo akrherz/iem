@@ -3,34 +3,41 @@ define("IEM_APPID", 158);
 require_once "../../config/settings.inc.php";
 require_once "../../include/forms.php";
 require_once "../../include/myview.php";
-$t = new MyView();
-$t->title = "Freezing Dates";
-
 require_once "../../include/database.inc.php";
 require_once "../../include/network.php";
 require_once "../../include/mlib.php";
-$nt = new NetworkTable("IACLIMATE");
-$cities = $nt->table;
+require_once "../../include/imagemaps.php";
 
 $sortcol = isset($_GET["sortcol"]) ? xssafe($_GET["sortcol"]) : "station";
+$network = isset($_GET["network"]) ? xssafe($_GET["network"]) : "IACLIMATE";
 
-$connection = iemdb("coop");
+$t = new MyView();
+$t->title = "Freezing Dates";
 
+$nt = new NetworkTable($network);
+$cities = $nt->table;
+
+$nselect = selectNetworkType("CLIMATE", $network);
+
+$conn = iemdb("coop");
+
+$stname = uniqid();
 $query = "select station, valid, min_low, min_low_yr from climate
-     WHERE valid > '2000-08-01' and min_low <= 32
-     and station NOT IN ('IA4381', 'IA7842')
-     and substr(station,0,3) = 'IA' ORDER by valid";
-$rs = pg_exec($connection, $query);
+     WHERE valid > '2000-08-01' and min_low <= $2
+     and substr(station,0,3) = $1 ORDER by valid";
+pg_prepare($conn, $stname, $query);
+$rs = pg_execute($conn, $stname, array(substr($network, 0, 2), 32));
 
+ 
+$stname = uniqid();
 $query = "select station, valid, low from climate
-     WHERE valid > '2000-08-01' and low <= 40
-     and station NOT IN ('IA4381', 'IA7842')
-     and substr(station,0,3) = 'IA' ORDER by valid";
-$rs2 = pg_exec($connection, $query);
-
+     WHERE valid > '2000-08-01' and low <= $2
+     and substr(station,0,3) = $1 ORDER by valid";
+pg_prepare($conn, $stname, $query);
+$rs2 = pg_execute($conn, $stname, array(substr($network, 0, 2), 40));
 
 $data = array();
-for ($i = 0; $row = pg_fetch_array($rs); $i++) {
+for ($i = 0; $row = pg_fetch_assoc($rs); $i++) {
     $st = $row["station"];
     if (!isset($data[$st])) {
         $data[$st] = array(
@@ -49,7 +56,7 @@ for ($i = 0; $row = pg_fetch_array($rs); $i++) {
     }
 }
 
-for ($i = 0; $row = pg_fetch_array($rs2); $i++) {
+for ($i = 0; $row = pg_fetch_assoc($rs2); $i++) {
     $st = $row["station"];
     if (!isset($data[$st]["avelow40day"])) {
         if (intval($row["low"]) < 41) {
@@ -86,7 +93,7 @@ foreach ($finalA as $key => $value) {
 }
 
 
-$t->content = <<<EOF
+$t->content = <<<EOM
 <h3>Freezing Dates</h3>
 
 <p>Using the NWS COOP data archive, significant dates relating to fall are
@@ -99,8 +106,17 @@ temperature.  The "Average Lows" column shows when certain climatological
 thresholds are surpassed in the fall.
 </p>
 
+<form method="GET" action="freezing.php">
+  <div class="row">
+    <div class="col-md-4">
+      <strong>Select Network:</strong> {$nselect}
+      <input type="submit" value="Switch Network">
+    </div>
+  </div>
+</form>
+
 <table class="table table-condensed table-striped">
-<thead>
+<thead class="sticky">
   <tr>
     <th rowspan='3'><a href='freezing.php?sortcol=station'>COOP Site:</a></th>
     <th colspan='4'>Record Lows:</th>
@@ -123,5 +139,5 @@ thresholds are surpassed in the fall.
   {$table}
 </tbody>
 </table>
-EOF;
+EOM;
 $t->render('single.phtml');

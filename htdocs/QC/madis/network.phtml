@@ -9,9 +9,10 @@ require_once "../../../include/mlib.php";
 $t = new MyView();
 $t->title = "Quality Control, MADIS Raw QC";
 $dbconn = iemdb("iem");
-$rs = pg_prepare(
+$stname = uniqid();
+pg_prepare(
     $dbconn,
-    "SELECT",
+    $stname,
     "SELECT c.*, t.id as station, t.name, " .
         "c.valid at time zone 'UTC' as uv from current_qc c JOIN stations t on " .
         "(c.iemid = t.iemid) WHERE t.network = $1"
@@ -23,7 +24,7 @@ if ($network == "AWOS") {
 }
 $baa = "network.phtml?network={$network}";
 
-$rs = pg_execute($dbconn, "SELECT", array($network));
+$rs = pg_execute($dbconn, $stname, array($network));
 
 $data = array();
 for ($i = 0; $row = pg_fetch_assoc($rs); $i++) {

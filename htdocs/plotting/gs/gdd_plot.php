@@ -42,18 +42,18 @@ function calcGDD($high, $low)
     if ($high < 50) return 0.00;
     return (($high + $low) / 2.00) - 50.00;
 }
+$stname = uniqid("gdd");
 if (strrpos($network, "CLIMATE") > 0) {
-    $rs = pg_prepare($coopdb, "SELECT", "SELECT high as max_tmpf, low as min_tmpf, day from 
-    alldata_" . substr($climate_site, 0, 2) . "
-        WHERE station = $1 and day between $2 and $3 " .
+    pg_prepare($coopdb, $stname, "SELECT high as max_tmpf, low as min_tmpf, day from 
+    alldata WHERE station = $1 and day between $2 and $3 " .
         " ORDER by day ASC");
-    $rs = pg_execute($coopdb, "SELECT", array($station, $sdate, $edate));
+    $rs = pg_execute($coopdb, $stname, array($station, $sdate, $edate));
 } else {
-    $rs = pg_prepare($iem, "SELECT", "SELECT max_tmpf, min_tmpf, day from summary_$year s JOIN stations t
+    pg_prepare($iem, $stname, "SELECT max_tmpf, min_tmpf, day from summary_$year s JOIN stations t
     ON (t.iemid = s.iemid) 
         WHERE id = $1 and day between $2 and $3 " .
         "and network = $4 ORDER by day ASC");
-    $rs = pg_execute($iem, "SELECT", array($station, $sdate, $edate, $network));
+    $rs = pg_execute($iem, $stname, array($station, $sdate, $edate, $network));
 }
 
 $obs = array();
@@ -73,10 +73,11 @@ for ($i = 0; $row = pg_fetch_array($rs); $i++) {
 }
 
 /* Now we need the climate data */
-$rs = pg_prepare($coopdb, "CCSELECT", "SELECT gdd50, valid from climate
+$stname = uniqid("gdd");
+pg_prepare($coopdb, $stname, "SELECT gdd50, valid from climate
         WHERE station = $1 and valid between $2 and $3
         ORDER by valid ASC");
-$rs = pg_execute($coopdb, "CCSELECT", array($climate_site, $s2date, $e2date));
+$rs = pg_execute($coopdb, $stname, array($climate_site, $s2date, $e2date));
 
 $climate = array();
 $cdiff = array();
@@ -95,8 +96,6 @@ for ($i = 0; $row = pg_fetch_array($rs); $i++) {
 
     $times[$i] = strtotime($row["valid"]);
 }
-
-pg_close($coopdb);
 
 // Create the graph. These two calls are always required
 $graph = new Graph(640, 480, "example1");

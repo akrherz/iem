@@ -15,10 +15,6 @@ $subc = isset($_GET["subc"]) ? $_GET["subc"] : "";
 $dwpf = isset($_GET["dwpf"]) ? $_GET["dwpf"] : "";
 $tmpf = isset($_GET["tmpf"]) ? $_GET["tmpf"] : "";
 $pcpn = isset($_GET["pcpn"]) ? $_GET["pcpn"] : "";
-$s0 = isset($_GET["s0"]) ? $_GET["s0"] : "";
-$s1 = isset($_GET["s1"]) ? $_GET["s1"] : "";
-$s2 = isset($_GET["s2"]) ? $_GET["s2"] : "";
-$s3 = isset($_GET["s3"]) ? $_GET["s3"] : "";
 $syear = get_int404("syear", date("Y"));
 $smonth = get_int404("smonth", date("m"));
 $sday = get_int404("sday", date("d"));
@@ -34,17 +30,19 @@ $ets->modify("+$days days");
 if (isset($_GET["limit"])) $val = "between 25 and 35";
 
 $rwisdb = iemdb('rwis');
-$rs = pg_prepare($rwisdb, "OBS", "
+$stname = uniqid("rwis");
+pg_prepare($rwisdb, $stname, "
  SELECT * FROM alldata WHERE 
  station = $1 and valid >= $2 and valid < $3 
  ORDER by valid ASC");
 $minInterval = 20;
-$result = pg_execute($rwisdb, "OBS", array($station, $sts->format("Y-m-d H:i"), $ets->format("Y-m-d H:i")));
+$result = pg_execute($rwisdb, $stname, array($station, $sts->format("Y-m-d H:i"), $ets->format("Y-m-d H:i")));
 
 $minInterval = 20;
 
-$rs = pg_prepare($rwisdb, "META", "SELECT * from sensors WHERE station = $1");
-$r1 = pg_execute($rwisdb, "META", array($station));
+$stname = uniqid("rwis");
+pg_prepare($rwisdb, $stname, "SELECT * from sensors WHERE station = $1");
+$r1 = pg_execute($rwisdb, $stname, array($station));
 
 $ns0 = "Sensor 1";
 $ns1 = "Sensor 2";
@@ -109,7 +107,6 @@ for ($i = 0; $row = pg_fetch_array($result); $i++) {
     $lastp = $p;
     $freezing[] = 32;
 }
-pg_close($rwisdb);
 
 $nt = new NetworkTable($network);
 $cities = $nt->table;

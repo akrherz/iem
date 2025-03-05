@@ -44,6 +44,9 @@ $public_uri = str_replace(
     $uri
 );
 $data = file_get_contents($uri);
+if ($data === FALSE) {
+    die("Failed to fetch data from $uri");
+}
 $json = json_decode($data, $assoc = TRUE);
 $table = "";
 if (sizeof($json["events"]) == 0) {

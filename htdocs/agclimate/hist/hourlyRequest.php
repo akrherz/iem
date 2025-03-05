@@ -39,7 +39,7 @@ data from this network, see <a href="dailyRequest.php">this page</a>.
 <table width="100%">
 <tr><td valign="top">
 
-<p><b><h4 class="subtitle">Select station(s):</h4></b>
+<p><b><h4>Select station(s):</h4></b>
     <input type="checkbox" name="sts[]" value="A130209">Ames<BR>
     <input type="checkbox" name="sts[]" value="A131069">Calmar<BR>
     <input type="checkbox" name="sts[]" value="A131299">Castana<BR>
@@ -56,7 +56,7 @@ data from this network, see <a href="dailyRequest.php">this page</a>.
 
 </td><td valign="top">
 
-<p><b><h4 class="subtitle">Select data:</h4></b>
+<p><h4>Select data:</h4>
   <input type="checkbox" name="vars[]" value="c100">Air Temperature [F]<BR>
   <input type="checkbox" name="vars[]" value="c800">Solar Radiation Values [kilo calorie per meter squared per hour]<br />
   <input type="checkbox" name="vars[]" value="c900">Precipitation [inches]<BR>
@@ -69,7 +69,7 @@ data from this network, see <a href="dailyRequest.php">this page</a>.
     -->
 </td></tr></table>
 
-<p><b><h4 class="subtitle">Select the time interval:</h4></b>
+<p><b><h4>Select the time interval:</h4></b>
         <TABLE>
                 <TR><TH></TH><TH>Year:</TH><TH>Month:</TH><TH>Day:</TH></TR>
                 <TR><TH>Starting On:</TH>
@@ -84,7 +84,7 @@ data from this network, see <a href="dailyRequest.php">this page</a>.
                 </TR>
             </TABLE>
 
-<p><b><h4 class="subtitle">Options:</h4></b>
+<p><b><h4>Options:</h4></b>
 <input type="checkbox" name="qcflags" value="yes">Include QC Flags
 <table class="table table-striped">
 <thead><tr><th>Flag</th><th>Meaning</th></tr></thead>

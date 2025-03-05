@@ -25,6 +25,15 @@ PUNTING = [
 ]
 
 
+def get_urls():
+    """yield up things we can run."""
+    with open(f"{os.path.dirname(__file__)}/urls.txt") as fh:
+        for line in fh:
+            if line.startswith("#") or line.strip() == "":
+                continue
+            yield line.strip()
+
+
 def apps():
     """yield apps found in this repo."""
     for _rt, _dirs, files in os.walk("htdocs"):
@@ -40,6 +49,17 @@ def test_php(app):
     if app in PUNTING:
         pytest.skip("Punting")
     resp = httpx.get(f"http://iem.local{app}", timeout=30)
+    # 422 IncompleteWebRequest when there's missing CGI params
+    # 301 The app could be upset about being approached via http
+    # 302 redirect
+    # 503 Service Temporarily Unavailable
+    assert resp.status_code in [503, 422, 301, 302, 200]
+
+
+@pytest.mark.parametrize("url", get_urls())
+def test_php_urls(url):
+    """Test the app."""
+    resp = httpx.get(f"http://iem.local{url}", timeout=30)
     # 422 IncompleteWebRequest when there's missing CGI params
     # 301 The app could be upset about being approached via http
     # 302 redirect

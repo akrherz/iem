@@ -3,10 +3,11 @@ define("IEM_APPID", 32);
 
 require_once "../../../../config/settings.inc.php";
 require_once "../../../../include/database.inc.php";
-$coopdb = iemdb("coop");
 require_once "../../../../include/forms.php";
 require_once "../../../../include/network.php";
 require_once "../../../../include/myview.php";
+require_once "../../../../include/imagemaps.php";
+$coopdb = iemdb("coop");
 
 $t = new MyView();
 
@@ -54,7 +55,8 @@ $tr .= "# Download From: https://mesonet.agron.iastate.edu/GIS/apps/coop/gsplot.
 $state = substr($network, 0, 2);
 
 /* Query the obs */
-$rs = pg_prepare($coopdb, "SELECT", <<<EOM
+$stname = uniqid();
+pg_prepare($coopdb, $stname, <<<EOM
 WITH data as (
   SELECT station,
   sum(precip) as s_rainfall,
@@ -94,7 +96,7 @@ from data d JOIN climo c on (d.station = c.station)
 EOM
 );
 
-$rs = pg_execute($coopdb, "SELECT", array(
+$rs = pg_execute($coopdb, $stname, array(
     $sts->format("md"),
     $ets->format("md"),
     $year,
@@ -124,7 +126,7 @@ $tr .= sprintf(
     'CLIM_CDD65',
     'CLIM_HDD65'
 );
-for ($i = 0; $row = pg_fetch_array($rs); $i++) {
+for ($i = 0; $row = pg_fetch_assoc($rs); $i++) {
 
     $ukey = $row["station"];
     if (!isset($cities[$ukey])) continue;
@@ -152,21 +154,7 @@ for ($i = 0; $row = pg_fetch_array($rs); $i++) {
     );
 }
 
-$netselect = "<select name=\"network\">";
-$mesosite = iemdb("mesosite");
-$rs = pg_query(
-    $mesosite,
-    "SELECT id, name from networks where id ~* 'CLIMATE' ".
-    "ORDER by name ASC");
-for ($i = 0; $row = pg_fetch_assoc($rs); $i++) {
-    $netselect .= sprintf(
-        "<option value='%s' %s>%s</option>\n",
-        $row["id"],
-        ($row["id"] == $network) ? "selected='selected'" : "",
-        $row["name"]
-    );
-}
-$netselect .= "</select>";
+$netselect = selectNetworkType("CLIMATE", $network);
 
 $ar = array(
     "gdd32" => "Growing Degree Days (base=32)",
@@ -190,7 +178,7 @@ $d1select = daySelect2($sday, 'sday');
 $m2select = monthSelect2($emonth, 'emonth');
 $d2select = daySelect2($eday, 'eday');
 
-$t->content = <<<EOF
+$t->content = <<<EOM
 <ol class="breadcrumb">
  <li><a href="/COOP/">NWS Cooperative Network</a></li>
  <li class="active">Custom Date Duration Charts</li>
@@ -249,5 +237,5 @@ in the data listing below (without the 2 character state identifier included).
 text editor and save the data file on your machine.  Most GIS systems can 
 then import this dataset as a layer.  You may have to omit the commented lines
 (#) if your GIS has trouble importing the data.
-EOF;
+EOM;
 $t->render('full.phtml');

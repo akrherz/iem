@@ -17,27 +17,26 @@ $day = get_int404("day", date("d", time() - 3 * 86400));
 
 $date = "$year-$month-$day";
 
-$rs = pg_prepare($connection, "SELECT", "SELECT sknt, drct, 
+$stname = uniqid();
+pg_prepare($connection, $stname, "SELECT sknt, drct, 
         to_char(valid, 'mmdd/HH24') as tvalid 
         from alldata WHERE 
         station = $1 and date(valid) >= $2  
         ORDER by tvalid ASC LIMIT 96");
 
-$result = pg_execute($connection, "SELECT", Array($station, $date));
+$result = pg_execute($connection, $stname, Array($station, $date));
 
 $ydata1 = array();
 $ydata2 = array();
 
 $xlabel= array();
 
-for( $i=0; $row = pg_fetch_array($result); $i++) 
+for( $i=0; $row = pg_fetch_assoc($result); $i++) 
 { 
   $ydata1[$i]  = $row["drct"];
   $ydata2[$i]  = $row["sknt"];
   $xlabel[$i] = $row["tvalid"];
 }
-
-pg_close($connection);
 
 // Create the graph. These two calls are always required
 $graph = new Graph(660,450,"example1");

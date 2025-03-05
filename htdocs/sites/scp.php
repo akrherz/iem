@@ -140,7 +140,7 @@ $ys = yearSelect($startyear, date("Y", $date));
 $ms = monthSelect(date("m", $date));
 $ds = daySelect(date("d", $date));
 
-$t->content = <<<EOF
+$t->content = <<<EOM
 <style>
 .rl {
     border-right: 2px solid;
@@ -180,5 +180,5 @@ Time Order:{$sortform}
 
 {$table}
 
-EOF;
+EOM;
 $t->render('sites.phtml');

@@ -137,7 +137,7 @@ $sql = "SELECT station, " . $dbarray[$plot] . " as d
 
 $rs = pg_query($coopdb, $sql);
 if ($rs !== FALSE) {
-    for ($i = 0; $row = pg_fetch_array($rs); $i++) {
+    for ($i = 0; $row = pg_fetch_assoc($rs); $i++) {
         $station = $row["station"];
         if (!array_key_exists($station, $cities)) continue;
         $pt = new pointObj();

@@ -33,6 +33,9 @@ $layers = isset($_GET["layers"]) ? $_GET["layers"] : array(
     "cwas", "warnings",
     "uscounties", "nexrad", "watches"
 );
+if (!is_array($layers)) {
+    $layers = array($layers);
+}
 $cu = get_int404("cu", 0);
 $loop = get_int404("loop", 0);
 if ($loop == 2) $loop = 1;
@@ -538,7 +541,7 @@ $wA = array();
 $iA = array();
 $uA = array();
 $fA = array();
-for ($i = 0; $row = pg_fetch_array($result); $i++) {
+for ($i = 0; $row = pg_fetch_assoc($result); $i++) {
     /* Save the drama! */
     if ($filter && $row["wfo"] != $site) continue;
 
@@ -607,7 +610,7 @@ $content .= "<div style=\"clear: both;\">";
 if (!$isarchive) {
     $content .= "<img src=\"/images/gisready.png\">Download <a href=\"/data/gis/shape/unproj/us/current_ww.zip\">GIS shapefile of current warnings</a> and/or <a href=\"/data/gis/images/4326/USCOMP/n0r_0.gtif.Z\">GeoTiff of NEXRAD base reflectivity</a>.";
 }
-$content .= <<<EOF
+$content .= <<<EOM
 <p><b>Notes:</b>
 <ul>
  <li>This application is educational grade and should not be used operationally.</li>
@@ -620,7 +623,7 @@ $content .= <<<EOF
  <li>Archive of watches begins 1 Jan 1997.</li>
 </ul>
 </div>
-EOF;
+EOM;
 $t->jsextra = $jsextra;
 $t->content = $content;
 $t->render('single.phtml');

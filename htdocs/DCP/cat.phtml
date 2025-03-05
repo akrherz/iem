@@ -62,7 +62,7 @@ $rs = pg_execute($pgconn, $stname, array($dstr, $network));
 /* Load up the data into a big fat array */
 $data = array();
 $datakeys = array();
-for ($i = 0; $row = pg_fetch_array($rs); $i++) {
+for ($i = 0; $row = pg_fetch_assoc($rs); $i++) {
     $station = $row["station"];
     if (!array_key_exists($station, $cities)) {
         continue;

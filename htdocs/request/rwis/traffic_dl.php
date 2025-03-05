@@ -24,27 +24,24 @@ $minute1 = isset($_GET["minute1"]) ? $_GET["minute1"] : die("No minute1 specifie
 $minute2 = isset($_GET["minute2"]) ? $_GET["minute2"] : die("No minute2 specified");
 
 
-$station = $_GET["station"];
 $stations = $_GET["station"];
-$stationString = "(";
 $selectAll = false;
 foreach ($stations as $key => $value) {
     if ($value == "_ALL") {
         $selectAll = true;
+        continue;
     }
-    $stationString .= " '" . $value . "',";
+    if (!array_key_exists($value, $cities)) {
+        xssafe("<tag>");
+    }
 }
 
 
 if ($selectAll) {
-    $stationString = "(";
-    foreach ($Rcities as $key => $value) {
-        $stationString .= " '" . $key . "',";
-    }
+    $stations = array_keys($cities);
 }
 
-$stationString = substr($stationString, 0, -1);
-$stationString .= ")";
+$stationSQL = "{". implode(",", $stations) . "}";
 
 if (isset($_GET["day"]))
     die("Incorrect CGI param, use day1, day2");
@@ -80,7 +77,7 @@ $d = array("space" => " ", "comma" => ",", "tab" => "\t");
 
 $sqlStr .= "to_char(valid, 'YYYY-MM-DD HH24:MI') as dvalid from alldata_traffic";
 $sqlStr .= " WHERE valid >= '" . $sqlTS1 . "' and valid <= '" . $sqlTS2 . "' ";
-$sqlStr .= " and station IN " . $stationString . " ORDER by valid ASC";
+$sqlStr .= " and station = ANY($1) ORDER by valid ASC";
 
 /**
  * Must handle different ideas for what to do...
@@ -95,12 +92,13 @@ if ($what == "download") {
 
 $connection = iemdb("rwis");
 
-$query1 = "SET TIME ZONE 'GMT'";
+$query1 = "SET TIME ZONE 'UTC'";
 
 $result = pg_exec($connection, $query1);
-$rs =  pg_exec($connection, $sqlStr);
+$stname = uniqid("st");
+pg_prepare($connection, $stname, $sqlStr);
+$rs = pg_execute($connection, $stname, array($stationSQL));
 
-pg_close($connection);
 if ($gis == "yes") {
     echo "station,station_name,lat,lon,valid(GMT),";
 } else {

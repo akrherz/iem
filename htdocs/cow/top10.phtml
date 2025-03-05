@@ -43,11 +43,13 @@ if ($wfo == 'ALL') {
 }
 
 pg_query($postgis, "SET TIME ZONE 'UTC'");
-$rs = pg_prepare($postgis, "SELECTASC", "select round((ST_AREA(ST_Transform(geom,9311)) / 1000000.0)::numeric,2) as area, 
+$stname_asc = uniqid();
+pg_prepare($postgis, $stname_asc, "select round((ST_AREA(ST_Transform(geom,9311)) / 1000000.0)::numeric,2) as area, 
 eventid, date(issue), phenomena, significance, wfo from sbw
 WHERE status = 'NEW' and phenomena in ($lstring) $wlimit and 
 significance = 'W' and issue > '$tstring' and ST_Area(geom) > 0 ORDER by area ASC LIMIT 10");
-$rs = pg_prepare($postgis, "SELECTDESC", "select round((ST_AREA(ST_Transform(geom,9311)) / 1000000.0)::numeric,2) as area, 
+$stname_desc = uniqid();
+pg_prepare($postgis, $stname_desc, "select round((ST_AREA(ST_Transform(geom,9311)) / 1000000.0)::numeric,2) as area, 
 eventid, date(issue), phenomena, significance, wfo from sbw 
 WHERE status = 'NEW' and phenomena in ($lstring) $wlimit and 
 significance = 'W' and issue > '$tstring'  ORDER by area DESC LIMIT 10");
@@ -76,7 +78,7 @@ $ar = array(
 $tselect = make_select("tlimit", $tlimit, $ar);
 
 $ltable = "";
-$rs = pg_execute($postgis, "SELECTDESC", array(unrectify_wfo($wfo)));
+$rs = pg_execute($postgis, $stname_desc, array(unrectify_wfo($wfo)));
 for ($i = 0; $row = pg_fetch_array($rs); $i++) {
 
     $url = sprintf(
@@ -101,7 +103,7 @@ for ($i = 0; $row = pg_fetch_array($rs); $i++) {
 }
 
 $btable = "";
-$rs = pg_execute($postgis, "SELECTASC", array(unrectify_wfo($wfo)));
+$rs = pg_execute($postgis, $stname_asc, array(unrectify_wfo($wfo)));
 for ($i = 0; $row = pg_fetch_array($rs); $i++) {
 
     $url = sprintf(
