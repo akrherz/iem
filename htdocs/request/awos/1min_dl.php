@@ -3,7 +3,7 @@ require_once "../../../config/settings.inc.php";
 require_once "../../../include/database.inc.php";
 require_once "../../../include/network.php";
 require_once "../../../include/forms.php";
-$nt = new NetworkTable("AWOS");
+$nt = new NetworkTable("IA_ASOS");
 
 $skycover = array(
     0 => "NOREPORT",
@@ -38,34 +38,21 @@ $hour2 = isset($_GET["hour2"]) ? xssafe($_GET["hour2"]) : die("No hour2 specifie
 $minute1 = isset($_GET["minute1"]) ? xssafe($_GET["minute1"]) : die("No minute1 specified");
 $minute2 = isset($_GET["minute2"]) ? xssafe($_GET["minute2"]) : die("No minute2 specified");
 $vars = isset($_GET["vars"]) ? $_GET["vars"] : die("No vars specified");
-$station = $_GET["station"];
+
 $stations = $_GET["station"];
-$stationString = "(";
 $selectAll = false;
 foreach ($stations as $key => $value) {
-    if ($value == "_ALL") {
+    if ($value === "_ALL") {
         $selectAll = true;
         continue;
     }
     if (!array_key_exists($value, $nt->table)) {
         xssafe("<tag>");
     }
-    $stationString .= " '" . $value . "',";
 }
-
-
 if ($selectAll) {
-    $stationString = "(";
-    foreach ($nt->table as $key => $value) {
-        $stationString .= " '" . $key . "',";
-    }
+    $stations = array_keys($nt->table);
 }
-if ($stationString == "(") {
-    die("No station provided.");
-}
-
-$stationString = substr($stationString, 0, -1);
-$stationString .= ")";
 
 if (isset($_GET["day"]))
     die("Incorrect CGI param, use day1, day2");
@@ -83,7 +70,7 @@ if ($num_vars == 0)  die("You did not specify data");
 
 $sqlStr = "SELECT station, ";
 for ($i = 0; $i < $num_vars; $i++) {
-    $sqlStr .= xssafe($vars[$i]) . " as var" . $i . ", ";
+    $sqlStr .= xssafe($vars[$i]) . " as var{$i}, ";
 }
 
 $sqlTS1 = date("Y-m-d H:i", $ts1);
@@ -103,12 +90,7 @@ $d = array("space" => " ", "comma" => ",", "tab" => "\t");
 $sqlStr .= "to_char(valid, 'YYYY-MM-DD HH24:MI') as dvalid from alldata ";
 $sqlStr .= " WHERE valid >= '" . $sqlTS1 . "' and valid <= '" . $sqlTS2 . "' ";
 $sqlStr .= " and extract(minute from valid)::int % " . $sampleStr[$sample] . " = 0 ";
-$sqlStr .= " and station IN " . $stationString . " ORDER by valid ASC";
-
-
-/**
- * Must handle different ideas for what to do...
- **/
+$sqlStr .= " and station = ANY($1) ORDER by valid ASC";
 
 if ($what == "download") {
     header("Content-type: application/octet-stream");
@@ -117,16 +99,17 @@ if ($what == "download") {
     header("Content-type: text/plain");
 }
 
-$connection = iemdb("awos");
+$conn = iemdb("awos");
 
 $tzn = "local";
 if ($tz == "UTC") {
     $tzn = "UTC";
-    $query1 = "SET TIME ZONE 'GMT'";
-    $result = pg_exec($connection, $query1);
+    $result = pg_exec($conn, "SET TIME ZONE 'UTC'");
 }
 
-$rs =  pg_exec($connection, $sqlStr);
+$stname = uniqid();
+pg_prepare($conn, $stname, $sqlStr);
+$rs = pg_execute($conn, $stname, Array("{ " . implode(",", $stations) . " }"));
 
 if ($gis == "yes") {
     echo "station,station_name,lat,lon,valid($tzn),";

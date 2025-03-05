@@ -1,6 +1,5 @@
 <?php
 require_once "../../../config/settings.inc.php";
-// Does the work of processing the download request...
 require_once "../../../include/database.inc.php";
 require_once "../../../include/forms.php";
 
@@ -55,20 +54,17 @@ $d = array(
 );
 
 $stations = $_GET["station"];
-$stationString = "(";
-foreach ($stations as $key => $value) {
-    $stationString .= " '" . substr($value, 0, 5) . "',";
-}
-$stationString = substr($stationString, 0, -1);
-$stationString .= ")";
+$stationSQL = "{". implode(",", $stations) . "}";
 
 $sqlStr .= "to_char(valid, 'YYYY-MM-DD HH24:MI') as dvalid from alldata";
 $sqlStr .= " WHERE valid >= '" . $sqlTS1 . "' and valid <= '" . $sqlTS2 . "' ";
-$sqlStr .= " and station IN " . $stationString . " and ";
+$sqlStr .= " and station = ANY($1) and ";
 $sqlStr .= " extract(minute from valid)::int % " . $sampleStr[$sample] . " = 0 ";
 $sqlStr .= " ORDER by valid ASC";
 
-$rs =  pg_exec($connection, $sqlStr);
+$stname = uniqid();
+pg_prepare($connection, $stname, $sqlStr);
+$rs = pg_execute($connection, $stname, array($stationSQL));
 
 if (pg_num_rows($rs) == 0) {
     die("Did not find any data for this query!");
@@ -95,7 +91,7 @@ if ($dl_option == "download") {
     }
 } else {
 
-    for ($i = 0; $row = pg_fetch_array($rs); $i++) {
+    for ($i = 0; $row = pg_fetch_assoc($rs); $i++) {
         printf("%s%s%s", $row["station"], $d[$delim], $row["dvalid"]);
         for ($j = 0; $j < $num_vars; $j++) {
             printf("%s%6s", $d[$delim], $row["var" . $j]);

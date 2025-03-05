@@ -35,7 +35,7 @@ foreach ($nt->table as $sid => $meta){
     }
 }
 
-$sselect = make_select('station[]', "", $ar, '', '', TRUE, TRUE);
+$sselect = make_select('station', "", $ar, '', '', TRUE, TRUE);
 
 $t->content = <<<EOM
 <ol class="breadcrumb">
