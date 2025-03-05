@@ -24,7 +24,7 @@ if ($network == "AWOS") {
 }
 $baa = "network.phtml?network={$network}";
 
-pg_execute($dbconn, $stname, array($network));
+$rs = pg_execute($dbconn, $stname, array($network));
 
 $data = array();
 for ($i = 0; $row = pg_fetch_assoc($rs); $i++) {

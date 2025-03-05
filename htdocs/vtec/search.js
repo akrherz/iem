@@ -178,7 +178,7 @@ function updateTable3(){
     const params = {
         wfo: $("#wfo3").val(),
         state: stateSelect3.val(),
-        year: year,
+        year,
     };
     let href = `#list/${by}/${datum}/${year}`;
     if (single === "single"){
@@ -312,12 +312,12 @@ function buildUI(){
     });
     stateSelect3 = $("#state3").select2({
         placeholder: "Select a geography/state",
-        data: data
+        data
     });
     stateSelect3.val('').trigger("change");
     stateSelect = $("#state").select2({
         placeholder: "Select a geography/state",
-        data: data
+        data
     });
     stateSelect.val('').trigger("change");
     stateSelect.on("select2:select", (e) => {
@@ -334,7 +334,7 @@ function buildUI(){
                 ugcSelect.empty();
                 $.map(data2.ugcs, (obj) => {
                     const extra = (obj.ugc.substr(2, 1) === "Z") ? " (Zone)": "";
-                    ugcSelect.append(new Option("[" + obj.ugc + "] "+ obj.name + extra, obj.ugc, false, false));
+                    ugcSelect.append(new Option(`[${obj.ugc}] ${obj.name}${extra}`, obj.ugc, false, false));
                 });
                 ugcSelect.val('').trigger("change");
                 if (hashlinkUGC){
@@ -474,7 +474,7 @@ function process_hash(hash){
             const by = text(tokens2[1]);
             const datum = text(tokens2[2]);
             const year = text(tokens2[3]);
-            $("input[name='by3'][value='"+by+"']").prop("checked", true);
+            $(`input[name='by3'][value='${by}']`).prop("checked", true);
             $("input[name='single3'][value='all']").prop("checked", true);
             $("#year3").val(year);
             if (by === "state"){
@@ -494,7 +494,7 @@ function process_hash(hash){
         const year = text(tokens2[3]);
         const ph = text(tokens2[4]);
         const sig = text(tokens2[5]);
-        $("input[name='by3'][value='"+by+"']").prop("checked", true);
+        $(`input[name='by3'][value='${by}']`).prop("checked", true);
         $("#year3").val(year);
         $("#ph3").val(ph);
         $("#sig3").val(sig);
