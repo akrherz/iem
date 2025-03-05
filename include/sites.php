@@ -16,43 +16,6 @@ class SitesContext
     public ?string $network = null;
     public ?array $metadata = null;
 
-    public function neighbors()
-    {
-        $con = iemdb("mesosite");
-        $stname = uniqid("select");
-        pg_prepare($con, $stname, "SELECT *,
-         ST_distance(ST_transform(geom,3857), 
-                     ST_transform(ST_Point({$this->metadata['lon']}, {$this->metadata['lat']}, 4326), 3857)) /1000.0 as dist from stations 
-         WHERE ST_PointInsideCircle(geom, {$this->metadata['lon']}, {$this->metadata['lat']}, 0.25) 
-         and id != $1 ORDER by dist ASC");
-        $result = pg_execute($con, $stname, array($this->station));
-
-        $s = <<<EOM
-<table class="table table-striped">
-<thead class="sticky">
-<tr><th>Distance [km]</th><th>Network</th><th>Station Name</th>
-<th>Archive Start</th><th>Archive End</th></tr></thead>
-<tbody>
-EOM;
-        for ($i = 0; $row = pg_fetch_assoc($result); $i++) {
-            $s .= sprintf(
-                "<tr><td>%.3f</td><td><a href=\"locate.php?network=%s\">%s</a></td>" .
-                    "<td><a href=\"site.php?station=%s&network=%s\">%s</a></td>".
-                    "<td>%s</td><td>%s</td></tr>",
-                $row["dist"],
-                $row["network"],
-                $row["network"],
-                $row["id"],
-                $row["network"],
-                $row["name"],
-                $row["archive_begin"],
-                $row["archive_end"],
-            );
-        }
-        $s .= "</tbody></table>";
-        return $s;
-    }
-
     public function printtd($instr, $selected)
     {
         $s = "";
