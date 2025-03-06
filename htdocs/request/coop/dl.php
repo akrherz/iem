@@ -330,7 +330,7 @@ CTRL, 1981, 2, 3.1898, 1.59032, -6.83361, 1.38607, NaN, NaN, NaN, 3
     }
     echo "\r\n";
 
-    for ($i = 0; $row = pg_fetch_array($rs); $i++) {
+    for ($i = 0; $row = pg_fetch_assoc($rs); $i++) {
         $sid = $row["station"];
         echo $sid . $d[$delim] . $cities[$sid]["name"];
         if ($gis == "yes") {

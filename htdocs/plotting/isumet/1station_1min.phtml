@@ -17,7 +17,7 @@ $ys = yearSelect2(2003, $year, "year");
 $ms = monthSelect($month, "month");
 $ds = daySelect($day, "day");
 
-$t->content = <<<EOF
+$t->content = <<<EOM
 
 <a href="/other/">Other Networks</a> &nbsp;<b> > </b> &nbsp; ISU AMS Station
 
@@ -42,5 +42,5 @@ the archive <br> begins 15 Jan 2003.</p>
 <BR>
 <img src="1min_P.php?year={$year}&month={$month}&day={$day}" ALT="Time Series">
 </td></tr></table>
-EOF;
+EOM;
 $t->render('single.phtml');

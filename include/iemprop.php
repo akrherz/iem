@@ -16,7 +16,7 @@ $cached_get_iemprop = cacheable("iemprop", 120)(function($propname)
     if (pg_num_rows($rs) < 1) {
         return null;
     }
-    $row = pg_fetch_array($rs, 0);
+    $row = pg_fetch_assoc($rs, 0);
     return $row["propvalue"];
 });
 

@@ -28,11 +28,12 @@ $sql = "SELECT extract(EPOCH from valid) as epoch, $var as data,
   from current_log c, stations t WHERE t.id IN ($1,$2) and t.iemid = c.iemid 
   and valid < CURRENT_TIMESTAMP and $var > -99 ORDER by
   valid ASC";
-pg_prepare($pgconn, "SELECT22", $sql);
-$rs = pg_execute($pgconn, "SELECT22", Array($station1,$station2));
+$stname = uniqid();
+pg_prepare($pgconn, $stname, $sql);
+$rs = pg_execute($pgconn, $stname, Array($station1,$station2));
 
 // Assign into data arrays
-for ($i=0;  $row=pg_fetch_array($rs); $i++)
+for ($i=0;  $row=pg_fetch_assoc($rs); $i++)
 {
   $s = $row["station"];
   if ($var == "drct" && floatval($row["data"]) == 0) { continue; }

@@ -24,18 +24,19 @@ $wfo = substr(xssafe($wfo), 1, 3);
 $phenomena = substr(xssafe($phenomena), 0, 2);
 $significance = substr(xssafe($significance), 0, 1);
 
-$rs = pg_prepare(
+$stname = uniqid();
+pg_prepare(
     $postgis,
-    "SELECT",
+    $stname,
     "SELECT polygon_begin at time zone 'UTC' as utc_polygon_begin, ".
     "ST_xmax(geom), ST_ymax(geom),
         ST_xmin(geom), ST_ymin(geom), *,
         round((ST_area2d(ST_transform(geom,9311))/1000000)::numeric,0 ) as area
-        from sbw_$year WHERE phenomena = $1 and 
-        eventid = $2 and wfo = $3 and significance = $4
+        from sbw WHERE phenomena = $1 and 
+        eventid = $2 and wfo = $3 and significance = $4 and vtec_year = $5
         ORDER by polygon_begin ASC");
 
-$rs = pg_execute($postgis, "SELECT", array($phenomena, $eventid, $wfo, $significance));
+$rs = pg_execute($postgis, $stname, array($phenomena, $eventid, $wfo, $significance, $year));
 
 $rows = pg_num_rows($rs);
 
@@ -74,7 +75,7 @@ $ymax = 0;
 $xmin = 0;
 $xmax = 0;
 $gdimg_dest = null;
-for ($i = 0; $row = pg_fetch_array($rs); $i++) {
+for ($i = 0; $row = pg_fetch_assoc($rs); $i++) {
     if ($i > 8) {
         continue;
     }
@@ -169,10 +170,11 @@ for ($i = 0; $row = pg_fetch_array($rs); $i++) {
     $wc->__set("connection", get_dbconn_str("postgis"));
     $wc->__set("status", MS_ON);
     $sql = sprintf(
-        "geom from (select random() as oid, geom from sbw_$year " .
-            "WHERE phenomena = '%s' and wfo = '%s' and eventid = %s and " .
+        "geom from (select random() as oid, geom from sbw " .
+            "WHERE vtec_year = %s and phenomena = '%s' and wfo = '%s' and eventid = %s and " .
             "significance = '%s' and status = 'NEW') as foo using unique oid " .
             "using SRID=4326",
+        $year,
         $phenomena,
         $wfo,
         $eventid,
@@ -195,10 +197,11 @@ for ($i = 0; $row = pg_fetch_array($rs); $i++) {
     $wc->__set("connection", get_dbconn_str("postgis"));
     $wc->__set("status", MS_ON);
     $sql = sprintf(
-        "geom from (select random() as oid, geom from sbw_$year " .
-            "WHERE phenomena = '%s' and wfo = '%s' and eventid = %s and " .
+        "geom from (select random() as oid, geom from sbw " .
+            "WHERE vtec_year = %s and phenomena = '%s' and wfo = '%s' and eventid = %s and " .
             "significance = '%s' and polygon_begin = '%s') as foo " .
             "using unique oid using SRID=4326",
+        $year,
         $phenomena,
         $wfo,
         $eventid,

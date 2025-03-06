@@ -37,12 +37,11 @@ from zoneinfo import ZoneInfo
 
 import pandas as pd
 from matplotlib.patches import Rectangle
-from pyiem.database import get_sqlalchemy_conn
+from pyiem.database import get_sqlalchemy_conn, sql_helper
 from pyiem.exceptions import NoDataFound
 from pyiem.nws.vtec import NWS_COLORS, get_ps_string
 from pyiem.plot import figure
 from pyiem.util import utc
-from sqlalchemy import text
 
 PDICT = {
     "active": "Include WaWA that have been created or valid at the given time",
@@ -95,12 +94,12 @@ def plotter(ctx: dict):
     col = "final_pop" if ctx["which"] == "pop" else "final_area_sqkm"
     with get_sqlalchemy_conn("postgis") as conn:
         df = pd.read_sql(
-            text(
-                f"""
+            sql_helper(
+                """
             with sbwpop as (
                 select phenomena ||'.'|| significance as key,
                 sum(population) as pop
-                from sbw w, gpw{popyear} p
+                from sbw w, {table} p
                 WHERE ST_Contains(w.geom, p.geom) and
                 polygon_begin <= :valid and polygon_end >= :valid
                 GROUP by key ORDER by pop DESC
@@ -118,7 +117,7 @@ def plotter(ctx: dict):
                 select phenomena ||'.'|| significance as key,
                 array_agg(distinct substr(w.ugc, 1, 2)) as states,
                 sum(area2163) as area,
-                sum(gpw_population_{popyear}) as pop, count(*) as events
+                sum({popcol}) as pop, count(*) as events
                 from warnings w JOIN ugcs u on (w.gid = u.gid)
                 WHERE {isscol} <= :valid and expire >= :valid
                 GROUP by key ORDER by pop DESC
@@ -132,7 +131,11 @@ def plotter(ctx: dict):
                 as final_area_sqkm
             from cbwpop c LEFT JOIN sbwagg s
             on (c.key = s.key) ORDER by {col} DESC
-                """
+                """,
+                table=f"gpw{popyear}",
+                popcol=f"gpw_population_{popyear}",
+                isscol=isscol,
+                col=col,
             ),
             conn,
             params={"valid": valid},

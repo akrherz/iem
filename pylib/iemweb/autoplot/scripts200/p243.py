@@ -14,10 +14,9 @@ produces monthly heatmaps.
 import pandas as pd
 import pyiem.nws.vtec as vtec
 from pyiem import reference
-from pyiem.database import get_sqlalchemy_conn
+from pyiem.database import get_sqlalchemy_conn, sql_helper
 from pyiem.exceptions import NoDataFound
 from pyiem.plot import figure
-from sqlalchemy import text
 
 from iemweb.autoplot import ARG_FEMA, FEMA_REGIONS, fema_region2states
 from iemweb.util import month2months
@@ -203,7 +202,7 @@ def plotter(ctx: dict):
         # NB quasi hack here as we have some redundant ETNs for a given year
         # so the groupby helps some.
         daily = pd.read_sql(
-            text(sql),
+            sql_helper(sql),
             conn,
             params=params,
             index_col=None,

@@ -64,15 +64,10 @@ foreach($new_contents as $line_num => $line){
 // Create the graph. These two calls are always required
 $graph = new Graph(600,300);
 $graph->SetScale("datlin");
-//$graph->xaxis->scale->SetDateFormat("h A");
 $graph->xaxis->SetLabelFormatString("h A", true);
 $graph->img->SetMargin(65,40,45,60);
-//$graph->xaxis->SetFont(FONT1,FS_BOLD);
-//$graph->xaxis->SetTickLabels($xlabel);
-//$graph->xaxis->SetTextLabelInterval(60);
 $graph->xaxis->SetTextTickInterval(6);
 $graph->xaxis->SetLabelAngle(90);
-//$graph->yaxis->scale->ticks->SetPrecision(2);
 $graph->yaxis->scale->ticks->Set(0.01,0.005);
 $graph->yscale->SetGrace(20);
 $graph->title->Set("Logger Battery Voltage");
@@ -87,7 +82,6 @@ $graph->yaxis->SetTitle("Voltage [Volts]");
 $graph->yaxis->title->SetFont(FF_FONT1,FS_BOLD,12);
 $graph->xaxis->SetTitle("Valid Local Time");
 $graph->xaxis->SetTitleMargin(30);
-//$graph->yaxis->SetTitleMargin(48);
 $graph->yaxis->SetTitleMargin(40);
 $graph->xaxis->title->SetFont(FF_FONT1,FS_BOLD,12);
 $graph->xaxis->SetPos("min");

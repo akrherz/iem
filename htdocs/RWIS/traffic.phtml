@@ -9,7 +9,8 @@ $dbconn = iemdb("iem");
 $sortcol = isset($_GET['sortcol']) ? xssafe($_GET['sortcol']): 'valid';
 
 /* Query out the data */
-$rs = pg_prepare($dbconn, "SELECT", <<<EOM
+$stname = uniqid();
+pg_prepare($dbconn, $stname, <<<EOM
     WITH data as (
         SELECT t.location_id, avg_speed, normal_vol, long_vol, occupancy,
         valid, s.name from
@@ -19,7 +20,7 @@ $rs = pg_prepare($dbconn, "SELECT", <<<EOM
     (d.location_id = t.remote_id) WHERE t.network = 'IA_RWIS'
 EOM
 );
-$rs = pg_execute($dbconn, "SELECT", Array() );
+$rs = pg_execute($dbconn, $stname, Array() );
 
  $t->title = "RWIS Current Traffic Data";
  $t->refresh = 600;
@@ -41,14 +42,14 @@ $rs = pg_execute($dbconn, "SELECT", Array() );
  );
 
  $table = "";
- for($i=0;$row=pg_fetch_array($rs);$i++){
+ for($i=0;$row=pg_fetch_assoc($rs);$i++){
      $table .= sprintf("<tr><th>%s</th><th>%s</th><td>%s</td><td>%.1f</td><td>%s</td><td>%s</td><td>%s</td></tr>\n",
              $row["station_name"], $row["name"], fancytime($row["valid"]), $row["avg_speed"],
              $row["normal_vol"], $row["long_vol"], $row["occupancy"]);
  }
 
-$t->content = <<<EOF
-<h3 class="subtitle">Iowa RWIS Traffic Data</h3>
+$t->content = <<<EOM
+<h3>Iowa RWIS Traffic Data</h3>
 
 <p>** This page will automatically refresh every 10 minutes.
 <br>Click on a column to sort it.</p>
@@ -74,5 +75,5 @@ $t->content = <<<EOF
 </form>
 
 <br><br>
-EOF;
+EOM;
 $t->render("sortables.phtml");

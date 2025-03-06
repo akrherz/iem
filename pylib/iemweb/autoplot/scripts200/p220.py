@@ -16,16 +16,14 @@ option exists for downloading these outlooks in-bulk.</p>
 from datetime import timedelta, timezone
 from zoneinfo import ZoneInfo
 
-# third party
+import geopandas as gpd
 import pandas as pd
-from geopandas import read_postgis
 from matplotlib.patches import Rectangle
-from pyiem.database import get_sqlalchemy_conn
+from pyiem.database import get_sqlalchemy_conn, sql_helper
 from pyiem.exceptions import NoDataFound
 from pyiem.plot import MapPlot
 from pyiem.reference import LATLON, Z_OVERLAY2_LABEL, Z_POLITICAL
 from pyiem.util import utc
-from sqlalchemy import text
 
 from iemweb.autoplot import ARG_FEMA
 
@@ -182,7 +180,7 @@ def outlook_search(valid, days, outlook_type):
     """Find nearest outlook."""
     with get_sqlalchemy_conn("postgis") as conn:
         res = conn.execute(
-            text("""
+            sql_helper("""
                  SELECT product_issue at time zone 'UTC' from spc_outlook
             WHERE day = ANY(:days) and outlook_type = :ot
             and product_issue > :sts and
@@ -258,8 +256,8 @@ def plotter(ctx: dict):
         """Getme data."""
         # NB careful here with the joins and not to use the view!
         with get_sqlalchemy_conn("postgis") as conn:
-            df = read_postgis(
-                text(SQL),
+            df = gpd.read_postgis(
+                sql_helper(SQL),
                 conn,
                 params={
                     "c": category,
@@ -269,7 +267,7 @@ def plotter(ctx: dict):
                 },
                 index_col=None,
                 geom_col="geom",
-            )
+            )  # type: ignore
         return df
 
     df = fetch(valid)

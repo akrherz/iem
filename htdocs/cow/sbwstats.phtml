@@ -1,13 +1,14 @@
 <?php
 require_once "../../config/settings.inc.php";
 define("IEM_APPID", 149);
-require_once "../../include/myview.php";
-$t = new MyView();
-$t->title = "Storm Based Warning Stats";
-
 require_once "../../include/forms.php";
 require_once "../../include/database.inc.php";
 require_once "../../include/network.php";
+require_once "../../include/myview.php";
+
+$t = new MyView();
+$t->title = "Storm Based Warning Stats";
+
 $nt = new NetworkTable("WFO", TRUE);
 $postgis = iemdb("postgis");
 
@@ -37,7 +38,8 @@ $gis_url = sprintf(
     date("H", $ets)
 );
 
-$rs = pg_prepare($postgis, "SELECT", "SELECT wfo, phenomena, count(*) as cnt,
+$stname = uniqid();
+pg_prepare($postgis, $stname, "SELECT wfo, phenomena, count(*) as cnt,
   sum( st_area2d( ST_transform(geom,9311) ) ) as sum_polysize,
   avg( st_area2d( ST_transform(geom,9311) ) ) as avg_polysize,
   sum( st_perimeter( ST_transform(geom,9311) ) ) as sum_perimsize,
@@ -49,7 +51,7 @@ $rs = pg_prepare($postgis, "SELECT", "SELECT wfo, phenomena, count(*) as cnt,
 pg_query($postgis, "SET TIME ZONE 'UTC'");
 $rs = pg_execute(
     $postgis,
-    "SELECT",
+    $stname,
     array(date('Y-m-d H:i', $sts), date('Y-m-d H:i', $ets))
 );
 
@@ -57,7 +59,7 @@ $data = array();
 $sorted = array();
 $suffixes = array("cnt", "sum_polysize", "sum_perimsize", "avg_polysize", "avg_perimsize");
 $phenoms = array("SV", "TO", "MA", "FF", "FA", "DS", "SQ");
-while ($row = pg_fetch_array($rs)) {
+while ($row = pg_fetch_assoc($rs)) {
     $wfo = $row["wfo"];
     if (!array_key_exists($wfo, $data)) {
         $sorted[] = $wfo;
@@ -263,7 +265,7 @@ $d2select = daySelect2($eday, "eday");
 $h2select = hour24Select($ehour, "ehour");
 
 /* BEGIN OUTPUT! */
-$t->content = <<<EOF
+$t->content = <<<EOM
 <h3>Storm Based Warning Geometry Statistics</h3>
 
 <p>Pick a time period of your choice and get back a summary table of
@@ -302,5 +304,5 @@ since summer of 2007.
 
 
 {$table}
-EOF;
+EOM;
 $t->render('full.phtml');

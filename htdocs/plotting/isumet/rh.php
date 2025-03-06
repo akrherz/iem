@@ -1,6 +1,6 @@
 <?php
-include("../../../config/settings.inc.php");
-include("../../../include/mlib.php");
+require_once "../../../config/settings.inc.php";
+require_once "../../../include/mlib.php";
 require_once "../../../include/jpgraph/jpgraph.php";
 require_once "../../../include/jpgraph/jpgraph_line.php";
 require_once "../../../include/jpgraph/jpgraph_scatter.php";
@@ -82,18 +82,11 @@ if ($station == null){
 $graph = new Graph(600, 400,"example1");
 $graph->SetScale("datelin",0,100);
 $graph->img->SetMargin(65,40,55,80);
-
-//$graph->yaxis->scale->ticks->SetPrecision(1);
 $graph->title->Set("$titleDate Relative Humidity");
 
 $graph->legend->SetLayout(LEGEND_HOR);
 $graph->legend->Pos(0.01,0.08);
 $graph->xaxis->SetLabelAngle(90);
-//$graph->yaxis->scale->ticks->Set(90,15);
-//$graph->yaxis->scale->ticks->SetPrecision(0);
-//$graph->yaxis->scale->ticks->SetPrecision(0);
-
-//$graph->yaxis->SetColor("blue");
 
 $graph->title->SetFont(FF_FONT1,FS_BOLD,14);
 
@@ -103,7 +96,6 @@ $graph->yaxis->title->SetFont(FF_FONT1,FS_BOLD,12);
 $graph->xaxis->SetTitle("Valid Local Time");
 $graph->xaxis->SetTitleMargin(50);
 $graph->yaxis->SetTitleMargin(30);
-//$graph->y2axis->SetTitleMargin(28);
 $graph->xaxis->title->SetFont(FF_FONT1,FS_BOLD,12);
 $graph->xaxis->SetPos("min");
 
@@ -120,6 +112,4 @@ $lineplot2->SetLegend("Inside");
 $lineplot2->SetWeight(3.0);
 $graph->Add($lineplot2);
 
-
 $graph->Stroke();
-?>

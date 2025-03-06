@@ -35,13 +35,12 @@ import geopandas as gpd
 import httpx
 import pandas as pd
 from matplotlib.patches import Rectangle
-from pyiem.database import get_sqlalchemy_conn
+from pyiem.database import get_sqlalchemy_conn, sql_helper
 from pyiem.exceptions import NoDataFound
 from pyiem.nws.vtec import NWS_COLORS, get_ps_string
 from pyiem.plot import MapPlot
 from pyiem.reference import SECTORS_NAME, Z_OVERLAY2, state_names
 from pyiem.util import utc
-from sqlalchemy import text
 
 # shared with 224
 PDICT = {
@@ -140,7 +139,7 @@ def make_legend(mp, df, statdf, year):
         # Build out an estimate of all combos
         with get_sqlalchemy_conn("postgis") as conn:
             domain = pd.read_sql(
-                text(
+                sql_helper(
                     """
                 select distinct phenomena || '.' || significance as key from
                 warnings WHERE vtec_year = :year
@@ -239,8 +238,8 @@ def plotter(ctx: dict):
     isscol = "issue" if ctx["opt"] == "within" else "product_issue"
     with get_sqlalchemy_conn("postgis") as conn:
         ugcdf = gpd.read_postgis(
-            text(
-                f"""
+            sql_helper(
+                """
             select w.ugc, simple_geom, phenomena, significance,
             phenomena || '.' || significance as ps,
             w.wfo || eventid || phenomena || significance as key
@@ -248,14 +247,15 @@ def plotter(ctx: dict):
             JOIN ugcs u on (w.gid = u.gid)
             WHERE {isscol} <= :valid and expire >= :valid
             ORDER by phenomena asc
-            """
+            """,
+                isscol=isscol,
             ),
             conn,
             params={"valid": valid},
             geom_col="simple_geom",
-        )
+        )  # type: ignore
         sbwdf = gpd.read_postgis(
-            text(
+            sql_helper(
                 """
             select geom, phenomena, significance,
             phenomena || '.' || significance as ps,
@@ -268,7 +268,7 @@ def plotter(ctx: dict):
             conn,
             params={"valid": valid},
             geom_col="geom",
-        )
+        )  # type: ignore
     mp = MapPlot(
         apctx=ctx,
         nocaption=True,

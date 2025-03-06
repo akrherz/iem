@@ -25,15 +25,15 @@ $dbconn = iemdb("mesosite");
 $stname1 = uniqid("yesterday");
 $stname2 = uniqid("today");
 $stname3 = uniqid("tomorrow");
-$rs = pg_prepare($dbconn, $stname1, "SELECT *, date(valid) as d,
+pg_prepare($dbconn, $stname1, "SELECT *, date(valid) as d,
               to_char(valid, 'YYYY/MM/YYMMDD') as imageref, 
               to_char(valid, 'DD Mon YYYY HH:MI AM') as webdate from feature
               WHERE valid < $1 ORDER by valid DESC limit 1");
-$rs = pg_prepare($dbconn, $stname2, "SELECT *, date(valid) as d,
+pg_prepare($dbconn, $stname2, "SELECT *, date(valid) as d,
               to_char(valid, 'YYYY/MM/YYMMDD') as imageref, 
               to_char(valid, 'DD Mon YYYY HH:MI AM') as webdate from feature
               WHERE date(valid) = $1");
-$rs = pg_prepare($dbconn, $stname3, "SELECT *, date(valid) as d,
+pg_prepare($dbconn, $stname3, "SELECT *, date(valid) as d,
               to_char(valid, 'YYYY/MM/YYMMDD') as imageref, 
               to_char(valid, 'DD Mon YYYY HH:MI AM') as webdate from feature
               WHERE valid > ($1::date + '1 day'::interval) 
@@ -51,7 +51,7 @@ if (pg_num_rows($result) == 0) {
     die("Feature Not Found");
 }
 
-$row = pg_fetch_array($result, 0);
+$row = pg_fetch_assoc($result, 0);
 $valid = strtotime($row["valid"]);
 
 if (is_null($row["fbid"])) {

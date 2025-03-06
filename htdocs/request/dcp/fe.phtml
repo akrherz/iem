@@ -41,7 +41,7 @@ $ms2 = monthSelect(date("m"), "month2");
 $ds2 = daySelect2(date("d"), "day2");
 $hs2 = gmtHourSelect("0", "hour2");
 
-$t->content = <<<EOF
+$t->content = <<<EOM
 <ol class="breadcrumb">
  <li><a href="/DCP/">DCP/HADS Mainpage</a></li>
  <li class="active">Data Download</li>
@@ -156,12 +156,12 @@ separated in the downloaded file?</p>
 </select>
 
 </div>
-  
+
 <h3>6. Submit Form:</h3>
 
 <input type="submit" value="Process Data Request">
 <input type="reset">
-            
+
 </div>
 </div>
 
@@ -195,5 +195,5 @@ feel free to contact us with questions. In general, the first three characters a
 most important, which are the variable type and duration of observation.</p>
 
 </form>
-EOF;
+EOM;
 $t->render('single.phtml');

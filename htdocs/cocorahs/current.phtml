@@ -42,10 +42,11 @@ ORDER by t.id asc
 EOM;
 $day1 = new DateTime();
 $days_this_month = intval($day1->format("d"));
-$rs = pg_prepare($dbconn, "CS", $sql);
-$rs = pg_execute($dbconn, "CS", array($network, $day1->format("Y-m") . '-01'));
+$stname = uniqid();
+pg_prepare($dbconn, $stname, $sql);
+$rs = pg_execute($dbconn, $stname, array($network, $day1->format("Y-m") . '-01'));
 $db = array();
-for ($i = 0; $row = pg_fetch_array($rs); $i++) {
+for ($i = 0; $row = pg_fetch_assoc($rs); $i++) {
     $site = $row["id"];
     $db[$site] = array(
         'sid' => $site,

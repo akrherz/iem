@@ -75,8 +75,6 @@ $graph->subtitle->Set($titleDate);
 $graph->legend->SetLayout(LEGEND_HOR);
 $graph->legend->Pos(0.01, 0.08);
 
-//$graph->yaxis->scale->ticks->SetPrecision(2);
-
 $graph->yscale->SetGrace(10);
 $graph->yaxis->SetColor("blue");
 $graph->xaxis->SetLabelAngle(90);
@@ -86,7 +84,6 @@ $graph->xaxis->SetTitle("Valid Local Time");
 $graph->xaxis->SetTitleMargin(30);
 $graph->yaxis->SetTitleMargin(43);
 $graph->xaxis->title->SetFont(FF_FONT1, FS_BOLD, 12);
-//$graph->SetAxisStyle(AXSTYLE_YBOXIN);
 $graph->xaxis->SetPos("min");
 
 // Create the linear plot

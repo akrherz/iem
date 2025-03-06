@@ -4,7 +4,7 @@ require_once "../../../include/myview.php";
 $t = new MyView();
 
 $t->title = "Monthly Temperature Spreads";
-$t->content = <<<EOF
+$t->content = <<<EOM
 
 <p><h3>Monthly Temperature Spreads</h3><p>
 
@@ -23,5 +23,5 @@ $t->content = <<<EOF
 <p><img src="images/spread_oct.png">
 <p><img src="images/spread_nov.png">
 <p><img src="images/spread_dec.png">
-EOF;
+EOM;
 $t->render('single.phtml');

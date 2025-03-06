@@ -56,7 +56,7 @@ EOM;
         } else {
             $rs = pg_execute($dbconn, $this->stname2, array($id));
         }
-        for ($i = 0; $row = pg_fetch_array($rs); $i++) {
+        for ($i = 0; $row = pg_fetch_assoc($rs); $i++) {
             $this->table[$row["id"]] = $row;
             $this->doConversions($row["id"]);
         }

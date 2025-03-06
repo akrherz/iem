@@ -35,7 +35,7 @@ $rs = pg_exec($c, $sql);
 
 $num = pg_num_rows($rs);
 
-$linkbar = <<<EOF
+$linkbar = <<<EOM
 <div class="row well">
     <div class="col-md-4 col-sm-4">
 <a href="{$plink}" class="btn btn-default btn-lg"><i class="fa fa-arrow-left"></i> Previous Month</a> 
@@ -45,7 +45,7 @@ $linkbar = <<<EOF
   <a href="{$nlink}" class="btn btn-default btn-lg">Next Month  <i class="fa fa-arrow-right"></i></a> 
     </div>
 </div>
-EOF;
+EOM;
 
 for ($i = 0; $i < $num; $i++) {
     $row = pg_fetch_assoc($rs);
@@ -70,7 +70,7 @@ EOM;
       <br /><a href="{$big}">View larger image</a>
 EOM;
     }
-    $table .= <<<EOF
+    $table .= <<<EOM
 <div class="row">
   <div class="col-md-12 well well-sm">{$row["calhead"]}</large></div>
 </div>
@@ -91,16 +91,14 @@ EOM;
     </div>
 </div>
 
-EOF;
+EOM;
 }
 
 if ($num == 0) {
     $table .= "<p>No entries found for this month\n";
 }
 
-
-
-$t->content = <<<EOF
+$t->content = <<<EOM
 <h3>Past Features</h3>
 
 <p>This page lists out the IEM Daily Features for a month at a time. Features
@@ -110,5 +108,5 @@ have been posted on most days since February 2002. List all
 {$linkbar}
 {$table}
 {$linkbar}
-EOF;
+EOM;
 $t->render('single.phtml');

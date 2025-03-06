@@ -8,10 +8,9 @@ but as yearly and monthly totals.
 from datetime import date, timedelta
 
 import pandas as pd
-from pyiem.database import get_sqlalchemy_conn
+from pyiem.database import get_sqlalchemy_conn, sql_helper
 from pyiem.exceptions import NoDataFound
 from pyiem.plot import calendar_plot
-from sqlalchemy import text
 
 PDICT = {"yes": "Colorize Cells in Chart", "no": "Just plot values please"}
 
@@ -86,13 +85,14 @@ def plotter(ctx: dict):
         title2 = "All NWS Offices"
     with get_sqlalchemy_conn("postgis") as conn:
         df = pd.read_sql(
-            text(
-                f"""
+            sql_helper(
+                """
     select date(issue at time zone :tzname), count(*)
     from sps
     where not ST_IsEmpty(geom) {wfo_limiter} and
     issue >= :sts and issue < :ets GROUP by date
-        """
+        """,
+                wfo_limiter=wfo_limiter,
             ),
             conn,
             params=params,

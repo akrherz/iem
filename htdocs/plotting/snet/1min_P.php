@@ -21,21 +21,14 @@ $day = get_int404("day", date("d"));
 $myTime = mktime(0, 0, 0, $month, $day, $year);
 $yesterday = mktime(0, 0, 0, date("m"), date("d"), date("Y")) - 96400;
 
-if ($myTime >= $yesterday) {
-    /* Look in IEM Access! */
-    $dbconn = iemdb("iem");
-    $tbl = "current_log";
-    $pcol = ", pres as alti";
-    $rs = pg_prepare($dbconn, "SELECT", "SELECT * $pcol from $tbl c JOIN stations s ON (c.iemid = s.iemid)
-                 WHERE id = $1 and date(valid) = $2 ORDER by valid ASC");
-} else {
-    /* Dig in the archive for our data! */
-    $dbconn = iemdb("snet");
-    $tbl = sprintf("t%s", date("Y_m", $myTime));
-    $pcol = "";
-    $rs = pg_prepare($dbconn, "SELECT", "SELECT * $pcol from $tbl 
+
+/* Dig in the archive for our data! */
+$dbconn = iemdb("snet");
+$tbl = sprintf("t%s", date("Y_m", $myTime));
+$pcol = "";
+pg_prepare($dbconn, "SELECT", "SELECT * $pcol from $tbl 
                  WHERE station = $1 and date(valid) = $2 ORDER by valid ASC");
-}
+
 
 $rs = pg_execute($dbconn, "SELECT", array($station, date("Y-m-d", $myTime)));
 if (pg_num_rows($rs) == 0) {
@@ -52,7 +45,7 @@ $times = array();
 $pcpn = array();
 $pres = array();
 
-for ($i = 0; $row = pg_fetch_array($rs); $i++) {
+for ($i = 0; $row = pg_fetch_assoc($rs); $i++) {
     $ts = strtotime(substr($row["valid"], 0, 16));
     $times[] = $ts;
     $pcpn[] = ($row["pday"] >= 0) ? $row["pday"] : "";

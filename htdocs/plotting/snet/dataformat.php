@@ -3,7 +3,7 @@ require_once "../../../config/settings.inc.php";
 require_once "../../../include/myview.php";
 $t = new MyView();
 $t->title = "School Net Data Format";
-$t->content = <<<EOF
+$t->content = <<<EOM
 
 <h3 class="heading">Data Format</h3><br /><br />
 <div class="text">
@@ -94,5 +94,5 @@ the end represents the change in pressure. 'S' == Steady.  'R' == Raising.
   <td>Calculated current hourly precipitation rate.</td>
 </tr>
 </table></div>
-EOF;
+EOM;
 $t->render('single.phtml');

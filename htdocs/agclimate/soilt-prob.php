@@ -14,10 +14,10 @@ $tstr = isset($_GET["tstr"]) ? xssafe($_GET['tstr']) : "50,45,40,35,32,28,23";
 $conn = iemdb("isuag");
 $stname1 = uniqid("spring");
 $stname2 = uniqid("fall");
-$rs = pg_prepare($conn, $stname1, "SELECT extract(year from valid) as yr,
+pg_prepare($conn, $stname1, "SELECT extract(year from valid) as yr,
       max(extract(doy from valid)) as v from daily WHERE station = $1 and c30 < $2 and 
       extract(month from valid) < 7 and c30_f != 'e' GROUP by yr");
-$rs = pg_prepare($conn, $stname2, "SELECT extract(year from valid) as yr,
+pg_prepare($conn, $stname2, "SELECT extract(year from valid) as yr,
       min(extract(doy from valid)) as v from daily WHERE station = $1 and c30 < $2 and
       extract(month from valid) > 6 and c30_f != 'e' GROUP by yr");
 
@@ -33,7 +33,7 @@ foreach ($thresholds as $k => $thres) {
     $rs = pg_execute($conn, $stname1, array($station, $thres));
     $cnts = array();
     $yrs = pg_num_rows($rs);
-    for ($i = 0; $row = pg_fetch_array($rs); $i++) {
+    for ($i = 0; $row = pg_fetch_assoc($rs); $i++) {
         if (!array_key_exists($row["v"], $cnts)) {
             $cnts[$row["v"]] = 0;
         }
@@ -75,7 +75,7 @@ foreach ($thresholds as $k => $thres) {
     $rs = pg_execute($conn, $stname2, array($station, $thres));
     $cnts = array();
     $yrs = pg_num_rows($rs);
-    for ($i = 0; $row = pg_fetch_array($rs); $i++) {
+    for ($i = 0; $row = pg_fetch_assoc($rs); $i++) {
         if (!array_key_exists($row["v"], $cnts)) {
             $cnts[$row["v"]] = 0;
         }

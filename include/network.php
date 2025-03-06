@@ -40,12 +40,12 @@ EOM;
         $this->dbconn = iemdb("mesosite");
         $this->stname1 = uniqid("SELECT");
         $this->stname2 = uniqid("SELECTST");
-        $rs = pg_prepare(
+        pg_prepare(
             $this->dbconn,
             $this->stname1,
             sprintf($sql_template, "network = $1")
         );
-        $rs = pg_prepare(
+        pg_prepare(
             $this->dbconn,
             $this->stname2,
             sprintf($sql_template, "id = $1")
@@ -63,7 +63,7 @@ EOM;
     public function loadNetwork($network, $force3char = FALSE)
     {
         $rs = pg_execute($this->dbconn, $this->stname1, array($network));
-        for ($i = 0; $row = pg_fetch_array($rs); $i++) {
+        for ($i = 0; $row = pg_fetch_assoc($rs); $i++) {
             $keyid = $row["id"];
             if ($force3char && strlen($keyid) === 4) {
                 $keyid = substr($keyid, 1, 3);
@@ -76,7 +76,7 @@ EOM;
     public function loadStation($id)
     {
         $rs = pg_execute($this->dbconn, $this->stname2, array($id));
-        for ($i = 0; $row = pg_fetch_array($rs); $i++) {
+        for ($i = 0; $row = pg_fetch_assoc($rs); $i++) {
             $this->table[$row["id"]] = $row;
             $this->doConversions($row["id"]);
         }
