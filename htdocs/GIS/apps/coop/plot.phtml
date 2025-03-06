@@ -102,10 +102,10 @@ $rs = pg_execute($dbconn, $stname, Array($state));
 $row = pg_fetch_assoc($rs, 0);
 $buf = 0.5;
 $map->setextent(
-    $row[0] - $buf,
-    $row[2] - $buf,
-    $row[1] + $buf,
-    $row[3] + $buf
+    $row["st_xmin"] - $buf,
+    $row["st_ymin"] - $buf,
+    $row["st_xmax"] + $buf,
+    $row["st_ymax"] + $buf
 );
 
 $states = $map->getLayerByName("states");

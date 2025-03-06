@@ -98,11 +98,11 @@ $rs = pg_prepare($wepp, $stname2, "select hrap_i, ST_distance( the_geom,
     ST_transform(ST_Point($1, $2, 4326), 26915) ) 
     from hrap_utm ORDER by st_distance ASC LIMIT 1");
 $rs = pg_execute($wepp, $stname2, array($longitude, $latitude));
-$row = pg_fetch_array($rs);
-if ($row[1] > 25000) {
+$row = pg_fetch_assoc($rs);
+if ($row["st_distance"] > 25000) {
     echo sprintf(
         "ERROR: Point is %.1f km outside of data domain, abort.",
-        $row[1] / 1000.0
+        $row["st_distance"] / 1000.0
     );
     die();
 }
@@ -123,7 +123,7 @@ $rs = pg_execute($wepp, $stname, array(
 
 $tot = 0;
 $otot = 0;
-while ($row = pg_fetch_array($rs)) {
+while ($row = pg_fetch_assoc($rs)) {
     $tot += $row["inch"];
     $ob = $d[$row["valid"]]["ob"];
     $otot += ($ob == "M") ? 0 : $ob;

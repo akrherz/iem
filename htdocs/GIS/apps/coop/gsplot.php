@@ -105,12 +105,12 @@ pg_prepare($dbconn, $stname,
 $rs = pg_execute($dbconn, $stname, Array($state));
 $row = pg_fetch_assoc($rs, 0);
 $buf = 0.2; // 35km
-$xsz = $row[1] - $row[0];
-$ysz = $row[3] - $row[2];
-$minx = $row[0] - $buf;
-$maxx = $row[1] + $buf;
-$miny = $row[2] - $buf;
-$maxy = $row[3] + $buf;
+$xsz = $row["st_xmax"] - $row["st_xmin"];
+$ysz = $row["st_ymax"] - $row["st_ymin"];
+$minx = $row["st_xmin"] - $buf;
+$maxx = $row["st_xmax"] + $buf;
+$miny = $row["st_ymin"] - $buf;
+$maxy = $row["st_ymax"] + $buf;
 $map->setextent($minx, $miny, $maxx, $maxy);
 
 $counties = $map->getLayerByName("counties");

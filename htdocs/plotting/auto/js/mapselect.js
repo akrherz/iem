@@ -59,7 +59,7 @@ function stationLayerStyleFunc(feature) {
     const network = feature.get("network");
     if (network.search("CLIMATE") > 0) {
         const sid = feature.get("sid");
-        if (sid.substr(2, 1) == "C") {
+        if (sid.substr(2, 1) === "C") {
             climodistrictStyle.getText().setText(sid.substr(0, 2) + parseInt(sid.substr(3, 3)));
             return climodistrictStyle;
         }
