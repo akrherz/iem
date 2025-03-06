@@ -1,9 +1,4 @@
 <?php
-if (!isset($sts)) {
-    header("Location: /cow/");
-    die(); /* Avoid direct calls.... */
-}
-
 function printLSR($lsr, $verified = FALSE)
 {
     $valid = new DateTime($lsr["valid"]);
