@@ -21,14 +21,14 @@ $table = <<<EOM
 EOM;
 $floor = date("YmdHi", time() - 8 * 86400);
 for ($i = 0; $row = pg_fetch_assoc($rs); $i++) {
-    $link = sprintf("<a href=\"/p.php?pid=%s\">%s</a>", $row[1], $row[1]);
-    if (substr($row[1], 0, 12) < $floor) {
-        $link = $row[1];
+    $link = sprintf("<a href=\"/p.php?pid=%s\">%s</a>", $row["max"], $row["nwsli"]);
+    if (substr($row["max"], 0, 12) < $floor) {
+        $link = $row["max"];
     }
     $table .= sprintf(
         "<tr><td>%s</td><td>%s</td><td>%s</td>\n",
-        $row[0],
-        substr($row[1], 13, 4),
+        $row["nwsli"],
+        substr($row["max"], 13, 4),
         $link
     );
 }
