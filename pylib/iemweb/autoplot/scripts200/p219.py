@@ -5,6 +5,7 @@ app will search backwards in time up to 24 hours to find the nearest
 issuance stored in the database.
 """
 
+import time
 from datetime import timedelta, timezone
 
 import httpx
@@ -56,13 +57,18 @@ def get_text(product_id):
     """get the raw text."""
     text = "Text Unavailable, Sorry."
     uri = f"https://mesonet.agron.iastate.edu/api/1/nwstext/{product_id}"
-    try:
-        resp = httpx.get(uri, timeout=5)
-        resp.raise_for_status()
-        text = resp.content.decode("ascii", "ignore").replace("\001", "")
-        text = "\n".join(text.replace("\r", "").split("\n")[5:])
-    except Exception as exp:
-        LOG.warning(exp)
+    # Allow for some time for the product to show up in AFOS
+    for attempt in range(2):
+        try:
+            resp = httpx.get(uri, timeout=5)
+            resp.raise_for_status()
+            text = resp.content.decode("ascii", "ignore").replace("\001", "")
+            text = "\n".join(text.replace("\r", "").split("\n")[5:])
+            break
+        except Exception as exp:
+            if attempt > 0:
+                LOG.warning(exp)
+            time.sleep(10)
 
     return text
 
