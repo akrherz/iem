@@ -10,7 +10,7 @@ $station = $ctx->station;
 $network = $ctx->network;
 $metadata = $ctx->metadata;
 
-$server = "https://iem.local";
+$server = "http://iem.local";
 $uri = sprintf("/geojson/station_neighbors.py?station=%s&network=%s", $station, $network);
 
 $resp = file_get_contents("{$server}{$uri}");
