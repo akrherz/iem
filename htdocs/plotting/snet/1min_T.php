@@ -24,9 +24,11 @@ $yesterday = mktime(0, 0, 0, date("m"), date("d"), date("Y")) - 96400;
 $dbconn = iemdb("snet");
 $tbl = sprintf("t%s", date("Y_m", $myTime));
 $stname = uniqid();
-pg_prepare($dbconn, $stname, "SELECT * from $tbl 
+$rs = pg_prepare($dbconn, $stname, "SELECT * from $tbl 
                  WHERE station = $1 and date(valid) = $2 ORDER by valid ASC");
-
+if ($rs === FALSE) {
+    die("Prepare failed: " . pg_last_error($dbconn));
+}
 $rs = pg_execute($dbconn, $stname, array($station, date("Y-m-d", $myTime)));
 if (pg_num_rows($rs) == 0) {
     $led = new DigitalLED74();
