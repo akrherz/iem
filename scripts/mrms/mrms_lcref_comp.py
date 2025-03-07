@@ -17,7 +17,7 @@ import pygrib
 import pyiem.mrms as mrms
 from PIL import Image
 from pyiem.reference import ISO8601
-from pyiem.util import logger, utc
+from pyiem.util import archive_fetch, logger, utc
 
 LOG = logger()
 
@@ -179,8 +179,18 @@ def main(valid: datetime):
     else:
         # If our time is an odd time, run 3 minutes ago
         utcnow = utcnow.replace(second=0, microsecond=0)
-        if utcnow.minute % 2 == 1:
-            do(utcnow - timedelta(minutes=5), True)
+        if utcnow.minute % 2 == 0:
+            LOG.info("Even real-time minute, exiting")
+            return
+        valid = utcnow - timedelta(minutes=5)
+        do(valid, True)
+        # Also check old dates
+        for delta in [30, 90, 600, 1440, 2880]:
+            ts = valid - timedelta(minutes=delta)
+            ppath = ts.strftime("%Y/%m/%d/GIS/mrms/lcref_%Y%m%d%H%M.png")
+            with archive_fetch(ppath) as fn:
+                if fn is None:
+                    do(ts, False)
 
 
 if __name__ == "__main__":
