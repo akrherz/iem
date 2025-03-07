@@ -32,7 +32,7 @@ foreach ($stations as $key => $value) {
     if ($value == "_ALL") {
         $selectAll = true;
     }
-    if (!array_key_exists($value, $cities)) {
+    if (strlen($value) > 6 && !array_key_exists($value, $cities)) {
         xssafe("<tag>");
     }
 }
