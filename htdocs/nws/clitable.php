@@ -25,7 +25,8 @@ if ($opt === "bystation") {
     $title = sprintf("Station: %s for Year: %s", $station, $year);
     $col1label = "Date";
     $uri = sprintf(
-        "http://iem.local/json/cli.py?station=%s&year=%s",
+        "%s/json/cli.py?station=%s&year=%s",
+        $INTERNAL_BASEURL,
         $station,
         $year
     );
@@ -38,14 +39,15 @@ if ($opt === "bystation") {
     $day = mktime(0, 0, 0, $month, $day, $year);
     $title = sprintf("All Stations for Date: %s", date("d F Y", $day));
     $uri = sprintf(
-        "http://iem.local/geojson/cli.py?dt=%s",
+        "%s/geojson/cli.py?dt=%s",
+        $INTERNAL_BASEURL,
         date("Y-m-d", $day)
     );
     $data = file_get_contents($uri);
     $json = json_decode($data, $assoc = TRUE);
     $arr = $json['features'];
 }
-$prettyurl = str_replace("http://iem.local", "https://mesonet.agron.iastate.edu", $uri);
+$prettyurl = str_replace($INTERNAL_BASEURL, $EXTERNAL_BASEURL, $uri);
 
 $table = <<<EOF
 <style>

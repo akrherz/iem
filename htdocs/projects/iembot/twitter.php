@@ -137,7 +137,7 @@ if ($screen_name == '') {
     $connection = new TwitterOAuth(TWITTER_KEY, TWITTER_SECRET);
     $request_token = $connection->oauth(
         "oauth/request_token",
-        ["oauth_callback" => "https://mesonet.agron.iastate.edu/projects/iembot/twitter.php?cb"]
+        ["oauth_callback" => "{$EXTERNAL_BASEURL}/projects/iembot/twitter.php?cb"]
     );
     $_SESSION['token'] = $token = $request_token['oauth_token'];
     $_SESSION['token_secret'] = $request_token['oauth_token_secret'];

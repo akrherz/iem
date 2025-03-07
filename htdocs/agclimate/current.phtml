@@ -7,7 +7,7 @@ require_once "../../include/network.php";
 require_once "../../include/mlib.php";
 $nt = new NetworkTable("ISUSM");
 
-$PUBLIC_URI = "https://mesonet.agron.iastate.edu/api/1/currents.json?network=ISUSM";
+$PUBLIC_URI = "{$EXTERNAL_BASEURL}/api/1/currents.json?network=ISUSM";
 $arr = array(
     "network" => "ISUSM",
 );

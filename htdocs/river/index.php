@@ -21,7 +21,7 @@ $sevcol = array(
     "U" => "#fff"
 );
 
-$url = "https://mesonet.agron.iastate.edu/api/1/nws/current_flood_warnings.json";
+$url = "{$EXTERNAL_BASEURL}/api/1/nws/current_flood_warnings.json";
 $c1 = "";
 $c2 = "";
 $c3 = "";

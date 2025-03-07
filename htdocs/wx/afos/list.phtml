@@ -44,7 +44,7 @@ $year2 = get_int404("year2", date("Y"));
 $month2 = get_int404("month2", date("m"));
 $day2 = get_int404("day2", date("d"));
 
-$res = file_get_contents("http://iem.local/json/reference.py");
+$res = file_get_contents("{$INTERNAL_BASEURL}/json/reference.py");
 $jobj = json_decode($res, $assoc = TRUE, JSON_FORCE_OBJECT);
 $pilselect = make_select("pil", $pil, $jobj['prodDefinitions'], $jscallback = "",
     $cssclass = "form-control iemselect2",

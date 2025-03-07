@@ -19,7 +19,7 @@ $myTime = mktime(0,0,0,$month,$day,$year);
 $titleDate = date("M d, Y", $myTime);
 
 $dirRef = date("Y/m/d", $myTime);
-$dataurl = "https://mesonet.agron.iastate.edu/archive/data/$dirRef/text/ot/ot0007
+$dataurl = "{$EXTERNAL_BASEURL}/archive/data/$dirRef/text/ot/ot0007
 .dat";
 
 $myTime = strtotime($year."-".$month."-".$day);

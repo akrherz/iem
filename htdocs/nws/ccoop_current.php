@@ -31,8 +31,7 @@ function make_row($dict, $oddrow)
     $s .= ">";
 
     $sitesurl = sprintf(
-        "%s/sites/site.php?station=%s&network=%s",
-        BASEURL,
+        "/sites/site.php?station=%s&network=%s",
         $dict["sid"],
         $dict["network"]
     );

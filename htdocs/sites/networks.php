@@ -78,7 +78,7 @@ if ($network == '_ALL_') {
     }
 } else {
     $resp = file_get_contents(
-        "http://iem.local/geojson/network/{$network}.geojson");
+        "{$INTERNAL_BASEURL}/geojson/network/{$network}.geojson");
     if ($resp === FALSE) {
         $cities = array();
     } else {

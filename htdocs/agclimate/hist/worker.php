@@ -91,7 +91,7 @@ if (isset($_GET["todisk"])) {
 
 echo "# ISU Ag Climate Download -- Iowa Environmental Mesonet $cr";
 echo "# For units and more information: $cr";
-echo "#    https://mesonet.agron.iastate.edu/agclimate/info.txt $cr";
+echo "#    {$EXTERNAL_BASEURL}/agclimate/info.txt $cr";
 echo "# Data Contact: $cr";
 echo "#    Daryl Herzmann akrherz@iastate.edu 515.294.5978 $cr";
 

@@ -58,7 +58,8 @@ $xref = array(
 if (isset($_GET["dl"])) {
     if (array_key_exists($report, $xref)) {
         $uri = sprintf(
-            "http://iem.local/plotting/auto/plot/%sstation:%s::network:%s.txt",
+            "%s/plotting/auto/plot/%sstation:%s::network:%s.txt",
+            $INTERNAL_BASEURL,
             $xref[$report],
             $station,
             $network
@@ -76,7 +77,8 @@ if (isset($_GET["dl"])) {
 if (isset($_GET["xlsx"])) {
     if (array_key_exists($report, $xref)) {
         $uri = sprintf(
-            "http://iem.local/plotting/auto/plot/%sstation:%s::network:%s.xlsx",
+            "%s/plotting/auto/plot/%sstation:%s::network:%s.xlsx",
+            $INTERNAL_BASEURL,
             $xref[$report],
             $station,
             $network
@@ -233,7 +235,8 @@ if ($station != "") {
 EOF;
     if (array_key_exists($report, $xref)) {
         $uri = sprintf(
-            "http://iem.local/plotting/auto/plot/%sstation:%s::network:%s.txt",
+            "%s/plotting/auto/plot/%sstation:%s::network:%s.txt",
+            $INTERNAL_BASEURL,
             $xref[$report],
             $station,
             $network

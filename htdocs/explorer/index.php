@@ -54,36 +54,36 @@ $t->content = <<<EOM
         <div class="col-md-2 maprow">
             <strong>4 inch Soil Temperatures</strong>
             <img src="/data/soilt_day1.png" role="button" title="4in Soil Temperatures"
-             data-target="https://mesonet.agron.iastate.edu/agclimate/soilt.php">
+             data-target="{$EXTERNAL_BASEURL}/agclimate/soilt.php">
 
              <br /><strong>Today's Precipitation</strong>
              <img src="/data/iowa_ifc_1d.png" role="button" title="Iowa Flood Center Rainfall"
-            data-target="https://mesonet.agron.iastate.edu">
+            data-target="{$EXTERNAL_BASEURL}">
 
             <br /><strong>Precipitation Departure</strong>
             <img src="/plotting/auto/plot/84/sector:IA::src:mrms::opt:dep::usdm:yes::ptype:g::sdate:2024-08-01::edate:2024-10-10::cmap:BrBG::_r:43.png"
             role="button" title="Precip Departure Aug 1"
-            data-target="https://mesonet.agron.iastate.edu">
+            data-target="{$EXTERNAL_BASEURL}">
 
             <br /><strong>Days to Accum 2 inches</strong>
             <img src="/plotting/auto/plot/185/sector:IA::threshold:2.0::cmap:terrain::_r:43.png" role="button"
             title="Days to Accumulate 2 inches"
-            data-target="https://mesonet.agron.iastate.edu">
+            data-target="{$EXTERNAL_BASEURL}">
 
             <br /><strong>Iowa Drought Coverage</strong>
             <img src="/plotting/auto/plot/183/s:state::state:IA::sdate:2024-01-01::_r:43.png" role="button"
             title="Iowa Drought Coverage"
-            data-target="https://mesonet.agron.iastate.edu">
+            data-target="{$EXTERNAL_BASEURL}">
 
             <br /><strong>NASS Corn Denting Progress</strong>
             <img src="/plotting/auto/plot/127/state:IA::short_desc:CD::cmap:jet::_r:43.png" role="button"
             title="USDA NASS Corn Denting Progress"
-            data-target="https://mesonet.agron.iastate.edu/plotting/auto/?_wait=no&q=127&state=IA&short_desc=CD&cmap=jet&_r=43&dpi=100&_fmt=png">
+            data-target="{$EXTERNAL_BASEURL}/plotting/auto/?_wait=no&q=127&state=IA&short_desc=CD&cmap=jet&_r=43&dpi=100&_fmt=png">
 
             <br /><strong>Climate District Ranks</strong>
             <img src="/plotting/auto/plot/24/csector:midwest::var:precip::p:month::year:2024::month:summer::cmap:RdBu_r::_r:43.png" role="button"
             title="Climate District Precip Ranks"
-            data-target="https://mesonet.agron.iastate.edu/plotting/auto/?_wait=no&q=24&csector=midwest&var=precip&p=month&year=2024&month=summer&sdate=2024%2F04%2F05&edate=2024%2F05%2F03&cmap=RdBu&cmap_r=on&_r=t&dpi=100&_fmt=png">
+            data-target="{$EXTERNAL_BASEURL}/plotting/auto/?_wait=no&q=24&csector=midwest&var=precip&p=month&year=2024&month=summer&sdate=2024%2F04%2F05&edate=2024%2F05%2F03&cmap=RdBu&cmap_r=on&_r=t&dpi=100&_fmt=png">
 
         </div>
     </div>

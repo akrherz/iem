@@ -5,7 +5,7 @@ $t = new MyView();
 
 $t->title = "ISUSM - Ames Second Tipping Bucket Printout";
 
-$table = file_get_contents("http://iem.local/agclimate/ames_precip.py");
+$table = file_get_contents($INTERNAL_BASEURL . "/agclimate/ames_precip.py");
 
 $t->content = <<<EOF
 <ol class="breadcrumb">

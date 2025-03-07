@@ -7,9 +7,11 @@ $year = get_int404("year", intval(date("Y")));
 require_once "../../include/myview.php";
 require_once "../../include/imagemaps.php";
 
-$uri = sprintf("http://iem.local/json/vtec_max_etn.py?year=%s&format=html", 
-        $year);
-$wsuri = sprintf("https://mesonet.agron.iastate.edu/json/vtec_max_etn.py?year=%s",
+$uri = sprintf("%s/json/vtec_max_etn.py?year=%s&format=html", 
+    $INTERNAL_BASEURL,
+    $year);
+$wsuri = sprintf("%s/json/vtec_max_etn.py?year=%s",
+    $EXTERNAL_BASEURL,
     $year);
 $table = file_get_contents($uri);
 

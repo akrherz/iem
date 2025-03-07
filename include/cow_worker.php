@@ -1,4 +1,7 @@
 <?php
+require_once dirname(__FILE__) . "/../config/settings.inc.php";
+
+
 function printLSR($lsr, $verified = FALSE)
 {
     $valid = new DateTime($lsr["valid"]);
@@ -134,8 +137,9 @@ foreach ($ltype as $k => $w) {
 
 // Build Cow API URL
 $wsuri = sprintf(
-    "http://iem.local/api/1/cow.json?wfo=%s&begints=%sZ&" .
+    "%s/api/1/cow.json?wfo=%s&begints=%sZ&" .
         "endts=%sZ&hailsize=%s&wind=%s%s%s&lsrbuffer=%s&warningbuffer=%s",
+    $INTERNAL_BASEURL,
     (strlen($wfo) == 4) ? substr($wfo, 1, 3) : $wfo,
     $sts->format("Y-m-d\\TH:i:00"),
     $ets->format("Y-m-d\\TH:i:00"),

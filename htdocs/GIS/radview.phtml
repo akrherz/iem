@@ -126,14 +126,14 @@ following URLs contain pure RASTER data layers.
 <br><a href="http://www.opengis.org/techno/specs/01-068r3.pdf">WMS</a> is a neat way to pull in images into your GIS, if your GIS can act
 as a WMS client.  Describing WMS is beyond the scope of this page, but we have
 set up a WMS on our webserver.  Point your WMS aware client at 
-<br><br><code>https://mesonet.agron.iastate.edu/wms/radar.php?</code><br><br>
+<br><br><code>{$EXTERNAL_BASEURL}/wms/radar.php?</code><br><br>
 for Iowa imagery in EPSG: 26915 (<i>NAD83 / UTM Zone 15N</i>)
 
 <br><b>-or</b>
 
-<br />Base Reflectivity: &nbsp; <code>https://mesonet.agron.iastate.edu/cgi-bin/wms/nexrad/n0r.cgi?</code>
-<br />1 Hour Rainfall: &nbsp; <code>https://mesonet.agron.iastate.edu/cgi-bin/wms/nexrad/daa.cgi?</code>
-<br />Storm Total Rainfall: &nbsp; <code>https://mesonet.agron.iastate.edu/cgi-bin/wms/nexrad/dta.cgi?</code>
+<br />Base Reflectivity: &nbsp; <code>{$EXTERNAL_BASEURL}/cgi-bin/wms/nexrad/n0r.cgi?</code>
+<br />1 Hour Rainfall: &nbsp; <code>{$EXTERNAL_BASEURL}/cgi-bin/wms/nexrad/daa.cgi?</code>
+<br />Storm Total Rainfall: &nbsp; <code>{$EXTERNAL_BASEURL}/cgi-bin/wms/nexrad/dta.cgi?</code>
 
 <br /><br />for United States imagery in EPSG: 4326 (<i>unprojected lat-lon</i>)
 

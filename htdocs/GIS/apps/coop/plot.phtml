@@ -202,7 +202,7 @@ for ($i = 0; $row = pg_fetch_assoc($rs); $i++) {
 
 
 $tr = "# " . $ndate . " " . $vardef[$var] . "
-# Download From: https://mesonet.agron.iastate.edu/GIS/apps/coop/plot.phtml
+# Download From: {$EXTERNAL_BASEURL}/GIS/apps/coop/plot.phtml
 # Download Date: " . date("d M Y") . "
 # Data Contact: Daryl Herzmann akrherz@iastate.edu 515.294.5978
 #-----------------------snip------------------\n";

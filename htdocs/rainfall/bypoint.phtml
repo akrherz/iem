@@ -36,13 +36,13 @@ while ($now < $ets) {
     $now += 86400;
 }
 
-$data = "# IEM Rainfall https://mesonet.agron.iastate.edu/rainfall 
+$data = "# IEM Rainfall {$EXTERNAL_BASEURL} 
 # Date Generated: " . date("r") . "\n";
 if ($method == "geocode") {
     $s = isset($_GET["street"]) ? xssafe($_GET["street"]) : "100 Main Street";
     $c = xssafe($_GET["city"]) . ", IA";
     $data .= "# Request Method: Geocoded $s , $c\n";
-    $u = sprintf("http://iem.local/cgi-bin/geocoder.py?street=%s&city=%s", $s, $c);
+    $u = sprintf("%s/cgi-bin/geocoder.py?street=%s&city=%s", $INTERNAL_BASEURL, $s, $c);
     $res = trim(file_get_contents(str_replace(" ", "%20", $u)));
     //echo "GEOCODER RESPONSE:::$res::: $u :::";
     if (substr($res, 0, 5) != "ERROR") {

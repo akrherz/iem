@@ -1,4 +1,5 @@
-<?php 
+<?php
+require_once dirname(__FILE__) ."/../../config/settings.inc.php";
 $title = is_null($this->title)? 'Iowa Environmental Mesonet': "IEM :: {$this->title}";
 // Page should refresh
 $refresh = "";
@@ -41,12 +42,12 @@ $bodyextra = is_null($this->bodyextra) ? '': " {$this->bodyextra}";
     <!-- Essential Social Tags -->
     <meta property="og:title" content="<?php echo $title; ?>">
     <meta property="og:description" content="<?php echo $this->twitter_description; ?>">
-    <meta property="og:image" content="https://mesonet.agron.iastate.edu<?php echo $this->twitter_image; ?>">
-    <meta property="og:url" content="https://mesonet.agron.iastate.edu<?php echo htmlentities($_SERVER["REQUEST_URI"]); ?>">
+    <meta property="og:image" content="<?php echo $EXTERNAL_BASEURL . $this->twitter_image; ?>">
+    <meta property="og:url" content="<?php echo $EXTERNAL_BASEURL .htmlentities($_SERVER["REQUEST_URI"]); ?>">
     <?php if (!is_null($this->twitter_video)){ 
         echo <<<EOM
     <meta property="og:type" content="video">
-    <meta property="og:video" content="https://mesonet.agron.iastate.edu{$this->twitter_video}">
+    <meta property="og:video" content="{$EXTERNAL_BASEURL}{$this->twitter_video}">
     <meta property="og:video:type" content="video/mp4">
     <meta property="og:video:width" content="{$this->twitter_video_width}">
     <meta property="og:video:height" content="{$this->twitter_video_height}">

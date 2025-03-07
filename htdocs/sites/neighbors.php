@@ -10,10 +10,9 @@ $station = $ctx->station;
 $network = $ctx->network;
 $metadata = $ctx->metadata;
 
-$server = "http://iem.local";
 $uri = sprintf("/geojson/station_neighbors.py?station=%s&network=%s", $station, $network);
 
-$resp = file_get_contents("{$server}{$uri}");
+$resp = file_get_contents("{$INTERNAL_BASEURL}{$uri}");
 if ($resp === FALSE) {
     die("Failed to fetch data");
 }

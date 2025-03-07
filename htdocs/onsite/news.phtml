@@ -86,7 +86,7 @@ for ($i = 0; $i < pg_num_rows($result) && $row = pg_fetch_assoc($result, $i); $i
 } // End of for
 
 if (pg_num_rows($result) == 1) {
-    $huri = "https://mesonet.agron.iastate.edu/onsite/news.phtml?id=" . $id;
+    $huri = "{$EXTERNAL_BASEURL}/onsite/news.phtml?id=" . $id;
     $content .= <<<EOM
 <div class="fb-comments" data-href="{$huri}" data-numposts="5" data-colorscheme="light"></div>
 EOM;

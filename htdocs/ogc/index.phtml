@@ -261,16 +261,16 @@ Example: goes_east_conus_ch02
 <strong>Services</strong>
 <ul>
 <li>Iowa Precipitation
- <br /><code>https://mesonet.agron.iastate.edu/cgi-bin/wms/iowa/rainfall.cgi?</code></li>
+ <br /><code>{$EXTERNAL_BASEURL}/cgi-bin/wms/iowa/rainfall.cgi?</code></li>
 <li>MRMS Q3 Precipitation (Missing data is grey)
- <br /><code>https://mesonet.agron.iastate.edu/cgi-bin/wms/us/mrms.cgi?</code>
+ <br /><code>{$EXTERNAL_BASEURL}/cgi-bin/wms/us/mrms.cgi?</code>
  <br /><i>Layer:</i> <strong>mrms_p72h</strong> 72 Hour Precipitation
  <br /><i>Layer:</i> <strong>mrms_p48h</strong> 48 Hour Precipitation
  <br /><i>Layer:</i> <strong>mrms_p24h</strong> 24 Hour Precipitation
  <br /><i>Layer:</i> <strong>mrms_p1h</strong> One Hour Precipitation
  </li>
 <li>MRMS Q3 Precipitation (Missing data is transparent)
- <br /><code>https://mesonet.agron.iastate.edu/cgi-bin/wms/us/mrms_nn.cgi?</code>
+ <br /><code>{$EXTERNAL_BASEURL}/cgi-bin/wms/us/mrms_nn.cgi?</code>
  <br /><i>Layer:</i> <strong>mrms_p72h</strong> 72 Hour Precipitation
  <br /><i>Layer:</i> <strong>mrms_p48h</strong> 48 Hour Precipitation
  <br /><i>Layer:</i> <strong>mrms_p24h</strong> 24 Hour Precipitation
@@ -283,11 +283,11 @@ Example: goes_east_conus_ch02
 <div class="col-md-6">
 <ul>
 <li>GOES East Imagery (All Sectors, All 16 Channels)
-<br /><code>https://mesonet.agron.iastate.edu/cgi-bin/wms/goes_east.cgi?</code>
+<br /><code>{$EXTERNAL_BASEURL}/cgi-bin/wms/goes_east.cgi?</code>
 <br /><i>Layer Template:</i> <strong>sector_chchannel</strong> ie conus_ch02</li>
 
 <li>GOES West Imagery (All Sectors, All 16 Channels)
-<br /><code>https://mesonet.agron.iastate.edu/cgi-bin/wms/goes_west.cgi?</code>
+<br /><code>{$EXTERNAL_BASEURL}/cgi-bin/wms/goes_west.cgi?</code>
 <br /><i>Layer Template:</i> <strong>sector_chchannel</strong></li>
 </ul>
 </div>
@@ -332,21 +332,21 @@ Example: goes_east_conus_ch02
 <hr />
 <ul>
 <li>CONUS NEXRAD Base Reflectivity (n0q) 
- <br /><code>https://mesonet.agron.iastate.edu/cgi-bin/wms/nexrad/n0q.cgi?</code></li>
+ <br /><code>{$EXTERNAL_BASEURL}/cgi-bin/wms/nexrad/n0q.cgi?</code></li>
 <li>Historical CONUS NEXRAD Base Reflectivity [WMS-T] (n0q) 
- <br /><code>https://mesonet.agron.iastate.edu/cgi-bin/wms/nexrad/n0q-t.cgi?</code></li>
+ <br /><code>{$EXTERNAL_BASEURL}/cgi-bin/wms/nexrad/n0q-t.cgi?</code></li>
  <li>Historical CONUS NEXRAD Base Reflectivity [WMS-T] (n0r) 
- <br /><code>https://mesonet.agron.iastate.edu/cgi-bin/wms/nexrad/n0r-t.cgi?</code></li>
+ <br /><code>{$EXTERNAL_BASEURL}/cgi-bin/wms/nexrad/n0r-t.cgi?</code></li>
 <li>CONUS NEXRAD 8-bit Net Echo Tops (eet) 
- <br /><code>https://mesonet.agron.iastate.edu/cgi-bin/wms/nexrad/eet.cgi?</code></li>
+ <br /><code>{$EXTERNAL_BASEURL}/cgi-bin/wms/nexrad/eet.cgi?</code></li>
 <li>CONUS NEXRAD 1 Hour Precipitation (daa) 
- <br /><code>https://mesonet.agron.iastate.edu/cgi-bin/wms/nexrad/daa.cgi?</code></li>
+ <br /><code>{$EXTERNAL_BASEURL}/cgi-bin/wms/nexrad/daa.cgi?</code></li>
 <li>CONUS NEXRAD Net Echo Tops (net) 
- <br /><code>https://mesonet.agron.iastate.edu/cgi-bin/wms/nexrad/net.cgi?</code></li>
+ <br /><code>{$EXTERNAL_BASEURL}/cgi-bin/wms/nexrad/net.cgi?</code></li>
 <li>CONUS NEXRAD Storm Total Precipitation (dta) 
- <br /><code>https://mesonet.agron.iastate.edu/cgi-bin/wms/nexrad/dta.cgi?</code></li>
+ <br /><code>{$EXTERNAL_BASEURL}/cgi-bin/wms/nexrad/dta.cgi?</code></li>
 <li>RIDGE Single NEXRAD Imagery 
- <br /><code>https://mesonet.agron.iastate.edu/cgi-bin/wms/nexrad/ridge.cgi?sector=XXX&amp;prod=XXX&amp;</code>
+ <br /><code>{$EXTERNAL_BASEURL}/cgi-bin/wms/nexrad/ridge.cgi?sector=XXX&amp;prod=XXX&amp;</code>
   <br />You also need to provide two CGI variables for the NEXRAD identifier
   and level III product you want. For example, sector=DMX&amp;prod=N0Q
   <br />
@@ -359,7 +359,7 @@ Example: goes_east_conus_ch02
         a specific volume scan time from IEM's archive of imagery.  You need
         to specify the prod and sector like with the "single" layer, but also
         need to include a year, month, day and time.  All of these values are 
-        in UTC.  Here's an <a href="https://mesonet.agron.iastate.edu/cgi-bin/wms/nexrad/ridge.cgi?service=wms&version=1.1.1&request=GetMap&format=png&TRANSPARENT=TRUE&bgcolor=0xCCCCFE&BBOX=-14215828.6745634,5401834.631799334,-13166501.150410566,6006604.399507464&SRS=EPSG:3857&width=1716&height=989&sector=RTX&prod=N0Q&layers=single-archive&year=2015&month=01&day=27&time=2303">example request</a>
+        in UTC.  Here's an <a href="{$EXTERNAL_BASEURL}/cgi-bin/wms/nexrad/ridge.cgi?service=wms&version=1.1.1&request=GetMap&format=png&TRANSPARENT=TRUE&bgcolor=0xCCCCFE&BBOX=-14215828.6745634,5401834.631799334,-13166501.150410566,6006604.399507464&SRS=EPSG:3857&width=1716&height=989&sector=RTX&prod=N0Q&layers=single-archive&year=2015&month=01&day=27&time=2303">example request</a>
         that gets NEXRAD RTX N0Q product for 27 Jan 2015 at 23:03 UTC.  You 
         must know the volume scan times prior to making the request.  There
         are <a href="/json/">JSON</a> services that can help you out. 
@@ -369,12 +369,12 @@ Example: goes_east_conus_ch02
  
  <hr />
  <li>NWS Current Warnings
- <br /><code>https://mesonet.agron.iastate.edu/cgi-bin/wms/us/wwa.cgi?</code>
+ <br /><code>{$EXTERNAL_BASEURL}/cgi-bin/wms/us/wwa.cgi?</code>
 </li>
 <li>Iowa Rainfall Estimates
- <br /><code>https://mesonet.agron.iastate.edu/cgi-bin/wms/iowa/rainfall.cgi?</code></li>
+ <br /><code>{$EXTERNAL_BASEURL}/cgi-bin/wms/iowa/rainfall.cgi?</code></li>
 <li>Iowa Winter Road Conditions 
- <br /><code>https://mesonet.agron.iastate.edu/cgi-bin/wms/iowa/roadcond.cgi?</code>
+ <br /><code>{$EXTERNAL_BASEURL}/cgi-bin/wms/iowa/roadcond.cgi?</code>
  <br /><i>Layer:</i> <strong>roadcond-noninterstate</strong> Non Interstate Road Conditions
  <br /><i>Layer:</i> <strong>roadcond-interstate</strong> Interstate Road Conditions
 </li>
@@ -393,17 +393,17 @@ Example: goes_east_conus_ch02
 
 <!-- No worky at the moment
 <li>Iowa Rainfall Estimates
- <br /><code>https://mesonet.agron.iastate.edu/wfs/rainfall.php?</code></li>
+ <br /><code>{$EXTERNAL_BASEURL}/wfs/rainfall.php?</code></li>
 -->
 
 <li>National Weather Service Warnings Current
- <br /><code>https://mesonet.agron.iastate.edu/wfs/ww.php?</code></li>
+ <br /><code>{$EXTERNAL_BASEURL}/wfs/ww.php?</code></li>
 
 <li>National Weather Service Warnings Archive For UTC Date (since 11 Jul 2002)
- <br /><code>https://mesonet.agron.iastate.edu/wfs/ww.php?date=YYYY-MM-DD&amp;</code></li>
+ <br /><code>{$EXTERNAL_BASEURL}/wfs/ww.php?date=YYYY-MM-DD&amp;</code></li>
 
 <li>National Weather Service Warnings Archive At Given UTC Time(since 11 Jul 2002)
- <br /><code>https://mesonet.agron.iastate.edu/wfs/ww.php?date=YYYY-MM-DD&amp;time=HH:MI&amp;</code></li>
+ <br /><code>{$EXTERNAL_BASEURL}/wfs/ww.php?date=YYYY-MM-DD&amp;time=HH:MI&amp;</code></li>
 
 
 </ul>

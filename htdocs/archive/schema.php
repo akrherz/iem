@@ -5,7 +5,7 @@ $t = new MyView();
 define("IEM_APPID", 20);
 $t->title = "Archived Data Schema";
 
-$url = sprintf("https://mesonet.agron.iastate.edu/archive/data/%s", gmdate('Y/m/d'));
+$url = sprintf("%s/archive/data/%s", $EXTERNAL_BASEURL, gmdate('Y/m/d'));
 $u = sprintf("<a href=\"%s\">%s</a>\n", $url, $url);
 
 $url2 = sprintf("https://mtarchive.geol.iastate.edu/%s", gmdate('Y/m/d'));

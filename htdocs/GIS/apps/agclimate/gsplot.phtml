@@ -79,7 +79,7 @@ $imgurl = sprintf(
 $round = array("precip" => 2, "gdd" => 0, "sgdd" => 0, "et" => 2, "srad" => 0);
 
 
-$jdata = file_get_contents("http://iem.local" . $wsuri);
+$jdata = file_get_contents($INTERNAL_BASEURL . $wsuri);
 $jobj = json_decode($jdata, $assoc = TRUE);
 
 $tr = "# " . $year . " " . $varDef[$var] . " ({$smonth}/{$sday} - {$emonth}/{$eday})\n";

@@ -100,7 +100,7 @@ echo "<?xml version=\"1.0\" encoding=\"UTF-8\"?>
 for ($i=0;$row=pg_fetch_array($result);$i++){
     $uri = sprintf(
         "<a href=\"%s/vtec/event/%s-O-NEW-%s-%s-%s-%04d\">%s</a>",
-        "https://mesonet.agron.iastate.edu", date('Y', strtotime($row["polygon_begin"])),
+        $EXTERNAL_BASEURL, date('Y', strtotime($row["polygon_begin"])),
         rectify_wfo($row["wfo"]), $row["phenomena"],
         $row["significance"], $row["eventid"], $row["eventid"]
     );

@@ -6,7 +6,7 @@ require_once "../../include/myview.php";
 require_once "../../include/forms.php";
 require_once "../../include/imagemaps.php";
 
-$uri = "http://iem.local/json/watches.py?is_pds=1";
+$uri = "{$INTERNAL_BASEURL}/json/watches.py?is_pds=1";
 $data = file_get_contents($uri);
 $json = json_decode($data, $assoc = TRUE);
 $table = "";
@@ -64,7 +64,7 @@ phrasing.
 
 <p>There is a <a href="/json/">JSON(P) webservice</a> that backends this table presentation, you can
 directly access it here:
-<br /><code>https://mesonet.agron.iastate.edu/json/watches.py?is_pds=1</code></p>
+<br /><code>{$EXTERNAL_BASEURL}/json/watches.py?is_pds=1</code></p>
 
 <p><strong>Related:</strong>
 <a class="btn btn-primary" href="/vtec/emergencies.php">TOR/FFW Emergencies</a>

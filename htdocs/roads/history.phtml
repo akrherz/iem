@@ -112,7 +112,7 @@ if (isset($_GET["month"]) && isset($_GET["segid"])) {
     $content .= "<div class=\"alert-info\">Here is a listing of historical road conditions for a particular
    time for all roads monitored in Iowa.  Click on the segment name to get 
    a listing of historical conditions for that segment.</div>";
-    $gisurl = "https://mesonet.agron.iastate.edu/archive/data/" . $valid->format('Y/m/d/') . "/GIS/iaroad_cond_" . $valid->format('YmdHi') . ".zip";
+    $gisurl = "{$EXTERNAL_BASEURL}/archive/data/" . $valid->format('Y/m/d/') . "/GIS/iaroad_cond_" . $valid->format('YmdHi') . ".zip";
     $content .= "<p>You can download a <a href=\"$gisurl\">gis shapefile</a> for this reporting time.";
     $content .= "<br /><table id='table1' class=\"table table-condensed table-striped\">
           <thead><tr><th>Date:</th><th>Report Time:</th><th>Road Segment</th>
@@ -161,14 +161,14 @@ basically complete back to 14 Feb 2006.
 
 <p>You can find an archive of the raw text reports by navigating the IEM's 
 archive here:
-<code><a href="https://mesonet.agron.iastate.edu/archive/data/2005/01/30/text/">https://mesonet.agron.iastate.edu/archive/data/2005/01/30/text/</a></code>
+<code><a href="/archive/data/2005/01/30/text/">{$EXTERNAL_BASEURL}/archive/data/2005/01/30/text/</a></code>
 <br />look for the .STOIA files.  All timestamps are in 
 Greenwhich Mean Time (GMT or UTC), which is 6 hours ahead of us in the winter.
 The directory structure of the site is ordered by year, month, and then day. 
 The example URL is for 30 Jan 2005.
 
 <p><br />and an archive of the GIS shapefiles per report here:
-<br /><code><a href="https://mesonet.agron.iastate.edu/archive/data/2005/01/30/GIS/">https://mesonet.agron.iastate.edu/archive/data/2005/01/30/GIS/</a></code>
+<br /><code><a href="/archive/data/2005/01/30/GIS/">{$EXTERNAL_BASEURL}/archive/data/2005/01/30/GIS/</a></code>
 <br />look for the iaroads_* files.  Again, timestamps are in GMT.
 EOF;
 }

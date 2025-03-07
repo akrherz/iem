@@ -65,7 +65,7 @@ IEM Sites Move Request
 > LAT:         {$newlat} OLD: {$metadata["lat"]}
 > EMAIL:       {$email}
 
-https://mesonet.agron.iastate.edu/sites/site.php?network={$network}&station={$station}
+{$EXTERNAL_BASEURL}/sites/site.php?network={$network}&station={$station}
 EOF;
     if (($delta < 0.5) || (strpos($email, '@') > 0)) {
        mail("akrherz@iastate.edu", "Please move {$station} {$network}", $msg);

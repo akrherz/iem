@@ -239,7 +239,7 @@ function ltypeSelect()
 </form>
 EOF;
 if (isset($_GET["hail"])) {
-    require_once "../../include/worker.php";
+    require_once "../../include/cow_worker.php";
 } else {
     $content .= <<<EOF
 
@@ -328,7 +328,7 @@ accounting of tornado <code>POSSIBLE</code> tags within Severe Thunderstorm
 Warnings.</p>
 
 <p>The JSON emitting service endpoint is:
-<br /><code>https://mesonet.agron.iastate.edu/api/1/cow.json</code></p>
+<br /><code>{$EXTERNAL_BASEURL}/api/1/cow.json</code></p>
 
 <p>This endpoint accepts a large number of CGI parameters via HTTP GET. None of
 the parameters are required.</p>

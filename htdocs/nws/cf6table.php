@@ -24,7 +24,8 @@ if ($opt === "bystation") {
     $title = sprintf("Station: %s for Year: %s", $station, $year);
     $col1label = "Date";
     $uri = sprintf(
-        "http://iem.local/json/cf6.py?station=%s&year=%s",
+        "%s/json/cf6.py?station=%s&year=%s",
+        $INTERNAL_BASEURL,
         $station,
         $year
     );
@@ -37,7 +38,8 @@ if ($opt === "bystation") {
     $day = mktime(0, 0, 0, $month, $day, $year);
     $title = sprintf("All Stations for Date: %s", date("d F Y", $day));
     $uri = sprintf(
-        "http://iem.local/geojson/cf6.py?dt=%s",
+        "%s/geojson/cf6.py?dt=%s",
+        $INTERNAL_BASEURL,
         date("Y-m-d", $day)
     );
     $data = file_get_contents($uri);
@@ -45,7 +47,7 @@ if ($opt === "bystation") {
     $arr = $json['features'];
 }
 $generated_at = $json['generated_at'];
-$prettyurl = str_replace("http://iem.local", "https://mesonet.agron.iastate.edu", $uri);
+$prettyurl = str_replace($INTERNAL_BASEURL, $EXTERNAL_BASEURL, $uri);
 
 $table = <<<EOM
 <style>

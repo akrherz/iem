@@ -20,7 +20,8 @@ if ($ts < $archivebegin) {
 }
 
 $imap = sprintf(
-    "http://iem.local/plotting/auto/plot/203/typ:%s::sort:%s::date:%s.txt",
+    "%s/plotting/auto/plot/203/typ:%s::sort:%s::date:%s.txt",
+    $INTERNAL_BASEURL,
     substr($typ, 0, 1),
     $d[$sortby],
     date("Y-m-d", $ts)

@@ -28,7 +28,8 @@ $bydamagetagchecked = "";
 if ($opt == "bywfo") {
     $bywfochecked = "checked";
     $jsonuri = sprintf(
-        "http://iem.local/json/ibw_tags.py?wfo=%s&year=%s",
+        "%s/json/ibw_tags.py?wfo=%s&year=%s",
+        $INTERNAL_BASEURL,
         $wfo,
         $year
     );
@@ -36,13 +37,14 @@ if ($opt == "bywfo") {
 } else {
     $bydamagetagchecked = "checked";
     $jsonuri = sprintf(
-        "http://iem.local/json/ibw_tags.py?damagetag=%s&year=%s",
+        "%s/json/ibw_tags.py?damagetag=%s&year=%s",
+        $INTERNAL_BASEURL,
         $damagetag,
         $year
     );
     $title = "NWS Damage Tags of $damagetag for $year";
 }
-$publicjsonuri = str_replace("http://iem.local", "https://mesonet.agron.iastate.edu", $jsonuri);
+$publicjsonuri = str_replace($INTERNAL_BASEURL, $EXTERNAL_BASEURL, $jsonuri);
 
 $t->title = $title;
 $t->headextra = '

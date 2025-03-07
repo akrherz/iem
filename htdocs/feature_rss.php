@@ -18,9 +18,9 @@ echo <<<EOF
 <?xml version="1.0" encoding="UTF-8"?>
 <rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom">
 <channel>
-<atom:link href="https://mesonet.agron.iastate.edu/feature_rss.php" rel="self" type="application/rss+xml" />
+<atom:link href="{$EXTERNAL_BASEURL}/feature_rss.php" rel="self" type="application/rss+xml" />
 <title>Iowa Environmental Mesonet Daily Feature</title>
-<link>https://mesonet.agron.iastate.edu</link>
+<link>{$EXTERNAL_BASEURL}</link>
 <description>Iowa Environmental Mesonet Daily Feature</description>
 <lastBuildDate>{$d}</lastBuildDate>
 EOF;
@@ -33,10 +33,10 @@ $rs = pg_exec(
 for ($i = 0; $row = pg_fetch_assoc($rs); $i++) {
     $appurl = "";
     if ($row["appurl"] != "") {
-        $appurl = "<p><a href=\"https://mesonet.agron.iastate.edu{$row['appurl']}\">Generate This Chart on IEM Website</a></p>";
+        $appurl = "<p><a href=\"{$EXTERNAL_BASEURL}{$row['appurl']}\">Generate This Chart on IEM Website</a></p>";
     }
     $mediaurl = sprintf(
-        "https://mesonet.agron.iastate.edu/onsite/features/%s.%s",
+        "{$EXTERNAL_BASEURL}/onsite/features/%s.%s",
         $row["imageref"],
         $row["mediasuffix"]
     );
@@ -63,8 +63,8 @@ EOM;
 <item>
 <title><![CDATA[{$t}]]></title>
 <author>akrherz@iastate.edu (Daryl Herzmann)</author>
-<link>https://mesonet.agron.iastate.edu/onsite/features/cat.php?day={$v}</link>
-<guid>https://mesonet.agron.iastate.edu/onsite/features/cat.php?day={$v}</guid>
+<link>{$EXTERNAL_BASEURL}/onsite/features/cat.php?day={$v}</link>
+<guid>{$EXTERNAL_BASEURL}/onsite/features/cat.php?day={$v}</guid>
 <description><![CDATA[{$cbody}]]></description>
 </item>
 EOF;

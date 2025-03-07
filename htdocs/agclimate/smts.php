@@ -43,7 +43,7 @@ $d2 = daySelect2($day2, "day2");
 $h2 = hourSelect($hour2, "hour2");
 
 // Retreive the autoplot description JSON
-$content = file_get_contents("http://iem.local/plotting/auto/meta/177.json");
+$content = file_get_contents($INTERNAL_BASEURL . "/plotting/auto/meta/177.json");
 $meta = json_decode($content, $assoc=TRUE);
 $dd = "This plot is a time series graph of
 observations from a time period and ISU Soil Moisture station of your choice.";

@@ -3,15 +3,16 @@ header("Content-type: text/plain");
 // Generate placefiles, whatever
 // Inspiration: http://grlevel3.tornadocentral.com/metars.php?state=IA
 
-echo 'Title: Iowa DOT RWIS
+echo <<<EOM
+Title: Iowa DOT RWIS
 Refresh: 5
 Color: 200 200 255
-IconFile: 1, 18, 32, 2, 31, "https://mesonet.agron.iastate.edu/request/grx/windbarbs.png" 
-IconFile: 2, 15, 15, 8, 8, "https://mesonet.agron.iastate.edu/request/grx/cloudcover.png" 
-IconFile: 3, 25, 25, 12, 12, "https://mesonet.agron.iastate.edu/request/grx/rwis_cr.png" 
+IconFile: 1, 18, 32, 2, 31, "{$EXTERNAL_BASEURL}/request/grx/windbarbs.png" 
+IconFile: 2, 15, 15, 8, 8, "{$EXTERNAL_BASEURL}/request/grx/cloudcover.png" 
+IconFile: 3, 25, 25, 12, 12, "{$EXTERNAL_BASEURL}/request/grx/rwis_cr.png" 
 Font: 1, 11, 1, "Courier New"
 
-';
+EOM;
 require_once "../../../config/settings.inc.php";
 require_once "../../../include/mlib.php";
 
