@@ -114,10 +114,10 @@ def fetch(station: str, ts: datetime) -> pd.DataFrame:
     """Getme data."""
     with get_sqlalchemy_conn("asos") as conn:
         df = pd.read_sql(
-            sql_helper(""""
-SELECT f.*, t.product_id from taf t JOIN taf_forecast f on
-(t.id = f.taf_id) WHERE t.station = :station and t.valid = :valid
-ORDER by f.valid ASC"""),
+            sql_helper("""
+    SELECT f.*, t.product_id from taf t JOIN taf_forecast f on
+    (t.id = f.taf_id) WHERE t.station = :station and t.valid = :valid
+    ORDER by f.valid ASC"""),
             conn,
             params={"station": station, "valid": ts},
             index_col="valid",
