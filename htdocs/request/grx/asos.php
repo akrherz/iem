@@ -1,4 +1,5 @@
 <?php
+require_once "../../../config/settings.inc.php";
 header("Content-type: text/plain");
 // Inspiration: http://grlevel3.tornadocentral.com/metars.php?state=IA
 
