@@ -115,7 +115,7 @@ $(document).ready(() => {
         maxDate: new Date()
     });
     $("#datepicker").datepicker('setDate', new Date());
-    $("#datepicker").change(function () {
+    $("#datepicker").change(() => {
         updateDate();
     });
 
@@ -142,8 +142,7 @@ $(document).ready(() => {
         })
     });
 
-    const layerSwitcher = new ol.control.LayerSwitcher();
-    map.addControl(layerSwitcher);
+    map.addControl(new ol.control.LayerSwitcher());
 
     element = document.getElementById('popup');
 
@@ -157,7 +156,7 @@ $(document).ready(() => {
     $(element).popover({
         'placement': 'top',
         'html': true,
-        content: function () { return $('#popover-content').html(); }
+        content() { return $('#popover-content').html(); }
     });
 
     // display popup on click
@@ -187,10 +186,10 @@ $(document).ready(() => {
 
     // Figure out if we have anything specified from the window.location
     var tokens = window.location.href.split("#");
-    if (tokens.length == 2) {
+    if (tokens.length === 2) {
         // #YYYYmmdd/variable
         tokens = tokens[1].split("/");
-        if (tokens.length == 2) {
+        if (tokens.length === 2) {
             const tpart = tokens[0];
             renderattr = tokens[1];
             $('select[id=renderattr] option[value=' + renderattr + ']').attr("selected", "selected");
