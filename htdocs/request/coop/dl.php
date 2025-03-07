@@ -19,10 +19,9 @@ $year1 = isset($_GET["year1"]) ? $_GET["year1"] : die("No year1 specified");
 $year2 = isset($_GET["year2"]) ? $_GET["year2"] : die("No year2 specified");
 $vars = isset($_GET["vars"]) ? $_GET["vars"] : die("No vars specified");
 
-$gis = isset($_GET["gis"]) ? $_GET["gis"] : 'no';
-$delim = isset($_GET["delim"]) ? $_GET["delim"] : ",";
-$sample = isset($_GET["sample"]) ? $_GET["sample"] : "1min";
-$what = isset($_GET["what"]) ? $_GET["what"] : 'dl';
+$gis = isset($_GET["gis"]) ? xssafe($_GET["gis"]) : 'no';
+$delim = isset($_GET["delim"]) ? xssafe($_GET["delim"]) : ",";
+$what = isset($_GET["what"]) ? xssafe($_GET["what"]) : 'dl';
 
 $nt = new NetworkTable($network);
 $cities = $nt->table;
@@ -318,7 +317,9 @@ CTRL, 1981, 2, 3.1898, 1.59032, -6.83361, 1.38607, NaN, NaN, NaN, 3
     }
 } else if ($what != "plot") {
 
-    $rs =  pg_exec($connection, $sqlStr);
+    $stname = uniqid();
+    pg_prepare($connection, $stname, $sqlStr);
+    $rs =  pg_execute($connection, $stname, Array($stationSQL));
 
     if ($gis == "yes") {
         echo "station" . $d[$delim] . "station_name" . $d[$delim] . "lat" . $d[$delim] . "lon" . $d[$delim] . "day" . $d[$delim] . "julianday" . $d[$delim];
