@@ -4,7 +4,7 @@ require_once "../../../include/myview.php";
 $t = new MyView();
 $t->title = "School Network Parameters";
 
-$t->content = <<<EOF
+$t->content = <<<EOM
 <h3>SchoolNet Data Explanation</h3>
 
 <div class="text">
@@ -48,5 +48,5 @@ capacity of the air.</p>
 
 <p><h3>Altimeter [alti]</h3>
 <p>Atmospheric pressure expressed in inches of mercury.</p></div>
-EOF;
+EOM;
 $t->render('single.phtml');

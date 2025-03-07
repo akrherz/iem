@@ -12,7 +12,7 @@ $cselect = networkSelect("IACLIMATE", "IA0200", Array(), "city");
 $mselect = monthSelect2("1", "month");
 $dselect = daySelect2("1", "day");
 
-$t->content = <<<EOF
+$t->content = <<<EOM
 <h3>The Weather on your Birthday!!</h3>
 <BR>
 
@@ -46,5 +46,5 @@ conditions at a location near to you.  Just follow the instructions below.
 
 <P>The weather data is not guarenteed to be accurate and it should be used for educational and entertainment
 purposes only.
-EOF;
+EOM;
 $t->render('single.phtml');

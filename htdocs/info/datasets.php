@@ -27,14 +27,14 @@ function get_text($pageid)
     $Parsedown = new Parsedown();
     $c = $Parsedown->text(file_get_contents($fn));
     $ts = date("F d, Y", filemtime($fn));
-    $s = <<<EOF
+    $s = <<<EOM
 <div class="panel panel-info">
 <div class="panel-body">
 {$c}
 </div>
 <div class="panel-footer">Updated: {$ts} <a href="/info/datasets/{$pageid}.html">Permalink</a></div>
 </div>
-EOF;
+EOM;
     return $s;
 }
 

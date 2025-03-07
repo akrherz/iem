@@ -24,7 +24,7 @@ $ms = monthSelect2($month, "month");
 $ds = daySelect2($day, "day");
 $ymd = sprintf("year=%s&month=%s&day=%s", $year, $month, $day);
 
-$t->content = <<< EOF
+$t->content = <<< EOM
 <ol class="breadcrumb">
  <li><a href="/other/">Miscellaneous Stations</a></li>
  <li class="active">ISU AMS Station</li>	
@@ -55,6 +55,6 @@ the archive <br> begins 8 Sep 2011.</p>
 <br />
 <img src="1min.php?station=ot0010&{$ymd}&rh" ALT="Time Series">
 </div>
-EOF;
+EOM;
 
 $t->render("single.phtml");

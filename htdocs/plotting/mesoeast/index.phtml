@@ -39,7 +39,7 @@ foreach($fcontents as $line_num => $line){
     }
 } // End of while
 
-$t->content = <<<EOF
+$t->content = <<<EOM
 <ul class="breadcrumb">
  <li><a href="/other/">Other Stations</a></li>
  <li class="active">Mesonet NE Ames</li>
@@ -83,5 +83,5 @@ Time of Maximum Wind Gust: {$gustTime}<br><br></font></div>
 <br />
 </td></tr></table>
 </div>
-EOF;
+EOM;
 $t->render('single.phtml');

@@ -5,7 +5,7 @@ require_once "../../include/forms.php";
 $network = isset($_GET["network"]) ? xssafe($_GET["network"]) : "KCCI"; 
 
 header("Content-Type: application/vnd.google-earth.kml+xml");
-echo <<<EOF
+echo <<<EOM
 <?xml version="1.0" encoding="UTF-8"?>
 <kml xmlns="http://earth.google.com/kml/2.2">
  <Document>
@@ -20,7 +20,7 @@ echo <<<EOF
       <bgColor>ffffffff</bgColor>
     </BalloonStyle>
   </Style>
-EOF;
+EOM;
 
 $conn = iemdb("mesosite");
 pg_prepare($conn, "SELECT", "SELECT *, ST_x(geom) as lon, ST_y(geom) as lat
@@ -34,7 +34,7 @@ for ($i=0;$row=pg_fetch_assoc($rs);$i++)
     <name>". str_replace('&', '&amp;', $row["name"]) ."</name>
     <description>
 <![CDATA[
-  <p><img src=\"https://mesonet.agron.iastate.edu/data/camera/stills/". $row["cam"] .".jpg\" /></p>
+  <p><img src=\"{$EXTERNAL_BASEURL}/data/camera/stills/". $row["cam"] .".jpg\" /></p>
         ]]>
     </description>
     <styleUrl>#iemstyle</styleUrl>

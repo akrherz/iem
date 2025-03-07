@@ -8,7 +8,7 @@ define("IEM_APPID", 9);
 require_once "../../include/myview.php";
 
 $t = new MyView();
-$t->headextra = <<<EOF
+$t->headextra = <<<EOM
 <link rel="stylesheet" type="text/css" href="https://extjs.cachefly.net/ext/gpl/5.0.0/build/packages/ext-theme-neptune/build/resources/ext-theme-neptune-all.css"/>
 <script type="text/javascript" src="https://extjs.cachefly.net/ext/gpl/5.0.0/build/ext-all.js"></script>
 <script type='text/javascript' src='webcam-static.js'></script>
@@ -30,7 +30,7 @@ $t->headextra = <<<EOF
 }
 
 </style>
-EOF;
+EOM;
 $t->title = "Webcams";
 $t->content = <<<EOM
 <div id="main">

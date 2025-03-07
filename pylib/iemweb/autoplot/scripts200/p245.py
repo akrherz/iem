@@ -12,10 +12,9 @@ import numpy as np
 import pandas as pd
 import seaborn as sns
 from pyiem import reference
-from pyiem.database import get_dbconn, get_sqlalchemy_conn
+from pyiem.database import get_dbconn, get_sqlalchemy_conn, sql_helper
 from pyiem.exceptions import NoDataFound
 from pyiem.plot import figure_axes
-from sqlalchemy import text
 
 MDICT = {
     "NONE": "All LSR Types",
@@ -200,14 +199,16 @@ def plotter(ctx: dict):
     with get_sqlalchemy_conn("postgis") as conn:
         if opt != "ugc":
             daily = pd.read_sql(
-                text(
-                    f"""
+                sql_helper(
+                    """
                      with data as (
                 SELECT distinct valid, geom, typetext, magnitude
                 from lsrs l where 1 = 1 {tlimiter} {wfo_limiter}
                 ) select date(valid at time zone :tzname),
                 count(*) from data GROUP by date ORDER by date
-            """
+            """,
+                    tlimiter=tlimiter,
+                    wfo_limiter=wfo_limiter,
                 ),
                 conn,
                 params=params,
@@ -216,8 +217,8 @@ def plotter(ctx: dict):
             )
         else:
             daily = pd.read_sql(
-                text(
-                    f"""
+                sql_helper(
+                    """
                 with data as (
                 SELECT distinct valid, l.geom, typetext, magnitude
                 from lsrs l JOIN ugcs u on (l.gid = u.gid)
@@ -225,7 +226,9 @@ def plotter(ctx: dict):
                 )
                 select date(valid at time zone :tzname), count(*)
                 from data GROUP by date ORDER by date
-            """
+            """,
+                    tlimiter=tlimiter,
+                    wfo_limiter=wfo_limiter,
                 ),
                 conn,
                 index_col=None,

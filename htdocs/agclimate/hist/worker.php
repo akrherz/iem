@@ -72,8 +72,8 @@ $ets  = mktime(0, 0, 0, $e_mo, $e_dy, $e_yr);
 
 if ($sts > $ets) die("Your start time is greater than your end time!");
 
+$stationSQL = "{". implode(",", $st) ."}";
 
-$str_stns = implode("','", $st);
 $str_vars = implode(",", $fvars);
 $str_sts  = date("Y-m-d H:00", $sts);
 if ($rtype == 'hourly') {
@@ -91,7 +91,7 @@ if (isset($_GET["todisk"])) {
 
 echo "# ISU Ag Climate Download -- Iowa Environmental Mesonet $cr";
 echo "# For units and more information: $cr";
-echo "#    https://mesonet.agron.iastate.edu/agclimate/info.txt $cr";
+echo "#    {$EXTERNAL_BASEURL}/agclimate/info.txt $cr";
 echo "# Data Contact: $cr";
 echo "#    Daryl Herzmann akrherz@iastate.edu 515.294.5978 $cr";
 
@@ -104,14 +104,15 @@ echo $cr;
 $c = iemdb("isuag");
 $rs = array();
 $tbl = sprintf("%s", $rtype);
-$sql = "SELECT station, to_char(valid, '{$tsfmt}') as dvalid, 
+$stname = uniqid();
+pg_prepare($c, $stname, "SELECT station, to_char(valid, '{$tsfmt}') as dvalid, 
    $str_vars from $tbl 
-   WHERE station IN ('$str_stns') and
+   WHERE station = ANY($1) and
    valid BETWEEN '$str_sts' and '$str_ets'
-   ORDER by station, valid";
-$rs = pg_exec($c, $sql);
+   ORDER by station, valid");
+$rs = pg_execute($c, $stname, array($stationSQL));
 
-for ($i = 0; $row = pg_fetch_array($rs); $i++) {
+for ($i = 0; $row = pg_fetch_assoc($rs); $i++) {
     echo $row["station"] . $d[$delim] . $ISUAGcities[$row["station"]]['name']
         . $d[$delim] . $row["dvalid"] . $d[$delim];
     for ($j = 0; $j < $num_vars; $j++) {

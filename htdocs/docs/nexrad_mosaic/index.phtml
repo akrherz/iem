@@ -5,7 +5,7 @@ $t = new MyView();
 $t->iem_resource = "MOSAIC";
 $t->title = "About NEXRAD Mosaics";
 $d = date("Y/m/d");
-$t->content = <<<EOF
+$t->content = <<<EOM
 
 <h3>Documentation on IEM generated NEXRAD Mosaics</h3>
 
@@ -289,5 +289,5 @@ https://mesonet.agron.iastate.edu/cgi-bin/wms/nexrad/n0r-t.cgi?
 <br />
 <iframe src="wmst.html" style="width: 550px; height: 450px;"></iframe>
 
-EOF;
+EOM;
 $t->render('single.phtml');

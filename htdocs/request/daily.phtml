@@ -80,7 +80,7 @@ foreach($vars as $key => $val){
 }
 
 
-$t->content = <<<EOF
+$t->content = <<<EOM
 <style>
 label {
     font-weight: normal !important;
@@ -163,5 +163,5 @@ exists for those wishing to script against this service.</p>
 </div></div>
 </form>
 
-EOF;
+EOM;
 $t->render('full.phtml');

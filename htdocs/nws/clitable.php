@@ -25,7 +25,8 @@ if ($opt === "bystation") {
     $title = sprintf("Station: %s for Year: %s", $station, $year);
     $col1label = "Date";
     $uri = sprintf(
-        "http://iem.local/json/cli.py?station=%s&year=%s",
+        "%s/json/cli.py?station=%s&year=%s",
+        $INTERNAL_BASEURL,
         $station,
         $year
     );
@@ -38,16 +39,17 @@ if ($opt === "bystation") {
     $day = mktime(0, 0, 0, $month, $day, $year);
     $title = sprintf("All Stations for Date: %s", date("d F Y", $day));
     $uri = sprintf(
-        "http://iem.local/geojson/cli.py?dt=%s",
+        "%s/geojson/cli.py?dt=%s",
+        $INTERNAL_BASEURL,
         date("Y-m-d", $day)
     );
     $data = file_get_contents($uri);
     $json = json_decode($data, $assoc = TRUE);
     $arr = $json['features'];
 }
-$prettyurl = str_replace("http://iem.local", "https://mesonet.agron.iastate.edu", $uri);
+$prettyurl = str_replace($INTERNAL_BASEURL, $EXTERNAL_BASEURL, $uri);
 
-$table = <<<EOF
+$table = <<<EOM
 <style>
 .empty{
     width: 0px !important;
@@ -89,7 +91,7 @@ $table = <<<EOF
 </tr>
 </thead>
 <tbody>
-EOF;
+EOM;
 function departure($actual, $normal)
 {
     // JSON upstream hacky returns M instead of null
@@ -236,7 +238,7 @@ $sselect = networkSelect("NWSCLI", $station);
 $t = new MyView();
 $t->title = "Tabular CLI Report Data";
 
-$t->content = <<<EOF
+$t->content = <<<EOM
 <ol class="breadcrumb">
     <li><a href="/climate/">Climate Data</a></li>
     <li class="active">Tabular CLI Report Data</li>		
@@ -288,14 +290,14 @@ directly access it here:
     <i class="fa fa-star-o"></i> Record Tied,
     <i class="fa fa-star"></i> Record Set.</p>
 
-EOF;
-$t->headextra = <<<EOF
+EOM;
+$t->headextra = <<<EOM
 <link rel="stylesheet" type="text/css" href="/vendor/select2/4.0.3/select2.min.css"/ >
 <link type="text/css" href="/vendor/jquery-datatables/{$DT}/datatables.min.css" rel="stylesheet" />
-EOF;
-$t->jsextra = <<<EOF
+EOM;
+$t->jsextra = <<<EOM
 <script src="/vendor/select2/4.0.3/select2.min.js"></script>
 <script src='/vendor/jquery-datatables/{$DT}/datatables.min.js'></script>
 <script src="clitable.js"></script>
-EOF;
+EOM;
 $t->render('full.phtml');

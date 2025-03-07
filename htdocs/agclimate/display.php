@@ -105,7 +105,7 @@ if ($prod == 10 || $prod == 11) {
     $extra .= '</form>';
 }
 
-$t->content = <<<EOF
+$t->content = <<<EOM
 <table style="float: left;" width="100%">
 <tr>
 <td valign="top">
@@ -204,5 +204,5 @@ $t->content = <<<EOF
 </table>
 
 <br clear="all" /><p>&nbsp;</p>
-EOF;
+EOM;
 $t->render('single.phtml');

@@ -5,9 +5,9 @@ $t = new MyView();
 
 $t->title = "ISUSM - Ames Second Tipping Bucket Printout";
 
-$table = file_get_contents("http://iem.local/agclimate/ames_precip.py");
+$table = file_get_contents($INTERNAL_BASEURL . "/agclimate/ames_precip.py");
 
-$t->content = <<<EOF
+$t->content = <<<EOM
 <ol class="breadcrumb">
     <li><a href="/agclimate/">ISU Soil Moisture Network</a></li>
     <li class="active">Ames AEA Farm Dual Tipping Bucket</li>
@@ -31,5 +31,5 @@ COOP total shown is a 24-hour value at 4 PM, not hourly like the buckets at
 
 {$table}
 
-EOF;
+EOM;
 $t->render('single.phtml');

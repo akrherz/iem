@@ -26,11 +26,10 @@ import numpy as np
 import pandas as pd
 from matplotlib.ticker import MaxNLocator
 from pyiem import reference
-from pyiem.database import get_dbconnc, get_sqlalchemy_conn
+from pyiem.database import get_dbconnc, get_sqlalchemy_conn, sql_helper
 from pyiem.exceptions import NoDataFound
 from pyiem.plot import figure
 from pyiem.plot.use_agg import plt
-from sqlalchemy import text
 
 from iemweb.autoplot import ARG_FEMA, get_monofont
 
@@ -236,7 +235,7 @@ def plotter(ctx: dict):
     with get_sqlalchemy_conn("postgis") as conn:
         if opt == "conus":
             df = pd.read_sql(
-                text(
+                sql_helper(
                     """
                 select distinct date(expire - '12 hours'::interval) as date
                 from spc_outlooks o WHERE o.outlook_type = :outlook_type and
@@ -253,15 +252,19 @@ def plotter(ctx: dict):
 
         else:
             df = pd.read_sql(
-                text(
-                    f"""
+                sql_helper(
+                    """
                 select distinct date(expire - '12 hours'::interval) as date
-                from spc_outlooks o, {geomtable} g WHERE {limiter}
+                from spc_outlooks o, {table} g WHERE {limiter}
                 and o.outlook_type = :outlook_type and o.day = :day
                 and o.threshold = :threshold and o.category = :category and
                 ST_Intersects(o.geom, g.{geomcol}) {overlapsql} and
                 o.expire > :sts
-                """
+                """,
+                    table=geomtable,
+                    geomcol=geomcol,
+                    limiter=limiter,
+                    overlapsql=overlapsql,
                 ),
                 conn,
                 params=params,
@@ -294,7 +297,7 @@ def plotter(ctx: dict):
     if ctx["overlap"] not in ["0", "99"]:
         subtitle += f" with >= {overlap}% overlap"
     fig = figure(apctx=ctx, title=title, subtitle=subtitle)
-    ax = fig.add_axes([0.08, 0.1, 0.58, 0.8])
+    ax = fig.add_axes((0.08, 0.1, 0.58, 0.8))
     monofont = get_monofont()
     for year, gdf in df.groupby("year"):
         size = max(gdf["doy"].max() - gdf["doy"].min(), 1)
@@ -344,7 +347,7 @@ def plotter(ctx: dict):
     ax.yaxis.set_major_locator(MaxNLocator(integer=True))
 
     # __________________________________________
-    ax = fig.add_axes([0.86, 0.1, 0.1, 0.8])
+    ax = fig.add_axes((0.86, 0.1, 0.1, 0.8))
     gdf = df[["year", "doy"]].groupby("year").count()
     ax.barh(gdf.index.values, gdf["doy"].values, fc="blue", align="center")
     for year, val in zip(gdf.index.values, gdf["doy"].values):

@@ -242,7 +242,7 @@ EOM;
     $t->title = sprintf("%s Network Summary for %s", $network, $nicedate);
     // We want a table of obs for one day!
     $uri = "hist.phtml?year=$year&month=$month&day=$day&mode=daily&station=$station&network=$network&sortvar=";
-    $htmlout = <<<EOF
+    $htmlout = <<<EOM
      
 <p>This table lists out IEM computed daily summary values for this network.
 These values are derived from available observations and specialized summary
@@ -270,7 +270,7 @@ summary information.</p>
 <th>Snow Depth:</a></th>
 </tr>
 </thead>
-EOF;
+EOM;
     foreach ($jobj["data"] as $bogus => $row) {
         if (is_null($row["max_tmpf"])) $row["max_tmpf"] = "M";
         if (is_null($row["min_tmpf"])) $row["min_tmpf"] = "M";
@@ -335,7 +335,7 @@ $ys = yearSelect($startyear, $year, "year");
 $ms = monthSelect($month, "month");
 $ds = daySelect($day);
 if ($mode == "monthly") {
-    $content .= <<<EOF
+    $content .= <<<EOM
 <h2>Data Calendar for {$metadata["name"]}</h2>
 <p>The calendar chart below shows the daily reported climate variables.  
 You can click on a date to display the values for all sites for that day. 
@@ -346,15 +346,15 @@ flagged with a <i>(E)</i> are estimated by the IEM.</p>
     <p>Month: &nbsp; {$ms}
     <p>&nbsp; <input type='submit' value='Change'></form>
 </div>
-EOF;
+EOM;
 } else {
-    $content .= <<<EOF
+    $content .= <<<EOM
   <h2>{$nicedate} Summary for {$network}</h2> 
   <p>Switch date shown:<br /><input type="hidden" value="daily" name="mode">
   {$ys} {$ms} {$ds}
   <input type="submit" value="Switch Date"></form>
   </div>
-EOF;
+EOM;
 }
 
 $content .= $htmlout;

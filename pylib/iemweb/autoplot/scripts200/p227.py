@@ -5,16 +5,14 @@ NWEM plots.
 
 from zoneinfo import ZoneInfo
 
-# third party
+import geopandas as gpd
 import httpx
-from geopandas import read_postgis
-from pyiem.database import get_sqlalchemy_conn
+from pyiem.database import get_sqlalchemy_conn, sql_helper
 from pyiem.exceptions import NoDataFound
 from pyiem.network import Table as NetworkTable
 from pyiem.plot.geoplot import MapPlot
 from pyiem.reference import LATLON, Z_OVERLAY2, prodDefinitions
 from pyiem.util import LOG
-from sqlalchemy import text
 
 TFORMAT = "%b %-d %Y %-I:%M %p %Z"
 WFOCONV = {"JSJ": "SJU"}
@@ -49,7 +47,7 @@ def get_text(product_id: str) -> str:
         resp = httpx.get(uri, timeout=5)
         resp.raise_for_status()
         res = resp.content.decode("ascii", "ignore").replace("\001", "")
-        res = "\n".join(text.replace("\r", "").split("\n")[5:])
+        res = "\n".join(res.replace("\r", "").split("\n")[5:])
     except Exception as exp:
         LOG.info(exp)
 
@@ -65,24 +63,25 @@ def plotter(ctx: dict):
     # Compute a population estimate
     popyear = min(max([int(pid[:4]) - int(pid[:4]) % 5, 2000]), 2020)
     with get_sqlalchemy_conn("postgis") as conn:
-        df = read_postgis(
-            text(
-                f"""
+        df = gpd.read_postgis(
+            sql_helper(
+                """
                 with geopop as (
                     select sum(population) as pop from text_products s,
-                    gpw{popyear} g WHERE s.product_id = :pid and
+                    {table} g WHERE s.product_id = :pid and
                     ST_Contains(s.geom, g.geom)
                 )
                 SELECT geom, issue, expire,
                 coalesce(pop, 0) as pop
                 from text_products, geopop where product_id = :pid
-                """
+                """,
+                table=f"gpw{popyear}",
             ),
             conn,
             params={"pid": pid, "segnum": segnum},
             index_col=None,
             geom_col="geom",
-        )
+        )  # type: ignore
     if df.empty:
         raise NoDataFound("NWEM Event was not found, sorry.")
     row = df.iloc[0]

@@ -16,14 +16,15 @@ require_once "../../include/network.php";
 require_once "../../include/imagemaps.php";
 
 $url = sprintf(
-    "http://iem.local/json/spc_bysize.py?day=%s&threshold=%s&category=%s&syear=%s",
+    "%s/json/spc_bysize.py?day=%s&threshold=%s&category=%s&syear=%s",
+    $INTERNAL_BASEURL,
     $day,
     $threshold,
     urlencode($category),
     $year,
 );
 
-$public = str_replace("http://iem.local", "https://mesonet.agron.iastate.edu", $url);
+$public = str_replace($INTERNAL_BASEURL, $EXTERNAL_BASEURL, $url);
 $table = <<<EOM
 
 <p>JSON Webservice for the data below:<br />
@@ -116,7 +117,7 @@ $levels = Array(
 $lselect = make_select("level", $level, $levels);
 $yrselect = yearSelect(1987, $year);
 
-$t->content = <<<EOF
+$t->content = <<<EOM
 <ol class="breadcrumb">
  <li><a href="/current/severe.phtml">Severe Weather Mainpage</a></li>
  <li class="active">Top 10 SPC Outlooks by size</li>
@@ -154,5 +155,5 @@ area is done within the <a href="https://spatialreference.org/ref/epsg/9311/">US
 
 $table
 
-EOF;
+EOM;
 $t->render('single.phtml');

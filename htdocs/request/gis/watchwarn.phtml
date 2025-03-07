@@ -103,7 +103,7 @@ for($year=1986;$year<=date("Y");$year++){
     );
 }
 
-$content = <<<EOF
+$content = <<<EOM
 <p>
 <ul class="breadcrumb">
 <li><a href="/nws/">NWS Mainpage</a></li>
@@ -148,7 +148,7 @@ for scripting against this service.</p>
 <form method="GET" action="/cgi-bin/request/gis/watchwarn.py">
 <input type="hidden" value="yes" name="simple">
 <input type="hidden" value="shapefile" name="accept" id="accept">
-EOF;
+EOM;
 
 for($group_idx=0;$group_idx<$location_select_group_count;$group_idx++){
     $group_key = $location_select_groups[$group_idx];
@@ -173,7 +173,7 @@ for($group_idx=0;$group_idx<$location_select_group_count;$group_idx++){
 }
 $pselect = make_select("phenomena", "TO", $reference["vtec_phenomena"], "", "", FALSE, TRUE);
 $sselect = make_select("significance", "W", $reference["vtec_significance"], "", "", FALSE, TRUE);
-$content .= <<<EOF
+$content .= <<<EOM
 
 <h4>Select time interval</h4>
 <i>(Times are in UTC.)</i>
@@ -331,6 +331,6 @@ when they were generated.</p>
 </tr>
 </table>
 
-EOF;
+EOM;
 $t->content = $content;
 $t->render('full.phtml');

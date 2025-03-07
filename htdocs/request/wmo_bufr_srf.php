@@ -20,7 +20,7 @@ $ms2 = monthSelect(date("m"), "month2");
 $ds2 = daySelect2(date("d"), "day2");
 $hs2 = gmtHourSelect("0", "hour2");
 
-$t->content = <<<EOF
+$t->content = <<<EOM
 <ol class="breadcrumb">
  <li><a href="/other/">Other Mainpage</a></li>
  <li class="active">WMO BUFR Surface Download</li>
@@ -138,5 +138,5 @@ srad_1h_j - Solar Radiation 1 hour sum (J/m^2)
 
 
 </form>
-EOF;
+EOM;
 $t->render('single.phtml');

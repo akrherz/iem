@@ -179,6 +179,7 @@ EOF;
  */
 function gen_feature($t)
 {
+    global $EXTERNAL_BASEURL;
     $s = '';
 
     $connection = iemdb("mesosite");
@@ -307,7 +308,7 @@ EOM;
 <script src="index.js"></script>
 {$jsextra}
 EOF;
-        $huri = "https://mesonet.agron.iastate.edu/onsite/features/cat.php?day=" . $row["permalink"];
+        $huri = "{$EXTERNAL_BASEURL}/onsite/features/cat.php?day=" . $row["permalink"];
         $fbtext = <<<EOF
 <div class="fb-comments" data-href="{$huri}" data-numposts="5" data-colorscheme="light"></div>
 EOF;

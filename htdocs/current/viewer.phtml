@@ -18,13 +18,13 @@ $t->jsextra = <<<EOM
  <script src="/vendor/bootstrap-datetimepicker/4.17.47/bootstrap-datetimepicker.min.js"></script>
  <script src='viewer.js?d=1'></script>
 EOM;
-$t->headextra = <<<EOF
+$t->headextra = <<<EOM
 <link rel="stylesheet" href="/vendor/openlayers/{$OL}/ol.css" type="text/css">
 <link rel="stylesheet" href="/vendor/openlayers/{$OL}/ol-layerswitcher.css" type="text/css">
 <link rel="stylesheet" href="/vendor/bootstrap-datetimepicker/4.17.47/bootstrap-datetimepicker.min.css" type="text/css">
-EOF;
+EOM;
 
-$t->content = <<<EOF
+$t->content = <<<EOM
 <style>
  h3 {
    margin-top: 0px;
@@ -118,5 +118,5 @@ can sometimes be wrong for various painful reasons.</p>
 <p>More information on the IEM's webcam work can be found
     <a href="/projects/webcam.php">here</a>.</p>
 
-EOF;
+EOM;
 $t->render('full.phtml');

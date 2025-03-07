@@ -9,7 +9,7 @@ import calendar
 from datetime import date
 
 import pandas as pd
-from pyiem.database import get_sqlalchemy_conn
+from pyiem.database import get_sqlalchemy_conn, sql_helper
 from pyiem.exceptions import NoDataFound
 from pyiem.plot import figure_axes
 
@@ -94,21 +94,24 @@ def plotter(ctx: dict):
     varname = ctx["var"]
     with get_sqlalchemy_conn("coop") as conn:
         df = pd.read_sql(
-            f"""
-            select month,
-            sum(case when {varname}::numeric >= %s and {varname}::numeric <= %s
+            sql_helper(
+                """
+    select month,
+    sum(case when {varname}::numeric >= :low and {varname}::numeric <= :high
                 then 1 else 0 end) as hits, count(*)
-            from alldata where station = %s and {varname} is not null
-            and year >= %s and year <= %s GROUP by month ORDER by month ASC
+    from alldata where station = :station and {varname} is not null
+    and year >= :syear and year <= :eyear GROUP by month ORDER by month ASC
         """,
-            conn,
-            params=(
-                low,
-                high,
-                station,
-                ctx["syear"],
-                ctx["eyear"],
+                varname=varname,
             ),
+            conn,
+            params={
+                "low": low,
+                "high": high,
+                "station": station,
+                "syear": ctx["syear"],
+                "eyear": ctx["eyear"],
+            },
             index_col="month",
         )
     if df.empty:

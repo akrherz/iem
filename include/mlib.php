@@ -91,9 +91,10 @@ function iemws_json($endpoint, $args)
 // Make sure a page is HTTPS when called
 function force_https()
 {
+    global $EXTERNAL_BASEURL;
     if (empty($_SERVER["HTTPS"]) || $_SERVER["HTTPS"] !== "on") {
         // Ensure we collapse folks that have bookmarks to aliases
-        header("Location: https://mesonet.agron.iastate.edu" . $_SERVER["REQUEST_URI"]);
+        header("Location: {$EXTERNAL_BASEURL}" . $_SERVER["REQUEST_URI"]);
         exit();
     }
 }

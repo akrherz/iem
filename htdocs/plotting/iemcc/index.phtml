@@ -11,15 +11,15 @@ require_once "../../../include/jpgraph/jpgraph_scatter.php";
 $t = new MyView();
 $t->title = "Central Command Time Series";
 
-$year = isset($_GET["year"]) ? intval($_GET["year"]): date("Y");
-$month = isset($_GET["month"]) ? intval($_GET["month"]): date("m");
-$day = isset($_GET["day"]) ? intval($_GET["day"]): date("d");
+$year = get_int404("year", date("Y"));
+$month = get_int404("month", date("m"));
+$day = get_int404("day", date("d"));
 $myTime = mktime(0,0,0,$month,$day,$year);
 
 $titleDate = date("M d, Y", $myTime);
 
 $dirRef = date("Y/m/d", $myTime);
-$dataurl = "https://mesonet.agron.iastate.edu/archive/data/$dirRef/text/ot/ot0007
+$dataurl = "{$EXTERNAL_BASEURL}/archive/data/$dirRef/text/ot/ot0007
 .dat";
 
 $myTime = strtotime($year."-".$month."-".$day);
@@ -226,7 +226,7 @@ $ys = yearSelect2(2003, $year, "year");
 $ms = monthSelect($month);
 $ds = daySelect($day);
 
-$t->content = <<<EOF
+$t->content = <<<EOM
 <ol class="breadcrumb">
 <li><a href="/other/">Other Networks</a></li>
 <li class="active">IEM Central Command</li>
@@ -249,5 +249,5 @@ every minute. Note that the archive begins 17 Aug 2006.</p>
 <img src="/tmp/{$fp1}">
 <img src="/tmp/{$fp2}">
 
-EOF;
+EOM;
 $t->render('single.phtml');

@@ -35,8 +35,8 @@ if (!is_null($metadata["archive_begin"])) {
 }
 
 $exturi = sprintf(
-    "https://mesonet.agron.iastate.edu/" .
-        "api/1/scp.json?station=%s&amp;date=%s&amp;tz=%s",
+    "%s/api/1/scp.json?station=%s&amp;date=%s&amp;tz=%s",
+    $EXTERNAL_BASEURL,
     $station,
     date("Y-m-d", $date),
     $metadata["tzname"],

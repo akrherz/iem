@@ -3,7 +3,7 @@ require_once "../../config/settings.inc.php";
 require_once "../../include/myview.php";
 $t = new MyView();
 $t->title = "Information";
-$t->content = <<<EOF
+$t->content = <<<EOM
 
 <h3>Iowa Environmental Mesonet</h3>
 
@@ -77,5 +77,5 @@ before beginning any quality control work.</p>
 <p>If you have any questions or comments, please
 <a href="contacts.php">let us know</a>.
 
-EOF;
+EOM;
 $t->render('single.phtml');

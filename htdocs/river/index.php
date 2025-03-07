@@ -21,7 +21,7 @@ $sevcol = array(
     "U" => "#fff"
 );
 
-$url = "https://mesonet.agron.iastate.edu/api/1/nws/current_flood_warnings.json";
+$url = "{$EXTERNAL_BASEURL}/api/1/nws/current_flood_warnings.json";
 $c1 = "";
 $c2 = "";
 $c3 = "";
@@ -82,7 +82,7 @@ foreach ($jobj["data"] as $bogus => $row) {
 $content .= $ptitle;
 $nselect = networkSelect("WFO", $wfo, array(), 'wfo');
 $sselect = stateSelect($state);
-$content .= <<<EOF
+$content .= <<<EOM
 <p>This page produces a summary listing for National Weather Service Flood 
 Forecast Points when the point is currently in a flood warning state.  The IEM
 processes the flood warning products and attempts to extract the important 
@@ -127,7 +127,7 @@ Documentation on this webservice is
  <td style="background: #f0f;">Major Flooding</td>
 </tr>
 </table>
-EOF;
+EOM;
 
 $content .= '<p><table class="table table-condensed table-bordered">';
 $rvs = array_keys($rivers);

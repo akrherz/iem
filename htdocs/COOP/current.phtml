@@ -37,11 +37,11 @@ function make_row($dict, $oddrow)
         $dict["network"]
     );
 
-    $s .= <<<EOF
+    $s .= <<<EOM
     <td><input type="checkbox" name="st[]" value="{$dict["sid"]}"/></td>
     <td><a href="/p.php?pid={$dict["raw"]}" class="btn btn-small"><i class="fa fa-paperclip"></i></a>
     </td>
-EOF;
+EOM;
     $s .= "<td><a href=\"cat.phtml?station=" . $dict["sid"] . "&network=" . $dict["network"] . "\">" . $dict['sid'] . "</a></td>";
     $s .= "<td><a href=\"$sitesurl\">" . $dict["name"] . ", " . $dict["state"] . "</a></td>";
     $s .= "<td>" . $dict["county"] . "</td>";
@@ -198,7 +198,7 @@ $ten = get_sortdir($baseurl, "ratio", $sortcol, $sortdir);
 $eleven = get_sortdir($baseurl, "snowd", $sortcol, $sortdir);
 $twelve = get_sortdir($baseurl, "snoww", $sortcol, $sortdir);
 
-$content = <<<EOF
+$content = <<<EOM
 <form method="GET" action="current.phtml" name="stctrl">
 <input type="hidden" name="sortcol" value="{$sortcol}">
 Option 1: <strong>View by State:</strong> {$nselect}
@@ -248,16 +248,16 @@ again will reverse the sort.
   <th><a href="{$twelve}">SWE</a></th>
 </tr></thead>
 <tbody>
-EOF;
+EOM;
 
 
-$content .= <<<EOF
+$content .= <<<EOM
 {$firstsection}
 {$lastsection}
 </tbody>
 </table>
 <input type="submit" value="Add to Favorites">
 </form>
-EOF;
+EOM;
 $t->content = $content;
 $t->render('sortables.phtml');

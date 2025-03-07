@@ -4,7 +4,7 @@ require_once "../../include/myview.php";
 $t = new MyView();
 $t->title = "LDM Request HOWTO";
 
-$t->content = <<<EOF
+$t->content = <<<EOM
 <ol class="breadcrumb">
   <li><a href="/info.php">IEM Information</a></li>
   <li class="active">Real-time IEM data feeds with LDM HOWTO</li>
@@ -43,5 +43,5 @@ Daryl Herzmann
 <br> (akrherz@iastate.edu)
 <br> Rev: 26 Dec 2002
 
-EOF;
+EOM;
 $t->render('single.phtml');

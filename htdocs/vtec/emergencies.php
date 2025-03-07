@@ -26,7 +26,7 @@ $t->jsextra = <<<EOM
 EOM;
 
 
-$t->content = <<<EOF
+$t->content = <<<EOM
 <ol class="breadcrumb">
  <li><a href="/nws/">NWS Resources</a></li>
  <li class="active">Tornado + Flash Flood Emergencies</li>
@@ -45,7 +45,7 @@ of VTEC have eventids.  These were retroactively generated and assigned by the I
 
 <p>There is a <a href="/api/1/docs#/vtec/service_nws_emergencies__fmt__get">IEM webservice</a> that backends this table presentation, you can
 directly access it here:
-<br /><code>https://mesonet.agron.iastate.edu/api/1/nws/emergencies.geojson</code></p>
+<br /><code>{$EXTERNAL_BASEURL}/api/1/nws/emergencies.geojson</code></p>
 
 <p><strong>Related:</strong>
 <a class="btn btn-primary" href="/vtec/pds.php">PDS Warnings</a>
@@ -77,5 +77,5 @@ directly access it here:
 </table>
 </div>
 
-EOF;
+EOM;
 $t->render("full.phtml");

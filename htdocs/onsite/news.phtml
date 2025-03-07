@@ -10,11 +10,11 @@ $dbconn = iemdb("mesosite");
 $id = get_int404("id");
 $q = isset($_GET["q"]) ? pg_escape_string($dbconn, xssafe($_GET["q"])) : "";
 $tag = isset($_GET['tag']) ? pg_escape_string($dbconn, xssafe($_GET['tag'])) : null;
-$content = <<< EOF
+$content = <<< EOM
 <p><form method="GET" action="news.phtml" name="searchnews">
 <b>Search Archive:</b> <input type="text" name="q" value="{$q}" size="20"><input type="submit" value="Go!">
 </form>
-EOF;
+EOM;
 
 if ($id > 0) {
     $stname = uniqid("reads");
@@ -22,20 +22,20 @@ if ($id > 0) {
       WHERE id = $1");
     pg_execute($dbconn, $stname, array($id));
     $stname = uniqid("SELECTONE");
-    $rs = pg_prepare($dbconn, $stname, "SELECT *, 
+    pg_prepare($dbconn, $stname, "SELECT *, 
       to_char(entered, 'YYYY-MM-DD HH:MI AM') as webdate 
       from news WHERE id = $1");
     $result = pg_execute($dbconn, $stname, array($id));
 } else if ($q != "") {
     $stname = uniqid("SEARCH");
-    $rs = pg_prepare($dbconn, $stname, "SELECT *, 
+    pg_prepare($dbconn, $stname, "SELECT *, 
       to_char(entered, 'YYYY-MM-DD HH:MI AM') as webdate 
       from news WHERE (title ~* $1 or body ~* $1) 
       ORDER by entered DESC");
     $result = pg_execute($dbconn, $stname, array($q));
 } else if (!is_null($tag)) {
     $stname = uniqid("SEARCH");
-    $rs = pg_prepare($dbconn, $stname, "SELECT *,
+    pg_prepare($dbconn, $stname, "SELECT *,
       to_char(entered, 'YYYY-MM-DD HH:MI AM') as webdate
       from news WHERE tags @> Array[$1]::varchar[]
       ORDER by entered DESC");
@@ -86,7 +86,7 @@ for ($i = 0; $i < pg_num_rows($result) && $row = pg_fetch_assoc($result, $i); $i
 } // End of for
 
 if (pg_num_rows($result) == 1) {
-    $huri = "https://mesonet.agron.iastate.edu/onsite/news.phtml?id=" . $id;
+    $huri = "{$EXTERNAL_BASEURL}/onsite/news.phtml?id=" . $id;
     $content .= <<<EOM
 <div class="fb-comments" data-href="{$huri}" data-numposts="5" data-colorscheme="light"></div>
 EOM;

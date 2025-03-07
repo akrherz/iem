@@ -3,24 +3,23 @@ require_once "../../config/settings.inc.php";
 require_once "../../include/myview.php";
 $t = new MyView();
 require_once "../../include/database.inc.php";
-    $t->title = "IEM Robin Tracker";
+$t->title = "IEM Robin Tracker";
 
-    $connection = iemdb("postgis");
-    $q = "SELECT * from robins ORDER by id";
-    $rs = pg_exec($connection, $q);
-    
-    $table = "";
-    for( $i=0; $row = pg_fetch_array($rs); $i++) {
+$connection = iemdb("postgis");
+$q = "SELECT * from robins ORDER by id";
+$rs = pg_exec($connection, $q);
 
-        $table .= "<tr> <td>". $row["id"] ."</td>
-    <td>". $row["name"] ."</td>
-    <td>". $row["day"] ."</td>
-    <td>". $row["city"] ."</td>
+$table = "";
+for ($i = 0; $row = pg_fetch_assoc($rs); $i++) {
+
+    $table .= "<tr> <td>" . $row["id"] . "</td>
+    <td>" . $row["name"] . "</td>
+    <td>" . $row["day"] . "</td>
+    <td>" . $row["city"] . "</td>
     </tr>\n";
+}
 
-    }
-
-$t->content = <<<EOF
+$t->content = <<<EOM
 The Red Robin is a welcome sign of spring in Iowa!  Here is a graphical 
 view and listing of reports received at the IEM of Robin sightings.  If you
 have a report to add, please send it to Daryl (<a href="mailto:akrherz@iastate.edu">akrherz@iastate.edu</a>).
@@ -43,7 +42,7 @@ have a report to add, please send it to Daryl (<a href="mailto:akrherz@iastate.e
 </tr>
 
 {$table}
-        
+
 </table>
-EOF;
+EOM;
 $t->render('single.phtml');

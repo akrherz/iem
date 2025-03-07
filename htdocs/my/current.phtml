@@ -89,7 +89,7 @@ foreach ($stations as $key => $value) {
     $reqstations .= sprintf("station=%s&", $value);
 }
 if ($reqstations != "") {
-    $jdata = file_get_contents("http://iem.local/api/1/currents.json?$reqstations");
+    $jdata = file_get_contents($INTERNAL_BASEURL . "/api/1/currents.json?$reqstations");
     $jobj = json_decode($jdata, $assoc = TRUE);
 } else {
     $jobj = array("data" => array());
@@ -183,7 +183,7 @@ foreach ($finalA as $key => $val) {
     }
 }
 
-$content = <<<EOF
+$content = <<<EOM
 <form name="opts" method="GET" action="current.phtml">
 <input type="hidden" name="sortcol" value="{$sortcol}">
 <input type="hidden" name="refresh" value="{$refresh}">
@@ -240,7 +240,7 @@ Click on a column to sort it.<br>
 
 <input type="submit" value="Remove Stations">
 </form>
-EOF;
+EOM;
 if ($doSF) {
     $sfstations = array();
     foreach ($stations as $key => $value) {
@@ -324,7 +324,7 @@ if ($doSF) {
             </tr>\n";
     }
 
-    $content .= <<<EOF
+    $content .= <<<EOM
 <h3>RWIS Pavement Conditions</h3>
 <form method="GET" action="current.phtml" name="opts2">
 <input type="hidden" name="sortcol" value="{$sortcol}">
@@ -356,10 +356,10 @@ if ($doSF) {
 </table>
 <input type="submit" value="Remove Stations">
 </form>
-EOF;
+EOM;
 }
 
-$content .= <<<EOF
+$content .= <<<EOM
 <br><br>
 
 <b>Notes:</b><br>
@@ -368,6 +368,6 @@ $content .= <<<EOF
 logic to account for sites without 4 sensors or broken sensors.</li>
         </ol>
 
-EOF;
+EOM;
 $t->content = $content;
 $t->render('sortables.phtml');

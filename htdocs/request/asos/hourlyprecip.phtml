@@ -52,7 +52,7 @@ $ar = array(
 
 $tzselect = make_select("tz", "America/Chicago", $ar);
 
-$t->content = <<<EOF
+$t->content = <<<EOM
 <ol class="breadcrumb">
     <li><a href="/ASOS/">ASOS Mainpage</a></li>
     <li class="current">IEM Computed Hourly Precipitation Totals</li>
@@ -137,5 +137,5 @@ data prior to 2010 for missing hours.</div>
 </div></div>
 </form>
 
-EOF;
+EOM;
 $t->render('single.phtml');

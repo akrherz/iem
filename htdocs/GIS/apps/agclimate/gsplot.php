@@ -101,7 +101,7 @@ $edate = new DateTime("{$year}-{$emonth}-{$eday}");
 $sstr_txt = $sdate->format("M j");
 $estr_txt = $edate->format("M j");
 
-$jdata = file_get_contents("http://iem.local" . $wsuri);
+$jdata = file_get_contents($INTERNAL_BASEURL . $wsuri);
 $jobj = json_decode($jdata, $assoc = TRUE);
 
 foreach ($jobj["features"] as $bogus => $value) {

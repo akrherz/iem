@@ -10,11 +10,10 @@ from datetime import date
 
 import pandas as pd
 from matplotlib.patches import Rectangle
-from pyiem.database import get_dbconn, get_sqlalchemy_conn
+from pyiem.database import get_dbconn, get_sqlalchemy_conn, sql_helper
 from pyiem.exceptions import NoDataFound
 from pyiem.plot import figure
 from pyiem.reference import state_names
-from sqlalchemy import text
 
 from iemweb.autoplot import ARG_FEMA
 from iemweb.util import month2months
@@ -185,8 +184,8 @@ def plotter(ctx: dict):
     if ctx["w"] == "all":
         with get_sqlalchemy_conn("postgis") as conn:
             df = pd.read_sql(
-                text(
-                    f"""
+                sql_helper(
+                    """
                 with data as (
                 select max(expire at time zone 'UTC') as max_expire,
                 threshold from spc_outlooks
@@ -197,8 +196,8 @@ def plotter(ctx: dict):
                 )
                 select d.* from data d JOIN spc_outlook_thresholds t
                 on (d.threshold = t.threshold) ORDER by t.priority desc
-
-            """
+            """,
+                    date_limiter=date_limiter,
                 ),
                 conn,
                 params=params,
@@ -246,8 +245,8 @@ def plotter(ctx: dict):
         params["geoval"] = geoval
         with get_sqlalchemy_conn("postgis") as conn:
             df = pd.read_sql(
-                text(
-                    f"""
+                sql_helper(
+                    """
                     WITH data as (
                 select max(expire at time zone 'UTC') as max_expire,
                 threshold from
@@ -259,7 +258,12 @@ def plotter(ctx: dict):
                 )
                 select d.* from data d JOIN spc_outlook_thresholds t
                 on (d.threshold = t.threshold) ORDER by t.priority desc
-            """
+            """,
+                    table=table,
+                    abbrcol=abbrcol,
+                    geomcol=geomcol,
+                    sqllimiter=sqllimiter,
+                    date_limiter=date_limiter,
                 ),
                 conn,
                 params=params,
@@ -270,7 +274,7 @@ def plotter(ctx: dict):
         raise NoDataFound("No Results For Query.")
     df["date"] = pd.to_datetime(
         df["max_expire"].dt.date - pd.Timedelta(days=1)
-    )
+    )  # type: ignore
 
     df["days"] = (pd.Timestamp(date.today()) - df["date"]).dt.days
     _ll = ""

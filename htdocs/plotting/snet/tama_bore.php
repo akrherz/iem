@@ -71,9 +71,6 @@ foreach($fcontents as $linenum => $line)
   $lts = $timestamp;
 } // End of while
 
-
-
-
 // Create the graph. These two calls are always required
 $graph = new Graph(640,480);
 $graph->SetScale('datlin',0,360);
@@ -136,9 +133,7 @@ $sp1->mark->SetFillColor("blue");
 $sp1->mark->SetWidth(3);
 $sp1->SetLegend("Wind Direction");
 
-
 $graph->Add($sp1);
 $graph->AddY(0,$lineplot);
 $graph->AddY(1,$lineplot2);
-//$graph->AddY2($lp1);
 $graph->Stroke();

@@ -19,12 +19,11 @@ import geopandas as gpd
 import matplotlib.colors as mpcolors
 import numpy as np
 import pandas as pd
-from pyiem.database import get_sqlalchemy_conn
+from pyiem.database import get_sqlalchemy_conn, sql_helper
 from pyiem.exceptions import NoDataFound
 from pyiem.network import Table as NetworkTable
 from pyiem.plot import MapPlot
 from pyiem.reference import Z_OVERLAY2, state_bounds
-from sqlalchemy import text
 from tqdm import tqdm
 
 PDICT = {
@@ -149,8 +148,8 @@ def plotter(ctx: dict):
             params["lon"] = meta["lon"]
             dfs.append(
                 pd.read_sql(
-                    text(
-                        f"""
+                    sql_helper(
+                        """
                 WITH data as (
                     SELECT sday, day,
                     sum(precip) OVER (PARTITION by station ORDER by day ASC
@@ -159,8 +158,7 @@ def plotter(ctx: dict):
                     ROWS BETWEEN :d2 PRECEDING AND CURRENT ROW) as p2,
                     sum(precip) OVER (PARTITION by station ORDER by day ASC
                     ROWS BETWEEN :d3 PRECEDING AND CURRENT ROW) as p3
-                    from alldata_{state} WHERE day <= :date and
-                    station = :station
+                    from alldata WHERE day <= :date and station = :station
                 ), stats as (
                     SELECT avg(p1) as avg_p1, stddev(p1) as stddev_p1,
                     avg(p2) as avg_p2, stddev(p2) as stddev_p2,

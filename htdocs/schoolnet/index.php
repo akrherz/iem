@@ -4,7 +4,7 @@ require_once "../../include/myview.php";
 
 $t = new MyView();
 
-$t->content = <<<EOF
+$t->content = <<<EOM
 
 <h3>SchoolNet</h3>
 
@@ -53,5 +53,5 @@ Often, they are placed on top of buildings and may
 have obstructions which could skew wind and temperature readings.  The
 stations are placed at schools for educational purposes and to get students
 interested in the weather.</div>
-EOF;
+EOM;
 $t->render('single.phtml');

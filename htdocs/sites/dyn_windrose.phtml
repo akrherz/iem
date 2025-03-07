@@ -117,7 +117,7 @@ $ar = array(
 );
 $fselect = make_select("fmt", $fmt, $ar);
 
-$content = <<<EOF
+$content = <<<EOM
 <h3>Custom Wind Rose Plots</h3>
 
 This application attempts to generate a wind rose for a time period of 
@@ -154,7 +154,7 @@ exists for those that wish to script against the windrose image/data service.</p
     <th>Year</th><th>Month</th><th>Day</th>
     <th>Hour</th><th>Minute</th>
 <td rowspan="3">
-EOF;
+EOM;
 $hs1 = hourSelect($hour1, "hour1");
 $hs2 = hourSelect($hour2, "hour2");
 $mi1 = minuteSelect($minute1, "minute1");
@@ -238,7 +238,7 @@ $content .= sprintf(
     $bins[5],
     $missive,
 );
-$jsextra = <<<EOF
+$jsextra = <<<EOM
 $(document).ready(function(){
     $("input[name=setbins]").click(function(){
         if (this.checked){
@@ -248,7 +248,7 @@ $(document).ready(function(){
         }
     });
 });
-EOF;
+EOM;
 
 $content .= "<br /><strong>Bar Convention of Plot:</strong>";
 $content .= '<br /><input type="radio" id="met" name="conv" value="from"';
@@ -326,12 +326,12 @@ if (isset($rose_uri)) {
     $content .= "<div class=\"alert alert-info\" id=\"img-loading\">Image will appear below once generated, please be patient...</div>";
     $content .= "<a href='{$rosedata_uri}' class='btn btn-primary' role='button' rel='nofollow'><i class='fa fa-list'></i> View raw data for chart</a><br />";
     if ($fmt == 'pdf') {
-        $content .= <<<EOF
+        $content .= <<<EOM
 <object id="windrose-plot" src="{$rose_uri}" width="700px" height="700px">
     <embed src="{$rose_uri}" width="700px" height="700px">
     </embed>
 </object>
-EOF;
+EOM;
     } else {
         $content .= "<img src=\"$rose_uri\" class=\"img-responsive\" id=\"windrose-plot\">";
     }
@@ -339,7 +339,7 @@ EOF;
     $content .= "<div class=\"alert alert-info\">Please make your custom plot
           selections above</a>";
 }
-$t->jsextra = <<<EOF
+$t->jsextra = <<<EOM
 <script>
   $('#windrose-plot').load(function(){
     $('#img-loading').css('display', 'none');	
@@ -347,7 +347,7 @@ $t->jsextra = <<<EOF
 
 {$jsextra}
 </script>
-EOF;
+EOM;
 
 $t->content = $content;
 $t->render('sites.phtml');

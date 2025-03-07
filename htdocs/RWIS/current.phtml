@@ -157,7 +157,7 @@ foreach ($skippedStations as $key => $parts) {
     $table .= ">" . $parts["ts"]->format($format) . "</td><th align='center' colspan='9'>Site Offline</th></tr>\n";
 }
 
-$content = <<<EOF
+$content = <<<EOM
 <ol class="breadcrumb">
  <li><a href="/RWIS/">RWIS Network</a></li>
  <li class="active">Sortable Currents (sorted by: <b>{$vals[$sortcol]}</b>)</li>
@@ -213,6 +213,6 @@ $content = <<<EOF
 <b>2</b> The Iowa City (I-80) RWIS site does not have atmospheric sensors on it
 , so it is not included on this page.<br>
 
-EOF;
+EOM;
 $t->content = $content;
 $t->render('sortables.phtml');

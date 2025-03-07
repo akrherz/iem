@@ -45,8 +45,15 @@ if ($station != null) {
         xssafe("</script>");
     }
     if ($sortcol == 'station') $sortcol = 'valid';
-    $jdata = file_get_contents("http://iem.local/json/climodat_stclimo.py?station={$station}&syear={$syear}&eyear={$eyear}");
-    $URI = sprintf("https://mesonet.agron.iastate.edu/json/climodat_stclimo.py?station={$station}&syear={$syear}&eyear={$eyear}");
+    $inturl = sprintf(
+        "%s/json/climodat_stclimo.py?station=%s&syear=%s&eyear=%s",
+        $INTERNAL_BASEURL,
+        $station,
+        $syear,
+        $eyear
+    );
+    $jdata = file_get_contents($inturl);
+    $URL = str_replace($INTERNAL_BASEURL, $EXTERNAL_BASEURL, $inturl);
     $json = json_decode($jdata, $assoc = TRUE);
     $data = array();
     $table = "";
@@ -98,8 +105,17 @@ if ($station != null) {
     // Option 2, just a single date
 } else {
     if ($sortcol == 'valid') $sortcol = 'station';
-    $jdata = file_get_contents("http://iem.local/geojson/climodat_dayclimo.py?network={$network}&month={$month}&day={$day}&syear={$syear}&eyear={$eyear}");
-    $URI = sprintf("https://mesonet.agron.iastate.edu/geojson/climodat_dayclimo.py?network={$network}&month={$month}&day={$day}&syear={$syear}&eyear={$eyear}");
+    $inturl = sprintf(
+        "%s/json/climodat_dayclimo.py?network=%s&month=%s&day=%s&syear=%s&eyear=%s",
+        $INTERNAL_BASEURL,
+        $network,
+        $month,
+        $day,
+        $syear,
+        $eyear,
+    );
+    $jdata = file_get_contents($inturl);
+    $URI = str_replace($INTERNAL_BASEURL, $EXTERNAL_BASEURL, $inturl);
     $json = json_decode($jdata, $assoc = TRUE);
     $data = array();
     $table = "";

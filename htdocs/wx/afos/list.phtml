@@ -12,7 +12,7 @@ require_once "../../../include/mlib.php";
 
 $t = new MyView();
 $t->title = "NWS Text Product by Issuing Center by Date";
-$t->headextra = <<<EOF
+$t->headextra = <<<EOM
  <link rel="stylesheet" type="text/css" href="/vendor/select2/4.0.3/select2.min.css"/ >
 <style>
 .col-md-2 {
@@ -21,11 +21,11 @@ $t->headextra = <<<EOF
     max-height: 350px;
 }
 </style>
-EOF;
-$t->jsextra = <<<EOF
+EOM;
+$t->jsextra = <<<EOM
 <script src="/vendor/select2/4.0.3/select2.min.js"></script>
 <script src="list.js"></script>
-EOF;
+EOM;
 
 // A dance here to get a 4-char and 3-char identifier
 $source = isset($_REQUEST["source"]) ? substr(xssafe($_GET["source"]), 0, 4) : 'DMX';
@@ -44,7 +44,7 @@ $year2 = get_int404("year2", date("Y"));
 $month2 = get_int404("month2", date("m"));
 $day2 = get_int404("day2", date("d"));
 
-$res = file_get_contents("http://iem.local/json/reference.py");
+$res = file_get_contents("{$INTERNAL_BASEURL}/json/reference.py");
 $jobj = json_decode($res, $assoc = TRUE, JSON_FORCE_OBJECT);
 $pilselect = make_select("pil", $pil, $jobj['prodDefinitions'], $jscallback = "",
     $cssclass = "form-control iemselect2",

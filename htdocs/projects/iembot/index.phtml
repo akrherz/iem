@@ -97,7 +97,7 @@ warnings by their chat partners.</p>
 <script>
 function urlChanger(){
  var myid =  document.myForm.wfo.value.toLowerCase();
- document.getElementById("wfolink").innerHTML = "<b>URL:</b> <a href=\"https://weather.im/iembot-rss/room/"+ myid +"chat.xml\">https://mesonet.agron.iastate.edu/iembot-rss/room/"+ myid +"chat.xml</a>";
+ document.getElementById("wfolink").innerHTML = "<b>URL:</b> <a href=\"https://weather.im/iembot-rss/room/"+ myid +"chat.xml\">{$EXTERNAL_BASEURL}/iembot-rss/room/"+ myid +"chat.xml</a>";
 }
 </script>
 <form name="myForm">

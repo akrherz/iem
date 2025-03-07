@@ -16,7 +16,7 @@ $nselect = networkSelect("IA_ASOS", $station);
 $yselect = yearSelect(1995, 2011, $year);
 $mselect = monthSelect($month);
 $dselect = daySelect($day);
-$content = <<<EOF
+$content = <<<EOM
 <ol class="breadcrumb">
  <li><a href="/AWOS/">AWOS Network</a></li>
  <li class="active">One minute time series</li>
@@ -37,10 +37,10 @@ Make plot selections: <br>
    
   <input type="submit" value="Make Plot">
   </form>
-EOF;
+EOM;
 if (strlen($station) > 0 ) {
 
-$content .= <<<EOF
+$content .= <<<EOM
 
 <br />
 <img class="img img-responsive" src="1min.php?year={$year}&amp;month={$month}&amp;day={$day}&amp;station={$station}" alt="Time Series">
@@ -55,11 +55,11 @@ $content .= <<<EOF
 <p><b>Note:</b> The wind speeds are indicated every minute by the red line. 
 The blue dots represent wind direction and are shown every 10 minutes.</p>
 
-EOF;
+EOM;
 } 
-$content .= <<<EOF
+$content .= <<<EOM
 
 <br><br>
-EOF;
+EOM;
 $t->content = $content;
 $t->render('single.phtml');

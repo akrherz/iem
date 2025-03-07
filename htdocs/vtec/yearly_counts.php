@@ -103,10 +103,10 @@ if (is_null($phenomena) || is_null($significance)) {
         $cachedwarning = '';
     }
 
-    $table = <<<EOF
+    $table = <<<EOM
     <table class="table table-striped">
     <thead class="sticky"><tr><th>P</th><th>S</th><th>Phenomena</th><th>Significance</th>
-EOF;
+EOM;
     $years = array_keys($data);
     asort($years);
     foreach ($years as $i => $yr) {
@@ -148,10 +148,10 @@ EOF;
         $cachedwarning = '';
     }
 
-    $table = <<<EOF
+    $table = <<<EOM
     <table class="table table-striped">
     <thead class="sticky"><tr><th>WFO</th><th>WFO Name</th>
-EOF;
+EOM;
     $years = array_keys($data);
     asort($years);
     foreach ($years as $i => $yr) {
@@ -185,7 +185,7 @@ EOF;
     );
 }
 
-$content = <<<EOF
+$content = <<<EOM
 <ol class="breadcrumb">
 <li><a href="/nws/">NWS Resources</a></li>
 <li class="active">VTEC Warning Counts by Year/WFO</li>
@@ -208,14 +208,14 @@ $cachedwarning
 <p><h4>Option 1: All VTEC Events by Year</h4>
 <form method="GET" name="wfo">
 Limit Numbers by WFO: 
-EOF;
+EOM;
 $allWFO = array("_ALL" => array(
     "id" => "_ALL",
     "name" => "All Available",
     "archive_end" => null,
     "archive_begin" => new DateTime("1980-01-01")));
 $content .= networkSelect("WFO", $wfo, $extra = $allWFO, $selectName = "wfo");
-$content .= <<<EOF
+$content .= <<<EOM
     <input type="submit" value="Generate Table">
 </form>
 
@@ -229,6 +229,6 @@ $content .= <<<EOF
 
 $table 
 
-EOF;
+EOM;
 $t->content = $content;
 $t->render("single.phtml");

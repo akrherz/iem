@@ -9,7 +9,7 @@ require_once "../../include/imagemaps.php";
 $vtec_phenomena = $reference["vtec_phenomena"];
 $vtec_significance = $reference["vtec_significance"];
 
-$uri = "http://iem.local/json/vtec_pds.py";
+$uri = "{$INTERNAL_BASEURL}/json/vtec_pds.py";
 $data = file_get_contents($uri);
 $json = json_decode($data, $assoc = TRUE);
 $table = "";
@@ -62,7 +62,7 @@ The phrasing can occur in either the issuance and/or followup statements.</p>
 
 <p>There is a <a href="/json/">JSON(P) webservice</a> that backends this table presentation, you can
 directly access it here:
-<br /><code>https://mesonet.agron.iastate.edu/json/vtec_pds.py</code></p>
+<br /><code>{$EXTERNAL_BASEURL}/json/vtec_pds.py</code></p>
 
 <p><strong>Related:</strong>
 <a class="btn btn-primary" href="/vtec/emergencies.php">TOR/FFW Emergencies</a>

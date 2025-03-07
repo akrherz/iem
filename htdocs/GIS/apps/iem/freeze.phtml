@@ -118,7 +118,7 @@ if ($refresh > 0) {
     $t->headextra = "<meta http-equiv=\"refresh\" content=\"" . $refresh . "; URL=" . $uri . "?imgsize=$imgsize&refresh=" . $refresh . "&extents=" . $extents . "&state=" . $state . "\">\n";
 }
 $t->title = "IEM Freeze";
-$t->jsextra = <<<EOF
+$t->jsextra = <<<EOM
 <script Language="JavaScript">
  function resetButtons(){
    document.panButton.src = "/images/button_pan_off.png";
@@ -126,7 +126,7 @@ $t->jsextra = <<<EOF
    document.zoomoutButton.src = "/images/button_zoomout_off.png";
  }
 </script>
-EOF;
+EOM;
 
 $ar = array("1" => "Show", "0" => "Hide");
 $rselect = make_select("radar", $radar, $ar);
@@ -178,7 +178,7 @@ $ar = array(
 $imgsizeselect = make_select("imgsize", $imgsize, $ar);
 
 
-$t->content = <<<EOF
+$t->content = <<<EOM
 
 
 <div class="row">
@@ -250,5 +250,5 @@ of precipitation:<br>
 
         <p>Your feedback is needed!  Please <a href="/info/contacts.php">let me know</a> how you would like this 
 application to behave.
-EOF;
+EOM;
 $t->render("single.phtml");

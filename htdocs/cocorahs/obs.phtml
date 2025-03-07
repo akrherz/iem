@@ -83,7 +83,7 @@ if (strlen($station) > 0) {
     $link = "obs.phtml?station=" . $station . "&network=" . $network . "&sortvar=";
     if ($sortvar == "") $sortvar = "day";
 
-    $content = <<<EOF
+    $content = <<<EOM
 <ol class="breadcrumb">
  <li><a href="/cocorahs/">CoCoRaHS Mainpage</a></li>
  <li class="active">CoCoRaHS obs listed by station</li>
@@ -95,13 +95,13 @@ if (strlen($station) > 0) {
 <input type="text" size="10" maxlength="10" name="station" value="{$station}">
 Select Year: {$ys}
 <input type="submit" value="View CoCoRaHS Station"></form>
-EOF;
+EOM;
 }
 if (strlen($date) > 0) {
     $year = substr($date, 0, 4);
     $link = "obs.phtml?date=" . $date . "&network=" . $network . "&sortvar=";
     if ($sortvar == "") $sortvar = "id";
-    $content = <<<EOF
+    $content = <<<EOM
 <ol class="breadcrumb">
  <li><a href="/cocorahs/">CoCoRaHS Mainpage</a></li>
  <li class="active">CoCoRaHS obs listed by date</li>
@@ -112,7 +112,7 @@ if (strlen($date) > 0) {
 <p>Enter Date:<input type="text" size="11" maxlength="10" name="date" value="{$date}">
 
 <input type="submit" value="View Date"></form>
-EOF;
+EOM;
 }
 
 $content .= <<<EOM

@@ -29,7 +29,7 @@ $ar = Array(
 
 $tzselect = make_select("tz", "Etc/UTC", $ar);
         
-$t->content = <<<EOF
+$t->content = <<<EOM
 
 <ol class="breadcrumb">
  <li><a href="/projects/iao/">IEM Iowa Atmospheric Observatory Homepage</a></li>
@@ -110,5 +110,5 @@ by the National Science Foundation (grant #1701278).</p>
 
 <br /><br />
 
-EOF;
+EOM;
 $t->render('single.phtml');

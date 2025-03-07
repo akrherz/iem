@@ -54,7 +54,7 @@ if (
     $delta = (
         ($newlat - $metadata["lat"]) ** 2 +
         ($newlon - $metadata["lon"]) ** 2) ** 0.5;
-    $msg = <<<EOF
+    $msg = <<<EOM
 IEM Sites Move Request
 ======================
 > REMOTE_ADDR: {$client_ip}
@@ -65,8 +65,8 @@ IEM Sites Move Request
 > LAT:         {$newlat} OLD: {$metadata["lat"]}
 > EMAIL:       {$email}
 
-https://mesonet.agron.iastate.edu/sites/site.php?network={$network}&station={$station}
-EOF;
+{$EXTERNAL_BASEURL}/sites/site.php?network={$network}&station={$station}
+EOM;
     if (($delta < 0.5) || (strpos($email, '@') > 0)) {
        mail("akrherz@iastate.edu", "Please move {$station} {$network}", $msg);
     }

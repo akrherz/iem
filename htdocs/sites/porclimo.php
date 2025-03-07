@@ -49,7 +49,7 @@ foreach ($json["data"] as $key => $row) {
         $row["precip_max_years"]
     );
 }
-$t->content = <<<EOF
+$t->content = <<<EOM
 
 <p>This table presents a simple period-of-record summary for the current station.
 This is simply based off of whatever daily data exists without any adjustments,
@@ -69,5 +69,5 @@ etc. The raw data is available as a
 </tbody>
 </table>
 
-EOF;
+EOM;
 $t->render('sites.phtml');

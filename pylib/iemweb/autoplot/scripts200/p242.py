@@ -11,14 +11,13 @@ from zoneinfo import ZoneInfo
 import geopandas as gpd
 import matplotlib.patheffects as PathEffects
 from matplotlib.offsetbox import AnnotationBbox, OffsetImage
-from pyiem.database import get_sqlalchemy_conn
+from pyiem.database import get_sqlalchemy_conn, sql_helper
 from pyiem.exceptions import NoDataFound
 from pyiem.network import Table as NetworkTable
 from pyiem.plot import MapPlot
 from pyiem.plot.geoplot import MAIN_AX_BOUNDS
 from pyiem.plot.use_agg import plt
 from pyiem.reference import Z_OVERLAY2
-from sqlalchemy import text
 
 ICONS = {
     "0": "tropicalstorm.gif",
@@ -142,13 +141,14 @@ def get_df(table, product_id):
     """Find me data."""
     with get_sqlalchemy_conn("postgis") as conn:
         df = gpd.read_postgis(
-            text(
-                f"""
+            sql_helper(
+                """
             SELECT *, null as local_valid,
             valid at time zone 'UTC' as utc_valid
             from {table} WHERE (product_id = :pid or product_id_summary = :pid)
             ORDER by magnitude DESC NULLS LAST
-            """
+            """,
+                table=table,
             ),
             conn,
             params={"pid": product_id},
@@ -156,7 +156,7 @@ def get_df(table, product_id):
             parse_dates=[
                 "utc_valid",
             ],
-        )
+        )  # type: ignore
     if not df.empty:
         df["utc_valid"] = df["utc_valid"].dt.tz_localize(ZoneInfo("UTC"))
         nt = NetworkTable("WFO")

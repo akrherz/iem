@@ -296,7 +296,7 @@ EOM;
 $radlinks = "";
 foreach ($radtimes as $value) {
     $myhref = "/archive/data/" . gmdate('Y/m/d/', $value) . "GIS/uscomp/{$gissource}_" . gmdate('YmdHi', $value) . ".png";
-    $myhref2 = "https://mesonet.agron.iastate.edu{$myhref}";
+    $myhref2 = "{$EXTERNAL_BASEURL}{$myhref}";
     $radlinks .= "<li><a href='$myhref'>$myhref2</a> " .
         "(<a href='/request/gis/{$gissource}2gtiff.php?dstr=" . gmdate('YmdHi', $value) . "'>GeoTiff</a> or " .
         "<a href=\"/cgi-bin/request/raster2netcdf.py?dstr=" . gmdate('YmdHi', $value) . "&prod=composite_{$gissource}\">netCDF</a>)</li>\n";
@@ -305,7 +305,7 @@ foreach ($radtimes as $value) {
 
 /* We finally start output */
 
-$headextra .= <<<EOF
+$headextra .= <<<EOM
 <script type="text/javascript">
 //<!--
 function switchToArchiveMode()
@@ -314,7 +314,7 @@ function switchToArchiveMode()
 }
 -->
 </script>
-EOF;
+EOM;
 if ($autopilot == "yes") {
     $headextra .= <<<EOM
 <style>

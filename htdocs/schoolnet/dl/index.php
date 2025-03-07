@@ -20,7 +20,7 @@ $m2 = monthSelect(date("m"), "month2");
 $d2 = daySelect2(date("d"), "day2");
 $h2 = hourSelect(0, "hour2");
 
-$t->content = <<<EOF
+$t->content = <<<EOM
 <h3>SchoolNet Data Download</h3>
 
 <p>With this form, you can download schoolnet data.  The 
@@ -150,5 +150,5 @@ cold season precipitation is not accurately measured.
 Wind data afterwards are 1 minute average values.
 
 <br>
-EOF;
+EOM;
 $t->render('single.phtml');

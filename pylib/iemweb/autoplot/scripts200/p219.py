@@ -5,7 +5,8 @@ app will search backwards in time up to 24 hours to find the nearest
 issuance stored in the database.
 """
 
-from datetime import timedelta, timezone
+import time
+from datetime import datetime, timedelta, timezone
 
 import httpx
 import matplotlib.patheffects as PathEffects
@@ -14,7 +15,7 @@ import pandas as pd
 from matplotlib.patches import Rectangle
 from metpy.calc import wind_components
 from metpy.units import units
-from pyiem.database import get_dbconn, get_sqlalchemy_conn
+from pyiem.database import get_dbconn, get_sqlalchemy_conn, sql_helper
 from pyiem.exceptions import NoDataFound
 from pyiem.plot import figure
 from pyiem.util import LOG, utc
@@ -56,13 +57,18 @@ def get_text(product_id):
     """get the raw text."""
     text = "Text Unavailable, Sorry."
     uri = f"https://mesonet.agron.iastate.edu/api/1/nwstext/{product_id}"
-    try:
-        resp = httpx.get(uri, timeout=5)
-        resp.raise_for_status()
-        text = resp.content.decode("ascii", "ignore").replace("\001", "")
-        text = "\n".join(text.replace("\r", "").split("\n")[5:])
-    except Exception as exp:
-        LOG.warning(exp)
+    # Allow for some time for the product to show up in AFOS
+    for attempt in range(2):
+        try:
+            resp = httpx.get(uri, timeout=5)
+            resp.raise_for_status()
+            text = resp.content.decode("ascii", "ignore").replace("\001", "")
+            text = "\n".join(text.replace("\r", "").split("\n")[5:])
+            break
+        except Exception as exp:
+            if attempt > 0:
+                LOG.warning(exp)
+            time.sleep(10)
 
     return text
 
@@ -104,31 +110,32 @@ def compute_flight_condition(row):
     return "UNK"
 
 
+def fetch(station: str, ts: datetime) -> pd.DataFrame:
+    """Getme data."""
+    with get_sqlalchemy_conn("asos") as conn:
+        df = pd.read_sql(
+            sql_helper("""
+    SELECT f.*, t.product_id from taf t JOIN taf_forecast f on
+    (t.id = f.taf_id) WHERE t.station = :station and t.valid = :valid
+    ORDER by f.valid ASC"""),
+            conn,
+            params={"station": station, "valid": ts},
+            index_col="valid",
+        )
+    return df
+
+
 def plotter(ctx: dict):
     """Go"""
     valid = ctx["valid"].replace(tzinfo=timezone.utc)
-
-    def fetch(ts):
-        """Getme data."""
-        with get_sqlalchemy_conn("asos") as conn:
-            df = pd.read_sql(
-                "SELECT f.*, t.product_id from taf t JOIN taf_forecast f on "
-                "(t.id = f.taf_id) WHERE t.station = %s and t.valid = %s "
-                "ORDER by f.valid ASC",
-                conn,
-                params=(ctx["station"], ts),
-                index_col="valid",
-            )
-        return df
-
-    df = fetch(valid)
+    df = fetch(ctx["station"], valid)
     if df.empty:
         pgconn = get_dbconn("asos")
         valid = taf_search(pgconn, ctx["station"], valid)
         pgconn.close()
         if valid is None:
             raise NoDataFound("TAF data was not found!")
-        df = fetch(valid)
+        df = fetch(ctx["station"], valid)
     # prevent all nan from becoming an object
     df = df.fillna(np.nan).infer_objects()
     df["next_valid"] = (

@@ -1,4 +1,5 @@
 <?php
+require_once "../../../../config/settings.inc.php";
 // Create animated GIF! and then send it to them...
 require_once "../../../../include/memcache.php";
 
@@ -17,7 +18,8 @@ $cmdstr = "gifsicle --colors 256 --loopcount=0 --delay=100 -o {$fts}_anim.gif ";
 foreach ($urls as $k => $v) {
     // value is now single quoted, so remove those
     $res = file_get_contents(sprintf(
-        "http://iem.local%s",
+        "%s%s",
+        $INTERNAL_BASEURL,
         str_replace("'", "", $v)
     ));
     $fn = "{$fts}_{$k}.png";

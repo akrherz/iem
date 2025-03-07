@@ -4,7 +4,7 @@ require_once "../../../include/myview.php";
 $t = new MyView();
 $t->title = "RadMapserver Docs";
 
-$t->content = <<<EOF
+$t->content = <<<EOM
 <h3>NEXRAD Composite + Mapserver Documentation</h3>
 
 <div class="text">
@@ -66,6 +66,6 @@ href="/cgi-bin/mapserv/mapserv?map=/opt/iem/htdocs/radmapserver/radmapserver.map
 </ul>
 		
 </td></tr></table></div>
-EOF;
+EOM;
 $t->render('single.phtml');
 ?>

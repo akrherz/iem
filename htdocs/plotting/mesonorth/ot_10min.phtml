@@ -13,9 +13,9 @@ $ts = mktime(0, 0, 0, $month, $day, $year);
 
 $battery = "";
 if ($ts < mktime(0, 0, 0, 7, 9, 2006)) {
-    $battery = <<<EOF
+    $battery = <<<EOM
   <img src="battery.php?year={$year}&month={$month}&day={$day}" ALT="Time Series">
-EOF;
+EOM;
 }
 
 $ys = yearSelect2(2003, $year, "year");
@@ -41,7 +41,7 @@ $p = sprintf(
     date("d", $ts - 86400)
 );
 
-$t->content = <<<EOF
+$t->content = <<<EOM
 <ol class="breadcrumb">
 <li><a href="/other/">Other Networks</a></li>
 <li class="active">B548 Agronomy Server Room</li>
@@ -108,5 +108,5 @@ cooled air departs the heat exchanger.</li>
   <br />Fire at ISU FP&amp;M shuts down chilled water supply.</li>
 </ul>
 
-EOF;
+EOM;
 $t->render('single.phtml');

@@ -18,7 +18,7 @@ $imgurl = sprintf("/plotting/auto/plot/179/network:%s::station:%s" .
 $t->title = "Growing Degree Day Scenarios / Probabilities";
 $nselect = networkSelect($network, $station);
 $sselect = selectNetworkType("CLIMATE", $network);
-$t->content = <<<EOF
+$t->content = <<<EOM
 <ol class="breadcrumb">
  <li><a href="/COOP/">NWS COOP Network</a></li>
  <li class="active">Growing Degree Day Probabilities</li>
@@ -69,5 +69,5 @@ on record got to {$gddbase} by 1 October prior to a freeze.
 <p>The image will appear above and may take a few seconds to generate.
 
 </div>
-EOF;
+EOM;
 $t->render('single.phtml');

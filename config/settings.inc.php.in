@@ -1,8 +1,25 @@
 <?php
+/**
+ * This is a template file for the settings.inc.php file that is used to
+ * configure the IEM.  You should copy this file to settings.inc.php and
+ * edit it to match your configuration.
+ */
+
+// Ensure our dates default to Iowa
 date_default_timezone_set('America/Chicago');
-$rooturl='http://localhost/iem';
-define("BASEURL", "http://iem.local");
-$rootcgi='http://localhost/cgi-bin/iem';
+
+class IEMConfig{
+    // How internal code finds a webserver to make calls to
+    const INTERNAL_BASEURL = "http://iem.local";  // no trail slash
+    // How we document references to this server to the outside world
+    const EXTERNAL_BASEURL = "https://mesonet.agron.iastate.edu"; // no trail slash
+}
+
+// Shortcuts to allow usage in string blocks
+$INTERNAL_BASEURL = IEMConfig::INTERNAL_BASEURL;
+$EXTERNAL_BASEURL = IEMConfig::EXTERNAL_BASEURL;
+
+// Legacy cruft to remove
 $fb_feature_key='';
 $fb_feature_secret='';
 $fb_feature_id='';

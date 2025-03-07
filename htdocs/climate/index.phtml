@@ -4,7 +4,7 @@ require_once "../../include/myview.php";
 $t = new MyView();
 $t->title = "Climatology";
 
-$t->content = <<<EOF
+$t->content = <<<EOM
 <h3>Climatological Products</h3>
 
 <div style="margin-left: 20px;">
@@ -51,5 +51,5 @@ and the world!</p>
 <p>The <a href="http://www.hprcc.unl.edu/">High Plains Climate Center</a> and
 <a href="https://mrcc.purdue.edu/">Midwestern Regional Cimate Center</a>
 have a number of quality products for Iowa.
-EOF;
+EOM;
 $t->render('single.phtml');

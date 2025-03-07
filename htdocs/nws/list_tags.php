@@ -28,7 +28,8 @@ $bydamagetagchecked = "";
 if ($opt == "bywfo") {
     $bywfochecked = "checked";
     $jsonuri = sprintf(
-        "http://iem.local/json/ibw_tags.py?wfo=%s&year=%s",
+        "%s/json/ibw_tags.py?wfo=%s&year=%s",
+        $INTERNAL_BASEURL,
         $wfo,
         $year
     );
@@ -36,13 +37,14 @@ if ($opt == "bywfo") {
 } else {
     $bydamagetagchecked = "checked";
     $jsonuri = sprintf(
-        "http://iem.local/json/ibw_tags.py?damagetag=%s&year=%s",
+        "%s/json/ibw_tags.py?damagetag=%s&year=%s",
+        $INTERNAL_BASEURL,
         $damagetag,
         $year
     );
     $title = "NWS Damage Tags of $damagetag for $year";
 }
-$publicjsonuri = str_replace("http://iem.local", "https://mesonet.agron.iastate.edu", $jsonuri);
+$publicjsonuri = str_replace($INTERNAL_BASEURL, $EXTERNAL_BASEURL, $jsonuri);
 
 $t->title = $title;
 $t->headextra = '
@@ -200,14 +202,14 @@ function do_row_ffw($row)
     );
 }
 
-$svrtable = <<<EOF
+$svrtable = <<<EOM
  <table id='svr' class="table table-condensed table-striped table-bordered">
  <thead><tr><th>Eventid</th><th>Product</th><th>WFO</th><th>Start (UTC)</th><th>End</th>
  <th>Counties/Parishes</th>
  <th>Wind Tag</th><th>Hail Tag</th><th>Tornado Tag</th><th>Damage Tag</th>
  <th>Storm Speed (kts)</th></tr></thead>
  <tbody>
-EOF;
+EOM;
 $tortable = str_replace('svr', 'tor', $svrtable);
 $smwtable = <<<EOM
  <table id='svr' class="table table-condensed table-striped table-bordered">
@@ -217,7 +219,7 @@ $smwtable = <<<EOM
  <th>Storm Speed (kts)</th></tr></thead>
  <tbody>
 EOM;
-$ffwtable = <<<EOF
+$ffwtable = <<<EOM
  <table id='ffw' class="table table-condensed table-striped table-bordered">
  <thead><tr><th>Eventid</th><th>Product</th><th>WFO</th><th>Start (UTC)</th><th>End</th>
  <th>Counties/Parishes</th>
@@ -225,7 +227,7 @@ $ffwtable = <<<EOF
  <th>Heavy Rain Tag</th><th>Dam Tag</th>
  <th>Leeve Tag</th></tr></thead>
  <tbody>
-EOF;
+EOM;
 
 $data = file_get_contents($jsonuri);
 $json = json_decode($data, $assoc = TRUE);
@@ -253,7 +255,7 @@ $yselect = yearSelect2(2002, $year, 'year');
 $wselect = networkSelect("WFO", $wfo, array(), "wfo");
 $gentime = $json["gentime"];
 
-$t->content = <<<EOF
+$t->content = <<<EOM
  <ol class="breadcrumb">
  <li><a href="/nws/">NWS Resources</a></li>
  <li>List Warning Tags Issued</li>
@@ -310,5 +312,5 @@ $t->content = <<<EOF
 <button id="create-grid4" class="btn btn-info" type="button">Make Table Sortable</button>
 {$smwtable}
 
-EOF;
+EOM;
 $t->render('full.phtml');

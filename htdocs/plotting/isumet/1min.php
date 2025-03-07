@@ -1,6 +1,7 @@
 <?php
 require_once "../../../config/settings.inc.php";
 require_once "../../../include/mlib.php";
+require_once "../../../include/forms.php";
 require_once "../../../include/jpgraph/jpgraph.php";
 require_once "../../../include/jpgraph/jpgraph_line.php";
 require_once "../../../include/jpgraph/jpgraph_date.php";
@@ -9,7 +10,7 @@ require_once "../../../include/jpgraph/jpgraph_date.php";
 $year = isset($_GET["year"]) ? $_GET["year"] : date("Y");
 $month = isset($_GET["month"]) ? $_GET["month"] : date("m");
 $day = isset($_GET["day"]) ? $_GET["day"] : date("d");
-$station = isset($_REQUEST['station']) ? $_REQUEST['station']: null;
+$station = isset($_REQUEST['station']) ? xssafe($_REQUEST['station']): null;
 
 if (strlen($year) == 4 && strlen($month) > 0 && strlen($day) > 0 ){
   $myTime = strtotime($year."-".$month."-".$day);

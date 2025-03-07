@@ -335,7 +335,7 @@ if (preg_match("/ASOS/", $network)) {
     $notes .= <<<EOM
 <li>For recent years, this page also optionally shows observations from the
 <a href="https://madis.ncep.noaa.gov/madis_OMO.shtml">MADIS High Frequency METAR</a>
-dataset.  This dataset had a problem with temperatures detailed <a href="https://mesonet.agron.iastate.edu/onsite/news.phtml?id=1290">here</a>.</li>
+dataset.  This dataset had a problem with temperatures detailed <a href="/onsite/news.phtml?id=1290">here</a>.</li>
 EOM;
     $header = <<<EOM
     <tr align="center" bgcolor="#b0c4de">

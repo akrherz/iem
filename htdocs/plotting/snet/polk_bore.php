@@ -1,7 +1,7 @@
 <?php
 // 1 minute schoolnet data plotter
 // Cool.....
-include("../../../config/settings.inc.php");
+require_once "../../../config/settings.inc.php";
 
 $fcontents = file("data/SPKI4_071002.txt");
 $sts = mktime(9,0,0,10,2,2007);
@@ -131,13 +131,6 @@ $lineplot2=new LinePlot($alti, $times);
 $lineplot2->SetLegend("Pressure");
 $lineplot2->SetColor("black");
 
-//if ($hasgust == 1){
-  // Create the linear plot
-//  $lp1=new LinePlot($gust);
-//  $lp1->SetLegend("Peak Wind Gust");
-//  $lp1->SetColor("black");
-//}
-
 // Create the linear plot
 $sp1=new ScatterPlot($drct, $times);
 $sp1->mark->SetType(MARK_FILLEDCIRCLE);
@@ -151,4 +144,3 @@ $graph->AddY(0,$lineplot);
 $graph->AddY(1,$lineplot2);
 //$graph->AddY2($lp1);
 $graph->Stroke();
-?>

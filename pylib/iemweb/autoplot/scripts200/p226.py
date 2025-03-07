@@ -5,9 +5,8 @@ CWA plots.
 
 from datetime import timedelta, timezone
 
-# third party
-from geopandas import read_postgis
-from pyiem.database import get_sqlalchemy_conn
+import geopandas as gpd
+from pyiem.database import get_sqlalchemy_conn, sql_helper
 from pyiem.exceptions import NoDataFound
 from pyiem.plot.geoplot import MapPlot
 from pyiem.reference import Z_OVERLAY2
@@ -50,21 +49,22 @@ def plotter(ctx: dict):
     num = ctx["num"]
 
     with get_sqlalchemy_conn("postgis") as conn:
-        df = read_postgis(
-            "select geom, expire at time zone 'UTC' as expire, "
-            "issue at time zone 'UTC' as issue, narrative from cwas "
-            "where center = %s and num = %s and "
-            "issue > %s and issue <= %s ORDER by issue DESC LIMIT 1",
+        df = gpd.read_postgis(
+            sql_helper("""
+    select geom, expire at time zone 'UTC' as expire,
+    issue at time zone 'UTC' as issue, narrative from cwas
+    where center = :center and num = :num and
+    issue > :sts and issue <= :ets ORDER by issue DESC LIMIT 1"""),
             conn,
-            params=(
-                ctx["cwsu"],
-                num,
-                ctx["issue"] - timedelta(hours=24),
-                ctx["issue"],
-            ),
+            params={
+                "center": ctx["cwsu"],
+                "num": num,
+                "sts": ctx["issue"] - timedelta(hours=24),
+                "ets": ctx["issue"],
+            },
             index_col=None,
             geom_col="geom",
-        )
+        )  # type: ignore
     if df.empty:
         raise NoDataFound("CWA Event was not found, sorry.")
     for col in ["issue", "expire"]:

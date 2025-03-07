@@ -712,7 +712,7 @@ if (in_array("ci", $layers)) {
     $ci->connection = get_dbconn_str("postgis");
     $ci->status = in_array("ci", $layers);
     $tblyr = $ts->format("Y");
-    $sql = <<<EOF
+    $sql = <<<EOM
 geo from (
     WITH stormbased as (SELECT geom from sbw_$tblyr where wfo = '$wfo' 
         and eventid = $eventid and significance = '$significance' 
@@ -730,7 +730,7 @@ geo from (
     from stormbased s, countybased c
             
 ) as foo USING unique k USING SRID=4326
-EOF;
+EOM;
     $ci->data = $sql;
     $ci->type = MS_LAYER_LINE;
     $ci->setProjection("init=epsg:4326");

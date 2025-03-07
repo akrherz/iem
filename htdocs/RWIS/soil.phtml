@@ -1,9 +1,10 @@
 <?php
 require_once "../../config/settings.inc.php";
 require_once "../../include/myview.php";
-$t = new MyView();
 require_once "../../include/database.inc.php";
 require_once "../../include/forms.php";
+
+$t = new MyView();
 $dbconn = iemdb("iem");
 $sortcol = isset($_GET['sortcol']) ? xssafe($_GET['sortcol']) : 'valid';
 $vals = array(
@@ -30,7 +31,8 @@ if (!array_key_exists($sortcol, $vals)){
 }
 
 /* Query out the data */
-$rs = pg_prepare($dbconn, "SELECT", "select t.valid, s.name as sname,
+$stname = uniqid();
+pg_prepare($dbconn, $stname, "select t.valid, s.name as sname,
     max(case when sensor_id = 1 then temp else null end) as tmpf_1in,
     max(case when sensor_id = 3 then temp else null end) as tmpf_3in,
     max(case when sensor_id = 6 then temp else null end) as tmpf_6in,
@@ -49,7 +51,7 @@ $rs = pg_prepare($dbconn, "SELECT", "select t.valid, s.name as sname,
       from rwis_soil_data t, stations s
       where s.remote_id = t.location_id GROUP by sname, valid
       ORDER by $sortcol DESC NULLS LAST");
-$rs = pg_execute($dbconn, "SELECT", array());
+$rs = pg_execute($dbconn, $stname, array());
 
 $t->title = "RWIS Current Soil Probe Data";
 $t->refresh = 600;
@@ -74,7 +76,7 @@ function f($val)
 
 $data = array();
 $table  = "";
-for ($i = 0; $row = pg_fetch_array($rs); $i++) {
+for ($i = 0; $row = pg_fetch_assoc($rs); $i++) {
     $table .= sprintf(
         "<tr><th>%s</th><th>%s</th>
    <td>%s</td><td>%s</td><td>%s</td><td>%s</td>
@@ -101,7 +103,7 @@ for ($i = 0; $row = pg_fetch_array($rs); $i++) {
     );
 }
 
-$t->content = <<<EOF
+$t->content = <<<EOM
 <h3>Iowa RWIS Soil Probe Data</h3>
 
 <p>** This page will automatically refresh every 10 minutes.
@@ -143,5 +145,5 @@ $t->content = <<<EOF
 </form>
 
 <br><br>
-EOF;
+EOM;
 $t->render('sortables.phtml');

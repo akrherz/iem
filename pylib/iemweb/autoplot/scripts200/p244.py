@@ -6,11 +6,10 @@ with its "Climdiv" dataset.  This autoplot creates comparisons between the two.
 """
 
 import pandas as pd
-from pyiem.database import get_dbconn, get_sqlalchemy_conn
+from pyiem.database import get_dbconn, get_sqlalchemy_conn, sql_helper
 from pyiem.exceptions import NoDataFound
 from pyiem.plot import figure
 from pyiem.util import get_properties
-from sqlalchemy import text
 
 from iemweb.util import month2months
 
@@ -114,7 +113,7 @@ def plotter(ctx: dict):
     """
     with get_sqlalchemy_conn("coop") as conn:
         df = pd.read_sql(
-            text(sql),
+            sql_helper(sql),
             conn,
             params={"station": station},
             index_col="year",

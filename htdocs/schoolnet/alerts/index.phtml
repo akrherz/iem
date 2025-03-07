@@ -4,7 +4,7 @@ require_once "../../../include/myview.php";
 $t = new MyView();
 $t->title = "School Network Wind Gusts";
 
-$t->content = <<<EOF
+$t->content = <<<EOM
 <h3>Automated Wind Gust Alerts</h3><p>
 
 <div class="text">
@@ -90,5 +90,5 @@ SchoolNets.  Some choose to subscribe to sites upstream of their CWA (County War
 
 <p>Please feel free to <a href="/info/contacts.php">contact us</a> if you have any questions!</p>
 </div>
-EOF;
+EOM;
 $t->render('single.phtml');

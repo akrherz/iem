@@ -7,7 +7,7 @@ $t->title = "NWS Text Archives";
 
 $d = date("Y/m/d");
 
-$t->content = <<<EOF
+$t->content = <<<EOM
 <ol class="breadcrumb">
  <li><a href="/">IEM Homepage</a></li>
  <li><a href="/nws/">NWS Mainpage</a></li>
@@ -118,5 +118,5 @@ efficiently.</p>
 </div>
 </div><!-- ./row -->
 
-EOF;
+EOM;
 $t->render('single.phtml');

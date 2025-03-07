@@ -29,7 +29,7 @@ if ($sday > 0) {
     $sname = $nt->table[$station]['name'];
     $link = "periods.phtml?station={$station}&amp;network={$network}&amp;sday=$sday&eday=$eday&smonth=$smonth&emonth=$emonth&sortcol=";
     $nicedate = sprintf("%s - %s", date("d M", $sts), date("d M", $ets));
-    $table .= <<<EOF
+    $table .= <<<EOM
      <p><strong>Yearly average temperatures for {$sname} [$station] between ({$nicedate}) 
      dates inclusive</strong><br />
      <table class="table table-striped table-condensed table-bordered">
@@ -41,7 +41,7 @@ if ($sday > 0) {
        <th><a href="{$link}sum_precip">Precip Total (inch):</a></th>
        <th><a href="{$link}sum_snow">Snow Total (inch):</a></th>
        </tr>
-EOF;
+EOM;
     $mytable = sprintf("alldata_%s", substr($station, 0, 2));
     $rs = pg_prepare($coop, "SELECTOR", "select year,
              sum(precip) as sum_precip, sum(snow) as sum_snow,

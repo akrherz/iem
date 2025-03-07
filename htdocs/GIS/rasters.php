@@ -27,7 +27,7 @@ for ($i = 0; $row = pg_fetch_assoc($rs); $i++) {
         $runits = $row["units"];
         $urltemplate = str_replace(
             "/mesonet/ARCHIVE",
-            "https://mesonet.agron.iastate.edu/archive",
+            "{$EXTERNAL_BASEURL}/archive",
             is_null($row["filename_template"]) ? "": $row["filename_template"]
         );
         $t->title = sprintf("RASTER info for %s", $rname);
@@ -80,7 +80,7 @@ if ($rid > 0) {
     }
 }
 
-$t->content = <<<EOF
+$t->content = <<<EOM
 <ol class="breadcrumb">
  <li><a href="/GIS/">GIS Mainpage</a></li>
  <li class="active">IEM RASTER Information</li>
@@ -112,7 +112,7 @@ modifiers below are <a href="https://docs.python.org/2/library/time.html#time.st
 <p>A general web service also exists to convert these RASTERs to netCDF "on-the-fly".  The
 URL format is like so:</p>
 
-<pre>https://mesonet.agron.iastate.edu/cgi-bin/request/raster2netcdf.py?dstr=%Y%m%d%H%M&amp;prod={$rname}</pre>
+<pre>{$EXTERNAL_BASEURL}/cgi-bin/request/raster2netcdf.py?dstr=%Y%m%d%H%M&amp;prod={$rname}</pre>
 
 <p>Try the netCDF Conversion!
 <form method="GET" name="try" action="/cgi-bin/request/raster2netcdf.py">
@@ -137,5 +137,5 @@ if so!</div>
 </tbody>
 </table>
 
-EOF;
+EOM;
 $t->render('single.phtml');

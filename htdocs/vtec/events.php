@@ -20,14 +20,16 @@ $son = (isset($_GET["son"]) && $_GET["son"] == "on");
 if ($which == 'wfo') {
     $service = "";
     $uri = sprintf(
-        "http://iem.local/json/vtec_events.py?wfo=%s&year=%s",
+        "%s/json/vtec_events.py?wfo=%s&year=%s",
+        $INTERNAL_BASEURL,
         $wfo,
         $year
     );
 } else {
     $service = "_bystate";
     $uri = sprintf(
-        "http://iem.local/json/vtec_events_bystate.py?state=%s&year=%s",
+        "%s/json/vtec_events_bystate.py?state=%s&year=%s",
+        $INTERNAL_BASEURL,
         $state,
         $year
     );
@@ -39,8 +41,8 @@ if ($phenomena != "" && $pon) {
     $uri .= sprintf("&phenomena=%s", $phenomena);
 }
 $public_uri = str_replace(
-    "http://iem.local",
-    "https://mesonet.agron.iastate.edu",
+    $INTERNAL_BASEURL,
+    $EXTERNAL_BASEURL,
     $uri
 );
 $data = file_get_contents($uri);
@@ -58,7 +60,7 @@ foreach ($json['events'] as $key => $val) {
         $ts = strtotime($val["issue"]);
         // Create a deep link to HML autoplot
         $hmlurl = sprintf(
-            "<a href=\"https://mesonet.agron.iastate.edu/" .
+            "<a href=\"{$EXTERNAL_BASEURL}/" .
                 "plotting/auto/?_wait=no&q=160&station=%s&dt=%s\">%s</a>",
             $val["hvtec_nwsli"],
             date("Y/m/d 0000", $ts),
@@ -106,7 +108,7 @@ $schecked = ($which == 'state') ? "CHECKED" : "";
 $ponchecked = $pon ? "CHECKED" : "";
 $sonchecked = $son ? "CHECKED" : "";
 
-$t->content = <<<EOF
+$t->content = <<<EOM
 <ol class="breadcrumb">
  <li><a href="/nws/">NWS Resources</a></li>
  <li class="active">NWS VTEC Event Listing</li>
@@ -121,9 +123,9 @@ is stored within the database.  Hopefully, you can copy/paste the table into
 your favorite spreadsheet program for further usage!</p>
 
 <p>This listing provides two links to find more information.  The "Event ID" column
-provides a direct link into the <a href="https://mesonet.agron.iastate.edu/vtec/">IEM VTEC Browser</a>
+provides a direct link into the <a href="/vtec/">IEM VTEC Browser</a>
 and the "HVTEC NWSLI" column provides a direct link into the
-<a href="https://mesonet.agron.iastate.edu/plotting/auto/?q=160">HML Obs + Forecast Autoplot</a>
+<a href="/plotting/auto/?q=160">HML Obs + Forecast Autoplot</a>
 application.</p>
 
 <p>There is a <a href="/json/">JSON(P) webservice</a> that backends this table presentation, you can
@@ -175,5 +177,5 @@ directly access it here:
 </table>
 </div>
 
-EOF;
+EOM;
 $t->render("single.phtml");

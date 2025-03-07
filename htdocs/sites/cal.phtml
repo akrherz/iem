@@ -60,7 +60,7 @@ if ($portfolio != null)
 }
 
 
-$t->content = <<<EOF
+$t->content = <<<EOM
 <table class="table table-striped">
 <thead><tr>
  <th>ID#:</th>
@@ -72,5 +72,5 @@ $t->content = <<<EOF
 </tr></thead>
 {$table}
 </table>
-EOF;
+EOM;
 $t->render('sites.phtml');

@@ -22,7 +22,7 @@ $modeselect = make_select("mode", $mode, $ar);
 $s1 = networkSelect("IACLIMATE", $station1, Array(), "station1");
 $s2 = networkSelect("IACLIMATE", $station2, Array(), "station2");
 
-$t->content = <<<EOF
+$t->content = <<<EOM
 <h3>Daily Climatology</h3>
 
 <p>This application dynamically generates plots of the daily average high
@@ -61,5 +61,5 @@ plot two stations at once for a visual comparison.</p>
 
 
 <img src="$imgurl">
-EOF;
+EOM;
 $t->render('single.phtml');

@@ -21,7 +21,7 @@ Open-GIS based web services.  Please let us know if you would like to see a diff
 Line coverage shapefile in the <i>NAD83 UTM Zone15 North</i> projection.
 </p>
 <ul>
- <li>Current road conditions: <a href="https://mesonet.agron.iastate.edu/data/gis/shape/26915/ia/iaroad_cond.zip">Zip File</a> (~200 KB)</li>
+ <li>Current road conditions: <a href="/data/gis/shape/26915/ia/iaroad_cond.zip">Zip File</a> (~200 KB)</li>
 </ul>
 
 <h4>Google Earth / KML</h4>
@@ -29,11 +29,11 @@ Line coverage shapefile in the <i>NAD83 UTM Zone15 North</i> projection.
 <p>This file is in KML format, which works in many applications, such as 
 Google Earth.<br />
 
-<a href="https://mesonet.agron.iastate.edu/kml/roadcond.kml">https://mesonet.agron.iastate.edu/kml/roadcond.kml</a>
+<a href="/kml/roadcond.kml">{$EXTERNAL_BASEURL}/kml/roadcond.kml</a>
 
 <p>Also, here is a test layer you can use to see the various colors used.<br />
 
-<a href="https://mesonet.agron.iastate.edu/kml/roadcond.php?test">https://mesonet.agron.iastate.edu/kml/roadcond.php?test</a>
+<a href="/kml/roadcond.php?test">{$EXTERNAL_BASEURL}/kml/roadcond.php?test</a>
 
 <h4>Open GIS Consortium Web Services:</h4>
 <p>
@@ -44,6 +44,6 @@ application to one of these services.
 </p>
 
 <p><strong>Web Map Service:</strong>
-<br /> <code>https://mesonet.agron.iastate.edu/cgi-bin/wms/iowa/roadcond.cgi?</code></p>
+<br /> <code>{$EXTERNAL_BASEURL}/cgi-bin/wms/iowa/roadcond.cgi?</code></p>
 EOM;
 $t->render('single.phtml');

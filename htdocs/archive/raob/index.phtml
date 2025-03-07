@@ -4,7 +4,7 @@ require_once "../../../include/imagemaps.php";
 require_once "../../../include/myview.php";
 define("IEM_APPID", 146);
 $t = new MyView();
-$t->jsextra=<<<EOF
+$t->jsextra=<<<EOM
 <script src="/vendor/flatpickr/4.6.9/flatpickr.min.js"></script>
 <script type="text/javascript">
 $(function(){
@@ -17,14 +17,14 @@ $(function(){
 });
 });
 </script>
-EOF;
-$t->headextra= <<<EOF
+EOM;
+$t->headextra= <<<EOM
 <link rel="stylesheet" type="text/css"
 href="/vendor/flatpickr/4.6.9/flatpickr.min.css"/>
-EOF;
+EOM;
 $t->title = "Rawinsonde Data Archive";
 $nselect = networkSelect("RAOB", "OAX");
-$t->content = <<<EOF
+$t->content = <<<EOM
 <h3>Rawinsonde (RAOB) Data Archive</h3>
 
 <p>The IEM proceses and archives Rawinsonde (RAOB) data made available on the
@@ -93,5 +93,5 @@ range_sm     Ballon range from launch in statute miles
 <p>A JSON webservice exists for more programatic access, more information is
 <a href="/json/raob.py?help">here</a>.</p>
 
-EOF;
+EOM;
 $t->render('single.phtml');

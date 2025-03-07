@@ -16,7 +16,7 @@ $eventid = get_int404("eventid", 103);
 $phenomena = isset($_GET["phenomena"]) ? substr(xssafe($_GET["phenomena"]),0,2) : "SV";
 $significance = isset($_GET["significance"]) ? substr(xssafe($_GET["significance"]),0,1) : "W";
 
-$sql = <<<EOF
+$sql = <<<EOM
     WITH stormbased as (SELECT geom from sbw_$year where wfo = '$wfo' 
         and eventid = $eventid and significance = '$significance' 
         and phenomena = '$phenomena' and status = 'NEW'), 
@@ -31,7 +31,7 @@ $sql = <<<EOF
           ST_exteriorring(ST_geometryn(ST_multi(s.geom),1))
             ), 4326) as geo
     from stormbased s, countybased c) as foo
-EOF;
+EOM;
 $rs = pg_exec($connect, $sql);
 header('Content-disposition: attachment; filename=sbw.kml');
 header("Content-Type: application/vnd.google-earth.kml+xml");

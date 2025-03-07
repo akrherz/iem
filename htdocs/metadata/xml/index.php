@@ -8,11 +8,11 @@ $nt = new NetworkTable("ISUSM");
 $t = new MyView();
 $t->title = "IEM NMP Metadata";
 
-$content = <<<EOF
+$content = <<<EOM
 
 <h3>IEM NMP Metadata</h3>
 
-EOF;
+EOM;
 
 foreach ($nt->table as $k => $v) {
     $content .= sprintf(

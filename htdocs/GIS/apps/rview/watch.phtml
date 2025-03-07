@@ -117,7 +117,7 @@ if (isset($lurl)) {
 }
 $kml = htmlentities($row["kml"]);
 
-$t->content = <<<EOF
+$t->content = <<<EOM
 <ol class="breadcrumb">
 <li><a href="/current/severe.phtml">Severe Wx Products</a></li>
 <li class="active">Storm Prediction Center Convective Watch Archive</li>
@@ -189,5 +189,5 @@ valid area is issued by county and marine zone.
 <pre>{$row["geojson"]}</pre>
 
 
-EOF;
+EOM;
 $t->render('single.phtml');

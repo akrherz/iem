@@ -38,7 +38,7 @@ $ar = Array(
 
 $tzselect = make_select("tz", "Etc/UTC", $ar);
         
-$t->content = <<<EOF
+$t->content = <<<EOM
 <style type="text/css">
         #map {
             width: 100%;
@@ -320,5 +320,5 @@ by site. Values are in inches. This value may or may not contain frozen
 <dd>unprocessed reported observation in METAR format</dd>
 </dl>
 
-EOF;
+EOM;
 $t->render('full.phtml');

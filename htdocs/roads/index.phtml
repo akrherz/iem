@@ -7,7 +7,7 @@ $t = new MyView();
 $t->title = 'Winter Road Conditions';
 $t->refresh = 600;
 $tm = time();
-$t->content = <<<EOF
+$t->content = <<<EOM
 
 <div class="row">
           <div class="col-md-4">
@@ -40,5 +40,5 @@ $t->content = <<<EOF
 <br />Data shown is provisional and without warranty.
 
 </div></div>
-EOF;
+EOM;
 $t->render('single.phtml');

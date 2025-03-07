@@ -315,7 +315,7 @@ EOM;
         $date2 =  date("d M Y", $basets);
         $year = date("Y", $basets);
         $year2 = intval($year) + 1;
-        $content .= <<<EOF
+        $content .= <<<EOM
 <div class="row">
 <div class="col-sm-7 col-md-7">
 <p>Displaying AFOS PIL: <strong>$pil</strong> 
@@ -360,7 +360,7 @@ Product Timestamp: <strong>{$dstamp} UTC</strong>
 </div>
 </div>
 
-EOF;
+EOM;
     }
     if (strtotime($row["mytime"]) != $basets) {
         continue;

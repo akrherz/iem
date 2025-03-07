@@ -10,11 +10,10 @@ cover the observation point and within one hour of the warning.
 from datetime import timedelta
 
 import pandas as pd
-from pyiem.database import get_sqlalchemy_conn
+from pyiem.database import get_sqlalchemy_conn, sql_helper
 from pyiem.exceptions import NoDataFound
 from pyiem.plot import figure_axes
 from pyiem.util import utc
-from sqlalchemy import text
 
 PDICT = {
     "svrtor": "Severe Thunderstorm + Tornado Warnings",
@@ -48,12 +47,14 @@ def get_data(ctx, meta):
     """Fetch Data."""
     with get_sqlalchemy_conn("asos1min") as conn:
         obsdf = pd.read_sql(
-            "SELECT valid, precip, extract(year from valid)::int as year, "
-            "extract(doy from valid)::int as doy "
-            "from alldata_1minute where station = %s and valid > %s and "
-            "precip > 0 and precip < 0.2 ORDER by valid ASC",
+            sql_helper("""
+    SELECT valid, precip, extract(year from valid)::int as year,
+    extract(doy from valid)::int as doy
+    from alldata_1minute where station = :station and valid > :valid and
+    precip > 0 and precip < 0.2 ORDER by valid ASC
+            """),
             conn,
-            params=(meta["id"], utc(2002, 1, 1)),
+            params={"station": meta["id"], "valid": utc(2002, 1, 1)},
             index_col="valid",
         )
     if obsdf.empty:
@@ -67,7 +68,7 @@ def get_data(ctx, meta):
         ]
     with get_sqlalchemy_conn("postgis") as conn:
         warndf = pd.read_sql(
-            text(
+            sql_helper(
                 """
             SELECT issue, expire from sbw WHERE issue > '2002-01-01' and
             phenomena = ANY(:ph) and significance = 'W' and
@@ -134,7 +135,7 @@ def plotter(ctx: dict):
     ax.set_xticks(range(df.index.min(), df.index.max() + 1, 4))
     ax.grid(True)
 
-    ax = fig.add_axes([0.05, 0.09, width, height])
+    ax = fig.add_axes((0.05, 0.09, width, height))
     ax.set_ylabel("Percentage [%]")
     ax.set_ylim(0, 100)
 
@@ -167,7 +168,7 @@ def plotter(ctx: dict):
     ax.set_xticks(range(df.index.min(), df.index.max() + 1, 4))
     ax.set_xlabel("Yearly precip may have missing data")
 
-    ax = fig.add_axes([0.58, 0.5, 0.37, 0.31])
+    ax = fig.add_axes((0.58, 0.5, 0.37, 0.31))
     idx = pd.MultiIndex.from_product([obsdf["precip"].unique(), [True, False]])
     gdf = (
         obsdf[["precip", "inwarn", "year"]]

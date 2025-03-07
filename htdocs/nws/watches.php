@@ -7,7 +7,7 @@ require_once "../../include/forms.php";
 require_once "../../include/imagemaps.php";
 
 $year = get_int404("year", date("Y"));
-$uri = sprintf("http://iem.local/json/watches.py?year=%s", $year);
+$uri = sprintf("%s/json/watches.py?year=%s", $INTERNAL_BASEURL, $year);
 $data = file_get_contents($uri);
 $json = json_decode($data, $assoc = TRUE);
 $table = "";
@@ -51,7 +51,7 @@ $('#makefancy').click(function(){
 EOM;
 
 
-$t->content = <<<EOF
+$t->content = <<<EOM
 <ol class="breadcrumb">
  <li><a href="/nws/">NWS Resources</a></li>
  <li class="active">SPC Watch Listing</li>
@@ -60,7 +60,7 @@ $t->content = <<<EOF
 
 <p>There is a <a href="/json/">JSON(P) webservice</a> that backends this table presentation, you can
 directly access it here:
-<br /><code>https://mesonet.agron.iastate.edu/json/watches.py?year=$year</code></p>
+<br /><code>{$EXTERNAL_BASEURL}/json/watches.py?year=$year</code></p>
 
 <p><strong>Related:</strong>
 <a class="btn btn-primary" href="/nws/pds_watches.php">PDS Watches</a>
@@ -91,5 +91,5 @@ directly access it here:
 </table>
 </div>
 
-EOF;
+EOM;
 $t->render("full.phtml");

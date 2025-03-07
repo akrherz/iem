@@ -29,7 +29,7 @@ $ar = array(
 );
 $tzselect = make_select("tz", "Etc/UTC", $ar);
 
-$t->content = <<<EOF
+$t->content = <<<EOM
 <ol class="breadcrumb">
  <li><a href="/RWIS/">RWIS Homepage</a></li>
  <li class="active">Iowa Soil Data Download</li>
@@ -134,5 +134,5 @@ How shall the output values be seperated?
 <input type="submit" value="Process Data Request">
 <input type="reset">
 </form>
-EOF;
+EOM;
 $t->render('single.phtml');

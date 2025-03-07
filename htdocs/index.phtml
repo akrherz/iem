@@ -12,11 +12,11 @@ require_once '../include/iemprop.php';
 require_once '../include/cameras.inc.php';
 
 $t = new MyView();
-$t->headextra = <<<EOF
+$t->headextra = <<<EOM
 <link rel="alternate" type="application/rss+xml" 
   title="IEM News + Notes Feed" 
   href="/rss.php" />
-EOF;
+EOM;
 if (date("md") == "0911" || isset($_GET["911"])){
     $feature = <<<EOM
 <h1 class="text-center">Remembering 9/11</h1>

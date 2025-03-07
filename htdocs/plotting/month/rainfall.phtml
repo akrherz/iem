@@ -12,12 +12,12 @@ $network = isset($_GET["network"]) ? xssafe($_GET['network']) : "IA_ASOS";
 $year = get_int404('year', date("Y"));
 $month = get_int404('month', date("m"));
 
-$t->headextra = <<<EOF
+$t->headextra = <<<EOM
 <link rel="stylesheet" href="/vendor/openlayers/{$OL}/ol.css" type="text/css">
 <link type="text/css" href="/vendor/openlayers/{$OL}/ol-layerswitcher.css" rel="stylesheet" />
 <link rel="stylesheet" type="text/css" href="/vendor/select2/4.0.3/select2.min.css"/ >
-EOF;
-$t->jsextra = <<<EOF
+EOM;
+$t->jsextra = <<<EOM
 <script src="/vendor/openlayers/{$OL}/ol.js" type="text/javascript"></script>
 <script src='/vendor/openlayers/{$OL}/ol-layerswitcher.js'></script>
 <script src="/js/olselect.js"></script>
@@ -27,11 +27,11 @@ $(document).ready(function(){
     $(".iemselect2").select2();	
 });
 </script>
-EOF;
+EOM;
 
 $t->title = "Monthly Rainfall Traces";
 
-$content = <<<EOF
+$content = <<<EOM
 <style type="text/css">
         #map {
             width: 450px;
@@ -44,12 +44,12 @@ $content = <<<EOF
 
 <p>This application creates a plot of observed precipitation versus 
 climatology for a site of your choice in Iowa. 
-EOF;
+EOM;
 if (strlen($station) > 0) {
     $nselect = networkSelect($network, $station);
     $yselect = yearSelect(2004, $year, "year");
     $mselect = monthSelect($month);
-    $content .= <<<EOF
+    $content .= <<<EOM
 <form name="ds" action="rainfall.phtml" method="GET">
 <input type="hidden" value="{$network}" name="network">
 <table cellspacing=2 border=1 cellpadding=2>
@@ -63,10 +63,10 @@ if (strlen($station) > 0) {
 </form>
 
 <p><img src="/plotting/auto/plot/17/month:{$month}::year:{$year}::station:{$station}::network:{$network}::p:precip.png" alt="Time Series" />
-EOF;
+EOM;
 } else {
     $nselect = networkSelect($network, "");
-    $content .= <<<EOF
+    $content .= <<<EOM
 
 <br /><a href="rainfall.phtml?network=IA_ASOS">Iowa ASOS</a> &nbsp; 
 <a href="rainfall.phtml?network=AWOS">Iowa AWOS</a> &nbsp; 
@@ -80,7 +80,7 @@ EOF;
 <td><input type="submit" value="Make Plot"></tr></table>
 <div id="map" data-network="{$network}"></div>
 </form>
-EOF;
+EOM;
 }
 $t->content = $content;
 $t->render('single.phtml');

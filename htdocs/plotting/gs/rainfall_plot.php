@@ -56,7 +56,7 @@ $aobs = array();
 $zeros = array();
 $atimes = array();
 $atot = 0;
-for ($i = 0; $row = pg_fetch_array($rs); $i++) {
+for ($i = 0; $row = pg_fetch_assoc($rs); $i++) {
     $p = $row["pday"];
     if ($p < 0) $p = 0;
     $atot += $p;
@@ -81,7 +81,7 @@ $aclimate = array();
 $atot = 0;
 
 $times = array();
-for ($i = 0; $row = pg_fetch_array($rs); $i++) {
+for ($i = 0; $row = pg_fetch_assoc($rs); $i++) {
     $p = $row["precip"];
     $climate[$i] = $p;
     $atot += $p;

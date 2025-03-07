@@ -173,7 +173,7 @@ if (strlen($station) > 0) {
 EOM; 
     }
 
-    $content .= <<<EOF
+    $content .= <<<EOM
 <table class="table table-bordered">
 <thead>
 <tr><th>Select Station</th><th colspan="4">Timespan</th></tr>
@@ -203,10 +203,10 @@ EOM;
 
  <br><img src="SFtemps.php?station={$station}&network={$network}{$cgiStr}" alt="Time Series" class="img img-responsive"/>
  $plots
-EOF;
+EOM;
 } else {
     $nselect = networkSelect($network, "");
-    $content .= <<<EOF
+    $content .= <<<EOM
 <input type="hidden" name="s0" value="yes" />
 <input type="hidden" name="s1" value="yes" />
 <input type="hidden" name="s2" value="yes" />
@@ -222,7 +222,7 @@ EOF;
 
   </form>
 
-EOF;
+EOM;
 }
 $t->content = $content;
 $t->render('single.phtml');

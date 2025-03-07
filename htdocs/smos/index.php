@@ -8,9 +8,9 @@ require_once "../../include/myview.php";
 $OL = "10.4.0";
 $t = new MyView();
 $t->title = "SMOS Data";
-$t->headextra = <<<EOF
+$t->headextra = <<<EOM
 <link rel='stylesheet' href="/vendor/openlayers/{$OL}/ol.css" type='text/css'>
-EOF;
+EOM;
 $t->jsextra = <<<EOM
 <script src='/vendor/openlayers/{$OL}/ol.js'></script>
 <script type="text/javascript" src="/js/olselect-lonlat.js"></script>

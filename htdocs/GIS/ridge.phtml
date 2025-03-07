@@ -7,7 +7,7 @@ define("IEM_APPID", 67);
 $t->title = "GIS RADAR Information";
 
 $d = date("Y/m/d");
-$t->content = <<<EOF
+$t->content = <<<EOM
 <style>
 .coded {
     border-top: 1px solid #ccc; 
@@ -24,8 +24,8 @@ and produce plots within GIS. Please do not use these services in applications
 that have thousands of simultaneous users!  Our servers will melt!</div>
 
 <div style="width: 310px; float: right; border: 1px solid #000; padding: 5px; margin: 5px;">
-<a href="https://mesonet.agron.iastate.edu/archive/data/1999/05/04/GIS/ridge/TLX/N0R/TLX_N0R_199905040012.png">
-<img width="300" src="https://mesonet.agron.iastate.edu/archive/data/1999/05/04/GIS/ridge/TLX/N0R/TLX_N0R_199905040012.png">
+<a href="{$EXTERNAL_BASEURL}/archive/data/1999/05/04/GIS/ridge/TLX/N0R/TLX_N0R_199905040012.png">
+<img width="300" src="{$EXTERNAL_BASEURL}/archive/data/1999/05/04/GIS/ridge/TLX/N0R/TLX_N0R_199905040012.png">
 </a>
 <br />May 3, 1999 : Moore Oklahoma F5 Tornado 7:12 PM.
 </div>
@@ -88,7 +88,7 @@ spectacular manner!  This should generate terabytes of data per year and million
 of files!  Anyway, these images are organized like the real-time data, but in
 per-UTC day folders like so:
 <br />
-<a href="/archive/data/{$d}/GIS/ridge/">https://mesonet.agron.iastate.edu/archive/data/{$d}/GIS/ridge/</a> 
+<a href="/archive/data/{$d}/GIS/ridge/">{$EXTERNAL_BASEURL}/archive/data/{$d}/GIS/ridge/</a> 
 
 <p>Data appears in the archive at the same time as it does for the realtime data.
 So this is neat, but how can you programically work with this data?  Here is
@@ -110,7 +110,7 @@ which RADAR sites are available?  If you do not specific a location, the
 service returns an estimate of RADARs available for the date of your timestamp.
 <br />
 <pre class="coded">
-URI: https://mesonet.agron.iastate.edu/json/radar.py?operation=available
+URI: {$EXTERNAL_BASEURL}/json/radar.py?operation=available
 HTTPD GET Variables:
  lat    - (optional) Latitude of your interested point 
  lon    - (optional) Longitude (-180 to 180) of your interested point
@@ -120,7 +120,7 @@ HTTPD GET Variables:
 <p><strong>Available Products for RADAR:</strong><br /> This service returns
 what products are available for this RADAR near a given time. <br />
 <pre class="coded">
-URI: https://mesonet.agron.iastate.edu/json/radar.py?operation=products
+URI: {$EXTERNAL_BASEURL}/json/radar.py?operation=products
 HTTPD GET Variables:
  radar  - RADAR identifier 
  start  - UTC timestamp in ISO-8601 format YYYY-mm-ddTHH:MMZ
@@ -132,7 +132,7 @@ radar, product, and during a period of time.  The results of this query can
 then be fed back to request actual images or tiles from the Tile Map Service.
 <strong>This service has a 500 scan limit return for each query.</strong><br />
 <pre class="coded">
-URI: https://mesonet.agron.iastate.edu/json/radar.py?operation=list
+URI: {$EXTERNAL_BASEURL}/json/radar.py?operation=list
 HTTPD GET Variables:
  radar  - RADAR identifier 
  product- level3 product identifier
@@ -148,10 +148,10 @@ archive and current realtime imagery is exposed via this service!  Here is how
 you can access it:<br />
 <pre class="coded">
 Archived:
-https://mesonet.agron.iastate.edu/cache/tile.py/1.0.0/ridge::BMX-N0Q-201201230813/7/33/50.png
+{$EXTERNAL_BASEURL}/cache/tile.py/1.0.0/ridge::BMX-N0Q-201201230813/7/33/50.png
 
 Latest imagery:
-https://mesonet.agron.iastate.edu/cache/tile.py/1.0.0/ridge::BMX-N0Q-0/7/33/50.png
+{$EXTERNAL_BASEURL}/cache/tile.py/1.0.0/ridge::BMX-N0Q-0/7/33/50.png
 </pre>
 
 <p>The 7/33/50 portion is the standard Z/X/Y tile map specification, your plotting
@@ -178,5 +178,5 @@ one!  It comes on the EXP feedtype with easy to use product identifiers.
 with on their RADAR web mapping projects.  It is our hope that many of the services
 developed will find a stable and permanent home with the NWS someday!
 
-EOF;
+EOM;
 $t->render('single.phtml');

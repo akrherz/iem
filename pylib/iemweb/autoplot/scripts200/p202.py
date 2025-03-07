@@ -21,7 +21,7 @@ import numpy as np
 import pandas as pd
 from matplotlib.colorbar import ColorbarBase
 from metpy.units import units
-from pyiem.database import get_sqlalchemy_conn
+from pyiem.database import get_sqlalchemy_conn, sql_helper
 from pyiem.exceptions import NoDataFound
 from pyiem.plot import figure_axes, get_cmap, pretty_bins
 
@@ -118,18 +118,19 @@ def plotter(ctx: dict):
 
     with get_sqlalchemy_conn("asos") as conn:
         df = pd.read_sql(
-            """
+            sql_helper("""
         WITH data as (
-            SELECT valid at time zone %s + '10 minutes'::interval
+            SELECT valid at time zone :tzname + '10 minutes'::interval
                 as localvalid,
             date_trunc(
-                'hour', valid at time zone %s  + '10 minutes'::interval) as v,
+                'hour', valid at time zone :tzname  + '10 minutes'::interval)
+                as v,
             tmpf, dwpf, sknt, drct, alti, relh, random() as r,
             coalesce(mslp, alti * 33.8639, 1013.25) as slp
-            from alldata where station = %s and report_type = 3
+            from alldata where station = :station and report_type = 3
             and extract(hour from
-            valid at time zone %s + '10 minutes'::interval)
-            in (%s, %s)),
+            valid at time zone :tzname + '10 minutes'::interval)
+            in (:h1, :h2)),
         agg as (
             select *, extract(hour from v) as hour,
             rank() OVER (PARTITION by v ORDER by localvalid ASC, r ASC)
@@ -137,20 +138,18 @@ def plotter(ctx: dict):
         )
 
         SELECT *, date(
-            case when hour = %s
+            case when hour = :h3
             then date(v - '1 day'::interval)
             else date(v) end) from agg WHERE rank = 1
-        """,
+        """),
             conn,
-            params=(
-                tzname,
-                tzname,
-                station,
-                tzname,
-                h1,
-                h2,
-                h2 if h2 < h1 else -1,
-            ),
+            params={
+                "tzname": tzname,
+                "station": station,
+                "h1": h1,
+                "h2": h2,
+                "h3": h2 if h2 < h1 else -1,
+            },
             index_col=None,
         )
     if df.empty:

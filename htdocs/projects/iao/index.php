@@ -13,7 +13,7 @@ div.hangs p {
 }
 </style>
 EOM;
-$t->content = <<<EOF
+$t->content = <<<EOM
 
 <div class="row">
 <div class="col-md-9">
@@ -491,6 +491,6 @@ Boulder CO. [<a href="/pickup/iao/nrel_wake_tools.pdf">Available PDF</a>]</p>
 </div><!-- ./col-md-3 -->
 </div><!-- ./row -->
 
-EOF;
+EOM;
 
 $t->render('full.phtml');

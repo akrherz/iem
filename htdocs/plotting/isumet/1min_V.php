@@ -1,7 +1,6 @@
 <?php
 require_once "../../../config/settings.inc.php";
 require_once "../../../include/forms.php";
-
 require_once "../../../include/jpgraph/jpgraph.php";
 require_once "../../../include/jpgraph/jpgraph_line.php";
 require_once "../../../include/jpgraph/jpgraph_scatter.php";
@@ -10,7 +9,7 @@ require_once "../../../include/jpgraph/jpgraph_date.php";
 $year = get_int404("year", date("Y"));
 $month = get_int404("month", date("m"));
 $day = get_int404("day", date("d"));
-$station = isset($_REQUEST['station']) ? $_REQUEST['station'] : null;
+$station = isset($_REQUEST['station']) ? xssafe($_REQUEST['station']) : null;
 
 if (strlen($year) == 4 && strlen($month) > 0 && strlen($day) > 0) {
     $myTime = strtotime($year . "-" . $month . "-" . $day);
@@ -82,7 +81,6 @@ $graph->SetScale("datelin", 0, 360);
 $graph->SetY2Scale("lin");
 $graph->img->SetMargin(55, 40, 55, 60);
 
-//$graph->yaxis->scale->ticks->SetPrecision(1);
 $graph->title->Set(" Time Series");
 $graph->subtitle->Set($titleDate);
 
@@ -90,8 +88,6 @@ $graph->legend->SetLayout(LEGEND_HOR);
 $graph->legend->Pos(0.01, 0.08);
 $graph->xaxis->SetLabelAngle(90);
 $graph->yaxis->scale->ticks->Set(90, 15);
-//$graph->yaxis->scale->ticks->SetPrecision(0);
-//$graph->yaxis->scale->ticks->SetPrecision(0);
 
 $graph->yaxis->SetColor("blue");
 $graph->y2axis->SetColor("red");
@@ -105,7 +101,6 @@ $graph->yaxis->title->SetFont(FF_FONT1, FS_BOLD, 12);
 $graph->xaxis->SetTitle("Valid Local Time");
 $graph->xaxis->SetTitleMargin(30);
 $graph->yaxis->SetTitleMargin(30);
-//$graph->y2axis->SetTitleMargin(28);
 $graph->xaxis->title->SetFont(FF_FONT1, FS_BOLD, 12);
 $graph->xaxis->SetPos("min");
 

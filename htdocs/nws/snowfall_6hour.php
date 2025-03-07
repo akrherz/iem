@@ -102,7 +102,7 @@ $allselected = ($w == "all") ? 'checked="checked"' : "";
 $stateselected = ($w == "state") ? 'checked="checked"' : "";
 $sselect = stateSelect($state);
 
-$t->content = <<<EOF
+$t->content = <<<EOM
 <ol class="breadcrumb">
  <li><a href="/nws/">NWS User Resources</a></li>
  <li class="active">NWS Six Hour Snowfall</li>
@@ -162,5 +162,5 @@ refresh every 6 minutes.</p>
 </tbody>
 </table>
 </div>
-EOF;
+EOM;
 $t->render('full.phtml');

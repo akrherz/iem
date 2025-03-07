@@ -61,7 +61,7 @@ $dayselect = daySelect($day, "day");
 $hrselect =  hourSelect($hour, "hour");
 $minselect = minuteSelect($minute, "minute", 5);
 
-$t->content = <<<EOF
+$t->content = <<<EOM
 <ol class="breadcrumb">
  <li><a href="/GIS/">GIS Mainpage</a></li>
  <li class="active">IEM NEXRAD Mosaic by Year</li>
@@ -93,5 +93,5 @@ You can click on the map to move the desired location.</p>
 </form>
 <p><i>The image below may take a few moments to appear...</i><br />
 <img src='$image_url' class='img-responsive'>
-EOF;
+EOM;
 $t->render('single.phtml');

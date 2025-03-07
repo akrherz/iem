@@ -1,7 +1,9 @@
 <?php 
 require_once "../../../config/settings.inc.php";
 require_once "../../../include/forms.php";
-include_once "../../../include/myview.php";
+require_once "../../../include/myview.php";
+require_once "../../../include/network.php";
+
 $t = new MyView();
 $t->title = "Low Temperature Threshold Histograms";
 
@@ -9,7 +11,6 @@ $station1 = isset($_GET["station1"]) ? xssafe($_GET["station1"]): "";
 $station2 = isset($_GET["station2"]) ? xssafe($_GET["station2"]): "";
 $mode = isset($_GET["mode"]) ? xssafe($_GET["mode"]): "";
 
-include("../../../include/network.php");     
 $nt = new NetworkTable("IACLIMATE");
 $cities = $nt->table;
 
@@ -44,9 +45,8 @@ if ($station1 != "" && $station2 != "")
     $imgurl = "<p>Select your site above...</p>";
 }
 
-$t->content = <<<EOF
+$t->content = <<<EOM
 <ol class="breadcrumb">
-<li><a href="https://mesonet.agron.iastate.edu/">IEM</a></li>
 <li><a href="/COOP/">NWS COOP</a></li>
 <li class="active">COOP Low Temperature Thresholds</li>
 </ol>
@@ -94,5 +94,5 @@ your sites.
 <br />
 
 {$imgurl}
-EOF;
+EOM;
 $t->render('single.phtml');

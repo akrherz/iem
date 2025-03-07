@@ -1,55 +1,54 @@
 <?php
 $OL = "7.2.2";
- require_once "../../../config/settings.inc.php";
- require_once "../../../include/myview.php";
- $t = new MyView();
- 
+require_once "../../../config/settings.inc.php";
+require_once "../../../include/myview.php";
+$t = new MyView();
+
 require_once "../../../include/forms.php";
- require_once "../../../include/imagemaps.php"; 
- $network = isset($_REQUEST["network"]) ? xssafe($_REQUEST["network"]): "KCCI";
- 
-$year = isset( $_GET["year"] ) ? intval($_GET["year"]): date("Y");
-$month = isset( $_GET["month"] ) ? intval($_GET["month"]): date("m");
-$day = isset( $_GET["day"] ) ? intval($_GET["day"]): date("d");
-$station = isset($_GET['station'] ) ? xssafe($_GET['station']): "";
- 
-if (! isset($_GET["station"])){
-$t->headextra = <<<EOF
+require_once "../../../include/imagemaps.php";
+$network = isset($_REQUEST["network"]) ? xssafe($_REQUEST["network"]) : "KCCI";
+
+$year = isset($_GET["year"]) ? intval($_GET["year"]) : date("Y");
+$month = isset($_GET["month"]) ? intval($_GET["month"]) : date("m");
+$day = isset($_GET["day"]) ? intval($_GET["day"]) : date("d");
+$station = isset($_GET['station']) ? xssafe($_GET['station']) : "";
+
+if (! isset($_GET["station"])) {
+    $t->headextra = <<<EOM
 <link rel="stylesheet" href="/vendor/openlayers/{$OL}/ol.css" type="text/css">
 <link type="text/css" href="/vendor/openlayers/{$OL}/ol-layerswitcher.css" rel="stylesheet" />
 <link rel="stylesheet" type="text/css" href="/vendor/select2/4.0.3/select2.min.css"/ >
-EOF;
-$t->jsextra = <<<EOF
+EOM;
+    $t->jsextra = <<<EOM
 <script src="/vendor/openlayers/{$OL}/ol.js" type="text/javascript"></script>
 <script src='/vendor/openlayers/{$OL}/ol-layerswitcher.js'></script>
 <script src="/js/olselect.js"></script>
 <script src="/vendor/select2/4.0.3/select2.min.js"></script>
 <script type="text/javascript">
 $(document).ready(function(){
-	$(".iemselect2").select2();	
+	$(".iemselect2").select2();
 });
 </script>
-EOF;
+EOM;
 }
 $t->title = "SchoolNet One Minute Time Series";
 
-$nselect = networkSelect($network, $station); 
+$nselect = networkSelect($network, $station);
 $ys = yearSelect2(2002, $year, "year");
 $ms = monthSelect($month);
 $ds = daySelect($day);
 
 $content = "";
-if (strlen($station) > 0 ) {
+if (strlen($station) > 0) {
 
-	$content .= sprintf("<p><img src=\"1min_T.php?station=%s&amp;year=%s&amp;month=%s&amp;day=%s\" />", $station, $year, $month, $day);
-	$content .= sprintf("<p><img src=\"1min_V.php?station=%s&amp;year=%s&amp;month=%s&amp;day=%s\" />", $station, $year, $month, $day);
-	$content .= sprintf("<p><img src=\"1min_P.php?station=%s&amp;year=%s&amp;month=%s&amp;day=%s\" />", $station, $year, $month, $day);
+    $content .= sprintf("<p><img src=\"1min_T.php?station=%s&amp;year=%s&amp;month=%s&amp;day=%s\" />", $station, $year, $month, $day);
+    $content .= sprintf("<p><img src=\"1min_V.php?station=%s&amp;year=%s&amp;month=%s&amp;day=%s\" />", $station, $year, $month, $day);
+    $content .= sprintf("<p><img src=\"1min_P.php?station=%s&amp;year=%s&amp;month=%s&amp;day=%s\" />", $station, $year, $month, $day);
 
-	$content .= "<p><b>Note:</b> The wind speeds are indicated every minute by the red line.  The blue dots represent wind direction and are shown every 10 minutes.</p>";
-
+    $content .= "<p><b>Note:</b> The wind speeds are indicated every minute by the red line.  The blue dots represent wind direction and are shown every 10 minutes.</p>";
 } else {
-	
-	$content = <<<EOF
+
+    $content = <<<EOM
 
 <p>or select from this map...<p>
 
@@ -78,10 +77,10 @@ if (strlen($station) > 0 ) {
 </style>
 <i>Click black dot to select your site:</i><br />
 <div id="map" data-network="{$network}"></div>
-EOF;
+EOM;
 }
 
-$t->content = <<<EOF
+$t->content = <<<EOM
 <h3>1 minute data interval time series</h3>
 
 <p>This application generates graphs of 1 minute interval data 
@@ -102,5 +101,5 @@ Make plot selections: {$nselect}
 
 </td></tr></table>
 </td></tr></table>
-EOF;
+EOM;
 $t->render('single.phtml');

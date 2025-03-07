@@ -5,7 +5,7 @@ $t = new MyView();
 define("IEM_APPID", 61);
 $t->title = "Information Mainpage";
 
-$t->content = <<<EOF
+$t->content = <<<EOM
 <h3>Information/Documents</h3><p>
 
 <div class="row">
@@ -44,5 +44,5 @@ $t->content = <<<EOF
 
 </div></div>
 
-EOF;
+EOM;
 $t->render('single.phtml');

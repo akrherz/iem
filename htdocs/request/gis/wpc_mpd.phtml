@@ -7,7 +7,7 @@ require_once "../../../include/imagemaps.php";
 
 $t = new MyView();
 $t->title = "Download WPC Mesoscale Precipitation Discussion Shapefile";
-$content = <<<EOF
+$content = <<<EOM
 <p>
 <ul class="breadcrumb">
 <li><a href="/nws/">NWS Mainpage</a></li>
@@ -42,7 +42,7 @@ for those wishing to script against this service.
 </tr>
 
 <tr>
-EOF;
+EOM;
 $content .= "<th>Start:</th>
     <td>
      ". yearSelect2(2017, date("Y"), "year1") ."
@@ -100,7 +100,7 @@ Field 6: Type=C/String, Title=`CONCERN', WPC MPD concerning heading
 <ol>
 <li>The <code>PROD_ID</code> DBF field is a string the IEM uses to identify
 NWS Text products and can be used to call an IEM API to fetch the text of
-this product. https://mesonet.agron.iastate.edu/api/1/nwstext/{PROD_ID}</li>
+this product. {$EXTERNAL_BASEURL}/api/1/nwstext/{PROD_ID}</li>
 
 <li>The <code>YEAR</code> and <code>NUM</code> fields can be used to construct
 a stable URL into SPC's website like so: https://www.spc.noaa.gov/products/md/{year}/md{NUM:04i}.html</li>
@@ -110,5 +110,3 @@ EOM;
 
 $t->content = $content;
 $t->render('single.phtml');
-
-?>

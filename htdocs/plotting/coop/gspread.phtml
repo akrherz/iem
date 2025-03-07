@@ -1,12 +1,12 @@
 <?php
-include("../../../config/settings.inc.php");
-include_once "../../../include/myview.php";
+require_once "../../../config/settings.inc.php";
+require_once "../../../include/myview.php";
 $t = new MyView();
 
 $t->title = "Growing Season Temperature Spreads";
 
-$t->content = <<<EOF
-<p><h3 class="heading">Seasonal Temperature Spreads</h3><p>
+$t->content = <<<EOM
+<p><h3>Seasonal Temperature Spreads</h3><p>
 
 <p>Related: <a href="spread_fe.phtml">View by Date</a>
 <b>|</b> <a href="mspread.phtml">View by Month</a>
@@ -15,5 +15,5 @@ $t->content = <<<EOF
 <p><img src="images/spread_mam.png">
 <p><img src="images/spread_jja.png">
 <p><img src="images/spread_son.png">
-EOF;
+EOM;
 $t->render('single.phtml');

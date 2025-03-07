@@ -31,9 +31,10 @@ function fmt($val, $varname)
     }
     return $val;
 }
-function make_shef_table($data, $iscurrent){
+function make_shef_table($data, $iscurrent)
+{
     global $shefcodes, $durationcodes, $extremumcodes, $metadata;
-    $msg = $iscurrent ? "Recent": "Five days and older";
+    $msg = $iscurrent ? "Recent" : "Five days and older";
     $table = <<<EOM
     <p><strong>{$msg} SHEF encoded data</strong></p>
     <table class="table table-striped">
@@ -55,10 +56,10 @@ function make_shef_table($data, $iscurrent){
         $valid = new DateTime($row["utc_valid"], $utctz);
         $valid->setTimezone($localtz);
         $plink = "N/A";
-        if ($iscurrent && $valid < $baseprodvalid){
+        if ($iscurrent && $valid < $baseprodvalid) {
             continue;
         }
-        if (! $iscurrent && $valid >= $baseprodvalid){
+        if (! $iscurrent && $valid >= $baseprodvalid) {
             continue;
         }
         if ($valid > $baseprodvalid) {
@@ -118,22 +119,24 @@ EOM;
     );
     $jobj = iemws_json("last_shef.json", $arr);
     $exturi = sprintf(
-        "https://mesonet.agron.iastate.edu/api/1/last_shef.json?" .
+        "%s/api/1/last_shef.json?" .
             "station=%s",
+        $EXTERNAL_BASEURL,
         $station,
     );
     $table .= make_shef_table($jobj["data"], TRUE);
     $table .= make_shef_table($jobj["data"], FALSE);
-
 } else {
     $wsuri = sprintf(
-        "http://iem.local/json/current.py?network=%s&station=%s",
+        "%s/json/current.py?network=%s&station=%s",
+        $INTERNAL_BASEURL,
         $network,
         $station
     );
     $exturi = sprintf(
-        "https://mesonet.agron.iastate.edu/" .
+        "%s/" .
             "json/current.py?network=%s&station=%s",
+        $EXTERNAL_BASEURL,
         $network,
         $station
     );
@@ -214,7 +217,7 @@ EOM;
     } // End if
     $table .= "</table>";
 
-    if (array_key_exists("last_ob", $json)){
+    if (array_key_exists("last_ob", $json)) {
         // Cloud Levels
         $skyc = $json["last_ob"]["skycover[code]"];
         $skyl = $json["last_ob"]["skylevel[ft]"];
@@ -265,7 +268,7 @@ if (array_key_exists($station, $SPECIAL)) {
 EOM;
 }
 
-$t->content = <<<EOF
+$t->content = <<<EOM
 
 <h3>Most Recent Observation</h3>
 
@@ -275,5 +278,5 @@ $t->content = <<<EOF
 
 {$interface}
 
-EOF;
+EOM;
 $t->render('sites.phtml');

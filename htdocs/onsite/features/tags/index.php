@@ -40,7 +40,7 @@ if (!isset($_GET["tag"])) {
     }
 
 
-    $t->content = <<<EOF
+    $t->content = <<<EOM
 <h3>IEM Daily Feature Tags</h3>
 
 <p>Some of the IEM Daily Features are tagged based on the content and topic.
@@ -51,7 +51,7 @@ if (!isset($_GET["tag"])) {
 {$table}
 </table>
 
-EOF;
+EOM;
     $t->render('single.phtml');
     die();
 }
@@ -120,12 +120,12 @@ EOM;
       <br /><a href="{$big}">View larger image</a>
 EOM;
     }
-    $content .= <<<EOF
+    $content .= <<<EOM
 <hr />
 <div class="row">
 <div class="col-md-5">	
       {$media}
-EOF;
+EOM;
     if ($row["appurl"] != "") {
         $content .= "<br /><a class=\"btn btn-sm btn-primary\" href=\"" . $row["appurl"] . "\"><i class=\"fa fa-signal\"></i> Generate This Chart on Website</a>";
     }
@@ -149,7 +149,7 @@ if (pg_num_rows($rs) == 0) {
 }
 
 
-$t->content = <<<EOF
+$t->content = <<<EOM
 <h3>Past IEM Features tagged: {$tag}</h3>
 <p><a href="index.php" class="btn btn-default"><i class="fa fa-th-list"></i>
 List all tags</a></p>
@@ -158,5 +158,5 @@ List all tags</a></p>
 
 {$content}
 
-EOF;
+EOM;
 $t->render('single.phtml');

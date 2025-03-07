@@ -23,12 +23,12 @@ $network = isset($_GET["network"]) ? xssafe($_GET["network"]) : "IA_ASOS";
 
 $t = new MyView();
 $t->title = "Site Locator";
-$t->headextra = <<<EOF
+$t->headextra = <<<EOM
 <link rel="stylesheet" href="/vendor/openlayers/{$OL}/ol.css" type="text/css">
 <link type="text/css" href="/vendor/openlayers/{$OL}/ol-layerswitcher.css" rel="stylesheet" />
 <link rel="stylesheet" type="text/css" href="/vendor/select2/4.0.3/select2.min.css"/ >
-EOF;
-$t->jsextra = <<<EOF
+EOM;
+$t->jsextra = <<<EOM
 <script src="/vendor/openlayers/{$OL}/ol.js" type="text/javascript"></script>
 <script src='/vendor/openlayers/{$OL}/ol-layerswitcher.js'></script>
 <script src="/js/olselect.js"></script>
@@ -38,12 +38,12 @@ $(document).ready(function(){
     $(".iemselect2").select2();	
 });
 </script>
-EOF;
+EOM;
 
 $nselect = selectNetwork($network);
 $n2select = networkSelect($network, "");
 
-$t->content = <<<EOF
+$t->content = <<<EOM
 <h3>IEM Site Information</h3><p>
 
 <p>The IEM collects information from many sites.  These sites are organized into
@@ -78,5 +78,5 @@ the 'Select Station' button above.</p>
 </form>
 
 </div>
-EOF;
+EOM;
 $t->render('single.phtml');

@@ -48,7 +48,7 @@ function ugcStateSelect($state, $selected)
         . " and substr(ugc,1,2) = $1 ORDER by name ASC");
     $rs = pg_execute($dbconn, $stname, array($state));
     $s = "<select name=\"ugc\">\n";
-    for ($i = 0; $row = pg_fetch_array($rs); $i++) {
+    for ($i = 0; $row = pg_fetch_assoc($rs); $i++) {
         $z = (substr($row["ugc"], 2, 1) == "Z") ? "Zone" : "County";
         $s .= "<option value=\"" . $row["ugc"] . "\" ";
         if ($row["ugc"] == $selected) {
@@ -78,7 +78,7 @@ function selectNetworkType($nettype, $selected)
         "SELECT * from networks WHERE id ~* $1 ORDER by name ASC");
     $rs = pg_execute($dbconn, $stname, array($nettype));
     $s = "<select class=\"iemselect2\" name=\"network\">\n";
-    for ($i = 0; $row = pg_fetch_array($rs); $i++) {
+    for ($i = 0; $row = pg_fetch_assoc($rs); $i++) {
         $s .= "<option value=\"" . $row["id"] . "\" ";
         if ($row["id"] == $selected) {
             $s .= "SELECTED";
@@ -103,7 +103,7 @@ function selectNetwork($selected, $extra = array())
         }
         $s .= ">[{$idx}] {$sid}</option>\n";
     }
-    for ($i = 0; $row = pg_fetch_array($rs); $i++) {
+    for ($i = 0; $row = pg_fetch_assoc($rs); $i++) {
         $s .= "<option value=\"" . $row["id"] . "\" ";
         if ($row["id"] == $selected) {
             $s .= "SELECTED";

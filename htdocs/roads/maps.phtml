@@ -17,17 +17,17 @@ $valid = substr($row["valid"], 0, 16);
 $ts = strtotime($valid);
 $valid = date("h:i A, d M Y", $ts);
 
-$t->headextra = <<<EOF
+$t->headextra = <<<EOM
 <link type="text/css" href="/vendor/openlayers/{$OL}/ol.css" rel="stylesheet" />
 <link type="text/css" href="/vendor/openlayers/{$OL}/ol-layerswitcher.css" rel="stylesheet" />
-EOF;
-$t->jsextra = <<<EOF
+EOM;
+$t->jsextra = <<<EOM
 <script src="/vendor/openlayers/{$OL}/ol.js"></script>
 <script src="/vendor/openlayers/{$OL}/ol-layerswitcher.js"></script>
 <script src="maps.js"></script>
-EOF;
+EOM;
 $t->title = "Interactive Road Conditions";
-$t->content = <<<EOF
+$t->content = <<<EOM
 <ol class="breadcrumb">
   <li><a href="/roads/">Roads</a></li>
   <li class="active">Interactive Mapping</li>
@@ -44,5 +44,5 @@ $t->content = <<<EOF
 
 <p>This map utilizes various <a href="/api/#json">GeoJSON Services</a> and
 <a href="/ogc/">OGC WebMap Services</a> provided by the IEM.</p>
-EOF;
+EOM;
 $t->render('single.phtml');
