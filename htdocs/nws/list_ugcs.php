@@ -57,7 +57,7 @@ $wfoselected = ($w == "wfo") ? 'checked="checked"': "";
 $stateselected = ($w == "state") ? 'checked="checked"': "";
 $sselect = stateSelect($state);
 
-$t->content = <<<EOF
+$t->content = <<<EOM
 <ol class="breadcrumb">
  <li><a href="/nws/">NWS User Resources</a></li>
  <li class="active">NWS UGCs by WFO</li>
@@ -102,5 +102,5 @@ you can <a href="list_ugcs.php?just_firewx=1">list all fire weather UGCs</a>.</p
 </tbody>
 </table>
 </div>
-EOF;
+EOM;
 $t->render('full.phtml');

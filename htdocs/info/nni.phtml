@@ -4,7 +4,7 @@ require_once "../../include/myview.php";
 $t = new MyView();
 
 $t->title = "Representivity";
-$t->content = <<<EOF
+$t->content = <<<EOM
 <style>
 .figure {
   background: #eee;
@@ -543,5 +543,5 @@ of inhomogeneous geophysical measuring networks. <i>Nature</i>, <b>319</b>,
 <li><a href="http://www.eumetnet.eu.org/Textes/WktZurich.htm">Workshop on Methods and Tools for the design of Surface observation networks</a>
 <br />SWS - 2002 held in Zurich, 14-15 May 2002</li>
 
-EOF;
+EOM;
 $t->render('single.phtml');

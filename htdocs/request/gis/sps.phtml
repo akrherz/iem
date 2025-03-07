@@ -7,7 +7,7 @@ require_once "../../../include/imagemaps.php";
 
 $t = new MyView();
 $t->title = "Download SPS Special Weather Statement Shapefile";
-$content = <<<EOF
+$content = <<<EOM
 <h3>NWS Special Weather Statement (SPS) Polygons</h3>
 
 <p>The IEM attempts to process and archive special weather statements (SPS)
@@ -31,7 +31,7 @@ to script against this service.</p>
 </tr>
 
 <tr>
-EOF;
+EOM;
 $content .= "<th>Start:</th>
     <td>
      ". yearSelect2(2002, date("Y"), "year1") ."

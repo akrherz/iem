@@ -3,7 +3,7 @@ require_once "../../../config/settings.inc.php";
 require_once "../../../include/myview.php";
 $t = new MyView();
 $t->title = "Unidata 2021 Equipment Award Report";
-$t->content = <<<EOF
+$t->content = <<<EOM
 
 <div style="text-align: center; width: 800px;">
 <h3>Unidata 2021 Equipment Award Report</h3>
@@ -86,5 +86,5 @@ has improved the performance of each.  Addtionally, besides running a PostgreSQL
 database server, this server also runs a python FastAPI server that provides
 the <a href="https://mesonet.agron.iastate.edu/api/1/docs">IEM API</a>.
 
-EOF;
+EOM;
 $t->render('single.phtml');

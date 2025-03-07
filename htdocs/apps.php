@@ -7,12 +7,12 @@ require_once "../include/database.inc.php";
 $dbconn = iemdb("mesosite");
 
 $t->title = "Application Listing";
-$t->jsextra = <<<EOF
+$t->jsextra = <<<EOM
 <script src="/vendor/jquery-filtertable/1.5.7/jquery.filtertable.min.js"></script>
 <script>
    $("#table1").filterTable({label: "Filter Table Using Text: "});
 </script>
-EOF;
+EOM;
 
 $table = "";
 $tags = Array();
@@ -36,7 +36,7 @@ for ($i=0;$row=pg_fetch_assoc($rs);$i++){
 }
 
 
-$t->content = <<<EOF
+$t->content = <<<EOM
  <h3>IEM Application Listing</h3>
  <p>This website contains a large number of 'applications' which allow for
  dynamic query and product generation.  This page displays a listing of these
@@ -51,5 +51,5 @@ $t->content = <<<EOF
 {$table}
  </tbody>
 </table>
-EOF;
+EOM;
 $t->render('single.phtml');

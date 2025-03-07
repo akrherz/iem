@@ -225,14 +225,14 @@ if ($station != "") {
         $network,
         $report
     );
-    $content .= <<<EOF
+    $content .= <<<EOM
 <p>
 <a href="{$dluri}" class="btn btn-primary"><i class="fa fa-book"></i> Download This Report</a>
 <a href="{$xluri}" class="btn btn-primary"><i class="fa fa-download"></i> Download This Report as Excel</a>
 <a href="{$autoploturi}" class="btn btn-primary"><i class="fa fa-signal"></i> View This Report in Autoplot App</a>
 </p>
 <pre>
-EOF;
+EOM;
     if (array_key_exists($report, $xref)) {
         $uri = sprintf(
             "%s/plotting/auto/plot/%sstation:%s::network:%s.txt",
@@ -245,7 +245,7 @@ EOF;
     }
     $content .= "</pre>\n";
 } else {
-    $content .= <<<EOF
+    $content .= <<<EOM
 <style type="text/css">
 #map {
    width: 640px;
@@ -288,7 +288,7 @@ if you would like to see other variables in these files or have any other commen
 
 <p><b>Disclaimer:</b> While we use care to provide accurate weather/climatic information, errors may occur because of equipment or other failure. We therefore provide this information without any warranty of accuracy. Users of this weather/climate data do so at their own risk, and are advised to use independent judgement as to whether to verify the data presented.</p>
 </div>
-EOF;
+EOM;
 }
 $t->content = $content;
 $t->render("single.phtml");

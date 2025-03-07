@@ -36,11 +36,11 @@ function make_row($dict, $oddrow)
         $dict["network"]
     );
 
-    $s .= <<<EOF
+    $s .= <<<EOM
     <td><input type="checkbox" name="st[]" value="{$dict["sid"]}"/></td>
     <td><a href="/p.php?pid={$dict["raw"]}" class="btn btn-small"><i class="fa fa-paperclip"></i></a>
     </td>
-EOF;
+EOM;
     $s .= "<td><a href=\"$sitesurl\">{$dict['sid']}</a></td>";
     $s .= "<td>{$dict['name']}, {$dict['state']}</a></td>";
 
@@ -118,7 +118,7 @@ function get_sortdir($baseurl, $column, $sortCol, $sortDir)
 }
 
 $t->title = "NWS CCOOP Current Sortables";
-$t->headextra = <<<EOF
+$t->headextra = <<<EOM
  <script language="JavaScript" type="text/javascript">
     <!--//BEGIN Script
     function new_window(url) {
@@ -126,7 +126,7 @@ $t->headextra = <<<EOF
     }
     //END Script-->
     </script>
-EOF;
+EOM;
 
 $cols = array(
     "ts" => "Valid", "county" => "County",
@@ -151,7 +151,7 @@ $six = get_sortdir($baseurl, "max_tmpf", $sortcol, $sortdir);
 $seven = get_sortdir($baseurl, "min_tmpf", $sortcol, $sortdir);
 $eight = get_sortdir($baseurl, "pday", $sortcol, $sortdir);
 
-$t->content = <<<EOF
+$t->content = <<<EOM
 
 <p>Sorted by: <strong>{$cols[$sortcol]} {$sorts[$sortdir]}</strong>. 
 Times are presented in the local time of the site. Click on the identifier to
@@ -183,5 +183,5 @@ again will reverse the sort.
 </table>
 <input type="submit" value="Add to Favorites">
 </form>
-EOF;
+EOM;
 $t->render('sortables.phtml');

@@ -4,7 +4,7 @@ require_once "../../include/myview.php";
 $t = new MyView();
 $t->title = "AMS GIS Presentation";
 
-$t->content = <<<EOF
+$t->content = <<<EOM
 <h3>2003 AMS Presentation Notes</h3>
 
         <div class="alert alert-danger">Sorry, some of the links on this page are no
@@ -43,5 +43,5 @@ user selections of stations and data variable.</p>
 
 <p>All of these applications are open-source and available for your use.  Please
 send Daryl (akrherz@iastate.edu) an email if you are interested in any of these apps.
-EOF;
+EOM;
 $t->render('single.phtml');

@@ -5,7 +5,7 @@ require_once "../../include/forms.php";
 $network = isset($_GET["network"]) ? xssafe($_GET["network"]) : "KCCI"; 
 
 header("Content-Type: application/vnd.google-earth.kml+xml");
-echo <<<EOF
+echo <<<EOM
 <?xml version="1.0" encoding="UTF-8"?>
 <kml xmlns="http://earth.google.com/kml/2.2">
  <Document>
@@ -20,7 +20,7 @@ echo <<<EOF
       <bgColor>ffffffff</bgColor>
     </BalloonStyle>
   </Style>
-EOF;
+EOM;
 
 $conn = iemdb("mesosite");
 pg_prepare($conn, "SELECT", "SELECT *, ST_x(geom) as lon, ST_y(geom) as lat

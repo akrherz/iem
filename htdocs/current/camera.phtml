@@ -92,7 +92,7 @@ foreach ($cameras as $id => $v) {
     $control .= sprintf("<div style=\"float: left; margin-left: 5px;\"><b>%s. %s, %s</b> (%s County)<br /><img src=\"%s\"></div>", $v["num"], $v["name"], $v["state"], $v["county"], $v["url"]);
 }
 
-$t->content = <<<EOF
+$t->content = <<<EOM
 
 <div class="alert alert-danger">This legacy app will be removed at some point
 in the future.  Please use the <a href="/current/webcam.php">newer version</a>.</div>
@@ -151,5 +151,5 @@ in the future.  Please use the <a href="/current/webcam.php">newer version</a>.<
  <li><a href="camera.phtml?archive=yes&year=2007&month=10&day=2&hour=17&minute=56">2 Oct 2007 - 5:56 PM, Twin Cedars possible tornado</a></li>
  <li><a href="camera.phtml?archive=yes&year=2008&month=8&day=30&hour=20&minute=20">30 Aug 2008 - 8:20 PM, Interesting Sunset Halos</a></li>
 </ul>
-EOF;
+EOM;
 $t->render('single.phtml');

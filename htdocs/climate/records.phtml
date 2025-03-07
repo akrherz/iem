@@ -4,7 +4,7 @@ require_once "../../include/myview.php";
 $t = new MyView();
 $t->title = "Information";
 
-$t->content = <<<EOF
+$t->content = <<<EOM
 <h3>Iowa Weather/Climate Records</h3>
 
 <strong>The information on this page is not being updated!</strong>
@@ -130,5 +130,5 @@ otherwise noted.
 
 </td></tr>
 </table>
-EOF;
+EOM;
 $t->render('single.phtml');

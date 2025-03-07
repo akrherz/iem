@@ -260,7 +260,7 @@ if (!$nohtml || $format == 'shapefile') {
     );
     $fselect = make_select("format", $format, $ar);
     $nselect = selectNetwork($network, $extra_networks);
-    $t->content = <<<EOF
+    $t->content = <<<EOM
 <h3>Network Location Tables</h3>
 
 <div class="well pull-right">
@@ -310,7 +310,7 @@ table that you need, please <a href="/info/contacts.php">let us know</a>.</p>
 <li>Latitude and Longitude values are in decimal degrees.</li>
 <li>Elevation is expressed in meters above sea level.</li>
 </ol>
-EOF;
+EOM;
     $t->render($page);
 } else {
     header("Content-type: text/plain");

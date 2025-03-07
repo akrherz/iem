@@ -69,7 +69,7 @@ $sselect = make_select("shef", $shef, $ar);
 $t->current_network = "DCP";
 $baseurl2 = "current.phtml?network=$network&sortcol=";
 
-$content = <<<EOF
+$content = <<<EOM
 <form method="GET" action="current.phtml" name="myselector">
 <input type="hidden" name="sortcol" value="{$sortcol}">
 <strong>Select Network:</strong> {$nselect}
@@ -94,7 +94,7 @@ $content = <<<EOF
   <th><a href="{$baseurl2}VBIZ">Battery</a> [V]</th>
   </tr></thead>
 <tbody>
-EOF;
+EOM;
 $now = time();
 foreach ($final as $site => $value) {
     $url = sprintf("/sites/site.php?station=%s&network=%s", $site, $network);
@@ -154,10 +154,10 @@ foreach ($final as $site => $value) {
         $content .= "</td></tr>";
     }
 }
-$content .= <<<EOF
+$content .= <<<EOM
 </tbody><tfoot>
 <tr><td colspan="9">&nbsp;</td></tr>
 </tfoot></table>
-EOF;
+EOM;
 $t->content = $content;
 $t->render('sortables.phtml');

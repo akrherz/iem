@@ -120,7 +120,7 @@ if ($by == "day") {
     $header = "<th>Day</th>";
 }
 
-$t->content = <<<EOF
+$t->content = <<<EOM
 <ol class="breadcrumb">
  <li><a href="/nws/">NWS User Resources</a></li>
  <li class="active">NWS COOP Observation Counts by Month by WFO</li>
@@ -155,5 +155,5 @@ is "missing" data from sites.  Please <a href="/info/contacts.php">let us know</
 {$table}
 </tbody>
 </table>
-EOF;
+EOM;
 $t->render('full.phtml');

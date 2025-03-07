@@ -3,7 +3,7 @@ require_once "../config/settings.inc.php";
 require_once "../include/myview.php";
 $t = new MyView();
 $t->title = "Disclaimer";
-$t->content = <<< EOF
+$t->content = <<< EOM
 <h3><i class="fa fa-exclamation-triangle"></i> Disclaimer</h3>
 
 <p>While we use care to provide accurate weather/climatic information,
@@ -23,5 +23,5 @@ staff from Iowa State University or the State of Iowa.  Users of the IEM
 must therefore recognize that the IEM may be discontinued at any time
 with little or no notice.</p>
 
-EOF;
+EOM;
 $t->render('single.phtml');

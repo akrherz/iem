@@ -4,7 +4,7 @@ require_once "../../include/myview.php";
 $t = new MyView();
 $t->title = "ISU GIS Day 2002";
 
-$t->content = <<<EOF
+$t->content = <<<EOM
 <h3>Iowa State GIS Day</h3>
 
 <div class="alert alert-danger">Sorry, some of the links on this page are no
@@ -49,5 +49,5 @@ with an IEM site location to produce a zoomable plot of a site's location. The
 maps are <b>fascinating</b> to look at.  Once you follow the link, you will
 want to select a station and then "Location Maps".</p>
 
-EOF;
+EOM;
 $t->render('single.phtml');

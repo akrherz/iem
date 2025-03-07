@@ -5,7 +5,7 @@ $t = new MyView();
 $t->title = "Debug + Create Simple Graphic from LAT...LON text";
 
 $imgurl = "/images/wait24trans.gif";
-$t->content = <<<EOF
+$t->content = <<<EOM
 
 <ol class="breadcrumb">
  <li><a href="/nws/">IEM NWS Homepage</a></li>
@@ -31,7 +31,7 @@ Title: <input id="thetitle" type="text" maxlength="220" size="100" value="My Tit
 
 </pre>
 
-EOF;
+EOM;
 $t->jsextra = <<<EOM
 <script type="text/javascript" src="index.js"></script>
 EOM;

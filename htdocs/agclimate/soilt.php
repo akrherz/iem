@@ -10,7 +10,7 @@ EOM;
 $t->jsextra = <<<EOM
 <script type="text/javascript" src="soilt.js"></script>
 EOM;
-$t->content = <<<EOF
+$t->content = <<<EOM
 <ol class="breadcrumb">
  <li><a href="/agclimate/">ISU Soil Moisture Network</a></li>
  <li class="active">County 4 inch Soil Temperature Maps</li>
@@ -70,5 +70,5 @@ hand plots are simple GFS forecast model outputs without any bias correction.</p
 </div>
 </div>
 
-EOF;
+EOM;
 $t->render('full.phtml');

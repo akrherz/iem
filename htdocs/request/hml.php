@@ -20,7 +20,7 @@ $y2select = yearSelect2(2012, date("Y"), "year2");
 $m2select = monthSelect(date("m"), "month2");
 $d2select = daySelect2(date("d"), "day2");
 
-$t->content = <<<EOF
+$t->content = <<<EOM
 <ol class="breadcrumb">
  <li><a href="/nws/">NWS Mainpage</a></li>
  <li class="active">Download HML Processed data</li>
@@ -130,5 +130,5 @@ timezone you specify.</i>
 
 </form>
 
-EOF;
+EOM;
 $t->render('full.phtml');

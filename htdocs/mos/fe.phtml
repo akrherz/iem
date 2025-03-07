@@ -37,7 +37,7 @@ $ar = Array(
 );
 $modselect = make_select("model", $model, $ar);
 
-$t->content = <<<EOF
+$t->content = <<<EOM
 <h3>NWS MOS Download Interface</h3>
 
 <p>This page allows you to download from the IEM's archive of NWS MOS
@@ -99,5 +99,5 @@ to script against this service.</p>
 <table>
 {$table}
 </table>
-EOF;
+EOM;
 $t->render('single.phtml');

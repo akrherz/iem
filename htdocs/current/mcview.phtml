@@ -305,7 +305,7 @@ foreach ($radtimes as $value) {
 
 /* We finally start output */
 
-$headextra .= <<<EOF
+$headextra .= <<<EOM
 <script type="text/javascript">
 //<!--
 function switchToArchiveMode()
@@ -314,7 +314,7 @@ function switchToArchiveMode()
 }
 -->
 </script>
-EOF;
+EOM;
 if ($autopilot == "yes") {
     $headextra .= <<<EOM
 <style>

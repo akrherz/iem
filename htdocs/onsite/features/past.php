@@ -23,14 +23,14 @@ $nlink = sprintf("past.php?year=%s&amp;month=%s", $nyear, $nmonth);
 $mstr = date("M Y", $ts);
 $table = "";
 $c = iemdb("mesosite");
-$sql = <<<EOF
+$sql = <<<EOM
     SELECT *, to_char(valid, 'YYYY/MM/YYMMDD') as imageref,
     to_char(valid, 'DD Mon YYYY HH:MI AM') as webdate,
     to_char(valid, 'Dy Mon DD, YYYY') as calhead,
     to_char(valid, 'D') as dow from feature
     WHERE valid BETWEEN '{$year}-{$month}-01' and '{$nyear}-{$nmonth}-01'
     and valid < now() ORDER by valid ASC
-EOF;
+EOM;
 $rs = pg_exec($c, $sql);
 
 $num = pg_num_rows($rs);

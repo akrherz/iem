@@ -22,10 +22,10 @@ $gddbase = get_int404("gddbase", 50);
 $gddfloor = isset($_GET["gddfloor"]) ? ss($_GET["gddfloor"]) : 50;
 $gddceil = isset($_GET["gddceil"]) ? ss($_GET["gddceil"]) : 86;
 
-$hiddendates = <<<EOF
+$hiddendates = <<<EOM
 <input type="hidden" name="sdate" value="{$sdate}">
 <input type="hidden" name="edate" value="{$edate}">
-EOF;
+EOM;
 $sdate = strtotime($sdate);
 $edate = strtotime($edate);
 $s = isset($_GET["s"]) ? $_GET["s"] : array();
@@ -78,7 +78,7 @@ foreach ($stationgrps as $state => $stations) {
     $sstring = "('" . implode(",", $stations) . "')";
     $sstring = str_replace(",", "','", $sstring);
     // bulk radiation bias values applied below
-    $sql = <<<EOF
+    $sql = <<<EOM
     WITH climo as (
       SELECT station, sday, avg(precip) as avg_precip,
       avg(sdd86(high,low)) as avg_sdd,
@@ -102,7 +102,7 @@ foreach ($stationgrps as $state => $stations) {
        and day >= '{$sdatestr}' and day <= '{$edatestr}'
        and o.sday = c.sday  GROUP by o.station
        ORDER by o.station ASC
-EOF;
+EOM;
     $rs = pg_query($pgconn, $sql);
     for ($i = 0; $row = pg_fetch_assoc($rs); $i++) {
         $table .= sprintf(
@@ -144,13 +144,13 @@ if (isset($_GET['map'])) {
     $showmap = "";
 }
 $t->title = "Climodat Station Monitor";
-$t->headextra = <<<EOF
+$t->headextra = <<<EOM
 <link rel="stylesheet" href="/vendor/jquery-ui/1.11.4/jquery-ui.min.css" />
-EOF;
+EOM;
 
 $sdatestr = date("m/d/Y", $sdate);
 $edatestr = date("m/d/Y", $edate);
-$t->jsextra = <<<EOF
+$t->jsextra = <<<EOM
 <script src="/vendor/jquery-ui/1.11.4/jquery-ui.min.js"></script>
 <script type="text/javascript">
 $(document).ready(function(){
@@ -165,14 +165,14 @@ $(document).ready(function(){
     });
 });
 </script>
-EOF;
+EOM;
 
 $sselect = selectNetworkType("CLIMATE", $network);
 
 $snice = date("d M Y", $sdate);
 $today = ($edate > time()) ? time() : $edate;
 $enice = date("d M Y", $today);
-$t->content = <<<EOF
+$t->content = <<<EOM
 <ol class="breadcrumb">
  <li><a href="/climodat/">Climodat Reports</a></li>
  <li class="active">IEM Climodat Station Monitor</li>
@@ -299,6 +299,6 @@ record since 1951.</p>
 
 <br /><input type="submit" value="Remove Selected Stations From List">
 </form>
-EOF;
+EOM;
 
 $t->render('full.phtml');

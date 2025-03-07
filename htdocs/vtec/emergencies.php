@@ -26,7 +26,7 @@ $t->jsextra = <<<EOM
 EOM;
 
 
-$t->content = <<<EOF
+$t->content = <<<EOM
 <ol class="breadcrumb">
  <li><a href="/nws/">NWS Resources</a></li>
  <li class="active">Tornado + Flash Flood Emergencies</li>
@@ -77,5 +77,5 @@ directly access it here:
 </table>
 </div>
 
-EOF;
+EOM;
 $t->render("full.phtml");

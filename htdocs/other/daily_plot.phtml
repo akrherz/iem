@@ -17,7 +17,7 @@ $yselect = yearSelect(2007, $year);
 $mselect = monthSelect($month);
 $dselect = daySelect($day);
 
-$t->content = <<<EOF
+$t->content = <<<EOM
 <ol class="breadcrumb">
  <li><a href="/other/">Other Networks</a></li>
  <li class="active">Mesonet Northeast Ames</li>
@@ -36,5 +36,5 @@ $t->content = <<<EOF
 <img src="plot_winds.php?station={$station}&year={$year}&month={$month}&day={$day}" ALT="Time Series">
 
 </div>
-EOF;
+EOM;
 $t->render('single.phtml');

@@ -158,24 +158,24 @@ $(document).ready(() => {
     $(".iemselect2").select2();
 });
 EOM;
-$headextra = <<<EOF
+$headextra = <<<EOM
 <link rel="stylesheet" href="/vendor/jquery-ui/{$JQUERYUI}/jquery-ui.min.css">
 <link rel="stylesheet" href="/vendor/jquery-ui/{$JQUERYUI}/jquery-ui.theme.min.css">
 <link rel="stylesheet" href="/vendor/jsani/2.84/jquery.jsani.min.css">
 <link rel="stylesheet" type="text/css" href="/vendor/select2/4.0.3/select2.min.css"/ >
 <link rel="stylesheet" type="text/css" href="warnings.css" />
-EOF;
+EOM;
 if (!$isarchive)
     $jsextra .= "setTimeout(\"document.myform.submit()\", 300000);\n";
 
 $jsextra .= "</script>";
 $t->headextra = $headextra;
 
-$content = <<<EOF
+$content = <<<EOM
 <form style="display: inline;" method="GET" name="myform" action="{$baseuri}">
 <input type="hidden" value="{$site}" name="osite">
 <input type="hidden" name="tzoff" value="0">
-EOF;
+EOM;
 if (isset($_GET["lat0"])) {
     $content .= "<input type=\"hidden\" value=\"{$lat0}\" name=\"lat0\">
     <input type=\"hidden\" value=\"{$lon0}\" name=\"lon0\">";
@@ -471,12 +471,12 @@ EOM;
     $content .= "<input type=\"image\" name=\"img\" src=\"" . $url . "\" border=\"1\">\n";
     $content .= "</form>";
 }
-$content .= <<<EOF
+$content .= <<<EOM
 <!-- Warnings Key! -->
 <br />
 <img src="static/warnings_legend.png">
 </div>
-EOF;
+EOM;
 
 $content .= "<input type=\"hidden\" name=\"extents\" value=\"{$x0},{$y0},{$x1},{$y1}\">\n";
 

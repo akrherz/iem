@@ -5,7 +5,7 @@ define("IEM_APPID", 66);
 require_once "../../include/myview.php";
 $t = new MyView();
 $t->title = "GIS RADAR Information";
-$t->content = <<<EOF
+$t->content = <<<EOM
 
 <h3>IEM Provided RADAR Information for GIS</h3>
 
@@ -153,5 +153,5 @@ radar detects rain, it will begin to accumulate the rainfall in the NTP product.
 Once it stops raining for an hour, the value is reset to zero.  Since all sites
 reset at different times, you see the issue.</li>
 </ol>
-EOF;
+EOM;
 $t->render('single.phtml');

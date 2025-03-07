@@ -7,13 +7,13 @@ $t = new MyView();
 define("IEM_APPID", 145);
 
 $t->title = "RWIS Archived Webcam Imagery";
-$t->headextra = <<<EOF
+$t->headextra = <<<EOM
  <link rel="stylesheet" href="/vendor/jquery-ui/1.11.4/jquery-ui.css" />
-EOF;
-$t->jsextra = <<<EOF
+EOM;
+$t->jsextra = <<<EOM
  <script src="/vendor/jquery-ui/1.11.4/jquery-ui.js"></script>
  <script src="camera.js"></script>
-EOF;
+EOM;
 
 $conn = iemdb("mesosite");
 $rs = pg_query($conn, "SELECT id, name, date(sts) as s from webcams WHERE network = 'IDOT'
@@ -30,7 +30,7 @@ for ($i = 0; $row = pg_fetch_assoc($rs); $i++) {
 $sform .= "</select>";
 
 
-$t->content = <<<EOF
+$t->content = <<<EOM
 <h3>Archived Iowa RWIS Webcam Imagery</h3>
 
 <p>The IEM archives imagery provided by the Iowa DOT RWIS network.  Each site
@@ -69,5 +69,5 @@ is another tool that allows viewing the RWIS webcam archive.</p>
 </div>
 
 <br clear="all" />
-EOF;
+EOM;
 $t->render("full.phtml");

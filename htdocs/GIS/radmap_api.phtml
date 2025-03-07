@@ -3,7 +3,7 @@ require_once "../../config/settings.inc.php";
 require_once "../../include/myview.php";
 $t = new MyView();
 $t->title = "RadMap API";
-$t->content = <<<EOF
+$t->content = <<<EOM
 <style>
 div.item h4 {
  color: #f00;
@@ -217,5 +217,5 @@ os.system("ffmpeg -y -i %05d.png -b 2000k out.mp4")
  <li><strong>22 May 2016:</strong> Clarified the Local Storm Reports timestamp
         options.</li>
 </ul>
-EOF;
+EOM;
 $t->render('single.phtml');

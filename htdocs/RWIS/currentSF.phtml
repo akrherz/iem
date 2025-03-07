@@ -33,12 +33,12 @@ if (!array_key_exists($sortcol, $vals)) {
     xssafe("</script>");
 }
 
-$t->breadcrumbs = <<<EOF
+$t->breadcrumbs = <<<EOM
 <ol class="breadcrumb">
  <li><a href="/RWIS/">RWIS</a></li>
  <li class="active">Current Conditions</li>
 </ol>
-EOF;
+EOM;
 $nselect = "<select name=\"network\">";
 $rs = pg_query($mesosite, "SELECT id, name from networks where id ~* 'RWIS' ORDER by name ASC");
 for ($i = 0; $row = pg_fetch_assoc($rs); $i++) {
@@ -141,7 +141,7 @@ foreach ($finalA as $key => $parts) {
 EOM;
 }
 
-$content = <<<EOF
+$content = <<<EOM
 <form method="GET" action="currentSF.phtml">
 {$nselect}
 <input type="submit" value="Show State">
@@ -196,6 +196,6 @@ logic to account for sites without 4 sensors or broken sensors.
 
 
 <br><br>
-EOF;
+EOM;
 $t->content = $content;
 $t->render('sortables.phtml');

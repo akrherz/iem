@@ -29,7 +29,7 @@ $ar = array(
 
 $tzselect = make_select("tz", "Etc/UTC", $ar);
 
-$t->content = <<<EOF
+$t->content = <<<EOM
 
 <ol class="breadcrumb">
  <li><a href="/projects/iao/">IEM Iowa Atmospheric Observatory Homepage</a></li>
@@ -144,5 +144,5 @@ request. Data exists between approximately 5 April 2016 and 21 Sept 2021.</p>
 
 <br /><br />
 
-EOF;
+EOM;
 $t->render('single.phtml');

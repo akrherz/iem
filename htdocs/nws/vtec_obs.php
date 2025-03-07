@@ -236,7 +236,7 @@ for ($i = 0; $row = pg_fetch_assoc($rs); $i++) {
     $table .= "</td></tr></table>";
 }
 
-$t->content = <<<EOF
+$t->content = <<<EOM
 <ol class="breadcrumb">
  <li><a href="/nws/">NWS User Resources</a></li>
  <li class="current">NWS Watch/Warning/Advisory + ASOS Observations</li>
@@ -307,5 +307,5 @@ $t->content = <<<EOF
   </form>
 
 {$table}
-EOF;
+EOM;
 $t->render('full.phtml');

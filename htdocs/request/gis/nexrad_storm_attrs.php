@@ -6,7 +6,7 @@ require_once "../../../include/forms.php";
 require_once "../../../include/imagemaps.php";
 
 $t = new MyView();
-$t->jsextra = <<<EOF
+$t->jsextra = <<<EOM
 <script>
 $('select[name=station]').change( function() {
     nexrad = $('select[name=station]').val();
@@ -19,7 +19,7 @@ if (tokens.length == 2 && tokens[1].length == 3){
     $('#histimage').attr('src', '/pickup/nexrad_attrs/'+ tokens[1] +'_histogram.png');
 }
 </script>
-EOF;
+EOM;
 $t->title = "Download NEXRAD Storm Attributes Shapefile";
 $content = <<<EOM
 <h3>Archived NEXRAD Storm Attributes Shapefiles</h3>

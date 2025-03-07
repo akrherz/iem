@@ -55,7 +55,7 @@ if (file_exists("/mesonet/share/pics/$station/HEADER.html")) {
     $more .= "<p><strong>" . file_get_contents("/mesonet/share/pics/$station/HEADER.html") . "</strong>";
 }
 
-$t->content = <<<EOF
+$t->content = <<<EOM
 <h3>Directional Photos</h3>
 
 <p>This application shows you photos of the observation site if they are
@@ -69,5 +69,5 @@ Iowa...</p>
 </table>
 
 {$more}
-EOF;
+EOM;
 $t->render('sites.phtml');

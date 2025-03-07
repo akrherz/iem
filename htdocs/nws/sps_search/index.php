@@ -17,7 +17,7 @@ $t->jsextra = <<<EOM
 <script type="text/javascript" src="search.js?v=2"></script>
 EOM;
 
-$t->headextra = <<<EOF
+$t->headextra = <<<EOM
 <link rel='stylesheet' href="/vendor/openlayers/{$OL}/ol.css" type='text/css'>
 <link rel="stylesheet" href="/vendor/jquery-datatables/1.10.20/datatables.min.css" />
 <link rel="stylesheet" href="/vendor/jquery-ui/1.11.4/jquery-ui.min.css" />
@@ -29,10 +29,10 @@ $t->headextra = <<<EOF
     float: left;
 }
 </style>
-EOF;
+EOM;
 $t->title = "Special Weather Statement (SPS) Search by Point";
 
-$t->content = <<<EOF
+$t->content = <<<EOM
 <p>
 <ul class="breadcrumb">
 <li><a href="/nws/">NWS Mainpage</a></li>
@@ -88,5 +88,5 @@ products have a polygon, so this interface <strong>does not show them</strong>.
 
 </form><!-- ./form2 -->
 
-EOF;
+EOM;
 $t->render('full.phtml');

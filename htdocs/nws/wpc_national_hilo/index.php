@@ -79,7 +79,7 @@ if (!is_null($entry)) $table .= write_entry($entry);
 
 $yearselected = ($opt == 0) ? ' checked="checked" ': "";
 $stateselected = ($opt == 1) ? ' checked="checked" ': "";
-$t->content = <<<EOF
+$t->content = <<<EOM
 <ol class="breadcrumb">
  <li><a href="/nws/">NWS User Resources</a></li>
  <li class="active">WPC National High Low</li>
@@ -126,5 +126,5 @@ fun.</p>
 </tbody>
 </table>
 </div>
-EOF;
+EOM;
 $t->render('full.phtml');

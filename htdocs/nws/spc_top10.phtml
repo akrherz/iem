@@ -117,7 +117,7 @@ $levels = Array(
 $lselect = make_select("level", $level, $levels);
 $yrselect = yearSelect(1987, $year);
 
-$t->content = <<<EOF
+$t->content = <<<EOM
 <ol class="breadcrumb">
  <li><a href="/current/severe.phtml">Severe Weather Mainpage</a></li>
  <li class="active">Top 10 SPC Outlooks by size</li>
@@ -155,5 +155,5 @@ area is done within the <a href="https://spatialreference.org/ref/epsg/9311/">US
 
 $table
 
-EOF;
+EOM;
 $t->render('single.phtml');

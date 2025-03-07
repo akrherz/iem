@@ -3,7 +3,7 @@ require_once "../../config/settings.inc.php";
 require_once "../../include/myview.php";
 $t = new MyView();
 $t->title = "AWOS Archive | Sky Coverages";
-$t->content = <<<EOF
+$t->content = <<<EOM
 <ol class="breadcrumb">
     <li><a href="/AWOS/">AWOS</a></li>
     <li class="active">AWOS Sky Coverage Codes</li>
@@ -68,5 +68,5 @@ to what the sky coverage codes mean that are found in the archive.<p>
 </table>
 
 </div>
-EOF;
+EOM;
 $t->render('single.phtml');

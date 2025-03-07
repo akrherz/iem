@@ -268,7 +268,7 @@ if (array_key_exists($station, $SPECIAL)) {
 EOM;
 }
 
-$t->content = <<<EOF
+$t->content = <<<EOM
 
 <h3>Most Recent Observation</h3>
 
@@ -278,5 +278,5 @@ $t->content = <<<EOF
 
 {$interface}
 
-EOF;
+EOM;
 $t->render('sites.phtml');

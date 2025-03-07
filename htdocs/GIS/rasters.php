@@ -80,7 +80,7 @@ if ($rid > 0) {
     }
 }
 
-$t->content = <<<EOF
+$t->content = <<<EOM
 <ol class="breadcrumb">
  <li><a href="/GIS/">GIS Mainpage</a></li>
  <li class="active">IEM RASTER Information</li>
@@ -137,5 +137,5 @@ if so!</div>
 </tbody>
 </table>
 
-EOF;
+EOM;
 $t->render('single.phtml');

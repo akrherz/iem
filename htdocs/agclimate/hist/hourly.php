@@ -66,7 +66,7 @@ $ar = array(
 );
 $vselect2 = make_checkboxes("vars", "", $ar);
 
-$t->content = <<<EOF
+$t->content = <<<EOM
  <ol class="breadcrumb">
   <li><a href="/agclimate">ISU Soil Moisture Network</a></li>
   <li class="active">Minute/Hourly Download</li>
@@ -251,5 +251,5 @@ the Ames-AEA location being at 14 inches.<br />
 
 </dl>
 
-EOF;
+EOM;
 $t->render("full.phtml");

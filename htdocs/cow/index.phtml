@@ -149,12 +149,12 @@ $wiselect = make_select("wind", $wind, $ar);
 
 $tagselect = '<input id="windhailtag" name="windhailtag" type="checkbox" value="Y" ';
 $tagselect .= (($useWindHailTag == 'Y') ? " CHECKED" : "");
-$tagselect .= <<<EOF
+$tagselect .= <<<EOM
 > <label for="windhailtag">When possible, verify SVR warnings against
 issuance WIND...HAIL tag</label>
  <a href="/nws/list_tags.php" target="_new"><i class="fa fa-link"></i> App listing per-WFO tags</a>
 <br /><input id="limitwarns" name="limitwarns" type="checkbox" value="Y" 
-EOF;
+EOM;
 $tagselect .= (($limitwarns == 'Y') ? " CHECKED" : "");
 $tagselect .= '> <label for="limitwarns">When possible, limit considered warnings to your hail/wind threshold</label>';
 
@@ -163,13 +163,13 @@ $resetlink = "/cow/";
 // Allow for a special bypass to expose this configuration setting
 if (isset($_GET["f"])) {
     $resetlink = "/cow/?f";
-    $forecaster_form = <<<EOF
+    $forecaster_form = <<<EOM
     <input type="hidden" name="f" />
 <br />Filter by Product Signature (exact match):<input type="text" name="fcster" size="15" value="{$fcster}" />
-EOF;
+EOM;
 }
 
-$content = <<<EOF
+$content = <<<EOM
 <a href="{$resetlink}">Reset Application</a> (All timestamps are displayed in UTC)
 <form method="GET" name="cow" rel="nofollow">
 
@@ -237,11 +237,11 @@ function ltypeSelect()
 
 <input type="submit" value="Go Cow Go">
 </form>
-EOF;
+EOM;
 if (isset($_GET["hail"])) {
     require_once "../../include/cow_worker.php";
 } else {
-    $content .= <<<EOF
+    $content .= <<<EOM
 
 <h3>IEM Cow (NWS Storm Based Warning Verification)</h3>
 
@@ -541,18 +541,18 @@ example, <code>fcster=forecaster10</code></td></tr>
 <p>There is a <a href="https://github.com/akrherz/DEV/blob/main/cow/api2shapefile.py">Python based example</a>
 that uses this API to generate shapefiles of the verification data.</p>
 
-EOF;
+EOM;
 }
-$t->headextra = <<<EOF
+$t->headextra = <<<EOM
 <link rel="stylesheet" type="text/css" href="/vendor/select2/4.0.3/select2.min.css"/ >
-EOF;
-$t->jsextra = <<<EOF
+EOM;
+$t->jsextra = <<<EOM
 <script src="/vendor/select2/4.0.3/select2.min.js"></script>
 <script type="text/javascript">
 $(document).ready(function(){
         $(".iemselect2").select2();
 });
 </script>
-EOF;
+EOM;
 $t->content = $content;
 $t->render('full.phtml');

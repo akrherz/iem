@@ -8,12 +8,12 @@ require_once "../../../include/iemprop.php";
 $t = new MyView();
 $OL = "9.2.4";
 
-$t->jsextra = <<<EOF
+$t->jsextra = <<<EOM
 <script src='/vendor/openlayers/{$OL}/ol.js'></script>
 <script type="text/javascript" src="/js/olselect-lonlat.js"></script>
 <script type="text/javascript" src="search.js?v=2"></script>
-EOF;
-$t->headextra = <<<EOF
+EOM;
+$t->headextra = <<<EOM
 <link rel="stylesheet" type="text/css" href="/vendor/openlayers/{$OL}/ol.css" />
 <style>
 .map {
@@ -22,10 +22,10 @@ $t->headextra = <<<EOF
     float: left;
 }
 </style>
-EOF;
+EOM;
 $t->title = "SPC Convective Outlook + Discussion + Watch Search by Point";
 
-$t->content = <<<EOF
+$t->content = <<<EOM
 <ol class="breadcrumb">
   <li><a href="/nws/">NWS Mainpage</a></li>
   <li class="active">SPC Convective Outlook + Discussion + Watch Search by Point</li>
@@ -173,5 +173,5 @@ tool to get more accurate results for the watch-by-county era.</p>
     </div><!-- ./col-md-8 -->
 </div><!-- ./row -->
 
-EOF;
+EOM;
 $t->render('full.phtml');

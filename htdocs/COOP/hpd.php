@@ -44,7 +44,7 @@ $t = new MyView();
 $t->title = "COOP HPD FisherPorter Precip";
 
 $sselect = networkSelect("IA_HPD", $station);
-$t->content = <<<EOF
+$t->content = <<<EOM
 <ol class="breadcrumb">
 <li><a href="/COOP/">COOP Data</a></li>
 <li class="active">Fisher Porter Rain Gauge Data</li>
@@ -71,5 +71,5 @@ this datasource available from NCEI.  So there's no data in this archive since
 
 {$table}
 
-EOF;
+EOM;
 $t->render('single.phtml');

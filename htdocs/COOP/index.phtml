@@ -109,12 +109,12 @@ $dict = array(
 );
 $content = "";
 foreach ($dict as $k => $v) {
-    $content .= <<<EOF
+    $content .= <<<EOM
 <div class="tease">
  <a href="{$v["url"]}"><img src="/images/{$v["img"]}" border="0"></a>
  <a href="{$v["url"]}">{$v["title"]}</a><br />{$v["desc"]}<br />&nbsp;
 </div>
-EOF;
+EOM;
 }
 
 $news = $get_news_by_tag("coop");

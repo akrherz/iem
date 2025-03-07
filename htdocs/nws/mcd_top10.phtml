@@ -48,7 +48,7 @@ EOM;
 $ltable = dowork($baseurl, "DESC");
 $stable = dowork($baseurl, "ASC");
 
-$t->content = <<<EOF
+$t->content = <<<EOM
 <ol class="breadcrumb">
  <li><a href="/current/severe.phtml">Severe Weather Mainpage</a></li>
  <li class="active">Top {$count} SPC Mesoscale Convective Discussions by size</li>
@@ -81,5 +81,5 @@ $ltable
 <h3>Top {$count} Smallest:</h3>
 $stable
 
-EOF;
+EOM;
 $t->render('single.phtml');

@@ -65,7 +65,7 @@ foreach ($levels as $key => $val) {
     );
 }
 
-$t->content = <<<EOF
+$t->content = <<<EOM
  <ol class="breadcrumb">
   <li><a href="/agclimate">ISU Soil Moisture Network</a></li>
   <li class="active">Daily Download</li>
@@ -251,5 +251,5 @@ When selecting the time interval, make sure you that choose <B> * valid * </B> d
 
 </div></div>
 
-EOF;
+EOM;
 $t->render("single.phtml");

@@ -6,7 +6,7 @@ $t->title = "GOES GIS Products";
 
 $adir = date("Y/m/d");
 
-$t->content = <<<EOF
+$t->content = <<<EOM
 <h3>GOES Satellite Imagery for GIS</h3>
 
 <p>The IEM has a long history processing the GOES Satellite information into
@@ -163,5 +163,5 @@ timestamps in UTC.
 radar and satellite data along with NWS warning products.</li>
 
 </ul>
-EOF;
+EOM;
 $t->render('single.phtml');

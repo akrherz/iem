@@ -7,7 +7,7 @@ require_once "../../../include/imagemaps.php";
 
 $t = new MyView();
 $t->title = "Download WPC Mesoscale Precipitation Discussion Shapefile";
-$content = <<<EOF
+$content = <<<EOM
 <p>
 <ul class="breadcrumb">
 <li><a href="/nws/">NWS Mainpage</a></li>
@@ -42,7 +42,7 @@ for those wishing to script against this service.
 </tr>
 
 <tr>
-EOF;
+EOM;
 $content .= "<th>Start:</th>
     <td>
      ". yearSelect2(2017, date("Y"), "year1") ."

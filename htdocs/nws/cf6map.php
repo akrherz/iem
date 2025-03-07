@@ -8,7 +8,7 @@ force_https();
 $t = new MyView();
 $t->title = "Map of Daily NWS CF6 reports";
 $OL = '10.4.0';
-$t->headextra = <<<EOF
+$t->headextra = <<<EOM
 <link rel="stylesheet" href="/vendor/openlayers/{$OL}/ol.css" type="text/css">
 <link rel="stylesheet" href="/vendor/jquery-ui/1.12.1/jquery-ui.min.css" />
 <link type="text/css" href="/vendor/openlayers/{$OL}/ol-layerswitcher.css" rel="stylesheet" />
@@ -22,15 +22,15 @@ $t->headextra = <<<EOF
 }
 
 </style>
-EOF;
-$t->jsextra = <<<EOF
+EOM;
+$t->jsextra = <<<EOM
 <script src="/vendor/openlayers/{$OL}/ol.js" type="text/javascript"></script>
 <script src="/vendor/jquery-ui/1.12.1/jquery-ui.js"></script>
 <script src='/vendor/openlayers/{$OL}/ol-layerswitcher.js'></script>
 <script src='cf6map.js'></script>
-EOF;
+EOM;
 
-$t->content = <<<EOF
+$t->content = <<<EOM
 
 <div id="popover-content" style="display: none">
   <!-- Hidden div with the popover content -->
@@ -93,6 +93,6 @@ $t->content = <<<EOF
 </div>
 </div>
 
-EOF;
+EOM;
 
 $t->render('full.phtml');

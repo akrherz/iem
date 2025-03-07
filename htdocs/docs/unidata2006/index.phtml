@@ -3,7 +3,7 @@ require_once "../../../config/settings.inc.php";
 require_once "../../../include/myview.php";
 $t = new MyView();
 $t->title = "Unidata Equipment Grant Report";
-$t->content = <<<EOF
+$t->content = <<<EOM
 
 <div style="text-align: center; width: 800px;">
 <h3>Increasing GIS Web Services Capacity to Serve The Unidata Community.</h3>
@@ -114,5 +114,5 @@ community, NWS, and private/public sector to increase the use of these
 services and adoption of similar technologies.  Please do not hesitate to contact <a href="https://mesonet.agron.iastate.edu/info/contacts.php">Daryl Herzmann</a> if you have
 any questions or suggestions.
 
-EOF;
+EOM;
 $t->render('single.phtml');

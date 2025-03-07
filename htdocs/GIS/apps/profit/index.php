@@ -7,19 +7,19 @@ force_https();
 $OL = "7.2.2";
 $t = new MyView();
 $t->title = "Profitability Map";
-$t->headextra = <<<EOF
+$t->headextra = <<<EOM
 <link rel="stylesheet" href="/vendor/openlayers/{$OL}/ol.css" type="text/css">
 <link rel="stylesheet" href="/vendor/jquery-ui/1.11.4/jquery-ui.min.css" />
 <link type="text/css" href="/vendor/openlayers/{$OL}/ol-layerswitcher.css" rel="stylesheet" />
-EOF;
-$t->jsextra = <<<EOF
+EOM;
+$t->jsextra = <<<EOM
 <script src="/vendor/openlayers/{$OL}/ol.js" type="text/javascript"></script>
 <script src="/vendor/jquery-ui/1.11.4/jquery-ui.js"></script>
 <script src='/vendor/openlayers/{$OL}/ol-layerswitcher.js'></script>
 <script src="index.js"></script>
-EOF;
+EOM;
 
-$t->content = <<<EOF
+$t->content = <<<EOM
 <style>
 #legend{
     position:absolute; 
@@ -101,6 +101,6 @@ Ag Decision Maker cost estimates</a>.</p>
 </div><!-- ./disclaimer -->
 </div>
 
-EOF;
+EOM;
 
 $t->render('app.phtml');

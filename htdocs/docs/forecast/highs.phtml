@@ -4,7 +4,7 @@ include_once "../../../include/myview.php";
 $t = new MyView();
 $t->title = "High Temperature Forecasting";
 
-$t->content = <<<EOF
+$t->content = <<<EOM
 <h3>High Temperature Forecasting Methods</h3>
 
 <p><img src="figs/year.png">
@@ -22,5 +22,5 @@ $t->content = <<<EOF
 <img src="figs/dec.png">
 
 <p>
-EOF;
+EOM;
 $t->render('single.phtml');

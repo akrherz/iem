@@ -65,25 +65,25 @@ variables including temperature, dew point, wind speed, and wind direction. If
 the plot covers more than five days, an hourly interval dataset is used,
 otherwise the values are plotted at one minute interval.
 EOM;
-$desc["6"] = <<<EOF
+$desc["6"] = <<<EOM
 This plot presents a histogram of hourly volumetric soil moisture observations.
 The y-axis is expressed in logarithmic to better show the low frequency obs
 within the distribution.
-EOF;
-$desc["7"] = <<<EOF
+EOM;
+$desc["7"] = <<<EOM
 This plot computes the daily change in soil water approximately between
 the depths of 6 to 30 inches.  This is using only two measurements at
 12, and 24 inch depths.  The 12 inch depth is assumed to cover the
 6-18 inch layer and the 24 inch depth to cover 18-30 layer.  If you select a
 period of less than 60 days, the daily rainfall will be plotted as well.
-EOF;
-$desc["10"] = <<<EOF
+EOM;
+$desc["10"] = <<<EOM
 This plot provides a diagnostic of the data being provided by the inversion
 sensors.  These temperature sensors are installed at 1.5 and 10 feet above the
 ground, which then can sense if temperature increases with height.  This
 sensor package was installed in 2021 and only found at three sites BOOI4 - Ames
 AEA, CRFI4 - Crawfordsville, and CAMI4 - Sutherland.
-EOF;
+EOM;
 $desc["encrh"] = <<<EOM
 Many of the stations track the humidity within the logger enclosure to ensure
 that desiccant packs are working as intended.  Elevated humidity leads to

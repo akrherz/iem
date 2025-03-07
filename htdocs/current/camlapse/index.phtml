@@ -5,9 +5,9 @@ require_once "../../../include/cameras.inc.php";
 
 $t = new MyView();
 $t->title = "Webcam Lapse Player";
-$t->headextra = <<<EOF
+$t->headextra = <<<EOM
 <link href="/vendor/flowplayer/7.2.6/skin/skin.css" rel="stylesheet">
-EOF;
+EOM;
 
 $camselect = "<select id=\"mycam\" name=\"mycam\" onchange=\"myloader();\">";
 foreach ($cameras as $key => $dict) {
@@ -18,7 +18,7 @@ foreach ($cameras as $key => $dict) {
 }
 $camselect .= "</select>";
 
-$t->content = <<<EOF
+$t->content = <<<EOM
 <h3>Recent Web Cam Time Lapses</h3>
 
 <p>Each day, the IEM generates five time lapses from each of the web cameras.
@@ -46,10 +46,10 @@ note the timestamp on the lapses, some of them may be old.</p>
 </select>
 </div>
 </form>
-EOF;
-$t->jsextra = <<<EOF
+EOM;
+$t->jsextra = <<<EOM
 <script type="text/javascript" src="/vendor/flowplayer/7.2.6/flowplayer.min.js"></script>
 <script type="text/javascript" src="app.js"></script>
-EOF;
+EOM;
 
 $t->render('single.phtml');

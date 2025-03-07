@@ -167,7 +167,7 @@ $sselect = networkSelect("NWSCLI", $station);
 $t = new MyView();
 $t->title = "Tabular CF6 Report Data";
 
-$t->content = <<<EOF
+$t->content = <<<EOM
 <ol class="breadcrumb">
     <li><a href="/climate/">Climate Data</a></li>
     <li class="active">Tabular CF6 Report Data</li>		
@@ -237,12 +237,12 @@ perhaps a slightly more human readable format.  The codes are as follows:
 </tbody>
 </table></p>
 
-EOF;
+EOM;
 
-$t->headextra = <<<EOF
+$t->headextra = <<<EOM
 <link rel="stylesheet" type="text/css" href="/vendor/select2/4.0.3/select2.min.css"/ >
 <link type="text/css" href="/vendor/jquery-datatables/1.10.20/datatables.min.css" rel="stylesheet" />
-EOF;
+EOM;
 $t->jsextra = <<<EOM
 <script src="/vendor/select2/4.0.3/select2.min.js"></script>
 <script src='/vendor/jquery-datatables/1.10.20/datatables.min.js'></script>

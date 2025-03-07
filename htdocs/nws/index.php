@@ -4,7 +4,7 @@ require_once "../../include/myview.php";
 $t = new MyView();
 $t->title = "NWS Related Information";
 
-$t->content = <<<EOF
+$t->content = <<<EOM
 
 <br />
 <ol class="breadcrumb">
@@ -375,5 +375,5 @@ about the IEM's text product archives.</p>
 </div>
 </div><!-- ./row -->
 
-EOF;
+EOM;
 $t->render('single.phtml');

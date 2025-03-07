@@ -33,7 +33,7 @@ $t->headextra = <<<EOM
 }
 </style>
 EOM;
-$t->content = <<<EOF
+$t->content = <<<EOM
 <ol class="breadcrumb">
  <li><a href="/nws/">NWS Mainpage</a></li>
  <li class="active">Download TAF data</li>
@@ -144,5 +144,5 @@ Greater than 6 miles is encoded as 6.01</td></tr>
 
 </form>
 
-EOF;
+EOM;
 $t->render('full.phtml');

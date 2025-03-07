@@ -14,7 +14,7 @@ ob_start();
 
 require_once "../include/database.inc.php";
 $d = date('D, d M Y H:i:s O');
-echo <<<EOF
+echo <<<EOM
 <?xml version="1.0" encoding="UTF-8"?>
 <rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom">
 <channel>
@@ -23,7 +23,7 @@ echo <<<EOF
 <link>{$EXTERNAL_BASEURL}</link>
 <description>Iowa Environmental Mesonet Daily Feature</description>
 <lastBuildDate>{$d}</lastBuildDate>
-EOF;
+EOM;
 $conn = iemdb("mesosite");
 $rs = pg_exec(
     $conn,
@@ -59,7 +59,7 @@ EOM;
 EOM;
     $t = $row["title"];
     $v = substr($row["valid"], 0, 10);
-    echo <<<EOF
+    echo <<<EOM
 <item>
 <title><![CDATA[{$t}]]></title>
 <author>akrherz@iastate.edu (Daryl Herzmann)</author>
@@ -67,7 +67,7 @@ EOM;
 <guid>{$EXTERNAL_BASEURL}/onsite/features/cat.php?day={$v}</guid>
 <description><![CDATA[{$cbody}]]></description>
 </item>
-EOF;
+EOM;
 }
 echo "</channel>\n";
 echo "</rss>\n";

@@ -311,7 +311,7 @@ $plusone = sprintf(
     $state,
 );
 
-$t->content = <<<EOF
+$t->content = <<<EOM
 <p>With this application, you can plot COOP observations for a date of your
 choice.
 
@@ -372,5 +372,5 @@ temperature (for example) was most likely for the previous date.</li>
 text editor and save the data file on your machine.  Most GIS systems can 
 then import this dataset as a layer.  You may have to omit the commented lines
 (#) if your GIS has trouble importing the data.
-EOF;
+EOM;
 $t->render('single.phtml');

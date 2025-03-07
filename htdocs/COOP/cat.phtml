@@ -16,7 +16,7 @@ if ($date == "" && $station == "") $station = "AMSI4";
 $t = new MyView();
 $t->title = "NWS COOP Observations by Date by Site";
 
-$content = <<<EOF
+$content = <<<EOM
  <ol class="breadcrumb">
   <li><a href="/COOP/">NWS Cooperative Observers</a></li>
   <li class="active">View Reports by Date or Site</li>
@@ -34,20 +34,20 @@ $content = <<<EOF
     observations.</div>
 
 <form name="switchnwsli" action="cat.phtml" method="GET">
-EOF;
+EOM;
 
 // SCENARIO 1: Print out data for year for station
 if (strlen($station) > 0) {
     $link = "cat.phtml?year=$year&station=$station&network=$network&sortvar=";
     if ($sortvar == "") $sortvar = "day";
     $stationselect = networkSelect($network, $station);
-    $content .= <<<EOF
+    $content .= <<<EOM
  <h3>COOP obs listed by station</h3>
  (<i>Click on a date to get all obs for a particular date.</i>)
  
  <p>{$stationselect}
  Select Year: 
-EOF;
+EOM;
     $content .= yearSelect(2004, $year, "year");
 }
 
@@ -56,12 +56,12 @@ if (strlen($date) > 0) {
     $year = substr($date, 0, 4);
     $link = "cat.phtml?date=$date&network=$network&sortvar=";
     if ($sortvar == "") $sortvar = "station";
-    $content .= <<<EOF
+    $content .= <<<EOM
 <h3>COOP obs listed by date</h3>
 (<i>Click on the NWSLI to view all obs from one station.</i>)
  
  <p>Enter Date: <input type="date" name="date" value="{$date}">
-EOF;
+EOM;
 }
 
 $netselect = selectNetworkType("COOP", $network);
@@ -188,12 +188,12 @@ for ($i = 0; $row = pg_fetch_assoc($rs); $i++) {
     $content .= $rowcontent;
 }
 
-$content .= <<<EOF
+$content .= <<<EOM
  </table>
 
 <p>Errors exist in this dataset and you should evaluate the observations
 before using...
-EOF;
+EOM;
 $t->content = $content;
 $t->jsextra = '<script type="module" src="cat.js"></script>';
 $t->render('full.phtml');

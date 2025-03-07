@@ -7,7 +7,7 @@ $t->iem_resource = "IEMRE";
 
 $s4link = sprintf("/archive/data/%s/stage4/", date("Y/m/d"));
 
-$t->content = <<<EOF
+$t->content = <<<EOM
 <h3>IEM Reanalysis (IEMRE)</h3><p>
 
 <div class="row">
@@ -236,5 +236,5 @@ IEMRE related datasets:
   <li><a href="/onsite/prism/">Oregon State PRISM Daily Data</a></li>
 </ul>
 
-EOF;
+EOM;
 $t->render('single.phtml');

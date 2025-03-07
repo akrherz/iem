@@ -13,7 +13,7 @@ $yearselect = yearSelect(1947, $year);
 $t->headextra = <<<EOM
 <link type="text/css" href="/vendor/jquery-datatables/1.10.20/datatables.min.css" rel="stylesheet" />
 EOM;
-$t->content = <<<EOF
+$t->content = <<<EOM
  <ol class="breadcrumb">
      <li><a href="/archive/raob/">Sounding Archive Mainpage</a></li>
     <li class="active">List Soundings by Year</li>
@@ -49,7 +49,7 @@ IEM. A <a href="/api/1/docs/">JSON Webservice</a> backends this page.</p>
  </div>
  </p>
 
-EOF;
+EOM;
 $t->jsextra = <<<EOM
 <script src='/vendor/jquery-datatables/1.10.20/datatables.min.js'></script>
 <script src="list.js"></script>

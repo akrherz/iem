@@ -38,7 +38,7 @@ for ($i = 0; $row = pg_fetch_array($rs); $i++) {
 }
 $sselect = make_select("station", "KDSM", $sids, '', '', FALSE, TRUE);
 
-$t->content = <<<EOF
+$t->content = <<<EOM
 <ol class="breadcrumb">
  <li><a href="/nws/">NWS Mainpage</a></li>
  <li class="active">Download Temps and Winds Aloft (FD) Data</li>
@@ -134,5 +134,5 @@ and end date.</i>
 
 </form>
 
-EOF;
+EOM;
 $t->render('full.phtml');

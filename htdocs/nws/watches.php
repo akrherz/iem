@@ -51,7 +51,7 @@ $('#makefancy').click(function(){
 EOM;
 
 
-$t->content = <<<EOF
+$t->content = <<<EOM
 <ol class="breadcrumb">
  <li><a href="/nws/">NWS Resources</a></li>
  <li class="active">SPC Watch Listing</li>
@@ -91,5 +91,5 @@ directly access it here:
 </table>
 </div>
 
-EOF;
+EOM;
 $t->render("full.phtml");

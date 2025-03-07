@@ -120,7 +120,7 @@ foreach ($jobj["features"] as $bogus => $value) {
 
 $t = new MyView();
 $t->title = "ISUAG Growing Season Data";
-$t->headextra = <<<EOF
+$t->headextra = <<<EOM
 <script language="JavaScript" type="text/javascript">
 <!--//BEGIN Script
 function new_window(url) {
@@ -128,7 +128,7 @@ function new_window(url) {
 }
 //END Script-->
 </script>
-EOF;
+EOM;
 
 $vselect = make_select("var", $var, $varDef);
 
@@ -149,7 +149,7 @@ $ar = array(
 );
 $iselect = make_select("imgsz", $imgsz, $ar);
 
-$t->content = <<<EOF
+$t->content = <<<EOM
 <h3>Growing Season Maps</h3>
 
 <p>This application will plot an accumulated variable for a time period of your 
@@ -218,6 +218,6 @@ improve readability.</p>
 text editor and save the data file on your machine.  Most GIS systems can 
 then import this dataset as a layer.  You may have to omit the commented lines
 (#) if your GIS has trouble importing the data.
-EOF;
+EOM;
 $t->jsextra = '<script type="text/javascript" src="gsplot.js"></script>';
 $t->render('single.phtml');

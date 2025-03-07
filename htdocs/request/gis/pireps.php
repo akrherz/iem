@@ -34,7 +34,7 @@ $artcc = Array(
 );
 $artccSelect = make_select("artcc", "_ALL", $artcc);
 
-$content = <<<EOF
+$content = <<<EOM
 <p>
 <ul class="breadcrumb">
 <li><a href="/nws/">NWS Mainpage</a></li>
@@ -109,7 +109,7 @@ exists for those wishing to script against this service.</p>
 </tr>
 
 <tr>
-EOF;
+EOM;
 $content .= "
     <th>Start:</th>
     <td>
@@ -149,7 +149,7 @@ $content .= "
   </tr>
 </table>";
 
-$content .= <<<EOF
+$content .= <<<EOM
 <p><input type="submit" value="Giveme data right now!">
 </form>
 
@@ -194,7 +194,7 @@ Field 9: Type=C/String, Title='PROD_ID', The IEM NWS text product identifier.
  in the CSV option with a "None" column for the latitude and longitude.  On a
  typical day, less than five PIREPs have unknown location details.</li>
  </ul>
-EOF;
+EOM;
 $t->content = $content;
 $t->jsextra = <<<EOM
 <script>

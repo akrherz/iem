@@ -7,7 +7,7 @@ define("IEM_APPID", 67);
 $t->title = "HRRR Reflectivity Information";
 
 $d = date("Y/m/d");
-$t->content = <<<EOF
+$t->content = <<<EOM
 <ol class="breadcrumb">
  <li><a href="radview.phtml">IEM RadView Mainpage</a></li>
  <li class="active">HRRR Reflectivity</li>
@@ -116,5 +116,5 @@ ice.</li>
 things can be improved for better usage.</li>
 </ol>
 
-EOF;
+EOM;
 $t->render('single.phtml');

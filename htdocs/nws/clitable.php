@@ -49,7 +49,7 @@ if ($opt === "bystation") {
 }
 $prettyurl = str_replace($INTERNAL_BASEURL, $EXTERNAL_BASEURL, $uri);
 
-$table = <<<EOF
+$table = <<<EOM
 <style>
 .empty{
     width: 0px !important;
@@ -91,7 +91,7 @@ $table = <<<EOF
 </tr>
 </thead>
 <tbody>
-EOF;
+EOM;
 function departure($actual, $normal)
 {
     // JSON upstream hacky returns M instead of null
@@ -238,7 +238,7 @@ $sselect = networkSelect("NWSCLI", $station);
 $t = new MyView();
 $t->title = "Tabular CLI Report Data";
 
-$t->content = <<<EOF
+$t->content = <<<EOM
 <ol class="breadcrumb">
     <li><a href="/climate/">Climate Data</a></li>
     <li class="active">Tabular CLI Report Data</li>		
@@ -290,14 +290,14 @@ directly access it here:
     <i class="fa fa-star-o"></i> Record Tied,
     <i class="fa fa-star"></i> Record Set.</p>
 
-EOF;
-$t->headextra = <<<EOF
+EOM;
+$t->headextra = <<<EOM
 <link rel="stylesheet" type="text/css" href="/vendor/select2/4.0.3/select2.min.css"/ >
 <link type="text/css" href="/vendor/jquery-datatables/{$DT}/datatables.min.css" rel="stylesheet" />
-EOF;
-$t->jsextra = <<<EOF
+EOM;
+$t->jsextra = <<<EOM
 <script src="/vendor/select2/4.0.3/select2.min.js"></script>
 <script src='/vendor/jquery-datatables/{$DT}/datatables.min.js'></script>
 <script src="clitable.js"></script>
-EOF;
+EOM;
 $t->render('full.phtml');

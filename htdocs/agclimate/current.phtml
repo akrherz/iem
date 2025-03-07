@@ -114,19 +114,19 @@ $t->current_network = "ISU Soil Moisture";
 $t->title = "ISU Ag Climate Sortable Currents";
 $t->refresh = 300;
 
-$t->breadcrumbs = <<<EOF
+$t->breadcrumbs = <<<EOM
  <ol class="breadcrumb">
  <li><a href="/agclimate/">ISU Soil Moisture Network</a></li>
  <li class="active">Sortable Currents</li>
  </ol>
-EOF;
-$t->content = <<<EOF
+EOM;
+$t->content = <<<EOM
 <p>This table provides the most recent hourly observations collected from the
 network.  The data was provided by <a href="{$PUBLIC_URI}">this JSON webservice</a>.</p>
 
 <br />
 {$table}
 
-EOF;
+EOM;
 
 $t->render('sortables.phtml');

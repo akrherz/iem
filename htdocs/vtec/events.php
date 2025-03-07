@@ -108,7 +108,7 @@ $schecked = ($which == 'state') ? "CHECKED" : "";
 $ponchecked = $pon ? "CHECKED" : "";
 $sonchecked = $son ? "CHECKED" : "";
 
-$t->content = <<<EOF
+$t->content = <<<EOM
 <ol class="breadcrumb">
  <li><a href="/nws/">NWS Resources</a></li>
  <li class="active">NWS VTEC Event Listing</li>
@@ -177,5 +177,5 @@ directly access it here:
 </table>
 </div>
 
-EOF;
+EOM;
 $t->render("single.phtml");

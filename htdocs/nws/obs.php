@@ -143,7 +143,7 @@ $mselect = make_select("metar", $metar, $ar);
 $ar = array("asc" => "Ascending", "desc" => "Descending");
 $sselect = make_select("sorder", $sorder, $ar);
 
-$t->content = <<<EOF
+$t->content = <<<EOM
 <form method="GET" action="obs.php" name="work">
 <input type="hidden" value="{$sortcol}" name="sortcol">
 
@@ -206,5 +206,5 @@ Timestamps displayed are for <strong>{$tzname}</strong> timezone.
 <input type="reset" value="Reset">
 
 </form></div>
-EOF;
+EOM;
 $t->render("sortables.phtml");

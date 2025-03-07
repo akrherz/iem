@@ -5,7 +5,7 @@ require_once "../../include/myview.php";
 $t = new MyView();
 $t->title = "ISUSM - Evapotranspiration Details";
 
-$t->content = <<<EOF
+$t->content = <<<EOM
 <ul class="breadcrumb">
     <li><a href="/agclimate/">ISU Soil Moisture Network</a></li>
     <li class="current">ET Details</li>
@@ -87,6 +87,6 @@ $t->content = <<<EOF
     <li><a href="https://github.com/woodcrafty/PyETo">Python Implementation</a> of FAO 56 and other equations</li>
 </ol></p>
 
-EOF;
+EOM;
 
 $t->render('single.phtml');

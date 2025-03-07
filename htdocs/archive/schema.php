@@ -11,7 +11,7 @@ $u = sprintf("<a href=\"%s\">%s</a>\n", $url, $url);
 $url2 = sprintf("https://mtarchive.geol.iastate.edu/%s", gmdate('Y/m/d'));
 $u2 = sprintf("<a href=\"%s\">%s</a>\n", $url2, $url2);
 
-$t->content = <<<EOF
+$t->content = <<<EOM
 
 <h3>Archived Data Schema</h3>
 
@@ -81,5 +81,5 @@ ROOT={$u2}
    | - text :: some NWS data in text format
 </pre>
 
-EOF;
+EOM;
 $t->render('single.phtml');

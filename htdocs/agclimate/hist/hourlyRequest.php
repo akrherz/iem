@@ -17,7 +17,7 @@ $ys2 = yearSelect2(1986, date("Y"), "endYear", '', 2014);
 $ms2 = monthSelect(date("m"), "endMonth");
 $ds2 = daySelect2(date("d"), "endDay");
 
-$t->content = <<<EOF
+$t->content = <<<EOM
  <ol class="breadcrumb">
   <li><a href="/agclimate">ISU AgClimate</a></li>
   <li class="active">Legacy Network Hourly Download</li>
@@ -125,5 +125,5 @@ data from this network, see <a href="dailyRequest.php">this page</a>.
 <br /><br />
 </form>
 
-EOF;
+EOM;
 $t->render('single.phtml');

@@ -99,7 +99,7 @@ $table .= "</tbody></table>";
 // Begin Output
 $t->title = "Model Output Statistics Table for $station";
 
-$content = <<<EOF
+$content = <<<EOM
 <ol class="breadcrumb">
  <li><a href="/mos/">Model Output Statistics</a></li>
  <li class="active">Single Variable Data Table</li>
@@ -115,7 +115,7 @@ should use the "K" for United States sites.</p>
 <input type="text" name="station" value="$station">
 
 <select name="vname">
-EOF;
+EOM;
 foreach ($mosvars as $v => $n) {
     $content .= "<option value=\"$v\"";
     if ($vname == $v) $content .= " SELECTED";
