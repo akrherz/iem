@@ -115,7 +115,7 @@ if ($station != null) {
         $eyear,
     );
     $jdata = file_get_contents($inturl);
-    $URI = str_replace($INTERNAL_BASEURL, $EXTERNAL_BASEURL, $inturl);
+    $URL = str_replace($INTERNAL_BASEURL, $EXTERNAL_BASEURL, $inturl);
     $json = json_decode($jdata, $assoc = TRUE);
     $data = array();
     $table = "";
@@ -200,7 +200,7 @@ for that date.</p>
 
 <p>The data found in this table was derived from the following
 <a href="/json/">JSON webservice</a>:<br />
-<code>{$URI}</code>
+<code>{$URL}</code>
 </p>
 
 <form method="GET" action="extremes.php" name="myform">
