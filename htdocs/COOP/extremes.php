@@ -106,7 +106,7 @@ if ($station != null) {
 } else {
     if ($sortcol == 'valid') $sortcol = 'station';
     $inturl = sprintf(
-        "%s/json/climodat_dayclimo.py?network=%s&month=%s&day=%s&syear=%s&eyear=%s",
+        "%s/geojson/climodat_dayclimo.py?network=%s&month=%s&day=%s&syear=%s&eyear=%s",
         $INTERNAL_BASEURL,
         $network,
         $month,
