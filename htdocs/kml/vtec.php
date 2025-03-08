@@ -18,7 +18,8 @@ $eventid = get_int404("eventid", 103);
 $phenomena = isset($_GET["phenomena"]) ? substr(xssafe($_GET["phenomena"]), 0, 2) : "SV";
 $significance = isset($_GET["significance"]) ? substr(xssafe($_GET["significance"]), 0, 1) : "W";
 
-$rs = pg_prepare($connect, "SELECT", "SELECT  
+$stname = uniqid();
+pg_prepare($connect, $stname, "SELECT  
            ST_askml(geom) as kml, issue, expire, status,
            round(ST_area(ST_transform(geom,9311)) / 1000000.0) as psize
            from sbw_$year 
@@ -28,12 +29,13 @@ $rs = pg_prepare($connect, "SELECT", "SELECT
 
 $result = pg_execute(
     $connect,
-    "SELECT",
+    $stname,
     array($wfo, $phenomena, $eventid, $significance)
 );
 
 if (pg_num_rows($result) <= 0) {
-    $rs = pg_prepare($connect, "SELECT2", "SELECT 
+    $stname = uniqid();
+    pg_prepare($connect, $stname, "SELECT 
             issue, expire, status,  
            ST_askml(u.geom) as kml,
            round(ST_area(ST_transform(u.geom,9311)) / 1000000.0) as psize
@@ -43,14 +45,14 @@ if (pg_num_rows($result) <= 0) {
 
     $result = pg_execute(
         $connect,
-        "SELECT2",
+        $stname,
         array($wfo, $phenomena, $eventid, $significance)
     );
 }
 
 $label = "";
 if (pg_num_rows($result) > 0) {
-    $row = pg_fetch_array($result, 0);
+    $row = pg_fetch_assoc($result, 0);
     $radarts = strtotime($row["issue"]);
     if (strtotime($row["expire"]) > time()) {
         $radarts = time();

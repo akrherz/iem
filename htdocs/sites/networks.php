@@ -49,7 +49,7 @@ if ($network == '_ALL_') {
             "network !~* '_COCORAHS' ORDER by name"
     );
     $cities = array();
-    for ($i = 0; $row = pg_fetch_array($rs); $i++) {
+    while ($row = pg_fetch_assoc($rs)) {
         $cities[$row["id"]] = $row;
     }
 } else if (isset($_GET["special"]) && $_GET["special"] == 'allasos') {
@@ -61,7 +61,7 @@ if ($network == '_ALL_') {
             "network ~* 'ASOS' ORDER by name"
     );
     $cities = array();
-    for ($i = 0; $row = pg_fetch_array($rs); $i++) {
+    while ($row = pg_fetch_assoc($rs)) {
         $cities[$row["id"]] = $row;
     }
 } else if (isset($_GET["special"]) && $_GET["special"] == 'alldcp') {
@@ -73,7 +73,7 @@ if ($network == '_ALL_') {
             "network ~* 'DCP' ORDER by name"
     );
     $cities = array();
-    for ($i = 0; $row = pg_fetch_array($rs); $i++) {
+    while ($row = pg_fetch_assoc($rs)) {
         $cities[$row["id"]] = $row;
     }
 } else {

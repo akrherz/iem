@@ -56,7 +56,11 @@ for ($now = $sts; $now <= $ets; $now += (3600 * $runsper[$model])) {
     $s = date("Y-m-d H:i", $now);
     $runtimes[] = $s;
 }
-$table .= sprintf("<table class=\"table table-condensed table-bordered table-striped\"><thead><tr><td></td><th colspan=\"%s\">Model Run Initialized at:</th></tr><tr><th width=\"75\">Valid:</th>", sizeof($runtimes));
+$table .= sprintf(
+    "<table class=\"table table-condensed table-bordered table-striped\">".
+    "<thead class=\"sticky\"><tr><td></td><th colspan=\"%s\">".
+    "Model Run Initialized at:</th></tr><tr><th width=\"75\">Valid:</th>",
+    sizeof($runtimes));
 for ($now = $sts; $now <= $ets; $now += (3600 * $runsper[$model])) {
     $s = date("Y-m-d H:i", $now);
     $sqlSelector .= sprintf("'%s',", $s);
@@ -66,12 +70,13 @@ for ($now = $sts; $now <= $ets; $now += (3600 * $runsper[$model])) {
 $table .= "</tr></thead><tbody>\n";
 $sqlSelector = substr($sqlSelector, 0, -1) . ")";
 
-$rs = pg_prepare($mosdb, "SELECT", "SELECT *, t06_1 ||'/'||t06_2 as t06, " .
+$stname = uniqid();
+pg_prepare($mosdb, $stname, "SELECT *, t06_1 ||'/'||t06_2 as t06, " .
     "t12_1 ||'/'|| t12_2 as t12 from alldata WHERE " .
     "runtime IN $sqlSelector " .
     "and station = $1 and model = $2");
-$rs = pg_execute($mosdb, "SELECT", array($station, $model));
-for ($i = 0; $row = pg_fetch_array($rs); $i++) {
+$rs = pg_execute($mosdb, $stname, array($station, $model));
+while ($row = pg_fetch_assoc($rs)) {
     $data[substr($row["runtime"], 0, 16)][substr($row["ftime"], 0, 16)] = $row[$vname];
 }
 

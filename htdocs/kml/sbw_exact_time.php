@@ -14,16 +14,17 @@ $eventid = isset($_GET["eventid"]) ? intval($_GET["eventid"]) : 103;
 $phenomena = isset($_GET["phenomena"]) ? substr($_GET["phenomena"],0,2) : "SV";
 $significance = isset($_GET["significance"]) ? substr($_GET["significance"],0,1) : "W";
 
-$rs = pg_prepare($connect, "SELECT", "SELECT issue, expire, status, 
+$stname = uniqid();
+pg_prepare($connect, $stname, "SELECT issue, expire, status, 
            ST_askml(geom) as kml,
            round(ST_area(ST_transform(geom,9311)) / 1000000.0) as psize
            from sbw_$year 
            WHERE wfo = $1 and phenomena = $2 and 
            eventid = $3 and significance = $4 and status = 'NEW'");
 
-$result = pg_execute($connect, "SELECT", 
+$result = pg_execute($connect, $stname, 
                      Array($wfo, $phenomena, $eventid, $significance) );
-$row = pg_fetch_array($result, 0);
+$row = pg_fetch_assoc($result, 0);
 $radarts = strtotime( $row["issue"] );
 if (strtotime( $row["expire"] ) > time()){
   $radarts = time();

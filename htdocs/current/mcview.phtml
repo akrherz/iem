@@ -84,7 +84,7 @@ if ($mode == "realtime") {
 
 $rs = pg_execute($postgis, "SELECT", array(date("Y-m-d H:i", $ts)));
 $watches = "<div style=\"border: 1px solid #000; padding-left: 10px; background: #eee; width: 100%;\"><strong>Valid Watches:</strong> ";
-for ($i = 0; $row = pg_fetch_array($rs); $i++) {
+while ($row = pg_fetch_assoc($rs)) {
     $issued = strtotime($row["issued"]);
     $watches .= sprintf(
         "<a href=\"mcview.phtml?prod=%srad&java=none&mode=%s&frames=1&interval=5&year=%s&month=%s&day=%s&hour=%s&minute=%s\">%s (%s %s)</a> &nbsp; ",
@@ -301,7 +301,6 @@ foreach ($radtimes as $value) {
         "(<a href='/request/gis/{$gissource}2gtiff.php?dstr=" . gmdate('YmdHi', $value) . "'>GeoTiff</a> or " .
         "<a href=\"/cgi-bin/request/raster2netcdf.py?dstr=" . gmdate('YmdHi', $value) . "&prod=composite_{$gissource}\">netCDF</a>)</li>\n";
 }
-
 
 /* We finally start output */
 
