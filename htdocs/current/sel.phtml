@@ -22,7 +22,7 @@ with data as (
 select * from data where rank = 1
 EOM
     );
-for ($i = 0; $row = pg_fetch_array($rs); $i++) {
+while ($row = pg_fetch_assoc($rs)) {
     $metadata[$row["sel"]] = $row;
     $metadata[$row["sel"]]["sts"] = strtotime(substr($row["issued"], 0, 16));
     $metadata[$row["sel"]]["ets"] = strtotime(substr($row["expired"], 0, 16));

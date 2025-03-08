@@ -14,7 +14,7 @@ $stname = uniqid("select");
 $res = pg_prepare($mesosite, $stname, 
     "SELECT id, name from stations WHERE network = $1");
 $rs = pg_execute($mesosite, $stname, array($network));
-for ($i = 0; $z = pg_fetch_array($rs); $i++) {
+while ($z = pg_fetch_assoc($rs)) {
     $data[$z["id"]] = array(
         "name" => $z["name"],
         "id" => $z["id"],
@@ -84,7 +84,7 @@ $rs = pg_execute($iem, $stname, array(
     $ts->format("Y-m-d H:i") ."+00",
     $network)
 );
-for ($i = 0; $z = pg_fetch_array($rs); $i++) {
+while ($z = pg_fetch_assoc($rs)) {
     foreach ($intervals as $key => $interval) {
         // hackery to account for trace values
         $val = floatval($z["p$interval"]);

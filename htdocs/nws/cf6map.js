@@ -37,7 +37,7 @@ var vectorStyleFunction = function (feature) {
     const value = feature.get(renderattr);
     let color = "#FFFFFF";
     const outlinecolor = "#000000";
-    if (value != "M") {
+    if (value !== "M") {
         if (renderattr.indexOf("depart") > -1) {
             if (renderattr.indexOf("high") > -1 || renderattr.indexOf("low") > -1) {
                 if (value > 0) {
@@ -185,7 +185,7 @@ $(document).ready(() => {
     });
 
     // Figure out if we have anything specified from the window.location
-    var tokens = window.location.href.split("#");
+    let tokens = window.location.href.split("#");
     if (tokens.length === 2) {
         // #YYYYmmdd/variable
         tokens = tokens[1].split("/");

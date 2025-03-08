@@ -55,7 +55,7 @@ if (! is_null($ts)) {
 
 /* Who was online and where did they look?  Hehe */
 $cdrct = array();
-for ($i = 0; $row = pg_fetch_array($rs); $i++) {
+while ($row = pg_fetch_assoc($rs)) {
     $cdrct[$row["cam"]] = $row["drct"];
 }
 

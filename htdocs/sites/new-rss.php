@@ -28,7 +28,7 @@ $cached_rss = cacheable("newstations_rss", 3600)(function () {
     $s .= "<id>{$EXTERNAL_BASEURL}/sites/locate.php</id>\n";
     $s .= "<author><name>daryl herzmann</name><email>akrherz@iastate.edu</email></author>\n";
 
-    for ($i = 0; $row = pg_fetch_array($rs); $i++) {
+    while ($row = pg_fetch_assoc($rs)) {
         $cbody = "<pre>\n";
         $cbody .= "ID     : " . $row["id"] . "\n";
         $cbody .= "Name   : " . $row["name"] . "\n";

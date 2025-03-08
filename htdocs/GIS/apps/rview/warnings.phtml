@@ -505,7 +505,7 @@ $query = "SELECT w.phenomena, u.name as cname, w.expire as expire,
   from $wtable w, nws_ugc u
   WHERE w.expire > $tsextra and w.significance != 'A'
    and w.ugc = u.ugc $cuextra ORDER by {$sortcol} {$sortdir}";
-pg_exec($connection, "set time zone 'GMT'");
+pg_exec($connection, "set time zone 'UTC'");
 $result = pg_exec($connection, $query);
 
 $afos = array(

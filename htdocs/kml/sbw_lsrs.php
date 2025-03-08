@@ -23,7 +23,7 @@ $query2 = "SELECT l.*, ST_askml(l.geom) as kml
            and w.status = 'NEW'";
 
 $result = pg_exec($connect, $query2);
-$row = pg_fetch_array($result);
+$row = pg_fetch_assoc($result);
 
 header('Content-disposition: attachment; filename=sbw_lsrs.kml');
 header("Content-Type: application/vnd.google-earth.kml+xml");

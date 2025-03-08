@@ -1,13 +1,13 @@
 <?php
 require_once "../../config/settings.inc.php";
 require_once "../../include/myview.php";
-$t = new MyView();
-
 require_once "../../include/forms.php";
 require_once "../../include/database.inc.php";
 require_once "../../include/network.php";
 require_once "../../include/imagemaps.php";
 require_once "../../include/reference.php";
+
+$t = new MyView();
 
 $nt = new NetworkTable("WFO");
 $nt->table["ALL"] = array("name" => " --- All ---- ", "id" => "ALL", "archive_begin" => null);
@@ -104,8 +104,7 @@ while ($row = pg_fetch_assoc($rs)) {
 
 $btable = "";
 $rs = pg_execute($postgis, $stname_asc, array(unrectify_wfo($wfo)));
-for ($i = 0; $row = pg_fetch_array($rs); $i++) {
-
+while ($row = pg_fetch_assoc($rs)) {
     $url = sprintf(
         "/vtec/event/%s-O-%s-%s-%s-%s-%04d",
         substr($row['date'], 0, 4),

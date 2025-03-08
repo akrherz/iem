@@ -1,5 +1,5 @@
 <?php
-putenv("TZ=GMT");
+putenv("TZ=UTC");
 require_once "../../config/settings.inc.php";
 require_once "../../include/database.inc.php";
 require_once "../../include/forms.php";
@@ -46,7 +46,7 @@ $ar = array(
 );
 
 echo implode(",", $ar) . "\n";
-for ($i = 0; $row = pg_fetch_assoc($rs); $i++) {
+while ($row = pg_fetch_assoc($rs)) {
     foreach ($ar as $k => $v) {
         echo sprintf("%s,", $row[$v]);
     }
