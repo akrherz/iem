@@ -28,8 +28,7 @@ $dwpf = array();
 $srad = array();
 $times = array();
 
-
-for ($i = 0; $row = pg_fetch_array($rs); $i++) {
+while ($row = pg_fetch_assoc($rs)) {
     $tmpf[] = $row["tmpf"];
     $dwpf[] = $row["dwpf"];
     $srad[] = $row["srad"];

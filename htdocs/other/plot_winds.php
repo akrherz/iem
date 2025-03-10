@@ -33,7 +33,7 @@ $drct = array();
 $sknt = array();
 $times = array();
 
-for ($i = 0; $row = pg_fetch_array($rs); $i++) {
+while ($row = pg_fetch_assoc($rs)) {
     $sknt[] = $row["sknt"];
     $drct[] = $row["drct"];
     $times[] = strtotime($row["valid"]);

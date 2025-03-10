@@ -49,7 +49,7 @@ $ns1 = "Sensor 2";
 $ns2 = "Sensor 3";
 $ns3 = "Sensor 4";
 if (pg_num_rows($r1) > 0) {
-    $row = pg_fetch_array($r1);
+    $row = pg_fetch_assoc($r1);
     $ns0 = $row['sensor0'];
     $ns1 = $row['sensor1'];
     $ns2 = $row['sensor2'];
@@ -86,7 +86,7 @@ function checker($v)
 }
 
 $lastp = 0;
-for ($i = 0; $row = pg_fetch_array($result); $i++) {
+while ($row = pg_fetch_assoc($result)) {
     $times[] = strtotime(substr($row["valid"], 0, 16));
     $tfs0[] = checker($row["tfs0"]);
     $tfs1[] = checker($row["tfs1"]);

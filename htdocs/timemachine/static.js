@@ -19,7 +19,7 @@ function readHashLink() {
     const pid = text(tokens2[0]);
     const stamp = text(tokens2[1]);
     // parse the timestamp
-    if (stamp != "0") {
+    if (stamp !== "0") {
         dt = moment.utc(stamp, 'YYYYMMDDHHmm');
         irealtime = false;
     }
@@ -32,7 +32,7 @@ function addproducts(data) {
     let groupname = '';
     let optgroup = null;
     $.each(data.products, (_i, item) => {
-        if (groupname != item.groupname) {
+        if (groupname !== item.groupname) {
             optgroup = $('<optgroup>');
             optgroup.attr('label', item.groupname);
             pp.append(optgroup);
@@ -210,13 +210,13 @@ function buildUI() {
 
     // Listen for click
     $('.btn').on('click', function () {
-        if (this.id == 'next') {
+        if (this.id === 'next') {
             const opt = getSelectedOption();
             dt.add(parseInt(opt.attr('data-interval'), 10), 'minutes');
-        } else if (this.id == 'prev') {
+        } else if (this.id === 'prev') {
             const opt = getSelectedOption();
             dt.add(0 - parseInt(opt.attr('data-interval'), 10), 'minutes');
-        } else if (this.id == 'realtime') {
+        } else if (this.id === 'realtime') {
             irealtime = true;
             dt = moment();
         } else {
