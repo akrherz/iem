@@ -153,7 +153,7 @@ function pull_wfos_in_states($state_abbreviations){
         if($valid_state_count > 0 ){
             $sql .= ')';
             $result  = pg_query($db, $sql);
-            while ($row = pg_fetch_array($result)){
+            while ($row = pg_fetch_assoc($result)){
                 if($row['wfo'] !== null){
                     $wfos[$wfo_count] = $row['wfo'];
                     ++$wfo_count;

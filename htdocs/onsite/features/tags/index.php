@@ -13,7 +13,7 @@ $pgconn = iemdb('mesosite');
 if (!isset($_GET["tag"])) {
     $rs = pg_exec($pgconn, "SELECT tags from feature WHERE tags is not null");
     $tags = array();
-    for ($i = 0; $row = pg_fetch_array($rs); $i++) {
+    while ($row = pg_fetch_assoc($rs)) {
         $tokens = preg_split("/,/", $row["tags"]);
         foreach ($tokens as $k => $v) {
             if ($v == "") {

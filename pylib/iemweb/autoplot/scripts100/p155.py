@@ -322,6 +322,9 @@ def plotter(ctx: dict):
     ax2.set_yticklabels(ylabels[::-1])
     ax.grid(True, zorder=11)
     ax.set_xlabel(f"{METRICS[varname]} {UNITS[dbvar]}")
+    if min(y) > 100:
+        rng = max(y) - min(y)
+        ax.set_xlim(min(y) - 0.1 * rng, max(y) + 0.1 * rng)
     fig.text(
         0.98,
         0.03,

@@ -48,7 +48,7 @@ $missing = 0;
 $accumP = 0;
 $lastP = 0;
 
-for ($p = 0; $row = pg_fetch_array($result); $p++) {
+for ($p = 0; $row = pg_fetch_assoc($result); $p++) {
     $strDate = $sqlDate . " " . $row["tvalid"];
     $timestamp = strtotime($strDate);
 

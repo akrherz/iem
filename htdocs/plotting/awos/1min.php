@@ -51,7 +51,7 @@ $missing = 0;
 $min_yaxis = 100;
 $max_yaxis = 0;
 
-for ($p = 0; $row = pg_fetch_array($result); $p++) {
+for ($p = 0; $row = pg_fetch_assoc($result); $p++) {
     $strDate = $sqlDate . " " . $row["tvalid"];
     $timestamp = strtotime($strDate);
 
@@ -73,8 +73,6 @@ for ($p = 0; $row = pg_fetch_array($result); $p++) {
     }
 
     $shouldbe = intval($start) + 60 * $i;
-
-    #  echo  $i ." - ". $p ."-". $shouldbe ." - ". $timestamp ;
 
     // We are good, write data, increment i
     if ($shouldbe == $timestamp) {
@@ -116,11 +114,9 @@ $xpre = array(
     '8 PM', '9 PM', '10 PM', '11 PM', 'Midnight'
 );
 
-
 for ($j = 0; $j < 24; $j++) {
     $xlabel[$j * 60] = $xpre[$j];
 }
-
 
 // Fix y[0] problems
 if ($tmpf[0] == "") {
@@ -149,7 +145,6 @@ $graph->yaxis->SetTitle("Temperature [F]");
 
 $graph->xaxis->SetTitle("Valid Local Time");
 $graph->xaxis->SetTitleMargin(30);
-//$graph->yaxis->SetTitleMargin(48);
 $graph->xaxis->SetPos("min");
 
 // Create the linear plot
