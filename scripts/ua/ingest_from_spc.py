@@ -153,7 +153,7 @@ def parse(raw):
                 "tmpc": conv(tokens[2]),
                 "dwpc": conv(tokens[3]),
                 "drct": conv(tokens[4]),
-                "smps": conv(tokens[5]),
+                "smps": rob.conv_speed(tokens[5]),
                 "ts": None,
                 "bearing": None,
                 "range": None,
