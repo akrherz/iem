@@ -11,10 +11,10 @@ from datetime import date, timedelta
 
 import matplotlib.dates as mdates
 import pandas as pd
+from pyiem.database import get_sqlalchemy_conn, sql_helper
 from pyiem.exceptions import NoDataFound
 from pyiem.plot import figure
-from pyiem.util import get_sqlalchemy_conn, utc
-from sqlalchemy import text
+from pyiem.util import utc
 
 # select distinct '"'||ident||'": "['||ident||'] '||name||'",' from airspaces
 # where type_code in ('AKZONE', 'ARTCC');
@@ -113,8 +113,8 @@ def plotter(ctx: dict):
         limiter = " WHERE "
     with get_sqlalchemy_conn("postgis") as conn:
         df = pd.read_sql(
-            text(
-                f"""
+            sql_helper(
+                """
             SELECT date(valid at time zone 'UTC') as date, count(*),
             sum(case when substring(report, '/IC([^/]*)/') is not null then 1
                 else 0 end) as icing_count,
@@ -126,7 +126,8 @@ def plotter(ctx: dict):
                 else 0 end) as ice_and_turb_count
             from pireps p{limiter} valid >= :sts and valid <= :ets
             GROUP by date ORDER by date ASC
-            """
+            """,
+                limiter=limiter,
             ),
             conn,
             params={
@@ -154,10 +155,10 @@ def plotter(ctx: dict):
     )
     height = 0.18
     axes = [
-        fig.add_axes([0.1, 0.1, 0.8, height]),
-        fig.add_axes([0.1, 0.3, 0.8, height]),
-        fig.add_axes([0.1, 0.5, 0.8, height]),
-        fig.add_axes([0.1, 0.7, 0.8, height]),
+        fig.add_axes((0.1, 0.1, 0.8, height)),
+        fig.add_axes((0.1, 0.3, 0.8, height)),
+        fig.add_axes((0.1, 0.5, 0.8, height)),
+        fig.add_axes((0.1, 0.7, 0.8, height)),
     ]
 
     ylabels = [

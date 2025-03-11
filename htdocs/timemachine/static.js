@@ -9,11 +9,11 @@ function text(str) {
 
 function readHashLink() {
     const tokens = window.location.href.split("#");
-    if (tokens.length != 2) {
+    if (tokens.length !== 2) {
         return;
     }
     const tokens2 = tokens[1].split(".");
-    if (tokens2.length != 2) {
+    if (tokens2.length !== 2) {
         return;
     }
     const pid = text(tokens2[0]);
@@ -79,7 +79,7 @@ function rectifyTime() {
         dt = ets;
     }
     // Check 2: If our modulus is OK, we can quit early
-    if ((dt.utc().hours() * 60 + dt.minutes()) % interval == 0) {
+    if ((dt.utc().hours() * 60 + dt.minutes()) % interval === 0) {
         return;
     }
 
@@ -89,7 +89,7 @@ function rectifyTime() {
     } else if (interval >= 60) {
         // minute has to be zero
         dt.utc().startOf('hour');
-        if (interval != 60) {
+        if (interval !== 60) {
             dt.utc().startOf('day');
         }
     } else {
@@ -198,12 +198,12 @@ function buildUI() {
     }).slider("pips", {
         rest: 'label',
         last: 'pip',
-        formatLabel: function (val) {
-            return moment(dt.format("YYYY") + "0101", "YYYYMMDD").add(val - 1, 'days').format("MMM D");
+        formatLabel(val) {
+            return moment(`${dt.format("YYYY")}0101`, "YYYYMMDD").add(val - 1, 'days').format("MMM D");
         }
     }).slider("float", {
-        formatLabel: function (val) {
-            return moment(dt.format("YYYY") + "0101", "YYYYMMDD").add(val - 1, 'days').format("MMM D");
+        formatLabel(val) {
+            return moment(`${dt.format("YYYY")}0101`, "YYYYMMDD").add(val - 1, 'days').format("MMM D");
         }
     });
 

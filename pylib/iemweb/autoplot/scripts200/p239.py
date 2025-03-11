@@ -13,12 +13,11 @@ import matplotlib.colors as mpcolors
 import pandas as pd
 from matplotlib.colorbar import ColorbarBase
 from matplotlib.ticker import MaxNLocator
-from pyiem.database import get_dbconn, get_sqlalchemy_conn
+from pyiem.database import get_dbconn, get_sqlalchemy_conn, sql_helper
 from pyiem.exceptions import NoDataFound
 from pyiem.plot import figure, get_cmap, pretty_bins
 from pyiem.reference import state_names
 from sklearn.linear_model import LinearRegression
-from sqlalchemy import text
 
 from iemweb.autoplot import ARG_STATION
 
@@ -78,7 +77,7 @@ def get_obsdf(ctx):
     """Figure out our observations."""
     with get_sqlalchemy_conn("coop") as conn:
         df = pd.read_sql(
-            text(
+            sql_helper(
                 """
                 SELECT year, sum(precip) as sum_precip,
                 sum(gddxx(50, 86, high, low)) as gdd5086,
@@ -147,14 +146,15 @@ def get_nass(ctx):
             ctx["crop"]
         ]
         df = pd.read_sql(
-            text(
-                f"""
+            sql_helper(
+                """
                 select year, avg(num_value) as num_value from
                 nass_quickstats where {ccol} = :c
                 and statisticcat_desc = 'YIELD' and commodity_desc = :cr and
                 util_practice_desc = :ut and
                 agg_level_desc = :agl GROUP by year ORDER by year ASC
-            """
+            """,
+                ccol=ccol,
             ),
             conn,
             params={
@@ -195,7 +195,7 @@ def plotter(ctx: dict):
         df[col] = obsdf[col]
 
     dcol = f"{ctx['how']}_departure"
-    deltas = df[dcol].values
+    deltas = df[dcol].to_numpy()
     extent = df[dcol].abs().max()
     bins = pretty_bins(0 - extent, extent)
     cmap = get_cmap(ctx["cmap"])
@@ -212,7 +212,7 @@ def plotter(ctx: dict):
     )
     mainax_width = 0.4
     mainax_height = 0.3
-    ax = fig.add_axes([0.06, 0.55, mainax_width, mainax_height])
+    ax = fig.add_axes((0.06, 0.55, mainax_width, mainax_height))
     ax.bar(xaxis, df["num_value"].values, color=colors)
     ax.plot(
         xaxis, df["trail10"].values, lw=2, color="k", label="10y Trailing Ave"
@@ -223,7 +223,7 @@ def plotter(ctx: dict):
     ax.legend(ncol=3, loc=(0, 1))
     ax.grid(True)
 
-    ax = fig.add_axes([0.06, 0.2, mainax_width, mainax_height])
+    ax = fig.add_axes((0.06, 0.2, mainax_width, mainax_height))
     ax.bar(xaxis, deltas, color=colors)
     ax.set_ylabel("Departure [bu/ac]")
     ax.grid(True)
@@ -244,7 +244,7 @@ def plotter(ctx: dict):
     height = 0.12
     pad = 0.05
     xpad = 0.04
-    ax = fig.add_axes([anchorx, anchory, width, height])
+    ax = fig.add_axes((anchorx, anchory, width, height))
     bling(df, ax, "sum_precip", dcol)
     ax.axvline(df["sum_precip"].mean())
     ax.set_ylabel("Departure [bu/ac]")
@@ -252,45 +252,45 @@ def plotter(ctx: dict):
     ax.legend(ncol=3, loc=(-2.75, 0))
     fig.text(0.46, 0.06, "Legend for Top 3/Bottom 3 Years ->", ha="right")
 
-    ax = fig.add_axes([anchorx, anchory + height + 2 * pad, width, height])
+    ax = fig.add_axes((anchorx, anchory + height + 2 * pad, width, height))
     bling(df, ax, "gdd5086", dcol)
     ax.axvline(df["gdd5086"].mean())
     ax.set_ylabel("Departure [bu/ac]")
     ax.set_xlabel("GDD (50, 86) [F]")
 
-    ax = fig.add_axes([anchorx + width + xpad, anchory, width, height])
+    ax = fig.add_axes((anchorx + width + xpad, anchory, width, height))
     bling(df, ax, "sdd86", dcol)
     ax.axvline(df["sdd86"].mean())
     ax.set_xlabel("SDD (86) [F]")
 
     ax = fig.add_axes(
-        [anchorx + width + xpad, anchory + height + 2 * pad, width, height]
+        (anchorx + width + xpad, anchory + height + 2 * pad, width, height)
     )
     bling(df, ax, "avg_low", dcol)
     ax.axvline(df["avg_low"].mean())
     ax.set_xlabel("Avg Daily Low [F]")
 
-    ax = fig.add_axes([anchorx, anchory + 2 * height + 4 * pad, width, height])
+    ax = fig.add_axes((anchorx, anchory + 2 * height + 4 * pad, width, height))
     bling(df, ax, "days_low_a70", dcol)
     ax.axvline(df["days_low_a70"].mean())
     ax.set_xlabel(r"Days Low >= 70 $^\circ$F")
     ax.set_ylabel("Departure [bu/ac]")
 
     ax = fig.add_axes(
-        [anchorx + width + xpad, anchory + 2 * height + 4 * pad, width, height]
+        (anchorx + width + xpad, anchory + 2 * height + 4 * pad, width, height)
     )
     bling(df, ax, "days_low_b60", dcol)
     ax.axvline(df["days_low_b60"].mean())
     ax.set_xlabel(r"Days Low < 60 $^\circ$F")
 
-    ax = fig.add_axes([anchorx, anchory + 3 * height + 6 * pad, width, height])
+    ax = fig.add_axes((anchorx, anchory + 3 * height + 6 * pad, width, height))
     bling(df, ax, "avg_merra_srad", dcol)
     ax.axvline(df["avg_merra_srad"].mean())
     ax.set_xlabel(r"Merra Solar Rad MJ$d^{-1}$")
     ax.set_ylabel("Departure [bu/ac]")
 
     ax = fig.add_axes(
-        [anchorx + width + xpad, anchory + 3 * height + 6 * pad, width, height]
+        (anchorx + width + xpad, anchory + 3 * height + 6 * pad, width, height)
     )
     bling(df, ax, "precip_days", dcol)
     ax.axvline(df["precip_days"].mean())

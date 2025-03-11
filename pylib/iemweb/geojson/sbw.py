@@ -43,12 +43,11 @@ from datetime import datetime, timedelta, timezone
 from typing import Optional
 
 from pydantic import AwareDatetime, Field, field_validator, model_validator
-from pyiem.database import get_sqlalchemy_conn
+from pyiem.database import get_sqlalchemy_conn, sql_helper
 from pyiem.nws.vtec import get_ps_string
 from pyiem.reference import ISO8601
 from pyiem.util import utc
 from pyiem.webutil import CGIModel, ListOrCSVType, iemapp
-from sqlalchemy import text
 
 from iemweb.imagemaps import rectify_wfo
 
@@ -159,7 +158,8 @@ def run(environ: dict):
     # NOTE: we have an arb offset check for child table exclusion
     with get_sqlalchemy_conn("postgis") as conn:
         rs = conn.execute(
-            text(f"""
+            sql_helper(
+                """
     with tagmaxes as (
         select wfo, phenomena, vtec_year, eventid, significance,
         max(windtag) as max_windtag,
@@ -192,7 +192,11 @@ def run(environ: dict):
             s.wfo = t.wfo and s.phenomena = t.phenomena and
             s.significance = t.significance and s.eventid = t.eventid and
             {time_limiter} {status_limiter} {wfo_limiter}
-        """),
+        """,
+                wfo_limiter=wfo_limiter,
+                time_limiter=time_limiter,
+                status_limiter=status_limiter,
+            ),
             params,
         )
         for row in rs.mappings():

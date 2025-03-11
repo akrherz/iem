@@ -12,11 +12,10 @@ import matplotlib.dates as mdates
 import numpy as np
 import pandas as pd
 from matplotlib.patches import Rectangle
-from pyiem.database import get_sqlalchemy_conn
+from pyiem.database import get_sqlalchemy_conn, sql_helper
 from pyiem.exceptions import NoDataFound
 from pyiem.nws.vtec import NWS_COLORS, get_ps_string
 from pyiem.plot import figure
-from sqlalchemy import text
 
 PDICT = {
     "BZ": "Blizzard Warning",
@@ -134,7 +133,7 @@ def get_firewx_zone(lon: float, lat: float):
     """Sigh."""
     with get_sqlalchemy_conn("postgis") as conn:
         res = conn.execute(
-            text(
+            sql_helper(
                 """
             SELECT ugc from ugcs where end_ts is null and
             ST_Contains(geom, ST_Point(:lon, :lat, 4326))
@@ -164,7 +163,7 @@ def plotter(ctx: dict):
         )
     with get_sqlalchemy_conn("postgis") as conn:
         wwa = pd.read_sql(
-            text(
+            sql_helper(
                 """
             SELECT phenomena ||'.'|| significance as key,
             issue at time zone 'UTC' as utc_issue,
@@ -190,7 +189,7 @@ def plotter(ctx: dict):
     # Find Obs
     with get_sqlalchemy_conn("asos") as conn:
         obs = pd.read_sql(
-            text(
+            sql_helper(
                 """
             SELECT valid at time zone 'UTC' as utc_valid, tmpf, sknt, gust,
             greatest(sknt, gust) * 1.15 as max_wind, feel, relh,

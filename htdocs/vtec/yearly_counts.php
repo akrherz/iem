@@ -49,7 +49,7 @@ function get_data()
 
     $data = array();
     $pcodes = array();
-    for ($i = 0; $row = pg_fetch_assoc($rs); $i++) {
+    while ($row = pg_fetch_assoc($rs)) {
         $yr = $row["yr"];
         if (!array_key_exists($yr, $data)) {
             $data[$yr] = array();
@@ -79,7 +79,7 @@ function get_data2()
     );
 
     $data = array();
-    for ($i = 0; $row = pg_fetch_assoc($rs); $i++) {
+    while ($row = pg_fetch_assoc($rs)) {
         $yr = $row["yr"];
         if (!array_key_exists($yr, $data)) {
             $data[$yr] = array();
@@ -118,6 +118,9 @@ EOM;
     asort($codes);
     foreach ($codes as $j => $code) {
         list($phenomena, $significance) = explode(".", $code);
+        if (!array_key_exists($phenomena, $vtec_phenomena)) {
+            continue;
+        }
         $table .= sprintf(
             "<tr><td>%s</td><td>%s</td><td>%s</td><td>%s</td>",
             $phenomena,

@@ -6,10 +6,9 @@ CWSU map unit.  These are events that do not have VTEC.
 from datetime import timezone
 
 import pandas as pd
-from pyiem.database import get_sqlalchemy_conn
+from pyiem.database import get_sqlalchemy_conn, sql_helper
 from pyiem.plot import MapPlot, pretty_bins
 from pyiem.util import utc
-from sqlalchemy import text
 
 PDICT = {
     "sps": "Special Weather Statements (SPS) with polygons",
@@ -74,7 +73,7 @@ def plotter(ctx: dict):
         """
     with get_sqlalchemy_conn("postgis") as conn:
         df = pd.read_sql(
-            text(sql),
+            sql_helper(sql),
             conn,
             params=params,
             index_col="datum",

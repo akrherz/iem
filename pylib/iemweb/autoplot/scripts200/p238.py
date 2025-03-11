@@ -4,11 +4,10 @@ bit of a work in progress yet, but will be added to as interest is shown!
 """
 
 import pandas as pd
-from pyiem.database import get_sqlalchemy_conn
+from pyiem.database import get_sqlalchemy_conn, sql_helper
 from pyiem.exceptions import NoDataFound
 from pyiem.plot import MapPlot, centered_bins, pretty_bins
 from pyiem.util import utc
-from sqlalchemy import text
 
 PDICT = {
     "corn": "Corn Grain",
@@ -73,7 +72,7 @@ def plotter(ctx: dict):
         params["util"] = "ALL UTILIZATION PRACTICES"
     with get_sqlalchemy_conn("coop") as conn:
         df = pd.read_sql(
-            text(
+            sql_helper(
                 """
             with data as (
                 select year, state_alpha || 'C' || county_ansi as ugc,

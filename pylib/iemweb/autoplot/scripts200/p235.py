@@ -11,11 +11,10 @@ import calendar
 import numpy as np
 import pandas as pd
 import seaborn as sns
-from pyiem.database import get_sqlalchemy_conn
+from pyiem.database import get_sqlalchemy_conn, sql_helper
 from pyiem.exceptions import NoDataFound
 from pyiem.plot import figure_axes
 from pyiem.reference import prodDefinitions
-from sqlalchemy import text
 
 
 def get_description():
@@ -62,8 +61,8 @@ def plotter(ctx: dict):
     with get_sqlalchemy_conn("afos") as conn:
         ss = "pil = :pil" if len(pil) > 3 else "substr(pil, 1, 3) = :pil"
         df = pd.read_sql(
-            text(
-                f"""
+            sql_helper(
+                """
                 SELECT
                 extract(year from entered at time zone 'UTC')::int as yr,
                 extract(month from entered at time zone 'UTC')::int as mo,
@@ -72,7 +71,9 @@ def plotter(ctx: dict):
                 count(*)
                 from products WHERE {ss} {wfo_limiter}
                 GROUP by yr, mo ORDER by yr, mo ASC
-        """
+        """,
+                ss=ss,
+                wfo_limiter=wfo_limiter,
             ),
             conn,
             params=params,
