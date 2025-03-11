@@ -51,9 +51,9 @@ class RAOB:
             ts -= timedelta(days=1)
         return ts
 
-    def conv_speed(self, raw):
+    def conv_speed(self, raw: str):
         """convert sped to mps units"""
-        if raw in ["99999", "-9999.00"]:
+        if raw.strip() in ["99999", "-9999.00"]:
             return None
         if self.wind_units == "kt":
             return float(raw) * 0.5144
