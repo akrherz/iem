@@ -127,7 +127,7 @@ def plotter(ctx: dict):
             from pireps p{limiter} valid >= :sts and valid <= :ets
             GROUP by date ORDER by date ASC
             """,
-                limter=limiter,
+                limiter=limiter,
             ),
             conn,
             params={
