@@ -3,8 +3,8 @@ let station = '_OAX';
 let year = new Date().getFullYear();
 let dt = null;
 
-function zero(val){
-    return (val === null) ? "": val;
+function rnd(val, precision){
+    return (val === null) ? "": val.toFixed(precision);
 }
 function fetch(){
     $('#datatable tbody').empty();
@@ -19,9 +19,19 @@ function fetch(){
             const row = ['<tr>',
                 `<td>${feat.station}</td>`,
                 `<td>${feat.valid}</td>`,
-                `<td>${zero(feat.sbcape_jkg)}</td>`,
-                `<td>${zero(feat.mucape_jkg)}</td>`,
-                `<td>${zero(feat.pwater_mm)}</td>`,
+                `<td>${rnd(feat.sbcape_jkg, 0)}</td>`,
+                `<td>${rnd(feat.mucape_jkg, 0)}</td>`,
+                `<td>${rnd(feat.sbcin_jkg, 0)}</td>`,
+                `<td>${rnd(feat.mucin_jkg, 0)}</td>`,
+                `<td>${rnd(feat.pwater_mm, 1)}</td>`,
+                `<td>${rnd(feat.lcl_agl_m, 0)}</td>`,
+                `<td>${rnd(feat.lfc_agl_m, 0)}</td>`,
+                `<td>${rnd(feat.el_agl_m, 0)}</td>`,
+                `<td>${rnd(feat.total_totals, 1)}</td>`,
+                `<td>${rnd(feat.sweat_index, 1)}</td>`,
+                `<td>${rnd(feat.srh_sfc_3km_total, 0)}</td>`,
+                `<td>${rnd(feat.srh_sfc_1km_total, 0)}</td>`,
+                `<td>${rnd(feat.shear_sfc_6km_smps, 1)}</td>`,
                 '</tr>'];
             $('#datatable tbody').append(row.join(''));
         }

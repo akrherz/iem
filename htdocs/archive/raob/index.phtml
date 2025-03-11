@@ -6,17 +6,7 @@ define("IEM_APPID", 146);
 $t = new MyView();
 $t->jsextra=<<<EOM
 <script src="/vendor/flatpickr/4.6.9/flatpickr.min.js"></script>
-<script type="text/javascript">
-$(function(){
-    $(".fdp").flatpickr({
-        minDate: new Date(1947, 1, 1, 0, 0),
-        dateFormat: "m/d/Y H:i",
-        time_24hr: true,
-        allowInput: true,
-        enableTime: true
-});
-});
-</script>
+<script src="index.js"></script>
 EOM;
 $t->headextra= <<<EOM
 <link rel="stylesheet" type="text/css"
@@ -27,13 +17,21 @@ $nselect = networkSelect("RAOB", "OAX");
 $t->content = <<<EOM
 <h3>Rawinsonde (RAOB) Data Archive</h3>
 
-<p>The IEM proceses and archives Rawinsonde (RAOB) data made available on the
-<a href="https://www.spc.noaa.gov/exper/soundings/">Storm Prediction Center</a> website.  This
- archive also contains data from other sources to backfill it to the 1940s.  Data
- for the United States and Canada is available. This
+<p>For many moons, the IEM archived the soundings provided by the now defunct
+NOAA rucsoundings website.  This website was shutdown during September 2024, so
+the IEM started to ingest what was provided by the
+<a href="https://www.spc.noaa.gov/exper/soundings/">Storm Prediction Center</a>
+website. This source was found to be missing many sounding locations that the
+IEM previous archived.  So the IEM started to ingest what is provided by
+<a href="https://www.ncei.noaa.gov/data/integrated-global-radiosonde-archive/">
+NCEI Integrated Global Radiosonde Archive</a>, but this archive is not in real-time.
+So as of March 2025, this website contains near real-time data from SPC and is
+backfilled eventually with data from the NCEI archive.</p>
+
+<p>Data for the United States and Canada is available. This
  data are vertical profiles of the atmosphere taken from weather balloons released
  twice daily.</p>
- 
+
  <h4>Available Tools:</h4>
 <ul>
     <li><a href="list.phtml">List Sounding Parameters per Year</a></li>
@@ -65,15 +63,15 @@ $t->content = <<<EOM
 <br /><pre>
 station      3 or 4 character station identifier
 validUTC     RAOB Launch Cycle Time in UTC
-levelcode    Level Code for this observation
+levelcode    Level Code for this observation, not always available
 pressure_mb  Pressure of data in millibar
 height_m     Height above sea level m
 tmpc         Air Temperature in C
 dwpc         Dew Point Temperature in C
 drct         Wind Direction in deg from North
 speed_kts    Wind Speed in knots
-bearing      Balloon bearing in degree
-range_sm     Ballon range from launch in statute miles
+bearing      Balloon bearing in degree, not always available
+range_sm     Ballon range from launch in statute miles, not always available
 </pre>
 </td>
 </table>
@@ -82,8 +80,9 @@ range_sm     Ballon range from launch in statute miles
 <tr><th>Select Site: {$nselect}</th>
 <td>Start Time: <input type="text" name="sts" class="fdp" width="20"/></td>
 <td>End Time: <input type="text" name="ets" class="fdp" width="20" /></td>
-<td><input type="checkbox" name="dl" />Download to disk</td>
-<td><input type="submit" value="Giveme Data!" /></td>
+<td><input type="checkbox" name="dl" id="dd">
+<label for="dd">Download to disk</label></td>
+<td><input type="submit" value="Giveme Data!"></td>
 </tr>
 </table>
 </form>
