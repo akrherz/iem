@@ -5,6 +5,8 @@ Run from RUN_10AFTER.sh
 
 import sys
 import warnings
+from datetime import datetime, timezone
+from typing import Optional
 
 import click
 import numpy as np
@@ -128,7 +130,7 @@ def compute_sweat_index(profile, total_totals):
     )
 
 
-def do_profile(cursor, fid, gdf, nt):
+def do_profile(cursor, fid, gdf: pd.DataFrame, nt):
     """Process this profile."""
     # The inbound profile may contain mandatory level data that is below
     # the surface.  It seems the best we can do here is to ensure both
@@ -257,7 +259,7 @@ def do_profile(cursor, fid, gdf, nt):
         nonull(mucin.to(units("joules / kilogram")).m, maxval=0),
         nonull(mlcape.to(units("joules / kilogram")).m, minval=0),
         nonull(mlcin.to(units("joules / kilogram")).m, maxval=0),
-        nonull(pwater.to(units("mm")).m),
+        nonull(pwater.to(units("mm")).m, minval=0),
         nonull(el_agl),
         nonull(el_p.to(units("hPa")).m),
         nonull(el_t.to(units.degC).m),
@@ -309,26 +311,48 @@ def do_profile(cursor, fid, gdf, nt):
 
 
 @click.command()
-@click.option("--year", required=True, type=int)
-def main(year: int):
+@click.option("--year", required=False, type=int)
+@click.option("--station", help="Specific station to process")
+@click.option("--valid", type=click.DateTime(), help="UTC time")
+def main(
+    year: Optional[int], station: Optional[str], valid: Optional[datetime]
+):
     """Go Main Go."""
     dbconn = get_dbconn("raob")
     cursor = dbconn.cursor()
-    nt = NetworkTable("RAOB")
-    table = f"raob_profile_{year}"
+    nt = NetworkTable("RAOB", only_online=False)
+    params = {}
+    valid_limiter = ""
+    if valid is not None:
+        valid = valid.replace(tzinfo=timezone.utc)
+        params["valid"] = valid
+        valid_limiter = " and valid = :valid"
+    table = f"raob_profile_{year if valid is None else valid.year}"
+    station_limiter = ""
+    if station is not None:
+        station_limiter = " station = :station"
+        params["station"] = station
+    limiter = "(not computed or computed is null or ingested_at > computed_at)"
+    if valid is not None and station is not None:
+        limiter = ""
     with get_sqlalchemy_conn("raob") as conn:
         df = pd.read_sql(
             sql_helper(
                 """
-            select f.fid, f.station, pressure, dwpc, tmpc, drct, smps, height,
+            select f.fid, f.station, pressure, tmpc, dwpc, drct, smps, height,
             levelcode from {table} p JOIN raob_flights f
-            on (p.fid = f.fid) WHERE (not computed or computed is null)
+            on (p.fid = f.fid)
+            WHERE {limiter} {station_limiter} {valid_limiter}
             and height is not null and pressure is not null and not locked
             ORDER by pressure DESC
         """,
                 table=table,
+                limiter=limiter,
+                station_limiter=station_limiter,
+                valid_limiter=valid_limiter,
             ),
             conn,
+            params=params,
         )
     if df.empty or pd.isnull(df["smps"].max()):
         return

@@ -2,10 +2,11 @@
 
 from pyiem.database import get_dbconn
 from pyiem.network import Table as NetworkTable
-from pyiem.util import logger
+from pyiem.util import logger, utc
 from tqdm import tqdm
 
 LOG = logger()
+OFFLINE_YR = utc().year - 1
 
 
 def main():
@@ -40,7 +41,7 @@ def main():
                 "network = 'RAOB'",
                 (sts, station),
             )
-        if ets is not None and current_ets is None and ets.year < 2018:
+        if ets is not None and current_ets is None and ets.year < OFFLINE_YR:
             LOG.info("%s ets %s->%s", station, current_ets, ets)
             mcursor.execute(
                 "UPDATE stations SET archive_end = %s where id = %s and "

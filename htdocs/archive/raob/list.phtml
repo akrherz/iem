@@ -14,12 +14,14 @@ $t->headextra = <<<EOM
 <link type="text/css" href="/vendor/jquery-datatables/1.10.20/datatables.min.css" rel="stylesheet" />
 EOM;
 $t->content = <<<EOM
- <ol class="breadcrumb">
-     <li><a href="/archive/raob/">Sounding Archive Mainpage</a></li>
+<ol class="breadcrumb">
+    <li><a href="/archive/raob/">Sounding Archive Mainpage</a></li>
     <li class="active">List Soundings by Year</li>
- </ol>
+</ol>
 <p>This page presents a yearly listing of sounding parameters computed by the
-IEM. A <a href="/api/1/docs/">JSON Webservice</a> backends this page.</p>
+IEM using <a href="https://unidata.github.io/MetPy/latest/index.html">Unidata's MetPy</a>.
+<strong>Please use caution</strong> when using these parameters directly as they
+can struggle with GIGO. A <a href="/api/1/docs/">JSON Webservice</a> backends this page.</p>
 
 <p>
  <form name="local">
@@ -42,7 +44,25 @@ IEM. A <a href="/api/1/docs/">JSON Webservice</a> backends this page.</p>
 <p>
  <div id="thetable">
  <table class="table table-bordered table-striped" id="datatable">
- <thead><tr><th>ID</th><th>Valid</th><th>SBCAPE J/kg</th><th>MUCAPE J/kg</th><th>PrecipWater mm</th></tr></thead>
+ <thead class="sticky">
+<tr>
+<th>ID</th>
+<th>Valid</th>
+<th>SBCAPE J/kg</th>
+<th>MUCAPE J/kg</th>
+<th>SBCIN J/kg</th>
+<th>MUCIN J/kg</th>
+<th>PrecipWater mm</th>
+<th>LCL m</th>
+<th>LFC m</th>
+<th>EL m</th>
+<th>Total Totals</th>
+<th>SWEAT</th>
+<th>SRH 0-3 km m2/s2</th>
+<th>SRH 0-1 km m2/s2</th>
+<th>SHR 0-6 km mps</th>
+</tr>
+</thead>
  <tbody>
  </tbody>
  </table>
@@ -52,7 +72,7 @@ IEM. A <a href="/api/1/docs/">JSON Webservice</a> backends this page.</p>
 EOM;
 $t->jsextra = <<<EOM
 <script src='/vendor/jquery-datatables/1.10.20/datatables.min.js'></script>
-<script src="list.js"></script>
+<script src="list.js?v=2"></script>
 EOM;
 
-$t->render('single.phtml');
+$t->render('full.phtml');
