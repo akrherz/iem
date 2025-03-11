@@ -41,7 +41,7 @@ $s_mo = get_int404('startMonth');
 $s_dy = get_int404('startDay');
 $e_mo = get_int404('endMonth');
 $e_dy = get_int404('endDay');
-$delim = xssafe($_GET['delim']);
+$delim = isset($_GET["delim"]) ? xssafe($_GET['delim']): "comma";
 $cr = isset($_GET['lf']) ? "\r\n" : "\n";
 
 // Error Catching
@@ -112,7 +112,7 @@ pg_prepare($c, $stname, "SELECT station, to_char(valid, '{$tsfmt}') as dvalid,
    ORDER by station, valid");
 $rs = pg_execute($c, $stname, array($stationSQL));
 
-for ($i = 0; $row = pg_fetch_assoc($rs); $i++) {
+while ($row = pg_fetch_assoc($rs)) {
     echo $row["station"] . $d[$delim] . $ISUAGcities[$row["station"]]['name']
         . $d[$delim] . $row["dvalid"] . $d[$delim];
     for ($j = 0; $j < $num_vars; $j++) {

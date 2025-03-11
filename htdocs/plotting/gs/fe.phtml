@@ -27,17 +27,15 @@ $t->jsextra = <<<EOM
 <script src="/vendor/select2/4.0.3/select2.min.js"></script>
 <script type="text/javascript">
 $(document).ready(function(){
-    $(".iemselect2").select2();	
+    $(".iemselect2").select2();
 });
 </script>
 EOM;
 $t->title = "Accumulated Values versus Climatology";
 
 $mesosite = iemdb("mesosite");
-$rs = pg_query($mesosite, "SELECT id, name from networks where
-    id ~* '^IA' or id ~* '^MN' or id ~* '^WI' or id ~* '^ND' or id ~* '^SD' or id ~* '^NE'
-     or id ~* '^KS' or id ~* '^MO' or id ~* '^IL' or id ~* '^IN' or id ~* '^OH' or id ~* '^KY'
-    or id in ('KCCI','KELO','KIMT')");
+$rs = pg_query($mesosite, 
+"SELECT id, name from networks WHERE strpos(id, '__') < 1 ORDER by name ASC");
 $nselect = "<select name=\"network\">";
 for ($i = 0; $row = pg_fetch_assoc($rs); $i++) {
     $nselect .= sprintf(
@@ -51,11 +49,11 @@ $nselect .= "</select>";
 
 $content = <<<EOM
 <style type="text/css">
-        #map {
-            width: 450px;
-            height: 450px;
-            border: 2px solid black;
-        }
+#map {
+    width: 450px;
+    height: 450px;
+    border: 2px solid black;
+}
 </style>
 
 <h3>Growing Season Traces</h3>
@@ -64,7 +62,6 @@ $content = <<<EOM
 versus climatology.  This application should be used with extreme caution
 since it uses non quality controlled observations.  There is also missing data which
 can cause errors in the accumulated values.</p>
-
 
 <P>Pick network to select station from:
 <form name='netselect' method='GET'>
@@ -82,6 +79,7 @@ if (strlen($station) > 0) {
     $edselect = daySelect2($eday, "eday");
     $content .= <<<EOM
 <form name="ds" action="fe.phtml" method="GET">
+<input type="hidden" name="network" value="{$network}">
 <table cellspacing=2 border=1 cellpadding=2>
 <thead>
 <tr><th>Site ID:</th><th>Year:</th><th>Start Date:</th><th>End Date:</th></tr>

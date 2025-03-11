@@ -89,7 +89,7 @@ if (strlen($station) > 0) {
     $ns2 = "Sensor 3";
     $ns3 = "Sensor 4";
     if (pg_num_rows($r0) > 0){
-        $row = pg_fetch_array($r0);
+        $row = pg_fetch_assoc($r0);
         $ns0 = $row['sensor0'];
         $ns1 = $row['sensor1'];
         $ns2 = $row['sensor2'];

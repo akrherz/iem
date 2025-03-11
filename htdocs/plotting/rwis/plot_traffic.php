@@ -37,7 +37,7 @@ $long_vol = array();
 $occupancy = array();
 $times = array();
 $labels = array();
-for ($i = 0; $row = pg_fetch_array($rs); $i++) {
+while ($row = pg_fetch_assoc($rs)) {
     $avg_speed[$row["lane_id"]] = array();
     $normal_vol[$row["lane_id"]] = array();
     $long_vol[$row["lane_id"]] = array();
@@ -56,7 +56,7 @@ $rs = pg_execute($dbconn, $stname, array(
     date("Y-m-d H:i", $ets)
 ));
 
-for ($i = 0; $row = pg_fetch_array($rs); $i++) {
+while ($row = pg_fetch_assoc($rs)) {
     $times[$row["lane_id"]][] = strtotime(substr($row["valid"], 0, 16));
     $avg_speed[$row["lane_id"]][] = $row["avg_speed"];
     $normal_vol[$row["lane_id"]][] = $row["avg_headway"];

@@ -8,11 +8,10 @@ type only supports up to 12 months plotted at once.
 from datetime import date, timedelta
 
 import pandas as pd
-from pyiem.database import get_sqlalchemy_conn
+from pyiem.database import get_sqlalchemy_conn, sql_helper
 from pyiem.exceptions import NoDataFound
 from pyiem.plot import calendar_plot
 from pyiem.reference import state_names
-from sqlalchemy import text
 
 PDICT = {"yes": "Colorize Cells in Chart", "no": "Just plot values please"}
 MDICT = {
@@ -186,8 +185,8 @@ def plotter(ctx: dict):
         tlimiter = f" and typetext = '{myfilter}' "
     with get_sqlalchemy_conn("postgis") as conn:
         df = pd.read_sql(
-            text(
-                f"""
+            sql_helper(
+                """
                 WITH data as (
                     SELECT distinct wfo, state,
                     valid at time zone :tzname as valid, magnitude, typetext,
@@ -197,7 +196,9 @@ def plotter(ctx: dict):
                 )
                 SELECT date(valid), count(*) from data GROUP by date
                 ORDER by date ASC
-        """
+        """,
+                wfo_limiter=wfo_limiter,
+                tlimiter=tlimiter,
             ),
             conn,
             params=params,
