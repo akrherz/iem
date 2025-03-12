@@ -22,7 +22,7 @@ echo "Refresh: 10\n";
 echo "Threshold: 999\n";
 echo "Title: SPC Watch by County\n";
 
-for ($i = 0; $row = pg_fetch_array($rs); $i++) {
+while ($row = pg_fetch_assoc($rs)) {
     $geom = $row["g"];
     if (is_null($geom)) {
         continue;

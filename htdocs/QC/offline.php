@@ -26,7 +26,7 @@ function networkOffline($network)
     $rs = pg_execute($pgconn, $stname, Array($network) );
 
     $q = 0;
-    for( $i=0; $row = pg_fetch_assoc($rs); $i++)
+    while ($row = pg_fetch_assoc($rs))
     {
         $valid = $row["v"];
         $station = $row["station"];
@@ -78,7 +78,6 @@ to a wide range of factors.  Here is a listing of sites currently offline.
 </table>
 
 <p>
-
-<p></div>
+</div>
 EOM;
 $t->render('single.phtml');

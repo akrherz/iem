@@ -210,7 +210,7 @@ def gauge(ax, row, col, params):
     ax.text(
         theta,
         -4.5,
-        rf"{row[col]}$^\circ$F" f"\n@{row[col + '_time']} LST",
+        rf"{row[col]}$^\circ$F" + f"\n@{row[col + '_time']} LST",
         ha="center",
         va="top",
         fontsize=14,

@@ -135,9 +135,7 @@ def do_step(
     subprocess.call(cmd)
     # This defines the center of the upper left pixel, so it jives with above
     with tempfile.NamedTemporaryFile(delete=False, mode="w") as wldtmp:
-        wldtmp.write(
-            "\n".join(["0.02", "0.0", "0.0", "-0.02", "-126.0", "50.0"])
-        )
+        wldtmp.write("0.02\n0.0\n0.0\n-0.02\n-126.0\n50.0")
     cmd = [
         "pqinsert",
         "-i",

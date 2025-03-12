@@ -20,10 +20,10 @@ chart of days per year by WFO, state.</p>
 """
 
 from datetime import timedelta
+from typing import TYPE_CHECKING
 
 import geopandas as gpd
 import numpy as np
-import pandas as pd
 from affine import Affine
 from pyiem.database import get_sqlalchemy_conn, sql_helper
 from pyiem.exceptions import NoDataFound
@@ -34,6 +34,9 @@ from pyiem.util import utc
 
 from iemweb.autoplot import ARG_FEMA
 from iemweb.util import month2months
+
+if TYPE_CHECKING:
+    import pandas as pd
 
 PDICT5 = {
     "yes": "YES: Draw Counties/Parishes",

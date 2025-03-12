@@ -32,10 +32,9 @@ from io import BytesIO, StringIO
 
 import pandas as pd
 from pydantic import AwareDatetime, Field
-from pyiem.database import get_sqlalchemy_conn
+from pyiem.database import get_sqlalchemy_conn, sql_helper
 from pyiem.util import utc
 from pyiem.webutil import CGIModel, iemapp
-from sqlalchemy import text
 
 from iemweb.imagemaps import rectify_wfo
 
@@ -105,8 +104,8 @@ def get_df(wfo, start, end, phenomena, significance):
         plimiter += " and significance = :significance "
     with get_sqlalchemy_conn("postgis") as conn:
         df = pd.read_sql(
-            text(
-                f"""
+            sql_helper(
+                """
             SELECT
             to_char(product_issue at time zone 'UTC',
                 'YYYY-MM-DDThh24:MI:SSZ') as product_issued,
@@ -126,7 +125,8 @@ def get_df(wfo, start, end, phenomena, significance):
             from warnings WHERE wfo = :wfo and issue < :end
             and (expire > :start or init_expire > :start)
             {plimiter} ORDER by issue ASC
-            """
+            """,
+                plimiter=plimiter,
             ),
             conn,
             params=params,

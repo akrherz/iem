@@ -39,9 +39,9 @@ from datetime import timedelta, timezone
 from zoneinfo import ZoneInfo
 
 from pydantic import AwareDatetime, Field
-from pyiem.database import get_sqlalchemy_conn
+from pyiem.database import get_sqlalchemy_conn, sql_helper
 from pyiem.webutil import CGIModel, iemapp
-from sqlalchemy import Connection, text
+from sqlalchemy import Connection
 
 US_CENTRAL = ZoneInfo("America/Chicago")
 
@@ -91,7 +91,7 @@ def query_db(conn: Connection, environ):
             "valid > (now() - '30 minutes'::interval) and c.cam = w.id "
             "and w.network = :network ORDER by name ASC"
         )
-    return conn.execute(text(sql), params)
+    return conn.execute(sql_helper(sql), params)
 
 
 @iemapp(

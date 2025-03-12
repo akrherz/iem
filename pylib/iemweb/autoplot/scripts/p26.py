@@ -274,7 +274,10 @@ def plotter(ctx: dict):
     ax.set_ylabel(ctx["ylabel"] + r" $^\circ$F")
     ax.axhline(ctx["t"], linestyle="--", lw=1, color="k", zorder=6)
     ax.text(
-        ax.get_xlim()[1], ctx["t"], f"{ctx['t']:.0f}" r"$^\circ$F", va="center"
+        ax.get_xlim()[1],
+        ctx["t"],
+        f"{ctx['t']:.0f}" + r"$^\circ$F",
+        va="center",
     )
     ax.grid(True)
 

@@ -40,7 +40,7 @@ from datetime import datetime, timedelta
 import httpx
 import pandas as pd
 import shapefile
-from pyiem.database import get_dbconnc, get_sqlalchemy_conn
+from pyiem.database import get_dbconnc, get_sqlalchemy_conn, sql_helper
 from pyiem.util import exponential_backoff, logger, utc
 from shapely.wkb import loads
 
@@ -165,11 +165,11 @@ def main():
 
     with get_sqlalchemy_conn("postgis") as conn:
         current = pd.read_sql(
-            """
+            sql_helper("""
             select c.segid, b.longname, c.cond_code, b.idot_id,
             c.valid at time zone 'UTC' as utc_valid from
             roads_current c JOIN roads_base b on (c.segid = b.segid)
-            """,
+            """),
             conn,
             index_col="idot_id",
         )

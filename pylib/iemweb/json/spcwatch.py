@@ -1,6 +1,6 @@
 """.. title:: SPC Watch GeoJSON Service
 
-Return to `JSON Services </json/>`_.
+Return to `API Services </api/#json>`_.
 
 This service provides information about Storm Prediction Center (SPC) watches
 for a given latitude and longitude point.
@@ -37,11 +37,10 @@ from io import BytesIO
 
 import geopandas as gpd
 from pydantic import Field
-from pyiem.database import get_sqlalchemy_conn
+from pyiem.database import get_sqlalchemy_conn, sql_helper
 from pyiem.reference import ISO8601
 from pyiem.util import utc
 from pyiem.webutil import CGIModel, iemapp
-from sqlalchemy import text
 
 
 class Schema(CGIModel):
@@ -88,7 +87,7 @@ def pointquery(lon, lat) -> gpd.GeoDataFrame:
     """Do a query for stuff"""
     with get_sqlalchemy_conn("postgis") as conn:
         watches = gpd.read_postgis(
-            text("""
+            sql_helper("""
         SELECT sel, issued at time zone 'UTC' as ii,
         expired at time zone 'UTC' as ee, type, geom, num as number,
         max_hail_size, max_wind_gust_knots, is_pds
@@ -98,7 +97,7 @@ def pointquery(lon, lat) -> gpd.GeoDataFrame:
             conn,
             params={"lon": lon, "lat": lat},
             geom_col="geom",
-        )
+        )  # type: ignore
     return process_df(watches)
 
 
@@ -106,7 +105,7 @@ def dowork(valid) -> gpd.GeoDataFrame:
     """Actually do stuff"""
     with get_sqlalchemy_conn("postgis") as conn:
         watches = gpd.read_postgis(
-            text("""
+            sql_helper("""
         SELECT sel, issued at time zone 'UTC' as ii,
         expired at time zone 'UTC' as ee, type, geom, num as number,
         max_hail_size, max_wind_gust_knots, is_pds
@@ -115,7 +114,7 @@ def dowork(valid) -> gpd.GeoDataFrame:
             conn,
             params={"valid": valid},
             geom_col="geom",
-        )
+        )  # type: ignore
     return process_df(watches)
 
 

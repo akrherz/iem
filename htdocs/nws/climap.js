@@ -188,7 +188,7 @@ $(document).ready(() => {
 
     // Figure out if we have anything specified from the window.location
     let tokens = window.location.href.split("#");
-    if (tokens.length == 2) {
+    if (tokens.length === 2) {
         // #YYYYmmdd/variable
         tokens = tokens[1].split("/");
         if (tokens.length === 2) {

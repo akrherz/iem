@@ -120,7 +120,7 @@ def main(valid: datetime, realtime: bool):
     os.unlink(f"{tmp.name}.json")
 
     with open(f"{tmp.name}.wld", "w", encoding="utf8") as fp:
-        fp.write("\n".join(["0.1", "0.0", "0.0", "-0.1", "-179.95", "89.95"]))
+        fp.write("0.1\n0.0\n0.0\n-0.1\n-179.95\n89.95")
     cmd = [
         "pqinsert",
         "-i",

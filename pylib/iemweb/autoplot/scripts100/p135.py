@@ -222,7 +222,7 @@ def plotter(ctx: dict):
     df = ctx["df"]
     obs = ctx["obs"]
 
-    title = ("%s [%s]\n" r"%s %.0f$^\circ$F") % (
+    title = ("%s [%s]\n" + r"%s %.0f$^\circ$F") % (
         ctx["_nt"].sts[station]["name"],
         station,
         PDICT[varname],

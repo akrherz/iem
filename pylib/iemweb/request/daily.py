@@ -37,11 +37,10 @@ from io import BytesIO, StringIO
 
 import pandas as pd
 from pydantic import Field
-from pyiem.database import get_dbconn, get_sqlalchemy_conn
+from pyiem.database import get_dbconn, get_sqlalchemy_conn, sql_helper
 from pyiem.exceptions import IncompleteWebRequest
 from pyiem.network import Table as NetworkTable
 from pyiem.webutil import CGIModel, ListOrCSVType, iemapp
-from sqlalchemy import text
 
 EXL = "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"
 DEFAULT_COLS = (
@@ -122,7 +121,7 @@ def get_climate(network, stations):
             clisites.append(clid)
     with get_sqlalchemy_conn("coop") as conn:
         df = pd.read_sql(
-            text(
+            sql_helper(
                 """
             SELECT station, to_char(valid, 'mmdd') as sday,
             high as climo_high_f, low as climo_low_f,
@@ -148,7 +147,7 @@ def get_data(network, sts, ets, stations, cols, na, fmt):
 
     with get_sqlalchemy_conn("iem") as conn:
         df = pd.read_sql(
-            text(
+            sql_helper(
                 """
             SELECT id as station, day, max_tmpf as max_temp_f,
             min_tmpf as min_temp_f, max_dwpf as max_dewpoint_f,

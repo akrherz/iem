@@ -112,7 +112,7 @@ def plotter(ctx: dict):
         0.98,
         "\n".join(
             [
-                "High Temp\n" rf"$\mu$ = {mu:.1f}$^\circ$F",
+                "High Temp\n" + rf"$\mu$ = {mu:.1f}$^\circ$F",
                 rf"$\sigma$ = {std:.2f}",
                 rf"$n$ = {len(highs)}",
             ]
@@ -149,7 +149,7 @@ def plotter(ctx: dict):
         0.98,
         "\n".join(
             [
-                "Low Temp\n" rf"$\mu$ = {mu:.1f}$^\circ$F",
+                "Low Temp\n" + rf"$\mu$ = {mu:.1f}$^\circ$F",
                 rf"$\sigma$ = {std:.2f}",
                 rf"$n$ = {len(lows)}",
             ]

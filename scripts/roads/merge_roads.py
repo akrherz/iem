@@ -3,9 +3,9 @@
 from datetime import timedelta
 
 import httpx
+import pandas as pd
 from ingest_roads_rest import LOG, URI
-from pandas import read_sql
-from pyiem.database import get_dbconn, get_sqlalchemy_conn
+from pyiem.database import get_dbconn, get_sqlalchemy_conn, sql_helper
 from pyiem.util import utc
 from shapely.geometry import LineString, MultiLineString
 
@@ -15,9 +15,11 @@ def main():
     pgconn = get_dbconn("postgis")
     cursor = pgconn.cursor()
     with get_sqlalchemy_conn("postgis") as conn:
-        df = read_sql(
-            "SELECT idot_id, longname from roads_base "
-            "where (archive_end is null or archive_end > now()) ",
+        df = pd.read_sql(
+            sql_helper("""
+    SELECT idot_id, longname from roads_base
+    where (archive_end is null or archive_end > now())
+            """),
             conn,
             index_col="idot_id",
         )

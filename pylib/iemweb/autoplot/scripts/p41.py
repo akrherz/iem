@@ -236,7 +236,7 @@ def plotter(ctx: dict):
         lw=3,
         color="r",
         zorder=2,
-        label=r"Fit R$^2$=" f"{s_r**2:.2f}",
+        label=r"Fit R$^2$=" + f"{s_r**2:.2f}",
     )
     ax.axvline(highlight, zorder=1, color="k")
     y = highlight * s_slp + s_int
@@ -244,14 +244,14 @@ def plotter(ctx: dict):
     ax.text(
         pc1[0],
         y,
-        f"{y:.0f}" r" $^\circ$F",
+        f"{y:.0f}" + r" $^\circ$F",
         va="center",
         bbox=dict(color="white"),
     )
     ax.text(
         highlight,
         pc2[0],
-        f"{highlight:.0f}" r" $^\circ$F",
+        f"{highlight:.0f}" + r" $^\circ$F",
         ha="center",
         rotation=90,
         bbox=dict(color="white"),
@@ -264,10 +264,10 @@ def plotter(ctx: dict):
         f"{MDICT[month2]} ({y1}-{y2}) vs {MDICT[month1]} ({y3}-{y4})\n{t2}"
     )
     ax.set_xlabel(
-        f"{MDICT[month1]} ({y1}-{y2}) {PDICT[varname]}" r" $^\circ$F"
+        f"{MDICT[month1]} ({y1}-{y2}) {PDICT[varname]}" + r" $^\circ$F"
     )
     ax.set_ylabel(
-        f"{MDICT[month2]} ({y3}-{y4}) {PDICT[varname]}" r" $^\circ$F"
+        f"{MDICT[month2]} ({y3}-{y4}) {PDICT[varname]}" + r" $^\circ$F"
     )
     ax.text(
         0.5,
@@ -317,7 +317,7 @@ def plotter(ctx: dict):
         ncol=1,
         loc=(0.1, -0.2),
     )
-    ax.set_ylabel(f"{PDICT[varname]}" r" $^\circ$F")
+    ax.set_ylabel(f"{PDICT[varname]}" + r" $^\circ$F")
     ax.grid()
 
     # Third

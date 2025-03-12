@@ -8,22 +8,23 @@ require_once "../../include/forms.php";
 $connect = iemdb("postgis");
 
 $year = get_int404("year", 2006);
-$wfo = isset($_GET["wfo"]) ? substr(xssafe($_GET["wfo"]),0,4) : "MPX";
-if (strlen($wfo) > 3){
+$wfo = isset($_GET["wfo"]) ? substr(xssafe($_GET["wfo"]), 0, 4) : "MPX";
+if (strlen($wfo) > 3) {
     $wfo = substr($wfo, 1, 3);
 }
 $eventid = get_int404("eventid", 103);
-$phenomena = isset($_GET["phenomena"]) ? substr(xssafe($_GET["phenomena"]),0,2) : "SV";
-$significance = isset($_GET["significance"]) ? substr(xssafe($_GET["significance"]),0,1) : "W";
+$phenomena = isset($_GET["phenomena"]) ? substr(xssafe($_GET["phenomena"]), 0, 2) : "SV";
+$significance = isset($_GET["significance"]) ? substr(xssafe($_GET["significance"]), 0, 1) : "W";
 
 $sql = <<<EOM
-    WITH stormbased as (SELECT geom from sbw_$year where wfo = '$wfo' 
-        and eventid = $eventid and significance = '$significance' 
-        and phenomena = '$phenomena' and status = 'NEW'), 
+    WITH stormbased as (SELECT geom from sbw where vtec_year = $1 and
+        wfo = $2 
+        and eventid = $3 and significance = $4 
+        and phenomena = $5 and status = 'NEW'), 
     countybased as (SELECT ST_Union(u.geom) as geom from 
-        warnings_$year w JOIN ugcs u on (u.gid = w.gid) 
-        WHERE w.wfo = '$wfo' and eventid = $eventid and 
-        significance = '$significance' and phenomena = '$phenomena') 
+        warnings w JOIN ugcs u on (u.gid = w.gid) 
+        WHERE w.vtec_year = $1 and w.wfo = $2 and eventid = $3 and 
+        significance = $4 and phenomena = $5) 
                 
     SELECT ST_askml(geo) as kml, ST_Length(ST_transform(geo,9311)) as sz from
         (SELECT ST_SetSRID(ST_intersection(
@@ -32,7 +33,12 @@ $sql = <<<EOM
             ), 4326) as geo
     from stormbased s, countybased c) as foo
 EOM;
-$rs = pg_exec($connect, $sql);
+$stname = uniqid();
+$rs = pg_prepare($connect, $stname, $sql);
+if ($rs === FALSE) {
+    die("Prepare failed: " . pg_last_error());
+}
+$rs = pg_execute($connect, $stname, array($year, $wfo, $eventid, $significance, $phenomena));
 header('Content-disposition: attachment; filename=sbw.kml');
 header("Content-Type: application/vnd.google-earth.kml+xml");
 
@@ -60,12 +66,12 @@ echo <<<EOM
     </Style>
 EOM;
 
-for($i=0;$row=pg_fetch_assoc($rs);$i++){
-  echo sprintf("<Placemark>
+for ($i = 0; $row = pg_fetch_assoc($rs); $i++) {
+    echo sprintf("<Placemark>
     <styleUrl>#iemstyle%s</styleUrl>
-    <name>Intersect size: %.1f km ID: %s</name>", $i%3, $row["sz"] /1000.0, $i);
-  echo $row["kml"];
-  echo "</Placemark>";
+    <name>Intersect size: %.1f km ID: %s</name>", $i % 3, $row["sz"] / 1000.0, $i);
+    echo $row["kml"];
+    echo "</Placemark>";
 }
 echo " </Document>
 </kml>";

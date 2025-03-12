@@ -116,7 +116,7 @@ def plotter(ctx: dict):
         f"{PDICT2[climo]} Climatology"
     )
     fig = figure(apctx=ctx, title=title)
-    ax = fig.add_axes([0.07, 0.1, 0.45, 0.8])
+    ax = fig.add_axes((0.07, 0.1, 0.45, 0.8))
 
     xaxis = np.arange(1, len(df.index) + 1)
     ax.fill_between(
@@ -152,7 +152,7 @@ def plotter(ctx: dict):
     for i, combo in enumerate(itertools.combinations(opts, 2)):
         row = i % 3
         col = i // 3
-        ax3 = fig.add_axes([0.6 + (0.22 * col), 0.1 + (0.3 * row), 0.15, 0.19])
+        ax3 = fig.add_axes((0.6 + (0.22 * col), 0.1 + (0.3 * row), 0.15, 0.19))
         df2 = df[df[combo[0]].notna() & df[combo[1]].notna()]
 
         xmax = df2[combo[0]].max()
@@ -187,12 +187,12 @@ def plotter(ctx: dict):
         ax3.set_xlim(0, maxv)
         ax3.plot([0, maxv], [0, maxv], color="k")
         ax3.set_xlabel(
-            f"{xlabel} " r"$\mu$=" f"{df2[combo[0]].mean():.1f}",
+            f"{xlabel} " + r"$\mu$=" + f"{df2[combo[0]].mean():.1f}",
             labelpad=0,
             fontsize=12,
         )
         ax3.set_ylabel(
-            f"{ylabel} " r"$\mu$=" f"{df2[combo[1]].mean():.1f}",
+            f"{ylabel} " + r"$\mu$=" + f"{df2[combo[1]].mean():.1f}",
             fontsize=12,
         )
 

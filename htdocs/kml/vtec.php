@@ -22,15 +22,15 @@ $stname = uniqid();
 pg_prepare($connect, $stname, "SELECT  
            ST_askml(geom) as kml, issue, expire, status,
            round(ST_area(ST_transform(geom,9311)) / 1000000.0) as psize
-           from sbw_$year 
+           from sbw
            WHERE wfo = $1 and phenomena = $2 and 
-           eventid = $3 and significance = $4
+           eventid = $3 and significance = $4 and vtec_year = $5
            and status = 'NEW'");
 
 $result = pg_execute(
     $connect,
     $stname,
-    array($wfo, $phenomena, $eventid, $significance)
+    array($wfo, $phenomena, $eventid, $significance, $year)
 );
 
 if (pg_num_rows($result) <= 0) {
@@ -39,14 +39,14 @@ if (pg_num_rows($result) <= 0) {
             issue, expire, status,  
            ST_askml(u.geom) as kml,
            round(ST_area(ST_transform(u.geom,9311)) / 1000000.0) as psize
-           from warnings_$year w JOIN ugcs u on (u.gid = w.gid)
+           from warnings w JOIN ugcs u on (u.gid = w.gid)
            WHERE w.wfo = $1 and phenomena = $2 and 
-           eventid = $3 and significance = $4 ");
+           eventid = $3 and significance = $4 and vtec_year = $5");
 
     $result = pg_execute(
         $connect,
         $stname,
-        array($wfo, $phenomena, $eventid, $significance)
+        array($wfo, $phenomena, $eventid, $significance, $year)
     );
 }
 
@@ -85,7 +85,7 @@ echo "<?xml version=\"1.0\" encoding=\"UTF-8\"?>
     </Style>
 ";
 
-for ($i = 0; $row = pg_fetch_assoc($result); $i++) {
+while ($row = pg_fetch_assoc($result)) {
     echo "<Placemark>
     <description>
         <![CDATA[

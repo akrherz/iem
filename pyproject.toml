@@ -8,9 +8,12 @@ target-version = "py39"
 [tool.ruff.lint]
 select = [
     "A",  # builtins
+    "ARG",  # unused args
     "ASYNC",  # async
     "B",  # bugbear
+    # "BLE",  # blind except
     "C4",  # comprehensions
+    # "C90",  # mccabe
     # "COM",  # commas
     # "DTZ",  # datetime
     "E",  # pycodestyle
@@ -18,25 +21,38 @@ select = [
     "ERA",  # eradicate
     "EXE",  # shebang
     "F",  # pyflakes
+    "FLY",  # fly
     "G",  # logging-format
     # "FBT",  # flake8-boolean-trap
     # "FIX",  # has fixme
     "FURB",  # refurb
+    "G",  # logging-format
     "I",  # isort
+    "ICN",  # implicit-conv
     "INT",  # flake8-gettext
+    "ISC",  # implicit-str-concat
+    "LOG",  # logging
+    # "N",  # naming
     "NPY",  # numpy
     # "PD",  # pandas-vet
     "PIE",  # flake8-pie
     "PERF",  # performance
     "PLE",  # pylint error
+    # "PLR",  # pylint refactoring
     "PLW",  # pylint warning
+    "PT", # pytest style
     # "PTH",  # pathlib
+    "PYI",  # pyi
     "Q",  # flake8-quotes
     # "RET",  # flake8-return
+    "RSE",  # raise
     "RUF",  # ruff specific
+    # "S",  # bandit
     # "S608",  # SQL injection
     # "SIM",  # simplify
     "T20",  # print
+    "TC",  # type checking
+    "TID",  # tidy imports
     # "TRY",  # try-except-raise
     "UP",  # pyupgrade
     "W",  # pycodestyle
