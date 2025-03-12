@@ -26,25 +26,56 @@ can struggle with GIGO. A <a href="/api/1/docs/">JSON Webservice</a> backends th
 <p>
  <form name="local">
  <div class="row">
- <div class="col-md-6">
+ <div class="col-md-4">
  <strong>Select Site:</strong>
      {$stationselect}
  </div>
- <div class="col-md-6">
- <strong>Select Year:</strong>
-    {$yearselect}
- </div>
+ <div class="col-md-4">
+ <!--
+ <input type="checkbox" name="filter_year" id="filter_year" checked="checked" />
+ <label for="filter_year">Filter by Year:</label>
+ -->
+<strong>Select Year:</strong> {$yearselect}
+</div>
+<div class="col-md-4">
+<strong>View Top 100 by Parameter:</strong>
+<select name="sortby" id="sortby">
+    <option value="-">Select Parameter...</option>
+    <option value="sbcape_jkg">Surface Based CAPE (J/kg)</option>
+    <option value="sbcin_jkg">Surface Based CIN (J/kg)</option>
+    <option value="mucape_jkg">Most Unstable CAPE (J/kg)</option>
+    <option value="mucin_jkg">Most Unstable CIN (J/kg)</option>
+    <option value="pwater_mm">Precipitable Water (mm)</option>
+    <option value="lcl_agl_m">LCL Height (m AGL)</option>
+    <option value="lfc_agl_m">LFC Height (m AGL)</option>
+    <option value="el_agl_m">EL Height (m AGL)</option>
+    <option value="total_totals">Total Totals Index</option>
+    <option value="sweat_index">Sweat Index</option>
+    <option value="srh_sfc_1km_total">Surface to 1km Storm Relative Helicity (m^2/s^2)</option>
+    <option value="srh_sfc_3km_total">Surface to 3km Storm Relative Helicity (m^2/s^2)</option>
+    <option value="shear_sfc_6km_smps">Surface to 6km Shear (m/s)</option>
+</select>
+<select name="asc" id="asc">
+    <option value="desc">Descending</option>
+    <option value="asc">Ascending</option>
+</select>
+</div>
 </form>
 </p>
 
 <br />
-<p><button id="makefancy" type="button">Make Table Interactive</button></p>
+<p>
+<button id="makefancy" type="button">Make Table Interactive</button>
+&nbsp;
+<button id="download" type="button">Download all data as CSV</button>
+</p>
 <br />
 
 <p>
  <div id="thetable">
- <table class="table table-bordered table-striped" id="datatable">
- <thead class="sticky">
+<table class="table table-bordered table-striped" id="datatable">
+<caption>Viewing: Table of Sounding Parameters</caption>
+<thead class="sticky">
 <tr>
 <th>ID</th>
 <th>Valid</th>
@@ -63,16 +94,16 @@ can struggle with GIGO. A <a href="/api/1/docs/">JSON Webservice</a> backends th
 <th>SHR 0-6 km mps</th>
 </tr>
 </thead>
- <tbody>
- </tbody>
- </table>
- </div>
- </p>
+<tbody>
+</tbody>
+</table>
+</div>
+</p>
 
 EOM;
 $t->jsextra = <<<EOM
 <script src='/vendor/jquery-datatables/1.10.20/datatables.min.js'></script>
-<script src="list.js?v=2"></script>
+<script src="list.js?v=3"></script>
 EOM;
 
 $t->render('full.phtml');
