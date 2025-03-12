@@ -11,6 +11,7 @@ is a reference to the raw product text.
 Changelog
 ---------
 
+- 2025-03-12: Added new Most Probable Intensity tags
 - 2024-05-29: Initial documentation
 
 Example Usage
@@ -31,7 +32,7 @@ from io import BytesIO
 # Third Party
 import geopandas as gpd
 from pydantic import AwareDatetime, Field
-from pyiem.database import get_sqlalchemy_conn
+from pyiem.database import get_sqlalchemy_conn, sql_helper
 from pyiem.exceptions import IncompleteWebRequest
 from pyiem.webutil import CGIModel, iemapp
 
@@ -86,24 +87,30 @@ def run(ctx, start_response):
             "NUM": "int",
             "CONFIDEN": "int",
             "CONCERN": "str:64",
+            "MP_TORN": "str:32",
+            "MP_HAIL": "str:32",
+            "MP_GUST": "str:32",
         },
     }
     with get_sqlalchemy_conn("postgis") as conn:
         df = gpd.read_postgis(
-            "select "
-            f"to_char(issue {common}) as issue, "
-            f"to_char(expire {common}) as expire, "
-            "product_id as prod_id, year, num, watch_confidence as confiden, "
-            "concerning as concern, geom "
-            "from mcd WHERE issue >= %s and "
-            "issue < %s ORDER by issue ASC",
-            conn,
-            params=(
-                ctx["sts"],
-                ctx["ets"],
+            sql_helper(
+                """select to_char(issue {common}) as issue,
+            to_char(expire {common}) as expire,
+            product_id as prod_id, year, num, watch_confidence as confiden,
+            concerning as concern, most_prob_tornado as mp_torn,
+            most_prob_hail as mp_hail, most_prob_gust as mp_gust, geom
+            from mcd WHERE issue >= :sts and
+            issue < :ets ORDER by issue ASC""",
+                common=common,
             ),
+            conn,
+            params={
+                "sts": ctx["sts"],
+                "ets": ctx["ets"],
+            },
             geom_col="geom",
-        )
+        )  # type: ignore
     if df.empty:
         start_response("200 OK", [("Content-type", "text/plain")])
         return b"ERROR: no results found for your query"

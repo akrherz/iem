@@ -5,6 +5,7 @@ Return to `API Services </api/#json>`_
 Changelog
 ---------
 
+- 2025-03-12: Added new Most Probable Intensity tags for MCDs
 - 2024-07-09: Add csv and excel output formats
 
 Example Requests
@@ -25,11 +26,10 @@ from io import BytesIO
 
 import pandas as pd
 from pydantic import Field
-from pyiem.database import get_sqlalchemy_conn
+from pyiem.database import get_sqlalchemy_conn, sql_helper
 from pyiem.reference import ISO8601
 from pyiem.util import utc
 from pyiem.webutil import CGIModel, iemapp
-from sqlalchemy import text
 
 
 class Schema(CGIModel):
@@ -59,10 +59,11 @@ def dowork(lon, lat) -> pd.DataFrame:
     """Actually do stuff"""
     with get_sqlalchemy_conn("postgis") as conn:
         mcds = pd.read_sql(
-            text("""
+            sql_helper("""
         SELECT issue at time zone 'UTC' as i,
         expire at time zone 'UTC' as e, watch_confidence,
-        num as product_num, product_id, year, concerning from mcd WHERE
+        num as product_num, product_id, year, concerning,
+        most_prob_tornado, most_prob_hail, most_prob_gust from mcd WHERE
         ST_Contains(geom, ST_Point(:lon, :lat, 4326))
         ORDER by product_id DESC
     """),
@@ -112,6 +113,9 @@ def application(environ, start_response):
                     product_href=row["product_href"],
                     concerning=row["concerning"],
                     watch_confidence=conf,
+                    most_prob_tornado=row["most_prob_tornado"],
+                    most_prob_hail=row["most_prob_hail"],
+                    most_prob_gust=row["most_prob_gust"],
                 )
             )
         headers = [("Content-type", "application/json")]

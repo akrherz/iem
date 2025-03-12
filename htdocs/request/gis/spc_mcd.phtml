@@ -97,7 +97,9 @@ Field 3: Type=N/Double, Title=`YEAR', YEAR of MCD
 Field 4: Type=N/Double, Title=`NUM', SPC MCD Number
 Field 5: Type=N/Double, Title=`CONFIDEN', SPC Watch issuance confidence
 Field 6: Type=C/String, Title=`CONCERN', SPC MCD concerning heading
-
+Field 7: Type=C/String, Title=`MP_TORN', SPC MCD Most Probable Tornado Intensity
+Field 8: Type=C/String, Title=`MP_HAIL', SPC MCD Most Probable Hail Intensity
+Field 9: Type=C/String, Title=`MP_GUST', SPC MCD Most Probable Gust Intensity
 </pre>
 
 <h4>Archive / Usage Notes:</h4>
@@ -114,5 +116,3 @@ EOM;
 
 $t->content = $content;
 $t->render('single.phtml');
-
-?>

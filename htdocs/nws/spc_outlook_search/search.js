@@ -106,10 +106,13 @@ function doMCD(lon, lat) {
                     `<td>${mcd.utc_expire}</td>` +
                     `<td>${mcd.watch_confidence || ''}</td>` +
                     `<td>${mcd.concerning}</td>` +
+                    `<td>${mcd.most_prob_tornado}</td>` +
+                    `<td>${mcd.most_prob_hail}</td>` +
+                    `<td>${mcd.most_prob_gust}</td>` +
                     '</tr>');
             });
             if (data.mcds.length === 0) {
-                tbody.append('<tr><td colspan="3">No Results Found!</td></tr>');
+                tbody.append('<tr><td colspan="6">No Results Found!</td></tr>');
             }
         }
     });

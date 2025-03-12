@@ -11,7 +11,7 @@ $OL = "9.2.4";
 $t->jsextra = <<<EOM
 <script src='/vendor/openlayers/{$OL}/ol.js'></script>
 <script type="text/javascript" src="/js/olselect-lonlat.js"></script>
-<script type="text/javascript" src="search.js?v=2"></script>
+<script type="text/javascript" src="search.js"></script>
 EOM;
 $t->headextra = <<<EOM
 <link rel="stylesheet" type="text/css" href="/vendor/openlayers/{$OL}/ol.css" />
@@ -104,10 +104,10 @@ table.</p>
 
 </tbody>
 </table>
-        <div id="outlook_spinner" style="display: none;"><img src="/images/wait24trans.gif"> Loading</div>
+<div id="outlook_spinner" style="display: none;"><img src="/images/wait24trans.gif"> Loading</div>
 
-        </div>
-        <div class="tab-pane" id="2a">
+</div>
+<div class="tab-pane" id="2a">
 
 <p>This archive dates back until <strong>20 October 2008</strong> and is based
 on the MCD polygon included within the text.</p>
@@ -130,6 +130,9 @@ on the MCD polygon included within the text.</p>
 <th>UTC Expire</th>
 <th>Watch Confidence</th>
 <th>Concerning</th>
+<th>Most Prob Tornado</th>
+<th>Most Prob Hail</th>
+<th>Most Prob Gust</th>
 </tr>
 </thead>
 <tbody>
