@@ -33,12 +33,11 @@ from datetime import timedelta
 import numpy as np
 import pandas as pd
 from matplotlib.colors import BoundaryNorm, ListedColormap
-from pyiem.database import get_sqlalchemy_conn
+from pyiem.database import get_sqlalchemy_conn, sql_helper
 from pyiem.exceptions import NoDataFound
 from pyiem.network import Table as NetworkTable
 from pyiem.plot.geoplot import MapPlot
 from pyiem.util import utc
-from sqlalchemy import text
 
 PDICT = {"realtime": "Realtime-ness", "latency": "Latency"}
 
@@ -77,7 +76,7 @@ def plotter(ctx: dict):
     nt = NetworkTable("NEXRAD")
     with get_sqlalchemy_conn("id3b") as conn:
         latency = pd.read_sql(
-            text("""
+            sql_helper("""
             with data as (
             select substr(awips_id, 4, 3) as nexrad,
             entered_at, wmo_valid_at, entered_at - wmo_valid_at as latency,

@@ -1,9 +1,9 @@
 /* global $, ol */
-var renderattr = "high";
-var vectorLayer;
-var map;
-var element;
-var fontSize = 14;
+let renderattr = "high";
+let vectorLayer = null;
+let map = null;
+let element = null;
+let fontSize = 14;
 
 function text(str) {
     // XSS
@@ -108,7 +108,6 @@ function makeVectorLayer(dt) {
 
 $(document).ready(() => {
 
-
     $("#datepicker").datepicker({
         dateFormat: "DD, d MM, yy",
         minDate: new Date(2001, 1, 1),
@@ -192,7 +191,7 @@ $(document).ready(() => {
     if (tokens.length == 2) {
         // #YYYYmmdd/variable
         tokens = tokens[1].split("/");
-        if (tokens.length == 2) {
+        if (tokens.length === 2) {
             const tpart = text(tokens[0]);
             renderattr = text(tokens[1]);
             $(`select[id=renderattr] option[value=${renderattr}]`).attr("selected", "selected");

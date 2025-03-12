@@ -367,7 +367,7 @@ $get_recent_news = cacheable("recentnews", 120)(function(){
     $today = new DateTime();
     
     $news = "";
-    for ($i=0; $row = pg_fetch_array($rs); $i++){
+    while ($row = pg_fetch_assoc($rs)){
         $ts = new DateTime(substr($row["entered"],0,16));
         if ($ts > $today) $sts = $ts->format("g:i A");
         $sts = $ts->format("j M g:i A");

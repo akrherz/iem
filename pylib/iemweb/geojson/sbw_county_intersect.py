@@ -25,9 +25,8 @@ https://mesonet.agron.iastate.edu/geojson/sbw_county_intersect.py\
 
 import geopandas as gpd
 from pydantic import Field
-from pyiem.database import get_sqlalchemy_conn
+from pyiem.database import get_sqlalchemy_conn, sql_helper
 from pyiem.webutil import CGIModel, iemapp
-from sqlalchemy import text
 
 
 class Schema(CGIModel):
@@ -47,7 +46,7 @@ def run(wfo, year, phenomena, significance, eventid):
     """Do great things"""
     with get_sqlalchemy_conn("postgis") as conn:
         borderdf = gpd.read_postgis(
-            text("""
+            sql_helper("""
             WITH stormbased as (
                 SELECT geom from sbw where vtec_year = :year and wfo = :wfo
                 and eventid = :eventid and significance = :significance
@@ -75,7 +74,7 @@ def run(wfo, year, phenomena, significance, eventid):
                 eventid=eventid,
             ),
             geom_col="geom",
-        )
+        )  # type: ignore
     return borderdf.to_json()
 
 

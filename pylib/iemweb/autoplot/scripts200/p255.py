@@ -17,10 +17,9 @@ year of the data represents the start year of the period that crosses 1 Jan.
 from datetime import date
 
 import pandas as pd
-from pyiem.database import get_sqlalchemy_conn
+from pyiem.database import get_sqlalchemy_conn, sql_helper
 from pyiem.exceptions import NoDataFound
 from pyiem.plot import figure
-from sqlalchemy import text
 
 from iemweb.autoplot import ARG_STATION
 from iemweb.autoplot.barchart import barchar_with_top10
@@ -81,12 +80,13 @@ def get_obsdf(ctx):
         limiter = "(sday >= :sday or sday <= :eday) "
     with get_sqlalchemy_conn("coop") as conn:
         df = pd.read_sql(
-            text(
-                f"""
+            sql_helper(
+                """
                 SELECT day, year, precip, sday, 0.0 as bucket_depth
                 from alldata
                 WHERE station = :station and {limiter} ORDER by day ASC
-            """
+            """,
+                limiter=limiter,
             ),
             conn,
             index_col="day",
@@ -147,7 +147,7 @@ def plotter(ctx: dict):
     if thisyear.empty:
         raise NoDataFound("No data found for year of interest.")
     # Plot the bucket depth
-    ax = fig.add_axes([0.1, 0.7, 0.7, 0.15])
+    ax = fig.add_axes((0.1, 0.7, 0.7, 0.15))
     ax.text(
         0.01,
         1.01,

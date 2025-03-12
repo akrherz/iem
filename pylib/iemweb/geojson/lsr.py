@@ -52,11 +52,10 @@ from datetime import datetime, timedelta, timezone
 
 import geopandas as gpd
 from pydantic import Field, field_validator, model_validator
-from pyiem.database import get_sqlalchemy_conn
+from pyiem.database import get_sqlalchemy_conn, sql_helper
 from pyiem.nws.vtec import get_ps_string
 from pyiem.util import utc
 from pyiem.webutil import CGIModel, ListOrCSVType, iemapp
-from sqlalchemy import text
 
 from iemweb.imagemaps import rectify_wfo
 
@@ -169,7 +168,7 @@ def do_vtec(environ: dict) -> gpd.GeoDataFrame:
     """Actually do the hard work of getting the current SBW in geojson"""
     with get_sqlalchemy_conn("postgis") as conn:
         lsrdf = gpd.read_postgis(
-            text(
+            sql_helper(
                 """
             SELECT l.wfo, l.type,
             l.magnitude as magf, l,county, l.typetext,
@@ -194,7 +193,7 @@ def do_vtec(environ: dict) -> gpd.GeoDataFrame:
                 "significance": environ["significance"],
             },
             geom_col="geom",
-        )
+        )  # type: ignore
     return lsrdf
 
 
@@ -202,7 +201,7 @@ def do_states(environ: dict) -> gpd.GeoDataFrame:
     """Actually do the hard work of getting the current SBW in geojson"""
     with get_sqlalchemy_conn("postgis") as conn:
         lsrdf = gpd.read_postgis(
-            text(
+            sql_helper(
                 """
             SELECT distinct l.wfo, l.type,
             l.magnitude as magf, l,county, l.typetext,
@@ -223,7 +222,7 @@ def do_states(environ: dict) -> gpd.GeoDataFrame:
                 "sts": environ["sts"],
             },
             geom_col="geom",
-        )
+        )  # type: ignore
     return lsrdf
 
 
@@ -239,8 +238,8 @@ def do_default(environ: dict) -> gpd.GeoDataFrame:
         )
     with get_sqlalchemy_conn("postgis") as conn:
         lsrdf = gpd.read_postgis(
-            text(
-                f"""
+            sql_helper(
+                """
             SELECT distinct wfo, type, magnitude as magf,
             county, typetext, state, remark, city, source, unit,
             to_char(valid at time zone 'UTC', 'YYYY-MM-DDThh24:MI:SSZ')
@@ -249,12 +248,13 @@ def do_default(environ: dict) -> gpd.GeoDataFrame:
             FROM lsrs WHERE
             valid BETWEEN :sts and :ets {wfo_limiter}
             LIMIT 10000
-                """
+                """,
+                wfo_limiter=wfo_limiter,
             ),
             conn,
             params=environ,
             geom_col="geom",
-        )
+        )  # type: ignore
     return lsrdf
 
 
@@ -264,7 +264,7 @@ def add_warnings(lsrdf: gpd.GeoDataFrame) -> None:
     with get_sqlalchemy_conn("postgis") as conn:
         for idx, row in lsrdf.iterrows():
             res = conn.execute(
-                text("""
+                sql_helper("""
                 SELECT distinct phenomena, significance, eventid, vtec_year
                 from sbw
                 WHERE vtec_year = :year and wfo = :wfo and issue <= :valid

@@ -29,11 +29,10 @@ https://mesonet.agron.iastate.edu/geojson/sps.py?valid=2024-08-10T20:00:00Z
 import json
 
 from pydantic import AwareDatetime, Field
-from pyiem.database import get_sqlalchemy_conn
+from pyiem.database import get_sqlalchemy_conn, sql_helper
 from pyiem.reference import ISO8601
 from pyiem.util import utc
 from pyiem.webutil import CGIModel, iemapp
-from sqlalchemy import text
 
 
 class Schema(CGIModel):
@@ -50,7 +49,7 @@ def run(valid):
     """Actually do the hard work of getting the current SPS in geojson"""
     with get_sqlalchemy_conn("postgis") as conn:
         res = conn.execute(
-            text("""
+            sql_helper("""
             SELECT ST_asGeoJson(geom) as geojson, product_id,
             issue at time zone 'UTC' as utc_issue,
             expire at time zone 'UTC' as utc_expire

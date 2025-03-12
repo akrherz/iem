@@ -224,7 +224,7 @@ def load_data(ctx: dict, basets: datetime, endts: datetime):
             },
             index_col=None,
             geom_col="geo",
-        )
+        )  # type: ignore
     df[USEME] = True
     df["nwsli"] = df.index.values
     df["plotme"] = True
@@ -259,7 +259,7 @@ def load_data(ctx: dict, basets: datetime, endts: datetime):
                 },
                 index_col=None,
                 geom_col="geo",
-            )
+            )  # type: ignore
         if not coopdf.empty:
             coopdf[USEME] = True
             coopdf["plotme"] = True
@@ -296,7 +296,7 @@ def load_data(ctx: dict, basets: datetime, endts: datetime):
                 },
                 index_col=None,
                 geom_col="geo",
-            )
+            )  # type: ignore
         if not cocodf.empty:
             cocodf[USEME] = True
             cocodf["plotme"] = True

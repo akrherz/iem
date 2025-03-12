@@ -10,11 +10,10 @@ from datetime import date
 
 import numpy as np
 import pandas as pd
-from pyiem.database import get_sqlalchemy_conn
+from pyiem.database import get_sqlalchemy_conn, sql_helper
 from pyiem.exceptions import NoDataFound
 from pyiem.network import Table as NetworkTable
 from pyiem.plot.geoplot import MapPlot
-from sqlalchemy import text
 
 PDICT3 = {"contour": "Contour + Plot Values", "values": "Plot Values Only"}
 PDICT2 = {
@@ -114,14 +113,15 @@ def plotter(ctx: dict):
     sday_limiter = "sday >= :sday and sday <= :eday"
     if ctx["sday"] > ctx["eday"]:
         sday_limiter = "(sday >= :sday or sday <= :eday)"
+    table = f"alldata_{sector.lower()}"
     with get_sqlalchemy_conn("coop") as conn:
         df = pd.read_sql(
-            text(
-                f"""
+            sql_helper(
+                """
             WITH events as (
                 SELECT station, year,
                 max(case when {varname} {comp} :t then 1 else 0 end) as hit
-                from alldata_{sector} WHERE {sday_limiter} and
+                from {table} WHERE {sday_limiter} and
                 year >= :syear and year <= :eyear and
                 substr(station, 3, 4) != '0000'
                 and substr(station, 3, 1) not in ('C', 'D', 'T')
@@ -130,7 +130,11 @@ def plotter(ctx: dict):
             )
             SELECT station, count(*) as count, sum(hit) as events
             from events GROUP by station ORDER by station ASC
-            """
+            """,
+                table=table,
+                varname=varname,
+                comp=comp,
+                sday_limiter=sday_limiter,
             ),
             conn,
             params={

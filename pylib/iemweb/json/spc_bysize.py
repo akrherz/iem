@@ -98,7 +98,7 @@ def get_mckey(environ: dict) -> str:
     return (
         f"/json/spc_bysize.json|{environ['category']}|{environ['day']}|"
         f"{environ['syear']}|{environ['threshold']}"
-    )
+    ).replace(" ", "")
 
 
 @iemapp(help=__doc__, schema=Schema, memcachekey=get_mckey, memcacheexpire=300)

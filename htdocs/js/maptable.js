@@ -54,7 +54,7 @@ function get_style(color, text) {
 
 function getLabelForFeature(inst, feat) {
     let label = "TBD";
-    if (inst.label_field == "id") {
+    if (inst.label_field === "id") {
         label = feat.getId();
     } else if (inst.label_field) {
         label = feat.get(inst.label_field).toString();
@@ -135,7 +135,7 @@ function init_map(idx, inst) {
     });
 
     inst.vectorLayer.getSource().on('change', (_e2) => {
-        if (inst.vectorLayer.getSource().getState() == 'ready' && inst.zoomReset === false) {
+        if (inst.vectorLayer.getSource().getState() === 'ready' && inst.zoomReset === false) {
             inst.map.getView().fit(
                 inst.vectorLayer.getSource().getExtent(),
                 {
@@ -164,7 +164,7 @@ function init_map(idx, inst) {
         }
         inst.vectorLayer.getSource().getFeatures().forEach((feat) => {
             if (columns.length == 1) {
-                feat.getKeys().forEach(function (key) {
+                feat.getKeys().forEach((key) => {
                     if (key == "geometry") {
                         return;
                     }
