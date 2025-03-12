@@ -10,6 +10,7 @@ Simple service that returns SPC's MCDs sorted by size.
 Changelog
 ---------
 
+- 2025-03-12: Added new Most Probable Intensity fields.
 - 2024-07-29: Initital documentation release.
 
 """
@@ -17,10 +18,9 @@ Changelog
 import json
 
 from pydantic import Field
-from pyiem.database import get_sqlalchemy_conn
+from pyiem.database import get_sqlalchemy_conn, sql_helper
 from pyiem.reference import ISO8601
 from pyiem.webutil import CGIModel, iemapp
-from sqlalchemy import text
 
 BASEURL = "https://www.spc.noaa.gov/products/md"
 
@@ -48,13 +48,17 @@ def dowork(count, sort):
     data = dict(mcds=[])
     with get_sqlalchemy_conn("postgis") as conn:
         res = conn.execute(
-            text(f"""
+            sql_helper(
+                """
             SELECT issue at time zone 'UTC' as i,
             expire at time zone 'UTC' as e, num, product_id, year,
             ST_Area(geom::geography) / 1000000. as area_sqkm,
-            concerning from mcd WHERE not ST_isEmpty(geom)
+            concerning, most_prob_tornado, most_prob_hail, most_prob_gust
+            from mcd WHERE not ST_isEmpty(geom)
             ORDER by area_sqkm {sort} LIMIT :cnt
-        """),
+        """,
+                sort=sort,
+            ),
             {"cnt": count},
         )
         for row in res:
@@ -69,6 +73,9 @@ def dowork(count, sort):
                     product_id=row[3],
                     area_sqkm=row[5],
                     concerning=row[6],
+                    most_prob_tornado=row[7],
+                    most_prob_hail=row[8],
+                    most_prob_gust=row[9],
                 )
             )
 

@@ -3,13 +3,12 @@ require_once "../../config/settings.inc.php";
 define("IEM_APPID", 121);
 require_once "../../include/myview.php";
 require_once "../../include/forms.php";
-$t = new MyView();
-$count = get_int404("count", 10);
-
 require_once "../../include/database.inc.php";
 require_once "../../include/network.php";
 require_once "../../include/imagemaps.php";
 
+$t = new MyView();
+$count = get_int404("count", 10);
 $baseurl = sprintf(
     "%s/json/mcd_bysize.py?count=%s&sort=",
     $INTERNAL_BASEURL,
@@ -67,7 +66,6 @@ $t->content = <<<EOM
 <p><strong>Related</strong>:
 <a href="spc_top10.phtml" class="btn btn-primary">Top 10 Outlooks by Size</a>
 </p>
-
 
  <p><form method="GET" name="u">
  Number of Events to Show:
