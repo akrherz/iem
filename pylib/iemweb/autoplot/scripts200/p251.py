@@ -9,12 +9,11 @@ from zoneinfo import ZoneInfo
 import matplotlib.dates as mdates
 import matplotlib.ticker as mticker
 import pandas as pd
-from pyiem.database import get_sqlalchemy_conn
+from pyiem.database import get_sqlalchemy_conn, sql_helper
 from pyiem.exceptions import IncompleteWebRequest
 from pyiem.nws.vtec import NWS_COLORS
 from pyiem.plot import figure_axes
 from pyiem.util import utc
-from sqlalchemy import text
 
 
 def get_description():
@@ -61,7 +60,8 @@ def getp(conn, phenomena, wfo, sts, ets):
         "phenomena": phenomena,
     }
     res = conn.execute(
-        text(f"""
+        sql_helper(
+            """
      WITH data as (
         select distinct vtec_year, wfo, eventid, phenomena,
         generate_series(issue, expire, '1 minute'::interval) as t
@@ -79,7 +79,9 @@ def getp(conn, phenomena, wfo, sts, ets):
      coalesce(agg.count, 0) as cnt from ts
      LEFT JOIN agg on (ts.t = agg.t)
      ORDER by ts.t ASC
-    """),
+    """,
+            wfolimiter=wfolimiter,
+        ),
         params,
     )
     times = []

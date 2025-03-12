@@ -95,7 +95,7 @@ every site.</p>
 Make plot selections: {$nselect}
 {$ys} {$ms} {$ds}
 
-  <input type="submit" value="Make Plot"></form>
+<input type="submit" value="Make Plot"></form>
 
 {$content}
 

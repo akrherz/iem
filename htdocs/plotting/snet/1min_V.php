@@ -24,12 +24,13 @@ $yesterday = mktime(0, 0, 0, date("m"), date("d"), date("Y")) - 96400;
 /* Dig in the archive for our data! */
 $dbconn = iemdb("snet");
 $tbl = sprintf("t%s", date("Y_m", $myTime));
-$rs = pg_prepare($dbconn, "SELECT", "SELECT * from $tbl 
+$stname = uniqid();
+$rs = pg_prepare($dbconn, $stname, "SELECT * from $tbl 
                  WHERE station = $1 and date(valid) = $2 ORDER by valid ASC");
 if ($rs === FALSE) {
     die("Prepare failed: " . pg_last_error($dbconn));
 }
-$rs = pg_execute($dbconn, "SELECT", array($station, date("Y-m-d", $myTime)));
+$rs = pg_execute($dbconn, $stname, array($station, date("Y-m-d", $myTime)));
 if (pg_num_rows($rs) == 0) {
     $led = new DigitalLED74();
     $led->StrokeNumber('NO DATA FOR THIS DATE', LEDC_GREEN);
@@ -50,7 +51,7 @@ $drct = array();
 $smph = array();
 $gust  = array();
 
-for ($i = 0; $row = pg_fetch_array($rs); $i++) {
+while ($row = pg_fetch_assoc($rs)) {
     $ts = strtotime(substr($row["valid"], 0, 16));
     $times[] = $ts;
     $drct[] = ($row["drct"] > 0 && $row["drct"] <= 360 && $i % 10 == 0) ? $row["drct"] : -199;

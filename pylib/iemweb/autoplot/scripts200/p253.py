@@ -32,12 +32,11 @@ from matplotlib.colorbar import ColorbarBase
 from matplotlib.colors import rgb2hex
 from matplotlib.lines import Line2D
 from matplotlib.patches import Rectangle
-from pyiem.database import get_sqlalchemy_conn
+from pyiem.database import get_sqlalchemy_conn, sql_helper
 from pyiem.exceptions import NoDataFound
 from pyiem.network import Table as NetworkTable
 from pyiem.plot import get_cmap
 from pyiem.plot.geoplot import MAIN_AX_BOUNDS, MapPlot
-from sqlalchemy import text
 
 
 def get_description():
@@ -209,7 +208,7 @@ def plotter(ctx: dict):
     # Get the warning polygons
     with get_sqlalchemy_conn("postgis") as conn:
         tow = gpd.read_postgis(
-            text(
+            sql_helper(
                 """
             SELECT wfo, eventid, phenomena, significance,
             issue at time zone 'UTC' as utc_issue,
@@ -229,7 +228,7 @@ def plotter(ctx: dict):
                 "geom": trackgdf.iloc[0]["geometry"].wkt,
             },
             geom_col="geom",
-        )
+        )  # type: ignore
     if not tow.empty:
         for col in ["utc_issue", "utc_expire"]:
             tow[col] = tow[col].dt.tz_localize(timezone.utc)

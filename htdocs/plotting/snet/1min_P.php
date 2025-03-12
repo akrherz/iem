@@ -26,12 +26,13 @@ $yesterday = mktime(0, 0, 0, date("m"), date("d"), date("Y")) - 96400;
 $dbconn = iemdb("snet");
 $tbl = sprintf("t%s", date("Y_m", $myTime));
 $pcol = "";
-$rs = pg_prepare($dbconn, "SELECT", "SELECT * $pcol from $tbl 
+$stname = uniqid();
+$rs = pg_prepare($dbconn, $stname, "SELECT * $pcol from $tbl 
                  WHERE station = $1 and date(valid) = $2 ORDER by valid ASC");
 if ($rs === FALSE) {
     die("Prepare failed: " . pg_last_error($dbconn));
 }
-$rs = pg_execute($dbconn, "SELECT", array($station, date("Y-m-d", $myTime)));
+$rs = pg_execute($dbconn, $stname, array($station, date("Y-m-d", $myTime)));
 if (pg_num_rows($rs) == 0) {
     $led = new DigitalLED74();
     $led->StrokeNumber('NO DATA FOR THIS DATE', LEDC_GREEN);
@@ -46,7 +47,7 @@ $times = array();
 $pcpn = array();
 $pres = array();
 
-for ($i = 0; $row = pg_fetch_assoc($rs); $i++) {
+while ($row = pg_fetch_assoc($rs)) {
     $ts = strtotime(substr($row["valid"], 0, 16));
     $times[] = $ts;
     $pcpn[] = ($row["pday"] >= 0) ? $row["pday"] : "";
@@ -65,14 +66,11 @@ $graph->yaxis->SetTitle("Pressure [millibars]");
 $tcolor = array(230, 230, 0);
 /* Common for all our plots */
 $graph->img->SetMargin(80, 60, 40, 80);
-//$graph->img->SetAntiAliasing();
 $graph->xaxis->SetTextTickInterval(120);
 $graph->xaxis->SetPos("min");
 
 $graph->xaxis->title->SetFont(FF_FONT1, FS_BOLD, 14);
 $graph->xaxis->SetFont(FF_FONT1, FS_BOLD, 12);
-//$graph->xaxis->title->SetBox( array(150,150,150), $tcolor, true);
-//$graph->xaxis->title->SetColor( $tcolor );
 $graph->xaxis->SetTitleMargin(15);
 $graph->xaxis->SetLabelFormatString("h A", true);
 $graph->xaxis->SetLabelAngle(90);
@@ -98,8 +96,6 @@ $graph->ygrid->SetFill(true, '#EFEFEF@0.5', '#BBCCEE@0.5');
 $graph->ygrid->Show();
 $graph->xgrid->Show();
 
-
-
 $graph->yaxis->SetTitleMargin(60);
 
 $graph->y2axis->scale->ticks->Set(0.5, 0.25);
@@ -110,13 +106,11 @@ $graph->yaxis->scale->ticks->SetLabelFormat("%4.1f");
 $graph->yaxis->scale->ticks->Set(1, 0.1);
 $graph->yaxis->SetColor("black");
 $graph->yscale->SetGrace(10);
-//$graph->yscale->SetAutoTicks();
 
 // Create the linear plot
 $lineplot = new LinePlot($pres, $times);
 $lineplot->SetLegend("Pressure");
 $lineplot->SetColor("black");
-//$lineplot->SetWeight(2);
 
 // Create the linear plot
 $lineplot2 = new LinePlot($pcpn, $times);

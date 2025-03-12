@@ -17,11 +17,10 @@ from zoneinfo import ZoneInfo
 import numpy as np
 import pandas as pd
 from matplotlib.dates import DateFormatter
-from pyiem.database import get_sqlalchemy_conn
+from pyiem.database import get_sqlalchemy_conn, sql_helper
 from pyiem.exceptions import NoDataFound
 from pyiem.plot import figure
 from pyiem.util import utc
-from sqlalchemy import text
 
 PDICT = {
     "tmpf": "Air Temperature (F)",
@@ -102,15 +101,16 @@ def plotter(ctx: dict):
 
     with get_sqlalchemy_conn("asos") as conn:
         df = pd.read_sql(
-            text(
-                f"""
+            sql_helper(
+                """
         SELECT date_trunc('hour', valid + '10 minutes'::interval)
             at time zone 'UTC' as utc_valid,
         station, {varname} from alldata
         WHERE station = ANY(:stids) and {varname} is not null
         and report_type = 3
         order by utc_valid asc
-        """
+        """,
+                varname=varname,
             ),
             conn,
             params={"stids": [station1, station2]},

@@ -20,10 +20,9 @@ from datetime import date, timedelta
 import httpx
 import matplotlib.dates as mdates
 import pandas as pd
-from pyiem.database import get_sqlalchemy_conn
+from pyiem.database import get_sqlalchemy_conn, sql_helper
 from pyiem.exceptions import NoDataFound
 from pyiem.plot import figure
-from sqlalchemy import text
 
 from iemweb.autoplot import ARG_STATION
 
@@ -47,7 +46,7 @@ def get_obsdf(ctx):
     """Figure out our observations."""
     with get_sqlalchemy_conn("coop") as conn:
         df = pd.read_sql(
-            text(
+            sql_helper(
                 """
                 SELECT day, gddxx(50, 86, high, low) as gdd, temp_hour
                 from alldata

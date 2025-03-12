@@ -1,7 +1,7 @@
 <?php
 /* Generate a 1 minute plot of temperature, dew point, and solar rad */
 require_once "../../../config/settings.inc.php";
-include_once("../../../include/network.php");
+require_once "../../../include/network.php";
 include_once("../../../include/mlib.php");
 include_once("../../../include/database.inc.php");
 include("../../../include/jpgraph/jpgraph.php");
@@ -45,7 +45,7 @@ $temps = array();
 $dewps = array();
 $srad  = array();
 
-for ($i = 0; $row = pg_fetch_array($rs); $i++) {
+while ($row = pg_fetch_assoc($rs)) {
     $ts = strtotime(substr($row["valid"], 0, 16));
     $times[] = $ts;
     $srad[] = ($row["srad"] >= 0) ? $row["srad"] : "";
@@ -118,8 +118,6 @@ $lineplot3->SetColor("black");
 
 $graph->Add($lineplot2);
 $graph->Add($lineplot);
-if ($station != 'SPEI4') {
-    $graph->AddY2($lineplot3);
-}
+$graph->AddY2($lineplot3);
 
 $graph->Stroke();

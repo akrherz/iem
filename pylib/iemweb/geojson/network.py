@@ -35,11 +35,10 @@ https://mesonet.agron.iastate.edu/geojson/network.py?network=AZOS&only_online=1
 import json
 
 from pydantic import Field
-from pyiem.database import get_sqlalchemy_conn
+from pyiem.database import get_sqlalchemy_conn, sql_helper
 from pyiem.reference import ISO8601
 from pyiem.util import utc
 from pyiem.webutil import CGIModel, iemapp
-from sqlalchemy import text
 
 XREF = {
     "HAS_HML": "HAS_HML",
@@ -81,7 +80,8 @@ def run(conn, network, only_online):
         subselect = "network = :network "
         subselect += "and online" if only_online else ""
     cursor = conn.execute(
-        text(f"""
+        sql_helper(
+            """
     WITH attrs as (
         SELECT t.iemid, string_agg(a.attr, '____') as attrs,
         string_agg(a.value, '____') as attr_values
@@ -92,7 +92,9 @@ def run(conn, network, only_online):
     coalesce(a.attrs, '') as attrs,
     coalesce(a.attr_values, '') as attr_values from stations t JOIN attrs a on
     (t.iemid = a.iemid) ORDER by t.id ASC
-            """),
+            """,
+            subselect=subselect,
+        ),
         params,
     )
 
