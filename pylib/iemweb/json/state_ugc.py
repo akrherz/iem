@@ -1,6 +1,6 @@
 """.. title:: Return UGCs for a given state.
 
-Return to `JSON Services </json/>`.
+Return to `API Services </api/#json>`.
 
 Documentation for /json/state_ugc.json
 --------------------------------------
@@ -26,9 +26,8 @@ https://mesonet.agron.iastate.edu/json/state_ugc.py?state=LM
 import json
 
 from pydantic import Field
-from pyiem.database import get_sqlalchemy_conn
+from pyiem.database import get_sqlalchemy_conn, sql_helper
 from pyiem.webutil import CGIModel, iemapp
-from sqlalchemy import text
 
 
 class Schema(CGIModel):
@@ -56,7 +55,7 @@ def application(environ, start_response):
     }
     with get_sqlalchemy_conn("postgis") as conn:
         res = conn.execute(
-            text(
+            sql_helper(
                 """
             SELECT ugc, name from ugcs WHERE substr(ugc,1,2) = :state and
             ugc is not null and end_ts is null and name is not null

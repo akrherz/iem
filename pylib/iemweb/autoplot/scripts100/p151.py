@@ -5,7 +5,7 @@ annual over a period of years; or a difference between a second set of years.
 more useful for some users than this one.
 """
 
-from datetime import date
+from typing import TYPE_CHECKING
 
 import numpy as np
 import pandas as pd
@@ -15,6 +15,9 @@ from pyiem.plot import MapPlot, centered_bins, get_cmap
 from pyiem.reference import SECTORS_NAME
 
 from iemweb.util import month2months
+
+if TYPE_CHECKING:
+    from datetime import date
 
 PDICT = {
     "state": "State Level Maps (select state)",

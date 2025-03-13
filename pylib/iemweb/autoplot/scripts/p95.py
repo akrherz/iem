@@ -184,7 +184,7 @@ def plotter(ctx: dict):
     ax.set_xlim(left=-0.01)
     ax.set_xlabel("Total Precipitation [inch], Avg: %.2f" % (np.average(xs),))
     ax.set_ylabel(
-        (r"Average Temperature $^\circ$F, " "Avg: %.1f") % (np.average(ys),)
+        r"Average Temperature $^\circ$F, " + f"Avg: {np.average(ys):.1f}"
     )
     ax2 = fig.add_axes((0.67, 0.55, 0.28, 0.35))
     ax2.scatter(df["soi3m"].values, df["tmpf"].values)

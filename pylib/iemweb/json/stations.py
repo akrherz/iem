@@ -1,6 +1,6 @@
 """.. title:: Recent IEM Station Metadata Changes
 
-Return to `JSON Services </json/>`_
+Return to `API Services </api/#json>`_
 
 This service emits station metadata for those stations that have recently
 received updates by the IEM.  There is a 1000 result limit to what is returned.
@@ -24,11 +24,10 @@ from datetime import date as dateobj
 
 import pandas as pd
 from pydantic import Field
-from pyiem.database import get_sqlalchemy_conn
+from pyiem.database import get_sqlalchemy_conn, sql_helper
 from pyiem.reference import ISO8601
 from pyiem.util import utc
 from pyiem.webutil import CGIModel, iemapp
-from sqlalchemy import text
 
 
 class Schema(CGIModel):
@@ -49,7 +48,7 @@ def run(dt):
     }
     with get_sqlalchemy_conn("mesosite") as conn:
         changed = pd.read_sql(
-            text(
+            sql_helper(
                 "select *, st_x(geom) as lon, st_y(geom) as lat from "
                 "stations where modified > :dt ORDER by modified DESC "
                 "limit 1000"

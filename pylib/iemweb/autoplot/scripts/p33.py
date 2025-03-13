@@ -96,7 +96,7 @@ def plotter(ctx: dict):
     mv = df["largest_change"].mean()
     ax.axhline(mv, lw=2, color="k")
     ax.grid(True)
-    ax.set_ylabel(r"Largest Low Temp Drop $^\circ$F, " f"Avg: {mv:.1f}")
+    ax.set_ylabel(r"Largest Low Temp Drop $^\circ$F, " + f"Avg: {mv:.1f}")
     ax.set_xlim(df.index.values.min() - 1, df.index.values.max() + 1)
 
     ax = fig.add_axes((0.58, 0.12, 0.4, 0.32))

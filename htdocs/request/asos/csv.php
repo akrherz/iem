@@ -18,7 +18,7 @@ if (isset($_GET["lat"]) && isset($_GET["lon"])) {
       WHERE network ~* 'ASOS' ORDER by dist ASC
       LIMIT 5", xssafe($_GET["lon"]), xssafe($_GET["lat"]));
     $rs = pg_exec($mesosite, $sql);
-    for ($i = 0; $row = pg_fetch_array($rs); $i++) {
+    for ($i = 0; $row = pg_fetch_assoc($rs); $i++) {
         $stations[$i] = $row["id"];
     }
 }
@@ -50,7 +50,7 @@ foreach ($stations as $k => $id) {
     if (pg_num_rows($rs) == 0) {
         continue;
     }
-    for ($i = 0; $row = pg_fetch_array($rs); $i++) {
+    while ($row = pg_fetch_assoc($rs)) {
         $result .= sprintf(
             "%s,%s,%s,%s,%s,%s,%s,%s,%s,%.4f,%.4f\n",
             $row["id"],

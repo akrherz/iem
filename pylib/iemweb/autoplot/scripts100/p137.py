@@ -142,7 +142,7 @@ def plotter(ctx: dict):
             ax[0].text(
                 dt,
                 val - 1,
-                f"{dt:%-d %b} {val:.1f}" r"$^\circ$F",
+                f"{dt:%-d %b} {val:.1f}" + r"$^\circ$F",
                 ha="center",
                 va="top",
                 bbox=dict(color="white", boxstyle="square,pad=0"),
@@ -153,7 +153,7 @@ def plotter(ctx: dict):
             ax[0].text(
                 dt,
                 val + 1,
-                f"{dt:%-d %b} {val:.1f}" r"$^\circ$F",
+                f"{dt:%-d %b} {val:.1f}" + r"$^\circ$F",
                 ha="center",
                 va="bottom",
                 bbox=dict(color="white", boxstyle="square,pad=0"),

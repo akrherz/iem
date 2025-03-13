@@ -204,7 +204,7 @@ def plotter(ctx: dict):
     ax.set_position([0.1, 0.2, 0.8, 0.7])
     ax.grid(True)
     _tt = "All Obs Considered" if ctx["opt"] == "no" else "Only Additive Obs"
-    ax.set_xlabel(r"Feels Like $^\circ$F, " f"{_tt}")
+    ax.set_xlabel(r"Feels Like $^\circ$F, " + f"{_tt}")
     ax.set_ylabel("Frequency [%]")
     ax.set_yticks([0, 5, 10, 25, 50, 75, 90, 95, 100])
     ax.set_title(ctx["title"])

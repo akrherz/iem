@@ -32,7 +32,7 @@ select station, name from data d LEFT JOIN stations t on
 EOM;
 $rs = pg_query($pgconn, $sql);
 $sids = Array();
-for ($i = 0; $row = pg_fetch_array($rs); $i++) {
+while ($row = pg_fetch_assoc($rs)) {
     $name = is_null($row["name"]) ? "((Unknown))": $row["name"];
     $sids[$row["station"]] = $name;
 }
@@ -89,13 +89,13 @@ is said to be based off.</td></tr>
 <h3>2. Timezone of Observations:</h3>
 <i>The timestamps used in the downloaded files will be set in the
 timezone you specify.</i>
-<SELECT name="tz">
+<select name="tz">
     <option value="UTC">UTC Time</option>
     <option value="America/New_York">Eastern Time</option>
     <option value="America/Chicago">Central Time</option>
     <option value="America/Denver">Mountain Time</option>
     <option value="America/Los_Angeles">Western Time</option>
-</SELECT>
+</select>
 
 <h3>3. Select Start/End Time:</h3><br>
 <i>This limits the data returned for forecast times between the start

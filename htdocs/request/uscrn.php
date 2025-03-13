@@ -123,7 +123,6 @@ wind_mps_flag
 
 <h3>Frequently Asked Questions:</h3>
 
-
 </form>
 EOM;
 $t->render('single.phtml');

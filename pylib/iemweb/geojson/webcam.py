@@ -27,11 +27,10 @@ import json
 from datetime import timezone
 
 from pydantic import AwareDatetime, Field
-from pyiem.database import get_sqlalchemy_conn
+from pyiem.database import get_sqlalchemy_conn, sql_helper
 from pyiem.reference import ISO8601
 from pyiem.util import utc
 from pyiem.webutil import CGIModel, iemapp
-from sqlalchemy import text
 
 
 class Schema(CGIModel):
@@ -61,7 +60,7 @@ def run(valid, network):
     with get_sqlalchemy_conn("mesosite") as conn:
         if valid is None:
             res = conn.execute(
-                text("""
+                sql_helper("""
                     SELECT *, ST_x(geom) as lon, ST_y(geom) as lat
                     from camera_current c, webcams w
                     WHERE valid > (now() - '15 minutes'::interval)
@@ -73,7 +72,7 @@ def run(valid, network):
             )
         else:
             res = conn.execute(
-                text("""
+                sql_helper("""
                     SELECT *, ST_x(geom) as lon, ST_y(geom) as lat
                     from camera_log c, webcams w
                     WHERE valid = :valid and c.cam = w.id

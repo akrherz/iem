@@ -123,14 +123,14 @@ def plotter(ctx: dict):
 
     color = "b" if ctx["var"] == "wcht" else "r"
     ax[0].barh(ys - 0.4, freq, ec=color, fc=color)
-    ax[0].set_ylabel(f"{PDICT[ctx['var']]} " r"$^\circ$F")
+    ax[0].set_ylabel(f"{PDICT[ctx['var']]} " + r"$^\circ$F")
     ax[0].set_xlabel("Frequency [%]")
     ax[0].set_xticks([0, 5, 10, 20, 30, 40, 50, 60, 70, 80, 90, 95, 100])
     ax[0].grid(True)
 
     ax[1].bar(df.index.values, df[col], fc=color, ec=color)
     ax[1].set_ylim(bottom=df[col].min() - 5)
-    ax[1].set_ylabel(f"{PDICT[ctx['var']]} " r"$^\circ$F")
+    ax[1].set_ylabel(f"{PDICT[ctx['var']]} " + r"$^\circ$F")
     ax[1].grid(True)
     if offset > 0:
         ax[1].set_xlabel("Year label for spring portion of season")

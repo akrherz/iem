@@ -183,7 +183,7 @@ def plotter(ctx: dict):
     if varname == "gdd" and ctx["w"] == "daily":
         ax.set_ylim(-0.25, 40)
     ax.grid(True)
-    ax.set_ylabel(f"{PDICT2[ctx['w']]}" r" $^{\circ}\mathrm{F}$")
+    ax.set_ylabel(f"{PDICT2[ctx['w']]}" + r" $^{\circ}\mathrm{F}$")
     ax.xaxis.set_major_formatter(
         mdates.DateFormatter("%-d %b"),
     )

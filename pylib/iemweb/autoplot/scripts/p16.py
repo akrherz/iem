@@ -225,16 +225,16 @@ def add_ctx(ctx):
     }
     if ctx["opt"] == "tmpf_above":
         limiter = "round(tmpf::numeric,0) >= :thres"
-        title = f"Air Temp at or above {ctx['threshold']}" r"$^\circ$F"
+        title = f"Air Temp at or above {ctx['threshold']}" + r"$^\circ$F"
     elif ctx["opt"] == "tmpf_below":
         limiter = "round(tmpf::numeric,0) < :thres"
-        title = f"Air Temp below {ctx['threshold']}" r"$^\circ$F"
+        title = f"Air Temp below {ctx['threshold']}" + r"$^\circ$F"
     elif ctx["opt"] == "dwpf_below":
         limiter = "round(dwpf::numeric,0) < :thres"
-        title = f"Dew Point below {ctx['threshold']}" r"$^\circ$F"
+        title = f"Dew Point below {ctx['threshold']}" + r"$^\circ$F"
     elif ctx["opt"] == "dwpf_above":
         limiter = "round(tmpf::numeric,0) >= :thres"
-        title = f"Dew Point at or above {ctx['threshold']}" r"$^\circ$F"
+        title = f"Dew Point at or above {ctx['threshold']}" + r"$^\circ$F"
     elif ctx["opt"] == "relh_above":
         limiter = "relh >= :thres"
         title = f"Relative Humidity at or above {ctx['threshold']}%"

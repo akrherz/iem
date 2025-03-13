@@ -64,7 +64,7 @@ if ($method == "geocode") {
         $id, date('Y-m-d', $sts),
         date('Y-m-d', $ets)
     ));
-    while ($row = pg_fetch_array($rs)) {
+    while ($row = pg_fetch_assoc($rs)) {
         if ($row["pday"] >= 0) {
             $d[$row["day"]]["ob"] = $row["pday"];
         } else {

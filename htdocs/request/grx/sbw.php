@@ -17,7 +17,8 @@ $minute = get_int404("minute", 0);
 $ts = gmmktime($hour, $minute, 0, $month, $day, $year);
 $wfo = isset($_GET["wfo"]) ? substr(xssafe($_GET["wfo"]), 0, 3) : "MPX";
 
-$rs = pg_prepare($connect, "SELECT", "SELECT *, ST_AsText(geom) as g, ".
+$stname = uniqid();
+pg_prepare($connect, $stname, "SELECT *, ST_AsText(geom) as g, ".
            "round(ST_area(ST_transform(geom,9311)) / 1000000.0) as psize ".
            "from sbw WHERE vtec_year = $3 and ".
            "wfo = $1 and issue <= $2 and expire > $2 ".
@@ -25,7 +26,7 @@ $rs = pg_prepare($connect, "SELECT", "SELECT *, ST_AsText(geom) as g, ".
 
 $result = pg_execute(
     $connect,
-    "SELECT",
+    $stname,
     array($wfo, gmdate("Y-m-d H:i", $ts), $year)
 );
 
@@ -36,7 +37,7 @@ echo "Refresh: 99999\n";
 echo "Threshold: 999\n";
 echo sprintf("Title: $wfo SBW @ %s UTC\n", gmdate("d M Y H:i", $ts));
 
-for ($i = 0; $row = pg_fetch_array($result); $i++) {
+while ($row = pg_fetch_assoc($result)) {
     $geom = $row["g"];
     $geom = str_replace("MULTIPOLYGON(((", "", $geom);
     $geom = str_replace(")))", "", $geom);

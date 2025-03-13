@@ -72,7 +72,7 @@ $t->content = <<<EOM
 {$tags}
 
 {$content}
-        
+
 EOM;
 
 $t->render('single.phtml');

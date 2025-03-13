@@ -374,7 +374,7 @@ def plotter(ctx: dict):
     elif varname.find("days") > -1:
         ylabel = "Days"
     elif varname == "gdd":
-        ylabel = f"Growing Degree Days ({gddbase},{gddceil}) " r"$^\circ$F"
+        ylabel = f"Growing Degree Days ({gddbase},{gddceil}) " + r"$^\circ$F"
     elif varname.find("soilm") > -1:
         ylabel = "Soil Moisture $kg/kg$"
     ax[0].set_ylabel(ylabel)

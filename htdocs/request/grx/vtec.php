@@ -18,16 +18,20 @@ $eventid = isset($_GET["eventid"]) ? intval($_GET["eventid"]) : 103;
 $phenomena = isset($_GET["phenomena"]) ? substr($_GET["phenomena"], 0, 2) : "SV";
 $significance = isset($_GET["significance"]) ? substr($_GET["significance"], 0, 1) : "W";
 
-$rs = pg_prepare($connect, "SELECT", "SELECT eventid, phenomena, ".
+$stname = uniqid();
+$rs = pg_prepare($connect, $stname, "SELECT eventid, phenomena, ".
         "significance, ST_AsText(geom) as g ".
         "from sbw ".
         "WHERE vtec_year = $5 and wfo = $1 and phenomena = $2 and ". 
         "eventid = $3 and significance = $4 ".
         "and status = 'NEW'");
-
+if ($rs === FALSE) {
+    http_response_code(503);
+    die("Failed to prepare query");
+}
 $result = pg_execute(
     $connect,
-    "SELECT",
+    $stname,
     array($wfo, $phenomena, $eventid, $significance, $year)
 );
 if (pg_num_rows($result) <= 0) {
@@ -52,7 +56,7 @@ echo "Refresh: 99999\n";
 echo "Threshold: 999\n";
 echo "Title: VTEC $wfo {$phenomena}.{$significance} $eventid\n";
 
-for ($i = 0; $row = pg_fetch_assoc($result); $i++) {
+while ($row = pg_fetch_assoc($result)) {
     $geom = $row["g"];
     $geom = str_replace("MULTIPOLYGON(((", "", $geom);
     $geom = str_replace(")))", "", $geom);

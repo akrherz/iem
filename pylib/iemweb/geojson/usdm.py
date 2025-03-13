@@ -33,12 +33,11 @@ from datetime import date as dateobj
 from datetime import timedelta
 
 from pydantic import Field
-from pyiem.database import get_sqlalchemy_conn
+from pyiem.database import get_sqlalchemy_conn, sql_helper
 from pyiem.exceptions import IncompleteWebRequest
 from pyiem.reference import ISO8601
 from pyiem.util import utc
 from pyiem.webutil import CGIModel, iemapp
-from sqlalchemy import text
 
 
 class Schema(CGIModel):
@@ -58,7 +57,7 @@ def rectify_date(dt: dateobj):
     if dt is None:
         with get_sqlalchemy_conn("postgis") as conn:
             # Go get the latest USDM stored in the database!
-            res = conn.exec_driver_sql("SELECT max(valid) from usdm")
+            res = conn.execute(sql_helper("SELECT max(valid) from usdm"))
             res = res.fetchone()[0]
         return res
 
@@ -71,7 +70,7 @@ def run(ts):
     utcnow = utc()
     with get_sqlalchemy_conn("postgis") as conn:
         res = conn.execute(
-            text(
+            sql_helper(
                 "SELECT ST_asGeoJson(geom) as geojson, dm, valid "
                 "from usdm WHERE valid = :ts ORDER by dm ASC"
             ),
@@ -80,7 +79,7 @@ def run(ts):
         if res.rowcount == 0:
             # go back one week
             res = conn.execute(
-                text(
+                sql_helper(
                     "SELECT ST_asGeoJson(geom) as geojson, dm, valid "
                     "from usdm WHERE valid = :ts ORDER by dm ASC"
                 ),

@@ -1,10 +1,9 @@
 <?php
-/* Generate a KML file of a network locations, yummy */
 require_once "../../config/settings.inc.php";
 require_once "../../include/database.inc.php";
 require_once "../../include/network.php";
 require_once "../../include/forms.php";
-$network = isset($_GET["network"]) ? xssafe($_GET["network"]) : "KCCI"; 
+$network = isset($_GET["network"]) ? xssafe($_GET["network"]) : "IA_ASOS"; 
 
 header("Content-Type: application/vnd.google-earth.kml+xml");
 echo <<<EOM

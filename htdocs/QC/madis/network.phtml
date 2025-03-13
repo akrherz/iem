@@ -27,7 +27,7 @@ $baa = "network.phtml?network={$network}";
 $rs = pg_execute($dbconn, $stname, array($network));
 
 $data = array();
-for ($i = 0; $row = pg_fetch_assoc($rs); $i++) {
+while ($row = pg_fetch_assoc($rs)) {
     $data[$row["station"]] = $row;
 }
 

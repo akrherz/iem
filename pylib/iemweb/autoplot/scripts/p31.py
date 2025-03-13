@@ -298,7 +298,7 @@ def plotter(ctx: dict):
             ax.text(
                 0.9,
                 yloc,
-                r"R^2=" f"{(r_value**2):.02f}",
+                r"R^2=" + f"{(r_value**2):.02f}",
                 color=color,
                 transform=ax.transAxes,
                 va="center",

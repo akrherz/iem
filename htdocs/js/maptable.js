@@ -163,9 +163,9 @@ function init_map(idx, inst) {
             });
         }
         inst.vectorLayer.getSource().getFeatures().forEach((feat) => {
-            if (columns.length == 1) {
+            if (columns.length === 1) {
                 feat.getKeys().forEach((key) => {
-                    if (key == "geometry") {
+                    if (key === "geometry") {
                         return;
                     }
                     $(inst.select).append(

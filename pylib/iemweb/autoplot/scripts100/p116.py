@@ -126,7 +126,7 @@ def plotter(ctx: dict):
     title = f"[{station}] {ctx['_nt'].sts[station]['name']} ({y1}-{y1 + 20})"
     fig, ax = figure_axes(
         title=title,
-        subtitle=f"{PDICT[varname]} base=60" r"$^\circ$F",
+        subtitle=f"{PDICT[varname]} base=60" + r"$^\circ$F",
         apctx=ctx,
     )
     filtered = df[(df["year"] >= y1) & (df["year"] <= (y1 + 20))]

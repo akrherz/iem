@@ -26,10 +26,10 @@ plot, but allows for a user defined period to be selected.</p>
 import calendar
 import math
 from datetime import date
+from typing import TYPE_CHECKING
 
 import numpy as np
 import pandas as pd
-from matplotlib.text import Text
 from pyiem import reference
 from pyiem.database import get_sqlalchemy_conn, sql_helper
 from pyiem.exceptions import NoDataFound
@@ -38,6 +38,9 @@ from pyiem.plot import figure
 from pyiem.plot.use_agg import plt
 
 from iemweb.autoplot import ARG_FEMA, fema_region2states
+
+if TYPE_CHECKING:
+    from matplotlib.text import Text
 
 PDICT = {"yes": "Limit Plot to Year-to-Date", "no": "Plot Entire Year"}
 PDICT2 = {

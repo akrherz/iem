@@ -23,28 +23,25 @@ $screen_name = isset($_SESSION["screen_name"]) ? $_SESSION["screen_name"] : '';
 $channel = isset($_REQUEST["channel"]) ? strtoupper(xssafe($_REQUEST["channel"])) : '';
 $channel = trim($channel);
 
-$rs = pg_prepare($pgconn, "SAVEAUTH", "INSERT into " .
+pg_prepare($pgconn, "SAVEAUTH", "INSERT into " .
     "iembot_twitter_oauth " .
     "(user_id, screen_name, access_token, access_token_secret) " .
     "VALUES ($1,$2,$3,$4)");
-$rs = pg_prepare($pgconn, "UPDATEAUTH", "UPDATE iembot_twitter_oauth " .
+pg_prepare($pgconn, "UPDATEAUTH", "UPDATE iembot_twitter_oauth " .
     "SET access_token = $1, access_token_secret = $2, updated = now(), " .
     "screen_name = $3 WHERE user_id = $4 RETURNING screen_name");
-
-$rs = pg_prepare(
+pg_prepare(
     $pgconn,
     "DELETEAUTH",
     "DELETE from iembot_twitter_oauth where user_id = $1",
 );
-
-$rs = pg_prepare($pgconn, "SELECTSUBS", "SELECT * from " .
+pg_prepare($pgconn, "SELECTSUBS", "SELECT * from " .
     "iembot_twitter_subs WHERE user_id = $1 ORDER by channel ASC");
-$rs = pg_prepare($pgconn, "ADDSUB", "INSERT into " .
+pg_prepare($pgconn, "ADDSUB", "INSERT into " .
     "iembot_twitter_subs(user_id, screen_name, channel) VALUES ($1, $2, $3)");
-$rs = pg_prepare($pgconn, "DELSUB", "DELETE from " .
+pg_prepare($pgconn, "DELSUB", "DELETE from " .
     "iembot_twitter_subs WHERE user_id = $1 and channel = $2");
-
-$rs = pg_prepare(
+pg_prepare(
     $pgconn,
     "DELETESUBS",
     "DELETE from iembot_twitter_subs where user_id = $1",
@@ -148,7 +145,7 @@ if ($screen_name == '') {
 
 $sselect2 = "";
 $rs = pg_execute($pgconn, "SELECTSUBS", array($user_id));
-for ($i = 0; $row = pg_fetch_array($rs); $i++) {
+while ($row = pg_fetch_assoc($rs)) {
     $sselect2 .= sprintf(
         '<tr><th>%s</th><td>%s</td>
         <td><a href="?del&amp;channel=%s">Unsubscribe</a></tr>',

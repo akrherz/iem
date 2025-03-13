@@ -13,7 +13,7 @@ if (!isset($_GET["valid"])) {
     $sql = "SELECT max(valid) as valid from roads_current";
     $rs = pg_query($con, $sql);
 
-    $row = pg_fetch_array($rs, 0);
+    $row = pg_fetch_assoc($rs, 0);
     $ts = new DateTime(substr($row["valid"], 0, 16), new DateTimeZone("America/Chicago"));
 } else {
     $ts = new DateTime($_GET["valid"], new DateTimeZone("America/Chicago"));

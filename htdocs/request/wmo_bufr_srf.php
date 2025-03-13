@@ -136,7 +136,6 @@ srad_1h_j - Solar Radiation 1 hour sum (J/m^2)
 
 <h3>Frequently Asked Questions:</h3>
 
-
 </form>
 EOM;
 $t->render('single.phtml');

@@ -62,7 +62,7 @@ $rs = pg_query($conn, "SELECT ST_astext(ST_transform(simple_geom,4326)) as t, ".
         "WHERE r.segid = b.segid and r.cond_code = c.code ".
         "and b.geom is not null ORDER by type DESC");
 
-for ($i = 0; $row = pg_fetch_assoc($rs); $i++) {
+while ($row = pg_fetch_assoc($rs)) {
     $meat = str_replace("MULTILINESTRING((", "", $row["t"]);
     $meat = str_replace("))", "", $meat);
     $segments = explode("),(", $meat);

@@ -1,6 +1,6 @@
 """Analysis of current MOS temperature bias."""
 
-from datetime import datetime
+from datetime import datetime, timezone
 from typing import Optional
 from zoneinfo import ZoneInfo
 
@@ -28,7 +28,7 @@ def doit(now, model):
     if runtime is None:
         LOG.info("Model %s runtime %s not found, abort", model, now)
         return
-    runtime = runtime.replace(tzinfo=ZoneInfo("UTC"))
+    runtime = runtime.replace(tzinfo=timezone.utc)
 
     # Load up the mos forecast for our given
     mcursor.execute(
@@ -101,7 +101,7 @@ def main(model: str, valid: Optional[datetime]):
     """Go main go"""
     ts = utc()
     if valid is not None:
-        ts = valid.replace(tzinfo=ZoneInfo("UTC"))
+        ts = valid.replace(tzinfo=timezone.utc)
     ts = ts.replace(minute=0, second=0, microsecond=0)
     doit(ts, model)
 

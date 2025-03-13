@@ -10,7 +10,7 @@ from zoneinfo import ZoneInfo
 import click
 import pandas as pd
 from metpy.units import units
-from pyiem.database import get_dbconn, get_sqlalchemy_conn
+from pyiem.database import get_dbconn, get_sqlalchemy_conn, sql_helper
 from pyiem.network import Table as NetworkTable
 from pyiem.util import logger
 
@@ -37,13 +37,14 @@ def run(valid: datetime):
     with get_sqlalchemy_conn("uscrn") as conn:
         # Fetch enough data to cross all the dates
         df = pd.read_sql(
-            "SELECT station, valid at time zone 'UTC' as utc_valid, precip_mm "
-            "from alldata where valid > %s and valid < %s",
+            sql_helper("""
+    SELECT station, valid at time zone 'UTC' as utc_valid, precip_mm
+    from alldata where valid > :sts and valid < :ets"""),
             conn,
-            params=(
-                valid - timedelta(days=1),
-                valid + timedelta(days=2),
-            ),
+            params={
+                "sts": valid - timedelta(days=1),
+                "ets": valid + timedelta(days=2),
+            },
             index_col=None,
         )
     if df.empty:
