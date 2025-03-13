@@ -57,7 +57,7 @@ def rectify_date(dt: dateobj):
     if dt is None:
         with get_sqlalchemy_conn("postgis") as conn:
             # Go get the latest USDM stored in the database!
-            res = conn(sql_helper("SELECT max(valid) from usdm"))
+            res = conn.execute(sql_helper("SELECT max(valid) from usdm"))
             res = res.fetchone()[0]
         return res
 
