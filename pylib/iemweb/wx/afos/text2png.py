@@ -39,7 +39,7 @@ def text_image(content):
     max_height = bbox[3] - bbox[1]
     max_width = font.getlength(max_width_line)
     height = (max_height + 2) * len(lines)  # perfect or a little oversized
-    width = int(round(max_width + 40))  # a little oversized
+    width = round(max_width + 40)  # a little oversized
     # A limit of PIL
     if (height * width) > 90_000_000:
         width, height = 1200, 1000

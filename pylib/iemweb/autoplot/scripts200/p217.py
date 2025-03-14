@@ -6,8 +6,8 @@ by WFO</a> page and click on the SPS product you are interested in.
 
 from zoneinfo import ZoneInfo
 
+import geopandas as gpd
 import httpx
-from geopandas import read_postgis
 from pyiem.database import get_sqlalchemy_conn, sql_helper
 from pyiem.exceptions import NoDataFound
 from pyiem.network import Table as NetworkTable
@@ -67,7 +67,7 @@ def plotter(ctx: dict):
     # Compute a population estimate
     popyear = min(max([int(pid[:4]) - int(pid[:4]) % 5, 2000]), 2020)
     with get_sqlalchemy_conn("postgis") as conn:
-        df = read_postgis(
+        df = gpd.read_postgis(
             sql_helper(
                 """
                 with geopop as (
@@ -88,7 +88,7 @@ def plotter(ctx: dict):
             params={"pid": pid, "segnum": segnum},
             index_col=None,
             geom_col="geom",
-        )
+        )  # type: ignore
     if df.empty:
         raise NoDataFound("SPS Event was not found, sorry.")
     row = df.iloc[0]
@@ -106,7 +106,7 @@ def plotter(ctx: dict):
         # Can a SPS be issued for Fire Weather zones? source = 'fz'
         with get_sqlalchemy_conn("postgis") as conn:
             for source in ["z", "fz", "mz"]:
-                ugcdf = read_postgis(
+                ugcdf = gpd.read_postgis(
                     sql_helper(
                         """
                         SELECT simple_geom, ugc, {gpwcol}
@@ -124,7 +124,7 @@ def plotter(ctx: dict):
                         "source": source,
                     },
                     geom_col="simple_geom",
-                )
+                )  # type: ignore
                 if not ugcdf.empty:
                     if source == "fz":
                         is_fwx = True
