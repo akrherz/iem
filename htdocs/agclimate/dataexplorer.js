@@ -212,11 +212,11 @@ $().ready(() => {
 
     try {
         const tokens = window.location.href.split('#');
-        if (tokens.length == 2) {
+        if (tokens.length === 2) {
             const tokens2 = tokens[1].split("/");
             varname = encodeURIComponent(tokens2[0]);
             $('#varpicker').val(varname);
-            if (tokens2.length == 2) {
+            if (tokens2.length === 2) {
                 currentdt = (new Date(Date.parse(encodeURIComponent(tokens2[1]))));
                 timeChanged = true;
             }

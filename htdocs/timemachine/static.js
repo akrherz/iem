@@ -98,7 +98,7 @@ function update() {
     // adjust the sliders
     const sts = moment(opt.attr('data-sts'));
     const now = moment();
-    const tpl = encodeURIComponent(opt.attr('data-template'));
+    const tpl = opt.attr('data-template');
     // We support %Y %m %d %H %i %y
     const url = tpl.replace(/%Y/g, dt.utc().format('YYYY'))
         .replace(/%y/g, dt.utc().format('YY'))
