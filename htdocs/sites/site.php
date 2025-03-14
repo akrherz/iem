@@ -166,7 +166,7 @@ long term record for the location.</p>
 <tbody>
 EOM;
     }
-    while ($row = pg_fetch_array($result)) {
+    while ($row = pg_fetch_assoc($result)) {
         $threading .= sprintf(
             "<tr><td><a href=\"/sites/site.php?station=%s&network=%s\">%s (%s)</a></td><td>%s</td><td>%s</td></tr>",
             $row["id"],
