@@ -205,7 +205,7 @@ def plotter(ctx: dict):
             zorder=Z_OVERLAY2 + 100,
         )
 
-    ugcs = {k: 1 for k in row["ugcs"]}
+    ugcs = dict.fromkeys(row["ugcs"], 1)
     if not row["geom"].is_empty:
         mp.panels[0].add_geometries(
             [row["geom"]],
