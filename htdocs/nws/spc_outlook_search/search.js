@@ -2,11 +2,6 @@
 /* global $, ol, olSelectLonLat */
 let marker = null;
 
-function text(str) {
-    // XSS
-    return $("<p>").text(str).html();
-}
-
 function workflow() {
     const lon = parseFloat($("#lon").val());
     const lat = parseFloat($("#lat").val());
@@ -58,9 +53,9 @@ function updateMarkerPosition(lon, lat) {
 }
 
 function doOutlook(lon, lat) {
-    const last = $('#last').is(":checked") ? text($("#events").val()) : '0';
-    const day = text($("input[name='day']:checked").val());
-    const cat = text($("input[name='cat']:checked").val());
+    const last = $('#last').is(":checked") ? encodeURIComponent($("#events").val()) : '0';
+    const day = encodeURIComponent($("input[name='day']:checked").val());
+    const cat = encodeURIComponent($("input[name='cat']:checked").val());
     const tbody = $("#outlooks tbody").empty();
     $("#outlook_spinner").show();
     const jsonurl = `/json/spcoutlook.py?lon=${lon}&lat=${lat}&last=${last}&day=${day}&cat=${cat}`;

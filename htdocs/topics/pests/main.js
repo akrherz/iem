@@ -8,11 +8,6 @@ pestData.japanese_beetle = { 'gddbase': 50, 'gddceil': 90 };
 pestData.western_bean_cutworm = { 'gddbase': 38, 'gddceil': 75 };
 pestData.european_corn_borer = { 'gddbase': 50, 'gddceil': 86 };
 
-function text(str) {
-    // XSS
-    return $("<p>").text(str).html();
-}
-
 function hideImageLoad() {
     $('#willload').css('display', 'none');
     const url = $("#theimage").attr("src").replace(".png", "");
@@ -30,17 +25,17 @@ function rectify_start_date(pest) {
         day = "20";
     }
     // Get the year from the edate datepicker
-    const edate = text($("#edate").val());
+    const edate = encodeURIComponent($("#edate").val());
     const year = parseInt(edate.substring(0, 4), 10);
     $("#sdate").val(`${year}-${month}-${day}`);
 }
 
 function updateStationForecast() {
-    const station = text($("select[name='station']").val());
-    const pest = text($("select[name='pest']").val());
+    const station = encodeURIComponent($("select[name='station']").val());
+    const pest = encodeURIComponent($("select[name='pest']").val());
     const opts = pestData[pest];
-    const sdate = text($("#sdate").val());
-    const edate = text($("#edate").val());
+    const sdate = encodeURIComponent($("#sdate").val());
+    const edate = encodeURIComponent($("#edate").val());
     const url = `/json/climodat_dd.py?station=${station}&gddbase=${opts.gddbase}&gddceil=${opts.gddceil}&sdate=${sdate}&edate=${edate}`;
     $.get(url, function (data) {
         $("#station_date").html(`${data.sdate} to ${data.edate}`);
@@ -59,8 +54,8 @@ function updateStationForecast() {
 function updateImage() {
     showProgressBar();
     $("#theimage").attr("src", "/images/pixel.gif");
-    const station = text($("select[name='station']").val());
-    const pest = text($("select[name='pest']").val());
+    const station = encodeURIComponent($("select[name='station']").val());
+    const pest = encodeURIComponent($("select[name='pest']").val());
 
     // Hide all the pinfo containers
     $('.pinfo').css('display', 'none');
@@ -68,9 +63,9 @@ function updateImage() {
     // Show this pest's pinfo container
     $('#' + pest).css('display', 'block');
     const opts = pestData[pest];
-    const sdate = text($("#sdate").val());
-    const edate = text($("#edate").val());
-    let state = text($("select[name='network']").val());
+    const sdate = encodeURIComponent($("#sdate").val());
+    const edate = encodeURIComponent($("#edate").val());
+    let state = encodeURIComponent($("select[name='network']").val());
     state = (state !== undefined) ? state.substring(0, 2) : "IA";
     const imgurl = `/plotting/auto/plot/97/d:sector::sector:${state}::var:gdd_sum::gddbase:${opts.gddbase}::gddceil:${opts.gddceil}::date1:${sdate}::usdm:no::date2:${edate}::p:contour::cmap:RdYlBu_r::c:yes::_r:43.png`;
     $("#theimage").attr("src", imgurl);
@@ -138,7 +133,7 @@ function setupUI() {
     });
 }
 function updatePest() { // skipcq: JS-0128
-    const pest = text($("select[name='pest']").val());
+    const pest = encodeURIComponent($("select[name='pest']").val());
     rectify_start_date(pest);
     updateImage();
 }

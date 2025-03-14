@@ -5,11 +5,6 @@ let map = null;
 let element = null;
 let fontSize = 14;
 
-function text(str){
-    // XSS shim
-    return $("<p>").text(str).html();
-}
-
 function updateURL() {
     const tt = $.datepicker.formatDate("yymmdd",
         $("#datepicker").datepicker('getDate'));
@@ -18,7 +13,7 @@ function updateURL() {
 
  
 function updateMap() {
-    renderattr = text($('#renderattr').val());
+    renderattr = encodeURIComponent($('#renderattr').val());
     vectorLayer.setStyle(vectorLayer.getStyle());
     updateURL();
 }

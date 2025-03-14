@@ -39,10 +39,6 @@ if (!Date.prototype.toISOString) {
 
     }());
 }
-function text(str) {
-    // XSS
-    return $("<p>").text(str).html();
-}
 
 function logic() {
     timeChanged = true;
@@ -218,10 +214,10 @@ $().ready(() => {
         const tokens = window.location.href.split('#');
         if (tokens.length == 2) {
             const tokens2 = tokens[1].split("/");
-            varname = text(tokens2[0]);
+            varname = encodeURIComponent(tokens2[0]);
             $('#varpicker').val(varname);
             if (tokens2.length == 2) {
-                currentdt = (new Date(Date.parse(text(tokens2[1]))));
+                currentdt = (new Date(Date.parse(encodeURIComponent(tokens2[1]))));
                 timeChanged = true;
             }
             gj.setStyle(gj.getStyle());
@@ -252,7 +248,7 @@ function setupUI() {
 
 
     $('#varpicker').change(() => {
-        varname = text($('#varpicker').val());
+        varname = encodeURIComponent($('#varpicker').val());
         gj.setStyle(gj.getStyle());
         updateTitle();
     });

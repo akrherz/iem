@@ -10,15 +10,11 @@ var fontSize = 14;
 function updateURL() {
     window.location.href = `#${physical_code}.${duration}.${days}`;
 }
-function text(str) {
-    // XSS
-    return $("<p>").text(str).html();
-}
 
 function updateMap() {
-    physical_code = text($('#pe').val());
-    duration = text($('#duration').val());
-    days = text($('#days').val());
+    physical_code = encodeURIComponent($('#pe').val());
+    duration = encodeURIComponent($('#duration').val());
+    days = encodeURIComponent($('#days').val());
     map.removeLayer(vectorLayer);
     vectorLayer = makeVectorLayer();
     map.addLayer(vectorLayer);
@@ -156,9 +152,9 @@ $(document).ready(() => {
         // #YYYYmmdd/variable
         tokens = tokens[1].split(".");
         if (tokens.length == 3) {
-            physical_code = text(tokens[0]);
-            duration = text(tokens[1]);
-            days = text(tokens[2]);
+            physical_code = encodeURIComponent(tokens[0]);
+            duration = encodeURIComponent(tokens[1]);
+            days = encodeURIComponent(tokens[2]);
         }
     }
     $(`select[id=pe] option[value=${physical_code}]`).attr("selected", "selected");

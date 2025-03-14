@@ -5,11 +5,6 @@ let map = null;
 let element = null;
 let fontSize = 14;
 
-function text(str) {
-    // XSS
-    return $("<p>").text(str).html();
-}
-
 function updateURL() {
     const tt = $.datepicker.formatDate("yymmdd",
         $("#datepicker").datepicker('getDate'));
@@ -17,7 +12,7 @@ function updateURL() {
 }
 
 function updateMap() {
-    renderattr = text($('#renderattr').val());
+    renderattr = encodeURIComponent($('#renderattr').val());
     vectorLayer.setStyle(vectorLayer.getStyle());
     updateURL();
 }
@@ -192,8 +187,8 @@ $(document).ready(() => {
         // #YYYYmmdd/variable
         tokens = tokens[1].split("/");
         if (tokens.length === 2) {
-            const tpart = text(tokens[0]);
-            renderattr = text(tokens[1]);
+            const tpart = encodeURIComponent(tokens[0]);
+            renderattr = encodeURIComponent(tokens[1]);
             $(`select[id=renderattr] option[value=${renderattr}]`).attr("selected", "selected");
             const dstr = `${tpart.substr(4, 2)}/${tpart.substr(6, 2)}/${tpart.substr(0, 4)}`;
             $("#datepicker").datepicker("setDate", new Date(dstr));

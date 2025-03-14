@@ -90,7 +90,7 @@ jQuery.fn.filterByText = function (textbox, selectSingleMatch) {
 function sortListing(option) {
     $("#stations_in").append($("#stations_in option").remove().sort(function (a, b) {
         let at = $(a).text(), bt = $(b).text();
-        if (option == 'name') {
+        if (option === 'name') {
             at = at.slice(at.indexOf(' ') + 1);
             bt = bt.slice(bt.indexOf(' ') + 1);
         }
@@ -204,10 +204,10 @@ $().ready(() => {
     });
 
     geojsonSource.on('change', () => {
-        if (geojsonSource.getState() == 'ready') {
+        if (geojsonSource.getState() === 'ready') {
             $.each(geojsonSource.getFeatures(), (_index, feat) => {
                 let lbl = `[${feat.get('sid')}] ${feat.get('sname')}`;
-                if (network != 'TAF') {
+                if (network !== 'TAF') {
                     lbl += ` ${feat.get('time_domain')}`;
                 }
                 $('#stations_in').append($('<option/>', {
