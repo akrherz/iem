@@ -11,11 +11,6 @@
     }
 })();
 
-function text(str) {
-    // XSS
-    return $("<p>").text(str).html();
-}
-
 function fetchtimes(findtime) {
     const cid = $('select[name=cid]').val();
     const mydate = $('#realdate').val();
@@ -59,7 +54,7 @@ function fetchtimes(findtime) {
 }
 
 function getimage() {
-    const href = text($('select[name=times]').val());
+    const href = encodeURIComponent($('select[name=times]').val());
     if (href && href != '-1') {
         const fn = href.split('/');
         window.location.href = `#${fn[fn.length - 1]}`;

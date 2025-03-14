@@ -5,7 +5,6 @@ This **replaces** the presently downloaded file.
 Run from hrrr_jobs.py
 """
 
-import logging
 import os
 import subprocess
 import sys
@@ -50,7 +49,7 @@ def is_archive_complete(valid: datetime) -> Optional[bool]:
                 )
                 return grbs.messages == answer
         except Exception as exp:
-            logging.debug(exp)
+            LOG.debug(exp)
     LOG.warning("Archive file %s is corrupt? Aborting...", ppath)
     sys.exit(1)
 

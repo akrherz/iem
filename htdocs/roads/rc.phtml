@@ -13,13 +13,12 @@ $conn = iemdb("postgis");
 $sortcol = isset($_GET["sortcol"]) ? xssafe($_GET["sortcol"]) : "segid";
 $t->refresh = 600;
 
-
 $sql = "SELECT * from roads_current r, roads_base b, roads_conditions c " .
     "WHERE r.segid = b.segid and r.cond_code = c.code";
 $rs = pg_query($conn, $sql);
 
 $obs = array();
-for ($i = 0; $row = pg_fetch_array($rs); $i++) {
+while ($row = pg_fetch_assoc($rs)) {
     $seg = intval($row["segid"]);
     $obs[$seg] = $row;
     $t2 = preg_split('/ to /', $row["longname"]);
@@ -84,7 +83,6 @@ $t->content = <<<EOM
 
 <br>Sorted by: <b>({$vals[$sortcol]})</b>  &nbsp; &nbsp; Click on
  a column to sort it or sort by <a href="{$uri}segid">travel path</a><br>
-
 
 <table class="table table-striped">
 <thead class="sticky">

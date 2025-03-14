@@ -363,9 +363,9 @@ def plotter(ctx: dict):
         for a in ann:
             bbox = a.get_window_extent()
             x0 = int(bbox.x0)
-            x1 = int(math.ceil(bbox.x1))
+            x1 = math.ceil(bbox.x1)
             y0 = int(bbox.y0)
-            y1 = int(math.ceil(bbox.y1))
+            y1 = math.ceil(bbox.y1)
 
             s = np.s_[x0 : x1 + 1, y0 : y1 + 1]
             if np.any(mask[s]):

@@ -64,10 +64,6 @@ const cameraStyle2 = new ol.style.Style({
     })
 });
 
-function text(str) {
-    return $("<p>").text(str).html();
-}
-
 
 function liveShot() {
     if (aqlive) return;
@@ -264,11 +260,11 @@ function parseURI() {
     if (tokens.length === 2) {
         const tokens2 = tokens[1].split("/");
         if (tokens2.length === 1) {
-            cameraID = text(tokens[1]);
+            cameraID = encodeURIComponent(tokens[1]);
         } else {
-            cameraID = text(tokens2[0]);
+            cameraID = encodeURIComponent(tokens2[0]);
             $('#toggle_event_mode button').eq(1).click();
-            $('#dtpicker').data('DateTimePicker').date(moment(text(tokens2[1])));
+            $('#dtpicker').data('DateTimePicker').date(moment(encodeURIComponent(tokens2[1])));
         }
     }
 }

@@ -65,11 +65,6 @@ const stateStyle = new ol.style.Style({
 });
 stateStyle.enabled = true;
 
-function text(str){
-    // XSS
-    return $("<p>").text(str).html();
-}
-
 function make_iem_tms(title, layername, visible, type) {
     return new ol.layer.Tile({
         title,
@@ -247,8 +242,8 @@ function compute_href(uri){
     const tokens = uri.split("/");
     let res = "";
     if (tokens[1] === "plotting"){
-        res = `/plotting/auto/?q=${text(tokens[4])}&`;
-        const tokens2 = text(tokens[5]).split("::");
+        res = `/plotting/auto/?q=${encodeURIComponent(tokens[4])}&`;
+        const tokens2 = encodeURIComponent(tokens[5]).split("::");
         tokens2.forEach((a) => {
             if (a.startsWith("_")){
                 return;
@@ -315,8 +310,8 @@ function loaderClicked(elem){
     const network = $(container).data("network");
     const tpl = $elem.data("url-template");
     const divid = `d${station}${network}`;
-    const month = text(container.find("select[name=month]").val());
-    const type = text(container.find("select[name=type]").val());
+    const month = encodeURIComponent(container.find("select[name=month]").val());
+    const type = encodeURIComponent(container.find("select[name=type]").val());
     const uri = tpl
         .replaceAll("{station}", station)
         .replaceAll("{network}", network)

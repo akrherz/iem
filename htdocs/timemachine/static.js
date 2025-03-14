@@ -2,11 +2,6 @@
 let dt = moment(); // Current application time
 let irealtime = true; // Is our application in realtime mode or not
 
-function text(str) {
-    // XSS
-    return $("<p>").text(str).html();
-}
-
 function readHashLink() {
     const tokens = window.location.href.split("#");
     if (tokens.length !== 2) {
@@ -16,8 +11,8 @@ function readHashLink() {
     if (tokens2.length !== 2) {
         return;
     }
-    const pid = text(tokens2[0]);
-    const stamp = text(tokens2[1]);
+    const pid = encodeURIComponent(tokens2[0]);
+    const stamp = encodeURIComponent(tokens2[1]);
     // parse the timestamp
     if (stamp !== "0") {
         dt = moment.utc(stamp, 'YYYYMMDDHHmm');
@@ -103,7 +98,7 @@ function update() {
     // adjust the sliders
     const sts = moment(opt.attr('data-sts'));
     const now = moment();
-    const tpl = text(opt.attr('data-template'));
+    const tpl = encodeURIComponent(opt.attr('data-template'));
     // We support %Y %m %d %H %i %y
     const url = tpl.replace(/%Y/g, dt.utc().format('YYYY'))
         .replace(/%y/g, dt.utc().format('YY'))
@@ -137,7 +132,7 @@ function update() {
     }
 
     $('#imagedisplay').attr('src', url);
-    window.location.href = `#${text(opt.val())}.${dt.utc().format('YYYYMMDDHHmm')}`;
+    window.location.href = `#${encodeURIComponent(opt.val())}.${dt.utc().format('YYYYMMDDHHmm')}`;
     updateUITimestamp();
 }
 function updateUITimestamp() {

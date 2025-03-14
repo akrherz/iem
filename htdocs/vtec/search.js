@@ -60,11 +60,6 @@ const states = [["AL", "Alabama"], ["AK", "Alaska"], ["AZ", "Arizona"],
         ["SL", "St. Lawrence River"]
 ];
 
-function text(str) {
-    // XSS
-    return $("<p>").text(str).html();
-}
-
 function updateMarkerPosition(lon, lat) {
     $("#lat").val(lat.toFixed(4));
     $("#lon").val(lon.toFixed(4));
@@ -171,10 +166,10 @@ function updateTable2ByPoint(){
 
 function updateTable3(){
     // get currently selected by3 radio button
-    const by = text($("input[name='by3']:checked").val());
-    const single = text($("input[name='single3']:checked").val());
-    const datum = (by === "state") ? text(stateSelect3.val()) : text($("#wfo3").val());
-    const year = text($("#year3").val());
+    const by = encodeURIComponent($("input[name='by3']:checked").val());
+    const single = encodeURIComponent($("input[name='single3']:checked").val());
+    const datum = (by === "state") ? encodeURIComponent(stateSelect3.val()) : encodeURIComponent($("#wfo3").val());
+    const year = encodeURIComponent($("#year3").val());
     const params = {
         wfo: $("#wfo3").val(),
         state: stateSelect3.val(),
@@ -182,8 +177,8 @@ function updateTable3(){
     };
     let href = `#list/${by}/${datum}/${year}`;
     if (single === "single"){
-        params.phenomena = text($("#ph3").val());
-        params.significance = text($("#sig3").val());
+        params.phenomena = encodeURIComponent($("#ph3").val());
+        params.significance = encodeURIComponent($("#sig3").val());
         href += `/${params.phenomena}/${params.significance}`;
     }
     window.location.href = href;
@@ -443,8 +438,8 @@ function process_hash(hash){
     }
     if (tokens2.length === 3 || tokens2.length === 4){
         if (tokens2[0] === 'bypoint'){
-            default_lat = parseFloat(text(tokens2[2]));
-            default_lon = parseFloat(text(tokens2[1]));
+            default_lat = parseFloat(encodeURIComponent(tokens2[2]));
+            default_lon = parseFloat(encodeURIComponent(tokens2[1]));
             if (tokens2.length === 4){
                 try {
                     const buffer = parseFloat(tokens2[3]);
@@ -456,8 +451,8 @@ function process_hash(hash){
             updateMarkerPosition(default_lon, default_lat);
         }
         if (tokens2[0] === 'eventsbypoint'){
-            default_lat = parseFloat(text(tokens2[2]));
-            default_lon = parseFloat(text(tokens2[1]));
+            default_lat = parseFloat(encodeURIComponent(tokens2[2]));
+            default_lon = parseFloat(encodeURIComponent(tokens2[1]));
             if (tokens2.length === 4){
                 try {
                     const buffer = parseFloat(tokens2[3]);
@@ -471,9 +466,9 @@ function process_hash(hash){
         if (tokens2[0] === 'list'){
             const aTag = $("a[name='list']");
             $('html,body').animate({scrollTop: aTag.offset().top},'slow');
-            const by = text(tokens2[1]);
-            const datum = text(tokens2[2]);
-            const year = text(tokens2[3]);
+            const by = encodeURIComponent(tokens2[1]);
+            const datum = encodeURIComponent(tokens2[2]);
+            const year = encodeURIComponent(tokens2[3]);
             $(`input[name='by3'][value='${by}']`).prop("checked", true);
             $("input[name='single3'][value='all']").prop("checked", true);
             $("#year3").val(year);
@@ -489,11 +484,11 @@ function process_hash(hash){
         // list
         const aTag = $("a[name='list']");
         $('html,body').animate({scrollTop: aTag.offset().top},'slow');
-        const by = text(tokens2[1]);
-        const datum = text(tokens2[2]);
-        const year = text(tokens2[3]);
-        const ph = text(tokens2[4]);
-        const sig = text(tokens2[5]);
+        const by = encodeURIComponent(tokens2[1]);
+        const datum = encodeURIComponent(tokens2[2]);
+        const year = encodeURIComponent(tokens2[3]);
+        const ph = encodeURIComponent(tokens2[4]);
+        const sig = encodeURIComponent(tokens2[5]);
         $(`input[name='by3'][value='${by}']`).prop("checked", true);
         $("#year3").val(year);
         $("#ph3").val(ph);

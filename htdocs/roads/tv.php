@@ -11,7 +11,7 @@ $metroview = isset($_GET["metro"]);
 $sql = "SELECT max(valid) as valid from roads_current";
 $rs = pg_query($con, $sql);
 
-$row = pg_fetch_array($rs, 0);
+$row = pg_fetch_assoc($rs, 0);
 $valid = substr($row["valid"], 0, 16);
 
 $map = new MapObj('roads.map');

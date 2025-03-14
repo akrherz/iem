@@ -6,21 +6,16 @@ let azosLayer = null;
 let mrmsLayer = null;
 let cocorahsLayer = null;
 
-function text(str){
-    // XSS
-    return $("<p>").text(str).html();
-}
-
 function parseHashlink(){
     // Figure out what was set from the hash links
     const tokens = window.location.href.split('#');
     if (tokens.length < 2) return;
     const subtokens = tokens[1].split("/");
     if (subtokens.length > 1) {
-        renderattr = text(subtokens[1]);
+        renderattr = encodeURIComponent(subtokens[1]);
         $("#renderattr").val(renderattr);
     }
-    const dt = $.datepicker.parseDate("yymmdd", text(subtokens[0]));
+    const dt = $.datepicker.parseDate("yymmdd", encodeURIComponent(subtokens[0]));
     $("#datepicker").datepicker("setDate", dt);
 }
 
@@ -32,7 +27,7 @@ function updateURL() {
 
  
 function updateMap() {
-    renderattr = text($('#renderattr').val());
+    renderattr = encodeURIComponent($('#renderattr').val());
     coopLayer.setStyle(coopLayer.getStyle());
     azosLayer.setStyle(azosLayer.getStyle());
     updateURL();

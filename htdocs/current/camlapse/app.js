@@ -1,13 +1,9 @@
-/* global flowplayer */
+/* global $, flowplayer */
 
 // https://stackoverflow.com/questions/5202085
 String.prototype.rsplit = function (sep, maxsplit) {
     var split = this.split(sep);
     return maxsplit ? [split.slice(0, -maxsplit).join(sep)].concat(split.slice(-maxsplit)) : split;
-}
-function text(str) {
-    // XSS
-    return $("<p>").text(str).html();
 }
 
 flowplayer((api) => {
@@ -22,8 +18,8 @@ flowplayer((api) => {
 
 function myloader() {
     const ts = new Date();
-    const mycam = text(document.theform.mycam.value);
-    const mylapse = text(document.theform.mylapse.value);
+    const mycam = encodeURIComponent(document.theform.mycam.value);
+    const mylapse = encodeURIComponent(document.theform.mylapse.value);
     window.location.href = `#${mycam}_${mylapse}`;
     const url = `/onsite/lapses/auto/${mycam}_${mylapse}.flv?${ts.getTime()}`;
     const url2 = `/onsite/lapses/auto/${mycam}_${mylapse}.mp4?${ts.getTime()}`;
@@ -37,9 +33,9 @@ function myloader() {
 
 $(() => {
     const tokens = window.location.href.split('#');
-    if (tokens.length == 2) {
+    if (tokens.length === 2) {
         const tokens2 = tokens[1].rsplit('_', 1);
-        if (tokens2.length == 2) {
+        if (tokens2.length === 2) {
             const mycam = tokens2[0];
             document.getElementById('mycam').value = mycam;
             const mylapse = tokens2[1];
