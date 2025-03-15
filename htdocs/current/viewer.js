@@ -9,6 +9,8 @@ let ts = null;
 let aqlive = 0;
 let realtimeMode = true;
 let currentCameraFeature = null;
+let popoverElement = null;
+let popup = null;
 let cameraID = "ISUC-006";
 const ISOFMT = "Y-MM-DD[T]HH:mm:ss[Z]";
 
@@ -323,12 +325,14 @@ function buildUI() {
  * @param feature {ol.Feature}
  */
 function popupSBW(feature) {
-    const issue = moment(feature.get('issue')).format('YYYY-MM-DD HH:mm:ss');
-    const expire = moment(feature.get('expire')).format('YYYY-MM-DD HH:mm:ss');
     const content = `<strong>You clicked:</strong> ${feature.get('wfo')} `
     + `<a target="_new" href="${feature.get('href')}">`
     + `${feature.get('ps')} ${feature.get('eventid')}</a>`;
-    $('#sbwinfo').html(content);
+    const geometry = feature.getGeometry();
+    const coord = geometry.getFirstCoordinate();
+    popup.setPosition(coord);
+    $('#popover-content').html(content);
+    $(element).popover('show');
 }
 
 $().ready(() => {
@@ -391,6 +395,7 @@ $().ready(() => {
         title: 'NEXRAD Base Reflectivity',
         source: getRADARSource()
     });
+
     map = new ol.Map({
         target: 'map',
         layers: [new ol.layer.Tile({
@@ -410,8 +415,22 @@ $().ready(() => {
             zoom: 6
         })
     });
-    const layerSwitcher = new ol.control.LayerSwitcher();
-    map.addControl(layerSwitcher);
+    map.addControl(new ol.control.LayerSwitcher());
+
+    element = document.getElementById('popup');
+
+    popup = new ol.Overlay({
+        element: element,
+        positioning: 'bottom-center',
+        stopEvent: false
+    });
+    map.addOverlay(popup);
+
+    $(element).popover({
+        'placement': 'top',
+        'html': true,
+        content() { return $('#popover-content').html(); }
+    });
 
     map.on('click', (evt) => {
         const feature = map.forEachFeatureAtPixel(evt.pixel,
@@ -419,13 +438,17 @@ $().ready(() => {
                 return feature2;
             }
         );
+        console.log("Clicked on feature", feature);
         if (!feature) {
+            $(element).popover('hide');
             return;
         }
         if (feature.get("cid") === undefined){
+            $(element).popover('hide');
             popupSBW(feature);
             return;
         }
+
         // Remove styling
         if (currentCameraFeature) {
             currentCameraFeature.setStyle(feature.getStyle());
