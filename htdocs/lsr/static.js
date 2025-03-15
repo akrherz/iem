@@ -110,7 +110,7 @@ function make_iem_tms(title, layername, visible, type) {
     })
 }
 
-var sbwLookup = {
+const sbwLookup = {
     "TO": 'red',
     "MA": 'purple',
     "FF": 'green',
@@ -123,7 +123,7 @@ var sbwLookup = {
 };
 
 // Lookup 'table' for styling
-var lsrLookup = {
+const lsrLookup = {
     "0": "icons/tropicalstorm.gif",
     "1": "icons/flood.png",
     "2": "icons/other.png",
@@ -165,7 +165,7 @@ var lsrLookup = {
     "Z": "icons/blizzard.png"
 };
 
-var sbwStyle = [new ol.style.Style({
+const sbwStyle = [new ol.style.Style({
     stroke: new ol.style.Stroke({
         color: '#000',
         width: 4.5
@@ -177,11 +177,11 @@ var sbwStyle = [new ol.style.Style({
     })
 })
 ];
-var lsrStyle = new ol.style.Style({
+const lsrStyle = new ol.style.Style({
     image: new ol.style.Icon({ src: lsrLookup['9'] })
 });
 
-var textStyle = new ol.style.Style({
+const textStyle = new ol.style.Style({
     text: new ol.style.Text({
         font: 'bold 11px "Open Sans", "Arial Unicode MS", "sans-serif"',
         fill: new ol.style.Fill({
@@ -206,7 +206,7 @@ const lsrLayer = new ol.layer.Vector({
     source: new ol.source.Vector({
         format: new ol.format.GeoJSON()
     }),
-    style: (feature) => {
+    style(feature) {
         if (feature.hidden === true) {
             return new ol.style.Style();
         }
@@ -277,7 +277,7 @@ const sbwLayer = new ol.layer.Vector({
         format: new ol.format.GeoJSON()
     }),
     visible: true,
-    style: (feature) => {
+    style(feature) {
         if (feature.hidden === true) {
             return new ol.style.Style();
         }
@@ -429,15 +429,15 @@ function initUI() {
     $("#timeslider").slider({
         min: 0,
         max: 100,
-        create: function () {
+        create() {
             handle.text(nexradBaseTime.local().format("L LT"));
         },
-        slide: function (event, ui) {
+        slide(_event, ui) {
             const dt = moment(nexradBaseTime);
             dt.add(ui.value * 5, 'minutes');
             handle.text(dt.local().format("L LT"));
         },
-        change: function (event, ui) {
+        change(_event, ui) {
             const dt = moment(nexradBaseTime);
             dt.add(ui.value * 5, 'minutes');
             n0q.setSource(getRADARSource(dt));
@@ -471,12 +471,12 @@ function initUI() {
         sbwtable.column(3).search(val ? '^' + val + '$' : '', true, false).draw();
     });
     wfoSelect = $("#wfo").select2({
-        templateSelection: (state) => {
+        templateSelection(state) {
             return state.id;
         }
     });
     stateSelect = $("#state").select2({
-        templateSelection: (state) => {
+        templateSelection(state) {
             return state.id;
         }
     });
@@ -494,7 +494,7 @@ function initUI() {
         step: 1,
         maxDate: '+1970/01/03',
         minDate: '2003/01/01',
-        onClose: () => {
+        onClose() {
             setTimeout(loadData, 0);
         }
     });
@@ -687,7 +687,7 @@ function initUI() {
         columnDefs: [
             {
                 targets: 3,
-                render: (data) => {
+                render(data) {
                     return moment.utc(data).local().format('M/D LT');
                 }
             }
@@ -739,17 +739,17 @@ function initUI() {
         columnDefs: [
             {
                 targets: 3,
-                render: (data) => {
+                render(data) {
                     return data in iemdata.vtec_phenomena ? iemdata.vtec_phenomena[data] : data;
                 }
             }, {
                 targets: 4,
-                render: (data) => {
+                render(data) {
                     return data in iemdata.vtec_significance ? iemdata.vtec_significance[data] : data;
                 }
             }, {
                 targets: 5,
-                render: (_data, type, row) => {
+                render(_data, type, row) {
                     if (type === 'display') {
                         return `<a href="${row.href}">${row.eventid}</a>`;
                     }
@@ -757,7 +757,7 @@ function initUI() {
                 }
             }, {
                 targets: [6, 7],
-                render: (data) => {
+                render(data) {
                     return moment.utc(data).local().format('M/D LT');
                 }
             }
@@ -786,7 +786,7 @@ function updateURL() {
     const by = $("input[type=radio][name=by]:checked").val();
     const wfos = $("#wfo").val();  // null for all or array
     const states = $("#state").val();  // null for all or array
-    var wstr = "";
+    let wstr = "";
     if (wfos !== null && by === "wfo") wstr = wfos.join(",");
     else if (states !== null && by === "state") wstr = states.join(",");
     window.location.href = `#${encodeURIComponent(wstr)}/${sts}/${ets}/${genSettings()}`;
@@ -856,7 +856,7 @@ function loadData() {
         method: "GET",
         url: `/geojson/lsr.geojson?${$.param(opts)}`,
         dataType: 'json',
-        success: (data) => {
+        success(data) {
             if (data.features.length === 10000) {
                 alert("App limit of 10,000 LSRs reached.");
             }
@@ -870,7 +870,7 @@ function loadData() {
         method: "GET",
         url: `/geojson/sbw.geojson?${$.param(opts)}`,
         dataType: 'json',
-        success: (data) => {
+        success(data) {
             sbwLayer.getSource().addFeatures(
                 (new ol.format.GeoJSON({ featureProjection: 'EPSG:3857' })
                 ).readFeatures(data)

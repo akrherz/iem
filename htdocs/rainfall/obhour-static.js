@@ -3,6 +3,7 @@ Ext.namespace('iemdata');
 
 let defaultnetwork = null;
 let gpanel = null;
+let vp = null;
 
 iemdata.networks = [
     ['IA_ASOS', 'Iowa ASOS/AWOS'],
@@ -258,7 +259,7 @@ Ext.onReady(() => {
     });
 
 
-    const vp = new Ext.Viewport({
+    vp = new Ext.Viewport({
         layout: 'border',
         items: [
             new Ext.BoxComponent({
