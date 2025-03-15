@@ -9,7 +9,7 @@ let ts = null;
 let aqlive = 0;
 let realtimeMode = true;
 let currentCameraFeature = null;
-let popoverElement = null;
+let element = null;
 let popup = null;
 let cameraID = "ISUC-006";
 const ISOFMT = "Y-MM-DD[T]HH:mm:ss[Z]";
@@ -438,16 +438,14 @@ $().ready(() => {
                 return feature2;
             }
         );
-        console.log("Clicked on feature", feature);
         if (!feature) {
-            $(element).popover('hide');
             return;
         }
         if (feature.get("cid") === undefined){
-            $(element).popover('hide');
             popupSBW(feature);
             return;
         }
+        $(element).popover('hide');
 
         // Remove styling
         if (currentCameraFeature) {
