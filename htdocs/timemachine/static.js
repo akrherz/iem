@@ -98,9 +98,12 @@ function update() {
     // adjust the sliders
     const sts = moment(opt.attr('data-sts'));
     const now = moment();
-    const tpl = opt.attr('data-template');
+    // workaround XSS issue that encodeURIComponents will break
+    const tpl = document.createElement('p');
+    tpl.textContent = opt.attr('data-template');
+    const templateText = tpl.textContent;
     // We support %Y %m %d %H %i %y
-    const url = tpl.replace(/%Y/g, dt.utc().format('YYYY'))
+    const url = templateText.replace(/%Y/g, dt.utc().format('YYYY'))
         .replace(/%y/g, dt.utc().format('YY'))
         .replace(/%m/g, dt.utc().format('MM'))
         .replace(/%d/g, dt.utc().format('DD'))
