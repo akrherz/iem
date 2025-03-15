@@ -83,7 +83,9 @@ $t->content = <<<EOM
 <br />
 </div><!-- ./col-md-6 -->
 <div class="col-md-6">
-<div style="width: 100%; height: 400px;" id="map"></div>
+<div style="width: 100%; height: 400px;" id="map">
+<div id="popup"></div>
+</div>
 <br />
 <h3 id="radar_title">Application is Loading...</h3>
 
@@ -117,6 +119,11 @@ can sometimes be wrong for various painful reasons.</p>
 
 <p>More information on the IEM's webcam work can be found
     <a href="/projects/webcam.php">here</a>.</p>
+
+<div id="popover-content" style="display: none; width: 300px;">
+  <!-- Hidden div with the popover content -->
+  <p>This is the popover content</p>
+</div>
 
 EOM;
 $t->render('full.phtml');

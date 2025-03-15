@@ -16,10 +16,10 @@ $t->jsextra = <<<EOM
 EOM;
 
 $conn = iemdb("mesosite");
-$rs = pg_query($conn, "SELECT id, name, date(sts) as s from webcams WHERE network = 'IDOT'
-        ORDER by name ASC");
+$rs = pg_query($conn, "SELECT id, name, date(sts) as s from webcams " .
+    "WHERE network = 'IDOT' ORDER by name ASC");
 $sform = "<select name='cid'>";
-for ($i = 0; $row = pg_fetch_assoc($rs); $i++) {
+while ($row = pg_fetch_assoc($rs)) {
     $sform .= sprintf(
         "<option value='%s'>%s -- (%s)</option>\n",
         $row["id"],
@@ -28,7 +28,6 @@ for ($i = 0; $row = pg_fetch_assoc($rs); $i++) {
     );
 }
 $sform .= "</select>";
-
 
 $t->content = <<<EOM
 <h3>Archived Iowa RWIS Webcam Imagery</h3>

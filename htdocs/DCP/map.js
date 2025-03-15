@@ -1,11 +1,11 @@
 /* global $, ol */
-var physical_code = "EP";
-var duration = "D";
-var days = 2;
-var vectorLayer;
-var map;
-var element;
-var fontSize = 14;
+let physical_code = "EP";
+let duration = "D";
+let days = 2;
+let vectorLayer = null;
+let map = null;
+let element = null;
+let fontSize = 14;
 
 function updateURL() {
     window.location.href = `#${physical_code}.${duration}.${days}`;
@@ -72,9 +72,9 @@ function makeVectorLayer() {
         projection: ol.proj.get('EPSG:3857'),
         url: `/api/1/shef_currents.geojson?duration=${duration}&pe=${physical_code}&days=${days}`
     });
-    vs.on('change', function () {
-        if (vs.getFeatures().length == 0) {
-            alert("No Data Found!");
+    vs.on('change', () => {
+        if (vs.getFeatures().length === 0) {
+            alert("No Data Found!");  // skipcq
         }
     });
     return new ol.layer.Vector({
@@ -148,10 +148,10 @@ $(document).ready(() => {
 
     // Figure out if we have anything specified from the window.location
     let tokens = window.location.href.split("#");
-    if (tokens.length == 2) {
+    if (tokens.length === 2) {
         // #YYYYmmdd/variable
         tokens = tokens[1].split(".");
-        if (tokens.length == 3) {
+        if (tokens.length === 3) {
             physical_code = encodeURIComponent(tokens[0]);
             duration = encodeURIComponent(tokens[1]);
             days = encodeURIComponent(tokens[2]);
