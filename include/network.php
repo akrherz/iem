@@ -15,7 +15,11 @@ class NetworkTable
     {
         // Cache the simple cache
         if (is_string($a)){
-            $mckey = sprintf("networkTable_%s_%s", $a, $only_online ? "t" : "f");
+            $mckey = sprintf("networkTable_%s_%s_%s",
+                $a,
+                $force3char ? "t" : "f",
+                $only_online ? "t" : "f",
+            );
             $memcache = MemcacheSingleton::getInstance();
             $result = $memcache->get($mckey);
             if ($result !== FALSE) {
