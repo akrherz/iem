@@ -243,6 +243,7 @@ lsrLayer.addEventListener(TABLE_FILTERED_EVENT, () => {
     lsrLayer.changed();
 });
 lsrLayer.getSource().on('change', () => {
+    lsrtable.rows().remove().draw();
     if (lsrLayer.getSource().isEmpty()) {
         return;
     }
@@ -255,7 +256,6 @@ lsrLayer.getSource().on('change', () => {
             }
         );
     }
-    lsrtable.rows().remove();
     const data = [];
     lsrLayer.getSource().getFeatures().forEach((feat) => {
         const props = feat.getProperties();

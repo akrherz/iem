@@ -21,7 +21,7 @@ $t->jsextra = <<<EOM
 <script src='/vendor/openlayers/{$OL}/ol-layerswitcher.js'></script>
 
 <script type="text/javascript" src="wfos.js"></script>
-<script type="text/javascript" src="static.js"></script>
+<script type="text/javascript" src="static.js?v=2"></script>
 EOM;
 $t->headextra = <<<EOM
 <link rel="stylesheet" href="/vendor/jquery-datatables/{$DT}/datatables.min.css" />
