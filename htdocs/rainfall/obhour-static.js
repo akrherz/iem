@@ -151,8 +151,8 @@ Ext.onReady(() => {
                 updateURI(network);
                 let localDate = sff.findField('df').getValue();
                 const tm = sff.findField('tm').getValue();
-                const d = new Date.parseDate(tm, 'h A');
-                localDate = localDate.add(Date.HOUR, d.format('H'));
+                const dt = new Date.parseDate(tm, 'h A');
+                localDate = localDate.add(Date.HOUR, dt.format('H'));
                 const gmtDate = localDate.add(Date.SECOND, 0 - localDate.format('Z'));
                 Ext.getCmp('precipgrid')
                     .setTitle(`Precip Accumulation valid at ${localDate.format('d M Y h A')}`)
@@ -160,7 +160,7 @@ Ext.onReady(() => {
                     .load({
                         params: `network=${network}&ts=${gmtDate.format('YmdHi')}`
                     });
-                Ext.getCmp('statusField').setText("Grid Loaded at " + new Date());
+                Ext.getCmp('statusField').setText(`Grid Loaded at ${new Date()}`);
                 updateHeaders(localDate);
             } // End of handler
         }],
@@ -258,7 +258,7 @@ Ext.onReady(() => {
     });
 
 
-    new Ext.Viewport({
+    const vp = new Ext.Viewport({
         layout: 'border',
         items: [
             new Ext.BoxComponent({
