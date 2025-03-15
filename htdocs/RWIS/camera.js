@@ -25,7 +25,7 @@ function fetchtimes(findtime) {
             result[0] = $.datepicker.formatDate('M dd ', ts);
             if (ts.getHours() > 12) {
                 result[2] = ts.getHours() - 12;
-            } else if (ts.getHours() == 0) {
+            } else if (ts.getHours() === 0) {
                 result[2] = "12";
             } else {
                 result[2] = ts.getHours();
@@ -42,7 +42,7 @@ function fetchtimes(findtime) {
 
             html += '<option ts="' + data.images[i].valid + '" value="' + data.images[i].href + '">' + ts + '</option>';
         }
-        if (len == 0) {
+        if (len === 0) {
             html += "<option value='-1'>No Images Found!</option>";
         }
         $('select[name=times]').html(html);
@@ -55,7 +55,7 @@ function fetchtimes(findtime) {
 
 function getimage() {
     const href = encodeURIComponent($('select[name=times]').val());
-    if (href && href != '-1') {
+    if (href && href !== '-1') {
         const fn = href.split('/');
         window.location.href = `#${fn[fn.length - 1]}`;
         $('#theimage').attr('src', href);

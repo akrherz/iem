@@ -318,6 +318,19 @@ function buildUI() {
     });
 }
 
+/**
+ * Popup the SBW information
+ * @param feature {ol.Feature}
+ */
+function popupSBW(feature) {
+    const issue = moment(feature.get('issue')).format('YYYY-MM-DD HH:mm:ss');
+    const expire = moment(feature.get('expire')).format('YYYY-MM-DD HH:mm:ss');
+    const content = `<strong>You clicked:</strong> ${feature.get('wfo')} `
+    + `<a target="_new" href="${feature.get('href')}">`
+    + `${feature.get('ps')} ${feature.get('eventid')}</a>`;
+    $('#sbwinfo').html(content);
+}
+
 $().ready(() => {
     buildUI();
 
@@ -328,8 +341,10 @@ $().ready(() => {
             format: new ol.format.GeoJSON()
         }),
         style: (feature) => {
-            const color = sbwLookup[feature.get('phenomena')];
-            if (color === undefined) return sbwStyle;
+            let color = sbwLookup[feature.get('phenomena')];
+            if (color === undefined) {
+                color = '#000000';
+            }
             sbwStyle[1].getStroke().setColor(color);
             return sbwStyle;
         }
@@ -405,6 +420,10 @@ $().ready(() => {
             }
         );
         if (!feature) {
+            return;
+        }
+        if (feature.get("cid") === undefined){
+            popupSBW(feature);
             return;
         }
         // Remove styling

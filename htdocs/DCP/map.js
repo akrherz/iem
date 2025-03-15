@@ -73,7 +73,7 @@ function makeVectorLayer() {
         url: `/api/1/shef_currents.geojson?duration=${duration}&pe=${physical_code}&days=${days}`
     });
     vs.on('change', function () {
-        if (vs.getFeatures().length == 0) {
+        if (vs.getFeatures().length === 0) {
             alert("No Data Found!");
         }
     });
@@ -148,10 +148,10 @@ $(document).ready(() => {
 
     // Figure out if we have anything specified from the window.location
     let tokens = window.location.href.split("#");
-    if (tokens.length == 2) {
+    if (tokens.length === 2) {
         // #YYYYmmdd/variable
         tokens = tokens[1].split(".");
-        if (tokens.length == 3) {
+        if (tokens.length === 3) {
             physical_code = encodeURIComponent(tokens[0]);
             duration = encodeURIComponent(tokens[1]);
             days = encodeURIComponent(tokens[2]);
