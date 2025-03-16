@@ -3,6 +3,11 @@
 // Legacy anchors looked like PIL-LIMIT, now are PIL:(LIMIT * ORDER)
 const NO_DATE_SET = 'No Limit';
 
+function text(str){
+    // XSS shim
+    return $("<p>").text(str).html();
+}
+
 function deal_with_token(token) {
     let tokens2 = token.split(":");
     if (tokens2.length !== 2) {
@@ -15,7 +20,7 @@ function deal_with_token(token) {
     // Last value indicates the order
     const order = (parseInt(tokens2[1], 10) < 0) ? "asc" : "desc";
     const limit = Math.abs(parseInt(tokens2[1], 10));
-    addTab(encodeURIComponent(tokens2[0]), "", "", limit, NO_DATE_SET, NO_DATE_SET, false, order);
+    addTab(text(tokens2[0]), "", "", limit, NO_DATE_SET, NO_DATE_SET, false, order);
 }
 
 function readAnchorTags() {
@@ -23,7 +28,7 @@ function readAnchorTags() {
     if (tokens.length !== 2) {
         return;
     }
-    $(encodeURIComponent(tokens[1]).split(",")).each((_idx, token) => {
+    $(text(tokens[1]).split(",")).each((_idx, token) => {
         deal_with_token(token);
     });
 }
@@ -102,11 +107,11 @@ function addTab(pil, center, ttaaii, limit, sdate, edate, doCookieSave, order) {
     }
     const pos = $(".nav-tabs").children().length;
     $("#thetabs .nav-tabs").append(
-        `<li data-center="${encodeURIComponent(center)}" data-sdate="${encodeURIComponent(sdate)}" ` +
-        `data-edate="${encodeURIComponent(edate)}" data-ttaaii="${encodeURIComponent(ttaaii)}" ` +
-        `data-limit="${encodeURIComponent(limit)}" data-pil="${encodeURIComponent(pil)}" ` +
-        `data-order="${encodeURIComponent(order)}"><a href="#tab${pos}" ` +
-        `data-toggle="tab">${encodeURIComponent(pil)}</a></li>`);
+        `<li data-center="${text(center)}" data-sdate="${text(sdate)}" ` +
+        `data-edate="${text(edate)}" data-ttaaii="${text(ttaaii)}" ` +
+        `data-limit="${text(limit)}" data-pil="${text(pil)}" ` +
+        `data-order="${text(order)}"><a href="#tab${pos}" ` +
+        `data-toggle="tab">${text(pil)}</a></li>`);
     $('.tab-content').append(`<div class="tab-pane" id="tab${pos}"></div>`);
     const newdiv = $(`#tab${pos}`);
     $(`.nav-tabs li:nth-child(${pos + 1}) a`).click();
