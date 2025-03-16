@@ -77,7 +77,7 @@ function updateMap() {
 }
 
 
-var mystyle = new ol.style.Style({
+const mystyle = new ol.style.Style({
     text: new ol.style.Text({
         font: '16px Calibri,sans-serif',
         fill: new ol.style.Fill({
@@ -90,14 +90,14 @@ var mystyle = new ol.style.Style({
         })
     })
 });
-var greenArrow = new ol.style.Style({
+const greenArrow = new ol.style.Style({
     image: new ol.style.Icon({
         crossOrigin: 'anonymous',
         scale: 0.04,
         src: '/images/green_arrow_up.svg',
     })
 });
-var redArrow = new ol.style.Style({
+const redArrow = new ol.style.Style({
     image: new ol.style.Icon({
         crossOrigin: 'anonymous',
         scale: 0.04,
@@ -156,7 +156,7 @@ $().ready(() => {
     });
 
     // Popup showing the position the user clicked
-    var popup = new ol.Overlay({
+    const popup = new ol.Overlay({
         element: document.getElementById('popup')
     });
     map.addOverlay(popup);
