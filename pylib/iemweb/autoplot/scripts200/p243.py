@@ -5,11 +5,14 @@ summary.  You can either produce top 10 totals for a given wfo/state or get the
 top 10 totals per wfo/state over all wfos/states.
 
 <p>If you summarize by a 12z to 12z period, the date of the start of the period
-is shown.</p>
+is shown. If you summarize over a multiple day period, the entire period must
+reside within any calendar date limit.</p>
 
 <p><a href="/plotting/auto/?q=171">Autoplot 171</a> is similar to this app, but
 produces monthly heatmaps.
 """
+
+from datetime import date
 
 import pandas as pd
 import pyiem.nws.vtec as vtec
@@ -78,6 +81,14 @@ def get_description():
             "label": "Define what a day means",
             "name": "day",
         },
+        {
+            "type": "int",
+            "name": "days",
+            "default": 1,
+            "label": "Number of Days to Summarize (1-31)",
+            "gt": 1,
+            "lt": 32,
+        },
         dict(
             type="select",
             name="month",
@@ -116,6 +127,22 @@ def get_description():
         ),
     ]
     return desc
+
+
+def compute_dates(months: list, dt: date, days: int):
+    """Figure out how to represent this period, since the end may out."""
+    end_dt = dt + pd.Timedelta(days=days - 1)
+    default = f"{dt:%d %b} - {end_dt:%d %b %Y}"
+    if end_dt.month in months:
+        return default
+    for _dt in pd.date_range(dt, end_dt):
+        if _dt.month not in months:
+            break
+        if _dt == dt:
+            default = f"{dt:%d %b %Y}"
+        else:
+            default = f"{dt:%d %b} - {_dt:%d %b %Y}"
+    return default
 
 
 def plotter(ctx: dict):
@@ -225,6 +252,7 @@ def plotter(ctx: dict):
             .reset_index()
             .rename(columns={"eventid": "count"})
             .sort_values(["count", "min_date"], ascending=False)
+            .copy()
         )
     else:
         df = (
@@ -233,6 +261,25 @@ def plotter(ctx: dict):
             .count()
             .reset_index()
             .rename(columns={"eventid": "count"})
+            .sort_values(["count", "min_date"], ascending=False)
+            .copy()
+        )
+    if ctx["days"] > 1:
+        # We need to undo the sort and reindex to include all days
+        df = (
+            df.set_index("min_date")
+            .reindex(
+                pd.date_range(
+                    start=daily["min_date"].min(),
+                    end=daily["min_date"].max(),
+                    freq="D",
+                    name="min_date",
+                )
+            )
+            .fillna(0)
+            .rolling(ctx["days"], min_periods=1)
+            .sum()
+            .reset_index()
             .sort_values(["count", "min_date"], ascending=False)
         )
 
@@ -248,6 +295,8 @@ def plotter(ctx: dict):
         title = "NWS Issued by WFO"
     elif opt == "fema":
         title = f"NWS Issued by FEMA {FEMA_REGIONS[ctx['fema']]}"
+    if ctx["days"] > 1:
+        title += f" [{ctx['days']} Day Sum]"
     if month != "all":
         title += f" [{MDICT[month]}]"
     fig = figure(
@@ -276,9 +325,13 @@ def plotter(ctx: dict):
             rank += 1
         lastval = row["count"]
         md = f"{row['min_date']:%d %b %Y}"
+        if ctx["days"] > 1:
+            # Life choices here about what happens when the period crosses
+            # a month boundary
+            md = compute_dates(months, row["min_date"], ctx["days"])
         if opt in ["bystate", "bywfo"]:
             extra = row[opt.replace("by", "")]
-        labels.append(f"#{rank} {extra} {md} :: {row['count']}")
+        labels.append(f"#{rank} {extra} {md} :: {row['count']:.0f}")
     ax.set_yticks(range(1, len(df2.index) + 1))
     ax.set_yticklabels(labels)
     ax.set_ylim(len(df2.index) + 1, 0)
