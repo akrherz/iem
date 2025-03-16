@@ -903,7 +903,7 @@ nopts = [
         "id": 80,
         "label": "Time Duration of a Watch/Warning/Advisory for a UGC/WFO",
     },
-    {"id": 243, "label": "Top 10 VTEC Event Dates by Year/Month"},
+    {"id": 243, "label": "Top 10 VTEC Event Days/Multi-Day by Year/Month"},
     {"id": 101, "label": "Top 25 Most Frequent VTEC Products by Office/NWS"},
     {"id": 259, "label": "UGC Geometry Change Diagnostic"},
     {
