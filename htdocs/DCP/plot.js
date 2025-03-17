@@ -8,7 +8,7 @@ Ext.override(Ext.form.ComboBox, {
         }
         const qe = {
             query: q,
-            forceAll: forceAll,
+            forceAll,
             combo: this,
             cancel: false
         };
@@ -112,7 +112,7 @@ Ext.onReady(() => {
             { name: 'id', mapping: 'id' }
         ]),
         listeners: {
-            load: function (_st, records) {
+            load(_st, records) {
                 if (records.length === 0) {
                     Ext.get('msg').update('Sorry, did not find any variables for this site!');
                 } else {
@@ -236,7 +236,7 @@ Ext.onReady(() => {
 
     }
 
-    new Ext.form.FormPanel({
+    const fp = new Ext.form.FormPanel({
         applyTo: 'myform',
         labelAlign: 'top',
         width: 320,
@@ -252,6 +252,9 @@ Ext.onReady(() => {
         }]
 
     });
+    if (fp === null) {
+        return;
+    }
     /* Check to see if we had something specified on the URL! */
     const tokens = window.location.href.split('#');
     if (tokens.length === 2) {

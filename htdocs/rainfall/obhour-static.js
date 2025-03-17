@@ -119,7 +119,7 @@ Ext.onReady(() => {
     });
 
     const task = {
-        run: function () {
+        run() {
             if (!realtime.checked) return;
             const localDate = new Date();
             dateselector.setValue(localDate);
@@ -130,7 +130,7 @@ Ext.onReady(() => {
             Ext.getCmp('precipgrid').setTitle("Precip Accumulation valid at " + localDate.format('d M Y h A')).getStore().load({
                 params: 'network=' + network + '&ts=' + gmtDate.format('YmdHi')
             });
-            Ext.getCmp('statusField').setText("Grid Loaded at " + new Date());
+            Ext.getCmp('statusField').setText(`Grid Loaded at ${new Date()}`);
             updateHeaders(localDate);
 
         },
@@ -146,7 +146,7 @@ Ext.onReady(() => {
         labelWidth: 0,
         buttons: [{
             text: 'Load Data',
-            handler: () => {
+            handler() {
                 const sff = Ext.getCmp('selectform').getForm();
                 const network = sff.findField('network').getValue();
                 updateURI(network);
@@ -284,5 +284,9 @@ Ext.onReady(() => {
             gpanel
         ]
     });
+    // meh, appease linter
+    if (vp === null) {
+        return;  // skipcq
+    }
 
 });

@@ -106,7 +106,8 @@ $( document ).ready(() => {
         }
         if (tokens2.length > 1){
             // Yuck, this is either a year or a sort by
-            if (tokens2[1].match(/^\d{4}$/)){
+            const year_re = new RegExp(/^\d{4}/);
+            if (year_re.test(tokens2[1])){
                 year = tokens2[1];
                 $("select[name='year']").val(year);
             } else {

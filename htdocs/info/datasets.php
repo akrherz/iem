@@ -27,7 +27,7 @@ function get_text($pageid)
     $Parsedown = new Parsedown();
     $c = $Parsedown->text(file_get_contents($fn));
     $ts = date("F d, Y", filemtime($fn));
-    $s = <<<EOM
+    $content = <<<EOM
 <div class="panel panel-info">
 <div class="panel-body">
 {$c}
@@ -35,7 +35,7 @@ function get_text($pageid)
 <div class="panel-footer">Updated: {$ts} <a href="/info/datasets/{$pageid}.html">Permalink</a></div>
 </div>
 EOM;
-    return $s;
+    return $content;
 }
 
 $content = "";
