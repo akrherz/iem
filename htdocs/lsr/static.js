@@ -213,13 +213,11 @@ const lsrLayer = new ol.layer.Vector({
         const mag = feature.get('magnitude').toString();
         const typ = feature.get('type');
         if (mag !== "") {
-            if (typ === 'S' || typ === 'R' || typ === '5') {
-                textStyle.getText().setText(mag);
-                textStyle.getText().getBackgroundFill().setColor(
-                    lsrTextBackgroundColor[typ]
-                );
-                return textStyle;
-            }
+            textStyle.getText().setText(mag);
+            textStyle.getText().getBackgroundFill().setColor(
+                lsrTextBackgroundColor[typ] || 'black'
+            );
+            return textStyle;
         }
         const url = lsrLookup[typ];
         if (url) {

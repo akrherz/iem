@@ -1,7 +1,7 @@
 """Ingest from NCEI IGRA2 data.
 
-At the moment, am unsure how often the upstream data is updated, so no
-automation is in place.
+Observation seems to indicate that the archive updates every Sunday, so we
+run once per week from RUN_2AM.sh on Mondays.
 """
 
 import os

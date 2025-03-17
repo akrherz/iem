@@ -817,6 +817,10 @@ nopts = [
         "label": "Map of WFO/CWSU Miscellaneous Event Counts (SPS/CWA)",
     },
     {
+        "id": 260,
+        "label": "Map of WFO Watch/Warning/Advisories over a Time Period",
+    },
+    {
         "id": 44,
         "label": "NWS Office Accumulated Watch/Warning/Advisories by Year",
     },
