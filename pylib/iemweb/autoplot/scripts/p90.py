@@ -86,6 +86,9 @@ so if you generate plots for years prior to this date, you may notice
 polygons well outside the County Warning Area bounds.  There was no
 enforcement of these unofficial polygons to stay within CWA bounds.</p>
 
+<p><a href="/plotting/auto/?q=260">Autoplot 260</a> is a similar application,
+but generates simple maps plotting events over a period of time.</p>
+
 <p><strong>This app can be very slow</strong>, so please let it grind
 away as sometimes it will take 3-5 minutes to generate a map :(
 """

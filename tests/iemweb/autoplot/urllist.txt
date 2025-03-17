@@ -392,3 +392,8 @@
 /plotting/auto/plot/257/valid:2024-08-16%201700::shade:yes::csector:southeast::cmap:afmhot_r::_r:t::dpi:100.png
 /plotting/auto/plot/258/valid:2024-08-02::outlook_type:C::lat:42.0::lon:-95.0::_r:t::dpi:100::_cb:1.png
 /plotting/auto/plot/259/ugc:CAZ509::fire:yes::_r:t::dpi:100::_cb:1.png
+/plotting/auto/plot/260/opt:wfo::sts:2024-05-01%200000::ets:2024-05-31%200000::network:WFO::wfo:DMX::csector:midwest::fema:7::c:single::phenomena:FF::significance:W::_r:t::dpi:100::_cb:1.png
+/plotting/auto/plot/260/opt:csector::sts:2024-05-01%200000::ets:2024-05-31%200000::network:WFO::wfo:DMX::csector:NE::fema:7::c:single::phenomena:TO::significance:W::_r:t::dpi:100::_cb:1.png
+/plotting/auto/plot/260/opt:fema::sts:2024-05-01%200000::ets:2024-05-31%200000::network:WFO::wfo:DMX::csector:NE::fema:7::c:single::phenomena:TO::significance:W::_r:t::dpi:100::_cb:1.png
+/plotting/auto/plot/260/opt:data::sts:2024-05-01%200000::ets:2024-05-31%200000::network:WFO::wfo:DMX::csector:NE::fema:7::c:single::phenomena:TO::significance:W::_r:t::dpi:100.png
+/plotting/auto/plot/260/geo:cbw::opt:csector::sts:2018-06-01%200000::ets:2018-06-30%200000::network:WFO::wfo:DMX::csector:IA::fema:7::c:single::phenomena:TO::significance:W::_r:t::dpi:100::_cb:1.png
