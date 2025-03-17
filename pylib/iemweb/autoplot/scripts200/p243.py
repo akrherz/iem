@@ -131,18 +131,18 @@ def get_description():
 
 def compute_dates(months: list, dt: date, days: int):
     """Figure out how to represent this period, since the end may out."""
-    end_dt = dt + pd.Timedelta(days=days - 1)
-    default = f"{dt:%d %b} - {end_dt:%d %b %Y}"
-    if end_dt.month in months:
-        return default
-    for _dt in pd.date_range(dt, end_dt):
+    start_dt = dt - pd.Timedelta(days=days - 1)
+    if start_dt.month in months and dt.month in months:
+        return f"{start_dt:%d %b} - {dt:%d %b %Y}"
+    sts = None
+    ets = None
+    for _dt in pd.date_range(start_dt, dt):
         if _dt.month not in months:
-            break
-        if _dt == dt:
-            default = f"{dt:%d %b %Y}"
-        else:
-            default = f"{dt:%d %b} - {_dt:%d %b %Y}"
-    return default
+            continue
+        if sts is None:
+            sts = _dt
+        ets = _dt
+    return f"{sts:%d %b} - {ets:%d %b %Y}"
 
 
 def plotter(ctx: dict):
