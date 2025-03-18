@@ -39,7 +39,20 @@ $.fn.dataTable.Api.register('row().show()', function() { // need this to work
     // Return row object
     return this;
 });
- 
+
+/**
+ * Replace HTML special characters with their entity equivalents
+ * @param string val 
+ * @returns string converted string
+ */
+function escapeHTML(val) {
+    return val.replace(/&/g, '&amp;')
+              .replace(/</g, '&lt;')
+              .replace(/>/g, '&gt;')
+              .replace(/"/g, '&quot;')
+              .replace(/'/g, '&#039;');
+}
+
 function parse_href() {
     // Figure out how we were called
     let sts = null;
@@ -52,7 +65,7 @@ function parse_href() {
     if (tokens2.length < 2) {
         return;
     }
-    const ids = encodeURIComponent(tokens2[0]).split(",");
+    const ids = escapeHTML(tokens2[0]).split(",");
     if (ids.length > 0){
         if (ids[0].length === 3){
             wfoSelect.val(ids).trigger("change");
@@ -62,8 +75,8 @@ function parse_href() {
         }
     }
     if (tokens2.length > 2) {
-        sts = moment.utc(encodeURIComponent(tokens2[1]), dateFormat1);
-        ets = moment.utc(encodeURIComponent(tokens2[2]), dateFormat1);
+        sts = moment.utc(escapeHTML(tokens2[1]), dateFormat1);
+        ets = moment.utc(escapeHTML(tokens2[2]), dateFormat1);
     }
     else {
         realtime = true;
@@ -787,7 +800,7 @@ function updateURL() {
     let wstr = "";
     if (wfos !== null && by === "wfo") wstr = wfos.join(",");
     else if (states !== null && by === "state") wstr = states.join(",");
-    window.location.href = `#${encodeURIComponent(wstr)}/${sts}/${ets}/${genSettings()}`;
+    window.location.href = `#${escapeHTML(wstr)}/${sts}/${ets}/${genSettings()}`;
 
 }
 function applySettings(opts) {
@@ -834,9 +847,9 @@ function buildOpts() {
         ets
     };
     if (by === "state"){
-        opts.states = (states === null) ? "" : encodeURIComponent(states.join(","));
+        opts.states = (states === null) ? "" : escapeHTML(states.join(","));
     } else {
-        opts.wfos = (wfos === null) ? "" : encodeURIComponent(wfos.join(","));
+        opts.wfos = (wfos === null) ? "" : escapeHTML(wfos.join(","));
     }
     return opts;
 }
@@ -884,13 +897,13 @@ function getShapefileLink(base) {
     const wfos = $("#wfo").val();
     if (wfos && by === "wfo") {
         for (let i = 0; i < wfos.length; i++) {
-            uri += `&wfo=${encodeURIComponent(wfos[i])}`;
+            uri += `&wfo=${escapeHTML(wfos[i])}`;
         }
     }
     const states = $("#state").val();
     if (states && by === "state") {
         for (let i = 0; i < states.length; i++) {
-            uri += `&state=${encodeURIComponent(states[i])}`;
+            uri += `&state=${escapeHTML(states[i])}`;
         }
     }
     const sts = moment($("#sts").val(), 'L LT');

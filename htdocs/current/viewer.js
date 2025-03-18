@@ -66,6 +66,18 @@ const cameraStyle2 = new ol.style.Style({
     })
 });
 
+/**
+ * Replace HTML special characters with their entity equivalents
+ * @param string val 
+ * @returns string converted string
+ */
+function escapeHTML(val) {
+    return val.replace(/&/g, '&amp;')
+              .replace(/</g, '&lt;')
+              .replace(/>/g, '&gt;')
+              .replace(/"/g, '&quot;')
+              .replace(/'/g, '&#039;');
+}
 
 function liveShot() {
     if (aqlive) return;
@@ -262,11 +274,11 @@ function parseURI() {
     if (tokens.length === 2) {
         const tokens2 = tokens[1].split("/");
         if (tokens2.length === 1) {
-            cameraID = encodeURIComponent(tokens[1]);
+            cameraID = escapeHTML(tokens[1]);
         } else {
-            cameraID = encodeURIComponent(tokens2[0]);
+            cameraID = escapeHTML(tokens2[0]);
             $('#toggle_event_mode button').eq(1).click();
-            $('#dtpicker').data('DateTimePicker').date(moment(encodeURIComponent(tokens2[1])));
+            $('#dtpicker').data('DateTimePicker').date(moment(escapeHTML(tokens2[1])));
         }
     }
 }

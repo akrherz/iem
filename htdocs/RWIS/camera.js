@@ -11,6 +11,19 @@
     }
 })();
 
+/**
+ * Replace HTML special characters with their entity equivalents
+ * @param string val 
+ * @returns string converted string
+ */
+function escapeHTML(val) {
+    return val.replace(/&/g, '&amp;')
+              .replace(/</g, '&lt;')
+              .replace(/>/g, '&gt;')
+              .replace(/"/g, '&quot;')
+              .replace(/'/g, '&#039;');
+}
+
 function fetchtimes(findtime) {
     const cid = $('select[name=cid]').val();
     const mydate = $('#realdate').val();
@@ -54,7 +67,7 @@ function fetchtimes(findtime) {
 }
 
 function getimage() {
-    const href = encodeURIComponent($('select[name=times]').val());
+    const href = escapeHTML($('select[name=times]').val());
     if (href && href !== '-1') {
         const fn = href.split('/');
         window.location.href = `#${fn[fn.length - 1]}`;

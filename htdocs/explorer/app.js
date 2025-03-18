@@ -76,6 +76,19 @@ function make_iem_tms(title, layername, visible, type) {
     })
 }
 
+/**
+ * Replace HTML special characters with their entity equivalents
+ * @param string val 
+ * @returns string converted string
+ */
+function escapeHTML(val) {
+    return val.replace(/&/g, '&amp;')
+              .replace(/</g, '&lt;')
+              .replace(/>/g, '&gt;')
+              .replace(/"/g, '&quot;')
+              .replace(/'/g, '&#039;');
+}
+
 function mapClickHandler(event){
     var feature = olMap.forEachFeatureAtPixel(event.pixel,
         (feature2) => {
@@ -242,8 +255,8 @@ function compute_href(uri){
     const tokens = uri.split("/");
     let res = "";
     if (tokens[1] === "plotting"){
-        res = `/plotting/auto/?q=${encodeURIComponent(tokens[4])}&`;
-        const tokens2 = encodeURIComponent(tokens[5]).split("::");
+        res = `/plotting/auto/?q=${escapeHTML(tokens[4])}&`;
+        const tokens2 = escapeHTML(tokens[5]).split("::");
         tokens2.forEach((a) => {
             if (a.startsWith("_")){
                 return;
@@ -310,8 +323,8 @@ function loaderClicked(elem){
     const network = $(container).data("network");
     const tpl = $elem.data("url-template");
     const divid = `d${station}${network}`;
-    const month = encodeURIComponent(container.find("select[name=month]").val());
-    const type = encodeURIComponent(container.find("select[name=type]").val());
+    const month = escapeHTML(container.find("select[name=month]").val());
+    const type = escapeHTML(container.find("select[name=type]").val());
     const uri = tpl
         .replaceAll("{station}", station)
         .replaceAll("{network}", network)

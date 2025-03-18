@@ -8,6 +8,19 @@ let varname = 'tmpf';
 let currentdt = new Date(defaultdt);
 let timeChanged = false;
 
+/**
+ * Replace HTML special characters with their entity equivalents
+ * @param string val 
+ * @returns string converted string
+ */
+function escapeHTML(val) {
+    return val.replace(/&/g, '&amp;')
+              .replace(/</g, '&lt;')
+              .replace(/>/g, '&gt;')
+              .replace(/"/g, '&quot;')
+              .replace(/'/g, '&#039;');
+}
+
 function pad(number) {
     let r = String(number);
     if (r.length === 1) {
@@ -214,10 +227,10 @@ $().ready(() => {
         const tokens = window.location.href.split('#');
         if (tokens.length === 2) {
             const tokens2 = tokens[1].split("/");
-            varname = encodeURIComponent(tokens2[0]);
+            varname = escapeHTML(tokens2[0]);
             $('#varpicker').val(varname);
             if (tokens2.length === 2) {
-                currentdt = (new Date(Date.parse(encodeURIComponent(tokens2[1]))));
+                currentdt = (new Date(Date.parse(escapeHTML(tokens2[1]))));
                 timeChanged = true;
             }
             gj.setStyle(gj.getStyle());
@@ -248,7 +261,7 @@ function setupUI() {
 
 
     $('#varpicker').change(() => {
-        varname = encodeURIComponent($('#varpicker').val());
+        varname = escapeHTML($('#varpicker').val());
         gj.setStyle(gj.getStyle());
         updateTitle();
     });

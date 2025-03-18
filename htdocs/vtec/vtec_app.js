@@ -88,6 +88,19 @@ const lsrLookup = {
     "Z": "/lsr/icons/blizzard.png"
 };
 
+/**
+ * Replace HTML special characters with their entity equivalents
+ * @param string val 
+ * @returns string converted string
+ */
+function escapeHTML(val) {
+    return val.replace(/&/g, '&amp;')
+              .replace(/</g, '&lt;')
+              .replace(/>/g, '&gt;')
+              .replace(/"/g, '&quot;')
+              .replace(/'/g, '&#039;');
+}
+
 const lsrStyle = new ol.style.Style({
     image: new ol.style.Icon({ src: lsrLookup['9'] })
 });
@@ -132,31 +145,31 @@ const textStyle = new ol.style.Style({
 });
 
 function getWFO() {
-    return encodeURIComponent($("#wfo").val());
+    return escapeHTML($("#wfo").val());
 }
 function setWFO(wfo) {
-    $("#wfo").val(encodeURIComponent(wfo));
+    $("#wfo").val(escapeHTML(wfo));
 }
 //----------------
 function getYear() {
     return parseInt($("#year").val(), 10);
 }
 function setYear(year) {
-    $("#year").val(encodeURIComponent(year));
+    $("#year").val(escapeHTML(year));
 }
 //----------------
 function getPhenomena() {
-    return encodeURIComponent($("#phenomena").val());
+    return escapeHTML($("#phenomena").val());
 }
 function setPhenomena(phenomena) {
-    $("#phenomena").val(encodeURIComponent(phenomena));
+    $("#phenomena").val(escapeHTML(phenomena));
 }
 //----------------
 function getSignificance() {
-    return encodeURIComponent($("#significance").val());
+    return escapeHTML($("#significance").val());
 }
 function setSignificance(significance) {
-    $("#significance").val(encodeURIComponent(significance));
+    $("#significance").val(escapeHTML(significance));
 }
 //----------------
 function getETN() {
@@ -275,9 +288,9 @@ function handleURLChange(url) {
         else if (pathSegments[i] === "radar") {
             const radartokens = pathSegments[i+1].split("-");
             if (radartokens.length === 3) {
-                CONFIG.radar = encodeURIComponent(radartokens[0]);
-                CONFIG.radarProduct = encodeURIComponent(radartokens[1]);
-                CONFIG.radarProductTime = moment.utc(encodeURIComponent(radartokens[2]),
+                CONFIG.radar = escapeHTML(radartokens[0]);
+                CONFIG.radarProduct = escapeHTML(radartokens[1]);
+                CONFIG.radarProductTime = moment.utc(escapeHTML(radartokens[2]),
                     'YYYYMMDDHHmm');
             }
         }
@@ -309,7 +322,7 @@ function setUpdateTab(tab) {
     if (tab === CONFIG.activeUpdate) {
         return;
     }
-    CONFIG.activeUpdate = encodeURIComponent(tab);
+    CONFIG.activeUpdate = escapeHTML(tab);
     $(`#text_tabs a[data-update='${tab}']`).click();
 }
 
@@ -322,7 +335,7 @@ function setActiveTab(tab) {
     if (tab === CONFIG.activeTab){
         return;
     }
-    CONFIG.activeTab = encodeURIComponent(tab);
+    CONFIG.activeTab = escapeHTML(tab);
     $(`#thetabs_tabs a[href='#${tab}']`).click();
 }
 
@@ -371,8 +384,8 @@ function getRADARSource() {
         });
     }
     radarTMSLayer.set("title", `@ ${dt.format()}`);
-    const src = encodeURIComponent($("#radarsource").val());
-    const prod = encodeURIComponent($("#radarproduct").val());
+    const src = escapeHTML($("#radarsource").val());
+    const prod = escapeHTML($("#radarproduct").val());
     const url = `/cache/tile.py/1.0.0/ridge::${src}-${prod}-${dt.utc().format('YMMDDHHmm')}/{z}/{x}/{y}.png`;
     return new ol.source.XYZ({
         url
@@ -578,7 +591,7 @@ function updateRADARProducts() {
             if (CONFIG.radarProduct) {
                 $("#radarproduct").val(CONFIG.radarProduct);
             } else {
-                CONFIG.radarProduct = encodeURIComponent($("#radarproduct").val());
+                CONFIG.radarProduct = escapeHTML($("#radarproduct").val());
             }
             // step3
             updateRADARTimeSlider();
@@ -612,7 +625,7 @@ function updateRADARSources() {
             if (CONFIG.radar) {
                 $("#radarsource").val(CONFIG.radar);
             } else {
-                CONFIG.radar = encodeURIComponent($("#radarsource").val());
+                CONFIG.radar = escapeHTML($("#radarsource").val());
             }
             // step2
             updateRADARProducts();
@@ -756,9 +769,9 @@ function loadTabs() {
     $("#sbwhistory").html(`<img src="/GIS/sbw-history.php?vtec=${vstring2}" class="img img-responsive">`);
 
     $("#vtec_label").html(
-        `${getYear()} ${encodeURIComponent($("#wfo option:selected").text())}
-            ${encodeURIComponent($("#phenomena option:selected").text())}
-            ${encodeURIComponent($("#significance option:selected").text())}
+        `${getYear()} ${escapeHTML($("#wfo option:selected").text())}
+            ${escapeHTML($("#phenomena option:selected").text())}
+            ${escapeHTML($("#significance option:selected").text())}
             Number ${getETN()}`
     );
     $.ajax({
@@ -998,14 +1011,14 @@ function buildUI() {
         }
     });
     $("#radarsource").change(() => {
-        CONFIG.radar = encodeURIComponent($("#radarsource").val());
+        CONFIG.radar = escapeHTML($("#radarsource").val());
         updateRADARProducts();
         updateURL();
     });
     $("#radarproduct").change(() => {
         // we can safely(??) assume that radartimes does not update when we
         // switch products
-        CONFIG.radarProduct = encodeURIComponent($("#radarproduct").val());
+        CONFIG.radarProduct = escapeHTML($("#radarproduct").val());
         radarTMSLayer.setSource(getRADARSource());
         updateURL();
     });
