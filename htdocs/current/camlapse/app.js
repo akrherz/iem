@@ -6,6 +6,19 @@ String.prototype.rsplit = function (sep, maxsplit) {
     return maxsplit ? [split.slice(0, -maxsplit).join(sep)].concat(split.slice(-maxsplit)) : split;
 }
 
+/**
+ * Replace HTML special characters with their entity equivalents
+ * @param string val 
+ * @returns string converted string
+ */
+function escapeHTML(val) {
+    return val.replace(/&/g, '&amp;')
+              .replace(/</g, '&lt;')
+              .replace(/>/g, '&gt;')
+              .replace(/"/g, '&quot;')
+              .replace(/'/g, '&#039;');
+}
+
 flowplayer((api) => {
     api.on("error", (_e, api2, err) => {
         if (err.code === 4) { // Video file not found
@@ -18,8 +31,8 @@ flowplayer((api) => {
 
 function myloader() {
     const ts = new Date();
-    const mycam = encodeURIComponent(document.theform.mycam.value);
-    const mylapse = encodeURIComponent(document.theform.mylapse.value);
+    const mycam = escapeHTML(document.theform.mycam.value);
+    const mylapse = escapeHTML(document.theform.mylapse.value);
     window.location.href = `#${mycam}_${mylapse}`;
     const url = `/onsite/lapses/auto/${mycam}_${mylapse}.flv?${ts.getTime()}`;
     const url2 = `/onsite/lapses/auto/${mycam}_${mylapse}.mp4?${ts.getTime()}`;

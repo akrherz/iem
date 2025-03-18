@@ -5,6 +5,19 @@ let map = null;
 let element = null;
 let fontSize = 14;
 
+/**
+ * Replace HTML special characters with their entity equivalents
+ * @param string val 
+ * @returns string converted string
+ */
+function escapeHTML(val) {
+    return val.replace(/&/g, '&amp;')
+              .replace(/</g, '&lt;')
+              .replace(/>/g, '&gt;')
+              .replace(/"/g, '&quot;')
+              .replace(/'/g, '&#039;');
+}
+
 function updateURL() {
     const tt = $.datepicker.formatDate("yymmdd",
         $("#datepicker").datepicker('getDate'));
@@ -12,7 +25,7 @@ function updateURL() {
 }
 
 function updateMap() {
-    renderattr = encodeURIComponent($('#renderattr').val());
+    renderattr = escapeHTML($('#renderattr').val());
     vectorLayer.setStyle(vectorLayer.getStyle());
     updateURL();
 }
@@ -187,8 +200,8 @@ $(document).ready(() => {
         // #YYYYmmdd/variable
         tokens = tokens[1].split("/");
         if (tokens.length === 2) {
-            const tpart = encodeURIComponent(tokens[0]);
-            renderattr = encodeURIComponent(tokens[1]);
+            const tpart = escapeHTML(tokens[0]);
+            renderattr = escapeHTML(tokens[1]);
             $(`select[id=renderattr] option[value=${renderattr}]`).attr("selected", "selected");
             const dstr = `${tpart.substr(4, 2)}/${tpart.substr(6, 2)}/${tpart.substr(0, 4)}`;
             $("#datepicker").datepicker("setDate", new Date(dstr));

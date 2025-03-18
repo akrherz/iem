@@ -2,6 +2,19 @@
 let dt = moment(); // Current application time
 let irealtime = true; // Is our application in realtime mode or not
 
+/**
+ * Replace HTML special characters with their entity equivalents
+ * @param string val 
+ * @returns string converted string
+ */
+function escapeHTML(val) {
+    return val.replace(/&/g, '&amp;')
+              .replace(/</g, '&lt;')
+              .replace(/>/g, '&gt;')
+              .replace(/"/g, '&quot;')
+              .replace(/'/g, '&#039;');
+}
+
 function readHashLink() {
     const tokens = window.location.href.split("#");
     if (tokens.length !== 2) {
@@ -11,8 +24,8 @@ function readHashLink() {
     if (tokens2.length !== 2) {
         return;
     }
-    const pid = encodeURIComponent(tokens2[0]);
-    const stamp = encodeURIComponent(tokens2[1]);
+    const pid = escapeHTML(tokens2[0]);
+    const stamp = escapeHTML(tokens2[1]);
     // parse the timestamp
     if (stamp !== "0") {
         dt = moment.utc(stamp, 'YYYYMMDDHHmm');
@@ -98,7 +111,7 @@ function update() {
     // adjust the sliders
     const sts = moment(opt.attr('data-sts'));
     const now = moment();
-    // workaround XSS issue that encodeURIComponents will break
+    // workaround XSS issue that escapeHTMLs will break
     const tpl = document.createElement('p');
     tpl.textContent = opt.attr('data-template');
     const templateText = tpl.textContent;
@@ -135,7 +148,7 @@ function update() {
     }
 
     $('#imagedisplay').attr('src', url);
-    window.location.href = `#${encodeURIComponent(opt.val())}.${dt.utc().format('YYYYMMDDHHmm')}`;
+    window.location.href = `#${escapeHTML(opt.val())}.${dt.utc().format('YYYYMMDDHHmm')}`;
     updateUITimestamp();
 }
 function updateUITimestamp() {

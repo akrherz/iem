@@ -7,14 +7,27 @@ let map = null;
 let element = null;
 let fontSize = 14;
 
+/**
+ * Replace HTML special characters with their entity equivalents
+ * @param string val 
+ * @returns string converted string
+ */
+function escapeHTML(val) {
+    return val.replace(/&/g, '&amp;')
+              .replace(/</g, '&lt;')
+              .replace(/>/g, '&gt;')
+              .replace(/"/g, '&quot;')
+              .replace(/'/g, '&#039;');
+}
+
 function updateURL() {
     window.location.href = `#${physical_code}.${duration}.${days}`;
 }
 
 function updateMap() {
-    physical_code = encodeURIComponent($('#pe').val());
-    duration = encodeURIComponent($('#duration').val());
-    days = encodeURIComponent($('#days').val());
+    physical_code = escapeHTML($('#pe').val());
+    duration = escapeHTML($('#duration').val());
+    days = escapeHTML($('#days').val());
     map.removeLayer(vectorLayer);
     vectorLayer = makeVectorLayer();
     map.addLayer(vectorLayer);
@@ -152,9 +165,9 @@ $(document).ready(() => {
         // #YYYYmmdd/variable
         tokens = tokens[1].split(".");
         if (tokens.length === 3) {
-            physical_code = encodeURIComponent(tokens[0]);
-            duration = encodeURIComponent(tokens[1]);
-            days = encodeURIComponent(tokens[2]);
+            physical_code = escapeHTML(tokens[0]);
+            duration = escapeHTML(tokens[1]);
+            days = escapeHTML(tokens[2]);
         }
     }
     $(`select[id=pe] option[value=${physical_code}]`).attr("selected", "selected");

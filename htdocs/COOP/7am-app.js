@@ -6,16 +6,29 @@ let azosLayer = null;
 let mrmsLayer = null;
 let cocorahsLayer = null;
 
+/**
+ * Replace HTML special characters with their entity equivalents
+ * @param string val 
+ * @returns string converted string
+ */
+function escapeHTML(val) {
+    return val.replace(/&/g, '&amp;')
+              .replace(/</g, '&lt;')
+              .replace(/>/g, '&gt;')
+              .replace(/"/g, '&quot;')
+              .replace(/'/g, '&#039;');
+}
+
 function parseHashlink(){
     // Figure out what was set from the hash links
     const tokens = window.location.href.split('#');
     if (tokens.length < 2) return;
     const subtokens = tokens[1].split("/");
     if (subtokens.length > 1) {
-        renderattr = encodeURIComponent(subtokens[1]);
+        renderattr = escapeHTML(subtokens[1]);
         $("#renderattr").val(renderattr);
     }
-    const dt = $.datepicker.parseDate("yymmdd", encodeURIComponent(subtokens[0]));
+    const dt = $.datepicker.parseDate("yymmdd", escapeHTML(subtokens[0]));
     $("#datepicker").datepicker("setDate", dt);
 }
 
@@ -27,7 +40,7 @@ function updateURL() {
 
  
 function updateMap() {
-    renderattr = encodeURIComponent($('#renderattr').val());
+    renderattr = escapeHTML($('#renderattr').val());
     coopLayer.setStyle(coopLayer.getStyle());
     azosLayer.setStyle(azosLayer.getStyle());
     updateURL();
