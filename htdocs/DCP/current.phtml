@@ -37,26 +37,37 @@ if (!array_key_exists($sortcol, $cols)) {
     xssafe("</script>");
 }
 
+$stname = uniqid();
 $rs = pg_prepare(
     $pgconn,
-    "SELECT",
+    $stname,
     "select c.*, s.name, " .
         "c.valid at time zone s.tzname as localvalid " .
         "from current_shef c JOIN stations s " .
-        "on (c.station = s.id) where s.network = $1"
+        "on (c.station = s.id) where s.network = $1 and c.value > -1000 ".
+        "order by valid desc"
 );
-$rs = pg_execute($pgconn, "SELECT", array($network));
+if ($rs === FALSE){
+    die("Failed to prepare query");
+}
+$rs = pg_execute($pgconn, $stname, array($network));
 
 $obs = array();
-for ($i = 0; $row = pg_fetch_assoc($rs); $i++) {
+while ($row = pg_fetch_assoc($rs)) {
     $datakey = sprintf(
         "%s%s%s",
         $row["physical_code"],
         $row["duration"],
         $row["extremum"]
     );
+    $lvalid = strtotime($row["localvalid"]);
+    if (!array_key_exists($row['station'], $obs)) {
+        $obs[$row['station']] = array("valid" => $lvalid);
+    }
+    if ($lvalid != $obs[$row['station']]['valid']) {
+        continue;
+    }
     $obs[$row['station']][$datakey] = $row["value"];
-    $obs[$row['station']]['valid'] = strtotime($row["localvalid"]);
     $obs[$row['station']]['name'] = $row["name"];
 }
 $final = aSortBySecondIndex($obs, $sortcol, "desc");
@@ -102,10 +113,12 @@ foreach ($final as $site => $value) {
     <td>" . $value["name"] . "</font></td>";
     $content .= "<td ";
     $tdiff = $now - $value["valid"];
+    $dtfmt = "d M h:i A";
     if ($tdiff > (6 * 3600)) {
+        $dtfmt = "d M Y h:i A";
         $content .= 'bgcolor="red"';
     }
-    $content .= ">" . date("d M h:i A", $value["valid"]) . "</td>";
+    $content .= ">" . date($dtfmt, $value["valid"]) . "</td>";
 
     if (array_key_exists('HGIZ', $value)) {
         $content .= sprintf("<td>%s</td>", $value["HGIZ"]);

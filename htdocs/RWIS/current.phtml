@@ -3,8 +3,8 @@ require_once "../../config/settings.inc.php";
 define("IEM_APPID", 83);
 require_once "../../include/myview.php";
 require_once "../../include/mlib.php";
-require_once "../../include/database.inc.php";
 require_once "../../include/forms.php";
+require_once "../../include/imagemaps.php";
 
 $t = new MyView();
 $t->current_network = 'RWIS';
@@ -12,7 +12,6 @@ $sortcol = isset($_GET["sortcol"]) ? xssafe($_GET["sortcol"]) : "ts";
 $network = isset($_GET['network']) ? xssafe($_GET['network']) : 'IA_RWIS';
 $t->title = "RWIS Sortable Currents";
 $t->refresh = 600;
-$mesosite = iemdb('mesosite');
 
 $vals = array(
     "tmpf" => "Air Temperature [F]", "dwpf" => "Dew Point Temp [F]",
@@ -24,22 +23,7 @@ $vals = array(
     "sid" => "Station ID", "relh" => "Relative Humidity", "vsby" => "Visibility"
 );
 
-$nselect = "<select name=\"network\">";
-$rs = pg_query($mesosite, "SELECT id, name from networks where id ~* 'RWIS' ORDER by name ASC");
-for ($i = 0; $row = pg_fetch_assoc($rs); $i++) {
-    $sel = '';
-    if ($network == $row["id"]) {
-        $sel = " selected='SELECTED'";
-    }
-    $nselect .= sprintf(
-        "<option value='%s'%s>%s</option>\n",
-        $row["id"],
-        $sel,
-        $row["name"]
-    );
-}
-$nselect .= "</select>";
-
+$nselect = selectNetworkType("RWIS", $network);
 $uri = "current.phtml?network={$network}&sortcol=";
 
 $mydata = array();
@@ -158,10 +142,6 @@ foreach ($skippedStations as $key => $parts) {
 }
 
 $content = <<<EOM
-<ol class="breadcrumb">
- <li><a href="/RWIS/">RWIS Network</a></li>
- <li class="active">Sortable Currents (sorted by: <b>{$vals[$sortcol]}</b>)</li>
-</ol>
 <form method="GET" action="current.phtml">
 {$nselect}
 <input type="submit" value="Show State">

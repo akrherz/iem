@@ -1,12 +1,12 @@
 <?php
 require_once "../../config/settings.inc.php";
 define("IEM_APPID", 7);
-
 require_once "../../include/myview.php";
 require_once "../../include/mlib.php";
 require_once "../../include/forms.php";
 require_once "../../include/network.php";
 require_once "../../include/database.inc.php";
+require_once "../../include/imagemaps.php";
 
 $network = get_str404("network", 'IA_ASOS', 10);
 $metar = isset($_GET['metar']) ? xssafe($_GET["metar"]) : "no";
@@ -110,21 +110,7 @@ if ($format == 'csv') {
     die();
 }
 
-$nselect = '<select class="iemselect2" name="network">';
-$rs = pg_query($mesosite, "SELECT id, name from networks where id ~* 'ASOS' ORDER by name ASC");
-for ($i = 0; $row = pg_fetch_assoc($rs); $i++) {
-    $sel = '';
-    if ($network == $row["id"]) {
-        $sel = " selected='SELECTED'";
-    }
-    $nselect .= sprintf(
-        "<option value='%s'%s>%s</option>\n",
-        $row["id"],
-        $sel,
-        $row["name"]
-    );
-}
-$nselect .= "</select>";
+$nselect = selectNetworkType("ASOS", $network);
 
 $ar = array(
     "no" => "No",
@@ -173,7 +159,7 @@ on this network.
 
 <form method="GET" action="/my/current.phtml">
 
-<table class="table table-striped table-condensed table-bordered">
+<table class="table table-striped table-condensed">
 <thead class="sticky">
 <tr>
   <th rowspan="2">ADD:</th>
@@ -268,7 +254,13 @@ foreach ($finalA as $key => $parts) {
     }
     $row .= "</td>";
     $row .= "<td>" . drct2txt($parts["drct"]) . "</td><td>";
-    if (isset($parts["peak_ts"])) $row .=  $parts["peak"] . " @ " . $parts["peak_ts"]->format("h:i A");
+    if (isset($parts["peak_ts"])) {
+        $row .= sprintf(
+            "%s @ %s",
+            myround($parts["peak"],0),
+            $parts["peak_ts"]->format("h:i A"),
+        );
+    }
     $text_pday = $parts['pday'] == -99 ? 'M' : $parts['pday'];
     $row .= "</td><td>{$phour}</td>
             <td>{$pday}</td>

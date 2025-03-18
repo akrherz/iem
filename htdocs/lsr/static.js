@@ -418,7 +418,7 @@ function copyToClipboard(ttext, msg) {
     $temp.val(ttext).select();
     document.execCommand("copy");
     $temp.remove();
-    alert(msg);
+    alert(msg);  // skipcq
 }
  
 function initUI() {
@@ -856,7 +856,7 @@ function loadData() {
         dataType: 'json',
         success(data) {
             if (data.features.length === 10000) {
-                alert("App limit of 10,000 LSRs reached.");
+                alert("App limit of 10,000 LSRs reached.");  // skipcq
             }
             lsrLayer.getSource().addFeatures(
                 (new ol.format.GeoJSON({ featureProjection: 'EPSG:3857' })

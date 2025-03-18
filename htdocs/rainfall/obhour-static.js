@@ -3,7 +3,6 @@ Ext.namespace('iemdata');
 
 let defaultnetwork = null;
 let gpanel = null;
-let vp = null;
 
 iemdata.networks = [
     ['IA_ASOS', 'Iowa ASOS/AWOS'],
@@ -259,7 +258,7 @@ Ext.onReady(() => {
     });
 
 
-    vp = new Ext.Viewport({
+    const viewport = new Ext.Viewport({
         layout: 'border',
         items: [
             new Ext.BoxComponent({
@@ -284,9 +283,6 @@ Ext.onReady(() => {
             gpanel
         ]
     });
-    // meh, appease linter
-    if (vp === null) {
-        return;  // skipcq
-    }
+    viewport.linters_are_painful = true;
 
 });
