@@ -5,7 +5,7 @@ from datetime import datetime
 
 import numpy as np
 from pyiem.grid.nav import get_nav
-from pyiem.iemre import get_dailyc_ncname
+from pyiem.iemre import DOMAINS, get_dailyc_ncname
 from pyiem.util import logger, ncopen
 
 LOG = logger()
@@ -112,7 +112,7 @@ def init_year(domain: str, ts: datetime):
 
 def main():
     """Go Main"""
-    for domain in ["", "china", "europe"]:
+    for domain in DOMAINS:
         init_year(domain, datetime(2000, 1, 1))
 
 

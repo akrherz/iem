@@ -13,6 +13,7 @@ python update_daily_srad.py --date=$(date --date '1 day ago' +'%Y-%m-%d')
 # Need this done so that IEMRE daily grids are there for DEP
 cd ../iemre
 python daily_analysis.py --date=$(date --date '1 day ago' +'%Y-%m-%d')
+python daily_analysis.py --date=$(date --date '1 day ago' +'%Y-%m-%d') --domain=sa
 
 cd ../asos
 python adjust_report_type.py --date=$(date -u --date '1 day ago' +'%Y-%m-%d')

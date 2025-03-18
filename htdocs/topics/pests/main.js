@@ -50,7 +50,7 @@ function updateStationForecast() {
     const sdate = escapeHTML($("#sdate").val());
     const edate = escapeHTML($("#edate").val());
     const url = `/json/climodat_dd.py?station=${station}&gddbase=${opts.gddbase}&gddceil=${opts.gddceil}&sdate=${sdate}&edate=${edate}`;
-    $.get(url, function (data) {
+    $.get(url, (data) => {
         $("#station_date").html(`${data.sdate} to ${data.edate}`);
         $("#station_accum").html(data.accum.toFixed(1));
 

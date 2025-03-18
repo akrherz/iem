@@ -6,7 +6,7 @@ from datetime import datetime
 import click
 import numpy as np
 from pyiem.grid.nav import get_nav
-from pyiem.iemre import get_hourly_ncname
+from pyiem.iemre import DOMAINS, get_hourly_ncname
 from pyiem.util import logger, ncopen, utc
 
 LOG = logger()
@@ -176,7 +176,7 @@ def init_year(ts: datetime, domain: str, ci: bool) -> None:
 @click.option("--ci", is_flag=True, help="Run in CI mode")
 def main(year: int, ci: bool) -> None:
     """Go Main Go"""
-    for domain in ["", "china", "europe"]:
+    for domain in DOMAINS:
         init_year(datetime(year, 1, 1), domain, ci)
         if ci:
             with ncopen(get_hourly_ncname(year, domain), "a") as nc:

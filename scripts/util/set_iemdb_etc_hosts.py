@@ -23,6 +23,7 @@ LOOKUP = {
     "-iemre": IPS[DB2],
     "-iemre_china": IPS[DB2],
     "-iemre_europe": IPS[DB2],
+    "-iemre_sa": IPS[DB2],
     "-isuag": IPS[DB1],
     "-kcci": IPS[DB1],
     "-mesonet": IPS[DB1],

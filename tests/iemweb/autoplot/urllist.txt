@@ -96,6 +96,7 @@
 /plotting/auto/plot/86/csector:AK::var:wind_speed::ptype:c::date:2024-01-01::cmap:magma::_r:t::dpi:100.png
 /plotting/auto/plot/86/csector:IN::var:wind_speed::ptype:c::date:2024-01-01::cmap:magma::_r:t::dpi:100.png
 /plotting/auto/plot/86/domain:europe::csector:IN::var:rsds::ptype:c::date:2024-01-01::cmap:magma::_r:t::dpi:100.png
+/plotting/auto/plot/86/domain:sa::csector:IN::var:rsds::ptype:c::date:2024-01-01::cmap:magma::_r:t::dpi:100.png
 /plotting/auto/plot/86/csector:midwest::var:p01d_12z::ptype:c::date:2023-01-01::cmap:magma::_r:43::dpi:100.png
 /plotting/auto/plot/86/csector:midwest::var:p01d_12z::ptype:g::date:2023-01-01::cmap:magma::_r:43::dpi:100.png
 /plotting/auto/plot/86/csector:TN::var:low_tmpk_12z::ptype:c::date:2023-01-01::clip:yes::cmap:magma::_r:t::dpi:100.png
