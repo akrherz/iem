@@ -46,7 +46,7 @@ $tzdict = array(
     "PST" => 28800
 );
 if (!array_key_exists($tz, $tzdict)) {
-    xssafe("<script>");
+    xssafe("<tag>");
 }
 
 $tzoff = $tzdict[$tz];
@@ -67,7 +67,7 @@ $frames = get_int404("frames", 10);
 $warngeo = isset($_GET["warngeo"]) ? xssafe($_GET["warngeo"]) : "both";
 $ar = explode("x", $imgsize);
 if (count($ar) != 2) {
-    xssafe("<script>");
+    xssafe("<tag>");
 }
 $width = $ar[0];
 $height = $ar[1];

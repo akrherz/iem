@@ -2,11 +2,11 @@
 require_once "../../../../config/settings.inc.php";
 define("IEM_APPID", 46);
 require_once "../../../../include/myview.php";
-$t = new MyView();
-
 require_once "../../../../include/iemmap.php";
 require_once "../../../../include/database.inc.php";
 require_once "../../../../include/forms.php";
+
+$t = new MyView();
 
 $state = isset($_GET['state']) ? xssafe($_GET['state']) : '';
 $radar = isset($_GET['radar']) ? xssafe($_GET['radar']) : 1;
@@ -87,13 +87,13 @@ function click2geo($oextents, $click_x, $click_y, $imgsz_x, $imgsz_y, $zoom)
     $n_ll_y = $centerY - (($dy * $zoom) * ($imgsz_y / 2.00));
     $n_ur_y = $centerY + (($dy * $zoom) * ($imgsz_y / 2.00));
 
-    return $n_ll_x . "," . $n_ll_y . "," . $n_ur_x . "," . $n_ur_y;
+    return "{$n_ll_x},{$n_ll_y},{$n_ur_x},{$n_ur_y}";
 }
 if (isset($_GET['img_x'])) {
     $extents = click2geo(
         $oextents,
-        $_GET['img_x'],
-        $_GET['img_y'],
+        xssafe($_GET['img_x']),
+        xssafe($_GET['img_y']),
         $imgwidth,
         $imgheight,
         $zoom
