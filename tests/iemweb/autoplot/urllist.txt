@@ -398,3 +398,4 @@
 /plotting/auto/plot/260/opt:fema::sts:2024-05-01%200000::ets:2024-05-31%200000::network:WFO::wfo:DMX::csector:NE::fema:7::c:single::phenomena:TO::significance:W::_r:t::dpi:100::_cb:1.png
 /plotting/auto/plot/260/opt:data::sts:2024-05-01%200000::ets:2024-05-31%200000::network:WFO::wfo:DMX::csector:NE::fema:7::c:single::phenomena:TO::significance:W::_r:t::dpi:100.png
 /plotting/auto/plot/260/geo:cbw::opt:csector::sts:2018-06-01%200000::ets:2018-06-30%200000::network:WFO::wfo:DMX::csector:IA::fema:7::c:single::phenomena:TO::significance:W::_r:t::dpi:100::_cb:1.png
+/plotting/auto/plot/260/geo:cbw::opt:wfo::sts:2024-05-01%200000::ets:2024-05-30%200000::network:WFO::wfo:DMX::csector:IA::fema:7::c:single::phenomena:TO::significance:W::_r:t::dpi:100.png

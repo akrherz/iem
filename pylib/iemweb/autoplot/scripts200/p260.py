@@ -163,10 +163,10 @@ def plotter(ctx: dict):
                 wfo_limiter = " and substr(w.ugc, 1, 2) = :state "
                 params["state"] = csector
     elif opt == "wfo":
-        wfo_limiter = " and wfo = :wfo "
+        wfo_limiter = " and w.wfo = :wfo "
         params["wfo"] = wfo if len(wfo) == 3 else wfo[1:]
     elif opt == "data":
-        wfo_limiter = " and wfo not in ('AFC', 'AFG', 'GUM', 'JSJ', 'HFO') "
+        wfo_limiter = " and w.wfo not in ('AFC', 'AFG', 'GUM', 'JSJ', 'HFO') "
 
     if ctx["c"] == "svrtor":
         params["ph"] = ["SV", "TO"]
@@ -178,7 +178,7 @@ def plotter(ctx: dict):
     sql = """
             SELECT
             geom, wfo, phenomena, significance, eventid
-            from sbw where phenomena = ANY(:ph) and significance = :sig
+            from sbw w where phenomena = ANY(:ph) and significance = :sig
             and status = 'NEW' and issue >= :sts and issue < :ets
             {wfo_limiter}
         """
