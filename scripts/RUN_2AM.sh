@@ -53,6 +53,7 @@ fi
 python fetch_power.py --year=$(date --date '7 days ago' +'%Y') --domain=
 python fetch_power.py --year=$(date --date '7 days ago' +'%Y') --domain=china
 python fetch_power.py --year=$(date --date '7 days ago' +'%Y') --domain=europe
+python fetch_power.py --year=$(date --date '7 days ago' +'%Y') --domain=sa
 cd ../climodat
 python power_extract.py &
 

@@ -132,10 +132,12 @@ def merge_grib(nc, now, domain: str, dom: dict):
     """Merge what grib data we can find into the netcdf file."""
     # Tricky here for how to compute a valid date
     # iemre US 2024-08-05 -> 2024-08-06  6 UTC
+    # sa      2024-08-05 -> 2024-08-06  6 UTC  Don't have hourly
     # europe   2024-08-05 -> 2024-08-06  0 UTC
     # china    2024-08-05 -> 2024-08-05 18 UTC
     write_hour = {
         "": 6,
+        "sa": 6,
         "europe": 0,
         "china": 18,
     }

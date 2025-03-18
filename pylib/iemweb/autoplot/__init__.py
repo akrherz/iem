@@ -24,11 +24,12 @@ ARG_IEMRE_DOMAIN = {
     "type": "select",
     "name": "domain",
     "default": "",
-    "label": "Select IEMRE Analysis Domain (China/Europe not working yet):",
+    "label": "Select IEMRE Analysis Domain (China/Europe/SA not complete):",
     "options": {
         "": "Contiguous USA",
         "china": "China",
         "europe": "Europe",
+        "sa": "South America",
     },
 }
 ARG_STATION = {

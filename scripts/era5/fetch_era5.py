@@ -8,14 +8,13 @@ import subprocess
 import sys
 import tempfile
 import warnings
-from datetime import timedelta
+from datetime import datetime, timedelta
 
 import cdsapi
 import click
 import numpy as np
 from netCDF4 import Dataset
-from pyiem.grid.nav import get_nav
-from pyiem.iemre import hourly_offset
+from pyiem.iemre import DOMAINS, hourly_offset
 from pyiem.util import logger, ncopen, utc
 
 LOG = logger()
@@ -39,86 +38,139 @@ warnings.simplefilter("ignore", RuntimeWarning)
 
 def ingest(ncin: Dataset, nc: Dataset, valid, domain):
     """Consume this grib file."""
+    # The grid delta and grid points are hopefully the same, we just need to
+    # figure out where they are.
+    # ncin is also top/down sigh.  90 to -90 , 0 to 359.9
+    lon = nc.variables["lon"][0]
+    if lon < 0:
+        lon += 360.0  # convert to match in
+    lat = nc.variables["lat"][0]
+    delta = 0.1
+    # Find the grid points
+    ll_j = int((90 - lat) / delta)
+    ul_j = ll_j - nc.dimensions["lat"].size
+    jslice = slice(ul_j, ll_j)
+    ll_i = int(lon / delta)
+    ur_i = ll_i + nc.dimensions["lon"].size
+    islice = slice(ll_i, ur_i)
+
+    # Of course, our Europe domain crosses the 0/360 boundary, so we have
+    # pain here
+    islices = [islice]
+    islices_out = [slice(None, None)]
+    if domain == "europe":
+        # NCIN starts at 0 and ends at 359.9
+        lon2 = nc.variables["lon"][-1]
+        # plus 2 since we include zero and the end cell
+        islices = [slice(ll_i, 3599), slice(0, int(lon2 / delta) + 2)]
+        i0 = islices[0].stop - islices[0].start
+        islices_out = [slice(0, i0), slice(i0 + 1, None)]
+
+    LOG.debug(
+        "domain: %s islices[%s]: %s jslice[%s]: %s",
+        domain,
+        lon,
+        islices,
+        lat,
+        jslice,
+    )
+
     tidx = hourly_offset(valid)
     dd = "" if domain == "" else f"_{domain}"
 
-    for ekey, key in VERBATIM.items():
-        nc.variables[key][tidx] = np.flipud(ncin.variables[ekey][0])
+    for islice_in, islice_out in zip(islices, islices_out):
+        for ekey, key in VERBATIM.items():
+            nc.variables[key][tidx, :, islice_out] = np.flipud(
+                ncin.variables[ekey][0, jslice, islice_in]
+            )
 
-    nc.variables["soilt"][tidx, 0] = np.flipud(ncin.variables["stl1"][0])
-    nc.variables["soilt"][tidx, 1] = np.flipud(ncin.variables["stl2"][0])
-    nc.variables["soilt"][tidx, 2] = np.flipud(ncin.variables["stl3"][0])
-    nc.variables["soilt"][tidx, 3] = np.flipud(ncin.variables["stl4"][0])
+        nc.variables["soilt"][tidx, 0, :, islice_out] = np.flipud(
+            ncin.variables["stl1"][0, jslice, islice_in]
+        )
+        nc.variables["soilt"][tidx, 1, :, islice_out] = np.flipud(
+            ncin.variables["stl2"][0, jslice, islice_in]
+        )
+        nc.variables["soilt"][tidx, 2, :, islice_out] = np.flipud(
+            ncin.variables["stl3"][0, jslice, islice_in]
+        )
+        nc.variables["soilt"][tidx, 3, :, islice_out] = np.flipud(
+            ncin.variables["stl4"][0, jslice, islice_in]
+        )
 
-    nc.variables["soilm"][tidx, 0] = np.flipud(ncin.variables["swvl1"][0])
-    nc.variables["soilm"][tidx, 1] = np.flipud(ncin.variables["swvl2"][0])
-    nc.variables["soilm"][tidx, 2] = np.flipud(ncin.variables["swvl3"][0])
-    nc.variables["soilm"][tidx, 3] = np.flipud(ncin.variables["swvl4"][0])
+        nc.variables["soilm"][tidx, 0, :, islice_out] = np.flipud(
+            ncin.variables["swvl1"][0, jslice, islice_in]
+        )
+        nc.variables["soilm"][tidx, 1, :, islice_out] = np.flipud(
+            ncin.variables["swvl2"][0, jslice, islice_in]
+        )
+        nc.variables["soilm"][tidx, 2, :, islice_out] = np.flipud(
+            ncin.variables["swvl3"][0, jslice, islice_in]
+        )
+        nc.variables["soilm"][tidx, 3, :, islice_out] = np.flipud(
+            ncin.variables["swvl4"][0, jslice, islice_in]
+        )
 
-    # -- these vars are accumulated since 0z, so 0z is the 24hr sum
-    rsds = nc.variables["rsds"]
-    p01m = nc.variables["p01m"]
-    evap = nc.variables["evap"]
-    if valid.hour == 0:
-        tidx0 = hourly_offset(valid - timedelta(hours=24))
-        # Special 1 Jan consideration
-        if valid.month == 1 and valid.day == 1 and valid.year > 1950:
-            with ncopen(
-                f"/mesonet/data/era5{dd}/{valid.year - 1}_era5land_hourly.nc"
-            ) as nc2:
-                tsolar = np.sum(nc2.variables["rsds"][(tidx0 + 1)], 0) * 3600.0
-                tp01m = np.sum(nc2.variables["p01m"][(tidx0 + 1)], 0)
-                tevap = np.sum(nc2.variables["evap"][(tidx0 + 1)], 0)
-        else:
-            tsolar = np.sum(rsds[(tidx0 + 1) : tidx], 0) * 3600.0
-            tp01m = np.sum(p01m[(tidx0 + 1) : tidx], 0)
-            tevap = np.sum(evap[(tidx0 + 1) : tidx], 0)
-    elif valid.hour > 1:
-        tidx0 = hourly_offset(valid.replace(hour=1))
-        tsolar = np.sum(rsds[tidx0:tidx], 0) * 3600.0
-        tp01m = np.sum(p01m[tidx0:tidx], 0)
-        tevap = np.sum(evap[tidx0:tidx], 0)
-    else:
-        tsolar = np.zeros(ncin.variables["t2m"][0].shape)
-        tp01m = np.zeros(ncin.variables["t2m"][0].shape)
-        tevap = np.zeros(ncin.variables["t2m"][0].shape)
-    # J m-2 to W/m2
-    val = np.flipud(ncin.variables["ssrd"][0])
-    newval = (val - tsolar) / 3600.0
-    # Le Sigh, sometimes things are negative, somehow?
-    rsds[tidx] = np.ma.where(newval < 0, 0, newval)
-    # m to mm
-    val = np.flipud(ncin.variables["e"][0])
-    newval = (val * 1000.0) - tevap
-    evap[tidx] = np.ma.where(newval < 0, 0, newval)
-    # m to mm
-    val = np.flipud(ncin.variables["tp"][0])
-    newval = (val * 1000.0) - tp01m
-    p01m[tidx] = np.ma.where(newval < 0, 0, newval)
-
-
-def run(valid, domain: str, force):
-    """Run for the given valid time."""
-    dd = "" if domain == "" else f"_{domain}"
-    ncoutfn = f"/mesonet/data/era5{dd}/{valid.year}_era5land_hourly.nc"
-    tidx = hourly_offset(valid)
-    if not force:
-        with ncopen(ncoutfn) as nc:
-            sample = nc.variables["tmpk"][tidx, 150, 150]
-            if 200 < sample < 350:
-                LOG.info(
-                    "Skipping %s, tmpk %.1fK for domain `%s`",
-                    valid,
-                    sample,
-                    domain,
+        # -- these vars are accumulated since 0z, so 0z is the 24hr sum
+        rsds = nc.variables["rsds"]
+        p01m = nc.variables["p01m"]
+        evap = nc.variables["evap"]
+        if valid.hour == 0:
+            tidx0 = hourly_offset(valid - timedelta(hours=24))
+            # Special 1 Jan consideration
+            if valid.month == 1 and valid.day == 1 and valid.year > 1950:
+                with ncopen(
+                    f"/mesonet/data/era5{dd}/"
+                    f"{valid.year - 1}_era5land_hourly.nc"
+                ) as nc2:
+                    tsolar = (
+                        np.sum(
+                            nc2.variables["rsds"][(tidx0 + 1), :, islice_out],
+                            0,
+                        )
+                        * 3600.0
+                    )
+                    tp01m = np.sum(
+                        nc2.variables["p01m"][(tidx0 + 1), :, islice_out], 0
+                    )
+                    tevap = np.sum(
+                        nc2.variables["evap"][(tidx0 + 1), :, islice_out], 0
+                    )
+            else:
+                tsolar = (
+                    np.sum(rsds[(tidx0 + 1) : tidx, :, islice_out], 0) * 3600.0
                 )
-                return
-    gridnav = get_nav("era5land", domain)
-    LOG.info("Running for %s[domain=%s]", valid, domain)
-    zipfn = f"{domain}_{valid:%Y%m%d%H}.zip"
+                tp01m = np.sum(p01m[(tidx0 + 1) : tidx, :, islice_out], 0)
+                tevap = np.sum(evap[(tidx0 + 1) : tidx, :, islice_out], 0)
+        elif valid.hour > 1:
+            tidx0 = hourly_offset(valid.replace(hour=1))
+            tsolar = np.sum(rsds[tidx0:tidx, :, islice_out], 0) * 3600.0
+            tp01m = np.sum(p01m[tidx0:tidx, :, islice_out], 0)
+            tevap = np.sum(evap[tidx0:tidx, :, islice_out], 0)
+        else:
+            tsolar = np.zeros(
+                ncin.variables["t2m"][0, jslice, islice_in].shape
+            )
+            tp01m = np.zeros(ncin.variables["t2m"][0, jslice, islice_in].shape)
+            tevap = np.zeros(ncin.variables["t2m"][0, jslice, islice_in].shape)
+        # J m-2 to W/m2
+        val = np.flipud(ncin.variables["ssrd"][0, jslice, islice_in])
+        newval = (val - tsolar) / 3600.0
+        # Le Sigh, sometimes things are negative, somehow?
+        rsds[tidx, :, islice_out] = np.ma.where(newval < 0, 0, newval)
+        # m to mm
+        val = np.flipud(ncin.variables["e"][0, jslice, islice_in])
+        newval = (val * 1000.0) - tevap
+        evap[tidx, :, islice_out] = np.ma.where(newval < 0, 0, newval)
+        # m to mm
+        val = np.flipud(ncin.variables["tp"][0, jslice, islice_in])
+        newval = (val * 1000.0) - tp01m
+        p01m[tidx, :, islice_out] = np.ma.where(newval < 0, 0, newval)
 
+
+def fetch(valid: datetime):
+    """Get the data from the CDS."""
+    zipfn = "data_0.nc.zip"
     cds = cdsapi.Client(quiet=True, progress=sys.stdout.isatty())
-
     cds.retrieve(
         "reanalysis-era5-land",
         {
@@ -127,14 +179,6 @@ def run(valid, domain: str, force):
             "month": f"{valid:%m}",
             "day": [f"{valid:%d}"],
             "time": [f"{valid:%H}:00"],
-            # Unclear what is happening here, but the download seems to
-            # conform to the requested grid
-            "area": [
-                gridnav.top,
-                gridnav.left,
-                gridnav.bottom,
-                gridnav.right,
-            ],
             "data_format": "netcdf",
             "download_format": "zip",
         },
@@ -143,26 +187,29 @@ def run(valid, domain: str, force):
     # unzip
     subprocess.call(["unzip", "-q", zipfn])
     os.unlink(zipfn)
-    with ncopen("data_0.nc") as ncin, ncopen(ncoutfn, "a") as nc:
-        ingest(ncin, nc, valid, domain)
+
+
+def run(valid):
+    """Run for the given valid time."""
+    fetch(valid)
+    for domain in DOMAINS:
+        dd = "" if domain == "" else f"_{domain}"
+        ncoutfn = f"/mesonet/data/era5{dd}/{valid.year}_era5land_hourly.nc"
+        LOG.info("Running for %s[domain=%s]", valid, domain)
+        with ncopen("data_0.nc") as ncin, ncopen(ncoutfn, "a") as nc:
+            ingest(ncin, nc, valid, domain)
     os.unlink("data_0.nc")
 
 
 @click.command()
 @click.option("--date", "valid", required=True, type=click.DateTime())
-@click.option("--domain", default=None, help="IEMRE Domain to run for")
-@click.option("--force", is_flag=True, help="Force re-download")
-def main(valid, domain, force: bool):
+def main(valid: datetime):
     """Go!"""
     valid = utc(valid.year, valid.month, valid.day)
-    domains = ["", "china", "europe"]
-    if domain is not None:
-        domains = [domain]
     with tempfile.TemporaryDirectory() as tmpdir:
         os.chdir(tmpdir)
         for offset in range(1, 25):
-            for _domain in domains:
-                run(valid + timedelta(hours=offset), _domain, force)
+            run(valid + timedelta(hours=offset))
 
 
 if __name__ == "__main__":
