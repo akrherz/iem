@@ -122,7 +122,7 @@ $(document).ready(() => {
         maxDate: new Date()
     });
     $("#datepicker").datepicker('setDate', new Date());
-    $("#datepicker").change(function () {
+    $("#datepicker").change(() => {
         updateDate();
     });
 
@@ -149,8 +149,7 @@ $(document).ready(() => {
         })
     });
 
-    const layerSwitcher = new ol.control.LayerSwitcher();
-    map.addControl(layerSwitcher);
+    map.addControl(new ol.control.LayerSwitcher());
 
     element = document.getElementById('popup');
 

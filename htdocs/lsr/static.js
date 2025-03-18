@@ -491,11 +491,11 @@ function initUI() {
             return state.id;
         }
     });
-    $.each(iemdata.wfos, function (idx, entry) {
+    $.each(iemdata.wfos, (_idx, entry) => {
         const opt = new Option(`[${entry[0]}] ${entry[1]}`, entry[0], false, false);
         wfoSelect.append(opt);
     });
-    $.each(iemdata.states, function (idx, entry) {
+    $.each(iemdata.states, (_idx, entry) => {
         const opt = new Option(`[${entry[0]}] ${entry[1]}`, entry[0], false, false);
         stateSelect.append(opt);
     });

@@ -58,7 +58,7 @@ let geojsonSource = null;
 let network = null;
 
 //http://www.lessanvaezi.com/filter-select-list-options/
-jQuery.fn.filterByText = function (textbox, selectSingleMatch) {
+jQuery.fn.filterByText = function (textbox, selectSingleMatch) {  // this
     return this.each(function () {
         const select = this;
         const options = [];
@@ -66,7 +66,7 @@ jQuery.fn.filterByText = function (textbox, selectSingleMatch) {
             options.push({ value: $(this).val(), text: $(this).text() });
         });
         $(select).data('options', options);
-        $(textbox).bind('change keyup', function () {
+        $(textbox).bind('change keyup', function () { // this
             const opts = $(select).empty().scrollTop(0).data('options');
             const search = $.trim($(this).val());
             const regex = new RegExp(search, 'gi');
@@ -88,7 +88,7 @@ jQuery.fn.filterByText = function (textbox, selectSingleMatch) {
 };
 
 function sortListing(option) {
-    $("#stations_in").append($("#stations_in option").remove().sort(function (a, b) {
+    $("#stations_in").append($("#stations_in option").remove().sort((a, b) => {
         let at = $(a).text(), bt = $(b).text();
         if (option === 'name') {
             at = at.slice(at.indexOf(' ') + 1);
@@ -106,7 +106,7 @@ $().ready(() => {
 
     // Make sure clicking the submit button selects all of the selected 
     // stations, this avoids user confusion
-    $("form[name='iemss'] :submit").click(function () {
+    $("form[name='iemss'] :submit").click(() => {
         // Empty input implies that all are selected!
         if ($("#iemss").data("supports-all") !== 0) {
             // If all entries are in the stations_out box
