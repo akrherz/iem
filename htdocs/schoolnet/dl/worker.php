@@ -62,8 +62,7 @@ $sqlStr .= " and station = ANY($1) and ";
 $sqlStr .= " extract(minute from valid)::int % " . $sampleStr[$sample] . " = 0 ";
 $sqlStr .= " ORDER by valid ASC";
 
-$stname = uniqid();
-pg_prepare($connection, $stname, $sqlStr);
+$stname = iem_pg_prepare($connection, $sqlStr);
 $rs = pg_execute($connection, $stname, array($stationSQL));
 
 if (pg_num_rows($rs) == 0) {
@@ -82,7 +81,7 @@ for ($j = 0; $j < $num_vars; $j++) {
 echo "\n";
 if ($dl_option == "download") {
 
-    for ($i = 0; $row = pg_fetch_assoc($rs); $i++) {
+    while ($row = pg_fetch_assoc($rs)) {
         printf("%s%s%s", $row["station"], $d[$delim],  $row["dvalid"]);
         for ($j = 0; $j < $num_vars; $j++) {
             printf("%s%6s", $d[$delim], $row["var" . $j]);
@@ -91,7 +90,7 @@ if ($dl_option == "download") {
     }
 } else {
 
-    for ($i = 0; $row = pg_fetch_assoc($rs); $i++) {
+    while ($row = pg_fetch_assoc($rs)) {
         printf("%s%s%s", $row["station"], $d[$delim], $row["dvalid"]);
         for ($j = 0; $j < $num_vars; $j++) {
             printf("%s%6s", $d[$delim], $row["var" . $j]);

@@ -22,8 +22,7 @@ $tableName = sprintf("t%s", date("Y_m", $myTime));
 $sqlDate = date("Y-m-d", $myTime);
 
 $connection = iemdb("awos");
-$stname = uniqid("select");
-$rs = pg_prepare($connection, $stname, "SELECT " .
+$stname = iem_pg_prepare($connection, "SELECT " .
     "to_char(valid, 'HH24:MI') as tvalid, p01i, alti from " .
     "alldata WHERE station = $1 and " .
     "valid >= $2 and valid < $3 ORDER by tvalid");

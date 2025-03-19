@@ -132,7 +132,7 @@ $(document).ready(() => {
         target: 'map',
         layers: [new ol.layer.Tile({
             title: 'Global Imagery',
-            source: new ol.source.BingMaps({ key: key, imagerySet: 'Aerial' })
+            source: new ol.source.BingMaps({ key, imagerySet: 'Aerial' })
         }),
         new ol.layer.Tile({
             title: 'State Boundaries',
@@ -154,7 +154,7 @@ $(document).ready(() => {
     element = document.getElementById('popup');
 
     const popup = new ol.Overlay({
-        element: element,
+        element,
         positioning: 'bottom-center',
         stopEvent: false
     });

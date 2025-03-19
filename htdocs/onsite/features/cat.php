@@ -22,18 +22,15 @@ if (is_null($day)) {
 }
 
 $dbconn = iemdb("mesosite");
-$stname1 = uniqid("yesterday");
-$stname2 = uniqid("today");
-$stname3 = uniqid("tomorrow");
-pg_prepare($dbconn, $stname1, "SELECT *, date(valid) as d,
+$stname1 = iem_pg_prepare($dbconn, "SELECT *, date(valid) as d,
               to_char(valid, 'YYYY/MM/YYMMDD') as imageref, 
               to_char(valid, 'DD Mon YYYY HH:MI AM') as webdate from feature
               WHERE valid < $1 ORDER by valid DESC limit 1");
-pg_prepare($dbconn, $stname2, "SELECT *, date(valid) as d,
+$stname2 = iem_pg_prepare($dbconn, "SELECT *, date(valid) as d,
               to_char(valid, 'YYYY/MM/YYMMDD') as imageref, 
               to_char(valid, 'DD Mon YYYY HH:MI AM') as webdate from feature
               WHERE date(valid) = $1");
-pg_prepare($dbconn, $stname3, "SELECT *, date(valid) as d,
+$stname3 = iem_pg_prepare($dbconn, "SELECT *, date(valid) as d,
               to_char(valid, 'YYYY/MM/YYMMDD') as imageref, 
               to_char(valid, 'DD Mon YYYY HH:MI AM') as webdate from feature
               WHERE valid > ($1::date + '1 day'::interval) 

@@ -30,11 +30,10 @@ $ets->modify("+$days days");
 if (isset($_GET["limit"])) $val = "between 25 and 35";
 
 $rwisdb = iemdb('rwis');
-$stname = uniqid("rwis");
-pg_prepare($rwisdb, $stname, "
- SELECT * FROM alldata WHERE 
- station = $1 and valid >= $2 and valid < $3 
- ORDER by valid ASC");
+$stname = iem_pg_prepare($rwisdb, <<<EOM
+    SELECT * FROM alldata WHERE station = $1 and valid >= $2 and valid < $3 
+    ORDER by valid ASC
+EOM);
 $minInterval = 20;
 $result = pg_execute($rwisdb, $stname, array($station, $sts->format("Y-m-d H:i"), $ets->format("Y-m-d H:i")));
 

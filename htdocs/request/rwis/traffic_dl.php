@@ -95,12 +95,7 @@ $connection = iemdb("rwis");
 $query1 = "SET TIME ZONE 'UTC'";
 
 $result = pg_exec($connection, $query1);
-$stname = uniqid("st");
-$rs = pg_prepare($connection, $stname, $sqlStr);
-if ($rs === FALSE) {
-    http_send_status(503);
-    die("Database failure");
-}
+$stname = iem_pg_prepare($connection, $sqlStr);
 $rs = pg_execute($connection, $stname, array($stationSQL));
 
 $dd = $d[$delim];

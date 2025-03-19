@@ -9,7 +9,6 @@ require_once "../../../../include/forms.php";
 require_once "../../../../include/network.php";
 require_once "../../../../include/vendor/mapscript.php";
 
-
 $var = isset($_GET["var"]) ? xssafe($_GET["var"]) : "high";
 $year = get_int404("year", date("Y"));
 $month = get_int404("month", date("m"));
@@ -92,10 +91,8 @@ $map->imagecolor->setRGB(255, 255, 255);
 $map->selectOutputFormat("PNG24");
 $map->setSize($width, $height);
 $dbconn = iemdb("postgis");
-$stname = uniqid();
-pg_prepare(
+$stname = iem_pg_prepare(
     $dbconn,
-    $stname,
     "SELECT ST_xmin(the_geom), ST_xmax(the_geom), ST_ymin(the_geom), ST_ymax(the_geom) ".
     "from states where state_abbr = $1");
 $rs = pg_execute($dbconn, $stname, Array($state));
@@ -148,15 +145,13 @@ if ($source == "qc") {
     if ($timing == "1") {
         $timingsql = " and temp_hour between 4 and 12 ";
     }
-    $sql = sprintf(
-        "SELECT *, $timecol as hour from alldata_{$state} ".
-        "WHERE day = '%s' and %s is not null" .
-            " and substr(station, 3, 1) not in ('C', 'D', 'T') " .
-            " and substr(station, 3, 4) != '0000'" .
-            " $timingsql ORDER by $dbvar DESC",
-        $ts->format("Y-m-d"),
-        $dbvar
-    );
+    $dbargs = Array($ts->format("Y-m-d"));
+    $sql = <<<EOM
+    SELECT *, $timecol as hour from alldata_{$state}
+    WHERE day = $1 and {$dbvar} is not null
+    and substr(station, 3, 1) not in ('C', 'D', 'T')
+    and substr(station, 3, 4) != '0000' $timingsql ORDER by $dbvar DESC
+EOM;
     $cutstring1 = 2;
     $cutstring2 = 4;
 } else {
@@ -166,20 +161,20 @@ if ($source == "qc") {
     if ($timing == "1") {
         $timingsql = " and extract(hour from coop_valid) between 4 and 12 ";
     }
-    $sql = sprintf(
-        "SELECT id as station, day, snowd, max_tmpf as high, extract(hour from coop_valid) as hour, " .
-            "min_tmpf as low, pday as precip, snow, snowd, coop_tmpf as tob " .
-            "from summary_%s s " .
-            "JOIN stations t on (t.iemid = s.iemid) WHERE day = '%s' and " .
-            "network = '{$state}_COOP' $timingsql ORDER by $dbvar DESC",
-        $ts->format("Y"),
-        $ts->format("Y-m-d")
-    );
+    $dbargs = Array($ts->format("Y-m-d"), "{$state}_COOP");
+    $sql = <<<EOM
+    SELECT id as station, day, snowd, max_tmpf as high,
+    extract(hour from coop_valid) as hour,
+    min_tmpf as low, pday as precip, snow, snowd, coop_tmpf as tob
+    from summary_{$ts->format('Y')} s JOIN stations t on (t.iemid = s.iemid)
+    WHERE day = $1 and network = $2 $timingsql ORDER by $dbvar DESC
+EOM;
 }
 
-$rs =  pg_exec($c, $sql);
+$stname = iem_pg_prepare($c, $sql);
+$rs =  pg_execute($c, $stname, $dbargs);
 $vals = array();
-for ($i = 0; $row = pg_fetch_assoc($rs); $i++) {
+while ($row = pg_fetch_assoc($rs)) {
     $stid = $row['station'];
     if ($var == "ratio") {
         if ($row["snow"] > 0 && $row["precip"] > 0) {

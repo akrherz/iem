@@ -37,19 +37,14 @@ if (!array_key_exists($sortcol, $cols)) {
     xssafe("</script>");
 }
 
-$stname = uniqid();
-$rs = pg_prepare(
+$stname = iem_pg_prepare(
     $pgconn,
-    $stname,
     "select c.*, s.name, " .
         "c.valid at time zone s.tzname as localvalid " .
         "from current_shef c JOIN stations s " .
         "on (c.station = s.id) where s.network = $1 and c.value > -1000 ".
         "order by valid desc"
 );
-if ($rs === FALSE){
-    die("Failed to prepare query");
-}
 $rs = pg_execute($pgconn, $stname, array($network));
 
 $obs = array();

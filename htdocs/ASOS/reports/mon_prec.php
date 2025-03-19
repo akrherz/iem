@@ -20,8 +20,7 @@ $pgconn = iemdb("iem");
 $nt = new NetworkTable($network);
 $cities = $nt->table;
 
-$stname = uniqid();
-pg_prepare($pgconn, $stname, <<<EOM
+$stname = iem_pg_prepare($pgconn, <<<EOM
 SELECT 
  id,
  sum(pday) as precip,

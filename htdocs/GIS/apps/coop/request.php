@@ -17,12 +17,13 @@ $sqlDate = $ts->format('Y-m-d');
 $filePre = $ts->format('md') . "_coop";
 
 $pgcon = iemdb("coop");
-$rs = pg_exec(
-    $pgcon,
-    "select c.*, ST_X(s.geom) as lon, ST_Y(s.geom) as lat, s.name, ".
-    "to_char(c.valid, 'YYYYMMDD') as cvalid from climate c JOIN stations s ".
-    "ON (c.station = s.id) WHERE c.valid = '{$sqlDate}' and ".
-    "s.network ~* 'CLIMATE'");
+$sql = <<<EOM
+    select c.*, ST_X(s.geom) as lon, ST_Y(s.geom) as lat, s.name,
+    to_char(c.valid, 'YYYYMMDD') as cvalid from climate c JOIN stations s
+    ON (c.station = s.id) WHERE c.valid = $1 and s.network ~* 'CLIMATE'
+EOM;
+$stname = iem_pg_prepare($pgcon, $sql);
+$rs = pg_execute($pgcon, $stname, Array($sqlDate));
 
 if (! is_dir("/tmp/cli2shp")){
     mkdir("/tmp/cli2shp", 0755);

@@ -18,8 +18,7 @@ $eventid = get_int404("eventid", 103);
 $phenomena = isset($_GET["phenomena"]) ? substr(xssafe($_GET["phenomena"]), 0, 2) : "SV";
 $significance = isset($_GET["significance"]) ? substr(xssafe($_GET["significance"]), 0, 1) : "W";
 
-$stname = uniqid();
-pg_prepare($connect, $stname, "SELECT  
+$stname = iem_pg_prepare($connect, "SELECT  
            ST_askml(geom) as kml, issue, expire, status,
            round(ST_area(ST_transform(geom,9311)) / 1000000.0) as psize
            from sbw
@@ -34,9 +33,8 @@ $result = pg_execute(
 );
 
 if (pg_num_rows($result) <= 0) {
-    $stname = uniqid();
-    pg_prepare($connect, $stname, "SELECT 
-            issue, expire, status,  
+    $stname = iem_pg_prepare($connect, "SELECT 
+            issue, expire, status,
            ST_askml(u.geom) as kml,
            round(ST_area(ST_transform(u.geom,9311)) / 1000000.0) as psize
            from warnings w JOIN ugcs u on (u.gid = w.gid)

@@ -96,14 +96,13 @@ $map->setSize(1024, 768);
 
 $state = substr($network, 0, 2);
 $dbconn = iemdb("postgis");
-$stname = uniqid();
-pg_prepare($dbconn, $stname,
+$stname = iem_pg_prepare($dbconn,
     "SELECT ST_xmin(g), ST_xmax(g), ST_ymin(g), ST_ymax(g) from (
         select ST_Extent(the_geom) as g from states 
         where state_abbr = $1
         ) as foo");
 $rs = pg_execute($dbconn, $stname, Array($state));
-$row = pg_fetch_assoc($rs, 0);
+$row = pg_fetch_assoc($rs);
 $buf = 0.2; // 35km
 $xsz = $row["st_xmax"] - $row["st_xmin"];
 $ysz = $row["st_ymax"] - $row["st_ymin"];
@@ -137,8 +136,7 @@ $bar640t->draw($map, $img);
 $dy = ($map->extent->maxy - $map->extent->miny) / 25;
 $dx = ($map->extent->maxx - $map->extent->minx) / 25;
 
-$stname = uniqid("select");
-pg_prepare($coopdb, $stname, <<<EOM
+$stname = iem_pg_prepare($coopdb, <<<EOM
     SELECT station, 
     sum(precip) as s_prec,
     sum(gddxx(32, 86, high, low)) as s_gdd32,

@@ -194,8 +194,7 @@ if (isset($_GET["vtec"])) {
       ST_ymax(st_extent) as y1, st_ymin(st_extent) as y0, gtype from agg
       WHERE gtype is not null and v is not null LIMIT 1
 EOM;
-    $stname = uniqid();
-    pg_prepare($postgis, $stname, $sql);
+    $stname = iem_pg_prepare($postgis, $sql);
     $rs = pg_execute($postgis, $stname, array(
         $wfo, $phenomena, $eventid,
         $significance, $year,
@@ -244,10 +243,8 @@ if (isset($_REQUEST['pid'])) {
         new DateTimeZone("UTC"),
     );
     /* First, we query for a bounding box please */
-    $stname = uniqid();
-    pg_prepare(
+    $stname = iem_pg_prepare(
         $postgis,
-        $stname,
         "SELECT ST_xmax(ST_extent(geom)) as x1, ST_xmin(ST_extent(geom)) as x0, "
             . "ST_ymin(ST_extent(geom)) as y0, ST_ymax(ST_extent(geom)) as y1 "
             . "from sps WHERE product_id = $1"
@@ -278,14 +275,13 @@ if (isset($_GET["bbox"])) {
 if ($sector == "wfo") {
     $sector_wfo = isset($_REQUEST["sector_wfo"]) ? strtoupper($_REQUEST["sector_wfo"]) : "DMX";
     /* Fetch the bounds */
-    $stname = uniqid();
-    pg_prepare($postgis, $stname, "SELECT ST_xmax(geom) as xmax, ST_ymax(geom) as ymax, "
+    $stname = iem_pg_prepare($postgis, "SELECT ST_xmax(geom) as xmax, ST_ymax(geom) as ymax, "
         . " ST_xmin(geom) as xmin, ST_ymin(geom) as ymin from "
         . " (SELECT ST_Extent(geom) as geom from ugcs WHERE "
         . " wfo = $1 and end_ts is null) as foo");
     $rs = pg_execute($postgis, $stname, array($sector_wfo));
     if (pg_num_rows($rs) > 0) {
-        $row = pg_fetch_assoc($rs, 0);
+        $row = pg_fetch_assoc($rs);
         $buffer = 0.25;
         $sectors["wfo"] = array(
             "epsg" => 4326,

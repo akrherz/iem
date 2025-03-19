@@ -21,23 +21,21 @@ $nselect = selectNetworkType("CLIMATE", $network);
 
 $conn = iemdb("coop");
 
-$stname = uniqid();
 $query = "select station, valid, min_low, min_low_yr from climate
      WHERE valid > '2000-08-01' and min_low <= $2
      and substr(station,0,3) = $1 ORDER by valid";
-pg_prepare($conn, $stname, $query);
+$stname = iem_pg_prepare($conn, $query);
 $rs = pg_execute($conn, $stname, array(substr($network, 0, 2), 32));
 
  
-$stname = uniqid();
 $query = "select station, valid, low from climate
      WHERE valid > '2000-08-01' and low <= $2
      and substr(station,0,3) = $1 ORDER by valid";
-pg_prepare($conn, $stname, $query);
+$stname = iem_pg_prepare($conn, $query);
 $rs2 = pg_execute($conn, $stname, array(substr($network, 0, 2), 40));
 
 $data = array();
-for ($i = 0; $row = pg_fetch_assoc($rs); $i++) {
+while ($row = pg_fetch_assoc($rs)) {
     $st = $row["station"];
     if (!isset($data[$st])) {
         $data[$st] = array(
@@ -56,7 +54,7 @@ for ($i = 0; $row = pg_fetch_assoc($rs); $i++) {
     }
 }
 
-for ($i = 0; $row = pg_fetch_assoc($rs2); $i++) {
+while ($row = pg_fetch_assoc($rs2)) {
     $st = $row["station"];
     if (!isset($data[$st]["avelow40day"])) {
         if (intval($row["low"]) < 41) {

@@ -9,8 +9,7 @@ $dbconn = iemdb("iem");
 $sortcol = isset($_GET['sortcol']) ? xssafe($_GET['sortcol']): 'valid';
 
 /* Query out the data */
-$stname = uniqid();
-pg_prepare($dbconn, $stname, <<<EOM
+$stname = iem_pg_prepare($dbconn, <<<EOM
     WITH data as (
         SELECT t.location_id, avg_speed, normal_vol, long_vol, occupancy,
         valid, s.name from

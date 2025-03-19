@@ -38,8 +38,7 @@ $gis_url = sprintf(
     date("H", $ets)
 );
 
-$stname = uniqid();
-pg_prepare($postgis, $stname, "SELECT wfo, phenomena, count(*) as cnt,
+$stname = iem_pg_prepare($postgis, "SELECT wfo, phenomena, count(*) as cnt,
   sum( st_area2d( ST_transform(geom,9311) ) ) as sum_polysize,
   avg( st_area2d( ST_transform(geom,9311) ) ) as avg_polysize,
   sum( st_perimeter( ST_transform(geom,9311) ) ) as sum_perimsize,

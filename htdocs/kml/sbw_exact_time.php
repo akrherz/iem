@@ -14,18 +14,13 @@ $eventid = isset($_GET["eventid"]) ? intval($_GET["eventid"]) : 103;
 $phenomena = isset($_GET["phenomena"]) ? substr($_GET["phenomena"],0,2) : "SV";
 $significance = isset($_GET["significance"]) ? substr($_GET["significance"],0,1) : "W";
 
-$stname = uniqid();
-$rs = pg_prepare($connect, $stname, "SELECT issue, expire, status, 
+$stname = iem_pg_prepare($connect, "SELECT issue, expire, status, 
            ST_askml(geom) as kml,
            round(ST_area(ST_transform(geom,9311)) / 1000000.0) as psize
            from sbw
            WHERE wfo = $1 and phenomena = $2 and 
            eventid = $3 and significance = $4 and vtec_year = $5 and
            status = 'NEW'");
-if ($rs === FALSE) {
-    http_response_code(503);
-    die("Failed to prepare query\n");
-}
 $result = pg_execute($connect, $stname, 
                      Array($wfo, $phenomena, $eventid, $significance, $year) );
 $row = pg_fetch_assoc($result, 0);

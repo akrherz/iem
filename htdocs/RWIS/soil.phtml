@@ -31,8 +31,7 @@ if (!array_key_exists($sortcol, $vals)){
 }
 
 /* Query out the data */
-$stname = uniqid();
-pg_prepare($dbconn, $stname, "select t.valid, s.name as sname,
+$stname = iem_pg_prepare($dbconn, "select t.valid, s.name as sname,
     max(case when sensor_id = 1 then temp else null end) as tmpf_1in,
     max(case when sensor_id = 3 then temp else null end) as tmpf_3in,
     max(case when sensor_id = 6 then temp else null end) as tmpf_6in,
@@ -76,7 +75,7 @@ function f($val)
 
 $data = array();
 $table  = "";
-for ($i = 0; $row = pg_fetch_assoc($rs); $i++) {
+while ($row = pg_fetch_assoc($rs)) {
     $table .= sprintf(
         "<tr><th>%s</th><th>%s</th>
    <td>%s</td><td>%s</td><td>%s</td><td>%s</td>

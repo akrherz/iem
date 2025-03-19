@@ -26,9 +26,7 @@ $sts = mktime(0, 0, 0, $smonth, $sday, $syear);
 $ets = $sts + ($days * 86400.0);
 
 $iemdb = iemdb('iem');
-$stname = uniqid("select");
-$rs = pg_prepare($iemdb, $stname, "SELECT * from 
-      rwis_traffic_meta WHERE nwsli = $1");
+$stname = iem_pg_prepare($iemdb, "SELECT * from rwis_traffic_meta WHERE nwsli = $1");
 $rs = pg_execute($iemdb, $stname, array($station));
 $avg_speed = array();
 

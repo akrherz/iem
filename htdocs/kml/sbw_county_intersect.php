@@ -33,11 +33,7 @@ $sql = <<<EOM
             ), 4326) as geo
     from stormbased s, countybased c) as foo
 EOM;
-$stname = uniqid();
-$rs = pg_prepare($connect, $stname, $sql);
-if ($rs === FALSE) {
-    die("Prepare failed: " . pg_last_error());
-}
+$stname = iem_pg_prepare($connect, $sql);
 $rs = pg_execute($connect, $stname, array($year, $wfo, $eventid, $significance, $phenomena));
 header('Content-disposition: attachment; filename=sbw.kml');
 header("Content-Type: application/vnd.google-earth.kml+xml");

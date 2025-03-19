@@ -9,10 +9,8 @@ require_once "../../include/database.inc.php";
 require_once "../../include/network.php";
 require_once "../../include/mlib.php";
 $pgconn = iemdb("iem");
-$stname = uniqid("select");
-pg_prepare(
+$stname = iem_pg_prepare(
     $pgconn,
-    $stname,
     "SELECT *, to_char(valid, 'Mon DD YYYY HH:MI AM') as v from offline ".
     "WHERE network = $1 ORDER by valid ASC",
 );

@@ -37,14 +37,13 @@ $iem = iemdb("iem");
 
 $climate_site = $cities[$station]["climate_site"];
 
-$stname = uniqid("rainfall_plot");
 if (strrpos($network, "CLIMATE") > 0) {
-    pg_prepare($coopdb, $stname, "SELECT precip as pday, day from 
+    $stname = iem_pg_prepare($coopdb, "SELECT precip as pday, day from 
     alldata WHERE station = $1 and day between $2 and $3 " .
         " ORDER by day ASC");
     $rs = pg_execute($coopdb, $stname, array($station, $sdate, $edate));
 } else {
-    pg_prepare($iem, $stname, "SELECT pday, day from summary_$year s JOIN stations t
+    $stname = iem_pg_prepare($iem, "SELECT pday, day from summary_$year s JOIN stations t
     ON (t.iemid = s.iemid)
         WHERE id = $1 and day between $2 and $3 " .
         "and network = $4 ORDER by day ASC");
@@ -56,21 +55,19 @@ $aobs = array();
 $zeros = array();
 $atimes = array();
 $atot = 0;
-for ($i = 0; $row = pg_fetch_assoc($rs); $i++) {
+while ($row = pg_fetch_assoc($rs)) {
     $p = $row["pday"];
     if ($p < 0) $p = 0;
     $atot += $p;
-    $aobs[$i] = $atot;
-    $obs[$i] = $p;
-    $zeros[$i] = 0;
-    $atimes[$i] = strtotime("2000-" . substr($row["day"], 5, 15));
+    $aobs[] = $atot;
+    $obs[] = $p;
+    $zeros[] = 0;
+    $atimes[] = strtotime("2000-" . substr($row["day"], 5, 15));
 }
 
 /* Now we need the climate data */
-$stname = uniqid("select");
-pg_prepare(
+$stname = iem_pg_prepare(
     $coopdb,
-    $stname,
     "SELECT precip, valid from climate WHERE station = $1 ".
     "and valid between $2 and $3 ORDER by valid ASC"
 );

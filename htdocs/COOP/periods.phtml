@@ -43,18 +43,18 @@ if ($sday > 0) {
        </tr>
 EOM;
     $mytable = sprintf("alldata_%s", substr($station, 0, 2));
-    $rs = pg_prepare($coop, "SELECTOR", "select year,
+    $stname = iem_pg_prepare($coop, "select year,
              sum(precip) as sum_precip, sum(snow) as sum_snow,
              avg(high) as avg_high, avg(low) as avg_low,
              avg((high+low)/2.0) as avg_temp from {$mytable}
              WHERE station = $1 and sday >= $2 and sday <= $3
              GROUP by year ORDER by {$sortcol} DESC");
 
-    $rs = pg_execute($coop, "SELECTOR", array(
+    $rs = pg_execute($coop, $stname, array(
         $station, date("md", $sts),
         date("md", $ets)
     ));
-    for ($i = 0; $row = pg_fetch_assoc($rs); $i++) {
+    while ($row = pg_fetch_assoc($rs)) {
         $table .= sprintf(
             "<tr><th>%s</th><td>%.2f</td><td>%.2f</td><td>%.2f</td><td>%.2f</td><td>%.1f</td></tr>",
             $row["year"],

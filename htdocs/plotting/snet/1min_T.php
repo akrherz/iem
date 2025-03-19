@@ -2,6 +2,7 @@
 /* Generate a 1 minute plot of temperature, dew point, and solar rad */
 require_once "../../../config/settings.inc.php";
 require_once "../../../include/network.php";
+require_once "../../../include/forms.php";
 include_once("../../../include/mlib.php");
 include_once("../../../include/database.inc.php");
 include("../../../include/jpgraph/jpgraph.php");
@@ -14,21 +15,17 @@ $nt = new NetworkTable(array("KCCI", "KIMT", "KELO"));
 $cities = $nt->table;
 
 $station = isset($_GET["station"]) ? $_GET["station"] : "SKCI4";
-$year = isset($_GET["year"]) ? $_GET["year"] : date("Y");
-$month = isset($_GET["month"]) ? $_GET["month"] : date("m");
-$day = isset($_GET["day"]) ? $_GET["day"] : date("d");
+$year = get_int404("year", die("No Year set"));
+$month = get_int404("month", die("No Month set"));
+$day = get_int404("day", die("No Day set"));
 $myTime = mktime(0, 0, 0, $month, $day, $year);
 $yesterday = mktime(0, 0, 0, date("m"), date("d"), date("Y")) - 96400;
 
 /* Dig in the archive for our data! */
 $dbconn = iemdb("snet");
 $tbl = sprintf("t%s", date("Y_m", $myTime));
-$stname = uniqid();
-$rs = pg_prepare($dbconn, $stname, "SELECT * from $tbl 
+$stname = iem_pg_prepare($dbconn, "SELECT * from $tbl 
                  WHERE station = $1 and date(valid) = $2 ORDER by valid ASC");
-if ($rs === FALSE) {
-    die("Prepare failed: " . pg_last_error($dbconn));
-}
 $rs = pg_execute($dbconn, $stname, array($station, date("Y-m-d", $myTime)));
 if (pg_num_rows($rs) == 0) {
     $led = new DigitalLED74();

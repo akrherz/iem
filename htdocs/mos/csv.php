@@ -3,8 +3,6 @@ putenv("TZ=UTC");
 require_once "../../config/settings.inc.php";
 require_once "../../include/database.inc.php";
 require_once "../../include/forms.php";
-$mos = iemdb("mos");
-pg_exec($mos, "SET TIME ZONE 'UTC'");
 
 $station = isset($_GET["station"]) ? xssafe($_GET["station"]) : "KAMW";
 $ts = isset($_GET["valid"]) ? strtotime(xssafe($_GET["valid"])) : time();
@@ -13,11 +11,9 @@ if ($year < 2007) {
     exit();
 }
 
-$stname = uniqid();
-$stname2 = uniqid();
-pg_prepare($mos, $stname, "select *, t06_1 ||'/'||t06_2 as t06, 
-                 t12_1 ||'/'|| t12_2 as t12  from t{$year} WHERE station = $1
-                 and ftime >= $2 and ftime <= ($2 + '10 days'::interval) ORDER by ftime ASC");
+$mos = iemdb("mos");
+pg_exec($mos, "SET TIME ZONE 'UTC'");
+
 
 if (isset($_GET["runtime"]) && isset($_GET["model"])) {
     $ts = strtotime($_GET["runtime"]);
@@ -25,7 +21,7 @@ if (isset($_GET["runtime"]) && isset($_GET["model"])) {
     if ($year < 2007) {
         die("Bad runtime '" . $_GET["runtime"] . "'");
     }
-    pg_prepare($mos, $stname2, "select *, t06_1 ||'/'||t06_2 as t06, 
+    $stname2 = iem_pg_prepare($mos, "select *, t06_1 ||'/'||t06_2 as t06, 
                  t12_1 ||'/'|| t12_2 as t12  from t{$year} WHERE station = $1
                  and runtime = $2 and model = $3 ORDER by ftime ASC");
     $rs = pg_execute($mos, $stname2, array(
@@ -33,6 +29,9 @@ if (isset($_GET["runtime"]) && isset($_GET["model"])) {
         $_GET["model"]
     ));
 } else {
+    $stname = iem_pg_prepare($mos, "select *, t06_1 ||'/'||t06_2 as t06, 
+    t12_1 ||'/'|| t12_2 as t12 from t{$year} WHERE station = $1
+    and ftime >= $2 and ftime <= ($2 + '10 days'::interval) ORDER by ftime ASC");
     $rs = pg_execute($mos, $stname, array($station, date("Y-m-d H:i", $ts)));
 }
 
