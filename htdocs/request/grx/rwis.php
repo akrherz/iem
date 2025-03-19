@@ -1,11 +1,16 @@
 <?php
 require_once "../../../config/settings.inc.php";
+require_once "../../../config/settings.inc.php";
+require_once "../../../include/mlib.php";
+
+$network = isset($_GET["network"]) ? xssafe($_GET["network"]) : "IA_RWIS";
+
 header("Content-type: text/plain");
 // Generate placefiles, whatever
 // Inspiration: http://grlevel3.tornadocentral.com/metars.php?state=IA
 
 echo <<<EOM
-Title: Iowa DOT RWIS
+Title: {$network}
 Refresh: 5
 Color: 200 200 255
 IconFile: 1, 18, 32, 2, 31, "{$EXTERNAL_BASEURL}/request/grx/windbarbs.png" 
@@ -14,8 +19,6 @@ IconFile: 3, 25, 25, 12, 12, "{$EXTERNAL_BASEURL}/request/grx/rwis_cr.png"
 Font: 1, 11, 1, "Courier New"
 
 EOM;
-require_once "../../../config/settings.inc.php";
-require_once "../../../include/mlib.php";
 
 function pcolor($tmpf)
 {
@@ -57,7 +60,7 @@ function s2icon($s)
     return "1,20";
 }
 $arr = array(
-    "network" => "IA_RWIS",
+    "network" => $network,
 );
 $jobj = iemws_json("currents.json", $arr);
 
@@ -103,7 +106,7 @@ foreach ($jobj["data"] as $bogus => $iemob) {
   Threshold: 999 
   Icon: 0,0,000,3," . pcolor($mydata["pave_avg"]) . "
   Icon: 0,0," . $mydata["drct"] . "," . s2icon(floatval($mydata["sknt"])) . "
-  Icon: 0,0,000,2,13,\"" . $mydata["name"] . " @ " . date("d M h:i A", strtotime($mydata['local_valid'])) . "\\nTemp: " . $mydata["tmpf"] . "F (Dew: " . $mydata["dwpf"] . "F)\\nWind: " . drct2txt($mydata["drct"]) . " @ " . intval($mydata["sknt"]) . "kt\\n{$condTxt}\" 
+  Icon: 0,0,000,2,13,\"" . $mydata["name"] . " @ " . date("d M h:i A", strtotime($mydata['local_valid'])) . "\\nTemp: {$mydata['tmpf']}F (Dew: " . $mydata["dwpf"] . "F)\\nVsby: {$mydata['vsby']}\\nWind: " . drct2txt($mydata["drct"]) . " @ " . intval($mydata["sknt"]) . "kt\\n{$condTxt}\" 
   Threshold: 150
   Text:  -17, 13, 1, \" " . myround($mydata["tmpf"], 0) . " \"
   Text:  -17, -13, 1, \" " . myround($mydata["dwpf"], 0) . " \"
