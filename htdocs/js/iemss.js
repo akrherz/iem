@@ -235,7 +235,7 @@ $().ready(() => {
     const element = document.getElementById('popup');
 
     const popup = new ol.Overlay({
-        element: element,
+        element,
         positioning: 'bottom-center',
         stopEvent: false
     });
