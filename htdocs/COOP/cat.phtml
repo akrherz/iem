@@ -99,22 +99,22 @@ if (
 )
     $sortdir = "DESC";
 if (strlen($station) > 0) {
-    $rs = pg_prepare($iemdb, "SELECT", "SELECT c.*, s.id as station, 
+    $stname = iem_pg_prepare($iemdb, "SELECT c.*, s.id as station, 
      s.name as sname, c.coop_valid at time zone s.tzname as cts, c.report 
      from summary_$year c, stations s
      WHERE s.id = $1 and s.network = $2 and c.iemid = s.iemid 
      and c.day <= 'TODAY' ORDER by $sortvar $sortdir");
-    $rs = pg_execute($iemdb, "SELECT", array($station, $network));
+    $rs = pg_execute($iemdb, $stname, array($station, $network));
 } else {
-    $rs = pg_prepare($iemdb, "SELECT", "SELECT c2.*, s.id as station, 
+    $stname = iem_pg_prepare($iemdb, "SELECT c2.*, s.id as station, 
      s.name as sname, c2.coop_valid at time zone s.tzname as cts, c2.report
      from summary_$year c2, stations s
      WHERE c2.day = $1
      and s.network = $2 and c2.iemid = s.iemid ORDER by $sortvar $sortdir");
-    $rs = pg_execute($iemdb, "SELECT", array($date, $network));
+    $rs = pg_execute($iemdb, $stname, array($date, $network));
 }
 
-for ($i = 0; $row = pg_fetch_assoc($rs); $i++) {
+while ($row = pg_fetch_assoc($rs)) {
     $nwsli = $row["station"];
     $high = $row["max_tmpf"];
     if ($high == "-99" || $high == "") $high = "M";

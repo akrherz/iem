@@ -17,8 +17,7 @@ require_once "lib.php";
 $db = iemdb("postgis");
 pg_exec($db, "SET TIME ZONE 'UTC'");
 
-$stname = uniqid();
-pg_prepare($db, $stname, "SELECT *, ST_xmin(geom) as x0, 
+$stname = iem_pg_prepare($db, "SELECT *, ST_xmin(geom) as x0, 
       ST_xmax(geom) as x1, ST_ymin(geom) as y0, ST_ymax(geom) as y1,
       ST_askml(geom) as kml, 
       ST_asGeoJSON(geom) as geojson from watches 
@@ -34,7 +33,7 @@ if (pg_num_rows($rs) == 0) {
     die();
 }
 
-$row = pg_fetch_assoc($rs, 0);
+$row = pg_fetch_assoc($rs);
 
 $textlinks = "";
 if (!is_null($row["product_id_saw"])) {

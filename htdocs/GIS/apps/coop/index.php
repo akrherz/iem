@@ -2,9 +2,6 @@
 require_once "../../../../config/settings.inc.php";
 define("IEM_APPID", 52);
 require_once "../../../../include/myview.php";
-$t = new MyView();
-$t->title = "NWS COOP Plotting";
-
 require_once "../../../../include/database.inc.php";
 require_once "../../../../include/iemmap.php";
 require_once "../../../../include/network.php";
@@ -12,6 +9,9 @@ require_once "../../../../include/mlib.php";
 require_once "../../../../include/forms.php";
 require_once "../rview/lib.php";
 require_once "../../../../include/vendor/mapscript.php";
+
+$t = new MyView();
+$t->title = "NWS COOP Plotting";
 
 $coopdb = iemdb("coop");
 $nt = new NetworkTable("IACLIMATE");
@@ -43,7 +43,7 @@ $ex = array(
     "nw" => array($lx,           $ly + ($dy / 2), $ux - ($dx / 2), $uy)
 );
 if (!array_key_exists($area, $ex)) {
-    xssafe("<script>");
+    xssafe("<tag>");
 }
 
 $map->setextent($ex[$area][0], $ex[$area][1], $ex[$area][2], $ex[$area][3]);
@@ -100,7 +100,7 @@ $var = array(
     "high" => "Average High Temp [F]"
 );
 if (!array_key_exists($plot, $var)) {
-    xssafe("<script>");
+    xssafe("<tag>");
 }
 
 $dbdate = new DateTime("2000-{$month}-{$day}");
@@ -130,14 +130,14 @@ if (strcmp($area, 'all') != 0) {
     );
 }
 
-$sql = "SELECT station, " . $dbarray[$plot] . " as d
-    from climate WHERE valid = '{$dbdate->format('Y-m-d')}'
+$stname = iem_pg_prepare($coopdb, "SELECT station, " . $dbarray[$plot] . " as d
+    from climate WHERE valid = $1
     and substr(station,1,2) = 'IA' and substr(station, 3, 1) not in ('T', 'C')
-    and substr(station, 3, 4) != '0000' ";
+    and substr(station, 3, 4) != '0000' ");
 
-$rs = pg_query($coopdb, $sql);
+$rs = pg_execute($coopdb, $stname, Array($dbdate->format('Y-m-d')));
 if ($rs !== FALSE) {
-    for ($i = 0; $row = pg_fetch_assoc($rs); $i++) {
+    while ($row = pg_fetch_assoc($rs)) {
         $station = $row["station"];
         if (!array_key_exists($station, $cities)) continue;
         $pt = new pointObj();

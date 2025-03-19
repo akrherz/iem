@@ -24,10 +24,8 @@ $wfo = substr(xssafe($wfo), 1, 3);
 $phenomena = substr(xssafe($phenomena), 0, 2);
 $significance = substr(xssafe($significance), 0, 1);
 
-$stname = uniqid();
-pg_prepare(
+$stname = iem_pg_prepare(
     $postgis,
-    $stname,
     "SELECT polygon_begin at time zone 'UTC' as utc_polygon_begin, ".
     "ST_xmax(geom), ST_ymax(geom),
         ST_xmin(geom), ST_ymin(geom), *,

@@ -22,7 +22,7 @@ $tstring = sprintf("%s-%02d-01", $year, intval($month));
 // sigh
 if ($tby == "month") {
     if ($by == "station") {
-        $rs = pg_prepare($dbconn, "MYSELECT", "select id, network, name,
+        $stname = iem_pg_prepare($dbconn, "select id, network, name,
         count(*) as total,
         sum(case when pday >= 0 then 1 else 0 end) as pobs, 
         sum(case when snow >= 0 then 1 else 0 end) as sobs, 
@@ -34,7 +34,7 @@ if ($tby == "month") {
         and t.wfo = $2 and t.network ~* 'COOP' GROUP by id, network, name
         ORDER by id ASC");
     } else {
-        $rs = pg_prepare($dbconn, "MYSELECT", "select day,
+        $stname = iem_pg_prepare($dbconn, "select day,
      count(*) as total,
      sum(case when pday >= 0 then 1 else 0 end) as pobs, 
      sum(case when snow >= 0 then 1 else 0 end) as sobs, 
@@ -49,7 +49,7 @@ if ($tby == "month") {
 } else {
     $tlabel = "year: {$year}";
     if ($by == "station") {
-        $rs = pg_prepare($dbconn, "MYSELECT", "select id, network, name,
+        $stname = iem_pg_prepare($dbconn, "select id, network, name,
         count(*) as total,
         sum(case when pday >= 0 then 1 else 0 end) as pobs, 
         sum(case when snow >= 0 then 1 else 0 end) as sobs, 
@@ -60,7 +60,7 @@ if ($tby == "month") {
         and t.wfo = $1 and t.network ~* 'COOP' GROUP by id, network, name
         ORDER by id ASC");
     } else {
-        $rs = pg_prepare($dbconn, "MYSELECT", "select day,
+        $stname = iem_pg_prepare($dbconn, "select day,
      count(*) as total,
      sum(case when pday >= 0 then 1 else 0 end) as pobs, 
      sum(case when snow >= 0 then 1 else 0 end) as sobs, 
@@ -76,7 +76,7 @@ if ($tby == "month") {
 $bselect = make_select("by", $by, array("station" => "Station", "day" => "Day"));
 $tselect = make_select("tby", $tby, array("month" => "Month", "year" => "Year"));
 
-$data = pg_execute($dbconn, "MYSELECT", $args);
+$data = pg_execute($dbconn, $stname, $args);
 
 $t->title = "NWS COOP Obs per month per WFO";
 
@@ -86,7 +86,7 @@ $ys = yearSelect("2010", $year);
 $ms = monthSelect($month);
 
 $table = "";
-for ($i = 0; $row = pg_fetch_assoc($data); $i++) {
+while ($row = pg_fetch_assoc($data)) {
     if ($by == "station") {
         $table .= sprintf(
             "<tr><td><a href=\"/sites/site.php?station=%s&amp;network=%s\">%s</a></td>" .

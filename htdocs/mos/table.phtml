@@ -70,8 +70,7 @@ for ($now = $sts; $now <= $ets; $now += (3600 * $runsper[$model])) {
 $table .= "</tr></thead><tbody>\n";
 $sqlSelector = substr($sqlSelector, 0, -1) . ")";
 
-$stname = uniqid();
-pg_prepare($mosdb, $stname, "SELECT *, t06_1 ||'/'||t06_2 as t06, " .
+$stname = iem_pg_prepare($mosdb, "SELECT *, t06_1 ||'/'||t06_2 as t06, " .
     "t12_1 ||'/'|| t12_2 as t12 from alldata WHERE " .
     "runtime IN $sqlSelector " .
     "and station = $1 and model = $2");

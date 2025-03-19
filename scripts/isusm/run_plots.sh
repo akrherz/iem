@@ -26,7 +26,7 @@ runner "pk-wind-out" 7
 runner "avewind-out" 8
 
 fp="chill-sum"
-wget -q http://${WEBHOST}/GIS/apps/agclimate/chill.php\?direct=yes -O ${fp}.png
+wget -q http://${WEBHOST}/GIS/apps/agclimate/chill.php -O ${fp}.png
 $PQI -p "plot c 000000000000 agclimate/${fp}.png bogus png" ${fp}.png
 rm -f ${fp}.png
 

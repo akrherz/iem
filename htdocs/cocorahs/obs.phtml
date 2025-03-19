@@ -38,12 +38,10 @@ if (
 ) {
     $sortdir = "DESC";
 }
-$stname = uniqid();
 if ($single_station_mode) {
     $link = "obs.phtml?station=$station&network=$network&year={$year}&sortvar=";
-    pg_prepare(
+    $stname = iem_pg_prepare(
         $access,
-        $stname,
         <<<EOM
     SELECT s.*, t.id as station, t.name, t.county
     from cocorahs_$year s JOIN stations t
@@ -56,9 +54,8 @@ EOM
     $year = $dt->format("Y");
     $link = "obs.phtml?network=$network&date={$datestr}&sortvar=";
     $table = sprintf("cocorahs_%s", $dt->format("Y"));
-    pg_prepare(
+    $stname = iem_pg_prepare(
         $access,
-        $stname,
         <<<EOM
         SELECT s.*, t.id as station, t.name, t.county
         from $table s JOIN stations t

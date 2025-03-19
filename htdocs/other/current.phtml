@@ -11,8 +11,8 @@ $sortcol = isset($_GET["sortcol"]) ? xssafe($_GET["sortcol"]) : "station";
 $network = isset($_GET["network"]) ? xssafe($_GET["network"]) : 'OT';
 
 $mesosite = iemdb('mesosite');
-pg_prepare($mesosite, "FINDTZ", "SELECT tzname from networks where id = $1");
-$rs = pg_execute($mesosite, "FINDTZ", array($network));
+$stname = iem_pg_prepare($mesosite, "SELECT tzname from networks where id = $1");
+$rs = pg_execute($mesosite, $stname, array($network));
 if (pg_num_rows($rs) < 1) {
     $tzname = "America/Chicago";
 } else {

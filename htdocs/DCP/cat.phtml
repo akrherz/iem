@@ -53,8 +53,7 @@ $tbl = sprintf("raw%s", date("Y_m", $ts));
 $dstr = date("Y-m-d H:i", $ts);
 $ldate = date("d M Y h:i A", $ts);
 
-$stname = uniqid("select");
-$rs = pg_prepare($pgconn, $stname, "SELECT t.* from $tbl t, stations s WHERE " .
+$stname = iem_pg_prepare($pgconn, "SELECT t.* from $tbl t, stations s WHERE " .
     "valid = $1 and s.id = t.station and s.network = $2");
 
 $rs = pg_execute($pgconn, $stname, array($dstr, $network));
@@ -62,7 +61,7 @@ $rs = pg_execute($pgconn, $stname, array($dstr, $network));
 /* Load up the data into a big fat array */
 $data = array();
 $datakeys = array();
-for ($i = 0; $row = pg_fetch_assoc($rs); $i++) {
+while ($row = pg_fetch_assoc($rs)) {
     $station = $row["station"];
     if (!array_key_exists($station, $cities)) {
         continue;

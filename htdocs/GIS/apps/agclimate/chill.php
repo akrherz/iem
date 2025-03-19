@@ -13,8 +13,6 @@ $month = get_int404("month", date("m", time() - 86400 - (7 * 3600)));
 $day = get_int404("day", date("d", time() - 86400 - (7 * 3600)));
 $date = isset($_GET["date"]) ? xssafe($_GET["date"]) : $year . "-" . $month . "-" . $day;
 
-$direct = isset($_GET["direct"]) ? $_GET['direct'] : "";
-
 $ts = strtotime($date);
 
 $myStations = $ISUAGcities;
@@ -64,11 +62,33 @@ if ($month >= 9) {
 }
 
 $data = array();
-$sql = "select station, min(valid) as v from sm_hourly "
-    . "WHERE valid > '{$sdate}' and tair_c_avg < f2c(29.0) and "
-    . "valid < '{$edate}' GROUP by station";
-$rs =  pg_exec($c, $sql);
-for ($i = 0; $row = pg_fetch_assoc($rs); $i++) {
+$dbargs = array($sdate, $edate);
+$sql = <<<EOM
+    select station, min(valid) as v from sm_hourly
+    WHERE valid > $1 and tair_c_avg < f2c(29.0) and
+    valid < $2 GROUP by station
+EOM;
+$stname = iem_pg_prepare($c, $sql);
+$rs =  pg_execute($c, $stname, $dbargs);
+
+$sql = <<< EOM
+    select count(distinct valid) as c from sm_hourly 
+    WHERE station = $1 and valid > $2 and valid < $3
+    and tair_c_avg >= f2c(32.0) and tair_c_avg <= f2c(45.0)
+EOM;
+$sub_st1 = iem_pg_prepare($c, $sql);
+
+$sql = <<< EOM
+    select count(distinct valid) as c 
+    from sm_hourly WHERE station = $1 and tair_c_avg >= f2c(32)
+    and tair_c_avg <= f2c(45) 
+    and extract(year from valid) >= $2 and 
+    extract(year from valid) < extract(year from now()) and
+    $dateint
+EOM;
+$sub_st2 = iem_pg_prepare($c, $sql);
+
+while ($row = pg_fetch_assoc($rs)) {
     $bdate = $sdate;
     $key = $row["station"];
 
@@ -76,12 +96,10 @@ for ($i = 0; $row = pg_fetch_assoc($rs); $i++) {
     $data[$key]['lon'] = $ISUAGcities[$key]['lon'];
     $data[$key]['lat'] = $ISUAGcities[$key]['lat'];
 
-    $sql = "select count(distinct valid) as c from sm_hourly 
-      WHERE station = '$key' and valid > '$bdate' and valid < '$edate'
-      and tair_c_avg >= f2c(32.0) and tair_c_avg <= f2c(45.0)";
-
-    $rs2 = pg_exec($c, $sql);
-    if (pg_num_rows($rs2) == 0) continue;
+    $rs2 = pg_execute($c, $sub_st1, array($key, $row["v"], $edate));
+    if (pg_num_rows($rs2) == 0) {
+        continue;
+    }
     $r = pg_fetch_assoc($rs2, 0);
     $val = $r["c"];
 
@@ -92,13 +110,8 @@ for ($i = 0; $row = pg_fetch_assoc($rs); $i++) {
     if (!is_null($ISUAGcities[$key]["archive_begin"])) {
         $syear = intval($ISUAGcities[$key]["archive_begin"]->format("Y"));
     }
-    $sql = "select count(distinct valid) as c 
-       from sm_hourly WHERE station = '$key' and tair_c_avg >= f2c(32) and tair_c_avg <= f2c(45) 
-       and extract(year from valid) >= $syear and 
-           extract(year from valid) < extract(year from now()) and
-           $dateint ";
-    //echo $sql ."<br />";
-    $rs2 = pg_exec($c, $sql);
+
+    $rs2 = pg_execute($c, $sub_st2, array($key, $syear));
     if (pg_num_rows($rs2) == 0) continue;
     $r = pg_fetch_assoc($rs2, 0);
     if ((intval(date("Y")) - $syear - 1) == 0) continue;
@@ -130,14 +143,9 @@ iemmap_title(
     $map,
     $img,
     "Standard Chill Units [ $sdate thru " . date("Y-m-d", $ts) . " ]",
-    ($i == 0) ? 'No Data Found!' : null
+    (pg_num_rows($rs) == 0) ? 'No Data Found!' : null
 );
 $map->drawLabelCache($img);
 
-if (strlen($direct) > 0) {
-    header("Content-type: image/png");
-    echo $img->getBytes();
-} else {
-    $url = saveWebImage($img);
-    echo sprintf("<img src=\"%s\" border=\"1\">", $url);
-}
+header("Content-type: image/png");
+echo $img->getBytes();

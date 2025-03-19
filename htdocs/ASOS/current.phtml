@@ -29,8 +29,7 @@ $t->current_network = "ASOS";
 $nt = new NetworkTable($network, FALSE, TRUE);
 $cities = $nt->table;
 $mesosite = iemdb('mesosite');
-$stname = uniqid("findtz");
-pg_prepare($mesosite, $stname, "SELECT tzname from networks where id = $1");
+$stname = iem_pg_prepare($mesosite, "SELECT tzname from networks where id = $1");
 $rs = pg_execute($mesosite, $stname, array($network));
 if (pg_num_rows($rs) < 1) {
     $tzname = "America/Chicago";

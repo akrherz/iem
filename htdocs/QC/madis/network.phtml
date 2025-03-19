@@ -9,10 +9,8 @@ require_once "../../../include/mlib.php";
 $t = new MyView();
 $t->title = "Quality Control, MADIS Raw QC";
 $dbconn = iemdb("iem");
-$stname = uniqid();
-pg_prepare(
+$stname = iem_pg_prepare(
     $dbconn,
-    $stname,
     "SELECT c.*, t.id as station, t.name, " .
         "c.valid at time zone 'UTC' as uv from current_qc c JOIN stations t on " .
         "(c.iemid = t.iemid) WHERE t.network = $1"

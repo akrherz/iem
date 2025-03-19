@@ -18,17 +18,12 @@ $eventid = isset($_GET["eventid"]) ? intval($_GET["eventid"]) : 103;
 $phenomena = isset($_GET["phenomena"]) ? substr($_GET["phenomena"], 0, 2) : "SV";
 $significance = isset($_GET["significance"]) ? substr($_GET["significance"], 0, 1) : "W";
 
-$stname = uniqid();
-$rs = pg_prepare($connect, $stname, "SELECT eventid, phenomena, ".
+$stname = iem_pg_prepare($connect, "SELECT eventid, phenomena, ".
         "significance, ST_AsText(geom) as g ".
         "from sbw ".
         "WHERE vtec_year = $5 and wfo = $1 and phenomena = $2 and ". 
         "eventid = $3 and significance = $4 ".
         "and status = 'NEW'");
-if ($rs === FALSE) {
-    http_response_code(503);
-    die("Failed to prepare query");
-}
 $result = pg_execute(
     $connect,
     $stname,

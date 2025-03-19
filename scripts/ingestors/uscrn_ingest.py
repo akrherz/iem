@@ -5,7 +5,6 @@ Called from RUN_20_AFTER.sh
 
 import glob
 import os
-import subprocess
 from datetime import datetime
 from typing import Optional
 from zoneinfo import ZoneInfo
@@ -39,12 +38,6 @@ def is_within(val, floor, ceiling):
     if val < floor or val >= ceiling:
         return None
     return val
-
-
-def init_year(year):
-    """We need to do great things, for a great new year"""
-    # We need FTP first, since that does proper wild card expansion
-    subprocess.call(["wget", "-q", f"{FTP}/{year}/*.txt'"])
 
 
 def process_file(icursor, ocursor, year, filename, size, reprocess):
@@ -201,23 +194,23 @@ def process_file(icursor, ocursor, year, filename, size, reprocess):
         )
 
 
-def download(year, reprocess=False):
+def download(year, reprocess=False) -> list:
     """Go Great Things"""
-    dirname = "%s/%s" % (BASE, year)
+    dirname = f"{BASE}/{year}"
     if not os.path.isdir(dirname):
         os.makedirs(dirname)
     os.chdir(dirname)
     files = glob.glob("*.txt")
     if not files:
-        init_year(year)
-        files = glob.glob("*.txt")
+        LOG.warning("uscrn_ingest %s has no files", year)
+        return []
     queue = []
     for filename in files:
         size = os.stat(filename).st_size
         req = exponential_backoff(
             httpx.get,
             f"{URI}/{year}/{filename}",
-            headers={"Range": "bytes=%s-%s" % (size, size + 16000000)},
+            headers={"Range": f"bytes={size}-{size + 16000000}"},
             timeout=30,
         )
         # No new data

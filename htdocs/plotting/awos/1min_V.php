@@ -17,12 +17,9 @@ $day = get_int404("day", date("d", time() - 86400));
 
 $myTime = strtotime($year . "-" . $month . "-" . $day);
 
-
-
 $titleDate = date("M d, Y", $myTime);
 $tableName = sprintf("t%s", date("Y_m", $myTime));
 $sqlDate = date("Y-m-d", $myTime);
-
 
 $mph = array();
 $drct = array();
@@ -37,8 +34,7 @@ $missing = 0;
 
 /** Time to get data from database **/
 $connection = iemdb("awos");
-$stname = uniqid("select");
-$rs = pg_prepare($connection, $stname, "SELECT " .
+$stname = iem_pg_prepare($connection, "SELECT " .
     "to_char(valid, 'HH24:MI') as tvalid, sknt, drct from " .
     "alldata WHERE station = $1 and " .
     "  valid >= $2 and valid < $3 ORDER by tvalid");

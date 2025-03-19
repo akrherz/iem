@@ -15,9 +15,9 @@ $nt = new NetworkTable(array("KCCI", "KIMT", "KELO"));
 $cities = $nt->table;
 
 $station = isset($_GET["station"]) ? xssafe($_GET["station"]) : "SKCI4";
-$year = get_int404("year", date("Y"));
-$month = get_int404("month", date("m"));
-$day = get_int404("day", date("d"));
+$year = get_int404("year", die("No Year set"));
+$month = get_int404("month", die("No Month set"));
+$day = get_int404("day", die("No Day set"));
 $myTime = mktime(0, 0, 0, $month, $day, $year);
 $yesterday = mktime(0, 0, 0, date("m"), date("d"), date("Y")) - 96400;
 
@@ -26,12 +26,8 @@ $yesterday = mktime(0, 0, 0, date("m"), date("d"), date("Y")) - 96400;
 $dbconn = iemdb("snet");
 $tbl = sprintf("t%s", date("Y_m", $myTime));
 $pcol = "";
-$stname = uniqid();
-$rs = pg_prepare($dbconn, $stname, "SELECT * $pcol from $tbl 
+$stname = iem_pg_prepare($dbconn, "SELECT * $pcol from $tbl 
                  WHERE station = $1 and date(valid) = $2 ORDER by valid ASC");
-if ($rs === FALSE) {
-    die("Prepare failed: " . pg_last_error($dbconn));
-}
 $rs = pg_execute($dbconn, $stname, array($station, date("Y-m-d", $myTime)));
 if (pg_num_rows($rs) == 0) {
     $led = new DigitalLED74();

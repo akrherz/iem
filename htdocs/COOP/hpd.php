@@ -19,18 +19,17 @@ $dselect = daySelect2($day, "day");
 $table = "<p>Please select a station and date.</p>";
 if ($station) {
     $dbconn = iemdb('other');
-    $rs = pg_prepare(
+    $stname = iem_pg_prepare(
         $dbconn,
-        "SELECT",
         "select * from hpd_alldata WHERE station = $1 and valid >= $2 " .
             "and valid < $3 ORDER by valid ASC"
     );
     $valid = mktime(0, 0, 0, $month, $day, $year);
     $sts = date("Y-m-d 00:00", $valid);
     $ets = date("Y-m-d 23:59", $valid);
-    $rs = pg_execute($dbconn, "SELECT", array($station, $sts, $ets));
+    $rs = pg_execute($dbconn, $stname, array($station, $sts, $ets));
     $table = '<table class="table table-striped"><tr><th>Valid</th><th>Precip</th></tr>';
-    for ($i = 0; $row = pg_fetch_assoc($rs); $i++) {
+    while ($row = pg_fetch_assoc($rs)) {
         $table .= sprintf(
             "<tr><td>%s</td><td>%s</td></tr>",
             $row["valid"],

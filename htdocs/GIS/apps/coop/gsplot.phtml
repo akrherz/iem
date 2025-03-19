@@ -19,7 +19,7 @@ $emonth = get_int404("emonth", date("m", time() - 86400));
 $eday = get_int404("eday", date("d", time() - 86400));
 $network = isset($_REQUEST["network"]) ? xssafe($_REQUEST["network"]) : "IACLIMATE";
 if (strlen($network) > 9){
-    xssafe("<script>");
+    xssafe("<tag>");
 }
 
 $nt = new NetworkTable($network);
@@ -55,8 +55,7 @@ $tr .= "# Download From: {$EXTERNAL_BASEURL}/GIS/apps/coop/gsplot.phtml
 $state = substr($network, 0, 2);
 
 /* Query the obs */
-$stname = uniqid();
-pg_prepare($coopdb, $stname, <<<EOM
+$stname = iem_pg_prepare($coopdb, <<<EOM
 WITH data as (
   SELECT station,
   sum(precip) as s_rainfall,
@@ -126,7 +125,7 @@ $tr .= sprintf(
     'CLIM_CDD65',
     'CLIM_HDD65'
 );
-for ($i = 0; $row = pg_fetch_assoc($rs); $i++) {
+while ($row = pg_fetch_assoc($rs)) {
 
     $ukey = $row["station"];
     if (!isset($cities[$ukey])) continue;

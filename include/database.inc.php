@@ -1,6 +1,26 @@
 <?php
 // Avoid circular includes here!
 
+/**
+ * Prepare a query, die if it fails
+ * @param PgSql\Connection $dbconn database connection
+ * @param string $sql SQL query
+ * @return string the statement name
+ */
+function iem_pg_prepare($dbconn, $sql)
+{
+    $stname = uniqid();
+    $res = pg_prepare($dbconn, $stname, $sql);
+    if ($res === FALSE) {
+        // Thought here is that erroring here is likely a code bug that 
+        // should be fixed, so we die here.
+        http_response_code(500);
+        error_log(pg_last_error($dbconn));
+        die("Aborting, failed to prepare database query.");
+    }
+    return $stname;
+}
+
 // Helper to get a dbconn string
 function get_dbconn_str($dbname)
 {

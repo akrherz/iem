@@ -42,14 +42,13 @@ function calcGDD($high, $low)
     if ($high < 50) return 0.00;
     return (($high + $low) / 2.00) - 50.00;
 }
-$stname = uniqid("gdd");
 if (strrpos($network, "CLIMATE") > 0) {
-    pg_prepare($coopdb, $stname, "SELECT high as max_tmpf, low as min_tmpf, day from 
+    $stname = iem_pg_prepare($coopdb, "SELECT high as max_tmpf, low as min_tmpf, day from 
     alldata WHERE station = $1 and day between $2 and $3 " .
         " ORDER by day ASC");
     $rs = pg_execute($coopdb, $stname, array($station, $sdate, $edate));
 } else {
-    pg_prepare($iem, $stname, "SELECT max_tmpf, min_tmpf, day from summary_$year s JOIN stations t
+    $stname = iem_pg_prepare($iem, "SELECT max_tmpf, min_tmpf, day from summary_$year s JOIN stations t
     ON (t.iemid = s.iemid) 
         WHERE id = $1 and day between $2 and $3 " .
         "and network = $4 ORDER by day ASC");
@@ -61,20 +60,19 @@ $aobs = array();
 $atot = 0;
 $atimes = array();
 $zeros = array();
-for ($i = 0; $row = pg_fetch_assoc($rs); $i++) {
+while ($row = pg_fetch_assoc($rs)) {
     $hi = (float)$row["max_tmpf"];
     $lo = (float)$row["min_tmpf"];
     $gdd = calcGDD($hi, $lo);
     $atot += $gdd;
-    $aobs[$i] = $atot;
-    $obs[$i] = $gdd;
-    $zeros[$i] = 0;
-    $atimes[$i] = strtotime("2000-" . substr($row["day"], 5, 15));
+    $aobs[] = $atot;
+    $obs[] = $gdd;
+    $zeros[] = 0;
+    $atimes[] = strtotime("2000-" . substr($row["day"], 5, 15));
 }
 
 /* Now we need the climate data */
-$stname = uniqid("gdd");
-pg_prepare($coopdb, $stname, "SELECT gdd50, valid from climate
+$stname = iem_pg_prepare($coopdb, "SELECT gdd50, valid from climate
         WHERE station = $1 and valid between $2 and $3
         ORDER by valid ASC");
 $rs = pg_execute($coopdb, $stname, array($climate_site, $s2date, $e2date));

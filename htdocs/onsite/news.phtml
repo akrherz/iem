@@ -17,25 +17,21 @@ $content = <<< EOM
 EOM;
 
 if ($id > 0) {
-    $stname = uniqid("reads");
-    $rs = pg_prepare($dbconn, $stname, "UPDATE news SET views = views + 1 
+    $stname = iem_pg_prepare($dbconn, "UPDATE news SET views = views + 1 
       WHERE id = $1");
     pg_execute($dbconn, $stname, array($id));
-    $stname = uniqid("SELECTONE");
-    pg_prepare($dbconn, $stname, "SELECT *, 
+    $stname = iem_pg_prepare($dbconn, "SELECT *, 
       to_char(entered, 'YYYY-MM-DD HH:MI AM') as webdate 
       from news WHERE id = $1");
     $result = pg_execute($dbconn, $stname, array($id));
 } else if ($q != "") {
-    $stname = uniqid("SEARCH");
-    pg_prepare($dbconn, $stname, "SELECT *, 
+    $stname = iem_pg_prepare($dbconn, "SELECT *, 
       to_char(entered, 'YYYY-MM-DD HH:MI AM') as webdate 
       from news WHERE (title ~* $1 or body ~* $1) 
       ORDER by entered DESC");
     $result = pg_execute($dbconn, $stname, array($q));
 } else if (!is_null($tag)) {
-    $stname = uniqid("SEARCH");
-    pg_prepare($dbconn, $stname, "SELECT *,
+    $stname = iem_pg_prepare($dbconn, "SELECT *,
       to_char(entered, 'YYYY-MM-DD HH:MI AM') as webdate
       from news WHERE tags @> Array[$1]::varchar[]
       ORDER by entered DESC");
@@ -44,7 +40,7 @@ if ($id > 0) {
     $q = "SELECT *, to_char(entered, 'YYYY-MM-DD HH:MI AM') as webdate 
            from news ORDER by entered DESC LIMIT 1";
     $result = pg_exec($dbconn, $q);
-    $row = pg_fetch_assoc($result, 0);
+    $row = pg_fetch_assoc($result);
     $id = intval($row["id"]);
 }
 
@@ -67,12 +63,12 @@ function print_tags($str)
     return $s;
 }
 
-for ($i = 0; $i < pg_num_rows($result) && $row = pg_fetch_assoc($result, $i); $i++) {
+while ($row = pg_fetch_assoc($result)) {
     $id = $row["id"];
     $content .= '<div class="panel panel-success">';
     $content .= "<div class=\"panel-heading\"><span class=\"badge\">{$row["views"]} Views</span> " . $row["title"] . "</div>";
-    $l = sprintf("<a href='news.phtml?id=%s'>ID #%s</a> ", $id, $id);
-    $content .= "<button type=\"button\" class=\"btn btn-default btn-xs\">Permalink: " . $l . "</button>";
+    $link = sprintf("<a href='news.phtml?id=%s'>ID #%s</a> ", $id, $id);
+    $content .= "<button type=\"button\" class=\"btn btn-default btn-xs\">Permalink: {$link}</button>";
     $content .= "<button type=\"button\" class=\"btn btn-default btn-xs\">Date: " . $row["webdate"] . "</button>";
     $content .= "<button type=\"button\" class=\"btn btn-default btn-xs\">Author: " . $row["author"] . "</button>";
     if (!is_null($row["tags"])) {

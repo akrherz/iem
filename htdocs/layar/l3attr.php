@@ -11,16 +11,15 @@ $center_lat = isset($_GET["lat"]) ? floatval(xssafe($_GET["lat"])): 58.1;
 $center_lng = isset($_GET["lon"]) ? floatval(xssafe($_GET["lon"])): -97.0;
 $radius = isset($_GET["radius"]) ? floatval(xssafe($_GET["radius"])): 2000.0; # in meters
 
-$rs = pg_prepare($postgis, "SELECT", "SELECT ST_x(geom) as lon, ST_y(geom) as lat,
+$stname = iem_pg_prepare($postgis, "SELECT ST_x(geom) as lon, ST_y(geom) as lat,
      ST_distance(ST_transform(geom,9311), 
        ST_transform(
-        ST_Point($center_lng, $center_lat, 4326),9311)) as dist,
+        ST_Point($1, $2, 4326),9311)) as dist,
       * from nexrad_attributes WHERE ST_distance(ST_transform(geom,9311), 
        ST_transform(
-        ST_Point($center_lng, $center_lat, 4326),9311)) < $radius");
+        ST_Point($1, $2, 4326),9311)) < $3");
 
-//header('Content-type: application/json');
-$rs = pg_execute($postgis, "SELECT", Array());
+$rs = pg_execute($postgis, $stname, Array($center_lng, $center_lat, $radius));
 if (pg_num_rows($rs) == 0){
   $json = array("hotspots"=> Array(), "layer"=>"nexradl3attr", "errorString"=>"Sorry, no attributes close to you right now!", "morePages"=>false, "errorCode"=>21, "nextPageKey"=>null);
   echo json_encode($json);

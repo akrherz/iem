@@ -59,9 +59,8 @@ $asos = iemdb("asos");
 pg_query($postgis, "SET TIME ZONE 'UTC'");
 pg_query($asos, "SET TIME ZONE 'UTC'");
 
-$rs = pg_prepare(
+$find_stname = iem_pg_prepare(
     $postgis,
-    "FIND",
     "SELECT string_agg(ugc::text, ',') as a, eventid, issue, " .
         "expire from warnings_$year WHERE wfo = $1 and phenomena =  $4 and " .
         "significance = $5 and eventid >= $2 and eventid < $3 " .
@@ -70,10 +69,10 @@ $rs = pg_prepare(
 
 $station2ugc = array();
 $ugc2station = array();
-$rs = pg_prepare($postgis, "STATIONS", "SELECT id, ugc_zone from stations " .
+$stname = iem_pg_prepare($postgis, "SELECT id, ugc_zone from stations " .
     "where wfo = $1 and network ~* 'ASOS'");
-$rs = pg_execute($postgis, "STATIONS", array($wfo3));
-for ($i = 0; $row = pg_fetch_assoc($rs); $i++) {
+$rs = pg_execute($postgis, $stname, array($wfo3));
+while ($row = pg_fetch_assoc($rs)) {
     if (!array_key_exists($row["ugc_zone"], $ugc2station)) {
         $ugc2station[$row["ugc_zone"]] = array();
     }
@@ -166,11 +165,11 @@ function c6($hidx, $thres)
 
 $table = "";
 
-$rs = pg_execute($postgis, "FIND", array(
+$rs = pg_execute($postgis, $find_stname, array(
     $wfo3, $sid, $eid, $phenomena,
     $significance
 ));
-if ($rs === FALSE) xssafe("</script>");
+if ($rs === FALSE) xssafe("<tag>");
 for ($i = 0; $row = pg_fetch_assoc($rs); $i++) {
     $ar = explode(",", $row["a"]);
     $issue = $row["issue"];
