@@ -995,6 +995,7 @@ def plotter(ctx: dict):
                 clevlabels=cl,
                 labelbuffer=1,  # Texas yall
                 extend="neither",
+                discontinued=True,
                 is_firewx=(phenomena == "FW"),
             )
         else:
@@ -1006,6 +1007,7 @@ def plotter(ctx: dict):
                 lblformat=ctx.get("lblformat", "%s"),
                 labelbuffer=1,  # Texas yall
                 extend=ctx.get("extend", "both"),
+                discontinued=True,
                 is_firewx=(phenomena == "FW"),
             )
     else:
