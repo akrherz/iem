@@ -15,14 +15,12 @@ $valid = isset($_GET["valid"]) ? DateTime::createFromFormat("Y-m-d H:i", $_GET['
 function segmentSelect($dbconn, $year, $month, $selected, $name = "segid")
 {
     $s = "<select name=\"$name\" class=\"iemselect2\">\n";
-    $stname = uniqid();
-    pg_prepare(
+    $stname = iem_pg_prepare(
         $dbconn,
-        $stname,
         "SELECT segid, major, minor from roads_base "
             . " WHERE archive_begin <= $1 and archive_end > $1 ORDER by major ASC"
     );
-    $rs = pg_execute($dbconn, $stname, array("{$year}-{$month}-01"));
+    $rs = pg_execute($dbconn, array("{$year}-{$month}-01"));
     while ($row = pg_fetch_assoc($rs)) {
         $s .= "<option value=\"" . $row["segid"] . "\" ";
         if ($row["segid"] == $selected) $s .= "SELECTED";
@@ -81,12 +79,12 @@ if (isset($_GET["month"]) && isset($_GET["segid"])) {
           <thead><tr><th>Date:</th><th>Report Time:</th><th>Road Segment</th>
           <th>Condition</th></tr></thead><tbody>";
 
-    $rs = pg_prepare($dbconn, "SELECT", "SELECT c.label, l.valid, "
+    $stname = iem_pg_prepare($dbconn, "SELECT c.label, l.valid, "
         . "b.major, b.minor from roads_base b, "
         . "roads_log l, roads_conditions c WHERE l.segid = $1 and "
         . "extract(month from l.valid) = $2 and l.cond_code = c.code "
         . "and b.segid = l.segid ORDER by valid ASC");
-    $rs = pg_execute($dbconn, "SELECT", array($segid, $month));
+    $rs = pg_execute($dbconn, $stname, array($segid, $month));
 
     $lastcond = "";
     while ($row = pg_fetch_assoc($rs)) {
@@ -118,10 +116,8 @@ if (isset($_GET["month"]) && isset($_GET["segid"])) {
     $content .= "<br /><table id='table1' class=\"table table-condensed table-striped\">
           <thead><tr><th>Date:</th><th>Report Time:</th><th>Road Segment</th>
           <th>Condition</th></tr></thead><tbody>";
-    $stname = uniqid();
-    pg_prepare(
+    $stname = iem_pg_prepare(
         $dbconn,
-        $stname,
         "SELECT c.label, l.valid, b.major, b.minor, " .
             "b.segid from roads_base b, roads_log l, roads_conditions c " .
             "WHERE l.valid > $1 and l.valid < $2 and l.cond_code = c.code " .

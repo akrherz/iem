@@ -86,15 +86,15 @@ previous winter seasons that these maps are available for:
 EOM;
 }
 
-$rs = pg_prepare($pgconn, "__SELECT", "SELECT *, 
+$stname = iem_pg_prepare($pgconn, "SELECT *, 
       to_char(valid, 'YYYY/MM/YYMMDD') as imageref, 
       to_char(valid, 'DD Mon YYYY HH:MI AM') as webdate,
       to_char(valid, 'YYYY-MM-DD') as permalink from feature
       WHERE tags ~* $1
       ORDER by valid DESC");
-$rs = pg_execute($pgconn, "__SELECT", array($tag));
+$rs = pg_execute($pgconn, $stname, array($tag));
 $content = "";
-for ($i = 0; $row = pg_fetch_assoc($rs); $i++) {
+while ($row = pg_fetch_assoc($rs)) {
     $tokens = preg_split("/,/", $row["tags"]);
     $found = False;
     foreach ($tokens as $k => $v) {

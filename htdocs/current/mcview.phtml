@@ -9,9 +9,8 @@ require_once "../../include/forms.php";
 require_once "../../include/database.inc.php";
 $postgis = iemdb("postgis");
 
-$rs = pg_prepare(
+$stname = iem_pg_prepare(
     $postgis,
-    "SELECT",
     "select * from watches " .
         "WHERE issued <= $1 and expired >= $1 ORDER by sel ASC"
 );
@@ -82,7 +81,7 @@ if ($mode == "realtime") {
         $ts = $ots;
 }
 
-$rs = pg_execute($postgis, "SELECT", array(date("Y-m-d H:i", $ts)));
+$rs = pg_execute($postgis, $stname, array(date("Y-m-d H:i", $ts)));
 $watches = "<div style=\"border: 1px solid #000; padding-left: 10px; background: #eee; width: 100%;\"><strong>Valid Watches:</strong> ";
 while ($row = pg_fetch_assoc($rs)) {
     $issued = strtotime($row["issued"]);

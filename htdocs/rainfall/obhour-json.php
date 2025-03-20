@@ -10,9 +10,10 @@ $tstr = isset($_GET["ts"]) ? $_GET["ts"] : gmdate("YmdHi");
 $ts = DateTime::createFromFormat("YmdHi", $tstr, new DateTimeZone(("UTC")));
 
 $data = array();
-$stname = uniqid("select");
-$res = pg_prepare($mesosite, $stname, 
-    "SELECT id, name from stations WHERE network = $1");
+$stname = iem_pg_prepare(
+    $mesosite,
+    "SELECT id, name from stations WHERE network = $1"
+);
 $rs = pg_execute($mesosite, $stname, array($network));
 while ($z = pg_fetch_assoc($rs)) {
     $data[$z["id"]] = array(
@@ -47,8 +48,7 @@ foreach ($intervals as $key => $interval) {
     }
     $tstamps[$interval] = $ts0->format("Y-m-d H:i") . "+00";
 }
-$stname = uniqid("select");
-$rs = pg_prepare($iem, $stname, <<<EOM
+$stname = iem_pg_prepare($iem, <<<EOM
     select id as station,
     sum(case when valid >= $1 then phour else 0 end) as p1,
     sum(case when valid >= $2 then phour else 0 end) as p3,
@@ -67,22 +67,26 @@ $rs = pg_prepare($iem, $stname, <<<EOM
     valid >= $13 and valid < $14 and t.network = $15
     GROUP by t.id
 EOM);
-$rs = pg_execute($iem, $stname, array(
-    $tstamps[1],
-    $tstamps[3],
-    $tstamps[6],
-    $tstamps[12],
-    $tstamps[24],
-    $tstamps[48],
-    $tstamps[72],
-    $tstamps[168],
-    $tstamps[720],
-    $tstamps[2160],
-    $tstamps[8760],
-    $tstamps["midnight"],
-    $tstamps[8760],
-    $ts->format("Y-m-d H:i") ."+00",
-    $network)
+$rs = pg_execute(
+    $iem,
+    $stname,
+    array(
+        $tstamps[1],
+        $tstamps[3],
+        $tstamps[6],
+        $tstamps[12],
+        $tstamps[24],
+        $tstamps[48],
+        $tstamps[72],
+        $tstamps[168],
+        $tstamps[720],
+        $tstamps[2160],
+        $tstamps[8760],
+        $tstamps["midnight"],
+        $tstamps[8760],
+        $ts->format("Y-m-d H:i") . "+00",
+        $network
+    )
 );
 while ($z = pg_fetch_assoc($rs)) {
     foreach ($intervals as $key => $interval) {

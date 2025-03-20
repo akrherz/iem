@@ -31,8 +31,7 @@ foreach ($wtype as $key => $val) {
 if (isset($_REQUEST["wfo"])) {
     /* Check to make sure we have warnings first! */
     $postgis = iemdb("postgis");
-    $stname = uniqid("select");
-    $rs = pg_prepare($postgis, $stname, "SELECT issue from sbw_{$year} " .
+    $stname = iem_pg_prepare($postgis, "SELECT issue from sbw_{$year} " .
         "WHERE wfo = $1 and phenomena in ('SV','TO','FF', 'MA', 'SQ', 'DS') " .
         "and significance = 'W' and issue BETWEEN $2 and $3");
     $rs = pg_execute($postgis, $stname, array(
@@ -44,8 +43,7 @@ if (isset($_REQUEST["wfo"])) {
         time period, please try again!";
     } else {
         $mesosite = iemdb("mesosite");
-        $stname = uniqid("insert");
-        pg_prepare($mesosite, $stname, "INSERT into racoon_jobs(wfo, sts, ets,
+        $stname = iem_pg_prepare($mesosite, "INSERT into racoon_jobs(wfo, sts, ets,
                 radar, nexrad_product, wtype) values ($1,$2,$3,$4,$5,$6) 
                 returning jobid");
         $rs = pg_execute($mesosite, $stname, array(

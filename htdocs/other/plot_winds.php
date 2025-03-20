@@ -17,10 +17,8 @@ $dirRef = date("Y_m/d", $myTime);
 $titleDate = date("M d, Y", $myTime);
 
 $db = iemdb("other");
-$stname = uniqid("select");
-$rs = pg_prepare(
+$stname = iem_pg_prepare(
     $db,
-    $stname,
     "SELECT * from alldata WHERE station = $1 and valid >= $2 and valid < $3 ORDER by valid ASC",
 );
 $rs = pg_execute(

@@ -20,8 +20,8 @@ $dirRef = date("Y_m/d", $myTime);
 $titleDate = date("M d, Y", $myTime);
 
 $db = iemdb("other");
-$rs = pg_prepare($db, "SELECT",  "SELECT * from t{$year} WHERE station = $1 and date(valid) = $2 ORDER by valid ASC");
-$rs = pg_execute($db, "SELECT", array($station, date("Y-m-d", $myTime)));
+$stname = iem_pg_prepare($db, "SELECT * from t{$year} WHERE station = $1 and date(valid) = $2 ORDER by valid ASC");
+$rs = pg_execute($db, $stname, array($station, date("Y-m-d", $myTime)));
 
 $tmpf = array();
 $dwpf = array();

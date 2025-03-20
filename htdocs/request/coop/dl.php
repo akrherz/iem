@@ -97,14 +97,13 @@ if (in_array('daycent', $vars)) {
      */
     if (sizeof($stations) > 1) die("Sorry, only one station request at a time for daycent option");
     if ($selectAll) die("Sorry, only one station request at a time for daycent option");
-    $stname = uniqid();
-    pg_prepare($connection, $stname, "SELECT extract(doy from day) as doy, high, low, precip,
+    $stname = iem_pg_prepare($connection, "SELECT extract(doy from day) as doy, high, low, precip,
         month, year, extract(day from day) as lday 
         from $table WHERE station = ANY($1) and day >= '" . $sqlTS1 . "' and day <= '" . $sqlTS2 . "' ORDER by day ASC");
     $rs = pg_execute($connection, $stname, array($stationSQL));
     echo "Daily Weather Data File (use extra weather drivers = 0):\n";
     echo "\n";
-    for ($i = 0; $row = pg_fetch_assoc($rs); $i++) {
+    while ($row = pg_fetch_assoc($rs)) {
         echo sprintf(
             "%s %s %s %s %.2f %.2f %.2f\n",
             $row["lday"],
@@ -134,14 +133,13 @@ tmax  1981  30.84  28.71  27.02  16.84  12.88   6.82   8.21   7.70  11.90  20.02
         die("Sorry, only one station request at a time for century option");
     }
     $table = sprintf("alldata_%s", substr($stations[0], 0, 2));
-    $stname = uniqid();
-    pg_prepare($connection, $stname, "SELECT year, month, avg(high) as avgh, " .
+    $stname = iem_pg_prepare($connection, "SELECT year, month, avg(high) as avgh, " .
         " avg(low) as avgl, sum(precip) as p" .
         " from $table WHERE station = ANY($3) and " .
         " year >= $1 and year <= $2 GROUP by year, month");
     $rs = pg_execute($connection, $stname, array($year1, $year2, $stationSQL));
     $monthly = array();
-    for ($i = 0; $row = pg_fetch_assoc($rs); $i++) {
+    while ($row = pg_fetch_assoc($rs)) {
         $key = sprintf("%s%02d", $row["year"], $row["month"]);
         $monthly[$key] = array(
             "tmax" => f2c($row["avgh"]),
@@ -200,15 +198,14 @@ year          day           radn          maxt          mint          rain
 
     $sql = "SELECT avg((high+low)/2) from climate51 " .
         " WHERE station = ANY($1) ";
-    pg_prepare($connection, "TBD", $sql);
-    $rs = pg_execute($connection, 'TBD', array($stationSQL));
+    $stname = iem_pg_prepare($connection, $sql);
+    $rs = pg_execute($connection, $stname, array($stationSQL));
     $row = pg_fetch_assoc($rs, 0);
     $response .= sprintf(
         "tav = %.3f (oC) ! annual average ambient temperature\n",
         f2c($row['avg'])
     );
-    $stname = uniqid();
-    pg_prepare($connection, $stname, "select max(avg) as h, min(avg) as l from
+    $stname = iem_pg_prepare($connection, "select max(avg) as h, min(avg) as l from
             (SELECT extract(month from valid) as month, avg((high+low)/2.)
              from climate51 
              WHERE station = ANY($1) GROUP by month) as foo ");
@@ -222,15 +219,14 @@ year          day           radn          maxt          mint          rain
     $response .= "year          day           radn          maxt          mint          rain
 ()            ()            (MJ/m^2)      (oC)          (oC)          (mm)\n";
 
-    $stname = uniqid();
-    pg_prepare($connection, $stname, "SELECT extract(doy from day) as doy, high," .
+    $stname = iem_pg_prepare($connection, "SELECT extract(doy from day) as doy, high," .
         " low, precip, month, year, extract(day from day) as lday, station, year," .
         " coalesce(narr_srad, merra_srad, hrrr_srad) as srad" .
         " from $table " .
         " WHERE station = ANY($1) and " .
         " day >= '" . $sqlTS1 . "' and day <= '" . $sqlTS2 . "' ORDER by day ASC");
     $rs = pg_execute($connection, $stname, array($stationSQL));
-    for ($i = 0; $row = pg_fetch_assoc($rs); $i++) {
+    while ($row = pg_fetch_assoc($rs)) {
         $response .= sprintf(
             " %s         %s        %.4f         %.4f      %.4f     %.2f\n",
             $row["year"],
@@ -251,15 +247,14 @@ year          day           radn          maxt          mint          rain
      * One file per year! named StationName / StationName_YYYY.txt
      * julian day, tmax C , tmin C, precip cm seperated by space
      */
-    $stname = uniqid();
-    pg_prepare($connection, $stname, "SELECT extract(doy from day) as doy, high," .
+    $stname = iem_pg_prepare($connection, "SELECT extract(doy from day) as doy, high," .
         " low, precip, month, year, extract(day from day) as lday, station, year " .
         " from $table " .
         " WHERE station = ANY($1) and " .
         " day >= '" . $sqlTS1 . "' and day <= '" . $sqlTS2 . "' ORDER by day ASC");
     $rs = pg_execute($connection, $stname, array($stationSQL));
     $zipfiles = array();
-    for ($i = 0; $row = pg_fetch_assoc($rs); $i++) {
+    while ($row = pg_fetch_assoc($rs)) {
         $sname = str_replace(" ", "_", $cities[$row["station"]]["name"]);
         $fn = sprintf("%s/%s_%s.txt", $sname, $sname, $row["year"]);
         if (!array_key_exists($fn, $zipfiles)) {
@@ -294,8 +289,7 @@ CTRL, 1981, 2, 3.1898, 1.59032, -6.83361, 1.38607, NaN, NaN, NaN, 3
     */
     if (sizeof($stations) > 1) die("Sorry, only one station request at a time for daycent option");
     if ($selectAll) die("Sorry, only one station request at a time for daycent option");
-    $stname = uniqid();
-    pg_prepare($connection, $stname, "SELECT extract(doy from day) as doy, high," .
+    $stname = iem_pg_prepare($connection, "SELECT extract(doy from day) as doy, high," .
         " low, precip, month, year, extract(day from day) as lday, station, year," .
         " coalesce(narr_srad, merra_srad, hrrr_srad) as srad" .
         " from $table WHERE station = ANY($1) and " .
@@ -317,8 +311,7 @@ CTRL, 1981, 2, 3.1898, 1.59032, -6.83361, 1.38607, NaN, NaN, NaN, 3
     }
 } else if ($what != "plot") {
 
-    $stname = uniqid();
-    pg_prepare($connection, $stname, $sqlStr);
+    $stname = iem_pg_prepare($connection, $sqlStr);
     $rs =  pg_execute($connection, $stname, Array($stationSQL));
 
     if ($gis == "yes") {
@@ -331,7 +324,7 @@ CTRL, 1981, 2, 3.1898, 1.59032, -6.83361, 1.38607, NaN, NaN, NaN, 3
     }
     echo "\r\n";
 
-    for ($i = 0; $row = pg_fetch_assoc($rs); $i++) {
+    while ($row = pg_fetch_assoc($rs)) {
         $sid = $row["station"];
         echo $sid . $d[$delim] . $cities[$sid]["name"];
         if ($gis == "yes") {

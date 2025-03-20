@@ -10,8 +10,7 @@ $jobid = xssafe($_REQUEST["jobid"]);
 $status = "PROCESSING";
 if (isset($_REQUEST["jobid"])) {
     $mesosite = iemdb("mesosite");
-    $stname = uniqid();
-    pg_prepare($mesosite, $stname, "SELECT * from racoon_jobs where jobid = $1");
+    $stname = iem_pg_prepare($mesosite, "SELECT * from racoon_jobs where jobid = $1");
     $rs = pg_execute($mesosite, $stname, array($jobid));
     if (pg_num_rows($rs) < 1) die();
     $row = pg_fetch_assoc($rs, 0);

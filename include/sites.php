@@ -41,8 +41,7 @@ function station_helper($station)
 {
     // Attempt to help the user find this station
     $iemdb = iemdb("mesosite");
-    $stname = uniqid("find");
-    pg_prepare($iemdb, $stname, "SELECT id, name, network from stations " .
+    $stname = iem_pg_prepare($iemdb, "SELECT id, name, network from stations " .
         "WHERE id = $1");
     $rs = pg_execute($iemdb, $stname, array($station));
     if (pg_num_rows($rs) == 0) {

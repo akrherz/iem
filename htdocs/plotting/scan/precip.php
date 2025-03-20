@@ -18,8 +18,7 @@ $date = "$year-$month-$day";
 $var = "phour";
 $accum = 1;
 
-$stname = uniqid();
-$rs = pg_prepare($connection, $stname, "SELECT sknt, drct, phour,
+$stname = iem_pg_prepare($connection, "SELECT sknt, drct, phour,
         to_char(valid, 'mmdd/HH24') as tvalid 
         from alldata WHERE 
         station = $1 and date(valid) >= $2  and phour >= 0

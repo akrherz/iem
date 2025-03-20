@@ -43,8 +43,7 @@ function ugcStateSelect($state, $selected)
 {
     $state = substr(strtoupper($state), 0, 2);
     $dbconn = iemdb('postgis');
-    $stname = uniqid("select");
-    pg_prepare($dbconn, $stname, "SELECT ugc, name from ugcs WHERE end_ts is null "
+    $stname = iem_pg_prepare($dbconn, "SELECT ugc, name from ugcs WHERE end_ts is null "
         . " and substr(ugc,1,2) = $1 ORDER by name ASC");
     $rs = pg_execute($dbconn, $stname, array($state));
     $s = "<select name=\"ugc\">\n";
@@ -71,14 +70,12 @@ function selectNetworkType($nettype, $selected)
 {
     $selected = strtoupper($selected);
     $dbconn = iemdb('mesosite');
-    $stname = uniqid("select");
-    $rs = pg_prepare(
+    $stname = iem_pg_prepare(
         $dbconn,
-        $stname,
         "SELECT * from networks WHERE id ~* $1 ORDER by name ASC");
     $rs = pg_execute($dbconn, $stname, array($nettype));
     $s = "<select class=\"iemselect2\" name=\"network\">\n";
-    for ($i = 0; $row = pg_fetch_assoc($rs); $i++) {
+    while ($row = pg_fetch_assoc($rs)) {
         $s .= "<option value=\"" . $row["id"] . "\" ";
         if ($row["id"] == $selected) {
             $s .= "SELECTED";

@@ -30,7 +30,7 @@ $result = pg_execute(
     array($wfo, $phenomena, $eventid, $significance, $year)
 );
 if (pg_num_rows($result) <= 0) {
-    $rs = pg_prepare($connect, "SELECT2", "SELECT eventid, phenomena, ".
+    $stname = iem_pg_prepare($connect, "SELECT eventid, phenomena, ".
         "significance, ST_astext(u.geom) as g ". 
         "from warnings w JOIN ugcs u on (u.gid = w.gid) ".
         "WHERE w.vtec_year = $5 and w.wfo = $1 and phenomena = $2 and ".
@@ -38,7 +38,7 @@ if (pg_num_rows($result) <= 0) {
 
     $result = pg_execute(
         $connect,
-        "SELECT2",
+        $stname,
         array($wfo, $phenomena, $eventid, $significance, $year)
     );
 }

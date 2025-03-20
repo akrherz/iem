@@ -39,8 +39,7 @@ $result = pg_execute($rwisdb, $stname, array($station, $sts->format("Y-m-d H:i")
 
 $minInterval = 20;
 
-$stname = uniqid("rwis");
-pg_prepare($rwisdb, $stname, "SELECT * from sensors WHERE station = $1");
+$stname = iem_pg_prepare($rwisdb, "SELECT * from sensors WHERE station = $1");
 $r1 = pg_execute($rwisdb, $stname, array($station));
 
 $ns0 = "Sensor 1";

@@ -21,10 +21,10 @@ $sts = time() - (3. * 86400.);
 $ets = time();
 
 $times = array();
-$depths = Array(1, 3, 6, 9, 12, 18, 24, 30, 36, 42, 48, 54, 60, 66, 72);
+$depths = array(1, 3, 6, 9, 12, 18, 24, 30, 36, 42, 48, 54, 60, 66, 72);
 $data = array();
 // initialize the data array for each depth
-foreach($depths as $depth){
+foreach ($depths as $depth) {
     $data["s{$depth}temp"] = array();
 }
 
@@ -32,21 +32,20 @@ $sts = mktime(0, 0, 0, $smonth, $sday, $syear);
 $ets = $sts + ($days * 86400.0);
 
 $dbconn = iemdb('rwis');
-$stname = uniqid("plot");
-$rs = pg_prepare($dbconn, $stname, "SELECT * from alldata_soil
+$stname = iem_pg_prepare($dbconn, "SELECT * from alldata_soil
 WHERE station = $1 and valid > $2 and valid < $3 ORDER by valid ASC");
 $rs = pg_execute($dbconn, $stname, array(
     $station,
-    date("Y-m-d H:i", $sts), date("Y-m-d H:i", $ets)
+    date("Y-m-d H:i", $sts),
+    date("Y-m-d H:i", $ets)
 ));
 
-for ($i = 0; $row = pg_fetch_assoc($rs); $i++) {
+while ($row = pg_fetch_assoc($rs)) {
     $times[] = strtotime(substr($row["valid"], 0, 16));
     foreach ($depths as $j) {
         $data["s{$j}temp"][] = $row["tmpf_{$j}in"];
     }
 }
-
 
 if (pg_num_rows($rs) == 0) {
     $led = new DigitalLED74();

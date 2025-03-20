@@ -21,16 +21,12 @@ if (is_null($pil) || trim($pil) == "") {
 }
 
 $conn = iemdb("afos");
-$st_nobbb = uniqid();
-$st_bbb = uniqid();
-pg_prepare(
+$st_nobbb = iem_pg_prepare(
     $conn,
-    $st_nobbb,
     "SELECT data, bbb, entered at time zone 'UTC' as mytime, source, wmo ".
     "from products WHERE pil = $1 and entered = $2");
-pg_prepare(
+$st_bbb = iem_pg_prepare(
     $conn,
-    $st_bbb,
     "SELECT data, bbb, entered at time zone 'UTC' as mytime, source, wmo ".
     "from products WHERE pil = $1 and entered = $2 and bbb = $3");
     
@@ -53,8 +49,7 @@ function locate_product($conn, $e, $pil, $dir)
         (intval(date("m", $ts)) > 6) ? "0712" : "0106"
     );
     // first attempt shortcut
-    $stname = uniqid();
-    pg_prepare($conn, $stname, "SELECT " .
+    $stname = iem_pg_prepare($conn, "SELECT " .
         "entered at time zone 'UTC' as mytime from $table " .
         "WHERE pil = $1 and entered $sign $2 " .
         "ORDER by entered $sortdir LIMIT 1");
@@ -64,8 +59,7 @@ function locate_product($conn, $e, $pil, $dir)
     ));
     if (pg_num_rows($rs) == 0) {
         // widen the net
-        $stname = uniqid();
-        pg_prepare($conn, $stname, "SELECT " .
+        $stname = iem_pg_prepare($conn, "SELECT " .
             "entered at time zone 'UTC' as mytime from products " .
             "WHERE pil = $1 and entered $sign $2 " .
             "ORDER by entered $sortdir LIMIT 1");
@@ -89,8 +83,7 @@ function locate_product($conn, $e, $pil, $dir)
 function last_product($conn, $pil)
 {
     // Get the latest
-    $stname = uniqid();
-    $rs = pg_prepare($conn, $stname, "SELECT data, bbb, "
+    $stname = iem_pg_prepare($conn, "SELECT data, bbb, "
         . " entered at time zone 'UTC' as mytime, source from products"
         . " WHERE pil = $1"
         . " ORDER by entered DESC LIMIT 1");
@@ -225,10 +218,9 @@ EOM;
         );
         if (substr($pil, 0, 3) == "CWA") {
             $pconn = iemdb("postgis");
-            $stname = uniqid();
-            pg_prepare(
+            $stname = iem_pg_prepare(
                 $pconn,
-                $stname, "SELECT num, issue, center from cwas WHERE ".
+                "SELECT num, issue, center from cwas WHERE ".
                 "issue > $1 and issue < $2 and product_id = $3");
             $rs2 = pg_execute(
                 $pconn, $stname, array(

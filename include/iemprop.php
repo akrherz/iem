@@ -6,10 +6,8 @@ require_once dirname(__FILE__) . "/memcache.php";
 $cached_get_iemprop = cacheable("iemprop", 120)(function($propname)
 {
     $dbconn = iemdb("mesosite");
-    $stname = uniqid("iemprop");
-    $rs = pg_prepare(
+    $stname = iem_pg_prepare(
         $dbconn,
-        $stname,
         "SELECT propvalue from properties where propname = $1",
     );
     $rs = pg_execute($dbconn, $stname, array($propname));

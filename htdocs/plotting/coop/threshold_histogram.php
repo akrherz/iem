@@ -27,8 +27,7 @@ if ($station2 != '' && !array_key_exists($station2, $nt->table)) {
 
 $xdata = array();
 $ydata = array();
-$stname = uniqid("select0");
-pg_prepare($conn, $stname, "SELECT y1, count(*) from 
+$stname = iem_pg_prepare($conn, "SELECT y1, count(*) from 
           ((SELECT year as y1, low from alldata_ia 
            WHERE month IN (12) $slimiter) UNION 
           (SELECT year - 1 as y1, low from alldata_ia 
@@ -53,8 +52,7 @@ foreach ($ydata as $k => $v) {
 if ($station2 != "") {
     $slimiter = "and station = '$station2'";
     $ydata = array();
-    $stname = uniqid("select1");
-    pg_prepare($conn, $stname, "SELECT y1, count(*) from 
+    $stname = iem_pg_prepare($conn, "SELECT y1, count(*) from 
           ((SELECT year as y1, low from alldata_ia 
            WHERE month IN (12) $slimiter) UNION 
           (SELECT year - 1 as y1, low from alldata_ia 

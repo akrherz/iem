@@ -17,8 +17,7 @@ $day = get_int404("day", date("d", time() - 3 * 86400));
 
 $date = "$year-$month-$day";
 
-$stname = uniqid();
-pg_prepare($connection, $stname, "SELECT sknt, drct, 
+$stname = iem_pg_prepare($connection, "SELECT sknt, drct, 
         to_char(valid, 'mmdd/HH24') as tvalid 
         from alldata WHERE 
         station = $1 and date(valid) >= $2  

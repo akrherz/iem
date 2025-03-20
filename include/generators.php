@@ -15,10 +15,8 @@ require_once dirname(__FILE__) . "/memcache.php";
  */
 $get_website_citations = cacheable('citations')(function ($label){
     $conn = iemdb("mesosite");
-    $stname = uniqid("CITSELECT");
-    $rs = pg_prepare(
+    $stname = iem_pg_prepare(
         $conn,
-        $stname,
         "SELECT * from website_citations WHERE iem_resource = $1 ".
         "ORDER by publication_date DESC LIMIT 10");
     $rs = pg_execute($conn, $stname, array($label));
@@ -44,10 +42,8 @@ $get_news_by_tag = cacheable("newsbytag")(function($tag)
 {
     // Generate a listing of recent news items by a certain tag
     $pgconn = iemdb("mesosite");
-    $stname = uniqid("NEWSTAGSELECT");
-    $rs = pg_prepare(
+    $stname = iem_pg_prepare(
         $pgconn,
-        $stname,
         "SELECT id, entered, title from news WHERE "
             . "tags @> ARRAY[$1]::varchar[] ORDER by entered DESC LIMIT 5"
     );
@@ -71,17 +67,15 @@ $get_iemapps_tags = cacheable("iemappstags")(function($tagname)
 {
     // Get a html list for this tagname
     $pgconn = iemdb("mesosite");
-    $stname = uniqid("TAGSELECT");
-    $rs = pg_prepare(
+    $stname = iem_pg_prepare(
         $pgconn,
-        $stname,
         "SELECT name, description, url from iemapps WHERE "
             . "appid in (SELECT appid from iemapps_tags WHERE tag = $1) "
             . "ORDER by name ASC"
     );
     $rs = pg_execute($pgconn, $stname, array($tagname));
     $s = "<ul>";
-    for ($i = 0; $row = pg_fetch_assoc($rs); $i++) {
+    while ($row = pg_fetch_assoc($rs)) {
         $s .= sprintf(
             "<li><a href=\"%s\">%s</a><br />%s</li>\n",
             $row["url"],

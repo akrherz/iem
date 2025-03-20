@@ -378,7 +378,7 @@ def get_raster(ctx: dict):
             params=params,
             geom_col="geom",
             index_col=None,
-        )
+        )  # type: ignore
     if df.empty:
         raise NoDataFound("No data found for query.")
     zs = zonal_stats(
