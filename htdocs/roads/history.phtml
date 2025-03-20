@@ -20,7 +20,7 @@ function segmentSelect($dbconn, $year, $month, $selected, $name = "segid")
         "SELECT segid, major, minor from roads_base "
             . " WHERE archive_begin <= $1 and archive_end > $1 ORDER by major ASC"
     );
-    $rs = pg_execute($dbconn, array("{$year}-{$month}-01"));
+    $rs = pg_execute($dbconn, $stname, array("{$year}-{$month}-01"));
     while ($row = pg_fetch_assoc($rs)) {
         $s .= "<option value=\"" . $row["segid"] . "\" ";
         if ($row["segid"] == $selected) $s .= "SELECTED";
