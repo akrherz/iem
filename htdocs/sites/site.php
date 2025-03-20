@@ -27,10 +27,8 @@ if (
     $client_ip = getClientIp();
     // Log the request so to effectively do some DOS protection.
     $pgconn = iemdb("mesosite");
-    $stname = uniqid("site");
-    pg_prepare(
+    $stname = iem_pg_prepare(
         $pgconn,
-        $stname,
         "INSERT into weblog ".
             "(client_addr, uri, referer, http_status, x_forwarded_for) " .
             "VALUES ($1, $2, $3, $4, $5)"
@@ -146,10 +144,8 @@ EOM;
 $threading = "";
 if ((strpos($network, "CLIMATE") > 0) && (substr($station, 2, 1) == "T")) {
     $pgconn = iemdb("mesosite");
-    $stname = uniqid("site");
-    pg_prepare(
+    $stname = iem_pg_prepare(
         $pgconn,
-        $stname,
         "SELECT t.id, t.network, t.name, s.begin_date, s.end_date " .
             "from station_threading s " .
             "JOIN stations t on (s.source_iemid = t.iemid) WHERE s.iemid = $1 " .

@@ -22,8 +22,7 @@ $queryData = "";
 
 $date = "$year-$month-$day";
 
-$stname = uniqid();
-pg_prepare($connection, $stname, "SELECT c1tmpf, c2tmpf, c3tmpf, 
+$stname = iem_pg_prepare($connection, "SELECT c1tmpf, c2tmpf, c3tmpf, 
         c4tmpf, c5tmpf, srad, tmpf, valid, 
         to_char(valid, 'mmdd/HH24') as tvalid 
         from alldata WHERE 

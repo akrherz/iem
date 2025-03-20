@@ -28,8 +28,7 @@ $sql = "SELECT extract(EPOCH from valid) as epoch, $var as data,
   from current_log c, stations t WHERE t.id IN ($1,$2) and t.iemid = c.iemid 
   and valid < CURRENT_TIMESTAMP and $var > -99 ORDER by
   valid ASC";
-$stname = uniqid();
-pg_prepare($pgconn, $stname, $sql);
+$stname = iem_pg_prepare($pgconn, $sql);
 $rs = pg_execute($pgconn, $stname, Array($station1,$station2));
 
 // Assign into data arrays

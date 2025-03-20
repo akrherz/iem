@@ -8,56 +8,54 @@ $vtec_action = $reference["vtec_action"];
 $vtec_phenomena = $reference["vtec_phenomena"];
 $vtec_significance = $reference["vtec_significance"];
 
-function nice_date($val){
+function nice_date($val)
+{
     if (is_null($val)) return "not available";
-    return gmdate('d M Y H:i', strtotime($val)) ." UTC";
+    return gmdate('d M Y H:i', strtotime($val)) . " UTC";
 }
 
 $connect = iemdb("postgis");
 $has_error = false;
 $error_message = 'Unknown error occurred';
 $mywfos = array();
-if (isset($_REQUEST['location_group'])){
+if (isset($_REQUEST['location_group'])) {
     $location_group = (string) $_REQUEST['location_group'];
-    if($location_group === 'states'){
-        if(isset($_REQUEST[$location_group])){
+    if ($location_group === 'states') {
+        if (isset($_REQUEST[$location_group])) {
             $mywfos = pull_wfos_in_states($_REQUEST[$location_group]);
-            if($mywfos === null){
+            if ($mywfos === null) {
                 $has_error = true;
                 $error_message = 'Error determine relevant list of WFO to use';
-            }
-            else{
+            } else {
                 // Make sure we have at least one wfo
-                if(count($mywfos) === 0){
+                if (count($mywfos) === 0) {
                     $has_error = true;
                     $error_message = 'Unable to find any WFO in those states';
                 }
             }
-        }
-        else{
+        } else {
             $has_error = true;
             $error_message = 'No states specified';
         }
+    } elseif ($location_group === 'wfo') {
+        $wfo = isset($_GET["wfo"]) ? substr($_GET["wfo"], 0, 3) : "";
+        $mywfos = isset($_GET["wfos"]) ? $_GET["wfos"] : array();
+        if (sizeof($mywfos) == 0 && $wfo != "") {
+            $mywfos[] = $wfo;
+        }
     }
-    elseif($location_group === 'wfo'){
-        $wfo = isset($_GET["wfo"]) ? substr($_GET["wfo"],0,3) : "";
-        $mywfos = isset($_GET["wfos"]) ? $_GET["wfos"] : Array();
-        if (sizeof($mywfos) == 0 && $wfo != ""){ $mywfos[] = $wfo; }
-    }
-}
-else{
+} else {
     $has_error = true;
     $error_message = 'No location type specified';
 }
 
-if($has_error){
+if ($has_error) {
     echo $error_message;
     exit;
-}
-else{
-    if (isset($_REQUEST["year1"])){
-        $ts = mktime($_REQUEST["hour1"], $_REQUEST["minute1"],0, $_REQUEST["month1"], $_REQUEST["day1"], $_REQUEST["year1"]);
-        $ts2 = mktime($_REQUEST["hour2"], $_REQUEST["minute2"],0, $_REQUEST["month2"], $_REQUEST["day2"], $_REQUEST["year2"]);
+} else {
+    if (isset($_REQUEST["year1"])) {
+        $ts = mktime($_REQUEST["hour1"], $_REQUEST["minute1"], 0, $_REQUEST["month1"], $_REQUEST["day1"], $_REQUEST["year1"]);
+        $ts2 = mktime($_REQUEST["hour2"], $_REQUEST["minute2"], 0, $_REQUEST["month2"], $_REQUEST["day2"], $_REQUEST["year2"]);
     } else {
         $ts = isset($_GET["ts"]) ? strtotime($_GET["ts"]) : die("APIFAIL");
         $ts2 = isset($_GET["ts2"]) ? strtotime($_GET["ts2"]) : die("APIFAIL");
@@ -67,7 +65,12 @@ else{
     $tsSQL2 = date("Y-m-d H:i:00+00", $ts2);
 
     $result = pull_vtec_events_by_wfo_year(
-        $connect, $mywfos, $tsSQL, $tsSQL2, $_GET);
+        $connect,
+        $mywfos,
+        $tsSQL,
+        $tsSQL2,
+        $_GET
+    );
 }
 
 header('Content-disposition: attachment; filename=sbw_interval.kml');
@@ -97,23 +100,27 @@ echo "<?xml version=\"1.0\" encoding=\"UTF-8\"?>
       <LineStyle><width>1</width><color>ff000000</color></LineStyle>
       <PolyStyle><color>7d00ff00</color></PolyStyle>
     </Style>";
-while ($row = pg_fetch_assoc($result)){
+while ($row = pg_fetch_assoc($result)) {
     $uri = sprintf(
         "<a href=\"%s/vtec/event/%s-O-NEW-%s-%s-%s-%04d\">%s</a>",
-        $EXTERNAL_BASEURL, date('Y', strtotime($row["polygon_begin"])),
-        rectify_wfo($row["wfo"]), $row["phenomena"],
-        $row["significance"], $row["eventid"], $row["eventid"]
+        $EXTERNAL_BASEURL,
+        date('Y', strtotime($row["polygon_begin"])),
+        rectify_wfo($row["wfo"]),
+        $row["phenomena"],
+        $row["significance"],
+        $row["eventid"],
+        $row["eventid"]
     );
-  echo "<Placemark>
+    echo "<Placemark>
     <description>
         <![CDATA[
-  <p><font color=\"red\"><i>Polygon Size:</i></font> ". $row["psize"] ." sq km
+  <p><font color=\"red\"><i>Polygon Size:</i></font> " . $row["psize"] . " sq km
   <br /><font color=\"red\"><i>Event ID:</i></font> $uri
-  <br /><font color=\"red\"><i>Issued:</i></font> ". nice_date($row["issue"]) ."
-  <br /><font color=\"red\"><i>Expires:</i></font> ". nice_date($row["expire"]) ."
-  <br /><font color=\"red\"><i>Polygon Begin:</i></font> ". nice_date($row["polygon_begin"]) ."
-  <br /><font color=\"red\"><i>Polygon End:</i></font> ". nice_date($row["polygon_end"]) ."
-  <br /><font color=\"red\"><i>Status:</i></font> ". $vtec_action[$row["status"]] ."
+  <br /><font color=\"red\"><i>Issued:</i></font> " . nice_date($row["issue"]) . "
+  <br /><font color=\"red\"><i>Expires:</i></font> " . nice_date($row["expire"]) . "
+  <br /><font color=\"red\"><i>Polygon Begin:</i></font> " . nice_date($row["polygon_begin"]) . "
+  <br /><font color=\"red\"><i>Polygon End:</i></font> " . nice_date($row["polygon_end"]) . "
+  <br /><font color=\"red\"><i>Status:</i></font> " . $vtec_action[$row["status"]] . "
   <br /><font color=\"red\"><i>Hail Tag:</i></font> {$row["hailtag"]} IN
   <br /><font color=\"red\"><i>Wind Tag:</i></font> {$row["windtag"]} MPH
   <br /><font color=\"red\"><i>Tornado Tag:</i></font> {$row["tornadotag"]}
@@ -121,15 +128,16 @@ while ($row = pg_fetch_assoc($result)){
    </p>
         ]]>
     </description>
-    <styleUrl>#".$row["phenomena"]."style</styleUrl>
-    <name>". $vtec_phenomena[$row["phenomena"]] ." ". $vtec_significance[$row["significance"]]  ."</name>\n";
-  echo $row["kml"];
-  echo "</Placemark>";
+    <styleUrl>#" . $row["phenomena"] . "style</styleUrl>
+    <name>" . $vtec_phenomena[$row["phenomena"]] . " " . $vtec_significance[$row["significance"]]  . "</name>\n";
+    echo $row["kml"];
+    echo "</Placemark>";
 }
 echo "</Document>
 </kml>";
 
-function pull_wfos_in_states($state_abbreviations){
+function pull_wfos_in_states($state_abbreviations)
+{
     $db = iemdb("mesosite");
     $status = true;
     $sql = 'SELECT distinct wfo FROM stations WHERE state IN (';
@@ -138,34 +146,32 @@ function pull_wfos_in_states($state_abbreviations){
     $valid_state_count = 0;
     $wfos = array();
     $wfo_count = 0;
-    foreach($state_abbreviations as $state_abbreviation){
-        if(preg_match('#^[A-Z]{2}$#', $state_abbreviation)){
+    foreach ($state_abbreviations as $state_abbreviation) {
+        if (preg_match('#^[A-Z]{2}$#', $state_abbreviation)) {
             $sql .= $in_delimiter . '\'' . $state_abbreviation . '\'';
             $in_delimiter = ',';
             ++$valid_state_count;
-        }
-        else{
+        } else {
             $status = false;
             break;
         }
     }
-    if($status){
-        if($valid_state_count > 0 ){
+    if ($status) {
+        if ($valid_state_count > 0) {
             $sql .= ')';
             $result  = pg_query($db, $sql);
-            while ($row = pg_fetch_assoc($result)){
-                if($row['wfo'] !== null){
+            while ($row = pg_fetch_assoc($result)) {
+                if ($row['wfo'] !== null) {
                     $wfos[$wfo_count] = $row['wfo'];
                     ++$wfo_count;
                 }
             }
-        }
-        else{
+        } else {
             $status = false;
         }
     }
 
-    if(!$status){
+    if (!$status) {
         $wfos = null;
     }
 
@@ -173,15 +179,19 @@ function pull_wfos_in_states($state_abbreviations){
 }
 
 function pull_vtec_events_by_wfo_year(
-        $db, $wfos, $tsSQL, $tsSQL2, $form){
-    if(count($wfos) > 0 && ! in_array("ALL", $wfos)){
+    $db,
+    $wfos,
+    $tsSQL,
+    $tsSQL2,
+    $form
+) {
+    if (count($wfos) > 0 && ! in_array("ALL", $wfos)) {
         $wfolimiter = 'wfo IN (\'' . implode("','", $wfos) . '\') and';
-    }
-    else{
+    } else {
         $wfolimiter = '';
     }
     $pslimiter = "";
-    if (isset($form["limitps"]) && ($form["limitps"] == "yes")){
+    if (isset($form["limitps"]) && ($form["limitps"] == "yes")) {
         $pslimiter = sprintf(
             " and phenomena = '%s' and significance = '%s' ",
             $form["phenomena"],
@@ -189,13 +199,15 @@ function pull_vtec_events_by_wfo_year(
         );
     }
     $statuslimiter = " status = 'NEW' ";
-    if (isset($form["addsvs"]) && ($form["addsvs"] == "yes")){
+    if (isset($form["addsvs"]) && ($form["addsvs"] == "yes")) {
         $statuslimiter = " status != 'CAN' ";
     }
     if (isset($form["limit2"]) && ($form["limit2"] == "yes")) {
         // This is tough as the sbw table has events come in and out of
         // emergency status
-        $rs = pg_prepare($db, "SELECT-INT", <<<EOM
+        $stname_int = iem_pg_prepare(
+            $db,
+            <<<EOM
 with possible_events as (
     select distinct wfo, vtec_year, eventid, phenomena, significance from sbw
     where is_emergency and $wfolimiter coalesce(issue, polygon_begin) >= $1
@@ -210,8 +222,10 @@ with possible_events as (
     WHERE s.vtec_year = pe.vtec_year and s.wfo = pe.wfo and
     s.eventid = pe.eventid and s.phenomena = pe.phenomena and $statuslimiter
 EOM
-    );
-    $rs = pg_prepare($db, "SELECT", <<<EOM
+        );
+        $stname = iem_pg_prepare(
+            $db,
+            <<<EOM
 with possible_events as (
     select distinct wfo, vtec_year, eventid, phenomena, significance from sbw
     where is_emergency and $wfolimiter coalesce(issue, polygon_begin) <= $1
@@ -227,8 +241,8 @@ with possible_events as (
     s.eventid = pe.eventid and s.phenomena = pe.phenomena and $statuslimiter
 EOM
         );
-        } else {
-        $rs = pg_prepare($db, "SELECT-INT", "SELECT 
+    } else {
+        $stname_int = iem_pg_prepare($db, "SELECT 
             issue, expire, phenomena, significance, eventid, wfo, status,
             ST_askml(geom) as kml,
             round(ST_area(ST_transform(geom,2163)) / 1000000.0) as psize,
@@ -237,7 +251,7 @@ EOM
             WHERE $wfolimiter coalesce(issue, polygon_begin) >= $1
             and coalesce(issue, polygon_begin) <= $2
             and $statuslimiter $pslimiter");
-        $rs = pg_prepare($db, "SELECT", "SELECT
+        $stname = iem_pg_prepare($db, "SELECT
             issue, expire, phenomena, significance, eventid, wfo, status,
             ST_askml(geom) as kml,
             round(ST_area(ST_transform(geom,2163)) / 1000000.0) as psize,
@@ -247,11 +261,10 @@ EOM
             expire > $2
             and $statuslimiter $pslimiter");
     }
-    if ($tsSQL != $tsSQL2)
-    {
-        $result = pg_execute($db, "SELECT-INT",  Array($tsSQL, $tsSQL2) );
+    if ($tsSQL != $tsSQL2) {
+        $result = pg_execute($db, $stname_int, array($tsSQL, $tsSQL2));
     } else {
-        $result = pg_execute($db, "SELECT",  Array($tsSQL, $tsSQL) );
+        $result = pg_execute($db, $stname, array($tsSQL, $tsSQL));
     }
     return $result;
 }

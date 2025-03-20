@@ -45,8 +45,7 @@ while ($row = pg_fetch_assoc($rs)) {
 }
 
 $dbconn = iemdb('rwis');
-$stname = uniqid("SELECT");
-pg_prepare($dbconn, $stname, "SELECT * from alldata_traffic " .
+$stname = iem_pg_prepare($dbconn, "SELECT * from alldata_traffic " .
     "WHERE station = $1 and valid > $2 and valid < $3 ORDER by valid ASC");
 $rs = pg_execute($dbconn, $stname, array(
     $station,

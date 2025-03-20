@@ -17,8 +17,7 @@ $minute = get_int404("minute", 0);
 $ts = gmmktime($hour, $minute, 0, $month, $day, $year);
 $wfo = isset($_GET["wfo"]) ? substr(xssafe($_GET["wfo"]), 0, 3) : "MPX";
 
-$stname = uniqid();
-pg_prepare($connect, $stname, "SELECT *, ST_AsText(geom) as g, ".
+$stname = iem_pg_prepare($connect, "SELECT *, ST_AsText(geom) as g, ".
            "round(ST_area(ST_transform(geom,9311)) / 1000000.0) as psize ".
            "from sbw WHERE vtec_year = $3 and ".
            "wfo = $1 and issue <= $2 and expire > $2 ".

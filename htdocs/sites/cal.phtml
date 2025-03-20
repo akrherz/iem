@@ -28,10 +28,8 @@ $varDict = array(
 $table = "";
 if ($portfolio != null) {
     $conn = iemdb("portfolio");
-    $stname = uniqid();
-    pg_prepare(
+    $stname = iem_pg_prepare(
         $conn,
-        $stname,
         "SELECT * from iem_calibration WHERE portfolio = $1 and " .
             "station = $2 ORDER by valid DESC"
     );

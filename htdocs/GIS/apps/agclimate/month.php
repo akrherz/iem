@@ -15,11 +15,10 @@ $title = array(
 );
 if (!array_key_exists($dvar, $title)) die();
 
-$rs = pg_prepare($dbconn, "SELECT", "select station, sum({$dvar}_qc) as s,
+$stname = iem_pg_prepare($dbconn, "select station, sum({$dvar}_qc) as s,
     min(valid) as min_valid, max(valid) as max_valid from sm_daily 
     WHERE extract(month from valid) = $1 and
     extract(year from valid) = $2 GROUP by station");
-
 
 $nt = new NetworkTable("ISUSM");
 $ISUAGcities = $nt->table;
@@ -63,10 +62,10 @@ $states->draw($map, $img);
 $iards->draw($map, $img);
 $bar640t->draw($map, $img);
 
-$rs = pg_execute($dbconn, "SELECT", array($month, $year));
+$rs = pg_execute($dbconn, $stname, array($month, $year));
 $minvalid = null;
 $maxvalid = null;
-for ($i = 0; $row = pg_fetch_assoc($rs); $i++) {
+while ($row = pg_fetch_assoc($rs)) {
     $key = $row["station"];
     if ($key == "AMFI4" or $key == "AHTI4") continue;
     $minv = strtotime($row["min_valid"]);

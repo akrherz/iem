@@ -15,13 +15,12 @@ $t->title = "GIS RASTER Documentation";
 $rid = isset($_GET["rid"]) ? intval($_GET["rid"]) : 1;
 
 $table = "";
-$rs = pg_query($mesosite, "SELECT * from iemrasters
-  ORDER by name ASC");
+$rs = pg_query($mesosite, "SELECT * from iemrasters ORDER by name ASC");
 
 $rname = "";
 $runits = "";
 $urltemplate = "";
-for ($i = 0; $row = pg_fetch_assoc($rs); $i++) {
+while ($row = pg_fetch_assoc($rs)) {
     if ($rid == intval($row["id"])) {
         $rname = $row["name"];
         $runits = $row["units"];
@@ -63,10 +62,10 @@ function rgb2html($r, $g, $b)
 
 $table2 = "";
 if ($rid > 0) {
-    $rs = pg_prepare($mesosite, "-SELECT", "SELECT * from iemrasters_lookup"
+    $stname = iem_pg_prepare($mesosite, "SELECT * from iemrasters_lookup"
         . " WHERE iemraster_id = $1 ORDER by coloridx ASC");
-    $rs = pg_execute($mesosite, "-SELECT", array($rid));
-    for ($i = 0; $row = pg_fetch_assoc($rs); $i++) {
+    $rs = pg_execute($mesosite, $stname, array($rid));
+    while ($row = pg_fetch_assoc($rs)) {
         $table2 .= sprintf(
             "<tr><td>%s</td><td>%s</td><td>%s</td>"
                 . "<td>%s</td><td>%s</td><td>%s</td></tr>\n",

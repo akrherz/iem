@@ -18,8 +18,7 @@ $y2label = "Volumetric Soil Moisture [%]";
 
 $date = "$year-$month-$day";
 
-$stname = uniqid();
-pg_prepare($connection, $stname, "SELECT c1smv, c2smv, c3smv, c4smv, c5smv, srad, 
+$stname = iem_pg_prepare($connection, "SELECT c1smv, c2smv, c3smv, c4smv, c5smv, srad, 
         to_char(valid, 'mmdd/HH24') as tvalid 
         from alldata WHERE 
         station = $1 and date(valid) >= $2  

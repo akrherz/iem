@@ -42,16 +42,12 @@ class NetworkTable
     (t.iemid = a.iemid) ORDER by t.name ASC
 EOM;
         $this->dbconn = iemdb("mesosite");
-        $this->stname1 = uniqid("SELECT");
-        $this->stname2 = uniqid("SELECTST");
-        pg_prepare(
+        $this->stname1 = iem_pg_prepare(
             $this->dbconn,
-            $this->stname1,
             sprintf($sql_template, "network = $1")
         );
-        pg_prepare(
+        $this->stname2 = iem_pg_prepare(
             $this->dbconn,
-            $this->stname2,
             sprintf($sql_template, "id = $1")
         );
         if (is_string($a)) {

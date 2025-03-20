@@ -11,10 +11,10 @@ $metadata = $ctx->metadata;
 // Switch this page to DCP, if necessary
 if (strpos($network, "COOP") > 0) {
     $dbconn = iemdb("mesosite");
-    pg_prepare($dbconn, "SEL", "SELECT network from stations where id = $1 and network = $2");
+    $stname = iem_pg_prepare($dbconn, "SELECT network from stations where id = $1 and network = $2");
     $rs = pg_execute(
         $dbconn,
-        "SEL",
+        $stname,
         Array(
             $station,
             str_replace("_COOP", "_DCP", $network),

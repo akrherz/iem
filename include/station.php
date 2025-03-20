@@ -27,16 +27,12 @@ class StationData
     (t.iemid = a.iemid)
 EOM;
 
-        $this->stname1 = uniqid("s1");
-        pg_prepare(
+        $this->stname1 = iem_pg_prepare(
             $dbconn,
-            $this->stname1,
             sprintf($sql_template, "id = $1 and network = $2")
         );
-        $this->stname2 = uniqid("s2");
-        pg_prepare(
+        $this->stname2 = iem_pg_prepare(
             $dbconn,
-            $this->stname2,
             sprintf($sql_template, "id = $1")
         );
 

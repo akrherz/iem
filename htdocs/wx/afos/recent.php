@@ -6,17 +6,17 @@ require_once "../../../include/database.inc.php";
 $pil = isset($_GET['pil']) ? strtoupper(substr($_GET['pil'], 0, 3)) : "AFD";
 
 $conn = iemdb("afos");
-$rs = pg_prepare($conn, "_LSELECT", "SELECT data from products " .
+$stname = iem_pg_prepare($conn, "SELECT data from products " .
     "WHERE substr(pil,1,3) = $1 " .
     "and entered between now() - '48 hours'::interval and now() " .
     "ORDER by entered DESC");
-$rs = pg_execute($conn, "_LSELECT", array($pil));
+$rs = pg_execute($conn, $stname, array($pil));
 
 $content = "";
 if (pg_num_rows($rs) < 1) {
     $content .= "ERROR: No products found in past 48 hours.";
 }
-for ($i = 0; $row = pg_fetch_assoc($rs); $i++) {
+while ($row = pg_fetch_assoc($rs)) {
     $d = preg_replace("/\r\r\n/", "\n", $row["data"]);
     $d = preg_replace("/\001/", "", $d);
     $d = preg_replace("/\x1e/", "", $d);

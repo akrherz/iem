@@ -104,8 +104,7 @@ echo $cr;
 $c = iemdb("isuag");
 $rs = array();
 $tbl = sprintf("%s", $rtype);
-$stname = uniqid();
-pg_prepare($c, $stname, "SELECT station, to_char(valid, '{$tsfmt}') as dvalid, 
+$stname = iem_pg_prepare($c, "SELECT station, to_char(valid, '{$tsfmt}') as dvalid, 
    $str_vars from $tbl 
    WHERE station = ANY($1) and
    valid BETWEEN '$str_sts' and '$str_ets'

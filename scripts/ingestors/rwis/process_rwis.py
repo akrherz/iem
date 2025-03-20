@@ -186,6 +186,7 @@ def merge(atmos, surface):
             "gust": row["MAX_WINDSPEED_KNOTS"],
             "drct": row["WIND_DIRECTION_DEG"],
             "pday": row["PRECIPITATION_ACCUMULATION"],
+            "vsby": row["VISIBILITY"],
         }
         for sid in range(4):
             try:

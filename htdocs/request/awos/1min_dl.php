@@ -107,8 +107,7 @@ if ($tz == "UTC") {
     $result = pg_exec($conn, "SET TIME ZONE 'UTC'");
 }
 
-$stname = uniqid();
-pg_prepare($conn, $stname, $sqlStr);
+$stname = iem_pg_prepare($conn, $sqlStr);
 $rs = pg_execute($conn, $stname, Array("{ " . implode(",", $stations) . " }"));
 
 if ($gis == "yes") {

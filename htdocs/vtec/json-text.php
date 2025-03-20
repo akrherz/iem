@@ -17,15 +17,14 @@ $phenomena = isset($_GET["phenomena"]) ? substr(xssafe($_GET["phenomena"]), 0, 2
 $significance = isset($_GET["significance"]) ? substr(xssafe($_GET["significance"]), 0, 1) : "W";
 $lastsvs = isset($_GET["lastsvs"]) ? xssafe($_GET["lastsvs"]) : 'n';
 
-$rs = pg_prepare(
+$stname = iem_pg_prepare(
     $connect,
-    "SELECT",
     "SELECT array_to_json(product_ids) as ja ".
     "from warnings WHERE vtec_year = $1 and wfo = $2 and ". 
     "phenomena = $3 and eventid = $4 and significance = $5 ".
     "ORDER by cardinality(product_ids) DESC LIMIT 1"
 );
-$rs = pg_execute($connect, "SELECT", Array($year, $wfo, $phenomena, $eventid, $significance));
+$rs = pg_execute($connect, $stname, Array($year, $wfo, $phenomena, $eventid, $significance));
 
 $ar = array("data" => array());
 if (pg_num_rows($rs) > 0) {

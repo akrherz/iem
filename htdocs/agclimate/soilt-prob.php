@@ -12,12 +12,10 @@ $station = isset($_GET["station"]) ? xssafe($_GET['station']) : "A130209";
 $tstr = isset($_GET["tstr"]) ? xssafe($_GET['tstr']) : "50,45,40,35,32,28,23";
 
 $conn = iemdb("isuag");
-$stname1 = uniqid("spring");
-$stname2 = uniqid("fall");
-pg_prepare($conn, $stname1, "SELECT extract(year from valid) as yr,
+$stname1 = iem_pg_prepare($conn, "SELECT extract(year from valid) as yr,
       max(extract(doy from valid)) as v from daily WHERE station = $1 and c30 < $2 and 
       extract(month from valid) < 7 and c30_f != 'e' GROUP by yr");
-pg_prepare($conn, $stname2, "SELECT extract(year from valid) as yr,
+$stname2 = iem_pg_prepare($conn, "SELECT extract(year from valid) as yr,
       min(extract(doy from valid)) as v from daily WHERE station = $1 and c30 < $2 and
       extract(month from valid) > 6 and c30_f != 'e' GROUP by yr");
 
@@ -33,7 +31,7 @@ foreach ($thresholds as $k => $thres) {
     $rs = pg_execute($conn, $stname1, array($station, $thres));
     $cnts = array();
     $yrs = pg_num_rows($rs);
-    for ($i = 0; $row = pg_fetch_assoc($rs); $i++) {
+    while ($row = pg_fetch_assoc($rs)) {
         if (!array_key_exists($row["v"], $cnts)) {
             $cnts[$row["v"]] = 0;
         }

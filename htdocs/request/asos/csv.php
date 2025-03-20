@@ -29,7 +29,7 @@ foreach ($stations as $k => $id) {
     if (isset($_REQUEST["date"])) {
         $ts = strtotime($_REQUEST["date"]);
         if (is_null($prepared)) {
-            $prepared = pg_prepare($asos, "SELECT", sprintf("SELECT station as id, valid,
+            $stname = iem_pg_prepare($asos, sprintf("SELECT station as id, valid,
             max(tmpf) as tmpf, max(dwpf) as dwpf, max(sknt) as sknt, max(drct) as drct,
             max(p01i) as phour, max(alti) as alti, max(gust) as gust, 
             max(ST_x(s.geom)) as lon, max(ST_y(s.geom)) as lat from alldata t, stations s
@@ -38,7 +38,7 @@ foreach ($stations as $k => $id) {
             and '%s'::date + '9 days'::interval GROUP by station, valid 
             ORDER by valid ASC", date("Y-m-d", $ts), date("Y-m-d", $ts)));
         }
-        $rs = pg_execute($asos, "SELECT", array($id));
+        $rs = pg_execute($asos, $stname, array($id));
     } else {
         $rs = pg_exec($access, "SELECT s.id, valid, max(tmpf) as tmpf, max(dwpf) as dwpf, 
       max(sknt) as sknt, max(drct) as drct,

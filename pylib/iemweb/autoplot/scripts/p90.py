@@ -378,7 +378,7 @@ def get_raster(ctx: dict):
             params=params,
             geom_col="geom",
             index_col=None,
-        )
+        )  # type: ignore
     if df.empty:
         raise NoDataFound("No data found for query.")
     zs = zonal_stats(
@@ -995,6 +995,7 @@ def plotter(ctx: dict):
                 clevlabels=cl,
                 labelbuffer=1,  # Texas yall
                 extend="neither",
+                discontinued=True,
                 is_firewx=(phenomena == "FW"),
             )
         else:
@@ -1006,6 +1007,7 @@ def plotter(ctx: dict):
                 lblformat=ctx.get("lblformat", "%s"),
                 labelbuffer=1,  # Texas yall
                 extend=ctx.get("extend", "both"),
+                discontinued=True,
                 is_firewx=(phenomena == "FW"),
             )
     else:
