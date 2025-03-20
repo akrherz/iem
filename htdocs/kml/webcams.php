@@ -23,12 +23,12 @@ echo <<<EOM
 EOM;
 
 $conn = iemdb("mesosite");
-pg_prepare($conn, "SELECT", "SELECT *, ST_x(geom) as lon, ST_y(geom) as lat
+$stname = iem_pg_prepare($conn, "SELECT *, ST_x(geom) as lon, ST_y(geom) as lat
         from camera_current c JOIN webcams w
         on (w.id = c.cam) WHERE 
         valid > (now() - '30 minutes'::interval) and network = $1");
-$rs = pg_execute($conn, "SELECT", Array($network)); 
-for ($i=0;$row=pg_fetch_assoc($rs);$i++)
+$rs = pg_execute($conn, $stname, Array($network)); 
+while ($row=pg_fetch_assoc($rs))
 {
   echo "<Placemark>
     <name>". str_replace('&', '&amp;', $row["name"]) ."</name>
