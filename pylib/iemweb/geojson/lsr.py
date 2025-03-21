@@ -49,6 +49,7 @@ sts=2024-01-01T00:00Z&ets=2024-12-31T23:59Z
 """
 
 from datetime import datetime, timedelta, timezone
+from typing import Optional
 
 import geopandas as gpd
 from pydantic import Field, field_validator, model_validator
@@ -298,11 +299,23 @@ def add_warnings(lsrdf: gpd.GeoDataFrame) -> None:
             lsrdf.at[idx, "prodlinks"] = products
 
 
+def get_mckey(environ: dict) -> Optional[str]:
+    """Figure out the key for this request."""
+    if environ["hours"] is None or environ["ets"] is not None:
+        return None
+    return (
+        f"geojson_lsr_{environ['hours']}_{environ['states']}_{environ['wfo']}_"
+        f"{environ['inc_ap']}"
+    ).replace(" ", "_")
+
+
 @iemapp(
     content_type="application/vnd.geo+json",
     help=__doc__,
     schema=Schema,
     parse_times=False,
+    memcacheexpire=60,
+    memcachekey=get_mckey,
 )
 def application(environ, start_response):
     """Do Something"""
@@ -339,4 +352,4 @@ def application(environ, start_response):
         r"\.0$", "", regex=True
     )
     start_response("200 OK", headers)
-    return [lsrdf.to_json().encode("ascii")]
+    return lsrdf.to_json().encode("ascii")
