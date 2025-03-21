@@ -90,7 +90,7 @@ function escapeHTML(val) {
 }
 
 function mapClickHandler(event){
-    var feature = olMap.forEachFeatureAtPixel(event.pixel,
+    const feature = olMap.forEachFeatureAtPixel(event.pixel,
         (feature2) => {
             return feature2;
         });
@@ -138,7 +138,7 @@ function stationLayerStyleFunc(feature){
     return climateStyle.enabled ? climateStyle: null;
 }
 function displayFeature(evt){
-    var features = olMap.getFeaturesAtPixel(olMap.getEventPixel(evt.originalEvent));
+    const features = olMap.getFeaturesAtPixel(olMap.getEventPixel(evt.originalEvent));
     if (features.length > 0){
         const feature = features[0];
         popup.element.hidden = false;

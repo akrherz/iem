@@ -1,3 +1,6 @@
 """implemented in /pylib/iemweb/geojson/cf6.py"""
 
-from iemweb.geojson.cf6 import application  # noqa
+from iemweb.geojson.cf6 import application
+
+# appease linter
+_ = application
