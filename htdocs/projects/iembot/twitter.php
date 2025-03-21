@@ -63,7 +63,7 @@ if (isset($_REQUEST["removeme"]) && $_REQUEST["removeme"] == "1") {
     unset($_SESSION["screen_name"]);
 }
 if (isset($_REQUEST['add']) && $channel != '' && $screen_name != '') {
-    pg_execute($pgconn, $st_addauth, array(
+    pg_execute($pgconn, $st_addsub, array(
         $_SESSION["user_id"],
         strtolower($_SESSION["screen_name"]), $channel
     ));
