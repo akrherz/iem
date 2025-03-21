@@ -135,7 +135,7 @@ $stname = iem_pg_prepare($coopdb, "SELECT station, " . $dbarray[$plot] . " as d
     and substr(station,1,2) = 'IA' and substr(station, 3, 1) not in ('T', 'C')
     and substr(station, 3, 4) != '0000' ");
 
-$rs = pg_execute($coopdb, $stname, Array($dbdate->format('Y-m-d')));
+$rs = pg_execute($coopdb, $stname, array($dbdate->format('Y-m-d')));
 if ($rs !== FALSE) {
     while ($row = pg_fetch_assoc($rs)) {
         $station = $row["station"];

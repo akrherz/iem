@@ -12,7 +12,7 @@ $t = new MyView();
 try {
     $day = isset($_GET["day"]) ? new DateTime(xssafe($_GET["day"])) : null;
 } catch (Exception $exp){
-    xssafe("<script>");
+    xssafe("<tag>");
     die();
 }
 $offset = isset($_GET["offset"]) ? intval($_GET["offset"]) : 0;
@@ -125,11 +125,6 @@ if ($row["voting"] == 't' && (intval($row["good"]) > 0 || intval($row["bad"]) > 
     if ($row["abstain"] > 0) $content .= " <br />Abstain = " . $row["abstain"];
 }
 $content .= "<br />" . printTags(is_null($row["tags"]) ? Array(): explode(",", $row["tags"]));
-
-// We fouled up for a while here and was using http:// on the homepage
-// and https:// here.  Rectify
-$fbhttpref = "https";
-if ($valid < strtotime("2016-08-09")) $fbhttpref = "http";
 
 $content .= <<<EOM
 </div>

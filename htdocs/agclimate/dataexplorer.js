@@ -204,7 +204,7 @@ $().ready(() => {
                 'placement': 'top',
                 'animation': false,
                 'html': true,
-                'content': content
+                content
             });
             $(element).popover('show');
         }

@@ -7,10 +7,11 @@ $t = new MyView();
 $t->title = "List of Daily Feature Titles";
 
 $connection = iemdb("mesosite");
-$query1 = "SELECT title, good, bad, abstain,
-      to_char(valid, 'YYYY-MM-DD') as href
-      from feature ORDER by title ASC";
-$result = pg_exec($connection, $query1);
+$sql = <<<EOM
+    SELECT title, good, bad, abstain, to_char(valid, 'YYYY-MM-DD') as href
+    from feature ORDER by title ASC
+EOM;
+$result = pg_exec($connection, $sql);
 $table = "";
 $count = pg_num_rows($result);
 for($i = 0; $row = pg_fetch_assoc($result); $i ++) {

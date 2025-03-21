@@ -1,10 +1,10 @@
 /* global $, flowplayer */
 
 // https://stackoverflow.com/questions/5202085
-String.prototype.rsplit = function (sep, maxsplit) {
-    var split = this.split(sep);
+function rsplit(val, sep, maxsplit) {
+    const split = val.split(sep);
     return maxsplit ? [split.slice(0, -maxsplit).join(sep)].concat(split.slice(-maxsplit)) : split;
-}
+};
 
 /**
  * Replace HTML special characters with their entity equivalents
@@ -47,7 +47,7 @@ function myloader() {
 $(() => {
     const tokens = window.location.href.split('#');
     if (tokens.length === 2) {
-        const tokens2 = tokens[1].rsplit('_', 1);
+        const tokens2 = rsplit(tokens[1], '_', 1);
         if (tokens2.length === 2) {
             const mycam = tokens2[0];
             document.getElementById('mycam').value = mycam;
