@@ -15,53 +15,47 @@ let timeChanged = false;
  */
 function escapeHTML(val) {
     return val.replace(/&/g, '&amp;')
-              .replace(/</g, '&lt;')
-              .replace(/>/g, '&gt;')
-              .replace(/"/g, '&quot;')
-              .replace(/'/g, '&#039;');
+        .replace(/</g, '&lt;')
+        .replace(/>/g, '&gt;')
+        .replace(/"/g, '&quot;')
+        .replace(/'/g, '&#039;');
 }
 
 function pad(number) {
-    let r = String(number);
-    if (r.length === 1) {
-        r = `0${r}`;
+    let strnum = String(number);
+    if (strnum.length === 1) {
+        strnum = `0${strnum}`;
     }
-    return r;
+    return strnum;
 };
 
 
-Date.prototype.toIEMString = function () {
-    return this.getUTCFullYear()
-        + pad(this.getUTCMonth() + 1)
-        + pad(this.getUTCDate())
-        + pad(this.getUTCHours())
-        + pad(this.getUTCMinutes());
+function toIEMString(val) {
+    return val.getUTCFullYear()
+        + pad(val.getUTCMonth() + 1)
+        + pad(val.getUTCDate())
+        + pad(val.getUTCHours())
+        + pad(val.getUTCMinutes());
 };
 
-if (!Date.prototype.toISOString) {
-    (function () {
-
-        Date.prototype.toISOString = function () { // this
-            return this.getUTCFullYear()
-                + '-' + pad(this.getUTCMonth() + 1)
-                + '-' + pad(this.getUTCDate())
-                + 'T' + pad(this.getUTCHours())
-                + ':' + pad(this.getUTCMinutes())
-                + 'Z';
-        };
-
-    }());
-}
+function toISOString(val) {
+    return val.getUTCFullYear()
+        + '-' + pad(val.getUTCMonth() + 1)
+        + '-' + pad(val.getUTCDate())
+        + 'T' + pad(val.getUTCHours())
+        + ':' + pad(val.getUTCMinutes())
+        + 'Z';
+};
 
 function logic() {
     timeChanged = true;
-    currentdt = dtpicker.datetimepicker('getDate'); // toISOString()
+    currentdt = dtpicker.datetimepicker('getDate');
     updateMap();
 }
 function updateTitle() {
     $('#maptitle').text(`The map is displaying ${$('#varpicker :selected').text()} valid at ${currentdt}`);
     if (timeChanged) {
-        window.location.href = `#${varname}/${currentdt.toISOString()}`;
+        window.location.href = `#${varname}/${toISOString(currentdt)}`;
     } else {
         window.location.href = `#${varname}`;
     }
@@ -69,7 +63,7 @@ function updateTitle() {
 
 function updateMap() {
     if (currentdt && typeof currentdt != "string") {
-        const dt = currentdt.toISOString();
+        const dt = toISOString(currentdt);
         const uristamp = timeChanged ? `dt=${dt}` : "";
         gj.setSource(new ol.source.Vector({
             url: `/geojson/agclimate.py?${uristamp}`,
@@ -83,7 +77,7 @@ function updateMap() {
         );
     }
     n0q.setSource(new ol.source.XYZ({
-        url: `/cache/tile.py/1.0.0/ridge::USCOMP-N0Q-${currentdt.toIEMString()}/{z}/{x}/{y}.png`
+        url: `/cache/tile.py/1.0.0/ridge::USCOMP-N0Q-${toIEMString(currentdt)}/{z}/{x}/{y}.png`
     })
     );
     updateTitle();
@@ -151,7 +145,7 @@ $().ready(() => {
     n0q = new ol.layer.Tile({
         title: 'NEXRAD Base Reflectivity',
         source: new ol.source.XYZ({
-            url: `/cache/tile.py/1.0.0/ridge::USCOMP-N0Q-${currentdt.toIEMString()}/{z}/{x}/{y}.png`
+            url: `/cache/tile.py/1.0.0/ridge::USCOMP-N0Q-${toIEMString(currentdt)}/{z}/{x}/{y}.png`
         })
     });
     map = new ol.Map({
@@ -204,7 +198,7 @@ $().ready(() => {
                 'placement': 'top',
                 'animation': false,
                 'html': true,
-                'content': content
+                content
             });
             $(element).popover('show');
         }

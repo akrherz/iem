@@ -9,9 +9,7 @@ $dbconn = iemdb("mesosite");
 $t->title = "Application Listing";
 $t->jsextra = <<<EOM
 <script src="/vendor/jquery-filtertable/1.5.7/jquery.filtertable.min.js"></script>
-<script>
-   $("#table1").filterTable({label: "Filter Table Using Text: "});
-</script>
+<script src="apps.js"></script>
 EOM;
 
 $table = "";
@@ -25,7 +23,7 @@ for ($i=0;$row=pg_fetch_assoc($rs);$i++){
     $tags[$row["appid"]] = $row["t"];
 }
 $rs = pg_exec($dbconn, "SELECT * from iemapps i ORDER by appid ASC");
-for ($i=0;$row=pg_fetch_assoc($rs);$i++){
+while ($row=pg_fetch_assoc($rs)){
     $tt = "";
     if (array_key_exists($row["appid"], $tags)){
         $tt = $tags[$row["appid"]];

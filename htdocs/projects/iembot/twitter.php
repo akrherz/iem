@@ -23,27 +23,25 @@ $screen_name = isset($_SESSION["screen_name"]) ? $_SESSION["screen_name"] : '';
 $channel = isset($_REQUEST["channel"]) ? strtoupper(xssafe($_REQUEST["channel"])) : '';
 $channel = trim($channel);
 
-pg_prepare($pgconn, "SAVEAUTH", "INSERT into " .
+$st_saveauth = iem_pg_prepare($pgconn, "INSERT into " .
     "iembot_twitter_oauth " .
     "(user_id, screen_name, access_token, access_token_secret) " .
     "VALUES ($1,$2,$3,$4)");
-pg_prepare($pgconn, "UPDATEAUTH", "UPDATE iembot_twitter_oauth " .
+$st_updateauth = iem_pg_prepare($pgconn, "UPDATE iembot_twitter_oauth " .
     "SET access_token = $1, access_token_secret = $2, updated = now(), " .
     "screen_name = $3 WHERE user_id = $4 RETURNING screen_name");
-pg_prepare(
+$st_deleteauth = iem_pg_prepare(
     $pgconn,
-    "DELETEAUTH",
     "DELETE from iembot_twitter_oauth where user_id = $1",
 );
-pg_prepare($pgconn, "SELECTSUBS", "SELECT * from " .
+$st_selectsubs = iem_pg_prepare($pgconn, "SELECT * from " .
     "iembot_twitter_subs WHERE user_id = $1 ORDER by channel ASC");
-pg_prepare($pgconn, "ADDSUB", "INSERT into " .
+$st_addsub = iem_pg_prepare($pgconn, "INSERT into " .
     "iembot_twitter_subs(user_id, screen_name, channel) VALUES ($1, $2, $3)");
-pg_prepare($pgconn, "DELSUB", "DELETE from " .
+$st_delsub = iem_pg_prepare($pgconn, "DELETE from " .
     "iembot_twitter_subs WHERE user_id = $1 and channel = $2");
-pg_prepare(
+$st_deletesubs = pg_prepare(
     $pgconn,
-    "DELETESUBS",
     "DELETE from iembot_twitter_subs where user_id = $1",
 );
 
@@ -57,15 +55,15 @@ $msg = array();
 //------------------------------------------------------------
 if (isset($_REQUEST["removeme"]) && $_REQUEST["removeme"] == "1") {
     // remove subs first due to foreign key constraints
-    pg_execute($pgconn, "DELETESUBS", array($user_id));
-    pg_execute($pgconn, "DELETEAUTH", array($user_id));
+    pg_execute($pgconn, $st_deletesubs, array($user_id));
+    pg_execute($pgconn, $st_deleteauth, array($user_id));
     $msg[] = "You have been removed from the bot.";
     reloadbot();
     unset($_SESSION["user_id"]);
     unset($_SESSION["screen_name"]);
 }
 if (isset($_REQUEST['add']) && $channel != '' && $screen_name != '') {
-    pg_execute($pgconn, 'ADDSUB', array(
+    pg_execute($pgconn, $st_addsub, array(
         $_SESSION["user_id"],
         strtolower($_SESSION["screen_name"]), $channel
     ));
@@ -77,7 +75,7 @@ if (isset($_REQUEST['add']) && $channel != '' && $screen_name != '') {
     );
 }
 if (isset($_REQUEST['del']) && $channel != '' && $screen_name != '') {
-    pg_execute($pgconn, 'DELSUB', array(
+    pg_execute($pgconn, $st_delsub, array(
         strtolower($_SESSION["user_id"]),
         $channel
     ));
@@ -110,7 +108,7 @@ if (isset($_REQUEST['cb']) && isset($_SESSION['token']) && isset($_SESSION['toke
         $_SESSION['screen_name'] = $screen_name;
         $rs = pg_execute(
             $pgconn,
-            "UPDATEAUTH",
+            $st_updateauth,
             array(
                 $access_token, $access_token_secret,
                 strtolower($screen_name), $user_id
@@ -119,7 +117,7 @@ if (isset($_REQUEST['cb']) && isset($_SESSION['token']) && isset($_SESSION['toke
         if (pg_num_rows($rs) == 0) {
             pg_execute(
                 $pgconn,
-                "SAVEAUTH",
+                $st_saveauth,
                 array(
                     $user_id, strtolower($screen_name),
                     $access_token, $access_token_secret
@@ -144,7 +142,7 @@ if ($screen_name == '') {
 }
 
 $sselect2 = "";
-$rs = pg_execute($pgconn, "SELECTSUBS", array($user_id));
+$rs = pg_execute($pgconn, $st_selectsubs, array($user_id));
 while ($row = pg_fetch_assoc($rs)) {
     $sselect2 .= sprintf(
         '<tr><th>%s</th><td>%s</td>

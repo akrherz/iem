@@ -245,7 +245,7 @@ foreach ($vals as $key => $value) {
     $pt->draw($map, $snet, $img, 0, $value["val"]);
 }
 
-if ($i == 0)
+if (pg_num_rows($rs) == 0)
     plotNoData($map, $img);
 
 iemmap_title($map, $img, $ndate . " " . $vardef[$var]);

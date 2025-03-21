@@ -28,10 +28,11 @@ $sql = <<<EOM
     to_char(valid, 'DD Mon YYYY HH:MI AM') as webdate,
     to_char(valid, 'Dy Mon DD, YYYY') as calhead,
     to_char(valid, 'D') as dow from feature
-    WHERE valid BETWEEN '{$year}-{$month}-01' and '{$nyear}-{$nmonth}-01'
+    WHERE valid BETWEEN $1 and $2
     and valid < now() ORDER by valid ASC
 EOM;
-$rs = pg_exec($c, $sql);
+$stname = iem_pg_prepare($c, $sql);
+$rs = pg_execute($c, $stname, Array("{$year}-{$month}-01", "{$nyear}-{$nmonth}-01"));
 
 $num = pg_num_rows($rs);
 
@@ -47,8 +48,7 @@ $linkbar = <<<EOM
 </div>
 EOM;
 
-for ($i = 0; $i < $num; $i++) {
-    $row = pg_fetch_assoc($rs);
+while ($row = pg_fetch_assoc($rs)) {
     $valid = strtotime(substr($row["valid"], 0, 16));
     $p = printTags(explode(",", is_null($row["tags"]) ? "": $row["tags"]));
     $d = date("Y-m-d", $valid);

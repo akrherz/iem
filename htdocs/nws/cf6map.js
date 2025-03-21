@@ -39,7 +39,7 @@ function updateDate() {
     updateURL();
 }
 
-var vectorStyleFunction = function (feature) {
+const vectorStyleFunction = function (feature) {
     let style = null;
     const value = feature.get(renderattr);
     let color = "#FFFFFF";

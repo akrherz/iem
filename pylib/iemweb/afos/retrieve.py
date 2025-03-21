@@ -30,6 +30,11 @@ Jan 2025 in text format.
 https://mesonet.agron.iastate.edu/cgi-bin/afos/retrieve.py?\
 limit=9999&pil=DSMDSM&fmt=text&sdate=2025-01-01&edate=2025-01-09
 
+Return the last 5 Daily Summary Messages for Des Moines in text format.
+
+https://mesonet.agron.iastate.edu/cgi-bin/afos/retrieve.py?\
+limit=5&pil=DSMDSM&fmt=text
+
 Return all TORnado warnings issued between 20 and 21 UTC on 27 Apr 2011 as
 a zip file.
 
@@ -230,15 +235,12 @@ def special_metar_logic(conn, pils, limit, fmt, sio, order):
 def get_mckey(environ: dict) -> Optional[str]:
     """Cache a specific request."""
     # limit=9999&pil=DSMDEN&fmt=text&sdate=2025-01-07&edate=2025-01-09
-    if (
-        environ["pil"][0].startswith("DSM")
-        and environ["fmt"] == "text"
-        and environ["sdate"] is not None
-        and environ["edate"] is not None
-    ):
+    if environ["pil"][0].startswith("DSM") and environ["fmt"] == "text":
+        sd = "" if environ["sdate"] is None else f"{environ['sdate']:%Y%m%d}"
+        ed = "" if environ["edate"] is None else f"{environ['edate']:%Y%m%d}"
         return (
-            f"afos_retrieve.py_{environ['pil'][0]}_{environ['sdate']:%Y%m%d}_"
-            f"{environ['edate']:%Y%m%d}_{environ['limit']}"
+            f"afos_retrieve.py_{environ['pil'][0]}_{sd}_"
+            f"{ed}_{environ['limit']}"
         )
     return None
 
