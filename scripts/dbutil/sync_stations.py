@@ -74,7 +74,7 @@ def sync(df, dbname):
             ugc_zone = %(ugc_zone)s, id = %(id)s, ncdc81 = %(ncdc81)s,
             ncei91 = %(ncei91)s,
             temp24_hour = %(temp24_hour)s, precip24_hour = %(precip24_hour)s,
-            wigos = %(wigos)s
+            wigos = %(wigos)s, synop = %(synop)s
             WHERE iemid = %(iemid)s
        """,
             prow,
@@ -106,8 +106,8 @@ def main():
             index_col="iemid",
         )
     df["iemid"] = df.index.values
-    # fix dtype for two columns
-    for col in ["temp24_hour", "precip24_hour", "remote_id"]:
+    # fix dtype
+    for col in ["temp24_hour", "precip24_hour", "remote_id", "synop"]:
         df[col] = df[col].astype("Int64")
     for sub in subscribers:
         sync(df, sub)

@@ -40,7 +40,7 @@ $st_addsub = iem_pg_prepare($pgconn, "INSERT into " .
     "iembot_twitter_subs(user_id, screen_name, channel) VALUES ($1, $2, $3)");
 $st_delsub = iem_pg_prepare($pgconn, "DELETE from " .
     "iembot_twitter_subs WHERE user_id = $1 and channel = $2");
-$st_deletesubs = pg_prepare(
+$st_deletesubs = iem_pg_prepare(
     $pgconn,
     "DELETE from iembot_twitter_subs where user_id = $1",
 );

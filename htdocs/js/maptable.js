@@ -41,7 +41,7 @@ function get_style(color, text) {
             font: '14px Calibri,sans-serif',
             text,
             fill: new ol.style.Fill({
-                color: color,
+                color,
                 width: 1
             }),
             stroke: new ol.style.Stroke({

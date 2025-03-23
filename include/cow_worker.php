@@ -9,7 +9,7 @@ function printLSR($lsr, $verified = FALSE)
         "x" => "Debris Flow", "q" => "Snow Squall",
         "F" => "Flash Flood", "T" => "Tornado", "D" => "Tstm Wnd Dmg",
         "H" => "Hail", "G" => "Wind Gust", "W" => "Waterspout",
-        "M" => "Marine Tstm Wnd", "2" => "Dust Storm"
+        "M" => "Marine Tstm Wnd", "2" => "Dust Storm", "h" => "Marine Hail",
     );
     $background = ($lsr["warned"] == False) ? "#f00" : "#0f0";
     if (is_null($lsr["leadtime"])) {
