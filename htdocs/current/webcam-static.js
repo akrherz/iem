@@ -22,12 +22,12 @@ Ext.onReady(() => {
     });
 
     Ext.override(Date, {
-        toUTC: function () {
+        toUTC: function () {  // this
             // Convert the date to the UTC date
             return Ext.Date.add(this, Ext.Date.MINUTE, this.getTimezoneOffset());
         },
 
-        fromUTC: function () {
+        fromUTC: function () {  // this
             // Convert the date from the UTC date
             return Ext.Date.add(this, Ext.Date.MINUTE, -this.getTimezoneOffset());
         }
@@ -75,9 +75,9 @@ Ext.onReady(() => {
             data.push({
                 boxLabel: Number(record.get("cid").substr(5, 3)) + " " + record.get("name"),
                 name: record.get("cid"),
-                checked: checked,
+                checked,
                 listeners: {
-                    change: (cb, isChecked) => {
+                    change(cb, isChecked) {
                         const id = cb.getName();
                         if (!imagestore.isLoaded) { return; }
 
@@ -125,7 +125,7 @@ Ext.onReady(() => {
         '</tpl>',
         '<div class="x-clear"></div>',
         {
-            shouldShow: (cid) => {
+            shouldShow(cid) {
                 return (disableStore.find('cid', cid) === -1);
             }
         }
@@ -155,7 +155,7 @@ Ext.onReady(() => {
             tbar: [{
                 xtype: 'button',
                 text: 'All Off',
-                handler: () => {
+                handler() {
                     Ext.getCmp("camselector").items.each((i) => {
                         i.setValue(false);
                     });
@@ -163,7 +163,7 @@ Ext.onReady(() => {
             }, {
                 xtype: 'button',
                 text: 'All On',
-                handler: () => {
+                handler()  {
                     Ext.getCmp("camselector").items.each((i) => {
                         i.setValue(true);
                     });
@@ -180,12 +180,12 @@ Ext.onReady(() => {
                 autoHeight: true,
                 overItemCls: 'x-view-over',
                 emptyText: "No Images Loaded or Selected for Display",
-                tpl: tpl
+                tpl
             }],
             tbar: [{
                 xtype: 'button',
                 text: 'Help',
-                handler: () => {
+                handler() {
                     helpWin.show();
                 }
             }, {
@@ -241,11 +241,11 @@ Ext.onReady(() => {
                         imagestore.reload({
                             add: false,
                             params: {
-                                'ts': ts,
+                                ts,
                                 'network': Ext.getCmp("networkSelect").getValue()
                             }
                         });
-                        window.location.href = "#" + Ext.getCmp("networkSelect").getValue() + "-" + ts;
+                        window.location.href = `#${Ext.getCmp("networkSelect").getValue()}-${ts}`;
                     }
                 }
 
@@ -334,7 +334,7 @@ Ext.onReady(() => {
 
 
     const task = {
-        run: function () {
+        run() {
             if (imagestore.data.length > 0 && Ext.getCmp("timemode") &&
                 Ext.getCmp("timemode").realtime) {
                 imagestore.reload({
