@@ -106,8 +106,8 @@ def main():
             index_col="iemid",
         )
     df["iemid"] = df.index.values
-    # fix dtype for two columns
-    for col in ["temp24_hour", "precip24_hour", "remote_id"]:
+    # fix dtype
+    for col in ["temp24_hour", "precip24_hour", "remote_id", "synop"]:
         df[col] = df[col].astype("Int64")
     for sub in subscribers:
         sync(df, sub)
