@@ -74,7 +74,7 @@ def sync(df, dbname):
             ugc_zone = %(ugc_zone)s, id = %(id)s, ncdc81 = %(ncdc81)s,
             ncei91 = %(ncei91)s,
             temp24_hour = %(temp24_hour)s, precip24_hour = %(precip24_hour)s,
-            wigos = %(wigos)s
+            wigos = %(wigos)s, synop = %(synop)s
             WHERE iemid = %(iemid)s
        """,
             prow,
