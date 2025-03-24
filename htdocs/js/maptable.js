@@ -242,7 +242,7 @@ function init(idx, div) {
 
     $.fn.MapTable = function (_options) { // this
         const res = [];
-        this.each(function (idx, item) {
+        this.each((idx, item) => {
             res.push(init(idx, item));
         });
         return res;
