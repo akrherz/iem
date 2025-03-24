@@ -29,7 +29,7 @@ from datetime import timedelta
 from io import BytesIO
 from zoneinfo import ZoneInfo
 
-from pydantic import AwareDatetime, Field
+from pydantic import AwareDatetime, Field, model_validator
 from pyiem.database import get_dbconn
 from pyiem.exceptions import IncompleteWebRequest
 from pyiem.network import Table as NetworkTable
@@ -126,6 +126,17 @@ class Schema(CGIModel):
     hour2: int = Field(0, description="End Hour, if ets not provided")
     minute2: int = Field(0, description="End Minute, if ets not provided")
 
+    @model_validator(mode="after")
+    def validator_raob_request(self):
+        """Ensure that level is set if the network is RAOB."""
+        if (
+            self.network is not None
+            and self.network == "RAOB"
+            and self.level is None
+        ):
+            raise ValueError("level is required when network is RAOB")
+        return self
+
 
 def send_error(form, msg, start_response):
     """Abort, abort"""
@@ -179,7 +190,7 @@ def get_station_info(environ):
     elif network in ("ISUSM", "ISUAG"):
         dbname = "isuag"
     elif network == "RAOB":
-        dbname = "postgis"
+        dbname = "raob"
     elif network.find("_DCP") > 0:
         dbname = "hads"
 
