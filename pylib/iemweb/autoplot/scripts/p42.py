@@ -63,7 +63,7 @@ MDICT = {
 def get_description():
     """Return a dict describing how to call this plotter"""
     desc = {"description": __doc__, "cache": 86400, "data": True}
-    year_range = f"1928-{date.today().year}"
+    year_range = f"1900-{date.today().year}"
     desc["arguments"] = [
         dict(
             type="zstation",

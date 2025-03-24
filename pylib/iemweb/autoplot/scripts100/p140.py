@@ -82,8 +82,8 @@ def get_description():
         ),
         dict(
             type="year",
-            default=1928,
-            min=1928,
+            default=1900,
+            min=1900,
             name="syear",
             label="Limit plot start year (if data exists) to:",
         ),

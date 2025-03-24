@@ -3,6 +3,7 @@ This application generates time series charts using data from the
 ISU Soil Moisture Network.
 """
 
+import re
 from datetime import datetime, timedelta
 from zoneinfo import ZoneInfo
 
@@ -583,11 +584,14 @@ def make_daily_water_change_plot(ctx):
             sql_helper("""
         WITH obs as (
             SELECT valid,
-            CASE WHEN t12_c_avg_qc > 1 then vwc12_qc else null end
+            CASE WHEN coalesce(t12_c_avg_qc, sv_t12_qc, sv_t14_qc) > 1 then
+                coalesce(vwc12_qc, sv_vwc12_qc, sv_vwc14_qc) else null end
             as v12,
-            CASE WHEN t24_c_avg_qc > 1 then vwc24_qc else null end
+            CASE WHEN coalesce(t24_c_avg_qc, sv_t24_qc) > 1 then
+                coalesce(vwc24_qc, sv_vwc24_qc) else null end
             as v24,
-            CASE WHEN t50_c_avg_qc > 1 then vwc50_qc else null end
+            CASE WHEN coalesce(t50_c_avg_qc, sv_t52_qc) > 1 then
+                coalesce(vwc50_qc, sv_vwc52_qc) else null end
             as v50
             from sm_daily
             where station = :station and valid >= :sts and valid < :ets)
@@ -627,7 +631,13 @@ def make_daily_water_change_plot(ctx):
     fig = figure(apctx=ctx, title=title)
     ax = fig.subplots(2, 1, sharex=True)
     if not df["depth"].isnull().all():
-        ax[0].bar(df["valid"].values, df["depth"], color="b", width=1)
+        df2 = df[df["depth"] > 0]
+        ax[0].bar(
+            df2["valid"].values,
+            df2["depth"].to_numpy(),
+            color="b",
+            width=1.1,
+        )
     oneday = timedelta(days=1)
     ax[0].grid(True)
     ax[0].set_ylabel("Plant Available Soil Water [inch]")
@@ -674,55 +684,47 @@ def make_daily_water_change_plot(ctx):
 def plot_sm(ctx):
     """Just soil moisture."""
     with get_sqlalchemy_conn("isuag") as conn:
+        # Find all columns in the sm_hourly table that have vwc in them
+        # and end with _qc
+        res = conn.execute(
+            sql_helper("""
+            SELECT column_name from information_schema.columns
+            WHERE table_name = 'sm_hourly' and column_name ~* 'vwc'
+            and column_name ~* '_qc' ORDER by column_name ASC
+            """)
+        )
+        cols = [row[0] for row in res]
+
         df = pd.read_sql(
-            "SELECT * from sm_hourly WHERE station = %s and "
-            "valid BETWEEN %s and %s ORDER by valid ASC",
+            sql_helper(
+                """
+    SELECT valid, {cols}
+    from sm_hourly WHERE station = :station and
+    valid BETWEEN :sts and :ets ORDER by valid ASC""",
+                cols=", ".join(cols),
+            ),
             conn,
-            params=(ctx["station"], ctx["sts"], ctx["ets"]),
+            params={
+                "station": ctx["station"],
+                "sts": ctx["sts"],
+                "ets": ctx["ets"],
+            },
             index_col="valid",
         )
-    d12t = df["vwc12_qc"]
-    d24t = df["vwc24_qc"]
-    d50t = df["vwc50_qc"]
-    d04t = df["vwc4_qc"]
     valid = df.index.values
 
     title = f"ISUSM Station: {ctx['_sname']} :: Soil Moisture Timeseries"
     (fig, ax) = figure_axes(apctx=ctx, title=title)
     ax.grid(True)
-    svplotted = False
-    for col in (
-        df.filter(regex=r"sv_vwc.*_qc", axis=1)
-        .sort_index(
-            axis=1,
-            key=lambda x: (
-                x.str.replace("_qc", "")
-                .str.replace("sv_vwc", " ")
-                .values.astype(int)
-            ),
-        )
-        .columns
-    ):
-        series = df[col]
-        if series.isnull().all():
+    depth_re = re.compile(r"(\d+)")
+    plotted = False
+    for col in cols:
+        if df[col].isnull().all():
             continue
-        depth = col.split("_")[1].replace("vwc", "")
-        ax.plot(valid, series, linewidth=2, label=f"{depth}in")
-        svplotted = True
-    oplotted = False
-    if not svplotted and not d04t.isnull().all():
-        ax.plot(valid, d04t, linewidth=2, color="brown", label="4 inch")
-        oplotted = True
-    if not svplotted and not d12t.isnull().all():
-        ax.plot(valid, d12t, linewidth=2, color="r", label="12 inch")
-        oplotted = True
-    if not svplotted and not d24t.isnull().all():
-        ax.plot(valid, d24t, linewidth=2, color="purple", label="24 inch")
-        oplotted = True
-    if not svplotted and not d50t.isnull().all():
-        ax.plot(valid, d50t, linewidth=2, color="black", label="50 inch")
-        oplotted = True
-    if not oplotted and not svplotted:
+        plotted = True
+        depth = depth_re.findall(col)[0]
+        ax.plot(valid, df[col].to_numpy(), linewidth=2, label=f"{depth}in")
+    if not plotted:
         raise NoDataFound("No Soil Moisture Data for this station")
     box = ax.get_position()
     ax.set_position([box.x0, box.y0, box.width, box.height * 0.94])
@@ -730,7 +732,7 @@ def plot_sm(ctx):
         bbox_to_anchor=(0.5, 1.0),
         ncol=10,
         loc="lower center",
-        fontsize=9 if svplotted else 12,
+        fontsize=9,
     )
     days = (ctx["ets"] - ctx["sts"]).days
     if days >= 3:

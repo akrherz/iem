@@ -2,11 +2,11 @@
 
 ### Summary
 
-The primary format that worldwide airport weather station data is reported in is called METAR. This format is somewhat archaic, but well known and utilized in the community.   The data is sourced from a number of places including: [Unidata IDD](https://www.unidata.ucar.edu/projects/#idd), [NCEI ISD](https://www.ncdc.noaa.gov/isd), and [MADIS One Minute ASOS](https://madis.ncep.noaa.gov/madis_OMO.shtml). The weather stations included are typically called "Automated Surface Observation System (ASOS)".  The term "Automated Weather Observation System (AWOS)" is often used inter-changably.
+The primary format that worldwide airport weather station data is reported in is called METAR. This format is somewhat archaic, but well known and utilized in the community.   The data is sourced from a number of places including: [Unidata IDD](https://www.unidata.ucar.edu/projects/#idd), [NCEI ISD](https://www.ncdc.noaa.gov/isd), [MADIS One Minute ASOS](https://madis.ncep.noaa.gov/madis_OMO.shtml), and [NCEI GHCHh](https://www.ncei.noaa.gov/products/global-historical-climatology-network-hourly). The weather stations included are typically called "Automated Surface Observation System (ASOS)".  The term "Automated Weather Observation System (AWOS)" is often used inter-changably.
 
 * __Download Interface__: [IEM On-Demand](https://mesonet.agron.iastate.edu/request/download.phtml)
 * __Spatial Domain__: Worldwide
-* __Temporal Domain__: 1928-present
+* __Temporal Domain__: 1900-present
 
 ### Justification for processing
 

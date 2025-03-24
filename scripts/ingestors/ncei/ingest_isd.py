@@ -54,7 +54,7 @@ def main(airforce, wban, faa, year1, year2):
         LOG.error("Provided faa ID should be 4 chars, abort")
         return
     tzname, iemid = get_metadata(faa)
-    year1 = max(year1, 1928)  # database starts in 1928
+    year1 = max(year1, 1900)  # database starts in 1900
     failedyears = []
     msgs = []
     dbid = normid(faa)

@@ -43,7 +43,7 @@ def get_description():
         ),
         dict(
             type="year",
-            min=1928,
+            min=1900,
             name="year",
             default=today.year,
             label="Select Year:",
