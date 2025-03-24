@@ -390,7 +390,8 @@ def workflow(ts: date, domain: str):
     if ts.year > 1949:
         copy_iemre_hourly(ts, ds, domain)
     else:
-        if ts.year > 1928:
+        # While data does exist, we have practical availability issues
+        if ts.year > 1940:
             LOG.info("Using ASOS for daily summary variables")
             use_asos_daily(ts, ds, domain)
         if domain == "":

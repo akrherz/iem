@@ -17,7 +17,7 @@ LOG = logger()
 ALLDATA = {}
 START_YEAR = {
     "rwis": 1994,
-    "asos": 1928,
+    "asos": 1900,
     "other": 2003,
     "scan": 1987,
     "uscrn": 2001,

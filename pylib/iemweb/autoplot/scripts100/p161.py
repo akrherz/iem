@@ -88,7 +88,7 @@ def get_description():
         ),
         dict(
             type="year",
-            min=1928,
+            min=1900,
             default=date.today().year,
             label="Year to Highlight",
             name="year",
