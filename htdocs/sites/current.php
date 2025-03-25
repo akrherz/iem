@@ -134,14 +134,17 @@ EOM;
         $station
     );
     $exturi = sprintf(
-        "%s/" .
-            "json/current.py?network=%s&station=%s",
+        "%s/json/current.py?network=%s&station=%s",
         $EXTERNAL_BASEURL,
         $network,
         $station
     );
     $data = file_get_contents($wsuri);
     $json = json_decode($data, $assoc = TRUE);
+    if ($json === FALSE) {
+        http_response_code(503);
+        die("Backend query failed, please try again later.");
+    }
 
     $vardict = array(
         "local_valid" => "Observation Local Time",

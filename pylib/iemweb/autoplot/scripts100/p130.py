@@ -11,7 +11,7 @@ import calendar
 
 import numpy as np
 import pandas as pd
-from pyiem.database import get_sqlalchemy_conn
+from pyiem.database import get_sqlalchemy_conn, sql_helper
 from pyiem.exceptions import NoDataFound
 from pyiem.plot import figure
 from pyiem.plot.use_agg import plt
@@ -34,10 +34,12 @@ def plotter(ctx: dict):
     # Load all available data
     with get_sqlalchemy_conn("coop") as conn:
         df = pd.read_sql(
-            "SELECT year, month, high, low, snowd from alldata "
-            "WHERE station = %s and snowd is not null",
+            sql_helper(
+                "SELECT year, month, high, low, snowd from alldata "
+                "WHERE station = :station and snowd is not null"
+            ),
             conn,
-            params=(station,),
+            params={"station": station},
             index_col=None,
         )
     if df.empty:
@@ -62,8 +64,8 @@ def plotter(ctx: dict):
 
     fig = figure(apctx=ctx, title=title)
     ax = [
-        fig.add_axes([0.12, 0.56, 0.83, 0.32]),
-        fig.add_axes([0.12, 0.1, 0.83, 0.32]),
+        fig.add_axes((0.12, 0.56, 0.83, 0.32)),
+        fig.add_axes((0.12, 0.1, 0.83, 0.32)),
     ]
     colors = ["r", "b"]
     res = []

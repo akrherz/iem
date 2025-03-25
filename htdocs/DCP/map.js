@@ -104,7 +104,7 @@ $(document).ready(() => {
         target: 'map',
         layers: [new ol.layer.Tile({
             title: 'Global Imagery',
-            source: new ol.source.BingMaps({ key: key, imagerySet: 'Aerial' })
+            source: new ol.source.BingMaps({ key, imagerySet: 'Aerial' })
         }),
         new ol.layer.Tile({
             title: 'State Boundaries',
