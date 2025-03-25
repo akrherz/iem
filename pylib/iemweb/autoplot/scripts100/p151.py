@@ -349,10 +349,17 @@ def plotter(ctx: dict):
         title = f"{p1syear:.0f}-{p1eyear:.0f} {title}"
     else:
         tt = UNITS[varname] if ctx["r"] == "english" else MUNITS[varname]
-        title = (
-            f"{p2syear:.0f}-{p2eyear:.0f} minus {p1syear:.0f}-{p1eyear:.0f} "
-            f"{title} Difference ({tt})"
+        p1 = (
+            f"{p1syear:.0f}-{p1eyear:.0f}"
+            if p1syear != p1eyear
+            else f"{p1syear:.0f}"
         )
+        p2 = (
+            f"{p2syear:.0f}-{p2eyear:.0f}"
+            if p2syear != p2eyear
+            else f"{p2syear:.0f}"
+        )
+        title = f"{p2} minus {p1} {title} Difference ({tt})"
 
     # Reindex so that most extreme values are first
     df = df.reindex(df[column].abs().sort_values(ascending=False).index)

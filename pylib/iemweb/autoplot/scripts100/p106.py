@@ -6,7 +6,7 @@ providing some insight into the population density at the given
 temperature.
 """
 
-from pyiem.database import get_dbconn
+from pyiem.database import get_sqlalchemy_conn, sql_helper
 from pyiem.exceptions import NoDataFound
 from pyiem.plot import figure_axes
 
@@ -75,8 +75,6 @@ def get_description():
 
 def plotter(ctx: dict):
     """Go"""
-    pgconn = get_dbconn("asos")
-    cursor = pgconn.cursor()
     station = ctx["zstation"]
     threshold = ctx["threshold"]
     opt = ctx["opt"]
@@ -85,38 +83,40 @@ def plotter(ctx: dict):
     months = month2months(month)
 
     if opt == "tmpf_above":
-        limiter = f"round(tmpf::numeric,0) >= {threshold}"
+        limiter = "round(tmpf::numeric,0) >= :threshold"
     else:
-        limiter = f"round(tmpf::numeric,0) < {threshold}"
+        limiter = "round(tmpf::numeric,0) < :threshold"
 
-    cursor.execute(
-        f"""
-        WITH obs as (
-            SELECT valid, tmpf from alldata WHERE
-            station = %s and extract(month from valid) = ANY(%s) and tmpf > -80
-        ),
-        events as (
-            SELECT distinct date(valid at time zone %s) from obs
-            WHERE {limiter})
-     SELECT valid at time zone %s + '10 minutes'::interval, tmpf
-     from obs a JOIN events e on
-     (date(a.valid at time zone %s) = e.date)
-    """,
-        (
-            station,
-            months,
-            ctx["_nt"].sts[station]["tzname"],
-            ctx["_nt"].sts[station]["tzname"],
-            ctx["_nt"].sts[station]["tzname"],
-        ),
-    )
-    data = [[] for _ in range(24)]
-    if cursor.rowcount == 0:
-        raise NoDataFound("Failed to find any data for station.")
-    for row in cursor:
-        data[row[0].hour].append(row[1])
-    cursor.close()
-    pgconn.close()
+    with get_sqlalchemy_conn("asos") as conn:
+        res = conn.execute(
+            sql_helper(
+                """
+            WITH obs as (
+                SELECT valid, tmpf from alldata WHERE
+                station = :station and extract(month from valid) = ANY(:months)
+                and tmpf > -80
+            ),
+            events as (
+                SELECT distinct date(valid at time zone :tzname) from obs
+                WHERE {limiter})
+        SELECT valid at time zone :tzname + '10 minutes'::interval, tmpf
+        from obs a JOIN events e on
+        (date(a.valid at time zone :tzname) = e.date)
+        """,
+                limiter=limiter,
+            ),
+            {
+                "station": station,
+                "threshold": threshold,
+                "months": months,
+                "tzname": ctx["_nt"].sts[station]["tzname"],
+            },
+        )
+        data = [[] for _ in range(24)]
+        if res.rowcount == 0:
+            raise NoDataFound("Failed to find any data for station.")
+        for row in res:
+            data[row[0].hour].append(row[1])
 
     title = (
         f"{ctx['_sname']} :: Hourly Temp "

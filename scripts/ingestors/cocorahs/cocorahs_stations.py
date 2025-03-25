@@ -90,16 +90,18 @@ def main(newerthan: datetime):
         else:
             iemid = current.at[sid, "iemid"]
             if abs(current.at[sid, "elevation"] - elevation) > 3:
-                print("elev")
                 dirty = True
             if abs(current.at[sid, "lat"] - row["Latitude"]) > 0.01:
-                print("lat")
                 dirty = True
             if abs(current.at[sid, "lon"] - row["Longitude"]) > 0.01:
-                print("lon")
                 dirty = True
             if current.at[sid, "name"] != sname:
-                print(f"name '{current.at[sid, 'name']}' '{sname}'")
+                LOG.info(
+                    "Station %s name changed from `%s` to `%s`",
+                    sid,
+                    current.at[sid, "name"],
+                    sname,
+                )
                 dirty = True
         if not dirty:
             continue

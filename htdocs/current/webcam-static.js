@@ -256,24 +256,24 @@ Ext.onReady(() => {
                 id: 'timemode',
                 text: 'Real Time Mode',
                 realtime: true,
-                handler: function () { // this
-                    if (this.realtime) {
+                handler(btn) {
+                    if (btn.realtime) {
                         Ext.getCmp("datepicker").enable();
                         Ext.getCmp("timepicker").enable();
-                        this.setText("Archived Mode");
-                        this.realtime = false;
+                        btn.setText("Archived Mode");
+                        btn.realtime = false;
                     } else {
                         Ext.getCmp("datepicker").disable();
                         Ext.getCmp("timepicker").disable();
-                        this.setText("Real Time Mode");
-                        this.realtime = true;
+                        btn.setText("Real Time Mode");
+                        btn.realtime = true;
                         imagestore.isLoaded = false;
                         imagestore.reload({
                             add: false, params: {
                                 'network': Ext.getCmp("networkSelect").getValue()
                             }
                         });
-                        window.location.href = "#" + Ext.getCmp("networkSelect").getValue() + "-0";
+                        window.location.href = `#${Ext.getCmp("networkSelect").getValue()}-0`;
                     }
                 }
             }, {
@@ -286,7 +286,7 @@ Ext.onReady(() => {
                 width: 100,
                 disabled: true,
                 listeners: {
-                    select: () => {
+                    select() {
                         imagestore.isLoaded = false;
                         const ts = Ext.Date.format(Ext.getCmp("datepicker").getValue(), 'm/d/Y')
                             + " " + Ext.getCmp("timepicker").getRawValue();
@@ -298,7 +298,7 @@ Ext.onReady(() => {
                                 'network': Ext.getCmp("networkSelect").getValue()
                             }
                         });
-                        window.location.href = "#" + Ext.getCmp("networkSelect").getValue() + "-" + Ext.Date.format(dt.toUTC(), 'YmdHi');
+                        window.location.href = `#${Ext.getCmp("networkSelect").getValue()}-${Ext.Date.format(dt.toUTC(), 'YmdHi')}`;
                     }
                 }
             }, {
