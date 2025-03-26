@@ -47,69 +47,13 @@ if ($opt == "bywfo") {
 $publicjsonuri = str_replace($INTERNAL_BASEURL, $EXTERNAL_BASEURL, $jsonuri);
 
 $t->title = $title;
-$t->headextra = '
+$t->headextra = <<<EOM
 <link rel="stylesheet" type="text/css" href="/vendor/ext/3.4.1/resources/css/ext-all.css"/>
 <script type="text/javascript" src="/vendor/ext/3.4.1/adapter/ext/ext-base.js"></script>
 <script type="text/javascript" src="/vendor/ext/3.4.1/ext-all.js"></script>
 <script type="text/javascript" src="/vendor/ext/ux/TableGrid.js"></script>
-<script>
-Ext.onReady(function(){
-    var btn = Ext.get("create-grid1");
-    btn.on("click", function(){
-        btn.dom.disabled = true;
- 
-        // create the grid
-        var grid = new Ext.ux.grid.TableGrid("svr", {
-            stripeRows: true // stripe alternate rows
-        });
-        grid.render();
-    }, false, {
-        single: true
-    }); // run once
-
-     var btn2 = Ext.get("create-grid2");
-    btn2.on("click", function(){
-        btn2.dom.disabled = true;
- 
-        // create the grid
-        var grid = new Ext.ux.grid.TableGrid("tor", {
-            stripeRows: true // stripe alternate rows
-        });
-        grid.render();
-    }, false, {
-        single: true
-    }); // run once
-
-    var btn3 = Ext.get("create-grid3");
-    btn3.on("click", function(){
-        btn3.dom.disabled = true;
- 
-        // create the grid
-        var grid = new Ext.ux.grid.TableGrid("ffw", {
-            stripeRows: true // stripe alternate rows
-        });
-        grid.render();
-    }, false, {
-        single: true
-    }); // run once
-
-    var btn4 = Ext.get("create-grid4");
-    btn4.on("click", function(){
-        btn4.dom.disabled = true;
- 
-        // create the grid
-        var grid = new Ext.ux.grid.TableGrid("smw", {
-            stripeRows: true // stripe alternate rows
-        });
-        grid.render();
-    }, false, {
-        single: true
-    }); // run once
-
-
-});
-</script>
-';
+<script src="list_tags.js"></script>
+EOM;
 
 
 function do_text($row)

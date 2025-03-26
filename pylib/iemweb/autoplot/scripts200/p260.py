@@ -21,7 +21,6 @@ from pyiem.reference import (
     SECTORS,
     Z_OVERLAY2,
     fema_region_bounds,
-    state_bounds,
     wfo_bounds,
 )
 from pyiem.util import load_geodf, utc
@@ -208,24 +207,24 @@ def plotter(ctx: dict):
         st.append(f"{len(gdf)} {vtec.get_ps_string(ph, sig)} ({ph}.{sig})")
     subtitle += ", ".join(st)
 
-    title = "Issued "
+    title = (
+        f"Issued between {ctx['sts']:%-d %b %Y %H:%M} and "
+        f"{ctx['ets']:%-d %b %Y %H:%M} UTC "
+    )
     bnds = wwadf.total_bounds
     if opt == "csector":
         if len(csector) == 2:
-            title = f"for State of {reference.state_names[csector]}"
-            bnds = state_bounds[csector]
+            title += f"for State of {reference.state_names[csector]}"
         else:
-            title = f"for {SECTORS[csector]}"
-            (west, east, south, north) = SECTORS[csector]
-            bnds = [west, south, east, north]
+            title += f"for {SECTORS[csector]}"
     elif opt == "wfo":
-        title = f"by {ctx['_sname']}"
+        title += f"by {ctx['_sname']}"
         bnds = wfo_bounds[wfo]
     elif opt == "fema":
-        title = f"for FEMA {FEMA_REGIONS[ctx['fema']]}"
+        title += f"for FEMA {FEMA_REGIONS[ctx['fema']]}"
         bnds = fema_region_bounds[int(ctx["fema"])]
     elif opt == "data":
-        title = "for Contiguous US"
+        title += "for Contiguous US"
 
     mp = MapPlot(
         apctx=ctx,

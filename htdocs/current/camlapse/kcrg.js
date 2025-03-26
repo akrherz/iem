@@ -34,9 +34,9 @@ function myloader() {
 }
 
 const tokens = window.location.href.split('#');
-if (tokens.length == 2) {
+if (tokens.length === 2) {
     const tokens2 = tokens[1].split('_');
-    if (tokens2.length == 2) {
+    if (tokens2.length === 2) {
         mycam = tokens2[0];
         document.getElementById('mycam').value = mycam;
         mylapse = tokens2[1];
