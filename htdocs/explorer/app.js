@@ -449,10 +449,10 @@ function windowFactory(initdiv, classID) {
         responsive: true,
         width: 800,
         height: 500,
-        close: function () { // this
-            $(this).dialog('destroy').remove();
+        close() {
+            $(dlg).dialog('destroy').remove();
         },
-        resizeStop: () => {
+        resizeStop() {
             resizeCharts(dlg);
         }
     });

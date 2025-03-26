@@ -59,7 +59,8 @@ $astart = array(
     "lotrad" => mktime(0, 0, 0, 1, 1, 1995)
 );
 if (!array_key_exists($prod, $astart)) {
-    xssafe("</script>");
+    // Naughty request
+    xssafe("<tag>");
 }
 
 $now = time() - 60;

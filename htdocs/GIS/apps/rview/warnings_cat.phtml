@@ -4,9 +4,9 @@ require_once "../../../../config/settings.inc.php";
 require_once "../../../../include/forms.php";
 
 /* Get some stuff from our request */
-$year = isset($_GET["year"]) ? intval(xssafe($_GET["year"])) : 2008;
+$year = get_int404("year", 2008);
 $wfo = isset($_GET["wfo"]) ? substr(xssafe($_GET["wfo"]),0,3) : "DMX";
-$eventid = isset($_GET["eventid"]) ? intval(xssafe($_GET["eventid"])) : 13;
+$eventid = get_int404("eventid", 13);
 $phenomena = isset($_GET["phenomena"]) ? substr(xssafe($_GET["phenomena"]),0,2) : "TO";
 $significance = isset($_GET["significance"]) ? substr(xssafe($_GET["significance"]),0,1) : "W";
 

@@ -9,10 +9,13 @@ require_once "../../include/imagemaps.php";
 
 $nt = new NetworkTable("WFO");
 $t = new MyView();
-$wfo = isset($_REQUEST["wfo"]) ? xssafe($_REQUEST["wfo"]) : 'DMX';
+$wfo = get_str404("wfo", 'DMX', 4);
 $wfo3 = unrectify_wfo($wfo);
 $year = get_int404("year", date("Y"));
-if ($year < 1986) xssafe("<script>");
+if ($year < 1986) {
+    // 1986 is the first year we have data for
+    xssafe("<tag>");
+}
 $sid = get_int404("sid", 1);
 $eid = get_int404("eid", 999);
 $rhthres = isset($_REQUEST["relh"]) ? floatval(xssafe($_REQUEST["relh"])) : 25;

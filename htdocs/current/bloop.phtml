@@ -90,13 +90,16 @@ $intselect = make_select("interval", $interval, $ar);
 $jsextra = "";
 $headextra = "";
 if ($java == "script") {
-    $sz = sizeof($images); 
-    $mis = Array();
+    $sz = sizeof($images);
+    $hidden_list = '<ul id="imagesrcs" style="display: none;">';
     foreach($images as $key => $val){
-        $mis[] = sprintf("'%s'", $val);
+        $hidden_list .= sprintf("<li>%s</li>", $val);
     }
-    $jsurls = implode(",", $mis);
-    $control = '<div id="myanimation"></div>';
+    $hidden_list .= "</ul>";
+    $control = <<<EOM
+<div id="myanimation" style="width: {$width}px; height: {$height}px;"></div>
+{$hidden_list}
+EOM;
     $headextra .= <<<EOM
 <link rel="stylesheet" href="/vendor/jquery-ui/{$JQUERYUI}/jquery-ui.min.css">
 <link rel="stylesheet" href="/vendor/jquery-ui/{$JQUERYUI}/jquery-ui.theme.min.css">
@@ -105,20 +108,7 @@ EOM;
     $jsextra .= <<<EOM
 <script src="/vendor/jquery-ui/{$JQUERYUI}/jquery-ui.min.js"></script>
 <script src="/vendor/jsani/2.84/jquery.jsani.min.js"></script>
-<script>
- $(document).ready(function () {
-    var myanimation = $("#myanimation").jsani({
-        imageSrcs: [$jsurls],
-        aniWidth: {$width},
-        aniHeight: {$height},
-        initdwell: 200,
-        controls: ['stopplay', 'firstframe', 'previous', 'next', 'lastframe', 'looprock', 'slow', 'fast', 'zoom'],
-        last_frame_pause: 8,
-        first_frame_pause: 1,
-        frame_pause: '0:5, 3:6'
-    });
-});
-</script>
+<script src="bloop.js"></script>
 EOM;
 } else {
     $control = "";

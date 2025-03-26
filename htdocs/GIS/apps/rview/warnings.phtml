@@ -102,7 +102,7 @@ else if ($m >= 15) $ma = "15";
 else if ($m >= 10) $ma = "10";
 else if ($m >= 5) $ma = "05";
 else $ma = "00";
-//if (! $isarchive ) {$m = $ma;}
+
 $m = $ma;
 $basets = mktime($hour, $m, 0, $month, $day, $year);
 $wfo_filter_ts = mktime(0, 0, 0, 8, 29, 2004);
@@ -148,28 +148,19 @@ if (isset($_GET["lat0"]) && isset($_GET["lon0"]) && $osite == $site) {
 }
 
 $t->title = "RADAR &amp; NWS Warnings";
-$jsextra = <<<EOM
-<script type="module" src="warnings.js"></script>
+$t->jsextra = <<<EOM
 <script src="/vendor/jquery-ui/{$JQUERYUI}/jquery-ui.min.js"></script>
 <script language="javascript" type="text/javascript" src="/vendor/jsani/2.84/jquery.jsani.min.js"></script>
 <script src="/vendor/select2/4.0.3/select2.min.js"></script>
-<script language="JavaScript1.2" type="text/javascript">
-$(document).ready(() => {
-    $(".iemselect2").select2();
-});
+<script src="warnings.js"></script>
 EOM;
-$headextra = <<<EOM
+$t->headextra = <<<EOM
 <link rel="stylesheet" href="/vendor/jquery-ui/{$JQUERYUI}/jquery-ui.min.css">
 <link rel="stylesheet" href="/vendor/jquery-ui/{$JQUERYUI}/jquery-ui.theme.min.css">
 <link rel="stylesheet" href="/vendor/jsani/2.84/jquery.jsani.min.css">
 <link rel="stylesheet" type="text/css" href="/vendor/select2/4.0.3/select2.min.css"/ >
 <link rel="stylesheet" type="text/css" href="warnings.css" />
 EOM;
-if (!$isarchive)
-    $jsextra .= "setTimeout(\"document.myform.submit()\", 300000);\n";
-
-$jsextra .= "</script>";
-$t->headextra = $headextra;
 
 $content = <<<EOM
 <form style="display: inline;" method="GET" name="myform" action="{$baseuri}">
@@ -334,8 +325,10 @@ $miselect = minuteSelect($m, "minute", 5);
 
 $achecked = ($isarchive) ? " CHECKED='CHECKED'" : "";
 $dwwidth = $width + 250;
+$dwheight = $height + 100;
 $content .= <<<EOM
-<div id="datawindow" style="background: #eee; width: {$dwwidth}px; z-index: 2;">
+<div id="datawindow"
+ style="background: #eee; height: {$dwheight}px; width: {$dwwidth}px; z-index: 2;">
 <button type="button" data-control="layers" style="background: #73FA4D;">
 Layers</button>
 <button type="button" data-control="locations" style="background: #F2FE5A;">
@@ -432,38 +425,28 @@ $heightadd = 0;
 $maptitle = "IEM NEXRAD Mosaic Base Reflectivity";
 if ($loop === 1 || $loop === 2) {
     // Alternative 1, we want javascript looper!
+    $hidden_list = '<ul style="display: none;" id="imagesrcs">';
     $urls = array();
     for ($i = 0; $i < $frames; $i++) {
         $imgi = $frames - 1 - $i;
         include "../../../../include/warnings_plot.php";
-        $urls[] = "'$url'";
+        $hidden_list .= sprintf('<li>%s</li>', $url);
+        $urls[] = "'{$url}'";
     }
-    $jsurls = implode(", ", $urls);
+    $hidden_list .= "</ul>";
     // Save this animation to memcache for future potential use
     $memcache = MemcacheSingleton::getInstance();
     // UNIX time is not unique enough, so we multiply by a random int
     $fts = time() * random_int(1, 100);
     $memcache->set("/GIS/apps/rview/warnings.phtml?fts={$fts}", $urls, 86400);
 
-    $content .= "</form>";
-    $content .= "<a href=\"anim_gif.php?fts=$fts\">Download as Animated Gif</a><br />";
-    $content .= "<div id=\"myanimation\"></div>\n";
-    $jsextra .= <<<EOM
-<script>
- $(document).ready(function () {
-    var myanimation = $("#myanimation").jsani({
-        imageSrcs: [$jsurls],
-        aniWidth: {$width},
-        aniHeight: {$height},
-        initdwell: 200,
-        controls: ['stopplay', 'firstframe', 'previous', 'next', 'lastframe', 'looprock', 'slow', 'fast', 'zoom'],
-        last_frame_pause: 8,
-        first_frame_pause: 1,
-        frame_pause: '0:5, 3:6'
-    });
-});
-</script>
+    $content .= <<<EOM
+</form>
+<a href="anim_gif.php?fts=$fts">Download as Animated Gif</a><br />
+<div id="myanimation"></div>
+{$hidden_list}
 EOM;
+
 } else {
     $imgi = 0;
     require "../../../../include/warnings_plot.php";
@@ -624,6 +607,5 @@ $content .= <<<EOM
 </ul>
 </div>
 EOM;
-$t->jsextra = $jsextra;
 $t->content = $content;
 $t->render('single.phtml');
