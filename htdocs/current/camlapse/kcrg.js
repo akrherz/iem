@@ -26,10 +26,10 @@ function myloader() {
     ts = new Date();
     mycam = document.theform.mycam.value;
     mylapse = document.theform.mylapse.value;
-    window.location.href = `#${mycam}_${mylapse}`;
-    const url = `/onsite/lapses/auto/${mycam}_${mylapse}.flv?${ts.getTime()}`;
-    const url2 = `/onsite/lapses/auto/${mycam}_${mylapse}.mp4?${ts.getTime()}`;
-    api = flowplayer();
+    window.location.href = `#${encodeURIComponent(mycam)}_${encodeURIComponent(mylapse)}`;
+    const url = `/onsite/lapses/auto/${encodeURIComponent(mycam)}_${encodeURIComponent(mylapse)}.flv?${ts.getTime()}`;
+    const url2 = `/onsite/lapses/auto/${encodeURIComponent(mycam)}_${encodeURIComponent(mylapse)}.mp4?${ts.getTime()}`;
+    const api = flowplayer();
     api.load([{ flash: url, mp4: url2 }]);
 }
 
