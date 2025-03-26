@@ -9,6 +9,24 @@ let imagestore = null;
 let disableStore = null;
 const ISO8601 = 'Y-m-d\\TH:i:s\\Z';
 
+/**
+ * Convert a date to UTC
+ * @param {Date} dt 
+ * @returns 
+ */
+function toUTC(dt) {
+    return Ext.Date.add(dt, Ext.Date.MINUTE, dt.getTimezoneOffset());
+}
+
+/**
+ * Convert a date from UTC
+ * @param {Date} dt
+ * @returns
+ */
+function fromUTC(dt) {
+    return Ext.Date.add(dt, Ext.Date.MINUTE, -dt.getTimezoneOffset());
+}
+
 Ext.onReady(() => {
 
     $(".ccool").click((event) => {
@@ -19,18 +37,6 @@ Ext.onReady(() => {
     /* Hack needed for Ext 3.0-rc2 to keep timefield working */
     Ext.override(Ext.form.ComboBox, {
         beforeBlur: Ext.emptyFn
-    });
-
-    Ext.override(Date, {
-        toUTC: function () {  // this
-            // Convert the date to the UTC date
-            return Ext.Date.add(this, Ext.Date.MINUTE, this.getTimezoneOffset());
-        },
-
-        fromUTC: function () {  // this
-            // Convert the date from the UTC date
-            return Ext.Date.add(this, Ext.Date.MINUTE, -this.getTimezoneOffset());
-        }
     });
 
     // Set up a model to use in our Store
@@ -237,7 +243,7 @@ Ext.onReady(() => {
                             + " " + Ext.getCmp("timepicker").getRawValue();
                         const dt = new Date(ts);
                         if (Ext.getCmp("timemode").realtime) { ts = 0; }
-                        else { ts = Ext.Date.format(dt.toUTC(), ISO8601); }
+                        else { ts = Ext.Date.format(toUTC(dt), ISO8601); }
                         imagestore.reload({
                             add: false,
                             params: {
@@ -294,11 +300,11 @@ Ext.onReady(() => {
                         imagestore.reload({
                             add: false,
                             params: {
-                                'ts': Ext.Date.format(dt.toUTC(), ISO8601),
+                                'ts': Ext.Date.format(toUTC(dt), ISO8601),
                                 'network': Ext.getCmp("networkSelect").getValue()
                             }
                         });
-                        window.location.href = `#${Ext.getCmp("networkSelect").getValue()}-${Ext.Date.format(dt.toUTC(), 'YmdHi')}`;
+                        window.location.href = `#${Ext.getCmp("networkSelect").getValue()}-${Ext.Date.format(toUTC(dt), 'YmdHi')}`;
                     }
                 }
             }, {
@@ -320,11 +326,11 @@ Ext.onReady(() => {
                         imagestore.reload({
                             add: false,
                             params: {
-                                'ts': Ext.Date.format(dt.toUTC(), ISO8601),
+                                'ts': Ext.Date.format(toUTC(dt), ISO8601),
                                 'network': Ext.getCmp("networkSelect").getValue()
                             }
                         });
-                        window.location.href = "#" + Ext.getCmp("networkSelect").getValue() + "-" + Ext.Date.format(dt.toUTC(), 'YmdHi');
+                        window.location.href = "#" + Ext.getCmp("networkSelect").getValue() + "-" + Ext.Date.format(toUTC(dt), 'YmdHi');
                     }
                 }
             }
@@ -356,8 +362,8 @@ Ext.onReady(() => {
             Ext.getCmp("networkSelect").setValue(network);
             const tstamp = tokens2[1];
             const dt = Ext.Date.parseDate(tstamp, 'YmdHi');
-            Ext.getCmp("datepicker").setValue(dt.fromUTC());
-            Ext.getCmp("timepicker").setValue(dt.fromUTC());
+            Ext.getCmp("datepicker").setValue(fromUTC(dt));
+            Ext.getCmp("timepicker").setValue(fromUTC(dt));
             Ext.getCmp("datepicker").enable();
             Ext.getCmp("timepicker").enable();
             Ext.getCmp("timemode").setText("Archived Mode");

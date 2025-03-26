@@ -1,11 +1,11 @@
-/* global defaultdt, ol, $ */
+/* global ol, $ */
 let map = null;
 let gj = null;
 let invgj = null;
 let dtpicker = null;
 let n0q = null;
 let varname = 'tmpf';
-let currentdt = new Date(defaultdt);
+let currentdt = null;
 let timeChanged = false;
 
 /**
@@ -112,7 +112,7 @@ const redArrow = new ol.style.Style({
     })
 });
 
-$().ready(() => {
+function setupMap() {
     gj = new ol.layer.Vector({
         title: 'ISUSM Data',
         source: new ol.source.Vector({
@@ -236,7 +236,7 @@ $().ready(() => {
 
     setDate();
     updateMap();
-});
+};
 
 function setDate() {
     dtpicker.datepicker("disable")
@@ -245,10 +245,10 @@ function setDate() {
 }
 
 function setupUI() {
-    $(".dt").click(function () {
+    $(".dt").click((event) => {
         timeChanged = true;
-        $(this).removeClass('focus');
-        currentdt = new Date(currentdt.valueOf() + parseInt($(this).data('delta')));
+        $(event.target).removeClass('focus');
+        currentdt = new Date(currentdt.valueOf() + parseInt($(event.target).data('delta')));
         setDate();
         updateMap();
     });
@@ -261,6 +261,8 @@ function setupUI() {
     });
 };
 
-$(document).ready(() => {
+$().ready(() => {
+    currentdt = new Date($("#defaultdt").data("dt"));
+    setupMap();
     setupUI();
 });
