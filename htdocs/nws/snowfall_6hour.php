@@ -14,11 +14,7 @@ $t->headextra = <<<EOM
 EOM;
 $t->jsextra = <<<EOM
 <script src='/vendor/jquery-datatables/1.10.20/datatables.min.js'></script>
-<script>
-$('#makefancy').click(function(){
-    $("#thetable table").DataTable();
-});
-</script>
+<script src="snowfall_6hour.js"></script>
 EOM;
 
 $year = get_int404("year", date("Y"));
