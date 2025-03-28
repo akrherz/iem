@@ -231,7 +231,7 @@ function setupMap() {
         }
     } catch {
         varname = 'tmpf';
-        currentdt = new Date(defaultdt);
+        currentdt = new Date($("#defaultdt").data("dt"));
     }
 
     setDate();
