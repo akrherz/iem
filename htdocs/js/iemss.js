@@ -157,10 +157,10 @@ $().ready(() => {
     $('#stations_delall').click(() => {
         return !$('#stations_out option').remove().appendTo('#stations_in');
     });
-    $('#stations_del').click(function () {
+    $('#stations_del').click(() => {
         $('#stations_out option:selected').remove().appendTo('#stations_in');
-        $('#stations_out option').each(function () { // this
-            $(this).attr("selected", "selected");
+        $('#stations_out option').each((_idx, item) => {
+            $(item).prop("selected", true);
         });
         return false;
     });

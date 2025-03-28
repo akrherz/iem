@@ -223,7 +223,7 @@ function refreshJSON() {
         url,
         format: new ol.format.GeoJSON()
     });
-    newsource.on('change', function () {
+    newsource.on('change', () => {
         updateCamera();
     });
     webcamGeoJsonLayer.setSource(newsource);
@@ -238,7 +238,7 @@ function refreshJSON() {
         url,
         format: new ol.format.GeoJSON()
     });
-    newsource.on('change', function () {
+    newsource.on('change', () => {
         updateCamera();
     });
     idotdashcamGeoJsonLayer.setSource(newsource);
@@ -253,7 +253,7 @@ function refreshJSON() {
         url,
         format: new ol.format.GeoJSON()
     });
-    newsource.on('change', function () {
+    newsource.on('change', () => {
         updateCamera();
     });
     idotRWISLayer.setSource(newsource);
@@ -445,11 +445,7 @@ $().ready(() => {
     });
 
     map.on('click', (evt) => {
-        const feature = map.forEachFeatureAtPixel(evt.pixel,
-            function (feature2) {
-                return feature2;
-            }
-        );
+        const feature = map.forEachFeatureAtPixel(evt.pixel, (ft) => ft);
         if (!feature) {
             return;
         }
