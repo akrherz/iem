@@ -149,15 +149,10 @@ if (isset($_GET["lat0"]) && isset($_GET["lon0"]) && $osite == $site) {
 
 $t->title = "RADAR &amp; NWS Warnings";
 $t->jsextra = <<<EOM
-<script src="/vendor/jquery-ui/{$JQUERYUI}/jquery-ui.min.js"></script>
-<script language="javascript" type="text/javascript" src="/vendor/jsani/2.84/jquery.jsani.min.js"></script>
 <script src="/vendor/select2/4.0.3/select2.min.js"></script>
 <script src="warnings.js"></script>
 EOM;
 $t->headextra = <<<EOM
-<link rel="stylesheet" href="/vendor/jquery-ui/{$JQUERYUI}/jquery-ui.min.css">
-<link rel="stylesheet" href="/vendor/jquery-ui/{$JQUERYUI}/jquery-ui.theme.min.css">
-<link rel="stylesheet" href="/vendor/jsani/2.84/jquery.jsani.min.css">
 <link rel="stylesheet" type="text/css" href="/vendor/select2/4.0.3/select2.min.css"/ >
 <link rel="stylesheet" type="text/css" href="warnings.css" />
 EOM;
@@ -424,8 +419,9 @@ EOM;
 $heightadd = 0;
 $maptitle = "IEM NEXRAD Mosaic Base Reflectivity";
 if ($loop === 1 || $loop === 2) {
+    $t->jsani = true;
     // Alternative 1, we want javascript looper!
-    $hidden_list = '<ul style="display: none;" id="imagesrcs">';
+    $hidden_list = '<ul style="display: none;" id="iemjsani_frames">';
     $urls = array();
     for ($i = 0; $i < $frames; $i++) {
         $imgi = $frames - 1 - $i;
@@ -443,7 +439,7 @@ if ($loop === 1 || $loop === 2) {
     $content .= <<<EOM
 </form>
 <a href="anim_gif.php?fts=$fts">Download as Animated Gif</a><br />
-<div id="myanimation"></div>
+<div id="iemjsani" style="width: {$width}px; height: {$height}px;"></div>
 {$hidden_list}
 EOM;
 

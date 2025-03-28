@@ -1,12 +1,13 @@
 <?php
 require_once "../../config/settings.inc.php";
-$JQUERYUI = "1.12.1";
-
 require_once "../../include/myview.php";
-$t = new MyView();
-$uri = 'mcview.phtml';
 require_once "../../include/forms.php";
 require_once "../../include/database.inc.php";
+
+$JQUERYUI = "1.12.1";
+
+$t = new MyView();
+$uri = 'mcview.phtml';
 $postgis = iemdb("postgis");
 
 $stname = iem_pg_prepare(
@@ -255,36 +256,15 @@ $jsextra = "";
 $headextra = "";
 
 if ($java == 'script') {
+    $t->jsani = true;
     $i = 0;
-    $jsurls = [];
+    $jsurls = '<ul id="iemjsani_frames" style="display: none;">';
     foreach ($images as $key => $val) {
-        $jsurls[] = sprintf("'%s'", $val);
+        $jsurls .= sprintf("<li>%s</li>\n", $val);
     }
-    $myimages = implode(",", $jsurls);
-    $control = "<p><div id=\"myanimation\"></div></p>";
-    $headextra .= <<<EOM
-<link rel="stylesheet" href="/vendor/jquery-ui/{$JQUERYUI}/jquery-ui.min.css">
-<link rel="stylesheet" href="/vendor/jquery-ui/{$JQUERYUI}/jquery-ui.theme.min.css">
-<link rel="stylesheet" href="/vendor/jsani/2.84/jquery.jsani.min.css">
-EOM;
-    $jsextra .= <<<EOM
-<script src="/vendor/jquery-ui/{$JQUERYUI}/jquery-ui.min.js"></script>
-<script language="javascript" type="text/javascript" src="/vendor/jsani/2.84/jquery.jsani.min.js"></script>
-<script>
- $(document).ready(function () {
-    var myanimation = $("#myanimation").jsani({
-        imageSrcs: [$myimages],
-        aniWidth: 640,
-        aniHeight: 480,
-        initdwell: 200,
-        controls: ['stopplay', 'firstframe', 'previous', 'next', 'lastframe', 'looprock', 'slow', 'fast', 'zoom'],
-        last_frame_pause: 8,
-        first_frame_pause: 1,
-        frame_pause: '0:5, 3:6'
-    });
-});
-</script>
-EOM;
+    $jsurls .= "</ul>";
+    $control = "{$jsurls}<p><div id=\"iemjsani\"></div></p>";
+
 } else {
     reset($images);
     $control = "";
