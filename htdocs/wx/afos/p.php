@@ -10,7 +10,8 @@ $t = new MyView();
 $e = get_int404("e", null);
 // Ensure e is 12 characters long
 if (!is_null($e) && strlen($_GET["e"]) != 12) {
-    xssafe("</script>");
+    // Naughty
+    xssafe("<tag>");
 }
 $pil = isset($_GET['pil']) ? strtoupper(substr(xssafe($_GET['pil']), 0, 6)) : null;
 $bbb = isset($_GET["bbb"]) ? strtoupper(substr(xssafe($_GET["bbb"]), 0, 3)) : null;

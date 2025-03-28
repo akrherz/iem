@@ -6,6 +6,14 @@ if ($this->iemss){
 <script src="/js/iemss.js"></script>
 EOF;
 }
+if ($this->jsani){
+    $jsextra .= <<<EOM
+<script src="/vendor/jquery-ui/1.12.1/jquery-ui.min.js"></script>
+<script language="javascript" type="text/javascript" src="/vendor/jsani/2.84/jquery.jsani.min.js"></script>
+<script src="/vendor/jsani/2.84/jquery.jsani.min.js"></script>
+<script src="/js/jsani.js"></script>
+EOM;
+}
 
 ?>
 <!-- footer -->

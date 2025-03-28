@@ -1,9 +1,13 @@
 // global $
+
+/**
+ * Converts the iemjsani div into an animation player
+ */
 $().ready(() => {
-    $("#myanimation").jsani({
-        imageSrcs: $("#imagesrcs li").map((_i, el) => $(el).text()).get(),
-        aniWidth: $("#myanimation").width() + 100,
-        aniHeight: $("#myanimation").width() + 100,
+    $("#iemjsani").jsani({
+        imageSrcs: $("#iemjsani_frames li").map((_i, el) => $(el).text()).get(),
+        aniWidth: $("#iemjsani").width(),
+        aniHeight: $("#iemjsani").height(),
         initdwell: 200,
         controls: ['stopplay', 'firstframe', 'previous', 'next', 'lastframe', 'looprock', 'slow', 'fast', 'zoom'],
         last_frame_pause: 8,

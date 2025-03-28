@@ -90,25 +90,16 @@ $intselect = make_select("interval", $interval, $ar);
 $jsextra = "";
 $headextra = "";
 if ($java == "script") {
+    $t->jsani = true;
     $sz = sizeof($images);
-    $hidden_list = '<ul id="imagesrcs" style="display: none;">';
+    $hidden_list = '<ul id="iemjsani_frames" style="display: none;">';
     foreach($images as $key => $val){
         $hidden_list .= sprintf("<li>%s</li>", $val);
     }
     $hidden_list .= "</ul>";
     $control = <<<EOM
-<div id="myanimation" style="width: {$width}px; height: {$height}px;"></div>
+<div id="iemjsani" style="width: {$width}px; height: {$height}px;"></div>
 {$hidden_list}
-EOM;
-    $headextra .= <<<EOM
-<link rel="stylesheet" href="/vendor/jquery-ui/{$JQUERYUI}/jquery-ui.min.css">
-<link rel="stylesheet" href="/vendor/jquery-ui/{$JQUERYUI}/jquery-ui.theme.min.css">
-<link rel="stylesheet" href="/vendor/jsani/2.84/jquery.jsani.min.css">
-EOM;
-    $jsextra .= <<<EOM
-<script src="/vendor/jquery-ui/{$JQUERYUI}/jquery-ui.min.js"></script>
-<script src="/vendor/jsani/2.84/jquery.jsani.min.js"></script>
-<script src="bloop.js"></script>
 EOM;
 } else {
     $control = "";
