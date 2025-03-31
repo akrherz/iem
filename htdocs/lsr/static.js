@@ -313,7 +313,7 @@ sbwLayer.addEventListener(TABLE_FILTERED_EVENT, () => {
 sbwLayer.getSource().on('change', () => {
     sbwtable.rows().remove();
     const data = [];
-    sbwLayer.getSource().getFeatures().forEach(function (feat) {
+    sbwLayer.getSource().getFeatures().forEach((feat) => {
         const props = feat.getProperties();
         props.id = feat.getId();
         data.push(props);
@@ -781,14 +781,14 @@ function initUI() {
 
 function genSettings() {
     /* Generate URL options set on this page */
-    let s = "";
-    s += (n0q.isVisible() ? "1" : "0");
-    s += (lsrLayer.isVisible() ? "1" : "0");
-    s += (sbwLayer.isVisible() ? "1" : "0");
-    s += (realtime ? "1" : "0");
-    s += (statesLayer.isVisible() ? "1" : "0");
-    s += (countiesLayer.isVisible() ? "1" : "0");
-    return s;
+    let res = "";
+    res += (n0q.isVisible() ? "1" : "0");
+    res += (lsrLayer.isVisible() ? "1" : "0");
+    res += (sbwLayer.isVisible() ? "1" : "0");
+    res += (realtime ? "1" : "0");
+    res += (statesLayer.isVisible() ? "1" : "0");
+    res += (countiesLayer.isVisible() ? "1" : "0");
+    return res;
 }
 
 function updateURL() {
@@ -908,16 +908,16 @@ function getShapefileLink(base) {
     }
     const sts = moment($("#sts").val(), 'L LT');
     const ets = moment($("#ets").val(), 'L LT');
-    uri += "&year1=" + sts.utc().format('Y');
-    uri += "&month1=" + sts.utc().format('M');
-    uri += "&day1=" + sts.utc().format('D');
-    uri += "&hour1=" + sts.utc().format('H');
-    uri += "&minute1=" + sts.utc().format('m');
-    uri += "&year2=" + ets.utc().format('Y');
-    uri += "&month2=" + ets.utc().format('M');
-    uri += "&day2=" + ets.utc().format('D');
-    uri += "&hour2=" + ets.utc().format('H');
-    uri += "&minute2=" + ets.utc().format('m');
+    uri += `&year1=${sts.utc().format('Y')}`;
+    uri += `&month1=${sts.utc().format('M')}`;
+    uri += `&day1=${sts.utc().format('D')}`;
+    uri += `&hour1=${sts.utc().format('H')}`;
+    uri += `&minute1=${sts.utc().format('m')}`;
+    uri += `&year2=${ets.utc().format('Y')}`;
+    uri += `&month2=${ets.utc().format('M')}`;
+    uri += `&day2=${ets.utc().format('D')}`;
+    uri += `&hour2=${ets.utc().format('H')}`;
+    uri += `&minute2=${ets.utc().format('m')}`;
     return uri;
 }
 

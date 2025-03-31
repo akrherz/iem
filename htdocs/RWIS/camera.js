@@ -83,7 +83,7 @@ $(document).ready(() => {
     });
     $("#datepicker").datepicker('setDate', new Date());
 
-    $('select[name=times]').change(function () {
+    $('select[name=times]').change(() => {
         getimage();
     });
 

@@ -9,7 +9,7 @@ $("#thebutton").click(() => {
             $("#theimage").attr("src", data.imgurl);
             $("#thegeojson").html(JSON.stringify(data.geojson));
         }
-    ).fail(function() {
+    ).fail(() => {
         alert("Image Generation Failed, sorry!"); // skipcq
     });
 });

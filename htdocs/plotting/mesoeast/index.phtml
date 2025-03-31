@@ -1,14 +1,14 @@
-<?php 
+<?php
 require_once "../../../config/settings.inc.php";
 require_once "../../../include/myview.php";
 require_once "../../../include/forms.php";
 $t = new MyView();
 $t->title = "IEM NE Ames Time Series";
 
-$year = isset($_GET["year"]) ? intval($_GET["year"]): date("Y");
-$month = isset($_GET["month"]) ? intval($_GET["month"]): date("m");
-$day = isset($_GET["day"]) ? intval($_GET["day"]): date("d");
-$myTime = mktime(0,0,0,$month,$day,$year);
+$year = get_int404("year", date("Y"));
+$month = get_int404("month", date("m"));
+$day = get_int404("day", date("d"));
+$myTime = mktime(0, 0, 0, $month, $day, $year);
 
 $dirRef = date("Y/m/d", $myTime);
 $dataurl = "/archive/data/$dirRef/text/ot/ot0006.dat";
@@ -20,24 +20,30 @@ $ds = daySelect($day);
 $titleDate = date("M d, Y", $myTime);
 
 $dirRef = date("Y/m/d", $myTime);
-$fcontents = file("/mesonet/ARCHIVE/data/$dirRef/text/ot/ot0006.dat");
-
 $thisMax = -99;
 $thisMin = 99;
 $maxGust = 0;
-foreach($fcontents as $line_num => $line){
-    if ($line_num < 5) continue;
-    $parts = explode(" ", $line);
-    $tm = $parts[5];
-    if ($tm > $thisMax){ $thisMax = $tm; }
-    if ($tm < $thisMin){ $thisMin = $tm; }
-    $gust = floatval($parts[11]);
-    $gust_time = $parts[12];
-    if ($gust > $maxGust){
-        $maxGust = $gust;
-        $gustTime = $gust_time;
-    }
-} // End of while
+$gustTime = "N/A";
+$fn = "/mesonet/ARCHIVE/data/$dirRef/text/ot/ot0006.dat";
+if (file_exists($fn)) {
+    foreach ($fcontents as $line_num => $line) {
+        if ($line_num < 5) continue;
+        $parts = explode(" ", $line);
+        $tm = $parts[5];
+        if ($tm > $thisMax) {
+            $thisMax = $tm;
+        }
+        if ($tm < $thisMin) {
+            $thisMin = $tm;
+        }
+        $gust = floatval($parts[11]);
+        $gust_time = $parts[12];
+        if ($gust > $maxGust) {
+            $maxGust = $gust;
+            $gustTime = $gust_time;
+        }
+    } // End of while
+}
 
 $t->content = <<<EOM
 <ul class="breadcrumb">

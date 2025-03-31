@@ -1,6 +1,6 @@
 """.. title:: JSON Webcam Data
 
-Return to `JSON Services </json/>`_
+Return to `API Services </api/>`_
 
 Changelog
 ---------
@@ -14,10 +14,9 @@ from datetime import datetime, timedelta
 from zoneinfo import ZoneInfo
 
 from pydantic import Field
-from pyiem.database import get_sqlalchemy_conn
+from pyiem.database import get_sqlalchemy_conn, sql_helper
 from pyiem.exceptions import IncompleteWebRequest
 from pyiem.webutil import CGIModel, iemapp
-from sqlalchemy import text
 
 
 class Schema(CGIModel):
@@ -38,7 +37,7 @@ def dance(cid, start_ts, end_ts):
     data = {"images": []}
     with get_sqlalchemy_conn("mesosite") as conn:
         res = conn.execute(
-            text("""
+            sql_helper("""
         SELECT valid at time zone 'UTC', drct from camera_log where
         cam = :cid and valid >= :sts and valid < :ets
     """),

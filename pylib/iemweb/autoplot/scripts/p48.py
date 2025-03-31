@@ -11,10 +11,11 @@ plots for a single WFO at a time.
 
 import numpy as np
 import pandas as pd
-from pyiem.database import get_dbconn
+from pyiem.database import sql_helper, with_sqlalchemy_conn
 from pyiem.exceptions import NoDataFound
 from pyiem.nws import vtec
 from pyiem.plot import figure_axes
+from sqlalchemy.engine import Connection
 
 
 def get_description():
@@ -43,65 +44,72 @@ def get_description():
     return desc
 
 
-def plotter(ctx: dict):
+@with_sqlalchemy_conn("postgis")
+def plotter(ctx: dict, conn: Connection):
     """Go"""
-    pgconn = get_dbconn("postgis")
-    cursor = pgconn.cursor()
-
     ugc = ctx["ugc"]
     phenomena = ctx["phenomena"]
     significance = ctx["significance"]
 
-    cursor.execute(
-        "SELECT s.wfo, s.tzname, u.name from ugcs u JOIN stations s on "
-        "(u.wfo = s.id) where ugc = %s and end_ts is null and "
-        "s.network = 'WFO' LIMIT 1",
-        (ugc,),
+    res = conn.execute(
+        sql_helper("""
+    SELECT s.wfo, s.tzname, u.name from ugcs u JOIN stations s on
+    (u.wfo = s.id) where ugc = :ugc and end_ts is null and
+    s.network = 'WFO' LIMIT 1"""),
+        {"ugc": ugc},
     )
     wfo = None
     tzname = None
     name = ""
-    if cursor.rowcount == 1:
-        row = cursor.fetchone()
+    if res.rowcount == 1:
+        row = res.fetchone()
         tzname = row[1]
         wfo = row[0]
         name = row[2]
-
-    cursor.execute(
-        """
-     SELECT count(*), min(issue at time zone %s), max(issue at time zone %s)
-     from warnings WHERE ugc = %s and phenomena = %s and significance = %s
-     and wfo = %s
-    """,
-        (tzname, tzname, ugc, phenomena, significance, wfo),
+    params = {
+        "tzname": tzname,
+        "ugc": ugc,
+        "phenomena": phenomena,
+        "significance": significance,
+        "wfo": wfo,
+    }
+    res = conn.execute(
+        sql_helper("""
+    SELECT count(*), min(issue at time zone :tzname),
+    max(issue at time zone :tzname)
+    from warnings WHERE ugc = :ugc and phenomena = :phenomena
+    and significance = :significance and wfo = :wfo
+    """),
+        params,
     )
-    row = cursor.fetchone()
+    row = res.fetchone()
     cnt = row[0]
     sts = row[1]
     ets = row[2]
     if sts is None:
         raise NoDataFound("No Results Found, try flipping zone/county")
 
-    cursor.execute(
-        """
+    res = conn.execute(
+        sql_helper("""
      WITH coverage as (
         SELECT extract(year from issue) as yr, eventid,
-        generate_series(issue at time zone %s,
-                        expire at time zone %s, '1 minute'::interval) as s
+        generate_series(issue at time zone :tzname,
+                        expire at time zone :tzname, '1 minute'::interval) as s
                         from warnings where
-        ugc = %s and phenomena = %s and significance = %s and wfo = %s),
+        ugc = :ugc and phenomena = :phenomena and significance = :significance
+        and wfo = :wfo),
       minutes as (SELECT distinct yr, eventid,
         (extract(hour from s)::numeric * 60. +
          extract(minute from s)::numeric) as m
         from coverage)
 
     SELECT minutes.m, count(*) from minutes GROUP by m
-          """,
-        (tzname, tzname, ugc, phenomena, significance, wfo),
+          """),
+        params,
     )
 
     data = np.zeros((1440,), "f")
-    for row in cursor:
+    for row in res:
         data[int(row[0])] = row[1]
 
     df = pd.DataFrame(

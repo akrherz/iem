@@ -1,6 +1,6 @@
 """.. title:: VTEC Events by WFO and Year
 
-Return to `JSON Services </json/>`_
+Return to `API Services </api/>`_
 
 Documentation for /json/vtec_events.py
 --------------------------------------
@@ -42,11 +42,11 @@ from io import BytesIO, StringIO
 
 import pandas as pd
 from pydantic import Field
-from pyiem.database import get_sqlalchemy_conn
+from pyiem.database import get_sqlalchemy_conn, sql_helper
 from pyiem.reference import ISO8601
 from pyiem.util import utc
 from pyiem.webutil import CGIModel, iemapp
-from sqlalchemy import Connection, text
+from sqlalchemy import Connection
 
 from iemweb.imagemaps import rectify_wfo
 
@@ -114,7 +114,8 @@ def get_res(conn: Connection, wfo, year, phenomena, significance, combo):
         )
         orderby = "u.utc_issue ASC"
     res = conn.execute(
-        text(f"""
+        sql_helper(
+            """
     WITH polyareas as (
         SELECT phenomena, significance, eventid, round((ST_area(
         ST_transform(geom,9311)) / 1000000.0)::numeric,0) as area
@@ -140,7 +141,10 @@ def get_res(conn: Connection, wfo, year, phenomena, significance, combo):
     from ugcareas u LEFT JOIN polyareas p on
     (u.phenomena = p.phenomena and u.significance = p.significance
      and u.eventid = p.eventid) ORDER by {orderby}
-    """),
+    """,
+            plimit=plimit,
+            orderby=orderby,
+        ),
         params,
     )
     data = {

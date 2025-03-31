@@ -14,11 +14,10 @@ https://mesonet.agron.iastate.edu/geojson/winter_roads.geojson
 import json
 
 from pydantic import Field
-from pyiem.database import get_sqlalchemy_conn
+from pyiem.database import get_sqlalchemy_conn, sql_helper
 from pyiem.reference import ISO8601
 from pyiem.util import utc
 from pyiem.webutil import CGIModel, iemapp
-from sqlalchemy import text
 
 
 class Schema(CGIModel):
@@ -34,7 +33,7 @@ def run():
     # with a start time in the future
     with get_sqlalchemy_conn("postgis") as conn:
         res = conn.execute(
-            text("""
+            sql_helper("""
             SELECT ST_asGeoJson(ST_Transform(simple_geom, 4326)) as geojson,
             cond_code, c.segid from
             roads_current c JOIN roads_base b on (c.segid = b.segid)

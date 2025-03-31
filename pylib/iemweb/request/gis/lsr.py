@@ -57,11 +57,10 @@ import geopandas as gpd
 import pandas as pd
 import shapefile
 from pydantic import AwareDatetime, Field, model_validator
-from pyiem.database import get_sqlalchemy_conn
+from pyiem.database import get_sqlalchemy_conn, sql_helper
 from pyiem.exceptions import IncompleteWebRequest
 from pyiem.util import utc
 from pyiem.webutil import CGIModel, ListOrCSVType, iemapp
-from sqlalchemy import text
 
 fiona.supported_drivers["KML"] = "rw"
 EXL = "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"
@@ -209,8 +208,8 @@ def do_excel_kml(fmt, params, sql_filters):
     """Export as Excel or KML."""
     with get_sqlalchemy_conn("postgis") as conn:
         df: gpd.GeoDataFrame = gpd.read_postgis(
-            text(
-                f"""
+            sql_helper(
+                """
             WITH wfos as (
                 select case when length(id) = 4 then substr(id, 2, 3)
                 else id end as cwa, tzname from stations where network = 'WFO'
@@ -230,12 +229,13 @@ def do_excel_kml(fmt, params, sql_filters):
             county, city, state, typetext, magnitude, source, lat, lon,
             remark, ugc, ugcname, geom, qualifier
             from reports l JOIN wfos w on (l.wfo = w.cwa)
-            ORDER by utcvalid ASC"""
+            ORDER by utcvalid ASC""",
+                sql_filters=sql_filters,
             ),
             conn,
             params=params,
             geom_col="geom",
-        )
+        )  # type: ignore
     df = df.rename(
         {
             "office": "Office",
@@ -333,8 +333,8 @@ def application(environ, start_response):
 
     with get_sqlalchemy_conn("postgis") as conn:
         res = conn.execute(
-            text(
-                f"""
+            sql_helper(
+                """
             SELECT distinct
             to_char(valid at time zone 'UTC', 'YYYYMMDDHH24MI') as dvalid,
             magnitude, l.wfo, type, typetext,
@@ -346,7 +346,8 @@ def application(environ, start_response):
             from lsrs l LEFT JOIN ugcs u on (l.gid = u.gid) WHERE
             valid >= :sts and valid < :ets {sql_filters}
             ORDER by dvalid ASC
-            """
+            """,
+                sql_filters=sql_filters,
             ),
             params,
         )
