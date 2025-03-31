@@ -59,7 +59,7 @@ def application(environ, start_response):
     with get_sqlalchemy_conn("hads") as conn:
         res = conn.execute(
             sql_helper(
-                """"
+                """
             select distinct key from {table} where station = :station""",
                 table=table,
             ),
