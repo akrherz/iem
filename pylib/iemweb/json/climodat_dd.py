@@ -32,13 +32,12 @@ from datetime import date, datetime, timedelta
 import numpy as np
 from metpy.units import units
 from pydantic import Field
-from pyiem.database import get_sqlalchemy_conn
+from pyiem.database import get_sqlalchemy_conn, sql_helper
 from pyiem.exceptions import IncompleteWebRequest
 from pyiem.grid.nav import IEMRE
 from pyiem.meteorology import gdd as calc_gdd
 from pyiem.util import c2f, ncopen
 from pyiem.webutil import CGIModel, iemapp
-from sqlalchemy import text
 
 
 class Schema(CGIModel):
@@ -99,7 +98,7 @@ def run(station, sdate, edate, gddbase, gddceil):
     """Do something"""
     with get_sqlalchemy_conn("coop") as conn:
         res = conn.execute(
-            text("""
+            sql_helper("""
             WITH obs as (
                 select sum(gddxx(:gddbase, :gddceil, high, low)) from alldata
                 where station = :station and day >= :sdate and day <= :edate)

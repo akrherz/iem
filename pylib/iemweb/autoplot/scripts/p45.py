@@ -10,7 +10,7 @@ import calendar
 from datetime import date, datetime
 
 import pandas as pd
-from pyiem.database import get_sqlalchemy_conn
+from pyiem.database import get_sqlalchemy_conn, sql_helper
 from pyiem.exceptions import NoDataFound
 from pyiem.plot import figure
 
@@ -56,23 +56,27 @@ def plotter(ctx: dict):
         # This could use report_type=3, but its not all that slow and already
         # accounts for double-accounting.
         df = pd.read_sql(
-            """
+            sql_helper("""
             WITH obs as (
                 SELECT to_char(valid, 'YYYYmmdd') as yyyymmdd,
                 SUM(case when (skyc1 = 'OVC' or skyc2 = 'OVC' or skyc3 = 'OVC'
                             or skyc4 = 'OVC') then 1 else 0 end)
-                from alldata where station = %s and valid > '1951-01-01'
-                and extract(hour from (valid at time zone %s) +
-                    '10 minutes'::interval ) = %s
+                from alldata where station = :station and valid > '1951-01-01'
+                and extract(hour from (valid at time zone :tzname) +
+                    '10 minutes'::interval ) = :hour
                 GROUP by yyyymmdd)
 
             SELECT substr(o.yyyymmdd,1,4)::int as year,
             substr(o.yyyymmdd,5,2)::int as month,
             sum(case when o.sum >= 1 then 1 else 0 end) as hits, count(*)
             from obs o GROUP by year, month ORDER by year ASC, month ASC
-        """,
+        """),
             conn,
-            params=(station, ctx["_nt"].sts[station]["tzname"], hour),
+            params={
+                "station": station,
+                "tzname": ctx["_nt"].sts[station]["tzname"],
+                "hour": hour,
+            },
             index_col=None,
         )
     if df.empty:

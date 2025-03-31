@@ -27,10 +27,9 @@ https://mesonet.agron.iastate.edu/json/dcp_vars.py?station=AESI4
 import json
 
 from pydantic import Field
-from pyiem.database import get_sqlalchemy_conn
+from pyiem.database import get_sqlalchemy_conn, sql_helper
 from pyiem.util import utc
 from pyiem.webutil import CGIModel, iemapp
-from sqlalchemy import text
 
 
 class Schema(CGIModel):
@@ -59,7 +58,11 @@ def application(environ, start_response):
     table = f"raw{utc():%Y_%m}"
     with get_sqlalchemy_conn("hads") as conn:
         res = conn.execute(
-            text(f"select distinct key from {table} where station = :station"),
+            sql_helper(
+                """"
+            select distinct key from {table} where station = :station""",
+                table=table,
+            ),
             {
                 "station": environ["station"],
             },

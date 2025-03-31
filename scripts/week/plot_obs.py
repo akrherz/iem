@@ -6,9 +6,8 @@ Called from RUN_10_AFTER.sh
 from datetime import date, timedelta
 
 import pandas as pd
-from pyiem.database import get_sqlalchemy_conn
+from pyiem.database import get_sqlalchemy_conn, sql_helper
 from pyiem.plot import MapPlot
-from sqlalchemy import text
 
 
 def fmter(val):
@@ -29,7 +28,7 @@ def runner(days):
     # Compute normal from the climate database
     with get_sqlalchemy_conn("iem") as conn:
         df = pd.read_sql(
-            text("""
+            sql_helper("""
             select s.id, ST_x(s.geom) as lon, ST_y(s.geom) as lat,
             sum(pday) as rainfall
             from summary c JOIN stations s on (c.iemid = s.iemid)

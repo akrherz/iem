@@ -12,13 +12,11 @@ This service returns a JSON representation of Impact Based Warning Tags
 
 import json
 
-from pydantic import Field
-from pyiem.database import get_sqlalchemy_conn
-from pyiem.exceptions import IncompleteWebRequest
+from pydantic import Field, model_validator
+from pyiem.database import get_sqlalchemy_conn, sql_helper
 from pyiem.reference import ISO8601
 from pyiem.util import utc
 from pyiem.webutil import CGIModel, iemapp
-from sqlalchemy import text
 
 from iemweb.imagemaps import rectify_wfo
 
@@ -33,6 +31,13 @@ class Schema(CGIModel):
     damagetag: str = Field(None, description="Damage Tag", max_length=20)
     wfo: str = Field(None, description="WFO Identifier", max_length=4)
     year: int = Field(..., description="Year to query", ge=2000, le=utc().year)
+
+    @model_validator(mode="after")
+    def validate_wfo_or_damagetag(self):
+        """Ensure we have either a WFO or a damage tag"""
+        if self.wfo is None and self.damagetag is None:
+            raise ValueError("Either a WFO or damage tag must be provided")
+        return self
 
 
 def ptime(val):
@@ -67,7 +72,8 @@ def run(wfo, damagetag, year):
     }
     with get_sqlalchemy_conn("postgis") as conn:
         cursor = conn.execute(
-            text(f"""
+            sql_helper(
+                """
     WITH stormbased as (
      SELECT eventid, phenomena, issue at time zone 'UTC' as utc_issue,
      expire at time zone 'UTC' as utc_expire,
@@ -76,16 +82,18 @@ def run(wfo, damagetag, year):
      status, windtag, hailtag, tornadotag, tml_sknt, damagetag, wfo,
      floodtag_flashflood, floodtag_damage, floodtag_heavyrain,
      floodtag_dam, floodtag_leeve, waterspouttag, product_id
-     from sbw_{year} w WHERE {damagelimiter} {wfolimiter}
+     from sbw w WHERE {damagelimiter} {wfolimiter}
      phenomena in ('SV', 'TO', 'FF', 'MA')
-     and significance = 'W' and status != 'EXP' and status != 'CAN'
+     and w.vtec_year = :year and significance = 'W' and status != 'EXP' and
+     status != 'CAN'
  ),
 
  countybased as (
-     select string_agg( u.name || ' ['||u.state||']', ', ') as locations,
-     eventid, phenomena, w.wfo from warnings_{year} w JOIN ugcs u
+    select string_agg( u.name || ' ['||u.state||']', ', ') as locations,
+    eventid, phenomena, w.wfo from warnings w JOIN ugcs u
     ON (u.gid = w.gid) WHERE {wfolimiter}
-    significance = 'W' and phenomena in ('SV', 'TO', 'FF', 'MA')
+    w.vtec_year = :year and significance = 'W' and
+    phenomena in ('SV', 'TO', 'FF', 'MA')
     and eventid is not null GROUP by w.wfo, eventid, phenomena
  )
 
@@ -97,7 +105,10 @@ def run(wfo, damagetag, year):
  from countybased c JOIN stormbased s ON (c.eventid = s.eventid and
  c.phenomena = s.phenomena and c.wfo = s.wfo)
  ORDER by s.wfo ASC, eventid ASC, utc_polygon_begin ASC
-     """),
+     """,
+                wfolimiter=wfolimiter,
+                damagelimiter=damagelimiter,
+            ),
             params,
         )
 
@@ -161,8 +172,6 @@ def application(environ, start_response):
     year = environ["year"]
     wfo = environ["wfo"]
     damagetag = environ["damagetag"]
-    if wfo is None and damagetag is None:
-        raise IncompleteWebRequest("wfo or damagetag is required")
 
     res = run(wfo, damagetag, year)
     headers = [("Content-type", "application/json")]

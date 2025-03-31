@@ -25,13 +25,12 @@ from zipfile import ZipFile
 import pandas as pd
 from metpy.units import units
 from pydantic import Field
-from pyiem.database import get_dbconnc, get_sqlalchemy_conn
+from pyiem.database import get_dbconnc, get_sqlalchemy_conn, sql_helper
 from pyiem.exceptions import IncompleteWebRequest
 from pyiem.network import Table as NetworkTable
 from pyiem.reference import state_names
 from pyiem.util import utc
 from pyiem.webutil import CGIModel, ListOrCSVType, iemapp
-from sqlalchemy import text
 
 DEGF = units.degF
 DEGC = units.degC
@@ -806,8 +805,8 @@ def do_swat(_cursor, ctx):
     thisyear = datetime.now().year
     with get_sqlalchemy_conn("coop") as conn:
         df = pd.read_sql(
-            text(
-                f"""
+            sql_helper(
+                """
             WITH scenario as (
                 SELECT
                 ('{thisyear}-'||month||'-'||extract(day from day))::date
@@ -824,7 +823,9 @@ def do_swat(_cursor, ctx):
                 SELECT *, extract(doy from day) as doy from scenario
             )
             SELECT * from total ORDER by day ASC
-        """
+        """,
+                thisyear=str(thisyear),
+                table=table,
             ),
             conn,
             params={

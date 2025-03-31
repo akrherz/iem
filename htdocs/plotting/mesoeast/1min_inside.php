@@ -1,9 +1,10 @@
 <?php
 require_once "../../../config/settings.inc.php";
-//  1 minute data plotter 
+require_once "../../../include/forms.php";
 require_once "../../../include/jpgraph/jpgraph.php";
 require_once "../../../include/jpgraph/jpgraph_line.php";
 require_once "../../../include/jpgraph/jpgraph_date.php";
+require_once "../../../include/jpgraph/jpgraph_led.php";
 
 function dwpf($tmpf, $relh){
   $tmpk = 273.15 + (5.00/9.00 * ($tmpf - 32.00));
@@ -11,9 +12,9 @@ function dwpf($tmpf, $relh){
   return round( ($dwpk - 273.15) * 9.00/5.00 + 32,2 );
 }
 
-$year = isset($_GET["year"]) ? $_GET["year"] : date("Y");
-$month = isset($_GET["month"]) ? $_GET["month"] : date("m");
-$day = isset($_GET["day"]) ? $_GET["day"] : date("d");
+$year = get_int404("year", date("Y"));
+$month = get_int404("month", date("m"));
+$day = get_int404("day", date("d"));
 
 $formatFloor = mktime(0, 0, 0, 1, 1, 2016);
 if (strlen($year) == 4 && strlen($month) > 0 && strlen($day) > 0 ){
@@ -24,8 +25,14 @@ if (strlen($year) == 4 && strlen($month) > 0 && strlen($day) > 0 ){
 
 $titleDate = date("M d, Y", $myTime);
 $dirRef = date("Y/m/d", $myTime);
+$fn = "/mesonet/ARCHIVE/data/$dirRef/text/ot/ot0006.dat";
+if (!file_exists($fn)) {
+    $led = new DigitalLED74();
+    $led->StrokeNumber('NO DATA FOR THIS DATE', LEDC_GREEN);
+    die();
+}
 
-$fcontents = file("/mesonet/ARCHIVE/data/$dirRef/text/ot/ot0006.dat");
+$fcontents = file($fn);
 
 $parts = array();
 $tmpf = array();

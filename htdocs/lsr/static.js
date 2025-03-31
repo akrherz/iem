@@ -313,7 +313,7 @@ sbwLayer.addEventListener(TABLE_FILTERED_EVENT, () => {
 sbwLayer.getSource().on('change', () => {
     sbwtable.rows().remove();
     const data = [];
-    sbwLayer.getSource().getFeatures().forEach(function (feat) {
+    sbwLayer.getSource().getFeatures().forEach((feat) => {
         const props = feat.getProperties();
         props.id = feat.getId();
         data.push(props);

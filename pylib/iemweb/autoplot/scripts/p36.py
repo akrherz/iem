@@ -9,9 +9,10 @@ from datetime import date, datetime
 import matplotlib.patheffects as PathEffects
 import numpy as np
 import pandas as pd
-from pyiem.database import get_dbconn
+from pyiem.database import sql_helper, with_sqlalchemy_conn
 from pyiem.exceptions import NoDataFound
 from pyiem.plot import figure_axes
+from sqlalchemy.engine import Connection
 
 from iemweb.autoplot import ARG_STATION
 
@@ -56,10 +57,9 @@ def get_description():
     return desc
 
 
-def plotter(ctx: dict):
+@with_sqlalchemy_conn("coop")
+def plotter(ctx: dict, conn: Connection = None):
     """Go"""
-    pgconn = get_dbconn("coop")
-    cursor = pgconn.cursor()
     station = ctx["station"]
 
     varname = ctx["var"]
@@ -67,18 +67,22 @@ def plotter(ctx: dict):
     if ctx["inc"] == "yes":
         last_date = date.today()
 
-    cursor.execute(
-        f"""
-        SELECT year, month, {COLSQL[varname]} from alldata WHERE
-        station = %s and day < %s GROUP by year, month ORDER by year ASC
+    res = conn.execute(
+        sql_helper(
+            """
+        SELECT year, month, {cols} from alldata WHERE
+        station = :station and day < :ets
+        GROUP by year, month ORDER by year ASC
         """,
-        (station, last_date),
+            cols=COLSQL[varname],
+        ),
+        {"station": station, "ets": last_date},
     )
-    if cursor.rowcount == 0:
+    if res.rowcount == 0:
         raise NoDataFound("No results found for query")
 
     baseyear = None
-    for row in cursor:
+    for row in res:
         if baseyear is None:
             baseyear = row[0]
             avgs = np.ones((datetime.now().year - baseyear + 1, 12)) * -99.0

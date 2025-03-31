@@ -1,7 +1,7 @@
 /* global *, ol */
 let map = null;
 let player = null;
-$(document).ready(function () {
+$(document).ready(() => {
     player = new ol.layer.Tile({
         title: 'Profitability',
         visible: true,
@@ -27,9 +27,10 @@ $(document).ready(function () {
     map.addControl(new ol.control.LayerSwitcher());
 
     $("#yearselect").buttonset();
-    $('#yearselect input[type=radio]').change(function () { // this
+    $('#yearselect input[type=radio]').change((event) => {
+        const year = $(event.target).val();
         player.setSource(new ol.source.XYZ({
-            url: '/c/tile.py/1.0.0/profit' + this.value + '/{z}/{x}/{y}.png'
+            url: `/c/tile.py/1.0.0/profit${year}/{z}/{x}/{y}.png`
         }));
     });
     $("#disclaimer_btn").click(() => {
