@@ -319,9 +319,9 @@ Ext.onReady(() => {
                 listeners: {
                     select: () => {
                         imagestore.isLoaded = false;
-                        const ts = Ext.Date.format(Ext.getCmp("datepicker").getValue(),
+                        const ts = (Ext.Date.format(Ext.getCmp("datepicker").getValue(),
                             'm/d/Y')
-                            + " " + Ext.getCmp("timepicker").getRawValue();
+                            + " " + Ext.getCmp("timepicker").getRawValue());
                         const dt = new Date(ts);
                         imagestore.reload({
                             add: false,
@@ -330,7 +330,7 @@ Ext.onReady(() => {
                                 'network': Ext.getCmp("networkSelect").getValue()
                             }
                         });
-                        window.location.href = "#" + Ext.getCmp("networkSelect").getValue() + "-" + Ext.Date.format(toUTC(dt), 'YmdHi');
+                        window.location.href = `#${Ext.getCmp("networkSelect").getValue()}-${Ext.Date.format(toUTC(dt), 'YmdHi')}`;
                     }
                 }
             }

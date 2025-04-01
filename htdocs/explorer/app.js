@@ -105,7 +105,7 @@ function mapClickHandler(event){
     div.setAttribute("data-station", station);
     const network = feature.get("network");
     div.setAttribute("data-network", network);
-    div.setAttribute("title", station + " " + feature.get("sname"));
+    div.setAttribute("title", `${station} ${feature.get("sname")}`);
     let prefix = (network.endsWith("ASOS") ? "asos": "coop");
     prefix = (network === "ISUSM") ? "isusm": prefix;
     const $newdiv = $(`.${prefix}-data-template`).clone().css("display", "block").appendTo($(div));
@@ -390,9 +390,9 @@ function addButtons(dlg) {
             $min.data("isMin", false);
             dlg.find(".ui-dialog-content").show();
             dlg.animate({
-                height: $min.data("original-size").height + "px",
-                top: $min.data("original-pos").top + "px",
-                left: $min.data("original-pos").left + "px"
+                height: `${$min.data("original-size").height}px`,
+                top: `${$min.data("original-pos").top}px`,
+                left: `${$min.data("original-pos").left}px`
             }, 200);
             dockPosition -= 50;
         }

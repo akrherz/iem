@@ -39,12 +39,12 @@ function toIEMString(val) {
 };
 
 function toISOString(val) {
-    return val.getUTCFullYear()
+    return (val.getUTCFullYear()
         + '-' + pad(val.getUTCMonth() + 1)
         + '-' + pad(val.getUTCDate())
         + 'T' + pad(val.getUTCHours())
         + ':' + pad(val.getUTCMinutes())
-        + 'Z';
+        + 'Z');
 };
 
 function logic() {
