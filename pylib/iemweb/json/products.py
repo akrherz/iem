@@ -25,7 +25,7 @@ https://mesonet.agron.iastate.edu/json/products.py
 import json
 
 from pydantic import Field
-from pyiem.database import get_sqlalchemy_conn
+from pyiem.database import get_sqlalchemy_conn, sql_helper
 from pyiem.webutil import CGIModel, iemapp
 from sqlalchemy import Connection
 
@@ -38,9 +38,11 @@ class Schema(CGIModel):
 
 def add_webcam(conn: Connection, data):
     """Append."""
-    res = conn.exec_driver_sql(
-        "SELECT * from webcams WHERE network != 'IDOT' "
-        "and sts is not null ORDER by network, name"
+    res = conn.execute(
+        sql_helper(
+            "SELECT * from webcams WHERE network != 'IDOT' "
+            "and sts is not null ORDER by network, name"
+        )
     )
     for row in res.mappings():
         tpl = (
@@ -63,9 +65,11 @@ def add_webcam(conn: Connection, data):
 
 def add_archive_products(conn: Connection, data):
     """Append."""
-    res = conn.exec_driver_sql(
-        "SELECT * from archive_products WHERE sts is not null "
-        "ORDER by groupname, name"
+    res = conn.execute(
+        sql_helper(
+            "SELECT * from archive_products WHERE sts is not null "
+            "ORDER by groupname, name"
+        )
     )
     for row in res.mappings():
         data["products"].append(

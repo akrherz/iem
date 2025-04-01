@@ -1,6 +1,6 @@
 """.. title:: VTEC Events by State and Year
 
-Return to `JSON Services </json/>`_
+Return to `API Services </api/>`_
 
 Changelog
 ---------
@@ -33,11 +33,10 @@ from io import BytesIO, StringIO
 
 import pandas as pd
 from pydantic import Field
-from pyiem.database import get_sqlalchemy_conn
+from pyiem.database import get_sqlalchemy_conn, sql_helper
 from pyiem.reference import ISO8601
 from pyiem.util import utc
 from pyiem.webutil import CGIModel, iemapp
-from sqlalchemy import text
 
 from iemweb.imagemaps import rectify_wfo
 
@@ -91,7 +90,8 @@ def get_res(state, year, phenomena, significance):
     data = {"state": state, "year": year, "events": []}
     with get_sqlalchemy_conn("postgis") as conn:
         res = conn.execute(
-            text(f"""
+            sql_helper(
+                """
     WITH polyareas as (
         SELECT wfo, phenomena, significance, eventid, round((ST_area(
         ST_transform(geom,9311)) / 1000000.0)::numeric,0) as area
@@ -121,7 +121,9 @@ def get_res(state, year, phenomena, significance):
     (u.phenomena = p.phenomena and u.significance = p.significance
      and u.eventid = p.eventid and u.wfo = p.wfo)
         ORDER by u.phenomena ASC, u.significance ASC, u.utc_issue ASC
-    """),
+    """,
+                plimit=plimit,
+            ),
             {"year": year, "st": state, "ph": phenomena, "sig": significance},
         )
         for row in res.mappings():

@@ -45,9 +45,10 @@ from io import BytesIO, StringIO
 
 import pandas as pd
 from pydantic import AwareDatetime, Field
+from pyiem.database import get_sqlalchemy_conn, sql_helper
 from pyiem.exceptions import IncompleteWebRequest
 from pyiem.nws.vtec import VTEC_PHENOMENA, VTEC_SIGNIFICANCE, get_ps_string
-from pyiem.util import get_sqlalchemy_conn, utc
+from pyiem.util import utc
 from pyiem.webutil import CGIModel, iemapp
 
 from iemweb.imagemaps import rectify_wfo
@@ -103,7 +104,7 @@ def get_df(ugc, sts: datetime, ets: datetime):
     """Answer the request!"""
     with get_sqlalchemy_conn("postgis") as conn:
         df = pd.read_sql(
-            """
+            sql_helper("""
             SELECT vtec_year,
             to_char(issue at time zone 'UTC',
                 'YYYY-MM-DDThh24:MI:SSZ') as iso_issued,
@@ -115,11 +116,11 @@ def get_df(ugc, sts: datetime, ets: datetime):
                 'YYYY-MM-DD hh24:MI') as expired,
             eventid, phenomena, significance, hvtec_nwsli, wfo, ugc,
             product_ids[1] as product_id
-            from warnings WHERE ugc = %s and issue >= %s
-            and issue < %s ORDER by issue ASC
-            """,
+            from warnings WHERE ugc = :ugc and issue >= :sts
+            and issue < :ets ORDER by issue ASC
+            """),
             conn,
-            params=(ugc, sts, ets),
+            params={"ugc": ugc, "sts": sts, "ets": ets},
         )
     if df.empty:
         return df
