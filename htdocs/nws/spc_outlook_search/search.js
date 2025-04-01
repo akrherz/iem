@@ -158,7 +158,7 @@ function doWatch(lon, lat) {
 
 $(document).ready(() => {
     buildUI();
-    let res = olSelectLonLat("map", -93.653, 41.53, updateMarkerPosition);
+    const res = olSelectLonLat("map", -93.653, 41.53, updateMarkerPosition);
     marker = res.marker;
 
     // Do the anchor tag linking, please

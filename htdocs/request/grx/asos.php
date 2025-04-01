@@ -15,7 +15,7 @@ EOM;
 require_once "../../../config/settings.inc.php";
 require_once "../../../include/mlib.php";
 
-function s2icon($s)
+function s2icon($s)  // skipcq
 {
     if ($s < 2.5) return "1,21";
     if ($s < 5) return "1,1";
