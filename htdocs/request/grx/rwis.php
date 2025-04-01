@@ -34,7 +34,7 @@ function pcolor($tmpf)
     return "1";
 }
 
-function s2icon($s)
+function s2icon($s)  // skipcq
 {
     if ($s < 2.5) return "1,21";
     if ($s < 5) return "1,1";

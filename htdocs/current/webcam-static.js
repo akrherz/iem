@@ -79,7 +79,7 @@ Ext.onReady(() => {
         Ext.each(records, (record) => {
             const checked = (disableStore.find('cid', record.get("cid")) === -1);
             data.push({
-                boxLabel: Number(record.get("cid").substr(5, 3)) + " " + record.get("name"),
+                boxLabel: `${Number(record.get("cid").substr(5, 3))} ${record.get("name")}`,
                 name: record.get("cid"),
                 checked,
                 listeners: {
@@ -294,8 +294,7 @@ Ext.onReady(() => {
                 listeners: {
                     select() {
                         imagestore.isLoaded = false;
-                        const ts = Ext.Date.format(Ext.getCmp("datepicker").getValue(), 'm/d/Y')
-                            + " " + Ext.getCmp("timepicker").getRawValue();
+                        const ts = `${Ext.Date.format(Ext.getCmp("datepicker").getValue(), 'm/d/Y')} ${Ext.getCmp("timepicker").getRawValue()}`;
                         const dt = new Date(ts);
                         imagestore.reload({
                             add: false,
@@ -319,9 +318,7 @@ Ext.onReady(() => {
                 listeners: {
                     select: () => {
                         imagestore.isLoaded = false;
-                        const ts = (Ext.Date.format(Ext.getCmp("datepicker").getValue(),
-                            'm/d/Y')
-                            + " " + Ext.getCmp("timepicker").getRawValue());
+                        const ts = `${Ext.Date.format(Ext.getCmp("datepicker").getValue(), 'm/d/Y')} ${Ext.getCmp("timepicker").getRawValue()}`;
                         const dt = new Date(ts);
                         imagestore.reload({
                             add: false,
@@ -376,7 +373,7 @@ Ext.onReady(() => {
                     'network': Ext.getCmp("networkSelect").getValue()
                 }
             });
-            window.location.href = "#" + Ext.getCmp("networkSelect").getValue() + "-" + Ext.Date.format(dt, 'YmdHi');
+            window.location.href = `#${Ext.getCmp("networkSelect").getValue()}-${Ext.Date.format(dt, 'YmdHi')}`;
         } else if (s.length === 6) {
             const tokens3 = s.split("-");
             Ext.getCmp("networkSelect").setValue(tokens3[0]);

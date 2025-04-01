@@ -42,7 +42,7 @@ const vectorStyleFunction = (feature) => {
                 color: 'rgba(255, 255, 255, 0.6)'
             }),
             text: new ol.style.Text({
-                font: fontSize + 'px Calibri,sans-serif',
+                font: `${fontSize}px Calibri,sans-serif`,
                 text: feature.get("value").toString(),
                 fill: new ol.style.Fill({
                     color: '#FFFFFF',

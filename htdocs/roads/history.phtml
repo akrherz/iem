@@ -7,18 +7,20 @@ require_once "../../include/forms.php";
 $t = new MyView();
 $dbconn = iemdb('postgis');
 
-$month = isset($_GET["month"]) ? intval($_GET["month"]) : intval(date("m"));
-$year = isset($_GET["year"]) ? intval($_GET["year"]) : intval(date("Y"));
-$segid = isset($_GET["segid"]) ? intval($_GET["segid"]) : "";
-$valid = isset($_GET["valid"]) ? DateTime::createFromFormat("Y-m-d H:i", $_GET['valid']) : null;
+$month = get_int404("month", intval(date("m")));
+$year = get_int404("year", intval(date("Y")));
+$segid = get_int404("segid", null);
+$valid = isset($_GET["valid"]) ? DateTime::createFromFormat("Y-m-d H:i", xssafe($_GET['valid'])) : null;
 
 function segmentSelect($dbconn, $year, $month, $selected, $name = "segid")
 {
     $s = "<select name=\"$name\" class=\"iemselect2\">\n";
     $stname = iem_pg_prepare(
-        $dbconn,
-        "SELECT segid, major, minor from roads_base "
-            . " WHERE archive_begin <= $1 and archive_end > $1 ORDER by major ASC"
+        $dbconn, <<<EOM
+    SELECT segid, major, minor from roads_base
+    WHERE archive_begin <= $1 and (archive_end > $1 or archive_end is null)
+    ORDER by major ASC
+EOM
     );
     $rs = pg_execute($dbconn, $stname, array("{$year}-{$month}-01"));
     while ($row = pg_fetch_assoc($rs)) {
@@ -39,11 +41,15 @@ $t->jsextra = <<<EOM
 <script src="history.js"></script>
 EOM;
 
-$segselect = segmentSelect($dbconn, $year, $month, $segid);
+$segselect = segmentSelect($dbconn, $year, $month, strval($segid));
 $ys = yearSelect2(2006, $year, "year");
 $ms = monthSelect($month);
 
 $content = <<<EOM
+<ul class="breadcrumb">
+<li><a href="/roads/">Roads Mainpage</a></li>
+<li class="active">Historical Listing</li>
+</ul>
 <h3>Historical Road Conditions</h3>
 
 <form method="GET" action="history.phtml">
@@ -65,8 +71,6 @@ $content = <<<EOM
 </form>
 EOM;
 
-$year1 = ($month < 7) ? ($year - 1) : $year;
-$year2 = ($month < 7) ? $year : ($year + 1);
 
 if (isset($_GET["month"]) && isset($_GET["segid"])) {
     $content .= "<div class=\"alert-info\">Here is a listing of historical 
@@ -75,16 +79,25 @@ if (isset($_GET["month"]) && isset($_GET["segid"])) {
           display only shows when the given segment changed condition.
           Click on the time of the report to get a listing of all road 
           conditions for that time.</div>";
-    $content .= "<br /><table id='table1' class=\"table table-condensed table-striped\">
-          <thead><tr><th>Date:</th><th>Report Time:</th><th>Road Segment</th>
-          <th>Condition</th></tr></thead><tbody>";
-
-    $stname = iem_pg_prepare($dbconn, "SELECT c.label, l.valid, "
-        . "b.major, b.minor from roads_base b, "
-        . "roads_log l, roads_conditions c WHERE l.segid = $1 and "
-        . "extract(month from l.valid) = $2 and l.cond_code = c.code "
-        . "and b.segid = l.segid ORDER by valid ASC");
-    $rs = pg_execute($dbconn, $stname, array($segid, $month));
+    $content .= <<<EOM
+<br />
+<table id='table1' class=\"table table-condensed table-striped\">
+<thead>
+<tr><th>Date:</th><th>Report Time:</th><th>Road Segment</th>
+<th>Condition</th></tr></thead>
+<tbody>
+EOM;
+    $sts = new DateTime("{$year}-{$month}-01");
+    $ets = new DateTime("{$year}-{$month}-01");
+    $ets->modify("+1 month");
+    $stname = iem_pg_prepare($dbconn, <<<EOM
+    SELECT c.label, l.valid,
+    b.major, b.minor from roads_base b,
+    roads_log l, roads_conditions c WHERE l.segid = $1 and
+    l.valid >= $2 and l.valid < $3 and l.cond_code = c.code
+    and b.segid = l.segid ORDER by valid ASC
+EOM);
+    $rs = pg_execute($dbconn, $stname, array($segid, $sts->format("Y-m-d"), $ets->format("Y-m-d")));
 
     $lastcond = "";
     while ($row = pg_fetch_assoc($rs)) {
@@ -104,15 +117,13 @@ if (isset($_GET["month"]) && isset($_GET["segid"])) {
         );
     }
     $content .= "</tbody></table>\n";
-} else if ($valid != null) {
+} else if (!is_null($valid)) {
     $year = intval($valid->format("Y"));
-    $year1 = (intval($valid->format("m")) < 7) ? ($year - 1) : $year;
-    $year2 = (intval($valid->format("m")) < 7) ? $year : ($year + 1);
     $content .= "<div class=\"alert-info\">Here is a listing of historical road conditions for a particular
    time for all roads monitored in Iowa.  Click on the segment name to get 
    a listing of historical conditions for that segment.</div>";
-    $gisurl = "{$EXTERNAL_BASEURL}/archive/data/" . $valid->format('Y/m/d/') . "/GIS/iaroad_cond_" . $valid->format('YmdHi') . ".zip";
-    $content .= "<p>You can download a <a href=\"$gisurl\">gis shapefile</a> for this reporting time.";
+    $gisurl = "{$EXTERNAL_BASEURL}/archive/data/" . $valid->format('Y/m/d/') . "/GIS/";
+    $content .= "<p>Directory of <a href=\"$gisurl\">gis shapefiles</a> for this UTC date.";
     $content .= "<br /><table id='table1' class=\"table table-condensed table-striped\">
           <thead><tr><th>Date:</th><th>Report Time:</th><th>Road Segment</th>
           <th>Condition</th></tr></thead><tbody>";
@@ -157,17 +168,9 @@ listing of road conditions per road segment for a particular month or a listing
 of all road conditions for a particular time.  Currently, our archive is 
 basically complete back to 14 Feb 2006.
 
-<p>You can find an archive of the raw text reports by navigating the IEM's 
-archive here:
-<code><a href="/archive/data/2005/01/30/text/">{$EXTERNAL_BASEURL}/archive/data/2005/01/30/text/</a></code>
-<br />look for the .STOIA files.  All timestamps are in 
-Greenwhich Mean Time (GMT or UTC), which is 6 hours ahead of us in the winter.
-The directory structure of the site is ordered by year, month, and then day. 
-The example URL is for 30 Jan 2005.
-
 <p><br />and an archive of the GIS shapefiles per report here:
 <br /><code><a href="/archive/data/2005/01/30/GIS/">{$EXTERNAL_BASEURL}/archive/data/2005/01/30/GIS/</a></code>
-<br />look for the iaroads_* files.  Again, timestamps are in GMT.
+<br />look for the iaroads_* files.  Again, timestamps are in UTC.
 EOM;
 }
 $t->content = $content;
