@@ -31,20 +31,11 @@ function pad(number) {
 
 
 function toIEMString(val) {
-    return (val.getUTCFullYear()
-        + pad(val.getUTCMonth() + 1)
-        + pad(val.getUTCDate())
-        + pad(val.getUTCHours())
-        + pad(val.getUTCMinutes()));
+    return `${val.getUTCFullYear()}${pad(val.getUTCMonth() + 1)}${pad(val.getUTCDate())}${pad(val.getUTCHours())}${pad(val.getUTCMinutes())}`;
 };
 
 function toISOString(val) {
-    return (val.getUTCFullYear()
-        + '-' + pad(val.getUTCMonth() + 1)
-        + '-' + pad(val.getUTCDate())
-        + 'T' + pad(val.getUTCHours())
-        + ':' + pad(val.getUTCMinutes())
-        + 'Z');
+    return `${val.getUTCFullYear()}-${pad(val.getUTCMonth() + 1)}-${pad(val.getUTCDate())}T${pad(val.getUTCHours())}:${pad(val.getUTCMinutes())}Z`;
 };
 
 function logic() {

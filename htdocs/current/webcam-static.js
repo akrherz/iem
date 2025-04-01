@@ -239,8 +239,7 @@ Ext.onReady(() => {
                 listeners: {
                     'select': () => {
                         imagestore.isLoaded = false;
-                        let ts = Ext.Date.format(Ext.getCmp("datepicker").getValue(), 'm/d/Y')
-                            + " " + Ext.getCmp("timepicker").getRawValue();
+                        let ts = `${Ext.Date.format(Ext.getCmp("datepicker").getValue(), 'm/d/Y')} ${Ext.getCmp("timepicker").getRawValue()}`;
                         const dt = new Date(ts);
                         if (Ext.getCmp("timemode").realtime) { ts = 0; }
                         else { ts = Ext.Date.format(toUTC(dt), ISO8601); }

@@ -26,7 +26,7 @@ $(document).ready(() => {
 
     // check if archive=yes is set in the URL
     const urlParams = new URLSearchParams(window.location.search);
-    if (urlParams.has('archive')) {
+    if (! urlParams.has('archive')) {
         setTimeout(() => { document.myform.submit(); }, 300000);
     }
 });
