@@ -406,18 +406,18 @@ function addButtons(dlg) {
             });
             $max.data("isMax", true);
             dlg.animate({
-                height: $(window).height() + "px",
-                width: $(window).width() - 20 + "px",
+                height: `${$(window).height()}px`,
+                width: `${$(window).width() - 20}px`,
                 top: 0,
                 left: 0
             }, 200);
         } else {
             $max.data("isMax", false);
             dlg.animate({
-                height: $max.data("original-size").height + "px",
-                width: $max.data("original-size").width + "px",
-                top: $max.data("original-pos").top + "px",
-                left: $max.data("original-pos").top + "px"
+                height: `${$max.data("original-size").height}px`,
+                width: `${$max.data("original-size").width}px`,
+                top: `${$max.data("original-pos").top}px`,
+                left: `${$max.data("original-pos").top}px`
             }, 200);
         }
         // Wait for parent to resize!

@@ -31,11 +31,11 @@ function pad(number) {
 
 
 function toIEMString(val) {
-    return val.getUTCFullYear()
+    return (val.getUTCFullYear()
         + pad(val.getUTCMonth() + 1)
         + pad(val.getUTCDate())
         + pad(val.getUTCHours())
-        + pad(val.getUTCMinutes());
+        + pad(val.getUTCMinutes()));
 };
 
 function toISOString(val) {
