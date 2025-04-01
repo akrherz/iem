@@ -263,8 +263,10 @@ if ($java == 'script') {
         $jsurls .= sprintf("<li>%s</li>\n", $val);
     }
     $jsurls .= "</ul>";
-    $control = "{$jsurls}<p><div id=\"iemjsani\"></div></p>";
-
+    $control = <<<EOM
+{$jsurls}
+<p><div id="iemjsani" style="width: 800px; height: 640px;"></div></p>
+EOM;
 } else {
     reset($images);
     $control = "";

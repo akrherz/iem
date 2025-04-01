@@ -53,7 +53,7 @@ function fetchtimes(findtime) {
 
             ts = result.join('');
 
-            html += '<option ts="' + data.images[i].valid + '" value="' + data.images[i].href + '">' + ts + '</option>';
+            html += `<option ts="${data.images[i].valid}" value="${data.images[i].href}">${ts}</option>`;
         }
         if (len === 0) {
             html += "<option value='-1'>No Images Found!</option>";

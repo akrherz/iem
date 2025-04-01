@@ -469,7 +469,7 @@ function initUI() {
     lsrtypefilter.on("change", function() { // this
         const vals = $(this).val();
         const val = vals ? vals.join("|") : null;
-        lsrtable.column(7).search(val ? '^' + val + '$' : '', true, false).draw();
+        lsrtable.column(7).search(val ? `^${val}$` : '', true, false).draw();
     });
     sbwtypefilter = $("#sbwtypefilter").select2({
         placeholder: "Filter SBWs by Event Type",
@@ -479,7 +479,7 @@ function initUI() {
     sbwtypefilter.on("change", function() { // this
         const vals = $(this).val();
         const val = vals ? vals.join("|") : null;
-        sbwtable.column(3).search(val ? '^' + val + '$' : '', true, false).draw();
+        sbwtable.column(3).search(val ? `^${val}$` : '', true, false).draw();
     });
     wfoSelect = $("#wfo").select2({
         templateSelection(state) {
