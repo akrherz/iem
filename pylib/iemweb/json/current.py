@@ -25,11 +25,11 @@ https://mesonet.agron.iastate.edu/json/current.py?station=AMW&network=IA_ASOS
 import json
 
 from pydantic import Field
-from pyiem.database import get_sqlalchemy_conn
+from pyiem.database import get_sqlalchemy_conn, sql_helper
 from pyiem.reference import ISO8601
 from pyiem.util import utc
 from pyiem.webutil import CGIModel, iemapp
-from sqlalchemy import Connection, text
+from sqlalchemy import Connection
 
 
 class Schema(CGIModel):
@@ -53,7 +53,7 @@ class Schema(CGIModel):
 def run(conn: Connection, network, station):
     """Get last ob!"""
     res = conn.execute(
-        text("""
+        sql_helper("""
     WITH mystation as (
              SELECT * from stations where id = :id and network = :net),
     lastob as (select *, m.iemid as miemid,

@@ -1,6 +1,6 @@
 """.. title:: IEM RIDGE Current Metadata
 
-Return to `JSON Services </json/>`_
+Return to `API Services </api/#json>`_
 
 Documentation for /json/ridge_current.py
 ----------------------------------------

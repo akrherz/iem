@@ -62,10 +62,9 @@ from typing import Optional
 
 import pandas as pd
 from pydantic import AwareDatetime, Field
-from pyiem.database import get_sqlalchemy_conn
+from pyiem.database import get_sqlalchemy_conn, sql_helper
 from pyiem.nws.vtec import VTEC_PHENOMENA, VTEC_SIGNIFICANCE, get_ps_string
 from pyiem.webutil import CGIModel, iemapp
-from sqlalchemy import text
 
 from iemweb.imagemaps import rectify_wfo
 
@@ -134,7 +133,8 @@ def get_df(lon, lat, sdate, edate, buffer: float, at: Optional[datetime]):
         )
     with get_sqlalchemy_conn("postgis") as conn:
         df = pd.read_sql(
-            text(f"""
+            sql_helper(
+                """
         WITH myugcs as (
             select gid from ugcs where ST_Intersects(geom, {ptsql})
         )
@@ -148,7 +148,10 @@ def get_df(lon, lat, sdate, edate, buffer: float, at: Optional[datetime]):
         eventid, phenomena, significance, wfo, hvtec_nwsli, w.ugc
         from warnings w JOIN myugcs u on (w.gid = u.gid) WHERE
         issue > :sdate and issue < :edate {time_limiter} ORDER by issue ASC
-        """),
+        """,
+                ptsql=ptsql,
+                time_limiter=time_limiter,
+            ),
             conn,
             params=params,
         )

@@ -239,11 +239,12 @@ def compute_tables_wfo(wfo):
     xmax += 0.5
     ymax += 0.5
     with get_sqlalchemy_conn("mesosite") as conn:
-        res = conn.exec_driver_sql(
-            "SELECT distinct substr(id, 1, 2) from stations where "
-            "network ~* 'CLIMATE' and ST_Contains("
-            "ST_MakeEnvelope(%s, %s, %s, %s, 4326), geom)",
-            (xmin, ymin, xmax, ymax),
+        res = conn.execute(
+            sql_helper("""
+    SELECT distinct substr(id, 1, 2) from stations where
+    network ~* 'CLIMATE' and ST_Contains(
+    ST_MakeEnvelope(:xmin, :ymin, :xmax, :ymax, 4326), geom)"""),
+            {"xmin": xmin, "ymin": ymin, "xmax": xmax, "ymax": ymax},
         )
         tables = [f"alldata_{row[0].lower()}" for row in res]
     return tables, [xmin, ymin, xmax, ymax]
@@ -456,7 +457,7 @@ def get_data(ctx):
                 params=params,
                 index_col="station",
                 geom_col="geom",
-            )
+            )  # type: ignore
             LOG.info("Finshing %s table query", table)
             if ctx["gddbase"] not in GDD_KNOWN_BASES or ctx["gddceil"] != 86:
                 # We need to compute our own GDD Climatology, Le Sigh

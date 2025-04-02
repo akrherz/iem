@@ -13,7 +13,7 @@ import calendar
 from datetime import date, datetime
 
 import pandas as pd
-from pyiem.database import get_sqlalchemy_conn
+from pyiem.database import get_sqlalchemy_conn, sql_helper
 from pyiem.exceptions import NoDataFound
 from pyiem.plot import figure_axes
 from pyiem.util import convert_value
@@ -130,19 +130,25 @@ def add_context(ctx):
 
     with get_sqlalchemy_conn("asos") as conn:
         df = pd.read_sql(
-            f"""
+            sql_helper(
+                """
         WITH obs as (
-            SELECT (valid + '10 minutes'::interval) at time zone %s as ts,
-            sknt from alldata where station = %s and sknt >= 0 and sknt < 150
-            and report_type = 3 {ylimiter})
+            SELECT (valid + '10 minutes'::interval) at time zone :tzname as ts,
+            sknt from alldata where station = :station and sknt >= 0
+            and sknt < 150 and report_type = 3 {ylimiter})
 
         select extract(month from ts)::int as month,
         extract(hour from ts)::int as hour, extract(day from ts)::int as day,
         avg(sknt) as avg_sknt from obs GROUP by month, day, hour
         ORDER by month, day, hour
             """,
+                ylimiter=ylimiter,
+            ),
             conn,
-            params=(ctx["_nt"].sts[station]["tzname"], station),
+            params={
+                "tzname": ctx["_nt"].sts[station]["tzname"],
+                "station": station,
+            },
             index_col=None,
         )
     # Figure out which mode we are going to do
@@ -159,7 +165,11 @@ def add_context(ctx):
     else:
         ctx["ncols"] = 3
         df["fake_date"] = pd.to_datetime(
-            {"year": 2000, "month": df["month"], "day": df["day"]}
+            {
+                "year": [2000] * len(df.index),
+                "month": df["month"],
+                "day": df["day"],
+            }
         )
         df = df.set_index("fake_date")
         dfs = []
@@ -198,54 +208,47 @@ def get_highcharts(ctx: dict) -> str:
     """highcharts output"""
     add_context(ctx)
     lines = []
+    dash_styles = ["Solid", "ShortDash"]
     for month, df2 in ctx["df"].groupby("month"):
-        v = df2[["hour", "avg_" + ctx["units"]]].to_json(orient="values")
+        v = df2[["hour", f"avg_{ctx['units']}"]].to_json(orient="values")
         lines.append(
-            """{
-            name: '"""
-            + ctx["labels"][month]
-            + """',
-            type: 'line',
-            tooltip: {valueDecimals: 1},
-            data: """
-            + v
-            + """
-            }
+            f"""
+{{
+    name: '{ctx["labels"][month]}',
+    type: 'line',
+    dashStyle: '{dash_styles[(month - 1) // 6]}',
+    tooltip: {{valueDecimals: 1}},
+    data: {v}
+}}
         """
         )
     series = ",".join(lines)
     containername = ctx["_e"]
-    return (
-        """
-Highcharts.chart('"""
-        + containername
-        + """', {
-        chart: {
-            type: 'column'
-        },
-        xAxis: {categories: ['Mid', '1 AM', '2 AM', '3 AM', '4 AM', '5 AM',
-        '6 AM', '7 AM', '8 AM', '9 AM', '10 AM', '11 AM', 'Noon', '1 PM',
-        '2 PM', '3 PM', '4 PM', '5 PM', '6 PM', '7 PM', '8 PM', '9 PM',
-        '10 PM', '11 PM'],
-            title: {text: '"""
-        + ctx["xlabel"]
-        + """'}},
-        tooltip: {shared: true},
-        yAxis: {title: {text: '"""
-        + ctx["ylabel"]
-        + """'}},
-        title: {text: '"""
-        + ctx["title"]
-        + """'},
-        subtitle: {text: '"""
-        + ctx["subtitle"]
-        + """'},
-        series: ["""
-        + series
-        + """]
-    });
-    """
-    )
+    return f"""
+Highcharts.chart('{containername}', {{
+    chart: {{
+        type: 'column'
+    }},
+    xAxis: {{
+        categories: ['Mid', '1 AM', '2 AM', '3 AM', '4 AM', '5 AM',
+    '6 AM', '7 AM', '8 AM', '9 AM', '10 AM', '11 AM', 'Noon', '1 PM',
+    '2 PM', '3 PM', '4 PM', '5 PM', '6 PM', '7 PM', '8 PM', '9 PM',
+    '10 PM', '11 PM'],
+        title: {{text: '{ctx["xlabel"]}'}}
+    }},
+    legend: {{
+        itemDistance: 50,
+        symbolWidth: 40,
+    }},
+    tooltip: {{shared: true}},
+    yAxis: {{
+        title: {{text: '{ctx["ylabel"]}'}}
+    }},
+    title: {{text: '{ctx["title"]}'}},
+    subtitle: {{text: '{ctx["subtitle"]}'}},
+    series: [{series}]
+}});
+"""
 
 
 def plotter(ctx: dict):

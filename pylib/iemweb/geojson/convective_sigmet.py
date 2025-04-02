@@ -21,10 +21,11 @@ https://mesonet.agron.iastate.edu/geojson/convective_sigmet.geojson
 import json
 
 from pydantic import Field
-from pyiem.database import get_sqlalchemy_conn
+from pyiem.database import sql_helper, with_sqlalchemy_conn
 from pyiem.reference import ISO8601
 from pyiem.util import utc
 from pyiem.webutil import CGIModel, iemapp
+from sqlalchemy.engine import Connection
 
 
 class Schema(CGIModel):
@@ -33,37 +34,37 @@ class Schema(CGIModel):
     callback: str = Field(None, description="JSONP callback function")
 
 
-def run():
+@with_sqlalchemy_conn("postgis")
+def run(conn: Connection = None) -> str:
     """Actually do the hard work of getting the current SBW in geojson"""
-    with get_sqlalchemy_conn("postgis") as conn:
-        res = conn.exec_driver_sql(
-            """
-            SELECT *, ST_asGeoJson(geom) as geojson,
-            issue at time zone 'UTC' as utc_issue,
-            expire at time zone 'UTC' as utc_expire,
-            label
-            FROM sigmets_current WHERE sigmet_type = 'C' and expire > now()
-            """
-        )
+    res = conn.execute(
+        sql_helper("""
+        SELECT *, ST_asGeoJson(geom) as geojson,
+        issue at time zone 'UTC' as utc_issue,
+        expire at time zone 'UTC' as utc_expire,
+        label
+        FROM sigmets_current WHERE sigmet_type = 'C' and expire > now()
+        """)
+    )
 
-        data = {
-            "type": "FeatureCollection",
-            "features": [],
-            "generation_time": utc().strftime(ISO8601),
-            "count": res.rowcount,
-        }
-        for row in res.mappings():
-            data["features"].append(
-                dict(
-                    type="Feature",
-                    properties={
-                        "issue": row["utc_issue"].strftime(ISO8601),
-                        "expire": row["utc_expire"].strftime(ISO8601),
-                        "label": row["label"],
-                    },
-                    geometry=json.loads(row["geojson"]),
-                )
+    data = {
+        "type": "FeatureCollection",
+        "features": [],
+        "generation_time": utc().strftime(ISO8601),
+        "count": res.rowcount,
+    }
+    for row in res.mappings():
+        data["features"].append(
+            dict(
+                type="Feature",
+                properties={
+                    "issue": row["utc_issue"].strftime(ISO8601),
+                    "expire": row["utc_expire"].strftime(ISO8601),
+                    "label": row["label"],
+                },
+                geometry=json.loads(row["geojson"]),
             )
+        )
     return json.dumps(data)
 
 

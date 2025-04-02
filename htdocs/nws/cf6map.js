@@ -65,7 +65,7 @@ const vectorStyleFunction = function (feature) {
                 color: 'rgba(255, 255, 255, 0.6)'
             }),
             text: new ol.style.Text({
-                font: fontSize + 'px Calibri,sans-serif',
+                font: `${fontSize}px Calibri,sans-serif`,
                 text: value.toString(),
                 fill: new ol.style.Fill({
                     color,
@@ -199,8 +199,8 @@ $(document).ready(() => {
         if (tokens.length === 2) {
             const tpart = tokens[0];
             renderattr = tokens[1];
-            $('select[id=renderattr] option[value=' + renderattr + ']').attr("selected", "selected");
-            const dstr = `${tpart.substr(4, 2)}/${tpart.substr(6, 2)}/${tpart.substr(0, 4)}`;
+            $(`select[id=renderattr] option[value=${renderattr}]`).attr("selected", "selected");
+            const dstr = `${tpart.slice(4, 6)}/${tpart.slice(6, 8)}/${tpart.slice(0, 4)}`;
             $("#datepicker").datepicker("setDate", new Date(dstr));
             updateDate();
         }

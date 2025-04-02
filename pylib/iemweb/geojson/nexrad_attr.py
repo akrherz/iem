@@ -40,11 +40,11 @@ from datetime import datetime, timedelta
 from zoneinfo import ZoneInfo
 
 from pydantic import Field
-from pyiem.database import get_sqlalchemy_conn
+from pyiem.database import sql_helper, with_sqlalchemy_conn
 from pyiem.reference import ISO8601
 from pyiem.util import utc
 from pyiem.webutil import CGIModel, iemapp
-from sqlalchemy import Connection, text
+from sqlalchemy import Connection
 
 
 class Schema(CGIModel):
@@ -63,22 +63,24 @@ class Schema(CGIModel):
     )
 
 
-def run(conn: Connection, valid, fmt):
+@with_sqlalchemy_conn("radar")
+def run(valid, fmt, conn: Connection = None):
     """Actually do the hard work of getting the geojson"""
 
     if valid is None:
-        res = conn.exec_driver_sql(
-            """
+        res = conn.execute(
+            sql_helper("""
             SELECT ST_x(geom) as lon, ST_y(geom) as lat, *,
             valid at time zone 'UTC' as utc_valid from
             nexrad_attributes WHERE valid > now() - '30 minutes'::interval
-            """
+            """)
         )
     else:
         valid = valid.replace(tzinfo=ZoneInfo("UTC"))
         tbl = f"nexrad_attributes_{valid:%Y}"
         res = conn.execute(
-            text(f"""
+            sql_helper(
+                """
     with vcps as (
         SELECT distinct nexrad, valid from {tbl}
         where valid between :sts and :ets),
@@ -92,7 +94,9 @@ def run(conn: Connection, valid, fmt):
     from {tbl} n, agg a WHERE
     a.rank = 1 and a.nexrad = n.nexrad and a.valid = n.valid
     ORDER by n.nexrad ASC
-    """),
+    """,
+                tbl=tbl,
+            ),
             {
                 "sts": valid - timedelta(minutes=10),
                 "ets": valid + timedelta(minutes=10),
@@ -197,7 +201,6 @@ def application(environ, start_response):
     fmt = environ["fmt"]
     headers = [("Content-type", get_ct(environ))]
 
-    with get_sqlalchemy_conn("radar") as conn:
-        res = run(conn, environ["valid"], fmt)
+    res = run(environ["valid"], fmt)
     start_response("200 OK", headers)
     return res.encode("ascii")

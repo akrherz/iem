@@ -19,9 +19,8 @@ https://mesonet.agron.iastate.edu/json/network.py?network=IA_ASOS
 import json
 
 from pydantic import Field
-from pyiem.database import get_sqlalchemy_conn
+from pyiem.database import get_sqlalchemy_conn, sql_helper
 from pyiem.webutil import CGIModel, iemapp
-from sqlalchemy import text
 
 
 class Schema(CGIModel):
@@ -48,7 +47,7 @@ def application(environ, start_response):
     }
     with get_sqlalchemy_conn("mesosite") as conn:
         res = conn.execute(
-            text(
+            sql_helper(
                 """
             select id, name, ST_x(geom) as lon, ST_y(geom) as lat
             from stations where network = :network order by id asc
