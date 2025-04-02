@@ -30,19 +30,28 @@ if (isset($x0)) {
     $x1 = $lon0 + $lpad;
     $y1 = $lat0 + $lpad;
 }
+if (in_array("goes_vis", $layers)) {
+    $url .= "layers[]=goes&goes_product=VIS&";
+}
+if (in_array("goes_wv", $layers)) {
+    $url .= "layers[]=goes&goes_product=WV&";
+}
+if (in_array("goes_ir", $layers)) {
+    $url .= "layers[]=goes&goes_product=IR&";
+}
 
 if (in_array("goes_east1V", $layers)) {
-    $url .= "layers[]=goes&goes_sector=EAST&goes_product=VIS&";
+    $url .= "layers[]=goes&goes_product=VIS&";
 }
 if (in_array("goes_west1V", $layers)) {
-    $url .= "layers[]=goes&goes_sector=WEST&goes_product=VIS&";
+    $url .= "layers[]=goes&goes_product=VIS&";
 }
 
 if (in_array("goes_west04I4", $layers)) {
-    $url .= "layers[]=goes&goes_sector=WEST&goes_product=IR&";
+    $url .= "layers[]=goes&goes_product=IR&";
 }
 if (in_array("goes_east04I4", $layers)) {
-    $url .= "layers[]=goes&goes_sector=EAST&goes_product=IR&";
+    $url .= "layers[]=goes&goes_product=IR&";
 }
 
 if (in_array("interstates", $layers)) {
