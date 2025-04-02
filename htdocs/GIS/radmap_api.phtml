@@ -48,10 +48,9 @@ width="640" height="480" alt="radmap image"/>
  <li><i>county_warnings</i> - County based Warnings</li>
  <li><i>cwas</i> - National Weather Service County Warning Area (CWA)</li>
  <li><i>goes</i> - <a href="goes.phtml">GOES Satellite</a> imagery, you
- also need to specify the sector and the product as two seperate 
- CGI variables. <sup>[2]</sup>
+ also need to specify the product as a seperate 
+ CGI variable. <sup>[2]</sup>
  <ul>
-     <li><i>goes_sector</i> either EAST, WEST, HI (Hawaii), AK (Alaska), PR (Puerto Rico)</li>
      <li><i>goes_product</i> VIS for visible, IR for infrared, and WV for water
      vapor</li>
  </ul>
@@ -209,13 +208,15 @@ os.system("ffmpeg -y -i %05d.png -b 2000k out.mp4")
 
 <h3>Change Log</h3>
 <ul>
- <li><strong>10 Mar 2009:</strong> Initial release</li>
- <li><strong>18 Oct 2011:</strong> Cleanup and clarify LSRs.</li>
- <li><strong>14 Apr 2012:</strong> Another cleanup and add ridge and GOES
- imagery layers as available plotting options.</li>
- <li><strong>4 May 2012:</strong> Add incorporated places as a layer option.</li>
+  <li><strong>2 April 2025:</strong> Simplified what actually works with regards
+   to IEM GOES archive plotting. All the IEM has is a composite of WV, IR, and VIS.</li>
  <li><strong>22 May 2016:</strong> Clarified the Local Storm Reports timestamp
         options.</li>
+ <li><strong>4 May 2012:</strong> Add incorporated places as a layer option.</li>
+ <li><strong>14 Apr 2012:</strong> Another cleanup and add ridge and GOES
+ imagery layers as available plotting options.</li>
+ <li><strong>18 Oct 2011:</strong> Cleanup and clarify LSRs.</li>
+ <li><strong>10 Mar 2009:</strong> Initial release</li>
 </ul>
 EOM;
 $t->render('single.phtml');

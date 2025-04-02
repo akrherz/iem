@@ -169,10 +169,9 @@ if (isset($_GET["lat0"])) {
 
 $rtl = array(
     "usdm" => "US Drought Monitor",
-    "goes_east1V" => "GOES East Visible",
-    "goes_west1V" => "GOES West Visible",
-    "goes_east04I4" => "GOES East IR",
-    "goes_west04I4" => "GOES West IR",
+    "goes_vis" => "CONUS GOES Visible",
+    "goes_ir" => "CONUS GOES Infrared",
+    "goes_wv" => "CONUS GOES Water Vapor",
     "current_barbs" => "Current Wind Barbs",
     "airtemps" => "Current Air Temps",
     "current_sites" => "Site Labels",
@@ -336,9 +335,8 @@ Options</button>
 <br />
 <div id="layers-control" style="width: 450px; background: #73FA4D; display: none; z-index: 3; position: absolute; padding: 5px; margin: 2px; border: 2px solid #000;">
 
-<strong>Realtime Only Layers</strong>
+<strong>Available Layers</strong>
 {$rtlselect}
-<br /><strong>Layers</strong>
 {$lselect}
 <input type="hidden" name="layers[]" value="blank">
 

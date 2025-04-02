@@ -37,23 +37,42 @@ function draw_header($map, $img, $width, $height)
     $layer->draw($map, $img);
 }
 
-function get_goes_fn_and_time($ts, $sector, $product)
+/**
+ * Get a filename and timestamp for the given inbound timestamp and prod
+ * 
+ * @param DateTime $ts
+ * @param string $product
+ * 
+ * @return array (filename, timestamp)
+ */
+function get_goes_fn_and_time($ts, $product)
 {
-    /*
-     * Return a filename or NULL for a requested GOES Product and time
-     * using a crude search algorithm
-     */
+    $domain = Array("WV", "IR", "VIS");
+    if (!in_array($product, $domain)) {
+        return array(NULL, NULL);
+    }
     $base = "/mesonet/ARCHIVE/data/";
-    for ($i = 0; $i < 60; $i++) {
-        foreach (array(1, -1) as $mul) {
-            $lts = clone $ts;
-            $mins = $i * $mul;
-            if ($mins > 0) $lts->add(new DateInterval("PT{$mins}M"));
-            $testfn = $base . $lts->format("Y/m/d") . "/GIS/sat/awips211/GOES_{$sector}_{$product}_" .
-                $lts->format("YmdHi") . ".png";
-            if (is_file($testfn)) {
-                return array($testfn, $lts);
-            }
+    // clone the timestamp
+    $lts = clone $ts;
+    // Rectify the timestamp back to the nearest 5 minutes
+    $mins = intval($lts->format("i")) % 5;
+    if ($mins > 0) {
+        $lts->sub(new DateInterval("PT{$mins}M"));
+    }
+    // Now we search backwards for up to 60 minutes
+    for ($i = 0; $i < 12; $i++) {
+        if ($i > 0) {
+            $lts->sub(new DateInterval("PT5M"));
+        }
+        $testfn = sprintf(
+            "%s%s/GIS/sat/conus_goes_%s4km_%s.tif",
+            $base,
+            $lts->format("Y/m/d"),
+            strtolower($product),
+            $lts->format("Hi"),
+        );
+        if (is_file($testfn)) {
+            return array($testfn, $lts);
         }
     }
     return array(NULL, NULL);
@@ -348,30 +367,30 @@ $places = $map->getLayerByName("places2010");
 $places->status = in_array("places", $layers);
 $places->draw($map, $img);
 
-if (
-    in_array("goes", $layers) && isset($_REQUEST["goes_sector"]) &&
-    isset($_REQUEST["goes_product"])
-) {
+if (in_array("goes", $layers) && isset($_REQUEST["goes_product"])) {
     $res = get_goes_fn_and_time(
         $ts,
-        strtoupper($_REQUEST["goes_sector"]),
         strtoupper($_REQUEST["goes_product"])
     );
-    if ($res[0] != NULL) {
-        $radar = $map->getLayerByName("east_vis_1km");
-        $radar->status = MS_ON;
-        $radar->data = $res[0];
-        $radar->draw($map, $img);
+    if (!is_null($res[0])) {
+        $glayer = new LayerObj($map);
+        $glayer->status = MS_ON;
+        $glayer->data = $res[0];
+        $glayer->type = MS_LAYER_RASTER;
+        $glayer->draw($map, $img);
 
         $plotmeta["subtitle"] .= sprintf(
-            " GOES %s %s %s ",
-            $_REQUEST["goes_sector"],
+            " CONUS GOES %s %s ",
             $_REQUEST["goes_product"],
-            $res[1]->format("h:i A e")
+            $res[1]->format("H:i e")
+        );
+    } else {
+        $plotmeta["subtitle"] .= sprintf(
+            " CONUS GOES %s Unavailable ",
+            $_REQUEST["goes_product"],
         );
     }
 }
-
 
 
 if (in_array("nexrad", $layers) || in_array("nexrad_tc", $layers)  || in_array("nexrad_tc6", $layers)) {
@@ -863,7 +882,7 @@ $point->setXY(80, 32);
 $point->draw($map, $tlayer, $img, 1, "$d");
 if ($plotmeta["subtitle"] != "") {
     $point = new pointobj();
-    $point->setXY(80, 43);
+    $point->setXY(80, 47);
     $point->draw($map, $tlayer, $img, 1, $plotmeta["subtitle"]);
 }
 
