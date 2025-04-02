@@ -54,12 +54,12 @@ function updateStationForecast() {
         $("#station_date").html(`${data.sdate} to ${data.edate}`);
         $("#station_accum").html(data.accum.toFixed(1));
 
-        $("#station_gfs_date").html(data.gfs_sdate + " to " + data.gfs_edate);
-        $("#station_gfs_accum").html("+" + data.gfs_accum.toFixed(1));
+        $("#station_gfs_date").html(`${data.gfs_sdate} to ${data.gfs_edate}`);
+        $("#station_gfs_accum").html(`+${data.gfs_accum.toFixed(1)}`);
         $("#station_gfs_total").html((data.accum + data.gfs_accum).toFixed(1));
 
         $("#station_ndfd_date").html(`${data.ndfd_sdate} to ${data.ndfd_edate}`);
-        $("#station_ndfd_accum").html("+" + data.ndfd_accum.toFixed(1));
+        $("#station_ndfd_accum").html(`+${data.ndfd_accum.toFixed(1)}`);
         $("#station_ndfd_total").html((data.accum + data.ndfd_accum).toFixed(1));
     });
 }
@@ -74,7 +74,7 @@ function updateImage() {
     $('.pinfo').css('display', 'none');
 
     // Show this pest's pinfo container
-    $('#' + pest).css('display', 'block');
+    $(`#${pest}`).css('display', 'block');
     const opts = pestData[pest];
     const sdate = escapeHTML($("#sdate").val());
     const edate = escapeHTML($("#edate").val());
@@ -87,7 +87,7 @@ function updateImage() {
     let url = `/topics/pests/?state=${state}&pest=${pest}&sdate=${sdate}&station=${station}`;
     // is edate_off checked?
     if (!$("#edate_off").is(':checked')) {
-        url += "&edate=" + edate;
+        url += `&edate=${edate}`;
     }
     window.history.pushState({}, "", url);
     updateStationForecast();
