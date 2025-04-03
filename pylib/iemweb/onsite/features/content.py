@@ -2,7 +2,6 @@
 
 import os
 import re
-import sys
 from datetime import date
 from io import BytesIO
 
@@ -11,6 +10,8 @@ from pyiem.exceptions import IncompleteWebRequest
 from pyiem.plot.use_agg import plt
 from pyiem.webutil import iemapp
 
+from iemweb import error_log
+
 PATTERN = re.compile(
     "^/onsite/features/(?P<yyyy>[0-9]{4})/(?P<mm>[0-9]{2})/"
     "(?P<yymmdd>[0-9]{6})(?P<extra>.*)."
@@ -18,7 +19,7 @@ PATTERN = re.compile(
 )
 
 
-def dblog(yymmdd: str):
+def dblog(environ: dict, yymmdd: str):
     """Log this request"""
     try:
         with get_dbconn("mesosite") as pgconn:
@@ -33,7 +34,7 @@ def dblog(yymmdd: str):
             cursor.close()
             pgconn.commit()
     except Exception as exp:
-        sys.stderr.write(str(exp))
+        error_log(environ, str(exp))
 
 
 def get_content_type(val):
@@ -118,6 +119,6 @@ def application(environ, start_response):
                 f"bytes {stripe.start}-{secondval}/{totalsize}",
             )
         )
-    dblog(data["yymmdd"])
+    dblog(environ, data["yymmdd"])
     start_response(status, headers)
     return [resdata[stripe]]
