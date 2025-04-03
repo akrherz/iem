@@ -1,15 +1,16 @@
 """Handle Apache proxy errors."""
 
-import sys
 from http.client import responses as HTTP_RESPONSES
 
 from pyiem.webutil import TELEMETRY, write_telemetry
+
+from iemweb import error_log
 
 
 def application(environ, start_response):
     """Handle Apache proxy errors."""
     status_code = int(environ.get("REDIRECT_STATUS", 200))
-    sys.stderr.write(f"{status_code} {environ.get('REQUEST_URI')}\n")
+    error_log(environ, f"{status_code} {environ.get('REQUEST_URI')}")
     ip = environ.get("X-Forwarded-For", environ.get("REMOTE_ADDR"))
     if ip is not None:
         ip = ip.split(",")[0].strip()

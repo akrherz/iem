@@ -19,13 +19,14 @@ https://mesonet.agron.iastate.edu/cgi-bin/request/metars.py\
 
 """
 
-import sys
 from datetime import datetime, timedelta, timezone
 from io import StringIO
 
 from pydantic import AwareDatetime, Field, field_validator
 from pyiem.database import get_sqlalchemy_conn, sql_helper
 from pyiem.webutil import CGIModel, iemapp
+
+from iemweb import error_log
 
 SIMULTANEOUS_REQUESTS = 30
 
@@ -50,7 +51,7 @@ class Schema(CGIModel):
         )
 
 
-def check_load(conn):
+def check_load(conn, environ: dict):
     """A crude check that aborts this script if there is too much
     demand at the moment"""
     res = conn.execute(
@@ -61,7 +62,7 @@ def check_load(conn):
     )
     load = len(res.fetchall())
     if load > SIMULTANEOUS_REQUESTS:
-        sys.stderr.write(f"/cgi-bin/request/metars.py over capacity: {load}\n")
+        error_log(environ, f"/cgi-bin/request/metars.py over capacity: {load}")
         return False
     return True
 
@@ -70,7 +71,7 @@ def check_load(conn):
 def application(environ, start_response):
     """Do Something"""
     with get_sqlalchemy_conn("asos") as conn:
-        if not check_load(conn):
+        if not check_load(conn, environ):
             start_response(
                 "503 Service Unavailable", [("Content-type", "text/plain")]
             )

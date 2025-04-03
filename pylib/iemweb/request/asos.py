@@ -31,7 +31,6 @@ https://mesonet.agron.iastate.edu/cgi-bin/request/asos.py\
 """
 
 import re
-import sys
 from datetime import datetime, timedelta
 from io import StringIO
 from zoneinfo import ZoneInfo, ZoneInfoNotFoundError
@@ -41,6 +40,8 @@ from pyiem.database import get_dbconn
 from pyiem.network import Table as NetworkTable
 from pyiem.util import utc
 from pyiem.webutil import CGIModel, ListOrCSVType, iemapp
+
+from iemweb import error_log
 
 STATION_RE = re.compile(r"^[A-Z0-9_]{3,4}$")
 NULLS = {"M": "M", "null": "null", "empty": ""}
@@ -344,7 +345,7 @@ def dance(val):
     return val.encode("ascii", "ignore").decode("ascii")
 
 
-def overloaded():
+def overloaded(environ: dict):
     """Prevent automation from overwhelming the server"""
 
     with get_dbconn("asos") as pgconn:
@@ -352,7 +353,7 @@ def overloaded():
         cursor.execute("select one::float from system_loadavg")
         val = cursor.fetchone()[0]
     if val > 30:  # Cut back on logging
-        sys.stderr.write(f"/cgi-bin/request/asos.py over cpu thres: {val}\n")
+        error_log(environ, f"/cgi-bin/request/asos.py over cpu thres: {val}")
     return val > 20
 
 
@@ -423,7 +424,7 @@ def build_querycols(form):
     return res
 
 
-def toobusy(pgconn, name):
+def toobusy(pgconn, environ, name):
     """Check internal logging..."""
     cursor = pgconn.cursor()
     cursor.execute(
@@ -432,7 +433,7 @@ def toobusy(pgconn, name):
     )
     over = cursor.rowcount > 6
     if over and cursor.rowcount > 9:  # cut back on logging
-        sys.stderr.write(f"asos.py cursors {cursor.rowcount}: {name}\n")
+        error_log(environ, f"asos.py cursors {cursor.rowcount}: {name}")
     cursor.close()
     return over
 
@@ -444,7 +445,7 @@ def application(environ, start_response):
         start_response("400 Bad Request", [("Content-type", "text/plain")])
         yield b"Allow: GET,POST,OPTIONS"
         return
-    if overloaded():
+    if overloaded(environ):
         start_response(
             "503 Service Unavailable", [("Content-type", "text/plain")]
         )
@@ -456,7 +457,7 @@ def application(environ, start_response):
     if ip is not None:
         ip = ip.split(",")[0].strip()
     cursor_name = f"mystream_{ip}"
-    if toobusy(pgconn, cursor_name):
+    if toobusy(pgconn, environ, cursor_name):
         pgconn.close()
         start_response(
             "503 Service Unavailable", [("Content-type", "text/plain")]

@@ -27,6 +27,7 @@ from pyiem.webutil import TELEMETRY, iemapp, write_telemetry
 from pymemcache.client import Client
 from six import string_types
 
+from iemweb import error_log
 from iemweb.autoplot import import_script
 
 # Attempt to stop hangs within mod_wsgi and numpy
@@ -123,14 +124,15 @@ def error_image(message, fmt):
     return ram.read()
 
 
-def handle_error(exp, fmt, uri):
+def handle_error(exp, fmt, environ: dict):
     """Handle errors"""
     exc_type, exc_value, exc_traceback = sys.exc_info()
     tb = traceback.extract_tb(exc_traceback)[-1]
     if not isinstance(exp, UnknownStationException):
-        sys.stderr.write(
-            f"URI:{uri} {exp.__class__.__name__} "
-            f"method:{tb[2]} lineno:{tb[1]} {exp}\n"
+        error_log(
+            environ,
+            f"URI:{environ['REQUEST_URI']} {exp.__class__.__name__} "
+            f"method:{tb[2]} lineno:{tb[1]} {exp}",
         )
     if not isinstance(
         exp, (IncompleteWebRequest, NoDataFound, UnknownStationException)
@@ -243,7 +245,7 @@ def workflow(mc, environ, fmt):
     try:
         res, meta = get_res_by_fmt(scriptnum, fmt, fdict)
     except (IncompleteWebRequest, NoDataFound, UnknownStationException) as exp:
-        return HTTP400, handle_error(exp, fmt, environ.get("REQUEST_URI"))
+        return HTTP400, handle_error(exp, fmt, environ)
     except Exception as exp:
         # Log this so that my review scripts see it.
         write_telemetry(
@@ -259,7 +261,7 @@ def workflow(mc, environ, fmt):
             )
         )
         # Everything else should be considered fatal
-        return HTTP500, handle_error(exp, fmt, environ.get("REQUEST_URI"))
+        return HTTP500, handle_error(exp, fmt, environ)
 
     [mixedobj, df, report] = res
     # Our output content
@@ -332,9 +334,10 @@ def workflow(mc, environ, fmt):
                 content = fh.read()
             os.unlink(tmpfn)
     else:
-        sys.stderr.write(
+        error_log(
+            environ,
             f"Undefined edge case: fmt: {fmt} "
-            f"uri: {environ.get('REQUEST_URI')}\n"
+            f"uri: {environ.get('REQUEST_URI')}",
         )
         return HTTP422, "Undefined edge case encountered"
 
@@ -353,12 +356,13 @@ def workflow(mc, environ, fmt):
                 dur,
             )
         else:
-            sys.stderr.write(
+            error_log(
+                environ,
                 f"Memcache object too large: {len(content)} "
-                f"uri: {environ.get('REQUEST_URI')}\n"
+                f"uri: {environ.get('REQUEST_URI')}",
             )
     except Exception as exp:
-        sys.stderr.write(f"Exception while writting key: {mckey}\n{exp}\n")
+        error_log(environ, f"Exception while writting key: {mckey} {exp}")
     if isinstance(mixedobj, plt.Figure):
         plt.close()
     syslog.syslog(
@@ -394,7 +398,7 @@ def application(environ, start_response):
         status, output = workflow(mc, environ, fmt)
     except Exception as exp:
         status = HTTP500
-        output = handle_error(exp, fmt, environ.get("REQUEST_URI"))
+        output = handle_error(exp, fmt, environ)
     finally:
         mc.close()
     # Special case for when we are returning a javascript alert

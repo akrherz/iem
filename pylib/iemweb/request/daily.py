@@ -31,7 +31,6 @@ var=precip_in,climo_precip_in&format=excel
 """
 
 import copy
-import sys
 from datetime import datetime
 from io import BytesIO, StringIO
 
@@ -41,6 +40,8 @@ from pyiem.database import get_dbconn, get_sqlalchemy_conn, sql_helper
 from pyiem.exceptions import IncompleteWebRequest
 from pyiem.network import Table as NetworkTable
 from pyiem.webutil import CGIModel, ListOrCSVType, iemapp
+
+from iemweb import error_log
 
 EXL = "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"
 DEFAULT_COLS = (
@@ -89,7 +90,7 @@ class MyCGI(CGIModel):
     day2: int = Field(None, description="End day when ets is not provided")
 
 
-def overloaded():
+def overloaded(environ: dict):
     """Prevent automation from overwhelming the server"""
 
     with get_dbconn("iem") as pgconn:
@@ -97,7 +98,7 @@ def overloaded():
         cursor.execute("select one::float from system_loadavg")
         val = cursor.fetchone()[0]
     if val > 25:  # Cut back on logging
-        sys.stderr.write(f"/cgi-bin/request/daily.py over cpu thres: {val}\n")
+        error_log(environ, f"/cgi-bin/request/daily.py over cpu thres: {val}")
     return val > 20
 
 
@@ -202,7 +203,7 @@ def application(environ, start_response):
         raise IncompleteWebRequest("Missing start and end times")
     sts, ets = environ["sts"].date(), environ["ets"].date()
 
-    if sts.year != ets.year and overloaded():
+    if sts.year != ets.year and overloaded(environ):
         start_response(
             "503 Service Unavailable", [("Content-type", "text/plain")]
         )

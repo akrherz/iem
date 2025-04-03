@@ -11,7 +11,6 @@ station, you get the US Drought Monitor valid for the district centroid.
 If you plot a statewide average, you get no USDM included.
 """
 
-import sys
 from datetime import date, datetime, timedelta
 
 import httpx
@@ -23,6 +22,8 @@ from pyiem.exceptions import NoDataFound
 from pyiem.plot import figure_axes
 from pyiem.plot.use_agg import plt
 from pyiem.util import LOG
+
+from iemweb import error_log
 
 UNITS = {"precip": "inch", "avgt": "F", "high": "F", "low": "F"}
 PDICT = {
@@ -304,7 +305,7 @@ def plotter(ctx: dict):
                 ctx["_nt"].sts[station]["lat"],
             )
         except Exception as exp:
-            sys.stderr.write(str(exp))
+            error_log(ctx, str(exp))
     offset = timedelta(days=2)
     ax.set_xlim(df.index.min() - offset, df.index.max() + offset)
 
