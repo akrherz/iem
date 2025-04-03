@@ -126,8 +126,8 @@ Ext.onReady(() => {
             const gmtDate = localDate.add(Date.SECOND, 0 - localDate.format('Z'));
             const sff = Ext.getCmp('selectform').getForm();
             const network = sff.findField('network').getValue();
-            Ext.getCmp('precipgrid').setTitle("Precip Accumulation valid at " + localDate.format('d M Y h A')).getStore().load({
-                params: 'network=' + network + '&ts=' + gmtDate.format('YmdHi')
+            Ext.getCmp('precipgrid').setTitle(`Precip Accumulation valid at ${localDate.format('d M Y h A')}`).getStore().load({
+                params: `network=${network}&ts=${gmtDate.format('YmdHi')}`
             });
             Ext.getCmp('statusField').setText(`Grid Loaded at ${new Date()}`);
             updateHeaders(localDate);
@@ -200,8 +200,8 @@ Ext.onReady(() => {
     });
 
     function offset_render(hrs) {
-        if (hrs < 24) { return hrs + " Hour"; }
-        return (hrs / 24) + " Day";
+        if (hrs < 24) { return `${hrs} Hour`; }
+        return `${hrs / 24} Day`;
     };
 
     function updateHeaders(ts) {
@@ -213,9 +213,9 @@ Ext.onReady(() => {
             ts0 = ts.add(Date.SECOND, 0 - (col.toffset * 3600));
             if (col.toffset === 0) {
                 ts0 = ts.add(Date.HOUR, 0 - (ts.format('H')));
-                cm.setColumnHeader(i, "Midnight<br />" + ts0.format('m/d hA') + "<br />" + ts.format('m/d hA'));
+                cm.setColumnHeader(i, `Midnight<br />${ts0.format('m/d hA')}<br />${ts.format('m/d hA')}`);
             } else {
-                cm.setColumnHeader(i, offset_render(col.toffset) + "<br />" + ts0.format('m/d hA') + "<br />" + ts.format('m/d hA'));
+                cm.setColumnHeader(i, `${offset_render(col.toffset)}<br />${ts0.format('m/d hA')}<br />${ts.format('m/d hA')}`);
             }
         }
     };
