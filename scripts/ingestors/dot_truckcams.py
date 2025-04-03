@@ -20,7 +20,7 @@ P3857 = pyproj.Proj("EPSG:3857")
 URI = (
     "https://services.arcgis.com/8lRhdTsQyJpO52F1/ArcGIS/rest/services/"
     "AVL_Images_Past_1HR_View/FeatureServer/0/query?"
-    "where=PHOTO_ANUMBER+IS+NOT+NULL&resultRecordCount=1000&"
+    "where=SECURE_PHOTO_URL+IS+NOT+NULL&resultRecordCount=1000&"
     "geometryType=esriGeometryEnvelope&"
     "spatialRel=esriSpatialRelIntersects&resultType=none&distance=0.0&"
     "units=esriSRUnit_Meter&returnGeodetic=false&outFields=*&"
@@ -79,41 +79,43 @@ def process_features(features):
     pgconn = get_dbconn("postgis")
     cursor = pgconn.cursor()
 
-    cursor.execute("SELECT label, idnum from idot_dashcam_current")
+    cursor.execute("SELECT label, idnum, valid from idot_dashcam_current")
     current = {}
     for row in cursor:
-        current[row[0]] = row[1]
+        current[row[0]] = {"idnum": row[1], "valid": row[2]}
 
     for feat in features:
-        logdt = feat["attributes"]["PHOTO_FILEDATE"]
-        if logdt is None:
+        # Major hack until upstream fixes the attributes
+        url = feat["attributes"]["SECURE_PHOTO_URL"].replace("http:", "https:")
+        # A32049-2025-04-01_13_48_49.jpg
+        label, tstamp = url.split("/")[-1].removesuffix(".jpg").split("-", 1)
+        valid = datetime.strptime(tstamp, "%Y-%m-%d_%H_%M_%S").replace(
+            tzinfo=timezone.utc
+        )
+        if label not in current:
+            LOG.info("Label %s is unknown", label)
             continue
-        ts = datetime.utcfromtimestamp(logdt / 1000.0)
-        valid = ts.replace(tzinfo=timezone.utc)
-        label = feat["attributes"]["PHOTO_ANUMBER"]
-        idnum = feat["attributes"]["PHOTO_UID"]
+        idnum = current[label]["idnum"]
+        if valid <= current[label]["valid"]:
+            LOG.debug("valid: %s current: %s", valid, current[label]["valid"])
+            continue
+        current[label]["valid"] = valid
         LOG.debug(
             "label: %s current: %s new: %s",
             label,
-            current.get(label, 0),
-            idnum,
+            current[label]["valid"],
+            valid,
         )
-        if idnum <= current.get(label, 0):
-            continue
-        photourl = feat["attributes"]["PHOTO_URL"]
-        # Go get the URL for saving!
-        LOG.debug("Fetch %s", photourl)
-        req = exponential_backoff(httpx.get, photourl, timeout=15)
+        req = exponential_backoff(httpx.get, url, timeout=15)
         if req is None or req.status_code != 200:
             LOG.info(
                 "dot_truckcams.py dl fail |%s| %s",
                 "req is None" if req is None else req.status_code,
-                photourl,
+                url,
             )
             continue
-        tmp = tempfile.NamedTemporaryFile(delete=False)
-        tmp.write(req.content)
-        tmp.close()
+        with tempfile.NamedTemporaryFile(delete=False) as tmp:
+            tmp.write(req.content)
         cmd = [
             "pqinsert",
             "-p",
