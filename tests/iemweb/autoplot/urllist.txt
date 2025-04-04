@@ -308,6 +308,8 @@
 /plotting/auto/plot/201/mode:cal::sdate:2024-01-01::edate:2024-08-16::outlook_type:C::day:1::w:wfo::network:WFO::wfo:STO::mystate:IA::ugc:IAZ048::g:yes::_r:t::dpi:100.png
 /plotting/auto/plot/201/mode:cal::sdate:2024-08-01::edate:2024-09-11::outlook_type:C::day:1::w:fema::network:WFO::wfo:DMX::mystate:IA::ugc:IAZ048::fema:7::g:yes::_r:43::dpi:100.png
 /plotting/auto/plot/201/mode:cal::sdate:2024-08-01::edate:2024-09-11::outlook_type:C::day:1::w:wfo::network:WFO::wfo:DMX::mystate:IA::ugc:IAZ048::fema:7::g:yes::_r:43::dpi:100.png
+/plotting/auto/plot/201/mode:cal::sdate:2025-01-01::edate:2025-04-03::outlook_type:C::day:2::w:ugc::network:WFO::wfo:MPX::mystate:IA::ugc:IAZ048::fema:7::g:yes::_r:t::dpi:100.png
+/plotting/auto/plot/201/mode:cal::sdate:2025-01-01::edate:2025-04-03::outlook_type:T::day:2::w:state::network:WFO::wfo:MPX::mystate:IA::ugc:IAC169::fema:7::g:yes::_r:t::dpi:100.png
 /plotting/auto/plot/203/typ:W::sort:W::date:2024-05-21::dpi:100.png
 /plotting/auto/plot/203/typ:W::sort:S::date:2024-05-21::dpi:100.png
 /plotting/auto/plot/205/network:IA_ASOS::station:DSM::max_tmpf_above:90::max_feel_above:90::_r:t::dpi:100.png

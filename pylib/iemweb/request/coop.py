@@ -368,6 +368,8 @@ def do_century(cursor, ctx):
 
     station = ctx["stations"][0]
     nt = NetworkTable(f"{station[:2]}CLIMATE", only_online=False)
+    if station not in nt.sts:
+        raise IncompleteWebRequest("Unknown station provided")
 
     # Automatically set dates to start and end of year to make output clean
     sts = date(ctx["sts"].year, 1, 1)

@@ -2,6 +2,7 @@
 /* Generate a plot of a locations RADAR by year */
 require_once "../../config/settings.inc.php";
 require_once "../../include/vendor/mapscript.php";
+require_once "../../include/forms.php";
 
 $mapFile = "../../data/gis/base4326.map";
 
@@ -18,11 +19,11 @@ $ts = time();
 $m = intval(date("i", $ts));
 $ts = $ts - (($m % 5) * 60.0);
 
-$day = isset($_GET["day"]) ? intval($_GET["day"]) : date("d", $ts);
-$month = isset($_GET["month"]) ? intval($_GET["month"]) : date("m", $ts);
-$year = isset($_GET["year"]) ? intval($_GET["year"]) : date("Y", $ts);
-$hour = isset($_GET["hour"]) ? intval($_GET["hour"]) : date("H", $ts);
-$minute = isset($_GET["minute"]) ? intval($_GET["minute"]) : date("i", $ts);
+$day = get_int404("day", date("d", $ts));
+$month = get_int404("month", date("m", $ts));
+$year = get_int404("year", date("Y", $ts));
+$hour = get_int404("hour", date("H", $ts));
+$minute = get_int404("minute", date("i", $ts));
 $extents = isset($_GET["BBOX"]) ? explode(",", $_GET["BBOX"]) : array(-105, 40, -97, 47);
 $dt = new DateTime("{$year}-{$month}-{$day} {$hour}:{$minute}");
 

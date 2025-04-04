@@ -44,10 +44,9 @@ import os.path
 from datetime import timedelta
 
 from pydantic import AwareDatetime, Field
-from pyiem.database import get_sqlalchemy_conn
+from pyiem.database import get_sqlalchemy_conn, sql_helper
 from pyiem.util import utc
 from pyiem.webutil import CGIModel, iemapp
-from sqlalchemy import text
 
 NIDS = {
     "N0B": "Base Reflectivity (Super Res)",
@@ -148,7 +147,7 @@ def available_radars(environ):
         }
     )
     with get_sqlalchemy_conn("mesosite") as pgconn:
-        res = pgconn.execute(text(sql), params)
+        res = pgconn.execute(sql_helper(sql), params)
         for row in res:
             radar = row[0]
             if not os.path.isdir(

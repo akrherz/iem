@@ -60,7 +60,7 @@ function friendly($val)
 $table = "";
 foreach ($data as $key => $val) {
     $table .= sprintf(
-        "<tr><td><a href=\"/sites/site.phtml?station=%s&network=%s\">%s</a></td><td>%s</td>
+        "<tr><td><a href=\"/sites/site.php?station=%s&network=%s\">%s</a></td><td>%s</td>
   <td>%s</td><td>%s</td><td>%s</td>
   <td>%s</td><td>%s</td><td>%s</td>
   <td>%s</td><td>%s</td><td>%s</td>

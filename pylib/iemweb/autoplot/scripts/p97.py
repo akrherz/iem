@@ -570,7 +570,11 @@ def plotter(ctx: dict):
         fmt = "%.0f"
         extend = "neither"
     if ctx.get("bins"):
-        clevels = [float(x) for x in ctx["bins"].split()]
+        try:
+            clevels = [float(x) for x in ctx["bins"].split()]
+        except ValueError as exp:
+            msg = "Invalid bins provided, should be space separated"
+            raise NoDataFound(msg) from exp
     cmap.set_bad("white")
     if ctx["p"] == "contour" and len(clevels) > 1:
         mp.contourf(

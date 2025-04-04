@@ -32,11 +32,10 @@ import json
 from datetime import datetime, timedelta
 
 from pydantic import AwareDatetime, Field
-from pyiem.database import get_sqlalchemy_conn
+from pyiem.database import get_sqlalchemy_conn, sql_helper
 from pyiem.exceptions import IncompleteWebRequest
 from pyiem.util import utc
 from pyiem.webutil import CGIModel, iemapp
-from sqlalchemy import text
 
 OPTPILS = (
     "AQA CFW DGT DSW FFA FFS FFW FLS FLW FWW HLS MWS MWW NPW NOW PNS PSH RER "
@@ -103,13 +102,14 @@ def application(environ, start_response):
         pil_limiter = "and substr(pil, 1, 3) = ANY(:pils) "
     with get_sqlalchemy_conn("afos") as conn:
         res = conn.execute(
-            text(
-                f"""
+            sql_helper(
+                """
                 SELECT data, to_char(entered at time zone 'UTC',
                 'YYYY-MM-DDThh24:MI:00Z') as e from products
                 where source = :center and entered >= :sts and entered < :ets
                 {pil_limiter} ORDER by entered ASC
-            """
+            """,
+                pil_limiter=pil_limiter,
             ),
             params,
         )

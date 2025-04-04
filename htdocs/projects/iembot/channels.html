@@ -1672,18 +1672,4 @@
         </td>
         </tr>
         </table>
-        <script>
-        function revdiv(myid){
-        var $a = $('#'+myid);
-        if ($a.css('display') == 'block'){
-            $a.css('display', 'none');
-            $("#channel_"+myid).html('<i class="fa fa-plus"></i>');
-        } else {
-            window.location.hash = '#channel_'+myid;
-            $("#channel_"+myid).parent().parent().addClass('info');
-            $a.css('display', 'block');
-            $("#channel_"+myid).html('<i class="fa fa-minus"></i>');
-        }
-        }
-        </script>
         

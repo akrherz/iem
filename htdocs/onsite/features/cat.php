@@ -15,7 +15,7 @@ try {
     xssafe("<tag>");
     die();
 }
-$offset = isset($_GET["offset"]) ? intval($_GET["offset"]) : 0;
+$offset = get_int404("offset", 0);
 if (is_null($day)) {
     $day = new DateTime("now");
     $offset = -1;

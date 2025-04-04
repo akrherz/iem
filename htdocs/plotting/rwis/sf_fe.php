@@ -10,10 +10,10 @@ require_once "../../../include/imagemaps.php";
 $network = isset($_GET["network"]) ? xssafe($_GET["network"]) : "IA_RWIS";
 $ostation = isset($_GET["ostation"]) ? xssafe($_GET["ostation"]) : "";
 $station = isset($_GET['station']) ? xssafe($_GET["station"]) : "";
-$syear = isset($_GET["syear"]) ? xssafe($_GET["syear"]) : date("Y");
+$syear = get_int404("syear", date("Y"));
 $smonth = isset($_GET["smonth"]) ? xssafe($_GET["smonth"]) : date("m");
 $sday = isset($_GET["sday"]) ? xssafe($_GET["sday"]) : date("d");
-$days = isset($_GET["days"]) ? intval($_GET["days"]) : 2;
+$days = get_int404("days", 2);
 
 $subc = isset($_GET["subc"]) ? xssafe($_GET["subc"]) : false;
 $dwpf = isset($_GET["dwpf"]) ? xssafe($_GET["dwpf"]) : false;
