@@ -47,7 +47,7 @@ $t->jsextra = <<<EOM
 <script src="index.js"></script>
 EOM;
 
-$wselect = "<select name=\"wfo\" onChange=\"javascript: urlChanger(); return false;\">";
+$wselect = "<select name=\"wfo\" id=\"wfoselect\">";
 foreach ($nt->table as $key => $val) {
     $wselect .= "<option value=\"$key\">[$key] " . $val["name"] . "\n";
 }

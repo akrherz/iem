@@ -145,7 +145,7 @@ def get_obs(dbconn, environ: dict) -> pd.DataFrame:
 def get_forecasts(dbconn, environ: dict) -> pd.DataFrame:
     """Get data!"""
     year = environ["sts"].year
-    table = f"hml_forecast_{year}"
+    table = f"hml_forecast_data_{year}"
     df = pd.read_sql(
         sql_helper(
             """
