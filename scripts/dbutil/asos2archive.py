@@ -82,9 +82,12 @@ def do_insert(source_cursor, reset_times, madis):
             elif reset_times.get(row["id"]) == row["valid"].minute:
                 report_type = 3
 
+        # While the `alldata` table works, it is slow, so alas
+        table = f"t{row['valid'].astimezone(timezone.utc):%Y}"
+
         # Look for previous entries
         cursor.execute(
-            "SELECT metar, editable from alldata where station = %s and "
+            f"SELECT metar, editable from {table} where station = %s and "
             f"valid = %s and report_type {'=' if madis else '!='} 1",
             (row["id"], row["valid"]),
         )
@@ -113,8 +116,8 @@ def do_insert(source_cursor, reset_times, madis):
             )
             deletes += cursor.rowcount
 
-        sql = """
-        INSERT into alldata (station, valid, tmpf,
+        sql = f"""
+        INSERT into {table} (station, valid, tmpf,
         dwpf, drct, sknt,  alti, p01i, gust, vsby, skyc1, skyc2, skyc3, skyc4,
         skyl1, skyl2, skyl3, skyl4, metar, p03i, p06i, p24i, max_tmpf_6hr,
         min_tmpf_6hr, max_tmpf_24hr, min_tmpf_24hr, mslp, wxcodes,
