@@ -249,6 +249,8 @@ def set_fig(ctx):
         obscount = ctx["totaldays"] * 24 * 0.8
     ctx["fig"] = figure(apctx=ctx, title=title)
     quorum = ydf[ydf["obs"] > obscount]
+    if quorum.empty:
+        raise NoDataFound("Error, no results returned!")
     ax = barchar_with_top10(
         ctx["fig"],
         quorum,
@@ -257,13 +259,14 @@ def set_fig(ctx):
         table_col_title="Hours",
     )
     antiquorum = ydf[ydf["obs"] < obscount]
-    ax.bar(
-        antiquorum.index.values,
-        antiquorum["hits"],
-        width=1,
-        align="center",
-        color="green",
-    )
+    if not antiquorum.empty:
+        ax.bar(
+            antiquorum.index.values,
+            antiquorum["hits"],
+            width=1,
+            align="center",
+            color="green",
+        )
     ax.set_position((0.07, 0.6, 0.68, 0.3))
     for _year in range(ydf.index.values[0], ydf.index.values[-1] + 1):
         if _year not in ydf.index or ydf.at[_year, "obs"] < obscount:

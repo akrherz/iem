@@ -254,6 +254,32 @@ def plotter(ctx: dict):
             .sort_values(["count", "min_date"], ascending=False)
             .copy()
         )
+        if ctx["days"] > 1:
+            # We need to fill out the dataframe to include all dates
+            # within the range of dates and all the states or offices
+            # that are in the data
+            df = (
+                df.set_index(["min_date", col])
+                .reindex(
+                    pd.MultiIndex.from_product(
+                        [
+                            pd.date_range(
+                                start=daily["min_date"].min(),
+                                end=daily["min_date"].max(),
+                                freq="D",
+                                name="min_date",
+                            ),
+                            df[col].unique(),
+                        ],
+                        names=["min_date", col],
+                    )
+                )
+                .fillna(0)
+                .rolling(ctx["days"], min_periods=1)
+                .sum()
+                .reset_index()
+                .sort_values(["count", "min_date"], ascending=False)
+            )
     else:
         df = (
             daily[["min_date", "eventid"]]
@@ -264,24 +290,24 @@ def plotter(ctx: dict):
             .sort_values(["count", "min_date"], ascending=False)
             .copy()
         )
-    if ctx["days"] > 1:
-        # We need to undo the sort and reindex to include all days
-        df = (
-            df.set_index("min_date")
-            .reindex(
-                pd.date_range(
-                    start=daily["min_date"].min(),
-                    end=daily["min_date"].max(),
-                    freq="D",
-                    name="min_date",
+        if ctx["days"] > 1:
+            # We need to undo the sort and reindex to include all days
+            df = (
+                df.set_index("min_date")
+                .reindex(
+                    pd.date_range(
+                        start=daily["min_date"].min(),
+                        end=daily["min_date"].max(),
+                        freq="D",
+                        name="min_date",
+                    )
                 )
+                .fillna(0)
+                .rolling(ctx["days"], min_periods=1)
+                .sum()
+                .reset_index()
+                .sort_values(["count", "min_date"], ascending=False)
             )
-            .fillna(0)
-            .rolling(ctx["days"], min_periods=1)
-            .sum()
-            .reset_index()
-            .sort_values(["count", "min_date"], ascending=False)
-        )
 
     title = f"NWS {ctx['_sname']}"
     if opt == "state":

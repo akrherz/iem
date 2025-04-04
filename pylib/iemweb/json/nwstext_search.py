@@ -32,9 +32,8 @@ import json
 from datetime import datetime
 
 from pydantic import Field
-from pyiem.database import get_sqlalchemy_conn
+from pyiem.database import get_sqlalchemy_conn, sql_helper
 from pyiem.webutil import CGIModel, iemapp
-from sqlalchemy import text
 
 
 class Schema(CGIModel):
@@ -64,13 +63,16 @@ def run(sts, ets, awipsid):
         pillimit = "substr(pil, 1, 3) "
     with get_sqlalchemy_conn("afos") as conn:
         res = conn.execute(
-            text(f"""
+            sql_helper(
+                """
         SELECT data,
         to_char(entered at time zone 'UTC', 'YYYY-MM-DDThh24:MIZ'),
         source, wmo from products WHERE
         entered >= :sts and entered < :ets and {pillimit} =:awipsid
         ORDER by entered ASC
-        """),
+        """,
+                pillimit=pillimit,
+            ),
             {"sts": sts, "ets": ets, "awipsid": awipsid},
         )
         for row in res:

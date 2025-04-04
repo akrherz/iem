@@ -35,9 +35,8 @@ import json
 from datetime import datetime, timezone
 
 from pydantic import Field
-from pyiem.database import get_sqlalchemy_conn
+from pyiem.database import get_sqlalchemy_conn, sql_helper
 from pyiem.webutil import CGIModel, iemapp
-from sqlalchemy import text
 
 
 class Schema(CGIModel):
@@ -73,7 +72,7 @@ def application(environ, start_response):
 
     with get_sqlalchemy_conn("afos") as conn:
         res = conn.execute(
-            text(
+            sql_helper(
                 "SELECT data from products "
                 "where pil = :pil and entered = :entered"
             ),

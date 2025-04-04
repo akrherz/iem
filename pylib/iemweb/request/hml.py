@@ -48,9 +48,8 @@ from zoneinfo import ZoneInfo
 
 import pandas as pd
 from pydantic import AwareDatetime, Field, field_validator
-from pyiem.database import get_sqlalchemy_conn
+from pyiem.database import get_sqlalchemy_conn, sql_helper
 from pyiem.webutil import CGIModel, ListOrCSVType, iemapp
-from sqlalchemy import text
 
 EXL = "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"
 
@@ -107,7 +106,7 @@ class MyModel(CGIModel):
 def get_obs(dbconn, environ: dict) -> pd.DataFrame:
     """Get data!"""
     df = pd.read_sql(
-        text(
+        sql_helper(
             """
         select distinct d.station, d.valid, k.label, d.value
         from hml_observed_data d JOIN
@@ -146,16 +145,18 @@ def get_obs(dbconn, environ: dict) -> pd.DataFrame:
 def get_forecasts(dbconn, environ: dict) -> pd.DataFrame:
     """Get data!"""
     year = environ["sts"].year
+    table = f"hml_forecast_{year}"
     df = pd.read_sql(
-        text(
-            f"""
+        sql_helper(
+            """
         select station, issued, primaryname, primaryunits,
         secondaryname, secondaryunits, valid as forecast_valid,
         primary_value, secondary_value from hml_forecast f,
-        hml_forecast_data_{year} d WHERE
+        {table} d WHERE
         f.station = ANY(:stations) and f.issued >= :sts and f.issued < :ets
         and f.id = d.hml_forecast_id ORDER by issued ASC, forecast_valid ASC
-        """
+        """,
+            table=table,
         ),
         dbconn,
         params={

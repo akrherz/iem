@@ -128,12 +128,12 @@ def plotter(ctx: dict):
         title += f" ({threshold})"
     (fig, ax) = figure_axes(title=title, apctx=ctx)
     avgv = df[ptype].mean()
-    data = df[ptype].values
+    data = df[ptype]
 
     # Compute 30 year trailing average
     tavg = [None] * 30
     for i in range(30, len(data)):
-        tavg.append(np.average(data[i - 30 : i]))
+        tavg.append(np.average(data.values[i - 30 : i]))
 
     a1981_2010 = df.loc[1981:2011, ptype].mean()
 
@@ -151,10 +151,14 @@ def plotter(ctx: dict):
         colorbelow = "tomato"
         precision = "%.2f"
     bars = ax.bar(
-        np.array(years), data, fc=colorabove, ec=colorabove, align="center"
+        np.array(years),
+        data.values,
+        fc=colorabove,
+        ec=colorabove,
+        align="center",
     )
     for i, mybar in enumerate(bars):
-        if data[i] < avgv:
+        if data.values[i] < avgv:
             mybar.set_facecolor(colorbelow)
             mybar.set_edgecolor(colorbelow)
     lbl = "Avg: " + precision % (avgv,)
@@ -168,7 +172,7 @@ def plotter(ctx: dict):
         ax.plot(years, tavg, lw=3, color="yellow", zorder=3)
     ax.set_xlim(years[0] - 1, years[-1] + 1)
     if ptype.find("precip") == -1 and ptype.find("days") == -1:
-        ax.set_ylim(min(data) - 5, max(data) + 5)
+        ax.set_ylim(data.min() - 5, data.max() + 5)
 
     ax.set_xlabel("Year")
     units = r"$^\circ$F"

@@ -45,6 +45,7 @@ class Schema(CGIModel):
     group: str = Field(
         default="coop",
         description="The group of stations to generate data for",
+        pattern=r"^(coop|azos|cocorahs)$",
     )
     dt: date = Field(
         default=date.today(),
@@ -84,9 +85,7 @@ def router(group, ts):
         )
     if group == "azos":
         return run_azos(ts)
-    if group == "cocorahs":
-        return run_cocorahs(ts)
-    return None
+    return run_cocorahs(ts)
 
 
 def run_azos(ts):
