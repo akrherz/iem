@@ -52,12 +52,13 @@ done
 /home/mesonet/bin/webalizer -c ${CONFBASE}/sustainablecorn.conf combined-sustainablecorn.log
 /home/mesonet/bin/webalizer -c ${CONFBASE}/weatherim.conf combined-weatherim.log
 /home/mesonet/bin/webalizer -c ${CONFBASE}/datateam.conf combined-datateam.log
-# Copy to shared NFS space
-rsync -a /mnt/webalizer/usage/. /mesonet/share/usage/
 
 grep " /agclimate" combined-iem.log > agclimate.log
 /home/mesonet/bin/webalizer -c ${CONFBASE}/agclimate.conf -T agclimate.log
 rm -f agclimate.log
+
+# Copy to shared NFS space
+rsync -a --exclude *webalizer*db /mnt/webalizer/usage/. /mesonet/share/usage/
 
 # Step 4, archive these files
 for PREF in $PREFIXES
