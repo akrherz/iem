@@ -1,0 +1,353 @@
+html, body {
+    margin: 0;
+    padding: 0;
+    height: 100%;
+    overflow: hidden;
+}
+
+#map {
+    width: 100%;
+    height: 100%;
+}
+
+#time-control {
+    position: absolute;
+    bottom: 10px;
+    left: 10px;
+    background: rgba(255, 255, 255, 0.8);
+    padding: 10px;
+    border-radius: 5px;
+    box-shadow: 0 2px 5px rgba(0, 0, 0, 0.3);
+    font-family: Arial, sans-serif;
+    font-size: 14px;
+}
+
+#time-control .time-buttons {
+    display: flex;
+    gap: 5px;
+    margin-top: 5px;
+}
+
+#time-control button {
+    background: #007bff;
+    color: white;
+    border: none;
+    padding: 5px 10px;
+    border-radius: 3px;
+    cursor: pointer;
+    font-size: 14px;
+}
+
+#time-control button:hover {
+    background: #0056b3;
+}
+
+#time-control button:disabled {
+    background: #cccccc; /* Gray background */
+    color: #666666; /* Dark gray text */
+    cursor: not-allowed; /* Show not-allowed cursor */
+}
+
+#animation-progress {
+    position: relative;
+    margin-top: 10px;
+    width: 100%;
+    height: 5px;
+    background: #e0e0e0;
+    border-radius: 3px;
+    overflow: hidden;
+}
+
+#animation-progress .progress {
+    height: 100%;
+    background: #007bff;
+    width: 0%;
+    transition: width 0.1s linear;
+}
+
+#branding-overlay {
+    position: absolute;
+    top: 10px;
+    left: 50%;
+    transform: translateX(-50%);
+    background: rgba(255, 255, 255, 0.8);
+    padding: 5px 10px;
+    border-radius: 5px;
+    font-family: Arial, sans-serif;
+    font-size: 16px;
+    font-weight: bold;
+    color: #333;
+    box-shadow: 0 2px 5px rgba(0, 0, 0, 0.3);
+    z-index: 1000;
+}
+
+#branding-overlay[data-mode="realtime"] {
+    background: rgba(144, 238, 144, 0.8); /* Light green */
+    color: #006400; /* Dark green text */
+}
+
+#branding-overlay[data-mode="archive"] {
+    background: rgba(255, 255, 224, 0.8); /* Light yellow */
+    color: #8B8000; /* Dark yellow text */
+}
+
+#layer-control {
+    position: absolute;
+    top: 50px; /* Adjusted to align with layers-toggle */
+    right: 10px;
+    width: 250px;
+    max-width: 80%;
+    background: rgba(255, 255, 255, 0.9);
+    border-radius: 5px;
+    box-shadow: 0 2px 5px rgba(0, 0, 0, 0.3);
+    font-family: Arial, sans-serif;
+    font-size: 14px;
+    z-index: 1000;
+    transform: translateX(100%); /* Start hidden off-screen */
+    transition: transform 0.3s ease-in-out;
+}
+
+#layer-control.open {
+    transform: translateX(0); /* Slide into view when open */
+}
+
+#layer-toggle {
+    position: absolute;
+    top: 10px;
+    left: -40px;
+    background: #007bff;
+    color: white;
+    border: none;
+    padding: 5px 10px;
+    border-radius: 3px;
+    cursor: pointer;
+    font-size: 16px;
+}
+
+#layer-toggle:hover {
+    background: #0056b3;
+}
+
+#layers-toggle {
+    position: absolute;
+    top: 10px; /* Align inside layer-control */
+    left: -80px; /* Position toggle button outside the drawer */
+    background: #007bff;
+    color: white;
+    border: none;
+    padding: 5px 10px;
+    border-radius: 3px;
+    cursor: pointer;
+    font-size: 16px;
+}
+
+#layers-toggle:hover {
+    background: #0056b3;
+}
+
+.drawer-content {
+    padding: 10px;
+}
+
+.drawer-content h3 {
+    margin: 0 0 10px;
+    font-size: 16px;
+    font-weight: bold;
+}
+
+.drawer-content label {
+    display: block;
+    margin-bottom: 5px;
+}
+
+.time-input-container {
+    display: flex;
+    align-items: center;
+    gap: 5px;
+}
+
+#current-time {
+    font-family: Arial, sans-serif;
+    font-size: 14px;
+    padding: 5px;
+    border: 1px solid #ccc;
+    border-radius: 3px;
+    width: 180px;
+}
+
+#warnings-control {
+    position: absolute;
+    top: 10px; /* Align with branding overlay */
+    right: 10px; /* Slide in from the right */
+    width: 300px;
+    max-width: 90%;
+    background: rgba(255, 255, 255, 0.9);
+    border-radius: 5px;
+    box-shadow: 0 2px 5px rgba(0, 0, 0, 0.3);
+    font-family: Arial, sans-serif;
+    font-size: 14px;
+    z-index: 1000; /* Ensure it appears above the map */
+    transform: translateX(110%); /* Start hidden off-screen */
+    transition: transform 0.3s ease-in-out;
+}
+
+#warnings-control.open {
+    transform: translateX(0); /* Slide into view when open */
+}
+
+#warnings-toggle {
+    position: absolute;
+    top: 10px; /* Align with branding overlay */
+    right: 10px; /* Position near the right edge */
+    background: #007bff;
+    color: white;
+    border: none;
+    padding: 5px 10px;
+    border-radius: 3px;
+    cursor: pointer;
+    font-size: 16px;
+    z-index: 1001; /* Ensure it appears above other elements */
+}
+
+#warnings-toggle:hover {
+    background: #0056b3;
+}
+
+#warnings-table {
+    width: 100%;
+    border-collapse: collapse;
+    margin-top: 10px;
+}
+
+#warnings-table th, #warnings-table td {
+    border: 1px solid #ccc;
+    padding: 5px;
+    text-align: left;
+}
+
+#warnings-table th {
+    background: #f4f4f4;
+    font-weight: bold;
+}
+
+/* Modal window for desktop */
+#warnings-modal {
+    position: fixed;
+    top: 20%;
+    left: 50%;
+    transform: translate(-50%, -20%);
+    width: 600px;
+    max-width: 90%;
+    background: rgba(255, 255, 255, 0.95);
+    border-radius: 8px;
+    box-shadow: 0 4px 10px rgba(0, 0, 0, 0.3);
+    z-index: 2000;
+    display: none; /* Hidden by default */
+    flex-direction: column;
+    resize: both;
+    overflow: auto;
+}
+
+#warnings-modal.open {
+    display: flex; /* Show modal when open */
+}
+
+#warnings-modal-header {
+    background: #007bff;
+    color: white;
+    padding: 10px;
+    font-size: 16px;
+    font-weight: bold;
+    cursor: move; /* Indicate draggable */
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+#warnings-modal-header button {
+    background: transparent;
+    border: none;
+    color: white;
+    font-size: 16px;
+    cursor: pointer;
+}
+
+#warnings-modal-content {
+    padding: 10px;
+    overflow-y: auto; /* Enable vertical scrolling */
+    max-height: calc(100vh - 100px); /* Ensure it fits within the viewport */
+    display: block; /* Ensure content is visible */
+}
+
+/* Full-screen overlay for mobile */
+@media (max-width: 768px) {
+    #warnings-modal {
+        position: fixed;
+        top: 0;
+        left: 0;
+        transform: none;
+        width: 100%;
+        height: 100%;
+        border-radius: 0;
+        display: none; /* Hidden by default */
+    }
+
+    #warnings-modal.open {
+        display: flex; /* Show overlay when open */
+    }
+
+    #warnings-modal-header {
+        font-size: 18px;
+    }
+
+    #collapse-warnings {
+        position: absolute;
+        bottom: 10px;
+        right: 10px;
+        background: #007bff;
+        color: white;
+        border: none;
+        padding: 5px 10px;
+        border-radius: 3px;
+        cursor: pointer;
+        font-size: 14px;
+        z-index: 2001; /* Ensure it appears above other elements */
+    }
+
+    #collapse-warnings:hover {
+        background: #0056b3;
+    }
+}
+
+.phenomena-toggles {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 5px;
+    margin-top: 10px;
+}
+
+.phenomena-toggle {
+    background: #007bff;
+    color: white;
+    border: none;
+    padding: 5px 10px;
+    border-radius: 3px;
+    cursor: pointer;
+    font-size: 12px;
+    text-align: center;
+    width: 40px;
+}
+
+.phenomena-toggle.active {
+    background: #0056b3;
+}
+
+.phenomena-toggle:not(.active) {
+    background: #ccc; /* Gray background for untoggled */
+    color: black; /* Black text for untoggled */
+}
+
+.phenomena-toggle:hover {
+    background: #0056b3;
+    color: white;
+}
