@@ -1,33 +1,40 @@
 function createGeoJSONLayer(map, tableElement, currentTime) {
     const colorLookup = {
-        "TO": 'red',
-        "MA": 'purple',
-        "EW": 'green',
-        "FF": 'blue',
-        "SV": 'yellow',
-        "SQ": "#C71585",
-        "DS": "#FFE4C4",
-        "FL": "#00CED1" // Add color for Flood
+        "FL.A": "#2E8B57",
+        "MA.W": "#FFA500",
+        "FL.W": "#00FF00",
+        "FF.W": "#8B0000",
+        "SV.W": "#FFA500",
+        "DS.Y": "#BDB76B",
+        "FL.Y": "#00FF7F",
+        "DS.W": "#FFE4C4",
+        "FA.A": "#2E8B57",
+        "FA.W": "#00FF00",
+        "SQ.W": "#C71585",
+        "TO.W": "#FF0000",
+        "FA.Y": "#00FF7F"
     };
 
-    const activePhenomena = new Set(["TO", "SV", "FF", "EW", "SQ", "DS"]); // Default active phenomena (FL excluded)
+    const activePhenomenaSignificance = new Set(["TO.W", "SV.W", "FF.W", "EW.W", "SQ.W", "DS.W"]); // Default active combinations
 
     const geojsonSource = new ol.source.Vector({
         format: new ol.format.GeoJSON(),
-        url: () => `/geojson/sbw.py?valid=${currentTime.toISOString()}`, // Fetch warnings
+        url: () => `/geojson/sbw.py?ts=${currentTime.toISOString()}`, // Fetch warnings with 1-minute granularity
     });
 
     const geojsonLayer = new ol.layer.Vector({
         source: geojsonSource,
         style: (feature) => {
             const phenomena = feature.get('phenomena');
+            const significance = feature.get('significance');
+            const key = `${phenomena}.${significance}`;
 
-            // Exclude features not in the active phenomena set
-            if (!activePhenomena.has(phenomena)) {
+            // Exclude features not in the active set
+            if (!activePhenomenaSignificance.has(key)) {
                 return null;
             }
 
-            const color = colorLookup[phenomena] || 'gray';
+            const color = colorLookup[key] || 'gray';
             return new ol.style.Style({
                 stroke: new ol.style.Stroke({
                     color: color,
@@ -100,21 +107,23 @@ function createGeoJSONLayer(map, tableElement, currentTime) {
         }
     });
 
-    // Update the HTML table with GeoJSON features and count phenomena
+    // Update the HTML table with GeoJSON features and count phenomena.significance
     function updateTableAndCounts(features) {
         const tbody = tableElement.querySelector('tbody');
         tbody.innerHTML = ''; // Clear existing rows
 
-        const phenomenaCounts = {}; // Track counts for each phenomena
+        const phenomenaSignificanceCounts = {}; // Track counts for each combination
 
         features.forEach((feature) => {
             const phenomena = feature.get('phenomena');
+            const significance = feature.get('significance');
+            const key = `${phenomena}.${significance}`;
 
-            // Increment the count for this phenomena
-            phenomenaCounts[phenomena] = (phenomenaCounts[phenomena] || 0) + 1;
+            // Increment the count for this combination
+            phenomenaSignificanceCounts[key] = (phenomenaSignificanceCounts[key] || 0) + 1;
 
-            // Skip adding rows for features not in the active phenomena set
-            if (!activePhenomena.has(phenomena)) {
+            // Skip adding rows for features not in the active set
+            if (!activePhenomenaSignificance.has(key)) {
                 return;
             }
 
@@ -128,7 +137,7 @@ function createGeoJSONLayer(map, tableElement, currentTime) {
             cell3.textContent = `${expireLocal} (${expireUTC.toISOString().slice(11, 16)} UTC)`;
             row.appendChild(cell3);
             const cell4 = document.createElement('td');
-            cell4.innerHTML = `<a href="${feature.get('href')}" target="_new">${feature.get('ps')} ${feature.get('eventid')}</a>`;
+            cell4.innerHTML = `<a href="${feature.get('href')}" target="_new">${key} ${feature.get('eventid')}</a>`;
             row.appendChild(cell4);
             tbody.appendChild(row);
         });
@@ -136,9 +145,11 @@ function createGeoJSONLayer(map, tableElement, currentTime) {
         // Update the toggle labels with counts
         const phenomenaToggles = document.querySelectorAll('.phenomena-toggle');
         phenomenaToggles.forEach((toggle) => {
-            const phenomena = toggle.dataset.phenomena;
-            const count = phenomenaCounts[phenomena] || 0;
-            toggle.textContent = `${phenomena} (${count})`;
+            const key = toggle.dataset.key; // Ensure `data-key` is correctly used
+            if (key) {
+                const count = phenomenaSignificanceCounts[key] || 0;
+                toggle.textContent = `${key} (${count})`; // Use `key` for the label
+            }
         });
     }
 
@@ -158,25 +169,25 @@ function createGeoJSONLayer(map, tableElement, currentTime) {
         });
     }
 
-    // Handle toggling of individual phenomena
+    // Handle toggling of individual phenomena.significance
     const phenomenaToggles = document.querySelectorAll('.phenomena-toggle');
     phenomenaToggles.forEach((toggle) => {
-        const phenomena = toggle.dataset.phenomena;
+        const key = toggle.dataset.key;
 
-        // Initialize the FL toggle as untoggled
-        if (phenomena === "FL") {
+        // Initialize the FL.W toggle as untoggled
+        if (key === "FL.W") {
             toggle.classList.remove('active');
         }
 
         toggle.addEventListener('click', (event) => {
-            if (activePhenomena.has(phenomena)) {
-                activePhenomena.delete(phenomena);
+            if (activePhenomenaSignificance.has(key)) {
+                activePhenomenaSignificance.delete(key);
                 event.target.classList.remove('active'); // Visually indicate toggle is off
                 event.target.style.background = '#ccc'; // Gray background for untoggled
             } else {
-                activePhenomena.add(phenomena);
+                activePhenomenaSignificance.add(key);
                 event.target.classList.add('active'); // Visually indicate toggle is on
-                event.target.style.background = ''; // Reset background for toggled
+                event.target.style.background = colorLookup[key] || ''; // Use color for toggled
             }
             geojsonLayer.changed(); // Trigger a re-render of the layer
         });

@@ -35,8 +35,8 @@ document.addEventListener('DOMContentLoaded', () => {
     });
     map.addLayer(tmsLayer);
 
-    function updateTMSLayer() {
-        const timestamp = formatTimestamp(currentTime);
+    function updateTMSLayer(radarTime = currentTime) {
+        const timestamp = formatTimestamp(radarTime);
         tmsLayer.getSource().setUrl(`https://mesonet.agron.iastate.edu/cache/tile.py/1.0.0/ridge::USCOMP-N0Q-${timestamp}/{z}/{x}/{y}.png`);
     }
 
@@ -67,11 +67,14 @@ document.addEventListener('DOMContentLoaded', () => {
     }
 
     // Time control logic
-    const currentTimeElement = document.getElementById('current-time');
     const timeStepBackwardButton = document.getElementById('time-step-backward');
     const timePlayPauseButton = document.getElementById('time-play-pause');
     const timeStepForwardButton = document.getElementById('time-step-forward');
     const realtimeModeButton = document.getElementById('realtime-mode');
+
+    // Initialize the GeoJSON layer after declaring it
+    const warningsTable = document.getElementById('warnings-table');
+    const geojsonLayer = createGeoJSONLayer(map, warningsTable, currentTime);
 
     let animationInterval = null;
 
@@ -85,15 +88,19 @@ document.addEventListener('DOMContentLoaded', () => {
     function stepTime(minutes) {
         const now = new Date();
         currentTime.setMinutes(currentTime.getMinutes() + minutes);
-        currentTime = rectifyToFiveMinutes(currentTime);
+
+        // Ensure radar layer uses rectified time
+        const radarTime = new Date(currentTime);
+        radarTime.setMinutes(Math.floor(radarTime.getMinutes() / 5) * 5, 0, 0);
 
         // Prevent selecting a timestamp from the future
         if (currentTime > now) {
-            currentTime = rectifyToFiveMinutes(now);
+            currentTime = new Date(now);
         }
 
         updateTimeInput(); // Update the timestamp in the input field
-        updateTMSLayer();
+        updateTMSLayer(radarTime); // Update radar layer with rectified time
+        updateGeoJSONLayer(); // Update warnings layer with 1-minute granularity
     }
 
     // Animation logic to toggle visibility
@@ -187,16 +194,18 @@ document.addEventListener('DOMContentLoaded', () => {
         } else {
             // Advance currentTime to the most current possible timestamp
             const now = new Date();
-            currentTime = rectifyToFiveMinutes(now);
+            currentTime = new Date(now);
             updateTimeInput(); // Update the timestamp in the input field
-            updateTMSLayer();
+            updateTMSLayer(new Date(Math.floor(now.getTime() / (5 * 60 * 1000)) * (5 * 60 * 1000))); // Rectified time for radar
+            updateGeoJSONLayer(); // Update warnings layer
 
             realTimeInterval = setInterval(() => {
                 const now = new Date();
-                currentTime = rectifyToFiveMinutes(now);
+                currentTime = new Date(now);
                 updateTimeInput(); // Update the timestamp in the input field
-                updateTMSLayer();
-            }, 300000); // Update every 5 minutes
+                updateTMSLayer(new Date(Math.floor(now.getTime() / (5 * 60 * 1000)) * (5 * 60 * 1000))); // Rectified time for radar
+                updateGeoJSONLayer(); // Update warnings layer
+            }, 60000); // Update every minute
             realtimeModeButton.textContent = '🔴';
             realtimeModeButton.title = 'Disable Real-Time Mode';
             queryParams.set('realtime', '1');
@@ -240,12 +249,14 @@ document.addEventListener('DOMContentLoaded', () => {
     timeStepBackwardButton.addEventListener('click', () => {
         stepTime(-5); // Step time backward by 5 minutes
         updateTimeInput(); // Update the timestamp in the input field
+        updateTMSLayer(); // Uses default currentTime
         updateURL();  // Update the URL to reflect the new state
     });
     timePlayPauseButton.addEventListener('click', toggleAnimation);
     timeStepForwardButton.addEventListener('click', () => {
         stepTime(5);
         updateTimeInput(); // Update the timestamp in the input field
+        updateTMSLayer(); // Uses default currentTime
         updateURL();
     }); // 5 minutes forward
 
@@ -329,12 +340,14 @@ document.addEventListener('DOMContentLoaded', () => {
     // Initialize the time input field
     updateTimeInput();
 
-    const warningsTable = document.getElementById('warnings-table');
-    const geojsonLayer = createGeoJSONLayer(map, warningsTable, currentTime);
 
+
+    // Function to update the GeoJSON layer
     function updateGeoJSONLayer() {
-        geojsonLayer.getSource().setUrl(`/geojson/sbw.py?valid=${currentTime.toISOString()}`);
-        geojsonLayer.getSource().refresh();
+        if (geojsonLayer) {
+            geojsonLayer.getSource().setUrl(`/geojson/sbw.py?ts=${currentTime.toISOString()}`);
+            geojsonLayer.getSource().refresh();
+        }
     }
 
     // Update GeoJSON layer when time changes
@@ -354,7 +367,8 @@ document.addEventListener('DOMContentLoaded', () => {
 
     realtimeModeButton.addEventListener('click', () => {
         toggleRealTimeMode();
-        updateGeoJSONLayer();
+        updateGeoJSONLayer(); // Ensure GeoJSON layer is updated when toggling real-time mode
+        updateTMSLayer(); // Uses default currentTime
     });
 
     // Warnings modal functionality
@@ -428,5 +442,16 @@ document.addEventListener('DOMContentLoaded', () => {
     document.addEventListener('mouseup', () => {
         isDragging = false;
         warningsModal.style.transition = ''; // Re-enable transition
+    });
+
+    // Add search functionality for warnings table
+    const searchInput = document.getElementById('warnings-search');
+    searchInput.addEventListener('input', (event) => {
+        const filter = event.target.value.toLowerCase();
+        const rows = document.querySelectorAll('#warnings-table tbody tr');
+        rows.forEach((row) => {
+            const text = row.textContent.toLowerCase();
+            row.style.display = text.includes(filter) ? '' : 'none';
+        });
     });
 });
