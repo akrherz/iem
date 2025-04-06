@@ -328,26 +328,28 @@ html, body {
 
 .phenomena-toggle {
     background: #007bff;
-    color: white;
+    color: #ffffff; /* High contrast white text */
     border: none;
-    padding: 5px 10px;
+    padding: 2px 5px; /* Reduced padding for better text fit */
     border-radius: 3px;
     cursor: pointer;
     font-size: 12px;
     text-align: center;
-    width: 40px;
+    width: auto; /* Allow buttons to resize based on content */
+    min-width: 50px; /* Ensure a minimum width for consistency */
 }
 
 .phenomena-toggle.active {
     background: #0056b3;
+    color: #ffffff; /* High contrast white text for active state */
 }
 
 .phenomena-toggle:not(.active) {
-    background: #ccc; /* Gray background for untoggled */
-    color: black; /* Black text for untoggled */
+    background: #e0e0e0; /* Light gray background for untoggled */
+    color: #333333; /* Dark gray text for untoggled */
 }
 
 .phenomena-toggle:hover {
     background: #0056b3;
-    color: white;
+    color: #ffffff; /* Ensure hover state is consistent */
 }
