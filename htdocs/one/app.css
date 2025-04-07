@@ -262,14 +262,19 @@ html, body {
     display: flex;
     justify-content: space-between;
     align-items: center;
+    position: sticky; /* Make the header sticky */
+    top: 0; /* Stick to the top of the modal */
+    z-index: 1; /* Ensure it stays above the content */
 }
 
+/* Ensure the close button is always visible */
 #warnings-modal-header button {
     background: transparent;
     border: none;
     color: white;
     font-size: 16px;
     cursor: pointer;
+    z-index: 2; /* Ensure it stays above other elements */
 }
 
 #warnings-modal-content {
