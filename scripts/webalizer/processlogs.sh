@@ -43,7 +43,8 @@ for PREF in $PREFIXES
 do
     echo "============== $PREF ============="
     wc -l ${PREF}*
-    /usr/share/awstats/tools/logresolvemerge.pl ${PREF}* > combined-${PREF}.log
+    # awstats merger has bugs, so using the ancient technology here
+    /usr/local/bin/mergelog ${PREF}* > combined-${PREF}.log
     rm -f ${PREF}*
 done
 
