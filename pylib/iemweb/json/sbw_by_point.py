@@ -50,12 +50,11 @@ from io import BytesIO, StringIO
 import numpy as np
 import pandas as pd
 from pydantic import AwareDatetime, Field, field_validator
-from pyiem.database import get_sqlalchemy_conn
+from pyiem.database import get_sqlalchemy_conn, sql_helper
 from pyiem.nws.vtec import VTEC_PHENOMENA, VTEC_SIGNIFICANCE, get_ps_string
 from pyiem.reference import ISO8601
 from pyiem.util import utc
 from pyiem.webutil import CGIModel, iemapp
-from sqlalchemy import text
 
 from iemweb.imagemaps import rectify_wfo
 
@@ -130,8 +129,8 @@ def get_events(environ):
 
     with get_sqlalchemy_conn("postgis") as conn:
         df = pd.read_sql(
-            text(
-                f"""
+            sql_helper(
+                """
     select vtec_year, wfo, significance, phenomena,
     to_char(issue at time zone 'UTC',
                 'YYYY-MM-DDThh24:MIZ') as iso_issued,
@@ -146,7 +145,9 @@ def get_events(environ):
     damagetag from sbw where status = 'NEW' and
     ST_Intersects(geom, {ptsql}) and issue > :sdate and expire < :edate
     {valid_limiter} ORDER by issue ASC
-        """
+        """,
+                ptsql=ptsql,
+                valid_limiter=valid_limiter,
             ),
             conn,
             params=params,

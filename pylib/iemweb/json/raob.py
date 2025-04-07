@@ -35,12 +35,11 @@ from datetime import datetime, timezone
 import numpy as np
 import pandas as pd
 from pydantic import Field, field_validator
-from pyiem.database import get_sqlalchemy_conn
+from pyiem.database import get_sqlalchemy_conn, sql_helper
 from pyiem.network import Table as NetworkTable
 from pyiem.reference import ISO8601
 from pyiem.util import utc
 from pyiem.webutil import CGIModel, iemapp
-from sqlalchemy import text
 
 json.encoder.FLOAT_REPR = lambda o: format(o, ".2f")
 
@@ -118,19 +117,23 @@ def run(ts, sid, pressure):
     pressurelimiter = ""
     if pressure > 0:
         pressurelimiter = " and p.pressure = :pid "
+    table = f"raob_profile_{ts:%Y}"
     with get_sqlalchemy_conn("raob") as conn:
         df = pd.read_sql(
-            text(
-                f"""
+            sql_helper(
+                """
             SELECT f.station, p.pressure, p.height,
             round(p.tmpc::numeric,1) as tmpc,
             round(p.dwpc::numeric,1) as dwpc, p.drct,
             round((p.smps * 1.94384)::numeric,0) as sknt
-            from raob_profile_{ts:%Y} p JOIN raob_flights f
+            from {table} p JOIN raob_flights f
                 on (p.fid = f.fid)
             WHERE {stationlimiter} f.valid = :valid {pressurelimiter}
             ORDER by f.station, p.pressure DESC
-            """
+            """,
+                table=table,
+                stationlimiter=stationlimiter,
+                pressurelimiter=pressurelimiter,
             ),
             conn,
             params=params,

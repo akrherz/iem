@@ -93,6 +93,9 @@ def do_work(valid, prod, start_response):
     """Our workflow"""
     # Get lookup table
     xref, template, units, long_name = get_table(prod)
+    if template is None:
+        start_response("200 OK", [("Content-type", "text/plain")])
+        return b"ERROR: The IEM Archives do not have this file available"
     # Get RASTER
     fn = valid.strftime(template)
     if not os.path.isfile(fn):

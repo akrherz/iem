@@ -5,8 +5,6 @@ from zoneinfo import ZoneInfo
 
 import numpy as np
 import pandas as pd
-from metpy.calc import apparent_temperature
-from metpy.units import units
 from pyiem import reference
 from pyiem.database import get_sqlalchemy_conn, sql_helper
 from pyiem.exceptions import NoDataFound
@@ -14,7 +12,22 @@ from pyiem.plot import MapPlot, get_cmap
 from pyiem.util import utc
 
 PDICT = {"cwa": "Plot by NWS Forecast Office", "state": "Plot by State"}
-PDICT2 = {"vsby": "Visibility", "feel": "Feels Like Temperature"}
+PDICT2 = {
+    "vsby": "Visibility",
+    "feel": "Feels Like Temperature",
+    "tmpf": "Air Temperature",
+    "dwpf": "Dew Point Temperature",
+    "sknt": "Wind Speed",
+    "relh": "Relative Humidity",
+}
+UNITS = {
+    "vsby": "miles",
+    "feel": "F",
+    "tmpf": "F",
+    "dwpf": "F",
+    "sknt": "kts",
+    "relh": "%",
+}
 
 
 def get_description():
@@ -92,6 +105,7 @@ def get_df(ctx, bnds, buf=2.25):
                     geom)
             )
             SELECT station, vsby, tmpf, dwpf, sknt, state, wfo, lat, lon, relh,
+            feel,
             abs(extract(epoch from (:valid - valid))) as tdiff from
             alldata a JOIN mystation m on (a.station = m.id)
             WHERE a.valid between :sts and :ets ORDER by tdiff ASC
@@ -113,7 +127,7 @@ def get_df(ctx, bnds, buf=2.25):
         with get_sqlalchemy_conn("iem") as conn:
             df = pd.read_sql(
                 sql_helper("""
-                SELECT state, wfo, tmpf, dwpf, sknt, relh,
+                SELECT state, wfo, tmpf, dwpf, sknt, relh, feel,
         id, network, vsby, ST_x(geom) as lon, ST_y(geom) as lat
         FROM
         current c JOIN stations s ON (s.iemid = c.iemid)
@@ -161,20 +175,6 @@ def plotter(ctx: dict):
     ramp = None
     if varname == "vsby":
         ramp = np.array([0.01, 0.1, 0.25, 0.5, 1, 2, 3, 5, 8, 9.9])
-        valunit = "miles"
-    else:  # feel
-        valunit = "F"
-        df["feel"] = (
-            apparent_temperature(
-                df["tmpf"].values * units("degF"),
-                df["relh"].values * units("percent"),
-                df["sknt"].values * units("knots"),
-                mask_undefined=False,
-            )
-            .to(units("degF"))
-            .m
-        )
-        df = df[pd.notna(df["feel"])]
     if df.empty:
         raise NoDataFound("No Data Found")
     # Data QC, cough
@@ -192,7 +192,7 @@ def plotter(ctx: dict):
         df["lat"].values,
         df[varname].values,
         ramp,
-        units=valunit,
+        units=UNITS[varname],
         cmap=get_cmap(ctx["cmap"]),
     )
     if ctx["t"] == "state":

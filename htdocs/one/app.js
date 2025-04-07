@@ -9,8 +9,8 @@ document.addEventListener('DOMContentLoaded', () => {
             })
         ],
         view: new ol.View({
-            center: ol.proj.fromLonLat([0, 0]),
-            zoom: 2
+            center: ol.proj.fromLonLat([-98.5795, 39.8283]), // Center on the contiguous US
+            zoom: 4 // Zoom level to cover the contiguous US
         })
     });
 
@@ -235,8 +235,11 @@ document.addEventListener('DOMContentLoaded', () => {
         currentTime = new Date(Date.UTC(year, month, day, hours, minutes));
         updateBrandingOverlay('archive');
     } else {
-        updateBrandingOverlay('archive');
+        // Default to real-time mode if no timestamp is provided
+        toggleRealTimeMode();
+        updateBrandingOverlay('realtime');
     }
+
     if (queryParams.center) {
         const [lon, lat] = queryParams.center.split(',').map(Number);
         map.getView().setCenter(ol.proj.fromLonLat([lon, lat]));
@@ -400,7 +403,6 @@ document.addEventListener('DOMContentLoaded', () => {
         }
 
         // Populate table with example data (replace with dynamic data as needed)
-        const warningsTable = document.getElementById('warnings-table');
         if (warningsTable) {
             const exampleData = [
                 { phenomena: 'Tornado', significance: 'Severe', eventId: '12345' },
