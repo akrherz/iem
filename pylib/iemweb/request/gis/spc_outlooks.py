@@ -1,5 +1,8 @@
 """.. title:: Download SPC Convective and Fire Weather or WPC ERO Outlooks
 
+Return to `API Services </api/#cgi>`_ or
+`User Frontend </request/gis/spc_outlooks.phtml>`_
+
 Documentation for /cgi-bin/request/gis/spc_outlooks.py
 ------------------------------------------------------
 
@@ -9,6 +12,8 @@ or WPC Excessive Rainfall Outlooks in shapefile format.
 Changelog
 ---------
 
+- 2025-04-08: A limit was placed on the number of years and outlook types
+  that can be requested at one time.  This limit is currently 10.
 - 2024-06-14: Initial documentation of this backend
 
 Example Requests
@@ -29,10 +34,9 @@ from io import BytesIO
 # Third Party
 import geopandas as gpd
 from pydantic import AwareDatetime, Field
-from pyiem.database import get_sqlalchemy_conn
+from pyiem.database import get_sqlalchemy_conn, sql_helper
 from pyiem.exceptions import IncompleteWebRequest
 from pyiem.webutil import CGIModel, ListOrCSVType, iemapp
-from sqlalchemy import text
 
 PRJFILE = "/opt/iem/data/gis/meta/4326.prj"
 
@@ -103,17 +107,21 @@ def run(ctx, start_response):
     }
     with get_sqlalchemy_conn("postgis") as conn:
         df = gpd.read_postgis(
-            text(f"""select
+            sql_helper(
+                """select
             to_char(issue {common}) as issue,
             to_char(expire {common}) as expire,
             to_char(product_issue {common}) as prodiss,
             outlook_type as type, day, threshold, category, cycle,
-            {ctx["geom_col"]} as geom
+            {geocol} as geom
             from spc_outlooks WHERE product_issue >= :sts and
             product_issue < :ets and outlook_type = ANY(:types)
             and day = ANY(:days)
             ORDER by product_issue ASC
-            """),
+            """,
+                common=common,
+                geocol=ctx["geom_col"],
+            ),
             conn,
             params={
                 "sts": ctx["sts"],
@@ -122,7 +130,7 @@ def run(ctx, start_response):
                 "days": ctx["days"],
             },
             geom_col="geom",
-        )
+        )  # type: ignore
     if df.empty:
         start_response("200 OK", [("Content-type", "text/plain")])
         return b"ERROR: no results found for your query"
@@ -154,5 +162,9 @@ def application(environ, start_response):
     """Do something fun!"""
     if environ["sts"] is None or environ["ets"] is None:
         raise IncompleteWebRequest("GET start/end time parameters missing")
+    if (environ["ets"].year - environ["sts"].year) * len(environ["type"]) > 10:
+        raise IncompleteWebRequest(
+            "Requests are limited to 10 outlook years at a time."
+        )
     ctx = get_context(environ)
     return [run(ctx, start_response)]
