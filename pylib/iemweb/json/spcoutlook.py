@@ -46,12 +46,11 @@ from io import BytesIO
 
 import pandas as pd
 from pydantic import Field
-from pyiem.database import get_sqlalchemy_conn
+from pyiem.database import get_sqlalchemy_conn, sql_helper
 from pyiem.nws.products.spcpts import THRESHOLD_ORDER
 from pyiem.reference import ISO8601
 from pyiem.util import utc
 from pyiem.webutil import CGIModel, iemapp
-from sqlalchemy import text
 
 
 class Schema(CGIModel):
@@ -108,7 +107,7 @@ def dotime(time, lon, lat, day, cat) -> tuple[pd.DataFrame, datetime]:
         ts = ts.replace(tzinfo=timezone.utc)
     with get_sqlalchemy_conn("postgis") as conn:
         outlooks = pd.read_sql(
-            text("""
+            sql_helper("""
         SELECT issue at time zone 'UTC' as i,
         expire at time zone 'UTC' as e,
         product_issue at time zone 'UTC' as v,
@@ -132,7 +131,7 @@ def dowork(lon, lat, day, cat) -> pd.DataFrame:
     with get_sqlalchemy_conn("postgis") as conn:
         # Need to compute SIGN seperately
         outlooks = pd.read_sql(
-            text("""
+            sql_helper("""
         WITH data as (
             SELECT issue at time zone 'UTC' as i,
             expire at time zone 'UTC' as e,

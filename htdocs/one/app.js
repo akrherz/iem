@@ -200,10 +200,10 @@ document.addEventListener('DOMContentLoaded', () => {
             updateGeoJSONLayer(); // Update warnings layer
 
             realTimeInterval = setInterval(() => {
-                const now = new Date();
-                currentTime = new Date(now);
+                const lnow = new Date();
+                currentTime = new Date(lnow);
                 updateTimeInput(); // Update the timestamp in the input field
-                updateTMSLayer(new Date(Math.floor(now.getTime() / (5 * 60 * 1000)) * (5 * 60 * 1000))); // Rectified time for radar
+                updateTMSLayer(new Date(Math.floor(lnow.getTime() / (5 * 60 * 1000)) * (5 * 60 * 1000))); // Rectified time for radar
                 updateGeoJSONLayer(); // Update warnings layer
             }, 60000); // Update every minute
             realtimeModeButton.textContent = '🔴';

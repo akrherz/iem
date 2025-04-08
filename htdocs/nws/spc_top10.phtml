@@ -16,7 +16,7 @@ require_once "../../include/network.php";
 require_once "../../include/imagemaps.php";
 
 $url = sprintf(
-    "%s/json/spc_bysize.py?day=%s&threshold=%s&category=%s&syear=%s",
+    "%s/json/spc_bysize.py?day=%s&threshold=%s&category=%s&syear=%s&sort=desc",
     $INTERNAL_BASEURL,
     $day,
     $threshold,
@@ -37,6 +37,9 @@ $table = <<<EOM
 <tbody>
 
 EOM;
+
+$stable = str_replace("sort=desc", "sort=asc", $table);
+
 $jdata = file_get_contents($url);
 $json = json_decode($jdata, $assoc = TRUE);
 if (sizeof($json["outlooks"]) == 0) {
@@ -58,6 +61,39 @@ if (sizeof($json["outlooks"]) == 0) {
     }
 }
 $table .= "</tbody></table>\n";
+
+$url = sprintf(
+    "%s/json/spc_bysize.py?day=%s&threshold=%s&category=%s&syear=%s&sort=asc",
+    $INTERNAL_BASEURL,
+    $day,
+    $threshold,
+    urlencode($category),
+    $year,
+);
+
+
+$jdata = file_get_contents($url);
+$json = json_decode($jdata, $assoc = TRUE);
+if (sizeof($json["outlooks"]) == 0) {
+    $stable .= "<tr><td colspan=\"5\">No Data Found</td></tr>";
+} else {
+    $rank = 1;
+    foreach ($json["outlooks"] as $key => $val) {
+        $stable .= sprintf(
+            "<tr><th>%s</th><td>%s</td><td>%s</td><td>%s</td>".
+            "<td><img src=\"%s\" class=\"img img-responsive\">".
+            "</div></tr>",
+            $rank,
+            $val["date"],
+            $val["cycle"],
+            $val["area_sqkm"],
+            $val["imgsrc"],
+        );
+        $rank += 1;
+    }
+}
+$stable .= "</tbody></table>\n";
+
 
 $days = Array(
     "1" => "Day 1",
@@ -125,6 +161,10 @@ $t->content = <<<EOM
 
 <h3>Top 10 SPC Outlooks by Size</h3>
 
+<div class="alert alert-info">
+<strong>New:</strong> Scroll down to see the top 10 smallest outlooks by size!
+</div>
+
 <p>The IEM attempts a robust archive of SPC outlooks.  These outlooks have
 changed methodologies and threshold meanings over the years. You are strongly
 encouraged to set a start year to limit the data to a given period. The listing
@@ -149,11 +189,17 @@ area is done within the <a href="https://spatialreference.org/ref/epsg/9311/">US
 <input type="submit" value="Update Table">
 </form></p>
 
-<h3>Top 10 Largest Day: ${day} Category: ${category} Threshold: ${threshold}</h3>
+<h3>Top 10 Largest Day: {$day} Category: {$category} Threshold: {$threshold}</h3>
 
 <p>Generated at: <code>{$json["generated_at"]}</code> in {$json["query_time[s]"]}s</p>
 
 $table
+
+<h3>Top 10 Smallest Day: {$day} Category: {$category} Threshold: {$threshold}</h3>
+
+<p>Generated at: <code>{$json["generated_at"]}</code> in {$json["query_time[s]"]}s</p>
+
+$stable
 
 EOM;
 $t->render('single.phtml');

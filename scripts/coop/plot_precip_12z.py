@@ -9,10 +9,9 @@ from datetime import date, datetime
 
 import click
 from psycopg import Connection
-from pyiem.database import get_sqlalchemy_conn
+from pyiem.database import get_sqlalchemy_conn, sql_helper
 from pyiem.network import Table as NetworkTable
 from pyiem.plot import MapPlot
-from sqlalchemy import text
 
 warnings.simplefilter("ignore", UserWarning)
 
@@ -30,11 +29,15 @@ def doit(conn: Connection, dt: date) -> None:
 
     clevs = [0, 0.01, 0.05, 0.1, 0.2, 0.3, 0.4, 0.5, 0.75, 1, 2, 3, 4, 5, 10]
     # We'll assume all COOP data is 12z, sigh for now
+    table = f"summary_{dt:%Y}"
     res = conn.execute(
-        text(f"""SELECT id, pday, network
-           from summary_{dt:%Y} s JOIN stations t ON (t.iemid = s.iemid)
+        sql_helper(
+            """SELECT id, pday, network
+           from {table} s JOIN stations t ON (t.iemid = s.iemid)
            WHERE day = :dt and
-           t.network ~* 'COOP' and pday >= 0"""),
+           t.network ~* 'COOP' and pday >= 0""",
+            table=table,
+        ),
         {"dt": dt},
     )
 

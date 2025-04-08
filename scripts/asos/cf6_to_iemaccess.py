@@ -9,9 +9,8 @@ from typing import Optional
 import click
 import pandas as pd
 from metpy.units import units
-from pyiem.database import get_dbconn, get_sqlalchemy_conn
+from pyiem.database import get_dbconn, get_sqlalchemy_conn, sql_helper
 from pyiem.util import logger
-from sqlalchemy import text
 
 LOG = logger()
 
@@ -40,7 +39,10 @@ def get_data(dt: Optional[date]) -> pd.DataFrame:
 
     with get_sqlalchemy_conn("iem") as conn:
         cf6 = pd.read_sql(
-            text(f"SELECT * from cf6_data where {lmt} ORDER by station ASC"),
+            sql_helper(
+                "SELECT * from cf6_data where {lmt} ORDER by station ASC",
+                lmt=lmt,
+            ),
             conn,
             params=params,
         )
@@ -111,16 +113,19 @@ def update_iemaccess(cf6df, valid):
     with get_sqlalchemy_conn("iem") as conn:
         # NB: we should not have any of these station IDs in the COOP network
         obs = pd.read_sql(
-            f"""
+            sql_helper(
+                """
             SELECT s.*, t.network,
             case when length(t.id) = 3 then 'K'||t.id else t.id end
             as station from {table} s JOIN
-            stations t on (s.iemid = t.iemid) WHERE s.day = %s and
+            stations t on (s.iemid = t.iemid) WHERE s.day = :valid and
             (t.network ~* 'ASOS' or (t.network ~* 'DCP' and length(id) < 5))
             ORDER by station ASC
             """,
+                table=table,
+            ),
             conn,
-            params=(valid,),
+            params={"valid": valid},
             index_col=None,
         )
 
