@@ -7,9 +7,8 @@ from datetime import datetime
 
 import click
 import pandas as pd
-from pyiem.database import get_sqlalchemy_conn
+from pyiem.database import get_sqlalchemy_conn, sql_helper
 from pyiem.plot import MapPlot
-from sqlalchemy import text
 
 
 @click.command()
@@ -19,19 +18,24 @@ def main(dt: datetime):
     now = dt.today()
     routes = "ac" if now == dt.today() else "a"
 
+    table = f"summary_{now:%Y}"
+
     # Compute normal from the climate database
     with get_sqlalchemy_conn("iem") as conn:
         obs = pd.read_sql(
-            text(f"""
+            sql_helper(
+                """
     SELECT
       s.id, max_tmpf as tmpf, min_tmpf as dwpf,
       ST_x(s.geom) as lon, ST_y(s.geom) as lat
     FROM
-      summary_{now.year} c JOIN stations s on (c.iemid = s.iemid)
+      {table} c JOIN stations s on (c.iemid = s.iemid)
     WHERE
       s.network = 'IA_ASOS' and day = :dt
       and max_tmpf is not null and min_tmpf is not null
-    """),
+    """,
+                table=table,
+            ),
             conn,
             params={"dt": now},
         )
