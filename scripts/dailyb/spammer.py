@@ -18,7 +18,8 @@ from pyiem.reference import ISO8601
 from pyiem.util import exponential_backoff, logger, utc
 
 LOG = logger()
-IEM_BRANCHES = "https://api.github.com/repos/akrherz/iem/branches"
+REPOS = "iem pyiem iemone pywwa iem-database iem-web-services".split()
+GITHUB_API_BASE = "https://api.github.com/repos/akrherz"
 URLS = re.compile(r"(https?://[\w\d:#@%/;$()~_?\+-=\\\.&]*)", re.MULTILINE)
 
 
@@ -47,30 +48,35 @@ def get_github_commits():
     yesterday = yesterday.replace(hour=12, minute=0, second=0)
     iso = yesterday.strftime(ISO8601)
 
-    txt = ["> IEM Code Pushes <to branch> on Github\n"]
-    html = ["<h3>IEM Code Pushes &lt;to branch&gt; on Github</h3>"]
+    txt = ["> IEM Code Pushes <repo,branch> on Github\n"]
+    html = """
+<h3 style="font-family: Arial, sans-serif; color: #333;">
+IEM Code Pushes &lt;repo,branch&gt; on Github</h3>
 
-    # get branches, main is first!
-    branches = ["main"]
-    req = exponential_backoff(httpx.get, IEM_BRANCHES, timeout=30)
-    for branch in req.json():
-        if branch["name"] == "main":
-            continue
-        branches.append(branch["name"])
+<table style="width: 100%; border-collapse: collapse;">
+<thead><tr style="background-color: #f2f2f2;">
+<th style="border: 1px solid #ddd; padding: 8px;">Timestamp</th>
+<th style="border: 1px solid #ddd; padding: 8px;">Repository</th>
+<th style="border: 1px solid #ddd; padding: 8px;">Message</th>
+<th style="border: 1px solid #ddd; padding: 8px;">Link</th>
+</tr></thead>
+<tbody>
+    """
 
-    hashes = []
     links = []
-    for branch in branches:
-        uri = (
-            f"https://api.github.com/repos/akrherz/iem/commits?since={iso}&"
-            f"sha={branch}"
-        )
-        req2 = exponential_backoff(httpx.get, uri, timeout=30)
+    for repo in REPOS:
+        uri = f"{GITHUB_API_BASE}/{repo}/commits?since={iso}&sha=main"
+        try:
+            resp = httpx.get(uri, timeout=30)
+            resp.raise_for_status()
+            commits = resp.json()[::-1]
+        except Exception as exp:
+            LOG.info("Exception fetching %s", uri)
+            LOG.exception(exp)
         # commits are in reverse order
-        for commit in req2.json()[::-1]:
-            if commit["sha"] in hashes:
+        for commit in commits:
+            if commit["commit"]["message"].startswith("Merge"):
                 continue
-            hashes.append(commit["sha"])
             timestring = commit["commit"]["author"]["date"]
             utcvalid = datetime.strptime(timestring, ISO8601)
             valid = utcvalid.replace(tzinfo=timezone.utc).astimezone(
@@ -82,30 +88,44 @@ def get_github_commits():
                 "htmlmsg": htmlize(commit["commit"]["message"])
                 .replace("\n\n", "\n")
                 .replace("\n", "<br />\n"),
-                "branch": branch,
+                "branch": "main",
                 "url": commit["html_url"][:-20],  # chomp to make shorter
                 "i": len(links) + 1,
+                "repo": repo,
             }
             links.append("[%(i)s] %(url)s" % data)
             txt.append(
-                mywrap("  %(stamp)s[%(i)s] <%(branch)s> %(msg)s" % data)
-            )
-            html.append(
-                (
-                    '<li><a href="%(url)s">%(stamp)s</a> '
-                    "&lt;%(branch)s&gt; %(htmlmsg)s</li>\n"
+                mywrap(
+                    "  %(stamp)s[%(i)s] <%(repo)s,%(branch)s> %(msg)s" % data
                 )
+            )
+            html += (
+                """
+<tr>
+<td style="border: 1px solid #ddd; padding: 8px;">%(stamp)s</td>
+<td style="border: 1px solid #ddd; padding: 8px;">
+<a href="https://github.com/akrherz/%(repo)s"
+ style="color: #007bff; text-decoration: none;">%(repo)s,main</a></td>
+<td style="border: 1px solid #ddd; padding: 8px;">%(htmlmsg)s</td>
+<td style="border: 1px solid #ddd; padding: 8px;">
+<a href="%(url)s" style="color: #007bff; text-decoration: none;">Link</a></td>
+</tr>"""
                 % data
             )
 
     if len(txt) == 1:
         txt = txt[0] + "    No code commits found in previous 24 Hours"
-        html = html[0] + (
-            "<strong>No code commits found in previous 24 Hours</strong>"
-        )
+        html += """
+<tr>
+<td colspan="4"
+ style="border: 1px solid #ddd; padding: 8px; text-align: center;">
+<strong>No code commits found in previous 24 Hours</strong>
+</td>
+</tr>
+        """
     else:
         txt = "\n".join(txt) + "\n\n" + "\n".join(links)
-        html = html[0] + "<ul>" + "\n".join(html[1:]) + "</ul>"
+        html += "</tbody></table>"
 
     return txt + "\n\n", html + "<br /><br />"
 
