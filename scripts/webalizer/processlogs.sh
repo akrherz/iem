@@ -59,7 +59,7 @@ grep " /agclimate" combined-iem.log > agclimate.log
 rm -f agclimate.log
 
 # Copy to shared NFS space
-rsync -a --exclude *webalizer*db /mnt/webalizer/usage/. /mesonet/share/usage/
+rsync -a --exclude *webalizer*db /mnt/webalizer/usage/. /mesonet/share/usage/  # skipcq
 
 # Step 4, archive these files
 for PREF in $PREFIXES

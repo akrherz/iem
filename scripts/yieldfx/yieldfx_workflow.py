@@ -49,7 +49,7 @@ def write_and_upload(df, location):
     """We are done, whew!"""
     (tmpfd, tmpfn) = tempfile.mkstemp(text=True)
     sio = StringIO()
-    with open(f"baseline/{location}.met", encoding="utf-8") as fh:
+    with open(f"baseline/{location}.met", encoding="utf-8") as fh:  # skipcq
         for line in fh:
             if line.startswith("year"):
                 break
