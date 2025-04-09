@@ -113,7 +113,7 @@ def combine_logs(log_files, output):
 
     progress = tqdm(disable=not os.isatty(0))
 
-    with open(output, "w") as outfp:
+    with open(output, "w") as outfp:  # skipcq
         processor(progress, outfp, log_iters)
 
     # Close all log files
