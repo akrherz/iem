@@ -82,6 +82,7 @@ def get_description():
             options=PDICT,
             default="ZMP",
             label="Select ARTCC/Alaska Zone:",
+            all=True,  # One-off problem with _ALL
         ),
         dict(
             type="date",

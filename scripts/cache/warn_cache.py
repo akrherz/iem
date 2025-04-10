@@ -26,7 +26,7 @@ def get_uri(uri, localfn):
             req.content,
         )
         return
-    with open(localfn, "wb") as fh:
+    with open(localfn, "wb") as fh:  # skipcq
         fh.write(req.content)
 
 
