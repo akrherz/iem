@@ -2,16 +2,18 @@
 
 import os
 from datetime import date, datetime
+from zoneinfo import ZoneInfo
 
 import pandas as pd
-from pyiem.database import get_dbconn
-from pyiem.util import logger
+from pyiem.database import get_dbconn, get_dbconnc
+from pyiem.observation import Observation
+from pyiem.util import c2f, convert_value, logger
 
 LOG = logger()
 BASE = "/mesonet/home/mesonet/ot/ot0005/incoming/Pierson"
 
 
-def get_starttimes(cursor):
+def get_starttimes(cursor) -> tuple[date, datetime]:
     """Figure out when we have data"""
     cursor.execute(
         "SELECT max(valid at time zone 'UTC-06') from feel_data_hourly"
@@ -34,25 +36,35 @@ def ingest(cursor):
         dstart = date(1980, 1, 1)
     if hstart is None:
         hstart = datetime(1980, 1, 1)
-    fn = "%s/%s/ISU_Feel_Daily.dat" % (BASE, date.today().year)
+    fn = f"{BASE}/{date.today():%Y}/ISU_Feel_Daily.dat"
     # If this file does not exist, try the previous year's file
     if not os.path.isfile(fn):
-        fn = "%s/%s/ISU_Feel_Daily.dat" % (
-            BASE,
-            date.today().year - 1,
-        )
+        fn = f"{BASE}/{date.today().year - 1}/ISU_Feel_Daily.dat"
         if not os.path.isfile(fn):
-            LOG.info("Double failure to find %s", fn)
+            LOG.warning("Double failure to find %s", fn)
             return
 
     df = pd.read_csv(
         fn, header=0, skiprows=[0, 2, 3], quotechar='"', on_bad_lines="warn"
     )
 
+    iconn, icursor = get_dbconnc("iem")
     for _, row in df.iterrows():
         ts = datetime.strptime(row["TIMESTAMP"][:10], "%Y-%m-%d")
         if ts.date() <= dstart:
             continue
+        # We have to do this because the data is in UTC-6
+        ob = Observation(
+            "OT0011", "OT", ts.replace(tzinfo=ZoneInfo("Etc/GMT+6"))
+        )
+        ob.data["max_tmpf"] = c2f(row["AirTemp_Max"])
+        ob.data["min_tmpf"] = c2f(row["AirTemp_Min"])
+        ob.data["pday"] = convert_value(row["Rain_Tot"], "mm", "inch")
+        ob.data["srad_mj"] = row["SolarRad_MJ_Tot"]
+        ob.data["max_sknt"] = convert_value(
+            row["Windspeed_Max"], "mps", "knots"
+        )
+        ob.save(icursor)
         cursor.execute(
             """
             INSERT into feel_data_daily(
@@ -70,15 +82,12 @@ def ingest(cursor):
             ),
         )
 
-    fn = "%s/%s/ISU_Feel_Hourly.dat" % (BASE, date.today().year)
+    fn = f"{BASE}/{date.today().year}/ISU_Feel_Hourly.dat"
     # If this file does not exist, try the previous year's file
     if not os.path.isfile(fn):
-        fn = "%s/%s/ISU_Feel_Hourly.dat" % (
-            BASE,
-            date.today().year - 1,
-        )
+        fn = f"{BASE}/{date.today().year - 1}/ISU_Feel_Hourly.dat"
         if not os.path.isfile(fn):
-            LOG.info("Double failure to find %s", fn)
+            LOG.warning("Double failure to find %s", fn)
             return
     df = pd.read_csv(
         fn, header=0, skiprows=[0, 2, 3], quotechar='"', on_bad_lines="warn"
@@ -88,6 +97,18 @@ def ingest(cursor):
         ts = datetime.strptime(row["TIMESTAMP"][:13], "%Y-%m-%d %H")
         if ts <= hstart:
             continue
+        # We have to do this because the data is in UTC-6
+        ob = Observation(
+            "OT0011", "OT", ts.replace(tzinfo=ZoneInfo("Etc/GMT+6"))
+        )
+        ob.data["tmpf"] = c2f(row["AirTemp_Avg"])
+        ob.data["relh"] = row["RH_Avg"]
+        ob.data["drct"] = row["WindDir_Avg"]
+        ob.data["sknt"] = convert_value(row["Windspeed_Avg"], "mps", "knots")
+        ob.data["srad"] = row["SolarRad_W_Avg"]
+        ob.data["phour"] = convert_value(row["Rain_Tot"], "mm", "inch")
+        ob.save(icursor)
+
         cursor.execute(
             """
             INSERT into feel_data_hourly(
@@ -124,6 +145,10 @@ def ingest(cursor):
                 row["LWS3_Ohms_Hst"],
             ),
         )
+
+    icursor.close()
+    iconn.commit()
+    iconn.close()
 
 
 def main():
