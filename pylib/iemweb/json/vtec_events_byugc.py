@@ -176,7 +176,7 @@ def get_mckey(environ):
     return (
         f"/json/vtec_events_byugc.json|{environ['ugc']}|"
         f"{environ['sdate']}|{environ['edate']}"
-    )
+    ).replace(" ", "_")  # memcache key cannot have spaces
 
 
 @iemapp(help=__doc__, schema=Schema, memcachekey=get_mckey, memcacheexpire=600)

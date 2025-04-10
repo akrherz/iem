@@ -178,6 +178,9 @@ def plotter(ctx: dict):
         raise NoDataFound("No Results Found, try flipping zone/county")
     for col in ["final", "initial"]:
         events[col] = events[col].dt.total_seconds() / 60.0
+        # Don't allow negative durations (GIGO)
+        events = events[events[col] >= 0]
+
     events["max"] = events[["final", "initial"]].max(axis=1)
     events["min"] = events[["final", "initial"]].min(axis=1)
 
