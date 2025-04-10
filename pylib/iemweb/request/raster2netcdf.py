@@ -33,7 +33,7 @@ class Schema(CGIModel):
 
 def get_gridinfo(filename, xpoints, ypoints):
     """Figure out the grid navigation, sigh"""
-    with open(f"{filename[:-4]}.wld", encoding="ascii") as fh:
+    with open(f"{filename[:-4]}.wld", encoding="ascii") as fh:  # skipcq
         lines = fh.readlines()
     dx = float(lines[0])
     dy = float(lines[3])

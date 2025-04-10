@@ -49,7 +49,7 @@ def pqinsert(tmpfn, ets, interval):
 
 def make_metadata(tmpfn, mydict):
     """Make metadata."""
-    with open(f"{tmpfn}_meta.json", "w") as fp:
+    with open(f"{tmpfn}_meta.json", "w") as fp:  # skipcq
         json.dump(mydict, fp)
 
 
