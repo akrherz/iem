@@ -124,7 +124,8 @@ def main(yr):
     mydir = "/mesonet/share/climodat/ks"
     if not os.path.isdir(mydir):
         os.makedirs(mydir)
-    with open(f"{mydir}/{yr}_monthly.csv", "w", encoding="utf-8") as fh:
+    fn = f"{mydir}/{yr}_monthly.csv"
+    with open(fn, "w", encoding="utf-8") as fh:  # skipcq
         fh.write("stationID,stationName,Latitude,Longitude,")
         for i in range(1, 13):
             for v in ["MINT", "MAXT", "PREC", "GDD50", "SDD86"]:

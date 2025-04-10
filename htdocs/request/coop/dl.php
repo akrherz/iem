@@ -11,12 +11,12 @@ require_once "../../../include/forms.php";
 
 $connection = iemdb("coop");
 $network = isset($_REQUEST["network"]) ? substr($_REQUEST["network"], 0, 10) : "IACLIMATE";
-$day1 = isset($_GET["day1"]) ? $_GET["day1"] : die("No day1 specified");
-$day2 = isset($_GET["day2"]) ? $_GET["day2"] : die("No day2 specified");
-$month1 = isset($_GET["month1"]) ? $_GET["month1"] : die("No month1 specified");
-$month2 = isset($_GET["month2"]) ? $_GET["month2"] : die("No month2 specified");
-$year1 = isset($_GET["year1"]) ? $_GET["year1"] : die("No year1 specified");
-$year2 = isset($_GET["year2"]) ? $_GET["year2"] : die("No year2 specified");
+$day1 = isset($_GET["day1"]) ? xssafe($_GET["day1"]) : die("No day1 specified");
+$day2 = isset($_GET["day2"]) ? xssafe($_GET["day2"]) : die("No day2 specified");
+$month1 = isset($_GET["month1"]) ? xssafe($_GET["month1"]) : die("No month1 specified");
+$month2 = isset($_GET["month2"]) ? xssafe($_GET["month2"]) : die("No month2 specified");
+$year1 = isset($_GET["year1"]) ? xssafe($_GET["year1"]) : die("No year1 specified");
+$year2 = isset($_GET["year2"]) ? xssafe($_GET["year2"]) : die("No year2 specified");
 $vars = isset($_GET["vars"]) ? $_GET["vars"] : die("No vars specified");
 
 $gis = isset($_GET["gis"]) ? xssafe($_GET["gis"]) : 'no';
@@ -26,7 +26,10 @@ $what = isset($_GET["what"]) ? xssafe($_GET["what"]) : 'dl';
 $nt = new NetworkTable($network);
 $cities = $nt->table;
 
-$stations = $_GET["station"];
+$stations = isset($_GET["station"]) ? $_GET["station"] : die("No station specified");
+if (!is_array($stations)) {
+    $stations = array($stations);
+}
 $selectAll = false;
 foreach ($stations as $key => $value) {
     if ($value == "_ALL") {

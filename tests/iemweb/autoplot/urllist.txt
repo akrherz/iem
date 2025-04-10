@@ -361,6 +361,7 @@
 /plotting/auto/plot/234/sdate:2023-05-01::edate:2024-06-30::filter:NONE::w:state::network:WFO::wfo:DMX::state:IA::heatmap:yes::cmap:viridis::_r:43::dpi:100.png
 /plotting/auto/plot/234/sdate:2024-05-01::edate:2024-06-30::filter:NONE::w:state::network:WFO::wfo:DMX::state:IA::heatmap:yes::cmap:viridis::_r:43::dpi:100.png
 /plotting/auto/plot/236/ident:ZMP::sdate:2024-07-31::edate:2024-08-01::_r:43::dpi:100.png
+/plotting/auto/plot/236/ident:_ALL::sdate:2024-04-11::edate:2025-04-11::_r:t::dpi:100.png
 /plotting/auto/plot/240/network:IACLIMATE::station:IATAME::sdate:2024-04-24::_r:t::dpi:100.png
 /plotting/auto/plot/241/sts:2000-08-06%200900::ets:2000-08-06%200900::w:min::csector:IA::mode:user::cmap:gnuplot2::_r:t::dpi:100.png
 /plotting/auto/plot/241/sts:2024-08-06%200900::ets:2024-08-06%200900::w:min::csector:IA::mode:user::cmap:gnuplot2::_r:t::dpi:100.png
