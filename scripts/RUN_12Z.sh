@@ -30,10 +30,7 @@ python compute_daily.py --date=$(date -u --date '2 days ago' +'%Y-%m-%d')
 cd ../dailyb
 python spammer.py
 
-cd ../ingestors/other
-python feel_ingest.py
-
-cd ../../util
+cd ../util
 sh BACKUP.sh
 
 cd ../uscrn

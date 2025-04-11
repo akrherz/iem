@@ -41,7 +41,10 @@ then
     python merge_mrms_q3.py	--date=$(date +'%Y-%m-%d') --for-dep
 fi
 
-cd ../iemre
+cd ../ingestors/other
+python feel_ingest.py &
+
+cd ../../iemre
 python merge_ifc.py --date=$(date +'%Y-%m-%d')
 if [ $LHH -eq "01" ]
 then
