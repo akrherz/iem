@@ -1,4 +1,7 @@
-"""Ingest the ISU FEEL Farm data."""
+"""Ingest the ISU FEEL Farm data.
+
+Run from RUN_10AFTER.sh
+"""
 
 import os
 from datetime import date, datetime

@@ -137,7 +137,7 @@ foreach ($ltype as $k => $w) {
 
 // Build Cow API URL
 $wsuri = sprintf(
-    "%s/api/1/cow.json?wfo=%s&begints=%sZ&" .
+    "%s/api/1/cow.json?wfo=%s&begints=%sZ&enable_shared_border=1&" .
         "endts=%sZ&hailsize=%s&wind=%s%s%s&lsrbuffer=%s&warningbuffer=%s",
     $INTERNAL_BASEURL,
     (strlen($wfo) == 4) ? substr($wfo, 1, 3) : $wfo,

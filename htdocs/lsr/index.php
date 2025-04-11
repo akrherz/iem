@@ -5,9 +5,9 @@ force_https();
 require_once "../../include/myview.php";
 $OL = "10.4.0";
 $DT = "1.11.1";
-$S2 = "4.1.0rc0";
 
 $t = new MyView();
+$t->iemselect2 = TRUE;
 $t->jsextra = <<<EOM
 <!-- need to load before datatables -->
 <script src="/vendor/moment/2.13.0/moment.min.js"></script>
@@ -16,7 +16,6 @@ $t->jsextra = <<<EOM
 <script
  src="/vendor/datetimepicker/2.5.20/jquery.datetimepicker.full.min.js">
 </script>
-<script src="/vendor/select2/{$S2}/select2.min.js"></script>
 <script src='/vendor/openlayers/{$OL}/ol.js'></script>
 <script src='/vendor/openlayers/{$OL}/ol-layerswitcher.js'></script>
 
@@ -28,7 +27,6 @@ $t->headextra = <<<EOM
 <link rel="stylesheet" href="/vendor/jquery-ui/1.11.4/jquery-ui.min.css" />
 <link rel="stylesheet" type="text/css"
 href="/vendor/datetimepicker/2.5.20/jquery.datetimepicker.min.css" />
-<link rel="stylesheet" type="text/css" href="/vendor/select2/{$S2}/select2.min.css"/ >
 <link rel='stylesheet' href="/vendor/openlayers/{$OL}/ol.css" type='text/css'>
 <link type="text/css" href="/vendor/openlayers/{$OL}/ol-layerswitcher.css" rel="stylesheet" />
 <link type="text/css" href="static.css" rel="stylesheet" />

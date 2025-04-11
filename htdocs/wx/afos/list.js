@@ -1,6 +1,5 @@
 /* global $ */
 $(document).ready(() => {
-    $(".iemselect2").select2();
     $("#zyx").click(() => {
         showHide();
         j();

@@ -6,12 +6,11 @@ require_once "../../config/settings.inc.php";
 require_once "../../include/myview.php";
 $t = new MyView();
 $t->title = "Time Machine";
-
+$t->iemselect2 = TRUE;
 $t->headextra = <<<EOM
 <link rel="stylesheet" href="/vendor/jquery-ui/{$JQUERYUI}/jquery-ui.min.css">
 <link rel="stylesheet" href="/vendor/jquery-ui/{$JQUERYUI}/jquery-ui.theme.min.css">
 <link rel="stylesheet" href="/vendor/jquery-ui-slider-pips/1.11.4/jquery-ui-slider-pips.css">
-<link rel="stylesheet" type="text/css" href="/vendor/select2/4.0.3/select2.min.css"/ >
 <style>
 .ui-slider-tip {
   width: 50px !important;
@@ -21,7 +20,6 @@ EOM;
 $t->jsextra = <<<EOM
 <script src="/vendor/jquery-ui/{$JQUERYUI}/jquery-ui.min.js"></script>
 <script src="/vendor/jquery-ui-slider-pips/1.11.4/jquery-ui-slider-pips.js"></script>
-<script src="/vendor/select2/4.0.3/select2.min.js"></script>
 <script src="/vendor/moment/2.13.0/moment.min.js"></script>
 <script type="text/javascript" src="static.js?v=2"></script>
 EOM;
