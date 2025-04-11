@@ -11,6 +11,7 @@ import matplotlib.colors as mpcolors
 import matplotlib.dates as mdates
 import numpy as np
 import pandas as pd
+from matplotlib.axes import Axes
 from matplotlib.lines import Line2D
 from matplotlib.patches import Patch
 from metpy.calc import dewpoint_from_relative_humidity
@@ -185,9 +186,7 @@ def make_inversion_plot(ctx):
     ax.grid(True)
     ax.set_ylabel(r"Air Temperature $^\circ$F")
     ax.set_title(f"ISUSM Station: {ctx['_sname']} :: Inversion Timeseries")
-    ax.xaxis.set_major_formatter(
-        mdates.DateFormatter("%-I:%M %p\n%-d %b", tz=CENTRAL)
-    )
+    apply_xaxis_formatting(ax, ctx)
     ax.legend(loc="best", ncol=3, fontsize=10)
 
     ax = axes[1]
@@ -202,9 +201,7 @@ def make_inversion_plot(ctx):
     ax.grid(True)
     ax.set_title("10 Foot Temperature minus 1.5 Foot Temperature")
     ax.set_ylabel(r"Air Temperature Diff $^\circ$F")
-    ax.xaxis.set_major_formatter(
-        mdates.DateFormatter("%-I:%M %p\n%-d %b", tz=CENTRAL)
-    )
+    apply_xaxis_formatting(ax, ctx)
 
     ax = axes[2]
     ax.set_position([0.07, 0.1, axwidth, axheight])
@@ -484,9 +481,7 @@ def make_daily_plot(ctx):
     ax.axhline(50, lw=1.5, c="k")
     ax.grid(True)
     ax.set_ylabel(r"4 inch Soil Temperature $^\circ$F")
-    ax.xaxis.set_major_formatter(mdates.DateFormatter("%-d %b\n%Y"))
-    interval = int(len(df.index) / 7.0 + 1)
-    ax.xaxis.set_major_locator(mdates.DayLocator(interval=interval))
+    apply_xaxis_formatting(ax, ctx)
     ax.legend(loc="best", ncol=2, fontsize=10)
     return fig, df
 
@@ -512,7 +507,7 @@ def make_hourly_plot(ctx, vname):
     ax.plot(df["valid"], df[vname])
     ax.grid(True)
     ax.set_ylabel(label)
-    xaxis_magic(ctx, ax)
+    apply_xaxis_formatting(ax, ctx)
     return fig, df
 
 
@@ -797,7 +792,7 @@ def plot2(ctx):
         loc="lower center",
         fontsize=9 if svplotted else 12,
     )
-    xaxis_magic(ctx, ax)
+    apply_xaxis_formatting(ax, ctx)
     if ax.get_ylim()[0] < 40:
         ax.axhline(32, linestyle="--", lw=2, color="tan")
     ax.set_ylabel(r"Temperature $^\circ$F")
@@ -838,7 +833,7 @@ def plot_at(ctx):
     ax2 = ax[0].twinx()
     ax2.plot(df.index, df["slrkj_tot_qc"].values / 60.0 * 1000, color="k")
     ax2.set_ylabel("Solar Radiation [$W m^{-2}$]")
-    xaxis_magic(ctx, ax[0])
+    apply_xaxis_formatting(ax[0], ctx)
 
     ax[1].bar(
         df.index,
@@ -939,7 +934,7 @@ def plot_meteogram(ctx):
         fontsize=10,
     )
 
-    xaxis_magic(ctx, ax)
+    apply_xaxis_formatting(ax, ctx)
     return fig, df
 
 
@@ -1061,14 +1056,14 @@ def plot1(ctx):
 
     ax[2].set_zorder(ax2.get_zorder() + 1)
     ax[2].patch.set_visible(False)
-    ax[0].set_xlim(df.index.min(), df.index.max())
-    xaxis_magic(ctx, ax[2])
+    ax[2].set_xlim(df.index.min(), df.index.max())
+    apply_xaxis_formatting(ax[2], ctx)
 
     return fig, df
 
 
-def xaxis_magic(ctx, ax):
-    """Do the xaxis magic."""
+def apply_xaxis_formatting(ax: Axes, ctx: dict) -> None:
+    """Apply consistent x-axis formatting based on the time range."""
     days = (ctx["ets"] - ctx["sts"]).days
     if days >= 3:
         interval = max(int(days / 7), 1)
@@ -1083,7 +1078,7 @@ def xaxis_magic(ctx, ax):
             mdates.AutoDateLocator(maxticks=10, tz=CENTRAL)
         )
         ax.xaxis.set_major_formatter(
-            mdates.DateFormatter("%-I %p\n%-d %b", tz=CENTRAL)
+            mdates.DateFormatter("%-I:%M %p\n%-d %b", tz=CENTRAL)
         )
 
 

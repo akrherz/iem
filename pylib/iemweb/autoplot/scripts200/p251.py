@@ -10,7 +10,7 @@ import matplotlib.dates as mdates
 import matplotlib.ticker as mticker
 import pandas as pd
 from pyiem.database import get_sqlalchemy_conn, sql_helper
-from pyiem.exceptions import IncompleteWebRequest
+from pyiem.exceptions import IncompleteWebRequest, NoDataFound
 from pyiem.nws.vtec import NWS_COLORS
 from pyiem.plot import figure_axes
 from pyiem.util import utc
@@ -111,6 +111,8 @@ def plotter(ctx: dict):
         _, sv_c = getp(conn, "SV", wfo, sts, ets)
         _, ff_c = getp(conn, "FF", wfo, sts, ets)
     df = pd.DataFrame({"valid": to_t, "tor": to_c, "svr": sv_c, "ffw": ff_c})
+    if df.empty:
+        raise NoDataFound("Sorry, no data found.")
     df["valid"] = df["valid"].dt.tz_localize(ZoneInfo("UTC"))
     df = df.set_index("valid")
     df["tor_ffw"] = df["tor"] + df["ffw"]

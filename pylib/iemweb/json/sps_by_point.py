@@ -38,11 +38,10 @@ from io import BytesIO, StringIO
 import numpy as np
 import pandas as pd
 from pydantic import AwareDatetime, Field
-from pyiem.database import get_sqlalchemy_conn
+from pyiem.database import get_sqlalchemy_conn, sql_helper
 from pyiem.reference import ISO8601
 from pyiem.util import utc
 from pyiem.webutil import CGIModel, iemapp
-from sqlalchemy import text
 
 EXL = "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"
 
@@ -99,8 +98,8 @@ def get_events(environ):
 
     with get_sqlalchemy_conn("postgis") as conn:
         df = pd.read_sql(
-            text(
-                f"""
+            sql_helper(
+                """
     select wfo, landspout, product_id, waterspout, max_hail_size,
     max_wind_gust,
     to_char(issue at time zone 'UTC', 'YYYY-MM-DDThh24:MIZ') as issue,
@@ -109,7 +108,8 @@ def get_events(environ):
     ST_Contains(geom, ST_Point(:lon, :lat, 4326)) and
     issue > :sdate and expire < :edate
     {valid_limiter} ORDER by issue ASC
-        """
+        """,
+                valid_limiter=valid_limiter,
             ),
             conn,
             params=params,
