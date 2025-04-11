@@ -40,11 +40,10 @@ from datetime import datetime
 import httpx
 import pandas as pd
 from pydantic import Field
-from pyiem.database import get_sqlalchemy_conn
+from pyiem.database import get_sqlalchemy_conn, sql_helper
 from pyiem.reference import ISO8601
 from pyiem.util import LOG, utc
 from pyiem.webutil import CGIModel, iemapp
-from sqlalchemy import text
 
 
 class Schema(CGIModel):
@@ -88,7 +87,7 @@ def run(environ):
 
     with get_sqlalchemy_conn("postgis") as conn:
         df = pd.read_sql(
-            text("""
+            sql_helper("""
             select product_ids, name, status, hvtec_nwsli,
             product_issue at time zone 'UTC' as utc_product_issue,
             init_expire at time zone 'UTC' as utc_init_expire,

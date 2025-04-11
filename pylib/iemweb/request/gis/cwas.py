@@ -1,6 +1,7 @@
 """.. title:: CWAS Data Service
 
-Return to `user frontend </request/gis/cwas.phtml>`_
+Return to `user frontend </request/gis/cwas.phtml>`_ or
+`API Services </api/#cgi>`_
 
 Documentation for /cgi-bin/request/gis/cwas.py
 ----------------------------------------------
@@ -36,10 +37,9 @@ from io import BytesIO
 import fiona
 import geopandas as gpd
 from pydantic import AwareDatetime, Field
-from pyiem.database import get_sqlalchemy_conn
+from pyiem.database import get_sqlalchemy_conn, sql_helper
 from pyiem.exceptions import IncompleteWebRequest
 from pyiem.webutil import CGIModel, iemapp
-from sqlalchemy import text
 
 fiona.supported_drivers["KML"] = "rw"
 PRJFILE = "/opt/iem/data/gis/meta/4326.prj"
@@ -101,12 +101,16 @@ def run(ctx, start_response):
     }
     with get_sqlalchemy_conn("postgis") as conn:
         df = gpd.read_postgis(
-            text(f"""select center,
+            sql_helper(
+                """select center,
             to_char(issue {common}) as issue,
             to_char(expire {common}) as expire,
             product_id as prod_id, narrative as narrativ, num as number,
             geom from cwas WHERE issue >= :sts and
-            issue < :ets ORDER by issue ASC"""),
+            issue < :ets ORDER by issue ASC
+                       """,
+                common=common,
+            ),
             conn,
             params={
                 "sts": ctx["sts"],
