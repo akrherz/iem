@@ -2,7 +2,6 @@
 $OL = "8.2.0";
 require_once "../../../config/settings.inc.php";
 require_once "../../../include/myview.php";
-$t = new MyView();
 require_once "../../../include/database.inc.php";
 require_once "../../../include/forms.php";
 require_once "../../../include/imagemaps.php";
@@ -28,21 +27,16 @@ if (!$subc && !$dwpf && !$tmpf && !$s0 && !$s1 && !$s2 && !$s3) {
     $_GET["tmpf"] = "on";
 }
 
+$t = new MyView();
+$t->iemselect2 = TRUE;
 $t->headextra = <<<EOM
 <link rel="stylesheet" href="/vendor/openlayers/{$OL}/ol.css" type="text/css">
 <link type="text/css" href="/vendor/openlayers/{$OL}/ol-layerswitcher.css" rel="stylesheet" />
-<link rel="stylesheet" type="text/css" href="/vendor/select2/4.0.3/select2.min.css"/ >
 EOM;
 $t->jsextra = <<<EOM
 <script src="/vendor/openlayers/{$OL}/ol.js" type="text/javascript"></script>
 <script src='/vendor/openlayers/{$OL}/ol-layerswitcher.js'></script>
 <script src="/js/olselect.js"></script>
-<script src="/vendor/select2/4.0.3/select2.min.js"></script>
-<script type="text/javascript">
-$(document).ready(function(){
-    $(".iemselect2").select2();
-});
-</script>
 EOM;
 $t->title = "RWIS Timeseries Plots";
 

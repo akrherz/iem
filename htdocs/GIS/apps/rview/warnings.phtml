@@ -148,12 +148,11 @@ if (isset($_GET["lat0"]) && isset($_GET["lon0"]) && $osite == $site) {
 }
 
 $t->title = "RADAR &amp; NWS Warnings";
+$t->iemselect2 = TRUE;
 $t->jsextra = <<<EOM
-<script src="/vendor/select2/4.0.3/select2.min.js"></script>
 <script src="warnings.js?v=2"></script>
 EOM;
 $t->headextra = <<<EOM
-<link rel="stylesheet" type="text/css" href="/vendor/select2/4.0.3/select2.min.css"/ >
 <link rel="stylesheet" type="text/css" href="warnings.css" />
 EOM;
 

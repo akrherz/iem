@@ -22,8 +22,6 @@ $(document).ready(() => {
         showControl(`${layer}-control`);
     });
 
-    $(".iemselect2").select2();
-
     // check if archive=yes is set in the URL
     const urlParams = new URLSearchParams(window.location.search);
     if (! urlParams.has('archive')) {

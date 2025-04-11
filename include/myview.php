@@ -18,6 +18,7 @@ class MyView {
     public ?string $current_network = null;
     public ?string $headextra = null;
     public bool $iemss = FALSE;
+    public bool $iemselect2 = FALSE; // Enables select2 form javascript
     public bool $jsani = FALSE;
     public ?string $jsextra = null;
     public int $refresh = -1;

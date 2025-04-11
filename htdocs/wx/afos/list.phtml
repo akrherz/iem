@@ -11,9 +11,9 @@ require_once "../../../include/network.php";
 require_once "../../../include/mlib.php";
 
 $t = new MyView();
+$t->iemselect2 = TRUE;
 $t->title = "NWS Text Product by Issuing Center by Date";
 $t->headextra = <<<EOM
- <link rel="stylesheet" type="text/css" href="/vendor/select2/4.0.3/select2.min.css"/ >
 <style>
 .col-md-2 {
     overflow-y: scroll;
@@ -23,7 +23,6 @@ $t->headextra = <<<EOM
 </style>
 EOM;
 $t->jsextra = <<<EOM
-<script src="/vendor/select2/4.0.3/select2.min.js"></script>
 <script src="list.js"></script>
 EOM;
 

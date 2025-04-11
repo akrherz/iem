@@ -14,6 +14,12 @@ if ($this->jsani){
 <script src="/js/jsani.js"></script>
 EOM;
 }
+if ($this->iemselect2) {
+    $jsextra .= <<<EOM
+<script src="/vendor/select2/4.1.0rc0/select2.min.js"></script>
+<script src="/js/select2.js"></script>
+EOM;
+}
 
 ?>
 <!-- footer -->

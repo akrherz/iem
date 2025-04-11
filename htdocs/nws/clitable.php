@@ -236,6 +236,7 @@ $table .= "</tbody></table>";
 $sselect = networkSelect("NWSCLI", $station);
 
 $t = new MyView();
+$t->iemselect2 = TRUE;
 $t->title = "Tabular CLI Report Data";
 
 $t->content = <<<EOM
@@ -292,11 +293,9 @@ directly access it here:
 
 EOM;
 $t->headextra = <<<EOM
-<link rel="stylesheet" type="text/css" href="/vendor/select2/4.0.3/select2.min.css"/ >
 <link type="text/css" href="/vendor/jquery-datatables/{$DT}/datatables.min.css" rel="stylesheet" />
 EOM;
 $t->jsextra = <<<EOM
-<script src="/vendor/select2/4.0.3/select2.min.js"></script>
 <script src='/vendor/jquery-datatables/{$DT}/datatables.min.js'></script>
 <script src="clitable.js"></script>
 EOM;

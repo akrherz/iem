@@ -165,6 +165,7 @@ $table .= "</tbody></table>";
 $sselect = networkSelect("NWSCLI", $station);
 
 $t = new MyView();
+$t->iemselect2 = TRUE;
 $t->title = "Tabular CF6 Report Data";
 
 $t->content = <<<EOM
@@ -240,11 +241,9 @@ perhaps a slightly more human readable format.  The codes are as follows:
 EOM;
 
 $t->headextra = <<<EOM
-<link rel="stylesheet" type="text/css" href="/vendor/select2/4.0.3/select2.min.css"/ >
 <link type="text/css" href="/vendor/jquery-datatables/1.10.20/datatables.min.css" rel="stylesheet" />
 EOM;
 $t->jsextra = <<<EOM
-<script src="/vendor/select2/4.0.3/select2.min.js"></script>
 <script src='/vendor/jquery-datatables/1.10.20/datatables.min.js'></script>
 <script src="cf6table.js"></script>
 EOM;

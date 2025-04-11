@@ -11,7 +11,6 @@ $OL = "10.4.0";
 $t->jsextra = <<<EOM
 <script src="/vendor/jquery-datatables/1.10.20/datatables.min.js"></script>
 <script src="/vendor/jquery-ui/1.11.4/jquery-ui.js"></script>
-<script src="/vendor/select2/4.1.0rc0/select2.min.js"></script>
 <script src='/vendor/openlayers/{$OL}/ol.js'></script>
 <script type="text/javascript" src="/js/olselect-lonlat.js"></script>
 <script type="text/javascript" src="search.js?v=2"></script>
@@ -21,7 +20,6 @@ $t->headextra = <<<EOM
 <link rel='stylesheet' href="/vendor/openlayers/{$OL}/ol.css" type='text/css'>
 <link rel="stylesheet" href="/vendor/jquery-datatables/1.10.20/datatables.min.css" />
 <link rel="stylesheet" href="/vendor/jquery-ui/1.11.4/jquery-ui.min.css" />
-<link rel="stylesheet" type="text/css" href="/vendor/select2/4.1.0rc0/select2.min.css"/ >
 <style>
 .map {
     width: 100%;

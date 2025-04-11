@@ -5,6 +5,7 @@ require_once "../../include/myview.php";
 require_once "../../include/database.inc.php";
 require_once "../../include/forms.php";
 $t = new MyView();
+$t->iemselect2 = TRUE;
 $dbconn = iemdb('postgis');
 
 $month = get_int404("month", intval(date("m")));
@@ -32,11 +33,7 @@ EOM
 } // End of segmentSelect
 
 $t->title = "Historical Iowa Winter Road Conditions";
-$t->headextra = <<<EOM
-<link rel="stylesheet" type="text/css" href="/vendor/select2/4.0.3/select2.min.css"/ >
-EOM;
 $t->jsextra = <<<EOM
-<script src="/vendor/select2/4.0.3/select2.min.js"></script>
 <script src="/vendor/jquery-filtertable/1.5.7/jquery.filtertable.min.js"></script>
 <script src="history.js"></script>
 EOM;

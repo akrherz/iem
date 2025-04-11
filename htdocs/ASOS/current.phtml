@@ -17,13 +17,7 @@ $format = isset($_REQUEST["format"]) ? xssafe($_REQUEST['format']) : 'html';
 $t = new MyView();
 $t->title = "{$network} Current Conditions";
 $t->refresh = 1200;
-$t->headextra = <<<EOM
-<link rel="stylesheet" type="text/css" href="/vendor/select2/4.0.3/select2.min.css"/ >
-EOM;
-$t->jsextra = <<<EOM
-<script src="/vendor/select2/4.0.3/select2.min.js"></script>
-<script src="current.js"></script>
-EOM;
+$t->iemselect2 = TRUE;
 $t->current_network = "ASOS";
 
 $nt = new NetworkTable($network, FALSE, TRUE);

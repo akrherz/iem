@@ -8,11 +8,10 @@ require_once "../../include/iemprop.php";
 $t = new MyView();
 $DT = "2.0.2";
 $OL = "10.4.0";
-
+$t->iemselect2 = TRUE;
 $t->jsextra = <<<EOM
 <script src="/vendor/jquery-datatables/{$DT}/datatables.min.js"></script>
 <script src="/vendor/jquery-ui/1.11.4/jquery-ui.js"></script>
-<script src="/vendor/select2/4.1.0rc0/select2.min.js"></script>
 <script type="text/javascript" src="wfos.js"></script>
 <script src='/vendor/openlayers/{$OL}/ol.js'></script>
 <script type="text/javascript" src="/js/olselect-lonlat.js"></script>
@@ -22,7 +21,6 @@ $t->headextra = <<<EOM
 <link rel="stylesheet" href="/vendor/jquery-datatables/{$DT}/datatables.min.css" />
 <link rel="stylesheet" href="/vendor/jquery-ui/1.11.4/jquery-ui.min.css" />
 <link rel='stylesheet' href="/vendor/openlayers/{$OL}/ol.css" type='text/css'>
-<link rel="stylesheet" type="text/css" href="/vendor/select2/4.1.0rc0/select2.min.css"/ >
 <style>
   .map {
     width: 100%;
