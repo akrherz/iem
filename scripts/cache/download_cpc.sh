@@ -1,8 +1,8 @@
 #!/bin/bash
 # Cache the CPC's Soil Moisture maps
-# https://mesonet.agron.iastate.edu/timemachine/#87
-# https://mesonet.agron.iastate.edu/timemachine/#88
-# https://mesonet.agron.iastate.edu/timemachine/#89
+# https://mesonet.agron.iastate.edu/timemachine/?product=87
+# https://mesonet.agron.iastate.edu/timemachine/?product=88
+# https://mesonet.agron.iastate.edu/timemachine/?product=89
 # set -x
 
 DSTAMP=$(date --date '1 day ago' +'%Y%m%d%H%M')

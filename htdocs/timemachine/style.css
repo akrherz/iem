@@ -1,0 +1,152 @@
+.ui-slider-tip {
+    width: 50px !important;
+}
+
+/* Add styles for noUiSlider */
+.noUi-tooltip {
+    display: none; /* Hide tooltip by default */
+    background: #333;
+    color: #fff;
+    border-radius: 3px;
+    font-size: 12px;
+    padding: 5px;
+}
+
+.noUi-active .noUi-tooltip {
+    display: block; /* Show tooltip when slider is active */
+    position: absolute;
+    top: -30px; /* Position above the slider handle */
+    background: #333;
+    color: #fff;
+    border-radius: 3px;
+    font-size: 12px;
+    padding: 5px;
+    white-space: nowrap;
+    z-index: 10;
+}
+
+.noUi-horizontal {
+    height: 10px;
+    background: #ddd;
+    border-radius: 5px;
+}
+
+.noUi-handle {
+    width: 20px;
+    height: 20px;
+    background: #007bff;
+    border-radius: 50%;
+    cursor: pointer;
+}
+
+/* Style for disabled sliders */
+.noUi-disabled {
+    pointer-events: none; /* Disable interaction */
+    opacity: 0.5; /* Greyed-out appearance */
+}
+
+#day_slider {
+    margin-top: 20px; /* Add spacing above the slider to avoid overlap */
+    margin-bottom: 40px; /* Increase spacing below the slider to avoid overlap */
+}
+
+.btn {
+    z-index: 10; /* Ensure buttons are above other elements */
+    position: relative; /* Prevent unintended overlap */
+}
+
+/* Flexbox layout for sliders and buttons */
+.slider-container {
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: space-between;
+    gap: 15px;
+    margin-bottom: 20px;
+}
+
+.slider-item {
+    flex: 1 1 calc(25% - 15px); /* Adjust width for responsiveness */
+    min-width: 150px;
+}
+
+.button-container {
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: center;
+    gap: 10px;
+    margin-top: 30px; /* Add more spacing above the buttons */
+}
+
+label[for="year_slider"],
+label[for="hour_slider"],
+label[for="minute_slider"] {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+}
+
+label[for="year_slider"] .btn,
+label[for="hour_slider"] .btn,
+label[for="minute_slider"] .btn {
+    margin: 0 5px;
+}
+
+/* Mobile adjustments */
+@media (max-width: 768px) {
+    .slider-item {
+        flex: 1 1 100%; /* Full width on smaller screens */
+    }
+
+    .button-container {
+        flex-direction: column;
+        align-items: center;
+    }
+
+    .noUi-pips {
+        display: none; /* Hide pip labels on mobile devices */
+    }
+}
+
+.time-display {
+    display: flex;
+    justify-content: center;
+    gap: 20px;
+    margin-bottom: 20px;
+}
+
+.time-card {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    background: #f8f9fa;
+    border: 1px solid #dee2e6;
+    border-radius: 8px;
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+    padding: 10px 15px;
+    width: 100%;
+}
+
+.time-card h4 {
+    font-size: 1.5rem;
+    color: #495057;
+    margin: 0 10px 0 0;
+}
+
+.time-card p {
+    font-size: 1.5rem;
+    font-weight: bold;
+    color: #212529;
+    margin: 0;
+}
+
+.time-card .icon {
+    font-size: 1.5rem;
+    color: #6c757d;
+    margin-right: 10px;
+}
+
+#loading-indicator {
+    font-size: 1.2rem;
+    font-weight: bold;
+    text-align: center;
+}
