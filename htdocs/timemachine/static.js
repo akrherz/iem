@@ -414,7 +414,7 @@ function buildUI() {
             let offset = parseInt(button.getAttribute('data-offset'), 10);
             // If the abs(offset) is greater than the interval, we need to adjust
             // the interval to match the offset
-            if (unit === "minute" & (Math.abs(offset) < interval)) {
+            if (unit === "minute" && (Math.abs(offset) < interval)) {
                 offset = offset < 0 ? -interval : interval;
             }
 
