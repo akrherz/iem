@@ -133,8 +133,7 @@ function update() {
         dt = ets;
     }
     // Check 2: If our modulus is OK, we can quit early
-    if ((dt.utc().hours() * 60 + dt.minutes()) % interval === 0) {
-    } else {
+    if ((dt.utc().hours() * 60 + dt.minutes()) % interval !== 0) {
         // Check 3: Place dt on a time that works for the given interval
         if (interval > 1440) {
             dt.utc().startOf('month');
@@ -152,7 +151,7 @@ function update() {
 
     // Update year slider
     const yearSlider = document.getElementById('year_slider');
-    if (yearSlider && yearSlider.noUiSlider) {
+    if (yearSlider?.noUiSlider) {
         yearSlider.noUiSlider.updateOptions({
             range: {
                 min: sts.year(),
@@ -164,14 +163,13 @@ function update() {
 
     // Update day slider
     const daySlider = document.getElementById('day_slider');
-    if (daySlider && daySlider.noUiSlider) {
+    if (daySlider?.noUiSlider) {
         daySlider.noUiSlider.set(dt.local().dayOfYear());
     }
 
     // Update hour slider
     const hourSlider = document.getElementById('hour_slider');
-    if (hourSlider && hourSlider.noUiSlider) {
-        const interval = parseInt(opt.getAttribute('data-interval'), 10);
+    if (hourSlider?.noUiSlider) {
         if (interval >= 1440) { // Disable if interval is a day or more
             hourSlider.setAttribute('disabled', true);
             hourSlider.classList.add('noUi-disabled');
@@ -184,8 +182,7 @@ function update() {
 
     // Update minute slider
     const minuteSlider = document.getElementById('minute_slider');
-    if (minuteSlider && minuteSlider.noUiSlider) {
-        const interval = parseInt(opt.getAttribute('data-interval'), 10);
+    if (minuteSlider?.noUiSlider) {
         if (interval < 60) {
             minuteSlider.removeAttribute('disabled');
             minuteSlider.classList.remove('noUi-disabled');
@@ -339,7 +336,7 @@ function buildUI() {
         daySlider.noUiSlider.pips({
             mode: 'values',
             values: monthStartDays,
-            density: density,
+            density,
             format: {
                 to: value => moment([year]).dayOfYear(value).format('MMM D'),
                 from: value => value
@@ -394,7 +391,6 @@ function buildUI() {
         }
     });
     minuteSlider.noUiSlider.on('change', (values) => {
-        setMinuteSliderLabel(values[0]);
         dt.minute(parseInt(values[0], 10));
         if (minuteLabelText) {
             minuteLabelText.textContent = `${values[0]}`;
