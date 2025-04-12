@@ -13,14 +13,14 @@ $cfg["air_temperature"] = array(
     "prods" => array(
         "2m_air_temperature" => array(
             "label" => "2m Air Temperature",
-            "timemachine" => "#115.0",
+            "timemachine" => "?product=115",
             "img" => "/data/iowa_tmpf.png",
             "desc" => "Analysis of air temperature readings from airport " .
                 "weather stations."
         ),
         "12z_low" => array(
             "label" => "12 UTC Low Temperature",
-            "timemachine" => "#63.0",
+            "timemachine" => "?product=63",
             "img" => "/data/summary/iowa_asos_12z_low.png",
             "desc" => "Based on manually computed minimums and 12 hour " .
                 "minimums, when available, the plot shows low temperatures at " .
@@ -38,46 +38,46 @@ EOM
         ),
         "today_high" => array(
             "label" => "Today's High Temperature",
-            "timemachine" => "#116.0",
+            "timemachine" => "?product=116",
             "img" => "/data/summary/iowa_asos_high.png",
             "desc" => "IEM computed calendar day high temperature."
         ),
         "iowa_heat_index" => array(
             "label" => "Heat Index",
-            "timemachine" => "#10.0",
+            "timemachine" => "?product=10",
             "img" => "/data/heat.gif",
             "desc" => "Current heat index values computed using present day " .
                 "NWS equation."
         ),
         "iowa_wc_index" => array(
             "label" => "Wind Chill Index",
-            "timemachine" => "#25.0",
+            "timemachine" => "?product=25",
             "img" => "/data/wcht.gif",
             "desc" => "Current wind chill index values computed using present " .
                 "day NWS equation."
         ),
         "iowa_wc_min" => array(
             "label" => "Today's Min Wind Chill Index",
-            "timemachine" => "#117.0",
+            "timemachine" => "?product=117",
             "img" => "/data/summary/iowa_min_windchill.png",
             "desc" => "This plot presents the minimum wind chill temperature" .
                 " for the local calendar day."
         ),
         "iowa_tw" => array(
             "label" => "Surface Temps &amp; Winds",
-            "timemachine" => "#23.0",
+            "timemachine" => "?product=23",
             "img" => "/data/surfaceTW0.gif",
             "desc" => "Legacy GEMPAK plot showing temp analysis and winds."
         ),
         "iowa_te" => array(
             "label" => "Surface Theta E &amp; Winds",
-            "timemachine" => "#22.0",
+            "timemachine" => "?product=22",
             "img" => "/data/surfaceTE0.gif",
             "desc" => "Legacy GEMPAK plot showing surface theta E and winds."
         ),
         "iowa_divergence" => array(
             "label" => "Surface Divergence",
-            "timemachine" => "#18.0",
+            "timemachine" => "?product=18",
             "img" => "/data/surfaceDIV0.gif",
             "desc" => "Legacy GEMPAK plot showing surface divergence."
         ),
@@ -160,13 +160,13 @@ $cfg["humidity"] = array(
         ),
         "iowa_md" => array(
             "label" => "Surface Moisture Divergence &amp; Winds",
-            "timemachine" => "#21.0",
+            "timemachine" => "?product=21",
             "img" => "/data/surfaceMD0.gif",
             "desc" => "Legacy plot of surface moisture divergence."
         ),
         "iowa_dw" => array(
             "label" => "Surface Dew Points &amp; Winds",
-            "timemachine" => "#19.0",
+            "timemachine" => "?product=19",
             "img" => "/data/surfaceDW0.gif",
             "desc" => "Legacy plot of surface winds and dew point."
         ),
@@ -178,7 +178,7 @@ $cfg["precipitation"] = array(
     "prods" => array(
         "today_mrms_iowa" => array(
             "label" => "MRMS Today's Precip",
-            "timemachine" => "#45.{$daylink}",
+            "timemachine" => "?product=45&timestamp={$daylink}",
             "img" => "/data/iowa_q2_1d.png",
             "desc" => <<<EOM
 Multi-RADAR Multi-Sensor (MRMS) summary of hourly precipitation estimates for
@@ -187,7 +187,7 @@ EOM
         ),
         "hour_mrms_iowa" => array(
             "label" => "MRMS Hourly Precip",
-            "timemachine" => "#46.{$daylink}",
+            "timemachine" => "?product=46&timestamp={$daylink}",
             "img" => "/data/iowa_q2_1h.png",
             "desc" => <<<EOM
 Multi-RADAR Multi-Sensor (MRMS) hourly precipitation esimates.
@@ -195,7 +195,7 @@ EOM
         ),
         "3hour_mrms_iowa" => array(
             "label" => "MRMS Three Hourly Precip",
-            "timemachine" => "#47.{$daylink}",
+            "timemachine" => "?product=47&timestamp={$daylink}",
             "img" => "/data/iowa_q2_3h.png",
             "desc" => <<<EOM
 Multi-RADAR Multi-Sensor (MRMS) 3 hour precipitation estimates computed by
@@ -204,7 +204,7 @@ EOM
         ),
         "6hour_mrms_iowa" => array(
             "label" => "MRMS Six Hourly Precip",
-            "timemachine" => "#48.{$daylink}",
+            "timemachine" => "?product=48&timestamp={$daylink}",
             "img" => "/data/iowa_q2_6h.png",
             "desc" => <<<EOM
 Multi-RADAR Multi-Sensor (MRMS) 6 hour precipitation estimates computed by
@@ -221,28 +221,28 @@ EOM
         ),
         "7day_asos_iowa" => array(
             "label" => "Iowa ASOS/AWOS 7 Day Precip",
-            "timemachine" => "#84.0",
+            "timemachine" => "?product=84",
             "img" => "/data/summary/7day/ia_precip.png",
             "desc" => "This plot presents a summary of calendar day precip" .
                 " obs over the past 7 days."
         ),
         "31day_asos_iowa" => array(
             "label" => "Iowa ASOS/AWOS 31 Day Precip",
-            "timemachine" => "#85.0",
+            "timemachine" => "?product=85",
             "img" => "/data/summary/31day/ia_precip.png",
             "desc" => "This plot presents a summary of calendar day precip" .
                 " obs over the past 31 days."
         ),
         "91day_asos_iowa" => array(
             "label" => "Iowa ASOS/AWOS 91 Day Precip",
-            "timemachine" => "#86.0",
+            "timemachine" => "?product=86",
             "img" => "/data/summary/91day/ia_precip.png",
             "desc" => "This plot presents a summary of calendar day precip" .
                 " obs over the past 91 days."
         ),
         "today_stage4_us" => array(
             "label" => "Stage IV Today's Precip",
-            "timemachine" => "#43.{$daylink}",
+            "timemachine" => "?product=43&timestamp={$daylink}",
             "img" => "/data/conus_stage4_1d.png",
             "desc" => <<<EOM
 IEM totaling of available NCEP Stage IV hourly precipitation estimates.
@@ -250,7 +250,7 @@ EOM
         ),
         "today_stage4_midwest" => array(
             "label" => "Stage IV Today's Precip",
-            "timemachine" => "#42.{$daylink}",
+            "timemachine" => "?product=42&timestamp={$daylink}",
             "img" => "/data/midwest_stage4_1d.png",
             "desc" => <<<EOM
 IEM totaling of available NCEP Stage IV hourly precipitation for the central
@@ -259,7 +259,7 @@ EOM
         ),
         "today_stage4_iowa" => array(
             "label" => "Stage IV Today's Precip",
-            "timemachine" => "#41.{$daylink}",
+            "timemachine" => "?product=41&timestamp={$daylink}",
             "img" => "/data/iowa_stage4_1d.png",
             "desc" => <<<EOM
 IEM totaling of available NCEP Stage IV hourly precipitation for the central
@@ -268,7 +268,7 @@ EOM
         ),
         "hour_stage4_midwest" => array(
             "label" => "Stage IV Hourly Precip",
-            "timemachine" => "#40.{$mhourlink}",
+            "timemachine" => "?product=40&timestamp={$mhourlink}",
             "img" => "/data/midwest_stage4_1h.png",
             "desc" => <<<EOM
 IEM computed total of NCEP Stage IV precipitation over an hour.
@@ -276,7 +276,7 @@ EOM
         ),
         "today_stage4_iowa" => array(
             "label" => "Stage IV Hourly Precip",
-            "timemachine" => "#39.{$mhourlink}",
+            "timemachine" => "?product=39&timestamp={$mhourlink}",
             "img" => "/data/iowa_stage4_1h.png",
             "desc" => <<<EOM
 IEM totaling of available NCEP Stage IV hourly precipitation for the central
@@ -285,19 +285,19 @@ EOM
         ),
         "midwest_coop_contour" => array(
             "label" => "COOP Precipitation Analysis",
-            "timemachine" => "#38.0",
+            "timemachine" => "?product=38",
             "img" => "/data/midwest_coop_12z_precip.png",
             "desc" => "Contour plot of available COOP reports."
         ),
         "iowa_coop_contour" => array(
             "label" => "COOP Precipitation Analysis",
-            "timemachine" => "#37.0",
+            "timemachine" => "?product=37",
             "img" => "/data/iowa_coop_12z_precip.png",
             "desc" => "Contour plot of available COOP reports."
         ),
         "iowa_flood_center" => array(
             "label" => "Iowa Flood Center",
-            "timemachine" => "#82.0",
+            "timemachine" => "?product=82",
             "img" => "/data/iowa_ifc_1d.png",
             "desc" => <<<EOM
 IEM computed daily total of available Iowa Flood Center precipitation estimates.
@@ -391,19 +391,19 @@ $cfg["soil_temperature"] = array(
     "prods" => array(
         "day1" => array(
             "label" => "Yesterday Average",
-            "timemachine" => "#57.0",
+            "timemachine" => "?product=57",
             "img" => "/data/soilt_day1.png",
             "desc" => "IEM Soil Temperature analysis maps."
         ),
         "day2" => array(
             "label" => "Day 2 Average",
-            "timemachine" => "#57.0",
+            "timemachine" => "?product=57",
             "img" => "/data/soilt_day2.png",
             "desc" => "IEM Soil Temperature analysis maps."
         ),
         "day3" => array(
             "label" => "Day 3 Average",
-            "timemachine" => "#57.0",
+            "timemachine" => "?product=57",
             "img" => "/data/soilt_day3.png",
             "desc" => "IEM Soil Temperature analysis maps."
         ),
@@ -415,13 +415,13 @@ $cfg["station_plot"] = array(
     "prods" => array(
         "iem" => array(
             "label" => "IEM Mesoplot",
-            "timemachine" => "#1.0",
+            "timemachine" => "?product=1",
             "img" => "/data/mesonet.gif",
             "desc" => "Iowa Mesonet station plot combining ASOS + RWIS."
         ),
         "mw" => array(
             "label" => "Midwest Mesoplot",
-            "timemachine" => "#4.0",
+            "timemachine" => "?product=4",
             "img" => "/data/MWmesonet.gif",
             "desc" => "Midwest station plot of airport data."
         ),
@@ -463,19 +463,19 @@ $cfg["wind_speed"] = array(
     "prods" => array(
         "10m_gust" => array(
             "label" => "10m Today's Peak Wind Gust",
-            "timemachine" => "#16.{$daylink}",
+            "timemachine" => "?product=16",
             "img" => "/data/summary/today_gust.png",
             "desc" => "Computed wind gust from ASOS stations."
         ),
         "wind_power" => array(
             "label" => "Wind Power Potential",
-            "timemachine" => "#60.{$mhourlink}",
+            "timemachine" => "?product=60",
             "img" => "/data/midwest/rtma_wind_power.png",
             "desc" => "An estimate of wind power based on NCEP RTMA."
         ),
         "iowa_frontogenesis" => array(
             "label" => "Surface Frontogenesis &amp; Winds",
-            "timemachine" => "#18.0",
+            "timemachine" => "?product=18",
             "img" => "/data/surfaceFRNT0.gif",
             "desc" => "Legacy surface frontogenesis plot."
         ),
@@ -498,7 +498,7 @@ $cfg["visibility"] = array(
     "prods" => array(
         "iowa_vsby" => array(
             "label" => "Iowa Visibility",
-            "timemachine" => "#24.0",
+            "timemachine" => "?product=24",
             "img" => "/data/iowa_vsby.png",
             "desc" => "Analysis of visibility from ASOS stations."
         ),

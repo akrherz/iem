@@ -137,7 +137,7 @@ options listed.</p>
   and RADAR site of your choice.</li>
  <li><a href="/plotting/auto/?q=109">Number of VTEC Events by WFO</a>
   <br />Map of the number of VTEC events by WFO for a time period of your choice.</li>
- <li><a href="/timemachine/#59.0">NWS WWA Map Archive</a>
+ <li><a href="/timemachine/?product=59">NWS WWA Map Archive</a>
  <br />The IEM saves the national watch, warning, and advisory (WWA) map every
  five minutes.</li>
  <li><a href="/vtec/">VTEC Browser</a>
@@ -356,7 +356,7 @@ some convective outlook or the number of outlooks for a given point.</li>
  <li>HRRR MidWest 1km Reflectivity [animated GIF]
  <br />Animated GIF of HRRR Forecasted Reflectivity. 
   <a href="/data/model/hrrr/hrrr_1km_ref.gif">Latest Run</a> or
-  <a href="/timemachine/#61.0">Archived plots</a></li> 
+  <a href="/timemachine/?product=61">Archived plots</a></li> 
 </ul>
   </div>
 </div>

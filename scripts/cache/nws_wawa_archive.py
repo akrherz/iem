@@ -1,6 +1,6 @@
 """Archive the NWS WaWA map.
 
-https://mesonet.agron.iastate.edu/timemachine/#59.0
+https://mesonet.agron.iastate.edu/timemachine/?product=59.0
 """
 
 import os

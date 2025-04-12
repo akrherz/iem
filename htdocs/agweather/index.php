@@ -59,8 +59,8 @@ the baseline weather observation network. The
 reports for 24 hour periods, not always for the calendar day.
 <ul>
  <li><a href="/data/coopHighLow.gif">COOP High + Low Temperature</a></li>
- <li><a href="/timemachine/#63">ASOS 12 UTC Low Temperature</a></li>
- <li><a href="/timemachine/#116">ASOS High Temperature</a></li>
+ <li><a href="/timemachine/?product=63">ASOS 12 UTC Low Temperature</a></li>
+ <li><a href="/timemachine/?product=116">ASOS High Temperature</a></li>
  <li><a href="/data/awos_rtp_00z.shef">00Z RTP First Guess</a> Formatted
 product generated for the National Weather Service for comparison.</li>
 <li><a href="/data/awos_rtp.shef">12Z RTP First Guess</a> Formatted
@@ -127,8 +127,8 @@ for various pests of interest.</p>
  <br />The IEM processes gridded analyses of precipitation
  <ul>
    <li><a href="/plotting/auto/?q=86&var=p01d">IEM Reanalysis</a></li>
-   <li><a href="/timemachine/#45.0">MRMS ~1km Product</a></li>
-   <li><a href="/timemachine/#41.0">NCEP Stage IV</a></li>
+   <li><a href="/timemachine/?product=45">MRMS ~1km Product</a></li>
+   <li><a href="/timemachine/?product=41">NCEP Stage IV</a></li>
  </ul>
  
  <br />There are daily <a href="/request/daily.phtml">ASOS precip reports</a>
@@ -191,7 +191,7 @@ soil temperature data.</td>
 summaries of high and low temperature.
 <ul>
  <li><a href="/agclimate/soilt.php">County Estimates</a></li>
- <li><a href="/timemachine/#57.0">Archived County Estimates</a></li>
+ <li><a href="/timemachine/?product=57">Archived County Estimates</a></li>
 </ul>
 </td>
 <td colspan="3">Summarized data for this timescale does not exist on the IEM 

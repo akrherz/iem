@@ -24,7 +24,7 @@ daily high and low value and the NAM Model representing an average of six hour
 interval data. The right
 hand plots are simple GFS forecast model outputs without any bias correction.</p>
 
-<p><strong>Links:</strong> <a class="btn btn-default" href="/timemachine/#57.0">Archive of This Map</a>
+<p><strong>Links:</strong> <a class="btn btn-default" href="/timemachine/?product=57">Archive of This Map</a>
 <a class="btn btn-default" href="/agclimate/hist/daily.php">Observation Download</a>
 <a class="btn btn-default" href="/agclimate/#soil04t">Real-time Map</a>
 </p>
