@@ -236,7 +236,7 @@ Ext.onReady(() => {
 
     }
 
-    const fp = new Ext.form.FormPanel({
+    const fp = new Ext.form.FormPanel({  // skipcq
         applyTo: 'myform',
         labelAlign: 'top',
         width: 320,
@@ -252,9 +252,6 @@ Ext.onReady(() => {
         }]
 
     });
-    if (fp === null) {
-        return;
-    }
     /* Check to see if we had something specified on the URL! */
     const tokens = window.location.href.split('#');
     if (tokens.length === 2) {

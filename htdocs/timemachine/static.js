@@ -219,9 +219,7 @@ function update() {
         loadingIndicator.textContent = 'Loading...'; // Set loading text
         loadingIndicator.style.display = 'block'; // Show loading indicator
     }
-    const tpl = document.createElement('p');
-    tpl.textContent = opt.getAttribute('data-template');
-    const templateText = tpl.textContent;
+    const templateText = escapeHTML(opt.getAttribute('data-template'));
     const url = templateText.replace(/%Y/g, dt.utc().format('YYYY'))
         .replace(/%y/g, dt.utc().format('YY'))
         .replace(/%m/g, dt.utc().format('MM'))
