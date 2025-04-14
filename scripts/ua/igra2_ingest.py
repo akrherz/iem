@@ -63,6 +63,7 @@ def main(overwrite: bool, icao: Optional[str]):
             cursor.close()
             pgconn.commit()
         os.unlink(fn)
+        os.unlink(tmp.name)
 
 
 if __name__ == "__main__":
