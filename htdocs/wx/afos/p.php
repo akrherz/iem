@@ -373,8 +373,11 @@ EOM;
         $content .= sprintf("<pre>%s",
             htmlentities(substr($row["data"], 0, $pos))
         );
-        for ($i = 1; $i < count($tokens); $i++) {
-            $rawxml = "<?xml" . $tokens[$i];
+        foreach ($tokens as $token) {
+            if (trim($token) == "") {
+                continue;
+            }
+            $rawxml = "<?xml" . $token;
             try {
                 $xml = new SimpleXMLElement($rawxml);
                 $dom = dom_import_simplexml($xml)->ownerDocument;
