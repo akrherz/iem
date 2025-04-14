@@ -436,7 +436,7 @@ def finalize_map(ctx):
             units=ctx["plot_units"],
             clip_on=False,
         )
-    if (ctx["east"] - ctx["west"]) < 10:
+    if (ctx["east"] - ctx["west"]) < 10 or len(ctx["sector"]) == 2:
         ctx["mp"].drawcounties()
         ctx["mp"].drawcities(minpop=500 if ctx["sector"] == "custom" else 5000)
     if ctx["usdm"].startswith("yes"):
