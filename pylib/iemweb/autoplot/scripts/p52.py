@@ -29,6 +29,10 @@ PDICT = {
     "wfo": "NWS Forecast Office",
     "ugc": "County/Zone",
 }
+PDICT2 = {
+    "yes": "Plot Event ID",
+    "no": "Do Not Plot Event ID",
+}
 
 
 def get_description():
@@ -65,6 +69,13 @@ def get_description():
         dict(
             type="int", name="days", default=10, label="Number of Days in Plot"
         ),
+        {
+            "type": "select",
+            "name": "labele",
+            "default": "yes",
+            "label": "Label Event ID?",
+            "options": PDICT2,
+        },
     ]
     return desc
 
@@ -266,10 +277,13 @@ def plotter(ctx: dict):
             align = "right"
             xpos = row["minproductissue"] - timedelta(minutes=90)
         textcolor = vtec.NWS_COLORS.get(phsig if phsig != "TO.A" else "X", "k")
+        label = row["label"].replace("Weather", "Wx")
+        if ctx["labele"] == "yes":
+            label = f"{label} {row['eventid']}"
         ax.text(
             xpos,
             i + 1,
-            row["label"].replace("Weather", "Wx") + " " + str(row["eventid"]),
+            label,
             color=textcolor,
             ha=align,
             va="center",
