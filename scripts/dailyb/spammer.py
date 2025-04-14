@@ -125,9 +125,9 @@ IEM Code Pushes &lt;repo,branch&gt; on Github</h3>
         """
     else:
         txt = "\n".join(txt) + "\n\n" + "\n".join(links)
-        html += "</tbody></table>"
+    html += "</tbody></table>"
 
-    return txt + "\n\n", html + "<br /><br />"
+    return f"{txt}\n\n", f"{html}<br /><br />"
 
 
 def cowreport():
