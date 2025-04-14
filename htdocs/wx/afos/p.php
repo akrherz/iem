@@ -24,13 +24,15 @@ if (is_null($pil) || trim($pil) == "") {
 $conn = iemdb("afos");
 $st_nobbb = iem_pg_prepare(
     $conn,
-    "SELECT data, bbb, entered at time zone 'UTC' as mytime, source, wmo ".
-    "from products WHERE pil = $1 and entered = $2");
+    "SELECT data, bbb, entered at time zone 'UTC' as mytime, source, wmo " .
+        "from products WHERE pil = $1 and entered = $2"
+);
 $st_bbb = iem_pg_prepare(
     $conn,
-    "SELECT data, bbb, entered at time zone 'UTC' as mytime, source, wmo ".
-    "from products WHERE pil = $1 and entered = $2 and bbb = $3");
-    
+    "SELECT data, bbb, entered at time zone 'UTC' as mytime, source, wmo " .
+        "from products WHERE pil = $1 and entered = $2 and bbb = $3"
+);
+
 function locate_product($conn, $e, $pil, $dir)
 {
     // Attempt to locate this product and redirect to stable URI if so
@@ -101,7 +103,8 @@ function last_product($conn, $pil)
     }
     return $rs;
 }
-function exact_product($conn, $e, $pil, $bbb){
+function exact_product($conn, $e, $pil, $bbb)
+{
     // Option 3: Explicit request
     $ts = gmmktime(
         intval(substr($e, 8, 2)),
@@ -144,13 +147,13 @@ if (is_null($e)) {
 $content = "<h3>National Weather Service Raw Text Product</h3>";
 
 if (is_null($rs) || pg_num_rows($rs) < 1) {
-    if (!is_null($e)){
+    if (!is_null($e)) {
         // Archived AFOS data suffers from some rectification problems, so we try
         // to be helpful here and look around for nearby products.
-        $offsets = Array(-1, 1, -2, 2, -3, 3, -4, 4, -5, 5);
-        foreach($offsets as $_idx => $offset){
+        $offsets = array(-1, 1, -2, 2, -3, 3, -4, 4, -5, 5);
+        foreach ($offsets as $_idx => $offset) {
             $rs = exact_product($conn, $e + $offset, $pil, $bbb);
-            if (!is_null($rs) && pg_num_rows($rs) > 0){
+            if (!is_null($rs) && pg_num_rows($rs) > 0) {
                 $row = pg_fetch_assoc($rs, 0);
                 $uri = sprintf(
                     "p.php?pil=%s&e=%s",
@@ -199,7 +202,7 @@ EOM;
         $t->title = sprintf(
             "%s from NWS %s",
             substr($pil, 0, 3),
-            substr(is_null($row["source"]) ? "": $row["source"], 1, 3)
+            substr(is_null($row["source"]) ? "" : $row["source"], 1, 3)
         );
         $product_id = sprintf(
             "%s-%s-%s-%s",
@@ -221,10 +224,13 @@ EOM;
             $pconn = iemdb("postgis");
             $stname = iem_pg_prepare(
                 $pconn,
-                "SELECT num, issue, center from cwas WHERE ".
-                "issue > $1 and issue < $2 and product_id = $3");
+                "SELECT num, issue, center from cwas WHERE " .
+                    "issue > $1 and issue < $2 and product_id = $3"
+            );
             $rs2 = pg_execute(
-                $pconn, $stname, array(
+                $pconn,
+                $stname,
+                array(
                     date("Y-m-d H:i+00", $basets - 3600),
                     date("Y-m-d H:i+00", $basets + 3600),
                     $product_id,
@@ -233,8 +239,8 @@ EOM;
             if (pg_num_rows($rs2) > 0) {
                 $row2 = pg_fetch_assoc($rs2, 0);
                 $t->twitter_image = sprintf(
-                    "/plotting/auto/plot/226/network:CWSU::cwsu:%s::num:%s::".
-                    "issue:%s%%20%s.png",
+                    "/plotting/auto/plot/226/network:CWSU::cwsu:%s::num:%s::" .
+                        "issue:%s%%20%s.png",
                     $row2["center"],
                     $row2["num"],
                     date("Y-m-d", strtotime($row2["issue"])),
@@ -358,10 +364,35 @@ EOM;
     if (strtotime($row["mytime"]) != $basets) {
         continue;
     }
-    $d = preg_replace(
-        "/\1/", "", preg_replace("/\r\r\n/", "\n", $row["data"])
-    );
-    $content .= "<pre>" . htmlentities($d) . "</pre>\n";
+    // Look for <?xml in the data and if found, pretty print it
+    if (preg_match("/<\?xml/", $row["data"])) {
+        $pos = strpos($row["data"], "<?xml");
+        // data could have multiple XML messages, so we need to
+        // parse each one
+        $tokens = explode("<?xml", substr($row["data"], $pos));
+        $content .= sprintf("<pre>%s",
+            htmlentities(substr($row["data"], 0, $pos))
+        );
+        for ($i = 1; $i < count($tokens); $i++) {
+            $rawxml = "<?xml" . $tokens[$i];
+            try {
+                $xml = new SimpleXMLElement($rawxml);
+                $dom = dom_import_simplexml($xml)->ownerDocument;
+                $dom->formatOutput = true;
+                $content .= htmlentities($dom->saveXML());
+            } catch (Exception $e) {
+                $content .= htmlentities($rawxml);
+            }
+        }
+        $content .= "</pre>";
+        continue;
+    }
+    $repr = htmlentities(preg_replace(
+        "/\1/",
+        "",
+        preg_replace("/\r\r\n/", "\n", $row["data"])
+    ));
+    $content .= "<pre>{$repr}</pre>\n";
 }
 
 $content .= $img;
