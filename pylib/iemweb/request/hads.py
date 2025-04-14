@@ -218,7 +218,10 @@ def application(environ, start_response):
     table = df.pivot_table(
         values="value", columns=["key"], index=["station", "utc_valid"]
     )
-    if environ["threshold"] is not None:
+    if (
+        environ["threshold"] is not None
+        and environ["thresholdvar"] is not None
+    ):
         if len(stations) > 1:
             start_response("200 OK", [("Content-type", "text/plain")])
             return [b"Can not do threshold search for more than one station"]
