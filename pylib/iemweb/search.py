@@ -172,7 +172,13 @@ of supported search values.</p>
 @iemapp(help=__doc__)
 def application(environ, start_response):
     """Here we are, answer with a redirect in most cases."""
-    q = environ.get("q", "").strip()
+    # Ensure we have only latin-1 characters per URL requirements
+    q = (
+        environ.get("q", "")
+        .strip()
+        .encode("latin-1", "replace")
+        .decode("utf-8")
+    )
     handler, qclean = find_handler(q)
     if handler is None:
         start_response("200 OK", [("Content-type", "text/html")])

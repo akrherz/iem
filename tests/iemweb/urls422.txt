@@ -3,6 +3,7 @@
 /cgi-bin/request/coop.py?network=%22IA%22CLIMATE&stations=%22IA%220000&year1=1988&month1=1&day1=1&year2=2024&month2=12&day2=31&vars%5B%5D=high&vars%5B%5D=highc&vars%5B%5D=low&vars%5B%5D=lowc&vars%5B%5D=precip&vars%5B%5D=precipmm&model=apsim&what=view&delim=comma&gis=no&scenario_year=2023
 /cgi-bin/request/coopobs.py?network=IA_COOP&stations=_ALL&sts=2000-01-01&ets=2020-01-01
 /cgi-bin/request/coopobs.py?network=IA_COOP&sts=2000-01-01&ets=2020-01-01
+/cgi-bin/request/feel.py?year1=2024&month1=7&day1=1
 /cgi-bin/request/gis/awc_gairmets.py
 /cgi-bin/request/gis/cwas.py
 /cgi-bin/request/gis/nexrad_storm_attrs.py

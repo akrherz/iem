@@ -456,6 +456,9 @@ def application(environ, start_response):
     ip = environ.get("HTTP_X_FORWARDED_FOR", environ.get("REMOTE_ADDR"))
     if ip is not None:
         ip = ip.split(",")[0].strip()
+        # Run the check at the class C level, since the requests could be
+        # coming from a network of systems
+        ip = ".".join(ip.split(".")[:2])
     cursor_name = f"mystream_{ip}"
     if toobusy(pgconn, environ, cursor_name):
         pgconn.close()
