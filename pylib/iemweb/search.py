@@ -177,7 +177,7 @@ def application(environ, start_response):
         environ.get("q", "")
         .strip()
         .encode("latin-1", "replace")
-        .decode("utf-8")
+        .decode("utf-8", "replace")
     )
     handler, qclean = find_handler(q)
     if handler is None:

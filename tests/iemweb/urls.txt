@@ -65,3 +65,4 @@
 /request/maxcsv.py?q=ahpsfx_DEWI4
 /request/maxcsv.py?q=ahpsobs_DEWI4
 /search.py?q=DSM
+/search?q=uzak+%C5%9Fehi+r+21.+b%C3%B6l%C3%BCm
