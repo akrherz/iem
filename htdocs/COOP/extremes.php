@@ -1,16 +1,16 @@
 <?php
 require_once "../../config/settings.inc.php";
-require_once "../../include/myview.php";
-$t = new MyView();
-
 define("IEM_APPID", 2);
+require_once "../../include/myview.php";
 require_once "../../include/forms.php";
 require_once "../../include/database.inc.php";
 require_once "../../include/network.php";
 require_once "../../include/mlib.php";
 require_once "../../include/imagemaps.php";
 
-$tbl = isset($_GET["tbl"]) ? substr($_GET["tbl"], 0, 10) : "climate";
+$t = new MyView();
+
+$tbl = isset($_GET["tbl"]) ? substr(xssafe($_GET["tbl"]), 0, 10) : "climate";
 $month = get_int404("month", date("m"));
 $day = get_int404("day", date("d"));
 $valid = mktime(0, 0, 0, $month, $day, 2000);
@@ -42,7 +42,8 @@ $td = date("Y-m-d", $valid);
 // Option 1, we want climo for one station!
 if ($station != null) {
     if (! array_key_exists($station, $cities)){
-        xssafe("</script>");
+        // naughty request
+        xssafe("<tag>");
     }
     if ($sortcol == 'station') $sortcol = 'valid';
     $inturl = sprintf(
@@ -196,7 +197,8 @@ COOP stations. You may click on a column to sort it.  You can click on the stati
 name to get all daily records for that station or click on the date to get all records
 for that date.</p>
 
-<p><a href="/COOP/dl/normals.phtml" class="btn btn-default">Download Daily Climatology</a>.</p>
+<p><a href="/COOP/dl/normals.phtml" class="btn btn-primary">
+<span class="fa fa-download"></span> Download Daily Climatology</a></p>
 
 <p>The data found in this table was derived from the following
 <a href="/json/">JSON webservice</a>:<br />

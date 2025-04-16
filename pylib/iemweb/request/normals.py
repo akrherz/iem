@@ -12,6 +12,7 @@ of the year.
 Changelog
 ---------
 
+- 2025-04-16: Added support for Microsoft Excel output and fixed csv download.
 - 2025-01-28: Initial implementation
 
 Example Requests
@@ -30,6 +31,16 @@ https://mesonet.agron.iastate.edu/cgi-bin/request/normals.py\
 
 Provide the NCEI 1981-2010 climatology for Ames, IA in JSON, this has a source
 of ncdc_climate81 due to lame reasons.
+
+https://mesonet.agron.iastate.edu/cgi-bin/request/normals.py\
+?mode=station&station=IATAME&source=ncdc_climate81&fmt=json
+
+Same request, but view "online" instead of downloading a file.
+
+https://mesonet.agron.iastate.edu/cgi-bin/request/normals.py\
+?mode=station&station=IATAME&source=ncdc_climate81&fmt=online
+
+Same request, but as a JSON object.
 
 https://mesonet.agron.iastate.edu/cgi-bin/request/normals.py\
 ?mode=station&station=IATAME&source=ncdc_climate81&fmt=json
@@ -60,7 +71,7 @@ class Schema(CGIModel):
     fmt: str = Field(
         default="csv",
         description="The format of the output, either csv, json, excel",
-        pattern="^(csv|json|excel)$",
+        pattern="^(csv|cdf|json|excel|online)$",
     )
     mode: str = Field(
         default="station",
@@ -139,9 +150,30 @@ def application(environ, start_response):
         start_response("200 OK", [("Content-type", "application/json")])
         return climodf.to_json(orient="records")
     if environ["fmt"] == "excel":
-        start_response("200 OK", [("Content-type", EXL)])
+        start_response(
+            "200 OK",
+            [
+                ("Content-type", EXL),
+                (
+                    "Content-Disposition",
+                    "attachment; filename=climatology.xlsx",
+                ),
+            ],
+        )
         bio = BytesIO()
         climodf.to_excel(bio, index=False)
         return bio.getvalue()
-    start_response("200 OK", [("Content-type", "text/plain")])
+    if environ["fmt"] == "online":
+        start_response("200 OK", [("Content-type", "text/plain")])
+    else:  # cdf or csv
+        start_response(
+            "200 OK",
+            [
+                ("Content-type", "application/octet-stream"),
+                (
+                    "Content-Disposition",
+                    "attachment; filename=climatology.csv",
+                ),
+            ],
+        )
     return climodf.to_csv(index=False)
