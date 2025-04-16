@@ -122,6 +122,8 @@ def plotter(ctx: dict):
         )
     df = pd.DataFrame(rows)
     df = df[np.isfinite(df["coverage"])]
+    if df.empty:
+        raise NoDataFound("No data found for this date range")
     title = (
         "IEM Estimated Areal Snow Coverage over "
         f"{reference.state_names[state]}\n"
