@@ -1,6 +1,7 @@
 """Generate the IEMRE climatology file, hmmm"""
 
 import os
+import sys
 from datetime import datetime
 
 import numpy as np
@@ -20,7 +21,11 @@ def init_year(domain: str, ts: datetime):
     if os.path.isfile(fn):
         LOG.warning("Cowardly refusing to create file: %s", fn)
         return
+    os.makedirs(os.path.dirname(fn), exist_ok=True)
     nc = ncopen(fn, "w")
+    if nc is None:
+        LOG.warning("ncopen None for fn:`%s` domain:`%s`", fn, domain)
+        sys.exit(3)
     nc.title = f"IEM Daily Reanalysis Climatology {ts:%Y}"
     nc.platform = "Grided Climatology"
     nc.description = "IEM daily analysis on a 0.125 degree grid"
