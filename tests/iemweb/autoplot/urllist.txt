@@ -236,6 +236,7 @@
 /plotting/auto/plot/172/network:IACLIMATE::station:IATAME::var:snow::year1:2024::sdate:0101::edate:0102::m:3::_r:t::dpi:100::_cb:1.png
 /plotting/auto/plot/173/network:IA_ASOS::zstation:AMW::units:mph::p1:0501-0510::p2:0511-0520::_r:t::dpi:100.png
 /plotting/auto/plot/174/network1:IA_ASOS::zstation1:DSM::network2:IA_ASOS::zstation2:AMW::var:temp::sdate:2024-01-01::edate:2024-05-08::_r:43::dpi:100.png
+/plotting/auto/plot/175/year:2023::thres:1.0::state:IA::_r:t::dpi:100.png
 /plotting/auto/plot/177/network:ISUSM::station:BOOI4::opt:1::sts:2024-07-18%201000::ets:2024-07-25%201000::_r:t::dpi:100.png
 /plotting/auto/plot/177/network:ISUSM::station:BOOI4::opt:m::sts:2024-07-18%201000::ets:2024-07-25%201000::_r:t::dpi:100.png
 /plotting/auto/plot/177/network:ISUSM::station:BOOI4::opt:8::sts:2024-07-18%201000::ets:2024-07-25%201000::_r:t::dpi:100.png
