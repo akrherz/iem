@@ -35,7 +35,7 @@ def download(now: datetime, offset: int):
             f"{hr:02.0f}h.grb2"
         )
         response = None
-        for center in ["ftpprd.ncep.noaa.gov", "nomads.ncep.noaa.gov/pub"]:
+        for center in ["nomads.ncep.noaa.gov/pub", "ftpprd.ncep.noaa.gov"]:
             try:
                 url = f"https://{center}{upath}"
                 LOG.info("fetching %s", url)

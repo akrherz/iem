@@ -251,8 +251,8 @@ def main(year: int, domain: str, ci: bool):
     init_year(datetime(year, 1, 1), domain, ci)
     if ci:
         with ncopen(get_daily_ncname(year, domain), "a") as nc:
-            nc.variables["p01d"][:] = 0
-            nc.variables["p01d_12z"][:] = 0
+            for vname in "p01d p01d_12z snow_12z snowd_12z".split():
+                nc.variables[vname][:] = 0
 
 
 if __name__ == "__main__":

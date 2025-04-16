@@ -28,7 +28,7 @@ from affine import Affine
 from pyiem.database import get_sqlalchemy_conn, sql_helper
 from pyiem.exceptions import NoDataFound
 from pyiem.grid.zs import CachingZonalStats
-from pyiem.plot import get_cmap
+from pyiem.plot import get_cmap, pretty_bins
 from pyiem.plot.geoplot import MapPlot
 from pyiem.util import utc
 
@@ -247,6 +247,12 @@ def get_description():
             default=utc().strftime("%Y/%m/%d"),
         ),
         {
+            "type": "float",
+            "default": "-1",
+            "label": "Hardcode max value for color ramp, -1 disables",
+            "name": "max",
+        },
+        {
             "type": "cmap",
             "name": "cmap",
             "default": "jet",
@@ -311,7 +317,7 @@ def get_raster(ctx: dict):
             params=params,
             geom_col="geom",
             index_col=None,
-        )
+        )  # type: ignore
     if df.empty:
         raise NoDataFound("No results found for query")
     # The affine is the edge and not the analysis centers
@@ -401,15 +407,13 @@ def plotter(ctx: dict):
             raster = np.where(raster < 1, np.nan, raster)
             rng = range(int(np.nanmin(raster)), int(np.nanmax(raster)) + 2)
     elif ctx["w"] == "count":
+        maxval = ctx["max"] if ctx["max"] > -1 else (np.nanmax(raster) + 1)
         raster = np.where(raster < 1, np.nan, raster)
-        rng = np.unique(np.linspace(1, np.nanmax(raster) + 1, 10, dtype=int))
+        rng = np.unique(np.linspace(1, maxval, 10, dtype=int))
     else:
-        rng = [
-            round(x, 2)
-            for x in np.linspace(
-                max([0.01, np.min(raster) - 0.5]), np.max(raster) + 0.1, 10
-            )
-        ]
+        maxval = ctx["max"] if ctx["max"] > -1 else (np.nanmax(raster) + 1)
+        rng = pretty_bins(0, maxval)
+        rng[0] = 0.01
 
     cmap = get_cmap(ctx["cmap"])
     cmap.set_bad("white")
