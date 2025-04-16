@@ -17,8 +17,8 @@ function revdiv(myid) {
         channelElem.innerHTML = '<i class="fa fa-plus"></i>';
     } else {
         window.location.hash = `#channel_${myid}`;
-        let parent = channelElem.parentElement;
-        if(parent && parent.parentElement) {
+        const parent = channelElem.parentElement;
+        if(parent?.parentElement) {
             parent.parentElement.classList.add('info');
         }
         elem.style.display = 'block';
@@ -26,7 +26,7 @@ function revdiv(myid) {
     }
 }
 
-document.addEventListener("DOMContentLoaded", function() {
+document.addEventListener("DOMContentLoaded", () => {
     document.getElementById("wfoselect").addEventListener("change", urlChanger);
     const tokens = window.location.href.split('#');
     if (tokens.length === 2) {
