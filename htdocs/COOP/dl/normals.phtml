@@ -68,15 +68,12 @@ is generally one to one, but it could be "nearest station"</p>
 </div>
 
 <h3>3. Download Options:</h3>
-<div class="alert alert-success">
-<strong>Wanting to load this data into Excel?</strong> Pick the 'Download to Disk' option
-and then from Excel, go to File -&gt; Open, set the file type to 'All Files' and attempt to
-open the comma delimited file.
-</div>
 
-<select name="dloption">
+<select name="fmt">
   <option value="online">View Online</option>
-  <option value="cdf">Download to Disk [CSV]</option>
+  <option value="csv">Download to Disk (.csv)</option>
+  <option value="excel" selected="selected">Download as Microsoft Excel (.xlsx)</option>
+  <option value="json">Download as JSON</option>
 </select><p>
 
 <h3>4. Submit Form:</h3><br>
