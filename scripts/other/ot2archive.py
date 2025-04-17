@@ -24,8 +24,8 @@ def dowork(sts, ets):
     icursor.execute(
         """
         SELECT c.*, t.id from current_log c JOIN stations t on
-        (t.iemid = c.iemid) WHERE t.network in ('OT', 'WMO_BUFR_SRF') and
-        updated >= %s and updated < %s ORDER by updated ASC
+        (t.iemid = c.iemid) WHERE t.network in ('OT', 'WMO_BUFR_SRF', 'VTWAC')
+        and updated >= %s and updated < %s ORDER by updated ASC
         """,
         (sts, ets),
     )

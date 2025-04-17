@@ -19,10 +19,9 @@ from io import BytesIO
 
 import pandas as pd
 from pydantic import AwareDatetime, Field
-from pyiem.database import get_sqlalchemy_conn
+from pyiem.database import get_sqlalchemy_conn, sql_helper
 from pyiem.exceptions import IncompleteWebRequest
 from pyiem.webutil import CGIModel, ListOrCSVType, iemapp
-from sqlalchemy import text
 
 LOOKUP = {
     9100104: "SSP #6",
@@ -68,16 +67,18 @@ def gage_run(sts, ets, stations, excel, start_response):
     if not stations:
         stations = list(LOOKUP.keys())
 
-    sql = text(
-        """select date(valid) as date, to_char(valid, 'HH24:MI:SS') as time,
+    sql = """
+    select date(valid) as date, to_char(valid, 'HH24:MI:SS') as time,
     site_serial, ch1_data_p, ch2_data_p,
     ch1_data_t, ch2_data_t, ch1_data_c
     from ss_logger_data WHERE valid between :sts and :ets and
-    site_serial = ANY(:stations) ORDER by valid ASC"""
-    )
+    site_serial = ANY(:stations) ORDER by valid ASC
+    """
     with get_sqlalchemy_conn("other") as conn:
         df = pd.read_sql(
-            sql, conn, params={"sts": sts, "ets": ets, "stations": stations}
+            sql_helper(sql),
+            conn,
+            params={"sts": sts, "ets": ets, "stations": stations},
         )
     eheaders = [
         "date",
@@ -105,8 +106,7 @@ def gage_run(sts, ets, stations, excel, start_response):
 
 def bubbler_run(sts, ets, excel, start_response):
     """run()"""
-    sql = text(
-        """
+    sql = """
     WITH one as (SELECT valid, value from ss_bubbler WHERE
     valid between :sts and :ets and field = 'Batt Voltage'),
     two as (SELECT valid, value from ss_bubbler WHERE
@@ -123,9 +123,10 @@ def bubbler_run(sts, ets, excel, start_response):
         FULL OUTER JOIN three on (coalesce(two.valid,one.valid) = three.valid)
     ORDER by date ASC, time ASC
     """
-    )
     with get_sqlalchemy_conn("other") as conn:
-        df = pd.read_sql(sql, conn, params={"sts": sts, "ets": ets})
+        df = pd.read_sql(
+            sql_helper(sql), conn, params={"sts": sts, "ets": ets}
+        )
     if excel:
         headers = [
             ("Content-type", "application/vnd.ms-excel"),
