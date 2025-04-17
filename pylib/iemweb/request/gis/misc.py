@@ -45,11 +45,10 @@ import fiona
 import geopandas as gpd
 import pandas as pd
 from pydantic import AwareDatetime, Field
-from pyiem.database import get_sqlalchemy_conn
+from pyiem.database import get_sqlalchemy_conn, sql_helper
 from pyiem.exceptions import IncompleteWebRequest
 from pyiem.reference import ISO8601
 from pyiem.webutil import CGIModel, iemapp
-from sqlalchemy import text
 
 fiona.supported_drivers["KML"] = "rw"
 PRJFILE = "/opt/iem/data/gis/meta/4326.prj"
@@ -88,7 +87,7 @@ def run(ctx, start_response):
     """Do something!"""
     with get_sqlalchemy_conn("postgis") as conn:
         df = gpd.read_postgis(
-            text("""
+            sql_helper("""
                 select pil, geom,
                 issue at time zone 'UTC' as issue,
                 expire at time zone 'UTC' as expire,
@@ -102,7 +101,7 @@ def run(ctx, start_response):
                 "ets": ctx["ets"],
             },
             geom_col="geom",
-        )
+        )  # type: ignore
     if df.empty:
         start_response("200 OK", [("Content-type", "text/plain")])
         return b"ERROR: no results found for your query"

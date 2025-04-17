@@ -38,10 +38,9 @@ from io import BytesIO, StringIO
 
 import shapefile
 from pydantic import AwareDatetime, Field
-from pyiem.database import get_sqlalchemy_conn
+from pyiem.database import get_sqlalchemy_conn, sql_helper
 from pyiem.exceptions import IncompleteWebRequest
 from pyiem.webutil import CGIModel, ListOrCSVType, iemapp
-from sqlalchemy import text
 
 
 class Schema(CGIModel):
@@ -143,7 +142,7 @@ def run(environ, start_response):
     else:
         if (environ["ets"] - environ["sts"]).days > 120:
             environ["ets"] = environ["sts"] + timedelta(days=120)
-    sql = f"""
+    sql = """
         SELECT to_char(valid at time zone 'UTC', 'YYYYMMDDHH24MI') as utctime,
         case when is_urgent then 'T' else 'F' end,
         substr(replace(aircraft_type, ',', ' '), 0, 40),
@@ -160,7 +159,9 @@ def run(environ, start_response):
     fn = f"pireps_{environ['sts']:%Y%m%d%H%M}_{environ['ets']:%Y%m%d%H%M}"
 
     with get_sqlalchemy_conn("postgis") as conn:
-        res = conn.execute(text(sql), params)
+        res = conn.execute(
+            sql_helper(sql, spatialsql=spatialsql, artcc_sql=artcc_sql), params
+        )
         if res.rowcount == 0:
             start_response("200 OK", [("Content-type", "text/plain")])
             return b"ERROR: no results found for your query"

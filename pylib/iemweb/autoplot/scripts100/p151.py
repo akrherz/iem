@@ -2,7 +2,8 @@
 This autoplot can either produce a plot of averages for a given period or
 annual over a period of years; or a difference between a second set of years.
 <a href="/plotting/auto/?q=97">Autoplot 97</a> is a similar plot and perhaps
-more useful for some users than this one.
+more useful for some users than this one.  <strong>This autoplot can be very
+slow when plotting more than a single state of data.</strong>
 """
 
 from typing import TYPE_CHECKING
@@ -12,7 +13,7 @@ import pandas as pd
 from pyiem.database import get_sqlalchemy_conn, sql_helper
 from pyiem.exceptions import NoDataFound
 from pyiem.plot import MapPlot, centered_bins, get_cmap
-from pyiem.reference import SECTORS_NAME
+from pyiem.reference import SECTORS_NAME, Z_CLIP
 
 from iemweb.util import month2months
 
@@ -40,6 +41,7 @@ PDICT3 = {
     "days_high_below": "Days with High Temp Below [Threshold]",
     "days_low_above": "Days with Low Temp At or Above [Threshold]",
     "days_low_below": "Days with Low Temp Below [Threshold]",
+    "days_precip_above": "Days with Precipitation At or Above [Threshold]",
 }
 PDICT4 = {
     "english": "English",
@@ -47,27 +49,29 @@ PDICT4 = {
 }
 UNITS = {
     "total_precip": "inch",
-    "gdd": "F",
-    "sdd": "F",
-    "avg_temp": "F",
+    "gdd": "°F",
+    "sdd": "°F",
+    "avg_temp": "°F",
     "avg_high": "F",
-    "avg_low": "F",
+    "avg_low": "°F",
     "days_high_above": "days",
     "days_high_below": "days",
     "days_low_above": "days",
     "days_low_below": "days",
+    "days_precip_above": "days",
 }
 MUNITS = {
     "total_precip": "mm",
-    "gdd": "C",
-    "sdd": "C",
-    "avg_temp": "C",
-    "avg_high": "C",
-    "avg_low": "C",
+    "gdd": "°C",
+    "sdd": "°C",
+    "avg_temp": "°C",
+    "avg_high": "°C",
+    "avg_low": "°C",
     "days_high_above": "days",
     "days_high_below": "days",
     "days_low_above": "days",
     "days_low_below": "days",
+    "days_precip_above": "days",
 }
 PRECISION = {"total_precip": 2}
 MDICT = {
@@ -251,6 +255,9 @@ def get_data(ctx):
         "days_low_below": (
             f"sum(case when {lcol}::numeric < :t then 1 else 0 end)"
         ),
+        "days_precip_above": (
+            f"sum(case when {pcol}::numeric >= :t then 1 else 0 end)"
+        ),
     }
 
     with get_sqlalchemy_conn("coop") as conn:
@@ -344,6 +351,9 @@ def plotter(ctx: dict):
     else:
         title = f"{MDICT[month]} {PDICT3[varname]}"
     title = title.replace("[Threshold]", f"{threshold:.1f}")
+    # this works, for now
+    tvar = "total_precip" if "precip" in varname else "avg_high"
+    title += f" {(MUNITS if ctx['r'] == 'metric' else UNITS)[tvar]}"
     if opt1 == "p1":
         column = f"p1_{varname}"
         title = f"{p1syear:.0f}-{p1eyear:.0f} {title}"
@@ -403,6 +413,7 @@ def plotter(ctx: dict):
             df2[column].values,
             fmt=f"%.{PRECISION.get(varname, 1):.0f}f",
             labelbuffer=5,
+            zorder=Z_CLIP - 1,  # Lame workaround to keep labels inside mask
         )
 
     return mp.fig, df.round(2)
