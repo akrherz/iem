@@ -1,7 +1,7 @@
 <?php
 require_once "../../config/settings.inc.php";
 define("IEM_APPID", 120);
-$OL = "7.2.2";
+$OL = "10.5.0";
 $JQUERYUI = "1.13.2";
 
 require_once "../../include/myview.php";
@@ -15,6 +15,7 @@ $t->headextra = <<<EOM
 <link rel="stylesheet" href="/vendor/jquery-ui/{$JQUERYUI}/jquery-ui.min.css" />
 <link rel='stylesheet' href="/vendor/openlayers/{$OL}/ol.css" type='text/css'>
 <link type="text/css" href="/vendor/openlayers/{$OL}/ol-layerswitcher.css" rel="stylesheet" />
+<link type="text/css" href="emergencies.css" rel="stylesheet" />
 EOM;
 $t->jsextra = <<<EOM
 <script src='/vendor/jquery-datatables/1.10.20/datatables.min.js'></script>
@@ -54,15 +55,14 @@ directly access it here:
 &nbsp;
 </p>
 
-<style>
-#map {
-    width: 100%;
-    height: 400px;
-}
-.popover {
-    min-width: 400px;
-}
-</style>
+<p>
+    Start Date: <input type="date" id="startdate" />
+    End Date: <input type="date" id="enddate" />
+    <button id="applyFilter">Apply Filter</button>
+</p>
+
+<h4 id="filter-title"></h4>
+
 <div id="map"></div>
 <div id="popup" class="ol-popup"></div>
 

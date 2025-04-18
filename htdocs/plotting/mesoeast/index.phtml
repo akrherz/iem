@@ -26,6 +26,7 @@ $maxGust = 0;
 $gustTime = "N/A";
 $fn = "/mesonet/ARCHIVE/data/$dirRef/text/ot/ot0006.dat";
 if (file_exists($fn)) {
+    $fcontents = file($fn);
     foreach ($fcontents as $line_num => $line) {
         if ($line_num < 5) continue;
         $parts = explode(" ", $line);
