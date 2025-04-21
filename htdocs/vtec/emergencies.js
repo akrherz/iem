@@ -1,7 +1,6 @@
 /* global moment, ol, $ */
 let olmap = null;
 let elayer = null;
-let element = null;
 let tornadoFeatures = [];
 let flashFloodFeatures = [];
 
@@ -116,7 +115,6 @@ function featureHTML(features, lalo) {
     return html.join('\n');
 }
 function init_map() {
-    element = document.getElementById('popup');
     elayer = new ol.layer.Vector({
         title: 'Emergencies',
         style: (feature) => {

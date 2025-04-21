@@ -31,10 +31,9 @@ from io import BytesIO
 # Third Party
 import geopandas as gpd
 from pydantic import AwareDatetime, Field
-from pyiem.database import get_sqlalchemy_conn
+from pyiem.database import get_sqlalchemy_conn, sql_helper
 from pyiem.exceptions import IncompleteWebRequest
 from pyiem.webutil import CGIModel, iemapp
-from sqlalchemy import text
 
 PRJFILE = "/opt/iem/data/gis/meta/4326.prj"
 
@@ -93,7 +92,8 @@ def run(ctx, start_response):
     }
     with get_sqlalchemy_conn("postgis") as pgconn:
         df = gpd.read_postgis(
-            text(f"""
+            sql_helper(
+                """
             select to_char(issue {common}) as issue,
             to_char(expire {common}) as expire, product_id as prod_id,
             wfo, landspout as lndspout, waterspout as wtrspout,
@@ -102,11 +102,13 @@ def run(ctx, start_response):
             tml_direction as tml_drct,
             tml_sknt, geom from sps WHERE issue >= :sts and
             issue < :ets and not ST_isempty(geom) ORDER by issue ASC
-            """),
+            """,
+                common=common,
+            ),
             pgconn,
             params=ctx,
             geom_col="geom",
-        )
+        )  # type: ignore
     if df.empty:
         start_response("200 OK", [("Content-type", "text/plain")])
         return b"ERROR: no results found for your query"

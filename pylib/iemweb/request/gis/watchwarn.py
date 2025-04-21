@@ -1,6 +1,7 @@
 """.. title:: NWS Watch/Warning/Advisory (WWA) Data Service
 
-Return to `Download User Interface </request/gis/watchwarn.phtml>`_.
+Return to `API Services </api/#cgi>`_ or
+`Download User Interface </request/gis/watchwarn.phtml>`_.
 
 Documentation for /cgi-bin/request/gis/watchwarn.py
 ---------------------------------------------------
@@ -82,13 +83,12 @@ from stat import S_IFREG
 import fiona
 import pandas as pd
 from pydantic import AwareDatetime, Field
-from pyiem.database import get_sqlalchemy_conn
+from pyiem.database import get_sqlalchemy_conn, sql_helper
 from pyiem.exceptions import IncompleteWebRequest
 from pyiem.util import utc
 from pyiem.webutil import CGIModel, ListOrCSVType, iemapp
 from shapely.geometry import mapping
 from shapely.wkb import loads
-from sqlalchemy import text
 from stream_zip import ZIP_32, stream_zip
 
 EXL = "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"
@@ -481,7 +481,7 @@ def build(environ: dict) -> tuple[str, str, dict]:
 def do_excel(sql, fmt, params):
     """Generate an Excel format response."""
     with get_sqlalchemy_conn("postgis") as conn:
-        df = pd.read_sql(text(sql), conn, params=params, index_col=None)
+        df = pd.read_sql(sql_helper(sql), conn, params=params, index_col=None)
     if fmt == "excel" and len(df.index) >= 1048576:
         raise IncompleteWebRequest("Result too large for Excel download")
     # Back-convert datetimes :/
@@ -653,7 +653,7 @@ def application(environ, start_response):
             open(f"{tmpdir}/{fn}.csv", "w", encoding="ascii") as csv,
             conn.execution_options(
                 stream_results=True, max_row_buffer=10000
-            ).execute(text(sql), params) as cursor,
+            ).execute(sql_helper(sql), params) as cursor,
         ):
             output.writerecords(process_results_yield_records(cursor, csv))
 

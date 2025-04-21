@@ -5,24 +5,24 @@ Example Requests
 
 Provide data for 10 August 2024
 
-https://mesonet.agron.iastate.edu/cgi-bin/request/purpleair.py?sts=2024-08-10T00:00Z&ets=2024-08-11T00:00Z
+https://mesonet.agron.iastate.edu/cgi-bin/request/purpleair.py\
+?sts=2024-08-10T00:00Z&ets=2024-08-11T00:00Z
 
 """
 
 from io import BytesIO
 
 import pandas as pd
-from pyiem.database import get_sqlalchemy_conn
+from pyiem.database import get_sqlalchemy_conn, sql_helper
 from pyiem.exceptions import IncompleteWebRequest
 from pyiem.webutil import iemapp
-from sqlalchemy import text
 
 EXL = "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"
 
 
 def run(environ, start_response):
     """run()"""
-    sql = text(
+    sql = sql_helper(
         """
     select * from purpleair where valid >= :sts and valid < :ets
     ORDER by valid asc

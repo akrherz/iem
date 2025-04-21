@@ -38,9 +38,8 @@ from io import BytesIO, StringIO
 
 import pandas as pd
 from pydantic import AwareDatetime, Field
-from pyiem.database import get_sqlalchemy_conn
+from pyiem.database import get_sqlalchemy_conn, sql_helper
 from pyiem.webutil import CGIModel, ListOrCSVType, iemapp
-from sqlalchemy import text
 
 EXL = "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"
 
@@ -107,7 +106,7 @@ def get_data(stations, sts, ets, tz, na, fmt):
     """Go fetch data please"""
     with get_sqlalchemy_conn("asos") as conn:
         df = pd.read_sql(
-            text(
+            sql_helper(
                 """
             SELECT *,
             to_char(obtime at time zone :tz, 'YYYY/MM/DD HH24:MI')
