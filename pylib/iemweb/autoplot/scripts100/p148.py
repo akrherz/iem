@@ -11,6 +11,7 @@ from datetime import date, datetime, timedelta
 
 import pandas as pd
 from dateutil.easter import easter as get_easter
+from matplotlib.patches import Patch
 from matplotlib.ticker import MaxNLocator
 from pyiem.database import get_sqlalchemy_conn, sql_helper
 from pyiem.exceptions import NoDataFound
@@ -156,10 +157,12 @@ def add_context(ctx):
     if dt == "exact":
         with get_sqlalchemy_conn("coop") as conn:
             ctx["df"] = pd.read_sql(
-                "SELECT year, high, low, day, precip, snow, snowd from "
-                "alldata WHERE station = %s and sday = %s ORDER by year ASC",
+                sql_helper("""
+    SELECT year, high, low, day, precip, snow, snowd, temp_hour, precip_hour
+    from alldata WHERE station = :station and sday = :sday ORDER by year ASC
+                """),
                 conn,
-                params=(station, thedate.strftime("%m%d")),
+                params={"station": station, "sday": thedate.strftime("%m%d")},
                 index_col="year",
             )
         ctx["subtitle"] = thedate.strftime("%B %-d")
@@ -186,7 +189,8 @@ def add_context(ctx):
         with get_sqlalchemy_conn("coop") as conn:
             ctx["df"] = pd.read_sql(
                 sql_helper("""
-    SELECT year, high, day, low, precip, snow, snowd from alldata
+    SELECT year, high, day, low, precip, snow, snowd, temp_hour, precip_hour
+    from alldata
     WHERE station = :station and day = ANY(:days) ORDER by year ASC
                 """),
                 conn,
@@ -208,60 +212,39 @@ def get_highcharts(ctx: dict) -> str:
     v2 = ctx["df"][["year", ctx["varname"]]].to_json(orient="values")
     avgval = ctx["df"][ctx["varname"]].mean()
     avgvallbl = f"{avgval:.2f}"
-    series = (
-        """{
-        name: '"""
-        + ctx["varname"]
-        + """',
-        data: """
-        + v2
-        + """,
+    series = f"""{{
+        name: '{ctx["varname"]}',
+        data: {v2},
         color: '#0000ff'
-    }
+    }}
     """
-    )
+
     containername = ctx["_e"]
 
-    return (
-        """
-    Highcharts.chart('"""
-        + containername
-        + """', {
-        chart: {
+    return f"""
+    Highcharts.chart('{containername}', {{
+        chart: {{
             type: 'column',
             zoomType: 'x'
-        },
-        yAxis: {
-            title: {text: '"""
-        + PDICT2[ctx["varname"]]
-        + """'},
-            plotLines: [{
-                value: """
-        + str(avgval)
-        + """,
+        }},
+        yAxis: {{
+            title: {{text: '{PDICT2[ctx["varname"]]}'}},
+            plotLines: [{{
+                value: {avgval},
                 color: 'green',
                 dashStyle: 'shortdash',
                 width: 2,
                 zIndex: 5,
-                label: {
-                    text: 'Average """
-        + avgvallbl
-        + """'
-                }
-            }]
-        },
-        title: {text: '"""
-        + ctx["title"]
-        + """'},
-        subtitle: {text: 'On """
-        + ctx["subtitle"]
-        + """'},
-        series: ["""
-        + series
-        + """]
-    });
+                label: {{
+                    text: 'Average {avgvallbl}'
+                }}
+            }}]
+        }},
+        title: {{text: '{ctx["title"]}'}},
+        subtitle: {{text: 'On {ctx["subtitle"]}'}},
+        series: [{series}]
+    }});
     """
-    )
 
 
 def plotter(ctx: dict):
@@ -278,6 +261,7 @@ def plotter(ctx: dict):
         fc="r",
         ec="r",
         align="center",
+        zorder=3,
     )
     mean = ctx["df"][ctx["varname"]].mean()
     ax.axhline(mean)
@@ -298,6 +282,45 @@ def plotter(ctx: dict):
             ctx["df"][ctx["varname"]].min() - 5,
             ctx["df"][ctx["varname"]].max() + 5,
         )
+
+    # Denote contiguous years that have morning observations
+    hrcol = "temp_hour" if ctx["varname"] in ["high", "low"] else "precip_hour"
+    morning_obs_years = ctx["df"][ctx["df"][hrcol].isin(range(2, 12))].index
+
+    # Group contiguous years
+    contiguous_groups = []
+    current_group = []
+
+    for year in morning_obs_years:
+        if not current_group or year == current_group[-1] + 1:
+            current_group.append(year)
+        else:
+            contiguous_groups.append(current_group)
+            current_group = [year]
+
+    if current_group:
+        contiguous_groups.append(current_group)
+
+    # Plot contiguous year spans
+    for group in contiguous_groups:
+        ax.axvspan(
+            group[0] - 0.49,
+            group[-1] + 0.49,
+            color="#0000ff",
+            alpha=0.2,
+            zorder=2,
+        )
+
+    legend_elements = [
+        Patch(
+            facecolor="#0000ff",
+            edgecolor="none",
+            alpha=0.2,
+            label="Morning Observations",
+        )
+    ]
+    ax.legend(handles=legend_elements, loc="upper left")
+
     if ctx["varname"] == "snowd":
         ax.yaxis.set_major_locator(MaxNLocator(integer=True))
         nonnull = ctx["df"][ctx["df"][ctx["varname"]].notnull()]

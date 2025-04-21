@@ -1,7 +1,6 @@
 /* global moment, ol, $ */
 let olmap = null;
 let elayer = null;
-let element = null;
 let tornadoFeatures = [];
 let flashFloodFeatures = [];
 
@@ -76,9 +75,6 @@ function load_data() {
                     `<tr><td>${prop.year}</td><td>${prop.wfo}</td><td>${prop.states}</td><td><a href="${prop.uri}">${prop.eventid}</a></td><td>${lbl} Warning</td><td>${prop.utc_issue}</td><td>${prop.utc_expire}</td></tr>`);
             });
 
-        },
-        error: () => {
-            alert("Failed to load data.");
         }
     })
 }
@@ -116,7 +112,6 @@ function featureHTML(features, lalo) {
     return html.join('\n');
 }
 function init_map() {
-    element = document.getElementById('popup');
     elayer = new ol.layer.Vector({
         title: 'Emergencies',
         style: (feature) => {

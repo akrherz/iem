@@ -30,10 +30,9 @@ from io import BytesIO, StringIO
 
 import pandas as pd
 from pydantic import AwareDatetime, Field
-from pyiem.database import get_dbconn, get_sqlalchemy_conn
+from pyiem.database import get_dbconn, get_sqlalchemy_conn, sql_helper
 from pyiem.exceptions import IncompleteWebRequest
 from pyiem.webutil import CGIModel, ListOrCSVType, iemapp
-from sqlalchemy import text
 
 EXL = "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"
 
@@ -149,7 +148,7 @@ def application(environ, start_response):
     """
     with get_sqlalchemy_conn("talltowers") as conn:
         df = pd.read_sql(
-            text(sql),
+            sql_helper(sql),
             conn,
             params={"tz": tzname, "sids": stations, "sts": sts, "ets": ets},
         )

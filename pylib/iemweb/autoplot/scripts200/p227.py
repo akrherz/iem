@@ -112,9 +112,11 @@ def plotter(ctx: dict):
     )
 
     # Plot text on the page, hehe
+    reports = get_text(pid).split("$$")
+    if len(reports) <= segnum:
+        raise NoDataFound("Segment number was not found with report.")
     report = (
-        get_text(pid)
-        .split("$$")[segnum]
+        reports[segnum]
         .replace("\r", "")
         .replace("\003", "")
         .replace("\001", "")
