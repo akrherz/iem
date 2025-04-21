@@ -75,9 +75,6 @@ function load_data() {
                     `<tr><td>${prop.year}</td><td>${prop.wfo}</td><td>${prop.states}</td><td><a href="${prop.uri}">${prop.eventid}</a></td><td>${lbl} Warning</td><td>${prop.utc_issue}</td><td>${prop.utc_expire}</td></tr>`);
             });
 
-        },
-        error: () => {
-            alert("Failed to load data.");
         }
     })
 }

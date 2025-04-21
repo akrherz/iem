@@ -157,10 +157,12 @@ def add_context(ctx):
     if dt == "exact":
         with get_sqlalchemy_conn("coop") as conn:
             ctx["df"] = pd.read_sql(
-                "SELECT year, high, low, day, precip, snow, snowd from "
-                "alldata WHERE station = %s and sday = %s ORDER by year ASC",
+                sql_helper("""
+    SELECT year, high, low, day, precip, snow, snowd, temp_hour, precip_hour
+    from alldata WHERE station = :station and sday = :sday ORDER by year ASC
+                """),
                 conn,
-                params=(station, thedate.strftime("%m%d")),
+                params={"station": station, "sday": thedate.strftime("%m%d")},
                 index_col="year",
             )
         ctx["subtitle"] = thedate.strftime("%B %-d")
