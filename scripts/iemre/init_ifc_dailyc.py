@@ -4,20 +4,21 @@ import os
 from datetime import datetime
 
 import numpy as np
+from pyiem.grid.nav import IFC
 from pyiem.util import logger, ncopen
 
 LOG = logger()
 BASEDIR = "/mesonet/data/iemre"
 
 
-def init_year(ts):
+def init_year(ts: datetime):
     """Create a new NetCDF file for a year of our specification!"""
     fn = f"{BASEDIR}/ifc_dailyc.nc"
     if os.path.isfile(fn):
         LOG.info("Cowardly refusing to overwrite %s", fn)
         return
     nc = ncopen(fn, "w")
-    nc.title = "IFC Climatology %s" % (ts.year,)
+    nc.title = f"IFC Climatology {ts:%Y}"
     nc.platform = "Grided Climatology"
     nc.description = "IFC"
     nc.institution = "Iowa State University, Ames, IA, USA"
@@ -43,14 +44,23 @@ def init_year(ts):
     lat.standard_name = "latitude"
     lat.axis = "Y"
     # Grid centers
-    lat[:] = 40.133331 + np.arange(1057) * 0.004167
+    # Grid centers
+    lat[:] = IFC.y_points
+
+    lat_bnds = nc.createVariable("lat_bnds", float, ("lat", "nv"))
+    lat_bnds[:, 0] = IFC.y_edges[:-1]
+    lat_bnds[:, 1] = IFC.y_edges[1:]
 
     lon = nc.createVariable("lon", float, ("lon",))
     lon.units = "degrees_east"
     lon.long_name = "Longitude"
     lon.standard_name = "longitude"
     lon.axis = "X"
-    lon[:] = -97.154167 + np.arange(1741) * 0.004167
+    lon[:] = IFC.x_points
+
+    lon_bnds = nc.createVariable("lon_bnds", float, ("lon", "nv"))
+    lon_bnds[:, 0] = IFC.x_edges[:-1]
+    lon_bnds[:, 1] = IFC.x_edges[1:]
 
     tm = nc.createVariable("time", float, ("time",))
     tm.units = "Days since %s-01-01 00:00:0.0" % (ts.year,)
@@ -61,7 +71,7 @@ def init_year(ts):
     tm[:] = np.arange(0, int(days))
 
     p01d = nc.createVariable(
-        "p01d", float, ("time", "lon", "lat"), fill_value=1.0e20
+        "p01d", float, ("time", "lat", "lon"), fill_value=1.0e20
     )
     p01d.units = "mm"
     p01d.long_name = "Precipitation"

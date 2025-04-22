@@ -41,7 +41,7 @@ network=IA_COOP&stations=AESI4&sts=2024-10-22&ets=2024-10-22&what=download\
 from datetime import date
 from io import StringIO
 
-from pydantic import Field
+from pydantic import Field, model_validator
 from pyiem.database import sql_helper, with_sqlalchemy_conn
 from pyiem.exceptions import IncompleteWebRequest
 from pyiem.network import Table as NetworkTable
@@ -101,6 +101,13 @@ class Schema(CGIModel):
         None,
         description="The ending day for the data request.",
     )
+
+    @model_validator(mode="after")
+    def validate_dates(self):
+        """Ensure that sts and ets are not None."""
+        if self.sts is None or self.ets is None:
+            raise ValueError("Both sts and ets are required.")
+        return self
 
 
 def get_cgi_stations(environ):
