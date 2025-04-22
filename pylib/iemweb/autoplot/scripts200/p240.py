@@ -131,6 +131,7 @@ def plotter(ctx: dict):
             "Based on Observations, GFS Operational Forecast, "
             "NWS NDFD Forecast"
         ),
+        apctx=ctx,
     )
     ax = fig.add_axes((0.06, 0.1, 0.85, 0.75))
     ax.bar(xaxis, df["gdd"].values, color="g", label="Observed")
