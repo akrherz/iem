@@ -9,6 +9,7 @@ import sys
 import tempfile
 import warnings
 from datetime import datetime, timedelta
+from typing import Optional
 
 import cdsapi
 import click
@@ -62,7 +63,7 @@ def ingest(ncin: Dataset, nc: Dataset, valid, domain):
         # NCIN starts at 0 and ends at 359.9
         lon2 = nc.variables["lon"][-1]
         # plus 2 since we include zero and the end cell
-        islices = [slice(ll_i, 3599), slice(0, int(lon2 / delta) + 2)]
+        islices = [slice(ll_i, 3599), slice(0, int(lon2 / delta) + 1)]
         i0 = islices[0].stop - islices[0].start
         islices_out = [slice(0, i0), slice(i0 + 1, None)]
 
@@ -167,8 +168,24 @@ def ingest(ncin: Dataset, nc: Dataset, valid, domain):
         p01m[tidx, :, islice_out] = np.ma.where(newval < 0, 0, newval)
 
 
-def fetch(valid: datetime):
+def fetch(valid: datetime, checkcache: bool):
     """Get the data from the CDS."""
+    if checkcache:
+        remotepath = (
+            f"/mnt/era5land/{valid:%Y/%m}/era5land_{valid:%Y%m%d%H}.nc"
+        )
+        cmd = [
+            "/usr/bin/scp",
+            "-q",
+            f"mesonet@metvm5-dc:{remotepath}",
+            "data_0.nc",
+        ]
+        LOG.info("command `%s`", " ".join(cmd))
+        subprocess.call(cmd)
+        if os.path.isfile("data_0.nc"):
+            LOG.info("Found %s in cache", remotepath)
+            return
+
     zipfn = "data_0.nc.zip"
     cds = cdsapi.Client(quiet=True, progress=sys.stdout.isatty())
     cds.retrieve(
@@ -189,27 +206,46 @@ def fetch(valid: datetime):
     os.unlink(zipfn)
 
 
-def run(valid):
+def archive(fn: str, valid: datetime):
+    """Copy file to the long term archive."""
+    remotepath = f"/mnt/era5land/{valid:%Y/%m}"
+    cmd = [
+        "/usr/bin/rsync",
+        "--rsync-path",
+        f"mkdir -p {remotepath} && rsync",
+        "-a",
+        fn,
+        f"mesonet@metvm5-dc:{remotepath}/era5land_{valid:%Y%m%d%H}.nc",
+    ]
+    LOG.info("command `%s`", " ".join(cmd))
+    if subprocess.call(cmd) != 0:
+        LOG.error("Failed to copy %s to remote", fn)
+
+
+def run(valid: datetime, justdomain: Optional[str], checkcache: bool):
     """Run for the given valid time."""
-    fetch(valid)
-    for domain in DOMAINS:
+    fetch(valid, checkcache)
+    for domain in DOMAINS if justdomain is None else [justdomain]:
         dd = "" if domain == "" else f"_{domain}"
         ncoutfn = f"/mesonet/data/era5{dd}/{valid.year}_era5land_hourly.nc"
         LOG.info("Running for %s[domain=%s]", valid, domain)
         with ncopen("data_0.nc") as ncin, ncopen(ncoutfn, "a") as nc:
             ingest(ncin, nc, valid, domain)
+    archive("data_0.nc", valid)
     os.unlink("data_0.nc")
 
 
 @click.command()
 @click.option("--date", "valid", required=True, type=click.DateTime())
-def main(valid: datetime):
+@click.option("--domain")
+@click.option("--checkcache", is_flag=True, default=False)
+def main(valid: datetime, domain: Optional[str], checkcache: bool):
     """Go!"""
     valid = utc(valid.year, valid.month, valid.day)
     with tempfile.TemporaryDirectory() as tmpdir:
         os.chdir(tmpdir)
         for offset in range(1, 25):
-            run(valid + timedelta(hours=offset))
+            run(valid + timedelta(hours=offset), domain, checkcache)
 
 
 if __name__ == "__main__":
