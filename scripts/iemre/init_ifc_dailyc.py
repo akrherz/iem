@@ -36,6 +36,7 @@ def init_year(ts: datetime):
     ts2 = datetime(ts.year + 1, 1, 1)
     days = (ts2 - ts).days
     nc.createDimension("time", int(days))
+    nc.createDimension("nv", 2)
 
     # Setup Coordinate Variables
     lat = nc.createVariable("lat", float, ("lat",))

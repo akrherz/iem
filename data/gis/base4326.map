@@ -235,8 +235,8 @@ LAYER
   NAME goes_east_2
   STATUS OFF
   TYPE RASTER
-  DATA /mesonet/ldmdata/gis/images/GOES/conus/channel02/GOES-16_C02.png
-  INCLUDE "/mesonet/ldmdata/gis/images/GOES/conus/channel02/GOES-16_C02.msinc"
+  DATA /mesonet/ldmdata/gis/images/GOES/conus/channel02/GOES-19_C02.png
+  INCLUDE "/mesonet/ldmdata/gis/images/GOES/conus/channel02/GOES-19_C02.msinc"
 END
 
 LAYER
