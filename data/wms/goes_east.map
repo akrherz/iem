@@ -698,24 +698,6 @@ LAYER
 END
 
 LAYER
-  NAME "puertorico_ch11"
-  STATUS OFF
-  DATA "/mesonet/ldmdata/gis/images/GOES/puertorico/channel11/GOES-19_C11.png"
-  TYPE RASTER
-  INCLUDE "/mesonet/ldmdata/gis/images/GOES/puertorico/channel11/GOES-19_C11.msinc"
-  PROCESSING "CLOSE_CONNECTION=NORMAL"
-END
-
-LAYER
-  NAME "puertorico_ch12"
-  STATUS OFF
-  DATA "/mesonet/ldmdata/gis/images/GOES/puertorico/channel12/GOES-19_C12.png"
-  TYPE RASTER
-  INCLUDE "/mesonet/ldmdata/gis/images/GOES/puertorico/channel12/GOES-19_C12.msinc"
-  PROCESSING "CLOSE_CONNECTION=NORMAL"
-END
-
-LAYER
   NAME "puertorico_ch13"
   STATUS OFF
   DATA "/mesonet/ldmdata/gis/images/GOES/puertorico/channel13/GOES-19_C13.png"
@@ -725,29 +707,11 @@ LAYER
 END
 
 LAYER
-  NAME "puertorico_ch14"
-  STATUS OFF
-  DATA "/mesonet/ldmdata/gis/images/GOES/puertorico/channel14/GOES-19_C14.png"
-  TYPE RASTER
-  INCLUDE "/mesonet/ldmdata/gis/images/GOES/puertorico/channel14/GOES-19_C14.msinc"
-  PROCESSING "CLOSE_CONNECTION=NORMAL"
-END
-
-LAYER
   NAME "puertorico_ch15"
   STATUS OFF
   DATA "/mesonet/ldmdata/gis/images/GOES/puertorico/channel15/GOES-19_C15.png"
   TYPE RASTER
   INCLUDE "/mesonet/ldmdata/gis/images/GOES/puertorico/channel15/GOES-19_C15.msinc"
-  PROCESSING "CLOSE_CONNECTION=NORMAL"
-END
-
-LAYER
-  NAME "puertorico_ch16"
-  STATUS OFF
-  DATA "/mesonet/ldmdata/gis/images/GOES/puertorico/channel16/GOES-19_C16.png"
-  TYPE RASTER
-  INCLUDE "/mesonet/ldmdata/gis/images/GOES/puertorico/channel16/GOES-19_C16.msinc"
   PROCESSING "CLOSE_CONNECTION=NORMAL"
 END
 
