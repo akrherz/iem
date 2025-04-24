@@ -7,7 +7,7 @@ require_once "../../include/mlib.php";
 force_https();
 $t = new MyView();
 $t->title = "Map of Daily NWS CF6 reports";
-$OL = '10.4.0';
+$OL = '10.5.0';
 $t->headextra = <<<EOM
 <link rel="stylesheet" href="/vendor/openlayers/{$OL}/ol.css" type="text/css">
 <link rel="stylesheet" href="/vendor/jquery-ui/1.12.1/jquery-ui.min.css" />
@@ -81,7 +81,7 @@ $t->content = <<<EOM
 <div class="row">
 <div class="col-md-12">
 
-<div id="map" class="map">
+<div id="map" class="map" data-bingmapsapikey="{$BING_MAPS_API_KEY}">
 <div id="popup"></div>
 
 </div></div><!-- ./row -->

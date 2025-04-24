@@ -99,7 +99,7 @@ function makeVectorLayer() {
 $(document).ready(() => {
 
     vectorLayer = makeVectorLayer();
-    const key = 'AsgbmE8m-iBbkypiCOE23M0qElHUfEQtaTvPdDPdM0p7s0N7pJcgrjo70FXjX6bY';
+    const key = document.getElementById('map').dataset.bingmapsapikey;
     map = new ol.Map({
         target: 'map',
         layers: [new ol.layer.Tile({

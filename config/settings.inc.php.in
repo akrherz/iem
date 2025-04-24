@@ -13,11 +13,14 @@ class IEMConfig{
     const INTERNAL_BASEURL = "http://iem.local";  // no trail slash
     // How we document references to this server to the outside world
     const EXTERNAL_BASEURL = "https://mesonet.agron.iastate.edu"; // no trail slash
+    // Bing Maps API Key
+    const BING_MAPS_API_KEY = "...";
 }
 
 // Shortcuts to allow usage in string blocks
 $INTERNAL_BASEURL = IEMConfig::INTERNAL_BASEURL;
 $EXTERNAL_BASEURL = IEMConfig::EXTERNAL_BASEURL;
+$BING_MAPS_API_KEY = IEMConfig::BING_MAPS_API_KEY;
 
 // Legacy cruft to remove
 $fb_feature_key='';
